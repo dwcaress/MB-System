@@ -701,6 +701,7 @@
 #define MB_PR_KLUGE_FIXWISSLTIMESTAMPS 5
 #define MB_PR_KLUGE_AUVSENTRYSENSORDEPTH 6
 #define MB_PR_KLUGE_IGNORESNIPPETS 7
+#define MB_PR_KLUGE_SONARDEPTHFROMHEAVE 8
 
 /** structure holding mbpreprocess parameters to be passed to preprocess
  * functions of i/o modules */

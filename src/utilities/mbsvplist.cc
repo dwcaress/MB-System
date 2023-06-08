@@ -345,7 +345,7 @@ int main(int argc, char **argv) {
   svp_last.n = 0;
   int svp_save_alloc = 0;
   struct mbsvplist_svp_struct *svp_save = nullptr;
-  char svp_file[MB_PATH_MAXLINE];
+  mb_pathplus svp_file;
   int svp_read_tot = 0;
   int svp_written_tot = 0;
   int svp_repeat_in_file;
@@ -625,7 +625,7 @@ int main(int argc, char **argv) {
           /* set the output */
           FILE *svp_fp = stdout;
           if (svp_file_output) {
-            sprintf(svp_file, "%s_%3.3d.svp", file, isvp);
+            snprintf(svp_file, sizeof(svp_file), "%s_%3.3d.svp", file, isvp);
             svp_fp = fopen(svp_file, "w");
           }
 

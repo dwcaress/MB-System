@@ -136,7 +136,7 @@ int main(int argc, char **argv) {
 	bool rockdata = false;
 	char insfile[MB_PATH_MAXLINE] = "";
 	bool insdata = false;
-	char ofile[MB_PATH_MAXLINE] = "";
+	char ofile[MB_PATH_MAXLINE+30] = "";
 	bool ofile_set = false;
 	char buffer[MB_PATH_MAXLINE] = "";  // TODO(schwehr): Localize
 	/* merge sonardepth from separate parosci pressure sensor data file */
@@ -1571,7 +1571,7 @@ int main(int argc, char **argv) {
 
 	s7kr_bluefin *bluefin;
 
-	char timedelayfile[MB_PATH_MAXLINE] = "";
+	char timedelayfile[MB_PATH_MAXLINE+100] = "";
 
 	int ntimedelay = 0;
 	int ntimedelaycount = 0;
@@ -2882,7 +2882,7 @@ int main(int argc, char **argv) {
 				/* output time delay from MBARI AUV */
 				if (tfp == nullptr) {
 					/* open file for timedelay values */
-					sprintf(timedelayfile, "%s_timedelay.txt", read_file);
+					snprintf(timedelayfile, sizeof(timedelayfile), "%s_timedelay.txt", read_file);
 					if ((tfp = fopen(timedelayfile, "w")) == nullptr) {
 						fprintf(stderr, "\nUnable to open time delay file <%s> for writing\n", timedelayfile);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -4145,11 +4145,11 @@ int main(int argc, char **argv) {
 				char fileroot[MB_PATH_MAXLINE] = "";
 				status = mb_get_format(verbose, ifile, fileroot, &testformat, &error);
 				if (strncmp(".s7k", &ifile[strlen(ifile) - 4], 4) == 0)
-					sprintf(ofile, "%s.mb%d", fileroot, format);
+					snprintf(ofile, sizeof(ofile), "%s.mb%d", fileroot, format);
 				else if (strncmp(".mb88", &ifile[strlen(ifile) - 5], 5) == 0)
-					sprintf(ofile, "%sf.mb%d", fileroot, format);
+					snprintf(ofile, sizeof(ofile), "%sf.mb%d", fileroot, format);
 				else
-					sprintf(ofile, "%s.mb%d", ifile, format);
+					snprintf(ofile, sizeof(ofile), "%s.mb%d", ifile, format);
 			}
 			/* initialize reading the input swath file */
 			if (mb_read_init(verbose, ifile, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
@@ -4186,9 +4186,9 @@ int main(int argc, char **argv) {
 				nfile_write++;
 
 				/* initialize ctd output file */
-				char ctdfile[MB_PATH_MAXLINE] = "";
+				char ctdfile[MB_PATH_MAXLINE+10] = "";
 				char fileroot[MB_PATH_MAXLINE] = "";
-				sprintf(ctdfile, "%s_ctd.txt", fileroot);
+				snprintf(ctdfile, sizeof(ctdfile), "%s_ctd.txt", fileroot);
 				if ((tfp = fopen(ctdfile, "w")) == nullptr) {
 					fprintf(stderr, "\nUnable to open ctd data file <%s> for writing\n", ctdfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -4198,8 +4198,8 @@ int main(int argc, char **argv) {
 				 * initialize asynchronous heading output
 				 * file
 				 */
-				char athfile[MB_PATH_MAXLINE] = "";
-				sprintf(athfile, "%s.ath", ofile);
+				char athfile[MB_PATH_MAXLINE+100] = "";
+				snprintf(athfile, sizeof(athfile), "%s.ath", ofile);
 				if ((athfp = fopen(athfile, "w")) == nullptr) {
 					fprintf(stderr, "\nUnable to open asynchronous heading data file <%s> for writing\n", athfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -4209,8 +4209,8 @@ int main(int argc, char **argv) {
 				 * initialize asynchronous sonardepth output
 				 * file
 				 */
-				char atsfile[MB_PATH_MAXLINE] = "";
-				sprintf(atsfile, "%s.ats", ofile);
+				char atsfile[MB_PATH_MAXLINE+100] = "";
+				snprintf(atsfile, sizeof(atsfile), "%s.ats", ofile);
 				if ((atsfp = fopen(atsfile, "w")) == nullptr) {
 					fprintf(stderr, "\nUnable to open asynchronous sonardepth data file <%s> for writing\n", atsfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -4220,8 +4220,8 @@ int main(int argc, char **argv) {
 				 * initialize asynchronous attitude output
 				 * file
 				 */
-				char atafile[MB_PATH_MAXLINE] = "";
-				sprintf(atafile, "%s.ata", ofile);
+				char atafile[MB_PATH_MAXLINE+100] = "";
+				snprintf(atafile, sizeof(atafile), "%s.ata", ofile);
 				if ((atafp = fopen(atafile, "w")) == nullptr) {
 					fprintf(stderr, "\nUnable to open asynchronous attitude data file <%s> for writing\n", atafile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -4231,8 +4231,8 @@ int main(int argc, char **argv) {
 				 * initialize synchronous attitude output
 				 * file
 				 */
-				char stafile[MB_PATH_MAXLINE] = "";
-				sprintf(stafile, "%s.sta", ofile);
+				char stafile[MB_PATH_MAXLINE+100] = "";
+				snprintf(stafile, sizeof(stafile), "%s.sta", ofile);
 				if ((stafp = fopen(stafile, "w")) == nullptr) {
 					fprintf(stderr, "\nUnable to open synchronous attitude data file <%s> for writing\n", stafile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);

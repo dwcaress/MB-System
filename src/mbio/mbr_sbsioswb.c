@@ -169,7 +169,6 @@ int mbr_dem_sbsioswb(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int read_status;
 	char dummy[2];
 	double lon, lat;
 	int id;
@@ -200,13 +199,14 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* read next header record from file */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
-	if ((status = fread(headerptr, 1, MB_SBSIOSWB_HEADER_SIZE, mb_io_ptr->mbfp)) == MB_SBSIOSWB_HEADER_SIZE) {
+  size_t read_len = 0;
+	if ((read_len = fread(headerptr, 1, MB_SBSIOSWB_HEADER_SIZE, mb_io_ptr->mbfp)) == (size_t) MB_SBSIOSWB_HEADER_SIZE) {
 		mb_io_ptr->file_bytes += status;
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
 	}
 	else {
-		mb_io_ptr->file_bytes += status;
+		mb_io_ptr->file_bytes += read_len;
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
 	}
@@ -279,14 +279,15 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		mb_io_ptr->file_pos += 1;
 
 		/* read next byte */
-		if ((status = fread(&headerptr[MB_SBSIOSWB_HEADER_SIZE - 1], 1, 1, mb_io_ptr->mbfp)) == 1) {
-			mb_io_ptr->file_bytes += status;
+    size_t read_len = 0;
+		if ((read_len = fread(&headerptr[MB_SBSIOSWB_HEADER_SIZE - 1], 1, 1, mb_io_ptr->mbfp)) == (size_t) 1) {
+			mb_io_ptr->file_bytes += read_len;
 			skip++;
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 		}
 		else {
-			mb_io_ptr->file_bytes += status;
+			mb_io_ptr->file_bytes += read_len;
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 		}
@@ -356,30 +357,32 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	if (status == MB_FAILURE && *error == MB_ERROR_UNINTELLIGIBLE) {
 		/* read rest of record into dummy */
 		for (int i = 0; i < data->sensor_size; i++) {
-			if ((read_status = fread(dummy, 1, 1, mb_io_ptr->mbfp)) != 1) {
+      size_t read_len = 0;
+			if ((read_len = fread(dummy, 1, 1, mb_io_ptr->mbfp)) != (size_t) 1) {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
 			}
-			mb_io_ptr->file_bytes += read_status;
+			mb_io_ptr->file_bytes += read_len;
 		}
 		for (int i = 0; i < data->data_size; i++) {
-			if ((read_status = fread(dummy, 1, 1, mb_io_ptr->mbfp)) != 1) {
+			if ((read_len = fread(dummy, 1, 1, mb_io_ptr->mbfp)) != (size_t) 1) {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
 			}
-			mb_io_ptr->file_bytes += read_status;
+			mb_io_ptr->file_bytes += read_len;
 		}
 	}
 
 	/* read sensor record from file */
 	if (status == MB_SUCCESS && data->sensor_size > 0) {
-		if ((status = fread(sensorptr, 1, data->sensor_size, mb_io_ptr->mbfp)) == data->sensor_size) {
-			mb_io_ptr->file_bytes += status;
+    size_t read_len = 0;
+		if ((read_len = fread(sensorptr, 1, data->sensor_size, mb_io_ptr->mbfp)) == (size_t) data->sensor_size) {
+			mb_io_ptr->file_bytes += read_len;
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 		}
 		else {
-			mb_io_ptr->file_bytes += status;
+			mb_io_ptr->file_bytes += read_len;
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 		}
@@ -402,13 +405,14 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* read data record from file */
 	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA && data->data_size > 0) {
-		if ((status = fread(datarecptr, 1, data->data_size, mb_io_ptr->mbfp)) == data->data_size) {
-			mb_io_ptr->file_bytes += status;
+    size_t read_len = 0;
+		if ((read_len = fread(datarecptr, 1, data->data_size, mb_io_ptr->mbfp)) == (size_t) data->data_size) {
+			mb_io_ptr->file_bytes += read_len;
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 		}
 		else {
-			mb_io_ptr->file_bytes += status;
+			mb_io_ptr->file_bytes += read_len;
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 		}
@@ -473,15 +477,16 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* read comment record from file */
 	if (status == MB_SUCCESS && data->kind == MB_DATA_COMMENT) {
-		if ((status = fread(commentptr, 1, data->data_size, mb_io_ptr->mbfp)) == data->data_size) {
-			mb_io_ptr->file_bytes += status;
+    size_t read_len = 0;
+		if ((read_len = fread(commentptr, 1, data->data_size, mb_io_ptr->mbfp)) == (size_t) data->data_size) {
+			mb_io_ptr->file_bytes += read_len;
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 			for (int i = data->data_size; i < MBSYS_SB_MAXLINE; i++)
 				commentptr[i] = '\0';
 		}
 		else {
-			mb_io_ptr->file_bytes += status;
+			mb_io_ptr->file_bytes += read_len;
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 		}
@@ -784,10 +789,11 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 #endif
 
 	int status = MB_SUCCESS;
+  size_t write_len = 0;
 
 	/* write header record to file */
 	if (status == MB_SUCCESS) {
-		if ((status = fwrite(headerptr, 1, MB_SBSIOSWB_HEADER_SIZE, mb_io_ptr->mbfp)) == MB_SBSIOSWB_HEADER_SIZE) {
+		if ((write_len = fwrite(headerptr, 1, MB_SBSIOSWB_HEADER_SIZE, mb_io_ptr->mbfp)) == (size_t) MB_SBSIOSWB_HEADER_SIZE) {
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 		}
@@ -799,7 +805,7 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* write sensor record to file */
 	if (status == MB_SUCCESS) {
-		if ((status = fwrite(sensorptr, 1, sensor_size, mb_io_ptr->mbfp)) == sensor_size) {
+		if ((write_len = fwrite(sensorptr, 1, sensor_size, mb_io_ptr->mbfp)) == (size_t) sensor_size) {
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 		}
@@ -811,7 +817,7 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* write data record to file */
 	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA) {
-		if ((status = fwrite(datarecptr, 1, data_size, mb_io_ptr->mbfp)) == data_size) {
+		if ((write_len = fwrite(datarecptr, 1, data_size, mb_io_ptr->mbfp)) == (size_t) data_size) {
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 		}
@@ -823,7 +829,8 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* write comment record to file */
 	if (status == MB_SUCCESS && data->kind == MB_DATA_COMMENT) {
-		if ((status = fwrite(commentptr, 1, strlen(data->comment), mb_io_ptr->mbfp)) == strlen(data->comment)) {
+    size_t write_len = 0;
+		if ((write_len = fwrite(commentptr, 1, strlen(data->comment), mb_io_ptr->mbfp)) == (size_t) strlen(data->comment)) {
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 		}

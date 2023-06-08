@@ -238,7 +238,7 @@ int mbr_rt_mbarimb1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
   int status = MB_SUCCESS;
   char **bufferptr = NULL;
-  int *bufferalloc = NULL;
+  size_t *bufferalloc = NULL;
   char *buffer = NULL;
 
   if (verbose >= 2) {
@@ -258,7 +258,7 @@ int mbr_rt_mbarimb1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
   /* get reading buffer */
   bufferptr = (char **)&mb_io_ptr->raw_data;
-  bufferalloc = (int *)&mb_io_ptr->structure_size;
+  bufferalloc = (size_t *)&mb_io_ptr->structure_size;
   buffer = *bufferptr;
 
   /* read next header from file, skipping bytes to find sync if necessary */
@@ -277,13 +277,13 @@ int mbr_rt_mbarimb1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   mb_io_ptr->file_bytes += skip;
 
   /* parse the header */
-  double time_d;
-  double navlon;
-  double navlat;
-  double sonardepth;
-  double heading;
-  int ping_number;
-  int beams_bath;
+  double time_d = 0.0;;
+  double navlon = 0.0;;
+  double navlat = 0.0;;
+  double sonardepth = 0.0;;
+  double heading = 0.0;
+  int ping_number = 0;
+  int beams_bath = 0;
   if (status == MB_SUCCESS) {
     int record_size;
     int index = 4;
@@ -381,7 +381,9 @@ int mbr_rt_mbarimb1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   if (status == MB_SUCCESS) {
     double depthmax = 0.0;
     double distmax = 0.0;
-    double bath, bathacrosstrack, bathalongtrack;
+    double bath = 0.0;
+    double bathacrosstrack = 0.0;
+    double bathalongtrack = 0.0;
     // int index = 0;
     for (int i = 0; i < beams_bath; i++) {
       int beam_id;
@@ -506,10 +508,10 @@ int mbr_wt_mbarimb1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
   /* get reading buffer */
   char **bufferptr = NULL;
-  int *bufferalloc = NULL;
+  size_t *bufferalloc = NULL;
   char *buffer = NULL;
   bufferptr = (char **)&mb_io_ptr->raw_data;
-  bufferalloc = (int *)&mb_io_ptr->structure_size;
+  bufferalloc = (size_t *)&mb_io_ptr->structure_size;
   buffer = *bufferptr;
 
   int status = MB_SUCCESS;

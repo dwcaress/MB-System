@@ -614,6 +614,7 @@ int main(int argc, char **argv) {
 	/* save file control variables */
 	char esffile[MB_PATH_MAXLINE];
 	struct mb_esf_struct esf;
+  memset(&esf, 0, sizeof(struct mb_esf_struct));
 	int files_tot = 0;
 
 	int kind;
@@ -629,7 +630,7 @@ int main(int argc, char **argv) {
 	double sonardepth;
 	char comment[MB_COMMENT_MAXLINE];
 
-       	void *store_ptr = nullptr;
+  void *store_ptr = nullptr;
 
 	int pingmultiplicity;
 	int pings_tot = 0;
@@ -769,7 +770,8 @@ int main(int argc, char **argv) {
 		/* now deal with old edit save file */
 		if (status == MB_SUCCESS) {
 			/* handle esf edits */
-			status = mb_esf_load(verbose, (char *)program_name, swathfile, true, false, esffile, &esf, &error);
+      int esf_error = MB_ERROR_NO_ERROR;
+			int esf_status = mb_esf_load(verbose, (char *)program_name, swathfile, true, false, esffile, &esf, &esf_error);
 		}
 
 		/* read */
@@ -845,7 +847,7 @@ int main(int argc, char **argv) {
 				else {
 					pingmultiplicity = 0;
 				}
-				status = mb_esf_apply(verbose, &esf, time_d, pingmultiplicity, beams_bath, beamflagorg, &error);
+        status = mb_esf_apply(verbose, &esf, time_d, pingmultiplicity, beams_bath, beamflagorg, &error);
 
 				/* update counters */
 				pings_tot++;

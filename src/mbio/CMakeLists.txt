@@ -1,5 +1,5 @@
 #
-# Gets GMT_INCLUDE_DIR from root CMakeLists
+# Gets GMT_INCLUDE_DIRS from root CMakeLists
 #
 
 message("in mbio")
@@ -155,8 +155,8 @@ mbsys_surf.c
 mbsys_swathplus.c
 mbsys_wassp.c
 mbsys_xse.c
-mbr_gsfgenmb.c
-mbsys_gsf.c
+${MBIO_GSF}
+${MBIO_GSF_GENMB}
 )
 
 # add static or shared library, depending on BUILD_SHARED_LIBS
@@ -176,9 +176,8 @@ ENDIF (APPLE)
 
 target_include_directories(mbio
                            PUBLIC
-			   ${NETCDF_INCLUDE_DIR}
-                           .
-			   ${NETCDF_INCLUDE_DIR}
+			   ${NETCDF_INCLUDE_DIRS}
+                           ${PROJ_INCLUDE_DIRS}
                            .
 			   ${CMAKE_SOURCE_DIR}/src/gsf
                            ${CMAKE_SOURCE_DIR}/src/bsio
@@ -187,6 +186,12 @@ target_include_directories(mbio
 			   ${CMAKE_SOURCE_DIR}/src/mbtrn/r7kr
 			   ${CMAKE_SOURCE_DIR}/src/mbtrn/mframe/src
 			   )
+
+target_link_libraries(mbio
+                      PRIVATE
+		      ${NETCDF_LIBRARIES}
+		      ${PROJ_LIBRARIES})
+
 
 install(TARGETS mbio mbio
 	DESTINATION ${CMAKE_INSTALL_LIBDIR})

@@ -131,7 +131,7 @@ int mbr_alm_wasspenl(int verbose, void *mbio_ptr, int *error) {
 	/* allocate starting memory for data record buffer */
 	char **bufferptr = (char **)&mb_io_ptr->saveptr1;
 	// char *buffer = (char *)*bufferptr;
-	int *bufferalloc = (int *)&mb_io_ptr->save6;
+	unsigned int *bufferalloc = (unsigned int *)&mb_io_ptr->save6;
 	*bufferptr = NULL;
 	*bufferalloc = 0;
 	if (status == MB_SUCCESS) {
@@ -166,7 +166,7 @@ int mbr_dem_wasspenl(int verbose, void *mbio_ptr, int *error) {
 	/* deallocate memory for reading/writing buffer */
 	char **bufferptr = (char **)&mb_io_ptr->saveptr1;
 	// char *buffer = (char *)*bufferptr;
-	int *bufferalloc = (int *)&mb_io_ptr->save6;
+	unsigned int *bufferalloc = (unsigned int *)&mb_io_ptr->save6;
 	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)bufferptr, error);
 	*bufferalloc = 0;
 
@@ -235,7 +235,7 @@ int mbr_wasspenl_rd_genbathy(int verbose, char *buffer, void *store_ptr, int *er
 	index += 4;
 	mb_get_binary_float(true, &buffer[index], &(genbathy->sound_velocity));
 	index += 4;
-	for (int i = 0; i < genbathy->number_beams; i++) {
+	for (unsigned int i = 0; i < genbathy->number_beams; i++) {
 		mb_get_binary_float(true, &buffer[index], &(genbathy->detection_point[i]));
 		index += 4;
 		mb_get_binary_float(true, &buffer[index], &(genbathy->rx_angle[i]));
@@ -293,7 +293,7 @@ int mbr_wasspenl_rd_genbathy(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr, "dbg5       genbathy->spreading_loss:             %f\n", genbathy->spreading_loss);
 		fprintf(stderr, "dbg5       genbathy->sample_type:                %u\n", genbathy->sample_type);
 		fprintf(stderr, "dbg5       genbathy->sound_velocity:             %f\n", genbathy->sound_velocity);
-		for (int i = 0; i < genbathy->number_beams; i++) {
+		for (unsigned int i = 0; i < genbathy->number_beams; i++) {
 			fprintf(stderr, "dbg5       genbathy->detection_point[%3d]:       %f\n", i, genbathy->detection_point[i]);
 			fprintf(stderr, "dbg5       genbathy->rx_angle[%3d]:              %f\n", i, genbathy->rx_angle[i]);
 			fprintf(stderr, "dbg5       genbathy->flags[%3d]:                 %u\n", i, genbathy->flags[i]);
@@ -354,7 +354,7 @@ int mbr_wasspenl_rd_corbathy(int verbose, char *buffer, void *store_ptr, int *er
 		mb_get_binary_int(true, &buffer[index], &(corbathy->spare[i]));
 		index += 4;
 	}
-	for (int i = 0; i < corbathy->num_beams; i++) {
+	for (unsigned int i = 0; i < corbathy->num_beams; i++) {
 		mb_get_binary_int(true, &buffer[index], &(corbathy->beam_index[i]));
 		index += 4;
 		mb_get_binary_float(true, &buffer[index], &(corbathy->x[i]));
@@ -408,7 +408,7 @@ int mbr_wasspenl_rd_corbathy(int verbose, char *buffer, void *store_ptr, int *er
 		for (int i = 0; i < 5; i++) {
 			fprintf(stderr, "dbg5       corbathy->spare[%3d]:                 %u\n", i, corbathy->spare[i]);
 		}
-		for (int i = 0; i < corbathy->num_beams; i++) {
+		for (unsigned int i = 0; i < corbathy->num_beams; i++) {
 			fprintf(stderr, "dbg5       corbathy->beam_index[%3d]:            %u\n", i, corbathy->beam_index[i]);
 			fprintf(stderr, "dbg5       corbathy->x[%3d]:                     %f\n", i, corbathy->x[i]);
 			fprintf(stderr, "dbg5       corbathy->y[%3d]:                     %f\n", i, corbathy->y[i]);
@@ -468,19 +468,19 @@ int mbr_wasspenl_rd_rawsonar(int verbose, char *buffer, void *store_ptr, int *er
 	index += 4;
 	mb_get_binary_int(true, &buffer[index], &(rawsonar->sample_type));
 	index += 4;
-	for (int i = 0; i < rawsonar->n; i++) {
+	for (unsigned int i = 0; i < rawsonar->n; i++) {
 		mb_get_binary_int(true, &buffer[index], &(rawsonar->spare[i]));
 		index += 4;
 	}
-	for (int i = 0; i < rawsonar->n; i++) {
+	for (unsigned int i = 0; i < rawsonar->n; i++) {
 		mb_get_binary_int(true, &buffer[index], &(rawsonar->beam_index[i]));
 		index += 4;
 	}
-	for (int i = 0; i < rawsonar->n; i++) {
+	for (unsigned int i = 0; i < rawsonar->n; i++) {
 		mb_get_binary_int(true, &buffer[index], &(rawsonar->detection_point[i]));
 		index += 4;
 	}
-	for (int i = 0; i < rawsonar->n; i++) {
+	for (unsigned int i = 0; i < rawsonar->n; i++) {
 		mb_get_binary_float(true, &buffer[index], &(rawsonar->beam_angle[i]));
 		index += 4;
 	}
@@ -518,15 +518,15 @@ int mbr_wasspenl_rd_rawsonar(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr, "dbg5       rawsonar->tx_power:                   %f\n", rawsonar->tx_power);
 		fprintf(stderr, "dbg5       rawsonar->pulse_width:                %f\n", rawsonar->pulse_width);
 		fprintf(stderr, "dbg5       rawsonar->sample_type:                %u\n", rawsonar->sample_type);
-		for (int i = 0; i < rawsonar->n; i++) {
+		for (unsigned int i = 0; i < rawsonar->n; i++) {
 			fprintf(stderr, "dbg5       rawsonar->spare[%3d]:                 %u\n", i, rawsonar->spare[i]);
 			fprintf(stderr, "dbg5       rawsonar->beam_index[%3d]:            %u\n", i, rawsonar->beam_index[i]);
 			fprintf(stderr, "dbg5       rawsonar->detection_point[%3d]:       %u\n", i, rawsonar->detection_point[i]);
 			fprintf(stderr, "dbg5       rawsonar->beam_angle[%3d]:            %f\n", i, rawsonar->beam_angle[i]);
 		}
 		fprintf(stderr, "dbg5       rawsonar->rawdata_alloc:              %zu\n", rawsonar->rawdata_alloc);
-		for (int i = 0; i < rawsonar->m; i++)
-			for (int j = 0; j < rawsonar->n; j++) {
+		for (unsigned int i = 0; i < rawsonar->m; i++)
+			for (unsigned int j = 0; j < rawsonar->n; j++) {
 				const int k = i * rawsonar->n + j;
 				fprintf(stderr, "dbg5       rawsonar->rawdata[%4d][%4d]:          %u\n", i, j, rawsonar->rawdata[k]);
 			}
@@ -725,7 +725,7 @@ int mbr_wasspenl_rd_wcd_navi(int verbose, char *buffer, void *store_ptr, int *er
 		else
 			wcd_navi->wcdata_alloc = wcd_navi->num_points;
 	}
-	for (int i = 0; i < wcd_navi->num_points; i++) {
+	for (unsigned int i = 0; i < wcd_navi->num_points; i++) {
 		mb_get_binary_float(true, &buffer[index], &(wcd_navi->wcdata_x[i]));
 		index += 4;
 		mb_get_binary_float(true, &buffer[index], &(wcd_navi->wcdata_y[i]));
@@ -755,7 +755,7 @@ int mbr_wasspenl_rd_wcd_navi(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr, "dbg5       wcd_navi->msec:                       %f\n", wcd_navi->msec);
 		fprintf(stderr, "dbg5       wcd_navi->ping_number:                %u\n", wcd_navi->ping_number);
 		fprintf(stderr, "dbg5       wcd_navi->sample_type:                %f\n", wcd_navi->sample_rate);
-		for (int i = 0; i < wcd_navi->num_points; i++) {
+		for (unsigned int i = 0; i < wcd_navi->num_points; i++) {
 			fprintf(stderr, "dbg5       wcd_navi->wcdata_x[%3d]:              %f\n", i, wcd_navi->wcdata_x[i]);
 			fprintf(stderr, "dbg5       wcd_navi->wcdata_y[%3d]:              %f\n", i, wcd_navi->wcdata_y[i]);
 			fprintf(stderr, "dbg5       wcd_navi->wcdata_mag[%3d]:            %f\n", i, wcd_navi->wcdata_mag[i]);
@@ -815,7 +815,7 @@ int mbr_wasspenl_rd_sensprop(int verbose, char *buffer, void *store_ptr, int *er
 		else
 			sensprop->n_alloc = sensprop->n;
 	}
-	for (int i = 0; i < sensprop->n; i++) {
+	for (unsigned int i = 0; i < sensprop->n; i++) {
 		mb_get_binary_int(true, &buffer[index], &(sensprop->sensors[i].sensor_type));
 		index += 4;
 		mb_get_binary_int(true, &buffer[index], &(sensprop->sensors[i].flags));
@@ -864,7 +864,7 @@ int mbr_wasspenl_rd_sensprop(int verbose, char *buffer, void *store_ptr, int *er
 		for (int i = 0; i < 8; i++)
 			fprintf(stderr, "dbg5       sensprop->spare[%d]:                   %d\n", i, sensprop->spare[i]);
 		fprintf(stderr, "dbg5       sensprop->n:                          %d\n", sensprop->n);
-		for (int i = 0; i < sensprop->n; i++) {
+		for (unsigned int i = 0; i < sensprop->n; i++) {
 			fprintf(stderr, "dbg5       sensprop->sensors[%d].sensor_type:    %u\n", i, sensprop->sensors[i].sensor_type);
 			fprintf(stderr, "dbg5       sensprop->sensors[%d].flags:          %u\n", i, sensprop->sensors[i].flags);
 			fprintf(stderr, "dbg5       sensprop->sensors[%d].port_number:    %u\n", i, sensprop->sensors[i].port_number);
@@ -988,7 +988,7 @@ int mbr_wasspenl_rd_sys_cfg1(int verbose, char *buffer, void *store_ptr, int *er
 
 	/* get the size */
 	int index = 4;
-	unsigned int size;
+	unsigned int size = 0;
 	mb_get_binary_int(true, &buffer[index], &size);
 	sys_cfg1->sys_cfg1_len = size;
 
@@ -1015,7 +1015,7 @@ int mbr_wasspenl_rd_sys_cfg1(int verbose, char *buffer, void *store_ptr, int *er
 
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
-		for (int i = 0; i < sys_cfg1->sys_cfg1_len; i++) {
+		for (unsigned int i = 0; i < sys_cfg1->sys_cfg1_len; i++) {
 			fprintf(stderr, "dbg5       sys_cfg1->sys_cfg1_data[%3d]:           %u\n", i, sys_cfg1->sys_cfg1_data[i]);
 		}
 	}
@@ -1096,7 +1096,7 @@ int mbr_wasspenl_rd_unknown1(int verbose, char *buffer, void *store_ptr, int *er
 
 	/* get the size */
 	int index = 4;
-	unsigned int size;
+	unsigned int size = 0;
 	mb_get_binary_int(true, &buffer[index], &size);
 	unknown1->unknown1_len = size;
 
@@ -1123,7 +1123,7 @@ int mbr_wasspenl_rd_unknown1(int verbose, char *buffer, void *store_ptr, int *er
 
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
-		for (int i = 0; i < unknown1->unknown1_len; i++) {
+		for (unsigned int i = 0; i < unknown1->unknown1_len; i++) {
 			fprintf(stderr, "dbg5       unknown1->unknown1_data[%3d]:           %u\n", i, unknown1->unknown1_data[i]);
 		}
 	}
@@ -1141,7 +1141,7 @@ int mbr_wasspenl_rd_unknown1(int verbose, char *buffer, void *store_ptr, int *er
 /*--------------------------------------------------------------------*/
 int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int status = MB_SUCCESS;
-	unsigned int syncvalue;
+	unsigned int syncvalue = 0;
 	char recordid[12];
 	size_t read_len;
 	int skip;
@@ -1165,7 +1165,7 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	char **bufferptr = (char **)&mb_io_ptr->saveptr1;
 	char *buffer = (char *)*bufferptr;
-	int *bufferalloc = (int *)&mb_io_ptr->save6;
+	unsigned int *bufferalloc = (unsigned int *)&mb_io_ptr->save6;
 	unsigned int *record_size = (unsigned int *)&buffer[4];
 
 	/* set file position */
@@ -1249,12 +1249,12 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 						/* reset beam flags if necessary */
 						reset_beamflags = false;
-						for (int i = 0; i < corbathy->num_beams; i++) {
+						for (unsigned int i = 0; i < corbathy->num_beams; i++) {
 							if (corbathy->z[i] == 0 && corbathy->empty[i] != MB_FLAG_NULL)
 								reset_beamflags = true;
 						}
 						if (reset_beamflags)
-							for (int i = 0; i < corbathy->num_beams; i++) {
+							for (unsigned int i = 0; i < corbathy->num_beams; i++) {
 								const int j = corbathy->beam_index[i];
 								if (corbathy->z[i] == 0)
 									corbathy->empty[i] = MB_FLAG_NULL;
@@ -1397,7 +1397,7 @@ int mbr_rt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wasspenl_wr_genbathy(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
+int mbr_wasspenl_wr_genbathy(int verbose, unsigned int *bufferalloc, char **bufferptr, void *store_ptr, unsigned int *size, int *error) {
 	int status = MB_SUCCESS;
 	char *buffer;
 	int index;
@@ -1437,7 +1437,7 @@ int mbr_wasspenl_wr_genbathy(int verbose, int *bufferalloc, char **bufferptr, vo
 		fprintf(stderr, "dbg5       genbathy->spreading_loss:             %f\n", genbathy->spreading_loss);
 		fprintf(stderr, "dbg5       genbathy->sample_type:                %u\n", genbathy->sample_type);
 		fprintf(stderr, "dbg5       genbathy->sound_velocity:             %f\n", genbathy->sound_velocity);
-		for (int i = 0; i < genbathy->number_beams; i++) {
+		for (unsigned int i = 0; i < genbathy->number_beams; i++) {
 			fprintf(stderr, "dbg5       genbathy->detection_point[%3d]:       %f\n", i, genbathy->detection_point[i]);
 			fprintf(stderr, "dbg5       genbathy->rx_angle[%3d]:              %f\n", i, genbathy->rx_angle[i]);
 			fprintf(stderr, "dbg5       genbathy->flags[%3d]:                 %u\n", i, genbathy->flags[i]);
@@ -1507,7 +1507,7 @@ int mbr_wasspenl_wr_genbathy(int verbose, int *bufferalloc, char **bufferptr, vo
 		index += 4;
 		mb_put_binary_float(true, genbathy->sound_velocity, &buffer[index]);
 		index += 4;
-		for (int i = 0; i < genbathy->number_beams; i++) {
+		for (unsigned int i = 0; i < genbathy->number_beams; i++) {
 			mb_put_binary_float(true, genbathy->detection_point[i], &buffer[index]);
 			index += 4;
 			mb_put_binary_float(true, genbathy->rx_angle[i], &buffer[index]);
@@ -1534,7 +1534,7 @@ int mbr_wasspenl_wr_genbathy(int verbose, int *bufferalloc, char **bufferptr, vo
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wasspenl_wr_corbathy(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
+int mbr_wasspenl_wr_corbathy(int verbose, unsigned int *bufferalloc, char **bufferptr, void *store_ptr, unsigned int *size, int *error) {
 	int status = MB_SUCCESS;
 	char *buffer;
 	int index;
@@ -1570,7 +1570,7 @@ int mbr_wasspenl_wr_corbathy(int verbose, int *bufferalloc, char **bufferptr, vo
 		for (int i = 0; i < 5; i++) {
 			fprintf(stderr, "dbg5       corbathy->spare[%3d]:                 %u\n", i, corbathy->spare[i]);
 		}
-		for (int i = 0; i < corbathy->num_beams; i++) {
+		for (unsigned int i = 0; i < corbathy->num_beams; i++) {
 			fprintf(stderr, "dbg5       corbathy->beam_index[%3d]:            %u\n", i, corbathy->beam_index[i]);
 			fprintf(stderr, "dbg5       corbathy->x[%3d]:                     %f\n", i, corbathy->x[i]);
 			fprintf(stderr, "dbg5       corbathy->y[%3d]:                     %f\n", i, corbathy->y[i]);
@@ -1637,7 +1637,7 @@ int mbr_wasspenl_wr_corbathy(int verbose, int *bufferalloc, char **bufferptr, vo
 			mb_put_binary_int(true, corbathy->spare[i], &buffer[index]);
 			index += 4;
 		}
-		for (int i = 0; i < corbathy->num_beams; i++) {
+		for (unsigned int i = 0; i < corbathy->num_beams; i++) {
 			mb_put_binary_int(true, corbathy->beam_index[i], &buffer[index]);
 			index += 4;
 			mb_put_binary_float(true, corbathy->x[i], &buffer[index]);
@@ -1678,7 +1678,7 @@ int mbr_wasspenl_wr_corbathy(int verbose, int *bufferalloc, char **bufferptr, vo
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wasspenl_wr_rawsonar(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
+int mbr_wasspenl_wr_rawsonar(int verbose, unsigned int *bufferalloc, char **bufferptr, void *store_ptr, unsigned int *size, int *error) {
 	int status = MB_SUCCESS;
 	char *buffer;
 	int index;
@@ -1710,15 +1710,15 @@ int mbr_wasspenl_wr_rawsonar(int verbose, int *bufferalloc, char **bufferptr, vo
 		fprintf(stderr, "dbg5       rawsonar->tx_power:                   %f\n", rawsonar->tx_power);
 		fprintf(stderr, "dbg5       rawsonar->pulse_width:                %f\n", rawsonar->pulse_width);
 		fprintf(stderr, "dbg5       rawsonar->sample_type:                %u\n", rawsonar->sample_type);
-		for (int i = 0; i < rawsonar->n; i++) {
+		for (unsigned int i = 0; i < rawsonar->n; i++) {
 			fprintf(stderr, "dbg5       rawsonar->spare[%3d]:                 %u\n", i, rawsonar->spare[i]);
 			fprintf(stderr, "dbg5       rawsonar->beam_index[%3d]:            %u\n", i, rawsonar->beam_index[i]);
 			fprintf(stderr, "dbg5       rawsonar->detection_point[%3d]:       %u\n", i, rawsonar->detection_point[i]);
 			fprintf(stderr, "dbg5       rawsonar->beam_angle[%3d]:            %f\n", i, rawsonar->beam_angle[i]);
 		}
 		fprintf(stderr, "dbg5       rawsonar->rawdata_alloc:              %zu\n", rawsonar->rawdata_alloc);
-		for (int i = 0; i < rawsonar->m; i++)
-			for (int j = 0; j < rawsonar->n; j++) {
+		for (unsigned int i = 0; i < rawsonar->m; i++)
+			for (unsigned int j = 0; j < rawsonar->n; j++) {
 				const int k = i * rawsonar->n + j;
 				fprintf(stderr, "dbg5       rawsonar->rawdata[%4d][%4d]:          %u\n", i, j, rawsonar->rawdata[k]);
 			}
@@ -1768,19 +1768,19 @@ int mbr_wasspenl_wr_rawsonar(int verbose, int *bufferalloc, char **bufferptr, vo
 		index += 4;
 		mb_put_binary_int(true, rawsonar->sample_type, &buffer[index]);
 		index += 4;
-		for (int i = 0; i < rawsonar->n; i++) {
+		for (unsigned int i = 0; i < rawsonar->n; i++) {
 			mb_put_binary_int(true, rawsonar->spare[i], &buffer[index]);
 			index += 4;
 		}
-		for (int i = 0; i < rawsonar->n; i++) {
+		for (unsigned int i = 0; i < rawsonar->n; i++) {
 			mb_put_binary_int(true, rawsonar->beam_index[i], &buffer[index]);
 			index += 4;
 		}
-		for (int i = 0; i < rawsonar->n; i++) {
+		for (unsigned int i = 0; i < rawsonar->n; i++) {
 			mb_put_binary_int(true, rawsonar->detection_point[i], &buffer[index]);
 			index += 4;
 		}
-		for (int i = 0; i < rawsonar->n; i++) {
+		for (unsigned int i = 0; i < rawsonar->n; i++) {
 			mb_put_binary_float(true, rawsonar->beam_angle[i], &buffer[index]);
 			index += 4;
 		}
@@ -1804,7 +1804,7 @@ int mbr_wasspenl_wr_rawsonar(int verbose, int *bufferalloc, char **bufferptr, vo
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wasspenl_wr_gen_sens(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
+int mbr_wasspenl_wr_gen_sens(int verbose, unsigned int *bufferalloc, char **bufferptr, void *store_ptr, unsigned int *size, int *error) {
 	int status = MB_SUCCESS;
 	char *buffer;
 	int index;
@@ -1887,7 +1887,7 @@ int mbr_wasspenl_wr_gen_sens(int verbose, int *bufferalloc, char **bufferptr, vo
 }
 /*--------------------------------------------------------------------*/
 
-int mbr_wasspenl_wr_nvupdate(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
+int mbr_wasspenl_wr_nvupdate(int verbose, unsigned int *bufferalloc, char **bufferptr, void *store_ptr, unsigned int *size, int *error) {
 	int status = MB_SUCCESS;
 	char *buffer;
 	int index;
@@ -1985,7 +1985,7 @@ int mbr_wasspenl_wr_nvupdate(int verbose, int *bufferalloc, char **bufferptr, vo
 }
 /*--------------------------------------------------------------------*/
 
-int mbr_wasspenl_wr_wcd_navi(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
+int mbr_wasspenl_wr_wcd_navi(int verbose, unsigned int *bufferalloc, char **bufferptr, void *store_ptr, unsigned int *size, int *error) {
 	int status = MB_SUCCESS;
 	char *buffer;
 	int index;
@@ -2015,7 +2015,7 @@ int mbr_wasspenl_wr_wcd_navi(int verbose, int *bufferalloc, char **bufferptr, vo
 		fprintf(stderr, "dbg5       wcd_navi->msec:                       %f\n", wcd_navi->msec);
 		fprintf(stderr, "dbg5       wcd_navi->ping_number:                %u\n", wcd_navi->ping_number);
 		fprintf(stderr, "dbg5       wcd_navi->sample_type:                %f\n", wcd_navi->sample_rate);
-		for (int i = 0; i < wcd_navi->num_points; i++) {
+		for (unsigned int i = 0; i < wcd_navi->num_points; i++) {
 			fprintf(stderr, "dbg5       wcd_navi->wcdata_x[%3d]:              %f\n", i, wcd_navi->wcdata_x[i]);
 			fprintf(stderr, "dbg5       wcd_navi->wcdata_y[%3d]:              %f\n", i, wcd_navi->wcdata_y[i]);
 			fprintf(stderr, "dbg5       wcd_navi->wcdata_mag[%3d]:            %f\n", i, wcd_navi->wcdata_mag[i]);
@@ -2064,7 +2064,7 @@ int mbr_wasspenl_wr_wcd_navi(int verbose, int *bufferalloc, char **bufferptr, vo
 		index += 4;
 		mb_put_binary_float(true, wcd_navi->sample_rate, &buffer[index]);
 		index += 4;
-		for (int i = 0; i < wcd_navi->num_points; i++) {
+		for (unsigned int i = 0; i < wcd_navi->num_points; i++) {
 			mb_put_binary_float(true, wcd_navi->wcdata_x[i], &buffer[index]);
 			index += 4;
 			mb_put_binary_float(true, wcd_navi->wcdata_y[i], &buffer[index]);
@@ -2090,7 +2090,7 @@ int mbr_wasspenl_wr_wcd_navi(int verbose, int *bufferalloc, char **bufferptr, vo
 }
 /*--------------------------------------------------------------------*/
 
-int mbr_wasspenl_wr_sensprop(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
+int mbr_wasspenl_wr_sensprop(int verbose, unsigned int *bufferalloc, char **bufferptr, void *store_ptr, unsigned int *size, int *error) {
 	int status = MB_SUCCESS;
 	char *buffer;
 	int index;
@@ -2119,7 +2119,7 @@ int mbr_wasspenl_wr_sensprop(int verbose, int *bufferalloc, char **bufferptr, vo
 		for (int i = 0; i < 8; i++)
 			fprintf(stderr, "dbg5       sensprop->spare[%d]:                   %d\n", i, sensprop->spare[i]);
 		fprintf(stderr, "dbg5       sensprop->n:                          %d\n", sensprop->n);
-		for (int i = 0; i < sensprop->n; i++) {
+		for (unsigned int i = 0; i < sensprop->n; i++) {
 			fprintf(stderr, "dbg5       sensprop->sensors[%d].sensor_type:    %u\n", i, sensprop->sensors[i].sensor_type);
 			fprintf(stderr, "dbg5       sensprop->sensors[%d].flags:          %u\n", i, sensprop->sensors[i].flags);
 			fprintf(stderr, "dbg5       sensprop->sensors[%d].port_number:    %u\n", i, sensprop->sensors[i].port_number);
@@ -2176,7 +2176,7 @@ int mbr_wasspenl_wr_sensprop(int verbose, int *bufferalloc, char **bufferptr, vo
 		}
 		mb_put_binary_int(true, sensprop->n, &buffer[index]);
 		index += 4;
-		for (int i = 0; i < sensprop->n; i++) {
+		for (unsigned int i = 0; i < sensprop->n; i++) {
 			mb_put_binary_int(true, sensprop->sensors[i].sensor_type, &buffer[index]);
 			index += 4;
 			mb_put_binary_int(true, sensprop->sensors[i].flags, &buffer[index]);
@@ -2222,7 +2222,7 @@ int mbr_wasspenl_wr_sensprop(int verbose, int *bufferalloc, char **bufferptr, vo
 }
 /*--------------------------------------------------------------------*/
 
-int mbr_wasspenl_wr_sys_prop(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
+int mbr_wasspenl_wr_sys_prop(int verbose, unsigned int *bufferalloc, char **bufferptr, void *store_ptr, unsigned int *size, int *error) {
 	int status = MB_SUCCESS;
 	char *buffer;
 	int index;
@@ -2323,7 +2323,7 @@ int mbr_wasspenl_wr_sys_prop(int verbose, int *bufferalloc, char **bufferptr, vo
 }
 /*--------------------------------------------------------------------*/
 
-int mbr_wasspenl_wr_sys_cfg1(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
+int mbr_wasspenl_wr_sys_cfg1(int verbose, unsigned int *bufferalloc, char **bufferptr, void *store_ptr, unsigned int *size, int *error) {
 	int status = MB_SUCCESS;
 	char *buffer;
 
@@ -2342,7 +2342,7 @@ int mbr_wasspenl_wr_sys_cfg1(int verbose, int *bufferalloc, char **bufferptr, vo
 
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
-		for (int i = 0; i < sys_cfg1->sys_cfg1_len; i++) {
+		for (unsigned int i = 0; i < sys_cfg1->sys_cfg1_len; i++) {
 			fprintf(stderr, "dbg5       sys_cfg1->sys_cfg1_data[%3d]:           %u\n", i, sys_cfg1->sys_cfg1_data[i]);
 		}
 	}
@@ -2380,7 +2380,7 @@ int mbr_wasspenl_wr_sys_cfg1(int verbose, int *bufferalloc, char **bufferptr, vo
 }
 /*--------------------------------------------------------------------*/
 
-int mbr_wasspenl_wr_mcomment(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
+int mbr_wasspenl_wr_mcomment(int verbose, unsigned int *bufferalloc, char **bufferptr, void *store_ptr, unsigned int *size, int *error) {
 	int status = MB_SUCCESS;
 	char *buffer;
 	int index;
@@ -2453,7 +2453,7 @@ int mbr_wasspenl_wr_mcomment(int verbose, int *bufferalloc, char **bufferptr, vo
 }
 /*--------------------------------------------------------------------*/
 
-int mbr_wasspenl_wr_unknown1(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
+int mbr_wasspenl_wr_unknown1(int verbose, unsigned int *bufferalloc, char **bufferptr, void *store_ptr, unsigned int *size, int *error) {
 	int status = MB_SUCCESS;
 	char *buffer;
 
@@ -2472,7 +2472,7 @@ int mbr_wasspenl_wr_unknown1(int verbose, int *bufferalloc, char **bufferptr, vo
 
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
-		for (int i = 0; i < unknown1->unknown1_len; i++) {
+		for (unsigned int i = 0; i < unknown1->unknown1_len; i++) {
 			fprintf(stderr, "dbg5       unknown1->unknown1_data[%3d]:           %u\n", i, unknown1->unknown1_data[i]);
 		}
 	}
@@ -2513,8 +2513,8 @@ int mbr_wasspenl_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int status = MB_SUCCESS;
 	char **bufferptr;
 	char *buffer;
-	int *bufferalloc;
-	int size;
+	unsigned int *bufferalloc;
+	unsigned int size;
 	size_t write_len;
 
 	if (verbose >= 2) {
@@ -2534,7 +2534,7 @@ int mbr_wasspenl_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* get saved values */
 	bufferptr = (char **)&mb_io_ptr->saveptr1;
 	buffer = (char *)*bufferptr;
-	bufferalloc = (int *)&mb_io_ptr->save6;
+	bufferalloc = (unsigned int *)&mb_io_ptr->save6;
 
 	/* write the current data record */
 

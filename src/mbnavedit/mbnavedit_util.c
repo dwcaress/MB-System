@@ -31,6 +31,8 @@
 
 #define XTPOINTER XtPointer
 
+#define STRING_MAX (10 * 1024)
+
 /*
  * The following enum is used to support wide character sets.
  * Use this enum for references into the Common Wide Characters array.
@@ -470,9 +472,9 @@ static XmString StringToXmString(char * str) {
 		return (NULL);
 
 	static char *tagBuf = NULL;
-	static int tagBufLen = 0;
+	static unsigned int tagBufLen = 0;
 	static char *textBuf = NULL;
-	static int textBufLen = 0;
+	static unsigned int textBufLen = 0;
 
 	/*
 	 * For expediencies sake, we'll overallocate this buffer so that
@@ -982,7 +984,7 @@ void BX_MENU_POST(Widget p, XtPointer mw, XEvent *ev, Boolean *dispatch) {
 	Widget m = (Widget)mw;
 	XtGetValues(m, args, argcnt);
 	XButtonEvent *e = (XButtonEvent *)ev;
-	if (e->button != button)
+	if ((int) e->button != button)
 		return;
 	XmMenuPosition(m, e);
 	XtManageChild(m);
@@ -1501,7 +1503,7 @@ LFUNC(atoui, unsigned int, (char *p, unsigned int l, unsigned int *ui_return));
 #endif
 
 static unsigned int atoui(char *p, unsigned int l, unsigned int *ui_return) {
-	int n, i;
+	unsigned int n, i;
 
 	n = 0;
 	for (i = 0; i < l; i++)
@@ -2277,7 +2279,7 @@ static void SetImagePixels(
 	char *dst;
 	int nbytes;
 	unsigned int *iptr;
-	int x, y, i;
+	unsigned int x, y, i;
 
 	iptr = pixelindex;
 	if (image->depth == 1) {
@@ -2337,12 +2339,12 @@ static unsigned long byteorderpixel = MSBFirst << 24;
 #endif
 
 static void SetImagePixels32(
-    XImage *image, unsigned int width, unsigned int height,
-    unsigned int *pixelindex, Pixel *pixels) {
+  XImage *image, unsigned int width, unsigned int height,
+  unsigned int *pixelindex, Pixel *pixels) {
 	unsigned char *addr;
 	unsigned int *paddr;
 	unsigned int *iptr;
-	int x, y;
+	unsigned int x, y;
 
 	iptr = pixelindex;
 #ifndef WORD64
@@ -2384,7 +2386,7 @@ static void SetImagePixels16(
     unsigned int *pixelindex, Pixel *pixels) {
 	unsigned char *addr;
 	unsigned int *iptr;
-	int x, y;
+	unsigned int x, y;
 
 	iptr = pixelindex;
 	if (image->byte_order == MSBFirst)
@@ -2411,7 +2413,7 @@ static void SetImagePixels8(
     XImage *image, unsigned int width, unsigned int height,
     unsigned int *pixelindex, Pixel *pixels) {
 	unsigned int *iptr;
-	int x, y;
+	unsigned int x, y;
 
 	iptr = pixelindex;
 	for (y = 0; y < height; y++)
@@ -2429,7 +2431,7 @@ static void SetImagePixels1(
 	unsigned char bit;
 	int xoff, yoff;
 	unsigned int *iptr;
-	int x, y;
+	unsigned int x, y;
 
 	if (image->byte_order != image->bitmap_bit_order)
 		SetImagePixels(image, width, height, pixelindex, pixels);
@@ -2941,7 +2943,7 @@ void SetAppDefaults(
 	XrmDatabase rdb = XrmGetStringDatabase("");
 
 	// Start the lineage with our name and then get our parents
-	char lineage[1000] = "";
+	char lineage[2048] = "";
 	Widget parent = w;
 	while (parent) {
 		WidgetClass wclass = XtClass(parent);
@@ -2976,7 +2978,7 @@ void SetAppDefaults(
 			continue;
 		}
 
-		char buf[1000];
+		char buf[STRING_MAX];
 		/* Build up string after lineage */
 		if (defs->cInstName != NULL) {
 			/* Don't include class instance name if it is also the instance */

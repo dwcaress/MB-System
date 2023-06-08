@@ -10,15 +10,39 @@ add_executable(mbeditviz
 	       mbeditviz_prog.c
 	       mbeditviz_callbacks.c)
 
+
+# Build library just containing non-GUI functions
+add_library(mbev
+            mbeditviz_prog.c)
+
+IF (APPLE)
+  # Resolve missing symbols at runtime
+  set_target_properties(mbev PROPERTIES LINK_FLAGS
+                  "-undefined dynamic_lookup -flat_namespace")
+ENDIF (APPLE)
+
+
 target_include_directories(mbeditviz
                            PUBLIC
                            .
                            ${CMAKE_SOURCE_DIR}/src/mbio
                            ${CMAKE_SOURCE_DIR}/src/mbaux
                            ${CMAKE_SOURCE_DIR}/src/gsf
-			   ${NETCDF_INCLUDE_DIR}
-			   ${X11_INCLUDE_DIR})
-			   
+			   ${NETCDF_INCLUDE_DIRS}
+                           ${PROJ_INCLUDE_DIRS}
+			   ${X11_INCLUDE_DIRS})
+
+target_include_directories(mbev
+                           PUBLIC
+                           .
+                           ${CMAKE_SOURCE_DIR}/src/mbio
+                           ${CMAKE_SOURCE_DIR}/src/mbaux
+                           ${CMAKE_SOURCE_DIR}/src/gsf
+                           ${CMAKE_SOURCE_DIR}/src/mbview
+                           ${PROJ_INCLUDE_DIRS}                           
+			   ${NETCDF_INCLUDE_DIRS}
+			   ${X11_INCLUDE_DIRS})
+
 # link_directories($GMT_LIBRARIES)
 target_link_libraries(mbeditviz
                       PRIVATE
@@ -28,9 +52,9 @@ target_link_libraries(mbeditviz
                       mbview
                       mbbsio
                       mbsapi
-                      mbgsf
-		      r7kr
-		      mframe
+                      ${GSF_LIB}
+		      ${R7KR_LIB}
+		      ${MFRAME_LIB}
 		      ${GMT_LIBRARIES}
 		      ${NETCDF_LIBRARIES}
 		      ${MOTIF_LIBRARIES}
@@ -43,6 +67,7 @@ target_link_libraries(mbeditviz
                       pthread)
                            
                            
+
 
 install(TARGETS mbeditviz
 	DESTINATION ${CMAKE_INSTALL_BINDIR})

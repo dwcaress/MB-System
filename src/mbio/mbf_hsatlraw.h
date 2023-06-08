@@ -199,15 +199,15 @@ int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
 int mbr_hsatlraw_rd_label(int verbose, FILE *mbfp, char *line, int *type, int *shift, int *error);
 int mbr_hsatlraw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line, int *error);
-int mbr_hsatlraw_rd_ergnhydi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error);
-int mbr_hsatlraw_rd_ergnpara(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error);
-int mbr_hsatlraw_rd_ergnposi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error);
-int mbr_hsatlraw_rd_ergneich(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error);
-int mbr_hsatlraw_rd_ergnmess(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error);
-int mbr_hsatlraw_rd_ergnslzt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error);
-int mbr_hsatlraw_rd_ergnctds(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error);
-int mbr_hsatlraw_rd_ergnampl(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error);
-int mbr_hsatlraw_rd_ldeocmnt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error);
+int mbr_hsatlraw_rd_ergnhydi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, size_t shift, int *error);
+int mbr_hsatlraw_rd_ergnpara(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, size_t shift, int *error);
+int mbr_hsatlraw_rd_ergnposi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, size_t shift, int *error);
+int mbr_hsatlraw_rd_ergneich(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, size_t shift, int *error);
+int mbr_hsatlraw_rd_ergnmess(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, size_t shift, int *error);
+int mbr_hsatlraw_rd_ergnslzt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, size_t shift, int *error);
+int mbr_hsatlraw_rd_ergnctds(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, size_t shift, int *error);
+int mbr_hsatlraw_rd_ergnampl(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, size_t shift, int *error);
+int mbr_hsatlraw_rd_ldeocmnt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, size_t shift, int *error);
 
 int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error);
 int mbr_hsatlraw_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error);

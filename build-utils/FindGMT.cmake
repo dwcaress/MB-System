@@ -1,5 +1,4 @@
 #
-# $Id$
 #
 # Locate GMT
 #
@@ -25,7 +24,7 @@
 # See COPYING-CMAKE-SCRIPTS for more information.
 #=============================================================================
 
-# This makes the presumption that you are include gmt.h like
+# This makes the presumption that you include gmt.h like
 #
 #include "gmt.h"
 
@@ -43,6 +42,7 @@ if (UNIX AND NOT GMT_FOUND)
 		/opt/local # DarwinPorts
 		/opt/csw # Blastwave
 		/opt
+		/usr/local
 	)
 
 	if (GMT_CONFIG)
@@ -50,18 +50,20 @@ if (UNIX AND NOT GMT_FOUND)
 			ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE
 			OUTPUT_VARIABLE GMT_CONFIG_CFLAGS)
 		if (GMT_CONFIG_CFLAGS)
-			string (REGEX MATCHALL "-I[^ ]+" _gmt_dashI ${GMT_CONFIG_CFLAGS})
-			string (REGEX REPLACE "-I" "" _gmt_includepath "${_gmt_dashI}")
-			string (REGEX REPLACE "-I[^ ]+" "" _gmt_cflags_other ${GMT_CONFIG_CFLAGS})
+			string (REGEX MATCHALL "(^| )-I[^ ]+" _gmt_dashI ${GMT_CONFIG_CFLAGS})
+			string (REGEX REPLACE "(^| )-I" "" _gmt_includepath "${_gmt_dashI}")
+			string (REGEX REPLACE "(^| )-I[^ ]+" "" _gmt_cflags_other ${GMT_CONFIG_CFLAGS})
 		endif (GMT_CONFIG_CFLAGS)
 		execute_process (COMMAND ${GMT_CONFIG} --libs
 			ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE
 			OUTPUT_VARIABLE GMT_CONFIG_LIBS)
 		if (GMT_CONFIG_LIBS)
-			string (REGEX MATCHALL "-l[^ ]+" _gmt_dashl ${GMT_CONFIG_LIBS})
-			string (REGEX REPLACE "-l" "" _gmt_lib "${_gmt_dashl}")
-			string (REGEX MATCHALL "-L[^ ]+" _gmt_dashL ${GMT_CONFIG_LIBS})
-			string (REGEX REPLACE "-L" "" _gmt_libpath "${_gmt_dashL}")
+			# Ensure -l is precedeced by whitespace to not match
+			# '-l' in '-L/usr/lib/x86_64-linux-gnu/hdf5/serial'
+			string (REGEX MATCHALL "(^| )-l[^ ]+" _gmt_dashl ${GMT_CONFIG_LIBS})
+			string (REGEX REPLACE "(^| )-l" "" _gmt_lib "${_gmt_dashl}")
+			string (REGEX MATCHALL "(^| )-L[^ ]+" _gmt_dashL ${GMT_CONFIG_LIBS})
+			string (REGEX REPLACE "(^| )-L" "" _gmt_libpath "${_gmt_dashL}")
 		endif (GMT_CONFIG_LIBS)
 	endif (GMT_CONFIG)
 	if (_gmt_lib)
@@ -85,6 +87,7 @@ find_path (GMT_INCLUDE_DIR gmt.h
 	/opt/local # DarwinPorts
 	/opt/csw # Blastwave
 	/opt
+	/usr/local
 )
 
 find_library (GMT_LIBRARY
@@ -95,12 +98,13 @@ find_library (GMT_LIBRARY
 	${GMT_ROOT}
 	$ENV{GMT_DIR}
 	$ENV{GMT_ROOT}
-	PATH_SUFFIXES lib64 lib
+	PATH_SUFFIXES lib
 	PATHS
 	/sw
 	/opt/local
 	/opt/csw
 	/opt
+	/usr/local
 )
 
 # find all libs that gmt-config reports
@@ -113,10 +117,8 @@ endforeach (_extralib)
 
 include (FindPackageHandleStandardArgs)
 find_package_handle_standard_args (GMT
-  DEFAULT_MSG GMT_LIBRARY GMT_INCLUDE_DIR)
+	DEFAULT_MSG GMT_LIBRARY GMT_INCLUDE_DIR)
 
 set (GMT_LIBRARIES ${GMT_LIBRARY})
 set (GMT_INCLUDE_DIRS ${GMT_INCLUDE_DIR})
 string (REPLACE "-DNDEBUG" "" GMT_DEFINITIONS "${_gmt_cflags_other}")
-
-#

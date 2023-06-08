@@ -13,21 +13,26 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 set(src
+    TopoColorMap.cpp
+    TopoGridReader.cpp
     Camera.cpp
     MBQuickItem.cpp
     ColorMap.cpp
+    DisplayProperties.cpp    
     MBQuickView.cpp
     QVtkItem.cpp
     GmtGridReader.cpp
-    SwathReader.cpp    
+    TopoGridData.cpp
+    GmtGridData.cpp    
     MBQuickItem.cpp
     QVtkRenderer.cpp
     GmtGridSurface.cpp
     Surface.cpp
+    SwathGridData.cpp
     MBGui.cpp
     SurfaceRenderer.cpp
     PickerInteractorStyle.cpp
-    Utilities.cpp    
+    Utilities.cpp
     resources.qrc)
 
 
@@ -35,17 +40,25 @@ set(src
 add_library(MBGui
             STATIC
             ${src})
-            
+
+target_link_libraries(MBGui
+                      PRIVATE
+                      ${PROJ_LIBRARIES}
+                      ${VTK_LIBRARIES}
+                      ${GMT_LIBRARIES})
+		      
 target_include_directories(MBGui
                            PUBLIC
                            .
                            ${MB_HOME}/src/mbio
-			   ${OPENGL_INCLUDE_DIR}
-                           ${GMT_INCLUDE_DIR}
-                           ${VTK_INCLUDE_DIR}
-                           ${QT5_INCLUDE_DIR})
+                           ${MB_HOME}/src/mbeditviz                           
+			   ${OPENGL_INCLUDE_DIRS}
+			   ${PROJ_INCLUDE_DIRS}
+                           ${GMT_INCLUDE_DIRS}
+                           ${QT5_INCLUDE_DIRS}
+                           ${VTK_INCLUDE_DIRS})
 
-message("*** OPENGL_INCLUDE_DIR: ${OPENGL_INCLUDE_DIR}")
+message("*** OPENGL_INCLUDE_DIRS: ${OPENGL_INCLUDE_DIRS}")
 
 set_target_properties(MBGui PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
@@ -57,16 +70,26 @@ add_library(MBGuiShared
 
 set_target_properties(MBGuiShared PROPERTIES OUTPUT_NAME MBGui)
 
+
 target_include_directories(MBGuiShared
                            PUBLIC
                            .
-			   ${OPENGL_INCLUDE_DIR}			   
-                           ${GMT_INCLUDE_DIR}
-                           ${VTK_INCLUDE_DIR}                           
-                           ${QT5_INCLUDE_DIR})
+                           ${MB_HOME}/src/mbio
+                           ${MB_HOME}/src/mbeditviz                           
+			   ${OPENGL_INCLUDE_DIRS}
+                           ${GMT_INCLUDE_DIRS}
+                           ${PROJ_INCLUDE_DIRS}                           
+                           ${QT5_INCLUDE_DIRS}
+                           ${VTK_INCLUDE_DIRS})
 
-target_link_libraries(MBGuiShared ${EXTRA_LIBRARIES})
+message("qt-guilib - EXTRA_LIBRARIES: ${EXTRA_LIBRARIES}")
+
+target_link_libraries(MBGuiShared
+                      ${PROJ_LIBRARIES}
+                      ${VTK_LIBRARIES}
+	              ${GMT_LIBRARIES} ${EXTRA_LIBRARIES})
 
 # Install
 install(TARGETS MBGui DESTINATION cmake-example/lib)
 install(TARGETS MBGuiShared DESTINATION cmake-example/lib)
+

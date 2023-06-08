@@ -1,4 +1,4 @@
-#!/usr/local/bin/bash
+#!/usr/bin/env bash
 #/bin/bash
 
 # Configuration for mb1svr log data plots

@@ -1722,7 +1722,6 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
   short type2swap;
   short sonar2swap;
   int nsonar, nlow, nhigh, subsystem;
-  int size;
 
   /* look for old Simrad Mermaid suffix convention */
   if (!found) {
@@ -1935,7 +1934,9 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
       i = strlen(filename) - 8;
     else
       i = 0;
-    if ((suffix = strstr(&filename[i], "tibr.txt")) != NULL)
+    if ((suffix = strstr(&filename[i], "nav.txt")) != NULL)
+      suffix_len = 4;
+    else if ((suffix = strstr(&filename[i], "tibr.txt")) != NULL)
       suffix_len = 4;
     else if ((suffix = strstr(&filename[i], "docr.txt")) != NULL)
       suffix_len = 4;
@@ -1973,6 +1974,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
     else if ((suffix = strstr(&filename[i], "ptloedited.txt")) != NULL)
       suffix_len = 4;
     else if ((suffix = strstr(&filename[i], "wflyedited.txt")) != NULL)
+      suffix_len = 4;
+    else if ((suffix = strstr(&filename[i], "navedited.txt")) != NULL)
       suffix_len = 4;
     else
       suffix_len = 0;
@@ -2461,6 +2464,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
             /* read and discard the rest of the record */
             if (!done) {
+              int size = 0;
               mb_get_binary_int(true, &buffer[12], &size);
               for (i = 0; i < size; i++) {
                 if (fread(buffer, 1, 1, checkfp) != 1)
@@ -2892,7 +2896,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
   /* check for old format id and provide alias if needed */
   if (found && *format > 0 && (*format < 10 || *format == 44 || *format == 52 || *format == 55)) {
-    int i;
+    int i = MBF_EMOLDRAW;;
     /* replace original mbio id's */
     if (*format < 10)
       i = format_alias_table[*format];
@@ -2902,7 +2906,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
       i = MBF_L3XSERAW;
 
     /* handle old Simrad EM12 and EM121 formats */
-    else if (*format == 52 || *format == 55)
+    else /* if (*format == 52 || *format == 55) */
       i = MBF_EMOLDRAW;
 
     if (verbose >= 2) {

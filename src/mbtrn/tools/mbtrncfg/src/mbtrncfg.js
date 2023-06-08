@@ -201,7 +201,8 @@ help_topics["input"]="7K input source IP\n\n\
 help_topics["log-directory"]="MB-System, TRN log directory";
 help_topics["swath-width"]="MB-System swath (deg)";
 help_topics["soundings"]="MB1 bathymetry soundings (integer)";
-help_topics["format"]="MB-System record format [MB1:88]";
+help_topics["format"]="MB-System format id (datalist: -1; Teledyn 7k: 88 or 89; Kongsberg kmall: 261; MB1: 72) [MB1:88]";
+help_topics["auv-sentry-em2040"]="Flag enabling use of special pressure depth encoding for EM2040 data collected on AUV Sentry";
 help_topics["median-filter"]="Median filter settings\n\n\
   filter_threshold/n_along/n_across";
 help_topics["output"]="MB-System output\n\
@@ -371,7 +372,7 @@ function trn_session(){
               ];
 
     var yday = days[leap][M] + D;
-	// add leading zeros 
+	// add leading zeros
     var leadz = (yday<100 ? "0" : "")
     leadz += (yday<10?"0":"")
 
@@ -410,6 +411,7 @@ function load_ctx(){
     x.elements["swath-width"].value="90";
     x.elements["soundings"].value="11";
     x.elements["format"].value="88";
+    x.elements["auv-sentry-em2040"].value="dis";
     x.elements["median-filter"].value="0.10/9/3";
     x.elements["output"].value="file:mbtrnpp_SESSION.mb1";
     x.elements["statsec"].value="30";
@@ -477,6 +479,7 @@ function init_preset(key){
     x.elements["swath-width"].value="90";
     x.elements["soundings"].value="11";
     x.elements["format"].value="88";
+    x.elements["auv-sentry-em2040"].value="dis";
     x.elements["median-filter"].value="0.10/9/3";
     x.elements["output"].value="file:mbtrnpp_SESSION.mb1";
     x.elements["statsec"].value="30";
@@ -568,6 +571,8 @@ function update(){
         text += '--soundings='+x.elements["soundings"].value+" ";
     if(x.elements["format"].value.length>0)
         text += '--format='+x.elements["format"].value+" ";
+    if(x.elements["auv-sentry-em2040"].value=='en')
+        text += '--auv-sentry-em2040'+" ";
     if(x.elements["median-filter"].value.length>0)
         text += '--median-filter='+x.elements["median-filter"].value+" ";
     if(x.elements["statsec"].value.length>0)
@@ -786,6 +791,16 @@ function cfg2str(){
         retval+="// input data format\n";
     }
     retval+="format="+x.elements["format"].value+"\n";
+
+    retval+="\n";
+    if(verbose){
+        retval+="// opt auv-sentry-em2040 [none]\n";
+        retval+="// enable/disable use of special pressure depth encoding for EM2040 data collected on AUV Sentry\n";
+    }
+    if(x.elements["auv-sentry-em2040"].value=="en")
+        retval+="auv-sentry-em2040\n";
+    else
+        retval+="#auv-sentry-em2040\n";
 
     retval+="\n";
     if(verbose){
@@ -1197,4 +1212,3 @@ function write_cfg(){
     w.document.writeln("</html>");
 
 }
-

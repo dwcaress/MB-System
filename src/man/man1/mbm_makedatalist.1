@@ -1,4 +1,4 @@
-.TH mbm_makedatalist 1 "3 January 2021" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_makedatalist 1 "22 June 2022" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_makedatalist\fP \- Macro to generate a datalist of the swath
 files in a specified directory.
@@ -7,7 +7,7 @@ files in a specified directory.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbm_makedatalist\fP [\fB\-F\fP\fIformat\fP \fB\-I\fP\fIdirectory\fP \fB-L\fP
+\fBmbm_makedatalist\fP [\fB\-B\fP\fIsize\fP \fB\-F\fP\fIformat\fP \fB\-I\fP\fIdirectory\fP \fB-L\fP
 \fB\-O\fP\fIdatalist\fP \fB-P\fP \fB-S\fP\fIsuffix\fP \fB\-T -H \-V\fP]
 
 .SH DESCRIPTION
@@ -88,6 +88,12 @@ Christian do Santos Ferreira
   University of Bremen
 
 .SH OPTIONS
+.TP
+.B \-B
+\fIsize\fP
+.br
+This option sets a size threshold in kilobytes below which a file will be
+ignored and not included in the output datalist file. 
 .TP
 .B \-F
 \fIformat\fP

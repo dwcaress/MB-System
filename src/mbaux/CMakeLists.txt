@@ -1,5 +1,5 @@
 #
-# Gets GMT_INCLUDE_DIR from root CMakeLists
+# Gets GMT_INCLUDE_DIRS from root CMakeLists
 #
 
 message("in mbaux")
@@ -18,9 +18,9 @@ ENDIF (APPLE)
 target_include_directories(mbaux
                            PUBLIC
                            .
-			   ${X11_INCLUDE_DIR}			   
-                           ${GMT_INCLUDE_DIR}
-                           ${GDAL_INCLUDE_DIR}
+			   ${X11_INCLUDE_DIRS}			   
+                           ${GMT_INCLUDE_DIRS}
+                           ${GDAL_INCLUDE_DIRS}
                            ${CMAKE_SOURCE_DIR}/src/mbio)
 
 # add static or shared library, depending on BUILD_SHARED_LIBS
@@ -37,9 +37,9 @@ ENDIF (APPLE)
 target_include_directories(mbxgr
                            PUBLIC
                            .
-			   ${X11_INCLUDE_DIR}			   
-                           ${GMT_INCLUDE_DIR}
-                           ${GDAL_INCLUDE_DIR}
+			   ${X11_INCLUDE_DIRS}			   
+                           ${GMT_INCLUDE_DIRS}
+                           ${GDAL_INCLUDE_DIRS}
                            ${CMAKE_SOURCE_DIR}/src/mbio)
 
 install(TARGETS mbaux mbxgr

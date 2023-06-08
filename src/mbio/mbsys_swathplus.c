@@ -816,7 +816,7 @@ int mbsys_swathplus_insert(int verbose, void *mbio_ptr, void *store_ptr, int kin
 
 		/* read distance and depth values into storage arrays */
 		sxp_ping->nosampsfile = nbath;
-		if (sxp_ping->points_alloc < nbath) {
+		if (sxp_ping->points_alloc < (size_t)nbath) {
 			status = mb_reallocd(verbose, __FILE__, __LINE__, nbath * sizeof(swpls_point), (void **)&(sxp_ping->points), error);
 			if (status != MB_SUCCESS) {
 				sxp_ping->points_alloc = 0;
@@ -877,7 +877,7 @@ int mbsys_swathplus_insert(int verbose, void *mbio_ptr, void *store_ptr, int kin
 		ocomment->microsec = 0;
 
 		/* allocate more memory for comment if necessary */
-		int nchars = strnlen(comment, MB_COMMENT_MAXLINE) + 1;
+		size_t nchars = strnlen(comment, MB_COMMENT_MAXLINE) + 1;
 		if (ocomment->message_alloc < nchars) {
 			status = mb_reallocd(verbose, __FILE__, __LINE__, nchars, (void **)&(ocomment->message), error);
 			if (status != MB_SUCCESS) {
@@ -960,7 +960,7 @@ int mbsys_swathplus_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		swpls_concat_rotate_y(verbose, &wtov, -sxp_ping->heading, error);
 
 		swpls_point *points = sxp_ping->points;
-		for (int i = 0; i < sxp_ping->nosampsfile; i++) {
+		for (unsigned int i = 0; i < sxp_ping->nosampsfile; i++) {
 			swpls_vector ppos;
 
 			/* point position relative to reference point */
@@ -1206,8 +1206,8 @@ int mbsys_swathplus_extract_altitude(int verbose, void *mbio_ptr, void *store_pt
 		*transducer_depth = sxp_ping->txer_waterdepth; /* static draft */
 
 		/* calculate mean depth of first 25 near-nadir samples */
-		int i = 0;
-		int n = 0;
+		unsigned int i = 0;
+		unsigned int n = 0;
 		double sum = 0.0;
 		while (i < sxp_ping->nosampsfile && n < 25) {
 			if (sxp_ping->points[i].status != SWPLS_POINT_REJECTED) {
@@ -1462,7 +1462,7 @@ int mbsys_swathplus_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int
 
 		/* transform points from old to new coordinates */
 		points = sxp_ping->points;
-		for (int i = 0; i < sxp_ping->nosampsfile; i++) {
+		for (unsigned int i = 0; i < sxp_ping->nosampsfile; i++) {
 			swpls_vector p;
 
 			p.x = points[i].x;
@@ -1914,7 +1914,7 @@ int swpls_rd_sxpping(int verbose, char *buffer, void *store_ptr, int pingtype, i
 
 	/* extract the point data from the buffer into the ping struct */
 	if (status == MB_SUCCESS) {
-		for (int i = 0; i < ping->nosampsfile; i++) {
+		for (unsigned int i = 0; i < ping->nosampsfile; i++) {
 			mb_get_binary_int(true, &buffer[index], &(ping->points[i].sampnum));
 			index += 4;
 			index += 4; /* padding bytes */
@@ -3198,7 +3198,7 @@ int swpls_wr_sxpping(int verbose, int *bufferalloc, char **bufferptr, void *stor
 		index += 8;
 
 		/* insert the xyza point data */
-		for (int i = 0; i != ping->nosampsfile; ++i) {
+		for (unsigned int i = 0; i != ping->nosampsfile; ++i) {
 			mb_put_binary_int(true, ping->points[i].sampnum, &buffer[index]);
 			index += 4;
 			index += 4; /* padding bytes */
@@ -4433,7 +4433,7 @@ int swpls_pr_sxpping(int verbose, FILE *fout, swpls_sxpping *ping, int *error) {
 	fprintf(fout, "%s        txer_pitch:           %lf\n", starter, ping->txer_pitch);
 
 	points = ping->points;
-	for (int i = 0; i < ping->nosampsfile; i++) {
+	for (unsigned int i = 0; i < ping->nosampsfile; i++) {
 		fprintf(fout, "%s        %4d %11.2lf %10.2lf %7.2f %5u %5u %u %5.2lf\n", starter, points[i].sampnum, points[i].y,
 		        points[i].x, points[i].z, points[i].amp, points[i].procamp, points[i].status, points[i].tpu);
 	}
@@ -4475,7 +4475,7 @@ int swpls_pr_projection(int verbose, FILE *fout, swpls_projection *projection, i
 	fprintf(fout, "\n%s  SWPLS_ID_PROJECTION [ID: 0x%X] %d bytes\n", starter, SWPLS_ID_PROJECTION, size);
 	fprintf(fout, "%s        time_d:               %d :: %s", starter, projection->time_d, asctime(gmtime(&tm)));
 	fprintf(fout, "%s        microsec:             %d\n", starter, projection->microsec);
-	fprintf(fout, "%s        nchars:               %d\n", starter, projection->nchars);
+	fprintf(fout, "%s        nchars:               %zu\n", starter, projection->nchars);
 	fprintf(fout, "%s        projection_id:        %s\n", starter, projection->projection_id);
 
 	const int status = MB_SUCCESS;
@@ -4516,7 +4516,7 @@ int swpls_pr_comment(int verbose, FILE *fout, swpls_comment *comment, int *error
 	fprintf(fout, "\n%s  SWPLS_ID_COMMENT [ID: 0x%X] %d bytes\n", starter, SWPLS_ID_COMMENT, size);
 	fprintf(fout, "%s        time_d:               %d :: %s", starter, comment->time_d, asctime(gmtime(&tm)));
 	fprintf(fout, "%s        microsec:             %d\n", starter, comment->microsec);
-	fprintf(fout, "%s        nchars:               %d\n", starter, comment->nchars);
+	fprintf(fout, "%s        nchars:               %zu\n", starter, comment->nchars);
 	fprintf(fout, "%s        message:              %s\n", starter, comment->message);
 
 	const int status = MB_SUCCESS;

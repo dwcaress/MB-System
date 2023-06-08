@@ -5,6 +5,7 @@
 message("in mbnavedit")
 
 add_executable(mbnavedit
+               mbnavedit.c
 	       mbnavedit_callbacks.c
                mbnavedit_creation.c
 	       mbnavedit_prog.c
@@ -16,8 +17,8 @@ target_include_directories(mbnavedit
                            ${CMAKE_SOURCE_DIR}/src/mbio
                            ${CMAKE_SOURCE_DIR}/src/mbaux
                            ${CMAKE_SOURCE_DIR}/src/gsf
-			   ${NETCDF_INCLUDE_DIR}
-			   ${X11_INCLUDE_DIR})
+			   ${NETCDF_INCLUDE_DIRS}
+			   ${X11_INCLUDE_DIRS})
 			   
 # link_directories($GMT_LIBRARIES)
 target_link_libraries(mbnavedit
@@ -28,9 +29,9 @@ target_link_libraries(mbnavedit
                       mbview
                       mbbsio
                       mbsapi
-                      mbgsf
-		      r7kr
-		      mframe
+                      ${GSF_LIB}
+		      ${R7KR_LIB}
+		      ${MFRAME_LIB}
 		      ${GMT_LIBRARIES}
 		      ${NETCDF_LIBRARIES}
 		      ${MOTIF_LIBRARIES}

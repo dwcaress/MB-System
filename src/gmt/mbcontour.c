@@ -32,12 +32,7 @@
  *                                  plotters removed)
  */
 
-#include <stdbool.h>
-
-#define THIS_MODULE_NAME "mbcontour"
-#define THIS_MODULE_LIB "mbsystem"
-#define THIS_MODULE_PURPOSE "Plot swath bathymetry, amplitude, or backscatter"
-#define THIS_MODULE_KEYS ""
+//#include <stdbool.h>
 
 /* GMT5 header file */
 #include "gmt_dev.h"
@@ -90,6 +85,15 @@
 #define gmt_set_grddim GMT_set_grddim
 #define gmt_show_name_and_purpose GMT_show_name_and_purpose
 #endif
+
+#define THIS_MODULE_CLASSIC_NAME "mbcontour"
+#define THIS_MODULE_MODERN_NAME "mbcontour"
+#define THIS_MODULE_LIB "mbsystem"
+#define THIS_MODULE_PURPOSE "Plot swath bathymetry, amplitude, or backscatter"
+
+#define THIS_MODULE_KEYS "<G{+,>}"
+#define THIS_MODULE_NEEDS "g"
+#define THIS_MODULE_OPTIONS "-:>RV" GMT_OPT("H")
 
 #define GMT_PROG_OPTIONS "->BJKOPRUVXY" GMT_OPT("S")
 
@@ -301,7 +305,7 @@ void Free_mbcontour_Ctrl(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl) { /*
 }
 
 int GMT_mbcontour_usage(struct GMTAPI_CTRL *API, int level) {
-	gmt_show_name_and_purpose(API, THIS_MODULE_LIB, THIS_MODULE_NAME, THIS_MODULE_PURPOSE);
+	gmt_show_name_and_purpose(API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_PURPOSE);
 	if (level == GMT_MODULE_PURPOSE)
 		return (GMT_NOERROR);
 	GMT_Message(API, GMT_TIME_NONE, "usage: mbcontour -I<inputfile> %s [%s]\n", GMT_J_OPT, GMT_B_OPT);
@@ -752,11 +756,11 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 
 		/* Parse the command-line arguments */
 #if GMT_MAJOR_VERSION >= 6 && GMT_MINOR_VERSION >= 1
-	GMT = gmt_init_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, "", "", NULL, &options, &GMT_cpy); /* Save current state */
+	GMT = gmt_init_module(API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_KEYS, THIS_MODULE_NEEDS, NULL, &options, &GMT_cpy); /* Save current state */
 #elif GMT_MAJOR_VERSION >= 6
-	GMT = gmt_init_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, "", "", &options, &GMT_cpy); /* Save current state */
+	GMT = gmt_init_module(API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_KEYS, THIS_MODULE_NEEDS, &options, &GMT_cpy); /* Save current state */
 #else
-	GMT = gmt_begin_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
+	GMT = gmt_begin_module(API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, &GMT_cpy); /* Save current state */
 #endif
 	if (GMT_Parse_Common(API, GMT_PROG_OPTIONS, options)) {
 		fprintf(stderr, "Error from GMT_Parse_common():%d\n", API->error);

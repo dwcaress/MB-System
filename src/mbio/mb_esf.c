@@ -802,6 +802,9 @@ int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error) {
 /* The following code has been modified from code obtained from
 	http://www.gnu-darwin.org/sources/4Darwin-x86/src/lib/libc/stdlib/merge.c
    on July 27, 2003 by David W. Caress.
+   On January 28, 2023 I found that the above url no longer exists, but the
+   pre-Darwin version can be found in FreeBSD at:
+   https://github.com/freebsd/freebsd-src/blob/master/lib/libc/stdlib/merge.c
  */
 
 /*
@@ -877,22 +880,24 @@ const int THRESHOLD = 16; /* Best choice for natural merge cut-off. */
 
 #define ISIZE sizeof(int)
 #define PSIZE sizeof(mb_u_char *)
-#define ICOPY_LIST(src, dst, last)                                                                                               \
-	do                                                                                                                           \
-		*(int *)dst = *(int *)src, src += ISIZE, dst += ISIZE;                                                                   \
+
+#define ICOPY_LIST(src, dst, last) \
+	do \
+		*(int *)dst = *(int *)src, src += ISIZE, dst += ISIZE; \
 	while (src < last)
-#define ICOPY_ELT(src, dst, i)                                                                                                   \
-	do                                                                                                                           \
-		*(int *)dst = *(int *)src, src += ISIZE, dst += ISIZE;                                                                   \
+
+#define ICOPY_ELT(src, dst, i) \
+	do \
+		*(int *)dst = *(int *)src, src += ISIZE, dst += ISIZE; \
 	while (i -= ISIZE)
 
-#define CCOPY_LIST(src, dst, last)                                                                                               \
-	do                                                                                                                           \
-		*dst++ = *src++;                                                                                                         \
+#define CCOPY_LIST(src, dst, last) \
+	do \
+		*dst++ = *src++; \
 	while (src < last)
-#define CCOPY_ELT(src, dst, i)                                                                                                   \
-	do                                                                                                                           \
-		*dst++ = *src++;                                                                                                         \
+#define CCOPY_ELT(src, dst, i) \
+	do \
+		*dst++ = *src++; \
 	while (i -= 1)
 
 /*
@@ -932,7 +937,7 @@ int mb_mergesort(void *base, size_t nmemb, size_t size, int (*cmp)(const void *,
 	mb_u_char *list1 = base;
 	mb_mergesort_setup(list1, list2, nmemb, size, cmp);
 	last = list2 + nmemb * size;
-	int i = 0;
+	unsigned int i = 0;
 	int big = 0;
 	while (*EVAL(list2) != last) {
 		mb_u_char *l2 = list1;
@@ -1046,29 +1051,29 @@ int mb_mergesort(void *base, size_t nmemb, size_t size, int (*cmp)(const void *,
 	return (0);
 }
 
-#define swap(a, b)                                                                                                               \
-	{                                                                                                                            \
-		s = b;                                                                                                                   \
-		i = size;                                                                                                                \
-		do {                                                                                                                     \
-			tmp = *a;                                                                                                            \
-			*a++ = *s;                                                                                                           \
-			*s++ = tmp;                                                                                                          \
-		} while (--i);                                                                                                           \
-		a -= size;                                                                                                               \
+#define swap(a, b) \
+	{ \
+		s = b; \
+		i = size; \
+		do { \
+			tmp = *a; \
+			*a++ = *s; \
+			*s++ = tmp; \
+		} while (--i); \
+		a -= size; \
 	}
-#define reverse(bot, top)                                                                                                        \
-	{                                                                                                                            \
-		s = top;                                                                                                                 \
-		do {                                                                                                                     \
-			i = size;                                                                                                            \
-			do {                                                                                                                 \
-				tmp = *bot;                                                                                                      \
-				*bot++ = *s;                                                                                                     \
-				*s++ = tmp;                                                                                                      \
-			} while (--i);                                                                                                       \
-			s -= size2;                                                                                                          \
-		} while (bot < s);                                                                                                       \
+#define reverse(bot, top) \
+	{ \
+		s = top; \
+		do { \
+			i = size; \
+			do { \
+				tmp = *bot; \
+				*bot++ = *s; \
+				*s++ = tmp; \
+			} while (--i); \
+			s -= size2; \
+		} while (bot < s); \
 	}
 
 /*
@@ -1161,3 +1166,5 @@ void mb_mergesort_insertionsort(mb_u_char *a, size_t n, size_t size, int (*cmp)(
 			swap(u, t);
 		}
 }
+
+/*--------------------------------------------------------------------*/

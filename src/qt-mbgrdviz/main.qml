@@ -57,12 +57,22 @@ ApplicationWindow {
     }
 
     ActionGroup {
+        id: overlayActions
+        exclusive: false
+    }
+
+    ActionGroup {
         id: topoActions
         exclusive: true
     }
 
     ActionGroup {
         id: shadeActions
+        exclusive: true
+    }
+
+    ActionGroup {
+        id: projectionActions
         exclusive: true
     }
 
@@ -74,6 +84,7 @@ ApplicationWindow {
     ActionGroup {
         id: colorActions
         exclusive: true
+        onTriggered: {console.log("selected a colormap")}
     }
 
     ActionGroup {
@@ -82,68 +93,85 @@ ApplicationWindow {
     }
 
     menuBar: MenuBar {
+    
         Menu {
             title: qsTr("File")
-            Action { text: qsTr("Open grid") ;
+
+            Menu {
+                title: qsTr("Open")
+            Action { text: qsTr("Open grid...") ;
                 onTriggered: { console.log("show file dialog")
-                    fileDialog.open()}
+                    gridfileDialog.open()}
             }
-            Action { text: qsTr("Open site") ;
+            Action { text: qsTr("Open site...") ;
                 onTriggered: { console.log("open site")
-                }
+                sitefileDialog.open()}
             }
-            Action { text: qsTr("Open route") ;
+            Action { text: qsTr("Open route...") ;
                 onTriggered: { console.log("open route")
                 }
             }
-            Action { text: qsTr("Open navigation") ;
+            Action { text: qsTr("Open navigation...") ;
                 onTriggered: { console.log("open navigation")
-                }
+                }                }
+                
+
             }
+            Menu {
+                title: qsTr("Save")
+                Action { text: qsTr("Sites") }
+                Action { text: qsTr("Routes") }
+                Action { text: qsTr("Navigation") }                
+                }
             Action { text: qsTr("Exit") ;
                 onTriggered: { console.log("exit");
                     quitDialog.open()
                 }
             }
-
-
         }
 
-
         Menu {
-            title: qsTr("&View")
-            Menu {
-                title: "Map/3D"
-                Action { checkable: true; checked: true; text: qsTr("&Map"); ActionGroup.group: mapActions }
-                Action { checkable: true; text: qsTr("&3D"); ActionGroup.group: mapActions }
-                Action { checkable: true; checked: true; text: qsTr("&Topography"); ActionGroup.group: topoActions }
-                Action { checkable: true; text: qsTr("&Topography slope"); ActionGroup.group: topoActions }
-
-            }
-
+        title: qsTr("&Edit")
+            Action {text: qsTr("Site list")}
+            Action {text: qsTr("Route list")}
+            Action {text: qsTr("Navigation list")}
+        }
+        
+        Menu {
+            title: qsTr("&Options")
+            Action { checkable: true; text: qsTr("&2D only") }            
             MenuSeparator {}
-            Action { checkable: true; text: qsTr("&Histograms") }
-            Action { checkable: true; text: qsTr("&Contours") }
-            Action { checkable: true; text: qsTr("&Sites") }
-            Action { checkable: true; text: qsTr("&Routes") }
-            Action { checkable: true; text: qsTr("&Vector") }
-            
-            Action { checkable: true; text: qsTr("&Profile window")
+            Menu {
+                title: "Color table"
+                Action {checkable: true; checked: true; text: qsTr("Haxby"); ActionGroup.group: colorActions
+                onTriggered: {mainWindow.qmlSignal("colormap " + "Haxby")}}
+                
+                Action {checkable: true; text: qsTr("BrightRainbow"); ActionGroup.group: colorActions
+                onTriggered: {mainWindow.qmlSignal("colormap BrightRainbow")}}
+                
+                Action {checkable: true; text: qsTr("MutedRainbow"); ActionGroup.group: colorActions
+                onTriggered: {mainWindow.qmlSignal("colormap MutedRainbow")}}
+                
+                Action {checkable: true; text: qsTr("Grayscale"); ActionGroup.group: colorActions
+                onTriggered: {mainWindow.qmlSignal("colormap Grayscale")}}
             }
-            
-            Action { checkable: true; text: qsTr("&Axes")
+            MenuSeparator {}
+            Menu {
+                title: "Overlays"
+                Action { checkable: true; checked: true; text: qsTr("&Sites"); ActionGroup.group: overlayActions }
+                Action { checkable: true; text: qsTr("&Routes"); ActionGroup.group: overlayActions }
+
+                Action { checkable: true; text: qsTr("&Contours"); ActionGroup.group: overlayActions }
+                Action { checkable: true; text: qsTr("&Vector"); ActionGroup.group: overlayActions }                
+                
+            Action { checkable: true; text: qsTr("&Axes");
+              ActionGroup.group: overlayActions;
 	      onTriggered: { console.log("axes triggered: ", checked);
               mainWindow.qmlSignal("showAxes " + checked)
               }}
-            
-            MenuSeparator {}
-            Menu {
-                title: "Shading"
-                Action {checkable: true; checked: true; text: qsTr("Off"); ActionGroup.group: shadeActions }
-                Action {checkable: true; text: qsTr("Slope"); ActionGroup.group: shadeActions}
-                Action {checkable: true; text: qsTr("Illumination"); ActionGroup.group: shadeActions }
-            }
-            MenuSeparator {}
+              
+              //  Action { checkable: true; checked: true;
+              //  text: qsTr("&Navigation"); ActionGroup.group: overlayActions }
             Menu {
                 title: "Navigation"
                 Action {checkable: true; checked: true; text: qsTr("Off"); ActionGroup.group: navActions }
@@ -151,51 +179,45 @@ ApplicationWindow {
                 Action {checkable: true; text: qsTr("Non-draped"); ActionGroup.group: navActions }
             }
             MenuSeparator {}
+                
+            }
+
+            MenuSeparator {}
             Menu {
-                title: "Color table"
-                Action {checkable: true; checked: true; text: qsTr("Haxby"); ActionGroup.group: colorActions }
-                Action {checkable: true; text: qsTr("Bright rainbow"); ActionGroup.group: colorActions}
-                Action {checkable: true; text: qsTr("Muted rainbow"); ActionGroup.group: colorActions }
-                Action {checkable: true; text: qsTr("Grayscale"); ActionGroup.group: colorActions }
-                Action {checkable: true; text: qsTr("Flat gray"); ActionGroup.group: colorActions }
-                Action {checkable: true; text: qsTr("Sealevel1"); ActionGroup.group: colorActions }
-                Action {checkable: true; text: qsTr("Sealevel2"); ActionGroup.group: colorActions }
-            }
-        }
+                title: "Projection"
+                Action {checkable: true; checked: true; text: qsTr("Auto"); ActionGroup.group: projectionActions }                
+                Action {checkable: true; checked: true; text: qsTr("Geographic"); ActionGroup.group: projectionActions }
+                Action {checkable: true; text: qsTr("UTM"); ActionGroup.group: projectionActions}
+                Action {checkable: true; text: qsTr("Spheroid"); ActionGroup.group: projectionActions }
+            }            
+            
 
-        Menu {
-            title: "&Settings"
-            Action {text: qsTr("Color and contours"); onTriggered: {
-                    console.log("Create Popup");
-                    var component = Qt.createComponent("ui-components/Popup.qml");
-                    if (component.status === Component.Ready) {
-                        var dialog = component.createObject(appWindow,{popupType: 1});
-                        // dialogConnection.target = dialog
-                        dialog.show();
-                    }
-                    else {
-                        console.log("component is NOT ready");
-                    }
-                }
+            MenuSeparator {}
+            Menu {
+                title: "Shading"
+                Action {checkable: true; checked: true; text: qsTr("Off"); ActionGroup.group: shadeActions }
+                Action {checkable: true; text: qsTr("Slope"); ActionGroup.group: shadeActions}
+                Action {checkable: true; text: qsTr("Illumination"); ActionGroup.group: shadeActions }
+                Action {text: qsTr("Settings...")}                
             }
-
-            Action {text: qsTr("2D"); onTriggered: {
-                    console.log("show 2d settings window");
-                    settings2d.show()
-                }
-            }
-
-            Action {text: qsTr("3D"); onTriggered: {
+            MenuSeparator {}
+            Action {text: qsTr("Camera/model..."); onTriggered: {
                     console.log("show 3d settings window");
                     settings3d.show()
                 }
             }
-            Action {text: qsTr("Shading")}
-            Action {text: qsTr("Resolution")}
-            Action {text: qsTr("Projections")}
-            Action {text: qsTr("Site list")}
-            Action {text: qsTr("Route list")}
-            Action {text: qsTr("Navigation list")}
+            Action {text: qsTr("2D..."); onTriggered: {
+                    console.log("show 2d settings window");
+                    settings2d.show()
+                }
+            }
+            
+            Action {text: qsTr("Lighting...")}            
+            Action {text: qsTr("Resolution...")}
+            Action { checkable: true; text: qsTr("Histograms") }
+            Action { checkable: true; text: qsTr("Profile")
+            }
+            
         }
 
         Menu {
@@ -224,12 +246,23 @@ ApplicationWindow {
     }
 
     FileDialog {
-        id: fileDialog
+        id: gridfileDialog
         title: "Open file"
-        nameFilters: ["Grid files (*.grd)"]
+        nameFilters: ["Grid files (*.grd *.mb?*)"]
         onAccepted: {
             console.log("accepted " + fileUrl);
             BackEnd.setGridFile(fileUrl)
+        }
+    }
+
+    FileDialog {
+        id: sitefileDialog
+        title: "Open site file"
+        nameFilters: ["Site files (*.ste)"]
+        onAccepted: {
+            console.log("accepted " + fileUrl);
+         //   BackEnd.setSiteFile(fileUrl);
+            mainWindow.qmlSignal("sitefile " + fileUrl)            
         }
     }
 
@@ -286,8 +319,6 @@ ApplicationWindow {
 
                 // Update picked coordinate text
                 onPickedPointChanged: {
-                  console.log("user picked a point!")
-                  console.log("this one: " + pickedPoint)
                   pickedCoords.text = pickedPoint
                 }
 

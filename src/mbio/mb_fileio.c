@@ -141,7 +141,7 @@ int mb_fileio_get(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
 
   int status = MB_SUCCESS;
 
-  size_t read_len;
+  size_t read_len = 0;
   if (mb_io_ptr->mbfp != NULL) {
       /* read expected number of bytes into buffer */
       if ((read_len = fread(buffer, 1, *size, mb_io_ptr->mbfp)) != *size) {

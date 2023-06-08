@@ -220,14 +220,14 @@ int main(int argc, char **argv) {
 	int etime_i[7];
 	double speedmin;
 	double timegap;
-  
+
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	bool printheader = false;
 	char file[MB_PATH_MAXLINE] = "";
 	mb_path nav_file = "";
 	bool nav_merge = false;
-  bool nav_merge_clip = false;
+    bool nav_merge_clip = false;
 	output_t output_mode = OUTPUT_MODE_TAB;
 	int nprintfields = 0;
 	struct printfield printfields[NFIELDSMAX];
@@ -235,11 +235,11 @@ int main(int argc, char **argv) {
 	bool calc_soundspeed = false;
 	bool calc_density = false;
 	bool calc_ktime = false;
-  bool calc_kspeed = false;
+    bool calc_kspeed = false;
 	bool recalculate_ctd = false;
 	int ctd_calibration_id = 0;
 	bool angles_in_degrees = false;
-  bool calculate_time_interval  = false;
+    bool calculate_time_interval  = false;
 
 	{
 		bool errflg = false;
@@ -308,8 +308,8 @@ int main(int argc, char **argv) {
 					calc_ktime = true;
 				if (strcmp(printfields[nprintfields].name, "calcKSpeed") == 0)
 					calc_kspeed = true;
-        if (strcmp(printfields[nprintfields].name, "timeInterval") == 0)
-          calculate_time_interval = true;
+        		if (strcmp(printfields[nprintfields].name, "timeInterval") == 0)
+          			calculate_time_interval = true;
 				printfields[nprintfields].index = -1;
 				nprintfields++;
 				break;
@@ -459,22 +459,32 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
 		}
-		while ((result = fgets(buffer, nchar, fp)) == buffer) {
-			double sec;
-			const int nget = sscanf(
-				buffer, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", &time_i[0], &time_i[1], &time_i[2],
-				&time_i[3], &time_i[4], &sec, &nav_time_d[nav_num], &nav_navlon[nav_num], &nav_navlat[nav_num],
-				&nav_heading[nav_num], &nav_speed[nav_num], &nav_sensordepth[nav_num], &nav_roll[nav_num],
-				&nav_pitch[nav_num], &nav_heave[nav_num]);
-			bool nav_ok = nget >= 9;
-			if (nav_num > 0 && nav_time_d[nav_num] <= nav_time_d[nav_num - 1])
-				nav_ok = false;
-			if (nav_ok)
-				nav_num++;
-		}
-		fclose(fp);
+    if (fp != NULL) {
+      bool done = false;
+      while (!done) {
+        memset(buffer, 0, MB_PATH_MAXLINE);
+      	char *line_ptr = fgets(buffer, MB_PATH_MAXLINE, fp);
+      	if (line_ptr == NULL) {
+          done = true;
+        }
+        else if (buffer[0] != '#') {
+    			double sec;
+    			const int nget = sscanf(
+    				buffer, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", &time_i[0], &time_i[1], &time_i[2],
+    				&time_i[3], &time_i[4], &sec, &nav_time_d[nav_num], &nav_navlon[nav_num], &nav_navlat[nav_num],
+    				&nav_heading[nav_num], &nav_speed[nav_num], &nav_sensordepth[nav_num], &nav_roll[nav_num],
+    				&nav_pitch[nav_num], &nav_heave[nav_num]);
+    			bool nav_ok = nget >= 9;
+    			if (nav_num > 0 && nav_time_d[nav_num] <= nav_time_d[nav_num - 1])
+    				nav_ok = false;
+    			if (nav_ok)
+    				nav_num++;
+        }
+      }
+		  fclose(fp);
+    }
 	}
-	if (nav_merge)
+  if (nav_merge)
 		fprintf(stderr, "%d %d records read from nav file %s\n", nav_alloc, nav_num, nav_file);
 
 	/* open the input file */
@@ -645,11 +655,11 @@ int main(int argc, char **argv) {
 	    }
 	}
 
-  /* if calculating speed from Kearfott velocity vector check for available Kearfott data */
-  if (calc_kspeed && !kvelocity_available) {
+    /* if calculating speed from Kearfott velocity vector check for available Kearfott data */
+    if (calc_kspeed && !kvelocity_available) {
 		fprintf(stderr, "\nUnable to calculate speed from Kearfott data as requested, Kearfoot velocity data not in file <%s>\n", file);
 		exit(MB_ERROR_BAD_FORMAT);
-  }
+    }
 
 	/* check the fields to be printed */
 	for (int i = 0; i < nprintfields; i++) {
@@ -815,8 +825,8 @@ int main(int argc, char **argv) {
 	double soundspeed_calc = 0.0;
 	double potentialtemperature_calc = 0.0;
 	double density_calc = 0.0;
-  double time_interval = 0.0;
-  double prior_time_d = 0.0;
+    double time_interval = 0.0;
+    double prior_time_d = 0.0;
 
 	/* read the data records in the auv log file */
 	int nrecord = 0;

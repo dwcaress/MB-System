@@ -469,7 +469,7 @@ int main(int argc, char **argv) {
 
 	/* output time list for the route */
 	if (!output_file_set) {
-		sprintf(output_file, "%s_wpttime_d.txt", read_file);
+		snprintf(output_file, sizeof(output_file), "%s_wpttime_d.txt", read_file);
 	}
 	fp = fopen(output_file, "w");
 	if (fp == nullptr) {

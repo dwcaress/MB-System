@@ -398,9 +398,9 @@ int printsimplevalue(int verbose, FILE *output, double value, int width, int pre
   if (*invert)
     strcpy(format, "%g");
   else if (width > 0)
-    sprintf(&format[1], "%d.%df", width, precision);
+    snprintf(&format[1], 23, "%d.%df", width, precision);
   else
-    sprintf(&format[1], ".%df", precision);
+    snprintf(&format[1], 23, ".%df", precision);
 
   /* invert value if desired */
   if (*invert) {
@@ -1231,7 +1231,7 @@ int main(int argc, char **argv) {
 
   int nbeams;
 
-  char output_file_temp[MB_PATH_MAXLINE] = "";
+  char output_file_temp[2*MB_PATH_MAXLINE+20] = "";
 
   /* netcdf variables */
   int lcount = 0;
@@ -2903,9 +2903,9 @@ int main(int argc, char **argv) {
             utm_zone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
             reference_lat = navlat;
             if (reference_lat >= 0.0)
-              sprintf(projection_id, "UTM%2.2dN", utm_zone);
+              snprintf(projection_id, sizeof(projection_id), "UTM%2.2dN", utm_zone);
             else
-              sprintf(projection_id, "UTM%2.2dS", utm_zone);
+              snprintf(projection_id, sizeof(projection_id), "UTM%2.2dS", utm_zone);
           }
           else
             strcpy(projection_id, projection_pars);
@@ -4855,11 +4855,11 @@ int main(int argc, char **argv) {
         rewind(output[i]);
 
         /* copy data to CDL file */
-        /* TODO(schwehr): Convert this abuse of for to a while. */
-	  char buffer[MB_BUFFER_MAX];
-        for (size_t j = fread(buffer, sizeof(char), MB_BUFFER_MAX, output[i]); j > 0;
-             j = fread(buffer, sizeof(char), MB_BUFFER_MAX, output[i])) {
-          if (j != fwrite(buffer, sizeof(char), j, outfile)) {
+	      char buffer[MB_BUFFER_MAX];
+        size_t read_len = 0;
+        while ((read_len = fread(buffer, sizeof(char), MB_BUFFER_MAX, output[i])) > 0) {
+          size_t write_len = fwrite(buffer, sizeof(char), read_len, outfile);
+          if (write_len != read_len) {
             fprintf(stderr, "Error writing to CDL file");
           }
         }
@@ -4872,16 +4872,21 @@ int main(int argc, char **argv) {
 
     /* convert cdl to netcdf */
     if (!netcdf_cdl) {
-      sprintf(output_file_temp, "ncgen -o %s %s.cdl", output_file, output_file);
+      snprintf(output_file_temp, sizeof(output_file_temp), "ncgen -o %s %s.cdl", output_file, output_file);
       const int shellstatus = system(output_file_temp);
       if (shellstatus == 0) {
-        sprintf(output_file_temp, "rm %s.cdl", output_file);
+        snprintf(output_file_temp, sizeof(output_file_temp), "rm %s.cdl", output_file);
         // TODO(schwehr): Check return of system.
         /* shellstatus = */ system(output_file_temp);
       }
     }
   } else {
     fclose(outfile);
+  }
+
+  /* free projection */
+  if (use_projection && pjptr != NULL) {
+    mb_proj_free(verbose, &(pjptr), &error);
   }
 
   if (verbose >= 4)

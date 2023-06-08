@@ -3530,9 +3530,9 @@ int mbedit_open_file(char *file, int form, bool savemode) {
 	}
 
 	int status = MB_SUCCESS;
-	mb_path error1 = "";
-	mb_path error2 = "";
-	mb_path error3 = "";
+	char error1[3072] = "";
+	char error2[3072] = "";
+	char error3[3072] = "";
 
 	/* swath file locking variables */
 	bool locked = false;
@@ -3783,7 +3783,7 @@ int mbedit_close_file() {
 			do_message_on("Bathymetry edits being applied using mbprocess...");
 
 			/* run mbprocess */
-			char command[MB_PATH_MAXLINE] = "";
+			char command[2*MB_PATH_MAXLINE] = "";
 			sprintf(command, "mbprocess -I %s\n", ifile);
 			/* int shellstatus = */ system(command);
 		}

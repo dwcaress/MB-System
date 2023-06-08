@@ -1,5 +1,5 @@
 #
-# Gets GMT_INCLUDE_DIR from root CMakeLists
+# Gets GMT_INCLUDE_DIRS from root CMakeLists
 #
 
 message("in mbview")
@@ -24,12 +24,16 @@ target_include_directories(mbview
                            PUBLIC
                            .
 			   ${CMAKE_INSTALL_PREFIX}/include
-			   ${MOTIF_INCLUDE_DIR}			   
-			   ${X11_INCLUDE_DIR}
-                           ${OPENGL_INCLUDE_DIR}  			   
-                           ${GMT_INCLUDE_DIR}
+			   ${MOTIF_INCLUDE_DIRS}			   
+			   ${X11_INCLUDE_DIRS}
+                           ${OPENGL_INCLUDE_DIRS}  			   
+                           ${GMT_INCLUDE_DIRS}
                            ${CMAKE_SOURCE_DIR}/src/mbio
                            ${CMAKE_SOURCE_DIR}/src/mbaux)
-                           
+
+target_link_libraries(mbview
+                      PRIVATE
+		      ${MOTIF_LIBRARIES})
+
 install(TARGETS mbview 
 	DESTINATION ${CMAKE_INSTALL_LIBDIR})

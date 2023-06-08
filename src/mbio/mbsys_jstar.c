@@ -861,7 +861,8 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 	double weight, altitude, xtrackmax, pixelsize, ssmax;
 	int istart, jstart, jxtrackmax;
 	int shortspersample;
-	int nsamples, trace_size;
+	int nsamples;
+  unsigned int trace_size;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2622,7 +2623,7 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int ki
 		const double weight = pow(2.0, (double)sbp->weightingFactor);
 
 		/* make sure enough memory is allocated for channel data */
-		const int data_size = sizeof(short) * sbp->samples;
+		const size_t data_size = sizeof(short) * sbp->samples;
 		if (sbp->trace_alloc < data_size) {
 			status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(sbp->trace), error);
 			if (status == MB_SUCCESS) {
@@ -2846,7 +2847,7 @@ int mbsys_jstar_copyrecord(int verbose, void *mbio_ptr, void *store_ptr, void *c
 		shortspersample = 2;
 	else
 		shortspersample = 1;
-	int trace_size = shortspersample * copy->sbp.samples * sizeof(short);
+	unsigned int trace_size = shortspersample * copy->sbp.samples * sizeof(short);
 
 	int status = MB_SUCCESS;
 	if (copy->sbp.trace_alloc < trace_size) {

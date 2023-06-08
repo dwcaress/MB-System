@@ -86,7 +86,7 @@ extern char *mbsystem_library_name;
 /* local variables */
 static Cardinal ac = 0;
 static Arg args[256];
-static char value_text[MB_PATH_MAXLINE];
+static char value_text[2*MB_PATH_MAXLINE];
 
 
 /*------------------------------------------------------------------------------*/
