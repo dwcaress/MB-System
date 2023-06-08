@@ -52,7 +52,7 @@ DataLogWriter::DataLogWriter(const char *objectName,
     trnLogDir = ".";
   }
 
-  snprintf(_fileName, sizeof(_fileName), "%s/%s/%s.log", trnLogDir, LatestLogDirName, name());
+  snprintf(_fileName, DLOG_FILENAME_BYTES, "%s/%s/%s.log", trnLogDir, LatestLogDirName, name());
 
   openFile();
 
@@ -156,30 +156,46 @@ void DataLogWriter::writeHeader()
   fflush(fileStream());
 }
 
+int DataLogWriter::checkLog()
+{
+    if (_logFile == NULL || _logOK == False) {
+        return -1;
+    }
+    return 0;
+}
+
+void DataLogWriter::updateAutoTimestamp()
+{
+    if (_autoTimestamp) {
+        //struct timespec timeSpec;
+        //clock_gettime(CLOCK_REALTIME, &_timeSpec);
+        TimeP::gettime(&_timeSpec);
+        _timeStamp.setValue((double )(_timeSpec.tv_sec + _timeSpec.tv_nsec/1.e9));
+    }
+}
 
 int DataLogWriter::write()
 {
-  if (_logFile == NULL || _logOK == False) {
-    if (DLDEBUG) printf("DataLogWriter::write() - no log file!\n");
-    return 0;
-  }
+    if (_logFile == NULL || _logOK == False) {
+        if (DLDEBUG) printf("DataLogWriter::write() - no log file!\n");
+        return -1;
+    }
 
-  char errorBuf[MAX_EXC_STRING_LEN];
+    if (!_handledHeader) {
+        // Need to write header. Note that write() is not called until
+        // after all Data fields have been added.
+        writeHeader();
+    }
 
-  if (!_handledHeader) {
-    // Need to write header. Note that write() is not called until
-    // after all Data fields have been added.
-    writeHeader();
-  }
+
+    if (_autoTimestamp) {
+        //struct timespec timeSpec;
+        //clock_gettime(CLOCK_REALTIME, &_timeSpec);
+        TimeP::gettime(&_timeSpec);
+        _timeStamp.setValue((double )(_timeSpec.tv_sec + _timeSpec.tv_nsec/1.e9));
+    }
 
   if (DLDEBUG) printf("DataLogWriter::write() - call setFields()\n");
-
-  if (_autoTimestamp) {
-     //struct timespec timeSpec;
-     //clock_gettime(CLOCK_REALTIME, &_timeSpec);
-     TimeP::gettime(&_timeSpec);
-    _timeStamp.setValue((double )(_timeSpec.tv_sec + _timeSpec.tv_nsec/1.e9));
-  }
 
   // Call subclass-defined method to set field values
   setFields();
@@ -195,6 +211,8 @@ int DataLogWriter::write()
     if (field != NULL) field->write(_logFile);
     else
     {
+      char errorBuf[MAX_EXC_STRING_LEN];
+
       snprintf(errorBuf, sizeof(errorBuf),
                "DataLogWriter::write() expected field %d where none was found",
                i);

@@ -169,8 +169,7 @@ const char **prof_stats_labels[PROF_LABEL_COUNT]={
 mlog_config_t mlog_conf = {
     ML_NOLIMIT, ML_NOLIMIT, ML_NOLIMIT,
     ML_MONO,
-    ML_FILE,ML_TFMT_ISO1806,
-    NULL
+    ML_FILE,ML_TFMT_ISO1806
 };
 mfile_flags_t log_flags = MFILE_RDWR|MFILE_APPEND|MFILE_CREATE;
 mfile_mode_t log_mode = MFILE_RU|MFILE_WU|MFILE_RG|MFILE_WG;
@@ -932,7 +931,7 @@ int netif_init_log(netif_t *self, char *log_name, char *log_dir, char *session_s
         }
 
         if(NULL!=session_str){
-            snprintf(session_date, sizeof(session_date), "%s",session_str);
+            snprintf(session_date, 32, "%s",session_str);
         }else{
         // make session time string to use
         // in log file names
@@ -940,12 +939,13 @@ int netif_init_log(netif_t *self, char *log_name, char *log_dir, char *session_s
         // Get GMT time
         struct tm *gmt = gmtime(&rawtime);
         // format YYYYMMDD-HHMMSS
-        snprintf(session_date, sizeof(session_date), "%04d%02d%02d-%02d%02d%02d",
+        snprintf(session_date, 32, "%04d%02d%02d-%02d%02d%02d",
                 (gmt->tm_year+1900),gmt->tm_mon+1,gmt->tm_mday,
                 gmt->tm_hour,gmt->tm_min,gmt->tm_sec);
 
         }
         self->mlog_path = (char *)malloc(NETIF_LOG_PATH_BYTES);
+        memset(self->mlog_path, 0 , NETIF_LOG_PATH_BYTES);
 
         snprintf(self->mlog_path, NETIF_LOG_PATH_BYTES, "%s//%s-%s%s",self->log_dir,log_name,session_date,NETIF_LOG_EXT);
 
@@ -1178,7 +1178,7 @@ static int s_netif_test_send(msock_socket_t *cli)
         char *msg_out=strdup("PING");
         if(NULL!=msg_out){
             size_t len=strlen(msg_out)+1;
-            if( len>0 && msock_send(cli,(byte *)msg_out,len)==(int64_t)len){
+            if( len>0 && msock_send(cli,(byte *)msg_out,len)==len){
                 fprintf(stderr,"client REQ send OK [%s/%zu]\n",msg_out,len);
                 retval=0;
             }else{

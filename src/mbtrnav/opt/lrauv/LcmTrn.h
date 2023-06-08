@@ -76,6 +76,7 @@
 #include "TNavConfig.h"
 #include "TerrainNav.h"
 #include "structDefs.h"
+#include "macros.h"
 
 using namespace std;
 using namespace libconfig;
@@ -117,21 +118,6 @@ using namespace lrauv_lcm_tools;
 #define LCMTRN_DEFAULT_WEIGHTING 1
 #define LCMTRN_DEFAULT_LOWGRADE false
 #define LCMTRN_DEFAULT_ALLOW true
-
-// Define a useful way to delete and reset a pointer to an object.
-// If the ptr is non-NULL, delete the object referenced by the ptr
-// and reset the ptr to NULL.
-// E.g.:
-// SomeObj *obj = new SomeObject();
-// DELOBJ(obj);
-//
-#define DELOBJ(ptr)                                                            \
-    {                                                                          \
-        if (NULL != ptr) {                                                     \
-            delete ptr;                                                        \
-            ptr = NULL;                                                        \
-        }                                                                      \
-    }
 
 namespace lcmTrn
 {

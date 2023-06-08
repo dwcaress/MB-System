@@ -37,7 +37,8 @@ OS_LIBS=-lrt
 endif
 
 # Build options
-BUILD_OPTIONS = $(STD) -D_GNU_SOURCE  $(OPT_TRN_VER) $(OPT_TRN_BUILD)
+GIT_VERS = -D__GIT_VERSION__="\"`git describe --tags`\""
+BUILD_OPTIONS = $(STD) -D_GNU_SOURCE $(GIT_VERS)  $(OPT_TRN_VER) $(OPT_TRN_BUILD)
 
 # Build directories
 OUTPUT_DIR=../../bin
@@ -85,15 +86,13 @@ LIB_PATHS = -L$(OUTPUT_DIR) $(OS_LIB_PATH) -L/usr/local/lib
 ########################################
 # Target Definitions
 LRTRN_APP=lrtrn-app
-LRTRN_APP_HDR=LcmTrn.h
-LRTRN_APP_SRC=lrtrn_app.cpp LcmTrn.cpp $(LRTRN_APP_HDR)
+LRTRN_APP_SRC=LcmTrn.cpp
 LRTRN_APP_OBJ = $(LRTRN_APP_SRC:%.cpp=$(BUILD_DIR)/%.o)
 LRTRN_APP_PP = $(LRTRN_APP_SRC:%.cpp=./%.cpp-pp) $(LRTRN_APP_SRC:%.h=./%.h-pp)
 LRTRN_APP_LIBS = -llcm -lconfig++ -lzf_log -ltrn  -lnewmat -lqnx -lgeolib -lnetcdf -lm $(OS_LIBS)
 
 LRCONAV_APP=lrconav-app
-LRCONAV_APP_HDR=lrconav_app.h CoNav.h MRFilter.h MRFilterLog.h CoNavLog.h
-LRCONAV_APP_SRC=lrconav_app.cpp CoNav.cpp MRFilter.cpp MRFilterLog.cpp CoNavLog.cpp $(LRCONAV_APP_HDR)
+LRCONAV_APP_SRC=lrconav_app.cpp EgoRobot.cpp MRFilter.cpp MRFilterLog.cpp EgoRobotLog.cpp
 LRCONAV_APP_OBJ = $(LRCONAV_APP_SRC:%.cpp=$(BUILD_DIR)/%.o)
 LRCONAV_APP_PP = $(LRCONAV_APP_SRC:%.cpp=./%.cpp-pp) $(LRCONAV_APP_SRC:%.h=./%.h-pp)
 LRCONAV_APP_LIBS = -llcm -lzf_log -ltrn  -lnewmat -lqnx -lgeolib -lnetcdf -lm $(OS_LIBS)
@@ -107,7 +106,8 @@ CONAV_MSG_LIBS = -llcm -lzf_log -ltrn  -lnewmat -lqnx -lgeolib -lnetcdf -lm $(OS
 
 ########################################
 # Build Files (mostly for cleanup)
-SOURCES = $(LRTRN_APP) $(LRCONAV_APP) $(CONAV_MSG_APP)
+#SOURCES = $(LRTRN_APP) $(LRCONAV_APP) $(CONAV_MSG_APP)
+SOURCES = $(LRTRN_APP_SRC) $(LRCONAV_APP_SRC) $(CONAV_MSG_SRC)
 
 OBJECTS = $(SOURCES:%.cpp=$(BUILD_DIR)/%.o)
 DEPENDS = $(SOURCES:%.cpp=$(BUILD_DIR)/%.d)
@@ -125,7 +125,7 @@ CLEANUP = gmon.out
 all: $(BINARIES)
 
 # build LRAUV TRN utility
-$(OUTPUT_DIR)/$(LRTRN_APP): $(LRTRN_APP_HDR) $(LRTRN_APP_OBJ)
+$(OUTPUT_DIR)/$(LRTRN_APP): lrtrn_app.cpp $(LRTRN_APP_OBJ)
 	@echo building $@...
 	$(CXX) $(CFLAGS) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(LRTRN_APP_LIBS)
 	@echo
@@ -158,19 +158,6 @@ endif
 endif
 
 
-# rule: build pretty-print files from source files
-CLANG_FORMAT=clang-format -style="{BasedOnStyle: llvm, IndentWidth: 4, BreakBeforeBraces: Linux, AlignConsecutiveAssignments: true}"
-
-./%.cpp-pp :%.cpp
-	@echo formatting $<...
-	$(CLANG_FORMAT) $< > $@
-	@echo
-
-./%.h-pp :%.h
-	@echo formatting $<...
-	$(CLANG_FORMAT) $< > $@
-	@echo
-
 # rule: build object files from source files
 $(BUILD_DIR)/%.o :%.cpp
 	@echo compiling $<...
@@ -193,6 +180,19 @@ $(BUILD_DIR)/%.d :%.cpp
 	@set -e; $(CXX) -MM $(CFLAGS) $(INC_PATHS) $< \
 	| awk '/o:/ {printf "%s", "$@ $(BUILD_DIR)/"} {print}' > $@; \
 	[ -s $@ ] || rm -f $@
+	@echo
+
+# rule: build pretty-print files from source files
+CLANG_FORMAT=clang-format -style="{BasedOnStyle: llvm, IndentWidth: 4, BreakBeforeBraces: Linux, AlignConsecutiveAssignments: true}"
+
+./%.cpp-pp :%.cpp
+	@echo formatting $<...
+	$(CLANG_FORMAT) $< > $@
+	@echo
+
+./%.h-pp :%.h
+	@echo formatting $<...
+	$(CLANG_FORMAT) $< > $@
 	@echo
 
 install:

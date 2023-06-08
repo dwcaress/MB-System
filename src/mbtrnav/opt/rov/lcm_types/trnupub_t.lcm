@@ -1,0 +1,61 @@
+//////////////////////////////////////////////////////////////////////////////
+// Copyright 2021  Monterey Bay Aquarium Research Institute                 //
+// Distributed under MIT license. See license.txt for more information.     //
+//////////////////////////////////////////////////////////////////////////////
+package trn;
+
+struct trnupub_t
+{
+    // sync bytes (see TRNU_PUB_SYNC)
+    int32_t sync;
+
+    // TRN estimates
+    // 0:pose_t 1:mle 2:mmse 3: offset 4: most recent useful offset
+    trnu_estimate_t est[5];
+
+    // number of reinits
+    int32_t reinit_count;
+
+    // time of last reinint (not implemented)
+    double reinit_tlast;
+
+    // TRN filter state
+    int32_t filter_state;
+
+    // last measurement successful
+    int32_t success;
+
+    // TRN is_converged
+    int16_t is_converged;
+
+    // TRN is_valid (covariance thresholds) - flag indicating this offset is reliable and can be used
+    int16_t is_valid;
+
+    // mbtrnpp MB1 cycle counter
+    int32_t mb1_cycle;
+
+    // MB1 ping number
+    int32_t ping_number;
+
+    // Number of current streak of converged estimates
+    int32_t n_con_seq;
+
+    // Total number of unconverged estimates
+    int32_t n_con_tot;
+
+    // Number of current streak of converged estimates
+    int32_t n_uncon_seq;
+
+    // Total number of unconverged estimates
+    int32_t n_uncon_tot;
+
+    // MB1 timestamp
+    double mb1_time;
+
+    // Time of most recent reinit (epoch seconds)
+    double reinit_time;
+
+    // TRN update time (taken in mbtrnpp)
+    double update_time;
+}
+

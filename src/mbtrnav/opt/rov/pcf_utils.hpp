@@ -128,7 +128,7 @@ namespace pcf
         app_name = std::string(getprogname());
 #endif
 
-#if defined(__LINUX__)
+#if defined(__LINUX__) || defined(__linux__)
         // create file input stream
         std::ifstream infile;
 
@@ -143,7 +143,7 @@ namespace pcf
         infile.close();
 #endif
 
-#if !defined(_MACOS) && !defined(__LINUX__) && !defined(__APPLE__)
+#if !defined(_MACOS) && !defined(__LINUX__) && !defined(__linux__) && !defined(__APPLE__)
     #pragma GCC warning "Unknown OS type"
 #endif
 

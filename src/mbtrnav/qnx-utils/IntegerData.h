@@ -19,6 +19,7 @@
 #include "DataField.h"
 
 #define IntegerTypeMnem "integer"
+#define IDATA_ASCII_BUFFER_BYTES 32 
 
 /*
 CLASS 
@@ -70,7 +71,7 @@ public:
 protected:
 
   int _value;
-  char _asciiBuffer[32];
+  char _asciiBuffer[IDATA_ASCII_BUFFER_BYTES];
 };
 
 

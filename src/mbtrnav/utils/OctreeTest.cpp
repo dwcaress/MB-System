@@ -238,7 +238,7 @@ void stat_show_summary(TreeStats *ts, bool do_hist)
 
         if (do_hist && ts->depth>0) {
             std::cout << std::setw(wkey) << "nodes v depth :" << std::endl;
-            for(int i=0;i<=ts->depth;i++){
+            for(long unsigned i=0;i<=ts->depth;i++){
                 std::cout << std::setw(wkey-6) << "[" << std::setw(2) << i << "] : " << std::setw(wval) <<    ts->histogram[i] << "\n";
             }
         }
@@ -273,7 +273,7 @@ void stat_show_summary(TreeStats *ts, bool do_hist)
             if(depth>0){
                 ts->nodes++;
             }
-            if (depth>ts->depth) {
+            if ((long unsigned)depth>ts->depth) {
                 ts->depth=depth;
             }
         }

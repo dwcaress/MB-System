@@ -1,0 +1,22 @@
+//////////////////////////////////////////////////////////////////////////////
+// Copyright 2021 MBARI.                                                    //
+// MBARI Proprietary Information. All rights reserved.                      //
+//////////////////////////////////////////////////////////////////////////////
+
+package oi;
+
+struct idt_t
+{
+    // message header
+    lcm_header_t header;
+
+    int8_t  valid;              // > 0 means valid ping
+    double  timestamp;          // local system time received epoch seconds
+    double  ping_time;          // time of sonar ping epoch seconds
+    int32_t ping_number;        // sonar ping number
+    float   altitude;           // altitude calculated by sonar
+    int32_t interval;           // interval between pings milliseconds
+    int32_t nbeams;             // number of beams in the packet
+    float   range[nbeams];      // beam ranges meters
+    int32_t intense[nbeams];    // beam intensities
+}

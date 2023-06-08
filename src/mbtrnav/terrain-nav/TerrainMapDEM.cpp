@@ -224,7 +224,7 @@ setRefMap(const char* mapName){
 	//define variance map file name
 	strcpy(mapPrefix, mapName);
 	strtok(mapPrefix, ".");
-	snprintf(mapVarName, sizeof(mapVarName), "%s%s", mapPrefix, "_sd.grd");
+	snprintf(mapVarName, 1040, "%s%s", mapPrefix, "_sd.grd");
 
 	//set variance map source if provided
 	this->refMap->varSrc = mapsrc_init();

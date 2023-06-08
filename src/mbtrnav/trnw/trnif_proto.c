@@ -65,10 +65,6 @@
 /////////////////////////
 #include "trnif_proto.h"
 #include "trnif_msg.h"
-#include "mutils.h"
-#include "medebug.h"
-#include "mmdebug.h"
-#include "mconfig.h"
 
 /////////////////////////
 // Macros
@@ -109,20 +105,72 @@
 // Function Definitions
 /////////////////////////
 
+
+trnuif_msg_t *trnu_msg_pd(const char *mid, int n, double *darr)
+{
+    trnuif_msg_t *instance = (trnuif_msg_t *)malloc(TRNX_MSG_SIZE);
+    if(NULL != instance) {
+        memset(instance,0,TRNX_MSG_SIZE);
+        // initialize msg ID
+#if defined(__QNX__)
+        memcpy(instance->mid,mid,TRNX_MSG_SBUF_BYTES-1);
+#else
+        snprintf(instance->mid,TRNX_MSG_SBUF_BYTES-1,"%s",mid);
+#endif
+        // initialize double args (if specified)
+        if(NULL!= darr && n > 0) {
+            int i=0;
+            for(i=0; i < (n<TRNX_MSG_DA_LEN ? n : TRNX_MSG_DA_LEN); i++) {
+                instance->dvals[i] = darr[i];
+            }
+        }
+    }
+    return instance;
+}
+
+trnuif_msg_t *trnu_msg_str(const char *mid)
+{
+    return trnu_msg_pd(mid, 0, NULL);
+}
+
+trnuif_msg_t *trnu_msg_d3(const char *mid, double d0, double d1, double d2)
+{
+    double da[3] = {0};
+    // initialize this way for QNX (C98) compatibility
+    da[0] = d0;
+    da[1] = d1;
+    da[2] = d2;
+    return trnu_msg_pd(mid, 3, &da[0]);
+}
+
+trnuif_msg_t *trnu_msg_d6(const char *mid, double d0, double d1, double d2, double d3, double d4, double d5)
+{
+    double da[6] = {0};
+    // initialize this way for QNX (C98) compatibility
+    da[0] = d0;
+    da[1] = d1;
+    da[2] = d2;
+    da[3] = d3;
+    da[4] = d4;
+    da[5] = d5;
+    return trnu_msg_pd(mid, 6, &da[0]);
+}
+
+#if defined (__UNIX__) || defined (__unix__) || defined (__APPLE__)
 static uint32_t s_trnif_dfl_send_tcp(msock_connection_t *peer, char *msg, int32_t send_len, int *errout)
 {
     uint32_t retval=0;
-    if(NULL!=peer && NULL!=msg && send_len>0){
+    if(NULL!=peer && NULL!=msg && send_len>0) {
         int64_t send_bytes=0;
         int flags=0;
 #if !defined(__APPLE__)
         flags=MSG_NOSIGNAL;
 #endif
-        if( (send_bytes=msock_sendto(peer->sock,  peer->addr, (byte *)msg, send_len,flags))==send_len){
+        if( (send_bytes=msock_sendto(peer->sock,  peer->addr, (byte *)msg, send_len,flags))==send_len) {
             retval=send_bytes;
             PDPRINT((stderr,"Reply OK len[%d] peer[%s:%s]\n",send_len, peer->chost,peer->service));
-        }else{
-            if(NULL!=errout){
+        } else {
+            if(NULL!=errout) {
                 *errout=errno;
             }
             PDPRINT((stderr,"Reply ERR peer[%s:%s] sock[%p/%p] len[%d] err[%d/%s]\n",peer->chost,peer->service,peer->sock,  peer->addr, send_len,errno,strerror(errno)));
@@ -135,14 +183,14 @@ static int s_trnif_msg_read_dfl(byte *dest, uint32_t readlen, msock_socket_t *so
 {
     int retval = 0;
 
-    if(NULL!=dest && NULL!=socket && NULL!=peer){
+    if(NULL!=dest && NULL!=socket && NULL!=peer) {
 
         int64_t msg_bytes=0;
         PDPRINT((stderr,"%s: READ - readlen[%d]\n",__FUNCTION__,readlen));
-        if( (msg_bytes=msock_recvfrom(socket, peer->addr,dest,readlen,0)) >0 ){
+        if( (msg_bytes=msock_recvfrom(socket, peer->addr,dest,readlen,0)) >0 ) {
             retval = msg_bytes;
             PDPRINT((stderr,"%s: READ - OK read[%"PRId64"]\n",__FUNCTION__,msg_bytes));
-        }else{
+        } else {
             if(errno!=EAGAIN)
             PDPRINT((stderr,"%s: READ - ERR read[%"PRId64"] [%d/%s]\n",__FUNCTION__,msg_bytes,errno,strerror(errno)));
         }
@@ -153,17 +201,17 @@ static int s_trnif_msg_read_dfl(byte *dest, uint32_t readlen, msock_socket_t *so
 static uint32_t s_trnif_dfl_send_udp(netif_t *self,msock_connection_t *peer, char *msg, int32_t send_len, int *errout)
 {
     uint32_t retval=0;
-    if(NULL!=peer && NULL!=msg && send_len>0){
+    if(NULL!=peer && NULL!=msg && send_len>0) {
         int64_t send_bytes=0;
         int flags=0;
 #if !defined(__APPLE__)
         flags=MSG_NOSIGNAL;
 #endif
-        if( (send_bytes=msock_sendto(self->socket,  peer->addr, (byte *)msg, send_len,flags))==send_len){
+        if( (send_bytes=msock_sendto(self->socket,  peer->addr, (byte *)msg, send_len,flags))==send_len) {
             retval=send_bytes;
             PDPRINT((stderr,"Reply OK len[%d] peer[%s:%s]\n",send_len, peer->chost,peer->service));
-        }else{
-            if(NULL!=errout){
+        } else {
+            if(NULL!=errout) {
                 *errout=errno;
             }
             PDPRINT((stderr,"Reply ERR peer[%s:%s] sock[%p/%p] len[%d] err[%d/%s]\n",peer->chost,peer->service,peer->sock,  peer->addr, send_len,errno,strerror(errno)));
@@ -185,12 +233,12 @@ int trnif_msg_read_trnmsg(byte **pdest, uint32_t *len, netif_t *self, msock_conn
     enum Action {AC_NOP=0,AC_SYNC, AC_HDR, AC_DATA, AC_CHK, AC_ERR };
     enum Action action = AC_NOP;
 
-    if(NULL!=pdest && NULL!=self && NULL!=peer){
+    if(NULL!=pdest && NULL!=self && NULL!=peer) {
         byte *buf=*pdest;
-        if(NULL==buf){
+        if(NULL==buf) {
             buf=(byte *)malloc(TRNIF_MAX_SIZE);
         }
-        if(NULL!=buf){
+        if(NULL!=buf) {
             memset(buf,0,TRNIF_MAX_SIZE);
             uint32_t msg_bytes=0;
             uint32_t test=0;
@@ -201,11 +249,11 @@ int trnif_msg_read_trnmsg(byte **pdest, uint32_t *len, netif_t *self, msock_conn
          byte *cur = buf;
             int err=0;
             trnmsg_header_t *pheader=(trnmsg_header_t *)buf;
-            if(NULL!=errout){
+            if(NULL!=errout) {
                 *errout=MSG_EOK;
             }
 
-            while(msg_bytes<*len && state!=ST_QUIT && !self->stop){
+            while(msg_bytes<*len && state!=ST_QUIT && !self->stop) {
                 switch (state) {
                     case ST_SYNC:
                         // read the sync pattern
@@ -235,15 +283,15 @@ int trnif_msg_read_trnmsg(byte **pdest, uint32_t *len, netif_t *self, msock_conn
                 }
                 PDPRINT((stderr,"state[%s] readlen[%u]\n",stateNames[state],readlen));
 
-                if(action==AC_SYNC){
+                if(action==AC_SYNC) {
                     // read byte by byte until sync pattern matched
-                    while( (unsigned int)(cur-buf)<TRNIF_SYNC_LEN && action!=AC_ERR && !self->stop){
-                        if( (test=msock_recvfrom(peer->sock, peer->addr,cur,1,MSG_DONTWAIT))==1 && TRNIF_SYNC_CMP(*cur,(unsigned int)(cur-buf))){
-                            PDPRINT((stderr,"SYNC - OK test[%d] cur[%p/x%02X] cur-buf[%ld] cmp[%d]\n",test,cur,*cur,(cur-buf),(TRNIF_SYNC_CMP(*cur,(unsigned int)(cur-buf))?1:0)));
+                    while( (cur-buf)<TRNIF_SYNC_LEN && action!=AC_ERR && !self->stop) {
+                        if( (test=msock_recvfrom(peer->sock, peer->addr,cur,1,MSG_DONTWAIT))==1 && TRNIF_SYNC_CMP(*cur,(cur-buf))) {
+                            PDPRINT((stderr,"SYNC - OK test[%d] cur[%p/x%02X] cur-buf[%ld] cmp[%d]\n",test,cur,*cur,(cur-buf),(TRNIF_SYNC_CMP(*cur,(cur-buf))?1:0)));
                             cur+=test;
                             msg_bytes+=test;
                             state=ST_SYNC_OK;
-                        }else{
+                        } else {
                             err=errno;
                             PDPRINT((stderr,"SYNC - ERR cur-buf[%ld] *cur[%02X] c(%02X) test[%d] err[%d/%s]\n",(cur-buf),*cur,((g_trn_sync>>(cur-buf))),test,err,strerror(err)));
                             action=AC_ERR;
@@ -251,44 +299,44 @@ int trnif_msg_read_trnmsg(byte **pdest, uint32_t *len, netif_t *self, msock_conn
                     }
                 }// AC_SYNC
 
-                if(action==AC_HDR){
-                    if( (test=msock_recvfrom(peer->sock, peer->addr,cur,TRNIF_HDR_LEN-TRNIF_SYNC_LEN,0)) >0  ){
+                if(action==AC_HDR) {
+                    if( (test=msock_recvfrom(peer->sock, peer->addr,cur,TRNIF_HDR_LEN-TRNIF_SYNC_LEN,0)) >0  ) {
                         PDPRINT((stderr,"HDR - OK test[%d] cur[%p/x%02X]\n",test,cur,*cur));
                         cur+=test;
                         msg_bytes+=test;
                         state=ST_HDR_OK;
-                    }else{
+                    } else {
                         PTRACE();
                         err=errno;
                         action=AC_ERR;
                     }
                 }// AC_HDR
 
-                if(action==AC_DATA){
+                if(action==AC_DATA) {
                     PTRACE();
-                    if(readlen==0){
+                    if(readlen==0) {
                         state=ST_DATA_OK;
-                    }else if( (test=msock_recvfrom(peer->sock, peer->addr,cur,readlen,0)) == readlen ){
+                    } else if( (test=msock_recvfrom(peer->sock, peer->addr,cur,readlen,0)) == readlen ) {
                         PDPRINT((stderr,"DATA - OK test[%d] cur[%p/x%02X]\n",test,cur,*cur));
                         cur+=test;
                         msg_bytes+=test;
                         state=ST_DATA_OK;
-                    }else{
+                    } else {
                         PTRACE();
                         err=errno;
                         action=AC_ERR;
                     }
                 }// AC_DATA
 
-                if(action==AC_CHK){
+                if(action==AC_CHK) {
                     PTRACE();
                     trn_checksum_t chk=0;
                     byte *cp = buf+TRNIF_HDR_LEN;
                     chk = mfu_checksum(cp, pheader->data_len);
-                    if(chk == pheader->checksum){
+                    if(chk == pheader->checksum) {
                         retval=msg_bytes;
-                    }else{
-                        if(NULL!=errout){
+                    } else {
+                        if(NULL!=errout) {
                             *errout=MSG_ECHK;
                         }
                         MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPROTO_RD]);
@@ -296,7 +344,7 @@ int trnif_msg_read_trnmsg(byte **pdest, uint32_t *len, netif_t *self, msock_conn
                     state=ST_QUIT;
                 }// AC_CHK
 
-                if(action==AC_ERR){
+                if(action==AC_ERR) {
                     MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPROTO_RD]);
                     // check for errors
                     switch (err) {
@@ -304,7 +352,7 @@ int trnif_msg_read_trnmsg(byte **pdest, uint32_t *len, netif_t *self, msock_conn
                         case EAGAIN:
                             PTRACE();
                             // nothing to read: quit
-                            if(NULL!=errout){
+                            if(NULL!=errout) {
                                 *errout=MSG_ENODATA;
                             }
                             state=ST_QUIT;
@@ -319,7 +367,7 @@ int trnif_msg_read_trnmsg(byte **pdest, uint32_t *len, netif_t *self, msock_conn
                     }
                 }// AC_ERR
             }
-        }else{PTRACE();}
+        } else {PTRACE();}
 
     }// else invalid arg
     PDPRINT((stderr,"errout[%d] msg_len/ret[%u]\n",(NULL==errout?-1:*errout),retval));
@@ -336,7 +384,7 @@ int trnif_msg_read_trnmsg(byte **pdest, uint32_t *len, netif_t *self, msock_conn
 int trnif_msg_handle_trnmsg(void *msg, netif_t *self, msock_connection_t *peer, int *errout)
 {
     int retval=-1;
-    if(NULL!=msg && NULL!=self && NULL!=peer){
+    if(NULL!=msg && NULL!=self && NULL!=peer) {
 
         wtnav_t *trn = self->rr_res;
         trnmsg_t *msg_in = NULL;
@@ -348,7 +396,7 @@ int trnif_msg_handle_trnmsg(void *msg, netif_t *self, msock_connection_t *peer, 
         // deserialize message bytes
         trnmsg_deserialize(&msg_in, (byte *)msg, TRNIF_MAX_SIZE);
         PDPRINT((stderr,"%s - TRNMSG received:\n",__FUNCTION__));
-        if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG | NETIF_V3 | NETIF_V4))){
+        if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG | NETIF_V3 | NETIF_V4))) {
         	trnmsg_show(msg_in,true,5);
         }
 
@@ -361,7 +409,7 @@ int trnif_msg_handle_trnmsg(void *msg, netif_t *self, msock_connection_t *peer, 
             case TRNIF_MEAS:
                 // get pointer to (trn_meas_t) data payload
                 trn_meas = TRNIF_TPDATA(msg_in, trn_meas_t);
-                if(NULL!=trn_meas){
+                if(NULL!=trn_meas) {
                     // deserialize meast
                     wmeast_unserialize(&mt, (char *) pdata+sizeof(trn_meas_t), msg_in->hdr.data_len);
                     // do measurement update
@@ -370,7 +418,7 @@ int trnif_msg_handle_trnmsg(void *msg, netif_t *self, msock_connection_t *peer, 
                     msg_out = trnmsg_new_meas_msg( TRNIF_MEAS, trn_meas->parameter, mt);
 
                     wmeast_destroy(mt);
-                }else{
+                } else {
                     PDPRINT((stderr,"%s - ERR NULL message\n",__func__));
                 }
 
@@ -401,9 +449,9 @@ int trnif_msg_handle_trnmsg(void *msg, netif_t *self, msock_connection_t *peer, 
 //            case TRN_MSG_LAST_MEAS:
 //                // get status, return ACK
 //                // (parameter set accordingly)
-//                if( wtnav_last_meas_successful(trn)){
+//                if( wtnav_last_meas_successful(trn)) {
 //                    send_len=trnw_ptype_msg(&msg_out, TRN_MSG_ACK, 1);
-//                }else{
+//                } else {
 //                    send_len=trnw_ptype_msg(&msg_out, TRN_MSG_ACK, 0);
 //                }
 //                break;
@@ -429,9 +477,9 @@ int trnif_msg_handle_trnmsg(void *msg, netif_t *self, msock_connection_t *peer, 
 //            case TRN_MSG_OUT_MEAS:
 //                // get status, return ACK
 //                // (parameter set accordingly)
-//                if( wtnav_outstanding_meas(trn)){
+//                if( wtnav_outstanding_meas(trn)) {
 //                    send_len=trnw_ptype_msg(&msg_out, TRN_MSG_ACK, 1);
-//                }else{
+//                } else {
 //                    send_len=trnw_ptype_msg(&msg_out, TRN_MSG_ACK, 0);
 //                }
 //                break;
@@ -439,9 +487,9 @@ int trnif_msg_handle_trnmsg(void *msg, netif_t *self, msock_connection_t *peer, 
 //            case TRN_MSG_INIT:
 //                // get status, return ACK
 //                // (parameter set accordingly)
-//                if( wtnav_initialized(trn)){
+//                if( wtnav_initialized(trn)) {
 //                    send_len=trnw_ptype_msg(&msg_out, TRN_MSG_ACK, 1);
-//                }else{
+//                } else {
 //                    send_len=trnw_ptype_msg(&msg_out, TRN_MSG_ACK, 0);
 //                }
 //                break;
@@ -449,9 +497,9 @@ int trnif_msg_handle_trnmsg(void *msg, netif_t *self, msock_connection_t *peer, 
 //            case TRN_MSG_IS_CONV:
 //                // get status, return ACK
 //                // (parameter set accordingly)
-//                if( wtnav_is_converged(trn)){
+//                if( wtnav_is_converged(trn)) {
 //                    send_len=trnw_ptype_msg(&msg_out, TRN_MSG_ACK, 1);
-//                }else{
+//                } else {
 //                    send_len=trnw_ptype_msg(&msg_out, TRN_MSG_ACK, 0);
 //                }
 //                break;
@@ -467,10 +515,10 @@ int trnif_msg_handle_trnmsg(void *msg, netif_t *self, msock_connection_t *peer, 
                 break;
         }
 
-        if(NULL!=msg_out){
+        if(NULL!=msg_out) {
             int32_t send_len = trnmsg_len(msg_out);
             retval=s_trnif_dfl_send_tcp(peer, (char *)msg_out, send_len, errout);
-        }else{
+        } else {
             MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPROTO_HND]);
         }
         trnmsg_destroy(&msg_in);
@@ -488,10 +536,10 @@ int trnif_msg_read_ct(byte **pdest, uint32_t *len, netif_t *self, msock_connecti
 
     int64_t msg_bytes=0;
     int retries = 0;
-   if(NULL!=pdest && NULL!=self && NULL!=peer){
+   if(NULL!=pdest && NULL!=self && NULL!=peer) {
         uint32_t readlen=TRN_MSG_SIZE;
         byte *buf=*pdest;
-        if(NULL==buf){
+        if(NULL==buf) {
             buf=(byte *)malloc(TRN_MSG_SIZE);
             memset(buf,0,TRN_MSG_SIZE);
             *pdest=buf;
@@ -509,20 +557,20 @@ int trnif_msg_read_ct(byte **pdest, uint32_t *len, netif_t *self, msock_connecti
         //   message complete or retries expire
         byte *pread = buf;
         int64_t read_sz = readlen;
-       while(retries<TRNIF_READ_RETRIES_CT  && msg_bytes<read_sz ){
+       while(retries<TRNIF_READ_RETRIES_CT  && msg_bytes<read_sz ) {
            int64_t read_bytes = 0;
 //            fprintf(stderr,"%s:%d msg_bytes[%"PRId64"] retries[%d/%d] readlen[%u]\n",__FUNCTION__,__LINE__,msg_bytes,TRNIF_READ_RETRIES_CT-retries,TRNIF_READ_RETRIES_CT,readlen);
-            if( (read_bytes=msock_recv(peer->sock, pread,readlen,0)) > 0 ){
+            if( (read_bytes=msock_recv(peer->sock, pread,readlen,0)) > 0 ) {
                 readlen   -= read_bytes;
                 msg_bytes += read_bytes;
                 pread     += read_bytes;
-            }else{
+            } else {
                 int errsave=errno;
-                if(errsave!=EAGAIN){
+                if(errsave!=EAGAIN) {
 	                fprintf(stderr,"%s:%d ERR recv msg_bytes[%"PRId64"] [%d/%s]\n",__FUNCTION__,__LINE__,msg_bytes,errsave,strerror(errsave));
                     MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPROTO_RD]);
                 }
-                if(NULL!=errout){
+                if(NULL!=errout) {
                		*errout = errsave;
                 }
             }
@@ -536,15 +584,15 @@ int trnif_msg_read_ct(byte **pdest, uint32_t *len, netif_t *self, msock_connecti
         *len = msg_bytes;
         retval = msg_bytes;
 
-    }else{
-        if(NULL!=self){
+    } else {
+        if(NULL!=self) {
         MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPROTO_RD]);
-        }else{
+        } else {
             fprintf(stderr,"%s - ERR invalid arg\n",__func__);
         }
     }
 
-    if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))){
+    if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))) {
    	 PDPRINT((stderr,"%s:%d RET msg_bytes[%"PRId64"] retries[%d]\n",__FUNCTION__,__LINE__,msg_bytes,retries));
     }
     return retval;
@@ -555,7 +603,7 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
 {
     int retval=-1;
 
-    if(NULL!=msg && NULL!=self && NULL!=peer){
+    if(NULL!=msg && NULL!=self && NULL!=peer) {
 
         int32_t send_len=0;
         char *msg_out=NULL;
@@ -571,7 +619,7 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
         d_triplet_t est_nav_ofs, *pest_nav_ofs=NULL;
         static int ensemble_count=0;
 
-        if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))){
+        if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))) {
         	wcommst_show(ct,true,5);
         }
         double msg_time = mtime_etime();
@@ -581,10 +629,10 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
                 // TODO : initialize TRN
                 commst_initialize(trn, ct);
                 // return ACK/NACK
-                if(wtnav_initialized(trn)){
+                if(wtnav_initialized(trn)) {
                     send_len=trnw_ack_msg(&msg_out);
                     mlog_tprintf(self->mlog_id,"trn_init_ack,[%s:%s]\n", peer->chost, peer->service);
-                }else{
+                } else {
                     send_len=trnw_nack_msg(&msg_out);
                     mlog_tprintf(self->mlog_id,"trn_init_nack,[%s:%s]\n", peer->chost, peer->service);
                 }
@@ -616,7 +664,7 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
                 send_len=wcommst_serialize(&msg_out,ct,TRN_MSG_SIZE);
                 mlog_tprintf(self->mlog_id,"trn_mle,%lf,[%s:%s]\n",msg_time,peer->chost, peer->service);
 
-                if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))){
+                if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))) {
                     PDPRINT((stderr,"MLE ct[%p] msg_out[%p] send_len[%d]\n",ct,msg_out,send_len));
 //                    wcommst_show(ct,true,5);
                 }
@@ -629,7 +677,7 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
                 send_len=wcommst_serialize(&msg_out,ct,TRN_MSG_SIZE);
 	            mlog_tprintf(self->mlog_id,"trn_mmse,%lf,%d,[%s:%s]\n",msg_time,++ensemble_count,peer->chost, peer->service);
 
-                if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))){
+                if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))) {
                     PDPRINT((stderr,"MMSE ct[%p] msg_out[%p] send_len[%d]\n",ct,msg_out,send_len));
 //                    wcommst_show(ct,true,5);
                 }
@@ -638,9 +686,9 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
             case TRN_MSG_LAST_MEAS:
                 // get status, return ACK
                 // (parameter set accordingly)
-                if( wtnav_last_meas_successful(trn)){
+                if( wtnav_last_meas_successful(trn)) {
                     param=1;
-                }else{
+                } else {
                     param=0;
                 }
                 send_len=trnw_ptype_msg(&msg_out, TRN_MSG_ACK, param);
@@ -651,7 +699,7 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
                 // get status, return ACK
                 // (parameter set accordingly)
                 send_len=trnw_ptype_msg(&msg_out, TRN_MSG_ACK, wtnav_get_num_reinits(trn));
-                if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))){
+                if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))) {
                     PDPRINT((stderr,"N_REINITS ct[%p] msg_out[%p] send_len[%d]\n",ct,msg_out,send_len));
 //                    mfu_hex_show(msg_out, 128, 16, true, 5);
                 }
@@ -675,9 +723,9 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
             case TRN_MSG_OUT_MEAS:
                 // get status, return ACK
                 // (parameter set accordingly)
-                if( wtnav_outstanding_meas(trn)){
+                if( wtnav_outstanding_meas(trn)) {
                     param=1;
-                }else{
+                } else {
                     param=0;
                 }
                 send_len=trnw_ptype_msg(&msg_out, TRN_MSG_ACK, param);
@@ -687,9 +735,9 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
             case TRN_MSG_IS_CONV:
                 // get status, return ACK
                 // (parameter set accordingly)
-                if( wtnav_is_converged(trn)){
+                if( wtnav_is_converged(trn)) {
                     param=1;
-                }else{
+                } else {
                     param=0;
                 }
                 send_len=trnw_ptype_msg(&msg_out, TRN_MSG_ACK, param);
@@ -706,7 +754,7 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
             case TRN_MSG_FILT_REINIT_OFFSET:
                 // reinit, return ACK
                 pest_nav_ofs = wcommst_get_est_nav_offset(ct, &est_nav_ofs);
-                if(NULL!=pxyz_sdev && NULL!=pest_nav_ofs){
+                if(NULL!=pxyz_sdev && NULL!=pest_nav_ofs) {
                     param = wcommst_get_parameter(ct);
                     bool lowInfoTransition = (param == 0 ? false : true );
                     wtnav_reinit_filter_offset(trn,lowInfoTransition,
@@ -714,7 +762,7 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
                     send_len=trnw_ack_msg(&msg_out);
                     mlog_tprintf(self->mlog_id,"trn_filt_reinit_offset,%lf,%lf,%lf,%lf,[%s:%s]\n", msg_time,pest_nav_ofs->x, pest_nav_ofs->y, pest_nav_ofs->z,
                                  peer->chost, peer->service);
-                }else{
+                } else {
                     send_len=trnw_nack_msg(&msg_out);
                     mlog_tprintf(self->mlog_id,"trn_filt_reinit_offset,[%s:%s]\n", peer->chost, peer->service);
                 }
@@ -724,7 +772,7 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
                 // reinit, return ACK
                 pxyz_sdev = wcommst_get_xyz_sdev(ct, &xyz_sdev);
                 pest_nav_ofs = wcommst_get_est_nav_offset(ct, &est_nav_ofs);
-                if(NULL!=pxyz_sdev && NULL!=pest_nav_ofs){
+                if(NULL!=pxyz_sdev && NULL!=pest_nav_ofs) {
                     param = wcommst_get_parameter(ct);
                     bool lowInfoTransition = (param == 0 ? false : true );
                 wtnav_reinit_filter_box(trn,lowInfoTransition,
@@ -733,7 +781,7 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
                 send_len=trnw_ack_msg(&msg_out);
                     mlog_tprintf(self->mlog_id,"trn_filt_reinit_box,%lf,%lf,%lf,%lf,%lf,%lf,%lf,[%s:%s]\n", msg_time,pest_nav_ofs->x, pest_nav_ofs->y, pest_nav_ofs->z,
                                  pxyz_sdev->x, pxyz_sdev->y, pxyz_sdev->z, peer->chost, peer->service);
-                }else{
+                } else {
                     send_len=trnw_nack_msg(&msg_out);
                     mlog_tprintf(self->mlog_id,"trn_filt_reinit_box,[%s:%s]\n", peer->chost, peer->service);
                 }
@@ -782,11 +830,11 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
             case TRN_MSG_SET_INITSTDDEVXYZ:
                 // set init xyz, return ACK
                 pxyz_sdev = wcommst_get_xyz_sdev(ct, &xyz_sdev);
-                if(NULL!=pxyz_sdev){
+                if(NULL!=pxyz_sdev) {
                     wtnav_set_init_stddev_xyz(trn, pxyz_sdev->x, pxyz_sdev->y, pxyz_sdev->z );
                     send_len=trnw_ack_msg(&msg_out);
                     mlog_tprintf(self->mlog_id,"trn_set_initxyz,%lf,%lf,%lf,%lf,[%s:%s]\n", msg_time, pxyz_sdev->x, pxyz_sdev->y, pxyz_sdev->z, peer->chost, peer->service);
-                }else{
+                } else {
                     send_len=trnw_nack_msg(&msg_out);
                     mlog_tprintf(self->mlog_id,"trn_set_initxyz,[%s:%s]\n", peer->chost, peer->service);
                 }
@@ -795,10 +843,10 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
             case TRN_MSG_GET_INITSTDDEVXYZ:
                 // get xyz_sdev, return values
                 pxyz_sdev=wtnav_get_init_stddev_xyz(trn, &xyz_sdev);
-                if(NULL != pxyz_sdev){
+                if(NULL != pxyz_sdev) {
                     send_len=trnw_triplet_msg(&msg_out, TRN_MSG_GET_INITSTDDEVXYZ, pxyz_sdev);
                     mlog_tprintf(self->mlog_id,"trn_get_initxyz,%lf,[%s:%s]\n",msg_time,peer->chost, peer->service);
-                }else{
+                } else {
                     send_len=trnw_nack_msg(&msg_out);
                     mlog_tprintf(self->mlog_id,"trn_get_initxyz,[%s:%s]\n", peer->chost, peer->service);
                 }
@@ -807,11 +855,11 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
             case TRN_MSG_SET_ESTNAVOFS:
                 // set estNavOffset, return ACK
                 pest_nav_ofs = wcommst_get_est_nav_offset(ct, &est_nav_ofs);
-                if(NULL!=pest_nav_ofs){
+                if(NULL!=pest_nav_ofs) {
                     wtnav_set_est_nav_offset(trn, pest_nav_ofs->x, pest_nav_ofs->y, pest_nav_ofs->z );
                     send_len=trnw_ack_msg(&msg_out);
                     mlog_tprintf(self->mlog_id,"trn_set_estnavofs,%lf,%lf,%lf,%lf,[%s:%s]\n", msg_time, pest_nav_ofs->x, pest_nav_ofs->y, pest_nav_ofs->z, peer->chost, peer->service);
-                }else{
+                } else {
                     send_len=trnw_nack_msg(&msg_out);
                     mlog_tprintf(self->mlog_id,"trn_set_estnavofs,[%s:%s]\n", peer->chost, peer->service);
                 }
@@ -820,10 +868,10 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
             case TRN_MSG_GET_ESTNAVOFS:
                 // get xyz_sdev, return values
                 pest_nav_ofs = wtnav_get_est_nav_offset(trn, &est_nav_ofs);
-                if(NULL != pest_nav_ofs){
+                if(NULL != pest_nav_ofs) {
                     send_len=trnw_triplet_msg(&msg_out, TRN_MSG_GET_ESTNAVOFS, pest_nav_ofs);
                     mlog_tprintf(self->mlog_id,"trn_get_estnavofs,%lf,[%s:%s]\n",msg_time,peer->chost, peer->service);
-                }else{
+                } else {
                     send_len=trnw_nack_msg(&msg_out);
                     mlog_tprintf(self->mlog_id,"trn_get_estnavofs,[%s:%s]\n", peer->chost, peer->service);
                 }
@@ -832,9 +880,9 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
             case TRN_MSG_FILT_GRD:
                 // set filter gradient, return ACK
                 param = wcommst_get_parameter(ct);
-               if(param==0){
+               if(param==0) {
                 	wtnav_use_highgrade_filter(trn);
-                }else{
+                } else {
                     wtnav_use_lowgrade_filter(trn);
                 }
                 send_len=trnw_ack_msg(&msg_out);
@@ -850,9 +898,9 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
             case TRN_MSG_IS_INIT:
                 // get status, return ACK
                 // (parameter set accordingly)
-                if( wtnav_initialized(trn)){
+                if( wtnav_initialized(trn)) {
                     param=1;
-                }else{
+                } else {
                     param=0;
                 }
                 send_len=trnw_ptype_msg(&msg_out, TRN_MSG_ACK, param);
@@ -867,19 +915,19 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
                 break;
         }
 
-        if(send_len>0){
+        if(send_len>0) {
             retval=s_trnif_dfl_send_tcp(peer, msg_out, send_len, errout);
-            if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))){
+            if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))) {
                 PDPRINT((stderr,"SEND_LEN>0 msg_type[%c/%02X] peer[%s:%s] %lf\n",(msg_type>0x20?msg_type:'.'), msg_type, peer->chost, peer->service, mtime_etime()));
                 mfu_hex_show((byte *)msg_out, 128, 16, true, 5);
             }
-        }else{
+        } else {
             PDPRINT((stderr,"SEND_LEN<=0 type [%c/%02X] peer[%s:%s] %lf\n",(msg_type>0x20?msg_type:'.'),msg_type, peer->chost, peer->service, mtime_etime()));
             MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPROTO_HND]);
 		 }
 
         wcommst_destroy(ct);
-        if(NULL!=msg_out){
+        if(NULL!=msg_out) {
             free(msg_out);
         }
     }// else invalid arg
@@ -891,16 +939,16 @@ int trnif_msg_read_mb(byte **pdest, uint32_t *len, netif_t *self, msock_connecti
 {
     int retval = 0;
 
-    if(NULL!=pdest && NULL!=self && NULL!=peer){
+    if(NULL!=pdest && NULL!=self && NULL!=peer) {
         uint32_t readlen=MBIF_MSG_SIZE;
         byte *buf=*pdest;
-        if(NULL==buf){
+        if(NULL==buf) {
             buf=(byte *)malloc(MBIF_MSG_SIZE);
             memset(buf,0,MBIF_MSG_SIZE);
             *pdest=buf;
         }
 
-        if( (retval=s_trnif_msg_read_dfl(buf, readlen, peer->sock, peer, errout))<=0){
+        if( (retval=s_trnif_msg_read_dfl(buf, readlen, peer->sock, peer, errout))<=0) {
             MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPROTO_RD]);
         }
     }
@@ -912,30 +960,30 @@ int trnif_msg_handle_mb(void *msg, netif_t *self, msock_connection_t *peer, int 
 {
     int retval=-1;
 
-    if(NULL!=msg && NULL!=self && NULL!=peer){
+    if(NULL!=msg && NULL!=self && NULL!=peer) {
 
         int32_t send_len=0;
         char *msg_out=NULL;
 
-        if(strcmp(msg,PROTO_MB_CON)==0){
+        if(strcmp(msg,PROTO_MB_CON)==0) {
             msg_out=strdup(PROTO_MB_ACK);
             send_len=strlen(PROTO_MB_ACK)+1;
-        }else if(strcmp(msg,PROTO_MB_REQ)==0){
+        } else if(strcmp(msg,PROTO_MB_REQ)==0) {
             msg_out=strdup(PROTO_MB_ACK);
             send_len=strlen(PROTO_MB_ACK)+1;
-        }else{
+        } else {
             msg_out=strdup(PROTO_MB_NACK);
             send_len=strlen(PROTO_MB_NACK)+1;
         }
 
-        if(send_len>0){
+        if(send_len>0) {
             // send response
             retval=s_trnif_dfl_send_udp(self,peer, msg_out, send_len, errout);
-        }else{
+        } else {
             MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPROTO_HND]);
         }
 
-        if(NULL!=msg_out){
+        if(NULL!=msg_out) {
             free(msg_out);
         }
     }
@@ -949,55 +997,20 @@ int trnif_msg_pub_mb(netif_t *self, msock_connection_t *peer, char *data, size_t
     return trnif_msg_pub(self,peer,data,len);
 }
 
-
-trnuif_msg_t *trnu_msg_pd(const char *mid, int n, double *darr)
-{
-    trnuif_msg_t *instance = (trnuif_msg_t *)malloc(TRNX_MSG_SIZE);
-    if(NULL != instance){
-        memset(instance,0,TRNX_MSG_SIZE);
-        // initialize msg ID
-        snprintf(instance->mid,TRNX_MSG_SBUF_BYTES-1,"%s",mid);
-        // initialize double args (if specified)
-        if(NULL!= darr && n > 0){
-            for(int i=0; i < (n<TRNX_MSG_DA_LEN ? n : TRNX_MSG_DA_LEN); i++){
-                instance->dvals[i] = darr[i];
-            }
-        }
-    }
-    return instance;
-}
-
-trnuif_msg_t *trnu_msg_str(const char *mid)
-{
-    return trnu_msg_pd(mid, 0, NULL);
-}
-
-trnuif_msg_t *trnu_msg_d3(const char *mid, double d0, double d1, double d2)
-{
-    double da[3] = {d0,d1,d2};
-    return trnu_msg_pd(mid, 3, &da[0]);
-}
-
-trnuif_msg_t *trnu_msg_d6(const char *mid, double d0, double d1, double d2, double d3, double d4, double d5)
-{
-    double da[6] = {d0,d1,d2,d3,d4,d5};
-    return trnu_msg_pd(mid, 6, &da[0]);
-}
-
 int trnif_msg_read_trnu(byte **pdest, uint32_t *len, netif_t *self, msock_connection_t *peer, int *errout)
 {
     int retval = 0;
 
-    if(NULL!=pdest && NULL!=self && NULL!=peer){
+    if(NULL!=pdest && NULL!=self && NULL!=peer) {
         uint32_t readlen = TRNX_MSG_SIZE;
         byte *buf = *pdest;
-        if(NULL==buf){
+        if(NULL==buf) {
             buf=(byte *)malloc(TRNX_MSG_SIZE);
             memset(buf,0,TRNX_MSG_SIZE);
             *pdest=buf;
         }
 
-        if( (retval=s_trnif_msg_read_dfl(buf, readlen, peer->sock, peer, errout))<=0){
+        if( (retval=s_trnif_msg_read_dfl(buf, readlen, peer->sock, peer, errout))<=0) {
             MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPROTO_RD]);
         }
     }
@@ -1008,7 +1021,7 @@ int trnif_msg_handle_trnu(void *pmsg, netif_t *self, msock_connection_t *peer, i
 {
     int retval=-1;
 
-    if(NULL!=pmsg && NULL!=self && NULL!=peer){
+    if(NULL!=pmsg && NULL!=self && NULL!=peer) {
 
         trnuif_msg_t *msg = (trnuif_msg_t *)pmsg;
 
@@ -1028,11 +1041,9 @@ int trnif_msg_handle_trnu(void *pmsg, netif_t *self, msock_connection_t *peer, i
         {
             msg_out = (char *)TRNU_MSG_ACK();
             send_len = TRNX_MSG_SIZE;
-        }
-        else if(strcmp(msg->mid,PROTO_TRNU_RST) == 0)
-        {
+        } else if(strcmp(msg->mid,PROTO_TRNU_RST) == 0) {
             // reinit, return ACK/NACK
-            if(NULL!=resources && NULL!=resources->reset_callback){
+            if(NULL!=resources && NULL!=resources->reset_callback) {
                 int test = resources->reset_callback();
                 msg_out = (char *)(test==0 ? TRNU_MSG_ACK() : TRNU_MSG_NACK());
                 send_len = TRNX_MSG_SIZE;
@@ -1042,11 +1053,9 @@ int trnif_msg_handle_trnu(void *pmsg, netif_t *self, msock_connection_t *peer, i
                 msg_out = (char *)TRNU_MSG_NACK();
                 send_len = TRNX_MSG_SIZE;
             }
-        }
-        else if(strcmp(msg->mid,PROTO_TRNU_RST_OFS) == 0)
-        {
+        } else if(strcmp(msg->mid,PROTO_TRNU_RST_OFS) == 0) {
             // reinit, return ACK/NACK
-            if(NULL!=resources && NULL!=resources->reset_ofs_callback){
+            if(NULL!=resources && NULL!=resources->reset_ofs_callback) {
                 int test = resources->reset_ofs_callback(msg->dvals[0], msg->dvals[1], msg->dvals[2]);
                 msg_out = (char *)(test==0 ? TRNU_MSG_ACK() : TRNU_MSG_NACK());
                 send_len = TRNX_MSG_SIZE;
@@ -1056,11 +1065,9 @@ int trnif_msg_handle_trnu(void *pmsg, netif_t *self, msock_connection_t *peer, i
                 msg_out = (char *)TRNU_MSG_NACK();
                 send_len = TRNX_MSG_SIZE;
             }
-        }
-        else if(strcmp(msg->mid,PROTO_TRNU_RST_BOX) == 0)
-        {
+        } else if(strcmp(msg->mid,PROTO_TRNU_RST_BOX) == 0) {
             // reinit, return ACK/NACK
-            if(NULL!=resources && NULL!=resources->reset_box_callback){
+            if(NULL!=resources && NULL!=resources->reset_box_callback) {
                 int test = resources->reset_box_callback(msg->dvals[0], msg->dvals[1], msg->dvals[2], msg->dvals[3], msg->dvals[4], msg->dvals[5]);
                 msg_out = (char *)(test==0 ? TRNU_MSG_ACK() : TRNU_MSG_NACK());
                 send_len = TRNX_MSG_SIZE;
@@ -1076,14 +1083,14 @@ int trnif_msg_handle_trnu(void *pmsg, netif_t *self, msock_connection_t *peer, i
         }
 
 
-        if(send_len>0){
+        if(send_len>0) {
             // send response
             retval=s_trnif_dfl_send_udp(self,peer, msg_out, send_len, errout);
         } else {
             MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPROTO_HND]);
         }
 
-        if(NULL!=msg_out){
+        if(NULL!=msg_out) {
             free(msg_out);
         }
     }
@@ -1102,36 +1109,36 @@ int trnif_msg_pub(netif_t *self, msock_connection_t *peer, char *data, size_t le
     int retval=-1;
 
     // validate args (NULL peer OK for UDPM)
-    if(NULL!=self && NULL!=data && len>0){
+    if(NULL!=self && NULL!=data && len>0) {
 
-        if(self->ctype==ST_UDP && NULL!=peer){
+        if(self->ctype==ST_UDP && NULL!=peer) {
             // publish to UDP peer
             int flags=0;
 #if !defined(__APPLE__)
             flags=MSG_NOSIGNAL;
 #endif
             int64_t iobytes = msock_sendto(self->socket, peer->addr, (byte *)data, len, flags );
-            if ( iobytes > 0) {
+            if( iobytes > 0) {
                 retval=iobytes;
             }
         }
 
-        if(self->ctype==ST_UDPM){
+        if(self->ctype==ST_UDPM) {
             // publish to multicast socket
             int flags=0;
 #if !defined(__APPLE__)
             flags=MSG_NOSIGNAL;
 #endif
             int64_t iobytes = msock_sendto(self->socket, self->socket->addr, (byte *)data, len, flags );
-            if ( iobytes > 0) {
+            if( iobytes > 0) {
                 retval=iobytes;
             }
         }
 
-        if(self->ctype==ST_TCP && NULL!=peer){
+        if(self->ctype==ST_TCP && NULL!=peer) {
             // publish to TCP peer
             int64_t iobytes = msock_send(peer->sock, (byte *)data, len );
-            if ( iobytes > 0) {
+            if( iobytes > 0) {
                 retval=iobytes;
             }
         }
@@ -1139,3 +1146,4 @@ int trnif_msg_pub(netif_t *self, msock_connection_t *peer, char *data, size_t le
     return retval;
 }
 // End function
+#endif

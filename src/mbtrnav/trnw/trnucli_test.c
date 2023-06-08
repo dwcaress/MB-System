@@ -111,6 +111,8 @@
 #define TRNUC_SRC_BIN_STR  "bin"
 
 #define HOSTNAME_BUF_LEN 256
+#define TRNUCLI_SESSION_DATE_BYTES 32
+#define TRNUCLI_CFG_LOG_PATH_BYTES 512
 
 // configuration defaults
 #define TRNUCLI_TEST_TRNU_MCAST_GROUP "239.255.0.16"
@@ -686,7 +688,9 @@ static app_cfg_t *app_cfg_new()
         instance->log_id=MLOG_ID_INVALID;
         instance->log_name=strdup(TRNUCLI_TEST_LOG_NAME);
         instance->log_dir=strdup(TRNUCLI_TEST_LOG_DIR);
-        instance->log_path=(char *)malloc(512);
+        instance->log_path=(char *)malloc(TRNUCLI_CFG_LOG_PATH_BYTES);
+        memset(instance->log_path, 0, TRNUCLI_CFG_LOG_PATH_BYTES);
+
         instance->recon_to_sec=TRNUCLI_TEST_RECON_TMOUT_SEC;
         instance->recon_timer=0.0;
         instance->listen_to_ms=TRNUCLI_TEST_LISTEN_TMOUT_MSEC;
@@ -798,7 +802,7 @@ static int s_update_callback(trnu_pub_t *update)
 
 static void s_init_log(int argc, char **argv, app_cfg_t *cfg)
 {
-    char session_date[32] = {0};
+    char session_date[TRNUCLI_SESSION_DATE_BYTES] = {0};
 
     // make session time string to use
     // in log file names
@@ -810,12 +814,12 @@ static void s_init_log(int argc, char **argv, app_cfg_t *cfg)
     // Get GMT time
     gmt = gmtime(&rawtime);
     // format YYYYMMDD-HHMMSS
-    sprintf(session_date, "%04d%02d%02d-%02d%02d%02d",
+    snprintf(session_date, TRNUCLI_SESSION_DATE_BYTES, "%04d%02d%02d-%02d%02d%02d",
             (gmt->tm_year+1900),gmt->tm_mon+1,gmt->tm_mday,
             gmt->tm_hour,gmt->tm_min,gmt->tm_sec);
 
 
-    sprintf(cfg->log_path,"%s//%s-%s-%s",cfg->log_dir,cfg->log_name,session_date,TRNUCLI_TEST_LOG_EXT);
+    snprintf(cfg->log_path, TRNUCLI_CFG_LOG_PATH_BYTES, "%s//%s-%s-%s",cfg->log_dir,cfg->log_name,session_date,TRNUCLI_TEST_LOG_EXT);
 
     cfg->log_id = mlog_get_instance(cfg->log_path, cfg->log_cfg, TRNUCLI_TEST_LOG_NAME);
 
@@ -831,8 +835,9 @@ static void s_init_log(int argc, char **argv, app_cfg_t *cfg)
             fprintf(stderr,"WARN - logged cmdline truncated\n");
             break;
         }
-        int ilen=sprintf(ip," %s",argv[x]);
-        ip+=ilen;
+        size_t wlen = TRNUCLI_TEST_CMD_LINE_BYTES - (ip - g_cmd_line);
+        int ilen = snprintf(ip, wlen, " %s",argv[x]);
+        ip += (ilen > 0 ? ilen : 0);
     }
     g_cmd_line[TRNUCLI_TEST_CMD_LINE_BYTES-1]='\0';
 
@@ -979,7 +984,7 @@ static int s_trnucli_process_update(trnu_pub_t *update, app_cfg_t *cfg)
     char *str=NULL;
     trnucli_update_str(update,&str,0,cfg->ofmt);
     if(NULL!=str){
-    	fprintf(cfg->ofile,"%s\n",str);
+        fprintf(cfg->ofile,"%s\n",str);
         free(str);
     }
     str=NULL;

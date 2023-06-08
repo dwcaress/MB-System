@@ -365,7 +365,7 @@ static char *s_session_str(char **pdest, size_t len)
     gmt = gmtime(&rawtime);
 
     // format YYYYMMDD-HHMMSS
-    sprintf(session_date, "%04d%02d%02d-%02d%02d%02d", (gmt->tm_year + 1900), gmt->tm_mon + 1, gmt->tm_mday, gmt->tm_hour,
+    snprintf(session_date, SESSION_BUF_LEN, "%04d%02d%02d-%02d%02d%02d", (gmt->tm_year + 1900), gmt->tm_mon + 1, gmt->tm_mday, gmt->tm_hour,
             gmt->tm_min, gmt->tm_sec);
 
     if(NULL!=pdest){
@@ -375,7 +375,7 @@ static char *s_session_str(char **pdest, size_t len)
             retval=*pdest;
         }else {
             if(len>=SESSION_BUF_LEN){
-                sprintf(*pdest,"%s",session_date);
+                snprintf(*pdest, SESSION_BUF_LEN, "%s",session_date);
                 retval=*pdest;
             }else{
                 fprintf(stderr,"ERR - dest buffer too small\n");
@@ -411,13 +411,18 @@ static int s_init_trnusvr(int argc, char **argv, app_cfg_t *cfg, bool verbose)
             char *ip=g_cmd_line;
             int x=0;
             for (x=0;x<argc;x++){
-                if ((ip+strlen(argv[x])-g_cmd_line) > TRNUSVR_CMD_LINE_BYTES) {
+
+                size_t check_len = (ip + strlen(argv[x]) - g_cmd_line);
+
+                if ( check_len > TRNUSVR_CMD_LINE_BYTES) {
                     fprintf(stderr,"warning - logged cmdline truncated\n");
                     mlog_tprintf(cfg->netif->mlog_id,"warning - logged cmdline truncated\n");
                     break;
                 }
-                int ilen=sprintf(ip," %s",argv[x]);
-                ip+=ilen;
+
+                size_t wlen = TRNUSVR_CMD_LINE_BYTES - (ip - g_cmd_line);
+                int ilen=snprintf(ip, wlen, " %s",argv[x]);
+                ip += (ilen > 0 ? ilen : 0);
             }
             g_cmd_line[TRNUSVR_CMD_LINE_BYTES-1]='\0';
             mlog_tprintf(cfg->netif->mlog_id,"*** trnusvr session start ***\n");
@@ -444,7 +449,7 @@ static void s_advance_update(trnu_pub_t *update)
 
     if(NULL!=update){
         static int count=0;
-
+        
         update->est[TRNU_EST_PT].time=mtime_etime();
         update->est[TRNU_EST_MLE].time=mtime_etime();
         update->est[TRNU_EST_MMSE].time=mtime_etime();

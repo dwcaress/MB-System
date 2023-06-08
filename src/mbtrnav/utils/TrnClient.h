@@ -86,10 +86,14 @@ public:
     int setVerbose(int val);
     void show(int indent=0, int wkey=15, int wval=18);
     TerrainNav* connectTRN();
+    void setQuitRef(bool *pvar);
+    bool isQuitSet();
+
 protected:
     char *_cfg_file;
     TRN_attr *_trn_attr;
     int verbose;
+    bool *_quit_ref;
     
 };
 

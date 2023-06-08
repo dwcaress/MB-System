@@ -56,7 +56,7 @@ void CharData::read(ExternalData *externalData)
 
 const char *CharData::ascii()
 {
-  snprintf(_asciiBuffer, sizeof(_asciiBuffer), asciiFormat(), _value);
+  snprintf(_asciiBuffer, ASCII_BUFFER_BYTES, asciiFormat(), _value);
   return _asciiBuffer;
 }
 
@@ -66,7 +66,7 @@ void CharData::parseValue(const char *stringRep)
 
   if (strlen(stringRep) > 1) {
     char errorBuf[MAX_EXC_STRING_LEN];
-    snprintf(errorBuf, sizeof(errorBuf), 
+      snprintf(errorBuf, MAX_EXC_STRING_LEN, 
 	    "CharData::parseValue() - invalid representation: \"%s\"",
 	    stringRep);
 
@@ -81,3 +81,4 @@ const char *CharData::typeMnemonic()
 {
   return CharTypeMnem;
 }
+

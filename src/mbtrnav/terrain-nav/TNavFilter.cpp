@@ -52,9 +52,9 @@ forceLowGradeFilter(false)
 	currVar[1] = windowVar[2];
 
 	//Initialize random number generator
-   unsigned int seed = seed_randn(NULL);
-   logs(TL_OMASK(TL_TNAV_PARTICLE_FILTER, TL_LOG),
-          "Random noise maker initialized with %d", seed);
+    unsigned int seed = seed_randn(NULL);
+    logs(TL_OMASK(TL_TNAV_PARTICLE_FILTER, TL_LOG),
+          "Random noise generator initialized with %d", seed);
 
 	initVariables();
 }

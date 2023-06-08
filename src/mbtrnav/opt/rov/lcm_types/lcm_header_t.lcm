@@ -1,0 +1,19 @@
+//////////////////////////////////////////////////////////////////////////////
+// Copyright 2019 MBARI.                                                    //
+// MBARI Proprietary Information. All rights reserved.                      //
+//////////////////////////////////////////////////////////////////////////////
+
+package oi;
+
+struct lcm_header_t
+{
+    // a string that uniquely identifies the process
+    // publishing the data ( e.g. hostname:process_name(pid) )
+    string publisher;
+
+    // epoch time in seconds
+    double timestamp;
+
+    // sequence number of published packet
+    int64_t sequence;
+}
