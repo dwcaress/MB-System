@@ -2338,7 +2338,7 @@ int main(int argc, char **argv) {
     if (verbose > 0)
       fprintf(stderr, "\nOutputting fnv files for survey sensors\n");
     for (isensor = 0; isensor < platform->num_sensors; isensor++) {
-      if (platform->sensors[isensor].capability2 != 0) {
+      //if (platform->sensors[isensor].capability2 != 0) {
         if (verbose > 0)
           fprintf(stderr, "Outputting sensor %d with capability %d\n", isensor, platform->sensors[isensor].capability2);
         for (ioffset = 0; ioffset < platform->sensors[isensor].num_offsets; ioffset++) {
@@ -2352,7 +2352,7 @@ int main(int argc, char **argv) {
             exit(MB_ERROR_OPEN_FAIL);
           }
         }
-      }
+      //}
     }
   }
 
@@ -2918,9 +2918,13 @@ int main(int argc, char **argv) {
           preprocess_pars.n_soundspeed = n_soundspeed;
           preprocess_pars.soundspeed_time_d = soundspeed_time_d;
           preprocess_pars.soundspeed_soundspeed = soundspeed_soundspeed;
+//fprintf(stderr, "\n%s:%d:%s: n_sensordepth: %d %d\n", __FILE__, __LINE__, __FUNCTION__, 
+//preprocess_pars.n_sensordepth, n_sensordepth);
 
           /* attempt to execute a preprocess function for these data */
           status = mb_preprocess(verbose, imbio_ptr, istore_ptr, (void *)platform, (void *)&preprocess_pars, &error);
+//fprintf(stderr, "%s:%d:%s: n_sensordepth: %d %d\n\n", __FILE__, __LINE__, __FUNCTION__, 
+//preprocess_pars.n_sensordepth, n_sensordepth);
 
           /* If a predefined preprocess function does not exist for
            * this format then standard preprocessing will be done
@@ -3212,7 +3216,7 @@ int main(int argc, char **argv) {
           /* loop over all sensors and output integrated nav for all
             sensors producing mapping data */
           for (isensor = 0; isensor < platform->num_sensors; isensor++) {
-            if (platform->sensors[isensor].capability2 != 0) {
+            //if (platform->sensors[isensor].capability2 != 0) {
               for (ioffset = 0; ioffset < platform->sensors[isensor].num_offsets; ioffset++) {
                 if (platform->sensors[isensor].offsets[ioffset].ofp != nullptr) {
                   /* calculate position and attitude of target sensor */
@@ -3231,7 +3235,7 @@ int main(int argc, char **argv) {
                       navlon, navlat, heading, speed, draft, roll, pitch, heave);
                 }
               }
-            }
+            //}
           }
         }
       }
@@ -3459,14 +3463,14 @@ int main(int argc, char **argv) {
   /* close any integrated navigation files */
   if (output_sensor_fnv) {
     for (isensor = 0; isensor < platform->num_sensors; isensor++) {
-      if (platform->sensors[isensor].capability2 != 0) {
+      //if (platform->sensors[isensor].capability2 != 0) {
         for (ioffset = 0; ioffset < platform->sensors[isensor].num_offsets; ioffset++) {
           if (platform->sensors[isensor].offsets[ioffset].ofp != nullptr) {
             fclose(platform->sensors[isensor].offsets[ioffset].ofp);
             platform->sensors[isensor].offsets[ioffset].ofp = nullptr;
           }
         }
-      }
+      //}
     }
   }
 

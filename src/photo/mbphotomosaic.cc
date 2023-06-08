@@ -2454,8 +2454,8 @@ int main(int argc, char** argv)
     double *ttide = NULL;
 
     /* Input quality variables */
-    bool imagequality_initialized = false;
     bool imagequality_specified = false;
+    bool imagequality_initialized = false;
     double imageQualityThreshold = 0.0;
     double imageQualityFilterLength = 0.0;
     mb_path ImageQualityFile;
@@ -3071,7 +3071,7 @@ int main(int argc, char** argv)
         fprintf(stream,"%s     TideFile:                         %s\n", first, TideFile);
         fprintf(stream,"%s     imagequality_specified:           %d\n", first, imagequality_specified);
         fprintf(stream,"%s     ImageQualityFile:                 %s\n", first, ImageQualityFile);
-        fprintf(stream,"%s     imagequality_initialized:                 %d\n", first, imagequality_initialized);
+        fprintf(stream,"%s     imagequality_initialized:         %d\n", first, imagequality_initialized);
         fprintf(stream,"%s     imageQualityThreshold:            %f\n", first, imageQualityThreshold);
         fprintf(stream,"%s     imageQualityFilterLength:         %f\n", first, imageQualityFilterLength);
         fprintf(stream,"%s     control.use_topography:           %d\n", first, control.use_topography);
@@ -3644,7 +3644,14 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             /* correction-file */
             else if (strncmp(imageLeftFile, "--correction-file=", 18) == 0) {
                 if (sscanf(imageLeftFile, "--correction-file=%s", tmp) == 1) {
-                    strcpy(ImageCorrectionFile, tmp);
+                	if (strlen(imageRightFile) > 0) {
+                		strcpy(ImageCorrectionFile, imageRightFile);
+                		strcat(ImageCorrectionFile, "/");
+                		strcat(ImageCorrectionFile, tmp);
+                	}
+                	else {
+                    	strcpy(ImageCorrectionFile, tmp);
+                    }
                     correction_specified = true;
                     control.corr_mode = MBPM_CORRECTION_FILE;
                 }
@@ -3714,7 +3721,14 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             /* platform-file */
             else if (strncmp(imageLeftFile, "--platform-file=", 16) == 0) {
                 if (sscanf(imageLeftFile, "--platform-file=%s", tmp) == 1) {
-                    strcpy(PlatformFile, tmp);
+                	if (strlen(imageRightFile) > 0) {
+                		strcpy(PlatformFile, imageRightFile);
+                		strcat(PlatformFile, "/");
+                		strcat(PlatformFile, tmp);
+                	}
+                	else {
+                    	strcpy(PlatformFile, tmp);
+                    }
                     platform_specified = true;
                 }
             }
@@ -3803,7 +3817,14 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             /* calibration-file */
             else if (strncmp(imageLeftFile, "--calibration-file=", 19) == 0) {
                 if (sscanf(imageLeftFile, "--calibration-file=%s", tmp) == 1) {
-                    strcpy(StereoCameraCalibrationFile, tmp);
+                	if (strlen(imageRightFile) > 0) {
+                		strcpy(StereoCameraCalibrationFile, imageRightFile);
+                		strcat(StereoCameraCalibrationFile, "/");
+                		strcat(StereoCameraCalibrationFile, tmp);
+                	}
+                	else {
+                    	strcpy(StereoCameraCalibrationFile, tmp);
+                    }
                     calibration_specified = true;
                 }
             }
@@ -3811,7 +3832,14 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             /* navigation-file */
             else if (strncmp(imageLeftFile, "--navigation-file=", 18) == 0) {
                 if (sscanf(imageLeftFile, "--navigation-file=%s", tmp) == 1) {
-                    strcpy(NavigationFile, tmp);
+                	if (strlen(imageRightFile) > 0) {
+                		strcpy(NavigationFile, imageRightFile);
+                		strcat(NavigationFile, "/");
+                		strcat(NavigationFile, tmp);
+                	}
+                	else {
+                    	strcpy(NavigationFile, tmp);
+                    }
                     navigation_specified = true;
                 }
             }
@@ -3819,7 +3847,14 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             /* tide-file */
             else if (strncmp(imageLeftFile, "--tide-file=", 12) == 0) {
                 if (sscanf(imageLeftFile, "--tide-file=%s", tmp) == 1) {
-                    strcpy(TideFile, tmp);
+                	if (strlen(imageRightFile) > 0) {
+                		strcpy(TideFile, imageRightFile);
+                		strcat(TideFile, "/");
+                		strcat(TideFile, tmp);
+                	}
+                	else {
+                    	strcpy(TideFile, tmp);
+                    }
                     tide_specified = true;
                 }
             }
@@ -3827,7 +3862,14 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             /* image-quality-file */
             else if (strncmp(imageLeftFile, "--image-quality-file=", 21) == 0) {
                 if (sscanf(imageLeftFile, "--image-quality-file=%s", tmp) == 1) {
-                    strcpy(ImageQualityFile, tmp);
+                	if (strlen(imageRightFile) > 0) {
+                		strcpy(ImageQualityFile, imageRightFile);
+                		strcat(ImageQualityFile, "/");
+                		strcat(ImageQualityFile, tmp);
+                	}
+                	else {
+                    	strcpy(ImageQualityFile, tmp);
+                    }
                     imagequality_specified = true;
                 }
             }
@@ -3989,7 +4031,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
                 exit(error);
             }
 
-            /* if newly specified load image correction table */
+            /* if newly specified load camera calibration model */
             if (calibration_specified) {
                 load_calibration(verbose, StereoCameraCalibrationFile, &control, &error);
                 calibration_initialized = true;

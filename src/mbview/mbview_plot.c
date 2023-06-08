@@ -325,7 +325,7 @@ int mbview_drawdata(size_t instance, int rez) {
 	}
 
 	else /* if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) */ {
-		for (int i = data->viewbounds[0]; i < data->viewbounds[1]; i += stride) {
+		for (int i = data->viewbounds[0]; i < data->viewbounds[1] - stride; i += stride) {
 			bool on = false;
 			bool flip = false;
 			for (int j = data->viewbounds[2]; j <= data->viewbounds[3]; j += stride) {

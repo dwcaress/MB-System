@@ -1256,6 +1256,15 @@ int main(int argc, char **argv) {
 							static_cast<int>(MBMOSAIC_PRIORITY_AZIMUTH));
 					}
 				}
+				else if (n >= 1) {
+					priority_azimuth = t1;
+					priority_azimuth_factor = 1.0;
+					if ((priority_mode & MBMOSAIC_PRIORITY_AZIMUTH) == 0) {
+						priority_mode = static_cast<priority_t>(
+							static_cast<int>(priority_mode) +
+							static_cast<int>(MBMOSAIC_PRIORITY_AZIMUTH));
+					}
+				}
 				break;
 			}
 			case 'V':

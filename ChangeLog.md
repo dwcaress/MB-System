@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta53    June 7, 2023
 - Version 5.7.9beta52    March 9, 2023
 - Version 5.7.9beta51    February 14, 2023
 - Version 5.7.9beta50    February 12, 2023
@@ -428,6 +429,41 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+Mbcontour: The navigation line width and color can now be set using the -W argument
+
+Format SOIUSBLN (275): Supports USBL tracking data from R/V Falkor (too) as format 275.
+
+Format SOIROVN (276): Supports ROV SuBastian INS navigation data as format 276.
+
+Mbm_route2mission: Added a depth limit parameter to the -D argument.
+
+Mbgrdviz: Fixed display of vector data.
+
+General: Fixed automated handling of asynchronous nav and attitude data when reading 
+Kongsberg or Teledyne multibeam data that have not been preprocessed. Changes are in
+mbio/mb_navint.c
+
+Format RESON7K3 (89): Fixed counting of valid records in the file catalog.
+
+Mbgetphotocorrection, mbphotomosaic, mbphotogrammetry: Fixed to properly handle embedding
+of parameters within recursive imagelist structures, allowing mixing of photographs taken
+with difference camera systems or perhaps different camera calibrations.
+
+Mbgetphotocorrection, mbphotogrammetry: enabled multi-threading.
+
+Mbauvloglist: Allow merging attitude data from a separate file. Allow decimation of input.
+
+Mbmosaic: Augmented azimuth priority mode so that the azimuth alone can be specified, in which
+case the azimuth priority factor is one.
+
+Mbpreprocess: Now outputs integrated navigation for all sensors producing mapping data.
+
+#### 5.7.9beta53 (June 7)
+
+Formats 56 (MBF_EM300RAW) and 57 (MBF_EM300MBA): Fixed catastrophic bug introduced in 
+5.7.9beta50 that treated many signed values (like acrosstrack distance) as unsigned.
+
 
 #### 5.7.9beta52 (March 9)
 

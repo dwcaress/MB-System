@@ -1688,7 +1688,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
   mb_pathplusplus offsetfile;
   double navlon1, navlon2, navlat1, navlat2;
   int time_i[7];
-  int nroute;
+  int nroute = 0;
   int snav_1, snav_2;
   int ncrossings_true = 0;
   int ncrossings_gt50 = 0;
@@ -3941,8 +3941,9 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
   double angle, dt, alongtrackdistance, xtrackavg, xtrackmax;
   int nxtrack;
 
+  int nread = 0;
+  int good_beams = 0;
   int obeams_bath, obeams_amp, opixels_ss;
-  int nread;
   bool first;
   double headingx, headingy, mtodeglon, mtodeglat;
   double lon, lat;
@@ -3985,7 +3986,6 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
   int new_sections = 0;
   int new_pings = 0;
   int new_crossings = 0;
-  int good_beams = 0;
 
   /* allocate mbna_file array if needed */
   if (project->num_files_alloc <= project->num_files) {

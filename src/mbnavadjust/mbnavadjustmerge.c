@@ -3635,13 +3635,9 @@ int main(int argc, char **argv) {
           }
         }
 
-        /* if not found ignore the global tie */
-        if (!found) {
-          fprintf(stderr, "Failure!!\n");
-        }
-
-        /* apply the global tie */
-        else if (found) {
+        /* if global tie found then count, otherwise ignore */
+        if (found) {
+          num_import_globaltie++;
           fprintf(stderr, "Success!!\nImport global tie from list: %4.4d:%4.4d:%2.2d %.3f/%.3f/%.3f  %.3f/%.3f/%.3f\n",
                   import_globaltie_file, import_globaltie_section_id, import_globaltie_snav,
                   import_globaltie_offset_x_m, import_globaltie_offset_y_m, import_globaltie_offset_z_m,
@@ -3678,6 +3674,9 @@ int main(int argc, char **argv) {
           section->globaltie.dr2_m = 0.0;
           section->globaltie.dr3_m = 0.0;
           section->globaltie.rsigma_m = 0.0;
+        }
+        else {
+          fprintf(stderr, "Failure!!\n");
         }
       }
 
