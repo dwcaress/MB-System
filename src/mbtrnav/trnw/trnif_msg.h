@@ -67,15 +67,23 @@
 // Includes 
 /////////////////////////
 
+#include <stdlib.h>
+#include <stdio.h>
+// use older ifdef with headers for QNX makedep compatibility
+#ifdef __QNX__
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/select.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#endif
+#if defined (__UNIX__) || defined (__unix__) || defined (__APPLE__)
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include <memory.h>
-
+#endif
 #include "trnw.h"
-#include "trn_common.h"
 
 /////////////////////////
 // Macros
@@ -136,6 +144,7 @@ typedef enum{
     TRNIF_PING,
     TRNIF_MSG_ID_COUNT
 }trnmsg_id_t;
+
 #pragma pack(push,1)
 
 typedef struct trnmsg_header_s{
@@ -186,14 +195,14 @@ typedef struct trn_box_s{
     d_triplet_t xyz_sdev;
 }trn_box_t;
 
-
 // MOTN, MLE, MMSE
 // contain single pt_cdata_t (pose)
 // (so may use this struct or
 // just overlay buffer w/ pt_cdata_t*)
 typedef struct trn_pose_s{
-    // pose (fixed len)
+    ;// pose (fixed len)
 }trn_pose_t;
+
 #pragma pack(pop)
 
 typedef trn_type_t trn_ack_t;
