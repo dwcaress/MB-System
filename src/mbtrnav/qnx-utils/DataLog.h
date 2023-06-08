@@ -33,6 +33,8 @@
 #define BeginDataMnem "begin"
 
 #define TimeTagFieldName "time"
+#define DLOG_FILENAME_BYTES 256
+
 class TimeTag;
 
 /*
@@ -160,7 +162,7 @@ protected:
 
   FileFormat _fileFormat;
 
-  char _fileName[256];
+  char _fileName[DLOG_FILENAME_BYTES];
 
 private:
 

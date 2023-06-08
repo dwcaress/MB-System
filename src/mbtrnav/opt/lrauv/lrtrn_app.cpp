@@ -60,8 +60,10 @@
  * Headers
  ***********************************************************************/
 
-#include "LcmTrn.h"
 #include <stdio.h>
+#include <sys/stat.h>
+#include "gitversion.h"
+#include "LcmTrn.h"
 
 /***********************************************************************
  * Macros
@@ -101,14 +103,30 @@ int main(int argc, char **argv)
     // Initialization phase
     //**************************************************************************
 
+    fprintf(stderr,
+        "##################################################################\n");
+    fprintf(stderr, "lrtrn_app %s, built on %s %s\n",
+        __GIT_VERSION__, __DATE__, __TIME__);
+    fprintf(stderr,
+        "##################################################################\n");
+
     // Use default configuration file if none was specified on the command line.
     char *configfile = NULL;
     if (argc == 1) {
         configfile = getDefaultConfig();
     } else if (argc == 2) {
         configfile = strdup(argv[1]);
+        // Ensure that homeDir exists
+        struct stat sb{};
+        if (stat(configfile, &sb) != 0 || !S_ISREG(sb.st_mode)) {
+            fprintf(stderr, "Bad config file specified %s\n\n", configfile);
+            usage();
+            exit(1);
+        }
+
     } else {
         usage();
+        exit(1);
     }
 
     // Quit if no config
@@ -124,7 +142,8 @@ int main(int argc, char **argv)
     if (!_trn.good()) {
         fprintf(stderr, "Initialization failed!\n");
     } else {
-        fprintf(stderr, "%s listening for messages...\n", argv[0]);
+        fprintf(stderr, "%s %s listening for messages...\n",
+            argv[0], __GIT_VERSION__);
         _trn.run();
     }
 

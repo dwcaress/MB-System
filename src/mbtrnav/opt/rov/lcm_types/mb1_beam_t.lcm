@@ -1,0 +1,22 @@
+//////////////////////////////////////////////////////////////////////////////
+// Copyright 2021  Monterey Bay Aquarium Research Institute                 //
+// Distributed under MIT license. See license.txt for more information.     //
+//////////////////////////////////////////////////////////////////////////////
+package trn;
+
+struct mb1_beam_t
+{
+    /// beam number
+    // beam number (0 is port-most beam)
+    int32_t beam_num;
+
+    /// along track position wrt sonar (m)
+    double rhox;
+
+    /// cross track position wrt sonar (m)
+    double rhoy;
+
+    /// vertical position wrt to sonar (m, positive down)
+    double rhoz;
+}
+

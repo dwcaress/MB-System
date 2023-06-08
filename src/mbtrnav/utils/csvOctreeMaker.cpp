@@ -86,8 +86,8 @@ int main( int argc, char **argv )
 	}
 	
 	char inFile[128], outFile[128];
-	sprintf(inFile, "%s.csv",argv[1]);
-	sprintf(outFile,"%s.bo",argv[1]);
+	snprintf(inFile, 128, "%s.csv", argv[1]);
+	snprintf(outFile, 128, "%s.bo", argv[1]);
 
 	if( access(inFile, F_OK) )
 	{

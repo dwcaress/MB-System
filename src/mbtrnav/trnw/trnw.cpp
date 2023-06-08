@@ -821,9 +821,13 @@ void commst_initialize(wtnav_t *self, wcommst_t *msg)
         if(NULL!=ct && NULL!=trn){
 
             int errors=0;
-            char mapname[512]={0};
-            char cfgname[512]={0};
-            char particlename[512]={0};
+            int BUF_SIZE=512;
+            char mapname[BUF_SIZE];
+            char cfgname[BUF_SIZE];
+            char particlename[BUF_SIZE];
+            memset(mapname, 0, BUF_SIZE);
+            memset(cfgname, 0, BUF_SIZE);
+            memset(particlename, 0, BUF_SIZE);
 
             char* mapPath = getenv("TRN_MAPFILES");
             char* cfgPath = getenv("TRN_DATAFILES");
@@ -841,19 +845,19 @@ void commst_initialize(wtnav_t *self, wcommst_t *msg)
             }
 
             if(ct->mapname[0]=='/'){
-                snprintf(mapname, sizeof(mapname), "%s", ct->mapname);
+                snprintf(mapname, BUF_SIZE, "%s", ct->mapname);
             }else{
-                snprintf(mapname, sizeof(mapname), "%s/%s", mapPath, ct->mapname);
+                snprintf(mapname, BUF_SIZE, "%s/%s", mapPath, ct->mapname);
             }
             if(ct->cfgname[0]=='/'){
-                snprintf(cfgname, sizeof(cfgname), "%s", ct->cfgname);
+                snprintf(cfgname, BUF_SIZE, "%s", ct->cfgname);
             }else{
-                snprintf(cfgname, sizeof(cfgname), "%s/%s", cfgPath, ct->mapname);
+                snprintf(cfgname, BUF_SIZE, "%s/%s", cfgPath, ct->mapname);
             }
             if(ct->particlename[0]=='/'){
-                snprintf(particlename, sizeof(particlename), "%s", ct->cfgname);
+                snprintf(particlename, BUF_SIZE, "%s", ct->cfgname);
             }else{
-                snprintf(particlename, sizeof(particlename), "%s/%s", cfgPath, ct->particlename);
+                snprintf(particlename, BUF_SIZE, "%s/%s", cfgPath, ct->particlename);
             }
 
             // Let's see if these files exist right now as
@@ -1167,11 +1171,17 @@ int wposet_mb1_to_pose(wposet_t **dest, mb1_t *src, long int utmZone)
             obj->gpsValid=(obj->z<2?true:false);
             obj->bottomLock=true;
             obj->dvlValid=true;
-            // why these consts?
-            obj->wx = -3.332e-002;
-            obj->wy = -9.155e-003;
-            obj->wz = -3.076e-002;
-            obj->vx = obj->vy = obj->vz = 0.01;
+            // TRN can't intialize if vx == 0
+            obj->vx = 0.01;
+            obj->vy = 0.;
+            obj->vz = 0.;
+            // wx not required; can use these (how determined?)
+            // obj->wx = -3.332e-002;
+            // obj->wy = -9.155e-003;
+            // obj->wz = -3.076e-002;
+            obj->wx = 0.;
+            obj->wy = 0.;
+            obj->wz = 0.;
 
             retval=0;
         }

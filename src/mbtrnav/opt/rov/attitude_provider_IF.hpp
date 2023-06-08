@@ -15,6 +15,8 @@ using att_tup = std::tuple<double, double, double>;
 
 typedef enum{
     AF_VALID=0x1,
+    AF_INVERT_PITCH=0x2,
+    AF_INVERT_ROLL=0x4,
 }att_flag_bits_t;
 
 typedef uint32_t att_flags_t;
@@ -61,19 +63,22 @@ public:
         return mTimeUsec;
     }
 
-    double pitch(att_angle_units_t=PA_RADIANS)
+    double pitch(att_angle_units_t u=PA_RADIANS)
     {
-        return std::get<0>(mAttitude);
+        double angle = (u==PA_DEGREES ? std::get<0>(mAttitude)*180./M_PI : std::get<0>(mAttitude));
+        return (mFlags.is_set(AF_INVERT_PITCH) ? (angle * -1.) : angle);
     }
 
-    double roll(att_angle_units_t=PA_RADIANS)
+    double roll(att_angle_units_t u=PA_RADIANS)
     {
-        return std::get<1>(mAttitude);
+        double angle = (u==PA_DEGREES ? std::get<1>(mAttitude)*180./M_PI : std::get<1>(mAttitude));
+        return (mFlags.is_set(AF_INVERT_ROLL) ? (angle * -1.) : angle);
     }
 
-    double heading(att_angle_units_t=PA_RADIANS)
+    double heading(att_angle_units_t u=PA_RADIANS)
     {
-        return std::get<2>(mAttitude);
+        double angle = (u==PA_DEGREES ? std::get<2>(mAttitude)*180./M_PI : std::get<2>(mAttitude));
+        return angle;
     }
 
     flag_var<att_flags_t> &flags()

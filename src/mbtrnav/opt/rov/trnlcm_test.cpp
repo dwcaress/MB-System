@@ -72,7 +72,7 @@ int main(int argc, char **argv)
 
     lcm.initialize();
 
-    lcm_pcf::signal_t signalMsg;
+    lcm_pcf::signal_t signalMsg={0};
     lcm_pcf::string_t stringMsg;
 //    double ts = 0.0;
     std::string msg;

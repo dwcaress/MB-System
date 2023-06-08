@@ -348,7 +348,7 @@ void runTerrainNav(const Matrix& dataKft, const Matrix& dataMeas,
                                       mapFile, spec_cfg, NULL, NULL, filterType, map_type);
 	} else {
 	
-		sprintf(filename, "%s%s", mapPath, mapFile);
+		snprintf(filename, 512, "%s%s", mapPath, mapFile);
 		printf("Loading map file %s\n", filename);
 		tercom = new TerrainNav(filename, spec_cfg, filterType, map_type);
 	}

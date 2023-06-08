@@ -30,9 +30,8 @@ int main( int argc, char **argv )
 	}
 	
 	char inFile[128], outFile[128];
-	sprintf(inFile, "%s.bo",argv[1]);
-	sprintf(outFile,"%sSerm.bo",argv[1]);
-	//sprintf(outFile,"%sPetersons.bo",argv[1]);
+	snprintf(inFile, 128, "%s.bo", argv[1]);
+	snprintf(outFile, 128, "%sSerm.bo", argv[1]);
 
 	if( access(inFile, F_OK) )
 	{

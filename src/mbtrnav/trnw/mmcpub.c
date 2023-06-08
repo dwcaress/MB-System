@@ -349,7 +349,7 @@ int main(int argc, char *argv[])
         memset(txbuf,0,MAX_DATA_BYTES);
         size_t tx_len=0;
         if(NULL == lcm){
-            snprintf(txbuf, sizeof(txbuf), "MSG mid[%3d]", msg_n++);
+            snprintf(txbuf, MAX_DATA_BYTES, "MSG mid[%3d]", msg_n++);
             tx_len=strlen(txbuf)+1;
         }else{
             typedef struct lcm_hdr_s{
@@ -364,16 +364,27 @@ int main(int argc, char *argv[])
             hdr->magic[2] = '0';
             hdr->magic[3] = '2';
             hdr->seq = msg_n;
+
+            // channel pointer
             char *pchannel = txbuf + sizeof(lcm_hdr_t);
             const char *channel="MSG";
+            // pointer to message length
             uint32_t *plen = (uint32_t *)((byte *)pchannel + strlen(channel)+1);
+            // message data pointer
             char *pdata = pchannel + strlen(channel)+1+sizeof(uint32_t);
-            snprintf(pchannel, sizeof(pchannel), "%s",channel);
-            *plen = snprintf(pdata, MSGBUFSIZE-strlen(txbuf), "mid[%3d]",msg_n++)+1;
-            tx_len=sizeof(lcm_hdr_t) + strlen(channel) + strlen(pdata)+2+sizeof(uint32_t);
 
+            // write channel
+            size_t wlen = strlen(channel)+1;
+            snprintf(pchannel, wlen, "%s",channel);
+
+            // write data (msg ID)
+            wlen = MAX_DATA_BYTES - (pdata - txbuf);
+            *plen = snprintf(pdata, wlen, "mid[%3d]",msg_n++)+1;
+            tx_len = sizeof(lcm_hdr_t) + strlen(channel) + strlen(pdata) + 2 + sizeof(uint32_t);
+
+            // hexdump message
             fprintf(stderr, "msg bytes\n");
-            for(unsigned int i=0, col=0;i<tx_len;i++){
+            for(int i=0, col=0;i<tx_len;i++){
                 fprintf(stderr, "%02x ",txbuf[i]);
                 if(col>0 && (col%7)==0) {
                     fprintf(stderr, "\n");
@@ -423,7 +434,7 @@ int main(int argc, char *argv[])
                     if( pids!=NULL){
                         sscanf(pids,"mid[%d",&mid);
                     }
-                    snprintf(txbuf, sizeof(txbuf), "ACK mid[%d] cid[%d] pid[%d] ",mid,cid,getpid());
+                    snprintf(txbuf, MSGBUFSIZE, "ACK mid[%d] cid[%d] pid[%d] ",mid,cid,getpid());
                     tx_len = strlen(txbuf)+1;
 
                     tx_bytes=0;
@@ -456,3 +467,5 @@ int main(int argc, char *argv[])
     msock_socket_destroy(&pub);
     return 0;
 }
+
+

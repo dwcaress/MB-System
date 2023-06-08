@@ -1,0 +1,34 @@
+package gss;
+
+struct pcomms_t
+{
+  /* 
+    Message data time stamp - decimal seconds since 00:00:00
+    UTC on January 1, 1970.
+   */
+  double time_unix_sec;
+
+  /* 
+    Monotonically increasing count of the times the sending 
+    application published this message.
+   */
+  int64_t count_publish;  
+  
+  /* 
+    Device identification string - for hardware devices the 
+    manufacturer and model number.
+   */
+  string sender_id;
+
+  /* analog values */
+  int32_t num_analogs;
+  analog_t analogs[num_analogs];
+
+  /* digital values */
+  int32_t num_digitals;
+  digital_t digitals[num_digitals]; 
+    
+  /* message values */
+  int32_t num_messages;
+  message_t messages[num_messages];
+}

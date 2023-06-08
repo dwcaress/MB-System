@@ -56,7 +56,7 @@ void ShortData::read(ExternalData *externalData)
 
 const char *ShortData::ascii()
 {
-  snprintf(_asciiBuffer, sizeof(_asciiBuffer), asciiFormat(), _value);
+  snprintf(_asciiBuffer, SDATA_ASCII_BUFFER_BYTES, asciiFormat(), _value);
   return _asciiBuffer;
 }
 
@@ -72,3 +72,4 @@ const char *ShortData::typeMnemonic()
 {
   return ShortTypeMnem;
 }
+
