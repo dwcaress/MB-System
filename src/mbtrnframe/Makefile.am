@@ -15,7 +15,8 @@ include_HEADERS = \
         mframe/src/mlog.h \
         mframe/src/mlist.h \
         mframe/src/mstats.h \
-        mframe/src/mkvconf.h
+        mframe/src/mkvconf.h \
+        mframe/src/mutils.h
 
 AM_CFLAGS =
 
