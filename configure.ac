@@ -89,6 +89,8 @@ AS_ECHO(["        --with-vtk-lib        - location of VTK8.2+ libraries (require
 AS_ECHO(["        --enable-opencv       - enable building tools using OpenCV (optional)"])
 AS_ECHO(["        --enable-mbtrn        - enable building terrain relative navigation (TRN) tools (optional)"])
 AS_ECHO(["        --enable-mbtnav       - enable building terrain relative navigation (TRN) tools (optional)"])
+AS_ECHO(["        --enable-rovtrn       - enable building terrain relative navigation (TRN) ROV tools
+ (optional)"])
 AS_ECHO(["        --disable-mbtools     - disable building graphical tools (use with --enable-mbtrn and --enable-mbtnav)"])
 AS_ECHO(["        --enable-hardening    - Enable compiler and linker options to frustrate memory corruption exploits  (e.g. -fPIE and -pie) (optional)"])
 AS_ECHO(["        --enable-test         - Enable building unit tests in test/ and third-party/"])
@@ -1344,6 +1346,31 @@ else
 fi
 
 dnl--------------------------------------------------------------------
+dnl ROVTRN Section - optionally build terrain relative navigation (TRN) tools for ROV
+dnl--------------------------------------------------------------------
+
+dnl Check if the rovtrn tools should be built
+AS_ECHO(["Check if the rovtrn tools should be built"])
+AC_ARG_ENABLE(rovtrn, [AS_HELP_STRING([--enable-rovtrn], [build rovtrn tools])], [build_rovtrn=yes], [build_rovtrn=no])
+AM_CONDITIONAL([BUILD_ROVTRN], [test $build_rovtrn = yes])
+if test "$build_rovtrn" = "yes" ; then
+    dnl Building rovtrn tools
+    AS_ECHO(["Build rovtrn tools in mbtrnav"])
+    AC_DEFINE(ROVTRN_ENABLED, 1, [Build rovtrn tools in mbtrnav])
+    AC_DEFINE(MBTRN_ENABLED, 1, [Build libmbtrn and mbtrnpp])
+    AC_DEFINE(MBTNAV_ENABLED, 1, [Build libmbtnav and embed TRN instance in mbtrnpp])
+    AM_CONDITIONAL([BUILD_MBTRN], [test $build_rovtrn = yes])
+    AM_CONDITIONAL([BUILD_MBTNAV], [test $build_rovtrn = yes])
+    AM_CONDITIONAL([BUILD_MBTRNUTILS], [test $build_rovtrn = yes])
+    build_mbtrn="yes"
+    build_mbrnutils="yes"
+    build_mbtrnframe="yes"
+else
+    dnl Not building rovtrn tools
+    AS_ECHO(["Not building rovtrn tools"])
+fi
+
+dnl--------------------------------------------------------------------
 dnl Point Cloud Library Section - optionally build ICP based feature matching
 dnl in mbnavadjust - uses ICP algorithm in Point Cloud Library (PCL)
 dnl--------------------------------------------------------------------
@@ -1626,6 +1653,11 @@ if test "$build_mbtrnframe" = "yes" ; then
 	AS_ECHO(["Build mbtrnframe: Enabled"])
 else
 	AS_ECHO(["Build mbtrnframe: Disabled"])
+fi
+if test "$build_rovtrn" = "yes" ; then
+	AS_ECHO(["Build rovtrn tools: Enabled"])
+else
+	AS_ECHO(["Build rovtrn tools: Disabled"])
 fi
 if test "$GOT_OPENCV4" = "yes" ; then
 	AS_ECHO(["Build OpenCV4 tools: Enabled"])
