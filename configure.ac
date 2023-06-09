@@ -11,14 +11,14 @@ dnl    See README file for copying and redistribution conditions.
 dnl--------------------------------------------------------------------
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.9beta52],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
-AC_DEFINE(VERSION_DATE, ["9 March 2023"], [Set VERSION_DATE define in mb_config.h])
+AC_INIT([mbsystem],[5.7.9beta53],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_DEFINE(VERSION_DATE, ["7 June 2023"], [Set VERSION_DATE define in mb_config.h])
 
 AS_ECHO([" "])
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO(["    The MB-system:    configure    12/7/2011"])
 AS_ECHO([" "])
-AS_ECHO(["    Copyright (c) 2011-2022 by"])
+AS_ECHO(["    Copyright (c) 2011-2023 by"])
 AS_ECHO(["    D. W. Caress (caress@lamont.ldgo.columbia.edu)"])
 AS_ECHO(["    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)"])
 AS_ECHO(["    Lamont-Doherty Earth Observatory"])
@@ -1486,6 +1486,7 @@ AC_CONFIG_FILES([\
     src/html/Makefile \
     src/ps/Makefile \
     src/share/Makefile \
+    src/mbgrd2gltf/Makefile \
     ])
 if test "$enable_gsf" = "yes" ; then
     AC_CONFIG_FILES([\
