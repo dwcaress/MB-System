@@ -19,6 +19,7 @@
 #include "DataField.h"
 
 #define FloatTypeMnem "float"
+#define FLTDATA_ASCII_BUFFER_BYTES 32
 
 /*
 CLASS 
@@ -69,7 +70,7 @@ public:
 protected:
 
   float _value;
-  char _asciiBuffer[32];
+  char _asciiBuffer[FLTDATA_ASCII_BUFFER_BYTES];
 };
 
 

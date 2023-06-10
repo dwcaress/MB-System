@@ -23,8 +23,9 @@
 
 
 TNavConfig::TNavConfig()
+:_vehicleSpecsFile(NULL), _particlesFile(NULL), _mapFile(NULL), _configPath(NULL), _logDir(NULL)
 {
-   _mapFile = _particlesFile = _vehicleSpecsFile = _logDir = NULL;
+
    _ignoreGps = 0;  // Pay heed unless told not to
 }
 
@@ -41,6 +42,9 @@ TNavConfig::~TNavConfig()
     }
     if (NULL!=_logDir){
         free(_logDir);
+    }
+    if (NULL!=_configPath){
+        free(_configPath);
     }
     _mapFile=NULL;
     _particlesFile=NULL;
@@ -134,6 +138,33 @@ char* TNavConfig::getParticlesFile()
 // caller owns return value - must free it
   char *cp = (_particlesFile ? strdup(_particlesFile) : NULL);
   return cp;
+}
+
+void TNavConfig::setConfigPath(char *filename)
+{
+    if (filename)
+    {
+        if (NULL != _configPath){
+            free(_configPath);
+            _configPath=NULL;
+        }
+
+        _configPath = strdup(filename);
+        logs(TL_OMASK(TL_TNAV_CONFIG, TL_LOG),"TNavConfig::setConfigPath: value is now %s\n", _configPath);
+    }
+    else
+    {
+        logs(TL_OMASK(TL_TNAV_CONFIG, TL_LOG),"setConfigPath: NULL passed in! Retaining value of %s\n",
+             (_configPath ? _configPath : "NULL"));
+    }
+}
+
+char* TNavConfig::getConfigPath()
+{
+    // copy is needed b/c it can change dynamically
+    // caller owns return value - must free it
+    char *cp = (_configPath ? strdup(_configPath) : NULL);
+    return cp;
 }
 
 void TNavConfig::setLogDir(char *filename)

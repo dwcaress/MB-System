@@ -13,6 +13,7 @@
 // Includes
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <unistd.h>
 #include <signal.h>
 #include <getopt.h>
@@ -33,6 +34,9 @@
 #include "nav_solution_input.hpp"
 #include "idt_input.hpp"
 #include "pcomms_input.hpp"
+#include "rdi_pd4_input.hpp"
+#include "kearfott_input.hpp"
+#include "octans_input.hpp"
 #include "trnxpp.hpp"
 #include "mb1_server.hpp"
 #include "NavUtils.h"
@@ -89,10 +93,10 @@
 
 
 #ifndef DTR
-#define DTR(x) (x * M_PI/180.)
+#define DTR(x) ((x) * M_PI/180.)
 #endif
 #ifndef RTD
-#define RTD(x) (x * 180./M_PI)
+#define RTD(x) ((x) * 180./M_PI)
 #endif
 
 // /////////////////
@@ -101,20 +105,13 @@ class mbgeo
 {
 public:
     static const int MBG_PDEG=0;
-    // number of beams
-    uint16_t beam_count;
-    // angle between first and last beam
-    double swath_deg;
-    // sensor rotation relative to vehicle CRP (r/p/y  aka phi/theta/psi deg)
-    double svr_deg[3];
-    // sensor translation relative to vehicle CRP (x/y/z m)
-    // +x: fwd +y: stbd, +z:down
-    double svt_m[3];
+
     mbgeo()
     :beam_count(0.),swath_deg(0.)
     {
-        memset(svr_deg,0,3*sizeof(double));
-        memset(svt_m,0,3*sizeof(double));
+        size_t asz = 3 * sizeof(double);
+        memset(svr_deg, 0, asz);
+        memset(svt_m, 0, asz);
     }
 
     mbgeo(uint16_t nbeams, double swath, double *rot, double *tran)
@@ -156,36 +153,37 @@ public:
     {
         tostream(std::cerr, wkey, wval);
     }
-};
-
-class dvlgeo
-{
-public:
 
     // number of beams
     uint16_t beam_count;
     // angle between first and last beam
-    // double swath_deg;
-    // sensor rotation relative to vehicle CRP (r/p/y  aka phi/theta/psi deg)
-    double yb_deg;
-    double yi_deg;
-    double pb_deg;
-    double pi_deg;
+    double swath_deg;
     // sensor rotation relative to vehicle CRP (r/p/y  aka phi/theta/psi deg)
     double svr_deg[3];
     // sensor translation relative to vehicle CRP (x/y/z m)
     // +x: fwd +y: stbd, +z:down
     double svt_m[3];
 
+};
+
+class dvlgeo
+{
+public:
+
+
     dvlgeo()
-    :beam_count(0.), yb_deg(0), yi_deg(0), pb_deg(0), pi_deg(0)//, swath_deg(0.)
+    :beam_count(0), yaw_rf(NULL), pitch_rf(NULL)
     {
         memset(svr_deg,0,3*sizeof(double));
         memset(svt_m,0,3*sizeof(double));
+        fprintf(stderr,"%s:%d this[%p] yrf[%p] prf[%p]\n",__func__,__LINE__,this, yaw_rf,pitch_rf);
+        yaw_rf = NULL;
+        pitch_rf = NULL;
+        fprintf(stderr,"%s:%d this[%p] yrf[%p] prf[%p]\n",__func__,__LINE__,this, yaw_rf,pitch_rf);
     }
 
-    dvlgeo(uint16_t nbeams, double yb, double yi, double pb, double pi, double *rot, double *tran)
-    :beam_count(nbeams),yb_deg(yb), yi_deg(yi), pb_deg(pb), pi_deg(pi)//swath_deg(swath)
+    dvlgeo(uint16_t nbeams, const char *bspec, double *rot, double *tran)
+    :beam_count(nbeams), yaw_rf(NULL), pitch_rf(NULL)
     {
         for(int i=0; i<3; i++)
         {
@@ -194,31 +192,106 @@ public:
             if(tran != NULL)
                 svt_m[i] = tran[i];
         }
+
+        beam_count = nbeams;
+        size_t asz = sizeof(double) * nbeams;
+        yaw_rf = (double *)malloc(asz);
+        pitch_rf = (double *)malloc(asz);
+        memset(yaw_rf, 0, asz);
+        memset(pitch_rf, 0, asz);
+        parse_bspec(bspec);
     }
 
-    ~dvlgeo(){}
+    ~dvlgeo()
+    {
+        free(yaw_rf);
+        free(pitch_rf);
+    }
+
+    void parse_bspec(const char *bspec)
+    {
+        if(NULL == bspec)
+            return;
+
+        char *spec = strdup(bspec);
+        if(spec[0] == 'A'){
+            double yb_deg = 0;
+            double yi_deg = 0;
+            double pb_deg = 0;
+            double pi_deg = 0;
+            if(sscanf(spec, "A,%lf,%lf,%lf,%lf",&yb_deg,&yi_deg,&pb_deg,&pi_deg ) == 4){
+                for(int i=0 ; i<beam_count; i++){
+                    yaw_rf[i] = yb_deg + i * yi_deg;
+                    pitch_rf[i] = pb_deg + i * pi_deg;
+                }
+            } else {
+                fprintf(stderr, "ERR - invalid auto beam spec [%s]\n",spec);
+            }
+        } else if(spec[0] == 'L') {
+            char *scpy = strdup(spec);
+            char *junk = strtok(scpy,",");
+            if(NULL != junk){
+                for(int i=0; i<beam_count; i++){
+                    char *next_y = strtok(NULL,",");
+                    char *next_p = strtok(NULL,",");
+
+                    if(next_y==NULL){
+                        fprintf(stderr, "ERR - not enough tokens [%s]\n",spec);
+                        break;
+                    }
+                    if(next_p==NULL){
+                        fprintf(stderr, "ERR - not enough tokens [%s]\n",spec);
+                        break;
+                    }
+                    if(sscanf(next_y,"%lf",&yaw_rf[i])!=1){
+                        fprintf(stderr, "ERR - Y[%d] invalid [%s]\n",i,next_y);
+                    }
+                    if(sscanf(next_p,"%lf",&pitch_rf[i])!=1){
+                        fprintf(stderr, "ERR - P[%d] invalid [%s]\n",i,next_p);
+                    }
+               }
+            } else {
+                fprintf(stderr, "ERR - not enough tokens [%s]\n",spec);
+            }
+            free(scpy);
+        } else {
+            fprintf(stderr, "ERR - unsupported beam spec type [%s]\n",spec);
+        }
+
+        for(int i=0 ; i<beam_count; i++){
+            // normalize yaw to 0 : 360
+            if(yaw_rf[i] < 0.)
+                yaw_rf[i] = (fmod(yaw_rf[i],360.)) + 360.;
+            if(yaw_rf[i] > 360.)
+                yaw_rf[i] = fmod(yaw_rf[i],360.);
+            // normalize pitch to -90 : 90
+            pitch_rf[i] = fmod(pitch_rf[i],90.);
+        }
+
+        free(spec);
+    }
 
     void tostream(std::ostream &os, int wkey=15, int wval=18)
     {
         os << std::setw(wkey) << "beam_count";
         os << std::setw(wval) << beam_count << "\n";
-        //        os << std::setw(wkey) << "swath";
-        //        os << std::setw(wval) << swath_deg << "\n";
-        os << std::setw(wkey) << "yb_deg";
-        os << std::setw(wval) << yb_deg << "\n";
-        os << std::setw(wkey) << "yi_deg";
-        os << std::setw(wval) << yi_deg << "\n";
-        os << std::setw(wkey) << "pb_deg";
-        os << std::setw(wval) << pb_deg << "\n";
-        os << std::setw(wkey) << "pi_deg";
-        os << std::setw(wval) << pi_deg << "\n";
         os << std::setw(wkey) << "rotation" ;
         os << std::setw(wval) << "[";
         os << svr_deg[0] << "," << svr_deg[1] << "," << svr_deg[2] << "]\n";
         os << std::setw(wkey) << "translation";
         os << std::setw(wval) << "[";
         os << svt_m[0] << "," << svt_m[1] << "," << svt_m[2] << "]";
-
+        if(beam_count > 0){
+        os << std::setw(wkey) << "beam angles (Yi,Pi)";
+        os << std::setw(wval) << "[";
+        for(int i=0; i<beam_count;i++){
+            os << (yaw_rf!=NULL?yaw_rf[i]:-1.) << "," << (pitch_rf!=NULL?pitch_rf[i]:-1.);
+            if(i!=beam_count-1)
+                os << ",";
+        }
+        os << std::setw(wval) << "]\n";
+        }
+        os << "\n";
     }
 
     std::string tostring(int wkey=15, int wval=18)
@@ -232,6 +305,18 @@ public:
     {
         tostream(std::cerr, wkey, wval);
     }
+
+    // number of beams
+    uint16_t beam_count;
+    // sensor rotation relative to vehicle CRP (r/p/y  aka phi/theta/psi deg)
+    double svr_deg[3];
+    // sensor translation relative to vehicle CRP (x/y/z m)
+    // +x: fwd +y: stbd, +z:down
+    double svt_m[3];
+    // transducer yaw angles (in sensor reference frame, deg)
+    double *yaw_rf;
+    // transducer pitch angles (in sensor reference frame, deg)
+    double *pitch_rf;
 };
 
 class app_stats
@@ -345,8 +430,8 @@ public:
     : mVerbose(false), mDebug(0), mCycles(-1), mHost(NULL),
     mPort(MB1SVR_PORT_DFL), mTrnuGroup(NULL), mTrnuPort(UDPMS_MCAST_PORT_DFL), mTrnuTTL(1), mDelay(0),
     mFakeMB1(false), mPubTrnEst(false), mPubTrnMotn(false), mPubTrnMeas(false), mPubMB1(false),
-    mPubMBEst(false), mTrnDecN(1), mMBGeo(),mTrnCsv(),mMB1Csv(),mLogDirStr("."), mMsgLog(), mStats(),
-    mStatPeriod()
+    mPubMBEst(false), mTrnDecN(1), mMBGeo(NULL), mDVLGeo(NULL), mTrnCsv(),mMB1Csv(),mLogDirStr("."), mMsgLog(), mStats(),
+    mStatPeriod(), mConfigSet(false)
     {
         mHost = strdup(MB1SVR_HOST_DFL);
         mTrnuGroup = strdup(UDPMS_GROUP_DFL);
@@ -374,12 +459,20 @@ public:
     ~app_cfg()
     {
         free(mHost);
+
         free(mTrnuGroup);
+
+        if(mDVLGeo!=NULL)
+            delete mDVLGeo;
+
+        if(mMBGeo!=NULL)
+            delete mMBGeo;
+
         while (mInputList.size()>0)
             mInputList.pop_front();
     }
 
-    void parse_args(int argc, char **argv, bool ignore_cfg=false)
+    void parse_args(int argc, char **argv)
     {
         extern char WIN_DECLSPEC *optarg;
         int option_index=0;
@@ -441,160 +534,177 @@ public:
                     else if (strcmp("version", options[option_index].name) == 0) {
                         version = true;
                     }
-                    // host
-                    else if (strcmp("host", options[option_index].name) == 0) {
-                        acpy = strdup(optarg);
-                        host_str = strtok(acpy,":");
-                        port_str = strtok(NULL,":");
-                        if(NULL!=host_str){
-                            free(mHost);
-                            mHost = strdup(host_str);
-                        }
-                        if(NULL != port_str){
-                            sscanf(port_str,"%d",&mPort);
-                        }
-                        free(acpy);
-                    }
-                    // delay
-                    else if (strcmp("delay", options[option_index].name) == 0) {
-                        sscanf(optarg,"%u",&mDelay);
-                    }
-                    // stats
-                    else if (strcmp("stats", options[option_index].name) == 0) {
-                        sscanf(optarg,"%lf,%d", &mStatPeriod, &mStatLevel);
-                    }
-                    // logdir
-                    else if (strcmp("logdir", options[option_index].name) == 0) {
-                        mLogDirStr=optarg;
-                    }
-                    // fake-mb1
-                    else if (strcmp("fake-mb1", options[option_index].name) == 0) {
-                        mFakeMB1=true;
-                    }
-                    // trn-csv
-                    else if (strcmp("trn-csv", options[option_index].name) == 0) {
-                        mTrnCsv = std::string(optarg);
-                    }
-                    // mb1-csv
-                    else if (strcmp("mb1-csv", options[option_index].name) == 0) {
-                        mMB1Csv = std::string(optarg);
-                    }
-                    // trn-cfg
-                    else if (strcmp("trn-cfg", options[option_index].name) == 0) {
-                        mTrnCfg = std::string(optarg);
-                    }
-                    // trn-decn
-                    else if (strcmp("trn-decn", options[option_index].name) == 0) {
-                        mTrnDecN = atoi(optarg);
-                    }
-                    // pub-trnest
-                    else if (strcmp("pub-trnest", options[option_index].name) == 0) {
-                        mPubTrnEst = true;
-                    }
-                    // pub-trnmeas
-                    else if (strcmp("pub-trnmeas", options[option_index].name) == 0) {
-                        mPubTrnMeas = true;
-                    }
-                    // pub-trnmotn
-                    else if (strcmp("pub-trnmotn", options[option_index].name) == 0) {
-                        mPubTrnMotn = true;
-                    }
-                    // pub-mb1
-                    else if (strcmp("pub-mb1", options[option_index].name) == 0) {
-                        mPubMB1 = true;
-                    }
-                    // pub-mbest
-                    else if (strcmp("pub-mbest", options[option_index].name) == 0) {
-                        mPubMBEst = true;
-                    }
-                    // input
-                    else if (strcmp("input", options[option_index].name) == 0) {
-                        mInputList.push_back(std::string(optarg));
-                    }
-                    // cfg
-                    else if (!ignore_cfg && strcmp("cfg", options[option_index].name) == 0) {
-                        mAppCfg = std::string(optarg);
-                    }
-                    // cycles
-                    else if (strcmp("cycles", options[option_index].name) == 0) {
-                        mCycles = atoi(optarg);
-                    }
-                    // mb-geo
-                    else if (!ignore_cfg && strcmp("mb-geo", options[option_index].name) == 0) {
-                        char *acpy = strdup(optarg);
-                        char *sbeams = strtok(acpy,":");
-                        char *sswath = strtok(NULL,":");
-                        char *srot = strtok(NULL,":");
-                        char *strn = strtok(NULL,":");
-                        double svr[3] = {0};
-                        double svt[3] = {0};
-                        uint16_t beams=0;
-                        double swath=0;
-                        if(NULL!=sbeams)
-                            sscanf(sbeams,"%hu",&beams);
-                        if(NULL!=sswath)
-                            sscanf(sswath,"%lf",&swath);
-                        if(NULL!=srot)
-                            sscanf(srot,"%lf,%lf,%lf",&svr[0],&svr[1],&svr[2]);
-                        if(NULL!=strn)
-                            sscanf(strn,"%lf,%lf,%lf",&svt[0],&svt[1],&svt[2]);
-                        mMBGeo = mbgeo(beams, swath, &svr[0], &svt[0]);
-                        free(acpy);
-                    }
-                    // dvl-geo
-                    else if (!ignore_cfg && strcmp("dvl-geo", options[option_index].name) == 0) {
-                        char *acpy = strdup(optarg);
-                        char *sbeams = strtok(acpy,":");
-                        char *syb = strtok(NULL,":");
-                        char *syi = strtok(NULL,":");
-                        char *spb = strtok(NULL,":");
-                        char *spi = strtok(NULL,":");
-                        char *srot = strtok(NULL,":");
-                        char *strn = strtok(NULL,":");
-                        double yb=0.;
-                        double yi=0.;
-                        double pb=0.;
-                        double pi=0.;
-                        double svr[3] = {0};
-                        double svt[3] = {0};
-                        uint16_t beams=0;
-                        if(NULL!=sbeams)
-                            sscanf(sbeams,"%hu",&beams);
-                        if(NULL!=syb)
-                            sscanf(syb,"%lf",&yb);
-                        if(NULL!=syi)
-                            sscanf(syi,"%lf",&yi);
-                        if(NULL!=spb)
-                            sscanf(spb,"%lf",&pb);
-                        if(NULL!=spi)
-                            sscanf(spi,"%lf",&pi);
-                        if(NULL!=srot)
-                            sscanf(srot,"%lf,%lf,%lf",&svr[0],&svr[1],&svr[2]);
-                        if(NULL!=strn)
-                            sscanf(strn,"%lf,%lf,%lf",&svt[0],&svt[1],&svt[2]);
-                        mDVLGeo = dvlgeo(beams, yb, yi, pb, pi, &svr[0], &svt[0]);
-                        free(acpy);
-                    }
-                    // trnum
-                    else if (!ignore_cfg && strcmp("trnum", options[option_index].name) == 0) {
-                        char *acpy = strdup(optarg);
-                        char *sgroup = strtok(acpy,":");
-                        char *sport = strtok(NULL,":");
-                        char *sttl = strtok(NULL,":");
 
-                        if(NULL!=sgroup){
-                            free(mTrnuGroup);
-                            mTrnuGroup = strdup(sgroup);
+                    if(!mConfigSet){
+                        // cfg
+                        if (strcmp("cfg", options[option_index].name) == 0) {
+                            mAppCfg = std::string(optarg);
                         }
-                        if(NULL!=sport){
-                            sscanf(sport,"%d",&mTrnuPort);
+                       mConfigSet = true;
+                        break;
+                    }else{
+                        // host
+                        if (strcmp("host", options[option_index].name) == 0) {
+                            acpy = strdup(optarg);
+                            host_str = strtok(acpy,":");
+                            port_str = strtok(NULL,":");
+                            if(NULL!=host_str){
+                                free(mHost);
+                                mHost = strdup(host_str);
+                            }
+                            if(NULL != port_str){
+                                sscanf(port_str,"%d",&mPort);
+                            }
+                            free(acpy);
                         }
-                        if(NULL!=sttl){
-                            sscanf(sttl,"%d",&mTrnuTTL);
+                        // delay
+                        else if (strcmp("delay", options[option_index].name) == 0) {
+                            sscanf(optarg,"%u",&mDelay);
                         }
-                        free(acpy);
+                        // stats
+                        else if (strcmp("stats", options[option_index].name) == 0) {
+                            sscanf(optarg,"%lf,%d", &mStatPeriod, &mStatLevel);
+                        }
+                        // logdir
+                        else if (strcmp("logdir", options[option_index].name) == 0) {
+                            mLogDirStr=optarg;
+                        }
+                        // fake-mb1
+                        else if (strcmp("fake-mb1", options[option_index].name) == 0) {
+                            mFakeMB1=true;
+                        }
+                        // trn-csv
+                        else if (strcmp("trn-csv", options[option_index].name) == 0) {
+                            mTrnCsv = std::string(optarg);
+                        }
+                        // mb1-csv
+                        else if (strcmp("mb1-csv", options[option_index].name) == 0) {
+                            mMB1Csv = std::string(optarg);
+                        }
+                        // trn-cfg
+                        else if (strcmp("trn-cfg", options[option_index].name) == 0) {
+                            mTrnCfg = std::string(optarg);
+                        }
+                        // trn-decn
+                        else if (strcmp("trn-decn", options[option_index].name) == 0) {
+                            mTrnDecN = atoi(optarg);
+                        }
+                        // pub-trnest
+                        else if (strcmp("pub-trnest", options[option_index].name) == 0) {
+                            mPubTrnEst = true;
+                        }
+                        // pub-trnmeas
+                        else if (strcmp("pub-trnmeas", options[option_index].name) == 0) {
+                            mPubTrnMeas = true;
+                        }
+                        // pub-trnmotn
+                        else if (strcmp("pub-trnmotn", options[option_index].name) == 0) {
+                            mPubTrnMotn = true;
+                        }
+                        // pub-mb1
+                        else if (strcmp("pub-mb1", options[option_index].name) == 0) {
+                            mPubMB1 = true;
+                        }
+                        // pub-mbest
+                        else if (strcmp("pub-mbest", options[option_index].name) == 0) {
+                            mPubMBEst = true;
+                        }
+                        // input
+                        else if (strcmp("input", options[option_index].name) == 0) {
+                            std::list<std::string>::iterator it;
+                            bool on_list=false;
+                            for(it = mInputList.begin(); it != mInputList.end(); it++)
+                            {
+                                if(it->compare(optarg)==0){
+                                    on_list=true;
+                                    break;
+                                }
+                            }
+                            if(!on_list){
+                                mInputList.push_back(std::string(optarg));
+                            }
+                        }
+                        // cycles
+                        else if (strcmp("cycles", options[option_index].name) == 0) {
+                            mCycles = atoi(optarg);
+                        }
+                        // mb-geo
+                        else if (strcmp("mb-geo", options[option_index].name) == 0) {
+                            char *acpy = strdup(optarg);
+                            char *sbeams = strtok(acpy,":");
+                            char *sswath = strtok(NULL,":");
+                            char *srot = strtok(NULL,":");
+                            char *strn = strtok(NULL,":");
+                            double svr[3] = {0};
+                            double svt[3] = {0};
+                            uint16_t beams=0;
+                            double swath=0;
+                            if(NULL!=sbeams)
+                                sscanf(sbeams,"%hu",&beams);
+                            if(NULL!=sswath)
+                                sscanf(sswath,"%lf",&swath);
+                            if(NULL!=srot)
+                                sscanf(srot,"%lf,%lf,%lf",&svr[0],&svr[1],&svr[2]);
+                            if(NULL!=strn)
+                                sscanf(strn,"%lf,%lf,%lf",&svt[0],&svt[1],&svt[2]);
+
+                            if(NULL != mMBGeo){
+                                // invalidate existing entry
+                                delete mMBGeo;
+                            }
+
+                            mMBGeo = new mbgeo(beams, swath, &svr[0], &svt[0]);
+
+                            free(acpy);
+                        }
+                        // dvl-geo
+                        else if (strcmp("dvl-geo", options[option_index].name) == 0) {
+                            char *acpy = strdup(optarg);
+                            char *snbeams = strtok(acpy,":");
+                            char *sbspec = strtok(NULL,":");
+                            char *srot = strtok(NULL,":");
+                            char *strn = strtok(NULL,":");
+                            double svr[3] = {0};
+                            double svt[3] = {0};
+                            uint16_t nbeams=0;
+                            if(NULL!=snbeams)
+                                sscanf(snbeams,"%hu",&nbeams);
+                            if(NULL!=srot)
+                                sscanf(srot,"%lf,%lf,%lf",&svr[0],&svr[1],&svr[2]);
+                            if(NULL!=strn)
+                                sscanf(strn,"%lf,%lf,%lf",&svt[0],&svt[1],&svt[2]);
+
+                            if(mDVLGeo!=NULL){
+                                // invalidate existing entry
+                                delete mDVLGeo;
+                            }
+
+                            mDVLGeo = new dvlgeo(nbeams, sbspec, &svr[0], &svt[0]);
+
+                            free(acpy);
+                        }
+                        // trnum
+                        else if (strcmp("trnum", options[option_index].name) == 0) {
+                            char *acpy = strdup(optarg);
+                            char *sgroup = strtok(acpy,":");
+                            char *sport = strtok(NULL,":");
+                            char *sttl = strtok(NULL,":");
+
+                            if(NULL!=sgroup){
+                                free(mTrnuGroup);
+                                mTrnuGroup = strdup(sgroup);
+                            }
+                            if(NULL!=sport){
+                                sscanf(sport,"%d",&mTrnuPort);
+                            }
+                            if(NULL!=sttl){
+                                sscanf(sttl,"%d",&mTrnuTTL);
+                            }
+                            free(acpy);
+                        }
+
                     }
-                    break;
+                     break;
                 default:
                     help=true;
                     break;
@@ -624,6 +734,7 @@ public:
         //    " --log-en      : enable app logging\n"
         " --help                : output help message\n"
         " --version             : output version info\n"
+        " --cfg=s               : configuration file path\n"
         " --host=addr[:port]    : MB1 server\n"
         " --trnum=addr[:port:ttl] : TRN UDP mcast config (from mbtrnpp)\n"
         " --delay=u             : main loop delay\n"
@@ -672,13 +783,18 @@ public:
         "                                  +x: fwd +y: stbd +z: down\n"
         " --dvlgeo=<spec>       : specify DVL geometry (used for MB1 output)\n"
         "                         spec is a specifier using format\n"
-        "                          n:yb:yi:pb:pi:svr(y,p,r deg):svt(x,y,z m)\n"
+        "                          n:bspec:svr(y,p,r deg):svt(x,y,z m)\n"
         "                         where\n"
         "                          n     : number of sonar beams\n"
-        "                          yb    : yaw start angle (deg)\n"
-        "                          yi    : yaw increment (deg)\n"
-        "                          pb    : pitch start angle (deg)\n"
-        "                          pi    : pitch increment (deg)\n"
+        "                          bspec uses one of two forms:\n"
+        "                           A,yb,yi,pb,pi where\n"
+        "                            yb    : yaw start angle (deg)\n"
+        "                            yi    : yaw increment (deg)\n"
+        "                            pb    : pitch start angle (deg)\n"
+        "                            pi    : pitch increment (deg)\n"
+        "                           or L,y0,p0...yn,pn where\n"
+        "                            yn : yaw angle of beam[n] (reference frame, deg)\n"
+        "                            pn : pitch angle of beam[n] (reference frame, deg)\n"
         "                          svr   : sensor-vehicle rotation angles (y,p,r deg)\n"
         "                          svt   : sensor-vehicle translation distances (x,y,z m)\n"
         "                                  +x: fwd +y: stbd +z: down\n"
@@ -805,7 +921,7 @@ public:
                     size_t var_len = pe-pb;
                     char var_buf[var_len+1];
                     memset(var_buf,0,var_len+1);
-                    for(int i=1;i<var_len;i++){
+                    for(uint32_t i=1;i<var_len;i++){
                         var_buf[i-1] = pb[i];
                     }
                     TRN_NDPRINT(4,">>> var_buf[%s]\n",var_buf);
@@ -832,52 +948,64 @@ public:
 
     void parse_file(const std::string &file_path)
     {
-        std::ifstream file(file_path);
+        std::ifstream file(file_path.c_str(), std::ifstream::in);
+
         if (file.is_open()) {
             std::string line;
-            while (std::getline(file, line)) {
+            while (std::getline(file, line) && file.good()) {
                 // using printf() in all tests for consistency
                 TRN_NDPRINT(4,">>> line : [%s]\n", line.c_str());
                 if(line.length()>0){
-                char *lcp = strdup(line.c_str());
-                char *wp = trim(lcp);
-                TRN_NDPRINT(4,">>> wp[%s]\n", wp);
-                if(wp==NULL || strlen(wp)<=0){
-                    continue;
-                }
-                char *cp = comment(wp);
-                TRN_NDPRINT(4,">>> cp[%s]\n", cp);
-                if(strlen(cp) > 0){
-                    char *key=NULL;
-                    char *val=NULL;
-                    parse_key_val(cp, "=", &key, &val);
-                    char *tkey = trim(key);
-                    char *tval = trim(val);
-                    TRN_NDPRINT(4,">>> key[%s] val[%s]\n",tkey,tval);
-                    char *etval = expand_env(tval);
-                    if(etval==NULL)
-                        etval=tval==NULL?strdup(""):strdup(tval);
+                    char *lcp = strdup(line.c_str());
+                    char *wp = trim(lcp);
+                    TRN_NDPRINT(4,">>> wp[%s]\n", wp);
+                    if(wp==NULL || strlen(wp)<=0){
+                        // empty/comment
+                    } else {
+                        char *cp = comment(wp);
+                        TRN_NDPRINT(4,">>> cp[%s]\n", cp);
+                        if(strlen(cp) > 0){
+                            char *key=NULL;
+                            char *val=NULL;
+                            parse_key_val(cp, "=", &key, &val);
+                            char *tkey = trim(key);
+                            char *tval = trim(val);
+                            TRN_NDPRINT(4,">>> key[%s] val[%s]\n",tkey,tval);
+                            char *etval = expand_env(tval);
+                            if(etval==NULL)
+                                etval=tval==NULL?strdup(""):strdup(tval);
 
-                    TRN_NDPRINT(4,">>> key[%s] etval[%s]\n",tkey,etval);
-                    size_t cmd_len = strlen(key) + strlen(etval) + 4;
-                    char *cmd_buf = (char *)malloc(cmd_len);
-                    memset(cmd_buf,0,cmd_len);
-                    sprintf(cmd_buf, "--%s%s%s", key,(strlen(etval)>0?"=":""),etval);
-                    char dummy[]{'f','o','o','\0'};
-                    char *cmdv[2]={dummy,cmd_buf};
-                    TRN_NDPRINT(4,">>> cmd_buf[%s] cmdv[%p]\n",cmd_buf,&cmdv[0]);
-                    parse_args(2,&cmdv[0]);
-                    free(key);
-                    free(val);
-                    free(etval);
-                    free(cmd_buf);
-                }else{
-                    TRN_NDPRINT(4, ">>> [comment line]\n");
-                }
-                free(lcp);
+                            TRN_NDPRINT(4,">>> key[%s] etval[%s]\n",tkey,etval);
+                            size_t cmd_len = strlen(key) + strlen(etval) + 4;
+                            char *cmd_buf = (char *)malloc(cmd_len);
+                            memset(cmd_buf,0,cmd_len);
+                            sprintf(cmd_buf, "--%s%s%s", key,(strlen(etval)>0?"=":""),etval);
+                            char dummy[]{'f','o','o','\0'};
+                            char *cmdv[2]={dummy,cmd_buf};
+                            TRN_NDPRINT(4,">>> cmd_buf[%s] cmdv[%p]\n",cmd_buf,&cmdv[0]);
+
+                            // parse this argument
+                            parse_args(2,&cmdv[0]);
+
+                            free(key);
+                            free(val);
+                            free(etval);
+                            free(cmd_buf);
+                            cmd_buf = NULL;
+                            key=NULL;
+                            val=NULL;
+                            etval=NULL;
+                        }else{
+                            TRN_NDPRINT(4, ">>> [comment line]\n");
+                        }
+                    }
+                    free(lcp);
+                    lcp=NULL;
                 }
             }
             file.close();
+        } else {
+            fprintf(stderr, "ERR - file open failed [%s] [%d/%s]", file_path.c_str(), errno, strerror(errno));
         }
     }
 
@@ -893,11 +1021,11 @@ public:
     bool pub_mb1(){return mPubMB1;}
     bool pub_mbest(){return mPubMBEst;}
     std::string trn_cfg(){return mTrnCfg;}
-    std::string cfg(){return mAppCfg;}
+    std::string app_cfg_path(){return mAppCfg;}
     std::list<std::string> input_list(){return mInputList;}
     int trn_decn(){return mTrnDecN;}
-    mbgeo &mb_geo(){return mMBGeo;}
-    dvlgeo &dvl_geo(){return mDVLGeo;}
+    mbgeo *mb_geo(){return mMBGeo;}
+    dvlgeo *dvl_geo(){return mDVLGeo;}
     std::string trn_csv(){return mTrnCsv;}
     std::string mb1_csv(){return mMB1Csv;}
     std::string session_string(){return mSessionStr;}
@@ -916,9 +1044,10 @@ public:
         os << std::dec << std::setfill(' ');
         os << std::setw(wkey) << "verbose " << std::setw(wval) << (mVerbose?"Y":"N") << "\n";
         os << std::setw(wkey) << "debug " << std::setw(wval) << mDebug  << "\n";
-        os << std::setw(wkey) << "cycles " << std::setw(wval) << mCycles  << "\n";
+        os << std::setw(wkey) << "cfg " << std::setw(wval) << mAppCfg  << "\n";
         os << std::setw(wkey) << "host " << std::setw(wval) << mHost << ":" << mPort << "\n";
         os << std::setw(wkey) << "trnu " << std::setw(wval) << mTrnuGroup << ":" <<  mTrnuPort << ":" << mTrnuTTL<< "\n";
+        os << std::setw(wkey) << "cycles " << std::setw(wval) << mCycles  << "\n";
         os << std::setw(wkey) << "delay " << std::setw(wval) << mDelay << "\n";
         os << std::fixed << std::setprecision(3);
         os << std::setw(wkey) << "stat_period " << std::setw(wval) << mStatPeriod << "\n";
@@ -935,7 +1064,6 @@ public:
         os << std::setw(wkey) << "trn-csv " << std::setw(wval) << mTrnCsv  << "\n";
         os << std::setw(wkey) << "mb1-csv " << std::setw(wval) << mMB1Csv  << "\n";
         os << std::setw(wkey) << "trn-decn " << std::setw(wval) << mTrnDecN  << "\n";
-        os << std::setw(wkey) << "cfg " << std::setw(wval) << mAppCfg  << "\n";
         os << std::setw(wkey) << "fakemb1 " << std::setw(wval) << (mFakeMB1?"Y":"N")  << "\n";
         os << std::setw(wkey) << "inputs"<< "\n";
 
@@ -946,9 +1074,11 @@ public:
         }
 
         os << std::setw(wkey) << "-- mbgeo --\n";
-        os << mMBGeo.tostring(wkey,wval) << "\n";
+        if(NULL != mMBGeo)
+        os << mMBGeo->tostring(wkey,wval) << "\n";
         os << std::setw(wkey) << "-- dvlgeo --\n";
-        os << mDVLGeo.tostring(wkey,wval) << "\n";
+        if(NULL != mDVLGeo)
+        os << mDVLGeo->tostring(wkey,wval) << "\n";
     }
 
     std::string tostring(int wkey=15, int wval=18)
@@ -962,6 +1092,7 @@ public:
     {
         tostream(std::cerr, wkey, wval);
     }
+    bool config_set(){return mConfigSet;}
 
 protected:
 private:
@@ -984,8 +1115,8 @@ private:
     std::string mTrnCfg;
     std::string mAppCfg;
     int mTrnDecN;
-    mbgeo mMBGeo;
-    dvlgeo mDVLGeo;
+    mbgeo *mMBGeo;
+    dvlgeo *mDVLGeo;
     std::string mTrnCsv;
     std::string mMB1Csv;
     std::string mSessionStr;
@@ -994,6 +1125,7 @@ private:
     app_stats mStats;
     double mStatPeriod;
     int mStatLevel;
+    bool mConfigSet;
 };
 
 typedef struct callback_res_s
@@ -1233,42 +1365,42 @@ int write_csv(FILE *fp, trn::bath_info *bi, trn::att_info *ai, trn::nav_info *ni
     return ss.str().length();
 }
 
-void trnest_tostream(std::ostream &os, double &time, poseT &pt, poseT &mle, poseT &mmse, int wkey=15, int wval=1)
+void trnest_tostream(std::ostream &os, double &ts, poseT &pt, poseT &mle, poseT &mmse, int wkey=15, int wval=1)
 {
     os << "--- TRN Estimate OK---" << "\n";
-    os << "MLE[t,tm,x,y,z] [";
+    os << "MLE[t,tm,x,y,z] ";
     os << std::fixed << std::setprecision(3);
-    os << time << ",";
+    os << ts << ",";
     os << std::setprecision(2);
     os << mle.time << ",";
     os << std::setprecision(4);
     os << mle.x << "," << mle.y << "," << mle.z << "\n";
 
-    os << "MMSE[t,tm,x,y,z] [";
+    os << "MMSE[t,tm,x,y,z] ";
     os << std::fixed << std::setprecision(3);
-    os << time << ",";
+    os << ts << ",";
     os << std::setprecision(2);
     os << mmse.time << ",";
     os << std::setprecision(4);
     os << mmse.x << "," << mmse.y << "," << mmse.z << "\n";
 
-    os << "POS[t,tm,x,y,z] [";
+    os << "POS[t,tm,x,y,z]  ";
     os << std::fixed << std::setprecision(3);
-    os << time << ",";
+    os << ts << ",";
     os << std::setprecision(2);
     os << mmse.time << ",";
     os << std::setprecision(4);
     os << pt.x << "," << pt.y << "," << pt.z << "\n";
 
-    os << "OFS[t,tm,x,y,z] [";
+    os << "OFS[t,tm,x,y,z]  ";
     os << std::fixed << std::setprecision(3);
-    os << time << ",";
+    os << ts << ",";
     os << std::setprecision(2);
     os << mmse.time << ",";
     os << std::setprecision(4);
     os << pt.x-mmse.x << "," << pt.y-mmse.y << "," << pt.z-mmse.z << "\n";
 
-    os << "COV[t,x,y,z] [";
+    os << "COV[t,x,y,z]     ";
     os << std::setprecision(3);
     os << mmse.time << ",";
     os << std::setprecision(2);
@@ -1379,6 +1511,7 @@ int cb_update_trncli(void *pargs)
         ni = np->nav_inst();
         ai = ap->att_inst();
         vi = vp->vel_inst();
+
         if(bi==nullptr){
             fprintf(stderr,"%s:%d WARN - bath info invalid i[%p]\n", __func__, __LINE__, bi);
             streams_ok=false;
@@ -1423,15 +1556,19 @@ int cb_update_trncli(void *pargs)
         double lon = ni->lon();
         long int utm = NavUtils::geoToUtmZone(Math::degToRad(lat),
                                               Math::degToRad(lon));
+        ai->flags().set(trn::AF_INVERT_PITCH);
+        // ai->flags().set(trn::AF_INVERT_ROLL);
         double x = 0.;
         double y = 0.;
         double z = ni->depth();
         double phi = ai->roll();
         double theta = ai->pitch();
         double psi = ai->heading();
+        // TRN requires vx != 0 to initialize
+        // vy, vz not strictly required
         double vx = vi->vx_ms();
-        double vy = vi->vy_ms();
-        double vz = vi->vz_ms();
+        double vy = 0.;
+        double vz = 0.;
         double time = ni->time_usec()/1e6;
         bool dvlValid = bi->flags().is_set(trn::BF_VALID);
         bool gpsValid = ni->flags().is_set(trn::NF_POS_VALID);
@@ -1453,8 +1590,8 @@ int cb_update_trncli(void *pargs)
         //    std::cerr << "bottomLock : " << bottomLock << "\n";
 
 
-        TRN_NDPRINT(2, "%s:%d lat[%.4lf] lon[%.4lf] utm[%ld]\n", __func__, __LINE__, lat, lon, utm);
-        TRN_NDPRINT(2, "%s:%d x[%.lf] y[%.4lf]\n", __func__, __LINE__, x, y);
+        TRN_NDPRINT(2, "%s:%d lat[%.6lf] lon[%.6lf] utm[%ld]\n", __func__, __LINE__, lat, lon, utm);
+        TRN_NDPRINT(2, "%s:%d x[%.4lf] y[%.4lf] depth[%.1lf] p/r/y[%.2lf%s %.2lf, %.2lf] vx[%.2lf]\n", __func__, __LINE__, x, y, z, theta, (ai->flags().is_set(trn::AF_INVERT_PITCH)? "*," :","), phi, psi, vx);
 
         poseT pt;
         pt.x = x;
@@ -1499,6 +1636,15 @@ int cb_update_trncli(void *pargs)
             mt.beamNums[k] = std::get<0>(bt);
             mt.measStatus[k] = (mt.ranges[k] > 1 ? true : false);
         }
+        TRN_NDPRINT(2, "%s:%d nbeams[%u] ranges[%.2lf, %.2lf, %.2lf, %.2lf] status[%c, %c, %c, %c]\n", __func__, __LINE__,n_beams,
+                    n_beams>0?mt.ranges[0]:-1.,
+                    n_beams>1?mt.ranges[1]:-1.,
+                    n_beams>2?mt.ranges[2]:-1.,
+                    n_beams>3?mt.ranges[3]:-1.,
+                    n_beams>0?mt.measStatus[0] ? 'Y' : 'N':'?',
+                    n_beams>1?mt.measStatus[1] ? 'Y' : 'N':'?',
+                    n_beams>2?mt.measStatus[2] ? 'Y' : 'N':'?',
+                    n_beams>3?mt.measStatus[3] ? 'Y' : 'N':'?');
 
         try{
             trn->motionUpdate(&pt);
@@ -1555,18 +1701,8 @@ int cb_update_trncli(void *pargs)
             if(trn->lastMeasSuccessful()){
                 cfg->stats().trn_est_ok_n++;
                 trnest_show(time, pt, mle, mmse);
+                fprintf(stderr, "\n");
                 LU_PEVENT(cfg->mlog(), "trn est:\n%s\n", trnest_tostring(time, pt, mle, mmse).c_str());
-
-//                fprintf(stderr,"%s:%d - lastMeasSuccessful OK\n",__func__,__LINE__);
-//                fprintf(stderr,"MLE[t,x,y,z] [ %.3lf, %.2f , %.4f , %.4f , %.4f ]\n",time,mle.time,mle.x, mle.y, mle.z);
-//                fprintf(stderr,"MSE[t,x,y,z] [ %.3lf, %.2f , %.4f , %.4f , %.4f ]\n",time,mmse.time, mmse.x, mmse.y, mmse.z);
-//
-//
-//                fprintf(stderr,"COV[t,x,y,z] [ %.3lf, %.2f , %.2f , %.2f ]\n",
-//                        mmse.time,
-//                        sqrt(mmse.covariance[0]),
-//                        sqrt(mmse.covariance[2]),
-//                        sqrt(mmse.covariance[5]));
             }else{
                 TRN_NDPRINT(3, "%s:%d - lastMeasSuccessful ERR\n",__func__,__LINE__);
             }
@@ -1585,7 +1721,7 @@ int cb_update_trncli(void *pargs)
 
     cx++;
 
-    return 0;
+    return retval;
 }
 
 Matrix applyRotation(const double* attitude,  const Matrix& beamsVF)
@@ -1637,9 +1773,13 @@ Matrix applyTranslation(const double* translation,  const Matrix& beamsVF)
 
 }
 
-void transform_dvl(trn::bath_info *bi, trn::att_info *ai, dvlgeo &geo, mb1_t *r_snd)
+// This is only for inputs mapped to mbtrnpp output
+// It probably doesn't make sense to filter DVL beams
+// using mbtrnpp, since it assumes they are distributed
+// in a linear array.
+void transform_dvl(trn::bath_info *bi, trn::att_info *ai, dvlgeo *geo, mb1_t *r_snd)
 {
-    if(geo.beam_count<=0){
+    if(NULL == geo || geo->beam_count<=0){
         fprintf(stderr, "%s - geometry error : beams<=0\n", __func__);
         return;
     }
@@ -1657,37 +1797,17 @@ void transform_dvl(trn::bath_info *bi, trn::att_info *ai, dvlgeo &geo, mb1_t *r_
     double VW[3] = {ai->roll(), ai->pitch(), 0};
 
     // sensor mounting angles (relative to vehicle, radians)
-    // r/p/y  (phi/theta/psi)
-    // mounted along track, beam[0] aft (phi=90)
-    double SV[3] = { DTR(geo.svr_deg[0]), DTR(geo.svr_deg[1]), DTR(geo.svr_deg[2])};
+    // 3-2-1 euler angles, r/p/y  (phi/theta/psi)
+    // wrt sensor mounted across track, b[0] port, downward facing
+    double RSV[3] = { DTR(geo->svr_deg[0]), DTR(geo->svr_deg[1]), DTR(geo->svr_deg[2])};
 
     // sensor mounting translation offsets (relative to vehicle CRP, meters)
     // +x: fwd +y: stbd, +z:down (aka FSK, fwd,stbd,keel)
     // TODO T is for transform use rSV
-    double TSV[3] = {geo.svt_m[0], geo.svt_m[1], geo.svt_m[2]};
+    double TSV[3] = {geo->svt_m[0], geo->svt_m[1], geo->svt_m[2]};
 
-    // beam angles (relative to sensor)
-    // r/p/y  (phi/theta/psi)
-    double SF[3][geo.beam_count];
-    memset(SF,0,3*geo.beam_count*sizeof(double));
-
-    for(int i=0; i<geo.beam_count; i++)
-    {
-        // ax/r : angle between beam and x-axis
-        double ax = geo.yb_deg + i*geo.yi_deg;
-        // az/p : angle between beam and z-axis
-        double az = geo.pb_deg + i*geo.pi_deg;
-        // ay/y : angle between beam and y-axis
-        double ay = 90. + ax;
-
-        SF[0][i] = DTR(ax);
-        SF[1][i] = DTR(az);
-        SF[2][i] = DTR(ay);
-    }
-
-    // beam angles (relative to nominal sensor frame, radians)
-    // r/p/y (phi/theta/psi)
-    Matrix beams_SF(3, nbeams);
+    // beam components in reference sensor frame (mounted center, across track)
+    Matrix comp_RSF(3,nbeams);
 
     std::list<trn::beam_tup> beams = bi->beams_raw();
     std::list<trn::beam_tup>::iterator it;
@@ -1701,20 +1821,26 @@ void transform_dvl(trn::bath_info *bi, trn::att_info *ai, dvlgeo &geo, mb1_t *r_
         // beam components SF x,y,z
         // matrix row/col (1 indexed)
         int c = b+1;
+
+        // ad : ith beam angle (deg)
+        double yd = geo->yaw_rf[b];
+        double pd = geo->pitch_rf[b];
+        double yr = DTR(yd);
+        double pr = DTR(pd);
+
         // beam components SF x,y,z w/ translation
-        beams_SF(1,c) = range * cos(SF[0][b]);
-        beams_SF(2,c) = range * cos(SF[2][b]);
-        beams_SF(3,c) = range * cos(SF[1][b]);
-        TRN_NDPRINT(5, "n[%3d] R[%7.2lf] X[%7.2lf] Y[%7.2lf] Z[%7.2lf] ax[%7.2lf] az[%7.2lf] ay[%7.2lf]\n",
-                b,range,
-                beams_SF(1,c), beams_SF(2,c), beams_SF(3,c),
-                RTD(SF[0][b]), RTD(SF[1][b]), RTD(SF[2][b])
-                );
+        comp_RSF(1,c) = cos(yr);
+        comp_RSF(2,c) = -sin(yr);
+        comp_RSF(3,c) = sin(yr) + cos(pr);
+        TRN_NDPRINT(5, "n[%3d] R[%7.2lf] X[%7.2lf] Y[%7.2lf] Z[%7.2lf] yd[%7.2lf] pd[%7.2lf] yr[%7.2lf] yr[%7.2lf]\n",
+                    b,range,
+                    comp_RSF(1,c), comp_RSF(2,c), comp_RSF(3,c),
+                    yd, pd, yr, pr);
     }
 
     // apply coordinate transforms; order is significant:
     // apply mounting rotation
-    Matrix beams_VF = applyRotation(SV, beams_SF);
+    Matrix beams_VF = applyRotation(RSV, comp_RSF);
     // apply mounting translation
     Matrix beams_TF = applyTranslation(TSV, beams_VF);
     // apply vehicle attitude (hdg, pitch, roll)
@@ -1727,19 +1853,28 @@ void transform_dvl(trn::bath_info *bi, trn::att_info *ai, dvlgeo &geo, mb1_t *r_
         trn::beam_tup bt = static_cast<trn::beam_tup> (*it);
         // beam number (0-indexed)
         int b = std::get<0>(bt);
+        double range = std::get<1>(bt);
         // beam components WF x,y,z
         // matrix row/col (1 indexed)
         int c = b + 1;
         r_snd->beams[k].beam_num = b;
-        r_snd->beams[k].rhox = beams_WF(1,c);
-        r_snd->beams[k].rhoy = beams_WF(2,c);
-        r_snd->beams[k].rhoz = beams_WF(3,c);
+        r_snd->beams[k].rhox = range * beams_WF(1,c);
+        r_snd->beams[k].rhoy = range * beams_WF(2,c);
+        r_snd->beams[k].rhoz = range * beams_WF(3,c);
+
+        TRN_NDPRINT(5, "b[%3d] R[%7.2lf] rhox[%7.2lf] rhoy[%7.2lf] rhoz[%7.2lf] \n",
+                    b,sqrt(r_snd->beams[k].rhox*r_snd->beams[k].rhox + r_snd->beams[k].rhoy*r_snd->beams[k].rhoy + r_snd->beams[k].rhoz*r_snd->beams[k].rhoz),
+                    r_snd->beams[k].rhox,
+                    r_snd->beams[k].rhoy,
+                    r_snd->beams[k].rhoz
+                    );
     }
 }
 
-void transform_deltat(trn::bath_info *bi, trn::att_info *ai, mbgeo &geo, mb1_t *r_snd)
+// this is only called for inputs mapped to mbtrnpp output
+void transform_deltat(trn::bath_info *bi, trn::att_info *ai, mbgeo *geo, mb1_t *r_snd)
 {
-    if(geo.beam_count<=0){
+    if(NULL == geo || geo->beam_count<=0){
         fprintf(stderr, "%s - geometry error : beams<=0\n", __func__);
         return;
     }
@@ -1756,45 +1891,32 @@ void transform_deltat(trn::bath_info *bi, trn::att_info *ai, mbgeo &geo, mb1_t *
     double VW[3] = {ai->roll(), ai->pitch(), 0};
 
     // sensor mounting angles (relative to vehicle, radians)
-    // r/p/y  (phi/theta/psi)
-    // mounted along track, beam[0] aft (phi=90)
-    double SV[3] = { DTR(geo.svr_deg[0]), DTR(geo.svr_deg[1]), DTR(geo.svr_deg[2])};
+    // 3-2-1 euler angles, r/p/y  (phi/theta/psi)
+    // wrt sensor mounted across track, b[0] port, downward facing
+    double RSV[3] = { DTR(geo->svr_deg[0]), DTR(geo->svr_deg[1]), DTR(geo->svr_deg[2])};
 
     // sensor mounting translation offsets (relative to vehicle CRP, meters)
     // +x: fwd +y: stbd, +z:down
-    double TSV[3] = {geo.svt_m[0], geo.svt_m[1], geo.svt_m[2]};
+    double TSV[3] = {geo->svt_m[0], geo->svt_m[1], geo->svt_m[2]};
 
+    // beam swath angle
+    double S = geo->swath_deg;
     // angle between PI and start angle
-    double K = (180.-geo.swath_deg)/2.;
-    // start angle
-    double s0 = 180. + K;
+    double K = (180. - S)/2.;
     // beam angle increment
-    double e = geo.swath_deg/geo.beam_count;
+    double e = S/geo->beam_count;
 
-    // beam angles (relative to nominal sensor frame, radians)
-    // r/p/y (phi/theta/psi)
-    double SF[3][geo.beam_count];
-
-    memset(SF,0, 3*geo.beam_count*sizeof(double));
-    for(int i=0; i<geo.beam_count; i++)
-    {
-        // ax/r : angle between beam and x-axis
-        double ax = s0 + i*e;
-        // az/p : angle between beam and z-axis
-        double az = 90. + K + i*e; // ? 90 - (k + i*e);
-        // ay/y : angle between beam and y-axis
-        double ay = 90.;
-
-        SF[0][i] = DTR(ax);
-        SF[1][i] = DTR(az);
-        SF[2][i] = DTR(ay);
-    }
-
-    // beams in sensor frame (nominal, mounted center, across track)
-    Matrix beams_SF(3,nbeams);
+    // beam components in reference sensor frame
+    // (i.e., directional cosine unit vectors)
+    Matrix comp_RSF(3,nbeams);
 
     std::list<trn::beam_tup> beams = bi->beams_raw();
     std::list<trn::beam_tup>::iterator it;
+    TRN_NDPRINT(5, "roll[%.2lf] pitch[%.2lf%s] hdg[%.2lf (%.2lf)] SVR[%.2lf, %.2lf, %.2lf] S[%.2lf] K[%.2lf] e[%.2lf]\n",
+                Math::radToDeg(VW[0]), Math::radToDeg(VW[1]), (ai->flags().is_set(trn::AF_INVERT_PITCH) ? " i" : " "), Math::radToDeg(VW[2]), Math::radToDeg(ai->heading()),
+                Math::radToDeg(RSV[0]), Math::radToDeg(RSV[1]), Math::radToDeg(RSV[2]),
+                S,K,e
+                );
 
     for(it=beams.begin(); it!=beams.end(); it++)
     {
@@ -1806,19 +1928,22 @@ void transform_deltat(trn::bath_info *bi, trn::att_info *ai, mbgeo &geo, mb1_t *
         // matrix row/col (1 indexed)
         int c = b + 1;
 
-        beams_SF(1,c) = range * cos(SF[0][b]);
-        beams_SF(2,c) = range * cos(SF[2][b]);
-        beams_SF(3,c) = range * cos(SF[1][b]);
-        TRN_NDPRINT(5, "n[%3d] R[%7.2lf] X[%7.2lf] Y[%7.2lf] Z[%7.2lf] ax[%7.2lf] az[%7.2lf] ay[%7.2lf]\n",
+        // ad : ith beam angle (deg)
+        double ad = K + S - b*e;
+
+        comp_RSF(1,c) = 0;
+        comp_RSF(2,c) = cos(DTR(ad));
+        comp_RSF(3,c) = sin(DTR(ad));
+
+        TRN_NDPRINT(5, "n[%3d] R[%7.2lf] X[%7.2lf] Y[%7.2lf] Z[%7.2lf] ad[%7.2lf] ar[%7.2lf]\n",
                 b,range,
-                beams_SF(1,c), beams_SF(2,c), beams_SF(3,c),
-                RTD(SF[0][b]), RTD(SF[1][b]), RTD(SF[2][b])
+                    comp_RSF(1,c), comp_RSF(2,c), comp_RSF(3,c),
+                    ad,DTR(ad)
                 );
     }
-
     // apply coordinate transforms; order is significant:
     // apply mounting rotation
-    Matrix beams_VF = applyRotation(SV, beams_SF);
+    Matrix beams_VF = applyRotation(RSV, comp_RSF);
     // apply mounting translation
     Matrix beams_TF = applyTranslation(TSV, beams_VF);
     // apply vehicle attitude (hdg, pitch, roll)
@@ -1831,13 +1956,24 @@ void transform_deltat(trn::bath_info *bi, trn::att_info *ai, mbgeo &geo, mb1_t *
         trn::beam_tup bt = static_cast<trn::beam_tup> (*it);
         // beam number (0-indexed)
         int b = std::get<0>(bt);
+        double range = std::get<1>(bt);
         // beam components WF x,y,z
         // matrix row/col (1 indexed)
         int c = b + 1;
         r_snd->beams[k].beam_num = b;
-        r_snd->beams[k].rhox = beams_WF(1,c);
-        r_snd->beams[k].rhoy = beams_WF(2,c);
-        r_snd->beams[k].rhoz = beams_WF(3,c);
+        r_snd->beams[k].rhox = range * beams_WF(1,c);
+        r_snd->beams[k].rhoy = range * beams_WF(2,c);
+        r_snd->beams[k].rhoz = range * beams_WF(3,c);
+
+        TRN_NDPRINT(5, "b[%3d] R[%7.2lf] rhox[%7.2lf] rhoy[%7.2lf] rhoz[%7.2lf] ax[%6.2lf] ay[%6.2lf] az[%6.2lf]\n",
+                    b,sqrt(r_snd->beams[k].rhox*r_snd->beams[k].rhox + r_snd->beams[k].rhoy*r_snd->beams[k].rhoy + r_snd->beams[k].rhoz*r_snd->beams[k].rhoz),
+                    r_snd->beams[k].rhox,
+                    r_snd->beams[k].rhoy,
+                    r_snd->beams[k].rhoz,
+                    (range==0. ? 0. : Math::radToDeg(acos(r_snd->beams[k].rhox/range))),
+                    (range==0. ? 0. : Math::radToDeg(acos(r_snd->beams[k].rhoy/range))),
+                    (range==0. ? 0. : Math::radToDeg(acos(r_snd->beams[k].rhoz/range)))
+                    );
     }
 }
 
@@ -1965,6 +2101,7 @@ int cb_update_mb1(void *pargs)
         ni = np->nav_inst();
         ai = ap->att_inst();
         vi = vp->vel_inst();
+
         if(bi==nullptr){
             fprintf(stderr,"%s:%d WARN - bath info invalid i[%p]\n", __func__, __LINE__, bi);
             streams_ok=false;
@@ -1988,6 +2125,8 @@ int cb_update_mb1(void *pargs)
 
         size_t n_beams = bi->beam_count();
         if(n_beams>0){
+            ai->flags().set(trn::AF_INVERT_PITCH);
+//            ai->flags().set(trn::AF_INVERT_ROLL);
             mb1_t *snd = mb1_new(n_beams);
             snd->hdg = ai->heading();
             snd->depth = ni->depth();
@@ -2008,18 +2147,7 @@ int cb_update_mb1(void *pargs)
             {
                 transform_deltat(bi, ai, cfg->mb_geo(), snd);
             } else {
-                // !!! this placeholder will not produce valid output
-                int k=0;
-                for(it=beams.begin(); it!=beams.end(); it++,k++)
-                {
-                    trn::beam_tup bt = static_cast<trn::beam_tup> (*it);
-                    snd->beams[k].beam_num=std::get<0>(bt);
-                    double range = std::get<1>(bt);
-                    // TODO: compute vector components
-                    snd->beams[k].rhox = range;
-                    snd->beams[k].rhoy = range;
-                    snd->beams[k].rhoz = range;
-                }
+                fprintf(stderr,"%s:%d ERR - unsupported input_type[%d] beam transformation invalid\n", __func__, __LINE__, bp->bath_input_type());
             }
 
             mb1_set_checksum(snd);
@@ -2133,6 +2261,10 @@ static void s_parse_ctx( char *i_ctx, const char *chan, callback_res_t *cb_res)
         // create input (chan, depth) if it doesn't exist
         listener = xpp->create_input(chan, 10);
         TRN_NDPRINT(2, "%s:%d - add input chan[%s] @[%p]\n",__func__, __LINE__, chan, listener);
+        if(listener == nullptr){
+            fprintf(stderr,"%s:%d ERR - NULL create_input returned NULL listener - check configuration for chan [%s]\n", __func__, __LINE__, chan);
+
+        }
         // add input
         xpp->add_input(chan, listener);
     }
@@ -2282,6 +2414,7 @@ static void s_init_logging(app_cfg &cfg, int argc, char **argv)
 
     LU_ULOG(cfg.mlog(),"mlog","# trnxpp_app message log session start %s\n", cfg.session_string().c_str());
 
+    // log command line args
     ostringstream sc;
     sc << "cmdline:" << argv[0] << " ";
     for(int i=1; i<argc; i++){
@@ -2290,6 +2423,26 @@ static void s_init_logging(app_cfg &cfg, int argc, char **argv)
             sc<<",";
     }
     LU_PEVENT(cfg.mlog(), "%s", sc.str().c_str());
+
+    // log environment
+    sc.str("");
+    sc << "env:\n";
+    char *ep = getenv("TRN_HOST");
+    sc << "TRN_HOST =" << (NULL==ep ? "" : ep ) << "\n";
+    ep = getenv("TRN_LOGFILES");
+    sc << "TRN_LOGFILES =" << (NULL==ep ? "" : ep ) << "\n";
+    ep = getenv("TRN_DATAFILES");
+    sc << "TRN_DATAFILES =" << (NULL==ep ? "" : ep )<< "\n";
+    ep = getenv("TRN_MAPFILES");
+    sc << "TRN_MAPFILES =" << (NULL==ep ? "" : ep ) << "\n";
+    ep = getenv("TRN_GROUP");
+    sc << "TRN_GROUP =" << (NULL==ep ? "" : ep ) << "\n";
+    ep = getenv("LCM_DEFAULT_URL");
+    sc << "LCM_DEFAULT_URL =" << (NULL==ep ? "" : ep ) << "\n";
+    ep = getenv("CLASSPATH");
+    sc << "CLASSPATH =" << (NULL==ep ? "" : ep ) << "\n";
+    LU_PEVENT(cfg.mlog(), "%s", sc.str().c_str());
+
     return;
 }
 
@@ -2350,6 +2503,32 @@ void update_cycle_stats(app_cfg &cfg)
     }
 }
 
+void copy_config(app_cfg &cfg)
+{
+    // copy terrainAid.cfg
+    ostringstream ss;
+    ss << "cp " << cfg.trn_cfg() << " " << cfg.logdir().c_str();
+    ss << "/terrainAid-";
+    ss << cfg.session_string().c_str();
+    ss << ".cfg";
+    if(system(ss.str().c_str()) != 0)
+    {
+        fprintf(stderr,"%s:%d - ERR config copy failed [%s] [%d/%s]\n",__func__, __LINE__,
+                ss.str().c_str(), errno, strerror(errno));
+    }
+
+    ss.str(std::string());
+    ss << "cp " << cfg.app_cfg_path() << " " << cfg.logdir().c_str();
+    ss << "/trnxpp-";
+    ss << cfg.session_string().c_str();
+    ss << ".cfg";
+    if(system(ss.str().c_str()) != 0 )
+    {
+        fprintf(stderr,"%s:%d - ERR config copy failed [%s] [%d/%s]\n",__func__, __LINE__,
+                ss.str().c_str(), errno, strerror(errno));
+    }
+}
+
 int main(int argc, char **argv)
 {
     struct sigaction saStruct;
@@ -2364,12 +2543,20 @@ int main(int argc, char **argv)
 
     setenv("XPP_SESSION",cfg.session_string().c_str(), false);
 
+    // parse command line (first pass for config file)
     cfg.parse_args(argc, argv);
-    if(cfg.cfg().length() > 0){
-        cfg.parse_file(cfg.cfg());
-        // reparse command line (should override config options)
-        cfg.parse_args(argc, argv, true);
+
+    // configure debug output (for parsing debug)
+    trn_debug::get()->set_debug(cfg.debug());
+    trn_debug::get()->set_verbose(cfg.verbose());
+
+    if(cfg.config_set() > 0){
+        // parse config file
+        cfg.parse_file(cfg.app_cfg_path());
     }
+
+    // reparse command line (should override config options)
+    cfg.parse_args(argc, argv);
 
     // Start logger
     s_init_logging(cfg, argc, argv);
@@ -2382,6 +2569,8 @@ int main(int argc, char **argv)
     if(cfg.debug()>0){
         cfg.show();
     }
+
+    copy_config(cfg);
 
     LU_PEVENT(cfg.mlog(), "session start [%s]",cfg.session_string().c_str());
 

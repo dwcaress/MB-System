@@ -1,0 +1,12 @@
+//////////////////////////////////////////////////////////////////////////////
+// Copyright 2021  Monterey Bay Aquarium Research Institute                 //
+// Distributed under MIT license. See license.txt for more information.     //
+//////////////////////////////////////////////////////////////////////////////
+package lcm_pcf;
+
+struct string_t
+{
+  // string value
+  string val;
+}
+

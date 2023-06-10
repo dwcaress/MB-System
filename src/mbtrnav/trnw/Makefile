@@ -85,7 +85,7 @@ ifndef MFRAME_LIB_DIR
 MFRAME_LIB_DIR=../../mframe/bin
 endif
 
-MFRAME_LIB=$(MFRAME_LIB_DIR)/libmframe.a
+MFRAME_LIB=# $(MFRAME_LIB_DIR)/libmframe.a
 
 # Compilation Options
 CXX = gcc
@@ -193,13 +193,13 @@ MCSUB_LIBS =
 MMCPUB=mmcpub
 MMCPUB_SRC=mmcpub.c
 MMCPUB_OBJ=$(MMCPUB_SRC:%.c=$(BUILD_DIR)/%.o)
-MMCPUB_LIBS = $(MFRAME_LIB) -lm
+MMCPUB_LIBS = $(MFRAME_LIB) -lmframe -lm
 
 # mmcsub: multicast test publisher  (uses mframe)
 MMCSUB=mmcsub
 MMCSUB_SRC=mmcsub.c
 MMCSUB_OBJ=$(MMCSUB_SRC:%.c=$(BUILD_DIR)/%.o)
-MMCSUB_LIBS = $(MFRAME_LIB) -lm
+MMCSUB_LIBS = $(MFRAME_LIB) -lmframe -lm
 
 TRNIF_TEST=trnif-test
 TRNIF_TEST_SRC=trnif_test.c trnif_proto.c trnif_msg.c
@@ -209,7 +209,7 @@ TRNIF_TEST_LIBS = -lnetif -lmframe -ltrnw -lpthread -lm -lqnx -lnewmat -ltrn -ln
 MB1RS=mb1rs
 MB1RS_SRC=mb1_msg.c mb1rs.c mb1rs-app.c
 MB1RS_OBJ=$(MB1RS_SRC:%.c=$(BUILD_DIR)/%.o)
-MB1RS_LIBS = $(MFRAME_LIB) -lm -lpthread
+MB1RS_LIBS = $(MFRAME_LIB) -lmframe -lm -lpthread
 
 # TRN clients
 TRNC_SRC+= $(LIBTRNCLI_SRC) \

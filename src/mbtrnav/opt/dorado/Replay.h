@@ -8,7 +8,7 @@
 /* Project  : Iceberg AUV                                                   */
 /* Version  : 1.0                                                           */
 /* Created  : 07/03/2017                                                    */
-/* Modified :                                                               */
+/* Modified : 06/06/2022  Add MB1 items to records (alongtrack, etc)        */
 /* Archived :                                                               */
 /****************************************************************************/
 /* Modification History:                                                    */
@@ -34,7 +34,7 @@ struct measT;
 class TerrainNav;
 
 #define LCM_HOST  "USING.LCM.COMMS"   // Host id to indicate LCM usae
-#define REPLAY_PATHNAME_LENGTH  300    // buffer lengths for full pathnames
+#define REPLAY_PATHNAME_LENGTH  300   // buffer lengths for full pathnames
 
 #undef WITH_REPLAY_DEGTORAD
 
@@ -56,7 +56,7 @@ enum DvlCsvFields
     DVL_VALID,
     DVL_LOCK,
     DVL_NBEAMS,
-    DVL_RANGES
+    DVL_RANGES         // or soundings
 };
 
 struct TRN_attr

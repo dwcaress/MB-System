@@ -35,7 +35,7 @@ DoubleData::DoubleData(const char *name, const char *longnm, const char *units)
 
 DoubleData::~DoubleData()
 {
-}
+} 
 
 
 void DoubleData::setValue(double value)
@@ -64,7 +64,7 @@ void DoubleData::read(ExternalData *externalData)
 
 const char *DoubleData::ascii()
 {
-  snprintf(_asciiBuffer, sizeof(_asciiBuffer), asciiFormat(), _value);
+  snprintf(_asciiBuffer, DBLDATA_ASCII_BUFFER_BYTES, asciiFormat(), _value);
   return _asciiBuffer;
 }
 

@@ -69,9 +69,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
-#if defined (__QNX__)
+// use older ifdef with headers for QNX makedep compatibility
+#ifdef __QNX__
 #include <ourTypes.h>
-#else
+#endif
+#if defined (__UNIX__) || defined (__unix__) || defined (__APPLE__)
 #include <stdbool.h>
 #include <inttypes.h>
 #endif
@@ -94,7 +96,7 @@
 #define MB1_TYPE_ID 0x0031424D
 /// @def MB1_HEADER_BYTES
 /// @brief MB1 header (static field) size (bytes)
-#define MB1_HEADER_BYTES   sizeof(mb1_header_t) //56
+#define MB1_HEADER_BYTES sizeof(mb1_header_t) //56
 /// @def MB1_TYPE_BYTES
 /// @brief MB1 type size (bytes)
 #define MB1_TYPE_BYTES   4
@@ -106,23 +108,23 @@
 #define MB1_BEAM_BYTES     28
 /// @def MB1_CHECKSUM_BYTES
 /// @brief MB1 checksum size
-#define MB1_CHECKSUM_BYTES  sizeof(mb1_checksum_t) //4
+#define MB1_CHECKSUM_BYTES sizeof(mb1_checksum_t) //4
 /// @def MB1_BEAM_ARRAY_BYTES
 /// @brief size of beam array
 /// @param[in] beams number of beams
-#define MB1_BEAM_ARRAY_BYTES(beams) (beams*MB1_BEAM_BYTES)
+#define MB1_BEAM_ARRAY_BYTES(beams) (beams * MB1_BEAM_BYTES)
 
 /// @def MB1_PSNDCHKSUM_U32(psounding)
 /// @brief checksum pointer (unsigned int *)
-#define MB1_PCHECKSUM(psounding)  ((uint32_t *) (((unsigned char *)psounding)+psounding->size-MB1_CHECKSUM_BYTES))
+#define MB1_PCHECKSUM(psounding)  ((uint32_t *) (((unsigned char *)psounding) + psounding->size-MB1_CHECKSUM_BYTES))
 
 /// @def MB1_PBEAMS(psounding)
 /// @brief pointer to start of beam data
-#define MB1_PBEAMS(psounding) ((mb1_beam_t *) (((unsigned char *)psounding)+MB1_HEADER_BYTES))
+#define MB1_PBEAMS(psounding) ((mb1_beam_t *) (((unsigned char *)psounding) + MB1_HEADER_BYTES))
 
 /// @def MB1_CHECKSUM_LEN_BYTES(psounding)
 /// @brief number of bytes over which checksum is calculated (header+beams)
-#define MB1_CHECKSUM_LEN_BYTES(psounding) (psounding->size-MB1_CHECKSUM_BYTES)
+#define MB1_CHECKSUM_LEN_BYTES(psounding) (psounding->size - MB1_CHECKSUM_BYTES)
 
 /// @def MB1_PSNDCHKSUM_U32(psounding)
 /// @brief checksum pointer (unsigned int *)
@@ -130,7 +132,7 @@
 
 /// @def MB1_SOUNDING_BYTES(beams)
 /// @brief sounding size (bytes)
-#define MB1_SOUNDING_BYTES(beams) (MB1_HEADER_BYTES+beams*MB1_BEAM_BYTES+MB1_CHECKSUM_BYTES)
+#define MB1_SOUNDING_BYTES(beams) (MB1_HEADER_BYTES + beams*MB1_BEAM_BYTES + MB1_CHECKSUM_BYTES)
 
 /// @def MB1_MAX_SOUNDING_BYTES
 /// @brief sounding size (bytes) for MB1_MAX_BEAMS
@@ -144,9 +146,9 @@
 // CSV does not include size or type
 #define MB1_CSV_HEADER_FIELDS 7
 #define MB1_BEAM_FIELDS 4
-#define MB1_CSV_BEAM_FIELDS(nbeams) (nbeams*MB1_BEAM_FIELDS)
+#define MB1_CSV_BEAM_FIELDS(nbeams) (nbeams * MB1_BEAM_FIELDS)
 #define MB1_CSV_CHECKSUM_FIELDS 1
-#define MB1_CSV_SOUNDING_FIELDS(nbeams) (MB1_CSV_HEADER_FIELDS+(nbeams*MB1_BEAM_FIELDS)+MB1_CSV_CHECKSUM_FIELDS)
+#define MB1_CSV_SOUNDING_FIELDS(nbeams) (MB1_CSV_HEADER_FIELDS + (nbeams * MB1_BEAM_FIELDS) + MB1_CSV_CHECKSUM_FIELDS)
 #define MB1_CSV_MAX_FIELDS MB1_CSV_SOUNDING_FIELDS(MB1_MAX_BEAMS)
 
 /////////////////////////
@@ -155,6 +157,11 @@
 
 #if defined(__QNX__)
 typedef int socklen_t;
+typedef unsigned char byte;
+typedef Boolean bool;
+#define false False
+#define true True
+#define PRIu32 "u"
 #endif
 
 typedef unsigned char byte;
@@ -164,11 +171,11 @@ typedef uint32_t mb1_checksum_t;
 /// @typedef enum mb1_resize_flags_t
 /// @brief resize flags (indicate which fields to clear)
 typedef enum{
-    MB1_RS_NONE=0x0,
-    MB1_RS_BEAMS=0x1,
-    MB1_RS_HEADER=0x2,
-    MB1_RS_CHECKSUM=0x4,
-    MB1_RS_ALL=0x7
+    MB1_RS_NONE = 0x0,
+    MB1_RS_BEAMS = 0x1,
+    MB1_RS_HEADER = 0x2,
+    MB1_RS_CHECKSUM = 0x4,
+    MB1_RS_ALL = 0x7
 } mb1_resize_flags_t;
 
 #pragma pack(push,1)
@@ -361,7 +368,7 @@ void mb1_hex_show(byte *data, uint32_t len, uint16_t cols, bool show_offsets, ui
 /// @brief mb1 unit test(s).
 /// currently subscribes to test server (exercising most of the mb1 API).
 /// @return 0 on success, -1 otherwise
-int mb1_test();
+int mb1_test(int verbose);
 
 #ifdef __cplusplus
 }

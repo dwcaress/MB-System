@@ -14,24 +14,24 @@
 /////////////////////////
 /*
  Copyright Information
-
+ 
  Copyright 2002-2019 MBARI
  Monterey Bay Aquarium Research Institute, all rights reserved.
-
+ 
  Terms of Use
-
+ 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 3 of the License, or
  (at your option) any later version. You can access the GPLv3 license at
  http://www.gnu.org/licenses/gpl-3.0.html
-
+ 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details
  (http://www.gnu.org/licenses/gpl-3.0.html)
-
+ 
  MBARI provides the documentation and software code "as is", with no warranty,
  express or implied, as to the software, title, non-infringement of third party
  rights, merchantability, or fitness for any particular purpose, the accuracy of
@@ -39,7 +39,7 @@
  assume the entire risk associated with use of the code, and you agree to be
  responsible for the entire cost of repair or servicing of the program with
  which you are using the code.
-
+ 
  In no event shall MBARI be liable for any damages, whether general, special,
  incidental or consequential damages, arising out of your use of the software,
  including, but not limited to, the loss or corruption of your data or damages
@@ -49,11 +49,11 @@
  liability or expense, including attorneys' fees, resulting from loss of or
  damage to property or the injury to or death of any person arising out of the
  use of the software.
-
+ 
  The MBARI software is provided without obligation on the part of the
  Monterey Bay Aquarium Research Institute to assist in its use, correction,
  modification, or enhancement.
-
+ 
  MBARI assumes no responsibility or liability for any third party and/or
  commercial software required for the database or applications. Licensee agrees
  to obtain and maintain valid licenses for any additional third party software
@@ -93,7 +93,7 @@
  /// @def PRODUCT
  /// @brief header software product name
  #define PRODUCT "TBD_PRODUCT"
-
+ 
  /// @def COPYRIGHT
  /// @brief header software copyright info
  #define COPYRIGHT "Copyright 2002-2013 MBARI Monterey Bay Aquarium Research Institute, all rights reserved."
@@ -128,6 +128,7 @@
 #define TRNCLI_CONNECT_RETRIES 5
 #define MB1_READ_RETRIES 50
 #define MB1_ETO_MSEC 250
+#define LOG_PATH_BYTES 512
 
 /////////////////////////
 // Declarations
@@ -551,7 +552,7 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 }
                 // mtype
                 else if (strcmp("trn-mtype", options[option_index].name) == 0) {
-
+                    
                     sscanf(optarg,"%c",&cmnem);
                     switch (cmnem) {
                         case 'd':
@@ -745,7 +746,7 @@ static void s_termination_handler (int signum)
 static app_cfg_t *app_cfg_new()
 {
     app_cfg_t *instance = (app_cfg_t *)malloc(sizeof(app_cfg_t));
-
+    
     if(NULL!=instance){
         memset(instance,0,sizeof(app_cfg_t));
         instance->verbose=false;
@@ -763,7 +764,7 @@ static app_cfg_t *app_cfg_new()
         instance->log_id=MLOG_ID_INVALID;
         instance->log_name=strdup(TRNCLI_TEST_LOG_NAME);
         instance->log_dir=strdup(TRNCLI_TEST_LOG_DIR);
-        instance->log_path=(char *)malloc(512);
+        instance->log_path=(char *)malloc(LOG_PATH_BYTES);
         instance->utm=TRNCLI_UTM_DFL;
         instance->state_n=0;
         instance->tcli_connect_retries = TRNCLI_CONNECT_RETRIES;
@@ -771,7 +772,7 @@ static app_cfg_t *app_cfg_new()
         instance->eto_msec = MB1_ETO_MSEC;
 
         instance->trn_cfg=trncfg_dnew();
-
+        
         if(NULL!=instance->trn_cfg->map_file)free(instance->trn_cfg->map_file);
         instance->trn_cfg->map_file=strdup(TRNCLI_TEST_TRNCFG_MAP);
         if(NULL!=instance->trn_cfg->cfg_file)free(instance->trn_cfg->cfg_file);
@@ -996,7 +997,7 @@ static int32_t s_trnc_read_mb1_rec( mb1_t **pdest, msock_socket_t *src, app_cfg_
 
             uint32_t record_bytes=readlen;
             retval=record_bytes;
-
+            
             s_dbg_printf(stderr, cfg->debug, "%s:%d - read [%"PRId64"/%"PRIu32"]\n", __func__, __LINE__, test, readlen);
 
             mlog_oset_t log_dest = mlog_get_dest(cfg->log_id);
@@ -1008,7 +1009,7 @@ static int32_t s_trnc_read_mb1_rec( mb1_t **pdest, msock_socket_t *src, app_cfg_
             if(cfg->verbose && dest->nbeams>0){
                 // add beam data for verbose output
                 fprintf(stderr, "%5s %8s %8s %8s\n","beam", "rhox", "rhoy", "rhoz");
-                for(unsigned int i=0; i<dest->nbeams; i++){
+                for(int i=0; i<dest->nbeams; i++){
                     fprintf(stderr, "[%03"PRIu32"] %8.2lf %8.2lf %8.2lf\n", dest->beams[i].beam_num, dest->beams[i].rhox, dest->beams[i].rhoy, dest->beams[i].rhoz );
                 }
             }
@@ -1160,7 +1161,7 @@ static int s_trncli_show_trn_update(trncli_t *tcli, mb1_t *mb1, app_cfg_t *cfg)
     pt_cdata_t *pt_dat=NULL;
     pt_cdata_t *mle_dat=NULL;
     pt_cdata_t *mse_dat=NULL;
-
+    
     if(NULL!=tcli && NULL!=mb1 && tcli_connected){
         int test=-1;
 
@@ -1236,7 +1237,7 @@ static int s_show_mb1(mb1_t *mb1, app_cfg_t *cfg)
         if(cfg->verbose && mb1->nbeams>0){
             // add beam data for verbose output
             fprintf(stderr, "%5s %8s %8s %8s\n","beam", "rhox", "rhoy", "rhoz");
-            for(unsigned int i=0; i<mb1->nbeams; i++){
+            for(int i=0; i<mb1->nbeams; i++){
                 fprintf(stderr, "[%03"PRIu32"] %8.2lf %8.2lf %8.2lf\n", mb1->beams[i].beam_num, mb1->beams[i].rhox, mb1->beams[i].rhoy, mb1->beams[i].rhoz );
             }
         }
@@ -1301,7 +1302,7 @@ static int s_trncli_test_csv(trncli_t *tcli, app_cfg_t *cfg)
     int retval=0;
     mfile_file_t *mb1_file = mfile_file_new(cfg->mb1_file);
     int test=-1;
-
+    
     if( (test=mfile_open(mb1_file, MFILE_RONLY)) >0){
         bool quit=false;
         mb1_t *mb1 = mb1_new(0);
@@ -1389,7 +1390,7 @@ static int s_trncli_test_trnc(trncli_t *tcli, app_cfg_t *cfg)
                 s_test_cli_con(cfg, test, &mb1_connected, &quit, cfg->eto_msec);
             }
         }
-
+        
         if(mb1_read_OK){
             s_do_trn_updates(mb1, mb1_count, tcli, cfg, &quit);
         }
@@ -1414,7 +1415,7 @@ static int s_trncli_test_mbin(trncli_t *tcli, app_cfg_t *cfg)
     mfile_file_t *mb1_file = NULL;
     mb1_file = mfile_file_new(cfg->mb1_file);
     int test=-1;
-
+    
     if( (test=mfile_open(mb1_file, MFILE_RONLY))>0){
         bool quit=false;
         mb1_t *mb1=mb1_new(MB1_MAX_BEAMS);
@@ -1428,7 +1429,7 @@ static int s_trncli_test_mbin(trncli_t *tcli, app_cfg_t *cfg)
             if(test > 0){
                 mb1_read_OK = true;
                 mb1_count++;
-
+                
                 s_show_mb1(mb1, cfg);
 
             } else {
@@ -1471,19 +1472,23 @@ static msock_socket_t **s_get_mb1_instance(app_cfg_t *cfg)
         mtime_delay_ms(250);
         if(test==0){
             s_dbg_printf(stderr,cfg->debug, "%s:%d mb1svr sending REQ %s:%d\n", __func__, __LINE__, cfg->mb1_host, cfg->mb1_port);
-            byte req[4]={0};
-            snprintf((char *)req, sizeof(req), "REQ");
-            int64_t st = msock_sendto(mb1_sock,NULL,req,4,0);
+            int REQ_BYTES=4;
+            byte req[REQ_BYTES];
+            memset(req, 0, REQ_BYTES);
+            snprintf((char *)req, REQ_BYTES, "REQ");
+            int64_t st = msock_sendto(mb1_sock,NULL,req, REQ_BYTES, 0);
             if(st == (int64_t)4){
                 s_dbg_printf(stderr,cfg->debug, "%s:%d sendto ret[%"PRId64"]\n", __func__, __LINE__, st);
                 mtime_delay_ms(250);
-                byte ack[4]={0};
-                memset(ack,0,4);
+
+                int ACK_BYTES=4;
+                byte ack[ACK_BYTES];
+                memset(ack,0,ACK_BYTES);
 
                 msock_set_blocking(mb1_sock,true);
                 s_dbg_printf(stderr,cfg->debug, "%s:%d mb1svr reading ACK %s:%d\n", __func__, __LINE__, cfg->mb1_host, cfg->mb1_port);
 
-                int64_t rf = msock_recvfrom(mb1_sock, NULL, (byte *)ack, 4, 0);
+                int64_t rf = msock_recvfrom(mb1_sock, NULL, (byte *)ack, ACK_BYTES, 0);
                 s_dbg_printf(stderr,cfg->debug, "%s:%d recvfrom ret[%"PRId64"]\n", __func__, __LINE__, rf);
 
                 if(rf==4){
@@ -1574,11 +1579,11 @@ static void s_init_log(int argc, char **argv, app_cfg_t *cfg)
     // Get GMT time
     gmt = gmtime(&rawtime);
     // format YYYYMMDD-HHMMSS
-    snprintf(session_date, sizeof(session_date), "%04d%02d%02d-%02d%02d%02d",
+    snprintf(session_date, 32, "%04d%02d%02d-%02d%02d%02d",
             (gmt->tm_year+1900),gmt->tm_mon+1,gmt->tm_mday,
             gmt->tm_hour,gmt->tm_min,gmt->tm_sec);
 
-    snprintf(cfg->log_path, 512, "%s//%s-%s-%s",cfg->log_dir,cfg->log_name,session_date,TRNCLI_TEST_LOG_EXT);
+    snprintf(cfg->log_path, LOG_PATH_BYTES, "%s//%s-%s-%s",cfg->log_dir,cfg->log_name,session_date,TRNCLI_TEST_LOG_EXT);
     cfg->log_id = mlog_get_instance(cfg->log_path, cfg->log_cfg, TRNCLI_TEST_LOG_NAME);
 
     if(!cfg->log_en){
@@ -1598,7 +1603,7 @@ static void s_init_log(int argc, char **argv, app_cfg_t *cfg)
             fprintf(stderr, "WARN - logged cmdline truncated\n");
             break;
         }
-        int ilen=snprintf(ip, sizeof(ip), " %s",argv[x]);
+        int ilen=snprintf(ip, TRN_CMD_LINE_BYTES-(strlen(ip)+1), " %s",argv[x]);
         ip+=ilen;
     }
     g_cmd_line[TRN_CMD_LINE_BYTES-1]='\0';
@@ -1678,9 +1683,9 @@ static int s_app_main(app_cfg_t *cfg)
 int main(int argc, char **argv)
 {
     int retval=-1;
-
+    
     app_cfg_t *cfg = app_cfg_new();
-
+    
     // configure signal handling
     // for main thread
     struct sigaction saStruct;
@@ -1688,12 +1693,12 @@ int main(int argc, char **argv)
     saStruct.sa_flags = 0;
     saStruct.sa_handler = s_termination_handler;
     sigaction(SIGINT, &saStruct, NULL);
-
+    
     // parse command line args (update config)
     parse_args(argc, argv, cfg);
 
     s_init_log(argc,argv,cfg);
-
+    
     s_app_main(cfg);
 
     const char *log_path = mlog_path(cfg->log_id);

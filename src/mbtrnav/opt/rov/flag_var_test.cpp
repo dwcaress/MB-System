@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
+#include <cassert>
 #include <iomanip>
 #include "flag_utils.hpp"
 
@@ -15,13 +16,13 @@ static void test_flag()
     assert(x == 0xcafedead);
 
     x >>= 16;
-    assert(x == 0xcafe);
+    assert(x == (uint32_t)0xcafe);
 
     x <<= 16;
     assert(x == 0xcafe0000);
 
     x &= 0x0;
-    assert(x == 0);
+    assert(x == (uint32_t)0);
 
     x = 0xcafe0000;
     assert(x == 0xcafe0000);
@@ -29,12 +30,12 @@ static void test_flag()
     x |= 0xabcd;
     assert(x == 0xcafeabcd);
 
-    assert( (x >> 16) == 0xcafe);
-    assert(x > 123);
+    assert( (x >> 16) == (uint32_t)0xcafe);
+    assert(x > (uint32_t)123);
     assert(x < 3.5e9);
 
     flag_var<uint32_t> y(0x3);
-    assert(y == 0x3);
+    assert(y == (uint32_t)0x3);
 
     y = x;
     assert(y == x);
@@ -47,7 +48,7 @@ static void test_flag()
     x = 0x1234abcd;
     y = 0xffff0000;
     y &= x;
-    assert(y == 0x12340000);
+    assert(y == (uint32_t)0x12340000);
     assert(y != x);
     assert(y < x);
     assert(x > y);

@@ -66,6 +66,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 
+#include "gitversion.h"
 #include "LcmTrn.h"
 #include "MathP.h"
 #include "NavUtils.h"
@@ -141,7 +142,8 @@ LcmTrn::LcmTrn(const char *configfilepath)
       _lastNavTimestamp(-1.0), _lastDepthTimestamp(-1.0),
       _lastCmdTimestamp(-1.0), _lastUpdateTimestamp(-1.0), _good(false)
 {
-    logs(tl_both, "LcmTrn::LcmTrn() - configuration file %s\n", configfilepath);
+    logs(tl_both, "LcmTrn::LcmTrn() version %s built %s %s - config file %s\n",
+        __GIT_VERSION__, __DATE__, __TIME__, configfilepath);
 
     // Setup default config
     //
@@ -276,8 +278,8 @@ void LcmTrn::initTrnState()
 //
 void LcmTrn::run()
 {
-    logs(tl_both, "LcmTrn::run() using bursty timeouts of %d and %d msec\n",
-         _lcmc.initial_timeout_msec, _lcmc.max_timeout_msec);
+    logs(tl_both, "LcmTrn::run() %s using bursty timeouts of %d and %d msec\n",
+         __GIT_VERSION__, _lcmc.initial_timeout_msec, _lcmc.max_timeout_msec);
 
     // As long as the status is good, process Lcm messages
     //
@@ -787,7 +789,8 @@ void LcmTrn::initLcm()
 //
 void LcmTrn::initTrn()
 {
-    logs(tl_log, "LcmTrn::initTrn() - configuration file %s\n", _configfile);
+    logs(tl_log, "LcmTrn::initTrn() version %s - configuration file %s\n",
+        __GIT_VERSION__, _configfile);
 
     cleanTrn();
 

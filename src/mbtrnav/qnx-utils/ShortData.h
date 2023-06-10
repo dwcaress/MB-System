@@ -19,6 +19,7 @@
 #include "DataField.h"
 
 #define ShortTypeMnem "short"
+#define SDATA_ASCII_BUFFER_BYTES 32
 
 /*
 CLASS 
@@ -70,7 +71,7 @@ public:
 protected:
 
   short _value;
-  char _asciiBuffer[32];
+  char _asciiBuffer[SDATA_ASCII_BUFFER_BYTES];
 };
 
 

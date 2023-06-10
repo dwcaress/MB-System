@@ -423,13 +423,12 @@ void TerrainNavClient::estimatePose(poseT* estimate, const int &type)
 {
   // Send request to server for estimate
   // Type = 1 is MLE, 2 is MMSE
-  //poseT est;
-  //est = *estimate;
   commsT *pose;
-  if (type == 1)
+  if (type == 1) {
     pose = new commsT(TRN_MLE, *estimate);
-  else
+  } else {
     pose = new commsT(TRN_MMSE, *estimate);
+  }
 
   for (int i = 0; i < 2; i++)
     if (0 != send_msg(*pose)) {

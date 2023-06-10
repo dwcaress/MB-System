@@ -213,10 +213,14 @@ void TerrainNavLog::logMeas(measT* mt)
 
     if (_dataType->value() == TRN_SENSOR_MB)
     {
-      _crossTrack[i]->setValue(mt->crossTrack[i]);
-      _alongTrack[i]->setValue(mt->alongTrack[i]);
-      _altitudes[i]->setValue(mt->altitudes[i]);
-      _beamNums[i]->setValue(mt->beamNums[i]);
+        if(NULL != mt->crossTrack)
+            _crossTrack[i]->setValue(mt->crossTrack[i]);
+        if(NULL != mt->alongTrack)
+            _alongTrack[i]->setValue(mt->alongTrack[i]);
+        if(NULL != mt->altitudes)
+            _altitudes[i]->setValue(mt->altitudes[i]);
+        if(NULL != mt->beamNums)
+            _beamNums[i]->setValue(mt->beamNums[i]);
     }
   }
   _goodBeams->setValue(goodBeams);

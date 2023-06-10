@@ -86,15 +86,21 @@
 /////////////////////////
 // Includes
 /////////////////////////
-#include <stdint.h>
+// use older ifdef with headers for QNX makedep compatibility
+#ifdef __QNX__
+#include <ourTypes.h>
+#endif
+#if defined (__UNIX__) || defined (__unix__) || defined (__APPLE__)
 #include <stdbool.h>
-
+#include <stdint.h>
+#endif
 #include "mb1_msg.h"
 #include "trn_msg.h"
 
 /////////////////////////
 // Macros
 /////////////////////////
+
 #define TRNW_MSG_SIZE TRN_MSG_SIZE
 #define TRNW_WMEAST_SERIAL_LEN(nmeas)  ( (2+1*nmeas)*sizeof(int) + (7+6*nmeas)*sizeof(double) + (0+1*nmeas)*sizeof(bool) + (0+1*nmeas)*sizeof(unsigned int) )
 

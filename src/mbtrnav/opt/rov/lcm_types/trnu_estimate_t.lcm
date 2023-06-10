@@ -1,0 +1,30 @@
+//////////////////////////////////////////////////////////////////////////////
+// Copyright 2021  Monterey Bay Aquarium Research Institute                 //
+// Distributed under MIT license. See license.txt for more information.     //
+//////////////////////////////////////////////////////////////////////////////
+package trn;
+
+struct trnu_estimate_t
+{
+    // Time (epoch s)
+    double time;
+
+    // North
+    double x;
+
+    // East
+    double y;
+
+    // Down
+    double z;
+
+    // Covariance matrix
+    // - symmetric 3x3 matrix
+    // - only (4) elements needed: diagonal and COV(XY) elements
+    // [0] : x : poset.covariance[0]
+    // [1] : y : poset.covariance[2]
+    // [2] : z : poset.covariance[5]
+    // [3] : xy: poset.covariance[1]
+    double cov[4];
+}
+

@@ -278,7 +278,7 @@ int64_t s_auto_frame_fn(mb1rs_ctx_t *ctx, byte *dest, uint32_t len)
         snd->nbeams = nbeams_hint;
         snd->ping_number = cx;
         snd->ts = stime;
-        unsigned int k=0;
+        int k=0;
         for(k=0;k<nbeams_hint;k++){
             snd->beams[k].beam_num=k;
             snd->beams[k].rhox = RX-0.02*k*nbeams_hint+0.01*k*k;
@@ -652,3 +652,5 @@ int mb1rs_stop(mb1rs_ctx_t *self)
     }
     return retval;
 }
+
+

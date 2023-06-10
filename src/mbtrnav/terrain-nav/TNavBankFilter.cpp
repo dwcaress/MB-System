@@ -69,7 +69,7 @@ deleteLogs()
         logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),"TNavBF::deleting logs bfLogs[%p] logCount[%u]\n", bfLogs, logCount);
 
         // iterate over the actual size of the array
-        for (int i=0; i < logCount;  i++)
+        for (uint32_t i=0; i < logCount;  i++)
         {
             if (bfLogs[i]) delete bfLogs[i];
             bfLogs[i] = NULL;
@@ -182,6 +182,8 @@ setModifiedWeighting(const int use)
                  numFilters);
             break;
     }
+    logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),"TNavBF::previous numFilters: %d \n",
+         currentNF);
 
     // allocate logs for filters (will delete any existing logs)
     allocateLogs();
@@ -1911,7 +1913,7 @@ initParticleDist(const particleT& initialGuess) {
 
             }
         }else{
-            snprintf(temp, sizeof(temp), 
+            snprintf(temp, TRN_MAX_BEAMS,
                     "TNavBankFilter::initParticleDist() - Error opening file: %s\n",
                     (pfname?pfname:"NULL"));
             if(pfname!=NULL)free(pfname);

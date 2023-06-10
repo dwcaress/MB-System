@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 #include <sstream>
 #include <cmath>
 #include <iostream>
@@ -22,6 +23,7 @@
 #include <list>
 #include <vector>
 #include <map>
+#include <string>
 #include <sys/stat.h>
 
 #include "flag_utils.hpp"
@@ -72,7 +74,7 @@
 #define LU_BLOG(p,...) p.blog(__VA_ARGS__)
 
 #define LUP_PDEBUG(p,...) p->pdebug(__VA_ARGS__)
-#define LUP_PNDEBUG(p,n...) p->pndebug(n,__VA_ARGS__)
+#define LUP_PNDEBUG(p,n,...) p->pndebug(n,__VA_ARGS__)
 #define LUP_PVERBOSE(p,...) p->pverbose(__VA_ARGS__)
 #define LUP_PEVENT(p,...) p->pevent(__VA_ARGS__)
 #define LUP_PINFO(p,...) p->pinfo(__VA_ARGS__)
@@ -358,8 +360,10 @@ public:
     logger()
     : mProfileMap(), mFileMap(), mLevel(0)
     {
-        mFileMap.emplace_hint(mFileMap.begin(),"stderr",stderr);
-        mFileMap.emplace_hint(mFileMap.end(),"stdout",stdout);
+        //mFileMap.emplace_hint(mFileMap.begin(), std::string("stderr"),stderr);
+        //mFileMap.emplace_hint(mFileMap.end(), std::string("stdout"),stdout);
+        add_file("stderr", stderr,true);
+        add_file("stdout", stdout,true);
     }
 
     ~logger()
@@ -569,7 +573,7 @@ public:
         if(nullptr != fp){
             retval = fwrite(src, len, 1, fp);
         }
-        return -1;
+        return retval;
     }
 
 

@@ -17,8 +17,15 @@
 
 #include "TerrainNav.h"
 #include "TerrainNavLog.h"
+#include "TrnLog.h"
 
 #define MBTRN_DEBUG 0
+#define _STR(x) #x
+#define STR(x) _STR(x)
+
+#ifdef WITH_ALT_DELTAT_VALIDATION
+#pragma message( __FILE__":" STR(__LINE__) " - feature WITH_ALT_DELTAT_VALIDATION enabled (see FEATURE_OPTIONS in Makefile)" )
+#endif
 
 /*TODO delete Transition Matrix, filterState, and newState
 trn_server.cpp calls getFilterState() which currently only returns 0
@@ -60,6 +67,9 @@ mapType(1),
 terrainMap(NULL),
 _initialized(false),
 _trnLog(NULL)
+#ifdef WITH_TRNLOG
+,_trnBinLog(NULL)
+#endif
 {
     for(int i=0;i<3;i++)lastValidVel[i]=0.;
     for(int i=0;i<4;i++)noValidRange[i]=false;
@@ -90,6 +100,9 @@ mapType(1),
 terrainMap(NULL),
 _initialized(false),
 _trnLog(NULL)
+#ifdef WITH_TRNLOG
+,_trnBinLog(NULL)
+#endif
 {
     for(int i=0;i<3;i++)lastValidVel[i]=0.;
     for(int i=0;i<4;i++)noValidRange[i]=false;
@@ -118,7 +131,8 @@ _trnLog(NULL)
 
 }
 
-TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs) {
+TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs)
+{
 	//initialize pointers
 	this->mapFile = STRDUPNULL(mapName);
 	this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
@@ -142,7 +156,8 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs) {
 }
 
 TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
-					   const int& filterType) {
+					   const int& filterType)
+{
 	//initialize pointers
 	this->mapFile = STRDUPNULL(mapName);
 	this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
@@ -166,7 +181,8 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 }
 
 TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
-					   const int& filterType, char* directory) {
+					   const int& filterType, char* directory)
+{
 	//initialize pointers
 	this->mapFile = STRDUPNULL(mapName);
 	this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
@@ -190,7 +206,8 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 }
 
 TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
-					   const int& filterType, const int& mapType) {
+					   const int& filterType, const int& mapType)
+{
 	//initialize pointers
 	this->mapFile = STRDUPNULL(mapName);
 	this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
@@ -213,7 +230,8 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 }
 
 TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
-					   const int& filterType, const int& mapType, char* directory) {
+					   const int& filterType, const int& mapType, char* directory)
+{
 	//initialize pointers
 	this->mapFile = STRDUPNULL(mapName);
 	this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
@@ -237,7 +255,8 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 }
 
 TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs, char* particles,
-							  const int& filterType, const int& mapType, char* directory) {
+							  const int& filterType, const int& mapType, char* directory)
+{
 
 	//initialize pointers
 	this->mapFile = STRDUPNULL(mapName);
@@ -286,6 +305,9 @@ TerrainNav::~TerrainNav() {
 	this->particlesFile=NULL;
 
     if(_trnLog !=NULL) delete _trnLog;
+#ifdef WITH_TRNLOG
+    if(_trnBinLog != NULL) delete _trnBinLog;
+#endif
 //	if (_posLog) delete _posLog;
 
 	logs(TL_OMASK(TL_TERRAIN_NAV, (TL_LOG|TL_SERR)),"%s - Number of reinitializations: %i\n", __func__,numReinits);
@@ -332,7 +354,11 @@ void TerrainNav::estimatePose(poseT* estimate, const int& type) {
 			_trnLog->logNav(&_incomingNav);
 			_trnLog->logReinits( numReinits );
 			_trnLog->write();
-
+#ifdef WITH_TRNLOG
+#ifdef WITH_TRNLOG_EST_OUT
+            _trnBinLog->logEst(estimate, TrnLog::MSE_OUT);
+#endif
+#endif
 			break;
 
 	   case 1:      //Compute MLE
@@ -375,8 +401,10 @@ void TerrainNav::measUpdate(measT* incomingMeas, const int& type) {
 	currMeas.dataType = type;
 
   // Record measurement
-  if (_trnLog) _trnLog->logMeas(&currMeas);
-
+    if (_trnLog) _trnLog->logMeas(&currMeas);
+#ifdef WITH_TRNLOG
+    if (NULL != _trnBinLog) _trnBinLog->logMeas(&currMeas, TrnLog::MEAS_IN);
+#endif
 	//check validity of range data
 	checkRangeValidity(currMeas);
 
@@ -478,6 +506,11 @@ void TerrainNav::motionUpdate(poseT* incomingNav) {
 
    // make a copy
 	currEstimate = *incomingNav;
+
+#ifdef WITH_TRNLOG
+    if (NULL != _trnBinLog) _trnBinLog->logMotn(&currEstimate, TrnLog::MOTN_IN);
+#endif
+
 #if MBTRN_DEBUG
 	logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"poseT time:%.3f\n", currEstimate.time);
 	logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"poseT  phi:%.3f\n", currEstimate.phi);
@@ -750,7 +783,10 @@ void TerrainNav::initVariables() {
 	copyToLogDir();
 
 	//create log objects
-	_trnLog = new TerrainNavLog(DataLog::BinaryFormat);
+    _trnLog = new TerrainNavLog(DataLog::BinaryFormat);
+#ifdef WITH_TRNLOG
+    _trnBinLog = new TrnLog(DataLog::BinaryFormat);
+#endif
     char *log_copy =STRDUPNULL(_trnLog->fileName());
     tl_new_logfile(dirname(log_copy));
     free(log_copy);
@@ -1067,34 +1103,94 @@ void TerrainNav::checkRangeValidity(measT& currMeas) {
 		}
 	}
 	else if(currMeas.dataType == TRN_SENSOR_DELTAT){
-        int msval=0;
-		for(int i = 0; i < currMeas.numMeas; i++) {
+#ifndef WITH_ALT_DELTAT_VALIDATION
+        for(int i = 0; i < currMeas.numMeas; i++) {
 			//check validity of each beam based on NaN or range value
-		        // Use only the middle 60 of 120 beams
+		    // Use only the middle 60 of 120 beams
 			if(std::isnan(currMeas.ranges[i]) || (currMeas.ranges[i] >= MAX_RANGE)
-			   //		|| (currMeas.ranges[i] <= MIN_RANGE) || ((i < 30) || (i >= 90)) )
-			   		|| (currMeas.ranges[i] <= MIN_RANGE) || ((i < 30) || (i >  90)) )
+               //            || (currMeas.ranges[i] <= MIN_RANGE) || ((i < 30) || (i >= 90)) )
+               || (currMeas.ranges[i] <= MIN_RANGE) || ((i < 30) || (i >  90)) )
 			{
 			   currMeas.measStatus[i] = false;
 			}
-			else
-			{
+            else {
 			   //currMeas.measStatus[i] = true;
 			   //Further pare the center 60 down to only 5
 			   //if( i==30 || i==44 || i==59 || i==74 || i==89 )
 
 			   //Try paring down to every 6th for 11 total.
-			   if( i%6 == 0 )
-			      currMeas.measStatus[i] = true;
-			   else
-			      currMeas.measStatus[i] = false;
-			   //
-			   // measStatus is set back to false during trip from MVC?
+                if( i%6 == 0 )
+			        currMeas.measStatus[i] = true;
+                else
+                    currMeas.measStatus[i] = false;
+                //
+                // measStatus is set back to false during trip from MVC?
 			}
-            msval += (currMeas.measStatus[i] ? 1 : 0);
 		}
-		logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::measUpdate() - IDT[45] = %.2f, IDT[75] = %.2f msval[%d]\n",
-			currMeas.ranges[45], currMeas.ranges[75], msval);
+        logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::measUpdate - IDT[45] = %.2f, IDT[75] = %.2f\n",
+             currMeas.ranges[45], currMeas.ranges[75]);
+#else
+
+        // Proposed DeltaT beam validation : decimates symmetrically
+        // accounting for angled sensor and pre-filtered beam set (< max beams),
+        // and provides adequate beam spacing.
+        // The original version over-decimates when the sensor is angled,
+        // as it removes low/high index beams (0-30, 60+) and futher invalidates
+        // every 6th beam, assuming a full set of beams.
+
+        logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::measUpdate - WARN - using alternative for ROVTRN\n");
+        int n_val=0, n_nan=0, n_lim=0;
+        for(int i = 0; i < currMeas.numMeas; i++)
+        {
+            logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::measUpdate - i[%d/%d] measStat[%d]\n", i, currMeas.numMeas, currMeas.measStatus[i]);
+            // invalidate NaN or invalid range values
+            if(std::isnan(currMeas.ranges[i]))
+            {
+                currMeas.measStatus[i] = false;
+                n_nan++;
+            } else if((currMeas.ranges[i] >= MAX_RANGE)
+                      || (currMeas.ranges[i] <= MIN_RANGE) ){
+                currMeas.measStatus[i] = false;
+                n_lim++;
+            }
+            n_val += (currMeas.measStatus[i] ? 1 : 0);
+        }
+
+        logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::measUpdate - n_val[%d] n_lim[%d] nan[%d]\n", n_val, n_lim, n_nan);
+
+        if(n_val>11){
+            // if there are more than 11 valid beams,
+            // decimate symmetrically from the lowest/highest beam numbers
+            int i=0, j=currMeas.numMeas-1, k=n_val;
+            // skip invalid beams on either end
+            while(!currMeas.measStatus[i] && i<currMeas.numMeas)i++;
+            while(!currMeas.measStatus[j] && j>0)j--;
+
+            logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"%s:%d INIT - i,j,k[%d, %d, %d]\n", __func__, __LINE__, i, j, k);
+            while(i<j && k>11){
+                if(currMeas.measStatus[i]){
+                    logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"%s:%d I - i,j,k[%d, %d, %d]\n", __func__, __LINE__, i, j, k);
+                    currMeas.measStatus[i] = false;
+                    k--;
+                }
+                if(k<=11)break;
+                if(currMeas.measStatus[j]){
+                    logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"%s:%d J - i,j,k[%d, %d, %d]\n", __func__, __LINE__, i, j, k);
+                    currMeas.measStatus[j] = false;
+                    k--;
+                }
+                // decimate every other beam,
+                // skip runs of invalid beams
+                for(int z=0; z < 2 ;z++){
+                    while(!currMeas.measStatus[i] && i<j)i++;
+                    while(!currMeas.measStatus[j] && i<j)j--;
+                    i++;
+                    j--;
+                    if(i>=j)break;
+                }
+            }
+        }
+#endif
 	}
 	else {
 		return;
@@ -1387,7 +1483,7 @@ char *TerrainNav::getSessionDir(char *dir_prefix, char *dest, size_t len, bool c
     char dot[]=".";
     char* logPath = getenv("TRN_LOGFILES");
     char dir_base[128] = {0};
-    snprintf(dir_base, sizeof(dir_base), "%s",dir_prefix!=NULL ? dir_prefix : LOGDIR_DFL);
+    snprintf(dir_base, 128, "%s",dir_prefix!=NULL ? dir_prefix : LOGDIR_DFL);
     if(NULL==logPath){
         logPath=dot;
     }
@@ -1396,11 +1492,11 @@ char *TerrainNav::getSessionDir(char *dir_prefix, char *dest, size_t len, bool c
     // Note that sequence skips index zero:
     //  <dir_base>-TRN, <dir_base>-TRN.01...
 
-    snprintf(sessiondir, sizeof(sessiondir), "%s/%s-TRN", logPath, dir_base);
+    snprintf(sessiondir, 512, "%s/%s-TRN", logPath, dir_base);
 //    fprintf(stderr, "%s - trying session directory [%s]\n",__func__, sessiondir);
 
     while(stat(sessiondir, &sb)==0 && S_ISDIR(sb.st_mode)){
-        snprintf(sessiondir, sizeof(sessiondir), "%s/%s-TRN.%02d", logPath, dir_base, dir_count++);
+        snprintf(sessiondir, 512, "%s/%s-TRN.%02d", logPath, dir_base, dir_count++);
 //        fprintf(stderr,"%s - trying session directory [%s]\n",__func__, sessiondir);
     }
 
@@ -1411,12 +1507,12 @@ char *TerrainNav::getSessionDir(char *dir_prefix, char *dest, size_t len, bool c
     }else{
         // return last tried (even if it doesn't exist)
         if(dir_count>1){
-            snprintf(sessiondir, sizeof(sessiondir), "%s/%s-TRN.%02d", logPath, dir_base, --dir_count);
+            snprintf(sessiondir, 512, "%s/%s-TRN.%02d", logPath, dir_base, --dir_count);
         }
     }
     // check dest size and copy
     if(NULL!=dest && len>(strlen(sessiondir)+1)){
-        snprintf(dest, len, "%s/",sessiondir);
+        snprintf(dest, strlen(sessiondir)+2, "%s/",sessiondir);
         retval=dest;
     }
 
@@ -1434,19 +1530,19 @@ void TerrainNav::copyToLogDir()
 {
     // Used the following line for testing
     // this->saveDirectory = "./logdir";
-
+    
     // Copy only if there is a place for the files to land
     //
     if (NULL != this->saveDirectory)
     {
-
+        
         char *slash = NULL;
         char* trnLogDir = getenv("TRN_LOGFILES");
         char dot[]=".";
         if (!trnLogDir) trnLogDir = dot;
         char dir_spec[512]={0};  // Reusable buffer to write log directory paths
         char dir_spec2[512]={0};  // Reusable buffer to write log directory paths
-
+        
         // Create the log directory
         // remove last component of directory prefix, if any (shouldn't exist)
         // klh - intentional? or is it meant to remove trailing slash?
@@ -1454,19 +1550,19 @@ void TerrainNav::copyToLogDir()
         {
             *slash = '\0';
         }
-
+        
         getSessionDir(this->saveDirectory,dir_spec,512,true);
-
+        
         // update saveDirectory (used to store filter files)
         free(this->saveDirectory);
         this->saveDirectory = STRDUPNULL(dir_spec);
         logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "TRN log directory is %s\n", this->saveDirectory);
-
+        
         // Create a latest link that points to the log directory
         //
-        snprintf(dir_spec, sizeof(dir_spec), "%s/%s", trnLogDir, LatestLogDirName);
+        snprintf(dir_spec, 512, "%s/%s", trnLogDir, LatestLogDirName);
         remove(dir_spec);
-
+        
         strncpy(dir_spec2, this->saveDirectory, 511);
         if (dir_spec2[strlen(dir_spec2)-1] == '/')
         {
@@ -1481,7 +1577,7 @@ void TerrainNav::copyToLogDir()
         {
             sessionLogDir += 1;
         }
-
+        
         if (0 != symlink(sessionLogDir, dir_spec))
         {
             logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "symlink %s to %s failed:%s\n",
@@ -1497,32 +1593,32 @@ void TerrainNav::copyToLogDir()
     {
         return;
     }
-
+    
     char copybuf[320];
     if (NULL != this->vehicleSpecFile)
     {
-        snprintf(copybuf, sizeof(copybuf), "cp %s %s/.", this->vehicleSpecFile,
+        snprintf(copybuf, 320, "cp %s %s/.", this->vehicleSpecFile,
                 this->saveDirectory);
         if (0 != system(copybuf))
             logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "command \'%s\' failed:%s\n",
                  copybuf, strerror(errno));
     }
-
+    
     if (NULL != this->particlesFile)
     {
-        snprintf(copybuf, sizeof(copybuf), "cp %s %s/.", this->particlesFile,
+        snprintf(copybuf, 320, "cp %s %s/.", this->particlesFile,
                 this->saveDirectory);
         if (0 != system(copybuf))
             logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "command \'%s\' failed:%s\n",
                  copybuf, strerror(errno));
     }
-
+    
     // Create a vehicleT object just to get the sensor spec files to copy
     //
     vehicleT *v = new vehicleT(vehicleSpecFile);
     for (int i = 0; i < v->numSensors; i++)
     {
-        snprintf(copybuf, sizeof(copybuf), "cp %s %s/.", v->sensors[i].filename,
+        snprintf(copybuf, 320, "cp %s %s/.", v->sensors[i].filename,
                 this->saveDirectory);
         if (0 != system(copybuf))
             logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "command \'%s\' failed:%s\n",

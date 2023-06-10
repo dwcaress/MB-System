@@ -86,6 +86,11 @@
 #define gmt_show_name_and_purpose GMT_show_name_and_purpose
 #endif
 
+/* Compatibility with old GMT_MSG names prior to version 6 */
+#if GMT_MAJOR_VERSION < 6
+#define GMT_MSG_ERROR GMT_MSG_NORMAL
+#endif
+
 #define THIS_MODULE_CLASSIC_NAME "mbcontour"
 #define THIS_MODULE_MODERN_NAME "mbcontour"
 #define THIS_MODULE_LIB "mbsystem"
@@ -362,7 +367,11 @@ int GMT_mbcontour_old_W_parser (struct GMTAPI_CTRL *API, struct MBCONTOUR_CTRL *
 	if (text[j] == '-') {Ctrl->W.pen.cptmode = 1; j++;}
 	if (text[j] == '+') {Ctrl->W.pen.cptmode = 3; j++;}
 	if (text[j] && gmt_getpen (API->GMT, &text[j], &Ctrl->W.pen)) {
+#if GMT_MAJOR_VERSION >= 6
 		gmt_pen_syntax (API->GMT, 'W', NULL, "sets pen attributes [Default pen is %s]:", NULL, 15);
+#else
+		gmt_pen_syntax (API->GMT, 'W', "sets pen attributes [Default pen is %s]:", 15);
+#endif
 		n_errors++;
 	}
 	return n_errors;
@@ -396,7 +405,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 				n_files = 1;
 			}
 			else {
-				GMT_Report(API, GMT_MSG_NORMAL, "Syntax error: only one input file is allowed.\n");
+				GMT_Report(API, GMT_MSG_ERROR, "Syntax error: only one input file is allowed.\n");
 				n_errors++;
 			}
 			break;
@@ -409,7 +418,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 			if (n > 0)
 				Ctrl->A.active = true;
 			else {
-				GMT_Report(API, GMT_MSG_NORMAL, "Syntax error -A option: \n");
+				GMT_Report(API, GMT_MSG_ERROR, "Syntax error -A option: \n");
 				n_errors++;
 			}
 			break;
@@ -420,7 +429,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 			if (n == 6)
 				Ctrl->b.active = true;
 			else {
-				GMT_Report(API, GMT_MSG_NORMAL, "Syntax error -b option: \n");
+				GMT_Report(API, GMT_MSG_ERROR, "Syntax error -b option: \n");
 				n_errors++;
 			}
 			break;
@@ -436,7 +445,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 			if (n > 0)
 				Ctrl->D.active = true;
 			else {
-				GMT_Report(API, GMT_MSG_NORMAL, "Syntax error -D option: \n");
+				GMT_Report(API, GMT_MSG_ERROR, "Syntax error -D option: \n");
 				n_errors++;
 			}
 			break;
@@ -447,7 +456,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 			if (n == 6)
 				Ctrl->e.active = true;
 			else {
-				GMT_Report(API, GMT_MSG_NORMAL, "Syntax error -e option: \n");
+				GMT_Report(API, GMT_MSG_ERROR, "Syntax error -e option: \n");
 				n_errors++;
 			}
 			break;
@@ -457,7 +466,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 			if (n == 1)
 				Ctrl->F.active = true;
 			else {
-				GMT_Report(API, GMT_MSG_NORMAL, "Syntax error -F option: \n");
+				GMT_Report(API, GMT_MSG_ERROR, "Syntax error -F option: \n");
 				n_errors++;
 			}
 			break;
@@ -470,7 +479,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 				Ctrl->G.name_perp = false;
 			}
 			else {
-				GMT_Report(API, GMT_MSG_NORMAL, "Syntax error -G option: \n");
+				GMT_Report(API, GMT_MSG_ERROR, "Syntax error -G option: \n");
 				n_errors++;
 			}
 			break;
@@ -482,7 +491,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 				n_files = 1;
 			}
 			else {
-				GMT_Report(API, GMT_MSG_NORMAL, "Syntax error -I: Requires a valid file\n");
+				GMT_Report(API, GMT_MSG_ERROR, "Syntax error -I: Requires a valid file\n");
 				n_errors++;
 			}
 			break;
@@ -491,7 +500,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 			if (n == 1)
 				Ctrl->L.active = true;
 			else {
-				GMT_Report(API, GMT_MSG_NORMAL, "Syntax error -L option: \n");
+				GMT_Report(API, GMT_MSG_ERROR, "Syntax error -L option: \n");
 				n_errors++;
 			}
 			break;
@@ -501,7 +510,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 			if (n > 0)
 				Ctrl->M.active = true;
 			else {
-				GMT_Report(API, GMT_MSG_NORMAL, "Syntax error -M option: \n");
+				GMT_Report(API, GMT_MSG_ERROR, "Syntax error -M option: \n");
 				n_errors++;
 			}
 			break;
@@ -510,7 +519,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 			if (n > 0)
 				Ctrl->N.active = true;
 			else {
-				GMT_Report(API, GMT_MSG_NORMAL, "Syntax error -N option: \n");
+				GMT_Report(API, GMT_MSG_ERROR, "Syntax error -N option: \n");
 				n_errors++;
 			}
 			break;
@@ -518,7 +527,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 			Ctrl->p.active = true;
 			Ctrl->p.pings = (int)strtol(opt->arg, NULL, 10);
 			if (Ctrl->p.pings < 0) {
-				GMT_Report(API, GMT_MSG_NORMAL, "Error -p option: Don't invent, number of pings must be >= 0\n");
+				GMT_Report(API, GMT_MSG_ERROR, "Error -p option: Don't invent, number of pings must be >= 0\n");
 				Ctrl->p.pings = 1;
 			}
 			break;
@@ -530,7 +539,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 			if (n == 1)
 				Ctrl->S.active = true;
 			else {
-				GMT_Report(API, GMT_MSG_NORMAL, "Syntax error -S option: \n");
+				GMT_Report(API, GMT_MSG_ERROR, "Syntax error -S option: \n");
 				n_errors++;
 			}
 			break;
@@ -539,36 +548,44 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 			if (n == 1)
 				Ctrl->T.active = true;
 			else {
-				GMT_Report(API, GMT_MSG_NORMAL, "Syntax error -T option: \n");
+				GMT_Report(API, GMT_MSG_ERROR, "Syntax error -T option: \n");
 				n_errors++;
 			}
 			break;
 		case 'W':		/* Set line attributes */
-			n_errors += gmt_M_repeated_module_option (API, Ctrl->W.active);
-			char *c = NULL;
-			if ((c = strstr (opt->arg, "+z"))) {
-				Ctrl->W.set_color = true;
-				c[0] = '\0';	/* Chop off this modifier */
-			}
-			if (opt->arg[0] == '-' || (opt->arg[0] == '+' && opt->arg[1] != 'c')) {	/* Definitively old-style args */
-				if (gmt_M_compat_check (API->GMT, 5)) {	/* Sorry */
-					GMT_Report (API, GMT_MSG_ERROR, "Your -W syntax is obsolete; see program usage.\n");
-					n_errors++;
-				}
-				else {
-					GMT_Report (API, GMT_MSG_ERROR, "Your -W syntax is obsolete; see program usage.\n");
-					n_errors += GMT_mbcontour_old_W_parser (API, Ctrl, opt->arg);
-				}
-			}
-			else if (opt->arg[0]) {
-				if (gmt_getpen (GMT, opt->arg, &Ctrl->W.pen)) {
-					gmt_pen_syntax (GMT, 'W', NULL, "sets pen attributes [Default pen is %s]:", NULL, 11);
-					n_errors++;
-				}
-			}
-			if (Ctrl->W.pen.cptmode) Ctrl->W.cpt_effect = true;
-			if (c) c[0] = '+';	/* Restore */
-			if (Ctrl->W.pen.rgb[0] < -4.0) Ctrl->W.sequential = irint (Ctrl->W.pen.rgb[0] + 7.0);
+                {
+#if GMT_MAJOR_VERSION >= 6
+                    n_errors += gmt_M_repeated_module_option (API, Ctrl->W.active);
+#endif
+                    char *c = NULL;
+                    if ((c = strstr (opt->arg, "+z"))) {
+                        Ctrl->W.set_color = true;
+                        c[0] = '\0';	/* Chop off this modifier */
+                    }
+                    if (opt->arg[0] == '-' || (opt->arg[0] == '+' && opt->arg[1] != 'c')) {	/* Definitively old-style args */
+                        if (gmt_M_compat_check (API->GMT, 5)) {	/* Sorry */
+                            GMT_Report (API, GMT_MSG_ERROR, "Your -W syntax is obsolete; see program usage.\n");
+                            n_errors++;
+                        }
+                        else {
+                            GMT_Report (API, GMT_MSG_ERROR, "Your -W syntax is obsolete; see program usage.\n");
+                            n_errors += GMT_mbcontour_old_W_parser (API, Ctrl, opt->arg);
+                        }
+                    }
+                    else if (opt->arg[0]) {
+                        if (gmt_getpen (GMT, opt->arg, &Ctrl->W.pen)) {
+#if GMT_MAJOR_VERSION >= 6
+                            gmt_pen_syntax (GMT, 'W', NULL, "sets pen attributes [Default pen is %s]:", NULL, 11);
+#else
+                            gmt_pen_syntax (API->GMT, 'W', "sets pen attributes [Default pen is %s]:", 11);
+#endif
+                            n_errors++;
+                        }
+                    }
+                    if (Ctrl->W.pen.cptmode) Ctrl->W.cpt_effect = true;
+                    if (c) c[0] = '+';	/* Restore */
+                    if (Ctrl->W.pen.rgb[0] < -4.0) Ctrl->W.sequential = irint (Ctrl->W.pen.rgb[0] + 7.0);
+                }
 			break;
 
 		case 'Z': /* contour algorithm */
@@ -576,7 +593,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 			if (n == 1)
 				Ctrl->Z.active = true;
 			else {
-				GMT_Report(API, GMT_MSG_NORMAL, "Syntax error -Z option: \n");
+				GMT_Report(API, GMT_MSG_ERROR, "Syntax error -Z option: \n");
 				n_errors++;
 			}
 			break;

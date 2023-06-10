@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
+#include <stdarg.h>
 
 // Module debug output macros
 // Applications may set the debug level for this module using
