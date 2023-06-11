@@ -1,49 +1,32 @@
-#
-# Gets variables from root CMakeLists
-#
+find_package(X11 REQUIRED)
+find_package(Motif REQUIRED)
 
-message("in mbnavadjust")
+add_executable(
+  mbnavadjust mbnavadjust_callbacks.c mbnavadjust_creation.c mbnavadjust_io.c
+              mbnavadjust_prog.c mbnavadjust_util.c mbnavadjustmerge.c)
 
-add_executable(mbnavadjust
-	       mbnavadjust_callbacks.c
-               mbnavadjust_creation.c
-               mbnavadjust_io.c
-	       mbnavadjust_prog.c
-	       mbnavadjust_util.c
-	       mbnavadjustmerge.c)
+target_link_libraries(mbnavadjust PRIVATE mbview mbaux mbxgr Motif::Motif
+                                          X11::Xt)
 
-target_include_directories(mbnavadjust
-                           PUBLIC
-                           .
-                           ${CMAKE_SOURCE_DIR}/src/mbio
-                           ${CMAKE_SOURCE_DIR}/src/mbaux
-                           ${CMAKE_SOURCE_DIR}/src/gsf
-			   ${NETCDF_INCLUDE_DIRS}
-			   ${X11_INCLUDE_DIRS})
-			   
-# link_directories($GMT_LIBRARIES)
-target_link_libraries(mbnavadjust
-                      PRIVATE
-                      mbio
-                      mbaux
-		      mbxgr
-                      mbview
-                      mbbsio
-                      mbsapi
-                      ${GSF_LIB}
-		      ${R7KR_LIB}
-		      ${MFRAME_LIB}
-		      ${GMT_LIBRARIES}
-		      ${NETCDF_LIBRARIES}
-		      ${MOTIF_LIBRARIES}
-		      ${X11_LIBRARIES}
-		      ${X11_XT_LIBRARIES}		      
-		      ${GDAL_LIBRARIES}
-		      ${PROJ_LIBRARIES}
-		      ${OPENGL_LIBRARIES}
-                      m
-                      pthread)
-                           
+if(buildPCL)
+  find_package(PCL REQUIRED)
+  find_package(LibPROJ REQUIRED)
 
-install(TARGETS mbnavadjust
-        DESTINATION ${CMAKE_INSTALL_BINDIR})
+  if(LibPROJ_VERSION VERSION_LESS 5)
+    message("mbnavadjustfine requires modern PROJ4")
+  else()
+    add_executable(mbnavadjustfine mbnavadjust_fine.cc mbnavadjust_icp.cc
+                                   mbnavadjust_io.c)
+    target_link_libraries(mbnavadjustfine PRIVATE mbaux LibPROJ::LibPROJ
+                                                  pthread)
+
+    target_link_directories(mbnavadjustfine PRIVATE ${PCL_LIBRARY_DIRS})
+    target_include_directories(mbnavadjustfine PRIVATE ${PCL_INCLUDE_DIRS})
+    target_compile_definitions(mbnavadjustfine PRIVATE ${PCL_DEFINITIONS})
+    target_link_libraries(mbnavadjustfine PRIVATE ${PCL_LIBRARIES})
+
+    install(TARGETS mbnavadjustfine DESTINATION ${CMAKE_INSTALL_BINDIR})
+  endif()
+endif()
+
+install(TARGETS mbnavadjust DESTINATION ${CMAKE_INSTALL_BINDIR})

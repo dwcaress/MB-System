@@ -610,7 +610,7 @@ s=NULL;\
 #define MBSYSOUT_OPT_N 8
 #define TRNOUT_OPT_N 16
 #define SONAR_READER_CAPACITY_DFL (256 * 1024)
-#define SESSION_BUF_LEN 16
+#define SESSION_BUF_LEN 32
 #define TRNSESSION_BUF_LEN 9
 
 #define SONAR_SIM_HOST "localhost"
@@ -1043,7 +1043,7 @@ static char *s_mbtrnpp_session_str(char **pdest, size_t len, mb_resource_flag_t 
     if(!initialized || ((flags&RF_FORCE_UPDATE)!=0)){
         initialized=true;
         // format YYYYMMDD-HHMMSS
-        sprintf(session_date, "%04d%02d%02d-%02d%02d%02d", (gmt->tm_year + 1900), gmt->tm_mon + 1, gmt->tm_mday, gmt->tm_hour,
+        snprintf(session_date, SESSION_BUF_LEN, "%04d%02d%02d-%02d%02d%02d", (gmt->tm_year + 1900), gmt->tm_mon + 1, gmt->tm_mday, gmt->tm_hour,
                 gmt->tm_min, gmt->tm_sec);
     }
 
@@ -1616,8 +1616,8 @@ static int s_mbtrnpp_cfgstr(char **pdest, size_t olen, mbtrnpp_cfg_t *self, cons
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "trn_decs", sep, wval, self->trn_decs, del);
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "covariance_magnitude_max", sep, wval, self->covariance_magnitude_max, del);
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "convergence_repeat_min", sep, wval, self->convergence_repeat_min, del);
-    mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "reinit_search_xy", sep, wval, self->reinit_search_xy, del);
-    mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "reinit_search_z", sep, wval, self->reinit_search_z, del);
+    mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "reinit_search_xy", sep, wval, self->reinit_search_xy, del);
+    mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "reinit_search_z", sep, wval, self->reinit_search_z, del);
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "reinit_gain_enable", sep, wval, BOOL2YNC(self->reinit_gain_enable), del);
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "reinit_file_enable", sep, wval, BOOL2YNC(self->reinit_file_enable), del);
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "reinit_xyoffset_enable", sep, wval, BOOL2YNC(self->reinit_xyoffset_enable), del);
@@ -1839,9 +1839,10 @@ static int s_parse_opt_output(mbtrnpp_cfg_t *cfg, char *opt_str)
         }
         free(ocopy);
 
-        if (strlen(cfg->output_mb1_file) > 4
-            && strncmp(&(cfg->output_mb1_file[strlen(cfg->output_mb1_file)-4]), ".mb1", 4) == 0) {
-          strncpy(cfg->output_trn_file, cfg->output_mb1_file, strlen(cfg->output_mb1_file)-4);
+        int flen = strlen(cfg->output_mb1_file);
+        if (flen > 4 && MB_PATH_SIZE > (flen-4 + strlen("_trn.txt")+1)
+            && strncmp(&(cfg->output_mb1_file[flen-4]), ".mb1", 4) == 0) {
+          snprintf(cfg->output_trn_file, flen-4, "%s", cfg->output_mb1_file );
           strcat(cfg->output_trn_file, "_trn.txt");
 
         }
@@ -2113,8 +2114,12 @@ static int s_parse_opt_logdir(mbtrnpp_cfg_t *cfg, char *opt_str)
             remove("mbtrnpp-latest");
             fprintf(stderr, "Delete old symlink mbtrnpp-latest\n");
         }
-        symlink(cfg->log_directory, "mbtrnpp-latest");
+        int test = symlink(cfg->log_directory, "mbtrnpp-latest");
+        if(test == 0)
         fprintf(stderr, "Create symlink mbtrnpp-latest->%s\n", cfg->log_directory);
+        else
+        fprintf(stderr, "Create symlink failed %s\n", cfg->log_directory);
+
         if(NULL==cfg->trn_log_dir){
             MEM_CHKINVALIDATE(cfg->trn_log_dir);
             cfg->trn_log_dir=strdup(CFG_TRN_LOG_DIR_DFL);

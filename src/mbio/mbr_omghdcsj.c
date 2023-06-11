@@ -4729,7 +4729,7 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		int_ptr = (int *)&buffer[offset];
 		*int_ptr = summary->totalProfileBytes;
 		offset += 4;
-		for (k = 0; k < 20; k++) {
+		for (int k = 0; k < 20; k++) {
 			int_ptr = (int *)&buffer[offset];
 			*int_ptr = summary->Profile_BitsDefining[k];
 			offset += 4;
@@ -4737,7 +4737,7 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		int_ptr = (int *)&buffer[offset];
 		*int_ptr = summary->totalBeamBytes;
 		offset += 4;
-		for (k = 0; k < 20; k++) {
+		for (int k = 0; k < 20; k++) {
 			int_ptr = (int *)&buffer[offset];
 			*int_ptr = summary->Beam_BitsDefining[k];
 			if (k < 19)
@@ -5753,7 +5753,7 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			if (summary->Profile_BitsDefining[0]) {
 				if (summary->Profile_BitsDefining[0] & PROF_ui_status) {
 					buffer[offset] = profile->status;
-					offset + 1;
+					offset += 1;
 				}
 				if (summary->Profile_BitsDefining[0] & PROF_ui_numDepths) {
 					short_ptr = (short *)&buffer[offset];

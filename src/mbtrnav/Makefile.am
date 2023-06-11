@@ -18,6 +18,7 @@ AM_CPPFLAGS += -I${top_srcdir}/src/mbtrn/utils
 AM_CPPFLAGS += -I${top_srcdir}/src/mbtrn/mb1r
 AM_CPPFLAGS += -I${top_srcdir}/src/mbtrnframe/usr
 AM_CPPFLAGS += -I${top_srcdir}/src/mbtrnframe/mframe/src
+AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
 AM_CPPFLAGS += -DHAVE_CONFIG_H
 AM_CPPFLAGS += -DWITH_TESTS
 AM_CPPFLAGS += -DWITH_MMDEBUG
@@ -186,7 +187,8 @@ libtnav_la_SOURCES += terrain-nav/TRNUtils.cpp
 libtnav_la_LIBADD = libgeolib.la
 libtnav_la_LIBADD += libnewmat.la
 libtnav_la_LIBADD += libqnx.la
-libtnav_la_LIBADD += -lm -lnetcdf -lpthread
+libtnav_la_LIBADD += ${libnetcdf_LIBS}
+libtnav_la_LIBADD += -lm -lpthread
 
 libtrnw_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 

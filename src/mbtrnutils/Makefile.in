@@ -129,6 +129,7 @@ mbgrdtilemaker_DEPENDENCIES = $(top_builddir)/src/mbio/libmbio.la \
 am_mbtrnpp_OBJECTS = mbtrnpp.$(OBJEXT)
 mbtrnpp_OBJECTS = $(am_mbtrnpp_OBJECTS)
 mbtrnpp_DEPENDENCIES = $(top_builddir)/src/mbio/libmbio.la \
+	$(top_builddir)/src/mbtrnframe/libmframe.la \
 	$(top_builddir)/src/mbaux/libmbaux.la $(LIBMBXGR) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(MBTRNLIBS) $(TRNWLIBS) \
@@ -466,6 +467,7 @@ AM_CPPFLAGS = -g -O0 $(MBTRN_INC) $(MBTNAV_INC) \
 
 mbtrnpp_SOURCES = mbtrnpp.c
 mbtrnpp_LDADD = $(top_builddir)/src/mbio/libmbio.la \
+  $(top_builddir)/src/mbtrnframe/libmframe.la \
   $(top_builddir)/src/mbaux/libmbaux.la \
   $(LIBMBXGR) \
   ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \

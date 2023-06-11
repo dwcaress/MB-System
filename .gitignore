@@ -5,6 +5,7 @@
 /config.status
 autom4te.cache/*
 build/*
+googletest/*
 src/**/*.o
 src/**/*.lo
 src/**/*.la
@@ -211,3 +212,4 @@ src/mbio/mb_config.h
 src/mbtrnav/otree
 src/utilities/mbtransmitpattern
 src/htmlsrc/man2html
+build-utils/FindProj.cmake
