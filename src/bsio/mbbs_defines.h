@@ -33,6 +33,16 @@
 #define __MBBS_DEFINES__
 
 #include <time.h>
+
+/* CMake build system section */
+#ifdef CMAKE_BUILD_SYSTEM
+
+#  include <rpc/rpc.h>
+#  include <rpc/types.h>
+#  include <rpc/xdr.h>
+
+#else // Begin Autotools section supporting legacy OS's
+
 #ifndef _WIN32
 #include <sys/time.h>
 #endif
@@ -52,6 +62,8 @@
 #include <float.h>
 #define isnan _isnan
 #endif
+
+#endif // End Autotools section
 
 /* Some type definitions given here are in a separate
  * header file unixversion.h in the original HMRG codebase */

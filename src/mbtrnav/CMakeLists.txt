@@ -64,6 +64,7 @@ libnetcdf.dll.a
 PATHS
 "/usr/lib64"
 "/opt/local/lib"
+"/opt/sw/lib"
 )
 
 find_path(NETCDF_HEADER_PATH
@@ -77,7 +78,10 @@ find_library(CURL
 NAMES
 libcurl
 libcurl.so
-PATHS "/usr/lib64"
+PATHS
+"/usr/lib64"
+"/opt/local/lib"
+"/opt/sw/lib"
 )
 
 # include LIBHDF5 [for some versions of netcdf]
@@ -98,6 +102,7 @@ libhdf5.so
 PATHS
 "/usr/lib64"
 "/opt/local/lib"
+"/opt/sw/lib"
 )
 
 #################################

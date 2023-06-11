@@ -673,6 +673,8 @@ BUILD_TEST_FALSE
 BUILD_TEST_TRUE
 BUILD_PCLTOOLS_FALSE
 BUILD_PCLTOOLS_TRUE
+BUILD_ROVTRN_FALSE
+BUILD_ROVTRN_TRUE
 BUILD_MBTNAV_FALSE
 BUILD_MBTNAV_TRUE
 BUILD_MBTRNUTILS_FALSE
@@ -950,6 +952,7 @@ with_vtk_lib
 with_vtk_include
 enable_mbtrn
 enable_mbtnav
+enable_rovtrn
 enable_pcltools
 enable_test
 enable_gsf
@@ -1637,6 +1640,7 @@ Optional Features:
   --enable-qt             build Qt5 based graphical tools
   --enable-mbtrn          build mbtrn tools
   --enable-mbtnav         build mbtnav tools
+  --enable-rovtrn         build rovtrn tools
   --enable-pcltools       build tools using PCL
   --enable-test           build test tools
   --disable-gsf           build without the GSF driver
@@ -3371,6 +3375,8 @@ printf "%s\n" "        --with-vtk-lib        - location of VTK8.2+ libraries (re
 printf "%s\n" "        --enable-opencv       - enable building tools using OpenCV (optional)"
 printf "%s\n" "        --enable-mbtrn        - enable building terrain relative navigation (TRN) tools (optional)"
 printf "%s\n" "        --enable-mbtnav       - enable building terrain relative navigation (TRN) tools (optional)"
+printf "%s\n" "        --enable-rovtrn       - enable building terrain relative navigation (TRN) ROV tools
+ (optional)"
 printf "%s\n" "        --disable-mbtools     - disable building graphical tools (use with --enable-mbtrn and --enable-mbtnav)"
 printf "%s\n" "        --enable-hardening    - Enable compiler and linker options to frustrate memory corruption exploits  (e.g. -fPIE and -pie) (optional)"
 printf "%s\n" "        --enable-test         - Enable building unit tests in test/ and third-party/"
@@ -24845,6 +24851,66 @@ else
 fi
 
 
+printf "%s\n" "Check if the rovtrn tools should be built"
+# Check whether --enable-rovtrn was given.
+if test ${enable_rovtrn+y}
+then :
+  enableval=$enable_rovtrn; build_rovtrn=yes
+else $as_nop
+  build_rovtrn=no
+fi
+
+ if test $build_rovtrn = yes; then
+  BUILD_ROVTRN_TRUE=
+  BUILD_ROVTRN_FALSE='#'
+else
+  BUILD_ROVTRN_TRUE='#'
+  BUILD_ROVTRN_FALSE=
+fi
+
+if test "$build_rovtrn" = "yes" ; then
+        printf "%s\n" "Build rovtrn tools in mbtrnav"
+
+printf "%s\n" "#define ROVTRN_ENABLED 1" >>confdefs.h
+
+
+printf "%s\n" "#define MBTRN_ENABLED 1" >>confdefs.h
+
+
+printf "%s\n" "#define MBTNAV_ENABLED 1" >>confdefs.h
+
+     if test $build_rovtrn = yes; then
+  BUILD_MBTRN_TRUE=
+  BUILD_MBTRN_FALSE='#'
+else
+  BUILD_MBTRN_TRUE='#'
+  BUILD_MBTRN_FALSE=
+fi
+
+     if test $build_rovtrn = yes; then
+  BUILD_MBTNAV_TRUE=
+  BUILD_MBTNAV_FALSE='#'
+else
+  BUILD_MBTNAV_TRUE='#'
+  BUILD_MBTNAV_FALSE=
+fi
+
+     if test $build_rovtrn = yes; then
+  BUILD_MBTRNUTILS_TRUE=
+  BUILD_MBTRNUTILS_FALSE='#'
+else
+  BUILD_MBTRNUTILS_TRUE='#'
+  BUILD_MBTRNUTILS_FALSE=
+fi
+
+    build_mbtrn="yes"
+    build_mbrnutils="yes"
+    build_mbtrnframe="yes"
+else
+        printf "%s\n" "Not building rovtrn tools"
+fi
+
+
 printf "%s\n" "Check if programs using PCL should be built"
 # Check whether --enable-pcltools was given.
 if test ${enable_pcltools+y}
@@ -25571,6 +25637,22 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_MBTRNUTILS_TRUE}" && test -z "${BUILD_MBTRNUTILS_FALSE}"; then
   as_fn_error $? "conditional \"BUILD_MBTRNUTILS\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUILD_MBTNAV_TRUE}" && test -z "${BUILD_MBTNAV_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_MBTNAV\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUILD_MBTRNUTILS_TRUE}" && test -z "${BUILD_MBTRNUTILS_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_MBTRNUTILS\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUILD_ROVTRN_TRUE}" && test -z "${BUILD_ROVTRN_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_ROVTRN\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUILD_MBTRN_TRUE}" && test -z "${BUILD_MBTRN_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_MBTRN\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_MBTNAV_TRUE}" && test -z "${BUILD_MBTNAV_FALSE}"; then
@@ -28151,6 +28233,11 @@ if test "$build_mbtrnframe" = "yes" ; then
 	printf "%s\n" "Build mbtrnframe: Enabled"
 else
 	printf "%s\n" "Build mbtrnframe: Disabled"
+fi
+if test "$build_rovtrn" = "yes" ; then
+	printf "%s\n" "Build rovtrn tools: Enabled"
+else
+	printf "%s\n" "Build rovtrn tools: Disabled"
 fi
 if test "$GOT_OPENCV4" = "yes" ; then
 	printf "%s\n" "Build OpenCV4 tools: Enabled"

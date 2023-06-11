@@ -369,7 +369,7 @@ int GMT_mbcontour_old_W_parser (struct GMTAPI_CTRL *API, struct MBCONTOUR_CTRL *
 	if (text[j] == '-') {Ctrl->W.pen.cptmode = 1; j++;}
 	if (text[j] == '+') {Ctrl->W.pen.cptmode = 3; j++;}
 	if (text[j] && gmt_getpen (API->GMT, &text[j], &Ctrl->W.pen)) {
-#if GMT_MAJOR_VERSION >= 6 && GMT_MINOR_VER <= 2
+#if GMT_MAJOR_VERSION == 6 && GMT_MINOR_VERSION <= 2
 		gmt_pen_syntax (API->GMT, 'W', NULL, "sets pen attributes [Default pen is %s]:", 15);
 #elif GMT_MAJOR_VERSION >= 6
 		gmt_pen_syntax (API->GMT, 'W', NULL, "sets pen attributes [Default pen is %s]:", NULL, 15);
@@ -578,7 +578,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
                     }
                     else if (opt->arg[0]) {
                         if (gmt_getpen (GMT, opt->arg, &Ctrl->W.pen)) {
-#if GMT_MAJOR_VERSION >= 6 && GMT_MINOR_VER <= 2
+#if GMT_MAJOR_VERSION == 6 && GMT_MINOR_VERSION <= 2
                             gmt_pen_syntax (GMT, 'W', NULL, "sets pen attributes [Default pen is %s]:", 11);
 #elif GMT_MAJOR_VERSION >= 6
                             gmt_pen_syntax (GMT, 'W', NULL, "sets pen attributes [Default pen is %s]:", NULL, 11);

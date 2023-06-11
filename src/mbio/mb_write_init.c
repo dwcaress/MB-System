@@ -24,11 +24,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "mb_config.h"
-
-#ifdef ENABLE_GSF
-#include "gsf.h"
-#endif
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
@@ -36,6 +31,9 @@
 #include "mb_status.h"
 #include "netcdf.h"
 #include "../surf/mb_sapi.h"
+#ifdef ENABLE_GSF
+#include "gsf.h"
+#endif
 #ifdef _WIN32
 #	include <rpc/xdr.h>			/* Don't understand why this is now need. It wasn't till recently. 26 Juin 2018 (JL)*/
 #endif
