@@ -5,6 +5,7 @@
 /config.status
 autom4te.cache/*
 build/*
+googletest/*
 src/**/*.o
 src/**/*.lo
 src/**/*.la
@@ -17,6 +18,7 @@ src/**/*.jar
 src/gsf/dump_gsf
 src/mbedit/mbedit
 src/mbeditviz/mbeditviz
+src/mbgrd2gltf/mbgrd2gltf
 src/mbgrdviz/mbgrdviz
 src/mbio/stamp-h1
 src/mbio/projections.h
@@ -209,3 +211,5 @@ src/mbtrnutils/mbgrdtilemaker
 src/mbio/mb_config.h
 src/mbtrnav/otree
 src/utilities/mbtransmitpattern
+src/htmlsrc/man2html
+build-utils/FindProj.cmake
