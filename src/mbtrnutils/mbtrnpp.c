@@ -6070,8 +6070,8 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
 
                             pstate->reinit_count = wtnav_get_num_reinits(tnav);
                             pstate->filter_state = wtnav_get_filter_state(tnav);
-                            pstate->is_converged = (wtnav_is_converged(tnav) ? 1 : 0);
-                            pstate->is_valid = use_trn_offset;
+                            pstate->is_converged = (converged ? 1 : 0);
+                            pstate->is_valid = (use_trn_offset ? 1 : 0);
                             // pstate->is_valid = ( (mb1->ts > 0. &&
                             //                       pstate->mse_dat->covariance[0] <= cfg->max_northing_cov &&
                             //                       pstate->mse_dat->covariance[2] <= cfg->max_easting_cov &&
