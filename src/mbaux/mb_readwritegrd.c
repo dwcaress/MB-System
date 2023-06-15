@@ -27,8 +27,11 @@
 #include <unistd.h>
 
 #include "gmt_dev.h"
-#ifdef HAVE_SINCOS
-#undef HAVE_SINCOS  // avoid clash between gmt_config.h and mb_config.h
+
+#ifndef CMAKE_BUILD_SYSTEM
+  #ifdef HAVE_SINCOS
+    #undef HAVE_SINCOS  // avoid clash between gmt_config.h and the Autotools build system mb_config.h
+  #endif
 #endif
 
 #include "mb_aux.h"

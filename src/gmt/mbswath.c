@@ -86,7 +86,8 @@
 #define gmt_show_name_and_purpose GMT_show_name_and_purpose
 #endif
 
-// Stop warnings about packaging collision between GDAL's cpl_port.h and mb_config.h
+// Stop warnings about packaging collision between GDAL's cpl_port.h and the 
+// Autotools build system mb_config.h
 #ifdef PACKAGE_BUGREPORT
 #undef PACKAGE_BUGREPORT
 #endif
