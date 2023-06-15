@@ -87,7 +87,7 @@
 #endif
 
 /* Compatibility with old GMT_MSG names prior to version 6 */
-#if GMT_MAJOR_VERSION >= 6 && GMT_MINOR_VER <= 2
+#if GMT_MAJOR_VERSION == 6 && GMT_MINOR_VERSION <= 2
 #define GMT_MSG_ERROR GMT_MSG_NORMAL
 #elif GMT_MAJOR_VERSION < 6
 #define GMT_MSG_ERROR GMT_MSG_NORMAL

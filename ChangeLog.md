@@ -23,7 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.9beta53    June 7, 2023
+- Version 5.7.9beta53    June 10, 2023
 - Version 5.7.9beta52    March 9, 2023
 - Version 5.7.9beta51    February 14, 2023
 - Version 5.7.9beta50    February 12, 2023
@@ -430,6 +430,13 @@ or beta, are equally accessible as tarballs through the Github interface.
 ### MB-System Version 5.7 Release Notes:
 --
 
+#### 5.7.9beta53 (June 10)
+
+Partially functional CMake build system derived from Josch, who altered an earlier
+version from Tom O'Reilly 
+
+Mbtrnpp and related TRN code: Many updates and improvements from Kent Headley
+
 Mbcontour: The navigation line width and color can now be set using the -W argument
 
 Format SOIUSBLN (275): Supports USBL tracking data from R/V Falkor (too) as format 275.
@@ -458,8 +465,6 @@ Mbmosaic: Augmented azimuth priority mode so that the azimuth alone can be speci
 case the azimuth priority factor is one.
 
 Mbpreprocess: Now outputs integrated navigation for all sensors producing mapping data.
-
-#### 5.7.9beta53 (June 7)
 
 Formats 56 (MBF_EM300RAW) and 57 (MBF_EM300MBA): Fixed catastrophic bug introduced in 
 5.7.9beta50 that treated many signed values (like acrosstrack distance) as unsigned.

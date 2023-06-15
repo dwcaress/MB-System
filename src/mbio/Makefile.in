@@ -575,7 +575,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 lib_LTLIBRARIES = libmbio.la
-@BUILD_MBTRN_TRUE@MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrnframe/usr -I${top_srcdir}/src/mbtrnframe/mframe/src
+@BUILD_MBTRN_TRUE@MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrnframe
 @BUILD_MBTRN_TRUE@MBTRNLIB = ${top_builddir}/src/mbtrn/libr7kr.la
 include_HEADERS = mb_config.h mb_define.h mb_format.h mb_info.h \
 	mb_io.h mb_process.h mb_segy.h mb_status.h mb_swap.h \

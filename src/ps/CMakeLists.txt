@@ -78,4 +78,4 @@ set(PS
     mbtime.ps
     mbvelocitytool.ps)
 
-install(FILES ${PS} DESTINATION ${CMAKE_INSTALL_PREFIX}/doc/mbsystem/ps)
+install(FILES ${PS} DESTINATION ${CMAKE_INSTALL_DOC}/mbsystem/ps)

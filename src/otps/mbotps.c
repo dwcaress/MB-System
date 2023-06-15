@@ -71,8 +71,14 @@
 #include "mb_process.h"
 #include "mb_status.h"
 
-// OTPS installation location include
+// OTPS installation location in CMake build system
+#ifdef CMAKE_BUILD_SYSTEM
+const char *otps_location = "$(otpsDir)";
+
+// OTPS installation location in Autotools build system
+#else
 #include "otps.h"
+#endif
 
 #define MBOTPS_MODE_POSITION            0x00
 #define MBOTPS_MODE_NAVIGATION          0x01

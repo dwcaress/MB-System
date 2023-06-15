@@ -1,7 +1,7 @@
 lib_LTLIBRARIES = libmbio.la
 
 if BUILD_MBTRN
-  MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrnframe/usr -I${top_srcdir}/src/mbtrnframe/mframe/src
+  MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrnframe
   MBTRNLIB = ${top_builddir}/src/mbtrn/libr7kr.la
 endif
 

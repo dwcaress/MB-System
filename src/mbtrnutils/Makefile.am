@@ -19,8 +19,7 @@ MBTNAV_INC=-I${top_builddir}/src/mbtrnav/terrain-nav  \
 
 MBTRN_INC = -I${top_srcdir}/src/mbtrn/r7kr  \
   -I${top_srcdir}/src/mbtrn/utils  \
-  -I${top_srcdir}/src/mbtrnframe/usr  \
-  -I${top_srcdir}/src/mbtrnframe/mframe/src
+  -I${top_srcdir}/src/mbtrnframe
 
 MBTNAV_OPT=-DWITH_MBTNAV
 endif
@@ -43,7 +42,7 @@ TEST_OPTS=-DWITH_TESTS -DWITH_R7KR_TEST
 AM_CPPFLAGS = -g -O0 $(MBTRN_INC) $(MBTNAV_INC) \
    -DHAVE_CONFIG_H  ${TEST_OPTS} -DWITH_MST_MSTATS -DMST_STATS_EN \
   -DWITH_PDEBUG -DWITH_MMDEBUG -D_GNU_SOURCE \
-  -DMFRAME_BUILD="${BUILD_DATE}" \
+  -DMBTRNFRAME_BUILD="${BUILD_DATE}" \
   ${libgmt_CPPFLAGS} ${libnetcdf_CPPFLAGS} \
   ${FRAMES7K_VER} ${TRNC_VER} ${STREAM7K_VER} \
   ${TBIN_VER} ${EMU7K_VER} ${MBTNAV_OPT}
@@ -53,7 +52,7 @@ bin_PROGRAMS =  mbtrnpp mbgrd2octree mbgrdtilemaker
 mbtrnpp_SOURCES = mbtrnpp.c
 
 mbtrnpp_LDADD =  $(top_builddir)/src/mbio/libmbio.la \
-  $(top_builddir)/src/mbtrnframe/libmframe.la \
+  $(top_builddir)/src/mbtrnframe/libmbtrnframe.la \
   $(top_builddir)/src/mbaux/libmbaux.la \
   $(LIBMBXGR) \
   ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
