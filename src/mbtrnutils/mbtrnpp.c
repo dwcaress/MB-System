@@ -4246,6 +4246,7 @@ int main(int argc, char **argv) {
                     reinit_flag = false;
                     n_reinit++;
                     n_reinit_since_use++;
+                    reinit_time = ping[i_ping_process].time_d;
                   }
 
                   MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_PROC_TRN_XT], mtime_dtime());
@@ -5538,6 +5539,7 @@ int s_mbtrnpp_trnu_reset_callback()
 //    reinit_flag = false;
     n_reinit++;
     n_reinit_since_use++;
+    reinit_time = reset_time;
 
     int reinit_post=wtnav_get_num_reinits(trn_instance);
 
@@ -5577,6 +5579,7 @@ int s_mbtrnpp_trnu_reset_ofs_callback(double ofs_x, double ofs_y, double ofs_z)
     //    reinit_flag = false;
     n_reinit++;
     n_reinit_since_use++;
+    reinit_time = reset_time;
 
     int reinit_post=wtnav_get_num_reinits(trn_instance);
 
@@ -5608,7 +5611,7 @@ int s_mbtrnpp_trnu_reset_box_callback(double ofs_x, double ofs_y, double ofs_z, 
     //    reinit_flag = false;
     n_reinit++;
     n_reinit_since_use++;
-
+    reinit_time = reset_time;
     int reinit_post=wtnav_get_num_reinits(trn_instance);
 
     if(reinit_post<=reinits_pre){
