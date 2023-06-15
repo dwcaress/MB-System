@@ -149,7 +149,7 @@ am__uninstall_files_from_dir = { \
   }
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libmb1r_la_DEPENDENCIES = ${top_srcdir}/src/mbtrnav/libmb1.la \
-	$(LIBMFRAME)
+	$(LIBMBTRNFRAME)
 am__dirstamp = $(am__leading_dot)dirstamp
 am_libmb1r_la_OBJECTS = utils/mb71_msg.lo mb1r/mb1-reader.lo
 libmb1r_la_OBJECTS = $(am_libmb1r_la_OBJECTS)
@@ -160,7 +160,7 @@ am__v_lt_1 =
 libmb1r_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libmb1r_la_LDFLAGS) $(LDFLAGS) -o $@
-libr7kr_la_DEPENDENCIES = $(LIBMFRAME)
+libr7kr_la_DEPENDENCIES = $(LIBMBTRNFRAME)
 am_libr7kr_la_OBJECTS = utils/mb71_msg.lo r7kr/r7k-reader.lo \
 	r7kr/r7kc.lo
 libr7kr_la_OBJECTS = $(am_libr7kr_la_OBJECTS)
@@ -169,43 +169,43 @@ libr7kr_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(libr7kr_la_LDFLAGS) $(LDFLAGS) -o $@
 am_emu7k_OBJECTS = utils/emu7k.$(OBJEXT)
 emu7k_OBJECTS = $(am_emu7k_OBJECTS)
-emu7k_DEPENDENCIES = $(LIBMFRAME) libr7kr.la
+emu7k_DEPENDENCIES = $(LIBMBTRNFRAME) libr7kr.la
 am_frames7k_OBJECTS = utils/frames7k.$(OBJEXT)
 frames7k_OBJECTS = $(am_frames7k_OBJECTS)
-frames7k_DEPENDENCIES = $(LIBMFRAME) libr7kr.la
+frames7k_DEPENDENCIES = $(LIBMBTRNFRAME) libr7kr.la
 am_mb1_cli_OBJECTS = mb1r/mb1cli-app.$(OBJEXT)
 mb1_cli_OBJECTS = $(am_mb1_cli_OBJECTS)
-mb1_cli_DEPENDENCIES = $(LIBMFRAME) libmb1r.la $(LIBMB1)
+mb1_cli_DEPENDENCIES = $(LIBMBTRNFRAME) libmb1r.la $(LIBMB1)
 am_mb12csv_OBJECTS = utils/mb12csv.$(OBJEXT)
 mb12csv_OBJECTS = $(am_mb12csv_OBJECTS)
-mb12csv_DEPENDENCIES = $(LIBMFRAME) libmb1r.la $(LIBMB1)
+mb12csv_DEPENDENCIES = $(LIBMBTRNFRAME) libmb1r.la $(LIBMB1)
 am_mb1conv_OBJECTS = utils/mb1conv.$(OBJEXT)
 mb1conv_OBJECTS = $(am_mb1conv_OBJECTS)
-mb1conv_DEPENDENCIES = $(LIBMFRAME) libmb1r.la $(LIBMB1)
+mb1conv_DEPENDENCIES = $(LIBMBTRNFRAME) libmb1r.la $(LIBMB1)
 am_mb1r_test_OBJECTS = mb1r/mb1r-test.$(OBJEXT)
 mb1r_test_OBJECTS = $(am_mb1r_test_OBJECTS)
 mb1r_test_DEPENDENCIES = libmb1r.la
 am_mbtnav_cli_OBJECTS = utils/mbtnav_cli.$(OBJEXT)
 mbtnav_cli_OBJECTS = $(am_mbtnav_cli_OBJECTS)
-mbtnav_cli_DEPENDENCIES = $(LIBMFRAME)
+mbtnav_cli_DEPENDENCIES = $(LIBMBTRNFRAME)
 am_r7kr_test_OBJECTS = r7kr/r7kr-test.$(OBJEXT)
 r7kr_test_OBJECTS = $(am_r7kr_test_OBJECTS)
 r7kr_test_DEPENDENCIES = libr7kr.la
 am_stream7k_OBJECTS = utils/stream7k.$(OBJEXT)
 stream7k_OBJECTS = $(am_stream7k_OBJECTS)
-stream7k_DEPENDENCIES = $(LIBMFRAME) libr7kr.la
+stream7k_DEPENDENCIES = $(LIBMBTRNFRAME) libr7kr.la
 am_tbinx_OBJECTS = utils/tbinx.$(OBJEXT)
 tbinx_OBJECTS = $(am_tbinx_OBJECTS)
-tbinx_DEPENDENCIES = $(LIBMFRAME) libmb1r.la libr7kr.la
+tbinx_DEPENDENCIES = $(LIBMBTRNFRAME) libmb1r.la libr7kr.la
 am_trnc_OBJECTS = utils/trnc.$(OBJEXT)
 trnc_OBJECTS = $(am_trnc_OBJECTS)
-trnc_DEPENDENCIES = $(LIBMFRAME) libmb1r.la
+trnc_DEPENDENCIES = $(LIBMBTRNFRAME) libmb1r.la
 am_udpc_OBJECTS = utils/udpc.$(OBJEXT)
 udpc_OBJECTS = $(am_udpc_OBJECTS)
-udpc_DEPENDENCIES = $(LIBMFRAME)
+udpc_DEPENDENCIES = $(LIBMBTRNFRAME)
 am_udps_OBJECTS = utils/udps.$(OBJEXT)
 udps_OBJECTS = $(am_udps_OBJECTS)
-udps_DEPENDENCIES = $(LIBMFRAME)
+udps_DEPENDENCIES = $(LIBMBTRNFRAME)
 SCRIPTS = $(bin_SCRIPTS) $(dist_bin_SCRIPTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -505,7 +505,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 lib_LTLIBRARIES = libr7kr.la libmb1r.la
-LIBMFRAME = ${top_srcdir}/src/mbtrnframe/libmframe.la
+LIBMBTRNFRAME = ${top_srcdir}/src/mbtrnframe/libmbtrnframe.la
 LIBMB1 = ${top_srcdir}/src/mbtrnav/libmb1.la
 include_HEADERS = \
         utils/mb71_msg.h \
@@ -515,52 +515,52 @@ include_HEADERS = \
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
-# configure mframe compilation flags
+# configure MBTRNFRAME compilation flags
 BUILD_DATE = `date +%Y/%m/%dT%H:%M:%S%z`
-MFRAME_VERSIONS = -DMFRAME_BUILD="${BUILD_DATE}" -DTRNC_VER=1.0 -DFRAMES7K_VER=1.0 -DSTREAM7K_VER=1.0 -DTBINX_VER=1.0 -DEMU7K_VER=1.0
-MFRAME_TESTS = -DWITH_TESTS -DWITH_R7KR_TEST -DWITH_MB1R_TEST
-MFRAME_FEATURES = -DWITH_MST_MSTATS -DMST_STATS_EN -DWITH_MMDEBUG
-MFRAME_OPTS = $(MFRAME_VERSIONS) $(MFRAME_FEATURES) $(MFRAME_TESTS)
-AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/mb1r -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrnframe/usr  -I${top_srcdir}/src/mbtrnframe/mframe/src -I${top_srcdir}/src/mbtrnav/trnw -I${top_srcdir}/src/mbtrnav/terrain-nav -DHAVE_CONFIG_H  -D_GNU_SOURCE $(MFRAME_OPTS)
+MBTRNFRAME_VERSIONS = -DMBTRNFRAME_BUILD="${BUILD_DATE}" -DTRNC_VER=1.0 -DFRAMES7K_VER=1.0 -DSTREAM7K_VER=1.0 -DTBINX_VER=1.0 -DEMU7K_VER=1.0
+MBTRNFRAME_TESTS = -DWITH_TESTS -DWITH_R7KR_TEST -DWITH_MB1R_TEST
+MBTRNFRAME_FEATURES = -DWITH_MST_MSTATS -DMST_STATS_EN -DWITH_MMDEBUG
+MBTRNFRAME_OPTS = $(MBTRNFRAME_VERSIONS) $(MBTRNFRAME_FEATURES) $(MBTRNFRAME_TESTS)
+AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/mb1r -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrnframe  -I${top_srcdir}/src/mbtrnav/trnw -I${top_srcdir}/src/mbtrnav/terrain-nav -DHAVE_CONFIG_H  -D_GNU_SOURCE $(MBTRNFRAME_OPTS)
 libr7kr_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libr7kr_la_SOURCES = \
 		utils/mb71_msg.c \
 		r7kr/r7k-reader.c \
 		r7kr/r7kc.c
 
-libr7kr_la_LIBADD = ${LIBMFRAME} -lpthread
+libr7kr_la_LIBADD = ${LIBMBTRNFRAME} -lpthread
 libmb1r_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmb1r_la_SOURCES = \
 		utils/mb71_msg.c \
 		mb1r/mb1-reader.c
 
-libmb1r_la_LIBADD = ${top_srcdir}/src/mbtrnav/libmb1.la ${LIBMFRAME} -lpthread
+libmb1r_la_LIBADD = ${top_srcdir}/src/mbtrnav/libmb1.la ${LIBMBTRNFRAME} -lpthread
 udps_SOURCES = utils/udps.c
-udps_LDADD = ${LIBMFRAME}
+udps_LDADD = ${LIBMBTRNFRAME}
 udpc_SOURCES = utils/udpc.c
-udpc_LDADD = ${LIBMFRAME}
+udpc_LDADD = ${LIBMBTRNFRAME}
 mbtnav_cli_SOURCES = utils/mbtnav_cli.c
-mbtnav_cli_LDADD = ${LIBMFRAME}
+mbtnav_cli_LDADD = ${LIBMBTRNFRAME}
 stream7k_SOURCES = utils/stream7k.c
-stream7k_LDADD = ${LIBMFRAME} libr7kr.la
+stream7k_LDADD = ${LIBMBTRNFRAME} libr7kr.la
 frames7k_SOURCES = utils/frames7k.c
-frames7k_LDADD = ${LIBMFRAME} libr7kr.la
+frames7k_LDADD = ${LIBMBTRNFRAME} libr7kr.la
 emu7k_SOURCES = utils/emu7k.c
-emu7k_LDADD = ${LIBMFRAME} libr7kr.la
+emu7k_LDADD = ${LIBMBTRNFRAME} libr7kr.la
 r7kr_test_SOURCES = r7kr/r7kr-test.c
 r7kr_test_LDADD = libr7kr.la
 trnc_SOURCES = utils/trnc.c
-trnc_LDADD = ${LIBMFRAME} libmb1r.la
+trnc_LDADD = ${LIBMBTRNFRAME} libmb1r.la
 tbinx_SOURCES = utils/tbinx.c
-tbinx_LDADD = ${LIBMFRAME} libmb1r.la libr7kr.la
+tbinx_LDADD = ${LIBMBTRNFRAME} libmb1r.la libr7kr.la
 mb1conv_SOURCES = utils/mb1conv.c
-mb1conv_LDADD = ${LIBMFRAME} libmb1r.la ${LIBMB1}
+mb1conv_LDADD = ${LIBMBTRNFRAME} libmb1r.la ${LIBMB1}
 mb12csv_SOURCES = utils/mb12csv.c
-mb12csv_LDADD = ${LIBMFRAME} libmb1r.la ${LIBMB1}
+mb12csv_LDADD = ${LIBMBTRNFRAME} libmb1r.la ${LIBMB1}
 mb1r_test_SOURCES = mb1r/mb1r-test.c
 mb1r_test_LDADD = libmb1r.la
 mb1_cli_SOURCES = mb1r/mb1cli-app.c
-mb1_cli_LDADD = ${LIBMFRAME} libmb1r.la ${LIBMB1}
+mb1_cli_LDADD = ${LIBMBTRNFRAME} libmb1r.la ${LIBMB1}
 dist_bin_SCRIPTS = tools/bin/mbtrnpp.sh emu7k.sh \
 	tools/bin/mbcfgstrip.sh tools/bin/mbcfg2opt.sh
 bin_SCRIPTS = tools/bin/mbtrnpp.sh tools/bin/mbcfgstrip.sh \

@@ -101,4 +101,4 @@ set(HTML
     mbvelocitytool.html
     ValJul2003.gif)
 
-install(FILES ${HTML} DESTINATION ${CMAKE_INSTALL_PREFIX}/doc/mbsystem/html)
+install(FILES ${HTML} DESTINATION ${CMAKE_INSTALL_DOC}/mbsystem/html)
