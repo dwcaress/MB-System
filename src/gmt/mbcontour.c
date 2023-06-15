@@ -104,7 +104,8 @@
 
 #define GMT_PROG_OPTIONS "->BJKOPRUVXY" GMT_OPT("S")
 
-// Stop warnings about packaging collision between GDAL's cpl_port.h and mb_config.h
+// Stop warnings about packaging collision between GDAL's cpl_port.h and the 
+// Autotools build system mb_config.h
 #ifdef PACKAGE_BUGREPORT
 #undef PACKAGE_BUGREPORT
 #endif

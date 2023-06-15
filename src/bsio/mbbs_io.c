@@ -31,10 +31,6 @@
    io.c --
    I/O routines for Hawaii Mapping Research Group BS files.
 */
-#ifdef HAVE_CONFIG_H
-#include <mb_config.h>
-#endif
-
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
