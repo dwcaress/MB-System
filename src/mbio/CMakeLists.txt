@@ -5,6 +5,10 @@ else()
 endif()
 
 find_package(LibPROJ REQUIRED)
+message(STATUS "  LibPROJ_INCLUDE_DIR: ${LibPROJ_INCLUDE_DIR}")
+message(STATUS "  LibPROJ_LIBRARY_RELEASE: ${LibPROJ_LIBRARY_RELEASE}")
+message(STATUS "  LibPROJ_LIBRARY_DEBUG: ${LibPROJ_LIBRARY_DEBUG}")
+
 find_package(NetCDF REQUIRED)
 
 set(SRC
@@ -180,7 +184,7 @@ if(buildGSF)
 endif()
 target_link_libraries(
   mbio
-  PRIVATE NetCDF::NetCDF mbbsio mbsapi LibPROJ::LibPROJ NetCDF::NetCDF
+  PRIVATE NetCDF::NetCDF mbbsio mbsapi LibPROJ::LibPROJ
   PUBLIC TIRPC::TIRPC m)
 
 install(TARGETS mbio DESTINATION ${CMAKE_INSTALL_LIBDIR})

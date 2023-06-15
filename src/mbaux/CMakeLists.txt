@@ -16,11 +16,13 @@ set_target_properties(mbaux PROPERTIES VERSION "0" SOVERSION "0")
 target_include_directories(mbaux PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(mbaux GMT::GMT GDAL::GDAL mbio)
 
+install(TARGETS mbaux DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
 if(buildGUIs)
   find_package(X11 REQUIRED)
   add_library(mbxgr mb_xgraphics.c)
   set_target_properties(mbxgr PROPERTIES VERSION "0" SOVERSION "0")
   target_link_libraries(mbxgr GMT::GMT GDAL::GDAL mbio X11::X11)
 
-  install(TARGETS mbaux mbxgr DESTINATION ${CMAKE_INSTALL_LIBDIR})
+  install(TARGETS mbxgr DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
