@@ -23,7 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.9beta53    June 10, 2023
+- Version 5.7.9beta53    June 15, 2023
 - Version 5.7.9beta52    March 9, 2023
 - Version 5.7.9beta51    February 14, 2023
 - Version 5.7.9beta50    February 12, 2023
@@ -430,10 +430,11 @@ or beta, are equally accessible as tarballs through the Github interface.
 ### MB-System Version 5.7 Release Notes:
 --
 
-#### 5.7.9beta53 (June 10)
+#### 5.7.9beta53 (June 15)
 
-Partially functional CMake build system derived from Josch, who altered an earlier
-version from Tom O'Reilly 
+Rewrote the CMake build system based on the work of both Tom O'Reilly and Josch. This
+build system now works on MacOs Ventura. We will continue to augment and test using
+cmake so that this build system also works on Ubuntu and Debian Linux.
 
 Mbtrnpp and related TRN code: Many updates and improvements from Kent Headley
 
