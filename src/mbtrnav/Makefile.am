@@ -1,6 +1,6 @@
 lib_LTLIBRARIES = libgeolib.la libnewmat.la libqnx.la libtnav.la libtrnw.la libnetif.la libmb1.la
 
-LIBMBTRNFRAME = $(top_builddir)/src/mbtrnframe/LIBMBTRNFRAME.la
+LIBMBTRNFRAME = $(top_builddir)/src/mbtrnframe/libmbtrnframe.la
 MBTRNFRAME_INC = -I${top_srcdir}/src/mbtrnframe
 
 
