@@ -37,6 +37,8 @@
 /* CMake build system section */
 #ifdef CMAKE_BUILD_SYSTEM
 
+  #include <stdint.h>
+
   #include <rpc/rpc.h>
   #include <rpc/types.h>
   #include <rpc/xdr.h>
@@ -48,6 +50,14 @@
   #endif
 
   #include <mb_config.h>
+
+	#ifdef _WIN32
+		#include <stdint.h> /* To get INT32_MIN, INT32_MAX, etc ... */
+	#else
+		#ifdef HAVE_STDINT_H
+			#include <stdint.h>
+		#endif
+	#endif
 
   /* XDR i/o include file */
   #ifdef HAVE_RPC_RPC_H
