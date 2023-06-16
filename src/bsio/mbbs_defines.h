@@ -37,31 +37,31 @@
 /* CMake build system section */
 #ifdef CMAKE_BUILD_SYSTEM
 
-#  include <rpc/rpc.h>
-#  include <rpc/types.h>
-#  include <rpc/xdr.h>
+  #include <rpc/rpc.h>
+  #include <rpc/types.h>
+  #include <rpc/xdr.h>
 
 #else // Begin Autotools section supporting legacy OS's
 
-#ifndef _WIN32
-#include <sys/time.h>
-#endif
+  #ifndef _WIN32
+    #include <sys/time.h>
+  #endif
 
-#include <mb_config.h>
+  #include <mb_config.h>
 
-/* XDR i/o include file */
-#ifdef HAVE_RPC_RPC_H
-#include <rpc/rpc.h>
-#endif
-#ifdef HAVE_RPC_TYPES_H
-#include <rpc/types.h>
-#include <rpc/xdr.h>
-#endif
+  /* XDR i/o include file */
+  #ifdef HAVE_RPC_RPC_H
+    #include <rpc/rpc.h>
+  #endif
+  #ifdef HAVE_RPC_TYPES_H
+    #include <rpc/types.h>
+    #include <rpc/xdr.h>
+  #endif
 
-#ifdef _WIN32
-#include <float.h>
-#define isnan _isnan
-#endif
+  #ifdef _WIN32
+    #include <float.h>
+    #define isnan _isnan
+  #endif
 
 #endif // End Autotools section
 
