@@ -1,6 +1,6 @@
 #------------------------------------------------------------------------------
 #
-# MBtrnav libraries
+# MBtrnav libraries and test programs
 #
 # This group of libraries derives for an MBARI software repository that supports
 # Terrain Relative Navigation (TRN) software. Aside from this CMakeLists.txt file
@@ -14,6 +14,13 @@
 #    qnx
 #    tnav
 #    trnw
+#.   netif
+#.   qnx
+#.   trnucli
+#
+# The test programs are:
+#    trnucli-test
+#.   trnusvr-test
 #
 message("In mbtrnav")
 #
@@ -25,7 +32,7 @@ find_package(NetCDF REQUIRED)
 #
 # build libgeolib (gctp)
 
-add_library(geolib STATIC
+add_library(geolib 
        gctp/source/gctp.c
        gctp/source/alberfor.c
        gctp/source/alberinv.c
@@ -101,7 +108,7 @@ add_library(geolib STATIC
 #
 # build libnewmat (matrix math)
 
-add_library(newmat STATIC
+add_library(newmat 
        newmat/newmat1.cpp
        newmat/newmat2.cpp
        newmat/newmat3.cpp
@@ -130,7 +137,7 @@ add_library(newmat STATIC
 #
 # build libqnx (utils)
 
-add_library(qnx STATIC
+add_library(qnx 
        qnx-utils/AsciiFile.cc
        qnx-utils/AngleData.cc
        qnx-utils/CharData.cc
@@ -153,13 +160,14 @@ add_library(qnx STATIC
        qnx-utils/DataFieldFactory.cc
        qnx-utils/LogFile.cc
 )
+target_link_libraries(qnx PRIVATE geolib)
 #
 #------------------------------------------------------------------------------
 #
 # build tnav (TRN engine core)
 
 # specify library
-add_library(tnav STATIC
+add_library(tnav 
        terrain-nav/TerrainNav.cpp
        terrain-nav/TNavConfig.cpp
        terrain-nav/TNavFilter.cpp
@@ -184,13 +192,14 @@ add_library(tnav STATIC
 target_include_directories(tnav PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnav/newmat
                                           ${CMAKE_SOURCE_DIR}/src/mbtrnav/qnx-utils
                                           ${NetCDF_INCLUDE_DIRS})
+target_link_libraries(tnav PRIVATE newmat qnx NetCDF::NetCDF)
 #
 #------------------------------------------------------------------------------
 #
 # build trnw (TRN C wrapper)
 
 # specify library
-add_library(trnw STATIC
+add_library(trnw 
        trnw/trnw.cpp
        trnw/mb1_msg.c
        trnw/trnif_msg.c
@@ -199,25 +208,27 @@ target_include_directories(trnw PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-
                                           ${CMAKE_SOURCE_DIR}/src/mbtrnav/newmat 
                                           ${CMAKE_SOURCE_DIR}/src/mbtrnav/qnx-utils
                                           ${NetCDF_INCLUDE_DIRS})
+target_link_libraries(trnw PRIVATE tnav newmat qnx NetCDF::NetCDF)
 #
 #------------------------------------------------------------------------------
 #
 # build libnetif (TRNx server network interfaces)
 
 # specify library
-add_library(netif STATIC
+add_library(netif 
        trnw/netif.c
        trnw/trnif_proto.c
 )
 target_include_directories(netif PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnframe
                                           ${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav)
+target_link_libraries(netif PRIVATE mbtrnframe tnav trnw)
 #
 #------------------------------------------------------------------------------
 #
 # build libmb1
 
 # specify library
-add_library(mb1 STATIC
+add_library(mb1 
        trnw/mb1_msg.c
 )
 #
@@ -226,11 +237,12 @@ add_library(mb1 STATIC
 # build trnu_cli component library
 
 # specify library
-add_library(trnucli STATIC
+add_library(trnucli 
        trnw/trnu_cli.c
 )
 target_include_directories(trnucli PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnframe
                                           ${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav)
+target_link_libraries(trnucli PRIVATE mbtrnframe netif)
 #
 #------------------------------------------------------------------------------
 #
@@ -258,7 +270,8 @@ target_link_libraries(trnusvr-test PRIVATE mbtrnframe netif tnav trnw newmat qnx
 #------------------------------------------------------------------------------
 # install it all
 #
-install(TARGETS mbio DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS geolib newmat tnav qnx trnw netif mb1 trnucli DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS trnucli-test trnusvr-test DESTINATION ${CMAKE_INSTALL_BINDIR})
 #
 #------------------------------------------------------------------------------
 
