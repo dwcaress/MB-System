@@ -10,29 +10,32 @@
 
 # import shared environment, variables
 source ${QP_PLOT_HOME}/qp-shared.conf.sh
-QX_TRNO_TARGET=${QX_TRNO_TARGET:-"tbd"}
 
 # session ID (used by local combiner job)
+# Let Application set this
 # QU_SESSION_ID="-`date +%s`
 
 # define plot titles and image names
 QU_TRNO_OFFSETS_PTITLE=${QU_PTITLE:-"TRN offsets"}
-QU_TRNO_OFFSETS_STITLE=${QU_STITLE:-"\n${QX_TRNO_TARGET} : ${QU_DATA_SET_ID}"}
-export QU_TRNO_OFFSETS_OIMG_NAME="trno-${QX_TRNO_TARGET}-ofs"
-QU_OFILE_NAME="trno-${QX_TRNO_TARGET}-ofs"
+TMP_STR="\n${QU_SESSION_ID} : ${QU_DATA_SET_ID}"
+QU_TRNO_OFFSETS_STITLE=${QU_STITLE:-$TMP_STR}
+export QU_TRNO_OFFSETS_OIMG_NAME="trno-${QU_SESSION_ID}-ofs"
+QU_OFILE_NAME="trno-${QU_SESSION_ID}-ofs"
 
 QU_TRNO_NORTHINGS_PTITLE=${QU_PTITLE:-"TRN Northings (mmse vs nav)"}
-QU_TRNO_NORTHINGS_STITLE=${QU_STITLE:-"\n${QX_TRNO_TARGET} : ${QU_DATA_SET_ID}"}
-export QU_TRNO_NORTHINGS_OIMG_NAME="trno-${QX_TRNO_TARGET}-nor"
-QU_OFILE_NAME="trno-${QX_TRNO_TARGET}-nor"
+TMP_STR="\n${QU_SESSION_ID} : ${QU_DATA_SET_ID}"
+QU_TRNO_NORTHINGS_STITLE=${QU_STITLE:-$TMP_STR}
+export QU_TRNO_NORTHINGS_OIMG_NAME="trno-${QU_SESSION_ID}-nor"
+QU_OFILE_NAME="trno-${QU_SESSION_ID}-nor"
 
 QU_TRNO_EASTINGS_PTITLE=${QU_PTITLE:-"TRN Eastings (mmse vs nav)"}
-QU_TRNO_EASTINGS_STITLE=${QU_STITLE:-"\n${QX_TRNO_TARGET} : ${QU_DATA_SET_ID}"}
-export QU_TRNO_EASTINGS_OIMG_NAME="trno-${QX_TRNO_TARGET}-eas"
-QU_OFILE_NAME="trno-${QX_TRNO_TARGET}-eas"
+TMP_STR="\n${QU_SESSION_ID} : ${QU_DATA_SET_ID}"
+QU_TRNO_EASTINGS_STITLE=${QU_STITLE:-$TMP_STR}
+export QU_TRNO_EASTINGS_OIMG_NAME="trno-${QU_SESSION_ID}-eas"
+QU_OFILE_NAME="trno-${QU_SESSION_ID}-eas"
 
 # Define job names to use in the configuration
-declare -a QU_KEYS=( "trno-${QX_TRNO_TARGET}-ofs" "trno-${QX_TRNO_TARGET}-nor" "trno-${QX_TRNO_TARGET}-eas" "comb-all" )
+declare -a QU_KEYS=( "trno-${QU_SESSION_ID}-ofs" "trno-${QU_SESSION_ID}-nor" "trno-${QU_SESSION_ID}-eas" "comb-all" )
 
 # Set time formats for data and plots
 # time format strings conform to gnuplot syntax
