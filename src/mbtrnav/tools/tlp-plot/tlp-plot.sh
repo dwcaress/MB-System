@@ -293,12 +293,10 @@ plot_trno(){
     # trno metrics
     #####################
 
-    export QX_TRNO_TARGET=${1}
-    export TRNO_LOG="${QU_LOG_PATH}/trno-${QX_TRNO_TARGET}-${QU_SESSION_ID}.csv"
-    export QU_TRNO_CSV="trno-${QX_TRNO_TARGET}-${QU_SESSION_ID}.csv"
+    export TRNO_LOG="${QU_LOG_PATH}/trno-${QU_SESSION_ID}.csv"
+    export QU_TRNO_CSV="trno-${QU_SESSION_ID}.csv"
 
     TRNO_QPCONF="qp-trno.conf.sh"
-
 
     if [ -f "${TRNO_LOG}" ] && [ -f "${QP_PLOT_HOME}/${TRNO_QPCONF}" ]
     then
@@ -327,13 +325,8 @@ plot_logs(){
     vout " QU_SESSION_ID  - ${QU_SESSION_ID}"
     vout " QU_DATA_SET_ID - ${QU_DATA_SET_ID}"
 
-	# generate plot CSV and images...
-
-	# plot DVL TRN replay data
-	plot_trno "DVL"
-
-	# plot IDT TRN replay data
-    plot_trno "IDT"
+    # generate plot CSV and images...
+    plot_trno
 
     # qplot PDF combiner job configuration
     COMB_QPCONF="qp-comb.conf.sh"
