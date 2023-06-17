@@ -1,4 +1,5 @@
 *.DS_Store
+.deps
 /aclocal.m4
 /Makefile
 /config.log
@@ -11,6 +12,7 @@ src/**/*.lo
 src/**/*.la
 src/**/*.dylib
 src/**/.deps
+src/**/**/.deps
 src/**/.libs
 src/**/Makefile
 src/**/*.exe
