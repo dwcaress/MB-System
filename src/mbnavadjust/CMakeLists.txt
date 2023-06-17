@@ -1,12 +1,19 @@
 find_package(X11 REQUIRED)
 find_package(Motif REQUIRED)
 
-add_executable(
-  mbnavadjust mbnavadjust_callbacks.c mbnavadjust_creation.c mbnavadjust_io.c
-              mbnavadjust_prog.c mbnavadjust_util.c mbnavadjustmerge.c)
+add_executable(mbnavadjust 
+                mbnavadjust_callbacks.c 
+                mbnavadjust_creation.c 
+                mbnavadjust_io.c
+                mbnavadjust_prog.c 
+                mbnavadjust_util.c 
+                mbnavadjustmerge.c)
+target_link_libraries(mbnavadjust PRIVATE mbview mbaux mbxgr Motif::Motif X11::Xt)
 
-target_link_libraries(mbnavadjust PRIVATE mbview mbaux mbxgr Motif::Motif
-                                          X11::Xt)
+add_executable(mbnavadjustmerge mbnavadjustmerge.c mbnavadjust_io.c)
+target_link_libraries(mbnavadjustmerge PRIVATE mbaux )
+
+install(TARGETS mbnavadjust mbnavadjustmerge DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 if(buildPCL)
   find_package(PCL REQUIRED)
@@ -28,5 +35,3 @@ if(buildPCL)
     install(TARGETS mbnavadjustfine DESTINATION ${CMAKE_INSTALL_BINDIR})
   endif()
 endif()
-
-install(TARGETS mbnavadjust DESTINATION ${CMAKE_INSTALL_BINDIR})

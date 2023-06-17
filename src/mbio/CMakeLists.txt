@@ -184,7 +184,7 @@ if(buildGSF)
 endif()
 target_link_libraries(
   mbio
-  PRIVATE NetCDF::NetCDF mbbsio mbsapi LibPROJ::LibPROJ
+  PRIVATE NetCDF::NetCDF mbbsio mbsapi r7kr LibPROJ::LibPROJ
   PUBLIC TIRPC::TIRPC m)
 
 install(TARGETS mbio DESTINATION ${CMAKE_INSTALL_LIBDIR})
