@@ -4,17 +4,17 @@
 # - option naming same as command line (w/o '--')
 # - use '#' or '//' for comments
 # - some options support variable substitution:
-#     option        variable          description
-#     ------        --------          -----------
-#     output        SESSION           mbtrpp session ID (YYYYMMDD-hhmmss)
-#     input         TRN_RESON_HOST[1] input socket IP address
-#     mb-out        TRN_HOST[1]       TRN processing host IP
-#     trn-out       TRN_HOST          TRN host IP (for trnsvr, trnusvr)
-#                   TRN_GROUP         TRN multicast group (for trnumsvr)
-#     trn-mid       TRN_SESSION       TRN mission ID (YYYY-JJJ) (JJJ: year day)
-#     log-directory TRN_LOGFILES[2]   TRN log directory
-#     trn-map       TRN_MAPFILES[2]   TRN map file directory
-#     trn-par       TRN_DATAFILES[2]  TRN data/cfg file directory
+#     option        variable           description
+#     ------        --------           -----------
+#     output        SESSION            mbtrpp session ID (YYYYMMDD-hhmmss)
+#     input         TRN_SOURCE_HOST[1] input socket IP address
+#     mb-out        TRN_HOST[1]        TRN processing host IP
+#     trn-out       TRN_HOST           TRN host IP (for trnsvr, trnusvr)
+#                   TRN_GROUP          TRN multicast group (for trnumsvr)
+#     trn-mid       TRN_SESSION        TRN mission ID (YYYY-JJJ) (JJJ: year day)
+#     log-directory TRN_LOGFILES[2]    TRN log directory
+#     trn-map       TRN_MAPFILES[2]    TRN map file directory
+#     trn-par       TRN_DATAFILES[2]   TRN data/cfg file directory
 #     trn-cfg       TRN_DATAFILES
 #   Notes
 #     [1] use current host IP address if environment unset
@@ -35,7 +35,7 @@ log-directory=/path/to logs
 // input data source specifier
 // file_path
 // socket:IP:port:?
-input=socket:TRN_RESON_HOST:7000:0
+input=socket:TRN_SOURCE_HOST:7000:0
 
 // opt "output" [?]
 // output mode specifier

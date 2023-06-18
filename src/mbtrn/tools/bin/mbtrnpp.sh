@@ -37,7 +37,7 @@ unset MBTRNPP_ENV
 # variables use environment values if set
 # and may be overridden on the command line
 # using an environment file or options
-TRN_RESON_HOST=${TRN_RESON_HOST:-"localhost"}
+TRN_SOURCE_HOST=${TRN_SOURCE_HOST:-"localhost"}
 TRN_HOST=${TRN_HOST:-"localhost"}
 TRN_MBTRNDIR=${TRN_MBTRNDIR:-"/usr/local/bin"}
 TRN_MAPFILES=${TRN_MAPFILES:-"./maps"}
@@ -94,7 +94,7 @@ init_vars(){
 #    # RESON3  134.89.32.110
 #    # RESON_PORT 7000
 #    # RESON_SIZE 0:default or size in bytes
-#    OPT_INPUT="--input=socket:${TRN_RESON_HOST}:7000:0"
+#    OPT_INPUT="--input=socket:${TRN_SOURCE_HOST}:7000:0"
 #
 #    # output destination
 #    # [alternatively, use --mb-out]
@@ -262,7 +262,7 @@ printUsage(){
     echo "  -m path : override mbtrnpp dir    [$TRN_MBTRNDIR]"
     echo "  -o addr : TRN host                [$TRN_HOST]"
     echo "             affects : [--trn-out, --mb-out]"
-    echo "  -r addr : TRN reson host          [$TRN_RESON_HOST]"
+    echo "  -s addr : TRN source host         [$TRN_SOURCE_HOST]"
     echo "             affects: [--input]"
     echo "  -t      : test [print cmdline]"
     echo "  -v      : verbose output         [$VERBOSE]"
@@ -282,13 +282,13 @@ printUsage(){
     echo "  `basename $0` -e /path/to/environment/file -- --config=/path/to/config/file [options...] --help"
     echo ""
     echo " Environment variables:"
-    echo "  TRN_MAPFILES   - TRN map directory       [--trn-maps]"
-    echo "  TRN_DATAFILES  - TRN config directory    [--trn-cfg, --trn-par]"
-    echo "  TRN_LOGFILES   - TRN log directory       [--trn-log]"
-    echo "  TRN_RESON_HOST - TRN reson (or emu7k) IP [--input]"
-    echo "  TRN_HOST       - TRN server IP           [--trn-out, --mb-out]"
-    echo "  TRN_GROUP      - TRN multicast group     [--trn-out]"
-    echo "  TRN_MBTRNDIR   - mbtrnpp directory       [mbtrnpp path]"
+    echo "  TRN_MAPFILES    - TRN map directory       [--trn-maps]"
+    echo "  TRN_DATAFILES   - TRN config directory    [--trn-cfg, --trn-par]"
+    echo "  TRN_LOGFILES    - TRN log directory       [--trn-log]"
+    echo "  TRN_SOURCE_HOST - TRN source IP           [--input]"
+    echo "  TRN_HOST        - TRN server IP           [--trn-out, --mb-out]"
+    echo "  TRN_GROUP       - TRN multicast group     [--trn-out]"
+    echo "  TRN_MBTRNDIR    - mbtrnpp directory       [mbtrnpp path]"
     echo ""
 }
 
@@ -330,7 +330,7 @@ processCmdLine(){
     OPTIND=1
     #    vout "`basename $0` all args[$*]"
 
-while getopts a:c:d:D:e:G:hL:M:m:o:r:tvw: Option
+while getopts a:c:d:D:e:G:hL:M:m:o:s:tvw: Option
     do
         case $Option in
         a ) APP_CMD=$OPTARG
@@ -356,7 +356,7 @@ while getopts a:c:d:D:e:G:hL:M:m:o:r:tvw: Option
         ;;
         o ) TRN_HOST=$OPTARG
         ;;
-        r ) TRN_RESON_HOST=$OPTARG
+        s ) TRN_SOURCE_HOST=$OPTARG
         ;;
         t ) DO_TEST="Y"
         ;;
