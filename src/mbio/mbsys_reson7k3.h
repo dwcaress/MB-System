@@ -378,7 +378,7 @@
 //-----------------------------------------------------------------
 
 // Structure size definitions
-#define MBSYS_RESON7K_BUFFER_STARTSIZE 32768
+#define MBSYS_RESON7K_BUFFER_STARTSIZE 600000 // 32768
 #define MBSYS_RESON7K_MAX_DEVICE 73
 #define MBSYS_RESON7K_MAX_BEAMS 2048
 #define MBSYS_RESON7K_MAX_SOUNDINGS 2560

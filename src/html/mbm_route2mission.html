@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbm_route2mission</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  22 February 2015 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  19 June 2023 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -31,14 +31,14 @@ Version 5.0
 <B>mbm_route2mission</B> <B>-I</B><I>routefile</I>
 [<B>-A</B><I>altmin/altabort[/altdesired[/altdesired2[/altdesired3]]]</I>
 <B>-B</B><I>behavior</I> <B>-C</B><I>missiontime</I>
-<B>-D</B><I>depthconstant[/depthconstant2]</I>
+<B>-D</B><I>depthconstant[/depthconstant2]</I> <B>-E</B><I>starttime</I>
 <B>-F</B><I>forwarddistance</I> <B>-G</B><I>gpsmode</I>
 <B>-J</B><I>depthprofilefile</I> <B>-L</B><I>approachdepth</I>
 <B>-M</B><I>[sensorlist]</I> <B>-N</B>[<I>spiraldescentaltitude</I>] <B>-O</B><I>missionfile</I>
 <B>-P</B><I>[startlon/startlat | startdistance]</I>
 <B>-R</B><I>transmitpower/receivegain[/rangeminfraction[/pulsewidth]]</I>
-<B>-S</B><I>speed</I> <B>-T</B><I>starttime</I> <B>-U</B><I>maxclimbrate</I>
-<B>-W</B><I>waypointspacing</I> <B>-V</B> <B>-H</B>]
+<B>-S</B><I>speed</I> <B>-T</B> <B>-U</B><I>maxclimbrate</I>
+<B>-W</B><I>waypointspacing</I> <B>-Z</B> <B>-V</B> <B>-H</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -209,6 +209,16 @@ typ START4 and END4 for <I>depthconstant</I> and START5 and END5 for
 <I>depthconstant2</I>. These are the waypoint types defined in
 <B>MBgrdviz</B> routes. While these waypoint types are active, the
 AUV is commanded to the specified constant depth value.
+<DT><B>-E</B>
+
+<DD>
+<I>starttime</I>
+<BR>
+
+This sets the expected time required for the AUV to reach the first waypoint
+in the survey mission. If neither
+the <B>-P</B> or <B>-E</B> options are specified, a distance of 500 meters
+to the first waypoint is assumed.
 <DT><B>-F</B>
 
 <DD>
@@ -338,13 +348,12 @@ This sets the commanded AUV speed in meters/second. Default: <I>speed</I> = 1.5 
 <DT><B>-T</B>
 
 <DD>
-<I>starttime</I>
 <BR>
 
-This sets the expected time required for the AUV to reach the first waypoint
-in the survey mission. If neither
-the <B>-P</B> or <B>-T</B> options are specified, a distance of 500 meters
-to the first waypoint is assumed.
+This option enables &quot;closing the loop&quot; on Terrain Relative Navigation (TRN) offset 
+estimates during the survey portions of the mission. This means that the AUV
+will use navigation offsets estimates from a TRN server if those estimates 
+have a &quot;stably converged&quot; status. 
 <DT><B>-U</B>
 
 <DD>
@@ -355,6 +364,10 @@ This sets the maximum climb rate in degrees allowed to be planned for the
 AUV mission. If the topography has a greater slope, the AUV will be brought
 up earlier so the planned climb angle never exceed <I>maxclimbrate</I>.
 Default: <I>maxclimbrate</I> = 25 degrees.
+<DT><B>-V</B>
+
+<DD>
+The <B>-V</B> option causes <B>mbm_route2mission</B> to print out status messages.
 <DT><B>-W</B>
 
 <DD>
@@ -362,10 +375,12 @@ Default: <I>maxclimbrate</I> = 25 degrees.
 <BR>
 
 Sets the spacing in meters of the waypoints output to the mission script.
-<DT><B>-V</B>
+<DT><B>-Z</B>
 
 <DD>
-The <B>-V</B> option causes <B>mbm_route2mission</B> to print out status messages.
+<BR>
+
+Turns off most output to the shell.
 <P>
 </DL>
 <A NAME="lbAH">&nbsp;</A>
@@ -528,7 +543,7 @@ Perhaps.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 22 February 2015</P></CENTER>
+Last Updated: 19 June 2023</P></CENTER>
 
 <HR>
 <center>
