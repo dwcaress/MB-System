@@ -6,6 +6,11 @@ project(MB-System
 set(PROJECT_DATE "9 June 2023")
 
 add_compile_definitions(CMAKE_BUILD_SYSTEM=1)
+if (CMAKE_C_BYTE_ORDER EQUAL LITTLE_ENDIAN)
+  set(BYTESWAPPED 1)
+else()
+  set(BYTESWAPPED 0)
+endif()
 
 option(buildGSF "build GSF library" ON)
 option(buildGUIs "build graphical tools" ON)

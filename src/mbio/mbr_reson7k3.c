@@ -46,8 +46,8 @@
 
 /* turn on debug statements here */
 // #define MBR_RESON7K3_DEBUG 1
-//#define MBR_RESON7K3_DEBUG2 1
-//#define MBR_RESON7K3_DEBUG3 1
+// #define MBR_RESON7K3_DEBUG2 1
+// #define MBR_RESON7K3_DEBUG3 1
 
 /*--------------------------------------------------------------------*/
 int mbr_info_reson7k3(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,

@@ -177,7 +177,8 @@ if(LibPROJ_VERSION VERSION_LESS 5)
                  PROJECTIONS_DAT="${CMAKE_INSTALL_DATADIR}/Projections.dat")
 endif()
 target_compile_definitions(mbio PUBLIC MB_PACKAGE_VERSION="${PROJECT_VERSION}"
-                                       MB_PACKAGE_DATE="${PROJECT_DATE}")
+                                       MB_PACKAGE_DATE="${PROJECT_DATE}"
+                                       BYTESWAPPED=1)
 target_include_directories(mbio PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 if(buildGSF)
   target_link_libraries(mbio PRIVATE mbgsf)
