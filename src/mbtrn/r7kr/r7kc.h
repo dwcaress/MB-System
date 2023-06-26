@@ -549,7 +549,9 @@ typedef enum{
 // max frame bytes is defined in Reson DRF.
 /// @def R7K_MAX_FRAME_BYTES
 /// @brief max 7k center frame size (bytes).
-#define R7K_MAX_FRAME_BYTES 600000 //60000
+// if water column data is enabled,
+// may require value >= 4800000
+#define R7K_MAX_FRAME_BYTES 600000
 // max frames/record is a guess
 /// @def R7K_MAX_RECORD_FRAMES
 /// @brief max record frames per ping (empirical/estimate).
