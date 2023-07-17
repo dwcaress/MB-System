@@ -61,7 +61,7 @@ GNU General Public License for more details
 /////////////////////////
 #include "mframe.h"
 #include "mfile.h"
-#include "medebug.h"
+#include "mxdebug.h"
 
 /////////////////////////
 // Macros
@@ -159,10 +159,10 @@ static mode_t s_iow2posix_mode(mfile_mode_t imode)
     pmode |= ( (imode&MFILE_RO  )!=0 ? S_IROTH : 0 );
     pmode |= ( (imode&MFILE_WO  )!=0 ? S_IWOTH : 0 );
     pmode |= ( (imode&MFILE_XO  )!=0 ? S_IXOTH : 0 );
-//    PDPRINT((stderr,"imode[0x%0X] pmode[0x%0X] S_IRUSR[0x0%X] S_IWUSR[0x%0X] S_IRGRP[0x%0X] S_IWGRP[0x%0X]\n",imode,pmode,S_IRUSR,S_IWUSR,S_IRGRP,S_IWGRP));
-//    PDPRINT((stderr,"S_IRWXU[0x%03X] S_IRUSR[0x%03X] S_IWUSR[0x%03X] S_IXUSR[0x%03X]\n",S_IRWXU,S_IRUSR,S_IWUSR,S_IXUSR));
-//    PDPRINT((stderr,"S_IRWXG[0x%03X] S_IRGRP[0x%03X] S_IWGRP[0x%03X] S_IXGRP[0x%03X]\n",S_IRWXG,S_IRGRP,S_IWGRP,S_IXGRP));
-//    PDPRINT((stderr,"S_IRWXO[0x%03X] S_IROTH[0x%03X] S_IWOTH[0x%03X] S_IXOTH[0x%03X]\n",S_IRWXO,S_IROTH,S_IWOTH,S_IXOTH));
+//    MX_PRINT("imode[0x%0X] pmode[0x%0X] S_IRUSR[0x0%X] S_IWUSR[0x%0X] S_IRGRP[0x%0X] S_IWGRP[0x%0X]\n", imode, pmode, S_IRUSR, S_IWUSR, S_IRGRP, S_IWGRP);
+//    MX_PRINT("S_IRWXU[0x%03X] S_IRUSR[0x%03X] S_IWUSR[0x%03X] S_IXUSR[0x%03X]\n", S_IRWXU, S_IRUSR, S_IWUSR, S_IXUSR);
+//    MX_PRINT("S_IRWXG[0x%03X] S_IRGRP[0x%03X] S_IWGRP[0x%03X] S_IXGRP[0x%03X]\n", S_IRWXG, S_IRGRP, S_IWGRP, S_IXGRP);
+//    MX_PRINT("S_IRWXO[0x%03X] S_IROTH[0x%03X] S_IWOTH[0x%03X] S_IXOTH[0x%03X]\n", S_IRWXO, S_IROTH, S_IWOTH, S_IXOTH);
     return pmode;
 }
 // End function s_iow2posix_mode
@@ -237,7 +237,7 @@ int mfile_open(mfile_file_t *self,mfile_flags_t flags)
         if ( (retval = open(self->path,pflags))>0){
            self->fd= retval;
             self->flags=pflags;
-//            PDPRINT((stderr,"open setting fd[%d]\n",self->fd));
+//             MX_PRINT("open setting fd[%d]\n", self->fd);
         }else{
             fprintf(stderr,"open failed [%d/%s]\n",errno,strerror(errno));
             self->fd=-1;
@@ -261,12 +261,12 @@ int mfile_mopen(mfile_file_t *self,mfile_flags_t flags,mfile_mode_t mode )
     if (NULL!=self && NULL!=self->path) {
         int pflags=s_iow2posix_flags(flags);
         mode_t pmode=s_iow2posix_mode(mode);
-//        PDPRINT((stderr,"opening [%s] mode[%x] pmode[%x]\n",self->path,mode,pmode));
+//        MX_PRINT("opening [%s] mode[%x] pmode[%x]\n", self->path, mode, pmode);
         if ( (retval = open(self->path,pflags,pmode) )>0){
             self->fd= retval;
             self->flags=pflags;
             self->mode=pmode;
-//            PDPRINT((stderr,"open setting fd[%d]\n",self->fd));
+//            MX_PRINT("open setting fd[%d]\n", self->fd);
         }else{
             fprintf(stderr,"open failed [%d/%s]\n",errno,strerror(errno));
             self->fd=-1;
@@ -313,13 +313,13 @@ int mfile_rename(mfile_file_t *self,const char *path)
             free(self->path);
         }
         
-//       PDPRINT((stderr,"renaming to %s\n",path));
+//       MX_PRINT("renaming to %s\n", path);
         self->path = strdup(path);
         
         if ( (retval = open(self->path,self->flags|O_CREAT,self->mode|S_IWUSR|S_IRUSR) )>0){
             self->fd = retval;
-//            PDPRINT((stderr,"opened %s fd[%d]\n",self->path,self->fd));
-            //            PDPRINT((stderr,"open setting fd[%d]\n",self->fd));
+//            MX_PRINT("opened %s fd[%d]\n", self->path, self->fd);
+            //            MX_PRINT("open setting fd[%d]\n", self->fd);
         }else{
             fprintf(stderr,"open %s failed [%d/%s]\n",self->path,errno,strerror(errno));
             self->fd=-1;

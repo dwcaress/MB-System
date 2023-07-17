@@ -137,6 +137,7 @@
 /// @brief default debug level
 #define APP_VERBOSE_DFL 0
 
+
 /////////////////////////
 // Declarations 
 /////////////////////////
@@ -327,6 +328,10 @@ static int s_app_main(app_cfg_t *cfg)
 {
     int retval=-1;
     if (NULL!=cfg) {
+#if defined(WITH_MBBUF_TEST) || defined(WITH_MLOG_TEST)
+        char *av[]={"false"};
+#endif
+
 #ifdef WITH_MSOCKET_TEST
         retval=msock_test();
         PMPRINT(MOD_MFTEST,MFTEST_1,(stderr,"msock_test [%d]\n",retval));
@@ -336,12 +341,13 @@ static int s_app_main(app_cfg_t *cfg)
         PMPRINT(MOD_MFTEST,MFTEST_1,(stderr,"mser_test [%d]\n",retval));
 #endif
 #ifdef WITH_MBBUF_TEST
-        char *av[]={"false"};
+        av[0]="false";
         retval=mbbuf_test(1,&av[0]);
         PMPRINT(MOD_MFTEST,MFTEST_1,(stderr,"mbbuf_test [%d]\n",retval));
 #endif
 #ifdef WITH_MLOG_TEST
-        retval=mlog_test((cfg->verbose!=0));
+        av[0]="false";
+        retval=mlog_test(1, &av[0]);
         PMPRINT(MOD_MFTEST,MFTEST_1,(stderr,"mlog_test [%d]\n",retval));
 #endif
 #ifdef WITH_MSWAP_TEST

@@ -62,8 +62,8 @@
 /////////////////////////
 
 #include "r7k-reader.h"
-#include "mmdebug.h"
-#include "medebug.h"
+#include "mxd_app.h"
+#include "mxdebug.h"
 #include "merror.h"
 #include "mtime.h"
 
@@ -196,34 +196,35 @@ int r7kr_reader_connect(r7kr_reader_t *self, bool replace_socket)
         int port = self->sockif->addr->port;
 
         if (replace_socket) {
-            PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"destroying socket\n"));
+//            MX_MMSG(R7KR_DEBUG, "destroying socket\n");
+            MX_DMSG(R7KR_DEBUG, "destroying socket\n");
             msock_socket_destroy(&self->sockif);
 
-            PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"building socket\n"));
+            MX_DMSG(R7KR_DEBUG, "building socket\n");
             self->sockif = msock_socket_new(host,port,ST_TCP);
         }
 
-        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"connecting to 7k center [%s]\n",self->sockif->addr->host));
+        MX_MPRINT(R7KR_DEBUG, "connecting to 7k center [%s]\n",self->sockif->addr->host);
         if(msock_connect(self->sockif)==0){
             self->state=R7KR_CONNECTED;
             self->sockif->status=SS_CONNECTED;
 
 //            if(mmd_channel_isset(MOD_R7KR,MM_DEBUG)){
-//            PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"requesting 7k device config data"));
+//            MX_DMSG(R7KR_DEBUG, "requesting 7k device config data"));
 //            r7k_req_config(r7kr_reader_sockif(self));
 //            }
 
-            PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"subscribing to 7k center [%s]\n",self->sockif->addr->host));
+            MX_MPRINT(R7KR_DEBUG, "subscribing to 7k center [%s]\n",self->sockif->addr->host);
             if (r7k_subscribe(r7kr_reader_sockif(self), self->device, self->sub_list, self->sub_count)==0) {
                 self->state=R7KR_SUBSCRIBED;
                 retval=0;
             }else{
-                PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"subscribe failed [%s]\n",self->sockif->addr->host));
+                MX_MPRINT(R7KR_DEBUG, "subscribe failed [%s]\n",self->sockif->addr->host);
                 me_errno=ME_ESUB;
                 self->state=R7KR_INITIALIZED;
             }
         }else{
-            PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"connect failed [%s]\n",self->sockif->addr->host));
+            MX_MPRINT(R7KR_DEBUG, "connect failed [%s]\n",self->sockif->addr->host);
             me_errno=ME_ECONNECT;
             self->state=R7KR_INITIALIZED;
             r7kr_reader_reset_socket(self);
@@ -408,7 +409,7 @@ int r7kr_reader_set_file(r7kr_reader_t *self, mfile_file_t *file)
             self->sockif = msock_wrap_fd(self->fileif->fd);
             retval=0;
         }else{
-            PMPRINT(MOD_R7KR,MM_ERR,(stderr,"ERR - could not open file [%s] [%d/%s]\n",self->fileif->path,errno,strerror(errno)));
+            MX_ERROR("ERR - could not open file [%s] [%d/%s]\n", self->fileif->path, errno, strerror(errno));
         }
     }
     return retval;
@@ -592,19 +593,20 @@ int64_t r7kr_reader_poll(r7kr_reader_t *self, byte *dest, uint32_t len, uint32_t
             if ( (me_errno==ME_OK || me_errno==ME_ETMOUT) ) {
                 retval = rbytes;
 
-//                PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"buf[%p] req[%d] rd[%"PRId64"] to[%u]\n",dest,len,rbytes,tmout_ms));
+//               MX_MPRINT(R7KR_DEBUG, "buf[%p] req[%d] rd[%"PRId64"] to[%u]\n",dest,len,rbytes,tmout_ms);
             }else{
                 // error
-                PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"read err1 to[%"PRIu32"] merr[%d/%s] rb[%"PRId64"]\n",tmout_ms,me_errno,me_strerror(me_errno),rbytes));
+                MX_MPRINT(R7KR_DEBUG, "read err1 to[%"PRIu32"] merr[%d/%s] rb[%"PRId64"]\n", tmout_ms, me_errno, me_strerror(me_errno), rbytes);
                 retval=-1;
             }
         }else{
             // error
-            PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"read err2 to[%"PRIu32"] merr[%d/%s] rb[%"PRId64"]\n",tmout_ms,me_errno,me_strerror(me_errno),rbytes));
+            MX_MPRINT(R7KR_DEBUG, "read err2 to[%"PRIu32"] merr[%d/%s] rb[%"PRId64"]\n", tmout_ms, me_errno, me_strerror(me_errno), rbytes);
             retval=-1;
         }
     }else{
-        PEPRINT((stderr,"invalid argument\n"));
+//        PEPRINT((stderr,"invalid argument\n"));
+        MX_ERROR_MSG("invalid argument\n");
     }
 
     return retval;
@@ -658,7 +660,7 @@ int64_t r7kr_read_nf(r7kr_reader_t *self, byte *dest, uint32_t len,
             switch (state) {
 
                 case R7KR_STATE_START:
-//                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"R7KR_STATE_START\n"));
+//                    MX_DMSG(R7KR_DEBUG, "R7KR_STATE_START\n"));
                     read_len       = R7K_NF_BYTES;
                     pbuf           = dest;
                     header_pending = true;
@@ -668,7 +670,7 @@ int64_t r7kr_read_nf(r7kr_reader_t *self, byte *dest, uint32_t len,
                     break;
 
                 case R7KR_STATE_READING:
-//                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"R7KR_STATE_READING\n"));
+//                   MX_DMSG(R7KR_DEBUG, "R7KR_STATE_READING\n"));
                     // don't touch inputs
                     action   = R7KR_ACTION_READ;
                     break;
@@ -676,7 +678,7 @@ int64_t r7kr_read_nf(r7kr_reader_t *self, byte *dest, uint32_t len,
                 case R7KR_STATE_READ_OK:
                     pnf   = (r7k_nf_t *)dest;
                     if (header_pending) {
-//                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"R7KR_STATE_READ_OK header\n"));
+//                        MX_MMSG(R7KR_DEBUG, "R7KR_STATE_READ_OK header\n"));
                         header_pending=false;
                         action = R7KR_ACTION_VALIDATE_HEADER;
                     }
@@ -685,22 +687,22 @@ int64_t r7kr_read_nf(r7kr_reader_t *self, byte *dest, uint32_t len,
                 case R7KR_STATE_HEADER_VALID:
                     state = R7KR_STATE_NF_VALID;
                     action = R7KR_ACTION_QUIT;
-//                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"R7KR_STATE_HEADER_VALID/NF_VALID\n"));
+//                    MX_DMSG(R7KR_DEBUG, "R7KR_STATE_HEADER_VALID/NF_VALID\n"));
                     break;
 
                 case R7KR_STATE_NF_INVALID:
-                    PMPRINT(MOD_R7KR,R7KR_V2,(stderr,"R7KR_STATE_NF_INVALID\n"));
+                    MX_LMSG(R7KR, 2, "R7KR_STATE_NF_INVALID\n");
                     if ( (flags&R7KR_RESYNC_NF)!=0 ) {
                         // pbuf points to end of input...
                         // psync points 1 byte into invalid frame
-                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,">>>>> RESYNC: NRF buffer:\n"));
-                        if(mmd_channel_isset(MOD_R7KR,(MM_DEBUG))){
+                        MX_DMSG(R7KR_DEBUG, ">>>>> RESYNC: NRF buffer:\n");
+                        if(mxd_testModule(R7KR_DEBUG, 1)){
                             r7k_hex_show(dest,R7K_NF_BYTES,16,true,5);
                         }
-                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"dest[%p] pbuf[%p] ofs[%"PRId32"]\n",dest,pbuf,(int32_t)(pbuf-dest)));
-                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"read_len[%"PRIu32"]\n",read_len));
-                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"frame_bytes[%"PRId64"]\n",frame_bytes));
-                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"lost_bytes[%"PRId64"]\n",lost_bytes));
+                        MX_MPRINT(R7KR_DEBUG, "dest[%p] pbuf[%p] ofs[%"PRId32"]\n", dest, pbuf, (int32_t)(pbuf-dest));
+                        MX_MPRINT(R7KR_DEBUG, "read_len[%"PRIu32"]\n", read_len);
+                        MX_MPRINT(R7KR_DEBUG, "frame_bytes[%"PRId64"]\n", frame_bytes);
+                        MX_MPRINT(R7KR_DEBUG, "lost_bytes[%"PRId64"]\n", lost_bytes);
 
                         psync = dest+1;
                         lost_bytes+=1;
@@ -714,33 +716,33 @@ int64_t r7kr_read_nf(r7kr_reader_t *self, byte *dest, uint32_t len,
                     break;
 
                 case R7KR_STATE_READ_ERR:
-                    PMPRINT(MOD_R7KR,R7KR_V2,(stderr,"R7KR_STATE_READ_ERR\n"));
+                    MX_LMSG(R7KR, 2, "R7KR_STATE_READ_ERR\n");
                     if (me_errno==ME_ESOCK) {
-                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"socket disconnected - quitting\n"));
+                        MX_MMSG(R7KR_DEBUG, "socket disconnected - quitting\n");
                     }else if (me_errno==ME_EOF) {
-                        PMPRINT(MOD_R7KR,MM_ERR,(stderr,"end of file\n"));
+                        MX_MMSG(R7KR_ERROR, "end of file\n");
                     }else if (me_errno==ME_ENOSPACE) {
-                        PMPRINT(MOD_R7KR,MM_ERR,(stderr,"buffer full [%"PRIu32"/%"PRIu32"]\n",(uint32_t)(pbuf+read_len-dest),len));
+                        MX_MPRINT(R7KR_ERROR, "buffer full [%"PRIu32"/%"PRIu32"]\n", (uint32_t)(pbuf+read_len-dest), len);
                     }else{
-                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"read error [%d/%s]\n",me_errno,me_strerror(me_errno)));
+                        MX_MPRINT(R7KR_DEBUG, "read error [%d/%s]\n", me_errno, me_strerror(me_errno));
                     }
                     action   = R7KR_ACTION_QUIT;
                     break;
 
                 default:
-                    PMPRINT(MOD_R7KR,MM_ERR,(stderr,"ERR - unknown state[%d]\n",state));
+                    MX_MPRINT(R7KR_ERROR, "ERR - unknown state[%d]\n",state);
                     break;
             }
 
-//            PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,">>> ACTION=[%d]\n",action));
+//            MX_MPRINT(R7KR_DEBUG, ">>> ACTION=[%d]\n", action);
 
             if (action==R7KR_ACTION_READ) {
                 // inputs: pbuf, read_len
-//                PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"R7KR_ACTION_READ rlen[%"PRIu32"]\n",read_len));
+//                MX_MPRINT(R7KR_DEBUG, "R7KR_ACTION_READ rlen[%"PRIu32"]\n", read_len);
                 read_bytes=0;
                 while (read_bytes<read_len) {
                     if ( (read_bytes=msock_read_tmout(r7kr_reader_sockif(self), pbuf, read_len, timeout_msec)) == read_len) {
-//                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"read OK [%"PRId64"]\n",read_bytes));
+//                        MX_MPRINT(R7KR_DEBUG, "read OK [%"PRId64"]\n", read_bytes));
 
                         pnf = (r7k_nf_t *)dest;
                         pbuf += read_bytes;
@@ -782,32 +784,32 @@ int64_t r7kr_read_nf(r7kr_reader_t *self, byte *dest, uint32_t len,
             }
 
             if (action==R7KR_ACTION_VALIDATE_HEADER) {
-//                PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"R7KR_ACTION_VALIDATE_HEADER\n"));
+//                MX_MMSG(R7KR_DEBUG, "R7KR_ACTION_VALIDATE_HEADER\n");
                 // inputs: pnf
                 state=R7KR_STATE_NF_INVALID;
                 if (pnf->protocol_version == R7K_NF_PROTO_VER) {
-//                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"nf version valid\n"));
+//                   MX_MMSG(R7KR_DEBUG, "nf version valid\n");
                     if (pnf->offset >= (R7K_NF_BYTES)) {
-//                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"nf offset valid\n"));
+//                        MX_MMSG(R7KR_DEBUG, "nf offset valid\n");
                         if (pnf->packet_size == (pnf->total_size+R7K_NF_BYTES)) {
-//                            PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"nf packet_size valid [%"PRIu32"]\n",pnf->packet_size));
+//                            MX_MPRINT(R7KR_DEBUG, "nf packet_size valid [%"PRIu32"]\n", pnf->packet_size);
                             if (pnf->total_records == 1) {
-//                                PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"nf total_records valid\n"));
+//                                MX_MMSG(R7KR_DEBUG, "nf total_records valid\n"));
                                 state = R7KR_STATE_HEADER_VALID;
                             }else{
-                                PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"INFO - nf total_records invalid[%"PRIu16"/%"PRIu16"]\n",pnf->total_records,(uint16_t)1));
+                                MX_MPRINT(R7KR_DEBUG, "INFO - nf total_records invalid[%"PRIu16"/%"PRIu16"]\n", pnf->total_records, (uint16_t)1);
                                 MST_COUNTER_INC(self->stats->events[R7KR_EV_ENFTOTALREC]);
                             }
                         }else{
-                            PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"INFO - nf packet_size invalid[%"PRIu32"/%"PRIu32"]\n",pnf->packet_size,(pnf->total_size+R7K_NF_BYTES)));
+                            MX_MPRINT(R7KR_DEBUG, "INFO - nf packet_size invalid[%"PRIu32"/%"PRIu32"]\n", pnf->packet_size, (pnf->total_size+R7K_NF_BYTES));
                             MST_COUNTER_INC(self->stats->events[R7KR_EV_ENFPACKETSZ]);
                         }
                     }else{
-                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"INFO - nf offset invalid [%"PRIu16"/%"PRIu16"]\n",pnf->offset,(uint16_t)R7K_NF_BYTES));
+                        MX_MPRINT(R7KR_DEBUG, "INFO - nf offset invalid [%"PRIu16"/%"PRIu16"]\n", pnf->offset, (uint16_t)R7K_NF_BYTES);
                         MST_COUNTER_INC(self->stats->events[R7KR_EV_ENFOFFSET]);
                     }
                 }else{
-                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"INFO - nf proto_version invalid [%"PRIu16"/%"PRIu16"]\n",pnf->protocol_version,(uint16_t)R7K_NF_PROTO_VER));
+                    MX_MPRINT(R7KR_DEBUG, "INFO - nf proto_version invalid [%"PRIu16"/%"PRIu16"]\n", pnf->protocol_version, (uint16_t)R7K_NF_PROTO_VER);
                     MST_COUNTER_INC(self->stats->events[R7KR_EV_ENFVER]);
                 }
             }
@@ -821,13 +823,13 @@ int64_t r7kr_read_nf(r7kr_reader_t *self, byte *dest, uint32_t len,
                 MST_COUNTER_INC(self->stats->events[R7KR_EV_NF_RESYNC]);
 
                 if( psync >= (pbuf-R7K_NF_PROTO_BYTES)){
-                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"WARN - pending bytes > found frame\n"));
+                    MX_MMSG(R7KR_DEBUG, "WARN - pending bytes > found frame\n");
                 }
 
                 // look until end of buffer (or sync found)
                 while (  (psync < (pbuf-R7K_NF_PROTO_BYTES)) && (sync_found==false) ) {
 
-                    PMPRINT(MOD_R7KR,R7KR_V2,(stderr,"psync[%p] ofs[%"PRId32"]\n",psync,(int32_t)(psync-dest)));
+                    MX_LPRINT(R7KR, 2, "psync[%p] ofs[%"PRId32"]\n",psync,(int32_t)(psync-dest));
                    pframe = (r7k_nf_t *)psync;
                     // match only proto version...
                     // we'll be back if other parts are invalid, and
@@ -858,14 +860,14 @@ int64_t r7kr_read_nf(r7kr_reader_t *self, byte *dest, uint32_t len,
 
                         // return to the state machine
                         sync_found     = true;
-                        PMPRINT(MOD_R7KR,R7KR_V2,(stderr,"sync found\n"));
-                        PMPRINT(MOD_R7KR,R7KR_V2,(stderr,"dest[%p] pbuf[%p] ofs[%"PRId32"]\n",dest,pbuf,(int32_t)(pbuf-dest)));
-                        PMPRINT(MOD_R7KR,R7KR_V2,(stderr,"psync[%p] ofs[%"PRId32"]\n",psync,(int32_t)(psync-dest)));
-                        PMPRINT(MOD_R7KR,R7KR_V2,(stderr,"pending_bytes[%"PRIu32"]\n",pending_bytes));
-                        PMPRINT(MOD_R7KR,R7KR_V2,(stderr,"read_len[%"PRIu32"]\n",read_len));
-                        PMPRINT(MOD_R7KR,R7KR_V2,(stderr,"frame_bytes[%"PRId64"]\n",frame_bytes));
-                        PMPRINT(MOD_R7KR,R7KR_V2,(stderr,"frame_bytes+read_len[%"PRId64"]\n",(int64_t)(frame_bytes+read_len)));
-                        PMPRINT(MOD_R7KR,R7KR_V2,(stderr,"lost_bytes[%"PRId64"]\n",lost_bytes));
+                        MX_LMSG(R7KR, 2, "sync found\n");
+                        MX_LPRINT(R7KR, 2, "dest[%p] pbuf[%p] ofs[%"PRId32"]\n",dest,pbuf,(int32_t)(pbuf-dest));
+                        MX_LPRINT(R7KR, 2, "psync[%p] ofs[%"PRId32"]\n",psync,(int32_t)(psync-dest));
+                        MX_LPRINT(R7KR, 2, "pending_bytes[%"PRIu32"]\n",pending_bytes);
+                        MX_LPRINT(R7KR, 2, "read_len[%"PRIu32"]\n",read_len);
+                        MX_LPRINT(R7KR, 2, "frame_bytes[%"PRId64"]\n",frame_bytes);
+                        MX_LPRINT(R7KR, 2, "frame_bytes+read_len[%"PRId64"]\n",(int64_t)(frame_bytes+read_len));
+                        MX_LPRINT(R7KR, 2, "lost_bytes[%"PRId64"]\n",lost_bytes);
                         //r7k_hex_show(dest,len,16,true,5);
 
                         break;
@@ -881,28 +883,28 @@ int64_t r7kr_read_nf(r7kr_reader_t *self, byte *dest, uint32_t len,
                 if (sync_found==false) {
                     // proto_version not found - restart
                     lost_bytes+=(pbuf-psync);
-                    PMPRINT(MOD_R7KR,R7KR_V2,(stderr,"nf proto_ver not found - restart lost_bytes[%"PRId64"]\n",lost_bytes));
+                    MX_LPRINT(R7KR, 2, "nf proto_ver not found - restart lost_bytes[%"PRId64"]\n", lost_bytes);
                     state=R7KR_STATE_START;
-                    PMPRINT(MOD_R7KR,R7KR_V2,(stderr,"dest[%p] pbuf[%p] ofs[%"PRId32"]\n",dest,pbuf,(int32_t)(pbuf-dest)));
-                    PMPRINT(MOD_R7KR,R7KR_V2,(stderr,"psync[%p] ofs[%"PRId32"]\n",psync,(int32_t)(psync-dest)));
-                    PMPRINT(MOD_R7KR,R7KR_V2,(stderr,"pending_bytes[%"PRIu32"]\n",pending_bytes));
-                    PMPRINT(MOD_R7KR,R7KR_V2,(stderr,"read_len[%"PRIu32"]\n",read_len));
-                    PMPRINT(MOD_R7KR,R7KR_V2,(stderr,"frame_bytes[%"PRId64"]\n",frame_bytes));
-                    PMPRINT(MOD_R7KR,R7KR_V2,(stderr,"frame_bytes+read_len[%"PRId64"]\n",(frame_bytes+read_len)));
-                    PMPRINT(MOD_R7KR,R7KR_V2,(stderr,"lost_bytes[%"PRId64"]\n",lost_bytes));
+                    MX_LPRINT(R7KR, 2, "dest[%p] pbuf[%p] ofs[%"PRId32"]\n", dest, pbuf, (int32_t)(pbuf-dest));
+                    MX_LPRINT(R7KR, 2, "psync[%p] ofs[%"PRId32"]\n", psync, (int32_t)(psync-dest));
+                    MX_LPRINT(R7KR, 2, "pending_bytes[%"PRIu32"]\n", pending_bytes);
+                    MX_LPRINT(R7KR, 2, "read_len[%"PRIu32"]\n", read_len);
+                    MX_LPRINT(R7KR, 2, "frame_bytes[%"PRId64"]\n", frame_bytes);
+                    MX_LPRINT(R7KR, 2, "frame_bytes+read_len[%"PRId64"]\n", (frame_bytes+read_len));
+                    MX_LPRINT(R7KR, 2, "lost_bytes[%"PRId64"]\n", lost_bytes);
                 }
             }
 
             if (action==R7KR_ACTION_QUIT) {
 
-//                PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"ACTION_QUIT\n"));
+//                MX_MMSG(R7KR_DEBUG, "ACTION_QUIT\n"));
                 if (state==R7KR_STATE_NF_VALID) {
                     retval = frame_bytes;
-                    PMPRINT(MOD_R7KR,R7KR_V2,(stderr,"NF valid - returning[%"PRId64"] lost[%"PRId64"]\n",retval,lost_bytes));
+                    MX_LPRINT(R7KR, 2, "NF valid - returning[%"PRId64"] lost[%"PRId64"]\n", retval, lost_bytes);
                     MST_COUNTER_INC(self->stats->events[R7KR_EV_NF_VALID]);
                     MST_COUNTER_ADD(self->stats->status[R7KR_STA_NF_VAL_BYTES],frame_bytes);
                 }else{
-                    PMPRINT(MOD_R7KR,R7KR_V2,(stderr,"NF invalid - returning[%"PRId64"] lost[%"PRId64"]\n",retval,lost_bytes));
+                    MX_LPRINT(R7KR, 2, "NF invalid - returning[%"PRId64"] lost[%"PRId64"]\n", retval, lost_bytes);
                     MST_COUNTER_INC(self->stats->events[R7KR_EV_NF_INVALID]);
                     MST_COUNTER_ADD(self->stats->status[R7KR_STA_NF_INVAL_BYTES],lost_bytes);
                 }
@@ -961,7 +963,7 @@ int64_t r7kr_read_drf(r7kr_reader_t *self, byte *dest, uint32_t len,
             switch (state) {
 
                 case R7KR_STATE_START:
-//                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"R7KR_STATE_START\n"));
+//                    MX_MMSG(R7KR_DEBUG, "R7KR_STATE_START\n");
                    read_len = R7K_DRF_BYTES;
                     pbuf     = dest;
                     memset(dest,0,len);
@@ -972,7 +974,7 @@ int64_t r7kr_read_drf(r7kr_reader_t *self, byte *dest, uint32_t len,
                     break;
 
                 case R7KR_STATE_READING:
-//                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"R7KR_STATE_READING\n"));
+//                   MX_MMSG(R7KR_DEBUG, "R7KR_STATE_READING\n");
                     // don't touch inputs
                     action   = R7KR_ACTION_READ;
                     break;
@@ -980,11 +982,11 @@ int64_t r7kr_read_drf(r7kr_reader_t *self, byte *dest, uint32_t len,
                 case R7KR_STATE_READ_OK:
                     pdrf   = (r7k_drf_t *)dest;
                     if (header_pending) {
-//                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"R7KR_STATE_READ_OK header\n"));
+//                        MX_MMSG(R7KR_DEBUG, "R7KR_STATE_READ_OK header\n");
                         header_pending=false;
                         action = R7KR_ACTION_VALIDATE_HEADER;
                     }else if (data_pending) {
-//                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"R7KR_STATE_READ_OK data\n"));
+//                       MX_MMSG(R7KR_DEBUG, "R7KR_STATE_READ_OK data\n");
                         data_pending=false;
                         action = R7KR_ACTION_VALIDATE_CHECKSUM;
                     }
@@ -994,28 +996,28 @@ int64_t r7kr_read_drf(r7kr_reader_t *self, byte *dest, uint32_t len,
                     data_pending=true;
                     read_len = pdrf->size-R7K_DRF_BYTES;
                     action = R7KR_ACTION_READ;
-//                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"R7KR_STATE_HEADER_VALID data read_len[%"PRIu32"]\n",read_len));
+//                    MX_MPRINT(R7KR_DEBUG, "R7KR_STATE_HEADER_VALID data read_len[%"PRIu32"]\n", read_len);
                     break;
 
                 case R7KR_STATE_CHECKSUM_VALID:
-//                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"R7KR_STATE_CHECKSUM_VALID\n"));
+//                    MX_MMSG(R7KR_DEBUG, "R7KR_STATE_CHECKSUM_VALID\n");
                     action = R7KR_ACTION_VALIDATE_TIMESTAMP;
                     break;
 
                 case R7KR_STATE_TIMESTAMP_VALID:
-//                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"R7KR_STATE_TIMESTAMP_VALID\n"));
+//                    MX_MMSG(R7KR_DEBUG, "R7KR_STATE_TIMESTAMP_VALID\n");
                     state = R7KR_STATE_DRF_VALID;
                     action = R7KR_ACTION_QUIT;
                     break;
 
                 case R7KR_STATE_DRF_REJECTED:
-                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"R7KR_STATE_DRF_REJECTED\n"));
+                    MX_MMSG(R7KR_DEBUG, "R7KR_STATE_DRF_REJECTED\n");
                     // start over with new frame
                     state = R7KR_STATE_START;
                     break;
 
                 case R7KR_STATE_DRF_INVALID:
-                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"R7KR_STATE_DRF_INVALID\n"));
+                    MX_MMSG(R7KR_DEBUG, "R7KR_STATE_DRF_INVALID\n");
                     if ( (flags&R7KR_RESYNC_DRF)!=0 ) {
                         // pbuf points to end of input...
                         // psync points 1 byte into invalid frame
@@ -1031,33 +1033,33 @@ int64_t r7kr_read_drf(r7kr_reader_t *self, byte *dest, uint32_t len,
                     break;
 
                 case R7KR_STATE_READ_ERR:
-                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"R7KR_STATE_READ_ERR\n"));
+                    MX_MMSG(R7KR_DEBUG, "R7KR_STATE_READ_ERR\n");
                     if (me_errno==ME_ESOCK) {
-                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"socket disconnected - quitting\n"));
+                        MX_MMSG(R7KR_DEBUG, "socket disconnected - quitting\n");
                     }else if (me_errno==ME_EOF) {
-                        PMPRINT(MOD_R7KR,MM_ERR,(stderr,"end of file\n"));
+                        MX_MMSG(R7KR_ERROR, "end of file\n");
                     }else if (me_errno==ME_ENOSPACE) {
-                        PMPRINT(MOD_R7KR,MM_ERR,(stderr,"buffer full [%"PRIu32"/%"PRIu32"]\n",(uint32_t)(pbuf+read_len-dest),len));
+                        MX_MPRINT(R7KR_ERROR, "buffer full [%"PRIu32"/%"PRIu32"]\n", (uint32_t)(pbuf+read_len-dest), len);
                     }else{
-                            PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"read error [%d/%s]\n",me_errno,me_strerror(me_errno)));
+                        MX_MPRINT(R7KR_DEBUG, "read error [%d/%s]\n", me_errno, me_strerror(me_errno));
                     }
                     action   = R7KR_ACTION_QUIT;
                     break;
 
                 default:
-                    PMPRINT(MOD_R7KR,MM_ERR,(stderr,"ERR - unknown state[%d]\n",state));
+                    MX_MPRINT(R7KR_ERROR, "ERR - unknown state[%d]\n", state);
                     break;
             }
 
-//            PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,">>> ACTION=[%d]\n",action));
+//            MX_MPRINT(R7KR_DEBUG, ">>> ACTION=[%d]\n",action);
 
             if (action==R7KR_ACTION_READ) {
                 // inputs: pbuf, read_len
-//                PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"R7KR_ACTION_READ rlen[%"PRIu32"]\n",read_len));
+//                MX_MPRINT(R7KR_DEBUG, "R7KR_ACTION_READ rlen[%"PRIu32"]\n", read_len);
                 read_bytes=0;
                 while (read_bytes<read_len) {
                     if ( (read_bytes=msock_read_tmout(r7kr_reader_sockif(self), pbuf, read_len, timeout_msec)) == read_len) {
-//                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"read OK [%"PRId64"]\n",read_bytes));
+//                        MX_MPRINT(R7KR_DEBUG, "read OK [%"PRId64"]\n",read_bytes);
 
                         pdrf = (r7k_drf_t *)dest;
                         pbuf += read_bytes;
@@ -1095,30 +1097,30 @@ int64_t r7kr_read_drf(r7kr_reader_t *self, byte *dest, uint32_t len,
             }
 
             if (action==R7KR_ACTION_VALIDATE_HEADER) {
-//                PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"R7KR_ACTION_VALIDATE_HEADER\n"));
+//                MX_MMSG(R7KR_DEBUG, "R7KR_ACTION_VALIDATE_HEADER\n");
                 // inputs: pdrf
                 state=R7KR_STATE_DRF_INVALID;
                 if (pdrf->protocol_version == R7K_DRF_PROTO_VER) {
-//                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"drf protocol version valid [0x%0X]\n",pdrf->protocol_version));
+//                    MX_MPRINT(R7KR_DEBUG, "drf protocol version valid [0x%0X]\n",pdrf->protocol_version);
                     if (pdrf->sync_pattern == R7K_DRF_SYNC_PATTERN) {
-//                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"drf sync_pattern valid [0x%0X]\n",pdrf->sync_pattern));
+//                       MX_MPRINT(R7KR_DEBUG, "drf sync_pattern valid [0x%0X]\n", pdrf->sync_pattern);
                         if (pdrf->size <= R7K_MAX_FRAME_BYTES) {
-//                            PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"drf size < max frame valid [0x%"PRIu32"]\n",pdrf->size));
+//                            MX_MPRINT(R7KR_DEBUG, "drf size < max frame valid [0x%"PRIu32"]\n", pdrf->size);
 
                             // conditionally validate
                             // (pending optional nf size)
                             state=R7KR_STATE_HEADER_VALID;
 //
                         }else{
-                            PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"INFO - drf size > max frame invalid [%"PRIu32"]\n",pdrf->size));
+                            MX_MPRINT(R7KR_DEBUG, "INFO - drf size > max frame invalid [%"PRIu32"]\n", pdrf->size);
                             MST_COUNTER_INC(self->stats->events[R7KR_EV_EDRFSIZE]);
                         }
                     }else{
-                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"INFO - drf sync pattern invalid [0x%0X/0x%0X]\n",pdrf->sync_pattern, R7K_DRF_SYNC_PATTERN));
+                        MX_MPRINT(R7KR_DEBUG, "INFO - drf sync pattern invalid [0x%0X/0x%0X]\n", pdrf->sync_pattern, R7K_DRF_SYNC_PATTERN);
                         MST_COUNTER_INC(self->stats->events[R7KR_EV_EDRFSYNC]);
                     }
                 }else{
-                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"INFO - drf protocol version invalid [0x%0X/0x%0X]\n",pdrf->protocol_version, R7K_DRF_PROTO_VER));
+                    MX_MPRINT(R7KR_DEBUG, "INFO - drf protocol version invalid [0x%0X/0x%0X]\n", pdrf->protocol_version, R7K_DRF_PROTO_VER);
                     MST_COUNTER_INC(self->stats->events[R7KR_EV_EDRFPROTO]);
                 }
             }
@@ -1131,7 +1133,7 @@ int64_t r7kr_read_drf(r7kr_reader_t *self, byte *dest, uint32_t len,
                 // only if flag set
                 if ( (pdrf->flags&0x1)==0 ){
                     // skip checksum constraint
-//                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"drf chksum valid (unchecked)\n"));
+//                    MX_MMSG(R7KR_DEBUG, "drf chksum valid (unchecked)\n");
                     state=R7KR_STATE_CHECKSUM_VALID;
                 }else{
                     // buffer/checksum boundary checked on entry
@@ -1142,10 +1144,10 @@ int64_t r7kr_read_drf(r7kr_reader_t *self, byte *dest, uint32_t len,
                     uint32_t *pchk = (uint32_t *)pd;
 
                     if (vchk == (uint32_t)(*pchk) ) {
-//                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"drf chksum valid [0x%08X]\n",vchk));
+//                        MX_MPRINT(R7KR_DEBUG, "drf chksum valid [0x%08X]\n", vchk);
                         state=R7KR_STATE_CHECKSUM_VALID;
                     }else{
-                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"INFO - drf chksum invalid [0x%08X/0x%08X]\n",vchk, (uint32_t)(*pchk)));
+                        MX_MPRINT(R7KR_DEBUG, "INFO - drf chksum invalid [0x%08X/0x%08X]\n", vchk,  (uint32_t)(*pchk));
                         MST_COUNTER_INC(self->stats->events[R7KR_EV_EDRFCHK]);
                     }
                 }
@@ -1158,7 +1160,7 @@ int64_t r7kr_read_drf(r7kr_reader_t *self, byte *dest, uint32_t len,
                 // optional, per newer_than value
                 if (newer_than<=0.0){
                     // skip timestamp constraint
-//                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"drf time valid (unchecked)\n"));
+//                    MX_MMSG(R7KR_DEBUG, "drf time valid (unchecked)\n"));
                     state=R7KR_STATE_TIMESTAMP_VALID;
                 }else{
 #if 0 // TODO: switch after nov2019 cruises
@@ -1176,10 +1178,10 @@ int64_t r7kr_read_drf(r7kr_reader_t *self, byte *dest, uint32_t len,
                     ttnow = mktime(&tmnow);
 
                     if(tt7k>=0 && ( (ttnow-tt7k)<newer_than ) ){
-                        //                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"drf time valid\n"));
+                        //                       MX_MMSG(R7KR_DEBUG, "drf time valid\n");
                         state=R7KR_STATE_TIMESTAMP_VALID;
                     }else{
-                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"INFO - drf time invalid (stale) [%lu/%lu/%.3lf]\n",(unsigned long)tt7k,(unsigned long)ttnow,newer_than));
+                        MX_MPRINT(R7KR_DEBUG, "INFO - drf time invalid (stale) [%lu/%lu/%.3lf]\n", (unsigned long)tt7k, (unsigned long)ttnow, newer_than);
                         MST_COUNTER_INC(self->stats->events[R7KR_EV_EDRFTIME]);
                     }
 #endif
@@ -1191,10 +1193,10 @@ int64_t r7kr_read_drf(r7kr_reader_t *self, byte *dest, uint32_t len,
                     dtime += pdrf->_7ktime.minutes*SEC_PER_MIN;
                     dtime += pdrf->_7ktime.seconds;
                     if (dtime>newer_than) {
-//                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"drf time valid\n"));
+//                        MX_MMSG(R7KR_DEBUG, "drf time valid\n");
                         state=R7KR_STATE_TIMESTAMP_VALID;
                     }else{
-                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"INFO - drf time invalid (stale) [%.4lf/%.4lf]\n",dtime,newer_than));
+                        MX_MPRINT(R7KR_DEBUG, "INFO - drf time invalid (stale) [%.4lf/%.4lf]\n", dtime, newer_than);
                         MST_COUNTER_INC(self->stats->events[R7KR_EV_EDRFTIME]);
                     }
                 }
@@ -1209,7 +1211,7 @@ int64_t r7kr_read_drf(r7kr_reader_t *self, byte *dest, uint32_t len,
                 MST_COUNTER_INC(self->stats->events[R7KR_EV_DRF_RESYNC]);
 
                 if( psync >= (pbuf-R7K_DRF_PROTO_BYTES)){
-                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"WARN - pending bytes > found frame\n"));
+                    MX_MMSG(R7KR_DEBUG, "WARN - pending bytes > found frame\n");
                 }
 
                 // look until end of buffer (or sync found)
@@ -1326,7 +1328,7 @@ int64_t r7kr_read_drf(r7kr_reader_t *self, byte *dest, uint32_t len,
 
                 if (sync_found==false) {
                     // proto_version not found - restart
-                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"INFO - drf proto_ver not found - restart\n"));
+                    MX_MMSG(R7KR_DEBUG, "INFO - drf proto_ver not found - restart\n");
                     state=R7KR_STATE_START;
                     lost_bytes+=(pbuf-psync);
                 }
@@ -1334,11 +1336,11 @@ int64_t r7kr_read_drf(r7kr_reader_t *self, byte *dest, uint32_t len,
 
             if (action==R7KR_ACTION_QUIT) {
 
-//                PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"ACTION_QUIT\n"));
+//                MX_MMSG(R7KR_DEBUG, "ACTION_QUIT\n");
                 if (state==R7KR_STATE_DRF_VALID) {
                     retval = frame_bytes;
 
-                    PMPRINT(MOD_R7KR,R7KR_V2,(stderr,"DRF valid - returning[%"PRId64"] lost[%"PRId64"] type[%"PRIu32"]\n",retval,lost_bytes,pdrf->record_type_id));
+                    MX_LPRINT(R7KR, 2, "DRF valid - returning[%"PRId64"] lost[%"PRId64"] type[%"PRIu32"]\n", retval, lost_bytes, pdrf->record_type_id);
                     MST_COUNTER_INC(self->stats->events[R7KR_EV_DRF_VALID]);
                     MST_COUNTER_ADD(self->stats->status[R7KR_STA_DRF_VAL_BYTES],frame_bytes);
 #ifdef R7KR_TIMING
@@ -1398,7 +1400,7 @@ int64_t r7kr_read_drf(r7kr_reader_t *self, byte *dest, uint32_t len,
 
 
                 }else{
-                    PMPRINT(MOD_R7KR,R7KR_V2,(stderr,"DRF invalid - returning[%"PRId64"] lost[%"PRId64"]\n",retval,lost_bytes));
+                    MX_LPRINT(R7KR, 2, "DRF invalid - returning[%"PRId64"] lost[%"PRId64"]\n", retval, lost_bytes);
                     MST_COUNTER_INC(self->stats->events[R7KR_EV_DRF_INVALID]);
                     MST_COUNTER_ADD(self->stats->status[R7KR_STA_DRF_INVAL_BYTES],lost_bytes);
 
@@ -1527,7 +1529,7 @@ int64_t r7kr_read_frame(r7kr_reader_t *self, byte *dest,
             switch (state) {
 
                 case R7KR_STATE_START:
-//                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"R7KR_STATE_START\n"));
+//                    MX_MPRINT(R7KR_DEBUG, "R7KR_STATE_START\n");
                     if (flags&R7KR_NET_STREAM) {
                         read_len = R7K_NF_BYTES;
                         rflags   = R7KR_RESYNC_NF;
@@ -1550,7 +1552,7 @@ int64_t r7kr_read_frame(r7kr_reader_t *self, byte *dest,
                     break;
 
                 case R7KR_STATE_NF_VALID:
-//                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"R7KR_STATE_NF_VALID\n"));
+//                    MX_MMSG(R7KR_DEBUG, "R7KR_STATE_NF_VALID\n"));
                     if (flags&R7KR_NET_STREAM) {
                         // next, read the DRF
                         read_len = len-R7K_NF_BYTES;
@@ -1560,7 +1562,7 @@ int64_t r7kr_read_frame(r7kr_reader_t *self, byte *dest,
                     }else if (flags&R7KR_DRF_STREAM) {
                         // drf only (e.g. s7k)
                         // shouldn't be here
-                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"ERR - invalid condition: NF_VALID for DRF stream\n"));
+                        MX_MMSG(R7KR_DEBUG, "ERR - invalid condition: NF_VALID for DRF stream\n");
                     }else {
                         // net frames only
                         // done
@@ -1570,52 +1572,52 @@ int64_t r7kr_read_frame(r7kr_reader_t *self, byte *dest,
                     break;
 
                 case R7KR_STATE_DRF_VALID:
-//                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"R7KR_STATE_DRF_VALID\n"));
+//                   MX_MMSG(R7KR_DEBUG, "R7KR_STATE_DRF_VALID\n");
                     if (flags&R7KR_NET_STREAM || flags&R7KR_DRF_STREAM) {
                         // done
                         state  = R7KR_STATE_FRAME_VALID;
                         action = R7KR_ACTION_QUIT;
                     }else {
                         // net frames only (unlikely)
-                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"ERR - invalid condition: DRF_VALID for NF stream\n"));
+                        MX_MMSG(R7KR_DEBUG, "ERR - invalid condition: DRF_VALID for NF stream\n");
                     }
                     break;
 
                 case R7KR_STATE_NF_INVALID:
-//                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"R7KR_STATE_NF_INVALID (retrying)\n"));
+//                     MX_MMSG(R7KR_DEBUG, "R7KR_STATE_NF_INVALID (retrying)\n");
                     state  = R7KR_STATE_START;
                     action = R7KR_ACTION_NOOP;
                     break;
 
                 case R7KR_STATE_DRF_INVALID:
-                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"R7KR_STATE_DRF_INVALID (retrying)\n"));
+                    MX_MMSG(R7KR_DEBUG, "R7KR_STATE_DRF_INVALID (retrying)\n");
                     state  = R7KR_STATE_START;
                     action = R7KR_ACTION_NOOP;
                     break;
 
                 case R7KR_STATE_READ_ERR:
-                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"R7KR_STATE_READ_ERR\n"));
+                    MX_MMSG(R7KR_DEBUG, "R7KR_STATE_READ_ERR\n");
                     if (me_errno==ME_ESOCK) {
-                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"socket disconnected - quitting\n"));
+                        MX_MMSG(R7KR_DEBUG, "socket disconnected - quitting\n");
                     }else if (me_errno==ME_EOF) {
-                        PMPRINT(MOD_R7KR,MM_ERR,(stderr,"end of file\n"));
+                        MX_MMSG(R7KR_ERROR, "end of file\n");
                     }else if (me_errno==ME_ENOSPACE) {
-                            PMPRINT(MOD_R7KR,MM_ERR,(stderr,"buffer full [%"PRIu32"/%"PRIu32"]\n",(uint32_t)(pbuf+read_len-dest),len));
+                        MX_MPRINT(R7KR_ERROR, "buffer full [%"PRIu32"/%"PRIu32"]\n", (uint32_t)(pbuf+read_len-dest), len);
                     }else{
-                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"read error [%d/%s]\n",me_errno,me_strerror(me_errno)));
+                        MX_MPRINT(R7KR_DEBUG, "read error [%d/%s]\n", me_errno, me_strerror(me_errno));
                     }
                     action   = R7KR_ACTION_QUIT;
                     break;
 
                default:
-                    PMPRINT(MOD_R7KR,MM_ERR,(stderr,"ERR - unknown state[%d]\n",state));
+                    MX_MPRINT(R7KR_ERROR, "ERR - unknown state[%d]\n", state);
                     break;
             }
 
             if (action==R7KR_ACTION_READ_NF) {
                 if ( (read_bytes=r7kr_read_nf(self, pbuf, read_len, rflags, newer_than, timeout_msec, sync_bytes)) == R7K_NF_BYTES) {
 
-//                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"nf read OK\n"));
+//                     MX_MMSG(R7KR_DEBUG, "nf read OK\n");
                     // update pointers
                     pbuf        += read_bytes;
                     nf_bytes    += read_bytes;
@@ -1623,7 +1625,7 @@ int64_t r7kr_read_frame(r7kr_reader_t *self, byte *dest,
 
                     state = R7KR_STATE_NF_VALID;
                 }else{
-                    PMPRINT(MOD_R7KR,MM_ERR,(stderr,"ERR - r7kr_read_nf read_bytes[%"PRId64"] [%d/%s]\n",read_bytes,me_errno,me_strerror(me_errno)));
+                    MX_MPRINT(R7KR_ERROR, "ERR - r7kr_read_nf read_bytes[%"PRId64"] [%d/%s]\n", read_bytes, me_errno, me_strerror(me_errno));
                     state = R7KR_STATE_READ_ERR;
                 }
             }
@@ -1631,7 +1633,7 @@ int64_t r7kr_read_frame(r7kr_reader_t *self, byte *dest,
             if (action==R7KR_ACTION_READ_DRF) {
                 if ( (read_bytes=r7kr_read_drf(self, pbuf, read_len, rflags, newer_than, timeout_msec, sync_bytes)) > R7K_DRF_BYTES) {
 
-//                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"drf read OK\n"));
+//                    MX_MMSG(R7KR_DEBUG, "drf read OK\n");
                     // update pointers
                     pbuf        += read_bytes;
                     drf_bytes   += read_bytes;
@@ -1639,16 +1641,16 @@ int64_t r7kr_read_frame(r7kr_reader_t *self, byte *dest,
 
                     state = R7KR_STATE_DRF_VALID;
                 }else{
-                    PMPRINT(MOD_R7KR,MM_ERR,(stderr,"ERR - r7kr_read_nf read_bytes[%"PRId64"] [%d/%s]\n",read_bytes,me_errno,me_strerror(me_errno)));
+                    MX_MPRINT(R7KR_ERROR, "ERR - r7kr_read_nf read_bytes[%"PRId64"] [%d/%s]\n", read_bytes, me_errno, me_strerror(me_errno));
                     state = R7KR_STATE_READ_ERR;
                 }
             }
             if (action==R7KR_ACTION_QUIT) {
 
-//                PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"ACTION_QUIT\n"));
+//                MX_MMSG(R7KR_DEBUG, "ACTION_QUIT\n");
                 if (state==R7KR_STATE_FRAME_VALID) {
                     retval = frame_bytes;
-                    PMPRINT(MOD_R7KR,R7KR_V2,(stderr,"Frame valid - returning[%"PRId64"]\n",retval));
+                    MX_LPRINT(R7KR, 2, "Frame valid - returning[%"PRId64"]\n", retval);
                     MST_COUNTER_ADD(self->stats->status[R7KR_STA_FRAME_VAL_BYTES],frame_bytes);
 
 
@@ -1666,7 +1668,7 @@ int64_t r7kr_read_frame(r7kr_reader_t *self, byte *dest,
                     }
 
                 }else{
-                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"Frame invalid [%d/%s] retval[%"PRId64"]\n",me_errno,me_strerror(me_errno),retval));
+                    MX_MMSG(R7KR_DEBUG, "Frame invalid [%d/%s] retval[%"PRId64"]\n", me_errno, me_strerror(me_errno), retval);
                     MST_COUNTER_INC(self->stats->events[R7KR_EV_FRAME_INVALID]);
                 }
                 // quit and return
@@ -1675,9 +1677,10 @@ int64_t r7kr_read_frame(r7kr_reader_t *self, byte *dest,
         }// while frame invalid
 
     }else{
-        PEPRINT((stderr,"invalid argument\n"));
+        //        PEPRINT((stderr,"invalid argument\n"));
+        MX_ERROR_MSG("invalid argument\n");
     }
-    PMPRINT(MOD_R7KR,R7KR_V2,(stderr,"r7kr_read_frame returning [%"PRId64"]\n",retval));
+    MX_LPRINT(R7KR, 2, "r7kr_read_frame returning [%"PRId64"]\n", retval);
     return retval;
  }
 // End function r7kr_read_frame
@@ -1694,7 +1697,8 @@ int64_t r7kr_reader_read(r7kr_reader_t *self, byte *dest, uint32_t len)
     if (NULL != self && NULL != dest) {
         return r7k_drfcon_read(self->fc,dest,len);
     }else{
-        PEPRINT((stderr,"invalid argument\n"));
+        //        PEPRINT((stderr,"invalid argument\n"));
+        MX_ERROR_MSG("invalid argument\n");
         retval=-1;
         me_errno = ME_EINVAL;
     }
@@ -1713,7 +1717,8 @@ int64_t r7kr_reader_seek(r7kr_reader_t *self, uint32_t ofs)
     if (NULL != self) {
         return r7k_drfcon_seek(self->fc, ofs);
     }else{
-        PEPRINT((stderr,"invalid argument\n"));
+        //        PEPRINT((stderr,"invalid argument\n"));
+        MX_ERROR_MSG("invalid argument\n");
         retval=-1;
         me_errno = ME_EINVAL;
     }
@@ -1731,7 +1736,8 @@ int64_t r7kr_reader_tell(r7kr_reader_t *self)
     if (NULL != self) {
         return r7k_drfcon_tell(self->fc);
     }else{
-        PEPRINT((stderr,"invalid argument\n"));
+        //        PEPRINT((stderr,"invalid argument\n"));
+        MX_ERROR_MSG("invalid argument\n");
         retval=-1;
         me_errno = ME_EINVAL;
     }
@@ -1749,7 +1755,8 @@ uint32_t r7kr_reader_frames(r7kr_reader_t *self)
     if (NULL != self) {
         return r7k_drfcon_frames(self->fc);
     }else{
-        PEPRINT((stderr,"invalid argument\n"));
+        //        PEPRINT((stderr,"invalid argument\n"));
+        MX_ERROR_MSG("invalid argument\n");
         retval=-1;
         me_errno = ME_EINVAL;
     }
@@ -1767,7 +1774,8 @@ r7k_drf_t *r7kr_reader_enumerate(r7kr_reader_t *self)
     if (NULL != self) {
         return r7k_drfcon_enumerate(self->fc);
     }else{
-        PEPRINT((stderr,"invalid argument\n"));
+        //        PEPRINT((stderr,"invalid argument\n"));
+        MX_ERROR_MSG("invalid argument\n");
     }
     return retval;
 }
@@ -1784,7 +1792,8 @@ r7k_drf_t    *r7kr_reader_next(r7kr_reader_t *self)
     if (NULL != self) {
         return r7k_drfcon_next(self->fc);
     }else{
-        PEPRINT((stderr,"invalid argument\n"));
+        //        PEPRINT((stderr,"invalid argument\n"));
+        MX_ERROR_MSG("invalid argument\n");
     }
     return retval;
 }
@@ -1838,7 +1847,7 @@ bool r7kr_peer_vcmp(void *item, void *value)
     if (NULL!=item && NULL!=value) {
         msock_connection_t *peer = (msock_connection_t *)item;
         int svc = *((int *)value);
-//        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"peer[%p] id[%d] svc[%d]\n",peer,peer->id,svc));
+//        MX_MPRINT(R7KR_DEBUG, "peer[%p] id[%d] svc[%d]\n", peer, peer->id, svc);
         retval = (peer->id == svc);
     }
     return retval;
@@ -1940,13 +1949,14 @@ int r7kr_test(int argc, char **argv)
                 r7k_nf_t *nf = (r7k_nf_t *)(frame_buf);
                 r7k_drf_t *drf = (r7k_drf_t *)(frame_buf+R7K_NF_BYTES);
 
-                PMPRINT(MOD_F7K,F7K_V1,(stderr,"NF:\n"));
+                MX_LMSG(F7K, 1, "NF:\n");
                 r7k_nf_show(nf,false,5);
-                PMPRINT(MOD_F7K,F7K_V1,(stderr,"DRF:\n"));
+                MX_LMSG(F7K, 1, "DRF:\n");
                 r7k_drf_show(drf,false,5);
-                if(verbose>1)
-                PMPRINT(MOD_F7K,F7K_V1,(stderr,"data:\n"));
-                r7k_hex_show(frame_buf,istat,16,true,5);
+                if(verbose>1){
+                    MX_LMSG(F7K, 1, "data:\n");
+                    r7k_hex_show(frame_buf,istat,16,true,5);
+                }
             }
         }else{
             retries--;

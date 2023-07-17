@@ -66,11 +66,10 @@
 #include "mlog.h"
 #include "msocket.h"
 #include "mfile.h"
-#include "mconfig.h"
 #include "mstats.h"
 #include "mtime.h"
-#include "mmdebug.h"
-#include "medebug.h"
+#include "mxdebug.h"
+#include "mxd_app.h"
 #include "merror.h"
 
 /////////////////////////
@@ -196,10 +195,10 @@ int mb1r_reader_connect(mb1r_reader_t *self, bool replace_socket)
         int port = self->sockif->addr->port;
 
         if (replace_socket) {
-            PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"destroying socket\n"));
+            MX_MMSG(MB1R_DEBUG,  "destroying socket\n");
             msock_socket_destroy(&self->sockif);
 
-            PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"building socket\n"));
+            MX_MMSG(MB1R_DEBUG,  "building socket\n");
             self->sockif = msock_socket_new(host,port,ST_TCP);
         }
 
@@ -209,13 +208,13 @@ int mb1r_reader_connect(mb1r_reader_t *self, bool replace_socket)
 #else
         msock_set_opt(self->sockif, SO_REUSEPORT, &optionval, sizeof(optionval));
 #endif
-        PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"connecting to stream [%s:%d]\n",self->sockif->addr->host,self->sockif->addr->port));
+        MX_MPRINT(MB1R_DEBUG, "connecting to stream [%s:%d]\n", self->sockif->addr->host, self->sockif->addr->port);
         if(msock_connect(self->sockif)==0){
             self->state=MB1R_CONNECTED;
             self->sockif->status=SS_CONNECTED;
             retval=0;
         }else{
-            PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"connect failed [%s]\n",self->sockif->addr->host));
+            MX_MPRINT(MB1R_DEBUG, "connect failed [%s]\n", self->sockif->addr->host);
             me_errno=ME_ECONNECT;
             self->state=MB1R_INITIALIZED;
             mb1r_reader_reset_socket(self);
@@ -388,7 +387,7 @@ int mb1r_reader_set_file(mb1r_reader_t *self, mfile_file_t *file)
             self->sockif = msock_wrap_fd(self->fileif->fd);
             retval=0;
         }else{
-            PMPRINT(MOD_MB1R,MM_ERR,(stderr,"ERR - could not open file [%s] [%d/%s]\n",self->fileif->path,errno,strerror(errno)));
+            MX_MPRINT(MB1R_ERROR, "ERR - could not open file [%s] [%d/%s]\n", self->fileif->path, errno, strerror(errno));
         }
     }
     return retval;
@@ -640,8 +639,8 @@ void mb1r_reader_flush(mb1r_reader_t *self, uint32_t len, int32_t retries, uint3
                 }
             }
         }while ( (x!=-1) && (me_errno!=(int)ME_ETMOUT));
-//        MMDEBUG(MB1R,"EXIT - retries[%d/%s] x[%"PRId64"] e[%d/%s] n[%u]\n",retries,(use_retries?"true":"false"),x,
-//               me_errno,me_strerror(me_errno),n);
+//        MX_MPRINT(MB1R_DEBUG, "EXIT - retries[%d/%s] x[%"PRId64"] e[%d/%s] n[%u]\n", retries, (use_retries?"true":"false"), x,
+//                me_errno, me_strerror(me_errno), n);
     }
 }
 // End function mb1r_reader_flush
@@ -775,7 +774,7 @@ static int s_sm_act_resync(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
 
     if (pctx->sync_found==false) {
         // proto_version not found - restart
-        PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"INFO - MB1_TYPE_ID not found - restart\n"));
+        MX_MMSG(MB1R_DEBUG, "INFO - MB1_TYPE_ID not found - restart\n");
         pctx->state=MB1R_STATE_START;
         pctx->lost_bytes+=(pctx->pbuf-pctx->psync);
     }else{
@@ -808,7 +807,7 @@ static int s_sm_act_read_header(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
 
             switch (pctx->state) {
                 case MB1R_STATE_START:
-                     PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read_header MB1R_STATE_START\n"));
+                    MX_MMSG(MB1R_DEBUG, "read_header MB1R_STATE_START\n");
                     pctx->read_len = MB1_HEADER_BYTES;
                     pctx->pbuf = pctx->dest;
                     pctx->header_pending = true;
@@ -817,14 +816,14 @@ static int s_sm_act_read_header(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
                     memset(pctx->dest,0,pctx->len);
                     break;
                 case MB1R_STATE_READING:
-                     PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read_header MB1R_STATE_READING\n"));
+                    MX_MMSG(MB1R_DEBUG, "read_header MB1R_STATE_READING\n");
                     // still reading
                     // don't touch inputs
                     pctx->action = MB1R_ACTION_READ;
                     break;
                 case MB1R_STATE_READ_OK:
                     if (pctx->header_pending) {
-                         PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read_header MB1R_STATE_READ_OK (header)\n"));
+                        MX_MMSG(MB1R_DEBUG, "read_header MB1R_STATE_READ_OK (header)\n");
                         pctx->header_pending = false;
                         pctx->action = MB1R_ACTION_VALIDATE_HEADER;
                     }
@@ -833,19 +832,19 @@ static int s_sm_act_read_header(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
                     pctx->state = MB1R_STATE_HEADER_VALID;
                     pctx->action = MB1R_ACTION_QUIT;
                     retval=0;
-                     PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read_header MB1R_STATE_HEADER_VALID\n"));
+                    MX_MMSG(MB1R_DEBUG, "read_header MB1R_STATE_HEADER_VALID\n");
                     break;
                 case MB1R_STATE_HEADER_INVALID:
-                     PMPRINT(MOD_MB1R,MB1R_V2,(stderr,"read_header MB1R_STATE_HEADER_INVALID\n"));
+                     MX_LMSG(MB1R, 2, "read_header MB1R_STATE_HEADER_INVALID\n");
                     if ( (pctx->flags&MB1R_RESYNC_HEADER)!=0 ) {
                         // pbuf points to end of input...
                         // psync points 1 byte into invalid frame
-                        PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read_header  RESYNC: header buffer:\n"));
+                        MX_MMSG(MB1R_DEBUG, "read_header  RESYNC: header buffer:\n");
                         mb1_hex_show(pctx->dest,MB1_HEADER_BYTES,16,true,5);
-                        PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read_header dest[%p] pbuf[%p] ofs[%"PRId32"]\n",pctx->dest,pctx->pbuf,(int32_t)(pctx->pbuf-pctx->dest)));
-                        PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read_header read_len[%"PRIu32"]\n",pctx->read_len));
-                        PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read_header frame_bytes[%"PRId64"]\n",pctx->frame_bytes));
-                        PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read_header lost_bytes[%"PRId64"]\n",pctx->lost_bytes));
+                        MX_MPRINT(MB1R_DEBUG, "read_header dest[%p] pbuf[%p] ofs[%"PRId32"]\n", pctx->dest, pctx->pbuf,  (int32_t)(pctx->pbuf-pctx->dest));
+                        MX_MPRINT(MB1R_DEBUG, "read_header read_len[%"PRIu32"]\n", pctx->read_len);
+                        MX_MPRINT(MB1R_DEBUG, "read_header frame_bytes[%"PRId64"]\n", pctx->frame_bytes);
+                        MX_MPRINT(MB1R_DEBUG, "read_header lost_bytes[%"PRId64"]\n", pctx->lost_bytes);
 
                         pctx->psync = pctx->dest+1;
                         pctx->lost_bytes+=1;
@@ -857,7 +856,7 @@ static int s_sm_act_read_header(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
                     }
                     break;
                 default:
-                    PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read_header invalid state [%d]\n",pctx->state));
+                    MX_MPRINT(MB1R_DEBUG, "read_header invalid state [%d]\n", pctx->state);
                     break;
             }// switch
 
@@ -866,11 +865,11 @@ static int s_sm_act_read_header(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
                 pctx->read_bytes=0;
                 while (pctx->read_bytes<pctx->read_len) {
 
-                    PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"reading [%"PRId64"/%"PRIu32"] rto_ms[%"PRIu32"]\n",pctx->read_bytes,pctx->read_len, pctx->timeout_msec));
+                    MX_MPRINT(MB1R_DEBUG, "reading [%"PRId64"/%"PRIu32"] rto_ms[%"PRIu32"]\n", pctx->read_bytes, pctx->read_len,  pctx->timeout_msec);
 
                     if ( (pctx->read_bytes=msock_read_tmout(mb1r_reader_sockif(self), pctx->pbuf, pctx->read_len, pctx->timeout_msec)) == pctx->read_len) {
 
-//                        PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read OK [%"PRId64"]\n",pctx->read_bytes));
+//                        MX_MPRINT(MB1R_DEBUG, "read OK [%"PRId64"]\n", pctx->read_bytes);
 
 //                        pnf = (r7k_nf_t *)dest;
                         pctx->pbuf += pctx->read_bytes;
@@ -913,26 +912,26 @@ static int s_sm_act_read_header(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
                 pctx->cx=0;
 
                 if(pctx->cx==0 && pctx->psnd->type != MB1_TYPE_ID){
-                    PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"INFO - header  type invalid [%04X/%04X]\n",pctx->psnd->type,(uint32_t)MB1_TYPE_ID));
+                    MX_MPRINT(MB1R_DEBUG, "INFO - header  type invalid [%04X/%04X]\n", pctx->psnd->type, (uint32_t)MB1_TYPE_ID);
                     MST_COUNTER_INC(self->stats->events[MB1R_EV_EHDRTYPE]);
                     pctx->cx++;
                 }
 
                 if(pctx->cx==0 && pctx->psnd->size < MB1_EMPTY_SOUNDING_BYTES){
-                    PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"INFO - header  size invalid [%"PRIu32"]\n",pctx->psnd->size));
+                    MX_MPRINT(MB1R_DEBUG, "INFO - header  size invalid [%"PRIu32"]\n", pctx->psnd->size);
                     MST_COUNTER_INC(self->stats->events[MB1R_EV_EHDRSZ]);
                     pctx->cx++;
                 }
 
                 if(pctx->cx==0 &&
                    (pctx->psnd->size != MB1_SOUNDING_BYTES(pctx->psnd->nbeams))){
-                    PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"INFO - header  size invalid [%"PRIu32"/%"PRIu32"]\n",pctx->psnd->size,(uint32_t)MB1_SOUNDING_BYTES(pctx->psnd->nbeams)));
+                    MX_MPRINT(MB1R_DEBUG, "INFO - header  size invalid [%"PRIu32"/%"PRIu32"]\n", pctx->psnd->size, (uint32_t)MB1_SOUNDING_BYTES(pctx->psnd->nbeams));
                     MST_COUNTER_INC(self->stats->events[MB1R_EV_EHDRSZ]);
                     pctx->cx++;
                 }
 
                 if(pctx->cx==0 && pctx->psnd->ts < 0){
-                    PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"INFO - header  timestamp invalid [%.2lf]\n",pctx->psnd->ts));
+                    MX_MPRINT(MB1R_DEBUG, "INFO - header  timestamp invalid [%.2lf]\n", pctx->psnd->ts);
                     MST_COUNTER_INC(self->stats->events[MB1R_EV_EHDRTS]);
                     pctx->cx++;
                 }
@@ -945,9 +944,9 @@ static int s_sm_act_read_header(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
 
             if(pctx->action == MB1R_ACTION_RESYNC){
                 if(s_sm_act_resync(self, pctx)==0){
-                    PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"INFO - header  sync OK\n"));
+                    MX_MMSG(MB1R_DEBUG, "INFO - header  sync OK\n");
                 }else{
-                    PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"INFO - header  sync ERR\n"));
+                    MX_MMSG(MB1R_DEBUG, "INFO - header  sync ERR\n");
                 }
             }
 
@@ -981,39 +980,39 @@ static int s_sm_act_read_data(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
 
             switch (pctx->state) {
                 case MB1R_STATE_START:
-                    PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read_data MB1R_STATE_START\n"));
+                    MX_MMSG(MB1R_DEBUG, "read_data MB1R_STATE_START\n");
                     pctx->read_len = MB1_BEAM_ARRAY_BYTES(pctx->psnd->nbeams)+MB1_CHECKSUM_BYTES;
                     pctx->pbuf = (byte *)MB1_PBEAMS(pctx->psnd);
-                    PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read_data pbuf[%p] rlen[%"PRIu32"]\n",pctx->pbuf,pctx->read_len));
+                    MX_MPRINT(MB1R_DEBUG, "read_data pbuf[%p] rlen[%"PRIu32"]\n", pctx->pbuf, pctx->read_len);
                     pctx->action = MB1R_ACTION_READ;
                     break;
                 case MB1R_STATE_READING:
-                    PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read_data MB1R_STATE_READING\n"));
+                    MX_MMSG(MB1R_DEBUG, "read_data MB1R_STATE_READING\n");
                     // still reading
                     // don't touch inputs
                     pctx->action = MB1R_ACTION_READ;
                     break;
                 case MB1R_STATE_READ_OK:
-                        PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read_data MB1R_STATE_READ_OK\n"));
+                    MX_MMSG(MB1R_DEBUG, "read_data MB1R_STATE_READ_OK\n");
                         pctx->action = MB1R_ACTION_VALIDATE_DATA;
                     break;
                 case MB1R_STATE_DATA_VALID:
                     pctx->state = MB1R_STATE_DATA_VALID;
                     pctx->action = MB1R_ACTION_QUIT;
                     retval=0;
-                    PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read_data MB1R_STATE_DATA_VALID\n"));
+                    MX_MMSG(MB1R_DEBUG, "read_data MB1R_STATE_DATA_VALID\n");
                     break;
                 case MB1R_STATE_DATA_INVALID:
-                    PMPRINT(MOD_MB1R,MB1R_V2,(stderr,"read_data MB1R_STATE_DATA_INVALID\n"));
+                    MX_LMSG(MB1R, 2, "read_data MB1R_STATE_DATA_INVALID\n");
                     if ( (pctx->flags&MB1R_RESYNC_HEADER)!=0 ) {
                         // pbuf points to end of input...
                         // psync points 1 byte into invalid frame
-                        PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read_data  RESYNC: header buffer:\n"));
+                        MX_MMSG(MB1R_DEBUG, "read_data  RESYNC: header buffer:\n");
                         mb1_hex_show(pctx->dest,MB1_HEADER_BYTES,16,true,5);
-                        PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read_data dest[%p] pbuf[%p] ofs[%"PRId32"]\n",pctx->dest,pctx->pbuf,(int32_t)(pctx->pbuf-pctx->dest)));
-                        PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read_data read_len[%"PRIu32"]\n",pctx->read_len));
-                        PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read_data frame_bytes[%"PRId64"]\n",pctx->frame_bytes));
-                        PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read_data lost_bytes[%"PRId64"]\n",pctx->lost_bytes));
+                        MX_MPRINT(MB1R_DEBUG, "read_data dest[%p] pbuf[%p] ofs[%"PRId32"]\n", pctx->dest, pctx->pbuf, (int32_t)(pctx->pbuf-pctx->dest));
+                        MX_MPRINT(MB1R_DEBUG, "read_data read_len[%"PRIu32"]\n", pctx->read_len);
+                        MX_MPRINT(MB1R_DEBUG, "read_data frame_bytes[%"PRId64"]\n", pctx->frame_bytes);
+                        MX_MPRINT(MB1R_DEBUG, "read_data lost_bytes[%"PRId64"]\n", pctx->lost_bytes);
 
                         pctx->psync = pctx->dest+1;
                         pctx->lost_bytes+=1;
@@ -1025,7 +1024,7 @@ static int s_sm_act_read_data(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
                     }
                     break;
                 default:
-                    PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read_data invalid state [%d]\n",pctx->state));
+                    MX_MPRINT(MB1R_DEBUG, "read_data invalid state [%d]\n", pctx->state);
                     sleep(1);
                     break;
             }// switch
@@ -1035,7 +1034,7 @@ static int s_sm_act_read_data(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
                 pctx->read_bytes=0;
                 while (pctx->read_bytes<pctx->read_len) {
                     if ( (pctx->read_bytes=msock_read_tmout(mb1r_reader_sockif(self), pctx->pbuf, pctx->read_len, pctx->timeout_msec)) == pctx->read_len) {
-                        PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read_data OK [%"PRId64"]\n",pctx->read_bytes));
+                        MX_MPRINT(MB1R_DEBUG, "read_data OK [%"PRId64"]\n", pctx->read_bytes);
 
                         pctx->pbuf += pctx->read_bytes;
                         pctx->frame_bytes += pctx->read_bytes;
@@ -1044,7 +1043,7 @@ static int s_sm_act_read_data(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
                     }else{
                         fprintf(stderr,"%s:%d errno[%d/%s] merrno[[%d/%s]\n",__func__,__LINE__,errno,strerror(errno),me_errno,me_strerror(me_errno));
 
-                        PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read_data SHORT READ [%"PRId64"]\n",pctx->read_bytes));
+                        MX_MPRINT(MB1R_DEBUG, "read_data SHORT READ [%"PRId64"]\n", pctx->read_bytes);
                         MST_COUNTER_INC(self->stats->events[MB1R_EV_DATA_SHORT_READ]);
                         if (pctx->read_bytes>=0) {
                             // short read, keep going
@@ -1079,7 +1078,7 @@ static int s_sm_act_read_data(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
                 pctx->cx=0;
 
                 if(pctx->cx==0 && mb1_validate_checksum(pctx->psnd)!=0 ){
-                    PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"INFO - read_data checksum invalid [%08X/%08X]\n",MB1_GET_CHECKSUM(pctx->psnd),mb1_calc_checksum(pctx->psnd)));
+                    MX_MPRINT(MB1R_DEBUG, "INFO - read_data checksum invalid [%08X/%08X]\n", MB1_GET_CHECKSUM(pctx->psnd), mb1_calc_checksum(pctx->psnd));
                     MST_COUNTER_INC(self->stats->events[MB1R_EV_ECHKSUM]);
                     pctx->cx++;
                 }
@@ -1092,9 +1091,9 @@ static int s_sm_act_read_data(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
 
             if(pctx->action == MB1R_ACTION_RESYNC){
                 if(s_sm_act_resync(self, pctx)==0){
-                    PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"INFO - read_data  sync OK\n"));
+                    MX_MMSG(MB1R_DEBUG, "INFO - read_data  sync OK\n");
                 }else{
-                    PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"INFO - read_data  sync ERR\n"));
+                    MX_MMSG(MB1R_DEBUG, "INFO - read_data  sync ERR\n");
                 }
             }
 
@@ -1114,7 +1113,7 @@ static int s_sm_update(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
     switch (pctx->state) {
 
         case MB1R_STATE_START:
-             PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"update MB1R_STATE_START\n"));
+            MX_MMSG(MB1R_DEBUG, "update MB1R_STATE_START\n");
             pctx->read_len = MB1_HEADER_BYTES;
             // resync on failed header read(?)
             pctx->rflags = MB1R_RESYNC_HEADER;
@@ -1127,7 +1126,7 @@ static int s_sm_update(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
             break;
 
         case MB1R_STATE_HEADER_VALID:
-             PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"update MB1R_STATE_HEADER_VALID\n"));
+            MX_MMSG(MB1R_DEBUG, "update MB1R_STATE_HEADER_VALID\n");
             // next, read the data and checksum
             pctx->read_len = MB1_BEAM_ARRAY_BYTES(pctx->psnd->nbeams)+MB1_CHECKSUM_BYTES;
             // don't resync on failed data read
@@ -1138,40 +1137,40 @@ static int s_sm_update(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
             break;
 
         case MB1R_STATE_DATA_VALID:
-             PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"update MB1R_STATE_DATA_VALID\n"));
+            MX_MMSG(MB1R_DEBUG, "update MB1R_STATE_DATA_VALID\n");
             // done
             pctx->action = MB1R_ACTION_QUIT;
             pctx->state = MB1R_STATE_FRAME_VALID;
             break;
 
         case MB1R_STATE_HEADER_INVALID:
-            // PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"MB1R_STATE_HEADER_INVALID (retrying)\n"));
+            // MX_MMSG(MB1R_DEBUG, "MB1R_STATE_HEADER_INVALID (retrying)\n");
             pctx->state  = MB1R_STATE_START;
             pctx->action = MB1R_ACTION_NOOP;
             break;
 
         case MB1R_STATE_DATA_INVALID:
-            PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"MB1R_STATE_DATA_INVALID (retrying)\n"));
+            MX_MMSG(MB1R_DEBUG, "MB1R_STATE_DATA_INVALID (retrying)\n");
             pctx->state  = MB1R_STATE_START;
             pctx->action = MB1R_ACTION_NOOP;
             break;
 
         case MB1R_STATE_READ_ERR:
-            PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"MB1R_STATE_READ_ERR\n"));
+            MX_MMSG(MB1R_DEBUG, "MB1R_STATE_READ_ERR\n");
             if (pctx->merrno==ME_ESOCK) {
-                PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"socket disconnected - quitting\n"));
+                MX_MMSG(MB1R_DEBUG, "socket disconnected - quitting\n");
             }else if (pctx->merrno==ME_EOF) {
-                PMPRINT(MOD_MB1R,MM_ERR,(stderr,"end of file\n"));
+                MX_MMSG(MB1R_ERROR, "end of file\n");
             }else if (pctx->merrno==ME_ENOSPACE) {
-                PMPRINT(MOD_MB1R,MM_ERR,(stderr,"buffer full [%"PRIu32"/%"PRIu32"]\n",(uint32_t)(pctx->pbuf+pctx->read_len-pctx->dest),pctx->len));
+                MX_MPRINT(MB1R_ERROR, "buffer full [%"PRIu32"/%"PRIu32"]\n", (uint32_t)(pctx->pbuf+pctx->read_len-pctx->dest),pctx->len);
             }else{
-                PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read error [%d/%s]\n",pctx->merrno,me_strerror(pctx->merrno)));
+                MX_MPRINT(MB1R_ERROR, "read error [%d/%s]\n", pctx->merrno, me_strerror(pctx->merrno));
             }
             pctx->action   = MB1R_ACTION_QUIT;
             break;
 
         default:
-            PMPRINT(MOD_MB1R,MM_ERR,(stderr,"ERR - unknown state[%d]\n",pctx->state));
+            MX_MPRINT(MB1R_ERROR, "ERR - unknown state[%d]\n", pctx->state);
             retval=-1;
             break;
     }
@@ -1236,11 +1235,11 @@ int64_t mb1r_read_frame(mb1r_reader_t *self,
             if (pctx->action==MB1R_ACTION_READ_HEADER) {
 
                 if ( s_sm_act_read_header(self,  pctx) == 0) {
-                    PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read_frame HEADER read OK\n"));
+                    MX_MMSG(MB1R_DEBUG, "read_frame HEADER read OK\n");
                     pctx->state = MB1R_STATE_HEADER_VALID;
                     pctx->action = MB1R_ACTION_NOOP;
                 }else{
-                    PMPRINT(MOD_MB1R,MM_ERR,(stderr,"read_frame ERR - mb1r_read_hdr read_bytes[%"PRId64"] [%d/%s]\n",pctx->read_bytes,me_errno,me_strerror(me_errno)));
+                    MX_MPRINT(MB1R_ERROR, "read_frame ERR - mb1r_read_hdr read_bytes[%"PRId64"] [%d/%s]\n", pctx->read_bytes, me_errno, me_strerror(me_errno));
                     mb1r_ctx_show(pctx, true, 5);
                     pctx->merrno = me_errno;
                     pctx->state = MB1R_STATE_READ_ERR;
@@ -1249,11 +1248,11 @@ int64_t mb1r_read_frame(mb1r_reader_t *self,
 
             if (pctx->action==MB1R_ACTION_READ_DATA) {
                 if ( s_sm_act_read_data(self, pctx) == 0) {
-                    PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read_frame DATA read OK\n"));
+                    MX_MMSG(MB1R_DEBUG, "read_frame DATA read OK\n");
                     pctx->state = MB1R_STATE_DATA_VALID;
                     pctx->action = MB1R_ACTION_NOOP;
                 }else{
-                    PMPRINT(MOD_MB1R,MM_ERR,(stderr,"read_frame ERR - mb1r_read_data read_bytes[%"PRId64"] [%d/%s]\n",pctx->read_bytes,me_errno,me_strerror(me_errno)));
+                    MX_MPRINT(MB1R_ERROR, "read_frame ERR - mb1r_read_data read_bytes[%"PRId64"] [%d/%s]\n",pctx->read_bytes,me_errno,me_strerror(me_errno));
                     mb1r_ctx_show(pctx, true, 5);
                     pctx->merrno = me_errno;
                     pctx->state = MB1R_STATE_READ_ERR;
@@ -1262,10 +1261,10 @@ int64_t mb1r_read_frame(mb1r_reader_t *self,
 
             if (pctx->action==MB1R_ACTION_QUIT) {
 
-                // PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"ACTION_QUIT\n"));
+                // MX_MMSG(MB1R_DEBUG, "ACTION_QUIT\n");
                 if (pctx->state==MB1R_STATE_FRAME_VALID) {
                     retval = pctx->frame_bytes;
-                    PMPRINT(MOD_MB1R,MB1R_V2,(stderr,"read_frame Frame valid - returning[%"PRId64"]\n",retval));
+                    MX_LPRINT(MB1R, 2, "read_frame Frame valid - returning[%"PRId64"]\n", retval);
                     MST_COUNTER_ADD(self->stats->status[MB1R_STA_FRAME_VAL_BYTES],pctx->frame_bytes);
 
                     //                    MST_COUNTER_INC(self->stats->events[MB1R_EV_FRAME_VALID]);
@@ -1282,7 +1281,7 @@ int64_t mb1r_read_frame(mb1r_reader_t *self,
                     }
 
                 }else{
-                    PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read_frame Frame invalid [%d/%s] retval[%"PRId64"]\n",me_errno,me_strerror(me_errno),retval));
+                    MX_MPRINT(MB1R_DEBUG, "read_frame Frame invalid [%d/%s] retval[%"PRId64"]\n", me_errno, me_strerror(me_errno), retval);
                     MST_COUNTER_INC(self->stats->events[MB1R_EV_FRAME_INVALID]);
                 }
                 // quit and return
@@ -1292,9 +1291,9 @@ int64_t mb1r_read_frame(mb1r_reader_t *self,
         }// while frame invalid
 
     }else{
-        PEPRINT((stderr,"read_frame invalid argument\n"));
+        MX_ERROR_MSG("read_frame invalid argument\n");
     }
-    PMPRINT(MOD_MB1R,MB1R_V2,(stderr,"mb1r_read_frame returning [%"PRId64"]\n",retval));
+    MX_LPRINT(MB1R, 2, "mb1r_read_frame returning [%"PRId64"]\n", retval);
     return retval;
  }
 // End function mb1r_read_frame
@@ -1341,7 +1340,7 @@ bool mb1r_peer_vcmp(void *item, void *value)
     if (NULL!=item && NULL!=value) {
         msock_connection_t *peer = (msock_connection_t *)item;
         int svc = *((int *)value);
-//        PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"peer[%p] id[%d] svc[%d]\n",peer,peer->id,svc));
+//        MX_MPRINT(MB1R_DEBUG, "peer[%p] id[%d] svc[%d]\n", peer, peer->id, svc);
         retval = (peer->id == svc);
     }
     return retval;
@@ -1416,7 +1415,7 @@ static void *s_test_worker(void *pargs)
                 for (int i=s->fd; i<=fdmax; i++) {
                     bool do_close=false;
                     if (FD_ISSET(i, &read_fds)){
-                        // MMINFO(APP1,"readfs [%d/%d] selected\n",i,fdmax);
+                        // MX_INFO("readfs [%d/%d] selected\n", i, fdmax);
                         if (i==s->fd) {
                             fprintf(stderr,"server ready to read\n");
 
@@ -1435,7 +1434,7 @@ static void *s_test_worker(void *pargs)
                                 }
                             }else{
                                 // accept failed
-                                // MMINFO(APP1,"accept failed [%d/%s]\n",errno,strerror(errno));
+                                // MX_INFO("accept failed [%d/%s]\n", errno, strerror(errno));
                             }
                         }else{
                             // client ready to read
@@ -1461,7 +1460,7 @@ static void *s_test_worker(void *pargs)
                         }
                     }else{
                         // fd[i] not ready to read
-//                        MMINFO(APP1,"readfs fd[%d/%d] ISSET:%s\n",i,fdmax,(FD_ISSET(i,&read_fds)?"TRUE":"FALSE"));
+//                        MX_INFO("readfs fd[%d/%d] ISSET:%s\n", i, fdmax, (FD_ISSET(i,&read_fds)?"TRUE":"FALSE"));
                     }
 
                     if (FD_ISSET(i, &err_fds)){
@@ -1518,7 +1517,7 @@ static void *s_test_worker(void *pargs)
 
             }else{
                 // select failed
-                //                    MMINFO(APP1,"select failed stat[%d] [%d/%s]\n",stat,errno,strerror(errno));
+                //                    MX_INFO("select failed stat[%d] [%d/%s]\n", stat, errno, strerror(errno));
                 tv.tv_sec = 3;
                 tv.tv_usec = 0;
             }
@@ -1607,12 +1606,10 @@ int mb1r_test(int argc, char **argv)
         fprintf(stderr,"verbose : [%d]\n",cfg->verbose);
     }
 
-    mmd_initialize();
-    mconf_init(NULL, NULL);
-    mmd_channel_set(MOD_MB1, MM_ALL);
-    mmd_channel_set(MOD_MB1R, MM_ALL);
-    mmd_channel_en(MOD_MB1, MM_ALL);
-    mmd_channel_en(MOD_MB1R, MM_ALL);
+    mxd_setModule(MB1R, 1, false, "MB1R");
+    mxd_setModule(MB1R_ERROR, 1, false, "MB1R_ERR");
+    mxd_setModule(MB1R_DEBUG, 1, false, "MB1R_DEBUG");
+    mxd_setModule(F7K, 1, false, "F7K");
 
     mthread_thread_t *worker = mthread_thread_new();
     if(mthread_thread_start(worker, s_test_worker, (void *)cfg)!=0){
@@ -1652,13 +1649,14 @@ int mb1r_test(int argc, char **argv)
                         cfg->cycles,lost_bytes,istat);
             // show contents
             if (cfg->verbose>=1) {
-                PMPRINT(MOD_F7K,F7K_V1,(stderr,"MB1:\n"));
+                MX_LMSG(F7K, 1, "MB1:\n");
 //                mb1_t *psnd = (mb1_t *)(frame_buf);
 //                mb1_show(psnd,false,5);
 
-                if(cfg->verbose>1)
-                PMPRINT(MOD_F7K,F7K_V1,(stderr,"data:\n"));
-                mb1_hex_show(frame_buf,istat,16,true,5);
+                if(cfg->verbose>1){
+                    MX_LMSG(F7K, 1, "data:\n");
+                    mb1_hex_show(frame_buf,istat,16,true,5);
+                }
             }
         }else{
             retries--;

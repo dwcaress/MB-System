@@ -709,6 +709,7 @@ void mlist_purge(mlist_t *self)
             self->tail = plist;
             plist=plist->next;
             free(self->tail);
+            self->size--;
         }
         self->head=NULL;
         self->tail=NULL;

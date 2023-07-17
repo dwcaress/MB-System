@@ -113,7 +113,8 @@ typedef enum{
 /// MM_CHANNEL_COUNT. If applications use these,
 /// they must also define corresponding channel names.
 typedef enum{
-    MMID_TRACE=0,
+    MMID_NONE=0,
+    MMID_TRACE,
     MMID_DEBUG,
     MMID_WARN,
     MMID_ERR,
@@ -123,7 +124,7 @@ typedef enum{
 /// @enum mmd_channel_mask
 /// @brief channel masks reserved for mframe modules
 typedef enum{
-	MM_NONE=0x00000000,
+    MM_NONE=0,
     MM_TRACE=(1<<MMID_TRACE),
     MM_DEBUG=(1<<MMID_DEBUG),
     MM_WARN=(1<<MMID_WARN),
@@ -300,6 +301,14 @@ void mmd_release();
 //// @return 0 on success, -1 otherwise
 int mmd_module_configure(mmd_module_config_t *config);
 
+/// @fn void mmd_config_show(mmd_module_config_t *self, bool verbose, uint16_t indent)
+/// @brief show module summary
+/// @param[in] self module configuration
+/// @param[in] verbose extra output
+/// @param[in]  indent number of spaces 
+//// @return 0 on success, -1 otherwise
+void mmd_config_show(mmd_module_config_t *self, bool verbose, uint16_t indent);
+
 /// @fn int mmd_channel_configure(mmd_module_id_t id, char *name, uint32_t channel, bool enable);
 /// @brief configure module output channels
 /// @param[in] id module/group ID
@@ -356,6 +365,9 @@ char *mmd_module_name(mmd_module_id_t id);
 /// @param[in] ch_id channel ID
 /// @return channel name on success, NULL otherwise
 char *mmd_channel_name(mmd_module_id_t id, mmd_channel_id_t ch_id);
+
+uint32_t mmd_channel_count(mmd_module_id_t id);
+
 
 #ifdef WITH_MMDEBUG_TEST
 /// @fn int mmd_test()

@@ -126,7 +126,7 @@ AS_ECHO(["----------------------------------------------------------------------
 AS_ECHO([" "])
 
 dnl Require automake 2.71 or later
-AC_PREREQ([2.71])
+AC_PREREQ([2.69])
 
 dnl Disable warnings about unrecognized options
 AC_DISABLE_OPTION_CHECKING
