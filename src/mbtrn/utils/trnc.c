@@ -3,7 +3,7 @@
 /// @authors k. Headley
 /// @date 01 jan 2018
 
-/// TRN test client
+/// TRN test client: subscribe to mb1svr UDP stream
 /// subscribes to mbtrnpreprocess data
 
 /////////////////////////
@@ -233,7 +233,7 @@ static bool g_interrupt=false;
 /// @return none
 static void s_show_help()
 {
-    char help_message[] = "\nTRN test client\n";
+    char help_message[] = "\nTRN test client: subscribe to mb1svr UDP stream\n";
     char usage_message[] = "\ntrnc [options]\n"
     "--verbose=n    : verbose output, n>0\n"
     "--help         : output help message\n"
