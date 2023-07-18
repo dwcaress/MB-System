@@ -504,10 +504,6 @@ typedef struct mbtrnpp_cfg_s{
 
 }mbtrnpp_cfg_t;
 
-typedef enum {
-    MBTRNPP = 5
-}mxdebug_channel_id;
-
 // ping buffer size default
 #define MBTRNPREPROCESS_BUFFER_DEFAULT 20
 #define MBTRNPREPROCESS_OUTPUT_STDOUT 0
@@ -4960,91 +4956,92 @@ int mbtrnpp_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags
 int mbtrnpp_init_debug(int verbose) {
 
     // enable MXERROR by default
-    mxd_setModule(MXINFO, 0, true, "INFO");
-    mxd_setModule(MXERROR, 1, false, "ERR");
-    mxd_setModule(MXDEBUG, 0, true, "DEBUG");
-    mxd_setModule(MXWARN, 0, true, "WARN");
-    mxd_setModule(MBTRNPP, 0, true, "MB12X");
-    mxd_setModule(R7KR, 0, true, "R7KR");
-    mxd_setModule(R7KR_DEBUG, 0, true, "R7KR_DEBUG");
-    mxd_setModule(R7KR_ERROR, 0, true, "R7KR_ERROR");
-    mxd_setModule(R7KC, 0, true, "R7KC");
-    mxd_setModule(R7KC_DEBUG, 0, true, "R7KC_DEBUG");
-    mxd_setModule(R7KC_ERROR, 0, true, "R7KC_ERROR");
-    mxd_setModule(R7KC_PARSER, 0, true, "R7KC_PARSER");
-    mxd_setModule(R7KC_DRFCON, 0, true, "R7KC_DRFCON");
-    mxd_setModule(MB1R, 0, true, "MB1R");
-    mxd_setModule(MB1R_DEBUG, 0, true, "MB1R_DEBUG");
-    mxd_setModule(MB1R_ERROR, 0, true, "MB1R_ERROR");
-    mxd_setModule(F7K, 0, true, "F7K");
+    mxd_setModule(MXINFO, 0, true, "info");
+    mxd_setModule(MXERROR, 1, false, "err");
+    mxd_setModule(MXDEBUG, 0, true, "debug");
+    mxd_setModule(MXWARN, 0, true, "warn");
+
+    mxd_setModule(MBTRNPP, 0, true, "mbtrn");
+    mxd_setModule(R7KR, 0, true, "r7kr");
+    mxd_setModule(R7KR_DEBUG, 0, true, "r7kr.debug");
+    mxd_setModule(R7KR_ERROR, 0, true, "r7kr.err");
+    mxd_setModule(R7KC, 0, true, "r7kc");
+    mxd_setModule(R7KC_DEBUG, 0, true, "r7kc.debug");
+    mxd_setModule(R7KC_ERROR, 0, true, "r7kc.err");
+    mxd_setModule(R7KC_PARSER, 0, true, "r7kc.parser");
+    mxd_setModule(R7KC_DRFCON, 0, true, "r7kc.drfcon");
+    mxd_setModule(MB1R, 0, true, "mb1r");
+    mxd_setModule(MB1R_DEBUG, 0, true, "mb1r.debug");
+    mxd_setModule(MB1R_ERROR, 0, true, "mb1r.err");
+    mxd_setModule(F7K, 0, true, "f7k");
 
     switch (verbose) {
         case 0:
             break;
         case 1:
             mxd_setModule(MBTRNPP, 1, false, NULL);
-            mxd_setModule(R7KR, 1, false, NULL);
-            mxd_setModule(MB1R, 1, false, NULL);
+            mxd_setModule(R7KR, 5, false, NULL);
+            mxd_setModule(MB1R, 5, false, NULL);
             break;
         case 2:
             mxd_setModule(MBTRNPP, 2, false, NULL);
-            mxd_setModule(R7KR, 1, false, NULL);
-            mxd_setModule(R7KR_DEBUG, 1, false, NULL);
-            mxd_setModule(MB1R, 1, false, NULL);
-            mxd_setModule(MB1R_DEBUG, 1, false, NULL);
-            mxd_setModule(R7KC_PARSER, 1, false, NULL);
+            mxd_setModule(R7KR, 5, false, NULL);
+            mxd_setModule(R7KR_DEBUG, 5, false, NULL);
+            mxd_setModule(MB1R, 5, false, NULL);
+            mxd_setModule(MB1R_DEBUG, 5, false, NULL);
+            mxd_setModule(R7KC_PARSER, 5, false, NULL);
             break;
         case -1:
             mxd_setModule(MBTRNPP, 1, false, NULL);
-            mxd_setModule(MXWARN, 1, false, NULL);
-            mxd_setModule(R7KR, 1, false, NULL);
-            mxd_setModule(R7KR_DEBUG, 1, false, NULL);
-            mxd_setModule(MB1R, 1, false, NULL);
-            mxd_setModule(MB1R_DEBUG, 1, false, NULL);
+            mxd_setModule(MXWARN, 5, false, NULL);
+            mxd_setModule(R7KR, 5, false, NULL);
+            mxd_setModule(R7KR_DEBUG, 5, false, NULL);
+            mxd_setModule(MB1R, 5, false, NULL);
+            mxd_setModule(MB1R_DEBUG, 5, false, NULL);
             mxd_setModule(NETIF, 2, false, NULL);
             break;
         case -2:
             mxd_setModule(MBTRNPP, 2, false, NULL);
-            mxd_setModule(MXWARN, 1, false, NULL);
-            mxd_setModule(R7KR, 1, false, NULL);
-            mxd_setModule(R7KR_DEBUG, 1, false, NULL);
-            mxd_setModule(MB1R, 1, false, NULL);
-            mxd_setModule(MB1R_DEBUG, 1, false, NULL);
+            mxd_setModule(MXWARN, 5, false, NULL);
+            mxd_setModule(R7KR, 5, false, NULL);
+            mxd_setModule(R7KR_DEBUG, 5, false, NULL);
+            mxd_setModule(MB1R, 5, false, NULL);
+            mxd_setModule(MB1R_DEBUG, 5, false, NULL);
             mxd_setModule(NETIF, 3, false, NULL);
             break;
         case -3:
             mxd_setModule(MBTRNPP, 3, false, NULL);
-            mxd_setModule(MXWARN, 1, false, NULL);
-            mxd_setModule(MXDEBUG, 1, false, NULL);
-            mxd_setModule(R7KR, 1, false, NULL);
-            mxd_setModule(R7KR_DEBUG, 1, false, NULL);
+            mxd_setModule(MXWARN, 5, false, NULL);
+            mxd_setModule(MXDEBUG, 5, false, NULL);
+            mxd_setModule(R7KR, 5, false, NULL);
+            mxd_setModule(R7KR_DEBUG, 5, false, NULL);
             mxd_setModule(MB1R, 5, false, NULL);
             mxd_setModule(MB1R_DEBUG, 5, false, NULL);
             mxd_setModule(MB1R_ERROR, 5, false, NULL);
-            mxd_setModule(R7KC_PARSER, 1, false, NULL);
+            mxd_setModule(R7KC_PARSER, 5, false, NULL);
             mxd_setModule(NETIF, 4, false, NULL);
             break;
         case -4:
             mxd_setModule(MBTRNPP, 4, false, NULL);
-            mxd_setModule(MXWARN, 1, false, NULL);
-            mxd_setModule(MXDEBUG, 1, false, NULL);
-            mxd_setModule(MBTRNPP, 3, false, NULL);
-            mxd_setModule(MXWARN, 1, false, NULL);
-            mxd_setModule(MXDEBUG, 1, false, NULL);
-            mxd_setModule(R7KR, 1, false, NULL);
-            mxd_setModule(R7KR_DEBUG, 1, false, NULL);
-            mxd_setModule(MB1R, 1, false, NULL);
-            mxd_setModule(MB1R_DEBUG, 1, false, NULL);
-            mxd_setModule(MB1R_ERROR, 1, false, NULL);
-            mxd_setModule(R7KC_PARSER, 1, false, NULL);
-            mxd_setModule(R7KC_DRFCON, 1, false, NULL);
-            mxd_setModule(NETIF, 1, false, NULL);
-            mxd_setModule(MXMSOCK, 1, false, NULL);
+            mxd_setModule(MXWARN, 5, false, NULL);
+            mxd_setModule(MXDEBUG, 5, false, NULL);
+            mxd_setModule(MBTRNPP, 5, false, NULL);
+            mxd_setModule(MXWARN, 5, false, NULL);
+            mxd_setModule(MXDEBUG, 5, false, NULL);
+            mxd_setModule(R7KR, 5, false, NULL);
+            mxd_setModule(R7KR_DEBUG, 5, false, NULL);
+            mxd_setModule(MB1R, 5, false, NULL);
+            mxd_setModule(MB1R_DEBUG, 5, false, NULL);
+            mxd_setModule(MB1R_ERROR, 5, false, NULL);
+            mxd_setModule(R7KC_PARSER, 5, false, NULL);
+            mxd_setModule(R7KC_DRFCON, 5, false, NULL);
+            mxd_setModule(NETIF, 5, false, NULL);
+            mxd_setModule(MXMSOCK, 5, false, NULL);
             break;
         case -5:
             mxd_setModule(MBTRNPP, 5, false, NULL);
-            mxd_setModule(MXWARN, 1, false, NULL);
-            mxd_setModule(MXDEBUG, 1, false, NULL);
+            mxd_setModule(MXWARN, 5, false, NULL);
+            mxd_setModule(MXDEBUG, 5, false, NULL);
             mxd_setModule(MBTRNPP, 5, false, NULL);
             mxd_setModule(MXWARN, 5, false, NULL);
             mxd_setModule(MXDEBUG, 5, false, NULL);
@@ -5059,11 +5056,14 @@ int mbtrnpp_init_debug(int verbose) {
             mxd_setModule(MXMSOCK, 5, false, NULL);
             break;
         default:
-            mxd_setModule(MXWARN, 1, false, NULL);
+            mxd_setModule(MXWARN, 5, false, NULL);
             break;
     }
 
-    mxd_show();
+    if(verbose < 0){
+        fprintf(stderr, "%s:%d verbose[%d]\n", __func__, __LINE__, verbose);
+        mxd_show();
+    }
 
     // TODO: convert mframe to mxdebug, eliminate this
 //    mmd_initialize();
