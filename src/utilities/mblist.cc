@@ -76,6 +76,14 @@ typedef enum {
     MBLIST_SEGMENT_MODE_DATALIST = 3,
 } segment_mode_t;
 
+#define SECONDARY_FILE_COLUMNS_MAX 20
+int num_secondary = 0;
+int num_secondary_columns = 0;
+int num_secondary_alloc = 0;
+int j_secondary_interp = 0;
+double *secondary_time_d = NULL;
+double *secondary_data = NULL;
+
 constexpr char program_name[] = "MBLIST";
 constexpr char help_message[] =
     "MBLIST prints the specified contents of a swath data\n"
@@ -84,8 +92,9 @@ constexpr char help_message[] =
     "style with data columns separated by tabs.";
 constexpr char usage_message[] =
     "mblist [-Byr/mo/da/hr/mn/sc -C -Ddump_mode -Eyr/mo/da/hr/mn/sc\n"
-    "    -Fformat -Gdelimiter -H -Ifile -Kdecimate -Llonflip -M[beam_start/beam_end | A | X%] -Npixel_start/pixel_end\n"
-    "    -Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -Ucheck -Xoutfile -V -W -Zsegment]";
+    "    -Fformat -Gdelimiter -H -Ifile -Jprojection -Kdecimate -Llonflip\n"
+    "    -M[beam_start/beam_end | A | X%] -Npixel_start/pixel_end\n"
+    "    -Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -Ucheck -V -W -Xoutfile -Zsegment]";
 
 /*--------------------------------------------------------------------*/
 int set_output(int verbose, int beams_bath, int beams_amp, int pixels_ss, bool use_bath, bool use_amp, bool use_ss, dump_mode_t dump_mode,
@@ -772,7 +781,7 @@ int main(int argc, char **argv) {
   double timegap;
   int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
-  char read_file[MB_PATH_MAXLINE] = "datalist.mb-1";
+  mb_path read_file = "datalist.mb-1";
   bool bathy_in_feet = false;
 
   bool ascii = true;
@@ -796,6 +805,8 @@ int main(int argc, char **argv) {
   bool segment = false;
   segment_mode_t segment_mode = MBLIST_SEGMENT_MODE_NONE;
   char segment_tag[MB_PATH_MAXLINE] = "";
+  mb_path secondary_file = "";
+  bool secondary_file_set = false;
 
   // set up the default list controls
   //   (Time, lon, lat, heading, speed, along-track distance, center beam depth)
@@ -807,7 +818,7 @@ int main(int argc, char **argv) {
     bool errflg = false;
     bool help = false;
     int c;
-    while ((c = getopt(argc, argv, "AaB:b:CcD:d:E:e:F:f:G:g:I:i:J:j:K:k:L:l:M:m:N:n:O:o:P:p:QqR:r:S:s:T:t:U:u:X:x:Z:z:VvWwHh")) !=
+    while ((c = getopt(argc, argv, "AaB:b:CcD:d:E:e:F:f:G:g:I:i:J:j:K:k:L:l:M:m:N:n:O:o:P:p:QqR:r:S:s:T:t:U:u:X:x:Y:y:Z:z:VvWwHh")) !=
            -1)
     {
       switch (c) {
@@ -962,6 +973,11 @@ int main(int argc, char **argv) {
       case 'x':
         sscanf(optarg, "%1023s", output_file);
         break;
+      case 'Y':
+      case 'y':
+        sscanf(optarg, "%1023s", secondary_file);
+        secondary_file_set = true;
+        break;
       case 'Z':
       case 'z':
         segment = true;
@@ -1039,6 +1055,8 @@ int main(int argc, char **argv) {
       fprintf(stderr, "dbg2       check_nav:      %d\n", check_nav);
       fprintf(stderr, "dbg2       use_projection: %d\n", use_projection);
       fprintf(stderr, "dbg2       projection_pars:%s\n", projection_pars);
+      fprintf(stderr, "dbg2       secondary_file: %s\n", secondary_file);
+      fprintf(stderr, "dbg2       secondary_file_set:%d\n", secondary_file_set);
       fprintf(stderr, "dbg2       n_list:         %d\n", n_list);
       for (int i = 0; i < n_list; i++)
         fprintf(stderr, "dbg2         list[%d]:      %c\n", i, list[i]);
@@ -1062,6 +1080,64 @@ int main(int argc, char **argv) {
     bathy_scale = 1.0 / 0.3048;
   else
     bathy_scale = 1.0;
+
+  /* if secondary file with time series table specified read up to NUM_SECONDARY_MAX columns */
+  if (secondary_file_set) {
+    FILE *sfp = fopen(secondary_file, "r");
+    if (sfp != nullptr) {
+      double dd[SECONDARY_FILE_COLUMNS_MAX];
+      mb_path buffer;
+      while (fgets(buffer, sizeof(mb_path), sfp) != NULL) {
+        if (buffer[0] != '#') {
+          int num_read = sscanf(buffer, 
+            "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+            &dd[0], &dd[1], &dd[2], &dd[3], &dd[4], &dd[5], &dd[6], &dd[7], &dd[8], &dd[9], 
+            &dd[10], &dd[11], &dd[12], &dd[13], &dd[14], &dd[15], &dd[16], &dd[17], &dd[18], &dd[19]);
+          num_secondary_columns = MAX(num_secondary_columns, num_read);
+        }
+      }
+      rewind(sfp);
+      while (fgets(buffer, sizeof(mb_path), sfp) != NULL) {
+        if (buffer[0] != '#') {
+          int num_read = sscanf(buffer, 
+            "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+            &dd[0], &dd[1], &dd[2], &dd[3], &dd[4], &dd[5], &dd[6], &dd[7], &dd[8], &dd[9], 
+            &dd[10], &dd[11], &dd[12], &dd[13], &dd[14], &dd[15], &dd[16], &dd[17], &dd[18], &dd[19]);
+          if (num_read == num_secondary_columns)
+            num_secondary_alloc++;
+        }
+      }
+      rewind(sfp);
+      status = mb_mallocd(verbose, __FILE__, __LINE__, 
+                          num_secondary_alloc * sizeof(double), 
+                          (void **)&secondary_time_d, &error);
+      status = mb_mallocd(verbose, __FILE__, __LINE__, 
+                          num_secondary_alloc * (num_secondary_columns - 1) * sizeof(double), 
+                          (void **)&secondary_data, &error);
+      while (fgets(buffer, sizeof(mb_path), sfp) != NULL) {
+        if (buffer[0] != '#') {
+          int num_read = sscanf(buffer, 
+            "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+            &dd[0], &dd[1], &dd[2], &dd[3], &dd[4], &dd[5], &dd[6], &dd[7], &dd[8], &dd[9], 
+            &dd[10], &dd[11], &dd[12], &dd[13], &dd[14], &dd[15], &dd[16], &dd[17], &dd[18], &dd[19]);
+          if (num_read == num_secondary_columns) {
+            secondary_time_d[num_secondary] = dd[0];
+            for (int i = 1; i < num_secondary_columns; i++) {
+              int j = (i - 1) * num_secondary_alloc + num_secondary;
+              secondary_data[j] = dd[i];
+            }
+            num_secondary++;
+          }
+        }
+      }
+      fclose(sfp);
+    }
+    else {
+      fprintf(stderr, "\nUnable to open data secondary file: %s\n", secondary_file);
+      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+      exit(MB_ERROR_OPEN_FAIL);
+    }
+  }
 
   /* determine whether to read one file or a list of files */
   const bool read_datalist = format < 0;
@@ -1228,6 +1304,7 @@ int main(int argc, char **argv) {
   double transmit_gain;
   double pulse_length;
   double receive_gain;
+  double dsecondary = 0.0;
 
   int nbeams;
 
@@ -3804,11 +3881,13 @@ int main(int argc, char **argv) {
                   }
                   raw_next_value = false;
                   break;
+
                 case 'a': /* absorption */
                   printsimplevalue(verbose, output[i], absorption, 5, 2, ascii, &invert_next_value,
                                    &signflip_next_value, &error);
                   raw_next_value = false;
                   break;
+
                 case 'B': /* BSN - Normal incidence backscatter */
                   printsimplevalue(verbose, output[i], bsn, 5, 2, ascii, &invert_next_value,
                                    &signflip_next_value, &error);
@@ -3819,6 +3898,7 @@ int main(int argc, char **argv) {
                                    &signflip_next_value, &error);
                   raw_next_value = false;
                   break;
+
                 case 'c': /* Mean backscatter */
                   mback = 0;
                   nback = 0;
@@ -3832,6 +3912,15 @@ int main(int argc, char **argv) {
                                    &signflip_next_value, &error);
                   raw_next_value = false;
                   break;
+
+                case 'C': /* Value from specified column of secondary file */
+                  mb_linear_interp(verbose, secondary_time_d-1, (&secondary_data[num_secondary * (count-1)])-1, num_secondary, time_d, 
+                                    &dsecondary, &j_secondary_interp, &error);
+                  printsimplevalue(verbose, output[i], dsecondary, 16, 8, ascii, &invert_next_value,
+                                   &signflip_next_value, &error);
+                  raw_next_value = false;
+                  break;
+
                 case 'd': /* beam depression angle */
                   if (beamflag[k] == MB_FLAG_NULL &&
                       (check_values == MBLIST_CHECK_OFF_NAN || check_values == MBLIST_CHECK_OFF_FLAGNAN)) {
@@ -3881,6 +3970,7 @@ int main(int argc, char **argv) {
                   }
                   raw_next_value = false;
                   break;
+
                 case 'g': /* TVG stop */
                   if (ascii)
                     fprintf(output[i], "%6d", tvg_stop);
@@ -3890,6 +3980,7 @@ int main(int argc, char **argv) {
                   }
                   raw_next_value = false;
                   break;
+
                 case 'L': /* Pulse length */
                   if (ascii)
                     fprintf(output[i], "%6d", ipulse_length);
@@ -3899,11 +3990,13 @@ int main(int argc, char **argv) {
                   }
                   raw_next_value = false;
                   break;
+
                 case 'l': /* Transmit pulse length (sec) */
                   printsimplevalue(verbose, output[i], pulse_length, 9, 6, ascii, &invert_next_value,
                                    &signflip_next_value, &error);
                   raw_next_value = false;
                   break;
+
                 case 'M': /* mode */
                   if (ascii)
                     fprintf(output[i], "%4d", mode);
@@ -3913,6 +4006,7 @@ int main(int argc, char **argv) {
                   }
                   raw_next_value = false;
                   break;
+
                 case 'N': /* ping counter */
                   if (ascii)
                     fprintf(output[i], "%6d", png_count);
@@ -3922,6 +4016,7 @@ int main(int argc, char **argv) {
                   }
                   raw_next_value = false;
                   break;
+
                 case 'p': /* sidescan */
                   invert = invert_next_value;
                   flip = signflip_next_value;
@@ -3948,9 +4043,9 @@ int main(int argc, char **argv) {
                       printNaN(verbose, output[i], ascii, &invert_next_value, &signflip_next_value, &error);
                     }
                   }
-
                   raw_next_value = false;
                   break;
+
                 case 'R': /* range */
                   if (ascii)
                     fprintf(output[i], "%6d", range[k]);
@@ -4612,21 +4707,25 @@ int main(int argc, char **argv) {
                                    &signflip_next_value, &error);
                   raw_next_value = false;
                   break;
+
                 case 'a': /* absorption */
                   printsimplevalue(verbose, output[i], absorption, 5, 2, ascii, &invert_next_value,
                                    &signflip_next_value, &error);
                   raw_next_value = false;
                   break;
+
                 case 'B': /* BSN - Normal incidence backscatter */
                   printsimplevalue(verbose, output[i], bsn, 5, 2, ascii, &invert_next_value,
                                    &signflip_next_value, &error);
                   raw_next_value = false;
                   break;
+
                 case 'b': /* BSO - Oblique backscatter */
                   printsimplevalue(verbose, output[i], bso, 5, 2, ascii, &invert_next_value,
                                    &signflip_next_value, &error);
                   raw_next_value = false;
                   break;
+
                 case 'c': /* Mean backscatter */
                   mback = 0;
                   nback = 0;
@@ -4640,11 +4739,21 @@ int main(int argc, char **argv) {
                                    &signflip_next_value, &error);
                   raw_next_value = false;
                   break;
+
+                case 'C': /* Value from specified column of secondary file */
+                  mb_linear_interp(verbose, secondary_time_d-1, (&secondary_data[num_secondary * (count-1)])-1, num_secondary, time_d, 
+                                    &dsecondary, &j_secondary_interp, &error);
+                  printsimplevalue(verbose, output[i], dsecondary, 16, 8, ascii, &invert_next_value,
+                                   &signflip_next_value, &error);
+                  raw_next_value = false;
+                  break;
+
                 case 'd': /* beam depression angle */
                   printsimplevalue(verbose, output[i], depression[beam_vertical], 5, 2, ascii,
                                    &invert_next_value, &signflip_next_value, &error);
                   raw_next_value = false;
                   break;
+
                 case 'F': /* filename */
                   if (netcdf)
                     fprintf(output[i], "\"");
@@ -4678,6 +4787,7 @@ int main(int argc, char **argv) {
                   }
                   raw_next_value = false;
                   break;
+
                 case 'g': /* TVG stop */
                   if (ascii)
                     fprintf(output[i], "%6d", tvg_stop);
@@ -4687,6 +4797,7 @@ int main(int argc, char **argv) {
                   }
                   raw_next_value = false;
                   break;
+
                 case 'L': /* Pulse length */
                   if (ascii)
                     fprintf(output[i], "%6d", ipulse_length);
@@ -4696,11 +4807,13 @@ int main(int argc, char **argv) {
                   }
                   raw_next_value = false;
                   break;
+
                 case 'l': /* Transmit pulse length (sec) */
                   printsimplevalue(verbose, output[i], pulse_length, 9, 6, ascii, &invert_next_value,
                                    &signflip_next_value, &error);
                   raw_next_value = false;
                   break;
+
                 case 'M': /* mode */
                   if (ascii)
                     fprintf(output[i], "%4d", mode);
@@ -4710,6 +4823,7 @@ int main(int argc, char **argv) {
                   }
                   raw_next_value = false;
                   break;
+
                 case 'N': /* ping counter */
                   if (ascii)
                     fprintf(output[i], "%6d", png_count);
@@ -4719,6 +4833,7 @@ int main(int argc, char **argv) {
                   }
                   raw_next_value = false;
                   break;
+
                 case 'p': /* sidescan */
                   invert = invert_next_value;
                   flip = signflip_next_value;
@@ -4882,6 +4997,13 @@ int main(int argc, char **argv) {
     }
   } else {
     fclose(outfile);
+  }
+
+  /* free secondary file data */
+  if (num_secondary_alloc > 0) {
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&secondary_time_d, &error);
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&secondary_data, &error);
+    num_secondary_alloc = 0;
   }
 
   /* free projection */

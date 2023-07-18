@@ -702,7 +702,6 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
       nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbTransmitPulseLength", &store->mbTransmitPulseLength_id);
       if (verbose >= 2 && nc_status != NC_NOERR)
         fprintf(stderr, "nc_inq_varid mbTransmitPulseLength_id not found: %s\n", nc_strerror(nc_status));
-
       nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbOperatorStationStatus", &store->mbOperatorStationStatus_id);
       if (verbose >= 2 && nc_status != NC_NOERR)
         fprintf(stderr, "nc_inq_varid mbOperatorStationStatus_id not found: %s\n", nc_strerror(nc_status));
@@ -766,7 +765,6 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
       nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbHiLoAbsorptionRatio", &store->mbHiLoAbsorptionRatio_id);
       if (verbose >= 2 && nc_status != NC_NOERR)
         fprintf(stderr, "nc_inq_varid mbHiLoAbsorptionRatio_id not found: %s\n", nc_strerror(nc_status));
-
       nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbAlongDistance", &store->mbAlongDistance_id);
       if (verbose >= 2 && nc_status != NC_NOERR)
         fprintf(stderr, "nc_inq_varid mbAlongDistance_id error: %s\n", nc_strerror(nc_status));
@@ -812,36 +810,35 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
       nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbSLengthOfDetection", &store->mbSLengthOfDetection_id);
       if (verbose >= 2 && nc_status != NC_NOERR)
         fprintf(stderr, "nc_inq_varid mbSLengthOfDetection_id not found: %s\n", nc_strerror(nc_status));
-      nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbAntenna", &store->mbAntenna_id);
+      //nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbAntenna", &store->mbAntenna_id);
       if (verbose >= 2 && nc_status != NC_NOERR)
         fprintf(stderr, "nc_inq_varid mbAntenna_id error: %s\n", nc_strerror(nc_status));
-      nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbBeamBias", &store->mbBeamBias_id);
+      //nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbBeamBias", &store->mbBeamBias_id);
       if (verbose >= 2 && nc_status != NC_NOERR)
         fprintf(stderr, "nc_inq_varid mbBeamBias_id not found: %s\n", nc_strerror(nc_status));
-      nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbBFlag", &store->mbBFlag_id);
+      //nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbBFlag", &store->mbBFlag_id);
       if (verbose >= 2 && nc_status != NC_NOERR)
         fprintf(stderr, "nc_inq_varid mbBFlag_id error: %s\n", nc_strerror(nc_status));
-      nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbBeam", &store->mbBeam_id);
+      //nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbBeam", &store->mbBeam_id);
       if (verbose >= 2 && nc_status != NC_NOERR)
         fprintf(stderr, "nc_inq_varid mbBeam_id error: %s\n", nc_strerror(nc_status));
-      nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbAFlag", &store->mbAFlag_id);
+      //nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbAFlag", &store->mbAFlag_id);
       if (verbose >= 2 && nc_status != NC_NOERR)
         fprintf(stderr, "nc_inq_varid mbAFlag_id error: %s\n", nc_strerror(nc_status));
-      nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbVelProfilRef", &store->mbVelProfilRef_id);
+      //nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbVelProfilRef", &store->mbVelProfilRef_id);
       if (verbose >= 2 && nc_status != NC_NOERR)
         fprintf(stderr, "nc_inq_varid mbVelProfilRef_id error: %s\n", nc_strerror(nc_status));
-      nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbVelProfilIdx", &store->mbVelProfilIdx_id);
+      //nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbVelProfilIdx", &store->mbVelProfilIdx_id);
       if (verbose >= 2 && nc_status != NC_NOERR)
         fprintf(stderr, "nc_inq_varid mbVelProfilIdx_id error: %s\n", nc_strerror(nc_status));
-      nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbVelProfilDate", &store->mbVelProfilDate_id);
+      //nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbVelProfilDate", &store->mbVelProfilDate_id);
       if (verbose >= 2 && nc_status != NC_NOERR)
         fprintf(stderr, "nc_inq_varid mbVelProfilDate_id error: %s\n", nc_strerror(nc_status));
-      nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbVelProfilTime", &store->mbVelProfilTime_id);
+      //nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbVelProfilTime", &store->mbVelProfilTime_id);
       if (verbose >= 2 && nc_status != NC_NOERR)
         fprintf(stderr, "nc_inq_varid mbVelProfilTime_id error: %s\n", nc_strerror(nc_status));
       if (nc_status != NC_NOERR) {
-        status = MB_FAILURE;
-        *error = MB_ERROR_EOF;
+        nc_status = NC_NOERR;
       }
 
       if (verbose >= 2) {

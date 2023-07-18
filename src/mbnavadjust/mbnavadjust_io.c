@@ -301,9 +301,9 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
     /* read the project */
     if (status == MB_SUCCESS) {
       /* first save copy of the project file */
-      mb_command command;
-      snprintf(command, sizeof(command), "cp %s %s.save", project->home, project->home);
-      /* const int shellstatus = */ system(command);
+      mb_pathplus dstfile;
+      snprintf(dstfile, sizeof(mb_pathplus), "%s.save", project->home);
+      mb_copyfile(verbose, project->home, dstfile, error);
 
       /* open and read home file */
       status = MB_SUCCESS;
@@ -438,7 +438,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
                     int grid_projection_mode;
                     int nxy;
                     mb_command path;
-                    snprintf(path, sizeof(path), "%s/%s", project->datadir, project->refgrid_names[irefgrid]);
+                    snprintf(path, sizeof(mb_command), "%s/%s", project->datadir, project->refgrid_names[irefgrid]);
                     status = mb_check_gmt_grd(verbose, path, &grid_projection_mode,
                              refgrid.projection_id,
                              &refgrid.nodatavalue, &nxy,
@@ -476,7 +476,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
               int grid_projection_mode;
               int nxy;
               mb_pathplusplus path;
-              snprintf(path, sizeof(path), "%s/%s", project->datadir, project->refgrid_names[0]);
+              snprintf(path, sizeof(mb_pathplusplus), "%s/%s", project->datadir, project->refgrid_names[0]);
               status = mb_check_gmt_grd(verbose, path, &grid_projection_mode,
                        refgrid.projection_id,
                        &refgrid.nodatavalue, &nxy,
@@ -1823,7 +1823,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
   }
 
   /* open and write datalist file */
-  snprintf(datalist, sizeof(datalist), "%s%s.mb-1", project->path, project->name);
+  snprintf(datalist, sizeof(mb_pathplusplus), "%s%s.mb-1", project->path, project->name);
   if ((hfp = fopen(datalist, "w")) != NULL) {
     for (i = 0; i < project->num_files; i++) {
       /* write file entry */
@@ -1886,7 +1886,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
   }
 
   /* write mbgrdviz route file for all unfixed true crossings */
-  snprintf(routefile,sizeof(routefile), "%s%s_truecrossing.rte", project->path, project->name);
+  snprintf(routefile,sizeof(mb_pathplusplus), "%s%s_truecrossing.rte", project->path, project->name);
   if ((hfp = fopen(routefile, "w")) == NULL) {
     fclose(hfp);
     status = MB_FAILURE;
@@ -1939,7 +1939,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
           truecrossing_char = ' ';
         else
           truecrossing_char = 'X';
-        snprintf(routename, sizeof(routename), "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing_char, i,
+        snprintf(routename, sizeof(mb_pathplus), "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing_char, i,
           file_1->block, crossing->file_id_1, crossing->section_1, file_2->block, crossing->file_id_2,
           crossing->section_2, crossing->overlap, crossing->num_ties);
         fprintf(hfp, "## ROUTENAME %s\n", routename);
@@ -1957,7 +1957,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
   }
 
   /* write mbgrdviz route file for all unfixed >=50% crossings */
-  snprintf(routefile, sizeof(routefile), "%s%s_gt50crossing.rte", project->path, project->name);
+  snprintf(routefile, sizeof(mb_pathplusplus), "%s%s_gt50crossing.rte", project->path, project->name);
   if ((hfp = fopen(routefile, "w")) == NULL) {
     fclose(hfp);
     status = MB_FAILURE;
@@ -2010,7 +2010,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
           truecrossing_char = ' ';
         else
           truecrossing_char = 'X';
-        snprintf(routename, sizeof(routename), "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing_char, i,
+        snprintf(routename, sizeof(mb_pathplus), "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing_char, i,
           file_1->block, crossing->file_id_1, crossing->section_1, file_2->block, crossing->file_id_2,
           crossing->section_2, crossing->overlap, crossing->num_ties);
         fprintf(hfp, "## ROUTENAME %s\n", routename);
@@ -2029,7 +2029,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
   }
 
   /* write mbgrdviz route file for all unfixed >=25% but less than 50% crossings */
-  snprintf(routefile, sizeof(routefile), "%s%s_gt25crossing.rte", project->path, project->name);
+  snprintf(routefile, sizeof(mb_pathplusplus), "%s%s_gt25crossing.rte", project->path, project->name);
   if ((hfp = fopen(routefile, "w")) == NULL) {
     fclose(hfp);
     status = MB_FAILURE;
@@ -2082,7 +2082,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
           truecrossing_char = ' ';
         else
           truecrossing_char = 'X';
-        snprintf(routename, sizeof(routename), "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing_char, i,
+        snprintf(routename, sizeof(mb_pathplus), "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing_char, i,
           file_1->block, crossing->file_id_1, crossing->section_1, file_2->block, crossing->file_id_2,
           crossing->section_2, crossing->overlap, crossing->num_ties);
         fprintf(hfp, "## ROUTENAME %s\n", routename);
@@ -2101,7 +2101,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
   }
 
   /* write mbgrdviz route file for all unfixed <25% crossings */
-  snprintf(routefile, sizeof(routefile), "%s%s_lt25crossing.rte", project->path, project->name);
+  snprintf(routefile, sizeof(mb_pathplusplus), "%s%s_lt25crossing.rte", project->path, project->name);
   if ((hfp = fopen(routefile, "w")) == NULL) {
     fclose(hfp);
     status = MB_FAILURE;
@@ -2154,7 +2154,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
           truecrossing_char = ' ';
         else
           truecrossing_char = 'X';
-        snprintf(routename, sizeof(routename), "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing_char, i,
+        snprintf(routename, sizeof(mb_pathplus), "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing_char, i,
           file_1->block, crossing->file_id_1, crossing->section_1, file_2->block, crossing->file_id_2,
           crossing->section_2, crossing->overlap, crossing->num_ties);
         fprintf(hfp, "## ROUTENAME %s\n", routename);
@@ -2172,7 +2172,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
   }
 
   /* write mbgrdviz route file for all fixed crossings */
-  snprintf(routefile, sizeof(routefile), "%s%s_fixedcrossing.rte", project->path, project->name);
+  snprintf(routefile, sizeof(mb_pathplusplus), "%s%s_fixedcrossing.rte", project->path, project->name);
   if ((hfp = fopen(routefile, "w")) == NULL) {
     fclose(hfp);
     status = MB_FAILURE;
@@ -2225,7 +2225,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
           truecrossing_char = ' ';
         else
           truecrossing_char = 'X';
-        snprintf(routename, sizeof(routename), "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing_char, i,
+        snprintf(routename, sizeof(mb_pathplus), "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing_char, i,
           file_1->block, crossing->file_id_1, crossing->section_1, file_2->block, crossing->file_id_2,
           crossing->section_2, crossing->overlap, crossing->num_ties);
         fprintf(hfp, "## ROUTENAME %s\n", routename);
@@ -2243,7 +2243,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
   }
 
   /* write mbgrdviz route file for all unfixed ties */
-  snprintf(routefile, sizeof(routefile), "%s%s_unfixedties.rte", project->path, project->name);
+  snprintf(routefile, sizeof(mb_pathplusplus), "%s%s_unfixedties.rte", project->path, project->name);
   if ((hfp = fopen(routefile, "w")) == NULL) {
     fclose(hfp);
     status = MB_FAILURE;
@@ -2294,7 +2294,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
             truecrossing_char = ' ';
           else
             truecrossing_char = 'X';
-          snprintf(routename, sizeof(routename), "Tie: %c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d of %2d", status_char,
+          snprintf(routename, sizeof(mb_pathplus), "Tie: %c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d of %2d", status_char,
             truecrossing_char, i, file_1->block, crossing->file_id_1, crossing->section_1, file_2->block,
             crossing->file_id_2, crossing->section_2, crossing->overlap, j, crossing->num_ties);
           fprintf(hfp, "## ROUTENAME %s\n", routename);
@@ -2313,7 +2313,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
   }
 
   /* write mbgrdviz route file for all fixed ties */
-  snprintf(routefile, sizeof(routefile), "%s%s_fixedties.rte", project->path, project->name);
+  snprintf(routefile, sizeof(mb_pathplusplus), "%s%s_fixedties.rte", project->path, project->name);
   if ((hfp = fopen(routefile, "w")) == NULL) {
     fclose(hfp);
     status = MB_FAILURE;
@@ -2364,7 +2364,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
             truecrossing_char = ' ';
           else
             truecrossing_char = 'X';
-          snprintf(routename, sizeof(routename), "Tie: %c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d of %2d", status_char,
+          snprintf(routename, sizeof(mb_pathplus), "Tie: %c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d of %2d", status_char,
             truecrossing_char, i, file_1->block, crossing->file_id_1, crossing->section_1, file_2->block,
             crossing->file_id_2, crossing->section_2, crossing->overlap, j, crossing->num_ties);
           fprintf(hfp, "## ROUTENAME %s\n", routename);
@@ -2384,7 +2384,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
 
   /* output offset vectors */
   if (project->inversion_status == MBNA_INVERSION_CURRENT) {
-    snprintf(offsetfile, sizeof(offsetfile), "%s%s_offset.txt", project->path, project->name);
+    snprintf(offsetfile, sizeof(mb_pathplusplus), "%s%s_offset.txt", project->path, project->name);
     if ((hfp = fopen(offsetfile, "w")) != NULL) {
       for (i = 0; i < project->num_files; i++) {
         file = &project->files[i];
@@ -2827,7 +2827,7 @@ int mbnavadjust_read_triangles(int verbose, struct mbna_project *project,
 
   // if all good then try to read existing triangularization
   mb_pathplus tpath;
-  snprintf(tpath, sizeof(tpath), "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, file_id, section_id);
+  snprintf(tpath, sizeof(mb_pathplus), "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, file_id, section_id);
 
   int status = MB_SUCCESS;
   FILE *tfp = fopen(tpath, "r");
@@ -3007,7 +3007,7 @@ int mbnavadjust_write_triangles(int verbose, struct mbna_project *project,
   *error = MB_ERROR_NO_ERROR;
   if (swath->ntri > 0) {
     mb_pathplus tpath;
-    snprintf(tpath, sizeof(tpath), "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, file_id, section_id);
+    snprintf(tpath, sizeof(mb_pathplus), "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, file_id, section_id);
     FILE *tfp = fopen(tpath, "w");
     if (tfp != NULL) {
       size_t write_size;
@@ -3107,9 +3107,9 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
   if (project->open && project->num_crossings > 0) {
     /* set section format and path */
     mb_pathplus path;
-    snprintf(path, sizeof(path), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, file_id, section_id);
+    snprintf(path, sizeof(mb_pathplus), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, file_id, section_id);
     mb_pathplus tpath;
-    snprintf(tpath, sizeof(tpath), "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, file_id, section_id);
+    snprintf(tpath, sizeof(mb_pathplus), "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, file_id, section_id);
     const int iformat = 71;
     struct mbna_file *file = &(project->files[file_id]);
     struct mbna_section *section = &(file->sections[section_id]);
@@ -3485,7 +3485,7 @@ int mbnavadjust_fix_section_sensordepth(int verbose, struct mbna_project *projec
 
         /* set section format and path */
         mb_pathplus path;
-        snprintf(path, sizeof(path), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, ifile, isection);
+        snprintf(path, sizeof(mb_pathplus), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, ifile, isection);
         const int iformat = 71;
         file = &(project->files[ifile]);
         struct mbna_section *section = &(file->sections[isection]);
@@ -3888,7 +3888,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
   if (mb_get_format(verbose, path, ipath, &iform, &format_error) != MB_SUCCESS) {
     strcpy(ipath, path);
   }
-  snprintf(mb_suffix, sizeof(mb_suffix), "p.mb%d", iformat);
+  snprintf(mb_suffix, 32, "p.mb%d", iformat);
   strcat(ipath, mb_suffix);
 
   struct stat file_status;
@@ -3978,7 +3978,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
   if (root == NULL)
     root = ipath;
   mb_pathplus message;
-  snprintf(message, sizeof(message), "Importing format %d data from %s", iformat, root);
+  snprintf(message, sizeof(mb_pathplus), "Importing format %d data from %s", iformat, root);
   fprintf(stderr, "%s\n", message);
   bool output_open = false;
   project->inversion_status = MBNA_INVERSION_NONE;
@@ -4057,7 +4057,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
 
   /* open nav file */
   if (status == MB_SUCCESS) {
-    snprintf(npath, sizeof(npath), "%s/nvs_%4.4d.mb166", project->datadir, project->num_files);
+    snprintf(npath, sizeof(mb_pathplus), "%s/nvs_%4.4d.mb166", project->datadir, project->num_files);
     if ((nfp = fopen(npath, "w")) == NULL) {
       status = MB_FAILURE;
       *error = MB_ERROR_OPEN_FAIL;
@@ -4407,7 +4407,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
         new_section = false;
 
         /* open output section file */
-        snprintf(opath, sizeof(opath), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, file->id, file->num_sections - 1);
+        snprintf(opath, sizeof(mb_pathplus), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, file->id, file->num_sections - 1);
         if ((status = mb_write_init(verbose, opath, 71, &ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss,
                   error)) != MB_SUCCESS) {
           mb_error(verbose, *error, &error_message);
@@ -4606,7 +4606,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
       for (int k = 0; k < file->num_sections; k++) {
         /* set section data to be read */
         section = (struct mbna_section *)&file->sections[k];
-        snprintf(opath, sizeof(opath), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, file->id, k);
+        snprintf(opath, sizeof(mb_pathplus), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, file->id, k);
 
         /* initialize reading the swath file */
         if ((status = mb_read_init(verbose, opath, 71, 1, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
@@ -4705,12 +4705,12 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
 
   /* add info text */
   if (status == MB_SUCCESS && new_pings > 0) {
-    snprintf(message, sizeof(message), "Imported format %d file: %s\n > Read %d pings\n > Added %d sections %d crossings\n", iformat, path,
+    snprintf(message, sizeof(mb_pathplus), "Imported format %d file: %s\n > Read %d pings\n > Added %d sections %d crossings\n", iformat, path,
       new_pings, new_sections, new_crossings);
     mbnavadjust_info_add(verbose, project, message, true, error);
   }
   else {
-    snprintf(message, sizeof(message), "Unable to import format %d file: %s\n", iformat, path);
+    snprintf(message, sizeof(mb_pathplus), "Unable to import format %d file: %s\n", iformat, path);
     mbnavadjust_info_add(verbose, project, message, true, error);
   }
 
@@ -4843,7 +4843,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
   if (root == NULL)
     root = ipath;
   mb_pathplus message;
-  snprintf(message, sizeof(message), "Re-importing format %d data from %s in %d sections\n", iformat, root, project->files[ifile].num_sections);
+  snprintf(message, sizeof(mb_pathplus), "Re-importing format %d data from %s in %d sections\n", iformat, root, project->files[ifile].num_sections);
   fprintf(stderr, "%s\n", message);
   bool output_open = false;
   if (project->inversion_status == MBNA_INVERSION_CURRENT)
@@ -4906,7 +4906,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
 
   /* open nav file */
   if (status == MB_SUCCESS) {
-    snprintf(npath, sizeof(npath), "%s/nvs_%4.4d.mb166", project->datadir, ifile);
+    snprintf(npath, sizeof(mb_pathplus), "%s/nvs_%4.4d.mb166", project->datadir, ifile);
     if ((nfp = fopen(npath, "w")) == NULL) {
       status = MB_FAILURE;
       *error = MB_ERROR_OPEN_FAIL;
@@ -5135,7 +5135,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
         section->globaltie.inversion_offset_z_m = 0.0;
 
         /* open output section file */
-        snprintf(opath, sizeof(opath), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, file->id, isection);
+        snprintf(opath, sizeof(mb_pathplus), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, file->id, isection);
         if ((status = mb_write_init(verbose, opath, 71, &ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss,
                   error)) != MB_SUCCESS) {
           mb_error(verbose, *error, &error_message);
@@ -5329,7 +5329,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
       for (int k = 0; k < file->num_sections; k++) {
         /* set section data to be read */
         section = (struct mbna_section *)&file->sections[k];
-        snprintf(opath, sizeof(opath), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, file->id, k);
+        snprintf(opath, sizeof(mb_pathplus), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, file->id, k);
 
         /* initialize reading the swath file */
         if ((status = mb_read_init(verbose, opath, 71, 1, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
@@ -5428,12 +5428,12 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
 
   /* add info text */
   if (status == MB_SUCCESS && new_pings > 0) {
-    snprintf(message, sizeof(message), "Imported format %d file: %s\n > Read %d pings\n > Added %d sections %d crossings\n", iformat, ipath,
+    snprintf(message, sizeof(mb_pathplus), "Imported format %d file: %s\n > Read %d pings\n > Added %d sections %d crossings\n", iformat, ipath,
       new_pings, new_sections, new_crossings);
     mbnavadjust_info_add(verbose, project, message, true, error);
   }
   else {
-    snprintf(message, sizeof(message), "Unable to import format %d file: %s\n", iformat, ipath);
+    snprintf(message, sizeof(mb_pathplus), "Unable to import format %d file: %s\n", iformat, ipath);
     mbnavadjust_info_add(verbose, project, message, true, error);
   }
 
@@ -5471,16 +5471,16 @@ int mbnavadjust_import_reference(int verbose, struct mbna_project *project, char
              &refgrid.dx, &refgrid.dy, error);
   if (status == MB_SUCCESS) {
     if (project->num_refgrids < MBNA_REFGRID_NUM_MAX) {
-      mb_command command;
       mb_path name;
       if (strrchr(path, '/') != NULL) {
         strncpy(name, strrchr(path, '/')+1, sizeof(name));
       } else {
         strncpy(name, path, sizeof(name));
       }
-      snprintf(command, sizeof(command), "cp %s %s/%s", path, project->datadir, name);
-      system(command);
-      fprintf(stderr, "Imported new reference grid: %s ==> %s/%s\n", path, project->datadir, name);
+      mb_pathplus dstfile;
+      snprintf(dstfile, sizeof(mb_pathplus), "%s/%s", project->datadir, name);
+      mb_copyfile(verbose, path, dstfile, error);
+      fprintf(stderr, "Imported new reference grid: %s ==> %s\n", path, dstfile);
       strncpy(project->refgrid_names[project->num_refgrids], name, MB_PATH_MAXLINE);
       project->refgrid_bounds[0][project->num_refgrids] = refgrid.bounds[0];
       project->refgrid_bounds[1][project->num_refgrids] = refgrid.bounds[1];
@@ -5539,7 +5539,7 @@ int mbnavadjust_reference_load(int verbose, struct mbna_project *project, int re
     int grid_projection_mode;
     int nxy;
     project->refgrid_select = refgrid_select;
-    snprintf(path, sizeof(path), "%s/%s", project->datadir, project->refgrid_names[project->refgrid_select]);
+    snprintf(path, sizeof(mb_pathplusplus), "%s/%s", project->datadir, project->refgrid_names[project->refgrid_select]);
     status = mb_read_gmt_grd(verbose, path, &grid_projection_mode,
                project->refgrid.projection_id,
                &project->refgrid.nodatavalue, &nxy,
@@ -6385,7 +6385,7 @@ int mbnavadjust_info_add(int verbose, struct mbna_project *project, char *info, 
     int error = MB_ERROR_NO_ERROR;
     status = mb_user_host_date(verbose, user, host, date, &error);
     mb_path tag;
-    snprintf(tag, sizeof(tag), " > User <%s> on cpu <%s> at <%s>\n", user, host, date);
+    snprintf(tag, sizeof(mb_path), " > User <%s> on cpu <%s> at <%s>\n", user, host, date);
     if (project->logfp != NULL)
       fputs(tag, project->logfp);
     if (verbose > 0)

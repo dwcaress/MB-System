@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mblist</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  28 November 2021 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  17 July 2023 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -39,6 +39,7 @@ Version 5.0
 <B>-S</B><I>speed</I> <B>-T</B><I>timegap</I>
 <B>-U</B><I>check</I> <B>-V</B> <B>-W</B>
 <B>-X</B><I>outfile</I>
+<B>-Y</B><I>secondaryfile</I>
 <B>-Z</B><I>segment</I>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
@@ -53,11 +54,20 @@ the output can be binary, with each field represented
 as a double precision float (<B>-A</B> option).
 Output can also be in netCDF CDL (<B>-C</B> option) format,
 or as a binary netCDF file (<B>-C -A</B>).
-The output of
-<B>mblist</B> can be piped to plotting and data analysis programs. The
-option <B>-O</B><I>output_format</I> can be
-used to control the data types that
-are sent to stdout. The default is to output a single record for
+<BR>
+
+<BR>
+
+The contents and order of the output table are controlled using the option 
+<B>-O</B><I>output_format</I>, where <I>output_format</I> is an array of
+characters that each specify a particular data value. Dozens of data types 
+are available, as are special modifier characters that change signs, invert
+values, or otherwise modify the following value.
+<BR>
+
+<BR>
+
+The default is to output a single record for
 each survey ping, and for any output navigation values to reflect
 the sonar or ship navigation. In this mode, any output depth,
 amplitude, or sidescan values are derived from the beam and pixel
@@ -69,7 +79,15 @@ pixels and any navigation, depth or sidescan values output reflect
 the positions and values of the specified beams or pixels.
 The data input may be averaged or windowed in time
 and space before it is listed.  Complete dumps of bathymetry,
-amplitude, or sidescan data are possible as well.
+amplitude, or sidescan data are possible as well. 
+<BR>
+
+<BR>
+
+The <B>-Y</B><I>secondaryfile</I> command specifies a file containing timestamped
+data in text columns. <B>Mblist</B> will merge these values with the swath
+data according to the timestamps, and print them out if requested. This capability
+allows other data to be merged with swath data navigation.
 <P>
 <A NAME="lbAF">&nbsp;</A>
 <H2>MB-SYSTEM AUTHORSHIP</H2>
@@ -574,8 +592,9 @@ for line number (only defined for SEGY files)
 <B> .</B>
 special character: this causes the next character to be
 interpretted from the following list rather than the above list.
-These allow access to raw values in format specific form and may
-not be supported by all formats.
+Most of these allow access to raw values in format specific form and are
+not be supported by all formats. The &quot;.NNC&quot; case allows printing values
+from the &quot;NN&quot;th column of a secondary data table file specified using <B>-Y</B>.
 <DT><DD>
 <B> .A</B>  Amplitude (backscatter) in dB (formats 56 &amp; 67 - Simrad multibeam only)
 <DT><DD>
@@ -586,6 +605,9 @@ not be supported by all formats.
 <B> .b</B>  Oblique backscatter in dB (formats 56 &amp; 67 - Simrad multibeam only)
 <DT><DD>
 <B> .c</B>  Mean backscatter, one value per ping (formats 56 &amp; 67 - Simrad multibeam only)
+<DT><DD>
+<B> .NNC</B> In which &quot;NN&quot; is a number from 1 to 19, which prints the value from 
+&quot;NN&quot; column in a secondary file specified using <B>-Y</B>.
 <DT><DD>
 <B> .d</B>  Beam depression angle (formats 56 &amp; 67 - Simrad multibeam only)
 <DT><DD>
@@ -716,6 +738,17 @@ Normally, <B>mblist</B> outputs to stdout.
 If the <B>-X</B> flag is given, then <B>mblist</B> creates a new file
 <I>outfile</I> and outputs to it.
 An output file must be specified if a netCDF file (<B>-C -A</B>) is required.
+<DT><B>-Y</B>
+
+<DD>
+<I>secondaryfile</I>
+<BR>
+
+This option specifies a secondary data file consiting of text columns in
+which the first column is epoch time (unix seconds == seconds since 1/1/1970)
+and up to 19 additional columns contain data collected during the survey. 
+If a secondary data file is specified, then values from the secondary file can
+be included in the <B>mblist</B> output 
 <DT><B>-Z</B>
 
 <DD>
@@ -729,7 +762,7 @@ is a single character, then the output is a multiple segment
 file of the sort accepted by the <B>GMT</B> program <B>psxy</B>.
 This option only works with ascii output, and is thus disabled
 when the <B>-A</B> option is specified. The most common usage
-is <B>-Z</B>I&gt;. If <I>segment</I> is the string &quot;swathfile&quot;
+is <B>-Z</B><I>&gt;</I>. If <I>segment</I> is the string &quot;swathfile&quot;
 then the segment lines will consist of the '#' character followed
 by the path for the source swath file. If <I>segment</I> is the string &quot;datalist&quot;
 then the segment lines will consist of the '#' character followed
@@ -8430,7 +8463,7 @@ the <B>-J</B> option, e.g. <B>-J</B><I>UTM10N</I> or <B>-J</B><I>epsg32749</I>.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 28 November 2021</P></CENTER>
+Last Updated: 17 July 2023</P></CENTER>
 
 <HR>
 <center>
