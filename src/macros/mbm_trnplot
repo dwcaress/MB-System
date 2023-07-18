@@ -75,10 +75,12 @@ def main (args, opts={}):
     print ("No mbtrnpp sessions found in "+inputdir+"\nMacro mbm_trnplot exiting...")
     sys.exit()
 
-  # If gridfile not yet specified then try to figure it out from the log header
+  # Get session name from the log header
   for sessionlog in sessionloglist :
     tmp = os.path.basename(sessionlog)
     sessionname = tmp[0:-8]
+
+    # If gridfile not yet specified then try to figure it out from the log header
     if gridset == False :
       fp = open(sessionlog)
       for line in fp:
@@ -89,9 +91,10 @@ def main (args, opts={}):
               gridfile = gridfile.replace('.bo', '.grd')
             else :
               gridfile = gridfile + "/source_grid.grd"
+            if gridfile[0] != '/' :
+              gridfile = "../"+gridfile
+            gridset = True
       fp.close()
-  if gridfile[0] != '/' :
-    gridfile = "../"+gridfile
 
   print("TRN Results\n---------")
   print("Session Directory: "+inputdir)
