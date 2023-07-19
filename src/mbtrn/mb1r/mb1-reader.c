@@ -1609,7 +1609,7 @@ int mb1r_test(int argc, char **argv)
     mxd_setModule(MB1R, 1, false, "MB1R");
     mxd_setModule(MB1R_ERROR, 1, false, "MB1R_ERR");
     mxd_setModule(MB1R_DEBUG, 1, false, "MB1R_DEBUG");
-    mxd_setModule(F7K, 1, false, "F7K");
+    mxd_setModule(MB1R, 1, false, "MB1R");
 
     mthread_thread_t *worker = mthread_thread_new();
     if(mthread_thread_start(worker, s_test_worker, (void *)cfg)!=0){
@@ -1649,12 +1649,12 @@ int mb1r_test(int argc, char **argv)
                         cfg->cycles,lost_bytes,istat);
             // show contents
             if (cfg->verbose>=1) {
-                MX_LMSG(F7K, 1, "MB1:\n");
+                MX_LMSG(MB1R, 1, "MB1:\n");
 //                mb1_t *psnd = (mb1_t *)(frame_buf);
 //                mb1_show(psnd,false,5);
 
                 if(cfg->verbose>1){
-                    MX_LMSG(F7K, 1, "data:\n");
+                    MX_LMSG(MB1R, 1, "data:\n");
                     mb1_hex_show(frame_buf,istat,16,true,5);
                 }
             }

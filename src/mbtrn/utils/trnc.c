@@ -66,8 +66,6 @@
 #include "r7k-reader.h"
 #include "mxdebug.h"
 #include "mxd_app.h"
-//#include "mmdebug.h"
-//#include "medebug.h"
 #include "mutils.h"
 #include "mb1_msg.h"
 
@@ -353,35 +351,31 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
 
     mxd_setModule(MXDEBUG, 0, true, NULL);
     mxd_setModule(MXERROR, 5, false, NULL);
-    mxd_setModule(TRNC, 1, false, "trnc.error");
-    mxd_setModule(TRNC_ERROR, 1, true, "trnc.error");
-    mxd_setModule(TRNC_DEBUG, 1, true, "trnc.debug");
-    mxd_setModule(MXMSOCK, 1, true, "msock");
-    mxd_setModule(R7KC, 1, true, "r7kc");
-    mxd_setModule(R7KC_DEBUG, 1, true, "r7kc.debug");
-    mxd_setModule(R7KC_ERROR, 1, true, "r7kc.error");
-    mxd_setModule(R7KR, 1, true, "r7kr");
-    mxd_setModule(R7KR_ERROR, 1, true, "r7kr.error");
-    mxd_setModule(R7KR_DEBUG, 1, true, "r7kr.debug");
+    mxd_setModule(TRNC, 0, false, "trnc.error");
+    mxd_setModule(TRNC_ERROR, 0, true, "trnc.error");
+    mxd_setModule(TRNC_DEBUG, 0, true, "trnc.debug");
+    mxd_setModule(MXMSOCK, 0, true, "msock");
+    mxd_setModule(R7KC, 0, true, "r7kc");
+    mxd_setModule(R7KC_DEBUG, 0, true, "r7kc.debug");
+    mxd_setModule(R7KC_ERROR, 0, true, "r7kc.error");
+    mxd_setModule(R7KR, 0, true, "r7kr");
+    mxd_setModule(R7KR_ERROR, 0, true, "r7kr.error");
+    mxd_setModule(R7KR_DEBUG, 0, true, "r7kr.debug");
 
     switch (cfg->verbose) {
         case 0:
             break;
         case 1:
-            mxd_setModule(MXDEBUG, 0, true, NULL);
-            mxd_setModule(MXERROR, 5, false, NULL);
             mxd_setModule(TRNC, 1, false, "trnc.error");
             break;
         case 2:
-            mxd_setModule(MXDEBUG, 5, true, NULL);
-            mxd_setModule(MXERROR, 5, false, NULL);
+            mxd_setModule(MXDEBUG, 5, false, NULL);
             mxd_setModule(TRNC, 5, false, "trnc.error");
             break;
         case 3:
         case 4:
         case 5:
             mxd_setModule(MXDEBUG, 5, false, NULL);
-            mxd_setModule(MXERROR, 5, false, NULL);
             mxd_setModule(TRNC_ERROR, 5, false, "trnc.error");
             mxd_setModule(TRNC_DEBUG, 5, false, "trnc.debug");
             mxd_setModule(MXMSOCK, 5, false, "msock");

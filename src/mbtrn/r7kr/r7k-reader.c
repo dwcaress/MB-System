@@ -1949,12 +1949,12 @@ int r7kr_test(int argc, char **argv)
                 r7k_nf_t *nf = (r7k_nf_t *)(frame_buf);
                 r7k_drf_t *drf = (r7k_drf_t *)(frame_buf+R7K_NF_BYTES);
 
-                MX_LMSG(F7K, 1, "NF:\n");
+                MX_LMSG(R7KR, 1, "NF:\n");
                 r7k_nf_show(nf,false,5);
-                MX_LMSG(F7K, 1, "DRF:\n");
+                MX_LMSG(R7KR, 1, "DRF:\n");
                 r7k_drf_show(drf,false,5);
                 if(verbose>1){
-                    MX_LMSG(F7K, 1, "data:\n");
+                    MX_LMSG(R7KR, 1, "data:\n");
                     r7k_hex_show(frame_buf,istat,16,true,5);
                 }
             }

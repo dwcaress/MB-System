@@ -65,9 +65,8 @@
 #include "msocket.h"
 #include "merror.h"
 #include "r7k-reader.h"
-#include "mmdebug.h"
-#include "medebug.h"
-#include "mconfig.h"
+#include "mxdebug.h"
+#include "mxd_app.h"
 
 /////////////////////////
 // Macros
@@ -115,43 +114,6 @@
 /////////////////////////
 // Declarations
 /////////////////////////
-
-/// @enum stream7k_module_ids
-/// @brief application module IDs
-/// [note : starting above reserved mframe module IDs]
-//typedef enum{
-//    MOD_S7K=MM_MODULE_COUNT,
-//    APP_MODULE_COUNT
-//}stream7k_module_ids;
-
-///// @enum s7k_channel_id
-///// @brief test module channel IDs
-///// [note : starting above reserved mframe channel IDs]
-//typedef enum{
-//    ID_S7K_V1=MM_CHANNEL_COUNT,
-//    ID_S7K_V2,
-//    S7K_CH_COUNT
-//}s7k_channel_id;
-//
-///// @enum s7k_channel_mask
-///// @brief test module channel masks
-//typedef enum{
-//    S7K_V1= (1<<ID_S7K_V1),
-//    S7K_V2= (1<<ID_S7K_V2)
-//}s7k_channel_mask;
-//
-///// @var char *mmd_test_m1_ch_names[S7K_CH_COUNT]
-///// @brief test module channel names
-//char *s7k_ch_names[S7K_CH_COUNT]={
-//    "trace.mbtrn",
-//    "debug.mbtrn",
-//    "warn.mbtrn",
-//    "err.mbtrn",
-//    "s7k.v1",
-//    "s7k.v2"
-//};
-//
-//static mmd_module_config_t mmd_config_default={MOD_S7K,"MOD_S7K",S7K_CH_COUNT,((MM_ERR|MM_WARN)),s7k_ch_names};
 
 /// @typedef struct app_cfg_s app_cfg_t
 /// @brief application configuration parameter structure
@@ -226,12 +188,12 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"dev", required_argument, NULL, 0},
         {NULL, 0, NULL, 0}};
 
-    // process argument list 
+    // process argument list
     while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1){
         switch (c) {
-                // long options all return c=0 
+                // long options all return c=0
             case 0:
-                // verbose 
+                // verbose
                 if (strcmp("verbose", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->verbose);
                 }
@@ -241,16 +203,16 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                     version=true;
                 }
 
-                // help 
+                // help
                 else if (strcmp("help", options[option_index].name) == 0) {
                     help = true;
                 }
                 
-                // host 
+                // host
                 else if (strcmp("host", options[option_index].name) == 0) {
                     cfg->host=strdup(optarg);
                 }
-                // cycles 
+                // cycles
                 else if (strcmp("cycles", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->cycles);
                 }
@@ -268,54 +230,60 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         }
         if (version) {
             MFRAME_SHOW_VERSION(STREAM7K_NAME, STREAM7K_BUILD);
-//            r7kr_show_app_version(STREAM7K_NAME, STREAM7K_BUILD);
+            //            r7kr_show_app_version(STREAM7K_NAME, STREAM7K_BUILD);
             exit(0);
         }
         if (help) {
             MFRAME_SHOW_VERSION(STREAM7K_NAME, STREAM7K_BUILD);
-//            r7kr_show_app_version(STREAM7K_NAME, STREAM7K_BUILD);
+            //            r7kr_show_app_version(STREAM7K_NAME, STREAM7K_BUILD);
             s_show_help();
             exit(0);
         }
     }// while
 
-
-	mconf_init(NULL,NULL);
-    mmd_channel_set(MOD_S7K,MM_ERR);
-    mmd_channel_set(MOD_R7K,MM_ERR);
-    mmd_channel_set(MOD_R7KR,MM_ERR);
-    mmd_channel_set(MOD_MSOCK,MM_ERR);
+    mxd_setModule(MXDEBUG, 0, true, NULL);
+    mxd_setModule(MXERROR, 5, false, NULL);
+    mxd_setModule(STREAM7K, 0, false, "stream7k.error");
+    mxd_setModule(STREAM7K_ERROR, 0, true, "stream7k.error");
+    mxd_setModule(STREAM7K_DEBUG, 0, true, "stream7k.debug");
+    mxd_setModule(MXMSOCK, 0, true, "msock");
+    mxd_setModule(R7KC, 0, true, "r7kc");
+    mxd_setModule(R7KC_DEBUG, 0, true, "r7kc.debug");
+    mxd_setModule(R7KC_ERROR, 0, true, "r7kc.error");
+    mxd_setModule(R7KR, 0, true, "r7kr");
+    mxd_setModule(R7KR_ERROR, 0, true, "r7kr.error");
+    mxd_setModule(R7KR_DEBUG, 0, true, "r7kr.debug");
 
     switch (cfg->verbose) {
         case 0:
-            mmd_channel_set(MOD_F7K,0);
-            mmd_channel_set(MOD_R7K,0);
-            mmd_channel_set(MOD_R7KR,0);
-            mmd_channel_set(MOD_MSOCK,0);
             break;
         case 1:
-            mmd_channel_en(MOD_F7K,S7K_V1);
-            mmd_channel_en(MOD_F7K,MM_DEBUG);
+            mxd_setModule(STREAM7K, 1, false, "stream7k.error");
             break;
         case 2:
-            mmd_channel_en(MOD_F7K,S7K_V1);
-            mmd_channel_en(MOD_F7K,S7K_V2);
-            mmd_channel_en(MOD_F7K,MM_DEBUG);
-            mmd_channel_en(MOD_MSOCK,MM_DEBUG);
-            mmd_channel_en(MOD_R7K,MM_DEBUG);
-            mmd_channel_en(MOD_R7KR,MM_DEBUG);
+            mxd_setModule(MXDEBUG, 5, false, NULL);
+            mxd_setModule(STREAM7K, 5, false, "stream7k.error");
+            break;
+        case 3:
+        case 4:
+        case 5:
+            mxd_setModule(MXDEBUG, 5, false, NULL);
+            mxd_setModule(STREAM7K_ERROR, 5, false, "stream7k.error");
+            mxd_setModule(STREAM7K_DEBUG, 5, false, "stream7k.debug");
+            mxd_setModule(MXMSOCK, 5, false, "msock");
+            mxd_setModule(R7KC, 5, false, "r7kc");
+            mxd_setModule(R7KC_DEBUG, 5, false, "r7kc.debug");
+            mxd_setModule(R7KC_ERROR, 5, false, "r7kc.error");
+            mxd_setModule(R7KR, 5, false, "r7kr");
+            mxd_setModule(R7KR_ERROR, 5, false, "r7kr.error");
+            mxd_setModule(R7KR_DEBUG, 5, false, "r7kr.debug");
             break;
         default:
-            if(cfg->verbose>2){
-                mmd_channel_en(MOD_F7K,S7K_V1);
-                mmd_channel_en(MOD_F7K,S7K_V2);
-                mmd_channel_en(MOD_F7K,MM_DEBUG);
-                mmd_channel_en(MOD_MSOCK,MM_DEBUG);
-                mmd_channel_en(MOD_R7K,MM_DEBUG|R7K_V2);
-                mmd_channel_en(MOD_R7KR,MM_DEBUG);
-            }
             break;
-	}
+    }
+
+    if(cfg->verbose != 0)
+        mxd_show();
 }
 // End function parse_args
 
@@ -329,11 +297,11 @@ static void s_termination_handler (int signum)
         case SIGINT:
         case SIGHUP:
         case SIGTERM:
-            PMPRINT(MOD_F7K,S7K_V2,(stderr,"received sig[%d]\n",signum));
+            MX_LPRINT(STREAM7K, 2, "received sig[%d]\n", signum);
             g_stop_flag=true;
             break;
         default:
-            PEPRINT((stderr,"not handled[%d]\n",signum));
+           MX_ERROR("not handled[%d]\n", signum);
             break;
     }
 }
@@ -359,43 +327,43 @@ static int s_app_main (app_cfg_t *cfg)
         while (!g_stop_flag) {
             s = msock_socket_new(cfg->host, R7K_7KCENTER_PORT, ST_TCP);
             if (NULL != s) {
-                PMPRINT(MOD_F7K,S7K_V1,(stderr,"connecting host[%s] dev[%d]\n",cfg->host,cfg->dev));
+                MX_LPRINT(STREAM7K, 1, "connecting host[%s] dev[%d]\n", cfg->host, cfg->dev);
                 if (msock_connect(s)==0) {
                     s->status=SS_CONNECTED;
 
-                    if(mmd_channel_isset(MOD_R7KR,MM_DEBUG)){
-                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"requesting 7k device config data"));
+                    if(mxd_testModule(R7KR_DEBUG, 1)){
+                        fprintf(stderr, "requesting 7k device config data");
                         r7k_req_config(s);
                     }
 
                     if(r7k_subscribe(s, cfg->dev, subs, nsubs)==0){
                         int test=msock_set_blocking(s,true);
-                        PMPRINT(MOD_F7K,S7K_V1,(stderr,"set_blocking ret[%d]\n",test));
-                        PMPRINT(MOD_F7K,S7K_V1,(stderr,"subscribing [%u]\n",nsubs));
-                        PMPRINT(MOD_F7K,S7K_V1,(stderr,"streaming c[%d]\n",cfg->cycles));
-                        r7k_stream_show(s,1024, 350, cfg->cycles,&g_stop_flag);
+                        MX_LPRINT(STREAM7K, 1, "set_blocking ret[%d]\n", test);
+                        MX_LPRINT(STREAM7K, 1, "subscribing [%u]\n", nsubs);
+                        MX_LPRINT(STREAM7K, 1, "streaming c[%d]\n", cfg->cycles);
+                        r7k_stream_show(s,1024, 350, cfg->cycles, &g_stop_flag);
                         cycle_count++;
                     }else{
-                        PMPRINT(MOD_F7K,S7K_V1,(stderr,"subscribe failed [%d/%s]\n",me_errno,strerror(me_errno)));
+                        MX_LPRINT(STREAM7K, 1, "subscribe failed [%d/%s]\n", me_errno, strerror(me_errno));
                     }
                 }else{
-                    PMPRINT(MOD_F7K,S7K_V1,(stderr,"connect failed [%d/%s]\n",me_errno,strerror(me_errno)));
+                    MX_LPRINT(STREAM7K, 1, "connect failed [%d/%s]\n", me_errno, strerror(me_errno));
                 }
             }else{
-                PMPRINT(MOD_F7K,S7K_V1,(stderr,"msock_socket_new failed [%d/%s]\n",me_errno,strerror(me_errno)));
+                MX_LPRINT(STREAM7K, 1, "msock_socket_new failed [%d/%s]\n", me_errno, strerror(me_errno));
             }
             if (cfg->cycles>0 && (cycle_count>=cfg->cycles)) {
                 g_stop_flag=true;
             }else{
                 if (!g_stop_flag) {
-                    PMPRINT(MOD_F7K,S7K_V1,(stderr,"retrying connection in 5 s\n"));
+                    MX_LMSG(STREAM7K, 1, "retrying connection in 5 s\n");
                     msock_socket_destroy(&s);
                     sleep(5);
                 }
             }
         }
         if (g_stop_flag) {
-            PMPRINT(MOD_F7K,S7K_V2,(stderr,"stop flag set\n"));
+            MX_LMSG(STREAM7K, 2, "stop flag set\n");
         }
     }// else invalid argument
     return retval;

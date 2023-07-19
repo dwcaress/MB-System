@@ -61,10 +61,9 @@
 
 #include <getopt.h>
 #include "msocket.h"
-#include "mmdebug.h"
-#include "medebug.h"
+#include "mxdebug.h"
+#include "mxd_app.h"
 #include "mutils.h"
-#include "mconfig.h"
 #include "mtime.h"
 #include "trn_msg.h"
 
@@ -149,36 +148,11 @@
 // Declarations
 /////////////////////////
 
-///// @enum trnc_channel_id
-///// @brief test module channel IDs
-///// [note : starting above reserved mframe channel IDs]
-//typedef enum{
-//    ID_MBTNAV_V1=MM_CHANNEL_COUNT,
-//    ID_MBTNAV_V2,
-//    MBTNAV_CH_COUNT
-//}trnc_channel_id;
-//
-///// @enum trnc_channel_mask
-///// @brief test module channel masks
-//typedef enum{
-//    MBTNAV_V1= (1<<ID_MBTNAV_V1),
-//    MBTNAV_V2= (1<<ID_MBTNAV_V2)
-//}trnc_channel_mask;
-//
-//
-///// @var char *trnc_ch_names[MBTNAV_CH_COUNT]
-///// @brief module channel names
-//char *trnc_ch_names[MBTNAV_CH_COUNT]={
-//    "trace.trnc",
-//    "debug.trnc",
-//    "warn.trnc",
-//    "err.trnc",
-//    "trnc.v1",
-//    "trnc.v2"
-//};
-//static mmd_module_config_t mmd_config_default= {MOD_MBTNAV,"MOD_MBTNAV",MBTNAV_CH_COUNT,((MM_ERR|MM_WARN)|MBTNAV_1),trnc_ch_names};
-
-typedef enum{OF_ASCII=0x1, OF_CSV=0x2, OF_HEX=0x4}ofmt_flag_t;
+typedef enum{
+    OF_ASCII=0x1,
+    OF_CSV=0x2,
+    OF_HEX=0x4
+}ofmt_flag_t;
 
 /// @typedef struct app_cfg_s app_cfg_t
 /// @brief application configuration parameter structure
@@ -376,44 +350,58 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         }
     }// while
 
-    mconf_init(NULL,NULL);
-    mmd_channel_set(MOD_MBTNAV,MM_ERR);
-    mmd_channel_set(MOD_R7K,MM_ERR);
-    mmd_channel_set(MOD_R7KR,MM_ERR);
-    mmd_channel_set(MOD_MSOCK,MM_ERR);
+    mxd_setModule(MXDEBUG, 0, true, NULL);
+    mxd_setModule(MXERROR, 5, false, NULL);
+    mxd_setModule(MBTNAVC, 0, true, "mbtnavc");
+    mxd_setModule(MBTNAVC_ERROR, 0, true, "mbtnavc.error");
+    mxd_setModule(MBTNAVC_DEBUG, 0, true, "mbtnavc.debug");
+    mxd_setModule(MXMSOCK, 0, true, "msock");
+    mxd_setModule(R7KC, 0, true, "r7kc");
+    mxd_setModule(R7KC_DEBUG, 0, true, "r7kc.debug");
+    mxd_setModule(R7KC_ERROR, 0, true, "r7kc.error");
+    mxd_setModule(R7KR, 0, true, "r7kr");
+    mxd_setModule(R7KR_ERROR, 0, true, "r7kr.error");
+    mxd_setModule(R7KR_DEBUG, 0, true, "r7kr.debug");
 
     switch (cfg->verbose) {
         case 0:
-            mmd_channel_set(MOD_MBTNAV,0);
-            mmd_channel_set(MOD_R7K,0);
-            mmd_channel_set(MOD_R7KR,0);
-            mmd_channel_set(MOD_MSOCK,0);
             break;
         case 1:
-            mmd_channel_en(MOD_MBTNAV,MBTNAV_V1);
-            mmd_channel_en(MOD_S7K,MM_DEBUG);
+            mxd_setModule(MBTNAVC, 1, false, "mbtnavc.error");
             break;
         case 2:
-            mmd_channel_en(MOD_MBTNAV,MBTNAV_V1);
-            mmd_channel_en(MOD_MBTNAV,MBTNAV_V2);
-            mmd_channel_en(MOD_MBTNAV,MM_DEBUG);
-            mmd_channel_en(MOD_MSOCK,MM_DEBUG);
-            mmd_channel_en(MOD_R7K,MM_DEBUG);
-            mmd_channel_en(MOD_R7KR,MM_DEBUG);
+            mxd_setModule(MXDEBUG, 5, false, NULL);
+            mxd_setModule(MBTNAVC_ERROR, 5, false, "mbtnavc.error");
+            break;
+        case 3:
+        case 4:
+        case 5:
+            mxd_setModule(MXDEBUG, 5, false, NULL);
+            mxd_setModule(MBTNAVC_ERROR, 5, false, "mbtnavc.error");
+            mxd_setModule(MBTNAVC_DEBUG, 5, false, "mbtnavc.debug");
+            mxd_setModule(MXMSOCK, 5, false, "msock");
+            mxd_setModule(R7KC, 5, false, "r7kc");
+            mxd_setModule(R7KC_DEBUG, 5, false, "r7kc.debug");
+            mxd_setModule(R7KC_ERROR, 5, false, "r7kc.error");
+            mxd_setModule(R7KR, 5, false, "r7kr");
+            mxd_setModule(R7KR_ERROR, 5, false, "r7kr.error");
+            mxd_setModule(R7KR_DEBUG, 5, false, "r7kr.debug");
             break;
         default:
-            mmd_channel_en(MOD_MBTNAV,MM_DEBUG);
             break;
     }
 
-    PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"verbose [%s]\n",(cfg->verbose?"Y":"N")));
-    PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"host    [%s]\n",cfg->host));
-    PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"port    [%d]\n",cfg->port));
-    PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"hbeat   [%d]\n",cfg->hbeat));
-    PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"block   [%s]\n",(cfg->blocking==0?"N":"Y")));
-    PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"cycles  [%d]\n",cfg->cycles));
-    PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"bsize   [%d]\n",cfg->bsize));
-    PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"ofmt    [%x]\n",cfg->ofmt));
+    if(cfg->verbose != 0)
+        mxd_show();
+
+    MX_MPRINT(MBTNAVC, "verbose [%s]\n", (cfg->verbose?"Y":"N"));
+    MX_MPRINT(MBTNAVC, "host    [%s]\n", cfg->host);
+    MX_MPRINT(MBTNAVC, "port    [%d]\n", cfg->port);
+    MX_MPRINT(MBTNAVC, "hbeat   [%d]\n", cfg->hbeat);
+    MX_MPRINT(MBTNAVC, "block   [%s]\n", (cfg->blocking==0?"N":"Y"));
+    MX_MPRINT(MBTNAVC, "cycles  [%d]\n", cfg->cycles);
+    MX_MPRINT(MBTNAVC, "bsize   [%d]\n", cfg->bsize);
+    MX_MPRINT(MBTNAVC, "ofmt    [%x]\n", cfg->ofmt);
 }
 // End function parse_args
 
@@ -427,7 +415,7 @@ static void s_termination_handler (int signum)
         case SIGINT:
         case SIGHUP:
         case SIGTERM:
-            PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"\nsig received[%d]\n",signum));
+            MX_MPRINT(MBTNAVC, "\nsig received[%d]\n",signum);
             g_interrupt=true;
             break;
         default:
@@ -611,12 +599,12 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
 
             // action: connect
             if (action == TRNAT_CONNECT) {
-                PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"connecting [%s:%d]\n",cfg->host,cfg->port));
+                MX_MPRINT(MBTNAVC, "connecting [%s:%d]\n", cfg->host, cfg->port);
                 if( (test=msock_connect(s))==0 ) {
-                    PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"connect OK fd[%d]\n",s->fd));
+                    MX_MPRINT(MBTNAVC, "connect OK fd[%d]\n", s->fd);
                     state=TRNSM_CONNECTED;
                 }else{
-                    PEPRINT((stderr,"connect failed [%"PRId64"]\n",test));
+                    MX_ERROR("connect failed [%"PRId64"]\n", test);
                 }
             }
 
@@ -626,14 +614,14 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
 
                 test=msock_sendto(s,NULL,(byte *)reqstr,4,0);
 
-                PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"sendto REQ ret[%"PRId64"] [%d/%s]\n",test,errno,strerror(errno)));
+                MX_MPRINT(MBTNAVC, "sendto REQ ret[%"PRId64"] [%d/%s]\n", test, errno, strerror(errno));
 
                 if( test>0 ){
                     trn_tx_count++;
                     trn_tx_bytes+=test;
                     state=TRNSM_REQ_PENDING;
                 }else{
-                    PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"sendto failed ret[%"PRId64"] [%d/%s]\n",test,errno,strerror(errno)));
+                    MX_MPRINT(MBTNAVC, "sendto failed ret[%"PRId64"] [%d/%s]\n", test, errno, strerror(errno));
                 }
             }
 
@@ -651,12 +639,12 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
 
                     // check message type
                     if(frame->sync==MBTRN_MSGTYPE_ACK){
-                        PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"received ACK ret[%"PRId64"] [%08X]\n",test,frame->sync));
+                        MX_MPRINT(MBTNAVC, "received ACK ret[%"PRId64"] [%08X]\n", test, frame->sync);
                         hbeat_counter=0;
                         state=TRNSM_SUBSCRIBED;
                     }else if(frame->sync==TRNU_PUB_SYNC && test==readlen){
 
-                        PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"received MSG ret[%"PRId64"] type[%08X] size[%"PRId64"] \n",test,frame->sync,test));
+                        MX_MPRINT(MBTNAVC, "received MSG ret[%"PRId64"] type[%08X] size[%"PRId64"] \n", test, frame->sync, test);
                         trn_msg_count++;
                         trn_msg_bytes+=test;
                         action=TRNAT_SHOW_MSG;
@@ -664,27 +652,27 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                             state=TRNSM_SUBSCRIBED;
                         }
                         hbeat_counter++;
-                        PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"hbeat[%d/%d]\n",hbeat_counter,cfg->hbeat));
+                        MX_MPRINT(MBTNAVC, "hbeat[%d/%d]\n", hbeat_counter, cfg->hbeat);
                         if ( (hbeat_counter!=0) &&  (cfg->hbeat>0) && (hbeat_counter%cfg->hbeat==0)) {
                             state=TRNSM_HBEAT_EXPIRED;
                         }
                     }else{
                         // response not recognized
-                        PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"invalid message sync[%u] len[%"PRId64"]\n",frame->sync,test));
+                        MX_MPRINT(MBTNAVC, "invalid message sync[%u] len[%"PRId64"]\n", frame->sync, test);
                     }
 
                 }else{
                     // read returned error
-                    //  PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"invalid message [%d]\n",test));
+                    //  MX_MPRINT(MBTNAVC, "invalid message [%d]\n", test);
                     switch (errno) {
                         case EWOULDBLOCK:
                             // nothing to read
-                            //   PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"err - [%d/%s]\n",errno, strerror(errno)));
+                            //   MX_MPRINT(MBTNAVC, "err - [%d/%s]\n", errno, strerror(errno));
                             break;
                         case ENOTCONN:
                         case ECONNREFUSED:
                             // host disconnected
-                            PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"err - server not connected [%d/%s]\n",errno, strerror(errno)));
+                            MX_MPRINT(MBTNAVC, "err - server not connected [%d/%s]\n", errno, strerror(errno));
                             msock_socket_destroy(&s);
                             s = msock_socket_new(cfg->host, cfg->port, ST_UDP);
                             msock_set_blocking(s,(cfg->blocking==0?false:true));
@@ -693,7 +681,7 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                             retval=-1;
                             break;
                         default:
-                            PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"err ? [%d/%s]\n",errno, strerror(errno)));
+                            MX_MPRINT(MBTNAVC, "err ? [%d/%s]\n", errno, strerror(errno));
                             break;
                     }//switch
                 }
@@ -719,13 +707,13 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
             // check cycles and signals
             scycles--;
             if(scycles==0){
-                PTRACE();
+                MX_TRACE();
                 retval=0;
                 state=TRNSM_DONE;
             }
 
             if(g_interrupt){
-                PTRACE();
+                MX_TRACE();
                 retval=-1;
                 state=TRNSM_DONE;
             }
@@ -733,9 +721,9 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
         }// while !TRNSM_DONE
     }//else invalid arg
 
-    PMPRINT(MOD_MBTNAV,MBTNAV_V1,(stderr,"tx count/bytes[%d/%d]\n",trn_tx_count,trn_tx_bytes));
-    PMPRINT(MOD_MBTNAV,MBTNAV_V1,(stderr,"rx count/bytes[%d/%d]\n",trn_rx_count,trn_rx_bytes));
-    PMPRINT(MOD_MBTNAV,MBTNAV_V1,(stderr,"trn count/bytes[%d/%d]\n",trn_msg_count,trn_msg_bytes));
+    MX_LPRINT(MBTNAVC, 1, "tx count/bytes[%d/%d]\n", trn_tx_count, trn_tx_bytes);
+    MX_LPRINT(MBTNAVC, 1, "rx count/bytes[%d/%d]\n", trn_rx_count, trn_rx_bytes);
+    MX_LPRINT(MBTNAVC, 1, "trn count/bytes[%d/%d]\n", trn_msg_count, trn_msg_bytes);
 
     return retval;
 }

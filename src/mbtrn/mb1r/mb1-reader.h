@@ -75,7 +75,6 @@
 #include "mlog.h"
 #include "msocket.h"
 #include "mfile.h"
-#include "mconfig.h"
 #include "mstats.h"
 #include "mb1_msg.h"
 

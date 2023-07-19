@@ -46,13 +46,11 @@
 
 #include "mframe.h"
 #include "merror.h"
-//#include "mconfig.h"
 #include "msocket.h"
 #include "mtime.h"
 #include "mlist.h"
 #include "mlog.h"
 #include "mbbuf.h"
-//#include "medebug.h"
 #include "mstats.h"
 #include "mkvconf.h"
 #include "mxdebug.h"
@@ -4973,7 +4971,6 @@ int mbtrnpp_init_debug(int verbose) {
     mxd_setModule(MB1R, 0, true, "mb1r");
     mxd_setModule(MB1R_DEBUG, 0, true, "mb1r.debug");
     mxd_setModule(MB1R_ERROR, 0, true, "mb1r.err");
-    mxd_setModule(F7K, 0, true, "f7k");
 
     switch (verbose) {
         case 0:
