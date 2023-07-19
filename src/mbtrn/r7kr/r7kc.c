@@ -63,8 +63,6 @@ GNU General Public License for more details
 #include "mxdebug.h"
 #include "mxd_app.h"
 #include "merror.h"
-//#include "medebug.h"
-//#include "mconfig.h"
 
 /////////////////////////
 // Macros
