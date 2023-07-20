@@ -689,6 +689,9 @@ s=NULL;\
 // MSF_PSTAT  : periodic stats
 // MSF_READER : r7kr reader stats
 #define MBTRNPP_STAT_FLAGS_DFL (MSF_STATUS | MSF_EVENT | MSF_ASTAT | MSF_PSTAT)
+/// @def MBTRNPP_STAT_PERIOD_SEC
+#define MBTRNPP_STAT_PERIOD_SEC ((double)20.0)
+
 
 mbtrnpp_opts_t mbtrn_opts_s, *mbtrn_opts=&mbtrn_opts_s;
 mbtrnpp_cfg_t mbtrn_cfg_s, *mbtrn_cfg=&mbtrn_cfg_s;
@@ -1223,10 +1226,10 @@ char *s_mnem_value(char **pdest, size_t len, const char *key)
             }
             if(NULL!=dest){
                 sprintf(dest,"%s",(NULL!=val ? val : alt));
-            } else {PTRACE();}
+            } else {MX_TRACE();}
 //            fprintf(stderr,"%s:%d - dest[%p/%s] pdest[%p/%s] retval[%s]\n",__func__,__LINE__,dest,dest,*pdest,*pdest,retval);
 
-        } else {PTRACE();}
+        } else {MX_TRACE();}
 
         MEM_CHKINVALIDATE(val);
     }// else invalid arg
@@ -3133,7 +3136,7 @@ int main(int argc, char **argv) {
     if(s_mbtrnpp_peek_opt_cfg(argc,argv,&cfg_path,0)!=NULL){
         fprintf(stderr,"loading config file [%s]\n",cfg_path);
         if(s_mbtrnpp_load_config(cfg_path,mbtrn_opts)!=0){
-            PTRACE();
+            MX_TRACE();
             fprintf(stderr,"ERR - error(s) in config file [%s]\n",cfg_path);
             errflg++;
         }
@@ -3275,11 +3278,10 @@ int main(int argc, char **argv) {
         mbtrnpp_init_trn(&trn_instance,mbtrn_cfg->verbose, trn_cfg);
 
         // temporarily enable module debug
-        mmd_en_mask_t olvl=0;
-
+        mx_module_t *mod_save = NULL;
         if (mbtrn_cfg->verbose!=0) {
-            olvl = mmd_get_enmask(MOD_MBTRNPP, NULL);
-            mmd_channel_en(MOD_MBTRNPP,MM_DEBUG);
+            mod_save = mxd_save(MBTRNPP_DEBUG);
+            mxd_setModule(MBTRNPP_DEBUG, 5, false, NULL);
         }
 
         // initialize socket outputs
@@ -3307,9 +3309,8 @@ int main(int argc, char **argv) {
         }
 
         if (mbtrn_cfg->verbose != 0) {
-       // restore module debug
-        mmd_channel_set(MOD_MBTRNPP,olvl);
-       }
+            mxd_restore(MBTRNPP_DEBUG, mod_save);
+        }
     } else {
         fprintf(stderr,"WARN: skipping TRN init trn_enable[%c] trn_cfg[%p]\n",(mbtrn_cfg->trn_enable?'Y':'N'),trn_cfg);
     }
@@ -3449,11 +3450,12 @@ int main(int argc, char **argv) {
   /* else open ipc to TRN */
 
  if ( OUTPUT_FLAG_SET(OUTPUT_MB1_SVR_EN) ) {
-    mmd_en_mask_t olvl= 0;
-    if (mbtrn_cfg->verbose != 0) {
-      olvl = mmd_get_enmask(MOD_MBTRNPP, NULL);
-      mmd_channel_en(MOD_MBTRNPP, MM_DEBUG);
-    }
+
+     mx_module_t *mod_save = NULL;
+     if (mbtrn_cfg->verbose!=0) {
+         mod_save = mxd_save(MBTRNPP_DEBUG);
+         mxd_setModule(MBTRNPP_DEBUG, 5, false, NULL);
+     }
 
     int test = -1;
      if( (test=mbtrnpp_init_mb1svr(&mb1svr, mbtrn_cfg->mb1svr_host,mbtrn_cfg->mb1svr_port,true))==0){
@@ -3463,7 +3465,7 @@ int main(int argc, char **argv) {
       }
 
     if (mbtrn_cfg->verbose != 0) {
-      mmd_channel_set(MOD_MBTRNPP, olvl);
+        mxd_restore(MBTRNPP_DEBUG, mod_save);
     }
   }
 
@@ -5061,77 +5063,6 @@ int mbtrnpp_init_debug(int verbose) {
         fprintf(stderr, "%s:%d verbose[%d]\n", __func__, __LINE__, verbose);
         mxd_show();
     }
-
-    // TODO: convert mframe to mxdebug, eliminate this
-//    mmd_initialize();
-//    mconf_init(NULL, NULL);
-//
-//    fprintf(stderr, "%s:%d >>> MOD_MBTRNPP[id=%d]  en[%08X] verbose[%d]\n", __FUNCTION__, __LINE__, MOD_MBTRNPP,
-//            mmd_get_enmask(MOD_MBTRNPP, NULL),verbose);
-//
-//    switch (verbose) {
-//        case 0:
-////            mmd_channel_set(MOD_MBTRNPP, MM_NONE);
-//            mmd_channel_set(MOD_R7K, MM_NONE);
-//            mmd_channel_set(MOD_R7KR, MM_NONE);
-//            mmd_channel_set(MOD_MB1R, MM_NONE);
-//            mmd_channel_set(MOD_MSOCK, MM_NONE);
-//            mmd_channel_set(MOD_NETIF, MM_NONE);
-//            break;
-//        case 1:
-////            mmd_channel_en(MOD_MBTRNPP, MBTRNPP_V1);
-//            mmd_channel_en(MOD_R7KR, R7KR_V1);
-//            mmd_channel_set(MOD_MB1R, MB1R_V1);
-//            break;
-//        case 2:
-////            mmd_channel_en(MOD_MBTRNPP, MM_DEBUG);
-//            mmd_channel_en(MOD_R7KR, MM_DEBUG);
-//            mmd_channel_en(MOD_R7K, R7K_PARSER);
-//            mmd_channel_en(MOD_MB1R, MM_DEBUG);
-//            break;
-//        case -1:
-////            mmd_channel_en(MOD_MBTRNPP, MBTRNPP_V1);
-//            mmd_channel_en(MOD_R7KR, MM_DEBUG);
-//            mmd_channel_set(MOD_NETIF, NETIF_V1 | NETIF_V2);
-//            mmd_channel_en(MOD_MB1R, MM_DEBUG);
-//            break;
-//        case -2:
-////            mmd_channel_en(MOD_MBTRNPP, MBTRNPP_V1 | MBTRNPP_V2);
-//            mmd_channel_set(MOD_NETIF, NETIF_V1 | NETIF_V2 | NETIF_V3 );
-//            break;
-//        case -3:
-////            mmd_channel_en(MOD_MBTRNPP, MM_DEBUG | MBTRNPP_V1 | MBTRNPP_V2 | MBTRNPP_V3 );
-//            mmd_channel_en(MOD_R7KR, MM_DEBUG);
-//            mmd_channel_en(MOD_R7K, MM_WARN | R7K_PARSER);
-//            mmd_channel_en(MOD_MB1R, MM_ALL);
-//            mmd_channel_set(MOD_NETIF, NETIF_V1 | NETIF_V2 | NETIF_V3 | NETIF_V4);
-//            // this enables messages from msock_recv (e.g. resource temporarily unavailable)
-//            msock_set_debug(1);
-//            break;
-//        case -4:
-////            mmd_channel_en(MOD_MBTRNPP, MM_DEBUG | MBTRNPP_V1 | MBTRNPP_V2 | MBTRNPP_V3 | MBTRNPP_V4);
-//            mmd_channel_en(MOD_R7KR, MM_DEBUG);
-//            mmd_channel_en(MOD_R7K, MM_WARN | R7K_PARSER | R7K_DRFCON);
-//            mmd_channel_en(MOD_MB1R, MM_DEBUG);
-//            mmd_channel_en(MOD_MSOCK, MM_DEBUG);
-//            mmd_channel_set(MOD_NETIF, MM_DEBUG | NETIF_V1 | NETIF_V2 | NETIF_V3 | NETIF_V4);
-//            msock_set_debug(1);
-//            break;
-//        case -5:
-////            mmd_channel_en(MOD_MBTRNPP, MM_ALL);
-//            mmd_channel_en(MOD_R7KR, MM_ALL);
-//            mmd_channel_en(MOD_R7K, MM_ALL);
-//            mmd_channel_en(MOD_MB1R, MM_ALL);
-//            mmd_channel_en(MOD_MSOCK, MM_ALL);
-//            mmd_channel_en(MOD_NETIF, MM_ALL);
-//            msock_set_debug(1);
-//            break;
-//        default:
-//            break;
-//    }
-//    fprintf(stderr, "%s:%d >>> MOD_MBTRNPP  en[%08X]\n", __FUNCTION__, __LINE__, mmd_get_enmask(MOD_MBTRNPP, NULL));
-//    fprintf(stderr, "%s:%d >>> MOD_R7KR  en[%08X]\n", __FUNCTION__, __LINE__, mmd_get_enmask(MOD_R7KR, NULL));
-//    fprintf(stderr, "%s:%d >>> MOD_R7K  en[%08X]\n", __FUNCTION__, __LINE__, mmd_get_enmask(MOD_R7K, NULL));
 
     // open mb1 data log
     if ( OUTPUT_FLAG_SET(OUTPUT_MB1_BIN) ) {

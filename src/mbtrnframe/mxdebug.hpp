@@ -224,11 +224,11 @@ private:
 
     MXDebug()
     {
-         MXD_PRINT("%s:%d ++++++++ CTOR ++++++++\n", __func__, __LINE__);
+        MXD_PRINT("%s:%d ++++++++ CTOR ++++++++\n", __func__, __LINE__);
     }
     ~MXDebug()
     {
-         MXD_PRINT("%s:%d ++++++++ DTOR ++++++++\n", __func__, __LINE__);
+        MXD_PRINT("%s:%d ++++++++ DTOR ++++++++\n", __func__, __LINE__);
     }
 
     static int init()
@@ -303,7 +303,7 @@ private:
         if(pa->id == pb->id)
             return 0;
         if(pa->id > pb->id)
-        return 1;
+            return 1;
         return -1;
     }
 
@@ -389,6 +389,16 @@ public:
         }
 
         MUTEX_UNLOCK(&m_list_mutex);
+    }
+
+    static bool suspended(int id)
+    {
+        mx_module_t *mod = lookupModule(id);
+
+        if(mod != NULL) {
+            return mod->suspend;
+        }
+        return false;
     }
 
     static void release()
@@ -538,7 +548,42 @@ public:
 
     static void  autoNewline(bool enable)
     {
-         m_auto_newline = enable;
+        m_auto_newline = enable;
+    }
+
+    static mx_module_t *save(int id)
+    {
+        mx_module_t *mod = lookupModule(id);
+        mx_module_t *dest = NULL;
+        if(mod != NULL) {
+            dest = (mx_module_t *)malloc(sizeof(mx_module_t));
+            if(dest != NULL){
+                MUTEX_LOCK(&m_list_mutex);
+                dest->id = mod->id;
+                dest->level = mod->level;
+                dest->suspend = mod->suspend;
+                dest->name = mod->name == NULL ? NULL : strdup(mod->name);
+                MUTEX_UNLOCK(&m_list_mutex);
+            }
+        }
+        return dest;
+    }
+
+    static void restore(int id, mx_module_t *src)
+    {
+        mx_module_t *mod = lookupModule(id);
+
+        if(mod != NULL && src != NULL) {
+            MUTEX_LOCK(&m_list_mutex);
+            mod->id = src->id;
+            mod->level = src->level;
+            mod->suspend = src->suspend;
+            free(mod->name);
+            mod->name = src->name == NULL ? NULL : strdup(src->name);
+            MUTEX_UNLOCK(&m_list_mutex);
+            free(src->name);
+            free(src);
+        }
     }
 
     static void dprint(const char *fmt, ...)
@@ -821,6 +866,21 @@ EXTERNC void mxd_suspend(int id, bool suspend)
 EXTERNC void mxd_nSuspend(int *idSet, int len, bool suspend)
 {
     return MXDebug::nSuspend(idSet, len, suspend);
+}
+
+EXTERNC int mxd_suspended(int id)
+{
+    return MXDebug::suspended(id);
+}
+
+EXTERNC mx_module_t *mxd_save(int id)
+{
+    return MXDebug::save(id);
+}
+
+EXTERNC void mxd_restore(int id, mx_module_t *src)
+{
+    return MXDebug::restore(id, src);
 }
 
 EXTERNC void mxd_dprint(const char *fmt, ...)

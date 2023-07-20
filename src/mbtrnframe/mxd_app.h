@@ -68,6 +68,7 @@
 
 typedef enum{
     MBTRNPP = MX_APP_RANGE,
+    MBTRNPP_DEBUG,
     R7KR,
     R7KR_DEBUG,
     R7KR_ERROR,

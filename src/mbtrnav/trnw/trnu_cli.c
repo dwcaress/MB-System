@@ -65,6 +65,7 @@
 #include "trnu_cli.h"
 #include "trnif_proto.h"
 #include "mtime.h"
+#include "mxdebug.h"
 
 /////////////////////////
 // Macros
@@ -120,7 +121,7 @@ static int s_get_acknak(trnucli_t *self, uint32_t retries, uint32_t delay)
     int retval = -1;
 
     if(NULL!=self && retries){
-        PDPRINT((stderr,"%s - retries[%"PRIu32"] del[%"PRIu32"]\n",__func__,retries,delay));
+        MX_DEBUG("%s - retries[%"PRIu32"] del[%"PRIu32"]\n", __func__, retries, delay);
         byte ack[TRNX_MSG_SIZE]={0};
         uint32_t rx_retries=retries;
         msock_set_blocking(self->trnu->sock,false);
@@ -130,7 +131,7 @@ static int s_get_acknak(trnucli_t *self, uint32_t retries, uint32_t delay)
             bool is_acknak=false;
             bool is_update=false;
             memset(ack,0,TRNX_MSG_SIZE);
-            PDPRINT((stderr,"%s - rx_retries[%"PRIu32"]\n",__func__,rx_retries));
+            MX_DEBUG("%s - rx_retries[%"PRIu32"]\n", __func__, rx_retries);
 
             // check message type
             if( (test=msock_recvfrom(self->trnu->sock,self->trnu->sock->addr,ack,TRNUCLI_ACK_BYTES,MSG_PEEK))>0){
@@ -146,13 +147,14 @@ static int s_get_acknak(trnucli_t *self, uint32_t retries, uint32_t delay)
             if(is_acknak){
                 // this is the ACK/NAK we're looking for
                 if((test=msock_recvfrom(self->trnu->sock,self->trnu->sock->addr,ack,TRNX_MSG_SIZE,0))>0){
-                    PDPRINT((stderr,"%s - ret/ret/ack[%"PRIu32"/%"PRId64"/%s]\n",__func__,rx_retries,test,ack->mid));
-#ifdef WITH_PDEBUG
-                    int64_t i=0;
-                    for(i=0;i<test && i<TRNUCLI_ACK_BYTES;i++)
-                        fprintf(stderr,"%02X ",ack[i]);
-                    fprintf(stderr,"\n");
-#endif
+                    if(mxd_testModule(MXDEBUG, 1)){
+                        fprintf(stderr, "%s - ret/ret/ack[%"PRIu32"/%"PRId64"/%s]\n", __func__, rx_retries, test, ack);
+
+                        int64_t i=0;
+                        for(i=0;i<test && i<TRNUCLI_ACK_BYTES;i++)
+                            fprintf(stderr,"%02X ",ack[i]);
+                        fprintf(stderr,"\n");
+                    }
                     trnuif_msg_t *mp=(trnuif_msg_t *)ack;
                     if(strcmp(mp->mid,PROTO_TRNU_ACK)==0 || strcmp(mp->mid,PROTO_TRNU_NACK)==0){
                         retval=0;
@@ -163,15 +165,16 @@ static int s_get_acknak(trnucli_t *self, uint32_t retries, uint32_t delay)
                 // it's an update - go get it, then resume ACK/NAK search
                 trnucli_listen(self,false);
             }else{
-                PDPRINT((stderr,"ACK/NACK failed [%"PRIu32"/%"PRId64"/%s]\n",rx_retries,test,ack));
-#ifdef WITH_PDEBUG
+                if(mxd_testModule(MXDEBUG, 1)){
+                    fprintf(stderr, "ACK/NACK failed [%"PRIu32"/%"PRId64"/%s]\n", rx_retries, test, ack);
+
                     fprintf(stderr,"ack bytes:\n");
 
                     int64_t i=0;
                     for(i=0;i<TRNUCLI_ACK_BYTES;i++)
                         fprintf(stderr,"%02X ",ack[i]);
                     fprintf(stderr,"\n");
-#endif
+                }
             }
 	    if(delay>0){
               mtime_delay_ms(delay);
@@ -192,9 +195,9 @@ static int s_send_recv(trnucli_t *self, byte *msg, int32_t len)
     if(NULL!=self && NULL!=msg && len>0){
         int64_t test=msock_sendto(self->trnu->sock,NULL,msg,len,0);
         if(test>0){
-            PDPRINT((stderr,"send msg OK [%s/%"PRId64"]\n",msg,test));
+            MX_DEBUG("send msg OK [%s/%"PRId64"]\n", msg, test);
             retval=s_get_acknak(self,TRNUCLI_ACK_RETRIES,TRNUCLI_ACK_WAIT_MSEC);
-        }else{PTRACE();}
+        }else{MX_TRACE();}
     }
 
     return retval;
@@ -249,11 +252,11 @@ int trnucli_connect(trnucli_t *self, char *host, int port)
             retval = s_send_recv(self,(byte *)msg,slen);
             free(msg);
         }else{
-            PTRACE();
-            PDPRINT((stderr,"CON failed [%d]\n",test));
+            MX_TRACE();
+            MX_DEBUG("CON failed [%d]\n", test);
         }
     }else{
-        PTRACE();
+        MX_TRACE();
     }
 
     return retval;
@@ -273,8 +276,8 @@ int trnucli_disconnect(trnucli_t *self)
                 if (msock_lset_opt (self->trnu->sock, IPPROTO_IP, IP_DROP_MEMBERSHIP,&mreq,sizeof(mreq)) == 0){
                     retval=0;
                 }else{
-                    PTRACE();
-                    PDPRINT((stderr,"ERR - msock_set_opt IP_DROP_MEMBERSHIP\r\n"));
+                    MX_TRACE();
+                    MX_DEBUG_MSG("ERR - msock_set_opt IP_DROP_MEMBERSHIP\r\n");
                 }
             }
         }else{
@@ -320,17 +323,17 @@ int trnucli_mcast_connect(trnucli_t *self, char *host, int port, int ttl)
         // future expansion (for mcast outbound)
         unsigned char mcast_loop=1;
         if(msock_lset_opt(self->trnu->sock, IPPROTO_IP, IP_MULTICAST_LOOP, &mcast_loop, sizeof(mcast_loop))) {
-            PDPRINT((stderr,"ERR - msock_set_opt IP_MULTICAST_LOOP\r\n"));
+            MX_DEBUG_MSG("ERR - msock_set_opt IP_MULTICAST_LOOP\r\n");
         }
 
         if(msock_lset_opt(self->trnu->sock, IPPROTO_IP, IP_MULTICAST_TTL, &ttl, sizeof(ttl))) {
-            PDPRINT((stderr,"ERR - msock_set_opt IP_MULTICAST_TTL\r\n"));
+            MX_DEBUG_MSG("ERR - msock_set_opt IP_MULTICAST_TTL\r\n");
         }
 #endif // WITH_MCAST_BIDIR
 
 		// bind the socket to INADDR_ANY (accept mcast on all interfaces)
         if(msock_bind(self->trnu->sock)!=0){
-            PDPRINT((stderr,"ERR - bind failed [%d/%s]\n",errno,strerror(errno)));
+            MX_DEBUG("ERR - bind failed [%d/%s]\n", errno, strerror(errno));
         }
         struct ip_mreq mreq;
 
@@ -340,12 +343,12 @@ int trnucli_mcast_connect(trnucli_t *self, char *host, int port, int ttl)
         if (msock_lset_opt(self->trnu->sock, IPPROTO_IP, IP_ADD_MEMBERSHIP,&mreq,sizeof(mreq)) == 0){
             retval=0;
         }else{
-            PTRACE();
-            PDPRINT((stderr,"ERR - msock_set_opt IP_ADD_MEMBERSHIP\r\n"));
+            MX_TRACE();
+            MX_DEBUG_MSG("ERR - msock_set_opt IP_ADD_MEMBERSHIP\r\n");
         }
 
     }else{
-        PTRACE();
+        MX_TRACE();
     }
 
     return retval;
@@ -376,23 +379,24 @@ int trnucli_listen(trnucli_t *self, bool callback_en)
             int64_t rret=msock_recvfrom(self->trnu->sock,self->trnu->sock->addr,(byte *)self->update,read_len,0);
             if(rret==read_len){
                 retval=0;
-                PDPRINT((stderr,"%s - recv OK rret/mb1cyc[%"PRId64",%d]\n",__func__,rret,self->update->mb1_cycle));
+                MX_DEBUG("%s - recv OK rret/mb1cyc[%"PRId64",%d]\n", __func__, rret, self->update->mb1_cycle);
                 if(callback_en && NULL!=self->update_fn){
                     retval= self->update_fn(self->update);
                 }else{
                     // no handler specified
                 }
             }else{
-                PDPRINT((stderr,"%s - recv ERR rret[%"PRId64"]\n",__func__,rret));
-#ifdef WITH_PDEBUG
-                if(rret>=0){
-                    int64_t i=0;
-                    byte *bp=(byte *)self->update;
-                    for(i=0;i<rret && i<TRNU_PUB_BYTES;i++)
-                        fprintf(stderr,"%02X ",bp[i]);
-                    fprintf(stderr,"\n");
+                
+                if(mxd_testModule(MXDEBUG, 1)){
+                    fprintf(stderr,"%s - recv ERR rret[%"PRId64"]\n", __func__, rret);
+                    if(rret>=0){
+                        int64_t i=0;
+                        byte *bp=(byte *)self->update;
+                        for(i=0;i<rret && i<TRNU_PUB_BYTES;i++)
+                            fprintf(stderr,"%02X ",bp[i]);
+                        fprintf(stderr,"\n");
+                    }
                 }
-#endif
             }// else reject non-updates (e.g. ACK/NACK
         }else{
             // could not alloc

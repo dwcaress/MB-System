@@ -73,8 +73,6 @@
 #include "trnif_proto.h"
 
 #include "mframe.h"
-#include "medebug.h"
-#include "mmdebug.h"
 
 /////////////////////////
 // Macros
@@ -559,13 +557,13 @@ static int s_app_main(app_cfg_t *cfg)
         if(NULL!=cfg->netif ){
 
             // enable module debug
-            netif_init_mmd();
+            netif_configure_debug(NULL, cfg->verbose);
 
             // test trn_server/commsT protocol
             s_run(cfg);
 
             // release module debug resources
-            mmd_release();
+            mxd_release();
 
             // log session end
             double now=mtime_etime();
