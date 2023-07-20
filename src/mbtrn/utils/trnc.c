@@ -150,34 +150,6 @@
 // Declarations
 /////////////////////////
 
-///// @enum trnc_channel_id
-///// @brief test module channel IDs
-///// [note : starting above reserved mframe channel IDs]
-//typedef enum{
-//    ID_TRNC_V1=MM_CHANNEL_COUNT,
-//    ID_TRNC_V2,
-//    TRNC_CH_COUNT
-//}trnc_channel_id;
-//
-///// @enum trnc_channel_mask
-///// @brief test module channel masks
-//typedef enum{
-//    TRNC_V1= (1<<ID_TRNC_V1),
-//    TRNC_V2= (1<<ID_TRNC_V2)
-//}trnc_channel_mask;
-//
-//
-///// @var char *trnc_ch_names[TRNC_CH_COUNT]
-///// @brief module channel names
-//char *trnc_ch_names[TRNC_CH_COUNT]={
-//    "trace.trnc",
-//    "debug.trnc",
-//    "warn.trnc",
-//    "err.trnc",
-//    "trnc.v1",
-//    "trnc.v2"
-//};
-//static mmd_module_config_t mmd_config_default= {MOD_TRNC,"MOD_TRNC",TRNC_CH_COUNT,((MM_ERR|MM_WARN)|TRNC_1),trnc_ch_names};
 
 /// @typedef struct app_cfg_s app_cfg_t
 /// @brief application configuration parameter structure
