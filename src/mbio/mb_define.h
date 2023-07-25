@@ -377,6 +377,7 @@ int mb_fileio_open(int verbose, void *mbio_ptr, int *error);
 int mb_fileio_close(int verbose, void *mbio_ptr, int *error);
 int mb_fileio_get(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *error);
 int mb_fileio_put(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *error);
+int mb_copyfile(int verbose, const char *src, const char *dst, int *error);
 int mb_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mb_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mb_get_store(int verbose, void *mbio_ptr, void **store_ptr, int *error);
