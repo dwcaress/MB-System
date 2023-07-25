@@ -532,10 +532,10 @@ s=NULL;\
 #define CFG_FORMAT_DFL            -1
 #define CFG_OUTPUT_FILE_DFL       "stdout"
 #define CFG_LOG_DIRECTORY_DFL     "."
-#define CFG_SOCKET_DEFINITION_DFL "socket:TRN_RESON_HOST:7000:0"
+#define CFG_SOCKET_DEFINITION_DFL "socket:TRN_SOURCE_HOST:7000:0"
 //#define CFG_INPUT_DFL          "socket:localhost:7000:0"
 #define CFG_MNEM_SESSION       "SESSION"
-#define CFG_MNEM_TRN_RESON_HOST         "TRN_RESON_HOST"
+#define CFG_MNEM_TRN_SOURCE_HOST "TRN_SOURCE_HOST"
 #define CFG_MNEM_TRN_HOST      "TRN_HOST"
 #define CFG_MNEM_TRN_SESSION   "TRN_SESSION"
 #define CFG_MNEM_TRN_LOGFILES  "TRN_LOGFILES"
@@ -610,7 +610,7 @@ s=NULL;\
 #define MBSYSOUT_OPT_N 8
 #define TRNOUT_OPT_N 16
 #define SONAR_READER_CAPACITY_DFL (256 * 1024)
-#define SESSION_BUF_LEN 16
+#define SESSION_BUF_LEN 32
 #define TRNSESSION_BUF_LEN 9
 
 #define SONAR_SIM_HOST "localhost"
@@ -1043,7 +1043,7 @@ static char *s_mbtrnpp_session_str(char **pdest, size_t len, mb_resource_flag_t 
     if(!initialized || ((flags&RF_FORCE_UPDATE)!=0)){
         initialized=true;
         // format YYYYMMDD-HHMMSS
-        sprintf(session_date, "%04d%02d%02d-%02d%02d%02d", (gmt->tm_year + 1900), gmt->tm_mon + 1, gmt->tm_mday, gmt->tm_hour,
+        snprintf(session_date, SESSION_BUF_LEN, "%04d%02d%02d-%02d%02d%02d", (gmt->tm_year + 1900), gmt->tm_mon + 1, gmt->tm_mday, gmt->tm_hour,
                 gmt->tm_min, gmt->tm_sec);
     }
 
@@ -1125,7 +1125,7 @@ char *s_mnem_value(char **pdest, size_t len, const char *key)
         char *val=NULL;
         char *alt=NULL;
 
-        if(strcmp(key,CFG_MNEM_TRN_RESON_HOST)==0){
+        if(strcmp(key,CFG_MNEM_TRN_SOURCE_HOST)==0){
             val=CHK_STRDUP(getenv(key));
             if(NULL==val){
                 // if unset, use local IP
@@ -1310,7 +1310,7 @@ char *s_sub_mnem(char **pdest, size_t len, char *src,const char *pkey,const char
 static int s_test_mnem()
 {
     char *opt_session = strdup("test_session-SESSION--");
-    char *opt_rhost=strdup("test_rhost-RESON_HOST--");
+    char *opt_trnsrchost=strdup("test_trnsrchost-TRN_SOURCE_HOST--");
     char *opt_trnhost=strdup("test_trnhost-TRN_HOST--");
     char *opt_trnsession = strdup("test_trnsession-TRN_SESSION--");
     char *opt_trnlog = strdup("test_trnlog-TRN_LOGFILES--");
@@ -1322,7 +1322,7 @@ static int s_test_mnem()
     char *val=NULL;
     s_sub_mnem(&opt_session,0,opt_session,CFG_MNEM_SESSION,s_mnem_value(&val,0,CFG_MNEM_SESSION));
     MEM_CHKINVALIDATE(val);
-    s_sub_mnem(&opt_rhost,0,opt_rhost,CFG_MNEM_TRN_RESON_HOST,s_mnem_value(&val,0,CFG_MNEM_TRN_RESON_HOST));
+    s_sub_mnem(&opt_trnsrchost,0,opt_trnsrchost,CFG_MNEM_TRN_SOURCE_HOST,s_mnem_value(&val,0,CFG_MNEM_TRN_SOURCE_HOST));
     MEM_CHKINVALIDATE(val);
     s_sub_mnem(&opt_trnhost,0,opt_trnhost,CFG_MNEM_TRN_HOST,s_mnem_value(&val,0,CFG_MNEM_TRN_HOST));
     MEM_CHKINVALIDATE(val);
@@ -1340,7 +1340,7 @@ static int s_test_mnem()
     MEM_CHKINVALIDATE(val);
 
     fprintf(stderr,"%s:%d - opt_session    [%s]\n",__func__,__LINE__,opt_session);
-    fprintf(stderr,"%s:%d - opt_rhost      [%s]\n",__func__,__LINE__,opt_rhost);
+    fprintf(stderr,"%s:%d - opt_trnsrchost [%s]\n",__func__,__LINE__,opt_trnsrchost);
     fprintf(stderr,"%s:%d - opt_trnhost    [%s]\n",__func__,__LINE__,opt_trnhost);
     fprintf(stderr,"%s:%d - opt_trnsession [%s]\n",__func__,__LINE__,opt_trnsession);
     fprintf(stderr,"%s:%d - opt_trnlog     [%s]\n",__func__,__LINE__,opt_trnlog);
@@ -1349,7 +1349,7 @@ static int s_test_mnem()
     fprintf(stderr,"%s:%d - opt_trncfg     [%s]\n",__func__,__LINE__,opt_trncfg);
 
     MEM_CHKFREE(opt_session);
-    MEM_CHKFREE(opt_rhost);
+    MEM_CHKFREE(opt_trnsrchost);
     MEM_CHKFREE(opt_trnhost);
     MEM_CHKFREE(opt_trnsession);
     MEM_CHKFREE(opt_trnlog);
@@ -1616,8 +1616,8 @@ static int s_mbtrnpp_cfgstr(char **pdest, size_t olen, mbtrnpp_cfg_t *self, cons
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "trn_decs", sep, wval, self->trn_decs, del);
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "covariance_magnitude_max", sep, wval, self->covariance_magnitude_max, del);
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "convergence_repeat_min", sep, wval, self->convergence_repeat_min, del);
-//    mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "reinit_search_xy", sep, wval, self->reinit_search_xy, del);
-//    mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "reinit_search_z", sep, wval, self->reinit_search_z, del);
+    mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "reinit_search_xy", sep, wval, self->reinit_search_xy, del);
+    mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "reinit_search_z", sep, wval, self->reinit_search_z, del);
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "reinit_gain_enable", sep, wval, BOOL2YNC(self->reinit_gain_enable), del);
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "reinit_file_enable", sep, wval, BOOL2YNC(self->reinit_file_enable), del);
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "reinit_xyoffset_enable", sep, wval, BOOL2YNC(self->reinit_xyoffset_enable), del);
@@ -1839,9 +1839,10 @@ static int s_parse_opt_output(mbtrnpp_cfg_t *cfg, char *opt_str)
         }
         free(ocopy);
 
-        if (strlen(cfg->output_mb1_file) > 4
-            && strncmp(&(cfg->output_mb1_file[strlen(cfg->output_mb1_file)-4]), ".mb1", 4) == 0) {
-          strncpy(cfg->output_trn_file, cfg->output_mb1_file, strlen(cfg->output_mb1_file)-4);
+        int flen = strlen(cfg->output_mb1_file);
+        if (flen > 4 && MB_PATH_SIZE > (flen-4 + strlen("_trn.txt")+1)
+            && strncmp(&(cfg->output_mb1_file[flen-4]), ".mb1", 4) == 0) {
+          snprintf(cfg->output_trn_file, flen-4, "%s", cfg->output_mb1_file );
           strcat(cfg->output_trn_file, "_trn.txt");
 
         }
@@ -2113,8 +2114,12 @@ static int s_parse_opt_logdir(mbtrnpp_cfg_t *cfg, char *opt_str)
             remove("mbtrnpp-latest");
             fprintf(stderr, "Delete old symlink mbtrnpp-latest\n");
         }
-        symlink(cfg->log_directory, "mbtrnpp-latest");
+        int test = symlink(cfg->log_directory, "mbtrnpp-latest");
+        if(test == 0)
         fprintf(stderr, "Create symlink mbtrnpp-latest->%s\n", cfg->log_directory);
+        else
+        fprintf(stderr, "Create symlink failed %s\n", cfg->log_directory);
+
         if(NULL==cfg->trn_log_dir){
             MEM_CHKINVALIDATE(cfg->trn_log_dir);
             cfg->trn_log_dir=strdup(CFG_TRN_LOG_DIR_DFL);
@@ -2484,7 +2489,7 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
 
         // perform mnemonic substitutions
         char *mval=NULL;
-        s_sub_mnem(&opts->input,0,opts->input,CFG_MNEM_TRN_RESON_HOST,s_mnem_value(&mval,0,CFG_MNEM_TRN_RESON_HOST));
+        s_sub_mnem(&opts->input,0,opts->input,CFG_MNEM_TRN_SOURCE_HOST,s_mnem_value(&mval,0,CFG_MNEM_TRN_SOURCE_HOST));
         MEM_CHKINVALIDATE(mval);
         s_sub_mnem(&opts->output,0,opts->output,CFG_MNEM_SESSION,s_mnem_value(&mval,0,CFG_MNEM_SESSION));
         MEM_CHKINVALIDATE(mval);
@@ -4241,6 +4246,7 @@ int main(int argc, char **argv) {
                     reinit_flag = false;
                     n_reinit++;
                     n_reinit_since_use++;
+                    reinit_time = ping[i_ping_process].time_d;
                   }
 
                   MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_PROC_TRN_XT], mtime_dtime());
@@ -5533,6 +5539,7 @@ int s_mbtrnpp_trnu_reset_callback()
 //    reinit_flag = false;
     n_reinit++;
     n_reinit_since_use++;
+    reinit_time = reset_time;
 
     int reinit_post=wtnav_get_num_reinits(trn_instance);
 
@@ -5572,6 +5579,7 @@ int s_mbtrnpp_trnu_reset_ofs_callback(double ofs_x, double ofs_y, double ofs_z)
     //    reinit_flag = false;
     n_reinit++;
     n_reinit_since_use++;
+    reinit_time = reset_time;
 
     int reinit_post=wtnav_get_num_reinits(trn_instance);
 
@@ -5603,7 +5611,7 @@ int s_mbtrnpp_trnu_reset_box_callback(double ofs_x, double ofs_y, double ofs_z, 
     //    reinit_flag = false;
     n_reinit++;
     n_reinit_since_use++;
-
+    reinit_time = reset_time;
     int reinit_post=wtnav_get_num_reinits(trn_instance);
 
     if(reinit_post<=reinits_pre){
@@ -6065,8 +6073,8 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
 
                             pstate->reinit_count = wtnav_get_num_reinits(tnav);
                             pstate->filter_state = wtnav_get_filter_state(tnav);
-                            pstate->is_converged = (wtnav_is_converged(tnav) ? 1 : 0);
-                            pstate->is_valid = use_trn_offset;
+                            pstate->is_converged = (converged ? 1 : 0);
+                            pstate->is_valid = (use_trn_offset ? 1 : 0);
                             // pstate->is_valid = ( (mb1->ts > 0. &&
                             //                       pstate->mse_dat->covariance[0] <= cfg->max_northing_cov &&
                             //                       pstate->mse_dat->covariance[2] <= cfg->max_easting_cov &&

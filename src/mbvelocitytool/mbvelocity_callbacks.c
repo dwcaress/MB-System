@@ -90,7 +90,7 @@ XFontStruct *fontStruct;
 
 int status;
 
-static mb_path message_str;
+static char message_str[2048];
 static mb_path input_file;
 int selected = 0; /* indicates an input file is selected */
 
@@ -129,7 +129,7 @@ int open_type = MBVT_IO_NONE;
 /* area, minus 1, located in mbvelocity.uil.              */
 static int borders[4] = {0, 1019, 0, 550};
 
-void do_fileselection_list();
+void do_fileselection_list(Widget w, XtPointer client_data, XtPointer call_data);
 void set_label_string(Widget, String);
 void set_label_multiline_string(Widget, String);
 void get_text_string(Widget, String);

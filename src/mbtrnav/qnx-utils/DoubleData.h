@@ -19,7 +19,7 @@
 #include "DataField.h"
 
 #define DoubleTypeMnem "double"
-
+#define DBLDATA_ASCII_BUFFER_BYTES 32
 
 /*
 CLASS 
@@ -71,7 +71,7 @@ public:
 protected:
 
   double _value;
-  char _asciiBuffer[32];
+  char _asciiBuffer[DBLDATA_ASCII_BUFFER_BYTES];
 };
 
 

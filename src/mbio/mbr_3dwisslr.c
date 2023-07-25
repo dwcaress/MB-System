@@ -852,7 +852,7 @@ int mbr_3dwisslr_index_data
 #endif
     qsort((void *)mb_io_ptr->indextable, mb_io_ptr->num_indextable,
       sizeof(struct mb_io_indextable_struct), (void *)mbr_3dwisslr_indextable_compare);
-    for (int i = 0; i < mb_io_ptr->num_indextable; i++)
+    for (unsigned int i = 0; i < mb_io_ptr->num_indextable; i++)
       mb_io_ptr->indextable[i].total_index_sorted = i;
 
 #ifdef MBF_3DWISSLR_DEBUG
@@ -931,7 +931,7 @@ int mbr_3dwisslr_rd_data
   /* find next unread record in the file index table */
   bool found = false;
   int irecord = 0;
-  for (int i = 0; i < mb_io_ptr->num_indextable && !found; i++)
+  for (unsigned int i = 0; i < mb_io_ptr->num_indextable && !found; i++)
     if (!mb_io_ptr->indextable[i].read)
       {
       found = true;

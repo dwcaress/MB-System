@@ -29,13 +29,13 @@ While not strictly required, using the wrapper script ensures that mbtrnpp is re
   -e path : environment file
   -h      : print use message
   -G addr : TRN UDP multicast group [239.255.0.16]
-  -D path : TRN config directory    [/Volumes/wdcs/20210617m2/config]
-  -L path : TRN log directory       [/Volumes/wdcs/20210617m2/logs/mbtrnpp]
-  -M path : TRN maps directory      [/Volumes/wdcs/20210617m2/maps]
+  -D path : TRN config directory    [/Volumes/linux-share/config]
+  -L path : TRN log directory       [/Volumes/linux-share/git/mbsys-trn/MB-System/test/feature.initvars/logs]
+  -M path : TRN maps directory      [/Volumes/linux-share/maps]
   -m path : override mbtrnpp dir    [/Volumes/linux-share/git/mbsys-trn/MB-System/src/mbtrnutils]
-  -o addr : TRN host                [134.89.13.166]
+  -o addr : TRN host                [192.168.1.101]
              affects : [--trn-out, --mb-out]
-  -r addr : TRN reson host          [134.89.32.107]
+  -s addr : TRN source host         [localhost]
              affects: [--input]
   -t      : test [print cmdline]
   -v      : verbose output         [N]
@@ -55,13 +55,13 @@ While not strictly required, using the wrapper script ensures that mbtrnpp is re
   mbtrnpp.sh -e /path/to/environment/file -- --config=/path/to/config/file [options...] --help
 
  Environment variables:
-  TRN_MAPFILES   - TRN map directory       [--trn-maps]
-  TRN_DATAFILES  - TRN config directory    [--trn-cfg, --trn-par]
-  TRN_LOGFILES   - TRN log directory       [--trn-log]
-  TRN_RESON_HOST - TRN reson (or emu7k) IP [--input]
-  TRN_HOST       - TRN server IP           [--trn-out, --mb-out]
-  TRN_GROUP      - TRN multicast group     [--trn-out]
-  TRN_MBTRNDIR   - mbtrnpp directory       [mbtrnpp path]
+  TRN_MAPFILES    - TRN map directory       [--trn-maps]
+  TRN_DATAFILES   - TRN config directory    [--trn-cfg, --trn-par]
+  TRN_LOGFILES    - TRN log directory       [--trn-log]
+  TRN_SOURCE_HOST - TRN source IP           [--input]
+  TRN_HOST        - TRN server IP           [--trn-out, --mb-out]
+  TRN_GROUP       - TRN multicast group     [--trn-out]
+  TRN_MBTRNDIR    - mbtrnpp directory       [mbtrnpp path]
 
 ```
 

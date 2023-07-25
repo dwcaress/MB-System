@@ -199,7 +199,7 @@ libmb1_la_OBJECTS = $(am_libmb1_la_OBJECTS)
 libmb1_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libmb1_la_LDFLAGS) $(LDFLAGS) -o $@
-libnetif_la_DEPENDENCIES = $(LIBMFRAME) libtrnw.la
+libnetif_la_DEPENDENCIES = $(LIBMBTRNFRAME) libtrnw.la
 am_libnetif_la_OBJECTS = trnw/netif.lo trnw/trnif_proto.lo
 libnetif_la_OBJECTS = $(am_libnetif_la_OBJECTS)
 libnetif_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
@@ -233,7 +233,9 @@ libqnx_la_OBJECTS = $(am_libqnx_la_OBJECTS)
 libqnx_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(libqnx_la_LDFLAGS) $(LDFLAGS) -o $@
-libtnav_la_DEPENDENCIES = libgeolib.la libnewmat.la libqnx.la
+am__DEPENDENCIES_1 =
+libtnav_la_DEPENDENCIES = libgeolib.la libnewmat.la libqnx.la \
+	$(am__DEPENDENCIES_1)
 am_libtnav_la_OBJECTS = terrain-nav/TerrainNav.lo \
 	terrain-nav/TNavConfig.lo terrain-nav/TNavFilter.lo \
 	terrain-nav/TNavPointMassFilter.lo \
@@ -258,19 +260,19 @@ libtrnw_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(CXXFLAGS) $(libtrnw_la_LDFLAGS) $(LDFLAGS) -o $@
 am_mb1rs_OBJECTS = trnw/mb1rs.$(OBJEXT) trnw/mb1rs-app.$(OBJEXT)
 mb1rs_OBJECTS = $(am_mb1rs_OBJECTS)
-mb1rs_DEPENDENCIES = $(LIBMFRAME) libmb1.la
+mb1rs_DEPENDENCIES = $(LIBMBTRNFRAME) libmb1.la
 am_mmcpub_OBJECTS = trnw/mmcpub.$(OBJEXT)
 mmcpub_OBJECTS = $(am_mmcpub_OBJECTS)
-mmcpub_DEPENDENCIES = $(LIBMFRAME)
+mmcpub_DEPENDENCIES = $(LIBMBTRNFRAME)
 am_mmcsub_OBJECTS = trnw/mmcsub.$(OBJEXT)
 mmcsub_OBJECTS = $(am_mmcsub_OBJECTS)
-mmcsub_DEPENDENCIES = $(LIBMFRAME)
+mmcsub_DEPENDENCIES = $(LIBMBTRNFRAME)
 am_netif_test_OBJECTS = utils/netif-test.$(OBJEXT)
 netif_test_OBJECTS = $(am_netif_test_OBJECTS)
 netif_test_DEPENDENCIES = libnetif.la libtrnw.la
 am_trn_cli_OBJECTS = trnw/trncli_test.$(OBJEXT) trnw/trn_cli.$(OBJEXT)
 trn_cli_OBJECTS = $(am_trn_cli_OBJECTS)
-trn_cli_DEPENDENCIES = $(LIBMFRAME) libtrnw.la
+trn_cli_DEPENDENCIES = $(LIBMBTRNFRAME) libtrnw.la
 am_trn_replay_OBJECTS = opt/dorado/Replay.$(OBJEXT) \
 	opt/dorado/trn_replay.$(OBJEXT) \
 	utils/TerrainNavClient.$(OBJEXT)
@@ -286,10 +288,10 @@ trnclient_test_OBJECTS = $(am_trnclient_test_OBJECTS)
 trnclient_test_DEPENDENCIES = libtnav.la libnewmat.la
 am_trnif_test_OBJECTS = trnw/trnif_test.$(OBJEXT)
 trnif_test_OBJECTS = $(am_trnif_test_OBJECTS)
-trnif_test_DEPENDENCIES = $(LIBMFRAME) libnetif.la libtrnw.la
+trnif_test_DEPENDENCIES = $(LIBMBTRNFRAME) libnetif.la libtrnw.la
 am_trnifsvr_test_OBJECTS = utils/trnifsvr-test.$(OBJEXT)
 trnifsvr_test_OBJECTS = $(am_trnifsvr_test_OBJECTS)
-trnifsvr_test_DEPENDENCIES = $(LIBMFRAME) libnetif.la libtrnw.la
+trnifsvr_test_DEPENDENCIES = $(LIBMBTRNFRAME) libnetif.la libtrnw.la
 am_trnlog_player_OBJECTS = utils/trnlog_player.$(OBJEXT) \
 	utils/TrnClient.$(OBJEXT) utils/TerrainNavClient.$(OBJEXT)
 trnlog_player_OBJECTS = $(am_trnlog_player_OBJECTS)
@@ -297,10 +299,10 @@ trnlog_player_DEPENDENCIES = libtnav.la libnewmat.la
 am_trnu_cli_OBJECTS = trnw/trnucli_test.$(OBJEXT) \
 	trnw/trnu_cli.$(OBJEXT)
 trnu_cli_OBJECTS = $(am_trnu_cli_OBJECTS)
-trnu_cli_DEPENDENCIES = $(LIBMFRAME) libtrnw.la libnetif.la
+trnu_cli_DEPENDENCIES = $(LIBMBTRNFRAME) libtrnw.la libnetif.la
 am_trnusvr_test_OBJECTS = trnw/trnusvr_test.$(OBJEXT)
 trnusvr_test_OBJECTS = $(am_trnusvr_test_OBJECTS)
-trnusvr_test_DEPENDENCIES = $(LIBMFRAME) libnetif.la libtrnw.la
+trnusvr_test_DEPENDENCIES = $(LIBMBTRNFRAME) libnetif.la libtrnw.la
 @BUILD_ROVTRN_TRUE@am_trnxpp_OBJECTS = opt/rov/udpm_sub.$(OBJEXT) \
 @BUILD_ROVTRN_TRUE@	opt/rov/trnxpp_app.$(OBJEXT) \
 @BUILD_ROVTRN_TRUE@	utils/TrnClient.$(OBJEXT) \
@@ -572,6 +574,7 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
+FILECMD = @FILECMD@
 GDAL_CONF = @GDAL_CONF@
 GMT_CONF = @GMT_CONF@
 GMT_PLUGINDIR = @GMT_PLUGINDIR@
@@ -748,8 +751,8 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 lib_LTLIBRARIES = libgeolib.la libnewmat.la libqnx.la libtnav.la libtrnw.la libnetif.la libmb1.la
-LIBMFRAME = $(top_builddir)/src/mbtrnframe/libmframe.la
-MFRAME_INC = -I${top_srcdir}/src/mbtrnframe/usr -I${top_srcdir}/src/mbtrnframe/mframe/src 
+LIBMBTRNFRAME = $(top_builddir)/src/mbtrnframe/libmbtrnframe.la
+MBTRNFRAME_INC = -I${top_srcdir}/src/mbtrnframe
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 #AM_CPPFLAGS += -DWITH_ALT_DELTAT_VALIDATION
 AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrnav/trnw \
@@ -760,10 +763,10 @@ AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrnav/trnw \
 	-I${top_srcdir}/src/mbtrnav/gctp/source \
 	-I${top_srcdir}/src/mbtrnav/opt/rov \
 	-I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mb1r \
-	-I${top_srcdir}/src/mbtrnframe/usr \
-	-I${top_srcdir}/src/mbtrnframe/mframe/src -DHAVE_CONFIG_H \
-	-DWITH_TESTS -DWITH_MMDEBUG -D_GNU_SOURCE -DWITH_MST_MSTATS \
-	-DMST_STATS_EN -DWITH_TRNLOG -DWITH_TRNLOG_EST_OUT
+	-I${top_srcdir}/src/mbtrnframe ${libnetcdf_CPPFLAGS} \
+	-DHAVE_CONFIG_H -DWITH_TESTS -DWITH_MMDEBUG -D_GNU_SOURCE \
+	-DWITH_MST_MSTATS -DMST_STATS_EN -DWITH_TNAVPF_CEP_CORRECTION \
+	-DWITH_TRNLOG -DWITH_TRNLOG_EST_OUT
 #AM_CPPFLAGS += -DTRN_NORAND
 libgeolib_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libgeolib_la_SOURCES = gctp/source/gctp.c gctp/source/alberfor.c \
@@ -833,14 +836,14 @@ libtnav_la_SOURCES = terrain-nav/TerrainNav.cpp \
 	terrain-nav/matrixArrayCalcs.cpp terrain-nav/TerrainMapDEM.cpp \
 	terrain-nav/OctreeSupport.cpp terrain-nav/Octree.cpp \
 	terrain-nav/OctreeNode.cpp terrain-nav/TRNUtils.cpp
-libtnav_la_LIBADD = libgeolib.la libnewmat.la libqnx.la -lm -lnetcdf \
-	-lpthread
+libtnav_la_LIBADD = libgeolib.la libnewmat.la libqnx.la \
+	${libnetcdf_LIBS} -lm -lpthread
 libtrnw_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libtrnw_la_SOURCES = trnw/trnw.cpp trnw/mb1_msg.c trnw/trnif_msg.c
 libtrnw_la_LIBADD = libtnav.la libqnx.la libnewmat.la -lm -lpthread
 libnetif_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libnetif_la_SOURCES = trnw/netif.c trnw/trnif_proto.c
-libnetif_la_LIBADD = ${LIBMFRAME} libtrnw.la -lm -lpthread
+libnetif_la_LIBADD = ${LIBMBTRNFRAME} libtrnw.la -lm -lpthread
 libmb1_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmb1_la_SOURCES = trnw/mb1_msg.c
 libmb1_la_LIBADD = 
@@ -910,23 +913,23 @@ trn_replay_LDADD = -ltnav  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeolib
 trnclient_test_SOURCES = utils/trnclient_test.cpp utils/TrnClient.cpp utils/TerrainNavClient.cpp
 trnclient_test_LDADD = libtnav.la libnewmat.la
 mmcpub_SOURCES = trnw/mmcpub.c
-mmcpub_LDADD = ${LIBMFRAME}
+mmcpub_LDADD = ${LIBMBTRNFRAME}
 mmcsub_SOURCES = trnw/mmcsub.c
-mmcsub_LDADD = ${LIBMFRAME}
+mmcsub_LDADD = ${LIBMBTRNFRAME}
 trnu_cli_SOURCES = trnw/trnucli_test.c trnw/trnu_cli.c
-trnu_cli_LDADD = ${LIBMFRAME} libtrnw.la libnetif.la
+trnu_cli_LDADD = ${LIBMBTRNFRAME} libtrnw.la libnetif.la
 trn_cli_SOURCES = trnw/trncli_test.c trnw/trn_cli.c
-trn_cli_LDADD = ${LIBMFRAME} libtrnw.la
+trn_cli_LDADD = ${LIBMBTRNFRAME} libtrnw.la
 trnif_test_SOURCES = trnw/trnif_test.c
-trnif_test_LDADD = ${LIBMFRAME} libnetif.la  libtrnw.la
+trnif_test_LDADD = ${LIBMBTRNFRAME} libnetif.la  libtrnw.la
 trnusvr_test_SOURCES = trnw/trnusvr_test.c
-trnusvr_test_LDADD = ${LIBMFRAME} libnetif.la libtrnw.la
+trnusvr_test_LDADD = ${LIBMBTRNFRAME} libnetif.la libtrnw.la
 netif_test_SOURCES = utils/netif-test.c
 netif_test_LDADD = libnetif.la  libtrnw.la
 trnifsvr_test_SOURCES = utils/trnifsvr-test.c
-trnifsvr_test_LDADD = ${LIBMFRAME} libnetif.la  libtrnw.la
+trnifsvr_test_LDADD = ${LIBMBTRNFRAME} libnetif.la  libtrnw.la
 mb1rs_SOURCES = trnw/mb1rs.c trnw/mb1rs-app.c
-mb1rs_LDADD = ${LIBMFRAME} libmb1.la
+mb1rs_LDADD = ${LIBMBTRNFRAME} libmb1.la
 trnlog_player_SOURCES = utils/trnlog_player.cpp utils/TrnClient.cpp utils/TerrainNavClient.cpp
 trnlog_player_LDADD = libtnav.la libnewmat.la
 dist_bin_SCRIPTS = 

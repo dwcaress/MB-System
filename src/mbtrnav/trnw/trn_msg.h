@@ -66,8 +66,14 @@
 /////////////////////////
 // Includes
 /////////////////////////
-#include "trn_common.h"
+// use older ifdef with headers for QNX makedep compatibility
+#ifdef __QNX__
+#include <sys/types.h>
+#endif
+#if defined (__UNIX__) || defined (__unix__) || defined (__APPLE__)
 #include <stdint.h>
+#endif
+#include "trn_common.h"
 
 /////////////////////////
 // Macros
@@ -407,11 +413,7 @@ typedef struct mt_cdata_s{
     double* alongTrack;
     double* altitudes;
     double* alphas;
-#if defined(__QNX__)
-    Boolean* measStatus;
-#else
     bool* measStatus;
-#endif
     // For use in sensors that vary the number of beams (e.g., MB-system)
     int* beamNums;
 }mt_cdata_t;

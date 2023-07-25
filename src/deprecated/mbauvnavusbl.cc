@@ -536,7 +536,8 @@ int main(int argc, char **argv) {
 
 		/* write out the adjusted navigation */
 		mb_get_date(verbose, ntime[i], time_i);
-		sprintf(buffer, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f %.2f %.2f %.2f\n", time_i[0],
+		snprintf(buffer, sizeof(buffer),
+            "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f %.2f %.2f %.2f\n", time_i[0],
 		        time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], ntime[i], nlon[i], nlat[i], nheading[i],
 		        nspeed[i], nsonardepth[i], nroll[i], npitch[i], nheave[i]);
 		if (fputs(buffer, fp) == EOF) {

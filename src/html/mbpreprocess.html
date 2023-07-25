@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbpreprocess</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  3 January 2021 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  5 November 2022 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -236,6 +236,9 @@ Version 5.0
 <BR>
 
 <B>--kluge-ignore-snippets</B>
+<BR>
+
+<B>--kluge-sonardepth-from-heave</B>
 <BR>
 
 ]
@@ -1071,6 +1074,7 @@ to the origin for a dual head lidar system. The only relevant formats are for
 <DT><B>--kluge-zero-alongtrack-angles</B>
 
 <DD>
+This option zeroes alongtrack angles used to calculated bathymetry.
 <DT><B>--kluge-fix-wissl-timestamps</B>
 
 <DD>
@@ -1083,6 +1087,13 @@ The i/o module for this format views pings without snippet records as incomplete
 When <B>--kluge-ignore-snippets</B> is specified, <B>mbpreprocess</B> creates an empty
 snippet record for each ping, and ignores any snippet records actually in the
 input datastream.
+<DT><B>--kluge-sonardepth-from-heave</B>
+
+<DD>
+This option causes heave values to be moved to the sonardepth (sometimes sensordepth)
+field, leaving the heave value as zero, for each survey ping. This is currently
+only relevant to the preprocessing of Imagenex DeltaT multibeam data in the vendor
+83P format (191). The output of preprocessing format 191 data are format 192 files.
 <P>
 </DL>
 <A NAME="lbAH">&nbsp;</A>
@@ -1118,7 +1129,7 @@ Oh yeah.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 3 January 2021</P></CENTER>
+Last Updated: 5 November 2022</P></CENTER>
 
 <HR>
 <center>

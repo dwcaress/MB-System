@@ -219,8 +219,9 @@
 #include "mb_format.h"
 #include "mb_define.h"
 
-// include gmt_def.h but first undefine PACKAGE variables to prevent
-// warnings about name collision between GDAL's cpl_port.h and mb_config.h
+// include gmt_dev.h but first undefine PACKAGE variables to prevent
+// warnings about name collision between GDAL's cpl_port.h and the 
+// Autotools build system mb_config.hmb_config.h
 #ifdef PACKAGE_BUGREPORT
 #undef PACKAGE_BUGREPORT
 #endif

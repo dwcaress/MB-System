@@ -37,8 +37,9 @@ $program_name = "mbm_makedatalist";
 
 # Deal with command line arguments
 $command_line = "@ARGV";
-&MBGetopts('HhF:f:I:i:LlO:o:PpS:s:TtVv');
+&MBGetopts('HhB:b:F:f:I:i:LlO:o:PpS:s:TtVv');
 
+$size_threshold =      ($opt_B || $opt_b || 0);
 $format_specified =    ($opt_F || $opt_f);
 $help =                ($opt_H || $opt_h);
 $directory =           ($opt_I || $opt_i);
@@ -66,7 +67,7 @@ if ($help) {
   print "directives that, for example, determine whether parsing returns references to\n";
   print "raw or processed data files. See the \fBMB-System\fP  manual page for details\n";
   print "on the format and structure of datalists.  \n";
-  print "\nBasic Usage:\n\tmbm_makedatalist [-Fformat -Idirectory -L -Odatalist -P -Ssuffix -T -H -V]\n";
+  print "\nBasic Usage:\n\tmbm_makedatalist [-Bsize -Fformat -Idirectory -L -Odatalist -P -Ssuffix -T -H -V]\n";
   exit 0;
 }
 
@@ -123,18 +124,25 @@ if ($directory) {
 }
 
 if ($ignoreprocessed && $suffix) {
-    @filelist = `/bin/ls -1 $lsarg | grep -v p$suffix`;
+    @filelistraw = `/bin/ls -1 -s $lsarg | grep -v p$suffix`;
 } else {
-    @filelist = `/bin/ls -1 $lsarg`;
+    @filelistraw = `/bin/ls -1 -s $lsarg`;
+}
+
+$size_threshold = 2 * $size_threshold;
+foreach $line (@filelistraw) {
+  ($size, $file) = $line =~ /(\S+)\s+(\S+)/;
+  if ($size >= $size_threshold) {
+    push(@filelist, $file);
+  }
 }
 
 # loop over the list of files counting identifiable swath files
 $count = 0;
 foreach $file (@filelist) {
-  chop $file;
   if ($format_specified) {
-        $format = $format_specified;
-    } else {
+    $format = $format_specified;
+  } else {
     $format = `mbformat -L -I $file`;
     chop $format;
   }
@@ -142,23 +150,35 @@ foreach $file (@filelist) {
   if (($suffix eq ".all" || $suffix eq ".ALL")
       && ($file eq "9999.all" || $file eq "9999.ALL")) {
 print "File ignored:   file:$file format:$format\n";
-} elsif ($format != 0 && ($file ne $datalist || $directory ne ".")) {
+  } elsif ($format != 0 && ($file ne $datalist || $directory ne ".")) {
     $count++;
     push(@outfilelist, $file);
     push(@outformatlist, $format);
-print "Adding to list: file:$file format:$format\n";
+    if ($verbose) {
+      print "Adding to list: file:$file format:$format\n";
+    }
   }
 }
 
 # If the suffix is *.all and -T is specified, attempt to time order the filenames
 if (($suffix eq ".all" || $suffix eq ".ALL" || $suffix eq ".mb56"
-     || $suffix eq ".mb57" || $suffix eq ".mb58" || $suffix eq ".mb59")
+     || $suffix eq ".mb57" || $suffix eq ".mb58" || $suffix eq ".mb59"
+     || $suffix eq ".kmall" || $suffix eq ".KMALL" || $suffix eq ".mb261")
         && !$disablesorting) {
-  # loop over the list of files
+  # Loop over the list of files
+  # Some Kongsberg SIS files look like 0124_20100908_191912_Healy.all with the
+  # timestamp to seconds and others are like 0250_20220620_2201_sentrye.kmall
+  # with the timestamp to minutes. The $case variable keeps track of which is
+  # present
+  $case = 0;
   for ($i = 0; $i < scalar(@outfilelist); $i++) {
     $file = $outfilelist[$i];
     $format = $outformatlist[$i];
     ($start, $yyyymmdd, $hhmmss, $end) = $file =~ /(\d{4})_(\d{8})_(\d{6})(\S+)/;
+    if ($yyyymmdd == "" || $hhmmss == "") {
+      ($start, $yyyymmdd, $hhmmss, $end) = $file =~ /(\d+)_(\d+)_(\d+)_(\S+)/;
+      $case = 1;
+    }
     $tmpname = $yyyymmdd . "^" . $hhmmss . "^" . $start . "^" . $end . "^" . $i . "^" . $format;
     push(@sortfilelist, $tmpname);
     $count++;
@@ -166,15 +186,19 @@ if (($suffix eq ".all" || $suffix eq ".ALL" || $suffix eq ".mb56"
   @sortedfilelist = sort @sortfilelist;
     $ii = 0;
   foreach $tmpname (@sortedfilelist) {
-    ($yyyymmdd, $hhmmss, $start, $end, $i, $format) = $tmpname =~ /(\d{8})\^(\d{6})\^(\d{4})\^(\S+)\^(\S+)\^(\S+)/;
-    $file = $start . "_" . $yyyymmdd . "_" . $hhmmss . $end;
-        if ($directory) {
-            $outfilelist[$ii] = "$directory/$file";
-        } else {
-            $outfilelist[$ii] = $file;
-        }
+    ($yyyymmdd, $hhmmss, $start, $end, $i, $format) = $tmpname =~ /(\d+)\^(\d+)\^(\d+)\^(\S+)\^(\S+)\^(\S+)/;
+    if ($case == 0) {
+      $file = $start . "_" . $yyyymmdd . "_" . $hhmmss . $end;
+    } else {
+      $file = $start . "_" . $yyyymmdd . "_" . $hhmmss . "_" . $end;
+    }
+    if ($directory) {
+        $outfilelist[$ii] = "$directory/$file";
+    } else {
+        $outfilelist[$ii] = $file;
+    }
     $outformatlist[$ii] = $format;
-        $ii++;
+    $ii++;
   }
 }
 

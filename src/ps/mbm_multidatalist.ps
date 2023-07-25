@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:02 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:09 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 3
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -232,10 +238,10 @@ BP
 /F0 10/Times-Roman@0 SF 112.6(mbm_multidatalist\(1\) MB-System)72 48 R
 112.6(5.0 mbm_multidatalist\(1\))2.5 F/F1 10.95/Times-Bold@0 SF -.219
 (NA)72 84 S(ME).219 E/F2 10/Times-Bold@0 SF(mbm_multidatalist)108 96 Q
-F0 4.078<ad4d>4.078 G 1.577(acro to use mbdatalist with the)-4.078 F F2
-<ad4f>4.077 E F0 1.577(option to generate standard ancillary \214les,)
-4.077 F(using parallel processes.)108 108 Q F1(VERSION)72 136.8 Q F0
--1.11(Ve)108 148.8 S(rsion 5.0)1.11 E F1(SYNOPSIS)72 177.6 Q F2
+F0 2.991<ad4d>2.991 G .491(acro to use mbdatalist with the)-2.991 F F2
+<ad4f>2.991 E F0 .49(option to generate standard ancillary \214les, us-)
+2.991 F(ing parallel processes.)108 108 Q F1(VERSION)72 136.8 Q F0 -1.11
+(Ve)108 148.8 S(rsion 5.0)1.11 E F1(SYNOPSIS)72 177.6 Q F2
 (mbm_multidatalist \255I)108 189.6 Q/F3 10/Times-Italic@0 SF(datalist)A
 F0([)2.5 E F2<ad58>A F3(npr)A(ocesses)-.45 E F0([)2.5 E F2
 <ad4e20ad4820ad56>A F0(])A F1(DESCRIPTION)72 218.4 Q F2
@@ -286,13 +292,13 @@ G .444(rall command will be achie).15 F -.15(ve)-.25 G 2.944(dw).15 G
 Q -.15(ve)-.25 G(rsity of Bremen).15 E F1(SIMPLE DESCRIPTION OF B)72
 616.8 Q(ASIC OPTIONS)-.329 E F2<ad48>108 628.8 Q F0 .162(This "help" \
 \215ag cause the program to print out a description of its operation an\
-d then e)22.52 F .162(xit immedi-)-.15 F(ately)144 640.8 Q(.)-.65 E F2
-<ad43>108 657.6 Q F0 1.013(This option causes the program to check if e\
-ach output \214le already e)144 669.6 R 1.013(xists, and to for)-.15 F
+d then e)144 628.8 R .162(xit immedi-)-.15 F(ately)144 640.8 Q(.)-.65 E
+F2<ad43>108 657.6 Q F0 1.013(This option causes the program to check if\
+ each output \214le already e)144 669.6 R 1.013(xists, and to for)-.15 F
 1.013(go cop)-.18 F(ying)-.1 E(those that do e)144 681.6 Q(xist.)-.15 E
-F2<ad49>108 698.4 Q F3(datalist)26.41 E F0 .417(Sets the input datalist\
- \214lename. A datalist is an ascii \214le containing a list of the inp\
-ut sw)144 710.4 R .417(ath sonar)-.1 F 2.061
+F2<ad49>108 698.4 Q F3(datalist)144 698.4 Q F0 .417(Sets the input data\
+list \214lename. A datalist is an ascii \214le containing a list of the\
+ input sw)144 710.4 R .417(ath sonar)-.1 F 2.061
 (data \214les to be copied and their formats.)144 722.4 R 2.061(In the)
 7.061 F F3(datalist)4.561 E F0 2.06(\214le, each sw)4.56 F 2.06
 (ath data \214le should be)-.1 F(MB-System 5.0)72 768 Q 2.5(3J)146.495 G
@@ -316,17 +322,18 @@ F0 1.499(manual page, datalists may reference other datalists, allo)
 (rently supported by)144 156 Q F1(MBIO)2.5 E F0
 (and their identi\214er v)2.5 E(alues is gi)-.25 E -.15(ve)-.25 G 2.5
 (ni).15 G 2.5(nt)-2.5 G(he)-2.5 E F1(MBIO)2.5 E F0(manual page.)2.5 E F1
-<ad4e>108 172.8 Q F0 1.151(This ar)23.08 F 1.151(gument causes)-.18 F F1
-(mbm_multidatalist)3.651 E F0 1.151
+<ad4e>108 172.8 Q F0 1.151(This ar)144 172.8 R 1.151(gument causes)-.18
+F F1(mbm_multidatalist)3.651 E F0 1.151
 (to generate the three ancillary data \214les \("inf", "fbt",)3.651 F
 (and "fn)144 184.8 Q(v"\) e)-.4 E -.15(ve)-.25 G 2.5(ni).15 G 2.5(ft)
 -2.5 G(he)-2.5 E 2.5(ya)-.15 G(lready e)-2.5 E(xist and are up to date.)
--.15 E F1<ad56>108 201.6 Q F0(Causes)23.08 E F1(mbm_multidatalist)2.753
-E F0 .253(to operate in "v)2.753 F .253
+-.15 E F1<ad56>108 201.6 Q F0(Causes)144 201.6 Q F1(mbm_multidatalist)
+2.753 E F0 .253(to operate in "v)2.753 F .253
 (erbose" mode so that it outputs more information than)-.15 F(usual.)144
-213.6 Q F1<ad58>108 230.4 Q/F2 10/Times-Italic@0 SF(npr)23.08 E(ocesses)
--.45 E F0(This option sets the number of parallel, simultaneous)144
-242.4 Q F1(mbdatalist)2.5 E F0(processes that may be run.)2.5 E/F3 10.95
+213.6 Q F1<ad58>108 230.4 Q/F2 10/Times-Italic@0 SF(npr)144 230.4 Q
+(ocesses)-.45 E F0
+(This option sets the number of parallel, simultaneous)144 242.4 Q F1
+(mbdatalist)2.5 E F0(processes that may be run.)2.5 E/F3 10.95
 /Times-Bold@0 SF(EXAMPLES)72 271.2 Q F0(Suppose one has tw)108 283.2 Q
 2.5(of)-.1 G(ormat 88 Reson 7125 data \214les:)-2.5 E
 (20110805_053612.mb88)144 295.2 Q(20110805_054149.mb88)144 307.2 Q .236
@@ -334,9 +341,9 @@ E F0 .253(to operate in "v)2.753 F .253
 (.mb-1 referencing these three sw)-.55 F .236(ath \214les using a te)-.1
 F .235(xt editor or by)-.15 F(using)108 331.2 Q F1(awk)2.5 E F0(:)A
 (ls \2551 *.mb88 | a)144 343.2 Q(wk '{print $1" 88"}' > datalist.mb-1)
--.15 E .032(In order to generate the usual ancillary \214les \(*.inf, *\
-.fbt, and *.fn)108 355.2 R 2.533<768c>-.4 G .033(les\) use the)-2.533 F
-F1(mbm_multidatalist)2.533 E F0(macro:)2.533 E
+-.15 E(In order to generate the usual ancillary \214les \(*.inf, *.fbt,\
+ and *.fn)108 355.2 Q 2.5<768c>-.4 G(les\) use the)-2.5 E F1
+(mbm_multidatalist)2.5 E F0(macro:)2.5 E
 (mbm_multidatalist \255I datalist.mb-1 \255X2 \255V)144 367.2 Q
 (The macro prints out the follo)108 379.2 Q
 (wing as it generates the *.inf, *.fbt, and *.fn)-.25 E 2.5<768c>-.4 G
@@ -354,9 +361,9 @@ F1(mbm_multidatalist)2.533 E F0(macro:)2.533 E
 -2.5 E(Generating fn)144 595.2 Q 2.5<768c>-.4 G
 (le for 20110805_053612.mb88)-2.5 E -.8(To)144 619.2 S(tal sw).8 E
 (ath \214les:)-.1 E(1)22.5 E -.8(To)144 643.2 S(tal sw).8 E
-(ath \214les:)-.1 E(1)22.5 E .99
+(ath \214les:)-.1 E(1)22.5 E .989
 (Note that the terminal messages from the tw)108 667.2 R(o)-.1 E F1
-(mbdatalist)3.489 E F0 .989(processes are mix)3.489 F .989
+(mbdatalist)3.489 E F0 .989(processes are mix)3.489 F .99
 (ed because the processes are)-.15 F -.15(exe)108 679.2 S
 (cuted in parallel.).15 E(MB-System 5.0)72 768 Q 2.5(3J)146.495 G
 (une 2013)-2.5 E(2)204.835 E 0 Cg EP

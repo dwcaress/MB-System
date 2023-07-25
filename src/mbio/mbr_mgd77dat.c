@@ -287,7 +287,7 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error) {
 	if (line[1] == '\r' || line[1] == '\n')
 		skip++;
 	if (skip > 0) {
-		for (int j = 0; j < MBF_MGD77DAT_DATA_LEN - skip; j++) {
+		for (unsigned int j = 0; j < MBF_MGD77DAT_DATA_LEN - skip; j++) {
 			line[j] = line[j + skip];
 		}
 		if ((read_len = fread(&line[MBF_MGD77DAT_DATA_LEN - skip], 1, skip, mb_io_ptr->mbfp)) == skip) {

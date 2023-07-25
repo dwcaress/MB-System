@@ -2161,103 +2161,103 @@ int main(int argc, char **argv) {
   if (stripmode == MBCOPY_STRIPMODE_NONE) {
     kind = MB_DATA_COMMENT;
     strncpy(comment, "", 256);
-    sprintf(comment, "These data copied by program %s", program_name);
+    snprintf(comment, sizeof(comment), "These data copied by program %s", program_name);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
     strncpy(comment, "", 256);
-    sprintf(comment, "MB-system Version %s", MB_VERSION);
+    snprintf(comment, sizeof(comment), "MB-system Version %s", MB_VERSION);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
     char user[256], host[256], date[32];
     status = mb_user_host_date(verbose, user, host, date, &error);
     strncpy(comment, "", 256);
-    sprintf(comment, "Run by user <%s> on cpu <%s> at <%s>", user, host, date);
+    snprintf(comment, sizeof(comment), "Run by user <%s> on cpu <%s> at <%s>", user, host, date);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
     strncpy(comment, "", 256);
-    sprintf(comment, "Control Parameters:");
+    snprintf(comment, sizeof(comment), "Control Parameters:");
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
     strncpy(comment, "", 256);
-    sprintf(comment, "  Input file:         %s", ifile);
+    snprintf(comment, sizeof(comment), "  Input file:         %s", ifile);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
     strncpy(comment, "", 256);
-    sprintf(comment, "  Input MBIO format:  %d", iformat);
+    snprintf(comment, sizeof(comment), "  Input MBIO format:  %d", iformat);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
     if (merge) {
       strncpy(comment, "", 256);
-      sprintf(comment, "  Merge file:         %s", mfile);
+      snprintf(comment, sizeof(comment), "  Merge file:         %s", mfile);
       status = mb_put_comment(verbose, ombio_ptr, comment, &error);
       if (error == MB_ERROR_NO_ERROR)
         ocomment++;
       strncpy(comment, "", 256);
-      sprintf(comment, "  Merge MBIO format:  %d", mformat);
+      snprintf(comment, sizeof(comment), "  Merge MBIO format:  %d", mformat);
       status = mb_put_comment(verbose, ombio_ptr, comment, &error);
       if (error == MB_ERROR_NO_ERROR)
         ocomment++;
     }
     strncpy(comment, "", 256);
-    sprintf(comment, "  Output file:        %s", ofile);
+    snprintf(comment, sizeof(comment), "  Output file:        %s", ofile);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
     strncpy(comment, "", 256);
-    sprintf(comment, "  Output MBIO format: %d", oformat);
+    snprintf(comment, sizeof(comment), "  Output MBIO format: %d", oformat);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
     strncpy(comment, "", 256);
-    sprintf(comment, "  Ping averaging:     %d", pings);
+    snprintf(comment, sizeof(comment), "  Ping averaging:     %d", pings);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
     strncpy(comment, "", 256);
-    sprintf(comment, "  Longitude flip:     %d", lonflip);
+    snprintf(comment, sizeof(comment), "  Longitude flip:     %d", lonflip);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
     strncpy(comment, "", 256);
-    sprintf(comment, "  Longitude bounds:   %f %f", bounds[0], bounds[1]);
+    snprintf(comment, sizeof(comment), "  Longitude bounds:   %f %f", bounds[0], bounds[1]);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
     strncpy(comment, "", 256);
-    sprintf(comment, "  Latitude bounds:    %f %f", bounds[2], bounds[3]);
+    snprintf(comment, sizeof(comment), "  Latitude bounds:    %f %f", bounds[2], bounds[3]);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
     strncpy(comment, "", 256);
-    sprintf(comment, "  Begin time:         %d %d %d %d %d %d %d", btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4],
+    snprintf(comment, sizeof(comment), "  Begin time:         %d %d %d %d %d %d %d", btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4],
             btime_i[5], btime_i[6]);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
     strncpy(comment, "", 256);
-    sprintf(comment, "  End time:           %d %d %d %d %d %d %d", etime_i[0], etime_i[1], etime_i[2], etime_i[3], etime_i[4],
+    snprintf(comment, sizeof(comment), "  End time:           %d %d %d %d %d %d %d", etime_i[0], etime_i[1], etime_i[2], etime_i[3], etime_i[4],
             etime_i[5], etime_i[6]);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
     strncpy(comment, "", 256);
-    sprintf(comment, "  Minimum speed:      %f", speedmin);
+    snprintf(comment, sizeof(comment), "  Minimum speed:      %f", speedmin);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
     strncpy(comment, "", 256);
-    sprintf(comment, "  Time gap:           %f", timegap);
+    snprintf(comment, sizeof(comment), "  Time gap:           %f", timegap);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
     strncpy(comment, "", 256);
-    sprintf(comment, " ");
+    snprintf(comment, sizeof(comment), " ");
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;

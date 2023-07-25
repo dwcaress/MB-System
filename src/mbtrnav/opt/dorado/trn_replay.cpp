@@ -257,7 +257,7 @@ int main(int argc, char* argv[])
   // Done
   // 
   fprintf(stderr,"Done. Close the connection after %ld updates, %ld good meas"
-                " and %d reinits...\n", nu, ng, numReinits);
+                " and %d reinits %ld updates...\n", nu, ng, numReinits, nupdates);
     free(logdir);
     free(host);
     free(map);

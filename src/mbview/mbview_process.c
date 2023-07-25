@@ -196,6 +196,10 @@ int mbview_projectdata(size_t instance) {
 			}
 
 			/* get bounds */
+if (ylatmin > 90.0 || ylatmax > 90.0) {
+fprintf(stderr, "%s:%d:%s: Warning: calling mb_proj_forward with invalid latitude: lon: %f %f lat: %f %f\n",
+__FILE__, __LINE__, __FUNCTION__, xlonmin, xlonmax, ylatmin, ylatmax);
+}
 			proj_status = mb_proj_forward(mbv_verbose, view->display_pjptr, xlonmin, ylatmin, &view->xmin, &view->ymin, &error);
 			proj_status = mb_proj_forward(mbv_verbose, view->display_pjptr, xlonmax, ylatmax, &view->xmax, &view->ymax, &error);
 
@@ -809,7 +813,7 @@ int mbview_zscalepointw(size_t instance, int globalview, double offset_factor, s
 }
 /*------------------------------------------------------------------------------*/
 int mbview_updatepointw(size_t instance, struct mbview_pointw_struct *pointw) {
-	int i;
+	size_t i;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1269,6 +1273,10 @@ int mbview_projectll2xygrid(size_t instance, double xlon, double ylat, double *x
 	/* get positions into grid coordinates */
 	if (data->primary_grid_projection_mode == MBV_PROJECTION_PROJECTED ||
 	    data->primary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED) {
+if (ylat > 90.0) {
+fprintf(stderr, "%s:%d:%s: Warning: calling mb_proj_forward with invalid latitude: lon: %f lat: %f\n",
+__FILE__, __LINE__, __FUNCTION__, xlon, ylat);
+}
 		mb_proj_forward(mbv_verbose, view->primary_pjptr, xlon, ylat, xgrid, ygrid, &error);
 	}
 	else {
@@ -1309,7 +1317,6 @@ int mbview_projectll2xyzgrid(size_t instance, double xlon, double ylat, double *
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
 		fprintf(stderr, "dbg2       xlon:             %f\n", xlon);
 		fprintf(stderr, "dbg2       ylat:             %f\n", ylat);
-		fprintf(stderr, "dbg2       zdata:            %p\n", zdata);
 	}
 
 	/* get view */
@@ -1319,6 +1326,10 @@ int mbview_projectll2xyzgrid(size_t instance, double xlon, double ylat, double *
 	/* get positions into grid coordinates */
 	if (data->primary_grid_projection_mode == MBV_PROJECTION_PROJECTED ||
 	    data->primary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED) {
+if (ylat > 90.0) {
+fprintf(stderr, "%s:%d:%s: Warning: calling mb_proj_forward with invalid latitude: lon: %f lat: %f\n",
+__FILE__, __LINE__, __FUNCTION__, xlon, ylat);
+}
 		mb_proj_forward(mbv_verbose, view->primary_pjptr, xlon, ylat, xgrid, ygrid, &error);
 	}
 	else {
@@ -1364,6 +1375,7 @@ int mbview_projectll2xyzgrid(size_t instance, double xlon, double ylat, double *
 		fprintf(stderr, "dbg2       xgrid:       %f\n", *xgrid);
 		fprintf(stderr, "dbg2       ygrid:       %f\n", *ygrid);
 		fprintf(stderr, "dbg2       zdata:       %f\n", *zdata);
+		fprintf(stderr, "dbg2       data->primary_nodatavalue:       %f\n", data->primary_nodatavalue);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
@@ -1395,6 +1407,10 @@ int mbview_projectll2display(size_t instance, double xlon, double ylat, double z
 	/* get positions in the display projection */
 	if (data->display_projection_mode == MBV_PROJECTION_PROJECTED ||
 	    data->display_projection_mode == MBV_PROJECTION_ALREADYPROJECTED) {
+if (ylat > 90.0) {
+fprintf(stderr, "%s:%d:%s: Warning: calling mb_proj_forward with invalid latitude: lon: %f lat: %f\n",
+__FILE__, __LINE__, __FUNCTION__, xlon, ylat);
+}
 		mb_proj_forward(mbv_verbose, view->display_pjptr, xlon, ylat, &xx, &yy, &error);
 		zz = data->exageration * zdata;
 		/* fprintf(stderr,"pos: %f %f %f   raw: %f %f %f ",
@@ -1525,10 +1541,18 @@ int mbview_projectdistance(size_t instance, double xlon1, double ylat1, double z
 	if (data->display_projection_mode == MBV_PROJECTION_PROJECTED ||
 	    data->display_projection_mode == MBV_PROJECTION_ALREADYPROJECTED) {
 		/* point 1 */
+if (ylat1 > 90.0) {
+fprintf(stderr, "%s:%d:%s: Warning: calling mb_proj_forward with invalid latitude: lon: %f lat: %f\n",
+__FILE__, __LINE__, __FUNCTION__, xlon1, ylat1);
+}
 		mb_proj_forward(mbv_verbose, view->display_pjptr, xlon1, ylat1, &xx1, &yy1, &error);
 		zz1 = zdata1;
 
 		/* point 2 */
+if (ylat2 > 90.0) {
+fprintf(stderr, "%s:%d:%s: Warning: calling mb_proj_forward with invalid latitude: lon: %f lat: %f\n",
+__FILE__, __LINE__, __FUNCTION__, xlon2, ylat2);
+}
 		mb_proj_forward(mbv_verbose, view->display_pjptr, xlon2, ylat2, &xx2, &yy2, &error);
 		zz2 = zdata2;
 
@@ -2724,7 +2748,8 @@ int mbview_colorvalue(struct mbview_world_struct *view, struct mbview_struct *da
 /*------------------------------------------------------------------------------*/
 int mbview_colorpoint(struct mbview_world_struct *view, struct mbview_struct *data,
                                 float *histogram, int i, int j, int k) {
-	double value, svalue, dd;
+	double value = 00;
+  double svalue, dd;
 	double intensity;
 
 	if (mbv_verbose >= 2) {
@@ -3118,6 +3143,10 @@ int mbview_getsecondaryvalue(struct mbview_world_struct *view, struct mbview_str
 	/* get position in secondary grid coordinates */
 	if (data->secondary_grid_projection_mode == MBV_PROJECTION_PROJECTED ||
 	    data->secondary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED) {
+if (ylat > 90.0) {
+fprintf(stderr, "%s:%d:%s: Warning: calling mb_proj_forward with invalid latitude: lon: %f lat: %f\n",
+__FILE__, __LINE__, __FUNCTION__, xlon, ylat);
+}
 		mb_proj_forward(mbv_verbose, view->secondary_pjptr, xlon, ylat, &xsgrid, &ysgrid, &error);
 	}
 	else {

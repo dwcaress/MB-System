@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:01 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:07 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 2
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -264,16 +270,16 @@ E F0 .169(represent the topographic surf)2.669 F .169(ace deri)-.1 F
 those capabilities may be added later\). The)-.15 F F2(-R)3.87 E F0
 (option)3.87 E .126(caan be used to specify the bounds of the OBJ outpu\
 t; these bounds must be a subset of the area co)108 338.4 R -.15(ve)-.15
-G .126(red by).15 F 1.478
-(the input grid. Areas of the grid represented as ha)108 350.4 R 1.479
-(ving no data are not included in the OBJ output. By)-.2 F(def)108 362.4
-Q 1.298
-(ault, the output OBJ \214le is named by replacing the ".grd" suf)-.1 F
-1.298(\214x of the input grid \214le with ".obj", or)-.25 F .556
-(adding the ".obj" suf)108 374.4 R .556
-(\214x to the input \214lename if the input does not ha)-.25 F .857 -.15
-(ve a ")-.2 H .557(.grd" suf).15 F .557(\214x. The)-.25 F F2<ad47>3.057
-E F0 .557(option can)3.057 F(be used to specify a dif)108 386.4 Q
+G .126(red by).15 F .641
+(the input grid. Areas of the grid represented as ha)108 350.4 R .641
+(ving no data are not included in the OBJ output. By de-)-.2 F -.1(fa)
+108 362.4 S .219
+(ult, the output OBJ \214le is named by replacing the ".grd" suf).1 F
+.219(\214x of the input grid \214le with ".obj", or adding)-.25 F .384
+(the ".obj" suf)108 374.4 R .385
+(\214x to the input \214lename if the input does not ha)-.25 F .685 -.15
+(ve a ")-.2 H .385(.grd" suf).15 F .385(\214x. The)-.25 F F2<ad47>2.885
+E F0 .385(option can be used)2.885 F(to specify a dif)108 386.4 Q
 (ferent output OBJ \214le name.)-.25 E .27(In order for)108 410.4 R F2
 (GMT)2.77 E F0 .27(to successfully e)2.77 F -.15(xe)-.15 G(cute).15 E F2
 (mbgrd2obj)2.769 E F0 2.769(,t)C .269(he location of the shared library)
@@ -364,10 +370,10 @@ S(lso produce compatibility w)-2.5 E(arnings [Def)-.1 E
 (erbose progress messages [Def)-3.61 E(ault when -V is used].)-.1 E 2.5
 (l-L)120.5 336 S(ong v)-2.5 E(erbose progress messages.)-.15 E 2.5(d-D)
 120.5 348 S(eb)-2.5 E(ugging messages.)-.2 E/F3 10.95/Times-Bold@0 SF
-(EXAMPLES)72 376.8 Q F0 1.798(Suppose we ha)108 388.8 R 2.098 -.15(ve o)
--.2 H 1.798(btained a GRD \214le called ZT).15 F 1.798
-(opo.grd that contains sea\215oor topograph)-.8 F 3.098 -.65(y. I)-.05 H
-4.298(no).65 G 1.798(rder to)-4.298 F(obtain an OBJ \214le named ZT)108
+(EXAMPLES)72 376.8 Q F0 .696(Suppose we ha)108 388.8 R .996 -.15(ve o)
+-.2 H .696(btained a GRD \214le called ZT).15 F .696
+(opo.grd that contains sea\215oor topograph)-.8 F 1.997 -.65(y. I)-.05 H
+3.197(no).65 G .697(rder to ob-)-3.197 F(tain an OBJ \214le named ZT)108
 400.8 Q(opo.obj, we use:)-.8 E(gmt mbgrd2obj ZT)113 412.8 Q(opo.grd -Vl)
 -.8 E(The output to the shell is:)108 424.8 Q(mbgrd2obj [INFORMA)113
 436.8 Q(TION]: Processing input grid)-1.11 E(mbgrd2obj [INFORMA)113

@@ -7,7 +7,6 @@
 #include <strings.h>
 #include <wchar.h>
 
-#include <mb_config.h>
 #include <Xm/Xm.h>
 #include <Xm/RowColumn.h>
 
@@ -390,9 +389,9 @@ static XmString StringToXmString(char *str) {
 		return (NULL);
 
 	static char *tagBuf = NULL;
-	static int tagBufLen = 0;
+	static unsigned int tagBufLen = 0;
 	static char *textBuf = NULL;
-	static int textBufLen = 0;
+	static unsigned int textBufLen = 0;
 
 	// For expediencies sake, we'll overallocate this buffer so that
 	// the wcs is guaranteed to fit (1 wc per byte in original string).
@@ -1292,7 +1291,7 @@ static void xpm_znormalizeimagebits(unsigned char *bp, XImage *img) {
 
 static unsigned int atoui(char *p, unsigned int l, unsigned int *ui_return) {
 	int n = 0;
-	int i = 0;
+	unsigned int i = 0;
 	for (; i < l; i++)
 		if (*p >= '0' && *p <= '9')
 			n = n * 10 + *p++ - '0';
@@ -1470,11 +1469,11 @@ static void SetImagePixels(
     unsigned int *pixelindex, Pixel *pixels) {
 	unsigned int *iptr = pixelindex;
 	if (image->depth == 1) {
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++, iptr++) {
+		for (unsigned int y = 0; y < height; y++) {
+			for (unsigned int x = 0; x < width; x++, iptr++) {
 				Pixel pixel = pixels[*iptr];
 				unsigned long px = pixel;
-				for (int i = 0; i < sizeof(unsigned long); i++, px >>= 8)
+				for (unsigned int i = 0; i < sizeof(unsigned long); i++, px >>= 8)
 					((unsigned char *)&pixel)[i] = (unsigned char)px;
 				char *src = &image->data[BXXYINDEX(x, y, image)];
 				char *dst = (char *)&px;
@@ -1493,12 +1492,12 @@ static void SetImagePixels(
 			}
 		}
 	} else {
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++, iptr++) {
+		for (unsigned int y = 0; y < height; y++) {
+			for (unsigned int x = 0; x < width; x++, iptr++) {
 				Pixel pixel = pixels[*iptr];
 				if (image->depth == 4)
 					pixel &= 0xf;
-				for (int i = 0, px = pixel; i < sizeof(unsigned long); i++, px >>= 8)
+				for (unsigned int i = 0, px = pixel; i < sizeof(unsigned long); i++, px >>= 8)
 					((unsigned char *)&pixel)[i] = (unsigned char)px;
 				char *src = &image->data[BXZINDEX(x, y, image)];
 				unsigned long px;
@@ -1533,16 +1532,16 @@ static void SetImagePixels32(
 
 #ifndef WORD64
 	if (*((char *)&byteorderpixel) == image->byte_order) {
-		for (int y = 0; y < height; y++)
-			for (int x = 0; x < width; x++, iptr++) {
+		for (unsigned int y = 0; y < height; y++)
+			for (unsigned int x = 0; x < width; x++, iptr++) {
 				unsigned int *paddr = (unsigned int *)(&(image->data[BXZINDEX32(x, y, image)]));
 				*paddr = (unsigned int)pixels[*iptr];
 			}
 	} else
 #endif
 	    if (image->byte_order == MSBFirst)
-		for (int y = 0; y < height; y++)
-			for (int x = 0; x < width; x++, iptr++) {
+		for (unsigned int y = 0; y < height; y++)
+			for (unsigned int x = 0; x < width; x++, iptr++) {
 				unsigned char *addr = &((unsigned char *)image->data)[BXZINDEX32(x, y, image)];
 				addr[0] = (unsigned char)(pixels[*iptr] >> 24);
 				addr[1] = (unsigned char)(pixels[*iptr] >> 16);
@@ -1550,8 +1549,8 @@ static void SetImagePixels32(
 				addr[3] = (unsigned char)(pixels[*iptr]);
 			}
 	else
-		for (int y = 0; y < height; y++)
-			for (int x = 0; x < width; x++, iptr++) {
+		for (unsigned int y = 0; y < height; y++)
+			for (unsigned int x = 0; x < width; x++, iptr++) {
 				unsigned char *addr = &((unsigned char *)image->data)[BXZINDEX32(x, y, image)];
 				addr[3] = (unsigned char)(pixels[*iptr] >> 24);
 				addr[2] = (unsigned char)(pixels[*iptr] >> 16);
@@ -1566,15 +1565,15 @@ static void SetImagePixels16(
     unsigned int *pixelindex, Pixel *pixels) {
 	unsigned int *iptr = pixelindex;
 	if (image->byte_order == MSBFirst)
-		for (int y = 0; y < height; y++)
-			for (int x = 0; x < width; x++, iptr++) {
+		for (unsigned int y = 0; y < height; y++)
+			for (unsigned int x = 0; x < width; x++, iptr++) {
 				unsigned char *addr = &((unsigned char *)image->data)[BXZINDEX16(x, y, image)];
 				addr[0] = (unsigned char)(pixels[*iptr] >> 8);
 				addr[1] = (unsigned char)(pixels[*iptr]);
 			}
 	else
-		for (int y = 0; y < height; y++)
-			for (int x = 0; x < width; x++, iptr++) {
+		for (unsigned int y = 0; y < height; y++)
+			for (unsigned int x = 0; x < width; x++, iptr++) {
 				unsigned char *addr = &((unsigned char *)image->data)[BXZINDEX16(x, y, image)];
 				addr[1] = (unsigned char)(pixels[*iptr] >> 8);
 				addr[0] = (unsigned char)(pixels[*iptr]);
@@ -1586,8 +1585,8 @@ static void SetImagePixels8(
     XImage *image, unsigned int width, unsigned int height, unsigned int *pixelindex, Pixel *pixels)
 {
 	unsigned int *iptr = pixelindex;
-	for (int y = 0; y < height; y++)
-		for (int x = 0; x < width; x++, iptr++)
+	for (unsigned int y = 0; y < height; y++)
+		for (unsigned int x = 0; x < width; x++, iptr++)
 			image->data[BXZINDEX8(x, y, image)] = (char)pixels[*iptr];
 }
 
@@ -1600,8 +1599,8 @@ static void SetImagePixels1(
 	} else {
 		unsigned int *iptr = pixelindex;
 		if (image->bitmap_bit_order == MSBFirst)
-			for (int y = 0; y < height; y++)
-				for (int x = 0; x < width; x++, iptr++) {
+			for (unsigned int y = 0; y < height; y++)
+				for (unsigned int x = 0; x < width; x++, iptr++) {
 					const int yoff = BXZINDEX1(x, y, image);
 					const int xoff = x & 7;
 					const unsigned char bit = 0x80 >> xoff;
@@ -1611,8 +1610,8 @@ static void SetImagePixels1(
 						image->data[yoff] &= ~bit;
 				}
 		else
-			for (int y = 0; y < height; y++)
-				for (int x = 0; x < width; x++, iptr++) {
+			for (unsigned int y = 0; y < height; y++)
+				for (unsigned int x = 0; x < width; x++, iptr++) {
 					const int yoff = BXZINDEX1(x, y, image);
 					const int xoff = x & 7;
 					const unsigned char bit = 1 << xoff;
@@ -2537,7 +2536,7 @@ void SetAppDefaults(
 	XrmDatabase rdb = XrmGetStringDatabase("");
 
 	/* Start the lineage with our name and then get our parents */
-	char lineage[1000] = "";
+	char lineage[2048] = "";
 	Widget parent = w;
 
 	while (parent) {
@@ -2571,7 +2570,7 @@ void SetAppDefaults(
 		}
 
 		/* Build up string after lineage */
-		char buf[1000];
+		char buf[3072];
 		if (defs->cInstName != NULL) {
 			// Don't include class instance name if it is also the instance being affected.
 			if (*defs->cInstName != '\0') {

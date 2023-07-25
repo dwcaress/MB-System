@@ -13,6 +13,7 @@
   - [macros](macros): Perl based command line programs
   - [mbedit](mbedit): Waterfall swath bathymetry editor
   - [mbeditviz](mbeditviz): Geographically oriented swath bathymetry editor
+  - [mbgrd2gltf](mbgrd2gltf): 2D/3D grd to gltf converter
   - [mbgrdviz](mbgrdviz): 2D/3D grid visualization
   - [mbnavadjust](mbnavadjust): Adjust survey navigation
   - [mbnavedit](mbnavedit): Survey navigation editor

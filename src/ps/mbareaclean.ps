@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:00 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:06 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 4
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -358,8 +364,8 @@ F2(mbar)2.596 E(eaclean)-.18 E F0 .096(to \215ag as bad an)2.596 F 2.596
 E F0(or)3.422 E F2<ad47>3.422 E F0 .922
 (are speci\214ed, then the program will by def)3.422 F(ault)-.1 E
 (use this option.)144 256.8 Q F2<ad44>108 273.6 Q/F3 10/Times-Italic@0
-SF(thr)23.08 E(eshold)-.37 E F0([)A F3(/nmin)A F0(])A -.45(Tu)144 285.6
-S .819(rns on use of a standard de).45 F .819
+SF(thr)144 273.6 Q(eshold)-.37 E F0([)A F3(/nmin)A F0(])A -.45(Tu)144
+285.6 S .819(rns on use of a standard de).45 F .819
 (viation \214lter test for the soundings.)-.25 F .818
 (Soundings that dif)5.819 F .818(fer from the)-.25 F 1.844
 (mean depth by a v)144 297.6 R 1.844(alue greater than)-.25 F F3(thr)
@@ -367,36 +373,37 @@ S .819(rns on use of a standard de).45 F .819
 (viation will be considered)-.25 F .193("bad". So, if)144 309.6 R F3
 (thr)2.693 E(eshold)-.37 E F0 2.693(=2)2.693 G .193(.0, then an)-2.693 F
 2.693(ys)-.15 G .193(ounding that is twice the standard de)-2.693 F .193
-(viation from the mean)-.25 F 2.687(depth will be considered bad. The)
-144 321.6 R F3(nmin)5.187 E F0 2.687
-(parameter sets the minimum number of soundings)5.187 F
-(required to use the standard de)144 333.6 Q(viation \214lter)-.25 E 2.5
+(viation from the mean)-.25 F 1.523(depth will be considered bad. The)
+144 321.6 R F3(nmin)4.023 E F0 1.524
+(parameter sets the minimum number of soundings re-)4.024 F
+(quired to use the standard de)144 333.6 Q(viation \214lter)-.25 E 2.5
 (.T)-.55 G(he def)-2.5 E(ault v)-.1 E(alues are)-.25 E F3(thr)2.5 E
 (eshold)-.37 E F0 2.5(=2)2.5 G(.0 and)-2.5 E F3(nmin)2.5 E F0 2.5(=1)2.5
-G(0.)-2.5 E F2<ad46>108 350.4 Q F3(format)24.19 E F0 1.241
-(Sets the data format used to read)144 362.4 R F3(in\214le)3.741 E F0
-6.241(.I)C(f)-6.241 E F3(format)3.741 E F0 3.741(<0)3.741 G 3.741(,t)
--3.741 G 1.241(hen the input \214le speci\214ed with the)-3.741 F F2
-<ad49>3.741 E F0 1.163(option will actually contain a list of input sw)
-144 374.4 R 1.164(ath sonar data \214les. This program uses the)-.1 F F2
-(MBIO)3.664 E F0 1.292(library and will read or write an)144 386.4 R
-3.792(ys)-.15 G -.1(wa)-3.792 G 1.292(th sonar format supported by).1 F
-F2(MBIO)3.792 E F0 3.792(.A)C 1.291(list of the sw)-.001 F(ath)-.1 E .39
-(sonar data formats currently supported by)144 398.4 R F2(MBIO)2.891 E
-F0 .391(and their identi\214er v)2.891 F .391(alues is gi)-.25 F -.15
-(ve)-.25 G 2.891(ni).15 G 2.891(nt)-2.891 G(he)-2.891 E F2(MBIO)2.891 E
-F0(manual page. Def)144 410.4 Q(ault:)-.1 E F3(format)2.5 E F0 2.5(=1)
-2.5 G(1.)-2.5 E F2<ad47>108 427.2 Q F0 .115(This option cause)22.52 F F2
-(mbar)2.615 E(ealcean)-.18 E F0 .115(to un\215ag \(set good\) an)2.615 F
-2.615(yp)-.15 G(re)-2.615 E .115
+G(0.)-2.5 E F2<ad46>108 350.4 Q F3(format)144 350.4 Q F0 .388
+(Sets the data format used to read)144 362.4 R F3(in\214le)2.888 E F0
+5.388(.I)C(f)-5.388 E F3(format)2.888 E F0 2.887(<0)2.888 G 2.887(,t)
+-2.887 G .387(hen the input \214le speci\214ed with the)-2.887 F F2
+<ad49>2.887 E F0(op-)2.887 E 1.013
+(tion will actually contain a list of input sw)144 374.4 R 1.014
+(ath sonar data \214les. This program uses the)-.1 F F2(MBIO)3.514 E F0
+(li-)3.514 E .187(brary and will read or write an)144 386.4 R 2.687(ys)
+-.15 G -.1(wa)-2.687 G .187(th sonar format supported by).1 F F2(MBIO)
+2.687 E F0 2.686(.Al)C .186(ist of the sw)-2.686 F .186(ath sonar)-.1 F
+.464(data formats currently supported by)144 398.4 R F2(MBIO)2.964 E F0
+.465(and their identi\214er v)2.965 F .465(alues is gi)-.25 F -.15(ve)
+-.25 G 2.965(ni).15 G 2.965(nt)-2.965 G(he)-2.965 E F2(MBIO)2.965 E F0
+(man-)2.965 E(ual page. Def)144 410.4 Q(ault:)-.1 E F3(format)2.5 E F0
+2.5(=1)2.5 G(1.)-2.5 E F2<ad47>108 427.2 Q F0 .115(This option cause)144
+427.2 R F2(mbar)2.615 E(ealcean)-.18 E F0 .115
+(to un\215ag \(set good\) an)2.615 F 2.615(yp)-.15 G(re)-2.615 E .115
 (viously \215agged soundings that pass all)-.25 F .23
 (of the speci\214ed statistical tests. If neither)144 439.2 R F2<ad42>
 2.73 E F0(or)2.731 E F2<ad47>2.731 E F0 .231
 (are speci\214ed, then the program will by def)2.731 F(ault)-.1 E
 (apply the)144 451.2 Q F2<ad42>5 E F0(option.)2.5 E F2<ad48>108 468 Q F0
 .162(This "help" \215ag cause the program to print out a description of\
- its operation and then e)22.52 F .161(xit immedi-)-.15 F(ately)144 480
-Q(.)-.65 E F2<ad49>108 496.8 Q F3(in\214le)26.41 E F0 .312
+ its operation and then e)144 468 R .161(xit immedi-)-.15 F(ately)144
+480 Q(.)-.65 E F2<ad49>108 496.8 Q F3(in\214le)144 496.8 Q F0 .312
 (Sets the input \214lename. If)144 508.8 R F3(format)2.813 E F0 2.813
 (>0\()2.813 G .313(set with the)-2.813 F F2<ad46>2.813 E F0 .313
 (option\) then the sw)2.813 F .313(ath sonar data contained)-.1 F(in)144
@@ -405,13 +412,13 @@ Q(.)-.65 E F2<ad49>108 496.8 Q F3(in\214le)26.41 E F0 .312
 (in\214le)2.937 E F0 .437(is assumed to be an ascii \214le containing a)
 2.937 F .868(list of the input sw)144 532.8 R .869
 (ath sonar data \214les to be processed and their formats.)-.1 F .869
-(The program will read)5.869 F .988(and process the data in all of thes\
-e \214les. Each input \214le will ha)144 544.8 R 1.288 -.15(ve a)-.2 H
-3.487(na).15 G .987(ssociated output \214le with)-3.487 F .405
-(either the ".esf" suf)144 556.8 R 2.905(\214x. In)-.25 F(the)2.905 E F3
-(in\214le)2.905 E F0 .405(\214le, each data \214le should be follo)2.905
-F .405(wed by a data format identi-)-.25 F(\214er)144 568.8 Q 2.5(,e)-.4
-G(.g.:)-2.5 E(data\214le1 11)180 580.8 Q(data\214le2 24)180 592.8 Q .569
+(The program will read)5.869 F .249(and process the data in all of thes\
+e \214les. Each input \214le will ha)144 544.8 R .549 -.15(ve a)-.2 H
+2.749(na).15 G .249(ssociated output \214le with ei-)-2.749 F .133
+(ther the ".esf" suf)144 556.8 R 2.634(\214x. In)-.25 F(the)2.634 E F3
+(in\214le)2.634 E F0 .134(\214le, each data \214le should be follo)2.634
+F .134(wed by a data format identi\214er)-.25 F(,)-.4 E(e.g.:)144 568.8
+Q(data\214le1 11)180 580.8 Q(data\214le2 24)180 592.8 Q .569
 (This program uses the)144 604.8 R F2(MBIO)3.068 E F0 .568
 (library and will read or write an)3.068 F 3.068(ys)-.15 G -.1(wa)-3.068
 G .568(th sonar format supported by).1 F F2(MBIO)144 616.8 Q F0 3.428
@@ -420,10 +427,10 @@ G .568(th sonar format supported by).1 F F2(MBIO)144 616.8 Q F0 3.428
 .928(and their identi\214er)3.428 F -.25(va)144 628.8 S(lues is gi).25 E
 -.15(ve)-.25 G 2.5(ni).15 G 2.5(nt)-2.5 G(he)-2.5 E F2(MBIO)2.5 E F0
 (manual page. Def)2.5 E(ault:)-.1 E F3(in\214le)2.5 E F0 2.5(=")2.5 G
-(datalist.mb-1".)-2.5 E F2<ad4d>108 645.6 Q F3(thr)20.86 E(eshold)-.37 E
-F0([)A F3(/nmin)A F0(])A -.45(Tu)144 657.6 S .21(rns on use of a median\
- \214lter test for the soundings. If no other test is speci\214ed, the \
-median \214lter).45 F .184(test is used by def)144 669.6 R .185
+(datalist.mb-1".)-2.5 E F2<ad4d>108 645.6 Q F3(thr)144 645.6 Q(eshold)
+-.37 E F0([)A F3(/nmin)A F0(])A -.45(Tu)144 657.6 S .21(rns on use of a\
+ median \214lter test for the soundings. If no other test is speci\214e\
+d, the median \214lter).45 F .184(test is used by def)144 669.6 R .185
 (ault. Soundings that dif)-.1 F .185(fer from the median depth by a v)
 -.25 F .185(alue greater than)-.25 F F3(thr)2.685 E(esh-)-.37 E(old)144
 681.6 Q F0 .866
@@ -443,7 +450,7 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 137.64(mbareaclean\(1\) MB-System)72 48 R 137.64
 (5.0 mbareaclean\(1\))2.5 F/F1 10/Times-Bold@0 SF<ad4e>108 84 Q F0([-])
-23.08 E/F2 10/Times-Italic@0 SF(min_beam)A F0([)A F2(/max_beam)A F0(])A
+144 84 Q/F2 10/Times-Italic@0 SF(min_beam)A F0([)A F2(/max_beam)A F0(])A
 .234(Limits the beams to which \215agging will be applied.)144 96 R .235
 (Only soundings for beams from)5.235 F F2(min_beam)2.735 E F0(to)2.735 E
 F2(max_beam)144 108 Q F0 3.519(,i)C(nclusi)-3.519 E -.15(ve)-.25 G 3.519
@@ -461,27 +468,27 @@ Q F0 1.37(will only \215ag beam numbers 1 to 29 and 82 to 111.)3.87 F
 1.371(All good soundings, re)6.371 F -.05(ga)-.15 G 1.371(rdless of).05
 F(beam, will be included in the calculations of median, mean and standa\
 rd de)144 156 Q(viation for the bin.)-.25 E F1<ad52>108 172.8 Q F2
-(west/east/south/north)23.08 E F0 1.206
+(west/east/south/north)144 172.8 Q F0 1.206
 (Sets the longitude and latitude bounds within which sw)144 184.8 R
 1.205(ath sonar data will be read, binned, and)-.1 F
 (tested. Soundings lying outside these bounds will be ignored.)144 196.8
 Q(Def)144 208.8 Q .209(ault: The program will determine and use a squar\
 e area encompassing all of the data contained)-.1 F
-(in the input \214les.)144 220.8 Q F1<ad53>108 237.6 Q F2(binsize)24.74
-E F0 .148(Sets the size of the bins to be used in meters. The area spec\
-i\214ed with the)144 249.6 R F1<ad52>2.647 E F0 .147
+(in the input \214les.)144 220.8 Q F1<ad53>108 237.6 Q F2(binsize)144
+237.6 Q F0 .148(Sets the size of the bins to be used in meters. The are\
+a speci\214ed with the)144 249.6 R F1<ad52>2.647 E F0 .147
 (option will be brok)2.647 F(en)-.1 E
 (into a grid with cells that are roughly)144 261.6 Q F2(binsize)2.5 E F0
 (meters east-west and north-south.)2.5 E(Def)144 273.6 Q(ault: A binsiz\
 e equal to 0.2 times the maximum sonar altitude will be used.)-.1 E F1
-<ad54>108 290.4 Q F2(detect_type)23.63 E F0 .584(Limits the soundings t\
-o which \215agging will be applied to only those which use the speci\
-\214ed bot-)144 302.4 R(tom detection algorithm.)144 314.4 Q F2
+<ad54>108 290.4 Q F2(detect_type)144 290.4 Q F0 .584(Limits the soundin\
+gs to which \215agging will be applied to only those which use the spec\
+i\214ed bot-)144 302.4 R(tom detection algorithm.)144 314.4 Q F2
 (detect_type)5 E F0(must be one of:)2.5 E 2.5(0\255u)159 326.4 S(nkno)
 -2.5 E(wn algorithm)-.25 E 2.5(1\255a)159 338.4 S(mplitude detection)
 -2.5 E 2.5(2\255p)159 350.4 S(hase detection)-2.5 E F1<ad56>108 367.2 Q
-F0(Normally)23.08 E(,)-.65 E F1(mbar)3.269 E(eaclean)-.18 E F0 -.1(wo)
-3.269 G .769(rks "silently" without outputting an).1 F .768
+F0(Normally)144 367.2 Q(,)-.65 E F1(mbar)3.269 E(eaclean)-.18 E F0 -.1
+(wo)3.269 G .769(rks "silently" without outputting an).1 F .768
 (ything to the stderr stream.)-.15 F .768(If the)5.768 F F1<ad56>144
 379.2 Q F0 .692(\215ag is gi)3.192 F -.15(ve)-.25 G .692(n, then).15 F
 F1(mbar)3.192 E(eaclean)-.18 E F0 -.1(wo)3.193 G .693(rks in a "v).1 F

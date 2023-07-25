@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:01 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:07 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 7
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -297,18 +303,18 @@ F 1.38(o-point picks, selected na)-.1 F(vig)-.2 E 1.38
 (MB-System)3.477 E F0 .977(tools. If)3.477 F(surv)108 602.4 Q 1.532 -.15
 (ey n)-.15 H -.2(av).15 G(ig).2 E 1.231
 (ation has been read and displayed, a user may interacti)-.05 F -.15(ve)
--.25 G 1.231(ly select \214les of interest, and then).15 F .898
-(start up the interacti)108 614.4 R 1.198 -.15(ve w)-.25 H(aterf).05 E
-.899(all bath)-.1 F .899(ymetry editor)-.05 F F2(MBedit)3.399 E F0 .899
-(to w)3.399 F .899(ork on those \214les.)-.1 F .899(Also a)5.899 F -.25
-(va)-.2 G .899(ilable are the).25 F(interacti)108 626.4 Q -.15(ve)-.25 G
-3.994(,v).15 G 1.494(isualization based bath)-3.994 F 1.494
-(ymetry editor)-.05 F F2(MBeditviz)3.994 E F0 3.994(,t)C 1.494(he na)
--3.994 F(vig)-.2 E 1.493(ation editor)-.05 F F2(MBna)3.993 E -.1(ve)-.25
-G(dit).1 E F0 3.993(,a)C 1.493(nd the)-3.993 F -.1(wa)108 638.4 S
-(ter sound speed modeling tool).1 E F2(MBv)2.5 E(elocitytool)-.1 E F0(.)
-A F2(MBgrdviz)108 662.4 Q F0 1.221(supports as man)3.721 F 3.721(ya)-.15
-G 3.721(st)-3.721 G 1.221(en displays deri)-3.721 F 1.222
+-.25 G 1.231(ly select \214les of interest, and then).15 F .045
+(start up the interacti)108 614.4 R .345 -.15(ve w)-.25 H(aterf).05 E
+.045(all bath)-.1 F .045(ymetry editor)-.05 F F2(MBedit)2.545 E F0 .045
+(to w)2.545 F .045(ork on those \214les.)-.1 F .046(Also a)5.046 F -.25
+(va)-.2 G .046(ilable are the in-).25 F(teracti)108 626.4 Q -.15(ve)-.25
+G 3.069(,v).15 G .569(isualization based bath)-3.069 F .569
+(ymetry editor)-.05 F F2(MBeditviz)3.068 E F0 3.068(,t)C .568(he na)
+-3.068 F(vig)-.2 E .568(ation editor)-.05 F F2(MBna)3.068 E -.1(ve)-.25
+G(dit).1 E F0 3.068(,a)C .568(nd the w)-3.068 F(a-)-.1 E
+(ter sound speed modeling tool)108 638.4 Q F2(MBv)2.5 E(elocitytool)-.1
+E F0(.)A F2(MBgrdviz)108 662.4 Q F0 1.221(supports as man)3.721 F 3.721
+(ya)-.15 G 3.721(st)-3.721 G 1.221(en displays deri)-3.721 F 1.222
 (ving either from reading topograph)-.25 F 3.722(yg)-.05 G 1.222
 (rids or e)-3.722 F(xtracting)-.15 E(user de\214ned re)108 674.4 Q
 (gions from e)-.15 E(xisting displays.)-.15 E F3(Starting Up)108 698.4 Q
@@ -363,18 +369,19 @@ G(opograph)-2.624 E 2.624(yw)-.05 G .124(hen the left b)-2.624 F .124
 .246(point and an info windo)108 276 R 2.746(wo)-.25 G 2.746(nt)-2.746 G
 .247(he left side of the)-2.746 F F1(MBview)2.747 E F0 .247
 (display windo)2.747 F 2.747(ww)-.25 G .247(ill sho)-2.747 F 2.747(wt)
--.25 G .247(he longitude, latitude,)-2.747 F .906(and topograph)108 288
-R 3.406(yv)-.05 G .906(alue of the pick point.)-3.656 F .906
-(If the left b)5.906 F .905
-(utton is used to drag the cursor from one location to)-.2 F(another)108
-300 Q 4.26(,b)-.4 G 1.76(oth the pick and release points will be sho)
--4.26 F 1.761(wn as red Xs and a red line will be displayed in)-.25 F
-1.883(between. The info windo)108 312 R 4.383(ww)-.25 G 1.883(ill sho)
--4.383 F 4.383(wb)-.25 G 1.882
-(oth the start and end positions and also the range and bearing)-4.383 F
-(between the tw)108 324 Q 2.5(ol)-.1 G(ocations.)-2.5 E(The middle b)108
-348 Q(utton can be used to pan by clicking, holding do)-.2 E(wn, and mo)
--.25 E(ving the cursor)-.15 E(.)-.55 E .65(The right b)108 372 R .65
+-.25 G .247(he longitude, latitude,)-2.747 F .136(and topograph)108 288
+R 2.636(yv)-.05 G .136(alue of the pick point.)-2.886 F .135
+(If the left b)5.135 F .135
+(utton is used to drag the cursor from one location to an-)-.2 F(other)
+108 300 Q 2.801(,b)-.4 G .301
+(oth the pick and release points will be sho)-2.801 F .302
+(wn as red Xs and a red line will be displayed in between.)-.25 F .126
+(The info windo)108 312 R 2.626(ww)-.25 G .126(ill sho)-2.626 F 2.626
+(wb)-.25 G .125(oth the start and end positions and also the range and \
+bearing between the tw)-2.626 F(o)-.1 E(locations.)108 324 Q
+(The middle b)108 348 Q
+(utton can be used to pan by clicking, holding do)-.2 E(wn, and mo)-.25
+E(ving the cursor)-.15 E(.)-.55 E .65(The right b)108 372 R .65
 (utton can be used to zoom the display by clicking, holding do)-.2 F .65
 (wn, and mo)-.25 F .65(ving the cursor up to)-.15 F(zoom in or do)108
 384 Q(wn to zoom out.)-.25 E F2(Manipulating a 3D V)108 408 Q(ie)-.74 E
@@ -387,31 +394,30 @@ F 2.972(wm)-.25 G .472(ode, picking, panning, and)-2.972 F .617
 (zooming are done in the same f)108 456 R .617(ashion as in the map vie)
 -.1 F 1.917 -.65(w. H)-.25 H -.25(ow).65 G -2.15 -.25(ev e).25 H 1.417
 -.4(r, t).25 H .617(he display is a perspecti).4 F .916 -.15(ve v)-.25 H
-(ie).15 E 3.116(wt)-.25 G(hat)-3.116 E 1.964
+(ie).15 E 3.116(wt)-.25 G(hat)-3.116 E .579
 (includes both rotation of the topographic model and of the vie)108 468
-R 1.965(wpoint. T)-.25 F 4.465(or)-.8 G 1.965
-(otate the model, select the)-4.465 F .999("Rotate Model" b)108 480 R
-.998(utton \(or the <Mouse->Rotate Model> menu item\). The left b)-.2 F
-.998(utton can be used to pick)-.2 F(topograph)108 492 Q 2.405 -.65
-(y, t)-.05 H 1.105(he middle b).65 F 1.105
-(utton will rotate the model when click)-.2 F 1.105
-(ed and dragged, and the right b)-.1 F 1.105(utton will)-.2 F .261
-(change the v)108 504 R .261(ertical e)-.15 F .261
-(xageration when click)-.15 F .261(ed and mo)-.1 F -.15(ve)-.15 G 2.761
-(du).15 G 2.761(p\()-2.761 G .261(more e)-2.761 F .26
-(xageration\) or do)-.15 F .26(wn \(less e)-.25 F(xageration\).)-.15 E
-2.391 -.8(To r)108 516 T .791(otate the vie).8 F .791
-(wpoint, select the "Rotate V)-.25 F(ie)-.6 E .791(w" b)-.25 F .791
-(utton \(or the <Mouse->Rotate V)-.2 F(ie)-.6 E .792
-(w> menu item\). The)-.25 F 1.825(left b)108 528 R 1.825
-(utton can be used to pick topograph)-.2 F 3.125 -.65(y, t)-.05 H 1.825
-(he middle b).65 F 1.824(utton will rotate the model when click)-.2 F
-1.824(ed and)-.1 F 2.05(dragged, and the right b)108 540 R 2.051
-(utton will change the v)-.2 F 2.051(ertical e)-.15 F 2.051
-(xageration when click)-.15 F 2.051(ed and mo)-.1 F -.15(ve)-.15 G 4.551
-(du).15 G 4.551(p\()-4.551 G(more)-4.551 E -.15(ex)108 552 S
-(ageration\) or do).15 E(wn \(less e)-.25 E(xageration\).)-.15 E/F3
-10.95/Times-Bold@0 SF(MB-SYSTEM A)72 580.8 Q(UTHORSHIP)-.548 E F0(Da)108
+R .58(wpoint. T)-.25 F 3.08(or)-.8 G .58
+(otate the model, select the "Ro-)-3.08 F .183(tate Model" b)108 480 R
+.183(utton \(or the <Mouse->Rotate Model> menu item\). The left b)-.2 F
+.183(utton can be used to pick topog-)-.2 F(raph)108 492 Q 1.867 -.65
+(y, t)-.05 H .567(he middle b).65 F .567
+(utton will rotate the model when click)-.2 F .567
+(ed and dragged, and the right b)-.1 F .567(utton will change)-.2 F .5
+(the v)108 504 R .5(ertical e)-.15 F .5(xageration when click)-.15 F .5
+(ed and mo)-.1 F -.15(ve)-.15 G 3(du).15 G 3(p\()-3 G .5(more e)-3 F .5
+(xageration\) or do)-.15 F .5(wn \(less e)-.25 F .5(xageration\). T)-.15
+F 3(or)-.8 G(o-)-3 E 1.145(tate the vie)108 516 R 1.145
+(wpoint, select the "Rotate V)-.25 F(ie)-.6 E 1.145(w" b)-.25 F 1.145
+(utton \(or the <Mouse->Rotate V)-.2 F(ie)-.6 E 1.146
+(w> menu item\). The left)-.25 F -.2(bu)108 528 S .567
+(tton can be used to pick topograph).2 F 1.867 -.65(y, t)-.05 H .567
+(he middle b).65 F .567(utton will rotate the model when click)-.2 F
+.567(ed and dragged,)-.1 F .3(and the right b)108 540 R .3
+(utton will change the v)-.2 F .301(ertical e)-.15 F .301
+(xageration when click)-.15 F .301(ed and mo)-.1 F -.15(ve)-.15 G 2.801
+(du).15 G 2.801(p\()-2.801 G .301(more e)-2.801 F .301(xageration\) or)
+-.15 F(do)108 552 Q(wn \(less e)-.25 E(xageration\).)-.15 E/F3 10.95
+/Times-Bold@0 SF(MB-SYSTEM A)72 580.8 Q(UTHORSHIP)-.548 E F0(Da)108
 592.8 Q(vid W)-.2 E 2.5(.C)-.92 G(aress)-2.5 E(Montere)113 604.8 Q 2.5
 (yB)-.15 G(ay Aquarium Research Institute)-2.5 E(Dale N. Chayes)108
 616.8 Q(Center for Coastal and Ocean Mapping)113 628.8 Q(Uni)113 640.8 Q
@@ -420,25 +426,25 @@ R 1.965(wpoint. T)-.25 F 4.465(or)-.8 G 1.965
 (UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
 676.8 Q -.15(ve)-.25 G(rsity of Bremen).15 E F3(OPTIONS)72 705.6 Q F1
 <ad48>108 717.6 Q F0 .162(This "help" \215ag cause the program to print\
- out a description of its operation and then e)22.52 F .161(xit immedi-)
--.15 F(ately)144 729.6 Q(.)-.65 E(MB-System 5.0)72 768 Q(16 August 2013)
-138.715 E(2)197.055 E 0 Cg EP
+ out a description of its operation and then e)144 717.6 R .161
+(xit immedi-)-.15 F(ately)144 729.6 Q(.)-.65 E(MB-System 5.0)72 768 Q
+(16 August 2013)138.715 E(2)197.055 E 0 Cg EP
 %%Page: 3 3
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 149.84(mbgrdviz\(1\) MB-System)72 48 R 149.84
 (5.0 mbgrdviz\(1\))2.5 F/F1 10/Times-Bold@0 SF<ad49>108 84 Q/F2 10
-/Times-Italic@0 SF(grid\214le)26.41 E F0 .859
+/Times-Italic@0 SF(grid\214le)144 84 Q F0 .859
 (Sets a GMT grid \214le to be read and displayed at startup.)144 96 R
 .86(This option is usually used only when)5.86 F F1(MBgrdviz)144 108 Q
 F0(is started automatically from some other process.)2.5 E F1<ad54>108
 124.8 Q F0 .362
 (Sets a test grid to be calculated and displayed at startup.This allo)
-23.63 F .361(ws the program to be tested e)-.25 F -.15(ve)-.25 G(n).15 E
-(when a grid \214le is una)144 136.8 Q -.25(va)-.2 G(ilable.).25 E F1
-<ad56>108 153.6 Q F0(Normally)23.08 E(,)-.65 E F1(MBgrdviz)2.536 E F0
-.036(outputs limited information to the stderr stream.)2.536 F .036
+144 124.8 R .361(ws the program to be tested e)-.25 F -.15(ve)-.25 G(n)
+.15 E(when a grid \214le is una)144 136.8 Q -.25(va)-.2 G(ilable.).25 E
+F1<ad56>108 153.6 Q F0(Normally)144 153.6 Q(,)-.65 E F1(MBgrdviz)2.536 E
+F0 .036(outputs limited information to the stderr stream.)2.536 F .036
 (If the)5.036 F F1<ad56>2.536 E F0 .036(\215ag is gi)2.536 F -.15(ve)
 -.25 G .036(n, then).15 F F1(MBgrdviz)144 165.6 Q F0 -.1(wo)2.683 G .183
 (rks in a "v).1 F .183(erbose" mode and outputs the program v)-.15 F
@@ -468,10 +474,10 @@ hite space delimited columns)-.15 E F1([MBgrdviz]:<File->Open Route>)108
 374.4 Q .2 -.1(ve S)-.25 H(ite>).1 E([MBgrdviz]:<File->Sa)108 391.2 Q .2
 -.1(ve R)-.25 H(oute>).1 E([MBgrdviz]:<File->Quit>)108 408 Q F0(This b)
 144 420 Q(utton causes the program to e)-.2 E(xit \(mostly\) gracefully)
--.15 E(.)-.65 E F1([MBgrdviz]:<Help->About>)108 436.8 Q F0 1.202(This b)
-144 448.8 R 1.202(utton causes the program to bring up a dialog sho)-.2
-F 1.202(wing the program')-.25 F 3.702(sn)-.55 G 1.202(ame, v)-3.702 F
-1.202(ersion, and)-.15 F(authors.)144 460.8 Q F3(INTERA)72 489.6 Q
+-.15 E(.)-.65 E F1([MBgrdviz]:<Help->About>)108 436.8 Q F0 .172(This b)
+144 448.8 R .172(utton causes the program to bring up a dialog sho)-.2 F
+.173(wing the program')-.25 F 2.673(sn)-.55 G .173(ame, v)-2.673 F .173
+(ersion, and au-)-.15 F(thors.)144 460.8 Q F3(INTERA)72 489.6 Q
 (CTIVE CONTR)-.602 E(OLS: MBview Main W)-.329 E(indo)-.197 E(w)-.11 E F1
 ([MBview]:<V)108 501.6 Q(iew->Map Display>)-.37 E([MBview]:<V)108 518.4
 Q(iew->3D Display>)-.37 E([MBview]:<V)108 535.2 Q(iew->T)-.37 E

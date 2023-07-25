@@ -78,7 +78,7 @@
 /*------------------------------------------------------------------------------*/
 
 /* local variables */
-static char value_string[MB_PATH_MAXLINE];
+static char value_string[2*MB_PATH_MAXLINE];
 
 
 /*------------------------------------------------------------------------------*/
@@ -632,6 +632,7 @@ int mbview_deleteallroutes(int verbose, size_t instance, int *error) {
 		fprintf(stderr, "dbg2       route_selected:       %d\n", shared.shareddata.route_selected);
 		fprintf(stderr, "dbg2       route_point_selected: %d\n", shared.shareddata.route_point_selected);
 		for (i = 0; i < shared.shareddata.nroute; i++) {
+			fprintf(stderr, "dbg2       route %d active:        %d\n", i, shared.shareddata.routes[i].active);
 			fprintf(stderr, "dbg2       route %d color:         %d\n", i, shared.shareddata.routes[i].color);
 			fprintf(stderr, "dbg2       route %d size:          %d\n", i, shared.shareddata.routes[i].size);
 			fprintf(stderr, "dbg2       route %d name:          %s\n", i, shared.shareddata.routes[i].name);
@@ -1031,7 +1032,8 @@ int mbview_pick_routebyname(int verbose, size_t instance, char *name, int *error
 		shared.shareddata.route_selected = MBV_SELECT_NONE;
 		shared.shareddata.route_point_selected = MBV_SELECT_NONE;
 		for (i = 0; i < shared.shareddata.nroute; i++) {
-			if (strcmp(name, shared.shareddata.routes[i].name) == 0) {
+			if (strcmp(name, shared.shareddata.routes[i].name) == 0
+          && shared.shareddata.routes[i].active) {
 				// found = true;
 				shared.shareddata.route_selected = i;
 				shared.shareddata.route_point_selected = MBV_SELECT_ALL;
@@ -1116,17 +1118,20 @@ int mbview_pick_route_select(int verbose, size_t instance, int which, int xpixel
 			rrmin = 1000000000.0;
 			shared.shareddata.route_selected = MBV_SELECT_NONE;
 			shared.shareddata.route_point_selected = MBV_SELECT_NONE;
-			for (i = 0; i < shared.shareddata.nroute; i++)
-				for (j = 0; j < shared.shareddata.routes[i].npoints; j++) {
-					xx = xgrid - shared.shareddata.routes[i].points[j].xgrid[instance];
-					yy = ygrid - shared.shareddata.routes[i].points[j].ygrid[instance];
-					rr = sqrt(xx * xx + yy * yy);
-					if (rr < rrmin) {
-						rrmin = rr;
-						shared.shareddata.route_selected = i;
-						shared.shareddata.route_point_selected = j;
-					}
-				}
+			for (i = 0; i < shared.shareddata.nroute; i++) {
+        if (shared.shareddata.routes[i].active) {
+  				for (j = 0; j < shared.shareddata.routes[i].npoints; j++) {
+  					xx = xgrid - shared.shareddata.routes[i].points[j].xgrid[instance];
+  					yy = ygrid - shared.shareddata.routes[i].points[j].ygrid[instance];
+  					rr = sqrt(xx * xx + yy * yy);
+  					if (rr < rrmin) {
+  						rrmin = rr;
+  						shared.shareddata.route_selected = i;
+  						shared.shareddata.route_point_selected = j;
+  					}
+  				}
+        }
+      }
 		}
 		else {
 			shared.shareddata.route_selected = MBV_SELECT_NONE;
@@ -1224,6 +1229,7 @@ int mbview_pick_route_select(int verbose, size_t instance, int which, int xpixel
 		fprintf(stderr, "dbg2       route_selected:       %d\n", shared.shareddata.route_selected);
 		fprintf(stderr, "dbg2       route_point_selected: %d\n", shared.shareddata.route_point_selected);
 		for (i = 0; i < shared.shareddata.nroute; i++) {
+			fprintf(stderr, "dbg2       route %d active:        %d\n", i, shared.shareddata.routes[i].active);
 			fprintf(stderr, "dbg2       route %d color:         %d\n", i, shared.shareddata.routes[i].color);
 			fprintf(stderr, "dbg2       route %d size:          %d\n", i, shared.shareddata.routes[i].size);
 			fprintf(stderr, "dbg2       route %d name:          %s\n", i, shared.shareddata.routes[i].name);
@@ -1595,6 +1601,7 @@ int mbview_pick_route_add(int verbose, size_t instance, int which, int xpixel, i
 		fprintf(stderr, "dbg2       route_selected:       %d\n", shared.shareddata.route_selected);
 		fprintf(stderr, "dbg2       route_point_selected: %d\n", shared.shareddata.route_point_selected);
 		for (i = 0; i < shared.shareddata.nroute; i++) {
+			fprintf(stderr, "dbg2       route %d active:        %d\n", i, shared.shareddata.routes[i].active);
 			fprintf(stderr, "dbg2       route %d color:         %d\n", i, shared.shareddata.routes[i].color);
 			fprintf(stderr, "dbg2       route %d size:          %d\n", i, shared.shareddata.routes[i].size);
 			fprintf(stderr, "dbg2       route %d name:          %s\n", i, shared.shareddata.routes[i].name);
@@ -1676,16 +1683,18 @@ int mbview_pick_route_delete(int verbose, size_t instance, int xpixel, int ypixe
 			idelete = MBV_SELECT_NONE;
 			jdelete = MBV_SELECT_NONE;
 			for (i = 0; i < shared.shareddata.nroute; i++) {
-				for (j = 0; j < shared.shareddata.routes[i].npoints; j++) {
-					xx = xgrid - shared.shareddata.routes[i].points[j].xgrid[instance];
-					yy = ygrid - shared.shareddata.routes[i].points[j].ygrid[instance];
-					rr = sqrt(xx * xx + yy * yy);
-					if (rr < rrmin) {
-						rrmin = rr;
-						idelete = i;
-						jdelete = j;
-					}
-				}
+        if (shared.shareddata.routes[i].active) {
+  				for (j = 0; j < shared.shareddata.routes[i].npoints; j++) {
+  					xx = xgrid - shared.shareddata.routes[i].points[j].xgrid[instance];
+  					yy = ygrid - shared.shareddata.routes[i].points[j].ygrid[instance];
+  					rr = sqrt(xx * xx + yy * yy);
+  					if (rr < rrmin) {
+  						rrmin = rr;
+  						idelete = i;
+  						jdelete = j;
+  					}
+  				}
+        }
 			}
 		}
 
@@ -1773,6 +1782,7 @@ int mbview_route_add(int verbose, size_t instance, int inew, int jnew, int waypo
 				memset((void *)&shared.shareddata.routes[shared.shareddata.nroute], 0,
 				       MBV_ALLOC_NUM * sizeof(struct mbview_route_struct));
 				for (i = shared.shareddata.nroute; i < shared.shareddata.nroute_alloc; i++) {
+					shared.shareddata.routes[i].color = false;
 					shared.shareddata.routes[i].color = MBV_COLOR_RED;
 					shared.shareddata.routes[i].size = 1;
 					shared.shareddata.routes[i].editmode = true;
@@ -1816,6 +1826,7 @@ int mbview_route_add(int verbose, size_t instance, int inew, int jnew, int waypo
 		shared.shareddata.nroute++;
 
 		/* add the new route */
+		shared.shareddata.routes[inew].active = true;
 		shared.shareddata.routes[inew].color = MBV_COLOR_BLACK;
 		shared.shareddata.routes[inew].size = 1;
 		shared.shareddata.routes[inew].editmode = true;
@@ -1940,6 +1951,7 @@ int mbview_route_add(int verbose, size_t instance, int inew, int jnew, int waypo
 		fprintf(stderr, "dbg2       route_selected:       %d\n", shared.shareddata.route_selected);
 		fprintf(stderr, "dbg2       route_point_selected: %d\n", shared.shareddata.route_point_selected);
 		for (i = 0; i < shared.shareddata.nroute; i++) {
+			fprintf(stderr, "dbg2       route %d active:        %d\n", i, shared.shareddata.routes[i].active);
 			fprintf(stderr, "dbg2       route %d color:         %d\n", i, shared.shareddata.routes[i].color);
 			fprintf(stderr, "dbg2       route %d size:          %d\n", i, shared.shareddata.routes[i].size);
 			fprintf(stderr, "dbg2       route %d name:          %s\n", i, shared.shareddata.routes[i].name);
@@ -2124,6 +2136,7 @@ int mbview_route_delete(size_t instance, int iroute, int ipoint) {
 		fprintf(stderr, "dbg2       route_selected:       %d\n", shared.shareddata.route_selected);
 		fprintf(stderr, "dbg2       route_point_selected: %d\n", shared.shareddata.route_point_selected);
 		for (i = 0; i < shared.shareddata.nroute; i++) {
+			fprintf(stderr, "dbg2       route %d active:        %d\n", i, shared.shareddata.routes[i].active);
 			fprintf(stderr, "dbg2       route %d color:         %d\n", i, shared.shareddata.routes[i].color);
 			fprintf(stderr, "dbg2       route %d size:          %d\n", i, shared.shareddata.routes[i].size);
 			fprintf(stderr, "dbg2       route %d name:          %s\n", i, shared.shareddata.routes[i].name);
@@ -2195,7 +2208,8 @@ int mbview_route_setdistance(size_t instance, int working_route) {
 	// struct mbview_struct *data = &(view->data);
 
 	/* check that the route is valid */
-	if (working_route >= 0 && working_route < shared.shareddata.nroute && shared.shareddata.routes[working_route].npoints > 0) {
+	if (working_route >= 0 && working_route < shared.shareddata.nroute
+      && shared.shareddata.routes[working_route].npoints > 0 && shared.shareddata.routes[working_route].active) {
 		/* get route pointer */
 		route = &(shared.shareddata.routes[working_route]);
 		valid_route = true;
@@ -2378,57 +2392,59 @@ int mbview_drawroute(size_t instance, int rez) {
 
 		/* loop over the route points */
 		for (iroute = 0; iroute < shared.shareddata.nroute; iroute++) {
-			for (jpoint = 0; jpoint < shared.shareddata.routes[iroute].npoints; jpoint++) {
+      if (shared.shareddata.routes[iroute].active) {
+  			for (jpoint = 0; jpoint < shared.shareddata.routes[iroute].npoints; jpoint++) {
 
-				/* set the color for this route */
-				if (iroute == shared.shareddata.route_selected && (jpoint == shared.shareddata.route_point_selected ||
-				                                                   shared.shareddata.route_point_selected == MBV_SELECT_ALL))
-					icolor = MBV_COLOR_RED;
-				else
-					icolor = shared.shareddata.routes[iroute].color;
-				glColor3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
+  				/* set the color for this route */
+  				if (iroute == shared.shareddata.route_selected && (jpoint == shared.shareddata.route_point_selected ||
+  				                                                   shared.shareddata.route_point_selected == MBV_SELECT_ALL))
+  					icolor = MBV_COLOR_RED;
+  				else
+  					icolor = shared.shareddata.routes[iroute].color;
+  				glColor3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
 
-				/* draw the route point as a disk or sphere using GLUT */
+  				/* draw the route point as a disk or sphere using GLUT */
 
-				glTranslatef(shared.shareddata.routes[iroute].points[jpoint].xdisplay[instance],
-				             shared.shareddata.routes[iroute].points[jpoint].ydisplay[instance],
-				             shared.shareddata.routes[iroute].points[jpoint].zdisplay[instance]);
-				if (iroute == shared.shareddata.route_selected && (jpoint == shared.shareddata.route_point_selected ||
-				                                                   shared.shareddata.route_point_selected == MBV_SELECT_ALL))
-					glCallList((GLuint)MBV_GLLIST_ROUTELARGE);
-				else
-					glCallList((GLuint)MBV_GLLIST_ROUTESMALL);
-				glTranslatef(-shared.shareddata.routes[iroute].points[jpoint].xdisplay[instance],
-				             -shared.shareddata.routes[iroute].points[jpoint].ydisplay[instance],
-				             -shared.shareddata.routes[iroute].points[jpoint].zdisplay[instance]);
-			}
+  				glTranslatef(shared.shareddata.routes[iroute].points[jpoint].xdisplay[instance],
+  				             shared.shareddata.routes[iroute].points[jpoint].ydisplay[instance],
+  				             shared.shareddata.routes[iroute].points[jpoint].zdisplay[instance]);
+  				if (iroute == shared.shareddata.route_selected && (jpoint == shared.shareddata.route_point_selected ||
+  				                                                   shared.shareddata.route_point_selected == MBV_SELECT_ALL))
+  					glCallList((GLuint)MBV_GLLIST_ROUTELARGE);
+  				else
+  					glCallList((GLuint)MBV_GLLIST_ROUTESMALL);
+  				glTranslatef(-shared.shareddata.routes[iroute].points[jpoint].xdisplay[instance],
+  				             -shared.shareddata.routes[iroute].points[jpoint].ydisplay[instance],
+  				             -shared.shareddata.routes[iroute].points[jpoint].zdisplay[instance]);
+  			}
 
-			/* draw draped route line segments */
-			glColor3f(0.0, 0.0, 0.0);
-			glLineWidth((float)(2.0));
-			glBegin(GL_LINE_STRIP);
-			for (jpoint = 0; jpoint < shared.shareddata.routes[iroute].npoints - 1; jpoint++) {
-				/* set size and color */
-				if (iroute == shared.shareddata.route_selected &&
-				    (jpoint == shared.shareddata.route_point_selected || jpoint == shared.shareddata.route_point_selected - 1 ||
-				     shared.shareddata.route_point_selected == MBV_SELECT_ALL)) {
-					icolor = MBV_COLOR_RED;
-				}
-				else {
-					icolor = shared.shareddata.routes[iroute].color;
-				}
-				glColor3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
+  			/* draw draped route line segments */
+  			glColor3f(0.0, 0.0, 0.0);
+  			glLineWidth((float)(2.0));
+  			glBegin(GL_LINE_STRIP);
+  			for (jpoint = 0; jpoint < shared.shareddata.routes[iroute].npoints - 1; jpoint++) {
+  				/* set size and color */
+  				if (iroute == shared.shareddata.route_selected &&
+  				    (jpoint == shared.shareddata.route_point_selected || jpoint == shared.shareddata.route_point_selected - 1 ||
+  				     shared.shareddata.route_point_selected == MBV_SELECT_ALL)) {
+  					icolor = MBV_COLOR_RED;
+  				}
+  				else {
+  					icolor = shared.shareddata.routes[iroute].color;
+  				}
+  				glColor3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
 
-				/* draw draped segment */
-				for (k = 0; k < shared.shareddata.routes[iroute].segments[jpoint].nls; k++) {
-					/* draw points */
-					glVertex3f((float)(shared.shareddata.routes[iroute].segments[jpoint].lspoints[k].xdisplay[instance]),
-					           (float)(shared.shareddata.routes[iroute].segments[jpoint].lspoints[k].ydisplay[instance]),
-					           (float)(shared.shareddata.routes[iroute].segments[jpoint].lspoints[k].zdisplay[instance]));
-				}
-			}
-			glEnd();
-		}
+  				/* draw draped segment */
+  				for (k = 0; k < shared.shareddata.routes[iroute].segments[jpoint].nls; k++) {
+  					/* draw points */
+  					glVertex3f((float)(shared.shareddata.routes[iroute].segments[jpoint].lspoints[k].xdisplay[instance]),
+  					           (float)(shared.shareddata.routes[iroute].segments[jpoint].lspoints[k].ydisplay[instance]),
+  					           (float)(shared.shareddata.routes[iroute].segments[jpoint].lspoints[k].zdisplay[instance]));
+  				}
+  			}
+  			glEnd();
+  		}
+    }
 	}
 #ifdef MBV_GETERRORS
 	mbview_glerrorcheck(instance, 1, __func__);
@@ -2472,106 +2488,114 @@ int mbview_updateroutelist() {
 
 		if (shared.shareddata.nroute > 0) {
 			/* get number of items */
-			nitems = shared.shareddata.nroute;
-			for (iroute = 0; iroute < shared.shareddata.nroute; iroute++) {
-				nitems += 1 + shared.shareddata.routes[iroute].npoints;
-			}
-
-			/* allocate array of label XmStrings */
-			xstr = (XmString *)malloc(nitems * sizeof(XmString));
-
-			/* loop over the routes */
 			nitems = 0;
 			for (iroute = 0; iroute < shared.shareddata.nroute; iroute++) {
-				if (shared.shareddata.routes[iroute].editmode)
-					sprintf(value_string, "Editable Route %3d | Waypoints:%3d | Length:%.2f %.2f m | %s | Name: %s", iroute,
-					        shared.shareddata.routes[iroute].npoints, shared.shareddata.routes[iroute].distancelateral,
-					        shared.shareddata.routes[iroute].distancetopo,
-					        mbview_colorname[shared.shareddata.routes[iroute].color], shared.shareddata.routes[iroute].name);
-				else
-					sprintf(value_string, "Static Route %3d | Waypoints:%3d | Length:%.2f %.2f m | %s | Name: %s", iroute,
-					        shared.shareddata.routes[iroute].npoints, shared.shareddata.routes[iroute].distancelateral,
-					        shared.shareddata.routes[iroute].distancetopo,
-					        mbview_colorname[shared.shareddata.routes[iroute].color], shared.shareddata.routes[iroute].name);
-				xstr[nitems] = XmStringCreateLocalized(value_string);
-				nitems++;
-
-				/* add list item for each waypoint */
-				for (jpoint = 0; jpoint < shared.shareddata.routes[iroute].npoints; jpoint++) {
-					/* add list item for each route */
-					mbview_setlonlatstrings(shared.shareddata.routes[iroute].points[jpoint].xlon,
-					                        shared.shareddata.routes[iroute].points[jpoint].ylat, londstr0, latdstr0, lonmstr0,
-					                        latmstr0);
-
-					if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_SIMPLE)
-						strcpy(waypointstr, "---------");
-					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_TRANSIT)
-						strcpy(waypointstr, "-TRANSIT-");
-					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_STARTLINE)
-						strcpy(waypointstr, "--START--");
-					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_ENDLINE)
-						strcpy(waypointstr, "---END---");
-					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_STARTLINE2)
-						strcpy(waypointstr, "--START2-");
-					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_ENDLINE2)
-						strcpy(waypointstr, "---END2--");
-					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_STARTLINE3)
-						strcpy(waypointstr, "--START3-");
-					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_ENDLINE3)
-						strcpy(waypointstr, "---END3--");
-					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_STARTLINE4)
-						strcpy(waypointstr, "--START4-");
-					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_ENDLINE4)
-						strcpy(waypointstr, "---END4--");
-					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_STARTLINE5)
-						strcpy(waypointstr, "--START5-");
-					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_ENDLINE5)
-						strcpy(waypointstr, "---END5--");
-					else
-						strcpy(waypointstr, "-------");
-					if (shared.lonlatstyle == MBV_LONLAT_DEGREESDECIMAL)
-						sprintf(value_string, "%3d | %3d | %s | %s | %.2f | %.2f | %.2f | %s", iroute, jpoint, londstr0, latdstr0,
-						        shared.shareddata.routes[iroute].points[jpoint].zdata,
-						        shared.shareddata.routes[iroute].distlateral[jpoint],
-						        shared.shareddata.routes[iroute].disttopo[jpoint], waypointstr);
-					else
-						sprintf(value_string, "%3d | %3d | %s | %s | %.2f | %.2f | %.2f | %s", iroute, jpoint, lonmstr0, latmstr0,
-						        shared.shareddata.routes[iroute].points[jpoint].zdata,
-						        shared.shareddata.routes[iroute].distlateral[jpoint],
-						        shared.shareddata.routes[iroute].disttopo[jpoint], waypointstr);
-					xstr[nitems] = XmStringCreateLocalized(value_string);
-					nitems++;
-				}
+        if (shared.shareddata.routes[iroute].active) {
+  				nitems += 1 + shared.shareddata.routes[iroute].npoints;
+        }
 			}
 
-			/* add list items */
-			XmListAddItems(shared.mb3d_routelist.mbview_list_routelist, xstr, nitems, 0);
+      if (nitems > 0) {
+  			/* allocate array of label XmStrings */
+  			xstr = (XmString *)malloc(nitems * sizeof(XmString));
 
-			/* select list item for selected route */
-			if (shared.shareddata.route_selected != MBV_SELECT_NONE) {
-				/* get item number */
-				iitem = 0;
-				for (iroute = 0; iroute < shared.shareddata.nroute; iroute++) {
-					iitem++;
-					if (iroute == shared.shareddata.route_selected && shared.shareddata.route_point_selected == MBV_SELECT_ALL) {
-						XmListSelectPos(shared.mb3d_routelist.mbview_list_routelist, iitem, 0);
-						XmListSetPos(shared.mb3d_routelist.mbview_list_routelist, MAX(iitem - 5, 1));
-					}
-					for (jwaypoint = 0; jwaypoint < shared.shareddata.routes[iroute].npoints; jwaypoint++) {
-						iitem++;
-						if (iroute == shared.shareddata.route_selected && shared.shareddata.route_point_selected == jwaypoint) {
-							XmListSelectPos(shared.mb3d_routelist.mbview_list_routelist, iitem, 0);
-							XmListSetPos(shared.mb3d_routelist.mbview_list_routelist, MAX(iitem - 5, 1));
-						}
-					}
-				}
-			}
+  			/* loop over the routes */
+  			nitems = 0;
+  			for (iroute = 0; iroute < shared.shareddata.nroute; iroute++) {
+          if (shared.shareddata.routes[iroute].active) {
+    				if (shared.shareddata.routes[iroute].editmode)
+    					sprintf(value_string, "Editable Route %3d | Waypoints:%3d | Length:%.2f %.2f m | %s | Name: %s", iroute,
+    					        shared.shareddata.routes[iroute].npoints, shared.shareddata.routes[iroute].distancelateral,
+    					        shared.shareddata.routes[iroute].distancetopo,
+    					        mbview_colorname[shared.shareddata.routes[iroute].color], shared.shareddata.routes[iroute].name);
+    				else
+    					sprintf(value_string, "Static Route %3d | Waypoints:%3d | Length:%.2f %.2f m | %s | Name: %s", iroute,
+    					        shared.shareddata.routes[iroute].npoints, shared.shareddata.routes[iroute].distancelateral,
+    					        shared.shareddata.routes[iroute].distancetopo,
+    					        mbview_colorname[shared.shareddata.routes[iroute].color], shared.shareddata.routes[iroute].name);
+    				xstr[nitems] = XmStringCreateLocalized(value_string);
+    				nitems++;
 
-			/* deallocate memory no longer needed */
-			for (iitem = 0; iitem < nitems; iitem++) {
-				XmStringFree(xstr[iitem]);
-			}
-			free(xstr);
+    				/* add list item for each waypoint */
+    				for (jpoint = 0; jpoint < shared.shareddata.routes[iroute].npoints; jpoint++) {
+    					/* add list item for each route */
+    					mbview_setlonlatstrings(shared.shareddata.routes[iroute].points[jpoint].xlon,
+    					                        shared.shareddata.routes[iroute].points[jpoint].ylat, londstr0, latdstr0, lonmstr0,
+    					                        latmstr0);
+
+    					if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_SIMPLE)
+    						strcpy(waypointstr, "---------");
+    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_TRANSIT)
+    						strcpy(waypointstr, "-TRANSIT-");
+    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_STARTLINE)
+    						strcpy(waypointstr, "--START--");
+    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_ENDLINE)
+    						strcpy(waypointstr, "---END---");
+    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_STARTLINE2)
+    						strcpy(waypointstr, "--START2-");
+    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_ENDLINE2)
+    						strcpy(waypointstr, "---END2--");
+    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_STARTLINE3)
+    						strcpy(waypointstr, "--START3-");
+    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_ENDLINE3)
+    						strcpy(waypointstr, "---END3--");
+    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_STARTLINE4)
+    						strcpy(waypointstr, "--START4-");
+    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_ENDLINE4)
+    						strcpy(waypointstr, "---END4--");
+    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_STARTLINE5)
+    						strcpy(waypointstr, "--START5-");
+    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_ENDLINE5)
+    						strcpy(waypointstr, "---END5--");
+    					else
+    						strcpy(waypointstr, "-------");
+    					if (shared.lonlatstyle == MBV_LONLAT_DEGREESDECIMAL)
+    						sprintf(value_string, "%3d | %3d | %s | %s | %.2f | %.2f | %.2f | %s", iroute, jpoint, londstr0, latdstr0,
+    						        shared.shareddata.routes[iroute].points[jpoint].zdata,
+    						        shared.shareddata.routes[iroute].distlateral[jpoint],
+    						        shared.shareddata.routes[iroute].disttopo[jpoint], waypointstr);
+    					else
+    						sprintf(value_string, "%3d | %3d | %s | %s | %.2f | %.2f | %.2f | %s", iroute, jpoint, lonmstr0, latmstr0,
+    						        shared.shareddata.routes[iroute].points[jpoint].zdata,
+    						        shared.shareddata.routes[iroute].distlateral[jpoint],
+    						        shared.shareddata.routes[iroute].disttopo[jpoint], waypointstr);
+    					xstr[nitems] = XmStringCreateLocalized(value_string);
+    					nitems++;
+    				}
+          }
+  			}
+
+  			/* add list items */
+  			XmListAddItems(shared.mb3d_routelist.mbview_list_routelist, xstr, nitems, 0);
+
+  			/* select list item for selected route */
+  			if (shared.shareddata.route_selected != MBV_SELECT_NONE) {
+          if (shared.shareddata.routes[iroute].active) {
+    				/* get item number */
+    				iitem = 0;
+    				for (iroute = 0; iroute < shared.shareddata.nroute; iroute++) {
+    					iitem++;
+    					if (iroute == shared.shareddata.route_selected && shared.shareddata.route_point_selected == MBV_SELECT_ALL) {
+    						XmListSelectPos(shared.mb3d_routelist.mbview_list_routelist, iitem, 0);
+    						XmListSetPos(shared.mb3d_routelist.mbview_list_routelist, MAX(iitem - 5, 1));
+    					}
+    					for (jwaypoint = 0; jwaypoint < shared.shareddata.routes[iroute].npoints; jwaypoint++) {
+    						iitem++;
+    						if (iroute == shared.shareddata.route_selected && shared.shareddata.route_point_selected == jwaypoint) {
+    							XmListSelectPos(shared.mb3d_routelist.mbview_list_routelist, iitem, 0);
+    							XmListSetPos(shared.mb3d_routelist.mbview_list_routelist, MAX(iitem - 5, 1));
+    						}
+    					}
+    				}
+    			}
+        }
+
+  			/* deallocate memory no longer needed */
+  			for (iitem = 0; iitem < nitems; iitem++) {
+  				XmStringFree(xstr[iitem]);
+  			}
+  			free(xstr);
+      }
 		}
 	}
 

@@ -383,6 +383,7 @@ struct mbview_area_struct {
 };
 
 struct mbview_site_struct {
+  bool active;
 	struct mbview_pointw_struct point;
 	int color;
 	int size;
@@ -390,6 +391,7 @@ struct mbview_site_struct {
 };
 
 struct mbview_route_struct {
+  bool active;
 	int color;
 	int size;
 	int editmode;
@@ -407,6 +409,7 @@ struct mbview_route_struct {
 };
 
 struct mbview_nav_struct {
+  bool active;
 	int color;
 	int size;
 	mb_path name;
@@ -427,6 +430,7 @@ struct mbview_nav_struct {
 };
 
 struct mbview_vector_struct {
+  bool active;
 	int color;
 	int size;
 	mb_path name;
@@ -842,6 +846,7 @@ int mbview_addnav(int verbose, size_t instance, int npoint, double *time_d, doub
 int mbview_enableviewnavs(int verbose, size_t instance, int *error);
 int mbview_enableadjustnavs(int verbose, size_t instance, int *error);
 int mbview_picknavbyname(int verbose, size_t instance, char *name, int *error);
+int mbview_setnavactivebyname(int verbose, size_t instance, char *name, bool active, bool updatelist, int *error);
 
 /* mbview_vector.c function prototypes */
 int mbview_getvectorcount(int verbose, size_t instance, int *nvec, int *error);

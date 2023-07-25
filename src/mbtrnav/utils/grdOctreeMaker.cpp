@@ -62,7 +62,7 @@
 #define EAST_BOUND  -1//591526
 #define WEST_BOUND  -1//587430
 #define MIN_ACCEPTED_DEPTH  1//1000
-#define MAX_ACCEPTED_DEPTH  3500
+#define MAX_ACCEPTED_DEPTH  5000
 
 #define OUTFILE "temp.bo"
 //#define INFILE  "/home/david/ARL/SharedWithVM/mapsfromRock/Topo_UpperCanyonTesting_2m_Wall_UTM_STEVE2.grd"
@@ -122,8 +122,8 @@ int main( int argc, char **argv )
    }
 	
    char inFile[128], outFile[128];
-   sprintf(inFile, "%s.grd",argv[1]);
-   sprintf(outFile,"%s.bo",argv[1]);
+   snprintf(inFile, 128, "%s.grd", argv[1]);
+   snprintf(outFile, 128, "%s.bo", argv[1]);
    
    //struct stat buf;
    //if( stat(inFile, &buf) == 0 )
@@ -156,7 +156,7 @@ int main( int argc, char **argv )
 	 {
 	    if( i < (argc - 1) )
 	    {
-	       sprintf(outFile,"%s.bo",argv[i+1]);
+	       snprintf(outFile, 128, "%s.bo", argv[i+1]);
 	    }
 	    else
 	    {
@@ -204,14 +204,13 @@ int main( int argc, char **argv )
 	    if((MAX_ACCEPTED_DEPTH != -1) && (zValues.getZ(xIndex, yIndex) > MAX_ACCEPTED_DEPTH)){continue;}
 	    if((MIN_ACCEPTED_DEPTH != -1) && (zValues.getZ(xIndex, yIndex) < MIN_ACCEPTED_DEPTH)){continue;}
 				
-				
 	    if(uninitialized){
 	       Lowermost = Vector(xValues[xIndex], yValues[yIndex], zValues.getZ(xIndex, yIndex));
 	       Uppermost = Vector(xValues[xIndex], yValues[yIndex], zValues.getZ(xIndex, yIndex));
 	       uninitialized = false;
 	       Lowermost.Print();
 	    }
-				
+
 	    point = Vector( xValues[xIndex], yValues[yIndex], zValues.getZ(xIndex, yIndex));
 	    if(Lowermost.x > point.x){ Lowermost.x = point.x;}
 	    if(Lowermost.y > point.y){ Lowermost.y = point.y;}
@@ -255,7 +254,7 @@ int main( int argc, char **argv )
    for(unsigned int xIndex = 0; xIndex < zValues.numXValues; xIndex++){
       for(unsigned int yIndex = 0; yIndex < zValues.numYValues; yIndex++){
 	 if(zValues.getZ(xIndex, yIndex) != 99999 && !isnan(zValues.getZ(xIndex, yIndex))){
-	    if(zValues.getZ(xIndex, yIndex) <= 4000){
+	    if(zValues.getZ(xIndex, yIndex) <= MAX_ACCEPTED_DEPTH){
 	       point = Vector( xValues[xIndex], yValues[yIndex], zValues.getZ(xIndex, yIndex));
 					
 	       //test bounds

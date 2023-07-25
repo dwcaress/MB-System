@@ -454,7 +454,7 @@ gsfOpenBuffered(const char *filename, const int mode, int *handle, int buf_size)
      */
     numOpenFiles++;
     length = strlen (filename);
-    if (length >= sizeof(gsfFileTable[0].file_name))
+    if ((size_t)length >= sizeof(gsfFileTable[0].file_name))
     {
         length = sizeof(gsfFileTable[0].file_name) - 1;
     }
@@ -1207,11 +1207,11 @@ gsfUnpackStream (int handle, int desiredRecord, gsfDataID *dataID, gsfRecords *r
     * If the caller's buffer isn't null, move this data into their buffer.
     *  Don't move the 4 byte checksum into the buffer.
     */
-    if ((buf) && (dataSize <= max_size))
+    if ((buf) && ((int)dataSize <= max_size))
     {
         memcpy(buf, dptr, dataSize);
     }
-    else if ((buf) && (dataSize > max_size))
+    else if ((buf) && ((int)dataSize > max_size))
     {
         gsfError = GSF_INSUFFICIENT_SIZE;
         return (-1);

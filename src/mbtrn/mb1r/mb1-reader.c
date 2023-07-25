@@ -204,8 +204,11 @@ int mb1r_reader_connect(mb1r_reader_t *self, bool replace_socket)
         }
 
         const int optionval = 1;
+#if defined(__CYGWIN__)
+        msock_set_opt(self->sockif, SO_REUSEADDR, &optionval, sizeof(optionval));
+#else
         msock_set_opt(self->sockif, SO_REUSEPORT, &optionval, sizeof(optionval));
-
+#endif
         PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"connecting to stream [%s:%d]\n",self->sockif->addr->host,self->sockif->addr->port));
         if(msock_connect(self->sockif)==0){
             self->state=MB1R_CONNECTED;
@@ -1483,7 +1486,7 @@ static void *s_test_worker(void *pargs)
                             snd->nbeams = test_beams;
                             snd->ping_number = cx;
                             snd->ts = mtime_dtime();
-                            int k=0;
+                            unsigned int k=0;
                             for(k=0;k<test_beams;k++){
                                 snd->beams[k].beam_num=k;
                                 snd->beams[k].rhox = cx*1.;

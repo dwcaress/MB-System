@@ -76,8 +76,7 @@ struct mbsys_singlebeam_struct {
 	          1 = Observed fix
 	          3 = Interpolated
 	          9 = Unspecified	*/
-	int nav_quality;
-	/* QUALITY CODE FOR NAVIGATION -
+	int nav_quality; /* R2Rnav QUALITY CODE FOR NAVIGATION -
 	             5 - Suspected, by the
 	                 originating institution
 	             6 - Suspected, by the data
@@ -99,9 +98,32 @@ struct mbsys_singlebeam_struct {
 	                     6 = Estimated (dead reckoning) mode
 	                     7 = Manual input mode
 	                     8 = Simulator mode */
-	int gps_nsat;        /* R2Rnav GPS height (m) */
-	double gps_dilution; /* R2Rnav GPS height (m) */
+	int gps_nsat;        /* R2Rnav number of satellites */
+	double gps_dilution; /* R2Rnav GPS horizontal dilution of position (hdop) */
 	int gps_height;      /* R2Rnav GPS height (m) */
+	
+	/* SOI USBL tracking */
+	double gps_time;     /* time since start of day */
+	// int gps_quality - same as above for R2R
+	// int gps_nsat - same as above for R2R
+	// double gps_dilution - same as above for R2R
+	// double sonar_depth - same as below submersible/ROV data
+	
+	/* SOI ROV INS Navigation */
+	// double roll; - same as below
+	// double pitch; - same as below
+	// double heading; - same as below
+	int orientation_status;
+	// double longitude; - same as below
+	// double latitude; - same as below
+	int position_status;
+	double velocity_fwd;
+	double velocity_stbd;
+	double velocity_down;
+	// double altitude; - same as rov_altitude below
+	int altitude_status;
+	// double depth; - same as sonar_depth below
+	int depth_used;
 
 	/* motion sensor data */
 	double roll;

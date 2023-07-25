@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:03 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:09 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 152
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -355,827 +361,824 @@ BP
 (gridding or plotting. The programs)108 108 R F1(mbgrid)3.812 E F0(,)A
 F1(mbswath)3.813 E F0 3.813(,a)C(nd)-3.813 E F1(mbcontour)3.813 E F0
 1.313(also use ".inf" \214les in the same)3.813 F -.1(fa)108 120 S
-(shion.).1 E(Usually)108 144 Q 3.965(,t)-.65 G 1.465(he internal w)
--3.965 F 1.464
-(orking grid has the same boundaries as the output grid. Ho)-.1 F(we)
--.25 E -.15(ve)-.25 G 2.264 -.4(r, t).15 H(he).4 E F1<ad58>3.964 E F0
-(option)3.964 E(allo)108 156 Q 1.05(ws the size of the internal grid to\
- be increased so that data outside the grid can be used to guide the)
--.25 F .283(spline interpolation of data g)108 168 R .282
-(aps which happen to lie at the the edge of the grid.)-.05 F .282
-(This is particularly impor)5.282 F(-)-.2 E .301(tant when adjacent gri\
-ds are created which should match along the edges.)108 180 R .301
-(The data input bounds are set to)5.301 F 3.843(ar)108 192 S -.15(eg)
--3.843 G 1.343(ion three times as lar).15 F 1.342(ge as the w)-.18 F
-1.342(orking grid in both longitude and latitude.)-.1 F 1.342
-(The program reads all)6.342 F .369
-(pings which lie within the data input bounds, and accepts all data v)
-108 204 R .369(alues with locations within the w)-.25 F(orking)-.1 E
-(grid.)108 216 Q .701
-(The sample priorities are set according to three criteria.)108 240 R .7
-(The \214rst criteria is set by using the)5.701 F F1<ad59>3.2 E F0 .7
-(option to)3.2 F .076(specify a \214le containing a list of data priori\
-ties as a function of apparent grazing angle \(this angle is the arc-)
-108 252 R .236(tan\(x/z\) where x is acrosstrack distance and z is dept\
-h, so that the center of the sw)108 264 R .236
+(shion.).1 E(Usually)108 144 Q 3.111(,t)-.65 G .611(he internal w)-3.111
+F .611(orking grid has the same boundaries as the output grid. Ho)-.1 F
+(we)-.25 E -.15(ve)-.25 G 1.41 -.4(r, t).15 H(he).4 E F1<ad58>3.11 E F0
+.61(option al-)3.11 F(lo)108 156 Q .13(ws the size of the internal grid\
+ to be increased so that data outside the grid can be used to guide the\
+ spline)-.25 F 1.105(interpolation of data g)108 168 R 1.104
+(aps which happen to lie at the the edge of the grid.)-.05 F 1.104
+(This is particularly important)6.104 F .125
+(when adjacent grids are created which should match along the edges.)108
+180 R .126(The data input bounds are set to a re-)5.125 F .809
+(gion three times as lar)108 192 R .809(ge as the w)-.18 F .808
+(orking grid in both longitude and latitude.)-.1 F .808
+(The program reads all pings)5.808 F
+(which lie within the data input bounds, and accepts all data v)108 204
+Q(alues with locations within the w)-.25 E(orking grid.)-.1 E .7
+(The sample priorities are set according to three criteria.)108 228 R
+.701(The \214rst criteria is set by using the)5.7 F F1<ad59>3.201 E F0
+.701(option to)3.201 F .077(specify a \214le containing a list of data \
+priorities as a function of apparent grazing angle \(this angle is the \
+arc-)108 240 R .236(tan\(x/z\) where x is acrosstrack distance and z is\
+ depth, so that the center of the sw)108 252 R .236
 (ath has an apparent graz-)-.1 F .525(ing angle of zero, the port sw)108
-276 R .525(ath edge has a lar)-.1 F .525(ge ne)-.18 F -.05(ga)-.15 G(ti)
+264 R .525(ath edge has a lar)-.1 F .525(ge ne)-.18 F -.05(ga)-.15 G(ti)
 .05 E .825 -.15(ve a)-.25 H .525(ngle, and the starboard sw).15 F .525
-(ath edge has a lar)-.1 F(ge)-.18 E(positi)108 288 Q .3 -.15(ve a)-.25 H
+(ath edge has a lar)-.1 F(ge)-.18 E(positi)108 276 Q .3 -.15(ve a)-.25 H
 (ngle\). The highest priority assigned should be one, and the lo).15 E
-(west zero.)-.25 E .402(The second criteria is set by using the)108 312
+(west zero.)-.25 E .402(The second criteria is set by using the)108 300
 R F1<ad55>2.902 E F0 .402
 (option to specify a preferred look azimuth \(data on the port side)
-2.902 F .537(of the sw)108 324 R .537(ath ha)-.1 F .837 -.15(ve a l)-.2
-H .538(ook azimuth equal to the heading \255 90 de).15 F .538
-(grees, and data on the starboard side ha)-.15 F .838 -.15(ve a)-.2 H
-1.091(look azimuth equal to the heading + 90 de)108 336 R 3.591
-(grees\). The)-.15 F 1.09(second parameter in the)3.591 F F1<ad55>3.59 E
-F0 1.09(option is a f)3.59 F 1.09(actor \(f\))-.1 F .478
-(which modulates ho)108 348 R 2.978(wr)-.25 G .478
-(apidly the priority de)-2.978 F .479(grades a)-.15 F -.1(wa)-.15 G
-2.979(yf).1 G .479(rom the preferred look azimuth. The priority \(p\))
--2.979 F(is assigned as follo)108 360 Q(ws:)-.25 E 2.5(p=c)128 372 S
+2.902 F .538(of the sw)108 312 R .538(ath ha)-.1 F .838 -.15(ve a l)-.2
+H .538(ook azimuth equal to the heading \255 90 de).15 F .537
+(grees, and data on the starboard side ha)-.15 F .837 -.15(ve a)-.2 H
+1.09(look azimuth equal to the heading + 90 de)108 324 R 3.59
+(grees\). The)-.15 F 1.091(second parameter in the)3.591 F F1<ad55>3.591
+E F0 1.091(option is a f)3.591 F 1.091(actor \(f\))-.1 F .479
+(which modulates ho)108 336 R 2.979(wr)-.25 G .479
+(apidly the priority de)-2.979 F .479(grades a)-.15 F -.1(wa)-.15 G
+2.979(yf).1 G .478(rom the preferred look azimuth. The priority \(p\))
+-2.979 F(is assigned as follo)108 348 Q(ws:)-.25 E 2.5(p=c)128 360 S
 (os\( f * \(Ap \255 Aa\)\))-2.5 E .141(where Ap is the preferred look a\
 zimuth and Aa is the actual look azimuth. If f = 1.0, the priority will\
- be 1.0)108 384 R .735(at the preferred look azimuth and will f)108 396
-R .736(all to zero for look azimuths more than 90 de)-.1 F .736(grees a)
--.15 F -.1(wa)-.15 G 3.236(yf).1 G .736(rom the)-3.236 F .961(preferred\
+ be 1.0)108 372 R .736(at the preferred look azimuth and will f)108 384
+R .736(all to zero for look azimuths more than 90 de)-.1 F .735(grees a)
+-.15 F -.1(wa)-.15 G 3.235(yf).1 G .735(rom the)-3.235 F .136(preferred\
  look azimuth. If f > 1.0, the range of nonzero priorities will shrink \
-closer to the preferred look)108 408 R .507(azimuth \(e.g. if f = 2.0, \
-nonzero priorities will be restricted to look azimuths within 45 de)108
-420 R .507(grees of the pre-)-.15 F 1.645(ferred look azimuth\). If f <\
- 1.0, the range of nonzero priorities will e)108 432 R 1.644
-(xpand \(e.g. if f = 0.5, only look)-.15 F(azimuths 180 de)108 444 Q
+closer to the preferred look az-)108 396 R .974(imuth \(e.g. if f = 2.0\
+, nonzero priorities will be restricted to look azimuths within 45 de)
+108 408 R .974(grees of the pre-)-.15 F .866(ferred look azimuth\). If \
+f < 1.0, the range of nonzero priorities will e)108 420 R .866
+(xpand \(e.g. if f = 0.5, only look az-)-.15 F(imuths 180 de)108 432 Q
 (grees a)-.15 E -.1(wa)-.15 G 2.5(yf).1 G
 (rom the preferred look azimuth will ha)-2.5 E .3 -.15(ve a z)-.2 H
-(ero priority\).).15 E .204(The third criteria is set by using the)108
-468 R F1<ad55>2.705 E F0 .205(option to specify a preferred heading.)
-2.705 F .205(The second parameter in the)5.205 F F1<ad55>108 480 Q F0
-.405(option is a f)2.905 F .405(actor \(f\) which modulates ho)-.1 F
-2.905(wr)-.25 G .405(apidly the priority de)-2.905 F .404(grades a)-.15
-F -.1(wa)-.15 G 2.904(yf).1 G .404(rom the preferred head-)-2.904 F
-(ing. The priority \(p\) is assigned as follo)108 492 Q(ws:)-.25 E 2.5
-(p=c)128 504 S(os\( f * \(Hp \255 Ha\)\))-2.5 E .076(where Hp is the pr\
+(ero priority\).).15 E .205(The third criteria is set by using the)108
+456 R F1<ad55>2.705 E F0 .205(option to specify a preferred heading.)
+2.705 F .204(The second parameter in the)5.204 F F1<ad55>108 468 Q F0
+.404(option is a f)2.904 F .405(actor \(f\) which modulates ho)-.1 F
+2.905(wr)-.25 G .405(apidly the priority de)-2.905 F .405(grades a)-.15
+F -.1(wa)-.15 G 2.905(yf).1 G .405(rom the preferred head-)-2.905 F
+(ing. The priority \(p\) is assigned as follo)108 480 Q(ws:)-.25 E 2.5
+(p=c)128 492 S(os\( f * \(Hp \255 Ha\)\))-2.5 E .076(where Hp is the pr\
 eferred heading and Ha is the actual heading. If f = 1.0, the priority \
-will be 1.0 at the pre-)108 516 R .108(ferred heading and will f)108 528
+will be 1.0 at the pre-)108 504 R .107(ferred heading and will f)108 516
 R .107(all to zero for heading more than 90 de)-.1 F .107(grees a)-.15 F
--.1(wa)-.15 G 2.607(yf).1 G .107(rom the heading.)-2.607 F .107
+-.1(wa)-.15 G 2.607(yf).1 G .107(rom the heading.)-2.607 F .108
 (If f > 1.0, the)5.107 F .204(range of nonzero priorities will shrink c\
 loser to the preferred heading \(e.g. if f = 2.0, nonzero priorities wi\
-ll)108 540 R .145(be restricted to headings within 45 de)108 552 R .144
+ll)108 528 R .144(be restricted to headings within 45 de)108 540 R .144
 (grees of the preferred heading\). If f < 1.0, the range of nonzero pri\
-ori-)-.15 F .035(ties will e)108 564 R .035
+ori-)-.15 F .035(ties will e)108 552 R .035
 (xpand \(e.g. if f = 0.5, only headings 180 de)-.15 F .035(grees a)-.15
 F -.1(wa)-.15 G 2.535(yf).1 G .035(rom the preferred heading will ha)
--2.535 F .335 -.15(ve a z)-.2 H(ero).15 E(priority\).)108 576 Q .232(Th\
+-2.535 F .335 -.15(ve a z)-.2 H(ero).15 E(priority\).)108 564 Q .232(Th\
 e priorities used in the mosaicing are found by multiplying the grazing\
- angle, look azimuth, and heading)108 600 R .454(priorities together)108
-612 R 2.954(.O)-.55 G 2.954(fc)-2.954 G .455(ourse, the priority associ\
-ated with a criteria that is not used because it has not been)-2.954 F
-(speci\214ed will be simply 1.0.)108 624 Q .336(The def)108 648 R .336
-(ault beha)-.1 F .336(vior is to set each bin to the v)-.2 F .335
+ angle, look azimuth, and heading)108 588 R .455(priorities together)108
+600 R 2.955(.O)-.55 G 2.955(fc)-2.955 G .454(ourse, the priority associ\
+ated with a criteria that is not used because it has not been)-2.955 F
+(speci\214ed will be simply 1.0.)108 612 Q .335(The def)108 636 R .335
+(ault beha)-.1 F .335(vior is to set each bin to the v)-.2 F .336
 (alue of the highest priority sample found in that bin. If more)-.25 F
-.052(than one sample has the same highest priority)108 660 R 2.552(,t)
+.053(than one sample has the same highest priority)108 648 R 2.552(,t)
 -.65 G .052(he \214rst such sample is used.)-2.552 F .052(If the)5.052 F
-F1<ad46>2.552 E F0 .053(option is used to set a)2.553 F .564(range of a\
+F1<ad46>2.552 E F0 .052(option is used to set a)2.552 F .564(range of a\
 cceptable priorities, then the mosaicing is done using a Gaussian weigh\
-ted mean algorithm. The)108 672 R .521
-(samples used are those with priorities lar)108 684 R .522
-(ger than the highest priority found minus the range v)-.18 F 3.022
-(alue. In)-.25 F(this)3.022 E .585(scheme, each sample')108 696 R 3.085
-(sc)-.55 G(ontrib)-3.085 E .585(ution to a Gaussian weighted a)-.2 F
--.15(ve)-.2 G .584(rage for each nearby grid cell is calculated).15 F
-(using this weighting function:)108 708 Q(W\(r\) = Ae)144 720 Q
-(xp\(r**2/a**2\))-.15 E(MB-System 5.0)72 768 Q(25 September 2021)131.775
-E(2)190.115 E 0 Cg EP
+ted mean algorithm. The)108 660 R .522
+(samples used are those with priorities lar)108 672 R .522
+(ger than the highest priority found minus the range v)-.18 F 3.021
+(alue. In)-.25 F(this)3.021 E .584(scheme, each sample')108 684 R 3.084
+(sc)-.55 G(ontrib)-3.084 E .585(ution to a Gaussian weighted a)-.2 F
+-.15(ve)-.2 G .585(rage for each nearby grid cell is calculated).15 F
+(using this weighting function:)108 696 Q(W\(r\) = Ae)144 708 Q
+(xp\(r**2/a**2\))-.15 E .385(where r is the distance from the center of\
+ the bin to the data point, a is the distance at which the weighting)108
+720 R(MB-System 5.0)72 768 Q(25 September 2021)131.775 E(2)190.115 E 0
+Cg EP
 %%Page: 3 3
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 147.06(mbmosaic\(1\) MB-System)72 48 R 147.06
-(5.0 mbmosaic\(1\))2.5 F .385(where r is the distance from the center o\
-f the bin to the data point, a is the distance at which the weighting)
-108 84 R 1.336(function f)108 96 R 1.336(alls to 1/e of its maximum v)
--.1 F 1.335(alue, and A is a normalizing f)-.25 F 1.335
-(actor set so that the sum of all the)-.1 F .603(weights adds to a v)108
-108 R .604(alue of 1.)-.25 F(Normally)5.604 E 3.104(,t)-.65 G .604
-(he distance a is set to be half the a)-3.104 F -.15(ve)-.2 G .604
-(rage grid point spacing, b).15 F(ut)-.2 E(this can be v)108 120 Q
+(5.0 mbmosaic\(1\))2.5 F 1.335(function f)108 84 R 1.335
+(alls to 1/e of its maximum v)-.1 F 1.335
+(alue, and A is a normalizing f)-.25 F 1.336
+(actor set so that the sum of all the)-.1 F .604(weights adds to a v)108
+96 R .604(alue of 1.)-.25 F(Normally)5.604 E 3.104(,t)-.65 G .604
+(he distance a is set to be half the a)-3.104 F -.15(ve)-.2 G .603
+(rage grid point spacing, b).15 F(ut)-.2 E(this can be v)108 108 Q
 (aried using the)-.25 E/F1 10/Times-Bold@0 SF<ad57>2.5 E F0(option.)2.5
-E .266(If the weight parameter is used on the)108 144 R F1<ad46>2.766 E
-F0 .266(option then for weight = 0 [def)2.766 F .265(ault] the abo)-.1 F
-.565 -.15(ve w)-.15 H .265(eight is used, for).15 F .864
-(weight = 1 the abo)108 156 R 1.164 -.15(ve w)-.15 H .864
+E .265(If the weight parameter is used on the)108 132 R F1<ad46>2.766 E
+F0 .266(option then for weight = 0 [def)2.766 F .266(ault] the abo)-.1 F
+.566 -.15(ve w)-.15 H .266(eight is used, for).15 F .864
+(weight = 1 the abo)108 144 R 1.164 -.15(ve w)-.15 H .864
 (eight is multiplied by the sample priority).15 F 3.364(,a)-.65 G .864
 (nd for weight = 2 the abo)-3.364 F 1.164 -.15(ve w)-.15 H .864
 (eight is).15 F .591(multiplied by the square of the sample priority)108
-168 R 5.591(.U)-.65 G(sing)-5.591 E F1(\255F1/1)3.091 E F0 .591
+156 R 5.591(.U)-.65 G(sing)-5.591 E F1(\255F1/1)3.091 E F0 .591
 (causes the priorities to be treated as weights)3.091 F
-(rather than priorities.)108 180 Q .142(If the)108 204 R F1<ad43>2.642 E
+(rather than priorities.)108 168 Q .143(If the)108 192 R F1<ad43>2.643 E
 F0 .143(option is used to set clipping to a v)2.643 F .143
 (alue > 0, then a 2D thin plate spline algorithm is applied to the)-.25
-F .447(successfully calculated grid v)108 216 R .447
-(alues to \214ll in, or interpolate, g)-.25 F .446(aps in the data.)-.05
-F(Ne)5.446 E 2.946(wv)-.25 G .446(alues are assigned only)-3.196 F .484
+F .446(successfully calculated grid v)108 204 R .446
+(alues to \214ll in, or interpolate, g)-.25 F .447(aps in the data.)-.05
+F(Ne)5.447 E 2.947(wv)-.25 G .447(alues are assigned only)-3.197 F .484
 (at grid points within a speci\214ed distance from the nearest data poi\
-nts \(this distance is speci\214ed in terms of)108 228 R .848
-(grid point spacing using the)108 240 R F1<ad43>3.348 E F0 3.348
+nts \(this distance is speci\214ed in terms of)108 216 R .847
+(grid point spacing using the)108 228 R F1<ad43>3.348 E F0 3.348
 (command\). Thus,)3.348 F .848(small g)3.348 F .848
 (aps in the data can be \214lled, or the whole grid)-.05 F
-(can be \214lled in with a smooth interpolation.)108 252 Q .936
-(The output grid will by def)108 276 R .936(ault contain v)-.1 F .936
+(can be \214lled in with a smooth interpolation.)108 240 Q .937
+(The output grid will by def)108 264 R .937(ault contain v)-.1 F .936
 (alues of 99999.9 at cells containing no data; if the)-.25 F F1<ad4e>
-3.437 E F0 .937(option is)3.437 F(used then the \215agging v)108 288 Q
-(alue used is NaN, or not-a-number)-.25 E(.)-.55 E .452(The names of th\
+3.436 E F0 .936(option is)3.436 F(used then the \215agging v)108 276 Q
+(alue used is NaN, or not-a-number)-.25 E(.)-.55 E .451(The names of th\
 e output \214les are based on the root character string speci\214ed usi\
-ng the)108 312 R F1<ad4f>2.951 E F0 .451(option. A num-)2.951 F .337(be\
+ng the)108 300 R F1<ad4f>2.952 E F0 .452(option. A num-)2.952 F .337(be\
 r of grid formats are supported, including all of the grid formats supp\
-orted by)108 324 R F1(GMT)2.837 E F0 5.338(.S)C .338(ee the)-5.338 F F1
-<ad47>2.838 E F0(option)2.838 E(belo)108 336 Q 2.821(wf)-.25 G .321
-(or a list of the a)-2.821 F -.25(va)-.2 G .321(ilable formats.).25 F
+orted by)108 312 R F1(GMT)2.837 E F0 5.337(.S)C .337(ee the)-5.337 F F1
+<ad47>2.837 E F0(option)2.837 E(belo)108 324 Q 2.82(wf)-.25 G .321
+(or a list of the a)-2.82 F -.25(va)-.2 G .321(ilable formats.).25 F
 .321(If the grid is output in an)5.321 F 2.821(yo)-.15 G 2.821(ft)-2.821
 G(he)-2.821 E F1(GMT)2.821 E F0 .321(grid formats, then its \214le-)
 2.821 F .07(name is "root.grd", and a shellscript which will allo)108
-348 R 2.57(wt)-.25 G .07(he contents of the grid to be vie)-2.57 F .07
-(wed using)-.25 F F1(GMT)2.57 E F0(pro-)2.57 E .331
-(grams is also output with the \214lename "root.grd.cmd".)108 360 R .331
-(If the)5.331 F F1<ad47>2.831 E/F2 10/Times-Italic@0 SF(1)A F0 .33
-(option is used to specify an ascii format)2.83 F
-(grid, then the output grid \214lename will be "root.asc", b)108 372 Q
-(ut no plotting shellscript will be created.)-.2 E 3.016(Ad)108 396 S
-.516(atalist \214le containing references to all of the sw)-3.016 F .517
-(ath \214les actually contib)-.1 F .517
+336 R 2.57(wt)-.25 G .07(he contents of the grid to be vie)-2.57 F .07
+(wed using)-.25 F F1(GMT)2.57 E F0(pro-)2.57 E .33
+(grams is also output with the \214lename "root.grd.cmd".)108 348 R .331
+(If the)5.33 F F1<ad47>2.831 E/F2 10/Times-Italic@0 SF(1)A F0 .331
+(option is used to specify an ascii format)2.831 F
+(grid, then the output grid \214lename will be "root.asc", b)108 360 Q
+(ut no plotting shellscript will be created.)-.2 E 3.017(Ad)108 384 S
+.517(atalist \214le containing references to all of the sw)-3.017 F .517
+(ath \214les actually contib)-.1 F .516
 (uting to the grid is also created.)-.2 F
-(This \214le is named by adding a ".mb-1" suf)108 408 Q
-(\214x to the root string.)-.25 E(The)108 432 Q F1<ad4d>2.848 E F0 .348
-(option causes)2.848 F F1(mbmosaic)2.848 E F0 .347(to output tw)2.848 F
-2.847(oa)-.1 G .347
+(This \214le is named by adding a ".mb-1" suf)108 396 Q
+(\214x to the root string.)-.25 E(The)108 420 Q F1<ad4d>2.847 E F0 .347
+(option causes)2.847 F F1(mbmosaic)2.847 E F0 .347(to output tw)2.847 F
+2.847(oa)-.1 G .348
 (dditional grids, the \214rst \("root_num.grd"\) being the num-)-2.847 F
-1.32(ber of high priority data points used within each bin, and the sec\
-ond \("root_sd.grd"\) being the standard)108 444 R(de)108 456 Q .738
-(viation of the data points used within each bin.)-.25 F(The)5.737 E F1
-<ad4d>3.237 E F0 .737(option can only be used if Gaussian weighted)3.237
-F 2.624(mean mosaicing is enabled with the)108 468 R F1<ad46>5.124 E F0
-5.124(option. Plotting)5.124 F 2.625
+.344(ber of high priority data points used within each bin, and the sec\
+ond \("root_sd.grd"\) being the standard de-)108 432 R 1.247
+(viation of the data points used within each bin.)108 444 R(The)6.248 E
+F1<ad4d>3.748 E F0 1.248(option can only be used if Gaussian weighted)
+3.748 F 2.624(mean mosaicing is enabled with the)108 456 R F1<ad46>5.124
+E F0 5.124(option. Plotting)5.124 F 2.624
 (shellscripts called "root_num.grd.cmd" and)5.124 F
-("root_sd.grd.cmd" are also output if the grids are in a)108 480 Q F1
-(GMT)2.5 E F0(grid format.)2.5 E(The)108 504 Q F1<ad4a>3.78 E F0 1.279(\
-option can be used to specify grids in UTM eastings and northings \(met\
-ers\) rather than in geo-)3.78 F
-(graphic coordinates \(longitude and latitude de)108 516 Q(grees\).)-.15
-E/F3 10.95/Times-Bold@0 SF(MB-SYSTEM A)72 544.8 Q(UTHORSHIP)-.548 E F0
-(Da)108 556.8 Q(vid W)-.2 E 2.5(.C)-.92 G(aress)-2.5 E(Montere)113 568.8
+("root_sd.grd.cmd" are also output if the grids are in a)108 468 Q F1
+(GMT)2.5 E F0(grid format.)2.5 E(The)108 492 Q F1<ad4a>3.779 E F0 1.279
+(option can be used to specify grids in UTM eastings and northings \(me\
+ters\) rather than in geo-)3.779 F
+(graphic coordinates \(longitude and latitude de)108 504 Q(grees\).)-.15
+E/F3 10.95/Times-Bold@0 SF(MB-SYSTEM A)72 532.8 Q(UTHORSHIP)-.548 E F0
+(Da)108 544.8 Q(vid W)-.2 E 2.5(.C)-.92 G(aress)-2.5 E(Montere)113 556.8
 Q 2.5(yB)-.15 G(ay Aquarium Research Institute)-2.5 E(Dale N. Chayes)108
-580.8 Q(Center for Coastal and Ocean Mapping)113 592.8 Q(Uni)113 604.8 Q
+568.8 Q(Center for Coastal and Ocean Mapping)113 580.8 Q(Uni)113 592.8 Q
 -.15(ve)-.25 G(rsity of Ne).15 E 2.5(wH)-.25 G(ampshire)-2.5 E
-(Christian do Santos Ferreira)108 616.8 Q(MAR)113 628.8 Q
+(Christian do Santos Ferreira)108 604.8 Q(MAR)113 616.8 Q
 (UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
-640.8 Q -.15(ve)-.25 G(rsity of Bremen).15 E F3(OPTIONS)72 669.6 Q F1
-<ad41>108 681.6 Q F2(datatype)23.08 E F0
-(Sets the type of data to be read and mosaiced.)144 693.6 Q F2(datatype)
-180 705.6 Q F0 2.5(=3)2.5 G 2.5(,a)-2.5 G
-(mplitude data will be mosaiced.)-2.5 E F2(datatype)180 717.6 Q F0 2.5
+628.8 Q -.15(ve)-.25 G(rsity of Bremen).15 E F3(OPTIONS)72 657.6 Q F1
+<ad41>108 669.6 Q F2(datatype)144 669.6 Q F0
+(Sets the type of data to be read and mosaiced.)144 681.6 Q F2(datatype)
+180 693.6 Q F0 2.5(=3)2.5 G 2.5(,a)-2.5 G
+(mplitude data will be mosaiced.)-2.5 E F2(datatype)180 705.6 Q F0 2.5
 (=4)2.5 G 2.5(,s)-2.5 G(idescan data will be mosaiced.)-2.5 E F2
-(datatype)180 729.6 Q F0 2.5(=5)2.5 G 2.5<2c8d>-2.5 G
-(at bottom grazing angle will be mosaiced.)-2.5 E(MB-System 5.0)72 768 Q
-(25 September 2021)131.775 E(3)190.115 E 0 Cg EP
+(datatype)180 717.6 Q F0 2.5(=5)2.5 G 2.5<2c8d>-2.5 G
+(at bottom grazing angle will be mosaiced.)-2.5 E F2(datatype)180 729.6
+Q F0 2.5(=6)2.5 G 2.5(,a)-2.5 G
+(crosstrack grazing angle will be mosaiced.)-2.5 E(MB-System 5.0)72 768
+Q(25 September 2021)131.775 E(3)190.115 E 0 Cg EP
 %%Page: 4 4
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 147.06(mbmosaic\(1\) MB-System)72 48 R 147.06
 (5.0 mbmosaic\(1\))2.5 F/F1 10/Times-Italic@0 SF(datatype)180 84 Q F0
-2.5(=6)2.5 G 2.5(,a)-2.5 G(crosstrack grazing angle will be mosaiced.)
--2.5 E F1(datatype)180 96 Q F0 2.5(=7)2.5 G 2.5(,a)-2.5 G
-(crosstrack slope will be mosaiced.)-2.5 E .241(Mosaicing of bath)144
-108 R .241(ymetry is not supported, and so)-.05 F F1(datatype)2.741 E F0
--.25(va)2.741 G .242(lues of 1 \(bath).25 F .242
-(ymetry\) and 2 \(topog-)-.05 F(raph)144 120 Q 1.485(y\) are not allo)
--.05 F 1.485(wed. Bath)-.25 F 1.484(ymetry and topograph)-.05 F 3.984
-(ys)-.05 G 1.484(hould be gridded with)-3.984 F/F2 10/Times-Bold@0 SF
-(mbgrid)3.984 E F0 6.484(.I)C 3.984(f")-6.484 G 1.484(F" is)-3.984 F
-.238(appended to)144 132 R F1(datatype)2.738 E F0 2.738(,t)C(hen)-2.738
-E F2(mbmosaic)2.738 E F0 .239
-(will attempt to mosaic amplitude or sidescan data that ha)2.738 F -.15
-(ve)-.2 G .893(been \214ltered with)144 144 R F2(mb\214lter)3.393 E F0
+2.5(=7)2.5 G 2.5(,a)-2.5 G(crosstrack slope will be mosaiced.)-2.5 E
+.242(Mosaicing of bath)144 96 R .242(ymetry is not supported, and so)
+-.05 F F1(datatype)2.741 E F0 -.25(va)2.741 G .241(lues of 1 \(bath).25
+F .241(ymetry\) and 2 \(topog-)-.05 F(raph)144 108 Q .367
+(y\) are not allo)-.05 F .367(wed. Bath)-.25 F .367
+(ymetry and topograph)-.05 F 2.867(ys)-.05 G .367(hould be gridded with)
+-2.867 F/F2 10/Times-Bold@0 SF(mbgrid)2.868 E F0 5.368(.I)C 2.868(f")
+-5.368 G .368(F" is ap-)-2.868 F .913(pended to)144 120 R F1(datatype)
+3.413 E F0 3.413(,t)C(hen)-3.413 E F2(mbmosaic)3.413 E F0 .913
+(will attempt to mosaic amplitude or sidescan data that ha)3.413 F -.15
+(ve)-.2 G .892(been \214ltered with)144 132 R F2(mb\214lter)3.393 E F0
 5.893(.I)C 3.393(ft)-5.893 G .893
 (he desired \214ltered data \214les do not e)-3.393 F .893
-(xist, data input will f)-.15 F .892(ail and)-.1 F F2(mbmosaic)144 156 Q
-F0 .006(will e)2.506 F .007(xit with an error message. Filtered amplitu\
-de data are stored in ancillary \214les end-)-.15 F .583(ing with ".f)
-144 168 R -.1(fa)-.25 G .583
+(xist, data input will f)-.15 F .893(ail and)-.1 F F2(mbmosaic)144 144 Q
+F0 .007(will e)2.507 F .007(xit with an error message. Filtered amplitu\
+de data are stored in ancillary \214les end-)-.15 F .582(ing with ".f)
+144 156 R -.1(fa)-.25 G .583
 (", and \214ltered sidescan \214les end in ".f).1 F .583
 (fs". Appending "F" to)-.25 F F1(mode)3.083 E F0 -.25(va)3.083 G .583
-(lues of 5-7 will).25 F(ha)144 180 Q .3 -.15(ve n)-.2 H 2.5(oe).15 G
+(lues of 5-7 will).25 F(ha)144 168 Q .3 -.15(ve n)-.2 H 2.5(oe).15 G
 -.25(ff)-2.5 G 2.5(ect. Def).25 F(ault:)-.1 E F1(datatype)2.5 E F0 2.5
-(=4\()2.5 G(sidescan\).)-2.5 E F2<ad42>108 196.8 Q F1(bor)23.63 E(der)
--.37 E F0 1.094
-(Sets the border of a smoothly interpolated grid to the v)144 208.8 R
-(alue)-.25 E F1(bor)3.595 E(der)-.37 E F0(where)3.595 E -.15(ve)-.25 G
-3.595(rn).15 G 3.595(od)-3.595 G 1.095(ata e)-3.595 F 1.095(xist, pro-)
--.15 F(vided)144 220.8 Q F1(bor)2.5 E(der)-.37 E F0 2.5(>0)2.5 G 2.5
+(=4\()2.5 G(sidescan\).)-2.5 E F2<ad42>108 184.8 Q F1(bor)144 184.8 Q
+(der)-.37 E F0 1.095
+(Sets the border of a smoothly interpolated grid to the v)144 196.8 R
+(alue)-.25 E F1(bor)3.594 E(der)-.37 E F0(where)3.594 E -.15(ve)-.25 G
+3.594(rn).15 G 3.594(od)-3.594 G 1.094(ata e)-3.594 F 1.094(xist, pro-)
+-.15 F(vided)144 208.8 Q F1(bor)2.5 E(der)-.37 E F0 2.5(>0)2.5 G 2.5
 (.0. Def)-2.5 F(ault:)-.1 E F1(bor)2.5 E(der)-.37 E F0 2.5(=0)2.5 G(.0)
--2.5 E F2<ad43>108 237.6 Q F1(clip)23.08 E F0 .999
-(Sets the clipping dimension for the spline interpolation. If)144 249.6
-R F1(clip)3.498 E F0 .998(=0 no spline interpolation will be)B 3.048
-(done. If)144 261.6 R F1(clip)3.048 E F0 .549
+-2.5 E F2<ad43>108 225.6 Q F1(clip)144 225.6 Q F0 .998
+(Sets the clipping dimension for the spline interpolation. If)144 237.6
+R F1(clip)3.499 E F0 .999(=0 no spline interpolation will be)B 3.049
+(done. If)144 249.6 R F1(clip)3.049 E F0 .549
 (>0 then the spline interpolation will \214ll data g)B .549
-(aps to a distance of)-.05 F F1(clip)3.049 E F0 .549(times the grid)
-3.049 F 2.5(spacing. Def)144 273.6 R(ault:)-.1 E F1(clip)2.5 E F0 2.5
-(=0)2.5 G(.)-2.5 E F2<ad44>108 290.4 Q F1(xdim/ydim)23.08 E F0 1.349
-(Sets the dimensions of the output grid.)144 302.4 R 1.349
+(aps to a distance of)-.05 F F1(clip)3.049 E F0 .548(times the grid)
+3.049 F 2.5(spacing. Def)144 261.6 R(ault:)-.1 E F1(clip)2.5 E F0 2.5
+(=0)2.5 G(.)-2.5 E F2<ad44>108 278.4 Q F1(xdim/ydim)144 278.4 Q F0 1.348
+(Sets the dimensions of the output grid.)144 290.4 R 1.349
 (This option is superceded if the user speci\214es the grid)6.349 F
-(spacing with the)144 314.4 Q F2<ad45>2.5 E F0 2.5(option. Def)2.5 F
+(spacing with the)144 302.4 Q F2<ad45>2.5 E F0 2.5(option. Def)2.5 F
 (ault:)-.1 E F1(xdim)5 E F0(=)2.5 E F1(ydim)2.5 E F0 2.5(=1)2.5 G(01.)
--2.5 E F2<ad45>108 331.2 Q F1(dx/dy/units[!])23.63 E F0 .468
-(Sets the grid cell spacing to)144 343.2 R F1(dx)2.968 E F0 .468
+-2.5 E F2<ad45>108 319.2 Q F1(dx/dy/units[!])144 319.2 Q F0 .468
+(Sets the grid cell spacing to)144 331.2 R F1(dx)2.968 E F0 .468
 (in longitude and)2.968 F F1(dy)2.968 E F0 .468(in latitude. If)2.968 F
 F1(units)2.968 E F0 .468(is not speci\214ed, the)2.968 F F1(dx)2.968 E
-F0(and)2.968 E F1(dy)144 355.2 Q F0 -.25(va)4.472 G 1.972
-(lues are assumed to be in meters. V).25 F 1.972(alid v)-1.11 F 1.972
-(alues for)-.25 F F1(units)4.472 E F0 1.972
-(include "km", "meters", "feet",)4.472 F("de)144 367.2 Q .589
-(grees", "arcmin", and "arcsec".)-.15 F .589(If not in de)5.589 F .589
-(grees, the grid cell spacing v)-.15 F .59(alues are con)-.25 F -.15(ve)
--.4 G .59(rted to).15 F(de)144 379.2 Q .746(grees. F)-.15 F .746
-(or "km" and "meters", the con)-.15 F -.15(ve)-.4 G .746(rsion to de).15
-F .746(grees is made using the distance per de)-.15 F(gree)-.15 E .087
-(latitude calculated for the Earth')144 391.2 R 2.587(ss)-.55 G(urf)
--2.587 E .087(ace at the central latitude of the grid. If)-.1 F F1(dy)
-2.588 E F0 2.588(=0)2.588 G .088(.0, then the lat-)-2.588 F 1.169(itude\
- cell spacing will be set equal to the longitude cell spacing \(after c\
-on)144 403.2 R -.15(ve)-.4 G 1.169(rsion to de).15 F 1.169(grees, if)
--.15 F 1.207(necessary\). By def)144 415.2 R 1.207(ault, the grid spaci\
-ng is calculated from the grid bounds and the grid dimen-)-.1 F .07
-(sions. When the user uses the)144 427.2 R F2<ad45>2.57 E F0 .069
-(option to set the cell spacings, the grid dimensions are calculated)
-2.57 F .305(using the grid bounds and grid cell spacings. Ho)144 439.2 R
-(we)-.25 E -.15(ve)-.25 G 1.105 -.4(r, s).15 H .306
-(light adjustments to the grid cell spacings).4 F 1.214
-(are usually required to k)144 451.2 R 1.214
+F0(and)2.968 E F1(dy)144 343.2 Q F0 -.25(va)3.139 G .639
+(lues are assumed to be in meters. V).25 F .639(alid v)-1.11 F .639
+(alues for)-.25 F F1(units)3.14 E F0 .64
+(include "km", "meters", "feet", "de-)3.14 F .434
+(grees", "arcmin", and "arcsec".)144 355.2 R .434(If not in de)5.434 F
+.434(grees, the grid cell spacing v)-.15 F .433(alues are con)-.25 F
+-.15(ve)-.4 G .433(rted to de-).15 F .116(grees. F)144 367.2 R .117
+(or "km" and "meters", the con)-.15 F -.15(ve)-.4 G .117(rsion to de).15
+F .117(grees is made using the distance per de)-.15 F .117(gree lati-)
+-.15 F .614(tude calculated for the Earth')144 379.2 R 3.114(ss)-.55 G
+(urf)-3.114 E .614(ace at the central latitude of the grid. If)-.1 F F1
+(dy)3.113 E F0 3.113(=0)3.113 G .613(.0, then the lati-)-3.113 F .105(t\
+ude cell spacing will be set equal to the longitude cell spacing \(afte\
+r con)144 391.2 R -.15(ve)-.4 G .105(rsion to de).15 F .105
+(grees, if nec-)-.15 F .818(essary\). By def)144 403.2 R .817(ault, the\
+ grid spacing is calculated from the grid bounds and the grid dimension\
+s.)-.1 F .151(When the user uses the)144 415.2 R F2<ad45>2.651 E F0 .151
+(option to set the cell spacings, the grid dimensions are calculated us\
+ing)2.651 F .936(the grid bounds and grid cell spacings. Ho)144 427.2 R
+(we)-.25 E -.15(ve)-.25 G 1.736 -.4(r, s).15 H .936
+(light adjustments to the grid cell spacings are).4 F .73
+(usually required to k)144 439.2 R .73
 (eep the grid bounds as speci\214ed. Appending an ! to the end of the)
--.1 F F2<ad45>3.713 E F0(ar)144 463.2 Q 1.188(guments forces)-.18 F F2
-(mbmosaic)3.688 E F0 1.188(to use the e)3.688 F 1.189
-(xact grid cell spacing v)-.15 F 1.189
-(alues speci\214ed by adjusting the)-.25 F .411(grid bounds.)144 475.2 R
-(Def)5.411 E .411(ault: If neither the)-.1 F F2<ad45>2.911 E F0(or)2.911
-E F2<ad44>2.911 E F0 .41
-(options are speci\214ed, the program sets the grid cell)2.911 F(spacin\
-g to be 0.02 times the maximum sonar altitude in the input \214les.)144
-487.2 Q F2<ad46>108 504 Q F1(priority_r)24.19 E(ang)-.15 E(e[/weight])
--.1 E F0 -.45(Tu)144 516 S 1.495
-(rns on Gaussian weighted mean mosaicing. The).45 F F1(priority_r)3.996
-E(ang)-.15 E(e)-.1 E F0 -.25(va)3.996 G 1.496(lue determines which data)
+-.1 F F2<ad45>3.23 E F0(ar)3.23 E(gu-)-.18 E 1.042(ments forces)144
+451.2 R F2(mbmosaic)3.542 E F0 1.042(to use the e)3.542 F 1.041
+(xact grid cell spacing v)-.15 F 1.041
+(alues speci\214ed by adjusting the grid)-.25 F 2.617(bounds. Def)144
+463.2 R .117(ault: If neither the)-.1 F F2<ad45>2.617 E F0(or)2.617 E F2
+<ad44>2.617 E F0 .117
+(options are speci\214ed, the program sets the grid cell spac-)2.617 F
+(ing to be 0.02 times the maximum sonar altitude in the input \214les.)
+144 475.2 Q F2<ad46>108 492 Q F1(priority_r)144 492 Q(ang)-.15 E
+(e[/weight])-.1 E F0 -.45(Tu)144 504 S 1.496
+(rns on Gaussian weighted mean mosaicing. The).45 F F1(priority_r)3.995
+E(ang)-.15 E(e)-.1 E F0 -.25(va)3.995 G 1.495(lue determines which data)
 .25 F .164(points are used in the mosaicing. The minimum priority thres\
-hold for each bin is the highest prior)144 528 R(-)-.2 E .284(ity v)144
-540 R .284(alue found among the samples in that bin minus the)-.25 F F1
+hold for each bin is the highest prior)144 516 R(-)-.2 E .284(ity v)144
+528 R .284(alue found among the samples in that bin minus the)-.25 F F1
 (priority_r)2.784 E(ang)-.15 E(e)-.1 E F0 -.25(va)2.784 G 2.784
-(lue. Only).25 F .284(samples with)2.784 F 1.812(priorities greater tha\
-n this threshold are used in the Gaussian weighted mean mosaicing.)144
-552 R(The)6.812 E(def)144 564 Q .985(ault is to simply set each bin')-.1
-F 3.485(sv)-.55 G .986(alue equal to the v)-3.735 F .986
-(alue of the highest priority sample in that)-.25 F 2.818(bin. The)144
-576 R F1(weight)2.818 E F0 -.25(va)2.818 G .317
+(lue. Only).25 F .284(samples with)2.784 F .592(priorities greater than\
+ this threshold are used in the Gaussian weighted mean mosaicing.)144
+540 R .593(The de-)5.593 F -.1(fa)144 552 S .495
+(ult is to simply set each bin').1 F 2.995(sv)-.55 G .495
+(alue equal to the v)-3.245 F .494
+(alue of the highest priority sample in that bin.)-.25 F(The)144 564 Q
+F1(weight)2.941 E F0 -.25(va)2.941 G .441
 (lue, if present, causes priorities to be also used to weight v).25 F
-.317(alues. A)-.25 F F1(weight)2.817 E F0 .317(of 0)2.817 F 1.558
-(\(the def)144 588 R 1.558
-(ault\) indicates priorities are not used as weights. A)-.1 F F1(weight)
-4.059 E F0 1.559(of 1 indicates the Gaussian)4.059 F .687
-(weight of each v)144 600 R .687
-(alue is multiplied by its priority to get the v)-.25 F .686
-(alue weight. A)-.25 F F1(weight)3.186 E F0 .686(of 2 indicates)3.186 F
-1.871(the Gaussian weight of each v)144 612 R 1.872
-(alue is multiplied by the square of its priority to get the v)-.25 F
-(alue)-.25 E(weight.)144 624 Q F2<ad47>108 640.8 Q F1(gridkind)22.52 E
-F0 1.064(This option sets the format of the output grid \214le.)144
-652.8 R 1.063(The def)6.063 F 1.063
-(ault is to output a current generation)-.1 F .657(GMT CO)144 664.8 R
-.657(ARDS-compliant netCDF 4-byte \215oat grid.)-.35 F 2.258 -.8(To o)
-5.658 H .658(utput a dif).8 F .658(ferent grid format, specify a)-.25 F
-(tw)144 676.8 Q(o-letter)-.1 E F2(GMT)2.609 E F0 .108
-(grid format id listed belo)2.609 F 1.408 -.65(w, o)-.25 H 2.608(ru).65
-G .108(se the full)-2.608 F F2(GMT)2.608 E F0 .108
+.441(alues. A)-.25 F F1(weight)2.941 E F0 .442(of 0 \(the)2.941 F(def)
+144 576 Q .055(ault\) indicates priorities are not used as weights. A)
+-.1 F F1(weight)2.555 E F0 .055(of 1 indicates the Gaussian weight of)
+2.555 F .44(each v)144 588 R .44
+(alue is multiplied by its priority to get the v)-.25 F .44
+(alue weight. A)-.25 F F1(weight)2.94 E F0 .44
+(of 2 indicates the Gauss-)2.94 F(ian weight of each v)144 600 Q
+(alue is multiplied by the square of its priority to get the v)-.25 E
+(alue weight.)-.25 E F2<ad47>108 616.8 Q F1(gridkind)144 616.8 Q F0
+1.064(This option sets the format of the output grid \214le.)144 628.8 R
+1.063(The def)6.063 F 1.063(ault is to output a current generation)-.1 F
+.657(GMT CO)144 640.8 R .657(ARDS-compliant netCDF 4-byte \215oat grid.)
+-.35 F 2.258 -.8(To o)5.658 H .658(utput a dif).8 F .658
+(ferent grid format, specify a)-.25 F(tw)144 652.8 Q(o-letter)-.1 E F2
+(GMT)2.609 E F0 .108(grid format id listed belo)2.609 F 1.408 -.65(w, o)
+-.25 H 2.608(ru).65 G .108(se the full)-2.608 F F2(GMT)2.608 E F0 .108
 (grid format syntax, which allo)2.608 F(ws)-.25 E(for scaling and of)144
-688.8 Q(fsets of the data. The)-.25 E F2(GMT)2.5 E F0
-(grid format ids are:)2.5 E(-----------------------------)149 700.8 Q
-(GMT 4 netCDF standard formats)149 712.8 Q
-(-----------------------------)149 724.8 Q(MB-System 5.0)72 768 Q
-(25 September 2021)131.775 E(4)190.115 E 0 Cg EP
+664.8 Q(fsets of the data. The)-.25 E F2(GMT)2.5 E F0
+(grid format ids are:)2.5 E(-----------------------------)149 676.8 Q
+(GMT 4 netCDF standard formats)149 688.8 Q
+(-----------------------------)149 700.8 Q 2.5(nb GMT)149 712.8 R
+(netCDF format \(8-bit inte)2.5 E(ger)-.15 E 2.5(,C)-.4 G -.35(OA)-2.5 G
+(RDS, CF-1.5\)).35 E 2.5(ns GMT)149 724.8 R(netCDF format \(16-bit inte)
+2.5 E(ger)-.15 E 2.5(,C)-.4 G -.35(OA)-2.5 G(RDS, CF-1.5\)).35 E
+(MB-System 5.0)72 768 Q(25 September 2021)131.775 E(4)190.115 E 0 Cg EP
 %%Page: 5 5
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 147.06(mbmosaic\(1\) MB-System)72 48 R 147.06
-(5.0 mbmosaic\(1\))2.5 F 2.5(nb GMT)149 84 R(netCDF format \(8-bit inte)
-2.5 E(ger)-.15 E 2.5(,C)-.4 G -.35(OA)-2.5 G(RDS, CF-1.5\)).35 E 2.5
-(ns GMT)149 96 R(netCDF format \(16-bit inte)2.5 E(ger)-.15 E 2.5(,C)-.4
-G -.35(OA)-2.5 G(RDS, CF-1.5\)).35 E 2.5(ni GMT)149 108 R
+(5.0 mbmosaic\(1\))2.5 F 2.5(ni GMT)149 84 R
 (netCDF format \(32-bit inte)2.5 E(ger)-.15 E 2.5(,C)-.4 G -.35(OA)-2.5
-G(RDS, CF-1.5\)).35 E 2.5(nf GMT)149 120 R
+G(RDS, CF-1.5\)).35 E 2.5(nf GMT)149 96 R
 (netCDF format \(32-bit \215oat, CO)2.5 E(ARDS, CF-1.5\))-.35 E 2.5
-(nd GMT)149 132 R(netCDF format \(64-bit \215oat, CO)2.5 E
-(ARDS, CF-1.5\))-.35 E(-----------------------------)149 144 Q
-(GMT 3 netCDF le)149 156 Q -.05(ga)-.15 G .3 -.15(cy f).05 H(ormats).15
-E(-----------------------------)149 168 Q 2.5(cb GMT)149 180 R
+(nd GMT)149 108 R(netCDF format \(64-bit \215oat, CO)2.5 E
+(ARDS, CF-1.5\))-.35 E(-----------------------------)149 120 Q
+(GMT 3 netCDF le)149 132 Q -.05(ga)-.15 G .3 -.15(cy f).05 H(ormats).15
+E(-----------------------------)149 144 Q 2.5(cb GMT)149 156 R
 (netCDF format \(8-bit inte)2.5 E(ger)-.15 E 2.5(,d)-.4 G(epreciated\))
--2.5 E 2.5(cs GMT)149 192 R(netCDF format \(16-bit inte)2.5 E(ger)-.15 E
-2.5(,d)-.4 G(epreciated\))-2.5 E 2.5(ci GMT)149 204 R
+-2.5 E 2.5(cs GMT)149 168 R(netCDF format \(16-bit inte)2.5 E(ger)-.15 E
+2.5(,d)-.4 G(epreciated\))-2.5 E 2.5(ci GMT)149 180 R
 (netCDF format \(32-bit inte)2.5 E(ger)-.15 E 2.5(,d)-.4 G(epreciated\))
--2.5 E 2.5(cf GMT)149 216 R
-(netCDF format \(32-bit \215oat, depreciated\))2.5 E 2.5(cd GMT)149 228
+-2.5 E 2.5(cf GMT)149 192 R
+(netCDF format \(32-bit \215oat, depreciated\))2.5 E 2.5(cd GMT)149 204
 R(netCDF format \(64-bit \215oat, depreciated\))2.5 E
-(-----------------------------)149 240 Q(GMT nati)149 252 Q .3 -.15
-(ve b)-.25 H(inary formats).15 E(-----------------------------)149 264 Q
-2.5(bm GMT)149 276 R(nati)2.5 E -.15(ve)-.25 G 2.5(,C).15 G
-(-binary format \(bit-mask\))-2.5 E 2.5(bb GMT)149 288 R(nati)2.5 E -.15
+(-----------------------------)149 216 Q(GMT nati)149 228 Q .3 -.15
+(ve b)-.25 H(inary formats).15 E(-----------------------------)149 240 Q
+2.5(bm GMT)149 252 R(nati)2.5 E -.15(ve)-.25 G 2.5(,C).15 G
+(-binary format \(bit-mask\))-2.5 E 2.5(bb GMT)149 264 R(nati)2.5 E -.15
 (ve)-.25 G 2.5(,C).15 G(-binary format \(8-bit inte)-2.5 E(ger\))-.15 E
-2.5(bs GMT)149 300 R(nati)2.5 E -.15(ve)-.25 G 2.5(,C).15 G
-(-binary format \(16-bit inte)-2.5 E(ger\))-.15 E 2.5(bi GMT)149 312 R
+2.5(bs GMT)149 276 R(nati)2.5 E -.15(ve)-.25 G 2.5(,C).15 G
+(-binary format \(16-bit inte)-2.5 E(ger\))-.15 E 2.5(bi GMT)149 288 R
 (nati)2.5 E -.15(ve)-.25 G 2.5(,C).15 G(-binary format \(32-bit inte)
--2.5 E(ger\))-.15 E 2.5(bf GMT)149 324 R(nati)2.5 E -.15(ve)-.25 G 2.5
-(,C).15 G(-binary format \(32-bit \215oat\))-2.5 E 2.5(bd GMT)149 336 R
+-2.5 E(ger\))-.15 E 2.5(bf GMT)149 300 R(nati)2.5 E -.15(ve)-.25 G 2.5
+(,C).15 G(-binary format \(32-bit \215oat\))-2.5 E 2.5(bd GMT)149 312 R
 (nati)2.5 E -.15(ve)-.25 G 2.5(,C).15 G
 (-binary format \(64-bit \215oat\))-2.5 E(-----------------------------)
-149 348 Q(Miscellaneous grid formats)149 360 Q
-(-----------------------------)149 372 Q 2.5(rb SUN)149 384 R
-(raster \214le format \(8-bit standard\))2.5 E 2.5(rf GEOD)149 396 R
-(AS grid format GRD98 \(NCEI\))-.4 E 2.5(sf Golden)149 408 R(Softw)2.5 E
-(are Surfer format 6 \(32-bit \215oat\))-.1 E 2.5(sd Golden)149 420 R
+149 324 Q(Miscellaneous grid formats)149 336 Q
+(-----------------------------)149 348 Q 2.5(rb SUN)149 360 R
+(raster \214le format \(8-bit standard\))2.5 E 2.5(rf GEOD)149 372 R
+(AS grid format GRD98 \(NCEI\))-.4 E 2.5(sf Golden)149 384 R(Softw)2.5 E
+(are Surfer format 6 \(32-bit \215oat\))-.1 E 2.5(sd Golden)149 396 R
 (Softw)2.5 E(are Surfer format 7 \(64-bit \215oat\))-.1 E 2.5
-(af Atlantic)149 432 R(Geoscience Center A)2.5 E(GC \(32-bit \215oat\))
--.4 E 2.5(ei ESRI)149 444 R
+(af Atlantic)149 408 R(Geoscience Center A)2.5 E(GC \(32-bit \215oat\))
+-.4 E 2.5(ei ESRI)149 420 R
 (Arc/Info ASCII Grid Interchange format \(ASCII inte)2.5 E(ger\))-.15 E
-2.5(ef ESRI)149 456 R
+2.5(ef ESRI)149 432 R
 (Arc/Info ASCII Grid Interchange format \(ASCII \215oat\))2.5 E 2.5
-(gd Import/e)149 468 R(xport via GD)-.15 E(AL 19)-.4 E(The full)144 480
+(gd Import/e)149 444 R(xport via GD)-.15 E(AL 19)-.4 E(The full)144 456
 Q/F1 10/Times-Bold@0 SF(GMT)2.5 E F0(grid format string has the form:)
-2.5 E(=id[/scale/of)180 492 Q(fset[/nan]])-.25 E .158
-(where id is one of the)144 504 R F1(GMT)2.658 E F0 .158
+2.5 E(=id[/scale/of)180 468 Q(fset[/nan]])-.25 E .158
+(where id is one of the)144 480 R F1(GMT)2.658 E F0 .158
 (format ids listed abo)2.658 F -.15(ve)-.15 G 2.658(,a).15 G .159
 (nd the other v)-2.658 F .159(alues are optional. If)-.25 F/F2 10
-/Times-Italic@0 SF(scale)2.659 E F0(and)2.659 E F2(of)144 516 Q(fset)
+/Times-Italic@0 SF(scale)2.659 E F0(and)2.659 E F2(of)144 492 Q(fset)
 -.18 E F0 .33(are gi)2.83 F -.15(ve)-.25 G .33
 (n, the data will be multiplied by).15 F F2(scale)2.829 E F0 .329
 (and of)2.829 F .329(fset by)-.25 F F2(of)2.829 E(fset)-.18 E F0 .329
-(prior to being output. The)2.829 F F2(nan)144 528 Q F0 -.25(va)2.5 G
+(prior to being output. The)2.829 F F2(nan)144 504 Q F0 -.25(va)2.5 G
 (lue sets the v).25 E(alue used for "not-a-number".)-.25 E -.15(Fo)144
-540 S 3.809(rb).15 G(ackw)-3.809 E 1.309
+516 S 3.809(rb).15 G(ackw)-3.809 E 1.309
 (ard compatibility with earlier v)-.1 F 1.309(ersions of)-.15 F F1
 (MB-System)3.809 E F0 3.809(,t)C 1.31(he user may also specify the)
--3.809 F(grid format using a numeric identi\214er between 1-4.)144 552 Q
-F2(gridkind)154 564 Q F0 2.5(=1)2.5 G 9.69(:A)-2.5 G(SCII table)-9.69 E
-F2(gridkind)154 576 Q F0 2.5(=2)2.5 G 9.69(:b)-2.5 G(inary \214le \()
+-3.809 F(grid format using a numeric identi\214er between 1-4.)144 528 Q
+F2(gridkind)154 540 Q F0 2.5(=1)2.5 G 9.69(:A)-2.5 G(SCII table)-9.69 E
+F2(gridkind)154 552 Q F0 2.5(=2)2.5 G 9.69(:b)-2.5 G(inary \214le \()
 -9.69 E F1(GMT)A F0 -.15(ve)2.5 G(rsion 1 GRD \214le\)).15 E F2
-(gridkind)154 588 Q F0 2.5(=3)2.5 G 9.69(:n)-2.5 G(etCDF \214le \()-9.69
+(gridkind)154 564 Q F0 2.5(=3)2.5 G 9.69(:n)-2.5 G(etCDF \214le \()-9.69
 E F1(GMT)A F0 -.15(ve)2.5 G(rsion 2 GRD \214le\)).15 E F2(gridkind)154
-600 Q F0 2.5(=4)2.5 G 9.69(:A)-2.5 G(rc/Info and ArcV)-9.69 E(ie)-.6 E
-2.5(wA)-.25 G(SCII grid)-2.5 E 2.324(Note that the follo)144 612 R 2.324
+576 Q F0 2.5(=4)2.5 G 9.69(:A)-2.5 G(rc/Info and ArcV)-9.69 E(ie)-.6 E
+2.5(wA)-.25 G(SCII grid)-2.5 E 2.324(Note that the follo)144 588 R 2.324
 (wing ar)-.25 F 2.324(guments are equi)-.18 F -.25(va)-.25 G 2.324
 (lent because the).25 F 4.824(ya)-.15 G 2.324(ll produce a standard)
--4.824 F F1(GMT)4.823 E F0(netCDF 4-byte \215oat grid:)144 624 Q(no)180
-636 Q F1<ad47>2.5 E F0(speci\214ed)2.5 E F1<ad47>180 648 Q F2(nf)A F1
-<ad47>180 660 Q F2(=nf)A F0 .834
-(Should the user wish to produce a grid in nati)144 672 R 1.134 -.15
+-4.824 F F1(GMT)4.823 E F0(netCDF 4-byte \215oat grid:)144 600 Q(no)180
+612 Q F1<ad47>2.5 E F0(speci\214ed)2.5 E F1<ad47>180 624 Q F2(nf)A F1
+<ad47>180 636 Q F2(=nf)A F0 .834
+(Should the user wish to produce a grid in nati)144 648 R 1.134 -.15
 (ve b)-.25 H .835(inary \215oats, then the follo).15 F .835(wing tw)-.25
-F 3.335(oa)-.1 G -.18(rg)-3.335 G(uments).18 E(will w)144 684 Q(ork:)-.1
-E F1<ad47>180 696 Q F2(bf)A F1<ad47>180 708 Q F2(=bf)A F0 .988
-(Should the user wish to produce a grid in nati)144 720 R 1.288 -.15
-(ve s)-.25 H .988(hort int format with a scaling f).15 F .987
-(actor of 10, an)-.1 F(MB-System 5.0)72 768 Q(25 September 2021)131.775
-E(5)190.115 E 0 Cg EP
+F 3.335(oa)-.1 G -.18(rg)-3.335 G(uments).18 E(will w)144 660 Q(ork:)-.1
+E F1<ad47>180 672 Q F2(bf)A F1<ad47>180 684 Q F2(=bf)A F0 .077
+(Should the user wish to produce a grid in nati)144 696 R .377 -.15
+(ve s)-.25 H .076(hort int format with a scaling f).15 F .076
+(actor of 10, an of)-.1 F(f-)-.25 E(set of 32000, and a NaN v)144 708 Q
+(alue of 32767, then the follo)-.25 E(wing ar)-.25 E(guments will suf)
+-.18 E(\214ce:)-.25 E F1<ad47>180 720 Q F2(=bs/10/32000/32767)A F0
+(MB-System 5.0)72 768 Q(25 September 2021)131.775 E(5)190.115 E 0 Cg EP
 %%Page: 6 6
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 147.06(mbmosaic\(1\) MB-System)72 48 R 147.06
-(5.0 mbmosaic\(1\))2.5 F(of)144 84 Q(fset of 32000, and a NaN v)-.25 E
-(alue of 32767, then the follo)-.25 E(wing ar)-.25 E(guments will suf)
--.18 E(\214ce:)-.25 E/F1 10/Times-Bold@0 SF<ad47>180 96 Q/F2 10
-/Times-Italic@0 SF(=bs/10/32000/32767)A F0 .977(If an)144 108 R 3.477
-(yo)-.15 G 3.478(ft)-3.477 G(he)-3.478 E F1(GMT)3.478 E F0 .978
+(5.0 mbmosaic\(1\))2.5 F .977(If an)144 84 R 3.477(yo)-.15 G 3.478(ft)
+-3.477 G(he)-3.478 E/F1 10/Times-Bold@0 SF(GMT)3.478 E F0 .978
 (output formats are speci\214ed, then)3.478 F F1(mbmosaic)3.478 E F0
-.978(also outputs shellscripts which)3.478 F(run)144 120 Q F1(GMT)3.161
-E F0 .661(programs to pro)3.161 F .661(vide preliminary color \214ll ma\
-ps of the gridded data. These shellscripts)-.15 F
-(are generated using the)144 132 Q F1(mbm_grdplot)2.5 E F0(macro.)2.5 E
-(If)144 144 Q F2(gridkind)3.828 E F0 1.329(is 4, =ei, or =ef, the outpu\
-t grids will be in the ESRI ASCII grid format.)3.828 F(Arc/Info)6.329 E
-.525(ASCII grids use "square" bins, meaning that the longitude and lati\
-tude grid cell spacings must be)144 156 R .344(identical. Thus, whene)
-144 168 R -.15(ve)-.25 G 2.844(rt).15 G .344(hese options are used, the)
+.978(also outputs shellscripts which)3.478 F(run)144 96 Q F1(GMT)3.161 E
+F0 .661(programs to pro)3.161 F .661(vide preliminary color \214ll maps\
+ of the gridded data. These shellscripts)-.15 F(are generated using the)
+144 108 Q F1(mbm_grdplot)2.5 E F0(macro.)2.5 E(If)144 120 Q/F2 10
+/Times-Italic@0 SF(gridkind)3.828 E F0 1.329(is 4, =ei, or =ef, the out\
+put grids will be in the ESRI ASCII grid format.)3.828 F(Arc/Info)6.329
+E .525(ASCII grids use "square" bins, meaning that the longitude and la\
+titude grid cell spacings must be)144 132 R .344(identical. Thus, whene)
+144 144 R -.15(ve)-.25 G 2.844(rt).15 G .344(hese options are used, the)
 -2.844 F F1<ad45>2.844 E F0 .344(option must also be used in a w)2.844 F
-.345(ay which)-.1 F(ensures equal grid cell spacings \(see the)144 180 Q
+.345(ay which)-.1 F(ensures equal grid cell spacings \(see the)144 156 Q
 F1<ad45>2.5 E F0(documentation abo)2.5 E -.15(ve)-.15 G 2.5(\). Def).15
 F(ault:)-.1 E F2(gridkind)2.5 E F0 2.5(=")2.5 G(=nf".)-2.5 E F1<ad48>108
-196.8 Q F0 .162(This "help" \215ag cause the program to print out a des\
-cription of its operation and then e)22.52 F .161(xit immedi-)-.15 F
-(ately)144 208.8 Q(.)-.65 E F1<ad49>108 225.6 Q F2(datalist)26.41 E F0
-.572
+172.8 Q F0 .162(This "help" \215ag cause the program to print out a des\
+cription of its operation and then e)144 172.8 R .161(xit immedi-)-.15 F
+(ately)144 184.8 Q(.)-.65 E F1<ad49>108 201.6 Q F2(datalist)144 201.6 Q
+F0 .572
 (Sets the \214lename of the \214le containing a list of the input sw)144
-237.6 R .573(ath sonar data \214les and their formats.)-.1 F(In the)144
-249.6 Q F2(datalist)2.5 E F0(\214le, each data \214le should be follo)
+213.6 R .573(ath sonar data \214les and their formats.)-.1 F(In the)144
+225.6 Q F2(datalist)2.5 E F0(\214le, each data \214le should be follo)
 2.5 E(wed by a data format identi\214er)-.25 E 2.5(,e)-.4 G(.g.:)-2.5 E
-(data\214le1 11)180 261.6 Q(data\214le2 24)180 273.6 Q .569
-(This program uses the)144 285.6 R F1(MBIO)3.068 E F0 .568
+(data\214le1 11)180 237.6 Q(data\214le2 24)180 249.6 Q .569
+(This program uses the)144 261.6 R F1(MBIO)3.068 E F0 .568
 (library and will read or write an)3.068 F 3.068(ys)-.15 G -.1(wa)-3.068
-G .568(th sonar format supported by).1 F F1(MBIO)144 297.6 Q F0 3.428
+G .568(th sonar format supported by).1 F F1(MBIO)144 273.6 Q F0 3.428
 (.Al)C .928(ist of the sw)-3.428 F .928
 (ath sonar data formats currently supported by)-.1 F F1(MBIO)3.428 E F0
-.928(and their identi\214er)3.428 F -.25(va)144 309.6 S(lues is gi).25 E
+.928(and their identi\214er)3.428 F -.25(va)144 285.6 S(lues is gi).25 E
 -.15(ve)-.25 G 2.5(ni).15 G 2.5(nt)-2.5 G(he)-2.5 E F1(MBIO)2.5 E F0
 (manual page.)2.5 E(Def)5 E(ault:)-.1 E F2(datalist)2.5 E F0 2.5(=d)2.5
-G(atalist.mb-1)-2.5 E F1<ad4a>108 326.4 Q F2(pr)25.3 E(ojection)-.45 E
-F0 .019(By def)2.52 F(ault,)-.1 E F1(mbmosaic)2.519 E F0 .019
+G(atalist.mb-1)-2.5 E F1<ad4a>108 302.4 Q F2(pr)144 302.4 Q(ojection)
+-.45 E F0 .019(By def)2.52 F(ault,)-.1 E F1(mbmosaic)2.519 E F0 .019
 (generates grids in Geographic coordinates, meaning that position)2.519
-F 1.97(is de\214ned in longitude and latitude using the WGS84 geographi\
-c coordinate system.)144 338.4 R(The)6.97 E F1<ad4a>4.47 E F0 1.422(opt\
-ion can be used to specify an alternate, projected coordinate system \(\
-PCS\). When a PCS is)144 350.4 R .177(used, position will be de\214ned \
-in eastings and northings \(meters\) relati)144 362.4 R .477 -.15(ve t)
--.25 H 2.677(ot).15 G .177(he origin of the partic-)-2.677 F 1.047
-(ular PCS. Uni)144 374.4 R -.15(ve)-.25 G 1.047(rsal T).15 F(ransv)-.35
-E 1.047
-(erse Mercator is the most commonly used PCS in the oceanographic)-.15 F
-(community)144 386.4 Q 3.182(,b)-.65 G(ut)-3.382 E F1(mbmosaic)3.182 E
-F0 .683(supports a lar)3.183 F .683(ge number of other PCS')-.18 F 3.183
-(sa)-.55 G 3.183(sw)-3.183 G 3.183(ell. The)-3.183 F .683
-(underlying pro-)3.183 F 1.58(jection functions deri)144 398.4 R 1.88
--.15(ve f)-.25 H 1.58(rom the).15 F F1(PR)4.079 E(OJ)-.3 E(.4)-.2 E F0
-1.579(library written by Gerald Ev)4.079 F 1.579
-(enden, then of the U.S.)-.15 F(Geological Surv)144 410.4 Q -.15(ey)-.15
-G(.)-.5 E(The)144 434.4 Q F2(pr)2.943 E(ojection)-.45 E F0(ar)2.943 E
+F .698(is de\214ned in longitude and latitude using the WGS84 geographi\
+c coordinate system.)144 314.4 R(The)5.699 E F1<ad4a>3.199 E F0(op-)
+3.199 E .5(tion can be used to specify an alternate, projected coordina\
+te system \(PCS\). When a PCS is used,)144 326.4 R .929
+(position will be de\214ned in eastings and northings \(meters\) relati)
+144 338.4 R 1.229 -.15(ve t)-.25 H 3.43(ot).15 G .93
+(he origin of the particular)-3.43 F .663(PCS. Uni)144 350.4 R -.15(ve)
+-.25 G .663(rsal T).15 F(ransv)-.35 E .662
+(erse Mercator is the most commonly used PCS in the oceanographic com-)
+-.15 F(munity)144 362.4 Q 2.706(,b)-.65 G(ut)-2.906 E F1(mbmosaic)2.706
+E F0 .206(supports a lar)2.706 F .206(ge number of other PCS')-.18 F
+2.707(sa)-.55 G 2.707(sw)-2.707 G 2.707(ell. The)-2.707 F .207
+(underlying projection)2.707 F .39(functions deri)144 374.4 R .69 -.15
+(ve f)-.25 H .39(rom the).15 F F1(PR)2.89 E(OJ)-.3 E(.4)-.2 E F0 .389
+(library written by Gerald Ev)2.889 F .389
+(enden, then of the U.S. Geological)-.15 F(Surv)144 386.4 Q -.15(ey)-.15
+G(.)-.5 E(The)144 410.4 Q F2(pr)2.943 E(ojection)-.45 E F0(ar)2.943 E
 .443(gument for the)-.18 F F1<ad4a>2.943 E F0 .443
 (option can be either a PCS identi\214er from the projection de\214-)
-2.943 F .443(nition list pro)144 446.4 R .443
+2.943 F .443(nition list pro)144 422.4 R .443
 (vided at the end of this manual page, or simply)-.15 F F1<ad4a>2.943 E
 F2(U)A F0 .442(to specify using UTM in what-)2.943 F -2.15 -.25(ev e)144
-458.4 T 2.5(rz).25 G
+434.4 T 2.5(rz).25 G
 (one is appropriate for the grid bounds speci\214ed with the)-2.5 E F1
-<ad52>2.5 E F0(option.)2.5 E -.15(Fo)144 482.4 S 3.248(ri).15 G .748
+<ad52>2.5 E F0(option.)2.5 E -.15(Fo)144 458.4 S 3.248(ri).15 G .748
 (nstance, to fully specify a particular northern UTM zone, set)-3.248 F
 F2(pr)3.249 E(ojection)-.45 E F0 3.249(=U)3.249 G .749(TMXXN where)
--3.249 F .122(XX gi)144 494.4 R -.15(ve)-.25 G 2.622(st).15 G .122
+-3.249 F .122(XX gi)144 470.4 R -.15(ve)-.25 G 2.622(st).15 G .122
 (he UTM zone \(de\214ned from 01 to 60\). As an e)-2.622 F .121
 (xample, a northern UTM zone 12 projec-)-.15 F 1.266
-(tion can be speci\214ed using)144 506.4 R F1<ad4a>3.766 E F2(UTM12N)A
+(tion can be speci\214ed using)144 482.4 R F1<ad4a>3.766 E F2(UTM12N)A
 F0 6.266(.S)C 1.266(outhern UTM zones are speci\214ed as UTMXXS. The)
--6.266 F .617(European Petroleum Surv)144 518.4 R .917 -.15(ey G)-.15 H
+-6.266 F .617(European Petroleum Surv)144 494.4 R .917 -.15(ey G)-.15 H
 .617(roup \(EPSG\) has de\214ned a lar).15 F .617(ge number of PCS')-.18
 F 3.117(su)-.55 G .616(sed w)-3.117 F(orldwide)-.1 E .031
-(and assigned number id')144 530.4 R 2.532(st)-.55 G 2.532(oe)-2.532 G
+(and assigned number id')144 506.4 R 2.532(st)-.55 G 2.532(oe)-2.532 G
 .032
 (ach; one can also specify the northern UTM zone 12 projection using)
--2.532 F .977(its EPSG designation, or)144 542.4 R F1<ad4a>3.477 E F2
+-2.532 F .977(its EPSG designation, or)144 518.4 R F1<ad4a>3.477 E F2
 (epsg32612)A F0 5.977(.W)C .976
 (hen the projected coordinate system is fully speci\214ed)-5.977 F .5
-(by the)144 554.4 R F1<ad4a>3 E F0 .5
+(by the)144 530.4 R F1<ad4a>3 E F0 .5
 (option, then the grid bounds may be speci\214ed using)3 F F1<ad52>3.001
 E F0 .501(in either longitude and latitude)3.001 F
-(or in eastings and northings.)144 566.4 Q(Alternati)144 590.4 Q -.15
+(or in eastings and northings.)144 542.4 Q(Alternati)144 566.4 Q -.15
 (ve)-.25 G(ly).15 E 3.394(,o)-.65 G .894
 (ne may indicate a UTM projection without specifying the zone by using)
 -3.394 F F1<ad4a>3.393 E F2(U)A F0 3.393(.I)C(n)-3.393 E .361(this case\
 , the UTM zone will be inferred from the midpoint of the speci\214ed lo\
-ngitude and latitude)144 602.4 R 1.308
-(bounds, and then the longitude and latitude bounds gi)144 614.4 R -.15
+ngitude and latitude)144 578.4 R 1.308
+(bounds, and then the longitude and latitude bounds gi)144 590.4 R -.15
 (ve)-.25 G 3.808(nw).15 G 1.308(ith the)-3.808 F F1(\255fR)3.808 E F0
 1.308(option are translated to)3.808 F(UTM eastings and northings.)144
-626.4 Q .922(All grids and mosaics produced by)144 650.4 R F1(MB-System)
+602.4 Q .922(All grids and mosaics produced by)144 626.4 R F1(MB-System)
 3.422 E F0 .923(programs contain identi\214ers that are recognized)3.423
-F 3.168(by the plotting macros)144 662.4 R F1(mbm_grdplot)5.668 E F0(,)A
+F 3.168(by the plotting macros)144 638.4 R F1(mbm_grdplot)5.668 E F0(,)A
 F1(mbm_grd3dplot)5.668 E F0 5.668(,a)C(nd)-5.668 E F1(mbm_grdtiff)5.668
 E F0 8.167(.T)C 3.167(hese plotting)-8.167 F .403
-(macros automatically use a linear map projection whene)144 674.4 R -.15
+(macros automatically use a linear map projection whene)144 650.4 R -.15
 (ve)-.25 G 2.903(rt).15 G(he)-2.903 E 2.903(ye)-.15 G .403
 (ncounter grids and mosaics that)-2.903 F 1.062
 (are already in a projected coordinate system. Also, the program)144
-686.4 R F1(mbgrdtiff)3.561 E F0 1.061(automatically inserts)3.561 F .786
+662.4 R F1(mbgrdtiff)3.561 E F0 1.061(automatically inserts)3.561 F .786
 (the appropriate projection information into the GeoTIFF images it gene\
-rates. As a result, images)144 698.4 R .147(generated by)144 710.4 R F1
-(mbgrdtiff)2.647 E F0 .147(will be properly georeferenced when the)2.647
-F 2.647(ya)-.15 G .147(re imported into GIS softw)-2.647 F(are.)-.1 E
+rates. As a result, images)144 674.4 R(generated by)144 686.4 Q F1
+(mbgrdtiff)2.5 E F0(will be properly georeferenced when the)2.5 E 2.5
+(ya)-.15 G(re imported into GIS softw)-2.5 E(are.)-.1 E F1<ad4c>108
+703.2 Q F2(lon\215ip)144 703.2 Q F0 .572
+(Sets the range of the longitude v)144 715.2 R .572(alues returned.)-.25
+F(If)5.572 E F2(lon\215ip)3.072 E F0 .572(=\2551 then the longitude v)B
+.571(alues will be in)-.25 F .488(the range from \255360 to 0 de)144
+727.2 R .488(grees. If)-.15 F F2(lon\215ip)2.988 E F0 .488
+(=0 then the longitude v)B .489(alues will be in the range from)-.25 F
 (MB-System 5.0)72 768 Q(25 September 2021)131.775 E(6)190.115 E 0 Cg EP
 %%Page: 7 7
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 147.06(mbmosaic\(1\) MB-System)72 48 R 147.06
-(5.0 mbmosaic\(1\))2.5 F/F1 10/Times-Bold@0 SF<ad4c>108 84 Q/F2 10
-/Times-Italic@0 SF(lon\215ip)23.63 E F0 .572
-(Sets the range of the longitude v)144 96 R .572(alues returned.)-.25 F
-(If)5.572 E F2(lon\215ip)3.072 E F0 .572(=\2551 then the longitude v)B
-.572(alues will be in)-.25 F .489(the range from \255360 to 0 de)144 108
-R .488(grees. If)-.15 F F2(lon\215ip)2.988 E F0 .488
-(=0 then the longitude v)B .488(alues will be in the range from)-.25 F
-1.382(\255180 to 180 de)144 120 R 1.382(grees. If)-.15 F F2(lon\215ip)
-3.882 E F0 1.382(=1 then the longitude v)B 1.382
-(alues will be in the range from 0 to 360)-.25 F(de)144 132 Q 2.5
-(grees. Def)-.15 F(ault:)-.1 E F2(lon\215ip)2.5 E F0 2.5(=0)2.5 G(.)-2.5
-E F1<ad4d>108 148.8 Q F0 1.111(Causes tw)20.86 F 3.611(oa)-.1 G 1.111
+(5.0 mbmosaic\(1\))2.5 F .506(\255180 to 180 de)144 84 R .506(grees. If)
+-.15 F/F1 10/Times-Italic@0 SF(lon\215ip)3.006 E F0 .506
+(=1 then the longitude v)B .506
+(alues will be in the range from 0 to 360 de-)-.25 F 2.5(grees. Def)144
+96 R(ault:)-.1 E F1(lon\215ip)2.5 E F0 2.5(=0)2.5 G(.)-2.5 E/F2 10
+/Times-Bold@0 SF<ad4d>108 112.8 Q F0 1.11(Causes tw)144 112.8 R 3.61(oa)
+-.1 G 1.111
 (dditional grids to be output. One is a grid containing the standard de)
--3.611 F 1.11(viation of the)-.25 F .234
-(data within each grid cell relati)144 160.8 R .534 -.15(ve t)-.25 H
+-3.61 F 1.111(viation of the)-.25 F .234
+(data within each grid cell relati)144 124.8 R .534 -.15(ve t)-.25 H
 2.734(ot).15 G .234(he grid v)-2.734 F .234
 (alue, the other contains the number of data points in)-.25 F 1.285(eac\
 h grid cell. This option is ignored unless the Gaussian weighted mean m\
-osaicing is enabled)144 172.8 R(with the)144 184.8 Q F1(-F)2.5 E F0
-(option.)2.5 E F1<ad4e>108 201.6 Q F0 1.457
+osaicing is enabled)144 136.8 R(with the)144 148.8 Q F2(-F)2.5 E F0
+(option.)2.5 E F2<ad4e>108 165.6 Q F0 .621
 (Causes grid cells with no data and no interpolation to be set to a v)
-23.08 F 1.458(alue of NaN instead of the)-.25 F(def)144 213.6 Q(ault v)
--.1 E(alue of 99999.9.)-.25 E(The NaN v)5 E(alue is e)-.25 E(xpected by)
--.15 E F1(GMT)2.5 E F0(programs such)2.5 E F1(grdview)2.5 E F0(.)A F1
-<ad4f>108 230.4 Q F2 -.45(ro)22.52 G(ot).45 E F0 .524(Sets the characte\
-r string to be used as the root of the output \214lenames. F)144 242.4 R
-.524(or e)-.15 F .524(xample, if the grid is)-.15 F .073(output as a)144
-254.4 R F1(GMT)2.573 E F0 -.15(ve)2.573 G .074
-(rsion 2 GRD format \(netCDF\) \214le \(the def).15 F .074
-(ault\), then its \214lename is "root.grd".)-.1 F 1.269(If the)144 266.4
-R F1<ad47>3.769 E F2(1)A F0 1.268(option is used to specify an ascii fo\
-rmat grid, then the output grid \214lename will be)3.769 F .083
-("root.asc". If the)144 278.4 R F1<ad47>2.584 E F2(2)A F0 .084
+144 165.6 R .621(alue of NaN instead of the de-)-.25 F -.1(fa)144 177.6
+S(ult v).1 E(alue of 99999.9.)-.25 E(The NaN v)5 E(alue is e)-.25 E
+(xpected by)-.15 E F2(GMT)2.5 E F0(programs such)2.5 E F2(grdview)2.5 E
+F0(.)A F2<ad4f>108 194.4 Q F1 -.45(ro)144 194.4 S(ot).45 E F0 .524(Sets\
+ the character string to be used as the root of the output \214lenames.\
+ F)144 206.4 R .524(or e)-.15 F .525(xample, if the grid is)-.15 F .074
+(output as a)144 218.4 R F2(GMT)2.574 E F0 -.15(ve)2.574 G .074
+(rsion 2 GRD format \(netCDF\) \214le \(the def).15 F .073
+(ault\), then its \214lename is "root.grd".)-.1 F 1.268(If the)144 230.4
+R F2<ad47>3.768 E F1(1)A F0 1.268(option is used to specify an ascii fo\
+rmat grid, then the output grid \214lename will be)3.768 F .084
+("root.asc". If the)144 242.4 R F2<ad47>2.584 E F1(2)A F0 .084
 (option is used to specify a v)2.584 F .084
 (ersion 1 GRD format \(binary\) grid, then the out-)-.15 F .831
 (put grid \214lename will be "root.grd1". If the output grid is in the)
-144 290.4 R F1(GMT)3.331 E F0 -.15(ve)3.331 G .831
-(rsion 2 GRD format, a).15 F .164(shellscript which will allo)144 302.4
-R 2.664(wt)-.25 G .164(he contents of the grid to vie)-2.664 F .165
-(wed using)-.25 F F1(GMT)2.665 E F0 .165(programs is also output)2.665 F
-(with the \214lename "root.grd.cmd".)144 314.4 Q F1<ad50>108 331.2 Q F2
-(pings)24.19 E F0 .01(Sets the ping a)144 343.2 R -.15(ve)-.2 G .01
-(raging of the input data. If).15 F F2(pings)2.51 E F0 2.509(>0)2.51 G
-2.509(,t)-2.509 G .009(hen that number of input pings will be a)-2.509 F
--.15(ve)-.2 G -.2(r-).15 G .306(aged to produce one output ping.)144
-355.2 R(If)5.306 E F2(pings)2.806 E F0 2.806(=0)2.806 G 2.806(,t)-2.806
-G .306(hen the ping a)-2.806 F -.15(ve)-.2 G .306
-(raging will automatically be done).15 F(so that the along-track ping s\
-pacing is equal to the across-track beam spacing. Def)144 367.2 Q(ault:)
--.1 E F2(pings)2.5 E F0 2.5(=1)2.5 G(.)-2.5 E F1<ad52>108 384 Q F2
-(west/east/south/north)23.08 E(factor)144 396 Q F0 2.431(The \214rst fo\
-rm sets the longitude and latitude bounds of the output grid.)144 408 R
-2.431(By def)7.431 F 2.431(ault \(if the)-.1 F F1<ad52>144 420 Q F2
-(west/east/south/north)A F0 .003(option is not speci\214ed\) the progra\
-m will set the grid bounds to be the area)2.502 F .367
+144 254.4 R F2(GMT)3.331 E F0 -.15(ve)3.331 G .831
+(rsion 2 GRD format, a).15 F .165(shellscript which will allo)144 266.4
+R 2.665(wt)-.25 G .164(he contents of the grid to vie)-2.665 F .164
+(wed using)-.25 F F2(GMT)2.664 E F0 .164(programs is also output)2.664 F
+(with the \214lename "root.grd.cmd".)144 278.4 Q F2<ad50>108 295.2 Q F1
+(pings)144 295.2 Q F0 .009(Sets the ping a)144 307.2 R -.15(ve)-.2 G
+.009(raging of the input data. If).15 F F1(pings)2.509 E F0 2.51(>0)
+2.509 G 2.51(,t)-2.51 G .01(hen that number of input pings will be a)
+-2.51 F -.15(ve)-.2 G -.2(r-).15 G .306
+(aged to produce one output ping.)144 319.2 R(If)5.306 E F1(pings)2.806
+E F0 2.806(=0)2.806 G 2.806(,t)-2.806 G .306(hen the ping a)-2.806 F
+-.15(ve)-.2 G .306(raging will automatically be done).15 F(so that the \
+along-track ping spacing is equal to the across-track beam spacing. Def)
+144 331.2 Q(ault:)-.1 E F1(pings)2.5 E F0 2.5(=1)2.5 G(.)-2.5 E F2<ad52>
+108 348 Q F1(west/east/south/north)144 348 Q(factor)144 360 Q F0 2.431(\
+The \214rst form sets the longitude and latitude bounds of the output g\
+rid.)144 372 R 2.432(By def)7.432 F 2.432(ault \(if the)-.1 F F2<ad52>
+144 384 Q F1(west/east/south/north)A F0 .003(option is not speci\214ed\
+\) the program will set the grid bounds to be the area)2.503 F .367
 (encompassing all of the data in the input \214les. The second form \()
-144 432 R F1<ad52>A F2(factor)A F0 2.866(\)e)C .366
-(xpands the automati-)-3.016 F .736
-(cally calculated bounds by the multiplicati)144 444 R -.15(ve)-.25 G F2
-(factor)3.386 E F0 .736(.The v)B(alue)-.25 E F2(factor)3.236 E F0 .737
-(must be greater than one; if)3.237 F F2(factor)144 456 Q F0 3.128(=1)
-3.128 G .628(.1 then the grid bounds will be e)-3.128 F .628
-(xpanded to the east and west by an amount 0.05 times)-.15 F 1.344
-(the data bounds east-west e)144 468 R 1.345
+144 396 R F2<ad52>A F1(factor)A F0 2.867(\)e)C .367
+(xpands the automati-)-3.017 F .737
+(cally calculated bounds by the multiplicati)144 408 R -.15(ve)-.25 G F1
+(factor)3.387 E F0 .736(.The v)B(alue)-.25 E F1(factor)3.236 E F0 .736
+(must be greater than one; if)3.236 F F1(factor)144 420 Q F0 3.127(=1)
+3.127 G .628(.1 then the grid bounds will be e)-3.127 F .628
+(xpanded to the east and west by an amount 0.05 times)-.15 F 1.345
+(the data bounds east-west e)144 432 R 1.345
 (xtend and to the north and south by an amount 0.05 times the data)-.15
-F .486(bounds north-south e)144 480 R 2.986(xtent. If)-.15 F .486
-(the user uses the)2.986 F F1<ad45>2.986 E F0 .486
+F .485(bounds north-south e)144 444 R 2.986(xtent. If)-.15 F .486
+(the user uses the)2.986 F F2<ad45>2.986 E F0 .486
 (option to set the grid spacing, then the dimen-)2.986 F .414(sions wil\
 l be calculated from the grid bounds and spacing. In these circumstance\
-s rounding errors)144 492 R 1.047(will usually require that the eastern\
- and northern bounds be adjusted to \214t e)144 504 R 1.046
-(xactly with the grid)-.15 F .705(dimensions and spacing.)144 516 R(Def)
-5.706 E .706(ault: If the)-.1 F F1<ad52>3.206 E F2
-(west/east/south/north)A F0 .706(option is not speci\214ed, the pro-)
-3.206 F(gram will set the grid bounds to be the area encompassing all o\
-f the data in the input \214les.)144 528 Q F1<ad53>108 544.8 Q F2(speed)
-24.74 E F0 .532
-(Sets the minimum speed in km/hr \(5.5 kts ~ 10 km/hr\) allo)144 556.8 R
-.531(wed in the input data; pings associated)-.25 F
-(with a smaller ship speed will not be output. Def)144 568.8 Q(ault:)-.1
-E F2(speed)2.5 E F0 2.5(=0)2.5 G(.)-2.5 E F1<ad54>108 585.6 Q F2
-(tension)23.63 E F0 .44(Sets the)144 597.6 R F2(tension)2.94 E F0 -.25
-(va)2.94 G .44(lue used in the thin plate spline interpolation.).25 F(A)
-5.441 E F2(tension)2.941 E F0 .441(of 0 gi)2.941 F -.15(ve)-.25 G 2.941
-(sam).15 G(inimum)-2.941 E(curv)144 609.6 Q 1.244(ature surf)-.25 F
+s rounding errors)144 456 R .185(will usually require that the eastern \
+and northern bounds be adjusted to \214t e)144 468 R .185
+(xactly with the grid di-)-.15 F 1.355(mensions and spacing.)144 480 R
+(Def)6.354 E 1.354(ault: If the)-.1 F F2<ad52>3.854 E F1
+(west/east/south/north)A F0 1.354(option is not speci\214ed, the pro-)
+3.854 F(gram will set the grid bounds to be the area encompassing all o\
+f the data in the input \214les.)144 492 Q F2<ad53>108 508.8 Q F1(speed)
+144 508.8 Q F0 .532
+(Sets the minimum speed in km/hr \(5.5 kts ~ 10 km/hr\) allo)144 520.8 R
+.532(wed in the input data; pings associated)-.25 F
+(with a smaller ship speed will not be output. Def)144 532.8 Q(ault:)-.1
+E F1(speed)2.5 E F0 2.5(=0)2.5 G(.)-2.5 E F2<ad54>108 549.6 Q F1
+(tension)144 549.6 Q F0 .441(Sets the)144 561.6 R F1(tension)2.941 E F0
+-.25(va)2.941 G .441(lue used in the thin plate spline interpolation.)
+.25 F(A)5.44 E F1(tension)2.94 E F0 .44(of 0 gi)2.94 F -.15(ve)-.25 G
+2.94(sam).15 G(inimum)-2.94 E(curv)144 573.6 Q 1.243(ature surf)-.25 F
 1.243(ace with free edges; this is a pure Laplacian solution. A nonzero)
--.1 F F2(tension)3.743 E F0 1.243(tends to)3.743 F .853
+-.1 F F1(tension)3.744 E F0 1.244(tends to)3.744 F .853
 (suppress spurious oscillations and \215atten the interpolation to)144
-621.6 R -.1(wa)-.25 G .853(rd the edges; a).1 F F2(tension)3.353 E F0
-.854(of in\214nity)3.353 F .31(yields a pure spline solution. The)144
-633.6 R F2(tension)2.81 E F0 .31(must be zero or greater)2.81 F 5.31(.D)
--.55 G(ef)-5.31 E(ault:)-.1 E F2(tension)2.81 E F0 2.81(=1)2.81 G .31
-(.0e10 \(pure)-2.81 F(spline solution\).)144 645.6 Q F1<ad55>108 662.4 Q
-F2(bearing/factor[/mode])23.08 E F0 .384(Enables prioritizing data poin\
-ts according to their look azimuth or to the platform heading at ping)
-144 674.4 R(time.)144 686.4 Q(If)144 710.4 Q F2(mode)3.129 E F0 3.129
-(=0o)3.129 G 3.129(ri)-3.129 G 3.129(sa)-3.129 G .629
-(bsent, then the look azimuth criteria is applied, with)-3.129 F F2
-(bearing)3.128 E F0 .628(being interpreted)3.128 F .781
-(as the desired look azimuth. Data on the port side of the sw)144 722.4
+585.6 R -.1(wa)-.25 G .853(rd the edges; a).1 F F1(tension)3.353 E F0
+.853(of in\214nity)3.353 F .31(yields a pure spline solution. The)144
+597.6 R F1(tension)2.81 E F0 .31(must be zero or greater)2.81 F 5.31(.D)
+-.55 G(ef)-5.31 E(ault:)-.1 E F1(tension)2.81 E F0 2.81(=1)2.81 G .31
+(.0e10 \(pure)-2.81 F(spline solution\).)144 609.6 Q F2<ad55>108 626.4 Q
+F1(bearing/factor[/mode])144 626.4 Q F0 .384(Enables prioritizing data \
+points according to their look azimuth or to the platform heading at pi\
+ng)144 638.4 R(time.)144 650.4 Q(If)144 674.4 Q F1(mode)3.128 E F0
+-5.627 3.128(=0 o)3.128 H 3.129(ri)-3.128 G 3.129(sa)-3.129 G .629
+(bsent, then the look azimuth criteria is applied, with)-3.129 F F1
+(bearing)3.129 E F0 .629(being interpreted)3.129 F .781
+(as the desired look azimuth. Data on the port side of the sw)144 686.4
 R .781(ath ha)-.1 F 1.081 -.15(ve a l)-.2 H .781
-(ook azimuth equal to the).15 F(MB-System 5.0)72 768 Q
-(25 September 2021)131.775 E(7)190.115 E 0 Cg EP
+(ook azimuth equal to the).15 F .68(heading \255 90 de)144 698.4 R .68
+(grees, and data on the starboard side ha)-.15 F .98 -.15(ve a l)-.2 H
+.68(ook azimuth equal to the heading +).15 F .055(90 de)144 710.4 R .055
+(grees\). The)-.15 F F1(factor)2.555 E F0 -.25(va)2.555 G .054
+(lue modulates ho).25 F 2.554(wr)-.25 G .054(apidly the priority de)
+-2.554 F .054(grades a)-.15 F -.1(wa)-.15 G 2.554(yf).1 G .054
+(rom the preferred)-2.554 F
+(look azimuth. The priority \(p\) for a data point is assigned as follo)
+144 722.4 Q(ws:)-.25 E(MB-System 5.0)72 768 Q(25 September 2021)131.775
+E(7)190.115 E 0 Cg EP
 %%Page: 8 8
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 147.06(mbmosaic\(1\) MB-System)72 48 R 147.06
-(5.0 mbmosaic\(1\))2.5 F .68(heading \255 90 de)144 84 R .68
-(grees, and data on the starboard side ha)-.15 F .98 -.15(ve a l)-.2 H
-.68(ook azimuth equal to the heading +).15 F .054(90 de)144 96 R .054
-(grees\). The)-.15 F/F1 10/Times-Italic@0 SF(factor)2.554 E F0 -.25(va)
-2.554 G .054(lue modulates ho).25 F 2.554(wr)-.25 G .054
-(apidly the priority de)-2.554 F .055(grades a)-.15 F -.1(wa)-.15 G
-2.555(yf).1 G .055(rom the preferred)-2.555 F
-(look azimuth. The priority \(p\) for a data point is assigned as follo)
-144 108 Q(ws:)-.25 E 2.5(p=c)164 120 S(os\(f * \(Ap \255 Aa\)\))-2.5 E
-(when \25590 < \(f * \(Ap \255 Aa\)\) < 90 and)144 132 Q 2.5(p=0)164 144
-S .398(otherwise, where f =)144 156 R F1(factor)2.898 E F0 2.898(,A)C
-2.898(p=)-2.898 G F1(bearing)A F0 2.898(,a)C .398
-(nd Aa is the actual look azimuth of the data point.)-2.898 F(If)5.397 E
-F1(factor)144 168 Q F0 2.594(=1)2.594 G .094
+(5.0 mbmosaic\(1\))2.5 F 2.5(p=c)164 84 S(os\(f * \(Ap \255 Aa\)\))-2.5
+E(when \25590 < \(f * \(Ap \255 Aa\)\) < 90 and)144 96 Q 2.5(p=0)164 108
+S .397(otherwise, where f =)144 120 R/F1 10/Times-Italic@0 SF(factor)
+2.898 E F0 2.898(,A)C 2.898(p=)-2.898 G F1(bearing)A F0 2.898(,a)C .398
+(nd Aa is the actual look azimuth of the data point.)-2.898 F(If)5.398 E
+F1(factor)144 132 Q F0 2.594(=1)2.594 G .094
 (.0, the priority will be 1.0 at)-2.594 F F1(bearing)2.594 E F0 .094
 (and will f)2.594 F .094(all to zero for look azimuths more than 90)-.1
-F(de)144 180 Q .92(grees a)-.15 F -.1(wa)-.15 G 3.42(yf).1 G(rom)-3.42 E
+F(de)144 144 Q .92(grees a)-.15 F -.1(wa)-.15 G 3.42(yf).1 G(rom)-3.42 E
 F1(bearing)3.42 E F0 5.92(.I)C(f)-5.92 E F1(factor)3.42 E F0 3.42(>1)
 3.42 G .92(.0, the range of nonzero priorities will shrink closer to)
--3.42 F F1(bearing)144 192 Q F0 2.081(\(e.g. if)4.581 F F1(factor)4.581
-E F0 4.581(=2)4.581 G 2.081
-(.0, nonzero priorities will be restricted to look azimuths within 45)
--4.581 F(de)144 204 Q .021(grees of)-.15 F F1(bearing)2.521 E F0 .021
-(\). If)B F1(factor)2.521 E F0 2.521(<1)2.521 G .021
-(.0, the range of nonzero priorities will e)-2.521 F .02
-(xpand \(e.g. if)-.15 F F1(factor)2.52 E F0 2.52(=0)2.52 G(.5,)-2.52 E
-(only look azimuths 180 de)144 216 Q(grees a)-.15 E -.1(wa)-.15 G 2.5
+-3.42 F F1(bearing)144 156 Q F0 .997(\(e.g. if)3.497 F F1(factor)3.497 E
+F0 3.497(=2)3.497 G .997(.0, nonzero priorities will be restricted to l\
+ook azimuths within 45 de-)-3.497 F .536(grees of)144 168 R F1(bearing)
+3.036 E F0 .536(\). If)B F1(factor)3.036 E F0 3.036(<1)3.036 G .537
+(.0, the range of nonzero priorities will e)-3.036 F .537
+(xpand \(e.g. if)-.15 F F1(factor)3.037 E F0 3.037(=0)3.037 G(.5,)-3.037
+E(only look azimuths 180 de)144 180 Q(grees a)-.15 E -.1(wa)-.15 G 2.5
 (yf).1 G(rom)-2.5 E F1(bearing)2.5 E F0(will ha)2.5 E .3 -.15(ve a z)-.2
-H(ero priority\).).15 E(If)144 240 Q F1(mode)2.525 E F0 2.526(=1t)2.525
+H(ero priority\).).15 E(If)144 204 Q F1(mode)2.526 E F0 2.526(=1t)2.526
 G .026(hen the heading criteria is applied, with)-2.526 F F1(bearing)
-2.526 E F0 .026(being interpreted as the desired head-)2.526 F .678
-(ing. The)144 252 R F1(factor)3.178 E F0 -.25(va)3.178 G .678
+2.526 E F0 .026(being interpreted as the desired head-)2.526 F .677
+(ing. The)144 216 R F1(factor)3.177 E F0 -.25(va)3.178 G .678
 (lue modulates ho).25 F 3.178(wr)-.25 G .678(apidly the priority de)
--3.178 F .678(grades a)-.15 F -.1(wa)-.15 G 3.178(yf).1 G .677
+-3.178 F .678(grades a)-.15 F -.1(wa)-.15 G 3.178(yf).1 G .678
 (rom the preferred head-)-3.178 F
-(ing. The priority \(p\) for a data point is assigned as follo)144 264 Q
-(ws:)-.25 E 2.5(p=c)164 276 S(os\(f * \(Hp \255 Ha\)\))-2.5 E
-(when \25590 < \(f * \(Hp \255 Ha\)\) < 90 and)144 288 Q 2.5(p=0)164 300
-S .105(otherwise, where f =)144 312 R F1(factor)2.605 E F0 2.606(,A)C
+(ing. The priority \(p\) for a data point is assigned as follo)144 228 Q
+(ws:)-.25 E 2.5(p=c)164 240 S(os\(f * \(Hp \255 Ha\)\))-2.5 E
+(when \25590 < \(f * \(Hp \255 Ha\)\) < 90 and)144 252 Q 2.5(p=0)164 264
+S .106(otherwise, where f =)144 276 R F1(factor)2.606 E F0 2.606(,A)C
 2.606(p=)-2.606 G F1(bearing)A F0 2.606(,a)C .106
-(nd Aa is the actual heading of the data point.)-2.606 F(If)5.106 E F1
-(factor)2.606 E F0 3.354(=1)144 324 S .854
-(.0, the priority will be 1.0 at)-3.354 F F1(bearing)3.354 E F0 .854
-(and will f)3.354 F .853(all to zero for headings more than 90 de)-.1 F
-(grees)-.15 E -2.3 -.15(aw a)144 336 T 3.375(yf).15 G(rom)-3.375 E F1
+(nd Aa is the actual heading of the data point.)-2.606 F(If)5.105 E F1
+(factor)2.605 E F0 3.353(=1)144 288 S .853
+(.0, the priority will be 1.0 at)-3.353 F F1(bearing)3.354 E F0 .854
+(and will f)3.354 F .854(all to zero for headings more than 90 de)-.1 F
+(grees)-.15 E -2.3 -.15(aw a)144 300 T 3.375(yf).15 G(rom)-3.375 E F1
 (bearing)3.375 E F0 5.875(.I)C(f)-5.875 E F1(factor)3.375 E F0 3.375(>1)
 3.375 G .875(.0, the range of nonzero priorities will shrink closer to)
--3.375 F F1(bearing)3.375 E F0 .157(\(e.g. if)144 348 R F1(factor)2.657
+-3.375 F F1(bearing)3.375 E F0 .156(\(e.g. if)144 312 R F1(factor)2.656
 E F0 2.657(=2)2.657 G .157
 (.0, nonzero priorities will be restricted to headings within 45 de)
--2.657 F .156(grees of)-.15 F F1(bearing)2.656 E F0(\).)A(If)144 360 Q
-F1(factor)2.927 E F0 2.927(<1)2.927 G .428
-(.0, the range of nonzero priorities will e)-2.927 F .428
-(xpand \(e.g. if)-.15 F F1(factor)2.928 E F0 2.928(=0)2.928 G .428
-(.5, only headings 180)-2.928 F(de)144 372 Q(grees a)-.15 E -.1(wa)-.15
+-2.657 F .157(grees of)-.15 F F1(bearing)2.657 E F0(\).)A(If)144 324 Q
+F1(factor)2.928 E F0 2.928(<1)2.928 G .428
+(.0, the range of nonzero priorities will e)-2.928 F .428
+(xpand \(e.g. if)-.15 F F1(factor)2.928 E F0 2.927(=0)2.928 G .427
+(.5, only headings 180)-2.927 F(de)144 336 Q(grees a)-.15 E -.1(wa)-.15
 G 2.5(yf).1 G(rom)-2.5 E F1(bearing)2.5 E F0(will ha)2.5 E .3 -.15
-(ve a z)-.2 H(ero priority\).).15 E/F2 10/Times-Bold@0 SF<ad56>108 388.8
-Q F0(Normally)23.08 E(,)-.65 E F2(mbmosaic)2.691 E F0 .191
+(ve a z)-.2 H(ero priority\).).15 E/F2 10/Times-Bold@0 SF<ad56>108 352.8
+Q F0(Normally)144 352.8 Q(,)-.65 E F2(mbmosaic)2.691 E F0 .191
 (prints out information re)2.691 F -.05(ga)-.15 G .191
 (rding its controlling parameters during e).05 F -.15(xe)-.15 G(cution;)
-.15 E(the)144 400.8 Q F2<ad56>2.5 E F0(option causes the program to als\
-o print out statements indicating its progress.)2.5 E F2<ad57>108 417.6
-Q F1(scale)20.3 E F0 .178(Sets the width of the g)144 429.6 R .178
-(aussian weighting function in terms of the grid spacing.)-.05 F .179
-(The distance to the)5.179 F .303
-(1/e point of the weighting function is gi)144 441.6 R -.15(ve)-.25 G
+.15 E(the)144 364.8 Q F2<ad56>2.5 E F0(option causes the program to als\
+o print out statements indicating its progress.)2.5 E F2<ad57>108 381.6
+Q F1(scale)144 381.6 Q F0 .179(Sets the width of the g)144 393.6 R .178
+(aussian weighting function in terms of the grid spacing.)-.05 F .178
+(The distance to the)5.178 F .303
+(1/e point of the weighting function is gi)144 405.6 R -.15(ve)-.25 G
 2.803(nb).15 G 2.803(yh)-2.803 G .303(alf of the grid spacing times)
 -2.803 F F1(scale)2.803 E F0 5.303(.D)C(ef)-5.303 E(ault:)-.1 E F1
-(scale)2.802 E F0 2.5(=1)144 453.6 S(.0)-2.5 E F2<ad58>108 470.4 Q F1
--.2(ex)23.08 G(tend).2 E F0 .645(Extends the size of the internal grid \
-so that the output grid is a subset from the center of a lar)144 482.4 R
-(ger)-.18 E 5.274(grid. This)144 494.4 R(allo)2.774 E .274(ws data outs\
-ide the output grid to guide the spline interpolation of data g)-.25 F
-.273(aps which)-.05 F .497
-(happen to lie at the the edge of the output grid.)144 506.4 R .498
-(The amount of e)5.497 F .498(xtension is)-.15 F F1 -.2(ex)2.998 G(tend)
-.2 E F0 .498(times the grid)2.998 F .882(width/height to each side.)144
-518.4 R .882(Thus, if)5.882 F F1 -.2(ex)3.382 G(tend).2 E F0 .881
-(=1.0, then the internal grid will ha)B 1.181 -.15(ve d)-.2 H .881
-(imensions three).15 F(times the output grid.)144 530.4 Q(Def)5 E(ault:)
+(scale)2.803 E F0 2.5(=1)144 417.6 S(.0)-2.5 E F2<ad58>108 434.4 Q F1
+-.2(ex)144 434.4 S(tend).2 E F0 .646(Extends the size of the internal g\
+rid so that the output grid is a subset from the center of a lar)144
+446.4 R(ger)-.18 E 5.273(grid. This)144 458.4 R(allo)2.773 E .274(ws da\
+ta outside the output grid to guide the spline interpolation of data g)
+-.25 F .274(aps which)-.05 F .498
+(happen to lie at the the edge of the output grid.)144 470.4 R .497
+(The amount of e)5.497 F .497(xtension is)-.15 F F1 -.2(ex)2.997 G(tend)
+.2 E F0 .497(times the grid)2.997 F .881(width/height to each side.)144
+482.4 R .881(Thus, if)5.881 F F1 -.2(ex)3.381 G(tend).2 E F0 .882
+(=1.0, then the internal grid will ha)B 1.182 -.15(ve d)-.2 H .882
+(imensions three).15 F(times the output grid.)144 494.4 Q(Def)5 E(ault:)
 -.1 E F1 -.2(ex)2.5 G(tend).2 E F0 2.5(=0)2.5 G(.0)-2.5 E F2<ad59>108
-547.2 Q F1(priority_sour)23.08 E(ce)-.37 E F0 .276(Enables priortizatio\
-n of data points based on their apparent grazing angle \(this angle is \
-arctan\(x/z\))144 559.2 R .132(where x is acrosstrack distance and z is\
- sonar altitude, so that the center of the sw)144 571.2 R .132
+511.2 Q F1(priority_sour)144 511.2 Q(ce)-.37 E F0 .276(Enables priortiz\
+ation of data points based on their apparent grazing angle \(this angle\
+ is arctan\(x/z\))144 523.2 R .132(where x is acrosstrack distance and \
+z is sonar altitude, so that the center of the sw)144 535.2 R .133
 (ath has an appar)-.1 F(-)-.2 E .531
-(ent grazing angle of zero, the port sw)144 583.2 R .531
+(ent grazing angle of zero, the port sw)144 547.2 R .531
 (ath edge has a lar)-.1 F .531(ge ne)-.18 F -.05(ga)-.15 G(ti).05 E .831
--.15(ve a)-.25 H .532(ngle, and the starboard sw).15 F(ath)-.1 E .845
-(edge has a lar)144 595.2 R .845(ge positi)-.18 F 1.145 -.15(ve a)-.25 H
+-.15(ve a)-.25 H .531(ngle, and the starboard sw).15 F(ath)-.1 E .845
+(edge has a lar)144 559.2 R .845(ge positi)-.18 F 1.145 -.15(ve a)-.25 H
 .845(ngle\). A number of prede\214ned priority tables are a).15 F -.25
-(va)-.2 G .845(ilable and can be).25 F(accessed by setting)144 607.2 Q
+(va)-.2 G .845(ilable and can be).25 F(accessed by setting)144 571.2 Q
 F1(priority_sour)2.5 E(ce)-.37 E F0
 (to a number from 1 to 8. These priority tables include:)2.5 E F1
-(priority_sour)144 643.2 Q(ce)-.37 E F0 2.5(=1)2.5 G(:)-2.5 E
-(Angle \(de)159 655.2 Q 2.5(g\) Priority)-.15 F
-(\255--------------------)159 667.2 Q 22.5(\25560 1.0)185 679.2 R 25(00)
-190 691.2 S(.0)-25 E 22.5(60 1.0)187.5 703.2 R(MB-System 5.0)72 768 Q
-(25 September 2021)131.775 E(8)190.115 E 0 Cg EP
+(priority_sour)144 607.2 Q(ce)-.37 E F0 2.5(=1)2.5 G(:)-2.5 E
+(Angle \(de)159 619.2 Q 2.5(g\) Priority)-.15 F
+(\255--------------------)159 631.2 Q 22.5(\25560 1.0)185 643.2 R 25(00)
+190 655.2 S(.0)-25 E 22.5(60 1.0)187.5 667.2 R F1(priority_sour)144
+703.2 Q(ce)-.37 E F0 2.5(=2)2.5 G(:)-2.5 E(Angle \(de)159 715.2 Q 2.5
+(g\) Priority)-.15 F(\255--------------------)159 727.2 Q(MB-System 5.0)
+72 768 Q(25 September 2021)131.775 E(8)190.115 E 0 Cg EP
 %%Page: 9 9
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 147.06(mbmosaic\(1\) MB-System)72 48 R 147.06
-(5.0 mbmosaic\(1\))2.5 F/F1 10/Times-Italic@0 SF(priority_sour)144 84 Q
-(ce)-.37 E F0 2.5(=2)2.5 G(:)-2.5 E(Angle \(de)159 96 Q 2.5
-(g\) Priority)-.15 F(\255--------------------)159 108 Q 22.5(\25567 1.0)
-185 120 R 25(00)190 132 S(.0)-25 E 22.5(67 1.0)187.5 144 R F1
-(priority_sour)144 180 Q(ce)-.37 E F0 2.5(=3)2.5 G(:)-2.5 E(Angle \(de)
-159 192 Q 2.5(g\) Priority)-.15 F(\255--------------------)159 204 Q
-22.5(\25575 1.0)185 216 R 25(00)190 228 S(.0)-25 E 22.5(75 1.0)187.5 240
-R F1(priority_sour)144 276 Q(ce)-.37 E F0 2.5(=4)2.5 G(:)-2.5 E
-(Angle \(de)159 288 Q 2.5(g\) Priority)-.15 F(\255--------------------)
-159 300 Q 22.5(\25585 1.0)185 312 R 25(00)190 324 S(.0)-25 E 22.5
-(85 1.0)187.5 336 R F1(priority_sour)144 372 Q(ce)-.37 E F0 2.5(=5)2.5 G
-(:)-2.5 E(Angle \(de)159 384 Q 2.5(g\) Priority)-.15 F
-(\255--------------------)159 396 Q 22.5(\25560 0.0)185 408 R 25(01)190
-420 S(.0)-25 E 22.5(60 0.0)187.5 432 R F1(priority_sour)144 468 Q(ce)
--.37 E F0 2.5(=6)2.5 G(:)-2.5 E(Angle \(de)159 480 Q 2.5(g\) Priority)
--.15 F(\255--------------------)159 492 Q 22.5(\25567 0.0)185 504 R 25
-(01)190 516 S(.0)-25 E 22.5(67 0.0)187.5 528 R F1(priority_sour)144 564
-Q(ce)-.37 E F0 2.5(=7)2.5 G(:)-2.5 E(Angle \(de)159 576 Q 2.5
-(g\) Priority)-.15 F(\255--------------------)159 588 Q 22.5(\25575 0.0)
-185 600 R 25(01)190 612 S(.0)-25 E 22.5(75 0.0)187.5 624 R F1
-(priority_sour)144 660 Q(ce)-.37 E F0 2.5(=8)2.5 G(:)-2.5 E(Angle \(de)
-159 672 Q 2.5(g\) Priority)-.15 F(\255--------------------)159 684 Q
-22.5(\25585 0.0)185 696 R 25(01)190 708 S(.0)-25 E 22.5(85 0.0)187.5 720
-R(MB-System 5.0)72 768 Q(25 September 2021)131.775 E(9)190.115 E 0 Cg EP
+(5.0 mbmosaic\(1\))2.5 F 22.5(\25567 1.0)185 84 R 25(00)190 96 S(.0)-25
+E 22.5(67 1.0)187.5 108 R/F1 10/Times-Italic@0 SF(priority_sour)144 144
+Q(ce)-.37 E F0 2.5(=3)2.5 G(:)-2.5 E(Angle \(de)159 156 Q 2.5
+(g\) Priority)-.15 F(\255--------------------)159 168 Q 22.5(\25575 1.0)
+185 180 R 25(00)190 192 S(.0)-25 E 22.5(75 1.0)187.5 204 R F1
+(priority_sour)144 240 Q(ce)-.37 E F0 2.5(=4)2.5 G(:)-2.5 E(Angle \(de)
+159 252 Q 2.5(g\) Priority)-.15 F(\255--------------------)159 264 Q
+22.5(\25585 1.0)185 276 R 25(00)190 288 S(.0)-25 E 22.5(85 1.0)187.5 300
+R F1(priority_sour)144 336 Q(ce)-.37 E F0 2.5(=5)2.5 G(:)-2.5 E
+(Angle \(de)159 348 Q 2.5(g\) Priority)-.15 F(\255--------------------)
+159 360 Q 22.5(\25560 0.0)185 372 R 25(01)190 384 S(.0)-25 E 22.5
+(60 0.0)187.5 396 R F1(priority_sour)144 432 Q(ce)-.37 E F0 2.5(=6)2.5 G
+(:)-2.5 E(Angle \(de)159 444 Q 2.5(g\) Priority)-.15 F
+(\255--------------------)159 456 Q 22.5(\25567 0.0)185 468 R 25(01)190
+480 S(.0)-25 E 22.5(67 0.0)187.5 492 R F1(priority_sour)144 528 Q(ce)
+-.37 E F0 2.5(=7)2.5 G(:)-2.5 E(Angle \(de)159 540 Q 2.5(g\) Priority)
+-.15 F(\255--------------------)159 552 Q 22.5(\25575 0.0)185 564 R 25
+(01)190 576 S(.0)-25 E 22.5(75 0.0)187.5 588 R F1(priority_sour)144 624
+Q(ce)-.37 E F0 2.5(=8)2.5 G(:)-2.5 E(Angle \(de)159 636 Q 2.5
+(g\) Priority)-.15 F(\255--------------------)159 648 Q 22.5(\25585 0.0)
+185 660 R 25(01)190 672 S(.0)-25 E 22.5(85 0.0)187.5 684 R(Alternati)144
+720 Q -.15(ve)-.25 G(ly).15 E 2.721(,i)-.65 G(f)-2.721 E F1
+(priority_sour)2.721 E(ce)-.37 E F0 .221(speci\214es a \214le name, the\
+n the data priority table will be read from)2.721 F(MB-System 5.0)72 768
+Q(25 September 2021)131.775 E(9)190.115 E 0 Cg EP
 %%Page: 10 10
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 147.06(mbmosaic\(1\) MB-System)72 48 R 147.06
-(5.0 mbmosaic\(1\))2.5 F(Alternati)144 84 Q -.15(ve)-.25 G(ly).15 E 2.72
-(,i)-.65 G(f)-2.72 E/F1 10/Times-Italic@0 SF(priority_sour)2.72 E(ce)
--.37 E F0 .221(speci\214es a \214le name, then the data priority table \
-will be read from)2.72 F 1.085(this \214le.)144 96 R 1.084
-(The priority \214le should contain tw)6.085 F 3.584(oc)-.1 G 1.084
-(olumns: apparent grazing angles in de)-3.584 F 1.084(grees from)-.15 F
--.15(ve)144 108 S .427(rtical follo).15 F .427(wed by data priority v)
+(5.0 mbmosaic\(1\))2.5 F 1.084(this \214le.)144 84 R 1.084
+(The priority \214le should contain tw)6.084 F 3.584(oc)-.1 G 1.085
+(olumns: apparent grazing angles in de)-3.584 F 1.085(grees from)-.15 F
+-.15(ve)144 96 S .428(rtical follo).15 F .427(wed by data priority v)
 -.25 F .427
 (alues between 0.0 and 1.0. The \214rst line of the \214le should con-)
--.25 F .873(tain the minimum, or port-most grazing angle follo)144 120 R
-.873(wed by the associated priority)-.25 F 3.373(.T)-.65 G .873
-(he follo)-3.373 F(wing)-.25 E .971
-(lines should contain increasingly lar)144 132 R .972
+-.25 F .873(tain the minimum, or port-most grazing angle follo)144 108 R
+.873(wed by the associated priority)-.25 F 3.373(.T)-.65 G .874
+(he follo)-3.373 F(wing)-.25 E .972
+(lines should contain increasingly lar)144 120 R .971
 (ge grazing angles \(and associated priorities\) up to the maxi-)-.18 F
-.272(mum, or starboard-most, grazing angle.)144 144 R .271
-(The highest priority assigned should be one, and the lo)5.272 F(w-)-.25
-E .273(est zero.)144 156 R .274(Priorities for grazing angles less than\
- the minimum or greater than the maximum will be)5.273 F
-(zero. See the e)144 168 Q(xamples belo)-.15 E 2.5(wf)-.25 G
-(or a further e)-2.5 E(xplanation of the use of)-.15 E F1(priority_sour)
-2.5 E(ce)-.37 E F0(.)A/F2 10/Times-Bold@0 SF<ad5a>108 184.8 Q F1
-(bath_default)23.63 E F0 .658(Sets the def)144 196.8 R .658(ault depth \
-used for calculating grazing angles for amplitude or sidescan v)-.1 F
-.657(alues where)-.25 F(depths are not a)144 208.8 Q -.25(va)-.2 G 2.5
-(ilable. Def).25 F(ault:)-.1 E F1(scale)2.5 E F0 2.5(=1)2.5 G(000.0)-2.5
-E/F3 10.95/Times-Bold@0 SF(EXAMPLES)72 225.6 Q F0 .637(Suppose you w)108
-237.6 R .638
+.271(mum, or starboard-most, grazing angle.)144 132 R .272
+(The highest priority assigned should be one, and the lo)5.271 F(w-)-.25
+E .274(est zero.)144 144 R .274(Priorities for grazing angles less than\
+ the minimum or greater than the maximum will be)5.274 F
+(zero. See the e)144 156 Q(xamples belo)-.15 E 2.5(wf)-.25 G
+(or a further e)-2.5 E(xplanation of the use of)-.15 E/F1 10
+/Times-Italic@0 SF(priority_sour)2.5 E(ce)-.37 E F0(.)A/F2 10
+/Times-Bold@0 SF<ad5a>108 172.8 Q F1(bath_default)144 172.8 Q F0 .657
+(Sets the def)144 184.8 R .658(ault depth used for calculating grazing \
+angles for amplitude or sidescan v)-.1 F .658(alues where)-.25 F
+(depths are not a)144 196.8 Q -.25(va)-.2 G 2.5(ilable. Def).25 F(ault:)
+-.1 E F1(scale)2.5 E F0 2.5(=1)2.5 G(000.0)-2.5 E/F3 10.95/Times-Bold@0
+SF(EXAMPLES)72 213.6 Q F0 .638(Suppose you w)108 225.6 R .638
 (ant to mosaic some SeaBeam 2112 sidescan data in six data \214les o)-.1
-F -.15(ve)-.15 G 3.138(rar).15 G -.15(eg)-3.138 G .638(ion with longi-)
+F -.15(ve)-.15 G 3.137(rar).15 G -.15(eg)-3.137 G .637(ion with longi-)
 .15 F .329(tude bounds of 113.4833E to 115.4333E and latitude bounds of\
- 32.1166S to 31.5500S, and you w)108 249.6 R .328(ould lik)-.1 F(e)-.1 E
-3.083(a1)108 261.6 S .583(00 m grid spacing.)-3.083 F .584
-(First, create a datalist \214le using a te)5.583 F .584
-(xt editor which contains the data \214lenames fol-)-.15 F(lo)108 273.6
+ 32.1166S to 31.5500S, and you w)108 237.6 R .329(ould lik)-.1 F(e)-.1 E
+3.084(a1)108 249.6 S .584(00 m grid spacing.)-3.084 F .584
+(First, create a datalist \214le using a te)5.584 F .583
+(xt editor which contains the data \214lenames fol-)-.15 F(lo)108 261.6
 Q(wed by the appropriate format identi\214er:)-.25 E
-(kn_perth_01.mb41 41)144 297.6 Q(kn_perth_05.mb41 41)144 309.6 Q
-(kn_perth_09.mb41 41)144 321.6 Q(kn_perth_13.mb41 41)144 333.6 Q
-(kn_perth_17.mb41 41)144 345.6 Q(kn_perth_03.mb41 41)144 357.6 Q .5
-(The nadir re)108 381.6 R .5(gion of the sidescan sw)-.15 F .5(ath is g\
+(kn_perth_01.mb41 41)144 285.6 Q(kn_perth_05.mb41 41)144 297.6 Q
+(kn_perth_09.mb41 41)144 309.6 Q(kn_perth_13.mb41 41)144 321.6 Q
+(kn_perth_17.mb41 41)144 333.6 Q(kn_perth_03.mb41 41)144 345.6 Q .5
+(The nadir re)108 369.6 R .5(gion of the sidescan sw)-.15 F .5(ath is g\
 enerally of little use because it is dominated by specular re\215ec-)-.1
-F 1.055(tion rather than backscatter)108 393.6 R 3.555(.I)-.55 G 3.555
+F 1.055(tion rather than backscatter)108 381.6 R 3.555(.I)-.55 G 3.555
 (no)-3.555 G 1.055(rder to allo)-3.555 F(w)-.25 E F2(mbmosaic)3.555 E F0
 1.055(to preferentially use data from the outer sw)3.555 F(ath,)-.1 E(w\
 here possible, create another \214le containing a list of data priority\
- as a function of apparent grazing angle:)108 405.6 Q(-60.0 0.2)144
-429.6 Q(-45.0 1.0)144 441.6 Q(-15.0 0.8)144 453.6 Q(-14.9 0.1)144 465.6
-Q(14.9 0.1)144 477.6 Q(15.0 0.8)144 489.6 Q(45.0 1.0)144 501.6 Q
-(60.0 0.2)144 513.6 Q .332(Here the ne)108 537.6 R -.05(ga)-.15 G(ti).05
+ as a function of apparent grazing angle:)108 393.6 Q(-60.0 0.2)144
+417.6 Q(-45.0 1.0)144 429.6 Q(-15.0 0.8)144 441.6 Q(-14.9 0.1)144 453.6
+Q(14.9 0.1)144 465.6 Q(15.0 0.8)144 477.6 Q(45.0 1.0)144 489.6 Q
+(60.0 0.2)144 501.6 Q .331(Here the ne)108 525.6 R -.05(ga)-.15 G(ti).05
 E .631 -.15(ve a)-.25 H .331(ngles denote the port side of the sw).15 F
 .331(ath and the positi)-.1 F .631 -.15(ve a)-.25 H .331
-(ngles denote the starboard side).15 F .09(of the sw)108 549.6 R 2.59
+(ngles denote the starboard side).15 F .09(of the sw)108 537.6 R 2.59
 (ath. The)-.1 F .09(priorities are linearly interpolated between the di\
-screet angle/priority pairs.)2.59 F .09(Note that the)5.09 F 1.541
-(nadir re)108 561.6 R 1.541(gion \(angles less than +/- 15 de)-.15 F
-1.541(grees\) has lo)-.15 F 4.041(wp)-.25 G(riority)-4.041 E 4.04(,a)
--.65 G 1.54(nd that the highest priority is gi)-4.04 F -.15(ve)-.25 G
-4.04(nt).15 G(o)-4.04 E(angles of 45 de)108 573.6 Q
+screet angle/priority pairs.)2.59 F .09(Note that the)5.09 F .655
+(nadir re)108 549.6 R .655(gion \(angles less than +/- 15 de)-.15 F .656
+(grees\) has lo)-.15 F 3.156(wp)-.25 G(riority)-3.156 E 3.156(,a)-.65 G
+.656(nd that the highest priority is gi)-3.156 F -.15(ve)-.25 G 3.156
+(nt).15 G 3.156(oa)-3.156 G(n-)-3.156 E(gles of 45 de)108 561.6 Q
 (grees. No data with angle magnitudes greater than 60 de)-.15 E
-(grees will be used.)-.15 E(Then, run)108 597.6 Q F2(mbmosaic)2.5 E F0
-(as follo)2.5 E(ws:)-.25 E(mbmosaic \255Idatalist \\)144 609.6 Q
-(-R114.1333/114.7833/-32.1166/-31.55 \\)180 621.6 Q
-(-A4 \255E100/100/meters \255N \\)180 633.6 Q(-Y)180 645.6 Q
+(grees will be used.)-.15 E(Then, run)108 585.6 Q F2(mbmosaic)2.5 E F0
+(as follo)2.5 E(ws:)-.25 E(mbmosaic \255Idatalist \\)144 597.6 Q
+(-R114.1333/114.7833/-32.1166/-31.55 \\)180 609.6 Q
+(-A4 \255E100/100/meters \255N \\)180 621.6 Q(-Y)180 633.6 Q
 (angle_priority)-1 E(.dat \255F0.10 \255C10 \\)-.65 E(-Operth_ss \255V)
-180 657.6 Q(The)108 681.6 Q F2<ad45>3.214 E F0 .715(option speci\214es \
+180 645.6 Q(The)108 669.6 Q F2<ad45>3.215 E F0 .715(option speci\214es \
 grid spacings of 100 meters in both the longitude and latitude; the dim\
-ensions of)3.214 F 1.23(the output grid are calculated according by)108
-693.6 R F2(mbmosaic)3.729 E F0 3.729(.T)C(he)-3.729 E F2<ad46>3.729 E F0
-1.229(option enables Gaussian weighted mean)3.729 F .722(mosaicing and \
-the priority range of 0.10 means that for each bin, all data with prior\
-ities within 0.1 of the)108 705.6 R .394(highest priority will be used.)
-108 717.6 R .393
-(By specifying a clipping dimension of 10 we cause small g)5.394 F .393
+ensions of)3.215 F 1.229(the output grid are calculated according by)108
+681.6 R F2(mbmosaic)3.729 E F0 3.729(.T)C(he)-3.729 E F2<ad46>3.729 E F0
+1.23(option enables Gaussian weighted mean)3.729 F .722(mosaicing and t\
+he priority range of 0.10 means that for each bin, all data with priori\
+ties within 0.1 of the)108 693.6 R .393(highest priority will be used.)
+108 705.6 R .393
+(By specifying a clipping dimension of 10 we cause small g)5.393 F .394
 (aps in the mosaic)-.05 F
-(to be \214lled in through spine interpolation .)108 729.6 Q
+(to be \214lled in through spine interpolation .)108 717.6 Q
 (The output looks lik)5 E(e:)-.1 E(MB-System 5.0)72 768 Q
 (25 September 2021)131.775 E(10)185.115 E 0 Cg EP
 %%Page: 11 11
@@ -1289,19 +1292,19 @@ E(xpsvie)128 420 Q 2.5(wt)-.25 G 2.5(ov)-2.5 G(ie)-2.5 E 2.5(wt)-.25 G
 (he plot on the screen.)-2.5 E(\255-------------)110.5 444 Q(Done.)110.5
 480 Q .816(The names of the output \214les are based on the root charac\
 ter string speci\214ed using the)108 504 R/F1 10/Times-Bold@0 SF<ad4f>
-3.316 E F0 3.317(option. Since)3.317 F .043(the grid is output as a net\
+3.316 E F0 3.316(option. Since)3.316 F .043(the grid is output as a net\
 CDF GRD format \214le, its \214lename is "perth_ss.grd"; a shellscript \
 which will allo)108 516 R(w)-.25 E 5.318
 (the contents of the grid to vie)108 528 R 5.318(wed using)-.25 F F1
 (GMT)7.818 E F0 5.318(programs is also output with the \214lename)7.818
-F("perth_ss.grd.cmd".)108 540 Q 1.392(Suppose that one w)108 564 R 1.391
-(ants to produce a mosaic composed only of data with a more or less eas\
-tw)-.1 F 1.391(ard look)-.1 F .261(azimuth. Then add the)108 576 R F1
-<ad55>2.761 E F0 .261(option with a preferred azimuth of 90 de)2.761 F
-.261(grees. A look azimuth f)-.15 F .261(actor of 2.0 will)-.1 F(cause)
-108 588 Q F1(mbmosaic)2.646 E F0 .146(to reject an)2.646 F 2.646(yd)-.15
-G .145(ata with look azimuths outside a range of 45 to 135 de)-2.646 F
-2.645(grees. The)-.15 F(follo)2.645 E(wing)-.25 E(will suf)108 600 Q
+F("perth_ss.grd.cmd".)108 540 Q .543(Suppose that one w)108 564 R .544(\
+ants to produce a mosaic composed only of data with a more or less east\
+w)-.1 F .544(ard look az-)-.1 F .729(imuth. Then add the)108 576 R F1
+<ad55>3.229 E F0 .728(option with a preferred azimuth of 90 de)3.229 F
+.728(grees. A look azimuth f)-.15 F .728(actor of 2.0 will)-.1 F(cause)
+108 588 Q F1(mbmosaic)2.645 E F0 .145(to reject an)2.645 F 2.645(yd)-.15
+G .146(ata with look azimuths outside a range of 45 to 135 de)-2.645 F
+2.646(grees. The)-.15 F(follo)2.646 E(wing)-.25 E(will suf)108 600 Q
 (\214ce:)-.25 E(mbmosaic \255Idatalist \\)144 612 Q
 (-R114.1333/114.7833/-32.1166/-31.55 \\)180 624 Q
 (-A4 \255E100/100/meters \255N \\)180 636 Q(-Y)180 648 Q(angle_priority)
@@ -1316,10 +1319,10 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 147.06(mbmosaic\(1\) MB-System)72 48 R 147.06
 (5.0 mbmosaic\(1\))2.5 F/F1 10.95/Times-Bold@0 SF -.11(BU)72 84 S(GS).11
-E F0 .063(The options for this program ha)108 96 R .363 -.15(ve g)-.2 H
-(ro).15 E .063(wn a bit complicated.)-.25 F .063(If you ha)5.063 F .364
--.15(ve o)-.2 H .064(ther problems, please let us kno).15 F -.65(w.)-.25
-G F1(APPENDIX 1: PR)72 136.8 Q(OJECTED COORDIN)-.329 E -1.04(AT)-.219 G
+E F0(The options for this program ha)108 96 Q .3 -.15(ve g)-.2 H(ro).15
+E(wn a bit complicated.)-.25 E(If you ha)5 E .3 -.15(ve o)-.2 H
+(ther problems, please let us kno).15 E -.65(w.)-.25 G F1
+(APPENDIX 1: PR)72 136.8 Q(OJECTED COORDIN)-.329 E -1.04(AT)-.219 G
 2.738(ES)1.04 G(YSTEM IDENTIFIERS)-2.738 E F0 .542(The follo)108 148.8 R
 .542(wing is a list of the projected coordinate systems \(PCS')-.25 F
 .542(s\) that are supported by MB-System. The)-.55 F 2.27(full PCS de\

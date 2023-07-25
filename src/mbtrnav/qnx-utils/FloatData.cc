@@ -56,7 +56,7 @@ void FloatData::read(ExternalData *externalData)
 
 const char *FloatData::ascii()
 {
-  sprintf(_asciiBuffer, asciiFormat(), _value);
+  snprintf(_asciiBuffer, FLTDATA_ASCII_BUFFER_BYTES, asciiFormat(), _value);
   return _asciiBuffer;
 }
 

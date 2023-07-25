@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:03 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:10 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 3
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -256,10 +262,10 @@ BP
 ated by manually cleaning data using the correlation plot)3.172 F .457
 (in the binstat tool of the neptune softw)108 326.4 R .457
 (are written by K)-.1 F(ongsber)-.35 E 2.957(gS)-.18 G .458
-(imrad and writes these edits in a mbsys-)-2.957 F .976(tem esf \214le.)
-108 338.4 R .976(The purpose of this tool is to allo)5.976 F 3.476(wd)
--.25 G .976(ata cleaning done using neptune to be carried into the)
--3.476 F(mbsystem en)108 350.4 Q
+(imrad and writes these edits in a mbsys-)-2.957 F .044(tem esf \214le.)
+108 338.4 R .044(The purpose of this tool is to allo)5.044 F 2.543(wd)
+-.25 G .043(ata cleaning done using neptune to be carried into the mb-)
+-2.543 F(system en)108 350.4 Q
 (vironment \255 thus making neptune a more useful tool.)-.4 E F2
 (mbneptune2esf)108 374.4 Q F0 .2
 (applies all the manual edits in the rules \214le gi)2.7 F -.15(ve)-.25
@@ -280,11 +286,11 @@ nually \215agged data is)108 458.4 R(\215agged.)108 470.4 Q F2
 (mbneptune2esf)108 494.4 Q F0 .079
 (can also be used to transfer processing done in neptune to other surv)
 2.579 F -.15(ey)-.15 G 2.58(s. Neptune).15 F .08(breaks a)2.58 F(surv)
-108 506.4 Q 1.126 -.15(ey u)-.15 H 3.326(pi).15 G .826(nto a number of \
-blocks and records all the processing done in these blocks. Changing a \
-block)-3.326 F .198(results in a loss of all the e)108 518.4 R .198
-(xisting processing information. When adding data to an e)-.15 F .199
-(xisting surv)-.15 F .499 -.15(ey t)-.15 H .199(hat f).15 F(alls)-.1 E
+108 506.4 Q .367 -.15(ey u)-.15 H 2.567(pi).15 G .066(nto a number of b\
+locks and records all the processing done in these blocks. Changing a b\
+lock re-)-2.567 F .63(sults in a loss of all the e)108 518.4 R .63
+(xisting processing information. When adding data to an e)-.15 F .63
+(xisting surv)-.15 F .93 -.15(ey t)-.15 H .63(hat f).15 F(alls)-.1 E
 .156(outside an)108 530.4 R 2.656(ye)-.15 G .156
 (xisting block, all of the e)-2.806 F .156(xisting blocks must be remo)
 -.15 F -.15(ve)-.15 G .155(d, and therefore all of the processing is).15
@@ -323,11 +329,11 @@ E(1)204.835 E 0 Cg EP
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 127.07(mbneptune2esf\(1\) MB-System)72 48 R
-127.07(5.0 mbneptune2esf\(1\))2.5 F 1.432(data \214le.)108 84 R(The)
-6.432 E/F1 10/Times-Bold@0 SF(mbpr)3.932 E(ocess)-.18 E F0 1.432
-(program is also used to mer)3.932 F 1.432(ge edited na)-.18 F(vig)-.2 E
-1.432(ation, recalculate bath)-.05 F(ymetry)-.05 E 3.933(,a)-.65 G(nd)
--3.933 E(apply other corrections to sw)108 96 Q(ath bath)-.1 E
+127.07(5.0 mbneptune2esf\(1\))2.5 F .318(data \214le.)108 84 R(The)5.318
+E/F1 10/Times-Bold@0 SF(mbpr)2.818 E(ocess)-.18 E F0 .319
+(program is also used to mer)2.818 F .319(ge edited na)-.18 F(vig)-.2 E
+.319(ation, recalculate bath)-.05 F(ymetry)-.05 E 2.819(,a)-.65 G .319
+(nd ap-)-2.819 F(ply other corrections to sw)108 96 Q(ath bath)-.1 E
 (ymetry data.)-.05 E/F2 10.95/Times-Bold@0 SF(MB-SYSTEM A)72 124.8 Q
 (UTHORSHIP)-.548 E F0(Da)108 136.8 Q(vid W)-.2 E 2.5(.C)-.92 G(aress)
 -2.5 E(Montere)113 148.8 Q 2.5(yB)-.15 G(ay Aquarium Research Institute)
@@ -339,9 +345,9 @@ Q(UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
 (THORSHIP OF THIS PR).548 E(OGRAM)-.329 E F0(Gordon K)108 261.6 Q(eith)
 -.25 E(CSIR)113 273.6 Q 2.5(OM)-.4 G(arine and Atmospheric Research)-2.5
 E F2(OPTIONS)72 302.4 Q F1<ad46>108 314.4 Q/F3 10/Times-Italic@0 SF
-(format)24.19 E F0 .22(Sets the data format used if the input is read f\
-rom stdin or from a \214le. If)144 326.4 R F3(format)2.72 E F0 2.72(<0)
-2.72 G 2.72(,t)-2.72 G .22(hen the input)-2.72 F .007
+(format)144 314.4 Q F0 .22(Sets the data format used if the input is re\
+ad from stdin or from a \214le. If)144 326.4 R F3(format)2.72 E F0 2.72
+(<0)2.72 G 2.72(,t)-2.72 G .22(hen the input)-2.72 F .007
 (\214le speci\214ed with the)144 338.4 R F1<ad49>2.507 E F0 .008
 (option will actually contain a list of input sw)2.508 F .008
 (ath sonar data \214les. This pro-)-.1 F .012(gram uses the)144 350.4 R
@@ -356,8 +362,8 @@ F1(MBIO)2.512 E F0 .012(library and will read or write an)2.512 F 2.512
 (formats 56 and 57 \214les are af)2.928 F(fected)-.25 E
 (by this program. Other \214les are ignored.)144 386.4 Q F1<ad48>108
 403.2 Q F0 .162(This "help" \215ag cause the program to print out a des\
-cription of its operation and then e)22.52 F .162(xit immedi-)-.15 F
-(ately)144 415.2 Q(.)-.65 E F1<ad49>108 432 Q F3(in\214le)26.41 E F0
+cription of its operation and then e)144 403.2 R .162(xit immedi-)-.15 F
+(ately)144 415.2 Q(.)-.65 E F1<ad49>108 432 Q F3(in\214le)144 432 Q F0
 .313(Sets the input \214lename. If)144 444 R F3(format)2.813 E F0 2.813
 (>0\()2.813 G .313(set with the)-2.813 F F1<ad46>2.813 E F0 .313
 (option\) then the sw)2.813 F .312(ath sonar data contained)-.1 F(in)144
@@ -383,20 +389,20 @@ F -.15(ve)-.25 G 3.01(ni).15 G 3.01(nt)-3.01 G(he)-3.01 E F1(MBIO)3.01 E
 F0 .51(manual page.)3.01 F .51(Only formats 56 and 57 \214les are af)
 5.51 F .51(fected by this pro-)-.25 F(gram. Other \214les are ignored.)
 144 576 Q(Def)5 E(ault:)-.1 E F3(in\214le)2.5 E F0 2.5(=")2.5 G
-(datalist.mb-1".)-2.5 E F1<ad4d>108 592.8 Q F3(mode)20.86 E F0
+(datalist.mb-1".)-2.5 E F1<ad4d>108 592.8 Q F3(mode)144 592.8 Q F0
 (Sets the manner in which \215agged by neptune are handled.)144 604.8 Q
 F3(mode)180 616.8 Q F0 2.5(=1)2.5 G 31.92(:F)-2.5 G
 (lags the \215agged beam.)-31.92 E F3(mode)180 628.8 Q F0 2.5(=3)2.5 G
 31.92(:Z)-2.5 G(eros the \215agged beam.)-31.92 E(Def)5 E(ault:)-.1 E F3
 (mode)2.5 E F0 2.5(=1)2.5 G(.)-2.5 E F1<ad4f>108 645.6 Q F3(out\214le)
-22.52 E F0 .927(Speci\214es a \214le to write a cop)144 657.6 R 3.427
-(yo)-.1 G 3.427(ft)-3.427 G .926(he beam information e)-3.427 F .926
-(xtracted from the rules \214le. Mostly for)-.15 F(deb)144 669.6 Q
-(ugging purposes.)-.2 E F1<ad52>108 686.4 Q F3(rules_\214le)23.08 E F0
-.735(The binstat rules \214le containing the manual \215agging rules to\
- be applied. Rules \214les are normally)144 698.4 R($PR)144 710.4 Q
-(OCHOME/)-.4 E F3(surve)A(y)-.3 E F0(/binstat_)A F3(bloc)A(k)-.2 E F0
-3.582(.rules. The)B(LINES_PING_BEAM_R)3.582 E 1.082
+144 645.6 Q F0 .027(Speci\214es a \214le to write a cop)144 657.6 R
+2.527(yo)-.1 G 2.527(ft)-2.527 G .027(he beam information e)-2.527 F
+.026(xtracted from the rules \214le. Mostly for de-)-.15 F -.2(bu)144
+669.6 S(gging purposes.).2 E F1<ad52>108 686.4 Q F3(rules_\214le)144
+686.4 Q F0 .735(The binstat rules \214le containing the manual \215aggi\
+ng rules to be applied. Rules \214les are normally)144 698.4 R($PR)144
+710.4 Q(OCHOME/)-.4 E F3(surve)A(y)-.3 E F0(/binstat_)A F3(bloc)A(k)-.2
+E F0 3.582(.rules. The)B(LINES_PING_BEAM_R)3.582 E 1.082
 (ULE rules from this \214le)-.4 F
 (will be applied to the matching line\(s\) in the input \214le.)144
 722.4 Q(Def)5 E(ault:)-.1 E F3(rules_\214le)2.5 E F0 2.5(=s)2.5 G(tdin.)
@@ -408,7 +414,7 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 127.07(mbneptune2esf\(1\) MB-System)72 48 R
 127.07(5.0 mbneptune2esf\(1\))2.5 F/F1 10/Times-Bold@0 SF<ad56>108 84 Q
-F0(Normally)23.08 E(,)-.65 E F1(mbneptune2esf)3.75 E F0 -.1(wo)3.75 G
+F0(Normally)144 84 Q(,)-.65 E F1(mbneptune2esf)3.75 E F0 -.1(wo)3.75 G
 1.25(rks "silently" without outputting an).1 F 1.25
 (ything to the stderr stream.)-.15 F(If)6.25 E(the)144 96 Q F1<ad56>
 3.652 E F0 1.152(\215ag is gi)3.652 F -.15(ve)-.25 G 1.152(n, then).15 F

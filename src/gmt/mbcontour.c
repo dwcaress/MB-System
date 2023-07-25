@@ -32,14 +32,9 @@
  *                                  plotters removed)
  */
 
-#include <stdbool.h>
+//#include <stdbool.h>
 
-#define THIS_MODULE_NAME "mbcontour"
-#define THIS_MODULE_LIB "mbsystem"
-#define THIS_MODULE_PURPOSE "Plot swath bathymetry, amplitude, or backscatter"
-#define THIS_MODULE_KEYS ""
-
-/* GMT5 header file */
+/* GMT header file */
 #include "gmt_dev.h"
 
 /*  Compatibility with old lower-function/macro names use prior to GMT 5.3.0 */
@@ -91,9 +86,26 @@
 #define gmt_show_name_and_purpose GMT_show_name_and_purpose
 #endif
 
+/* Compatibility with old GMT_MSG names prior to version 6 */
+#if GMT_MAJOR_VERSION == 6 && GMT_MINOR_VERSION <= 2
+#define GMT_MSG_ERROR GMT_MSG_NORMAL
+#elif GMT_MAJOR_VERSION < 6
+#define GMT_MSG_ERROR GMT_MSG_NORMAL
+#endif
+
+#define THIS_MODULE_CLASSIC_NAME "mbcontour"
+#define THIS_MODULE_MODERN_NAME "mbcontour"
+#define THIS_MODULE_LIB "mbsystem"
+#define THIS_MODULE_PURPOSE "Plot swath bathymetry, amplitude, or backscatter"
+
+#define THIS_MODULE_KEYS "<G{+,>}"
+#define THIS_MODULE_NEEDS "g"
+#define THIS_MODULE_OPTIONS "-:>RV" GMT_OPT("H")
+
 #define GMT_PROG_OPTIONS "->BJKOPRUVXY" GMT_OPT("S")
 
-// Stop warnings about packaging collision between GDAL's cpl_port.h and mb_config.h
+// Stop warnings about packaging collision between GDAL's cpl_port.h and the 
+// Autotools build system mb_config.h
 #ifdef PACKAGE_BUGREPORT
 #undef PACKAGE_BUGREPORT
 #endif
@@ -194,8 +206,12 @@ struct MBCONTOUR_CTRL {
 		bool active;
 		double timegap;
 	} T;
-	struct mbcontour_W { /* -W */
+	struct mbcontour_W {	/* -W<pen>[+z] */
 		bool active;
+		bool cpt_effect;
+		bool set_color;
+		unsigned int sequential;
+		struct GMT_PEN pen;
 	} W;
 	struct mbcontour_Z { /* -Z<algorithm> */
 		bool active;
@@ -284,6 +300,12 @@ void *New_mbcontour_Ctrl(struct GMT_CTRL *GMT) { /* Allocate and initialize a ne
 	Ctrl->S.active = false;
 	Ctrl->T.active = false;
 	Ctrl->W.active = false;
+	Ctrl->W.pen = GMT->current.setting.map_default_pen;
+	Ctrl->W.active = false;
+	Ctrl->W.cpt_effect = false;
+	Ctrl->W.set_color = false;
+	Ctrl->W.sequential = 0;
+	//Ctrl->W.pen;
 	Ctrl->Z.active = false;
 	Ctrl->Z.contour_algorithm = MB_CONTOUR_OLD;
 
@@ -293,15 +315,14 @@ void *New_mbcontour_Ctrl(struct GMT_CTRL *GMT) { /* Allocate and initialize a ne
 void Free_mbcontour_Ctrl(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl) { /* Deallocate control structure */
 	if (!Ctrl)
 		return;
-	if (Ctrl->C.contourfile)
-		free(Ctrl->C.contourfile);
-	if (Ctrl->I.inputfile)
-		free(Ctrl->I.inputfile);
+	gmt_M_str_free (Ctrl->C.contourfile);
+	gmt_M_str_free (Ctrl->I.inputfile);
+	gmt_freepen (GMT, &Ctrl->W.pen);
 	gmt_M_free(GMT, Ctrl);
 }
 
 int GMT_mbcontour_usage(struct GMTAPI_CTRL *API, int level) {
-	gmt_show_name_and_purpose(API, THIS_MODULE_LIB, THIS_MODULE_NAME, THIS_MODULE_PURPOSE);
+	gmt_show_name_and_purpose(API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_PURPOSE);
 	if (level == GMT_MODULE_PURPOSE)
 		return (GMT_NOERROR);
 	GMT_Message(API, GMT_TIME_NONE, "usage: mbcontour -I<inputfile> %s [%s]\n", GMT_J_OPT, GMT_B_OPT);
@@ -311,7 +332,7 @@ int GMT_mbcontour_usage(struct GMTAPI_CTRL *API, int level) {
 	GMT_Message(API, GMT_TIME_NONE, "\t[-e<year>/<month>/<day>/<hour>/<minute>/<second>]\n");
 	GMT_Message(API, GMT_TIME_NONE, "\t[-F<format>] [-G<magnitude>/<azimuth | median>]\n");
 	GMT_Message(API, GMT_TIME_NONE, "\t[-I<inputfile>] [-L<lonflip>] [-N<cptfile>]\n");
-	GMT_Message(API, GMT_TIME_NONE, "\t[-S<speed>] [-T<timegap>] [-W] [-Z<mode>]\n");
+	GMT_Message(API, GMT_TIME_NONE, "\t[-S<speed>] [-T<timegap>] [-W<pen>] [-Z<mode>]\n");
 	GMT_Message(API, GMT_TIME_NONE, "\t[%s] [-T] [%s] [%s]\n", GMT_Rgeo_OPT, GMT_U_OPT, GMT_V_OPT);
 #if GMT_MAJOR_VERSION >= 6
 	GMT_Message(API, GMT_TIME_NONE, "\t[%s] [%s] [%s]\n\t[%s]\n\t[%s] [%s]\n\n", GMT_X_OPT, GMT_Y_OPT, GMT_f_OPT, GMT_n_OPT,
@@ -344,6 +365,23 @@ int GMT_mbcontour_usage(struct GMTAPI_CTRL *API, int level) {
 	return (EXIT_FAILURE);
 }
 
+int GMT_mbcontour_old_W_parser (struct GMTAPI_CTRL *API, struct MBCONTOUR_CTRL *Ctrl, char *text) {
+	unsigned int j = 0, n_errors = 0;
+	if (text[j] == '-') {Ctrl->W.pen.cptmode = 1; j++;}
+	if (text[j] == '+') {Ctrl->W.pen.cptmode = 3; j++;}
+	if (text[j] && gmt_getpen (API->GMT, &text[j], &Ctrl->W.pen)) {
+#if GMT_MAJOR_VERSION == 6 && GMT_MINOR_VERSION <= 2
+		gmt_pen_syntax (API->GMT, 'W', NULL, "sets pen attributes [Default pen is %s]:", 15);
+#elif GMT_MAJOR_VERSION >= 6
+		gmt_pen_syntax (API->GMT, 'W', NULL, "sets pen attributes [Default pen is %s]:", NULL, 15);
+#else
+		gmt_pen_syntax (API->GMT, 'W', "sets pen attributes [Default pen is %s]:", 15);
+#endif
+		n_errors++;
+	}
+	return n_errors;
+}
+
 int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struct GMT_OPTION *options) {
 	/* This parses the options provided to mbcontour and sets parameters in Ctrl.
 	 * Note Ctrl has already been initialized and non-zero default values set.
@@ -372,7 +410,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 				n_files = 1;
 			}
 			else {
-				GMT_Report(API, GMT_MSG_NORMAL, "Syntax error: only one input file is allowed.\n");
+				GMT_Report(API, GMT_MSG_ERROR, "Syntax error: only one input file is allowed.\n");
 				n_errors++;
 			}
 			break;
@@ -385,7 +423,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 			if (n > 0)
 				Ctrl->A.active = true;
 			else {
-				GMT_Report(API, GMT_MSG_NORMAL, "Syntax error -A option: \n");
+				GMT_Report(API, GMT_MSG_ERROR, "Syntax error -A option: \n");
 				n_errors++;
 			}
 			break;
@@ -396,7 +434,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 			if (n == 6)
 				Ctrl->b.active = true;
 			else {
-				GMT_Report(API, GMT_MSG_NORMAL, "Syntax error -b option: \n");
+				GMT_Report(API, GMT_MSG_ERROR, "Syntax error -b option: \n");
 				n_errors++;
 			}
 			break;
@@ -412,7 +450,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 			if (n > 0)
 				Ctrl->D.active = true;
 			else {
-				GMT_Report(API, GMT_MSG_NORMAL, "Syntax error -D option: \n");
+				GMT_Report(API, GMT_MSG_ERROR, "Syntax error -D option: \n");
 				n_errors++;
 			}
 			break;
@@ -423,7 +461,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 			if (n == 6)
 				Ctrl->e.active = true;
 			else {
-				GMT_Report(API, GMT_MSG_NORMAL, "Syntax error -e option: \n");
+				GMT_Report(API, GMT_MSG_ERROR, "Syntax error -e option: \n");
 				n_errors++;
 			}
 			break;
@@ -433,7 +471,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 			if (n == 1)
 				Ctrl->F.active = true;
 			else {
-				GMT_Report(API, GMT_MSG_NORMAL, "Syntax error -F option: \n");
+				GMT_Report(API, GMT_MSG_ERROR, "Syntax error -F option: \n");
 				n_errors++;
 			}
 			break;
@@ -446,7 +484,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 				Ctrl->G.name_perp = false;
 			}
 			else {
-				GMT_Report(API, GMT_MSG_NORMAL, "Syntax error -G option: \n");
+				GMT_Report(API, GMT_MSG_ERROR, "Syntax error -G option: \n");
 				n_errors++;
 			}
 			break;
@@ -458,7 +496,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 				n_files = 1;
 			}
 			else {
-				GMT_Report(API, GMT_MSG_NORMAL, "Syntax error -I: Requires a valid file\n");
+				GMT_Report(API, GMT_MSG_ERROR, "Syntax error -I: Requires a valid file\n");
 				n_errors++;
 			}
 			break;
@@ -467,7 +505,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 			if (n == 1)
 				Ctrl->L.active = true;
 			else {
-				GMT_Report(API, GMT_MSG_NORMAL, "Syntax error -L option: \n");
+				GMT_Report(API, GMT_MSG_ERROR, "Syntax error -L option: \n");
 				n_errors++;
 			}
 			break;
@@ -477,7 +515,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 			if (n > 0)
 				Ctrl->M.active = true;
 			else {
-				GMT_Report(API, GMT_MSG_NORMAL, "Syntax error -M option: \n");
+				GMT_Report(API, GMT_MSG_ERROR, "Syntax error -M option: \n");
 				n_errors++;
 			}
 			break;
@@ -486,7 +524,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 			if (n > 0)
 				Ctrl->N.active = true;
 			else {
-				GMT_Report(API, GMT_MSG_NORMAL, "Syntax error -N option: \n");
+				GMT_Report(API, GMT_MSG_ERROR, "Syntax error -N option: \n");
 				n_errors++;
 			}
 			break;
@@ -494,7 +532,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 			Ctrl->p.active = true;
 			Ctrl->p.pings = (int)strtol(opt->arg, NULL, 10);
 			if (Ctrl->p.pings < 0) {
-				GMT_Report(API, GMT_MSG_NORMAL, "Error -p option: Don't invent, number of pings must be >= 0\n");
+				GMT_Report(API, GMT_MSG_ERROR, "Error -p option: Don't invent, number of pings must be >= 0\n");
 				Ctrl->p.pings = 1;
 			}
 			break;
@@ -506,7 +544,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 			if (n == 1)
 				Ctrl->S.active = true;
 			else {
-				GMT_Report(API, GMT_MSG_NORMAL, "Syntax error -S option: \n");
+				GMT_Report(API, GMT_MSG_ERROR, "Syntax error -S option: \n");
 				n_errors++;
 			}
 			break;
@@ -515,19 +553,54 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 			if (n == 1)
 				Ctrl->T.active = true;
 			else {
-				GMT_Report(API, GMT_MSG_NORMAL, "Syntax error -T option: \n");
+				GMT_Report(API, GMT_MSG_ERROR, "Syntax error -T option: \n");
 				n_errors++;
 			}
 			break;
-		case 'W': /* -W */
-			Ctrl->W.active = true;
+		case 'W':		/* Set line attributes */
+                {
+#if GMT_MAJOR_VERSION >= 6 && GMT_MINOR_VERSION > 2
+                    n_errors += gmt_M_repeated_module_option (API, Ctrl->W.active);
+#endif
+                    char *c = NULL;
+                    if ((c = strstr (opt->arg, "+z"))) {
+                        Ctrl->W.set_color = true;
+                        c[0] = '\0';	/* Chop off this modifier */
+                    }
+                    if (opt->arg[0] == '-' || (opt->arg[0] == '+' && opt->arg[1] != 'c')) {	/* Definitively old-style args */
+                        if (gmt_M_compat_check (API->GMT, 5)) {	/* Sorry */
+                            GMT_Report (API, GMT_MSG_ERROR, "Your -W syntax is obsolete; see program usage.\n");
+                            n_errors++;
+                        }
+                        else {
+                            GMT_Report (API, GMT_MSG_ERROR, "Your -W syntax is obsolete; see program usage.\n");
+                            n_errors += GMT_mbcontour_old_W_parser (API, Ctrl, opt->arg);
+                        }
+                    }
+                    else if (opt->arg[0]) {
+                        if (gmt_getpen (GMT, opt->arg, &Ctrl->W.pen)) {
+#if GMT_MAJOR_VERSION == 6 && GMT_MINOR_VERSION <= 2
+                            gmt_pen_syntax (GMT, 'W', NULL, "sets pen attributes [Default pen is %s]:", 11);
+#elif GMT_MAJOR_VERSION >= 6
+                            gmt_pen_syntax (GMT, 'W', NULL, "sets pen attributes [Default pen is %s]:", NULL, 11);
+#else
+                            gmt_pen_syntax (API->GMT, 'W', "sets pen attributes [Default pen is %s]:", 11);
+#endif
+                            n_errors++;
+                        }
+                    }
+                    if (Ctrl->W.pen.cptmode) Ctrl->W.cpt_effect = true;
+                    if (c) c[0] = '+';	/* Restore */
+                    if (Ctrl->W.pen.rgb[0] < -4.0) Ctrl->W.sequential = irint (Ctrl->W.pen.rgb[0] + 7.0);
+                }
 			break;
+
 		case 'Z': /* contour algorithm */
 			n = sscanf(opt->arg, "%d", &(Ctrl->Z.contour_algorithm));
 			if (n == 1)
 				Ctrl->Z.active = true;
 			else {
-				GMT_Report(API, GMT_MSG_NORMAL, "Syntax error -Z option: \n");
+				GMT_Report(API, GMT_MSG_ERROR, "Syntax error -Z option: \n");
 				n_errors++;
 			}
 			break;
@@ -685,8 +758,7 @@ void mbcontour_plot(double x, double y, int ipen) {
 
 /*--------------------------------------------------------------------------*/
 void mbcontour_setline(int linewidth) {
-	(void)linewidth; // Unused parameter
-	                 // PSL_setlinewidth(PSL, (double)linewidth);
+	PSL_setlinewidth(PSL, (double)linewidth);
 }
 
 /*--------------------------------------------------------------------------*/
@@ -752,11 +824,11 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 
 		/* Parse the command-line arguments */
 #if GMT_MAJOR_VERSION >= 6 && GMT_MINOR_VERSION >= 1
-	GMT = gmt_init_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, "", "", NULL, &options, &GMT_cpy); /* Save current state */
+	GMT = gmt_init_module(API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_KEYS, THIS_MODULE_NEEDS, NULL, &options, &GMT_cpy); /* Save current state */
 #elif GMT_MAJOR_VERSION >= 6
-	GMT = gmt_init_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, "", "", &options, &GMT_cpy); /* Save current state */
+	GMT = gmt_init_module(API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_KEYS, THIS_MODULE_NEEDS, &options, &GMT_cpy); /* Save current state */
 #else
-	GMT = gmt_begin_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
+	GMT = gmt_begin_module(API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, &GMT_cpy); /* Save current state */
 #endif
 	if (GMT_Parse_Common(API, GMT_PROG_OPTIONS, options)) {
 		fprintf(stderr, "Error from GMT_Parse_common():%d\n", API->error);
@@ -875,8 +947,6 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 	if (Ctrl->T.active)
 		timegap = Ctrl->T.timegap;
 	bool bathy_in_feet = false;
-	if (Ctrl->W.active)
-		bathy_in_feet = true;
 	int contour_algorithm = MB_CONTOUR_OLD;
 	if (Ctrl->Z.active)
 		contour_algorithm = Ctrl->Z.contour_algorithm;
@@ -1044,6 +1114,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 	gmt_plane_perspective(GMT, GMT->current.proj.z_project.view_plane, GMT->current.proj.z_level);
 	gmt_plotcanvas(GMT); /* Fill canvas if requested */
 	gmt_map_clip_on(GMT, GMT->session.no_rgb, 3);
+
 
 	/* Set particulars of output image for the postscript plot */
 	double clipx[4];

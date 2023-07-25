@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbnavadjustmerge</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  30 September 2019 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  15 November 2022 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -48,6 +48,15 @@ Version 5.0
 <BR>
 
 --set-global-tie-zonly=file:section[:snav]
+<BR>
+
+--set-all-global-ties-xyz
+<BR>
+
+--set-all-global-ties-xyonly
+<BR>
+
+--set-all-global-ties-zonly
 <BR>
 
 --unset-global-tie=file:section
@@ -293,6 +302,27 @@ for an optimal navigation model.
 
 <DD>
 This option sets the mode of the existing specified global tie in the
+<B>MBnavadjust</B> project to be &quot;Z&quot;. This means only the vertical
+coordinate of the tie will be used as a constraint in the inversion
+for an optimal navigation model.
+<DT><B>--set-all-global-ties-xyz</B>
+
+<DD>
+This option sets the mode of all global ties in the
+<B>MBnavadjust</B> project to be &quot;XYZ&quot;. This means all three
+coordinates of the tie will be used as constraints in the inversion
+for an optimal navigation model.
+<DT><B>--set-all-global-ties-xyonly</B>
+
+<DD>
+This option sets the mode of all global ties in the
+<B>MBnavadjust</B> project to be &quot;XY&quot;. This means only the horizontal
+coordinates of the tie will be used as constraints in the inversion
+for an optimal navigation model.
+<DT><B>--set-all-global-ties-zonly</B>
+
+<DD>
+This option sets the mode of all global ties in the
 <B>MBnavadjust</B> project to be &quot;Z&quot;. This means only the vertical
 coordinate of the tie will be used as a constraint in the inversion
 for an optimal navigation model.
@@ -561,6 +591,17 @@ navigation track length less than <I>min_length</I>.
 This option sets all crossings for which one or both data sections have a
 navigation track length less than <I>min_length</I> to &quot;skipped&quot; mode. Any ties
 associated with these crossings are deleted.
+<DT><B>--remake-mb166-files</B>
+
+<DD>
+This option causes <B>mbnavadjustmerge</B> to remake the navigation files inside
+the project, fixing problems caused by a since-fixed bug.
+<DT><B>--fix-sensordepth</B>
+
+<DD>
+This option causes <B>mbnavadjustmerge</B> to recalculate the sensordepth values
+in the project file from the imported swath data, fixing problems caused by a
+since-fixed bug.
 <DT><B>--verbose</B>
 
 <DD>
@@ -630,7 +671,7 @@ Good luck.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 30 September 2019</P></CENTER>
+Last Updated: 15 November 2022</P></CENTER>
 
 <HR>
 <center>

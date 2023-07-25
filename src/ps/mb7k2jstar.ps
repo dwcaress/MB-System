@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:00 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:06 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 5
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -251,33 +257,33 @@ ll channels of sonar data from the Reson 7k \214le to the Edgetech Jsta\
 r \214le.).15 F(Edgetech)5.441 E .042
 (sonar systems may include dual frequenc)108 278.4 R 2.542(ys)-.15 G
 .042(idescans and a subbottom pro\214ler)-2.542 F 2.542(.U)-.55 G .042
-(sers may use the)-2.542 F F2<ad41>2.542 E F0(option)2.542 E 1.722
+(sers may use the)-2.542 F F2<ad41>2.542 E F0(option)2.542 E .66
 (to specify which channels are e)108 290.4 R(xtracted.)-.15 E F2
-(MB7k2jstar)4.221 E F0 1.721
-(operates on single input \214les or on datalists. By)4.221 F(def)108
-302.4 Q .106(ault there will be a separate output \214le for e)-.1 F
--.15(ve)-.25 G .106(ry input \214le, b).15 F .106(ut if the)-.2 F F2
-<ad4f>2.606 E F0 .106(option is used to specify an out-)2.606 F(put \
-\214le, data from all input \214les will be directed to that single out\
-put \214le.)108 314.4 Q 1.093(The e)108 338.4 R 1.093
-(xtracted Jstar data \214le\(s\) can be or)-.15 F -.05(ga)-.18 G 1.093
-(nized three w).05 F 1.093(ays. If the)-.1 F F2<ad4f>3.593 E F0 1.092
-(option is used to specify a single)3.592 F .045(Jstar output \214le, t\
-hen all of the Jstar data will be output to that single \214le. If the)
-108 350.4 R F2<ad52>2.545 E F0 .046(option is used to specify)2.546 F
-2.787(as)108 362.4 S(urv)-2.787 E .587 -.15(ey r)-.15 H .287
-(oute \214le that includes the w).15 F .287(aypoints co)-.1 F -.15(ve)
--.15 G .287(red while collecting the data \214le\(s\) referenced by).15
-F F2<ad49>2.786 E F3(\214le)A F0(,)A .79
+(MB7k2jstar)3.16 E F0 .659
+(operates on single input \214les or on datalists. By de-)3.159 F -.1
+(fa)108 302.4 S .105(ult there will be a separate output \214le for e).1
+F -.15(ve)-.25 G .105(ry input \214le, b).15 F .106(ut if the)-.2 F F2
+<ad4f>2.606 E F0 .106(option is used to specify an output)2.606 F(\214l\
+e, data from all input \214les will be directed to that single output \
+\214le.)108 314.4 Q .358(The e)108 338.4 R .358
+(xtracted Jstar data \214le\(s\) can be or)-.15 F -.05(ga)-.18 G .358
+(nized three w).05 F .358(ays. If the)-.1 F F2<ad4f>2.857 E F0 .357
+(option is used to specify a single Js-)2.857 F .078(tar output \214le,\
+ then all of the Jstar data will be output to that single \214le. If th\
+e)108 350.4 R F2<ad52>2.579 E F0 .079(option is used to specify a)2.579
+F(surv)108 362.4 Q 1.069 -.15(ey r)-.15 H .769
+(oute \214le that includes the w).15 F .769(aypoints co)-.1 F -.15(ve)
+-.15 G .768(red while collecting the data \214le\(s\) referenced by).15
+F F2<ad49>3.268 E F3(\214le)A F0(,)A .79
 (then the output Jstar data will be brok)108 374.4 R .791
 (en up by the sequential lines de\214ned by the w)-.1 F .791
-(aypoints. In this case)-.1 F 1.951(each output Jstar \214le will be na\
-med using the line root name speci\214ed by)108 386.4 R F2<ad4c>4.45 E
-F3(startline/liner)A(oot)-.45 E F0 1.95(with a)4.45 F .746
-(sequential line number starting from)108 398.4 R F3(startline)3.246 E
-F0 3.246(.I)C 3.246(fn)-3.246 G .746(either the)-3.246 F F2<ad4f>3.246 E
-F0(or)3.247 E F2<ad4c>3.247 E F0 .747(options are used, each input sw)
-3.247 F(ath)-.1 E(\214le will ha)108 410.4 Q .3 -.15(ve a c)-.2 H
+(aypoints. In this case)-.1 F 1.003(each output Jstar \214le will be na\
+med using the line root name speci\214ed by)108 386.4 R F2<ad4c>3.503 E
+F3(startline/liner)A(oot)-.45 E F0 1.003(with a se-)3.503 F .318
+(quential line number starting from)108 398.4 R F3(startline)2.819 E F0
+2.819(.I)C 2.819(fn)-2.819 G .319(either the)-2.819 F F2<ad4f>2.819 E F0
+(or)2.819 E F2<ad4c>2.819 E F0 .319(options are used, each input sw)
+2.819 F .319(ath \214le)-.1 F(will ha)108 410.4 Q .3 -.15(ve a c)-.2 H
 (orresponding Jstar output \214le.).15 E .127(When the user speci\214es\
  that all Edgetech sidescan and subbottom data be e)108 434.4 R .126
 (xtracted b)-.15 F .126(ut does not specify the)-.2 F .784
@@ -300,7 +306,7 @@ G .711(idescan be e)-3.211 F .711(xtracted, the)-.15 F
 (ampshire)-2.5 E(Christian do Santos Ferreira)108 583.2 Q(MAR)113 595.2
 Q(UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
 607.2 Q -.15(ve)-.25 G(rsity of Bremen).15 E F1(OPTIONS)72 636 Q F2
-<ad41>108 648 Q F3(mode)23.08 E F0 .888
+<ad41>108 648 Q F3(mode)144 648 Q F0 .888
 (This option sets the types of data to be e)144 660 R .887
 (xtracted and output.)-.15 F(If)5.887 E F2<ad41>3.387 E F3(1)A F0 .887
 (is gi)3.387 F -.15(ve)-.25 G .887(n, then an).15 F 3.387(yl)-.15 G
@@ -313,7 +319,7 @@ Q(UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
 (3)A F0 1.1(option causes subbottom pro\214ler records to be)3.6 F -.15
 (ex)144 696 S(tracted. Def).15 E
 (ault: All Edgetech sidescan and subbottom pro\214ler records are e)-.1
-E(xtracted.)-.15 E F2<ad42>108 712.8 Q F3(bottompic)23.63 E
+E(xtracted.)-.15 E F2<ad42>108 712.8 Q F3(bottompic)144 712.8 Q
 (kmode/bottompic)-.2 E(kthr)-.2 E(eshold)-.37 E F0 1.555
 (This option sets the source of the sonar \214rst arri)144 724.8 R -.25
 (va)-.25 G 4.056(lt).25 G 1.556
@@ -345,24 +351,24 @@ G 2.5(,t)-2.5 G(hen)-2.5 E F2(mb7k2jstar)2.5 E F0
 <ad43>108 160.8 Q F0 .521(This option causes)144 172.8 R F2(mb7k2jstar)
 3.021 E F0 .521(to print out an)3.021 F 3.021(yc)-.15 G .522
 (omment records encountered in the input Reson)-3.021 F(7k data.)144
-184.8 Q F2<ad46>108 201.6 Q F1(format)24.19 E F0 .22(Sets the data form\
-at used if the input is read from stdin or from a \214le. If)144 213.6 R
-F1(format)2.72 E F0 2.72(<0)2.72 G 2.72(,t)-2.72 G .22(hen the input)
--2.72 F .007(\214le speci\214ed with the)144 225.6 R F2<ad49>2.507 E F0
-.008(option will actually contain a list of input sw)2.508 F .008
-(ath sonar data \214les. This pro-)-.1 F
+184.8 Q F2<ad46>108 201.6 Q F1(format)144 201.6 Q F0 .22(Sets the data \
+format used if the input is read from stdin or from a \214le. If)144
+213.6 R F1(format)2.72 E F0 2.72(<0)2.72 G 2.72(,t)-2.72 G .22
+(hen the input)-2.72 F .007(\214le speci\214ed with the)144 225.6 R F2
+<ad49>2.507 E F0 .008(option will actually contain a list of input sw)
+2.508 F .008(ath sonar data \214les. This pro-)-.1 F
 (gram only reads Reson 7k format data \214les \()144 237.6 Q F2(MBIO)A
 F0(format 88\).)2.5 E F2<ad48>108 254.4 Q F0 .162(This "help" \215ag ca\
 use the program to print out a description of its operation and then e)
-22.52 F .161(xit immedi-)-.15 F(ately)144 266.4 Q(.)-.65 E F2<ad49>108
-283.2 Q F1(in\214le)26.41 E F0 .514(Sets the input \214le path. If)144
-295.2 R F1(format)3.015 E F0 3.015(>0\()3.015 G .515(set with the)-3.015
-F F2<ad66>3.015 E F0 .515(option or)3.015 F F2(mbdefaults)3.015 E F0
-3.015(\)t)C .515(hen the sw)-3.015 F .515(ath sonar)-.1 F .797
-(data contained in)144 307.2 R F1(in\214le)3.297 E F0 .797
-(is read and processed. If)3.297 F F1(format)3.297 E F0 3.297(<0)3.297 G
-3.297(,t)-3.297 G(hen)-3.297 E F1(in\214le)3.297 E F0 .796
-(is assumed to be an ascii)3.297 F .156
+144 254.4 R .161(xit immedi-)-.15 F(ately)144 266.4 Q(.)-.65 E F2<ad49>
+108 283.2 Q F1(in\214le)144 283.2 Q F0 .514
+(Sets the input \214le path. If)144 295.2 R F1(format)3.015 E F0 3.015
+(>0\()3.015 G .515(set with the)-3.015 F F2<ad66>3.015 E F0 .515
+(option or)3.015 F F2(mbdefaults)3.015 E F0 3.015(\)t)C .515(hen the sw)
+-3.015 F .515(ath sonar)-.1 F .797(data contained in)144 307.2 R F1
+(in\214le)3.297 E F0 .797(is read and processed. If)3.297 F F1(format)
+3.297 E F0 3.297(<0)3.297 G 3.297(,t)-3.297 G(hen)-3.297 E F1(in\214le)
+3.297 E F0 .796(is assumed to be an ascii)3.297 F .156
 (\214le containing a list of the input sw)144 319.2 R .157
 (ath sonar data \214les to be processed and their formats.)-.1 F .157
 (The pro-)5.157 F .929
@@ -372,9 +378,9 @@ F F2<ad66>3.015 E F0 .515(option or)3.015 F F2(mbdefaults)3.015 E F0
 (wed by a data format identi\214er)-.25 E 2.5(,e)-.4 G(.g.:)-2.5 E
 (data\214le1 88)180 355.2 Q(data\214le2 88)180 367.2 Q
 (This program only reads Reson 7k format data \214les \()144 379.2 Q F2
-(MBIO)A F0(format 88\).)2.5 E F2<ad4c>108 396 Q F1(startline/liner)23.63
-E(oot)-.45 E F0 .035(This option sets the starting line number and the \
-output \214lename root used when)144 408 R F2<ad52>2.536 E F0 .036
+(MBIO)A F0(format 88\).)2.5 E F2<ad4c>108 396 Q F1(startline/liner)144
+396 Q(oot)-.45 E F0 .035(This option sets the starting line number and \
+the output \214lename root used when)144 408 R F2<ad52>2.536 E F0 .036
 (is speci\214ed so)2.536 F
 (that data are output according to planned surv)144 420 Q .3 -.15(ey l)
 -.15 H(ines. Def).15 E(ault:)-.1 E F1(startline)2.5 E F0 2.5(=1)2.5 G(;)
@@ -400,12 +406,12 @@ alist is being processed\) will be the input sw).1 F(ath)-.1 E .347
 .114(xtracted, and ".mb133" is used when the high frequenc)-.15 F 2.613
 (ys)-.15 G .113(idescan records are)-2.613 F -.15(ex)144 561.6 S
 (tracted. The record types to be e).15 E(xtracted are set using the)-.15
-E F2<ad41>2.5 E F0(option.)2.5 E F2<ad52>108 578.4 Q F1 -.45(ro)23.08 G
-(ute\214le).45 E F0 1.002(This option speci\214es an)144 590.4 R F2
-(mbgrdviz)3.502 E F0 1.002(route \214le containing the intended w)3.502
-F 1.002(aypoints of the surv)-.1 F -.15(ey)-.15 G 3.503(.I)-.5 G(f)
--3.503 E F1 -.45(ro)144 602.4 S(ute\214le).45 E F0 .656(is speci\214ed,)
-3.156 F F2(mb7k2jstar)3.156 E F0 .656
+E F2<ad41>2.5 E F0(option.)2.5 E F2<ad52>108 578.4 Q F1 -.45(ro)144
+578.4 S(ute\214le).45 E F0 1.002(This option speci\214es an)144 590.4 R
+F2(mbgrdviz)3.502 E F0 1.002(route \214le containing the intended w)
+3.502 F 1.002(aypoints of the surv)-.1 F -.15(ey)-.15 G 3.503(.I)-.5 G
+(f)-3.503 E F1 -.45(ro)144 602.4 S(ute\214le).45 E F0 .656
+(is speci\214ed,)3.156 F F2(mb7k2jstar)3.156 E F0 .656
 (will output Jstar data in \214les corresponding to the planned sur)
 3.156 F(-)-.2 E .976 -.15(vey l)144 614.4 T 3.176(ines. The).15 F .676
 (output Jstar \214le names will be based on)3.176 F F1(liner)3.177 E
@@ -422,11 +428,11 @@ rocessed\) will be the input sw).1 F(ath)-.1 E 1.12
 (quenc)144 662.4 Q 2.5(ys)-.15 G
 (idescan only \214les, and ".mb133" for high frequenc)-2.5 E 2.5(ys)-.15
 G(idescan only \214les\).)-2.5 E F2<ad56>108 679.2 Q F0 .753
-(This option increases the v)23.08 F .753(erbosity of)-.15 F F2
+(This option increases the v)144 679.2 R .753(erbosity of)-.15 F F2
 (mb7k2jstar)3.253 E F0 3.254(,c)C .754
 (ausing it to print out messages re)-3.254 F -.05(ga)-.15 G .754
 (rding its).05 F(progress to stdout.)144 691.2 Q F2<ad58>108 708 Q F0
-(This option switches port and starboard sidescan channels.)23.08 E
+(This option switches port and starboard sidescan channels.)144 708 Q
 (MB-System 5.0)72 768 Q 2.5(3J)146.495 G(une 2013)-2.5 E(2)204.835 E 0
 Cg EP
 %%Page: 3 3
@@ -483,19 +489,18 @@ BP
 /F0 10/Times-Roman@0 SF 143.17(mb7k2jstar\(1\) MB-System)72 48 R 143.17
 (5.0 mb7k2jstar\(1\))2.5 F(Lo)156.5 84 Q 2.5(wS)-.25 G 2.5(idescan: 990)
 -2.5 F(High Sidescan: 0)156.5 96 Q(2527 records output to se)144 120 Q
-(gy \214le 20040722_154429.s7k.se)-.15 E(gy)-.15 E 1.383(Users may proc\
-ess multiple Reson 7k \214les by inputting a datalist, or list of sw)108
-144 R 1.383(ath data \214les. All of the)-.1 F -.15(ex)108 156 S .876(t\
-racted data records can be output to a single \214le by specifying the \
-output \214le with the).15 F/F1 10/Times-Bold@0 SF<ad4f>3.376 E F0 .876
-(option. F)3.376 F(or)-.15 E -.15(ex)108 168 S(ample, if one has a data\
-list \214le called datalistp.mb-1 that references three Reson 7k \214le\
-s:).15 E(20050418_150155p.mb88 88)144 180 Q(20050418_151812p.mb88 88)144
-192 Q 4.085(and one w)108 204 R 4.085(ants all the lo)-.1 F 6.585(wf)
--.25 G(requenc)-6.585 E 6.584(ys)-.15 G 4.084
-(idescan data collated into a single Jstar data \214le called)-6.584 F
-(20050418_sslo)108 216 Q -.65(w.)-.25 G(mb132, then use the follo).65 E
-(wing command:)-.25 E
+(gy \214le 20040722_154429.s7k.se)-.15 E(gy)-.15 E .558(Users may proce\
+ss multiple Reson 7k \214les by inputting a datalist, or list of sw)108
+144 R .558(ath data \214les. All of the e)-.1 F(x-)-.15 E .54(tracted d\
+ata records can be output to a single \214le by specifying the output \
+\214le with the)108 156 R/F1 10/Times-Bold@0 SF<ad4f>3.041 E F0 .541
+(option. F)3.041 F .541(or e)-.15 F(x-)-.15 E(ample, if one has a datal\
+ist \214le called datalistp.mb-1 that references three Reson 7k \214les\
+:)108 168 Q(20050418_150155p.mb88 88)144 180 Q(20050418_151812p.mb88 88)
+144 192 Q .397(and one w)108 204 R .397(ants all the lo)-.1 F 2.897(wf)
+-.25 G(requenc)-2.897 E 2.897(ys)-.15 G .396(idescan data collated into\
+ a single Jstar data \214le called 20050418_ss-)-2.897 F(lo)108 216 Q
+-.65(w.)-.25 G(mb132, then use the follo).65 E(wing command:)-.25 E
 (mb7k2jstar \255A1 \255I datalistp.mb-1 \255O 20050418_sslo)144 228 Q
 -.65(w.)-.25 G(mb132).65 E(which yields the follo)108 240 Q
 (wing output:)-.25 E(Data records to e)144 252 Q(xtract:)-.15 E(Lo)156.5

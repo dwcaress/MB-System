@@ -63,7 +63,7 @@
 #include "mbview.h"
 #include "mbviewprivate.h"
 
-static char value_string[MB_PATH_MAXLINE];
+static char value_string[2*MB_PATH_MAXLINE];
 
 /*------------------------------------------------------------------------------*/
 int mbview_getnavcount(int verbose, size_t instance, int *nnav, int *error) {
@@ -379,6 +379,7 @@ int mbview_addnav(int verbose, size_t instance, int npoint, double *time_d, doub
 		}
 		else {
 			for (int i = shared.shareddata.nnav; i < shared.shareddata.nnav_alloc; i++) {
+				shared.shareddata.navs[i].active = false;
 				shared.shareddata.navs[i].color = MBV_COLOR_RED;
 				shared.shareddata.navs[i].size = 4;
 				shared.shareddata.navs[i].name[0] = '\0';
@@ -419,6 +420,7 @@ int mbview_addnav(int verbose, size_t instance, int npoint, double *time_d, doub
 		shared.shareddata.nnav++;
 
 		/* set color size and name for new nav */
+		shared.shareddata.navs[inav].active = true;
 		shared.shareddata.navs[inav].color = navcolor;
 		shared.shareddata.navs[inav].size = navsize;
 		strcpy(shared.shareddata.navs[inav].name, navname);
@@ -573,6 +575,7 @@ int mbview_addnav(int verbose, size_t instance, int npoint, double *time_d, doub
 		fprintf(stderr, "dbg2       nav_selected[1]:    %d\n", shared.shareddata.nav_selected[1]);
 		fprintf(stderr, "dbg2       nav_point_selected: %p\n", shared.shareddata.nav_point_selected);
 		for (int i = 0; i < shared.shareddata.nnav; i++) {
+			fprintf(stderr, "dbg2       nav %d active:        %d\n", i, shared.shareddata.navs[i].active);
 			fprintf(stderr, "dbg2       nav %d color:         %d\n", i, shared.shareddata.navs[i].color);
 			fprintf(stderr, "dbg2       nav %d size:          %d\n", i, shared.shareddata.navs[i].size);
 			fprintf(stderr, "dbg2       nav %d name:          %s\n", i, shared.shareddata.navs[i].name);
@@ -700,7 +703,7 @@ int mbview_enableviewnavs(int verbose, size_t instance, int *error)
 
 	/* set widget sensitivity on all active instances */
 	for (instance = 0; instance < MBV_MAX_WINDOWS; instance++) {
-			struct mbview_world_struct *view = &(mbviews[instance]);
+		struct mbview_world_struct *view = &(mbviews[instance]);
 		struct mbview_struct *data = &(view->data);
 
 		/* if instance active reset action sensitivity */
@@ -802,16 +805,18 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
 					shared.shareddata.nav_point_selected[1] = MBV_SELECT_NONE;
 
 					for (int i = 0; i < shared.shareddata.nnav; i++) {
-						for (int j = 0; j < shared.shareddata.navs[i].npoints; j++) {
-							const double xx = xgrid - shared.shareddata.navs[i].navpts[j].point.xgrid[instance];
-							const double yy = ygrid - shared.shareddata.navs[i].navpts[j].point.ygrid[instance];
-							const double rr = sqrt(xx * xx + yy * yy);
-							if (rr < rrmin) {
-								rrmin = rr;
-								shared.shareddata.nav_selected[0] = i;
-								shared.shareddata.nav_point_selected[0] = j;
-							}
-						}
+            if (shared.shareddata.navs[i].active) {
+  						for (int j = 0; j < shared.shareddata.navs[i].npoints; j++) {
+  							const double xx = xgrid - shared.shareddata.navs[i].navpts[j].point.xgrid[instance];
+  							const double yy = ygrid - shared.shareddata.navs[i].navpts[j].point.ygrid[instance];
+  							const double rr = sqrt(xx * xx + yy * yy);
+  							if (rr < rrmin) {
+  								rrmin = rr;
+  								shared.shareddata.nav_selected[0] = i;
+  								shared.shareddata.nav_point_selected[0] = j;
+  							}
+  						}
+            }
 					}
 
 					/* set pick location */
@@ -885,16 +890,18 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
 					shared.shareddata.nav_point_selected[1] = MBV_SELECT_NONE;
 
 					for (int i = 0; i < shared.shareddata.nnav; i++) {
-						for (int j = 0; j < shared.shareddata.navs[i].npoints; j++) {
-							const double xx = xgrid - shared.shareddata.navs[i].navpts[j].point.xgrid[instance];
-							const double yy = ygrid - shared.shareddata.navs[i].navpts[j].point.ygrid[instance];
-							const double rr = sqrt(xx * xx + yy * yy);
-							if (rr < rrmin) {
-								rrmin = rr;
-								shared.shareddata.nav_selected[1] = i;
-								shared.shareddata.nav_point_selected[1] = j;
-							}
-						}
+            if (shared.shareddata.navs[i].active) {
+  						for (int j = 0; j < shared.shareddata.navs[i].npoints; j++) {
+  							const double xx = xgrid - shared.shareddata.navs[i].navpts[j].point.xgrid[instance];
+  							const double yy = ygrid - shared.shareddata.navs[i].navpts[j].point.ygrid[instance];
+  							const double rr = sqrt(xx * xx + yy * yy);
+  							if (rr < rrmin) {
+  								rrmin = rr;
+  								shared.shareddata.nav_selected[1] = i;
+  								shared.shareddata.nav_point_selected[1] = j;
+  							}
+  						}
+            }
 					}
 
 					/* set pick location */
@@ -1070,16 +1077,18 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
 				if (found) {
 					double rrmin = 1000000000.0;
 					for (int i = 0; i < shared.shareddata.nnav; i++) {
-						for (int j = 0; j < shared.shareddata.navs[i].npoints; j++) {
-							const double xx = xgrid - shared.shareddata.navs[i].navpts[j].point.xgrid[instance];
-							const double yy = ygrid - shared.shareddata.navs[i].navpts[j].point.ygrid[instance];
-							const double rr = sqrt(xx * xx + yy * yy);
-							if (rr < rrmin) {
-								rrmin = rr;
-								shared.shareddata.nav_selected[0] = i;
-								shared.shareddata.nav_point_selected[0] = j;
-							}
-						}
+            if (shared.shareddata.navs[i].active) {
+  						for (int j = 0; j < shared.shareddata.navs[i].npoints; j++) {
+  							const double xx = xgrid - shared.shareddata.navs[i].navpts[j].point.xgrid[instance];
+  							const double yy = ygrid - shared.shareddata.navs[i].navpts[j].point.ygrid[instance];
+  							const double rr = sqrt(xx * xx + yy * yy);
+  							if (rr < rrmin) {
+  								rrmin = rr;
+  								shared.shareddata.nav_selected[0] = i;
+  								shared.shareddata.nav_point_selected[0] = j;
+  							}
+  						}
+            }
 					}
 
 					/* set pick location */
@@ -1153,16 +1162,18 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
 					shared.shareddata.nav_point_selected[1] = MBV_SELECT_NONE;
 
 					for (int i = 0; i < shared.shareddata.nnav; i++) {
-						for (int j = 0; j < shared.shareddata.navs[i].npoints; j++) {
-							const double xx = xgrid - shared.shareddata.navs[i].navpts[j].point.xgrid[instance];
-							const double yy = ygrid - shared.shareddata.navs[i].navpts[j].point.ygrid[instance];
-							const double rr = sqrt(xx * xx + yy * yy);
-							if (rr < rrmin) {
-								rrmin = rr;
-								shared.shareddata.nav_selected[1] = i;
-								shared.shareddata.nav_point_selected[1] = j;
-							}
-						}
+            if (shared.shareddata.navs[i].active) {
+  						for (int j = 0; j < shared.shareddata.navs[i].npoints; j++) {
+  							const double xx = xgrid - shared.shareddata.navs[i].navpts[j].point.xgrid[instance];
+  							const double yy = ygrid - shared.shareddata.navs[i].navpts[j].point.ygrid[instance];
+  							const double rr = sqrt(xx * xx + yy * yy);
+  							if (rr < rrmin) {
+  								rrmin = rr;
+  								shared.shareddata.nav_selected[1] = i;
+  								shared.shareddata.nav_point_selected[1] = j;
+  							}
+  						}
+            }
 					}
 
 					/* set pick location */
@@ -1391,6 +1402,7 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
 		fprintf(stderr, "dbg2       nav_selected[1]:       %d\n", shared.shareddata.nav_selected[1]);
 		fprintf(stderr, "dbg2       nav_point_selected[1]: %d\n", shared.shareddata.nav_point_selected[1]);
 		for (int i = 0; i < shared.shareddata.nnav; i++) {
+			fprintf(stderr, "dbg2       nav %d active:        %d\n", i, shared.shareddata.navs[i].active);
 			fprintf(stderr, "dbg2       nav %d color:         %d\n", i, shared.shareddata.navs[i].color);
 			fprintf(stderr, "dbg2       nav %d size:          %d\n", i, shared.shareddata.navs[i].size);
 			fprintf(stderr, "dbg2       nav %d name:          %s\n", i, shared.shareddata.navs[i].name);
@@ -1695,7 +1707,8 @@ int mbview_nav_delete(size_t instance, int inav) {
 			shared.shareddata.navs[i] = shared.shareddata.navs[i + 1];
 		}
 
-		/* rest last nav */
+		/* reset last nav */
+		shared.shareddata.navs[shared.shareddata.nnav - 1].active = false;
 		shared.shareddata.navs[shared.shareddata.nnav - 1].color = MBV_COLOR_RED;
 		shared.shareddata.navs[shared.shareddata.nnav - 1].size = 4;
 		shared.shareddata.navs[shared.shareddata.nnav - 1].name[0] = '\0';
@@ -2044,28 +2057,30 @@ int mbview_drawnav(size_t instance, int rez) {
 	if (shared.shareddata.nav_mode != MBV_NAV_OFF && data->nav_view_mode == MBV_VIEW_ON && shared.shareddata.nnav > 0) {
 		/* loop over the navs plotting xyz navigation */
 		for (int inav = 0; inav < shared.shareddata.nnav; inav++) {
-			int icolor = shared.shareddata.navs[inav].color;
-			glLineWidth((float)(shared.shareddata.navs[inav].size));
-			glBegin(GL_LINE_STRIP);
-			for (int jpoint = 0; jpoint < shared.shareddata.navs[inav].npoints; jpoint += stride) {
-				/* set size and color */
-				if (shared.shareddata.navs[inav].navpts[jpoint].selected ||
-				    (jpoint < shared.shareddata.navs[inav].npoints - 1 &&
-				     shared.shareddata.navs[inav].navpts[jpoint + 1].selected)) {
-					glColor3f(colortable_object_red[MBV_COLOR_RED], colortable_object_green[MBV_COLOR_RED],
-					          colortable_object_blue[MBV_COLOR_RED]);
-				}
-				else {
-					glColor3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
-				}
+      if (shared.shareddata.navs[inav].active) {
+  			int icolor = shared.shareddata.navs[inav].color;
+  			glLineWidth((float)(shared.shareddata.navs[inav].size));
+  			glBegin(GL_LINE_STRIP);
+  			for (int jpoint = 0; jpoint < shared.shareddata.navs[inav].npoints; jpoint += stride) {
+  				/* set size and color */
+  				if (shared.shareddata.navs[inav].navpts[jpoint].selected ||
+  				    (jpoint < shared.shareddata.navs[inav].npoints - 1 &&
+  				     shared.shareddata.navs[inav].navpts[jpoint + 1].selected)) {
+  					glColor3f(colortable_object_red[MBV_COLOR_RED], colortable_object_green[MBV_COLOR_RED],
+  					          colortable_object_blue[MBV_COLOR_RED]);
+  				}
+  				else {
+  					glColor3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
+  				}
 
-				/* draw points */
-				glVertex3f((float)(shared.shareddata.navs[inav].navpts[jpoint].point.xdisplay[instance]),
-				           (float)(shared.shareddata.navs[inav].navpts[jpoint].point.ydisplay[instance]),
-				           (float)(shared.shareddata.navs[inav].navpts[jpoint].point.zdisplay[instance]));
-			}
-			glEnd();
-		}
+  				/* draw points */
+  				glVertex3f((float)(shared.shareddata.navs[inav].navpts[jpoint].point.xdisplay[instance]),
+  				           (float)(shared.shareddata.navs[inav].navpts[jpoint].point.ydisplay[instance]),
+  				           (float)(shared.shareddata.navs[inav].navpts[jpoint].point.zdisplay[instance]));
+  			}
+  			glEnd();
+  		}
+    }
 	}
 
 	int status = MB_SUCCESS;
@@ -2074,45 +2089,47 @@ int mbview_drawnav(size_t instance, int rez) {
 	if (shared.shareddata.nav_mode != MBV_NAV_OFF && data->navdrape_view_mode == MBV_VIEW_ON && shared.shareddata.nnav > 0) {
 		/* loop over the navs plotting draped navigation */
 		for (int inav = 0; inav < shared.shareddata.nnav; inav++) {
-			int icolor = shared.shareddata.navs[inav].color;
-			glLineWidth((float)(shared.shareddata.navs[inav].size));
-			glBegin(GL_LINE_STRIP);
-			for (int jpoint = 0; jpoint < shared.shareddata.navs[inav].npoints - stride; jpoint += stride) {
-				/* set size and color */
-				if (shared.shareddata.navs[inav].navpts[jpoint].selected ||
-				    shared.shareddata.navs[inav].navpts[jpoint + stride].selected) {
-					glColor3f(colortable_object_red[MBV_COLOR_RED], colortable_object_green[MBV_COLOR_RED],
-					          colortable_object_blue[MBV_COLOR_RED]);
-				}
-				else {
-					glColor3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
-				}
+      if (shared.shareddata.navs[inav].active) {
+  			int icolor = shared.shareddata.navs[inav].color;
+  			glLineWidth((float)(shared.shareddata.navs[inav].size));
+  			glBegin(GL_LINE_STRIP);
+  			for (int jpoint = 0; jpoint < shared.shareddata.navs[inav].npoints - stride; jpoint += stride) {
+  				/* set size and color */
+  				if (shared.shareddata.navs[inav].navpts[jpoint].selected ||
+  				    shared.shareddata.navs[inav].navpts[jpoint + stride].selected) {
+  					glColor3f(colortable_object_red[MBV_COLOR_RED], colortable_object_green[MBV_COLOR_RED],
+  					          colortable_object_blue[MBV_COLOR_RED]);
+  				}
+  				else {
+  					glColor3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
+  				}
 
-				/*fprintf(stderr,"inav:%d npoints:%d jpoint:%d nls:%d\n",
-				inav, shared.shareddata.navs[inav].npoints, jpoint, shared.shareddata.navs[inav].segments[jpoint].nls);*/
-				/* draw draped segment if stride == 1 */
-				if (stride == 1)
-					for (int k = 0; k < shared.shareddata.navs[inav].segments[jpoint].nls; k++) {
-						/* draw points */
-						glVertex3f((float)(shared.shareddata.navs[inav].segments[jpoint].lspoints[k].xdisplay[instance]),
-						           (float)(shared.shareddata.navs[inav].segments[jpoint].lspoints[k].ydisplay[instance]),
-						           (float)(shared.shareddata.navs[inav].segments[jpoint].lspoints[k].zdisplay[instance]));
-						/*fprintf(stderr,"inav:%d jpoint:%d k:%d zdata:%f zdisplay:%f\n",
-						inav,jpoint,k,
-						shared.shareddata.navs[inav].segments[jpoint].lspoints[k].zdata,
-						shared.shareddata.navs[inav].segments[jpoint].lspoints[k].zdisplay[instance]);*/
-					}
+  				/*fprintf(stderr,"inav:%d npoints:%d jpoint:%d nls:%d\n",
+  				inav, shared.shareddata.navs[inav].npoints, jpoint, shared.shareddata.navs[inav].segments[jpoint].nls);*/
+  				/* draw draped segment if stride == 1 */
+  				if (stride == 1)
+  					for (int k = 0; k < shared.shareddata.navs[inav].segments[jpoint].nls; k++) {
+  						/* draw points */
+  						glVertex3f((float)(shared.shareddata.navs[inav].segments[jpoint].lspoints[k].xdisplay[instance]),
+  						           (float)(shared.shareddata.navs[inav].segments[jpoint].lspoints[k].ydisplay[instance]),
+  						           (float)(shared.shareddata.navs[inav].segments[jpoint].lspoints[k].zdisplay[instance]));
+  						/*fprintf(stderr,"inav:%d jpoint:%d k:%d zdata:%f zdisplay:%f\n",
+  						inav,jpoint,k,
+  						shared.shareddata.navs[inav].segments[jpoint].lspoints[k].zdata,
+  						shared.shareddata.navs[inav].segments[jpoint].lspoints[k].zdisplay[instance]);*/
+  					}
 
-				/* else draw decimated draped nav */
-				else if (shared.shareddata.navs[inav].segments[jpoint].nls > 0) {
-					/* draw points */
-					glVertex3f((float)(shared.shareddata.navs[inav].segments[jpoint].lspoints[0].xdisplay[instance]),
-					           (float)(shared.shareddata.navs[inav].segments[jpoint].lspoints[0].ydisplay[instance]),
-					           (float)(shared.shareddata.navs[inav].segments[jpoint].lspoints[0].zdisplay[instance]));
-				}
-			}
-			glEnd();
-		}
+  				/* else draw decimated draped nav */
+  				else if (shared.shareddata.navs[inav].segments[jpoint].nls > 0) {
+  					/* draw points */
+  					glVertex3f((float)(shared.shareddata.navs[inav].segments[jpoint].lspoints[0].xdisplay[instance]),
+  					           (float)(shared.shareddata.navs[inav].segments[jpoint].lspoints[0].ydisplay[instance]),
+  					           (float)(shared.shareddata.navs[inav].segments[jpoint].lspoints[0].zdisplay[instance]));
+  				}
+  			}
+  			glEnd();
+  		}
+    }
 	}
 
 	/* draw swathbounds */
@@ -2126,143 +2143,145 @@ int mbview_drawnav(size_t instance, int rez) {
 
 		/* loop over the navs plotting swathbounds */
 		for (int inav = 0; inav < shared.shareddata.nnav; inav++) {
-			const double timegapuse = 60.0 * shared.shareddata.navs[inav].decimation * view->timegap;
-			if (shared.shareddata.navs[inav].swathbounds && shared.shareddata.navs[inav].nselected > 0) {
-				glColor3f(colortable_object_red[MBV_COLOR_YELLOW], colortable_object_green[MBV_COLOR_YELLOW],
-				          colortable_object_blue[MBV_COLOR_YELLOW]);
-				glLineWidth((float)(shared.shareddata.navs[inav].size));
+      if (shared.shareddata.navs[inav].active) {
+  			const double timegapuse = 60.0 * shared.shareddata.navs[inav].decimation * view->timegap;
+  			if (shared.shareddata.navs[inav].swathbounds && shared.shareddata.navs[inav].nselected > 0) {
+  				glColor3f(colortable_object_red[MBV_COLOR_YELLOW], colortable_object_green[MBV_COLOR_YELLOW],
+  				          colortable_object_blue[MBV_COLOR_YELLOW]);
+  				glLineWidth((float)(shared.shareddata.navs[inav].size));
 
-				/* draw port side of swath */
-				bool swathbounds_on = false;
-				for (int jpoint = 0; jpoint < shared.shareddata.navs[inav].npoints; jpoint++) {
-					/* draw from center at start of selected data */
-					if (!swathbounds_on && shared.shareddata.navs[inav].navpts[jpoint].selected) {
-						swathbounds_on = true;
-						glBegin(GL_LINE_STRIP);
+  				/* draw port side of swath */
+  				bool swathbounds_on = false;
+  				for (int jpoint = 0; jpoint < shared.shareddata.navs[inav].npoints; jpoint++) {
+  					/* draw from center at start of selected data */
+  					if (!swathbounds_on && shared.shareddata.navs[inav].navpts[jpoint].selected) {
+  						swathbounds_on = true;
+  						glBegin(GL_LINE_STRIP);
 
-						if (data->display_mode == MBV_DISPLAY_3D && stride == 1) {
-							/* drape segment on the fly */
-							segment.endpoints[0] = shared.shareddata.navs[inav].navpts[jpoint].pointcntr;
-							segment.endpoints[1] = shared.shareddata.navs[inav].navpts[jpoint].pointport;
-							mbview_drapesegmentw(instance, &(segment));
+  						if (data->display_mode == MBV_DISPLAY_3D && stride == 1) {
+  							/* drape segment on the fly */
+  							segment.endpoints[0] = shared.shareddata.navs[inav].navpts[jpoint].pointcntr;
+  							segment.endpoints[1] = shared.shareddata.navs[inav].navpts[jpoint].pointport;
+  							mbview_drapesegmentw(instance, &(segment));
 
-							/* draw the segment */
-							for (int i = 0; i < segment.nls; i++) {
-								glVertex3f((float)(segment.lspoints[i].xdisplay[instance]),
-								           (float)(segment.lspoints[i].ydisplay[instance]),
-								           (float)(segment.lspoints[i].zdisplay[instance]));
-							}
-						}
-						else {
-							glVertex3f((float)(shared.shareddata.navs[inav].navpts[jpoint].pointcntr.xdisplay[instance]),
-							           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointcntr.ydisplay[instance]),
-							           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointcntr.zdisplay[instance]));
-						}
-					}
+  							/* draw the segment */
+  							for (int i = 0; i < segment.nls; i++) {
+  								glVertex3f((float)(segment.lspoints[i].xdisplay[instance]),
+  								           (float)(segment.lspoints[i].ydisplay[instance]),
+  								           (float)(segment.lspoints[i].zdisplay[instance]));
+  							}
+  						}
+  						else {
+  							glVertex3f((float)(shared.shareddata.navs[inav].navpts[jpoint].pointcntr.xdisplay[instance]),
+  							           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointcntr.ydisplay[instance]),
+  							           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointcntr.zdisplay[instance]));
+  						}
+  					}
 
-					/* draw during selected data */
-					if (shared.shareddata.navs[inav].navpts[jpoint].selected) {
-						glVertex3f((float)(shared.shareddata.navs[inav].navpts[jpoint].pointport.xdisplay[instance]),
-						           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointport.ydisplay[instance]),
-						           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointport.zdisplay[instance]));
-					}
+  					/* draw during selected data */
+  					if (shared.shareddata.navs[inav].navpts[jpoint].selected) {
+  						glVertex3f((float)(shared.shareddata.navs[inav].navpts[jpoint].pointport.xdisplay[instance]),
+  						           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointport.ydisplay[instance]),
+  						           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointport.zdisplay[instance]));
+  					}
 
-					/* draw to center at end of selected data */
-					if (swathbounds_on &&
-					    (!shared.shareddata.navs[inav].navpts[jpoint].selected ||
-					     jpoint >= shared.shareddata.navs[inav].npoints - 1 ||
-					     (jpoint > 0 && (shared.shareddata.navs[inav].navpts[jpoint].time_d -
-					                     shared.shareddata.navs[inav].navpts[jpoint - 1].time_d) > timegapuse))) {
-						if (data->display_mode == MBV_DISPLAY_3D && stride == 1) {
-							/* drape segment on the fly */
-							segment.endpoints[0] = shared.shareddata.navs[inav].navpts[jpoint].pointport;
-							segment.endpoints[1] = shared.shareddata.navs[inav].navpts[jpoint].pointcntr;
-							mbview_drapesegmentw(instance, &(segment));
+  					/* draw to center at end of selected data */
+  					if (swathbounds_on &&
+  					    (!shared.shareddata.navs[inav].navpts[jpoint].selected ||
+  					     jpoint >= shared.shareddata.navs[inav].npoints - 1 ||
+  					     (jpoint > 0 && (shared.shareddata.navs[inav].navpts[jpoint].time_d -
+  					                     shared.shareddata.navs[inav].navpts[jpoint - 1].time_d) > timegapuse))) {
+  						if (data->display_mode == MBV_DISPLAY_3D && stride == 1) {
+  							/* drape segment on the fly */
+  							segment.endpoints[0] = shared.shareddata.navs[inav].navpts[jpoint].pointport;
+  							segment.endpoints[1] = shared.shareddata.navs[inav].navpts[jpoint].pointcntr;
+  							mbview_drapesegmentw(instance, &(segment));
 
-							/* draw the segment */
-							for (int i = 0; i < segment.nls; i++) {
-								glVertex3f((float)(segment.lspoints[i].xdisplay[instance]),
-								           (float)(segment.lspoints[i].ydisplay[instance]),
-								           (float)(segment.lspoints[i].zdisplay[instance]));
-							}
-						}
-						else {
-							glVertex3f((float)(shared.shareddata.navs[inav].navpts[jpoint].pointcntr.xdisplay[instance]),
-							           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointcntr.ydisplay[instance]),
-							           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointcntr.zdisplay[instance]));
-						}
+  							/* draw the segment */
+  							for (int i = 0; i < segment.nls; i++) {
+  								glVertex3f((float)(segment.lspoints[i].xdisplay[instance]),
+  								           (float)(segment.lspoints[i].ydisplay[instance]),
+  								           (float)(segment.lspoints[i].zdisplay[instance]));
+  							}
+  						}
+  						else {
+  							glVertex3f((float)(shared.shareddata.navs[inav].navpts[jpoint].pointcntr.xdisplay[instance]),
+  							           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointcntr.ydisplay[instance]),
+  							           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointcntr.zdisplay[instance]));
+  						}
 
-						swathbounds_on = false;
-						glEnd();
-					}
-				}
+  						swathbounds_on = false;
+  						glEnd();
+  					}
+  				}
 
-				/* draw starboard side of swath */
-				swathbounds_on = false;
-				for (int jpoint = 0; jpoint < shared.shareddata.navs[inav].npoints; jpoint++) {
-					/* draw from center at start of selected data */
-					if (!swathbounds_on && shared.shareddata.navs[inav].navpts[jpoint].selected) {
-						swathbounds_on = true;
-						glBegin(GL_LINE_STRIP);
+  				/* draw starboard side of swath */
+  				swathbounds_on = false;
+  				for (int jpoint = 0; jpoint < shared.shareddata.navs[inav].npoints; jpoint++) {
+  					/* draw from center at start of selected data */
+  					if (!swathbounds_on && shared.shareddata.navs[inav].navpts[jpoint].selected) {
+  						swathbounds_on = true;
+  						glBegin(GL_LINE_STRIP);
 
-						if (data->display_mode == MBV_DISPLAY_3D && stride == 1) {
-							/* drape segment on the fly */
-							segment.endpoints[0] = shared.shareddata.navs[inav].navpts[jpoint].pointcntr;
-							segment.endpoints[1] = shared.shareddata.navs[inav].navpts[jpoint].pointstbd;
-							mbview_drapesegmentw(instance, &(segment));
+  						if (data->display_mode == MBV_DISPLAY_3D && stride == 1) {
+  							/* drape segment on the fly */
+  							segment.endpoints[0] = shared.shareddata.navs[inav].navpts[jpoint].pointcntr;
+  							segment.endpoints[1] = shared.shareddata.navs[inav].navpts[jpoint].pointstbd;
+  							mbview_drapesegmentw(instance, &(segment));
 
-							/* draw the segment */
-							for (int i = 0; i < segment.nls; i++) {
-								glVertex3f((float)(segment.lspoints[i].xdisplay[instance]),
-								           (float)(segment.lspoints[i].ydisplay[instance]),
-								           (float)(segment.lspoints[i].zdisplay[instance]));
-							}
-						}
-						else {
-							glVertex3f((float)(shared.shareddata.navs[inav].navpts[jpoint].pointcntr.xdisplay[instance]),
-							           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointcntr.ydisplay[instance]),
-							           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointcntr.zdisplay[instance]));
-						}
-					}
+  							/* draw the segment */
+  							for (int i = 0; i < segment.nls; i++) {
+  								glVertex3f((float)(segment.lspoints[i].xdisplay[instance]),
+  								           (float)(segment.lspoints[i].ydisplay[instance]),
+  								           (float)(segment.lspoints[i].zdisplay[instance]));
+  							}
+  						}
+  						else {
+  							glVertex3f((float)(shared.shareddata.navs[inav].navpts[jpoint].pointcntr.xdisplay[instance]),
+  							           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointcntr.ydisplay[instance]),
+  							           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointcntr.zdisplay[instance]));
+  						}
+  					}
 
-					/* draw during selected data */
-					if (shared.shareddata.navs[inav].navpts[jpoint].selected) {
-						glVertex3f((float)(shared.shareddata.navs[inav].navpts[jpoint].pointstbd.xdisplay[instance]),
-						           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointstbd.ydisplay[instance]),
-						           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointstbd.zdisplay[instance]));
-					}
+  					/* draw during selected data */
+  					if (shared.shareddata.navs[inav].navpts[jpoint].selected) {
+  						glVertex3f((float)(shared.shareddata.navs[inav].navpts[jpoint].pointstbd.xdisplay[instance]),
+  						           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointstbd.ydisplay[instance]),
+  						           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointstbd.zdisplay[instance]));
+  					}
 
-					/* draw to center at end of selected data */
-					if (swathbounds_on &&
-					    (!shared.shareddata.navs[inav].navpts[jpoint].selected ||
-					     jpoint >= shared.shareddata.navs[inav].npoints - 1 ||
-					     (jpoint > 0 && (shared.shareddata.navs[inav].navpts[jpoint].time_d -
-					                     shared.shareddata.navs[inav].navpts[jpoint - 1].time_d) > timegapuse))) {
-						if (data->display_mode == MBV_DISPLAY_3D && stride == 1) {
-							/* drape segment on the fly */
-							segment.endpoints[0] = shared.shareddata.navs[inav].navpts[jpoint].pointstbd;
-							segment.endpoints[1] = shared.shareddata.navs[inav].navpts[jpoint].pointcntr;
-							mbview_drapesegmentw(instance, &(segment));
+  					/* draw to center at end of selected data */
+  					if (swathbounds_on &&
+  					    (!shared.shareddata.navs[inav].navpts[jpoint].selected ||
+  					     jpoint >= shared.shareddata.navs[inav].npoints - 1 ||
+  					     (jpoint > 0 && (shared.shareddata.navs[inav].navpts[jpoint].time_d -
+  					                     shared.shareddata.navs[inav].navpts[jpoint - 1].time_d) > timegapuse))) {
+  						if (data->display_mode == MBV_DISPLAY_3D && stride == 1) {
+  							/* drape segment on the fly */
+  							segment.endpoints[0] = shared.shareddata.navs[inav].navpts[jpoint].pointstbd;
+  							segment.endpoints[1] = shared.shareddata.navs[inav].navpts[jpoint].pointcntr;
+  							mbview_drapesegmentw(instance, &(segment));
 
-							/* draw the segment */
-							for (int i = 0; i < segment.nls; i++) {
-								glVertex3f((float)(segment.lspoints[i].xdisplay[instance]),
-								           (float)(segment.lspoints[i].ydisplay[instance]),
-								           (float)(segment.lspoints[i].zdisplay[instance]));
-							}
-						}
-						else {
-							glVertex3f((float)(shared.shareddata.navs[inav].navpts[jpoint].pointcntr.xdisplay[instance]),
-							           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointcntr.ydisplay[instance]),
-							           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointcntr.zdisplay[instance]));
-						}
+  							/* draw the segment */
+  							for (int i = 0; i < segment.nls; i++) {
+  								glVertex3f((float)(segment.lspoints[i].xdisplay[instance]),
+  								           (float)(segment.lspoints[i].ydisplay[instance]),
+  								           (float)(segment.lspoints[i].zdisplay[instance]));
+  							}
+  						}
+  						else {
+  							glVertex3f((float)(shared.shareddata.navs[inav].navpts[jpoint].pointcntr.xdisplay[instance]),
+  							           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointcntr.ydisplay[instance]),
+  							           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointcntr.zdisplay[instance]));
+  						}
 
-						swathbounds_on = false;
-						glEnd();
-					}
-				}
-			}
-		}
+  						swathbounds_on = false;
+  						glEnd();
+  					}
+  				}
+  			}
+  		}
+    }
 
 		/* deallocate on the fly draping segment */
 		if (segment.nls_alloc > 0 && segment.lspoints != NULL) {
@@ -2300,47 +2319,57 @@ int mbview_updatenavlist() {
 			/* get number of items */
 			int nitems = 0;
 			for (int inav = 0; inav < shared.shareddata.nnav; inav++) {
-				nitems += 1 + shared.shareddata.navs[inav].npoints;
+        if (shared.shareddata.navs[inav].active) {
+				  nitems += 1;
+        }
 			}
 
-			/* allocate array of label XmStrings */
-			XmString *xstr = (XmString *)malloc(nitems * sizeof(XmString));
+      if (nitems > 0) {
 
-			/* loop over the navs */
-			nitems = 0;
-			for (int inav = 0; inav < shared.shareddata.nnav; inav++) {
-				/* add list item for each nav */
-				sprintf(value_string, "%3d | %3d | %s | %d | %s", inav, shared.shareddata.navs[inav].npoints,
-				        mbview_colorname[shared.shareddata.navs[inav].color], shared.shareddata.navs[inav].size,
-				        shared.shareddata.navs[inav].name);
-				xstr[nitems] = XmStringCreateLocalized(value_string);
-				nitems++;
-			}
+  			/* allocate array of label XmStrings */
+  			XmString *xstr = (XmString *)malloc(nitems * sizeof(XmString));
 
-			/* add list items */
-			XmListAddItems(shared.mb3d_navlist.mbview_list_navlist, xstr, nitems, 0);
+  			/* loop over the navs */
+  			nitems = 0;
+  			for (int inav = 0; inav < shared.shareddata.nnav; inav++) {
+          if (shared.shareddata.navs[inav].active) {
+    				/* add list item for each nav */
+    				sprintf(value_string, "%3d | %3d | %s | %d | %s", inav, shared.shareddata.navs[inav].npoints,
+    				        mbview_colorname[shared.shareddata.navs[inav].color], shared.shareddata.navs[inav].size,
+    				        shared.shareddata.navs[inav].name);
+    				xstr[nitems] = XmStringCreateLocalized(value_string);
+    				nitems++;
+          }
+  			}
 
-			/* deallocate memory no longer needed */
-			for (int iitem = 0; iitem < nitems; iitem++) {
-				XmStringFree(xstr[iitem]);
-			}
-			free(xstr);
+  			/* add list items */
+  			XmListAddItems(shared.mb3d_navlist.mbview_list_navlist, xstr, nitems, 0);
 
-			/* check for completely selected navs */
-			int inavselect = MBV_SELECT_NONE;
-			for (int inav = 0; inav < shared.shareddata.nnav; inav++) {
-				if (inavselect == MBV_SELECT_NONE && shared.shareddata.navs[inav].npoints > 1 &&
-				    shared.shareddata.navs[inav].nselected == shared.shareddata.navs[inav].npoints) {
-					inavselect = inav;
-				}
-			}
+  			/* deallocate memory no longer needed */
+  			for (int iitem = 0; iitem < nitems; iitem++) {
+  				XmStringFree(xstr[iitem]);
+  			}
+  			free(xstr);
 
-			/* select first item with fully selected nav */
-			if (inavselect != MBV_SELECT_NONE) {
-				const int iitem = inavselect + 1;
-				XmListSelectPos(shared.mb3d_navlist.mbview_list_navlist, iitem, 0);
-				XmListSetPos(shared.mb3d_navlist.mbview_list_navlist, MAX(iitem - 5, 1));
-			}
+  			/* check for completely selected navs */
+  			int inavselect = MBV_SELECT_NONE;
+  			for (int inav = 0; inav < shared.shareddata.nnav; inav++) {
+          if (shared.shareddata.navs[inav].active) {
+    				if (inavselect == MBV_SELECT_NONE && shared.shareddata.navs[inav].npoints > 1 &&
+    				    shared.shareddata.navs[inav].nselected == shared.shareddata.navs[inav].npoints) {
+    					inavselect = inav;
+    				}
+          }
+  			}
+
+  			/* select first item with fully selected nav */
+  			if (inavselect != MBV_SELECT_NONE) {
+  				const int iitem = inavselect + 1;
+  				XmListSelectPos(shared.mb3d_navlist.mbview_list_navlist, iitem, 0);
+  				XmListSetPos(shared.mb3d_navlist.mbview_list_navlist, MAX(iitem - 5, 1));
+  			}
+
+      }
 		}
 	}
 
@@ -2377,7 +2406,8 @@ int mbview_picknavbyname(int verbose, size_t instance, char *name, int *error) {
 	if (shared.shareddata.nav_mode != MBV_NAV_OFF && shared.shareddata.nnav > 0) {
 		bool found = false;
 		for (int inav = 0; inav < shared.shareddata.nnav && !found; inav++) {
-			if (strcmp(shared.shareddata.navs[inav].name, name) == 0) {
+			if (strcmp(shared.shareddata.navs[inav].name, name) == 0
+          && shared.shareddata.navs[inav].active) {
 				found = true;
 				shared.shareddata.navpick_type = MBV_PICK_TWOPOINT;
 				shared.shareddata.nav_selected[0] = inav;
@@ -2392,7 +2422,6 @@ int mbview_picknavbyname(int verbose, size_t instance, char *name, int *error) {
 				}
 			}
 		}
-		// if (found) fprintf(stderr,"FILE FOUND: %s\n",name);
 	}
 
 	/* else beep */
@@ -2437,6 +2466,164 @@ int mbview_picknavbyname(int verbose, size_t instance, char *name, int *error) {
 		fprintf(stderr, "dbg2       nav_selected[1]:       %d\n", shared.shareddata.nav_selected[1]);
 		fprintf(stderr, "dbg2       nav_point_selected[1]: %d\n", shared.shareddata.nav_point_selected[1]);
 		for (int i = 0; i < shared.shareddata.nnav; i++) {
+			fprintf(stderr, "dbg2       nav %d active:        %d\n", i, shared.shareddata.navs[i].active);
+			fprintf(stderr, "dbg2       nav %d color:         %d\n", i, shared.shareddata.navs[i].color);
+			fprintf(stderr, "dbg2       nav %d size:          %d\n", i, shared.shareddata.navs[i].size);
+			fprintf(stderr, "dbg2       nav %d name:          %s\n", i, shared.shareddata.navs[i].name);
+			fprintf(stderr, "dbg2       nav %d swathbounds:   %d\n", i, shared.shareddata.navs[i].swathbounds);
+			fprintf(stderr, "dbg2       nav %d line:          %d\n", i, shared.shareddata.navs[i].line);
+			fprintf(stderr, "dbg2       nav %d shot:          %d\n", i, shared.shareddata.navs[i].shot);
+			fprintf(stderr, "dbg2       nav %d cdp:           %d\n", i, shared.shareddata.navs[i].cdp);
+			fprintf(stderr, "dbg2       nav %d decimation:    %d\n", i, shared.shareddata.navs[i].decimation);
+			fprintf(stderr, "dbg2       nav %d npoints:       %d\n", i, shared.shareddata.navs[i].npoints);
+			fprintf(stderr, "dbg2       nav %d npoints_alloc: %d\n", i, shared.shareddata.navs[i].npoints_alloc);
+			fprintf(stderr, "dbg2       nav %d nselected:     %d\n", i, shared.shareddata.navs[i].nselected);
+			for (int j = 0; j < shared.shareddata.navs[i].npoints; j++) {
+				fprintf(stderr, "dbg2       nav %d %d draped:   %d\n", i, j, shared.shareddata.navs[i].navpts[j].draped);
+				fprintf(stderr, "dbg2       nav %d %d selected: %d\n", i, j, shared.shareddata.navs[i].navpts[j].selected);
+				fprintf(stderr, "dbg2       nav %d %d time_d:   %f\n", i, j, shared.shareddata.navs[i].navpts[j].time_d);
+				fprintf(stderr, "dbg2       nav %d %d heading:  %f\n", i, j, shared.shareddata.navs[i].navpts[j].heading);
+				fprintf(stderr, "dbg2       nav %d %d speed:    %f\n", i, j, shared.shareddata.navs[i].navpts[j].speed);
+				fprintf(stderr, "dbg2       nav %d %d line:     %d\n", i, j, shared.shareddata.navs[i].navpts[j].line);
+				fprintf(stderr, "dbg2       nav %d %d shot:     %d\n", i, j, shared.shareddata.navs[i].navpts[j].shot);
+				fprintf(stderr, "dbg2       nav %d %d cdp:      %d\n", i, j, shared.shareddata.navs[i].navpts[j].cdp);
+
+				fprintf(stderr, "dbg2       nav %d %d xgrid:    %f\n", i, j,
+				        shared.shareddata.navs[i].navpts[j].point.xgrid[instance]);
+				fprintf(stderr, "dbg2       nav %d %d ygrid:    %f\n", i, j,
+				        shared.shareddata.navs[i].navpts[j].point.ygrid[instance]);
+				fprintf(stderr, "dbg2       nav %d %d xlon:     %f\n", i, j, shared.shareddata.navs[i].navpts[j].point.xlon);
+				fprintf(stderr, "dbg2       nav %d %d ylat:     %f\n", i, j, shared.shareddata.navs[i].navpts[j].point.ylat);
+				fprintf(stderr, "dbg2       nav %d %d zdata:    %f\n", i, j, shared.shareddata.navs[i].navpts[j].point.zdata);
+				fprintf(stderr, "dbg2       nav %d %d xdisplay: %f\n", i, j,
+				        shared.shareddata.navs[i].navpts[j].point.xdisplay[instance]);
+				fprintf(stderr, "dbg2       nav %d %d ydisplay: %f\n", i, j,
+				        shared.shareddata.navs[i].navpts[j].point.ydisplay[instance]);
+				fprintf(stderr, "dbg2       nav %d %d zdisplay: %f\n", i, j,
+				        shared.shareddata.navs[i].navpts[j].point.zdisplay[instance]);
+
+				fprintf(stderr, "dbg2       nav %d %d stbd xgrid:    %f\n", i, j,
+				        shared.shareddata.navs[i].navpts[j].pointport.xgrid[instance]);
+				fprintf(stderr, "dbg2       nav %d %d stbd ygrid:    %f\n", i, j,
+				        shared.shareddata.navs[i].navpts[j].pointport.ygrid[instance]);
+				fprintf(stderr, "dbg2       nav %d %d stbd xlon:     %f\n", i, j,
+				        shared.shareddata.navs[i].navpts[j].pointport.xlon);
+				fprintf(stderr, "dbg2       nav %d %d stbd ylat:     %f\n", i, j,
+				        shared.shareddata.navs[i].navpts[j].pointport.ylat);
+				fprintf(stderr, "dbg2       nav %d %d stbd zdata:    %f\n", i, j,
+				        shared.shareddata.navs[i].navpts[j].pointport.zdata);
+				fprintf(stderr, "dbg2       nav %d %d stbd xdisplay: %f\n", i, j,
+				        shared.shareddata.navs[i].navpts[j].pointport.xdisplay[instance]);
+				fprintf(stderr, "dbg2       nav %d %d stbd ydisplay: %f\n", i, j,
+				        shared.shareddata.navs[i].navpts[j].pointport.ydisplay[instance]);
+				fprintf(stderr, "dbg2       nav %d %d stbd zdisplay: %f\n", i, j,
+				        shared.shareddata.navs[i].navpts[j].pointport.zdisplay[instance]);
+
+				fprintf(stderr, "dbg2       nav %d %d cntr xgrid:    %f\n", i, j,
+				        shared.shareddata.navs[i].navpts[j].pointcntr.xgrid[instance]);
+				fprintf(stderr, "dbg2       nav %d %d cntr ygrid:    %f\n", i, j,
+				        shared.shareddata.navs[i].navpts[j].pointcntr.ygrid[instance]);
+				fprintf(stderr, "dbg2       nav %d %d cntr xlon:     %f\n", i, j,
+				        shared.shareddata.navs[i].navpts[j].pointcntr.xlon);
+				fprintf(stderr, "dbg2       nav %d %d cntr ylat:     %f\n", i, j,
+				        shared.shareddata.navs[i].navpts[j].pointcntr.ylat);
+				fprintf(stderr, "dbg2       nav %d %d cntr zdata:    %f\n", i, j,
+				        shared.shareddata.navs[i].navpts[j].pointcntr.zdata);
+				fprintf(stderr, "dbg2       nav %d %d cntr xdisplay: %f\n", i, j,
+				        shared.shareddata.navs[i].navpts[j].pointcntr.xdisplay[instance]);
+				fprintf(stderr, "dbg2       nav %d %d cntr ydisplay: %f\n", i, j,
+				        shared.shareddata.navs[i].navpts[j].pointcntr.ydisplay[instance]);
+				fprintf(stderr, "dbg2       nav %d %d cntr zdisplay: %f\n", i, j,
+				        shared.shareddata.navs[i].navpts[j].pointcntr.zdisplay[instance]);
+
+				fprintf(stderr, "dbg2       nav %d %d port xgrid:    %f\n", i, j,
+				        shared.shareddata.navs[i].navpts[j].pointstbd.xgrid[instance]);
+				fprintf(stderr, "dbg2       nav %d %d port ygrid:    %f\n", i, j,
+				        shared.shareddata.navs[i].navpts[j].pointstbd.ygrid[instance]);
+				fprintf(stderr, "dbg2       nav %d %d port xlon:     %f\n", i, j,
+				        shared.shareddata.navs[i].navpts[j].pointstbd.xlon);
+				fprintf(stderr, "dbg2       nav %d %d port ylat:     %f\n", i, j,
+				        shared.shareddata.navs[i].navpts[j].pointstbd.ylat);
+				fprintf(stderr, "dbg2       nav %d %d port zdata:    %f\n", i, j,
+				        shared.shareddata.navs[i].navpts[j].pointstbd.zdata);
+				fprintf(stderr, "dbg2       nav %d %d port xdisplay: %f\n", i, j,
+				        shared.shareddata.navs[i].navpts[j].pointstbd.xdisplay[instance]);
+				fprintf(stderr, "dbg2       nav %d %d port ydisplay: %f\n", i, j,
+				        shared.shareddata.navs[i].navpts[j].pointstbd.ydisplay[instance]);
+				fprintf(stderr, "dbg2       nav %d %d port zdisplay: %f\n", i, j,
+				        shared.shareddata.navs[i].navpts[j].pointstbd.zdisplay[instance]);
+			}
+			for (int j = 0; j < shared.shareddata.navs[i].npoints - 1; j++) {
+				fprintf(stderr, "dbg2       nav %d %d nls:          %d\n", i, j, shared.shareddata.navs[i].segments[j].nls);
+				fprintf(stderr, "dbg2       nav %d %d nls_alloc:    %d\n", i, j, shared.shareddata.navs[i].segments[j].nls_alloc);
+				fprintf(stderr, "dbg2       nav %d %d endpoints[0]: %p\n", i, j,
+				        &shared.shareddata.navs[i].segments[j].endpoints[0]);
+				fprintf(stderr, "dbg2       nav %d %d endpoints[1]: %p\n", i, j,
+				        &shared.shareddata.navs[i].segments[j].endpoints[1]);
+			}
+		}
+	}
+
+	const int status = MB_SUCCESS;
+
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
+/*------------------------------------------------------------------------------*/
+
+int mbview_setnavactivebyname(int verbose, size_t instance, char *name, bool active, bool updatelist, int *error) {
+	(void)verbose;  // Unused parameter
+	(void)error;  // Unused parameter
+
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
+		fprintf(stderr, "dbg2       name:             %s\n", name);
+		fprintf(stderr, "dbg2       active:           %d\n", active);
+		fprintf(stderr, "dbg2       updatelist:       %d\n", updatelist);
+	}
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+	/* find and select the navigation associated with name */
+	if (shared.shareddata.nav_mode != MBV_NAV_OFF && shared.shareddata.nnav > 0) {
+		bool found = false;
+		for (int inav = 0; inav < shared.shareddata.nnav && !found; inav++) {
+			if (strcmp(shared.shareddata.navs[inav].name, name) == 0) {
+				found = true;
+				shared.shareddata.navs[inav].active = active;
+			}
+		}
+	}
+
+	/* update nav data list */
+	if (updatelist) {
+    mbview_updatenavlist();
+  }
+
+	/* print nav debug statements */
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  Nav data altered in function <%s>\n", __func__);
+		fprintf(stderr, "dbg2  Nav values:\n");
+		fprintf(stderr, "dbg2       nav_mode:              %d\n", shared.shareddata.nav_mode);
+		fprintf(stderr, "dbg2       nav_view_mode:         %d\n", data->nav_view_mode);
+		fprintf(stderr, "dbg2       navdrape_view_mode:    %d\n", data->navdrape_view_mode);
+		fprintf(stderr, "dbg2       nnav:                  %d\n", shared.shareddata.nnav);
+		fprintf(stderr, "dbg2       nnav_alloc:            %d\n", shared.shareddata.nnav_alloc);
+		fprintf(stderr, "dbg2       nav_selected[0]:       %d\n", shared.shareddata.nav_selected[0]);
+		fprintf(stderr, "dbg2       nav_point_selected[0]: %d\n", shared.shareddata.nav_point_selected[0]);
+		fprintf(stderr, "dbg2       nav_selected[1]:       %d\n", shared.shareddata.nav_selected[1]);
+		fprintf(stderr, "dbg2       nav_point_selected[1]: %d\n", shared.shareddata.nav_point_selected[1]);
+		for (int i = 0; i < shared.shareddata.nnav; i++) {
+			fprintf(stderr, "dbg2       nav %d active:        %d\n", i, shared.shareddata.navs[i].active);
 			fprintf(stderr, "dbg2       nav %d color:         %d\n", i, shared.shareddata.navs[i].color);
 			fprintf(stderr, "dbg2       nav %d size:          %d\n", i, shared.shareddata.navs[i].size);
 			fprintf(stderr, "dbg2       nav %d name:          %s\n", i, shared.shareddata.navs[i].name);

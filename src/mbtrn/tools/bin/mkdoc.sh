@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #########################################
 # Name: mkdoc.sh
@@ -6,7 +6,7 @@
 # Summary: convert markdown to html, PDF using pandoc
 #
 # Description: Build HTML and PDF doc from markdown
-#  
+#
 #  ./mkdoc/mkdoc.sh -vi hw-checkout-guide/hw-checkout-guide.md  -a hw-checkout-guide/media
 #  ./mkdoc/mkdoc.sh -vi controller-help/controller-help.md
 #  ./mkdoc/mkdoc.sh -vi system-guide/system-guide.md  -a system-guide/examples -a system-guide/media
@@ -332,4 +332,3 @@ then
     rm -rf ${MKDOC_TMP}
     rm -rf ${PDF_OPATH}/${XFNAME}.pdf
 fi
-

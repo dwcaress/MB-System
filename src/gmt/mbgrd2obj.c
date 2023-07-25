@@ -29,8 +29,9 @@
 
 #include "mb_define.h"
 
-// include gmt_def.h but first undefine PACKAGE variables to prevent
-// warnings about name collision between GDAL's cpl_port.h and mb_config.h
+// include gmt_dev.h but first undefine PACKAGE variables to prevent
+// warnings about name collision between GDAL's cpl_port.h and the 
+// Autotools build system mb_config.h
 #ifdef PACKAGE_BUGREPORT
 #undef PACKAGE_BUGREPORT
 #endif
@@ -179,7 +180,7 @@ GMT_LOCAL int parse(struct GMT_CTRL *GMT, struct MBGRD2OBJ_CTRL *Ctrl, struct GM
 
 	unsigned int n_errors = 0, n_files = 0;
 	struct GMT_OPTION *opt = NULL;
-	struct GMTAPI_CTRL *API = GMT->parent;
+	// struct GMTAPI_CTRL *API = GMT->parent;
 
 	for (opt = options; opt; opt = opt->next) { /* Process all the options given */
 
@@ -229,15 +230,16 @@ GMT_LOCAL int parse(struct GMT_CTRL *GMT, struct MBGRD2OBJ_CTRL *Ctrl, struct GM
 	}
 
 int GMT_mbgrd2obj(void *V_API, int mode, void *args) {
-	bool first = true;
-	unsigned int row, col, n_output, w_col = 3;
-	int error = 0, write_error = 0;
+	// bool first = true;
+	unsigned int row, col;
+	int error = 0;
 
 	uint64_t ij;
 
-	char header[GMT_BUFSIZ];
+	// char header[GMT_BUFSIZ];
 
-	double wesn[4], d_value;
+	double wesn[4];
+  // double d_value;
 
 	struct GMT_GRID *G = NULL;
 	struct MBGRD2OBJ_CTRL *Ctrl = NULL;
@@ -328,7 +330,7 @@ int GMT_mbgrd2obj(void *V_API, int mode, void *args) {
 	/* Output user information */
   char user[256], host[256], date[32];
   const int verbose = 0;
-  int status = mb_user_host_date(verbose, user, host, date, &error);
+  mb_user_host_date(verbose, user, host, date, &error);
 	fprintf(fp, "# OBJ format 3D model file\n");
 	fprintf(fp, "# This file created by mbgrd2obs\n");
 	fprintf(fp, "# MB-System Version %s\n", MB_VERSION);

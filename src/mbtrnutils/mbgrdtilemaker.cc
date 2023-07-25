@@ -290,7 +290,7 @@ int main( int argc, char **argv )
   mb_path tile_xlabel;
   mb_path tile_ylabel;
   mb_path tile_zlabel;
-  mb_path tile_title;
+  mb_pathplusplus tile_title;
   strcpy(tile_xlabel, "Easting (meters)");
   strcpy(tile_ylabel, "Northing (meters)");
   strcpy(tile_zlabel, "Topography (meters)");
@@ -311,8 +311,8 @@ int main( int argc, char **argv )
   fprintf(stdout, "  tile_title:         %s\n", tile_title);
 
   mkdir(output_root, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-  mb_path csv_file;
-  sprintf(csv_file, "%s/tiles.csv", output_root);
+  mb_pathplus csv_file;
+  snprintf(csv_file, sizeof(csv_file), "%s/tiles.csv", output_root);
   FILE *csv_fp = fopen(csv_file, "w");
   fprintf(csv_fp, "TileName , Easting , Northing , %d\n", num_tiles);
 
@@ -321,13 +321,13 @@ int main( int argc, char **argv )
   for (int j=0; j<num_tiles_y; j++) {
     for (int i=0; i<num_tiles_x; i++) {
       int k = i * num_tiles_y + j;
-      mb_path tile_name;
-      mb_path tile_grid;
-      mb_path tile_bo;
-      sprintf(tile_name, "%s_%4.4d", output_root, itile);
-      sprintf(tile_grid, "%s/%s.grd", output_root, tile_name);
-      sprintf(tile_bo, "%s.bo", tile_name);
-      sprintf(tile_title, "Tile %s", tile_name);
+      mb_pathplus tile_name;
+      mb_pathplusplus tile_grid;
+      mb_pathplusplus tile_bo;
+      snprintf(tile_name, sizeof(tile_name), "%s_%4.4d", output_root, itile);
+      snprintf(tile_grid, sizeof(tile_grid), "%s/%s.grd", output_root, tile_name);
+      snprintf(tile_bo, sizeof(tile_bo), "%s.bo", tile_name);
+      snprintf(tile_title, sizeof(tile_title), "Tile %s", tile_name);
       int tile_projection_mode = grid_projection_mode;
       mb_path tile_projection_id;
       strncpy(tile_projection_id, grid_projection_id, MB_PATH_MAXLINE-1);
@@ -404,18 +404,18 @@ int main( int argc, char **argv )
   fclose(csv_fp);
 
   // Copy source grid to tiles directory
-  char command[MB_COMMAND_LENGTH];
-  sprintf(command, "cp %s %s/source_grid.grd", input_grid, output_root);
+  mb_command command;
+  snprintf(command, sizeof(command), "cp %s %s/source_grid.grd", input_grid, output_root);
   fprintf(outfp, "\n-----------------------------------------------------------\nExecuting: %s\n", command);
   system(command);
 
   // Generate octree files from the grids
   for (int itile=0; itile<num_tiles; itile++) {
-    mb_path tile_name;
-    mb_path tile_pathlet;
-    sprintf(tile_name, "%s_%4.4d", output_root, itile);
-    sprintf(tile_pathlet, "%s/%s", output_root, tile_name);
-    sprintf(command, "mbgrd2octree --input=%s.grd --output=%s.bo",
+    mb_pathplus tile_name;
+    mb_pathplusplus tile_pathlet;
+    snprintf(tile_name, sizeof(tile_name), "%s_%4.4d", output_root, itile);
+    snprintf(tile_pathlet, sizeof(tile_pathlet), "%s/%s", output_root, tile_name);
+    snprintf(command, sizeof(command), "mbgrd2octree --input=%s.grd --output=%s.bo",
                       tile_pathlet, tile_pathlet);
     fprintf(outfp, "\n-----------------------------------------------------------\nExecuting: %s\n", command);
     system(command);

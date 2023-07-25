@@ -70,7 +70,7 @@ trnuctx-20200905-162653-560bc2a09330-0000.log
 
 Each time one of the scripts is run, it generates:  
 
-|                     |                           |
+|                     |                           |  
 |---------------------|---------------------------|  
 |       jobs directory|plot session subdirectories|
 |  plot-data directory|intermediate data|

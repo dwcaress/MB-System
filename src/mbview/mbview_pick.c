@@ -572,8 +572,8 @@ int mbview_pick_text(size_t instance) {
 	struct mbview_struct *data = &(view->data);
 	// fprintf(stderr,"mbview_pick_text: instance:%zu pickinfo_mode:%d\n",instance,data->pickinfo_mode);
 
-  char value_text[MB_PATH_MAXLINE];
-  char value_list[MB_PATH_MAXLINE];
+  char value_text[3*MB_PATH_MAXLINE];
+  char value_list[5*MB_PATH_MAXLINE];
 
 	int time_i[7];
 	char londstr0[24], londstr1[24], lonmstr0[24], lonmstr1[24];
@@ -887,9 +887,11 @@ int mbview_pick_text(size_t instance) {
 	        {
 	        sprintf(value_text, ":::t\"Pick Info:\":t\"No Pick\"");
 	        sprintf(value_list, "Pick Info: No Pick\n");
+          data->pickinfo_mode = MBV_PICK_NONE;
 	        }
 	set_mbview_label_multiline_string(view->mb3dview.mbview_label_pickinfo, value_text);
-	fprintf(stderr, "%s", value_list);
+  if (data->pickinfo_mode != MBV_PICK_NONE)
+    fprintf(stderr, "%s", value_list);
 
 	const int status = MB_SUCCESS;
 

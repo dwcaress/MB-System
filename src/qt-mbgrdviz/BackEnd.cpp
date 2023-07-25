@@ -6,6 +6,8 @@
 
 #define VERTICAL_EXAGG "verticalExagg"
 #define SHOW_AXES "showAxes"
+#define COLORMAP "colormap"
+#define SITE_FILE "sitefile"
 
 /// Initialize singleton to null
 BackEnd *BackEnd::singleInstance_ = nullptr;
@@ -101,11 +103,12 @@ bool BackEnd::setGridFile(QUrl fileURL) {
 }
 
 
-void BackEnd::showAxes(bool show) {
-  qDebug() << "BackEnd::showAxes(" << show << ")";
-  qVtkItem_->showAxes(show);
-  qVtkItem_->update();
+bool BackEnd::setSiteFile(QUrl fileURL) {
+    qDebug() << "*** setSiteFile() - " << fileURL;
+    return true;
 }
+
+
 
 void BackEnd::qmlSlot(const QString &qmsg) {
     qDebug() << "qmlSlot() qmsg: " << qmsg;
@@ -123,10 +126,35 @@ void BackEnd::qmlSlot(const QString &qmsg) {
     }
     else if (!strncmp(msg, SHOW_AXES, strlen(SHOW_AXES))) {
       if (strstr(msg, "true")) {
-        showAxes(true);
+        qVtkItem_->showAxes(true);
       }
       else {
-        showAxes(false);
+        qVtkItem_->showAxes(false);
       }
+      qVtkItem_->update();        
+    }
+    else if (!strncmp(msg, COLORMAP, strlen(COLORMAP))) {
+      // Scheme name is second token
+      char *schemeName = strchr(msg, ' ') + 1;
+      if (!schemeName) {
+        qCritical() << "Couldn't find colormap scheme name in " << msg;
+        return;
+      }
+      qDebug() << "colormap schemeName: " << schemeName;
+      if (!qVtkItem_->setColorMapScheme(schemeName)) {
+        qCritical() << "Unknown colormap scheme: " << schemeName;
+      }
+      else {
+        qDebug() << "Set colormap scheme to " << schemeName;
+      }
+      qVtkItem_->update();
+    }
+    else if (!strncmp(msg, SITE_FILE, strlen(SITE_FILE))) {
+      qDebug() << "open site file " << (strchr(msg, ' ') + 1);
+      char *siteFile = strchr(msg, ' ') + 1;
+      // Remove file URL prefix      
+      siteFile += strlen("file://"); 
+      qVtkItem_->setSiteFile(siteFile);
+      qVtkItem_->update();
     }
   }

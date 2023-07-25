@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:03 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:10 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 12
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -275,8 +281,8 @@ E F2(--attitude-async)108 525.6 Q F0(=)A F3(RECORDTYPE)A F2
 (--time-latency-apply-all-ancilliary)108 693.6 Q
 (--time-latency-apply-sur)108 705.6 Q -.1(ve)-.1 G(y).1 E
 (--time-latency-apply-all)108 717.6 Q(--\214lter)108 729.6 Q F0(=)A F3
-(SECONDS)A F0(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2021)-2.5 E
-(1)198.45 E 0 Cg EP
+(SECONDS)A F0(MB-System 5.0)72 768 Q 2.5(5N)134.705 G -.15(ove)-2.5 G
+(mber 2022).15 E(1)193.045 E 0 Cg EP
 %%Page: 2 2
 %%BeginPageSetup
 BP
@@ -303,38 +309,38 @@ F1(--kluge-time-jumps)108 252 Q F0(=)A F2(SECONDS)A F1
 (o-attitude-corr)-.18 E(ection)-.18 E(--kluge-zer)108 324 Q
 (o-alongtrack-angles)-.18 E(--kluge-\214x-wissl-timestamps)108 336 Q
 (--kluge-auv-sentry-sensordepth)108 348 Q(--kluge-ignor)108 360 Q
-(e-snippets)-.18 E F0(])108 372 Q/F3 10.95/Times-Bold@0 SF(DESCRIPTION)
-72 400.8 Q F0 .948(MBpreprocess handles preprocessing of sw)108 412.8 R
-.949(ath sonar data as part of setting up an MB-System processing)-.1 F
-.663(structure for a dataset. This program replaces the se)108 424.8 R
--.15(ve)-.25 G .663
-(ral format-speci\214c preprocessing programs found in).15 F .609
-(MB-System v)108 436.8 R .609
+(e-snippets)-.18 E(--kluge-sonardepth-fr)108 372 Q(om-hea)-.18 E -.1(ve)
+-.25 G F0(])108 384 Q/F3 10.95/Times-Bold@0 SF(DESCRIPTION)72 412.8 Q F0
+.948(MBpreprocess handles preprocessing of sw)108 424.8 R .949
+(ath sonar data as part of setting up an MB-System processing)-.1 F .663
+(structure for a dataset. This program replaces the se)108 436.8 R -.15
+(ve)-.25 G .663(ral format-speci\214c preprocessing programs found in)
+.15 F .609(MB-System v)108 448.8 R .609
 (ersion 5 releases with a single program for v)-.15 F .609(ersion 6.)
 -.15 F .61(In man)5.61 F 3.11(yc)-.15 G .61(ases the preprocessing con-)
 -3.11 F .467
 (sists only of creating the ancillary \214les parallel to the ra)108
-448.8 R 2.967<778c>-.15 G .467(les, b)-2.967 F .467
-(ut in others the data must be translated to)-.2 F(dif)108 460.8 Q .98
+460.8 R 2.967<778c>-.15 G .467(les, b)-2.967 F .467
+(ut in others the data must be translated to)-.2 F(dif)108 472.8 Q .98
 (ferent formats. The proprocessing step can also be used to mer)-.25 F
 .98(ge na)-.18 F(vig)-.2 E .98(ation, attitude, sound speed, or)-.05 F
-(other ancillary data with the surv)108 472.8 Q .3 -.15(ey d)-.15 H
-(ata.).15 E F3(MB-SYSTEM A)72 501.6 Q(UTHORSHIP)-.548 E F0(Da)108 513.6
-Q(vid W)-.2 E 2.5(.C)-.92 G(aress)-2.5 E(Montere)113 525.6 Q 2.5(yB)-.15
-G(ay Aquarium Research Institute)-2.5 E(Dale N. Chayes)108 537.6 Q
-(Center for Coastal and Ocean Mapping)113 549.6 Q(Uni)113 561.6 Q -.15
+(other ancillary data with the surv)108 484.8 Q .3 -.15(ey d)-.15 H
+(ata.).15 E F3(MB-SYSTEM A)72 513.6 Q(UTHORSHIP)-.548 E F0(Da)108 525.6
+Q(vid W)-.2 E 2.5(.C)-.92 G(aress)-2.5 E(Montere)113 537.6 Q 2.5(yB)-.15
+G(ay Aquarium Research Institute)-2.5 E(Dale N. Chayes)108 549.6 Q
+(Center for Coastal and Ocean Mapping)113 561.6 Q(Uni)113 573.6 Q -.15
 (ve)-.25 G(rsity of Ne).15 E 2.5(wH)-.25 G(ampshire)-2.5 E
-(Christian do Santos Ferreira)108 573.6 Q(MAR)113 585.6 Q
+(Christian do Santos Ferreira)108 585.6 Q(MAR)113 597.6 Q
 (UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
-597.6 Q -.15(ve)-.25 G(rsity of Bremen).15 E F3(OPTIONS)72 626.4 Q F1
-(--help)108 638.4 Q F0(This option causes)11 E F1(mbcon\214g)2.5 E F0
-(to print out its usage options and e)2.5 E(xit.)-.15 E F1(--v)108 655.2
-Q(erbose)-.1 E F0 1.14(By def)144 667.2 R(ault)-.1 E F1(mbpr)3.64 E(epr)
--.18 E(ocess)-.18 E F0 1.139
+609.6 Q -.15(ve)-.25 G(rsity of Bremen).15 E F3(OPTIONS)72 638.4 Q F1
+(--help)108 650.4 Q F0(This option causes)144 650.4 Q F1(mbcon\214g)2.5
+E F0(to print out its usage options and e)2.5 E(xit.)-.15 E F1(--v)108
+667.2 Q(erbose)-.1 E F0 1.14(By def)144 679.2 R(ault)-.1 E F1(mbpr)3.64
+E(epr)-.18 E(ocess)-.18 E F0 1.139
 (outputs minimal information to the shell. This option causes the pro-)
-3.64 F(gram to indicate it')144 679.2 Q 2.5(sp)-.55 G
-(rogress as it runs.)-2.5 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G
-(anuary 2021)-2.5 E(2)198.45 E 0 Cg EP
+3.64 F(gram to indicate it')144 691.2 Q 2.5(sp)-.55 G
+(rogress as it runs.)-2.5 E(MB-System 5.0)72 768 Q 2.5(5N)134.705 G -.15
+(ove)-2.5 G(mber 2022).15 E(2)193.045 E 0 Cg EP
 %%Page: 3 3
 %%BeginPageSetup
 BP
@@ -451,7 +457,8 @@ F0(=)A F2(\214lename)A F0 1.066(Speci\214es an e)144 681.6 R 1.066
 -.05 F .475(By def)5.475 F(ault)-.1 E F1(mbpr)2.974 E(epr)-.18 E(ocess)
 -.18 E F0 .474(attempts to use na)2.974 F(vig)-.2 E(ation)-.05 E -.25
 (va)144 705.6 S(lues included in the input data.).25 E(MB-System 5.0)72
-768 Q 2.5(3J)140.11 G(anuary 2021)-2.5 E(3)198.45 E 0 Cg EP
+768 Q 2.5(5N)134.705 G -.15(ove)-2.5 G(mber 2022).15 E(3)193.045 E 0 Cg
+EP
 %%Page: 4 4
 %%BeginPageSetup
 BP
@@ -459,11 +466,11 @@ BP
 /F0 10/Times-Roman@0 SF 132.63(mbpreprocess\(1\) MB-System)72 48 R
 132.63(5.0 mbpreprocess\(1\))2.5 F/F1 10/Times-Bold@0 SF<adad6e61>108 84
 Q(v-\214le-f)-.25 E(ormat)-.25 E F0(=)A/F2 10/Times-Italic@0 SF
-(format_id)A F0 1.947(Speci\214es the format of an e)144 96 R 1.947
-(xternal na)-.15 F(vig)-.2 E 1.947
-(ation time series \214le from which position v)-.05 F 1.948(alues are)
--.25 F(deri)144 108 Q -.15(ve)-.25 G 2.5(d\().15 G(as de\214ned with)
--2.5 E F1<adad6e61>2.5 E(v-\214le)-.25 E F0(\). Options for the)A F2
+(format_id)A F0 .799(Speci\214es the format of an e)144 96 R .799
+(xternal na)-.15 F(vig)-.2 E .799
+(ation time series \214le from which position v)-.05 F .8(alues are de-)
+-.25 F(ri)144 108 Q -.15(ve)-.25 G 2.5(d\().15 G(as de\214ned with)-2.5
+E F1<adad6e61>2.5 E(v-\214le)-.25 E F0(\). Options for the)A F2
 (format_id)2.5 E F0 -.25(va)2.5 G(lue are:).25 E(1: ASCCI te)151.5 120 Q
 (xt \214le with lines of the form:)-.15 E
 (time_d longitude latitude speed)164 132 Q(where time_d is time in deci\
@@ -535,8 +542,8 @@ titude.)159 648 Q(The longitude is gi)159 660 Q -.15(ve)-.25 G 2.5(na)
 W' for west longitude.)159 672 Q(day_minute v)159 708 Q(alues are inte)
 -.25 E(gers,)-.15 E(the second v)159 720 Q
 (alue is decimal, and longitude and latitude are in decimal)-.25 E
-(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2021)-2.5 E(4)198.45 E 0
-Cg EP
+(MB-System 5.0)72 768 Q 2.5(5N)134.705 G -.15(ove)-2.5 G(mber 2022).15 E
+(4)193.045 E 0 Cg EP
 %%Page: 5 5
 %%BeginPageSetup
 BP
@@ -610,11 +617,11 @@ E .385(ation has been calculated)-.05 F .376
 (ra).15 G(rm correction is made.)-2.5 E F1(--sensordepth-\214le=)108
 554.4 Q F2(FILE)A F0 1.31(Speci\214es an e)144 566.4 R 1.31
 (xternal time series \214le from which to mer)-.15 F 1.31
-(ge sensor depth, replacing sensor depth)-.18 F 1.039
-(data included in the data stream.)144 578.4 R 1.039(By def)6.039 F
-(ault)-.1 E F1(mbpr)3.539 E(epr)-.18 E(ocess)-.18 E F0 1.038
-(attempts to use sensor depth v)3.538 F(alues)-.25 E
-(included in the input data.)144 590.4 Q F1(--sensordepth-\214le-f)108
+(ge sensor depth, replacing sensor depth)-.18 F .062
+(data included in the data stream.)144 578.4 R .062(By def)5.062 F(ault)
+-.1 E F1(mbpr)2.562 E(epr)-.18 E(ocess)-.18 E F0 .062
+(attempts to use sensor depth v)2.562 F .062(alues in-)-.25 F
+(cluded in the input data.)144 590.4 Q F1(--sensordepth-\214le-f)108
 607.2 Q(ormat=)-.25 E F2(FORMA)A(TID)-.37 E F0 .057
 (Speci\214es the format of an e)144 619.2 R .058
 (xternal sensor depth time series \214le from which sensor depth v)-.15
@@ -631,8 +638,8 @@ econds \(seconds since 1970\), and)159 667.2 Q(sensordepth v)159 679.2 Q
 (,a)-.4 G(nd minute v)-2.5 E(alues are inte)-.25 E(gers, the second)-.15
 E -.25(va)159 727.2 S(lue is decimal, and sensordepth v).25 E
 (alues are in meters positi)-.25 E .3 -.15(ve d)-.25 H -.25(ow).15 G(n.)
-.25 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2021)-2.5 E(5)198.45
-E 0 Cg EP
+.25 E(MB-System 5.0)72 768 Q 2.5(5N)134.705 G -.15(ove)-2.5 G(mber 2022)
+.15 E(5)193.045 E 0 Cg EP
 %%Page: 6 6
 %%BeginPageSetup
 BP
@@ -688,10 +695,10 @@ E(vig)-.2 E(ation data from na)-.05 E(vig)-.2 E(ation system 2\))-.05 E
 (ation system 3\))-.05 E(MB_D)154 436.8 Q -1.21 -1.11(AT A)-.4 H(_SON)
 1.11 E(ARDEPTH 59 \(sensor depth data\))-.35 E 1.747(What types of data\
  records are present is format-dependent, as is the def)144 448.8 R
-1.747(ault choice of which)-.1 F 1.581
+1.747(ault choice of which)-.1 F .614
 (record type is used as the sensor depth source. The program)144 460.8 R
-F1(mbinf)4.081 E(o)-.25 E F0 1.581(can be used with the)4.081 F F1(-N)
-4.081 E F0(option to determine the numbers of dif)144 472.8 Q
+F1(mbinf)3.114 E(o)-.25 E F0 .614(can be used with the)3.114 F F1(-N)
+3.113 E F0(op-)3.113 E(tion to determine the numbers of dif)144 472.8 Q
 (ferent record types present in a data \214le.)-.25 E F1
 (--sensordepth-sensor=)108 489.6 Q F2(SENSORID)A F0 .465(If a platform \
 \214le has been speci\214ed, this option de\214nes the id of the sensor\
@@ -707,12 +714,12 @@ F1(mbinf)4.081 E(o)-.25 E F0 1.581(can be used with the)4.081 F F1(-N)
 (hen the sensor id should be)-3.308 F(the same as the surv)144 549.6 Q
 .3 -.15(ey s)-.15 H(ensor so that a null le).15 E -.15(ve)-.25 G 2.5(ra)
 .15 G(rm correction is made.)-2.5 E F1(--heading-\214le=)108 566.4 Q F2
-(FILE)A F0 2.8(Speci\214es an e)144 578.4 R 2.8
-(xternal time series \214le from which to mer)-.15 F 2.8
-(ge heading, replacing heading data)-.18 F .364
-(included in the data stream.)144 590.4 R .364(By def)5.364 F(ault)-.1 E
-F1(mbpr)2.864 E(epr)-.18 E(ocess)-.18 E F0 .363
-(attempts to use heading v)2.864 F .363(alues included in)-.25 F
+(FILE)A F0 1.627(Speci\214es an e)144 578.4 R 1.628
+(xternal time series \214le from which to mer)-.15 F 1.628
+(ge heading, replacing heading data in-)-.18 F .92
+(cluded in the data stream.)144 590.4 R .919(By def)5.919 F(ault)-.1 E
+F1(mbpr)3.419 E(epr)-.18 E(ocess)-.18 E F0 .919
+(attempts to use heading v)3.419 F .919(alues included in)-.25 F
 (the input data.)144 602.4 Q F1(--heading-\214le-f)108 619.2 Q(ormat=)
 -.25 E F2(FORMA)A(TID)-.37 E F0 .403(Speci\214es the format of an e)144
 631.2 R .403(xternal heading time series \214le from which heading v)
@@ -728,8 +735,8 @@ ds \(seconds since 1970\), and)159 679.2 Q(heading v)159 691.2 Q
 (year month day hour minute second heading)164 715.2 Q(where year)159
 727.2 Q 2.5(,m)-.4 G(onth, day)-2.5 E 2.5(,h)-.65 G(our)-2.5 E 2.5(,a)
 -.4 G(nd minute v)-2.5 E(alues are inte)-.25 E(gers, the second)-.15 E
-(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2021)-2.5 E(6)198.45 E 0
-Cg EP
+(MB-System 5.0)72 768 Q 2.5(5N)134.705 G -.15(ove)-2.5 G(mber 2022).15 E
+(6)193.045 E 0 Cg EP
 %%Page: 7 7
 %%BeginPageSetup
 BP
@@ -799,12 +806,12 @@ cription associated)144 501.6 R 1.673
 (ve)-.25 G 4.173(sf).15 G 1.673(rom asynchronous records in the data)
 -4.173 F(stream or from an e)144 525.6 Q(xternal na)-.15 E(vig)-.2 E
 (ation \214le.)-.05 E F1(--altitude-\214le=)108 542.4 Q F2(FILE)A F0
-1.468(Speci\214es an e)144 554.4 R 1.468
-(xternal time series \214le from which to mer)-.15 F 1.469
-(ge altitude data, replacing altitude data)-.18 F .483
-(included in the data stream.)144 566.4 R .482(By def)5.482 F(ault)-.1 E
-F1(mbpr)2.982 E(epr)-.18 E(ocess)-.18 E F0 .482
-(attempts to use altitude v)2.982 F .482(alues included in)-.25 F .532
+.463(Speci\214es an e)144 554.4 R .463
+(xternal time series \214le from which to mer)-.15 F .464
+(ge altitude data, replacing altitude data in-)-.18 F 1.038
+(cluded in the data stream.)144 566.4 R 1.038(By def)6.038 F(ault)-.1 E
+F1(mbpr)3.538 E(epr)-.18 E(ocess)-.18 E F0 1.038
+(attempts to use altitude v)3.538 F 1.037(alues included in)-.25 F .532
 (the input data. T)144 578.4 R .533(ypically altitude data are critical\
  only for processing sidescan data in the absence)-.8 F(of sw)144 590.4
 Q(ath bath)-.1 E(ymetry)-.05 E(.)-.65 E F1(--altitude-\214le-f)108 607.2
@@ -822,8 +829,8 @@ nd)159 667.2 Q(altitude v)159 679.2 Q(alues are in meters.)-.25 E
 715.2 Q 2.5(,m)-.4 G(onth, day)-2.5 E 2.5(,h)-.65 G(our)-2.5 E 2.5(,a)
 -.4 G(nd minute v)-2.5 E(alues are inte)-.25 E(gers, the second)-.15 E
 -.25(va)159 727.2 S(lue is decimal, and altitude v).25 E
-(alues are in meters.)-.25 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G
-(anuary 2021)-2.5 E(7)198.45 E 0 Cg EP
+(alues are in meters.)-.25 E(MB-System 5.0)72 768 Q 2.5(5N)134.705 G
+-.15(ove)-2.5 G(mber 2022).15 E(7)193.045 E 0 Cg EP
 %%Page: 8 8
 %%BeginPageSetup
 BP
@@ -919,8 +926,8 @@ s the minute, second is the decimal seconds, time_d is time in)159 703.2
 Q(decimal epoch seconds \(seconds since 1970\), lon is the longitude)159
 715.2 Q(in decimal de)159 727.2 Q
 (grees, lat is the latitude in decimal de)-.15 E(grees, heading is in)
--.15 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2021)-2.5 E(8)
-198.45 E 0 Cg EP
+-.15 E(MB-System 5.0)72 768 Q 2.5(5N)134.705 G -.15(ove)-2.5 G
+(mber 2022).15 E(8)193.045 E 0 Cg EP
 %%Page: 9 9
 %%BeginPageSetup
 BP
@@ -973,15 +980,15 @@ E .937(ation data being used, whether that deri)-.05 F -.15(ve)-.25 G
 (ation \214le.)-.05 E F1(--soundspeed-\214le=)108 374.4 Q F2(FILE)A F0
 .093(Speci\214es an e)144 386.4 R .093
 (xternal time series \214le from which to mer)-.15 F .094
-(ge sound speed data, replacing sound speed)-.18 F 1.118
-(data included in the data stream.)144 398.4 R 1.118(By def)6.118 F
-(ault)-.1 E F1(mbpr)3.618 E(epr)-.18 E(ocess)-.18 E F0 1.118
-(attempts to use sound speed v)3.618 F(alues)-.25 E .324
-(included in the input data. The sound speed v)144 410.4 R .324
-(alues represent the speed of sound at the surv)-.25 F .625 -.15(ey s)
--.15 H(en-).15 E .039(sor \(i.e. the sonar arrays\); typically these ar\
-e input only when the preprocessing includes recalcula-)144 422.4 R
-(tion of multibeam bath)144 434.4 Q(ymetry)-.05 E(.)-.65 E F1
+(ge sound speed data, replacing sound speed)-.18 F .136
+(data included in the data stream.)144 398.4 R .136(By def)5.136 F(ault)
+-.1 E F1(mbpr)2.636 E(epr)-.18 E(ocess)-.18 E F0 .136
+(attempts to use sound speed v)2.636 F .136(alues in-)-.25 F .259
+(cluded in the input data. The sound speed v)144 410.4 R .259
+(alues represent the speed of sound at the surv)-.25 F .559 -.15(ey s)
+-.15 H(ensor).15 E .233(\(i.e. the sonar arrays\); typically these are \
+input only when the preprocessing includes recalculation)144 422.4 R
+(of multibeam bath)144 434.4 Q(ymetry)-.05 E(.)-.65 E F1
 (--soundspeed-\214le-f)108 451.2 Q(ormat=)-.25 E F2(FORMA)A(TID)-.37 E
 F0 .581(Speci\214es the format of an e)144 463.2 R .582
 (xternal soundspeed time series \214le from which soundspeed v)-.15 F
@@ -1017,8 +1024,8 @@ E .3 -.15(ve d)-.25 H -.25(ow).15 G(n.).25 E F1(--soundspeed-async=)108
 (ormat)-.25 E F0(\). Options for the)A F2 -.37(re)2.5 G(cor).37 E
 (d_kind)-.37 E F0(include:)2.5 E(MB_D)154 720 Q -1.21 -1.11(AT A)-.4 H
 (_D)1.11 E -1.21 -1.11(AT A)-.4 H 17.5(:1)1.11 G(\(surv)-15 E .3 -.15
-(ey d)-.15 H(ata\)).15 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G
-(anuary 2021)-2.5 E(9)198.45 E 0 Cg EP
+(ey d)-.15 H(ata\)).15 E(MB-System 5.0)72 768 Q 2.5(5N)134.705 G -.15
+(ove)-2.5 G(mber 2022).15 E(9)193.045 E 0 Cg EP
 %%Page: 10 10
 %%BeginPageSetup
 BP
@@ -1088,16 +1095,16 @@ F(sonar depth data mer)144 568.8 Q(ged with the surv)-.18 E .3 -.15
 1.135(Speci\214es that the time latenc)144 597.6 R 3.635(yc)-.15 G 1.135
 (orrection will be applied to the time stamps associated with the)-3.635
 F(heading data mer)144 609.6 Q(ged with the surv)-.18 E .3 -.15(ey d)
--.15 H(ata.).15 E F1(--time-latency-apply-attitude)108 626.4 Q F0 1.134
-(Speci\214es that the time latenc)144 638.4 R 3.634(yc)-.15 G 1.135
-(orrection will be applied to the time stamps associated with the)-3.634
-F(attitude data mer)144 650.4 Q(ged with the surv)-.18 E .3 -.15(ey d)
--.15 H(ata.).15 E F1(--time-latency-apply-altitude)108 667.2 Q F0 1.135
-(Speci\214es that the time latenc)144 679.2 R 3.635(yc)-.15 G 1.135
-(orrection will be applied to the time stamps associated with the)-3.635
-F(altitude data mer)144 691.2 Q(ged with the surv)-.18 E .3 -.15(ey d)
--.15 H(ata.).15 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2021)
--2.5 E(10)193.45 E 0 Cg EP
+-.15 H(ata.).15 E F1(--time-latency-apply-attitude)108 626.4 Q F0 .248
+(Speci\214es that the time latenc)144 638.4 R 2.748(yc)-.15 G .248
+(orrection will be applied to the time stamps associated with the at-)
+-2.748 F(titude data mer)144 650.4 Q(ged with the surv)-.18 E .3 -.15
+(ey d)-.15 H(ata.).15 E F1(--time-latency-apply-altitude)108 667.2 Q F0
+.249(Speci\214es that the time latenc)144 679.2 R 2.748(yc)-.15 G .248
+(orrection will be applied to the time stamps associated with the al-)
+-2.748 F(titude data mer)144 691.2 Q(ged with the surv)-.18 E .3 -.15
+(ey d)-.15 H(ata.).15 E(MB-System 5.0)72 768 Q 2.5(5N)134.705 G -.15
+(ove)-2.5 G(mber 2022).15 E(10)188.045 E 0 Cg EP
 %%Page: 11 11
 %%BeginPageSetup
 BP
@@ -1153,18 +1160,18 @@ Q .3 -.15(ey d)-.15 H(ata \(i.e. the na).15 E(vig)-.2 E
 (--no-change-sur)108 556.8 Q -.1(ve)-.1 G(y).1 E F0(This option forces)
 144 568.8 Q F1(mbpr)2.5 E(epr)-.18 E(ocess)-.18 E F0
 (to not modify the surv)2.5 E .3 -.15(ey d)-.15 H(ata.).15 E F1
-(--multibeam-sidescan-sour)108 585.6 Q(ce=)-.18 E F2(SOURCE)A F0 1.148(\
-This option de\214nes the source type for the backscatter used in calcu\
-lating the sidescan imagery)144 597.6 R .172
-(associated with multibeam data for multibeam data formats that ha)144
-609.6 R .473 -.15(ve m)-.2 H .173(ultiple types of backscatter).15 F
-1.592(records and may ha)144 621.6 R 1.892 -.15(ve m)-.2 H 1.591
-(ore that one type a).15 F -.25(va)-.2 G 1.591
-(ilable in a data stream. The rele).25 F -.25(va)-.25 G 1.591
-(nt formats are).25 F .473(Reson 7k \(88\), T)144 633.6 R .473
-(eledyne 7k3 \(89\), and K)-.7 F(ongsber)-.35 E 2.973(gk)-.18 G .473
-(mall \(161\). If)-2.973 F F2(SOURCE)2.973 E F0 2.973(=So)2.973 G 2.973
-(rs)-2.973 G 2.973(,t)-2.973 G .473(hen uncali-)-2.973 F 1.198
+(--multibeam-sidescan-sour)108 585.6 Q(ce=)-.18 E F2(SOURCE)A F0 .127(T\
+his option de\214nes the source type for the backscatter used in calcul\
+ating the sidescan imagery as-)144 597.6 R .813
+(sociated with multibeam data for multibeam data formats that ha)144
+609.6 R 1.113 -.15(ve m)-.2 H .813(ultiple types of backscatter).15 F
+.502(records and may ha)144 621.6 R .801 -.15(ve m)-.2 H .501
+(ore that one type a).15 F -.25(va)-.2 G .501
+(ilable in a data stream. The rele).25 F -.25(va)-.25 G .501
+(nt formats are Re-).25 F 1.126(son 7k \(88\), T)144 633.6 R 1.126
+(eledyne 7k3 \(89\), and K)-.7 F(ongsber)-.35 E 3.626(gk)-.18 G 1.126
+(mall \(161\). If)-3.626 F F2(SOURCE)3.627 E F0 3.627(=So)3.627 G 3.627
+(rs)-3.627 G 3.627(,t)-3.627 G 1.127(hen uncali-)-3.627 F 1.198
 (brated snippet records will be used. If)144 645.6 R F2(SOURCE)3.697 E
 F0 3.697(=Co)3.697 G 3.697(rc)-3.697 G 3.697(,t)-3.697 G 1.197
 (hen the source records will be cali-)-3.697 F .702(brated snippets. If)
@@ -1181,8 +1188,8 @@ F0 3.697(=Co)3.697 G 3.697(rc)-3.697 G 3.697(,t)-3.697 G 1.197
 E(ocess)-.18 E F0 .632(will attempt to use the best a)3.133 F -.25(va)
 -.2 G .632(ilable source, with a preference order of calibrated).25 F
 (snippets, then snippets, then calibrated wide beam, then wide beam.)144
-705.6 Q(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2021)-2.5 E(11)
-193.45 E 0 Cg EP
+705.6 Q(MB-System 5.0)72 768 Q 2.5(5N)134.705 G -.15(ove)-2.5 G
+(mber 2022).15 E(11)188.045 E 0 Cg EP
 %%Page: 12 12
 %%BeginPageSetup
 BP
@@ -1221,25 +1228,38 @@ R .247(fsets of optical head 2 relati)-.25 F .547 -.15(ve t)-.25 H 2.747
 (TO)1.15 G(R).18 E F1(--kluge-soundspeed-tweak=)108 326.4 Q F2 -.5 -1.15
 (FA C)D -.18(TO)1.15 G(R).18 E F1(--kluge-zer)108 343.2 Q
 (o-attitude-corr)-.18 E(ection)-.18 E(--kluge-zer)108 360 Q
-(o-alongtrack-angles)-.18 E(--kluge-\214x-wissl-timestamps)108 376.8 Q
-(--kluge-ignor)108 393.6 Q(e-snippets)-.18 E F0 .372(This option w)144
-405.6 R .372(as created to handle some K)-.1 F(ongsber)-.35 E 2.871(gE)
+(o-alongtrack-angles)-.18 E F0
+(This option zeroes alongtrack angles used to calculated bath)144 372 Q
+(ymetry)-.05 E(.)-.65 E F1(--kluge-\214x-wissl-timestamps)108 388.8 Q
+(--kluge-ignor)108 405.6 Q(e-snippets)-.18 E F0 .372(This option w)144
+417.6 R .372(as created to handle some K)-.1 F(ongsber)-.35 E 2.871(gE)
 -.18 G .371(M122 data in *.all \214les \(supported as format)-2.871 F
-.481(58\) in which most, b)144 417.6 R .482
+.481(58\) in which most, b)144 429.6 R .482
 (ut not all, of the snippet backscatter records are missing.)-.2 F .482
-(The i/o module for)5.482 F .612(this format vie)144 429.6 R .612
+(The i/o module for)5.482 F .612(this format vie)144 441.6 R .612
 (ws pings without snippet records as incomplete.)-.25 F(When)5.612 E F1
 (--kluge-ignor)3.111 E(e-snippets)-.18 E F0(is)3.111 E(speci\214ed,)144
-441.6 Q F1(mbpr)3.413 E(epr)-.18 E(ocess)-.18 E F0 .913
+453.6 Q F1(mbpr)3.413 E(epr)-.18 E(ocess)-.18 E F0 .913
 (creates an empty snippet record for each ping, and ignores an)3.413 F
 3.414(ys)-.15 G(nippet)-3.414 E
-(records actually in the input datastream.)144 453.6 Q/F3 10.95
-/Times-Bold@0 SF(EXAMPLES)72 482.4 Q F0 1.6 -.8(To b)108 494.4 T 2.5(ew)
-.8 G(ritten.....)-2.5 E F3(SEE ALSO)72 523.2 Q F1(mbsystem)108 535.2 Q
-F0(\(1\),)A F1(mbdatalist)2.5 E F0(\(1\),)A F1(mbpr)2.5 E(ocess)-.18 E
-F0(\(1\))A F3 -.11(BU)72 564 S(GS).11 E F0(Oh yeah.)108 576 Q
-(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2021)-2.5 E(12)193.45 E 0
-Cg EP
+(records actually in the input datastream.)144 465.6 Q F1
+(--kluge-sonardepth-fr)108 482.4 Q(om-hea)-.18 E -.1(ve)-.25 G F0 1.56
+(This option causes hea)144 494.4 R 1.86 -.15(ve v)-.2 H 1.56
+(alues to be mo)-.1 F -.15(ve)-.15 G 4.06(dt).15 G 4.06(ot)-4.06 G 1.56
+(he sonardepth \(sometimes sensordepth\) \214eld,)-4.06 F(lea)144 506.4
+Q .207(ving the hea)-.2 F .507 -.15(ve v)-.2 H .207
+(alue as zero, for each surv)-.1 F .508 -.15(ey p)-.15 H .208
+(ing. This is currently only rele).15 F -.25(va)-.25 G .208
+(nt to the prepro-).25 F .092(cessing of Imagene)144 518.4 R 2.592(xD)
+-.15 G .091(eltaT multibeam data in the v)-2.592 F .091
+(endor 83P format \(191\). The output of prepro-)-.15 F
+(cessing format 191 data are format 192 \214les.)144 530.4 Q/F3 10.95
+/Times-Bold@0 SF(EXAMPLES)72 559.2 Q F0 1.6 -.8(To b)108 571.2 T 2.5(ew)
+.8 G(ritten.....)-2.5 E F3(SEE ALSO)72 600 Q F1(mbsystem)108 612 Q F0
+(\(1\),)A F1(mbdatalist)2.5 E F0(\(1\),)A F1(mbpr)2.5 E(ocess)-.18 E F0
+(\(1\))A F3 -.11(BU)72 640.8 S(GS).11 E F0(Oh yeah.)108 652.8 Q
+(MB-System 5.0)72 768 Q 2.5(5N)134.705 G -.15(ove)-2.5 G(mber 2022).15 E
+(12)188.045 E 0 Cg EP
 %%Trailer
 end
 %%EOF

@@ -974,7 +974,7 @@ int main(int argc, char **argv) {
 	void *imbio_ptr = nullptr;
 
 	/* MBIO write control parameters */
-	char ofile[MB_PATH_MAXLINE];
+	char ofile[MB_PATH_MAXLINE+10];
 	void *ombio_ptr = nullptr;
 
 	/* mbio read and write values */
@@ -1012,11 +1012,11 @@ int main(int argc, char **argv) {
 
 		/* initialize writing the output swath sonar file */
 		if (datakind == MBFILTER_BATH)
-			sprintf(ofile, "%s.ffb", file);
+			snprintf(ofile, sizeof(ofile), "%s.ffb", file);
 		else if (datakind == MBFILTER_AMP)
-			sprintf(ofile, "%s.ffa", file);
+			snprintf(ofile, sizeof(ofile), "%s.ffa", file);
 		else if (datakind == MBFILTER_SS)
-			sprintf(ofile, "%s.ffs", file);
+			snprintf(ofile, sizeof(ofile), "%s.ffs", file);
 		if (mb_write_init(verbose, ofile, 71, &ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss, &error) !=
 		    MB_SUCCESS) {
 			char *message;
@@ -1127,114 +1127,114 @@ int main(int argc, char **argv) {
 
 		/* write comments to beginning of output file */
 		kind = MB_DATA_COMMENT;
-		sprintf(comment, "Data filtered by program %s", program_name);
+		snprintf(comment, sizeof(comment), "Data filtered by program %s", program_name);
 		status = mb_put_comment(verbose, ombio_ptr, comment, &error);
-		sprintf(comment, "MB-system Version %s", MB_VERSION);
+		snprintf(comment, sizeof(comment), "MB-system Version %s", MB_VERSION);
 		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
     char user[256], host[256], date[32];
     status = mb_user_host_date(verbose, user, host, date, &error);
-		sprintf(comment, "Run by user <%s> on cpu <%s> at <%s>", user, host, date);
+		snprintf(comment, sizeof(comment), "Run by user <%s> on cpu <%s> at <%s>", user, host, date);
 		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		if (datakind == MBFILTER_BATH) {
-			sprintf(comment, "Processing bathymetry data...");
+			snprintf(comment, sizeof(comment), "Processing bathymetry data...");
 			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		else if (datakind == MBFILTER_AMP) {
-			sprintf(comment, "Processing beam amplitude data...");
+			snprintf(comment, sizeof(comment), "Processing beam amplitude data...");
 			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		else if (datakind == MBFILTER_SS) {
-			sprintf(comment, "Processing sidescan data...");
+			snprintf(comment, sizeof(comment), "Processing sidescan data...");
 			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		if (hipass_mode == MBFILTER_HIPASS_MEAN) {
-			sprintf(comment, "applying mean subtraction filter for hipass");
+			snprintf(comment, sizeof(comment), "applying mean subtraction filter for hipass");
 			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		else if (hipass_mode == MBFILTER_HIPASS_GAUSSIAN) {
-			sprintf(comment, "applying gaussian mean subtraction filter for hipass");
+			snprintf(comment, sizeof(comment), "applying gaussian mean subtraction filter for hipass");
 			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		else if (hipass_mode == MBFILTER_HIPASS_MEDIAN) {
-			sprintf(comment, "applying median subtraction filter for hipass");
+			snprintf(comment, sizeof(comment), "applying median subtraction filter for hipass");
 			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		if (hipass_mode != MBFILTER_HIPASS_NONE) {
-			sprintf(comment, "  filter acrosstrack dimension: %d", hipass_xdim);
+			snprintf(comment, sizeof(comment), "  filter acrosstrack dimension: %d", hipass_xdim);
 			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
-			sprintf(comment, "  filter alongtrack dimension:  %d", hipass_ldim);
+			snprintf(comment, sizeof(comment), "  filter alongtrack dimension:  %d", hipass_ldim);
 			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
-			sprintf(comment, "  filter iterations:            %d", hipass_iter);
+			snprintf(comment, sizeof(comment), "  filter iterations:            %d", hipass_iter);
 			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
-			sprintf(comment, "  filter offset:                %f", hipass_offset);
+			snprintf(comment, sizeof(comment), "  filter offset:                %f", hipass_offset);
 			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		if (smooth_mode == MBFILTER_SMOOTH_MEAN) {
-			sprintf(comment, "applying mean filter for smoothing");
+			snprintf(comment, sizeof(comment), "applying mean filter for smoothing");
 			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		else if (smooth_mode == MBFILTER_SMOOTH_GAUSSIAN) {
-			sprintf(comment, "applying gaussian mean filter for smoothing");
+			snprintf(comment, sizeof(comment), "applying gaussian mean filter for smoothing");
 			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		else if (smooth_mode == MBFILTER_SMOOTH_MEDIAN) {
-			sprintf(comment, "applying median filter for smoothing");
+			snprintf(comment, sizeof(comment), "applying median filter for smoothing");
 			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		else if (smooth_mode == MBFILTER_SMOOTH_GRADIENT) {
-			sprintf(comment, "applying inverse gradient filter for smoothing");
+			snprintf(comment, sizeof(comment), "applying inverse gradient filter for smoothing");
 			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		if (smooth_mode == MBFILTER_SMOOTH_MEDIAN && apply_threshold) {
-			sprintf(comment, "  filter low ratio threshold:   %f", threshold_lo);
+			snprintf(comment, sizeof(comment), "  filter low ratio threshold:   %f", threshold_lo);
 			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
-			sprintf(comment, "  filter high ratio threshold:  %f", threshold_hi);
+			snprintf(comment, sizeof(comment), "  filter high ratio threshold:  %f", threshold_hi);
 			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		if (smooth_mode != MBFILTER_SMOOTH_NONE) {
-			sprintf(comment, "  filter acrosstrack dimension: %d", smooth_xdim);
+			snprintf(comment, sizeof(comment), "  filter acrosstrack dimension: %d", smooth_xdim);
 			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
-			sprintf(comment, "  filter alongtrack dimension:  %d", smooth_ldim);
+			snprintf(comment, sizeof(comment), "  filter alongtrack dimension:  %d", smooth_ldim);
 			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
-			sprintf(comment, "  filter iterations:            %d", smooth_iter);
+			snprintf(comment, sizeof(comment), "  filter iterations:            %d", smooth_iter);
 			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		if (contrast_mode == MBFILTER_CONTRAST_EDGE) {
-			sprintf(comment, "applying edge detection filter for contrast enhancement");
+			snprintf(comment, sizeof(comment), "applying edge detection filter for contrast enhancement");
 			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		else if (contrast_mode == MBFILTER_CONTRAST_GRADIENT) {
-			sprintf(comment, "applying gradient subtraction filter for contrast enhancement");
+			snprintf(comment, sizeof(comment), "applying gradient subtraction filter for contrast enhancement");
 			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		if (contrast_mode != MBFILTER_CONTRAST_NONE) {
-			sprintf(comment, "  filter acrosstrack dimension: %d", contrast_xdim);
+			snprintf(comment, sizeof(comment), "  filter acrosstrack dimension: %d", contrast_xdim);
 			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
-			sprintf(comment, "  filter alongtrack dimension:  %d", contrast_ldim);
+			snprintf(comment, sizeof(comment), "  filter alongtrack dimension:  %d", contrast_ldim);
 			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
-			sprintf(comment, "  filter iterations:            %d", contrast_iter);
+			snprintf(comment, sizeof(comment), "  filter iterations:            %d", contrast_iter);
 			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		strncpy(comment, "", 256);
-		sprintf(comment, "Control Parameters:");
+		snprintf(comment, sizeof(comment), "Control Parameters:");
 		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		strncpy(comment, "", 256);
-		sprintf(comment, "  MBIO data format:   %d", format);
+		snprintf(comment, sizeof(comment), "  MBIO data format:   %d", format);
 		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		strncpy(comment, "", 256);
-		sprintf(comment, "  Input file:         %s", file);
+		snprintf(comment, sizeof(comment), "  Input file:         %s", file);
 		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		strncpy(comment, "", 256);
-		sprintf(comment, "  Output file:        %s", ofile);
+		snprintf(comment, sizeof(comment), "  Output file:        %s", ofile);
 		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		strncpy(comment, "", 256);
-		sprintf(comment, "  Longitude flip:     %d", lonflip);
+		snprintf(comment, sizeof(comment), "  Longitude flip:     %d", lonflip);
 		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		strncpy(comment, "", 256);
-		sprintf(comment, "  Data kind:         %d", datakind);
+		snprintf(comment, sizeof(comment), "  Data kind:         %d", datakind);
 		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		strncpy(comment, "", 256);
-		sprintf(comment, " ");
+		snprintf(comment, sizeof(comment), " ");
 		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 
 		/* read and write */

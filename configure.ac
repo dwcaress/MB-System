@@ -11,14 +11,14 @@ dnl    See README file for copying and redistribution conditions.
 dnl--------------------------------------------------------------------
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.9beta37],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
-AC_DEFINE(VERSION_DATE, ["17 June 2022"], [Set VERSION_DATE define in mb_config.h])
+AC_INIT([mbsystem],[5.7.9beta58],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_DEFINE(VERSION_DATE, ["18 July 2023"], [Set VERSION_DATE define in mb_config.h])
 
 AS_ECHO([" "])
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO(["    The MB-system:    configure    12/7/2011"])
 AS_ECHO([" "])
-AS_ECHO(["    Copyright (c) 2011-2022 by"])
+AS_ECHO(["    Copyright (c) 2011-2023 by"])
 AS_ECHO(["    D. W. Caress (caress@lamont.ldgo.columbia.edu)"])
 AS_ECHO(["    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)"])
 AS_ECHO(["    Lamont-Doherty Earth Observatory"])
@@ -84,8 +84,8 @@ AS_ECHO(["        --with-opengl-include - location of OpenGL headers (optional)"
 AS_ECHO(["        --with-otps-dir       - location of OTPS installation (optional)"])
 AS_ECHO(["        --with-opencv-lib     - location of OpenCV libs (optional)"])
 AS_ECHO(["        --with-opencv-include - location of OpenCV headers (optional)"])
-AS_ECHO(["        --with-vtk-include    - location of VTK8.2+ headers (required if qt enabled)"])
-AS_ECHO(["        --with-vtk-lib        - location of VTK8.2+ libraries (required if qt enabled)"])
+AS_ECHO(["        --with-vtk-include    - location of VTK8.2+ headers (required if qt enabled, not functional yet)"])
+AS_ECHO(["        --with-vtk-lib        - location of VTK8.2+ libraries (required if qt enabled, not functional yet)"])
 AS_ECHO(["        --enable-opencv       - enable building tools using OpenCV (optional)"])
 AS_ECHO(["        --enable-mbtrn        - enable building terrain relative navigation (TRN) tools (optional)"])
 AS_ECHO(["        --enable-mbtnav       - enable building terrain relative navigation (TRN) tools (optional)"])
@@ -94,7 +94,7 @@ AS_ECHO(["        --enable-rovtrn       - enable building terrain relative navig
 AS_ECHO(["        --disable-mbtools     - disable building graphical tools (use with --enable-mbtrn and --enable-mbtnav)"])
 AS_ECHO(["        --enable-hardening    - Enable compiler and linker options to frustrate memory corruption exploits  (e.g. -fPIE and -pie) (optional)"])
 AS_ECHO(["        --enable-test         - Enable building unit tests in test/ and third-party/"])
-AS_ECHO(["        --enable-qt           - Enable building graphical tools using the Qt5 framework"])
+AS_ECHO(["        --enable-qt           - Enable building graphical tools using the Qt5 framework (Not functional yet)"])
 AS_ECHO(["        --with-debug          - Set compiler flags to allow full debugging"])
 AS_ECHO([" "])
 AS_ECHO(["    After configure you can run the make utility in the usual fashion"])
@@ -1486,6 +1486,7 @@ AC_CONFIG_FILES([\
     src/html/Makefile \
     src/ps/Makefile \
     src/share/Makefile \
+    src/mbgrd2gltf/Makefile \
     ])
 if test "$enable_gsf" = "yes" ; then
     AC_CONFIG_FILES([\

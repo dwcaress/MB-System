@@ -203,15 +203,15 @@ int mbr_rt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* handle the data */
 	if (status == MB_SUCCESS) {
-		int ilongitude;
-		int ilatitude;
-		int idepth;
+		int ilongitude = 0;
+		int ilatitude = 0;
+		int idepth = 0;
 
 		/* parse data */
 		mb_get_binary_int(true, &line[0], (int *)&ilatitude);
 		mb_get_binary_int(true, &line[4], (int *)&ilongitude);
 		mb_get_binary_int(true, &line[8], (int *)&idepth);
-		short itype;
+		short itype = 0;
 		mb_get_binary_short(true, &line[12], (short *)&itype);
 		store->longitude = (ilongitude)*0.000001;
 		store->latitude = (ilatitude)*0.000001;

@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:02 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:08 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 2
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -245,20 +251,20 @@ F2(mbm_grd2ar)108 230.4 Q(c)-.18 E F0 1.406(is a macro to con)3.906 F
 -.6 E(w)-.25 E .385(ASCII grid. This allo)108 242.4 R .385
 (ws users to import the grid into Arc/Info and ArcV)-.25 F(ie)-.6 E
 1.685 -.65(w. T)-.25 H .385(he grids must ha).65 F .685 -.15(ve t)-.2 H
-.385(he same).15 F 1.259(grid interv)108 254.4 R 1.259
-(al in both longitude and latitude. If the grid w)-.25 F 1.26
-(as created using)-.1 F F2(mbgrid)3.76 E F0(or)3.76 E F2(mbmosaic)3.76 E
-F0 3.76(,t)C(he)-3.76 E F2<ad45>3.76 E F0 .609(option must ha)108 266.4
-R .909 -.15(ve b)-.2 H .609(een used in that program to set the grid ce\
-ll sizes equal \(see the mbgrid and mbmosaic).15 F(manual pages\).)108
-278.4 Q 1.509(The macro \214rst obtains the bounds, dimensions, and gri\
-d cell size of the grid using the GMT program)108 290.4 R F2(grdinf)108
-302.4 Q(o)-.25 E F0 5.267(.T)C .267(he grid dimensions, the lo)-5.267 F
-.266(wer left position, and the grid cell size are written to the heade\
-r of the)-.25 F .131(output ArcV)108 314.4 R(ie)-.6 E 2.631(wA)-.25 G
-.131(SCII grid \214le.)-2.631 F .131
-(The macro then uses the GMT program)5.131 F F2(grd2xyz)2.631 E F0 .131
-(to dump each of the grid)2.631 F -.25(va)108 326.4 S .094
+.385(he same).15 F .31(grid interv)108 254.4 R .31
+(al in both longitude and latitude. If the grid w)-.25 F .31
+(as created using)-.1 F F2(mbgrid)2.81 E F0(or)2.81 E F2(mbmosaic)2.81 E
+F0 2.81(,t)C(he)-2.81 E F2<ad45>2.81 E F0(op-)2.81 E 1.136(tion must ha)
+108 266.4 R 1.436 -.15(ve b)-.2 H 1.135(een used in that program to set\
+ the grid cell sizes equal \(see the mbgrid and mbmosaic).15 F
+(manual pages\).)108 278.4 Q 1.509(The macro \214rst obtains the bounds\
+, dimensions, and grid cell size of the grid using the GMT program)108
+290.4 R F2(grdinf)108 302.4 Q(o)-.25 E F0 5.267(.T)C .267
+(he grid dimensions, the lo)-5.267 F .266(wer left position, and the gr\
+id cell size are written to the header of the)-.25 F .131(output ArcV)
+108 314.4 R(ie)-.6 E 2.631(wA)-.25 G .131(SCII grid \214le.)-2.631 F
+.131(The macro then uses the GMT program)5.131 F F2(grd2xyz)2.631 E F0
+.131(to dump each of the grid)2.631 F -.25(va)108 326.4 S .094
 (lues to a temporary ASCII \214le.).25 F .094
 (This temporary \214le is read and parsed one v)5.094 F .093
 (alue at a time.)-.25 F(An)5.093 E 2.593(yN)-.15 G .093(aN v)-2.593 F
@@ -274,18 +280,18 @@ r of the)-.25 F .131(output ArcV)108 314.4 R(ie)-.6 E 2.631(wA)-.25 G
 (UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
 475.2 Q -.15(ve)-.25 G(rsity of Bremen).15 E F1(OPTIONS)72 504 Q F2
 <ad48>108 516 Q F0 .162(This "help" \215ag cause the program to print o\
-ut a description of its operation and then e)22.52 F .161(xit immedi-)
--.15 F(ately)144 528 Q(.)-.65 E F2<ad49>108 544.8 Q F3(gr)26.41 E(dname)
--.37 E F0(Sets the \214lename of the input GMT grid \214le. This \214le\
- must be in the GMT NetCDF GRD format.)144 556.8 Q F2<ad4e>108 573.6 Q
-F3(nodata)23.08 E F0(Sets the "no data" v)144 585.6 Q
+ut a description of its operation and then e)144 516 R .161(xit immedi-)
+-.15 F(ately)144 528 Q(.)-.65 E F2<ad49>108 544.8 Q F3(gr)144 544.8 Q
+(dname)-.37 E F0(Sets the \214lename of the input GMT grid \214le. This\
+ \214le must be in the GMT NetCDF GRD format.)144 556.8 Q F2<ad4e>108
+573.6 Q F3(nodata)144 573.6 Q F0(Sets the "no data" v)144 585.6 Q
 (alue used in the output ASCII \214le.)-.25 E(Def)5 E(ault:)-.1 E F3
 (nodata)2.5 E F0 2.5<3dad>2.5 G(99999.)-2.5 E F2<ad4f>108 602.4 Q F3(ar)
-22.52 E(c\214le)-.37 E F0(Sets the \214lename of the output ArcV)144
+144 602.4 Q(c\214le)-.37 E F0(Sets the \214lename of the output ArcV)144
 614.4 Q(ie)-.6 E 2.5(wA)-.25 G(SCII grid.)-2.5 E F2<ad56>108 631.2 Q F0
-(The)23.08 E F2<ad56>2.5 E F0(option causes)2.5 E F2(mbm_grd2ar)2.5 E(c)
--.18 E F0(to print out status messages.)2.5 E F1(EXAMPLES)72 660 Q F0
-.713(Suppose that we ha)108 672 R 1.013 -.15(ve u)-.2 H(sed).15 E F2
+(The)144 631.2 Q F2<ad56>2.5 E F0(option causes)2.5 E F2(mbm_grd2ar)2.5
+E(c)-.18 E F0(to print out status messages.)2.5 E F1(EXAMPLES)72 660 Q
+F0 .713(Suppose that we ha)108 672 R 1.013 -.15(ve u)-.2 H(sed).15 E F2
 (mbgrid)3.213 E F0 .713(to obtain a topograph)3.213 F 3.213(yg)-.05 G
 .713(rid \214le called K)-3.213 F .714(ohalaA_bath.grd in the GMT)-.35 F
 (NetCDF GRD format:)108 684 Q(mbgrid \255Idatalist \\)144 696 Q(-OK)180

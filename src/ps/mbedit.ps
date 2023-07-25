@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:01 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:07 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 11
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -262,12 +268,12 @@ F .772(to mer)108 314.4 R .772(ge edited na)-.18 F(vig)-.2 E .772
 (nd apply other corrections to sw)-3.272 F .771(ath bath)-.1 F .771
 (ymetry data.)-.05 F(Users may cause)108 326.4 Q F2(mbpr)2.5 E(ocess)
 -.18 E F0(to be run automatically by specifying the)2.5 E F2<ad58>2.5 E
-F0(option when starting)2.5 E F2(mbedit)2.5 E F0(.)A 1.166(In pre)108
-350.4 R 1.166(vious v)-.25 F 1.166(ersions of)-.15 F F2(MB-System)3.666
-E F0(\(v)3.666 E 1.166(ersion 4.6.10 or earlier\),)-.15 F F2(mbedit)
-3.667 E F0 1.167(produced output sw)3.667 F 1.167(ath data \214les)-.1 F
-1.368(directly by reading and storing all of the sw)108 362.4 R 1.367
-(ath data information in memory \(including non-surv)-.1 F 1.667 -.15
+F0(option when starting)2.5 E F2(mbedit)2.5 E F0(.)A .181(In pre)108
+350.4 R .181(vious v)-.25 F .181(ersions of)-.15 F F2(MB-System)2.681 E
+F0(\(v)2.681 E .181(ersion 4.6.10 or earlier\),)-.15 F F2(mbedit)2.681 E
+F0 .182(produced output sw)2.681 F .182(ath data \214les di-)-.1 F 1.886
+(rectly by reading and storing all of the sw)108 362.4 R 1.886
+(ath data information in memory \(including non-surv)-.1 F 2.186 -.15
 (ey d)-.15 H(ata).15 E .096(records\). This approach limited the amount\
  of data that could be handled at once, frequently requiring users)108
 374.4 R 1.894(to process \214les in small pieces. The current v)108
@@ -352,12 +358,12 @@ BP
 (tton un\215ags all soundings from).2 F .167(the current position forw)
 108 108 R .167(ard to the end of the data held in memory)-.1 F 2.666(.T)
 -.65 G(he)-2.666 E F1(Contr)2.666 E(ols)-.18 E F0 .166(menu includes a)
-2.666 F F1(Filters...)2.666 E F0 -.2(bu)108 120 S 1.737(tton that bring\
-s up a dialog which sets the automatic \215agging functions. At present\
-, these include a).2 F 2.345(median \214lter algorithm, a "wrong side \
-\214lter", "data cutting" by beam number)108 132 R 4.845(,a)-.4 G 2.345
-(nd "data cutting" by)-4.845 F .87(acrosstrack distance. The "wrong sid\
-e" \214lter \215ags soundings positioned on the "wrong" side of the sw)
+2.666 F F1(Filters...)2.666 E F0 -.2(bu)108 120 S .573(tton that brings\
+ up a dialog which sets the automatic \215agging functions. At present,\
+ these include a me-).2 F 3.16(dian \214lter algorithm, a "wrong side \
+\214lter", "data cutting" by beam number)108 132 R 5.66(,a)-.4 G 3.16
+(nd "data cutting" by)-5.66 F .87(acrosstrack distance. The "wrong side\
+" \214lter \215ags soundings positioned on the "wrong" side of the sw)
 108 144 R(ath)-.1 E .444
 (\(port soundings incorrectly located on the starboard side, or vice v)
 108 156 R .444(ersa\). The tw)-.15 F 2.944(o")-.1 G .444
@@ -408,28 +414,28 @@ R F1 -.25(Fo)3.929 G(rward).25 E F0(and)3.929 E F1(Re)3.929 E -.1(ve)
 (multiple b)108 408 R(uf)-.2 E 1.014(fers of data. The)-.25 F F1 1.014
 (Next Buffer)3.514 F F0 -.2(bu)3.514 G 1.014(tton will cause).2 F F1
 (MBedit)3.514 E F0 1.015(to dump the current b)3.515 F(uf)-.2 E 1.015
-(fer contents)-.25 F 1.72(and read in a ne)108 420 R 4.22(ws)-.25 G 1.72
-(et of data.)-4.22 F 1.72(The handling of b)6.72 F(uf)-.2 E 1.72
-(fered data is set using the)-.25 F F1 1.72(Buffer Contr)4.22 F(ols)-.18
-E F0(dialog)4.22 E .746(accessed by pulling do)108 432 R .746(wn the)
--.25 F F1 .746(Buffer Contr)3.246 F(ols...)-.18 E F0 .746
-(menu item from the)3.246 F F1(Contr)3.246 E(ols)-.18 E F0 -.2(bu)3.246
-G 3.246(tton. The).2 F F1 .746(Buffer Con-)3.246 F(tr)108 444 Q(ols)-.18
-E F0 .598(dialog includes tw)3.098 F 3.098(os)-.1 G .598
-(lider controls, one entitled)-3.098 F F1 .597(Data Buffer Size)3.098 F
-F0 .597(and the other)3.097 F F1 .597(Buffer Retain Size)3.097 F F0(.)A
-.2(Users on memory limited machines may \214nd it necessary to set the \
-maximum b)108 456 R(uf)-.2 E .201(fer size to a smaller num-)-.25 F
-1.609(ber using the)108 468 R F1 1.609(Data Buffer Size)4.109 F F0
-(slider)4.109 E 6.609(.T)-.55 G(he)-6.609 E F1 1.609(Buffer Retain Size)
-4.109 F F0 1.609(slider sets the number of data records)4.109 F
-(retained from the old b)108 480 Q(uf)-.2 E
-(fer when more data are loaded.)-.25 E .377(The user can bring up a)108
-504 R F1 .377(Go T)2.877 F 2.877(oS)-.92 G .377(peci\214ed T)-2.877 F
-(ime)-.18 E F0 .377(dialog by pulling do)2.877 F .377(wn the)-.25 F F1
-.377(Go to a speci\214ed time...)2.877 F F0(menu)2.877 E 1.047
-(item from the)108 516 R F1(Contr)3.547 E(ols)-.18 E F0 -.2(bu)3.547 G
-1.047(tton. This dialog allo).2 F 1.047
+(fer contents)-.25 F .899(and read in a ne)108 420 R 3.399(ws)-.25 G
+.899(et of data.)-3.399 F .899(The handling of b)5.899 F(uf)-.2 E .898
+(fered data is set using the)-.25 F F1 .898(Buffer Contr)3.398 F(ols)
+-.18 E F0 .898(dialog ac-)3.398 F .276(cessed by pulling do)108 432 R
+.276(wn the)-.25 F F1 .276(Buffer Contr)2.776 F(ols...)-.18 E F0 .276
+(menu item from the)2.776 F F1(Contr)2.776 E(ols)-.18 E F0 -.2(bu)2.776
+G 2.776(tton. The).2 F F1 .276(Buffer Contr)2.776 F(ols)-.18 E F0 .222
+(dialog includes tw)108 444 R 2.722(os)-.1 G .222
+(lider controls, one entitled)-2.722 F F1 .222(Data Buffer Size)2.722 F
+F0 .222(and the other)2.722 F F1 .222(Buffer Retain Size)2.722 F F0
+5.221(.U)C(sers)-5.221 E .262(on memory limited machines may \214nd it \
+necessary to set the maximum b)108 456 R(uf)-.2 E .263
+(fer size to a smaller number us-)-.25 F .989(ing the)108 468 R F1 .989
+(Data Buffer Size)3.489 F F0(slider)3.488 E 5.988(.T)-.55 G(he)-5.988 E
+F1 .988(Buffer Retain Size)3.488 F F0 .988
+(slider sets the number of data records retained)3.488 F(from the old b)
+108 480 Q(uf)-.2 E(fer when more data are loaded.)-.25 E .377
+(The user can bring up a)108 504 R F1 .377(Go T)2.877 F 2.877(oS)-.92 G
+.377(peci\214ed T)-2.877 F(ime)-.18 E F0 .377(dialog by pulling do)2.877
+F .377(wn the)-.25 F F1 .377(Go to a speci\214ed time...)2.877 F F0
+(menu)2.877 E 1.047(item from the)108 516 R F1(Contr)3.547 E(ols)-.18 E
+F0 -.2(bu)3.547 G 1.047(tton. This dialog allo).2 F 1.047
 (ws the user to specify the time of a particular ping to be)-.25 F(vie)
 108 528 Q 2.92(wed. The)-.25 F .421(\214rst ping with a time tag later \
 than or equal to the speci\214ed time is then displayed, pro)2.92 F
@@ -492,22 +498,22 @@ F0(Da)108 124.8 Q(vid W)-.2 E 2.5(.C)-.92 G(aress)-2.5 E(Montere)113
 Q(UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
 208.8 Q -.15(ve)-.25 G(rsity of Bremen).15 E F1(OPTIONS)72 237.6 Q/F2 10
 /Times-Bold@0 SF<ad42>108 249.6 Q/F3 10/Times-Italic@0 SF
-(yr/mo/da/hr/mn/sc)23.63 E F0 .614(Sets the starting time for data allo)
-144 261.6 R .614
+(yr/mo/da/hr/mn/sc)144 249.6 Q F0 .614
+(Sets the starting time for data allo)144 261.6 R .614
 (wed in the input data; pings with times before the starting time)-.25 F
 (will be ignored.)144 273.6 Q(Def)5 E(ault:)-.1 E F3(yr/mo/da/hr/mn/sc)
 2.5 E F0 2.5(=1)2.5 G(962/2/21/10/30/0.)-2.5 E F2<ad44>108 290.4 Q F0
-.883(Starts up the program in "bro)23.08 F .883
+.883(Starts up the program in "bro)144 290.4 R .883
 (wse" mode. If a \214le is opened in bro)-.25 F .884
 (wse mode \(either at startup or)-.25 F .571
 (later\), none of the edited data will be output to a \214le. The def)
 144 302.4 R .57(ault is to output the edited data to a)-.1 F(\214le.)144
-314.4 Q F2<ad45>108 331.2 Q F3(yr/mo/da/hr/mn/sc)23.63 E F0 .286
+314.4 Q F2<ad45>108 331.2 Q F3(yr/mo/da/hr/mn/sc)144 331.2 Q F0 .286
 (Sets the ending time for data allo)144 343.2 R .287
 (wed in the input data; pings with times after the ending time will)-.25
 F(be ignored.)144 355.2 Q(Def)5 E(ault:)-.1 E F3(yr/mo/da/hr/mn/sc)2.5 E
-F0 2.5(=2)2.5 G(062/2/21/10/30/0.)-2.5 E F2<ad46>108 372 Q F3(format)
-24.19 E F0 1.018(Sets the format at startup for the input and output sw)
+F0 2.5(=2)2.5 G(062/2/21/10/30/0.)-2.5 E F2<ad46>108 372 Q F3(format)144
+372 Q F0 1.018(Sets the format at startup for the input and output sw)
 144 384 R 1.018(ath sonar data using)-.1 F F2(MBIO)3.518 E F0(inte)3.518
 E 1.018(ger format)-.15 F .974(identi\214ers. This v)144 396 R .974
 (alue can also be set interacti)-.25 F -.15(ve)-.25 G .974
@@ -524,19 +530,20 @@ E 1.018(ger format)-.15 F .974(identi\214ers. This v)144 396 R .974
 -.25 F F2(MB-System)2.718 E F0(con)2.718 E -.15(ve)-.4 G(ntion).15 E
 (of an ".mbXX" suf)144 444 Q(\214x \(the XX corresponds to the)-.25 E F2
 (MBIO)2.5 E F0(format id\).)2.5 E F2<ad47>108 460.8 Q F0 .178
-(This \215ag causes the program to treat the)22.52 F F2(Done)2.678 E F0
--.2(bu)2.678 G .178(tton as equi).2 F -.25(va)-.25 G .178(lent to the)
-.25 F F2(Quit)2.679 E F0 -.2(bu)2.679 G .179(tton. This option).2 F
-1.025(is used when)144 472.8 R F2(MBedit)3.525 E F0 1.025(is started au\
-tomatically by some other process and only a single \214le is to)3.525 F
-(edited.)144 484.8 Q F2<ad48>108 501.6 Q F0 .162(This "help" \215ag cau\
-se the program to print out a description of its operation and then e)
-22.52 F .162(xit immedi-)-.15 F(ately)144 513.6 Q(.)-.65 E F2<ad49>108
-530.4 Q F3(in\214le)26.41 E F0 .01(Sets the data \214le from which the \
-input data will be read at startup.)144 542.4 R .01
-(This option is usually used only)5.01 F(when)144 554.4 Q F2(MBedit)
-2.956 E F0 .456(is started automatically from some other process. The)
-2.956 F F2<ad46>2.956 E F0 .457(option can be used to set)2.956 F .337
+(This \215ag causes the program to treat the)144 460.8 R F2(Done)2.678 E
+F0 -.2(bu)2.678 G .178(tton as equi).2 F -.25(va)-.25 G .178
+(lent to the).25 F F2(Quit)2.679 E F0 -.2(bu)2.679 G .179
+(tton. This option).2 F 1.025(is used when)144 472.8 R F2(MBedit)3.525 E
+F0 1.025(is started automatically by some other process and only a sing\
+le \214le is to)3.525 F(edited.)144 484.8 Q F2<ad48>108 501.6 Q F0 .162
+(This "help" \215ag cause the program to print out a description of its\
+ operation and then e)144 501.6 R .162(xit immedi-)-.15 F(ately)144
+513.6 Q(.)-.65 E F2<ad49>108 530.4 Q F3(in\214le)144 530.4 Q F0 .01(Set\
+s the data \214le from which the input data will be read at startup.)144
+542.4 R .01(This option is usually used only)5.01 F(when)144 554.4 Q F2
+(MBedit)2.956 E F0 .456
+(is started automatically from some other process. The)2.956 F F2<ad46>
+2.956 E F0 .457(option can be used to set)2.956 F .337
 (the data format id if the \214lename does not conform to the)144 566.4
 R F2(MB-System)2.837 E F0(con)2.837 E -.15(ve)-.4 G .336
 (ntion of an ".mbXX").15 F(suf)144 578.4 Q .124
@@ -546,7 +553,7 @@ R F2(MB-System)2.837 E F0(con)2.837 E -.15(ve)-.4 G .336
 (mode, then the edit sa)144 590.4 Q .3 -.15(ve o)-.2 H
 (utput \214le is automatically set as).15 E F3(in\214le)2.5 E F0
 (with ".esf" appended.)2.5 E F2<ad58>108 607.2 Q F0 .773
-(This option causes)23.08 F F2(mbpr)3.273 E(ocess)-.18 E F0 .773
+(This option causes)144 607.2 R F2(mbpr)3.273 E(ocess)-.18 E F0 .773
 (to run automatically on an input sw)3.273 F .772
 (ath data \214le when the)-.1 F F2(mbedit)3.272 E F0 1.079
 (editing session is completed. The)144 619.2 R F2<ad58>3.579 E F0 1.079
@@ -556,8 +563,8 @@ R F2(MB-System)2.837 E F0(con)2.837 E -.15(ve)-.4 G .336
 (he program)-5.787 F F2(mbpr)3.287 E(ocess)-.18 E F0 .787
 (will not be in)3.287 F -.2(vo)-.4 G -.1(ke).2 G 3.287(di).1 G(f)-3.287
 E(the editing session is in the bro)144 643.2 Q(wse mode.)-.25 E F2
-<ad56>108 660 Q F0(Normally)23.08 E(,)-.65 E F2(MBedit)4.904 E F0 2.404
-(outputs information to the stderr stream re)4.904 F -.05(ga)-.15 G
+<ad56>108 660 Q F0(Normally)144 660 Q(,)-.65 E F2(MBedit)4.904 E F0
+2.404(outputs information to the stderr stream re)4.904 F -.05(ga)-.15 G
 2.404(rding the number of records).05 F .363(loaded and dumped.)144 672
 R .363(If the)5.363 F F2<ad56>2.863 E F0 .363(\215ag is gi)2.863 F -.15
 (ve)-.25 G .363(n, then).15 F F2(MBedit)2.863 E F0 -.1(wo)2.863 G .363
@@ -575,34 +582,34 @@ BP
 /F0 10/Times-Roman@0 SF 160.39(mbedit\(1\) MB-System)72 48 R 160.39
 (5.0 mbedit\(1\))2.5 F/F1 10.95/Times-Bold@0 SF(INTERA)72 84 Q
 (CTIVE CONTR)-.602 E(OLS)-.329 E/F2 10/Times-Bold@0 SF(File)108 96 Q F0
-(This b)19.89 E(utton accesses a pulldo)-.2 E(wn menu with tw)-.25 E 2.5
-(op)-.1 G(ush b)-2.5 E(uttons:)-.2 E F2(Open)2.5 E F0(and)2.5 E F2
+(This b)144 96 Q(utton accesses a pulldo)-.2 E(wn menu with tw)-.25 E
+2.5(op)-.1 G(ush b)-2.5 E(uttons:)-.2 E F2(Open)2.5 E F0(and)2.5 E F2
 (File Selection List)2.5 E F0(,)A F2(File->Open)108 112.8 Q F0 .615
 (This b)144 124.8 R .615(utton brings up a popup windo)-.2 F 3.115(ww)
 -.25 G .615(hich allo)-3.115 F .615(ws the user to specify an input sw)
--.25 F .614(ath sonar ba-)-.1 F(th)144 136.8 Q 1.867
-(ymetry data \214le, its)-.05 F F2(MBIO)4.367 E F0 1.867
-(format id, and the output mode.)4.367 F 1.868(This program uses the)
-6.868 F F2(MBIO)4.368 E F0 1.292(library and will read or write an)144
-148.8 R 3.792(ys)-.15 G -.1(wa)-3.792 G 1.292
-(th sonar format supported by).1 F F2(MBIO)3.792 E F0 3.792(.A)C 1.291
-(list of the sw)-.001 F(ath)-.1 E .39
-(sonar data formats currently supported by)144 160.8 R F2(MBIO)2.891 E
-F0 .391(and their identi\214er v)2.891 F .391(alues is gi)-.25 F -.15
-(ve)-.25 G 2.891(ni).15 G 2.891(nt)-2.891 G(he)-2.891 E F2(MBIO)2.891 E
-F0 .682(manual page.)144 172.8 R .682(If the sw)5.682 F .681
-(ath sonar data \214le is named using the)-.1 F F2(MB-System)3.181 E F0
-(suf)3.181 E .681(\214x con)-.25 F -.15(ve)-.4 G .681(ntion \(for).15 F
-(-)-.2 E .162(mat 11 \214les end with ".mb11", format 41 \214les end wi\
-th ".mb41", etc.\), then the program will auto-)144 184.8 R .552(matica\
-lly use the appropriate format id; otherwise the format must be set by \
-the user)144 196.8 R 5.551(.T)-.55 G .551(he popup)-5.551 F(windo)144
-208.8 Q 2.692(wa)-.25 G .192(lso allo)-2.692 F .193
-(ws the output mode to be set to "bro)-.25 F .193
-(wse" so that no edit e)-.25 F -.15(ve)-.25 G .193(nts are output.).15 F
-(When)5.193 E 2.903(av)144 220.8 S .403
-(alid \214le is speci\214ed and the)-3.153 F F2(OK)2.903 E F0 -.2(bu)
-2.903 G .403(tton is click).2 F .403
+-.25 F .614(ath sonar ba-)-.1 F(th)144 136.8 Q 1.038
+(ymetry data \214le, its)-.05 F F2(MBIO)3.538 E F0 1.039
+(format id, and the output mode.)3.539 F 1.039(This program uses the)
+6.039 F F2(MBIO)3.539 E F0(li-)3.539 E .187
+(brary and will read or write an)144 148.8 R 2.687(ys)-.15 G -.1(wa)
+-2.687 G .187(th sonar format supported by).1 F F2(MBIO)2.687 E F0 2.686
+(.Al)C .186(ist of the sw)-2.686 F .186(ath sonar)-.1 F .464
+(data formats currently supported by)144 160.8 R F2(MBIO)2.964 E F0 .465
+(and their identi\214er v)2.965 F .465(alues is gi)-.25 F -.15(ve)-.25 G
+2.965(ni).15 G 2.965(nt)-2.965 G(he)-2.965 E F2(MBIO)2.965 E F0(man-)
+2.965 E .192(ual page.)144 172.8 R .192(If the sw)5.192 F .192
+(ath sonar data \214le is named using the)-.1 F F2(MB-System)2.692 E F0
+(suf)2.692 E .192(\214x con)-.25 F -.15(ve)-.4 G .191(ntion \(format 11)
+.15 F .999(\214les end with ".mb11", format 41 \214les end with ".mb41"\
+, etc.\), then the program will automati-)144 184.8 R .34(cally use the\
+ appropriate format id; otherwise the format must be set by the user)144
+196.8 R 5.34(.T)-.55 G .34(he popup win-)-5.34 F(do)144 208.8 Q 3.106
+(wa)-.25 G .606(lso allo)-3.106 F .607
+(ws the output mode to be set to "bro)-.25 F .607
+(wse" so that no edit e)-.25 F -.15(ve)-.25 G .607(nts are output.).15 F
+.607(When a)5.607 F -.25(va)144 220.8 S .79
+(lid \214le is speci\214ed and the).25 F F2(OK)3.29 E F0 -.2(bu)3.29 G
+.79(tton is click).2 F .789
 (ed, \214le will be added to an internal list of sw)-.1 F(ath)-.1 E .447
 (\214les a)144 232.8 R -.25(va)-.2 G .447(ilable for editing, and then \
 that \214le will be loaded into memory for editing \(if another \214le)
@@ -623,11 +630,12 @@ e \214les loaded. When a \214le is loaded for editing,)144 268.8 R F2
 (ath \214les a)-.1 F -.25(va)-.2 G .369(ilable for edit-).25 F .069
 (ing. The list has four columns.)144 333.6 R .069
 (The \214rst \(left-most\) column is either blank or sho)5.069 F .07
-(ws "<lock)-.25 F .07(ed>" or)-.1 F 3.73("<loaded>". If)144 345.6 R 3.73
-<618c>3.73 G 1.23(le is loaded for editing by this program, it sho)-3.73
-F 1.229(ws as "<loaded>".)-.25 F 1.229(If a \214le is)6.229 F 1.458
-(being edited or processed by another program, it sho)144 357.6 R 1.458
-(ws as "<lock)-.25 F 1.458(ed>". Lock)-.1 F 1.458(ed \214les cannot be)
+(ws "<lock)-.25 F .07(ed>" or)-.1 F 2.862("<loaded>". If)144 345.6 R
+2.861<618c>2.861 G .361
+(le is loaded for editing by this program, it sho)-2.861 F .361
+(ws as "<loaded>".)-.25 F .361(If a \214le is be-)5.361 F 2.132
+(ing edited or processed by another program, it sho)144 357.6 R 2.132
+(ws as "<lock)-.25 F 2.132(ed>". Lock)-.1 F 2.133(ed \214les cannot be)
 -.1 F .494(opened for editing, and an)144 369.6 R 2.994<798c>-.15 G .494
 (le loaded for editing by)-2.994 F F2(MBedit)2.993 E F0 .493(will sho)
 2.993 F 2.993(wa)-.25 G 2.993(s")-2.993 G(lock)-2.993 E .493
@@ -648,10 +656,10 @@ F0 .249(format id, respecti)2.749 F -.15(ve)-.25 G(ly).15 E 5.249(.U)
 -.15(ve S)-.15 H .465(elected File" b).15 F .465
 (utton is selected, then)-.2 F(the selected \214le will be remo)144
 441.6 Q -.15(ve)-.15 G 2.5(df).15 G(rom the a)-2.5 E -.25(va)-.2 G
-(ilable list.).25 E F2 -.37(Vi)108 458.4 S(ew).37 E F0 .792(This b)14.71
-F .792(utton accesses a pulldo)-.2 F .792(wn menu with se)-.25 F -.15
-(ve)-.25 G .792(ral toggle b).15 F(uttons:)-.2 E F2 -.65(Wa)3.291 G .791
-(terfall V).65 F(iew)-.37 E F0(,)A F2(Alongtrack)3.291 E -.37(Vi)144
+(ilable list.).25 E F2 -.37(Vi)108 458.4 S(ew).37 E F0 .792(This b)144
+458.4 R .792(utton accesses a pulldo)-.2 F .792(wn menu with se)-.25 F
+-.15(ve)-.25 G .792(ral toggle b).15 F(uttons:)-.2 E F2 -.65(Wa)3.291 G
+.791(terfall V).65 F(iew)-.37 E F0(,)A F2(Alongtrack)3.291 E -.37(Vi)144
 470.4 S(ew).37 E F0(,)A F2(Acr)3.512 E 1.012(osstrack V)-.18 F(iew)-.37
 E F0(,)A F2(Sho)3.512 E 3.513(wF)-.1 G 1.013(lagged Pr)-3.513 F(o\214le)
 -.18 E F0(,)A F2(Sho)3.513 E 3.513(wB)-.1 G 1.013
@@ -698,95 +706,95 @@ S(ew->Sho).37 E 2.5(wF)-.1 G(lagged Soundings)-2.5 E F0 .188
 F .187(ymetry soundings)-.05 F 1.042(are displayed \(toggle set to "Of)
 144 717.6 R 1.042
 (f"\) or whether the display also includes the \215agged or "bad" ba-)
--.25 F(th)144 729.6 Q .078(ymetry soundings \(toggle set to "On"\). In \
-the latter case, the \215agged soundings are sho)-.05 F .078(wn as red.)
--.25 F(MB-System 5.0)72 768 Q(24 No)132.205 E -.15(ve)-.15 G(mber 2018)
-.15 E(4)190.545 E 0 Cg EP
+-.25 F(th)144 729.6 Q(ymetry soundings \(toggle set to "On"\). In the l\
+atter case, the \215agged soundings are sho)-.05 E(wn as red.)-.25 E
+(MB-System 5.0)72 768 Q(24 No)132.205 E -.15(ve)-.15 G(mber 2018).15 E
+(4)190.545 E 0 Cg EP
 %%Page: 5 5
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 160.39(mbedit\(1\) MB-System)72 48 R 160.39
 (5.0 mbedit\(1\))2.5 F/F1 10/Times-Bold@0 SF -.37(Vi)108 84 S(ew->Sho)
-.37 E 2.5(wF)-.1 G(lagged Pr)-2.5 E(o\214le)-.18 E F0 .176
-(This toggle allo)144 96 R .176
-(ws the user to specify whether the acrosstrack bath)-.25 F .177
-(ymetry pro\214le includes only the)-.05 F 1.908
+.37 E 2.5(wF)-.1 G(lagged Pr)-2.5 E(o\214le)-.18 E F0 .177
+(This toggle allo)144 96 R .177
+(ws the user to specify whether the acrosstrack bath)-.25 F .176
+(ymetry pro\214le includes only the)-.05 F 1.907
 (un\215agged or "good" bath)144 108 R 1.907(ymetry \(toggle set to "Of)
 -.05 F 1.907(f"\) or whether the pro\214le also includes the)-.25 F
-1.123(\215agged or "bad" bath)144 120 R 1.123
+1.124(\215agged or "bad" bath)144 120 R 1.123
 (ymetry \(toggle set to "On"\). In the latter case, red line se)-.05 F
-1.124(gments sho)-.15 F 3.624(wt)-.25 G(he)-3.624 E
+1.123(gments sho)-.15 F 3.623(wt)-.25 G(he)-3.623 E
 (portion of the pro\214le associated with the \215agged depth points.)
 144 132 Q F1 -.37(Vi)108 148.8 S(ew->Sho).37 E 2.5(wB)-.1 G
-(ottom Detect Algorithms)-2.5 E F0 .922(This toggle allo)144 160.8 R
+(ottom Detect Algorithms)-2.5 E F0 .921(This toggle allo)144 160.8 R
 .921(ws the user to specify whether the beams are colored according to \
 their \215agging)-.25 F .07(status \(toggle set to "Of)144 172.8 R .07(\
 f" or according to the bottom detect algorithm used by the sonar \(togg\
-le set)-.25 F .372(to "On"\). The def)144 184.8 R .372(ault is to color\
+le set)-.25 F .371(to "On"\). The def)144 184.8 R .372(ault is to color\
  each sounding according to its \215agging status \255 un\215agged beam\
-s)-.1 F(are black, manually \215agged beams are red, and \214lter \215a\
-gged beams are green. If the beams are col-)144 196.8 Q 2.088(ored acco\
-rding to bottom detect algorithm, then amplitude detects are sho)144
-208.8 R 2.087(wn in black, phase)-.25 F 1.437(detects are sho)144 220.8
-R 1.437
+s)-.1 F .001(are black, manually \215agged beams are red, and \214lter \
+\215agged beams are green. If the beams are col-)144 196.8 R .848(ored \
+according to bottom detect algorithm, then amplitude detects are sho)144
+208.8 R .848(wn in black, phase de-)-.25 F .165(tects are sho)144 220.8
+R .165
 (wn in red, and beams for which the bottom detection algorithm is unkno)
--.25 F 1.438(wn are)-.25 F(sho)144 232.8 Q .166
-(wn in green. Users should be a)-.25 F -.1(wa)-.15 G .166(re that man).1
-F 2.666(ys)-.15 G -.1(wa)-2.666 G .165
-(th data formats do not include bottom detec-).1 F
-(tion algorithm information.)144 244.8 Q F1 -.37(Vi)108 261.6 S(ew->W)
-.37 E(ide Bath)-.18 E(ymetry Pr)-.15 E(o\214les)-.18 E F0 .794
+-.25 F .165(wn are sho)-.25 F(wn)-.25 E .358
+(in green. Users should be a)144 232.8 R -.1(wa)-.15 G .358(re that man)
+.1 F 2.858(ys)-.15 G -.1(wa)-2.858 G .358
+(th data formats do not include bottom detection al-).1 F
+(gorithm information.)144 244.8 Q F1 -.37(Vi)108 261.6 S(ew->W).37 E
+(ide Bath)-.18 E(ymetry Pr)-.15 E(o\214les)-.18 E F0 .794
 (This toggle, when set, causes)144 273.6 R F1(mbedit)3.294 E F0 .794
 (to display the widest possible plots of the bath)3.294 F .794
-(ymetry pro-)-.05 F 1.288
+(ymetry pro-)-.05 F 1.287
 (\214les. All of the other options discussed immediately belo)144 285.6
-R 3.787(wn)-.25 G(arro)-3.787 E 3.787(wt)-.25 G 1.287
+R 3.787(wn)-.25 G(arro)-3.787 E 3.787(wt)-.25 G 1.288
 (he primary plot in order to)-3.787 F
 (present additional information on the left side of the windo)144 297.6
 Q -.65(w.)-.25 G F1 -.37(Vi)108 314.4 S(ew->Plot T).37 E(ime Stamps)-.18
-E F0 .136(This toggle, when set, causes)144 326.4 R F1(mbedit)2.637 E F0
+E F0 .137(This toggle, when set, causes)144 326.4 R F1(mbedit)2.637 E F0
 .137(to display time stamp information to the left of the bath)2.637 F
 (yme-)-.05 E(try pro\214les.)144 338.4 Q F1 -.37(Vi)108 355.2 S
-(ew->Plot Ping Inter).37 E -.1(va)-.1 G(l).1 E F0 .136
-(This toggle, when set, causes)144 367.2 R F1(mbedit)2.636 E F0 .135
-(to display an automatically scaled v)2.635 F .135
+(ew->Plot Ping Inter).37 E -.1(va)-.1 G(l).1 E F0 .135
+(This toggle, when set, causes)144 367.2 R F1(mbedit)2.635 E F0 .135
+(to display an automatically scaled v)2.635 F .136
 (ertical time series plot of)-.15 F(the time between pings.)144 379.2 Q
 (This plot appears to the left of the bath)146.5 391.2 Q
 (ymetry pro\214les.)-.05 E F1 -.37(Vi)108 408 S(ew->Plot Longitude).37 E
-F0 .135(This toggle, when set, causes)144 420 R F1(mbedit)2.635 E F0
-.135(to display an automatically scaled v)2.635 F .136
+F0 .136(This toggle, when set, causes)144 420 R F1(mbedit)2.636 E F0
+.135(to display an automatically scaled v)2.635 F .135
 (ertical time series plot of)-.15 F(the na)144 432 Q(vig)-.2 E
 (ation longitude associated with each ping.)-.05 E
 (This plot appears to the left of the bath)146.5 444 Q
 (ymetry pro\214les.)-.05 E F1 -.37(Vi)108 460.8 S(ew->Plot Latitude).37
-E F0 .136(This toggle, when set, causes)144 472.8 R F1(mbedit)2.636 E F0
-.135(to display an automatically scaled v)2.635 F .135
+E F0 .135(This toggle, when set, causes)144 472.8 R F1(mbedit)2.635 E F0
+.135(to display an automatically scaled v)2.635 F .136
 (ertical time series plot of)-.15 F(the na)144 484.8 Q(vig)-.2 E
 (ation latitude associated with each ping.)-.05 E
 (This plot appears to the left of the bath)146.5 496.8 Q
 (ymetry pro\214les.)-.05 E F1 -.37(Vi)108 513.6 S(ew->Plot Heading).37 E
-F0 .135(This toggle, when set, causes)144 525.6 R F1(mbedit)2.635 E F0
-.135(to display an automatically scaled v)2.635 F .136
+F0 .136(This toggle, when set, causes)144 525.6 R F1(mbedit)2.636 E F0
+.135(to display an automatically scaled v)2.635 F .135
 (ertical time series plot of)-.15 F
 (the heading associated with each ping.)144 537.6 Q
 (This plot appears to the left of the bath)146.5 549.6 Q
 (ymetry pro\214les.)-.05 E F1 -.37(Vi)108 566.4 S(ew->Plot Speed).37 E
-F0 .136(This toggle, when set, causes)144 578.4 R F1(mbedit)2.636 E F0
-.135(to display an automatically scaled v)2.635 F .135
+F0 .135(This toggle, when set, causes)144 578.4 R F1(mbedit)2.635 E F0
+.135(to display an automatically scaled v)2.635 F .136
 (ertical time series plot of)-.15 F
 (the speed associated with each ping.)144 590.4 Q
 (This plot appears to the left of the bath)146.5 602.4 Q
 (ymetry pro\214les.)-.05 E F1 -.37(Vi)108 619.2 S
-(ew->Plot Center Beam Depth).37 E F0 .135(This toggle, when set, causes)
-144 631.2 R F1(mbedit)2.635 E F0 .135
-(to display an automatically scaled v)2.635 F .136
+(ew->Plot Center Beam Depth).37 E F0 .136(This toggle, when set, causes)
+144 631.2 R F1(mbedit)2.636 E F0 .135
+(to display an automatically scaled v)2.635 F .135
 (ertical time series plot of)-.15 F
 (the speed associated with each ping.)144 643.2 Q
 (This plot appears to the left of the bath)146.5 655.2 Q
 (ymetry pro\214les.)-.05 E F1 -.37(Vi)108 672 S(ew->Plot Sonar Depth).37
-E F0 .136(This toggle, when set, causes)144 684 R F1(mbedit)2.636 E F0
-.135(to display an automatically scaled v)2.635 F .135
+E F0 .135(This toggle, when set, causes)144 684 R F1(mbedit)2.635 E F0
+.135(to display an automatically scaled v)2.635 F .136
 (ertical time series plot of)-.15 F
 (the sonar depth associated with each ping.)144 696 Q
 (This plot appears to the left of the bath)146.5 708 Q
@@ -798,45 +806,45 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 160.39(mbedit\(1\) MB-System)72 48 R 160.39
 (5.0 mbedit\(1\))2.5 F/F1 10/Times-Bold@0 SF -.37(Vi)108 84 S
-(ew->Plot Sonar Altitude).37 E F0 .135(This toggle, when set, causes)144
-96 R F1(mbedit)2.635 E F0 .135(to display an automatically scaled v)
-2.635 F .136(ertical time series plot of)-.15 F
+(ew->Plot Sonar Altitude).37 E F0 .136(This toggle, when set, causes)144
+96 R F1(mbedit)2.636 E F0 .135(to display an automatically scaled v)
+2.635 F .135(ertical time series plot of)-.15 F
 (the sonar altitude associated with each ping.)144 108 Q
 (This plot appears to the left of the bath)146.5 120 Q
 (ymetry pro\214les.)-.05 E F1 -.37(Vi)108 136.8 S(ew->Plot Roll).37 E F0
-.136(This toggle, when set, causes)144 148.8 R F1(mbedit)2.636 E F0 .135
-(to display an automatically scaled v)2.635 F .135
-(ertical time series plot of)-.15 F .164(the roll associated with each \
-ping. In addition to the roll time series sho)144 160.8 R .165
+.135(This toggle, when set, causes)144 148.8 R F1(mbedit)2.635 E F0 .135
+(to display an automatically scaled v)2.635 F .136
+(ertical time series plot of)-.15 F .165(the roll associated with each \
+ping. In addition to the roll time series sho)144 160.8 R .164
 (wn in black, an estimate of)-.25 F 1.455
 (the acrosstrack sea\215oor slope is sho)144 172.8 R 1.455
 (wn in red \(calculated by linear re)-.25 F 1.455
 (gression of the un\215agged)-.15 F .342
 (soundings for each ping\), and the dif)144 184.8 R .342
-(ference between the roll and apparent slope is sho)-.25 F .342
+(ference between the roll and apparent slope is sho)-.25 F .341
 (wn in blue.)-.25 F .832(If the sonar roll has been correctly applied, \
 the roll and sea\215oor slope should be uncorrelated. If)144 196.8 R .05
 (there is a timing error in the roll correction, then the apparent sea\
 \215oor slope may correlate strongly)144 208.8 R(with the roll.)144
 220.8 Q(This plot appears to the left of the bath)146.5 232.8 Q
 (ymetry pro\214les.)-.05 E F1 -.37(Vi)108 249.6 S(ew->Plot Pitch).37 E
-F0 .136(This toggle, when set, causes)144 261.6 R F1(mbedit)2.636 E F0
-.135(to display an automatically scaled v)2.635 F .135
+F0 .135(This toggle, when set, causes)144 261.6 R F1(mbedit)2.635 E F0
+.135(to display an automatically scaled v)2.635 F .136
 (ertical time series plot of)-.15 F
 (the pitch associated with each ping.)144 273.6 Q
 (This plot appears to the left of the bath)146.5 285.6 Q
 (ymetry pro\214les.)-.05 E F1 -.37(Vi)108 302.4 S(ew->Plot Hea).37 E -.1
-(ve)-.25 G F0 .135(This toggle, when set, causes)144 314.4 R F1(mbedit)
-2.635 E F0 .135(to display an automatically scaled v)2.635 F .136
+(ve)-.25 G F0 .136(This toggle, when set, causes)144 314.4 R F1(mbedit)
+2.636 E F0 .135(to display an automatically scaled v)2.635 F .135
 (ertical time series plot of)-.15 F(the hea)144 326.4 Q .3 -.15(ve a)-.2
 H(ssociated with each ping.).15 E
 (This plot appears to the left of the bath)146.5 338.4 Q
-(ymetry pro\214les.)-.05 E F1(Contr)108 355.2 Q(ols)-.18 E F0 1.651
-(This b)144 367.2 R 1.651(utton accesses a pulldo)-.2 F 1.651
-(wn menu with six items:)-.25 F F1 1.651(Go T)4.151 F 4.15(oS)-.92 G
-1.65(peci\214ed T)-4.15 F(ime...)-.18 E F0(,)A F1 1.65(Buffer Con-)4.15
-F(tr)144 379.2 Q(ols...)-.18 E F0(,)A F1(Annotation...)2.884 E F0(,)A F1
-(Filters...)2.884 E F0(,)A F1(Re)2.884 E -.1(ve)-.15 G .384
+(ymetry pro\214les.)-.05 E F1(Contr)108 355.2 Q(ols)-.18 E F0 1.65
+(This b)144 367.2 R 1.65(utton accesses a pulldo)-.2 F 1.651
+(wn menu with six items:)-.25 F F1 1.651(Go T)4.151 F 4.151(oS)-.92 G
+1.651(peci\214ed T)-4.151 F(ime...)-.18 E F0(,)A F1 1.651(Buffer Con-)
+4.151 F(tr)144 379.2 Q(ols...)-.18 E F0(,)A F1(Annotation...)2.884 E F0
+(,)A F1(Filters...)2.884 E F0(,)A F1(Re)2.884 E -.1(ve)-.15 G .384
 (rse Right/Left K).1 F .384(ey Macr)-.25 F(os)-.18 E F0 2.884(,a)C(nd)
 -2.884 E F1(Re)2.884 E -.1(ve)-.15 G .384(rse Mouse Buttons).1 F F0(.)A
 .556(The \214rst \(top\) four items bring up a dialog of the same name.\
@@ -844,25 +852,25 @@ F(tr)144 379.2 Q(ols...)-.18 E F0(,)A F1(Annotation...)2.884 E F0(,)A F1
 (The last tw)144 403.2 Q 2.5(oi)-.1 G(tems are toggle b)-2.5 E
 (uttons which set mouse b)-.2 E(utton and k)-.2 E .3 -.15(ey m)-.1 H
 (acro beha).15 E(viors.)-.2 E F1(Contr)108 420 Q(ols->Go T)-.18 E 2.5
-(oS)-.92 G(peci\214ed T)-2.5 E(ime...)-.18 E F0 .199
-(This menu item brings up a dialog which allo)144 432 R .2
+(oS)-.92 G(peci\214ed T)-2.5 E(ime...)-.18 E F0 .2
+(This menu item brings up a dialog which allo)144 432 R .199
 (ws the user to specify the time of a particular ping to)-.25 F .13
 (be displayed.)144 444 R .13(Once the year)5.13 F 2.63(,m)-.4 G .13
 (onth, day)-2.63 F 2.63(,h)-.65 G(our)-2.63 E 2.63(,m)-.4 G .13
 (inute, and second v)-2.63 F .13(alues are entered, clicking the)-.25 F
-F1 -.25(Ap)144 456 S(ply).25 E F0 -.2(bu)3.745 G 1.245(tton causes).2 F
-F1(mbedit)3.745 E F0 1.245(to seek the speci\214ed tar)3.745 F 1.245
-(get time.)-.18 F 1.246(If the current data b)6.245 F(uf)-.2 E 1.246
-(fer be)-.25 F(gins)-.15 E .282(after the tar)144 468 R .282
-(get time, an error is returned.)-.18 F .282(If the tar)5.282 F .281
+F1 -.25(Ap)144 456 S(ply).25 E F0 -.2(bu)2.818 G .318(tton causes).2 F
+F1(mbedit)2.818 E F0 .318(to seek the speci\214ed tar)2.818 F .317
+(get time.)-.18 F .317(If the current data b)5.317 F(uf)-.2 E .317
+(fer be)-.25 F .317(gins af-)-.15 F .67(ter the tar)144 468 R .67
+(get time, an error is returned.)-.18 F .67(If the tar)5.67 F .67
 (get time is later than the end of the current data)-.18 F -.2(bu)144
-480 S -.25(ff).2 G(er).25 E 2.517(,t)-.4 G(hen)-2.517 E F1(mbedit)2.517
-E F0 .018(will dump and load b)2.517 F(uf)-.2 E .018(fers until the tar)
+480 S -.25(ff).2 G(er).25 E 2.518(,t)-.4 G(hen)-2.518 E F1(mbedit)2.518
+E F0 .018(will dump and load b)2.518 F(uf)-.2 E .018(fers until the tar)
 -.25 F .018(get time is reached or the data \214le ends.)-.18 F(If the \
 end of the \214le is reached during the search, the \214le will be clos\
 ed.)144 492 Q F1(Contr)108 508.8 Q(ols->Buffer Contr)-.18 E(ols...)-.18
-E F0 .838(This menu item brings up a dialog which allo)144 520.8 R .837
-(ws the user to set the data b)-.25 F(uf)-.2 E .837
+E F0 .837(This menu item brings up a dialog which allo)144 520.8 R .838
+(ws the user to set the data b)-.25 F(uf)-.2 E .838
 (fer handling through)-.25 F(tw)144 532.8 Q 2.5(os)-.1 G
 (liders discussed immediately belo)-2.5 E -.65(w.)-.25 G F1(Contr)108
 549.6 Q(ols->Buffer Contr)-.18 E(ols->Data Buffer Size)-.18 E F0 .1
@@ -871,25 +879,25 @@ E F0 .838(This menu item brings up a dialog which allo)144 520.8 R .837
 (data b)144 573.6 Q(uf)-.2 E(fer)-.25 E 5(.A)-.55 G .3 -.15(ny c)-5 H
 (hange becomes ef).15 E(fecti)-.25 E .3 -.15(ve t)-.25 H(he ne).15 E
 (xt time that a data \214le is read in.)-.15 E F1(Contr)108 590.4 Q
-(ols->Buffer Contr)-.18 E(ols->Buffer Retain Size)-.18 E F0 .598
-(This slider on the)144 602.4 R F1 .598(Buffer Contr)3.098 F(ols)-.18 E
-F0 .598(dialog sets the number of data records which are held o)3.098 F
--.15(ve)-.15 G 3.097(ri).15 G(n)-3.097 E(the b)144 614.4 Q(uf)-.2 E
+(ols->Buffer Contr)-.18 E(ols->Buffer Retain Size)-.18 E F0 .597
+(This slider on the)144 602.4 R F1 .597(Buffer Contr)3.097 F(ols)-.18 E
+F0 .598(dialog sets the number of data records which are held o)3.097 F
+-.15(ve)-.15 G 3.098(ri).15 G(n)-3.098 E(the b)144 614.4 Q(uf)-.2 E
 (fer each time the old b)-.25 E(uf)-.2 E(fer is written out.)-.25 E F1
-(Contr)108 631.2 Q(ols->Annotation...)-.18 E F0 1.217
-(This menu item brings up a dialog which allo)144 643.2 R 1.218
-(ws the user to set the annotation interv)-.25 F 1.218(als for the)-.25
+(Contr)108 631.2 Q(ols->Annotation...)-.18 E F0 1.218
+(This menu item brings up a dialog which allo)144 643.2 R 1.217
+(ws the user to set the annotation interv)-.25 F 1.217(als for the)-.25
 F(across track distance and depth ax)144 655.2 Q(es through the tw)-.15
 E 2.5(os)-.1 G(liders discussed immediately belo)-2.5 E -.65(w.)-.25 G
 F1(Contr)108 672 Q(ols->Annotation->X Axis T)-.18 E(ick Inter)-.18 E -.1
-(va)-.1 G(l).1 E F0 .566(This slider on the)144 684 R F1(Annotation)
+(va)-.1 G(l).1 E F0 .565(This slider on the)144 684 R F1(Annotation)
 3.066 E F0 .566(dialog sets the tick interv)3.066 F .566
 (al in m for the across track distance axis.)-.25 F .723
 (If a particular v)144 696 R .723
 (alue is desired which cannot be obtained by dragging the slider)-.25 F
-3.223(,t)-.4 G .723(he slider can be)-3.223 F .806
-(changed by increments of 1 by clicking with the left b)144 708 R .805
-(utton inside the slider area, b)-.2 F .805(ut not on the)-.2 F
+3.223(,t)-.4 G .723(he slider can be)-3.223 F .805
+(changed by increments of 1 by clicking with the left b)144 708 R .806
+(utton inside the slider area, b)-.2 F .806(ut not on the)-.2 F
 (slider itself.)144 720 Q(MB-System 5.0)72 768 Q(24 No)132.205 E -.15
 (ve)-.15 G(mber 2018).15 E(6)190.545 E 0 Cg EP
 %%Page: 7 7
@@ -899,47 +907,48 @@ BP
 /F0 10/Times-Roman@0 SF 160.39(mbedit\(1\) MB-System)72 48 R 160.39
 (5.0 mbedit\(1\))2.5 F/F1 10/Times-Bold@0 SF(Contr)108 84 Q
 (ols->Annotation->Y Axis T)-.18 E(ick Inter)-.18 E -.1(va)-.1 G(l).1 E
-F0 .596(This slider on the)144 96 R F1(Annotation)3.096 E F0 .596
+F0 .597(This slider on the)144 96 R F1(Annotation)3.096 E F0 .596
 (dialog sets the tick interv)3.096 F .596(al in m for the depth axis.)
--.25 F .597(If a particular)5.596 F -.25(va)144 108 S 1.306
+-.25 F .596(If a particular)5.596 F -.25(va)144 108 S .428
 (lue is desired which cannot be obtained by dragging the slider).25 F
-3.805(,t)-.4 G 1.305(he slider can be changed by)-3.805 F
-(increments of 1 by clicking with the left b)144 120 Q
+2.928(,t)-.4 G .429(he slider can be changed by in-)-2.928 F
+(crements of 1 by clicking with the left b)144 120 Q
 (utton inside the slider area, b)-.2 E(ut not on the slider itself.)-.2
-E F1(Contr)108 136.8 Q(ols->Filters)-.18 E F0 1.106
-(This menu item brings up a dialog which allo)144 148.8 R 1.107
-(ws the user to turn automatic bath)-.25 F 1.107(ymetry \214ltering)-.05
-F .807(algorithms on and of)144 160.8 R 3.307(fa)-.25 G .806(nd to set \
-the \214lter parameters through the widgets discussed immediately)-3.307
-F(belo)144 172.8 Q 5.09 -.65(w. C)-.25 H 1.29(licking on the).65 F F1
--.25(Ap)3.79 G(ply).25 E F0 -.2(bu)3.79 G 1.29(tton \214rst remo).2 F
--.15(ve)-.15 G 3.79(sa).15 G 1.59 -.15(ny p)-3.79 H(re).15 E 1.29
-(vious automatic \214lter \215ags and then)-.25 F .081
-(applies the current \214lter settings to the sw)144 184.8 R .081
-(ath bath)-.1 F .08(ymetry data. These actions are applied only from)
--.05 F 1.309
+E F1(Contr)108 136.8 Q(ols->Filters)-.18 E F0 .222
+(This menu item brings up a dialog which allo)144 148.8 R .222
+(ws the user to turn automatic bath)-.25 F .221(ymetry \214ltering al-)
+-.05 F .216(gorithms on and of)144 160.8 R 2.716(fa)-.25 G .216(nd to s\
+et the \214lter parameters through the widgets discussed immediately be\
+-)-2.716 F(lo)144 172.8 Q 4.616 -.65(w. C)-.25 H .816(licking on the).65
+F F1 -.25(Ap)3.316 G(ply).25 E F0 -.2(bu)3.316 G .815(tton \214rst remo)
+.2 F -.15(ve)-.15 G 3.315(sa).15 G 1.115 -.15(ny p)-3.315 H(re).15 E
+.815(vious automatic \214lter \215ags and then ap-)-.25 F .71
+(plies the current \214lter settings to the sw)144 184.8 R .71(ath bath)
+-.1 F .71(ymetry data. These actions are applied only from)-.05 F .357
 (the current position to the end of the data currently in memory)144
-196.8 R 3.809(.T)-.65 G 1.309(he \214ltering is not applied \(or)-3.809
-F .391(unapplied\) to pings earlier in the data \214le than the current\
- position.)144 208.8 R(The)5.391 E F1(Reset)2.891 E F0 -.2(bu)2.891 G
-.391(tton restores the).2 F(\214lter settings that were applied last.)
-144 220.8 Q F1(Contr)108 237.6 Q(ols->Filters->Median Spik)-.18 E 2.5
-(eF)-.1 G(llter)-2.5 E F0 2.019(This toggle b)144 249.6 R 2.019
-(utton turns automatic median \214ltering of bath)-.2 F 2.019
-(ymetry pro\214les on and of)-.05 F 4.52(f. When)-.25 F .397(median \
-\214ltering is enabled, the median depth is calculated for each bath)144
-261.6 R .397(ymetry ping. Each sound-)-.05 F .186
-(ing in the ping is compared with the median v)144 273.6 R .187
-(alue; an)-.25 F 2.687(ys)-.15 G .187(ounding that dif)-2.687 F .187
-(fers from the median by a)-.25 F(percentage greater than a threshold p\
-ercentage is \215agged as bad data.)144 285.6 Q F1(Contr)108 302.4 Q
-(ols->Filters->% Median Depth Thr)-.18 E(eshold)-.18 E F0 .258(This sli\
-der sets the threshold of the median depth \214lter in units of percent\
-age of the median depth.)144 314.4 R F1(Contr)108 331.2 Q
-(ols->Filters->Wr)-.18 E(ong Side Fllter)-.18 E F0 .397(This toggle b)
-144 343.2 R .397(utton turns automatic wrong side \214ltering of bath)
--.2 F .398(ymetry pro\214les on and of)-.05 F .398(f. This \214l-)-.25 F
-1.114(ter e)144 355.2 R 1.114(xpects bath)-.15 F 1.114
+196.8 R 2.857(.T)-.65 G .356(he \214ltering is not applied \(or un-)
+-2.857 F .123(applied\) to pings earlier in the data \214le than the cu\
+rrent position.)144 208.8 R(The)5.123 E F1(Reset)2.623 E F0 -.2(bu)2.623
+G .123(tton restores the \214l-).2 F
+(ter settings that were applied last.)144 220.8 Q F1(Contr)108 237.6 Q
+(ols->Filters->Median Spik)-.18 E 2.5(eF)-.1 G(llter)-2.5 E F0 .586
+(This toggle b)144 249.6 R .586
+(utton turns automatic median \214ltering of bath)-.2 F .586
+(ymetry pro\214les on and of)-.05 F 3.085(f. When)-.25 F(me-)3.085 E
+.595(dian \214ltering is enabled, the median depth is calculated for ea\
+ch bath)144 261.6 R .595(ymetry ping. Each sounding)-.05 F .014
+(in the ping is compared with the median v)144 273.6 R .013(alue; an)
+-.25 F 2.513(ys)-.15 G .013(ounding that dif)-2.513 F .013
+(fers from the median by a per)-.25 F(-)-.2 E
+(centage greater than a threshold percentage is \215agged as bad data.)
+144 285.6 Q F1(Contr)108 302.4 Q(ols->Filters->% Median Depth Thr)-.18 E
+(eshold)-.18 E F0(This slider sets the threshold of the median depth \
+\214lter in units of percentage of the median depth.)144 314.4 Q F1
+(Contr)108 331.2 Q(ols->Filters->Wr)-.18 E(ong Side Fllter)-.18 E F0
+.397(This toggle b)144 343.2 R .397
+(utton turns automatic wrong side \214ltering of bath)-.2 F .398
+(ymetry pro\214les on and of)-.05 F .398(f. This \214l-)-.25 F 1.114
+(ter e)144 355.2 R 1.114(xpects bath)-.15 F 1.114
 (ymetry beams to be numbered from port to starboard. An)-.05 F 3.613(yb)
 -.15 G 1.113(eam numbered less)-3.613 F 1.228
 (than the center beam with a positi)144 367.2 R 1.529 -.15(ve \()-.25 H
@@ -1023,11 +1032,10 @@ F .126(l' k)-.1 F -.15(ey)-.1 G 2.626(sw).15 G .126
 (utton, when set, re)-.2 F -.15(ve)-.25 G .166
 (rses the meaning of the right and left mouse b).15 F .167
 (uttons. This option)-.2 F(is for the con)144 242.4 Q -.15(ve)-.4 G
-(nience of left-handed users.).15 E F1(Start)108 259.2 Q F0 1.483
-(This b)14.34 F 1.483
-(utton causes the set of displayed pings to step backw)-.2 F 1.482
-(ard to the be)-.1 F 1.482(ginning of the current)-.15 F -.2(bu)144
-271.2 S -.25(ff).2 G(er).25 E 2.5(.T)-.55 G(he middle mouse b)-2.5 E
+(nience of left-handed users.).15 E F1(Start)108 259.2 Q F0 .28(This b)
+144 259.2 R .28(utton causes the set of displayed pings to step backw)
+-.2 F .28(ard to the be)-.1 F .28(ginning of the current b)-.15 F(uf-)
+-.2 E(fer)144 271.2 Q 2.5(.T)-.55 G(he middle mouse b)-2.5 E
 (utton causes the same action if the 'G' or 'g' k)-.2 E .3 -.15(ey i)-.1
 H 2.5(sd).15 G -.25(ow)-2.5 G(n.).25 E F1(Re)108 288 Q -.1(ve)-.15 G
 (rse).1 E F0 .963(This b)144 300 R .963
@@ -1040,9 +1048,9 @@ H 2.5(sd).15 G -.25(ow)-2.5 G(n.).25 E F1(Re)108 288 Q -.1(ve)-.15 G
 F0 .122(pings forw)2.622 F .122(ard in the current b)-.1 F(uf)-.2 E(fer)
 -.25 E 5.122(.T)-.55 G(he)-5.122 E(right mouse b)144 352.8 Q
 (utton causes the same action.)-.2 E F1(End)108 369.6 Q F0 .548(This b)
-18.21 F .548(utton causes the set of displayed pings to step forw)-.2 F
-.549(ard to the end of the current b)-.1 F(uf)-.2 E(fer)-.25 E 3.049(.T)
--.55 G(he)-3.049 E(right mouse b)144 381.6 Q
+144 369.6 R .548(utton causes the set of displayed pings to step forw)
+-.2 F .549(ard to the end of the current b)-.1 F(uf)-.2 E(fer)-.25 E
+3.049(.T)-.55 G(he)-3.049 E(right mouse b)144 381.6 Q
 (utton causes the same action if the 'G' or 'g' k)-.2 E .3 -.15(ey i)-.1
 H 2.5(sd).15 G -.25(ow)-2.5 G(n.).25 E F1(Next Buffer)108 398.4 Q F0 .59
 (This b)144 410.4 R .59
@@ -1062,15 +1070,15 @@ H 2.5(sd).15 G -.25(ow)-2.5 G(n.).25 E F1(Next Buffer)108 398.4 Q F0 .59
 . If the current \214le is not the last)-.05 F(one in the a)144 499.2 Q
 -.25(va)-.2 G(ilable list, then the ne).25 E(xt unlock)-.15 E
 (ed \214le will be loaded for editing.)-.1 E F1(Quit)108 516 Q F0 .624
-(This b)16.55 F .624(utton causes the program to e)-.2 F .624
+(This b)144 516 R .624(utton causes the program to e)-.2 F .624
 (xit gracefully)-.15 F 5.624(.I)-.65 G 3.124(fad)-5.624 G .625
 (ata \214le has been loaded, all of the edited)-3.124 F(na)144 528 Q
 (vig)-.2 E(ation will be written to the output \214le before e)-.05 E
-(xiting.)-.15 E F1(About)108 544.8 Q F0 1.202(This b)9.33 F 1.202
-(utton causes the program to bring up a dialog sho)-.2 F 1.202
-(wing the program')-.25 F 3.702(sn)-.55 G 1.202(ame, v)-3.702 F 1.202
-(ersion, and)-.15 F(authors.)144 556.8 Q F1(Acr)108 573.6 Q(osstrack W)
--.18 E(idth)-.18 E F0 .451
+(xiting.)-.15 E F1(About)108 544.8 Q F0 .173(This b)144 544.8 R .173
+(utton causes the program to bring up a dialog sho)-.2 F .172
+(wing the program')-.25 F 2.672(sn)-.55 G .172(ame, v)-2.672 F .172
+(ersion, and au-)-.15 F(thors.)144 556.8 Q F1(Acr)108 573.6 Q
+(osstrack W)-.18 E(idth)-.18 E F0 .451
 (This slider sets the width of the plot in meters; in general this v)144
 585.6 R .451(alue should be slightly lar)-.25 F .452(ger than)-.18 F
 .444(the sw)144 597.6 R .444
@@ -1088,16 +1096,16 @@ ed by increments of 1 by clicking with the left b)144 621.6 R .424
 (depth scale will change as the)2.63 F 1.529
 (cross track distance scale is changed to maintain the same v)144 674.4
 R 1.528(ertical e)-.15 F 4.028(xageration. If)-.15 F 4.028(ap)4.028 G
-(articular)-4.028 E -.25(va)144 686.4 S 1.305
+(articular)-4.028 E -.25(va)144 686.4 S .428
 (lue is desired which cannot be obtained by dragging the slider).25 F
-3.806(,t)-.4 G 1.306(he slider can be changed by)-3.806 F .034
-(increments of 0.01 by clicking with the left b)144 698.4 R .033
-(utton inside the slider area, b)-.2 F .033
-(ut not on the slider itself.)-.2 F F1(Mode)108 715.2 Q F0 .911
-(This set of radio b)11.56 F .911(uttons allo)-.2 F .912
+2.928(,t)-.4 G .429(he slider can be changed by in-)-2.928 F
+(crements of 0.01 by clicking with the left b)144 698.4 Q
+(utton inside the slider area, b)-.2 E(ut not on the slider itself.)-.2
+E F1(Mode)108 715.2 Q F0 .912(This set of radio b)144 715.2 R .912
+(uttons allo)-.2 F .912
 (ws the user to specify the edit mode. If mode is set to)-.25 F F2 -.76
--.92(To g g)3.412 H(le).92 E F0 3.412(,t)C(hen)-3.412 E 2.987
-(clicking the left mouse b)144 727.2 R 2.986
+-.92(To g g)3.411 H(le).92 E F0 3.411(,t)C(hen)-3.411 E 2.986
+(clicking the left mouse b)144 727.2 R 2.987
 (utton will cause the nearest beam to toggle between \215agged and)-.2 F
 (MB-System 5.0)72 768 Q(24 No)132.205 E -.15(ve)-.15 G(mber 2018).15 E
 (8)190.545 E 0 Cg EP
@@ -1106,29 +1114,29 @@ R 1.528(ertical e)-.15 F 4.028(xageration. If)-.15 F 4.028(ap)4.028 G
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 160.39(mbedit\(1\) MB-System)72 48 R 160.39
-(5.0 mbedit\(1\))2.5 F 4.517(un\215agged. If)144 84 R 2.017
-(mode is set to)4.517 F/F1 10/Times-Italic@0 SF(Pic)4.517 E(k)-.2 E F0
-4.517(,t)C 2.018(hen clicking the left mouse b)-4.517 F 2.018
-(utton will cause the nearest)-.2 F .065
-(un\215agged beam to be \215agged.)144 96 R .064(If mode is set to)5.064
-F F1(Er)2.564 E(ase)-.15 E F0 2.564(,t)C .064
-(hen the cursor will change to an erasor and)-2.564 F(an)144 108 Q 2.834
-(yb)-.15 G .334(eam with the cursor while the left mouse b)-2.834 F .335
-(utton is held do)-.2 F .335(wn will be \215agged.)-.25 F .335
-(If mode is set)5.335 F(to)144 120 Q F1(Restor)4.231 E(e)-.37 E F0 4.231
-(,t)C 1.731(he beha)-4.231 F 1.731(vior will be the same as for)-.2 F F1
-(Er)4.231 E(ase)-.15 E F0 -.15(ex)4.23 G 1.73(cept that the af).15 F
-1.73(fected beams will be)-.25 F .162
-(un\215agged instead of \215agged. In)144 132 R F1(Gr)2.662 E(ab)-.15 E
-F0 .162(mode, a red rectangle is dra)2.662 F .163
+(5.0 mbedit\(1\))2.5 F 3.468(un\215agged. If)144 84 R .968
+(mode is set to)3.468 F/F1 10/Times-Italic@0 SF(Pic)3.468 E(k)-.2 E F0
+3.468(,t)C .968(hen clicking the left mouse b)-3.468 F .967
+(utton will cause the nearest un-)-.2 F .59
+(\215agged beam to be \215agged.)144 96 R .59(If mode is set to)5.59 F
+F1(Er)3.091 E(ase)-.15 E F0 3.091(,t)C .591
+(hen the cursor will change to an erasor and)-3.091 F(an)144 108 Q 2.835
+(yb)-.15 G .335(eam with the cursor while the left mouse b)-2.835 F .335
+(utton is held do)-.2 F .335(wn will be \215agged.)-.25 F .334
+(If mode is set)5.334 F(to)144 120 Q F1(Restor)3.255 E(e)-.37 E F0 3.255
+(,t)C .755(he beha)-3.255 F .755(vior will be the same as for)-.2 F F1
+(Er)3.255 E(ase)-.15 E F0 -.15(ex)3.255 G .755(cept that the af).15 F
+.755(fected beams will be un-)-.25 F .751
+(\215agged instead of \215agged. In)144 132 R F1(Gr)3.251 E(ab)-.15 E F0
+.751(mode, a red rectangle is dra)3.251 F .75
 (wn as the mouse is dragged with)-.15 F .206(the left b)144 144 R .206
 (utton do)-.2 F .206(wn. When the b)-.25 F .206
 (utton is released, all un\215agged soundings within the rectangle are)
--.2 F(\215agged.)144 156 Q F1(Info)5.734 E F0 .734(mode acts lik)3.234 F
-3.234(ep)-.1 G .735(ick mode, e)-3.234 F .735
+-.2 F(\215agged.)144 156 Q F1(Info)5.735 E F0 .735(mode acts lik)3.235 F
+3.235(ep)-.1 G .735(ick mode, e)-3.235 F .734
 (xcept that instead of \215agging the nearest sounding, the)-.15 F .764
 (program displays information about the selected ping and sounding abo)
-144 168 R 1.064 -.15(ve t)-.15 H .764(he bath).15 F .764
+144 168 R 1.064 -.15(ve t)-.15 H .765(he bath).15 F .765
 (ymetry pro\214le)-.05 F 2.5(box. The)144 180 R
 (edit mode can also be set using k)2.5 E .3 -.15(ey m)-.1 H
 (acros \(see the k).15 E -.15(ey)-.1 G(board action section\):).15 E -.8
@@ -1137,15 +1145,15 @@ F0 .162(mode, a red rectangle is dra)2.662 F .163
 ('e', 'O', 'o')2.5 E .17(Restore: 'R',)180 228 R -.5('r)2.5 G
 (', 'P', 'p').5 E 46.73(Grab: 'Y',)180 240 R('y', '}, ']')2.5 E 50.06
 (Info: 'T',)180 252 R -.18('t)2.5 G(', '{', '[').18 E/F2 10/Times-Bold@0
-SF(Un\215ag V)108 268.8 Q(iew)-.37 E F0 1.409(This b)144 280.8 R 1.409(\
-utton \215ags all un\215agged beams among the currently displayed pings\
-. Pings in the b)-.2 F(uf)-.2 E(fer)-.25 E
-(before or after the current display are unaf)144 292.8 Q(fected.)-.25 E
-F2(Un\215ag V)108 309.6 Q(iew)-.37 E F0 1.41(This b)144 321.6 R 1.409(u\
-tton un\215ags all \215agged beams among the currently displayed pings.\
- Pings in the b)-.2 F(uf)-.2 E(fer)-.25 E
-(before or after the current display are unaf)144 333.6 Q(fected.)-.25 E
-F2(Un\215ag F)108 350.4 Q(orward)-.25 E F0 .644(This b)144 362.4 R .644
+SF(Un\215ag V)108 268.8 Q(iew)-.37 E F0 .298(This b)144 280.8 R .297(ut\
+ton \215ags all un\215agged beams among the currently displayed pings. \
+Pings in the b)-.2 F(uf)-.2 E .297(fer be-)-.25 F
+(fore or after the current display are unaf)144 292.8 Q(fected.)-.25 E
+F2(Un\215ag V)108 309.6 Q(iew)-.37 E F0 .297(This b)144 321.6 R .297(ut\
+ton un\215ags all \215agged beams among the currently displayed pings. \
+Pings in the b)-.2 F(uf)-.2 E .298(fer be-)-.25 F
+(fore or after the current display are unaf)144 333.6 Q(fected.)-.25 E
+F2(Un\215ag F)108 350.4 Q(orward)-.25 E F0 .645(This b)144 362.4 R .644
 (utton un\215ags all \215agged beams among all pings from the start of \
 the current display to the)-.2 F(end of the current data b)144 374.4 Q
 (uf)-.2 E(fer)-.25 E 2.5(.P)-.55 G
@@ -1159,39 +1167,38 @@ E F2(Number of pings to step)108 420 Q F0
 460.8 Q(CTIONS)-.602 E F2(Left Mouse Button)108 472.8 Q F0 .693
 (The left mouse b)144 484.8 R .693(utton is used to pick beams.)-.2 F
 .693(Good beams are sho)5.693 F .693(wn as \214lled black squares and)
--.25 F 1.646
-(bad \(\215agged\) beams as un\214lled red or green squares.)144 496.8 R
-1.647(The result of picking a particular beam)6.647 F .741
-(depends on the current edit mode, as set by the)144 508.8 R F2(Mode)
-3.241 E F0 -.2(bu)3.241 G .741(tton or k).2 F -.15(ey)-.1 G .741
-(board macros de\214ned belo).15 F -.65(w.)-.25 G 2.372(The last pick)
-144 520.8 R 2.373
+-.25 F .59(bad \(\215agged\) beams as un\214lled red or green squares.)
+144 496.8 R .589(The result of picking a particular beam de-)5.589 F
+.191(pends on the current edit mode, as set by the)144 508.8 R F2(Mode)
+2.691 E F0 -.2(bu)2.691 G .191(tton or k).2 F -.15(ey)-.1 G .192
+(board macros de\214ned belo).15 F 1.492 -.65(w. T)-.25 H(he).65 E .855
+(last pick)144 520.8 R .855
 (ed beam \(and ping\) is remembered for use with some of the k)-.1 F
--.15(ey)-.1 G 2.373(board actions).15 F(described belo)144 532.8 Q -.65
+-.15(ey)-.1 G .854(board actions described).15 F(belo)144 532.8 Q -.65
 (w.)-.25 G F2(Middle Mouse Button)108 549.6 Q F0 1.125
 (The middle mouse b)144 561.6 R 1.125
 (utton causes the set of displayed pings to step)-.2 F F1(nstep)3.625 E
-F0 1.125(pings backw)3.625 F 1.125(ard in the)-.1 F 2.31(current b)144
-573.6 R(uf)-.2 E(fer)-.25 E 7.31(.T)-.55 G 2.31(he control b)-7.31 F
-(utton)-.2 E F2(Re)4.81 E -.1(ve)-.15 G(rse).1 E F0 2.311
-(causes the same action. If the 'G' or 'g' k)4.81 F 2.611 -.15(ey i)-.1
-H(s).15 E(depressed, the display will jump to the be)144 585.6 Q
-(ginning of the current b)-.15 E(uf)-.2 E(fer)-.25 E(.)-.55 E F2
-(Right Mouse Button)108 602.4 Q F0 .194(The right mouse b)144 614.4 R
-.194(utton causes the set of displayed pings to step)-.2 F F1(nstep)
-2.693 E F0 .193(pings forw)2.693 F .193(ard in the current)-.1 F -.2(bu)
-144 626.4 S -.25(ff).2 G(er).25 E 5.278(.T)-.55 G .278(he control b)
--5.278 F(utton)-.2 E F2 -.25(Fo)2.779 G(rward).25 E F0 .279
-(causes the same action. If the 'G' or 'g' k)2.779 F .579 -.15(ey i)-.1
-H 2.779(sd).15 G .279(epressed, the)-2.779 F
+F0 1.125(pings backw)3.625 F 1.125(ard in the)-.1 F 1.277(current b)144
+573.6 R(uf)-.2 E(fer)-.25 E 6.277(.T)-.55 G 1.277(he control b)-6.277 F
+(utton)-.2 E F2(Re)3.777 E -.1(ve)-.15 G(rse).1 E F0 1.276
+(causes the same action. If the 'G' or 'g' k)3.777 F 1.576 -.15(ey i)-.1
+H 3.776(sd).15 G(e-)-3.776 E(pressed, the display will jump to the be)
+144 585.6 Q(ginning of the current b)-.15 E(uf)-.2 E(fer)-.25 E(.)-.55 E
+F2(Right Mouse Button)108 602.4 Q F0 .193(The right mouse b)144 614.4 R
+.193(utton causes the set of displayed pings to step)-.2 F F1(nstep)
+2.694 E F0 .194(pings forw)2.694 F .194(ard in the current)-.1 F -.2(bu)
+144 626.4 S -.25(ff).2 G(er).25 E 5.279(.T)-.55 G .279(he control b)
+-5.279 F(utton)-.2 E F2 -.25(Fo)2.779 G(rward).25 E F0 .279
+(causes the same action. If the 'G' or 'g' k)2.779 F .578 -.15(ey i)-.1
+H 2.778(sd).15 G .278(epressed, the)-2.778 F
 (display will jump to the end of the current b)144 638.4 Q(uf)-.2 E(fer)
 -.25 E(.)-.55 E F3(KEYBO)72 667.2 Q(ARD A)-.438 E(CTIONS)-.602 E F2
-('G' or 'g')108 679.2 Q 1.52(Big J)144 691.2 R(ump:)-.15 E F0 1.52
-(Scolling forw)4.02 F 1.52(ard while pressing one of these k)-.1 F -.15
-(ey)-.1 G 4.02(sj).15 G 1.52(umps to the end of the current)-4.02 F -.2
-(bu)144 703.2 S -.25(ff).2 G(er).25 E 2.5(,a)-.4 G(nd scrolling backw)
--2.5 E(ard jumps to the be)-.1 E(ginning of the b)-.15 E(uf)-.2 E(fer)
--.25 E(.)-.55 E(MB-System 5.0)72 768 Q(24 No)132.205 E -.15(ve)-.15 G
+('G' or 'g')108 679.2 Q .315(Big J)144 691.2 R(ump:)-.15 E F0 .315
+(Scolling forw)2.815 F .315(ard while pressing one of these k)-.1 F -.15
+(ey)-.1 G 2.815(sj).15 G .316(umps to the end of the current b)-2.815 F
+(uf-)-.2 E(fer)144 703.2 Q 2.5(,a)-.4 G(nd scrolling backw)-2.5 E
+(ard jumps to the be)-.1 E(ginning of the b)-.15 E(uf)-.2 E(fer)-.25 E
+(.)-.55 E(MB-System 5.0)72 768 Q(24 No)132.205 E -.15(ve)-.15 G
 (mber 2018).15 E(9)190.545 E 0 Cg EP
 %%Page: 10 10
 %%BeginPageSetup
@@ -1199,89 +1206,90 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 160.39(mbedit\(1\) MB-System)72 48 R 160.39
 (5.0 mbedit\(1\))2.5 F/F1 10/Times-Bold@0 SF('Z', 'z', 'M', or 'm')108
-84 Q .321(Bad Ping:)144 96 R F0 .321(Pressing one of these k)2.821 F
--.15(ey)-.1 G 2.821(sc).15 G .322
-(auses all of the beams in the last pick)-2.821 F .322
+84 Q .322(Bad Ping:)144 96 R F0 .322(Pressing one of these k)2.822 F
+-.15(ey)-.1 G 2.822(sc).15 G .322
+(auses all of the beams in the last pick)-2.822 F .321
 (ed ping to be \215agged)-.1 F(as bad.)144 108 Q F1
-('X', 'x', '<', or ',)108 124.8 Q(')-.55 E(Right:)144 136.8 Q F0 .258
-(Pressing one of these k)2.758 F -.15(ey)-.1 G 2.758(sc).15 G .258
+('X', 'x', '<', or ',)108 124.8 Q(')-.55 E(Right:)144 136.8 Q F0 .257
+(Pressing one of these k)2.757 F -.15(ey)-.1 G 2.758(sc).15 G .258
 (auses all of the un\215agged beams in the current display to to be)
 -2.758 F(\215agged as bad. This is equi)144 148.8 Q -.25(va)-.25 G
 (lent to the CFlag V).25 E(ie)-.6 E(w)-.25 E F1 -.2(bu)2.5 G(tton.).2 E
-('C', 'c', '>', or '.)108 165.6 Q(')-.55 E(Right:)144 177.6 Q F0 .813
-(Pressing one of these k)3.313 F -.15(ey)-.1 G 3.313(sc).15 G .813
-(auses all of the \215agged beams in the current display to to be)-3.313
+('C', 'c', '>', or '.)108 165.6 Q(')-.55 E(Right:)144 177.6 Q F0 .814
+(Pressing one of these k)3.314 F -.15(ey)-.1 G 3.314(sc).15 G .813
+(auses all of the \215agged beams in the current display to to be)-3.314
 F(un\215agged. This is equi)144 189.6 Q -.25(va)-.25 G(lent to the).25 E
 F1(Un\215ag V)2.5 E(iew)-.37 E F0 -.2(bu)2.5 G(tton.).2 E F1('S', ')108
-206.4 Q(s', 'K', or 'k')-.37 E 1.775(Good Ping:)144 218.4 R F0 1.775
-(Pressing one of these k)4.275 F -.15(ey)-.1 G 4.275(sc).15 G 1.774
-(auses all of the beams in the last pick)-4.275 F 1.774(ed ping to be)
--.1 F(un\215agged as good.)144 230.4 Q F1('A)108 247.2 Q
-(', 'a', 'J', or 'j')-.74 E(Left:)144 259.2 Q F0 .176
-(Pressing one of these k)2.676 F -.15(ey)-.1 G 2.677(sc).15 G .177
+206.4 Q(s', 'K', or 'k')-.37 E .847(Good Ping:)144 218.4 R F0 .848
+(Pressing one of these k)3.347 F -.15(ey)-.1 G 3.348(sc).15 G .848
+(auses all of the beams in the last pick)-3.348 F .848
+(ed ping to be un-)-.1 F(\215agged as good.)144 230.4 Q F1('A)108 247.2
+Q(', 'a', 'J', or 'j')-.74 E(Left:)144 259.2 Q F0 .177
+(Pressing one of these k)2.677 F -.15(ey)-.1 G 2.677(sc).15 G .177
 (auses all of the beams including and to the left of the last pick)
 -2.677 F(ed)-.1 E(beam to be \215agged as bad.)144 271.2 Q F1('D', ')108
-288 Q(d', 'L)-.2 E(', or 'l')-1.1 E(Right:)144 300 Q F0 1.153
-(Pressing one of these k)3.653 F -.15(ey)-.1 G 3.652(sc).15 G 1.152
+288 Q(d', 'L)-.2 E(', or 'l')-1.1 E(Right:)144 300 Q F0 1.152
+(Pressing one of these k)3.652 F -.15(ey)-.1 G 3.652(sc).15 G 1.152
 (auses all of the beams including and to the right of the last)-3.652 F
-(pick)144 312 Q(ed beam to be \215agged as bad.)-.1 E F1 23.51('!' Zer)
-108 328.8 R 3.458(oP)-.18 G(ing:)-3.458 E F0 .958(Pressing this k)3.458
-F 1.258 -.15(ey c)-.1 H .958
+(pick)144 312 Q(ed beam to be \215agged as bad.)-.1 E F1('!')108 328.8 Q
+(Zer)144 328.8 Q 3.459(oP)-.18 G(ing:)-3.459 E F0 .959(Pressing this k)
+3.459 F 1.258 -.15(ey c)-.1 H .958
 (auses all of the beams in the ping associated with the last pick).15 F
 (ed)-.1 E .043(beam to be zeroed. This should be used only for complete\
 ly ridiculous v)144 340.8 R .043(alues, as the v)-.25 F .043
 (alues are not)-.25 F(reco)144 352.8 Q -.15(ve)-.15 G(rable.).15 E F1
-('Q', 'q', 'U', or 'u')108 369.6 Q -.92(To)144 381.6 S .907(ggle Mode:)
-.92 F F0 .907(Pressing one of these k)3.407 F -.15(ey)-.1 G 3.408(ss).15
-G .908(ets the edit mode to "toggle" so that clicking the left)-3.408 F
-1.757(mouse b)144 393.6 R 1.756(utton will cause the nearest beam to to\
-ggle between \215agged and un\215agged.)-.2 F 1.756(The edit)6.756 F
+('Q', 'q', 'U', or 'u')108 369.6 Q -.92(To)144 381.6 S .908(ggle Mode:)
+.92 F F0 .908(Pressing one of these k)3.408 F -.15(ey)-.1 G 3.408(ss).15
+G .907(ets the edit mode to "toggle" so that clicking the left)-3.408 F
+1.756(mouse b)144 393.6 R 1.756(utton will cause the nearest beam to to\
+ggle between \215agged and un\215agged.)-.2 F 1.757(The edit)6.757 F
 (mode can also be set using the)144 405.6 Q F1(Mode)2.5 E F0(toggle b)
-2.5 E(uttons.)-.2 E F1('W', 'w', 'I', or 'i')108 422.4 Q .204
-(Pick Mode:)144 434.4 R F0 .204(Pressing one of these k)2.704 F -.15(ey)
--.1 G 2.704(ss).15 G .205
-(ets the edit mode to "pick" so that clicking the left mouse)-2.704 F
+2.5 E(uttons.)-.2 E F1('W', 'w', 'I', or 'i')108 422.4 Q .205
+(Pick Mode:)144 434.4 R F0 .205(Pressing one of these k)2.705 F -.15(ey)
+-.1 G 2.705(ss).15 G .204
+(ets the edit mode to "pick" so that clicking the left mouse)-2.705 F
 -.2(bu)144 446.4 S .711
 (tton will cause the nearest un\215agged beam to be \215agged.).2 F .711
 (The edit mode can also be set using)5.711 F(the)144 458.4 Q F1(Mode)2.5
 E F0(toggle b)2.5 E(uttons.)-.2 E F1('E', 'e', 'O', or 'o')108 475.2 Q
-1.377(Erase Mode:)144 487.2 R F0 1.377(Pressing one of these k)3.877 F
--.15(ey)-.1 G 3.878(ss).15 G 1.378
+1.378(Erase Mode:)144 487.2 R F0 1.378(Pressing one of these k)3.878 F
+-.15(ey)-.1 G 3.878(ss).15 G 1.377
 (ets the edit mode to "erase" so that clicking the left)-3.878 F .195
 (mouse b)144 499.2 R .195(utton will cause an)-.2 F 2.695(yb)-.15 G .195
 (eam under the cursor while the left mouse b)-2.695 F .195
 (utton is held do)-.2 F .195(wn to be)-.25 F 2.5(\215agged. The)144
 511.2 R(edit mode can also be set using the)2.5 E F1(Mode)2.5 E F0
 (toggle b)2.5 E(uttons.)-.2 E F1('R', ')108 528 Q(r', 'P', or 'p')-.2 E
-(Restor)144 540 Q 3.006(eM)-.18 G(ode:)-3.006 E F0 .506
-(Pressing one of these k)3.006 F -.15(ey)-.1 G 3.006(ss).15 G .507
-(ets the edit mode to "restore" so that clicking the left)-3.006 F .195
+(Restor)144 540 Q 3.007(eM)-.18 G(ode:)-3.007 E F0 .507
+(Pressing one of these k)3.007 F -.15(ey)-.1 G 3.007(ss).15 G .506
+(ets the edit mode to "restore" so that clicking the left)-3.007 F .195
 (mouse b)144 552 R .195(utton will cause an)-.2 F 2.695(yb)-.15 G .195
 (eam under the cursor while the left mouse b)-2.695 F .195
 (utton is held do)-.2 F .195(wn to be)-.25 F 2.5(un\215agged. The)144
 564 R(edit mode can also be set using the)2.5 E F1(Mode)2.5 E F0
-(toggle b)2.5 E(uttons.)-.2 E F1('T', 't', '{', or '[')108 580.8 Q 1.442
-(Grab Mode:)144 592.8 R F0 1.442(Pressing one of these k)3.942 F -.15
-(ey)-.1 G 3.942(ss).15 G 1.443
+(toggle b)2.5 E(uttons.)-.2 E F1('T', 't', '{', or '[')108 580.8 Q 1.443
+(Grab Mode:)144 592.8 R F0 1.443(Pressing one of these k)3.943 F -.15
+(ey)-.1 G 3.942(ss).15 G 1.442
 (ets the edit mode to "grab" so that dragging the left)-3.942 F .51
 (mouse b)144 604.8 R .51(utton will dra)-.2 F 3.01(war)-.15 G .51
 (ed rectangle. An)-3.01 F 3.01(yb)-.15 G .51
 (eams inside the rectangle when the left mouse b)-3.01 F(ut-)-.2 E(ton \
 is released will be \215agged. The edit mode can also be set using the)
 144 616.8 Q F1(Mode)2.5 E F0(toggle b)2.5 E(uttons.)-.2 E F1
-('Y', 'y', '}', or ']')108 633.6 Q(Inf)144 645.6 Q 2.841(oM)-.25 G(ode:)
--2.841 E F0 .341(Pressing one of these k)2.841 F -.15(ey)-.1 G 2.842(ss)
-.15 G .342(ets the edit mode to "info" so that clicking the left mouse)
--2.842 F -.2(bu)144 657.6 S .234
+('Y', 'y', '}', or ']')108 633.6 Q(Inf)144 645.6 Q 2.842(oM)-.25 G(ode:)
+-2.842 E F0 .342(Pressing one of these k)2.842 F -.15(ey)-.1 G 2.842(ss)
+.15 G .341(ets the edit mode to "info" so that clicking the left mouse)
+-2.842 F -.2(bu)144 657.6 S .233
 (tton will cause information about the nearest beam to be displayed abo)
-.2 F .533 -.15(ve t)-.15 H .233(he bath).15 F .233(ymetry pro\214le)-.05
+.2 F .534 -.15(ve t)-.15 H .234(he bath).15 F .234(ymetry pro\214le)-.05
 F 2.5(box. The)144 669.6 R(edit mode can also be set using the)2.5 E F1
-(Mode)2.5 E F0(toggle b)2.5 E(uttons.)-.2 E F1('2')108 686.4 Q F0 .186
-(Sets the)24.34 F F1(mbedit)2.686 E F0 .186(display so that the bath)
-2.686 F .187(ymetry acrosstrack pro\214les are plotted with v)-.05 F
-.187(ertical of)-.15 F(fsets)-.25 E(between each pro\214le \(in w)144
-698.4 Q(aterf)-.1 E(all f)-.1 E(ashion\).)-.1 E F1('3')108 715.2 Q F0
-.97(Sets the)24.34 F F1(mbedit)3.47 E F0 .97(display so that the bath)
+(Mode)2.5 E F0(toggle b)2.5 E(uttons.)-.2 E F1('2')108 686.4 Q F0 .187
+(Sets the)144 686.4 R F1(mbedit)2.687 E F0 .187
+(display so that the bath)2.687 F .186
+(ymetry acrosstrack pro\214les are plotted with v)-.05 F .186
+(ertical of)-.15 F(fsets)-.25 E(between each pro\214le \(in w)144 698.4
+Q(aterf)-.1 E(all f)-.1 E(ashion\).)-.1 E F1('3')108 715.2 Q F0 .97
+(Sets the)144 715.2 R F1(mbedit)3.47 E F0 .97(display so that the bath)
 3.47 F .97(ymetry acrosstrack pro\214les are vie)-.05 F .97
 (wed in the alongtrack)-.25 F(direction without v)144 727.2 Q
 (ertical of)-.15 E(fsets between the pings.)-.25 E(MB-System 5.0)72 768
@@ -1291,9 +1299,9 @@ Q(24 No)132.205 E -.15(ve)-.15 G(mber 2018).15 E(10)185.545 E 0 Cg EP
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 160.39(mbedit\(1\) MB-System)72 48 R 160.39
-(5.0 mbedit\(1\))2.5 F/F1 10/Times-Bold@0 SF('4')108 84 Q F0 .772
-(Sets the)24.34 F F1(mbedit)3.272 E F0 .772(display so that the bath)
-3.272 F .772(ymetry acrosstrack pro\214les are vie)-.05 F .773
+(5.0 mbedit\(1\))2.5 F/F1 10/Times-Bold@0 SF('4')108 84 Q F0 .773
+(Sets the)144 84 R F1(mbedit)3.273 E F0 .772(display so that the bath)
+3.272 F .772(ymetry acrosstrack pro\214les are vie)-.05 F .772
 (wed in the acrosstrack)-.25 F(direction without v)144 96 Q(ertical of)
 -.15 E(fsets between the pings.)-.25 E/F2 10.95/Times-Bold@0 SF
 (SEE ALSO)72 124.8 Q F1(mbsystem)108 136.8 Q F0(\(1\),)A F1(mbpr)2.5 E

@@ -198,25 +198,27 @@ void mapsrc_free(struct mapsrc** psrc) {
 
 char* mapsrc_tostring(struct mapsrc* src) {
 
-	char* str = (char*) malloc(180 * sizeof(char));
-	char buf[100];
+    int ssz = 180 * sizeof(char);
+    int bsz = 100;
+    char* str = (char*) malloc(ssz);
+	char buf[bsz];
 	//char *buf = malloc(100 * sizeof(char));
-	sprintf(str, "mapsrc {\n\tncid = %i\n", src->ncid);
-	sprintf(buf, "\txid = %i\n", src->xid);
+	snprintf(str, ssz, "mapsrc {\n\tncid = %i\n", src->ncid);
+	snprintf(buf, bsz, "\txid = %i\n", src->xid);
 	strcat(str, buf);
-	sprintf(buf, "\txdimid = %i\n", src->xdimid);
+	snprintf(buf,  bsz, "\txdimid = %i\n", src->xdimid);
 	strcat(str, buf);
-	sprintf(buf, "\txdimlen = %d\n", int(src->xdimlen));
+	snprintf(buf,  bsz, "\txdimlen = %d\n", int(src->xdimlen));
 	strcat(str, buf);
-	sprintf(buf, "\tyid = %i\n", src->yid);
+	snprintf(buf,  bsz, "\tyid = %i\n", src->yid);
 	strcat(str, buf);
-	sprintf(buf, "\tydimid = %i\n", src->ydimid);
+	snprintf(buf,  bsz, "\tydimid = %i\n", src->ydimid);
 	strcat(str, buf);
-	sprintf(buf, "\tydimlen = %d\n", int(src->ydimlen));
+	snprintf(buf,  bsz, "\tydimlen = %d\n", int(src->ydimlen));
 	strcat(str, buf);
-	sprintf(buf, "\tzid = %i\n", src->zid);
+	snprintf(buf,  bsz, "\tzid = %i\n", src->zid);
 	strcat(str, buf);
-	sprintf(buf, "\tstatus = %i\n", src->status);
+	snprintf(buf,  bsz, "\tstatus = %i\n", src->status);
 	strcat(str, buf);
 	strcat(str, "}");
 	return str;
@@ -382,28 +384,30 @@ void mapdata_free(struct mapdata* data, int free_all) {
 char* mapdata_tostring(struct mapdata* data) {
     char *retval = NULL;
     if(NULL!=data){
-        char* str = (char*) malloc(180 * sizeof(char));
+        int ssz = 180 * sizeof(char);
+        char* str = (char*) malloc(ssz);
         if(NULL!=str){
-            memset(str,0,180 * sizeof(char));
-            char buf[100];
+            memset(str,0,ssz * sizeof(char));
+            int bsz = 100;
+            char buf[bsz];
             strcpy(str, "mapdata {\n");
-            sprintf(buf, "\txcenter = %f\n", data->xcenter);
+            snprintf(buf,  bsz, "\txcenter = %f\n", data->xcenter);
             strcat(str, buf);
-            sprintf(buf, "\tycenter = %f\n", data->ycenter);
+            snprintf(buf,  bsz, "\tycenter = %f\n", data->ycenter);
             strcat(str, buf);
             if(data->xpts == NULL) {
-                sprintf(buf, "\tWARNING: x = NULL");
+                snprintf(buf,  bsz, "\tWARNING: x = NULL");
                 strcat(str, buf);
             }
             if(data->ypts == NULL) {
-                sprintf(buf, "\tWARNING: y = NULL");
+                snprintf(buf,  bsz, "\tWARNING: y = NULL");
                 strcat(str, buf);
             }
-            sprintf(buf, "\txdimlen = %zu\n", data->xdimlen);
+            snprintf(buf,  bsz, "\txdimlen = %zu\n", data->xdimlen);
             strcat(str, buf);
-            sprintf(buf, "\tydimlen = %zu\n", data->ydimlen);
+            snprintf(buf,  bsz, "\tydimlen = %zu\n", data->ydimlen);
             strcat(str, buf);
-            sprintf(buf, "\tstatus = %i\n", data->status);
+            snprintf(buf,  bsz, "\tstatus = %i\n", data->status);
             strcat(str, buf);
             strcat(str, "}");
             retval = str;
@@ -501,22 +505,24 @@ int mapbounds_fill1(struct mapsrc* src, struct mapbounds* bounds) {
 }
 
 char* mapbounds_tostring(struct mapbounds* bounds) {
-	char* str = (char*) malloc(256 * sizeof(char));
+    int ssz = 256 * sizeof(char);
+    int bsz = 100;
+	char* str = (char*) malloc(ssz);
 	char buf[100];
 	strcpy(str, "mapbounds {\n");
-	sprintf(buf, "\tncid = %d\n", bounds->ncid);
+	snprintf(buf,  bsz, "\tncid = %d\n", bounds->ncid);
 	strcat(str, buf);
-	sprintf(buf, "\txmin = %f\n", bounds->xmin);
+	snprintf(buf,  bsz, "\txmin = %f\n", bounds->xmin);
 	strcat(str, buf);
-	sprintf(buf, "\txmax = %f\n", bounds->xmax);
+	snprintf(buf,  bsz, "\txmax = %f\n", bounds->xmax);
 	strcat(str, buf);
-	sprintf(buf, "\tdx = %f\n", bounds->dx);
+	snprintf(buf,  bsz, "\tdx = %f\n", bounds->dx);
 	strcat(str, buf);
-	sprintf(buf, "\tymin = %f\n", bounds->ymin);
+	snprintf(buf,  bsz, "\tymin = %f\n", bounds->ymin);
 	strcat(str, buf);
-	sprintf(buf, "\tymax = %f\n", bounds->ymax);
+	snprintf(buf,  bsz, "\tymax = %f\n", bounds->ymax);
 	strcat(str, buf);
-	sprintf(buf, "\tdy = %f\n", bounds->dy);
+	snprintf(buf,  bsz, "\tdy = %f\n", bounds->dy);
 	strcat(str, buf);
 	strcat(str, "}");
 	return str;

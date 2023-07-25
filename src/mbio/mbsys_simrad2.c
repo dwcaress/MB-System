@@ -1705,7 +1705,7 @@ int mbsys_simrad2_preprocess(int verbose,     /* in: verbosity level set on comm
 
   /* get data structure pointers */
 	struct mbsys_simrad2_struct *store = (struct mbsys_simrad2_struct *)store_ptr;
-  struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
+  // struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       target_sensor:              %d\n", pars->target_sensor);

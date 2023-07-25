@@ -1,9 +1,9 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:01 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:07 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 4
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -13,7 +13,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -71,6 +71,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -136,7 +137,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -174,8 +178,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -266,7 +272,7 @@ E F0 1.107(is speci\214ed, each)3.607 F -.25(va)108 338.4 S 1.001
 G(ampshire)-2.5 E(Christian do Santos Ferreira)108 475.2 Q(MAR)113 487.2
 Q(UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
 499.2 Q -.15(ve)-.25 G(rsity of Bremen).15 E F1(OPTIONS)72 528 Q F2
-(--help)108 540 Q F0(This option causes)11 E F2(mbcon\214g)2.5 E F0
+(--help)108 540 Q F0(This option causes)144 540 Q F2(mbcon\214g)2.5 E F0
 (to print out its usage options and e)2.5 E(xit.)-.15 E F2(--v)108 556.8
 Q(erbose)-.1 E F0 .925(By def)144 568.8 R(ault)-.1 E F2(mbcon\214g)3.425
 E F0 .925(outputs the desired v)3.425 F .924
@@ -274,24 +280,24 @@ E F0 .925(outputs the desired v)3.425 F .924
 (--v)3.424 E(er)-.1 E(-)-.37 E(bose)144 580.8 Q F0(is speci\214ed the v)
 2.5 E(alues are preceded on a separate line by a descripti)-.25 E .3
 -.15(ve i)-.25 H(denti\214er).15 E(.)-.55 E F2(--pr)108 597.6 Q(e\214x)
--.18 E F0 1.936(This option causes)144 609.6 R F2(mbcon\214g)4.437 E F0
-1.937(to output the)4.437 F F2(MB-System)4.437 E F0 1.937
-(install location.)4.437 F 1.937(The locations of the)6.937 F -.15(exe)
-144 621.6 S .813(cutable programs, the linkable libraries, and the head\
-er \214les are in directories named bin, lib,).15 F 2.734
-(and include in the install locations. F)144 633.6 R 2.734
-(or instance, if the install location is "/usr/local", then)-.15 F -.15
-(exe)144 645.6 S 1.853(cutable programs will be in "/usr/local/bin", li\
-braries in "/usr/local/lib", and header \214les in).15 F
-("/usr/local/include".)144 657.6 Q F2(--c\215ags)108 674.4 Q F0 2.215
-(This option causes)5.45 F F2(mbcon\214g)4.715 E F0 2.216
-(to output the compiler \215ags needed to compile C programs or)4.715 F
-.295(libraries that mak)144 686.4 R 2.795(eu)-.1 G .295
-(se of functions a)-2.795 F -.25(va)-.2 G .295(ilable in).25 F F2
-(MB-System)2.795 E F0 .294(linkable libraries. These \215ags consist)
-2.794 F(of specifying the location of the)144 698.4 Q F2(MB-System)2.5 E
+-.18 E F0 .412(This option causes)144 609.6 R F2(mbcon\214g)2.912 E F0
+.412(to output the)2.912 F F2(MB-System)2.912 E F0 .412
+(install location.)2.912 F .412(The locations of the e)5.412 F -.15(xe)
+-.15 G(-).15 E .535(cutable programs, the linkable libraries, and the h\
+eader \214les are in directories named bin, lib, and)144 621.6 R .733
+(include in the install locations. F)144 633.6 R .733
+(or instance, if the install location is "/usr/local", then e)-.15 F
+-.15(xe)-.15 G(cutable).15 E .793(programs will be in "/usr/local/bin",\
+ libraries in "/usr/local/lib", and header \214les in "/usr/local/in-)
+144 645.6 R(clude".)144 657.6 Q F2(--c\215ags)108 674.4 Q F0 1.308
+(This option causes)144 674.4 R F2(mbcon\214g)3.808 E F0 1.309
+(to output the compiler \215ags needed to compile C programs or li-)
+3.808 F .723(braries that mak)144 686.4 R 3.223(eu)-.1 G .722
+(se of functions a)-3.223 F -.25(va)-.2 G .722(ilable in).25 F F2
+(MB-System)3.222 E F0 .722(linkable libraries. These \215ags consist)
+3.222 F(of specifying the location of the)144 698.4 Q F2(MB-System)2.5 E
 F0(header \214les.)2.5 E F2(--libs)108 715.2 Q F0 .486
-(This option causes)14.33 F F2(mbcon\214g)2.986 E F0 .486
+(This option causes)144 715.2 R F2(mbcon\214g)2.986 E F0 .486
 (to output the link)2.986 F .486
 (er \215ags needed to link a C program with)-.1 F F2(MB-Sys-)2.987 E
 (tem)144 727.2 Q F0 .723
@@ -351,8 +357,8 @@ F F1(MB-System)3.957 E F0(.)A .379(This is the \214rst of three v)144
 (mbcon\214g)3.092 E F0 .592(to output the path to the Le)3.092 F .592
 (vitus w)-.25 F .592(ater sound speed model database)-.1 F
 (accessed by the program)144 424.8 Q F1(mble)2.5 E(vitus)-.15 E F0(.)A
-F1(--otps)108 441.6 Q F0 .149(This option causes)11.56 F F1(mbcon\214g)
-2.649 E F0 .149(to output the location of the O)2.649 F .15
+F1(--otps)108 441.6 Q F0 .149(This option causes)144 441.6 R F1
+(mbcon\214g)2.649 E F0 .149(to output the location of the O)2.649 F .15
 (TPS tidal prediction softw)-.4 F .15(are accessed)-.1 F(by program)144
 453.6 Q F1(mbotps)2.5 E F0(.)A/F2 10.95/Times-Bold@0 SF(EXAMPLES)72
 482.4 Q F0 .748(Consider an)108 494.4 R F1(MB-System)3.248 E F0 .747(in\

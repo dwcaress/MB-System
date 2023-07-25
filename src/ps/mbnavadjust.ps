@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:03 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:09 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 23
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -232,123 +238,123 @@ BP
 /F0 10/Times-Roman@0 SF(mbna)72 48 Q -.25(va)-.2 G 137.51
 (djust\(1\) MB-System).25 F 137.51(5.0 mbna)2.5 F -.25(va)-.2 G
 (djust\(1\)).25 E/F1 10.95/Times-Bold@0 SF -.219(NA)72 84 S(ME).219 E/F2
-10/Times-Bold@0 SF(mbna)108 96 Q -.1(va)-.25 G(djust).1 E F0 2.711<ad50>
-2.711 G .211(ackage that solv)-2.861 F .211(es for optimal na)-.15 F
-(vig)-.2 E .211(ation by matching bath)-.05 F .21(ymetry of o)-.05 F
--.15(ve)-.15 G .21(rlapping sw).15 F(aths.)-.1 E F1(VERSION)72 124.8 Q
-F0 -1.11(Ve)108 136.8 S(rsion 5.0)1.11 E F1(SYNOPSIS)72 165.6 Q F2(mbna)
-108 177.6 Q -.1(va)-.25 G(djust).1 E F0([)2.5 E F2
-<ad5620ad4820ad4420ad52>A F0(])A F1(DESCRIPTION)72 206.4 Q F2(MBna)108
-218.4 Q -.1(va)-.25 G(djust).1 E F0 .387(is an interacti)2.887 F .687
--.15(ve g)-.25 H .387(raphical program used to adjust sw).15 F .387
-(ath data na)-.1 F(vig)-.2 E .388(ation by matching bath)-.05 F(y-)-.05
-E .895(metric features in o)108 230.4 R -.15(ve)-.15 G .894
+10/Times-Bold@0 SF(mbna)108 96 Q -.1(va)-.25 G(djust).1 E F0 2.5<ad50>
+2.5 G(ackage that solv)-2.65 E(es for optimal na)-.15 E(vig)-.2 E
+(ation by matching bath)-.05 E(ymetry of o)-.05 E -.15(ve)-.15 G
+(rlapping sw).15 E(aths.)-.1 E F1(VERSION)72 124.8 Q F0 -1.11(Ve)108
+136.8 S(rsion 5.0)1.11 E F1(SYNOPSIS)72 165.6 Q F2(mbna)108 177.6 Q -.1
+(va)-.25 G(djust).1 E F0([)2.5 E F2<ad5620ad4820ad4420ad52>A F0(])A F1
+(DESCRIPTION)72 206.4 Q F2(MBna)108 218.4 Q -.1(va)-.25 G(djust).1 E F0
+.388(is an interacti)2.888 F .687 -.15(ve g)-.25 H .387
+(raphical program used to adjust sw).15 F .387(ath data na)-.1 F(vig)-.2
+E .387(ation by matching bath)-.05 F(y-)-.05 E .894
+(metric features in o)108 230.4 R -.15(ve)-.15 G .894
 (rlapping and crossing sw).15 F .894(aths. The primary purpose of)-.1 F
-F2(mbna)3.394 E -.1(va)-.25 G(djust).1 E F0 .894(is to eliminate)3.394 F
-(relati)108 242.4 Q .379 -.15(ve n)-.25 H -.2(av).15 G(ig).2 E .079
+F2(mbna)3.395 E -.1(va)-.25 G(djust).1 E F0 .895(is to eliminate)3.395 F
+(relati)108 242.4 Q .38 -.15(ve n)-.25 H -.2(av).15 G(ig).2 E .08
 (ational errors in sw)-.05 F .079(ath data obtained from poorly na)-.1 F
-(vig)-.2 E .079(ated sonars. Submer)-.05 F .08(ged platforms such)-.18 F
-1.359(as to)108 254.4 R 1.359(wed v)-.25 F 1.359
+(vig)-.2 E .079(ated sonars. Submer)-.05 F .079(ged platforms such)-.18
+F 1.358(as to)108 254.4 R 1.358(wed v)-.25 F 1.358
 (ehicles, remotely operated v)-.15 F 1.358(ehicles \(R)-.15 F -.5(OV)-.4
-G 1.358(s\) and autonomous underw).5 F 1.358(ater v)-.1 F 1.358
-(ehicles \(A)-.15 F 1.358(UVs\) are)-.55 F 1.244(frequently not na)108
-266.4 R(vig)-.2 E 1.244(ated with accurac)-.05 F 3.744(ye)-.15 G(qui)
--3.744 E -.25(va)-.25 G 1.245(lent to the lateral resolution of sw).25 F
-1.245(ath bath)-.1 F 1.245(ymetry obtained)-.05 F .573
-(with high frequenc)108 278.4 R 3.073(ys)-.15 G .573
-(onars operated close to the sea\215oor)-3.073 F 3.072(.T)-.55 G .572
-(his is particularly true for systems that depend)-3.072 F .054
+G 1.358(s\) and autonomous underw).5 F 1.359(ater v)-.1 F 1.359
+(ehicles \(A)-.15 F 1.359(UVs\) are)-.55 F 1.245(frequently not na)108
+266.4 R(vig)-.2 E 1.245(ated with accurac)-.05 F 3.745(ye)-.15 G(qui)
+-3.745 E -.25(va)-.25 G 1.245(lent to the lateral resolution of sw).25 F
+1.244(ath bath)-.1 F 1.244(ymetry obtained)-.05 F .572
+(with high frequenc)108 278.4 R 3.072(ys)-.15 G .572
+(onars operated close to the sea\215oor)-3.072 F 3.073(.T)-.55 G .573
+(his is particularly true for systems that depend)-3.073 F .054
 (on ultra-short baseline na)108 290.4 R(vig)-.2 E .054
 (ation \(USBL\) or on inertial na)-.05 F(vig)-.2 E .054
 (ation \(as opposed to long baseline \(LBL\) na)-.05 F(v-)-.2 E(ig)108
 302.4 Q .993(ation obtained using transponder netw)-.05 F .993
 (orks\). Man)-.1 F 3.493(yo)-.15 G .993(ld, pre-GPS surv)-3.493 F -.15
 (ey)-.15 G 3.493(sw).15 G .993(ith hull mounted sonars also)-3.493 F
-(suf)108 314.4 Q 1(fer from poor na)-.25 F(vig)-.2 E 1(ation relati)-.05
-F 1.3 -.15(ve t)-.25 H 3.5(ot).15 G 1.001(he resolution of the sw)-3.5 F
-1.001(ath bath)-.1 F(ymetry)-.05 E 3.501(,a)-.65 G 1.001
-(nd can thus be impro)-3.501 F -.15(ve)-.15 G(d).15 E .908
-(with application of this tool.)108 326.4 R F2(MBna)3.408 E -.1(va)-.25
-G(djust).1 E F0 .908(also w)3.408 F .908(orks well to co-re)-.1 F .908
-(gister surv)-.15 F -.15(ey)-.15 G 3.408(sa).15 G 3.408(td)-3.408 G(if)
--3.408 E .908(ferent scales. F)-.25 F(or)-.15 E .529
-(instance, our initial use of this tool in)108 338.4 R -.2(vo)-.4 G(lv)
-.2 E .529(ed co-re)-.15 F .529(gistering a deep-to)-.15 F .53
-(wed Reson 8101 multibeam surv)-.25 F .83 -.15(ey o)-.15 H(f).15 E
-(the Loihi Seamount summit \(of)108 350.4 Q(fshore Ha)-.25 E -.1(wa)-.15
-G(ii\) with a hull mounted Simrad EM300 multibeam surv).1 E -.15(ey)-.15
-G(.)-.5 E .486(When sw)108 374.4 R .486(ath surv)-.1 F -.15(ey)-.15 G
-2.986(sa).15 G .486(re poorly na)-2.986 F(vig)-.2 E .485
+(suf)108 314.4 Q 1.001(fer from poor na)-.25 F(vig)-.2 E 1.001
+(ation relati)-.05 F 1.301 -.15(ve t)-.25 H 3.501(ot).15 G 1.001
+(he resolution of the sw)-3.501 F 1(ath bath)-.1 F(ymetry)-.05 E 3.5(,a)
+-.65 G 1(nd can thus be impro)-3.5 F -.15(ve)-.15 G(d).15 E
+(with application of this tool.)108 326.4 Q F2(MBna)2.5 E -.1(va)-.25 G
+(djust).1 E F0 .001(also w)2.5 F .001(orks well to co-re)-.1 F .001
+(gister surv)-.15 F -.15(ey)-.15 G 2.501(sa).15 G 2.501(td)-2.501 G(if)
+-2.501 E .001(ferent scales. F)-.25 F .001(or in-)-.15 F .063
+(stance, our initial use of this tool in)108 338.4 R -.2(vo)-.4 G(lv).2
+E .063(ed co-re)-.15 F .062(gistering a deep-to)-.15 F .062
+(wed Reson 8101 multibeam surv)-.25 F .362 -.15(ey o)-.15 H 2.562(ft).15
+G(he)-2.562 E(Loihi Seamount summit \(of)108 350.4 Q(fshore Ha)-.25 E
+-.1(wa)-.15 G(ii\) with a hull mounted Simrad EM300 multibeam surv).1 E
+-.15(ey)-.15 G(.)-.5 E .485(When sw)108 374.4 R .485(ath surv)-.1 F -.15
+(ey)-.15 G 2.985(sa).15 G .485(re poorly na)-2.985 F(vig)-.2 E .486
 (ated, features clearly imaged by the sonar may not match in o)-.05 F
--.15(ve)-.15 G(rlap-).15 E .171(ping and crossing sw)108 386.4 R 2.671
+-.15(ve)-.15 G(rlap-).15 E .172(ping and crossing sw)108 386.4 R 2.672
 (aths. Ho)-.1 F(we)-.25 E -.15(ve)-.25 G .972 -.4(r, b).15 H 2.672(ys).4
-G .172(ystematically determining the positional of)-2.672 F .172
-(fsets between matching)-.25 F 1.016(features throughout a surv)108
+G .172(ystematically determining the positional of)-2.672 F .171
+(fsets between matching)-.25 F 1.015(features throughout a surv)108
 398.4 R -.15(ey)-.15 G 3.516(,i)-.5 G 3.516(ti)-3.516 G 3.516(sp)-3.516
 G 1.016(ossible to solv)-3.516 F 1.016(e, or in)-.15 F -.15(ve)-.4 G
 1.016(rt, for a na).15 F(vig)-.2 E 1.016
-(ation model which is consistent)-.05 F .627(with the original na)108
+(ation model which is consistent)-.05 F .628(with the original na)108
 410.4 R(vig)-.2 E .628(ational constraints, satis\214es the requirement\
- of reasonableness, and also causes fea-)-.05 F .205(tures in o)108
-422.4 R -.15(ve)-.15 G .205(rlapping sw).15 F .205
-(aths to match within the sonar')-.1 F 2.704(sr)-.55 G .204
-(esolution. The analysis and adjustment can be lim-)-2.704 F .511
+ of reasonableness, and also causes fea-)-.05 F .204(tures in o)108
+422.4 R -.15(ve)-.15 G .204(rlapping sw).15 F .204
+(aths to match within the sonar')-.1 F 2.704(sr)-.55 G .205
+(esolution. The analysis and adjustment can be lim-)-2.704 F .512
 (ited to lateral \(x and y or longitude and latitude\) of)108 434.4 R
-.512(fsets when all v)-.25 F .512(ertical of)-.15 F .512(fsets ha)-.25 F
-.812 -.15(ve b)-.2 H .512(een corrected prior).15 F 1.044
+.512(fsets when all v)-.25 F .511(ertical of)-.15 F .511(fsets ha)-.25 F
+.811 -.15(ve b)-.2 H .511(een corrected prior).15 F 1.043
 (to importation into)108 446.4 R F2(MBna)3.543 E -.1(va)-.25 G(djust).1
 E F0 1.043(\(e.g. tidal corrections ha)3.543 F 1.343 -.15(ve b)-.2 H
-1.043(een made\).).15 F 1.043(Otherwise, the of)6.043 F 1.043
+1.043(een made\).).15 F 1.043(Otherwise, the of)6.043 F 1.044
 (fset analysis)-.25 F(and in)108 458.4 Q -.15(ve)-.4 G
 (rsions are three dimensional.).15 E .507(Early attempts to address thi\
 s problem \(e.g. Nishimura et al. [1988]\) focused on automating the id\
 enti\214ca-)108 482.4 R .252(tion of matching features and their na)108
 494.4 R(vig)-.2 E .252(ational of)-.05 F .252
 (fsets. A purely automated approach is dif)-.25 F .252
-(\214cult to achie)-.25 F -.15(ve)-.25 G 2.61
-(because sea\215oor features are comple)108 506.4 R 2.61
-(x, and the cross correlation function of matching features often)-.15 F
--.15(ex)108 518.4 S .236(hibits multiple local minima. W).15 F 2.736(eh)
--.8 G -2.25 -.2(av e)-2.736 H .235
-(not found an automatic algorithm that matches the human e)2.936 F .235
+(\214cult to achie)-.25 F -.15(ve)-.25 G 1.344
+(because sea\215oor features are comple)108 506.4 R 1.343
+(x, and the cross correlation function of matching features often e)-.15
+F(x-)-.15 E .816(hibits multiple local minima. W)108 518.4 R 3.316(eh)
+-.8 G -2.25 -.2(av e)-3.316 H .816
+(not found an automatic algorithm that matches the human e)3.516 F .817
 (ye and)-.15 F .446
 (brain in reliably matching real sea\215oor features. Our approach in)
-108 530.4 R F2(MBna)2.946 E -.1(va)-.25 G(djust).1 E F0 .447
-(is to automate as much of)2.946 F .071(the process as possible, b)108
-542.4 R .071(ut also allo)-.2 F 2.571(wf)-.25 G .071(or interacti)-2.571
-F .371 -.15(ve i)-.25 H .071(nspection and interv).15 F .07
+108 530.4 R F2(MBna)2.946 E -.1(va)-.25 G(djust).1 E F0 .446
+(is to automate as much of)2.946 F .07(the process as possible, b)108
+542.4 R .07(ut also allo)-.2 F 2.571(wf)-.25 G .071(or interacti)-2.571
+F .371 -.15(ve i)-.25 H .071(nspection and interv).15 F .071
 (ention. The identi\214cation of o)-.15 F -.15(ve)-.15 G -.2(r-).15 G
-1.299(lapping data sections is fully automated, as is the in)108 554.4 R
--.15(ve)-.4 G 1.3(rsion for an optimal na).15 F(vig)-.2 E 1.3
-(ation adjustment model)-.05 F .522(once na)108 566.4 R(vig)-.2 E .522
-(ation "ties" ha)-.05 F .822 -.15(ve b)-.2 H .521
-(een made. The measurement of the na).15 F(vig)-.2 E .521(ation of)-.05
-F .521(fsets required for features in)-.25 F -.15(ove)108 578.4 S .617
+1.3(lapping data sections is fully automated, as is the in)108 554.4 R
+-.15(ve)-.4 G 1.299(rsion for an optimal na).15 F(vig)-.2 E 1.299
+(ation adjustment model)-.05 F .521(once na)108 566.4 R(vig)-.2 E .521
+(ation "ties" ha)-.05 F .821 -.15(ve b)-.2 H .521
+(een made. The measurement of the na).15 F(vig)-.2 E .522(ation of)-.05
+F .522(fsets required for features in)-.25 F -.15(ove)108 578.4 S .618
 (rlapping sw).15 F .617
 (ath data to match can be done both automatically and interacti)-.1 F
--.15(ve)-.25 G .618(ly; most datasets require a).15 F
+-.15(ve)-.25 G .617(ly; most datasets require a).15 F
 (combination of both methods plus interacti)108 590.4 Q .3 -.15(ve i)
 -.25 H(nspection of suspect automatic ties.).15 E F2(MBna)108 614.4 Q
--.1(va)-.25 G(djust).1 E F0 .308(operates within the conte)2.808 F .308
+-.1(va)-.25 G(djust).1 E F0 .308(operates within the conte)2.807 F .308
 (xt of the)-.15 F F2(mbpr)2.808 E(ocess)-.18 E F0 .308
-(parallel processing scheme, b)2.808 F .307(ut it should used)-.2 F .726
+(parallel processing scheme, b)2.808 F .308(ut it should used)-.2 F .727
 (on data for which the initial na)108 626.4 R(vig)-.2 E .727
-(ation processing \(e.g. bathmetry editing with)-.05 F F2(mbedit)3.227 E
-F0(and)3.227 E F2(mbeditviz)3.227 E F0 3.227(\)i)C(s)-3.227 E 3.674
-(complete. When)108 638.4 R(sw)3.674 E 1.174
+(ation processing \(e.g. bathmetry editing with)-.05 F F2(mbedit)3.226 E
+F0(and)3.226 E F2(mbeditviz)3.226 E F0 3.226(\)i)C(s)-3.226 E 3.673
+(complete. When)108 638.4 R(sw)3.673 E 1.173
 (ath data \214les are imported into)-.1 F F2(mbna)3.673 E -.1(va)-.25 G
-(djust).1 E F0 3.673(,t)C 1.173(he data is tak)-3.673 F 1.173
-(en from processed \214les)-.1 F .09(generated by)108 650.4 R F2(mbpr)
-2.59 E(ocess)-.18 E F0(whene)2.59 E -.15(ve)-.25 G 2.59(rp).15 G .09
-(ossible \(when those \214les e)-2.59 F .091
-(xist\). If no processed \214le e)-.15 F .091(xists, the ra)-.15 F 2.591
-(wd)-.15 G(ata)-2.591 E 1.211(\214le is used. When the processing with)
-108 662.4 R F2(mbna)3.711 E -.1(va)-.25 G(djust).1 E F0 1.21
-(is completed and an optimal na)3.711 F(vig)-.2 E 1.21
-(ation solution is)-.05 F(achie)108 674.4 Q -.15(ve)-.25 G .78(d, ne).15
-F 3.28(wn)-.25 G -.2(av)-3.28 G(ig).2 E .781
+(djust).1 E F0 3.673(,t)C 1.174(he data is tak)-3.673 F 1.174
+(en from processed \214les)-.1 F .091(generated by)108 650.4 R F2(mbpr)
+2.591 E(ocess)-.18 E F0(whene)2.591 E -.15(ve)-.25 G 2.591(rp).15 G .091
+(ossible \(when those \214les e)-2.591 F .09
+(xist\). If no processed \214le e)-.15 F .09(xists, the ra)-.15 F 2.59
+(wd)-.15 G(ata)-2.59 E 1.21(\214le is used. When the processing with)108
+662.4 R F2(mbna)3.711 E -.1(va)-.25 G(djust).1 E F0 1.211
+(is completed and an optimal na)3.711 F(vig)-.2 E 1.211
+(ation solution is)-.05 F(achie)108 674.4 Q -.15(ve)-.25 G .781(d, ne)
+.15 F 3.281(wn)-.25 G -.2(av)-3.281 G(ig).2 E .781
 (ation \214les are generated \(".na0" \214les, see belo)-.05 F 3.281(wf)
--.25 G .781(or full description\) which supercede)-3.281 F .634(the ".n)
+-.25 G .78(or full description\) which supercede)-3.281 F .634(the ".n)
 108 686.4 R -.15(ve)-.4 G 3.134<228c>.15 G .634(les generated by)-3.134
 F F2(mbna)3.134 E -.1(ve)-.25 G(dit).1 E F0 3.134(.R)C(erunning)-3.134 E
 F2(mbpr)3.134 E(ocess)-.18 E F0 .634(will mer)3.134 F .634(ge the ne)
@@ -356,54 +362,56 @@ F2(mbpr)3.134 E(ocess)-.18 E F0 .634(will mer)3.134 F .634(ge the ne)
 F(w)-.25 E .14(set of processed \214les. Once a sw)108 698.4 R .14
 (ath \214le is processed with)-.1 F F2(mbna)2.64 E -.1(va)-.25 G(djust)
 .1 E F0 2.64(,a)C .44 -.15(ny f)-2.64 H .14
-(urther attempts to process the).15 F(na)108 710.4 Q(vig)-.2 E .531
-(ation with)-.05 F F2(mbna)3.031 E -.1(ve)-.25 G(dit).1 E F0 .531
-(will only produce na)3.031 F(vig)-.2 E .531
-(ation \214les that are ignored by)-.05 F F2(mbpr)3.03 E(ocess)-.18 E F0
-3.03(.T)C .53(his beha)-3.03 F(v-)-.2 E 1.468(ior can be re)108 722.4 R
--.15(ve)-.25 G 1.468(rsed manually using).15 F F2(mbset)3.969 E F0 3.969
-(,b)C 1.469(ut then the user will unnecessarily complicating his or her)
--4.169 F(MB-System 5.0)72 768 Q(28 No)132.205 E -.15(ve)-.15 G
-(mber 2016).15 E(1)190.545 E 0 Cg EP
+(urther attempts to process the).15 F(na)108 710.4 Q(vig)-.2 E .53
+(ation with)-.05 F F2(mbna)3.03 E -.1(ve)-.25 G(dit).1 E F0 .531
+(will only produce na)3.03 F(vig)-.2 E .531
+(ation \214les that are ignored by)-.05 F F2(mbpr)3.031 E(ocess)-.18 E
+F0 3.031(.T)C .531(his beha)-3.031 F(v-)-.2 E 1.469(ior can be re)108
+722.4 R -.15(ve)-.25 G 1.469(rsed manually using).15 F F2(mbset)3.969 E
+F0 3.969(,b)C 1.469
+(ut then the user will unnecessarily complicating his or her)-4.169 F
+(MB-System 5.0)72 768 Q(28 No)132.205 E -.15(ve)-.15 G(mber 2016).15 E
+(1)190.545 E 0 Cg EP
 %%Page: 2 2
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF(mbna)72 48 Q -.25(va)-.2 G 137.51
 (djust\(1\) MB-System).25 F 137.51(5.0 mbna)2.5 F -.25(va)-.2 G
-(djust\(1\)).25 E(ef)108 84 Q(forts.)-.25 E 6.37(Ac)108 108 S 3.87
-(ompanion program)-6.37 F/F1 10/Times-Bold@0 SF(mbna)6.37 E -.1(va)-.25
-G(djustmer).1 E(ge)-.1 E F0 3.87(can add)6.37 F F1(mbna)6.37 E -.1(va)
--.25 G(djust).1 E F0 3.87(projects together or or modify)6.37 F F1(mbna)
-108 120 Q -.1(va)-.25 G(djust).1 E F0(project settings.)2.5 E .748
-(The in)108 144 R -.15(ve)-.4 G .748(rsion for an optimal na).15 F(vig)
--.2 E .749(ation which \214ts the of)-.05 F .749
-(fsets identi\214ed at matching features must also be)-.25 F 1.186
-(reasonable. This is achie)108 156 R -.15(ve)-.25 G 3.686(db).15 G 3.686
-(ym)-3.686 G 1.185(inimizing the \214rst deri)-3.686 F -.25(va)-.25 G
-(ti).25 E 1.485 -.15(ve o)-.25 H 3.685(ft).15 G 1.185
-(he perturbation in the in)-3.685 F -.15(ve)-.4 G 3.685(rsion. This).15
-F .29(approach of penalizing \214rst \(and sometimes second\) deri)108
-168 R -.25(va)-.25 G(ti).25 E -.15(ve)-.25 G 2.791(sw).15 G .291
-(ithin a linear in)-2.791 F -.15(ve)-.4 G .291(rse problem is common).15
+(djust\(1\)).25 E(ef)108 84 Q(forts.)-.25 E 4.404(Ac)108 108 S 1.904
+(ompanion program)-4.404 F/F1 10/Times-Bold@0 SF(mbna)4.404 E -.1(va)
+-.25 G(djustmer).1 E(ge)-.1 E F0 1.904(can add)4.404 F F1(mbna)4.404 E
+-.1(va)-.25 G(djust).1 E F0 1.904(projects together or or modify)4.404 F
+F1(mb-)4.405 E(na)108 120 Q -.1(va)-.25 G(djust).1 E F0
+(project settings.)2.5 E .749(The in)108 144 R -.15(ve)-.4 G .749
+(rsion for an optimal na).15 F(vig)-.2 E .749(ation which \214ts the of)
+-.05 F .748(fsets identi\214ed at matching features must also be)-.25 F
+.156(reasonable. This is achie)108 156 R -.15(ve)-.25 G 2.657(db).15 G
+2.657(ym)-2.657 G .157(inimizing the \214rst deri)-2.657 F -.25(va)-.25
+G(ti).25 E .457 -.15(ve o)-.25 H 2.657(ft).15 G .157
+(he perturbation in the in)-2.657 F -.15(ve)-.4 G 2.657(rsion. This).15
+F(ap-)2.657 E .965
+(proach of penalizing \214rst \(and sometimes second\) deri)108 168 R
+-.25(va)-.25 G(ti).25 E -.15(ve)-.25 G 3.465(sw).15 G .965
+(ithin a linear in)-3.465 F -.15(ve)-.4 G .965(rse problem is common).15
 F(within the geoph)108 180 Q(ysical in)-.05 E -.15(ve)-.4 G
-(rse theory literature \(e.g. P).15 E(ark)-.15 E(er [1994]\).)-.1 E .972
-(Users are advised that)108 204 R F1(mbna)3.472 E -.1(va)-.25 G(djust).1
-E F0 .971(is complicated in both conception and implementation. W)3.472
-F 3.471(es)-.8 G(trongly)-3.471 E .814
+(rse theory literature \(e.g. P).15 E(ark)-.15 E(er [1994]\).)-.1 E .971
+(Users are advised that)108 204 R F1(mbna)3.471 E -.1(va)-.25 G(djust).1
+E F0 .972(is complicated in both conception and implementation. W)3.471
+F 3.472(es)-.8 G(trongly)-3.472 E .814
 (recommend that users read all of the documentation pro)108 216 R .814
 (vided belo)-.15 F 3.314(wp)-.25 G .814
-(rior to attempting a \214rst use of this)-3.314 F(softw)108 228 Q 2.748
-(are. The)-.1 F .248(meaning and use of the indi)2.748 F .247
-(vidual widgets and windo)-.25 F .247(ws emplo)-.25 F .247
-(yed in the graphical interf)-.1 F(ace)-.1 E .206(is pro)108 240 R .206
-(vided in the)-.15 F F1(INTERA)2.706 E .206(CTIVE CONTR)-.55 F(OLS)-.3 E
-F0 .206(section. The)2.706 F F1 .207(USING MBN)2.707 F -.95 -1.45(AV A)
--.2 H(DJUST)1.45 E F0 .207(section pro)2.707 F(vides)-.15 E 3.446(am)108
-252 S .946(ore coherent discussion of ho)-3.446 F 3.445(wt)-.25 G 3.445
+(rior to attempting a \214rst use of this)-3.314 F(softw)108 228 Q 2.747
+(are. The)-.1 F .247(meaning and use of the indi)2.747 F .247
+(vidual widgets and windo)-.25 F .248(ws emplo)-.25 F .248
+(yed in the graphical interf)-.1 F(ace)-.1 E .207(is pro)108 240 R .207
+(vided in the)-.15 F F1(INTERA)2.707 E .206(CTIVE CONTR)-.55 F(OLS)-.3 E
+F0 .206(section. The)2.706 F F1 .206(USING MBN)2.706 F -.95 -1.45(AV A)
+-.2 H(DJUST)1.45 E F0 .206(section pro)2.706 F(vides)-.15 E 3.445(am)108
+252 S .945(ore coherent discussion of ho)-3.445 F 3.445(wt)-.25 G 3.445
 (ou)-3.445 G(se)-3.445 E F1(mbna)3.445 E -.1(va)-.25 G(djust).1 E F0
-3.445(,h)C 1.445 -.25(ow t)-3.445 H .945(his program interacts with the)
-.25 F F1(mbpr)3.445 E(ocess)-.18 E F0(parallel processing scheme, and t\
+3.445(,h)C 1.445 -.25(ow t)-3.445 H .946(his program interacts with the)
+.25 F F1(mbpr)3.446 E(ocess)-.18 E F0(parallel processing scheme, and t\
 he underlying concepts and algorithms.)108 264 Q/F2 10.95/Times-Bold@0
 SF(MB-SYSTEM A)72 292.8 Q(UTHORSHIP)-.548 E F0(Da)108 304.8 Q(vid W)-.2
 E 2.5(.C)-.92 G(aress)-2.5 E(Montere)113 316.8 Q 2.5(yB)-.15 G
@@ -414,129 +422,129 @@ E 2.5(.C)-.92 G(aress)-2.5 E(Montere)113 316.8 Q 2.5(yB)-.15 G
 (UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
 388.8 Q -.15(ve)-.25 G(rsity of Bremen).15 E F2(OPTIONS)72 417.6 Q F1
 <ad48>108 429.6 Q F0 .162(This "help" \215ag cause the program to print\
- out a description of its operation and then e)22.52 F .162(xit immedi-)
--.15 F(ately)144 441.6 Q(.)-.65 E F1<ad44>108 470.4 Q F0(Normally)23.08
-E(,)-.65 E F1(mbna)3.051 E -.1(va)-.25 G(djust).1 E F0 .551
-(uses a white background for the interacti)3.051 F .851 -.15(ve p)-.25 H
-.55(lots. This option causes the).15 F
+ out a description of its operation and then e)144 429.6 R .161
+(xit immedi-)-.15 F(ately)144 441.6 Q(.)-.65 E F1<ad44>108 470.4 Q F0
+(Normally)144 470.4 Q(,)-.65 E F1(mbna)3.05 E -.1(va)-.25 G(djust).1 E
+F0 .551(uses a white background for the interacti)3.05 F .851 -.15(ve p)
+-.25 H .551(lots. This option causes the).15 F
 (program to use a black background for the plots.)144 482.4 Q F1<ad52>
-108 511.2 Q F0 1.035(This option causes)23.08 F F1(mbna)3.535 E -.1(va)
--.25 G(djust).1 E F0 1.035(to discard all na)3.535 F(vig)-.2 E 1.036
-(ation ties, set all crossings to "unanalyzed")-.05 F .083
-(status, and to sa)144 523.2 R .383 -.15(ve t)-.2 H .083
+108 511.2 Q F0 1.036(This option causes)144 511.2 R F1(mbna)3.536 E -.1
+(va)-.25 G(djust).1 E F0 1.035(to discard all na)3.536 F(vig)-.2 E 1.035
+(ation ties, set all crossings to "unanalyzed")-.05 F .082
+(status, and to sa)144 523.2 R .382 -.15(ve t)-.2 H .083
 (he project in this pristine state. Only use this option if you really)
-.15 F 2.582(,r)-.65 G .082(eally w)-2.582 F .082(ant to)-.1 F(start o)
+.15 F 2.583(,r)-.65 G .083(eally w)-2.583 F .083(ant to)-.1 F(start o)
 144 535.2 Q -.15(ve)-.15 G -.55(r.).15 G F1<ad56>108 564 Q F0(Normally)
-23.08 E(,)-.65 E F1(mbna)5.042 E -.1(va)-.25 G(djust).1 E F0 2.543
-(outputs nothing to the stderr stream.)5.042 F 2.543(If the)7.543 F F1
-<ad56>5.043 E F0 2.543(\215ag is gi)5.043 F -.15(ve)-.25 G 2.543
-(n, then).15 F F1(mbna)144 576 Q -.1(va)-.25 G(djust).1 E F0 -.1(wo)
-3.613 G 1.113(rks in a "v).1 F 1.113
-(erbose" mode and outputs the program v)-.15 F 1.113
-(ersion being used, all error)-.15 F(status messages, and a lar)144 588
+144 564 Q(,)-.65 E F1(mbna)3.559 E -.1(va)-.25 G(djust).1 E F0 1.059
+(outputs nothing to the stderr stream.)3.559 F 1.059(If the)6.059 F F1
+<ad56>3.559 E F0 1.058(\215ag is gi)3.558 F -.15(ve)-.25 G 1.058
+(n, then).15 F F1(mb-)3.558 E(na)144 576 Q -.1(va)-.25 G(djust).1 E F0
+-.1(wo)2.779 G .279(rks in a "v).1 F .279
+(erbose" mode and outputs the program v)-.15 F .28
+(ersion being used, all error status)-.15 F(messages, and a lar)144 588
 Q(ge amount of other information.)-.18 E F2(INTERA)72 616.8 Q
 (CTIVE CONTR)-.602 E(OLS)-.329 E F1(MBna)87 628.8 Q -.1(va)-.25 G
 (djust W).1 E(indo)-.18 E(w)-.1 E F0(This is the primary windo)108 640.8
 Q 2.5(wo)-.25 G(f)-2.5 E F1(mbna)2.5 E -.1(va)-.25 G(djust).1 E F0(.)A
-F1(File)108 669.6 Q F0 .854(This b)19.89 F .854(utton acti)-.2 F -.25
-(va)-.25 G .854(tes a pulldo).25 F .854(wn menu with six items:)-.25 F
-F1(New)3.354 E F0(,)A F1(Open)3.354 E F0(,)A F1(Close)3.355 E F0(,)A F1
-.855(Import Swath Data)3.355 F F0(,)A(and)144 681.6 Q F1(Quit)2.5 E F0
-(.)A(MB-System 5.0)72 768 Q(28 No)132.205 E -.15(ve)-.15 G(mber 2016).15
-E(2)190.545 E 0 Cg EP
+F1(File)108 669.6 Q F0 .855(This b)144 669.6 R .855(utton acti)-.2 F
+-.25(va)-.25 G .855(tes a pulldo).25 F .854(wn menu with six items:)-.25
+F F1(New)3.354 E F0(,)A F1(Open)3.354 E F0(,)A F1(Close)3.354 E F0(,)A
+F1 .854(Import Swath Data)3.354 F F0(,)A(and)144 681.6 Q F1(Quit)2.5 E
+F0(.)A(MB-System 5.0)72 768 Q(28 No)132.205 E -.15(ve)-.15 G(mber 2016)
+.15 E(2)190.545 E 0 Cg EP
 %%Page: 3 3
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF(mbna)72 48 Q -.25(va)-.2 G 137.51
 (djust\(1\) MB-System).25 F 137.51(5.0 mbna)2.5 F -.25(va)-.2 G
-(djust\(1\)).25 E/F1 10/Times-Bold@0 SF(File->New)108 84 Q F0 .585
+(djust\(1\)).25 E/F1 10/Times-Bold@0 SF(File->New)108 84 Q F0 .584
 (This menu item brings up a popup windo)144 96 R 3.084(ww)-.25 G .584
-(hich allo)-3.084 F .584(ws the user to specify a ne)-.25 F(w)-.25 E F1
-(mbna)3.084 E -.1(va)-.25 G(djust).1 E F0 .243
-(project. As part of initializing a ne)144 108 R 2.743(wp)-.25 G
-(roject,)-2.743 E F1(mbna)2.743 E -.1(va)-.25 G(djust).1 E F0 .244
-(creates a \214le with a ".n)2.744 F .244(vh" suf)-.4 F .244
+(hich allo)-3.084 F .585(ws the user to specify a ne)-.25 F(w)-.25 E F1
+(mbna)3.085 E -.1(va)-.25 G(djust).1 E F0 .244
+(project. As part of initializing a ne)144 108 R 2.744(wp)-.25 G
+(roject,)-2.744 E F1(mbna)2.744 E -.1(va)-.25 G(djust).1 E F0 .243
+(creates a \214le with a ".n)2.744 F .243(vh" suf)-.4 F .243
 (\214x and a)-.25 F(directory with a ".dir" suf)144 120 Q(\214x.)-.25 E
-F1(File->Open)108 148.8 Q F0 .717
+F1(File->Open)108 148.8 Q F0 .716
 (This menu item brings up a popup windo)144 160.8 R 3.216(ww)-.25 G .716
 (hich allo)-3.216 F .716(ws the user to open an e)-.25 F(xisting)-.15 E
-F1(mbna)3.216 E -.1(va)-.25 G(d-).1 E(just)144 172.8 Q F0(project.)2.5 E
+F1(mbna)3.217 E -.1(va)-.25 G(d-).1 E(just)144 172.8 Q F0(project.)2.5 E
 F1(File->Close)108 201.6 Q F0(This menu item causes)144 213.6 Q F1(mbna)
 2.5 E -.1(va)-.25 G(djust).1 E F0(to close the current project.)2.5 E F1
-(File->Import Swath Data)108 242.4 Q F0 .122
+(File->Import Swath Data)108 242.4 Q F0 .123
 (This menu item brings up a popup windo)144 254.4 R 2.622(ww)-.25 G .122
-(hich allo)-2.622 F .122(ws the user to specify a sw)-.25 F .123
-(ath sonar data \214le)-.1 F .071(or a list of sw)144 266.4 R .071
-(ath \214les to be imported into the current)-.1 F F1(mbna)2.57 E -.1
-(va)-.25 G(djust).1 E F0 2.57(project. This)2.57 F .07(program uses the)
-2.57 F F1(MBIO)144 278.4 Q F0 1.354(library and will read an)3.854 F
-3.854(ys)-.15 G -.1(wa)-3.854 G 1.354(th sonar formats supported by).1 F
-F1(MBIO)3.855 E F0 3.855(.Al)C 1.355(ist of the sw)-3.855 F(ath)-.1 E
-.391(sonar data formats currently supported by)144 290.4 R F1(MBIO)2.891
-E F0 .391(and their identi\214er v)2.891 F .39(alues is gi)-.25 F -.15
-(ve)-.25 G 2.89(ni).15 G 2.89(nt)-2.89 G(he)-2.89 E F1(MBIO)2.89 E F0
-.681(manual page.)144 302.4 R .681(If the sw)5.681 F .681
-(ath sonar data \214le is named using the)-.1 F F1(MB-System)3.182 E F0
-(suf)3.182 E .682(\214x con)-.25 F -.15(ve)-.4 G .682(ntion \(for).15 F
+(hich allo)-2.622 F .122(ws the user to specify a sw)-.25 F .122
+(ath sonar data \214le)-.1 F .07(or a list of sw)144 266.4 R .071
+(ath \214les to be imported into the current)-.1 F F1(mbna)2.571 E -.1
+(va)-.25 G(djust).1 E F0 2.571(project. This)2.571 F .071
+(program uses the)2.571 F F1(MBIO)144 278.4 Q F0 1.355
+(library and will read an)3.855 F 3.855(ys)-.15 G -.1(wa)-3.855 G 1.354
+(th sonar formats supported by).1 F F1(MBIO)3.854 E F0 3.854(.Al)C 1.354
+(ist of the sw)-3.854 F(ath)-.1 E .39
+(sonar data formats currently supported by)144 290.4 R F1(MBIO)2.891 E
+F0 .391(and their identi\214er v)2.891 F .391(alues is gi)-.25 F -.15
+(ve)-.25 G 2.891(ni).15 G 2.891(nt)-2.891 G(he)-2.891 E F1(MBIO)2.891 E
+F0 .682(manual page.)144 302.4 R .682(If the sw)5.682 F .681
+(ath sonar data \214le is named using the)-.1 F F1(MB-System)3.181 E F0
+(suf)3.181 E .681(\214x con)-.25 F -.15(ve)-.4 G .681(ntion \(for).15 F
 (-)-.2 E .162(mat 11 \214les end with ".mb11", format 41 \214les end wi\
 th ".mb41", etc.\), then the program will auto-)144 314.4 R .275(matica\
 lly use the appropriate format id; otherwise the format must be set by \
 the user in the format)144 326.4 R(te)144 338.4 Q(xt box.)-.15 E F1
-(File->Quit)108 367.2 Q F0 .448(This b)144 379.2 R .448(utton causes)-.2
-F F1(mbna)2.948 E -.1(va)-.25 G(djust).1 E F0 .447
+(File->Quit)108 367.2 Q F0 .447(This b)144 379.2 R .447(utton causes)-.2
+F F1(mbna)2.947 E -.1(va)-.25 G(djust).1 E F0 .448
 (to quit. If a project has been created or opened, that project will)
-2.948 F(be closed before the program quits.)144 391.2 Q F1(Option)108
-420 Q F0(This b)5.99 E(utton brings up a pulldo)-.2 E
+2.947 F(be closed before the program quits.)144 391.2 Q F1(Option)108
+420 Q F0(This b)144 420 Q(utton brings up a pulldo)-.2 E
 (wn menu with one item:)-.25 E F1(Contr)2.5 E(ols)-.18 E F0(.)A F1
-(Option->Contr)108 448.8 Q(ols)-.18 E F0 .242
+(Option->Contr)108 448.8 Q(ols)-.18 E F0 .243
 (This menu item brings up a dialog windo)144 460.8 R 2.743(ww)-.25 G
-.243(ith se)-2.743 F -.15(ve)-.25 G .243
+.243(ith se)-2.743 F -.15(ve)-.25 G .242
 (ral slider widgets that set parameters control-).15 F .088(ling ho)144
 472.8 R 2.588(ws)-.25 G -.1(wa)-2.588 G .088
 (th data are imported and displayed.).1 F .088
 (These widgets are discussed in the)5.088 F F1(Contr)2.588 E(ols)-.18 E
 F0(sec-)2.588 E(tion belo)144 484.8 Q -.65(w.)-.25 G F1 -.37(Vi)108
-513.6 S(ew).37 E F0 .875(This b)14.71 F .875(utton brings up a pulldo)
--.2 F .875
+513.6 S(ew).37 E F0 .876(This b)144 513.6 R .876
+(utton brings up a pulldo)-.2 F .875
 (wn menu with nineteen items in three groups. This menu controls)-.25 F
-1.846(the contents of the list widget in the lo)144 525.6 R 1.846
-(wer right)-.25 F F1(MBna)4.346 E -.1(va)-.25 G 1.845(djust W).1 F(indo)
--.18 E(w)-.1 E F0 4.345(.I)C 4.345(fa)-4.345 G(n)-4.345 E F1(mbna)4.345
+1.845(the contents of the list widget in the lo)144 525.6 R 1.846
+(wer right)-.25 F F1(MBna)4.346 E -.1(va)-.25 G 1.846(djust W).1 F(indo)
+-.18 E(w)-.1 E F0 4.346(.I)C 4.346(fa)-4.346 G(n)-4.346 E F1(mbna)4.346
 E -.1(va)-.25 G(djust).1 E F0 .77
 (project has been created or opened, the)144 537.6 R F1 .77(Data T)3.27
 F(able)-.92 E F0 .77(list widget will display a table of items con-)3.27
-F 1.979(trolled by these menu items, and the corresponding menu item wi\
-ll be disabled. Selection of)144 549.6 R
-(another item items will change what is displayed in the)144 561.6 Q F1
-(Data T)2.5 E(able)-.92 E F0(list widget accordingly)2.5 E(.)-.65 E .921
+F .829(trolled by these menu items, and the corresponding menu item wil\
+l be disabled. Selection of an-)144 549.6 R
+(other item items will change what is displayed in the)144 561.6 Q F1
+(Data T)2.5 E(able)-.92 E F0(list widget accordingly)2.5 E(.)-.65 E .922
 (The \214rst group includes the)144 585.6 R F1(Sho)3.422 E 3.422(wS)-.1
 G(ur)-3.422 E -.1(ve)-.1 G(ys).1 E F0(,)A F1(Sho)3.422 E 3.422(wS)-.1 G
-(ur)-3.422 E -.1(ve)-.1 G(y-vs-Sur).1 E -.1(ve)-.1 G 3.422(yB).1 G
-(locks)-3.422 E F0(,)A F1(Sho)3.422 E 3.422(wD)-.1 G .922(ata Files)
--3.422 F F0(,)A F1(Sho)144 597.6 Q 2.728(wD)-.1 G .228
-(ata File Sections)-2.728 F F0(,)A F1(Sho)2.728 E 2.728(wA)-.1 G .228
-(ll Cr)-2.728 F(ossings)-.18 E F0(,)A F1(Sho)2.727 E 2.727(w>)-.1 G .227
-(10% Cr)-2.727 F(ossings)-.18 E F0(,)A F1(Sho)2.727 E 2.727(w>)-.1 G
-.227(25% Cr)-2.727 F(ossings)-.18 E F0(,)A F1(Sho)144 609.6 Q 2.5(w>)-.1
+(ur)-3.422 E -.1(ve)-.1 G(y-vs-Sur).1 E -.1(ve)-.1 G 3.421(yB).1 G
+(locks)-3.421 E F0(,)A F1(Sho)3.421 E 3.421(wD)-.1 G .921(ata Files)
+-3.421 F F0(,)A F1(Sho)144 597.6 Q 2.727(wD)-.1 G .227
+(ata File Sections)-2.727 F F0(,)A F1(Sho)2.727 E 2.727(wA)-.1 G .227
+(ll Cr)-2.727 F(ossings)-.18 E F0(,)A F1(Sho)2.728 E 2.728(w>)-.1 G .228
+(10% Cr)-2.728 F(ossings)-.18 E F0(,)A F1(Sho)2.728 E 2.728(w>)-.1 G
+.228(25% Cr)-2.728 F(ossings)-.18 E F0(,)A F1(Sho)144 609.6 Q 2.5(w>)-.1
 G(50% Cr)-2.5 E(ossings)-.18 E F0(,)A F1(Sho)2.5 E 2.5(wT)-.1 G(rue Cr)
 -3.24 E(ossings)-.18 E F0 2.5(,a)C(nd)-2.5 E F1(Sho)2.5 E 2.5(wT)-.1 G
-(ies)-2.68 E F0(items.)2.5 E 1.775(The second group includes the)144
-633.6 R F1(Sho)4.275 E 4.275(wA)-.1 G 1.775(ll Sur)-4.275 F -.1(ve)-.1 G
-(ys).1 E F0(,)A F1(Sho)4.275 E 4.276(wO)-.1 G 1.776(nly Selected Sur)
--4.276 F -.1(ve)-.1 G(y).1 E F0(,)A F1(Sho)4.276 E 4.276(wO)-.1 G(nly)
--4.276 E .778(Selected Sur)144 645.6 R -.1(ve)-.1 G(y-vs-Sur).1 E -.1
-(ve)-.1 G 3.278(yB).1 G(lock)-3.278 E F0(,)A F1(Sho)3.278 E 3.277(wO)-.1
-G .777(nly Selected File)-3.277 F F0 3.277(,a)C(nd)-3.277 E F1(Sho)3.277
-E 3.277(wO)-.1 G .777(nly Selected Section)-3.277 F F0 .116
-(items. One of these options is al)144 657.6 R -.1(wa)-.1 G .116
-(ys acti).1 F -.15(ve)-.25 G 2.616(,a).15 G .117
-(nd modi\214es what is displayed in the)-2.616 F F1 .117(Data T)2.617 F
-(able)-.92 E F0(list.)2.617 E(The third group includes tw)144 681.6 Q
-2.5(oo)-.1 G(ptions:)-2.5 E F1 -.37(Vi)2.5 G(sualize Sur).37 E -.1(ve)
--.1 G(y).1 E F0(and)2.5 E F1(Sho)2.5 E 2.5(wM)-.1 G(odelplot)-2.5 E F0
-(.)A(MB-System 5.0)72 768 Q(28 No)132.205 E -.15(ve)-.15 G(mber 2016).15
-E(3)190.545 E 0 Cg EP
+(ies)-2.68 E F0(items.)2.5 E .518(The second group includes the)144
+633.6 R F1(Sho)3.018 E 3.018(wA)-.1 G .518(ll Sur)-3.018 F -.1(ve)-.1 G
+(ys).1 E F0(,)A F1(Sho)3.018 E 3.018(wO)-.1 G .518(nly Selected Sur)
+-3.018 F -.1(ve)-.1 G(y).1 E F0(,)A F1(Sho)3.018 E 3.017(wO)-.1 G .517
+(nly Se-)-3.017 F 1.686(lected Sur)144 645.6 R -.1(ve)-.1 G(y-vs-Sur).1
+E -.1(ve)-.1 G 4.186(yB).1 G(lock)-4.186 E F0(,)A F1(Sho)4.186 E 4.186
+(wO)-.1 G 1.686(nly Selected File)-4.186 F F0 4.186(,a)C(nd)-4.186 E F1
+(Sho)4.187 E 4.187(wO)-.1 G 1.687(nly Selected Section)-4.187 F F0
+(items. One of these options is al)144 657.6 Q -.1(wa)-.1 G(ys acti).1 E
+-.15(ve)-.25 G 2.5(,a).15 G(nd modi\214es what is displayed in the)-2.5
+E F1(Data T)2.5 E(able)-.92 E F0(list.)2.5 E
+(The third group includes tw)144 681.6 Q 2.5(oo)-.1 G(ptions:)-2.5 E F1
+-.37(Vi)2.5 G(sualize Sur).37 E -.1(ve)-.1 G(y).1 E F0(and)2.5 E F1(Sho)
+2.5 E 2.5(wM)-.1 G(odelplot)-2.5 E F0(.)A(MB-System 5.0)72 768 Q(28 No)
+132.205 E -.15(ve)-.15 G(mber 2016).15 E(3)190.545 E 0 Cg EP
 %%Page: 4 4
 %%BeginPageSetup
 BP
@@ -636,12 +644,12 @@ BP
 2.5(wT)-.1 G(rue Cr)-3.24 E(ossings)-.18 E F0 .239
 (This menu item causes the)144 96 R F1 .239(Data T)2.739 F(able)-.92 E
 F0 .238(list widget to display a list of all the sw)2.739 F .238
-(ath crossings in the)-.1 F(current)144 108 Q F1(mbna)4.634 E -.1(va)
--.25 G(djust).1 E F0 2.134(project for which the na)4.634 F(vig)-.2 E
-2.135(ation tracks cross.)-.05 F 2.135(When this option is set,)7.135 F
-.556(selecting a list item causes)144 120 R F1(mbna)3.056 E -.1(va)-.25
-G(djust).1 E F0 .555
-(to load and display the selected selected crossing in the)3.055 F("Na)
+(ath crossings in the)-.1 F(current)144 108 Q F1(mbna)3.47 E -.1(va)-.25
+G(djust).1 E F0 .97(project for which the na)3.47 F(vig)-.2 E .971
+(ation tracks cross.)-.05 F .971(When this option is set, se-)5.971 F
+1.111(lecting a list item causes)144 120 R F1(mbna)3.611 E -.1(va)-.25 G
+(djust).1 E F0 1.11
+(to load and display the selected selected crossing in the)3.611 F("Na)
 144 132 Q 2.5(vE)-.2 G(rr" windo)-2.5 E -.65(w.)-.25 G F1 -.37(Vi)108
 160.8 S(ew->Sho).37 E 2.5(wT)-.1 G(ies)-2.68 E F0 .642
 (This menu item causes the)144 172.8 R F1 .642(Data T)3.142 F(able)-.92
@@ -698,28 +706,28 @@ ed with the most recently selected section \(e.g. a section selected by\
 R F1 .169(Data T)2.669 F(able)-.92 E F0 .169
 (list is con\214gured to sho)2.669 F 2.669(wc)-.25 G .169
 (rossings or ties, an)-2.669 F 2.669(ya)-.15 G .168
-(ssociated ties are also o)-2.669 F -.15(ve)-.15 G -.2(r-).15 G 1.526
-(lain on the bath)144 585.6 R 1.526
-(ymetry grid. These ties are displayed as tw)-.05 F 4.026(oc)-.1 G 1.526
-(onnected circles with the circles)-4.026 F 1.754(located at the na)144
-597.6 R 4.254(vp)-.2 G 1.754(oints that ha)-4.254 F 2.054 -.15(ve b)-.2
-H 1.754(een tied. The bath).15 F 1.753
-(ymetry grid is generated from the data)-.05 F 1.795
-(imported into the project follo)144 609.6 R 1.795
-(wing application of the adjusted na)-.25 F(vig)-.2 E 1.795
-(ation model generated by)-.05 F(MBna)144 621.6 Q -.25(va)-.2 G .264
-(djust. This grid al).25 F -.1(wa)-.1 G .264(ys e).1 F .264(xists, b)
--.15 F .264(ut is only updated by the <Action->Update Grids> option.)-.2
-F .447(Therefore, frequently the current na)144 633.6 R(vig)-.2 E .448
-(ation and tie locations will be sho)-.05 F .448(wn o)-.25 F -.15(ve)
--.15 G 2.948(rb).15 G(ath)-2.948 E .448(ymetry gen-)-.05 F
+(ssociated ties are also o)-2.669 F -.15(ve)-.15 G -.2(r-).15 G .58
+(lain on the bath)144 585.6 R .58
+(ymetry grid. These ties are displayed as tw)-.05 F 3.08(oc)-.1 G .58
+(onnected circles with the circles lo-)-3.08 F 1.145(cated at the na)144
+597.6 R 3.644(vp)-.2 G 1.144(oints that ha)-3.644 F 1.444 -.15(ve b)-.2
+H 1.144(een tied. The bath).15 F 1.144
+(ymetry grid is generated from the data im-)-.05 F .823
+(ported into the project follo)144 609.6 R .824
+(wing application of the adjusted na)-.25 F(vig)-.2 E .824
+(ation model generated by MB-)-.05 F(na)144 621.6 Q -.25(va)-.2 G 1.461
+(djust. This grid al).25 F -.1(wa)-.1 G 1.461(ys e).1 F 1.461(xists, b)
+-.15 F 1.461(ut is only updated by the <Action->Update Grids> option.)
+-.2 F .447(Therefore, frequently the current na)144 633.6 R(vig)-.2 E
+.448(ation and tie locations will be sho)-.05 F .448(wn o)-.25 F -.15
+(ve)-.15 G 2.948(rb).15 G(ath)-2.948 E .448(ymetry gen-)-.05 F
 (erated using a pre)144 645.6 Q(vious na)-.25 E(vig)-.2 E(ation model.)
 -.05 E F1 -.37(Vi)108 674.4 S(ew->Sho).37 E 2.5(wM)-.1 G(odelplot)-2.5 E
-F0 1.567(This option causes an addition "Model Plot" windo)144 686.4 R
-4.066(wt)-.25 G 4.066(ob)-4.066 G 4.066(es)-4.066 G(ho)-4.066 E 1.566
-(wn that displays the na)-.25 F(vig)-.2 E(ation)-.05 E .351(adjustment \
-model as three time series: longitude on top, latitude in the middle, a\
-nd v)144 698.4 R .352(ertical on the)-.15 F(bottom.)144 710.4 Q
+F0 .444(This option causes an addition "Model Plot" windo)144 686.4 R
+2.944(wt)-.25 G 2.944(ob)-2.944 G 2.944(es)-2.944 G(ho)-2.944 E .444
+(wn that displays the na)-.25 F(vig)-.2 E .444(ation ad-)-.05 F .941(ju\
+stment model as three time series: longitude on top, latitude in the mi\
+ddle, and v)144 698.4 R .942(ertical on the)-.15 F(bottom.)144 710.4 Q
 (MB-System 5.0)72 768 Q(28 No)132.205 E -.15(ve)-.15 G(mber 2016).15 E
 (5)190.545 E 0 Cg EP
 %%Page: 6 6
@@ -729,7 +737,7 @@ BP
 /F0 10/Times-Roman@0 SF(mbna)72 48 Q -.25(va)-.2 G 137.51
 (djust\(1\) MB-System).25 F 137.51(5.0 mbna)2.5 F -.25(va)-.2 G
 (djust\(1\)).25 E/F1 10/Times-Bold@0 SF(Action)108 84 Q F0 .171(This b)
-7.67 F .171(utton brings up a pulldo)-.2 F .171
+144 84 R .171(utton brings up a pulldo)-.2 F .171
 (wn menu with nine items:)-.25 F F1 .17(Set File P)2.671 F .17(oor Na)
 -.2 F(vigation)-.25 E F0(,)A F1 .17(Set File Good)2.67 F(Na)144 96 Q
 (vigation)-.25 E F0(,)A F1 .451(Set File Fixed Na)2.95 F(vigation)-.25 E
@@ -836,36 +844,37 @@ BP
 (sets de\214ned at the na)144 108 R(vig)-.2 E .218
 (ation tie points while minimizing the \214rst deri)-.05 F -.25(va)-.25
 G(ti).25 E .518 -.15(ve \()-.25 H .218(speed\) of the na).15 F(vig)-.2 E
-(a-)-.05 E 2.325(tion perturbation. This option is only acti)144 120 R
--.25(va)-.25 G 2.324(ted when all of the true crossings in the current)
-.25 F F1(mbna)144 132 Q -.1(va)-.25 G(djust).1 E F0(project ha)2.5 E .3
--.15(ve b)-.2 H(een analyzed interacti).15 E -.15(ve)-.25 G(ly).15 E(.)
--.65 E F1(Action->Update Grids)108 160.8 Q F0 .12(This menu item causes)
-144 172.8 R F1(mbna)2.62 E -.1(va)-.25 G(djust).1 E F0 .12
-(to apply the current na)2.62 F(vig)-.2 E .12(ation model to the bath)
--.05 F .12(ymetry data)-.05 F .092(that ha)144 184.8 R .392 -.15(ve b)
--.2 H .092(een imported into the project, and then create a bath).15 F
-.092(ymetry grid using the adjusted data.)-.05 F 1.188
-(This option is only acti)144 196.8 R -.25(va)-.25 G 1.189
-(ted when the in).25 F -.15(ve)-.4 G 1.189(rsion is current and ne).15 F
-1.189(wer than the most recent grid)-.25 F 1.225
-(update. The gridding is done by the program)144 208.8 R F1(mbgrid)3.725
-E F0 1.224(using the "weighted footprint" algorithm.)3.724 F .903(The g\
-rid bounds encompass all of the data in the project, and the grid cell \
-size is set by mbgrid)144 220.8 R
-(according to the sounding footprint sizes contained in the data.)144
-232.8 Q F1(Action->A)108 261.6 Q(pply Adjusted Na)-.25 E(vigation)-.25 E
-F0 1.398(This menu item causes)144 273.6 R F1(mbna)3.898 E -.1(va)-.25 G
-(djust).1 E F0 1.398(to e)3.898 F 1.398(xport the adjusted na)-.15 F
-(vig)-.2 E 1.397(ation model from the current)-.05 F(in)144 285.6 Q -.15
-(ve)-.4 G .79(rsion to the sw).15 F .791
+(a-)-.05 E .947(tion perturbation. This option is only acti)144 120 R
+-.25(va)-.25 G .947(ted when all of the true crossings in the current)
+.25 F F1(mb-)3.446 E(na)144 132 Q -.1(va)-.25 G(djust).1 E F0
+(project ha)2.5 E .3 -.15(ve b)-.2 H(een analyzed interacti).15 E -.15
+(ve)-.25 G(ly).15 E(.)-.65 E F1(Action->Update Grids)108 160.8 Q F0 .12
+(This menu item causes)144 172.8 R F1(mbna)2.62 E -.1(va)-.25 G(djust).1
+E F0 .12(to apply the current na)2.62 F(vig)-.2 E .12
+(ation model to the bath)-.05 F .12(ymetry data)-.05 F .092(that ha)144
+184.8 R .392 -.15(ve b)-.2 H .092
+(een imported into the project, and then create a bath).15 F .092
+(ymetry grid using the adjusted data.)-.05 F .187
+(This option is only acti)144 196.8 R -.25(va)-.25 G .187
+(ted when the in).25 F -.15(ve)-.4 G .188(rsion is current and ne).15 F
+.188(wer than the most recent grid up-)-.25 F .562
+(date. The gridding is done by the program)144 208.8 R F1(mbgrid)3.062 E
+F0 .562(using the "weighted footprint" algorithm. The)3.062 F .144(grid\
+ bounds encompass all of the data in the project, and the grid cell siz\
+e is set by mbgrid accord-)144 220.8 R
+(ing to the sounding footprint sizes contained in the data.)144 232.8 Q
+F1(Action->A)108 261.6 Q(pply Adjusted Na)-.25 E(vigation)-.25 E F0 .326
+(This menu item causes)144 273.6 R F1(mbna)2.826 E -.1(va)-.25 G(djust)
+.1 E F0 .326(to e)2.826 F .326(xport the adjusted na)-.15 F(vig)-.2 E
+.325(ation model from the current in-)-.05 F -.15(ve)144 285.6 S .319
+(rsion to the sw).15 F .319
 (ath \214les in the project.This option is only acti)-.1 F -.25(va)-.25
-G .791(ted when the in).25 F -.15(ve)-.4 G .791(rsion is cur).15 F(-)-.2
-E .135(rent, meaning that no ne)144 297.6 R 2.635(wd)-.25 G .135(ata ha)
--2.635 F .435 -.15(ve b)-.2 H .135(een imported and no changes to of).15
-F .134(fset picks ha)-.25 F .434 -.15(ve b)-.2 H .134(een made).15 F
+G .32(ted when the in).25 F -.15(ve)-.4 G .32(rsion is current,).15 F
+1.428(meaning that no ne)144 297.6 R 3.928(wd)-.25 G 1.428(ata ha)-3.928
+F 1.728 -.15(ve b)-.2 H 1.427(een imported and no changes to of).15 F
+1.427(fset picks ha)-.25 F 1.727 -.15(ve b)-.2 H 1.427(een made).15 F
 (since the last in)144 309.6 Q -.15(ve)-.4 G(rsion.).15 E F1(About)108
-338.4 Q F0(This b)9.33 E(utton brings up a pulldo)-.2 E
+338.4 Q F0(This b)144 338.4 Q(utton brings up a pulldo)-.2 E
 (wn menu with one item:)-.25 E F1(About)2.5 E F0(.)A F1(About->About)108
 367.2 Q F0 .095(This menu item brings up a popup windo)144 379.2 R 2.595
 (wt)-.25 G .095(hat displays the program')-2.595 F 2.596(sn)-.55 G .096
@@ -933,11 +942,11 @@ H(2).15 E(block 0004: Surv)180 180 Q .3 -.15(ey 0)-.15 H 2.5(1v).15 G
 2.5(sS)-2.5 G(urv)-2.5 E .3 -.15(ey 0)-.15 H(2).15 E .12
 (The user can select one of the surv)144 192 R -.15(ey)-.15 G(-v).15 E
 (ersus-surv)-.15 E .42 -.15(ey o)-.15 H .12
-(ptions, then use this selection to \214lter listings).15 F 2.322
+(ptions, then use this selection to \214lter listings).15 F .809
 (of crossings or ties by choosing the <V)144 204 R(ie)-.6 E(w->Sho)-.25
-E 4.822(wO)-.25 G 2.322(nly Selected Surv)-4.822 F -.15(ey)-.15 G
-(-vs-Surv).15 E 2.622 -.15(ey B)-.15 H(locks>).15 E(option.)144 216 Q
-(The Data Files list will look something lik)144 240 Q(e:)-.1 E 2.5
+E 3.309(wO)-.25 G .809(nly Selected Surv)-3.309 F -.15(ey)-.15 G
+(-vs-Surv).15 E 1.11 -.15(ey B)-.15 H .81(locks> op-).15 F(tion.)144 216
+Q(The Data Files list will look something lik)144 240 Q(e:)-.1 E 2.5
 (0000:00 good)180 252 R 2.5(11 0.0 0.0)7.5 F
 (../../20090803/20090803_081706.mb88)2.5 E 2.5(0001:00 good)180 264 R
 2.5(11 0.0 0.0)7.5 F(../../20090803/20090803_083332.mb88)2.5 E 2.5
@@ -961,28 +970,28 @@ E 4.822(wO)-.25 G 2.322(nly Selected Surv)-4.822 F -.15(ey)-.15 G
 -.15(ey c)-.15 H .326(ounter separated by a colon.).15 F .326
 (The second col-)5.326 F .715(umn indicates the \214le na)144 420 R(vig)
 -.2 E .715(ations state; "gd" indicates good na)-.05 F(vig)-.2 E .716
-(ation, "pr" indicates poor na)-.05 F(vi-)-.2 E -.05(ga)144 432 S 2.519
-(tion, and "fx" indicates \214x).05 F 2.519(ed na)-.15 F(vig)-.2 E 2.518
-(ation. The third column sho)-.05 F 2.518(ws the number of sections)-.25
-F -.15(ex)144 444 S 1.469(tracted from this \214le.).15 F 1.469
-(The fourth and \214fth columns sho)6.469 F 3.969(wa)-.25 G 1.77 -.15
-(ny h)-3.969 H 1.47(eading or roll bias of).15 F 1.47(fsets in)-.25 F
-(de)144 456 Q .379(grees applied to the sw)-.15 F .379
-(ath data for that \214le.)-.1 F .378(The sixth column gi)5.378 F -.15
-(ve)-.25 G 2.878(st).15 G .378(he name of the sw)-2.878 F .378(ath data)
--.1 F .006(\214le imported into)144 468 R/F1 10/Times-Bold@0 SF(mbna)
-2.506 E -.1(va)-.25 G(djust).1 E F0 2.506(.N)C .006
-(ote that the name sho)-2.506 F .007(wn here is that of the "ra)-.25 F
-.007(w" sw)-.15 F .007(ath \214le. The)-.1 F .889(data imported by)144
+(ation, "pr" indicates poor na)-.05 F(vi-)-.2 E -.05(ga)144 432 S 1.259
+(tion, and "fx" indicates \214x).05 F 1.259(ed na)-.15 F(vig)-.2 E 1.259
+(ation. The third column sho)-.05 F 1.258(ws the number of sections e)
+-.25 F(x-)-.15 E 1.031(tracted from this \214le.)144 444 R 1.031
+(The fourth and \214fth columns sho)6.031 F 3.531(wa)-.25 G 1.331 -.15
+(ny h)-3.531 H 1.031(eading or roll bias of).15 F 1.032(fsets in de-)
+-.25 F .044(grees applied to the sw)144 456 R .043
+(ath data for that \214le.)-.1 F .043(The sixth column gi)5.043 F -.15
+(ve)-.25 G 2.543(st).15 G .043(he name of the sw)-2.543 F .043
+(ath data \214le)-.1 F .961(imported into)144 468 R/F1 10/Times-Bold@0
+SF(mbna)3.461 E -.1(va)-.25 G(djust).1 E F0 3.462(.N)C .962
+(ote that the name sho)-3.462 F .962(wn here is that of the "ra)-.25 F
+.962(w" sw)-.15 F .962(ath \214le. The)-.1 F .889(data imported by)144
 480 R F1(mbna)3.389 E -.1(va)-.25 G(djust).1 E F0 .889
 (is, if possible, e)3.389 F .888(xtracted from a "processed" sw)-.15 F
 .888(ath \214le generated)-.1 F(by)144 492 Q F1(mbpr)2.5 E(ocess)-.18 E
 F0(rather than the associated "ra)2.5 E(w" \214le.)-.15 E .61(The user \
 can select one of the \214les, then use this selection to \214lter list\
-ings of crossings or ties by)144 516 R 2.38(choosing the <V)144 528 R
-(ie)-.6 E(w->Sho)-.25 E 4.88(wO)-.25 G 2.38(nly Selected File> or <V)
--4.88 F(ie)-.6 E(w->Sho)-.25 E 4.88(wO)-.25 G 2.38(nly W)-4.88 F 2.38
-(ith Selected File>)-.4 F(options.)144 540 Q
+ings of crossings or ties by)144 516 R .863(choosing the <V)144 528 R
+(ie)-.6 E(w->Sho)-.25 E 3.363(wO)-.25 G .863(nly Selected File> or <V)
+-3.363 F(ie)-.6 E(w->Sho)-.25 E 3.362(wO)-.25 G .862(nly W)-3.362 F .862
+(ith Selected File> op-)-.4 F(tions.)144 540 Q
 (The \214le section list will look something lik)144 564 Q(e:)-.1 E
 (00:0000:00 2009/08/03 08:17:07.546998 2009/08/03 08:18:49.484999)180
 576 Q(00:0000:01 2009/08/03 08:18:49.984999 2009/08/03 08:20:26.952999)
@@ -1055,12 +1064,11 @@ R 1.314(xist that can be used to determine the na)-.15 F(vig)-.2 E 1.313
 2.5(wc)-.25 G(rossings al)-2.5 E -.1(wa)-.1 G(ys be).1 E
 (gin with 0 tie points prior to being inspected by a user)-.15 E(.)-.55
 E(The na)144 420 Q(vig)-.2 E
-(ation tie point list will look something lik)-.05 E(e:)-.1 E 2.592(700)
-187.592 432 S .092(09:008:07 010:000:04 00:00)-2.592 F .091
-(1.02 \2552.87 0.00 |)5.091 F 2.591(9.61 8.49)5.091 F .091
-(1.40 | 0.041 0.107 0.027)2.591 F 2.591(800)187.591 444 S .091
-(09:009:02 010:000:00 00:00)-2.591 F .091(0.90 \2554.47 0.00 |)5.091 F
-2.591(7.37 6.30)5.091 F .092(2.29 | 0.040 0.184 0.033)2.591 F 1.598
+(ation tie point list will look something lik)-.05 E(e:)-.1 E 2.5(700)
+187.5 432 S(09:008:07 010:000:04 00:00)-2.5 E(1.02 \2552.87 0.00 |)5 E
+2.5(9.61 8.49)5 F(1.40 | 0.041 0.107 0.027)2.5 E 2.5(800)187.5 444 S
+(09:009:02 010:000:00 00:00)-2.5 E(0.90 \2554.47 0.00 |)5 E 2.5
+(7.37 6.30)5 F(2.29 | 0.040 0.184 0.033)2.5 E 1.598
 (12 0 009:008:04 010:002:04 00:00)186.598 456 R 1.597
 (4.11 \2558.24 0.00 |)6.597 F 4.097(9.28 5.99)6.597 F 1.597
 (1.80 | 0.037 0.021)4.097 F(0.025)144 468 Q 1.597
@@ -1120,18 +1128,18 @@ F 2.888(ertical. The)-.15 F .388
 (fset calculated for this tie point in the in)-.25 F -.15(ve)-.4 G .55
 (rsion and that set by the user).15 F
 (\(displayed in the \214fth through se)144 132 Q -.15(ve)-.25 G
-(nth columns\).).15 E .869(If the \214le list is displayed and one \214\
-le is selected by clicking in the list, then the user can \214x or)144
-156 R .823(un\214x the na)144 168 R(vig)-.2 E .824(ation of that \214le\
- using the <Action->Fix File> or <Action->Un\214x File> pulldo)-.05 F
-(wn)-.25 E .552(menu items.)144 180 R .551(If either the crossing list \
-or the tie point list are displayed, selecting one crossing or)5.552 F
-.674(one tie point by clicking in the list widget will cause the speci\
-\214ed crossing to be loaded and dis-)144 192 R(played in the)144 204 Q
-/F1 10/Times-Bold@0 SF(Na)2.5 E 2.5(vE)-.25 G(rr)-2.5 E F0(windo)2.5 E
--.65(w.)-.25 G F1(Contr)87 232.8 Q(ols W)-.18 E(indo)-.18 E(w)-.1 E F0
-.132(This dialog windo)108 244.8 R 2.632(wi)-.25 G 2.632(sb)-2.632 G
-.131(rought up by clicking the)-2.632 F F1(Option->Contr)2.631 E(ols)
+(nth columns\).).15 E .11(If the \214le list is displayed and one \214l\
+e is selected by clicking in the list, then the user can \214x or un-)
+144 156 R 1.593(\214x the na)144 168 R(vig)-.2 E 1.593(ation of that \
+\214le using the <Action->Fix File> or <Action->Un\214x File> pulldo)
+-.05 F(wn)-.25 E .552(menu items.)144 180 R .551(If either the crossing\
+ list or the tie point list are displayed, selecting one crossing or)
+5.552 F .674(one tie point by clicking in the list widget will cause th\
+e speci\214ed crossing to be loaded and dis-)144 192 R(played in the)144
+204 Q/F1 10/Times-Bold@0 SF(Na)2.5 E 2.5(vE)-.25 G(rr)-2.5 E F0(windo)
+2.5 E -.65(w.)-.25 G F1(Contr)87 232.8 Q(ols W)-.18 E(indo)-.18 E(w)-.1
+E F0 .132(This dialog windo)108 244.8 R 2.632(wi)-.25 G 2.632(sb)-2.632
+G .131(rought up by clicking the)-2.632 F F1(Option->Contr)2.631 E(ols)
 -.18 E F0 .131(menu item in the)2.631 F F1(MBna)2.631 E -.1(va)-.25 G
 .131(djust W).1 F(in-)-.18 E(do)108 256.8 Q(w)-.1 E F0 2.836(.T)C .336
 (his windo)-2.836 F 2.836(wi)-.25 G .336(ncludes tw)-2.836 F 2.836(os)
@@ -1179,8 +1187,8 @@ imation is set to 2, the soundings)144 523.2 R(from e)144 535.2 Q -.15
 (Color Inter)108 604.8 Q -.1(va)-.1 G 2.5(l\().1 G(m\))-2.5 E F0 .554
 (This slider widget sets the the depth interv)144 616.8 R .553
 (al in meters at which the color of the bath)-.25 F .553(ymetric con-)
--.05 F 1.111(tours changes. The contours are generated in four colors: \
-black, red, green, and blue. The color)144 628.8 R(interv)144 640.8 Q
+-.05 F .191(tours changes. The contours are generated in four colors: b\
+lack, red, green, and blue. The color in-)144 628.8 R(terv)144 640.8 Q
 (al should be a multiple of the contour interv)-.25 E(al.)-.25 E F1 -.18
 (Ti)108 669.6 S(ck Inter).18 E -.1(va)-.1 G 2.5(l\().1 G(m\))-2.5 E F0
 .93(This slider widget sets the depth interv)144 681.6 R .929
@@ -1207,7 +1215,7 @@ R -.25(va)-.25 G(ti).25 E -.15(ve)-.25 G(of the adjusted na)144 132 Q
 (vig)-.2 E(ation perturbation is:)-.05 E(10^\(S - 2\))159 144 Q(di)144
 156 Q(vided by the time dif)-.25 E(ference between the rele)-.25 E -.25
 (va)-.25 G(nt na).25 E(vig)-.2 E(ation points in seconds.)-.05 E F1 -.25
-(Ap)108 172.8 S(ply).25 E F0 1.566(This b)10.13 F 1.566
+(Ap)108 172.8 S(ply).25 E F0 1.566(This b)144 172.8 R 1.566
 (utton applies an)-.2 F 4.066(yc)-.15 G 1.566(hanged v)-4.066 F 1.565
 (alues in the slider widgets of the)-.25 F F1(Contr)4.065 E 1.565(ols W)
 -.18 F(indo)-.18 E(w)-.1 E F0 6.565(.I)C 4.065(ft)-6.565 G(he)-4.065 E
@@ -1339,21 +1347,21 @@ G 1.008(he bath)-3.508 F 1.008
 (This can)144 196.8 R -.25(va)-.4 G 2.677(ss).25 G(ho)-2.677 E .177
 (ws a color pro\214le plot of the RMS bath)-.25 F .178
 (ymetric mis\214t between the tw)-.05 F 2.678(oo)-.1 G -.15(ve)-2.828 G
-(rlapping).15 E(sw)144 208.8 Q 1.28(aths. The mis\214t is sho)-.1 F
-1.279(wn as a function of relati)-.25 F 1.579 -.15(ve ve)-.25 H 1.279
-(rtical \(z\) of).15 F 1.279(fset between the tw)-.25 F 3.779(os)-.1 G
--.1(wa)-3.779 G(ths).1 E .313(using the current lateral \(x andy\) of)
-144 220.8 R 2.813(fsets. Put)-.25 F .313(anothe w)2.813 F(ay)-.1 E 2.813
-(,t)-.65 G .313(he mis\214t plot sho)-2.813 F .313(ws ho)-.25 F 2.813
-(wg)-.25 G .313(ood, or bad,)-2.813 F .222
-(the mis\214t becomes as one mo)144 232.8 R -.15(ve)-.15 G 2.721(so).15
-G .221(ne sw)-2.721 F .221(ath v)-.1 F .221(ertically relati)-.15 F .521
--.15(ve t)-.25 H 2.721(oa).15 G(nother)-2.721 E 5.221(.T)-.55 G .221
-(he lo)-5.221 F .221(west mis\214t v)-.25 F(alues)-.25 E .27(are sho)144
-244.8 R .27(wn in red and as high points in the pro\214le; higher mis\
-\214ts are sho)-.25 F .271(wn in blues to purples and)-.25 F .734(as lo)
-144 256.8 R 3.234(wp)-.25 G .734
-(oints. The location of the minimum mis\214t is mark)-3.234 F .734
+(rlapping).15 E(sw)144 208.8 Q .339(aths. The mis\214t is sho)-.1 F .338
+(wn as a function of relati)-.25 F .638 -.15(ve ve)-.25 H .338
+(rtical \(z\) of).15 F .338(fset between the tw)-.25 F 2.838(os)-.1 G
+-.1(wa)-2.838 G .338(ths us-).1 F .836
+(ing the current lateral \(x andy\) of)144 220.8 R 3.336(fsets. Put)-.25
+F .836(anothe w)3.336 F(ay)-.1 E 3.336(,t)-.65 G .836
+(he mis\214t plot sho)-3.336 F .836(ws ho)-.25 F 3.336(wg)-.25 G .836
+(ood, or bad,)-3.336 F .222(the mis\214t becomes as one mo)144 232.8 R
+-.15(ve)-.15 G 2.721(so).15 G .221(ne sw)-2.721 F .221(ath v)-.1 F .221
+(ertically relati)-.15 F .521 -.15(ve t)-.25 H 2.721(oa).15 G(nother)
+-2.721 E 5.221(.T)-.55 G .221(he lo)-5.221 F .221(west mis\214t v)-.25 F
+(alues)-.25 E .27(are sho)144 244.8 R .27(wn in red and as high points \
+in the pro\214le; higher mis\214ts are sho)-.25 F .271
+(wn in blues to purples and)-.25 F .734(as lo)144 256.8 R 3.234(wp)-.25
+G .734(oints. The location of the minimum mis\214t is mark)-3.234 F .734
 (ed by a black "X", and the location of)-.1 F 1.261(the current v)144
 268.8 R 1.261(ertical of)-.15 F 1.261(fset is sho)-.25 F 1.261
 (wn by a solid line. If an in)-.25 F -.15(ve)-.4 G 1.262
@@ -1386,8 +1394,8 @@ F0(sec-)2.588 E(tion abo)144 475.2 Q -.15(ve)-.15 G(.).15 E F1(Pr)108
 504 Q -.15(ev)-.18 G(ious).15 E F0(Clicking this b)144 516 Q
 (utton causes the Na)-.2 E 2.5(vE)-.2 G(rr windo)-2.5 E 2.5(wt)-.25 G
 2.5(ol)-2.5 G(oad and display the pre)-2.5 E(vious crossing.)-.25 E F1
-(Next)108 544.8 Q F0(Clicking this b)16.01 E(utton causes the Na)-.2 E
-2.5(vE)-.2 G(rr windo)-2.5 E 2.5(wt)-.25 G 2.5(ol)-2.5 G
+(Next)108 544.8 Q F0(Clicking this b)144 544.8 Q(utton causes the Na)-.2
+E 2.5(vE)-.2 G(rr windo)-2.5 E 2.5(wt)-.25 G 2.5(ol)-2.5 G
 (oad and display the ne)-2.5 E(xt crossing.)-.15 E F1(Next Unset)108
 573.6 Q F0 .059(Clicking this b)144 585.6 R .059(utton causes the Na)-.2
 F 2.559(vE)-.2 G .059(rr windo)-2.559 F 2.559(wt)-.25 G 2.559(ol)-2.559
@@ -1521,27 +1529,27 @@ E F0(windo)2.543 E 2.543(wh)-.25 G -2.25 -.2(av e)-2.543 H .043
 278.4 R 2.549(yl)-.15 G .049(isted na)-2.549 F(vig)-.2 E .049
 (ation ties are each sho)-.05 F .049(wn as tw)-.25 F 2.549(oc)-.1 G .049
 (onnected circles. The circles sho)-2.549 F 2.549(wt)-.25 G .049
-(he loca-)-2.549 F 2.085(tion of the tied na)108 290.4 R(vig)-.2 E 2.084
-(ation points. T)-.05 F 2.084(ies within a surv)-.35 F 2.384 -.15(ey a)
--.15 H 2.084(re displayed with light blue circles, and ties).15 F .971
-(between dif)108 302.4 R .971(ferent surv)-.25 F -.15(ey)-.15 G 3.471
-(sa).15 G .971(re sho)-3.471 F .972
-(wn with dark blue circles. The interf)-.25 F .972(ace is lar)-.1 F .972
-(gely the same used in the)-.18 F(program)108 314.4 Q F1(mbgrdviz)2.932
-E F0 2.932(;r)C .432(efer to the)-2.932 F F1(mbgrdviz)2.932 E F0 .432
-(for a full description of the controls and their use in manipulat-)
-2.932 F .714(ing the 2D and 3D display)108 326.4 R 3.214(.T)-.65 G .714
-(he only dif)-3.214 F .714(ferences relati)-.25 F 1.014 -.15(ve t)-.25 H
-3.214(oa).15 G(n)-3.214 E F1(mbgrdviz)3.214 E F0(windo)3.214 E 3.214(wi)
--.25 G -1.9 -.4(nv o)-3.214 H(lv).4 E 3.214(et)-.15 G .715
-(he selection of)-3.214 F .983(data sections, na)108 338.4 R(vig)-.2 E
-.983(ation ties, and crossings. The)-.05 F F1(mbna)3.482 E -.1(va)-.25 G
-(djust).1 E F0(surv)3.482 E 1.282 -.15(ey v)-.15 H .982
-(isualization windo).15 F 3.482(wi)-.25 G .982(ncludes the)-3.482 F .237
-(mouse mode b)108 350.4 R .237(uttons <Pick T)-.2 F .237
-(ies> and <Pick Na)-.35 F 2.737(vS)-.2 G .238
-(ection>, and the <Action->Add and open ne)-2.737 F 2.738(wc)-.25 G
-(rossing>)-2.738 E(menu option.)108 362.4 Q F1(Pick T)108 391.2 Q(ies)
+(he loca-)-2.549 F 1.12(tion of the tied na)108 290.4 R(vig)-.2 E 1.12
+(ation points. T)-.05 F 1.12(ies within a surv)-.35 F 1.42 -.15(ey a)
+-.15 H 1.12(re displayed with light blue circles, and ties be-).15 F
+.377(tween dif)108 302.4 R .377(ferent surv)-.25 F -.15(ey)-.15 G 2.877
+(sa).15 G .377(re sho)-2.877 F .378
+(wn with dark blue circles. The interf)-.25 F .378(ace is lar)-.1 F .378
+(gely the same used in the pro-)-.18 F(gram)108 314.4 Q F1(mbgrdviz)3.16
+E F0 3.16(;r)C .66(efer to the)-3.16 F F1(mbgrdviz)3.16 E F0 .66
+(for a full description of the controls and their use in manipulating)
+3.16 F .485(the 2D and 3D display)108 326.4 R 2.986(.T)-.65 G .486
+(he only dif)-2.986 F .486(ferences relati)-.25 F .786 -.15(ve t)-.25 H
+2.986(oa).15 G(n)-2.986 E F1(mbgrdviz)2.986 E F0(windo)2.986 E 2.986(wi)
+-.25 G -1.9 -.4(nv o)-2.986 H(lv).4 E 2.986(et)-.15 G .486
+(he selection of data)-2.986 F .195(sections, na)108 338.4 R(vig)-.2 E
+.195(ation ties, and crossings. The)-.05 F F1(mbna)2.695 E -.1(va)-.25 G
+(djust).1 E F0(surv)2.695 E .495 -.15(ey v)-.15 H .195
+(isualization windo).15 F 2.695(wi)-.25 G .195(ncludes the mouse)-2.695
+F .496(mode b)108 350.4 R .496(uttons <Pick T)-.2 F .496
+(ies> and <Pick Na)-.35 F 2.997(vS)-.2 G .497
+(ection>, and the <Action->Add and open ne)-2.997 F 2.997(wc)-.25 G .497
+(rossing> menu)-2.997 F(option.)108 362.4 Q F1(Pick T)108 391.2 Q(ies)
 -.18 E F0 .44(This b)144 403.2 R .44
 (utton changes the mouse mode to allo)-.2 F 2.94(ws)-.25 G .44
 (election of an)-2.94 F 2.94(yd)-.15 G .44(isplayed na)-2.94 F(vig)-.2 E
@@ -1640,14 +1648,14 @@ F0(This slider widget sets the roll bias for sw)144 400.8 Q
 (ath \214les in the)-.1 F F1(mbna)144 453.6 Q -.1(va)-.25 G(djust).1 E
 F0 2.5(project. This)2.5 F -.2(bu)2.5 G
 (tton is only enabled when the <Same Biases> toggle is selected.).2 E F1
--.25(Ap)108 482.4 S(ply).25 E F0 .102(This b)10.13 F .103
+-.25(Ap)108 482.4 S(ply).25 E F0 .102(This b)144 482.4 R .103
 (utton sets the current heading and roll bias v)-.2 F .103
 (alues as the bias v)-.25 F .103(alues for the sw)-.25 F .103
-(ath sections in)-.1 F 1.691(the current crossing. The bath)144 494.4 R
-1.691
-(ymetry contours and mis\214t plot are recalculated and redisplayed)-.05
-F(using the ne)144 506.4 Q 2.5(wb)-.25 G(ias v)-2.5 E(alues.)-.25 E F1
-(Dismiss)108 535.2 Q F0(This b)144 547.2 Q(utton closes the)-.2 E F1
+(ath sections in)-.1 F .429(the current crossing. The bath)144 494.4 R
+.428
+(ymetry contours and mis\214t plot are recalculated and redisplayed us-)
+-.05 F(ing the ne)144 506.4 Q 2.5(wb)-.25 G(ias v)-2.5 E(alues.)-.25 E
+F1(Dismiss)108 535.2 Q F0(This b)144 547.2 Q(utton closes the)-.2 E F1
 (Contr)2.5 E(ols W)-.18 E(indo)-.18 E(w)-.1 E F0(.)A/F2 10.95
 /Times-Bold@0 SF(USING MBN)72 588 Q -1.04 -1.588(AV A)-.219 H
 (DJUST 1: IMPOR)1.588 E(TING D)-.438 E -1.644 -1.04(AT A)-.383 H F0
@@ -1724,20 +1732,20 @@ ch \214le selected.)108 240 R 1.015(If a \214lename)6.015 F .205
 (en into a number of sections. The maximum size of the sections in line)
 -.1 F .386(length or in number of soundings is set in a dialog opened b\
 y clicking on <Option->Controls>. Na)108 300 R(vig)-.2 E(ation)-.05 E
-1.255(control points are selected at re)108 312 R 1.255(gular interv)
--.15 F 1.255(als within each section. The control point distance interv)
--.25 F 1.256(al is)-.25 F .571
-(approximately one tenth of the speci\214ed se)108 324 R .571
-(gment length, so there are up to 11 control points for each sec-)-.15 F
-.081(tion. The data for each section is written as a format 71 bath)108
-336 R .082(ymetry-only \214le in the "*.dir" directory)-.05 F 5.082(.A)
--.65 G 2.582(st)-5.082 G(he)-2.582 E .781
-(\214les are imported, the areal e)108 348 R .781
-(xtent of each section is compared to the other sections. An)-.15 F 3.28
-(yp)-.15 G .78(air of sections)-3.28 F 1.572(that o)108 360 R -.15(ve)
--.15 G 1.573(rlap is added to a list of crossings to be in).15 F -.15
-(ve)-.4 G(stig).15 E 1.573(ated graphically)-.05 F 4.073(.T)-.65 G 1.573
-(his list can be displayed by)-4.073 F(pulling do)108 372 Q(wn the <V)
+.222(control points are selected at re)108 312 R .222(gular interv)-.15
+F .223(als within each section. The control point distance interv)-.25 F
+.223(al is ap-)-.25 F .278(proximately one tenth of the speci\214ed se)
+108 324 R .277
+(gment length, so there are up to 11 control points for each section.)
+-.15 F .155(The data for each section is written as a format 71 bath)108
+336 R .155(ymetry-only \214le in the "*.dir" directory)-.05 F 5.155(.A)
+-.65 G 2.655(st)-5.155 G .155(he \214les)-2.655 F .874
+(are imported, the areal e)108 348 R .873
+(xtent of each section is compared to the other sections. An)-.15 F
+3.373(yp)-.15 G .873(air of sections that)-3.373 F -.15(ove)108 360 S
+.831(rlap is added to a list of crossings to be in).15 F -.15(ve)-.4 G
+(stig).15 E .832(ated graphically)-.05 F 3.332(.T)-.65 G .832
+(his list can be displayed by pulling)-3.332 F(do)108 372 Q(wn the <V)
 -.25 E(ie)-.6 E(w->Sho)-.25 E 2.5(wC)-.25 G(rossings> menu item.)-2.5 E
 .144(As the user later w)108 396 R .143(orks through the crossings, he \
 or she will will de\214ne tie points whene)-.1 F -.15(ve)-.25 G 2.643
@@ -1768,45 +1776,44 @@ H(istincti).15 E .912 -.15(ve f)-.25 H .612(eatures to).15 F 1.082
 520.8 Q 2.5(vE)-.25 G(rr)-2.5 E(or W)-.18 E(indo)-.18 E(w)-.1 E F0 .4
 (The heart of)108 532.8 R F1(mbna)2.9 E -.1(va)-.25 G(djust).1 E F0 .4
 (is the interacti)2.9 F .7 -.15(ve i)-.25 H .4(nspection of the sw).15 F
-.4(ath crossings. One can bring up the cross-)-.1 F 1.453
-(ing inspection windo)108 544.8 R 3.953(w\()-.25 G 1.453(entitled "Na)
--3.953 F 3.953(vE)-.2 G 1.452(rror"\) in a number of w)-3.953 F 1.452
-(ays. If one pulls do)-.1 F 1.452(wn the menu option)-.25 F .847
-(<Action->Analyze Crossings>, then the "Na)108 556.8 R 3.347(vE)-.2 G
-.847(rror" windo)-3.347 F 3.347(ww)-.25 G .847
-(ill come up with the \214rst crossing loaded.)-3.347 F(Alternati)108
-568.8 Q -.15(ve)-.25 G(ly).15 E 3.25(,i)-.65 G 3.25(ft)-3.25 G .75
-(he <V)-3.25 F(ie)-.6 E(w->Sho)-.25 E 3.25(wC)-.25 G .75
-(rossings> menu item has been selected so that a table of crossings is)
--3.25 F .804(displayed, clicking once on an)108 580.8 R 3.304(yo)-.15 G
-3.304(ft)-3.304 G .805
-(he crossing items in this tabel will bring up the)-3.304 F("Na)5.805 E
-3.305(vE)-.2 G .805(rror" windo)-3.305 F(w)-.25 E .309
-(with that crossing loaded.)108 592.8 R(Similarly)5.309 E 2.809(,i)-.65
-G 2.809(ft)-2.809 G .309(ie points ha)-2.809 F .609 -.15(ve b)-.2 H .309
-(een established and the tie point table displayed by).15 F .542
-(selecting the <V)108 604.8 R(ie)-.6 E(w->Sho)-.25 E 3.042(wT)-.25 G
-.542(ies> menu item, then clicking on an)-3.392 F 3.042(yo)-.15 G 3.042
-(ft)-3.042 G .543(he tie items this table will bring up)-3.042 F .619
-(the "Na)108 616.8 R 3.119(vE)-.2 G .619(rror" windo)-3.119 F 3.119(wa)
--.25 G .618
+.4(ath crossings. One can bring up the cross-)-.1 F .087
+(ing inspection windo)108 544.8 R 2.587(w\()-.25 G .087(entitled "Na)
+-2.587 F 2.587(vE)-.2 G .087(rror"\) in a number of w)-2.587 F .087
+(ays. If one pulls do)-.1 F .086(wn the menu option <Ac-)-.25 F .198
+(tion->Analyze Crossings>, then the "Na)108 556.8 R 2.698(vE)-.2 G .199
+(rror" windo)-2.698 F 2.699(ww)-.25 G .199
+(ill come up with the \214rst crossing loaded. Alter)-2.699 F(-)-.2 E
+(nati)108 568.8 Q -.15(ve)-.25 G(ly).15 E 3.386(,i)-.65 G 3.386(ft)
+-3.386 G .886(he <V)-3.386 F(ie)-.6 E(w->Sho)-.25 E 3.386(wC)-.25 G .885
+(rossings> menu item has been selected so that a table of crossings is \
+dis-)-3.386 F .309(played, clicking once on an)108 580.8 R 2.809(yo)-.15
+G 2.809(ft)-2.809 G .309
+(he crossing items in this tabel will bring up the)-2.809 F("Na)5.309 E
+2.809(vE)-.2 G .309(rror" windo)-2.809 F 2.809(ww)-.25 G(ith)-2.809 E
+.669(that crossing loaded.)108 592.8 R(Similarly)5.669 E 3.169(,i)-.65 G
+3.169(ft)-3.169 G .669(ie points ha)-3.169 F .969 -.15(ve b)-.2 H .669
+(een established and the tie point table displayed by se-).15 F .177
+(lecting the <V)108 604.8 R(ie)-.6 E(w->Sho)-.25 E 2.677(wT)-.25 G .177
+(ies> menu item, then clicking on an)-3.027 F 2.677(yo)-.15 G 2.677(ft)
+-2.677 G .178(he tie items this table will bring up the)-2.677 F("Na)108
+616.8 Q 2.669(vE)-.2 G .169(rror" windo)-2.669 F 2.669(wa)-.25 G .169
 (nd load the crossing that includes the selected tie point. If the "Na)
--3.119 F 3.118(vE)-.2 G .618(rror" win-)-3.118 F(do)108 628.8 Q 2.735
-(wi)-.25 G 2.735(sa)-2.735 G .236(lready displayed, clicking on crossin\
-g or tie items in the display tables will load the selected cross-)
--2.735 F(ing in place of whate)108 640.8 Q -.15(ve)-.25 G 2.5(rc).15 G
-(rossing w)-2.5 E(as pre)-.1 E(viously sho)-.25 E(wn.)-.25 E .614
-(Once the "Na)108 664.8 R 3.114(vE)-.2 G .614(rr" windo)-3.114 F 3.114
-(wi)-.25 G 3.114(sd)-3.114 G .613(isplayed, the user can also mo)-3.114
-F .913 -.15(ve t)-.15 H .613(hrough the crossings by clicking on the).15
-F(<Pre)108 676.8 Q .02(vious>, <Ne)-.25 F .02(xt>, and <Ne)-.15 F .02
-(xt Unset> b)-.15 F .02(uttons. The <Pre)-.2 F .02(vious> and <Ne)-.25 F
-.02(xt> b)-.15 F .02(uttons will load the pre)-.2 F(vious)-.25 E .998
-(or ne)108 688.8 R .998(xt, respecti)-.15 F -.15(ve)-.25 G(ly).15 E
-3.498(,c)-.65 G .998(rossings in the crossing list. As discussed belo)
--3.498 F 2.298 -.65(w, e)-.25 H .998(ach crossing must ultimately be).65
-F("resolv)108 700.8 Q 2.269(ed" by either ha)-.15 F 2.269
-(ving one or more na)-.2 F(vig)-.2 E 2.269(ation of)-.05 F 2.27
+-2.669 F 2.669(vE)-.2 G .168(rror" windo)-2.669 F 2.668(wi)-.25 G(s)
+-2.668 E .774(already displayed, clicking on crossing or tie items in t\
+he display tables will load the selected crossing in)108 628.8 R
+(place of whate)108 640.8 Q -.15(ve)-.25 G 2.5(rc).15 G(rossing w)-2.5 E
+(as pre)-.1 E(viously sho)-.25 E(wn.)-.25 E .614(Once the "Na)108 664.8
+R 3.114(vE)-.2 G .614(rr" windo)-3.114 F 3.114(wi)-.25 G 3.114(sd)-3.114
+G .613(isplayed, the user can also mo)-3.114 F .913 -.15(ve t)-.15 H
+.613(hrough the crossings by clicking on the).15 F(<Pre)108 676.8 Q .02
+(vious>, <Ne)-.25 F .02(xt>, and <Ne)-.15 F .02(xt Unset> b)-.15 F .02
+(uttons. The <Pre)-.2 F .02(vious> and <Ne)-.25 F .02(xt> b)-.15 F .02
+(uttons will load the pre)-.2 F(vious)-.25 E .998(or ne)108 688.8 R .998
+(xt, respecti)-.15 F -.15(ve)-.25 G(ly).15 E 3.498(,c)-.65 G .998
+(rossings in the crossing list. As discussed belo)-3.498 F 2.298 -.65
+(w, e)-.25 H .998(ach crossing must ultimately be).65 F("resolv)108
+700.8 Q 2.269(ed" by either ha)-.15 F 2.269(ving one or more na)-.2 F
+(vig)-.2 E 2.269(ation of)-.05 F 2.27
 (fsets set at particular "tie points", or by being)-.25 F .95
 ("skipped" because no matchable sea\215oor features are found. The <Ne)
 108 712.8 R .95(xt Unset> b)-.15 F .95(utton will load the ne)-.2 F(xt)
@@ -1842,22 +1849,22 @@ E .262(ger plot on the right consists of o)-.18 F -.15(ve)-.15 G .262
 (sional plot of the RMS mis\214t between the tw)108 156 R 3.061(os)-.1 G
 -.1(wa)-3.061 G .56(ths. The mis\214t is sho).1 F .56
 (wn as a function of relati)-.25 F .86 -.15(ve l)-.25 H(ateral).15 E(of)
-108 168 Q 2.13(fsets between the tw)-.25 F 4.63(os)-.1 G -.1(wa)-4.63 G
-2.13(ths. Put another w).1 F(ay)-.1 E 4.631(,t)-.65 G 2.131
-(he mis\214t plot sho)-4.631 F 2.131(ws ho)-.25 F 4.631(wg)-.25 G 2.131
-(ood, or bad, the mis\214t)-4.631 F .124(becomes as one mo)108 180 R
--.15(ve)-.15 G 2.624(so).15 G .124(ne sw)-2.624 F .124(ath relati)-.1 F
-.423 -.15(ve t)-.25 H 2.623(oa).15 G(nother)-2.623 E 2.623(.T)-.55 G
-.123(he lo)-2.623 F .123(west mis\214t v)-.25 F .123(alues are sho)-.25
-F .123(wn in red; higher mis-)-.25 F .204(\214ts are sho)108 192 R .205
-(wn in blues to purples. The location of the global \(three dimensional\
-\) minimum mis\214t is mark)-.25 F(ed)-.1 E .345(by the lar)108 204 R
+108 168 Q 1.163(fsets between the tw)-.25 F 3.664(os)-.1 G -.1(wa)-3.664
+G 1.164(ths. Put another w).1 F(ay)-.1 E 3.664(,t)-.65 G 1.164
+(he mis\214t plot sho)-3.664 F 1.164(ws ho)-.25 F 3.664(wg)-.25 G 1.164
+(ood, or bad, the mis\214t be-)-3.664 F .154(comes as one mo)108 180 R
+-.15(ve)-.15 G 2.654(so).15 G .154(ne sw)-2.654 F .154(ath relati)-.1 F
+.453 -.15(ve t)-.25 H 2.653(oa).15 G(nother)-2.653 E 2.653(.T)-.55 G
+.153(he lo)-2.653 F .153(west mis\214t v)-.25 F .153(alues are sho)-.25
+F .153(wn in red; higher mis\214ts)-.25 F .335(are sho)108 192 R .336(w\
+n in blues to purples. The location of the global \(three dimensional\)\
+ minimum mis\214t is mark)-.25 F .336(ed by)-.1 F .345(the lar)108 204 R
 .345
 (ge black "X", the location of the minimum mis\214t using the current v)
 -.18 F .345(ertical of)-.15 F .345(fset v)-.25 F .345(alue is mark)-.25
-F(ed)-.1 E .195
-(by a small black "x", and the location of the current na)108 216 R(vig)
--.2 E .195(ation of)-.05 F .195(fset is sho)-.25 F .196
+F .345(ed by)-.1 F 3.33(as)108 216 S .83
+(mall black "x", and the location of the current na)-3.33 F(vig)-.2 E
+.83(ation of)-.05 F .83(fset is sho)-.25 F .83
 (wn by a small red square with a)-.25 F(black outline.)108 228 Q .529
 (The interacti)108 252 R .829 -.15(ve a)-.25 H .529(spect of the "Na).15
 F 3.029(vE)-.2 G .529(rror" windo)-3.029 F 3.029(ww)-.25 G .529
@@ -1887,13 +1894,13 @@ G .03(rr" windo)-2.53 F 2.53(wi)-.25 G .03(ncludes tw)-2.53 F 2.53(ob)
 (tures. The <Minimum Mis\214t> b)108 360 R 1.026(utton belo)-.2 F 3.527
 (wt)-.25 G 1.027(he mis\214t display will cause)-3.527 F F1(mbna)3.527 E
 -.1(va)-.25 G(djust).1 E F0 1.027(to set the current)3.527 F(na)108 372
-Q(vig)-.2 E .957(ational of)-.05 F .956(fset to that associated with th\
-e smallest mis\214t for the current mis\214t display)-.25 F 3.456(.T)
--.65 G .956(his b)-3.456 F .956(utton is)-.2 F .839
-(often used \214rst to get close to the right of)108 384 R 3.339
-(fsets. The)-.25 F .839(<Zero Of)3.339 F .839(fset> b)-.25 F .839
-(utton abo)-.2 F 1.139 -.15(ve t)-.15 H .839(he contour display will).15
-F(return both displays to a state of zero na)108 396 Q(vig)-.2 E
+Q(vig)-.2 E .068(ational of)-.05 F .067(fset to that associated with th\
+e smallest mis\214t for the current mis\214t display)-.25 F 2.567(.T)
+-.65 G .067(his b)-2.567 F .067(utton is of-)-.2 F .517
+(ten used \214rst to get close to the right of)108 384 R 3.017
+(fsets. The)-.25 F .517(<Zero Of)3.017 F .518(fset> b)-.25 F .518
+(utton abo)-.2 F .818 -.15(ve t)-.15 H .518(he contour display will re-)
+.15 F(turn both displays to a state of zero na)108 396 Q(vig)-.2 E
 (ational of)-.05 E(fset.)-.25 E .773
 (The relationship between the contoured bath)108 420 R .773
 (ymetry and the mis\214t plot is usually quite clear)-.05 F 3.273(.I)
@@ -1917,16 +1924,16 @@ ot will not display a strong minimum).15 F .406
 (and it will be impossible to determine the relati)108 504 R .706 -.15
 (ve n)-.25 H -.2(av).15 G(ig).2 E .406(ational of)-.05 F .406
 (fset. Alternati)-.25 F -.15(ve)-.25 G(ly).15 E 2.906(,t)-.65 G .406
-(he e)-2.906 F .406(xistence of multi-)-.15 F 2.071(ple similar feature\
+(he e)-2.906 F .406(xistence of multi-)-.15 F 1.051(ple similar feature\
 s can produce multiple local minima in the mis\214t map. In this case, \
-the ambiguity)108 516 R .999(between multiple possible solutions pre)108
-528 R -.15(ve)-.25 G .999(nts the determination of the na).15 F(vig)-.2
-E .999(ational of)-.05 F 1(fset. W)-.25 F 3.5(eh)-.8 G -2.25 -.2(av e)
--3.5 H(found)3.7 E .805
-(that combining both contour and mis\214t displays allo)108 540 R .805
-(ws interacti)-.25 F -.15(ve)-.25 G 3.305(,v).15 G .805
-(isually based decision making that is)-3.305 F
-(more generally reliable than an)108 552 Q 2.5(ya)-.15 G
+the ambiguity be-)108 516 R .352(tween multiple possible solutions pre)
+108 528 R -.15(ve)-.25 G .352(nts the determination of the na).15 F(vig)
+-.2 E .352(ational of)-.05 F .352(fset. W)-.25 F 2.852(eh)-.8 G -2.25
+-.2(av e)-2.852 H .353(found that)3.053 F .409
+(combining both contour and mis\214t displays allo)108 540 R .409
+(ws interacti)-.25 F -.15(ve)-.25 G 2.909(,v).15 G .408
+(isually based decision making that is more)-2.909 F
+(generally reliable than an)108 552 Q 2.5(ya)-.15 G
 (utomated scheme we can de)-2.5 E(vise.)-.25 E(Na)108 576 Q(vig)-.2 E
 1.516(ational of)-.05 F 1.516(fsets can only be used when the)-.25 F
 4.016(ya)-.15 G 1.516(re associated with speci\214c points on the o)
@@ -1951,11 +1958,11 @@ G .521(ay turn out that both sw)-3.021 F .521(aths are poorly na)-.1 F
 (vig)-.2 E .75(ation of)-.05 F .75(fsets among the af)-.25 F .75
 (fected sw)-.25 F .75(ath \214les intrinsically in)-.1 F -.2(vo)-.4 G
 (lv).2 E .75(es speed changes. F)-.15 F(ortunately)-.15 E 3.25(,w)-.65 G
-3.25(ea)-3.25 G(re)-3.25 E .082(able to formulate the automated in)108
-684 R -.15(ve)-.4 G .081(rsion process discussed belo).15 F 2.581(wt)
--.25 G 2.581(oo)-2.581 G .081(btain an optimal na)-2.581 F(vig)-.2 E
-.081(ation solution.)-.05 F(MB-System 5.0)72 768 Q(28 No)132.205 E -.15
-(ve)-.15 G(mber 2016).15 E(17)185.545 E 0 Cg EP
+3.25(ea)-3.25 G(re)-3.25 E(able to formulate the automated in)108 684 Q
+-.15(ve)-.4 G(rsion process discussed belo).15 E 2.5(wt)-.25 G 2.5(oo)
+-2.5 G(btain an optimal na)-2.5 E(vig)-.2 E(ation solution.)-.05 E
+(MB-System 5.0)72 768 Q(28 No)132.205 E -.15(ve)-.15 G(mber 2016).15 E
+(17)185.545 E 0 Cg EP
 %%Page: 18 18
 %%BeginPageSetup
 BP
@@ -1963,16 +1970,16 @@ BP
 /F0 10/Times-Roman@0 SF(mbna)72 48 Q -.25(va)-.2 G 137.51
 (djust\(1\) MB-System).25 F 137.51(5.0 mbna)2.5 F -.25(va)-.2 G
 (djust\(1\)).25 E/F1 10/Times-Bold@0 SF(Display Contr)87 84 Q(ols)-.18 E
-F0 1.284(The user controls the appearance of the bath)108 96 R 1.284
-(ymetry contour plot.)-.05 F 1.284(The contours are generated at re)
-6.284 F(gular)-.15 E(interv)108 108 Q .381
+F0 .353(The user controls the appearance of the bath)108 96 R .353
+(ymetry contour plot.)-.05 F .353(The contours are generated at re)5.353
+F .353(gular in-)-.15 F(terv)108 108 Q .867
 (als in depth, and also change color and are annotated with do)-.25 F
-.38(wnhill f)-.25 F .38(acing tickmarks at re)-.1 F .38(gular inter)-.15
-F(-)-.2 E -.25(va)108 120 S 3.313(ls. A).25 F .813
+.867(wnhill f)-.25 F .867(acing tickmarks at re)-.1 F .867(gular inter)
+-.15 F(-)-.2 E -.25(va)108 120 S 3.314(ls. A).25 F .813
 (controls dialog brought up by clicking on the <Settings->Contours> b)
-3.313 F .813(utton allo)-.2 F .813(ws the user to set)-.25 F .886
-(the contour)108 132 R 3.386(,c)-.4 G .886
-(olor change, and tickmark interv)-3.386 F .885
+3.314 F .813(utton allo)-.2 F .813(ws the user to set)-.25 F .885
+(the contour)108 132 R 3.385(,c)-.4 G .885
+(olor change, and tickmark interv)-3.385 F .886
 (als. This same dialog also sets a decimation parameter that)-.25 F .407
 (causes the contours to be calculated from fe)108 144 R .407
 (wer soundings \(the data are decimated by ignoring pings\). The)-.25 F
@@ -1980,29 +1987,29 @@ F(-)-.2 E -.25(va)108 120 S 3.313(ls. A).25 F .813
 156 R .15(ut is not generally recommended unless the)-.2 F(bath)108 168
 Q(ymetry is strongly o)-.05 E -.15(ve)-.15 G(rsampled.).15 E .436(Users\
  may also use a "zoom" feature to focus on small areas in the contour p\
-lot.)108 192 R .436(The center mouse b)5.436 F(utton)-.2 E .487
-(is used to drag a box o)108 204 R -.15(ve)-.15 G 2.987(rar).15 G -.15
-(eg)-2.987 G .487
-(ion of interest in the contour plot. When the center b).15 F .486
-(utton is released, both)-.2 F .824
-(the contour and mis\214t plots are re)108 216 R .824(generated to sho)
--.15 F 3.324(wt)-.25 G .824(he smaller area.)-3.324 F .825
-(Users may zoom as man)5.825 F 3.325(yt)-.15 G .825(imes in)-3.325 F
-.564(succession as desired. One cannot undo the indi)108 228 R .564
-(vidual zoom e)-.25 F -.15(ve)-.25 G .564(nts, b).15 F .563
-(ut clicking the <Full Size> b)-.2 F .563(utton in)-.2 F .519(the "Na)
+lot.)108 192 R .435(The center mouse b)5.435 F(utton)-.2 E .486
+(is used to drag a box o)108 204 R -.15(ve)-.15 G -5.485 2.986(ra r).15
+H -.15(eg)-2.986 G .487
+(ion of interest in the contour plot. When the center b).15 F .487
+(utton is released, both)-.2 F .825
+(the contour and mis\214t plots are re)108 216 R .825(generated to sho)
+-.15 F 3.324(wt)-.25 G .824(he smaller area.)-3.324 F .824
+(Users may zoom as man)5.824 F 3.324(yt)-.15 G .824(imes in)-3.324 F
+.563(succession as desired. One cannot undo the indi)108 228 R .564
+(vidual zoom e)-.25 F -.15(ve)-.25 G .564(nts, b).15 F .564
+(ut clicking the <Full Size> b)-.2 F .564(utton in)-.2 F .519(the "Na)
 108 240 R 3.019(vE)-.2 G .519(rr" windo)-3.019 F 3.019(ww)-.25 G .519
 (ill cause the plots to sho)-3.019 F 3.019(wt)-.25 G .519
 (he original, full area co)-3.019 F -.15(ve)-.15 G .519(red by the tw)
 .15 F 3.019(os)-.1 G -.1(wa)-3.019 G .519(ths in the).1 F
 (current crossing.)108 252 Q .893
 (The mis\214t plot represents lateral of)108 276 R .893
-(fsets scaled according to the current contour plot display)-.25 F 3.392
-(.S)-.65 G(peci\214cally)-3.392 E(,)-.65 E .563(the width and height of\
+(fsets scaled according to the current contour plot display)-.25 F 3.393
+(.S)-.65 G(peci\214cally)-3.393 E(,)-.65 E .563(the width and height of\
  the mis\214t plot correspond to one half the width and height of the b\
-ath)108 288 R .564(ymetry con-)-.05 F .249(tour plot.)108 300 R .249
-(When the bath)5.249 F .248(ymetry plot area changes due to a zoom e)
--.05 F -.15(ve)-.25 G .248(nt, the mis\214t is recalculated and redis-)
+ath)108 288 R .563(ymetry con-)-.05 F .248(tour plot.)108 300 R .248
+(When the bath)5.248 F .248(ymetry plot area changes due to a zoom e)
+-.05 F -.15(ve)-.25 G .249(nt, the mis\214t is recalculated and redis-)
 .15 F .302(played centered around the current of)108 312 R .302(fset. T\
 he color map used for the mis\214t display is automatically scaled)-.25
 F(according to the minimum and maximum mis\214t v)108 324 Q(alues.)-.25
@@ -2010,81 +2017,81 @@ E F1(Setting Cr)87 352.8 Q(ossing T)-.18 E(ies and Offsets)-.18 E F0
 1.614(In order to actually set the relati)108 364.8 R 1.914 -.15(ve n)
 -.25 H -.2(av).15 G(ig).2 E 1.614(ational of)-.05 F 1.614
 (fset between tw)-.25 F 4.114(op)-.1 G 1.614(articular points on o)
--4.114 F -.15(ve)-.15 G 1.614(rlapping or).15 F .607(crossing sw)108
+-4.114 F -.15(ve)-.15 G 1.614(rlapping or).15 F .608(crossing sw)108
 376.8 R .607(aths, the user must \214rst create a tie point.)-.1 F .607
 (This is accomplished by clicking on the <Add T)5.607 F(ie>)-.35 E -.2
-(bu)108 388.8 S .203(tton in the "Na).2 F 2.703(vE)-.2 G .203(rr" windo)
--2.703 F 4.003 -.65(w. O)-.25 H .203(nce a tie point e).65 F .202
-(xists, it will be sho)-.15 F .202(wn on the contour plot as tw)-.25 F
-2.702(oy)-.1 G(ello)-2.702 E(w)-.25 E .147(or red-\214lled, black outli\
+(bu)108 388.8 S .202(tton in the "Na).2 F 2.702(vE)-.2 G .202(rr" windo)
+-2.702 F 4.002 -.65(w. O)-.25 H .202(nce a tie point e).65 F .202
+(xists, it will be sho)-.15 F .203(wn on the contour plot as tw)-.25 F
+2.703(oy)-.1 G(ello)-2.703 E(w)-.25 E .147(or red-\214lled, black outli\
 ned squares connected by a thin black line. Each of the squares is loca\
-ted along one)108 400.8 R 1.696(of the sw)108 412.8 R 1.696(ath na)-.1 F
-(vig)-.2 E 1.696(ation tracks, and represents one of the na)-.05 F(vig)
--.2 E 1.696(ation control points de\214ned during data)-.05 F 2.939
-(importation. There)108 424.8 R .439(can be multiple tie points for eac\
-h crossing, and each one is created by clicking on the)2.939 F(<Add T)
-108 436.8 Q(ie> b)-.35 E(utton.)-.2 E .062
-(Only one tie point will be acti)108 460.8 R .362 -.15(ve a)-.25 H 2.562
-(ta).15 G .362 -.15(ny t)-2.562 H .062(ime. The acti).15 F .361 -.15
-(ve t)-.25 H .061(ie point is displayed with lar).15 F .061(ger box)-.18
-F .061(es \(the inacti)-.15 F -.15(ve)-.25 G .335(tie points are only 1\
-/4 the size. If only one tie point has been de\214ned, it will al)108
-472.8 R -.1(wa)-.1 G .336(ys be acti).1 F -.15(ve)-.25 G 2.836(.I).15 G
-2.836(fm)-2.836 G .336(ore than)-2.836 F .365(one tie point e)108 484.8
-R .365(xists, clicking on the <Select T)-.15 F .365(ie> b)-.35 F .365
-(utton in the "Na)-.2 F 2.865(vE)-.2 G .365(rr" windo)-2.865 F 2.864(ww)
--.25 G .364(ill change the acti)-2.864 F .664 -.15(ve t)-.25 H(ie).15 E
-.442(point to the ne)108 496.8 R .442(xt in the list for the displayed \
+ted along one)108 400.8 R .565(of the sw)108 412.8 R .565(ath na)-.1 F
+(vig)-.2 E .566(ation tracks, and represents one of the na)-.05 F(vig)
+-.2 E .566(ation control points de\214ned during data im-)-.05 F 3.527
+(portation. There)108 424.8 R 1.026(can be multiple tie points for each\
+ crossing, and each one is created by clicking on the)3.527 F(<Add T)108
+436.8 Q(ie> b)-.35 E(utton.)-.2 E .061(Only one tie point will be acti)
+108 460.8 R .361 -.15(ve a)-.25 H 2.561(ta).15 G .361 -.15(ny t)-2.561 H
+.061(ime. The acti).15 F .362 -.15(ve t)-.25 H .062
+(ie point is displayed with lar).15 F .062(ger box)-.18 F .062
+(es \(the inacti)-.15 F -.15(ve)-.25 G .336(tie points are only 1/4 the\
+ size. If only one tie point has been de\214ned, it will al)108 472.8 R
+-.1(wa)-.1 G .335(ys be acti).1 F -.15(ve)-.25 G 2.835(.I).15 G 2.835
+(fm)-2.835 G .335(ore than)-2.835 F .364(one tie point e)108 484.8 R
+.365(xists, clicking on the <Select T)-.15 F .365(ie> b)-.35 F .365
+(utton in the "Na)-.2 F 2.865(vE)-.2 G .365(rr" windo)-2.865 F 2.865(ww)
+-.25 G .365(ill change the acti)-2.865 F .665 -.15(ve t)-.25 H(ie).15 E
+.443(point to the ne)108 496.8 R .442(xt in the list for the displayed \
 crossing \(the tie points are selected in the order in which the)-.15 F
 (y)-.15 E .309(were created\). If the user wishes to delete a tie point\
 , then click <Select T)108 508.8 R .309
-(ie> until the undesirable tie point)-.35 F .471(is acti)108 520.8 R
--.15(ve)-.25 G 2.971(,a).15 G .471(nd then click <Delete T)-2.971 F
-2.971(ie>. The)-.35 F(acti)2.971 E .771 -.15(ve t)-.25 H .472
+(ie> until the undesirable tie point)-.35 F .472(is acti)108 520.8 R
+-.15(ve)-.25 G 2.972(,a).15 G .472(nd then click <Delete T)-2.972 F
+2.972(ie>. The)-.35 F(acti)2.972 E .772 -.15(ve t)-.25 H .471
 (ie point will be displayed in red \214ll if either the associ-).15 F
 .52(ated na)108 532.8 R(vig)-.2 E .52(ation control points or the na)
 -.05 F(vig)-.2 E .52(ational of)-.05 F .52(fset ha)-.25 F .82 -.15(ve b)
 -.2 H .52(een changed since it w).15 F .52(as created or last set.)-.1 F
-.099(If the acti)108 544.8 R .399 -.15(ve t)-.25 H .099
+.1(If the acti)108 544.8 R .399 -.15(ve t)-.25 H .099
 (ie point is up-to-date, then it will be displayed in yello).15 F 2.599
 <778c>-.25 G .099(ll. Each ne)-2.599 F 2.599(wt)-.25 G .099
 (ie point is initially dis-)-2.599 F(played in yello)108 556.8 Q 1.3
 -.65(w. A)-.25 H(ll inacti).65 E .3 -.15(ve t)-.25 H
 (ie points will be sho).15 E(wn in yello)-.25 E 2.5<778c>-.25 G(ll.)-2.5
-E .544(When vie)108 580.8 R .544
-(wing a crossing with one or more tie points, the of)-.25 F .543
-(fsets displayed are associated with the current)-.25 F 1.054
+E .543(When vie)108 580.8 R .543
+(wing a crossing with one or more tie points, the of)-.25 F .544
+(fsets displayed are associated with the current)-.25 F 1.055
 (tie point. As one mo)108 592.8 R -.15(ve)-.15 G 3.554(st).15 G 1.054
 (he contours to match o)-3.554 F -.15(ve)-.15 G 1.054
 (rlapping features, it is important to remember that the).15 F(na)108
-604.8 Q(vig)-.2 E .975(ational of)-.05 F .975
-(fset will be applied to the na)-.25 F(vig)-.2 E .974
-(ation points indicated for the current tie. Thus, the feature)-.05 F
-.155(being matched should deri)108 616.8 R .455 -.15(ve f)-.25 H .156(r\
-om data \(soundings\) associated with those particular points on the sh\
-iptrack.).15 F 1.138(This is accomplished by clicking on the bath)108
-628.8 R 1.137
+604.8 Q(vig)-.2 E .018(ational of)-.05 F .019
+(fset will be applied to the na)-.25 F(vig)-.2 E .019
+(ation points indicated for the current tie. Thus, the feature be-)-.05
+F .83(ing matched should deri)108 616.8 R 1.13 -.15(ve f)-.25 H .83(rom\
+ data \(soundings\) associated with those particular points on the ship\
+track.).15 F 1.137(This is accomplished by clicking on the bath)108
+628.8 R 1.138
 (ymetric feature in the contour display with the right mouse)-.05 F -.2
 (bu)108 640.8 S .335(tton. The "right-click" causes).2 F F1(mbna)2.835 E
 -.1(va)-.25 G(djust).1 E F0 .335(to \214nd the soundings from each sw)
-2.835 F .335(ath that are closest to the)-.1 F .073(point click)108
-652.8 R .073(ed, and then to shift the current tie point to the na)-.1 F
-(vig)-.2 E .072(ation points on each sw)-.05 F .072
-(ath that include these)-.1 F .206(soundings \(that is, the na)108 664.8
-R(vig)-.2 E .207(ation points associated with the sonar pings that incl\
-ude the closest soundings\).)-.05 F .709(In order to set, and sa)108
-688.8 R -.15(ve)-.2 G 3.209(,a).15 G(na)-.001 E(vig)-.2 E .708
-(ational of)-.05 F .708(fset that causes a bath)-.25 F .708
+2.835 F .335(ath that are closest to the)-.1 F .072(point click)108
+652.8 R .072(ed, and then to shift the current tie point to the na)-.1 F
+(vig)-.2 E .073(ation points on each sw)-.05 F .073
+(ath that include these)-.1 F(soundings \(that is, the na)108 664.8 Q
+(vig)-.2 E(ation points associated with the sonar pings that include th\
+e closest soundings\).)-.05 E .709(In order to set, and sa)108 688.8 R
+-.15(ve)-.2 G 3.209(,a).15 G(na)-.001 E(vig)-.2 E .708(ational of)-.05 F
+.708(fset that causes a bath)-.25 F .708
 (ymetric feature to be matched in o)-.05 F -.15(ve)-.15 G(rlap-).15 E
-.898(ping sw)108 700.8 R .898(aths, the user must click the <Set Of)-.1
-F .898(fset> b)-.25 F .898(utton abo)-.2 F 1.198 -.15(ve t)-.15 H .898
-(he contour display).15 F 3.399(.I)-.65 G 3.399(fau)-3.399 G .899
-(ser changes the)-3.399 F(acti)108 712.8 Q .876 -.15(ve t)-.25 H .576
-(ie point or loads a dif).15 F .576
-(ferent crossing without clicking <Set T)-.25 F .576(ie>, then no of)
--.35 F .575(fset information will be)-.25 F(sa)108 724.8 Q -.15(ve)-.2 G
-3.407(d. Con).15 F -.15(ve)-.4 G(rsely).15 E 3.407(,f)-.65 G .907(or an)
--3.407 F 3.407(yc)-.15 G .907
+.076(ping sw)108 700.8 R .077(aths, the user must click the <Set Of)-.1
+F .077(fset> b)-.25 F .077(utton abo)-.2 F .377 -.15(ve t)-.15 H .077
+(he contour display).15 F 2.577(.I)-.65 G 2.577(fau)-2.577 G .077
+(ser changes the ac-)-2.577 F(ti)108 712.8 Q 1.399 -.15(ve t)-.25 H
+1.099(ie point or loads a dif).15 F 1.098
+(ferent crossing without clicking <Set T)-.25 F 1.098(ie>, then no of)
+-.35 F 1.098(fset information will be)-.25 F(sa)108 724.8 Q -.15(ve)-.2
+G 3.407(d. Con).15 F -.15(ve)-.4 G(rsely).15 E 3.407(,f)-.65 G .907
+(or an)-3.407 F 3.407(yc)-.15 G .907
 (rossing with one or more tie points, the <Reset Of)-3.407 F .907
 (fset> b)-.25 F .907(utton will reset the)-.2 F(MB-System 5.0)72 768 Q
 (28 No)132.205 E -.15(ve)-.15 G(mber 2016).15 E(18)185.545 E 0 Cg EP
@@ -2096,11 +2103,11 @@ BP
 (djust\(1\) MB-System).25 F 137.51(5.0 mbna)2.5 F -.25(va)-.2 G
 (djust\(1\)).25 E(na)108 84 Q(vig)-.2 E(ational of)-.05 E
 (fset to the last v)-.25 E
-(alue set for the current crossing and tie point.)-.25 E 1.277
-(So, in practice, setting na)108 108 R(vig)-.2 E 1.277(ational of)-.05 F
-1.277(fsets that will be used in obtaining an optimal na)-.25 F(vig)-.2
-E 1.276(ation solution)-.05 F(in)108 120 Q -.2(vo)-.4 G(lv).2 E
-(es the follo)-.15 E(wing steps:)-.25 E(1. Identify a bath)144 132 Q
+(alue set for the current crossing and tie point.)-.25 E .347
+(So, in practice, setting na)108 108 R(vig)-.2 E .346(ational of)-.05 F
+.346(fsets that will be used in obtaining an optimal na)-.25 F(vig)-.2 E
+.346(ation solution in-)-.05 F -.2(vo)108 120 S(lv).2 E(es the follo)
+-.15 E(wing steps:)-.25 E(1. Identify a bath)144 132 Q
 (ymetric feature with)-.05 E -.15(ove)151.5 144 S
 (rlapping data so that it can be).15 E(matched.)151.5 156 Q
 (2. Create a tie point by clicking the)144 168 Q(<Add T)151.5 180 Q
@@ -2214,14 +2221,13 @@ E .02(the west while another tie point requires a mo)108 108 R .32 -.15
 (ferent penalty weights, and the "best" solution is)-.25 F .356
 (selected and applied to the data. The details of ho)108 156 R 2.856(wt)
 -.25 G .356(he "best" solution is identi\214ed are gi)-2.856 F -.15(ve)
--.25 G 2.855(ni).15 G 2.855(nt)-2.855 G .355(he section)-2.855 F 1.214
-("Details of the In)108 168 R -.15(ve)-.4 G 1.214(rsion" section belo)
-.15 F 2.514 -.65(w. A l)-.25 H 1.214(og of the in).65 F -.15(ve)-.4 G
-1.214(rsion parameters, the results from each of the).15 F(in)108 180 Q
--.15(ve)-.4 G .02
-(rsion iterations, and detailed results from the \214nal in).15 F -.15
-(ve)-.4 G .019(rsion are output to the Message te).15 F .019(xt windo)
--.15 F 1.319 -.65(w. T)-.25 H(he).65 E .747
+-.25 G 2.855(ni).15 G 2.855(nt)-2.855 G .355(he section)-2.855 F .39
+("Details of the In)108 168 R -.15(ve)-.4 G .39(rsion" section belo).15
+F 1.69 -.65(w. A l)-.25 H .391(og of the in).65 F -.15(ve)-.4 G .391
+(rsion parameters, the results from each of the in-).15 F -.15(ve)108
+180 S .481(rsion iterations, and detailed results from the \214nal in)
+.15 F -.15(ve)-.4 G .48(rsion are output to the Message te).15 F .48
+(xt windo)-.15 F 1.78 -.65(w. T)-.25 H(he).65 E .747
 (program then outputs an adjusted na)108 192 R(vig)-.2 E .747
 (ation \214le for each of the input sw)-.05 F .747
 (ath \214les and updates \(or creates\))-.1 F
@@ -2252,50 +2258,50 @@ F -.15(ve)-.4 G .544(rsion in).15 F F1(mbna)3.044 E -.1(va)-.25 G(djust)
 .1 E F0 5.544(.U)C(sers)-5.544 E .078(do need to be a)108 384 R -.1(wa)
 -.15 G .078(re that the order of na).1 F(vig)-.2 E .078
 (ation processing is important because, when possible,)-.05 F F1(mbna)
-2.579 E -.1(va)-.25 G(d-).1 E(just)108 396 Q F0 1.448(imports e)3.948 F
-1.447(xisting processed data \214les.)-.15 F 1.447(The data within the)
-6.447 F F1(mbna)3.947 E -.1(va)-.25 G(djust).1 E F0 1.447
-(projects are not, ho)3.947 F(we)-.25 E -.15(ve)-.25 G -.4(r,).15 G .306
-(updated when the source data are updated. Consequently)108 408 R 2.806
-(,a)-.65 G .606 -.15(ny r)-2.806 H .306(equired standard na).15 F(vig)
--.2 E .307(ation processing \(e.g.)-.05 F F1(MBna)108 420 Q -.1(ve)-.25
+2.579 E -.1(va)-.25 G(d-).1 E(just)108 396 Q F0 .296(imports e)2.796 F
+.296(xisting processed data \214les.)-.15 F .295(The data within the)
+5.295 F F1(mbna)2.795 E -.1(va)-.25 G(djust).1 E F0 .295
+(projects are not, ho)2.795 F(we)-.25 E -.15(ve)-.25 G 1.095 -.4(r, u)
+.15 H(p-).4 E 1.075
+(dated when the source data are updated. Consequently)108 408 R 3.575
+(,a)-.65 G 1.376 -.15(ny r)-3.575 H 1.076(equired standard na).15 F(vig)
+-.2 E 1.076(ation processing \(e.g.)-.05 F F1(MBna)108 420 Q -.1(ve)-.25
 G(dit).1 E F0 3.317(\)o)C 3.317(rb)-3.317 G(ath)-3.317 E .817
 (ymetry editing \(e.g.)-.05 F F1 .816
 (MBeditviz\) should be completed and applied with mbpr)3.317 F(ocess)
 -.18 E(bef)108 432 Q(or)-.25 E 2.5(eas)-.18 G
 (wath \214le is imported into an mbna)-2.5 E -.1(va)-.25 G(djust pr).1 E
 (oject.)-.18 E(Fine-T)87 460.8 Q(uning the In)-.92 E -.1(ve)-.4 G(rsion)
-.1 E F0 1.581(Once an in)108 472.8 R -.15(ve)-.4 G 1.582(rsion has been\
- performed, the user should inspect the \214t for each of the tie point\
-s before).15 F .595(accepting and applying the adjusted na)108 484.8 R
-(vig)-.2 E .595(ation. The relationship between the interacti)-.05 F
--.15(ve)-.25 G .595(ly de\214ned na).15 F(vig)-.2 E(a-)-.05 E .168
-(tion of)108 496.8 R .168(fsets and the of)-.25 F .169
-(fsets associated with the in)-.25 F -.15(ve)-.4 G .169(rsion can be in)
-.15 F -.15(ve)-.4 G(stig).15 E .169
-(ated numerically in the tie points ta-)-.05 F
-(ble or visually in the "Na)108 508.8 Q 2.5(vE)-.2 G(rr" windo)-2.5 E
--.65(w.)-.25 G 2.345 -.8(We s)108 532.8 T .745(uggest \214rst e).8 F
-.744(xamining the tie points table by pulling do)-.15 F .744(wn the <V)
--.25 F(ie)-.6 E(w->Sho)-.25 E 3.244(wT)-.25 G .744(ies> menu item. This)
+.1 E F0 .724(Once an in)108 472.8 R -.15(ve)-.4 G .724(rsion has been p\
+erformed, the user should inspect the \214t for each of the tie points \
+before ac-).15 F .316(cepting and applying the adjusted na)108 484.8 R
+(vig)-.2 E .316(ation. The relationship between the interacti)-.05 F
+-.15(ve)-.25 G .315(ly de\214ned na).15 F(vig)-.2 E(ation)-.05 E(of)108
+496.8 Q .071(fsets and the of)-.25 F .071(fsets associated with the in)
+-.25 F -.15(ve)-.4 G .071(rsion can be in).15 F -.15(ve)-.4 G(stig).15 E
+.071(ated numerically in the tie points table or)-.05 F
+(visually in the "Na)108 508.8 Q 2.5(vE)-.2 G(rr" windo)-2.5 E -.65(w.)
+-.25 G 2.345 -.8(We s)108 532.8 T .745(uggest \214rst e).8 F .744
+(xamining the tie points table by pulling do)-.15 F .744(wn the <V)-.25
+F(ie)-.6 E(w->Sho)-.25 E 3.244(wT)-.25 G .744(ies> menu item. This)
 -3.594 F .045(table sho)108 544.8 R .046(ws, from left to right, the id\
 entity of each tie point, the longitude and latitude of)-.25 F .046
-(fsets de\214ned by the)-.25 F 1.266
+(fsets de\214ned by the)-.25 F .301
 (user \(in meters\), and the longitude and latitude residuals, or dif)
-108 556.8 R 1.265(ferences between these of)-.25 F 1.265
-(fsets and those)-.25 F .54(associated with the in)108 568.8 R -.15(ve)
--.4 G .54(rsion \(in meters\).).15 F .541(If an)5.541 F 3.041(yo)-.15 G
-3.041(ft)-3.041 G .541(hese residuals are une)-3.041 F .541
-(xpectedly lar)-.15 F .541(ge, simply clicking)-.18 F .24
-(on the table line sho)108 580.8 R .24(wing the suspect na)-.25 F(vig)
--.2 E .24(ation tie will bring up the "Na)-.05 F 2.74(vE)-.2 G .24
-(rr" windo)-2.74 F 2.74(wa)-.25 G .24(nd load the cross-)-2.74 F .321
-(ing including that na)108 592.8 R(vig)-.2 E .321(ation tie. Once an in)
--.05 F -.15(ve)-.4 G .321(rsion is performed, the "Na).15 F 2.821(vE)-.2
-G .322(rr" crossing displays sho)-2.821 F 2.822(wt)-.25 G(he)-2.822 E
-(in)108 604.8 Q -.15(ve)-.4 G .184(rted of).15 F .183(fset as a small '\
-+' symbol on the mis\214t plot. The user can then determine whether the\
- pre)-.25 F(viously)-.25 E .296(set na)108 616.8 R(vig)-.2 E .296
+108 556.8 R .301(ferences between these of)-.25 F .301
+(fsets and those as-)-.25 F .246(sociated with the in)108 568.8 R -.15
+(ve)-.4 G .246(rsion \(in meters\).).15 F .246(If an)5.246 F 2.746(yo)
+-.15 G 2.746(ft)-2.746 G .246(hese residuals are une)-2.746 F .247
+(xpectedly lar)-.15 F .247(ge, simply clicking on)-.18 F .423
+(the table line sho)108 580.8 R .423(wing the suspect na)-.25 F(vig)-.2
+E .423(ation tie will bring up the "Na)-.05 F 2.923(vE)-.2 G .423
+(rr" windo)-2.923 F 2.922(wa)-.25 G .422(nd load the crossing)-2.922 F
+.425(including that na)108 592.8 R(vig)-.2 E .425(ation tie. Once an in)
+-.05 F -.15(ve)-.4 G .426(rsion is performed, the "Na).15 F 2.926(vE)-.2
+G .426(rr" crossing displays sho)-2.926 F 2.926(wt)-.25 G .426(he in-)
+-2.926 F -.15(ve)108 604.8 S .594(rted of).15 F .593(fset as a small '+\
+' symbol on the mis\214t plot. The user can then determine whether the \
+pre)-.25 F(viously)-.25 E .296(set na)108 616.8 R(vig)-.2 E .296
 (ation of)-.05 F .297
 (fset is truly required by the data. On occasion, one disco)-.25 F -.15
 (ve)-.15 G .297(rs that the of).15 F .297(fset obtained in the)-.25 F
@@ -2316,13 +2322,13 @@ G .322(rr" crossing displays sho)-2.821 F 2.822(wt)-.25 G(he)-2.822 E
 .335(ycles of in)-2.985 F -.15(ve)-.4 G .335(rsion and inspec-).15 F
 .193(tion until a satisf)108 700.8 R .193
 (actory \(self-consistemt\) solution is obtained. When the \214nal in)
--.1 F -.15(ve)-.4 G .192(rsion has been performed,).15 F .714
-(the user can then run)108 712.8 R F1(mbpr)3.214 E(ocess)-.18 E F0 .714
-(on all of the af)3.214 F .715(fected sw)-.25 F .715
-(ath data \214les to produce a set of processed \214les)-.1 F
-(incorporating the optimally adjusted na)108 724.8 Q(vig)-.2 E(ation.)
--.05 E(MB-System 5.0)72 768 Q(28 No)132.205 E -.15(ve)-.15 G(mber 2016)
-.15 E(20)185.545 E 0 Cg EP
+-.1 F -.15(ve)-.4 G .192(rsion has been performed,).15 F .032
+(the user can then run)108 712.8 R F1(mbpr)2.532 E(ocess)-.18 E F0 .032
+(on all of the af)2.532 F .032(fected sw)-.25 F .033
+(ath data \214les to produce a set of processed \214les in-)-.1 F
+(corporating the optimally adjusted na)108 724.8 Q(vig)-.2 E(ation.)-.05
+E(MB-System 5.0)72 768 Q(28 No)132.205 E -.15(ve)-.15 G(mber 2016).15 E
+(20)185.545 E 0 Cg EP
 %%Page: 21 21
 %%BeginPageSetup
 BP
@@ -2330,37 +2336,37 @@ BP
 /F0 10/Times-Roman@0 SF(mbna)72 48 Q -.25(va)-.2 G 137.51
 (djust\(1\) MB-System).25 F 137.51(5.0 mbna)2.5 F -.25(va)-.2 G
 (djust\(1\)).25 E/F1 10/Times-Bold@0 SF(Details of the In)87 84 Q -.1
-(ve)-.4 G(rsion).1 E F0 1.435(The solution for an optimal na)108 96 R
-(vig)-.2 E 1.434(ation adjustment model occurs in tw)-.05 F 3.934(os)-.1
-G 3.934(tages. both)-3.934 F 1.434(of which are con-)3.934 F .301
-(structed as sparse o)108 108 R -.15(ve)-.15 G .302(rdetermined least s\
-quares matrix problems. The \214rst stage is to solv).15 F 2.802(ef)-.15
-G .302(or a)-2.802 F -.15(ve)-.2 G .302(rage lon-).15 F 1.529
-(gitude, latitude, and sensor)108 120 R 1.529(-depth of)-.2 F 1.528
-(fsets for each of the time-contiguous blocks of data comprising the)
--.25 F .711(project. Usually each data block is an indi)108 132 R .711
-(vidual surv)-.25 F -.15(ey)-.15 G 3.211(,b)-.5 G .711
-(ut sometimes surv)-3.411 F -.15(ey)-.15 G 3.211(sh).15 G -2.25 -.2
-(av e)-3.211 H .712(time g)3.412 F .712(aps that cause)-.05 F 1.203
-(them to be treated as multiple blocks, or users ha)108 144 R 1.502 -.15
-(ve u)-.2 H(sed).15 E F1(MBna)3.702 E -.1(va)-.25 G(djustmer).1 E(ge)-.1
-E F0 1.202(to insert breaks at points)3.702 F .087(with na)108 156 R
-(vig)-.2 E .087(ation tears. This stage solv)-.05 F .087(es for the a)
--.15 F -.15(ve)-.2 G .087(rage of).15 F .087(fsets between surv)-.25 F
--.15(ey)-.15 G 2.588(s\().15 G .088(blocks\) while applying an)-2.588 F
-(y)-.15 E -2.25 -.2(av e)108 168 T .243
-(rage global ties de\214ned for each block. The a).2 F -.15(ve)-.2 G
-.243(rage of).15 F .243(fset model is remo)-.25 F -.15(ve)-.15 G 2.743
-(df).15 G .243(rom the of)-2.743 F .243(fsets associated)-.25 F
-(with the na)108 180 Q(vig)-.2 E
-(ation ties before doing the full resolution in)-.05 E -.15(ve)-.4 G
-(rsion.).15 E .515(The second phase, or full resolution in)108 204 R
--.15(ve)-.4 G .516(rsion, solv).15 F .516(es for adjustment v)-.15 F
-.516(alues at all of the na)-.25 F(vig)-.2 E .516(ation control)-.05 F
-.023(points de\214ned for all of the surv)108 216 R .323 -.15(ey d)-.15
-H .023(ata in the project. Suppose we ha).15 F .322 -.15(ve N n)-.2 H
--.2(av).15 G(ig).2 E .022(ation control points in all of)-.05 F(the sw)
-108 228 Q(ath \214les and ha)-.1 E .3 -.15(ve d)-.2 H
+(ve)-.4 G(rsion).1 E F0 .22(The solution for an optimal na)108 96 R(vig)
+-.2 E .219(ation adjustment model occurs in tw)-.05 F 2.719(os)-.1 G
+2.719(tages. both)-2.719 F .219(of which are construc-)2.719 F .006
+(ted as sparse o)108 108 R -.15(ve)-.15 G .006(rdetermined least square\
+s matrix problems. The \214rst stage is to solv).15 F 2.507(ef)-.15 G
+.007(or a)-2.507 F -.15(ve)-.2 G .007(rage longitude,).15 F 1.331
+(latitude, and sensor)108 120 R 1.331(-depth of)-.2 F 1.331(fsets for e\
+ach of the time-contiguous blocks of data comprising the project.)-.25 F
+.668(Usually each data block is an indi)108 132 R .669(vidual surv)-.25
+F -.15(ey)-.15 G 3.169(,b)-.5 G .669(ut sometimes surv)-3.369 F -.15(ey)
+-.15 G 3.169(sh).15 G -2.25 -.2(av e)-3.169 H .669(time g)3.369 F .669
+(aps that cause them to)-.05 F .556
+(be treated as multiple blocks, or users ha)108 144 R .856 -.15(ve u)-.2
+H(sed).15 E F1(MBna)3.056 E -.1(va)-.25 G(djustmer).1 E(ge)-.1 E F0 .555
+(to insert breaks at points with na)3.056 F(vi-)-.2 E -.05(ga)108 156 S
+.358(tion tears. This stage solv).05 F .358(es for the a)-.15 F -.15(ve)
+-.2 G .358(rage of).15 F .358(fsets between surv)-.25 F -.15(ey)-.15 G
+2.858(s\().15 G .358(blocks\) while applying an)-2.858 F 2.858(ya)-.15 G
+-.15(ve)-3.058 G(rage).15 E .126
+(global ties de\214ned for each block. The a)108 168 R -.15(ve)-.2 G
+.125(rage of).15 F .125(fset model is remo)-.25 F -.15(ve)-.15 G 2.625
+(df).15 G .125(rom the of)-2.625 F .125(fsets associated with the)-.25 F
+(na)108 180 Q(vig)-.2 E(ation ties before doing the full resolution in)
+-.05 E -.15(ve)-.4 G(rsion.).15 E .515
+(The second phase, or full resolution in)108 204 R -.15(ve)-.4 G .516
+(rsion, solv).15 F .516(es for adjustment v)-.15 F .516
+(alues at all of the na)-.25 F(vig)-.2 E .516(ation control)-.05 F .023
+(points de\214ned for all of the surv)108 216 R .323 -.15(ey d)-.15 H
+.023(ata in the project. Suppose we ha).15 F .322 -.15(ve N n)-.2 H -.2
+(av).15 G(ig).2 E .022(ation control points in all of)-.05 F(the sw)108
+228 Q(ath \214les and ha)-.1 E .3 -.15(ve d)-.2 H
 (e\214ned M tie points. The form of the problem is:).15 E F1 2.5(AX)144
 252 S F0(=)A F1(D)2.5 E F0(Here)108 276 Q F1(X)3.281 E F0 .781(is the v)
 3.281 F .781(ector of unkno)-.15 F .781(wns, which happen to be the cha\
@@ -2397,13 +2403,13 @@ F1(D)2.623 E F0 .123(also corresponds to the number of constraints.)
 (The most important constraints are the relati)108 444 R .443 -.15(ve n)
 -.25 H -.2(av).15 G(ig).2 E .143
 (ation ofsets de\214ned for each of the M tie points.)-.05 F(Since)5.142
-E 1.171(each of)108 456 R 1.171
-(fset has a longitude, latitude, and sensor)-.25 F 1.172(-depth v)-.2 F
-1.172(alue, there are 3M ro)-.25 F 1.172(ws in)-.25 F F1(A)3.672 E F0
-1.172(and elements in)3.672 F F1(D)3.672 E F0 .127
-(associated with the tie points.)108 468 R .126
-(If the "i"th tie point speci\214es an of)5.126 F .126(fset DLONi, DLA)
--.25 F -.35(Ti)-1.11 G 2.626(,a).35 G .126(nd DZi between the)-2.626 F
+E .364(each of)108 456 R .364
+(fset has a longitude, latitude, and sensor)-.25 F .365(-depth v)-.2 F
+.365(alue, there are 3M ro)-.25 F .365(ws in)-.25 F F1(A)2.865 E F0 .365
+(and elements in)2.865 F F1(D)2.865 E F0(as-)2.865 E .589
+(sociated with the tie points.)108 468 R .589
+(If the "i"th tie point speci\214es an of)5.589 F .589(fset DLONi, DLA)
+-.25 F -.35(Ti)-1.11 G 3.089(,a).35 G .588(nd DZi between the)-3.089 F
 ("j1"th and "j2"th na)108 480 Q(vig)-.2 E
 (ation control points, then the constraint may be e)-.05 E(xpressed as:)
 -.15 E(-XLONj1 + XLONj2 = DLONi)144 504 Q(-XLA)144 528 Q(Tj1 + XLA)-1.11
@@ -2414,22 +2420,22 @@ E(Tj2 = DLA)-1.11 E -.35(Ti)-1.11 G(-XZj1 + XZj2 = DZi)144 552 Q .883
 108 600 R(vig)-.2 E .279(ation points. F)-.05 F .279(or instance, an A)
 -.15 F .279(UV may ha)-.55 F .579 -.15(ve b)-.2 H -.15(eg).15 G .279
 (un its surv).15 F .579 -.15(ey a)-.15 H 2.779(tt).15 G .279(he surf)
--2.779 F .279(ace with a GPS \214x)-.1 F 1.432(so the the initial na)108
-612 R(vig)-.2 E 1.433(ation point of the surv)-.05 F 1.733 -.15(ey h)
--.15 H 1.433(as a zero of).15 F 1.433(fset relati)-.25 F 1.733 -.15
-(ve t)-.25 H 3.933(ot).15 G 1.433(he global reference frame.)-3.933 F
-.481(Another e)108 624 R .481(xample might be a feature in a surv)-.15 F
-.781 -.15(ey \()-.15 H .481(e.g. a h).15 F .48(ydrothermal v)-.05 F .48
-(ent chimne)-.15 F .48(y\) for which the location)-.15 F .891(is kno)108
-636 R .891(wn by other means \(e.g. well na)-.25 F(vig)-.2 E .891
-(ated R)-.05 F 1.891 -.5(OV d)-.4 H -2.15 -.25(iv e).5 H .891
-(s\). In that case, the global of).25 F .892(fset for a na)-.25 F(vig)
--.2 E(ation)-.05 E 1.073(point associated with the bath)108 648 R 1.073
-(yemtry data including the kno)-.05 F 1.072(wn feature is the of)-.25 F
-1.072(fset required to mak)-.25 F 3.572(et)-.1 G(he)-3.572 E .182
-(location of that feature match the kno)108 660 R .182(wn v)-.25 F .182
+-2.779 F .279(ace with a GPS \214x)-.1 F .407(so the the initial na)108
+612 R(vig)-.2 E .407(ation point of the surv)-.05 F .707 -.15(ey h)-.15
+H .407(as a zero of).15 F .408(fset relati)-.25 F .708 -.15(ve t)-.25 H
+2.908(ot).15 G .408(he global reference frame. An-)-2.908 F .624
+(other e)108 624 R .624(xample might be a feature in a surv)-.15 F .923
+-.15(ey \()-.15 H .623(e.g. a h).15 F .623(ydrothermal v)-.05 F .623
+(ent chimne)-.15 F .623(y\) for which the location is)-.15 F(kno)108 636
+Q .119(wn by other means \(e.g. well na)-.25 F(vig)-.2 E .119(ated R)
+-.05 F 1.119 -.5(OV d)-.4 H -2.15 -.25(iv e).5 H .12
+(s\). In that case, the global of).25 F .12(fset for a na)-.25 F(vig)-.2
+E .12(ation point)-.05 F .344(associated with the bath)108 648 R .344
+(yemtry data including the kno)-.05 F .344(wn feature is the of)-.25 F
+.343(fset required to mak)-.25 F 2.843(et)-.1 G .343(he location)-2.843
+F .83(of that feature match the kno)108 660 R .83(wn v)-.25 F .83
 (alue \(and thus in general not zero\). If the "jth" na)-.25 F(vig)-.2 E
-.183(ation control)-.05 F(point has a global na)108 672 Q(vig)-.2 E
+.83(ation control point)-.05 F(has a global na)108 672 Q(vig)-.2 E
 (ation of)-.05 E(fset of DLONj, DLA)-.25 E
 (Tj, DZj, the the constraint may be e)-1.11 E(xpressed as:)-.15 E
 (XLONj = DLONj)144 696 Q(XLA)144 720 Q(Tj =DLA)-1.11 E(Tj)-1.11 E
@@ -2462,10 +2468,10 @@ al control point and Tj and Tj+1 are the times of the "j"th and "j+1"th\
 .116(across breaks in the sw)108 336 R .116
 (ath data. Note that multiple sw)-.1 F .116
 (ath \214les may be sequential without breaks, while time)-.1 F -.05(ga)
-108 348 S 1.029(ps or breaks can occur within a single sw).05 F 1.029
-(ath \214le. The e)-.1 F 1.03(xistence of g)-.15 F 1.03
-(aps or breaks in the sw)-.05 F 1.03(ath data is)-.1 F
-(determined solely on the basis of time g)108 360 Q
+108 348 S .253(ps or breaks can occur within a single sw).05 F .253
+(ath \214le. The e)-.1 F .253(xistence of g)-.15 F .254
+(aps or breaks in the sw)-.05 F .254(ath data is de-)-.1 F
+(termined solely on the basis of time g)108 360 Q
 (aps as the data are imported.)-.05 E 1.318
 (The size of the matrix problem will v)108 384 R 1.318
 (ary with the number of na)-.25 F(vig)-.2 E 1.317
@@ -2484,29 +2490,29 @@ aints guarantees that the num-).4 F .328(ber of constraints will al)108
 (A)3.379 E F0 3.379(.A)C 3.379(sar)-3.379 G .879
 (esult, this matrix problem is)-3.379 F .81(also al)108 444 R -.1(wa)-.1
 G .81(ys e).1 F .81(xtremely sparse. This condition allo)-.15 F .811
-(ws us to use one of a class of approximate least squares)-.25 F 1.321
-(solution algorithms that are ef)108 456 R 1.321
-(\214cient in solving sparse problems. F)-.25 F 1.321(or man)-.15 F 3.82
-(yy)-.15 G 1.32(ears the algorithm used for)-3.82 F F1(mbna)108 468 Q
--.1(va)-.25 G(djust).1 E F0(in)3.907 E -.15(ve)-.4 G 1.407(rsions w).15
-F 1.408(as that of Olsen [1987]. Starting with MB-System release 5.5.22\
-85, the least)-.1 F(squares algorithm used in)108 480 Q F1(mbna)2.5 E
--.1(va)-.25 G(djust).1 E F0(is no)2.5 E 2.5(wL)-.25 G(SQR by P)-2.5 E
-(aige and Saunders [1982a, 1982b, 2007].)-.15 E .975
-(The importance of the speed minimization constraints is v)108 504 R
-.975(aried by multiplying the associated matrix ro)-.25 F(w)-.25 E .942
-(elements by a penalty weight v)108 516 R 3.442(alue. This)-.25 F .942
-(smoothing penalty is set interacti)3.442 F -.15(ve)-.25 G .942(ly in)
-.15 F F1(MBna)3.442 E -.1(va)-.25 G(djust).1 E F0 3.442(,a)C .942(nd in)
--3.442 F .448(practice users may iterate by solving with a range of pen\
-alty weights so as to identify the "best" in)108 528 R -.15(ve)-.4 G
-(rsion.).15 E 1.564(Generally speaking, we seek the smoothest in)108 540
-R -.15(ve)-.4 G 1.565(rsion that satisf).15 F 1.565
-(actorily \214ts the tie point of)-.1 F 1.565(fsets. W)-.25 F 4.065(es)
--.8 G(et)-4.065 E .196(smoothness using the penalty weight v)108 552 R
-.196(alue so that lar)-.25 F .195
-(ger penalty weights correspond to smoother solutions.)-.18 F 1.6 -.8
-(We m)108 564 T(easure the \214t to the tie point of).8 E
+(ws us to use one of a class of approximate least squares)-.25 F .006
+(solution algorithms that are ef)108 456 R .006
+(\214cient in solving sparse problems. F)-.25 F .006(or man)-.15 F 2.505
+(yy)-.15 G .005(ears the algorithm used for)-2.505 F F1(mb-)2.505 E(na)
+108 468 Q -.1(va)-.25 G(djust).1 E F0(in)4.976 E -.15(ve)-.4 G 2.476
+(rsions w).15 F 2.476(as that of Olsen [1987]. Starting with MB-System \
+release 5.5.2285, the least)-.1 F(squares algorithm used in)108 480 Q F1
+(mbna)2.5 E -.1(va)-.25 G(djust).1 E F0(is no)2.5 E 2.5(wL)-.25 G
+(SQR by P)-2.5 E(aige and Saunders [1982a, 1982b, 2007].)-.15 E .04
+(The importance of the speed minimization constraints is v)108 504 R .04
+(aried by multiplying the associated matrix ro)-.25 F 2.54(we)-.25 G(l-)
+-2.54 E 1.423(ements by a penalty weight v)108 516 R 3.923(alue. This)
+-.25 F 1.423(smoothing penalty is set interacti)3.923 F -.15(ve)-.25 G
+1.424(ly in).15 F F1(MBna)3.924 E -.1(va)-.25 G(djust).1 E F0 3.924(,a)C
+1.424(nd in)-3.924 F .448(practice users may iterate by solving with a \
+range of penalty weights so as to identify the "best" in)108 528 R -.15
+(ve)-.4 G(rsion.).15 E 1.564
+(Generally speaking, we seek the smoothest in)108 540 R -.15(ve)-.4 G
+1.565(rsion that satisf).15 F 1.565(actorily \214ts the tie point of)-.1
+F 1.565(fsets. W)-.25 F 4.065(es)-.8 G(et)-4.065 E .196
+(smoothness using the penalty weight v)108 552 R .196(alue so that lar)
+-.25 F .195(ger penalty weights correspond to smoother solutions.)-.18 F
+1.6 -.8(We m)108 564 T(easure the \214t to the tie point of).8 E
 (fsets using the usual least squares calculation:)-.25 E 57.5 15(22 2)
 151.5 576 T 2.5(Fit =)144 588 R 2.5(Chi =)2.5 F 2.5(SUM\( \(DLONi)2.5 F
 2.5<ad28>2.5 G(XLONj2 \255 XLONj1\)\))-2.5 E(2)261.5 600 Q 2.5(+\()189
@@ -2518,11 +2524,11 @@ E 2.5(Tj1\)\) \))-1.11 F(2)261.5 624 Q 2.5(+\()189 636 S
 (ysically meaningful.)-.05 F 3.204(As)108 660 S .704
 (maller Chi corresponds to a better \214t to the tie point of)-3.204 F
 .703(fsets. The Chi v)-.25 F .703(alue will be smallest for a zero)-.25
-F 1.433(penalty weight, and increase as more smoothing is applied. In p\
-rinciple, one can choose the smoothing)108 672 R .988
-(penalty so that the Chi v)108 684 R .988
-(alue equals an independently kno)-.25 F .988(wn data precision, b)-.25
-F .988(ut in practice choosing the)-.2 F .172
+F .077(penalty weight, and increase as more smoothing is applied. In pr\
+inciple, one can choose the smoothing pen-)108 672 R 1.891
+(alty so that the Chi v)108 684 R 1.891
+(alue equals an independently kno)-.25 F 1.89(wn data precision, b)-.25
+F 1.89(ut in practice choosing the)-.2 F .172
 (smoothing penalty depends more often on a qualitati)108 696 R .473 -.15
 (ve s)-.25 H .173(ense of the noise or error le).15 F -.15(ve)-.25 G
 2.673(li).15 G 2.673(nt)-2.673 G .173(he na)-2.673 F(vig)-.2 E .173

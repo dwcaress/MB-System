@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:04 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:10 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 21
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -279,17 +285,17 @@ F .475(alues will be modi\214ed. If no)-.25 F F2(mbpr)2.974 E(ocess)-.18
 E F0 .474(parameter \214le e)2.974 F(xists,)-.15 E(then)108 494.4 Q F2
 (mbset)3.23 E F0 .73(starts with def)3.23 F .73
 (ault processing parameters, modi\214es those, and then generates a ne)
--.1 F 3.23(wp)-.25 G(arameter)-3.23 E(\214le.)108 506.4 Q 1.113
-(If the input \214le speci\214ed by the)108 530.4 R F2<ad49>3.612 E F0
-1.112(option is a single sw)3.612 F 1.112(ath data \214le,)-.1 F F2
-(mbset)3.612 E F0 1.112(will act on that \214le and it')3.612 F(s)-.55 E
-.842(parameter \214le only)108 542.4 R 3.342(.I)-.65 G 3.342(ft)-3.342 G
-.842(he input \214le is a datalist, then)-3.342 F F2(mbset)3.342 E F0
-.842(will act on all sw)3.342 F .842(ath \214les e)-.1 F .842
-(xtracted from the)-.15 F .45(datalist \(and an)108 554.4 R 2.95(yr)-.15
-G(ecursi)-2.95 E -.15(ve)-.25 G .45
-(ly parsed datalist \214les\). This function allo).15 F .45
-(ws users to easily set uniform process-)-.25 F(ing parameters for lar)
+-.1 F 3.23(wp)-.25 G(arameter)-3.23 E(\214le.)108 506.4 Q .4
+(If the input \214le speci\214ed by the)108 530.4 R F2<ad49>2.9 E F0 .4
+(option is a single sw)2.9 F .4(ath data \214le,)-.1 F F2(mbset)2.9 E F0
+.4(will act on that \214le and it')2.9 F 2.9(sp)-.55 G(a-)-2.9 E .048
+(rameter \214le only)108 542.4 R 2.548(.I)-.65 G 2.548(ft)-2.548 G .048
+(he input \214le is a datalist, then)-2.548 F F2(mbset)2.548 E F0 .048
+(will act on all sw)2.548 F .048(ath \214les e)-.1 F .049
+(xtracted from the datal-)-.15 F .092(ist \(and an)108 554.4 R 2.592(yr)
+-.15 G(ecursi)-2.592 E -.15(ve)-.25 G .092
+(ly parsed datalist \214les\). This function allo).15 F .092
+(ws users to easily set uniform processing pa-)-.25 F(rameters for lar)
 108 566.4 Q(ge numbers of data \214les. The def)-.18 E
 (ault input \214le is "datalist.mb-1".)-.1 E .418
 (The processing parameter \214le used by)108 590.4 R F2(mbpr)2.919 E
@@ -304,17 +310,17 @@ F2(mbpr)3.029 E(ocess)-.18 E F0 .529(are named using a con)3.029 F -.15
 (ve)-.4 G .528(ntion based on the data).15 F .987(format id.)108 638.4 R
 F2(MB-System)5.987 E F0 .988(data formats are speci\214ed using tw)3.488
 F .988(o-digit or three-digit numbers \(see the)-.1 F F2(MBIO)3.488 E F0
-1.504(manual page\).)108 650.4 R 1.504(If an input sw)6.504 F 1.503(ath\
- data \214le is named "root.mbXX", where XX is the format id, then the)
--.1 F(def)108 662.4 Q 2.67(ault processed output \214le will be "rootp.\
-mbXX" \(e.g. mydata.mb71 \255> mydatap.mb71\).)-.1 F 2.67(The "p")7.67 F
-.949(inserted before the ".mbXX" suf)108 674.4 R .948
+.621(manual page\).)108 650.4 R .621(If an input sw)5.621 F .62(ath dat\
+a \214le is named "root.mbXX", where XX is the format id, then the de-)
+-.1 F -.1(fa)108 662.4 S .563(ult processed output \214le will be "root\
+p.mbXX" \(e.g. mydata.mb71 \255> mydatap.mb71\).).1 F .563
+(The "p" inserted)5.563 F .778(before the ".mbXX" suf)108 674.4 R .778
 (\214x indicates the output \214le has been created by)-.25 F F2(mbpr)
-3.448 E(ocess)-.18 E F0 5.948(.I)C 3.448(ft)-5.948 G .948(he input)
--3.448 F .475(\214le does not follo)108 686.4 R 2.975(wt)-.25 G .475
-(he *.mbXX naming con)-2.975 F -.15(ve)-.4 G .475
-(ntion, then the output \214lename will just consist of the input).15 F
-(name with "p.mbXX" added as a suf)108 698.4 Q
+3.277 E(ocess)-.18 E F0 5.777(.I)C 3.277(ft)-5.777 G .777
+(he input \214le does)-3.277 F 1.251(not follo)108 686.4 R 3.751(wt)-.25
+G 1.252(he *.mbXX naming con)-3.751 F -.15(ve)-.4 G 1.252
+(ntion, then the output \214lename will just consist of the input name)
+.15 F(with "p.mbXX" added as a suf)108 698.4 Q
 (\214x \(e.g. mydata \255> mydatap.mb71\))-.25 E(MB-System 5.0)72 768 Q
 (14 September 2018)131.775 E(1)190.115 E 0 Cg EP
 %%Page: 2 2
@@ -1001,10 +1007,10 @@ F0(ha)2.5 E .3 -.15(ve a)-.2 H 2.5(n").15 G(.n)-2.5 E -.15(ve)-.4 G 2.5
 (Adjusted na)108 300 Q(vig)-.2 E(ation \214les generated by)-.05 E F1
 (mbna)2.5 E -.1(va)-.25 G(djust).1 E F0(ha)2.5 E .3 -.15(ve a)-.2 H 2.5
 (n").15 G(.naY" suf)-2.5 E(\214x, where "Y" is a number between)-.25 E
-3.477(0-9. The)108 312 R F1(mbna)3.477 E -.1(va)-.25 G(djust).1 E F0
-.977(package may be used multiple times for a surv)3.477 F -.15(ey)-.15
-G 3.476(;t).15 G .976(he adjustments are numbered)-3.476 F
-(sequentially from "0":)108 324 Q(mydata.mb71.na0)128 336 Q
+2.531(0-9. The)108 312 R F1(mbna)2.531 E -.1(va)-.25 G(djust).1 E F0
+.031(package may be used multiple times for a surv)2.531 F -.15(ey)-.15
+G 2.53(;t).15 G .03(he adjustments are numbered se-)-2.53 F
+(quentially from "0":)108 324 Q(mydata.mb71.na0)128 336 Q
 (mydata.mb71.na1)128 348 Q(mydata.mb71.na2)128 360 Q
 (and so on. These na)108 372 Q(vig)-.2 E
 (ation \214les can be read independently using format 166.)-.05 E/F2
@@ -1026,36 +1032,35 @@ R F1<ad50>3.384 E/F3 10/Times-Italic@0 SF(SVPFILE:best.svp)A F0(,)A F1
 (mbset)3.384 E F0 -.1(wo)3.384 G .884(uld normally set the bath).1 F
 .884(ymetry recalculation mode)-.05 F
 (on so that the SVP \214le speci\214ed actually gets used.)144 585.6 Q
-F1<ad49>108 602.4 Q F3(in\214le)26.41 E F0(Sw)144 614.4 Q .276
+F1<ad49>108 602.4 Q F3(in\214le)144 602.4 Q F0(Sw)144 614.4 Q .276
 (ath data \214le for which an)-.1 F F1(mbpr)2.776 E(ocess)-.18 E F0 .276
 (parameter \214le will be created or updated, or a datalist \214le)2.776
 F .741(containing a list of input sw)144 626.4 R .741
 (ath data \214les and/or other datalist \214les. If)-.1 F F3(in\214le)
 3.241 E F0 .741(is a datalist \214le, then)3.241 F F1(mbset)144 638.4 Q
-F0 1.461
-(will attempt to update or create the parameter \214les for all sw)3.962
-F 1.461(ath data \214les identi\214ed by)-.1 F(recursi)144 650.4 Q -.15
+F0 .575
+(will attempt to update or create the parameter \214les for all sw)3.076
+F .575(ath data \214les identi\214ed by re-)-.1 F(cursi)144 650.4 Q -.15
 (ve)-.25 G(ly reading).15 E F3(in\214le)2.5 E F0 5(.D)C(ef)-5 E(ault)-.1
 E F3(in\214le)2.5 E F0 2.5(:d)C(atalist.mb-1)-2.5 E F1<ad4c>108 667.2 Q
-F0 1.207(If gi)144 679.2 R -.15(ve)-.25 G 3.707(no).15 G 1.207
-(nce, this option causes)-3.707 F F1(mbset)3.707 E F0 1.207
-(to look for an)3.707 F 3.707(ye)-.15 G 1.207(dit sa)-3.707 F 1.507 -.15
-(ve \214)-.2 H 1.207(les and na).15 F(vig)-.2 E 1.207
-(ation \214les with)-.05 F -.15(ex)144 691.2 S .444
-(pected names and set the).15 F F1(mbpr)2.944 E(ocess)-.18 E F0 .444
-(parameters so that these \214les are used. If multiple na)2.944 F(vig)
--.2 E(a-)-.05 E .554(tion \214les are a)144 703.2 R -.25(va)-.2 G .554
-(ilable \(re\215ecting use of).25 F F1(mbna)3.054 E -.1(ve)-.25 G(dit).1
-E F0 .554(and one or more uses of)3.054 F F1(mbna)3.054 E -.1(va)-.25 G
-(djust).1 E F0 .554(\), then)B .182(the latest \(highest numbered\))144
-715.2 R F1(mbna)2.682 E -.1(va)-.25 G(djust).1 E F0 .182
-(solution is used.)2.682 F(If)5.182 E F1<ad4c>2.682 E F0 .182(is gi)
-2.682 F -.15(ve)-.25 G 2.682(nt).15 G(wice,)-2.682 E F1(mbset)2.682 E F0
-.182(will also)2.682 F .651(look for an)144 727.2 R 3.151(yS)-.15 G .651
-(VP \214les with e)-3.151 F .651(xpected names and set the)-.15 F F1
-(mbpr)3.151 E(ocess)-.18 E F0 .652(parameters so that these \214les)
-3.151 F(MB-System 5.0)72 768 Q(14 September 2018)131.775 E(14)185.115 E
-0 Cg EP
+F0 .3(If gi)144 679.2 R -.15(ve)-.25 G 2.8(no).15 G .3
+(nce, this option causes)-2.8 F F1(mbset)2.8 E F0 .3(to look for an)2.8
+F 2.8(ye)-.15 G .3(dit sa)-2.8 F .6 -.15(ve \214)-.2 H .3(les and na).15
+F(vig)-.2 E .3(ation \214les with e)-.05 F(x-)-.15 E .248
+(pected names and set the)144 691.2 R F1(mbpr)2.748 E(ocess)-.18 E F0
+.248(parameters so that these \214les are used. If multiple na)2.748 F
+(vig)-.2 E(ation)-.05 E .776(\214les are a)144 703.2 R -.25(va)-.2 G
+.776(ilable \(re\215ecting use of).25 F F1(mbna)3.277 E -.1(ve)-.25 G
+(dit).1 E F0 .777(and one or more uses of)3.277 F F1(mbna)3.277 E -.1
+(va)-.25 G(djust).1 E F0 .777(\), then the)B 1.247
+(latest \(highest numbered\))144 715.2 R F1(mbna)3.747 E -.1(va)-.25 G
+(djust).1 E F0 1.247(solution is used.)3.747 F(If)6.246 E F1<ad4c>3.746
+E F0 1.246(is gi)3.746 F -.15(ve)-.25 G 3.746(nt).15 G(wice,)-3.746 E F1
+(mbset)3.746 E F0 1.246(will also)3.746 F .651(look for an)144 727.2 R
+3.151(yS)-.15 G .651(VP \214les with e)-3.151 F .651
+(xpected names and set the)-.15 F F1(mbpr)3.151 E(ocess)-.18 E F0 .652
+(parameters so that these \214les)3.151 F(MB-System 5.0)72 768 Q
+(14 September 2018)131.775 E(14)185.115 E 0 Cg EP
 %%Page: 15 15
 %%BeginPageSetup
 BP
@@ -1077,10 +1082,10 @@ al", meaning located in the same directory as the input \214le. This)144
 er \214les containing full paths for output \214les \(as generated)-.25
 F(by early v)144 144 Q(ersions of this program\).)-.15 E F1<ad48>108
 160.8 Q F0 .391(This "help" \215ag causes the program to print out a de\
-scription of its operation and then e)22.52 F .391(xit imme-)-.15 F
+scription of its operation and then e)144 160.8 R .391(xit imme-)-.15 F
 (diately)144 172.8 Q(.)-.65 E F1<ad50>108 189.6 Q/F2 10/Times-Italic@0
-SF -.9(PA)24.19 G(RAMETER:value).9 E F0(The)4.085 E F1<ad50>4.085 E F0
-1.585(option of)4.085 F F1(mbset)4.085 E F0 1.584
+SF -.9(PA)144 189.6 S(RAMETER:value).9 E F0(The)4.085 E F1<ad50>4.085 E
+F0 1.585(option of)4.085 F F1(mbset)4.085 E F0 1.584
 (is used to modify a single)4.085 F F1(mbpr)4.084 E(ocess)-.18 E F0
 (parameter)4.084 E 1.106(command. Here)144 201.6 R F2 -.9(PA)3.606 G
 (RAMETER).9 E F0 1.106(may be an)3.606 F 3.606(yo)-.15 G 3.606(ft)-3.606
@@ -1097,7 +1102,7 @@ G 1.106(he processing parameter names listed abo)-3.606 F -.15(ve)-.15 G
 (can be either ':' or '='. Only the \214rst ':' or '=' acts)2.618 F
 (as a separater; later instances of these characters are tak)144 249.6 Q
 (en as part of)-.1 E F2(value)2.5 E F0(.)A F1<ad56>108 266.4 Q F0
-(Normally)23.08 E(,)-.65 E F1(mbset)2.897 E F0 -.1(wo)2.897 G .397
+(Normally)144 266.4 Q(,)-.65 E F1(mbset)2.897 E F0 -.1(wo)2.897 G .397
 (rks "silently" without outputting an).1 F .397
 (ything to the stderr stream.)-.15 F .397(If the)5.397 F F1<ad56>2.898 E
 F0(\215ag)2.898 E .63(is gi)144 278.4 R -.15(ve)-.25 G .63(n, then).15 F

@@ -82,7 +82,7 @@ int get_segy_limits(int verbose, char *segyfile, tracemode_t *tracemode,
 
 	/* set sinf filename */
 	char sinffile[MB_PATH_MAXLINE] = "";
-	sprintf(sinffile, "%s.sinf", segyfile);
+	snprintf(sinffile, sizeof(sinffile), "%s.sinf", segyfile);
 
 	/* check status of segy and sinf file */
 	int datmodtime = 0;
@@ -102,7 +102,7 @@ int get_segy_limits(int verbose, char *segyfile, tracemode_t *tracemode,
 		if (verbose >= 1)
 			fprintf(stderr, "\nGenerating sinf file for %s\n", segyfile);
 		char command[MB_PATH_MAXLINE] = "";
-		sprintf(command, "mbsegyinfo -I %s -O", segyfile);
+		snprintf(command, sizeof(command), "mbsegyinfo -I %s -O", segyfile);
 		/* int shellstatus = */ system(command);
 	}
 
@@ -119,7 +119,7 @@ int get_segy_limits(int verbose, char *segyfile, tracemode_t *tracemode,
 	int rptrace1 = 0;
 
 	/* read sinf file if possible */
-	sprintf(sinffile, "%s.sinf", segyfile);
+	snprintf(sinffile, sizeof(sinffile), "%s.sinf", segyfile);
 	FILE *sfp = fopen(sinffile, "r");
 	if (sfp != nullptr) {
 		/* read the sinf file */
@@ -741,8 +741,8 @@ int main(int argc, char **argv) {
 		strcpy(zlabel, "dB/Hz");
 	else
 		strcpy(zlabel, "Intensity/Hz");
-	char title[MB_PATH_MAXLINE] = "";
-	sprintf(title, "Power Spectral Density Grid from %s", segyfile);
+	char title[MB_PATH_MAXLINE+50] = "";
+	snprintf(title, sizeof(title), "Power Spectral Density Grid from %s", segyfile);
 	status &= mb_write_gmt_grd(
 		verbose, gridfile, grid, std::numeric_limits<float>::quiet_NaN(),
 		ngridx, ngridy, xmin, xmax, ymin, ymax, gridmintot, gridmaxtot, dx,
@@ -773,8 +773,8 @@ int main(int argc, char **argv) {
 	/* run mbm_grdplot */
 	double xwidth = std::min(0.01 * ngridx, 55.0);
 	double ywidth = std::min(0.01 * ngridy, 28.0);
-	char plot_cmd[MB_PATH_MAXLINE] = "";
-	sprintf(plot_cmd, "mbm_grdplot -I%s -JX%f/%f -G1 -S -V -L\"File %s - %s:%s\"", gridfile, xwidth, ywidth, gridfile, title,
+	char plot_cmd[(5*MB_PATH_MAXLINE)+100] = "";
+	snprintf(plot_cmd, sizeof(plot_cmd), "mbm_grdplot -I%s -JX%f/%f -G1 -S -V -L\"File %s - %s:%s\"", gridfile, xwidth, ywidth, gridfile, title,
 	        zlabel);
 	if (verbose) {
 		fprintf(outfp, "\nexecuting mbm_grdplot...\n%s\n", plot_cmd);
@@ -787,7 +787,7 @@ int main(int argc, char **argv) {
 	/* run mbm_xyplot */
 	xwidth = 9.0;
 	ywidth = 7.0;
-	sprintf(plot_cmd, "mbm_xyplot -I%s -JX%f/%f -V -L\"File %s - %s:%s\"", psdfile, xwidth, ywidth, psdfile, title, zlabel);
+	snprintf(plot_cmd, sizeof(plot_cmd), "mbm_xyplot -I%s -JX%f/%f -V -L\"File %s - %s:%s\"", psdfile, xwidth, ywidth, psdfile, title, zlabel);
 	if (verbose) {
 		fprintf(outfp, "\nexecuting mbm_xyplot...\n%s\n", plot_cmd);
 	}
