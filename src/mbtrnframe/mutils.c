@@ -311,7 +311,9 @@ void mfu_fmt_xml(int fd,const char *buf, const char *del, int indent)
         while(*ip!='<' && ip<end )ip++;
         
         for(i=0;i<(level+indent);i++){
-            write(fd," ",1);
+            if(write(fd," ",1) < 0){
+                fprintf(stderr,"%s:%d write error [%d/%s]\n", __func__, __LINE__, errno, strerror(errno));
+            }
         }
 
         while(ip>=buf && ip<end ){
@@ -368,16 +370,22 @@ void mfu_fmt_xml(int fd,const char *buf, const char *del, int indent)
                     break;
             }
             if ( (action&PRINT_BYTE) !=0 ) {
-                write(fd,ip++,1);
+                if(write(fd,ip++,1) < 0){
+                    fprintf(stderr,"%s:%d write error [%d/%s]\n", __func__, __LINE__, errno, strerror(errno));
+                }
             }
 
             if ( (action&NEWLINE) !=0 ) {
 	            int j=0;
                 if(NULL!=del){
-                    write(fd,del,strlen(del));
+                    if(write(fd,del,strlen(del)) < 0){
+                        fprintf(stderr,"%s:%d write error [%d/%s]\n", __func__, __LINE__, errno, strerror(errno));
+                    }
                 }
                 for(j=0;j<(level+indent);j++){
-                    write(fd," ",1);
+                    if(write(fd," ",1) < 0){
+                        fprintf(stderr,"%s:%d write error [%d/%s]\n", __func__, __LINE__, errno, strerror(errno));
+                    }
                 }
             }
             
@@ -386,7 +394,9 @@ void mfu_fmt_xml(int fd,const char *buf, const char *del, int indent)
             }
         }
         if(NULL!=del){
-            write(fd,del,strlen(del));
+            if(write(fd,del,strlen(del)) < 0){
+                fprintf(stderr,"%s:%d write error [%d/%s]\n", __func__, __LINE__, errno, strerror(errno));
+            }
         }
 
     }else{
