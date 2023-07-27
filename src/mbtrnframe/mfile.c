@@ -558,3 +558,16 @@ time_t mfile_mtime(const char *path)
     return retval;
 }
 // End function mfile_mtime
+
+/// @fn int mfile_fd(mfile_file_t *self)
+/// @brief return underlying file descriptor
+/// @param[in] self file instance
+/// @return file descriptor on success, -1 otherwise
+int mfile_fd(mfile_file_t *self)
+{
+  if (NULL!=self) {
+      return self->fd;
+  }
+  return -1;
+}
+

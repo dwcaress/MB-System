@@ -892,6 +892,14 @@ msock_socket_t *msock_wrap_fd(int fd)
 // End function msock_wrap_fd
 
 
+int msock_fd(msock_socket_t *self)
+{
+    if(self != NULL){
+        return self->fd;
+    }
+    return -1;
+}
+
 int msock_get_opt(msock_socket_t *self, int opt_name, void *optval, socklen_t *optlen)
 {
     return msock_lget_opt(self, SOL_SOCKET, opt_name, optval, optlen);
