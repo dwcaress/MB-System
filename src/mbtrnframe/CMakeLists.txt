@@ -28,7 +28,7 @@ add_library(
   mutils.c
   mkvconf.c
   mconfig.c)
-target_link_libraries(mbtrnframe PRIVATE m)
+target_link_libraries(mbtrnframe PRIVATE m pthread)
 #
 #------------------------------------------------------------------------------
 #

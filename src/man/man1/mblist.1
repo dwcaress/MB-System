@@ -1,4 +1,4 @@
-.TH mblist 1 "28 November 2021" "MB-System 5.0" "MB-System 5.0"
+.TH mblist 1 "17 July 2023" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmblist\fP \- List data in swath data files.
 
@@ -18,6 +18,7 @@ Version 5.0
 \fB\-S\fP\fIspeed\fP \fB\-T\fP\fItimegap\fP
 \fB\-U\fP\fIcheck\fP \fB\-V\fP \fB\-W\fP
 \fB\-X\fP\fIoutfile\fP
+\fB\-Y\fP\fIsecondaryfile\fP
 \fB\-Z\fP\fIsegment\fP]
 
 .SH DESCRIPTION
@@ -30,11 +31,16 @@ the output can be binary, with each field represented
 as a double precision float (\fB\-A\fP option).
 Output can also be in netCDF CDL (\fB\-C\fP option) format,
 or as a binary netCDF file (\fB\-C \-A\fP).
-The output of
-\fBmblist\fP can be piped to plotting and data analysis programs. The
-option \fB\-O\fP\fIoutput_format\fP can be
-used to control the data types that
-are sent to stdout. The default is to output a single record for
+.br
+.br
+The contents and order of the output table are controlled using the option 
+\fB\-O\fP\fIoutput_format\fP, where \fIoutput_format\fP is an array of
+characters that each specify a particular data value. Dozens of data types 
+are available, as are special modifier characters that change signs, invert
+values, or otherwise modify the following value.
+.br
+.br
+The default is to output a single record for
 each survey ping, and for any output navigation values to reflect
 the sonar or ship navigation. In this mode, any output depth,
 amplitude, or sidescan values are derived from the beam and pixel
@@ -46,7 +52,13 @@ pixels and any navigation, depth or sidescan values output reflect
 the positions and values of the specified beams or pixels.
 The data input may be averaged or windowed in time
 and space before it is listed.  Complete dumps of bathymetry,
-amplitude, or sidescan data are possible as well.
+amplitude, or sidescan data are possible as well. 
+.br
+.br
+The \fB-Y\fP\fIsecondaryfile\fP command specifies a file containing timestamped
+data in text columns. \fBMblist\fP will merge these values with the swath
+data according to the timestamps, and print them out if requested. This capability
+allows other data to be merged with swath data navigation.
 
 .SH MB-SYSTEM AUTHORSHIP
 David W. Caress
@@ -503,8 +515,9 @@ for line number (only defined for SEGY files)
 \fB .\fP
 special character: this causes the next character to be
 interpretted from the following list rather than the above list.
-These allow access to raw values in format specific form and may
-not be supported by all formats.
+Most of these allow access to raw values in format specific form and are
+not be supported by all formats. The ".NNC" case allows printing values
+from the "NN"th column of a secondary data table file specified using \fB-Y\fP.
 .IP
 \fB .A\fP  Amplitude (backscatter) in dB (formats 56 & 67 \- Simrad multibeam only)
 .IP
@@ -515,6 +528,9 @@ not be supported by all formats.
 \fB .b\fP  Oblique backscatter in dB (formats 56 & 67 \- Simrad multibeam only)
 .IP
 \fB .c\fP  Mean backscatter, one value per ping (formats 56 & 67 \- Simrad multibeam only)
+.IP
+\fB .NNC\fP In which "NN" is a number from 1 to 19, which prints the value from 
+"NN" column in a secondary file specified using \fB-Y\fP.
 .IP
 \fB .d\fP  Beam depression angle (formats 56 & 67 \- Simrad multibeam only)
 .IP
@@ -630,6 +646,15 @@ If the \fB\-X\fP flag is given, then \fBmblist\fP creates a new file
 \fIoutfile\fP and outputs to it.
 An output file must be specified if a netCDF file (\fB\-C \-A\fP) is required.
 .TP
+.B \-Y
+\fIsecondaryfile\fP
+.br
+This option specifies a secondary data file consiting of text columns in
+which the first column is epoch time (unix seconds == seconds since 1/1/1970)
+and up to 19 additional columns contain data collected during the survey. 
+If a secondary data file is specified, then values from the secondary file can
+be included in the \fBmblist\fP output 
+.TP
 .B \-Z
 \fIsegment\fP
 .br
@@ -640,7 +665,7 @@ is a single character, then the output is a multiple segment
 file of the sort accepted by the \fBGMT\fP program \fBpsxy\fP.
 This option only works with ascii output, and is thus disabled
 when the \fB\-A\fP option is specified. The most common usage
-is \fB\-Z\fP\I>\fP. If \fIsegment\fP is the string "swathfile"
+is \fB\-Z\fP\fI>\fP. If \fIsegment\fP is the string "swathfile"
 then the segment lines will consist of the '#' character followed
 by the path for the source swath file. If \fIsegment\fP is the string "datalist"
 then the segment lines will consist of the '#' character followed

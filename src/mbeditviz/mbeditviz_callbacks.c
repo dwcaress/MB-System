@@ -769,10 +769,30 @@ void do_mbeditviz_changecellsize(Widget w, XtPointer client_data, XtPointer call
   /* get cell size value */
   ac = 0;
   int icellsize;
+  int iscalemax;
   XtSetArg(args[ac], XmNvalue, &icellsize);
+  ac++;
+  XtSetArg(args[ac], XmNmaximum, &iscalemax);
   ac++;
   XtGetValues(scale_cellsize, args, ac);
   mbev_grid_cellsize = 0.001 * icellsize;
+
+  /* reset the scale maximum */
+  if (icellsize <= 1) {
+    iscalemax /= 2;
+    ac = 0;
+    XtSetArg(args[ac], XmNmaximum, iscalemax);
+    ac++;
+    XtSetValues(scale_cellsize, args, ac);
+  }
+  else if (icellsize == iscalemax) {
+    iscalemax *= 2;
+    ac = 0;
+    XtSetArg(args[ac], XmNmaximum, iscalemax);
+    ac++;
+    XtSetValues(scale_cellsize, args, ac);
+  }
+
 
   /* get updated grid dimensions */
   mbev_grid_n_columns = (mbev_grid_boundsutm[1] - mbev_grid_boundsutm[0]) / mbev_grid_cellsize + 1;

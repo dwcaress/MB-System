@@ -9812,7 +9812,6 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
       smoothweight = pow(10.0, smooth_exp) / 100.0;
 
       bool full_inversion = false;
-      int ncoffset = 0;
       int inavstart = 0;
       int inavend = nnav - 1;
       if (isurvey == -1 || isurvey == project.num_surveys) {
@@ -9844,7 +9843,6 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
               section = &file->sections[isection];
 
               if (first) {
-                ncoffset = section->snav_invert_id[0];
                 inavstart = section->snav_invert_id[0];
                 first = false;
               }
@@ -9946,12 +9944,12 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
                   /* A1: get absolute id for first snav point */
                   file1 = &project.files[crossing->file_id_1];
                   section1 = &file1->sections[crossing->section_1];
-                  nc1 = section1->snav_invert_id[tie->snav_1] - ncoffset;
+                  nc1 = section1->snav_invert_id[tie->snav_1] - inavstart;
 
                   /* A2: get absolute id for second snav point */
                   file2 = &project.files[crossing->file_id_2];
                   section2 = &file2->sections[crossing->section_2];
-                  nc2 = section2->snav_invert_id[tie->snav_2] - ncoffset;
+                  nc2 = section2->snav_invert_id[tie->snav_2] - inavstart;
 
                   /* get uncertainty ellipsoid component magnitudes,
                       make them small if tie is set fixed so that
@@ -10246,7 +10244,7 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
       //fprintf(stderr,"APPLYING WEIGHT: %f  ifile:%d isection:%d\n",weight,ifile,isection);
 
                       index_m = irow * 6;
-                      index_n = (section->snav_invert_id[globaltie->snav] - ncoffset) * 3;
+                      index_n = (section->snav_invert_id[globaltie->snav] - inavstart) * 3;
                       matrix.ia[index_m] = index_n;
                       matrix.a[index_m] = weight;
                       b[irow] = weight * offset_x;
@@ -10259,7 +10257,7 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
                       weight *= matrix_scale;
 
                       index_m = irow * 6;
-                      index_n = (section->snav_invert_id[globaltie->snav] - ncoffset) * 3 + 1;
+                      index_n = (section->snav_invert_id[globaltie->snav] - inavstart) * 3 + 1;
                       matrix.ia[index_m] = index_n;
                       matrix.a[index_m] = weight;
                       b[irow] = weight * offset_y;
@@ -10280,7 +10278,7 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
                       weight *= matrix_scale;
 
                       index_m = irow * 6;
-                      index_n = (section->snav_invert_id[globaltie->snav] - ncoffset) * 3 + 2;
+                      index_n = (section->snav_invert_id[globaltie->snav] - inavstart) * 3 + 2;
                       matrix.ia[index_m] = index_n;
                       matrix.a[index_m] = weight;
                       b[irow] = weight * offset_z;
@@ -10310,7 +10308,7 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
                       for (int isnav = 0; isnav < section->num_snav; isnav++) {
                           if (file->status == MBNA_FILE_FIXEDNAV || file->status == MBNA_FILE_FIXEDXYNAV) {
                               index_m = irow * 6;
-                              index_n = (section->snav_invert_id[isnav] - ncoffset) * 3;
+                              index_n = (section->snav_invert_id[isnav] - inavstart) * 3;
                               matrix.ia[index_m] = index_n;
                               matrix.a[index_m] = weight;
                               b[irow] = -file->block_offset_x;
@@ -10318,7 +10316,7 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
                               irow++;
 
                               index_m = irow * 6;
-                              index_n = (section->snav_invert_id[isnav] - ncoffset) * 3 + 1;
+                              index_n = (section->snav_invert_id[isnav] - inavstart) * 3 + 1;
                               matrix.ia[index_m] = index_n;
                               matrix.a[index_m] = weight;
                               b[irow] = -file->block_offset_y;
@@ -10328,7 +10326,7 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
 
                           if (file->status == MBNA_FILE_FIXEDNAV || file->status == MBNA_FILE_FIXEDZNAV) {
                               index_m = irow * 6;
-                              index_n = (section->snav_invert_id[isnav] - ncoffset) * 3 + 2;
+                              index_n = (section->snav_invert_id[isnav] - inavstart) * 3 + 2;
                               matrix.ia[index_m] = index_n;
                               matrix.a[index_m] = weight;
                               b[irow] = -file->block_offset_z;
@@ -10510,6 +10508,8 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
       itielast = -1;
       itienext = -1;
       for (int inav = inavstart; inav <= inavend; inav++) {
+          int iinv = inav - inavstart;
+
           if (x_num_ties[inav] > 0) {
               itielast = inav;
           }
@@ -10534,19 +10534,19 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
               /* now interpolate or extrapolate */
               if (itielast >= 0 && itienext > itielast) {
                   factor = (x_time_d[inav] - x_time_d[itielast] ) / (x_time_d[itienext] - x_time_d[itielast]);
-                  x[inav * 3] = x[(itielast - ncoffset) * 3] + factor * (x[(itienext - ncoffset) * 3] - x[(itielast - ncoffset) * 3]);
-                  x[inav * 3 + 1] = x[(itielast - ncoffset) * 3 + 1] + factor * (x[(itienext - ncoffset) * 3 + 1] - x[(itielast - ncoffset) * 3 + 1]);
-                  x[inav * 3 + 2] = x[(itielast - ncoffset) * 3 + 2] + factor * (x[(itienext - ncoffset) * 3 + 2] - x[(itielast - ncoffset) * 3 + 2]);
+                  x[iinv * 3] = x[(itielast - inavstart) * 3] + factor * (x[(itienext - inavstart) * 3] - x[(itielast - inavstart) * 3]);
+                  x[iinv * 3 + 1] = x[(itielast - inavstart) * 3 + 1] + factor * (x[(itienext - inavstart) * 3 + 1] - x[(itielast - inavstart) * 3 + 1]);
+                  x[iinv * 3 + 2] = x[(itielast - inavstart) * 3 + 2] + factor * (x[(itienext - inavstart) * 3 + 2] - x[(itielast - inavstart) * 3 + 2]);
               }
               else if (itielast >= 0) {
-                  x[inav * 3] = x[(itielast - ncoffset) * 3];
-                  x[inav * 3 + 1] = x[(itielast - ncoffset) * 3 + 1];
-                  x[inav * 3 + 2] = x[(itielast - ncoffset) * 3 + 2];
+                  x[iinv * 3] = x[(itielast - inavstart) * 3];
+                  x[iinv * 3 + 1] = x[(itielast - inavstart) * 3 + 1];
+                  x[iinv * 3 + 2] = x[(itielast - inavstart) * 3 + 2];
               }
               else if (itienext >= 0) {
-                  x[inav * 3] = x[(itienext - ncoffset) * 3];
-                  x[inav * 3 + 1] = x[(itienext - ncoffset) * 3 + 1];
-                  x[inav * 3 + 2] = x[(itienext - ncoffset) * 3 + 2];
+                  x[iinv * 3] = x[(itienext - inavstart) * 3];
+                  x[iinv * 3 + 1] = x[(itienext - inavstart) * 3 + 1];
+                  x[iinv * 3 + 2] = x[(itienext - inavstart) * 3 + 2];
               }
           }
       }
@@ -10561,11 +10561,7 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
               for (int isection = 0; isection < file->num_sections; isection++) {
                   section = &file->sections[isection];
                   for (int isnav = 0; isnav < section->num_snav; isnav++) {
-                      int k = section->snav_invert_id[isnav] - ncoffset;
-/* fprintf(stderr, "Solution: %d:%d:%d:%d  inav:%d %d  prior: %f %f %f   perturbation: %f %f %f\n",
-file->block, ifile, isection, isnav, section->snav_invert_id[isnav], k,
-section->snav_lon_offset[isnav]/project.mtodeglon, section->snav_lat_offset[isnav]/project.mtodeglat, section->snav_z_offset[isnav],
-x[3 * k], x[3 * k + 1], x[3 * k + 2]); */
+                      int k = section->snav_invert_id[isnav] - inavstart;
                       section->snav_lon_offset[isnav] += x[3 * k] * project.mtodeglon;
                       section->snav_lat_offset[isnav] += x[3 * k + 1] * project.mtodeglat;
                       section->snav_z_offset[isnav] += x[3 * k + 2];

@@ -22,7 +22,7 @@ if(buildGUIs)
   find_package(X11 REQUIRED)
   add_library(mbxgr mb_xgraphics.c)
   set_target_properties(mbxgr PROPERTIES VERSION "0" SOVERSION "0")
-  target_link_libraries(mbxgr GMT::GMT GDAL::GDAL mbio X11::X11)
+  target_link_libraries(mbxgr GMT::GMT GDAL::GDAL mbio ${X11_LIBRARIES})
 
   install(TARGETS mbxgr DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
