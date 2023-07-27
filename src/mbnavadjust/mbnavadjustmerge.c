@@ -1594,6 +1594,17 @@ int main(int argc, char **argv) {
     project_output.num_truecrossings_analyzed = project_inputbase.num_truecrossings_analyzed;
     project_output.crossings = NULL;
     project_output.num_ties = project_inputbase.num_ties;
+    project_output.num_globalties = project_inputbase.num_globalties;
+    project_output.num_globalties_analyzed = project_inputbase.num_globalties_analyzed;
+    project_output.num_refgrids = project_inputbase.num_refgrids;
+    for (int iref_grid=0; iref_grid < project_output.num_refgrids; iref_grid++) {
+      strncpy(project_output.refgrid_names[iref_grid], project_inputbase.refgrid_names[iref_grid], sizeof(mb_path));
+      project_output.refgrid_bounds[0][iref_grid] = project_inputbase.refgrid_bounds[0][iref_grid];
+      project_output.refgrid_bounds[1][iref_grid] = project_inputbase.refgrid_bounds[1][iref_grid];
+      project_output.refgrid_bounds[2][iref_grid] = project_inputbase.refgrid_bounds[2][iref_grid];
+      project_output.refgrid_bounds[3][iref_grid] = project_inputbase.refgrid_bounds[3][iref_grid];
+    }
+
     project_output.section_length = project_inputbase.section_length;
     project_output.section_soundings = project_inputbase.section_soundings;
     project_output.cont_int = project_inputbase.cont_int;
@@ -1604,7 +1615,10 @@ int main(int argc, char **argv) {
     project_output.precision = project_inputbase.precision;
     project_output.smoothing = project_inputbase.smoothing;
     project_output.zoffsetwidth = project_inputbase.zoffsetwidth;
+    project_output.triangle_scale = project_inputbase.triangle_scale;
     // project_output.inversion_status = project_inputbase.inversion_status;
+    // project_output.refgrid_status = project_inputbase.refgrid_status;
+    // project_output.refgrid_select = project_inputbase.refgrid_select;
     // project_output.grid_status = project_inputbase.grid_status;
     // project_output.modelplot = project_inputbase.modelplot;
     // project_output.modelplot_style = project_inputbase.modelplot_style;
@@ -1692,21 +1706,47 @@ int main(int argc, char **argv) {
     for (int i = 0; i < project_output.num_files; i++) {
       /* copy the file navigation */
       {
-        mb_command command = "";
-        sprintf(command, "cp %s/nvs_%4.4d.mb166 %s", project_inputbase.datadir, i, project_output.datadir);
+        mb_command srcfile = "";
+        mb_command dstfile = "";
+        sprintf(srcfile, "%s/nvs_%4.4d.mb166", project_inputbase.datadir, i);
+        sprintf(dstfile, "%s/nvs_%4.4d.mb166", project_output.datadir, i);
+        mb_copyfile(verbose, srcfile, dstfile, &error);
+        //mb_command command = "";
+        //sprintf(command, "cp %s/nvs_%4.4d.mb166 %s", project_inputbase.datadir, i, project_output.datadir);
         // fprintf(stderr, "Executing in shell: %s\n", command);
-        /* int shellstatus = */ system(command);
+        ///* int shellstatus = */ system(command);
       }
 
       /* copy all the section files */
       for (int j = 0; j < project_output.files[i].num_sections; j++) {
         /* copy the section file */
-        mb_command command = "";
-        sprintf(command, "cp %s/nvs_%4.4d_%4.4d.mb71* %s", project_inputbase.datadir, i, j, project_output.datadir);
+        mb_command srcfile = "";
+        mb_command dstfile = "";
+        sprintf(srcfile, "%s/nvs_%4.4d_%4.4d.mb71", project_inputbase.datadir, i, j);
+        sprintf(dstfile, "%s/nvs_%4.4d_%4.4d.mb71", project_output.datadir, i, j);
+        mb_copyfile(verbose, srcfile, dstfile, &error);
+        //mb_command command = "";
+        //sprintf(command, "cp %s/nvs_%4.4d_%4.4d.mb71* %s", project_inputbase.datadir, i, j, project_output.datadir);
         // fprintf(stderr, "Executing in shell: %s\n", command);
-        /* int shellstatus = */ system(command);
+        ///* int shellstatus = */ system(command);
       }
     }
+
+    /* copy the actual reference grid files from the input project to the new output project */
+    for (int irefgrid = 0; irefgrid < project_output.num_refgrids; irefgrid++) {
+        /* copy the ref_grid file */
+        mb_command srcfile = "";
+        mb_command dstfile = "";
+        sprintf(srcfile, "%s/%s", project_inputbase.datadir, project_inputbase.refgrid_names[irefgrid]);
+        sprintf(dstfile, "%s/%s", project_output.datadir, project_inputbase.refgrid_names[irefgrid]);
+        mb_copyfile(verbose, srcfile, dstfile, &error);
+        //mb_command command = "";
+        //sprintf(command, "cp %s/%s %s", project_inputbase.datadir, 
+        //      project_inputbase.refgrid_names[irefgrid], project_output.datadir);
+        // fprintf(stderr, "Executing in shell: %s\n", command);
+        ///* int shellstatus = */ system(command);
+    }
+
     fprintf(stderr, "\nCopied input base project to output project:\n\t%s\n", project_output_path);
     fprintf(stderr, "\t%d files\n\t%d crossings\n\t%d ties\n", project_output.num_files, project_output.num_crossings,
             project_output.num_ties);
@@ -1792,6 +1832,7 @@ int main(int argc, char **argv) {
       for (int k = 0; k < project_output.files[j].num_sections; k++) {
         project_output.files[j].sections[k].global_start_ping += project_output.num_pings;
         project_output.files[j].sections[k].global_start_snav += project_output.num_snavs;
+        project_output.files[j].sections[k].globaltie.refgrid_id += project_output.num_refgrids;
       }
     }
 
@@ -1851,34 +1892,67 @@ int main(int argc, char **argv) {
 
       /* copy the file navigation */
       {
-        mb_command command = "";
-        sprintf(command, "cp %s/nvs_%4.4d.mb166 %s/nvs_%4.4d.mb166", project_inputadd.datadir, i, project_output.datadir, k);
+        mb_command srcfile = "";
+        mb_command dstfile = "";
+        sprintf(srcfile, "%s/nvs_%4.4d.mb166", project_inputadd.datadir, i);
+        sprintf(dstfile, "%s/nvs_%4.4d.mb166", project_output.datadir, k);
+        mb_copyfile(verbose, srcfile, dstfile, &error);
+        //mb_command command = "";
+        //sprintf(command, "cp %s/nvs_%4.4d.mb166 %s/nvs_%4.4d.mb166", project_inputadd.datadir, i, project_output.datadir, k);
         // fprintf(stderr, "Executing in shell: %s\n", command);
-        /* int shellstatus = */ system(command);
+        ///* int shellstatus = */ system(command);
       }
 
       /* copy all the section files */
       for (int j = 0; j < project_inputadd.files[i].num_sections; j++) {
         /* copy the section file */
-        mb_command command = "";
-        sprintf(command, "cp %s/nvs_%4.4d_%4.4d.mb71 %s/nvs_%4.4d_%4.4d.mb71", project_inputadd.datadir, i, j,
-                project_output.datadir, k, j);
+        mb_command srcfile = "";
+        mb_command dstfile = "";
+        sprintf(srcfile, "%s/nvs_%4.4d_%4.4d.mb71", project_inputbase.datadir, i, j);
+        sprintf(dstfile, "%s/nvs_%4.4d_%4.4d.mb71", project_output.datadir, k, j);
+        mb_copyfile(verbose, srcfile, dstfile, &error);
+        //mb_command command = "";
+        //sprintf(command, "cp %s/nvs_%4.4d_%4.4d.mb71 %s/nvs_%4.4d_%4.4d.mb71", project_inputadd.datadir, i, j,
+        //        project_output.datadir, k, j);
         // fprintf(stderr, "Executing in shell: %s\n", command);
-        /* int shellstatus = */ system(command);
+        ///* int shellstatus = */ system(command);
 
         /* copy the triangle file if it exists */
         struct stat file_status;
-        sprintf(command, "%s/nvs_%4.4d_%4.4d.mb71.tri", project_inputadd.datadir, i, j);
-        const int fstat = stat(command, &file_status);
+        sprintf(srcfile, "%s/nvs_%4.4d_%4.4d.mb71.tri", project_inputadd.datadir, i, j);
+        sprintf(dstfile, "%s/nvs_%4.4d_%4.4d.mb71.tri", project_output.datadir, k, j);
+        const int fstat = stat(srcfile, &file_status);
         if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR
                       && file_status.st_size > 0) {
-          sprintf(command, "cp %s/nvs_%4.4d_%4.4d.mb71.tri %s/nvs_%4.4d_%4.4d.mb71.tri",
-                  project_inputadd.datadir, i, j, project_output.datadir, k, j);
-          // fprintf(stderr, "Executing in shell: %s\n", command);
-          /* int shellstatus = */ system(command);
+          mb_copyfile(verbose, srcfile, dstfile, &error);
         }
+        //sprintf(command, "%s/nvs_%4.4d_%4.4d.mb71.tri", project_inputadd.datadir, i, j);
+        //const int fstat = stat(command, &file_status);
+        //if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR
+        //              && file_status.st_size > 0) {
+        //  sprintf(command, "cp %s/nvs_%4.4d_%4.4d.mb71.tri %s/nvs_%4.4d_%4.4d.mb71.tri",
+        //          project_inputadd.datadir, i, j, project_output.datadir, k, j);
+          // fprintf(stderr, "Executing in shell: %s\n", command);
+        //  /* int shellstatus = */ system(command);
+        //}
       }
     }
+
+    /* copy the actual reference grid files from the input project to the new output project */
+    for (int irefgrid = 0; irefgrid < project_inputadd.num_refgrids; irefgrid++) {
+        /* copy the ref_grid file */
+        mb_command srcfile = "";
+        mb_command dstfile = "";
+        sprintf(srcfile, "%s/%s", project_inputbase.datadir, project_inputbase.refgrid_names[irefgrid]);
+        sprintf(dstfile, "%s/%s", project_output.datadir, project_inputbase.refgrid_names[irefgrid]);
+        mb_copyfile(verbose, srcfile, dstfile, &error);
+        //mb_command command = "";
+        //sprintf(command, "cp %s/%s %s", project_inputadd.datadir, 
+        //      project_inputadd.refgrid_names[irefgrid], project_output.datadir);
+        // fprintf(stderr, "Executing in shell: %s\n", command);
+        ///* int shellstatus = */ system(command);
+    }
+
     fprintf(stderr, "\nCopied input add project to output project:\n\t%s\n", project_output_path);
     fprintf(stderr, "\t%d files\n\t%d crossings\n\t%d ties\n", project_output.num_files, project_output.num_crossings,
             project_output.num_ties);
@@ -1895,6 +1969,9 @@ int main(int argc, char **argv) {
     project_output.num_truecrossings += project_inputadd.num_truecrossings;
     project_output.num_truecrossings_analyzed += project_inputadd.num_truecrossings_analyzed;
     project_output.num_ties += project_inputadd.num_ties;
+    project_output.num_globalties += project_inputadd.num_globalties;
+    project_output.num_globalties_analyzed += project_inputadd.num_globalties_analyzed;
+    project_output.num_refgrids += project_inputadd.num_refgrids;
   }
 
   struct mbna_file *file1;
@@ -3395,19 +3472,17 @@ int main(int argc, char **argv) {
       // renaming them *.mb166 files
       for (int ifile = 0; ifile < project_output.num_files; ifile++) {
         file = &(project_output.files[ifile]);
-        mb_pathplus fnvfile;
-        mb_pathplusplus command;
-        sprintf(fnvfile, "%s.fnv", file->path);
+        mb_pathplus srcfile, dstfile;
+        sprintf(srcfile, "%s.fnv", file->path);
+        sprintf(dstfile, "%s/nvs_%4.4d.mb166", project_output.datadir, ifile);
         struct stat file_status;
-        if (stat(fnvfile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR
+        if (stat(srcfile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR
                       && file_status.st_size > 0) {
-          sprintf(command, "cp %s %s/nvs_%4.4d.mb166",
-                  fnvfile, project_output.datadir, ifile);
-          fprintf(stderr, "Executing in shell: %s\n", command);
-          /* int shellstatus = */ system(command);
+          mb_copyfile(verbose, srcfile, dstfile, &error);
         }
-        else if (stat(file->path, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR
+         else if (stat(file->path, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR
                       && file_status.st_size > 0) {
+          mb_pathplusplus command;
           sprintf(command, "mblist -I %s -OtMXYHScRPr=X=Y+X+Y > %s/nvs_%4.4d.mb166",
                   file->path, project_output.datadir, ifile);
           fprintf(stderr, "Executing in shell: %s\n", command);
@@ -3496,66 +3571,65 @@ int main(int argc, char **argv) {
     }
   }
 
-  // TODO(schwehr): Localize variables.
-  int num_import_tie;
-  int num_import_globaltie;
-  int import_status = IMPORT_NONE;
-  int import_tie_status;
-  mb_path import_tie_file_1_path;
-  mb_path import_tie_file_2_path;
-  mb_path import_tie_file_1_name;
-  mb_path import_tie_file_2_name;
-  double import_tie_snav_1_time_d;
-  double import_tie_snav_2_time_d;
-  double import_tie_offset_x_m;
-  double import_tie_offset_y_m;
-  double import_tie_offset_z_m;
-  double import_tie_sigmar1;
-  double import_tie_sigmax1[3];
-  double import_tie_sigmar2;
-  double import_tie_sigmax2[3];
-  double import_tie_sigmar3;
-  double import_tie_sigmax3[3];
-  int import_tie_file_1;
-  int import_tie_file_2;
-  int import_tie_section_1_id;
-  int import_tie_section_2_id;
-  int import_tie_snav_1;
-  int import_tie_snav_2;
-  int num_old_ties, num_new_ties;
-  mb_path import_globaltie_file_path;
-  mb_path import_globaltie_file_name;
-  int import_globaltie_status;
-  int import_globaltie_file;
-  int import_globaltie_section_id;
-  int import_globaltie_snav;
-  double import_globaltie_snav_time_d;
-  double import_globaltie_offset_x_m;
-  double import_globaltie_offset_y_m;
-  double import_globaltie_offset_z_m;
-  double import_globaltie_offset_xsigma;
-  double import_globaltie_offset_ysigma;
-  double import_globaltie_offset_zsigma;
-  FILE *tfp;
-
-  mb_command buffer;
-  char *result = NULL;
-  mb_pathplusplus filename = "";
-  bool found = false;
-  int itie_set, isnav;
-  double timediff, timediffmin;
-  mb_path tmp_mb_path = "";
-  int tmp_int;
-  double tmp_double;
-
   /* if specified import ties from a tie list file */
   if (import_tie_list_set) {
+    FILE *tfp;
     if ((tfp = fopen(import_tie_list_path, "r")) == NULL) {
       fprintf(stderr, "Unable to open tie list file %s for reading\n", import_tie_list_path);
       status = MB_FAILURE;
       error = MB_ERROR_OPEN_FAIL;
       exit(error);
     }
+
+    int num_import_tie;
+    int num_import_globaltie;
+    int import_status = IMPORT_NONE;
+    int import_tie_status;
+    mb_path import_tie_file_1_path;
+    mb_path import_tie_file_2_path;
+    mb_path import_tie_file_1_name;
+    mb_path import_tie_file_2_name;
+    double import_tie_snav_1_time_d;
+    double import_tie_snav_2_time_d;
+    double import_tie_offset_x_m;
+    double import_tie_offset_y_m;
+    double import_tie_offset_z_m;
+    double import_tie_sigmar1;
+    double import_tie_sigmax1[3];
+    double import_tie_sigmar2;
+    double import_tie_sigmax2[3];
+    double import_tie_sigmar3;
+    double import_tie_sigmax3[3];
+    int import_tie_file_1;
+    int import_tie_file_2;
+    int import_tie_section_1_id;
+    int import_tie_section_2_id;
+    int import_tie_snav_1;
+    int import_tie_snav_2;
+    int num_old_ties, num_new_ties;
+    mb_path import_globaltie_file_path;
+    mb_path import_globaltie_file_name;
+    int import_globaltie_status;
+    int import_globaltie_file;
+    int import_globaltie_section_id;
+    int import_globaltie_snav;
+    double import_globaltie_snav_time_d;
+    double import_globaltie_offset_x_m;
+    double import_globaltie_offset_y_m;
+    double import_globaltie_offset_z_m;
+    double import_globaltie_offset_xsigma;
+    double import_globaltie_offset_ysigma;
+    double import_globaltie_offset_zsigma;
+
+    mb_command buffer;
+    char *result = NULL;
+    mb_pathplusplus filename = "";
+    bool found = false;
+    int itie_set, isnav;
+    double timediff, timediffmin;
+    mb_path tmp_mb_path = "";
+    int tmp_int;
+    double tmp_double;
 
     /* read and process the ties */
     bool done = false;
@@ -3637,7 +3711,6 @@ int main(int argc, char **argv) {
 
         /* if global tie found then count, otherwise ignore */
         if (found) {
-          num_import_globaltie++;
           fprintf(stderr, "Success!!\nImport global tie from list: %4.4d:%4.4d:%2.2d %.3f/%.3f/%.3f  %.3f/%.3f/%.3f\n",
                   import_globaltie_file, import_globaltie_section_id, import_globaltie_snav,
                   import_globaltie_offset_x_m, import_globaltie_offset_y_m, import_globaltie_offset_z_m,
@@ -4019,10 +4092,13 @@ int main(int argc, char **argv) {
         }
       }
     }
+    fprintf(stderr, "Imported %d crossing ties\n", num_import_tie);
+    fprintf(stderr, "Imported %d global ties\n\n", num_import_globaltie);
   }
 
   /* if specified output ties to a tie list file */
   if (export_tie_list_set) {
+    FILE *tfp;
     if ((tfp = fopen(export_tie_list_path, "w")) == NULL) {
       fprintf(stderr, "Unable to open tie list file %s for writing\n", export_tie_list_path);
       status = MB_FAILURE;
@@ -4080,27 +4156,30 @@ int main(int argc, char **argv) {
       exit(error);
     }
 
-        if (update_datalist) {
-            /* update datalist and ancillary files */
-            sprintf(filename, "%s/%s.dir/datalist.mb-1", project_output.path, project_output.name);
-            if ((tfp = fopen(filename, "w")) != NULL) {
-                for (int i = 0; i < project_output.num_files; i++) {
-                    file1 = &project_output.files[i];
-                    for (int j = 0; j < file1->num_sections; j++) {
-                        fprintf(tfp, "%s/nvs_%4.4d_%4.4d.mb71 71\n", project_output.datadir, file1->id, j);
-                    }
-                }
-                fclose(tfp);
-            }
-            sprintf(filename, "cd %s/%s.dir ; mbdatalist -Idatalist.mb-1 -O -Z -V", project_output.path, project_output.name);
-            /* int shellstatus = */ system(filename);
-            sprintf(filename, "%s/%s.dir/mbgrid.cmd", project_output.path, project_output.name);
-            if ((tfp = fopen(filename, "w")) != NULL) {
-                fprintf(tfp, "mbgrid -I datalistp.mb-1 \\\n\t-A2 -F5 -N -C2 \\\n\t-O ProjectTopo\n\n");
-                fclose(tfp);
+    if (update_datalist) {
+      FILE *tfp;
+      mb_pathplusplus filename = "";
+
+      /* update datalist and ancillary files */
+      sprintf(filename, "%s/%s.dir/datalist.mb-1", project_output.path, project_output.name);
+      if ((tfp = fopen(filename, "w")) != NULL) {
+        for (int i = 0; i < project_output.num_files; i++) {
+            file1 = &project_output.files[i];
+            for (int j = 0; j < file1->num_sections; j++) {
+                fprintf(tfp, "%s/nvs_%4.4d_%4.4d.mb71 71\n", project_output.datadir, file1->id, j);
             }
         }
+        fclose(tfp);
+      }
+      sprintf(filename, "cd %s/%s.dir ; mbdatalist -Idatalist.mb-1 -O -Z -V", project_output.path, project_output.name);
+      /* int shellstatus = */ system(filename);
+      sprintf(filename, "%s/%s.dir/mbgrid.cmd", project_output.path, project_output.name);
+      if ((tfp = fopen(filename, "w")) != NULL) {
+          fprintf(tfp, "mbgrid -I datalistp.mb-1 \\\n\t-A2 -F5 -N -C2 \\\n\t-O ProjectTopo\n\n");
+          fclose(tfp);
+      }
     }
+  }
 
   /* check memory */
   if (verbose >= 4)

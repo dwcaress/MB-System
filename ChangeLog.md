@@ -23,7 +23,8 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.9beta57    June 23, 2023
+- Version 5.7.9beta58    July 18, 2023
+- Version 5.7.9beta57    June 27, 2023
 - Version 5.7.9beta53    June 15, 2023
 - Version 5.7.9beta52    March 9, 2023
 - Version 5.7.9beta51    February 14, 2023
@@ -431,13 +432,29 @@ or beta, are equally accessible as tarballs through the Github interface.
 ### MB-System Version 5.7 Release Notes:
 --
 
-#### 5.7.9beta57 (June 23)
+#### 5.7.9beta58 (July 18)
+
+Mblist: Added option to merge data from a secondary file and allow printing those
+secondary data values. The secondary file is columnar text in which the first column
+holds the time stamp in epoch or unix time (seconds since 1/1/1970), and up to 19
+following columns hold other data collected during the survey (e.g. temperature or 
+salinity measured on a CTD sensor).
+
+Mbeditviz: The scale widget controlling grid cell size now changes it's range if either
+the minimum or maximum values are selected (halving or doubling, respectively).
+
+Mbnavadjustmerge: Copying mbnavadjust projects is much more efficient due to use of
+a fast file copy function replacing a shell call of the program cp.
+
+#### 5.7.9beta57 (June 27)
 
 Mbm_route2mission: Added -T option to embed use of Terrain Relative Navigation in 
 MBARI Mapping AUV missions.
 
 Format 89 (MBF_RESON7K3): Fixed too small buffer size for broadcast Teledyne s7k 
-data records. This was 32K and is now 600K.
+data records, which caused mbtrnpp to crash by seg fault. This was 32K and is now 600K.
+
+Mbnavadjust: Fixed bug in the inversion algorithm.
 
 #### 5.7.9beta53 (June 15)
 

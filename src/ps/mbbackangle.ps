@@ -1,6 +1,6 @@
 %!PS-Adobe-3.0
 %%Creator: groff version 1.22.4
-%%CreationDate: Fri Jun 23 18:10:55 2023
+%%CreationDate: Tue Jul 18 15:55:07 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
@@ -242,14 +242,14 @@ G .084(rage amplitude or sidescan v).15 F .083(alues in sw)-.25 F .083
 (ath sonar data as a func-)-.1 F
 (tion of the grazing angle with the sea\215oor)108 52.8 Q(.)-.55 E F1
 (VERSION)72 81.6 Q F0 -1.11(Ve)108 93.6 S(rsion 5.0)1.11 E F1(SYNOPSIS)
-72 122.4 Q F2(mb)108 134.4 Q(backangle)-.1 E F0([)2.992 E F2<ad41>A/F3
-10/Times-Italic@0 SF(kind)A F2 .492<ad4320ad4420ad46>2.992 F F3(format)A
-F2<ad47>2.992 E F3(kind/angle/max/nx/ny)A F2<ad49>2.992 E F3(\214le)A F2
-<ad4e>2.992 E F3(nangle/anglemax)A F2<ad50>2.993 E F3(pings)A F2<ad51>
-2.993 E<ad52>108 146.4 Q F3 -.37(re)C(fangle).37 E F2<ad54>2.5 E F3
-(topo)A(grid\214le)-.1 E F2<ad5a>2.5 E F3(altitude)A F2(\255V \255H])2.5
-E F1(DESCRIPTION)72 175.2 Q F0 .758(The program)108 187.2 R F2(mb)3.258
-E(backangle)-.1 E F0 .757(reads a sw)3.257 F .757
+72 122.4 Q F2(mb)108 134.4 Q(backangle)-.1 E F0([)2.828 E F2<ad41>A/F3
+10/Times-Italic@0 SF(kind)A F2 .329<ad4320ad4420ad46>2.828 F F3(format)A
+F2<ad47>2.829 E F3(kind/angle/min/max/nx/ny)A F2<ad49>2.829 E F3(\214le)
+A F2<ad4e>2.829 E F3(nangle/anglemax)A F2<ad50>2.829 E F3(pings)A F2
+<ad5120ad52>108 146.4 Q F3 -.37(re)C(fangle).37 E F2<ad54>2.5 E F3(topo)
+A(grid\214le)-.1 E F2<ad5a>2.5 E F3(altitude)A F2(\255V \255H])2.5 E F1
+(DESCRIPTION)72 175.2 Q F0 .758(The program)108 187.2 R F2(mb)3.258 E
+(backangle)-.1 E F0 .757(reads a sw)3.257 F .757
 (ath sonar data \214le containing beam amplitude and/or sidescan data)
 -.1 F .11(and generates tables of the a)108 199.2 R -.15(ve)-.2 G .11
 (rage amplitude and/or sidescan v).15 F .11
@@ -373,7 +373,7 @@ E(backangle)-.1 E F0(to dump the output to stdout rather than to ".sg)
 F F2<ad49>2.917 E F0 .417(option. By def)2.917 F(ault,)-.1 E F2(mb)144
 295.2 Q(backangle)-.1 E F0(infers the format from the "*.mbXX")2.5 E F2
 (MB-System)2.5 E F0(suf)2.5 E(\214x con)-.25 E -.15(ve)-.4 G(ntion.).15
-E F2<ad47>108 312 Q F3(kind/angle/max/nx/ny)144 312 Q F0 .033
+E F2<ad47>108 312 Q F3(kind/angle/min/max/nx/ny)144 312 Q F0 .033
 (This option causes)144 324 R F2(mb)2.534 E(backangle)-.1 E F0 .034
 (to output gridded histograms of the amplitude v)2.534 F .034
 (ersus grazing an-)-.15 F .44(gle data for each sw)144 336 R .439(ath \
@@ -391,16 +391,17 @@ E F2<ad47>108 312 Q F3(kind/angle/max/nx/ny)144 312 Q F0 .033
 (wice \(once with)-3.52 F F3(kind)3.52 E F0 3.52(=1a)3.52 G(nd)-3.52 E
 .472(once with)144 384 R F3(kind)2.972 E F0 2.972(=2)2.972 G 2.972(\)t)
 -2.972 G 2.972(og)-2.972 G .472(enerate both amplitude and sidescan his\
-tograms. The histogram grid con-)-2.972 F .551(sists of)144 396 R F3(nx)
-3.051 E F0 .551(bins e)3.051 F .551(xtending from \255)-.15 F F3(angle)A
-F0 .551(to +)3.051 F F3(angle)A F0(de)3.051 E .551
-(grees in the x-dimension, and)-.15 F F3(ny)3.052 E F0 .552(bins e)3.052
-F(xtend-)-.15 E .723(ing from 0.0 to)144 408 R F3(max)3.223 E F0 .722
-(in the y-dimension. The v)3.223 F .722
-(alues of the histogram are normalized so that the)-.25 F(y)-.15 E
-(sum to 1000.0 within each angle bin.)144 420 Q F2<ad48>108 436.8 Q F0
-.391(This "help" \215ag causes the program to print out a description o\
-f its operation and then e)144 436.8 R .391(xit imme-)-.15 F(diately)144
+tograms. The histogram grid con-)-2.972 F 1.895(sists of)144 396 R F3
+(nx)4.395 E F0 1.895(bins e)4.395 F 1.895(xtending from \255)-.15 F F3
+(angle)A F0 1.896(to +)4.396 F F3(angle)A F0(de)4.396 E 1.896
+(grees in the x-dimension, and)-.15 F F3(ny)4.396 E F0 1.896(bins of)
+4.396 F .522(backscatter v)144 408 R .522(alue e)-.25 F .522
+(xtending from)-.15 F F3(min)3.022 E F0(to)3.022 E F3(max)3.022 E F0
+.522(in the y-dimension. The v)3.022 F .522(alues of the histogram are)
+-.25 F(normalized so that the)144 420 Q 2.5(ys)-.15 G
+(um to 1000.0 within each angle bin.)-2.5 E F2<ad48>108 436.8 Q F0 .391
+(This "help" \215ag causes the program to print out a description of it\
+s operation and then e)144 436.8 R .391(xit imme-)-.15 F(diately)144
 448.8 Q(.)-.65 E F2<ad49>108 465.6 Q F3(\214lename)144 465.6 Q F0 .313
 (Sets the input \214lename. If)144 477.6 R F3(format)2.813 E F0 2.813
 (>0\()2.813 G .313(set with the)-2.813 F F2<ad46>2.813 E F0 .313
@@ -446,8 +447,8 @@ R F3(nangle)4.056 E F0 1.556(points spaced equally from \255)4.056 F F3
 (raged for each amplitude vs grazing angle table. The).15 F 3.63
 (output "*.sg)144 727.2 R 3.63(a" or ".ag)-.05 F 3.63
 (a" \214les will generally contain man)-.05 F 6.13(yt)-.15 G 3.63
-(ables, each with a timestamp)-6.13 F(MB-System 5.0)72 768 Q 2.5(3J)
-146.495 G(une 2013)-2.5 E(2)204.835 E 0 Cg EP
+(ables, each with a timestamp)-6.13 F(MB-System 5.0)72 768 Q
+(13 July 2023)144.825 E(2)203.165 E 0 Cg EP
 %%Page: 3 3
 %%BeginPageSetup
 BP
@@ -533,8 +534,8 @@ e beam amplitude and)125.5 424.8 R(sidescan with mbprocess, \214rst use)
 664.8 Q(Outputting gridded histograms of sidescan amplitude vs grazing \
 angle...)144 676.8 Q(processing sw)144 700.8 Q
 (ath \214le: mbari_1998_988_msn.mb57 57)-.1 E(7274 records processed)144
-724.8 Q(MB-System 5.0)72 768 Q 2.5(3J)146.495 G(une 2013)-2.5 E(3)
-204.835 E 0 Cg EP
+724.8 Q(MB-System 5.0)72 768 Q(13 July 2023)144.825 E(3)203.165 E 0 Cg
+EP
 %%Page: 4 4
 %%BeginPageSetup
 BP
@@ -589,8 +590,8 @@ F(## Number of angle bins:)144 432 Q(81)5 E(## Maximum angle:)144 444 Q
 R(5.1880)17.5 E 12.5(-56.0000 31.6249)144 672 R(5.0681)17.5 E 12.5
 (-54.0000 31.6362)144 684 R(4.9521)17.5 E 12.5(-52.0000 31.5590)144 696
 R(5.0482)17.5 E 12.5(-50.0000 31.3955)144 708 R(5.1242)17.5 E 12.5
-(-48.0000 31.0372)144 720 R(5.2364)17.5 E(MB-System 5.0)72 768 Q 2.5(3J)
-146.495 G(une 2013)-2.5 E(4)204.835 E 0 Cg EP
+(-48.0000 31.0372)144 720 R(5.2364)17.5 E(MB-System 5.0)72 768 Q
+(13 July 2023)144.825 E(4)203.165 E 0 Cg EP
 %%Page: 5 5
 %%BeginPageSetup
 BP
@@ -632,8 +633,8 @@ R(4.6856)17.5 E 12.5(8.0000 24.0867)146.5 408 R(4.5882)17.5 E 12.5
 (52.0000 28.4042)144 672 R(4.9034)17.5 E 12.5(54.0000 28.3741)144 684 R
 (4.9500)17.5 E 12.5(56.0000 28.5195)144 696 R(4.9799)17.5 E 12.5
 (58.0000 28.6455)144 708 R(5.0142)17.5 E 12.5(60.0000 28.9284)144 720 R
-(4.9876)17.5 E(MB-System 5.0)72 768 Q 2.5(3J)146.495 G(une 2013)-2.5 E
-(5)204.835 E 0 Cg EP
+(4.9876)17.5 E(MB-System 5.0)72 768 Q(13 July 2023)144.825 E(5)203.165 E
+0 Cg EP
 %%Page: 6 6
 %%BeginPageSetup
 BP
@@ -649,7 +650,7 @@ BP
 256.8 Q F0(\(1\),)A F2(mbpr)2.5 E(ocess)-.18 E F0(\(1\),)A F2(mbset)2.5
 E F0(\(1\),)A F2(mb\214lter)2.5 E F0(\(1\))A F1 -.11(BU)72 285.6 S(GS)
 .11 E F0(None w)108 297.6 Q(orth bragging about.)-.1 E(MB-System 5.0)72
-768 Q 2.5(3J)146.495 G(une 2013)-2.5 E(6)204.835 E 0 Cg EP
+768 Q(13 July 2023)144.825 E(6)203.165 E 0 Cg EP
 %%Trailer
 end
 %%EOF
