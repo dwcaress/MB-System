@@ -10,7 +10,12 @@ set(CMAKE_AUTOUIC ON)
 
 add_executable(topoGridViewer TopoGridViewer.cpp)
 
-target_link_libraries(topoGridViewer PRIVATE 
-                                          mbeditvizlib)
+target_include_directories(topoGridViewer PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+target_link_libraries(topoGridViewer PRIVATE
+                      MBGui
+                      PUBLIC
+                      ${VTK_LIBRARIES}
+                      ) 
 
 install(TARGETS topoGridViewer DESTINATION ${CMAKE_INSTALL_BINDIR})
