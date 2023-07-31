@@ -1,7 +1,7 @@
 // These first three lines address
 // issue described at
 // https://stackoverflow.com/questions/18642155/no-override-found-for-vtkpolydatamapper
-#include "vtkAutoInit.h" 
+#include <vtkAutoInit.h> 
 VTK_MODULE_INIT(vtkRenderingOpenGL2); // VTK was built with vtkRenderingOpenGL2
 VTK_MODULE_INIT(vtkInteractionStyle);
 
