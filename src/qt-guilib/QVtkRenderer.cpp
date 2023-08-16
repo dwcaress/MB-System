@@ -459,7 +459,7 @@ bool QVtkRenderer::assemblePipeline() {
   elevColorizer_->SetLowPoint(0, 0, gridBounds[4]);
   elevColorizer_->SetHighPoint(0, 0, gridBounds[5]);
 
-  /// Scale z axis based on 
+  /// Scale z axis based on vertical exaggeration
   float zScale = displayProperties_->verticalExagg() *
     gridReader_->zScaleLatLon();
   ;
