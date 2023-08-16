@@ -171,7 +171,7 @@ int TopoGridReader::RequestData(vtkInformation* request,
   //  PJ *toUTM = nullptr;
   PJ_CONTEXT *projContext = nullptr;
 
-  // If in grid is in geographic CRM, must project it to UTM
+  // If grid is in geographic CRM, must project it to UTM
   // to maintain same scale (meters) on x, y, and z axes
   bool convertToUTM = geographicCRS();
 
@@ -187,7 +187,7 @@ int TopoGridReader::RequestData(vtkInformation* request,
                                                 xMax - xMin,
                                                 zMax - zMin);
     
-    std::cerr << "lat-lon z-scale: " << zScale << std::endl;
+    std::cerr << "TopoGridReader: lat-lon z-scale: " << zScale << std::endl;
   }
   
   if (projTransform_) {
