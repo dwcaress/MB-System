@@ -8,7 +8,13 @@ add_executable(mbnavadjust
                 mbnavadjust_prog.c 
                 mbnavadjust_util.c 
                 mbnavadjustmerge.c)
-target_link_libraries(mbnavadjust PRIVATE mbview mbaux mbxgr Motif::Motif X11::Xt)
+	      
+	      target_link_libraries(mbnavadjust PRIVATE mbview mbaux mbxgr
+		 	${MOTIF_LIBRARIES}
+			${X11_LIBRARIES}
+			${X11_Xt_LIB})
+
+
 
 add_executable(mbnavadjustmerge mbnavadjustmerge.c mbnavadjust_io.c)
 target_link_libraries(mbnavadjustmerge PRIVATE mbaux )
