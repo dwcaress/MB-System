@@ -1,4 +1,5 @@
 #include <math.h>
+#include <limits>
 #include <GL/gl.h>
 #include "Surface.h"
 
