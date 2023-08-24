@@ -46,8 +46,7 @@ target_include_directories(MBGui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(
   MBGui
   PRIVATE Qt5::Core Qt5::Quick mbio mbeditvizlib
-  PUBLIC VTK::CommonCore
-  	 VTK::CommonColor
+  PUBLIC VTK::CommonColor
   	 VTK::CommonSystem
 	 VTK::pugixml
 	 VTK::CommonImplicitArrays
