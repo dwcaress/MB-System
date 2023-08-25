@@ -49,7 +49,6 @@ target_link_libraries(
   PUBLIC VTK::CommonColor
   	 VTK::CommonSystem
 	 VTK::pugixml
-	 VTK::CommonImplicitArrays
 	 VTK::CommonComputationalGeometry
          VTK::CommonExecutionModel
 	 VTK::DICOMParser
@@ -66,7 +65,8 @@ target_link_libraries(
 	 VTK::ImagingColor
 	 VTK::ImagingGeneral
 	 VTK::ImagingHybrid
-	 VTK::ImagingSources	 
+	 VTK::ImagingSources
+	 VTK::IOImage
          VTK::IOGeometry
          VTK::IOXML
          VTK::InteractionStyle
