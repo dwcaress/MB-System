@@ -113,12 +113,13 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # Configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT =                  ../src/qt-mbgrdviz
+INPUT =                 mainpage.h
+INPUT +=                  ../src/qt-mbgrdviz
 INPUT +=                 ../src/qt-mbgrdviz-2
 INPUT +=                 ../src/qt-mbgrdviz-3
 INPUT +=                 ../src/qt-guilib
 INPUT +=                 ../src/mbio
-INPUT +=                 mainpage.h
+
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.c \
                          *.cc \
