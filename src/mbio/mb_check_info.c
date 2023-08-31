@@ -305,7 +305,7 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 					nscan = sscanf(line, "  Number of Flagged Beams: %d", &mb_info->nbeams_bath_flagged);
 			}
 
-			else if (strncmp(line, "Amplitude Data (", 17) == 0) {
+			else if (strncmp(line, "Amplitude Data (", 16) == 0) {
 				nscan = sscanf(line, "Amplitude Data (%d beams):", &mb_info->nbeams_amp);
 				if (fgets(line, MB_PATH_MAXLINE, fp) != NULL)
 					nscan = sscanf(line, "  Number of Beams: %d", &mb_info->nbeams_amp_total);
@@ -1148,17 +1148,17 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 			mb_info->nrecords_ss1 += mb_info_file.nrecords_ss1;
 			mb_info->nrecords_ss2 += mb_info_file.nrecords_ss2;
 			mb_info->nrecords_sbp += mb_info_file.nrecords_sbp;
-			mb_info->nbeams_bath += mb_info_file.nbeams_bath;
+			mb_info->nbeams_bath = MAX(mb_info->nbeams_bath, mb_info_file.nbeams_bath);
 			mb_info->nbeams_bath_total += mb_info_file.nbeams_bath_total;
 			mb_info->nbeams_bath_good += mb_info_file.nbeams_bath_good;
 			mb_info->nbeams_bath_zero += mb_info_file.nbeams_bath_zero;
 			mb_info->nbeams_bath_flagged += mb_info_file.nbeams_bath_flagged;
-			mb_info->nbeams_amp += mb_info_file.nbeams_amp;
+			mb_info->nbeams_amp = MAX(mb_info->nbeams_amp, mb_info_file.nbeams_amp);
 			mb_info->nbeams_amp_total += mb_info_file.nbeams_amp_total;
 			mb_info->nbeams_amp_good += mb_info_file.nbeams_amp_good;
 			mb_info->nbeams_amp_zero += mb_info_file.nbeams_amp_zero;
 			mb_info->nbeams_amp_flagged += mb_info_file.nbeams_amp_flagged;
-			mb_info->npixels_ss += mb_info_file.npixels_ss;
+			mb_info->npixels_ss = MAX(mb_info->npixels_ss, mb_info_file.npixels_ss);
 			mb_info->npixels_ss_total += mb_info_file.npixels_ss_total;
 			mb_info->npixels_ss_good += mb_info_file.npixels_ss_good;
 			mb_info->npixels_ss_zero += mb_info_file.npixels_ss_zero;

@@ -1,15 +1,388 @@
 #-------------------------------------------------------------------------
-# Notes on using the MB-System autotools based build system
+# How to Download and Install MB-System
 #------------------------------------------------------------------------------
 #
 # David W. Caress
-# July 18, 2023
+# July 26, 2023
+#
+#------------------------------------------------------------------------------
+# General Advice for Building and Installing MB-System
 #------------------------------------------------------------------------------
 #
-# This Autoconf build system was begun by Bob Covill in 2011, and then completed
-# with a distributed, multi-continental effort by Bob Covill, Christian
-# Ferreira, Hamish Bowman, Kurt Schwehr, and David Caress in May to August
-# of 2013.
+# MB-System is an open source software package intended for Unix-like operating systems, including a build system based on the GNU Autotools incorporating Autoconf, Automake, Libtool, and Make. In order to build and install MB-System, one first runs a script named "configure" included at the top level directory of the MB-System source code that generates files named "Makefile" throughout the source code structure. In turn, these Make files determine how the libraries and programs are compiled, linked, and installed using the Make utility. 
+# 
+# MB-System depends on a number of other software packages. For some operating systems, special arguments to the configure script are required to integrate the MB-System source to prerequisite software packages. 
+# 
+# Among the software packages that are prerequisite for MB-System are:
+#   GMT (Generic Mapping Tools)
+#   Proj
+#   GDAL
+#   netCDF
+#   FFTW (Fastest Fourier Transform in the West)
+#   X11
+#   OpenMotif
+#   OpenGL
+#   OpenCV
+#   PCL (Point Cloud Library) (planned, not yet in release 5.7.9)
+# 
+# The sections below provide some instructions for building MB-System on a few 
+# common operating system distributions, including MacOs, Ubuntu Linux, 
+# Debian Linux, and the CygWin environment on Windows. These instructions 
+# include the installation of the prerequisite software packages using a 
+# package manager relevant to each OS and the special arguments needed for 
+# the configure script.
+# 
+#------------------------------------------------------------------------------
+How to download an MB-System source distribution
+#------------------------------------------------------------------------------
+# 
+# The source code for MB-System is available from a repository on Github:
+#     https://github.com/dwcaress/MB-System
+# 
+# This link will open the page for the most recent stable release of MB-System. The source code distribution can be downloaded as zip or tar.gz archives from the "Assets" section at the bottom.
+#     https://github.com/dwcaress/MB-System/releases/latest
+# 
+# This link will open a page listing all recent MB-System releases, with the most recent release at the top. The most recent release could be a beta or pre-release. The source code distribution can be downloaded as zip or tar.gz archives from the "Assets" section at the bottom.
+#     https://github.com/dwcaress/MB-System/releases/releases
+# 
+# This link will download the current state of the master branch of the MB-System repository:
+#     https://github.com/dwcaress/MB-System/archive/refs/heads/master.zip
+# 
+# 
+#------------------------------------------------------------------------------
+MacOS 13 Ventura (and MacOs 10 High Sierra, 11 Big Sur, and 12 Monterey)
+#------------------------------------------------------------------------------
+# 
+# The use of MacPorts to install the MB-System prerequisite packages is recommended on Apple Mac computers, particularly because this approach enables cleanly building with a complete X11 + Motif + OpenGL infrastructure separate from the libraries and header files associated with the XQuartz package. One usually still installs XQuartz and uses it as the X11 display server, but confining the MB-System compilation and linking to headers and libraries within the MacPorts structure avoids several issues.
+# 
+# This example is relevant for MacOs 10.13 High Sierra to the current MacOs 13 Ventura on both Intel and ARM (Apple Silicon) architecture computers.
+# 
+# Install Xcode and the Xcode command line tools, which includes the LLVM compiler suite.
+# 
+# Install the XQuartz X11 server from
+#   https://www.xquartz.org
+# XQuartz 2.8.5 or later is required for all MB-System installations.
+# 
+# Install MacPorts using the appropriate downloadable installer package from:
+#   https://www.macports.org/install.php
+# 
+# After MacPorts installation, first make sure the default port packages are current by running selfupdate and then install the MB-System prerequisites.
+#   sudo port -v selfupdate
+#   sudo port install gmt6 fftw-3 mesa libGLU openmotif
+# 
+# Also make sure that a current version of Python3 is available. First list the available Python3 versions, install the most recent, and then set port to link that version to python3:
+#   port select --list python
+# 
+# Result as of July 18, 2023:
+#   Available versions for python:
+#    none
+#    python27
+#    python30
+#    python311 (active)
+#    python38
+# 
+# The most recent version is python311, so install it:
+#   sudo port install python311
+#   sudo port select --set python python311
+#   sudo port select --set python3 python311
+# 
+# Also install the most recent Python imaging library Pillow
+#   sudo port install py311-Pillow
+# 
+# Download the MB-System source package from the repository at GitHub:
+#   https://github.com/dwcaress/MB-System
+# There are often beta releases that are more recent than the current stable release. For instance, to download 5.7.9.beta42 go to:
+#     https://github.com/dwcaress/MB-System/archive/refs/tags/5.7.9beta58.tar.gz
+# 
+# Recommend using Chrome for the above, not Safari, and placing the tarball in /usr/local/src.
+# 
+# Unpack the MB-System distribution tarball, and then cd into the top directory of the resulting structure. This will typically be named something like "MB-System-5.7.9". At that location, execute the configure script, named "configure", with the options necessary for your context. The XCode compiler tools do not look for header files or libraries in the locations used by MacPorts, and so it is necessary to specify these locations for several of the prerequisite packages.
+# 
+# This command should successfully enable building the current MB-System (5.7.9 or later) on any Mac computer with the prerequisites installed through MacPorts. This has been tested with computers running Ventura and Monterey.
+#   ./configure \
+      --prefix=/usr/local \
+      --disable-static \
+      --enable-shared \
+      --enable-hardening \
+      --enable-test \
+      --with-proj-lib=/opt/local/lib/proj9/lib \
+      --with-proj-include=/opt/local/lib/proj9/include \
+      --with-gmt-config=/opt/local/lib/gmt6/bin \
+      --with-fftw-lib=/opt/local/lib \
+      --with-fftw-include=/opt/local/include \
+      --with-x11-lib=/opt/local/lib \
+      --with-x11-include=/opt/local/include \
+      --with-motif-lib=/opt/local/lib \
+      --with-motif-include=/opt/local/include \
+      --with-opengl-include=/opt/local/include \
+      --with-opengl-lib=/opt/local/lib \
+      --with-otps-dir=/usr/local/src/otps
+
+Once the makefiles have been generated by configure, build and install MB-System using:
+  make
+  make check
+  sudo make install
+
+The MB-System codebase includes some optional components, such as OpenCV based photomosaicing (enabled with --enable-opencv) and  a realtime Terrain Relative Navigation infrastructure and toolset (--enable-mtrn and --enable-mbtnav). An additional prerequisite for the photomosaicing is OpenCV4, which can be installed by:
+  sudo port install gmt6 fftw-3 libGLU openmotif opencv4
+This configure command should enable building the entire MB-System package, including these optional tools.
+  ./configure \
+      --prefix=/usr/local \
+      --disable-static \
+      --enable-shared \
+      --enable-hardening \
+      --enable-test \
+      --with-proj-lib=/opt/local/lib/proj9/lib \
+      --with-proj-include=/opt/local/lib/proj9/include \
+      --with-gmt-config=/opt/local/lib/gmt6/bin \
+      --with-fftw-lib=/opt/local/lib \
+      --with-fftw-include=/opt/local/include \
+      --with-x11-lib=/opt/local/lib \
+      --with-x11-include=/opt/local/include \
+      --with-motif-lib=/opt/local/lib \
+      --with-motif-include=/opt/local/include \
+      --with-opengl-include=/opt/local/include \
+      --with-opengl-lib=/opt/local/lib \
+      --enable-mbtrn \
+      --enable-mbtnav \
+      --enable-opencv \
+      --with-opencv-include=/opt/local/include/opencv4 \
+      --with-opencv-lib=/opt/local/lib/opencv4 \
+      --with-otps-dir=/usr/local/src/otps
+
+#------------------------------------------------------------------------------
+Ubuntu Jammy Jellyfish 22.04
+#------------------------------------------------------------------------------
+
+Install Ubuntu 20 from ISO, and then update the starting packages:
+    sudo apt upgrade
+
+Install compilers:
+sudo apt install build-essential
+
+Install MB-System prerequisites:
+    sudo apt install libnetcdf-bin libnetcdf-dev libgdal-dev \
+gmt libgmt6 libgmt-dev libproj-dev \
+libfftw3-3 libfftw3-dev libmotif-dev \
+xfonts-100dpi libglu1-mesa-dev \
+libopencv-dev gfortran
+
+Run configure to build all of MB-System:
+    ./configure \
+        --enable-mbtrn --enable-mbtnav --enable-opencv \
+        --with-opencv-include=/usr/include/opencv4 \
+        --with-opencv-lib=/lib/x86_64-linux-gnu
+
+The MB-System libraries will be placed in /usr/local/lib, but the
+runtime dynamic linker does not look for shared libraries in this
+directory by default. Users can add /usr/local/lib to the directories
+searched for shared libraries by adding "/usr/local/lib" to the
+environment variable LD_LIBRARY_PATH. This is accomplished by 
+placing the command 
+
+   export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+
+in in an environment file in the user’s home 
+directory named .zprofile (if using the zsh shell) or .profile 
+(if using the bash shell). Other user environment files can be used, 
+such as .zshrc for zsh or .bashrc for bash.
+
+The preferred alternative to using LD_LIBRARY_PATH is to embed the 
+shared library location in the compiled executables
+by passing an rpath command to the linker by setting the LD_FLAGS
+environment variable available to the configure command:
+ 
+    LDFLAGS="-Wl,-rpath -Wl,/usr/local/lib" \
+        ./configure \
+        --enable-mbtrn --enable-mbtnav --enable-opencv \
+        --with-opencv-include=/usr/include/opencv4 \
+        --with-opencv-lib=/lib/x86_64-linux-gnu
+
+Build MB-System:
+    make
+    make check
+    sudo make install
+
+Post-Installation Actions:
+    cpan Parallel::ForkManager
+    gmt gmtset IO_NC4_CHUNK_SIZE classic
+    gmt gmtset GMT_CUSTOM_LIBS /usr/local/lib/mbsystem.so
+
+
+#------------------------------------------------------------------------------
+Ubuntu Focal Fossa 20.04
+#------------------------------------------------------------------------------
+
+Install Ubuntu 22 from ISO, and then update the starting packages:
+    sudo apt upgrade
+
+Install compilers:
+sudo apt install build-essential
+
+Install MB-System prerequisites:
+    sudo apt install libgdal-dev \
+gmt libgmt6 libgmt-dev libproj-dev \
+libfftw3-3 libfftw3-dev libmotif-dev \
+xfonts-100dpi libglu1-mesa-dev libopencv-dev \
+gfortran
+
+Run configure to build all of MB-System:
+    # export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+    LDFLAGS="-Wl,-rpath -Wl,/usr/local/lib" \
+./configure \
+--enable-mbtrn --enable-mbtnav --enable-opencv \
+--with-opencv-include=/usr/include/opencv4 \
+--with-opencv-lib=/lib/x86_64-linux-gnu
+
+Build MB-System:
+    make
+    make check
+    sudo make install
+
+Post-Installation Actions:
+    cpan Parallel::ForkManager
+    gmt gmtset IO_NC4_CHUNK_SIZE classic
+    gmt gmtset GMT_CUSTOM_LIBS /usr/local/lib/mbsystem.so
+
+
+#------------------------------------------------------------------------------
+Ubuntu Bionic Beaver 18.04
+#------------------------------------------------------------------------------
+
+Note that the photomosaicing tools utilising OpenCV cannot be built under Ubuntu 18.
+
+Install Ubuntu 22 from ISO, and then update the starting packages:
+    sudo apt upgrade
+
+Install compilers:
+sudo apt install build-essential
+
+Install MB-System prerequisites:
+    sudo apt install libgdal-dev \
+gmt libgmt5 libgmt-dev gmt-common proj-bin proj-data libproj-dev \
+libfftw3-3 libfftw3-dev libmotif-dev \
+xfonts-100dpi libglu1-mesa-dev \
+gfortran
+
+Run configure to build all of MB-System:
+    # export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+    LDFLAGS="-Wl,-rpath -Wl,/usr/local/lib" \
+./configure \
+--enable-mbtrn --enable-mbtnav
+
+Build MB-System:
+    make
+    make check
+    sudo make install
+
+Post-Installation Actions:
+    cpan Parallel::ForkManager
+    gmt gmtset IO_NC4_CHUNK_SIZE classic
+    gmt gmtset GMT_CUSTOM_LIBS /usr/local/lib/mbsystem.so
+
+
+#------------------------------------------------------------------------------
+Debian 12
+#------------------------------------------------------------------------------
+
+Install Debian 12 from ISO, and then update the starting packages:
+    sudo apt upgrade
+
+Install compilers:
+sudo apt install build-essential
+
+Install MB-System prerequisites:
+    sudo apt install netcdf-bin libnetcdf-dev libgdal-dev \
+gmt libgmt6 libgmt-dev libproj-dev \
+libfftw3-3 libfftw3-dev libmotif-dev \
+xfonts-100dpi libglu1-mesa-dev \
+libopencv-dev gfortran
+
+Run configure to build all of MB-System:
+    # export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+    LDFLAGS="-Wl,-rpath -Wl,/usr/local/lib" \
+./configure \
+--enable-mbtrn --enable-mbtnav --enable-opencv \
+--with-opencv-include=/usr/include/opencv4 \
+--with-opencv-lib=/lib/x86_64-linux-gnu
+
+Build MB-System:
+    make
+    sudo make install
+
+Post-Installation Actions:
+    cpan Parallel::ForkManager
+    gmt gmtset IO_NC4_CHUNK_SIZE classic
+    gmt gmtset GMT_CUSTOM_LIBS /usr/local/lib/mbsystem.so
+
+
+
+#------------------------------------------------------------------------------
+CygWin
+#------------------------------------------------------------------------------
+
+CygWin is a collection of software tools that augment Windows computers with a Unix-style environment within which one can build, install, and run Unix-y packages like MB-System.
+
+If Cygwin is installed, then one must install a number of prerequisite packages before building MB-System. These include:
+
+    gcc, g++, rpc-devel, gambas3-devel, libproj-devel, libproj12, libnetcdf-devel, libnetcdf, libgdal-devl,libgdal19, libfftw3-devel, libfftw3, cmake, make, fftw, fftw-devel, ghostscript, gv, libcurl-devel,  libnpcr0, libnpcr0-devel (libpcre, pcre-devel), openssh, subversion, xinit, zlib, zlib-devel, liblapack-devel
+
+Run configure to build MB-System without any graphical tools::
+    ./configure --enable-mbtrn --enable-mbtnav  --disable-dependency-tracking --disable-mbtools
+    
+Build MB-System:
+    make
+    sudo make install
+
+Post-Installation Actions:
+    cpan Parallel::ForkManager
+    gmt gmtset IO_NC4_CHUNK_SIZE classic
+    gmt gmtset GMT_CUSTOM_LIBS /usr/local/lib/mbsystem.so
+
+#------------------------------------------------------------------------------
+Docker Container with MB-System
+#------------------------------------------------------------------------------
+
+An updated MB-System Docker Image is generated each time that a new release is created in the MB-System Github repository. This Docker is based on CentOs 7, and can be run on MacOs, Linux, and Windows computers. Data present on the host computer's filesystems can be processed using the MB-System programs in the Docker container.
+
+The MB-System docker image is available at 
+    https://hub.docker.com/r/mbari/mbsystem
+
+Documentation is available at:
+    https://github.com/dwcaress/MB-System/tree/master/docker/user
+    https://github.com/dwcaress/MB-System/blob/master/docker/user/README-win11.md
+
+
+#------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#
+# The MB-System build system based on GNU Autotools was begun by Bob Covill in 2011, 
+# and then completed through a distributed, multi-continental effort by Bob 
+# Covill, Christian Ferreira, Hamish Bowman, Kurt Schwehr, and David Caress 
+# during 2013.
 #
 #------------------------------------------------------------------------------
 # To use the build system...
@@ -81,25 +454,12 @@ make uninstall (to fully uninstall the installed libraries, headers, and program
 #    --enable-opencv       - enable building tools using OpenCV (optional)
 #    --enable-mbtrn        - enable building terrain relative navigation (TRN) tools (optional)
 #    --enable-mbtnav       - enable building terrain relative navigation (TRN) tools (optional)
-#    --disable-mbtools     - disable building graphical tools (use with --enable-mbtrn and --enable-mbtnav)
+#    --disable-mbtools     - disable building graphical tools (most often used with 
+#                            --enable-mbtrn and --enable-mbtnav)
 #    --enable-qt           - Enable building graphical tools using the Qt5 framework
 #    --with-vtk-include    - location of VTK8.2+ headers (required if qt enabled)
 #    --with-vtk-lib        - location of VTK8.2+ libraries (required if qt enabled)
 #    --with-debug          - Set compiler flags to allow full debugging
-#
-#------------------------------------------------------------------------------
-# Setting X11 fonts used by mbgrdviz, mbeditviz, mbedit, mbnavedit, mbnavadjust
-# and mbvelocitytool:
-#------------------------------------------------------------------------------
-# By default the graphical utilities use three fonts: Helvetica, Times New
-# Roman, and Courier. This can be set in the CFLAGS environment variable by
-# including options of the form:
-#       -DSANS='\"helvetica\"' -DSERIF='\"times\"' -DMONO='\"courier\"'
-# In the examples below, the CFLAGS environment value is set for the configure
-# script by setting it on the same command line as ./configure. To set the
-# fonts to Lucida, one might add:
-#       -DSANS='\"lucida\"' -DSERIF='\"lucida\"' -DMONO='\"lucidatypewriter\"'
-# to the CFLAGS definition
 #
 #------------------------------------------------------------------------------
 # MacOs Example Using MacPorts to Install Prerequisite packages:
@@ -121,7 +481,7 @@ make uninstall (to fully uninstall the installed libraries, headers, and program
 #
 # Install the XQuartz X11 server from
 #   https://www.xquartz.org
-# XQuartz 2.8.2 or later is required for all MB-System installations.
+# XQuartz 2.8.5 or later is required for all MB-System installations.
 #
 # Install MacPorts using the appropriate downloadable installer package from:
 #   https://www.macports.org/install.php
@@ -129,22 +489,33 @@ make uninstall (to fully uninstall the installed libraries, headers, and program
 # After MacPorts installation, first make sure the default port packages are
 # current by running selfupdate and then install the MB-System prerequisites.
   sudo port -v selfupdate
-  sudo port install gmt6 proj6 fftw-3 xorg mesa libGLU openmotif
+  sudo port install gmt6 fftw-3 mesa libGLU openmotif
 #
 # Also make sure that a current version of Python3 is available. First list the
 # available Python3 versions, install the most recent, and then set port to link
 # that version to python3:
   port select --list python
-  sudo port install python310
-  sudo port select --set python3 python310
+#
+# Result as of July 18, 2023:
+#   Available versions for python:
+#    none
+#    python27
+#    python30
+#    python311 (active)
+#    python38
+#
+# The most recent version is python311, so install it:
+  sudo port install python311
+  sudo port select --set python python311
+  sudo port select --set python3 python311
 # Also install the most recent Python imaging library Pillow
-  sudo port install py310-Pillow
+  sudo port install py311-Pillow
 #
 # Download the MB-System source package from the repository at GitHub:
 #   https://github.com/dwcaress/MB-System
 # There are often beta releases that are more recent than the current stable
 # release. For instance, to download 5.7.9.beta42 go to:
-    https://github.com/dwcaress/MB-System/archive/refs/tags/5.7.9beta42.tar.gz
+    https://github.com/dwcaress/MB-System/archive/refs/tags/5.7.9beta58.tar.gz
 #
 # Unpack the MB-System distribution tarball, and then cd into the top directory
 # of the resulting structure. This will typically be named something like
@@ -156,16 +527,15 @@ the prerequisite packages.
 #
 # This command should successfully enable building the current MB-System
 # (5.7.9 or later) on any Mac computer with the prerequisites installed through
-# MacPorts. This has been tested with computers running High Sierra, Big Sur,
-# and Monterey.
+# MacPorts. This has been tested with computers running Ventura and Monterey.
   ./configure \
       --prefix=/usr/local \
       --disable-static \
       --enable-shared \
       --enable-hardening \
       --enable-test \
-      --with-proj-lib=/opt/local/lib/proj8/lib \
-      --with-proj-include=/opt/local/lib/proj8/include \
+      --with-proj-lib=/opt/local/lib/proj9/lib \
+      --with-proj-include=/opt/local/lib/proj9/include \
       --with-gmt-config=/opt/local/lib/gmt6/bin \
       --with-fftw-lib=/opt/local/lib \
       --with-fftw-include=/opt/local/include \
@@ -183,22 +553,22 @@ the prerequisite packages.
   make check
   sudo make install
 #
-# The MB-System codebase includes some experimental components, such as OpenCV
+# The MB-System codebase includes some optional components, such as OpenCV
 # based photomosaicing (enabled with --enable-opencv) and  a realtime Terrain
 # Relative Navigation infrastructure and toolset (--enable-mtrn and --enable-mbtnav).
-# An additional prerequisite for the photomosaicing is OpenCV, which can be
+# An additional prerequisite for the photomosaicing is OpenCV4, which can be
 # installed by:
-  sudo port install gmt6 proj6 fftw-3 xorg mesa libGLU openmotif opencv4
+  sudo port install gmt6 fftw-3 libGLU openmotif opencv4
 # This configure command should enable building the entire MB-System
-# package, including these experimental tools.
+# package, including these optional tools.
   ./configure \
       --prefix=/usr/local \
       --disable-static \
       --enable-shared \
       --enable-hardening \
       --enable-test \
-      --with-proj-lib=/opt/local/lib/proj6/lib \
-      --with-proj-include=/opt/local/lib/proj6/include \
+      --with-proj-lib=/opt/local/lib/proj9/lib \
+      --with-proj-include=/opt/local/lib/proj9/include \
       --with-gmt-config=/opt/local/lib/gmt6/bin \
       --with-fftw-lib=/opt/local/lib \
       --with-fftw-include=/opt/local/include \
@@ -216,81 +586,21 @@ the prerequisite packages.
       --with-otps-dir=/usr/local/src/otps
 #
 #------------------------------------------------------------------------------
-# MacOs Example Using Homebrew to Install Prerequisite packages:
+# Currently Impossible to Build MB-System on MacOs using Fink or Homebrew:
 #------------------------------------------------------------------------------
 #
-# The use of MacPorts to install the MB-System prerequisite packages is
-# recommended, but for Intel architecture computers and pre-Monterey OS versions
-# the use of Homebrew is still a viable option.
-#
-# This example is relevant for MacOs Big Sur (11.6) on both Intel and ARM
-# architecture computers when the prerequisite software packages have been
-# installed using the Homebrew package manager. These commands will also
-# succeed in building MB-System on Macs running MacOs Monterey (11.7), but the
-# graphical programs will not execute properly on ARM Macs.
-#
-# Install Xcode and the Xcode command line tools, which includes the LLVM
-# compiler suite.
-#
-# Install the XQuartz X11 server from
-#   https://www.xquartz.org (2.8 or later required for Monterey OS and/or ARM architecture)
-#
-# Install the Homebrew package manager from https://brew.sh and then use brew
-# to install all of the the MB-System prerequisite packages:
-#   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-#   brew upgrade
-#   brew install proj gdal netcdf fftw gmt openmotif
-#
-# Unpack the MB-System distribution tarball, and then cd into the top directory
-# of the resulting structure. This will typically be named something like
-# MB-System-5.7.9/. At that location, execute the configure script, named "configure",
-# with the options necessary for your context. The XCode compiler tools do not
-# look for header files or libraries in the locations used by Homebrew, and so it
-# is necessary to specify these locations for several of the prerequisite packages.
-# On Intel architecture Macs, Homebrew installs packages into /usr/local/, while
-# on ARM architecture (Apple Silicon) Macs, Homebrew installs packages into
-# /opt/local/
-#
-# In Intel Macs running Big Sur, the following command should succeed:
-./configure \
-    --prefix=/usr/local \
-    --disable-static \
-    --enable-shared \
-    --enable-hardening \
-    --enable-test \
-    --with-x11-lib=/opt/X11/lib \
-    --with-x11-include=/opt/X11/include \
-    --with-motif-lib=/usr/local/opt/openmotif/lib \
-    --with-motif-include=/usr/local/opt/openmotif/include \
-    --with-opengl-include=/opt/X11/include \
-    --with-opengl-lib=/opt/X11/lib \
-    --with-otps-dir=/usr/local/src/otps
-#
-# In ARM Macs running Big Sur, the following command should succeed:
-./configure \
-    --prefix=/usr/local \
-    --disable-static \
-    --enable-shared \
-    --enable-hardening \
-    --enable-test \
-    --with-x11-lib=/opt/X11/lib \
-    --with-x11-include=/opt/X11/include \
-    --with-opengl-lib=/opt/X11/lib \
-    --with-opengl-include=/opt/X11/include \
-    --with-motif-lib=/opt/homebrew/lib \
-    --with-motif-include=/opt/homebrew/include \
-    --with-otps-dir=/usr/local/src/otps
-#
-# Once the makefiles have been generated by configure, build and install
-# MB-System using:
-        sudo make
-        sudo make install
+# In the past it has been possible to build MB-System on a Mac using the package
+# managers Fink or Homebrew to install the prerequisite software. Unfortunately,
+# currently (July 2023) we do not know how to successfully install MB-System 
+# when the prerequisite packages are installed using Fink or Homebrew. Even if 
+# libraries and programs compile and link, the X11/Motif/OpenGL programs fail 
+# to run correctly.
 #
 #------------------------------------------------------------------------------
 # Ubuntu Linux configure script command line example:
 #------------------------------------------------------------------------------
 #
-# The following procedure serves to install MB-System on Ubuntu Focal 20.04.
+# The following procedure serves to install MB-System on Ubuntu Jammy 22.04.
 #
 # GMT:
 # ----
@@ -409,7 +719,21 @@ the prerequisite packages.
         mbdefaults -Dgv -Ifeh -V
 # These defaults are stored in a hidden file called ".mbio_defaults" in the user's
 # home directory.
-
+#
+#------------------------------------------------------------------------------
+# Setting X11 fonts used by mbgrdviz, mbeditviz, mbedit, mbnavedit, mbnavadjust
+# and mbvelocitytool:
+#------------------------------------------------------------------------------
+# By default the graphical utilities use three fonts: Helvetica, Times New
+# Roman, and Courier. This can be set in the CFLAGS environment variable by
+# including options of the form:
+#       -DSANS='\"helvetica\"' -DSERIF='\"times\"' -DMONO='\"courier\"'
+# In the examples below, the CFLAGS environment value is set for the configure
+# script by setting it on the same command line as ./configure. To set the
+# fonts to Lucida, one might add:
+#       -DSANS='\"lucida\"' -DSERIF='\"lucida\"' -DMONO='\"lucidatypewriter\"'
+# to the CFLAGS definition
+#
 #------------------------------------------------------------------------------
 # To modify the build system...
 #------------------------------------------------------------------------------
