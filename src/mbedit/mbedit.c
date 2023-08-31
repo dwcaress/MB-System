@@ -18,7 +18,6 @@
 // TODO(schwehr): These should be in headers.
 extern void RegisterBxConverters(XtAppContext);
 extern Pixmap XPM_PIXMAP(Widget, char **);
-extern void do_quit(Widget, XtPointer, XtPointer);
 Widget Createwindow_mbedit(Widget parent);
 
 #define BX_APP_CLASS "mbedit"

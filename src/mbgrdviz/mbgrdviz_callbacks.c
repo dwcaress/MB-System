@@ -1777,7 +1777,7 @@ int do_mbgrdviz_openprimary(char *input_file_ptr) {
       }
 
       /* else if grid geographic and covers much of the world use spheroid */
-      else if (mbv_primary_xmax - mbv_primary_xmin > 15.0 || mbv_primary_ymax - mbv_primary_ymin > 15.0) {
+      else if (mbv_primary_xmax - mbv_primary_xmin > 20.0 || mbv_primary_ymax - mbv_primary_ymin > 20.0) {
         mbv_display_projection_mode = MBV_PROJECTION_SPHEROID;
         sprintf(mbv_display_projection_id, "SPHEROID");
       }

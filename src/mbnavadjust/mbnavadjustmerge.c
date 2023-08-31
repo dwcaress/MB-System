@@ -1908,7 +1908,7 @@ int main(int argc, char **argv) {
         /* copy the section file */
         mb_command srcfile = "";
         mb_command dstfile = "";
-        sprintf(srcfile, "%s/nvs_%4.4d_%4.4d.mb71", project_inputbase.datadir, i, j);
+        sprintf(srcfile, "%s/nvs_%4.4d_%4.4d.mb71", project_inputadd.datadir, i, j);
         sprintf(dstfile, "%s/nvs_%4.4d_%4.4d.mb71", project_output.datadir, k, j);
         mb_copyfile(verbose, srcfile, dstfile, &error);
         //mb_command command = "";
@@ -1943,14 +1943,16 @@ int main(int argc, char **argv) {
         /* copy the ref_grid file */
         mb_command srcfile = "";
         mb_command dstfile = "";
-        sprintf(srcfile, "%s/%s", project_inputbase.datadir, project_inputbase.refgrid_names[irefgrid]);
-        sprintf(dstfile, "%s/%s", project_output.datadir, project_inputbase.refgrid_names[irefgrid]);
+        sprintf(srcfile, "%s/%s", project_inputadd.datadir, project_inputadd.refgrid_names[irefgrid]);
+        sprintf(dstfile, "%s/%s", project_output.datadir, project_inputadd.refgrid_names[irefgrid]);
         mb_copyfile(verbose, srcfile, dstfile, &error);
         //mb_command command = "";
         //sprintf(command, "cp %s/%s %s", project_inputadd.datadir, 
         //      project_inputadd.refgrid_names[irefgrid], project_output.datadir);
         // fprintf(stderr, "Executing in shell: %s\n", command);
         ///* int shellstatus = */ system(command);
+        strncpy(project_output.refgrid_names[project_output.num_refgrids + irefgrid], 
+                project_inputadd.refgrid_names[irefgrid], sizeof(mb_path));
     }
 
     fprintf(stderr, "\nCopied input add project to output project:\n\t%s\n", project_output_path);

@@ -1,5 +1,9 @@
 #!/bin/bash
 
+
+echo which emu7k
+which emu7k
+
 #########################################
 # Name: emu7k.sh
 #
@@ -45,7 +49,7 @@ CONLOG_PATH=${CONLOG_PATH:-"$CONLOG_PATH_DFL"}
 let CYCLES="${CYCLES_DFL}"
 
 # application path
-APP_CMD="/usr/local/bin/emu7k.exe"
+APP_CMD="emu7k"
 
 # 7k center host
 # localhost     : if clients are on this host
@@ -328,13 +332,14 @@ fi
 
 vout "cmdline:"
 vout "$APP_CMD $APP_OPTS"
+vout "$APP_CMD $APP_OPTS"
 vout
 
 # validate application options
-if [ ! -f ${APP_CMD} ]
-then
-	exitError "executable not found [$APP_CMD]" 1
-fi
+#if [ ! -f ${APP_CMD} ]
+#then
+#	exitError "executable not found [$APP_CMD]" 1
+#fi
 
 if [ "${DO_CONLOG}" == "Y" ] && [ ! -d ${CONLOG_PATH} ]
 then
@@ -350,13 +355,20 @@ then
         fi
     fi
 fi
+vout "LINE 359"
 
 # initialize cycle count
 # [loop indefinitely if <0]
 let "LOOP_COUNT=${CYCLES}"
 
+vout "LINE 365"
+
 while [ ${LOOP_COUNT} -ne 0 ]
 do
+    vout "LINE 369"
+    echo which $APP_CMD
+    which $APP_CMD
+
     # run the app
     if [ "${DO_CONLOG}" == "Y" ]
     then
