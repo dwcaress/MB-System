@@ -33,7 +33,8 @@ namespace mb_system {
      SwathReader reads raw data stored in a file format that is supported
      by MB-System, and outputs the data into a vtkPoints (vertices) and 
      vtkCellArray (triangles) where data can be accessed by the VTK pipeline.
-     Integrates functions and variables from mbeditviz 'C' module
+     Integrates types, functions and variables from mb_define, mb_io, and 
+     mbeditviz 'C' modules
   */
   class SwathReader : public vtkAbstractPolyDataReader {
 
@@ -126,16 +127,24 @@ namespace mb_system {
     /// Format code of latest swath data file read
     int swathFormat_;
 
-    // Spatial swath data units
+
+    /// x-axis units
     const char *xUnits_;
+
+    /// y-axis units
     const char *yUnits_;
+
+    /// z-axis units
     const char *zUnits_;
-    
+
+    /// swath VTK points
     vtkSmartPointer<vtkPoints> swathPoints_;
+
+    /// swath VTK polygons
     vtkSmartPointer<vtkCellArray> swathPolygons_;  
 
-    // Application name - must provide this to 
-    // mbeditviz_init() function, used in locking/unlocking files
+    /// Application name - must provide this to 
+    /// mbeditviz_init() function, used in locking/unlocking files
     char *appName_;
     
     /// Minimum latitude value in dataset
