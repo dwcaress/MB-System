@@ -12,11 +12,11 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /**
-   @file
- * mbsys_benthos.h defines the data structures used by MBIO functions
+ * @file
+ * @brief Define the data structures used by MBIO functions
  * to store data from Benthos SIS1624 Sidescan sonar systems.
- * The formats associated with this i/o module are:
- *      MBF_XTFB1624 : MBIO ID 211
+ * @details The formats associated with this i/o module are:
+ *  - MBF_XTFB1624 (MBIO ID 211)
  *
  * Author:	Jens Renken (MARUM/University of Bremen)
  * Date:	March 29, 2011

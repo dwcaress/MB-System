@@ -12,8 +12,10 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /**
-   @file
- * mb_segy.h defines the SEG-Y trace header used by MB-System when
+ * @file
+ * @brief Defines SEG-Y trace header used when extracting seismic reflection
+ * or subbottom profiler data from swath data files.
+ * @details Defines the SEG-Y trace header used by MB-System when
  * extracting seismic reflection or subbottom profiler data from
  * swath mapping data files. The SIOSEIS implementation of the
  * trace header is used because it incorporates a deep water delay
