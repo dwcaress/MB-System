@@ -6,9 +6,9 @@
 struct mbev_grid_struct;
 
 namespace mb_system {
-  /* **
+  /**
      SwathGridData encapsulates data read from a swath file
-     ** */
+  */
   class SwathGridData : public TopoGridData {
 
   public:
