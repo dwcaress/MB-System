@@ -70,7 +70,7 @@ bool SwathGridData::readDatafile(char *swathFile) {
     return false;
   }
   
-  // Get list of relevant files
+  // Get list of relevant files into global C structure
   if (mbeditviz_import_file((char *)swathFile, sonarFormat) != MB_SUCCESS) {
     std::cerr << "Couldn't import data from " << swathFile << std::endl;
     return false;
@@ -87,13 +87,22 @@ bool SwathGridData::readDatafile(char *swathFile) {
   std::cout << "Unlock swath file" << std::endl;
   unlockSwath((char *)swathFile);
 
-  // Point to swath data just loaded
+  // Point to swath data just loaded into global array
   mbev_file_struct* swathData = &mbev_files[0];
 
+  // Get bounds of loaded swath data
   mbeditviz_get_grid_bounds();
+
+  // Release previously loaded sounding memory
   mbeditviz_mb3dsoundings_dismiss();
+
+  // Prepare grid to contain loaded swath data
   mbeditviz_setup_grid();
+
+  // Allocate memory and load individual swath soundings
   mbeditviz_project_soundings();
+
+  // Load sounding data into grid
   mbeditviz_make_grid();
 
   // Print swath navigation UTM coords
