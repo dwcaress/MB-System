@@ -119,6 +119,7 @@ INPUT +=                 ../src/qt-mbgrdviz-2
 INPUT +=                 ../src/qt-mbgrdviz-3
 INPUT +=                 ../src/qt-guilib
 INPUT +=                 ../src/mbio
+INPUT +=                 ../src/mbeditviz
 
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.c \
