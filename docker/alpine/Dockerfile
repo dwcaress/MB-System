@@ -26,6 +26,7 @@ ENV MBSYS_DEPS "proj-dev \
     ghostscript \
     libx11-dev \
     libxt-dev \
+    mesa-dri-gallium \
     libtirpc-dev \
     glu-dev \
     motif-dev"
