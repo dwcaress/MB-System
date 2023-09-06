@@ -4567,10 +4567,9 @@ int mbnavadjust_get_misfit() {
     zmin = mbna_misfit_offset_z - 0.5 * project.zoffsetwidth;
     zmax = mbna_misfit_offset_z + 0.5 * project.zoffsetwidth;
     zoff_dz = project.zoffsetwidth / (nzmisfitcalc - 1);
-    /* fprintf(stderr,"DEBUG %s %d: mbna_misfit_offset_z:%f project.zoffsetwidth:%f nzmisfitcalc:%d zmin:%f zmax:%f
-    zoff_dz:%f\n",
-    __FILE__,__LINE__,
-    mbna_misfit_offset_z,project.zoffsetwidth,nzmisfitcalc,zmin,zmax,zoff_dz); */
+//fprintf(stderr,"DEBUG %s:%d:%s: mbna_misfit_offset_z:%f project.zoffsetwidth:%f nzmisfitcalc:%d zmin:%f zmax:%f zoff_dz:%f\n",
+//__FILE__,__LINE__, __FUNCTION__, 
+//mbna_misfit_offset_z,project.zoffsetwidth,nzmisfitcalc,zmin,zmax,zoff_dz);
 
     /* allocate and initialize grids and arrays */
     if (status == MB_SUCCESS) {
@@ -5061,6 +5060,9 @@ int mbnavadjust_get_misfitxy() {
       && ((mbna_naverr_mode == MBNA_NAVERR_MODE_CROSSING && project.num_crossings > 0 && mbna_current_crossing >= 0)
           || (mbna_naverr_mode == MBNA_NAVERR_MODE_SECTION && project.refgrid_status == MBNA_REFGRID_LOADED))) {
     /* get minimum misfit in plane at current z offset */
+fprintf(stderr,"DEBUG %s:%d:%s: mbna_misfit_offset_z:%f project.zoffsetwidth:%f nzmisfitcalc:%d zmin:%f zmax:%f zoff_dz:%f\n",
+__FILE__,__LINE__, __FUNCTION__, 
+mbna_misfit_offset_z,project.zoffsetwidth,nzmisfitcalc,zmin,zmax,zoff_dz);
     if (grid_nxyzeq > 0) {
       /* get closest to current zoffset in existing 3d grid */
       misfit_max = 0.0;

@@ -23,7 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.9beta58    July 18, 2023
+- Version 5.7.9beta58    August 30, 2023
 - Version 5.7.9beta57    June 27, 2023
 - Version 5.7.9beta53    June 15, 2023
 - Version 5.7.9beta52    March 9, 2023
@@ -432,7 +432,22 @@ or beta, are equally accessible as tarballs through the Github interface.
 ### MB-System Version 5.7 Release Notes:
 --
 
-#### 5.7.9beta58 (July 18)
+#### 5.7.9beta58 (August 30)
+
+Mbm_route2mission: Modifications to accomodate changes to Dorado AUV vehicle software.
+
+Mbinfo: Added -Q option which causes mbinfo to read statistics from existing \*.inf 
+files rather than to read the actual swath files. Variances, record types, nonfatal error messages
+and mask output cannot be generated with this option.
+
+Mbnavadjustmerge: Fixed bug in merging projects.
+
+Docker: Added a lightweight (945 MB) MB-System Dockerfile build based on alpine 
+Linux distribution. The image contains full MB-System, including TRN and graphical tools.
+Runs on MacOS 12 (Monterey) and Ubuntu 22.04.
+
+TRN tools: Minor changes to .gitignore (add binaries) and mbtrn/utils/tbinx.cpp (add signal 
+handler, reconnect timing, bug fix).
 
 Mblist: Added option to merge data from a secondary file and allow printing those
 secondary data values. The secondary file is columnar text in which the first column

@@ -62,6 +62,7 @@
 /////////////////////////
 
 #include <getopt.h>
+#include <signal.h>
 #include "mframe.h"
 #include "mlist.h"
 #include "mfile.h"
@@ -158,6 +159,13 @@ typedef enum{OF_NONE=0,OF_SOUT=0x1,OF_CSV=0x2, OF_SOCKET=0x4, OF_SERR=0x10}oflag
 /// @def TBX_DELAY_DFL
 /// @brief default output delay
 #define TBX_DELAY_DFL 0
+/// @def TBX_DELAY_DFL
+/// @brief default output delay
+#define TBX_RCDMS_DFL 500
+
+/// @def TBX_SNDBUF_SIZE
+/// @brief osocket sendbuf size
+#define TBX_SNDBUF_BYTES 1048576
 
 /// @typedef struct app_cfg_s app_cfg_t
 /// @brief application configuration parameter structure
@@ -189,6 +197,9 @@ typedef struct app_cfg_s{
     ///  0: use timestamps (default)
     /// >0: use specified value
     int delay_msec;
+    /// @var app_cfg_s::rcdms
+    /// @brief delay if error/reconnect (msec)
+    long rcdms;
  
 }app_cfg_t;
 
@@ -214,6 +225,9 @@ static int trn_msg_count=0;
 static int trn_msg_bytes=0;
 static int trn_cli_con=0;
 static int trn_cli_dis=0;
+static bool g_interrupt=false;
+static int g_sig_count=0;
+static int g_alt_count=0;
 
 /////////////////////////
 // Function Definitions
@@ -234,6 +248,7 @@ static void s_show_help()
     "--serr           : export to stderr\n"
     "--csv=file       : export to csv file\n"
     "--delay=msec     : minimum packet delay [0:use timestamps (default), -1:no delay]\n"
+    "--rcdms=msec     : delay on reconnect/socket error (msec)\n"
     "\n";
     printf("%s",help_message);
     printf("%s",usage_message);
@@ -263,6 +278,7 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"socket", required_argument, NULL, 0},
         {"csv", required_argument, NULL, 0},
         {"delay", required_argument, NULL, 0},
+        {"rcdms", required_argument, NULL, 0},
        {NULL, 0, NULL, 0}};
 
     /* process argument list */
@@ -317,6 +333,10 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 // delay
                 else if (strcmp("delay", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->delay_msec);
+                }
+                // delay
+                else if (strcmp("rcdms", options[option_index].name) == 0) {
+                    sscanf(optarg,"%ld",&cfg->rcdms);
                 }
                break;
             default:
@@ -405,10 +425,32 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
         if (cfg->oflags&OF_SOCKET) {
         fprintf(stderr, "host:port [%s:%d]\n",cfg->host,cfg->port);
         }
-        fprintf(stderr, "delay     [%d]\n",(cfg->delay_msec));
+        fprintf(stderr,"delay     [%d]\n",(cfg->delay_msec));
+        fprintf(stderr,"rcdms     [%ld]\n",(cfg->rcdms));
     }
 }
 // End function parse_args
+
+/// @fn void s_sig_handler(int sig)
+/// @brief signal handler
+/// @param[in] sig signal received
+
+static void s_sig_handler(int sig)
+{
+    switch(sig){
+        case SIGINT:
+        case SIGKILL:
+        case SIGQUIT:
+        case SIGSTOP:
+            g_interrupt = true;
+            break;
+        default:
+            g_alt_count++;
+            break;
+    }
+    g_sig_count++;
+    return;
+}
 
 /// @fn int s_delay_message(trn_data_t *message)
 /// @brief delay packet per packet timestamp
@@ -564,7 +606,7 @@ static int s_out_csv(mfile_file_t *dest, mb1_t *sounding)
 /// @param[in] s socket reference
 /// @param[in] message message reference
 /// @return 0 on success, -1 otherwise
-static int s_out_socket(msock_socket_t *s, mb1_t *sounding)
+static int s_out_socket(msock_socket_t *s, mb1_t *sounding, app_cfg_t *cfg)
 {
     int retval=-1;
     
@@ -596,11 +638,15 @@ static int s_out_socket(msock_socket_t *s, mb1_t *sounding)
                             mlist_remove(trn_plist,peer);
                         }
                     }
-                    data_available=true;
+                    data_available=false;
                     break;
                 case -1:
                     // nothing to read - bail out
-                    MX_LPRINT(TBINX, 1, "err - recvfrom cli[%d] ret -1 [%d/%s]\n", trn_peer->id, errno, strerror(errno));
+                    if(errno != EWOULDBLOCK){
+                        MX_LPRINT(TBINX, 1, "err - recvfrom cli[%d] ret -1 [%d/%s]\n", trn_peer->id, errno, strerror(errno));
+                        struct timespec ts = {0, cfg->rcdms * 1000000L};
+                        nanosleep(&ts, NULL);
+                    }
                     data_available=false;
                     break;
                     
@@ -678,13 +724,13 @@ static int s_out_socket(msock_socket_t *s, mb1_t *sounding)
                     break;
             }
             // keep reading while data is available
-        } while (data_available);
+        } while (data_available && !g_interrupt);
         
         
         // send output to clients
         psub = (msock_connection_t *)mlist_first(trn_plist);
         idx=0;
-        while (psub != NULL) {
+        while (psub != NULL && !g_interrupt) {
             
             psub->heartbeat--;
             
@@ -732,7 +778,13 @@ int s_process_file(app_cfg_t *cfg)
     
    if (NULL!=cfg && cfg->nfiles>0) {
         for (int i=0; i<cfg->nfiles; i++) {
+
+            if(g_interrupt)
+                break;
+
             MX_LPRINT(TBINX, 2, "processing %s\n", cfg->files[i]);
+            PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"processing %s\n",cfg->files[i]));
+
             mfile_file_t *ifile = mfile_file_new(cfg->files[i]);
             int test=0;
             mfile_file_t *csv_file = NULL;
@@ -754,11 +806,14 @@ int s_process_file(app_cfg_t *cfg)
 
                 trn_osocket = msock_socket_new(cfg->host, cfg->port, ST_UDP);
                 msock_set_blocking(trn_osocket,false);
-                const int optionval = 1;
+                int optionval = 1;
 #if !defined(__CYGWIN__)
                 msock_set_opt(trn_osocket, SO_REUSEPORT, &optionval, sizeof(optionval));
 #endif
                 msock_set_opt(trn_osocket, SO_REUSEADDR, &optionval, sizeof(optionval));
+
+                optionval = TBX_SNDBUF_BYTES;
+                msock_set_opt(trn_osocket, SO_SNDBUF, &optionval, sizeof(optionval));
 
                 if ( (test=msock_bind(trn_osocket))==0) {
                     fprintf(stderr,"TRN host socket bind OK [%s:%d]\n",cfg->host, cfg->port);
@@ -819,6 +874,10 @@ int s_process_file(app_cfg_t *cfg)
                             break;
                         }
                     }
+
+                    if(g_interrupt)
+                        ferror = true;
+
 //                    if( (sync_valid && !ferror && (rbytes=mfile_read(ifile,(byte *)psize,4))==4)){
 //                        // read size
 //                        header_valid=true;
@@ -852,7 +911,9 @@ int s_process_file(app_cfg_t *cfg)
                         }
                     }
                     
-                    
+                    if(g_interrupt)
+                        ferror = true;
+
                     if (header_valid && ferror==false ) {
                         
                         if(mb1->nbeams>0){
@@ -868,7 +929,7 @@ int s_process_file(app_cfg_t *cfg)
                             }
 
                         }
-                        
+
                         byte *cp = (byte *)MB1_PCHECKSUM(mb1);
 
                         if( ((rbytes=mfile_read(ifile,cp,MB1_CHECKSUM_BYTES))==MB1_CHECKSUM_BYTES)){
@@ -883,7 +944,10 @@ int s_process_file(app_cfg_t *cfg)
                     }else{
                         MX_MPRINT(TBINX_DEBUG, "header read failed [%"PRId64"]\n", rbytes);
                     }
-                    
+
+                    if(g_interrupt)
+                        ferror = true;
+
                     if (rec_valid && ferror==false) {
 
                         trn_msg_bytes+=mb1->size;
@@ -906,10 +970,10 @@ int s_process_file(app_cfg_t *cfg)
                             do{
                                 // send message to socket
                                 // or wait until clients connected
-                                if( (test_con=s_out_socket(trn_osocket,mb1)) != 0 ){
-                                    sleep(TBX_SOCKET_DELAY_SEC);
+                                if( (test_con=s_out_socket(trn_osocket, mb1, cfg)) != 0 ){
+//                                    sleep(TBX_SOCKET_DELAY_SEC);
                                 }
-                            }while (test_con!=0);
+                            }while (test_con!=0 && !g_interrupt);
                         }
                     }
                 }
@@ -925,6 +989,10 @@ int s_process_file(app_cfg_t *cfg)
     MX_LPRINT(TBINX, 1, "tx count/bytes[%d/%d]\n", trn_tx_count, trn_tx_bytes);
     MX_LPRINT(TBINX, 1, "rx count/bytes[%d/%d]\n", trn_rx_count, trn_rx_bytes);
     MX_LPRINT(TBINX, 1, "trn count/bytes[%d/%d]\n", trn_msg_count, trn_msg_bytes);
+    MX_LPRINT(TBINX, 1, "g_interrupt[%d]\n", (g_interrupt ? 1 : 0));
+    MX_LPRINT(TBINX, 1, "g_sig_count[%d]\n", g_sig_count);
+    MX_LPRINT(TBINX, 1, "g_alt_count[%d]\n", g_alt_count);
+
     return retval;
 }
 // End function s_process_file
@@ -943,12 +1011,21 @@ int s_process_file(app_cfg_t *cfg)
 int main(int argc, char **argv)
 {
     int retval=0;
-    
+
+    struct sigaction saStruct;
+    sigemptyset(&saStruct.sa_mask);
+    saStruct.sa_flags = 0;
+    saStruct.sa_handler = s_sig_handler;
+    sigaction(SIGINT, &saStruct, NULL);
+    sigaction(SIGQUIT, &saStruct, NULL);
+
     // set default app configuration
     app_cfg_t cfg = {TBX_VERBOSE_DFL,TBX_NFILES_DFL,NULL,
         TBX_OFLAGS_DFL,NULL,
         TBX_HOST_DFL,TBX_PORT_DFL,
-        TBX_DELAY_DFL};
+        TBX_DELAY_DFL,
+        TBX_RCDMS_DFL
+    };
     
     app_cfg_t *pcfg = &cfg;
     
@@ -957,7 +1034,7 @@ int main(int argc, char **argv)
     }else{
         // parse command line args (update config)
         parse_args(argc, argv, pcfg);
-        
+
         s_process_file(pcfg);
     }
 
