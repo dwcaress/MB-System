@@ -2393,7 +2393,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
           mb_coor_scale(verbose, 0.5 * (section->latmin + section->latmax), &mtodeglon, &mtodeglat);
           for (k = 0; k < section->num_snav; k++) {
             mb_get_date(verbose, section->snav_time_d[k], time_i);
-            fprintf(hfp, "%4.4d:%4.4d:%2.2d  %4d/%2d/%2d %2d:%2d:%2d.%6.6d  %.6f %8.3f %8.3f %6.3f\n",
+            fprintf(hfp, "%4.4d:%4.4d:%2.2d  %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d  %.6f %8.3f %8.3f %6.3f\n",
               i, j, k, time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
               section->snav_time_d[k],
               (section->snav_lon_offset[k] / mtodeglon),

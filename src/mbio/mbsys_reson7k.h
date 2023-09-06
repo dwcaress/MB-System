@@ -340,7 +340,7 @@ in a Bluefin data record */
 /*---------------------------------------------------------------*/
 
 /* Structure size definitions */
-#define MBSYS_RESON7K_BUFFER_STARTSIZE 600000 //65536
+#define MBSYS_RESON7K_BUFFER_STARTSIZE 600000
 #define MBSYS_RESON7K_MAX_DEVICE 10
 #define MBSYS_RESON7K_MAX_RECEIVERS 1024
 #define MBSYS_RESON7K_MAX_BEAMS 1024
