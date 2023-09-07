@@ -66,8 +66,8 @@
 #include "netif.h"
 #include "mtime.h"
 #include "mutils.h"
-#include "medebug.h"
-#include "mconfig.h"
+#include "mxdebug.h"
+#include "mxd_app.h"
 
 /////////////////////////
 // Macros
@@ -103,27 +103,6 @@
 /////////////////////////
 // Module Global Variables
 /////////////////////////
-
-#ifdef NETIF_MMDEBUG
-// definitions are used when not
-// defined in mconfig.c (i.e. by application)
-
-/// @var char *netif_ch_names[NETIF_CH_COUNT]
-/// @brief module channel names
-char *netif_ch_names[NETIF_CHAN_COUNT]={
-    "trace.netif",
-    "debug.netif",
-    "warn.netif",
-    "err.netif",
-    "netif.v1",
-    "netif.v2",
-    "netif.v3",
-    "netif.v4"
-};
-static mmd_module_config_t mmd_config_defaults[]={
-    {MOD_NETIF,"MOD_NETIF",NETIF_CHAN_COUNT,((MM_ERR|MM_WARN)|NETIF_V1|NETIF_V2|NETIF_V3|NETIF_V4),netif_ch_names}
-};
-#endif // NETIF_MMDEBUG
 
 const char *prof_event_labels[]={ \
     "e_src_socket",
@@ -191,12 +170,12 @@ static bool s_peer_idval_cmp(void *item, void *value)
     if (NULL!=item && NULL!=value) {
         msock_connection_t *peer = (msock_connection_t *)item;
         int svc = *((int *)value);
-        PMPRINT(MOD_NETIF,MM_DEBUG,(stderr,"peer[%p] id[%d] svc[%d]\n",peer,peer->id,svc));
+        MX_MPRINT(NETIF_DEBUG, "peer[%p] id[%d] svc[%d]\n", peer, peer->id, svc);
 
 //        fprintf(stderr,"%s - peer[%p] id[%d] svc[%d]\n",__FUNCTION__,peer,peer->id,svc);
         retval = (peer->id == svc);
     }else{
-        PTRACE();
+        MX_TRACE();
     }
     return retval;
 }
@@ -218,7 +197,7 @@ static bool s_peer_idval_cmp(void *item, void *value)
 
     // clear buffer
     memset(buf,0,NETIF_UDP_BUF_LEN);
-    //    PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[UDPCON.%s]:RX n[%d]\n",self->port_name,netif_connections(self)));
+    //    MX_LPRINT(NETIF, 4,  "[UDPCON.%s]:RX n[%d]\n", self->port_name, netif_connections(self));
 
     // read client socket
     iobytes = msock_recvfrom(socket, peer->addr, buf, NETIF_UDP_BUF_LEN,0);
@@ -226,14 +205,14 @@ static bool s_peer_idval_cmp(void *item, void *value)
 
     switch (iobytes) {
         case 0:
-            PMPRINT(MOD_NETIF,NETIF_V3,(stderr,"[UDPCON.%s]:ERR - recvfrom ret[0] (no input)\n",self->port_name));
+            MX_LPRINT(NETIF, 3,  "[UDPCON.%s]:ERR - recvfrom ret[0] (no input)\n", self->port_name);
             retval=-1;
             MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_ECLI_RXZ]);
 
             break;// fall through - OK(?)
         case -1:
             if(errsave!=EAGAIN){
-                PMPRINT(MOD_NETIF,NETIF_V2,(stderr,"[UDPCON.%s]:ERR - recvfrom ret[-1] err[%d/%s]\n",self->port_name,errsave,strerror(errsave)));
+                MX_LPRINT(NETIF, 2,  "[UDPCON.%s]:ERR - recvfrom ret[-1] err[%d/%s]\n", self->port_name, errsave, strerror(errsave));
             }else{
                 MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EAGAIN]);
             }
@@ -247,8 +226,8 @@ static bool s_peer_idval_cmp(void *item, void *value)
             // get host name info from connection
             int svc = msock_connection_addr2str(peer);
 
-            PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[UDPCON.%s]:RX - ret[%"PRId64"] bytes id[%s:%s]\n",
-                                        self->port_name,iobytes, peer->chost, peer->service));
+            MX_LPRINT(NETIF, 4,  "[UDPCON.%s]:RX - ret[%"PRId64"] bytes id[%s:%s]\n",
+                                        self->port_name,iobytes, peer->chost, peer->service);
 
             // update client list
             msock_connection_t *pcon=NULL;
@@ -259,7 +238,7 @@ static bool s_peer_idval_cmp(void *item, void *value)
                 // update heartbeat if client on list
                 pcon->hbtime=connect_time;
             }else{
-                PMPRINT(MOD_NETIF,NETIF_V1,(stderr,"[UDPCON.%s]:ADD_SUB - id[%p/%s:%s] idx[%zd]\n",self->port_name,peer,peer->chost, peer->service,mlist_size(list)-1));
+                MX_LPRINT(NETIF, 1,  "[UDPCON.%s]:ADD_SUB - id[%p/%s:%s] idx[%zd]\n", self->port_name,peer, peer->chost, peer->service, mlist_size(list)-1);
                 // client doesn't exist
                 // initialize and add to list
                 peer->id = svc;
@@ -276,7 +255,7 @@ static bool s_peer_idval_cmp(void *item, void *value)
                 MST_COUNTER_SET(self->profile->stats->status[NETIF_STA_CLI_LIST_LEN],mlist_size(self->list));
             }
             if ( (NULL!=pcon) && ( iobytes > 0) ) {
-                PMPRINT(MOD_NETIF,NETIF_V1,(stderr,"%s - [UDPCON] handle SUB connect message (if any)\n",__FUNCTION__));
+                MX_LPRINT(NETIF, 1,  "%s - [UDPCON] handle SUB connect message (if any)\n", __FUNCTION__);
                 int errout=0;
                 // invoke handler (if client sent connect message)
                 MST_METRIC_START(self->profile->stats->metrics[NETIF_CH_HANDLE_XT], mtime_dtime());
@@ -299,7 +278,7 @@ int netif_tcp_update_connections(netif_t *self)
 {
     int retval=-1;
 
-    PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]:ACC\n",self->port_name));
+    MX_LPRINT(NETIF, 4,  "[TCPCON.%s]:ACC\n", self->port_name);
 
     msock_socket_t *sock_inst =self->socket;
     msock_connection_t *peer =self->peer;
@@ -316,20 +295,20 @@ int netif_tcp_update_connections(netif_t *self)
     switch(new_fd){
         case -1:
             if(errsave!=EAGAIN){
-                PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]:ERR - accept ret[-1] sfd[%d] nfd[%d] err[%d/%s]\n",self->port_name,sock_inst->fd,new_fd,errsave,strerror(errsave)));
+                MX_LPRINT(NETIF, 4,  "[TCPCON.%s]:ERR - accept ret[-1] sfd[%d] nfd[%d] err[%d/%s]\n", self->port_name, sock_inst->fd, new_fd, errsave, strerror(errsave));
             }else{
                 MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EAGAIN]);
             }
             MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_ECLI_RXE]);
                break;
         case 0:
-            PMPRINT(MOD_NETIF,MM_ALL,(stderr,"[TCPCON.%s]:ERR - ret[0] (no input) err[%d/%s]\n",self->port_name,errsave,strerror(errsave)));
+            MX_MPRINT(NETIF, "[TCPCON.%s]:ERR - ret[0] (no input) err[%d/%s]\n", self->port_name, errsave, strerror(errsave));
             MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_ECLI_RXZ]);
            break;
 
         default:
             connect_time = mtime_dtime();
-            PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]:CONNECTED -  sfd[%d] nfd[%d]\n",self->port_name,sock_inst->fd,new_fd));
+            MX_LPRINT(NETIF, 4,  "[TCPCON.%s]:CONNECTED -  sfd[%d] nfd[%d]\n", self->port_name, sock_inst->fd, new_fd);
             // generate a socket (wrapper) for the client connection
             peer->sock = msock_wrap_fd(new_fd);
             // record connect time
@@ -337,52 +316,52 @@ int netif_tcp_update_connections(netif_t *self)
             msock_connection_addr2str(peer);
             peer->hbtime=connect_time;
 
-            if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))){
+            if(mxd_testModule(NETIF, 1)){
                 int sndbuf=0;
                 int rcvbuf=0;
                 socklen_t bsz=sizeof(int);
 //                int newsz=16*1024;
                 // read TCP buffer sizes
                 if(msock_get_opt(peer->sock,SO_SNDBUF,&sndbuf,&bsz)<0){
-                    PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]: ERR getopt SNDBUF failed [%d/%s]\n",self->port_name,errno,strerror(errno)));
+                    MX_LPRINT(NETIF, 4,  "[TCPCON.%s]: ERR getopt SNDBUF failed [%d/%s]\n", self->port_name, errno, strerror(errno));
                 }
 
                 if(msock_get_opt(peer->sock,SO_RCVBUF,&rcvbuf,&bsz)<0){
-                    PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]: ERR getopt RCVBUF failed [%d/%s]\n",self->port_name,errno,strerror(errno)));
+                    MX_LPRINT(NETIF, 4,  "[TCPCON.%s]: ERR getopt RCVBUF failed [%d/%s]\n", self->port_name, errno, strerror(errno));
                 }
 
-                PMPRINT(MOD_NETIF,NETIF_V1,(stderr,"[TCPCON.%s]:ADD_CLI - SNDBUF[%d] RCVBUF[%d]\n",self->port_name,sndbuf,rcvbuf));
+                MX_LPRINT(NETIF, 1,  "[TCPCON.%s]:ADD_CLI - SNDBUF[%d] RCVBUF[%d]\n", self->port_name, sndbuf, rcvbuf);
 
 //                // resize if too small
 //                if(newsz>sndbuf)
 //                if(msock_set_opt(peer->sock,SO_SNDBUF,&newsz,bsz)<0){
-//                    PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]: ERR setopt SNDBUF failed [%d/%s]\n",self->port_name,errno,strerror(errno)));
+//                    MX_LPRINT(NETIF, 4,  "[TCPCON.%s]: ERR setopt SNDBUF failed [%d/%s]\n", self->port_name, errno, strerror(errno));
 //                }
 //
 //                if(newsz>sndbuf)
 //                if(msock_set_opt(peer->sock,SO_RCVBUF,&newsz,bsz)<0){
-//                    PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]: ERR setopt RCVBUF failed [%d/%s]\n",self->port_name,errno,strerror(errno)));
+//                    MX_LPRINT(NETIF, 4,  "[TCPCON.%s]: ERR setopt RCVBUF failed [%d/%s]\n", self->port_name, errno, strerror(errno));
 //                }
 //
 //                // confirm new size
 //                if(msock_get_opt(peer->sock,SO_SNDBUF,&sndbuf,&bsz)<0){
-//                    PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]: ERR getopt SNDBUF failed [%d/%s]\n",self->port_name,errno,strerror(errno)));
+//                    MX_LPRINT(NETIF, 4,  "[TCPCON.%s]: ERR getopt SNDBUF failed [%d/%s]\n", self->port_name, errno, strerror(errno));
 //                }
 //
 //                if(msock_get_opt(peer->sock,SO_RCVBUF,&rcvbuf,&bsz)<0){
-//                    PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]: ERR getopt RCVBUF failed [%d/%s]\n",self->port_name,errno,strerror(errno)));
+//                    MX_LPRINT(NETIF, 4,  "[TCPCON.%s]: ERR getopt RCVBUF failed [%d/%s]\n", self->port_name, errno, strerror(errno));
 //                }
 //
-//                PMPRINT(MOD_NETIF,NETIF_V1,(stderr,"[TCPCON.%s]:ADD_CLI - SNDBUF[%d] RCVBUF[%d]\n",self->port_name,sndbuf,rcvbuf));
+//                MX_LPRINT(NETIF, 1,  "[TCPCON.%s]:ADD_CLI - SNDBUF[%d] RCVBUF[%d]\n", self->port_name, sndbuf, rcvbuf);
 
             }
 
-            //            PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]:ADD_CLI - id[%p/%s:%s] fd[%d] sfd[%d] nfd[%d] \n",self->port_name,peer,peer->chost, peer->service,peer->s->fd,sock_inst->fd,new_fd));
+            //            MX_LPRINT(NETIF, 4,  "[TCPCON.%s]:ADD_CLI - id[%p/%s:%s] fd[%d] sfd[%d] nfd[%d] \n", self->port_name, peer, peer->chost, peer->service, peer->s->fd, sock_inst->fd, new_fd);
 
             mlist_add(list,(void *)peer);
             self->peer = msock_connection_new();
-            PMPRINT(MOD_NETIF,NETIF_V1,(stderr,"[TCPCON.%s]:ADD_CLI - id[%p/%s:%s] fd[%d] idx[%zd]\n",self->port_name,self->peer,peer->chost, peer->service,peer->sock->fd,mlist_size(list)-1));
-            mlog_tprintf(self->mlog_id,"[TCPCON.%s]:ADD_CLI - id[%p/%s:%s] n[%zd]\n",self->port_name,self->peer,peer->chost, peer->service,mlist_size(list));
+            MX_LPRINT(NETIF, 1,  "[TCPCON.%s]:ADD_CLI - id[%p/%s:%s] fd[%d] idx[%zd]\n", self->port_name, self->peer, peer->chost, peer->service, peer->sock->fd, mlist_size(list)-1);
+            mlog_tprintf(self->mlog_id,"[TCPCON.%s]:ADD_CLI - id[%p/%s:%s] n[%zd]\n", self->port_name, self->peer, peer->chost, peer->service, mlist_size(list));
             retval=0;
 
             MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_CLI_CONN]);
@@ -435,8 +414,8 @@ int netif_check_hbeat(netif_t *self, msock_connection_t **ppsub, int idx)
 
             if (NULL!=psub && tmout>0.0 && ((now-psub->hbtime)>tmout)) {
 
-                PMPRINT(MOD_NETIF,NETIF_V1,(stderr,"[CHKHB.%s]:DEL_CLI - expired id[%d/%s:%s] - removed\n",self->port_name,idx,psub->chost, psub->service));
-                mlog_tprintf(self->mlog_id,"[CHKHB.%s]:DEL_CLI - expired id[%d/%s:%s] - removed\n",self->port_name,idx,psub->chost, psub->service);
+                MX_LPRINT(NETIF, 1,  "[CHKHB.%s]:DEL_CLI - expired id[%d/%s:%s] - removed\n", self->port_name, idx, psub->chost, psub->service);
+                mlog_tprintf(self->mlog_id,"[CHKHB.%s]:DEL_CLI - expired id[%d/%s:%s] - removed\n", self->port_name, idx, psub->chost, psub->service);
 
                 mlist_remove(self->list,psub);
                 *ppsub=NULL;
@@ -446,7 +425,7 @@ int netif_check_hbeat(netif_t *self, msock_connection_t **ppsub, int idx)
 
             }else{
                 if(NULL!=psub)
-                PMPRINT(MOD_NETIF,NETIF_V1,(stderr,"[CHKHB.%s]:OK id[%d/%s:%s] - %.3lf/%.3lf/%.3lf %lf\n",self->port_name,idx,psub->chost, psub->service, now,psub->hbtime,(now-psub->hbtime),tmout));
+                MX_LPRINT(NETIF, 1,  "[CHKHB.%s]:OK id[%d/%s:%s] - %.3lf/%.3lf/%.3lf %lf\n", self->port_name, idx, psub->chost, psub->service, now, psub->hbtime, (now-psub->hbtime), tmout);
             }
         }// if !UDPM
 
@@ -488,7 +467,7 @@ int netif_reqres(netif_t *self)
 
 
             if (  (iobytes > 0) && (self->hbto > 0.0) ) {
-                PMPRINT(MOD_NETIF,NETIF_V2,(stderr,"[SVCCLI.%s]:RX - bytes[%d] id[%d/%s:%s] hb[%.2lf]\n", self->port_name,iobytes, cli, psub->chost, psub->service, psub->hbtime));
+                MX_LPRINT(NETIF, 2,  "[SVCCLI.%s]:RX - bytes[%d] id[%d/%s:%s] hb[%.2lf]\n", self->port_name, iobytes, cli, psub->chost, psub->service, psub->hbtime);
 
                 // update connection hbeat time
                 psub->hbtime=mtime_dtime();
@@ -498,7 +477,7 @@ int netif_reqres(netif_t *self)
 
             }else{
                 if(errno!=EAGAIN)
-                    PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[SVCCLI.%s]:ERR - recvfrom ret[%d] id[%d/%s:%s] err[%d/%s]\n",self->port_name,iobytes,cli,psub->chost, psub->service,errno,strerror(errno)));
+                    MX_LPRINT(NETIF, 4,  "[SVCCLI.%s]:ERR - recvfrom ret[%d] id[%d/%s:%s] err[%d/%s]\n", self->port_name, iobytes, cli, psub->chost, psub->service, errno, strerror(errno));
             }
 
             // check hbeat, remove expired connections
@@ -513,8 +492,8 @@ int netif_reqres(netif_t *self)
                 if( (iobytes=self->handle_fn(pmsg,self,psub,&errout))<=0){
                     switch (errout) {
                         case EPIPE:
-                            PMPRINT(MOD_NETIF,NETIF_V1,(stderr,"[SVCCLI.%s]:DEL_CLI - send err (EPIPE) id[%d/%s:%s] err[%d/%s]\n",self->port_name,cli,psub->chost, psub->service,errno,strerror(errno)));
-                            mlog_tprintf(self->mlog_id,"[SVCCLI.%s]:DEL_CLI - send err (EPIPE) id[%d/%s:%s]\n",self->port_name,cli,psub->chost, psub->service);
+                            MX_LPRINT(NETIF, 1,  "[SVCCLI.%s]:DEL_CLI - send err (EPIPE) id[%d/%s:%s] err[%d/%s]\n", self->port_name, cli, psub->chost, psub->service, errno, strerror(errno));
+                            mlog_tprintf(self->mlog_id,"[SVCCLI.%s]:DEL_CLI - send err (EPIPE) id[%d/%s:%s]\n", self->port_name, cli, psub->chost, psub->service);
 
                             mlist_remove(self->list,psub);
                             MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_CLI_DISN]);
@@ -522,7 +501,7 @@ int netif_reqres(netif_t *self)
                             psub=NULL;
                             break;
                         default:
-                            PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[SVCCLI.%s]:ERR - send id[%d/%s:%s] err[%d/%s]\n",self->port_name,cli,psub->chost, psub->service,errno,strerror(errno)));
+                            MX_LPRINT(NETIF, 4,  "[SVCCLI.%s]:ERR - send id[%d/%s:%s] err[%d/%s]\n", self->port_name, cli, psub->chost, psub->service, errno, strerror(errno));
                             break;
                     }
                 }else{
@@ -581,12 +560,12 @@ int netif_pub(netif_t *self, char *output_buffer, size_t len, size_t *r_iobytes)
                     MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_CLI_PUBN]);
                     MST_COUNTER_ADD(self->profile->stats->status[NETIF_STA_CLI_PUB_BYTES],iobytes);
 
-                    PMPRINT(MOD_NETIF,NETIF_V2,(stderr,"[SVCPUB.%s]:TX - ret[%5d] bytes id[%d/%s:%s] hbtime[%.2lf]\n", self->port_name,iobytes, idx, psub->chost, psub->service, psub->hbtime));
+                    MX_LPRINT(NETIF, 2,  "[SVCPUB.%s]:TX - ret[%5d] bytes id[%d/%s:%s] hbtime[%.2lf]\n", self->port_name, iobytes, idx, psub->chost, psub->service, psub->hbtime);
                     if(NULL != r_iobytes) {
                         *r_iobytes = iobytes;
                     }
                 }else{
-                    PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"\n[SVCPUB.%s]:ERR - sendto ret[%d] id[%d/%s:%s] [%d/%s]\n",self->port_name,iobytes,idx,psub->chost, psub->service,errno,strerror(errno)));
+                    MX_LPRINT(NETIF, 4,  "\n[SVCPUB.%s]:ERR - sendto ret[%d] id[%d/%s:%s] [%d/%s]\n", self->port_name, iobytes, idx, psub->chost, psub->service, errno, strerror(errno));
                     //                mlog_tprintf(self->mlog_id,"[PUB.%s]:ERR - sendto ret[%d] id[%d/%s:%s] [%d/%s]\n",self->port_name,iobytes,idx,psub->chost, psub->service,errno,strerror(errno));
                     MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPUB_TX]);
                 }
@@ -642,7 +621,7 @@ int netif_connect(netif_t *self)
                 msock_set_blocking(self->socket,false);
 
                 if ( (test=msock_bind(self->socket))==0) {
-                    PMPRINT(MOD_NETIF,MM_DEBUG,(stderr,"TRN udp socket bind OK [%s:%d]\n",self->host,self->port));
+                    MX_MPRINT(NETIF_DEBUG, "TRN udp socket bind OK [%s:%d]\n", self->host, self->port);
                     retval=0;
                 }else{
                     fprintf(stderr, "\nTRN udp socket bind failed [%d] [%d %s]\n",test,errno,strerror(errno));
@@ -696,9 +675,9 @@ int netif_connect(netif_t *self)
 #endif
                 msock_set_opt(self->socket, SO_REUSEADDR, &optionval, sizeof(optionval));
                 if ( (test=msock_bind(self->socket))==0) {
-                    PMPRINT(MOD_NETIF,MM_DEBUG,(stderr,"TRN tcp socket bind OK [%s:%d]\n",self->host,self->port));
+                    MX_MPRINT(NETIF_DEBUG, "TRN tcp socket bind OK [%s:%d]\n", self->host, self->port);
                     if ( (test=msock_listen(self->socket,NETIF_QUEUE_DFL))==0) {
-                        PMPRINT(MOD_NETIF,MM_DEBUG,(stderr,"TRN tcp socket listen OK [%s:%d]\n",self->host,self->port));
+                        MX_MPRINT(NETIF_DEBUG, "TRN tcp socket listen OK [%s:%d]\n", self->host, self->port);
                         retval=0;
                     }
                 }else{
@@ -975,7 +954,7 @@ int netif_start(netif_t *self, uint32_t delay_msec)
             s_netif_run(self,delay_msec);
         }else{
             mlog_tprintf(self->mlog_id,"connect failed[%d]\n",test);
-            PEPRINT((stderr,"connect failed[%d]\n",test));
+            MX_ERROR("connect failed[%d]\n", test);
         }
         mlog_tprintf(self->mlog_id,"*** netif session end ***\n");
 
@@ -1008,26 +987,48 @@ int netif_stop(netif_t *self,int sig)
 int netif_configure_debug(netif_t *self, int level)
 {
     int retval=0;
+    mxd_setModule(MXDEBUG, 0, true, NULL);
+    mxd_setModule(MXERROR, 5, false, NULL);
+    mxd_setModule(NETIF, 0, true, "netif");
+    mxd_setModule(NETIF_ERROR, 0, true, "netif.error");
+    mxd_setModule(NETIF_DEBUG, 0, true, "netif.debug");
 
     switch (level) {
         case 0:
-            mmd_channel_dis(MOD_NETIF,MM_ALL);
             break;
         case 1:
-            mmd_channel_en(MOD_NETIF,NETIF_V1);
+            mxd_setModule(NETIF, 1, false, "netif.error");
+            mxd_setModule(NETIF_ERROR, 5, false, "netif.error");
             break;
         case 2:
-            mmd_channel_en(MOD_NETIF,NETIF_V1|NETIF_V2);
+            mxd_setModule(MXDEBUG, 5, false, NULL);
+            mxd_setModule(NETIF, 2, false, "netif.error");
+            mxd_setModule(NETIF_ERROR, 5, false, "netif.error");
+            mxd_setModule(NETIF_DEBUG, 5, false, "netif.debug");
             break;
         case 3:
-            mmd_channel_en(MOD_NETIF,NETIF_V1|NETIF_V2|NETIF_V3);
+            mxd_setModule(MXDEBUG, 5, false, NULL);
+            mxd_setModule(NETIF, 3, false, "netif.error");
+            mxd_setModule(NETIF_ERROR, 5, false, "netif.error");
+            mxd_setModule(NETIF_DEBUG, 5, false, "netif.debug");
             break;
         case 4:
-            mmd_channel_en(MOD_NETIF,NETIF_V1|NETIF_V2|NETIF_V3|NETIF_V4);
+            mxd_setModule(MXDEBUG, 5, false, NULL);
+            mxd_setModule(NETIF, 4, false, "netif.error");
+            mxd_setModule(NETIF_ERROR, 5, false, "netif.error");
+            mxd_setModule(NETIF_DEBUG, 5, false, "netif.debug");
             break;
-
+        case 5:
+            mxd_setModule(MXDEBUG, 5, false, NULL);
+            mxd_setModule(NETIF, 4, false, "netif.error");
+            mxd_setModule(NETIF_ERROR, 5, false, "netif.error");
+            mxd_setModule(NETIF_DEBUG, 5, false, "netif.debug");
+             break;
         default:
-            mmd_channel_en(MOD_NETIF,(MM_ERR|MM_WARN)|NETIF_V1);
+            mxd_setModule(MXDEBUG, 5, false, NULL);
+            mxd_setModule(NETIF, 4, false, "netif.error");
+            mxd_setModule(NETIF_ERROR, 5, false, "netif.error");
+            mxd_setModule(NETIF_DEBUG, 5, false, "netif.debug");
             break;
     }
 
@@ -1042,15 +1043,6 @@ void netif_set_reqres_res(netif_t *self, void *res)
 void netif_set_pub_res(netif_t *self, void *res)
 {
     self->pub_res=res;
-}
-
-void netif_init_mmd()
-{
-#ifdef NETIF_MMDEBUG
-    mmd_module_configure(&mmd_config_defaults[0]);
-#else
-    mconf_init(NULL,NULL);
-#endif
 }
 
 mstats_t *netif_stats(netif_t *self)
@@ -1142,7 +1134,7 @@ int s_netif_test_read(byte **pdest, uint32_t *len, netif_t *self, msock_connecti
             *pdest=buf;
         }
         if( (msg_bytes=msock_recvfrom(peer->sock, peer->addr,buf,readlen,0)) >0 ){
-            PDPRINT((stderr,"%s: READ - msg_bytes[%"PRId64"]\n",__FUNCTION__,msg_bytes));
+            MX_DEBUG("%s: READ - msg_bytes[%"PRId64"]\n", __FUNCTION__, msg_bytes);
             retval=msg_bytes;
         }
     }
@@ -1161,9 +1153,9 @@ int s_netif_test_handle(void *msg, netif_t *self, msock_connection_t *peer, int 
             msg_out=strdup("NACK");
         }
         if(msock_send(peer->sock,(byte *)msg_out,strlen(msg_out)+1)){
-	        PDPRINT((stderr,"%s: PING - ACK/NACK OK [%s]\n",__FUNCTION__,msg_out));
+	        MX_DEBUG("%s: PING - ACK/NACK OK [%s]\n", __FUNCTION__, msg_out);
         }else{
-            PDPRINT((stderr,"%s: PING - ACK/NACK ERR [%s] [%d/%s]\n",__FUNCTION__,msg_out,errno,strerror(errno)));
+            MX_DEBUG("%s: PING - ACK/NACK ERR [%s] [%d/%s]\n", __FUNCTION__, msg_out, errno, strerror(errno));
         }
 
         free(msg_out);
@@ -1234,7 +1226,7 @@ int netif_test()
 
     assert(trn!=NULL);
 
-    netif_init_mmd();
+    netif_configure_debug(netif, 5);
     netif_set_reqres_res(netif,trn);
     // initialize message log
     int il = netif_init_log(netif, NETIF_MLOG_NAME, NULL,NULL);
@@ -1307,7 +1299,7 @@ int netif_test()
     // release trn
     wtnav_destroy(trn);
     // debug: release resources
-    mmd_release();
+    mxd_release();
 
     retval=0;
     return retval;

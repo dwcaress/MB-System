@@ -72,7 +72,6 @@
 #include "msocket.h"
 #include "mlog.h"
 #include "mtime.h"
-#include "medebug.h"
 #include "trn_msg.h"
 
 /////////////////////////
@@ -605,7 +604,6 @@ static void s_termination_handler (int signum)
         case SIGINT:
         case SIGHUP:
         case SIGTERM:
-            PDPRINT((stderr,"INFO - sig received[%d]\n",signum));
             g_interrupt=true;
             g_signal=signum;
             break;

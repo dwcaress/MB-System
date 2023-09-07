@@ -17,6 +17,7 @@ AM_CPPFLAGS += -I${top_srcdir}/src/mbtrnav/opt/rov
 AM_CPPFLAGS += -I${top_srcdir}/src/mbtrn/utils
 AM_CPPFLAGS += -I${top_srcdir}/src/mbtrn/mb1r
 AM_CPPFLAGS += -I${top_srcdir}/src/mbtrnframe
+AM_CPPFLAGS += -I${top_srcdir}/src/mbtrnutils
 AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
 AM_CPPFLAGS += -DHAVE_CONFIG_H
 AM_CPPFLAGS += -DWITH_TESTS

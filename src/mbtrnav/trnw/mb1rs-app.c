@@ -69,8 +69,7 @@
 #include "mb1rs.h"
 #include "mb1_msg.h"
 #include "msocket.h"
-#include "mmdebug.h"
-#include "medebug.h"
+#include "mxdebug.h"
 #include "merror.h"
 #include "mtime.h"
 
@@ -252,25 +251,21 @@ static void s_parse_args(int argc, char **argv, mb1rs_cfg_t *cfg)
         }
     }// while
 
-    //    mmd_initialize();
-    //    mconf_init(NULL, NULL);
-    //    mmd_channel_set(MOD_MB1, MM_ALL);
-    //    mmd_channel_set(MOD_MB1R, MM_ALL);
-    //    mmd_channel_en(MOD_MB1, MM_ALL);
-    //    mmd_channel_en(MOD_MB1R, MM_ALL);
-
-
-    PDPRINT((stderr,"verbose   [%d]\n",cfg->verbose));
-    PDPRINT((stderr,"host      [%s:%d]\n",cfg->host,cfg->port));
-    if(MB1RS_GET_MSK(&cfg->flags,MB1RS_MODE_AUTO))
-        PDPRINT((stderr,"src       [a:%"PRIu32"]\n",cfg->auto_nbeams));
-    else
-        PDPRINT((stderr,"src       [f:%s]\n",cfg->ifile));
-    PDPRINT((stderr,"rto_ms    [%"PRIu32"]\n",cfg->rto_ms));
-    PDPRINT((stderr,"del_ms    [%"PRIu32"]\n",cfg->del_ms));
-    PDPRINT((stderr,"lim_cyc   [%"PRIu32"]\n",cfg->lim_cyc));
-    PDPRINT((stderr,"lim_ret   [%"PRIu32"]\n",cfg->lim_ret));
-    PDPRINT((stderr,"lim_sec   [%lf]\n",cfg->lim_sec));
+    if(cfg->verbose > 0){
+        mxd_setModule(MXDEBUG, 1, false, NULL);
+    }
+    MX_DEBUG("verbose   [%d]\n", cfg->verbose);
+    MX_DEBUG("host      [%s:%d]\n", cfg->host,cfg->port);
+    if(MB1RS_GET_MSK(&cfg->flags, MB1RS_MODE_AUTO)) {
+        MX_DEBUG("src       [a:%"PRIu32"]\n", cfg->auto_nbeams);
+    } else {
+        MX_DEBUG("src       [f:%s]\n", cfg->ifile);
+    }
+    MX_DEBUG("rto_ms    [%"PRIu32"]\n", cfg->rto_ms);
+    MX_DEBUG("del_ms    [%"PRIu32"]\n", cfg->del_ms);
+    MX_DEBUG("lim_cyc   [%"PRIu32"]\n", cfg->lim_cyc);
+    MX_DEBUG("lim_ret   [%"PRIu32"]\n", cfg->lim_ret);
+    MX_DEBUG("lim_sec   [%lf]\n", cfg->lim_sec);
 }
 // End function parse_args
 
@@ -280,7 +275,7 @@ static void s_parse_args(int argc, char **argv, mb1rs_cfg_t *cfg)
 /// @return none
 static void s_termination_handler (int signum)
 {
-    PDPRINT((stderr,"sig received[%d]\n",signum));
+    MX_DEBUG("sig received[%d]\n", signum);
     switch (signum) {
         case SIGINT:
         case SIGHUP:
