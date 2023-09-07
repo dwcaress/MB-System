@@ -783,7 +783,6 @@ int s_process_file(app_cfg_t *cfg)
                 break;
 
             MX_LPRINT(TBINX, 2, "processing %s\n", cfg->files[i]);
-            PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"processing %s\n",cfg->files[i]));
 
             mfile_file_t *ifile = mfile_file_new(cfg->files[i]);
             int test=0;
