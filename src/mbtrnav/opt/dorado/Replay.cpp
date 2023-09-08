@@ -835,7 +835,7 @@ int Replay::parseDvlCsvLine(const char *line, poseT *pt, measT *mt)
       fprintf(stderr, "Replay - unexpected EOL parsing record %ld of %s data\n",
         nupdates, instr);
       fprintf(stderr, "Replay - last parsed token: %s \n",
-        lastToken);
+        (lastToken == NULL ? "" : lastToken));
       fprintf(stderr, "Replay - expecting %d items, EOL detected after beam #%d\n",
         1+DVL_RANGES+(mt->numMeas*nItems), bi);
       fprintf(stderr, "Replay - expecting %d items per beam with %s data\n",

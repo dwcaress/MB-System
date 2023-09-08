@@ -345,7 +345,7 @@ extern "C" {
 
 
 #ifdef WITH_MLOG_TEST
-   int mlog_test(int verbose);
+   int mlog_test(int argc, char **argv);
 #endif
 #ifdef __cplusplus
 }

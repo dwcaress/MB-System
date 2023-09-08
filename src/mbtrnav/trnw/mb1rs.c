@@ -69,8 +69,6 @@
 #include "mb1_msg.h"
 #include "mthread.h"
 #include "msocket.h"
-#include "mmdebug.h"
-#include "medebug.h"
 #include "merror.h"
 #include "mtime.h"
 

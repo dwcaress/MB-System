@@ -44,10 +44,10 @@ endif
 # or make NETIF_MMDEBUG=1
 ifeq ($(MAKECMDGOALS),trnc)
 OPT_NETIF_MMDEBUG=-DNETIF_MMDEBUG
-$(info INFO >>>>>> using NETIF_MMDEBUG)
+$(info "INFO +++ using NETIF_MMDEBUG")
 else ifdef NETIF_MMDEBUG
 OPT_NETIF_MMDEBUG=-DNETIF_MMDEBUG
-$(info INFO >>>>>> using NETIF_MMDEBUG)
+$(info "INFO +++ using NETIF_MMDEBUG")
 endif
 
 # Build options

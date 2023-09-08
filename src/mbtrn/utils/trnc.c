@@ -3,7 +3,7 @@
 /// @authors k. Headley
 /// @date 01 jan 2018
 
-/// TRN test client
+/// TRN test client: subscribe to mb1svr UDP stream
 /// subscribes to mbtrnpreprocess data
 
 /////////////////////////
@@ -64,8 +64,8 @@
 #include "msocket.h"
 #include "r7kc.h"
 #include "r7k-reader.h"
-#include "mmdebug.h"
-#include "medebug.h"
+#include "mxdebug.h"
+#include "mxd_app.h"
 #include "mutils.h"
 #include "mb1_msg.h"
 
@@ -150,34 +150,6 @@
 // Declarations
 /////////////////////////
 
-///// @enum trnc_channel_id
-///// @brief test module channel IDs
-///// [note : starting above reserved mframe channel IDs]
-//typedef enum{
-//    ID_TRNC_V1=MM_CHANNEL_COUNT,
-//    ID_TRNC_V2,
-//    TRNC_CH_COUNT
-//}trnc_channel_id;
-//
-///// @enum trnc_channel_mask
-///// @brief test module channel masks
-//typedef enum{
-//    TRNC_V1= (1<<ID_TRNC_V1),
-//    TRNC_V2= (1<<ID_TRNC_V2)
-//}trnc_channel_mask;
-//
-//
-///// @var char *trnc_ch_names[TRNC_CH_COUNT]
-///// @brief module channel names
-//char *trnc_ch_names[TRNC_CH_COUNT]={
-//    "trace.trnc",
-//    "debug.trnc",
-//    "warn.trnc",
-//    "err.trnc",
-//    "trnc.v1",
-//    "trnc.v2"
-//};
-//static mmd_module_config_t mmd_config_default= {MOD_TRNC,"MOD_TRNC",TRNC_CH_COUNT,((MM_ERR|MM_WARN)|TRNC_1),trnc_ch_names};
 
 /// @typedef struct app_cfg_s app_cfg_t
 /// @brief application configuration parameter structure
@@ -233,7 +205,7 @@ static bool g_interrupt=false;
 /// @return none
 static void s_show_help()
 {
-    char help_message[] = "\nTRN test client\n";
+    char help_message[] = "\nTRN test client: subscribe to mb1svr UDP stream\n";
     char usage_message[] = "\ntrnc [options]\n"
     "--verbose=n    : verbose output, n>0\n"
     "--help         : output help message\n"
@@ -348,44 +320,51 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
             exit(0);
         }
     }// while
-    
-    mconf_init(NULL,NULL);
-    mmd_channel_set(MOD_TRNC,MM_ERR);
-    mmd_channel_set(MOD_R7K,MM_ERR);
-    mmd_channel_set(MOD_R7KR,MM_ERR);
-    mmd_channel_set(MOD_MSOCK,MM_ERR);
+
+    mxd_setModule(MXDEBUG, 0, true, NULL);
+    mxd_setModule(MXERROR, 5, false, NULL);
+    mxd_setModule(TRNC, 0, false, "trnc.error");
+    mxd_setModule(TRNC_ERROR, 0, true, "trnc.error");
+    mxd_setModule(TRNC_DEBUG, 0, true, "trnc.debug");
+    mxd_setModule(MXMSOCK, 0, true, "msock");
+    mxd_setModule(R7KC, 0, true, "r7kc");
+    mxd_setModule(R7KC_DEBUG, 0, true, "r7kc.debug");
+    mxd_setModule(R7KC_ERROR, 0, true, "r7kc.error");
+    mxd_setModule(R7KR, 0, true, "r7kr");
+    mxd_setModule(R7KR_ERROR, 0, true, "r7kr.error");
+    mxd_setModule(R7KR_DEBUG, 0, true, "r7kr.debug");
 
     switch (cfg->verbose) {
         case 0:
-            mmd_channel_set(MOD_TRNC,0);
-            mmd_channel_set(MOD_R7K,0);
-            mmd_channel_set(MOD_R7KR,0);
-            mmd_channel_set(MOD_MSOCK,0);
             break;
         case 1:
-            mmd_channel_en(MOD_TRNC,TRNC_V1);
-            mmd_channel_en(MOD_S7K,MM_DEBUG);
+            mxd_setModule(TRNC, 1, false, "trnc.error");
             break;
         case 2:
-            mmd_channel_en(MOD_TRNC,TRNC_V1);
-            mmd_channel_en(MOD_TRNC,TRNC_V2);
-            mmd_channel_en(MOD_TRNC,MM_DEBUG);
-            mmd_channel_en(MOD_MSOCK,MM_DEBUG);
-            mmd_channel_en(MOD_R7K,MM_DEBUG);
-            mmd_channel_en(MOD_R7KR,MM_DEBUG);
+            mxd_setModule(MXDEBUG, 5, false, NULL);
+            mxd_setModule(TRNC, 5, false, "trnc.error");
+            break;
+        case 3:
+        case 4:
+        case 5:
+            mxd_setModule(MXDEBUG, 5, false, NULL);
+            mxd_setModule(TRNC_ERROR, 5, false, "trnc.error");
+            mxd_setModule(TRNC_DEBUG, 5, false, "trnc.debug");
+            mxd_setModule(MXMSOCK, 5, false, "msock");
+            mxd_setModule(R7KC, 5, false, "r7kc");
+            mxd_setModule(R7KC_DEBUG, 5, false, "r7kc.debug");
+            mxd_setModule(R7KC_ERROR, 5, false, "r7kc.error");
+            mxd_setModule(R7KR, 5, false, "r7kr");
+            mxd_setModule(R7KR_ERROR, 5, false, "r7kr.error");
+            mxd_setModule(R7KR_DEBUG, 5, false, "r7kr.debug");
             break;
         default:
-            mmd_channel_en(MOD_TRNC,MM_DEBUG);
             break;
     }
-    
-    PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"verbose [%s]\n",(cfg->verbose?"Y":"N")));
-    PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"host    [%s]\n",cfg->host));
-    PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"port    [%d]\n",cfg->port));
-    PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"hbeat   [%d]\n",cfg->hbeat));
-    PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"block   [%s]\n",(cfg->blocking==0?"N":"Y")));
-    PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"cycles  [%d]\n",cfg->cycles));
-    PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"bsize   [%d]\n",cfg->bsize));
+
+    if(cfg->verbose != 0)
+        mxd_show();
+
 }
 // End function parse_args
 
@@ -399,11 +378,11 @@ static void s_termination_handler (int signum)
         case SIGINT:
         case SIGHUP:
         case SIGTERM:
-            PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"\nsig received[%d]\n",signum));
+            MX_MPRINT(TRNC_DEBUG, "\nsig received[%d]\n", signum);
             g_interrupt=true;
             break;
         default:
-            fprintf(stderr,"\ns_termination_handler: sig not handled[%d]\n",signum);
+            fprintf(stderr,"\ns_termination_handler: sig not handled[%d]\n", signum);
             break;
     }
 }
@@ -472,12 +451,12 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
             
             // action: connect
             if (action == TRNAT_CONNECT) {
-                PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"connecting [%s:%d]\n",cfg->host,cfg->port));
+                MX_MPRINT(TRNC_DEBUG, "connecting [%s:%d]\n", cfg->host, cfg->port);
                 if( (test=msock_connect(s))==0 ) {
-                    PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"connect OK fd[%d]\n",s->fd));
+                    MX_MPRINT(TRNC_DEBUG, "connect OK fd[%d]\n", s->fd);
                     state=TRNSM_CONNECTED;
                 }else{
-                    PEPRINT((stderr,"connect failed [%"PRId64"]\n",test));
+                    MX_ERROR("connect failed [%"PRId64"]\n",test);
                 }
             }
             
@@ -487,14 +466,14 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
 
                 test=msock_sendto(s,NULL,(byte *)reqstr,4,0);
                 
-                PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"sendto REQ ret[%"PRId64"] [%d/%s]\n",test,errno,strerror(errno)));
+                MX_MPRINT(TRNC_DEBUG, "sendto REQ ret[%"PRId64"] [%d/%s]\n", test, errno, strerror(errno));
                 
                 if( test>0 ){
                     trn_tx_count++;
                     trn_tx_bytes+=test;
                     state=TRNSM_REQ_PENDING;
                 }else{
-                    PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"sendto failed ret[%"PRId64"] [%d/%s]\n",test,errno,strerror(errno)));
+                    MX_MPRINT(TRNC_DEBUG, "sendto failed ret[%"PRId64"] [%d/%s]\n", test, errno, strerror(errno));
                 }
             }
             
@@ -507,11 +486,12 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                 
                 // request message
                 if ((test = msock_recvfrom(s, NULL, pread, readlen,0))>0) {
-                    PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"%s - received [%"PRId64"] bytes\n",__FUNCTION__,test));
+                    MX_MPRINT(TRNC_DEBUG, "%s - received [%"PRId64"] bytes\n", __FUNCTION__, test);
 
                     trn_rx_bytes+=test;
                     trn_rx_count++;
-                    
+
+                    if(mxd_testModule(MXDEBUG, 2))
                     mfu_hex_show(msg_buf, test, 16, true, 5);
                     
                     // check message type
@@ -519,11 +499,11 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                     mb1_t *mb1=(mb1_t *)(msg_buf);
 
                     if (mb1->type==MBTRN_MSGTYPE_ACK) {
-                        PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"%s - received ACK ret[%"PRId64"] [%08X]\n",__FUNCTION__,test,mb1->type));
+                        MX_MPRINT(TRNC_DEBUG, "%s - received ACK ret[%"PRId64"] [%08X]\n",__FUNCTION__, test, mb1->type);
                         hbeat_counter=0;
                         state=TRNSM_SUBSCRIBED;
                     }else if (mb1->type==MBTRN_MSGTYPE_MB1) {
-                        PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"%s - received MSG ret[%"PRId64"] type[%08X] size[%d] ping[%06d]\n",__FUNCTION__,test,mb1->type,mb1->size,mb1->ping_number));
+                        MX_MPRINT(TRNC_DEBUG, "%s - received MSG ret[%"PRId64"] type[%08X] size[%d] ping[%06d]\n", __FUNCTION__, test, mb1->type, mb1->size, mb1->ping_number);
                         trn_msg_count++;
                         trn_msg_bytes+=test;
                         
@@ -533,26 +513,26 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                             state=TRNSM_SUBSCRIBED;
                         }
                         hbeat_counter++;
-                        PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"%s -hbeat[%d/%d]\n",__FUNCTION__,hbeat_counter,cfg->hbeat));
+                        MX_MPRINT(TRNC_DEBUG, "%s -hbeat[%d/%d]\n", __FUNCTION__, hbeat_counter, cfg->hbeat);
                         if ( (hbeat_counter!=0) && (hbeat_counter%cfg->hbeat==0)) {
                             state=TRNSM_HBEAT_EXPIRED;
                         }
                     }else{
                         // response not recognized
-                        PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"%s - invalid message [%08X]\n",__FUNCTION__,mb1->type));
+                        MX_MPRINT(TRNC_DEBUG, "%s - invalid message [%08X]\n", __FUNCTION__, mb1->type);
                     }
                 }else{
                     // read returned error
-                    //  PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"invalid message [%d]\n",test));
+                    //  MX_MPRINT(TRNC_DEBUG, "invalid message [%d]\n", test);
                     switch (errno) {
                         case EWOULDBLOCK:
                             // nothing to read
-                            //   PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"err - [%d/%s]\n",errno, strerror(errno)));
+                            //   MX_MPRINT(TRNC_DEBUG, "err - [%d/%s]\n", errno, strerror(errno));
                             break;
                         case ENOTCONN:
                         case ECONNREFUSED:
                             // host disconnected
-                            PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"err - server not connected [%d/%s]\n",errno, strerror(errno)));
+                            MX_MPRINT(TRNC_DEBUG, "err - server not connected [%d/%s]\n", errno, strerror(errno));
                             msock_socket_destroy(&s);
                             s = msock_socket_new(cfg->host, cfg->port, ST_UDP);
                             msock_set_blocking(s,(cfg->blocking==0?false:true));
@@ -561,7 +541,7 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                             retval=-1;
                             break;
                         default:
-                            PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"err ? [%d/%s]\n",errno, strerror(errno)));
+                            MX_MPRINT(TRNC_DEBUG, "err ? [%d/%s]\n", errno, strerror(errno));
                             break;
                     }//switch
                 }
@@ -569,45 +549,33 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
             
             // action: show message
             if (action == TRNAT_SHOW_MSG) {
-//                PMPRINT(MOD_TRNC,MM_DEBUG|TRNC_V1|TRNC_V2,(stderr,"\nts[%.3f] ping[%06d] lat[%.4lf] lon[%.4lf]\nsd[%7.2lf] hdg[%6.2lf] nb[%03"PRIu32"]\n",
-//                        psounding->ts,
-//                        psounding->ping_number,
-//                        psounding->lat,
-//                        psounding->lon,
-//                        psounding->depth,
-//                        psounding->hdg,
-//                        (uint32_t)psounding->nbeams));
-//                uint32_t j=0;
-//                struct mbtrn_beam_data *bd=psounding->beams;
-//                for (j=0; j<psounding->nbeams; j++,bd++){
-//                    PMPRINT(MOD_TRNC,MM_DEBUG|TRNC_V2,(stderr,"n[%03"PRIu32"] atrk/X[% 10.3lf] ctrk/Y[% 10.3lf] dpth/Z[% 10.3lf]\n",
-//                            (uint32_t)bd->beam_num,
-//                            bd->rhox,
-//                            bd->rhoy,
-//                            bd->rhoz));
-//                }
 
                 mb1_t *mb1=(mb1_t *)(msg_buf);
 
-                PMPRINT(MOD_TRNC,MM_DEBUG|TRNC_V1|TRNC_V2,(stderr,"\nts[%.3f] ping[%06d] lat[%.4lf] lon[%.4lf]\nsd[%7.2lf] hdg[%6.2lf] nb[%03"PRIu32"]\n",
-                                                           mb1->ts,
-                                                           mb1->ping_number,
-                                                           mb1->lat,
-                                                           mb1->lon,
-                                                           mb1->depth,
-                                                           mb1->hdg,
-                                                           (uint32_t)mb1->nbeams));
-                uint32_t j=0;
-                mb1_beam_t *bd=mb1->beams;
-                for (j=0; j<mb1->nbeams; j++,bd++){
-                    PMPRINT(MOD_TRNC,MM_DEBUG|TRNC_V2,(stderr,"n[%03"PRIu32"] atrk/X[% 10.3lf] ctrk/Y[% 10.3lf] dpth/Z[% 10.3lf]\n",
-                                                       (uint32_t)bd->beam_num,
-                                                       bd->rhox,
-                                                       bd->rhoy,
-                                                       bd->rhoz));
+                int idSet[]={MXDEBUG, TRNC, TRNC_DEBUG};
+                if(mxd_nTestModule(idSet, 2, 1)){
+                    fprintf(stderr,"\nts[%.3f] ping[%06d] lat[%.4lf] lon[%.4lf]\nsd[%7.2lf] hdg[%6.2lf] nb[%03"PRIu32"]\n",
+                            mb1->ts,
+                            mb1->ping_number,
+                            mb1->lat,
+                            mb1->lon,
+                            mb1->depth,
+                            mb1->hdg,
+                            (uint32_t)mb1->nbeams);
+
+                    if(mxd_nTestModule(idSet, 2, 2)){
+                        uint32_t j=0;
+                        mb1_beam_t *bd=mb1->beams;
+                        for (j=0; j<mb1->nbeams; j++,bd++){
+                            fprintf(stderr,"n[%03"PRIu32"] atrk/X[% 10.3lf] ctrk/Y[% 10.3lf] dpth/Z[% 10.3lf]\n",
+                                    (uint32_t)bd->beam_num,
+                                    bd->rhox,
+                                    bd->rhoy,
+                                    bd->rhoz);
+                        }
+
+                    }
                 }
-
-
             }
             
             // action: quit state machine
@@ -618,13 +586,13 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
             // check cycles and signals
             scycles--;
             if(scycles==0){
-                PTRACE();
+                MX_TRACE();
                 retval=0;
                 state=TRNSM_DONE;
             }
             
             if(g_interrupt){
-                PTRACE();
+                MX_TRACE();
                 retval=-1;
                 state=TRNSM_DONE;
             }
@@ -632,9 +600,9 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
         }// while !TRNSM_DONE
     }//else invalid arg
     
-    PMPRINT(MOD_TRNC,TRNC_V1,(stderr,"tx count/bytes[%d/%d]\n",trn_tx_count,trn_tx_bytes));
-    PMPRINT(MOD_TRNC,TRNC_V1,(stderr,"rx count/bytes[%d/%d]\n",trn_rx_count,trn_rx_bytes));
-    PMPRINT(MOD_TRNC,TRNC_V1,(stderr,"trn count/bytes[%d/%d]\n",trn_msg_count,trn_msg_bytes));
+    MX_LPRINT(TRNC, 1, "tx count/bytes[%d/%d]\n",trn_tx_count,trn_tx_bytes);
+    MX_LPRINT(TRNC, 1, "rx count/bytes[%d/%d]\n",trn_rx_count,trn_rx_bytes);
+    MX_LPRINT(TRNC, 1, "trn count/bytes[%d/%d]\n",trn_msg_count,trn_msg_bytes);
     
     return retval;
 }

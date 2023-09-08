@@ -12,8 +12,9 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /**
-   @file
- * mb_format.h defines data format identifiers used by MBIO functions
+ * @file
+ * @brief Define swath data format integer identifier codes used by 
+ * MBIO functions
  *
  * Author:	D. W. Caress
  * Date:	January 19, 1993

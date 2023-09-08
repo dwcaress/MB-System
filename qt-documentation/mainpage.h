@@ -12,5 +12,11 @@
  * - VTK version 8.2+
  * - QT version 5.14+
  *
- *
  */
+
+/**
+ * @namespace mb_system
+ * @brief MB-System C++ framework
+ */
+
+

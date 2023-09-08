@@ -70,7 +70,6 @@
 #include "trnw.h"
 #include "mb1_msg.h"
 #include "msocket.h"
-#include "medebug.h"
 
 /////////////////////////
 // Macros
