@@ -168,12 +168,12 @@ static uint32_t s_trnif_dfl_send_tcp(msock_connection_t *peer, char *msg, int32_
 #endif
         if( (send_bytes=msock_sendto(peer->sock,  peer->addr, (byte *)msg, send_len,flags))==send_len) {
             retval=send_bytes;
-            PDPRINT((stderr,"Reply OK len[%d] peer[%s:%s]\n",send_len, peer->chost,peer->service));
+            MX_DEBUG("Reply OK len[%d] peer[%s:%s]\n", send_len, peer->chost, peer->service);
         } else {
             if(NULL!=errout) {
                 *errout=errno;
             }
-            PDPRINT((stderr,"Reply ERR peer[%s:%s] sock[%p/%p] len[%d] err[%d/%s]\n",peer->chost,peer->service,peer->sock,  peer->addr, send_len,errno,strerror(errno)));
+            MX_DEBUG("Reply ERR peer[%s:%s] sock[%p/%p] len[%d] err[%d/%s]\n", peer->chost, peer->service, peer->sock, peer->addr, send_len, errno, strerror(errno));
         }
     }
     return retval;
@@ -186,13 +186,13 @@ static int s_trnif_msg_read_dfl(byte *dest, uint32_t readlen, msock_socket_t *so
     if(NULL!=dest && NULL!=socket && NULL!=peer) {
 
         int64_t msg_bytes=0;
-        PDPRINT((stderr,"%s: READ - readlen[%d]\n",__FUNCTION__,readlen));
+        MX_DEBUG("%s: READ - readlen[%d]\n", __FUNCTION__, readlen);
         if( (msg_bytes=msock_recvfrom(socket, peer->addr,dest,readlen,0)) >0 ) {
             retval = msg_bytes;
-            PDPRINT((stderr,"%s: READ - OK read[%"PRId64"]\n",__FUNCTION__,msg_bytes));
+            MX_DEBUG("%s: READ - OK read[%"PRId64"]\n", __FUNCTION__, msg_bytes);
         } else {
             if(errno!=EAGAIN)
-            PDPRINT((stderr,"%s: READ - ERR read[%"PRId64"] [%d/%s]\n",__FUNCTION__,msg_bytes,errno,strerror(errno)));
+            MX_DEBUG("%s: READ - ERR read[%"PRId64"] [%d/%s]\n",__FUNCTION__, msg_bytes, errno, strerror(errno));
         }
     }
     return retval;
@@ -209,12 +209,12 @@ static uint32_t s_trnif_dfl_send_udp(netif_t *self,msock_connection_t *peer, cha
 #endif
         if( (send_bytes=msock_sendto(self->socket,  peer->addr, (byte *)msg, send_len,flags))==send_len) {
             retval=send_bytes;
-            PDPRINT((stderr,"Reply OK len[%d] peer[%s:%s]\n",send_len, peer->chost,peer->service));
+            MX_DEBUG("Reply OK len[%d] peer[%s:%s]\n", send_len, peer->chost, peer->service);
         } else {
             if(NULL!=errout) {
                 *errout=errno;
             }
-            PDPRINT((stderr,"Reply ERR peer[%s:%s] sock[%p/%p] len[%d] err[%d/%s]\n",peer->chost,peer->service,peer->sock,  peer->addr, send_len,errno,strerror(errno)));
+            MX_DEBUG("Reply ERR peer[%s:%s] sock[%p/%p] len[%d] err[%d/%s]\n",peer->chost, peer->service, peer->sock, peer->addr, send_len, errno, strerror(errno));
         }
     }
     return retval;
@@ -243,10 +243,9 @@ int trnif_msg_read_trnmsg(byte **pdest, uint32_t *len, netif_t *self, msock_conn
             uint32_t msg_bytes=0;
             uint32_t test=0;
             uint32_t readlen=0;
-#if defined(WITH_PDEBUG)
             char *stateNames[]={"ST_START","ST_SYNC_OK","ST_HDR_OK","ST_DATA_OK", "ST_CHK_OK", "ST_SYNC", "ST_QUIT"};
-#endif
-         byte *cur = buf;
+
+            byte *cur = buf;
             int err=0;
             trnmsg_header_t *pheader=(trnmsg_header_t *)buf;
             if(NULL!=errout) {
@@ -281,19 +280,19 @@ int trnif_msg_read_trnmsg(byte **pdest, uint32_t *len, netif_t *self, msock_conn
                         MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPROTO_RD]);
                         break;
                 }
-                PDPRINT((stderr,"state[%s] readlen[%u]\n",stateNames[state],readlen));
+                MX_DEBUG("state[%s] readlen[%u]\n", stateNames[state], readlen);
 
                 if(action==AC_SYNC) {
                     // read byte by byte until sync pattern matched
                     while( (cur-buf)<TRNIF_SYNC_LEN && action!=AC_ERR && !self->stop) {
                         if( (test=msock_recvfrom(peer->sock, peer->addr,cur,1,MSG_DONTWAIT))==1 && TRNIF_SYNC_CMP(*cur,(cur-buf))) {
-                            PDPRINT((stderr,"SYNC - OK test[%d] cur[%p/x%02X] cur-buf[%ld] cmp[%d]\n",test,cur,*cur,(cur-buf),(TRNIF_SYNC_CMP(*cur,(cur-buf))?1:0)));
+                            MX_DEBUG("SYNC - OK test[%d] cur[%p/x%02X] cur-buf[%ld] cmp[%d]\n", test, cur, *cur, (cur-buf), (TRNIF_SYNC_CMP(*cur,(cur-buf))?1:0));
                             cur+=test;
                             msg_bytes+=test;
                             state=ST_SYNC_OK;
                         } else {
                             err=errno;
-                            PDPRINT((stderr,"SYNC - ERR cur-buf[%ld] *cur[%02X] c(%02X) test[%d] err[%d/%s]\n",(cur-buf),*cur,((g_trn_sync>>(cur-buf))),test,err,strerror(err)));
+                            MX_DEBUG("SYNC - ERR cur-buf[%ld] *cur[%02X] c(%02X) test[%d] err[%d/%s]\n", (cur-buf), *cur, ((g_trn_sync>>(cur-buf))), test, err, strerror(err));
                             action=AC_ERR;
                         }
                     }
@@ -301,35 +300,35 @@ int trnif_msg_read_trnmsg(byte **pdest, uint32_t *len, netif_t *self, msock_conn
 
                 if(action==AC_HDR) {
                     if( (test=msock_recvfrom(peer->sock, peer->addr,cur,TRNIF_HDR_LEN-TRNIF_SYNC_LEN,0)) >0  ) {
-                        PDPRINT((stderr,"HDR - OK test[%d] cur[%p/x%02X]\n",test,cur,*cur));
+                        MX_DEBUG("HDR - OK test[%d] cur[%p/x%02X]\n", test, cur, *cur);
                         cur+=test;
                         msg_bytes+=test;
                         state=ST_HDR_OK;
                     } else {
-                        PTRACE();
+                        MX_TRACE();
                         err=errno;
                         action=AC_ERR;
                     }
                 }// AC_HDR
 
                 if(action==AC_DATA) {
-                    PTRACE();
+                    MX_TRACE();
                     if(readlen==0) {
                         state=ST_DATA_OK;
                     } else if( (test=msock_recvfrom(peer->sock, peer->addr,cur,readlen,0)) == readlen ) {
-                        PDPRINT((stderr,"DATA - OK test[%d] cur[%p/x%02X]\n",test,cur,*cur));
+                        MX_DEBUG("DATA - OK test[%d] cur[%p/x%02X]\n", test, cur, *cur);
                         cur+=test;
                         msg_bytes+=test;
                         state=ST_DATA_OK;
                     } else {
-                        PTRACE();
+                        MX_TRACE();
                         err=errno;
                         action=AC_ERR;
                     }
                 }// AC_DATA
 
                 if(action==AC_CHK) {
-                    PTRACE();
+                    MX_TRACE();
                     trn_checksum_t chk=0;
                     byte *cp = buf+TRNIF_HDR_LEN;
                     chk = mfu_checksum(cp, pheader->data_len);
@@ -350,7 +349,7 @@ int trnif_msg_read_trnmsg(byte **pdest, uint32_t *len, netif_t *self, msock_conn
                     switch (err) {
                             // EWOULDBLOCK == EAGAIN on many systems
                         case EAGAIN:
-                            PTRACE();
+                            MX_TRACE();
                             // nothing to read: quit
                             if(NULL!=errout) {
                                 *errout=MSG_ENODATA;
@@ -358,7 +357,7 @@ int trnif_msg_read_trnmsg(byte **pdest, uint32_t *len, netif_t *self, msock_conn
                             state=ST_QUIT;
                             break;
                         default:
-                            PTRACE();
+                            MX_TRACE();
                             // start over
                             cur=buf;
                             msg_bytes=0;
@@ -367,10 +366,10 @@ int trnif_msg_read_trnmsg(byte **pdest, uint32_t *len, netif_t *self, msock_conn
                     }
                 }// AC_ERR
             }
-        } else {PTRACE();}
+        } else {MX_TRACE();}
 
     }// else invalid arg
-    PDPRINT((stderr,"errout[%d] msg_len/ret[%u]\n",(NULL==errout?-1:*errout),retval));
+    MX_DEBUG("errout[%d] msg_len/ret[%u]\n", (NULL == errout ? -1 : *errout), retval);
     //    sleep(1);
 
     return retval;
@@ -395,14 +394,14 @@ int trnif_msg_handle_trnmsg(void *msg, netif_t *self, msock_connection_t *peer, 
 
         // deserialize message bytes
         trnmsg_deserialize(&msg_in, (byte *)msg, TRNIF_MAX_SIZE);
-        PDPRINT((stderr,"%s - TRNMSG received:\n",__FUNCTION__));
-        if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG | NETIF_V3 | NETIF_V4))) {
+        MX_DEBUG("%s - TRNMSG received:\n", __FUNCTION__);
+        if(mxd_testModule(MXDEBUG,1)) {
         	trnmsg_show(msg_in,true,5);
         }
 
         switch (msg_in->hdr.msg_id) {
             case TRNIF_PING:
-                PDPRINT((stderr,"PING from peer[%s:%s]\n",peer->chost,peer->service));
+                MX_DEBUG("PING from peer[%s:%s]\n", peer->chost, peer->service);
                 msg_out = trnmsg_new_type_msg(TRNIF_ACK, 0xabcd);
                 break;
 
@@ -419,7 +418,7 @@ int trnif_msg_handle_trnmsg(void *msg, netif_t *self, msock_connection_t *peer, 
 
                     wmeast_destroy(mt);
                 } else {
-                    PDPRINT((stderr,"%s - ERR NULL message\n",__func__));
+                    MX_DEBUG("%s - ERR NULL message\n", __func__);
                 }
 
                 break;
@@ -511,7 +510,7 @@ int trnif_msg_handle_trnmsg(void *msg, netif_t *self, msock_connection_t *peer, 
 //                break;
 
             default:
-                PDPRINT((stderr,"UNKNOWN msg msg_in[%p] type [%c/%02X] from peer[%s:%s]\n",msg_in,msg_in->hdr.msg_id,msg_in->hdr.msg_id,peer->chost,peer->service));
+                MX_DEBUG("UNKNOWN msg msg_in[%p] type [%c/%02X] from peer[%s:%s]\n", msg_in, msg_in->hdr.msg_id, msg_in->hdr.msg_id, peer->chost, peer->service);
                 break;
         }
 
@@ -547,7 +546,7 @@ int trnif_msg_read_ct(byte **pdest, uint32_t *len, netif_t *self, msock_connecti
 
         // default read (all at once)
 //        retval=s_trnif_msg_read_dfl(buf, readlen, peer->sock, peer, errout);
-//        PDPRINT((stderr,"%s: READ - readlen[%d]\n",__FUNCTION__,readlen));
+//        MX_DEBUG("%s: READ - readlen[%d]\n", __FUNCTION__, readlen);
 
         // alternative read
         // (writer chunks data, and there is no sync mechanism - scary)
@@ -592,8 +591,8 @@ int trnif_msg_read_ct(byte **pdest, uint32_t *len, netif_t *self, msock_connecti
         }
     }
 
-    if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))) {
-   	 PDPRINT((stderr,"%s:%d RET msg_bytes[%"PRId64"] retries[%d]\n",__FUNCTION__,__LINE__,msg_bytes,retries));
+    if(mxd_testModule(MXDEBUG,1)) {
+   	 MX_DEBUG("%s:%d RET msg_bytes[%"PRId64"] retries[%d]\n", __FUNCTION__, __LINE__, msg_bytes, retries);
     }
     return retval;
 }
@@ -619,7 +618,7 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
         d_triplet_t est_nav_ofs, *pest_nav_ofs=NULL;
         static int ensemble_count=0;
 
-        if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))) {
+        if(mxd_testModule(MXDEBUG,1)) {
         	wcommst_show(ct,true,5);
         }
         double msg_time = mtime_etime();
@@ -664,8 +663,8 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
                 send_len=wcommst_serialize(&msg_out,ct,TRN_MSG_SIZE);
                 mlog_tprintf(self->mlog_id,"trn_mle,%lf,[%s:%s]\n",msg_time,peer->chost, peer->service);
 
-                if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))) {
-                    PDPRINT((stderr,"MLE ct[%p] msg_out[%p] send_len[%d]\n",ct,msg_out,send_len));
+                if(mxd_testModule(MXDEBUG,1)) {
+                    MX_DEBUG("MLE ct[%p] msg_out[%p] send_len[%d]\n", ct, msg_out, send_len);
 //                    wcommst_show(ct,true,5);
                 }
                 break;
@@ -677,8 +676,8 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
                 send_len=wcommst_serialize(&msg_out,ct,TRN_MSG_SIZE);
 	            mlog_tprintf(self->mlog_id,"trn_mmse,%lf,%d,[%s:%s]\n",msg_time,++ensemble_count,peer->chost, peer->service);
 
-                if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))) {
-                    PDPRINT((stderr,"MMSE ct[%p] msg_out[%p] send_len[%d]\n",ct,msg_out,send_len));
+                if(mxd_testModule(MXDEBUG,1)) {
+                    MX_DEBUG("MMSE ct[%p] msg_out[%p] send_len[%d]\n", ct, msg_out, send_len);
 //                    wcommst_show(ct,true,5);
                 }
                break;
@@ -699,8 +698,8 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
                 // get status, return ACK
                 // (parameter set accordingly)
                 send_len=trnw_ptype_msg(&msg_out, TRN_MSG_ACK, wtnav_get_num_reinits(trn));
-                if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))) {
-                    PDPRINT((stderr,"N_REINITS ct[%p] msg_out[%p] send_len[%d]\n",ct,msg_out,send_len));
+                if(mxd_testModule(MXDEBUG,1)) {
+                    MX_DEBUG("N_REINITS ct[%p] msg_out[%p] send_len[%d]\n", ct, msg_out, send_len);
 //                    mfu_hex_show(msg_out, 128, 16, true, 5);
                 }
             mlog_tprintf(self->mlog_id,"trn_n_reinits,%lf,[%s:%s]\n",msg_time,peer->chost, peer->service);
@@ -890,7 +889,7 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
                break;
 
             case TRN_MSG_PING:
-                PDPRINT((stderr,"trn_ping_ack,%lf,[%s:%s]\n",msg_time,peer->chost,peer->service));
+                MX_DEBUG("trn_ping_ack,%lf,[%s:%s]\n", msg_time, peer->chost, peer->service);
                 send_len = trnw_ack_msg(&msg_out);
                 mlog_tprintf(self->mlog_id,"trn_ping_ACK,%lf,[%s:%s]\n", msg_time, peer->chost, peer->service);
                break;
@@ -908,7 +907,7 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
                break;
 
             default:
-                PDPRINT((stderr,"UNSUPPORTED msg ct[%p] type [%c/%02X] from peer[%s:%s] %lf\n",ct,msg_type,msg_type,peer->chost,peer->service,mtime_etime()));
+                MX_DEBUG("UNSUPPORTED msg ct[%p] type [%c/%02X] from peer[%s:%s] %lf\n", ct, msg_type, msg_type, peer->chost, peer->service, mtime_etime());
 
                 send_len=trnw_nack_msg(&msg_out);
                 MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPROTO_HND]);
@@ -917,12 +916,12 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
 
         if(send_len>0) {
             retval=s_trnif_dfl_send_tcp(peer, msg_out, send_len, errout);
-            if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))) {
-                PDPRINT((stderr,"SEND_LEN>0 msg_type[%c/%02X] peer[%s:%s] %lf\n",(msg_type>0x20?msg_type:'.'), msg_type, peer->chost, peer->service, mtime_etime()));
+            if(mxd_testModule(MXDEBUG,1)) {
+                MX_DEBUG("SEND_LEN>0 msg_type[%c/%02X] peer[%s:%s] %lf\n",(msg_type>0x20?msg_type:'.'), msg_type, peer->chost,  peer->service, mtime_etime());
                 mfu_hex_show((byte *)msg_out, 128, 16, true, 5);
             }
         } else {
-            PDPRINT((stderr,"SEND_LEN<=0 type [%c/%02X] peer[%s:%s] %lf\n",(msg_type>0x20?msg_type:'.'),msg_type, peer->chost, peer->service, mtime_etime()));
+            MX_DEBUG("SEND_LEN<=0 type [%c/%02X] peer[%s:%s] %lf\n",(msg_type>0x20?msg_type:'.'),msg_type, peer->chost, peer->service, mtime_etime());
             MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPROTO_HND]);
 		 }
 

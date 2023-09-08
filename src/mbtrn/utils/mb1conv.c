@@ -71,7 +71,6 @@
 #include "mb71_msg.h"
 #include "mframe.h"
 #include "mfile.h"
-#include "medebug.h"
 
 /////////////////////////
 // Macros
@@ -251,11 +250,12 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         }
         sprintf(cp,".mb71");
     }
-    if( cfg->verbose>0){
-    PDPRINT((stderr,"verbose   [%d]\n",(cfg->verbose)));
-    PDPRINT((stderr,"swap      [%s]\n",(cfg->bswap?"Y":"N")));
-    PDPRINT((stderr,"ifile     [%s]\n",cfg->ifile));
-    PDPRINT((stderr,"ofile     [%s]\n",cfg->ofile));
+
+    if(cfg->verbose>0) {
+        fprintf(stderr,"verbose   [%d]\n", cfg->verbose);
+        fprintf(stderr,"swap      [%s]\n", (cfg->bswap?"Y":"N"));
+        fprintf(stderr,"ifile     [%s]\n", cfg->ifile);
+        fprintf(stderr,"ofile     [%s]\n", cfg->ofile);
     }
 }
 // End function parse_args
@@ -270,7 +270,6 @@ static void s_termination_handler (int signum)
         case SIGINT:
         case SIGHUP:
         case SIGTERM:
-            PDPRINT((stderr,"sig received[%d]\n",signum));
             g_interrupt=true;
             g_signal=signum;
             break;

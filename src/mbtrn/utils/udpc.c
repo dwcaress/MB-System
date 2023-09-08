@@ -61,9 +61,7 @@
 
 
 #include <getopt.h>
-
 #include "msocket.h"
-#include "medebug.h"
 
 /////////////////////////
 // Macros

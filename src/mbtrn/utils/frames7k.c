@@ -62,11 +62,10 @@
 #include <getopt.h>
 #include "r7kc.h"
 #include "msocket.h"
-#include "medebug.h"
-#include "mmdebug.h"
+#include "mxdebug.h"
+#include "mxd_app.h"
 #include "r7k-reader.h"
 #include "merror.h"
-#include "mconfig.h"
 
 /////////////////////////
 // Macros
@@ -114,43 +113,6 @@
 /////////////////////////
 // Declarations
 /////////////////////////
-
-/// @enum frames7k_module_ids
-/// @brief application module IDs
-/// [note : starting above reserved mframe module IDs]
-//typedef enum{
-//    MOD_S7K=MM_MODULE_COUNT,
-//    APP_MODULE_COUNT
-//}frames7k_module_ids;
-
-///// @enum f7k_channel_id
-///// @brief test module channel IDs
-///// [note : starting above reserved mframe channel IDs]
-//typedef enum{
-//    ID_F7K_V1=MM_CHANNEL_COUNT,
-//    ID_F7K_V2,
-//    F7K_CH_COUNT
-//}f7k_channel_id;
-//
-///// @enum f7k_channel_mask
-///// @brief test module channel masks
-//typedef enum{
-//    F7K_V1= (1<<ID_F7K_V1),
-//    F7K_V2= (1<<ID_F7K_V2)
-//}f7k_channel_mask;
-//
-///// @var char *mmd_test_m1_ch_names[F7K_CH_COUNT]
-///// @brief test module channel names
-//char *f7k_ch_names[F7K_CH_COUNT]={
-//    "trace.mbtrn",
-//    "debug.mbtrn",
-//    "warn.mbtrn",
-//    "err.mbtrn",
-//    "f7k.v1",
-//    "f7k.v2"
-//};
-//
-//static mmd_module_config_t mmd_config_default={MOD_F7K,"MOD_F7K",F7K_CH_COUNT,((MM_ERR|MM_WARN)),f7k_ch_names};
 
 /// @typedef struct app_cfg_s app_cfg_t
 /// @brief application configuration parameter structure
@@ -287,40 +249,88 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         }
     }// while
 
-    mconf_init(NULL,NULL);
-    mmd_channel_set(MOD_F7K,MM_ERR);
-    mmd_channel_set(MOD_R7K,MM_ERR);
-    mmd_channel_set(MOD_R7KR,MM_ERR);
-    mmd_channel_set(MOD_MSOCK,MM_ERR);
+    mxd_setModule(MXDEBUG, 0, true, NULL);
+    mxd_setModule(MXERROR, 5, false, NULL);
+    mxd_setModule(FRAMES7K, 1, false, "trnc.error");
+    mxd_setModule(FRAMES7K_ERROR, 1, true, "trnc.error");
+    mxd_setModule(FRAMES7K_DEBUG, 1, true, "trnc.debug");
+    mxd_setModule(MXMSOCK, 1, true, "msock");
+    mxd_setModule(R7KC, 1, true, "r7kc");
+    mxd_setModule(R7KC_DEBUG, 1, true, "r7kc.debug");
+    mxd_setModule(R7KC_ERROR, 1, true, "r7kc.error");
+    mxd_setModule(R7KR, 1, true, "r7kr");
+    mxd_setModule(R7KR_ERROR, 1, true, "r7kr.error");
+    mxd_setModule(R7KR_DEBUG, 1, true, "r7kr.debug");
 
     switch (cfg->verbose) {
         case 0:
-            mmd_channel_set(MOD_F7K,0);
-            mmd_channel_set(MOD_R7K,0);
-            mmd_channel_set(MOD_R7KR,0);
-            mmd_channel_set(MOD_MSOCK,0);
             break;
         case 1:
-            mmd_channel_en(MOD_F7K,S7K_V1);
-            mmd_channel_en(MOD_F7K,MM_DEBUG);
+            mxd_setModule(MXDEBUG, 0, true, NULL);
+            mxd_setModule(MXERROR, 5, false, NULL);
+            mxd_setModule(FRAMES7K, 1, false, "trnc.error");
             break;
         case 2:
-            mmd_channel_en(MOD_F7K,S7K_V1);
-            mmd_channel_en(MOD_F7K,S7K_V2);
-            mmd_channel_en(MOD_F7K,MM_DEBUG);
-            mmd_channel_en(MOD_R7KR,MM_DEBUG);
+            mxd_setModule(MXDEBUG, 5, true, NULL);
+            mxd_setModule(MXERROR, 5, false, NULL);
+            mxd_setModule(FRAMES7K, 5, false, "trnc.error");
+            break;
+        case 3:
+        case 4:
+        case 5:
+            mxd_setModule(MXDEBUG, 5, false, NULL);
+            mxd_setModule(MXERROR, 5, false, NULL);
+            mxd_setModule(FRAMES7K_ERROR, 5, false, "trnc.error");
+            mxd_setModule(FRAMES7K_DEBUG, 5, false, "trnc.debug");
+            mxd_setModule(MXMSOCK, 5, false, "msock");
+            mxd_setModule(R7KC, 5, false, "r7kc");
+            mxd_setModule(R7KC_DEBUG, 5, false, "r7kc.debug");
+            mxd_setModule(R7KC_ERROR, 5, false, "r7kc.error");
+            mxd_setModule(R7KR, 5, false, "r7kr");
+            mxd_setModule(R7KR_ERROR, 5, false, "r7kr.error");
+            mxd_setModule(R7KR_DEBUG, 5, false, "r7kr.debug");
             break;
         default:
-            if(cfg->verbose>2){
-                mmd_channel_en(MOD_F7K,S7K_V1);
-                mmd_channel_en(MOD_F7K,S7K_V2);
-                mmd_channel_en(MOD_F7K,MM_DEBUG);
-                mmd_channel_en(MOD_MSOCK,MM_DEBUG);
-                mmd_channel_en(MOD_R7K,MM_DEBUG|R7K_V2);
-                mmd_channel_en(MOD_R7KR,MM_DEBUG);
-            }
             break;
     }
+
+    if(cfg->verbose != 0)
+        mxd_show();
+
+//    mconf_init(NULL,NULL);
+//    mmd_channel_set(MOD_F7K,MM_ERR);
+//    mmd_channel_set(MOD_R7K,MM_ERR);
+//    mmd_channel_set(MOD_R7KR,MM_ERR);
+//    mmd_channel_set(MOD_MSOCK,MM_ERR);
+//
+//    switch (cfg->verbose) {
+//        case 0:
+//            mmd_channel_set(MOD_F7K,0);
+//            mmd_channel_set(MOD_R7K,0);
+//            mmd_channel_set(MOD_R7KR,0);
+//            mmd_channel_set(MOD_MSOCK,0);
+//            break;
+//        case 1:
+//            mmd_channel_en(MOD_F7K,S7K_V1);
+//            mmd_channel_en(MOD_F7K,MM_DEBUG);
+//            break;
+//        case 2:
+//            mmd_channel_en(MOD_F7K,S7K_V1);
+//            mmd_channel_en(MOD_F7K,S7K_V2);
+//            mmd_channel_en(MOD_F7K,MM_DEBUG);
+//            mmd_channel_en(MOD_R7KR,MM_DEBUG);
+//            break;
+//        default:
+//            if(cfg->verbose>2){
+//                mmd_channel_en(MOD_F7K,S7K_V1);
+//                mmd_channel_en(MOD_F7K,S7K_V2);
+//                mmd_channel_en(MOD_F7K,MM_DEBUG);
+//                mmd_channel_en(MOD_MSOCK,MM_DEBUG);
+//                mmd_channel_en(MOD_R7K,MM_DEBUG|R7K_V2);
+//                mmd_channel_en(MOD_R7KR,MM_DEBUG);
+//            }
+//            break;
+//    }
 }
 // End function parse_args
 
@@ -334,11 +344,11 @@ static void s_termination_handler (int signum)
         case SIGINT:
         case SIGHUP:
         case SIGTERM:
-            PMPRINT(MOD_F7K,F7K_V2,(stderr,"received sig[%d]\n",signum));
+            MX_LPRINT(FRAMES7K, 2, "received sig[%d]\n", signum);
             g_stop_flag=true;
             break;
         default:
-            PEPRINT((stderr,"unhandled signal[%d]\n",signum));
+            MX_ERROR_MSG("unhandled signal[%d]\n", signum);
             break;
     }
 }
@@ -376,7 +386,7 @@ static int s_app_main (app_cfg_t *cfg)
         // test r7kr_read_frame
         byte frame_buf[MAX_FRAME_BYTES_7K]={0};
         
-        PMPRINT(MOD_F7K,F7K_V2,(stderr,"reader connected [%s/%d] err(%s)\n",cfg->host,R7K_7KCENTER_PORT,me_strerror(me_errno)));
+        MX_LPRINT(FRAMES7K, 2, "reader connected [%s/%d] err(%s)\n", cfg->host,R7K_7KCENTER_PORT,  me_strerror(me_errno));
         
         retval=0;
         int read_retries=5;
@@ -389,17 +399,17 @@ static int s_app_main (app_cfg_t *cfg)
             if( (istat = r7kr_read_frame(reader, frame_buf, MAX_FRAME_BYTES_7K, R7KR_NET_STREAM, 0.0, R7KR_READ_TMOUT_MSEC,&lost_bytes )) > 0){
                 read_retries=5;
 
-                PMPRINT(MOD_F7K,F7K_V1,(stderr,"r7kr_read_frame cycle[%d/%d] ret[%d] lost[%"PRIu32"]\n",count,cfg->cycles,istat,lost_bytes));
+                MX_LPRINT(FRAMES7K, 1, "r7kr_read_frame cycle[%d/%d] ret[%d] lost[%"PRIu32"]\n", count, cfg->cycles, istat, lost_bytes);
                 // show contents
                 if (cfg->verbose>=1) {
                     r7k_nf_t *nf = (r7k_nf_t *)(frame_buf);
                     r7k_drf_t *drf = (r7k_drf_t *)(frame_buf+R7K_NF_BYTES);
-                    PMPRINT(MOD_F7K,F7K_V1,(stderr,"NF:\n"));
+                    MX_LMSG(FRAMES7K, 1, "NF:\n");
                     r7k_nf_show(nf,false,5);
-                    PMPRINT(MOD_F7K,F7K_V1,(stderr,"DRF:\n"));
+                    MX_LMSG(FRAMES7K, 1, "DRF:\n");
                     r7k_drf_show(drf,false,5);
                     if(cfg->verbose>3){
-                        PMPRINT(MOD_F7K,F7K_V1,(stderr,"data:\n"));
+                        MX_LMSG(FRAMES7K, 1, "data:\n");
                         if (istat>0 && cfg->verbose>1) {
                             r7k_hex_show(frame_buf,istat,16,true,5);
                         }
@@ -407,9 +417,9 @@ static int s_app_main (app_cfg_t *cfg)
                 }
             }else{
                 // read error
-                PEPRINT((stderr,"ERR - r7kr_read_frame - cycle[%d/%d] ret[%d] me_err[%d] lost[%d]\n",count+1, cfg->cycles, istat, (me_errno-ME_ERRORNO_BASE), lost_bytes));
+                MX_ERROR("ERR - r7kr_read_frame - cycle[%d/%d] ret[%d] me_err[%d] lost[%d]\n", count+1, cfg->cycles, istat, (me_errno-ME_ERRORNO_BASE), lost_bytes);
                 if (me_errno==ME_ESOCK || me_errno==ME_EOF || me_errno==ME_ERECV || (read_retries-- <= 0)) {
-                    PEPRINT((stderr,"socket closed - reconnecting in 5 sec\n"));
+                    MX_ERROR_MSG("socket closed - reconnecting in 5 sec\n");
                     sleep(5);
                     r7kr_reader_connect(reader,true);
                     read_retries=5;
@@ -418,9 +428,9 @@ static int s_app_main (app_cfg_t *cfg)
         }
         
         if (g_stop_flag) {
-            PMPRINT(MOD_F7K,F7K_V2,(stderr,"interrupted - exiting cycles[%d/%d]\n",count,cfg->cycles));
+            MX_LPRINT(FRAMES7K, 2, "interrupted - exiting cycles[%d/%d]\n", count, cfg->cycles);
         }else{
-            PMPRINT(MOD_F7K,F7K_V2,(stderr,"cycles[%d/%d]\n",count,cfg->cycles));
+            MX_LPRINT(FRAMES7K, 2, "cycles[%d/%d]\n", count, cfg->cycles);
         }
     }// else invalid argument
     return retval;

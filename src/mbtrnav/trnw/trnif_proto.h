@@ -72,9 +72,7 @@
 #include "trnw.h"
 #include "msocket.h"
 #include "mutils.h"
-#include "medebug.h"
-#include "mmdebug.h"
-#include "mconfig.h"
+#include "mxdebug.h"
 #endif
 
 /////////////////////////

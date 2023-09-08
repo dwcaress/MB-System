@@ -64,7 +64,7 @@ GNU General Public License for more details
 #include "msocket.h"
 #include "mtime.h"
 #include "merror.h"
-#include "medebug.h"
+#include "mxdebug.h"
 
 /////////////////////////
 // Macros
@@ -249,12 +249,12 @@ int msock_connection_addr2str(msock_connection_t *self)
             snprintf(self->service,NI_MAXSERV,"%d",svc);
             retval=svc;
         }else{
-            PEPRINT((stderr,"inet_ntop failed peer [%d %s]\n",errno,strerror(errno)));
+            MX_ERROR("inet_ntop failed peer [%d %s]\n", errno, strerror(errno));
         }
     }else{
-        PEPRINT((stderr,"invalid arguments self[%p] addr[%p] ainfo[%p]\n",self,
-                 (NULL!=self ? self->addr : NULL),
-                 ( (NULL!=self && NULL!=self->addr) ? self->addr->ainfo : NULL)));
+        MX_PRINT("invalid arguments self[%p] addr[%p] ainfo[%p]\n", self,
+                 (NULL != self ? self->addr : NULL),
+                 ((NULL != self && NULL != self->addr) ? self->addr->ainfo : NULL));
     }
 
     return retval;
@@ -407,10 +407,10 @@ int msock_configure(msock_socket_t *s, const char *host, int port, msock_socket_
     s->addr->port=port;
 
     memset(s->addr->portstr,0,PORTSTR_BYTES*sizeof(char));
-    sprintf(s->addr->portstr,"%d",port);
+    snprintf(s->addr->portstr, PORTSTR_BYTES, "%d",port);
     
     memset(&s->addr->hints,0,sizeof(struct addrinfo));
-    PDPRINT((stderr,"configuring type [%s]\n",(type==ST_TCP ? "SOCK_STREAM" : "SOCK_DGRAM")));
+    MX_PRINT("configuring type [%s]\n", (type==ST_TCP ? "SOCK_STREAM" : "SOCK_DGRAM"));
     s->addr->hints.ai_family=PF_INET;
     s->addr->hints.ai_socktype=(type==ST_TCP ? SOCK_STREAM : SOCK_DGRAM);
     s->addr->hints.ai_flags=AI_PASSIVE;
@@ -435,7 +435,7 @@ int msock_configure(msock_socket_t *s, const char *host, int port, msock_socket_
         s->addr->alist = rp;
         
         for (; rp!=NULL; rp = rp->ai_next) {
-////            PDPRINT((stderr,"rp[%p]\n",rp));
+////            MX_PRINT("rp[%p]\n", rp);
 //            fprintf(stderr,"msock_configure - rp family[%s] type[%s]\n",
 //                    (rp->ai_family==AF_INET?"IPv4":"IPv6"),
 //                    (rp->ai_socktype==SOCK_STREAM?"TCP":"UDP"));
@@ -453,7 +453,7 @@ int msock_configure(msock_socket_t *s, const char *host, int port, msock_socket_
                 int so_nosigpipe=1;
                 setsockopt(s->fd,SOL_SOCKET,SO_NOSIGPIPE,&so_nosigpipe,sizeof(so_nosigpipe));
 #endif
-                PDPRINT((stderr,"socket created[%d] ainfo[%p] alist[%p]\n",s->fd,s->addr->ainfo,s->addr->alist));
+                MX_PRINT("socket created[%d] ainfo[%p] alist[%p]\n", s->fd, s->addr->ainfo, s->addr->alist);
                 retval=0;
                 break;
             }else {
@@ -482,7 +482,7 @@ int msock_connect(msock_socket_t *s)
             // success
 #ifdef WITH_PDEBUG
             char buf[ADDRSTR_BYTES]={0};
-            PDPRINT((stderr,"%s - connect OK [%s]\n",__func__,msock_addr2str(s,buf,ADDRSTR_BYTES)));
+            MX_PRINT("%s - connect OK [%s]\n", __func__, msock_addr2str(s, buf, ADDRSTR_BYTES));
 #endif
             retval=0;
         }else{
@@ -532,7 +532,7 @@ int msock_listen(msock_socket_t *s, int queue)
             // success
 #ifdef WITH_PDEBUG
             char buf[ADDRSTR_BYTES]={0};
-            PDPRINT((stderr,"%s - listening [%s] queue[%d]\n",__FUNCTION__,msock_addr2str(s,buf,ADDRSTR_BYTES),queue));
+            MX_PRINT("%s - listening [%s] queue[%d]\n", __FUNCTION__, msock_addr2str(s, buf, ADDRSTR_BYTES), queue);
 #endif
             retval=0;
         }else{
@@ -561,11 +561,11 @@ int msock_accept(msock_socket_t *s,msock_addr_t *addr)
  
         int new_fd = accept(s->fd, (struct sockaddr *)dest_addr, &addrlen);
         if (new_fd != -1) {
-            PDPRINT((stderr,"accept received connection from client on socket new_fd[%d]\n",new_fd));
+            MX_PRINT("accept received connection from client on socket new_fd[%d]\n", new_fd);
             retval = new_fd;
         }else{
             // accept failed
-//            PDPRINT((stderr,"accept failed fd[%d] dest_addr[%p] addrlen[%d] [%d/%s]\n",s->fd,dest_addr,addrlen,errno,strerror(errno)));
+//            MX_PRINT("accept failed fd[%d] dest_addr[%p] addrlen[%d] [%d/%s]\n", s->fd, dest_addr, addrlen, errno, strerror(errno));
         }
     }else{
         fprintf(stderr,"%s - invalid arguments\n",__FUNCTION__);
@@ -626,7 +626,7 @@ if (NULL != s && NULL != buf && len>0) {
     }
     
     if( (retval = sendto(s->fd,buf,len,flags,dest_addr,MSOCK_ADDR_LEN)) > 0){
-        //                    PDPRINT((stderr,"sendto OK [%lld]\n",retval));
+        //                    MX_PRINT("sendto OK [%lld]\n", retval);
     }else{
         //                    fprintf(stderr,"ERR - sendto returned %lld [%d/%s]\n",retval,errno,strerror(errno));
     }
@@ -674,11 +674,11 @@ int64_t msock_recvfrom(msock_socket_t *s, msock_addr_t *addr, byte *buf, uint32_
 //        fprintf(stderr,"recvfrom connection[%p] dest_addr[%p] ai_family[%d] addrlen[%d]\n",addr,(addr?addr->ainfo->ai_addr:NULL),(int)(addr?addr->ainfo->ai_family:-1),(int)(addr?addr->ainfo->ai_addrlen:-1));
         
         if( (retval = recvfrom(s->fd,buf,len,flags,dest_addr,&addrlen))>0){
-            // PDPRINT((stderr,"received data connection[%p] dest[%p] ainfo[%p] [%lld]\n",addr,dest_addr,addr->ainfo,retval));
+            // MX_PRINT("received data connection[%p] dest[%p] ainfo[%p] [%lld]\n", addr, dest_addr, addr->ainfo, retval);
         }
         else{
             if(g_msocket_debug_level>0)
-            PDPRINT((stderr,"recvfrom failed [%d %s]\n",errno,strerror(errno)));
+                MX_PRINT("recvfrom failed [%d %s]\n", errno, strerror(errno));
         }
     }else{
         fprintf(stderr,"%s - invalid arguments\n",__FUNCTION__);
@@ -891,6 +891,14 @@ msock_socket_t *msock_wrap_fd(int fd)
 }
 // End function msock_wrap_fd
 
+
+int msock_fd(msock_socket_t *self)
+{
+    if(self != NULL){
+        return self->fd;
+    }
+    return -1;
+}
 
 int msock_get_opt(msock_socket_t *self, int opt_name, void *optval, socklen_t *optlen)
 {

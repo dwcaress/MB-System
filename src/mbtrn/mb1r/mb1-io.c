@@ -69,9 +69,8 @@ GNU General Public License for more details
 #ifdef WITH_MB1_UTILS
 #include "msocket.h"
 #include "merror.h"
-#include "mmdebug.h"
-#include "medebug.h"
-#include "mconfig.h"
+#include "mxdebug.h"
+#include "mxd_app.h"
 #endif //WITH_MB1_UTILS
 
 /////////////////////////
@@ -100,53 +99,10 @@ GNU General Public License for more details
 // string buffer expansion increment
 #define MB1_STR_INC 256
 #define TRACKING_BYTES 16
+
 /////////////////////////
 // Declarations 
 /////////////////////////
-
-// define module IDs in mconfig.h
-
-/// @enum mb1_module_ids
-/// @brief application module IDs
-/// [note : starting above reserved mframe module IDs]
-//typedef enum{
-//    MOD_MB1=MM_MODULE_COUNT,
-//    APP_MODULE_COUNT
-//}mb1_module_ids;
-
-///// @enum mb1_channel_id
-///// @brief test module channel IDs
-///// [note : starting above reserved mframe channel IDs]
-//typedef enum{
-//    ID_MB1_V1=MM_CHANNEL_COUNT,
-//    ID_MB1_V2,
-//    ID_MB1_PARSER,
-//    ID_MB1_DRFCON,
-//    MB1_CH_COUNT
-//}mb1_channel_id;
-//
-///// @enum mb1_channel_mask
-///// @brief test module channel masks
-//typedef enum{
-//    MB1_V1= (1<<ID_MB1_V1),
-//    MB1_V2= (1<<ID_MB1_V2),
-//    MB1_PARSER= (1<<ID_MB1_PARSER),
-//    MB1_DRFCON= (1<<ID_MB1_DRFCON)
-//}mb1_channel_mask;
-//
-///// @var char *mmd_test_m1_ch_names[MB1_CH_COUNT]
-///// @brief test module channel names
-//char *mb1_ch_names[MB1_CH_COUNT]={
-//    "trace.mb1",
-//    "debug.mb1",
-//    "warn.mb1",
-//    "err.mb1",
-//    "mb1.1",
-//    "mb1.verbose",
-//    "mb1.parser"
-//};
-//
-//static mmd_module_config_t mmd_config_default= {MOD_MB1,"MOD_MB1",MB1_CH_COUNT,((MM_ERR|MM_WARN)|MB1_V1),mb1_ch_names};
 
 /////////////////////////
 // Imports
@@ -443,7 +399,7 @@ int mb1_stream_show(msock_socket_t *s, int sz, uint32_t tmout_ms, int cycles, bo
         if (cycles>0) {
             forever=false;
         }
-        //    PEPRINT((stderr,"cycles[%d] forever[%s] c||f[%s]\n",cycles,(forever?"Y":"N"),(forever || (cycles>0) ? "Y" :"N")));
+        //    MX_MPRINT(MBIO, "cycles[%d] forever[%s] c||f[%s]\n",cycles,(forever?"Y":"N"),(forever || (cycles>0) ? "Y" :"N"));
 
         // read cycles or forever (cycles<=0)
         while ( (forever || (count++ < cycles)) &&
@@ -456,14 +412,14 @@ int mb1_stream_show(msock_socket_t *s, int sz, uint32_t tmout_ms, int cycles, bo
                 fprintf(stderr,"c[%d/%d] ret[%"PRId64"/%u] stat[%d] good/zero/tmout/err [%d/%d/%d/%d]\n",count,cycles,test,sz,status,good,zero,tmout,err);
                 retval=0;
             }else if(test<0){
-                PMPRINT(MOD_MB1,MM_DEBUG,(stderr,"ERR [%d/%s]\n",me_errno,me_strerror(me_errno)));
+                MX_MPRINT(MB1IO_DEBUG, "ERR [%d/%s]\n", me_errno, me_strerror(me_errno));
                 err++;
                 tmout = (me_errno==ME_ETMOUT ? tmout+1 : tmout );
                 if (me_errno==ME_ETMOUT || me_errno==ME_EOF || me_errno==ME_ESOCK) {
                     break;
                 }
             }else{
-                PMPRINT(MOD_MB1,MM_DEBUG,(stderr,"read returned 0\n"));
+                MX_MSG(MB1IO_DEBUG, "read returned 0\n");
                 zero++;
                 if (me_errno==ME_ESOCK || me_errno==ME_EOF) {
                     break;
@@ -493,7 +449,7 @@ int mb1_sounding_receive(msock_socket_t *s, mb1_sounding_t **dest, uint32_t time
 
         if ( (nbytes=msock_read_tmout(s,headers,header_len,timeout_msec)) == header_len) {
             int64_t total_len=nbytes;
-            PMPRINT(MOD_MB1,MM_DEBUG,(stderr,"read headers [%"PRId64"/%"PRId64"]\n",nbytes,header_len));
+            MX_MPRINT(MB1IO_DEBUG, "read headers [%"PRId64"/%"PRId64"]\n", nbytes, header_len);
             // get data and checksum
             mb1_header_t *hdr = (mb1_header_t *)(headers);
 
@@ -501,7 +457,7 @@ int mb1_sounding_receive(msock_socket_t *s, mb1_sounding_t **dest, uint32_t time
             uint32_t data_len = MB1_BEAM_ARRAY_BYTES(hdr->nbeams);
             uint32_t read_len = data_len+MB1_CHECKSUM_BYTES;
 
-            PMPRINT(MOD_MB1,MM_DEBUG,(stderr,"data_len[%u] read_len[%u]\n",data_len,read_len));
+            MX_MPRINT(MB1IO_DEBUG, "data_len[%u] read_len[%u]\n", data_len, read_len);
             // read rth/rd/od [if any], checksum
             if (read_len>0) {
                 // INVALID C. JL
@@ -510,7 +466,7 @@ int mb1_sounding_receive(msock_socket_t *s, mb1_sounding_t **dest, uint32_t time
                 memset(data,0,read_len);
                 if ( (nbytes=msock_read_tmout(s,data,read_len,timeout_msec)) == read_len) {
                     total_len+=nbytes;
-                   PMPRINT(MOD_MB1,MM_DEBUG,(stderr,"read data [%"PRId64"/%d] -> %p\n",nbytes,read_len,dest));
+                   MX_MPRINT(MB1IO_DEBUG, "read data [%"PRId64"/%d] -> %p\n", nbytes, read_len, dest);
                     // TODO: validate content
                     // create message
                     mb1_sounding_t *m = mb1_sounding_new(hdr->nbeams);
@@ -518,24 +474,24 @@ int mb1_sounding_receive(msock_socket_t *s, mb1_sounding_t **dest, uint32_t time
                         memcpy(m,hdr,header_len);
                         byte *pdata = (byte *)m + MB1_HEADER_BYTES;
                         memcpy(pdata,data,nbytes);
-//                       PMPRINT(MOD_MB1,MM_DEBUG,(stderr,"dest msg:\n"));
+//                       MX_MMSG(MB1IO_DEBUG, "dest msg:\n");
 //                        mb1_sounding_show(m,true,6);
                         *dest=m;
                         retval=total_len;
                     }else{
-                        PEPRINT((stderr,"recv - msg_new failed\n"));
+                        MX_ERROR_MSG("recv - msg_new failed\n");
                     }
                 }else{
-                   PMPRINT(MOD_MB1,MM_DEBUG,(stderr,"recv - incomplete data read nbytes[%"PRId64"] data_len[%u]\n",nbytes,data_len));
+                   MX_MPRINT(MB1IO_DEBUG, "recv - incomplete data read nbytes[%"PRId64"] data_len[%u]\n", nbytes, data_len);
                 }
             }else{
-               PMPRINT(MOD_MB1,MM_DEBUG,(stderr,"recv - read_len <= 0 nbytes[%"PRId64"] read_len[%u]\n",nbytes,read_len));
+               MX_MPRINT(MB1IO_DEBUG, "recv - read_len <= 0 nbytes[%"PRId64"] read_len[%u]\n", nbytes, read_len);
             }
         }else{
-           PMPRINT(MOD_MB1,MM_DEBUG,(stderr,"recv - incomplete header read? nbytes[%"PRId64"] header_len[%"PRId64"]\n",nbytes,header_len));
+           MX_MPRINT(MB1IO_DEBUG, "recv - incomplete header read? nbytes[%"PRId64"] header_len[%"PRId64"]\n", nbytes, header_len);
         }
     }else{
-        PMPRINT(MOD_MB1,MM_DEBUG,(stderr,"recv - invalid socket or status s[%p, %d/%d]\n",s, (s!=NULL?s->status:0),SS_CONNECTED));
+        MX_MPRINT(MB1IO_DEBUG, "recv - invalid socket or status s[%p, %d/%d]\n", s,  (s!=NULL?s->status:0), SS_CONNECTED);
     }
         
     return retval;
@@ -550,21 +506,21 @@ int mb1_sounding_send(msock_socket_t *s, mb1_sounding_t *self)
         byte *buf = mb1_sounding_serialize(self, &r_size);
 
         if( NULL!=buf && r_size>0){
-            //       PMPRINT(MOD_MB1,MM_DEBUG,(stderr,"SEND nf:\n"));
+            //       MX_MMSG(MB1IO_DEBUG, "SEND nf:\n");
             //        mb1_nf_show((mb1_nf_t *)buf,true,4);
             int64_t status=0;
 
             if( (status=msock_send(s,buf,r_size))>0){
                 retval=0;
-                PMPRINT(MOD_MB1,MM_DEBUG,(stderr,"send OK s[%p, %d]\n",s, s->status));
+                MX_MPRINT(MB1IO_DEBUG, "send OK s[%p, %d]\n", s, s->status);
             }else{
-                PEPRINT((stderr,"send failed [%"PRId64"] [%d/%s]\n",status,errno,strerror(errno)));
+                MX_ERROR("send failed [%"PRId64"] [%d/%s]\n", status, errno, strerror(errno));
             }
         }
 
         free(buf);
     }else{
-        PMPRINT(MOD_MB1,MM_DEBUG,(stderr,"invalid socket or message\n"));
+        MX_MMSG(MB1IO_DEBUG, "invalid socket or message\n");
    }
     return retval;
 }

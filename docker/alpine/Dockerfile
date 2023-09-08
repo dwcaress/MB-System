@@ -30,7 +30,7 @@ ENV MBSYS_DEPS "proj-dev \
     glu-dev \
     motif-dev"
 
-ENV COMMON_DEPS "libgcc libstdc++ mesa-dev"
+ENV COMMON_DEPS "libgcc libstdc++ bash mesa-dev mesa-dri-gallium"
 
 ENV BUILD_DEPS "${COMMON_DEPS} ${LCM_DEPS} ${MBSYS_DEPS}"
 

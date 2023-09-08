@@ -74,8 +74,6 @@
 #include "trnif_proto.h"
 
 #include "mframe.h"
-#include "medebug.h"
-#include "mmdebug.h"
 
 /////////////////////////
 // Macros
@@ -262,43 +260,6 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
     fprintf(stderr,"particles [%s]\n",cfg->map);
     fprintf(stderr,"logdir    [%s]\n",cfg->map);
 
-//    mconf_init(NULL,NULL);
-//    mmd_channel_set(MOD_MBTNAV,MM_ERR);
-//    mmd_channel_set(MOD_R7K,MM_ERR);
-//    mmd_channel_set(MOD_R7KR,MM_ERR);
-//    mmd_channel_set(MOD_MSOCK,MM_ERR);
-//
-//    switch (cfg->verbose) {
-//        case 0:
-//            mmd_channel_set(MOD_MBTNAV,0);
-//            mmd_channel_set(MOD_R7K,0);
-//            mmd_channel_set(MOD_R7KR,0);
-//            mmd_channel_set(MOD_MSOCK,0);
-//            break;
-//        case 1:
-//            mmd_channel_en(MOD_MBTNAV,MBTNAV_V1);
-//            mmd_channel_en(MOD_S7K,MM_DEBUG);
-//            break;
-//        case 2:
-//            mmd_channel_en(MOD_MBTNAV,MBTNAV_V1);
-//            mmd_channel_en(MOD_MBTNAV,MBTNAV_V2);
-//            mmd_channel_en(MOD_MBTNAV,MM_DEBUG);
-//            mmd_channel_en(MOD_MSOCK,MM_DEBUG);
-//            mmd_channel_en(MOD_R7K,MM_DEBUG);
-//            mmd_channel_en(MOD_R7KR,MM_DEBUG);
-//            break;
-//        default:
-//            mmd_channel_en(MOD_MBTNAV,MM_DEBUG);
-//            break;
-//    }
-//
-//    PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"verbose [%s]\n",(cfg->verbose?"Y":"N")));
-//    PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"host    [%s]\n",cfg->host));
-//    PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"port    [%d]\n",cfg->port));
-//    PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"hbeat   [%d]\n",cfg->hbeat));
-//    PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"block   [%s]\n",(cfg->blocking==0?"N":"Y")));
-//    PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"cycles  [%d]\n",cfg->cycles));
-//    PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"bsize   [%d]\n",cfg->bsize));
 }
 // End function parse_args
 
@@ -544,8 +505,7 @@ static int s_app_main(app_cfg_t *cfg)
             if(NULL!=trn){
                 netif_set_reqres_res(netif,trn);
 
-                //    mmd_module_configure(&mmd_config_defaults[0]);
-                netif_init_mmd();
+                netif_configure_debug(netif, 5);
                 netif_show(netif,true,5);
 
                 // initialize message log
@@ -643,7 +603,7 @@ int main(int argc, char **argv)
         // release trn
         wtnav_destroy(cfg->trn);
         // debug: release resources
-        mmd_release();
+        mxd_release();
 
     }
 //#ifdef WITH_NETIF_TEST

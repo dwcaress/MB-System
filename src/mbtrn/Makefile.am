@@ -18,7 +18,15 @@ MBTRNFRAME_TESTS=-DWITH_TESTS -DWITH_R7KR_TEST -DWITH_MB1R_TEST
 MBTRNFRAME_FEATURES=-DWITH_MST_MSTATS -DMST_STATS_EN -DWITH_MMDEBUG
 MBTRNFRAME_OPTS=$(MBTRNFRAME_VERSIONS) $(MBTRNFRAME_FEATURES) $(MBTRNFRAME_TESTS)
 
-AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/mb1r -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrnframe  -I${top_srcdir}/src/mbtrnav/trnw -I${top_srcdir}/src/mbtrnav/terrain-nav -DHAVE_CONFIG_H  -D_GNU_SOURCE $(MBTRNFRAME_OPTS)
+AM_CPPFLAGS = -g -O0 
+AM_CPPFLAGS += -I${top_srcdir}/src/mbtrn/r7kr 
+AM_CPPFLAGS += -I${top_srcdir}/src/mbtrn/mb1r 
+AM_CPPFLAGS += -I${top_srcdir}/src/mbtrn/utils 
+AM_CPPFLAGS += -I${top_srcdir}/src/mbtrnframe 
+AM_CPPFLAGS += -I${top_srcdir}/src/mbtrnav/trnw 
+AM_CPPFLAGS += -I${top_srcdir}/src/mbtrnav/terrain-nav 
+AM_CPPFLAGS += -I${top_srcdir}/src/mbtrnutils
+AM_CPPFLAGS += -DHAVE_CONFIG_H  -D_GNU_SOURCE $(MBTRNFRAME_OPTS)
 
 libr7kr_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 

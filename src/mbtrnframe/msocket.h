@@ -287,6 +287,7 @@ extern "C" {
     char *msock_addr2str(msock_socket_t *s, char *dest, size_t len);
     int msock_close(msock_socket_t *self);
     msock_socket_t *msock_wrap_fd(int fd);
+    int msock_fd(msock_socket_t *self);
     
     msock_addr_t *msock_addr_new();
     void msock_addr_destroy(msock_addr_t **pself);

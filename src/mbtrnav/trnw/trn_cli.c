@@ -63,6 +63,7 @@
 // Headers 
 /////////////////////////
 #include "trn_cli.h"
+#include "mxdebug.h"
 
 /////////////////////////
 // Macros
@@ -119,8 +120,8 @@ static int32_t s_trncli_send_recv(trncli_t *self, byte *msg, int32_t len, bool b
         }
     }
 
-    PDPRINT((stderr,"%s - send ret[%"PRId32"]\n",__FUNCTION__,sret));
-    PDPRINT((stderr,"%s - recv ret[%"PRId32"]\n",__FUNCTION__,rret));
+    MX_DEBUG("%s - send ret[%"PRId32"]\n",__FUNCTION__, sret);
+    MX_DEBUG("%s - recv ret[%"PRId32"]\n",__FUNCTION__, rret);
 
     return retval;
 }// end function s_trncli_send_recv

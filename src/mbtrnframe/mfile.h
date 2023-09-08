@@ -166,7 +166,7 @@ int mfile_flush(mfile_file_t *self);
 int64_t mfile_fsize(mfile_file_t *self);
 time_t mfile_mtime(const char *path);
 int mfile_rename(mfile_file_t *self,const char *path);
-    
+int mfile_fd(mfile_file_t *self);    
 #ifdef __cplusplus
 }
 #endif
