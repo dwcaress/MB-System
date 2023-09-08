@@ -65,29 +65,6 @@ void AprojTest(char *msg) {
     std::cerr << "created proj OK" << std::endl;    
   }
 
-  char buffer[BSIZE];
-  int const pid = getpid();
-  snprintf(buffer, BSIZE, "/proc/%d/maps", pid);
-  FILE * const maps = fopen(buffer, "r");
-  while (fgets(buffer, BSIZE, maps) != NULL) {
-    unsigned long from, to;
-    int const r = sscanf(buffer, "%lx-%lx", &from, &to);
-    if (r != 2) {
-      puts("!");
-      continue;
-    }
-    void *fptr = (void *)(&proj_create_crs_to_crs);
-        
-    if ((from <= (uintptr_t)fptr) &&
-        ((uintptr_t)fptr < to)) {
-      char const * name = strchr(buffer, '/');
-      if (name) {
-        printf("using %s", name);
-      } else {
-        puts("?");
-      }
-    }
-  }
   if (error) {
     exit(-1);
   }
@@ -171,7 +148,7 @@ int TopoGridReader::RequestData(vtkInformation* request,
   //  PJ *toUTM = nullptr;
   PJ_CONTEXT *projContext = nullptr;
 
-  // If in grid is in geographic CRM, must project it to UTM
+  // If grid is in geographic CRM, must project it to UTM
   // to maintain same scale (meters) on x, y, and z axes
   bool convertToUTM = geographicCRS();
 
@@ -187,7 +164,7 @@ int TopoGridReader::RequestData(vtkInformation* request,
                                                 xMax - xMin,
                                                 zMax - zMin);
     
-    std::cerr << "lat-lon z-scale: " << zScale << std::endl;
+    std::cerr << "TopoGridReader: lat-lon z-scale: " << zScale << std::endl;
   }
   
   if (projTransform_) {

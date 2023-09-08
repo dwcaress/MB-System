@@ -11,8 +11,9 @@
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
-/*
- * mb_io.h defines data structures used by MBIO "mb_" functions
+/**
+ * @file
+ * @brief Data structures and macros used by MBIO "mb_" functions
  * to store parameters relating to reading data from or writing
  * data to a single multibeam data file.
  *

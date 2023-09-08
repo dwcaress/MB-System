@@ -12,7 +12,10 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /** @file
- * mb_proj.c includes the "mb_" functions used to initialize
+ * @brief mb_system functions to initialize and transform between projections and
+ * geographic coordinates systems.
+ * 
+ * @details  Declare mb_system functions used to initialize
  * projections, and then to do forward (mb_proj_forward())
  * and inverse (mb_proj_inverse()) projections
  * between geographic coordinates (longitude and latitude) and

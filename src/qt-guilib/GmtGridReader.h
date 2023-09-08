@@ -32,7 +32,7 @@ namespace mb_system {
     /// Set grid file name
     virtual void SetFileName(
                              const char *fileName ///< [in] grid file name
-                             );
+                             ) override;
 
     /// Return pointer to gridPoints
     vtkPoints *gridPoints() { return gridPoints_; }

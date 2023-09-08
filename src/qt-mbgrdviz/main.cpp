@@ -1,7 +1,9 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QVTKOpenGLWindow.h>
 #include "BackEnd.h"
 #include "QVtkItem.h"
+
 // These first three lines address
 // issue described at
 // https://stackoverflow.com/questions/18642155/no-override-found-for-vtkpolydatamapper
@@ -16,6 +18,8 @@ int main(int argc, char *argv[])
 
     QGuiApplication app(argc, argv);
 
+    QSurfaceFormat::setDefaultFormat(QVTKOpenGLWindow::defaultFormat());
+    
     app.setOrganizationName("MBARI");
     app.setOrganizationDomain("www.mbari.org");
     app.setApplicationName("my app");

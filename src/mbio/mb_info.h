@@ -13,8 +13,8 @@
  *--------------------------------------------------------------------*/
 /**
    @file
- * mb_info.h defines file information and data structures used by
- * mbproject..
+ * @brief Define file information and data structures used by
+ * mbproject.
  *
  * Author:	D. W. Caress
  * Date:	August 21, 2006

@@ -11,13 +11,14 @@
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
-/*
- * mb_define.h defines macros used by MB-System programs and functions
- * for degree/radian conversions and min/max calculations.
- *
+/**
+ * @file 
+ * @brief Define macros, types and functions used by MB-System 
+ * 
  * Author:  D. W. Caress
  * Date:  April 21, 1996
  */
+
 
 #ifndef MB_DEFINE_H_
 #define MB_DEFINE_H_
@@ -122,7 +123,7 @@ typedef signed char mb_s_char;
 typedef long long unsigned mb_u_long;
 typedef long long mb_s_long;
 
-/* type definitions for structures used in beam angle calculations */
+/** Type definitions for structures used in beam angle calculations */
 typedef struct {
   double x;
   double y;
@@ -135,7 +136,7 @@ typedef struct {
   double heading;
 } mb_3D_orientation;
 
-/* declare buffer maximum */
+/** declare buffer maximum */
 #define MB_BUFFER_MAX 5000
 
 /* maximum path length in characters */
@@ -307,7 +308,17 @@ int mb_format_flags(int verbose, int *format, int *variable_beams, int *travelti
 int mb_format_source(int verbose, int *format, int *platform_source, int *nav_source, int *sonardepth_source, int *heading_source,
                      int *attitude_source, int *svp_source, int *error);
 int mb_format_beamwidth(int verbose, int *format, double *beamwidth_xtrack, double *beamwidth_ltrack, int *error);
-int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int *error);
+
+/** Get swath file format code
+    @param verbose verbose debug output, True or False
+    @param filename swath data file
+    @param fileroot ???
+    @param format swath code
+    @param error error code, if returns MB_FAILURE
+    @return MB_SUCCESS or MB_FAILURE
+ */
+ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int *error);
+  
 int mb_datalist_open(int verbose, void **datalist_ptr, char *path, int look_processed, int *error);
 int mb_datalist_read(int verbose, void *datalist_ptr, char *path, char *dpath, int *format, double *weight, int *error);
 int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path, char *ppath, char *dpath, int *format,

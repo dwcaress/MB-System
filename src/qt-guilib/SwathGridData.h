@@ -6,9 +6,10 @@
 struct mbev_grid_struct;
 
 namespace mb_system {
-  /* **
-     SwathGridData encapsulates data read from a swath file
-     ** */
+  /**
+     SwathGridData encapsulates data read from a swath file in any format supported
+     by MB-System.
+  */
   class SwathGridData : public TopoGridData {
 
   public:
@@ -24,7 +25,7 @@ namespace mb_system {
     bool data(int row, int col, double *x, double *y,
               double *z) override;
   
-    /// Read data from GMT file
+    /// Read data from swath file
     bool readDatafile(char *filename) override;
 
     /// Invoked by mbeditviz_prog C functions
@@ -34,7 +35,7 @@ namespace mb_system {
     }
 
     /// Invoked by mbeditviz_prog C functions    
-    static void hideMessage() {
+    static int hideMessage() {
       std::cout << "hideMessage() " << std::endl;
     }
 

@@ -12,17 +12,17 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /**
-   @file
- * mbsys_atlas.h defines the MBIO data structures for handling data from
+ * @file
+ * @brief Defines the MBIO data structures for handling data from
  * STN Atlas Marine Electronics multibeam sonars.
- * The relevant sonars include Hydrosweep DS2 and Fansweep sonars.
+ * @details The relevant sonars include Hydrosweep DS2 and Fansweep sonars.
  * The older  Hydrosweep DS and MD sonars produce data in different
  * formats (e.g. 21-24 and 101-102).
  * The data formats associated with (newer) STN Atlas sonars
  * include:
- *    MBSYS_ATLAS formats (code in mbsys_atlas.c and mbsys_atlas.h):
- *      MBF_HSDS2RAW : MBIO ID 182 - Vendor raw HSDS2 and Fansweep format
- *      MBF_HSDS2LAM : MBIO ID 183 - L-DEO HSDS2 and Fansweep processing format
+ *    - MBSYS_ATLAS formats (code in mbsys_atlas.c and mbsys_atlas.h):
+ *    - MBF_HSDS2RAW : MBIO ID 182 - Vendor raw HSDS2 and Fansweep format
+ *    - MBF_HSDS2LAM : MBIO ID 183 - L-DEO HSDS2 and Fansweep processing format
  *
  *
  * Author:	D. W. Caress

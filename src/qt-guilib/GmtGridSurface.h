@@ -1,6 +1,12 @@
 #ifndef GMTGRIDSURFACE_H
 #define GMTGRIDSURFACE_H
+#if defined(__APPLE__)
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#else
 #include <GL/gl.h>
+#include <GL/glu.h>
+#endif
 #include "gmt.h"
 #include "Surface.h"
 #include "ColorMap.h"

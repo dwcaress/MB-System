@@ -12,10 +12,11 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /**
-   @file
- * mb_swap.h is an include file with macro definitions
- * used to swap bytes for 2 and 4 byte integer values to deal with the
- * differences between "big endian" and "little endian" machines.
+ * @file
+ * @brief Macro definitions to swap 2-byte and 4-byte integers between big-endian and
+ * little-endian machines. 
+ * @details Macro definitions used to swap bytes for 2 and 4 byte integer values to 
+ * deal with the differences between "big endian" and "little endian" machines.
  * The two macros mb_swap_short and mb_swap_long come courtesy of
  * Paul Cohen of Sonatech.
  *

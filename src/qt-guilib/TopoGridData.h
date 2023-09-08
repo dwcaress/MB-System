@@ -5,10 +5,10 @@ namespace mb_system {
 
   
   
-  /* **
+  /**
      TopoGridData defines interface to 3D gridded data such as GMT grid data or 
      swath data. 
-     ** */
+  */
   class TopoGridData {
 
   public:

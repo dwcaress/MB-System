@@ -11,9 +11,10 @@
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
-/*
- *
- * MBeditviz is an interactive swath bathymetry editor and patch
+/**
+ * @file
+ * @brief Functions, macros and types for mebeditviz tool.
+ * @details mbeditviz is an interactive swath bathymetry editor and patch
  * test tool for  MB-System.
  * It can work with any data format supported by the MBIO library.
  * This include file contains global control parameters shared with
@@ -318,8 +319,13 @@ int mbeditviz_init(int argc, char **argv,
 
 int mbeditviz_get_format(char *file, int *form);
 int mbeditviz_open_data(char *path, int format);
+
+/** Read list of relevant files into global mbev_files array */
 int mbeditviz_import_file(char *path, int format);
+
+/** Read swath data from specified file into global mbev_file array element  */
 int mbeditviz_load_file(int ifile, bool assertLock);
+
 int mbeditviz_apply_biasesandtimelag(struct mbev_file_struct *file, struct mbev_ping_struct *ping, double rollbias, double pitchbias,
                             double headingbias, double timelag, double *headingdelta, double *sonardepth, double *rolldelta,
                             double *pitchdelta);
@@ -333,10 +339,19 @@ int mbeditviz_delete_file(int ifile);
 double mbeditviz_erf(double x);
 int mbeditviz_bin_weight(double foot_a, double foot_b, double scale, double pcx, double pcy, double dx, double dy, double *px,
                          double *py, double *weight, int *use);
+
+/** Read grid bounds of loaded files into global mbev_grid_bounds array */
 int mbeditviz_get_grid_bounds(void);
+
+/** Setup the grid to contain loaded files */
 int mbeditviz_setup_grid(void);
+
+/** Allocate and load individual swath soundings */
 int mbeditviz_project_soundings(void);
+
+/** Create the grid to containing loaded files */
 int mbeditviz_make_grid(void);
+
 int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *ping, int ibeam,
                         bool beam_ok, bool apply_now);
 

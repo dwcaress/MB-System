@@ -3,10 +3,9 @@
 
 
 namespace mb_system {
-        
-  /* **
+  /**
      GmtGridData encapsulates data read from a GMT grid file.
-     ** */
+  */
   class GmtGridData : public TopoGridData {
 
   public:
