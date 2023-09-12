@@ -12,8 +12,9 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /**
-   @file
- * mbio_status.h defines version, status and error codes used
+ * @file
+ * @brief Defines version, status and error codes used
+ * @details Defines version, status and error codes used
  * by MBIO functions and programs
  *
  * Author:	D. W. Caress

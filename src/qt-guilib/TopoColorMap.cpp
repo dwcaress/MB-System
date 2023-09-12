@@ -1,5 +1,6 @@
 #include <vtkColorTransferFunction.h>
 #include <vtkLookupTable.h>
+#include <array>
 #include "TopoColorMap.h"
 
 using namespace mb_system;

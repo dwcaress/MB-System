@@ -189,13 +189,18 @@ void QVtkRenderer::render() {
     qDebug() << "QVtkRenderer::render() resize renderWindow " << \
       item_->width() << " x " << item_->height();
     renderWindow_->SetSize(item_->width(), item_->height());
+    qDebug() << "Resized";
   }
 
+  qDebug() << "call renderWindow->Render()";
   renderWindow_->Render();
+  qDebug() << "back from renderWindow->Render() - reset opengl state";
   
   // Done with render. Reset OpenGL state
   renderWindow_->PopState();
-  item_->window()->resetOpenGLState();;
+  qDebug() << "back from PopState()";
+  item_->window()->resetOpenGLState();
+  qDebug() << "back from resetOpenGLState()";
 
 }
 
@@ -459,7 +464,7 @@ bool QVtkRenderer::assemblePipeline() {
   elevColorizer_->SetLowPoint(0, 0, gridBounds[4]);
   elevColorizer_->SetHighPoint(0, 0, gridBounds[5]);
 
-  /// Scale z axis based on 
+  /// Scale z axis based on vertical exaggeration
   float zScale = displayProperties_->verticalExagg() *
     gridReader_->zScaleLatLon();
   ;

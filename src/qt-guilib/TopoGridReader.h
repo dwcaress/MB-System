@@ -20,9 +20,10 @@ namespace mb_system {
                      SwathGrid};
 
   /**
-     TopoGridReader reads data stored in a data file 
-     and outputs the data into a vtkPoints (vertices) and vtkCellArray 
-     (triangles) where data can be accessed by the VTK pipeline.
+     TopoGridReader reads topgraphy/bathymetry data from a file and
+     outputs the data into vtkPoints vertices and vtkCellArray 
+     triangles which can be accessed by the VTK pipeline. The data file may be
+     a GMT grid file, or a swath file in any format supported by MB-System.
   */
   class TopoGridReader : public vtkAbstractPolyDataReader {
 
@@ -39,7 +40,7 @@ namespace mb_system {
     /// Set grid file name
     virtual void SetFileName(
                              const char *fileName ///< [in] grid file name
-                             );
+                             ) override;
 
     /// Return pointer to gridPoints
     vtkPoints *gridPoints() { return gridPoints_; }
