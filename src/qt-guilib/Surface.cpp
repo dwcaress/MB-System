@@ -1,5 +1,12 @@
 #include <math.h>
-#include <GL/gl.h>
+#include <limits>
+
+#if defined(__APPLE__)
+# include <OpenGL/gl.h>
+#else
+# include <GL/gl.h>
+#endif
+
 #include "Surface.h"
 
 using namespace mb_system;

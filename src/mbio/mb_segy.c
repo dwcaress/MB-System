@@ -658,7 +658,7 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheade
 		index += 4;
 	}
 
-	int bytes_per_sample;
+	size_t bytes_per_sample;
 
 	/* make sure there is adequate memory */
 	if (status == MB_SUCCESS) {
@@ -728,13 +728,13 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheade
 				index += bytes_per_sample;
 			}
 			else if (fileheader->format == 2) {
-				int intval;
+				int intval = 0;
 				mb_get_binary_int(false, (void *)&(buffer[index]), &(intval));
 				trace[i] = (float)intval;
 				index += bytes_per_sample;
 			}
 			else if (fileheader->format == 3) {
-				short shortval;
+				short shortval = 0;
 				mb_get_binary_short(false, (void *)&(buffer[index]), &(shortval));
 				trace[i] = (float)shortval;
 				index += bytes_per_sample;
@@ -1034,7 +1034,7 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytracehead
 			mb_segyio_ptr->bufferalloc = 0;
 	}
 
-	int bytes_per_sample;
+	size_t bytes_per_sample;
 
 	/* make sure there is adequate memory */
 	if (status == MB_SUCCESS) {
@@ -1239,7 +1239,7 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytracehead
 
 	/* write trace */
 	if (status == MB_SUCCESS &&
-	    fwrite(buffer, 1, bytes_per_sample + traceheader->nsamps, mb_segyio_ptr->fp) != bytes_per_sample + traceheader->nsamps) {
+	    fwrite(buffer, 1, bytes_per_sample * traceheader->nsamps, mb_segyio_ptr->fp) != bytes_per_sample * traceheader->nsamps) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
 	}

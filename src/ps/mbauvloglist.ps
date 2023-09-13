@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:00 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:06 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 8
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -276,32 +282,31 @@ ted te)-.55 F .462(xt output.)-.15 F(MB)108 230.4 Q .353(ARI A)-.35 F
 Q(wing)-.25 E F2<ad4f>2.5 E F0(commands.)2.5 E 2.157 -.8(To \214)108
 494.4 T .557(nd out the v).8 F .557(alues contained in an)-.25 F 3.057
 (yp)-.15 G .557(articular log \214le, use the)-3.057 F F2<ad50>3.057 E
-F0 .557(option alone to print out a list of the)3.057 F 1.207
-(contents. Then run)108 506.4 R F2(mbauvloglist)3.707 E F0(ag)3.707 E
-1.207(ain using the)-.05 F F2<ad4f>3.708 E F0 1.208
-(option to specify each of the desired v)3.708 F 1.208(alues in the)-.25
-F .418(desired order of columns. The)108 518.4 R F2<ad46>2.917 E F0 .417
-(option can be used to set the printing format. Otherwise, the def)2.917
-F .417(ault for)-.1 F(-)-.2 E
-(mat speci\214ed in the log header will be used.)108 530.4 Q(The)108
-554.4 Q F2(-M)3.697 E F3(mode)A F0 1.197
-(option sets the output mode. By def)3.697 F 1.197
-(ault, the output will be ASCII te)-.1 F 1.197(xt with tab characters)
--.15 F .898(between \214elds, which is equi)108 566.4 R -.25(va)-.25 G
-.898(lent to).25 F F2(-M)3.398 E F3(0)A F0 3.398(.I)C(f)-3.398 E F3
-(mode)3.397 E F0 3.397(=1)3.397 G 3.397(,t)-3.397 G .897
-(hen the output will be ASCII te)-3.397 F .897(xt with comma)-.15 F .228
-(delimiters. If)108 578.4 R F3(mode)2.728 E F0 2.729(=1)2.729 G 2.729
-(,t)-2.729 G .229(hen the output will binary v)-2.729 F .229
-(alues \(8-btye double or 4-byte int v)-.25 F .229(alues\) with nothing)
--.25 F(between the desired \214elds.)108 590.4 Q -.15(Fo)108 614.4 S
-2.829(rl).15 G .329(og \214les that do not include na)-2.829 F(vig)-.2 E
-.328(ation, an e)-.05 F .328(xternal na)-.15 F(vig)-.2 E .328
-(ation \214le in the "fn)-.05 F .328(v" format may be speci\214ed)-.4 F
-(using the)108 626.4 Q F2(-N)2.5 E F0(option.)2.5 E
-(As of August 2009, the contents of the MB)108 650.4 Q(ARI Mapping A)
--.35 E(UV missions logs are:)-.55 E(DropW)108 674.4 Q
-(eight.log Contents:)-.8 E(timeT)110.5 686.4 Q
+F0 .557(option alone to print out a list of the)3.057 F .292
+(contents. Then run)108 506.4 R F2(mbauvloglist)2.792 E F0(ag)2.792 E
+.292(ain using the)-.05 F F2<ad4f>2.792 E F0 .292
+(option to specify each of the desired v)2.792 F .293(alues in the de-)
+-.25 F .283(sired order of columns. The)108 518.4 R F2<ad46>2.782 E F0
+.282(option can be used to set the printing format. Otherwise, the def)
+2.782 F .282(ault format)-.1 F
+(speci\214ed in the log header will be used.)108 530.4 Q(The)108 554.4 Q
+F2(-M)2.782 E F3(mode)A F0 .282(option sets the output mode. By def)
+2.782 F .282(ault, the output will be ASCII te)-.1 F .283
+(xt with tab characters be-)-.15 F .561(tween \214elds, which is equi)
+108 566.4 R -.25(va)-.25 G .561(lent to).25 F F2(-M)3.061 E F3(0)A F0
+3.061(.I)C(f)-3.061 E F3(mode)3.061 E F0 3.061(=1)3.061 G 3.061(,t)
+-3.061 G .561(hen the output will be ASCII te)-3.061 F .561
+(xt with comma de-)-.15 F .753(limiters. If)108 578.4 R F3(mode)3.253 E
+F0 3.253(=1)3.253 G 3.253(,t)-3.253 G .753(hen the output will binary v)
+-3.253 F .754(alues \(8-btye double or 4-byte int v)-.25 F .754
+(alues\) with nothing)-.25 F(between the desired \214elds.)108 590.4 Q
+-.15(Fo)108 614.4 S 2.829(rl).15 G .329
+(og \214les that do not include na)-2.829 F(vig)-.2 E .328(ation, an e)
+-.05 F .328(xternal na)-.15 F(vig)-.2 E .328(ation \214le in the "fn)
+-.05 F .328(v" format may be speci\214ed)-.4 F(using the)108 626.4 Q F2
+(-N)2.5 E F0(option.)2.5 E(As of August 2009, the contents of the MB)108
+650.4 Q(ARI Mapping A)-.35 E(UV missions logs are:)-.55 E(DropW)108
+674.4 Q(eight.log Contents:)-.8 E(timeT)110.5 686.4 Q
 (ag time %8.8e ,time ,UNKNO)-.8 E(WN)-.35 E(short WDT)110.5 698.4 Q
 (imer %d ,Count Do)-.35 E(wn T)-.25 E(imer ,Seconds)-.35 E(short BWT)
 110.5 710.4 Q(imer %d ,Burn W)-.35 E(ire T)-.4 E(imer ,Seconds)-.35 E
@@ -565,29 +570,29 @@ f ,Kalman \214lter easting \(WGS 84 Zone 10S\) ,Meters)110.5 204 Q
 (UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
 664.8 Q -.15(ve)-.25 G(rsity of Bremen).15 E F1(OPTIONS)72 693.6 Q/F2 10
 /Times-Bold@0 SF<ad48>108 705.6 Q F0 .162(This "help" \215ag cause the \
-program to print out a description of its operation and then e)22.52 F
-.161(xit immedi-)-.15 F(ately)144 717.6 Q(.)-.65 E(MB-System 5.0)72 768
-Q(17 June 2021)143.995 E(5)202.335 E 0 Cg EP
+program to print out a description of its operation and then e)144 705.6
+R .161(xit immedi-)-.15 F(ately)144 717.6 Q(.)-.65 E(MB-System 5.0)72
+768 Q(17 June 2021)143.995 E(5)202.335 E 0 Cg EP
 %%Page: 6 6
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 135.94(mbauvloglist\(1\) MB-System)72 48 R
 135.94(5.0 mbauvloglist\(1\))2.5 F/F1 10/Times-Bold@0 SF<ad46>108 84 Q
-/F2 10/Times-Italic@0 SF(printformat)24.19 E F0 1.347
+/F2 10/Times-Italic@0 SF(printformat)144 84 Q F0 .37
 (Sets the printing format \(in fprintf\(\) style\) of the ne)144 96 R
-1.348(xt v)-.15 F 1.348(alue speci\214ed using the)-.25 F F1<ad4f>3.848
-E F0 1.348(option. By)3.848 F(def)144 108 Q(ault,)-.1 E F1(mbauvloglist)
-3.682 E F0 1.182
-(uses the print format speci\214ed in the log \214le header)3.682 F
-3.682(.I)-.55 G 3.682(ft)-3.682 G(he)-3.682 E F1(-F)3.682 E F0 1.181
-(option has)3.681 F 1.455(been used, using it ag)144 120 R 1.455
-(ain with)-.05 F F2(printformat)3.955 E F0 1.456(equal to "def)3.956 F
-1.456(ault" will reset the print format to that)-.1 F
-(speci\214ed in the log \214le header)144 132 Q(.)-.55 E F1<ad49>108
-148.8 Q F2(i\214le)26.41 E F0(Sets the input MB)144 160.8 Q(ARI A)-.35 E
-(UV mission log \214lename.)-.55 E F1<ad4c>108 177.6 Q F2(lon\215ip)
-23.63 E F0 .129(Sets the range of the longitude v)144 189.6 R .129
+.37(xt v)-.15 F .37(alue speci\214ed using the)-.25 F F1<ad4f>2.87 E F0
+.37(option. By de-)2.87 F -.1(fa)144 108 S(ult,).1 E F1(mbauvloglist)
+2.91 E F0 .41
+(uses the print format speci\214ed in the log \214le header)2.91 F 2.91
+(.I)-.55 G 2.91(ft)-2.91 G(he)-2.91 E F1(-F)2.91 E F0 .41
+(option has been)2.91 F .413(used, using it ag)144 120 R .413(ain with)
+-.05 F F2(printformat)2.914 E F0 .414(equal to "def)2.914 F .414
+(ault" will reset the print format to that speci\214ed)-.1 F
+(in the log \214le header)144 132 Q(.)-.55 E F1<ad49>108 148.8 Q F2
+(i\214le)144 148.8 Q F0(Sets the input MB)144 160.8 Q(ARI A)-.35 E
+(UV mission log \214lename.)-.55 E F1<ad4c>108 177.6 Q F2(lon\215ip)144
+177.6 Q F0 .129(Sets the range of the longitude v)144 189.6 R .129
 (alues output.)-.25 F(If)5.129 E F2(lon\215ip)2.629 E F0 .129
 (=\2551 then the longitude v)B .128(alues will be in the)-.25 F .02
 (range from \255360 to 0 de)144 201.6 R .02(grees. If)-.15 F F2
@@ -598,7 +603,7 @@ R .702(grees. If)-.15 F F2(lon\215ip)3.202 E F0 .702
 (alues will be in the range from 0 to 360 de)-.25 F(grees.)-.15 E(Def)
 144 225.6 Q(ault:)-.1 E F1(mbauvloglist)2.5 E F0(uses the user def)2.5 E
 (ault)-.1 E F2(lon\215ip)2.5 E F0(set using)2.5 E F1(mbdefaults)2.5 E F0
-(.)A F1<ad4d>108 242.4 Q F2(mode)20.86 E F0 .44
+(.)A F1<ad4d>108 242.4 Q F2(mode)144 242.4 Q F0 .44
 (Speci\214es the output mode. If)144 254.4 R F2(mode)2.94 E F0 2.94(=0)
 2.94 G 2.94(,t)-2.94 G .44(hen the output is ASCII te)-2.94 F .44
 (xt with tab delimiters between)-.15 F .088(\214elds. If)144 266.4 R F2
@@ -608,11 +613,11 @@ R .702(grees. If)-.15 F F2(lon\215ip)3.202 E F0 .702
 2.587 E F0(=)2.587 E .597(2, then the output is binary with no v)144
 278.4 R .597(alues or breaks between \214elds. Def)-.25 F .597
 (ault: ASCII te)-.1 F .597(xt with tab)-.15 F(delimiters.)144 290.4 Q F1
-<ad4e>108 307.2 Q F2(nav\214le)23.08 E F0 1.145(Speci\214es a na)144
-319.2 R(vig)-.2 E 1.145(ation \214le in the "fn)-.05 F 1.144
-(v" format that contains position, heading, sensor depth, and)-.4 F
-(attitude data. V)144 331.2 Q(alues mer)-1.11 E(ged \(interpolated\) fr\
-om these data can be speci\214ed for output using the)-.18 E(mer)156.5
+<ad4e>108 307.2 Q F2(nav\214le)144 307.2 Q F0 .198(Speci\214es a na)144
+319.2 R(vig)-.2 E .198(ation \214le in the "fn)-.05 F .198
+(v" format that contains position, heading, sensor depth, and at-)-.4 F
+(titude data. V)144 331.2 Q(alues mer)-1.11 E(ged \(interpolated\) from\
+ these data can be speci\214ed for output using the)-.18 E(mer)156.5
 343.2 Q(geLon)-.18 E(mer)156.5 355.2 Q(geLat)-.18 E(mer)156.5 367.2 Q
 (geHeading)-.18 E(mer)156.5 379.2 Q(geSpeed)-.18 E(mer)156.5 391.2 Q
 (geDraft)-.18 E(mer)156.5 403.2 Q(geSensordepth)-.18 E(mer)156.5 415.2 Q
@@ -625,13 +630,13 @@ om these data can be speci\214ed for output using the)-.18 E(mer)156.5
 (ation data. The)-.05 F F1(-C)3.245 E F0 .745(option can be)3.245 F .15
 (used to suppress output of records with timestamps outside the start a\
 nd end bounds of the na)144 475.2 R(vig)-.2 E(a-)-.05 E(tion.)144 487.2
-Q F1<ad4f>108 504 Q F2(valuename)22.52 E F0(Causes)144 516 Q F1
+Q F1<ad4f>108 504 Q F2(valuename)144 504 Q F0(Causes)144 516 Q F1
 (mbauvloglist)3.373 E F0 .872(to output the speci\214ed v)3.373 F .872
 (alue. This option can be gi)-.25 F -.15(ve)-.25 G 3.372(nm).15 G .872
-(ultiple times, and)-3.372 F 1.767(the v)144 528 R 1.767
-(alues will be output in the order speci\214ed.)-.25 F 1.767(The v)6.767
-F 1.768(alid v)-.25 F 1.768(aluename strings consist of those)-.25 F
-(de\214ned in the header of the log \214le being parsed, plus the follo)
+(ultiple times, and)-3.372 F .702(the v)144 528 R .702
+(alues will be output in the order speci\214ed.)-.25 F .703(The v)5.703
+F .703(alid v)-.25 F .703(aluename strings consist of those de-)-.25 F
+(\214ned in the header of the log \214le being parsed, plus the follo)
 144 540 Q(wing:)-.25 E(zero)156.5 552 Q(timeT)156.5 564 Q(ag)-.8 E
 (timeInterv)156.5 576 Q(al)-.25 E(mer)156.5 588 Q(geLon)-.18 E(mer)156.5
 600 Q(geLat)-.18 E(mer)156.5 612 Q(geHeading)-.18 E(mer)156.5 624 Q
@@ -689,7 +694,7 @@ he lateral \(x-y\) speed calcu-).15 F(lated from the x and y rate v)144
 336 Q(alues \(mVbodyxK and mVbodyyK\) in the k)-.25 E
 (earfott.log \214le.)-.1 E F1<ad50>108 352.8 Q F0
 (Prints out the log \214le header)144 364.8 Q(.)-.55 E F1<ad52>108 381.6
-Q F2(id)23.08 E F0 .436
+Q F2(id)144 381.6 Q F0 .436
 (This option is meaningful only when the input \214le is f)144 393.6 R
 .437(astcatlog.log, which contains both ra)-.1 F 2.937(wc)-.15 G(on-)
 -2.937 E(ducti)144 405.6 Q(vity)-.25 E 3.184(,t)-.65 G .684
@@ -720,8 +725,8 @@ E .448(ation to)-.05 F .915(not be output by)144 547.2 R F1
 -.1 F .915(vior is to output all records, and for the v)-.2 F(alues)-.25
 E(mer)144 559.2 Q(ged from the e)-.18 E(xternal na)-.15 E(vig)-.2 E
 (ation to be zero when outside the na)-.05 E(vig)-.2 E
-(ation time bounds.)-.05 E F1<ad56>108 576 Q F0(The)23.08 E F1<ad56>2.5
-E F0(option causes the program to be v)2.5 E(erbose.)-.15 E/F3 10.95
+(ation time bounds.)-.05 E F1<ad56>108 576 Q F0(The)144 576 Q F1<ad56>
+2.5 E F0(option causes the program to be v)2.5 E(erbose.)-.15 E/F3 10.95
 /Times-Bold@0 SF(EXAMPLE)72 592.8 Q F0 1.6 -.8(To e)108 604.8 T
 (xtract a list of pressure and w).65 E
 (ater sound speed from the CTD log of an A)-.1 E(UV mission, use:)-.55 E

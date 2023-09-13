@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:02 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:08 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 6
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -255,19 +261,19 @@ C .468(nd produces a terrain tile set that may be vie)-2.967 F .468
 (wed in a web bro)-.25 F .468(wser with an appropriate plugin.)-.25 F
 1.265(The bath)108 326.4 R 1.265
 (ymetry \(geometry\) is paired with imagery \(te)-.05 F 1.264
-(xture\) to produce arti\214cially illuminated terrain or)-.15 F 1.876
+(xture\) to produce arti\214cially illuminated terrain or)-.15 F .735
 (slope shaded terrain. Alternati)108 338.4 R -.15(ve)-.25 G(ly).15 E
-4.376(,ac)-.65 G(o-re)-4.376 E 1.877(gistered image may be pro)-.15 F
-1.877(vided as a substitute to the latter)-.15 F .992
-(imagery which is generated from the bath)108 350.4 R .991(ymetry data.)
--.05 F .991(This may be used to, for instance, draping a side)5.991 F
-(scan sonar image o)108 362.4 Q -.15(ve)-.15 G 2.5(rt).15 G(he bath)-2.5
-E(ymetry)-.05 E(.)-.65 E 1.289
+3.235(,ac)-.65 G(o-re)-3.235 E .735(gistered image may be pro)-.15 F
+.735(vided as a substitute to the latter im-)-.15 F .397
+(agery which is generated from the bath)108 350.4 R .397(ymetry data.)
+-.05 F .396(This may be used to, for instance, draping a side scan)5.397
+F(sonar image o)108 362.4 Q -.15(ve)-.15 G 2.5(rt).15 G(he bath)-2.5 E
+(ymetry)-.05 E(.)-.65 E .412
 (Before the geoVRML \214les can be created an intermediate T)108 386.4 R
-(erraV)-.7 E 1.289(ision tile set must be created from the)-.6 F .046
-(input GMT bath)108 398.4 R .045
+(erraV)-.7 E .413(ision tile set must be created from the in-)-.6 F .503
+(put GMT bath)108 398.4 R .503
 (ymetry \214le and a TIFF image that is either generated from the bath)
--.05 F .045(ymetry or speci\214ed from)-.05 F(an e)108 410.4 Q
+-.05 F .503(ymetry or speci\214ed from)-.05 F(an e)108 410.4 Q
 (xisting \214le with the)-.15 E F3(-ne)2.5 E(wima)-.15 E -.1(ge)-.1 G F0
 (option.)2.6 E .235(This tileset is then used to generate a GeoVRML qua\
 dtree multi-resolution set of \214les.)108 434.4 R .235
@@ -296,17 +302,17 @@ Q F2(\255olat)2.5 E F0(and)2.5 E F2(\255olon)2.5 E F0(settings.)2.5 E
 (data within the rectangle.)108 578.4 R .862
 (This presents a problem for ocean bath)5.862 F .862
 (ymetric data which often ha)-.05 F 1.162 -.15(ve i)-.2 H(rre).15 E
-(gular)-.15 E 2.261(\(not rectangular\) boundaries.)108 590.4 R 2.261
-(Before con)7.261 F -.15(ve)-.4 G 2.261(rting a grid \214le to T).15 F
-(erraV)-.7 E 2.261(ision format)-.6 F F2(mbm_grd2geo)4.76 E(vrml)-.1 E
-F0 .254(replaces all no-data ele)108 602.4 R -.25(va)-.25 G .254(tion v)
-.25 F .254(alues with a coarse resolution spline-\214lled e)-.25 F .254
-(xtrapolation from the data in the)-.15 F(irre)108 614.4 Q .031(gular a\
-rea. This results in a rectangular grid with smooth transitions from ar\
-eas of ele)-.15 F -.25(va)-.25 G .03(tion data to areas).25 F .161
-(of no data.)108 626.4 R .161(In the resulting GeoVRML the no data area\
-s are colored black \(or white if)5.161 F F2(\255white)2.661 E F0 .162
-(is speci\214ed\).)2.661 F(If)108 638.4 Q F2(\255newimage)2.5 E F3
+(gular)-.15 E .94(\(not rectangular\) boundaries.)108 590.4 R .939
+(Before con)5.939 F -.15(ve)-.4 G .939(rting a grid \214le to T).15 F
+(erraV)-.7 E .939(ision format)-.6 F F2(mbm_grd2geo)3.439 E(vrml)-.1 E
+F0(re-)3.439 E .772(places all no-data ele)108 602.4 R -.25(va)-.25 G
+.772(tion v).25 F .772(alues with a coarse resolution spline-\214lled e)
+-.25 F .772(xtrapolation from the data in the)-.15 F(irre)108 614.4 Q
+.031(gular area. This results in a rectangular grid with smooth transit\
+ions from areas of ele)-.15 F -.25(va)-.25 G .03(tion data to areas).25
+F .161(of no data.)108 626.4 R .161(In the resulting GeoVRML the no dat\
+a areas are colored black \(or white if)5.161 F F2(\255white)2.661 E F0
+.162(is speci\214ed\).)2.661 F(If)108 638.4 Q F2(\255newimage)2.5 E F3
 (\214le)2.5 E F0(is speci\214ed then the outer boundaries will stay the\
  same color as in the image.)2.5 E F1(MB-SYSTEM A)72 667.2 Q(UTHORSHIP)
 -.548 E F0(Da)108 679.2 Q(vid W)-.2 E 2.5(.C)-.92 G(aress)-2.5 E
@@ -337,17 +343,16 @@ Q 2.5(eM)-.1 G(cCann)-2.5 E(Montere)113 160.8 Q 2.5(yB)-.15 G
 ut. If the compressed data \214le does not e)3.53 F 1.029(xist then)-.15
 F('.grd' will be appended to)144 249.6 Q F2(bath_\214le)2.5 E F0
 (and it will be used, if it e)2.5 E(xists.)-.15 E/F3 10/Times-Bold@0 SF
-(\255tvdir)108 278.4 Q F2(tvpar)9.19 E(ent)-.37 E F0 1.535(The T)144
-302.4 R(erraV)-.7 E 1.535(ision tileset destination directory)-.6 F
-6.535(.A)-.65 G 1.536(subdirectory named)-2.5 F F2(bath_\214le)4.036 E
-F0 1.536(\(without the .grd)4.036 F -.15(ex)144 314.4 S
-(tension\) will be created here.).15 E F3(\255vrmldir)108 331.2 Q F2
-(vrmlpar)144 343.2 Q(ent)-.37 E F0 1.669
-(The GeoVRML tileset destination directory)144 355.2 R 6.669(.A)-.65 G
-1.669(subdirectory named)-2.5 F F2(bath_\214le)4.169 E F0 1.669
-(\(without the .grd)4.169 F -.15(ex)144 367.2 S
-(tension\) will be created here.).15 E F3(\255olat)108 396 Q F2(lat)
-14.19 E F3(\255olon)108 412.8 Q F2(lon)11.96 E F0 .178
+(\255tvdir)108 278.4 Q F2(tvpar)144 278.4 Q(ent)-.37 E F0 .147(The T)144
+302.4 R(erraV)-.7 E .147(ision tileset destination directory)-.6 F 5.147
+(.A)-.65 G .148(subdirectory named)-2.5 F F2(bath_\214le)2.648 E F0 .148
+(\(without the .grd e)2.648 F(x-)-.15 E(tension\) will be created here.)
+144 314.4 Q F3(\255vrmldir)108 331.2 Q F2(vrmlpar)144 343.2 Q(ent)-.37 E
+F0 .27(The GeoVRML tileset destination directory)144 355.2 R 5.27(.A)
+-.65 G .27(subdirectory named)-2.5 F F2(bath_\214le)2.77 E F0 .27
+(\(without the .grd e)2.77 F(x-)-.15 E(tension\) will be created here.)
+144 367.2 Q F3(\255olat)108 396 Q F2(lat)144 396 Q F3(\255olon)108 412.8
+Q F2(lon)144 412.8 Q F0 .178
 (The geoOrigin latitude and longitude in decimal de)144 436.8 R .179
 (grees. Because of single precision arithmetic in)-.15 F .016
 (VRML97 it is necessary to de\214ne a geoOrigin from which of)144 448.8
@@ -426,18 +431,17 @@ The quadrupling together with)144 290.4 R .598(the '-numpix)144 302.4 R
 (vrml\(1\) command results in identical resolution of)-.15 F .526
 (the highest le)144 314.4 R -.15(ve)-.25 G 3.026(lG).15 G .526
 (eoVRML tiles and the original bath)-3.026 F .526(ymetric data.\))-.05 F
-.526(Making this image can be a)5.526 F 1.15(time consuming process.)144
-326.4 R 1.15(By def)6.15 F 1.15(ault, if a \214le with '.tif)-.1 F 3.65
-('a).55 G 1.15(ppended to)-3.65 F F2(bath_\214le)3.65 E F0 1.15
-(\(without the .grd)3.65 F -.15(ex)144 338.4 S .454
-(tension\) or appended to).15 F F2(basename)2.954 E F0(\(if)2.954 E F2
-(-basename)2.954 E F0 .453(option is speci\214ed\) e)2.954 F .453
-(xists in $TMPDIR then a)-.15 F(ne)144 350.4 Q 3.705(wi)-.25 G 1.205
-(mage is not created.)-3.705 F 2.805 -.8(To o)6.205 H -.15(ve).65 G
-1.205(rride this either remo).15 F 1.505 -.15(ve t)-.15 H 1.205
-(he .tif \214le or specify the \255ne).15 F(wimage)-.25 E(option.)144
-362.4 Q F2(type|\214le)144 386.4 Q F0 .781
-(is the type used in the \255G option of mbm_grdtif)3.282 F .781
+.526(Making this image can be a)5.526 F .133(time consuming process.)144
+326.4 R .133(By def)5.133 F .133(ault, if a \214le with '.tif)-.1 F
+2.633('a).55 G .133(ppended to)-2.633 F F2(bath_\214le)2.633 E F0 .134
+(\(without the .grd e)2.633 F(x-)-.15 E 1.118(tension\) or appended to)
+144 338.4 R F2(basename)3.617 E F0(\(if)3.617 E F2(-basename)3.617 E F0
+1.117(option is speci\214ed\) e)3.617 F 1.117(xists in $TMPDIR then a)
+-.15 F(ne)144 350.4 Q 2.702(wi)-.25 G .203(mage is not created.)-2.702 F
+1.803 -.8(To o)5.203 H -.15(ve).65 G .203(rride this either remo).15 F
+.503 -.15(ve t)-.15 H .203(he .tif \214le or specify the \255ne).15 F
+.203(wimage op-)-.25 F(tion.)144 362.4 Q F2(type|\214le)144 386.4 Q F0
+.781(is the type used in the \255G option of mbm_grdtif)3.282 F .781
 (f\(1\) or the name of a TIFF \214le that you)-.25 F(wish draped o)144
 398.4 Q -.15(ve)-.15 G 2.5(rt).15 G(he bath)-2.5 E(ymetry)-.05 E(.)-.65
 E .225(The def)144 422.4 R .225(ault type v)-.1 F .225(alue is 2 for sy\
@@ -458,9 +462,10 @@ is co-re)144 446.4 R(gistered)-.15 E .469(with the bath)144 458.4 R .469
 535.2 R .995(xample, for printing purposes\) then use this option.)-.15
 F -.8(Ty)5.995 G(pically).8 E 3.495(,f)-.65 G .995(or computer visual)
 -3.495 F(display a black background w)144 547.2 Q(orks best.)-.1 E F1
-(\255zmax)108 576 Q F2(maxclip)7.53 E F1(\255zmin)108 592.8 Q F2
-(minclip)9.19 E F0 .001(Maxclip and minclip may be used clip the ele)144
-616.8 R -.25(va)-.25 G .001(tion data at set v).25 F 2.5(alues. F)-.25 F
+(\255zmax)108 576 Q F2(maxclip)144 576 Q F1(\255zmin)108 592.8 Q F2
+(minclip)144 592.8 Q F0 .001
+(Maxclip and minclip may be used clip the ele)144 616.8 R -.25(va)-.25 G
+.001(tion data at set v).25 F 2.5(alues. F)-.25 F
 (or instance, to clip the ele-)-.15 E -.25(va)144 628.8 S .042
 (tion data at seale).25 F -.15(ve)-.25 G 2.542(la).15 G .043
 (nd tile only bath)-2.542 F .043(ymetry use)-.05 F F1 .043(\255zmax 0)
@@ -555,27 +560,26 @@ BP
 (apauA_slope)-.15 E .891(This e)108 180 R .891
 (xample uses a pre-generated side-scan sonar TIFF image and drapes it o)
 -.15 F -.15(ve)-.15 G 3.392(rt).15 G .892(he bath)-3.392 F .892
-(ymetry data in)-.05 F -.15(Pa)108 192 S 20.408(pauA_bath.grd. V).15 F
-(ie)-.6 E 17.908(wpoints are e)-.25 F 20.408(xcluded. Ouptut)-.15 F
-17.907(is written to ~/T)20.407 F(ile-)-.35 E(Sets/geoVRML/ha)108 204 Q
--.1(wa)-.15 G(ii/P).1 E(apauA_ssdtl.)-.15 E(mbm_grd2geo)113 240 Q
-(vrml P)-.15 E(apauA_bath \\)-.15 E(\255olat 21 \255olon \255157 \\)123
-252 Q(\255tvdir ~/T)123 264 Q(ileSets/Pyramids/ha)-.35 E -.1(wa)-.15 G
-(ii \\).1 E(\255vrmldir ~/T)123 276 Q(ileSets/geoVRML/ha)-.35 E -.1(wa)
--.15 G(ii \\).1 E(\255vrmlurl \\)123 288 Q
-(http://menard/vrml/terrain/ha)123 300 Q -.1(wa)-.15 G(ii/P).1 E
-(apauA_ssdtl \\)-.15 E(\255no)123 312 Q(vie)-.15 E 2.5(w\\)-.25 G
-(\255ne)123 324 Q(wimage P)-.25 E(apauA_ssdtl.tif \\)-.15 E
-(\255basename P)123 336 Q(apauA_ssdtl)-.15 E/F1 10.95/Times-Bold@0 SF
-(SEE ALSO)72 400.8 Q F0 2.108(This macro is b)108 412.8 R 2.108
-(uilt upon some pretty strong shoulders.)-.2 F 2.108
-(It uses all of these programs which must be)7.108 F
-(installed on your system.)108 424.8 Q 3.383(GMT programs:)108 448.8 R
-/F2 10/Times-Bold@0 SF(grdclip)5.883 E F0(\(1\),)A F2(grdsample)5.883 E
-F0(\(1\),)A F2(grd2xyz)5.883 E F0(\(1\),)A F2(blockmean)5.882 E F0
-(\(1\),)A F2(surface)5.882 E F0(\(1\),)A F2(grdedit)5.882 E F0(\(1\),)A
-F2(grd-)5.882 E(math)108 460.8 Q F0(\(1\),)A F2(grdclip)2.5 E F0(\(1\),)
-A(mb-system macro:)108 484.8 Q F2(mbm_grdtiff)2.5 E F0(\(1\))A
+(ymetry data in)-.05 F -.15(Pa)108 192 S 3.028(pauA_bath.grd. V).15 F
+(ie)-.6 E .528(wpoints are e)-.25 F 3.028(xcluded. Ouptut)-.15 F .527
+(is written to ~/T)3.027 F(ileSets/geoVRML/ha)-.35 E -.1(wa)-.15 G(ii/P)
+.1 E(apauA_ss-)-.15 E(dtl.)108 204 Q(mbm_grd2geo)113 240 Q(vrml P)-.15 E
+(apauA_bath \\)-.15 E(\255olat 21 \255olon \255157 \\)123 252 Q
+(\255tvdir ~/T)123 264 Q(ileSets/Pyramids/ha)-.35 E -.1(wa)-.15 G(ii \\)
+.1 E(\255vrmldir ~/T)123 276 Q(ileSets/geoVRML/ha)-.35 E -.1(wa)-.15 G
+(ii \\).1 E(\255vrmlurl \\)123 288 Q(http://menard/vrml/terrain/ha)123
+300 Q -.1(wa)-.15 G(ii/P).1 E(apauA_ssdtl \\)-.15 E(\255no)123 312 Q
+(vie)-.15 E 2.5(w\\)-.25 G(\255ne)123 324 Q(wimage P)-.25 E
+(apauA_ssdtl.tif \\)-.15 E(\255basename P)123 336 Q(apauA_ssdtl)-.15 E
+/F1 10.95/Times-Bold@0 SF(SEE ALSO)72 400.8 Q F0 1.235(This macro is b)
+108 412.8 R 1.235(uilt upon some pretty strong shoulders.)-.2 F 1.235
+(It uses all of these programs which must be in-)6.235 F
+(stalled on your system.)108 424.8 Q 3.383(GMT programs:)108 448.8 R/F2
+10/Times-Bold@0 SF(grdclip)5.883 E F0(\(1\),)A F2(grdsample)5.883 E F0
+(\(1\),)A F2(grd2xyz)5.883 E F0(\(1\),)A F2(blockmean)5.882 E F0(\(1\),)
+A F2(surface)5.882 E F0(\(1\),)A F2(grdedit)5.882 E F0(\(1\),)A F2(grd-)
+5.882 E(math)108 460.8 Q F0(\(1\),)A F2(grdclip)2.5 E F0(\(1\),)A
+(mb-system macro:)108 484.8 Q F2(mbm_grdtiff)2.5 E F0(\(1\))A
 (mb-system utility:)108 508.8 Q F2(mbstripNaN)2.5 E F0(\(1\))A
 (tsmApi-2.3 \(http://www)108 532.8 Q(.tsmapi.com\) programs:)-.65 E F2
 (mak)2.5 E(e_dem)-.1 E F0(\(1\),)A F2(mak)2.5 E(e_oi)-.1 E F0(\(1\))A F2

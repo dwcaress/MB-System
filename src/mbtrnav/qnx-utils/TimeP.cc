@@ -104,10 +104,10 @@ void TimeP::getEpoch(timespec *timeSpec)
 
 void TimeP::secsToHourMinSec(double secs, char *timestring)
 {
-  int days;
-  int hrs;
-  int min;
-  int isecs;
+  unsigned int days;
+  unsigned int hrs;
+  unsigned int min;
+  unsigned int isecs;
 
   isecs = secs;
 
@@ -125,7 +125,7 @@ void TimeP::secsToHourMinSec(double secs, char *timestring)
   }
   secs = isecs + (secs - (int )secs);
 
-  sprintf(timestring, "%03d:%02d:%02d:%02.1f", days, hrs, min, secs);
+  snprintf(timestring, 15, "%03d:%02d:%02d:%02.1f", days, hrs, min, secs);
 
   return;
 }

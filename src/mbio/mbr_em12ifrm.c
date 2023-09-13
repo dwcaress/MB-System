@@ -266,8 +266,8 @@ int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error) {
 	struct stat imgfile_status, navfile_status;
 	int imgfile_stat, navfile_stat;
 	mb_path path;
-	mb_path imgtest;
-	mb_path navtest;
+	char imgtest[1500];
+	char navtest[1500];
 	char *tag_ptr;
 	char *name;
 	double *pixel_size;
@@ -435,7 +435,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 	int read_status;
 	char line[MBF_EM12IFRM_RECORD_SIZE] = "";
 	int shift;
-	short short_value;
+	short short_value = 0;
 	int len;
 	int beamlist[MBF_EM12IFRM_MAXBEAMS];
 	mb_s_char *beam_ss;

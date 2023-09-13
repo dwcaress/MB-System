@@ -305,7 +305,7 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 					nscan = sscanf(line, "  Number of Flagged Beams: %d", &mb_info->nbeams_bath_flagged);
 			}
 
-			else if (strncmp(line, "Amplitude Data (", 17) == 0) {
+			else if (strncmp(line, "Amplitude Data (", 16) == 0) {
 				nscan = sscanf(line, "Amplitude Data (%d beams):", &mb_info->nbeams_amp);
 				if (fgets(line, MB_PATH_MAXLINE, fp) != NULL)
 					nscan = sscanf(line, "  Number of Beams: %d", &mb_info->nbeams_amp_total);
@@ -640,8 +640,8 @@ int mb_make_info(int verbose, bool force, char *file, int format, int *error) {
 		sprintf(command, "mbinfo -F %d -I %s -G -N -O -M10/10", format, file);
 		if (verbose >= 2)
 			fprintf(stderr, "\t%s\n", command);
-		  if ((shellstatus = system(command)) != 0)
-        status = MB_FAILURE;
+		if ((shellstatus = system(command)) != 0)
+      status = MB_FAILURE;
 	}
 
 	/* make new fbt file if not there or out of date */
@@ -658,10 +658,16 @@ int mb_make_info(int verbose, bool force, char *file, int format, int *error) {
 	if ((force || (datmodtime > 0 && datmodtime > fnvmodtime)) && mb_should_make_fnv(verbose, format)) {
 		if (verbose >= 1)
 			fprintf(stderr, "Generating fnv file for %s\n", file);
-		  char command[MB_PATH_MAXLINE];
-		  sprintf(command, "mblist -F %d -I %s -O tMXYHScRPr=X=Y+X+Y -UN > %s.fnv", format, file, file);
-		  if ((shellstatus = system(command)) != 0)
-        status = MB_FAILURE;
+	  char command[MB_PATH_MAXLINE];
+    sprintf(command,  "echo \"## <yyyy mm dd hh mm ss.ssssss> <epoch seconds> "
+                      "<longitude (deg)> <latitude (deg)> <heading (deg)> <speed (km/hr)> "
+                      "<draft (m)> <roll (deg)> <pitch (deg)> <heave (m)> <portlon (deg)> "
+                      "<portlat (deg)> <stbdlon (deg)> <stbdlat (deg)>\"  > %s.fnv", file);
+	  if ((shellstatus = system(command)) != 0)
+      status = MB_FAILURE;
+	  sprintf(command, "mblist -F %d -I %s -O tMXYHScRPr=X=Y+X+Y -UN >> %s.fnv", format, file, file);
+	  if ((shellstatus = system(command)) != 0)
+      status = MB_FAILURE;
 	}
 
 	if (verbose >= 2) {
@@ -1142,17 +1148,17 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 			mb_info->nrecords_ss1 += mb_info_file.nrecords_ss1;
 			mb_info->nrecords_ss2 += mb_info_file.nrecords_ss2;
 			mb_info->nrecords_sbp += mb_info_file.nrecords_sbp;
-			mb_info->nbeams_bath += mb_info_file.nbeams_bath;
+			mb_info->nbeams_bath = MAX(mb_info->nbeams_bath, mb_info_file.nbeams_bath);
 			mb_info->nbeams_bath_total += mb_info_file.nbeams_bath_total;
 			mb_info->nbeams_bath_good += mb_info_file.nbeams_bath_good;
 			mb_info->nbeams_bath_zero += mb_info_file.nbeams_bath_zero;
 			mb_info->nbeams_bath_flagged += mb_info_file.nbeams_bath_flagged;
-			mb_info->nbeams_amp += mb_info_file.nbeams_amp;
+			mb_info->nbeams_amp = MAX(mb_info->nbeams_amp, mb_info_file.nbeams_amp);
 			mb_info->nbeams_amp_total += mb_info_file.nbeams_amp_total;
 			mb_info->nbeams_amp_good += mb_info_file.nbeams_amp_good;
 			mb_info->nbeams_amp_zero += mb_info_file.nbeams_amp_zero;
 			mb_info->nbeams_amp_flagged += mb_info_file.nbeams_amp_flagged;
-			mb_info->npixels_ss += mb_info_file.npixels_ss;
+			mb_info->npixels_ss = MAX(mb_info->npixels_ss, mb_info_file.npixels_ss);
 			mb_info->npixels_ss_total += mb_info_file.npixels_ss_total;
 			mb_info->npixels_ss_good += mb_info_file.npixels_ss_good;
 			mb_info->npixels_ss_zero += mb_info_file.npixels_ss_zero;

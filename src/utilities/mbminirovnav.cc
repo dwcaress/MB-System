@@ -186,11 +186,11 @@ int main(int argc, char **argv) {
             if (nscan == 2) {
               utm_zone_set = true;
               if (NorS == 'N' || NorS == 'n')
-                sprintf(projection_id, "UTM%2.2dN", utm_zone);
+                snprintf(projection_id, sizeof(projection_id), "UTM%2.2dN", utm_zone);
               else if (NorS == 'S' || NorS == 's')
-                sprintf(projection_id, "UTM%2.2dS", utm_zone);
+                snprintf(projection_id, sizeof(projection_id), "UTM%2.2dS", utm_zone);
               else
-                sprintf(projection_id, "UTM%2.2dN", utm_zone);
+                snprintf(projection_id, sizeof(projection_id), "UTM%2.2dN", utm_zone);
             } else {
               fprintf(stderr,"Program %s command error: %s %s\n",
                       program_name, options[option_index].name, optarg);
@@ -606,16 +606,16 @@ int main(int argc, char **argv) {
   /* get UTM projection for easting and northing fields */
   if (utm_zone_set) {
     if (utm_zone < 0)
-      sprintf(projection_id, "UTM%2.2dS", abs(utm_zone));
+      snprintf(projection_id, sizeof(projection_id), "UTM%2.2dS", abs(utm_zone));
     else
-      sprintf(projection_id, "UTM%2.2dN", utm_zone);
+      snprintf(projection_id, sizeof(projection_id), "UTM%2.2dN", utm_zone);
   }
   else {
     utm_zone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
     if (reference_lat >= 0.0)
-      sprintf(projection_id, "UTM%2.2dN", utm_zone);
+      snprintf(projection_id, sizeof(projection_id), "UTM%2.2dN", utm_zone);
     else
-      sprintf(projection_id, "UTM%2.2dS", utm_zone);
+      snprintf(projection_id, sizeof(projection_id), "UTM%2.2dS", utm_zone);
   }
 
   int jnav = 0;

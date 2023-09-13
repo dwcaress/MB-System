@@ -134,7 +134,7 @@ int mbr_alm_kemkmall(int verbose, void *mbio_ptr, int *error) {
 
   /* allocate starting memory for data record buffer */
   char **bufferptr = (char **)&mb_io_ptr->raw_data;
-  int *bufferalloc = (int *)&mb_io_ptr->structure_size;
+  size_t *bufferalloc = (size_t *)&mb_io_ptr->structure_size;
 
   *bufferptr = NULL;
   *bufferalloc = 0;
@@ -1002,13 +1002,13 @@ int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header
 
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
-    fprintf(stderr, " dbg5       numBytesDgm:     %u\n", svp->header.numBytesDgm);
-    fprintf(stderr, " dbg5       dgmType:         %s\n", svp->header.dgmType);
-    fprintf(stderr, " dbg5       dgmVersion:      %u\n", svp->header.dgmVersion);
-    fprintf(stderr, " dbg5       systemID:        %u\n", svp->header.systemID);
-    fprintf(stderr, " dbg5       echoSounderID:   %u\n", svp->header.echoSounderID);
-    fprintf(stderr, " dbg5       time_sec:        %u\n", svp->header.time_sec);
-    fprintf(stderr, " dbg5       time_nanosec:    %u\n", svp->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:     %u\n", svp->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:         %.4s\n", svp->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:      %u\n", svp->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:        %u\n", svp->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:   %u\n", svp->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:        %u\n", svp->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:    %u\n", svp->header.time_nanosec);
 
     fprintf(stderr, "dbg5       numBytesCmnPart:  %u\n", svp->numBytesCmnPart);
     fprintf(stderr, "dbg5       numSamples:       %u\n", svp->numSamples);
@@ -1578,13 +1578,18 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg2       header_ptr: %p\n", (void *)header_ptr);
   }
 
+  int status = MB_SUCCESS;
+  *error = MB_ERROR_NO_ERROR;
+
   struct mbsys_kmbes_mrz *mrz = NULL;
   struct mbsys_kmbes_m_partition partition;
   struct mbsys_kmbes_m_body cmnPart;
-  int index_EMdgmMbody, index_pingInfo, index_txSectorInfo = 0;
-  int index_rxInfo;
-  int index_extraDetClassInfo;
-  int index_sounding, index_SIsample = 0;
+  unsigned int index_EMdgmMbody = 0;
+  unsigned int index_pingInfo = 0;
+  unsigned int index_txSectorInfo = 0;
+  unsigned int index_rxInfo = 0;
+  unsigned int index_extraDetClassInfo = 0;
+  unsigned int index_sounding, index_SIsample = 0;
 
   /* get pointer to raw data structure */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
@@ -1949,7 +1954,7 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
 
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
-    fprintf(stderr, "dbg5       numBytesInfoData:           %d\n", mrz->rxInfo.numBytesRxInfo);
+    fprintf(stderr, "dbg5       numBytesRxInfo:             %d\n", mrz->rxInfo.numBytesRxInfo);
     fprintf(stderr, "dbg5       numSoundingsMaxMain:        %d\n", mrz->rxInfo.numSoundingsMaxMain);
     fprintf(stderr, "dbg5       numSoundingsValidMain:      %d\n", mrz->rxInfo.numSoundingsValidMain);
     fprintf(stderr, "dbg5       numBytesPerSounding:        %d\n", mrz->rxInfo.numBytesPerSounding);
@@ -1967,224 +1972,234 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
       - this avoids breaking the decoding if fields have been added to extraDetClassInfo */
   index_extraDetClassInfo = index_rxInfo + mrz->rxInfo.numBytesRxInfo;
 
-  /* EMdgmMRZ_extraDetClassInfo -  Extra detection class info */
-  for (int i = 0; i<(mrz->rxInfo.numExtraDetectionClasses); i++)
-  {
-  /* calculate index at start of of each extraDetClassInfo using pingInfo.numBytesPerTxSector
-      - this avoids breaking the decoding if fields have been added to txSectorInfo */
-    index = index_extraDetClassInfo + i * mrz->rxInfo.numBytesPerClass;
-
-    mb_get_binary_short(true, &buffer[index], &(mrz->extraDetClassInfo[i].numExtraDetInClass));
-    index += 2;
-    mrz->extraDetClassInfo[i].padding = buffer[index];
-    index++;
-    mrz->extraDetClassInfo[i].alarmFlag = buffer[index];
-    index++;
-
-    if (verbose >= 5) {
-      fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
-      fprintf(stderr, "dbg5       numExtraDetInClass:  %d\n", mrz->extraDetClassInfo[i].numExtraDetInClass);
-      fprintf(stderr, "dbg5       padding:             %d\n", mrz->extraDetClassInfo[i].padding);
-      fprintf(stderr, "dbg5       alarmFlag:           %d\n", mrz->extraDetClassInfo[i].alarmFlag);
+  /* check against corrupted data */
+  if (index_extraDetClassInfo + mrz->rxInfo.numExtraDetectionClasses * mrz->rxInfo.numBytesPerClass > header->numBytesDgm) {
+    *error = MB_ERROR_BAD_DATA;
+    status = MB_FAILURE;
+    if (verbose > 0) {
+      fprintf(stderr, "\nCorrupted MRZ datagram dropped...\n");
     }
   }
 
-  /* calculate index at start of sounding using rxInfo.numExtraDetectionClasses & rxInfo.numBytesPerClass
-      - this avoids breaking the decoding if fields have been added to extraDetClassInfo */
-  index_sounding = index_extraDetClassInfo + mrz->rxInfo.numExtraDetectionClasses * mrz->rxInfo.numBytesPerClass;
-
-  /* EMdgmMRZ_sounding - Data for each sounding */
-  int numSidescanSamples = 0;
-  int numSoundings = mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections;
-  for (int i = 0; i<numSoundings; i++)
+  if (status == MB_SUCCESS)
   {
-  /* calculate index at start of of each sounding using pingInfo.numBytesPerTxSector
-      - this avoids breaking the decoding if fields have been added to sounding */
-    index = index_sounding + i * mrz->rxInfo.numBytesPerSounding;
+    /* EMdgmMRZ_extraDetClassInfo -  Extra detection class info */
+    for (int i = 0; i<(mrz->rxInfo.numExtraDetectionClasses); i++)
+    {
+    /* calculate index at start of of each extraDetClassInfo using pingInfo.numBytesPerTxSector
+        - this avoids breaking the decoding if fields have been added to txSectorInfo */
+      index = index_extraDetClassInfo + i * mrz->rxInfo.numBytesPerClass;
 
-    mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].soundingIndex));
-    index += 2;
-    mrz->sounding[i].txSectorNumb = buffer[index];
-    index++;
+      mb_get_binary_short(true, &buffer[index], &(mrz->extraDetClassInfo[i].numExtraDetInClass));
+      index += 2;
+      mrz->extraDetClassInfo[i].padding = buffer[index];
+      index++;
+      mrz->extraDetClassInfo[i].alarmFlag = buffer[index];
+      index++;
 
-    /* Detection info. */
-    mrz->sounding[i].detectionType = buffer[index];
-    index++;
-    mrz->sounding[i].detectionMethod = buffer[index];
-    index++;
-    mrz->sounding[i].rejectionInfo1 = buffer[index];
-    index++;
-    mrz->sounding[i].rejectionInfo2 = buffer[index];
-    index++;
-    mrz->sounding[i].postProcessingInfo = buffer[index];
-    index++;
-    mrz->sounding[i].detectionClass = buffer[index];
-    index++;
-    mrz->sounding[i].detectionConfidenceLevel = buffer[index];
-    index++;
-    /* These two bytes specified as padding in the Kongsberg specification but are
-       here used for the MB-System beam flag - if the first mb_u_char == 1 then the
-       second byte is an MB-System beamflag */
-    // mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].padding));
-    // index += 2;
-    mrz->sounding[i].beamflag_enabled = buffer[index];
-    index++;
-    mrz->sounding[i].beamflag = buffer[index];
-    index++;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].rangeFactor));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].qualityFactor));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].detectionUncertaintyVer_m));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].detectionUncertaintyHor_m));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].detectionWindowLength_sec));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].echoLength_sec));
-    index += 4;
-
-    /* Water column paramters. */
-    mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].WCBeamNumb));
-    index += 2;
-    mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].WCrange_samples));
-    index += 2;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].WCNomBeamAngleAcross_deg));
-    index += 4;
-
-    /* Reflectivity data (backscatter (BS) data). */
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].meanAbsCoeff_dBPerkm));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].reflectivity1_dB));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].reflectivity2_dB));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].receiverSensitivityApplied_dB));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].sourceLevelApplied_dB));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].BScalibration_dB));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].TVG_dB));
-    index += 4;
-
-    /* Range and angle data. */
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].beamAngleReRx_deg));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].beamAngleCorrection_deg));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].twoWayTravelTime_sec));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].twoWayTravelTimeCorrection_sec));
-    index += 4;
-
-    /* Georeferenced depth points. */
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].deltaLatitude_deg));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].deltaLongitude_deg));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].z_reRefPoint_m));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].y_reRefPoint_m));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].x_reRefPoint_m));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].beamIncAngleAdj_deg));
-    index += 4;
-    mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].realTimeCleanInfo));
-    index += 2;
-
-    /* Seabed image. */
-    mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].SIstartRange_samples));
-    index += 2;
-    mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].SIcentreSample));
-    index += 2;
-    mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].SInumSamples));
-    index += 2;
-
-    numSidescanSamples += mrz->sounding[i].SInumSamples;
-
-    /* calculate beamflag */
-    if (mrz->sounding[i].beamflag_enabled != 1) {
-      if (mrz->sounding[i].detectionType >= 2) {
-        mrz->sounding[i].beamflag = MB_FLAG_NULL;
+      if (verbose >= 5) {
+        fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
+        fprintf(stderr, "dbg5       numExtraDetInClass:  %d\n", mrz->extraDetClassInfo[i].numExtraDetInClass);
+        fprintf(stderr, "dbg5       padding:             %d\n", mrz->extraDetClassInfo[i].padding);
+        fprintf(stderr, "dbg5       alarmFlag:           %d\n", mrz->extraDetClassInfo[i].alarmFlag);
       }
-      else if (mrz->sounding[i].detectionType == 1) {
-        mrz->sounding[i].beamflag = (char)(MB_FLAG_FLAG + MB_FLAG_SONAR);
-      }
-      else if (mrz->sounding[i].qualityFactor > MBSYS_KMBES_QUAL_FACTOR_THRESHOLD) {
+    }
+
+    /* calculate index at start of sounding using rxInfo.numExtraDetectionClasses & rxInfo.numBytesPerClass
+        - this avoids breaking the decoding if fields have been added to extraDetClassInfo */
+    index_sounding = index_extraDetClassInfo + mrz->rxInfo.numExtraDetectionClasses * mrz->rxInfo.numBytesPerClass;
+
+    /* EMdgmMRZ_sounding - Data for each sounding */
+    int numSidescanSamples = 0;
+    int numSoundings = mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections;
+    for (int i = 0; i<numSoundings; i++)
+    {
+    /* calculate index at start of of each sounding using pingInfo.numBytesPerTxSector
+        - this avoids breaking the decoding if fields have been added to sounding */
+      index = index_sounding + i * mrz->rxInfo.numBytesPerSounding;
+
+      mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].soundingIndex));
+      index += 2;
+      mrz->sounding[i].txSectorNumb = buffer[index];
+      index++;
+
+      /* Detection info. */
+      mrz->sounding[i].detectionType = buffer[index];
+      index++;
+      mrz->sounding[i].detectionMethod = buffer[index];
+      index++;
+      mrz->sounding[i].rejectionInfo1 = buffer[index];
+      index++;
+      mrz->sounding[i].rejectionInfo2 = buffer[index];
+      index++;
+      mrz->sounding[i].postProcessingInfo = buffer[index];
+      index++;
+      mrz->sounding[i].detectionClass = buffer[index];
+      index++;
+      mrz->sounding[i].detectionConfidenceLevel = buffer[index];
+      index++;
+      /* These two bytes specified as padding in the Kongsberg specification but are
+         here used for the MB-System beam flag - if the first mb_u_char == 1 then the
+         second byte is an MB-System beamflag */
+      // mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].padding));
+      // index += 2;
+      mrz->sounding[i].beamflag_enabled = buffer[index];
+      index++;
+      mrz->sounding[i].beamflag = buffer[index];
+      index++;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].rangeFactor));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].qualityFactor));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].detectionUncertaintyVer_m));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].detectionUncertaintyHor_m));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].detectionWindowLength_sec));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].echoLength_sec));
+      index += 4;
+
+      /* Water column paramters. */
+      mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].WCBeamNumb));
+      index += 2;
+      mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].WCrange_samples));
+      index += 2;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].WCNomBeamAngleAcross_deg));
+      index += 4;
+
+      /* Reflectivity data (backscatter (BS) data). */
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].meanAbsCoeff_dBPerkm));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].reflectivity1_dB));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].reflectivity2_dB));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].receiverSensitivityApplied_dB));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].sourceLevelApplied_dB));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].BScalibration_dB));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].TVG_dB));
+      index += 4;
+
+      /* Range and angle data. */
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].beamAngleReRx_deg));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].beamAngleCorrection_deg));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].twoWayTravelTime_sec));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].twoWayTravelTimeCorrection_sec));
+      index += 4;
+
+      /* Georeferenced depth points. */
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].deltaLatitude_deg));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].deltaLongitude_deg));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].z_reRefPoint_m));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].y_reRefPoint_m));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].x_reRefPoint_m));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].beamIncAngleAdj_deg));
+      index += 4;
+      mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].realTimeCleanInfo));
+      index += 2;
+
+      /* Seabed image. */
+      mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].SIstartRange_samples));
+      index += 2;
+      mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].SIcentreSample));
+      index += 2;
+      mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].SInumSamples));
+      index += 2;
+
+      numSidescanSamples += mrz->sounding[i].SInumSamples;
+
+      /* calculate beamflag */
+      if (mrz->sounding[i].beamflag_enabled != 1) {
+        if (mrz->sounding[i].detectionType >= 2) {
+          mrz->sounding[i].beamflag = MB_FLAG_NULL;
+        }
+        else if (mrz->sounding[i].detectionType == 1) {
           mrz->sounding[i].beamflag = (char)(MB_FLAG_FLAG + MB_FLAG_SONAR);
+        }
+        else if (mrz->sounding[i].qualityFactor > MBSYS_KMBES_QUAL_FACTOR_THRESHOLD) {
+            mrz->sounding[i].beamflag = (char)(MB_FLAG_FLAG + MB_FLAG_SONAR);
+        }
+        else {
+            mrz->sounding[i].beamflag = MB_FLAG_NONE;
+        }
+        mrz->sounding[i].beamflag_enabled = 1;
       }
-      else {
-          mrz->sounding[i].beamflag = MB_FLAG_NONE;
+
+      if (verbose >= 5) {
+        fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
+        fprintf(stderr, "dbg5       soundingIndex:                   %d\n", mrz->sounding[i].soundingIndex);
+        fprintf(stderr, "dbg5       txSectorNumb:                    %d\n", mrz->sounding[i].txSectorNumb);
+        fprintf(stderr, "dbg5       detectionType:                   %d\n", mrz->sounding[i].detectionType);
+        fprintf(stderr, "dbg5       detectionMethod:                 %d\n", mrz->sounding[i].detectionMethod);
+        fprintf(stderr, "dbg5       rejectionInfo1:                  %d\n", mrz->sounding[i].rejectionInfo1);
+        fprintf(stderr, "dbg5       rejectionInfo2:                  %d\n", mrz->sounding[i].rejectionInfo2);
+        fprintf(stderr, "dbg5       postProcessingInfo:              %d\n", mrz->sounding[i].postProcessingInfo);
+        fprintf(stderr, "dbg5       detectionClass:                  %d\n", mrz->sounding[i].detectionClass);
+        fprintf(stderr, "dbg5       detectionConfidenceLevel:        %d\n", mrz->sounding[i].detectionConfidenceLevel);
+        // fprintf(stderr, "dbg5       padding:                        %d\n", mrz->sounding[i].padding);
+        fprintf(stderr, "dbg5       beamflag_enabled:                %d\n", mrz->sounding[i].beamflag_enabled);
+        fprintf(stderr, "dbg5       beamflag:                        %d\n", mrz->sounding[i].beamflag);
+        fprintf(stderr, "dbg5       rangeFactor:                     %f\n", mrz->sounding[i].rangeFactor);
+        fprintf(stderr, "dbg5       qualityFactor:                   %f\n", mrz->sounding[i].qualityFactor);
+        fprintf(stderr, "dbg5       detectionUncertaintyVer_m:       %f\n", mrz->sounding[i].detectionUncertaintyVer_m);
+        fprintf(stderr, "dbg5       detectionUncertaintyHor_m:       %f\n", mrz->sounding[i].detectionUncertaintyHor_m);
+        fprintf(stderr, "dbg5       detectionWindowLength_sec:       %f\n", mrz->sounding[i].detectionWindowLength_sec);
+        fprintf(stderr, "dbg5       echoLength_sec:                  %f\n", mrz->sounding[i].echoLength_sec);
+        fprintf(stderr, "dbg5       WCBeamNumb:                      %d\n", mrz->sounding[i].WCBeamNumb);
+        fprintf(stderr, "dbg5       WCrange_samples:                 %d\n", mrz->sounding[i].WCrange_samples);
+        fprintf(stderr, "dbg5       WCNomBeamAngleAcross_deg:        %f\n", mrz->sounding[i].WCNomBeamAngleAcross_deg);
+        fprintf(stderr, "dbg5       meanAbsCoeff_dBPerkm:            %f\n", mrz->sounding[i].meanAbsCoeff_dBPerkm);
+        fprintf(stderr, "dbg5       reflectivity1_dB:                %f\n", mrz->sounding[i].reflectivity1_dB);
+        fprintf(stderr, "dbg5       reflectivity2_dB:                %f\n", mrz->sounding[i].reflectivity2_dB);
+        fprintf(stderr, "dbg5       receiverSensitivityApplied_dB:   %f\n", mrz->sounding[i].receiverSensitivityApplied_dB);
+        fprintf(stderr, "dbg5       sourceLevelApplied_dB:           %f\n", mrz->sounding[i].sourceLevelApplied_dB);
+        fprintf(stderr, "dbg5       BScalibration_dB:                %f\n", mrz->sounding[i].BScalibration_dB);
+        fprintf(stderr, "dbg5       TVG_dB:                          %f\n", mrz->sounding[i].TVG_dB);
+        fprintf(stderr, "dbg5       beamAngleReRx_deg:               %f\n", mrz->sounding[i].beamAngleReRx_deg);
+        fprintf(stderr, "dbg5       beamAngleCorrection_deg:         %f\n", mrz->sounding[i].beamAngleCorrection_deg);
+        fprintf(stderr, "dbg5       twoWayTravelTime_sec:            %f\n", mrz->sounding[i].twoWayTravelTime_sec);
+        fprintf(stderr, "dbg5       twoWayTravelTimeCorrection_sec:  %f\n", mrz->sounding[i].twoWayTravelTimeCorrection_sec);
+        fprintf(stderr, "dbg5       deltaLatitude_deg:               %f\n", mrz->sounding[i].deltaLatitude_deg);
+        fprintf(stderr, "dbg5       deltaLongitude_deg:              %f\n", mrz->sounding[i].deltaLongitude_deg);
+        fprintf(stderr, "dbg5       z_reRefPoint_m:                  %f\n", mrz->sounding[i].z_reRefPoint_m);
+        fprintf(stderr, "dbg5       y_reRefPoint_m:                  %f\n", mrz->sounding[i].y_reRefPoint_m);
+        fprintf(stderr, "dbg5       x_reRefPoint_m:                  %f\n", mrz->sounding[i].x_reRefPoint_m);
+        fprintf(stderr, "dbg5       beamIncAngleAdj_deg:             %f\n", mrz->sounding[i].beamIncAngleAdj_deg);
+        fprintf(stderr, "dbg5       realTimeCleanInfo:               %d\n", mrz->sounding[i].realTimeCleanInfo);
+        fprintf(stderr, "dbg5       SIstartRange_samples:            %d\n", mrz->sounding[i].SIstartRange_samples);
+        fprintf(stderr, "dbg5       SIcentreSample:                  %d\n", mrz->sounding[i].SIcentreSample);
+        fprintf(stderr, "dbg5       SInumSamples:                    %d\n", mrz->sounding[i].SInumSamples);
       }
-      mrz->sounding[i].beamflag_enabled = 1;
     }
 
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
-      fprintf(stderr, "dbg5       soundingIndex:                   %d\n", mrz->sounding[i].soundingIndex);
-      fprintf(stderr, "dbg5       txSectorNumb:                    %d\n", mrz->sounding[i].txSectorNumb);
-      fprintf(stderr, "dbg5       detectionType:                   %d\n", mrz->sounding[i].detectionType);
-      fprintf(stderr, "dbg5       detectionMethod:                 %d\n", mrz->sounding[i].detectionMethod);
-      fprintf(stderr, "dbg5       rejectionInfo1:                  %d\n", mrz->sounding[i].rejectionInfo1);
-      fprintf(stderr, "dbg5       rejectionInfo2:                  %d\n", mrz->sounding[i].rejectionInfo2);
-      fprintf(stderr, "dbg5       postProcessingInfo:              %d\n", mrz->sounding[i].postProcessingInfo);
-      fprintf(stderr, "dbg5       detectionClass:                  %d\n", mrz->sounding[i].detectionClass);
-      fprintf(stderr, "dbg5       detectionConfidenceLevel:        %d\n", mrz->sounding[i].detectionConfidenceLevel);
-      // fprintf(stderr, "dbg5       padding:                        %d\n", mrz->sounding[i].padding);
-      fprintf(stderr, "dbg5       beamflag_enabled:                %d\n", mrz->sounding[i].beamflag_enabled);
-      fprintf(stderr, "dbg5       beamflag:                        %d\n", mrz->sounding[i].beamflag);
-      fprintf(stderr, "dbg5       rangeFactor:                     %f\n", mrz->sounding[i].rangeFactor);
-      fprintf(stderr, "dbg5       qualityFactor:                   %f\n", mrz->sounding[i].qualityFactor);
-      fprintf(stderr, "dbg5       detectionUncertaintyVer_m:       %f\n", mrz->sounding[i].detectionUncertaintyVer_m);
-      fprintf(stderr, "dbg5       detectionUncertaintyHor_m:       %f\n", mrz->sounding[i].detectionUncertaintyHor_m);
-      fprintf(stderr, "dbg5       detectionWindowLength_sec:       %f\n", mrz->sounding[i].detectionWindowLength_sec);
-      fprintf(stderr, "dbg5       echoLength_sec:                  %f\n", mrz->sounding[i].echoLength_sec);
-      fprintf(stderr, "dbg5       WCBeamNumb:                      %d\n", mrz->sounding[i].WCBeamNumb);
-      fprintf(stderr, "dbg5       WCrange_samples:                 %d\n", mrz->sounding[i].WCrange_samples);
-      fprintf(stderr, "dbg5       WCNomBeamAngleAcross_deg:        %f\n", mrz->sounding[i].WCNomBeamAngleAcross_deg);
-      fprintf(stderr, "dbg5       meanAbsCoeff_dBPerkm:            %f\n", mrz->sounding[i].meanAbsCoeff_dBPerkm);
-      fprintf(stderr, "dbg5       reflectivity1_dB:                %f\n", mrz->sounding[i].reflectivity1_dB);
-      fprintf(stderr, "dbg5       reflectivity2_dB:                %f\n", mrz->sounding[i].reflectivity2_dB);
-      fprintf(stderr, "dbg5       receiverSensitivityApplied_dB:   %f\n", mrz->sounding[i].receiverSensitivityApplied_dB);
-      fprintf(stderr, "dbg5       sourceLevelApplied_dB:           %f\n", mrz->sounding[i].sourceLevelApplied_dB);
-      fprintf(stderr, "dbg5       BScalibration_dB:                %f\n", mrz->sounding[i].BScalibration_dB);
-      fprintf(stderr, "dbg5       TVG_dB:                          %f\n", mrz->sounding[i].TVG_dB);
-      fprintf(stderr, "dbg5       beamAngleReRx_deg:               %f\n", mrz->sounding[i].beamAngleReRx_deg);
-      fprintf(stderr, "dbg5       beamAngleCorrection_deg:         %f\n", mrz->sounding[i].beamAngleCorrection_deg);
-      fprintf(stderr, "dbg5       twoWayTravelTime_sec:            %f\n", mrz->sounding[i].twoWayTravelTime_sec);
-      fprintf(stderr, "dbg5       twoWayTravelTimeCorrection_sec:  %f\n", mrz->sounding[i].twoWayTravelTimeCorrection_sec);
-      fprintf(stderr, "dbg5       deltaLatitude_deg:               %f\n", mrz->sounding[i].deltaLatitude_deg);
-      fprintf(stderr, "dbg5       deltaLongitude_deg:              %f\n", mrz->sounding[i].deltaLongitude_deg);
-      fprintf(stderr, "dbg5       z_reRefPoint_m:                  %f\n", mrz->sounding[i].z_reRefPoint_m);
-      fprintf(stderr, "dbg5       y_reRefPoint_m:                  %f\n", mrz->sounding[i].y_reRefPoint_m);
-      fprintf(stderr, "dbg5       x_reRefPoint_m:                  %f\n", mrz->sounding[i].x_reRefPoint_m);
-      fprintf(stderr, "dbg5       beamIncAngleAdj_deg:             %f\n", mrz->sounding[i].beamIncAngleAdj_deg);
-      fprintf(stderr, "dbg5       realTimeCleanInfo:               %d\n", mrz->sounding[i].realTimeCleanInfo);
-      fprintf(stderr, "dbg5       SIstartRange_samples:            %d\n", mrz->sounding[i].SIstartRange_samples);
-      fprintf(stderr, "dbg5       SIcentreSample:                  %d\n", mrz->sounding[i].SIcentreSample);
-      fprintf(stderr, "dbg5       SInumSamples:                    %d\n", mrz->sounding[i].SInumSamples);
+      fprintf(stderr, "dbg5       numSidescanSamples:  %d\n", numSidescanSamples);
+    }
+
+    /* calculate index at start of SIsample_desidB using numSoundings and mrz->rxInfo.numBytesPerSounding
+        - this avoids breaking the decoding if fields have been added to sounding */
+    index_SIsample = index_sounding + numSoundings * mrz->rxInfo.numBytesPerSounding;
+    index = index_SIsample;
+
+    for (int i = 0; i < numSidescanSamples; i++)
+    {
+      mb_get_binary_short(true, &buffer[index], &(mrz->SIsample_desidB[i]));
+      index += 2;
     }
   }
-
-  if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
-    fprintf(stderr, "dbg5       numSidescanSamples:  %d\n", numSidescanSamples);
-  }
-
-  /* calculate index at start of SIsample_desidB using numSoundings and mrz->rxInfo.numBytesPerSounding
-      - this avoids breaking the decoding if fields have been added to sounding */
-  index_SIsample = index_sounding + numSoundings * mrz->rxInfo.numBytesPerSounding;
-  index = index_SIsample;
-
-  for (int i = 0; i<numSidescanSamples; i++)
-  {
-    mb_get_binary_short(true, &buffer[index], &(mrz->SIsample_desidB[i]));
-    index += 2;
-  }
-
-  int status = MB_SUCCESS;
 
   /* set kind */
   if (status == MB_SUCCESS) {
@@ -3209,7 +3224,7 @@ int mbr_kemkmall_rd_fcf(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       numBytesFile:               %u\n", fcf->cmnPart.numBytesFile);
     fprintf(stderr, "dbg5       fcf->fileName:              %s\n", fcf->cmnPart.fileName);
     fprintf(stderr, "dbg5       fcf->bsCalibrationFile:\n");
-    for (int i=0; i<cmnPart->numBytesFile; i++)
+    for (unsigned int i=0; i<cmnPart->numBytesFile; i++)
       fprintf(stderr, "%c", fcf->bsCalibrationFile[i]);
     fprintf(stderr,"\n");
   }
@@ -3751,12 +3766,14 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
   int *file_indexed = NULL;
   int *dgm_id = NULL;
   char buffer[256];
-  size_t read_len, offset;
-  int index, skip;
-  int num_bytes_dgm_end;
+  size_t read_len = 0;
+  size_t offset = 0;
+  unsigned int index = 0;
+  unsigned int skip = 0;
+  unsigned int num_bytes_dgm_end = 0;
   int iip_location = -1;
   const int HEADER_SKIP = 8;
-  unsigned short pingCnt;
+  unsigned short pingCnt = 0;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -4127,7 +4144,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
 
 #ifdef MBR_KEMKMALL_DEBUG
   fprintf(stderr, "\n\nIndexed %ld valid EM datagrams:\n", dgm_index_table->dgm_count);
-  for (int i=0; i<dgm_index_table->dgm_count; i++)
+  for (unsigned int i=0; i<dgm_index_table->dgm_count; i++)
   {
     fprintf(stderr, "ID: %4d, ", i);
     fprintf(stderr, "file_pos: %8.zu, ", dgm_index_table->indextable[i].file_pos);
@@ -4173,8 +4190,8 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   size_t read_len = 0;
   char **bufferptr = NULL;
   char *buffer = NULL;
-  int *bufferalloc = NULL;
-  int *dgm_id = NULL;
+  size_t *bufferalloc = NULL;
+  unsigned int *dgm_id = NULL;
   int jmrz;
   int jmwc;
   int jxmt, isounding;
@@ -4185,13 +4202,13 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
   /* get buffer and related vars from mbio saved values */
   bufferptr = (char **)&mb_io_ptr->raw_data;
-  bufferalloc = (int *)&mb_io_ptr->structure_size;
+  bufferalloc = (size_t *)&mb_io_ptr->structure_size;
   buffer = (char *)*bufferptr;
   mbsys_kmbes_emdgm_type emdgm_type;
 
   /* get the datagram index table */
   dgm_index_table = (struct mbsys_kmbes_index_table *)mb_io_ptr->saveptr1;
-  dgm_id = (int *)&mb_io_ptr->save1;
+  dgm_id = (unsigned int *)&mb_io_ptr->save1;
 
   /* get pointer to raw data structure */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
@@ -4249,8 +4266,8 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
       if (status == MB_SUCCESS) {
         status = mbr_kemkmall_rd_hdr(verbose, buffer, (void *)&header, (void *)&emdgm_type, error);
         if (status == MB_SUCCESS && (emdgm_type == MRZ || emdgm_type == MWC)) {
-          unsigned short numOfDgms;
-          unsigned short dgmNum;
+          unsigned short numOfDgms = 0;
+          unsigned short dgmNum = 0;
           mb_get_binary_short(true, &buffer[MBSYS_KMBES_HEADER_SIZE], &numOfDgms);
           mb_get_binary_short(true, &buffer[MBSYS_KMBES_HEADER_SIZE+2], &dgmNum);
           if (numOfDgms != 1) {
@@ -4293,7 +4310,7 @@ numOfDgms, dgmNum, header.numBytesDgm, dgm_index->index_org, dgm_index->ping_num
         // check for partitioned datagrams (i.e. multiple UDP packets that have
         // not been concatenated) and ignore these
         if (status == MB_SUCCESS && (emdgm_type == MRZ || emdgm_type == MWC)) {
-          unsigned short numOfDgms;
+          unsigned short numOfDgms = -1;
           mb_get_binary_short(true, &buffer[MBSYS_KMBES_HEADER_SIZE], &numOfDgms);
           if (numOfDgms != 1) {
             *error = MB_ERROR_UNINTELLIGIBLE;
@@ -4368,7 +4385,7 @@ numOfDgms, dgmNum, header.numBytesDgm, dgm_index->index_org, dgm_index->ping_num
           break;
 
         case SVT:
-          /* #SVP - Sensor sound Velocity measured at Transducer */
+          /* #SVT - Sensor sound Velocity measured at Transducer */
           status = mbr_kemkmall_rd_svt(verbose, buffer, store_ptr, (void *)&header, error);
           if (status == MB_SUCCESS)
             done = true;
@@ -4928,16 +4945,16 @@ int mbr_kemkmall_wr_header(int verbose, char **bufferptr, void *header_ptr, int 
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
+int mbr_kemkmall_wr_spo(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
-  int index = 0;
+  unsigned int index = 0;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -5048,7 +5065,7 @@ int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+  fprintf(stderr, "KEMKMALL datagram type %.4s written - time: %d.%9.9d status:%d error:%d\n",
           spo->header.dgmType, spo->header.time_sec, spo->header.time_nanosec, status, *error);
 #endif
 
@@ -5058,7 +5075,7 @@ int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
+int mbr_kemkmall_wr_skm(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
   char *buffer = NULL;
   int index = 0;
 
@@ -5066,7 +5083,7 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -5266,7 +5283,7 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+  fprintf(stderr, "KEMKMALL datagram type %.4s written - time: %d.%9.9d status:%d error:%d\n",
           skm->header.dgmType, skm->header.time_sec, skm->header.time_nanosec, status, *error);
 #endif
 
@@ -5276,7 +5293,7 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_svp(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   char *buffer = NULL;
   int index = 0;
 
@@ -5284,7 +5301,7 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -5295,16 +5312,18 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* datagram version being written */
   svp->header.dgmVersion = MBSYS_KMBES_SVP_VERSION;
+  svp->numBytesCmnPart = 28;
+  svp->header.numBytesDgm = MBSYS_KMBES_HEADER_SIZE + svp->numBytesCmnPart + svp->numSamples * 20 + sizeof(int);
 
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
-    fprintf(stderr, " dbg5       numBytesDgm:     %u\n", svp->header.numBytesDgm);
-    fprintf(stderr, " dbg5       dgmType:         %s\n", svp->header.dgmType);
-    fprintf(stderr, " dbg5       dgmVersion:      %u\n", svp->header.dgmVersion);
-    fprintf(stderr, " dbg5       systemID:        %u\n", svp->header.systemID);
-    fprintf(stderr, " dbg5       echoSounderID:   %u\n", svp->header.echoSounderID);
-    fprintf(stderr, " dbg5       time_sec:        %u\n", svp->header.time_sec);
-    fprintf(stderr, " dbg5       time_nanosec:    %u\n", svp->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:     %u\n", svp->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:         %.4s\n", svp->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:      %u\n", svp->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:        %u\n", svp->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:   %u\n", svp->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:        %u\n", svp->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:    %u\n", svp->header.time_nanosec);
 
     fprintf(stderr, "dbg5       numBytesCmnPart:  %u\n", svp->numBytesCmnPart);
     fprintf(stderr, "dbg5       numSamples:       %u\n", svp->numSamples);
@@ -5342,7 +5361,7 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
     buffer = (char *) *bufferptr;
 
     /* insert the header */
-        mbr_kemkmall_wr_header(verbose, bufferptr, (void *)&svp->header, error);
+    mbr_kemkmall_wr_header(verbose, bufferptr, (void *)&svp->header, error);
 
     /* insert the data */
     index = MBSYS_KMBES_HEADER_SIZE;
@@ -5388,7 +5407,7 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+  fprintf(stderr, "KEMKMALL datagram type %.4s written - time: %d.%9.9d status:%d error:%d\n",
           svp->header.dgmType, svp->header.time_sec, svp->header.time_nanosec, status, *error);
 #endif
 
@@ -5398,7 +5417,7 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_svt(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   char *buffer = NULL;
   int index = 0;
 
@@ -5406,7 +5425,7 @@ int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -5519,7 +5538,7 @@ int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+  fprintf(stderr, "KEMKMALL datagram type %.4s written - time: %d.%9.9d status:%d error:%d\n",
           svt->header.dgmType, svt->header.time_sec, svt->header.time_nanosec, status, *error);
 #endif
 
@@ -5529,7 +5548,7 @@ int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_scl(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
   int index = 0;
@@ -5538,7 +5557,7 @@ int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -5629,7 +5648,7 @@ int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+  fprintf(stderr, "KEMKMALL datagram type %.4s written - time: %d.%9.9d status:%d error:%d\n",
           scl->header.dgmType, scl->header.time_sec, scl->header.time_nanosec, status, *error);
 #endif
 
@@ -5639,7 +5658,7 @@ int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
+int mbr_kemkmall_wr_sde(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
   int index = 0;
@@ -5648,7 +5667,7 @@ int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -5748,7 +5767,7 @@ int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+  fprintf(stderr, "KEMKMALL datagram type %.4s written - time: %d.%9.9d status:%d error:%d\n",
           sde->header.dgmType, sde->header.time_sec, sde->header.time_nanosec, status, *error);
 #endif
 
@@ -5758,7 +5777,7 @@ int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
+int mbr_kemkmall_wr_shi(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
   int index = 0;
@@ -5767,7 +5786,7 @@ int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -5858,7 +5877,7 @@ int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+  fprintf(stderr, "KEMKMALL datagram type %.4s written - time: %d.%9.9d status:%d error:%d\n",
           shi->header.dgmType, shi->header.time_sec, shi->header.time_nanosec, status, *error);
 #endif
 
@@ -5868,7 +5887,7 @@ int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_sha(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   char *buffer = NULL;
   int index = 0;
 
@@ -5876,7 +5895,7 @@ int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -5993,7 +6012,7 @@ int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int imrz, size_t *size, int *error) {
+int mbr_kemkmall_wr_mrz(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, int imrz, size_t *size, int *error) {
   char *buffer = NULL;
   int numSoundings = 0;
   int numSidescanSamples = 0;
@@ -6003,7 +6022,7 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
     fprintf(stderr, "dbg2       imrz:       %d\n", imrz);
@@ -6601,12 +6620,12 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int imwc, size_t *size, int *error) {
+int mbr_kemkmall_wr_mwc(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, int imwc, size_t *size, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
     fprintf(stderr, "dbg2       imwcc:      %d\n", imwc);
@@ -6881,7 +6900,7 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_cpo(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
   int index = 0;
@@ -6890,7 +6909,7 @@ int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -7011,12 +7030,12 @@ int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_che(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -7136,7 +7155,7 @@ int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_iip(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
   int index = 0;
@@ -7145,7 +7164,7 @@ int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -7234,7 +7253,7 @@ int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_iop(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
   int index = 0;
@@ -7243,7 +7262,7 @@ int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -7331,7 +7350,7 @@ int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_ibe(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_ibe(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   char *buffer = NULL;
   int index = 0;
 
@@ -7339,7 +7358,7 @@ int mbr_kemkmall_wr_ibe(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -7431,7 +7450,7 @@ int mbr_kemkmall_wr_ibe(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_ibr(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_ibr(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   char *buffer = NULL;
   int index = 0;
 
@@ -7439,7 +7458,7 @@ int mbr_kemkmall_wr_ibr(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -7531,7 +7550,7 @@ int mbr_kemkmall_wr_ibr(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_ibs(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_ibs(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   char *buffer = NULL;
   int index = 0;
 
@@ -7539,7 +7558,7 @@ int mbr_kemkmall_wr_ibs(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -7631,7 +7650,7 @@ int mbr_kemkmall_wr_ibs(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_fcf(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_fcf(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   char *buffer = NULL;
   int index = 0;
 
@@ -7639,7 +7658,7 @@ int mbr_kemkmall_wr_fcf(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -7656,11 +7675,11 @@ int mbr_kemkmall_wr_fcf(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* size of output record and components thereof - set the size according to what
       we know about, as anything added by Kongsberg that we don't know about will
       have been skipped while reading */
-  fcf->cmnPart.numBytesCmnPart = 72;
+  cmnPart->numBytesCmnPart = 72;
   fcf->header.numBytesDgm = MBSYS_KMBES_HEADER_SIZE
-                            + fcf->cmnPart.numBytesCmnPart
+                            + cmnPart->numBytesCmnPart
                             + MBSYS_KMBES_PARITION_SIZE
-                            + fcf->cmnPart.numBytesFile
+                            + cmnPart->numBytesFile
                             + MBSYS_KMBES_END_SIZE;
 
   *size = (size_t) fcf->header.numBytesDgm;
@@ -7699,35 +7718,35 @@ int mbr_kemkmall_wr_fcf(int verbose, int *bufferalloc, char **bufferptr, void *s
 
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
-      fprintf(stderr, "dbg5       numOfDgms:                 %d\n", fcf->partition.numOfDgms);
-      fprintf(stderr, "dbg5       dgmNum:                    %d\n", fcf->partition.dgmNum);
+      fprintf(stderr, "dbg5       numOfDgms:                 %d\n", partition->numOfDgms);
+      fprintf(stderr, "dbg5       dgmNum:                    %d\n", partition->dgmNum);
 
-      fprintf(stderr, "dbg5       numBytesCmnPart:            %u\n", fcf->cmnPart.numBytesCmnPart);
-      fprintf(stderr, "dbg5       fileStatus:                 %u\n", fcf->cmnPart.fileStatus);
-      fprintf(stderr, "dbg5       fileStatus:                 %u\n", fcf->cmnPart.padding1);
-      fprintf(stderr, "dbg5       numBytesFile:               %u\n", fcf->cmnPart.numBytesFile);
-      fprintf(stderr, "dbg5       fcf->fileName:              %s\n", fcf->cmnPart.fileName);
+      fprintf(stderr, "dbg5       numBytesCmnPart:            %u\n", cmnPart->numBytesCmnPart);
+      fprintf(stderr, "dbg5       fileStatus:                 %u\n", cmnPart->fileStatus);
+      fprintf(stderr, "dbg5       fileStatus:                 %u\n", cmnPart->padding1);
+      fprintf(stderr, "dbg5       numBytesFile:               %u\n", cmnPart->numBytesFile);
+      fprintf(stderr, "dbg5       fcf->fileName:              %s\n", cmnPart->fileName);
     }
 
     /* insert the data */
     index = MBSYS_KMBES_HEADER_SIZE;
 
     /* EMdgmMpartition - data partition information */
-    mb_put_binary_short(true, fcf->partition.numOfDgms, &buffer[index]);
+    mb_put_binary_short(true, partition->numOfDgms, &buffer[index]);
     index += 2;
-    mb_put_binary_short(true, fcf->partition.dgmNum, &buffer[index]);
+    mb_put_binary_short(true, partition->dgmNum, &buffer[index]);
     index += 2;
 
     /* EMdgmMbody - information of transmitter and receiver used to find data in datagram */
-    mb_put_binary_short(true, fcf->cmnPart.numBytesCmnPart, &buffer[index]);
+    mb_put_binary_short(true, cmnPart->numBytesCmnPart, &buffer[index]);
     index += 2;
-    buffer[index] = fcf->cmnPart.fileStatus;
+    buffer[index] = cmnPart->fileStatus;
     index++;
-    buffer[index] = fcf->cmnPart.padding1;
+    buffer[index] = cmnPart->padding1;
     index++;
-    mb_put_binary_int(true, fcf->cmnPart.numBytesFile, &buffer[index]);
+    mb_put_binary_int(true, cmnPart->numBytesFile, &buffer[index]);
     index += 4;
-    memcpy(&buffer[index], fcf->cmnPart.fileName, MBSYS_KMBES_MAX_F_FILENAME_LENGTH);
+    memcpy(&buffer[index], cmnPart->fileName, MBSYS_KMBES_MAX_F_FILENAME_LENGTH);
     index += MBSYS_KMBES_MAX_F_FILENAME_LENGTH;
     memcpy(&buffer[index], fcf->bsCalibrationFile, cmnPart->numBytesFile);
     index += cmnPart->numBytesFile;
@@ -7756,7 +7775,7 @@ int mbr_kemkmall_wr_fcf(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_xmb(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   size_t numBytesVersion = 0;
   char *buffer = NULL;
   int index = 0;
@@ -7765,7 +7784,7 @@ int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -7866,7 +7885,7 @@ int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_xmc(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   size_t numBytesComment = 0;
   char *buffer = NULL;
   int index = 0;
@@ -7875,7 +7894,7 @@ int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -7960,12 +7979,12 @@ int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *s
 };
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_xmt(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int ixmt, size_t *size, int *error) {
+int mbr_kemkmall_wr_xmt(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, int ixmt, size_t *size, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
     fprintf(stderr, "dbg2       ixmt:       %d\n", ixmt);
@@ -8179,12 +8198,12 @@ int mbr_kemkmall_wr_xmt(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_xms(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -8292,14 +8311,14 @@ int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_unknown(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_unknown(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   (void)size;  // unused
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -8338,7 +8357,7 @@ int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
   // size_t write_len = 0;
   char **bufferptr = NULL;
-  int *bufferalloc = NULL;
+  size_t *bufferalloc = NULL;
   size_t size = 0;
 
   /* get pointer to mbio descriptor */
@@ -8346,7 +8365,7 @@ int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
   /* get buffer and related vars from mbio saved values */
   bufferptr = (char **)&mb_io_ptr->raw_data;
-  bufferalloc = (int *)&mb_io_ptr->structure_size;
+  bufferalloc = (size_t *)&mb_io_ptr->structure_size;
   // char *buffer = (char *)*bufferptr;
 
   /* get pointer to raw data structure */

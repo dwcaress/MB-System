@@ -196,7 +196,8 @@ int mbr_dem_sb2000sb(int verbose, void *mbio_ptr, int *error) {
 int mbr_rt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int read_status;
 	char buffer[2 * MBSYS_SB2000_PIXELS + 4];
-	short test_sensor_size, test_data_size;
+	short test_sensor_size = 0;
+  short test_data_size = 0;
 	int found, skip;
 
 	if (verbose >= 2) {

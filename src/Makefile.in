@@ -160,7 +160,7 @@ DIST_SUBDIRS = gsf surf bsio mbtrnframe mbtrnav mbtrn mbio mbaux \
 	utilities deprecated mbtrnutils gmt otps macros share man html \
 	ps mbedit mbnavedit mbvelocitytool mbview mbgrdviz mbeditviz \
 	mbnavadjust photo qt-mbgrdviz qt-mbgrdviz-2 qt-guilib \
-	qt-mbgrdviz-3
+	qt-mbgrdviz-3 mbgrd2gltf
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
@@ -196,6 +196,7 @@ EGREP = @EGREP@
 ETAGS = @ETAGS@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
+FILECMD = @FILECMD@
 GDAL_CONF = @GDAL_CONF@
 GMT_CONF = @GMT_CONF@
 GMT_PLUGINDIR = @GMT_PLUGINDIR@
@@ -385,7 +386,7 @@ SUBDIRS = $(am__append_1) surf bsio $(XBUILD_SUB_MBTFRAME) \
 	$(XBUILD_SUB_MBTNAV) $(XBUILD_SUB_MBTRN) mbio mbaux utilities \
 	deprecated $(XBUILD_SUB_MBTRNBIN) gmt otps macros share man \
 	html ps $(XBUILD_SUB_MOTIF) $(XBUILD_SUB_GL) \
-	$(XBUILD_SUB_OPENCVTOOLS) $(XBUILD_SUB_QTTOOLS)
+	$(XBUILD_SUB_OPENCVTOOLS) $(XBUILD_SUB_QTTOOLS) mbgrd2gltf
 CLEANFILES = 
 DISTCLEANFILES = 
 all: all-recursive

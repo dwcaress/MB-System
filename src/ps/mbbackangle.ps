@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:01 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:07 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 6
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -236,14 +242,14 @@ G .084(rage amplitude or sidescan v).15 F .083(alues in sw)-.25 F .083
 (ath sonar data as a func-)-.1 F
 (tion of the grazing angle with the sea\215oor)108 52.8 Q(.)-.55 E F1
 (VERSION)72 81.6 Q F0 -1.11(Ve)108 93.6 S(rsion 5.0)1.11 E F1(SYNOPSIS)
-72 122.4 Q F2(mb)108 134.4 Q(backangle)-.1 E F0([)2.992 E F2<ad41>A/F3
-10/Times-Italic@0 SF(kind)A F2 .492<ad4320ad4420ad46>2.992 F F3(format)A
-F2<ad47>2.992 E F3(kind/angle/max/nx/ny)A F2<ad49>2.992 E F3(\214le)A F2
-<ad4e>2.992 E F3(nangle/anglemax)A F2<ad50>2.993 E F3(pings)A F2<ad51>
-2.993 E<ad52>108 146.4 Q F3 -.37(re)C(fangle).37 E F2<ad54>2.5 E F3
-(topo)A(grid\214le)-.1 E F2<ad5a>2.5 E F3(altitude)A F2(\255V \255H])2.5
-E F1(DESCRIPTION)72 175.2 Q F0 .758(The program)108 187.2 R F2(mb)3.258
-E(backangle)-.1 E F0 .757(reads a sw)3.257 F .757
+72 122.4 Q F2(mb)108 134.4 Q(backangle)-.1 E F0([)2.828 E F2<ad41>A/F3
+10/Times-Italic@0 SF(kind)A F2 .329<ad4320ad4420ad46>2.828 F F3(format)A
+F2<ad47>2.829 E F3(kind/angle/min/max/nx/ny)A F2<ad49>2.829 E F3(\214le)
+A F2<ad4e>2.829 E F3(nangle/anglemax)A F2<ad50>2.829 E F3(pings)A F2
+<ad5120ad52>108 146.4 Q F3 -.37(re)C(fangle).37 E F2<ad54>2.5 E F3(topo)
+A(grid\214le)-.1 E F2<ad5a>2.5 E F3(altitude)A F2(\255V \255H])2.5 E F1
+(DESCRIPTION)72 175.2 Q F0 .758(The program)108 187.2 R F2(mb)3.258 E
+(backangle)-.1 E F0 .757(reads a sw)3.257 F .757
 (ath sonar data \214le containing beam amplitude and/or sidescan data)
 -.1 F .11(and generates tables of the a)108 199.2 R -.15(ve)-.2 G .11
 (rage amplitude and/or sidescan v).15 F .11
@@ -290,16 +296,16 @@ rrection tables are read and interpolated according to ping time by)108
 427.2 R F2(mbpr)2.854 E(ocess)-.18 E F0 2.854(.T)C .354(he correction v)
 -2.854 F(alue)-.25 E .713(for each amplitude or sidescan sample is also\
  interpolated using the samples apparent grazing angle.)108 439.2 R(The)
-5.713 E 1.232
+5.713 E .451
 (grazing angle is calculated using a \215at bottom assumption by def)108
-451.2 R 1.232(ault b)-.1 F 1.232(ut, if the)-.2 F F2<ad51>3.731 E F0
-1.231(option is used, will)3.731 F .443
-(instead be calculated using the acrosstrack slope in the bath)108 463.2
-R .443(ymetry \(if a)-.05 F -.25(va)-.2 G .443(ilable\) .).25 F .444
-(If the)5.444 F F2<ad54>2.944 E F0 .444(option is used)2.944 F 1.43
-(to specify a topograph)108 475.2 R 3.93(yg)-.05 G 1.43(rid of the area\
- of interest, then the grazing angle is calculated using that grid)-3.93
-F(rather than an)108 487.2 Q 2.5(yb)-.15 G(ath)-2.5 E
+451.2 R .45(ault b)-.1 F .45(ut, if the)-.2 F F2<ad51>2.95 E F0 .45
+(option is used, will in-)2.95 F .288
+(stead be calculated using the acrosstrack slope in the bath)108 463.2 R
+.288(ymetry \(if a)-.05 F -.25(va)-.2 G .289(ilable\) .).25 F .289
+(If the)5.289 F F2<ad54>2.789 E F0 .289(option is used to)2.789 F .567
+(specify a topograph)108 475.2 R 3.067(yg)-.05 G .567(rid of the area o\
+f interest, then the grazing angle is calculated using that grid rather)
+-3.067 F(than an)108 487.2 Q 2.5(yb)-.15 G(ath)-2.5 E
 (ymetry data within the \214le being processed.)-.05 E .102(If the v)108
 511.2 R .102(alues are in dB, and therefore log scaled, then the correc\
 tions are subtracted from the ra)-.25 F 2.603(wv)-.15 G .103(alues and)
@@ -322,12 +328,12 @@ R F2<ad47>3.092 E F0 .592(option must be gi)3.092 F -.15(ve)-.25 G 3.092
 F 1.037(In addition to outputting the grids,)108 607.2 R F2(mb)3.538 E
 (backangle)-.1 E F0(uses)3.538 E F2(mbm_grdplot)3.538 E F0 1.038
 (to generate)3.538 F F2(GMT)3.538 E F0 1.038(shellscripts that,)3.538 F
-1.134(when e)108 619.2 R -.15(xe)-.15 G 1.134
+.04(when e)108 619.2 R -.15(xe)-.15 G .04
 (cuted, will generate plots of the gridded histograms o).15 F -.15(ve)
--.15 G 1.133(rlain with the amplitude v).15 F 1.133(ersus grazing)-.15 F
-(angle tables in the ".ag)108 631.2 Q(a" and ".sg)-.05 E(a" \214les.)
--.05 E F1(MB-SYSTEM A)72 660 Q(UTHORSHIP)-.548 E F0(Da)108 672 Q(vid W)
--.2 E 2.5(.C)-.92 G(aress)-2.5 E(Montere)113 684 Q 2.5(yB)-.15 G
+-.15 G .04(rlain with the amplitude v).15 F .04(ersus grazing an-)-.15 F
+(gle tables in the ".ag)108 631.2 Q(a" and ".sg)-.05 E(a" \214les.)-.05
+E F1(MB-SYSTEM A)72 660 Q(UTHORSHIP)-.548 E F0(Da)108 672 Q(vid W)-.2 E
+2.5(.C)-.92 G(aress)-2.5 E(Montere)113 684 Q 2.5(yB)-.15 G
 (ay Aquarium Research Institute)-2.5 E(Dale N. Chayes)108 696 Q
 (Center for Coastal and Ocean Mapping)113 708 Q(Uni)113 720 Q -.15(ve)
 -.25 G(rsity of Ne).15 E 2.5(wH)-.25 G(ampshire)-2.5 E(1)535 768 Q 0 Cg
@@ -341,14 +347,14 @@ BP
 113 96 Q(UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)
 113 108 Q -.15(ve)-.25 G(rsity of Bremen).15 E/F1 10.95/Times-Bold@0 SF
 (OPTIONS)72 136.8 Q/F2 10/Times-Bold@0 SF<ad41>108 148.8 Q/F3 10
-/Times-Italic@0 SF(kind)23.08 E F0 2.171
-(Determines if beam amplitude \()144 160.8 R F3(kind)A F0 4.671(=1)4.671
-G 4.671(\)a)-4.671 G 2.171(nd/or sidescan \()-4.671 F F3(kind)A F0 4.672
-(=2)4.671 G 4.672(\)d)-4.672 G 2.172(ata will be processed.)-4.672 F
-(Def)144 172.8 Q(ault: both amplitude and sidescan data are processed.)
--.1 E F2<ad43>108 189.6 Q F0(Normally)23.08 E(,)-.65 E F2(mb)2.615 E
-(backangle)-.1 E F0 .115
-(produces a table of amplitude vs grazing angle v)2.615 F .114
+/Times-Italic@0 SF(kind)144 148.8 Q F0 .786
+(Determines if beam amplitude \()144 160.8 R F3(kind)A F0 3.286(=1)3.286
+G 3.286(\)a)-3.286 G .786(nd/or sidescan \()-3.286 F F3(kind)A F0 3.286
+(=2)3.286 G 3.286(\)d)-3.286 G .787(ata will be processed.)-3.286 F(De-)
+5.787 E -.1(fa)144 172.8 S
+(ult: both amplitude and sidescan data are processed.).1 E F2<ad43>108
+189.6 Q F0(Normally)144 189.6 Q(,)-.65 E F2(mb)2.615 E(backangle)-.1 E
+F0 .115(produces a table of amplitude vs grazing angle v)2.615 F .114
 (alues which is asymmet-)-.25 F .415(ric about the v)144 201.6 R .415
 (ertical \(zero angle\) axis. If)-.15 F F2<ad43>2.915 E F0 .415
 (is speci\214ed, the amplitude vs grazing angle function)2.915 F .382
@@ -358,91 +364,91 @@ G 4.671(\)a)-4.671 G 2.171(nd/or sidescan \()-4.671 F F3(kind)A F0 4.672
 F0 2.881(,a)C(nd)-2.881 E .128(to instead use)144 225.6 R F2(mbset)2.628
 E F0 .129(to set symmetric or asymmetric sidescan correction in the)
 2.628 F F2(mbpr)2.629 E(ocess)-.18 E F0(param-)2.629 E(eter \214le.)144
-237.6 Q F2<ad44>108 254.4 Q F0 .132(This option causes)23.08 F F2(mb)
-2.632 E(backangle)-.1 E F0 .132
-(to dump the output to stdout rather than to ".sg)2.632 F .132
-(a" or ".ag)-.05 F .131(a" \214les..)-.05 F F2<ad46>108 271.2 Q F3
-(format)24.19 E F0 .417(Sets the)144 283.2 R F2(MBIO)2.917 E F0(inte)
-2.917 E .417
+237.6 Q F2<ad44>108 254.4 Q F0(This option causes)144 254.4 Q F2(mb)2.5
+E(backangle)-.1 E F0(to dump the output to stdout rather than to ".sg)
+2.5 E(a" or ".ag)-.05 E(a" \214les..)-.05 E F2<ad46>108 271.2 Q F3
+(format)144 271.2 Q F0 .418(Sets the)144 283.2 R F2(MBIO)2.918 E F0
+(inte)2.918 E .418
 (ger format identi\214er for the input \214le speci\214ed with the)-.15
-F F2<ad49>2.918 E F0 .418(option. By def)2.918 F(ault,)-.1 E F2(mb)144
+F F2<ad49>2.917 E F0 .417(option. By def)2.917 F(ault,)-.1 E F2(mb)144
 295.2 Q(backangle)-.1 E F0(infers the format from the "*.mbXX")2.5 E F2
 (MB-System)2.5 E F0(suf)2.5 E(\214x con)-.25 E -.15(ve)-.4 G(ntion.).15
-E F2<ad47>108 312 Q F3(kind/angle/max/nx/ny)22.52 E F0 1.31
-(This option causes)144 324 R F2(mb)3.809 E(backangle)-.1 E F0 1.309
-(to output gridded histograms of the amplitude v)3.809 F 1.309
-(ersus grazing)-.15 F 1.265(angle data for each sw)144 336 R 1.265(ath \
-\214le processed. The program also generates a shellscript to produce a)
--.1 F(\214rst-cut)144 348 Q F2(GMT)4.174 E F0 1.674
-(postscript plot of the histogram o)4.174 F -.15(ve)-.15 G 1.674
-(rlain by the amplitude v).15 F 1.673(ersus grazing angle)-.15 F .022
-(tables used by)144 360 R F2(mbpr)2.522 E(ocess)-.18 E F0 5.022(.T)C(he)
--5.022 E F3(kind)2.522 E F0 .023
-(parameter indicates whether an amplitude \()2.523 F F3(kind)A F0 2.523
-(=1)2.523 G 2.523(\)o)-2.523 G 2.523(rs)-2.523 G(ides-)-2.523 E .104
-(can \()144 372 R F3(kind)A F0 2.604(=2)2.604 G 2.604(\)h)-2.604 G .104
-(istogram is desired; the)-2.604 F F2<ad47>2.604 E F0 .104
-(command must be gi)2.604 F -.15(ve)-.25 G 2.604(nt).15 G .103
-(wice \(once with)-2.604 F F3(kind)2.603 E F0 2.603(=1a)2.603 G(nd)
--2.603 E .472(once with)144 384 R F3(kind)2.972 E F0 2.972(=2)2.972 G
-2.972(\)t)-2.972 G 2.972(og)-2.972 G .472(enerate both amplitude and si\
-descan histograms. The histogram grid con-)-2.972 F .552(sists of)144
-396 R F3(nx)3.052 E F0 .552(bins e)3.052 F .551(xtending from \255)-.15
-F F3(angle)A F0 .551(to +)3.051 F F3(angle)A F0(de)3.051 E .551
-(grees in the x-dimension, and)-.15 F F3(ny)3.051 E F0 .551(bins e)3.051
-F(xtend-)-.15 E .722(ing from 0.0 to)144 408 R F3(max)3.222 E F0 .722
-(in the y-dimension. The v)3.222 F .723
-(alues of the histogram are normalized so that the)-.25 F(y)-.15 E
-(sum to 1000.0 within each angle bin.)144 420 Q F2<ad48>108 436.8 Q F0
-.391(This "help" \215ag causes the program to print out a description o\
-f its operation and then e)22.52 F .39(xit imme-)-.15 F(diately)144
-448.8 Q(.)-.65 E F2<ad49>108 465.6 Q F3(\214lename)26.41 E F0 .312
+E F2<ad47>108 312 Q F3(kind/angle/min/max/nx/ny)144 312 Q F0 .033
+(This option causes)144 324 R F2(mb)2.534 E(backangle)-.1 E F0 .034
+(to output gridded histograms of the amplitude v)2.534 F .034
+(ersus grazing an-)-.15 F .44(gle data for each sw)144 336 R .439(ath \
+\214le processed. The program also generates a shellscript to produce a\
+ \214rst-)-.1 F(cut)144 348 Q F2(GMT)3.558 E F0 1.058
+(postscript plot of the histogram o)3.558 F -.15(ve)-.15 G 1.059
+(rlain by the amplitude v).15 F 1.059(ersus grazing angle tables)-.15 F
+1.116(used by)144 360 R F2(mbpr)3.616 E(ocess)-.18 E F0 6.116(.T)C(he)
+-6.116 E F3(kind)3.616 E F0 1.116
+(parameter indicates whether an amplitude \()3.616 F F3(kind)A F0 3.615
+(=1)3.615 G 3.615(\)o)-3.615 G 3.615(rs)-3.615 G(idescan)-3.615 E(\()144
+372 Q F3(kind)A F0 3.519(=2)3.519 G 3.519(\)h)-3.519 G 1.019
+(istogram is desired; the)-3.519 F F2<ad47>3.519 E F0 1.019
+(command must be gi)3.519 F -.15(ve)-.25 G 3.52(nt).15 G 1.02
+(wice \(once with)-3.52 F F3(kind)3.52 E F0 3.52(=1a)3.52 G(nd)-3.52 E
+.472(once with)144 384 R F3(kind)2.972 E F0 2.972(=2)2.972 G 2.972(\)t)
+-2.972 G 2.972(og)-2.972 G .472(enerate both amplitude and sidescan his\
+tograms. The histogram grid con-)-2.972 F 1.895(sists of)144 396 R F3
+(nx)4.395 E F0 1.895(bins e)4.395 F 1.895(xtending from \255)-.15 F F3
+(angle)A F0 1.896(to +)4.396 F F3(angle)A F0(de)4.396 E 1.896
+(grees in the x-dimension, and)-.15 F F3(ny)4.396 E F0 1.896(bins of)
+4.396 F .522(backscatter v)144 408 R .522(alue e)-.25 F .522
+(xtending from)-.15 F F3(min)3.022 E F0(to)3.022 E F3(max)3.022 E F0
+.522(in the y-dimension. The v)3.022 F .522(alues of the histogram are)
+-.25 F(normalized so that the)144 420 Q 2.5(ys)-.15 G
+(um to 1000.0 within each angle bin.)-2.5 E F2<ad48>108 436.8 Q F0 .391
+(This "help" \215ag causes the program to print out a description of it\
+s operation and then e)144 436.8 R .391(xit imme-)-.15 F(diately)144
+448.8 Q(.)-.65 E F2<ad49>108 465.6 Q F3(\214lename)144 465.6 Q F0 .313
 (Sets the input \214lename. If)144 477.6 R F3(format)2.813 E F0 2.813
 (>0\()2.813 G .313(set with the)-2.813 F F2<ad46>2.813 E F0 .313
-(option\) then the sw)2.813 F .313(ath sonar data contained)-.1 F(in)144
+(option\) then the sw)2.813 F .312(ath sonar data contained)-.1 F(in)144
 489.6 Q F3(in\214le)2.937 E F0 .437(is read and processed. If)2.937 F F3
 (format)2.937 E F0 2.937(<0)2.937 G 2.937(,t)-2.937 G(hen)-2.937 E F3
 (in\214le)2.937 E F0 .437(is assumed to be an ascii \214le containing a)
-2.937 F .868(list of the input sw)144 501.6 R .869
-(ath sonar data \214les to be processed and their formats.)-.1 F .869
+2.937 F .869(list of the input sw)144 501.6 R .869
+(ath sonar data \214les to be processed and their formats.)-.1 F .868
 (The program will read)5.869 F .711(and process the data in each one of\
  these \214les. Each input \214le will ha)144 513.6 R 1.011 -.15(ve a)
--.2 H 3.211(na).15 G .711(ssociated output \214le)-3.211 F .281
+-.2 H 3.211(na).15 G .712(ssociated output \214le)-3.211 F .281
 (with either the ".sg)144 525.6 R .281(a" or ".ag)-.05 F .281(a" suf)
 -.05 F 2.781(\214x. In)-.25 F(the)2.781 E F3(in\214le)2.781 E F0 .281
 (\214le, each data \214le should be follo)2.781 F .281(wed by a data)
 -.25 F(format identi\214er)144 537.6 Q 2.5(,e)-.4 G(.g.:)-2.5 E
-(data\214le1 11)180 549.6 Q(data\214le2 24)180 561.6 Q .03
-(This program uses the)144 573.6 R F2(MBIO)2.53 E F0 .029
-(library and will read an)2.53 F 2.529(ys)-.15 G -.1(wa)-2.529 G .029
-(th sonar format supported by).1 F F2(MBIO)2.529 E F0 2.529(.A)C 1.296
+(data\214le1 11)180 549.6 Q(data\214le2 24)180 561.6 Q .029
+(This program uses the)144 573.6 R F2(MBIO)2.529 E F0 .029
+(library and will read an)2.529 F 2.529(ys)-.15 G -.1(wa)-2.529 G .03
+(th sonar format supported by).1 F F2(MBIO)2.53 E F0 2.53(.A)C 1.297
 (list of the sw)144 585.6 R 1.297
 (ath sonar data formats currently supported by)-.1 F F2(MBIO)3.797 E F0
-1.297(and their identi\214er v)3.797 F 1.297(alues is)-.25 F(gi)144
+1.296(and their identi\214er v)3.796 F 1.296(alues is)-.25 F(gi)144
 597.6 Q -.15(ve)-.25 G 2.5(ni).15 G 2.5(nt)-2.5 G(he)-2.5 E F2(MBIO)2.5
 E F0(manual page. Def)2.5 E(ault:)-.1 E F3(in\214le)2.5 E F0 2.5(=")2.5
-G(datalist.mb-1".)-2.5 E F2<ad4e>108 614.4 Q F3(nangle/angle)23.08 E F0
-.927(The amplitude vs grazing angle table is calculated by binning the \
-amplitude v)144 626.4 R .926(alues according to)-.25 F .426
+G(datalist.mb-1".)-2.5 E F2<ad4e>108 614.4 Q F3(nangle/angle)144 614.4 Q
+F0 .926(The amplitude vs grazing angle table is calculated by binning t\
+he amplitude v)144 626.4 R .927(alues according to)-.25 F .427
 (their grazing angles and a)144 638.4 R -.15(ve)-.2 G .427
 (raging the amplitudes within each bin. This option sets the number of)
-.15 F .725(grazing angle bins \()144 650.4 R F3(nangle)A F0 3.225(\)a)C
-.725(nd the maximum angle considered \()-3.225 F F3(angle)A F0 .724
+.15 F .724(grazing angle bins \()144 650.4 R F3(nangle)A F0 3.224(\)a)C
+.725(nd the maximum angle considered \()-3.224 F F3(angle)A F0 .725
 (\). The grazing angle func-)B 1.556(tion will be de\214ned at)144 662.4
 R F3(nangle)4.056 E F0 1.556(points spaced equally from \255)4.056 F F3
 (angle)A F0 1.556(to +)4.056 F F3(angle)A F0 4.056(.T)C(he)-4.056 E F3
-(nangle)4.056 E F0 -.25(va)4.056 G(lue).25 E .196(should be an odd inte)
+(nangle)4.056 E F0 -.25(va)4.056 G(lue).25 E .195(should be an odd inte)
 144 674.4 R .195
 (ger so that the middle bin is centered on the angle 0.0.)-.15 F(Def)
-5.195 E(ault:)-.1 E F3(nangle)2.695 E F0 2.695(=8)2.695 G(1,)-2.695 E F3
+5.196 E(ault:)-.1 E F3(nangle)2.696 E F0 2.696(=8)2.696 G(1,)-2.696 E F3
 (angle)144 686.4 Q F0 2.5(=8)2.5 G(0.0.)-2.5 E F2<ad50>108 703.2 Q F3
-(pings)24.19 E F0 .673(Sets the number of pings to be read and a)144
+(pings)144 703.2 Q F0 .673(Sets the number of pings to be read and a)144
 715.2 R -.15(ve)-.2 G .673
 (raged for each amplitude vs grazing angle table. The).15 F 3.63
 (output "*.sg)144 727.2 R 3.63(a" or ".ag)-.05 F 3.63
 (a" \214les will generally contain man)-.05 F 6.13(yt)-.15 G 3.63
-(ables, each with a timestamp)-6.13 F(MB-System 5.0)72 768 Q 2.5(3J)
-146.495 G(une 2013)-2.5 E(2)204.835 E 0 Cg EP
+(ables, each with a timestamp)-6.13 F(MB-System 5.0)72 768 Q
+(13 July 2023)144.825 E(2)203.165 E 0 Cg EP
 %%Page: 3 3
 %%BeginPageSetup
 BP
@@ -451,56 +457,56 @@ BP
 (5.0 mbbackangle\(1\))2.5 F .04(corresponding to the a)144 84 R -.15(ve)
 -.2 G .04
 (rage of the ping times used for each table. A table may be output a).15
-F -.15(ve)-.2 G(raged).15 E -.15(ove)144 96 S 3.071(ral).15 G .571
-(esser number of beams if a time g)-3.071 F .571
+F -.15(ve)-.2 G(raged).15 E -.15(ove)144 96 S -5.569 3.07(ra l).15 H
+.571(esser number of beams if a time g)-3.07 F .571
 (ap is encountered in the data, and also at the end of the)-.05 F
 (\214le. Def)144 108 Q(ault:)-.1 E/F1 10/Times-Italic@0 SF(pings)2.5 E
-F0 2.5(=5)2.5 G(0.)-2.5 E/F2 10/Times-Bold@0 SF<ad51>108 124.8 Q F0 .823
-(By def)22.52 F(ault,)-.1 E F2(mb)3.323 E(backangle)-.1 E F0 .824(does \
-not use sea\215oor slopes in calculating the grazing angles for each)
-3.323 F .18(amplitude beam and sidescan pix)144 136.8 R .179
+F0 2.5(=5)2.5 G(0.)-2.5 E/F2 10/Times-Bold@0 SF<ad51>108 124.8 Q F0 .824
+(By def)144 124.8 R(ault,)-.1 E F2(mb)3.324 E(backangle)-.1 E F0 .823(d\
+oes not use sea\215oor slopes in calculating the grazing angles for eac\
+h)3.324 F .179(amplitude beam and sidescan pix)144 136.8 R .179
 (el. This option causes the program to calculate acrosstrack slopes)-.15
-F .887(from sw)144 148.8 R .887(ath bath)-.1 F(ymetry)-.05 E 3.387(,i)
+F .888(from sw)144 148.8 R .888(ath bath)-.1 F(ymetry)-.05 E 3.387(,i)
 -.65 G 3.387(fa)-3.387 G -.25(va)-3.587 G .887(ilable, and to f).25 F
 .887(actor these slopes into the grazing angle calculation)-.1 F
-(for each data point.)144 160.8 Q F2<ad52>108 177.6 Q F1 -.37(re)23.08 G
-(fangle).37 E F0 .237(Sets the reference angle that will be used by)
-2.737 F F2(mbpr)2.737 E(ocess)-.18 E F0 .236
-(in applying the amplitude and/or)2.736 F
+(for each data point.)144 160.8 Q F2<ad52>108 177.6 Q F1 -.37(re)144
+177.6 S(fangle).37 E F0 .236
+(Sets the reference angle that will be used by)2.736 F F2(mbpr)2.737 E
+(ocess)-.18 E F0 .237(in applying the amplitude and/or)2.737 F
 (sidescan correction tables generated by)144 189.6 Q F2(mb)2.5 E
 (backangle)-.1 E F0 2.5(.D)C(ef)-2.5 E(ault:)-.1 E F1 -.37(re)2.5 G
 (fangle).37 E F0 2.5(=3)2.5 G(0.0 de)-2.5 E(grees.)-.15 E F2<ad54>108
-206.4 Q F1(topo)23.63 E(grid\214le)-.1 E F0 2.124(By def)4.624 F(ault,)
--.1 E F2(mb)4.624 E(backangle)-.1 E F0 2.124
-(does not use sea\215oor slopes in calculating the grazing)4.624 F 1.02
-(angles for each amplitude beam and sidescan pix)144 218.4 R 1.02
+206.4 Q F1(topo)144 206.4 Q(grid\214le)-.1 E F0 .787(By def)3.287 F
+(ault,)-.1 E F2(mb)3.286 E(backangle)-.1 E F0 .786
+(does not use sea\215oor slopes in calculating the grazing an-)3.286 F
+1.694(gles for each amplitude beam and sidescan pix)144 218.4 R 1.695
 (el. This option causes the program to calculate)-.15 F .51
 (acrosstrack slopes using the topograph)144 230.4 R 3.01(yg)-.05 G(rid)
 -3.01 E F1(topo)3.01 E(grid\214le)-.1 E F0 3.01(,a)C .51(nd to f)-3.01 F
 .51(actor these slopes into the graz-)-.1 F
 (ing angle calculation for each data point.)144 242.4 Q F2<ad56>108
-259.2 Q F0(Normally)23.08 E(,)-.65 E F2(mb)3.075 E(backangle)-.1 E F0
--.1(wo)3.075 G .575(rks "silently" without outputting an).1 F .575
+259.2 Q F0(Normally)144 259.2 Q(,)-.65 E F2(mb)3.075 E(backangle)-.1 E
+F0 -.1(wo)3.075 G .575(rks "silently" without outputting an).1 F .575
 (ything to the stderr stream.)-.15 F .575(If the)5.575 F F2<ad56>144
-271.2 Q F0 .238(\215ag is gi)2.738 F -.15(ve)-.25 G .238(n, then).15 F
+271.2 Q F0 .239(\215ag is gi)2.739 F -.15(ve)-.25 G .238(n, then).15 F
 F2(mbmask)2.738 E F0 -.1(wo)2.738 G .238(rks in a "v).1 F .238
-(erbose" mode and outputs the program v)-.15 F .239(ersion being)-.15 F
+(erbose" mode and outputs the program v)-.15 F .238(ersion being)-.15 F
 (used and all error status messages.)144 283.2 Q F2<ad5a>108 300 Q F1
-(depth)23.63 E F0 .419(This option speci\214es a def)144 312 R .419
+(depth)144 300 Q F0 .418(This option speci\214es a def)144 312 R .419
 (ault sonar altitude v)-.1 F .419(alue in meters to be used whene)-.25 F
--.15(ve)-.25 G 2.918(rb).15 G(ath)-2.918 E .418(ymetry v)-.05 F(al-)-.25
+-.15(ve)-.25 G 2.919(rb).15 G(ath)-2.919 E .419(ymetry v)-.05 F(al-)-.25
 E .47(ues are una)144 324 R -.25(va)-.2 G .47
 (ilable. A \215at sea\215oor \(zero slope\) will be assumed where).25 F
 -.15(ve)-.25 G 2.97(rt).15 G .47(he def)-2.97 F .47(ault depth needs)-.1
-F .563(to be used \(e.g. data \214les with sidescan b)144 336 R .562
+F .562(to be used \(e.g. data \214les with sidescan b)144 336 R .562
 (ut no bath)-.2 F(ymetry)-.05 E 3.062(,o)-.65 G 3.062(rt)-3.062 G .562
-(he outer parts of sw)-3.062 F .562(aths where the)-.1 F .408
+(he outer parts of sw)-3.062 F .563(aths where the)-.1 F .408
 (sidescan may e)144 348 R .408(xtend further than the bath)-.15 F .408
 (ymetry\). If this option is not speci\214ed, an)-.05 F 2.908(ya)-.15 G
-.408(mplitude or)-2.908 F 1.871(sidescan v)144 360 R 1.871
-(alues without associated bath)-.25 F 1.871
-(ymetry information will not be used in calculating the)-.05 F
-(amplitude vs grazing angle table.)144 372 Q/F3 10.95/Times-Bold@0 SF
+.408(mplitude or)-2.908 F .338(sidescan v)144 360 R .338
+(alues without associated bath)-.25 F .339
+(ymetry information will not be used in calculating the am-)-.05 F
+(plitude vs grazing angle table.)144 372 Q/F3 10.95/Times-Bold@0 SF
 (EXAMPLE)72 400.8 Q F0
 (Suppose one has a Simrad EM300 data \214le called)108 412.8 Q .749(000\
 3_20020425_022926.mb57 which contains 131 pings. In order to correct th\
@@ -528,8 +534,8 @@ e beam amplitude and)125.5 424.8 R(sidescan with mbprocess, \214rst use)
 664.8 Q(Outputting gridded histograms of sidescan amplitude vs grazing \
 angle...)144 676.8 Q(processing sw)144 700.8 Q
 (ath \214le: mbari_1998_988_msn.mb57 57)-.1 E(7274 records processed)144
-724.8 Q(MB-System 5.0)72 768 Q 2.5(3J)146.495 G(une 2013)-2.5 E(3)
-204.835 E 0 Cg EP
+724.8 Q(MB-System 5.0)72 768 Q(13 July 2023)144.825 E(3)203.165 E 0 Cg
+EP
 %%Page: 4 4
 %%BeginPageSetup
 BP
@@ -548,16 +554,16 @@ BP
 (5371412 total sidescan data processed)144 216 Q(146 total sg)144 228 Q
 2.5(at)-.05 G(ables written)-2.5 E .696
 (The output \214les include the amplitude v)108 252 R .696
-(ersus grazing angle tables in mbari_1998_988_msn.mb57.ag)-.15 F 3.196
-(aa)-.05 G(nd)-3.196 E(mbari_1998_988_msn.mb57.sg)108 264 Q 3.27
+(ersus grazing angle tables in mbari_1998_988_msn.mb57.ag)-.15 F 3.195
+(aa)-.05 G(nd)-3.195 E(mbari_1998_988_msn.mb57.sg)108 264 Q 3.27
 (a, the gridded histogram \214les mbari_1998_988_msn.mb57_ag)-.05 F 3.27
-(a.grd and)-.05 F(mbari_1998_988_msn.mb57_sg)108 276 Q 41.832
+(a.grd and)-.05 F(mbari_1998_988_msn.mb57_sg)108 276 Q 41.833
 (a.grd, and the plotting shellscripts)-.05 F(mbari_1998_988_msn.mb57_ag)
-108 288 Q 1.343(a.grd.cmd and mbari_1998_988_msn.mb57_sg)-.05 F 1.342
-(a.grd.cmd. The)-.05 F/F1 10/Times-Bold@0 SF(mbpr)3.842 E(ocess)-.18 E
-F0 1.285(parameter \214le mbari_1998_988_msn.mb57.par has also been eit\
-her created \(if necessary\) or modi\214ed to)108 300 R 9.299
-(enable sidescan correction using the ".sg)108 312 R 9.298
+108 288 Q 1.342(a.grd.cmd and mbari_1998_988_msn.mb57_sg)-.05 F 1.343
+(a.grd.cmd. The)-.05 F/F1 10/Times-Bold@0 SF(mbpr)3.843 E(ocess)-.18 E
+F0 .012(parameter \214le mbari_1998_988_msn.mb57.par has also been eith\
+er created \(if necessary\) or modi\214ed to en-)108 300 R 10.024
+(able sidescan correction using the ".sg)108 312 R 10.025
 (a" tables. The \214rst of the six tables in)-.05 F
 (mbari_1998_988_msn.mb57.sg)108 324 Q 2.5(al)-.05 G(ooks lik)-2.5 E(e:)
 -.1 E
@@ -584,8 +590,8 @@ F(## Number of angle bins:)144 432 Q(81)5 E(## Maximum angle:)144 444 Q
 R(5.1880)17.5 E 12.5(-56.0000 31.6249)144 672 R(5.0681)17.5 E 12.5
 (-54.0000 31.6362)144 684 R(4.9521)17.5 E 12.5(-52.0000 31.5590)144 696
 R(5.0482)17.5 E 12.5(-50.0000 31.3955)144 708 R(5.1242)17.5 E 12.5
-(-48.0000 31.0372)144 720 R(5.2364)17.5 E(MB-System 5.0)72 768 Q 2.5(3J)
-146.495 G(une 2013)-2.5 E(4)204.835 E 0 Cg EP
+(-48.0000 31.0372)144 720 R(5.2364)17.5 E(MB-System 5.0)72 768 Q
+(13 July 2023)144.825 E(4)203.165 E 0 Cg EP
 %%Page: 5 5
 %%BeginPageSetup
 BP
@@ -627,8 +633,8 @@ R(4.6856)17.5 E 12.5(8.0000 24.0867)146.5 408 R(4.5882)17.5 E 12.5
 (52.0000 28.4042)144 672 R(4.9034)17.5 E 12.5(54.0000 28.3741)144 684 R
 (4.9500)17.5 E 12.5(56.0000 28.5195)144 696 R(4.9799)17.5 E 12.5
 (58.0000 28.6455)144 708 R(5.0142)17.5 E 12.5(60.0000 28.9284)144 720 R
-(4.9876)17.5 E(MB-System 5.0)72 768 Q 2.5(3J)146.495 G(une 2013)-2.5 E
-(5)204.835 E 0 Cg EP
+(4.9876)17.5 E(MB-System 5.0)72 768 Q(13 July 2023)144.825 E(5)203.165 E
+0 Cg EP
 %%Page: 6 6
 %%BeginPageSetup
 BP
@@ -644,7 +650,7 @@ BP
 256.8 Q F0(\(1\),)A F2(mbpr)2.5 E(ocess)-.18 E F0(\(1\),)A F2(mbset)2.5
 E F0(\(1\),)A F2(mb\214lter)2.5 E F0(\(1\))A F1 -.11(BU)72 285.6 S(GS)
 .11 E F0(None w)108 297.6 Q(orth bragging about.)-.1 E(MB-System 5.0)72
-768 Q 2.5(3J)146.495 G(une 2013)-2.5 E(6)204.835 E 0 Cg EP
+768 Q(13 July 2023)144.825 E(6)203.165 E 0 Cg EP
 %%Trailer
 end
 %%EOF

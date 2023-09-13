@@ -72,8 +72,6 @@
 #include "trnif_proto.h"
 
 #include "mframe.h"
-#include "medebug.h"
-#include "mmdebug.h"
 
 /////////////////////////
 // Macros
@@ -350,7 +348,7 @@ static int s_app_main(app_cfg_t *cfg)
                 double start_time=mtime_dtime();
                 netif_set_reqres_res(netif,trn);
 
-                netif_init_mmd();
+                netif_configure_debug(netif, 5);
                 netif_show(netif,true,5);
 
                 // initialize message log
@@ -388,7 +386,7 @@ static int s_app_main(app_cfg_t *cfg)
                 // release trn
                 wtnav_destroy(trn);
                 // debug: release resources
-                mmd_release();
+                mxd_release();
 
                 retval=0;
             }else{

@@ -334,9 +334,9 @@ int main(int argc, char **argv) {
             utm_zone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
             reference_lat = navlat;
             if (reference_lat >= 0.0)
-              sprintf(projection_id, "UTM%2.2dN", utm_zone);
+              snprintf(projection_id, sizeof(projection_id), "UTM%2.2dN", utm_zone);
             else
-              sprintf(projection_id, "UTM%2.2dS", utm_zone);
+              snprintf(projection_id, sizeof(projection_id), "UTM%2.2dS", utm_zone);
           }
           else
             strcpy(projection_id, projection_pars);
@@ -395,7 +395,7 @@ int main(int argc, char **argv) {
     } else {
       read_data = false;
     }
- 
+
     /* end loop over files in list */
   }
   if (read_datalist)

@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:02 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:08 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 2
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -256,20 +262,21 @@ F .046(cut requires that one specify bounds which e)108 230.4 R .046
 (UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
 379.2 Q -.15(ve)-.25 G(rsity of Bremen).15 E F1(OPTIONS)72 408 Q F2
 <ad48>108 420 Q F0 .162(This "help" \215ag cause the program to print o\
-ut a description of its operation and then e)22.52 F .162(xit immedi-)
--.15 F(ately)144 432 Q(.)-.65 E F2<ad49>108 448.8 Q F3(in\214le)26.41 E
-F0(Sets the \214lename of the input GMT grid \214le. This \214le must b\
-e in the GMT NetCDF GRD format.)144 460.8 Q F2<ad4f>108 477.6 Q F3
-(out\214le)22.52 E F0(Sets the \214lename of the output GMT grid \214le\
-. This \214le will be in the GMT NetCDF GRD format.)144 489.6 Q F2<ad52>
-108 506.4 Q F3(w/e/s/n)23.08 E F0(Sets the bounds of the area to be e)
-144 518.4 Q(xtracted from the input grid \214le.)-.15 E F2<ad56>108
-535.2 Q F0(The)23.08 E F2<ad56>2.5 E F0(option causes)2.5 E F2
-(mbm_grdcut)2.5 E F0(to print out status messages.)2.5 E F1(EXAMPLES)72
-564 Q F0 .714(Suppose that we ha)108 576 R 1.013 -.15(ve u)-.2 H(sed).15
-E F2(mbgrid)3.213 E F0 .713(to obtain a topograph)3.213 F 3.213(yg)-.05
-G .713(rid \214le called K)-3.213 F .713(ohalaA_bath.grd in the GMT)-.35
-F(NetCDF GRD format:)108 588 Q(mbgrid \255Idatalist \\)118 600 Q(\255OK)
+ut a description of its operation and then e)144 420 R .162(xit immedi-)
+-.15 F(ately)144 432 Q(.)-.65 E F2<ad49>108 448.8 Q F3(in\214le)144
+448.8 Q F0(Sets the \214lename of the input GMT grid \214le. This \214l\
+e must be in the GMT NetCDF GRD format.)144 460.8 Q F2<ad4f>108 477.6 Q
+F3(out\214le)144 477.6 Q F0(Sets the \214lename of the output GMT grid \
+\214le. This \214le will be in the GMT NetCDF GRD format.)144 489.6 Q F2
+<ad52>108 506.4 Q F3(w/e/s/n)144 506.4 Q F0
+(Sets the bounds of the area to be e)144 518.4 Q
+(xtracted from the input grid \214le.)-.15 E F2<ad56>108 535.2 Q F0(The)
+144 535.2 Q F2<ad56>2.5 E F0(option causes)2.5 E F2(mbm_grdcut)2.5 E F0
+(to print out status messages.)2.5 E F1(EXAMPLES)72 564 Q F0 .714
+(Suppose that we ha)108 576 R 1.013 -.15(ve u)-.2 H(sed).15 E F2(mbgrid)
+3.213 E F0 .713(to obtain a topograph)3.213 F 3.213(yg)-.05 G .713
+(rid \214le called K)-3.213 F .713(ohalaA_bath.grd in the GMT)-.35 F
+(NetCDF GRD format:)108 588 Q(mbgrid \255Idatalist \\)118 600 Q(\255OK)
 128 612 Q(ohalaA_bath \\)-.35 E
 (\255R-155.72855/-155.31928/20.09488/20.47645 \\)128 624 Q
 (\255E30.0/0m! \255A2 \255N \255G3 \255C1 \255V)128 636 Q .372
@@ -278,12 +285,12 @@ F(NetCDF GRD format:)108 588 Q(mbgrid \255Idatalist \\)118 600 Q(\255OK)
 (grees 31 minutes W to 155)-.15 F(de)108 660 Q .862
 (grees 26 minutes W in longitude and 20 de)-.15 F .862
 (grees 13 minutes N to 20 de)-.15 F .862
-(grees 18 minutes N in latitude.)-.15 F .982(This can be done using the)
-108 672 R F2(GMT)3.482 E F0(program)3.482 E F2(grdcut)3.482 E F0 3.482
-(,b)C(ut)-3.682 E F2(grdcut)3.482 E F0 .983
-(requires that the user specify bounds that)3.482 F -.15(ex)108 684 S
-.224(actly match the grid cell boundaries in the \214le.).15 F(The)5.224
-E F2(mbm_grdcut)2.724 E F0 .224(macros allo)2.724 F .223
+(grees 18 minutes N in latitude.)-.15 F .087(This can be done using the)
+108 672 R F2(GMT)2.588 E F0(program)2.588 E F2(grdcut)2.588 E F0 2.588
+(,b)C(ut)-2.788 E F2(grdcut)2.588 E F0 .088
+(requires that the user specify bounds that e)2.588 F(x-)-.15 E .805
+(actly match the grid cell boundaries in the \214le.)108 684 R(The)5.804
+E F2(mbm_grdcut)3.304 E F0 .804(macros allo)3.304 F .804
 (ws one to specify approxi-)-.25 F .762
 (mate desired bounds, calculates the e)108 696 R .762
 (xact, nearest bounds that)-.15 F F2(grdcut)3.262 E F0 .762

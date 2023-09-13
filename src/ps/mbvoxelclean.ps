@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:04 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:11 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 5
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -269,34 +275,34 @@ e applied to the data by the program mbprocess. These are the same edit\
 (and/or modi\214ed by)108 518.4 R F2(mbedit)2.773 E F0(,)A F2(mbeditviz)
 2.773 E F0(,)A F2(mbedit)2.773 E F0 2.773(,a)C(nd)-2.773 E F2(mbclean)
 2.773 E F0 2.773(.T)C .274(he input data are one sw)-2.773 F .274
-(ath \214le or a datal-)-.1 F 1.969(ist referencing multiple sw)108
-530.4 R 1.969(ath \214les. Each \214le is read and processed separately)
--.1 F 6.968(.T)-.65 G 1.968(he rectangular prism)-6.968 F .531
-(including all of the \215agged and un\215agged soundings is di)108
-542.4 R .532(vided into 3D v)-.25 F(ox)-.2 E .532
-(els of the speci\214ed size. All of)-.15 F .206
-(the soundings are read into memory and associated with one of the v)108
-554.4 R(ox)-.2 E .206(els. Once all of data are read, a den-)-.15 F .464
-(sity \214lter is applied such that containing more than a speci\214ed \
-threshold of soundings are considered to be)108 566.4 R .876
-(occupied by a v)108 578.4 R .876(alid tar)-.25 F .876(get and v)-.18 F
-(ox)-.2 E .876
+(ath \214le or a datal-)-.1 F .93(ist referencing multiple sw)108 530.4
+R .93(ath \214les. Each \214le is read and processed separately)-.1 F
+5.93(.T)-.65 G .93(he rectangular prism in-)-5.93 F .138
+(cluding all of the \215agged and un\215agged soundings is di)108 542.4
+R .138(vided into 3D v)-.25 F(ox)-.2 E .139
+(els of the speci\214ed size. All of the)-.15 F .407
+(soundings are read into memory and associated with one of the v)108
+554.4 R(ox)-.2 E .406(els. Once all of data are read, a density)-.15 F
+.007(\214lter is applied such that containing more than a speci\214ed t\
+hreshold of soundings are considered to be occu-)108 566.4 R .812
+(pied by a v)108 578.4 R .812(alid tar)-.25 F .812(get and v)-.18 F(ox)
+-.2 E .812
 (els containing less than the threshold are considered to be empty)-.15
-F 5.875(.T)-.65 G(he)-5.875 E(user may specify one or both of the follo)
-108 590.4 Q(wing actions:)-.25 E(1\) Pre)113 614.4 Q
-(viously un\215agged soundings in an empty v)-.25 E(ox)-.2 E
-(el are \215agged as bad.)-.15 E(2\) Pre)113 626.4 Q
+F 5.811(.T)-.65 G .811(he user)-5.811 F
+(may specify one or both of the follo)108 590.4 Q(wing actions:)-.25 E
+(1\) Pre)113 614.4 Q(viously un\215agged soundings in an empty v)-.25 E
+(ox)-.2 E(el are \215agged as bad.)-.15 E(2\) Pre)113 626.4 Q
 (viously \215agged soundings in a full v)-.25 E(ox)-.2 E
-(el are un\215agged.)-.15 E 1.803(This program will also apply speci\
-\214ed minimum and maximum range, acrosstrack distance, and beam)108
-650.4 R .213(amplitude \214lters.)108 662.4 R .212(If a sounding')5.213
-F 2.712<738d>-.55 G .212
+(el are un\215agged.)-.15 E .385(This program will also apply speci\214\
+ed minimum and maximum range, acrosstrack distance, and beam am-)108
+650.4 R .077(plitude \214lters.)108 662.4 R .077(If a sounding')5.077 F
+2.577<738d>-.55 G .076
 (ag status is changed, that \215agging action is output to the edit sa)
--2.712 F .512 -.15(ve \214)-.2 H .212(le of).15 F .757(the sw)108 674.4
-R .757
+-2.577 F .376 -.15(ve \214)-.2 H .076(le of the).15 F(sw)108 674.4 Q
+.234
 (ath \214le containing that sounding. This program will create edit sa)
--.1 F 1.058 -.15(ve \214)-.2 H .758(les if necessary).15 F 3.258(,o)-.65
-G 3.258(ra)-3.258 G .758(ppend to)-3.258 F(those that already e)108
+-.1 F .535 -.15(ve \214)-.2 H .235(les if necessary).15 F 2.735(,o)-.65
+G 2.735(ra)-2.735 G .235(ppend to those)-2.735 F(that already e)108
 686.4 Q(xist.)-.15 E(MB-System 5.0)72 768 Q(27 October 2020)137.055 E(1)
 195.395 E 0 Cg EP
 %%Page: 2 2
@@ -396,9 +402,9 @@ BP
 /F0 10/Times-Roman@0 SF(mb)72 48 Q -.2(vo)-.15 G -.15(xe).2 G 132.57
 (lclean\(1\) MB-System).15 F 132.57(5.0 mb)2.5 F -.2(vo)-.15 G -.15(xe)
 .2 G(lclean\(1\)).15 E/F1 10/Times-Bold@0 SF(\255\255ignor)108 84 Q
-(e-empty)-.18 E F0 1.233(If this option is speci\214ed then an)144 96 R
-3.733(yu)-.15 G 1.233(n\215agged soundings in v)-3.733 F(ox)-.2 E 1.232
-(els considered empty are are left)-.15 F(un\215agged.)144 108 Q F1
+(e-empty)-.18 E F0 .167(If this option is speci\214ed then an)144 96 R
+2.666(yu)-.15 G .166(n\215agged soundings in v)-2.666 F(ox)-.2 E .166
+(els considered empty are are left un-)-.15 F(\215agged.)144 108 Q F1
 (\255\255un\215ag-occupied)108 124.8 Q F0 .249
 (If this option is speci\214ed then an)144 136.8 R 2.749<798d>-.15 G
 .249(agged soundings in v)-2.749 F(ox)-.2 E .25
@@ -434,13 +440,12 @@ F .664(sensor than)144 312 R F2(min-acr)3.164 E(osstr)-.45 E(ac)-.15 E
 (osstr)-.45 E(ac)-.15 E(k)-.2 E F0(]";)A .189(If a)144 364.8 R F2
 (max-acr)2.689 E(osstr)-.45 E(ac)-.15 E(k)-.2 E F0 -.25(va)2.689 G .189
 (lue is speci\214ed, then an).25 F 2.689(yu)-.15 G .188
-(n\215agged soundings that are more to starboard of)-2.689 F 1.44
-(the sensor than)144 376.8 R F2(max-acr)3.94 E(osstr)-.45 E(ac)-.15 E(k)
--.2 E F0 1.441
-(are \215agged. Because this \214lter is applied as the data are read,)
-3.94 F .312(before density \214ltering, use of the)144 388.8 R F1
-(\255\255un\215ag-occupied)2.812 E F0 .311
-(option could result in soundings \215agged by)2.812 F
+(n\215agged soundings that are more to starboard of)-2.689 F .396
+(the sensor than)144 376.8 R F2(max-acr)2.896 E(osstr)-.45 E(ac)-.15 E
+(k)-.2 E F0 .396(are \215agged. Because this \214lter is applied as the\
+ data are read, be-)2.896 F 1.038(fore density \214ltering, use of the)
+144 388.8 R F1(\255\255un\215ag-occupied)3.538 E F0 1.037
+(option could result in soundings \215agged by)3.538 F
 (this maximum acrosstrack \214lter being un\215agged.)144 400.8 Q F1
 (\255\255amplitude-minimum)108 417.6 Q F0(=)A F2(min-amplitude)A F0
 1.334(If a)144 429.6 R F2(min-amplitude)3.834 E F0 -.25(va)3.834 G 1.334

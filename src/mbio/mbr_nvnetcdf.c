@@ -192,7 +192,7 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbsys_navnetcdf_struct *store = (struct mbsys_navnetcdf_struct *)store_ptr;
 	int *dataread = (int *)&mb_io_ptr->save1;
 	int *commentread = (int *)&mb_io_ptr->save2;
-	int *recread = (int *)&mb_io_ptr->save4;
+	size_t *recread = (size_t *)&mb_io_ptr->save4;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
@@ -1656,7 +1656,7 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* if comment and nothing written yet save it */
 	if (store->kind == MB_DATA_COMMENT && *recwrite == 0) {
 		/* allocate arrays if needed */
-		if (storelocal->mbNbrHistoryRec >= storelocal->mbHistoryRecNbr) {
+		if (storelocal->mbNbrHistoryRec >= (short) storelocal->mbHistoryRecNbr) {
 			/* allocate or reallocate history arrays */
 			storelocal->mbHistoryRecNbr += 20;
 			status &= mb_reallocd(verbose, __FILE__, __LINE__, storelocal->mbHistoryRecNbr * sizeof(int),
@@ -1674,7 +1674,7 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			status &=
 			    mb_reallocd(verbose, __FILE__, __LINE__, storelocal->mbHistoryRecNbr * storelocal->mbCommentLength * sizeof(char),
 			                (void **)&storelocal->mbHistComment, error);
-			for (int i = storelocal->mbNbrHistoryRec; i < storelocal->mbHistoryRecNbr; i++) {
+			for (int i = (int) storelocal->mbNbrHistoryRec; i < (int) storelocal->mbHistoryRecNbr; i++) {
 				storelocal->mbHistDate[i] = 0;
 				storelocal->mbHistTime[i] = 0;
 				storelocal->mbHistCode[i] = 0;

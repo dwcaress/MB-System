@@ -799,7 +799,7 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 	/* insert comment in structure */
 	else if (store->kind == MB_DATA_COMMENT) {
 		dataID->recordID = GSF_RECORD_COMMENT;
-		if (records->comment.comment_length < strlen(comment) + 1) {
+		if ((unsigned int) records->comment.comment_length < strlen(comment) + 1) {
 			if ((records->comment.comment = (char *)realloc(records->comment.comment, strlen(comment) + 1)) == NULL) {
 				status = MB_FAILURE;
 				*error = MB_ERROR_MEMORY_FAIL;

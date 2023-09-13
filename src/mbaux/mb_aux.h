@@ -222,6 +222,9 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
               int *error);
 
 /* mb_readwritegrd function prototypes */
+int mb_check_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char *grid_projection_id, float *nodatavalue, int *nxy,
+                    int *n_columns, int *n_rows, double *min, double *max, double *xmin, double *xmax, double *ymin, double *ymax,
+                    double *dx, double *dy, int *error);
 int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char *grid_projection_id, float *nodatavalue, int *nxy,
                     int *n_columns, int *n_rows, double *min, double *max, double *xmin, double *xmax, double *ymin, double *ymax,
                     double *dx, double *dy, float **data, float **data_dzdx, float **data_dzdy, int *error);

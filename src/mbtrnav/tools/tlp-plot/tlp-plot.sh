@@ -59,7 +59,7 @@ QX_PLOTSET_DEF=""
 QX_LOG_PATH="."
 QX_SESSION_ID="-"
 QX_DATA_SET_ID="undefined"
-QX_JOB_DIR=${QX_JOB_DIR:-"tlp-jobs"}
+QX_JOB_DIR=${QX_JOB_DIR:-"jobs"}
 QX_PLOTSET_COUNT=0
 declare -a QX_LOG_PATHS
 declare -a QX_SESSION_IDS
@@ -298,9 +298,6 @@ plot_trno(){
 
     TRNO_QPCONF="qp-trno.conf.sh"
 
-    vout " TRNO_LOG       - ${TRNO_LOG}"
-    vout " QU_TRNO_CSV    - ${QU_TRNO_CSV}"
-
     if [ -f "${TRNO_LOG}" ] && [ -f "${QP_PLOT_HOME}/${TRNO_QPCONF}" ]
     then
         vout " processing ${TRNO_LOG}"
@@ -308,14 +305,8 @@ plot_trno(){
         # use qplot to generate plot set
         ${QPLOT_CMD} -f ${QP_PLOT_HOME}/${TRNO_QPCONF}
     else
-    	if [ ! -f "${TRNO_LOG}" ]
-        then
-	  echo "WARN - TRNO_LOG log not found ${TRNO_LOG}"
-        fi
-    	if [ ! -f "${QP_PLOT_HOME}/${TRNO_QPCONF}" ]
-        then
-	  echo "ERR - TRNO_QPCONF config not found ${QP_PLOT_HOME}/${TRNO_QPCONF}"
-        fi
+        echo "ERR - TRNO_LOG log not found ${TRNO_LOG}"
+        echo "ERR - TRNO_QPCONF log not found ${QP_PLOT_HOME}/${TRNO_QPCONF}"
     fi
 }
 
@@ -335,8 +326,6 @@ plot_logs(){
     vout " QU_DATA_SET_ID - ${QU_DATA_SET_ID}"
 
     # generate plot CSV and images...
-
-    # plot TRN replay data
     plot_trno
 
     # qplot PDF combiner job configuration
@@ -443,18 +432,13 @@ fi
 # create plot output directory if it doesn't exist
 if [ ! -d "${QP_OUTPUT_DIR}" ]
 then
-	vout "creating plot output dir : ${QP_PLOT_DATA_DIR}"
+	vout "creating plot data dir : ${QP_PLOT_DATA_DIR}"
 	mkdir -p ${QP_OUTPUT_DIR}
-    if [ ! -d "${QP_OUTPUT_DIR}" ]
-    then
-    echo "could not create output dir : ${QP_OUTPUT_DIR}"
-    exit -1
-    fi
 fi
 # create plot job output directory if it doesn't exist
 if [ ! -d "${QX_JOB_DIR}" ]
 then
-	vout "creating job dir : ${QX_JOB_DIR}"
+	vout "creating job dir : ${QP_PLOT_DATA_DIR}"
 	mkdir -p ${QX_JOB_DIR}
     if [ ! -d "${QX_JOB_DIR}" ]
     then
@@ -465,16 +449,6 @@ fi
 
 # process jobs
 run_jobs
-
-if [ -d "${QP_OUTPUT_DIR}" ]
-then
-    rm -r ${QP_OUTPUT_DIR}
-fi
-
-if [ -d "${QP_PLOT_DATA_DIR}" ]
-then
-    rm -r ${QP_PLOT_DATA_DIR}
-fi
 
 vout ""
 

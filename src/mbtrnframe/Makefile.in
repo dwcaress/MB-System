@@ -144,22 +144,20 @@ am__uninstall_files_from_dir = { \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
 LTLIBRARIES = $(lib_LTLIBRARIES)
-libmframe_la_DEPENDENCIES =
-am__dirstamp = $(am__leading_dot)dirstamp
-am_libmframe_la_OBJECTS = mframe/src/mframe.lo mframe/src/mbbuf.lo \
-	mframe/src/mcbuf.lo mframe/src/msocket.lo \
-	mframe/src/mthread.lo mframe/src/mfile.lo mframe/src/mtime.lo \
-	mframe/src/mmdebug.lo mframe/src/merror.lo mframe/src/mlog.lo \
-	mframe/src/mlist.lo mframe/src/mstats.lo mframe/src/mswap.lo \
-	mframe/src/mutils.lo mframe/src/mkvconf.lo usr/mconfig.lo
-libmframe_la_OBJECTS = $(am_libmframe_la_OBJECTS)
+libmbtrnframe_la_DEPENDENCIES =
+am_libmbtrnframe_la_OBJECTS = mframe.lo mbbuf.lo mcbuf.lo msocket.lo \
+	mthread.lo mfile.lo mtime.lo mmdebug.lo merror.lo mlog.lo \
+	mlist.lo mstats.lo mswap.lo mutils.lo mkvconf.lo mconfig.lo \
+	mxdebug.lo
+libmbtrnframe_la_OBJECTS = $(am_libmbtrnframe_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-libmframe_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(libmframe_la_LDFLAGS) $(LDFLAGS) -o $@
+libmbtrnframe_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CXXLD) \
+	$(AM_CXXFLAGS) $(CXXFLAGS) $(libmbtrnframe_la_LDFLAGS) \
+	$(LDFLAGS) -o $@
 SCRIPTS = $(bin_SCRIPTS) $(dist_bin_SCRIPTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -176,17 +174,15 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src/mbio
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = mframe/src/$(DEPDIR)/mbbuf.Plo \
-	mframe/src/$(DEPDIR)/mcbuf.Plo mframe/src/$(DEPDIR)/merror.Plo \
-	mframe/src/$(DEPDIR)/mfile.Plo mframe/src/$(DEPDIR)/mframe.Plo \
-	mframe/src/$(DEPDIR)/mkvconf.Plo \
-	mframe/src/$(DEPDIR)/mlist.Plo mframe/src/$(DEPDIR)/mlog.Plo \
-	mframe/src/$(DEPDIR)/mmdebug.Plo \
-	mframe/src/$(DEPDIR)/msocket.Plo \
-	mframe/src/$(DEPDIR)/mstats.Plo mframe/src/$(DEPDIR)/mswap.Plo \
-	mframe/src/$(DEPDIR)/mthread.Plo \
-	mframe/src/$(DEPDIR)/mtime.Plo mframe/src/$(DEPDIR)/mutils.Plo \
-	usr/$(DEPDIR)/mconfig.Plo
+am__depfiles_remade = ./$(DEPDIR)/mbbuf.Plo ./$(DEPDIR)/mcbuf.Plo \
+	./$(DEPDIR)/mconfig.Plo ./$(DEPDIR)/merror.Plo \
+	./$(DEPDIR)/mfile.Plo ./$(DEPDIR)/mframe.Plo \
+	./$(DEPDIR)/mkvconf.Plo ./$(DEPDIR)/mlist.Plo \
+	./$(DEPDIR)/mlog.Plo ./$(DEPDIR)/mmdebug.Plo \
+	./$(DEPDIR)/msocket.Plo ./$(DEPDIR)/mstats.Plo \
+	./$(DEPDIR)/mswap.Plo ./$(DEPDIR)/mthread.Plo \
+	./$(DEPDIR)/mtime.Plo ./$(DEPDIR)/mutils.Plo \
+	./$(DEPDIR)/mxdebug.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -206,7 +202,25 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(libmframe_la_SOURCES)
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CXXFLAGS) $(CXXFLAGS)
+AM_V_CXX = $(am__v_CXX_@AM_V@)
+am__v_CXX_ = $(am__v_CXX_@AM_DEFAULT_V@)
+am__v_CXX_0 = @echo "  CXX     " $@;
+am__v_CXX_1 = 
+CXXLD = $(CXX)
+CXXLINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+AM_V_CXXLD = $(am__v_CXXLD_@AM_V@)
+am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
+am__v_CXXLD_0 = @echo "  CXXLD   " $@;
+am__v_CXXLD_1 = 
+SOURCES = $(libmbtrnframe_la_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
 	install-data-recursive install-dvi-recursive \
@@ -280,6 +294,7 @@ EGREP = @EGREP@
 ETAGS = @ETAGS@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
+FILECMD = @FILECMD@
 GDAL_CONF = @GDAL_CONF@
 GMT_CONF = @GMT_CONF@
 GMT_PLUGINDIR = @GMT_PLUGINDIR@
@@ -455,24 +470,24 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-lib_LTLIBRARIES = libmframe.la
+lib_LTLIBRARIES = libmbtrnframe.la
 include_HEADERS = \
-        usr/mconfig.h \
-        mframe/src/mframe.h \
-        mframe/src/mbbuf.h \
-        mframe/src/mcbuf.h \
-        mframe/src/msocket.h \
-        mframe/src/mthread.h \
-        mframe/src/mfile.h \
-        mframe/src/mtime.h\
-        mframe/src/medebug.h \
-        mframe/src/mmdebug.h \
-        mframe/src/merror.h \
-        mframe/src/mlog.h \
-        mframe/src/mlist.h \
-        mframe/src/mstats.h \
-        mframe/src/mkvconf.h \
-        mframe/src/mutils.h
+        mconfig.h \
+        mframe.h \
+        mbbuf.h \
+        mcbuf.h \
+        msocket.h \
+        mthread.h \
+        mfile.h \
+        mtime.h\
+        medebug.h \
+        mmdebug.h \
+        merror.h \
+        mlog.h \
+        mlist.h \
+        mstats.h \
+        mkvconf.h \
+        mutils.h
 
 AM_CFLAGS = 
 
@@ -480,28 +495,29 @@ AM_CFLAGS =
 BUILD_DATE = `date +%Y/%m/%dT%H:%M:%S%z`
 MFRAME_VERSIONS = -DMFRAME_BUILD="${BUILD_DATE}" -DTRNC_VER=1.0 -DFRAMES7K_VER=1.0 -DSTREAM7K_VER=1.0 -DTBINX_VER=1.0 -DEMU7K_VER=1.0
 MFRAME_TESTS = -DWITH_TESTS -DWITH_R7KR_TEST -DWITH_MB1R_TEST
-MFRAME_FEATURES = -DWITH_MST_MSTATS -DMST_STATS_EN -DWITH_MMDEBUG
+MFRAME_FEATURES = -DWITH_MST_MSTATS -DMST_STATS_EN -DMXDEBUG_C_API 
 MFRAME_OPTS = $(MFRAME_VERSIONS) $(MFRAME_FEATURES) $(MFRAME_TESTS)
-AM_CPPFLAGS = -g -O0 -I./usr -I./mframe/src -DHAVE_CONFIG_H  -D_GNU_SOURCE $(MFRAME_OPTS)
-libmframe_la_LDFLAGS = -no-undefined -version-info 0:0:0
-libmframe_la_SOURCES = mframe/src/mframe.c \
-        mframe/src/mbbuf.c \
-        mframe/src/mcbuf.c \
-        mframe/src/msocket.c \
-        mframe/src/mthread.c \
-        mframe/src/mfile.c \
-        mframe/src/mtime.c\
-        mframe/src/mmdebug.c \
-        mframe/src/merror.c \
-        mframe/src/mlog.c \
-        mframe/src/mlist.c \
-        mframe/src/mstats.c \
-        mframe/src/mswap.c \
-        mframe/src/mutils.c \
-        mframe/src/mkvconf.c \
-        usr/mconfig.c
+AM_CPPFLAGS = -g -O0 -DHAVE_CONFIG_H  -D_GNU_SOURCE $(MFRAME_OPTS)
+libmbtrnframe_la_LDFLAGS = -no-undefined -version-info 0:0:0
+libmbtrnframe_la_SOURCES = mframe.c \
+        mbbuf.c \
+        mcbuf.c \
+        msocket.c \
+        mthread.c \
+        mfile.c \
+        mtime.c\
+        mmdebug.c \
+        merror.c \
+        mlog.c \
+        mlist.c \
+        mstats.c \
+        mswap.c \
+        mutils.c \
+        mkvconf.c \
+        mconfig.c \
+        mxdebug.cpp
 
-libmframe_la_LIBADD = 
+libmbtrnframe_la_LIBADD = 
 dist_bin_SCRIPTS = 
 bin_SCRIPTS = 
 DIST_SUBDIRS = 
@@ -510,7 +526,7 @@ DISTCLEANFILES =
 all: all-recursive
 
 .SUFFIXES:
-.SUFFIXES: .c .lo .o .obj
+.SUFFIXES: .c .cpp .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -624,52 +640,9 @@ clean-libLTLIBRARIES:
 	  echo rm -f $${locs}; \
 	  rm -f $${locs}; \
 	}
-mframe/src/$(am__dirstamp):
-	@$(MKDIR_P) mframe/src
-	@: > mframe/src/$(am__dirstamp)
-mframe/src/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) mframe/src/$(DEPDIR)
-	@: > mframe/src/$(DEPDIR)/$(am__dirstamp)
-mframe/src/mframe.lo: mframe/src/$(am__dirstamp) \
-	mframe/src/$(DEPDIR)/$(am__dirstamp)
-mframe/src/mbbuf.lo: mframe/src/$(am__dirstamp) \
-	mframe/src/$(DEPDIR)/$(am__dirstamp)
-mframe/src/mcbuf.lo: mframe/src/$(am__dirstamp) \
-	mframe/src/$(DEPDIR)/$(am__dirstamp)
-mframe/src/msocket.lo: mframe/src/$(am__dirstamp) \
-	mframe/src/$(DEPDIR)/$(am__dirstamp)
-mframe/src/mthread.lo: mframe/src/$(am__dirstamp) \
-	mframe/src/$(DEPDIR)/$(am__dirstamp)
-mframe/src/mfile.lo: mframe/src/$(am__dirstamp) \
-	mframe/src/$(DEPDIR)/$(am__dirstamp)
-mframe/src/mtime.lo: mframe/src/$(am__dirstamp) \
-	mframe/src/$(DEPDIR)/$(am__dirstamp)
-mframe/src/mmdebug.lo: mframe/src/$(am__dirstamp) \
-	mframe/src/$(DEPDIR)/$(am__dirstamp)
-mframe/src/merror.lo: mframe/src/$(am__dirstamp) \
-	mframe/src/$(DEPDIR)/$(am__dirstamp)
-mframe/src/mlog.lo: mframe/src/$(am__dirstamp) \
-	mframe/src/$(DEPDIR)/$(am__dirstamp)
-mframe/src/mlist.lo: mframe/src/$(am__dirstamp) \
-	mframe/src/$(DEPDIR)/$(am__dirstamp)
-mframe/src/mstats.lo: mframe/src/$(am__dirstamp) \
-	mframe/src/$(DEPDIR)/$(am__dirstamp)
-mframe/src/mswap.lo: mframe/src/$(am__dirstamp) \
-	mframe/src/$(DEPDIR)/$(am__dirstamp)
-mframe/src/mutils.lo: mframe/src/$(am__dirstamp) \
-	mframe/src/$(DEPDIR)/$(am__dirstamp)
-mframe/src/mkvconf.lo: mframe/src/$(am__dirstamp) \
-	mframe/src/$(DEPDIR)/$(am__dirstamp)
-usr/$(am__dirstamp):
-	@$(MKDIR_P) usr
-	@: > usr/$(am__dirstamp)
-usr/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) usr/$(DEPDIR)
-	@: > usr/$(DEPDIR)/$(am__dirstamp)
-usr/mconfig.lo: usr/$(am__dirstamp) usr/$(DEPDIR)/$(am__dirstamp)
 
-libmframe.la: $(libmframe_la_OBJECTS) $(libmframe_la_DEPENDENCIES) $(EXTRA_libmframe_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(libmframe_la_LINK) -rpath $(libdir) $(libmframe_la_OBJECTS) $(libmframe_la_LIBADD) $(LIBS)
+libmbtrnframe.la: $(libmbtrnframe_la_OBJECTS) $(libmbtrnframe_la_DEPENDENCIES) $(EXTRA_libmbtrnframe_la_DEPENDENCIES) 
+	$(AM_V_CXXLD)$(libmbtrnframe_la_LINK) -rpath $(libdir) $(libmbtrnframe_la_OBJECTS) $(libmbtrnframe_la_LIBADD) $(LIBS)
 install-binSCRIPTS: $(bin_SCRIPTS)
 	@$(NORMAL_INSTALL)
 	@list='$(bin_SCRIPTS)'; test -n "$(bindir)" || list=; \
@@ -743,30 +716,27 @@ uninstall-dist_binSCRIPTS:
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
-	-rm -f mframe/src/*.$(OBJEXT)
-	-rm -f mframe/src/*.lo
-	-rm -f usr/*.$(OBJEXT)
-	-rm -f usr/*.lo
 
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@mframe/src/$(DEPDIR)/mbbuf.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@mframe/src/$(DEPDIR)/mcbuf.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@mframe/src/$(DEPDIR)/merror.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@mframe/src/$(DEPDIR)/mfile.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@mframe/src/$(DEPDIR)/mframe.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@mframe/src/$(DEPDIR)/mkvconf.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@mframe/src/$(DEPDIR)/mlist.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@mframe/src/$(DEPDIR)/mlog.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@mframe/src/$(DEPDIR)/mmdebug.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@mframe/src/$(DEPDIR)/msocket.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@mframe/src/$(DEPDIR)/mstats.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@mframe/src/$(DEPDIR)/mswap.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@mframe/src/$(DEPDIR)/mthread.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@mframe/src/$(DEPDIR)/mtime.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@mframe/src/$(DEPDIR)/mutils.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@usr/$(DEPDIR)/mconfig.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbbuf.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mcbuf.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mconfig.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/merror.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mfile.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mframe.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mkvconf.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mlist.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mlog.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mmdebug.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/msocket.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mstats.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mswap.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mthread.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mtime.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mutils.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mxdebug.Plo@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -798,13 +768,35 @@ am--depfiles: $(am__depfiles_remade)
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
 
+.cpp.o:
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCXX_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXXCOMPILE) -c -o $@ $<
+
+.cpp.obj:
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.obj$$||'`;\
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ `$(CYGPATH_W) '$<'` &&\
+@am__fastdepCXX_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+.cpp.lo:
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.lo$$||'`;\
+@am__fastdepCXX_TRUE@	$(LTCXXCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCXX_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LTCXXCOMPILE) -c -o $@ $<
+
 mostlyclean-libtool:
 	-rm -f *.lo
 
 clean-libtool:
 	-rm -rf .libs _libs
-	-rm -rf mframe/src/.libs mframe/src/_libs
-	-rm -rf usr/.libs usr/_libs
 install-includeHEADERS: $(include_HEADERS)
 	@$(NORMAL_INSTALL)
 	@list='$(include_HEADERS)'; test -n "$(includedir)" || list=; \
@@ -962,10 +954,6 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
-	-rm -f mframe/src/$(DEPDIR)/$(am__dirstamp)
-	-rm -f mframe/src/$(am__dirstamp)
-	-rm -f usr/$(DEPDIR)/$(am__dirstamp)
-	-rm -f usr/$(am__dirstamp)
 	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
@@ -977,22 +965,23 @@ clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
 	clean-libtool mostlyclean-am
 
 distclean: distclean-recursive
-		-rm -f mframe/src/$(DEPDIR)/mbbuf.Plo
-	-rm -f mframe/src/$(DEPDIR)/mcbuf.Plo
-	-rm -f mframe/src/$(DEPDIR)/merror.Plo
-	-rm -f mframe/src/$(DEPDIR)/mfile.Plo
-	-rm -f mframe/src/$(DEPDIR)/mframe.Plo
-	-rm -f mframe/src/$(DEPDIR)/mkvconf.Plo
-	-rm -f mframe/src/$(DEPDIR)/mlist.Plo
-	-rm -f mframe/src/$(DEPDIR)/mlog.Plo
-	-rm -f mframe/src/$(DEPDIR)/mmdebug.Plo
-	-rm -f mframe/src/$(DEPDIR)/msocket.Plo
-	-rm -f mframe/src/$(DEPDIR)/mstats.Plo
-	-rm -f mframe/src/$(DEPDIR)/mswap.Plo
-	-rm -f mframe/src/$(DEPDIR)/mthread.Plo
-	-rm -f mframe/src/$(DEPDIR)/mtime.Plo
-	-rm -f mframe/src/$(DEPDIR)/mutils.Plo
-	-rm -f usr/$(DEPDIR)/mconfig.Plo
+		-rm -f ./$(DEPDIR)/mbbuf.Plo
+	-rm -f ./$(DEPDIR)/mcbuf.Plo
+	-rm -f ./$(DEPDIR)/mconfig.Plo
+	-rm -f ./$(DEPDIR)/merror.Plo
+	-rm -f ./$(DEPDIR)/mfile.Plo
+	-rm -f ./$(DEPDIR)/mframe.Plo
+	-rm -f ./$(DEPDIR)/mkvconf.Plo
+	-rm -f ./$(DEPDIR)/mlist.Plo
+	-rm -f ./$(DEPDIR)/mlog.Plo
+	-rm -f ./$(DEPDIR)/mmdebug.Plo
+	-rm -f ./$(DEPDIR)/msocket.Plo
+	-rm -f ./$(DEPDIR)/mstats.Plo
+	-rm -f ./$(DEPDIR)/mswap.Plo
+	-rm -f ./$(DEPDIR)/mthread.Plo
+	-rm -f ./$(DEPDIR)/mtime.Plo
+	-rm -f ./$(DEPDIR)/mutils.Plo
+	-rm -f ./$(DEPDIR)/mxdebug.Plo
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -1039,22 +1028,23 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-recursive
-		-rm -f mframe/src/$(DEPDIR)/mbbuf.Plo
-	-rm -f mframe/src/$(DEPDIR)/mcbuf.Plo
-	-rm -f mframe/src/$(DEPDIR)/merror.Plo
-	-rm -f mframe/src/$(DEPDIR)/mfile.Plo
-	-rm -f mframe/src/$(DEPDIR)/mframe.Plo
-	-rm -f mframe/src/$(DEPDIR)/mkvconf.Plo
-	-rm -f mframe/src/$(DEPDIR)/mlist.Plo
-	-rm -f mframe/src/$(DEPDIR)/mlog.Plo
-	-rm -f mframe/src/$(DEPDIR)/mmdebug.Plo
-	-rm -f mframe/src/$(DEPDIR)/msocket.Plo
-	-rm -f mframe/src/$(DEPDIR)/mstats.Plo
-	-rm -f mframe/src/$(DEPDIR)/mswap.Plo
-	-rm -f mframe/src/$(DEPDIR)/mthread.Plo
-	-rm -f mframe/src/$(DEPDIR)/mtime.Plo
-	-rm -f mframe/src/$(DEPDIR)/mutils.Plo
-	-rm -f usr/$(DEPDIR)/mconfig.Plo
+		-rm -f ./$(DEPDIR)/mbbuf.Plo
+	-rm -f ./$(DEPDIR)/mcbuf.Plo
+	-rm -f ./$(DEPDIR)/mconfig.Plo
+	-rm -f ./$(DEPDIR)/merror.Plo
+	-rm -f ./$(DEPDIR)/mfile.Plo
+	-rm -f ./$(DEPDIR)/mframe.Plo
+	-rm -f ./$(DEPDIR)/mkvconf.Plo
+	-rm -f ./$(DEPDIR)/mlist.Plo
+	-rm -f ./$(DEPDIR)/mlog.Plo
+	-rm -f ./$(DEPDIR)/mmdebug.Plo
+	-rm -f ./$(DEPDIR)/msocket.Plo
+	-rm -f ./$(DEPDIR)/mstats.Plo
+	-rm -f ./$(DEPDIR)/mswap.Plo
+	-rm -f ./$(DEPDIR)/mthread.Plo
+	-rm -f ./$(DEPDIR)/mtime.Plo
+	-rm -f ./$(DEPDIR)/mutils.Plo
+	-rm -f ./$(DEPDIR)/mxdebug.Plo
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

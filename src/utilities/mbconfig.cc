@@ -28,7 +28,16 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+// CMake build system
+#ifdef CMAKE_BUILD_SYSTEM
+const char *levitusfile = "$(levitusDir)/LevitusAnnual82.dat";
+const char *otps_location = "$(otpsDir)";
+
+// Autotools build system
+#else
 #include "levitus.h"
+#endif
+
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_status.h"

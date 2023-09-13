@@ -1098,8 +1098,7 @@ if (!$bounds || !$zbounds || $zmode == 1)
         /\S+\s+v_min:\s+(\S+)\s+v_max:\s+(\S+)\s+name:\s+(.+)/;
       }
     }
-
-  if ($zmin_f >= $zmax_f)
+  if ($color_mode != 6 && $zmin_f >= $zmax_f)
     {
     if ($zbounds)
       {
@@ -1134,7 +1133,7 @@ if (!$bounds || !$zbounds || $zmode == 1)
 
   # check that there are data
   if ($xmin_f >= $xmax_f || $ymin_f >= $ymax_f
-    || ($zmin_f >= $zmax_f && !$zbounds))
+    || ($color_mode != 6 && $zmin_f >= $zmax_f && !$zbounds))
     {
     print "\a";
     print "$xmin_f $xmax_f $ymin_f $ymax_f $zmin_f $zmax_f\n";
@@ -1200,7 +1199,7 @@ if (!$zbounds)
 
 # check that there are data
 if ((!$use_corner_points && ($xmin >= $xmax || $ymin >= $ymax))
-  || $zmin >= $zmax)
+  || ($color_mode != 6 && $zmin >= $zmax))
   {
   print "\a";
   die "Improper data limits: x: $xmin $xmax  y: $ymin $ymax  z: $zmin $zmax\n$program_name aborted.\n"
@@ -2988,7 +2987,9 @@ print FCMD "$hash"; print FCMD "    ps_viewer=\"\"\n";
 print FCMD "$hash"; print FCMD "  fi\n";
 print FCMD "$hash"; print FCMD "  if [[ -x \"\$(command -v \$ps_viewer)\" ]]; then\n";
 print FCMD "$hash"; print FCMD "    echo Displaying \$PS_FILE using user specified program \$ps_viewer...\n";
-print FCMD "$hash"; print FCMD "    if [[ \$ps_viewer == \"gv\" ]]; then\n";
+print FCMD "$hash"; print FCMD "    if [[ \$ps_viewer == \"evince\" ]]; then\n";
+print FCMD "$hash"; print FCMD "      evince \$PS_FILE &\n";
+print FCMD "$hash"; print FCMD "    elif [[ \$ps_viewer == \"gv\" ]]; then\n";
 if ($portrait) {
   $pagescale = min((11.0 / $page_height_in{$pagesize}), 1.0);
   $view_pageflag = "--orientation=portrait --media=BBox -scale=$pagescale";

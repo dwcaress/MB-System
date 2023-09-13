@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:04 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:10 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 3
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -262,32 +268,31 @@ ognized by the program)108 302.4 R F2(mbsvpselect)3.145 E F0 .645
 (which uses the)3.145 F .484
 (information to select the best SVP models to apply to sw)108 314.4 R
 .484(ath data \214les for bath)-.1 F .483(ymetry recalculation.)-.05 F
-(Some)5.483 E 1.363(\214les contain SVPs at re)108 326.4 R 1.363
-(gular interv)-.15 F 1.363
-(als, typically with the same SVP duplicated man)-.25 F 3.864(yt)-.15 G
-1.364(imes. By def)-3.864 F(ault,)-.1 E F2(mbsvplist)108 338.4 Q F0
-1.522(ignores duplicate SVPs. The)4.022 F F2<ad44>4.022 E F0 1.522
-(option causes duplicate SVPs to be output.)4.022 F(The)6.522 E F2<ad50>
-4.022 E F0(option)4.022 E(implies)108 350.4 Q F2<ad4f>3.885 E F0 3.885
-(,a)C 1.386(nd also causes the parameter \214le to be modi\214ed so tha\
-t the \214rst SVP output for each \214le)-3.885 F .163
-(becomes the SVP used for recalculating bath)108 362.4 R .163
-(ymetry for that sw)-.05 F .163(ath \214le.)-.1 F(The)5.163 E F2<ad43>
-2.663 E F0 .163(option causes)2.663 F F2(mbsvplist)2.663 E F0(to)2.663 E
-(output the number of unique SVPs in a \214le to the shell \(standard o\
-ut\).)108 374.4 Q(The)108 398.4 Q F2<ad53>3.615 E F0 1.115
-(option causes)3.615 F F2(mbsvplist)3.615 E F0 1.115
-(to output the sound v)3.615 F 1.115(elocity v)-.15 F 1.115
-(alues used for beamforming by the sonar)-.25 F .598
-(\(often called surf)108 410.4 R .597(ace sound v)-.1 F(elocity)-.15 E
-3.097(,o)-.65 G 3.097(rS)-3.097 G .597
-(SV\) instead of SVP pro\214les. Each SSV v)-3.097 F .597
-(alue will be paired with)-.25 F .302
-(the corresponding sonar depth, and there will generally be one SSV v)
-108 422.4 R .302(alue output for each surv)-.25 F .602 -.15(ey p)-.15 H
-.302(ing. The).15 F F2(-R)108 434.4 Q F0 .313
-(option can be used in conjunction with)2.813 F F2(-S)2.813 E F0 .313
-(to output SSV v)2.813 F .313
+(Some)5.483 E .045(\214les contain SVPs at re)108 326.4 R .045
+(gular interv)-.15 F .046
+(als, typically with the same SVP duplicated man)-.25 F 2.546(yt)-.15 G
+.046(imes. By def)-2.546 F(ault,)-.1 E F2(mb-)2.546 E(svplist)108 338.4
+Q F0 .298(ignores duplicate SVPs. The)2.799 F F2<ad44>2.798 E F0 .298
+(option causes duplicate SVPs to be output.)2.798 F(The)5.298 E F2<ad50>
+2.798 E F0 .298(option implies)2.798 F F2<ad4f>108 350.4 Q F0 2.803(,a)C
+.304(nd also causes the parameter \214le to be modi\214ed so that the \
+\214rst SVP output for each \214le becomes the)-2.803 F .753
+(SVP used for recalculating bath)108 362.4 R .753(ymetry for that sw)
+-.05 F .753(ath \214le.)-.1 F(The)5.752 E F2<ad43>3.252 E F0 .752
+(option causes)3.252 F F2(mbsvplist)3.252 E F0 .752(to output the)3.252
+F(number of unique SVPs in a \214le to the shell \(standard out\).)108
+374.4 Q(The)108 398.4 Q F2<ad53>2.52 E F0 .02(option causes)2.52 F F2
+(mbsvplist)2.52 E F0 .02(to output the sound v)2.52 F .021(elocity v)
+-.15 F .021(alues used for beamforming by the sonar \(of-)-.25 F .394
+(ten called surf)108 410.4 R .394(ace sound v)-.1 F(elocity)-.15 E 2.894
+(,o)-.65 G 2.894(rS)-2.894 G .394
+(SV\) instead of SVP pro\214les. Each SSV v)-2.894 F .394
+(alue will be paired with the)-.25 F .4
+(corresponding sonar depth, and there will generally be one SSV v)108
+422.4 R .4(alue output for each surv)-.25 F .7 -.15(ey p)-.15 H .4
+(ing. The).15 F F2(-R)2.9 E F0 1.148
+(option can be used in conjunction with)108 434.4 R F2(-S)3.648 E F0
+1.148(to output SSV v)3.648 F 1.148
 (alues only within a desired longitude-latitude)-.25 F(box.)108 446.4 Q
 F1(MB-SYSTEM A)72 475.2 Q(UTHORSHIP)-.548 E F0(Da)108 487.2 Q(vid W)-.2
 E 2.5(.C)-.92 G(aress)-2.5 E(Montere)113 499.2 Q 2.5(yB)-.15 G
@@ -297,7 +302,7 @@ E 2.5(.C)-.92 G(aress)-2.5 E(Montere)113 499.2 Q 2.5(yB)-.15 G
 (Christian do Santos Ferreira)108 547.2 Q(MAR)113 559.2 Q
 (UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
 571.2 Q -.15(ve)-.25 G(rsity of Bremen).15 E F1(OPTIONS)72 600 Q F2
-<ad41>108 612 Q F3(sour)23.08 E(ce)-.37 E F0 3.501
+<ad41>108 612 Q F3(sour)144 612 Q(ce)-.37 E F0 3.501
 (Sets the source data record type for the SVPs to be output. By def)144
 624 R(ault,)-.1 E F2(mbsvplist)6.002 E F0(uses)6.002 E(MB_D)144 636 Q
 -1.21 -1.11(AT A)-.4 H(_VELOCITY_PR)1.11 E .979
@@ -320,7 +325,7 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 149.27(mbsvplist\(1\) MB-System)72 48 R 149.27
 (5.0 mbsvplist\(1\))2.5 F/F1 10/Times-Bold@0 SF<ad46>108 84 Q/F2 10
-/Times-Italic@0 SF(format)24.19 E F0 .422
+/Times-Italic@0 SF(format)144 84 Q F0 .422
 (Sets the format for the input sw)144 96 R .422(ath sonar data using)-.1
 F F1(MBIO)2.923 E F0(inte)2.923 E .423(ger format identi\214ers.)-.15 F
 (If)5.423 E F2(format)2.923 E F0(<)2.923 E .718
@@ -335,9 +340,9 @@ F0 .717(option will actually contain a list of input sw)3.217 F .717
 .088(and their identi\214er)2.588 F -.25(va)144 144 S(lues is gi).25 E
 -.15(ve)-.25 G 2.5(ni).15 G 2.5(nt)-2.5 G(he)-2.5 E F1(MBIO)2.5 E F0
 (manual page.)2.5 E F1<ad48>108 160.8 Q F0 .162(This "help" \215ag caus\
-e the program to print out a description of its operation and then e)
-22.52 F .162(xit immedi-)-.15 F(ately)144 172.8 Q(.)-.65 E F1<ad49>108
-189.6 Q F2(\214le)26.41 E F0 .313(Sets the input \214lename. If)144
+e the program to print out a description of its operation and then e)144
+160.8 R .162(xit immedi-)-.15 F(ately)144 172.8 Q(.)-.65 E F1<ad49>108
+189.6 Q F2(\214le)144 189.6 Q F0 .313(Sets the input \214lename. If)144
 201.6 R F2(format)2.813 E F0 2.813(>0\()2.813 G .313(set with the)-2.813
 F F1<ad46>2.813 E F0 .313(option\) then the sw)2.813 F .312
 (ath sonar data contained)-.1 F(in)144 213.6 Q F2(\214le)2.955 E F0 .455
@@ -359,7 +364,7 @@ G .568(th sonar format supported by).1 F F1(MBIO)144 297.6 Q F0 3.428
 .928(and their identi\214er)3.428 F -.25(va)144 309.6 S(lues is gi).25 E
 -.15(ve)-.25 G 2.5(ni).15 G 2.5(nt)-2.5 G(he)-2.5 E F1(MBIO)2.5 E F0
 (manual page. Def)2.5 E(ault:)-.1 E F2(\214le)2.5 E F0 2.5(=")2.5 G
-(datalist.mb-1".)-2.5 E F1<ad4d>108 326.4 Q F2(mode)20.86 E F0 .536
+(datalist.mb-1".)-2.5 E F1<ad4d>108 326.4 Q F2(mode)144 326.4 Q F0 .536
 (Sets the SVP output mode. If)144 338.4 R F2(mode)3.036 E F0 .536
 (=0 \(the def)B .536
 (ault\), then the \214rst SVP of each \214le will be output,)-.1 F .878
@@ -386,9 +391,9 @@ R F1<ad4f>3.542 E F0 3.542(.A)C(dditionally)-3.542 E 3.542(,t)-.65 G
 .155(ymetry in that sw)-.05 F .154(ath\214le by)-.1 F F1(mbpr)2.654 E
 (ocess)-.18 E F0 .154(by mod-)2.654 F
 (ifying the associated parameter \214le.)144 480 Q F1<ad52>108 496.8 Q
-F2(west/east/south/north)23.08 E F0 .761(When the)144 508.8 R F1<ad53>
-3.261 E F0 .761(option has been speci\214ed, this option sets the longi\
-tude and latitude bounds within)3.261 F(which SSV v)144 520.8 Q
+F2(west/east/south/north)144 496.8 Q F0 .761(When the)144 508.8 R F1
+<ad53>3.261 E F0 .761(option has been speci\214ed, this option sets the\
+ longitude and latitude bounds within)3.261 F(which SSV v)144 520.8 Q
 (alues will be output. Def)-.25 E(ault: all SSV v)-.1 E
 (alues are output.)-.25 E F1<ad53>108 537.6 Q F0 1.253
 (This option causes)144 549.6 R F1(mbsvplist)3.752 E F0 1.252
@@ -399,22 +404,23 @@ tude and latitude bounds within)3.261 F(which SSV v)144 520.8 Q
 (SV\) instead of SVP pro\214les. Each SSV v)-3.147 F .647(alue will)-.25
 F .014(be paired with the corresponding sonar depth, and in general one\
  depth-SSV pair will be output for)144 573.6 R(each surv)144 585.6 Q .3
--.15(ey p)-.15 H(ing.).15 E F1<ad56>108 602.4 Q F0(Normally)23.08 E(,)
--.65 E F1(mbsvplist)3.076 E F0 -.1(wo)3.076 G .576
+-.15(ey p)-.15 H(ing.).15 E F1<ad56>108 602.4 Q F0(Normally)144 602.4 Q
+(,)-.65 E F1(mbsvplist)3.076 E F0 -.1(wo)3.076 G .576
 (rks "silently" without outputting an).1 F .576
 (ything to the stderr stream.)-.15 F .577(If the)5.576 F F1<ad56>3.077 E
 F0 .525(\215ag is gi)144 614.4 R -.15(ve)-.25 G .525(n, then).15 F F1
 (mblist)3.025 E F0 -.1(wo)3.025 G .525(rks in a "v).1 F .525
 (erbose" mode and outputs the program v)-.15 F .525(ersion being used)
 -.15 F(and all error status messages.)144 626.4 Q F1<ad5a>108 643.2 Q F0
-(Normally)23.63 E(,)-.65 E F1(mbsvplist)3.159 E F0 -.1(fa)3.159 G .659
-(ithfully outputs the SVP data just as it is stored in the sw).1 F .66
-(ath \214les. Rarely)-.1 F(,)-.65 E .933(sonars may store SVP data with\
- a nonzero depth for the \214rst sound speed v)144 655.2 R .933
-(alue, a circumstance)-.25 F 2.375(that causes problems with bath)144
-667.2 R 2.375(ymetry recalculation using)-.05 F F1(mbpr)4.876 E(ocess)
--.18 E F0 4.876(.T)C(he)-4.876 E F1<ad5a>4.876 E F0 2.376(option causes)
-4.876 F F1(mbsvplist)144 679.2 Q F0(to replace the \214rst depth v)2.5 E
+(Normally)144 643.2 Q(,)-.65 E F1(mbsvplist)3.159 E F0 -.1(fa)3.159 G
+.659(ithfully outputs the SVP data just as it is stored in the sw).1 F
+.66(ath \214les. Rarely)-.1 F(,)-.65 E .933(sonars may store SVP data w\
+ith a nonzero depth for the \214rst sound speed v)144 655.2 R .933
+(alue, a circumstance)-.25 F .534(that causes problems with bath)144
+667.2 R .534(ymetry recalculation using)-.05 F F1(mbpr)3.034 E(ocess)
+-.18 E F0 3.034(.T)C(he)-3.034 E F1<ad5a>3.034 E F0 .535(option causes)
+3.034 F F1(mb-)3.035 E(svplist)144 679.2 Q F0
+(to replace the \214rst depth v)2.5 E
 (alue with zero before outputting the SVP)-.25 E(.)-1.11 E
 (MB-System 5.0)72 768 Q(23 July 2020)144.825 E(2)203.165 E 0 Cg EP
 %%Page: 3 3

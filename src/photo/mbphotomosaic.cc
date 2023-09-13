@@ -337,24 +337,28 @@ void load_navigation(int verbose, mb_path NavigationFile, int lonflip,
         fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
         exit(*error);
         }
-    while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
-        {
-        bool value_ok = false;
-        int time_i[7];
-        double sec;
 
-        /* read the navigation from an fnv file */
-        int nget = sscanf(buffer,"%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
-            &time_i[0], &time_i[1], &time_i[2],
-            &time_i[3], &time_i[4], &sec, &ntime[*nnav], &nlon[*nnav], &nlat[*nnav],
-            &nheading[*nnav], &nspeed[*nnav], &ndraft[*nnav],
-            &nroll[*nnav], &npitch[*nnav], &nheave[*nnav]);
-        if (nget >= 15)
-            value_ok = true;
+    if (tfp != NULL) {
+      bool done = false;
+      while (!done) {
+        memset(buffer, 0, MB_PATH_MAXLINE);
+        if ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == NULL) {
+          done = true;
+        }
+        else if (buffer[0] != '#') {
+          bool value_ok = false;
+          int time_i[7];
+          double sec;
+          int nget = sscanf(buffer,"%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+              &time_i[0], &time_i[1], &time_i[2],
+              &time_i[3], &time_i[4], &sec, &ntime[*nnav], &nlon[*nnav], &nlat[*nnav],
+              &nheading[*nnav], &nspeed[*nnav], &ndraft[*nnav],
+              &nroll[*nnav], &npitch[*nnav], &nheave[*nnav]);
+          if (nget >= 15)
+              value_ok = true;
 
-        /* make sure longitude is defined according to lonflip */
-        if (value_ok)
-            {
+          /* make sure longitude is defined according to lonflip */
+          if (value_ok) {
             if (lonflip == -1 && nlon[*nnav] > 0.0)
                 nlon[*nnav] = nlon[*nnav] - 360.0;
             else if (lonflip == 0 && nlon[*nnav] < -180.0)
@@ -363,41 +367,38 @@ void load_navigation(int verbose, mb_path NavigationFile, int lonflip,
                 nlon[*nnav] = nlon[*nnav] - 360.0;
             else if (lonflip == 1 && nlon[*nnav] < 0.0)
                 nlon[*nnav] = nlon[*nnav] + 360.0;
-            }
+          }
 
-        /* output some debug values */
-        if (verbose >= 5 && value_ok)
-            {
+          /* output some debug values */
+          if (verbose >= 5 && value_ok) {
             fprintf(stderr,"\ndbg5  New navigation point read in program <%s>\n",program_name);
             fprintf(stderr,"dbg5       nav[%d]: %f %f %f\n",
                 *nnav,ntime[*nnav], nlon[*nnav], nlat[*nnav]);
-            }
-        else if (verbose >= 5)
-            {
+          }
+          else if (verbose >= 5) {
             fprintf(stderr,"\ndbg5  Error parsing line in navigation file in program <%s>\n",program_name);
             fprintf(stderr,"dbg5       line: %s\n",buffer);
-            }
+          }
 
-        /* check for reverses or repeats in time */
-        if (value_ok)
-            {
+          /* check for reverses or repeats in time */
+          if (value_ok) {
             if (*nnav == 0)
-                (*nnav)++;
+              (*nnav)++;
             else if (ntime[*nnav] > ntime[*nnav-1])
-                (*nnav)++;
+              (*nnav)++;
             else if (*nnav > 0 && ntime[*nnav] <= ntime[*nnav-1]
-                && verbose >= 5)
-                {
-                fprintf(stderr,"\ndbg5  Navigation time error in program <%s>\n",program_name);
-                fprintf(stderr,"dbg5       nav[%d]: %f %f %f\n",
-                    *nnav-1,ntime[*nnav-1], nlon[*nnav-1], nlat[*nnav-1]);
-                fprintf(stderr,"dbg5       nav[%d]: %f %f %f\n",
-                    *nnav,ntime[*nnav], nlon[*nnav], nlat[*nnav]);
-                }
+                && verbose >= 5) {
+              fprintf(stderr,"\ndbg5  Navigation time error in program <%s>\n",program_name);
+              fprintf(stderr,"dbg5       nav[%d]: %f %f %f\n",
+                  *nnav-1,ntime[*nnav-1], nlon[*nnav-1], nlat[*nnav-1]);
+              fprintf(stderr,"dbg5       nav[%d]: %f %f %f\n",
+                  *nnav,ntime[*nnav], nlon[*nnav], nlat[*nnav]);
             }
-        strncpy(buffer,"\0",sizeof(buffer));
+          }
         }
-    fclose(tfp);
+      }
+      fclose(tfp);
+    }
 
 }
 
@@ -831,36 +832,51 @@ void load_correction(int verbose, mb_path ImageCorrectionFile, struct mbpm_contr
         fprintf(stream, "    Reference Red Chroma Difference:    %f (range 0-255)\n", control->reference_cr);
         fprintf(stream, "    Reference Blue Chroma Difference:   %f (range 0-255)\n", control->reference_cb);
     }
-    if (verbose > 1) {
-        for (int icamera=0; icamera < 2; icamera++) {
-            fprintf(stream, "\nIntensity Correction Table[camera %d]:\n", icamera);
-            for (int i=0;i<control->ncorr_x;i++) {
-                for (int j=0;j<control->ncorr_y;j++) {
-                    for (int k=0;k<control->ncorr_z;k++) {
-                    fprintf(stream,"    %d %d %d   %f\n", i, j, k, control->corr_table_y[icamera].at<float>(i, j, k));
-                    }
-                }
-            }
-            if (control->corr_color_enabled) {
-                fprintf(stream, "\nRed Chroma Correction Table[camera %d]:\n", icamera);
-                for (int i=0;i<control->ncorr_x;i++) {
-                    for (int j=0;j<control->ncorr_y;j++) {
-                        for (int k=0;k<control->ncorr_z;k++) {
-                        fprintf(stream,"    %d %d %d   %f\n", i, j, k, control->corr_table_cr[icamera].at<float>(i, j, k));
-                        }
-                    }
-                }
-                fprintf(stream, "\nBlue Chroma Correction Table[camera %d]:\n", icamera);
-                for (int i=0;i<control->ncorr_x;i++) {
-                    for (int j=0;j<control->ncorr_y;j++) {
-                        for (int k=0;k<control->ncorr_z;k++) {
-                        fprintf(stream,"    %d %d %d   %f\n", i, j, k, control->corr_table_cb[icamera].at<float>(i, j, k));
-                        }
-                    }
-                }
-            }
-        }
+
+    if (verbose > 0) {
+
+      /* print out each correction table layer from lowest standoff to largest */
+      fprintf(stderr, "\n---------------------\nCamera 0 Image Correction\n--------------------\n");
+      for (int k=0;k<control->ncorr_z;k++) {
+        fprintf(stderr, "Camera 0 Correction: Standoff %.3f meters +/- %.3f\n", k * control->bin_dz + control->corr_zmin, 0.5 * control->bin_dz);
+          for (int j=0;j<control->ncorr_y;j++) {
+              for (int i=0;i<control->ncorr_x;i++) {
+                  fprintf(stderr, "%5.1f ", control->corr_table_y[0].at<float>(i, j, k));
+              }
+              fprintf(stderr, "   ");
+              for (int i=0;i<control->ncorr_x;i++) {
+                  fprintf(stderr, "%5.1f ", control->corr_table_cr[0].at<float>(i, j, k));
+              }
+              fprintf(stderr, "   ");
+              for (int i=0;i<control->ncorr_x;i++) {
+                  fprintf(stderr, "%5.1f ", control->corr_table_cb[0].at<float>(i, j, k));
+              }
+              fprintf(stderr, "\n");
+          }
+          fprintf(stderr, "\n");
+      }
+      fprintf(stderr, "\n---------------------\nCamera 1 Image Correction\n--------------------\n");
+      for (int k=0;k<control->ncorr_z;k++) {
+        fprintf(stderr, "Camera 1 Correction: Standoff %.3f meters +/- %.3f\n", k * control->bin_dz + control->corr_zmin, 0.5 * control->bin_dz);
+          for (int j=0;j<control->ncorr_y;j++) {
+              for (int i=0;i<control->ncorr_x;i++) {
+                  fprintf(stderr, "%5.1f ", control->corr_table_y[1].at<float>(i, j, k));
+              }
+              fprintf(stderr, "   ");
+              for (int i=0;i<control->ncorr_x;i++) {
+                  fprintf(stderr, "%5.1f ", control->corr_table_cr[1].at<float>(i, j, k));
+              }
+              fprintf(stderr, "   ");
+              for (int i=0;i<control->ncorr_x;i++) {
+                  fprintf(stderr, "%5.1f ", control->corr_table_cb[1].at<float>(i, j, k));
+              }
+              fprintf(stderr, "\n");
+          }
+          fprintf(stderr, "\n");
+      }
+
     }
+
 }
 
 /*--------------------------------------------------------------------*/
@@ -2438,8 +2454,8 @@ int main(int argc, char** argv)
     double *ttide = NULL;
 
     /* Input quality variables */
-    bool imagequality_initialized = false;
     bool imagequality_specified = false;
+    bool imagequality_initialized = false;
     double imageQualityThreshold = 0.0;
     double imageQualityFilterLength = 0.0;
     mb_path ImageQualityFile;
@@ -2581,8 +2597,8 @@ int main(int argc, char** argv)
         };
 
     /* set default imagelistfile name */
-    sprintf(ImageListFile, "imagelist.mb-1");
-    sprintf(ImageCorrectionFile, "imagelist_cameracorrection.yml");
+    snprintf(ImageListFile, sizeof(ImageListFile), "imagelist.mb-1");
+    snprintf(ImageCorrectionFile, sizeof(ImageCorrectionFile), "imagelist_cameracorrection.yml");
     control.OutputDim[0] = 1000;
     control.OutputDim[1] = 1000;
 
@@ -2808,6 +2824,7 @@ int main(int argc, char** argv)
                 if (n == 1)
                     {
                     control.corr_mode = MBPM_CORRECTION_FILE;
+                    correction_specified = true;
                     if (strlen(ImageCorrectionFile) < 5
                         || strncmp(".yml", &ImageCorrectionFile[strlen(ImageCorrectionFile)-4], 4) != 0)
                         {
@@ -3054,7 +3071,7 @@ int main(int argc, char** argv)
         fprintf(stream,"%s     TideFile:                         %s\n", first, TideFile);
         fprintf(stream,"%s     imagequality_specified:           %d\n", first, imagequality_specified);
         fprintf(stream,"%s     ImageQualityFile:                 %s\n", first, ImageQualityFile);
-        fprintf(stream,"%s     imagequality_initialized:                 %d\n", first, imagequality_initialized);
+        fprintf(stream,"%s     imagequality_initialized:         %d\n", first, imagequality_initialized);
         fprintf(stream,"%s     imageQualityThreshold:            %f\n", first, imageQualityThreshold);
         fprintf(stream,"%s     imageQualityFilterLength:         %f\n", first, imageQualityFilterLength);
         fprintf(stream,"%s     control.use_topography:           %d\n", first, control.use_topography);
@@ -3174,9 +3191,9 @@ int main(int argc, char** argv)
                 / 6.0) + 0.5);
             reference_lat = 0.5 * (control.OutputBounds[2] + control.OutputBounds[3]);
             if (reference_lat >= 0.0)
-                sprintf(projection_id, "UTM%2.2dN", utm_zone);
+                snprintf(projection_id, sizeof(projection_id), "UTM%2.2dN", utm_zone);
             else
-                sprintf(projection_id, "UTM%2.2dS", utm_zone);
+                snprintf(projection_id, sizeof(projection_id), "UTM%2.2dS", utm_zone);
             }
         else
             strcpy(projection_id, projection_pars);
@@ -3627,7 +3644,14 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             /* correction-file */
             else if (strncmp(imageLeftFile, "--correction-file=", 18) == 0) {
                 if (sscanf(imageLeftFile, "--correction-file=%s", tmp) == 1) {
-                    strcpy(ImageCorrectionFile, tmp);
+                	if (strlen(imageRightFile) > 0) {
+                		strcpy(ImageCorrectionFile, imageRightFile);
+                		strcat(ImageCorrectionFile, "/");
+                		strcat(ImageCorrectionFile, tmp);
+                	}
+                	else {
+                    	strcpy(ImageCorrectionFile, tmp);
+                    }
                     correction_specified = true;
                     control.corr_mode = MBPM_CORRECTION_FILE;
                 }
@@ -3697,7 +3721,14 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             /* platform-file */
             else if (strncmp(imageLeftFile, "--platform-file=", 16) == 0) {
                 if (sscanf(imageLeftFile, "--platform-file=%s", tmp) == 1) {
-                    strcpy(PlatformFile, tmp);
+                	if (strlen(imageRightFile) > 0) {
+                		strcpy(PlatformFile, imageRightFile);
+                		strcat(PlatformFile, "/");
+                		strcat(PlatformFile, tmp);
+                	}
+                	else {
+                    	strcpy(PlatformFile, tmp);
+                    }
                     platform_specified = true;
                 }
             }
@@ -3786,7 +3817,14 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             /* calibration-file */
             else if (strncmp(imageLeftFile, "--calibration-file=", 19) == 0) {
                 if (sscanf(imageLeftFile, "--calibration-file=%s", tmp) == 1) {
-                    strcpy(StereoCameraCalibrationFile, tmp);
+                	if (strlen(imageRightFile) > 0) {
+                		strcpy(StereoCameraCalibrationFile, imageRightFile);
+                		strcat(StereoCameraCalibrationFile, "/");
+                		strcat(StereoCameraCalibrationFile, tmp);
+                	}
+                	else {
+                    	strcpy(StereoCameraCalibrationFile, tmp);
+                    }
                     calibration_specified = true;
                 }
             }
@@ -3794,7 +3832,14 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             /* navigation-file */
             else if (strncmp(imageLeftFile, "--navigation-file=", 18) == 0) {
                 if (sscanf(imageLeftFile, "--navigation-file=%s", tmp) == 1) {
-                    strcpy(NavigationFile, tmp);
+                	if (strlen(imageRightFile) > 0) {
+                		strcpy(NavigationFile, imageRightFile);
+                		strcat(NavigationFile, "/");
+                		strcat(NavigationFile, tmp);
+                	}
+                	else {
+                    	strcpy(NavigationFile, tmp);
+                    }
                     navigation_specified = true;
                 }
             }
@@ -3802,7 +3847,14 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             /* tide-file */
             else if (strncmp(imageLeftFile, "--tide-file=", 12) == 0) {
                 if (sscanf(imageLeftFile, "--tide-file=%s", tmp) == 1) {
-                    strcpy(TideFile, tmp);
+                	if (strlen(imageRightFile) > 0) {
+                		strcpy(TideFile, imageRightFile);
+                		strcat(TideFile, "/");
+                		strcat(TideFile, tmp);
+                	}
+                	else {
+                    	strcpy(TideFile, tmp);
+                    }
                     tide_specified = true;
                 }
             }
@@ -3810,7 +3862,14 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             /* image-quality-file */
             else if (strncmp(imageLeftFile, "--image-quality-file=", 21) == 0) {
                 if (sscanf(imageLeftFile, "--image-quality-file=%s", tmp) == 1) {
-                    strcpy(ImageQualityFile, tmp);
+                	if (strlen(imageRightFile) > 0) {
+                		strcpy(ImageQualityFile, imageRightFile);
+                		strcat(ImageQualityFile, "/");
+                		strcat(ImageQualityFile, tmp);
+                	}
+                	else {
+                    	strcpy(ImageQualityFile, tmp);
+                    }
                     imagequality_specified = true;
                 }
             }
@@ -3972,7 +4031,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
                 exit(error);
             }
 
-            /* if newly specified load image correction table */
+            /* if newly specified load camera calibration model */
             if (calibration_specified) {
                 load_calibration(verbose, StereoCameraCalibrationFile, &control, &error);
                 calibration_initialized = true;
@@ -4354,7 +4413,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             }
 
             /* write out world file contents */
-            fprintf(tfp, "%.10g\r\n0.0\r\n0.0\r\n%.10g\r\n%.10g\r\n%.10g\r\n",
+            fprintf(tfp, "%.15g\r\n0.0\r\n0.0\r\n%.15g\r\n%.15g\r\n%.15g\r\n",
                 control.OutputDx[0], -control.OutputDx[1],
                 control.OutputBounds[0] - 0.5 * control.OutputDx[0],
                 control.OutputBounds[3] + 0.5 * control.OutputDx[1]);
@@ -4370,8 +4429,8 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             mb_path zlabel;
             mb_path title;
             if (control.use_projection) {
-              sprintf(xlabel, "Easting (%s)", units);
-              sprintf(ylabel, "Northing (%s)", units);
+              snprintf(xlabel, sizeof(xlabel), "Easting (%s)", units);
+              snprintf(ylabel, sizeof(ylabel), "Northing (%s)", units);
             }
             else {
               strcpy(xlabel, "Longitude");

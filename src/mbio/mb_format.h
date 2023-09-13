@@ -12,8 +12,9 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /**
-   @file
- * mb_format.h defines data format identifiers used by MBIO functions
+ * @file
+ * @brief Define swath data format integer identifier codes used by 
+ * MBIO functions
  *
  * Author:	D. W. Caress
  * Date:	January 19, 1993
@@ -433,6 +434,16 @@ single beam bathymetry, nav, magnetics, gravity, \
 single beam bathymetry, nav, magnetics, gravity, \
 tab delimited ascii records with CRLF line breaks, NOAA NGDC */
 
+#define MBF_SOIUSBLN 175
+/* NGDC MGD77T underway geophysics format, \
+single beam bathymetry, nav, magnetics, gravity, \
+tab delimited ascii records with CRLF line breaks, NOAA NGDC */
+
+#define MBF_SOIROVNV 176
+/* NGDC MGD77T underway geophysics format, \
+single beam bathymetry, nav, magnetics, gravity, \
+tab delimited ascii records with CRLF line breaks, NOAA NGDC */
+
 #define MBF_SAMESURF 181
 /* STN Atlas processing multibeam format,  \
 Hydrosweep DS2, Hydrosweep MD,  \
@@ -530,12 +541,13 @@ int mbr_register_sburicen(int verbose, void *mbio_ptr, int *error);
 int mbr_register_sburivax(int verbose, void *mbio_ptr, int *error);
 int mbr_register_sbsioswb(int verbose, void *mbio_ptr, int *error);
 int mbr_register_sbifremr(int verbose, void *mbio_ptr, int *error);
+int mbr_register_hsatlraw(int verbose, void *mbio_ptr, int *error);
 int mbr_register_hsldedmb(int verbose, void *mbio_ptr, int *error);
 int mbr_register_hsuricen(int verbose, void *mbio_ptr, int *error);
-int mbr_register_hsatlraw(int verbose, void *mbio_ptr, int *error);
 int mbr_register_hsldeoih(int verbose, void *mbio_ptr, int *error);
 int mbr_register_hsurivax(int verbose, void *mbio_ptr, int *error);
 int mbr_register_hsunknwn(int verbose, void *mbio_ptr, int *error);
+int mbr_register_sb2000rw(int verbose, void *mbio_ptr, int *error);
 int mbr_register_sb2000sb(int verbose, void *mbio_ptr, int *error);
 int mbr_register_sb2000ss(int verbose, void *mbio_ptr, int *error);
 int mbr_register_sb2100rw(int verbose, void *mbio_ptr, int *error);
@@ -555,16 +567,19 @@ int mbr_register_mr1prvr2(int verbose, void *mbio_ptr, int *error);
 int mbr_register_mbldeoih(int verbose, void *mbio_ptr, int *error);
 int mbr_register_mbarimb1(int verbose, void *mbio_ptr, int *error);
 int mbr_register_mbnetcdf(int verbose, void *mbio_ptr, int *error);
-int mbr_register_mbnetcdf(int verbose, void *mbio_ptr, int *error);
+int mbr_register_mbncdfxt(int verbose, void *mbio_ptr, int *error);
 int mbr_register_cbat9001(int verbose, void *mbio_ptr, int *error);
 int mbr_register_cbat8101(int verbose, void *mbio_ptr, int *error);
 int mbr_register_hypc8101(int verbose, void *mbio_ptr, int *error);
 int mbr_register_xtfr8101(int verbose, void *mbio_ptr, int *error);
+int mbr_register_resons8k(int verbose, void *mbio_ptr, int *error);
+int mbr_register_sbatproc(int verbose, void *mbio_ptr, int *error);
 int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error);
 int mbr_register_reson7k3(int verbose, void *mbio_ptr, int *error);
 int mbr_register_bchrtunb(int verbose, void *mbio_ptr, int *error);
 int mbr_register_elmk2unb(int verbose, void *mbio_ptr, int *error);
 int mbr_register_bchrxunb(int verbose, void *mbio_ptr, int *error);
+int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error);
 int mbr_register_hsmdaraw(int verbose, void *mbio_ptr, int *error);
 int mbr_register_hsmdldih(int verbose, void *mbio_ptr, int *error);
 int mbr_register_dsl120pf(int verbose, void *mbio_ptr, int *error);
@@ -581,21 +596,23 @@ int mbr_register_mgd77dat(int verbose, void *mbio_ptr, int *error);
 int mbr_register_asciixyz(int verbose, void *mbio_ptr, int *error);
 int mbr_register_asciiyxz(int verbose, void *mbio_ptr, int *error);
 int mbr_register_hydrob93(int verbose, void *mbio_ptr, int *error);
-int mbr_register_hydrob93(int verbose, void *mbio_ptr, int *error);
 int mbr_register_mbarirov(int verbose, void *mbio_ptr, int *error);
-int mbr_register_mbarrov2(int verbose, void *mbio_ptr, int *error);
 int mbr_register_mbpronav(int verbose, void *mbio_ptr, int *error);
 int mbr_register_nvnetcdf(int verbose, void *mbio_ptr, int *error);
 int mbr_register_asciixyt(int verbose, void *mbio_ptr, int *error);
 int mbr_register_asciiyxt(int verbose, void *mbio_ptr, int *error);
-int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error);
+int mbr_register_mbarrov2(int verbose, void *mbio_ptr, int *error);
 int mbr_register_hs10jams(int verbose, void *mbio_ptr, int *error);
+int mbr_register_hir2rnav(int verbose, void *mbio_ptr, int *error);
+int mbr_register_mgd77txt(int verbose, void *mbio_ptr, int *error);
+int mbr_register_mgd77tab(int verbose, void *mbio_ptr, int *error);
+int mbr_register_soiusbln(int verbose, void *mbio_ptr, int *error);
+int mbr_register_soirovnv(int verbose, void *mbio_ptr, int *error);
+int mbr_register_samesurf(int verbose, void *mbio_ptr, int *error);
 int mbr_register_hsds2raw(int verbose, void *mbio_ptr, int *error);
 int mbr_register_hsds2lam(int verbose, void *mbio_ptr, int *error);
-int mbr_register_samesurf(int verbose, void *mbio_ptr, int *error);
 int mbr_register_image83p(int verbose, void *mbio_ptr, int *error);
 int mbr_register_imagemba(int verbose, void *mbio_ptr, int *error);
-int mbr_register_hir2rnav(int verbose, void *mbio_ptr, int *error);
 int mbr_register_hysweep1(int verbose, void *mbio_ptr, int *error);
 int mbr_register_xtfb1624(int verbose, void *mbio_ptr, int *error);
 int mbr_register_swplssxi(int verbose, void *mbio_ptr, int *error);
@@ -604,10 +621,13 @@ int mbr_register_3ddepthp(int verbose, void *mbio_ptr, int *error);
 int mbr_register_3dwisslr(int verbose, void *mbio_ptr, int *error);
 int mbr_register_3dwisslp(int verbose, void *mbio_ptr, int *error);
 int mbr_register_wasspenl(int verbose, void *mbio_ptr, int *error);
-int mbr_register_mgd77txt(int verbose, void *mbio_ptr, int *error);
-int mbr_register_mgd77tab(int verbose, void *mbio_ptr, int *error);
 int mbr_register_photgram(int verbose, void *mbio_ptr, int *error);
 int mbr_register_kemkmall(int verbose, void *mbio_ptr, int *error);
+int mbr_info_sbsiomrg(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
+                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
+                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
+                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
+                      double *beamwidth_ltrack, int *error);
 int mbr_info_sbsiomrg(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
@@ -643,17 +663,17 @@ int mbr_info_sbifremr(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error);
+int mbr_info_hsatlraw(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
+                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
+                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
+                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
+                      double *beamwidth_ltrack, int *error);
 int mbr_info_hsldedmb(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error);
 int mbr_info_hsuricen(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
-                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
-                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
-                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
-                      double *beamwidth_ltrack, int *error);
-int mbr_info_hsatlraw(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
@@ -669,6 +689,11 @@ int mbr_info_hsurivax(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error);
 int mbr_info_hsunknwn(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
+                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
+                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
+                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
+                      double *beamwidth_ltrack, int *error);
+int mbr_info_sb2000rw(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
@@ -768,11 +793,6 @@ int mbr_info_mbnetcdf(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error);
-int mbr_info_mbnetcdf(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
-                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
-                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
-                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
-                      double *beamwidth_ltrack, int *error);
 int mbr_info_mbncdfxt(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
@@ -798,12 +818,22 @@ int mbr_info_xtfr8101(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error);
-int mbr_info_reson7k3(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
+int mbr_info_resons8k(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
+                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
+                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
+                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
+                      double *beamwidth_ltrack, int *error);
+int mbr_info_sbatproc(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error);
 int mbr_info_reson7kr(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
+                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
+                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
+                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
+                      double *beamwidth_ltrack, int *error);
+int mbr_info_reson7k3(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
@@ -819,6 +849,11 @@ int mbr_info_elmk2unb(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error);
 int mbr_info_bchrxunb(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
+                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
+                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
+                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
+                      double *beamwidth_ltrack, int *error);
+int mbr_info_l3xseraw(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
@@ -903,17 +938,7 @@ int mbr_info_hydrob93(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error);
-int mbr_info_hydrob93(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
-                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
-                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
-                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
-                      double *beamwidth_ltrack, int *error);
 int mbr_info_mbarirov(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
-                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
-                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
-                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
-                      double *beamwidth_ltrack, int *error);
-int mbr_info_mbarrov2(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
@@ -938,12 +963,42 @@ int mbr_info_asciiyxt(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error);
-int mbr_info_l3xseraw(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
+int mbr_info_mbarrov2(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error);
 int mbr_info_hs10jams(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
+                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
+                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
+                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
+                      double *beamwidth_ltrack, int *error);
+int mbr_info_hir2rnav(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
+                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
+                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
+                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
+                      double *beamwidth_ltrack, int *error);
+int mbr_info_mgd77txt(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
+                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
+                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
+                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
+                      double *beamwidth_ltrack, int *error);
+int mbr_info_mgd77tab(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
+                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
+                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
+                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
+                      double *beamwidth_ltrack, int *error);
+int mbr_info_soiusbln(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
+                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
+                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
+                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
+                      double *beamwidth_ltrack, int *error);
+int mbr_info_soirovnv(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
+                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
+                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
+                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
+                      double *beamwidth_ltrack, int *error);
+int mbr_info_samesurf(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
@@ -958,22 +1013,12 @@ int mbr_info_hsds2lam(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error);
-int mbr_info_samesurf(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
-                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
-                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
-                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
-                      double *beamwidth_ltrack, int *error);
 int mbr_info_image83p(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error);
 int mbr_info_imagemba(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
-                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
-                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
-                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
-                      double *beamwidth_ltrack, int *error);
-int mbr_info_hir2rnav(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
@@ -1018,25 +1063,15 @@ int mbr_info_wasspenl(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error);
-int mbr_info_mgd77txt(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
-                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
-                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
-                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
-                      double *beamwidth_ltrack, int *error);
-int mbr_info_mgd77tab(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
-                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
-                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
-                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
-                      double *beamwidth_ltrack, int *error);
 int mbr_info_photgram(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error);
 int mbr_info_kemkmall(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
-                     char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
-                     int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
-                     int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
-                     double *beamwidth_ltrack, int *error);
+                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
+                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
+                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
+                      double *beamwidth_ltrack, int *error);
 
 #endif  /* MB_FORMAT_H_ */

@@ -12,9 +12,9 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /**
-   @file
- * MBprocess is a tool for processing swath sonar bathymetry data.
- * This program performs a number of functions, including:
+ * @file
+ * @brief MBprocess is a tool for processing swath sonar bathymetry data.
+ * @details This program performs a number of functions, including:
  *   - merging navigation
  *   - recalculating bathymetry from travel time and angle data
  *     by raytracing through a layered water sound velocity model.
@@ -701,6 +701,7 @@
 #define MB_PR_KLUGE_FIXWISSLTIMESTAMPS 5
 #define MB_PR_KLUGE_AUVSENTRYSENSORDEPTH 6
 #define MB_PR_KLUGE_IGNORESNIPPETS 7
+#define MB_PR_KLUGE_SONARDEPTHFROMHEAVE 8
 
 /** structure holding mbpreprocess parameters to be passed to preprocess
  * functions of i/o modules */

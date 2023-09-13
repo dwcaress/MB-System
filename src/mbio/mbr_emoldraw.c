@@ -595,7 +595,7 @@ int mbr_emoldraw_rd_pos(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 /*--------------------------------------------------------------------*/
 int mbr_emoldraw_rd_svp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error) {
 	char line[EM_SVP_SIZE];
-	short short_val;
+	short short_val = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -663,9 +663,9 @@ int mbr_emoldraw_rd_em1000bath(int verbose, FILE *mbfp, struct mbsys_simrad_stru
 	struct mbsys_simrad_survey_struct *ping;
 	char line[EM_1000_BATH_SIZE];
 	char beamarray[11];
-	unsigned short int ushort_val;
-	short int short_val;
-	short int *short_ptr;
+	unsigned short ushort_val = 0;
+	short int short_val = 0;
+	short *short_ptr = NULL;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -787,9 +787,9 @@ int mbr_emoldraw_rd_em12bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct
 	struct mbsys_simrad_survey_struct *ping;
 	char line[EM_12S_BATH_SIZE];
 	char beamarray[11];
-	unsigned short int ushort_val;
-	short int short_val;
-	short int *short_ptr;
+	unsigned short ushort_val = 0;
+	short short_val = 0;
+	short *short_ptr = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -912,9 +912,9 @@ int mbr_emoldraw_rd_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 	struct mbsys_simrad_survey_struct *ping;
 	char line[EM_121_BATH_SIZE];
 	char beamarray[11];
-	unsigned short int ushort_val;
-	short int short_val;
-	short int *short_ptr;
+	unsigned short ushort_val = 0;
+	short short_val = 0;
+	short *short_ptr = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1053,8 +1053,7 @@ int mbr_emoldraw_rd_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 	mb_s_char *beam_ss;
 	int ioffset;
 	int npixelsum;
-	unsigned short int ushort_val;
-	short int short_val;
+	unsigned short ushort_val = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1217,8 +1216,8 @@ int mbr_emoldraw_rd_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 	short int *beam_ssp;
 	int ioffset;
 	int npixelsum;
-	unsigned short int ushort_val;
-	short int short_val;
+	unsigned short ushort_val = 0;
+	short short_val = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2231,7 +2230,7 @@ int mbr_emoldraw_wr_start(int verbose, FILE *mbfp, struct mbsys_simrad_struct *s
 	int write_len;
 	int write_size;
 	unsigned short checksum;
-	short int short_val;
+	short short_val = 0;
 	mb_u_char *uchar_ptr;
 	char *char_ptr;
 
@@ -2358,7 +2357,7 @@ int mbr_emoldraw_wr_stop(int verbose, FILE *mbfp, struct mbsys_simrad_struct *st
 	int write_len;
 	int write_size;
 	unsigned short checksum;
-	short int short_val;
+	short short_val = 0;
 	mb_u_char *uchar_ptr;
 	char *char_ptr;
 
@@ -2484,7 +2483,7 @@ int mbr_emoldraw_wr_parameter(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 	int write_len;
 	int write_size;
 	unsigned short checksum;
-	short int short_val;
+	short short_val = 0;
 	mb_u_char *uchar_ptr;
 	char *char_ptr;
 
@@ -2610,7 +2609,7 @@ int mbr_emoldraw_wr_pos(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 	int write_len;
 	int write_size;
 	unsigned short checksum;
-	short int short_val;
+	short short_val = 0;
 	mb_u_char *uchar_ptr;
 	char *char_ptr;
 	double degree_dec;
@@ -2757,7 +2756,7 @@ int mbr_emoldraw_wr_svp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 	int write_len;
 	int write_size;
 	unsigned short checksum;
-	short int short_val;
+	short short_val = 0;
 	mb_u_char *uchar_ptr;
 	char *char_ptr;
 
@@ -2861,7 +2860,7 @@ int mbr_emoldraw_wr_em1000bath(int verbose, FILE *mbfp, struct mbsys_simrad_stru
 	int write_len;
 	int write_size;
 	unsigned short checksum;
-	short int short_val;
+	short short_val = 0;
 	mb_u_char *uchar_ptr;
 	char *char_ptr;
 
@@ -2996,7 +2995,7 @@ int mbr_emoldraw_wr_em12bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct
 	int write_len;
 	int write_size;
 	unsigned short checksum;
-	short int short_val;
+	short short_val = 0;
 	mb_u_char *uchar_ptr;
 	char *char_ptr;
 
@@ -3136,7 +3135,7 @@ int mbr_emoldraw_wr_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 	int write_len;
 	int write_size;
 	unsigned short checksum;
-	short int short_val;
+	short short_val = 0;
 	mb_u_char *uchar_ptr;
 	char *char_ptr;
 
@@ -3287,7 +3286,7 @@ int mbr_emoldraw_wr_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 	int write_len;
 	int write_size;
 	unsigned short checksum;
-	short int short_val;
+	short short_val = 0;
 	mb_u_char *uchar_ptr;
 	char *char_ptr;
 	int num_datagrams;
@@ -3520,7 +3519,7 @@ int mbr_emoldraw_wr_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 	int write_len;
 	int write_size;
 	unsigned short checksum;
-	short int short_val;
+	short short_val = 0;
 	mb_u_char *uchar_ptr;
 	char *char_ptr;
 	int num_datagrams;

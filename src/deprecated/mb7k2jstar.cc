@@ -321,7 +321,7 @@ int main(int argc, char **argv) {
 	int linenumber = 0;
 	if (route_file_set) {
 		linenumber = startline;
-		sprintf(output_file, "%s_%4.4d.mb132", lineroot, linenumber);
+		snprintf(output_file, sizeof(output_file), "%s_%4.4d.mb132", lineroot, linenumber);
 	}
 
 	/* new output file obviously needed */
@@ -682,7 +682,7 @@ int main(int argc, char **argv) {
 						linenumber++;
 
 						/* set output file name */
-						sprintf(output_file, "%s_%4.4d", lineroot, linenumber);
+						snprintf(output_file, sizeof(output_file), "%s_%4.4d", lineroot, linenumber);
 						if (extract_sbp && extract_sslow && extract_sshigh) {
 							strcat(output_file, ".jsf");
 							format_output = MBF_EDGJSTAR;

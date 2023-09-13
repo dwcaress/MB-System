@@ -2,18 +2,18 @@
 /// @file r7kc.c
 /// @authors k. Headley
 /// @date 01 jan 2018
- 
+
 /// Reson 7k Center data structures and protocol API
 
 /////////////////////////
-// Terms of use 
+// Terms of use
 /////////////////////////
 /*
 Copyright Information
 
 Copyright 2000-2018 MBARI
 Monterey Bay Aquarium Research Institute, all rights reserved.
- 
+
 Terms of Use
 
 This program is free software; you can redistribute it and/or modify
@@ -25,50 +25,50 @@ http://www.gnu.org/licenses/gpl-3.0.html
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details 
+GNU General Public License for more details
 (http://www.gnu.org/licenses/gpl-3.0.html)
- 
+
  MBARI provides the documentation and software code "as is", with no warranty,
- express or implied, as to the software, title, non-infringement of third party 
+ express or implied, as to the software, title, non-infringement of third party
  rights, merchantability, or fitness for any particular purpose, the accuracy of
- the code, or the performance or results which you may obtain from its use. You 
- assume the entire risk associated with use of the code, and you agree to be 
- responsible for the entire cost of repair or servicing of the program with 
+ the code, or the performance or results which you may obtain from its use. You
+ assume the entire risk associated with use of the code, and you agree to be
+ responsible for the entire cost of repair or servicing of the program with
  which you are using the code.
- 
+
  In no event shall MBARI be liable for any damages, whether general, special,
- incidental or consequential damages, arising out of your use of the software, 
- including, but not limited to, the loss or corruption of your data or damages 
- of any kind resulting from use of the software, any prohibited use, or your 
+ incidental or consequential damages, arising out of your use of the software,
+ including, but not limited to, the loss or corruption of your data or damages
+ of any kind resulting from use of the software, any prohibited use, or your
  inability to use the software. You agree to defend, indemnify and hold harmless
- MBARI and its officers, directors, and employees against any claim, loss, 
- liability or expense, including attorneys' fees, resulting from loss of or 
- damage to property or the injury to or death of any person arising out of the 
+ MBARI and its officers, directors, and employees against any claim, loss,
+ liability or expense, including attorneys' fees, resulting from loss of or
+ damage to property or the injury to or death of any person arising out of the
  use of the software.
- 
- The MBARI software is provided without obligation on the part of the 
- Monterey Bay Aquarium Research Institute to assist in its use, correction, 
+
+ The MBARI software is provided without obligation on the part of the
+ Monterey Bay Aquarium Research Institute to assist in its use, correction,
  modification, or enhancement.
- 
- MBARI assumes no responsibility or liability for any third party and/or 
- commercial software required for the database or applications. Licensee agrees 
- to obtain and maintain valid licenses for any additional third party software 
+
+ MBARI assumes no responsibility or liability for any third party and/or
+ commercial software required for the database or applications. Licensee agrees
+ to obtain and maintain valid licenses for any additional third party software
  required.
 */
 /////////////////////////
-// Headers 
+// Headers
 /////////////////////////
 
 #include "r7kc.h"
+#include "mxdebug.h"
+#include "mxd_app.h"
 #include "merror.h"
-#include "medebug.h"
-#include "mconfig.h"
 
 /////////////////////////
 // Macros
 /////////////////////////
 
-// These macros should only be defined for 
+// These macros should only be defined for
 // application main files rather than general C files
 /*
 /// @def PRODUCT
@@ -91,7 +91,7 @@ GNU General Public License for more details
 #define R7K_STR_INC 256
 #define TRACKING_BYTES 16
 /////////////////////////
-// Declarations 
+// Declarations
 /////////////////////////
 uint32_t g_ticket=0;
 byte g_tracking_number[TRACKING_BYTES]={0};
@@ -218,8 +218,8 @@ int r7k_req_config(msock_socket_t *s)
             r7k_msg_set_checksum(msg);
 
             // serialize, send
-            PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"sending CONFIG_DATA request:\n"));
-            if(mmd_channel_isset(MOD_R7K,MM_ERR|MM_WARN|R7K_V2)){
+            MX_MMSG(R7KR_DEBUG, "sending CONFIG_DATA request:\n");
+            if(mxd_testModule(R7KC_ERROR, 1) || mxd_testModule(R7KC, 2)){
                 r7k_msg_show(msg,true,3);
             }
             r7k_msg_send(s, msg);
@@ -237,14 +237,14 @@ int r7k_req_config(msock_socket_t *s)
                 if(reply->drf->record_type_id==R7K_RT_REMCON_NACK)
                     rep_str="NACK";
 
-                PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"CONFIG_DATA reply received %s [%p]:\n",rep_str,reply));
-                if(mmd_channel_isset(MOD_R7K,MM_ERR|MM_WARN|R7K_V2)){
+                MX_MPRINT(R7KR_DEBUG, "CONFIG_DATA reply received %s [%p]:\n", rep_str, reply);
+                if(mxd_testModule(R7KC_ERROR, 1) || mxd_testModule(R7KC, 2)){
                     r7k_msg_show(reply,true,3);
                 }
 
                 if(reply->drf->record_type_id==R7K_RT_REMCON_ACK){
                     // if ACK, read/show config data message
-                    PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"CONFIG_DATA reading config data\n"));
+                    MX_MMSG(R7KR_DEBUG, "CONFIG_DATA reading config data\n");
 
                     // release reply memory and reuse for config data
                     r7k_msg_destroy(&reply);
@@ -252,9 +252,9 @@ int r7k_req_config(msock_socket_t *s)
                     int status = -1;
 
                     if( (status=r7k_msg_receive(s, &reply, R7K_SUBSCRIBE_TIMEOUT_MS)) > 0 && NULL!=reply){
-                        PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"CONFIG_DATA message received [%p/%d]:\n",reply,status));
+                        MX_MPRINT(R7KR_DEBUG, "CONFIG_DATA message received [%p/%d]:\n", reply, status);
 
-                        if(mmd_channel_isset(MOD_R7K,MM_ERR|MM_WARN|R7K_V2)){
+                        if(mxd_testModule(R7KC_ERROR, 1) || mxd_testModule(R7KC, 2)){
                             r7k_msg_show(reply,true,3);
 
                             if(reply->drf->record_type_id==R7K_RT_CONFIG_DATA){
@@ -265,27 +265,27 @@ int r7k_req_config(msock_socket_t *s)
                                 int wkey=15;
                                 int wval=8;
 
-                                PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"%*s%*s %*"PRIu64"\n",indent," ",wkey,"sonar_sn",wval,rdata->sonar_sn));
-                                PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"%*s%*s %*"PRIu32"\n\n",indent," ",wkey,"device_count",wval,rdata->device_count));
+                                MX_MPRINT(R7KR_DEBUG, "%*s%*s %*"PRIu64"\n", indent," ", wkey, "sonar_sn", wval, rdata->sonar_sn);
+                                MX_MPRINT(R7KR_DEBUG, "%*s%*s %*"PRIu32"\n\n",indent," ",wkey,"device_count", wval, rdata->device_count);
 
-                                int i=0;
+                                unsigned int i=0;
                                 for(i=0;i<rdata->device_count;i++){
-                                    PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"%*s%*s [%*d/%d] ***\n",indent," ",wkey,"*** Device",3,(i+1),rdata->device_count));
+                                    MX_MPRINT(R7KR_DEBUG, "%*s%*s [%*d/%d] ***\n",indent," ",wkey,"*** Device", 3, (i+1), rdata->device_count);
                                     // fixed length device info header
-                                    PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"%*s%*s %*"PRIu32"\n",indent," ",wkey,"unique_id",wval,dev_inf->unique_id));
-                                    PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"%*s%*s %*s\n",indent," ",wkey,"desc",wval,dev_inf->desc));
-                                    PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"%*s%*s %*"PRIu32"\n",indent," ",wkey,"alph_data",wval,dev_inf->alph_data_type));
-                                    PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"%*s%*s %*"PRIu64"\n",indent," ",wkey,"serial_number",wval,dev_inf->serial_number));
-                                    PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"%*s%*s %*"PRIu32"\n",indent," ",wkey,"info_bytes",wval,dev_inf->info_bytes));
+                                    MX_MPRINT(R7KR_DEBUG, "%*s%*s %*"PRIu32"\n",indent," ",wkey,"unique_id", wval, dev_inf->unique_id);
+                                    MX_MPRINT(R7KR_DEBUG, "%*s%*s %*s\n",indent," ", wkey, "desc", wval, dev_inf->desc);
+                                    MX_MPRINT(R7KR_DEBUG, "%*s%*s %*"PRIu32"\n", indent, " ", wkey, "alph_data", wval, dev_inf->alph_data_type);
+                                    MX_MPRINT(R7KR_DEBUG, "%*s%*s %*"PRIu64"\n", indent, " ", wkey, "serial_number", wval, dev_inf->serial_number);
+                                    MX_MPRINT(R7KR_DEBUG, "%*s%*s %*"PRIu32"\n", indent, " ", wkey, "info_bytes", wval, dev_inf->info_bytes);
                                     // variable length device data XML
                                     byte *pinfo = (byte *)(&dev_inf->info_bytes) + sizeof(uint32_t);
                                     if(dev_inf->info_bytes){
-                                        PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"%*s%*s\n%s\n",indent," ",wkey,"device XML:",(char *)pinfo));
+                                        MX_MPRINT(R7KR_DEBUG, "%*s%*s\n%s\n", indent, " ", wkey, "device XML:", (char *)pinfo);
                                     }
                                     // point to next device info
                                     dev_inf = (r7k_7001_dev_info_t *)(pinfo + dev_inf->info_bytes);
                                 }
-                                PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"\n"));
+                                MX_MMSG(R7KR_DEBUG, "\n");
                             }
                         }
                     }
@@ -299,7 +299,7 @@ int r7k_req_config(msock_socket_t *s)
             retval=0;
         }
     }else{
-        PEPRINT((stderr,"ERR - invalid argument\n"));
+        MX_ERROR_MSG("ERR - invalid argument\n");
     }
     return retval;
 }
@@ -372,16 +372,16 @@ const char *r7k_devidstr(int dev_id)
 int  r7k_subscribe(msock_socket_t *s, r7k_device_t device_id, uint32_t *records, uint32_t record_count)
 {
     int retval=-1;
-    
+
     if (NULL != s && NULL != records && record_count>0) {
-        
+
         size_t rth_len = sizeof(r7k_rth_7500_rc_t);
         size_t rd_len = sizeof(r7k_sub_rd_t)+record_count*sizeof(uint32_t);
-        
+
         r7k_msg_t *msg = r7k_msg_new(rth_len+rd_len);
-        
+
         if (msg) {
-            
+
             // set NF fields
             msg->nf->tx_id            = r7k_txid();
             msg->nf->protocol_version = R7K_NF_PROTO_VER;
@@ -393,7 +393,7 @@ int  r7k_subscribe(msock_socket_t *s, r7k_device_t device_id, uint32_t *records,
             msg->nf->dest_enumerator = 0;
             msg->nf->src_enumerator  = 0;
             msg->nf->src_dev_id      = 0;
-            
+
             // set DRF fields
             msg->drf->size           = R7K_MSG_DRF_SIZE(msg);
             msg->drf->record_type_id = R7K_RT_REMCON;
@@ -410,21 +410,21 @@ int  r7k_subscribe(msock_socket_t *s, r7k_device_t device_id, uint32_t *records,
 
             r7k_sub_rd_t *prdata = (r7k_sub_rd_t *)(msg->data+rth_len);
             prdata->record_count = record_count;
-            
+
             // set record data
             memcpy((msg->data+rth_len+sizeof(r7k_sub_rd_t)),records, (record_count*sizeof(uint32_t)));
-            
+
             // set checksum [do last]
             // TODO: optionally do in send()?
             r7k_msg_set_checksum(msg);
-            
+
             // serialize, send
-           PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"sending SUB request:\n"));
-            if(mmd_channel_isset(MOD_R7K,MM_ERR|MM_WARN|R7K_V2)){
+            MX_MMSG(R7KR_DEBUG, "sending SUB request:\n");
+            if(mxd_testModule(R7KC_ERROR, 1) || mxd_testModule(R7KC, 2)){
                 r7k_msg_show(msg,true,3);
             }
             r7k_msg_send(s, msg);
-            
+
             // get ACK/NAK
             r7k_msg_t *reply = NULL;
             r7k_msg_receive(s, &reply, R7K_SUBSCRIBE_TIMEOUT_MS);
@@ -437,11 +437,11 @@ int  r7k_subscribe(msock_socket_t *s, r7k_device_t device_id, uint32_t *records,
                 }
                 if(reply->drf->record_type_id==R7K_RT_REMCON_NACK){
                     rt_str="NACK";
-                    PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"SUB request returned NAK - possibly invalid device (%d/%s)\n",device_id,r7k_devidstr(device_id)));
+                    MX_MPRINT(R7KR_DEBUG, "SUB request returned NAK - possibly invalid device (%d/%s)\n", device_id, r7k_devidstr(device_id));
                 }
             }
-            PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"SUB reply received [%p/%s]:\n",reply,rt_str));
-            if(mmd_channel_isset(MOD_R7K,MM_ERR|MM_WARN|R7K_V2)){
+            MX_MPRINT(R7KR_DEBUG, "SUB reply received [%p/%s]:\n", reply, rt_str);
+            if(mxd_testModule(R7KC_ERROR, 1) || mxd_testModule(R7KC, 2)){
                 r7k_msg_show(reply,true,3);
             }
             // validate reply
@@ -450,7 +450,7 @@ int  r7k_subscribe(msock_socket_t *s, r7k_device_t device_id, uint32_t *records,
             r7k_msg_destroy(&reply);
         }
     }else{
-    	PEPRINT((stderr,"ERR - invalid argument\n"));
+    	MX_ERROR_MSG("ERR - invalid argument\n");
     }
     return retval;
 }
@@ -463,7 +463,7 @@ int  r7k_subscribe(msock_socket_t *s, r7k_device_t device_id, uint32_t *records,
 int r7k_unsubscribe(msock_socket_t *s)
 {
     int retval=-1;
-    PEPRINT((stderr,"ERR - not implemented\n"));
+    MX_ERROR_MSG("ERR - not implemented\n");
     return retval;
 }
 // End function r7k_unsubscribe
@@ -515,7 +515,7 @@ void r7k_update_time(r7k_time_t *t7k)
         t7k->day     = tms.tm_yday;
         t7k->hours   = tms.tm_hour;
         t7k->minutes = tms.tm_min;
-        t7k->seconds = (tms.tm_sec == 60. ? 0. : (float)tms.tm_sec);        
+        t7k->seconds = (tms.tm_sec == 60. ? 0. : (float)tms.tm_sec);
     }
 }
 // End function r7k_update_time
@@ -564,7 +564,7 @@ void r7k_hex_show(byte *data, uint32_t len, uint16_t cols, bool show_offsets, ui
             }
             fprintf(stderr,"%*s ]\n",3*(cols-rem)," ");
         }
-        
+
     }
 }
 // End function r7k_hex_show
@@ -603,9 +603,9 @@ char *r7k_parser_str(r7k_parse_stat_t *self, char *dest, uint32_t len, bool verb
     char *retval=NULL;
 
 //    uint32_t inc=256;
-    
+
     if (NULL!=self) {
-        
+
         char *wbuf=(char *)malloc(R7K_STR_INC*sizeof(char));
 
         // TODO: check length/realloc
@@ -625,7 +625,7 @@ char *r7k_parser_str(r7k_parse_stat_t *self, char *dest, uint32_t len, bool verb
             }
             sprintf(dp,fmt,indent,(indent>0?" ":""), self);
             dp = wbuf+strlen(wbuf);
-            
+
             fmt="%*s[src_bytes      %10u]\n";
             wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self->src_bytes);
             wlen+=wb;
@@ -636,7 +636,7 @@ char *r7k_parser_str(r7k_parse_stat_t *self, char *dest, uint32_t len, bool verb
             }
             sprintf(dp,fmt,indent,(indent>0?" ":""), self->src_bytes);
             dp = wbuf+strlen(wbuf);
-            
+
             fmt="%*s[sync_bytes     %10u]\n";
             wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self->sync_bytes);
             wlen+=wb;
@@ -647,7 +647,7 @@ char *r7k_parser_str(r7k_parse_stat_t *self, char *dest, uint32_t len, bool verb
             }
             sprintf(dp,fmt,indent,(indent>0?" ":""), self->sync_bytes);
             dp = wbuf+strlen(wbuf);
-            
+
             fmt="%*s[unread_bytes   %10u]\n";
             wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self->unread_bytes);
             wlen+=wb;
@@ -658,8 +658,8 @@ char *r7k_parser_str(r7k_parse_stat_t *self, char *dest, uint32_t len, bool verb
             }
             sprintf(dp,fmt,indent,(indent>0?" ":""), self->unread_bytes);
             dp = wbuf+strlen(wbuf);
-            
-            
+
+
             fmt="%*s[parsed_records %10u]\n";
             wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self->parsed_records);
             wlen+=wb;
@@ -670,7 +670,7 @@ char *r7k_parser_str(r7k_parse_stat_t *self, char *dest, uint32_t len, bool verb
             }
             sprintf(dp,fmt,indent,(indent>0?" ":""), self->parsed_records);
             dp = wbuf+strlen(wbuf);
-            
+
             fmt="%*s[parsed_bytes   %10u]\n";
             wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self->parsed_bytes);
             wlen+=wb;
@@ -681,7 +681,7 @@ char *r7k_parser_str(r7k_parse_stat_t *self, char *dest, uint32_t len, bool verb
             }
             sprintf(dp,fmt,indent,(indent>0?" ":""), self->parsed_bytes);
             dp = wbuf+strlen(wbuf);
-            
+
             fmt="%*s[resync_count   %10u]\n";
             wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self->resync_count);
             wlen+=wb;
@@ -692,7 +692,7 @@ char *r7k_parser_str(r7k_parse_stat_t *self, char *dest, uint32_t len, bool verb
             }
             sprintf(dp,fmt,indent,(indent>0?" ":""), self->resync_count);
             dp = wbuf+strlen(wbuf);
-            
+
             fmt="%*s[status         %10d]\n";
             wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self->status);
             wlen+=wb;
@@ -702,7 +702,7 @@ char *r7k_parser_str(r7k_parse_stat_t *self, char *dest, uint32_t len, bool verb
                 dp = wbuf+strlen(wbuf);
             }
             sprintf(dp,fmt,indent,(indent>0?" ":""), self->status);
-            
+
             if (NULL!=dest) {
                 snprintf(dest,(len<wlen?len:wlen),"%s",wbuf);
                 free(wbuf);
@@ -729,7 +729,7 @@ char *r7k_parser_str(r7k_parse_stat_t *self, char *dest, uint32_t len, bool verb
 uint32_t r7k_parse(byte *src, uint32_t len, r7k_drf_container_t *dest, r7k_parse_stat_t *status)
 {
     int retval=-1;
-    
+
     if (NULL != src && NULL!=dest) {
         me_errno=ME_OK;
         r7k_nf_t *pnf=NULL;
@@ -741,98 +741,98 @@ uint32_t r7k_parse(byte *src, uint32_t len, r7k_drf_container_t *dest, r7k_parse
         psrc=src;
         memset(status,0,sizeof(r7k_parse_stat_t));
         status->src_bytes = len;
-        
+
         bool resync=false;
-        
+
         // move src pointer along, and mark
         // add records to the drf container (expands dynamically)
         // stop when we've found the end of the source buffer
-        
+
         while (psrc<(src+len)) {
-            
+
             pnf = (r7k_nf_t *)psrc;
-//            PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"psrc[%p]\n",psrc));
+//            MX_MMSG(R7KR_DEBUG, "psrc[%p]\n",psrc));
             // pnf is legit?...
             if ( (pnf->protocol_version == (uint16_t)R7K_NF_PROTO_VER) &&
                 (pnf->total_packets > (uint32_t)0) &&
                 (pnf->total_size >= (uint32_t)R7K_DRF_BYTES)
                 ) {
-                
+
                 pdrf=(r7k_drf_t *)(psrc + R7K_NF_BYTES);
-                
+
                 // check DRF
                 if( (pdrf->protocol_version == (uint16_t)R7K_DRF_PROTO_VER) &&
                    (pdrf->sync_pattern == (uint32_t)R7K_DRF_SYNC_PATTERN) &&
                    (pdrf->size > (uint32_t)R7K_DRF_BYTES) ){
-                    
+
                     byte *pw = (byte *)pdrf;
                     // this fixes an uninitialized variable (vchk)
                     // warning (in valgrind? compiler?)
                     pw[0]=pw[0];
                     pchk = (r7k_checksum_t *)(pw+pdrf->size-R7K_CHECKSUM_BYTES);
-                    
+
                     if ( ((byte *)pchk) < (src+len) ) {
-                        
+
                         r7k_checksum_t vchk = 0;
                         vchk = r7k_checksum(pw,(pdrf->size-R7K_CHECKSUM_BYTES));
-                        
+
                         // checksum is valid or unused (flags:0 unset)
                         if ( ((pdrf->flags&0x1) == 0) || vchk == *pchk ) { // vchk UNINIT
                             // found a valid record...
-                            
+
                             // add it to the frame container
                             // also adds frame offset info
                             if(r7k_drfcon_add(dest,(byte *)pdrf,pdrf->size)==0){
                                 //                            byte *prev=psrc;
                                 // update src pointer
                                 psrc = ((byte *)pchk + R7K_CHECKSUM_BYTES+R7K_CHECKSUM_BYTES);
-                                
+
                                 // update record count
                                 record_count++;
-                                
-                                //                            PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"adding record prv[%p] nxt[%p]\n",prev,psrc));
+
+                                //                            MX_MPRINT(R7KR_DEBUG, "adding record prv[%p] nxt[%p]\n", prev, psrc);
                                 // set retval to parsed bytes
                                 retval = r7k_drfcon_length(dest);
-                                
+
                                 resync=false;
                                 status->parsed_records++;
                                 status->status=ME_OK;
-                                
+
                             }else{
-                                PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"DRF container full\n"));
+                                MX_MMSG(R7KR_DEBUG, "DRF container full\n");
                                 status->status = ME_ENOSPACE;
                                 me_errno = ME_ENOSPACE;
                                 break;
                             }
-                            
+
                         }else{
-                            PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"CHKSUM err: checksum mismatch p/c[%u/%u]\n",*pchk,vchk));
+                            MX_MPRINT(R7KR_DEBUG, "CHKSUM err: checksum mismatch p/c[%u/%u]\n", *pchk, vchk);
                             // skip to checksum, start resync there
                             sync_bytes+=((byte *)pchk-psrc);
                             psrc=(byte *)pchk;
                             resync=true;
                         }
                      }else{
-                         PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"CHKSUM err: pointer out of bounds\n"));
+                         MX_MMSG(R7KR_DEBUG, "CHKSUM err: pointer out of bounds\n");
                          break;
                      }
                 }else{
-                    PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"DRF err\n"));
+                    MX_MMSG(R7KR_DEBUG, "DRF err\n");
                     //                    r7k_drf_show(pdrf,true,3);
                     //                    r7k_hex_show(psrc,0x50,16,true,5);
                     resync=true;
                 }
             }else{
-                PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"NRF err: psrc[%p] ofs[%zd] protov[%hu] totpkt[%u] totsz[%u]\n",
+                MX_MPRINT(R7KR_DEBUG, "NRF err: psrc[%p] ofs[%zd] protov[%hu] totpkt[%u] totsz[%u]\n",
                         psrc,
                         (psrc-src),
                         pnf->protocol_version,
                         pnf->total_packets,
-                        pnf->total_size));
-                
+                        pnf->total_size);
+
                 resync=true;
             }
-            
+
             if (resync) {
                 // search for the next valid network frame
                 int64_t x=0;
@@ -848,19 +848,19 @@ uint32_t r7k_parse(byte *src, uint32_t len, r7k_drf_container_t *dest, r7k_parse
                 size_t space_rem=(src+len-psrc);
                 // search until sync found or end of buffer
                 while ( (NULL != psrc) && (space_rem>0) && (sync_found==false) ){
-                    
+
                     space_rem = (src+len-psrc);
                     // set net frame and data record pointers
                     pnf = (r7k_nf_t *)psrc;
                     pdrf = (r7k_drf_t *)(psrc+R7K_NF_BYTES);
-                    
+
                     capacity_ok= (space_rem >= hdr_len);
                     bool hdr_valid = (( pnf->protocol_version == (uint16_t)R7K_NF_PROTO_VER ) &&
                                       ( pnf->total_packets > (uint32_t)0 ) &&
                                       ( pnf->total_size >= (uint32_t)R7K_DRF_BYTES) &&
                                       ( pdrf->protocol_version  == (uint16_t)R7K_DRF_PROTO_VER ) &&
                                       ( pdrf->sync_pattern  == (uint32_t)R7K_DRF_SYNC_PATTERN) );
-                    
+
                     // stop if we find a valid record
                     // or there isn't remaining space for one
                     if(  capacity_ok && hdr_valid ){
@@ -876,18 +876,18 @@ uint32_t r7k_parse(byte *src, uint32_t len, r7k_drf_container_t *dest, r7k_parse
                     sync_bytes++;
                 }
 
-                
+
                 if (sync_found){
-                    PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"skipped %"PRId64" bytes oofs[%zd] new_ofs[%zd]\n",x,oofs,(psrc-src)));
-//                    PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"nrf ofs[%zd] protov[%hu] totpkt[%u] totsz[%u]\n",
+                    MX_MPRINT(R7KR_DEBUG, "skipped %"PRId64" bytes oofs[%zd] new_ofs[%zd]\n", x, oofs, (psrc-src));
+//                    MX_MPRINT(R7KR_DEBUG, "nrf ofs[%zd] protov[%hu] totpkt[%u] totsz[%u]\n",
 //                            (psrc-src),
 //                            pnf->protocol_version,
 //                            pnf->total_packets,
 //                            pnf->total_size));
                 }else{
-                    PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"ERR - resync failed: spc[%zd] hdr_len[%zd] skipped [%"PRId64"]\n",space_rem,hdr_len,x));
+                    MX_MPRINT(R7KR_DEBUG, "ERR - resync failed: spc[%zd] hdr_len[%zd] skipped [%"PRId64"]\n", space_rem, hdr_len, x);
                     if (!capacity_ok) {
-                        PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"DRF container full\n"));
+                        MX_MMSG(R7KR_DEBUG, "DRF container full\n");
                         status->status = ME_ENOSPACE;
                         me_errno = ME_ENOSPACE;
                         break;
@@ -900,10 +900,10 @@ uint32_t r7k_parse(byte *src, uint32_t len, r7k_drf_container_t *dest, r7k_parse
         status->unread_bytes = ((src+len)-psrc);
         status->parsed_bytes = r7k_drfcon_length(dest);
         status->sync_bytes   = sync_bytes;
-       if (mmd_channel_isset(MOD_R7K,R7K_PARSER)) {
+       if (mxd_testModule(R7KC_PARSER, 1)) {
             r7k_parser_show(status,true,5);
         }
-        PMPRINT(MOD_R7K,R7K_PARSER,(stderr,"valid[%d] resyn[%d] sync[%d] rv[%d]\n",status->parsed_records,status->resync_count,status->sync_bytes,retval));
+        MX_MPRINT(R7KC_PARSER, "valid[%d] resyn[%d] sync[%d] rv[%d]\n",status->parsed_records,status->resync_count,status->sync_bytes,retval);
     }
     return retval;
 }
@@ -931,8 +931,8 @@ int r7k_stream_show(msock_socket_t *s, int sz, uint32_t tmout_ms, int cycles, bo
         if (cycles>0) {
             forever=false;
         }
-        //    PEPRINT((stderr,"cycles[%d] forever[%s] c||f[%s]\n",cycles,(forever?"Y":"N"),(forever || (cycles>0) ? "Y" :"N")));
-        
+        //    MX_ERROR("cycles[%d] forever[%s] c||f[%s]\n",cycles,(forever?"Y":"N"),(forever || (cycles>0) ? "Y" :"N")));
+
         // read cycles or forever (cycles<=0)
         while ( (forever || (count++ < cycles)) &&
                (NULL!=interrupt && !(*interrupt)) ) {
@@ -944,14 +944,14 @@ int r7k_stream_show(msock_socket_t *s, int sz, uint32_t tmout_ms, int cycles, bo
                 fprintf(stderr,"c[%d/%d] ret[%"PRId64"/%u] stat[%d] good/zero/tmout/err [%d/%d/%d/%d]\n",count,cycles,test,sz,status,good,zero,tmout,err);
                 retval=0;
             }else if(test<0){
-                PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"ERR [%d/%s]\n",me_errno,me_strerror(me_errno)));
+                MX_MPRINT(R7KR_DEBUG, "ERR [%d/%s]\n", me_errno, me_strerror(me_errno));
                 err++;
                 tmout = (me_errno==ME_ETMOUT ? tmout+1 : tmout );
                 if (me_errno==ME_ETMOUT || me_errno==ME_EOF || me_errno==ME_ESOCK) {
                     break;
                 }
             }else{
-                PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"read returned 0\n"));
+                MX_MMSG(R7KR_DEBUG, "read returned 0\n");
                 zero++;
                 if (me_errno==ME_ESOCK || me_errno==ME_EOF) {
                     break;
@@ -971,7 +971,7 @@ int r7k_stream_show(msock_socket_t *s, int sz, uint32_t tmout_ms, int cycles, bo
 double r7k_7ktime2d(r7k_time_t *r7kt)
 {
     double retval=0.0;
-    
+
     if (NULL != r7kt) {
 
         double pti=0.0;
@@ -987,7 +987,7 @@ double r7k_7ktime2d(r7k_time_t *r7kt)
 //        fprintf(stderr,"tms[%s] ret[%.3lf]\n",tms,retval);
 
     }// else invalid argument
-    
+
     return retval;
 }
 // End function r7k_7ktime2d
@@ -1018,7 +1018,7 @@ void r7k_nf_destroy(r7k_nf_t **pself)
         }
         *pself=NULL;
     }
-	
+
 }
 // End function r7k_nf_destroy
 
@@ -1046,18 +1046,18 @@ r7k_nf_t * r7k_nf_init(r7k_nf_t **pnf,bool erase)
             // caller must set:
             // total_size
             // packet_size
-            
+
             // caller may optionally set
             // total packets
             // trans_id
             // seq_number
-            
+
             nf->protocol_version = R7K_NF_PROTO_VER;
             nf->offset           = R7K_NF_BYTES;
             nf->total_packets    = 1;
             nf->total_records    = 1;
             nf->tx_id            = 0;
-            
+
             nf->seq_number       = 0;
             nf->dest_dev_id      = R7K_DEVID_7KCENTER;
             nf->dest_enumerator  = 0;
@@ -1066,8 +1066,8 @@ r7k_nf_t * r7k_nf_init(r7k_nf_t **pnf,bool erase)
         }
 
     }
-    
-    
+
+
     return nf;
 }
 // End function r7k_nf_init
@@ -1095,7 +1095,7 @@ void r7k_nf_show(r7k_nf_t *self, bool verbose, uint16_t indent)
         fprintf(stderr,"%*s[src_enumerator   %10hu]\n",indent,(indent>0?" ":""), self->src_enumerator);
         fprintf(stderr,"%*s[src_dev_id       %10u]\n",indent,(indent>0?" ":""), self->src_dev_id);
     }
-    
+
 }
 // End function r7k_nf_show
 
@@ -1165,9 +1165,9 @@ void r7k_drf_show(r7k_drf_t *self, bool verbose, uint16_t indent)
 //            uint32_t data_sz = self->size-R7K_DRF_BYTES-R7K_CHECKSUM_BYTES;
 //            fprintf(stderr,"%*s[data:            %10p]\n",indent,(indent>0?" ":""),pdata);
 //            fprintf(stderr,"%*s[data bytes:      %10u]\n",indent,(indent>0?" ":""),data_sz);
-//            
+//
 //            r7k_hex_show(pdata,data_sz,16,true,indent+3);
-//            
+//
 //            fprintf(stderr,"%*s[checksum          x%08x]\n",indent,(indent>0?" ":""), r7k_drf_get_checksum(self));
 //        }
     }
@@ -1181,7 +1181,7 @@ void r7k_drf_show(r7k_drf_t *self, bool verbose, uint16_t indent)
 r7k_checksum_t r7k_drf_get_checksum(r7k_drf_t *self)
 {
     r7k_checksum_t retval=0;
-    
+
     if (self) {
         byte *bp = (byte *)self;
         r7k_checksum_t *pchk = (r7k_checksum_t *)(bp+self->size-R7K_CHECKSUM_BYTES);
@@ -1210,7 +1210,7 @@ void r7k_drf_init(r7k_drf_t *drf, bool erase)
         // size
         // _7ktime
         // record_type_id
-        
+
         // and optionally set
         // device_id
         // opt_data_offset
@@ -1331,7 +1331,7 @@ int r7k_drfcon_resize(r7k_drf_container_t *self, uint32_t new_size)
 {
     int retval=-1;
     if (NULL!=self && new_size>0) {
-        
+
         if (new_size > self->size) {
             // save read/write pointer offsets
             off_t rofs  = self->p_read-self->data;
@@ -1342,20 +1342,20 @@ int r7k_drfcon_resize(r7k_drf_container_t *self, uint32_t new_size)
             // increase size
             self->size    += (uint32_t)R7K_DRFC_SIZE_INC;
             self->data     = (byte *)realloc(self->data,(new_size*sizeof(byte)));
-            
+
             // update read/write pointers
             self->p_read    = self->data+rofs;
             self->p_write   = self->data+wofs;
-            
+
             // clear new memory
             memset(self->p_write+owe,0,R7K_DRFC_SIZE_INC);
             retval=0;
         }else{
-            PEPRINT((stderr,"shrink not implemented\n"));
+            MX_ERROR_MSG("shrink not implemented\n");
         }
 
     }else{
-        PEPRINT((stderr,"invalid argument\n"));
+        MX_ERROR_MSG("invalid argument\n");
     }
     return retval;
 }
@@ -1370,15 +1370,15 @@ int r7k_drfcon_resize(r7k_drf_container_t *self, uint32_t new_size)
 int r7k_drfcon_add(r7k_drf_container_t *self, byte *src, uint32_t len)
 {
     me_errno=ME_OK;
-    
+
     int retval=-1;
     if (NULL!=self && NULL!=src) {
 
         if ( len <= r7k_drfcon_space(self) ) {
-            
+
             // save record offset
             uint32_t record_ofs = self->p_write-self->data;
-            
+
             // add to offset table if needed
             if ( (self->ofs_count!=0) && (self->ofs_count%self->ofs_sz) == 0) {
                 uint32_t *mp = NULL;
@@ -1387,31 +1387,31 @@ int r7k_drfcon_add(r7k_drf_container_t *self, byte *src, uint32_t len)
                     self->ofs_sz+=R7K_DRFC_RECORD_INC;
                     memset( &self->ofs_list[self->ofs_count],0,R7K_DRFC_RECORD_INC*sizeof(uint32_t));
                 }else{
-                    PEPRINT((stderr,"record offset realloc failed\n"));
+                    MX_ERROR_MSG("record offset realloc failed\n");
                     me_errno = ME_ENOMEM;
                 }
             }
-            
+
             if (me_errno==ME_OK) {
                 // add record
                 memcpy(self->p_write,src,len);
-                
+
                 // update count, pointers
                 self->p_write += len;
-                
+
                 // add record offset entry
                 self->ofs_list[self->ofs_count] = record_ofs;
                 self->ofs_count++;
                 self->record_count++;
-                
+
                 retval=0;
             }
         }else{
-            PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"no space in container cap/spc/req[%u/%u/%u]\n",self->size,r7k_drfcon_space(self),len));
+            MX_MPRINT(R7KR_DEBUG, "no space in container cap/spc/req[%u/%u/%u]\n", self->size, r7k_drfcon_space(self), len);
             me_errno = ME_ENOSPACE;
         }
     }else{
-        PEPRINT((stderr,"invalid argument\n"));
+        MX_ERROR_MSG("invalid argument\n");
     }
     return retval;
 }
@@ -1437,7 +1437,7 @@ int r7k_drfcon_flush(r7k_drf_container_t *self)
         }
         retval=0;
     }else{
-        PEPRINT((stderr,"invalid argument]\n"));
+        MX_ERROR_MSG("invalid argument]\n");
     }
     return retval;
 }
@@ -1452,7 +1452,7 @@ int r7k_drfcon_seek(r7k_drf_container_t *self, uint32_t ofs)
 {
     int retval=-1;
     if (NULL!=self && NULL!=self->data && ofs<self->size && (self->data+ofs)<=self->p_write) {
-       PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"sz[%u] ofs[%u]\n",self->size,ofs));
+       MX_MPRINT(R7KR_DEBUG, "sz[%u] ofs[%u]\n", self->size, ofs);
         self->p_read = self->data+ofs;
         retval = 0;
     }
@@ -1483,10 +1483,10 @@ uint32_t r7k_drfcon_tell(r7k_drf_container_t *self)
 uint32_t r7k_drfcon_read(r7k_drf_container_t *self, byte *dest, uint32_t len)
 {
     uint32_t retval=0;
-    
+
     if (NULL!=self && NULL!=self->data && len!=0 ) {
         uint32_t read_len = 0;
-        
+
         if (len<r7k_drfcon_pending(self)) {
             read_len=len;
         }else{
@@ -1496,19 +1496,19 @@ uint32_t r7k_drfcon_read(r7k_drf_container_t *self, byte *dest, uint32_t len)
             memcpy(dest,self->p_read,read_len);
             self->p_read += read_len;
             if (self->p_read > self->p_write) {
-                PMPRINT(MOD_R7K,R7K_DRFCON,(stderr,"pread>pwrite\n"));
+                MX_MMSG(R7KC_DRFCON, "pread>pwrite\n");
                 self->p_read = self->p_write;
             }else if (self->p_read > (self->data+self->size)) {
-                PMPRINT(MOD_R7K,R7K_DRFCON,(stderr,"pread>data+size\n"));
+                MX_MMSG(R7KC_DRFCON, "pread>data+size\n");
                 self->p_read = self->data+self->size;
             }
             retval = read_len;
         }else{
-//           PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"read_len <= 0 [%u]\n",read_len));
+//           MX_MPRINT(R7KR_DEBUG, "read_len <= 0 [%u]\n",read_len));
 //            r7k_drfcon_show(self,false,5);
         }
     }else{
-        PEPRINT((stderr,"invalid argument\n"));
+        MX_ERROR_MSG("invalid argument\n");
     }
     return retval;
 }
@@ -1598,7 +1598,7 @@ int r7k_drfcon_bytes(r7k_drf_container_t *self, uint32_t ofs, byte *dest, uint32
         NULL!=self->data &&
         len < (self->size - ofs) &&
         ofs < self->size ){
-        
+
         memcpy(dest,self->data+ofs,len);
         retval = 0;
     }
@@ -1632,7 +1632,7 @@ r7k_drf_t* r7k_drfcon_next(r7k_drf_container_t *self)
 {
     r7k_drf_t *retval = NULL;
     if (NULL!=self){
-        
+
         if (self->drf_enum < self->ofs_count) {
             if (self->ofs_list[self->drf_enum] < self->size) {
                 retval = (r7k_drf_t *)(self->data+self->ofs_list[self->drf_enum]);
@@ -1663,7 +1663,7 @@ r7k_msg_t *r7k_msg_new(uint32_t data_len)
         self->msg_len += R7K_DRF_BYTES;
         self->msg_len += data_len;
         self->msg_len += R7K_CHECKSUM_BYTES;
-    
+
         self->data_size = data_len;
         if (data_len>0) {
             self->data=(byte *)malloc(data_len*sizeof(byte));
@@ -1749,7 +1749,7 @@ uint32_t r7k_msg_set_checksum(r7k_msg_t *self)
         byte *bp = (byte *)self->drf;
 //        uint32_t cs_len = self->drf->size-R7K_CHECKSUM_BYTES;
 //        self->checksum=r7k_checksum(bp,cs_len);
-       
+
         for (uint32_t i=0; i<(R7K_DRF_BYTES); i++) {
             self->checksum += *(bp+i);
         }
@@ -1787,22 +1787,22 @@ byte *r7k_msg_serialize(r7k_msg_t *self)
         size_t bufsz = (self->msg_len)*sizeof(byte);
 //        fprintf(stderr,"r7k_msg_serialize - bufsz[%"PRIu32"] msg->data_size[%"PRIu32"]\n",bufsz,self->data_size);
         retval = (byte *)malloc( bufsz );
-        
+
         if (retval) {
             byte *pnf  = retval;
             byte *pdrf = pnf+R7K_NF_BYTES;
             byte *pdata = pdrf+R7K_DRF_BYTES;
             byte *pchk = pdrf+self->drf->size-R7K_CHECKSUM_BYTES;//pdata+self->data_size;
-            
+
             memcpy(pnf,self->nf,R7K_NF_BYTES);
             memcpy(pdrf,self->drf,R7K_DRF_BYTES);
             memcpy(pdata,self->data,self->data_size);
             memcpy(pchk,&self->checksum,R7K_CHECKSUM_BYTES);
         }
     }else{
-        PEPRINT((stderr,"invalid argument\n"));
+        MX_ERROR_MSG("invalid argument\n");
     }
-    
+
     return retval;
 }
 // End function r7k_msg_serialize
@@ -1817,7 +1817,7 @@ int r7k_msg_receive(msock_socket_t *s, r7k_msg_t **dest, uint32_t timeout_msec)
 {
     int retval=-1;
     if (NULL != s && s->status==SS_CONNECTED) {
-        
+
        int64_t nbytes=0;
         // read nf, drf headers
         int64_t header_len = sizeof(r7k_nf_headers_t);
@@ -1825,22 +1825,22 @@ int r7k_msg_receive(msock_socket_t *s, r7k_msg_t **dest, uint32_t timeout_msec)
         //byte headers[header_len];	// Invalid C.	JL
         byte *headers;
         headers = (byte *)malloc(header_len+1);
-        
+
         memset(headers,0,header_len);
         if ( (nbytes=msock_read_tmout(s,headers,header_len,timeout_msec)) == header_len) {
             int64_t total_len=nbytes;
-            PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"read headers [%"PRId64"/%"PRId64"]\n",nbytes,header_len));
+            MX_MPRINT(R7KR_DEBUG, "read headers [%"PRId64"/%"PRId64"]\n", nbytes, header_len);
             // get frame content
             r7k_nf_t *nf = (r7k_nf_t *)(headers);
             r7k_drf_t *drf = (r7k_drf_t *)(headers+sizeof(r7k_nf_t));
 			// get size of data (RTH, RD, OD, checksum)
             uint32_t read_len = drf->size - sizeof(r7k_drf_t);
             uint32_t data_len = read_len-sizeof(r7k_checksum_t);
-//           PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"ACK nf:\n"));
+//           MX_MMSG(R7KR_DEBUG, "ACK nf:\n");
 //            r7k_nf_show(nf,true,5);
-//           PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"ACK drf:\n"));
+//           MX_MMSG(R7KR_DEBUG, "ACK drf:\n");
 //            r7k_drf_show(drf,true,5);
-            PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"data_len[%u] read_len[%u]\n",data_len,read_len));
+            MX_MPRINT(R7KR_DEBUG, "data_len[%u] read_len[%u]\n", data_len, read_len);
             // read rth/rd/od [if any], checksum
             if (read_len>0) {
                 //byte data[read_len];		// INVALID C. JL
@@ -1849,7 +1849,7 @@ int r7k_msg_receive(msock_socket_t *s, r7k_msg_t **dest, uint32_t timeout_msec)
                 memset(data,0,read_len);
                 if ( (nbytes=msock_read_tmout(s,data,read_len,timeout_msec)) == read_len) {
                     total_len+=nbytes;
-                   PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"read data [%"PRId64"/%d] -> %p\n",nbytes,read_len,dest));
+                   MX_MPRINT(R7KR_DEBUG, "read data [%"PRId64"/%d] -> %p\n", nbytes, read_len, dest);
                     // TODO: validate content
                     // create message
                     r7k_msg_t *m = r7k_msg_new(data_len);
@@ -1858,28 +1858,28 @@ int r7k_msg_receive(msock_socket_t *s, r7k_msg_t **dest, uint32_t timeout_msec)
                         memcpy(m->drf,drf,sizeof(r7k_drf_t));
                         memcpy(m->data,data,data_len);
                         memcpy(&m->checksum,(data+data_len),sizeof(r7k_checksum_t));
-//                       PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"dest msg:\n"));
+//                       MX_MMSG(R7KR_DEBUG, "dest msg:\n");
 //                        r7k_msg_show(m,true,6);
                         *dest=m;
                         retval=total_len;
                     }else{
-                        PEPRINT((stderr,"recv - msg_new failed\n"));
+                        MX_ERROR_MSG("recv - msg_new failed\n");
                     }
                 }else{
-                   PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"recv - incomplete data read nbytes[%"PRId64"] data_len[%u]\n",nbytes,data_len));
+                   MX_MPRINT(R7KR_DEBUG, "recv - incomplete data read nbytes[%"PRId64"] data_len[%u]\n", nbytes, data_len);
                 }
                 free(data);
             }else{
-               PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"recv - read_len <= 0 nbytes[%"PRId64"] read_len[%u]\n",nbytes,read_len));
+               MX_MPRINT(R7KR_DEBUG, "recv - read_len <= 0 nbytes[%"PRId64"] read_len[%u]\n", nbytes, read_len);
             }
         }else{
-           PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"recv - incomplete header read? nbytes[%"PRId64"] header_len[%"PRId64"]\n",nbytes,header_len));
+           MX_MPRINT(R7KR_DEBUG, "recv - incomplete header read? nbytes[%"PRId64"] header_len[%"PRId64"]\n", nbytes, header_len);
         }
         free(headers);
     }else{
-        PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"recv - invalid socket or status s[%p, %d/%d]\n",s, (s!=NULL?s->status:0),SS_CONNECTED));
+        MX_MPRINT(R7KR_DEBUG, "recv - invalid socket or status s[%p, %d/%d]\n", s, (s!=NULL?s->status:0), SS_CONNECTED);
     }
-        
+
     return retval;
 }
 // End function r7k_msg_receive
@@ -1893,22 +1893,23 @@ int r7k_msg_send(msock_socket_t *s, r7k_msg_t *self)
 {
     int retval=-1;
     if ( (NULL != self) && (NULL!=s)) {
-        
+
         byte *buf = r7k_msg_serialize(self);
-//       PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"SEND nf:\n"));
+//       MX_MMSG(R7KR_DEBUG, "SEND nf:\n");
 //        r7k_nf_show((r7k_nf_t *)buf,true,4);
         int64_t status=0;
 
         if( (status=msock_send(s,buf,self->msg_len))>0){
             retval=0;
-            PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"send OK s[%p, %d]\n",s, s->status));
+            MX_MPRINT(R7KR_DEBUG, "send OK s[%p, %d]\n", s, s->status);
         }else{
-            PEPRINT((stderr,"send failed [%"PRId64"] [%d/%s]\n",status,errno,strerror(errno)));
+            MX_ERROR("send failed [%"PRId64"] [%d/%s]\n", status, errno, strerror(errno));
         }
 
         free(buf);
     }else{
-        PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"invalid socket or message\n"));
+
+                MX_MMSG(R7KR_DEBUG, "invalid socket or message\n");
    }
     return retval;
 }
@@ -1921,28 +1922,26 @@ int r7k_msg_send(msock_socket_t *s, r7k_msg_t *self)
 int r7k_test()
 {
     int retval=-1;
-   PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"entering...\n"));
+    MX_MMSG(R7KR_DEBUG, "entering...\n");
     uint32_t sub_recs[2]={1000,2000};
-   PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"create/connect socket...\n"));
+    MX_MMSG(R7KR_DEBUG, "create/connect socket...\n");
     msock_socket_t *s = msock_socket_new("localhost",R7K_7KCENTER_PORT,ST_TCP);
     msock_connect(s);
-   PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"subscribing...\n"));
+    MX_MMSG(R7KR_DEBUG, "subscribing...\n");
     retval = r7k_subscribe(s,R7KC_DEV_7125_400KHZ,sub_recs,2);
-   PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"releasing resources...\n"));
+    MX_MMSG(R7KR_DEBUG, "releasing resources...\n");
     msock_socket_destroy(&s);
-    
+
 //    byte random[50];
 //    for (int i=0; i<50; i++) {
 //        random[i]=i%256+20;
 //    }
-//   PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"hex_show 30/9/f/5\n"));
+//   MX_MMSG(R7KR_DEBUG, "hex_show 30/9/f/5\n");
 //    r7k_hex_show(random,30,9,false,5);
-//   PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"hex_show 30/7/t/5\n"));
+//   MX_MMSG(R7KR_DEBUG, "hex_show 30/7/t/5\n");
 //    r7k_hex_show(random,30,7,true,5);
-//   PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"hex_show 30/10/t,5\n"));
+//   MX_MMSG(R7KR_DEBUG, "hex_show 30/10/t,5\n");
 //    r7k_hex_show(random,30,10,true,5);
     return retval;
 }
 // End function r7k_test
-
-

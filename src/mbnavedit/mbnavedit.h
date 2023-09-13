@@ -71,7 +71,7 @@ MBNAVEDIT_EXTERNAL int use_ping_data;  // TODO(schwehr): bool
 MBNAVEDIT_EXTERNAL int strip_comments;  // TODO(schwehr): bool
 MBNAVEDIT_EXTERNAL int format;
 MBNAVEDIT_EXTERNAL char ifile[MB_PATH_MAXLINE];
-MBNAVEDIT_EXTERNAL char nfile[MB_PATH_MAXLINE];
+MBNAVEDIT_EXTERNAL char nfile[MB_PATHPLUS_MAXLINE];
 MBNAVEDIT_EXTERNAL int nfile_defined;
 MBNAVEDIT_EXTERNAL int model_mode;
 MBNAVEDIT_EXTERNAL double weight_speed;

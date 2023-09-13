@@ -1,7 +1,7 @@
 lib_LTLIBRARIES = libmbio.la
 
 if BUILD_MBTRN
-  MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrnframe/usr -I${top_srcdir}/src/mbtrnframe/mframe/src
+  MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrnframe
   MBTRNLIB = ${top_builddir}/src/mbtrn/libr7kr.la
 endif
 
@@ -215,6 +215,8 @@ libmbio_la_SOURCES += mbr_sbsioswb.c
 libmbio_la_SOURCES += mbr_sburicen.c
 libmbio_la_SOURCES += mbr_sburivax.c
 libmbio_la_SOURCES += mbr_segysegy.c
+libmbio_la_SOURCES += mbr_soirovnv.c
+libmbio_la_SOURCES += mbr_soiusbln.c
 libmbio_la_SOURCES += mbr_swplssxi.c
 libmbio_la_SOURCES += mbr_swplssxp.c
 libmbio_la_SOURCES += mbr_wasspenl.c

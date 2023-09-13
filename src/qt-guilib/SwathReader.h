@@ -9,8 +9,23 @@
 #include "vtkPoints.h"
 #include "vtkCellArray.h"
 
+// Need to make phony typdefs for X11 types here as we need to include
+// header that includes them in prototype declarations for
+// functions we do not use
+typedef void *  Widget;
+typedef void *  XtAppContext;
+typedef void *  XtPointer;
+typedef void *  String;
+
+// Other types used in mbeditviz
+typedef bool Boolean;
+
+extern "C" {
 #include "mb_define.h"
 #include "mb_io.h"
+// Defines extern variables used by mbeditviz functions
+#include "mbeditviz.h"   
+}
 
 namespace mb_system {
 
@@ -18,6 +33,8 @@ namespace mb_system {
      SwathReader reads raw data stored in a file format that is supported
      by MB-System, and outputs the data into a vtkPoints (vertices) and 
      vtkCellArray (triangles) where data can be accessed by the VTK pipeline.
+     Integrates types, functions and variables from mb_define, mb_io, and 
+     mbeditviz 'C' modules
   */
   class SwathReader : public vtkAbstractPolyDataReader {
 
@@ -25,8 +42,6 @@ namespace mb_system {
 
     vtkTypeMacro(SwathReader,vtkAbstractPolyDataReader);
 
-    // TEST TEST TEST
-    void dummy();
     
     /// Get a new SwathReader object
     /// For use with vtkSmartPointer
@@ -40,7 +55,7 @@ namespace mb_system {
                              );
 
     /// Return pointer to swathPoints
-    vtkPoints *swathPoints() { return points_; }
+    vtkPoints *swathPoints() { return swathPoints_; }
 
     /// Get span of z values
     void zBounds(double *zMin, ///< [out] minimum z value
@@ -53,9 +68,36 @@ namespace mb_system {
 
     /// Read data from file, load into vtk geometry.
     /// @return false on error, else true
-    bool readSwathFile(const char *file ///<[in] swath data file
-                       );
+    bool readSwathFile(const char *file);
 
+    /// Invoked by mbeditviz_prog C functions
+    static int showMessage(char *msg) {
+      std::cout << "showMessage(): " << msg << std::endl;
+      return 0;
+    }
+
+    /// Invoked by mbeditviz_prog C functions    
+    static void hideMessage() {
+      std::cout << "hideMessage() " << std::endl;
+    }
+
+    /// Invoked by mbeditviz_prog C functions    
+    static void updateGui() {
+      std::cout << "updateGui() " << std::endl;      
+    }
+
+    /// Invoked by mbeditviz_prog C functions    
+    static int showErrorDialog(char *s1, char *s2, char *s3) {
+      std::cout << "showErrorDialog():\n" << s1 << "\n"
+                << s2 << "\n" << s3
+                << std::endl;
+
+      return 0;
+    }
+
+    /// Unlock specified swath file
+    void unlockSwath(char *swathFile);
+    
   protected:
 
     /// Callback registered with the VariableArraySelection.
@@ -73,6 +115,7 @@ namespace mb_system {
     /// errors by calling vtkAlgorithm::GetErrorCode().
     int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
 		    vtkInformationVector* outputVector) override;
+
     
     /// Register arrays to be filled and handled by mbio
     /// library functions
@@ -83,43 +126,26 @@ namespace mb_system {
 
     /// Format code of latest swath data file read
     int swathFormat_;
-    
-    vtkSmartPointer<vtkPoints> points_;
-    vtkSmartPointer<vtkCellArray> polygons_;  
 
-    /// Pointer to MBIO input/output control structure
-    void *mbioPtr_;
 
-    /** @name Arrays allocated and filled by mbio library functions
-        NOTE: Important to initialize these pointers to NULL before
-        calling registerArrays(). These arrays will be deallocated when
-        mb_close() is called. */
-    ///@{
-    
-    /// Beam quality flags
-    char *beamFlags_;
-    /// Bathymetry array
-    double *bathymetry_;
+    /// x-axis units
+    const char *xUnits_;
 
-    /// Sidescan array
-    double *sideScan_;
+    /// y-axis units
+    const char *yUnits_;
 
-    /// Latitudes corresponding to each bathymetry point
-    double *bathymetryLat_;
+    /// z-axis units
+    const char *zUnits_;
 
-    /// Longitudes corresponding to each bathymetry point
-    double *bathymetryLon_;
+    /// swath VTK points
+    vtkSmartPointer<vtkPoints> swathPoints_;
 
-    /// Latitudes corresponding to each sideScan point
-    double *sideScanLat_;
+    /// swath VTK polygons
+    vtkSmartPointer<vtkCellArray> swathPolygons_;  
 
-    /// Longitudes corresponding to each sideScan point
-    double *sideScanLon_;
-
-    /// Amplitudes at each point
-    double *amplitude_;
-
-    ///@}
+    /// Application name - must provide this to 
+    /// mbeditviz_init() function, used in locking/unlocking files
+    char *appName_;
     
     /// Minimum latitude value in dataset
     double latMin_;
@@ -164,12 +190,11 @@ namespace mb_system {
 
     // Private constructor and destructor
 
-    /// Normally PRIVATE, but TESTING HERE
     /// Constructor - publicly accessed with New()
     SwathReader();
   
     /// Destructor - should be protected, accessed with Delete()
-    ~SwathReader(); ///// TEST TEST TESToverride;
+    ~SwathReader();        ///// TEST TEST TESToverride;
 
     SwathReader(const SwathReader&) = delete;
     void operator=(const SwathReader&) = delete;

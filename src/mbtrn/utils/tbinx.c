@@ -62,12 +62,13 @@
 /////////////////////////
 
 #include <getopt.h>
+#include <signal.h>
 #include "mframe.h"
 #include "mlist.h"
-#include "medebug.h"
-#include "mmdebug.h"
 #include "mfile.h"
 #include "msocket.h"
+#include "mxdebug.h"
+#include "mxd_app.h"
 #include "r7k-reader.h"
 #include "mb1_msg.h"
 
@@ -114,42 +115,6 @@
 // Declarations
 /////////////////////////
 
-///// @enum tbinx_channel_id
-///// @brief test module channel IDs
-///// [note : starting above reserved mframe channel IDs]
-//typedef enum{
-//    ID_TBINX_V1=MM_CHANNEL_COUNT,
-//    ID_TBINX_V2,
-//    ID_TBINX_V2,
-//    ID_TBINX_V3,
-//    ID_TBINX_V4,
-//    TBINX_CH_COUNT
-//}tbinx_channel_id;
-//
-///// @enum tbinx_channel_mask
-///// @brief test module channel masks
-//typedef enum{
-//    TBINX_V1= (1<<ID_TBINX_V1),
-//    TBINX_V2= (1<<ID_TBINX_V2)
-//    TBINX_V3= (1<<ID_TBINX_V3)
-//    TBINX_V4= (1<<ID_TBINX_V4)
-//}tbinx_channel_mask;
-//
-///// @var char *tbinx_ch_names[TBINX_CH_COUNT]
-///// @brief module channel names
-//char *tbinx_ch_names[TBINX_CH_COUNT]={
-//    "trace.tbinx",
-//    "debug.tbinx",
-//    "warn.tbinx",
-//    "err.tbinx",
-//    "tbinx.v1",
-//    "tbinx.v2"
-//    "tbinx.v3"
-//    "tbinx.v4"
-//};
-//static mmd_module_config_t mmd_config_default= {MOD_TBINX,"MOD_TBINX",TBINX_CH_COUNT,((MM_ERR|MM_WARN)|TBINX_V1),tbinx_ch_names};
-
-
 /// @typedef enum oflags_t oflags_t
 /// @brief flags specifying output types
 typedef enum{OF_NONE=0,OF_SOUT=0x1,OF_CSV=0x2, OF_SOCKET=0x4, OF_SERR=0x10}oflags_t;
@@ -194,6 +159,13 @@ typedef enum{OF_NONE=0,OF_SOUT=0x1,OF_CSV=0x2, OF_SOCKET=0x4, OF_SERR=0x10}oflag
 /// @def TBX_DELAY_DFL
 /// @brief default output delay
 #define TBX_DELAY_DFL 0
+/// @def TBX_DELAY_DFL
+/// @brief default output delay
+#define TBX_RCDMS_DFL 500
+
+/// @def TBX_SNDBUF_SIZE
+/// @brief osocket sendbuf size
+#define TBX_SNDBUF_BYTES 1048576
 
 /// @typedef struct app_cfg_s app_cfg_t
 /// @brief application configuration parameter structure
@@ -225,6 +197,9 @@ typedef struct app_cfg_s{
     ///  0: use timestamps (default)
     /// >0: use specified value
     int delay_msec;
+    /// @var app_cfg_s::rcdms
+    /// @brief delay if error/reconnect (msec)
+    long rcdms;
  
 }app_cfg_t;
 
@@ -250,6 +225,9 @@ static int trn_msg_count=0;
 static int trn_msg_bytes=0;
 static int trn_cli_con=0;
 static int trn_cli_dis=0;
+static bool g_interrupt=false;
+static int g_sig_count=0;
+static int g_alt_count=0;
 
 /////////////////////////
 // Function Definitions
@@ -270,6 +248,7 @@ static void s_show_help()
     "--serr           : export to stderr\n"
     "--csv=file       : export to csv file\n"
     "--delay=msec     : minimum packet delay [0:use timestamps (default), -1:no delay]\n"
+    "--rcdms=msec     : delay on reconnect/socket error (msec)\n"
     "\n";
     printf("%s",help_message);
     printf("%s",usage_message);
@@ -299,6 +278,7 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"socket", required_argument, NULL, 0},
         {"csv", required_argument, NULL, 0},
         {"delay", required_argument, NULL, 0},
+        {"rcdms", required_argument, NULL, 0},
        {NULL, 0, NULL, 0}};
 
     /* process argument list */
@@ -354,6 +334,10 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 else if (strcmp("delay", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->delay_msec);
                 }
+                // delay
+                else if (strcmp("rcdms", options[option_index].name) == 0) {
+                    sscanf(optarg,"%ld",&cfg->rcdms);
+                }
                break;
             default:
                 help=true;
@@ -383,59 +367,90 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
     cfg->files=&argv[optind];
     cfg->nfiles=argc-optind;
     
-    // initialize reader
-    // create and open socket connection
-
-    mconf_init(NULL,NULL);
-    mmd_channel_dis(MOD_TBINX,MM_ALL);
-    mmd_channel_set(MOD_TBINX,MM_ERR);
+    mxd_setModule(MXDEBUG, 0, true, NULL);
+    mxd_setModule(MXERROR, 5, false, NULL);
+    mxd_setModule(TBINX, 0, false, "tbinx.error");
+    mxd_setModule(TBINX_ERROR, 0, true, "tbinx.error");
+    mxd_setModule(TBINX_DEBUG, 0, true, "tbinx.debug");
+    mxd_setModule(MXMSOCK, 0, true, "msock");
+    mxd_setModule(R7KC, 0, true, "r7kc");
+    mxd_setModule(R7KC_DEBUG, 0, true, "r7kc.debug");
+    mxd_setModule(R7KC_ERROR, 0, true, "r7kc.error");
+    mxd_setModule(R7KR, 0, true, "r7kr");
+    mxd_setModule(R7KR_ERROR, 0, true, "r7kr.error");
+    mxd_setModule(R7KR_DEBUG, 0, true, "r7kr.debug");
 
     switch (cfg->verbose) {
         case 0:
-            mmd_channel_dis(MOD_TBINX,MM_ALL);
             break;
         case 1:
-            mmd_channel_en(MOD_TBINX,TBINX_V1);
+            mxd_setModule(TBINX, 1, false, "tbinx.error");
             break;
         case 2:
-            mmd_channel_en(MOD_TBINX,TBINX_V1);
-            mmd_channel_en(MOD_TBINX,TBINX_V2);
+            mxd_setModule(MXDEBUG, 5, false, NULL);
+            mxd_setModule(TBINX, 5, false, "tbinx.error");
             break;
         case 3:
-            mmd_channel_en(MOD_TBINX,TBINX_V1);
-            mmd_channel_en(MOD_TBINX,TBINX_V2);
-            mmd_channel_en(MOD_TBINX,TBINX_V3);
-            break;
         case 4:
-            mmd_channel_en(MOD_TBINX,TBINX_V1);
-            mmd_channel_en(MOD_TBINX,TBINX_V2);
-            mmd_channel_en(MOD_TBINX,TBINX_V3);
-            mmd_channel_en(MOD_TBINX,TBINX_V4);
+        case 5:
+            mxd_setModule(MXDEBUG, 5, false, NULL);
+            mxd_setModule(TBINX_ERROR, 5, false, "tbinx.error");
+            mxd_setModule(TBINX_DEBUG, 5, false, "tbinx.debug");
+            mxd_setModule(MXMSOCK, 5, false, "msock");
+            mxd_setModule(R7KC, 5, false, "r7kc");
+            mxd_setModule(R7KC_DEBUG, 5, false, "r7kc.debug");
+            mxd_setModule(R7KC_ERROR, 5, false, "r7kc.error");
+            mxd_setModule(R7KR, 5, false, "r7kr");
+            mxd_setModule(R7KR_ERROR, 5, false, "r7kr.error");
+            mxd_setModule(R7KR_DEBUG, 5, false, "r7kr.debug");
             break;
         default:
-            mmd_channel_set(MOD_TBINX,MM_ERR);
-           break;
+            break;
     }
+
+    if(cfg->verbose != 0)
+        mxd_show();
 
     if (cfg->verbose!=0) {
-        fprintf(stderr,"verbose   [%s]\n",(cfg->verbose?"Y":"N"));
-        fprintf(stderr,"nfiles    [%d]\n",cfg->nfiles);
+        fprintf(stderr, "verbose   [%s]\n", (cfg->verbose?"Y":"N"));
+        fprintf(stderr, "nfiles    [%d]\n", cfg->nfiles);
         if (cfg->nfiles>0) {
             for (int i=0; i<cfg->nfiles; i++) {
-                fprintf(stderr,"files[%2d] [%s]\n",i,cfg->files[i]);
+                fprintf(stderr, "files[%2d] [%s]\n", i,cfg->files[i]);
             }
         }
-        fprintf(stderr,"sout      [%c]\n",( ((cfg->oflags&OF_SOUT)   !=0 )?'Y':'N'));
-        fprintf(stderr,"csv       [%c]\n",( ((cfg->oflags&OF_CSV)    !=0 )?'Y':'N'));
-        fprintf(stderr,"socket    [%c]\n",( ((cfg->oflags&OF_SOCKET) !=0 )?'Y':'N'));
+        fprintf(stderr, "sout      [%c]\n", (((cfg->oflags&OF_SOUT)   !=0 ) ? 'Y' : 'N'));
+        fprintf(stderr, "csv       [%c]\n", (((cfg->oflags&OF_CSV)    !=0 ) ? 'Y' : 'N'));
+        fprintf(stderr, "socket    [%c]\n", (((cfg->oflags&OF_SOCKET) !=0 ) ? 'Y' : 'N'));
         if (cfg->oflags&OF_SOCKET) {
-        fprintf(stderr,"host:port [%s:%d]\n",cfg->host,cfg->port);
+        fprintf(stderr, "host:port [%s:%d]\n",cfg->host,cfg->port);
         }
         fprintf(stderr,"delay     [%d]\n",(cfg->delay_msec));
+        fprintf(stderr,"rcdms     [%ld]\n",(cfg->rcdms));
     }
-
 }
 // End function parse_args
+
+/// @fn void s_sig_handler(int sig)
+/// @brief signal handler
+/// @param[in] sig signal received
+
+static void s_sig_handler(int sig)
+{
+    switch(sig){
+        case SIGINT:
+        case SIGKILL:
+        case SIGQUIT:
+        case SIGSTOP:
+            g_interrupt = true;
+            break;
+        default:
+            g_alt_count++;
+            break;
+    }
+    g_sig_count++;
+    return;
+}
 
 /// @fn int s_delay_message(trn_data_t *message)
 /// @brief delay packet per packet timestamp
@@ -456,12 +471,12 @@ static int s_delay_message(mb1_t *sounding, double prev_time, app_cfg_t *cfg)
             // use timestamps
            double tsdiff = (sounding->ts-prev_time);
 
-            PMPRINT(MOD_TBINX,TBINX_V4,(stderr,"prev_time[%.3lf] ts[%.3lf] tsdiff[%.3lf]\n",prev_time,sounding->ts,tsdiff));
+            MX_LPRINT(TBINX, 4, "prev_time[%.3lf] ts[%.3lf] tsdiff[%.3lf]\n", prev_time, sounding->ts, tsdiff);
             if (tsdiff>TBX_MAX_DELAY_SEC) {
                 // if delay too large, use min delay
                 delay.tv_sec=TBX_MIN_DELAY_SEC;
                 delay.tv_nsec=TBX_MIN_DELAY_NSEC;//0;//800000;
-                PMPRINT(MOD_TBINX,TBINX_V4,(stderr,"case >max - using min delay[%"PRIu32":%"PRIu32"]\n",(uint32_t)delay.tv_sec,(uint32_t)delay.tv_nsec));
+                MX_LPRINT(TBINX, 4, "case >max - using min delay[%"PRIu32":%"PRIu32"]\n", (uint32_t)delay.tv_sec, (uint32_t)delay.tv_nsec);
             }else{
                 if (  prev_time>0 && tsdiff > 0) {
                     time_t lsec = (time_t)tsdiff;
@@ -470,10 +485,10 @@ static int s_delay_message(mb1_t *sounding, double prev_time, app_cfg_t *cfg)
                     rem.tv_nsec=0;
                     delay.tv_sec=lsec;
                     delay.tv_nsec=lnsec;
-                    PMPRINT(MOD_TBINX,TBINX_V4,(stderr,"case ts - using delay[%"PRIu32":%"PRIu32"]\n",(uint32_t)delay.tv_sec,(uint32_t)delay.tv_nsec));
+                    MX_LPRINT(TBINX, 4, "case ts - using delay[%"PRIu32":%"PRIu32"]\n", (uint32_t)delay.tv_sec, (uint32_t)delay.tv_nsec);
                     
                     while (nanosleep(&delay,&rem)<0) {
-                        PMPRINT(MOD_TBINX,TBINX_V4,(stderr,"sleep interrupted\n"));
+                        MX_LMSG(TBINX, 4, "sleep interrupted\n");
                         delay.tv_sec=rem.tv_sec;
                         delay.tv_nsec=rem.tv_nsec;
                     }
@@ -481,7 +496,7 @@ static int s_delay_message(mb1_t *sounding, double prev_time, app_cfg_t *cfg)
                     // if delay <0, use min delay
                     delay.tv_sec=TBX_MIN_DELAY_SEC;
                     delay.tv_nsec=TBX_MIN_DELAY_NSEC;//0;//800000;
-                    PMPRINT(MOD_TBINX,TBINX_V4,(stderr,"case ts<0 - using min delay[%"PRIu32":%"PRIu32"]\n",(uint32_t)delay.tv_sec,(uint32_t)delay.tv_nsec));
+                    MX_LPRINT(TBINX, 4, "case ts<0 - using min delay[%"PRIu32":%"PRIu32"]\n", (uint32_t)delay.tv_sec, (uint32_t)delay.tv_nsec);
                 }
             }
         }else if (cfg->delay_msec>0){
@@ -490,13 +505,13 @@ static int s_delay_message(mb1_t *sounding, double prev_time, app_cfg_t *cfg)
             uint64_t dmsec=cfg->delay_msec%1000;
             delay.tv_sec=dsec;
             delay.tv_nsec=dmsec*1000000L;
-            PMPRINT(MOD_TBINX,TBINX_V4,(stderr,"case specified - using delay[%"PRIu32":%"PRIu32"]\n",(uint32_t)delay.tv_sec,(uint32_t)delay.tv_nsec));
+            MX_LPRINT(TBINX, 4, "case specified - using delay[%"PRIu32":%"PRIu32"]\n", (uint32_t)delay.tv_sec, (uint32_t)delay.tv_nsec);
         }else{
             // else no delay/min delay
             // with zero delay, client REQ missed/arrive late - why?
            delay.tv_sec=TBX_MIN_DELAY_SEC;
             delay.tv_nsec=TBX_MIN_DELAY_NSEC;//0;//800000;
-            PMPRINT(MOD_TBINX,TBINX_V4,(stderr,"case <0 - using min delay[%"PRIu32":%"PRIu32"]\n",(uint32_t)delay.tv_sec,(uint32_t)delay.tv_nsec));
+            MX_LPRINT(TBINX, 4, "case <0 - using min delay[%"PRIu32":%"PRIu32"]\n", (uint32_t)delay.tv_sec, (uint32_t)delay.tv_nsec);
         }
 
         if (delay.tv_sec>0 || delay.tv_nsec>0) {
@@ -543,7 +558,7 @@ static int s_out_stdx(FILE *dest, mb1_t *sounding)
             }
         }
     }else{
-        PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"invalid argument\n"));
+        MX_LMSG(TBINX, 2, "invalid argument\n");
         retval=-1;
     }
     return retval;
@@ -579,7 +594,7 @@ static int s_out_csv(mfile_file_t *dest, mb1_t *sounding)
         }
         mfile_fprintf(dest,"\n");
     }else{
-        PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"invalid argument\n"));
+        MX_LMSG(TBINX, 2, "invalid argument\n");
         retval=-1;
     }
     return retval;
@@ -591,7 +606,7 @@ static int s_out_csv(mfile_file_t *dest, mb1_t *sounding)
 /// @param[in] s socket reference
 /// @param[in] message message reference
 /// @return 0 on success, -1 otherwise
-static int s_out_socket(msock_socket_t *s, mb1_t *sounding)
+static int s_out_socket(msock_socket_t *s, mb1_t *sounding, app_cfg_t *cfg)
 {
     int retval=-1;
     
@@ -610,12 +625,12 @@ static int s_out_socket(msock_socket_t *s, mb1_t *sounding)
         
         do{
             // check the socket for client activity
-            PMPRINT(MOD_TBINX,TBINX_V1,(stderr,"checking TRN host socket\n"));
+            MX_LMSG(TBINX, 1, "checking TRN host socket\n");
             iobytes = msock_recvfrom(s, trn_peer->addr, cmsg, TBX_MSG_CON_LEN,0);
             
             switch (iobytes) {
                 case 0:
-                    PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"err - recvfrom ret 0 (socket closed) removing cli[%d]\n",trn_peer->id));
+                    MX_LPRINT(TBINX, 2, "err - recvfrom ret 0 (socket closed) removing cli[%d]\n", trn_peer->id);
                     // socket closed, remove client from list
                     if(sscanf(trn_peer->service,"%d",&svc)==1){
                         msock_connection_t *peer = (msock_connection_t *)mlist_vlookup(trn_plist, &svc, r7kr_peer_vcmp);
@@ -623,11 +638,15 @@ static int s_out_socket(msock_socket_t *s, mb1_t *sounding)
                             mlist_remove(trn_plist,peer);
                         }
                     }
-                    data_available=true;
+                    data_available=false;
                     break;
                 case -1:
                     // nothing to read - bail out
-                    PMPRINT(MOD_TBINX,TBINX_V1,(stderr,"err - recvfrom cli[%d] ret -1 [%d/%s]\n",trn_peer->id,errno,strerror(errno)));
+                    if(errno != EWOULDBLOCK){
+                        MX_LPRINT(TBINX, 1, "err - recvfrom cli[%d] ret -1 [%d/%s]\n", trn_peer->id, errno, strerror(errno));
+                        struct timespec ts = {0, cfg->rcdms * 1000000L};
+                        nanosleep(&ts, NULL);
+                    }
                     data_available=false;
                     break;
                     
@@ -664,10 +683,10 @@ static int s_out_socket(msock_socket_t *s, mb1_t *sounding)
                             if (pclient!=NULL) {
                                 // client exists, update heartbeat tokens
                                 // [could make additive, i.e. +=]
-                                PMPRINT(MOD_TBINX,TBINX_V1,(stderr,"updating client hbeat id[%d] addr[%p]\n",svc,trn_peer));
+                                MX_LPRINT(TBINX, 1, "updating client hbeat id[%d] addr[%p]\n", svc,trn_peer);
                                 pclient->heartbeat = trn_hbtok;
                             }else{
-                                PMPRINT(MOD_TBINX,TBINX_V1,(stderr,"adding to client list id[%d] addr[%p]\n",svc,trn_peer));
+                                MX_LPRINT(TBINX, 1, "adding to client list id[%d] addr[%p]\n", svc, trn_peer);
                                 // client doesn't exist
                                 // initialize and add to list
                                 trn_peer->id = svc;
@@ -682,20 +701,20 @@ static int s_out_socket(msock_socket_t *s, mb1_t *sounding)
                                 trn_cli_con++;
                             }
                             
-                            PMPRINT(MOD_TBINX,TBINX_V1,(stderr,"rx [%d]b cli[%d/%s:%s]\n", iobytes, svc, trn_peer->chost, trn_peer->service));
+                            MX_LPRINT(TBINX, 1, "rx [%d]b cli[%d/%s:%s]\n", iobytes, svc, trn_peer->chost, trn_peer->service);
 
                             if ( (NULL!=pclient) &&  (iobytes> 0) ) {
                                 // send ACK
                                 iobytes = msock_sendto(s, pclient->addr, (byte *)"ACK", 4, 0 );
 
-                                PMPRINT(MOD_TBINX,TBINX_V1,(stderr,"tx ACK [%d]b cli[%d/%s:%s]\n",iobytes, svc, pclient->chost, pclient->service));
+                                MX_LPRINT(TBINX, 1, "tx ACK [%d]b cli[%d/%s:%s]\n", iobytes, svc, pclient->chost, pclient->service);
                                 trn_tx_count++;
                                 trn_tx_bytes+=iobytes;
                             }else{
                                 fprintf(stderr,"tx cli[%d] failed pclient[%p] iobytes[%d] [%d/%s]\n",svc,pclient,iobytes,errno,strerror(errno));
                             }
                         }else{
-                            PEPRINT((stderr,"err - inet_ntop failed [%d/%s]\n",errno,strerror(errno)));
+                            MX_ERROR("err - inet_ntop failed [%d/%s]\n", errno, strerror(errno));
                         }
                     }else{
                         // invalid sockaddr
@@ -705,13 +724,13 @@ static int s_out_socket(msock_socket_t *s, mb1_t *sounding)
                     break;
             }
             // keep reading while data is available
-        } while (data_available);
+        } while (data_available && !g_interrupt);
         
         
         // send output to clients
         psub = (msock_connection_t *)mlist_first(trn_plist);
         idx=0;
-        while (psub != NULL) {
+        while (psub != NULL && !g_interrupt) {
             
             psub->heartbeat--;
             
@@ -722,15 +741,15 @@ static int s_out_socket(msock_socket_t *s, mb1_t *sounding)
                 trn_tx_bytes+=iobytes;
                  retval=0;
 
-                PMPRINT(MOD_TBINX,TBINX_V1,(stderr,"tx TRN [%5d]b cli[%d/%s:%s] hb[%d]\n",
-                        iobytes, idx, psub->chost, psub->service, psub->heartbeat));
+                MX_LPRINT(TBINX, 1, "tx TRN [%5d]b cli[%d/%s:%s] hb[%d]\n",
+                        iobytes, idx, psub->chost, psub->service, psub->heartbeat);
                 
             }else{
-                PEPRINT((stderr,"err - sendto ret[%d] cli[%d] [%d/%s]\n",iobytes,idx,errno,strerror(errno)));
+                MX_ERROR("err - sendto ret[%d] cli[%d] [%d/%s]\n", iobytes, idx, errno, strerror(errno));
             }
             // check heartbeat, remove expired peers
             if (psub->heartbeat==0) {
-                PMPRINT(MOD_TBINX,TBINX_V1,(stderr,"hbeat=0 cli[%d/%d] - removed\n",idx,psub->id));
+                MX_LPRINT(TBINX, 1, "hbeat=0 cli[%d/%d] - removed\n", idx, psub->id);
                 mlist_remove(trn_plist,psub);
                 trn_cli_dis++;
             }
@@ -740,7 +759,7 @@ static int s_out_socket(msock_socket_t *s, mb1_t *sounding)
         
         
     }else{
-        PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"invalid argument\n"));
+        MX_LMSG(TBINX, 2, "invalid argument\n");
         retval=-1;
     }
     
@@ -759,7 +778,12 @@ int s_process_file(app_cfg_t *cfg)
     
    if (NULL!=cfg && cfg->nfiles>0) {
         for (int i=0; i<cfg->nfiles; i++) {
-            PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"processing %s\n",cfg->files[i]));
+
+            if(g_interrupt)
+                break;
+
+            MX_LPRINT(TBINX, 2, "processing %s\n", cfg->files[i]);
+
             mfile_file_t *ifile = mfile_file_new(cfg->files[i]);
             int test=0;
             mfile_file_t *csv_file = NULL;
@@ -767,10 +791,10 @@ int s_process_file(app_cfg_t *cfg)
             if(cfg->csv_path!=NULL){
                 csv_file=mfile_file_new(cfg->csv_path);
                 if ( (test=mfile_mopen(csv_file,MFILE_RDWR|MFILE_CREATE,MFILE_RU|MFILE_WU|MFILE_RG|MFILE_WG)) <= 0) {
-                    PEPRINT((stderr,"could not open CSV file\n"));
+                    MX_ERROR_MSG("could not open CSV file\n");
                     csv_file=NULL;
                 }else{
-                    PMPRINT(MOD_TBINX,TBINX_V1,(stderr,"opened CSV file [%s]\n",cfg->csv_path));
+                    MX_LPRINT(TBINX, 1, "opened CSV file [%s]\n", cfg->csv_path);
                 }
             }
             
@@ -781,11 +805,14 @@ int s_process_file(app_cfg_t *cfg)
 
                 trn_osocket = msock_socket_new(cfg->host, cfg->port, ST_UDP);
                 msock_set_blocking(trn_osocket,false);
-                const int optionval = 1;
+                int optionval = 1;
 #if !defined(__CYGWIN__)
                 msock_set_opt(trn_osocket, SO_REUSEPORT, &optionval, sizeof(optionval));
 #endif
                 msock_set_opt(trn_osocket, SO_REUSEADDR, &optionval, sizeof(optionval));
+
+                optionval = TBX_SNDBUF_BYTES;
+                msock_set_opt(trn_osocket, SO_SNDBUF, &optionval, sizeof(optionval));
 
                 if ( (test=msock_bind(trn_osocket))==0) {
                     fprintf(stderr,"TRN host socket bind OK [%s:%d]\n",cfg->host, cfg->port);
@@ -795,7 +822,7 @@ int s_process_file(app_cfg_t *cfg)
             }
             
             if ( (test=mfile_open(ifile,MFILE_RONLY)) > 0) {
-                PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"open OK [%s]\n",cfg->files[i]));
+                MX_LPRINT(TBINX, 2, "open OK [%s]\n", cfg->files[i]);
                 
                 byte msg_buf[MB1_MAX_SOUNDING_BYTES+sizeof(mb1_t)]={0};
                 mb1_t *mb1= (mb1_t *) &msg_buf[0];
@@ -819,8 +846,8 @@ int s_process_file(app_cfg_t *cfg)
                                     sp++;
                                     if( ((rbytes=mfile_read(ifile,(byte *)sp,1))==1) && *sp=='\0'){
                                         sync_valid=true;
-                                        PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"sync read slen[%d]\n",MB1_TYPE_BYTES));
-                                       PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"  sync     ['%c''%c''%c''%c']/[%02X %02X %02X %02X]\n",
+                                        MX_LPRINT(TBINX, 2, "sync read slen[%d]\n", MB1_TYPE_BYTES);
+                                       MX_LPRINT(TBINX, 2, "  sync     ['%c''%c''%c''%c']/[%02X %02X %02X %02X]\n",
                                                 ptype[0],
                                                 ptype[1],
                                                 ptype[2],
@@ -828,7 +855,7 @@ int s_process_file(app_cfg_t *cfg)
                                                 ptype[0],
                                                 ptype[1],
                                                 ptype[2],
-                                                ptype[3]));
+                                                ptype[3]);
                                         break;
                                     }else{
                                         sp=ptype;
@@ -841,11 +868,15 @@ int s_process_file(app_cfg_t *cfg)
                             }
                         }
                         if(rbytes<=0){
-                            PMPRINT(MOD_TBINX,TBINX_V1,(stderr,"reached EOF looking for sync\n"));
+                            MX_LMSG(TBINX, 1, "reached EOF looking for sync\n");
                             ferror=true;
                             break;
                         }
                     }
+
+                    if(g_interrupt)
+                        ferror = true;
+
 //                    if( (sync_valid && !ferror && (rbytes=mfile_read(ifile,(byte *)psize,4))==4)){
 //                        // read size
 //                        header_valid=true;
@@ -861,25 +892,27 @@ int s_process_file(app_cfg_t *cfg)
                             
                             if ((int32_t)mb1->size == cmplen ) {
                                 header_valid=true;
-                                PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"sounding header read len[%"PRIu32"/%"PRId64"]\n",(uint32_t)readlen,rbytes));
-                                PMPRINT(MOD_TBINX,TBINX_V3,(stderr,"  size   [%d]\n",mb1->size));
-                                PMPRINT(MOD_TBINX,TBINX_V3,(stderr,"  time   [%.3f]\n",mb1->ts));
-                                PMPRINT(MOD_TBINX,TBINX_V3,(stderr,"  lat    [%.3f]\n",mb1->lat));
-                                PMPRINT(MOD_TBINX,TBINX_V3,(stderr,"  lon    [%.3f]\n",mb1->lon));
-                                PMPRINT(MOD_TBINX,TBINX_V3,(stderr,"  depth  [%.3f]\n",mb1->depth));
-                                PMPRINT(MOD_TBINX,TBINX_V3,(stderr,"  hdg    [%.3f]\n",mb1->hdg));
-                                PMPRINT(MOD_TBINX,TBINX_V3,(stderr,"  ping   [%06d]\n",mb1->ping_number));
-                                PMPRINT(MOD_TBINX,TBINX_V3,(stderr,"  nbeams [%d]\n",mb1->nbeams));
+                                MX_LPRINT(TBINX, 2, "sounding header read len[%"PRIu32"/%"PRId64"]\n", (uint32_t)readlen, rbytes);
+                                MX_LPRINT(TBINX, 3, "  size   [%d]\n", mb1->size);
+                                MX_LPRINT(TBINX, 3, "  time   [%.3f]\n", mb1->ts);
+                                MX_LPRINT(TBINX, 3, "  lat    [%.3f]\n", mb1->lat);
+                                MX_LPRINT(TBINX, 3, "  lon    [%.3f]\n", mb1->lon);
+                                MX_LPRINT(TBINX, 3, "  depth  [%.3f]\n", mb1->depth);
+                                MX_LPRINT(TBINX, 3, "  hdg    [%.3f]\n", mb1->hdg);
+                                MX_LPRINT(TBINX, 3, "  ping   [%06d]\n", mb1->ping_number);
+                                MX_LPRINT(TBINX, 3, "  nbeams [%d]\n", mb1->nbeams);
                             }else{
-                                PMPRINT(MOD_TBINX,MM_WARN,(stderr,"message len invalid l[%d] l*[%d]\n",mb1->size,cmplen));
+                                MX_MPRINT(TBINX_DEBUG, "message len invalid l[%d] l*[%d]\n", mb1->size, cmplen);
                             }
                         }else{
-                            PEPRINT((stderr,"could not read header bytes [%"PRId64"]\n",rbytes));
+                            MX_ERROR("could not read header bytes [%"PRId64"]\n", rbytes);
                             ferror=true;
                         }
                     }
                     
-                    
+                    if(g_interrupt)
+                        ferror = true;
+
                     if (header_valid && ferror==false ) {
                         
                         if(mb1->nbeams>0){
@@ -888,30 +921,32 @@ int s_process_file(app_cfg_t *cfg)
                             uint32_t readlen = MB1_BEAM_ARRAY_BYTES(mb1->nbeams);
                             if( ((rbytes=mfile_read(ifile,bp,readlen))==readlen)){
                                 
-                                //                                PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"beams read blen[%d/%"PRId64"]\n",beamsz,rbytes));
-                                
+                                //                                MX_LPRINT(TBINX, 2, "beams read blen[%d/%"PRId64"]\n", beamsz, rbytes);
                                 
                             }else{
-                                PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"beam read failed pb[%p] read[%"PRId64"]\n",bp,rbytes));
+                                MX_LPRINT(TBINX, 2, "beam read failed pb[%p] read[%"PRId64"]\n", bp, rbytes);
                             }
 
                         }
-                        
+
                         byte *cp = (byte *)MB1_PCHECKSUM(mb1);
 
                         if( ((rbytes=mfile_read(ifile,cp,MB1_CHECKSUM_BYTES))==MB1_CHECKSUM_BYTES)){
-                            //                                    PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"chksum read clen[%"PRId64"]\n",rbytes));
-                            //                                    PMPRINT(MOD_TBINX,TBINX_V3,(stderr,"  chksum [%0X]\n",pmessage->chksum));
+                            //                                    MX_LPRINT(TBINX, 2, "chksum read clen[%"PRId64"]\n", rbytes);
+                            //                                    MX_LPRINT(TBINX, 3, "  chksum [%0X]\n", pmessage->chksum);
                             
                             rec_valid=true;
                         }else{
-                            PMPRINT(MOD_TBINX,MM_WARN,(stderr,"chksum read failed [%"PRId64"]\n",rbytes));
+                            MX_MPRINT(TBINX_DEBUG, "chksum read failed [%"PRId64"]\n", rbytes);
                         }
 
                     }else{
-                        PMPRINT(MOD_TBINX,MM_WARN,(stderr,"header read failed [%"PRId64"]\n",rbytes));
+                        MX_MPRINT(TBINX_DEBUG, "header read failed [%"PRId64"]\n", rbytes);
                     }
-                    
+
+                    if(g_interrupt)
+                        ferror = true;
+
                     if (rec_valid && ferror==false) {
 
                         trn_msg_bytes+=mb1->size;
@@ -934,10 +969,10 @@ int s_process_file(app_cfg_t *cfg)
                             do{
                                 // send message to socket
                                 // or wait until clients connected
-                                if( (test_con=s_out_socket(trn_osocket,mb1)) != 0 ){
-                                    sleep(TBX_SOCKET_DELAY_SEC);
+                                if( (test_con=s_out_socket(trn_osocket, mb1, cfg)) != 0 ){
+//                                    sleep(TBX_SOCKET_DELAY_SEC);
                                 }
-                            }while (test_con!=0);
+                            }while (test_con!=0 && !g_interrupt);
                         }
                     }
                 }
@@ -945,14 +980,18 @@ int s_process_file(app_cfg_t *cfg)
                 mfile_file_destroy(&ifile);
                 mfile_file_destroy(&csv_file);
             }else{
-                PEPRINT((stderr,"file open failed[%s] [%d/%s]\n",cfg->files[i],errno,strerror(errno)));
+                MX_ERROR("file open failed[%s] [%d/%s]\n", cfg->files[i], errno, strerror(errno));
             }
         }
     }
     
-    PMPRINT(MOD_TBINX,TBINX_V1,(stderr,"tx count/bytes[%d/%d]\n",trn_tx_count,trn_tx_bytes));
-    PMPRINT(MOD_TBINX,TBINX_V1,(stderr,"rx count/bytes[%d/%d]\n",trn_rx_count,trn_rx_bytes));
-    PMPRINT(MOD_TBINX,TBINX_V1,(stderr,"trn count/bytes[%d/%d]\n",trn_msg_count,trn_msg_bytes));
+    MX_LPRINT(TBINX, 1, "tx count/bytes[%d/%d]\n", trn_tx_count, trn_tx_bytes);
+    MX_LPRINT(TBINX, 1, "rx count/bytes[%d/%d]\n", trn_rx_count, trn_rx_bytes);
+    MX_LPRINT(TBINX, 1, "trn count/bytes[%d/%d]\n", trn_msg_count, trn_msg_bytes);
+    MX_LPRINT(TBINX, 1, "g_interrupt[%d]\n", (g_interrupt ? 1 : 0));
+    MX_LPRINT(TBINX, 1, "g_sig_count[%d]\n", g_sig_count);
+    MX_LPRINT(TBINX, 1, "g_alt_count[%d]\n", g_alt_count);
+
     return retval;
 }
 // End function s_process_file
@@ -971,12 +1010,21 @@ int s_process_file(app_cfg_t *cfg)
 int main(int argc, char **argv)
 {
     int retval=0;
-    
+
+    struct sigaction saStruct;
+    sigemptyset(&saStruct.sa_mask);
+    saStruct.sa_flags = 0;
+    saStruct.sa_handler = s_sig_handler;
+    sigaction(SIGINT, &saStruct, NULL);
+    sigaction(SIGQUIT, &saStruct, NULL);
+
     // set default app configuration
     app_cfg_t cfg = {TBX_VERBOSE_DFL,TBX_NFILES_DFL,NULL,
         TBX_OFLAGS_DFL,NULL,
         TBX_HOST_DFL,TBX_PORT_DFL,
-        TBX_DELAY_DFL};
+        TBX_DELAY_DFL,
+        TBX_RCDMS_DFL
+    };
     
     app_cfg_t *pcfg = &cfg;
     
@@ -985,7 +1033,7 @@ int main(int argc, char **argv)
     }else{
         // parse command line args (update config)
         parse_args(argc, argv, pcfg);
-        
+
         s_process_file(pcfg);
     }
 

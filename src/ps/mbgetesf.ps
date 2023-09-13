@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:01 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:07 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 2
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -288,7 +294,7 @@ F0 .13(cases are)2.63 F .702(useful if pre)108 398.4 R .702
 G(ampshire)-2.5 E(Christian do Santos Ferreira)108 547.2 Q(MAR)113 559.2
 Q(UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
 571.2 Q -.15(ve)-.25 G(rsity of Bremen).15 E F1(OPTIONS)72 600 Q F2
-<ad46>108 612 Q F3(format)24.19 E F0 .401
+<ad46>108 612 Q F3(format)144 612 Q F0 .401
 (Sets the format for the input and output sw)144 624 R .401
 (ath data using)-.1 F F2(MBIO)2.9 E F0(inte)2.9 E .4
 (ger format identi\214ers.)-.15 F(These)5.4 E .238(utilities uses the)
@@ -300,53 +306,55 @@ Q(UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
 -.25 G 3.823(ni).15 G 3.823(nt)-3.823 G(he)-3.823 E F2(MBIO)144 660 Q F0
 (manual page.)2.5 E F2<ad48>108 676.8 Q F0 .391(This "help" \215ag caus\
 es the program to print out a description of its operation and then e)
-22.52 F .391(xit imme-)-.15 F(diately)144 688.8 Q(.)-.65 E F2<ad49>108
-705.6 Q F3(in\214le)26.41 E F0 .33(Data \214le from which the input dat\
-a will be read. If no input \214le is speci\214ed, the input will be re\
-ad)144 717.6 R(from stdin. Def)144 729.6 Q(ault:)-.1 E F3(in\214le)2.5 E
-F0 2.5(=s)2.5 G(tdin.)-2.5 E(MB-System 5.0)72 768 Q 2.5(3J)146.495 G
-(une 2013)-2.5 E(1)204.835 E 0 Cg EP
+144 676.8 R .391(xit imme-)-.15 F(diately)144 688.8 Q(.)-.65 E F2<ad49>
+108 705.6 Q F3(in\214le)144 705.6 Q F0 .33(Data \214le from which the i\
+nput data will be read. If no input \214le is speci\214ed, the input wi\
+ll be read)144 717.6 R(from stdin. Def)144 729.6 Q(ault:)-.1 E F3
+(in\214le)2.5 E F0 2.5(=s)2.5 G(tdin.)-2.5 E(MB-System 5.0)72 768 Q 2.5
+(3J)146.495 G(une 2013)-2.5 E(1)204.835 E 0 Cg EP
 %%Page: 2 2
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 151.51(mbgetesf\(1\) MB-System)72 48 R 151.51
 (5.0 mbgetesf\(1\))2.5 F/F1 10/Times-Bold@0 SF<ad4d>108 84 Q/F2 10
-/Times-Italic@0 SF(mode)20.86 E F0 .487(Speci\214es which beam \215ag v)
-144 96 R .488(alues are output as edit e)-.25 F -.15(ve)-.25 G 2.988
-(nts. If).15 F F2(mode)2.988 E F0 2.988(=1)2.988 G 2.988(,t)-2.988 G
-.488(hen only \215agged beams)-2.988 F .871(are output. If)144 108 R F2
+/Times-Italic@0 SF(mode)144 84 Q F0 .487
+(Speci\214es which beam \215ag v)144 96 R .488
+(alues are output as edit e)-.25 F -.15(ve)-.25 G 2.988(nts. If).15 F F2
+(mode)2.988 E F0 2.988(=1)2.988 G 2.988(,t)-2.988 G .488
+(hen only \215agged beams)-2.988 F .871(are output. If)144 108 R F2
 (mode)3.371 E F0 3.371(=2)3.371 G 3.371(,t)-3.371 G .871
 (hen \215agged and null beams are output. If)-3.371 F F2(mode)3.37 E F0
 3.37(=3)3.37 G 3.37(,t)-3.37 G .87(hen an edit e)-3.37 F -.15(ve)-.25 G
 (nt).15 E 1.516(will be output for e)144 120 R -.15(ve)-.25 G 1.516(ry \
 beam, including those that are "good" \(neither \215agged nor null\).)
-.15 F(The)6.516 E F2(mode)144 132 Q F0 -.25(va)3.764 G 1.264
-(lues of 4 to 6 cause the output "edit sa).25 F 1.563 -.15(ve \214)-.2 H
-1.263(le" to ha).15 F 1.563 -.15(ve a)-.2 H 3.763(ne).15 G 1.263
-(mbedded special mode that)-3.763 F .141
-(implicitly sets all beam \215ags not speci\214ed with an edit e)144 144
-R -.15(ve)-.25 G .141(nt to a def).15 F .141(ault v)-.1 F .141(alue. If)
--.25 F F2(mode)2.641 E F0 .142(=5 then the)B(def)144 156 Q 1.39(ault v)
+.15 F(The)6.516 E F2(mode)144 132 Q F0 -.25(va)2.835 G .334
+(lues of 4 to 6 cause the output "edit sa).25 F .634 -.15(ve \214)-.2 H
+.334(le" to ha).15 F .634 -.15(ve a)-.2 H 2.834(ne).15 G .334
+(mbedded special mode that im-)-2.834 F .728
+(plicitly sets all beam \215ags not speci\214ed with an edit e)144 144 R
+-.15(ve)-.25 G .728(nt to a def).15 F .728(ault v)-.1 F .728(alue. If)
+-.25 F F2(mode)3.228 E F0 .728(=5 then the)B(def)144 156 Q 1.39(ault v)
 -.1 F 1.39(alue is null, if)-.25 F F2(mode)3.89 E F0 1.39
 (=6 then the def)B 1.39(ault v)-.1 F 1.39(alue is good, and if)-.25 F F2
 (mode)3.89 E F0 1.39(=4 then the def)B(ault)-.1 E -.25(va)144 168 S .413
 (lue is good for most formats and null for the fe).25 F 2.913(wf)-.25 G
 .413(ormats that ha)-2.913 F .713 -.15(ve m)-.2 H .413(ore null than v)
-.15 F .413(alid beams.)-.25 F 1.98(The def)144 180 R 1.98
-(ault modes are used by programs)-.1 F F1(mbpr)4.48 E(epr)-.18 E(ocess)
--.18 E F0(and)4.48 E F1(mbeditviz)4.48 E F0 1.98(when generating and)
-4.48 F .162(using "global edit \214les" \("*.gef" suf)144 192 R .162
+.15 F .413(alid beams.)-.25 F .696(The def)144 180 R .696
+(ault modes are used by programs)-.1 F F1(mbpr)3.195 E(epr)-.18 E(ocess)
+-.18 E F0(and)3.195 E F1(mbeditviz)3.195 E F0 .695
+(when generating and us-)3.195 F .685
+(ing "global edit \214les" \("*.gef" suf)144 192 R .685
 (\214x\) that are used to completely specify the beam \215ag state of a)
 -.25 F(ra)144 204 Q 2.5(ws)-.15 G -.1(wa)-2.5 G(th bath).1 E
 (ymetry \214le.)-.05 E(Def)5 E(ault:)-.1 E F2(mode)2.5 E F0 2.5(=1)2.5 G
-(.)-2.5 E F1<ad4f>108 220.8 Q F2(esf)22.52 E(\214le)-.18 E F0 .464
+(.)-2.5 E F1<ad4f>108 220.8 Q F2(esf)144 220.8 Q(\214le)-.18 E F0 .464
 (Speci\214es output edit sa)144 232.8 R .763 -.15(ve \214)-.2 H .463
 (le to which the edit e).15 F -.15(ve)-.25 G .463
 (nts will be written. If no edit sa).15 F .763 -.15(ve \214)-.2 H .463
 (le is speci-).15 F(\214ed, the output will be written to stdout. Def)
 144 244.8 Q(ault:)-.1 E F2(esf)2.5 E(\214le)-.18 E F0 2.5(=s)2.5 G
-(tdout.)-2.5 E F1<ad56>108 261.6 Q F0(Normally)23.08 E(,)-.65 E F1
+(tdout.)-2.5 E F1<ad56>108 261.6 Q F0(Normally)144 261.6 Q(,)-.65 E F1
 (mbgetesf)3.291 E F0 -.1(wo)3.291 G .791
 (rks "silently" without outputting an).1 F .792
 (ything to the stderr stream.)-.15 F .792(If the)5.792 F F1<ad56>3.292 E

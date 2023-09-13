@@ -1,4 +1,4 @@
-.TH mbm_route2mission 1 "22 February 2015" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_route2mission 1 "19 June 2023" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_route2mission\fP \- Macro to convert an \fBmbgrdviz\fP route file into an
 MBARI AUV mission script.
@@ -10,14 +10,14 @@ Version 5.0\fP
 \fBmbm_route2mission\fP \fB\-I\fP\fIroutefile\fP
 [\fB\-A\fP\fIaltmin/altabort[/altdesired[/altdesired2[/altdesired3]]]\fP
 \fB\-B\fP\fIbehavior\fP \fB\-C\fP\fImissiontime\fP
-\fB\-D\fP\fIdepthconstant[/depthconstant2]\fP
+\fB\-D\fP\fIdepthconstant[/depthconstant2]\fP \fB\-E\fP\fIstarttime\fP
 \fB\-F\fP\fIforwarddistance\fP \fB\-G\fP\fIgpsmode\fP
 \fB\-J\fP\fIdepthprofilefile\fP \fB\-L\fP\fIapproachdepth\fP
 \fB\-M\fP\fI[sensorlist]\fP \fB\-N\fP[\fIspiraldescentaltitude\fP] \fB\-O\fP\fImissionfile\fP
 \fB\-P\fP\fI[startlon/startlat | startdistance]\fP
 \fB\-R\fP\fItransmitpower/receivegain[/rangeminfraction[/pulsewidth]]\fP
-\fB\-S\fP\fIspeed\fP \fB\-T\fP\fIstarttime\fP \fB\-U\fP\fImaxclimbrate\fP
-\fB\-W\fP\fIwaypointspacing\fP \fB\-V\fP \fB\-H\fP]
+\fB\-S\fP\fIspeed\fP \fB\-T\fP \fB\-U\fP\fImaxclimbrate\fP
+\fB\-W\fP\fIwaypointspacing\fP \fB\-Z\fP \fB\-V\fP \fB\-H\fP]
 
 .SH DESCRIPTION
 \fBmbm_route2mission\fP \- Macro to convert an \fBmbgrdviz\fP route file into an
@@ -167,6 +167,14 @@ typ START4 and END4 for \fIdepthconstant\fP and START5 and END5 for
 \fBMBgrdviz\fP routes. While these waypoint types are active, the
 AUV is commanded to the specified constant depth value.
 .TP
+.B \-E
+\fIstarttime\fP
+.br
+This sets the expected time required for the AUV to reach the first waypoint
+in the survey mission. If neither
+the \fB\-P\fP or \fB\-E\fP options are specified, a distance of 500 meters
+to the first waypoint is assumed.
+.TP
 .B \-F
 \fIforwarddistance\fP
 .br
@@ -272,12 +280,11 @@ transmit pulse width in microseconds. Default: \fItransmitpower\fP = 220, \fIrec
 This sets the commanded AUV speed in meters/second. Default: \fIspeed\fP = 1.5 m/s.
 .TP
 .B \-T
-\fIstarttime\fP
 .br
-This sets the expected time required for the AUV to reach the first waypoint
-in the survey mission. If neither
-the \fB\-P\fP or \fB\-T\fP options are specified, a distance of 500 meters
-to the first waypoint is assumed.
+This option enables "closing the loop" on Terrain Relative Navigation (TRN) offset 
+estimates during the survey portions of the mission. This means that the AUV
+will use navigation offsets estimates from a TRN server if those estimates 
+have a "stably converged" status. 
 .TP
 .B \-U
 \fImaxclimbrate\fP
@@ -287,13 +294,17 @@ AUV mission. If the topography has a greater slope, the AUV will be brought
 up earlier so the planned climb angle never exceed \fImaxclimbrate\fP.
 Default: \fImaxclimbrate\fP = 25 degrees.
 .TP
+.B \-V
+The \fB\-V\fP option causes \fBmbm_route2mission\fP to print out status messages.
+.TP
 .B \-W
 \fIwaypointspacing\fP
 .br
 Sets the spacing in meters of the waypoints output to the mission script.
 .TP
-.B \-V
-The \fB\-V\fP option causes \fBmbm_route2mission\fP to print out status messages.
+.B \-Z
+.br
+Turns off most output to the shell.
 
 .SH EXAMPLES
 Suppose you are going to run the MBARI Mapping AUV on the Coaxial Segment of the

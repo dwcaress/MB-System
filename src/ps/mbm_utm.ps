@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:03 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:09 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 2
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -243,11 +249,11 @@ F0 -1.11(Ve)108 136.8 S(rsion 5.0)1.11 E F1(SYNOPSIS)72 165.6 Q F0
 1.281(rse UTM projections of ASCII data triples using the).15 F 1.16
 (GMT program mapproject.)108 230.4 R -.15(Fo)6.16 G(rw).15 E 1.16
 (ard projections translate from geographic data \(lon, lat, v)-.1 F 1.16
-(alue\) to UTM)-.25 F 1.096(eastings and northings \(x, y)108 242.4 R
-3.596(,v)-.65 G 3.596(alue\). In)-3.846 F -.15(ve)-.4 G 1.096
-(rse projections translate from \(x, y).15 F 3.595(,z)-.65 G 3.595(\)t)
--3.595 G 3.595(o\()-3.595 G 1.095(lon, lat, z\).)-3.595 F 1.095
-(Both the)6.095 F(input and output \214les must be speci\214ed.)108
+(alue\) to UTM)-.25 F .322(eastings and northings \(x, y)108 242.4 R
+2.822(,v)-.65 G 2.822(alue\). In)-3.072 F -.15(ve)-.4 G .322
+(rse projections translate from \(x, y).15 F 2.821(,z)-.65 G 2.821(\)t)
+-2.821 G 2.821(o\()-2.821 G .321(lon, lat, z\).)-2.821 F .321
+(Both the in-)5.321 F(put and output \214les must be speci\214ed.)108
 254.4 Q F1(MB-SYSTEM A)72 283.2 Q(UTHORSHIP)-.548 E F0(Da)108 295.2 Q
 (vid W)-.2 E 2.5(.C)-.92 G(aress)-2.5 E(Montere)113 307.2 Q 2.5(yB)-.15
 G(ay Aquarium Research Institute)-2.5 E(Dale N. Chayes)108 319.2 Q
@@ -258,7 +264,7 @@ G(ay Aquarium Research Institute)-2.5 E(Dale N. Chayes)108 319.2 Q
 379.2 Q -.15(ve)-.25 G(rsity of Bremen).15 E F1(SIMPLE DESCRIPTION OF B)
 72 408 Q(ASIC OPTIONS)-.329 E F2<ad48>108 420 Q F0 .162(This "help" \
 \215ag cause the program to print out a description of its operation an\
-d then e)22.52 F .162(xit immedi-)-.15 F(ately)144 432 Q(.)-.65 E F2
+d then e)144 420 R .162(xit immedi-)-.15 F(ately)144 432 Q(.)-.65 E F2
 <ad45>108 448.8 Q F3(ellipsoid)A F0 .803
 (Sets the ellipsoid to be used. The def)144 460.8 R .802
 (ault is to use the WGS-84 ellipsoid, in accordance with the)-.1 F -.35
@@ -271,10 +277,10 @@ nnot be used to accomplish a true datum)-.35 F 1.053(shift between N)144
 (AD-83 because the 1986 transition to N)-.35 F 1.054(AD-83 also in)-.35
 F -.2(vo)-.4 G(lv).2 E 1.054(ed addi-)-.15 F
 (tional adjustments to positions.)144 508.8 Q F2<ad46>108 525.6 Q F0
-(Causes)24.19 E F2(mbm_utm)2.5 E F0
+(Causes)144 525.6 Q F2(mbm_utm)2.5 E F0
 (to use or generate eastings and northings in feet rather than meters.)
 2.5 E F2<ad49>108 542.4 Q F3(in\214le)A F0 1.391
-(Sets the name of the data \214le to be processed.)6.41 F 1.39
+(Sets the name of the data \214le to be processed.)144 542.4 R 1.39
 (The \214rst tw)6.391 F 3.89(oc)-.1 G 1.39
 (olumns of the ASCII input data)-3.89 F .208
 (stream must be either longitude and latitude v)144 554.4 R .209
@@ -293,11 +299,11 @@ R .294(alues \(for geographic to projected transformation\))-.25 F .492
 2.993(ya)-.15 G .493(dditional col-)-2.993 F
 (umns of data are passed unaltered to the output.)144 643.2 Q F2<ad51>
 108 660 Q F0 .316(This option causes the transformation to be from proj\
-ected coordinates \(eastings and northings\) to)22.52 F 1.115
+ected coordinates \(eastings and northings\) to)144 660 R 1.115
 (geographic coordinates \(longitude and latitude\).)144 672 R 1.116
 (The def)6.116 F 1.116(ault is to transform from geographic to)-.1 F
 (projected coordinates.)144 684 Q F2<ad5a>108 700.8 Q F3(zone)A F0
-(Sets the UTM zone.)5.3 E(MB-System 5.0)72 768 Q 2.5(3J)146.495 G
+(Sets the UTM zone.)144 700.8 Q(MB-System 5.0)72 768 Q 2.5(3J)146.495 G
 (une 2013)-2.5 E(1)204.835 E 0 Cg EP
 %%Page: 2 2
 %%BeginPageSetup

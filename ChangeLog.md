@@ -23,6 +23,23 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta58    August 30, 2023
+- Version 5.7.9beta57    June 27, 2023
+- Version 5.7.9beta53    June 15, 2023
+- Version 5.7.9beta52    March 9, 2023
+- Version 5.7.9beta51    February 14, 2023
+- Version 5.7.9beta50    February 12, 2023
+- Version 5.7.9beta49    January 22, 2023
+- Version 5.7.9beta48    December 16, 2022
+- Version 5.7.9beta47    November 15, 2022
+- Version 5.7.9beta46    November 11, 2022
+- Version 5.7.9beta45    November 6, 2022
+- Version 5.7.9beta44    August 9, 2022
+- Version 5.7.9beta43    July 29, 2022
+- Version 5.7.9beta42    June 26, 2022
+- Version 5.7.9beta41    June 22, 2022
+- Version 5.7.9beta40    June 18, 2022
+- Version 5.7.9beta38    June 18, 2022
 - Version 5.7.9beta37    June 17, 2022
 - Version 5.7.9beta36    June 15, 2022
 - Version 5.7.9beta35    June 13, 2022
@@ -414,6 +431,301 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta58 (August 30)
+
+Mbm_route2mission: Modifications to accomodate changes to Dorado AUV vehicle software.
+
+Mbinfo: Added -Q option which causes mbinfo to read statistics from existing \*.inf 
+files rather than to read the actual swath files. Variances, record types, nonfatal error messages
+and mask output cannot be generated with this option.
+
+Mbnavadjustmerge: Fixed bug in merging projects.
+
+Docker: Added a lightweight (945 MB) MB-System Dockerfile build based on alpine 
+Linux distribution. The image contains full MB-System, including TRN and graphical tools.
+Runs on MacOS 12 (Monterey) and Ubuntu 22.04.
+
+TRN tools: Minor changes to .gitignore (add binaries) and mbtrn/utils/tbinx.cpp (add signal 
+handler, reconnect timing, bug fix).
+
+Mblist: Added option to merge data from a secondary file and allow printing those
+secondary data values. The secondary file is columnar text in which the first column
+holds the time stamp in epoch or unix time (seconds since 1/1/1970), and up to 19
+following columns hold other data collected during the survey (e.g. temperature or 
+salinity measured on a CTD sensor).
+
+Mbeditviz: The scale widget controlling grid cell size now changes it's range if either
+the minimum or maximum values are selected (halving or doubling, respectively).
+
+Mbnavadjustmerge: Copying mbnavadjust projects is much more efficient due to use of
+a fast file copy function replacing a shell call of the program cp.
+
+#### 5.7.9beta57 (June 27)
+
+Mbm_route2mission: Added -T option to embed use of Terrain Relative Navigation in 
+MBARI Mapping AUV missions.
+
+Format 89 (MBF_RESON7K3): Fixed too small buffer size for broadcast Teledyne s7k 
+data records, which caused mbtrnpp to crash by seg fault. This was 32K and is now 600K.
+
+Mbnavadjust: Fixed bug in the inversion algorithm.
+
+#### 5.7.9beta53 (June 15)
+
+Rewrote the CMake build system based on the work of both Tom O'Reilly and Josch. This
+build system now works on MacOs Ventura. We will continue to augment and test using
+cmake so that this build system also works on Ubuntu and Debian Linux.
+
+Mbtrnpp and related TRN code: Many updates and improvements from Kent Headley
+
+Mbcontour: The navigation line width and color can now be set using the -W argument
+
+Format SOIUSBLN (275): Supports USBL tracking data from R/V Falkor (too) as format 275.
+
+Format SOIROVN (276): Supports ROV SuBastian INS navigation data as format 276.
+
+Mbm_route2mission: Added a depth limit parameter to the -D argument.
+
+Mbgrdviz: Fixed display of vector data.
+
+General: Fixed automated handling of asynchronous nav and attitude data when reading 
+Kongsberg or Teledyne multibeam data that have not been preprocessed. Changes are in
+mbio/mb_navint.c
+
+Format RESON7K3 (89): Fixed counting of valid records in the file catalog.
+
+Mbgetphotocorrection, mbphotomosaic, mbphotogrammetry: Fixed to properly handle embedding
+of parameters within recursive imagelist structures, allowing mixing of photographs taken
+with difference camera systems or perhaps different camera calibrations.
+
+Mbgetphotocorrection, mbphotogrammetry: enabled multi-threading.
+
+Mbauvloglist: Allow merging attitude data from a separate file. Allow decimation of input.
+
+Mbmosaic: Augmented azimuth priority mode so that the azimuth alone can be specified, in which
+case the azimuth priority factor is one.
+
+Mbpreprocess: Now outputs integrated navigation for all sensors producing mapping data.
+
+Formats 56 (MBF_EM300RAW) and 57 (MBF_EM300MBA): Fixed catastrophic bug introduced in 
+5.7.9beta50 that treated many signed values (like acrosstrack distance) as unsigned.
+
+
+#### 5.7.9beta52 (March 9)
+
+Formats 56 (MBF_EM300RAW) and 57 (MBF_EM300MBA): Fixed catastrophic bug introduced in 
+5.7.9beta50 that treated many signed values (like acrosstrack distance) as unsigned.
+
+MBgrdviz: Added ability to export routes as TECDIS LST files for display in a variety of
+marine chart display software. 
+
+Autotools build system: Altered Makefile.am files in third_party/googlemock and 
+third_party/googletest to eliminate benign but alarming error messages during make install 
+and make clean commands.
+
+Mbm_route2mission: Added ability to insert a magnetometer calibration maneuver into an
+AUV mission spiral descent using the -Naltitude/mode command, where altitude is the
+spiral descent termination altitude and mode = 0 for no start survey behavior, 1 for 
+start survey behavior alone, and 2 for start survey plus a magnetometer calibration 
+maneuver.
+
+#### 5.7.9beta51 (February 14)
+
+Format 89 (MBF_RESON7k3): Removed debug message inadvertently left active in 5.7.9beta50.
+
+#### 5.7.9beta50 (February 12, 2023)
+
+General: Changed many sprintf() calls to snprintf() calls. 
+
+General: Fixed many compiler warnings having to do with unused variables, unitialized 
+variables, and possible string overflows.
+
+MBnavadjust: Fixed interface issues for importing multiple reference grids and
+selecting those while makeing global ties.
+
+Format 261 (MBF_KEMKMALL): Added code to detect and handle gracefully some 
+instances of corruption of MRZ datagrams, particularly due to missing bytes.
+
+Format 201 (MBF_HYSWEEP1): Fixed reading of Hysweep multibeam in which beam angles are
+stored in spherical coordinates but are not corrected for roll and pitch. Updated 
+support to handle multibeam data with angles in spherical coordinates that have not
+been corrected for roll and pitch, and to be consistent with the most recent Hypack
+users manual released February 2023.
+
+#### 5.7.9beta49 (January 22, 2023)
+
+Mbm_grdplot, mbm_grd3dplot, mbm_histplot, mbm_plot, mbm_xyplot: Made evince one
+of the default Postscript viewers because it is commonly installed on Ubuntu
+machines.
+
+General: Addressed compiler warnings due to uninitialized variables, inconsistent
+variable typing, and other minor issues.
+
+MBnavadjust: Changed the solution algorithm so that the final stage of LSQR
+matrix inversion is done in several steps. As before, the first three stages are
+to construct an initial model by interpolating any global ties, then solve for
+and apply average offsets for each survey, then conduct an iterative relaxation
+towards an additional perturbation solution. Each stage produces a perturbation
+solution, that is, a solution to fit the navigation offsets remaining after
+applying the existing navigation model. Each perturbation is added to the
+navigation model, which is then the starting point for the next stage. These
+three stages build up an approximate navigation solution that solves most of the
+original mismatch between overlapping and crossing swathes. The final stage is
+to build and solve an overdetermined least squares matrix problem constrained by
+all crossing and global times, by any surveys with fixed navigation, and also
+constrained by a penalty against first and second derivatives of the perturbation.
+Now, for multi-survey projects the matrix solution stage consists of first
+solving the full matrix problem, then solving for a perturbation to satisfy
+the remaining misfit for each of the individual surveys in turn, and finally
+redoing the full matrix problem. Again, after each solution step the resulting
+perturbation is added to the navigation solution.
+
+Mbnavadjust: Added two new list options for sorted crossing ties. Now the sorted
+crossing tie list can be limited to the top 5% or 1% of ties.
+
+Format MBF_MBARIROV (165): Added recognition for new filenaming conventions for
+MBARI ROV navigation files.
+
+#### 5.7.9beta48 (December 16, 2022)
+
+Mbmosaic: Fixed parsing of the -Ypriority_source option when priority_source is
+a filename.
+
+Mbm_grdplot: Fixed handling of image file min max when color_mode == 6.
+
+Mbnavadjust: Added controls allowing the mode of global ties to be changed
+interactively.
+
+Mbnavadjust: Changed project file format, adding the the id of the source
+reference grid used for each global tie.
+
+Mbview library: Fixed problem where mbview did not render the last row and
+column of a grid (the easternmost and northernmost data). Also attempted to
+make picking more robust.
+
+Mbnavadjust: Fixed interpolation of global ties to create the starting navigation
+model during inversions. Fixed several actions in section and reference grid mode.
+
+#### 5.7.9beta47 (November 15, 2022)
+
+Mbnavadjust: Individual survey grids are now sized to the region of those
+surveys rather than the entire project. When the individual surveys are
+visualized, only the navigation for that survey are loaded into the mbview
+2D/3D map instance. Also fixed picking of section navigation in both crossing
+and section (vs reference grid) modes.
+
+Mbnavadjustmerge: Added options set the mode (XYZ vs XY vs Z) of all global ties.
+
+#### 5.7.9beta46 (November 11, 2022)
+
+Mbnavadjust: Added ability to import and use multiple reference grids for picking
+global ties of individual swath data sections.
+
+#### 5.7.9beta45 (November 6, 2022)
+
+FNV files: The fast navigation or *.fnv files are created as ancillary files
+allowing navigation to be read without reading the full swath files. The *.fnv
+files are in the MBF_MBPRONAV (166) format. Format 166 has always supported
+comment records as lines beginning with the '#' character, but fnv files have
+always been created without any comment records. Many MB-System programs read
+fnv files directly without using the MBF_MBPRONAV i/o module. Now all format
+166 files will be written with a first record documenting the contents of the
+file:
+    fprintf(mb_io_ptr->mbfp,  "## <yyyy mm dd hh mm ss.ssssss> <epoch seconds> "
+                  "<longitude (deg)> <latitude (deg)> <heading (deg)> <speed (km/hr)> "
+                  "<draft (m)> <roll (deg)> <pitch (deg)> <heave (m)> <portlon (deg)> "
+                  "<portlat (deg)> <stbdlon (deg)> <stbdlat (deg)>\n");
+whether they are written by the MBF_MBPRONAV i/o module or by functions in
+applications like mbprocess or mbpreprocess. All instances reading these files
+will ignore these file header records.
+
+Mbgrdviz: augmented and corrected the headers of route and site files output by
+mbgrdviz, better self documenting the formats of these files.
+
+Mbnavadjust: Added ability to import a reference bathymetry grid that can be
+used to define global ties. Also modified so that when the main display list mode
+limits what is shown to "with selected survey" or other modifiers, these constraints
+also limit what navigation is shown in the project visualization. So, if one selects
+a survey and then sets the list mode to show only the selected survey, then the
+visualization will also only display the navigation from that survey, the crossing
+ties or global ties from that survey, and only allow picking on that survey's
+navigation.
+
+Mbareaclean: Fixed issue in which mbareaclean does not apply filters for files
+without pre-existing *.esf files.
+
+Mbbackangle: Plots of the backscatter vs grazing angle distribution are no longer
+histogram equalized.
+
+Mbprocess: Modified the threaded processing function process_file() so that each
+instance carries a thread id that can be checked during debugging.
+
+#### 5.7.9beta44 (August 9, 2022)
+
+Mbphotomosaic: Fixed problem in which an image correction model from mbgetphotocorrection
+was read but not applied.
+
+Mbeditviz: Fixed display of beam info when picking in info mode in the 3D
+soundings display.
+
+#### 5.7.9beta43 (July 29, 2022)
+
+Mblist and mbnavlist: Fixed failure to deallocate proj object.
+
+Mbtrnpp: Added UTM projection to top level using Proj, but this is not used yet.
+The UTM projection used within the TRN codebase remains defined in the very old
+GCTP package, which is embedded with TRN.
+
+TRN execution and plotting scripts (e.g. src/mbtrn/tools/mbtrnpp-plot/trnucli-plot.sh):
+Changed the shebang call from #!/usr/local/bin/bash to #!/usr/bin/env bash for
+portability.
+
+Mbnavadjust: Recast global ties to utilize a full 3D covariance model just like
+the crossing ties, in preparation for allowing graphical picking of global ties
+relative to a reference bathymetry model.
+
+Mbnavadjustmerge: Added ability to remove disconitinuities in mbnavadjust projects.
+Recast global ties to utilize a full 3D covariance model just like
+the crossing ties, in preparation for allowing graphical picking of global ties
+relative to a reference bathymetry model.
+
+Mbm_trnplot: Added mission names to mbtrnpp result plots.
+
+Cmake Build System: Incorporates an initial attempt at a cmake based build system
+that will provide an alternative to the existing AutoTools based build system.
+Updated documentation for both build systems is not included yet.
+
+#### 5.7.9beta42 (June 26, 2022)
+
+Format 261 (MBF_KEMKMALL): Fixed bug in handling beam amplitude data from null
+beams.
+
+Mbtrnpp: Fixed trnu logging.
+
+Mbnavadjust: Altered the navigation adjustment inversion algorithm to apply
+linear interpolation of global ties to create a starting model for the
+inversion. Fixed picking on tie offsets in the modelplot window.
+
+#### 5.7.9beta41 (June 22, 2022)
+
+Mbm_makedatalist: Fixed to work with *.kmall files, and added -Bsize option
+to impose a size threshold for files included in the output datalist.
+
+TRN: Several fixes to the TRN (terrain relative navigation) capability.
+
+#### 5.7.9beta40 (June 18, 2022)
+
+Mbtrnpp: Fixed decimation algorithm more so it doesn't crash in Linux.
+
+#### 5.7.9beta38 (June 18, 2022)
+
+Mbtrnpp: Added option --auv-sentry-em2040 to configuration file and command line
+options in order to enable use of the special pressure depth encoding in EM2040
+data collected on AUV Sentry. Previously this option was hard coded in mbtrnpp.c.
+By default this option is disabled, so in order for mbtrnpp to work with Sentry
+EM2040 multibeam either in realtime or playback modes this option must now be
+specified.
 
 #### 5.7.9beta37 (June 17, 2022)
 

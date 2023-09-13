@@ -1,7 +1,7 @@
 #ifndef GmtGridReader_h
 #define GmtGridReader_h
 
-#include <gmt/gmt.h>
+#include "gmt.h"
 
 #include "vtkAbstractPolyDataReader.h"
 #include "vtkPolyData.h"
@@ -32,7 +32,7 @@ namespace mb_system {
     /// Set grid file name
     virtual void SetFileName(
                              const char *fileName ///< [in] grid file name
-                             );
+                             ) override;
 
     /// Return pointer to gridPoints
     vtkPoints *gridPoints() { return gridPoints_; }

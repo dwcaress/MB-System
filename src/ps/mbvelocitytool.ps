@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:04 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:11 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 5
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -253,16 +259,16 @@ F2(MBv)3.445 E(elocitytool)-.1 E F0 .944(can be used by the program)
 -.15(ve)-.2 G 2.5(lt).15 G(ime and angle data.)-2.5 E .234(In general,)
 108 278.4 R F2(MBv)2.734 E(elocitytool)-.1 E F0 .234(is used to e)2.734
 F .234(xamine SVPs obtained from sw)-.15 F .234(ath data \214les \(see)
--.1 F F2(mbsvplist)2.734 E F0(manual)2.734 E 1.116
-(page\), XBTs, CTDs, or databases, and to construct ne)108 290.4 R 3.615
-(wp)-.25 G 1.115(ro\214les consistent with these v)-3.615 F 1.115
-(arious sources of)-.25 F .212
-(information. The SVPs are represented by a set of paired depth and v)
-108 302.4 R .213(elocity v)-.15 F .213(alues which are connected by)-.25
-F 1.631(linear interpolation.)108 314.4 R 1.631
-(Users may load a number of SVPs for display)6.631 F 4.13(.U)-.65 G 1.63
-(sers may load or create a single)-4.13 F
-(editable SVP and then interacti)108 326.4 Q -.15(ve)-.25 G
+-.1 F F2(mbsvplist)2.734 E F0(manual)2.734 E .195
+(page\), XBTs, CTDs, or databases, and to construct ne)108 290.4 R 2.695
+(wp)-.25 G .195(ro\214les consistent with these v)-2.695 F .195
+(arious sources of in-)-.25 F .67
+(formation. The SVPs are represented by a set of paired depth and v)108
+302.4 R .67(elocity v)-.15 F .67(alues which are connected by)-.25 F
+.692(linear interpolation.)108 314.4 R .692
+(Users may load a number of SVPs for display)5.692 F 3.192(.U)-.65 G
+.691(sers may load or create a single ed-)-3.192 F
+(itable SVP and then interacti)108 326.4 Q -.15(ve)-.25 G
 (ly modify this pro\214le.).15 E .497(When users load sw)108 350.4 R
 .497(ath bath)-.1 F .497(ymetry data containing ra)-.05 F 2.997(wt)-.15
 G(ra)-2.997 E -.15(ve)-.2 G 2.997(lt).15 G .497
@@ -322,12 +328,12 @@ acing is the handling of the initial tak)108 578.4 R(eof)-.1 E 3.867(fa)
 .035(forming. The usual approach is to use Snell')108 614.4 R 2.536(sl)
 -.55 G .336 -.15(aw t)-2.536 H 2.536(oa).15 G .036
 (djust the starting angle for this change in sound v)-2.536 F(eloc-)-.15
-E(ity)108 626.4 Q 3.843(.T)-.65 G 1.343
-(his amounts to an assumption that the original SSV w)-3.843 F 1.343
-(as correct and that the rays pass through an)-.1 F .301(insigni\214can\
-tly thick layer in which the sound speed equals the SSV before transiti\
-oning to the sound speed)108 638.4 R .895(implied by the SVP)108 650.4 R
-3.395(.T)-1.11 G .895(his is the def)-3.395 F .894
+E(ity)108 626.4 Q 3.056(.T)-.65 G .556
+(his amounts to an assumption that the original SSV w)-3.056 F .556
+(as correct and that the rays pass through an in-)-.1 F .787(signi\214c\
+antly thick layer in which the sound speed equals the SSV before transi\
+tioning to the sound speed)108 638.4 R .895(implied by the SVP)108 650.4
+R 3.395(.T)-1.11 G .895(his is the def)-3.395 F .894
 (ault setting for raytracing in)-.1 F F2(MB-System)3.394 E F0 5.894(.A)C
 (lternati)-5.894 E -.15(ve)-.25 G(ly).15 E 3.394(,o)-.65 G .894
 (ne can pro-)-3.394 F .313
@@ -356,13 +362,13 @@ BP
 /F0 10/Times-Roman@0 SF(mb)72 48 Q -.15(ve)-.15 G 127.91
 (locitytool\(1\) MB-System).15 F 127.91(5.0 mb)2.5 F -.15(ve)-.15 G
 (locitytool\(1\)).15 E/F1 10/Times-Bold@0 SF(MBv)108 84 Q(elocitytool)
--.1 E F0 1.591(can be used in conjunction with)4.091 F F1(mbpr)4.091 E
-(ocess)-.18 E F0 6.591(.I)C 4.091(ft)-6.591 G 1.59(he user uses the)
--4.091 F F1(Sa)4.09 E 1.79 -.1(ve s)-.25 H 1.59(wath svp \214le).1 F F0
-.066(option to sa)108 96 R .366 -.15(ve a)-.2 H 2.566(nS).15 G .066
-(VP model de)-2.566 F -.15(ve)-.25 G .066
-(loped through the analysis of a particular sw).15 F .067
-(ath data \214le,)-.1 F F1(MBv)2.567 E(elocitytool)-.1 E F0 .455
+-.1 E F0 .566(can be used in conjunction with)3.066 F F1(mbpr)3.066 E
+(ocess)-.18 E F0 5.566(.I)C 3.066(ft)-5.566 G .566(he user uses the)
+-3.066 F F1(Sa)3.066 E .766 -.1(ve s)-.25 H .566(wath svp \214le).1 F F0
+(op-)3.065 E .691(tion to sa)108 96 R .991 -.15(ve a)-.2 H 3.191(nS).15
+G .691(VP model de)-3.191 F -.15(ve)-.25 G .691
+(loped through the analysis of a particular sw).15 F .692
+(ath data \214le,)-.1 F F1(MBv)3.192 E(elocitytool)-.1 E F0 .455
 (also sets the associated)108 108 R F1(mbpr)2.955 E(ocess)-.18 E F0 .455
 (parameter \214le so that)2.955 F F1(mbpr)2.955 E(ocess)-.18 E F0 .455
 (recalculates the bath)2.955 F .455(ymetry using the)-.05 F(ne)108 120 Q
@@ -385,18 +391,18 @@ E F0 .938(parameters by using the)3.438 F F1(Sa)3.438 E -.1(ve)-.25 G
 E(ocess)-.18 E F0 .621(as static corrections to the)3.121 F(bath)108 204
 Q(ymetry)-.05 E 2.5(.T)-.65 G(his is accomplished by using the)-2.5 E F1
 (Sa)2.5 E .2 -.1(ve r)-.25 H(esiduals as offsets)-.08 E F0
-(option under the)2.5 E F1(File)2.5 E F0(menu.)2.5 E .998
-(If a user attempts to read in sw)108 228 R .998(ath bath)-.1 F .998
-(ymetry that does not contain the tra)-.05 F -.15(ve)-.2 G 3.498(lt).15
-G .998(ime and beam angle data)-3.498 F 1.01(required for bath)108 240 R
-1.01(ymetry recalculation,)-.05 F F1(MBv)3.51 E(elocitytool)-.1 E F0
-1.01(will estimate the tra)3.51 F -.15(ve)-.2 G 3.51(lt).15 G 1.01
-(imes and angles from the)-3.51 F(bath)108 252 Q 1.163
+(option under the)2.5 E F1(File)2.5 E F0(menu.)2.5 E .268
+(If a user attempts to read in sw)108 228 R .268(ath bath)-.1 F .268
+(ymetry that does not contain the tra)-.05 F -.15(ve)-.2 G 2.768(lt).15
+G .268(ime and beam angle data re-)-2.768 F .402(quired for bath)108 240
+R .402(ymetry recalculation,)-.05 F F1(MBv)2.902 E(elocitytool)-.1 E F0
+.402(will estimate the tra)2.902 F -.15(ve)-.2 G 2.902(lt).15 G .402
+(imes and angles from the ba-)-2.902 F(th)108 252 Q .523
 (ymetry by assuming a 1500 m/s half-space \(and then post a w)-.05 F
-1.162(arning dialog\). Although the user can)-.1 F .265
-(proceed to model bath)108 264 R .265
-(ymetry recalculation by modifying the acti)-.05 F .566 -.15(ve S)-.25 H
-.266(VP just as with proper data, the tra).15 F -.15(ve)-.2 G(l).15 E
+.522(arning dialog\). Although the user can pro-)-.1 F 1.098
+(ceed to model bath)108 264 R 1.099
+(ymetry recalculation by modifying the acti)-.05 F 1.399 -.15(ve S)-.25
+H 1.099(VP just as with proper data, the tra).15 F -.15(ve)-.2 G(l).15 E
 .27
 (times and angles are not in general correct and so the modeling and an)
 108 276 R 2.77(yr)-.15 G .27(esults it gi)-2.77 F -.15(ve)-.25 G 2.77
@@ -418,20 +424,21 @@ G .998(ime and beam angle data)-3.498 F 1.01(required for bath)108 240 R
 (Christian do Santos Ferreira)108 424.8 Q(MAR)113 436.8 Q
 (UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
 448.8 Q -.15(ve)-.25 G(rsity of Bremen).15 E F2(OPTIONS)72 477.6 Q F1
-<ad42>108 489.6 Q/F3 10/Times-Italic@0 SF(yr/mo/da/hr/mn/sc)23.63 E F0
-.614(Sets the starting time for data allo)144 501.6 R .614
+<ad42>108 489.6 Q/F3 10/Times-Italic@0 SF(yr/mo/da/hr/mn/sc)144 489.6 Q
+F0 .614(Sets the starting time for data allo)144 501.6 R .614
 (wed in the input data; pings with times before the starting time)-.25 F
 (will be ignored.)144 513.6 Q(Def)5 E(ault:)-.1 E F3(yr/mo/da/hr/mn/sc)
 2.5 E F0 2.5(=1)2.5 G(962/2/21/10/30/0.)-2.5 E F1<ad45>108 530.4 Q F3
-(yr/mo/da/hr/mn/sc)23.63 E F0 .286(Sets the ending time for data allo)
-144 542.4 R .287
+(yr/mo/da/hr/mn/sc)144 530.4 Q F0 .286
+(Sets the ending time for data allo)144 542.4 R .287
 (wed in the input data; pings with times after the ending time will)-.25
 F(be ignored.)144 554.4 Q(Def)5 E(ault:)-.1 E F3(yr/mo/da/hr/mn/sc)2.5 E
 F0 2.5(=2)2.5 G(062/2/21/10/30/0.)-2.5 E F1<ad46>108 571.2 Q F3(format)
-24.19 E F0 1.018(Sets the format at startup for the input and output sw)
-144 583.2 R 1.018(ath sonar data using)-.1 F F1(MBIO)3.518 E F0(inte)
-3.518 E 1.018(ger format)-.15 F .974(identi\214ers. This v)144 595.2 R
-.974(alue can also be set interacti)-.25 F -.15(ve)-.25 G .974
+144 571.2 Q F0 1.018
+(Sets the format at startup for the input and output sw)144 583.2 R
+1.018(ath sonar data using)-.1 F F1(MBIO)3.518 E F0(inte)3.518 E 1.018
+(ger format)-.15 F .974(identi\214ers. This v)144 595.2 R .974
+(alue can also be set interacti)-.25 F -.15(ve)-.25 G .974
 (ly when specifying the input \214le.).15 F .975(This program)5.975 F
 .992(uses the)144 607.2 R F1(MBIO)3.492 E F0 .991
 (library and will read an)3.492 F 3.491(ys)-.15 G -.1(wa)-3.491 G .991
@@ -442,13 +449,14 @@ F0 2.5(=2)2.5 G(062/2/21/10/30/0.)-2.5 E F1<ad46>108 571.2 Q F3(format)
 -.25 G 3.194(ni).15 G 3.194(nt)-3.194 G(he)-3.194 E F1(MBIO)144 631.2 Q
 F0(manual page.)2.5 E(Def)5 E(ault:)-.1 E F3(format)2.5 E F0 2.5(=1)2.5
 G(1.)-2.5 E F1<ad48>108 648 Q F0 .162(This "help" \215ag cause the prog\
-ram to print out a description of its operation and then e)22.52 F .161
-(xit immedi-)-.15 F(ately)144 660 Q(.)-.65 E F1<ad49>108 676.8 Q F3
-(\214le)26.41 E F0 .702(Sets the data \214le from which the input sw)144
-688.8 R .703(ath data will be read at startup.)-.1 F .703(This v)5.703 F
-.703(alue can also be)-.25 F(set interacti)144 700.8 Q -.15(ve)-.25 G
-(ly).15 E 2.5(.S)-.65 G(ee belo)-2.5 E -.65(w.)-.25 G F1<ad53>108 717.6
-Q F3(svp\214le)24.74 E F0 .985
+ram to print out a description of its operation and then e)144 648 R
+.161(xit immedi-)-.15 F(ately)144 660 Q(.)-.65 E F1<ad49>108 676.8 Q F3
+(\214le)144 676.8 Q F0 .702
+(Sets the data \214le from which the input sw)144 688.8 R .703
+(ath data will be read at startup.)-.1 F .703(This v)5.703 F .703
+(alue can also be)-.25 F(set interacti)144 700.8 Q -.15(ve)-.25 G(ly).15
+E 2.5(.S)-.65 G(ee belo)-2.5 E -.65(w.)-.25 G F1<ad53>108 717.6 Q F3
+(svp\214le)144 717.6 Q F0 .985
 (Sets the data \214le from which an input display sound v)144 729.6 R
 .984(elocity pro\214le will be read at startup. See)-.15 F
 (MB-System 5.0)72 768 Q(10 No)132.205 E -.15(ve)-.15 G(mber 2014).15 E
@@ -462,13 +470,13 @@ BP
 (locitytool\(1\)).15 E(belo)144 84 Q 3.8 -.65(w. T)-.25 H(his v).65 E
 (alue can also be set interacti)-.25 E -.15(ve)-.25 G(ly).15 E(.)-.65 E
 /F1 10/Times-Bold@0 SF<ad57>108 100.8 Q/F2 10/Times-Italic@0 SF
-(svp\214le)20.3 E F0 .478
+(svp\214le)144 100.8 Q F0 .478
 (Sets the data \214le from which an input editable sound v)144 112.8 R
 .478(elocity pro\214le will be read at startup.)-.15 F(This)5.479 E -.25
 (va)144 124.8 S(lue can also be set interacti).25 E -.15(ve)-.25 G(ly)
 .15 E 2.5(.S)-.65 G(ee belo)-2.5 E -.65(w.)-.25 G F1<ad56>108 141.6 Q F0
-(Normally)23.08 E(,)-.65 E F1(mb)2.626 E -.1(ve)-.15 G(locitytool).1 E
-F0 -.1(wo)2.626 G .126(rks "silently" without outputting an).1 F .126
+(Normally)144 141.6 Q(,)-.65 E F1(mb)2.626 E -.1(ve)-.15 G(locitytool).1
+E F0 -.1(wo)2.626 G .126(rks "silently" without outputting an).1 F .126
 (ything to the stderr stream.)-.15 F .125(If the)5.125 F F1<ad56>144
 153.6 Q F0 .178(\215ag is gi)2.678 F -.15(ve)-.25 G .178(n, then).15 F
 F1(mb)2.678 E -.1(ve)-.15 G(locitytool).1 E F0 -.1(wo)2.679 G .179
@@ -476,7 +484,7 @@ F1(mb)2.678 E -.1(ve)-.15 G(locitytool).1 E F0 -.1(wo)2.679 G .179
 (ersion)-.15 E(being used, all error status messages, and a lar)144
 165.6 Q(ge amount of other information.)-.18 E/F3 10.95/Times-Bold@0 SF
 (INTERA)72 194.4 Q(CTIVE CONTR)-.602 E(OLS)-.329 E F1(File)108 206.4 Q
-F0(This b)19.89 E
+F0(This b)144 206.4 Q
 (utton brings up a menu containing the commands listed belo)-.2 E(w:)
 -.25 E F1(File->Open Display Pr)108 223.2 Q(o\214le)-.18 E F0 .211
 (Selecting this menu item brings up a popup windo)144 235.2 R 2.711(ww)
@@ -522,10 +530,10 @@ d dragged using the left mouse b)-.15 F(utton)-.2 E .929
 3.43(wv)-.25 G .93(elocity-depth points,)-3.58 F(and the right mouse b)
 144 460.8 Q(utton remo)-.2 E -.15(ve)-.15 G 2.5(sv).15 G
 (elocity-depth points.)-2.65 E F1(File->Sa)108 477.6 Q .2 -.1(ve E)-.25
-H(ditable Pr).1 E(o\214le)-.18 E F0 1.438
-(Selecting this menu item brings up a popup windo)144 489.6 R 3.937(ww)
--.25 G 1.437(hich allo)-3.937 F 1.437(ws the user to sa)-.25 F 1.737
--.15(ve t)-.2 H 1.437(he current).15 F(editable v)144 501.6 Q
+H(ditable Pr).1 E(o\214le)-.18 E F0 .455
+(Selecting this menu item brings up a popup windo)144 489.6 R 2.955(ww)
+-.25 G .455(hich allo)-2.955 F .455(ws the user to sa)-.25 F .754 -.15
+(ve t)-.2 H .454(he current ed-).15 F(itable v)144 501.6 Q
 (elocity pro\214le as a \214le.)-.15 E F1(File->Open Swath Sonar Data)
 108 518.4 Q F0 .144(Selecting this menu item brings up a popup windo)144
 530.4 R 2.645(ww)-.25 G .145(hich allo)-2.645 F .145
@@ -550,11 +558,11 @@ appropriate format id.)144 614.4 R .318(The sw)5.318 F .318
 (ath sonar data \214le)-.1 F .017
 (must be in one of the formats which store tra)144 626.4 R -.15(ve)-.2 G
 2.517(lt).15 G .017(ime data for each beam. Up to 25000 data records)
--2.517 F 1.309(will be read into a b)144 638.4 R(uf)-.2 E 1.308
-(fer for processing.)-.25 F 1.308(If there is no current editable v)
-6.308 F 1.308(elocity pro\214le, then a)-.15 F(def)144 650.4 Q .037
-(ault pro\214le consisting of 14 v)-.1 F .037
-(elocity-depth points with a v)-.15 F .038
+-2.517 F .388(will be read into a b)144 638.4 R(uf)-.2 E .387
+(fer for processing.)-.25 F .387(If there is no current editable v)5.387
+F .387(elocity pro\214le, then a de-)-.15 F -.1(fa)144 650.4 S .627
+(ult pro\214le consisting of 14 v).1 F .627
+(elocity-depth points with a v)-.15 F .628
 (elocity of 1500 m/s will be created. A)-.15 F 2.138
 (display pro\214le generated by the)144 662.4 R F1(mble)4.638 E(vitus)
 -.15 E F0 2.137(program will also be automatically generated and)4.638 F
@@ -644,16 +652,16 @@ R F1(mb)3.957 E -.1(ve)-.15 G(locitytool).1 E F0 1.457(in the interacti)
 -.15 F(depth in the SVP)144 554.4 Q(.)-1.11 E F1
 (Angle Mode->Adjust Angles Using Snell')108 571.2 Q 2.5(sL)-.37 G(aw)
 -2.5 E F0 .864(This b)144 583.2 R .863(utton sets the angle mode so tha\
-t the starting beam angles are corrected before raytracing,)-.2 F 1.617
-(using Snell')144 595.2 R 4.117(sL)-.55 G -.15(aw)-4.117 G 4.118(,f)-.5
-G 1.618(or the dif)-4.118 F 1.618(ference between the surf)-.25 F 1.618
-(ace sound v)-.1 F 1.618(elocity \(SSV\) and the sound)-.15 F -.15(ve)
-144 607.2 S .139(locity of the starting depth in the SVP).15 F 2.639(.T)
--1.11 G .139(his amounts to an assumption that the original SSV w)-2.639
-F(as)-.1 E 1.755(correct and that the rays pass through an insigni\214c\
-antly thick layer in which the sound speed)144 619.2 R .197(equals the \
-SSV before transitioning to the sound speed implied by the SVP)144 631.2
-R 2.696(.T)-1.11 G .196(his is the def)-2.696 F .196(ault set-)-.1 F
+t the starting beam angles are corrected before raytracing,)-.2 F .502
+(using Snell')144 595.2 R 3.002(sL)-.55 G -.15(aw)-3.002 G 3.002(,f)-.5
+G .502(or the dif)-3.002 F .502(ference between the surf)-.25 F .502
+(ace sound v)-.1 F .502(elocity \(SSV\) and the sound v)-.15 F(e-)-.15 E
+.686(locity of the starting depth in the SVP)144 607.2 R 3.185(.T)-1.11
+G .685(his amounts to an assumption that the original SSV w)-3.185 F(as)
+-.1 E 1.755(correct and that the rays pass through an insigni\214cantly\
+ thick layer in which the sound speed)144 619.2 R .197(equals the SSV b\
+efore transitioning to the sound speed implied by the SVP)144 631.2 R
+2.696(.T)-1.11 G .196(his is the def)-2.696 F .196(ault set-)-.1 F
 (ting for raytracing in)144 643.2 Q F1(mb)2.5 E -.1(ve)-.15 G
 (locitytool).1 E F0(and in)2.5 E F1(MB-System)2.5 E F0(in general.)2.5 E
 F1(Angle Mode->Adjust Angles Using Sonar Geometry)108 660 Q F0 .863
@@ -685,11 +693,11 @@ BP
 (Selecting this b)144 124.8 R .134(utton causes the sw)-.2 F .135
 (ath sonar tra)-.1 F -.15(ve)-.2 G 2.635(lt).15 G .135
 (ime data to be processed into bath)-2.635 F .135(ymetry using)-.05 F
-1.816(the current editable v)144 136.8 R 1.816
-(elocity pro\214le. The processing in)-.15 F -.2(vo)-.4 G(lv).2 E 1.816
-(es full raytracing through the w)-.15 F(ater)-.1 E -.15(ve)144 148.8 S
-.255(locity model. The bath).15 F .256
-(ymetry of each ping is \214t with a line, and bath)-.05 F .256
+.513(the current editable v)144 136.8 R .513
+(elocity pro\214le. The processing in)-.15 F -.2(vo)-.4 G(lv).2 E .513
+(es full raytracing through the w)-.15 F .513(ater v)-.1 F(e-)-.15 E
+.836(locity model. The bath)144 148.8 R .836
+(ymetry of each ping is \214t with a line, and bath)-.05 F .837
 (ymetry residuals are calcu-)-.05 F .422
 (lated for each good beam relati)144 160.8 R .721 -.15(ve t)-.25 H 2.921
 (ot).15 G .421(he linear \214t.)-2.921 F .421(The a)5.421 F -.15(ve)-.2
@@ -719,16 +727,16 @@ esidual plot will be roughly \215at.)-.15 F .991(If the)5.991 F -.1(wa)
 144 268.8 S .696(ter v).1 F .696
 (elocity pro\214le is signi\214cantly in error)-.15 F 3.196(,t)-.4 G
 .697(hen the outer beam depths may anomalously shal-)-3.196 F(lo)144
-280.8 Q 3.53(w\()-.25 G 1.03(edge curl up\) or deep \(edge curl do)-3.53
-F 3.529(wn\). In)-.25 F 1.029(practice, the editable v)3.529 F 1.029
-(elocity pro\214le is altered)-.15 F(interacti)144 292.8 Q -.15(ve)-.25
-G 1.372(ly until a reasonably residual pattern is achie).15 F -.15(ve)
--.25 G 1.372(d; reference v).15 F 1.372(elocity pro\214les obtained)-.15
-F .089(from CTD casts, XBT')144 304.8 R .089
-(s, or data bases \(see manual page for program)-.55 F F1(mble)2.589 E
-(vitus)-.15 E F0 2.589(\)m)C .088(ay be read in as)-2.589 F
-(display pro\214les to guide the editing process.)144 316.8 Q F1(Quit)
-108 333.6 Q F0 .046(This b)16.55 F .046(utton causes the program to e)
+280.8 Q 2.669(w\()-.25 G .168(edge curl up\) or deep \(edge curl do)
+-2.669 F 2.668(wn\). In)-.25 F .168(practice, the editable v)2.668 F
+.168(elocity pro\214le is altered in-)-.15 F(teracti)144 292.8 Q -.15
+(ve)-.25 G .077(ly until a reasonably residual pattern is achie).15 F
+-.15(ve)-.25 G .078(d; reference v).15 F .078
+(elocity pro\214les obtained from)-.15 F .35(CTD casts, XBT')144 304.8 R
+.35(s, or data bases \(see manual page for program)-.55 F F1(mble)2.85 E
+(vitus)-.15 E F0 2.85(\)m)C .35(ay be read in as dis-)-2.85 F
+(play pro\214les to guide the editing process.)144 316.8 Q F1(Quit)108
+333.6 Q F0 .046(This b)144 333.6 R .046(utton causes the program to e)
 -.2 F .047(xit gracefully)-.15 F 2.547(,b)-.65 G .047
 (ut without asking an)-2.747 F 2.547(yq)-.15 G 2.547(uestions. If)-2.547
 F .047(you ha)2.547 F -.15(ve)-.2 G(n').15 E(t)-.18 E(already sa)144

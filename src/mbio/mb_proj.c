@@ -12,7 +12,10 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /** @file
- * mb_proj.c includes the "mb_" functions used to initialize
+ * @brief mb_system functions to initialize and transform between projections and
+ * geographic coordinates systems.
+ * 
+ * @details  Declare mb_system functions used to initialize
  * projections, and then to do forward (mb_proj_forward())
  * and inverse (mb_proj_inverse()) projections
  * between geographic coordinates (longitude and latitude) and
@@ -278,7 +281,7 @@ int mb_proj_inverse(int verbose, void *pjptr, double easting, double northing, d
 #include <proj.h>
 
 /*--------------------------------------------------------------------*/
-int mb_proj6_init(int verbose, char *source_crs, char *target_crs, void **pjptr, int *error) {
+static int mb_proj6_init(int verbose, char *source_crs, char *target_crs, void **pjptr, int *error) {
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -306,15 +309,15 @@ int mb_proj6_init(int verbose, char *source_crs, char *target_crs, void **pjptr,
   else if (strncmp(source_crs, "UTM", 3) == 0) {
     int utm_zone;
     char utm_ns;
-    int epsg_id;
     int n = sscanf(source_crs, "UTM%d%c", &utm_zone, &utm_ns);
     if (n == 2 && utm_zone > 0 && utm_zone < 61
       && (utm_ns == 'N' || utm_ns == 'n'
           || utm_ns == 'S' || utm_ns == 's')) {
+      int epsg_id;
       if (utm_ns == 'N' || utm_ns == 'n') {
         epsg_id = 32600 + utm_zone;
       }
-      else if (utm_ns == 'S' || utm_ns == 's') {
+      else /* if (utm_ns == 'S' || utm_ns == 's') */ {
         epsg_id = 32700 + utm_zone;
       }
       sprintf(source, "EPSG:%4.4d", epsg_id);
@@ -332,15 +335,15 @@ int mb_proj6_init(int verbose, char *source_crs, char *target_crs, void **pjptr,
   else if (strncmp(target_crs, "UTM", 3) == 0) {
     int utm_zone;
     char utm_ns;
-    int epsg_id;
     int n = sscanf(target_crs, "UTM%d%c", &utm_zone, &utm_ns);
     if (n == 2 && utm_zone > 0 && utm_zone < 61
       && (utm_ns == 'N' || utm_ns == 'n'
           || utm_ns == 'S' || utm_ns == 's')) {
+      int epsg_id;
       if (utm_ns == 'N' || utm_ns == 'n') {
         epsg_id = 32600 + utm_zone;
       }
-      else if (utm_ns == 'S' || utm_ns == 's') {
+      else /* if (utm_ns == 'S' || utm_ns == 's') */ {
         epsg_id = 32700 + utm_zone;
       }
       sprintf(target, "EPSG:%4.4d", epsg_id);

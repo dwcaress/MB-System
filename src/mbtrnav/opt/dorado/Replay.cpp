@@ -43,6 +43,8 @@
 #define MEAS_ALONGTRACK 3
 #define MEAS_CROSSTRACK 4
 #define MEAS_ALTITUDE   5
+#define BUF_512 512
+#define BUF_1024 1024
 
 static char csvbuf[50000];
 
@@ -423,13 +425,14 @@ int Replay::getMbTrnRecordSet(poseT *pt, measT *mt)
 
 int Replay::openLogFiles()
 {
-  char logfile[1000];
+
+  char logfile[BUF_1024];
   fprintf(stdout, "Replay - Loading log files in %s...\n", logdir);
 
   // Open the "special cases" if needed
   if (trn_attr->_lrauvDvlFilename) {
     // Open the dvl CSV file and prep for reading
-    sprintf(logfile, "%s/%s", logdir, trn_attr->_lrauvDvlFilename);
+    snprintf(logfile, BUF_1024, "%s/%s", logdir, trn_attr->_lrauvDvlFilename);
     fprintf(stdout, "replay - Loading CSV file %s...\n", logfile);
     dvl_csv = fopen(logfile, "r");
     if (dvl_csv) {
@@ -439,27 +442,27 @@ int Replay::openLogFiles()
     }
   } else if (trn_attr->_useMbTrnData) {
     // Open the MbTrn file and prep for reading
-    sprintf(logfile, "%s/MbTrn.log", logdir);
+    snprintf(logfile, BUF_1024, "%s/MbTrn.log", logdir);
     fprintf(stdout, "replay - Loading MbTrn.log file %s...\n", logfile);
     mbtrn_log = new DataLogReader(logfile);
     return 0;
   }
 
-  sprintf(logfile, "%s/TerrainNav.log", logdir);
+  snprintf(logfile, BUF_1024, "%s/TerrainNav.log", logdir);
   if (access(logfile, R_OK) == 0) {
     // TerrainNav log files
     fprintf(stdout, "Replay - Opening %s...\n", logfile);
     tnav_log = new DataLogReader(logfile);
   } else {
     // Default log files
-    sprintf(logfile, "%s/TerrainAid.log", logdir);
+    snprintf(logfile, BUF_1024, "%s/TerrainAid.log", logdir);
     fprintf(stdout, "Replay - Opening %s...\n", logfile);
     trn_log = new DataLogReader(logfile);
 
     if (trn_attr->_useDvlSide) {
-      sprintf(logfile, "%s/dvlSide.log", logdir);
+      snprintf(logfile, BUF_1024, "%s/dvlSide.log", logdir);
     } else {
-      sprintf(logfile, "%s/navigation.log", logdir);
+      snprintf(logfile, BUF_1024, "%s/navigation.log", logdir);
     }
     fprintf(stdout, "Replay - Opening %s...\n", logfile);
     nav_log = new DataLogReader(logfile);
@@ -492,8 +495,8 @@ bool Replay::useTRNServer()
 // since it works OK.
 int Replay::loadCfgAttributes()
 {
-  char cfgfile[300];
-  sprintf(cfgfile, "%s/terrainAid.cfg", logdir);
+  char cfgfile[BUF_512];
+  snprintf(cfgfile, BUF_512, "%s/terrainAid.cfg", logdir);
   if (access(cfgfile, F_OK) < 0) {
     fprintf(stderr, "replay - Could not find %s", cfgfile);
     return 1;
@@ -648,17 +651,17 @@ TerrainNav* Replay::connectTRN() {
         // set path names (only if configured in trn_attr)
         memset(buf,0,REPLAY_PATHNAME_LENGTH);
         if(NULL!=trn_attr->_mapFileName) {
-            sprintf(buf, "%s/%s", mapdir, trn_attr->_mapFileName);
+            snprintf(buf, REPLAY_PATHNAME_LENGTH, "%s/%s", mapdir, trn_attr->_mapFileName);
             free(trn_attr->_mapFileName); trn_attr->_mapFileName = strdup(buf);
         }
         memset(buf,0,REPLAY_PATHNAME_LENGTH);
         if(NULL!=trn_attr->_vehicleCfgName) {
-            sprintf(buf, "%s/%s", datadir, trn_attr->_vehicleCfgName);
+            snprintf(buf, REPLAY_PATHNAME_LENGTH, "%s/%s", datadir, trn_attr->_vehicleCfgName);
             free(trn_attr->_vehicleCfgName); trn_attr->_vehicleCfgName = strdup(buf);
         }
         memset(buf,0,REPLAY_PATHNAME_LENGTH);
         if(NULL!=trn_attr->_particlesName) {
-            sprintf(buf, "%s/%s", datadir, trn_attr->_particlesName);
+            snprintf(buf, REPLAY_PATHNAME_LENGTH, "%s/%s", datadir, trn_attr->_particlesName);
             free(trn_attr->_particlesName); trn_attr->_particlesName = strdup(buf);
         }
         fprintf(stdout, "%s:%d - %s\n%s\n%s\n", __FILE__,__LINE__,trn_attr->_mapFileName, trn_attr->_vehicleCfgName, trn_attr->_particlesName);
@@ -832,7 +835,7 @@ int Replay::parseDvlCsvLine(const char *line, poseT *pt, measT *mt)
       fprintf(stderr, "Replay - unexpected EOL parsing record %ld of %s data\n",
         nupdates, instr);
       fprintf(stderr, "Replay - last parsed token: %s \n",
-        lastToken);
+        (lastToken == NULL ? "" : lastToken));
       fprintf(stderr, "Replay - expecting %d items, EOL detected after beam #%d\n",
         1+DVL_RANGES+(mt->numMeas*nItems), bi);
       fprintf(stderr, "Replay - expecting %d items per beam with %s data\n",

@@ -1577,9 +1577,7 @@ public:
                     char *pecpy = strdup(pe);
                     char *rebuf = (char *)malloc(new_len);
                     memset(rebuf,0,new_len);
-
                     snprintf(rebuf, new_len, "%s%s%s",wp,val,pecpy);
-
                     free(pecpy);
                     free(obuf);
                     obuf = rebuf;
@@ -1626,7 +1624,6 @@ public:
                             size_t cmd_len = strlen(key) + strlen(etval) + 4;
                             char *cmd_buf = (char *)malloc(cmd_len);
                             memset(cmd_buf,0,cmd_len);
-
                             snprintf(cmd_buf, cmd_len, "--%s%s%s", key,(strlen(etval)>0?"=":""),etval);
 
                             char dummy[]={'f','o','o','\0'};

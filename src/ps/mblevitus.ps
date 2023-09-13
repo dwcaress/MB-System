@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:02 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:08 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 4
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -245,18 +251,18 @@ F 1.407
 (elocity pro\214le for a speci\214ed location using temperature and)-.15
 F .78(salinity data from the 1982 Climatological Atlas of the W)108
 242.4 R .779(orld Ocean [Le)-.8 F .779(vitus, 1982].)-.25 F .779(The w)
-5.779 F .779(ater v)-.1 F(elocity)-.15 E 1.2(pro\214le is representati)
-108 254.4 R 1.5 -.15(ve o)-.25 H 3.7(ft).15 G 1.2(he mean annual w)-3.7
-F 1.201(ater column structure for a speci\214ed 1 de)-.1 F 1.201
-(gree by 1 de)-.15 F(gree)-.15 E(re)108 266.4 Q 3.28(gion. The)-.15 F
-.779(pro\214le is output to a speci\214ed \214le which can be read and \
-used by programs \(e.g.)3.28 F F2(mb)3.279 E(bath)-.1 E F0(or)3.279 E F2
-(mb)108 278.4 Q -.1(ve)-.15 G(locitytool).1 E F0 3.423(\)w)C .923
-(hich calculate sw)-3.423 F .923(ath sonar sonar bath)-.1 F .923
-(ymetry from tra)-.05 F -.15(ve)-.2 G 3.423(lt).15 G .923
-(imes by raytracing through a)-3.423 F -.1(wa)108 290.4 S(ter v).1 E
-(elocity model.)-.15 E(The Le)108 314.4 Q(vitus [1982] reference is:)
--.25 E(Le)120.5 326.4 Q(vitus, S, Climatological Atlas of the W)-.25 E
+5.779 F .779(ater v)-.1 F(elocity)-.15 E .378(pro\214le is representati)
+108 254.4 R .678 -.15(ve o)-.25 H 2.878(ft).15 G .378(he mean annual w)
+-2.878 F .378(ater column structure for a speci\214ed 1 de)-.1 F .379
+(gree by 1 de)-.15 F .379(gree re-)-.15 F 2.636(gion. The)108 266.4 R
+.136(pro\214le is output to a speci\214ed \214le which can be read and \
+used by programs \(e.g.)2.636 F F2(mb)2.635 E(bath)-.1 E F0(or)2.635 E
+F2(mb-)2.635 E -.1(ve)108 278.4 S(locitytool).1 E F0 2.58(\)w)C .08
+(hich calculate sw)-2.58 F .081(ath sonar sonar bath)-.1 F .081
+(ymetry from tra)-.05 F -.15(ve)-.2 G 2.581(lt).15 G .081
+(imes by raytracing through a w)-2.581 F(ater)-.1 E -.15(ve)108 290.4 S
+(locity model.).15 E(The Le)108 314.4 Q(vitus [1982] reference is:)-.25
+E(Le)120.5 326.4 Q(vitus, S, Climatological Atlas of the W)-.25 E
 (orld Ocean,)-.8 E(NO)120.5 338.4 Q(AA Professional P)-.35 E
 (aper 13, U.S. Go)-.15 E -.15(ve)-.15 G(rnment Printing Of).15 E
 (\214ce,)-.25 E -.8(Wa)120.5 350.4 S(shington D.C., 173pp, 1982.).8 E
@@ -269,31 +275,32 @@ E(B. M. Ho)125.5 386.4 Q(we, "On equations for the speed of)-.25 E
 (ter", J. Acoust. Soc. Am., 93,).1 E(255-275, 1993)125.5 410.4 Q .223
 (The implementation of these equations follo)108 422.4 R .223
 (ws code written at the Ocean Data F)-.25 F .223
-(acility of the Scripps Insti-)-.15 F 2.485(tution of Oceanograph)108
-434.4 R 6.285 -.65(y. T)-.05 H 2.485(he depth to which the Le).65 F
-2.485(vitus database de\214nes the w)-.25 F 2.485
-(ater column re\215ects)-.1 F(re)108 446.4 Q .592(gional w)-.15 F .592
-(ater depths which may be e)-.1 F .591(xceeded in places.)-.15 F F2
-(mble)5.591 E(vitus)-.15 E F0 -.15(ex)3.091 G .591(tends the w).15 F
-.591(ater sound v)-.1 F .591(elocity pro-)-.15 F .293(\214les to a dept\
-h of 12000 meters using the deepest salinity and temperature v)108 458.4
-R .294(alues a)-.25 F -.25(va)-.2 G .294(ilable in the database.).25 F
-(If the speci\214ed location is subaerial, then no w)108 470.4 Q(ater v)
--.1 E(elocity pro\214le is calculated.)-.15 E F1(MB-SYSTEM A)72 499.2 Q
-(UTHORSHIP)-.548 E F0(Da)108 511.2 Q(vid W)-.2 E 2.5(.C)-.92 G(aress)
--2.5 E(Montere)113 523.2 Q 2.5(yB)-.15 G(ay Aquarium Research Institute)
--2.5 E(Dale N. Chayes)108 535.2 Q(Center for Coastal and Ocean Mapping)
-113 547.2 Q(Uni)113 559.2 Q -.15(ve)-.25 G(rsity of Ne).15 E 2.5(wH)-.25
-G(ampshire)-2.5 E(Christian do Santos Ferreira)108 571.2 Q(MAR)113 583.2
-Q(UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
+(acility of the Scripps Insti-)-.15 F 1.412(tution of Oceanograph)108
+434.4 R 5.212 -.65(y. T)-.05 H 1.413(he depth to which the Le).65 F
+1.413(vitus database de\214nes the w)-.25 F 1.413
+(ater column re\215ects re-)-.1 F .21(gional w)108 446.4 R .21
+(ater depths which may be e)-.1 F .21(xceeded in places.)-.15 F F2(mble)
+5.21 E(vitus)-.15 E F0 -.15(ex)2.71 G .21(tends the w).15 F .21
+(ater sound v)-.1 F .21(elocity pro\214les)-.15 F .735(to a depth of 12\
+000 meters using the deepest salinity and temperature v)108 458.4 R .736
+(alues a)-.25 F -.25(va)-.2 G .736(ilable in the database.).25 F(If)
+5.736 E(the speci\214ed location is subaerial, then no w)108 470.4 Q
+(ater v)-.1 E(elocity pro\214le is calculated.)-.15 E F1(MB-SYSTEM A)72
+499.2 Q(UTHORSHIP)-.548 E F0(Da)108 511.2 Q(vid W)-.2 E 2.5(.C)-.92 G
+(aress)-2.5 E(Montere)113 523.2 Q 2.5(yB)-.15 G
+(ay Aquarium Research Institute)-2.5 E(Dale N. Chayes)108 535.2 Q
+(Center for Coastal and Ocean Mapping)113 547.2 Q(Uni)113 559.2 Q -.15
+(ve)-.25 G(rsity of Ne).15 E 2.5(wH)-.25 G(ampshire)-2.5 E
+(Christian do Santos Ferreira)108 571.2 Q(MAR)113 583.2 Q
+(UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
 595.2 Q -.15(ve)-.25 G(rsity of Bremen).15 E F1(OPTIONS)72 624 Q F2
 <ad48>108 636 Q F0 .162(This "help" \215ag cause the program to print o\
-ut a description of its operation and then e)22.52 F .161(xit immedi-)
--.15 F(ately)144 648 Q(.)-.65 E F2<ad4f>108 664.8 Q F3(out\214le)22.52 E
-F0(Sets the output \214le for the w)144 676.8 Q(ater v)-.1 E
+ut a description of its operation and then e)144 636 R .161(xit immedi-)
+-.15 F(ately)144 648 Q(.)-.65 E F2<ad4f>108 664.8 Q F3(out\214le)144
+664.8 Q F0(Sets the output \214le for the w)144 676.8 Q(ater v)-.1 E
 (elocity pro\214le.)-.15 E(Def)5 E(ault:)-.1 E F3(out\214le)2.5 E F0 2.5
 (=")2.5 G -.15(ve)-2.5 G(locity".).15 E F2<ad52>108 693.6 Q F3(lon/lat)
-23.08 E F0 .337
+144 693.6 Q F0 .337
 (Sets the longitude and latitude of the location of the w)144 705.6 R
 .338(ater v)-.1 F .338(elocity pro\214le.)-.15 F .338(Whole de)5.338 F
 .338(grees should)-.15 F(be used, as the database has a 1 de)144 717.6 Q
@@ -306,7 +313,7 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF(mble)72 48 Q 148.97(vitus\(1\) MB-System)-.25 F
 148.97(5.0 mble)2.5 F(vitus\(1\))-.25 E/F1 10/Times-Bold@0 SF<ad56>108
-84 Q F0(Normally)23.08 E(,)-.65 E F1(mble)2.533 E(vitus)-.15 E F0 .032
+84 Q F0(Normally)144 84 Q(,)-.65 E F1(mble)2.533 E(vitus)-.15 E F0 .032
 (outputs only a minor bit of information to the stdout stream.)2.533 F
 .032(If the)5.032 F F1<ad56>2.532 E F0 .032(\215ag is)2.532 F(gi)144 96
 Q -.15(ve)-.25 G .107(n, then).15 F F1(mble)2.607 E(vitus)-.15 E F0 -.1

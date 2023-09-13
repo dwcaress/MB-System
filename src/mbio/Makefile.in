@@ -178,21 +178,21 @@ am_libmbio_la_OBJECTS = mb_absorption.lo mb_access.lo mb_angle.lo \
 	mbr_sb2000ss.lo mbr_sb2100bi.lo mbr_sb2100rw.lo \
 	mbr_sbifremr.lo mbr_sbsiocen.lo mbr_sbsiolsi.lo \
 	mbr_sbsiomrg.lo mbr_sbsioswb.lo mbr_sburicen.lo \
-	mbr_sburivax.lo mbr_segysegy.lo mbr_swplssxi.lo \
-	mbr_swplssxp.lo mbr_wasspenl.lo mbr_xtfb1624.lo \
-	mbr_xtfr8101.lo mbsys_3datdepthlidar.lo mbsys_3ddwissl.lo \
-	mbsys_atlas.lo mbsys_benthos.lo mbsys_dsl.lo mbsys_elac.lo \
-	mbsys_elacmk2.lo mbsys_hdcs.lo mbsys_hs10.lo mbsys_hsds.lo \
-	mbsys_hsmd.lo mbsys_hysweep.lo mbsys_image83p.lo \
-	mbsys_jstar.lo mbsys_kmbes.lo mbsys_ldeoih.lo mbsys_mr1b.lo \
-	mbsys_mr1.lo mbsys_mr1v2001.lo mbsys_mstiff.lo \
-	mbsys_navnetcdf.lo mbsys_netcdf.lo mbsys_oic.lo \
-	mbsys_reson7k3.lo mbsys_reson7k.lo mbsys_reson8k.lo \
-	mbsys_reson.lo mbsys_sb2000.lo mbsys_sb2100.lo mbsys_sb.lo \
-	mbsys_simrad2.lo mbsys_simrad3.lo mbsys_simrad.lo \
-	mbsys_singlebeam.lo mbsys_stereopair.lo mbsys_surf.lo \
-	mbsys_swathplus.lo mbsys_wassp.lo mbsys_xse.lo \
-	$(am__objects_1)
+	mbr_sburivax.lo mbr_segysegy.lo mbr_soirovnv.lo \
+	mbr_soiusbln.lo mbr_swplssxi.lo mbr_swplssxp.lo \
+	mbr_wasspenl.lo mbr_xtfb1624.lo mbr_xtfr8101.lo \
+	mbsys_3datdepthlidar.lo mbsys_3ddwissl.lo mbsys_atlas.lo \
+	mbsys_benthos.lo mbsys_dsl.lo mbsys_elac.lo mbsys_elacmk2.lo \
+	mbsys_hdcs.lo mbsys_hs10.lo mbsys_hsds.lo mbsys_hsmd.lo \
+	mbsys_hysweep.lo mbsys_image83p.lo mbsys_jstar.lo \
+	mbsys_kmbes.lo mbsys_ldeoih.lo mbsys_mr1b.lo mbsys_mr1.lo \
+	mbsys_mr1v2001.lo mbsys_mstiff.lo mbsys_navnetcdf.lo \
+	mbsys_netcdf.lo mbsys_oic.lo mbsys_reson7k3.lo \
+	mbsys_reson7k.lo mbsys_reson8k.lo mbsys_reson.lo \
+	mbsys_sb2000.lo mbsys_sb2100.lo mbsys_sb.lo mbsys_simrad2.lo \
+	mbsys_simrad3.lo mbsys_simrad.lo mbsys_singlebeam.lo \
+	mbsys_stereopair.lo mbsys_surf.lo mbsys_swathplus.lo \
+	mbsys_wassp.lo mbsys_xse.lo $(am__objects_1)
 nodist_libmbio_la_OBJECTS =
 libmbio_la_OBJECTS = $(am_libmbio_la_OBJECTS) \
 	$(nodist_libmbio_la_OBJECTS)
@@ -272,6 +272,7 @@ am__depfiles_remade = ./$(DEPDIR)/mb_absorption.Plo \
 	./$(DEPDIR)/mbr_sbsiolsi.Plo ./$(DEPDIR)/mbr_sbsiomrg.Plo \
 	./$(DEPDIR)/mbr_sbsioswb.Plo ./$(DEPDIR)/mbr_sburicen.Plo \
 	./$(DEPDIR)/mbr_sburivax.Plo ./$(DEPDIR)/mbr_segysegy.Plo \
+	./$(DEPDIR)/mbr_soirovnv.Plo ./$(DEPDIR)/mbr_soiusbln.Plo \
 	./$(DEPDIR)/mbr_swplssxi.Plo ./$(DEPDIR)/mbr_swplssxp.Plo \
 	./$(DEPDIR)/mbr_wasspenl.Plo ./$(DEPDIR)/mbr_xtfb1624.Plo \
 	./$(DEPDIR)/mbr_xtfr8101.Plo \
@@ -397,6 +398,7 @@ EGREP = @EGREP@
 ETAGS = @ETAGS@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
+FILECMD = @FILECMD@
 GDAL_CONF = @GDAL_CONF@
 GMT_CONF = @GMT_CONF@
 GMT_PLUGINDIR = @GMT_PLUGINDIR@
@@ -573,7 +575,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 lib_LTLIBRARIES = libmbio.la
-@BUILD_MBTRN_TRUE@MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrnframe/usr -I${top_srcdir}/src/mbtrnframe/mframe/src
+@BUILD_MBTRN_TRUE@MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrnframe
 @BUILD_MBTRN_TRUE@MBTRNLIB = ${top_builddir}/src/mbtrn/libr7kr.la
 include_HEADERS = mb_config.h mb_define.h mb_format.h mb_info.h \
 	mb_io.h mb_process.h mb_segy.h mb_status.h mb_swap.h \
@@ -627,18 +629,19 @@ libmbio_la_SOURCES = mb_absorption.c mb_access.c mb_angle.c \
 	mbr_sb2000sb.c mbr_sb2000ss.c mbr_sb2100bi.c mbr_sb2100rw.c \
 	mbr_sbifremr.c mbr_sbsiocen.c mbr_sbsiolsi.c mbr_sbsiomrg.c \
 	mbr_sbsioswb.c mbr_sburicen.c mbr_sburivax.c mbr_segysegy.c \
-	mbr_swplssxi.c mbr_swplssxp.c mbr_wasspenl.c mbr_xtfb1624.c \
-	mbr_xtfr8101.c mbsys_3datdepthlidar.c mbsys_3ddwissl.c \
-	mbsys_atlas.c mbsys_benthos.c mbsys_dsl.c mbsys_elac.c \
-	mbsys_elacmk2.c mbsys_hdcs.c mbsys_hs10.c mbsys_hsds.c \
-	mbsys_hsmd.c mbsys_hysweep.c mbsys_image83p.c mbsys_jstar.c \
-	mbsys_kmbes.c mbsys_ldeoih.c mbsys_mr1b.c mbsys_mr1.c \
-	mbsys_mr1v2001.c mbsys_mstiff.c mbsys_navnetcdf.c \
-	mbsys_netcdf.c mbsys_oic.c mbsys_reson7k3.c mbsys_reson7k.c \
-	mbsys_reson8k.c mbsys_reson.c mbsys_sb2000.c mbsys_sb2100.c \
-	mbsys_sb.c mbsys_simrad2.c mbsys_simrad3.c mbsys_simrad.c \
-	mbsys_singlebeam.c mbsys_stereopair.c mbsys_surf.c \
-	mbsys_swathplus.c mbsys_wassp.c mbsys_xse.c $(am__append_3)
+	mbr_soirovnv.c mbr_soiusbln.c mbr_swplssxi.c mbr_swplssxp.c \
+	mbr_wasspenl.c mbr_xtfb1624.c mbr_xtfr8101.c \
+	mbsys_3datdepthlidar.c mbsys_3ddwissl.c mbsys_atlas.c \
+	mbsys_benthos.c mbsys_dsl.c mbsys_elac.c mbsys_elacmk2.c \
+	mbsys_hdcs.c mbsys_hs10.c mbsys_hsds.c mbsys_hsmd.c \
+	mbsys_hysweep.c mbsys_image83p.c mbsys_jstar.c mbsys_kmbes.c \
+	mbsys_ldeoih.c mbsys_mr1b.c mbsys_mr1.c mbsys_mr1v2001.c \
+	mbsys_mstiff.c mbsys_navnetcdf.c mbsys_netcdf.c mbsys_oic.c \
+	mbsys_reson7k3.c mbsys_reson7k.c mbsys_reson8k.c mbsys_reson.c \
+	mbsys_sb2000.c mbsys_sb2100.c mbsys_sb.c mbsys_simrad2.c \
+	mbsys_simrad3.c mbsys_simrad.c mbsys_singlebeam.c \
+	mbsys_stereopair.c mbsys_surf.c mbsys_swathplus.c \
+	mbsys_wassp.c mbsys_xse.c $(am__append_3)
 libmbio_la_LIBADD = $(top_builddir)/src/bsio/libmbbsio.la \
 	$(top_builddir)/src/surf/libmbsapi.la $(am__append_4) \
 	${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} ${XDR_LIB} \
@@ -848,6 +851,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_sburicen.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_sburivax.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_segysegy.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_soirovnv.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_soiusbln.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_swplssxi.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_swplssxp.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_wasspenl.Plo@am__quote@ # am--include-marker
@@ -1158,6 +1163,8 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/mbr_sburicen.Plo
 	-rm -f ./$(DEPDIR)/mbr_sburivax.Plo
 	-rm -f ./$(DEPDIR)/mbr_segysegy.Plo
+	-rm -f ./$(DEPDIR)/mbr_soirovnv.Plo
+	-rm -f ./$(DEPDIR)/mbr_soiusbln.Plo
 	-rm -f ./$(DEPDIR)/mbr_swplssxi.Plo
 	-rm -f ./$(DEPDIR)/mbr_swplssxp.Plo
 	-rm -f ./$(DEPDIR)/mbr_wasspenl.Plo
@@ -1355,6 +1362,8 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/mbr_sburicen.Plo
 	-rm -f ./$(DEPDIR)/mbr_sburivax.Plo
 	-rm -f ./$(DEPDIR)/mbr_segysegy.Plo
+	-rm -f ./$(DEPDIR)/mbr_soirovnv.Plo
+	-rm -f ./$(DEPDIR)/mbr_soiusbln.Plo
 	-rm -f ./$(DEPDIR)/mbr_swplssxi.Plo
 	-rm -f ./$(DEPDIR)/mbr_swplssxp.Plo
 	-rm -f ./$(DEPDIR)/mbr_wasspenl.Plo

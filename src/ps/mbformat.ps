@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:01 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:07 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 2
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -258,17 +264,17 @@ hich is the \214lename minus whate)108 278.4 R -.15(ve)-.25 G 3.259(rf)
 .15 G .759(ormat-speci\214c pre\214x)-3.259 F .998(or suf)108 290.4 R
 .998(\214x has been recognized. In no pre\214x or suf)-.25 F .997
 (\214x is recognized, then the root is simply the entire \214le-)-.25 F
-(name.)108 302.4 Q(Normally)108 326.4 Q(,)-.65 E F2(mbf)4.22 E(ormat)
--.25 E F0 1.721
-(prints out a brief description of each identi\214ed format. If the)4.22
-F F2<ad4c>4.221 E F0 1.721(option is used,)4.221 F F2(mbf)108 338.4 Q
-(ormat)-.25 E F0 .755(simply prints out the v)3.255 F .755
-(alid format id number)-.25 F 3.255(,o)-.4 G 3.255(r0)-3.255 G .754
-(if a \214le or format has been speci\214ed b)-.001 F .754(ut no)-.2 F
--.25(va)108 350.4 S .634(lid id can be identi\214ed.).25 F .634(If the)
-5.634 F F2<ad4b>3.134 E F0 .634(option is used,)3.134 F F2(mbf)3.135 E
-(ormat)-.25 E F0 .635(will print out the \214lename "root" follo)3.135 F
-(wed)-.25 E(by the format id number)108 362.4 Q(.)-.55 E F1(MB-SYSTEM A)
+(name.)108 302.4 Q(Normally)108 326.4 Q(,)-.65 E F2(mbf)2.959 E(ormat)
+-.25 E F0 .459
+(prints out a brief description of each identi\214ed format. If the)
+2.959 F F2<ad4c>2.96 E F0 .46(option is used,)2.96 F F2(mb-)2.96 E -.25
+(fo)108 338.4 S(rmat).25 E F0 .321(simply prints out the v)2.821 F .321
+(alid format id number)-.25 F 2.821(,o)-.4 G 2.821(r0)-2.821 G .32
+(if a \214le or format has been speci\214ed b)-.001 F .32(ut no v)-.2 F
+(alid)-.25 E .339(id can be identi\214ed.)108 350.4 R .339(If the)5.339
+F F2<ad4b>2.839 E F0 .339(option is used,)2.839 F F2(mbf)2.839 E(ormat)
+-.25 E F0 .34(will print out the \214lename "root" follo)2.84 F .34
+(wed by the)-.25 F(format id number)108 362.4 Q(.)-.55 E F1(MB-SYSTEM A)
 72 391.2 Q(UTHORSHIP)-.548 E F0(Da)108 403.2 Q(vid W)-.2 E 2.5(.C)-.92 G
 (aress)-2.5 E(Montere)113 415.2 Q 2.5(yB)-.15 G
 (ay Aquarium Research Institute)-2.5 E(Dale N. Chayes)108 427.2 Q
@@ -277,7 +283,7 @@ F F2<ad4c>4.221 E F0 1.721(option is used,)4.221 F F2(mbf)108 338.4 Q
 (Christian do Santos Ferreira)108 463.2 Q(MAR)113 475.2 Q
 (UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
 487.2 Q -.15(ve)-.25 G(rsity of Bremen).15 E F1(OPTIONS)72 516 Q F2
-<ad46>108 528 Q F3(format)24.19 E F0 .281
+<ad46>108 528 Q F3(format)144 528 Q F0 .281
 (Sets the format id to be listed.)144 540 R .281(If no format is gi)
 5.281 F -.15(ve)-.25 G .28
 (n, all of the currently supported formats will be).15 F .139
@@ -286,19 +292,19 @@ F F2<ad4c>4.221 E F0 1.721(option is used,)4.221 F F2(mbf)108 338.4 Q
 .14(and their identi\214er v)2.64 F(al-)-.25 E(ues is gi)144 564 Q -.15
 (ve)-.25 G 2.5(ni).15 G 2.5(nt)-2.5 G(he)-2.5 E F2(MBIO)2.5 E F0
 (manual page.)2.5 E F2<ad48>108 580.8 Q F0 .162(This "help" \215ag caus\
-e the program to print out a description of its operation and then e)
-22.52 F .161(xit immedi-)-.15 F(ately)144 592.8 Q(.)-.65 E F2<ad49>108
-609.6 Q F3(\214le)26.41 E F0 1.346(Sets the \214lename to be tested ag)
-144 621.6 R 1.346(ainst kno)-.05 F 1.346(wn \214lename pre\214x and suf)
--.25 F 1.346(\214x con)-.25 F -.15(ve)-.4 G 1.346(ntions in order to).15
-F(identify the format id.)144 633.6 Q F2<ad4b>108 650.4 Q F0 .112(Cause\
-s the \214leroot and the format id to be output. The \214leroot is the \
-\214lename with an)22.52 F 2.612(yf)-.15 G .112(ormat spe-)-2.612 F
-(ci\214c suf)144 662.4 Q(\214x remo)-.25 E -.15(ve)-.15 G(d.).15 E F2
-<ad4c>108 679.2 Q F0
-(Causes the format descriptions to be omitted so that only the)23.63 E
-F2(MBIO)2.5 E F0(format id numbers are listed.)2.5 E F2<ad56>108 696 Q
-F0(Normally)23.08 E(,)-.65 E F2(mbf)2.952 E(ormat)-.25 E F0 .453
+e the program to print out a description of its operation and then e)144
+580.8 R .161(xit immedi-)-.15 F(ately)144 592.8 Q(.)-.65 E F2<ad49>108
+609.6 Q F3(\214le)144 609.6 Q F0 1.346
+(Sets the \214lename to be tested ag)144 621.6 R 1.346(ainst kno)-.05 F
+1.346(wn \214lename pre\214x and suf)-.25 F 1.346(\214x con)-.25 F -.15
+(ve)-.4 G 1.346(ntions in order to).15 F(identify the format id.)144
+633.6 Q F2<ad4b>108 650.4 Q F0 .112(Causes the \214leroot and the forma\
+t id to be output. The \214leroot is the \214lename with an)144 650.4 R
+2.612(yf)-.15 G .112(ormat spe-)-2.612 F(ci\214c suf)144 662.4 Q
+(\214x remo)-.25 E -.15(ve)-.15 G(d.).15 E F2<ad4c>108 679.2 Q F0
+(Causes the format descriptions to be omitted so that only the)144 679.2
+Q F2(MBIO)2.5 E F0(format id numbers are listed.)2.5 E F2<ad56>108 696 Q
+F0(Normally)144 696 Q(,)-.65 E F2(mbf)2.952 E(ormat)-.25 E F0 .453
 (only prints out format descriptions.)2.952 F .453(If the)5.453 F F2
 <ad56>2.953 E F0 .453(\215ag is gi)2.953 F -.15(ve)-.25 G .453(n, then)
 .15 F F2(mbf)2.953 E(ormat)-.25 E F0 -.1(wo)144 708 S(rks in a "v).1 E
@@ -311,7 +317,7 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 148.73(mbformat\(1\) MB-System)72 48 R 148.73
 (5.0 mbformat\(1\))2.5 F/F1 10/Times-Bold@0 SF<ad57>108 84 Q F0
-(Output the list of formats as HTML.)20.3 E/F2 10.95/Times-Bold@0 SF
+(Output the list of formats as HTML.)144 84 Q/F2 10.95/Times-Bold@0 SF
 (EXAMPLES)72 112.8 Q F0 .35(Suppose one wishes to identify the sw)108
 124.8 R .35(ath sonar data format associated with a format id of 11.)-.1
 F .35(The follo)5.35 F(w-)-.25 E(ing will suf)108 136.8 Q(\214ce:)-.25 E

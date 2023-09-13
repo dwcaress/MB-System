@@ -337,7 +337,7 @@ int mbsys_wassp_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		/* read distance and depth values into storage arrays */
 		*nbath = corbathy->num_beams;
 		*namp = *nbath;
-		for (int i = 0; i < genbathy->number_beams; i++) {
+		for (unsigned int i = 0; i < genbathy->number_beams; i++) {
 			bath[i] = 0.0;
 			beamflag[i] = MB_FLAG_NULL;
 			bathacrosstrack[i] = 0.0;
@@ -627,7 +627,7 @@ int mbsys_wassp_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 		const double headingy = cos(heading * DTR);
 
 		/* read distance and depth values into storage arrays */
-		for (int i = 0; i < corbathy->num_beams; i++) {
+		for (unsigned int i = 0; i < corbathy->num_beams; i++) {
 			const int j = corbathy->beam_index[i];
 			corbathy->z[i] = -bath[j];
 			corbathy->empty[i] = beamflag[j];
