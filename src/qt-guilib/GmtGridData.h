@@ -26,8 +26,8 @@ namespace mb_system {
     
   protected:
 
-    /// Base class calls this to get class parameter variables
-    /// N.B.: xUnits, yUnits and zUnits memory should be unallocated
+    /// Base class calls this to get class parameter variables.
+    /// Note: xUnits, yUnits and zUnits memory should be unallocated
     /// before calling this function to prevent memory leak.
     void getParameters(int *nRows, int *nColumns,
                        double *xMin, double *xMax,

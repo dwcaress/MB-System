@@ -27,11 +27,14 @@
 namespace mb_system {
 
   class QVtkItem;
-  
+
   /**
      QVtkRenderer and QVtkItem coordinate with one another to render VTK scenes 
-     within a QQuickItem specified in QML. The QML QVtkItem  instantiates a
-     C++ QVtkItem, and QVtkItem::createRenderer() creates a QVtkRenderer object.
+     within a QVtkItem declared in QML. QVtkItem is registered in the QML
+     system by a call to qmlRegisterType() within an application's main() 
+     function, and thus a QML declaration of QVtkItem instantiates a C++ 
+     QvtkItem, which in turn instantiates a QVtkRenderer 
+     (QVtkItem::createRenderer()).
      QVtkRenderer code runs in the app's renderer thread, and is responsible 
      for setting up the scene in the VTK pipeline, rendering the scene, and 
      modifying the scene based on user inputs such as mouse zoom, rotate, pan, 
@@ -40,6 +43,9 @@ namespace mb_system {
      when the main thread is blocked.
 
      See https://www.qt.io/blog/2015/05/11/integrating-custom-opengl-rendering-with-qt-quick-via-qquickframebufferobject
+
+     QVtkRenderer contains TopoGridReader gridReader_, which reads data
+     from a specified file which is added to the VTK pipeline.
   */
   class QVtkRenderer : public QObject,
                        public QQuickFramebufferObject::Renderer,
@@ -198,7 +204,7 @@ namespace mb_system {
 
     bool newPointPicked_;
     
-    /// Worker thread to load grid file
+    /// Worker thread to load grid file with TopoGridReader
     class LoadFileWorker : public QThread {
 
     public:

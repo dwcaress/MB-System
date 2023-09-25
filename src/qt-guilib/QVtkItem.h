@@ -10,8 +10,11 @@
 namespace mb_system {
   /**
      QVtkRenderer and QVtkItem coordinate with one another to render VTK scenes 
-     within a QQuickItem specified in QML. The QML QVtkItem  instantiates a
-     C++ QVtkItem, and QVtkItem::createRenderer() creates a QVtkRenderer object.
+     within a QVtkItem declared in QML. QVtkItem is registered in the QML
+     system by a call to qmlRegisterType() within an application's main() 
+     function, and thus a QML declaration of QVtkItem instantiates a C++ 
+     QvtkItem, which in turn instantiates a QVtkRenderer 
+     (QVtkItem::createRenderer()).
      QVtkRenderer code runs in the app's renderer thread, and is responsible 
      for setting up the scene in the VTK pipeline, rendering the scene, and 
      modifying the scene based on user inputs such as mouse zoom, rotate, pan, 

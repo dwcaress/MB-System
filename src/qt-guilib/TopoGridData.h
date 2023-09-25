@@ -87,7 +87,7 @@ namespace mb_system {
   
     /// Must be implemented by subclasses
     /// Base class calls this to set class parameter variables
-    /// N.B.: xUnits, yUnits and zUnits memory should be unallocated
+    /// Note: xUnits, yUnits and zUnits memory should be unallocated
     /// before calling this funtion.
     virtual void getParameters(int *nRows, int *nColumns,
                                double *xMin, double *xMax,
