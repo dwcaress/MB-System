@@ -16,8 +16,10 @@ if (APPLE)
   endforeach()
 
 else()
+  set(CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE)  
+  message("in photo/CMakeLists.txt - find_package()")
   find_package(OpenCV 4 REQUIRED COMPONENTS core highgui calib3d)
-
+  message("in photo/CMakeLists.txt - BACK from find_package()")
   if(OpenCV_FOUND)
     message(STATUS "Found OpenCV version ${OpenCV_VERSION}")
     message(STATUS "OpenCV directories: ${OpenCV_INCLUDE_DIRS}")
