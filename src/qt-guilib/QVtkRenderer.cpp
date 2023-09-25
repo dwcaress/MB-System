@@ -539,17 +539,6 @@ bool QVtkRenderer::assemblePipeline() {
   vtkColor3d axisColor = namedColors_->GetColor3d("black");
 
   // Set up axes
-  /* ***
-  // vtkCubeAxesActor2D version
-  setupAxes(axesActor_,
-            namedColors_,
-            surfaceMapper_->GetBounds(),
-            gridBounds,
-            gridReader_->xUnits(), 
-            gridReader_->yUnits(),
-            gridReader_->zUnits());
-            *** */
-
   setupAxes(axesActor_,
             namedColors_,
             surfaceMapper_->GetBounds(),
