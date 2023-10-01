@@ -208,7 +208,6 @@ public:
     int mb_cli_dis;
 };
 
-
 class trnxpp_cfg
 {
 public:
@@ -378,12 +377,12 @@ public:
         " --config=s            : configuration file path\n"
         " --delay=u             : main loop delay\n"
         " --logdir=s            : log directory\n"
-        " --cycles=u             : stop after u cycles (for debugging)\n"
-        " --stats=f,d            : stats output period (log, decimal sec), level (console) \n"
+        " --cycles=u            : stop after u cycles (for debugging)\n"
+        " --stats=f,d           : stats output period (log, decimal sec), level (console) \n"
         " --fake-mb1            : publish fake MB1 output\n"
         " --trn=<tspec>         : specify TRN output\n"
         " --sem=<sspec>         : specify semaphore callback\n"
-        " --input=<ispec>      : specify input channel\n"
+        " --input=<ispec>       : specify input channel\n"
         " --ctx=<cspec>         : specify processing context (input/output mapping)\n"
         "\n"
         " Notes:\n"
@@ -830,6 +829,7 @@ public:
         {
             os << std::setw(wkey) << " " << std::setw(wval) << static_cast<std::string>(*it) << "\n";
         }
+
         os << std::setw(wkey) << "sem" << std::setw(wval) << mSemList.size() << "\n";
         for(it=mSemList.begin(); it != mSemList.end(); it++)
         {
@@ -921,6 +921,7 @@ private:
     std::list<std::string> mTrnList;
     std::list<std::string> mSemList;
     std::list<std::string> mCtxList;
+    std::list<std::string> mPluginList;
 };
 
 #endif

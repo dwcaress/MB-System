@@ -93,7 +93,6 @@ public:
             }
             mGeoList.pop_front();
         }
-
     }
 
     void tostream(std::ostream &os, int wkey=15, int wval=18)
@@ -276,6 +275,7 @@ public:
             if(inp->test_sem(channel, to_msec)){
 
                 TRN_NDPRINT(6, "calling sem chan[%s] count[%u]\n", channel.c_str(), sem->get_count());
+                TRN_NDPRINT(6, "testing sem cb[%p]\n", cb);
 
                 int stat = cb(parg);
                 sem->clear_count();
@@ -1540,7 +1540,7 @@ public:
             }
         }
 
-        // create/configure contexts
+        // create/configure semaphores
         list = cfg->sem_list();
         if(list.size() > 0) {
             for(it=list.begin(); it != list.end(); it++)
