@@ -3782,6 +3782,14 @@ int mbnavadjust_crossing_load() {
     mbna_plot_lon_max = mbna_lon_max;
     mbna_plot_lat_min = mbna_lat_min;
     mbna_plot_lat_max = mbna_lat_max;
+// fprintf(stderr, "%s:%d:%s: section1  lonmin:%f lonmax:%f latmin:%f latmax:%f\n",
+// __FILE__, __LINE__, __FUNCTION__, section1->lonmin, section1->lonmax, section1->latmin, section1->latmax);
+// fprintf(stderr, "%s:%d:%s: section2  lonmin:%f lonmax:%f latmin:%f latmax:%f\n",
+// __FILE__, __LINE__, __FUNCTION__, section2->lonmin, section2->lonmax, section2->latmin, section2->latmax);
+// fprintf(stderr, "%s:%d:%s:  mbna_offset_x:%f mbna_offset_y:%f\n",
+// __FILE__, __LINE__, __FUNCTION__, mbna_offset_x, mbna_offset_y);
+// fprintf(stderr, "%s:%d:%s: mbna_plot_lon_min:%f mbna_plot_lon_max:%f mbna_plot_lat_min:%f mbna_plot_lat_max:%f\n",
+// __FILE__, __LINE__, __FUNCTION__, mbna_plot_lon_min, mbna_plot_lon_max, mbna_plot_lat_min, mbna_plot_lat_max);
     mb_coor_scale(mbna_verbose, 0.5 * (mbna_lat_min + mbna_lat_max), &mbna_mtodeglon, &mbna_mtodeglat);
 
     /* load sections */
@@ -4186,6 +4194,8 @@ int mbnavadjust_referenceplussection_load() {
     mbna_plot_lon_max = mbna_lon_max;
     mbna_plot_lat_min = mbna_lat_min;
     mbna_plot_lat_max = mbna_lat_max;
+fprintf(stderr, "%s:%d:%s: mbna_plot_lon_min:%f mbna_plot_lon_max:%f mbna_plot_lat_min:%f mbna_plot_lat_max:%f\n",
+__FILE__, __LINE__, __FUNCTION__, mbna_plot_lon_min, mbna_plot_lon_max, mbna_plot_lat_min, mbna_plot_lat_max);
 
     /* generate contour data */
     if (mbna_status != MBNA_STATUS_AUTOPICK) {
@@ -4522,9 +4532,9 @@ int mbnavadjust_get_misfit() {
     if ((mbna_plot_lon_max - mbna_plot_lon_min) / mbna_mtodeglon > (mbna_plot_lat_max - mbna_plot_lat_min) / mbna_mtodeglat) {
       grid_dx = (mbna_plot_lon_max - mbna_plot_lon_min) / (grid_nx - 1);
       grid_dy = grid_dx * mbna_mtodeglat / mbna_mtodeglon;
-      /* fprintf(stderr,"DEBUG %s %d: grid scale: grid_dx:%f grid_dy:%f\n",
-      __FILE__,__LINE__,
-      grid_dx,grid_dy); */
+//fprintf(stderr,"DEBUG %s %d: grid scale: grid_dx:%f grid_dy:%f\n",
+//__FILE__,__LINE__,
+//grid_dx,grid_dy);
     }
     else {
       grid_dy = (mbna_plot_lat_max - mbna_plot_lat_min) / (grid_ny - 1);
@@ -4536,9 +4546,9 @@ int mbnavadjust_get_misfit() {
     grid_nxy = grid_nx * grid_ny;
     grid_olon = 0.5 * (mbna_plot_lon_min + mbna_plot_lon_max) - (grid_nx / 2 + 0.5) * grid_dx;
     grid_olat = 0.5 * (mbna_plot_lat_min + mbna_plot_lat_max) - (grid_ny / 2 + 0.5) * grid_dy;
-    /* fprintf(stderr,"DEBUG %s %d: grid_olon:%.10f grid_olat:%.10f\n",
-    __FILE__,__LINE__,
-    grid_olon,grid_olat); */
+//fprintf(stderr,"DEBUG %s %d: grid_olon:%.10f grid_olat:%.10f\n",
+//__FILE__,__LINE__,
+//grid_olon,grid_olat);
 
     /* get 3d misfit grid */
     nzmisfitcalc = MBNA_MISFIT_DIMZ;
@@ -4555,13 +4565,12 @@ int mbnavadjust_get_misfit() {
       mbna_misfit_offset_y = mbna_offset_y;
       mbna_misfit_offset_z = mbna_offset_z;
     }
-    /* fprintf(stderr,"DEBUG %s %d: GRID parameters: dx:%.10f dy:%.10f nx:%d ny:%d  bounds:  grid: %.10f %.10f %.10f %.10f
-    plot: %.10f %.10f %.10f %.10f\n",
-    __FILE__,__LINE__,
-    grid_dx, grid_dy, grid_nx, grid_ny,
-    grid_olon, grid_olon + grid_nx * grid_dx,
-    grid_olat, grid_olat + grid_ny * grid_dy,
-    mbna_lon_min, mbna_lon_max, mbna_lat_min, mbna_lat_max); */
+//fprintf(stderr,"DEBUG %s %d: GRID parameters: dx:%.10f dy:%.10f nx:%d ny:%d  bounds:  grid: %.10f %.10f %.10f %.10f  plot: %.10f %.10f %.10f %.10f\n",
+//__FILE__,__LINE__,
+//grid_dx, grid_dy, grid_nx, grid_ny,
+//grid_olon, grid_olon + grid_nx * grid_dx,
+//grid_olat, grid_olat + grid_ny * grid_dy,
+//mbna_lon_min, mbna_lon_max, mbna_lat_min, mbna_lat_max);
 
     /* figure out range of z offsets */
     zmin = mbna_misfit_offset_z - 0.5 * project.zoffsetwidth;
@@ -4663,10 +4672,10 @@ int mbnavadjust_get_misfit() {
             grid1[k] += swath1->pings[i].bath[j];
             gridn1[k]++;
           }
-          /* else
-          fprintf(stderr,"DEBUG %s %d: BAD swath1: %d %d  %.10f %.10f  %f %f  %d %d\n",
-          __FILE__,__LINE__,
-          i, j, swath1->pings[i].bathlon[j], swath1->pings[i].bathlat[j], x, y, igx, igy); */
+//else
+//fprintf(stderr,"DEBUG %s %d: BAD swath1: %d %d  %.10f %.10f  %f %f  %d %d\n",
+//__FILE__,__LINE__,
+//i, j, swath1->pings[i].bathlon[j], swath1->pings[i].bathlat[j], x, y, igx, igy);
         }
       }
     }
@@ -4684,10 +4693,10 @@ int mbnavadjust_get_misfit() {
             grid2[k] += swath2->pings[i].bath[j];
             gridn2[k]++;
           }
-          /* else
-          fprintf(stderr,"DEBUG %s %d: BAD swath2: %d %d  %.10f %.10f  %f %f  %d %d\n",
-          __FILE__,__LINE__,
-          i, j, swath2->pings[i].bathlon[j], swath2->pings[i].bathlat[j], x, y, igx, igy); */
+//else
+//fprintf(stderr,"DEBUG %s %d: BAD swath2: %d %d  %.10f %.10f  %f %f  %d %d\n",
+//__FILE__,__LINE__,
+//i, j, swath2->pings[i].bathlon[j], swath2->pings[i].bathlat[j], x, y, igx, igy);
         }
       }
     }
@@ -4741,6 +4750,9 @@ int mbnavadjust_get_misfit() {
     mbna_minmisfit_y = 0.0;
     mbna_minmisfit_z = 0.0;
     found = false;
+//int imin;
+//int jmin;
+//int kmin;
     for (int ic = 0; ic < gridm_nx; ic++)
       for (int jc = 0; jc < gridm_ny; jc++)
         for (int kc = 0; kc < nzmisfitcalc; kc++) {
@@ -4758,22 +4770,21 @@ int mbnavadjust_get_misfit() {
               mbna_minmisfit_x = (ic - gridm_nx / 2) * grid_dx + mbna_misfit_offset_x;
               mbna_minmisfit_y = (jc - gridm_ny / 2) * grid_dy + mbna_misfit_offset_y;
               mbna_minmisfit_z = zmin + zoff_dz * kc;
-              // const int imin = ic;
-              // const int jmin = jc;
-              // const int kmin = kc;
+//imin = ic;
+//jmin = jc;
+//kmin = kc;
               found = true;
-              /* zoff = zmin + zoff_dz * kc;
-              fprintf(stderr,"DEBUG %s %d: ic:%d jc:%d kc:%d misfit:%f %f %d  pos:%f %f %f zoff:%f
-              mbna_ofset_z:%f\n",
-              __FILE__,__LINE__,
-              ic,jc,kc,misfit_min,mbna_minmisfit,mbna_minmisfit_n,mbna_minmisfit_x,mbna_minmisfit_y,mbna_minmisfit_z,
-              zoff,mbna_offset_z); */
+//zoff = zmin + zoff_dz * kc;
+//fprintf(stderr,"DEBUG %s %d: ic:%d jc:%d kc:%d misfit:%f %f %d  pos:%f %f %f zoff:%f mbna_ofset_z:%f\n",
+//__FILE__,__LINE__,
+//ic,jc,kc,misfit_min,mbna_minmisfit,mbna_minmisfit_n,mbna_minmisfit_x,mbna_minmisfit_y,mbna_minmisfit_z,
+//zoff,mbna_offset_z);
             }
           }
-          /* if (ic == jc && kc == 0)
-          fprintf(stderr,"DEBUG %s %d: ic:%d jc:%d misfit:%d %f\n",
-          __FILE__,__LINE__,
-          ic,jc,gridnm[lc],gridm[lc]);*/
+//if (ic == jc && kc == 0)
+//fprintf(stderr,"DEBUG %s %d: ic:%d jc:%d misfit:%d %f\n",
+//__FILE__,__LINE__,
+//ic,jc,gridnm[lc],gridm[lc]);
         }
     if (!found) {
       mbna_minmisfit_nthreshold /= 10.0;
@@ -4788,34 +4799,33 @@ int mbnavadjust_get_misfit() {
               mbna_minmisfit_x = (ic - gridm_nx / 2) * grid_dx + mbna_misfit_offset_x;
               mbna_minmisfit_y = (jc - gridm_ny / 2) * grid_dy + mbna_misfit_offset_y;
               mbna_minmisfit_z = zmin + zoff_dz * kc;
-              // imin = ic;
-              // jmin = jc;
-              // kmin = kc;
+//imin = ic;
+//jmin = jc;
+//kmin = kc;
               found = true;
             }
-            /* fprintf(stderr,"DEBUG %s %d: ijk:%d %d %d gridm:%d %f  misfit:%f %f %d  pos:%f %f %f\n",
-            __FILE__,__LINE__,
-            ic,jc,kc,gridnm[lc],gridm[lc],misfit_min,mbna_minmisfit,mbna_minmisfit_n,mbna_minmisfit_x,mbna_minmisfit_y,mbna_minmisfit_z);
-            */
+//fprintf(stderr,"DEBUG %s %d: ijk:%d %d %d gridm:%d %f  misfit:%f %f %d  pos:%f %f %f\n",
+//__FILE__,__LINE__,
+//ic,jc,kc,gridnm[lc],gridm[lc],misfit_min,mbna_minmisfit,mbna_minmisfit_n,mbna_minmisfit_x,mbna_minmisfit_y,mbna_minmisfit_z);
           }
     }
     misfit_min = 0.99 * misfit_min;
     misfit_max = 1.01 * misfit_max;
-    /* if (found)
-    {
-    lc = kmin + nzmisfitcalc * (imin + jmin * gridm_nx);
-    fprintf(stderr,"DEBUG %s %d: min misfit: i:%d j:%d k:%d    n:%d m:%f   offsets: %f %f %f\n",
-    __FILE__,__LINE__,
-    imin, jmin, kmin, gridnm[lc], gridm[lc],
-    mbna_minmisfit_x / mbna_mtodeglon,
-    mbna_minmisfit_y / mbna_mtodeglat,
-    mbna_minmisfit_z);
-    } */
+//if (found)
+//{
+//lc = kmin + nzmisfitcalc * (imin + jmin * gridm_nx);
+//fprintf(stderr,"DEBUG %s %d: min misfit: i:%d j:%d k:%d    n:%d m:%f   offsets: %f %f %f\n",
+//__FILE__,__LINE__,
+//imin, jmin, kmin, gridnm[lc], gridm[lc],
+//mbna_minmisfit_x / mbna_mtodeglon,
+//mbna_minmisfit_y / mbna_mtodeglat,
+//mbna_minmisfit_z);
+//}
 
-    /* fprintf(stderr,"DEBUG %s %d: Misfit bounds: nmin:%d best:%f min:%f max:%f min loc: %f %f %f\n",
-    __FILE__,__LINE__,
-    mbna_minmisfit_n,mbna_minmisfit,misfit_min,misfit_max,
-    mbna_minmisfit_x/mbna_mtodeglon,mbna_minmisfit_y/mbna_mtodeglat,mbna_minmisfit_z); */
+//fprintf(stderr,"DEBUG %s %d: Misfit bounds: nmin:%d best:%f min:%f max:%f min loc: %f %f %f\n",
+//__FILE__,__LINE__,
+//mbna_minmisfit_n,mbna_minmisfit,misfit_min,misfit_max,
+//mbna_minmisfit_x/mbna_mtodeglon,mbna_minmisfit_y/mbna_mtodeglat,mbna_minmisfit_z);
 
     /* set message on */
     if (mbna_verbose > 1)
@@ -5060,9 +5070,9 @@ int mbnavadjust_get_misfitxy() {
       && ((mbna_naverr_mode == MBNA_NAVERR_MODE_CROSSING && project.num_crossings > 0 && mbna_current_crossing >= 0)
           || (mbna_naverr_mode == MBNA_NAVERR_MODE_SECTION && project.refgrid_status == MBNA_REFGRID_LOADED))) {
     /* get minimum misfit in plane at current z offset */
-fprintf(stderr,"DEBUG %s:%d:%s: mbna_misfit_offset_z:%f project.zoffsetwidth:%f nzmisfitcalc:%d zmin:%f zmax:%f zoff_dz:%f\n",
-__FILE__,__LINE__, __FUNCTION__, 
-mbna_misfit_offset_z,project.zoffsetwidth,nzmisfitcalc,zmin,zmax,zoff_dz);
+// fprintf(stderr,"DEBUG %s:%d:%s: mbna_misfit_offset_z:%f project.zoffsetwidth:%f nzmisfitcalc:%d zmin:%f zmax:%f zoff_dz:%f\n",
+// __FILE__,__LINE__, __FUNCTION__, 
+// mbna_misfit_offset_z,project.zoffsetwidth,nzmisfitcalc,zmin,zmax,zoff_dz);
     if (grid_nxyzeq > 0) {
       /* get closest to current zoffset in existing 3d grid */
       misfit_max = 0.0;
@@ -6360,6 +6370,8 @@ int mbnavadjust_autopick(bool do_vertical) {
         mbna_plot_lon_max = mbna_overlap_lon_max;
         mbna_plot_lat_min = mbna_overlap_lat_min;
         mbna_plot_lat_max = mbna_overlap_lat_max;
+// fprintf(stderr, "%s:%d:%s: mbna_plot_lon_min:%f mbna_plot_lon_max:%f mbna_plot_lat_min:%f mbna_plot_lat_max:%f\n",
+// __FILE__, __LINE__, __FUNCTION__, mbna_plot_lon_min, mbna_plot_lon_max, mbna_plot_lat_min, mbna_plot_lat_max);
 
                 /* get characteristic scale of the overlap region */
         overlap_scale = MIN((mbna_overlap_lon_max - mbna_overlap_lon_min) / mbna_mtodeglon,
@@ -6391,6 +6403,8 @@ int mbnavadjust_autopick(bool do_vertical) {
           mbna_plot_lon_max = MIN((lon_focus + dlon), mbna_overlap_lon_max);
           mbna_plot_lat_min = MAX((lat_focus - dlat), mbna_overlap_lat_min);
           mbna_plot_lat_max = MIN((lat_focus + dlat), mbna_overlap_lat_max);
+// fprintf(stderr, "%s:%d:%s: mbna_plot_lon_min:%f mbna_plot_lon_max:%f mbna_plot_lat_min:%f mbna_plot_lat_max:%f\n",
+// __FILE__, __LINE__, __FUNCTION__, mbna_plot_lon_min, mbna_plot_lon_max, mbna_plot_lat_min, mbna_plot_lat_max);
 
           /* get naverr plot scaling */
           mbnavadjust_naverr_scale();
@@ -7271,6 +7285,8 @@ int mbnavadjust_autosetsvsvertical() {
         mbna_plot_lon_max = mbna_overlap_lon_max;
         mbna_plot_lat_min = mbna_overlap_lat_min;
         mbna_plot_lat_max = mbna_overlap_lat_max;
+fprintf(stderr, "%s:%d:%s: mbna_plot_lon_min:%f mbna_plot_lon_max:%f mbna_plot_lat_min:%f mbna_plot_lat_max:%f\n",
+__FILE__, __LINE__, __FUNCTION__, mbna_plot_lon_min, mbna_plot_lon_max, mbna_plot_lat_min, mbna_plot_lat_max);
         overlap_scale = MIN((mbna_overlap_lon_max - mbna_overlap_lon_min) / mbna_mtodeglon,
                             (mbna_overlap_lat_max - mbna_overlap_lat_min) / mbna_mtodeglat);
 

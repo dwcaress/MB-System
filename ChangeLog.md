@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta59    September 19, 2023
 - Version 5.7.9beta58    August 30, 2023
 - Version 5.7.9beta57    June 27, 2023
 - Version 5.7.9beta53    June 15, 2023
@@ -431,6 +432,17 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta59 (September 19)
+
+Mbnavadjustmerge: Made copying of mbnavadjust projects more efficient.
+
+Mbnavadjustmerge: Add --remove-short-sections option to eliminate undesirably
+short sections by merging them with their prior section.
+
+Mbnavadjustmerge: Add --remove-file option to remove a file from an mbnavadjust project.
+
+Mbcontour: Fixed drawing of survey tracklines - restored to generate thin lines.
 
 #### 5.7.9beta58 (August 30)
 

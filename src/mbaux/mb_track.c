@@ -53,7 +53,7 @@ void mb_track(int verbose, struct swath *data, int *error) {
 	}
 
 	/* set line width */
-	data->contour_setline(3);
+	data->contour_setline(0);
 	data->contour_newpen(0);
 
 	/* draw the time ticks */

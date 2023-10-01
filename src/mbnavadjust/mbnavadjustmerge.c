@@ -97,8 +97,10 @@
 #define MOD_MODE_TRIANGULATE_SECTION 51
 #define MOD_MODE_UNSET_SHORT_SECTION_TIES 52
 #define MOD_MODE_SKIP_SHORT_SECTION_CROSSINGS 53
-#define MOD_MODE_REMAKE_MB166_FILES 54
-#define MOD_MODE_FIX_SENSORDEPTH 55
+#define MOD_MODE_REMOVE_SHORT_SECTIONS 54
+#define MOD_MODE_REMOVE_FILE 55
+#define MOD_MODE_REMAKE_MB166_FILES 56
+#define MOD_MODE_FIX_SENSORDEPTH 57
 #define IMPORT_NONE 0
 #define IMPORT_TIE 1
 #define IMPORT_GLOBALTIE 2
@@ -188,6 +190,8 @@ static char usage_message[] =
     "\t--triangulate-section=file:section\n"
     "\t--unset-short-section-ties=min_length\n"
     "\t--skip-short-section-crossings=min_length\n"
+    "\t--remove-short-sections=min_length\n"
+    "\t--remove-file=file\n"
     "\t--remake-mb166-files\n"
     "\t--fix-sensordepth\n"
     "\t--verbose --help]\n";
@@ -217,6 +221,8 @@ int main(int argc, char **argv) {
   int triangulate = TRIANGULATE_NONE;
   double triangle_scale = 0.0;
   double minimum_section_length = 0.0;
+  int minimum_section_soundings = 0;
+  int ifile_remove = 0;
 
   {
   static struct option options[] = {{"verbose", no_argument, NULL, 0},
@@ -279,6 +285,8 @@ int main(int argc, char **argv) {
                                     {"triangulate-scale", required_argument, NULL, 0},
                                     {"unset-short-section-ties", required_argument, NULL, 0},
                                     {"skip-short-section-crossings", required_argument, NULL, 0},
+                                    {"remove-short-sections", required_argument, NULL, 0},
+                                    {"remove-file", required_argument, NULL, 0},
                                     {"remake-mb166-files", no_argument, NULL, 0},
                                     {"fix-sensordepth", no_argument, NULL, 0},
                                     {NULL, 0, NULL, 0}};
@@ -1358,7 +1366,7 @@ int main(int argc, char **argv) {
         if (num_mods < NUMBER_MODS_MAX) {
           mods[num_mods].mode = MOD_MODE_UNSET_SHORT_SECTION_TIES;
           int nscan;
-          if ((nscan = sscanf(optarg, "%lf", &minimum_section_length)) == 1) {
+          if ((nscan = sscanf(optarg, "%lf/%d", &minimum_section_length, &minimum_section_soundings)) >= 1) {
             num_mods++;
           }
           else {
@@ -1374,7 +1382,7 @@ int main(int argc, char **argv) {
         if (num_mods < NUMBER_MODS_MAX) {
           mods[num_mods].mode = MOD_MODE_SKIP_SHORT_SECTION_CROSSINGS;
           int nscan;
-          if ((nscan = sscanf(optarg, "%lf", &minimum_section_length)) == 1) {
+          if ((nscan = sscanf(optarg, "%lf/%d", &minimum_section_length, &minimum_section_soundings)) >= 1) {
             num_mods++;
           }
           else {
@@ -1384,6 +1392,45 @@ int main(int argc, char **argv) {
         else {
           fprintf(stderr,
                   "Maximum number of mod commands reached:\n\tskip-short-section-crossings command ignored\n\n");
+        }
+      }
+
+      /*-------------------------------------------------------*/
+      // remove sections that are too short by adding them to the
+      // prior section
+      else if (strcmp("remove-short-sections", options[option_index].name) == 0) {
+        if (num_mods < NUMBER_MODS_MAX) {
+          mods[num_mods].mode = MOD_MODE_REMOVE_SHORT_SECTIONS;
+          int nscan;
+          if ((nscan = sscanf(optarg, "%lf/%d", &minimum_section_length, &minimum_section_soundings)) >= 1) {
+            num_mods++;
+          }
+          else {
+            fprintf(stderr, "Minimum section length not parsed:\n\tremove-short-sections command ignored\n\n");
+          }
+        }
+        else {
+          fprintf(stderr,
+                  "Maximum number of mod commands reached:\n\tremove-short-sections command ignored\n\n");
+        }
+      }
+
+      /*-------------------------------------------------------*/
+      // remove specified file
+      else if (strcmp("remove-file", options[option_index].name) == 0) {
+        if (num_mods < NUMBER_MODS_MAX) {
+          mods[num_mods].mode = MOD_MODE_REMOVE_FILE;
+          int nscan;
+          if ((nscan = sscanf(optarg, "%d", &ifile_remove)) == 1) {
+            num_mods++;
+          }
+          else {
+            fprintf(stderr, "Remove file not parsed:\n\tremove-file command ignored\n\n");
+          }
+        }
+        else {
+          fprintf(stderr,
+                  "Maximum number of mod commands reached:\n\tremove-file command ignored\n\n");
         }
       }
 
@@ -3438,8 +3485,10 @@ int main(int argc, char **argv) {
         file2 = &project_output.files[crossing->file_id_2];
         section2 = &file2->sections[crossing->section_2];
         if (crossing->num_ties > 0 &&
-            (section1->distance < 0.25 * minimum_section_length
-              || section2->distance < 0.25 * minimum_section_length)) {
+            ((section1->distance < 0.25 * minimum_section_length 
+                && section1->num_beams < minimum_section_soundings)
+            || (section2->distance < 0.25 * minimum_section_length 
+                && section2->num_beams < minimum_section_soundings))) {
           fprintf(stderr, "Unset tie(s) of crossing: %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", current_crossing, file1->block,
                   crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2, crossing->section_2);
           crossing->num_ties = 0;
@@ -3458,14 +3507,31 @@ int main(int argc, char **argv) {
         file2 = &project_output.files[crossing->file_id_2];
         section2 = &file2->sections[crossing->section_2];
         if (crossing->status != MBNA_CROSSING_STATUS_SKIP
-            && (section1->distance < 0.25 * minimum_section_length
-                || section2->distance < 0.25 * minimum_section_length)) {
+            && ((section1->distance < 0.25 * minimum_section_length 
+                && section1->num_beams < minimum_section_soundings)
+            || (section2->distance < 0.25 * minimum_section_length 
+                && section2->num_beams < minimum_section_soundings))) {
           fprintf(stderr, "Skip crossing: %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", icrossing, file1->block,
                   crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2, crossing->section_2);
           crossing->num_ties = 0;
           crossing->status = MBNA_CROSSING_STATUS_SKIP;
         }
       }
+      break;
+
+    case MOD_MODE_REMOVE_SHORT_SECTIONS:
+
+      // loop over all files and sections, merging short sections with the
+      // immediately prior sections
+      status = mbnavadjust_remove_short_sections(verbose, &project_output, 
+                    minimum_section_length, minimum_section_soundings, &error);
+      break;
+
+    case MOD_MODE_REMOVE_FILE:
+
+      // remove specified file
+      status = mbnavadjust_remove_file_by_id(verbose, &project_output, 
+                    ifile_remove, &error);
       break;
 
     case MOD_MODE_REMAKE_MB166_FILES:
