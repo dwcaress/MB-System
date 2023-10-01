@@ -305,7 +305,6 @@ void *New_mbcontour_Ctrl(struct GMT_CTRL *GMT) { /* Allocate and initialize a ne
 	Ctrl->W.cpt_effect = false;
 	Ctrl->W.set_color = false;
 	Ctrl->W.sequential = 0;
-	//Ctrl->W.pen;
 	Ctrl->Z.active = false;
 	Ctrl->Z.contour_algorithm = MB_CONTOUR_OLD;
 

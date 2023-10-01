@@ -29,6 +29,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "mb_define.h"
 #include "mb_io.h"
@@ -232,14 +233,14 @@ int mb_copyfile(int verbose, const char *src, const char *dst, int *error)
       *error = MB_ERROR_MEMORY_FAIL;
       return(status); 
     }
-    FILE *hin = fopen(src, "rb");
+    FILE *hin = fopen(src, "r");
     if (!hin) { 
       free(buf); 
       status = MB_FAILURE;
       *error = MB_ERROR_OPEN_FAIL;
       return(status);
     }
-    FILE *hout = fopen(dst, "wb");
+    FILE *hout = fopen(dst, "w");
     if (!hout) { 
       free(buf); 
       fclose(hin); 
@@ -268,6 +269,132 @@ int mb_copyfile(int verbose, const char *src, const char *dst, int *error)
         *error = MB_ERROR_WRITE_FAIL;
     }
     fclose(hout);
+    return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_catfiles(int verbose, const char *src1, const char *src2, const char *dst, int *error)
+{
+  /* The code here is modified from an example within a comment to the
+     following Stackoverflow post:
+        https://stackoverflow.com/questions/66362309/proper-methods-to-copy-files-folders-\
+              programmatically-in-c-using-posix-functions
+  */
+    int status = MB_SUCCESS;
+    *error = MB_ERROR_NO_ERROR;
+    const int bufsz = 65536;
+    char *buf = malloc(bufsz);
+    if (!buf) {
+      status = MB_FAILURE;
+      *error = MB_ERROR_MEMORY_FAIL;
+      return(status); 
+    }
+    if (!(strlen(src1) > 0 && strlen(src2) > 0 && strlen(dst) > 0)) {
+      status = MB_FAILURE;
+      *error = MB_ERROR_MEMORY_FAIL;
+      return(status); 
+    }
+
+    /* src1 == dst so concatenate src2 onto src1 in place */
+    if (strcmp(src1, dst) == 0) {
+      FILE *hin = fopen(src2, "r");
+      if (!hin) { 
+        free(buf); 
+        status = MB_FAILURE;
+        *error = MB_ERROR_OPEN_FAIL;
+        return(status);
+      }
+      FILE *hout = fopen(dst, "a");
+      if (!hout) { 
+        free(buf); 
+        fclose(hin); 
+        status = MB_FAILURE;
+        *error = MB_ERROR_OPEN_FAIL;
+        return(status);
+      }
+      size_t buflen;
+      while ((buflen = fread(buf, 1, bufsz, hin)) > 0) {
+        if (buflen != fwrite(buf, 1, buflen, hout)) {
+          /* IO error writing data */
+          fclose(hout);
+          fclose(hin);
+          free(buf);
+          status = MB_FAILURE;
+          *error = MB_ERROR_WRITE_FAIL;
+          return(status);
+        }
+      }
+      fclose(hin);
+      free(buf);
+
+      /* final case: check if IO error flushing buffer 
+          -- don't omit this it really can happen; calling `fflush()` won't help. */
+      if (ferror(hout) != 0) {
+          status = MB_FAILURE;
+          *error = MB_ERROR_WRITE_FAIL;
+      }
+      fclose(hout);
+    }
+ 
+    /* src1 != dst so concatenate src2 onto src1 in dst */
+    else {
+      FILE *hin = fopen(src1, "r");
+      if (!hin) { 
+        free(buf); 
+        status = MB_FAILURE;
+        *error = MB_ERROR_OPEN_FAIL;
+        return(status);
+      }
+      FILE *hout = fopen(dst, "w");
+      if (!hout) { 
+        free(buf); 
+        fclose(hin); 
+        status = MB_FAILURE;
+        *error = MB_ERROR_OPEN_FAIL;
+        return(status);
+      }
+      size_t buflen;
+      while ((buflen = fread(buf, 1, bufsz, hin)) > 0) {
+        if (buflen != fwrite(buf, 1, buflen, hout)) {
+          /* IO error writing data */
+          fclose(hout);
+          fclose(hin);
+          free(buf);
+          status = MB_FAILURE;
+          *error = MB_ERROR_WRITE_FAIL;
+          return(status);
+        }
+      }
+      fclose(hin);
+      hin = fopen(src2, "r");
+      if (!hin) { 
+        free(buf); 
+        status = MB_FAILURE;
+        *error = MB_ERROR_OPEN_FAIL;
+        return(status);
+      }
+      while ((buflen = fread(buf, 1, bufsz, hin)) > 0) {
+        if (buflen != fwrite(buf, 1, buflen, hout)) {
+          /* IO error writing data */
+          fclose(hout);
+          fclose(hin);
+          free(buf);
+          status = MB_FAILURE;
+          *error = MB_ERROR_WRITE_FAIL;
+          return(status);
+        }
+      }
+      fclose(hin);
+      free(buf);
+
+      /* final case: check if IO error flushing buffer 
+          -- don't omit this it really can happen; calling `fflush()` won't help. */
+      if (ferror(hout) != 0) {
+          status = MB_FAILURE;
+          *error = MB_ERROR_WRITE_FAIL;
+      }
+      fclose(hout);
+
+    }
     return(status);
 }
 /*--------------------------------------------------------------------*/
