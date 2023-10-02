@@ -146,7 +146,7 @@ TRNXPP=trnxpp
 TRNXPP_SRC= trnxpp_app.cpp
 TRNXPP_HPP= trnxpp.hpp
 TRNXPP_OBJ = $(TRNXPP_SRC:%.cpp=$(BUILD_DIR)/%.o)
-TRNXPP_LIBS =  -llcm -lstdc++ -lmb1 -ltrncli -ltrn  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeolib -ludpms $(OS_LIBS)
+TRNXPP_LIBS =  -llcm -lstdc++ -lmb1 -ltrncli -ltrn  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeolib -ludpms $(OS_LIBS) -ltrnxplug
 
 FVTEST=fv-test
 FVTEST_SRC = flag_var_test.cpp
@@ -159,9 +159,14 @@ LIBUDPMS_SRC=udpm_sub.c
 LIBUDPMS_OBJ=$(LIBUDPMS_SRC:%.c=$(BUILD_DIR)/%.o)
 LIBUDPMS_LIBS=
 
+LIBTRNXPLUG = libtrnxplug.a
+LIBTRNXPLUG_SRC = plug-common.cpp plug-oisledx.cpp plug-dvl.cpp plug-idt.cpp plug-oisled.cpp plug-oisled2.cpp
+LIBTRNXPLUG_OBJ = $(LIBTRNXPLUG_SRC:%.cpp=$(BUILD_DIR)/%.o)
+LIBTRNXPLUG_LIBS = -lnewmat -lgeolib -ltrnw -lqnx -lmb1 -ltrn -ludpms -ltrncli -lnetcdf -llcm
+
 ########################################
 # Build Files (mostly for cleanup)
-SOURCES = $(TRNLCM_SRC) $(TRNXPP_SRC) $(FVTEST_SRC)
+SOURCES = $(TRNLCM_SRC) $(TRNXPP_SRC) $(FVTEST_SRC) $(LIBTRNXPLUG_SRC)
 C_SOURCES = $(LIBUDPMS_SRC)
 
 OBJECTS = $(SOURCES:%.cpp=$(BUILD_DIR)/%.o) \
@@ -171,6 +176,8 @@ DEPENDS = $(SOURCES:%.cpp=$(BUILD_DIR)/%.d) \
 $(C_SOURCES:%.c=$(BUILD_DIR)/%.d)
 
 LIBS = $(OUTPUT_DIR)/$(LIBUDPMS)
+PLUGINS = $(OUTPUT_DIR)/$(LIBTRNXPLUG)
+
 BINARIES = $(OUTPUT_DIR)/$(TRNLCM) \
 $(OUTPUT_DIR)/$(TRNXPP) \
 $(OUTPUT_DIR)/$(FVTEST)
@@ -189,12 +196,16 @@ CLEANUP = gmon.out
 ########################################
 # Rules: build targets
 
-all: $(LIBS) $(LCM_HPP) $(JARS) $(BINARIES)
+all: $(LIBS) $(LCM_HPP) $(PLUGINS) $(JARS) $(BINARIES)
 
 # example: build lib
 $(OUTPUT_DIR)/$(LIBUDPMS): $(LIBUDPMS_OBJ)
 	@echo building $@...
-	ar -rcs $@ $(LIBUDPMS_OBJ)
+	ar -rcs $@ $^
+
+$(OUTPUT_DIR)/$(LIBTRNXPLUG): $(LIBTRNXPLUG_OBJ)
+	@echo building $@...
+	ar -rcs $@ $^
 
 # build trnlcm test
 $(OUTPUT_DIR)/$(TRNLCM): $(LCM_HPP) $(TRNLCM_OBJ)
@@ -325,7 +336,7 @@ install:
 
 # clean : delete object, dependency, binary files
 clean:
-	rm -f $(OBJECTS) $(DEPENDS) $(LIBS) $(BINARIES) $(JARS)
+	rm -f $(OBJECTS) $(DEPENDS) $(LIBS) $(PLUGINS) $(BINARIES) $(JARS)
 	rm -rf $(LCM_PKGS)
 	$(RM_DSYMS)
 
