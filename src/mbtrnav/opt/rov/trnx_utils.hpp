@@ -560,6 +560,71 @@ public:
         return errors;
     }
 
+    static Matrix mb_sframe_components(trn::mb1_info *bi, mbgeo *geo)
+    {
+        // set debug for this function
+        int FN_DEBUG_HI = 6;
+        int FN_DEBUG = 5;
+
+        if(bi == nullptr || geo == NULL){
+            Matrix err_ret = Matrix(4,1);
+        }
+
+        // number of beams read (<= nominal beams)
+        int nbeams = bi->beam_count();
+
+        Matrix sf_comp = Matrix(4,nbeams);
+
+
+        // beam components in reference sensor frame (mounted center, across track)
+
+        std::list<trn::mb1_beam_tup> beams = bi->beams_raw();
+        std::list<trn::mb1_beam_tup>::iterator it;
+
+        // zero- and one-based indexs
+        int idx[2] = {0, 1};
+
+        TRN_NDPRINT(FN_DEBUG, "%s: --- \n",__func__);
+
+        for(it = beams.begin(); it != beams.end(); it++)
+        {
+            trn::mb1_beam_tup bt = static_cast<trn::mb1_beam_tup> (*it);
+
+            // beam components already computed, just copy
+
+            // beam number (0-indexed)
+            int b = std::get<0>(bt);
+            double x = std::get<1>(bt);
+            double y = std::get<2>(bt);
+            double z = std::get<3>(bt);
+            double range = sqrt((x * x) +(y * y) + (z * z));
+            // beam components (reference orientation, sensor frame)
+            // 1: along (x) 2: across (y) 3: down (z)
+            sf_comp(1, idx[1]) = x;
+            sf_comp(2, idx[1]) = y;
+            sf_comp(3, idx[1]) = z;
+            sf_comp(4, idx[1]) = 0.;
+
+            if(trn_debug::get()->debug() >= 5){
+
+                double rho[3] = {sf_comp(1,idx[1]), sf_comp(2,idx[1]), sf_comp(3,idx[1])};
+
+                double rhoNorm = vnorm(rho);
+
+                const char *sep = (b == 60 ? "****" : "    ");
+                TRN_NDPRINT(FN_DEBUG_HI, "%s - b[%3d] r[%7.2lf] R[%7.2lf] %s Rx[%7.2lf] Ry[%7.2lf] Rz[%7.2lf]\n",
+                            __func__, b, range, rhoNorm,
+                            sep, sf_comp(1,idx[1]), sf_comp(2,idx[1]), sf_comp(3,idx[1]));
+            }
+
+            idx[0]++;
+            idx[1]++;
+        }
+        TRN_NDPRINT(FN_DEBUG, "%s: --- \n\n",__func__);
+
+        return sf_comp;
+    }
+
     static Matrix mb_sframe_components(trn::bath_info *bi, mbgeo *geo)
     {
         // set debug for this function
@@ -1036,6 +1101,36 @@ public:
         return retval;
     }
 
+    static mb1_t *lcm_to_mb1(trn::mb1_info *bi, trn::nav_info *ni, trn::att_info *ai)
+    {
+        mb1_t *retval = nullptr;
+
+        if(bi == nullptr || ni == nullptr || ai == nullptr){
+            fprintf(stderr,"%s:%d ERR - invalid arg bi[%p] ni[%p] ai[%p]\n", __func__, __LINE__, bi, ni, ai);
+            return retval;
+        }
+
+        size_t n_beams = bi->nbeams();
+
+        if(n_beams <= 0){
+            fprintf(stderr,"%s:%d WARN - beams <= 0 %lu\n", __func__, __LINE__, (long unsigned)n_beams);
+        }
+
+        mb1_t *snd = mb1_new(n_beams);
+        snd->hdg = bi->heading();
+        snd->depth = bi->depth();
+        snd->lat = bi->lat();
+        snd->lon = bi->lon();
+        snd->type = MB1_TYPE_ID;
+        snd->size = MB1_SOUNDING_BYTES(n_beams);
+        snd->nbeams = n_beams;
+        snd->ping_number = bi->ping_number();//ping_number;
+        snd->ts = bi->time_usec()/1e6;
+        retval = snd;
+
+        return retval;
+    }
+
     // returns new poseT; caller must delete
     static poseT *lcm_to_poset(trn::bath_info *bi, trn::nav_info *ni, trn::att_info *ai, trn::vel_info *vi)
     {
@@ -1186,6 +1281,90 @@ public:
         return ss.str();
     }
 
+    static std::string mb1_to_csv(mb1_t *snd, trn::mb1_info *bi, trn::att_info *ai, trn::vel_info *vi=nullptr)
+    {
+
+        std::ostringstream ss;
+        if(nullptr != snd && nullptr != ai)
+        {
+            double lat = snd->lat;
+            double lon = snd->lon;
+            double pos_N=0;
+            double pos_E=0;
+            long int utm = NavUtils::geoToUtmZone(Math::degToRad(lat),
+                                                  Math::degToRad(lon));
+
+            // NavUtils::geoToUtm(latitude, longitude, utmZone, *northing, *easting)
+            NavUtils::geoToUtm(Math::degToRad(lat), Math::degToRad(lon), utm, &pos_N, &pos_E);
+            // Note that TRN uses N,E,D frame (i.e. N:x E:y D:z)
+            // [ 0] time POSIX epoch sec
+            // [ 1] northings
+            // [ 2] eastings
+            // [ 3] depth
+            // [ 4] heading
+            // [ 5] pitch
+            // [ 6] roll
+            // [ 7] flag (0)
+            // [ 8] flag (0)
+            // [ 9] flag (0)
+            // [10] vx (0)
+            // [11] xy (0)
+            // [12] vz (0)
+            // [13] sounding valid flag (1)
+            // [14] bottom lock valid flag (1)
+            // [15] number of beams
+            // beam[16 + i*3] number
+            // beam[17 + i*3] valid (always 1)
+            // beam[18 + i*3] range
+            // ...
+            // NEWLINE
+
+            ss << std::dec << std::setfill(' ') << std::fixed << std::setprecision(7);
+            ss << snd->ts << ",";
+            ss << std::setprecision(7);
+            ss << pos_N << ",";
+            ss << pos_E << ",";
+            ss << snd->depth << ",";
+            ss << snd->hdg << ",";
+            ss << ai->pitch() << ",";
+            ss << ai->roll() << ",";
+            ss << 0 << ",";
+            ss << 0 << ",";
+            ss << 0 << ",";
+            if(vi != nullptr){
+                ss << vi->vx_ms() << ",";
+                ss << vi->vy_ms() << ",";
+                ss << vi->vz_ms() << ",";
+            }else{
+                ss << 0. << ",";
+                ss << 0. << ",";
+                ss << 0. << ",";
+            }
+            ss << std::setprecision(1);
+            // sounding valid flag
+            ss << (bi->flags().is_set(trn::BF_VALID)?1:0) << ",";
+            // bottom lock flag
+            ss << (bi->flags().is_set(trn::BF_BLOCK)?1:0) << ",";
+            ss << snd->nbeams << ",";
+            ss << std::setprecision(4);
+
+            for(int i=0; i < snd->nbeams; i++)
+            {
+                // beam number
+                ss <<  snd->beams[i].beam_num << ",";
+                // valid (set to 1)
+                ss << 1 << ",";
+                // range
+                double comp[3] = {snd->beams[i].rhox, snd->beams[i].rhoz, snd->beams[i].rhoz};
+                double range = vnorm(comp);
+
+                ss << range;
+                if(i < (snd->nbeams-1))
+                    ss << ",";
+            }
+        }
+        return ss.str();
+    }
 
     static std::string lcm_to_csv_raw(trn::bath_info *bi, trn::att_info *ai, trn::nav_info *ni, trn::vel_info *vi=nullptr)
     {

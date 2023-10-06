@@ -35,6 +35,7 @@
 #include "trn/trn_pose_t.hpp"
 #include "trn_msg_utils.hpp"
 
+#include "x_mb1_input.hpp"
 #include "dvl_stat_input.hpp"
 #include "rdi_dvl_input.hpp"
 #include "nav_solution_input.hpp"
@@ -596,7 +597,14 @@ public:
             dynamic_cast<trn::bath_input *>(obj)->set_bath_input_type(BT_MULTIBEAM);
             return obj;
         }
-        std::cerr << __func__ << ": ERR - Unsupported type [" << channel << "]\n";
+        else if(channel.compare("XMB1")==0)
+        {
+            trn_lcm_input *obj = new trn::x_mb1_input("XMB1", 10);
+            dynamic_cast<trn::mb1_input *>(obj)->set_mb1_input_type(BT_MULTIBEAM);
+            return obj;
+        } else {
+            std::cerr << __func__ << ": ERR - Unsupported type [" << channel << "]\n";
+        }
         return nullptr;
     }
 
@@ -607,6 +615,30 @@ public:
         trn::trn_lcm_input *li = this->get_input(chan);
         if(li != nullptr){
             trn::bath_input *ip = dynamic_cast<trn::bath_input *>(li);
+            retval = ip;
+        }
+        return retval;
+    }
+
+    trn::mb1_info *get_mb1_info(const std::string chan)
+    {
+        trn::mb1_info *retval = nullptr;
+        trn::mb1_input *ip = get_mb1_input(chan);
+
+        if(ip != nullptr){
+            retval = ip->mb1_inst();
+        }
+
+        return retval;
+    }
+
+    trn::mb1_input *get_mb1_input(const std::string chan)
+    {
+        trn::mb1_input *retval = nullptr;
+
+        trn::trn_lcm_input *li = this->get_input(chan);
+        if(li != nullptr){
+            trn::mb1_input *ip = dynamic_cast<trn::mb1_input *>(li);
             retval = ip;
         }
         return retval;
@@ -966,14 +998,22 @@ public:
 
                     if(listener != nullptr) {
 
-                        if(listener->provides_bath()){
+                        if(listener->provides_bath() || listener->provides_mb1()){
                             // bath must provide GEO
                             flags |= GEO;
                             if( geo_s != NULL){
                                 // parse geometry
                                 // extra_s may contain additional options
-                                trn::bath_input *bi = dynamic_cast<trn::bath_input *>(listener);
-                                int btype = bi->bath_input_type();
+                                int btype = 0;
+                                if(listener->provides_bath()) {
+                                    trn::bath_input *bi = dynamic_cast<trn::bath_input *>(listener);
+                                    btype = bi->bath_input_type();
+
+                                } else if(listener->provides_mb1()) {
+                                    trn::mb1_input *bi = dynamic_cast<trn::mb1_input *>(listener);
+                                    btype = bi->mb1_input_type();
+
+                                }
 
                                 TRN_NDPRINT(5,  "%s:%d - btype[%d] geo[%s]\n", __func__, __LINE__, btype, geo_s);
 
@@ -1150,11 +1190,12 @@ public:
             char *cur = NULL;
             char *opt_s = strtok_r(cpy, ",", &cur);
 
-            enum {BATH=0x1, NAV=0x2, ATT=0x4, VEL=0x8, TRN=0x10, CB=0x20, KEY=0x40, LCM=0x80, ERR=0x100};
+            enum {BATH=0x1, MB1=0x2, NAV=0x4, ATT=0x8, VEL=0x10, TRN=0x20, CB=0x40, KEY=0x80, LCM=0x100, ERR=0x200};
 
-            // set required flag values (vel optional)
+            // set required flag values
+            // required NAV, ATT, CB, TRN, BATH and/or MB1
             // optional: KEY, VEL, LCM
-            unsigned int flags = (CB|TRN|BATH|ATT|NAV);
+            unsigned int flags = (CB|TRN|BATH|ATT|NAV|MB1);
 
             // create, configure context
             trnxpp_ctx *ctx = new trnxpp_ctx();
@@ -1162,21 +1203,25 @@ public:
             while(NULL != opt_s && (flags & ERR)==0 )
             {
                 int bath_idx = -1;
+                int mb1_idx = -1;
                 int att_idx = -1;
                 int nav_idx = -1;
                 int vel_idx = -1;
 
                 char *bath_ch = NULL;
+                char *mb1_ch = NULL;
                 char *att_ch = NULL;
                 char *nav_ch = NULL;
                 char *vel_ch = NULL;
 
                 char *bath_cb = NULL;
+                char *mb1_cb = NULL;
                 char *nav_cb = NULL;
                 char *att_cb = NULL;
                 char *vel_cb = NULL;
 
                 int bath_to = 100;
+                int mb1_to = 100;
                 int nav_to = 100;
                 int att_to = 100;
                 int vel_to = 100;
@@ -1346,6 +1391,27 @@ public:
                     } else {
                         flags |= ERR;
                     }
+                }  else  if(strstr(opt_s, "mi:") != NULL) {
+
+                    if(parse_ctx_input(opt_s, "mi", &mb1_idx, &mb1_ch, &mb1_cb, &mb1_to) == 0){
+
+                        TRN_NDPRINT(5,  "%s:%d - m1 idx[%d] ch[%s] cb[%s]\n", __func__, __LINE__, mb1_idx, mb1_ch, mb1_cb);
+
+                        ctx->set_mb1_input(mb1_idx, mb1_ch);
+
+                        if(NULL != mb1_cb){
+                            add_ctx_sem(mb1_ch, mb1_cb, mb1_to);
+                            ctx->add_callback_key(mb1_cb);
+                        }
+
+                        // free strings allocated by parse_ctx_input
+                        free(mb1_ch);
+                        free(mb1_cb);
+
+                        flags &= ~MB1;
+                    } else {
+                        flags |= ERR;
+                    }
                 } else if(strstr(opt_s, "ai:") != NULL) {
 
                     if(parse_ctx_input(opt_s, "ai", &att_idx, &att_ch, &att_cb, &att_to) == 0){
@@ -1460,10 +1526,13 @@ public:
 
                 // get next
                 opt_s = strtok_r(NULL, ",", &cur);
-        }
+            }
+
 
             // OK if no flags set
-            if(flags == 0){
+            // or only one of MB1 or BATH are set
+            if((flags == 0) ||
+               ((flags & (MB1 | BATH)) != (MB1 | BATH))){
                 // add context
                 mCtx.push_back(ctx);
                 retval = 0;

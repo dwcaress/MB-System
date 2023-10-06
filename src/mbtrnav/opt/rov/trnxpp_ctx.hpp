@@ -32,6 +32,7 @@
 #include "navigation_provider_IF.hpp"
 #include "velocity_provider_IF.hpp"
 #include "attitude_provider_IF.hpp"
+#include "mb1_provider_IF.hpp"
 #include "trn_msg_utils.hpp"
 #include "trnx_utils.hpp"
 
@@ -275,6 +276,12 @@ public:
             wx = (alen > wval ? alen+1 : wval);
             os << std::setw(wkey-2) << "bath src[" << i << "]" << std::setw(wx) << st <<"\n";
         }
+        for(i=0, vit = mMB1InputKeys.begin(); vit != mMB1InputKeys.end(); vit++, i++){
+            std::string st = *vit;
+            alen = strlen(st.c_str());
+            wx = (alen > wval ? alen+1 : wval);
+            os << std::setw(wkey-2) << "mb1 src[" << i << "]" << std::setw(wx) << st <<"\n";
+        }
         for(i=0, vit = mNavInputKeys.begin(); vit != mNavInputKeys.end(); vit++, i++){
             std::string st = *vit;
             alen = strlen(st.c_str());
@@ -390,6 +397,21 @@ public:
     std::string *bath_input_chan(int i)
     {
         return mBathInputKeys.size() > i ? &mBathInputKeys.at(i) : nullptr;
+    }
+
+    void set_mb1_input(int i, const std::string &inp)
+    {
+        if(mMB1InputKeys.size() <= i) {
+            TRN_NDPRINT(2, "%s - resizing %d > %d\n", __func__, mMB1InputKeys.size(), i+1);
+            mMB1InputKeys.resize(i+1);
+        }
+
+        mMB1InputKeys.at(i) = std::string(inp);
+    }
+
+    std::string *mb1_input_chan(int i)
+    {
+        return mMB1InputKeys.size() > i ? &mMB1InputKeys.at(i) : nullptr;
     }
 
     void set_nav_input_chan(int i, const std::string &inp)
@@ -670,6 +692,28 @@ public:
     }
 
     int write_mb1_csv(mb1_t *snd, trn::bath_info *bi, trn::att_info *ai, trn::vel_info *vi=nullptr)
+    {
+        int retval = 0;
+
+        // vi optional, valid if NULL
+        if(nullptr != mMB1CsvFile && nullptr != snd && nullptr != ai && nullptr != bi){
+
+            std::string ss = trnx_utils::mb1_to_csv(snd, bi, ai, vi);
+            if(ss.length() > 1){
+                fprintf(mMB1CsvFile, "%s\n", ss.c_str());
+            }
+
+            //            TRN_NDPRINT(6, "%s\n", ss.c_str());
+
+            retval = ss.length();
+        } else {
+            TRN_DPRINT("%s:%d - invalid arg snd[%p] ai[%p] mMB1CsvFile[%p]\n", __func__, __LINE__, snd, ai, mMB1CsvFile);
+        }
+
+        return retval;
+    }
+
+    int write_mb1_csv(mb1_t *snd, trn::mb1_info *bi, trn::att_info *ai, trn::vel_info *vi=nullptr)
     {
         int retval = 0;
 
@@ -1664,6 +1708,7 @@ private:
     std::vector<std::string> mNavInputKeys;
     std::vector<std::string> mAttInputKeys;
     std::vector<std::string> mCallbackKeys;
+    std::vector<std::string> mMB1InputKeys;
 
     std::list<trn::trn_host> mMB1SvrList;
     std::list<trn::trn_host> mUdpmSubList;

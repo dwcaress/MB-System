@@ -270,7 +270,7 @@ libtrnxplug_la_DEPENDENCIES =
 @BUILD_ROVTRN_TRUE@	opt/rov/plug-oisledx.lo opt/rov/plug-dvl.lo \
 @BUILD_ROVTRN_TRUE@	opt/rov/plug-idt.lo opt/rov/plug-oisled.lo \
 @BUILD_ROVTRN_TRUE@	opt/rov/plug-oisled2.lo \
-@BUILD_ROVTRN_TRUE@	opt/rov/plug-lassmb.lo
+@BUILD_ROVTRN_TRUE@	opt/rov/plug-lassmb.lo opt/rov/plug-xmb1.lo
 libtrnxplug_la_OBJECTS = $(am_libtrnxplug_la_OBJECTS)
 libtrnxplug_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CXXLD) \
@@ -434,6 +434,7 @@ am__depfiles_remade = gctp/source/$(DEPDIR)/alberfor.Plo \
 	opt/rov/$(DEPDIR)/plug-oisled.Plo \
 	opt/rov/$(DEPDIR)/plug-oisled2.Plo \
 	opt/rov/$(DEPDIR)/plug-oisledx.Plo \
+	opt/rov/$(DEPDIR)/plug-xmb1.Plo \
 	opt/rov/$(DEPDIR)/trnxpp_app.Po opt/rov/$(DEPDIR)/udpm_sub.Plo \
 	qnx-utils/$(DEPDIR)/AngleData.Plo \
 	qnx-utils/$(DEPDIR)/AsciiFile.Plo \
@@ -922,7 +923,8 @@ libtrncli_la_LIBADD = -lnewmat -lgeolib -ltrnw -lqnx -lmb1 -ltnav -lnetcdf
 @BUILD_ROVTRN_TRUE@	opt/rov/plug-dvl.cpp opt/rov/plug-idt.cpp \
 @BUILD_ROVTRN_TRUE@	opt/rov/plug-oisled.cpp \
 @BUILD_ROVTRN_TRUE@	opt/rov/plug-oisled2.cpp \
-@BUILD_ROVTRN_TRUE@	opt/rov/plug-lassmb.cpp
+@BUILD_ROVTRN_TRUE@	opt/rov/plug-lassmb.cpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/plug-xmb1.cpp
 @BUILD_ROVTRN_TRUE@libtrnxplug_la_LIBADD = -lnewmat -lgeolib -ltrnw -lqnx -lmb1 -ltnav -lnetcdf -llcm -ltrncli -ludpms
 @BUILD_ROVTRN_TRUE@ROVTRN_APPS = trnxpp
 @BUILD_ROVTRN_TRUE@trnxpp_SOURCES = \
@@ -1456,6 +1458,8 @@ opt/rov/plug-oisled2.lo: opt/rov/$(am__dirstamp) \
 	opt/rov/$(DEPDIR)/$(am__dirstamp)
 opt/rov/plug-lassmb.lo: opt/rov/$(am__dirstamp) \
 	opt/rov/$(DEPDIR)/$(am__dirstamp)
+opt/rov/plug-xmb1.lo: opt/rov/$(am__dirstamp) \
+	opt/rov/$(DEPDIR)/$(am__dirstamp)
 
 libtrnxplug.la: $(libtrnxplug_la_OBJECTS) $(libtrnxplug_la_DEPENDENCIES) $(EXTRA_libtrnxplug_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(libtrnxplug_la_LINK) $(am_libtrnxplug_la_rpath) $(libtrnxplug_la_OBJECTS) $(libtrnxplug_la_LIBADD) $(LIBS)
@@ -1719,6 +1723,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@opt/rov/$(DEPDIR)/plug-oisled.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@opt/rov/$(DEPDIR)/plug-oisled2.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@opt/rov/$(DEPDIR)/plug-oisledx.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@opt/rov/$(DEPDIR)/plug-xmb1.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@opt/rov/$(DEPDIR)/trnxpp_app.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@opt/rov/$(DEPDIR)/udpm_sub.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@qnx-utils/$(DEPDIR)/AngleData.Plo@am__quote@ # am--include-marker
@@ -2116,6 +2121,7 @@ distclean: distclean-am
 	-rm -f opt/rov/$(DEPDIR)/plug-oisled.Plo
 	-rm -f opt/rov/$(DEPDIR)/plug-oisled2.Plo
 	-rm -f opt/rov/$(DEPDIR)/plug-oisledx.Plo
+	-rm -f opt/rov/$(DEPDIR)/plug-xmb1.Plo
 	-rm -f opt/rov/$(DEPDIR)/trnxpp_app.Po
 	-rm -f opt/rov/$(DEPDIR)/udpm_sub.Plo
 	-rm -f qnx-utils/$(DEPDIR)/AngleData.Plo
@@ -2328,6 +2334,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f opt/rov/$(DEPDIR)/plug-oisled.Plo
 	-rm -f opt/rov/$(DEPDIR)/plug-oisled2.Plo
 	-rm -f opt/rov/$(DEPDIR)/plug-oisledx.Plo
+	-rm -f opt/rov/$(DEPDIR)/plug-xmb1.Plo
 	-rm -f opt/rov/$(DEPDIR)/trnxpp_app.Po
 	-rm -f opt/rov/$(DEPDIR)/udpm_sub.Plo
 	-rm -f qnx-utils/$(DEPDIR)/AngleData.Plo

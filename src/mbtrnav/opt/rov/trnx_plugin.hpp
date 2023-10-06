@@ -23,6 +23,13 @@ extern "C" int cb_proto_oisled(void *pargs);// dec 2022
 extern "C" void transform_oidvl2(trn::bath_info **bi, trn::att_info **ai, dvlgeo **geo, mb1_t *r_snd);
 extern "C" int cb_proto_oisled2(void *pargs);
 
+void transform_mblass(trn::bath_info **bi, trn::att_info **ai, mbgeo **geo, mb1_t *r_snd);
+int cb_proto_mblass(void *pargs);
+
+
+void transform_xmb1(trn::mb1_info **bi, trn::att_info **ai, mbgeo **geo, mb1_t *r_snd);
+int cb_proto_xmb1(void *pargs);
+
 class TrnxPlugin
 {
 public:
@@ -37,6 +44,7 @@ public:
         xpp.register_callback("cb_proto_oisled2", cb_proto_oisled2);
         xpp.register_callback("cb_proto_oisledx", cb_proto_oisledx);
         xpp.register_callback("cb_proto_mblass", cb_proto_oisledx);
+        xpp.register_callback("cb_proto_xmb1", cb_proto_xmb1);
     }
 };
 
