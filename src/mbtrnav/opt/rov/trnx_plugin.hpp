@@ -36,6 +36,7 @@ public:
         xpp.register_callback("cb_proto_oisled", cb_proto_oisled);
         xpp.register_callback("cb_proto_oisled2", cb_proto_oisled2);
         xpp.register_callback("cb_proto_oisledx", cb_proto_oisledx);
+        xpp.register_callback("cb_proto_mblass", cb_proto_oisledx);
     }
 };
 

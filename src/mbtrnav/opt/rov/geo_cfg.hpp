@@ -21,6 +21,7 @@
 #include <string.h>
 #include <memory.h>
 #include <libgen.h>
+#include <map>
 
 #ifndef GEO_CFG_H
 #define GEO_CFG_H
@@ -30,6 +31,61 @@ class beam_geometry
 public:
     beam_geometry(){}
     ~beam_geometry(){}
+
+    static char *trim(char *src)
+    {
+        char *bp = NULL;
+        if(NULL!=src){
+            bp = src;
+            char *ep = src+strlen(src);
+            while(isspace(*bp) && (*bp != '\0')){
+                bp++;
+            }
+            while((isspace(*ep) || *ep == '\0') && (ep >= src)){
+                *ep = '\0';
+                ep--;
+            }
+        }
+        return bp;
+    }
+
+    static void parse_map(const char *map_spec, std::map<std::string, double>& kvmap)
+    {
+
+        if(NULL != map_spec){
+            // parse extra parameters:
+            // - comma-separated key=value pairs
+            // - keys may contain [a-zA-Z0-9_-.]
+            // - values are type double (parsed using %g)
+            // - trims leading/trailing whitespace
+            TRN_NDPRINT(5,  "%s:%d - parsing map_spec[%s]\n", __func__, __LINE__, map_spec);
+            const char *kvdel="/";
+            char *acpy = strdup(map_spec);
+            char *next_pair = strtok_r(acpy, ",", &acpy);
+            TRN_NDPRINT(5,  "%s:%d - next_pair[%s]\n", __func__, __LINE__, next_pair);
+            while (next_pair != NULL) {
+                char *kcpy = strdup(next_pair);
+                char *skey = strtok(kcpy, kvdel);
+                char *sval = strtok(NULL, kvdel);
+                if(skey != NULL && sval != NULL) {
+                    char *tkey = beam_geometry::trim(skey);
+                    char *tval = beam_geometry::trim(sval);
+                    TRN_NDPRINT(5,  "%s:%d - tkey[%s] tval[%s]\n", __func__, __LINE__, tkey, tval);
+                    if (tkey != NULL && tval != NULL){
+                        double dval = 0.0;
+                        if (sscanf(tval, "%lf", &dval) == 1){
+                            kvmap[tkey] = dval;
+                            TRN_NDPRINT(5,  "%s:%d - added key[%s] val[%.3lf]\n", __func__, __LINE__, tkey, dval);                   }
+                        }
+                }
+                free(kcpy);
+                next_pair = strtok_r(acpy, ",", &acpy);
+                TRN_NDPRINT(5,  "%s:%d - next_pair[%s]\n", __func__, __LINE__, next_pair);
+            }
+            free(acpy);
+        }
+    }
+
 private:
 };
 
@@ -74,6 +130,30 @@ public:
         memset(pitch_rf, 0, asz);
         parse_bspec(bspec);
     }
+    dvlgeo(uint16_t nbeams, const char *bspec, double *rot, double *tran, double rrot, std::map<std::string, double>& kvmap)
+    :beam_count(nbeams)
+    , yaw_rf(NULL)
+    , pitch_rf(NULL)
+    , rot_radius_m(rrot)
+    , xmap(kvmap)
+    {
+        for(int i=0; i<3; i++)
+        {
+            if(rot != NULL)
+                svr_deg[i] = rot[i];
+            if(tran != NULL)
+                svt_m[i] = tran[i];
+        }
+
+        beam_count = nbeams;
+        size_t asz = sizeof(double) * nbeams;
+        yaw_rf = (double *)malloc(asz);
+        pitch_rf = (double *)malloc(asz);
+        memset(yaw_rf, 0, asz);
+        memset(pitch_rf, 0, asz);
+        parse_bspec(bspec);
+    }
+
 
     ~dvlgeo()
     {
@@ -82,7 +162,7 @@ public:
     }
 
     // caller must free sbspec
-    static int parse_dvl_args(const char *spec, char **r_bspec, uint16_t *r_nbeams, double *r_svr, double *r_svt, double *r_rrot)
+    static int parse_dvl_args(const char *spec, char **r_bspec, uint16_t *r_nbeams, double *r_svr, double *r_svt, double *r_rrot, std::map<std::string, double> *r_xmap)
     {
         int retval = 0;
 
@@ -90,15 +170,16 @@ public:
 
         TRN_NDPRINT(5,  "%s:%d - parsing dvlgeo [%s]\n", __func__, __LINE__, spec);
 
-        char *sbspec_type = strtok(acpy,":");
-        char *snbeams = strtok(NULL,":");
-        char *sbspec = strtok(NULL,":");
-        char *srot = strtok(NULL,":");
-        char *strn = strtok(NULL,":");
-        char *srrot = strtok(NULL,":");
+        char *sbspec_type = strtok(acpy, ":");
+        char *snbeams = strtok(NULL, ":");
+        char *sbspec = strtok(NULL, ":");
+        char *srot = strtok(NULL, ":");
+        char *strn = strtok(NULL, ":");
+        char *srrot = strtok(NULL, ":");
+        char *sxmap = strtok(NULL, ":");
 
-        TRN_NDPRINT(5,  "%s:%d - parsing dvl/oi geo sbspec_type[%s] snbeams[%s] sbspec[%s] srot[%s] stx[%s] srrot[%s]\n", __func__, __LINE__, sbspec_type,
-                    snbeams, sbspec, srot, strn, srrot);
+        TRN_NDPRINT(5,  "%s:%d - parsing dvl/oi geo sbspec_type[%s] snbeams[%s] sbspec[%s] srot[%s] stx[%s] srrot[%s] sxmap[%s]\n", __func__, __LINE__, sbspec_type,
+                    snbeams, sbspec, srot, strn, srrot, sxmap);
 
         char *bspec = NULL;
         uint16_t nbeams=0;
@@ -106,6 +187,7 @@ public:
         double svt[3] = {0.};
         double rrot = 0.;
         int n_parsed = 0;
+        std::map<std::string, double> kvmap;
 
         if(NULL!=snbeams){
             int test = sscanf(snbeams,"%hu",&nbeams);
@@ -131,7 +213,11 @@ public:
             if(test == 1)
                 n_parsed += test;
         }
+        if(NULL != sxmap){
 
+            beam_geometry::parse_map(sxmap, kvmap);
+            n_parsed++;
+        }
         if(n_parsed >= 8){
             if(nullptr != r_nbeams)
                 *r_nbeams = nbeams;
@@ -143,6 +229,8 @@ public:
                 memcpy(r_svt, svt, 3 * sizeof(double));
             if(nullptr != r_rrot)
                 *r_rrot = rrot;
+            if(nullptr != r_xmap)
+                *r_xmap = kvmap;
 
             retval = n_parsed;
         } else {
@@ -165,12 +253,13 @@ public:
         double svr[3] = {0.};
         double svt[3] = {0.};
         double rrot = 0.;
+        std::map<std::string, double> kvmap;
 
         // must free bspec
-        int test = parse_dvl_args(spec, &bspec, &nbeams, svr, svt, &rrot);
+        int test = parse_dvl_args(spec, &bspec, &nbeams, svr, svt, &rrot, &kvmap);
 
         if(test >= 8){
-            retval = new dvlgeo(nbeams, bspec, &svr[0], &svt[0], rrot);
+            retval = new dvlgeo(nbeams, bspec, &svr[0], &svt[0], rrot, kvmap);
         } else {
             fprintf(stderr, "%s:%d - parsing error expected >= 8 [%d]\n", __func__, __LINE__, test);
         }
@@ -265,6 +354,14 @@ public:
         }
         os << std::setw(wkey) << "rot_radius_m";
         os << std::setw(wval) << rot_radius_m << "\n";
+        os << std::setw(wkey) << "xmap";
+        os << std::setw(wval) << xmap.size() << "\n";
+        std::map<std::string, double>::iterator it = xmap.begin();
+        while (it != xmap.end()) {
+            os << std::setw(wkey) << it->first;
+            os << std::setw(wval) << static_cast<double>(it->second) << "\n";
+            ++it;
+        }
         os << "\n";
     }
 
@@ -293,6 +390,9 @@ public:
     double *pitch_rf;
     // DVL rotation radius (OI toolsled)
     double rot_radius_m;
+    // extra parameters (key/value pairs)
+    // keys may contain [a-zA-Z0-9_-.]
+    std::map<std::string, double> xmap;
 };
 
 class mbgeo : public beam_geometry
@@ -322,7 +422,23 @@ public:
         }
     }
 
+    mbgeo(uint16_t nbeams, double swath, double *rot, double *tran, double rrot,  const std::map<std::string, double> &kvmap)
+    : beam_count(nbeams)
+    , swath_deg(swath)
+    , rot_radius_m(rrot)
+    , xmap(kvmap)
+    {
+        for(int i=0; i<3; i++)
+        {
+            if(rot != NULL)
+                svr_deg[i] = rot[i];
+            if(tran != NULL)
+                svt_m[i] = tran[i];
+        }
+    }
+
     ~mbgeo(){}
+
 
    static mbgeo *parse_mbgeo(const char *spec)
     {
@@ -331,33 +447,40 @@ public:
         char *acpy = strdup(spec);
         // skip name
         strtok(acpy,":");
-        char *sbeams = strtok(NULL,":");
-        char *sswath = strtok(NULL,":");
-        char *srot = strtok(NULL,":");
-        char *strn = strtok(NULL,":");
-        char *srrot = strtok(NULL,":");
+        char *sbeams = strtok(NULL, ":");
+        char *sswath = strtok(NULL, ":");
+        char *srot = strtok(NULL, ":");
+        char *strn = strtok(NULL, ":");
+        char *srrot = strtok(NULL, ":");
+        char *sxmap = strtok(NULL, ":");
 
-       TRN_NDPRINT(5,  "%s:%d - parsing mbgeo spec[%s] sbeams[%s] sswath[%s] srot[%s] stx[%s] srrot[%s]\n", __func__, __LINE__, spec,
-                    sbeams, sswath, srot, strn, srrot);
+       TRN_NDPRINT(5,  "%s:%d - parsing mbgeo spec[%s] sbeams[%s] sswath[%s] srot[%s] stx[%s] srrot[%s] sxmap[%s]\n", __func__, __LINE__, spec,
+                    sbeams, sswath, srot, strn, srrot, sxmap);
 
         double svr[3] = {0};
         double svt[3] = {0};
         uint16_t beams=0;
         double swath=0;
         double rrot = 0.;
+        std::map<std::string, double> kvmap;
 
-       if(NULL!=sbeams)
+       if(NULL != sbeams)
             sscanf(sbeams,"%hu",&beams);
-        if(NULL!=sswath)
+        if(NULL != sswath)
             sscanf(sswath,"%lf",&swath);
-        if(NULL!=srot)
+        if(NULL != srot)
             sscanf(srot,"%lf,%lf,%lf",&svr[0],&svr[1],&svr[2]);
-        if(NULL!=strn)
+        if(NULL != strn)
             sscanf(strn,"%lf,%lf,%lf",&svt[0],&svt[1],&svt[2]);
-        if(NULL!=srrot)
+        if(NULL != srrot)
            sscanf(srrot, "%lf", &rrot);
+       if(NULL != sxmap){
 
-        retval = new mbgeo(beams, swath, &svr[0], &svt[0], rrot);
+           beam_geometry::parse_map(sxmap, kvmap);
+
+       }
+
+        retval = new mbgeo(beams, swath, &svr[0], &svt[0], rrot, kvmap);
 
         free(acpy);
 
@@ -378,6 +501,15 @@ public:
         os << svt_m[0] << "," << svt_m[1] << "," << svt_m[2] << "]\n";
         os << std::setw(wkey) << "rot_radius_m";
         os << std::setw(wval) << rot_radius_m << "\n";
+        os << std::setw(wkey) << "xmap";
+        os << std::setw(wval) << xmap.size() << "\n";
+        std::map<std::string, double>::iterator it = xmap.begin();
+        while (it != xmap.end()) {
+            os << std::setw(wkey) << it->first;
+            os << std::setw(wval) << static_cast<double>(it->second) << "\n";
+            ++it;
+        }
+
         os << "\n";
     }
 
@@ -404,6 +536,9 @@ public:
     double svt_m[3];
     // device rotation radius (OI toolsled)
     double rot_radius_m;
+    // extra parameters (key/value pairs)
+    // keys may contain [a-zA-Z0-9_-.]
+    std::map<std::string, double> xmap;
 
 };
 

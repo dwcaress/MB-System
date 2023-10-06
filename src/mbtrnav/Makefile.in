@@ -269,7 +269,8 @@ libtrnxplug_la_DEPENDENCIES =
 @BUILD_ROVTRN_TRUE@am_libtrnxplug_la_OBJECTS = opt/rov/plug-common.lo \
 @BUILD_ROVTRN_TRUE@	opt/rov/plug-oisledx.lo opt/rov/plug-dvl.lo \
 @BUILD_ROVTRN_TRUE@	opt/rov/plug-idt.lo opt/rov/plug-oisled.lo \
-@BUILD_ROVTRN_TRUE@	opt/rov/plug-oisled2.lo
+@BUILD_ROVTRN_TRUE@	opt/rov/plug-oisled2.lo \
+@BUILD_ROVTRN_TRUE@	opt/rov/plug-lassmb.lo
 libtrnxplug_la_OBJECTS = $(am_libtrnxplug_la_OBJECTS)
 libtrnxplug_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CXXLD) \
@@ -429,6 +430,7 @@ am__depfiles_remade = gctp/source/$(DEPDIR)/alberfor.Plo \
 	opt/dorado/$(DEPDIR)/trn_replay.Po \
 	opt/rov/$(DEPDIR)/plug-common.Plo \
 	opt/rov/$(DEPDIR)/plug-dvl.Plo opt/rov/$(DEPDIR)/plug-idt.Plo \
+	opt/rov/$(DEPDIR)/plug-lassmb.Plo \
 	opt/rov/$(DEPDIR)/plug-oisled.Plo \
 	opt/rov/$(DEPDIR)/plug-oisled2.Plo \
 	opt/rov/$(DEPDIR)/plug-oisledx.Plo \
@@ -919,7 +921,8 @@ libtrncli_la_LIBADD = -lnewmat -lgeolib -ltrnw -lqnx -lmb1 -ltnav -lnetcdf
 @BUILD_ROVTRN_TRUE@	opt/rov/plug-oisledx.cpp \
 @BUILD_ROVTRN_TRUE@	opt/rov/plug-dvl.cpp opt/rov/plug-idt.cpp \
 @BUILD_ROVTRN_TRUE@	opt/rov/plug-oisled.cpp \
-@BUILD_ROVTRN_TRUE@	opt/rov/plug-oisled2.cpp
+@BUILD_ROVTRN_TRUE@	opt/rov/plug-oisled2.cpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/plug-lassmb.cpp
 @BUILD_ROVTRN_TRUE@libtrnxplug_la_LIBADD = -lnewmat -lgeolib -ltrnw -lqnx -lmb1 -ltnav -lnetcdf -llcm -ltrncli -ludpms
 @BUILD_ROVTRN_TRUE@ROVTRN_APPS = trnxpp
 @BUILD_ROVTRN_TRUE@trnxpp_SOURCES = \
@@ -1451,6 +1454,8 @@ opt/rov/plug-oisled.lo: opt/rov/$(am__dirstamp) \
 	opt/rov/$(DEPDIR)/$(am__dirstamp)
 opt/rov/plug-oisled2.lo: opt/rov/$(am__dirstamp) \
 	opt/rov/$(DEPDIR)/$(am__dirstamp)
+opt/rov/plug-lassmb.lo: opt/rov/$(am__dirstamp) \
+	opt/rov/$(DEPDIR)/$(am__dirstamp)
 
 libtrnxplug.la: $(libtrnxplug_la_OBJECTS) $(libtrnxplug_la_DEPENDENCIES) $(EXTRA_libtrnxplug_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(libtrnxplug_la_LINK) $(am_libtrnxplug_la_rpath) $(libtrnxplug_la_OBJECTS) $(libtrnxplug_la_LIBADD) $(LIBS)
@@ -1710,6 +1715,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@opt/rov/$(DEPDIR)/plug-common.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@opt/rov/$(DEPDIR)/plug-dvl.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@opt/rov/$(DEPDIR)/plug-idt.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@opt/rov/$(DEPDIR)/plug-lassmb.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@opt/rov/$(DEPDIR)/plug-oisled.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@opt/rov/$(DEPDIR)/plug-oisled2.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@opt/rov/$(DEPDIR)/plug-oisledx.Plo@am__quote@ # am--include-marker
@@ -2106,6 +2112,7 @@ distclean: distclean-am
 	-rm -f opt/rov/$(DEPDIR)/plug-common.Plo
 	-rm -f opt/rov/$(DEPDIR)/plug-dvl.Plo
 	-rm -f opt/rov/$(DEPDIR)/plug-idt.Plo
+	-rm -f opt/rov/$(DEPDIR)/plug-lassmb.Plo
 	-rm -f opt/rov/$(DEPDIR)/plug-oisled.Plo
 	-rm -f opt/rov/$(DEPDIR)/plug-oisled2.Plo
 	-rm -f opt/rov/$(DEPDIR)/plug-oisledx.Plo
@@ -2317,6 +2324,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f opt/rov/$(DEPDIR)/plug-common.Plo
 	-rm -f opt/rov/$(DEPDIR)/plug-dvl.Plo
 	-rm -f opt/rov/$(DEPDIR)/plug-idt.Plo
+	-rm -f opt/rov/$(DEPDIR)/plug-lassmb.Plo
 	-rm -f opt/rov/$(DEPDIR)/plug-oisled.Plo
 	-rm -f opt/rov/$(DEPDIR)/plug-oisled2.Plo
 	-rm -f opt/rov/$(DEPDIR)/plug-oisledx.Plo

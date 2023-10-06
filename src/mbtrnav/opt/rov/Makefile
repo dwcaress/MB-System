@@ -160,7 +160,7 @@ LIBUDPMS_OBJ=$(LIBUDPMS_SRC:%.c=$(BUILD_DIR)/%.o)
 LIBUDPMS_LIBS=
 
 LIBTRNXPLUG = libtrnxplug.a
-LIBTRNXPLUG_SRC = plug-common.cpp plug-oisledx.cpp plug-dvl.cpp plug-idt.cpp plug-oisled.cpp plug-oisled2.cpp
+LIBTRNXPLUG_SRC = plug-common.cpp plug-oisledx.cpp plug-dvl.cpp plug-idt.cpp  plug-oisled.cpp plug-oisled2.cpp plug-lassmb.cpp
 LIBTRNXPLUG_OBJ = $(LIBTRNXPLUG_SRC:%.cpp=$(BUILD_DIR)/%.o)
 LIBTRNXPLUG_LIBS = -lnewmat -lgeolib -ltrnw -lqnx -lmb1 -ltrn -ludpms -ltrncli -lnetcdf -llcm
 

@@ -105,20 +105,25 @@ public:
         }
     }
 
+    virtual void tostream(std::ostream &os, int wkey=15, int wval=28) override
+    {
+        trn_lcm_input::tostream(os, wkey, wval);
+        os << std::setw(wkey) << "lat" << std::setw(wval) << mNavInst.lat() << "\n";
+        os << std::setw(wkey) << "lon" << std::setw(wval) << mNavInst.lon() << "\n";
+        os << std::setw(wkey) << "depth" << std::setw(wval) << mNavInst.depth() << "\n";
+        os << std::setw(wkey) << "nflags" << std::setw(wval-8) << "x";
+        os << std::setw(8) << std::hex << std::setfill('0') << mNavInst.flags().get() << "\n";
+        os << std::setfill(' ');
+        os << std::setw(wkey) << "pitch" << std::setw(wval) << mAttInst.pitch() << "\n";
+        os << std::setw(wkey) << "roll" << std::setw(wval) << mAttInst.roll() << "\n";
+        os << std::setw(wkey) << "heading" << std::setw(wval) << mAttInst.heading() << "\n";
+        os << std::setw(wkey) << "aflags" << std::setw(wval-8) << "x";
+        os << std::setw(8) << std::hex << std::setfill('0') << mAttInst.flags().get() << "\n";
+    }
+
     virtual void show(int wkey=15, int wval=28) override
     {
-        trn_lcm_input::show(wkey, wval);
-        std::cerr << std::setw(wkey) << "lat" << std::setw(wval) << mNavInst.lat() << "\n";
-        std::cerr << std::setw(wkey) << "lon" << std::setw(wval) << mNavInst.lon() << "\n";
-        std::cerr << std::setw(wkey) << "depth" << std::setw(wval) << mNavInst.depth() << "\n";
-        std::cerr << std::setw(wkey) << "nflags" << std::setw(wval-8) << "x";
-        std::cerr << std::setw(8) << std::hex << std::setfill('0') << mNavInst.flags().get() << "\n";
-        std::cerr << std::setfill(' ');
-        std::cerr << std::setw(wkey) << "pitch" << std::setw(wval) << mAttInst.pitch() << "\n";
-        std::cerr << std::setw(wkey) << "roll" << std::setw(wval) << mAttInst.roll() << "\n";
-        std::cerr << std::setw(wkey) << "heading" << std::setw(wval) << mAttInst.heading() << "\n";
-        std::cerr << std::setw(wkey) << "aflags" << std::setw(wval-8) << "x";
-        std::cerr << std::setw(8) << std::hex << std::setfill('0') << mAttInst.flags().get() << "\n";
+        tostream(std::cerr, wkey, wval);
     }
 
 protected:

@@ -35,6 +35,16 @@
 #include "trn/trn_pose_t.hpp"
 #include "trn_msg_utils.hpp"
 
+#include "dvl_stat_input.hpp"
+#include "rdi_dvl_input.hpp"
+#include "nav_solution_input.hpp"
+#include "idt_input.hpp"
+#include "pcomms_input.hpp"
+#include "rdi_pd4_input.hpp"
+#include "kearfott_input.hpp"
+#include "octans_input.hpp"
+#include "trn_mb1_input.hpp"
+
 namespace trn
 {
 
@@ -580,6 +590,12 @@ public:
         {
             return new trn::octans_input("IMU_OCTANS", buf_depth);
         }
+        else if(channel.compare("COMPAS_MB1")==0)
+        {
+            trn_lcm_input *obj = new trn::trn_mb1_input("COMPAS_MB1", 10);
+            dynamic_cast<trn::bath_input *>(obj)->set_bath_input_type(BT_MULTIBEAM);
+            return obj;
+        }
         std::cerr << __func__ << ": ERR - Unsupported type [" << channel << "]\n";
         return nullptr;
     }
@@ -973,7 +989,7 @@ public:
                                     mbgeo *geo = mbgeo::parse_mbgeo(geo_s);
                                     mGeoList.emplace_back(chan, btype, geo);
 
-                                    TRN_NDPRINT(5,  "%s:%d - added mbgeo[%s, %d, %p]\n", __func__, __LINE__, chan, btype, geo);
+                                    TRN_NDPRINT(5,  "%s:%d - added mbgeo[%s, %d, %p]:\n%s\n", __func__, __LINE__, chan, btype, geo, geo->tostring().c_str());
 
                                 } else if(btype == BT_MULTIBEAM) {
 
