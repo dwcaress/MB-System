@@ -11,6 +11,7 @@
 // a[0]   : vehicle attitude
 // a[1]   : sled attitude
 // geo[0] : mbgeo (transforms)
+// with xmap : "atx", "aty", "atz"
 // snd - sounding (w. navigation in vehicle frame)
 void transform_xmb1(trn::mb1_info **bi, trn::att_info **ai, mbgeo **geo, mb1_t *r_snd)
 {
@@ -49,14 +50,17 @@ void transform_xmb1(trn::mb1_info **bi, trn::att_info **ai, mbgeo **geo, mb1_t *
     // +x: fwd +y: stbd, +z:down (aka FSK, fwd,stbd,keel)
     // TODO T is for transform use rSV
     double STRN[3] = {geo[0]->svt_m[0], geo[0]->svt_m[1], geo[0]->svt_m[2]};
-
-    double XTRN[3] = {geo[0]->rot_radius_m, 0., 0.};
+    double ax = geo[0]->xmap["atx"];
+    double ay = geo[0]->xmap["aty"];
+    double az = geo[0]->xmap["atz"];
+    double XTRN[3] = {ax, ay, az};
     double XR = ai[1]->pitch() - ai[0]->pitch();
     double XROT[3] = {0., XR, 0.};
 
     // beam components in reference sensor frame (mounted center, across track)
     Matrix beams_SF = trnx_utils::mb_sframe_components(bi[0], geo[0]);
     TRN_NDPRINT(FN_DEBUG, "%s: --- \n",__func__);
+    TRN_NDPRINT(FN_DEBUG, "%s: geo[0]:\n%s\n",__func__,geo[0]->tostring().c_str());
 
     TRN_NDPRINT(FN_DEBUG, "VATT[%.3lf, %.3lf, %.3lf]\n", VATT[0], VATT[1], VATT[2]);
     TRN_NDPRINT(FN_DEBUG, "SROT[%.3lf, %.3lf, %.3lf]\n", SROT[0], SROT[1], SROT[2]);
@@ -111,7 +115,11 @@ void transform_xmb1(trn::mb1_info **bi, trn::att_info **ai, mbgeo **geo, mb1_t *
 
         // beam number (0-indexed)
         int b = std::get<0>(bt);
-        double range = std::get<1>(bt);
+        double bx = std::get<1>(bt);
+        double by = std::get<2>(bt);
+        double bz = std::get<3>(bt);
+        double range = sqrt(bx*bx + by*by + bz*bz);
+
         // beam components WF x,y,z
         // matrix row/col (1 indexed)
         r_snd->beams[idx[0]].beam_num = b;

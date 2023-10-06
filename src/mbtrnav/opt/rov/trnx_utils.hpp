@@ -600,9 +600,9 @@ public:
             double range = sqrt((x * x) +(y * y) + (z * z));
             // beam components (reference orientation, sensor frame)
             // 1: along (x) 2: across (y) 3: down (z)
-            sf_comp(1, idx[1]) = x;
-            sf_comp(2, idx[1]) = y;
-            sf_comp(3, idx[1]) = z;
+            sf_comp(1, idx[1]) = x/range;
+            sf_comp(2, idx[1]) = y/range;
+            sf_comp(3, idx[1]) = z/range;
             sf_comp(4, idx[1]) = 0.;
 
             if(trn_debug::get()->debug() >= 5){

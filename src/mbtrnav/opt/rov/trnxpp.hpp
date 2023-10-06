@@ -1035,8 +1035,8 @@ public:
 
                                     mbgeo *geo = mbgeo::parse_mbgeo(geo_s);
                                     mGeoList.emplace_back(chan, btype, geo);
-
-                                    TRN_NDPRINT(5,  "%s:%d - added mbgeo[%s, %d, %p]\n", __func__, __LINE__, chan, btype, geo);
+                                    
+                                    TRN_NDPRINT(5,  "%s:%d - added mbgeo[%s, %d, %p]:\n%s\n", __func__, __LINE__, chan, btype, geo, geo->tostring().c_str());
 
                                 } else {
                                     TRN_NDPRINT(5,  "%s:%d - invalid btype[%d]\n", __func__, __LINE__, btype);
