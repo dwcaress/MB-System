@@ -22,6 +22,7 @@ typedef enum{
 typedef uint32_t bath_flags_t;
 
 typedef enum{
+    BT_NONE=0,
     BT_DVL=1,
     BT_MULTIBEAM,
     BT_PENCIL,

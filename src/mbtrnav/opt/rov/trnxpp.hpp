@@ -918,6 +918,7 @@ public:
             } else {
                 flags |= ERR;
             }
+            TRN_NDPRINT(5,  "%s:%d - parsing input[%s] \n", __func__, __LINE__, str);
 
             while(NULL != opt_s && (flags & ERR)==0 )
             {
@@ -1012,7 +1013,7 @@ public:
                     listener = create_input(chan, depth);
 
                     if(listener != nullptr) {
-//TODO: add logic to add geo to non-bath inputs
+                        //TODO: add logic to add geo to non-bath inputs
                         if(listener->provides_bath() || listener->provides_mb1()){
                             // bath must provide GEO
                             flags |= GEO;
@@ -1063,6 +1064,16 @@ public:
                                 flags |= ERR;
                             }
                         }
+                        
+                        if(listener->provides_nav() || listener->provides_att()) {
+                            if (geo_s != NULL) {
+                                int btype = BT_NONE;
+                                txgeo *geo = txgeo::parse_txgeo(geo_s);
+                                mGeoList.emplace_back(chan, BT_NONE, geo);
+
+                                TRN_NDPRINT(5,  "%s:%d - added txgeo[%s, %d, %p]:\n%s\n", __func__, __LINE__, chan, btype, geo, geo->tostring().c_str());
+                            }
+                       }
 
                         if(listener->provides_att() && invert_pitch) {
 

@@ -444,6 +444,9 @@ public:
     {
         mbgeo *retval = NULL;
 
+       if(spec == NULL)
+           return retval;
+
         char *acpy = strdup(spec);
         // skip name
         strtok(acpy,":");
@@ -542,52 +545,223 @@ public:
 
 };
 
-//class oigeo : public dvlgeo
-//{
-//public:
-//    oigeo()
-//    : dvlgeo()
-//    , tilt_deg(0.)
-//    , dvl_rot_radius_m(0.)
-//    {
-//
-//    }
-//
-//    oigeo(uint16_t nbeams, const char *bspec, double *rot, double *tran, double pivot = 0.)
-//    : dvlgeo(nbeams, bspec, rot, tran)
-//    , tilt_deg(0.)
-//    , dvl_rot_radius_m(pivot)
-//    {
-//
-//    }
-//
-//    ~oigeo()
-//    {
-//    }
-//
-//    void tostream(std::ostream &os, int wkey=15, int wval=18)
-//    {
-//        dvlgeo::tostream(os, wkey, wval);
-//        os << std::setw(wkey) << "tilt_deg";
-//        os << std::setw(wval) << tilt_deg << "\n";
-//        os << std::setw(wkey) << "dvl_rot_radius_m";
-//        os << std::setw(wval) << dvl_rot_radius_m << "\n";
-//    }
-//
-//    std::string tostring(int wkey=15, int wval=18)
-//    {
-//        std::ostringstream ss;
-//        tostream(ss, wkey, wval);
-//        return ss.str();
-//    }
-//
-//    void show(int wkey=15, int wval=18)
-//    {
-//        tostream(std::cerr, wkey, wval);
-//    }
-//
-//    double tilt_deg;
-//    // DVL rotation radius
-//    double dvl_rot_radius_m;
-//};
+class txgeo : public beam_geometry
+{
+public:
+    txgeo()
+    : mRotLen(0)
+    , rot_deg(nullptr)
+    , mTranLen(0)
+    , tran_m(nullptr)
+    , xmap()
+    {
+
+    }
+
+    txgeo(int rlen, double *rot, int tlen, double *tran, const std::map<std::string, double> &kvmap)
+    : mRotLen(rlen)
+    , mTranLen(tlen)
+    , xmap(kvmap)
+    {
+        int ra_len = rlen * sizeof(double);
+        rot_deg = (double *)malloc(ra_len);
+        if(rot_deg != NULL){
+            memset(rot_deg, 0, ra_len);
+            memcpy(rot_deg, rot, ra_len);
+        } else {
+            fprintf(stderr, "%s:%d - ERR: could not allocate rot_deg\n", __func__, __LINE__);
+        }
+
+        ra_len = tlen * sizeof(double);
+        tran_m = (double *)malloc(ra_len);
+        if(tran_m != NULL){
+            memset(tran_m, 0, ra_len);
+            memcpy(tran_m, tran, ra_len);
+        } else {
+            fprintf(stderr, "%s:%d - ERR: could not allocate tran_m\n", __func__, __LINE__);
+        }
+    }
+
+    ~txgeo()
+    {
+        free(rot_deg);
+        free(tran_m);
+    }
+
+    static txgeo *parse_txgeo(const char *spec)
+    {
+        txgeo *retval = NULL;
+        TRN_NDPRINT(5,  "%s:%d - parsing txgeo spec[%s]\n", __func__, __LINE__, spec);
+
+        if(spec == NULL)
+            return retval;
+
+        char *acpy = strdup(spec);
+        // skip name
+        strtok(acpy,":");
+        char *srlen = strtok(NULL, ":");
+        char *srot = strtok(NULL, ":");
+        char *stlen = strtok(NULL, ":");
+        char *stran = strtok(NULL, ":");
+        char *sxmap = strtok(NULL, ":");
+
+        TRN_NDPRINT(5,  "%s:%d - parsing txgeo spec[%s] srlen[%s] srot[%s] stlen[%s] stran[%s] sxmap[%s]\n", __func__, __LINE__, spec,
+                    srlen, srot, stlen, stran, sxmap);
+
+        int err_count = 0;
+        int rlen = 0;
+        int tlen = 0;
+        double *rot = NULL;
+        double *tran = NULL;
+        std::map<std::string, double> kvmap;
+
+        if (NULL != srlen)
+            sscanf(srlen,"%d",&rlen);
+        if (NULL != stlen)
+            sscanf(stlen,"%d",&tlen);
+
+        if((rlen % 3) != 0) {
+            while ( (rlen % 3) != 0) rlen++;
+            fprintf(stderr, "%s:%d - WARN: rlen not a multiple of 3; padding with zero to %d\n", __func__, __LINE__, rlen);
+
+        }
+        if((tlen % 3) != 0) {
+            while ( (tlen % 3) != 0) tlen++;
+            fprintf(stderr, "%s:%d - WARN: tlen not a multiple of 3; padding with zero to %d\n", __func__, __LINE__, tlen);
+
+        }
+
+        if (rlen > 0) {
+            char *xcpy = strdup(srot);
+            rot = (double *) malloc(rlen * sizeof(double));
+
+            if (rot != NULL) {
+
+                memset(rot, 0, rlen * sizeof(double));
+
+                char *next_s = strtok(xcpy, ",");
+                for (int i = 0; i < rlen; i++) {
+                    if(next_s != NULL)
+                        sscanf(next_s, "%lf", &rot[i]);
+                    else
+                        rot[i] = 0.;
+                    next_s = strtok(NULL, ",");
+                }
+                free(xcpy);
+            } else {
+                fprintf(stderr, "%s:%d - ERR: could not allocate temp rot array\n", __func__, __LINE__);
+                err_count++;
+            }
+
+        } else {
+            fprintf(stderr, "%s:%d - ERR: rlen <= 0\n", __func__, __LINE__);
+            err_count++;
+        }
+
+        if (tlen > 0) {
+
+            char *xcpy = strdup(stran);
+            tran = (double *) malloc(tlen * sizeof(double));
+
+            if (tran != NULL) {
+
+                memset(tran, 0, tlen * sizeof(double));
+
+                char *next_s = strtok(xcpy, ",");
+                for (int i = 0; i < tlen; i++) {
+                    if(next_s != NULL)
+                        sscanf(next_s, "%lf", &tran[i]);
+                    else
+                        tran[i] = 0.;
+                    next_s = strtok(NULL, ",");
+                }
+                free(xcpy);
+            } else {
+                fprintf(stderr, "%s:%d - ERR: could not allocate temp tran array\n", __func__, __LINE__);
+            }
+
+        } else {
+            fprintf(stderr, "%s:%d - ERR: tlen <= 0\n", __func__, __LINE__);
+        }
+
+        if(NULL != sxmap){
+
+            beam_geometry::parse_map(sxmap, kvmap);
+
+        }
+
+        if(err_count == 0) {
+            retval = new txgeo(rlen, rot, tlen, tran, kvmap);
+        } else {
+            fprintf(stderr, "%s:%d - parse errors, returning NULL spec[%s]\n", __func__, __LINE__, spec);
+
+        }
+
+        free(acpy);
+
+        return retval;
+    }
+
+    void tostream(std::ostream &os, int wkey=15, int wval=18)
+    {
+        os << std::setw(wkey) << "rotation" ;
+        os << std::setw(wval) << mRotLen << std::endl;
+
+        for (int i = 0; i < mRotLen; i += 3) {
+            os << std::setw(wkey) << i/3;
+            os << std::setw(wval) << "[";
+            os << rot_deg[i] << "," << rot_deg[i + 1] << "," << rot_deg[i + 2] << "]\n";
+        }
+
+
+        os << std::setw(wkey) << "translation" ;
+        os << std::setw(wval) << mTranLen << std::endl;
+
+        for (int i = 0; i < mTranLen; i += 3) {
+            os << std::setw(wkey) << i/3;
+            os << std::setw(wval) << "[";
+            os << tran_m[i] << "," << tran_m[i + 1] << "," << tran_m[i + 2] << "]\n";
+        }
+
+        os << std::setw(wkey) << "xmap";
+        os << std::setw(wval) << xmap.size() << "\n";
+        std::map<std::string, double>::iterator it = xmap.begin();
+        while (it != xmap.end()) {
+            os << std::setw(wkey) << it->first;
+            os << std::setw(wval) << static_cast<double>(it->second) << "\n";
+            ++it;
+        }
+
+        os << "\n";
+    }
+
+    std::string tostring(int wkey=15, int wval=18)
+    {
+        std::ostringstream ss;
+        tostream(ss, wkey, wval);
+        return ss.str();
+    }
+
+    void show(int wkey=15, int wval=18)
+    {
+        tostream(std::cerr, wkey, wval);
+    }
+
+    // rot_deg array len (multiple of 3)
+    int mRotLen;
+
+    // sensor rotation relative to vehicle CRP (r/p/y  aka phi/theta/psi deg)
+    double *rot_deg;
+
+    // tran_m array len (multiple of 3)
+    int mTranLen;
+
+    // sensor translation relative to vehicle CRP (x/y/z m)
+    // +x: fwd +y: stbd, +z:down
+    double *tran_m;
+
+    // extra parameters (key/value pairs)
+    // keys may contain [a-zA-Z0-9_-.]
+    std::map<std::string, double> xmap;
+};
 #endif
