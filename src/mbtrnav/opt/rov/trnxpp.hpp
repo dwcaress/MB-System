@@ -1012,7 +1012,7 @@ public:
                     listener = create_input(chan, depth);
 
                     if(listener != nullptr) {
-TODO: add logic to add geo to non-bath inputs
+//TODO: add logic to add geo to non-bath inputs
                         if(listener->provides_bath() || listener->provides_mb1()){
                             // bath must provide GEO
                             flags |= GEO;
