@@ -928,7 +928,7 @@ public:
 
                     // discard option "depth:"
                     strtok(opt_s,":");
-                    char *key_s = strtok(NULL,":");
+                    char *key_s = strtok(NULL, ":");
                     char *val_key = trnxpp_cfg::trim(key_s);
 
                     if(strlen(val_key) > 0) {
@@ -944,7 +944,7 @@ public:
 
                     // discard option "invert-pitch:"
                     strtok(opt_s,":");
-                    char *key_s = strtok(NULL,":");
+                    char *key_s = strtok(NULL, ":");
                     char *val_key = trnxpp_cfg::trim(key_s);
 
                     if(strlen(val_key) > 0) {
@@ -963,7 +963,7 @@ public:
 
                     // discard option "geo:"
                     strtok(opt_s,":");
-                    char *key_s = strtok(NULL,"*");
+                    char *key_s = strtok(NULL, "*");
                     char *val_key = trnxpp_cfg::trim(key_s);
 
                     if(strlen(val_key) > 0) {
@@ -978,13 +978,28 @@ public:
                 }
                 TRN_NDPRINT(5,  "%s:%d - loop end: opt_s[%s] cur[%s]\n",__func__, __LINE__, opt_s, cur);
 
-                if( (cur != NULL) && strstr(cur,"geo") != NULL )
+                if( cur != NULL )
                 {
-                    // geo contains ',', so parse to '*' geo terminator
-                    opt_s = strtok_r(NULL, "*", &cur);
+                    char *pc = strstr(cur,",");
+                    char *pg = strstr(cur,"geo");
+                    if(pc != NULL && pg != NULL && pc > pg){
+                        // geo contains ',', so parse to '*' geo terminator
+                        opt_s = strtok_r(NULL, "*", &cur);
+                    } else {
+                        opt_s = strtok_r(NULL, ",", &cur);
+                    }
                 } else {
                     opt_s = strtok_r(NULL, ",", &cur);
                 }
+
+//
+//                if( (cur != NULL) && strstr(cur,"geo") != NULL )
+//                {
+//                    // geo contains ',', so parse to '*' geo terminator
+//                    opt_s = strtok_r(NULL, "*", &cur);
+//                } else {
+//                    opt_s = strtok_r(NULL, ",", &cur);
+//                }
             } // while
 
             if(flags == 0){
@@ -997,7 +1012,7 @@ public:
                     listener = create_input(chan, depth);
 
                     if(listener != nullptr) {
-
+TODO: add logic to add geo to non-bath inputs
                         if(listener->provides_bath() || listener->provides_mb1()){
                             // bath must provide GEO
                             flags |= GEO;

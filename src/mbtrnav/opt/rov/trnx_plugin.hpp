@@ -26,9 +26,11 @@ extern "C" int cb_proto_oisled2(void *pargs);
 void transform_mblass(trn::bath_info **bi, trn::att_info **ai, mbgeo **geo, mb1_t *r_snd);
 int cb_proto_mblass(void *pargs);
 
-
 void transform_xmb1(trn::mb1_info **bi, trn::att_info **ai, mbgeo **geo, mb1_t *r_snd);
 int cb_proto_xmb1(void *pargs);
+
+void transform_idtlass(trn::bath_info **bi, trn::att_info **ai, mbgeo **geo, mb1_t *r_snd);
+int cb_proto_idtlass(void *pargs);
 
 class TrnxPlugin
 {
