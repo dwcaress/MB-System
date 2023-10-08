@@ -12,39 +12,37 @@
 // a[1]   : sled attitude
 // n[0]   : vehicle navigation
 // n[1]   : sled navigation
-// geo[0] : mbgeo
-// geo[1] : oigeo
+// geo[0] : mbgeo (multibeam geometry)
+// geo[1] : txgeo (INS geometry)
 
-void transform_idtlass(trn::bath_info **bi, trn::att_info **ai, mbgeo **geo, mb1_t *r_snd)
+int transform_idtlass(trn::bath_info **bi, trn::att_info **ai, beam_geometry **bgeo, mb1_t *r_snd)
 {
+    int retval = -1;
     int FN_DEBUG_HI = 6;
     int FN_DEBUG = 5;
 
     // validate inputs
-    if(NULL == geo || geo[0] == nullptr){
-        fprintf(stderr, "%s - geometry error : NULL input geo[%p] {%p, %p} \n", __func__, geo, (geo?geo[0]:nullptr), (geo?geo[0]:nullptr));
-        return;
+    if(NULL == bgeo || bgeo[0] == nullptr || bgeo[1] == nullptr){
+        fprintf(stderr, "%s - geometry error : NULL input bgeo[%p] {%p, %p} \n", __func__, bgeo, (bgeo?bgeo[0]:nullptr), (bgeo?bgeo[1]:nullptr));
+        return retval;
     }
-    if(geo[0] && geo[0]->beam_count <= 0){
-        fprintf(stderr, "%s - geometry warning : geo[0] beams <= 0 {%u}\n", __func__, geo[0]->beam_count);
+
+    mbgeo *mb_geo[1] = {static_cast<mbgeo *>(bgeo[0])};
+    txgeo *ni_geo[1] = {static_cast<txgeo *>(bgeo[1])};
+
+    if(mb_geo[0] && mb_geo[0]->beam_count <= 0){
+        fprintf(stderr, "%s - geometry warning : geo[0] beams <= 0 {%u}\n", __func__, mb_geo[0]->beam_count);
     }
-//    if(geo[1] && geo[1]->beam_count <= 0){
-//        fprintf(stderr, "%s - geometry error : geo[1] beams <= 0 {%u}\n", __func__, geo[1]->beam_count);
-//        return;
-//    }
+
     if(NULL == r_snd || NULL == ai|| NULL == bi){
         fprintf(stderr, "%s - ERR invalid argument bi[%p] ai[%p] snd[%p]\n", __func__, bi, ai, r_snd);
-        return;
+        return retval;
     }
 
     if(NULL == ai[0] || NULL == ai[1] || NULL == bi[0]){
         fprintf(stderr, "%s - ERR invalid info ai[0][%p] ai[1][%p] bi[0][%p] \n", __func__, ai[0], ai[1], bi[0]);
-        return;
+        return retval;
     }
-//    if(NULL == ni[0] || NULL == ni[1]){
-//        fprintf(stderr, "%s - ERR invalid info ni[0][%p] ni[1][%p]\n", __func__, ni[0], ni[1]);
-//        return;
-//    }
 
     // vehicle attitude (relative to NED, radians)
     // r/p/y  (phi/theta/psi)
@@ -54,19 +52,22 @@ void transform_idtlass(trn::bath_info **bi, trn::att_info **ai, mbgeo **geo, mb1
     // sensor mounting angles (relative to vehicle, radians)
     // 3-2-1 euler angles, r/p/y  (phi/theta/psi)
     // wrt sensor mounted across track, b[0] port, downward facing
-    double SROT[3] = { DTR(geo[0]->svr_deg[0]), DTR(geo[0]->svr_deg[1]), DTR(geo[0]->svr_deg[2])};
+    double SROT[3] = { DTR(mb_geo[0]->svr_deg[0]), DTR(mb_geo[0]->svr_deg[1]), DTR(mb_geo[0]->svr_deg[2])};
 
     // sensor mounting translation offsets (relative to vehicle CRP, meters)
     // +x: fwd +y: stbd, +z:down
-    double STRN[3] = {geo[0]->svt_m[0], geo[0]->svt_m[1], geo[0]->svt_m[2]};
+    double STRN[3] = {mb_geo[0]->svt_m[0], mb_geo[0]->svt_m[1], mb_geo[0]->svt_m[2]};
 
-    double XTRN[3] = {geo[1]->rot_radius_m, 0., 0.};
+    double XTRN[3] = {mb_geo[0]->rot_radius_m, 0., 0.};
     double XR = ai[1]->pitch() - ai[0]->pitch();
     double XROT[3] = {0., XR, 0.};
 
-    Matrix beams_SF = trnx_utils::mb_sframe_components(bi[0], geo[0]);
+    Matrix beams_SF = trnx_utils::mb_sframe_components(bi[0], mb_geo[0]);
 
     TRN_NDPRINT(FN_DEBUG, "%s: --- \n",__func__);
+    TRN_NDPRINT(FN_DEBUG, "mb_geo:\n%s\n",mb_geo[0]->tostring().c_str());
+    TRN_NDPRINT(FN_DEBUG, "ni_geo:\n%s\n",ni_geo[0]->tostring().c_str());
+
 
     TRN_NDPRINT(FN_DEBUG, "VATT[%.3lf, %.3lf, %.3lf]\n", VATT[0], VATT[1], VATT[2]);
     TRN_NDPRINT(FN_DEBUG, "SROT[%.3lf, %.3lf, %.3lf]\n", SROT[0], SROT[1], SROT[2]);
@@ -154,7 +155,8 @@ void transform_idtlass(trn::bath_info **bi, trn::att_info **ai, mbgeo **geo, mb1
     }
     TRN_NDPRINT(FN_DEBUG, "%s: --- \n\n",__func__);
 
-    return;
+    retval = 0;
+    return retval;
 }
 
 // OI Toolsled
@@ -215,10 +217,10 @@ int cb_proto_idtlass(void *pargs)
             ss << (akey[1]==nullptr ? " akey[1]" : "");
             ss << (nkey[0]==nullptr ? " nkey[0]" : "");
             ss << (nkey[1]==nullptr ? " nkey[1]" : "");
-            TRN_NDPRINT(5, "%s:%d WARN - NULL input key: %s\n", __func__, __LINE__, ss.str().c_str());
-            err_count++;
-            err_count++;
-            continue;
+            ss << (vkey == nullptr ? " vkey" : "");
+            TRN_NDPRINT(5, "%s:%d ERR - NULL input key: %s\n", __func__, __LINE__, ss.str().c_str());
+                err_count++;
+                continue;
         }
 
         trn::bath_info *bi[2] = {xpp->get_bath_info(*bkey[0]), nullptr};
@@ -227,17 +229,18 @@ int cb_proto_idtlass(void *pargs)
         trn::vel_info *vi = (vkey == nullptr ? nullptr : xpp->get_vel_info(*vkey));
 
         // vi optional
-        if(bi[0] == nullptr || ni[0] == nullptr || ni[0] == nullptr || ai[1] == nullptr || ai[1] == nullptr || vi == nullptr)
+        if(bi[0] == nullptr || ni[0] == nullptr || ni[0] == nullptr || ai[1] == nullptr || ai[1] == nullptr)
         {
             ostringstream ss;
-            ss << (bi[0]==nullptr ? " bi[0]" : "");
-            ss << (ai[0]==nullptr ? " ai[0]" : "");
-            ss << (ai[1]==nullptr ? " ai[1]" : "");
-            ss << (ni[0]==nullptr ? " ni[0]" : "");
-            ss << (ni[1]==nullptr ? " ni[1]" : "");
-            ss << (vi==nullptr ? " vi" : "");
+            ss << (bi[0] == nullptr ? " bi[0]" : "");
+            ss << (ai[0] == nullptr ? " ai[0]" : "");
+            ss << (ai[1] == nullptr ? " ai[1]" : "");
+            ss << (ni[0] == nullptr ? " ni[0]" : "");
+            ss << (ni[1] == nullptr ? " ni[1]" : "");
+            ss << (vi == nullptr ? " vi" : "");
             TRN_NDPRINT(5, "%s:%d WARN - NULL info instance: %s\n", __func__, __LINE__, ss.str().c_str());
-            err_count++;
+                err_count++;
+                continue;
         }
 
         if(bkey[0] != nullptr && bi[0] != nullptr)
@@ -245,7 +248,7 @@ int cb_proto_idtlass(void *pargs)
 
         size_t n_beams = bi[0]->beam_count();
 
-        if(n_beams > 0){
+        if (n_beams > 0) {
 
             // generate MB1 sounding (raw beams)
             mb1_t *snd = trnx_utils::lcm_to_mb1(bi[0], ni[0], ai[0]);
@@ -255,26 +258,25 @@ int cb_proto_idtlass(void *pargs)
 
             // if streams_ok, bs/bp pointers have been validated
             trn::bath_input *bp[1] = {xpp->get_bath_input(*bkey[0])};
-            int trn_type[2] = {-1, -1};
-
-            if(bp[0] != nullptr){
-                trn_type[0] = bp[0]->bath_input_type();
-            }
+            int trn_type[2] = {-1, trn::BT_NONE};
 
             if(nullptr != bp[0]) {
-
-                mbgeo *geo[2] = {nullptr, nullptr};
-                beam_geometry *bgeo[2] = {nullptr, nullptr};
+                trn_type[0] = bp[0]->bath_input_type();
 
                 if(trn_type[0] == trn::BT_DELTAT)
                 {
+                    beam_geometry *bgeo[2] = {nullptr, nullptr};
+
+                    // get geometry for IDT and sled INS
                     bgeo[0] = xpp->lookup_geo(*bkey[0], trn_type[0]);
-                    geo[0] = static_cast<mbgeo *>(bgeo[0]);
-                    bgeo[1] = xpp->lookup_geo(*nkey[1], trn_type[0]);
-                    geo[1] = static_cast<mbgeo *>(bgeo[1]);
+                    bgeo[1] = xpp->lookup_geo(*nkey[1], trn_type[1]);
 
                     // compute MB1 beam components in vehicle frame
-                    transform_idtlass(bi, ai, geo, snd);
+                    if (transform_idtlass(bi, ai, bgeo, snd) != 0) {
+                        TRN_NDPRINT(6, "%s:%d ERR - transform_idtlass failed\n", __func__, __LINE__);
+                        err_count++;
+                        continue;
+                    }
 
                 } else {
                     fprintf(stderr,"%s:%d ERR - unsupported input_type[%d] beam transformation invalid\n", __func__, __LINE__, trn_type[0]);

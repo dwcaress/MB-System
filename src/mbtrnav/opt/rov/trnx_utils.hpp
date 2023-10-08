@@ -560,6 +560,8 @@ public:
         return errors;
     }
 
+    // in : beams in MB1 format (along, across, down)
+    // out : directional cosine matrix (along, across, down)
     static Matrix mb_sframe_components(trn::mb1_info *bi, mbgeo *geo)
     {
         // set debug for this function
@@ -625,6 +627,8 @@ public:
         return sf_comp;
     }
 
+    // in : beam ranges, sensor geometry
+    // out : directional cosine matrix (along, across, down)
     static Matrix mb_sframe_components(trn::bath_info *bi, mbgeo *geo)
     {
         // set debug for this function
