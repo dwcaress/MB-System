@@ -13,7 +13,8 @@
 // n[0]   : vehicle navigation
 // n[1]   : sled navigation
 // geo[0] : mbgeo (multibeam geometry)
-// geo[1] : txgeo (INS geometry)
+// geo[1] : txgeo (sled INS geometry)
+// geo[2] : txgeo (veh nav geometry)
 
 int transform_idtlass(trn::bath_info **bi, trn::att_info **ai, beam_geometry **bgeo, mb1_t *r_snd)
 {
@@ -22,13 +23,17 @@ int transform_idtlass(trn::bath_info **bi, trn::att_info **ai, beam_geometry **b
     int FN_DEBUG = 5;
 
     // validate inputs
-    if(NULL == bgeo || bgeo[0] == nullptr || bgeo[1] == nullptr){
-        fprintf(stderr, "%s - geometry error : NULL input bgeo[%p] {%p, %p} \n", __func__, bgeo, (bgeo?bgeo[0]:nullptr), (bgeo?bgeo[1]:nullptr));
+    if(NULL == bgeo || bgeo[0] == nullptr || bgeo[1] == nullptr || bgeo[2] == nullptr){
+        fprintf(stderr, "%s - geometry error : NULL input bgeo[%p] {%p, %p, %p} \n", __func__, bgeo, (bgeo?bgeo[0]:nullptr), (bgeo?bgeo[1]:nullptr), (bgeo?bgeo[2]:nullptr));
         return retval;
     }
 
+    // IDT geometry
     mbgeo *mb_geo[1] = {static_cast<mbgeo *>(bgeo[0])};
-    txgeo *ni_geo[1] = {static_cast<txgeo *>(bgeo[1])};
+
+    // 0: sled INS geometry
+    // 1: veh nav geometry
+    txgeo *tx_geo[2] = {static_cast<txgeo *>(bgeo[1]), static_cast<txgeo *>(bgeo[2])};
 
     if(mb_geo[0] && mb_geo[0]->beam_count <= 0){
         fprintf(stderr, "%s - geometry warning : geo[0] beams <= 0 {%u}\n", __func__, mb_geo[0]->beam_count);
@@ -56,6 +61,7 @@ int transform_idtlass(trn::bath_info **bi, trn::att_info **ai, beam_geometry **b
 
     // sensor mounting translation offsets (relative to vehicle CRP, meters)
     // +x: fwd +y: stbd, +z:down
+    // or should it be relative to location sensor?
     double STRN[3] = {mb_geo[0]->svt_m[0], mb_geo[0]->svt_m[1], mb_geo[0]->svt_m[2]};
 
     double XTRN[3] = {mb_geo[0]->rot_radius_m, 0., 0.};
@@ -66,7 +72,8 @@ int transform_idtlass(trn::bath_info **bi, trn::att_info **ai, beam_geometry **b
 
     TRN_NDPRINT(FN_DEBUG, "%s: --- \n",__func__);
     TRN_NDPRINT(FN_DEBUG, "mb_geo:\n%s\n",mb_geo[0]->tostring().c_str());
-    TRN_NDPRINT(FN_DEBUG, "ni_geo:\n%s\n",ni_geo[0]->tostring().c_str());
+    TRN_NDPRINT(FN_DEBUG, "tx_geo.0:\n%s\n",tx_geo[0]->tostring().c_str());
+    TRN_NDPRINT(FN_DEBUG, "tx_geo.1:\n%s\n",tx_geo[1]->tostring().c_str());
 
 
     TRN_NDPRINT(FN_DEBUG, "VATT[%.3lf, %.3lf, %.3lf]\n", VATT[0], VATT[1], VATT[2]);
@@ -81,7 +88,7 @@ int transform_idtlass(trn::bath_info **bi, trn::att_info **ai, beam_geometry **b
     TRN_NDPRINT(FN_DEBUG, "XROT[%.3lf, %.3lf, %.3lf]\n", XROT[0], XROT[1], XROT[2]);
     TRN_NDPRINT(FN_DEBUG, "pitch (deg) veh[%.3lf] ois[%.3lf] angle[%.3lf]\n", Math::radToDeg(ai[0]->pitch()), Math::radToDeg(ai[1]->pitch()), Math::radToDeg(XR));
     TRN_NDPRINT(5,"\n");
-
+#if 0
     // generate coordinate tranformation matrices
     // translate arm rotation point to sled origin
     Matrix mat_XTRN = trnx_utils::affineTranslation(XTRN);
@@ -93,8 +100,6 @@ int transform_idtlass(trn::bath_info **bi, trn::att_info **ai, beam_geometry **b
     Matrix mat_STRN = trnx_utils::affineTranslation(STRN);
     // vehicle attitude (pitch, roll, heading)
     Matrix mat_VATT = trnx_utils::affine321Rotation(VATT);
-    // combine to get composite tranformation
-    // order is significant:
 
     // combine to get composite tranformation
     // order is significant:
@@ -109,6 +114,35 @@ int transform_idtlass(trn::bath_info **bi, trn::att_info **ai, beam_geometry **b
 
     // apply coordinate transforms
     Matrix beams_VF = Q * beams_SF;
+#endif
+
+    // 2023/10/10 : first order
+    // - uncompensated lat/lon from sled kearfott
+    // - use vehicle depth ()
+
+    // mounting rotation matrix
+    Matrix mat_SROT = trnx_utils::affine321Rotation(SROT);
+    // mounting translation matrix
+    Matrix mat_STRN = trnx_utils::affineTranslation(STRN);
+    // vehicle attitude (pitch, roll, heading)
+    Matrix mat_VATT = trnx_utils::affine321Rotation(VATT);
+
+    // combine to get composite tranformation
+    // order is significant:
+
+    // apply IDT mounting translation, rotation
+    Matrix S0 = mat_SROT * mat_STRN;
+    // apply vehicle attitude
+    Matrix S1 = mat_VATT * S0;
+
+    // apply coordinate transforms
+    Matrix beams_VF = S1 * beams_SF;
+
+    // snd is intialized with vehicle nav
+    // if initialized w/ sled INS
+    // adjust depth for mounting offset difference (Z+ down)
+    // Znav - Zmb
+    r_snd->depth += (tx_geo[0]->tran_m[3] - tx_geo[1]->tran_m[3]);
 
     // fill in the MB1 record using transformed beams
     std::list<trn::beam_tup> beams = bi[0]->beams_raw();
@@ -258,18 +292,19 @@ int cb_proto_idtlass(void *pargs)
 
             // if streams_ok, bs/bp pointers have been validated
             trn::bath_input *bp[1] = {xpp->get_bath_input(*bkey[0])};
-            int trn_type[2] = {-1, trn::BT_NONE};
+            int trn_type[3] = {-1, trn::BT_NONE, trn::BT_NONE};
 
             if(nullptr != bp[0]) {
                 trn_type[0] = bp[0]->bath_input_type();
 
                 if(trn_type[0] == trn::BT_DELTAT)
                 {
-                    beam_geometry *bgeo[2] = {nullptr, nullptr};
+                    beam_geometry *bgeo[3] = {nullptr, nullptr};
 
-                    // get geometry for IDT and sled INS
+                    // get geometry for IDT, sled INS, veh nav
                     bgeo[0] = xpp->lookup_geo(*bkey[0], trn_type[0]);
                     bgeo[1] = xpp->lookup_geo(*nkey[1], trn_type[1]);
+                    bgeo[2] = xpp->lookup_geo(*nkey[0], trn_type[2]);
 
                     // compute MB1 beam components in vehicle frame
                     if (transform_idtlass(bi, ai, bgeo, snd) != 0) {

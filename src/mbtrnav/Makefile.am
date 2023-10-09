@@ -286,6 +286,7 @@ libtrnxplug_la_SOURCES += opt/rov/plug-oisled.cpp
 libtrnxplug_la_SOURCES += opt/rov/plug-oisled2.cpp
 libtrnxplug_la_SOURCES += opt/rov/plug-lassmb.cpp
 libtrnxplug_la_SOURCES += opt/rov/plug-xmb1.cpp
+libtrnxplug_la_SOURCES += opt/rov/plug-idtlass.cpp
 
 libtrnxplug_la_LIBADD = -lnewmat -lgeolib -ltrnw -lqnx -lmb1 -ltnav -lnetcdf -llcm -ltrncli -ludpms
 
