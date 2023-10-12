@@ -33,6 +33,42 @@
 #define TRN_VPRINT(...) trn_debug::get()->vprint(__VA_ARGS__)
 #define TRN_TRACE() fprintf(stderr,"%s:%d\n",__func__,__LINE__)
 
+// module-specific debug levels
+
+#define TRNDL_TRNLCMINPUT_NOTIFYSEM 5
+
+#define TRNDL_UTILS_MBSFCOMP 3
+#define TRNDL_UTILS_MBSFCOMP_H 3
+
+#define TRNDL_UTILS_DVLSFCOMP 5
+#define TRNDL_UTILS_DVLSFCOMP_H 6
+
+#define TRNDL_PLUGIDTLASS 3
+#define TRNDL_PLUGIDTLASS_H 3
+
+#define TRNDL_PLUGIDT 5
+#define TRNDL_PLUGIDT_H 6
+
+#define TRNDL_PLUGXMB1 5
+#define TRNDL_PLUGXMB1_H 6
+
+#define TRNDL_PLUGOIDELTAT 5
+#define TRNDL_PLUGOIDELTAT_H 6
+
+#define TRNDL_PLUGOIDVL2 5
+#define TRNDL_PLUGOIDVL2_H 6
+
+#define TRNDL_PLUGOIDVL 5
+#define TRNDL_PLUGOIDVL_H 6
+
+#define TRNDL_PLUGOIDVLX 5
+#define TRNDL_PLUGOIDVLX_H 6
+
+#define TRNDL_PLUGMBLASS 5
+#define TRNDL_PLUGMBLASS_H 6
+
+#define TRNDL_PLUGDVL2 5
+#define TRNDL_PLUGDVL2_H 6
 
 // module level debug output singleton
 // use with TRN* debug macros

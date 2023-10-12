@@ -6,9 +6,6 @@
 
 void transform_deltat(trn::bath_info *bi, trn::att_info *ai, mbgeo *geo, mb1_t *r_snd)
 {
-    int FN_DEBUG_HI = 6;
-    int FN_DEBUG = 5;
-
     if(NULL == geo || geo->beam_count<=0){
         fprintf(stderr, "%s - geometry error : beams<=0\n", __func__);
         return;
@@ -35,15 +32,15 @@ void transform_deltat(trn::bath_info *bi, trn::att_info *ai, mbgeo *geo, mb1_t *
 
     Matrix beams_SF = trnx_utils::mb_sframe_components(bi, geo);
 
-    TRN_NDPRINT(FN_DEBUG, "%s: --- \n",__func__);
+    TRN_NDPRINT(TRNDL_PLUGIDT, "%s: --- \n",__func__);
 
-    TRN_NDPRINT(FN_DEBUG, "VATT[%.3lf, %.3lf, %.3lf]\n", VATT[0], VATT[1], VATT[2]);
-    TRN_NDPRINT(FN_DEBUG, "SROT[%.3lf, %.3lf, %.3lf]\n", SROT[0], SROT[1], SROT[2]);
-    TRN_NDPRINT(FN_DEBUG, "STRN[%.3lf, %.3lf, %.3lf]\n", STRN[0], STRN[1], STRN[2]);
+    TRN_NDPRINT(TRNDL_PLUGIDT, "VATT[%.3lf, %.3lf, %.3lf]\n", VATT[0], VATT[1], VATT[2]);
+    TRN_NDPRINT(TRNDL_PLUGIDT, "SROT[%.3lf, %.3lf, %.3lf]\n", SROT[0], SROT[1], SROT[2]);
+    TRN_NDPRINT(TRNDL_PLUGIDT, "STRN[%.3lf, %.3lf, %.3lf]\n", STRN[0], STRN[1], STRN[2]);
 
     const char *pinv = (ai->flags().is_set(trn::AF_INVERT_PITCH)? "(p-)" :"(p+)");
 
-    TRN_NDPRINT(FN_DEBUG, "VATT (deg) [%.2lf, %.2lf, %.2lf (%.2lf)] %s\n",
+    TRN_NDPRINT(TRNDL_PLUGIDT, "VATT (deg) [%.2lf, %.2lf, %.2lf (%.2lf)] %s\n",
                 Math::radToDeg(VATT[0]), Math::radToDeg(VATT[1]), Math::radToDeg(VATT[2]), Math::radToDeg(ai->heading()), pinv);
     TRN_NDPRINT(5,"\n");
 
@@ -65,7 +62,7 @@ void transform_deltat(trn::bath_info *bi, trn::att_info *ai, mbgeo *geo, mb1_t *
     // apply coordinate transforms
     Matrix beams_VF = Q * beams_SF;
 
-    if(trn_debug::get()->debug() >= FN_DEBUG_HI){
+    if(trn_debug::get()->debug() >= TRNDL_PLUGIDT_H){
 
         TRN_NDPRINT(5, "\n");
         trnx_utils::matrix_show(mat_SROT, "mat_SROT");
@@ -113,7 +110,7 @@ void transform_deltat(trn::bath_info *bi, trn::att_info *ai, mbgeo *geo, mb1_t *
             double ayr = (range==0. ? 0. :acos(r_snd->beams[idx[0]].rhoy/range));
             double azr = (range==0. ? 0. :acos(r_snd->beams[idx[0]].rhoz/range));
 
-            TRN_NDPRINT(FN_DEBUG_HI, "%s: b[%3d] r[%7.2lf] R[%7.2lf]     rhox[%7.2lf] rhoy[%7.2lf] rhoz[%7.2lf]     ax[%6.2lf] ay[%6.2lf] az[%6.2lf]\n",
+            TRN_NDPRINT(TRNDL_PLUGIDT_H, "%s: b[%3d] r[%7.2lf] R[%7.2lf]     rhox[%7.2lf] rhoy[%7.2lf] rhoz[%7.2lf]     ax[%6.2lf] ay[%6.2lf] az[%6.2lf]\n",
                         __func__, b, range, rhoNorm,
                         r_snd->beams[idx[0]].rhox,
                         r_snd->beams[idx[0]].rhoy,
@@ -124,7 +121,7 @@ void transform_deltat(trn::bath_info *bi, trn::att_info *ai, mbgeo *geo, mb1_t *
                         );
         }
     }
-    TRN_NDPRINT(FN_DEBUG, "%s: --- \n\n",__func__);
+    TRN_NDPRINT(TRNDL_PLUGIDT, "%s: --- \n\n",__func__);
 
     return;
 }
@@ -139,13 +136,7 @@ int cb_proto_deltat(void *pargs)
 {
     int retval=-1;
 
-    int FN_DEBUG_HI = 6;
-    int FN_DEBUG = 5;
-    //    int FN_INFO_HI = 4;
-    int FN_INFO = 3;
-    //    int FN_INFO_LO = 2;
-
-    TRN_NDPRINT(FN_INFO, "%s:%d >>> Callback triggered <<<\n", __func__, __LINE__);
+    TRN_NDPRINT(TRNDL_PLUGIDT_H, "%s:%d >>> Callback triggered <<<\n", __func__, __LINE__);
 
     trn::trnxpp::callback_res_t *cb_res = static_cast<trn::trnxpp::callback_res_t *>(pargs);
     trn::trnxpp *xpp = cb_res->xpp;
@@ -165,7 +156,7 @@ int cb_proto_deltat(void *pargs)
             continue;
         }
 
-        TRN_NDPRINT(FN_DEBUG, "%s:%d processing ctx[%s]\n", __func__, __LINE__, ctx->ctx_key().c_str());
+        TRN_NDPRINT(TRNDL_PLUGIDT, "%s:%d processing ctx[%s]\n", __func__, __LINE__, ctx->ctx_key().c_str());
 
         int err_count = 0;
 
@@ -177,7 +168,7 @@ int cb_proto_deltat(void *pargs)
         // vi is optional
         if(bkey == nullptr || nkey == nullptr || akey == nullptr)
         {
-            TRN_NDPRINT(FN_DEBUG, "%s:%d WARN - NULL input key\n", __func__, __LINE__);
+            TRN_NDPRINT(TRNDL_PLUGIDT, "%s:%d WARN - NULL input key\n", __func__, __LINE__);
             err_count++;
             continue;
         }
@@ -189,13 +180,13 @@ int cb_proto_deltat(void *pargs)
 
         if(bi == nullptr || ni == nullptr || ai == nullptr || vi == nullptr)
         {
-            TRN_NDPRINT(FN_DEBUG, "%s:%d WARN - NULL info instance\n", __func__, __LINE__);
-            TRN_NDPRINT(FN_DEBUG, "%s:%d   bi[%p] ni[%p] ai[%p] vi[%p]\n", __func__, __LINE__);
+            TRN_NDPRINT(TRNDL_PLUGIDT, "%s:%d WARN - NULL info instance\n", __func__, __LINE__);
+            TRN_NDPRINT(TRNDL_PLUGIDT, "%s:%d   bi[%p] ni[%p] ai[%p] vi[%p]\n", __func__, __LINE__);
             err_count++;
         }
 
         std::string *bath_0_key = ctx->bath_input_chan(0);
-        TRN_NDPRINT(FN_DEBUG_HI, "BATHINST.%s : %s\n",bath_0_key->c_str(), bi->bathstr());
+        TRN_NDPRINT(TRNDL_PLUGIDT_H, "BATHINST.%s : %s\n",bath_0_key->c_str(), bi->bathstr());
 
         size_t n_beams = bi->beam_count();
 
@@ -238,7 +229,7 @@ int cb_proto_deltat(void *pargs)
             // check modulus
             if(ctx->decmod() <= 0 || (ctx->cbcount() % ctx->decmod()) == 0){
 
-                if(cfg->debug() >= FN_DEBUG ){
+                if(cfg->debug() >= TRNDL_PLUGIDT ){
                     fprintf(stderr,"%s - >>>>>>> Publishing MB1:\n",__func__);
                     mb1_show(snd, (cfg->debug()>=5 ? true: false), 5);
                 }
@@ -254,7 +245,7 @@ int cb_proto_deltat(void *pargs)
                     poseT *pt = trnx_utils::mb1_to_pose(snd, ai, (long)ctx->utm_zone());
                     measT *mt = trnx_utils::mb1_to_meas(snd, ai, trn_type, (long)ctx->utm_zone());
 
-                    if(cfg->debug() >= FN_DEBUG ){
+                    if(cfg->debug() >= TRNDL_PLUGIDT ){
                         fprintf(stderr,"%s - >>>>>>> Publishing POSE:\n",__func__);
                         trnx_utils::pose_show(*pt);
                         fprintf(stderr,"%s - >>>>>>> Publishing MEAS:\n",__func__);
@@ -277,7 +268,7 @@ int cb_proto_deltat(void *pargs)
                 }
 
             } else {
-                TRN_NDPRINT(FN_DEBUG, "%s:%d WARN - not ready count/mod[%d/%d]\n", __func__, __LINE__,ctx->cbcount(), ctx->decmod());
+                TRN_NDPRINT(TRNDL_PLUGIDT, "%s:%d WARN - not ready count/mod[%d/%d]\n", __func__, __LINE__,ctx->cbcount(), ctx->decmod());
             }
             ctx->inc_cbcount();
 

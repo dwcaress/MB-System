@@ -15,9 +15,6 @@
 // snd - sounding (w. navigation in vehicle frame)
 void transform_xmb1(trn::mb1_info **bi, trn::att_info **ai, mbgeo **geo, mb1_t *r_snd)
 {
-    int FN_DEBUG_HI = 6;
-    int FN_DEBUG = 5;
-
     // validate inputs
     if(NULL == geo || geo[0] == nullptr){
         fprintf(stderr, "%s - geometry error : NULL input geo[%p] {%p} \n", __func__, geo, (geo?geo[0]:nullptr));
@@ -59,21 +56,21 @@ void transform_xmb1(trn::mb1_info **bi, trn::att_info **ai, mbgeo **geo, mb1_t *
 
     // beam components in reference sensor frame (mounted center, across track)
     Matrix beams_SF = trnx_utils::mb_sframe_components(bi[0], geo[0]);
-    TRN_NDPRINT(FN_DEBUG, "%s: --- \n",__func__);
-    TRN_NDPRINT(FN_DEBUG, "%s: geo[0]:\n%s\n",__func__,geo[0]->tostring().c_str());
+    TRN_NDPRINT(TRNDL_PLUGXMB1, "%s: --- \n",__func__);
+    TRN_NDPRINT(TRNDL_PLUGXMB1, "%s: geo[0]:\n%s\n",__func__,geo[0]->tostring().c_str());
 
-    TRN_NDPRINT(FN_DEBUG, "VATT[%.3lf, %.3lf, %.3lf]\n", VATT[0], VATT[1], VATT[2]);
-    TRN_NDPRINT(FN_DEBUG, "SROT[%.3lf, %.3lf, %.3lf]\n", SROT[0], SROT[1], SROT[2]);
-    TRN_NDPRINT(FN_DEBUG, "STRN[%.3lf, %.3lf, %.3lf]\n", STRN[0], STRN[1], STRN[2]);
+    TRN_NDPRINT(TRNDL_PLUGXMB1, "VATT[%.3lf, %.3lf, %.3lf]\n", VATT[0], VATT[1], VATT[2]);
+    TRN_NDPRINT(TRNDL_PLUGXMB1, "SROT[%.3lf, %.3lf, %.3lf]\n", SROT[0], SROT[1], SROT[2]);
+    TRN_NDPRINT(TRNDL_PLUGXMB1, "STRN[%.3lf, %.3lf, %.3lf]\n", STRN[0], STRN[1], STRN[2]);
 
     const char *pinv = (ai[0]->flags().is_set(trn::AF_INVERT_PITCH)? "(p-)" :"(p+)");
 
-    TRN_NDPRINT(FN_DEBUG, "VATT (deg) [%.2lf, %.2lf, %.2lf (%.2lf)] %s\n",
+    TRN_NDPRINT(TRNDL_PLUGXMB1, "VATT (deg) [%.2lf, %.2lf, %.2lf (%.2lf)] %s\n",
                 Math::radToDeg(VATT[0]), Math::radToDeg(VATT[1]), Math::radToDeg(VATT[2]), Math::radToDeg(ai[0]->heading()), pinv);
-    TRN_NDPRINT(FN_DEBUG, "XTRN[%.3lf, %.3lf, %.3lf]\n", XTRN[0], XTRN[1], XTRN[2]);
-    TRN_NDPRINT(FN_DEBUG, "XROT[%.3lf, %.3lf, %.3lf]\n", XROT[0], XROT[1], XROT[2]);
-    TRN_NDPRINT(FN_DEBUG, "pitch (deg) veh[%.3lf] ois[%.3lf] angle[%.3lf]\n", Math::radToDeg(ai[0]->pitch()), Math::radToDeg(ai[1]->pitch()), Math::radToDeg(XR));
-    TRN_NDPRINT(FN_DEBUG, "\n");
+    TRN_NDPRINT(TRNDL_PLUGXMB1, "XTRN[%.3lf, %.3lf, %.3lf]\n", XTRN[0], XTRN[1], XTRN[2]);
+    TRN_NDPRINT(TRNDL_PLUGXMB1, "XROT[%.3lf, %.3lf, %.3lf]\n", XROT[0], XROT[1], XROT[2]);
+    TRN_NDPRINT(TRNDL_PLUGXMB1, "pitch (deg) veh[%.3lf] ois[%.3lf] angle[%.3lf]\n", Math::radToDeg(ai[0]->pitch()), Math::radToDeg(ai[1]->pitch()), Math::radToDeg(XR));
+    TRN_NDPRINT(TRNDL_PLUGXMB1, "\n");
 
     // generate coordinate tranformation matrices
 
@@ -139,7 +136,7 @@ void transform_xmb1(trn::mb1_info **bi, trn::att_info **ai, mbgeo **geo, mb1_t *
             double ayr = (range==0. ? 0. :acos(r_snd->beams[idx[0]].rhoy/range));
             double azr = (range==0. ? 0. :acos(r_snd->beams[idx[0]].rhoz/range));
 
-            TRN_NDPRINT(FN_DEBUG_HI, "%s: b[%3d] r[%7.2lf] R[%7.2lf]     rhox[%7.2lf] rhoy[%7.2lf] rhoz[%7.2lf]     ax[%6.2lf] ay[%6.2lf] az[%6.2lf]\n",
+            TRN_NDPRINT(TRNDL_PLUGXMB1_H, "%s: b[%3d] r[%7.2lf] R[%7.2lf]     rhox[%7.2lf] rhoy[%7.2lf] rhoz[%7.2lf]     ax[%6.2lf] ay[%6.2lf] az[%6.2lf]\n",
                         __func__, b, range, rhoNorm,
                         r_snd->beams[idx[0]].rhox,
                         r_snd->beams[idx[0]].rhoy,
@@ -150,7 +147,7 @@ void transform_xmb1(trn::mb1_info **bi, trn::att_info **ai, mbgeo **geo, mb1_t *
                         );
         }
     }
-    TRN_NDPRINT(FN_DEBUG, "%s: --- \n\n",__func__);
+    TRN_NDPRINT(TRNDL_PLUGXMB1, "%s: --- \n\n",__func__);
 
     return;
 }

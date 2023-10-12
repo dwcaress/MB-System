@@ -59,7 +59,7 @@ public:
             oi::kearfott_t msg;
             msg.decode((void *)dcon.data_bytes(), 0, dcon.data_len());
 
-            double time = msg.time_unix_sec * 1000000UL;
+            double time = msg.time_unix_sec * 1.e6;
             dcon.set_data_time(time);
 
             nav_input::mDataInstMutex.lock();
@@ -71,7 +71,7 @@ public:
             double pitch = msg.pitch_rad;
             double roll = msg.roll_rad;
             double heading = msg.heading_rad;
-
+            
             // TODO: check doubles[] parameters? (not documented...)
             nav_flags_t nflags = 0;
             bool pos_valid = ((msg.monitor&GPS_REJ)==0);

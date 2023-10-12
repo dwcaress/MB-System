@@ -14,9 +14,6 @@
 // in a linear array.
 void transform_dvl(trn::bath_info *bi, trn::att_info *ai, dvlgeo *geo, mb1_t *r_snd)
 {
-    int FN_DEBUG_HI = 6;
-    int FN_DEBUG = 5;
-
     if(NULL == geo || geo->beam_count<=0){
         fprintf(stderr, "%s - geometry error : beams<=0\n", __func__);
         return;
@@ -44,17 +41,17 @@ void transform_dvl(trn::bath_info *bi, trn::att_info *ai, dvlgeo *geo, mb1_t *r_
     // beam components in sensor frame
     Matrix beams_SF = trnx_utils::dvl_sframe_components(bi, geo);
 
-    TRN_NDPRINT(FN_DEBUG, "%s: --- \n",__func__);
+    TRN_NDPRINT(TRNDL_PLUGOIDVL, "%s: --- \n",__func__);
 
-    TRN_NDPRINT(FN_DEBUG, "VATT[%.3lf, %.3lf, %.3lf]\n", VATT[0], VATT[1], VATT[2]);
-    TRN_NDPRINT(FN_DEBUG, "SROT[%.3lf, %.3lf, %.3lf]\n", SROT[0], SROT[1], SROT[2]);
-    TRN_NDPRINT(FN_DEBUG, "STRN[%.3lf, %.3lf, %.3lf]\n", STRN[0], STRN[1], STRN[2]);
+    TRN_NDPRINT(TRNDL_PLUGOIDVL, "VATT[%.3lf, %.3lf, %.3lf]\n", VATT[0], VATT[1], VATT[2]);
+    TRN_NDPRINT(TRNDL_PLUGOIDVL, "SROT[%.3lf, %.3lf, %.3lf]\n", SROT[0], SROT[1], SROT[2]);
+    TRN_NDPRINT(TRNDL_PLUGOIDVL, "STRN[%.3lf, %.3lf, %.3lf]\n", STRN[0], STRN[1], STRN[2]);
 
     const char *pinv = (ai->flags().is_set(trn::AF_INVERT_PITCH)? "(p-)" :"(p+)");
 
-    TRN_NDPRINT(FN_DEBUG, "VATT (deg) [%.2lf, %.2lf, %.2lf (%.2lf)] %s\n",
+    TRN_NDPRINT(TRNDL_PLUGOIDVL, "VATT (deg) [%.2lf, %.2lf, %.2lf (%.2lf)] %s\n",
                 Math::radToDeg(VATT[0]), Math::radToDeg(VATT[1]), Math::radToDeg(VATT[2]), Math::radToDeg(ai->heading()), pinv);
-    TRN_NDPRINT(FN_DEBUG,"\n");
+    TRN_NDPRINT(TRNDL_PLUGOIDVL,"\n");
 
     // generate coordinate tranformation matrices
     // mounting rotation matrix
@@ -75,7 +72,7 @@ void transform_dvl(trn::bath_info *bi, trn::att_info *ai, dvlgeo *geo, mb1_t *r_
     // apply coordinate transforms
     Matrix beams_VF = Q * beams_SF;
 
-    if(trn_debug::get()->debug() >= FN_DEBUG_HI){
+    if(trn_debug::get()->debug() >= TRNDL_PLUGOIDVL_H){
 
         TRN_NDPRINT(5, "\n");
         trnx_utils::matrix_show(mat_SROT, "mat_SROT");
@@ -123,7 +120,7 @@ void transform_dvl(trn::bath_info *bi, trn::att_info *ai, dvlgeo *geo, mb1_t *r_
             double ayr = (range==0. ? 0. :acos(r_snd->beams[idx[0]].rhoy/range));
             double azr = (range==0. ? 0. :acos(r_snd->beams[idx[0]].rhoz/range));
 
-            TRN_NDPRINT(FN_DEBUG_HI, "%s: b[%3d] r[%7.2lf] R[%7.2lf]     rhox[%7.2lf] rhoy[%7.2lf] rhoz[%7.2lf]     ax[%6.2lf] ay[%6.2lf] az[%6.2lf]\n",
+            TRN_NDPRINT(TRNDL_PLUGOIDVL_H, "%s: b[%3d] r[%7.2lf] R[%7.2lf]     rhox[%7.2lf] rhoy[%7.2lf] rhoz[%7.2lf]     ax[%6.2lf] ay[%6.2lf] az[%6.2lf]\n",
                         __func__, b, range, rhoNorm,
                         r_snd->beams[idx[0]].rhox,
                         r_snd->beams[idx[0]].rhoy,
@@ -134,7 +131,7 @@ void transform_dvl(trn::bath_info *bi, trn::att_info *ai, dvlgeo *geo, mb1_t *r_
                         );
         }
     }
-    TRN_NDPRINT(FN_DEBUG, "%s: --- \n\n",__func__);
+    TRN_NDPRINT(TRNDL_PLUGOIDVL, "%s: --- \n\n",__func__);
 
     return;
 }
@@ -150,7 +147,6 @@ int cb_proto_dvl(void *pargs)
 {
     int retval=-1;
     static uint32_t ping_number = 0;
-    int FN_DEBUG = 5;
 
     TRN_NDPRINT(3, "%s:%d >>> Callback triggered <<<\n", __func__, __LINE__);
 
@@ -172,7 +168,7 @@ int cb_proto_dvl(void *pargs)
             continue;
         }
 
-        TRN_NDPRINT(FN_DEBUG, "%s:%d processing ctx[%s]\n", __func__, __LINE__, ctx->ctx_key().c_str());
+        TRN_NDPRINT(TRNDL_PLUGOIDVL, "%s:%d processing ctx[%s]\n", __func__, __LINE__, ctx->ctx_key().c_str());
 
         int err_count = 0;
 
@@ -183,7 +179,7 @@ int cb_proto_dvl(void *pargs)
 
         if(bkey[0] == nullptr || nkey == nullptr || akey[0] == nullptr || vkey == nullptr)
         {
-            TRN_NDPRINT(FN_DEBUG, "%s:%d WARN - NULL input key\n", __func__, __LINE__);
+            TRN_NDPRINT(TRNDL_PLUGOIDVL, "%s:%d WARN - NULL input key\n", __func__, __LINE__);
             err_count++;
             continue;
         }
@@ -233,7 +229,7 @@ int cb_proto_dvl(void *pargs)
                 delete mt;
 
         } else {
-            TRN_NDPRINT(FN_DEBUG, "%s:%d WARN - not ready count/mod[%d/%d]\n", __func__, __LINE__,ctx->cbcount(), ctx->decmod());
+            TRN_NDPRINT(TRNDL_PLUGOIDVL, "%s:%d WARN - not ready count/mod[%d/%d]\n", __func__, __LINE__,ctx->cbcount(), ctx->decmod());
         }
         ctx->inc_cbcount();
 

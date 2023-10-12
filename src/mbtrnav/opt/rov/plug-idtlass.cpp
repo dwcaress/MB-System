@@ -19,8 +19,6 @@
 int transform_idtlass(trn::bath_info **bi, trn::att_info **ai, beam_geometry **bgeo, mb1_t *r_snd)
 {
     int retval = -1;
-    int FN_DEBUG_HI = 6;
-    int FN_DEBUG = 5;
 
     // validate inputs
     if(NULL == bgeo || bgeo[0] == nullptr || bgeo[1] == nullptr || bgeo[2] == nullptr){
@@ -65,28 +63,28 @@ int transform_idtlass(trn::bath_info **bi, trn::att_info **ai, beam_geometry **b
     double STRN[3] = {mb_geo[0]->svt_m[0], mb_geo[0]->svt_m[1], mb_geo[0]->svt_m[2]};
 
     double XTRN[3] = {mb_geo[0]->rot_radius_m, 0., 0.};
-    double XR = ai[1]->pitch() - ai[0]->pitch();
+    double XR = 0;//ai[1]->pitch() - ai[0]->pitch();
     double XROT[3] = {0., XR, 0.};
 
     Matrix beams_SF = trnx_utils::mb_sframe_components(bi[0], mb_geo[0]);
 
-    TRN_NDPRINT(FN_DEBUG, "%s: --- \n",__func__);
-    TRN_NDPRINT(FN_DEBUG, "mb_geo:\n%s\n",mb_geo[0]->tostring().c_str());
-    TRN_NDPRINT(FN_DEBUG, "tx_geo.0:\n%s\n",tx_geo[0]->tostring().c_str());
-    TRN_NDPRINT(FN_DEBUG, "tx_geo.1:\n%s\n",tx_geo[1]->tostring().c_str());
+    TRN_NDPRINT(TRNDL_PLUGIDTLASS, "%s: --- \n",__func__);
+    TRN_NDPRINT(TRNDL_PLUGIDTLASS, "mb_geo:\n%s\n",mb_geo[0]->tostring().c_str());
+    TRN_NDPRINT(TRNDL_PLUGIDTLASS, "tx_geo.0:\n%s\n",tx_geo[0]->tostring().c_str());
+    TRN_NDPRINT(TRNDL_PLUGIDTLASS, "tx_geo.1:\n%s\n",tx_geo[1]->tostring().c_str());
 
 
-    TRN_NDPRINT(FN_DEBUG, "VATT[%.3lf, %.3lf, %.3lf]\n", VATT[0], VATT[1], VATT[2]);
-    TRN_NDPRINT(FN_DEBUG, "SROT[%.3lf, %.3lf, %.3lf]\n", SROT[0], SROT[1], SROT[2]);
-    TRN_NDPRINT(FN_DEBUG, "STRN[%.3lf, %.3lf, %.3lf]\n", STRN[0], STRN[1], STRN[2]);
+    TRN_NDPRINT(TRNDL_PLUGIDTLASS, "VATT[%.3lf, %.3lf, %.3lf]\n", VATT[0], VATT[1], VATT[2]);
+    TRN_NDPRINT(TRNDL_PLUGIDTLASS, "SROT[%.3lf, %.3lf, %.3lf]\n", SROT[0], SROT[1], SROT[2]);
+    TRN_NDPRINT(TRNDL_PLUGIDTLASS, "STRN[%.3lf, %.3lf, %.3lf]\n", STRN[0], STRN[1], STRN[2]);
 
     const char *pinv = (ai[0]->flags().is_set(trn::AF_INVERT_PITCH)? "(p-)" :"(p+)");
 
-    TRN_NDPRINT(FN_DEBUG, "VATT (deg) [%.2lf, %.2lf, %.2lf (%.2lf)] %s\n",
+    TRN_NDPRINT(TRNDL_PLUGIDTLASS, "VATT (deg) [%.2lf, %.2lf, %.2lf (%.2lf)] %s\n",
                 Math::radToDeg(VATT[0]), Math::radToDeg(VATT[1]), Math::radToDeg(VATT[2]), Math::radToDeg(ai[0]->heading()), pinv);
-    TRN_NDPRINT(FN_DEBUG, "XTRN[%.3lf, %.3lf, %.3lf]\n", XTRN[0], XTRN[1], XTRN[2]);
-    TRN_NDPRINT(FN_DEBUG, "XROT[%.3lf, %.3lf, %.3lf]\n", XROT[0], XROT[1], XROT[2]);
-    TRN_NDPRINT(FN_DEBUG, "pitch (deg) veh[%.3lf] ois[%.3lf] angle[%.3lf]\n", Math::radToDeg(ai[0]->pitch()), Math::radToDeg(ai[1]->pitch()), Math::radToDeg(XR));
+    TRN_NDPRINT(TRNDL_PLUGIDTLASS, "XTRN[%.3lf, %.3lf, %.3lf]\n", XTRN[0], XTRN[1], XTRN[2]);
+    TRN_NDPRINT(TRNDL_PLUGIDTLASS, "XROT[%.3lf, %.3lf, %.3lf]\n", XROT[0], XROT[1], XROT[2]);
+    TRN_NDPRINT(TRNDL_PLUGIDTLASS, "pitch (deg) veh[%.3lf] ois[%.3lf] angle[%.3lf]\n", Math::radToDeg(ai[0]->pitch()), Math::radToDeg(ai[1]->pitch()), Math::radToDeg(XR));
     TRN_NDPRINT(5,"\n");
 #if 0
     // generate coordinate tranformation matrices
@@ -164,7 +162,7 @@ int transform_idtlass(trn::bath_info **bi, trn::att_info **ai, beam_geometry **b
         r_snd->beams[idx[0]].rhoy = range * beams_VF(2, idx[1]);
         r_snd->beams[idx[0]].rhoz = range * beams_VF(3, idx[1]);
 
-        if(trn_debug::get()->debug() >= 5){
+        if(trn_debug::get()->debug() >= TRNDL_PLUGIDTLASS){
 
             // calculated beam range (should match measured range)
             double rho[3] = {r_snd->beams[idx[0]].rhox, r_snd->beams[idx[0]].rhoy, r_snd->beams[idx[0]].rhoz};
@@ -176,7 +174,7 @@ int transform_idtlass(trn::bath_info **bi, trn::att_info **ai, beam_geometry **b
             double ayr = (range==0. ? 0. :acos(r_snd->beams[idx[0]].rhoy/range));
             double azr = (range==0. ? 0. :acos(r_snd->beams[idx[0]].rhoz/range));
 
-            TRN_NDPRINT(FN_DEBUG_HI, "%s: b[%3d] r[%7.2lf] R[%7.2lf]     rhox[%7.2lf] rhoy[%7.2lf] rhoz[%7.2lf]     ax[%6.2lf] ay[%6.2lf] az[%6.2lf]\n",
+            TRN_NDPRINT(TRNDL_PLUGIDTLASS_H, "%s: b[%3d] r[%7.2lf] R[%7.2lf]     rhox[%7.2lf] rhoy[%7.2lf] rhoz[%7.2lf]     ax[%6.2lf] ay[%6.2lf] az[%6.2lf]\n",
                         __func__, b, range, rhoNorm,
                         r_snd->beams[idx[0]].rhox,
                         r_snd->beams[idx[0]].rhoy,
@@ -187,7 +185,7 @@ int transform_idtlass(trn::bath_info **bi, trn::att_info **ai, beam_geometry **b
                         );
         }
     }
-    TRN_NDPRINT(FN_DEBUG, "%s: --- \n\n",__func__);
+    TRN_NDPRINT(TRNDL_PLUGIDTLASS, "%s: --- \n\n",__func__);
 
     retval = 0;
     return retval;
@@ -208,12 +206,7 @@ int cb_proto_idtlass(void *pargs)
 {
     int retval=-1;
 
-    int FN_DEBUG = 5;
-    //    int FN_INFO_HI = 4;
-    int FN_INFO = 3;
-    //    int FN_INFO_LO = 2;
-
-    TRN_NDPRINT(FN_INFO, "%s:%d >>> Callback triggered <<<\n", __func__, __LINE__);
+    TRN_NDPRINT(TRNDL_PLUGIDTLASS_H, "%s:%d >>> Callback triggered <<<\n", __func__, __LINE__);
 
     trn::trnxpp::callback_res_t *cb_res = static_cast<trn::trnxpp::callback_res_t *>(pargs);
     trn::trnxpp *xpp = cb_res->xpp;
@@ -233,7 +226,7 @@ int cb_proto_idtlass(void *pargs)
             continue;
         }
 
-        TRN_NDPRINT(FN_DEBUG, "%s:%d processing ctx[%s]\n", __func__, __LINE__, ctx->ctx_key().c_str());
+        TRN_NDPRINT(TRNDL_PLUGIDTLASS, "%s:%d processing ctx[%s]\n", __func__, __LINE__, ctx->ctx_key().c_str());
 
         int err_count = 0;
 
@@ -252,7 +245,7 @@ int cb_proto_idtlass(void *pargs)
             ss << (nkey[0]==nullptr ? " nkey[0]" : "");
             ss << (nkey[1]==nullptr ? " nkey[1]" : "");
             ss << (vkey == nullptr ? " vkey" : "");
-            TRN_NDPRINT(5, "%s:%d ERR - NULL input key: %s\n", __func__, __LINE__, ss.str().c_str());
+            TRN_NDPRINT(TRNDL_PLUGIDTLASS, "%s:%d ERR - NULL input key: %s\n", __func__, __LINE__, ss.str().c_str());
                 err_count++;
                 continue;
         }
@@ -272,20 +265,23 @@ int cb_proto_idtlass(void *pargs)
             ss << (ni[0] == nullptr ? " ni[0]" : "");
             ss << (ni[1] == nullptr ? " ni[1]" : "");
             ss << (vi == nullptr ? " vi" : "");
-            TRN_NDPRINT(5, "%s:%d WARN - NULL info instance: %s\n", __func__, __LINE__, ss.str().c_str());
+            TRN_NDPRINT(TRNDL_PLUGIDTLASS, "%s:%d WARN - NULL info instance: %s\n", __func__, __LINE__, ss.str().c_str());
                 err_count++;
                 continue;
         }
 
         if(bkey[0] != nullptr && bi[0] != nullptr)
-            TRN_NDPRINT(6, "BATHINST.%s : %s\n",bkey[0]->c_str(), bi[0]->bathstr());
+            TRN_NDPRINT(TRNDL_PLUGIDTLASS_H, "BATHINST.%s : %s\n",bkey[0]->c_str(), bi[0]->bathstr());
 
         size_t n_beams = bi[0]->beam_count();
 
         if (n_beams > 0) {
 
             // generate MB1 sounding (raw beams)
-            mb1_t *snd = trnx_utils::lcm_to_mb1(bi[0], ni[0], ai[0]);
+            mb1_t *snd = trnx_utils::lcm_to_mb1(bi[0], ni[1], ai[0]);
+
+//            fprintf(stderr,"%s - >>>>>>> new MB1 from lcm:\n",__func__);
+//            mb1_show(snd, true, 5);
 
             std::list<trn::beam_tup> beams = bi[0]->beams_raw();
             std::list<trn::beam_tup>::iterator it;
@@ -308,7 +304,7 @@ int cb_proto_idtlass(void *pargs)
 
                     // compute MB1 beam components in vehicle frame
                     if (transform_idtlass(bi, ai, bgeo, snd) != 0) {
-                        TRN_NDPRINT(6, "%s:%d ERR - transform_idtlass failed\n", __func__, __LINE__);
+                        TRN_NDPRINT(TRNDL_PLUGIDTLASS_H, "%s:%d ERR - transform_idtlass failed\n", __func__, __LINE__);
                         err_count++;
                         continue;
                     }
@@ -325,9 +321,9 @@ int cb_proto_idtlass(void *pargs)
             // check modulus
             if(ctx->decmod() <= 0 || (ctx->cbcount() % ctx->decmod()) == 0){
 
-                if(cfg->debug() >= FN_DEBUG ){
+                if(cfg->debug() >= TRNDL_PLUGIDTLASS ){
                     fprintf(stderr,"%s - >>>>>>> Publishing MB1:\n",__func__);
-                    mb1_show(snd, (cfg->debug()>=5 ? true: false), 5);
+                    mb1_show(snd, (cfg->debug()>=TRNDL_PLUGIDTLASS ? true: false), 5);
                 }
 
                 // publish MB1 to mbtrnpp
@@ -340,7 +336,7 @@ int cb_proto_idtlass(void *pargs)
                     poseT *pt = trnx_utils::mb1_to_pose(snd, ai[0], (long)ctx->utm_zone());
                     measT *mt = trnx_utils::mb1_to_meas(snd, ai[0], trn_type[0], (long)ctx->utm_zone());
 
-                    if(cfg->debug() >= FN_DEBUG ){
+                    if(cfg->debug() >= TRNDL_PLUGIDTLASS ){
                         fprintf(stderr,"%s - >>>>>>> Publishing POSE:\n",__func__);
                         trnx_utils::pose_show(*pt);
                         fprintf(stderr,"%s - >>>>>>> Publishing MEAS:\n",__func__);
@@ -363,7 +359,7 @@ int cb_proto_idtlass(void *pargs)
                 }
 
             } else {
-                TRN_NDPRINT(FN_DEBUG, "%s:%d WARN - not ready count/mod[%d/%d]\n", __func__, __LINE__,ctx->cbcount(), ctx->decmod());
+                TRN_NDPRINT(TRNDL_PLUGIDTLASS, "%s:%d WARN - not ready count/mod[%d/%d]\n", __func__, __LINE__,ctx->cbcount(), ctx->decmod());
             }
             ctx->inc_cbcount();
 
