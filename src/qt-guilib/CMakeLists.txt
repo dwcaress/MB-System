@@ -4,6 +4,7 @@ find_package(
   REQUIRED)
 find_package(GMT REQUIRED)
 find_package(VTK REQUIRED)
+message("Found VTK_VERSION ${VTK_VERSION}")
 
 find_package(LibPROJ REQUIRED)
 
