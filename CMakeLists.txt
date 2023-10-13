@@ -98,7 +98,7 @@ option(buildGUIs "build graphical tools" ON)
 option(buildOpenCV "build OpenCV tools" ON)
 option(buildTRN "build MBTRN tools" ON)
 option(buildPCL "build point-cloud-library" OFF)
-option(buildQt "build Qt tools" OFF)
+option(buildQt "build Qt tools" ON)
 option(buildTests "build unit tests exercised by make check" OFF)
 
 if(APPLE)
