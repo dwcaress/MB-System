@@ -451,6 +451,52 @@ public:
         return mat;
     }
 
+    // 321 euler rotation R(phi, theta, psi)
+    // and translation
+    // where
+    // phi: roll (rotation about X)
+    // theta: pitch (rotation about Y)
+    // psi: yaw (rotation about Z)
+    // expects
+    // rot_rad[0]: phi / roll (rad)
+    // rot_rad[1]: theta / pitch (rad)
+    // rot_rad[2]: psi / yaw (rad)
+    // tran_m[0] : translation x (m)
+    // tran_m[1] : translation y (m)
+    // tran_m[2] : translation z (m)
+    static Matrix affine321Transform(double *rot_rad, double *tran_m)
+    {
+        Matrix mat(4,4);
+
+        double cphi = cos(rot_rad[0]);
+        double sphi = sin(rot_rad[0]);
+        double ctheta = cos(rot_rad[1]);
+        double stheta = sin(rot_rad[1]);
+        double cpsi = cos(rot_rad[2]);
+        double spsi = sin(rot_rad[2]);
+        double stheta_sphi = stheta * sphi;
+        double stheta_cphi = stheta * cphi;
+
+        mat(1, 1) = cpsi * ctheta;
+        mat(1, 2) = spsi * ctheta;
+        mat(1, 3) = -stheta;
+        mat(1, 4) = tran_m[0];
+        mat(2, 1) = -spsi * cphi + cpsi * stheta_sphi;
+        mat(2, 2) = cpsi * cphi + spsi * stheta_sphi;
+        mat(2, 3) = ctheta * sphi;
+        mat(2, 4) = tran_m[1];
+        mat(3, 1) = spsi * sphi + cpsi * stheta_cphi;
+        mat(3, 2) = -cpsi * sphi + spsi * stheta_cphi;
+        mat(3, 3) = ctheta * cphi;
+        mat(3, 4) = tran_m[2];
+        mat(4, 1) = 0.;
+        mat(4, 2) = 0.;
+        mat(4, 3) = 0.;
+        mat(4, 4) = 1.;
+
+        return mat;
+    }
+
     static int test_affine()
     {
         // validate matrix geometry operations
