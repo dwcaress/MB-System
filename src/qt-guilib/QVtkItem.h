@@ -124,7 +124,7 @@ namespace mb_system {
     /// Set app busy status
     void setAppBusy(bool busy);
 
-    /// Get app busy status
+    /// Get app busy status; return true if busy, else false
     bool getAppBusy();
     
     
