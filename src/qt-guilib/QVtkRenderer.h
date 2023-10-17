@@ -1,6 +1,6 @@
 #ifndef QVTKRENDERER_H
 #define QVTKRENDERER_H
-
+#include <vector>
 #include <QObject>
 #include <QQuickFramebufferObject>
 #include <QOpenGLFunctions>
@@ -21,6 +21,7 @@
 #include "TopoGridReader.h"
 #include "DisplayProperties.h"
 #include "PickerInteractorStyle.h"
+#include "Route.h"
 
 #define SELECTED_POINT_FILE "selectedPoint.txt"
 
@@ -111,11 +112,11 @@ namespace mb_system {
     /// Display properties copied from QVtkItem
     mb_system::DisplayProperties *displayProperties_;
     
-    /// Initilize VTK pipeline member objects, then assemble (connect) ; return
-    /// false on error.
+    /// Initilize VTK pipeline member objects, then assemble (connect) ;
+    /// return false on error.
     bool initializePipeline(const char *grdFilename);
 
-    /// Connect pipeline components
+    /// Connect pipeline components; return false on error
     bool assemblePipeline();
 
     /// Setup axes, using vtkCubeAxesActor2D
@@ -203,8 +204,13 @@ namespace mb_system {
     bool pointPicked_;
 
     bool newPointPicked_;
+
+
+    /// Routes to be overlaid on topography
+    std::vector<Route> routes_;
+
     
-    /// Worker thread to load grid file with TopoGridReader
+    /// Worker thread class to load grid file with TopoGridReader
     class LoadFileWorker : public QThread {
 
     public:
