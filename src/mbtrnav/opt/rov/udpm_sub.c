@@ -361,7 +361,7 @@ int64_t udpms_listen(udpm_sub_t *self, byte *dest, uint32_t len, int32_t to_msec
 
         if(test > 0){
             retval = test;
-            // UDPMS_DBG(stderr,"received data connection[%p] dest[%p] ainfo[%p] [%lld]\n",addr,dest_addr,addr->ainfo,retval);
+             UDPMS_NDBG(4, stderr,"received %zd bytes on connection[%p] fd[%d] dest[%p] ret[%lld]\n", test, &self->_addr, self->fd, dest_addr, retval);
         } else {
             UDPMS_NDBG(4, stderr,"%s: nothing to read ret[%zd] [%d/%s]\n", __func__, test, errno,strerror(errno));
            if(errno != EAGAIN && errno != EWOULDBLOCK){

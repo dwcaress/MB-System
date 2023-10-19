@@ -124,7 +124,7 @@ public:
                 os << "\n";
             }
         }
-
+        os << std::dec << std::setfill(' ');
         os << std::setw(wkey) << "geo"  << std::setw(wval) << mGeoList.size() << "\n";
         std::list<beam_geo>::iterator it;
         if(mGeoList.size() > 0){

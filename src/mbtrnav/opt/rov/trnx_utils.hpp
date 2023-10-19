@@ -258,7 +258,7 @@ public:
         os << std::fixed << std::setprecision(3);
         os << mbest.est[1].time << ",";
         os << std::setprecision(4);
-        os << mbest.est[1].x << "," << mbest.est[1].y << "," << mbest.est[1].z << ",";
+        os << mbest.est[1].x << "," << mbest.est[1].y << "," << mbest.est[1].z;
 
         return os.str();
     }
@@ -451,6 +451,30 @@ public:
         return mat;
     }
 
+    static Matrix affineScale(double *k)
+    {
+        Matrix mat(4,4);
+
+        mat(1, 1) = k[0];
+        mat(1, 2) = 0.;
+        mat(1, 3) = 0.;
+        mat(1, 4) = 0.;
+        mat(2, 1) = 0.;
+        mat(2, 2) = k[1];
+        mat(2, 3) = 0.;
+        mat(2, 4) = 0.;
+        mat(3, 1) = 0.;
+        mat(3, 2) = 0.;
+        mat(3, 3) = k[2];
+        mat(3, 4) = 0.;
+        mat(4, 1) = 0.;
+        mat(4, 2) = 0.;
+        mat(4, 3) = 0.;
+        mat(4, 4) = 1.;
+
+        return mat;
+    }
+
     // 321 euler rotation R(phi, theta, psi)
     // and translation
     // where
@@ -607,7 +631,7 @@ public:
 
     // in : beams in MB1 format (along, across, down)
     // out : directional cosine matrix (along, across, down)
-    static Matrix mb_sframe_components(trn::mb1_info *bi, mbgeo *geo)
+    static Matrix mb_sframe_components(trn::mb1_info *bi, mbgeo *geo, double q_sel=1.0)
     {
         if(bi == nullptr || geo == NULL){
             Matrix err_ret = Matrix(4,1);
@@ -646,7 +670,10 @@ public:
             sf_comp(1, idx[1]) = x/range;
             sf_comp(2, idx[1]) = y/range;
             sf_comp(3, idx[1]) = z/range;
-            sf_comp(4, idx[1]) = 0.;
+            // set M[4,i]
+            // 1.: points
+            // 0.: vectors
+            sf_comp(4, idx[1]) = q_sel;
 
             if(trn_debug::get()->debug() >= TRNDL_UTILS_MBSFCOMP){
 
@@ -670,7 +697,7 @@ public:
 
     // in : beam ranges, sensor geometry
     // out : directional cosine matrix (along, across, down)
-    static Matrix mb_sframe_components(trn::bath_info *bi, mbgeo *geo)
+    static Matrix mb_sframe_components(trn::bath_info *bi, mbgeo *geo, double q_sel=1.0)
     {
         if(bi == nullptr || geo == NULL){
             Matrix err_ret = Matrix(4,1);
@@ -727,7 +754,10 @@ public:
             sf_comp(1, idx[1]) = cos(pr)*cos(yr);
             sf_comp(2, idx[1]) = cos(pr)*sin(yr);
             sf_comp(3, idx[1]) = sin(pr);
-            sf_comp(4, idx[1]) = 0.;
+            // set M[4,i]
+            // 1.: points
+            // 0.: vectors
+            sf_comp(4, idx[1]) = q_sel;
 
             if(trn_debug::get()->debug() >= TRNDL_UTILS_MBSFCOMP_H){
                 double rho[3] = {sf_comp(1,idx[1]), sf_comp(2,idx[1]), sf_comp(3,idx[1])};

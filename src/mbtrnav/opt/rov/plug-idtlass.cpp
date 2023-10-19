@@ -47,11 +47,14 @@ int transform_idtlass(trn::bath_info **bi, trn::att_info **ai, beam_geometry **b
         return retval;
     }
 
+    Matrix mBcompSF = trnx_utils::mb_sframe_components(bi[0], mb_geo[0], 1.0);
+
     // vehicle attitude (relative to NED, radians)
     // r/p/y  (phi/theta/psi)
     // MB1 assumes vehicle frame, not world frame (i.e. exclude heading)
-    double VATT[3] = {ai[0]->roll(), ai[0]->pitch(), 0.};
+    double vATT[3] = {ai[0]->roll(), ai[0]->pitch(), 0.};
 
+#ifdef CODE_20231010
     // sensor mounting angles (relative to vehicle, radians)
     // 3-2-1 euler angles, r/p/y  (phi/theta/psi)
     // wrt sensor mounted across track, b[0] port, downward facing
@@ -61,58 +64,6 @@ int transform_idtlass(trn::bath_info **bi, trn::att_info **ai, beam_geometry **b
     // +x: fwd +y: stbd, +z:down
     // or should it be relative to location sensor?
     double STRN[3] = {mb_geo[0]->svt_m[0], mb_geo[0]->svt_m[1], mb_geo[0]->svt_m[2]};
-
-    double XTRN[3] = {mb_geo[0]->rot_radius_m, 0., 0.};
-    double XR = 0;//ai[1]->pitch() - ai[0]->pitch();
-    double XROT[3] = {0., XR, 0.};
-
-    Matrix beams_SF = trnx_utils::mb_sframe_components(bi[0], mb_geo[0]);
-
-    TRN_NDPRINT(TRNDL_PLUGIDTLASS, "%s: --- \n",__func__);
-    TRN_NDPRINT(TRNDL_PLUGIDTLASS, "mb_geo:\n%s\n",mb_geo[0]->tostring().c_str());
-    TRN_NDPRINT(TRNDL_PLUGIDTLASS, "tx_geo.0:\n%s\n",tx_geo[0]->tostring().c_str());
-    TRN_NDPRINT(TRNDL_PLUGIDTLASS, "tx_geo.1:\n%s\n",tx_geo[1]->tostring().c_str());
-
-
-    TRN_NDPRINT(TRNDL_PLUGIDTLASS, "VATT[%.3lf, %.3lf, %.3lf]\n", VATT[0], VATT[1], VATT[2]);
-    TRN_NDPRINT(TRNDL_PLUGIDTLASS, "SROT[%.3lf, %.3lf, %.3lf]\n", SROT[0], SROT[1], SROT[2]);
-    TRN_NDPRINT(TRNDL_PLUGIDTLASS, "STRN[%.3lf, %.3lf, %.3lf]\n", STRN[0], STRN[1], STRN[2]);
-
-    const char *pinv = (ai[0]->flags().is_set(trn::AF_INVERT_PITCH)? "(p-)" :"(p+)");
-
-    TRN_NDPRINT(TRNDL_PLUGIDTLASS, "VATT (deg) [%.2lf, %.2lf, %.2lf (%.2lf)] %s\n",
-                Math::radToDeg(VATT[0]), Math::radToDeg(VATT[1]), Math::radToDeg(VATT[2]), Math::radToDeg(ai[0]->heading()), pinv);
-    TRN_NDPRINT(TRNDL_PLUGIDTLASS, "XTRN[%.3lf, %.3lf, %.3lf]\n", XTRN[0], XTRN[1], XTRN[2]);
-    TRN_NDPRINT(TRNDL_PLUGIDTLASS, "XROT[%.3lf, %.3lf, %.3lf]\n", XROT[0], XROT[1], XROT[2]);
-    TRN_NDPRINT(TRNDL_PLUGIDTLASS, "pitch (deg) veh[%.3lf] ois[%.3lf] angle[%.3lf]\n", Math::radToDeg(ai[0]->pitch()), Math::radToDeg(ai[1]->pitch()), Math::radToDeg(XR));
-    TRN_NDPRINT(5,"\n");
-#if 0
-    // generate coordinate tranformation matrices
-    // translate arm rotation point to sled origin
-    Matrix mat_XTRN = trnx_utils::affineTranslation(XTRN);
-    // sled arm rotation
-    Matrix mat_XROT = trnx_utils::affine321Rotation(XROT);
-    // mounting rotation matrix
-    Matrix mat_SROT = trnx_utils::affine321Rotation(SROT);
-    // mounting translation matrix
-    Matrix mat_STRN = trnx_utils::affineTranslation(STRN);
-    // vehicle attitude (pitch, roll, heading)
-    Matrix mat_VATT = trnx_utils::affine321Rotation(VATT);
-
-    // combine to get composite tranformation
-    // order is significant:
-    // mounting rotations, translate
-    Matrix S0 = mat_XTRN * mat_SROT;
-    // arm rotation
-    Matrix S1 = mat_XROT * S0;
-    // translate to position on arm
-    Matrix S2 = mat_STRN * S1;
-    // appy vehicle attitude
-    Matrix Q = mat_VATT * S2;
-
-    // apply coordinate transforms
-    Matrix beams_VF = Q * beams_SF;
-#endif
 
     // 2023/10/10 : first order
     // - uncompensated lat/lon from sled kearfott
@@ -142,6 +93,83 @@ int transform_idtlass(trn::bath_info **bi, trn::att_info **ai, beam_geometry **b
     // Znav - Zmb
     r_snd->depth += (tx_geo[0]->tran_m[3] - tx_geo[1]->tran_m[3]);
 
+
+#endif
+
+
+    double Xo = tx_geo[0]->tran_m[0];
+    double Yo = tx_geo[0]->tran_m[1];
+    double Zo = tx_geo[0]->tran_m[2];
+    double r = sqrt(Xo*Xo + Zo*Zo);
+    double Wo = atan2(Zo, Xo);
+    double Wa = ai[1]->pitch() - ai[0]->pitch();
+    double Wr = (Wo + Wa);
+    double Xr = r * cos(Wr);
+    double Yr = Yo;
+    double Zr = r * sin(Wr);
+    // INS position offsets due to arm rotation
+    double dX = Xr - Xo;
+    double dY = Yr - Yo;
+    double dZ = Zo - Zr;
+
+    // arm rotation matrix
+    double vARM_ROT[3] = {0., -Wa, 0.};
+    Matrix mat_ARMROT = trnx_utils::affine321Rotation(vARM_ROT);
+
+    // INS mount rotation matrix
+    double vINS_ROT[3] = {DTR(tx_geo[0]->rot_deg[0]), DTR(tx_geo[0]->rot_deg[1]), DTR(tx_geo[0]->rot_deg[2])};
+    Matrix mINSROT = trnx_utils::affine321Rotation(vINS_ROT);
+
+    // sensor mounting angles (relative to vehicle, radians)
+    // 3-2-1 euler angles, r/p/y  (phi/theta/psi)
+    // wrt sensor mounted across track, b[0] port, downward facing
+    double vIDT_ROT[3] = { DTR(mb_geo[0]->svr_deg[0]), DTR(mb_geo[0]->svr_deg[1]), DTR(mb_geo[0]->svr_deg[2])};
+    Matrix mIDT_ROT = trnx_utils::affine321Rotation(vIDT_ROT);
+
+    // sensor mounting translation offsets (relative to INS in vehicle frame, meters)
+    // +x: fwd +y: stbd, +z:down
+    double vIDT_TRAN[3] = { -(mb_geo[0]->svt_m[0] + dX), -(mb_geo[0]->svt_m[1] + dY), -(mb_geo[0]->svt_m[2] + dZ)};
+    Matrix mIDT_TRAN = trnx_utils::affineTranslation(vIDT_TRAN);
+
+    // vehicle attitude (pitch, roll, heading)
+    Matrix mATT = trnx_utils::affine321Rotation(vATT);
+
+    // apply IDT sensor frame rotation, vehicle attitude transforms
+    // to get (unscaled) beam components in vehicle frame, i.e. direction cosines
+    Matrix mBcompVF = mATT * mIDT_ROT * mBcompSF;
+
+    // adjust sounding depth (Z+ down)
+    // should not be needed
+    double zofs = tx_geo[0]->xmap["depthOfs"];
+    r_snd->depth += zofs;
+
+    if(trn_debug::get()->debug() >= TRNDL_PLUGIDTLASS){
+        
+            TRN_NDPRINT(TRNDL_PLUGIDTLASS, "%s: --- \n",__func__);
+            TRN_NDPRINT(TRNDL_PLUGIDTLASS, "mb_geo:\n%s\n",mb_geo[0]->tostring().c_str());
+            TRN_NDPRINT(TRNDL_PLUGIDTLASS, "tx_geo.0:\n%s\n",tx_geo[0]->tostring().c_str());
+            TRN_NDPRINT(TRNDL_PLUGIDTLASS, "tx_geo.1:\n%s\n",tx_geo[1]->tostring().c_str());
+        
+            TRN_NDPRINT(TRNDL_PLUGIDTLASS, "arm rotation (deg) Pv[%.3lf] Pa[%.3lf] angle[%.3lf]\n", Math::radToDeg(ai[0]->pitch()), Math::radToDeg(ai[1]->pitch()), Math::radToDeg(Wa));
+            TRN_NDPRINT(TRNDL_PLUGIDTLASS, "Z ofs: (m) %.3lf\n", zofs);
+        
+            TRN_NDPRINT(TRNDL_PLUGIDTLASS, "Xo, Yo, Zo, Wo [%.3lf, %.3lf, %.3lf, %.3lf (%.3lf)]\n", Xo, Yo, Zo, Wo, RTD(Wo));
+            TRN_NDPRINT(TRNDL_PLUGIDTLASS, "Xr, Yr, Zr, Wr [%.3lf, %.3lf, %.3lf, %.3lf (%.3lf)]\n", Xr, Yr, Zr, Wr, RTD(Wr));
+            TRN_NDPRINT(TRNDL_PLUGIDTLASS, "dX, dY, dZ[%.3lf, %.3lf, %.3lf]\n", dX, dY, dZ);
+            TRN_NDPRINT(TRNDL_PLUGIDTLASS, "r[%.3lf]\n", r);
+        
+            TRN_NDPRINT(TRNDL_PLUGIDTLASS, "ARM_ROT  [%.3lf, %.3lf, %.3lf] [%.3lf, %.3lf, %.3lf] deg\n", vARM_ROT[0], vARM_ROT[1], vARM_ROT[2], RTD(vARM_ROT[0]), RTD(vARM_ROT[1]), RTD(vARM_ROT[2]));
+            TRN_NDPRINT(TRNDL_PLUGIDTLASS, "INS_ROT  [%.3lf, %.3lf, %.3lf] [%.3lf, %.3lf, %.3lf] deg\n", vINS_ROT[0], vINS_ROT[1], vINS_ROT[2], RTD(vINS_ROT[0]), RTD(vINS_ROT[1]), RTD(vINS_ROT[2]));
+            TRN_NDPRINT(TRNDL_PLUGIDTLASS, "IDT_ROT  [%.3lf, %.3lf, %.3lf] [%.3lf, %.3lf, %.3lf] deg\n", vIDT_ROT[0], vIDT_ROT[1], vIDT_ROT[2], RTD(vIDT_ROT[0]), RTD(vIDT_ROT[1]), RTD(vIDT_ROT[2]));
+            TRN_NDPRINT(TRNDL_PLUGIDTLASS, "IDT_TRANo [%.3lf, %.3lf, %.3lf]\n", mb_geo[0]->svt_m[0], mb_geo[0]->svt_m[1], mb_geo[0]->svt_m[2]);
+            TRN_NDPRINT(TRNDL_PLUGIDTLASS, "IDT_TRAN [%.3lf, %.3lf, %.3lf]\n", vIDT_TRAN[0], vIDT_TRAN[1], vIDT_TRAN[2]);
+            const char *pinv = (ai[0]->flags().is_set(trn::AF_INVERT_PITCH)? "(p-)" :"(p+)");
+            TRN_NDPRINT(TRNDL_PLUGIDTLASS, "VATT     [%.3lf, %.3lf, %.3lf] rad\n", vATT[0], vATT[1], vATT[2]);
+            TRN_NDPRINT(TRNDL_PLUGIDTLASS, "VATT     [%.2lf, %.2lf, %.2lf] deg %s hdg(%.2lf)\n",
+                        Math::radToDeg(vATT[0]), Math::radToDeg(vATT[1]), Math::radToDeg(vATT[2]), pinv, Math::radToDeg(ai[0]->heading()));
+        
+            TRN_NDPRINT(TRNDL_PLUGIDTLASS,"\n");
+    }
     // fill in the MB1 record using transformed beams
     std::list<trn::beam_tup> beams = bi[0]->beams_raw();
     std::list<trn::beam_tup>::iterator it;
@@ -149,32 +177,85 @@ int transform_idtlass(trn::bath_info **bi, trn::att_info **ai, beam_geometry **b
     int idx[2] = {0, 1};
     for(it=beams.begin(); it!=beams.end(); it++, idx[0]++, idx[1]++)
     {
-        // write beam data to MB1 sounding
+        // get beam tuple: range, vehicle frame components (direction cosines)
         trn::beam_tup bt = static_cast<trn::beam_tup> (*it);
 
         // beam number (0-indexed)
         int b = std::get<0>(bt);
-        double range = std::get<1>(bt);
-        // beam components WF x,y,z
-        // matrix row/col (1 indexed)
+
+        double urange = std::get<1>(bt);
         r_snd->beams[idx[0]].beam_num = b;
-        r_snd->beams[idx[0]].rhox = range * beams_VF(1, idx[1]);
-        r_snd->beams[idx[0]].rhoy = range * beams_VF(2, idx[1]);
-        r_snd->beams[idx[0]].rhoz = range * beams_VF(3, idx[1]);
+        double rho[3] = {0., 0., 0.};
+        double urho[3] = {0., 0., 0.};
+
+        if (urange != 0.) {
+
+            // apply scale to vehicle frame components (beams_VF)
+            // and transform coordinates to INS origin
+            double vRange[3] = {urange, urange, urange};
+            Matrix mRange = trnx_utils::affineScale(vRange);
+            // beams in vehicle frame, before translation
+            Matrix mUBeams = mRange * mBcompVF;
+            urho[0] = mUBeams(1, idx[1]);
+            urho[1] = mUBeams(2, idx[1]);
+            urho[2] = mUBeams(3, idx[1]);
+
+            Matrix mBeams = mIDT_TRAN * mUBeams;
+
+            // populate sounding with beam components
+            // matrix row/col (1 indexed)
+            r_snd->beams[idx[0]].rhox = mBeams(1, idx[1]);
+            r_snd->beams[idx[0]].rhoy = mBeams(2, idx[1]);
+            r_snd->beams[idx[0]].rhoz = mBeams(3, idx[1]);
+
+
+            rho[0] = mBeams(1, idx[1]);
+            rho[1] = mBeams(2, idx[1]);
+            rho[2] = mBeams(3, idx[1]);
+
+        } else {
+            r_snd->beams[idx[0]].rhox = 0.;
+            r_snd->beams[idx[0]].rhoy = 0.;
+            r_snd->beams[idx[0]].rhoz = 0.;
+        }
 
         if(trn_debug::get()->debug() >= TRNDL_PLUGIDTLASS){
 
-            // calculated beam range (should match measured range)
-            double rho[3] = {r_snd->beams[idx[0]].rhox, r_snd->beams[idx[0]].rhoy, r_snd->beams[idx[0]].rhoz};
 
+            double range = sqrt(rho[0] * rho[0] + rho[1] * rho[1] + rho[2] * rho[2]);
+
+           // double urange = sqrt(urho[0]*urho[0] + urho[1]*urho[1] + urho[2]*urho[2]);
+//            double urhoNorm = trnx_utils::vnorm(urho);
+//            double uaxr = (urhoNorm == 0. ? 0. : acos(urho[0] / urhoNorm));
+//            double uayr = (urhoNorm == 0. ? 0. : acos(urho[1] / urhoNorm));
+//            double uazr = (urhoNorm == 0. ? 0. : acos(urho[2] / urhoNorm));
+
+//            TRN_NDPRINT(TRNDL_PLUGIDTLASS_H, "%s: urho[%7.4lf, %7.4lf, %7.4lf] urange[%7.4lf]\n",
+//                        __func__, urho[0], urho[1], urho[2], urange);
+//
+//            TRN_NDPRINT(TRNDL_PLUGIDTLASS_H, "%s:  rho[%7.4lf, %7.4lf, %7.4lf] range [%7.4lf]\n",
+//                        __func__, rho[0], rho[1], rho[2], range);
+
+//            TRN_NDPRINT(TRNDL_PLUGIDTLASS_H, "%s: b[%3d] r[%7.2lf] R[%7.2lf]     rhox[%7.4lf] rhoy[%7.4lf] rhoz[%7.4lf]     ax[%6.3lf] ay[%6.3lf] az[%6.3lf] U\n",
+//                        __func__, b, urange, urhoNorm,
+//                        urho[0],
+//                        urho[1],
+//                        urho[2],
+//                        Math::radToDeg(uaxr),
+//                        Math::radToDeg(uayr),
+//                        Math::radToDeg(uazr)
+//                        );
+
+            // calculated beam range (should match measured range)
+            //double rho[3] = {r_snd->beams[idx[0]].rhox, r_snd->beams[idx[0]].rhoy, r_snd->beams[idx[0]].rhoz};
             double rhoNorm = trnx_utils::vnorm( rho );
 
             // calculate component angles wrt vehicle axes
-            double axr = (range==0. ? 0. :acos(r_snd->beams[idx[0]].rhox/range));
-            double ayr = (range==0. ? 0. :acos(r_snd->beams[idx[0]].rhoy/range));
-            double azr = (range==0. ? 0. :acos(r_snd->beams[idx[0]].rhoz/range));
+            double axr = (rhoNorm == 0. ? 0. : acos(rho[0] / rhoNorm));
+            double ayr = (rhoNorm == 0. ? 0. : acos(rho[1] / rhoNorm));
+            double azr = (rhoNorm == 0. ? 0. : acos(rho[2] / rhoNorm));
 
-            TRN_NDPRINT(TRNDL_PLUGIDTLASS_H, "%s: b[%3d] r[%7.2lf] R[%7.2lf]     rhox[%7.2lf] rhoy[%7.2lf] rhoz[%7.2lf]     ax[%6.2lf] ay[%6.2lf] az[%6.2lf]\n",
+            TRN_NDPRINT(TRNDL_PLUGIDTLASS_H, "%s: b[%3d] r[%7.2lf] R[%7.2lf]     rhox[%7.4lf] rhoy[%7.4lf] rhoz[%7.4lf]     ax[%6.3lf] ay[%6.3lf] az[%6.3lf]\n",
                         __func__, b, range, rhoNorm,
                         r_snd->beams[idx[0]].rhox,
                         r_snd->beams[idx[0]].rhoy,
@@ -280,9 +361,6 @@ int cb_proto_idtlass(void *pargs)
             // generate MB1 sounding (raw beams)
             mb1_t *snd = trnx_utils::lcm_to_mb1(bi[0], ni[1], ai[0]);
 
-//            fprintf(stderr,"%s - >>>>>>> new MB1 from lcm:\n",__func__);
-//            mb1_show(snd, true, 5);
-
             std::list<trn::beam_tup> beams = bi[0]->beams_raw();
             std::list<trn::beam_tup>::iterator it;
 
@@ -290,33 +368,36 @@ int cb_proto_idtlass(void *pargs)
             trn::bath_input *bp[1] = {xpp->get_bath_input(*bkey[0])};
             int trn_type[3] = {-1, trn::BT_NONE, trn::BT_NONE};
 
-            if(nullptr != bp[0]) {
-                trn_type[0] = bp[0]->bath_input_type();
+            if(ctx->decmod() <= 0 || (ctx->cbcount() % ctx->decmod()) == 0) {
 
-                if(trn_type[0] == trn::BT_DELTAT)
-                {
-                    beam_geometry *bgeo[3] = {nullptr, nullptr};
+                if(nullptr != bp[0]) {
+                    trn_type[0] = bp[0]->bath_input_type();
 
-                    // get geometry for IDT, sled INS, veh nav
-                    bgeo[0] = xpp->lookup_geo(*bkey[0], trn_type[0]);
-                    bgeo[1] = xpp->lookup_geo(*nkey[1], trn_type[1]);
-                    bgeo[2] = xpp->lookup_geo(*nkey[0], trn_type[2]);
+                    if(trn_type[0] == trn::BT_DELTAT)
+                    {
+                        beam_geometry *bgeo[3] = {nullptr, nullptr};
 
-                    // compute MB1 beam components in vehicle frame
-                    if (transform_idtlass(bi, ai, bgeo, snd) != 0) {
-                        TRN_NDPRINT(TRNDL_PLUGIDTLASS_H, "%s:%d ERR - transform_idtlass failed\n", __func__, __LINE__);
-                        err_count++;
-                        continue;
+                        // get geometry for IDT, sled INS, veh nav
+                        bgeo[0] = xpp->lookup_geo(*bkey[0], trn_type[0]);
+                        bgeo[1] = xpp->lookup_geo(*nkey[1], trn_type[1]);
+                        bgeo[2] = xpp->lookup_geo(*nkey[0], trn_type[2]);
+
+                        // compute MB1 beam components in vehicle frame
+                        if (transform_idtlass(bi, ai, bgeo, snd) != 0) {
+                            TRN_NDPRINT(TRNDL_PLUGIDTLASS_H, "%s:%d ERR - transform_idtlass failed\n", __func__, __LINE__);
+                            err_count++;
+                            continue;
+                        }
+
+                    } else {
+                        fprintf(stderr,"%s:%d ERR - unsupported input_type[%d] beam transformation invalid\n", __func__, __LINE__, trn_type[0]);
                     }
-
                 } else {
-                    fprintf(stderr,"%s:%d ERR - unsupported input_type[%d] beam transformation invalid\n", __func__, __LINE__, trn_type[0]);
+                    fprintf(stderr,"%s:%d ERR - NULL bath input; skipping transforms\n", __func__, __LINE__);
                 }
-            } else {
-                fprintf(stderr,"%s:%d ERR - NULL bath input; skipping transforms\n", __func__, __LINE__);
+                mb1_set_checksum(snd);
             }
 
-            mb1_set_checksum(snd);
 
             // check modulus
             if(ctx->decmod() <= 0 || (ctx->cbcount() % ctx->decmod()) == 0){

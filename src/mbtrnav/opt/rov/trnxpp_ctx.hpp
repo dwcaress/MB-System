@@ -605,6 +605,9 @@ public:
 
             std::string ss = trnx_utils::mbest_tocsv(mbest);
 
+
+            //trnx_utils::mbest_tostream(std::cerr, &mbest);
+
             fprintf(mMBEstCsvFile, "%s\n", ss.c_str());
 
             //            TRN_NDPRINT(6, "%s\n", ss.c_str());
@@ -895,11 +898,16 @@ public:
                 TRN_NDPRINT(4, "TRNUM client listening...\n");
 
                 // listen for UDP mcast TRN update (trnum)
-                int64_t test = udpms_listen(trnum_cli, iobuf, 512, 1000, 0);
+                uint32_t update_len = sizeof(trnu_pub_t);
+                int64_t test = udpms_listen(trnum_cli, iobuf, update_len, 100, 0);
 
-                if(test > 0){
+                if(test == update_len){
+                    uint32_t *msg_id = (uint32_t *)iobuf;
+                    if(len >= test && *msg_id == TRNU_PUB_SYNC){
 
-                    if(len >= test){
+//                        TRN_NDPRINT(4, "%s:%d TRNUM sync bytes %04X vs %04X\n", __func__, __LINE__, *msg_id, (uint32_t)TRNU_PUB_SYNC);
+//                        mb1_hex_show(iobuf, update_len, 16, true, 5);
+
                         memset(dest, 0, len);
                         memcpy(dest, iobuf, test);
                         retval = test;
@@ -1109,11 +1117,12 @@ public:
                     }
 
                     // get TRNUM update/estimate
-                    byte iobuf[512] = {0};
+                    byte iobuf[512];
+                    memset(iobuf, 0, 512);
 
-                    int update_bytes = get_udpms_update(key, cfg, iobuf, 512);
+                    int update_bytes = get_udpms_update(key, cfg, iobuf, sizeof(trnu_pub_t));
 
-                    TRN_NDPRINT(5, "%s:%d - UDPM update key[%s] vp[%p] update_bytes[%d]\n", __func__, __LINE__, key.c_str(), vp, update_bytes);
+                    TRN_NDPRINT(5, "%s:%d - UDPM update key[%s] vp[%p] update_bytes[%d] trn_pub_t size[%u]\n", __func__, __LINE__, key.c_str(), vp, update_bytes, sizeof(trnu_pub_t));
 
                     if(update_bytes > 0){
 
