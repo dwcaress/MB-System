@@ -402,10 +402,11 @@ int cb_proto_idtlass(void *pargs)
             // check modulus
             if(ctx->decmod() <= 0 || (ctx->cbcount() % ctx->decmod()) == 0){
 
-                if(cfg->debug() >= TRNDL_PLUGIDTLASS ){
-                    fprintf(stderr,"%s - >>>>>>> Publishing MB1:\n",__func__);
-                    mb1_show(snd, (cfg->debug()>=TRNDL_PLUGIDTLASS ? true: false), 5);
-                }
+                TRN_NDPRINT(3, "%s - >>>>>>> Publishing MB1\n", __func__);
+                mb1_show(snd, (cfg->debug()>=4 ? true: false), 5);
+//                if(cfg->debug() >= TRNDL_PLUGIDTLASS ){
+//                    mb1_show(snd, (cfg->debug()>=TRNDL_PLUGIDTLASS ? true: false), 5);
+//                }
 
                 // publish MB1 to mbtrnpp
                 ctx->pub_mb1(snd, xpp->pub_list(), cfg);

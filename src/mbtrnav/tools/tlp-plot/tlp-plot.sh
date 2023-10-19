@@ -76,6 +76,10 @@ source ${QP_PLOT_HOME}/qu-plotsets-conf.sh
 # source shared definitions
 source ${QP_PLOT_HOME}/qp-shared.conf.sh
 
+# keep intermediate files and directories
+# unset by default
+unset QX_KEEP_FLAG
+
 #################################
 # Function Definitions
 #################################
@@ -93,10 +97,11 @@ show_help(){
     echo " Options:"
     echo "  -l         : list plotset keys"
     echo "  -f file    : use plotset config file   [1,2]"
-	echo "  -j dir     : job output directory"
-	echo "  -i n       : generate plotset by index [1]"
+    echo "  -j dir     : job output directory"
+    echo "  -i n       : generate plotset by index [1]"
     echo "  -k s       : generate plotset by key   [1]"
-	echo "  -s \"p,i,d\" : generate plotset using path,id,description [1]"
+    echo "  -K         : keep intermediate files and directories"
+    echo "  -s \"p,i,d\" : generate plotset using path,id,description [1]"
     echo "  -v         : verbose output"
     echo "  -h         : print use message"
     echo ""
@@ -210,7 +215,7 @@ process_cmdline(){
     OPTIND=1
     vout "`basename $0` all args[$*]"
 
-while getopts hf:i:j:k:ls:v Option
+while getopts hf:i:j:Kk:ls:v Option
     do
         vout "processing $Option[$OPTARG]"
         case $Option in
@@ -231,6 +236,8 @@ while getopts hf:i:j:k:ls:v Option
 				fi
             ;;
             j ) QX_JOB_DIR=$OPTARG
+            ;;
+            K) QX_KEEP_FLAG="Y"
             ;;
 			k ) key=$OPTARG
              	key_valid=""
@@ -255,7 +262,7 @@ while getopts hf:i:j:k:ls:v Option
             s ) QU_PLOTSET_DEF=$OPTARG
                 IFSO=$IFS
                 IFS=',' read -r lp sid dsid <<< ${QU_PLOTSET_DEF}
-				IFS=$IFSO
+                IFS=$IFSO
                 if [ ! -z "${lp}" ] && [ ! -z "${sid}" ] && [ ! -z "${dsid}" ]
                 then
                     if [ -d ${lp} ]
@@ -264,8 +271,8 @@ while getopts hf:i:j:k:ls:v Option
                         QX_SESSION_IDS[$QX_PLOTSET_COUNT]=$sid
                         QX_DATA_SET_IDS[$QX_PLOTSET_COUNT]=$dsid
                         let "QX_PLOTSET_COUNT=$QX_PLOTSET_COUNT+1"
-					else
-						echo "WARN - directory does not exist [$lp]"
+                    else
+                        echo "WARN - directory does not exist [$lp]"
                     fi
                 fi
             ;;
@@ -351,12 +358,12 @@ run_jobs(){
         # set parameters for this job
         QU_LOG_PATH=${QX_LOG_PATHS[$i]}
         export QU_SESSION_ID=${QX_SESSION_IDS[$i]}
-		export QU_DATA_SET_ID="${QX_DATA_SET_IDS[$i]}"
+        export QU_DATA_SET_ID="${QX_DATA_SET_IDS[$i]}"
 
-		QX_JOB_N_DIR="${QX_JOB_DIR}/job-${i}-$$"
-		vout "running job : [$i]"
-		vout "     output : [${QX_JOB_N_DIR}]"
-		# generate plot data and plots
+        QX_JOB_N_DIR="${QX_JOB_DIR}/job-${i}-$$"
+        vout "running job : [$i]"
+        vout "     output : [${QX_JOB_N_DIR}]"
+	# generate plot data and plots
         plot_logs
         vout ""
         if [ ! -d "${QX_JOB_N_DIR}" ]
@@ -432,7 +439,7 @@ fi
 # create plot output directory if it doesn't exist
 if [ ! -d "${QP_OUTPUT_DIR}" ]
 then
-	vout "creating plot data dir : ${QP_PLOT_DATA_DIR}"
+	vout "creating plot output dir : ${QP_OUTPUT_DIR}"
 	mkdir -p ${QP_OUTPUT_DIR}
 fi
 # create plot job output directory if it doesn't exist
@@ -450,6 +457,11 @@ fi
 # process jobs
 run_jobs
 
+if [ -z $QX_KEEP_FLAG ]
+then
+rm -r ${QP_PLOT_DATA_DIR}
+rm -r ${QP_OUTPUT_DIR}
+fi
 vout ""
 
 exit 0
