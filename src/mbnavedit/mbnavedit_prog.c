@@ -162,7 +162,7 @@ static void *store_ptr = NULL;
 static int kind;
 static double distance;
 static double altitude;
-static double sonardepth;
+static double sensordepth;
 static int nbath;
 static int namp;
 static int nss;
@@ -331,7 +331,6 @@ int mbnavedit_init(int argc, char **argv, int *startup_file) {
 	int errflg = 0;
 	int c;
 	int help = 0;
-	int flag = 0;
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "VvHhB:b:DdE:e:F:f:GgI:i:NnPpXx")) != -1)
@@ -348,50 +347,41 @@ int mbnavedit_init(int argc, char **argv, int *startup_file) {
 		case 'b':
 			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);
 			btime_i[6] = 0;
-			flag++;
 			break;
 		case 'D':
 		case 'd':
 			output_mode = OUTPUT_MODE_BROWSE;
-			flag++;
 			break;
 		case 'E':
 		case 'e':
 			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
 			etime_i[6] = 0;
-			flag++;
 			break;
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d", &format);
-			flag++;
 			break;
 		case 'G':
 		case 'g':
 			gui_mode = true;
-			flag++;
 			break;
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", ifile);
 			do_parse_datalist(ifile, format);
-			flag++;
 			fileflag++;
 			break;
 		case 'N':
 		case 'n':
 			strip_comments = true;
-			flag++;
 			break;
 		case 'P':
 		case 'p':
 			use_ping_data = true;
-			flag++;
 			break;
 		case 'X':
 		case 'x':
 			run_mbprocess = true;
-			flag++;
 			break;
 		case '?':
 			errflg++;
@@ -941,7 +931,7 @@ int mbnavedit_load_data() {
 	if (status == MB_SUCCESS)
 		do {
 			status = mb_get_all(verbose, imbio_ptr, &store_ptr, &kind, ping[nbuff].time_i, &ping[nbuff].time_d, &ping[nbuff].lon,
-			                    &ping[nbuff].lat, &ping[nbuff].speed, &ping[nbuff].heading, &distance, &altitude, &sonardepth,
+			                    &ping[nbuff].lat, &ping[nbuff].speed, &ping[nbuff].heading, &distance, &altitude, &sensordepth,
 			                    &nbath, &namp, &nss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack,
 			                    ssalongtrack, comment, &error);
 			if (error <= MB_ERROR_NO_ERROR && (kind == nav_source || (kind == MB_DATA_DATA && use_ping_data)) &&

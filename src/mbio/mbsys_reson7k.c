@@ -537,7 +537,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   processedsidescan->number_pixels = 0;
   processedsidescan->ss_type = 0;
   processedsidescan->pixelwidth = 0;
-  processedsidescan->sonardepth = 0;
+  processedsidescan->sensordepth = 0;
   processedsidescan->altitude = 0;
   for (int i = 0; i < MBSYS_RESON7K_MAX_PIXELS; i++) {
     processedsidescan->sidescan[i] = 0.0;
@@ -2653,7 +2653,7 @@ int mbsys_reson7k_print_processedsidescan(int verbose, s7kr_processedsidescan *p
   fprintf(stderr, "%s     ss_source:                  %u\n", first, processedsidescan->ss_source);
   fprintf(stderr, "%s     number_pixels:              %u\n", first, processedsidescan->number_pixels);
   fprintf(stderr, "%s     pixelwidth:                 %f\n", first, processedsidescan->pixelwidth);
-  fprintf(stderr, "%s     sonardepth:                 %f\n", first, processedsidescan->sonardepth);
+  fprintf(stderr, "%s     sensordepth:                 %f\n", first, processedsidescan->sensordepth);
   fprintf(stderr, "%s     altitude:                   %f\n", first, processedsidescan->altitude);
   for (unsigned int i = 0; i < processedsidescan->number_pixels; i++)
     fprintf(stderr, "%s     pixel[%d]:  sidescan:%f alongtrack:%f\n", first, i, processedsidescan->sidescan[i],
@@ -6754,7 +6754,7 @@ int mbsys_reson7k_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
       *draft = -bathymetry->vehicle_height + reference->water_z;
       heave_use = 0.0;
     }
-    else if (mb_io_ptr->nsonardepth > 0) {
+    else if (mb_io_ptr->nsensordepth > 0) {
       mb_depint_interp(verbose, mbio_ptr, store->time_d, draft, error);
       heave_use = 0.0;
     }
@@ -7010,7 +7010,7 @@ int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
     if (bathymetry->optionaldata) {
       *transducer_depth = -bathymetry->vehicle_height + reference->water_z;
     }
-    else if (mb_io_ptr->nsonardepth > 0) {
+    else if (mb_io_ptr->nsensordepth > 0) {
       mb_depint_interp(verbose, mbio_ptr, store->time_d, transducer_depth, error);
     }
     else if (mb_io_ptr->nattitude > 0) {
@@ -7163,7 +7163,7 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
       *navlat = RTD * bathymetry->latitude;
 
       *draft = -bathymetry->vehicle_height + reference->water_z;
-    } else if (mb_io_ptr->nsonardepth > 0) {
+    } else if (mb_io_ptr->nsensordepth > 0) {
       mb_depint_interp(verbose, mbio_ptr, store->time_d, draft, error);
     } else {
       *draft = reference->water_z;
@@ -7209,9 +7209,9 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
     }
 
     /* get draft  */
-    if (mb_io_ptr->nsonardepth > 0) {
+    if (mb_io_ptr->nsensordepth > 0) {
       // TODO(schwehr): Was something else intended in the if?
-      // if (mb_io_ptr->nsonardepth > 0)
+      // if (mb_io_ptr->nsensordepth > 0)
         mb_depint_interp(verbose, mbio_ptr, store->time_d, draft, error);
       *heave = 0.0;
     }
@@ -7277,7 +7277,7 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
       heading[0] = RTD * bathymetry->heading;
 
     /* get draft  */
-    if (mb_io_ptr->nsonardepth > 0) {
+    if (mb_io_ptr->nsensordepth > 0) {
       mb_depint_interp(verbose, mbio_ptr, store->time_d, &(draft[0]), error);
     }
     else if (bathymetry->optionaldata) {
@@ -7510,7 +7510,7 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
       navlat[0] = RTD * bathymetry->latitude;
 
       draft[0] = -bathymetry->vehicle_height + reference->water_z;
-    } else if (mb_io_ptr->nsonardepth > 0) {
+    } else if (mb_io_ptr->nsensordepth > 0) {
       mb_depint_interp(verbose, mbio_ptr, store->time_d, &(draft[0]), error);
     } else {
       draft[0] = reference->water_z;
@@ -7550,7 +7550,7 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
     mb_attint_interp(verbose, mbio_ptr, *time_d, &(heave[0]), &(roll[0]), &(pitch[0]), error);
 
     /* get draft  */
-    if (mb_io_ptr->nsonardepth > 0) {
+    if (mb_io_ptr->nsensordepth > 0) {
       mb_depint_interp(verbose, mbio_ptr, store->time_d, &draft[0], error);
       heave[0] = 0.0;
     }
@@ -7627,7 +7627,7 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
       heading[0] = RTD * bathymetry->heading;
 
     /* get draft  */
-    if (mb_io_ptr->nsonardepth > 0) {
+    if (mb_io_ptr->nsensordepth > 0) {
       mb_depint_interp(verbose, mbio_ptr, store->time_d, &(draft[0]), error);
     }
     else if (bathymetry->optionaldata) {
@@ -7676,7 +7676,7 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
       }
 
       /* get draft  */
-      if (mb_io_ptr->nsonardepth > 0) {
+      if (mb_io_ptr->nsensordepth > 0) {
         mb_depint_interp(verbose, mbio_ptr, time_d[iatt], &(draft[iatt]), error);
       }
       else if (bathymetry->optionaldata) {
@@ -7721,7 +7721,7 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
     }
 
     /* get draft  */
-    if (mb_io_ptr->nsonardepth > 0) {
+    if (mb_io_ptr->nsensordepth > 0) {
       mb_depint_interp(verbose, mbio_ptr, store->time_d, &(draft[0]), error);
     }
     else if (bathymetry->optionaldata) {
@@ -7760,7 +7760,7 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
       }
 
       /* get draft  */
-      if (mb_io_ptr->nsonardepth > 0) {
+      if (mb_io_ptr->nsensordepth > 0) {
         mb_depint_interp(verbose, mbio_ptr, time_d[iatt], &(draft[iatt]), error);
       }
       else if (bathymetry->optionaldata) {
@@ -7801,7 +7801,7 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
     }
 
     /* get draft  */
-    if (mb_io_ptr->nsonardepth > 0) {
+    if (mb_io_ptr->nsensordepth > 0) {
       mb_depint_interp(verbose, mbio_ptr, store->time_d, &(draft[0]), error);
     }
     else if (bathymetry->optionaldata) {
@@ -7829,9 +7829,9 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
     /* done translating values */
   }
 
-  /* extract data from sonardepth structure */
-  else if (*kind == MB_DATA_SONARDEPTH) {
-    /* just one sonardepth value */
+  /* extract data from sensordepth structure */
+  else if (*kind == MB_DATA_SENSORDEPTH) {
+    /* just one sensordepth value */
     *n = 1;
 
     /* get time */
@@ -7851,7 +7851,7 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
     }
 
     /* get draft  */
-    if (mb_io_ptr->nsonardepth > 0) {
+    if (mb_io_ptr->nsensordepth > 0) {
       mb_depint_interp(verbose, mbio_ptr, store->time_d, &(draft[0]), error);
     }
     else if (bathymetry->optionaldata) {
@@ -8198,7 +8198,7 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
   s7kr_bathymetry *bathymetry;
   s7kr_fsdwsb *fsdwsb;
   s7k_fsdwchannel *fsdwchannel;
-  double dsonardepth, dsonaraltitude;
+  double dsensordepth, dsonaraltitude;
   double longitude, latitude;
   double speed, heading;
   double roll, pitch, heave;
@@ -8217,9 +8217,9 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
     // s7k_fsdwsegyheader *fsdwsegyheader = &(fsdwsb->segyheader);
 
     /* get needed values */
-    mb_depint_interp(verbose, mbio_ptr, store->time_d, &dsonardepth, error);
+    mb_depint_interp(verbose, mbio_ptr, store->time_d, &dsensordepth, error);
     mb_altint_interp(verbose, mbio_ptr, store->time_d, &dsonaraltitude, error);
-    double dwaterdepth = dsonardepth + dsonaraltitude;
+    double dwaterdepth = dsensordepth + dsonaraltitude;
 
     /* if possible get altitude from nadir of multibeam bathymetry */
     if (bathymetry->optionaldata) {
@@ -8228,14 +8228,14 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
       for (unsigned int i = 0; i < bathymetry->number_beams; i++) {
         if (((bathymetry->quality[i] & 15) == 15) && fabs((double)bathymetry->acrosstrack[i]) < xtrackmin) {
           dwaterdepth = bathymetry->depth[i];
-          dsonaraltitude = bathymetry->depth[i] - dsonardepth;
+          dsonaraltitude = bathymetry->depth[i] - dsensordepth;
           xtrackmin = fabs((double)bathymetry->acrosstrack[i]);
         }
       }
     }
 
     /* get needed values */
-    const int sonardepth = (int)(100 * dsonardepth);
+    const int sensordepth = (int)(100 * dsensordepth);
     const int waterdepth = (int)(100 * dwaterdepth);
     int watersoundspeed;
     if (ctd->n > 0)
@@ -8269,9 +8269,9 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
     mb_segytraceheader_ptr->cdp_fold = 0;
     mb_segytraceheader_ptr->use = fsdwsb->data_format;
     mb_segytraceheader_ptr->range = 0;
-    mb_segytraceheader_ptr->grp_elev = -sonardepth;
-    mb_segytraceheader_ptr->src_elev = -sonardepth;
-    mb_segytraceheader_ptr->src_depth = sonardepth;
+    mb_segytraceheader_ptr->grp_elev = -sensordepth;
+    mb_segytraceheader_ptr->src_elev = -sensordepth;
+    mb_segytraceheader_ptr->src_depth = sensordepth;
     mb_segytraceheader_ptr->grp_datum = 0;
     mb_segytraceheader_ptr->src_datum = 0;
     mb_segytraceheader_ptr->src_wbd = waterdepth;
@@ -8647,11 +8647,11 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int 
     s7k_fsdwsegyheader *fsdwsegyheader = &(fsdwsb->segyheader);
 
     /* get needed values */
-    double dsonardepth;
-    mb_depint_interp(verbose, mbio_ptr, store->time_d, &dsonardepth, error);
+    double dsensordepth;
+    mb_depint_interp(verbose, mbio_ptr, store->time_d, &dsensordepth, error);
     double dsonaraltitude;
     mb_altint_interp(verbose, mbio_ptr, store->time_d, &dsonaraltitude, error);
-    // const double dwaterdepth = dsonardepth + dsonaraltitude;
+    // const double dwaterdepth = dsensordepth + dsonaraltitude;
     // int watersoundspeed;
     // if (ctd->n > 0)
     //   watersoundspeed = (int)(ctd->sound_velocity[ctd->n - 1]);
@@ -8673,15 +8673,15 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int 
     else
       fsdwsb->ping_number = 0;
     fsdwsb->data_format = mb_segytraceheader_ptr->use;
-    // int sonardepth = (int)(100 * dsonardepth);
+    // int sensordepth = (int)(100 * dsensordepth);
     // if (mb_segytraceheader_ptr->grp_elev != 0)
-    //   sonardepth = -mb_segytraceheader_ptr->grp_elev;
+    //   sensordepth = -mb_segytraceheader_ptr->grp_elev;
     // else if (mb_segytraceheader_ptr->src_elev != 0)
-    //   sonardepth = -mb_segytraceheader_ptr->src_elev;
+    //   sensordepth = -mb_segytraceheader_ptr->src_elev;
     // else if (mb_segytraceheader_ptr->src_depth != 0)
-    //   sonardepth = mb_segytraceheader_ptr->src_depth;
+    //   sensordepth = mb_segytraceheader_ptr->src_depth;
     // else
-    //   sonardepth = 0;
+    //   sensordepth = 0;
 
     // float factor;
     // if (mb_segytraceheader_ptr->elev_scalar < 0)
@@ -9967,8 +9967,8 @@ int mbsys_reson7k_makess_source(int verbose, void *mbio_ptr, void *store_ptr,
     processedsidescan->number_pixels = nss;
     processedsidescan->ss_type = MB_SIDESCAN_LINEAR;
     processedsidescan->pixelwidth = *pixel_size;
-    processedsidescan->sonardepth = -bathymetry->vehicle_height + reference->water_z;
-    processedsidescan->altitude = bathymetry->depth[iminxtrack] - processedsidescan->sonardepth;
+    processedsidescan->sensordepth = -bathymetry->vehicle_height + reference->water_z;
+    processedsidescan->altitude = bathymetry->depth[iminxtrack] - processedsidescan->sensordepth;
     for (int i = 0; i < MBSYS_RESON7K_MAX_PIXELS; i++) {
       processedsidescan->sidescan[i] = ss[i];
       processedsidescan->alongtrack[i] = ssalongtrack[i];

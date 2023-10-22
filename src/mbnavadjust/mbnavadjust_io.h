@@ -34,9 +34,13 @@
 
 /* Current MBnavadjust project file verion is 3.13 */
 #define MBNA_FILE_VERSION_MAJOR 3
-#define MBNA_FILE_VERSION_MINOR 14
+#define MBNA_FILE_VERSION_MINOR 15
 
 /* mbnavadjust global defines */
+#define MBNA_USE_MODE_NONE 0
+#define MBNA_USE_MODE_PRIMARY 1
+#define MBNA_USE_MODE_SECONDARY 2
+#define MBNA_USE_MODE_TERTIARY 3
 #define ALLOC_NUM 10
 #define MBNA_REFGRID_NUM_MAX  25
 #define MBNA_SNAV_NUM 11
@@ -367,6 +371,7 @@ struct mbna_project {
   mb_path refgrid_names[MBNA_REFGRID_NUM_MAX];
   double refgrid_bounds[4][MBNA_REFGRID_NUM_MAX];
 
+  int use_mode;
   double section_length;
   int section_soundings;
   int bin_beams_bath;

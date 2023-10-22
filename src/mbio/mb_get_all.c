@@ -35,7 +35,7 @@
 
 /*--------------------------------------------------------------------*/
 int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
-               double *navlat, double *speed, double *heading, double *distance, double *altitude, double *sonardepth, int *nbath,
+               double *navlat, double *speed, double *heading, double *distance, double *altitude, double *sensordepth, int *nbath,
                int *namp, int *nss, char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack,
                double *ss, double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
 	if (verbose >= 2) {
@@ -124,7 +124,7 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int tim
 		if (status == MB_SUCCESS && (*kind == MB_DATA_DATA || *kind == MB_DATA_CALIBRATE || *kind == MB_DATA_SUBBOTTOM_MCS ||
 		                             *kind == MB_DATA_SUBBOTTOM_CNTRBEAM || *kind == MB_DATA_SUBBOTTOM_SUBBOTTOM ||
 		                             *kind == MB_DATA_SIDESCAN2 || *kind == MB_DATA_SIDESCAN3 || *kind == MB_DATA_WATER_COLUMN)) {
-			status = mb_extract_altitude(verbose, mbio_ptr, *store_ptr, kind, sonardepth, altitude, error);
+			status = mb_extract_altitude(verbose, mbio_ptr, *store_ptr, kind, sensordepth, altitude, error);
 		}
 		if (status == MB_SUCCESS &&
 		    (*kind == MB_DATA_NAV || *kind == MB_DATA_NAV1 || *kind == MB_DATA_NAV2 || *kind == MB_DATA_NAV3)) {
@@ -132,8 +132,28 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int tim
 			double pitch;
 			double heave;
 			status = mb_extract_nav(verbose, mbio_ptr, *store_ptr, kind, time_i, time_d, navlon, navlat, speed, heading,
-			                        sonardepth, &roll, &pitch, &heave, error);
+			                        sensordepth, &roll, &pitch, &heave, error);
 		}
+	}
+
+	/* if alternative nav is available use it for survey records */
+	if (status == MB_SUCCESS && *kind == MB_DATA_DATA && mb_io_ptr->alternative_navigation) {
+		double zoffset = 0.0;
+		int inavadjtime = 0;
+		mb_linear_interp_longitude(	verbose, mb_io_ptr->nav_alt_time_d - 1, mb_io_ptr->nav_alt_navlon - 1,      mb_io_ptr->nav_alt_num, *time_d, navlon,      &inavadjtime, error);
+    mb_linear_interp_latitude(	verbose, mb_io_ptr->nav_alt_time_d - 1, mb_io_ptr->nav_alt_navlat - 1,      mb_io_ptr->nav_alt_num, *time_d, navlat,      &inavadjtime, error);
+    mb_linear_interp(						verbose, mb_io_ptr->nav_alt_time_d - 1, mb_io_ptr->nav_alt_speed - 1,       mb_io_ptr->nav_alt_num, *time_d, speed,       &inavadjtime, error);
+    mb_linear_interp_heading(		verbose, mb_io_ptr->nav_alt_time_d - 1, mb_io_ptr->nav_alt_heading - 1,     mb_io_ptr->nav_alt_num, *time_d, heading,     &inavadjtime, error);
+  	mb_linear_interp(           verbose, mb_io_ptr->nav_alt_time_d - 1, mb_io_ptr->nav_alt_sensordepth - 1, mb_io_ptr->nav_alt_num, *time_d, sensordepth, &inavadjtime, error);
+    mb_linear_interp(           verbose, mb_io_ptr->nav_alt_time_d - 1, mb_io_ptr->nav_alt_zoffset - 1,     mb_io_ptr->nav_alt_num, *time_d, &zoffset,     &inavadjtime, error);
+    if (*heading < 0.0)
+      *heading += 360.0;
+    else if (*heading > 360.0)
+      *heading -= 360.0;
+  	*sensordepth += zoffset;
+  	for (int ibeam=0; ibeam<*nbath; ibeam++) {
+  		bath[ibeam] += zoffset;
+  	}
 	}
 
 	if (verbose >= 4) {
@@ -210,7 +230,7 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int tim
 			fprintf(stderr, "dbg4       old lat:      %f\n", mb_io_ptr->old_lat);
 			fprintf(stderr, "dbg4       distance:     %f\n", *distance);
 			fprintf(stderr, "dbg4       altitude:     %f\n", *altitude);
-			fprintf(stderr, "dbg4       sonardepth:   %f\n", *sonardepth);
+			fprintf(stderr, "dbg4       sensordepth:  %f\n", *sensordepth);
 			fprintf(stderr, "dbg4       delta_time:   %f\n", delta_time);
 			fprintf(stderr, "dbg4       raw speed:    %f\n", mb_io_ptr->new_speed);
 			fprintf(stderr, "dbg4       speed:        %f\n", *speed);
@@ -260,7 +280,7 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int tim
 			fprintf(stderr, "dbg4       old lat:      %f\n", mb_io_ptr->old_lat);
 			fprintf(stderr, "dbg4       distance:     %f\n", *distance);
 			fprintf(stderr, "dbg4       altitude:     %f\n", *altitude);
-			fprintf(stderr, "dbg4       sonardepth:   %f\n", *sonardepth);
+			fprintf(stderr, "dbg4       sensordepth:  %f\n", *sensordepth);
 			fprintf(stderr, "dbg4       delta_time:   %f\n", delta_time);
 			fprintf(stderr, "dbg4       raw speed:    %f\n", mb_io_ptr->new_speed);
 			fprintf(stderr, "dbg4       speed:        %f\n", *speed);
@@ -275,7 +295,7 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int tim
 		*navlat = 0.0;
 		*distance = 0.0;
 		*altitude = 0.0;
-		*sonardepth = 0.0;
+		*sensordepth = 0.0;
 		*speed = 0.0;
 	}
 
@@ -370,7 +390,7 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int tim
 		fprintf(stderr, "dbg2       heading:       %f\n", *heading);
 		fprintf(stderr, "dbg2       distance:      %f\n", *distance);
 		fprintf(stderr, "dbg2       altitude:      %f\n", *altitude);
-		fprintf(stderr, "dbg2       sonardepth:    %f\n", *sonardepth);
+		fprintf(stderr, "dbg2       sensordepth:   %f\n", *sensordepth);
 	}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR && *kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);

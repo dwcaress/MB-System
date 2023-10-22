@@ -1169,7 +1169,7 @@ void do_mbeditviz_viewgrid() {
             navtime_d[iping] = ping->time_d;
             navlon[iping] = ping->navlon;
             navlat[iping] = ping->navlat;
-            navz[iping] = -ping->sonardepth;
+            navz[iping] = -ping->sensordepth;
             navheading[iping] = ping->heading;
             navspeed[iping] = ping->speed;
             navportlon[iping] = ping->portlon;
@@ -1614,7 +1614,7 @@ void do_mbeditviz_update_filelist() {
           athchar = 'H';
         else
           athchar = ' ';
-        if (file->n_async_sonardepth > 0)
+        if (file->n_async_sensordepth > 0)
           atschar = 'S';
         else
           atschar = ' ';

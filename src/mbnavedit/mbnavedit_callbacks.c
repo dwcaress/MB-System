@@ -730,8 +730,8 @@ void do_set_controls() {
 	XmToggleButtonSetState(toggleButton_heading, plot_heading, TRUE);
 	XmToggleButtonSetState(toggleButton_org_heading, plot_heading_org, TRUE);
 	XmToggleButtonSetState(toggleButton_show_cmg, plot_cmg, TRUE);
-	XmToggleButtonSetState(toggleButton_sonardepth, plot_draft, TRUE);
-	XmToggleButtonSetState(toggleButton_org_sonardepth, plot_draft_org, TRUE);
+	XmToggleButtonSetState(toggleButton_sensordepth, plot_draft, TRUE);
+	XmToggleButtonSetState(toggleButton_org_sensordepth, plot_draft_org, TRUE);
 
 	/* hide or display items according to toggle states */
 	if (plot_tint)
@@ -803,10 +803,10 @@ void do_set_controls() {
 		XtUnmanageChild(pushButton_heading_cmg);
 	}
 	if (plot_draft) {
-		XtManageChild(toggleButton_org_sonardepth);
+		XtManageChild(toggleButton_org_sensordepth);
 	}
 	else {
-		XtUnmanageChild(toggleButton_org_sonardepth);
+		XtUnmanageChild(toggleButton_org_sensordepth);
 	}
 
 	/* get and set size of canvas */
@@ -1614,16 +1614,16 @@ void do_toggle_speed(Widget w, XtPointer client_data, XtPointer call_data) {
 
 /*--------------------------------------------------------------------*/
 
-void do_toggle_sonardepth(Widget w, XtPointer client_data, XtPointer call_data) {
+void do_toggle_sensordepth(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	plot_draft = XmToggleButtonGetState(toggleButton_sonardepth);
+	plot_draft = XmToggleButtonGetState(toggleButton_sensordepth);
 	if (plot_draft) {
-		XtManageChild(toggleButton_org_sonardepth);
+		XtManageChild(toggleButton_org_sensordepth);
 	}
 	else {
-		XtUnmanageChild(toggleButton_org_sonardepth);
+		XtUnmanageChild(toggleButton_org_sensordepth);
 		mbnavedit_action_deselect_all(PLOT_DRAFT);
 	}
 
@@ -1950,11 +1950,11 @@ void do_toggle_org_heading(Widget w, XtPointer client_data, XtPointer call_data)
 }
 /*--------------------------------------------------------------------*/
 
-void do_toggle_org_sonardepth(Widget w, XtPointer client_data, XtPointer call_data) {
+void do_toggle_org_sensordepth(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	plot_draft_org = XmToggleButtonGetState(toggleButton_org_sonardepth);
+	plot_draft_org = XmToggleButtonGetState(toggleButton_org_sensordepth);
 
 	/* replot */
 	mbnavedit_plot_all();

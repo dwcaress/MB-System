@@ -743,7 +743,7 @@ int main(int argc, char **argv) {
   double heading;
   double distance;
   double altitude;
-  double sonardepth;
+  double sensordepth;
   char *beamflag = NULL;
   double *bath = NULL;
   double *bathacrosstrack = NULL;
@@ -1191,7 +1191,7 @@ int main(int argc, char **argv) {
             &heading,
             &distance,
             &altitude,
-            &sonardepth,
+            &sensordepth,
             &beams_bath,
             &beams_amp,
             &pixels_ss,

@@ -1166,7 +1166,7 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 			rx_p = store->par_s3p;
 		}
 
-		/* insert sonardepth if requested */
+		/* insert sensordepth if requested */
 		// if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY) {
 			// ping->png_xducer_depth = sensordepth;
 		// } else {

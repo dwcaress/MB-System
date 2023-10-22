@@ -453,7 +453,7 @@ int mbsys_jstar_preprocess(int verbose,     /* in: verbosity level set on comman
   			sbp->heading = (short)(100.0 * heading);
   		}
 
-  		/* set sonardepth */
+  		/* set sensordepth */
   		if (pars->n_sensordepth > 1) {
   			sbp->startDepth = sensordepth / sbp->sampleInterval / 0.00000075;
   			sbp->sonarDepth = 1000 * sensordepth;
@@ -501,7 +501,7 @@ int mbsys_jstar_preprocess(int verbose,     /* in: verbosity level set on comman
   			ssstbd->heading = (short)(100.0 * heading);
   		}
 
-  		/* set sonardepth */
+  		/* set sensordepth */
   		if (pars->n_sensordepth > 1) {
   			ssport->startDepth = sensordepth / ssport->sampleInterval / 0.00000075;
   			ssstbd->startDepth = sensordepth / ssstbd->sampleInterval / 0.00000075;
@@ -2142,18 +2142,18 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 
 		/* get needed values */
 		/* get transducer_depth */
-		double dsonardepth;
+		double dsensordepth;
 		if (sbp->sonarDepth > 0)
-			dsonardepth = 0.001 * sbp->sonarDepth;
+			dsensordepth = 0.001 * sbp->sonarDepth;
 		else
-			dsonardepth = sbp->startDepth * sbp->sampleInterval * 0.00000075;
+			dsensordepth = sbp->startDepth * sbp->sampleInterval * 0.00000075;
 		const double dsonaraltitude = 0.001 * sbp->sonarAltitude;
 		double dwaterdepth;
 		if (sbp->sonarDepth > 0)
 			dwaterdepth = 0.001 * sbp->sonarDepth + dsonaraltitude;
 		else
-			dwaterdepth = dsonardepth + dsonaraltitude;
-		const int sonardepth = (int)(100 * dsonardepth);
+			dwaterdepth = dsensordepth + dsonaraltitude;
+		const int sensordepth = (int)(100 * dsensordepth);
 		const int waterdepth = (int)(100 * dwaterdepth);
 		const double watersoundspeed = 1500;
 		const float fwatertime = 2.0 * dwaterdepth / ((double)watersoundspeed);
@@ -2175,9 +2175,9 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 		mb_segytraceheader_ptr->cdp_fold = 0;
 		mb_segytraceheader_ptr->use = sbp->dataFormat;
 		mb_segytraceheader_ptr->range = 0;
-		mb_segytraceheader_ptr->grp_elev = -sonardepth;
-		mb_segytraceheader_ptr->src_elev = -sonardepth;
-		mb_segytraceheader_ptr->src_depth = sonardepth;
+		mb_segytraceheader_ptr->grp_elev = -sensordepth;
+		mb_segytraceheader_ptr->src_elev = -sensordepth;
+		mb_segytraceheader_ptr->src_depth = sensordepth;
 		mb_segytraceheader_ptr->grp_datum = 0;
 		mb_segytraceheader_ptr->src_datum = 0;
 		mb_segytraceheader_ptr->src_wbd = waterdepth;
@@ -2561,15 +2561,15 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int ki
 		else
 			sbp->pingNum = 0;
 		sbp->dataFormat = mb_segytraceheader_ptr->use;
-		int sonardepth;
+		int sensordepth;
 		if (mb_segytraceheader_ptr->grp_elev != 0)
-			sonardepth = -mb_segytraceheader_ptr->grp_elev;
+			sensordepth = -mb_segytraceheader_ptr->grp_elev;
 		else if (mb_segytraceheader_ptr->src_elev != 0)
-			sonardepth = -mb_segytraceheader_ptr->src_elev;
+			sensordepth = -mb_segytraceheader_ptr->src_elev;
 		else if (mb_segytraceheader_ptr->src_depth != 0)
-			sonardepth = mb_segytraceheader_ptr->src_depth;
+			sensordepth = mb_segytraceheader_ptr->src_depth;
 		else
-			sonardepth = 0;
+			sensordepth = 0;
 		// float factor;
 		// if (mb_segytraceheader_ptr->elev_scalar < 0)
 		//	factor = 1.0 / ((float)(-mb_segytraceheader_ptr->elev_scalar));
@@ -2604,8 +2604,8 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int ki
 		sbp->millisecondsToday = 0.001 * time_i[6] + 1000 * (time_i[5] + 60.0 * (time_i[4] + 60.0 * time_i[3]));
 
 		sbp->sonarDepth = 1000 * waterdepth;
-		sbp->sonarDepth = 1000 * sonardepth;
-		sbp->sonarAltitude = 1000 * (waterdepth - sonardepth);
+		sbp->sonarDepth = 1000 * sensordepth;
+		sbp->sonarAltitude = 1000 * (waterdepth - sensordepth);
 		if (sbp->sonarAltitude < 0)
 			sbp->sonarAltitude = 0;
 

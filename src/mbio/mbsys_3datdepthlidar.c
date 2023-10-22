@@ -1868,7 +1868,7 @@ int mbsys_3datdepthlidar_print_store(int verbose,     /* in: verbosity level set
 		fprintf(stderr, "%s     time_d:                        %f\n", first, store->time_d);
 		fprintf(stderr, "%s     navlon:                        %f\n", first, store->navlon);
 		fprintf(stderr, "%s     navlat:                        %f\n", first, store->navlat);
-		fprintf(stderr, "%s     sonardepth:                    %f\n", first, store->sensordepth);
+		fprintf(stderr, "%s     sensordepth:                    %f\n", first, store->sensordepth);
 		fprintf(stderr, "%s     heading:                       %f\n", first, store->heading);
 		fprintf(stderr, "%s     roll:                          %f\n", first, store->roll);
 		fprintf(stderr, "%s     pitch:                         %f\n", first, store->pitch);
@@ -1901,7 +1901,7 @@ int mbsys_3datdepthlidar_print_store(int verbose,     /* in: verbosity level set
 			fprintf(stderr, "%s     depth:                         %f\n", first, pulse->depth);
 			fprintf(stderr, "%s     navlon:                        %f\n", first, pulse->navlon);
 			fprintf(stderr, "%s     navlat:                        %f\n", first, pulse->navlat);
-			fprintf(stderr, "%s     sonardepth:                    %f\n", first, pulse->sensordepth);
+			fprintf(stderr, "%s     sensordepth:                    %f\n", first, pulse->sensordepth);
 			fprintf(stderr, "%s     heading:                       %f\n", first, pulse->heading);
 			fprintf(stderr, "%s     roll:                          %f\n", first, pulse->roll);
 			fprintf(stderr, "%s     pitch:                         %f\n", first, pulse->pitch);

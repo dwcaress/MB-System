@@ -24,7 +24,7 @@ typedef struct _MBpeditData {
 	Widget mbpingedit_toggleButton_show_speed;
 	Widget mbpingedit_toggleButton_show_depth;
 	Widget mbpingedit_toggleButton_show_altitude;
-	Widget mbpingedit_toggleButton_show_sonardepth;
+	Widget mbpingedit_toggleButton_show_sensordepth;
 	Widget mbpingedit_toggleButton_show_roll;
 	Widget mbpingedit_toggleButton_show_pitch;
 	Widget mbpingedit_toggleButton_show_heave;

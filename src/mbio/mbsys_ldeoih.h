@@ -53,12 +53,12 @@ struct mbsys_ldeoih_struct {
 	double latitude;  /* latitude (degrees 0-360) */
 
 	/* sonar depth and altitude */
-	double sonardepth; /* meters (sonar depth for bathymetry calculation,
+	double sensordepth; /* meters (sonar depth for bathymetry calculation,
 	                      already corrected for heave if needed,
-	                          sonardepth = transducer_depth
-	                          bath = altitude + sonardepth
-	                          sonardepth = draft - heave
-	                          draft = sonardepth + heave */
+	                          sensordepth = transducer_depth
+	                          bath = altitude + sensordepth
+	                          sensordepth = draft - heave
+	                          draft = sensordepth + heave */
 	double altitude;   /* meters */
 
 	/* heading and speed */

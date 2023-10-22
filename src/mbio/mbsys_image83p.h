@@ -60,7 +60,7 @@
  *      either as a static draft on a surface vessel or a pressure depth on a
  *      submerged AUV or ROV platform. Heave is positive up and sonar depth is
  *      positive down. In some cases on submerged platforms the pressure depth is
- *      recorded into the heave field. In that case the --kluge-sonardepth-from-heave
+ *      recorded into the heave field. In that case the --kluge-sensordepth-from-heave
  *      argument to mbpreprocess will cause the heave value to be moved to the
  *      sonar_depth field in the output MBF_IMAGEMBA format files.
  *   9. Comment records are supported for both formats - this is specific to MB-System.

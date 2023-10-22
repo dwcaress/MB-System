@@ -574,6 +574,20 @@ void do_update_status() {
 
   /* set status label */
   mb_path refgrid_name;
+  char *use_mode_primary = "Primary";
+  char *use_mode_secondary = "Secondary";
+  char *use_mode_tertiary = "Tertiary";
+  char *use_mode = NULL;
+  if (project.use_mode == MBNA_USE_MODE_PRIMARY)
+    use_mode = use_mode_primary;
+  else if (project.use_mode == MBNA_USE_MODE_SECONDARY)
+    use_mode = use_mode_secondary; 
+  else if (project.use_mode == MBNA_USE_MODE_TERTIARY)
+    use_mode = use_mode_tertiary; 
+  else {
+    project.use_mode = MBNA_USE_MODE_PRIMARY;
+    use_mode = use_mode_primary;
+  }
   if (project.refgrid_select >= 0 && project.refgrid_select < project.num_refgrids)
     strcpy(refgrid_name, project.refgrid_names[project.refgrid_select]);
   else
@@ -581,15 +595,16 @@ void do_update_status() {
   mb_command string = "";
   snprintf(string, sizeof(string), 
     ":::t\"Project: %s\""
-    ":t\"Number of Files:                             %4d      Selected Survey:  %4d\""
+    ":t\"Navigation Adjustment Use Mode:       %s\""
+    ":t\"Number of Files:                               %4d      Selected Survey:  %4d\""
     ":t\"Number of Crossings Found:             %4d     Selected File:    %4d\""
-    ":t\"Number of Crossings Analyzed:         %4d     Selected Section: %4d\""
+    ":t\"Number of Crossings Analyzed:        %4d     Selected Section: %4d\""
     ":t\"Number of True Crossings:               %4d     Selected Crossing:%4d\""
     ":t\"Number of True Crossings Analyzed: %4d     Selected Tie:     %4d\""
     ":t\"Number of Ties Set:                        %4d\""
     ":t\"Number of Global Ties Set:              %4d\""
     ":t\"Reference Grid: %s\"",
-    project.name, project.num_files, mbna_survey_select, project.num_crossings, mbna_file_select,
+    project.name, use_mode, project.num_files, mbna_survey_select, project.num_crossings, mbna_file_select,
     project.num_crossings_analyzed, mbna_section_select, project.num_truecrossings, mbna_crossing_select,
     project.num_truecrossings_analyzed, mbna_tie_select, project.num_ties, project.num_globalties, refgrid_name);
 
@@ -598,13 +613,13 @@ void do_update_status() {
   else if (project.inversion_status == MBNA_INVERSION_OLD)
     strcat(string, ":t\"Inversion Performed:                     Out of Date\"");
   else
-    strcat(string, ":t\"Inversion Performed:                     No\"");
+    strcat(string, ":t\"Inversion Performed:                         No\"");
   if (project.grid_status == MBNA_GRID_CURRENT)
-    strcat(string, ":t\"Topography Grid Status:                  Current\"");
+    strcat(string, ":t\"Topography Grid Status:                      Current\"");
   else if (project.grid_status == MBNA_GRID_OLD)
-    strcat(string, ":t\"Topography Grid Status:                  Out of Date\"");
+    strcat(string, ":t\"Topography Grid Status:                    Out of Date\"");
   else
-    strcat(string, ":t\"Topography Grid Status:                  Not made yet\"");
+    strcat(string, ":t\"Topography Grid Status:                    Not made yet\"");
   set_label_multiline_string(label_status, string);
   if (mbna_verbose > 0) {
     snprintf(string, sizeof(string),
@@ -2308,68 +2323,6 @@ void do_update_status() {
       XtVaSetValues(pushButton_showmodelplot, XmNsensitive, True, NULL);
     else
       XtVaSetValues(pushButton_showmodelplot, XmNsensitive, False, NULL);
-  }
-
-  /* set values of decimation slider */
-  XtVaSetValues(scale_controls_decimation, XmNvalue, project.decimation, NULL);
-
-  /* set values of section length slider */
-  int ivalue = (int)(100 * project.section_length);
-  int imax = (int)(100 * 50.0);
-  XtVaSetValues(scale_controls_sectionlength, XmNminimum, 1, XmNmaximum, imax, XmNdecimalPoints, 2, XmNvalue, ivalue, NULL);
-
-  /* set values of section soundings slider */
-  XtVaGetValues(scale_controls_sectionsoundings, XmNvalue, &ivalue, XmNmaximum, &imax, NULL);
-  ivalue = project.section_soundings;
-  if (ivalue >= imax) {
-    if (ivalue >= 2 * imax)
-      imax = 2 * ivalue;
-    else
-      imax = 2 * imax;
-  } else if (ivalue < imax/2) {
-    imax = MIN(2 * ivalue, 100000);
-  }
-  XtVaSetValues(scale_controls_sectionsoundings, XmNminimum, 1, XmNmaximum, imax, XmNvalue, ivalue, NULL);
-
-  /* set values of contour interval slider */
-  ivalue = (int)(100 * project.cont_int);
-  if (project.cont_int >= 10.0)
-    imax = (int)(100 * 400.0);
-  else
-    imax = (int)(100 * 50.0);
-  XtVaSetValues(scale_controls_contourinterval, XmNminimum, 1, XmNmaximum, imax, XmNdecimalPoints, 2, XmNvalue, ivalue, NULL);
-
-  /* set values of color interval slider */
-  ivalue = (int)(100 * project.col_int);
-  if (project.col_int >= 10.0)
-    imax = (int)(100 * 400.0);
-  else
-    imax = (int)(100 * 50.0);
-  XtVaSetValues(scale_controls_colorinterval, XmNminimum, 1, XmNmaximum, imax, XmNdecimalPoints, 2, XmNvalue, ivalue, NULL);
-
-  /* set values of tick interval slider */
-  ivalue = (int)(100 * project.tick_int);
-  if (project.tick_int >= 10.0)
-    imax = (int)(100 * 400.0);
-  else
-    imax = (int)(100 * 50.0);
-  XtVaSetValues(scale_controls_tickinterval, XmNminimum, 1, XmNmaximum, imax, XmNdecimalPoints, 2, XmNvalue, ivalue, NULL);
-
-  /* set values of inversion smoothing weight slider */
-  ivalue = (int)(100 * project.smoothing);
-  imax = (int)(100 * 10.0);
-  XtVaSetValues(scale_controls_smoothing, XmNminimum, 1, XmNmaximum, imax, XmNdecimalPoints, 2, XmNvalue, ivalue, NULL);
-
-  /* set values of z offset width slider */
-  ivalue = (int)(10 * project.zoffsetwidth);
-  XtVaSetValues(scale_controls_zoffset, XmNvalue, ivalue, NULL);
-
-  /* set misfit offset center toggles */
-  if (mbna_misfit_center == MBNA_MISFIT_ZEROCENTER) {
-    XmToggleButtonSetState(toggleButton_misfitcenter_zero, TRUE, TRUE);
-  }
-  else {
-    XmToggleButtonSetState(toggleButton_misfitcenter_auto, TRUE, TRUE);
   }
 }
 /*--------------------------------------------------------------------*/
@@ -4481,6 +4434,92 @@ void do_biases_roll(Widget w, XtPointer client_data, XtPointer call_data) {
 
 /*--------------------------------------------------------------------*/
 
+void do_controls_show(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w; // Unused parameter
+  (void)client_data; // Unused parameter
+  (void)call_data; // Unused parameter
+
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+
+  /* set values of decimation slider */
+  XtVaSetValues(scale_controls_decimation, XmNvalue, project.decimation, NULL);
+
+  /* set values of section length slider */
+  int ivalue = (int)(100 * project.section_length);
+  int imax = (int)(100 * 50.0);
+  XtVaSetValues(scale_controls_sectionlength, XmNminimum, 1, XmNmaximum, imax, XmNdecimalPoints, 2, XmNvalue, ivalue, NULL);
+
+  /* set values of section soundings slider */
+  XtVaGetValues(scale_controls_sectionsoundings, XmNvalue, &ivalue, XmNmaximum, &imax, NULL);
+  ivalue = project.section_soundings;
+  if (ivalue >= imax) {
+    if (ivalue >= 2 * imax)
+      imax = 2 * ivalue;
+    else
+      imax = 2 * imax;
+  } else if (ivalue < imax/2) {
+    imax = MIN(2 * ivalue, 100000);
+  }
+  XtVaSetValues(scale_controls_sectionsoundings, XmNminimum, 1, XmNmaximum, imax, XmNvalue, ivalue, NULL);
+
+  /* set values of contour interval slider */
+  ivalue = (int)(100 * project.cont_int);
+  if (project.cont_int >= 10.0)
+    imax = (int)(100 * 400.0);
+  else
+    imax = (int)(100 * 50.0);
+  XtVaSetValues(scale_controls_contourinterval, XmNminimum, 1, XmNmaximum, imax, XmNdecimalPoints, 2, XmNvalue, ivalue, NULL);
+
+  /* set values of color interval slider */
+  ivalue = (int)(100 * project.col_int);
+  if (project.col_int >= 10.0)
+    imax = (int)(100 * 400.0);
+  else
+    imax = (int)(100 * 50.0);
+  XtVaSetValues(scale_controls_colorinterval, XmNminimum, 1, XmNmaximum, imax, XmNdecimalPoints, 2, XmNvalue, ivalue, NULL);
+
+  /* set values of tick interval slider */
+  ivalue = (int)(100 * project.tick_int);
+  if (project.tick_int >= 10.0)
+    imax = (int)(100 * 400.0);
+  else
+    imax = (int)(100 * 50.0);
+  XtVaSetValues(scale_controls_tickinterval, XmNminimum, 1, XmNmaximum, imax, XmNdecimalPoints, 2, XmNvalue, ivalue, NULL);
+
+  /* set values of inversion smoothing weight slider */
+  ivalue = (int)(100 * project.smoothing);
+  imax = (int)(100 * 10.0);
+  XtVaSetValues(scale_controls_smoothing, XmNminimum, 1, XmNmaximum, imax, XmNdecimalPoints, 2, XmNvalue, ivalue, NULL);
+
+  /* set values of z offset width slider */
+  ivalue = (int)(10 * project.zoffsetwidth);
+  XtVaSetValues(scale_controls_zoffset, XmNvalue, ivalue, NULL);
+
+  /* set value of use mode radioBox toggles */
+  if (project.use_mode <= MBNA_USE_MODE_PRIMARY) {
+    XmToggleButtonSetState(toggleButton_controls_use_primary, TRUE, TRUE);
+    project.use_mode = MBNA_USE_MODE_PRIMARY;
+  }
+  else if (project.use_mode == MBNA_USE_MODE_SECONDARY) {
+    XmToggleButtonSetState(toggleButton_controls_use_secondary, TRUE, TRUE);
+  }
+  else {
+    XmToggleButtonSetState(toggleButton_controls_use_tertiary, TRUE, TRUE);
+    project.use_mode = MBNA_USE_MODE_TERTIARY;
+  }
+
+  /* set misfit offset center toggles */
+  if (mbna_misfit_center == MBNA_MISFIT_ZEROCENTER) {
+    XmToggleButtonSetState(toggleButton_misfitcenter_zero, TRUE, TRUE);
+  }
+  else {
+    XmToggleButtonSetState(toggleButton_misfitcenter_auto, TRUE, TRUE);
+  }
+
+}
+
+/*--------------------------------------------------------------------*/
+
 void do_controls_apply(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)w; // Unused parameter
   (void)client_data; // Unused parameter
@@ -4524,6 +4563,16 @@ void do_controls_apply(Widget w, XtPointer client_data, XtPointer call_data) {
   XtVaGetValues(scale_controls_zoffset, XmNvalue, &ivalue, NULL);
   project.zoffsetwidth = ((double)ivalue) / 10.0;
 
+  /* get value of use mode toggles */
+  if (XmToggleButtonGetState(toggleButton_controls_use_primary))
+    project.use_mode = MBNA_USE_MODE_PRIMARY;
+  else if (XmToggleButtonGetState(toggleButton_controls_use_secondary))
+    project.use_mode = MBNA_USE_MODE_SECONDARY;
+  else if (XmToggleButtonGetState(toggleButton_controls_use_tertiary))
+    project.use_mode = MBNA_USE_MODE_TERTIARY;
+  else
+    project.use_mode = MBNA_USE_MODE_PRIMARY;
+
   if (mbna_file_id_1 >= 0 && mbna_section_1 >= 0)
     project.files[mbna_file_id_1].sections[mbna_section_1].contoursuptodate = false;
   if (mbna_file_id_2 >= 0 && mbna_section_2 >= 0)
@@ -4534,6 +4583,7 @@ void do_controls_apply(Widget w, XtPointer client_data, XtPointer call_data) {
   mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
   mbnavadjust_get_misfit();
   mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
+  do_update_status();
   do_naverr_update();
 //  do_update_status();
 //  if (project.modelplot) {

@@ -642,9 +642,9 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 		                    XmRFontList, 0, &argok));
 		if (argok)
 			ac++;
-		class_in->mbpingedit_toggleButton_show_sonardepth = XmCreateToggleButton(
-		    class_in->mbpingedit_pulldownMenu_view, (char *)"mbpingedit_toggleButton_show_sonardepth", args, ac);
-		XtManageChild(class_in->mbpingedit_toggleButton_show_sonardepth);
+		class_in->mbpingedit_toggleButton_show_sensordepth = XmCreateToggleButton(
+		    class_in->mbpingedit_pulldownMenu_view, (char *)"mbpingedit_toggleButton_show_sensordepth", args, ac);
+		XtManageChild(class_in->mbpingedit_toggleButton_show_sensordepth);
 
 		/**
 		 * Free any memory allocated for resources.
@@ -652,7 +652,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 		XmStringFree((XmString)tmp0);
 	}
 
-	XtAddCallback(class_in->mbpingedit_toggleButton_show_sonardepth, XmNvalueChangedCallback, do_mbpingedit_show_time,
+	XtAddCallback(class_in->mbpingedit_toggleButton_show_sensordepth, XmNvalueChangedCallback, do_mbpingedit_show_time,
 	              (XtPointer)0);
 
 	ac = 0;

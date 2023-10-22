@@ -350,7 +350,7 @@ int main(int argc, char **argv) {
 	int time_i[7], time_j[5];
 	double time_d, time_d_old;
 	double navlon, navlat;
-	double factor, sonardepth, waterdepth;
+	double factor, sensordepth, waterdepth;
 	double delay, interval;
 	double seconds;
 
@@ -383,13 +383,13 @@ int main(int argc, char **argv) {
 			else
 				factor = (float)traceheader.elev_scalar;
 			if (traceheader.grp_elev != 0)
-				sonardepth = -factor * traceheader.grp_elev;
+				sensordepth = -factor * traceheader.grp_elev;
 			else if (traceheader.src_elev != 0)
-				sonardepth = -factor * traceheader.src_elev;
+				sensordepth = -factor * traceheader.src_elev;
 			else if (traceheader.src_depth != 0)
-				sonardepth = factor * traceheader.src_depth;
+				sensordepth = factor * traceheader.src_depth;
 			else
-				sonardepth = 0.0;
+				sensordepth = 0.0;
 			if (traceheader.src_wbd != 0)
 				waterdepth = -traceheader.grp_elev;
 			else if (traceheader.grp_wbd != 0)
@@ -699,14 +699,14 @@ int main(int argc, char **argv) {
 					else
 						factor = (float)traceheader.elev_scalar;
 					if (traceheader.grp_elev != 0)
-						sonardepth = -factor * traceheader.grp_elev;
+						sensordepth = -factor * traceheader.grp_elev;
 					else if (traceheader.src_elev != 0)
-						sonardepth = -factor * traceheader.src_elev;
+						sensordepth = -factor * traceheader.src_elev;
 					else if (traceheader.src_depth != 0)
-						sonardepth = factor * traceheader.src_depth;
+						sensordepth = factor * traceheader.src_depth;
 					else
-						sonardepth = 0.0;
-					printsimplevalue(verbose, sonardepth, 11, 6, ascii, &invert_next_value, &signflip_next_value, &error);
+						sensordepth = 0.0;
+					printsimplevalue(verbose, sensordepth, 11, 6, ascii, &invert_next_value, &signflip_next_value, &error);
 					break;
 				case 'z': /* water depth (m) */
 					if (traceheader.elev_scalar < 0)

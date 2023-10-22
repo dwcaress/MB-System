@@ -134,7 +134,7 @@ constexpr char usage_message[] =
     "\t--kluge-fix-wissl-timestamps\n"
     "\t--kluge-auv-sentry-sensordepth\n"
     "\t--kluge-ignore-snippets\n"
-    "\t--kluge-sonardepth-from-heave\n";
+    "\t--kluge-sensordepth-from-heave\n";
 
 /*--------------------------------------------------------------------*/
 
@@ -166,7 +166,7 @@ int main(int argc, char **argv) {
   bool kluge_fix_wissl_timestamps = false;
   bool kluge_auv_sentry_sensordepth = false;
   bool kluge_ignore_snippets = false;
-  bool kluge_sonardepth_from_heave = false;
+  bool kluge_sensordepth_from_heave = false;
 
   mb_path sensordepth_file;
   memset(sensordepth_file, 0, sizeof(mb_path));
@@ -298,7 +298,7 @@ int main(int argc, char **argv) {
                                       {"kluge-fix-wissl-timestamps", no_argument, nullptr, 0},
                                       {"kluge-auv-sentry-sensordepth", no_argument, nullptr, 0},
                                       {"kluge-ignore-snippets", no_argument, nullptr, 0},
-                                      {"kluge-sonardepth-from-heave", no_argument, nullptr, 0},
+                                      {"kluge-sensordepth-from-heave", no_argument, nullptr, 0},
                                       {nullptr, 0, nullptr, 0}};
 
     int option_index;
@@ -672,10 +672,10 @@ int main(int argc, char **argv) {
           preprocess_pars.n_kluge++;
           kluge_ignore_snippets = true;
         }
-        else if (strcmp("kluge-sonardepth-from-heave", options[option_index].name) == 0) {
-          preprocess_pars.kluge_id[preprocess_pars.n_kluge] = MB_PR_KLUGE_SONARDEPTHFROMHEAVE;
+        else if (strcmp("kluge-sensordepth-from-heave", options[option_index].name) == 0) {
+          preprocess_pars.kluge_id[preprocess_pars.n_kluge] = MB_PR_KLUGE_SENSORDEPTHFROMHEAVE;
           preprocess_pars.n_kluge++;
-          kluge_sonardepth_from_heave = true;
+          kluge_sensordepth_from_heave = true;
         }
 
         break;
@@ -855,7 +855,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "dbg2       kluge_fix_wissl_timestamps:   %d\n", kluge_fix_wissl_timestamps);
     fprintf(stderr, "dbg2       kluge_auv_sentry_sensordepth: %d\n", kluge_auv_sentry_sensordepth);
     fprintf(stderr, "dbg2       kluge_ignore_snippets:        %d\n", kluge_ignore_snippets);
-    fprintf(stderr, "dbg2       kluge_sonardepth_from_heave   %d\n", kluge_sonardepth_from_heave);
+    fprintf(stderr, "dbg2       kluge_sensordepth_from_heave   %d\n", kluge_sensordepth_from_heave);
     fprintf(stderr, "dbg2  Additional output:\n");
     fprintf(stderr, "dbg2       output_sensor_fnv:            %d\n", output_sensor_fnv);
     fprintf(stderr, "dbg2  Skip existing output files:\n");
@@ -965,7 +965,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "     kluge_fix_wissl_timestamps:   %d\n", kluge_fix_wissl_timestamps);
     fprintf(stderr, "     kluge_auv_sentry_sensordepth: %d\n", kluge_auv_sentry_sensordepth);
     fprintf(stderr, "     kluge_ignore_snippets:        %d\n", kluge_ignore_snippets);
-    fprintf(stderr, "     kluge_sonardepth_from_heave:  %d\n", kluge_sonardepth_from_heave);
+    fprintf(stderr, "     kluge_sensordepth_from_heave:  %d\n", kluge_sensordepth_from_heave);
     fprintf(stderr, "Additional output:\n");
     fprintf(stderr, "     output_sensor_fnv:            %d\n", output_sensor_fnv);
     fprintf(stderr, "Skip existing output files:\n");
@@ -1379,11 +1379,11 @@ int main(int argc, char **argv) {
       }
       else if (iformat == MBF_KEMKMALL) {
         sensordepth_mode = MBPREPROCESS_MERGE_ASYNC;
-        sensordepth_async = MB_DATA_SONARDEPTH;
+        sensordepth_async = MB_DATA_SENSORDEPTH;
       }
       else if (iformat == MBF_RESON7KR) {
         sensordepth_mode = MBPREPROCESS_MERGE_ASYNC;
-        sensordepth_async = MB_DATA_SONARDEPTH;
+        sensordepth_async = MB_DATA_SENSORDEPTH;
       }
       else if (iformat == MBF_RESON7K3) {
         sensordepth_mode = MBPREPROCESS_MERGE_ASYNC;

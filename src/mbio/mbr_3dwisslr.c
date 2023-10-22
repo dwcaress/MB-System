@@ -543,9 +543,9 @@ int mbr_3dwisslr_index_data
     read_len = (size_t)sizeof(short);
     buffer = mb_io_ptr->raw_data;
     bool valid_id = false;
-    int skip = 0;
 
 #ifdef MBF_3DWISSLR_DEBUG
+    int skip = 0;
     fprintf(stderr,
       "%s:%s():%d About to index next record, location in file: %ld\n",
       __FILE__,
@@ -581,8 +581,8 @@ int mbr_3dwisslr_index_data
             valid_id,
             status,
             *error);
-#endif
           skip++;
+#endif
           buffer[0] = buffer[1];
           read_len = (size_t)sizeof(char);
           status =

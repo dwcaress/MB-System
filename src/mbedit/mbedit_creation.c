@@ -768,13 +768,13 @@ Widget Createwindow_mbedit(Widget parent) {
 		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
 		if (argok)
 			ac++;
-		toggleButton_show_sonardepth = XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_show_sonardepth", args, ac);
-		XtManageChild(toggleButton_show_sonardepth);
+		toggleButton_show_sensordepth = XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_show_sensordepth", args, ac);
+		XtManageChild(toggleButton_show_sensordepth);
 
 		XmStringFree(tmp0);
 	}
 
-	XtAddCallback(toggleButton_show_sonardepth, XmNvalueChangedCallback, do_show_time, (XtPointer)0);
+	XtAddCallback(toggleButton_show_sensordepth, XmNvalueChangedCallback, do_show_time, (XtPointer)0);
 
 	ac = 0;
 	{

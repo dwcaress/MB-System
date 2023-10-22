@@ -215,9 +215,9 @@ int mbr_tempform_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			}
 
 			/* read asynchronous sensordepth data */
-			else if (read_kind == MB_DATA_SONARDEPTH) {
+			else if (read_kind == MB_DATA_SENSORDEPTH) {
 
-				store->kind = MB_DATA_SONARDEPTH;
+				store->kind = MB_DATA_SENSORDEPTH;
 			}
 
 			/* read asynchronous attitude data */
@@ -337,7 +337,7 @@ int mbr_tempform_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	}
 
 	/* write asynchronous sensordepth data */
-	else if (store->kind == MB_DATA_SONARDEPTH) {
+	else if (store->kind == MB_DATA_SENSORDEPTH) {
 	}
 
 	/* write asynchronous attitude data */

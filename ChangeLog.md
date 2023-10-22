@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta60    October 22, 2023
 - Version 5.7.9beta59    September 19, 2023
 - Version 5.7.9beta58    August 30, 2023
 - Version 5.7.9beta57    June 27, 2023
@@ -432,6 +433,87 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta60 (October 22)
+
+Mbnavadjust: Added an application or use mode to MBnavadjust projects. Projects can now be primary,
+secondary, or tertiary, with the setting found in the Controls diaglog brought up
+via the Options menu. A primary project behaves as MBnavadjust projects have always
+behaved, so that applying the navigation model writes the adjusted navigation model to \*.na0
+files parallel to the swath files and sets the \*.par parameter files so that mbprocess merges
+the adjusted navigation as it generates the processed swath files. In a secondary project, 
+applying the adjusted navigation model writes \*.na1 files parallel to the processed swath
+files (not the raw swath files), and in a tertiary project the output is in \*.na2 files.
+The purpose for this change is to allow the existence of multiple navigation adjustment models
+for the same swath data, generally because there may be reasons to have different vertical
+adjustments. The secondary and tertiary navigation models are termed alternative navigation
+models. A specific example is for repeated surveys of an active volcano experiencing
+deformation - one may want to adjust surveys so that vertical offsets over time are removed
+to allow a seamless topographic map, and to also adjust surveys so that the vertical changes
+betweeen surveys are revealed by differencing the topographic models.
+The MBnavadjust project file version has been updated to 3.15 with the addition of the 
+USEMODE parameters (primary=0, secondary=1, tertiary=2). MBnavadjust will read all old format
+projects but only write out the current format.
+
+Mbgrid, mbmosaic, and mblist: These programs are now capable of accessing alternative 
+navigation for processed swath data if such files exist and a datalist structure is set
+to enable use of the alternative navigation, as described above. The internal changes
+made to enable this capability are described below.
+
+Datalists and a mechanism for alternative navigation: 
+A new specialized datalist tag has been implemented to allow use of the alternative
+navigations files (\*.na1 and \*.na2) introduced above. Adding this tag to a datalist is the
+only way to access alternative navigation when reading swath files. If the following line appears
+in a datalist:
+    $ALTNAVSUFFIX:.na1
+then following this tag the new datalist parsing function will look for a \*.na1 file parallel
+to each processed file, and return a flag and the path to that file. This functionality works
+recursively, as all things do in datalist structures - a top level use of this tag sets the
+behavior for all datalist parsing down through a recursive datalist file structure. To use this
+functionality, a program must use a new function mb_datalist_read3() in place of mb_datalist_read()
+or mb_datalist_read2():
+
+    int mb_datalist_read(int verbose, void *datalist_ptr, char *path, char *dpath, 
+                            int *format, double *weight, int *error);
+
+    int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path, 
+                            char *ppath, char *dpath, int *format,
+                            double *weight, int *error);
+
+    int mb_datalist_read3(int verbose, void *datalist_ptr, int *pstatus, char *path, 
+                            char *ppath, int *astatus, char *apath, 
+                            char *dpath, int *format, double *weight, int *error);
+
+Here the new astatus is a boolean indicating that an alternative navigation file exists for 
+this swath file, and apath is a string containing the path for that alternative navigation file.
+In order to have the MBIO library calls actually use the alternative navigation in place of the
+navigation embedded in processed swath files, the program must use another new function 
+mb_read_init_altnav() to initialize reading (instead of mb_read_init()) - here the change is 
+to pass in the astatus and apath values obtained from mb_datalist_read3(). 
+
+    int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, 
+                            double bounds[4], int btime_i[7], int etime_i[7],
+                            double speedmin, double timegap, void **mbio_ptr, 
+                            double *btime_d, double *etime_d, int *beams_bath,
+                            int *beams_amp, int *pixels_ss, int *error);
+
+    int mb_read_init_altnav(int verbose, char *file, int format, int pings, 
+                      int lonflip, double bounds[4], int btime_i[7], int etime_i[7],
+                      double speedmin, double timegap, int astatus, char *apath, 
+                      void **mbio_ptr, double *btime_d, double *etime_d, 
+                      int *beams_bath, int *beams_amp, int *pixels_ss, int *error);
+
+If mb_read_init_altnav() is used, astatus is true, and apath is a valid alternative
+navigation file, then calls to mb_get_all(), mb_get(), and mb_read() will return survey
+records with the alternative navigation merged in place of the embedded navigation.
+
+The only programs utilizing this capability are mbgrid, mbmosaic, and mblist - this allows
+generating data products utilizing the alternative navigation.
+
+We have chosen to implement these features using new MBIO functions rather than the simpler
+approach of modifying the original functions. This choice is to avoid breaking the MBIO API for
+existing other programs at this time. We will likely simplify the API at some point in
+the future when the consequences of an API change are understood and manageable.
 
 #### 5.7.9beta59 (September 19)
 
