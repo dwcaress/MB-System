@@ -428,7 +428,7 @@ struct mb_io_ping_struct {
   double heading;
   double distance;
   double altitude;
-  double sonardepth;
+  double sensordepth;
   int nbath;
   int namp;
   int nss;
@@ -637,9 +637,9 @@ struct mb_io_struct {
   /* variables for interpolating/extrapolating sonar depth
       for formats containing sonar depth as asynchronous
       data records separate from ping data */
-  int nsonardepth;
-  double sonardepth_time_d[MB_ASYNCH_SAVE_MAX];
-  double sonardepth_sonardepth[MB_ASYNCH_SAVE_MAX];
+  int nsensordepth;
+  double sensordepth_time_d[MB_ASYNCH_SAVE_MAX];
+  double sensordepth_sensordepth[MB_ASYNCH_SAVE_MAX];
 
   /* variables for interpolating/extrapolating altitude
       for formats containing altitude as asynchronous
@@ -665,6 +665,22 @@ struct mb_io_struct {
   void **regarray_oldptr;
   int *regarray_type;
   size_t *regarray_size;
+
+  /* variables for alternative navigation that will be used to replace the
+        embedded navigation during reading (if specified) */
+  bool alternative_navigation;
+  int nav_alt_num;
+  int nav_alt_num_alloc;
+  double *nav_alt_time_d;
+  double *nav_alt_navlon;
+  double *nav_alt_navlat;
+  double *nav_alt_heading;
+  double *nav_alt_speed;
+  double *nav_alt_sensordepth;
+  double *nav_alt_roll;
+  double *nav_alt_pitch;
+  double *nav_alt_heave;
+  double *nav_alt_zoffset;
 
   /* variables for saving information */
   char save_label[12];
@@ -800,15 +816,17 @@ struct mb_buffer_struct {
 #define MB_DATALIST_RECURSION_MAX 25
 struct mb_datalist_struct {
   bool open;
+  FILE *fp;
   int recursion;
+  mb_path path;
+  int printed;
+  struct mb_datalist_struct *datalist;
   int look_processed;
+  bool look_altnav;
+  mb_path altnav_suffix;
   bool local_weight;
   bool weight_set;
   double weight;
-  FILE *fp;
-  char path[MB_PATH_MAXLINE];
-  int printed;
-  struct mb_datalist_struct *datalist;
 };
 
 /* MBIO imagelist control structure */

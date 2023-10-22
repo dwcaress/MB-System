@@ -504,9 +504,9 @@ int main(int argc, char **argv) {
 			double heading;
 			double distance;
 			double altitude;
-			double sonardepth;
+			double sensordepth;
 			status = mb_get_all(verbose, mbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
-			                    &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
+			                    &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
 			                    bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
 
 			/* time gaps are not a problem here */
@@ -576,7 +576,7 @@ int main(int argc, char **argv) {
 					roll = aroll[inav];
 					pitch = apitch[inav];
 					heave = aheave[inav];
-					sonardepth = draft - heave;
+					sensordepth = draft - heave;
 
 					/* calculate course made good and distance */
 					mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
@@ -667,7 +667,7 @@ int main(int argc, char **argv) {
 								signflip_next_value = true;
 								break;
 							case 'c': /* Sonar transducer depth (m) */
-								printsimplevalue(verbose, sonardepth, 0, 4, ascii, &invert_next_value, &signflip_next_value,
+								printsimplevalue(verbose, sensordepth, 0, 4, ascii, &invert_next_value, &signflip_next_value,
 								                 &error);
 								break;
 							case 'H': /* heading */

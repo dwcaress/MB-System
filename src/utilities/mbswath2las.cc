@@ -228,7 +228,7 @@ int main(int argc, char **argv) {
   double heading;
   double distance;
   double altitude;
-  double sonardepth;
+  double sensordepth;
   double draft;
   double roll;
   double pitch;
@@ -297,7 +297,7 @@ int main(int argc, char **argv) {
 
       /* read next data record */
       status = mb_get_all(verbose, mbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
-                          &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
+                          &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
                           bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
 
       /* time gaps are not a problem here */

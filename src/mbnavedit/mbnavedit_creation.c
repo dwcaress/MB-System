@@ -86,8 +86,8 @@ void do_start(Widget, XtPointer, XtPointer);
 void do_interpolationrepeats(Widget, XtPointer, XtPointer);
 void do_unflag(Widget, XtPointer, XtPointer);
 void do_flag(Widget, XtPointer, XtPointer);
-void do_toggle_org_sonardepth(Widget, XtPointer, XtPointer);
-void do_toggle_sonardepth(Widget, XtPointer, XtPointer);
+void do_toggle_org_sensordepth(Widget, XtPointer, XtPointer);
+void do_toggle_sensordepth(Widget, XtPointer, XtPointer);
 void do_button_use_dr(Widget, XtPointer, XtPointer);
 void do_toggle_dr_lat(Widget, XtPointer, XtPointer);
 void do_toggle_dr_lon(Widget, XtPointer, XtPointer);
@@ -655,13 +655,13 @@ Widget CreatemainWindow(Widget parent) {
 		ac++;
 		XtSetArg(args[ac], XmNheight, 20);
 		ac++;
-		toggleButton_org_sonardepth = XmCreateToggleButton(bulletinBoard, (char *)"toggleButton_org_sonardepth", args, ac);
-		XtManageChild(toggleButton_org_sonardepth);
+		toggleButton_org_sensordepth = XmCreateToggleButton(bulletinBoard, (char *)"toggleButton_org_sensordepth", args, ac);
+		XtManageChild(toggleButton_org_sensordepth);
 
 		XmStringFree((XmString)tmp0);
 	}
 
-	XtAddCallback(toggleButton_org_sonardepth, XmNvalueChangedCallback, do_toggle_org_sonardepth, (XtPointer)0);
+	XtAddCallback(toggleButton_org_sensordepth, XmNvalueChangedCallback, do_toggle_org_sensordepth, (XtPointer)0);
 
 	ac = 0;
 	{
@@ -687,13 +687,13 @@ Widget CreatemainWindow(Widget parent) {
 		ac++;
 		XtSetArg(args[ac], XmNheight, 20);
 		ac++;
-		toggleButton_sonardepth = XmCreateToggleButton(bulletinBoard, (char *)"toggleButton_sonardepth", args, ac);
-		XtManageChild(toggleButton_sonardepth);
+		toggleButton_sensordepth = XmCreateToggleButton(bulletinBoard, (char *)"toggleButton_sensordepth", args, ac);
+		XtManageChild(toggleButton_sensordepth);
 
 		XmStringFree((XmString)tmp0);
 	}
 
-	XtAddCallback(toggleButton_sonardepth, XmNvalueChangedCallback, do_toggle_sonardepth, (XtPointer)0);
+	XtAddCallback(toggleButton_sensordepth, XmNvalueChangedCallback, do_toggle_sensordepth, (XtPointer)0);
 
 	ac = 0;
 	{

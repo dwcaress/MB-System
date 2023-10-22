@@ -484,7 +484,7 @@ int main(int argc, char **argv) {
 	double heading;
 	double distance;
 	double altitude;
-	double sonardepth;
+	double sensordepth;
 	char *beamflag = nullptr;
 	double *bath = nullptr;
 	double *bathacrosstrack = nullptr;
@@ -1051,7 +1051,7 @@ int main(int argc, char **argv) {
 
 			/* read a ping of data */
 			status = mb_get(verbose, mbio_ptr, &kind, &pings, time_i, &time_d, &navlon, &navlat, &speed, &heading, &distance,
-			                &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp, bathacrosstrack,
+			                &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp, bathacrosstrack,
 			                bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
 
 			/* Apply ESF Edits if available */
@@ -1170,7 +1170,7 @@ int main(int argc, char **argv) {
 								    grid.data[kgrid11] > grid.nodatavalue) {
 									/* get look vector for data */
 									bathy = -grid.data[kgrid];
-									r[2] = grid.data[kgrid] + sonardepth;
+									r[2] = grid.data[kgrid] + sensordepth;
 									rr = -sqrt(r[0] * r[0] + r[1] * r[1] + r[2] * r[2]);
 									r[0] /= rr;
 									r[1] /= rr;
@@ -1208,10 +1208,10 @@ int main(int argc, char **argv) {
 									if (ix >= 0 && ix < grid.n_columns && jy >= 0 && jy < grid.n_rows && grid.data[kgrid] > grid.nodatavalue)
 										bathy = -grid.data[kgrid];
 									else if (altitude > 0.0)
-										bathy = altitude + sonardepth;
+										bathy = altitude + sensordepth;
 									else
-										bathy = altitude_default + sonardepth;
-									angle = RTD * atan(bathacrosstrack[i] / (bathy - sonardepth));
+										bathy = altitude_default + sensordepth;
+									angle = RTD * atan(bathacrosstrack[i] / (bathy - sensordepth));
 									slope = 0.0;
 								}
 							}
@@ -1220,25 +1220,25 @@ int main(int argc, char **argv) {
 								                              slopeacrosstrack, bathacrosstrack[i], &bathy, &slope, &error);
 								if (status != MB_SUCCESS) {
 									if (altitude > 0.0)
-										bathy = altitude + sonardepth;
+										bathy = altitude + sensordepth;
 									else
-										bathy = altitude_default + sonardepth;
+										bathy = altitude_default + sensordepth;
 									slope = 0.0;
 									status = MB_SUCCESS;
 									error = MB_ERROR_NO_ERROR;
 								}
-								altitude_use = bathy - sonardepth;
+								altitude_use = bathy - sensordepth;
 								angle = RTD * atan(bathacrosstrack[i] / altitude_use);
 								if (corr_slope)
 									angle += RTD * atan(slope);
 							}
 							else {
 								if (altitude > 0.0)
-									bathy = altitude + sonardepth;
+									bathy = altitude + sensordepth;
 								else
-									bathy = altitude_default + sonardepth;
+									bathy = altitude_default + sensordepth;
 								slope = 0.0;
-								altitude_use = bathy - sonardepth;
+								altitude_use = bathy - sensordepth;
 								angle = RTD * atan(bathacrosstrack[i] / altitude_use);
 							}
 							if (bathy > 0.0) {
@@ -1293,7 +1293,7 @@ int main(int argc, char **argv) {
 								    grid.data[kgrid11] > grid.nodatavalue) {
 									/* get look vector for data */
 									bathy = -grid.data[kgrid];
-									r[2] = grid.data[kgrid] + sonardepth;
+									r[2] = grid.data[kgrid] + sensordepth;
 									rr = -sqrt(r[0] * r[0] + r[1] * r[1] + r[2] * r[2]);
 									r[0] /= rr;
 									r[1] /= rr;
@@ -1331,10 +1331,10 @@ int main(int argc, char **argv) {
 									if (ix >= 0 && ix < grid.n_columns && jy >= 0 && jy < grid.n_rows && grid.data[kgrid] > grid.nodatavalue)
 										bathy = -grid.data[kgrid];
 									else if (altitude > 0.0)
-										bathy = altitude + sonardepth;
+										bathy = altitude + sensordepth;
 									else
-										bathy = altitude_default + sonardepth;
-									angle = RTD * atan(ssacrosstrack[i] / (bathy - sonardepth));
+										bathy = altitude_default + sensordepth;
+									angle = RTD * atan(ssacrosstrack[i] / (bathy - sensordepth));
 									slope = 0.0;
 								}
 							}
@@ -1343,25 +1343,25 @@ int main(int argc, char **argv) {
 								                              slopeacrosstrack, ssacrosstrack[i], &bathy, &slope, &error);
 								if (status != MB_SUCCESS || bathy <= 0.0) {
 									if (altitude > 0.0)
-										bathy = altitude + sonardepth;
+										bathy = altitude + sensordepth;
 									else
 										bathy = altitude_default;
 									slope = 0.0;
 									status = MB_SUCCESS;
 									error = MB_ERROR_NO_ERROR;
 								}
-								altitude_use = bathy - sonardepth;
+								altitude_use = bathy - sensordepth;
 								angle = RTD * atan(ssacrosstrack[i] / altitude_use);
 								if (corr_slope)
 									angle += RTD * atan(slope);
 							}
 							else {
 								if (altitude > 0.0)
-									bathy = altitude + sonardepth;
+									bathy = altitude + sensordepth;
 								else
 									bathy = altitude_default;
 								slope = 0.0;
-								altitude_use = bathy - sonardepth;
+								altitude_use = bathy - sensordepth;
 								angle = RTD * atan(ssacrosstrack[i] / altitude_use);
 							}
 							if (bathy > 0.0) {

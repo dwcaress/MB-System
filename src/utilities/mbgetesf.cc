@@ -369,7 +369,7 @@ int main(int argc, char **argv) {
 	double heading;
 	double distance;
 	double altitude;
-	double sonardepth;
+	double sensordepth;
 	int nbath;
 	int namp;
 	int nss;
@@ -390,7 +390,7 @@ int main(int argc, char **argv) {
 		error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;
 		status = mb_get_all(verbose, imbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading, &distance,
-		                    &altitude, &sonardepth, &nbath, &namp, &nss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss,
+		                    &altitude, &sensordepth, &nbath, &namp, &nss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss,
 		                    ssacrosstrack, ssalongtrack, comment, &error);
 
 		/* increment counter */

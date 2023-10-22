@@ -49,7 +49,7 @@ struct mbf_mbpronav_struct {
 	double latitude;
 	double heading;
 	double speed;
-	double sonardepth;
+	double sensordepth;
 	double roll;
 	double pitch;
 	double heave;

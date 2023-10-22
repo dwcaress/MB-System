@@ -402,24 +402,42 @@ int main(int argc, char **argv) {
 				sscanf(pargv[i], "ATTITUDEFORMAT:%d", &process.mbp_attitude_format);
 			}
 
-			/* sonardepth merging */
+			/* sensordepth merging */
+			if (!found && strncmp(pargv[i], "SENSORDEPTHMODE", 15) == 0) {
+        found = true;
+				sscanf(pargv[i], "SENSORDEPTHMODE:%d", &process.mbp_sensordepth_mode);
+				if (!is_explicit && process.mbp_sensordepth_mode == MBP_SENSORDEPTH_OFF) {
+					process.mbp_sensordepthfile[0] = '\0';
+				}
+			}
 			if (!found && strncmp(pargv[i], "SONARDEPTHMODE", 14) == 0) {
         found = true;
-				sscanf(pargv[i], "SONARDEPTHMODE:%d", &process.mbp_sonardepth_mode);
-				if (!is_explicit && process.mbp_sonardepth_mode == MBP_SONARDEPTH_OFF) {
-					process.mbp_sonardepthfile[0] = '\0';
+				sscanf(pargv[i], "SONARDEPTHMODE:%d", &process.mbp_sensordepth_mode);
+				if (!is_explicit && process.mbp_sensordepth_mode == MBP_SENSORDEPTH_OFF) {
+					process.mbp_sensordepthfile[0] = '\0';
+				}
+			}
+			if (!found && strncmp(pargv[i], "SENSORDEPTHFILE", 15) == 0) {
+        found = true;
+				sscanf(pargv[i], "SENSORDEPTHFILE:%1023s", process.mbp_sensordepthfile);
+				if (!is_explicit) {
+					process.mbp_sensordepth_mode = MBP_SENSORDEPTH_ON;
 				}
 			}
 			if (!found && strncmp(pargv[i], "SONARDEPTHFILE", 14) == 0) {
         found = true;
-				sscanf(pargv[i], "SONARDEPTHFILE:%1023s", process.mbp_sonardepthfile);
+				sscanf(pargv[i], "SONARDEPTHFILE:%1023s", process.mbp_sensordepthfile);
 				if (!is_explicit) {
-					process.mbp_sonardepth_mode = MBP_SONARDEPTH_ON;
+					process.mbp_sensordepth_mode = MBP_SENSORDEPTH_ON;
 				}
+			}
+			if (!found && strncmp(pargv[i], "SENSORDEPTHFORMAT", 17) == 0) {
+        found = true;
+				sscanf(pargv[i], "SENSORDEPTHFORMAT:%d", &process.mbp_sensordepth_format);
 			}
 			if (!found && strncmp(pargv[i], "SONARDEPTHFORMAT", 16) == 0) {
         found = true;
-				sscanf(pargv[i], "SONARDEPTHFORMAT:%d", &process.mbp_sonardepth_format);
+				sscanf(pargv[i], "SONARDEPTHFORMAT:%d", &process.mbp_sensordepth_format);
 			}
 
 			/* data cutting */

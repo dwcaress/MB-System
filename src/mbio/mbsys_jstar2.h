@@ -262,7 +262,7 @@ struct mbsys_jstar_sonarmessage_struct {
 	/* MB-System-only parameters from ???-???               */
 	/* -------------------------------------------------------------------- */
 	//int depth;         /* 227-231 : Seafloor depth in 0.001 m */
-	//int sonardepth;    /* 232-235 : Sonar depth in 0.001 m */
+	//int sensordepth;    /* 232-235 : Sonar depth in 0.001 m */
 	//int sonaraltitude; /* 236-239 : Sonar altitude in 0.001 m */
 
 	/* trace data stored as shorts */

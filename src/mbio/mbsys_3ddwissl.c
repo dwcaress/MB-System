@@ -3481,7 +3481,7 @@ int mbsys_3ddwissl_print_store
     fprintf(stderr, "%s     time_d:                        %f\n", first, store->time_d);
     fprintf(stderr, "%s     navlon:                        %f\n", first, store->navlon);
     fprintf(stderr, "%s     navlat:                        %f\n", first, store->navlat);
-    fprintf(stderr, "%s     sonardepth:                    %f\n", first, store->sensordepth);
+    fprintf(stderr, "%s     sensordepth:                    %f\n", first, store->sensordepth);
     fprintf(stderr, "%s     speed:                         %f\n", first, store->speed);
     fprintf(stderr, "%s     heading:                       %f\n", first, store->heading);
     fprintf(stderr, "%s     roll:                          %f\n", first, store->roll);

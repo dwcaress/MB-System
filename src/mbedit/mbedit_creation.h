@@ -81,7 +81,7 @@ EXTERNAL Widget toggleButton_show_heading;
 EXTERNAL Widget toggleButton_show_speed;
 EXTERNAL Widget toggleButton_show_depth;
 EXTERNAL Widget toggleButton_show_altitude;
-EXTERNAL Widget toggleButton_show_sonardepth;
+EXTERNAL Widget toggleButton_show_sensordepth;
 EXTERNAL Widget toggleButton_show_roll;
 EXTERNAL Widget toggleButton_show_pitch;
 EXTERNAL Widget toggleButton_show_heave;

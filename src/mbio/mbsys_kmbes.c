@@ -1,4 +1,4 @@
-/*--------------------------------------------------------------------
+ /*--------------------------------------------------------------------
  *    The MB-system:  mbsys_kmbes.c  3.00  5/25/2018
  *
  *    Copyright (c) 2018-2020 by
@@ -1076,7 +1076,7 @@ if (verbose >= 2) {
   }
 
   /* extract data from structure */
-  else if (*kind == MB_DATA_SONARDEPTH) {
+  else if (*kind == MB_DATA_SENSORDEPTH) {
     /* get time */
     for (int i = 0; i < 7; i++)
       time_i[i] = store->time_i[i];
@@ -1465,7 +1465,7 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
   }
 
   /* insert data in nav structure */
-  else if (store->kind == MB_DATA_SONARDEPTH) {
+  else if (store->kind == MB_DATA_SENSORDEPTH) {
 
   }
 
@@ -2117,7 +2117,7 @@ int mbsys_kmbes_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
   }
 
   /* extract data from nav record */
-  else if (*kind == MB_DATA_SONARDEPTH) {
+  else if (*kind == MB_DATA_SENSORDEPTH) {
     /* get time */
     for (int i = 0; i < 7; i++)
       time_i[i] = store->time_i[i];
@@ -2377,7 +2377,7 @@ int mbsys_kmbes_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int n
   }
 
   /* extract data from nav record */
-  else if (*kind == MB_DATA_SONARDEPTH) {
+  else if (*kind == MB_DATA_SENSORDEPTH) {
     *n = 1;
 
     /* get time */

@@ -298,7 +298,7 @@ int main(int argc, char **argv) {
 	double heading;
 	double distance;
 	double altitude;
-	double sonardepth;
+	double sensordepth;
 	char *beamflag = nullptr;
 	double *bath = nullptr;
 	double *bathacrosstrack = nullptr;
@@ -443,7 +443,7 @@ int main(int argc, char **argv) {
 
 			/* read a ping of data */
 			status = mb_get(verbose, mbio_ptr, &kind, &pings, time_i, &time_d, &navlon, &navlat, &speed, &heading, &distance,
-			                &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp, bathacrosstrack,
+			                &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp, bathacrosstrack,
 			                bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
 
 			/* process the pings */

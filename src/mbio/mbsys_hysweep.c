@@ -2122,8 +2122,8 @@ int mbsys_hysweep_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 		}
 
 		/* get draft  */
-		if (mb_io_ptr->nsonardepth > 0) {
-			if (mb_io_ptr->nsonardepth > 0)
+		if (mb_io_ptr->nsensordepth > 0) {
+			if (mb_io_ptr->nsensordepth > 0)
 				mb_depint_interp(verbose, mbio_ptr, store->time_d, draft, error);
 			*heave = 0.0;
 		}
@@ -2154,8 +2154,8 @@ int mbsys_hysweep_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 		*heave = store->HCP_heave;
 
 		/* get draft  */
-		if (mb_io_ptr->nsonardepth > 0) {
-			if (mb_io_ptr->nsonardepth > 0)
+		if (mb_io_ptr->nsensordepth > 0) {
+			if (mb_io_ptr->nsensordepth > 0)
 				mb_depint_interp(verbose, mbio_ptr, store->time_d, draft, error);
 			*heave = 0.0;
 		}

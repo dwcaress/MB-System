@@ -317,7 +317,7 @@ int main(int argc, char **argv) {
 	double speed;
 	double distance;
 	double altitude;
-	double sonardepth;
+	double sensordepth;
 	char *beamflag = nullptr;
 	double *bath = nullptr;
 	double *bathacrosstrack = nullptr;
@@ -388,7 +388,7 @@ int main(int argc, char **argv) {
 
 			/* read next data record */
 			status = mb_get_all(verbose, mbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
-			                    &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
+			                    &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
 			                    bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
 
 			/* deal with nav and time from survey data only - not nav, sidescan, or subbottom */

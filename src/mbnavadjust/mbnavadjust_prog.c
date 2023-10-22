@@ -218,6 +218,7 @@ int mbnavadjust_init_globals() {
   mbna_save_frequency = 10;
   mbna_color_foreground = BLACK;
   mbna_color_background = WHITE;
+  project.use_mode = MBNA_USE_MODE_PRIMARY;
   project.section_length = 0.14;
   project.section_soundings = 100000;
   project.decimation = 1;
@@ -6552,7 +6553,6 @@ int mbnavadjust_autosetsvsvertical() {
 
   int nnav = 0;
   int nblock = 0;
-  int ndiscontinuity = 0;
   int nsmooth = 0;
   int ntie = 0;
   int nglobal = 0;
@@ -6653,7 +6653,6 @@ int mbnavadjust_autosetsvsvertical() {
     /* count number of nav points, discontinuities, and blocks */
     nnav = 0;
     nblock = 0;
-    ndiscontinuity = 0;
     nsmooth = 0;
     for (int ifile = 0; ifile < project.num_files; ifile++) {
       file = &project.files[ifile];
@@ -6662,8 +6661,6 @@ int mbnavadjust_autosetsvsvertical() {
       for (int isection = 0; isection < file->num_sections; isection++) {
         section = &file->sections[isection];
         nnav += section->num_snav - section->continuity;
-        if (!section->continuity)
-          ndiscontinuity++;
       }
       file->block = nblock - 1;
       file->block_offset_x = 0.0;
@@ -7844,11 +7841,9 @@ int mbnavadjust_invertnav() {
 
   int nnav = 0;
   int nblock = 0;
-  int ndiscontinuity = 0;
   int nglobaltiexy = 0;
   int nglobaltiez = 0;
   int nsmooth = 0;
-  int nnsmooth = 0;
   int ntie = 0;
   int nglobal = 0;
   int nfixed = 0;
@@ -8074,7 +8069,6 @@ int mbnavadjust_invertnav() {
     /* count number of nav points, discontinuities, blocks, and global ties */
     nnav = 0;
     nblock = 0;
-    ndiscontinuity = 0;
     nglobaltiexy = 0;
     nglobaltiez = 0;
     for (int ifile = 0; ifile < project.num_files; ifile++) {
@@ -8084,8 +8078,6 @@ int mbnavadjust_invertnav() {
       for (int isection = 0; isection < file->num_sections; isection++) {
         section = &file->sections[isection];
         nnav += section->num_snav - section->continuity;
-        if (!section->continuity)
-          ndiscontinuity++;
         if (section->globaltie.status != MBNA_TIE_NONE) {
           if (section->globaltie.status == MBNA_TIE_XY || section->globaltie.status == MBNA_TIE_XYZ
               || section->globaltie.status == MBNA_TIE_XY_FIXED || section->globaltie.status == MBNA_TIE_XYZ_FIXED) {
@@ -10358,7 +10350,6 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
       }
 
       /* E1: loop over all navigation applying first derivative smoothing */
-      nnsmooth = 0;
       for (int inav = inavstart; inav < inavend; inav++) {
           int index_m;
           int index_n;
@@ -10374,7 +10365,6 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
               }
               weight *= matrix_scale;
               zweight = 10.0 * weight;
-              nnsmooth++;
 
               index_m = irow * 6;
               index_n = (inav - inavstart) * 3;
@@ -10415,7 +10405,6 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
       }
 
       /* E1: loop over all navigation applying second derivative smoothing */
-      nnsmooth = 0;
       for (int inav = inavstart; inav < inavend - 1; inav++) {
           int index_m;
           int index_n;
@@ -10433,7 +10422,6 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
               }
               weight *= matrix_scale;
               zweight = 10.0 * weight;
-              nnsmooth++;
 
               index_m = irow * 6;
               index_n = (inav - inavstart) * 3;
@@ -11052,7 +11040,7 @@ int mbnavadjust_updategrid() {
       for (int ifile = 0; ifile < project.num_files; ifile++) {
         file = &project.files[ifile];
         snprintf(npath, sizeof(npath), "%s/nvs_%4.4d.mb166", project.datadir, ifile);
-        snprintf(apath, sizeof(apath), "%s/nvs_%4.4d.na%d", project.datadir, ifile, file->output_id);
+        snprintf(apath, sizeof(apath), "%s/nvs_%4.4d.na0", project.datadir, ifile);
         if ((nfp = fopen(npath, "r")) == NULL) {
           status = MB_FAILURE;
           error = MB_ERROR_OPEN_FAIL;
@@ -11239,41 +11227,16 @@ int mbnavadjust_applynav() {
   }
 
   int status = MB_SUCCESS;
-  struct mbna_file *file;
-  struct mbna_section *section;
-  mb_pathplus npath;
-  mb_pathplus apath;
-  mb_pathplus opath;
-  FILE *nfp, *afp, *ofp;
-  char *result;
-  mb_command buffer;
-  int nscan;
-  int time_i[7];
-  double time_d;
-  double navlon;
-  double navlat;
-  double heading;
-  double speed;
-  double draft;
-  double roll;
-  double pitch;
-  double heave;
-  double factor;
-  double zoffset;
-  mb_pathplus ostring;
-  int mbp_heading_mode;
-  double mbp_headingbias;
-  int mbp_rollbias_mode;
-  double mbp_rollbias;
-  double mbp_rollbias_port;
-  double mbp_rollbias_stbd;
-  int isection, isnav;
-  double seconds;
 
   /* output results from navigation solution */
   if (project.open && project.num_crossings > 0 &&
       (project.num_crossings_analyzed >= 10 || project.num_truecrossings_analyzed == project.num_truecrossings) &&
       error == MB_ERROR_NO_ERROR) {
+
+    mb_pathplus npath;
+    mb_pathplus opath;
+    mb_path ppath;
+    FILE *nfp, *ofp;
 
     /* now output inverse solution */
     snprintf(message, sizeof(message), "Applying navigation solution...");
@@ -11281,10 +11244,21 @@ int mbnavadjust_applynav() {
 
     /* generate new nav files */
     for (int ifile = 0; ifile < project.num_files; ifile++) {
-      file = &project.files[ifile];
+      struct mbna_file *file = &project.files[ifile];
+
       snprintf(npath, sizeof(npath), "%s/nvs_%4.4d.mb166", project.datadir, ifile);
-      snprintf(apath, sizeof(apath), "%s/nvs_%4.4d.na%d", project.datadir, ifile, file->output_id);
-      snprintf(opath, sizeof(opath), "%s.na%d", file->path, file->output_id);
+      if (project.use_mode == MBNA_USE_MODE_PRIMARY) {
+        snprintf(opath, sizeof(opath), "%s.na%d", file->path, 0);
+      }
+      else {
+        status = mb_pr_get_output(mbna_verbose, &file->format, file->path, ppath, &error);
+        if (project.use_mode == MBNA_USE_MODE_SECONDARY) {
+          snprintf(opath, sizeof(ppath), "%s.na%d", ppath, 1);
+        }
+        else {
+          snprintf(opath, sizeof(ppath), "%s.na%d", ppath, 2);
+        }
+      }
       if ((nfp = fopen(npath, "r")) == NULL) {
         status = MB_FAILURE;
         error = MB_ERROR_OPEN_FAIL;
@@ -11293,18 +11267,8 @@ int mbnavadjust_applynav() {
         if (mbna_verbose == 0)
           fprintf(stderr, "%s", message);
       }
-      else if ((afp = fopen(apath, "w")) == NULL) {
-        fclose(nfp);
-        status = MB_FAILURE;
-        error = MB_ERROR_OPEN_FAIL;
-        snprintf(message, sizeof(message), " > Unable to open output nav file %s\n", apath);
-        do_info_add(message, false);
-        if (mbna_verbose == 0)
-          fprintf(stderr, "%s", message);
-      }
       else if ((ofp = fopen(opath, "w")) == NULL) {
         fclose(nfp);
-        fclose(afp);
         status = MB_FAILURE;
         error = MB_ERROR_OPEN_FAIL;
         snprintf(message, sizeof(message), " > Unable to open output nav file %s\n", opath);
@@ -11320,34 +11284,43 @@ int mbnavadjust_applynav() {
 
         /* write file header */
         char user[256], host[256], date[32];
+        mb_pathplus ostring;
         status = mb_user_host_date(mbna_verbose, user, host, date, &error);
         snprintf(ostring, sizeof(ostring), "# Adjusted navigation generated using MBnavadjust\n");
         fprintf(ofp, "%s", ostring);
-        fprintf(afp, "%s", ostring);
         snprintf(ostring, sizeof(ostring), "# MB-System version:        %s\n", MB_VERSION);
         fprintf(ofp, "%s", ostring);
-        fprintf(afp, "%s", ostring);
         snprintf(ostring, sizeof(ostring), "# MB-System build data:     %s\n", MB_BUILD_DATE);
         fprintf(ofp, "%s", ostring);
-        fprintf(afp, "%s", ostring);
         snprintf(ostring, sizeof(ostring), "# MBnavadjust project name: %s\n", project.name);
         fprintf(ofp, "%s", ostring);
-        fprintf(afp, "%s", ostring);
         snprintf(ostring, sizeof(ostring), "# MBnavadjust project path: %s\n", project.path);
         fprintf(ofp, "%s", ostring);
-        fprintf(afp, "%s", ostring);
         snprintf(ostring, sizeof(ostring), "# MBnavadjust project home: %s\n", project.home);
         fprintf(ofp, "%s", ostring);
-        fprintf(afp, "%s", ostring);
         snprintf(ostring, sizeof(ostring), "# Generated by user <%s> on cpu <%s> at <%s>\n", user, host, date);
         fprintf(ofp, "%s", ostring);
-        fprintf(afp, "%s", ostring);
 
         /* read the input nav */
-        isection = 0;
-        section = &file->sections[isection];
-        isnav = 0;
+        int isection = 0;
+        struct mbna_section *section = &file->sections[isection];
+        int isnav = 0;
         bool done = false;
+        char *result = NULL;
+        mb_command buffer;
+        int nscan;
+        int time_i[7];
+        double seconds;
+        double time_d;
+        double navlon;
+        double navlat;
+        double heading;
+        double speed;
+        double draft;
+        double roll;
+        double pitch;
+        double heave;
+        double zoffset;
         while (!done) {
           if ((result = fgets(buffer, sizeof(buffer), nfp)) != buffer) {
             done = true;
@@ -11381,6 +11354,7 @@ int mbnavadjust_applynav() {
             }
 
             /* update the nav if possible (and it should be...) */
+            double factor;
             if (time_d < section->snav_time_d[isnav]) {
               factor = 0.0;
 //fprintf(stderr,"%s:%4.4d:%s: Nav time outside expected section: %f < %f ifile:%d isection:%d isnav:%d\n",
@@ -11419,61 +11393,68 @@ int mbnavadjust_applynav() {
                       time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], time_d, navlon,
                       navlat, heading, speed, draft, roll, pitch, heave, zoffset);
               fprintf(ofp, "%s", ostring);
-              fprintf(afp, "%s", ostring);
               /* fprintf(stderr, "NAV OUT: %3.3d:%3.3d:%2.2d factor:%f | %s", i,isection,isnav,factor,ostring); */
             }
           }
         }
         fclose(nfp);
-        fclose(afp);
         fclose(ofp);
 
-        /* get bias values */
-        mb_pr_get_heading(mbna_verbose, file->path, &mbp_heading_mode, &mbp_headingbias, &error);
-        mb_pr_get_rollbias(mbna_verbose, file->path, &mbp_rollbias_mode, &mbp_rollbias, &mbp_rollbias_port,
-                           &mbp_rollbias_stbd, &error);
+        if (project.use_mode == MBNA_USE_MODE_PRIMARY) {
+          int mbp_heading_mode;
+          double mbp_headingbias;
+          int mbp_rollbias_mode;
+          double mbp_rollbias;
+          double mbp_rollbias_port;
+          double mbp_rollbias_stbd;
 
-        /* update output file in mbprocess parameter file */
-        status = mb_pr_update_format(mbna_verbose, file->path, true, file->format, &error);
-        status = mb_pr_update_navadj(mbna_verbose, file->path, MBP_NAVADJ_LLZ, opath, MBP_NAV_LINEAR, &error);
+          /* get bias values */
+          mb_pr_get_heading(mbna_verbose, file->path, &mbp_heading_mode, &mbp_headingbias, &error);
+          mb_pr_get_rollbias(mbna_verbose, file->path, &mbp_rollbias_mode, &mbp_rollbias, &mbp_rollbias_port,
+                             &mbp_rollbias_stbd, &error);
 
-        /* update heading bias in mbprocess parameter file */
-        mbp_headingbias = file->heading_bias + file->heading_bias_import;
-        if (mbp_headingbias == 0.0) {
-          if (mbp_heading_mode == MBP_HEADING_OFF || mbp_heading_mode == MBP_HEADING_OFFSET)
-            mbp_heading_mode = MBP_HEADING_OFF;
-          else if (mbp_heading_mode == MBP_HEADING_CALC || mbp_heading_mode == MBP_HEADING_CALCOFFSET)
-            mbp_heading_mode = MBP_HEADING_CALC;
-        }
-        else {
-          if (mbp_heading_mode == MBP_HEADING_OFF || mbp_heading_mode == MBP_HEADING_OFFSET)
-            mbp_heading_mode = MBP_HEADING_OFFSET;
-          else if (mbp_heading_mode == MBP_HEADING_CALC || mbp_heading_mode == MBP_HEADING_CALCOFFSET)
-            mbp_heading_mode = MBP_HEADING_CALCOFFSET;
-        }
-        status = mb_pr_update_heading(mbna_verbose, file->path, mbp_heading_mode, mbp_headingbias, &error);
+          /* update output file in mbprocess parameter file */
+          status = mb_pr_update_format(mbna_verbose, file->path, true, file->format, &error);
+          status = mb_pr_update_navadj(mbna_verbose, file->path, MBP_NAVADJ_LLZ, opath, MBP_NAV_LINEAR, &error);
 
-        /* update roll bias in mbprocess parameter file */
-        mbp_rollbias = file->roll_bias + file->roll_bias_import;
-        if (mbp_rollbias == 0.0) {
-          if (mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE) {
-            mbp_rollbias_port = mbp_rollbias + mbp_rollbias_port - file->roll_bias_import;
-            mbp_rollbias_stbd = mbp_rollbias + mbp_rollbias_stbd - file->roll_bias_import;
-          }
-          else
-            mbp_rollbias_mode = MBP_ROLLBIAS_OFF;
-        }
-        else {
-          if (mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE) {
-            mbp_rollbias_port = mbp_rollbias + mbp_rollbias_port - file->roll_bias_import;
-            mbp_rollbias_stbd = mbp_rollbias + mbp_rollbias_stbd - file->roll_bias_import;
+          /* update heading bias in mbprocess parameter file */
+          mbp_headingbias = file->heading_bias + file->heading_bias_import;
+          if (mbp_headingbias == 0.0) {
+            if (mbp_heading_mode == MBP_HEADING_OFF || mbp_heading_mode == MBP_HEADING_OFFSET)
+              mbp_heading_mode = MBP_HEADING_OFF;
+            else if (mbp_heading_mode == MBP_HEADING_CALC || mbp_heading_mode == MBP_HEADING_CALCOFFSET)
+              mbp_heading_mode = MBP_HEADING_CALC;
           }
           else {
-            mbp_rollbias_mode = MBP_ROLLBIAS_SINGLE;
+            if (mbp_heading_mode == MBP_HEADING_OFF || mbp_heading_mode == MBP_HEADING_OFFSET)
+              mbp_heading_mode = MBP_HEADING_OFFSET;
+            else if (mbp_heading_mode == MBP_HEADING_CALC || mbp_heading_mode == MBP_HEADING_CALCOFFSET)
+              mbp_heading_mode = MBP_HEADING_CALCOFFSET;
           }
+          status = mb_pr_update_heading(mbna_verbose, file->path, mbp_heading_mode, mbp_headingbias, &error);
+
+          /* update roll bias in mbprocess parameter file */
+          mbp_rollbias = file->roll_bias + file->roll_bias_import;
+          if (mbp_rollbias == 0.0) {
+            if (mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE) {
+              mbp_rollbias_port = mbp_rollbias + mbp_rollbias_port - file->roll_bias_import;
+              mbp_rollbias_stbd = mbp_rollbias + mbp_rollbias_stbd - file->roll_bias_import;
+            }
+            else
+              mbp_rollbias_mode = MBP_ROLLBIAS_OFF;
+          }
+          else {
+            if (mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE) {
+              mbp_rollbias_port = mbp_rollbias + mbp_rollbias_port - file->roll_bias_import;
+              mbp_rollbias_stbd = mbp_rollbias + mbp_rollbias_stbd - file->roll_bias_import;
+            }
+            else {
+              mbp_rollbias_mode = MBP_ROLLBIAS_SINGLE;
+            }
+          }
+          status = mb_pr_update_rollbias(mbna_verbose, file->path, mbp_rollbias_mode, mbp_rollbias, mbp_rollbias_port,
+                                         mbp_rollbias_stbd, &error);
         }
-        status = mb_pr_update_rollbias(mbna_verbose, file->path, mbp_rollbias_mode, mbp_rollbias, mbp_rollbias_port,
-                                       mbp_rollbias_stbd, &error);
       }
     }
 
@@ -12189,7 +12170,6 @@ int mbnavadjust_modelplot_pick_globaltieoffsets(int x, int y) {
     int pick_section;
     int ix, iy;
     int rangemin = 10000000;
-    int plot_index = 0;
     for (int ifile = 0; ifile < project.num_files; ifile++) {
       file = &project.files[ifile];
       for (int jsection = 0; jsection < file->num_sections; jsection++) {
@@ -12224,9 +12204,6 @@ int mbnavadjust_modelplot_pick_globaltieoffsets(int x, int y) {
               pick_section = jsection;
             }
           }
-
-          /* increment plot_index */
-          plot_index++;
         }
       }
     }
@@ -15778,7 +15755,7 @@ int mbnavadjust_open_visualization(int which_grid) {
   struct mbna_section *section;
   int year, month, day, hour, minute;
   double seconds, roll, pitch, heave;
-  double sonardepth;
+  double sensordepth;
   int nscan;
 
   /* destroy any pre-existing visualization */
@@ -16095,11 +16072,11 @@ int mbnavadjust_open_visualization(int which_grid) {
                     nscan = sscanf(line, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
                                          &year, &month, &day, &hour, &minute, &seconds, &navtime_d[mbv_navpings],
                                          &navlon[mbv_navpings], &navlat[mbv_navpings], &navheading[mbv_navpings],
-                                         &navspeed[mbv_navpings], &sonardepth, &roll, &pitch, &heave,
+                                         &navspeed[mbv_navpings], &sensordepth, &roll, &pitch, &heave,
                                          &navportlon[mbv_navpings], &navportlat[mbv_navpings],
                                          &navstbdlon[mbv_navpings], &navstbdlat[mbv_navpings]);
                     if (nscan >= 15) {
-                      navz[mbv_navpings] = -sonardepth;
+                      navz[mbv_navpings] = -sensordepth;
                       navline[mbv_navpings] = i;
                       navshot[mbv_navpings] = j;
                       navcdp[mbv_navpings] = mbv_navpings;
@@ -16201,7 +16178,6 @@ int mbnavadjust_reset_visualization_navties() {
   struct mbna_crossing *crossing;
   struct mbna_tie *tie;
   size_t instance;
-  int num_navties, num_globalties;
   int npoint;
   int snav_1, snav_2;
   double navtielon[2];
@@ -16221,8 +16197,6 @@ int mbnavadjust_reset_visualization_navties() {
     /* count and allocate for the the navties to be displayed according
         to the current settings */
     instance = 0;
-    num_navties = 0;
-    num_globalties = 0;
     npoint = 2;
     waypoint[0] = 1;
     waypoint[1] = 1;
@@ -16254,8 +16228,6 @@ int mbnavadjust_reset_visualization_navties() {
                     crossing->section_1, file_2->block, crossing->file_id_2, crossing->section_2);
             status = mbview_addroute(mbna_verbose, instance, npoint, navtielon, navtielat, waypoint, navtiecolor,
                                      navtiesize, navtieeditmode, navtiename, &id, &error);
-            if (status == MB_SUCCESS)
-              num_navties++;
           }
         }
       }
@@ -16280,8 +16252,6 @@ int mbnavadjust_reset_visualization_navties() {
           snprintf(navtiename, sizeof(navtiename), "%2.2d:%4.4d:%2.2d", file->block, i, j);
           status = mbview_addroute(mbna_verbose, instance, npoint, navtielon, navtielat, waypoint, navtiecolor,
                                    navtiesize, navtieeditmode, navtiename, &id, &error);
-          if (status == MB_SUCCESS)
-            num_globalties++;
         }
       }
     }

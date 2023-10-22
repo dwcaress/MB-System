@@ -1143,9 +1143,13 @@ int main(int argc, char **argv) {
   const bool read_datalist = format < 0;
   bool read_data;
   void *datalist;
-  char file[MB_PATH_MAXLINE] = "";
-  char dfile[MB_PATH_MAXLINE] = "";
+  char path[MB_PATH_MAXLINE] = "";
+  char ppath[MB_PATH_MAXLINE] = "";
+  char apath[MB_PATH_MAXLINE] = "";
+  char dpath[MB_PATH_MAXLINE] = "";
   double file_weight;
+  int pstatus;
+  int astatus;
 
   /* open file list */
   if (read_datalist) {
@@ -1155,10 +1159,11 @@ int main(int argc, char **argv) {
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
       exit(MB_ERROR_OPEN_FAIL);
     }
-    read_data = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS;
+    read_data = mb_datalist_read3(verbose, datalist, &pstatus, path, ppath, 
+                                  &astatus, apath, dpath, &format, &file_weight, &error) == MB_SUCCESS;
   } else {
     // else copy single filename to be read
-    strcpy(file, read_file);
+    strcpy(path, read_file);
     read_data = true;
   }
 
@@ -1208,7 +1213,7 @@ int main(int argc, char **argv) {
   double heading;
   double distance;
   double altitude;
-  double sonardepth;
+  double sensordepth;
   double draft;
   double roll;
   double pitch;
@@ -2755,12 +2760,12 @@ int main(int argc, char **argv) {
   while (read_data) {
 
     /* initialize reading the swath file */
-    if (mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mbio_ptr,
+    if (mb_read_init_altnav(verbose, path, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, astatus, apath, &mbio_ptr,
                                &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error) != MB_SUCCESS) {
       char *message;
       mb_error(verbose, error, &message);
       fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
-      fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", file);
+      fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", path);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
       exit(error);
     }
@@ -2893,9 +2898,9 @@ int main(int argc, char **argv) {
       if (segment_mode == MBLIST_SEGMENT_MODE_TAG)
         fprintf(output[0], "%s\n", segment_tag);
       else if (segment_mode == MBLIST_SEGMENT_MODE_SWATHFILE)
-        fprintf(output[0], "# %s\n", file);
+        fprintf(output[0], "# %s\n", path);
       else if (segment_mode == MBLIST_SEGMENT_MODE_DATALIST)
-        fprintf(output[0], "# %s\n", dfile);
+        fprintf(output[0], "# %s\n", dpath);
     }
 
     /* read and print data */
@@ -2909,7 +2914,7 @@ int main(int argc, char **argv) {
       if (pings == 1 || use_attitude || use_detects || use_pingnumber || use_linenumber) {
         /* read next data record */
         status = mb_get_all(verbose, mbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
-                            &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
+                            &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
                             bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
 
         /* time gaps are not a problem here */
@@ -2919,9 +2924,13 @@ int main(int argc, char **argv) {
         }
 
         /* if survey data extract nav */
-        if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA)
-          status = mb_extract_nav(verbose, mbio_ptr, store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
-                                  &heading, &draft, &roll, &pitch, &heave, &error);
+        if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
+           /* get attitude using mb_extract_nav(), but do not overwrite the navigation that 
+            may derive from an alternative navigation source */
+          double tnavlon, tnavlat, tspeed, theading;
+          status = mb_extract_nav(verbose, mbio_ptr, store_ptr, &kind, time_i, &time_d, &tnavlon, &tnavlat,
+                                  &tspeed, &theading, &draft, &roll, &pitch, &heave, &error);
+        }
 
         /* if survey data extract detects */
         if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && use_detects) {
@@ -2939,7 +2948,7 @@ int main(int argc, char **argv) {
       }
       else {
         status = mb_get(verbose, mbio_ptr, &kind, &pings_read, time_i, &time_d, &navlon, &navlat, &speed, &heading,
-                        &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
+                        &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
                         bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
 
         /* time gaps are not a problem here */
@@ -3293,7 +3302,7 @@ int main(int argc, char **argv) {
                                    &signflip_next_value, &error);
                   break;
                 case 'c': /* Sonar transducer depth (m) */
-                  printsimplevalue(verbose, output[i], sonardepth, 0, 4, ascii, &invert_next_value,
+                  printsimplevalue(verbose, output[i], sensordepth, 0, 4, ascii, &invert_next_value,
                                    &signflip_next_value, &error);
                   break;
                 case 'D': /* acrosstrack dist. */
@@ -3376,7 +3385,7 @@ int main(int argc, char **argv) {
                     printNaN(verbose, output[i], ascii, &invert_next_value, &signflip_next_value, &error);
                   }
                   else {
-                    angle = RTD * (atan(bathacrosstrack[k] / (bath[k] - sonardepth)));
+                    angle = RTD * (atan(bathacrosstrack[k] / (bath[k] - sensordepth)));
                     printsimplevalue(verbose, output[i], angle, 0, 3, ascii, &invert_next_value,
                                      &signflip_next_value, &error);
                   }
@@ -3392,7 +3401,7 @@ int main(int argc, char **argv) {
                   else {
                     status = get_bathyslope(verbose, ndepths, depths, depthacrosstrack, nslopes, slopes,
                                             slopeacrosstrack, bathacrosstrack[k], &depth, &slope, &error);
-                    angle = RTD * (atan(bathacrosstrack[k] / (bath[k] - sonardepth))) + slope;
+                    angle = RTD * (atan(bathacrosstrack[k] / (bath[k] - sensordepth))) + slope;
                     printsimplevalue(verbose, output[i], angle, 0, 3, ascii, &invert_next_value,
                                      &signflip_next_value, &error);
                   }
@@ -3776,7 +3785,7 @@ int main(int argc, char **argv) {
                   else {
                     b = -bathy_scale * bath[k];
                     if (sensorrelative_next_value)
-                      b -= -bathy_scale * sonardepth;
+                      b -= -bathy_scale * sensordepth;
                     printsimplevalue(verbose, output[i], b, 0, 4, ascii, &invert_next_value,
                                      &signflip_next_value, &error);
                   }
@@ -3794,7 +3803,7 @@ int main(int argc, char **argv) {
                   else {
                     b = bathy_scale * bath[k];
                     if (sensorrelative_next_value)
-                      b -= bathy_scale * sonardepth;
+                      b -= bathy_scale * sensordepth;
                     printsimplevalue(verbose, output[i], b, 0, 4, ascii, &invert_next_value,
                                      &signflip_next_value, &error);
                   }
@@ -3939,14 +3948,14 @@ int main(int argc, char **argv) {
                 case 'F': /* filename */
                   if (netcdf)
                     fprintf(output[i], "\"");
-                  fprintf(output[i], "%s", file);
+                  fprintf(output[i], "%s", path);
 
                   if (netcdf)
                     fprintf(output[i], "\"");
 
                   if (!ascii)
-                    for (k = strlen(file); k < MB_PATH_MAXLINE; k++)
-                      fwrite(&file[strlen(file)], sizeof(char), 1, outfile);
+                    for (k = strlen(path); k < MB_PATH_MAXLINE; k++)
+                      fwrite(&path[strlen(path)], sizeof(char), 1, outfile);
 
                   raw_next_value = false;
                   break;
@@ -4228,7 +4237,7 @@ int main(int argc, char **argv) {
                                    &signflip_next_value, &error);
                   break;
                 case 'c': /* Sonar transducer depth (m) */
-                  printsimplevalue(verbose, output[i], sonardepth, 0, 4, ascii, &invert_next_value,
+                  printsimplevalue(verbose, output[i], sensordepth, 0, 4, ascii, &invert_next_value,
                                    &signflip_next_value, &error);
                   break;
                 case 'D': /* acrosstrack dist. */
@@ -4246,14 +4255,14 @@ int main(int argc, char **argv) {
                 case 'G': /* flat bottom grazing angle */
                   status = get_bathyslope(verbose, ndepths, depths, depthacrosstrack, nslopes, slopes,
                                           slopeacrosstrack, ssacrosstrack[k], &depth, &slope, &error);
-                  angle = RTD * (atan(ssacrosstrack[k] / (depth - sonardepth)));
+                  angle = RTD * (atan(ssacrosstrack[k] / (depth - sensordepth)));
                   printsimplevalue(verbose, output[i], angle, 0, 3, ascii, &invert_next_value,
                                    &signflip_next_value, &error);
                   break;
                 case 'g': /* grazing angle using slope */
                   status = get_bathyslope(verbose, ndepths, depths, depthacrosstrack, nslopes, slopes,
                                           slopeacrosstrack, ssacrosstrack[k], &depth, &slope, &error);
-                  angle = RTD * (atan(bathacrosstrack[k] / (depth - sonardepth))) + slope;
+                  angle = RTD * (atan(bathacrosstrack[k] / (depth - sensordepth))) + slope;
                   printsimplevalue(verbose, output[i], angle, 0, 3, ascii, &invert_next_value,
                                    &signflip_next_value, &error);
                   break;
@@ -4612,7 +4621,7 @@ int main(int argc, char **argv) {
                   else {
                     b = -bathy_scale * bath[beam_vertical];
                     if (sensorrelative_next_value)
-                      b -= -bathy_scale * sonardepth;
+                      b -= -bathy_scale * sensordepth;
                     printsimplevalue(verbose, output[i], b, 0, 4, ascii, &invert_next_value,
                                      &signflip_next_value, &error);
                   }
@@ -4630,7 +4639,7 @@ int main(int argc, char **argv) {
                   else {
                     b = bathy_scale * bath[beam_vertical];
                     if (sensorrelative_next_value)
-                      b -= bathy_scale * sonardepth;
+                      b -= bathy_scale * sensordepth;
                     printsimplevalue(verbose, output[i], b, 0, 4, ascii, &invert_next_value,
                                      &signflip_next_value, &error);
                   }
@@ -4757,13 +4766,13 @@ int main(int argc, char **argv) {
                 case 'F': /* filename */
                   if (netcdf)
                     fprintf(output[i], "\"");
-                  fprintf(output[i], "%s", file);
+                  fprintf(output[i], "%s", path);
                   if (netcdf)
                     fprintf(output[i], "\"");
 
                   if (!ascii)
-                    for (k = strlen(file); k < MB_PATH_MAXLINE; k++)
-                      fwrite(&file[strlen(file)], sizeof(char), 1, outfile);
+                    for (k = strlen(path); k < MB_PATH_MAXLINE; k++)
+                      fwrite(&path[strlen(path)], sizeof(char), 1, outfile);
 
                   raw_next_value = false;
                   break;
@@ -4952,7 +4961,8 @@ int main(int argc, char **argv) {
 
     /* figure out whether and what to read next */
     if (read_datalist) {
-      read_data = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS;
+      read_data = mb_datalist_read3(verbose, datalist, &pstatus, path, ppath, 
+                                    &astatus, apath, dpath, &format, &file_weight, &error) == MB_SUCCESS;
     } else {
       read_data = false;
     }

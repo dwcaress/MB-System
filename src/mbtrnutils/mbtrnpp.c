@@ -82,7 +82,7 @@ struct mbtrnpp_ping_struct {
   double heading;
   double distance;
   double altitude;
-  double sonardepth;
+  double sensordepth;
   double roll;
   double pitch;
   double heave;
@@ -3875,7 +3875,7 @@ int main(int argc, char **argv) {
       status = mb_get_all(mbtrn_cfg->verbose, imbio_ptr, &store_ptr, &kind, ping[idataread].time_i, &ping[idataread].time_d,
                           &ping[idataread].navlon, &ping[idataread].navlat, &ping[idataread].speed,
                           &ping[idataread].heading, &ping[idataread].distance, &ping[idataread].altitude,
-                          &ping[idataread].sonardepth, &ping[idataread].beams_bath, &ping[idataread].beams_amp,
+                          &ping[idataread].sensordepth, &ping[idataread].beams_bath, &ping[idataread].beams_amp,
                           &ping[idataread].pixels_ss, ping[idataread].beamflag, ping[idataread].bath, ping[idataread].amp,
                           ping[idataread].bathacrosstrack, ping[idataread].bathalongtrack, ping[idataread].ss,
                           ping[idataread].ssacrosstrack, ping[idataread].ssalongtrack, comment, &error);
@@ -3924,9 +3924,9 @@ int main(int argc, char **argv) {
 
         status = mb_extract_nav(mbtrn_cfg->verbose, imbio_ptr, store_ptr, &kind, ping[idataread].time_i, &ping[idataread].time_d,
                                 &ping[idataread].navlon, &ping[idataread].navlat, &ping[idataread].speed,
-                                &ping[idataread].heading, &ping[idataread].sonardepth, &ping[idataread].roll,
+                                &ping[idataread].heading, &ping[idataread].sensordepth, &ping[idataread].roll,
                                 &ping[idataread].pitch, &ping[idataread].heave, &error);
-        status = mb_extract_altitude(mbtrn_cfg->verbose, imbio_ptr, store_ptr, &kind, &ping[idataread].sonardepth,
+        status = mb_extract_altitude(mbtrn_cfg->verbose, imbio_ptr, store_ptr, &kind, &ping[idataread].sensordepth,
                                      &ping[idataread].altitude, &error);
 
         // apply static nav offset if specified
@@ -3948,7 +3948,7 @@ int main(int argc, char **argv) {
           double tidevalue = 0.0;
           mb_linear_interp(mbtrn_cfg->verbose, tide_time_d - 1, tide_tide - 1, n_tide,
                             ping[idataread].time_d, &tidevalue, &itide_time, &error);
-          ping[idataread].sonardepth -= tidevalue;
+          ping[idataread].sensordepth -= tidevalue;
           for (int i = 0; i < ping[idataread].beams_bath; i++) {
             if (ping[idataread].beamflag[i] != MB_FLAG_NULL) {
                 ping[idataread].bath[i] -= tidevalue;
@@ -3976,7 +3976,7 @@ int main(int argc, char **argv) {
           for (int j = 0; j < ping[i_ping_process].beams_bath; j++) {
             if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
               tangent = ping[i_ping_process].bathacrosstrack[j] /
-                        (ping[i_ping_process].bath[j] - ping[i_ping_process].sonardepth);
+                        (ping[i_ping_process].bath[j] - ping[i_ping_process].sensordepth);
               if (fabs(tangent) > threshold_tangent && mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
                 ping[i_ping_process].beamflag_filter[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
                 n_soundings_trimmed++;
@@ -4067,13 +4067,13 @@ int main(int argc, char **argv) {
           /* write out results to stdout as text */
           if ( OUTPUT_FLAG_SET(OUTPUT_MBSYS_STDOUT) ) {
             fprintf(stderr, "Ping: %.9f %.7f %.7f %.3f %.3f %4d\n", ping[i_ping_process].time_d,
-                    ping[i_ping_process].navlat, ping[i_ping_process].navlon, ping[i_ping_process].sonardepth,
+                    ping[i_ping_process].navlat, ping[i_ping_process].navlon, ping[i_ping_process].sensordepth,
                     (double)(DTR * ping[i_ping_process].heading), n_output);
             for (int j = 0; j < ping[i_ping_process].beams_bath; j++) {
               if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
                 fprintf(stderr, "%3.3d starboard:%.3f forward:%.3f down:%.3f\n", j,
                         ping[i_ping_process].bathacrosstrack[j], ping[i_ping_process].bathalongtrack[j],
-                        ping[i_ping_process].bath[j] - ping[i_ping_process].sonardepth);
+                        ping[i_ping_process].bath[j] - ping[i_ping_process].sensordepth);
                 n_soundings_written++;
               }
             }
@@ -4123,7 +4123,7 @@ int main(int argc, char **argv) {
             index += 8;
             mb_put_binary_double(true, ping[i_ping_process].navlon, &output_buffer[index]);
             index += 8;
-            mb_put_binary_double(true, ping[i_ping_process].sonardepth, &output_buffer[index]);
+            mb_put_binary_double(true, ping[i_ping_process].sensordepth, &output_buffer[index]);
             index += 8;
             mb_put_binary_double(true, (double)(DTR * ping[i_ping_process].heading), &output_buffer[index]);
             index += 8;
@@ -4139,7 +4139,7 @@ int main(int argc, char **argv) {
                      "p/r/y[%.3lf / %.3lf / %.3lf]\n",
                      ping[i_ping_process].time_d, n_output, ping_number, ping[i_ping_process].navlat,
                      ping[i_ping_process].navlon, (double)(DTR * ping[i_ping_process].heading),
-                     ping[i_ping_process].sonardepth, ping[i_ping_process].speed, ping[i_ping_process].pitch,
+                     ping[i_ping_process].sensordepth, ping[i_ping_process].speed, ping[i_ping_process].pitch,
                      ping[i_ping_process].roll, ping[i_ping_process].heave);
 
             for (int j = 0; j < ping[i_ping_process].beams_bath; j++) {
@@ -4154,13 +4154,13 @@ int main(int argc, char **argv) {
                 //                                mb_put_binary_double(true, ping[i_ping_process].bath[j],
                 //                                &output_buffer[index]); index += 8;
                 // subtract sonar depth from vehicle bathy; changed 12jul18 cruises
-                mb_put_binary_double(true, (ping[i_ping_process].bath[j] - ping[i_ping_process].sonardepth),
+                mb_put_binary_double(true, (ping[i_ping_process].bath[j] - ping[i_ping_process].sensordepth),
                                      &output_buffer[index]);
                 index += 8;
 
                   MX_LPRINT(MBTRNPP, 2, "n[%03d] atrk/X[%+10.3lf] ctrk/Y[%+10.3lf] dpth/Z[%+10.3lf]\n", j,
                          ping[i_ping_process].bathalongtrack[j], ping[i_ping_process].bathacrosstrack[j],
-                         (ping[i_ping_process].bath[j] - ping[i_ping_process].sonardepth));
+                         (ping[i_ping_process].bath[j] - ping[i_ping_process].sensordepth));
               }
             }
 
@@ -4264,9 +4264,9 @@ int main(int argc, char **argv) {
                     fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
                                     "| %11.6f %11.6f %8.3f | Ping not processed - low gain condition\n",
                     time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], ping[i_ping_process].time_d,
-                    ping[i_ping_process].navlon, ping[i_ping_process].navlat, ping[i_ping_process].sonardepth);
+                    ping[i_ping_process].navlon, ping[i_ping_process].navlat, ping[i_ping_process].sensordepth);
                     mbtrnpp_trnu_pubempty_osocket(ping[i_ping_process].time_d, ping[i_ping_process].navlat,
-                      ping[i_ping_process].navlon, ping[i_ping_process].sonardepth,trnusvr);
+                      ping[i_ping_process].navlon, ping[i_ping_process].sensordepth,trnusvr);
                 }
 
 #endif // WITH_MBTNAV

@@ -1533,7 +1533,7 @@ struct mbsys_kmbes_struct {
         MB_DATA_VELOCITY_PROFILE  =  6: #SVP datagram
         MB_DATA_SSV               = 19: #SVT datagram
         MB_DATA_CLOCK             = 14: #SCL datagram
-        MB_DATA_SONARDEPTH        = 59: #SDE datagram
+        MB_DATA_SENSORDEPTH       = 59: #SDE datagram
         MB_DATA_HEIGHT            = 16: #SHI datagram
         MB_DATA_HEADING           = 17: #SHA datagram
         MB_DATA_DATA              = 12: #MRZ datagram

@@ -1108,7 +1108,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* save primary sonardepth data */
-			if (status == MB_SUCCESS && kind == MB_DATA_SONARDEPTH) {
+			if (status == MB_SUCCESS && kind == MB_DATA_SENSORDEPTH) {
 				/* check device for being enabled */
 				device = (struct mbsys_hysweep_device_struct *)&(istore->devices[istore->DFT_device_number]);
 				if (device->DV2_enabled) {
@@ -1396,7 +1396,7 @@ int main(int argc, char **argv) {
 	if (nsonardepth > 0 && (mode == MBHYSWEEPPREPROCESS_TIMESTAMPLIST)) {
 		fprintf(stdout, "\nTotal sonardepth data read: %d\n", nsonardepth);
 		for (int i = 0; i < nnav; i++) {
-			fprintf(stdout, "  SONARDEPTH: %12d %8.3f %8.3f\n", i, sonardepth_time_d[i], sonardepth_sonardepth[i]);
+			fprintf(stdout, "  SENSORDEPTH: %12d %8.3f %8.3f\n", i, sonardepth_time_d[i], sonardepth_sonardepth[i]);
 		}
 	}
 
@@ -2133,7 +2133,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* handle sonar depth data */
-				else if (status == MB_SUCCESS && kind == MB_DATA_SONARDEPTH) {
+				else if (status == MB_SUCCESS && kind == MB_DATA_SENSORDEPTH) {
 					nrec_DFT++;
 				}
 

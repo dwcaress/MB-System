@@ -356,6 +356,7 @@ void do_biases_init(Widget w, XtPointer client_data, XtPointer call_data);
 void do_biases_toggle(Widget w, XtPointer client_data, XtPointer call_data);
 void do_biases_heading(Widget w, XtPointer client_data, XtPointer call_data);
 void do_biases_roll(Widget w, XtPointer client_data, XtPointer call_data);
+void do_controls_show(Widget, XtPointer, XtPointer);
 void do_controls_apply(Widget w, XtPointer client_data, XtPointer call_data);
 void do_scale_controls_sectionlength(Widget w, XtPointer client_data, XtPointer call_data);
 void do_scale_controls_sectionsoundings(Widget w, XtPointer client_data, XtPointer call_data);

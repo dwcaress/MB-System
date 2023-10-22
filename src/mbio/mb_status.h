@@ -114,7 +114,7 @@
 #define MB_DATA_ATTITUDE1 56             /* ancillary attitude system 1 */
 #define MB_DATA_ATTITUDE2 57             /* ancillary attitude system 2 */
 #define MB_DATA_ATTITUDE3 58             /* ancillary attitude system 3 */
-#define MB_DATA_SONARDEPTH 59            /* HYSWEEP dynamic draft */
+#define MB_DATA_SENSORDEPTH 59            /* HYSWEEP dynamic draft */
 #define MB_DATA_ALTITUDE 60              /* HYSWEEP single beam echosounder */
 #define MB_DATA_GEN_SENS 61              /* WASSP generic sensor data */
 #define MB_DATA_WC_PICKS 62              /* WASSP water column picks */
@@ -195,10 +195,12 @@
 #define MB_PROBLEM_TOO_DEEP 5
 #define MB_PROBLEM_BAD_DATAGRAM 6
 
-/* processing status values returned by mb_datalist_read2() */
+/* processing status values returned by mb_datalist_read3() */
 #define MB_PROCESSED_NONE 0
 #define MB_PROCESSED_EXIST 1
 #define MB_PROCESSED_USE 2
+#define MB_ALTNAV_NONE 0
+#define MB_ALTNAV_USE 1
 
 /* image status values returned by mb_imagelist_read() */
 #define MB_IMAGESTATUS_NONE             0x00
@@ -302,7 +304,7 @@ const char *notice_msg[] = {
     "MB_DATA_NMEA_ZDA (ID=52): NMEA ZDA record", "MB_DATA_NMEA_GLL (ID=53): NMEA GLL record",
     "MB_DATA_NMEA_GGA (ID=54): NMEA GGA record", "MB_DATA_SURVEY_LINE (ID=55): Survey line record",
     "MB_DATA_ATTITUDE1 (56): ancillary attitude system 1", "MB_DATA_ATTITUDE2 (57): ancillary attitude system 2",
-    "MB_DATA_ATTITUDE3 (58): ancillary attitude system 3", "MB_DATA_SONARDEPTH (59): HYSWEEP dynamic draft",
+    "MB_DATA_ATTITUDE3 (58): ancillary attitude system 3", "MB_DATA_SENSORDEPTH (59): HYSWEEP dynamic draft",
     "MB_DATA_ALTITUDE (60): HYSWEEP single beam echosounder",
     "MB_DATA_GEN_SENS (61): WASSP generic sensor data",
     "MB_DATA_WC_PICKS (62): WASSP water column picks",

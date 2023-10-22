@@ -62,7 +62,7 @@ struct mb_info_struct {
 	double depth_start;
 	double heading_start;
 	double speed_start;
-	double sonardepth_start;
+	double sensordepth_start;
 	double sonaraltitude_start;
 
 	double time_end;
@@ -71,15 +71,15 @@ struct mb_info_struct {
 	double depth_end;
 	double heading_end;
 	double speed_end;
-	double sonardepth_end;
+	double sensordepth_end;
 	double sonaraltitude_end;
 
 	double lon_min;
 	double lon_max;
 	double lat_min;
 	double lat_max;
-	double sonardepth_min;
-	double sonardepth_max;
+	double sensordepth_min;
+	double sensordepth_max;
 	double altitude_min;
 	double altitude_max;
 	double depth_min;

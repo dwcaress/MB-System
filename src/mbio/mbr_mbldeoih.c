@@ -342,7 +342,7 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			index += 8;
 			mb_get_binary_double(false, (void *)&buffer[index], &store->latitude);
 			index += 8;
-			mb_get_binary_double(false, (void *)&buffer[index], &store->sonardepth);
+			mb_get_binary_double(false, (void *)&buffer[index], &store->sensordepth);
 			index += 8;
 			mb_get_binary_double(false, (void *)&buffer[index], &store->altitude);
 			index += 8;
@@ -389,7 +389,7 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			index += 8;
 			mb_get_binary_double(false, (void *)&buffer[index], &store->latitude);
 			index += 8;
-			mb_get_binary_double(false, (void *)&buffer[index], &store->sonardepth);
+			mb_get_binary_double(false, (void *)&buffer[index], &store->sensordepth);
 			index += 8;
 			mb_get_binary_double(false, (void *)&buffer[index], &store->altitude);
 			index += 8;
@@ -524,8 +524,8 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			store->longitude = ((double)oldstore.lon2u) / 60. + ((double)oldstore.lon2b) / 600000.;
 			store->latitude = ((double)oldstore.lat2u) / 60. + ((double)oldstore.lat2b) / 600000. - 90.;
 
-			/* get sonardepth and altitude */
-			store->sonardepth = 0.001 * oldstore.transducer_depth;
+			/* get sensordepth and altitude */
+			store->sensordepth = 0.001 * oldstore.transducer_depth;
 			store->altitude = 0.001 * oldstore.altitude;
 
 			/* get heading (360 degrees = 65536) and speed */
@@ -604,7 +604,7 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       time_d:           %f\n", store->time_d);
 		fprintf(stderr, "dbg5       longitude:        %f\n", store->longitude);
 		fprintf(stderr, "dbg5       latitude:         %f\n", store->latitude);
-		fprintf(stderr, "dbg5       sonardepth:       %f\n", store->sonardepth);
+		fprintf(stderr, "dbg5       sensordepth:       %f\n", store->sensordepth);
 		fprintf(stderr, "dbg5       altitude:         %f\n", store->altitude);
 		fprintf(stderr, "dbg5       heading:          %f\n", store->heading);
 		fprintf(stderr, "dbg5       speed:            %f\n", store->speed);
@@ -787,12 +787,12 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		if (version < 3) {
 			depthmax = 0.0;
 			for (int i = 0; i < store->beams_bath; i++) {
-				depthmax = MAX(depthmax, (store->depth_scale * store->bath[i] - store->sonardepth));
+				depthmax = MAX(depthmax, (store->depth_scale * store->bath[i] - store->sensordepth));
 			}
 			if (depthmax > 0.0)
 				newdepthscale = 0.001 * (double)(MAX((int)(1 + depthmax / 30.0), 1));
 			for (int i = 0; i < store->beams_bath; i++) {
-				store->bath[i] = (short)((store->depth_scale * store->bath[i] - store->sonardepth) / newdepthscale);
+				store->bath[i] = (short)((store->depth_scale * store->bath[i] - store->sensordepth) / newdepthscale);
 			}
 			store->depth_scale = newdepthscale;
 		}
@@ -925,7 +925,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			oldstore.distance_scale = 10;
 
 		/* set scaled transducer_depth and altitude */
-		oldstore.transducer_depth = 1000 * store->sonardepth;
+		oldstore.transducer_depth = 1000 * store->sensordepth;
 		oldstore.altitude = 1000 * store->altitude;
 
 		/* get sidescan type */
@@ -962,7 +962,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       time_d:           %f\n", store->time_d);
 		fprintf(stderr, "dbg5       longitude:        %f\n", store->longitude);
 		fprintf(stderr, "dbg5       latitude:         %f\n", store->latitude);
-		fprintf(stderr, "dbg5       sonardepth:       %f\n", store->sonardepth);
+		fprintf(stderr, "dbg5       sensordepth:       %f\n", store->sensordepth);
 		fprintf(stderr, "dbg5       altitude:         %f\n", store->altitude);
 		fprintf(stderr, "dbg5       heading:          %f\n", store->heading);
 		fprintf(stderr, "dbg5       speed:            %f\n", store->speed);
@@ -1091,7 +1091,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			index += 8;
 			mb_put_binary_double(false, store->latitude, (void *)&buffer[index]);
 			index += 8;
-			mb_put_binary_double(false, store->sonardepth, (void *)&buffer[index]);
+			mb_put_binary_double(false, store->sensordepth, (void *)&buffer[index]);
 			index += 8;
 			mb_put_binary_double(false, store->altitude, (void *)&buffer[index]);
 			index += 8;
@@ -1141,7 +1141,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			index += 8;
 			mb_put_binary_double(false, store->latitude, (void *)&buffer[index]);
 			index += 8;
-			mb_put_binary_double(false, store->sonardepth, (void *)&buffer[index]);
+			mb_put_binary_double(false, store->sensordepth, (void *)&buffer[index]);
 			index += 8;
 			mb_put_binary_double(false, store->altitude, (void *)&buffer[index]);
 			index += 8;

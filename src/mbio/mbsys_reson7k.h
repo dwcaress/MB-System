@@ -1065,7 +1065,7 @@ typedef struct s7kr_processedsidescan_struct {
 	                                                                    acrosstrack = (ipixel - number_pixels / 2) * pixelwidth
 	                                                                where i = pixel number and N is the total number
 	                                                                of pixels, counting from port to starboard starting at 0 */
-	double sonardepth;                          /* Sonar depth in m */
+	double sensordepth;                          /* Sonar depth in m */
 	double altitude;                            /* Sonar nadir altitude in m */
 	float sidescan[MBSYS_RESON7K_MAX_PIXELS];   /* Depth releative to chart datum in meters */
 	float alongtrack[MBSYS_RESON7K_MAX_PIXELS]; /* Alongtrack distance in meters */

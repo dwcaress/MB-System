@@ -41,7 +41,7 @@
 int mbr_info_3ddepthp(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source,
-                      int *sonardepth_source,
+                      int *sensordepth_source,
                       // int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
@@ -71,7 +71,7 @@ int mbr_info_3ddepthp(int verbose, int *system, int *beams_bath_max, int *beams_
 	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
-	*sonardepth_source = MB_DATA_DATA;
+	*sensordepth_source = MB_DATA_DATA;
 	*heading_source = MB_DATA_DATA;
 	*attitude_source = MB_DATA_DATA;
 	*svp_source = MB_DATA_NONE;
@@ -97,7 +97,7 @@ int mbr_info_3ddepthp(int verbose, int *system, int *beams_bath_max, int *beams_
 		fprintf(stderr, "dbg2       beam_flagging:      %d\n", *beam_flagging);
 		fprintf(stderr, "dbg2       platform_source:    %d\n", *platform_source);
 		fprintf(stderr, "dbg2       nav_source:         %d\n", *nav_source);
-		fprintf(stderr, "dbg2       sonardepth_source:  %d\n", *sonardepth_source);
+		fprintf(stderr, "dbg2       sensordepth_source:  %d\n", *sensordepth_source);
 		fprintf(stderr, "dbg2       heading_source:     %d\n", *heading_source);
 		fprintf(stderr, "dbg2       attitude_source:    %d\n", *attitude_source);
 		fprintf(stderr, "dbg2       svp_source:         %d\n", *svp_source);
@@ -308,7 +308,6 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 		/* read the next record header */
 		size_t read_len = (size_t)sizeof(short);
-		int skip = 0;
 		int valid_id;
 		do {
 			status = mb_fileio_get(verbose, mbio_ptr, (void *)&(store->record_id), &read_len, error);
@@ -321,7 +320,6 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				}
 				else {
 					valid_id = false;
-					skip++;
 				}
 			}
 		} while (status == MB_SUCCESS && !valid_id);
@@ -480,7 +478,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					mb_get_binary_double(true, (void *)&buffer[index], &(store->sdp_sensordepth));
 					// index += sizeof(double);
 
-					store->kind = MB_DATA_SONARDEPTH;
+					store->kind = MB_DATA_SENSORDEPTH;
 				}
 			}
 
@@ -1142,7 +1140,7 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		}
 
 		/* write sensordepth record */
-		else if (store->kind == MB_DATA_SONARDEPTH) {
+		else if (store->kind == MB_DATA_SENSORDEPTH) {
 			/* encode the data */
 			size_t index = 0;
 			store->record_id = MBF_3DDEPTHP_RECORD_SENSORDEPTH;

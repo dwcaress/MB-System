@@ -51,7 +51,7 @@ struct mbvt_ping_struct {
 	double navlat;
 	double speed;
 	double heading;
-	double sonardepth;
+	double sensordepth;
 	double ssv;
 	int beams_bath;
 	char *beamflag;

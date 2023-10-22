@@ -556,6 +556,8 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
           fprintf(stderr, "Die at line:%d file:%s buffer:%s\n", __LINE__, __FILE__, buffer);
           exit(0);
         }
+        if (project->use_mode < MBNA_USE_MODE_PRIMARY || project->use_mode > MBNA_USE_MODE_TERTIARY)
+          project->use_mode = MBNA_USE_MODE_PRIMARY;
 
         if (status == MB_SUCCESS &&
             ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
@@ -644,6 +646,15 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
           }
           else
             project->zoffsetwidth = 1.0;
+        }
+
+        if (status == MB_SUCCESS && version_id >= 315 && ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
+                   (nscan = sscanf(buffer, "%s %d", label, &project->use_mode)) != 2 ||
+                   strcmp(label, "USEMODE") != 0))
+          status = MB_FAILURE;
+        if (status == MB_FAILURE) {
+          fprintf(stderr, "Die at line:%d file:%s buffer:%s\n", __LINE__, __FILE__, buffer);
+          exit(0);
         }
 
         /* allocate memory for files array */
@@ -1738,6 +1749,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
     fprintf(hfp, "GRIDSTATUS\t%d\n", project->grid_status);
     fprintf(hfp, "SMOOTHING\t%f\n", project->smoothing);
     fprintf(hfp, "ZOFFSETWIDTH\t%f\n", project->zoffsetwidth);
+    fprintf(hfp, "USEMODE\t%d\n", project->use_mode);
     for (i = 0; i < project->num_files; i++) {
       /* write out basic file info */
       file = &project->files[i];
@@ -2413,43 +2425,61 @@ int mbnavadjust_remove_short_sections(int verbose, struct mbna_project *project,
   }
 
   int status = MB_SUCCESS;
-  int *crossing_changes = NULL;
-  if (project->num_crossings > 0) {
+
+  /* Save all ties and global ties in lists, then delete all crossings and crossing ties 
+      Then look for short sections, and merge those with prior sections, working backwards
+      through the project. Once the short sections have been identified and
+      merged with prior sections, then recalculate the list of crossings, and recreate all
+      of the ties using the revised sections */
+
+  /* Save a list of the current crossings with ties */
+  int num_crossings_save = 0;
+  int num_crossings_save_alloc = 0;
+  struct mbna_crossing *crossings_save = NULL;
+  for (int icrossing = 0; icrossing < project->num_crossings; icrossing++) {
+    struct mbna_crossing *crossing = &project->crossings[icrossing];
+    if (crossing->num_ties > 0) {
+      num_crossings_save_alloc++;
+    }
+  }
+  if (num_crossings_save_alloc > 0) {
     status = mb_mallocd(verbose, __FILE__, __LINE__, 
-                        project->num_crossings * sizeof(int), 
-                        (void **)&crossing_changes, error);
+                        num_crossings_save_alloc * sizeof(struct mbna_crossing), 
+                        (void **)&crossings_save, error);
     if (status != MB_SUCCESS) {
       fprintf(stderr, "%s:%d:%s: Memory allocation error\n", __FILE__, __LINE__, __FUNCTION__);
       exit(*error);
     }
   }
+  for (int icrossing = 0; icrossing < project->num_crossings; icrossing++) {
+    struct mbna_crossing *crossing = &project->crossings[icrossing];
+    if (crossing->num_ties > 0) {
+      crossings_save[num_crossings_save] = project->crossings[icrossing];
+      num_crossings_save++;
+    }
+  }
 
-  /* loop backwards over all files and sections, looking for sections that
+  /* Loop backwards over all files and sections, looking for sections that
       are too short and can be added to the prior section - then change section id's
-      in all affected crossing and ties */
+      in all affected crossing and ties 
+      - */
   for (int ifile = project->num_files-1; ifile >= 0; ifile--) {
     struct mbna_file *file = &project->files[ifile];
     for (int isection = file->num_sections-1; isection > 0; isection--) {
       struct mbna_section *section = &file->sections[isection];
       struct mbna_section *sectionprior = &file->sections[isection-1];
-      if (project->num_crossings > 0) {
-//fprintf(stderr, "\n%s:%d:%s: Reset crossing_changes array for %d crossings, section: %3.3d:%2.2d\n",
-//__FILE__, __LINE__, __FUNCTION__, project->num_crossings, ifile, isection);
-        memset(crossing_changes, 0, (size_t)(sizeof(int) * project->num_crossings));
-      }
       if (section->distance < minimum_section_length 
           && section->num_beams < minimum_section_soundings 
           && section->continuity
           && sectionprior->num_snav + section->num_snav < MBNA_SNAV_NUM) {
-        int snav_offset = sectionprior->num_snav - 1;
-//fprintf(stderr, "\n%s:%d:%s: Removing short section: %2.2d:%4.4d:%2.2d   %9.6f %6d\n",
-//__FILE__, __LINE__, __FUNCTION__, file->block, ifile, isection, section->distance, section->num_beams);
+fprintf(stderr, "\n%s:%d:%s: Removing short section: %2.2d:%4.4d:%2.2d   %9.6f %6d\n",
+__FILE__, __LINE__, __FUNCTION__, file->block, ifile, isection, section->distance, section->num_beams);
 
         /* copy the short section onto the end of the prior section */
         sectionprior->num_pings += section->num_pings;
         sectionprior->num_beams += section->num_beams;
         sectionprior->distance += section->distance;
-        sectionprior->etime_d += section->etime_d;
+        sectionprior->etime_d = section->etime_d;
         sectionprior->lonmin = MIN(section->lonmin, sectionprior->lonmin);
         sectionprior->lonmax = MAX(section->lonmax, sectionprior->lonmax);
         sectionprior->latmin = MIN(section->latmin, sectionprior->latmin);
@@ -2486,8 +2516,6 @@ int mbnavadjust_remove_short_sections(int verbose, struct mbna_project *project,
             project->num_globalties--;
           }
         }
-//fprintf(stderr, "%s:%d:%s: Reset crossings and ties associated with short section %3.3d:%2.2d\n",
-//__FILE__, __LINE__, __FUNCTION__, ifile, isection);
 
         /* concatenate the *.mb71 and *.fnv files */
         mb_path shortsectionfile, priorsectionfile;
@@ -2567,192 +2595,362 @@ int mbnavadjust_remove_short_sections(int verbose, struct mbna_project *project,
 
         }
         file->num_sections--;
-
-        /* look for crossings that should be deleted because they connect the two sections being
-           combined, crossings that should be deleted because they reference the deleted section
-            but are duplicated by an existing crossing referencing the prior/combined section,
-            and crossings that should have one or both section ids reduced because they are in
-            the same file as the section being deleted but come after the deletec section */
-        if (project->num_crossings > 0) {
-          const int CROSSING_DELETE = 0x40000000;
-          const int CROSSING_SECTION1_SHIFT = 0x01;
-          const int CROSSING_SECTION2_SHIFT = 0x02;
-          for (int icrossing=0; icrossing < project->num_crossings; icrossing++) {
-            struct mbna_crossing *crossing = &project->crossings[icrossing];
-
-            /* delete a crossing between short and prior sections */
-            if (crossing->file_id_1 == ifile && crossing->section_1 == isection - 1 &&
-              crossing->file_id_2 == ifile && crossing->section_2 == isection) {
-              crossing_changes[icrossing] = CROSSING_DELETE;
-//fprintf(stderr, "%s:%d:%s: Set delete for crossing %d  %2.2d:%4.4d %2.2d:%4.4d across combined section",
-//__FILE__, __LINE__, __FUNCTION__, icrossing, crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2);
-            }
-
-            /* delete a crossing if it references the deleted/short section and the 
-                an equivalent crossing with the combined/prior section already exists 
-                - any tie in the deleted crossing will need to be copied to the 
-                existing crossing */ 
-            else if (crossing->file_id_1 == ifile && crossing->section_1 == isection) {
-              for (int jcrossing=0; jcrossing < project->num_crossings; jcrossing++) {
-                struct mbna_crossing *tcrossing = &project->crossings[jcrossing];
-                if (jcrossing != icrossing 
-                    && tcrossing->file_id_1 == ifile 
-                    && tcrossing->section_1 == isection - 1
-                    && tcrossing->file_id_2 == crossing->file_id_2 
-                    && tcrossing->section_2 == crossing->section_2) {
-                  crossing_changes[icrossing] = CROSSING_DELETE + jcrossing;
-//fprintf(stderr, "%s:%d:%s: Set delete crossing %d  %2.2d:%4.4d %2.2d:%4.4d because of duplicate crossing %d  %2.2d:%4.4d %2.2d:%4.4d\n",
-//__FILE__, __LINE__, __FUNCTION__, 
-//icrossing, crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2,
-//jcrossing, tcrossing->file_id_1, tcrossing->section_1, tcrossing->file_id_2, tcrossing->section_2);
-                }
-              }
-              if (crossing_changes[icrossing] < CROSSING_DELETE) {
-                crossing_changes[icrossing] = crossing_changes[icrossing] | CROSSING_SECTION1_SHIFT;
-//fprintf(stderr, "%s:%d:%s: Set section 2 shift in crossing %d  %2.2d:%4.4d %2.2d:%4.4d\n",
-//__FILE__, __LINE__, __FUNCTION__, 
-//icrossing, crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2);
-              }
-            }
-            else if (crossing->file_id_2 == ifile && crossing->section_2 == isection) {
-              for (int jcrossing=0; jcrossing < project->num_crossings; jcrossing++) {
-                struct mbna_crossing *tcrossing = &project->crossings[jcrossing];
-                if (jcrossing != icrossing 
-                    && tcrossing->file_id_1 == crossing->file_id_1 
-                    && tcrossing->section_1 == crossing->section_1
-                    && tcrossing->file_id_2 == ifile 
-                    && tcrossing->section_2 == isection - 1) {
-                  crossing_changes[icrossing] = CROSSING_DELETE + jcrossing;
-//fprintf(stderr, "%s:%d:%s: Set delete crossing %d  %2.2d:%4.4d %2.2d:%4.4d because of duplicate crossing %d  %2.2d:%4.4d %2.2d:%4.4d\n",
-//__FILE__, __LINE__, __FUNCTION__, 
-//icrossing, crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2,
-//jcrossing, tcrossing->file_id_1, tcrossing->section_1, tcrossing->file_id_2, tcrossing->section_2);
-                }
-              }
-              if (crossing_changes[icrossing] < CROSSING_DELETE) {
-                crossing_changes[icrossing] = crossing_changes[icrossing] | CROSSING_SECTION2_SHIFT;
-//fprintf(stderr, "%s:%d:%s: Set section 2 shift in crossing %d  %2.2d:%4.4d %2.2d:%4.4d\n",
-//__FILE__, __LINE__, __FUNCTION__, 
-//icrossing, crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2);
-              }
-            }
-
-            /* identify crossings referencing sections from the same file but after the 
-                deleted section so the section ids can be decremented */
-            else {
-              if (crossing->file_id_1 == ifile && crossing->section_1 > isection) {
-                crossing_changes[icrossing] = crossing_changes[icrossing] | CROSSING_SECTION1_SHIFT;
-//fprintf(stderr, "%s:%d:%s: Set section 1 shift in crossing %d  %2.2d:%4.4d %2.2d:%4.4d\n",
-//__FILE__, __LINE__, __FUNCTION__, 
-//icrossing, crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2);
-              }
-              if (crossing->file_id_2 == ifile && crossing->section_2 > isection) {
-                crossing_changes[icrossing] = crossing_changes[icrossing] | CROSSING_SECTION2_SHIFT;
-//fprintf(stderr, "%s:%d:%s: Set section 2 shift in crossing %d  %2.2d:%4.4d %2.2d:%4.4d\n",
-//__FILE__, __LINE__, __FUNCTION__, 
-//icrossing, crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2);
-              }
-            }
-          }
-
-          /* apply the crossing shifts and deletes */
-          for (int icrossing = 0; icrossing < project->num_crossings; icrossing++) {
-            struct mbna_crossing *crossing = &project->crossings[icrossing];
-            if (crossing_changes[icrossing] < CROSSING_DELETE) {
-              if (crossing_changes[icrossing] & CROSSING_SECTION1_SHIFT) {
-//fprintf(stderr, "%s:%d:%s: Shift section1: crossing %d  %2.2d:%4.4d %2.2d:%4.4d ",
-//__FILE__, __LINE__, __FUNCTION__, icrossing, crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2);
-                crossing->section_1--;
-//fprintf(stderr, "   %2.2d:%4.4d %2.2d:%4.4d\n",
-//crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2);
-              }
-              if (crossing_changes[icrossing] & CROSSING_SECTION2_SHIFT) {
-//fprintf(stderr, "%s:%d:%s: Shift section2: crossing %d  %2.2d:%4.4d %2.2d:%4.4d ",
-//__FILE__, __LINE__, __FUNCTION__, icrossing, crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2);
-                crossing->section_2--;
-//fprintf(stderr, "   %2.2d:%4.4d %2.2d:%4.4d\n",
-//crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2);
-              }
-            }
-          }
-
-          /* apply the crossing deletes */
-          for (int icrossing = project->num_crossings - 1; icrossing >= 0; icrossing--) {
-            struct mbna_crossing *crossing = &project->crossings[icrossing];
-
-            /* copy ties if crossings need to be combined */
-            if (crossing_changes[icrossing] > CROSSING_DELETE) {
-              int jcrossing = crossing_changes[icrossing] - CROSSING_DELETE;
-              struct mbna_crossing *tcrossing = &project->crossings[jcrossing];
-              if (tcrossing->num_ties <= MBNA_SNAV_NUM - crossing->num_ties) {
-//fprintf(stderr, "%s:%d:%s: Copy %d ties before deleting crossing %d  %2.2d:%4.4d %2.2d:%4.4d\n",
-//__FILE__, __LINE__, __FUNCTION__, 
-//crossing->num_ties, icrossing, crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2);
-                for (int jtie=0; jtie < crossing->num_ties; jtie++) {
-                  tcrossing->ties[tcrossing->num_ties] = crossing->ties[jtie];
-                  if (crossing->file_id_1 == ifile && crossing->section_1 == isection)
-                    tcrossing->ties[tcrossing->num_ties].snav_1 += snav_offset;
-                  else
-                    tcrossing->ties[tcrossing->num_ties].snav_2 += snav_offset;
-                  tcrossing->num_ties++;
-                }
-              }
-              else {
-                project->num_ties -= crossing->num_ties;
-              }
-            }
-
-            /* delete the duplicate or unnecessary crossing */
-            if (crossing_changes[icrossing] >= CROSSING_DELETE) {
-//if (crossing_changes[icrossing] > CROSSING_DELETE) {
-//int jcrossing = crossing_changes[icrossing] - CROSSING_DELETE;
-//struct mbna_crossing *tcrossing = &project->crossings[jcrossing];
-//fprintf(stderr, "%s:%d:%s: Delete crossing %d  %2.2d:%4.4d %2.2d:%4.4d because of duplicate crossing %d  %2.2d:%4.4d %2.2d:%4.4d\n",
-//__FILE__, __LINE__, __FUNCTION__, 
-//icrossing, crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2,
-//jcrossing, tcrossing->file_id_1, tcrossing->section_1, tcrossing->file_id_2, tcrossing->section_2);
-//}
-//else {
-//fprintf(stderr, "%s:%d:%s: Delete crossing %d  %2.2d:%4.4d %2.2d:%4.4d because it connects combined sections\n",
-//__FILE__, __LINE__, __FUNCTION__, 
-//icrossing, crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2);
-//}
-              for (int jcrossing=icrossing; jcrossing<project->num_crossings - 1; jcrossing++) {
-                project->crossings[jcrossing] = project->crossings[jcrossing+1];
-              }
-              project->num_crossings--;
-            }
-          }
-        }
-
-
-      //for (int itfile = 0; itfile < project->num_files; itfile++) {
-      //  struct mbna_file *tfile = &project->files[itfile];
-      //  fprintf(stderr, "\nfile %d of %d - %d sections\n", itfile, project->num_files, tfile->num_sections);
-      //  for (int itsection = 0; itsection < tfile->num_sections; itsection++) {
-      //   struct mbna_section *tsection = &tfile->sections[itsection];
-      //    fprintf(stderr, "----section %d of %d - %d snav\n", itsection, tfile->num_sections, tsection->num_snav);
-      //  }
-      //}
-      //for (int itcrossing = 0; itcrossing < project->num_crossings; itcrossing++) {
-        //struct mbna_crossing *tcrossing = &project->crossings[itcrossing];
-        //fprintf(stderr, "crossing %d of %d: %4.4d:%2.2d  %4.4d:%2.2d  : %d ties\n",
-        //        itcrossing, project->num_crossings, tcrossing->file_id_1, tcrossing->section_1,
-        //        tcrossing->file_id_2, tcrossing->section_2, tcrossing->num_ties);
-        //for (int ittie=0; ittie < tcrossing->num_ties; ittie++) {
-          //struct mbna_tie *ttie = &tcrossing->ties[ittie];
-          //fprintf(stderr, "----tie %d of %d: %4.4d:%2.2d:%2.2d  %4.4d:%2.2d:%2.2d\n", 
-          //        ittie, tcrossing->num_ties, 
-          //        tcrossing->file_id_1, tcrossing->section_1, ttie->snav_1, 
-          //        tcrossing->file_id_2, tcrossing->section_2, ttie->snav_2);
-        //}
-      //}
       }
     }
   }
 
-  if (crossing_changes != NULL) {
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&crossing_changes, error);
+  /* Reset counts in the project, including deleting previously existing crossings, 
+      crossing ties, and global ties */
+  project->num_surveys = 0;
+  project->num_snavs = 0;
+  project->num_pings = 0;
+  project->num_beams = 0;
+  project->num_crossings = 0;
+  project->num_crossings_analyzed = 0;
+  project->num_goodcrossings = 0;
+  project->num_truecrossings = 0;
+  project->num_truecrossings_analyzed = 0;
+
+  /* recount the number of surveys (blocks), pings, beams */
+  for (int ifile = 0; ifile < project->num_files; ifile++) {
+    struct mbna_file *file = &project->files[ifile];
+    if (ifile == 0 || !file->sections[0].continuity) {
+      project->num_surveys++;
+    }
+    file->block = project->num_surveys - 1;
+    file->block_offset_x = 0.0;
+    file->block_offset_y = 0.0;
+    file->block_offset_z = 0.0;
+    for (int isection = 0; isection < file->num_sections; isection++) {
+      struct mbna_section *section = &file->sections[isection];
+      project->num_snavs += section->num_snav;
+      project->num_pings += section->num_pings;
+      project->num_beams += section->num_beams;
+    }
+  }
+
+  /* reset project bounds and scaling */
+  bool first = true;
+  for (int ifile = 0; ifile < project->num_files; ifile++) {
+    struct mbna_file *file = &project->files[ifile];
+    if (file->status != MBNA_FILE_FIXEDNAV) {
+      for (int isection = 0; isection < file->num_sections; isection++) {
+        struct mbna_section *section = &file->sections[isection];
+        project->num_snavs += section->num_snav;
+        if (!(check_fnan(section->lonmin) || check_fnan(section->lonmax) || check_fnan(section->latmin) ||
+              check_fnan(section->latmax))) {
+          if (first) {
+            project->lon_min = section->lonmin;
+            project->lon_max = section->lonmax;
+            project->lat_min = section->latmin;
+            project->lat_max = section->latmax;
+            first = false;
+          }
+          else {
+            project->lon_min = MIN(project->lon_min, section->lonmin);
+            project->lon_max = MAX(project->lon_max, section->lonmax);
+            project->lat_min = MIN(project->lat_min, section->latmin);
+            project->lat_max = MAX(project->lat_max, section->latmax);
+          }
+        }
+      }
+    }
+    // fprintf(stderr, "%s:%d:%s: PROJECT BOUNDS: file %d %s: %.7f %.7f    %.7f %.7f\n",
+    // __FILE__, __LINE__, __FUNCTION__, 
+    // ifile, file->path, project->lon_min, project->lon_max, project->lat_min, project->lat_max);
+  }
+  mb_coor_scale(verbose, 0.5 * (project->lat_min + project->lat_max), &project->mtodeglon, &project->mtodeglat);
+
+  /* now redo scaling of global ties since mtodeglon and mtodeglat are defined */
+  for (int ifile = 0; ifile < project->num_files; ifile++) {
+    struct mbna_file *file = &project->files[ifile];
+    for (int isection = 0; isection < file->num_sections; isection++) {
+      struct mbna_section *section = &file->sections[isection];
+      if (section->status == MBNA_CROSSING_STATUS_SET) {
+        section->globaltie.offset_x_m = section->globaltie.offset_x / project->mtodeglon;
+        section->globaltie.offset_y_m = section->globaltie.offset_y / project->mtodeglat;
+        if (section->globaltie.inversion_status != MBNA_INVERSION_NONE) {
+          section->globaltie.inversion_offset_x = section->snav_lon_offset[section->globaltie.snav];
+          section->globaltie.inversion_offset_y = section->snav_lat_offset[section->globaltie.snav];
+          section->globaltie.inversion_offset_x_m = section->snav_lon_offset[section->globaltie.snav] / project->mtodeglon;
+          section->globaltie.inversion_offset_y_m = section->snav_lat_offset[section->globaltie.snav] / project->mtodeglat;
+          section->globaltie.inversion_offset_z_m = section->snav_z_offset[section->globaltie.snav];
+          section->globaltie.dx_m = section->globaltie.offset_x_m - section->globaltie.inversion_offset_x_m;
+          section->globaltie.dy_m = section->globaltie.offset_y_m - section->globaltie.inversion_offset_y_m;
+          section->globaltie.dz_m = section->globaltie.offset_z_m - section->globaltie.inversion_offset_z_m;
+          section->globaltie.sigma_m = sqrt(section->globaltie.dx_m * section->globaltie.dx_m 
+                                            + section->globaltie.dy_m * section->globaltie.dy_m 
+                                            + section->globaltie.dz_m * section->globaltie.dz_m);
+          section->globaltie.dr1_m = section->globaltie.inversion_offset_x_m / section->globaltie.sigmar1;
+          section->globaltie.dr2_m = section->globaltie.inversion_offset_y_m / section->globaltie.sigmar2;
+          section->globaltie.dr3_m = section->globaltie.inversion_offset_z_m / section->globaltie.sigmar3;
+          section->globaltie.rsigma_m = sqrt(section->globaltie.dr1_m * section->globaltie.dr1_m 
+                                            + section->globaltie.dr2_m * section->globaltie.dr2_m 
+                                            + section->globaltie.dr3_m * section->globaltie.dr3_m);
+        }
+      }
+    }
+  }
+
+  /* find crossings */
+  mbnavadjust_findcrossings(verbose, project, error);
+
+  /* loop over all pre-existing crossing ties, adding them again to the project while ignoring
+      duplicate crossings */
+  for (int icrossing_save = 0; icrossing_save < num_crossings_save; icrossing_save++) {
+    struct mbna_crossing *crossing_save = &crossings_save[icrossing_save];
+    int import_tie_file_1 = crossing_save->file_id_1;
+    int import_tie_file_2 = crossing_save->file_id_2;
+    struct mbna_file *file1 = &project->files[import_tie_file_1];
+    struct mbna_file *file2 = &project->files[import_tie_file_2];
+    for (int itie = 0; itie < crossing_save->num_ties; itie++) {
+      struct mbna_tie *tie_save = &crossing_save->ties[itie];
+      int import_tie_section_1 = -1;
+      int import_tie_section_2 = -1;
+      int import_tie_snav_1 = -1;
+      int import_tie_snav_2 = -1;
+bool debug_verbose = false;
+if (import_tie_file_1 == 3360 && import_tie_file_2 == 4999) {
+debug_verbose = true;
+fprintf(stderr, "\nSaved Tie:  %2.2d:%4.4d:%2.2d:%2.2d %.6f %2.2d:%4.4d:%2.2d:%2.2d %.6f\n",
+file1->block, crossing_save->file_id_1, crossing_save->section_1, tie_save->snav_1, tie_save->snav_1_time_d,
+file2->block, crossing_save->file_id_2, crossing_save->section_2, tie_save->snav_2, tie_save->snav_2_time_d);
+}
+
+      /* find the sections and snavs */
+      bool found = false;
+      for (int isection = 0; isection < file1->num_sections && !found; isection++) {
+        struct mbna_section *section1 = &(file1->sections[isection]);
+if (debug_verbose) {
+fprintf(stderr, "Looking for sections and snavs 1: section %d of %d  times: %.6f %.6f %.6f\n",
+isection, file1->num_sections, section1->btime_d, tie_save->snav_1_time_d, section1->etime_d);
+}
+        if (tie_save->snav_1_time_d >= section1->btime_d && tie_save->snav_1_time_d <= section1->etime_d) {
+          /* now pick the closest snav */
+          found = true;
+          import_tie_section_1 = isection;
+          double timediffmin = fabs(tie_save->snav_1_time_d - section1->btime_d);
+          import_tie_snav_1 = 0;
+if (debug_verbose) {
+fprintf(stderr, "Found section %d looking for snav from %d starting with timediffmin: %.6f\n",
+import_tie_section_1, section1->num_snav, timediffmin);
+}
+          for (int isnav = 0; isnav < section1->num_snav; isnav++) {
+            double timediff = fabs(tie_save->snav_1_time_d - section1->snav_time_d[isnav]);
+            if (timediff < timediffmin) {
+              import_tie_snav_1 = isnav;
+              timediffmin = timediff;
+            }
+if (debug_verbose) {
+fprintf(stderr, "  isnav:%d  %.6f %.6f  timediff: %.6f timediffmin: %.6f   %d\n", 
+isnav, tie_save->snav_1_time_d, section1->snav_time_d[isnav], timediff, timediffmin, import_tie_snav_1);
+}
+          }
+        }
+      }
+      found = false;
+      for (int isection = 0; isection < file2->num_sections && !found; isection++) {
+        struct mbna_section *section2 = &(file2->sections[isection]);
+if (debug_verbose) {
+fprintf(stderr, "Looking for sections and snavs 2: section %d of %d  times: %.6f %.6f %.6f\n",
+isection, file2->num_sections, section2->btime_d, tie_save->snav_2_time_d, section2->etime_d);
+}
+        if (tie_save->snav_2_time_d >= section2->btime_d && tie_save->snav_2_time_d <= section2->etime_d) {
+          /* now pick the closest snav */
+          found = true;
+          import_tie_section_2 = isection;
+          double timediffmin = fabs(tie_save->snav_2_time_d - section2->btime_d);
+          import_tie_snav_2 = 0;
+if (debug_verbose) {
+fprintf(stderr, "Found section %d looking for snav from %d starting with timediffmin: %.6f\n",
+import_tie_section_2, section2->num_snav, timediffmin);
+}
+          for (int isnav = 0; isnav < section2->num_snav; isnav++) {
+            double timediff = fabs(tie_save->snav_2_time_d - section2->snav_time_d[isnav]);
+            if (timediff < timediffmin) {
+              import_tie_snav_2 = isnav;
+              timediffmin = timediff;
+            }
+if (debug_verbose) {
+fprintf(stderr, "  isnav:%d  %.6f %.6f  timediff: %.6f timediffmin: %.6f   %d\n", 
+isnav, tie_save->snav_2_time_d, section2->snav_time_d[isnav], timediff, timediffmin, import_tie_snav_2);
+}
+          }
+        }
+      }
+if (debug_verbose) {
+fprintf(stderr, "Located tie:  %2.2d:%4.4d:%2.2d:%2.2d %.6f %2.2d:%4.4d:%2.2d:%2.2d %.6f\n",
+project->files[import_tie_file_1].block, import_tie_file_1, import_tie_section_1, import_tie_snav_1, 
+project->files[import_tie_file_1].sections[import_tie_section_1].snav_time_d[import_tie_snav_1],
+project->files[import_tie_file_2].block, import_tie_file_2, import_tie_section_2, import_tie_snav_2, 
+project->files[import_tie_file_2].sections[import_tie_section_2].snav_time_d[import_tie_snav_2]);
+}
+
+      /* if nav points for tie are found, add tie to appropriate crossing, 
+          creating a new crossing if necessary */
+      if (import_tie_file_1 >= 0 && import_tie_section_1 >= 0 && import_tie_snav_1 >= 0
+          && import_tie_file_2 >= 0 && import_tie_section_2 >= 0 && import_tie_snav_2 >= 0) {
+
+        if (import_tie_snav_1 >= project->files[import_tie_file_1].sections[import_tie_section_1].num_snav) {
+          fprintf(stderr, "****** snav:%d too large for %d snavs in section %2.2d:%4.4d:%4.4d\n",
+                          import_tie_snav_1, project->files[import_tie_file_1].sections[import_tie_section_1].num_snav, 
+                          project->files[import_tie_file_1].block, import_tie_file_1, import_tie_section_1);
+          import_tie_snav_1 = project->files[import_tie_file_1].sections[import_tie_section_1].num_snav - 1;
+        }
+        if (import_tie_snav_2 >= project->files[import_tie_file_2].sections[import_tie_section_2].num_snav) {
+          fprintf(stderr, "****** snav:%d too large for %d snavs in section %2.2d:%4.4d:%4.4d\n",
+                          import_tie_snav_2, project->files[import_tie_file_2].sections[import_tie_section_2].num_snav, 
+                          project->files[import_tie_file_2].block, import_tie_file_2, import_tie_section_2);
+          import_tie_snav_2 = project->files[import_tie_file_2].sections[import_tie_section_2].num_snav - 1;
+        }
+
+        /* search for an existing crossing */
+        bool found = false;
+        bool swap = false;
+        int icrossing_use = -1;
+        for (int icrossing = 0; icrossing < project->num_crossings && !found; icrossing++) {
+          struct mbna_crossing *crossing = &project->crossings[icrossing];
+          if (crossing->file_id_1 == import_tie_file_1 && crossing->file_id_2 == import_tie_file_2 &&
+                   crossing->section_1 == import_tie_section_1 &&
+                   crossing->section_2 == import_tie_section_2) {
+            found = true;
+            swap = false;
+            icrossing_use = icrossing;
+          }
+          else if (crossing->file_id_2 == import_tie_file_1 && crossing->file_id_1 == import_tie_file_2 &&
+              crossing->section_2 == import_tie_section_1 && crossing->section_1 == import_tie_section_2) {
+            found = true;
+            swap = true;
+            icrossing_use = icrossing;
+          }
+        }
+
+        /* swap crossing if needed - this should never happen */
+        if (found && swap) {
+          struct mbna_crossing *crossing = &project->crossings[icrossing_use];
+          int int_tmp = crossing->file_id_1;
+          crossing->file_id_1 = crossing->file_id_2;
+          crossing->file_id_2 = int_tmp;
+          int_tmp = crossing->section_1;
+          crossing->section_1 = crossing->section_2;
+          crossing->section_2 = int_tmp;
+          for (int itie = 0; itie < crossing->num_ties; itie++) {
+            struct mbna_tie *tie = &crossing->ties[itie];
+            int_tmp = tie->snav_1;
+            tie->snav_1 = tie->snav_2;
+            tie->snav_2 = int_tmp;
+            double double_tmp = tie->snav_1_time_d;
+            tie->snav_1_time_d = tie->snav_2_time_d;
+            tie->snav_2_time_d = double_tmp;
+            tie->offset_x *= -1.0;
+            tie->offset_y *= -1.0;
+            tie->offset_x_m *= -1.0;
+            tie->offset_y_m *= -1.0;
+            tie->offset_z_m *= -1.0;
+            tie->inversion_offset_x *= -1.0;
+            tie->inversion_offset_y *= -1.0;
+            tie->inversion_offset_x_m *= -1.0;
+            tie->inversion_offset_y_m *= -1.0;
+            tie->inversion_offset_z_m *= -1.0;
+          }
+
+          fprintf(stderr, "Swapped order of crossing: %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", icrossing_use,
+                  project->files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1, 
+                  project->files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2);
+        }
+
+        /* existing crossing not found, so make new crossing */
+        if (!found) {
+          /* allocate mbna_crossing array if needed */
+          if (project->num_crossings_alloc <= project->num_crossings) {
+            project->crossings = (struct mbna_crossing *)realloc(
+                project->crossings,
+                sizeof(struct mbna_crossing) * (project->num_crossings_alloc + ALLOC_NUM));
+            if (project->crossings != NULL)
+              project->num_crossings_alloc += ALLOC_NUM;
+            else {
+              status = MB_FAILURE;
+              *error = MB_ERROR_MEMORY_FAIL;
+            }
+          }
+
+          /* add crossing to list */
+          icrossing_use = project->num_crossings;
+          struct mbna_crossing *crossing = &project->crossings[icrossing_use];
+          crossing->status = MBNA_CROSSING_STATUS_NONE;
+          crossing->truecrossing = false;
+          crossing->overlap = 0;
+          crossing->file_id_1 = import_tie_file_1;
+          crossing->section_1 = import_tie_section_1;
+          crossing->file_id_2 = import_tie_file_2;
+          crossing->section_2 = import_tie_section_2;
+          crossing->num_ties = 0;
+          project->num_crossings++;
+
+          fprintf(stderr, "Added crossing: %d  %2.2d:%4.4d:%4.4d-%2.2d   %2.2d:%4.4d:%4.4d-%2.2d\n", 
+                  icrossing_use,
+                  project->files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1, 
+                  project->files[crossing->file_id_1].sections[crossing->section_1].num_snav, 
+                  project->files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2, 
+                  project->files[crossing->file_id_2].sections[crossing->section_2].num_snav);
+        }
+            
+        /* now copy tie into crossing if it does not already exist and there is room */
+        if (icrossing_use >= 0 && icrossing_use < project->num_crossings) {
+          struct mbna_crossing *crossing = &project->crossings[icrossing_use];
+          if (crossing->num_ties < MBNA_SNAV_NUM) {
+            found = false;
+            for (int itie = 0; itie < crossing->num_ties; itie++) {
+              struct mbna_tie *tie = &crossing->ties[itie];
+              if (tie->snav_1 == import_tie_snav_1 && tie->snav_2 == import_tie_snav_2) {
+                found = true;
+              }
+            }
+            if (!found) {
+              struct mbna_tie *tie = &crossing->ties[crossing->num_ties];
+              *tie = *tie_save;
+              tie->icrossing = icrossing_use;
+              tie->itie = crossing->num_ties;
+              tie->snav_1 = import_tie_snav_1;
+              tie->snav_2 = import_tie_snav_2;
+              crossing->num_ties++;
+              crossing->status = MBNA_CROSSING_STATUS_SET;
+              fprintf(stderr, "Added tie: %d:%d  %2.2d:%4.4d:%4.4d:%2.2d   %2.2d:%4.4d:%4.4d:%2.2d\n", icrossing_use,
+                    crossing->num_ties-1, project->files[crossing->file_id_1].block, 
+                    crossing->file_id_1, crossing->section_1, tie->snav_1, 
+                    project->files[crossing->file_id_2].block,
+                    crossing->file_id_2, crossing->section_2, tie->snav_2);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if (crossings_save != NULL) {
+    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&crossings_save, error);
+  }
+
+  for (int itfile = 0; itfile < project->num_files; itfile++) {
+    struct mbna_file *tfile = &project->files[itfile];
+    fprintf(stderr, "\nfile %d of %d - %d sections\n", itfile, project->num_files, tfile->num_sections);
+    for (int itsection = 0; itsection < tfile->num_sections; itsection++) {
+     struct mbna_section *tsection = &tfile->sections[itsection];
+      fprintf(stderr, "----section %d of %d - %d snav\n", itsection, tfile->num_sections, tsection->num_snav);
+    }
+  }
+  for (int itcrossing = 0; itcrossing < project->num_crossings; itcrossing++) {
+    struct mbna_crossing *tcrossing = &project->crossings[itcrossing];
+    fprintf(stderr, "crossing %d of %d: %4.4d:%2.2d  %4.4d:%2.2d  : %d ties\n",
+            itcrossing, project->num_crossings, tcrossing->file_id_1, tcrossing->section_1,
+            tcrossing->file_id_2, tcrossing->section_2, tcrossing->num_ties);
+    for (int ittie=0; ittie < tcrossing->num_ties; ittie++) {
+      struct mbna_tie *ttie = &tcrossing->ties[ittie];
+      fprintf(stderr, "----tie %d of %d: %4.4d:%2.2d:%2.2d  %4.4d:%2.2d:%2.2d\n", 
+              ittie, tcrossing->num_ties, 
+              tcrossing->file_id_1, tcrossing->section_1, ttie->snav_1, 
+              tcrossing->file_id_2, tcrossing->section_2, ttie->snav_2);
+    }
   }
 
   if (verbose >= 2) {
@@ -3866,7 +4064,7 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
         double heading;
         double distance;
         double altitude;
-        double sonardepth;
+        double sensordepth;
         double roll;
         double pitch;
         double heave;
@@ -3874,7 +4072,7 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
 
         /* read the next ping */
         status = mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
-                &heading, &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag,
+                &heading, &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag,
                 bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
 
         /* handle successful read */
@@ -3922,7 +4120,7 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
             pingraw->navlon = navlon;
             pingraw->navlat = navlat;
             pingraw->heading = heading;
-            pingraw->draft = sonardepth;
+            pingraw->draft = sensordepth;
             pingraw->beams_bath = beams_bath;
             /* fprintf(stderr,"\nPING %d : %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
                swathraw->npings,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6]); */
@@ -4179,16 +4377,16 @@ int mbnavadjust_fix_section_sensordepth(int verbose, struct mbna_project *projec
             double heading;
             double distance;
             double altitude;
-            double sonardepth;
+            double sensordepth;
             /* read the next ping */
             status = mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
-                    &heading, &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag,
+                    &heading, &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag,
                     bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
 
             /* handle successful read */
             if (status == MB_SUCCESS && kind == MB_DATA_DATA) {
               if (num_pings == section->snav_id[isnav]) {
-                section->snav_sensordepth[isnav] = sonardepth;
+                section->snav_sensordepth[isnav] = sensordepth;
                 fprintf(stderr, "Update sensordepth section %4.4d:%4.4d:%2.2d  %4d/%2d/%2d %2d:%2d:%2d.%6.6d  %.6f %.6f %.6f\n",
                   ifile, isection, isnav, time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
                   time_d, section->snav_time_d[isnav], (section->snav_time_d[isnav]-time_d));
@@ -4537,7 +4735,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
   double heading;
   double distance;
   double altitude;
-  double sonardepth;
+  double sensordepth;
   double draft;
   double roll;
   double pitch;
@@ -4684,7 +4882,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
     while (*error <= MB_ERROR_NO_ERROR) {
       /* read a ping of data */
       status = mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
-              &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
+              &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
               bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
 
       /* extract all nav values */
@@ -4777,11 +4975,11 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
           for (int i = 0; i < beams_bath; i++) {
             if (mb_beam_ok(beamflag[i])) {
               /* get apparent acrosstrack beam angle and bin accordingly */
-              angle = RTD * atan(bathacrosstrack[i] / (bath[i] - sonardepth));
+              angle = RTD * atan(bathacrosstrack[i] / (bath[i] - sensordepth));
               const int j = (int)floor((angle + 0.5 * project->bin_swathwidth + 0.5 * project->bin_pseudobeamwidth) /
                      project->bin_pseudobeamwidth);
-              /* fprintf(stderr,"i:%d bath:%f %f %f sonardepth:%f angle:%f j:%d\n",
-                 i,bath[i],bathacrosstrack[i],bathalongtrack[i],sonardepth,angle,j); */
+              /* fprintf(stderr,"i:%d bath:%f %f %f sensordepth:%f angle:%f j:%d\n",
+                 i,bath[i],bathacrosstrack[i],bathalongtrack[i],sensordepth,angle,j); */
               if (j >= 0 && j < project->bin_beams_bath) {
                 bin_bath[j] += bath[i];
                 bin_bathacrosstrack[j] += bathacrosstrack[i];
@@ -5140,7 +5338,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
           distscale = MAX(0.001, distmax / 32000);
           ostore->depth_scale = depthscale;
           ostore->distance_scale = distscale;
-          ostore->sonardepth = draft - heave;
+          ostore->sensordepth = draft - heave;
           ostore->roll = roll;
           ostore->pitch = pitch;
           ostore->heave = heave;
@@ -5277,7 +5475,7 @@ int mbnavadjust_coverage_mask(int verbose, struct mbna_project *project,
   double heading;
   double distance;
   double altitude;
-  double sonardepth;
+  double sensordepth;
   int beams_bath = 0;
   int beams_amp = 0;
   int pixels_ss = 0;
@@ -5343,7 +5541,7 @@ int mbnavadjust_coverage_mask(int verbose, struct mbna_project *project,
     /* read a ping of data */
     status =
       mb_get_all(verbose, mbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
-           &heading, &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag,
+           &heading, &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag,
            bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
 
     /* ignore minor errors */
@@ -5461,7 +5659,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
   double heading;
   double distance;
   double altitude;
-  double sonardepth;
+  double sensordepth;
   double draft;
   double roll;
   double pitch;
@@ -5583,7 +5781,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
     while (*error <= MB_ERROR_NO_ERROR) {
       /* read a ping of data */
       status = mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
-              &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
+              &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
               bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
 
       /* extract all nav values */
@@ -5676,11 +5874,11 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
           for (int i = 0; i < beams_bath; i++) {
             if (mb_beam_ok(beamflag[i])) {
               /* get apparent acrosstrack beam angle and bin accordingly */
-              angle = RTD * atan(bathacrosstrack[i] / (bath[i] - sonardepth));
+              angle = RTD * atan(bathacrosstrack[i] / (bath[i] - sensordepth));
               const int j = (int)floor((angle + 0.5 * project->bin_swathwidth + 0.5 * project->bin_pseudobeamwidth) /
                      project->bin_pseudobeamwidth);
-              /* fprintf(stderr,"i:%d bath:%f %f %f sonardepth:%f angle:%f j:%d\n",
-                 i,bath[i],bathacrosstrack[i],bathalongtrack[i],sonardepth,angle,j); */
+              /* fprintf(stderr,"i:%d bath:%f %f %f sensordepth:%f angle:%f j:%d\n",
+                 i,bath[i],bathacrosstrack[i],bathalongtrack[i],sensordepth,angle,j); */
               if (j >= 0 && j < project->bin_beams_bath) {
                 bin_bath[j] += bath[i];
                 bin_bathacrosstrack[j] += bathacrosstrack[i];
@@ -5912,7 +6110,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
           distscale = MAX(0.001, distmax / 32000);
           ostore->depth_scale = depthscale;
           ostore->distance_scale = distscale;
-          ostore->sonardepth = draft - heave;
+          ostore->sensordepth = draft - heave;
           ostore->roll = roll;
           ostore->pitch = pitch;
           ostore->heave = heave;
@@ -6045,7 +6243,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
           /* read a ping of data */
           status =
             mb_get_all(verbose, ombio_ptr, &ostore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
-                 &heading, &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag,
+                 &heading, &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag,
                  bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
 
           /* ignore minor errors */

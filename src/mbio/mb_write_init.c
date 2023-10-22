@@ -535,7 +535,7 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 	mb_io_ptr->nfix = 0;
 	mb_io_ptr->nattitude = 0;
 	mb_io_ptr->nheading = 0;
-	mb_io_ptr->nsonardepth = 0;
+	mb_io_ptr->nsensordepth = 0;
 	mb_io_ptr->naltitude = 0;
 	for (int i = 0; i < MB_ASYNCH_SAVE_MAX; i++) {
 		mb_io_ptr->fix_time_d[i] = 0.0;
@@ -547,8 +547,8 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 		mb_io_ptr->attitude_pitch[i] = 0.0;
 		mb_io_ptr->heading_time_d[i] = 0.0;
 		mb_io_ptr->heading_heading[i] = 0.0;
-		mb_io_ptr->sonardepth_time_d[i] = 0.0;
-		mb_io_ptr->sonardepth_sonardepth[i] = 0.0;
+		mb_io_ptr->sensordepth_time_d[i] = 0.0;
+		mb_io_ptr->sensordepth_sensordepth[i] = 0.0;
 		mb_io_ptr->altitude_time_d[i] = 0.0;
 		mb_io_ptr->altitude_altitude[i] = 0.0;
 	}

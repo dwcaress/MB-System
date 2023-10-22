@@ -313,7 +313,7 @@ int main(int argc, char **argv) {
   double heading;
   double distance;
   double altitude;
-  double sonardepth;
+  double sensordepth;
   char *beamflag = nullptr;
   double *bath = nullptr;
   double *bathacrosstrack = nullptr;
@@ -454,7 +454,7 @@ int main(int argc, char **argv) {
     while (error <= MB_ERROR_NO_ERROR) {
       /* read a data record */
       status = mb_get_all(verbose, mbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
-                          &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
+                          &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
                           bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
 
       if (verbose >= 2) {
@@ -600,13 +600,13 @@ int main(int argc, char **argv) {
         if (ssv_output) {
           /* extract ttimes */
           status = mb_ttimes(verbose, mbio_ptr, store_ptr, &kind, &nbeams, ttimes, angles, angles_forward, angles_null,
-                             heave, alongtrack_offset, &sonardepth, &ssv, &error);
+                             heave, alongtrack_offset, &sensordepth, &ssv, &error);
 
           /* output ssv */
           if (status == MB_SUCCESS) {
             if (!ssv_bounds_set || (navlon >= ssv_bounds[0] && navlon <= ssv_bounds[1] &&
                                             navlat >= ssv_bounds[2] && navlat <= ssv_bounds[3]))
-              fprintf(stdout, "%f %f\n", sonardepth, ssv);
+              fprintf(stdout, "%f %f\n", sensordepth, ssv);
           }
         }
       }

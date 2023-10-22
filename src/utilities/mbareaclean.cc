@@ -627,7 +627,7 @@ int main(int argc, char **argv) {
 	double heading;
 	double distance;
 	double altitude;
-	double sonardepth;
+	double sensordepth;
 	char comment[MB_COMMENT_MAXLINE];
 
   void *store_ptr = nullptr;
@@ -789,7 +789,7 @@ int main(int argc, char **argv) {
 			/* read next record */
 			error = MB_ERROR_NO_ERROR;
 			status &= mb_read(verbose, mbio_ptr, &kind, &pingsread, time_i, &time_d, &navlon, &navlat, &speed, &heading, &distance,
-			                 &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp, bathlon, bathlat,
+			                 &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp, bathlon, bathlat,
 			                 ss, sslon, sslat, comment, &error);
 			if (verbose >= 2) {
 				fprintf(stderr, "\ndbg2  current data status:\n");
