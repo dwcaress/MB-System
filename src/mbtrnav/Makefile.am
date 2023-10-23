@@ -34,7 +34,7 @@ AM_CPPFLAGS += -DWITH_TNAVPF_CEP_CORRECTION
 AM_CPPFLAGS += -DWITH_TRNLOG
 AM_CPPFLAGS += -DWITH_TRNLOG_EST_OUT
 AM_CPPFLAGS += -DWITH_TNAVPF_CEP_CORRECTION
-#AM_CPPFLAGS += -DTRN_NORAND
+AM_CPPFLAGS += -DTRN_NORAND
 
 libgeolib_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
@@ -250,8 +250,11 @@ opt/rov/gss/analog_t.hpp \
 opt/rov/gss/digital_t.hpp \
 opt/rov/gss/dvl_stat_t.hpp \
 opt/rov/gss/pcomms_t.hpp \
+opt/rov/gss/parosci_stat_t.hpp \
 opt/rov/oi/idt_t.hpp \
 opt/rov/oi/lcm_header_t.hpp \
+opt/rov/oi/ctd_t.hpp \
+opt/rov/oi/octans_t.hpp \
 opt/rov/trn/mb1_beam_t.hpp \
 opt/rov/trn/trnu_estimate_t.hpp \
 opt/rov/trn/trn_stat_t.hpp \
@@ -305,6 +308,8 @@ TRN_HPP += opt/rov/gss/analog_t.hpp
 TRN_HPP += opt/rov/gss/digital_t.hpp
 TRN_HPP += opt/rov/gss/dvl_stat_t.hpp
 TRN_HPP += opt/rov/gss/pcomms_t.hpp
+TRN_HPP += opt/rov/gss/parosci_stat_t.hpp
+TRN_HPP += opt/rov/oi/ctd_t.hpp
 TRN_HPP += opt/rov/oi/idt_t.hpp
 TRN_HPP += opt/rov/oi/lcm_header_t.hpp
 TRN_HPP += opt/rov/oi/rdi_pd4_t.hpp
@@ -369,7 +374,17 @@ opt/rov/gss/pcomms_t.hpp : opt/rov/lcm_types/pcomms_t.lcm
 	lcm-gen -x --cpp-hpath=opt/rov  $<
 	@echo
 
+opt/rov/gss/pcomms_t.hpp : opt/rov/lcm_types/parosci_stat_t.lcm
+	@ echo compiling $@...
+	lcm-gen -x --cpp-hpath=opt/rov  $<
+	@echo
+
 opt/rov/oi/idt_t.hpp : opt/rov/lcm_types/idt_t.lcm
+	@ echo compiling $@...
+	lcm-gen -x --cpp-hpath=opt/rov  $<
+	@echo
+
+opt/rov/oi/ctd_t.hpp : opt/rov/lcm_types/ctd_t.lcm
 	@ echo compiling $@...
 	lcm-gen -x --cpp-hpath=opt/rov  $<
 	@echo
@@ -471,6 +486,16 @@ opt/rov/gss/dvl_stat_t.java : opt/rov/lcm_types/dvl_stat_t.lcm
 	@echo
 
 opt/rov/gss/pcomms_t.java : opt/rov/lcm_types/pcomms_t.lcm
+	@ echo compiling $@...
+	lcm-gen -j --jpath=opt/rov $<
+	@echo
+
+opt/rov/gss/parosci_stat_t.java : opt/rov/lcm_types/parosci_stat_t.lcm
+	@ echo compiling $@...
+	lcm-gen -j --jpath=opt/rov $<
+	@echo
+
+opt/rov/oi/ctd_t.java : opt/rov/lcm_types/ctd_t.lcm
 	@ echo compiling $@...
 	lcm-gen -j --jpath=opt/rov $<
 	@echo
@@ -582,7 +607,17 @@ opt/rov/gss/pcomms_t.class : opt/rov/gss/pcomms_t.java  opt/rov/gss/message_t.ja
 	javac -cp $(LCM_JAR) $^
 	@echo
 
+opt/rov/gss/parosci_stat_t.class : opt/rov/gss/parosci_stat_t.java
+	@ echo compiling $@...
+	javac -cp $(LCM_JAR) $^
+	@echo
+
 opt/rov/oi/idt_t.class : opt/rov/oi/idt_t.java opt/rov/oi/lcm_header_t.java
+	@ echo compiling $@...
+	javac -cp $(LCM_JAR) $^
+	@echo
+
+opt/rov/oi/ctd_t.class : opt/rov/oi/ctd_t.java opt/rov/oi/lcm_header_t.java
 	@ echo compiling $@...
 	javac -cp $(LCM_JAR) $^
 	@echo
@@ -650,7 +685,7 @@ lcm_rovtrn.jar: ${TRN_JCLS}
 
 endif
 
-bin_PROGRAMS =  trn-server trn-replay trnclient-test mmcpub mmcsub trnu-cli trn-cli trnif-test trnusvr-test netif-test trnifsvr-test mb1rs  trnlog-player ${ROVTRN_APPS} #  readlog writelog
+bin_PROGRAMS =  trn-server trn-replay trnclient-test mmcpub mmcsub trnu-cli trn-cli trnif-test trnusvr-test netif-test trnifsvr-test mb1rs  trnlog-player mb1log-player ${ROVTRN_APPS} #  readlog writelog
 
 trn_server_SOURCES = utils/trn_server.cpp
 trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
@@ -691,8 +726,10 @@ mb1rs_SOURCES = trnw/mb1rs.c trnw/mb1rs-app.c
 mb1rs_LDADD = ${LIBMBTRNFRAME} libmb1.la
 
 trnlog_player_SOURCES = utils/trnlog_player.cpp
-
 trnlog_player_LDADD = libtnav.la libnewmat.la libtrncli.la
+
+mb1log_player_SOURCES = utils/mb1log_player.cpp
+mb1log_player_LDADD = libtnav.la libnewmat.la libtrncli.la
 
 dist_bin_SCRIPTS =
 
