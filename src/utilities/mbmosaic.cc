@@ -2185,7 +2185,7 @@ int main(int argc, char **argv) {
 			exit(MB_ERROR_OPEN_FAIL);
 		}
 		int pstatus;
-		int astatus;
+  		int astatus = MB_ALTNAV_NONE;
 		mb_path path = "";
 		mb_path ppath = "";
 		mb_path apath = "";

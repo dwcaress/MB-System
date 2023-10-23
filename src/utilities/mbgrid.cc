@@ -806,7 +806,7 @@ int main(int argc, char **argv) {
   float outclipvalue = NO_DATA_FLAG;
   int rformat;
   int pstatus;
-  int astatus;
+  int astatus = MB_ALTNAV_NONE;
   char path[MB_PATH_MAXLINE] = "";
   char ppath[MB_PATH_MAXLINE] = "";
   char apath[MB_PATH_MAXLINE] = "";
