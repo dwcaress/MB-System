@@ -104,7 +104,8 @@ $(GSS)/message_t.hpp \
 $(GSS)/analog_t.hpp \
 $(GSS)/digital_t.hpp \
 $(GSS)/dvl_stat_t.hpp \
-$(GSS)/pcomms_t.hpp
+$(GSS)/pcomms_t.hpp \
+$(GSS)/parosci_stat_t.hpp
 GSS_JAVA=$(GSS_HPP:%.hpp=%.java)
 GSS_CLASS=$(GSS_HPP:%.hpp=%.class)
 
@@ -116,6 +117,7 @@ $(OI)/double_t.hpp \
 $(OI)/rdi_pd4_t.hpp \
 $(OI)/octans_t.hpp \
 $(OI)/kearfott_t.hpp \
+$(OI)/ctd_t.hpp \
 $(OI)/lcm_header_t.hpp
 OI_JAVA=$(OI_HPP:%.hpp=%.java)
 OI_CLASS=$(OI_HPP:%.hpp=%.class)

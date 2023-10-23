@@ -3,8 +3,8 @@
 // Copyright 2022  Monterey Bay Aquarium Research Institute                 //
 // Distributed under MIT license. See license.txt for more information.     //
 //////////////////////////////////////////////////////////////////////////////
-#ifndef OCTANS_INPUT_HPP  // include guard
-#define OCTANS_INPUT_HPP
+#ifndef CTD_FASTCAT_INPUT_HPP  // include guard
+#define CTD_FASTCAT_INPUT_HPP
 
 #include <tuple>
 #include <queue>
@@ -14,22 +14,23 @@
 #include "lcm_subscriber.hpp"
 #include "lcm_pcf/string_t.hpp"
 #include "data_container.hpp"
-#include "oi/octans_t.hpp"
-#include "att_input.hpp"
+#include "oi/ctd_t.hpp"
+#include "depth_input.hpp"
 
 namespace trn
 {
-class octans_input : public att_input
+class ctd_fastcat_input : public depth_input
 {
 public:
 
-    octans_input(const std::string& name = "UNKNOWN", uint32_t depth=0)
+
+    ctd_fastcat_input(const std::string& name = "UNKNOWN", uint32_t depth=0)
     :trn_lcm_input(name, depth)
     {
         mDelegateNotify = false;
     }
 
-    ~octans_input()
+    ~ctd_fastcat_input()
     {
     }
 
@@ -44,26 +45,26 @@ public:
         if(!mDataList.empty()){
             data_container &dcon = mDataList.front();
 
-            oi::octans_t msg;
+            oi::ctd_t msg;
             msg.decode((void *)dcon.data_bytes(), 0, dcon.data_len());
 
-            // TODO: this time may not be epoch sec
             double time = msg.header.timestamp * 1.e6;
             dcon.set_data_time(time);
 
-            att_input::mDataInstMutex.lock();
+            depth_input::mDataInstMutex.lock();
 
-            // set (Instantaneous) nav values
-            double pitch = Math::degToRad(msg.pitch_deg);
-            double roll = Math::degToRad(msg.roll_deg);
-            double heading = Math::degToRad(msg.heading_deg);
+            // set (Instantaneous) pressure/depth values
+            double depth = 0;
+            // assumes pressure in dbar
+            // TODO: convert units
+            double pressure = msg.pressure_decibar;
 
-            // TODO: check status byte (undocumented...)
-            att_flags_t aflags = 0;
-            bool att_valid = true;
-            aflags |= (att_valid ? AF_VALID : 0);
-            mAttInst = att_info(time, pitch, roll, heading, aflags);
-            att_input::mDataInstMutex.unlock();
+            // TODO: check doubles[] parameters? (not documented...)
+            depth_flags_t flags = DF_DEPTH_VALID;
+//            fprintf(stderr, "%s:%d - t %.3lf p %.3lf, d %.3lf \n", __func__, __LINE__, time, pressure, depth);
+            mDepthInst = depth_info(time, depth, pressure, flags);
+
+            depth_input::mDataInstMutex.unlock();
 
 #ifdef WITH_SHOW_DCON
             std::cerr << __func__ << ":" << std::dec << __LINE__ << " Updated DATA_TIME\n";
@@ -83,14 +84,21 @@ public:
         }
     }
 
+    virtual void tostream(std::ostream &os, int wkey=15, int wval=28) override
+    {
+        trn_lcm_input::tostream(os, wkey, wval);
+        os << std::setw(wkey) << "timestamp" << std::setw(wval) << mDepthInst.time_usec() << "\n";
+        os << std::setw(wkey) << "depth" << std::setw(wval) << mDepthInst.depth_m() << "\n";
+        os << std::setw(wkey) << "p_to_depth(0)" << std::setw(wval) << mDepthInst.pressure_to_depth_m(0.) << "\n";
+        os << std::setw(wkey) << "pressure" << std::setw(wval) << mDepthInst.pressure_dbar() << "\n";
+        os << std::setw(wkey) << "flags" << std::setw(wval-8) << "x";
+        os << std::setw(8) << std::hex << std::setfill('0') << mDepthInst.flags().get() << "\n";
+        os << std::setfill(' ');
+    }
+
     virtual void show(int wkey=15, int wval=28) override
     {
-        std::cerr << std::setfill(' ');
-        std::cerr << std::setw(wkey) << "pitch" << std::setw(wval) << mAttInst.pitch() << "\n";
-        std::cerr << std::setw(wkey) << "roll" << std::setw(wval) << mAttInst.roll() << "\n";
-        std::cerr << std::setw(wkey) << "heading" << std::setw(wval) << mAttInst.heading() << "\n";
-        std::cerr << std::setw(wkey) << "aflags" << std::setw(wval-8) << "x";
-        std::cerr << std::setw(8) << std::hex << std::setfill('0') << mAttInst.flags().get() << "\n";
+        tostream(std::cerr, wkey, wval);
     }
 
 protected:

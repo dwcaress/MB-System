@@ -109,6 +109,7 @@ public:
     , mb_cb_n(0)
     , mb_pub_n(0)
     , mb_csv_n(0)
+    , mb_log_mb1_n(0)
     , mb_pub_mb1_n(0)
     , mb_pub_est_n(0)
     , mb_est_n(0)
@@ -116,6 +117,8 @@ public:
     , mb_err_n(0)
     , mb_cli_con(0)
     , mb_cli_dis(0)
+    , err_plugin_n(0)
+    , err_nobeams_n(0)
     {}
 
     ~app_stats()
@@ -152,6 +155,7 @@ public:
         os << std::setw(wkey) << "mb_cb_n" << std::setw(wval) << mb_cb_n <<"\n";
         os << std::setw(wkey) << "mb_pub_n" << std::setw(wval) << mb_pub_n <<"\n";
         os << std::setw(wkey) << "mb_csv_n" << std::setw(wval) << mb_csv_n <<"\n";
+        os << std::setw(wkey) << "mb_log_mb1_n" << std::setw(wval) << mb_log_mb1_n <<"\n";
         os << std::setw(wkey) << "mb_pub_mb1_n" << std::setw(wval) << mb_pub_mb1_n <<"\n";
         os << std::setw(wkey) << "mb_pub_est_n" << std::setw(wval) << mb_pub_est_n <<"\n";
         os << std::setw(wkey) << "mb_est_n" << std::setw(wval) << mb_est_n <<"\n";
@@ -159,6 +163,8 @@ public:
         os << std::setw(wkey) << "mb_err_n" << std::setw(wval) << mb_err_n <<"\n";
         os << std::setw(wkey) << "mb_cli_con" << std::setw(wval) << mb_cli_con <<"\n";
         os << std::setw(wkey) << "mb_cli_dis" << std::setw(wval) << mb_cli_dis <<"\n";
+        os << std::setw(wkey) << "err_plugin_n" << std::setw(wval) << err_plugin_n <<"\n";
+        os << std::setw(wkey) << "err_nobeams_n" << std::setw(wval) << err_nobeams_n <<"\n";
     }
 
     std::string tostring(int wkey=15, int wval=18)
@@ -199,6 +205,7 @@ public:
     int mb_cb_n;
     int mb_pub_n;
     int mb_csv_n;
+    int mb_log_mb1_n;
     int mb_pub_mb1_n;
     int mb_pub_est_n;
     int mb_est_n;
@@ -206,6 +213,9 @@ public:
     int mb_err_n;
     int mb_cli_con;
     int mb_cli_dis;
+
+    int err_plugin_n;
+    int err_nobeams_n;
 };
 
 class trnxpp_cfg

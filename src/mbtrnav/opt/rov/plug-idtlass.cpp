@@ -315,6 +315,7 @@ int cb_proto_idtlass(void *pargs)
         std::string *nkey[2] = {ctx->nav_input_chan(0),ctx->nav_input_chan(1)};
         std::string *akey[2] = {ctx->att_input_chan(0), ctx->att_input_chan(1)};
         std::string *vkey = ctx->vel_input_chan(0);
+        std::string *dkey[1] = {ctx->depth_input_chan(0)};
 
         // vi is optional
         if(bkey[0] == nullptr || nkey[0] == nullptr || nkey[1] == nullptr || akey[0] == nullptr || akey[1] == nullptr)
@@ -325,6 +326,7 @@ int cb_proto_idtlass(void *pargs)
             ss << (akey[1]==nullptr ? " akey[1]" : "");
             ss << (nkey[0]==nullptr ? " nkey[0]" : "");
             ss << (nkey[1]==nullptr ? " nkey[1]" : "");
+            ss << (nkey[1]==nullptr ? " dkey[1]" : "");
             ss << (vkey == nullptr ? " vkey" : "");
             TRN_NDPRINT(TRNDL_PLUGIDTLASS, "%s:%d ERR - NULL input key: %s\n", __func__, __LINE__, ss.str().c_str());
                 err_count++;
@@ -334,6 +336,7 @@ int cb_proto_idtlass(void *pargs)
         trn::bath_info *bi[2] = {xpp->get_bath_info(*bkey[0]), nullptr};
         trn::nav_info *ni[2] = {xpp->get_nav_info(*nkey[0]), xpp->get_nav_info(*nkey[1])};
         trn::att_info *ai[2] = {xpp->get_att_info(*akey[0]), xpp->get_att_info(*akey[1])};
+        trn::depth_info *di[1] = {xpp->get_depth_info(*dkey[0])};
         trn::vel_info *vi = (vkey == nullptr ? nullptr : xpp->get_vel_info(*vkey));
 
         // vi optional
@@ -361,6 +364,7 @@ int cb_proto_idtlass(void *pargs)
             // generate MB1 sounding (raw beams)
             mb1_t *snd = trnx_utils::lcm_to_mb1(bi[0], ni[1], ai[0]);
 
+
             std::list<trn::beam_tup> beams = bi[0]->beams_raw();
             std::list<trn::beam_tup>::iterator it;
 
@@ -369,6 +373,15 @@ int cb_proto_idtlass(void *pargs)
             int trn_type[3] = {-1, trn::BT_NONE, trn::BT_NONE};
 
             if(ctx->decmod() <= 0 || (ctx->cbcount() % ctx->decmod()) == 0) {
+
+                if(di[0] != NULL) {
+                    double depth = di[0]->pressure_to_depth_m(ni[1]->lat());
+                    TRN_NDPRINT(3, "ni depth: %.3lf di pressure: %.3lf lat: %.3lf depth: %.3lf\n", ni[1]->depth(), di[0]->pressure_dbar(), ni[1]->lat(), depth );
+                    //                trn::depth_input *din = xpp->get_depth_input(*dkey[0]);
+                    //                TRN_NDPRINT(3, "presssure:\n");
+                    //                din->tostream(std::cerr);
+                    snd->depth = depth;
+                }
 
                 if(nullptr != bp[0]) {
                     trn_type[0] = bp[0]->bath_input_type();
@@ -381,11 +394,28 @@ int cb_proto_idtlass(void *pargs)
                         bgeo[0] = xpp->lookup_geo(*bkey[0], trn_type[0]);
                         bgeo[1] = xpp->lookup_geo(*nkey[1], trn_type[1]);
                         bgeo[2] = xpp->lookup_geo(*nkey[0], trn_type[2]);
+                        double t[6] = {
+                            (bi[0] != NULL ? bi[0]->time_usec()/1.e6 : 0.),
+                            (ni[0] != NULL ? ni[0]->time_usec()/1.e6 : 0.),
+                            (ni[1] != NULL ? ni[1]->time_usec()/1.e6 : 0.),
+                            (ai[0] != NULL ? ai[0]->time_usec()/1.e6 : 0.),
+                            (ai[1] != NULL ? ai[1]->time_usec()/1.e6 : 0.),
+                            (di[0] != NULL ? di[1]->time_usec()/1.e6 : 0.)
+                        };
+
+                        TRN_NDPRINT(3, "time skew (rel to bathy)\n");
+                        TRN_NDPRINT(3, "bi[0] time: %.3lf\n", t[0]);
+                        TRN_NDPRINT(3, "ni[0] time: %.3lf (%.3lf)\n", t[1], t[1]-t[0]);
+                        TRN_NDPRINT(3, "ni[1] time: %.3lf (%.3lf)\n",  t[2], t[2]-t[0]);
+                        TRN_NDPRINT(3, "ai[0] time: %.3lf (%.3lf)\n",  t[3], t[3]-t[0]);
+                        TRN_NDPRINT(3, "ai[1] time: %.3lf (%.3lf)\n",  t[4], t[4]-t[0]);
+                        TRN_NDPRINT(3, "di[0] time: %.3lf (%.3lf)\n",  t[5], t[5]-t[0]);
 
                         // compute MB1 beam components in vehicle frame
                         if (transform_idtlass(bi, ai, bgeo, snd) != 0) {
                             TRN_NDPRINT(TRNDL_PLUGIDTLASS_H, "%s:%d ERR - transform_idtlass failed\n", __func__, __LINE__);
                             err_count++;
+                            cfg->stats().err_plugin_n++;
                             continue;
                         }
 
@@ -400,7 +430,7 @@ int cb_proto_idtlass(void *pargs)
 
 
             // check modulus
-            if(ctx->decmod() <= 0 || (ctx->cbcount() % ctx->decmod()) == 0){
+            if (ctx->decmod() <= 0 || (ctx->cbcount() % ctx->decmod()) == 0) {
 
                 TRN_NDPRINT(3, "%s - >>>>>>> Publishing MB1\n", __func__);
                 mb1_show(snd, (cfg->debug()>=4 ? true: false), 5);
@@ -411,52 +441,63 @@ int cb_proto_idtlass(void *pargs)
                 // publish MB1 to mbtrnpp
                 ctx->pub_mb1(snd, xpp->pub_list(), cfg);
 
-                if(ctx->trncli_count() > 0){
+                if (ctx->trncli_count() > 0) {
 
                     // publish poseT/measT to trn-server
 
                     poseT *pt = trnx_utils::mb1_to_pose(snd, ai[0], (long)ctx->utm_zone());
                     measT *mt = trnx_utils::mb1_to_meas(snd, ai[0], trn_type[0], (long)ctx->utm_zone());
 
-                    if(cfg->debug() >= TRNDL_PLUGIDTLASS ){
-                        fprintf(stderr,"%s - >>>>>>> Publishing POSE:\n",__func__);
-                        trnx_utils::pose_show(*pt);
-                        fprintf(stderr,"%s - >>>>>>> Publishing MEAS:\n",__func__);
-                        trnx_utils::meas_show(*mt);
-                    }
 
+                    if (pt != nullptr && mt != nullptr) {
 
-                    if(pt != nullptr && mt != nullptr){
+                        if (cfg->debug() >= TRNDL_PLUGIDTLASS ) {
+                            fprintf(stderr,"%s - >>>>>>> Publishing POSE:\n", __func__);
+                            trnx_utils::pose_show(*pt);
+                            fprintf(stderr,"%s - >>>>>>> Publishing MEAS:\n", __func__);
+                            trnx_utils::meas_show(*mt);
+                        }
 
                         double nav_time = ni[0]->time_usec()/1e6;
 
                         // publish update TRN, publish estimate to TRN, LCM
                         ctx->pub_trn(nav_time, pt, mt, trn_type[0], xpp->pub_list(), cfg);
+                    } else {
+                        TRN_NDPRINT(TRNDL_PLUGIDTLASS, "%s - >>>>>>> skipping pub_trn pt[%p], mt[%p]:\n", __func__, pt, mt);
                     }
 
-                    if(pt != nullptr)
+                    if (pt != nullptr)
                         delete pt;
-                    if(mt != nullptr)
+                    if (mt != nullptr)
                         delete mt;
+                } else {
+                    TRN_NDPRINT(TRNDL_PLUGIDTLASS, "%s - >>>>>>> No TRN clients:\n", __func__);
+                }
+
+                // write CSV
+                if (ctx->write_mb1_csv(snd, bi[0], ai[0], vi) > 0) {
+                    TRN_NDPRINT(TRNDL_PLUGIDTLASS, "%s - >>>>>>> wrote MB1 CSV\n",__func__);
+                    cfg->stats().mb_csv_n++;
+                }
+
+                // write MB1 binary
+                if (ctx->write_mb1_bin(snd) >= 0) {
+                    TRN_NDPRINT(TRNDL_PLUGIDTLASS, "%s - >>>>>>> wrote MB1 bin\n",__func__);
+                    cfg->stats().mb_log_mb1_n++;
                 }
 
             } else {
                 TRN_NDPRINT(TRNDL_PLUGIDTLASS, "%s:%d WARN - not ready count/mod[%d/%d]\n", __func__, __LINE__,ctx->cbcount(), ctx->decmod());
             }
+
             ctx->inc_cbcount();
-
-
-            // write CSV
-            if(ctx->write_mb1_csv(snd, bi[0], ai[0], vi) > 0){
-                cfg->stats().mb_csv_n++;
-            }
-
-            ctx->write_mb1_bin(snd);
 
             retval=0;
 
             // release sounding memory
             mb1_destroy(&snd);
+        } else {
+            cfg->stats().err_nobeams_n++;
         }
 
         if(bi[0] != nullptr)

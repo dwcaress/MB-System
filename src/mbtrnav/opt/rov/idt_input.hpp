@@ -44,9 +44,11 @@ public:
         if(!mDataList.empty()){
             data_container &dcon = mDataList.front();
 
-            oi::idt_t idt;
-            idt.decode((void *)dcon.data_bytes(), 0, dcon.data_len());
-            double time = idt.ping_time * 1000000UL;
+            oi::idt_t msg;
+            msg.decode((void *)dcon.data_bytes(), 0, dcon.data_len());
+            // msg.ping_time uses clock where deltaT software is running
+            // which may not use UTC
+            double time = msg.header.timestamp * 1.e6;
             dcon.set_data_time(time);
 
             bath_input::mDataInstMutex.lock();
@@ -54,9 +56,9 @@ public:
             bath_flags_t bflags = 0;
             bflags |= BF_BLOCK;
             bflags |= BF_RLOCK;
-            bflags |= (idt.valid>0 ? BF_VALID : 0);
+            bflags |= (msg.valid > 0 ? BF_VALID : 0);
 
-            uint32_t ping_number = idt.ping_number;
+            uint32_t ping_number = msg.ping_number;
 //            std::cerr << std::hex;
 //            std::cerr << "  bflags : " << bflags << "\n";
 //            std::cerr << std::dec;
@@ -64,9 +66,9 @@ public:
 //            std::cerr << "  idt.lock_ref : " << (idt.lock_ref?1:0) << "\n";
 
             std::list<beam_tup> beams;
-            int i=0;
-            for(i=0; i<idt.nbeams; i++){
-                beams.emplace_back(i,idt.range[i]);
+            int i = 0;
+            for(i = 0; i < msg.nbeams; i++){
+                beams.emplace_back(i, msg.range[i]);
             }
             mBathInst = bath_info(time, ping_number, beams, bflags);
 

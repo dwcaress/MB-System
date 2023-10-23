@@ -237,6 +237,8 @@ public:
     virtual bool provides_nav(){return false;}
     virtual bool provides_vel(){return false;}
     virtual bool provides_mb1(){return false;}
+    virtual bool provides_depth(){return false;}
+    
 protected:
 
     void buffer_data()

@@ -32,6 +32,7 @@
 #include "navigation_provider_IF.hpp"
 #include "velocity_provider_IF.hpp"
 #include "attitude_provider_IF.hpp"
+#include "depth_provider_IF.hpp"
 #include "mb1_provider_IF.hpp"
 #include "trn_msg_utils.hpp"
 #include "trnx_utils.hpp"
@@ -282,6 +283,12 @@ public:
             wx = (alen > wval ? alen+1 : wval);
             os << std::setw(wkey-2) << "mb1 src[" << i << "]" << std::setw(wx) << st <<"\n";
         }
+        for(i=0, vit = mDepthInputKeys.begin(); vit != mDepthInputKeys.end(); vit++, i++){
+            std::string st = *vit;
+            alen = strlen(st.c_str());
+            wx = (alen > wval ? alen+1 : wval);
+            os << std::setw(wkey-2) << "depth src[" << i << "]" << std::setw(wx) << st <<"\n";
+        }
         for(i=0, vit = mNavInputKeys.begin(); vit != mNavInputKeys.end(); vit++, i++){
             std::string st = *vit;
             alen = strlen(st.c_str());
@@ -412,6 +419,21 @@ public:
     std::string *mb1_input_chan(int i)
     {
         return mMB1InputKeys.size() > i ? &mMB1InputKeys.at(i) : nullptr;
+    }
+
+    void set_depth_input(int i, const std::string &inp)
+    {
+        if(mDepthInputKeys.size() <= i) {
+            TRN_NDPRINT(2, "%s - resizing %d > %d\n", __func__, mDepthInputKeys.size(), i+1);
+            mDepthInputKeys.resize(i+1);
+        }
+
+        mDepthInputKeys.at(i) = std::string(inp);
+    }
+
+    std::string *depth_input_chan(int i)
+    {
+        return mDepthInputKeys.size() > i ? &mDepthInputKeys.at(i) : nullptr;
     }
 
     void set_nav_input_chan(int i, const std::string &inp)
@@ -1133,8 +1155,8 @@ public:
 //                        LU_PEVENT(cfg->mlog(), "udpm est:\n%s\n", est_str.c_str());
 
                         if(cfg->debug() >= 5 ){
-                            fprintf(stderr, "%s - udpm est:\n", __func__ );
-                            est_str.c_str();
+                            fprintf(stderr, "%s - udpm est:\n%s\n", __func__,
+                            est_str.c_str());
                         }
 
                         // write TRN estimate CSV (compatible w/ tlp-plot)
@@ -1718,6 +1740,7 @@ private:
     std::vector<std::string> mAttInputKeys;
     std::vector<std::string> mCallbackKeys;
     std::vector<std::string> mMB1InputKeys;
+    std::vector<std::string> mDepthInputKeys;
 
     std::list<trn::trn_host> mMB1SvrList;
     std::list<trn::trn_host> mUdpmSubList;

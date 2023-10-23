@@ -35,6 +35,8 @@
 #include "trn/trn_pose_t.hpp"
 #include "trn_msg_utils.hpp"
 
+#include "depth_input.hpp"
+
 #include "x_mb1_input.hpp"
 #include "dvl_stat_input.hpp"
 #include "rdi_dvl_input.hpp"
@@ -44,6 +46,8 @@
 #include "rdi_pd4_input.hpp"
 #include "kearfott_input.hpp"
 #include "octans_input.hpp"
+#include "parosci_stat_input.hpp"
+#include "ctd_fastcat_input.hpp"
 #include "trn_mb1_input.hpp"
 
 namespace trn
@@ -602,6 +606,12 @@ public:
             trn_lcm_input *obj = new trn::x_mb1_input("XMB1", 10);
             dynamic_cast<trn::mb1_input *>(obj)->set_mb1_input_type(BT_MULTIBEAM);
             return obj;
+        } else if(channel.compare("PAROSCI_STAT")==0)
+        {
+            return new trn::parosci_stat_input("PAROSCI_STAT", 10);
+        }  else if(channel.compare("CTD_FASTCAT")==0)
+        {
+            return new trn::ctd_fastcat_input("CTD_FASTCAT", 10);
         } else {
             std::cerr << __func__ << ": ERR - Unsupported type [" << channel << "]\n";
         }
@@ -639,6 +649,30 @@ public:
         trn::trn_lcm_input *li = this->get_input(chan);
         if(li != nullptr){
             trn::mb1_input *ip = dynamic_cast<trn::mb1_input *>(li);
+            retval = ip;
+        }
+        return retval;
+    }
+
+    trn::depth_info *get_depth_info(const std::string chan)
+    {
+        trn::depth_info *retval = nullptr;
+        trn::depth_input *ip = get_depth_input(chan);
+
+        if(ip != nullptr){
+            retval = ip->depth_inst();
+        }
+
+        return retval;
+    }
+
+    trn::depth_input *get_depth_input(const std::string chan)
+    {
+        trn::depth_input *retval = nullptr;
+
+        trn::trn_lcm_input *li = this->get_input(chan);
+        if(li != nullptr){
+            trn::depth_input *ip = dynamic_cast<trn::depth_input *>(li);
             retval = ip;
         }
         return retval;
@@ -1065,7 +1099,7 @@ public:
                             }
                         }
                         
-                        if(listener->provides_nav() || listener->provides_att()) {
+                        if(listener->provides_nav() || listener->provides_att() || listener->provides_depth()) {
                             if (geo_s != NULL) {
                                 int btype = BT_NONE;
                                 txgeo *geo = txgeo::parse_txgeo(geo_s);
@@ -1216,7 +1250,7 @@ public:
             char *cur = NULL;
             char *opt_s = strtok_r(cpy, ",", &cur);
 
-            enum {BATH=0x1, MB1=0x2, NAV=0x4, ATT=0x8, VEL=0x10, TRN=0x20, CB=0x40, KEY=0x80, LCM=0x100, ERR=0x200};
+            enum {BATH=0x1, MB1=0x2, NAV=0x4, ATT=0x8, VEL=0x10, TRN=0x20, CB=0x40, KEY=0x80, LCM=0x100, DEPTH=0x200, ERR=0x400};
 
             // set required flag values
             // required NAV, ATT, CB, TRN, BATH and/or MB1
@@ -1233,24 +1267,28 @@ public:
                 int att_idx = -1;
                 int nav_idx = -1;
                 int vel_idx = -1;
+                int depth_idx = -1;
 
                 char *bath_ch = NULL;
                 char *mb1_ch = NULL;
                 char *att_ch = NULL;
                 char *nav_ch = NULL;
                 char *vel_ch = NULL;
+                char *depth_ch = NULL;
 
                 char *bath_cb = NULL;
                 char *mb1_cb = NULL;
                 char *nav_cb = NULL;
                 char *att_cb = NULL;
                 char *vel_cb = NULL;
+                char *depth_cb = NULL;
 
                 int bath_to = 100;
                 int mb1_to = 100;
                 int nav_to = 100;
                 int att_to = 100;
                 int vel_to = 100;
+                int depth_to = 100;
 
                 char *mbcsv_path = nullptr;
                 char *mbbin_path = nullptr;
@@ -1435,6 +1473,27 @@ public:
                         free(mb1_cb);
 
                         flags &= ~MB1;
+                    } else {
+                        flags |= ERR;
+                    }
+                }   else  if(strstr(opt_s, "di:") != NULL) {
+
+                    if(parse_ctx_input(opt_s, "di", &depth_idx, &depth_ch, &depth_cb, &depth_to) == 0){
+
+                        TRN_NDPRINT(5,  "%s:%d - di idx[%d] ch[%s] cb[%s]\n", __func__, __LINE__, depth_idx, depth_ch, depth_cb);
+
+                        ctx->set_depth_input(depth_idx, depth_ch);
+
+                        if(NULL != depth_cb){
+                            add_ctx_sem(depth_ch, depth_cb, depth_to);
+                            ctx->add_callback_key(depth_cb);
+                        }
+
+                        // free strings allocated by parse_ctx_input
+                        free(depth_ch);
+                        free(depth_cb);
+
+                        flags &= ~DEPTH;
                     } else {
                         flags |= ERR;
                     }
