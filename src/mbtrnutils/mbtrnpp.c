@@ -4237,7 +4237,7 @@ int main(int argc, char **argv) {
                     fprintf(stderr, "--reinit time_d:%.6f centered on offset: %f %f %f  sd: %f %f %f\n",
                                   ping[i_ping_process].time_d, use_offset_e, use_offset_n, use_offset_z,
                                   xyz_sdev.x, xyz_sdev.y, xyz_sdev.z);
-                    wtnav_reinit_filter_box(trn_instance, true, use_offset_n, use_offset_e, use_offset_z,
+                      wtnav_reinit_filter_box(trn_instance, true, use_offset_n, use_offset_e, use_offset_z,
                                               xyz_sdev.x, xyz_sdev.y, xyz_sdev.z);
 
                     mlog_tprintf(mbtrnpp_mlog_id, "i,trn filter reinit time_d:%.6f centered on offset: %f %f %f\n",
@@ -4252,7 +4252,7 @@ int main(int argc, char **argv) {
                   MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_PROC_TRN_XT], mtime_dtime());
 
                   // do TRN processing, output, and tests for reinitializing TRN
-                  mbtrnpp_trn_process_mb1(trn_instance, (mb1_t *)output_buffer, trn_cfg);
+                    mbtrnpp_trn_process_mb1(trn_instance, (mb1_t *)output_buffer, trn_cfg);
 
                   MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_PROC_TRN_XT], mtime_dtime());
 
