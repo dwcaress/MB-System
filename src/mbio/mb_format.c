@@ -3028,15 +3028,18 @@ int mb_datalist_open(int verbose, void **datalist_ptr, char *path, int look_proc
       MB_SUCCESS) {
     /* get datalist pointer */
     datalist = (struct mb_datalist_struct *)*datalist_ptr;
-    strcpy(datalist->path, "");
-    datalist->printed = false;
     datalist->open = false;
+    datalist->fp = NULL;
     datalist->recursion = 0;
-    datalist->look_processed = look_processed;
-    datalist->local_weight = true;
-    datalist->weight_set = false;
-    datalist->weight = 0.0;
+    memset(datalist->path, 0, sizeof(mb_path));
+    datalist->printed = false;
     datalist->datalist = NULL;
+    datalist->look_processed = look_processed;
+    datalist->look_altnav = false;
+    memset(datalist->altnav_suffix, 0, sizeof(mb_path));
+    datalist->weight_set = false;
+    datalist->local_weight = true;
+    datalist->weight = 0.0;
 
     if ((datalist->fp = fopen(path, "r")) == NULL) {
       mb_freed(verbose, __FILE__, __LINE__, (void **)datalist_ptr, error);
@@ -3534,6 +3537,8 @@ int mb_datalist_read3(int verbose, void *datalist_ptr,
   bool processedspecified = false;
   bool altnavspecified = false;
   int istart;
+
+  *astatus = MB_ALTNAV_NONE;
 
   /* loop over reading from datalist_ptr */
   bool done = false;
