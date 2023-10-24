@@ -105,6 +105,33 @@ public:
         return mStrBuf.c_str();
     }
 
+    const char *bathcsv()
+    {
+        mStrBuf.clear();
+        std::ostringstream ss;
+        ss << std::dec << std::setfill(' ') << std::fixed << std::setprecision(3);
+        ss << time_usec()/1.e6 << ",";
+        ss << "x" << std::hex << std::setfill('0') << std::setw(8);
+        ss << mFlags.get() << ",";
+        ss << std::dec << std::setfill(' ');
+        ss << ping_number() << ",";
+        ss << beam_count() << ",";
+
+        std::list<trn::beam_tup>::iterator it;
+        int k=0;
+        for(it=mBeamList.begin(); it!=mBeamList.end(); k++)
+        {
+            trn::beam_tup bt = static_cast<trn::beam_tup> (*it);
+            ss <<  std::get<0>(bt) << "," << std::get<1>(bt);
+            it++;
+            if(it != mBeamList.end())
+                ss << ",";
+        }
+
+        mStrBuf = ss.str();
+        return mStrBuf.c_str();
+    }
+
 protected:
     double mTimeUsec;
     flag_var<uint32_t> mFlags;

@@ -91,6 +91,7 @@ public:
     , mMB1BinFile(nullptr)
     , mTrnEstCsvFile(nullptr)
     , mMBEstCsvFile(nullptr)
+    , mRawBathCsvFile(nullptr)
     , mUtmZone(10)
     , mDecMod(0)
     , mCBCount(0)
@@ -99,6 +100,7 @@ public:
     , mMB1BinPath()
     , mTrnEstCsvPath()
     , mMBEstCsvPath()
+    , mRawBathCsvPath()
     , mLcmFlags(0)
     {
     }
@@ -109,6 +111,7 @@ public:
     , mMB1BinFile(other.mMB1BinFile)
     , mTrnEstCsvFile(other.mTrnEstCsvFile)
     , mMBEstCsvFile(other.mMBEstCsvFile)
+    , mRawBathCsvFile(other.mRawBathCsvFile)
     , mUtmZone(other.mUtmZone)
     , mDecMod(other.mDecMod)
     , mCBCount(other.mCBCount)
@@ -117,6 +120,7 @@ public:
     , mMB1BinPath(other.mMB1BinPath)
     , mTrnEstCsvPath(other.mTrnEstCsvPath)
     , mMBEstCsvPath(other.mMBEstCsvPath)
+    , mRawBathCsvPath(other.mMBEstCsvPath)
     , mLcmFlags(other.mLcmFlags)
     {
     }
@@ -168,6 +172,10 @@ public:
         {
             fclose(mMBEstCsvFile);
         }
+        if(mRawBathCsvFile != nullptr)
+        {
+            fclose(mRawBathCsvFile);
+        }
     }
 
     void tostream(std::ostream &os, int wkey=15, int wval=18)
@@ -188,6 +196,7 @@ public:
         os << std::setw(wkey) << "mb1_csv_file" << std::setw(wval) << mMB1CsvFile <<"\n";
         os << std::setw(wkey) << "mb1_bin_file" << std::setw(wval) << mMB1BinFile <<"\n";
         os << std::setw(wkey) << "trnest_csv_file" << std::setw(wval) << mTrnEstCsvFile <<"\n";
+        os << std::setw(wkey) << "rawBath_csv_file" << std::setw(wval) << mRawBathCsvFile <<"\n";
         os << std::setw(wkey) << "utm zone" << std::setw(wval) << mUtmZone <<"\n";
         os << std::setw(wkey) << "cb_count" << std::setw(wval) << mCBCount <<"\n";
         os << std::setw(wkey) << "cb_mod" << std::setw(wval) << mDecMod <<"\n";
@@ -203,6 +212,10 @@ public:
         alen = strlen(mTrnEstCsvPath.c_str());
         wx = (alen > wval ? alen+1 : wval);
         os << std::setw(wkey) << "trnest_csv_path" << std::setw(wx) << mTrnEstCsvPath.c_str() <<"\n";
+
+        alen = strlen(mRawBathCsvPath.c_str());
+        wx = (alen > wval ? alen+1 : wval);
+        os << std::setw(wkey) << "rawBath_csv_path" << std::setw(wx) << mRawBathCsvPath.c_str() <<"\n";
 
         std::list<trn_host>::iterator hit;
         os << std::setw(wkey) << "MB1Servers" << std::setw(wval) << mMB1SvrList.size() <<"\n";
@@ -601,7 +614,7 @@ public:
     {
         if(mMBEstCsvFile == nullptr){
 
-            TRN_NDPRINT(2, "%s:%d - opening MBEst CSV file[%s]\n", __func__, __LINE__, mTrnEstCsvPath.c_str());
+            TRN_NDPRINT(2, "%s:%d - opening MBEst CSV file[%s]\n", __func__, __LINE__, mMBEstCsvPath.c_str());
             if(logu::utils::open_file(&mMBEstCsvFile, mMBEstCsvPath, mMBEstCsvPath, true) == 0)
             {
                 TRN_NDPRINT(2, "%s:%d - opened MBEst CSV file[%s]\n", __func__, __LINE__, mMBEstCsvPath.c_str());
@@ -842,6 +855,97 @@ public:
                 fprintf(stderr, "%s:%d - MB1 wrote [%lu] size[%u]\n", __func__, __LINE__, (unsigned long)retval, snd->size);
             }
         }
+        return retval;
+    }
+
+    /////////////////
+    void set_rawbath_csv_path(const std::string &inp)
+    {
+        mRawBathCsvPath = std::string(inp);
+    }
+
+    std::string rawbath_csv_path()
+    {
+        return mRawBathCsvPath;
+    }
+
+    int init_rawbath_csv_file(trnxpp_cfg *cfg)
+    {
+        int retval = -1;
+
+        if(mRawBathCsvFile != NULL)
+        {
+            fclose(mRawBathCsvFile);
+            mRawBathCsvFile = nullptr;
+        }
+
+        set_rawbath_csv_path(rawbath_csv_path());
+        mRawBathCsvFile = rawbath_csv_open();
+
+        if(mRawBathCsvFile != nullptr) {
+            fprintf(mRawBathCsvFile, "# unix_sec, ping_num, lat_r, lon_r, ");
+            fprintf(mRawBathCsvFile, "utmN_m, utmE_m, depth_m, roll_r, pitch_r, ");
+            fprintf(mRawBathCsvFile, "heading_r, n_beams, beam, range...\n");
+            // time (epoch sec)
+            // ping_number
+            // lat_deg
+            // lon_deg
+            // utmN_m
+            // utmE_m
+            // depth_m
+            // roll_rad
+            // pitch_rad
+            // heading_rad
+            // n_beams
+            // beam[0]_num
+            // beam[0]_range
+            // ...
+            // beam[n-1]_num
+            // beam[n-1]_range
+
+        } else {
+            LU_PERROR(cfg->mlog(), "RawBath CSV file open failed");
+        }
+        return retval;
+    }
+
+    FILE *rawbath_csv_open()
+    {
+        if(mRawBathCsvFile == nullptr){
+
+            TRN_NDPRINT(2, "%s:%d - opening RawBath CSV file[%s]\n", __func__, __LINE__, mRawBathCsvPath.c_str());
+            if(logu::utils::open_file(&mRawBathCsvFile, mRawBathCsvPath, mRawBathCsvPath, true) == 0)
+            {
+                TRN_NDPRINT(2, "%s:%d - opened RawBath CSV file[%s]\n", __func__, __LINE__, mRawBathCsvPath.c_str());
+
+            } else {
+                TRN_DPRINT("%s:%d - ERR open RawBath CSV file[%s] failed\n", __func__, __LINE__, mRawBathCsvPath.c_str());
+            }
+        }
+        return mRawBathCsvFile;
+    }
+
+    FILE *rawbath_csv_file()
+    {
+        return mRawBathCsvFile;
+    }
+
+    int write_rawbath_csv(trn::bath_info *bi, trn::nav_info *ni, trn::att_info *ai, long int utm, double alt_depth=-1.)
+    {
+        int retval = 0;
+
+        // vi optional, valid if NULL
+        if(nullptr != mRawBathCsvFile){
+
+            std::string ss = trnx_utils::rawbath_tocsv(bi, ni, ai, utm, alt_depth);
+
+            fprintf(mRawBathCsvFile, "%s\n", ss.c_str());
+
+            retval = ss.length();
+        } else {
+            TRN_DPRINT("%s:%d - invalid arg mRawBathCsvFile[%p]\n", __func__, __LINE__, mRawBathCsvFile);
+        }
+
         return retval;
     }
 
@@ -1724,6 +1828,7 @@ private:
     FILE *mMB1BinFile;
     FILE *mTrnEstCsvFile;
     FILE *mMBEstCsvFile;
+    FILE *mRawBathCsvFile;
     long int mUtmZone;
     int mDecMod;
     int mCBCount;
@@ -1732,6 +1837,7 @@ private:
     std::string mMB1BinPath;
     std::string mTrnEstCsvPath;
     std::string mMBEstCsvPath;
+    std::string mRawBathCsvPath;
     uint32_t mLcmFlags;
 
     std::vector<std::string> mBathInputKeys;

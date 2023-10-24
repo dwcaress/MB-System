@@ -340,7 +340,7 @@ int cb_proto_idtlass(void *pargs)
         trn::vel_info *vi = (vkey == nullptr ? nullptr : xpp->get_vel_info(*vkey));
 
         // vi optional
-        if(bi[0] == nullptr || ni[0] == nullptr || ni[0] == nullptr || ai[1] == nullptr || ai[1] == nullptr)
+        if(bi[0] == nullptr || ni[0] == nullptr || ni[1] == nullptr || ai[1] == nullptr || ai[1] == nullptr)
         {
             ostringstream ss;
             ss << (bi[0] == nullptr ? " bi[0]" : "");
@@ -374,14 +374,19 @@ int cb_proto_idtlass(void *pargs)
 
             if(ctx->decmod() <= 0 || (ctx->cbcount() % ctx->decmod()) == 0) {
 
+
+                double alt_depth = -1.0;
                 if(di[0] != NULL) {
-                    double depth = di[0]->pressure_to_depth_m(ni[1]->lat());
-                    TRN_NDPRINT(3, "ni depth: %.3lf di pressure: %.3lf lat: %.3lf depth: %.3lf\n", ni[1]->depth(), di[0]->pressure_dbar(), ni[1]->lat(), depth );
+                    alt_depth = di[0]->pressure_to_depth_m(ni[1]->lat());
+                    TRN_NDPRINT(3, "ni depth: %.3lf di pressure: %.3lf lat: %.3lf alt_depth: %.3lf\n", ni[1]->depth(), di[0]->pressure_dbar(), ni[1]->lat(), alt_depth );
                     //                trn::depth_input *din = xpp->get_depth_input(*dkey[0]);
                     //                TRN_NDPRINT(3, "presssure:\n");
                     //                din->tostream(std::cerr);
-                    snd->depth = depth;
+                    snd->depth = alt_depth;
                 }
+
+                // log raw beams
+                ctx->write_rawbath_csv(bi[0], ni[1], ai[0], ctx->utm_zone(), alt_depth);
 
                 if(nullptr != bp[0]) {
                     trn_type[0] = bp[0]->bath_input_type();

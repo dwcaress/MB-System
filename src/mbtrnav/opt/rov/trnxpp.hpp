@@ -801,6 +801,9 @@ public:
                 if(ctx->init_mbest_csv_file(cfg) != 0){
                     errors++;
                 }
+                if(ctx->init_rawbath_csv_file(cfg) != 0){
+                    errors++;
+                }
             }
         }
         retval = errors;
@@ -1294,6 +1297,7 @@ public:
                 char *mbbin_path = nullptr;
                 char *tecsv_path = nullptr;
                 char *mecsv_path = nullptr;
+                char *rbcsv_path = nullptr;
                 long int utm = 10;
 
                 TRN_NDPRINT(5,  "%s:%d - parsing opt_s[%s] \n", __func__, __LINE__, opt_s);
@@ -1414,9 +1418,22 @@ public:
 
                     mecsv_path = trnxpp_cfg::trim(val_key);
 
-                    TRN_NDPRINT(5,  "%s:%d - mecsv_path[%s]\n", __func__, __LINE__, tecsv_path);
+                    TRN_NDPRINT(5,  "%s:%d - mecsv_path[%s]\n", __func__, __LINE__, mecsv_path);
 
                     ctx->set_mbest_csv_path(mecsv_path);
+
+                }  else if(strstr(opt_s, "rbcsv:") != NULL)  {
+
+                    // discard option "rbcsv:"
+                    strtok(opt_s,":");
+                    char *key_s = strtok(NULL,":");
+                    char *val_key = trnxpp_cfg::trim(key_s);
+
+                    rbcsv_path = trnxpp_cfg::trim(val_key);
+
+                    TRN_NDPRINT(5,  "%s:%d - rbcsv_path[%s]\n", __func__, __LINE__, rbcsv_path);
+
+                    ctx->set_rawbath_csv_path(rbcsv_path);
 
                 } else if(strstr(opt_s, "utm:") != NULL)  {
 

@@ -199,6 +199,77 @@ public:
         trnest_tostream(std::cerr, time, pt, mle, mmse, wkey, wval);
     }
 
+    static std::string  rawbath_tocsv(trn::bath_info *bi, trn::nav_info *ni, trn::att_info *ai, long int utm, double alt_depth=-1.)
+    {
+        // Format
+        // time (epoch sec)
+        // ping_number
+        // lat_deg
+        // lon_deg
+        // depth_m
+        // roll_rad
+        // pitch_rad
+        // heading_rad
+        // n_beams
+        // beam[0]_num
+        // beam[0]_range
+        // ...
+        // beam[n-1]_num
+        // beam[n-1]_range
+        ostringstream os;
+        os << std::fixed << std::setprecision(6);
+        os << bi->time_usec()/1e6 << ",";
+        os << bi->ping_number() << ",";
+        os << std::fixed << std::setprecision(5);
+
+        os << ni->lat() << ",";
+        os << ni->lon() << ",";
+        double posN=0., posE=0.;
+
+        NavUtils::geoToUtm(Math::degToRad(ni->lat()),
+                           Math::degToRad(ni->lon()),
+                           utm, &posN, &posE);
+        //fprintf(stderr, "utm %ld posN %lf, posE %lf\n",utm, posN, posE);
+        os << posN << ",";
+        os << posE << ",";
+        os << std::fixed << std::setprecision(3);
+        os << (alt_depth >= 0 ? alt_depth: ni->depth()) << ",";
+        os << ai->pitch() << ",";
+        os << ai->roll() << ",";
+        os << ai->heading() << ",";
+        os << bi->beam_count() << ",";
+
+        std::list<trn::beam_tup> mBeamList = bi->beams_raw();
+        std::list<trn::beam_tup>::iterator it;
+        int k=0;
+        for(it=mBeamList.begin(); it!=mBeamList.end(); k++)
+        {
+            trn::beam_tup bt = static_cast<trn::beam_tup> (*it);
+            os <<  std::get<0>(bt) << "," << std::get<1>(bt);
+            it++;
+            if(it != mBeamList.end())
+                os << ",";
+        }
+        return os.str();
+    }
+
+    static void rawbath_tostream(std::ostream &os, trn::bath_info *bi, trn::nav_info *ni, trn::att_info *ai, long int utm, double alt_depth=-1., int wkey=15, int wval=18)
+    {
+        os << "--- Raw Bath---" << "\n";
+    }
+
+    static std::string rawbath_tostring(trn::bath_info *bi, trn::nav_info *ni, trn::att_info *ai, long int utm, double alt_depth=-1., int wkey=15, int wval=18)
+    {
+        std::ostringstream ss;
+        rawbath_tostream(ss, bi, ni, ai, alt_depth=-1., wkey, wval);
+        return ss.str();
+    }
+
+    static void rawbath_show(trn::bath_info *bi, trn::nav_info *ni, trn::att_info *ai, long int utm, double alt_depth=-1., int wkey=15, int wval=18)
+    {
+        rawbath_tostream(std::cerr, bi, ni, ai, alt_depth=-1., wkey, wval);
+    }
+
     static std::string mbest_tocsv(trnu_pub_t &mbest)
     {
         // Format (compatible with tlp-plot)
