@@ -17,10 +17,11 @@
 #include "oi/kearfott_t.hpp"
 #include "nav_input.hpp"
 #include "att_input.hpp"
+#include "vel_input.hpp"
 
 namespace trn
 {
-class kearfott_input : public nav_input, public att_input
+class kearfott_input : public nav_input, public att_input, public vel_input
 {
 public:
 
@@ -85,6 +86,14 @@ public:
             bool att_valid = true;
             aflags |= (att_valid ? AF_VALID : 0);
             mAttInst = att_info(time, pitch, roll, heading, aflags);
+
+            vel_flags_t vflags = 0;
+            aflags |= (AF_VALID | VF_BLOCK | VF_RLOCK);
+            double vx = msg.vbodyx_ms;
+            double vy = msg.vbodyy_ms;
+            double vz = msg.vbodyz_ms;
+            mVelInst = vel_info(time, vx, vy, vz, vflags);
+
             nav_input::mDataInstMutex.unlock();
 
 #ifdef WITH_SHOW_DCON

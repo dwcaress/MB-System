@@ -314,7 +314,7 @@ int cb_proto_idtlass(void *pargs)
         std::string *bkey[1] = {ctx->bath_input_chan(0)};
         std::string *nkey[2] = {ctx->nav_input_chan(0),ctx->nav_input_chan(1)};
         std::string *akey[2] = {ctx->att_input_chan(0), ctx->att_input_chan(1)};
-        std::string *vkey = ctx->vel_input_chan(0);
+        std::string *vkey[1] = {ctx->vel_input_chan(0)};
         std::string *dkey[1] = {ctx->depth_input_chan(0)};
 
         // vi is optional
@@ -327,7 +327,7 @@ int cb_proto_idtlass(void *pargs)
             ss << (nkey[0]==nullptr ? " nkey[0]" : "");
             ss << (nkey[1]==nullptr ? " nkey[1]" : "");
             ss << (nkey[1]==nullptr ? " dkey[1]" : "");
-            ss << (vkey == nullptr ? " vkey" : "");
+            ss << (vkey[0] == nullptr ? " vkey[0]" : "");
             TRN_NDPRINT(TRNDL_PLUGIDTLASS, "%s:%d ERR - NULL input key: %s\n", __func__, __LINE__, ss.str().c_str());
                 err_count++;
                 continue;
@@ -337,7 +337,7 @@ int cb_proto_idtlass(void *pargs)
         trn::nav_info *ni[2] = {xpp->get_nav_info(*nkey[0]), xpp->get_nav_info(*nkey[1])};
         trn::att_info *ai[2] = {xpp->get_att_info(*akey[0]), xpp->get_att_info(*akey[1])};
         trn::depth_info *di[1] = {xpp->get_depth_info(*dkey[0])};
-        trn::vel_info *vi = (vkey == nullptr ? nullptr : xpp->get_vel_info(*vkey));
+        trn::vel_info *vi[1] = {(vkey[0] == nullptr ? nullptr : xpp->get_vel_info(*vkey[0]))};
 
         // vi optional
         if(bi[0] == nullptr || ni[0] == nullptr || ni[1] == nullptr || ai[1] == nullptr || ai[1] == nullptr)
@@ -348,7 +348,7 @@ int cb_proto_idtlass(void *pargs)
             ss << (ai[1] == nullptr ? " ai[1]" : "");
             ss << (ni[0] == nullptr ? " ni[0]" : "");
             ss << (ni[1] == nullptr ? " ni[1]" : "");
-            ss << (vi == nullptr ? " vi" : "");
+            ss << (vi[0] == nullptr ? " vi[0]" : "");
             TRN_NDPRINT(TRNDL_PLUGIDTLASS, "%s:%d WARN - NULL info instance: %s\n", __func__, __LINE__, ss.str().c_str());
                 err_count++;
                 continue;
@@ -386,7 +386,7 @@ int cb_proto_idtlass(void *pargs)
                 }
 
                 // log raw beams
-                ctx->write_rawbath_csv(bi[0], ni[1], ai[0], ctx->utm_zone(), alt_depth);
+                ctx->write_rawbath_csv(bi[0], ni[1], ai[0], vi[0], ctx->utm_zone(), alt_depth);
 
                 if(nullptr != bp[0]) {
                     trn_type[0] = bp[0]->bath_input_type();
@@ -480,7 +480,7 @@ int cb_proto_idtlass(void *pargs)
                 }
 
                 // write CSV
-                if (ctx->write_mb1_csv(snd, bi[0], ai[0], vi) > 0) {
+                if (ctx->write_mb1_csv(snd, bi[0], ai[0], vi[0]) > 0) {
                     TRN_NDPRINT(TRNDL_PLUGIDTLASS, "%s - >>>>>>> wrote MB1 CSV\n",__func__);
                     cfg->stats().mb_csv_n++;
                 }
@@ -515,8 +515,8 @@ int cb_proto_idtlass(void *pargs)
             delete ni[0];
         if(ni[1] != nullptr)
             delete ni[1];
-        if(vi != nullptr)
-            delete vi;
+        if(vi[0] != nullptr)
+            delete vi[0];
     }
 
     return retval;

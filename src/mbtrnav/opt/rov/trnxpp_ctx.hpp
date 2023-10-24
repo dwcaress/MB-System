@@ -16,6 +16,8 @@
 #include <chrono>
 #include <list>
 #include <string>
+#include <map>
+
 #include <unistd.h>
 
 #include "pcf_utils.hpp"
@@ -325,6 +327,24 @@ public:
             alen = strlen(st.c_str());
             wx = (alen > wval ? alen+1 : wval);
             os << std::setw(wkey-2) << "callback[" << i << "]" << std::setw(wx) << st <<"\n";
+        }
+
+        os << std::setw(wkey) << "mUmap";
+        os << std::setw(wval) << mUmap.size() << "\n";
+        std::map<std::string, uint64_t>::iterator umit = mUmap.begin();
+        while (umit != mUmap.end()) {
+            os << std::setw(wkey) << umit->first;
+            os << std::setw(wval) << static_cast<uint64_t>(umit->second) << "\n";
+            ++umit;
+        }
+
+        os << std::setw(wkey) << "mDmap";
+        os << std::setw(wval) << mDmap.size() << "\n";
+        std::map<std::string, double>::iterator dmit = mDmap.begin();
+        while (dmit != mDmap.end()) {
+            os << std::setw(wkey) << dmit->first;
+            os << std::setw(wval) << static_cast<double>(dmit->second) << "\n";
+            ++dmit;
         }
 
         os << "\n";
@@ -883,25 +903,9 @@ public:
         mRawBathCsvFile = rawbath_csv_open();
 
         if(mRawBathCsvFile != nullptr) {
-            fprintf(mRawBathCsvFile, "# unix_sec, ping_num, lat_r, lon_r, ");
-            fprintf(mRawBathCsvFile, "utmN_m, utmE_m, depth_m, roll_r, pitch_r, ");
-            fprintf(mRawBathCsvFile, "heading_r, n_beams, beam, range...\n");
-            // time (epoch sec)
-            // ping_number
-            // lat_deg
-            // lon_deg
-            // utmN_m
-            // utmE_m
-            // depth_m
-            // roll_rad
-            // pitch_rad
-            // heading_rad
-            // n_beams
-            // beam[0]_num
-            // beam[0]_range
-            // ...
-            // beam[n-1]_num
-            // beam[n-1]_range
+//            fprintf(mRawBathCsvFile, "# unix_sec, ping_num, lat_r, lon_r, ");
+//            fprintf(mRawBathCsvFile, "utmN_m, utmE_m, depth_m, roll_r, pitch_r, ");
+//            fprintf(mRawBathCsvFile, "heading_r, n_beams, beam, range...\n");
 
         } else {
             LU_PERROR(cfg->mlog(), "RawBath CSV file open failed");
@@ -930,14 +934,14 @@ public:
         return mRawBathCsvFile;
     }
 
-    int write_rawbath_csv(trn::bath_info *bi, trn::nav_info *ni, trn::att_info *ai, long int utm, double alt_depth=-1.)
+    int write_rawbath_csv(trn::bath_info *bi, trn::nav_info *ni, trn::att_info *ai, trn::vel_info *vi, long int utm, double alt_depth=-1.)
     {
         int retval = 0;
 
         // vi optional, valid if NULL
         if(nullptr != mRawBathCsvFile){
 
-            std::string ss = trnx_utils::rawbath_tocsv(bi, ni, ai, utm, alt_depth);
+            std::string ss = trnx_utils::rawbath_tocsv(bi, ni, ai, vi, utm, mUmap["RBFMT"] ,alt_depth);
 
             fprintf(mRawBathCsvFile, "%s\n", ss.c_str());
 
@@ -1820,6 +1824,11 @@ public:
     {
         return ((mLcmFlags & mask) != 0 ? true : false);
     }
+
+    // extra parameters (key/value pairs)
+    // keys may contain [a-zA-Z0-9_-.]
+    std::map<std::string, double> mDmap;
+    std::map<std::string, uint64_t> mUmap;
 
 protected:
 private:

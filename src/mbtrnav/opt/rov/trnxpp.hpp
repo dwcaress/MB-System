@@ -12,6 +12,8 @@
 #include <tuple>
 #include <list>
 #include <string>
+#include <map>
+
 #ifdef XPP_PROTO_SEM_CHECK
 // for threaded sem checking
 #include <thread>
@@ -1134,6 +1136,84 @@ public:
         return retval;
     }
 
+    int parse_ctx_dmap(const char *map_spec, std::map<std::string, double>& kvmap)
+    {
+        int retval = -1;
+        if(NULL != map_spec){
+            // parse extra parameters:
+            // - comma-separated key=value pairs
+            // - keys may contain [a-zA-Z0-9_-.]
+            // - values are type double (parsed using %g)
+            // - trims leading/trailing whitespace
+            TRN_NDPRINT(5,  "%s:%d - parsing map_spec[%s]\n", __func__, __LINE__, map_spec);
+            const char *kvdel="/";
+            char *acpy = strdup(map_spec);
+            char *next_pair = strtok_r(acpy, ":", &acpy);
+            TRN_NDPRINT(5,  "%s:%d - next_pair[%s]\n", __func__, __LINE__, next_pair);
+            while (next_pair != NULL) {
+                char *kcpy = strdup(next_pair);
+                char *skey = strtok(kcpy, kvdel);
+                char *sval = strtok(NULL, kvdel);
+                if(skey != NULL && sval != NULL) {
+                    char *tkey = beam_geometry::trim(skey);
+                    char *tval = beam_geometry::trim(sval);
+                    TRN_NDPRINT(5,  "%s:%d - tkey[%s] tval[%s]\n", __func__, __LINE__, tkey, tval);
+                    if (tkey != NULL && tval != NULL){
+                        double dval = 0.0;
+                        if (sscanf(tval, "%lf", &dval) == 1){
+                            kvmap[tkey] = dval;
+                            TRN_NDPRINT(5,  "%s:%d - added key[%s] val[%.3lf]\n", __func__, __LINE__, tkey, dval);                   }
+                    }
+                }
+                free(kcpy);
+                next_pair = strtok_r(acpy, ":", &acpy);
+                TRN_NDPRINT(5,  "%s:%d - next_pair[%s]\n", __func__, __LINE__, next_pair);
+            }
+            free(acpy);
+            retval = 0;
+        }
+        return retval;
+    }
+
+    int parse_ctx_umap(const char *map_spec, std::map<std::string, uint64_t>& kvmap)
+    {
+        int retval = -1;
+        if(NULL != map_spec){
+            // parse extra parameters:
+            // - comma-separated key=value pairs
+            // - keys may contain [a-zA-Z0-9_-.]
+            // - values are type double (parsed using %g)
+            // - trims leading/trailing whitespace
+            TRN_NDPRINT(5,  "%s:%d - parsing map_spec[%s]\n", __func__, __LINE__, map_spec);
+            const char *kvdel="/";
+            char *acpy = strdup(map_spec);
+            char *next_pair = strtok_r(acpy, ":", &acpy);
+            TRN_NDPRINT(5,  "%s:%d - next_pair[%s]\n", __func__, __LINE__, next_pair);
+            while (next_pair != NULL) {
+                char *kcpy = strdup(next_pair);
+                char *skey = strtok(kcpy, kvdel);
+                char *sval = strtok(NULL, kvdel);
+                if(skey != NULL && sval != NULL) {
+                    char *tkey = beam_geometry::trim(skey);
+                    char *tval = beam_geometry::trim(sval);
+                    TRN_NDPRINT(5,  "%s:%d - tkey[%s] tval[%s]\n", __func__, __LINE__, tkey, tval);
+                    if (tkey != NULL && tval != NULL){
+                        uint64_t val = 0.0;
+                        if (sscanf(tval, "%" PRIu64 "", &val) == 1){
+                            kvmap[tkey] = val;
+                            TRN_NDPRINT(5,  "%s:%d - added key[%s] val[%" PRIu64 "]\n", __func__, __LINE__, tkey, val);                   }
+                    }
+                }
+                free(kcpy);
+                next_pair = strtok_r(acpy, ":", &acpy);
+                TRN_NDPRINT(5,  "%s:%d - next_pair[%s]\n", __func__, __LINE__, next_pair);
+            }
+            free(acpy);
+            retval = 0;
+        }
+        return retval;
+    }
+
     // note: r_chan, r_sem return dynamically allocated strings, caller must free
     int parse_ctx_input(char *opt_s, const char *key, int *r_idx, char **r_chan, char **r_cb=NULL, int *r_tmout=NULL)
     {
@@ -1253,7 +1333,7 @@ public:
             char *cur = NULL;
             char *opt_s = strtok_r(cpy, ",", &cur);
 
-            enum {BATH=0x1, MB1=0x2, NAV=0x4, ATT=0x8, VEL=0x10, TRN=0x20, CB=0x40, KEY=0x80, LCM=0x100, DEPTH=0x200, ERR=0x400};
+            enum {BATH=0x1, MB1=0x2, NAV=0x4, ATT=0x8, VEL=0x10, TRN=0x20, CB=0x40, KEY=0x80, LCM=0x100, DEPTH=0x200, UMAP=0x400, DMAP=0x800, ERR=0x1000};
 
             // set required flag values
             // required NAV, ATT, CB, TRN, BATH and/or MB1
@@ -1622,6 +1702,44 @@ public:
                     } else {
                         flags |= ERR;
                     }
+                } else if(strstr(opt_s, "umap:") != NULL)  {
+                    // discard option "umap:"
+                    strtok(opt_s,":");
+                    char *key_s = strtok(NULL,",");
+                    char *val_key = trnxpp_cfg::trim(key_s);
+
+                    std::map<std::string, uint64_t> map;
+
+                    if(parse_ctx_umap(val_key, map) == 0){
+
+                        TRN_NDPRINT(5,  "%s:%d - umap\n", __func__, __LINE__);
+
+                        ctx->mUmap = map;
+
+                        flags &= ~UMAP;
+                    } else {
+                        flags |= ERR;
+                    }
+
+                }  else if(strstr(opt_s, "dmap:") != NULL)  {
+                    // discard option "dmap:"
+                    strtok(opt_s,":");
+                    char *key_s = strtok(NULL,",");
+                    char *val_key = trnxpp_cfg::trim(key_s);
+
+                    std::map<std::string, double> map;
+
+                    if(parse_ctx_dmap(val_key, map) == 0){
+
+                        TRN_NDPRINT(5,  "%s:%d - dmap\n", __func__, __LINE__);
+
+                        ctx->mDmap = map;
+
+                        flags &= ~DMAP;
+                    } else {
+                        flags |= ERR;
+                    }
+
                 } else {
                     flags |= ERR;
                 }
@@ -1629,7 +1747,6 @@ public:
                 // get next
                 opt_s = strtok_r(NULL, ",", &cur);
             }
-
 
             // OK if no flags set
             // or only one of MB1 or BATH are set

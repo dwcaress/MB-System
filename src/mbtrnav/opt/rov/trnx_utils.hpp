@@ -199,44 +199,108 @@ public:
         trnest_tostream(std::cerr, time, pt, mle, mmse, wkey, wval);
     }
 
-    static std::string  rawbath_tocsv(trn::bath_info *bi, trn::nav_info *ni, trn::att_info *ai, long int utm, double alt_depth=-1.)
+    static std::string  rawbath_tocsv(trn::bath_info *bi, trn::nav_info *ni, trn::att_info *ai, trn::vel_info *vi, long int utm, int format=0, double alt_depth=-1.)
     {
-        // Format
-        // time (epoch sec)
-        // ping_number
-        // lat_deg
-        // lon_deg
-        // depth_m
-        // roll_rad
-        // pitch_rad
-        // heading_rad
-        // n_beams
+        // Standard Format
+        // [ 0] time (epoch sec)
+        // [ 1] ping_number
+        // [ 2] lat_deg
+        // [ 3] lon_deg
+        // [ 6] depth_m
+        // [ 7] roll_rad
+        // [ 8] pitch_rad
+        // [ 9] heading_rad
+        // [10] vx (0)
+        // [11] xy (0)
+        // [12] vz (0)
+        // [13] sounding valid flag (1)
+        // [14] bottom lock valid flag (1)
+        // [0] n_beams
         // beam[0]_num
         // beam[0]_range
         // ...
         // beam[n-1]_num
         // beam[n-1]_range
+
+        // Stanford Format
+        // [ 0] time (epoch sec)
+        // [ 4] utmN_m
+        // [ 5] utmE_m
+        // [ 6] depth_m
+        // [ 7] roll_rad
+        // [ 8] pitch_rad
+        // [ 9] heading_rad
+        // [  ] flag (0)
+        // [  ] flag (0)
+        // [  ] flag (0)
+        // [10] vx (0)
+        // [11] xy (0)
+        // [12] vz (0)
+        // [13] sounding valid flag (1)
+        // [14] bottom lock valid flag (1)
+        // [0] n_beams
+        // beam[0]_num
+        // beam[0]_range
+        // ...
+        // beam[n-1]_num
+        // beam[n-1]_range
+
+        typedef enum {
+            FMT_STANDARD = 0,
+            FMT_STANFORD
+        } fmt_t;
+
+        fmt_t fmt = (format != 0 ? FMT_STANFORD : FMT_STANDARD);
+
         ostringstream os;
         os << std::fixed << std::setprecision(6);
         os << bi->time_usec()/1e6 << ",";
-        os << bi->ping_number() << ",";
+
+        if (fmt == FMT_STANDARD) {
+            os << bi->ping_number() << ",";
+        }
+
         os << std::fixed << std::setprecision(5);
 
-        os << ni->lat() << ",";
-        os << ni->lon() << ",";
-        double posN=0., posE=0.;
+        if (fmt == FMT_STANDARD) {
+            os << ni->lat() << ",";
+            os << ni->lon() << ",";
+        } else {
+            double posN=0., posE=0.;
 
-        NavUtils::geoToUtm(Math::degToRad(ni->lat()),
-                           Math::degToRad(ni->lon()),
-                           utm, &posN, &posE);
-        //fprintf(stderr, "utm %ld posN %lf, posE %lf\n",utm, posN, posE);
-        os << posN << ",";
-        os << posE << ",";
+            NavUtils::geoToUtm(Math::degToRad(ni->lat()),
+                               Math::degToRad(ni->lon()),
+                               utm, &posN, &posE);
+            //fprintf(stderr, "utm %ld posN %lf, posE %lf\n",utm, posN, posE);
+            os << posN << ",";
+            os << posE << ",";
+        }
+
         os << std::fixed << std::setprecision(3);
         os << (alt_depth >= 0 ? alt_depth: ni->depth()) << ",";
         os << ai->pitch() << ",";
         os << ai->roll() << ",";
         os << ai->heading() << ",";
+
+        if (fmt == FMT_STANFORD) {
+            os << 0 << ",";
+            os << 0 << ",";
+            os << 0 << ",";
+        }
+
+        if(vi != nullptr){
+            os << vi->vx_ms() << ",";
+            os << vi->vy_ms() << ",";
+            os << vi->vz_ms() << ",";
+        }else{
+            os << 0. << ",";
+            os << 0. << ",";
+            os << 0. << ",";
+        }
+        // sounding valid flag
+        os << (bi->flags().is_set(trn::BF_VALID) ? 1 : 0) << ",";
+        // bottom lock flag
+        os << (bi->flags().is_set(trn::BF_BLOCK) ? 1 : 0) << ",";
         os << bi->beam_count() << ",";
 
         std::list<trn::beam_tup> mBeamList = bi->beams_raw();
@@ -253,21 +317,110 @@ public:
         return os.str();
     }
 
-    static void rawbath_tostream(std::ostream &os, trn::bath_info *bi, trn::nav_info *ni, trn::att_info *ai, long int utm, double alt_depth=-1., int wkey=15, int wval=18)
+    static void rawbath_tostream(std::ostream &os, trn::bath_info *bi, trn::nav_info *ni, trn::att_info *ai, trn::vel_info *vi, long int utm, int format=0, double alt_depth=-1., int wkey=15, int wval=18)
     {
+         typedef enum {
+            FMT_STANDARD = 0,
+            FMT_STANFORD
+        } fmt_t;
+
+        fmt_t fmt = (format != 0 ? FMT_STANFORD : FMT_STANDARD);
+
         os << "--- Raw Bath---" << "\n";
+        os << std::fixed << std::setprecision(6);
+        os << std::setw(wkey) << "time_s" << std::endl;
+        os << std::setw(wval) << bi->time_usec()/1e6 << std::endl;
+
+        if (fmt == FMT_STANDARD) {
+            os << std::setw(wkey) << "ping_n" << std::endl;
+            os << std::setw(wval) << bi->ping_number() << std::endl;
+        }
+
+        os << std::fixed << std::setprecision(5);
+
+        if (fmt == FMT_STANDARD) {
+            os << std::setw(wkey) << "lat_d" << std::endl;
+            os << std::setw(wval) << ni->lat() << std::endl;
+            os << std::setw(wkey) << "lat_d" << std::endl;
+            os << std::setw(wval) << ni->lon() << std::endl;
+        } else {
+            double posN=0., posE=0.;
+
+            NavUtils::geoToUtm(Math::degToRad(ni->lat()),
+                               Math::degToRad(ni->lon()),
+                               utm, &posN, &posE);
+            //fprintf(stderr, "utm %ld posN %lf, posE %lf\n",utm, posN, posE);
+            os << std::setw(wkey) << "utmN_m" << std::endl;
+            os << std::setw(wval) << posN << std::endl;
+            os << std::setw(wkey) << "utmE_m" << std::endl;
+            os << std::setw(wval) << posE << std::endl;
+        }
+
+        os << std::fixed << std::setprecision(3);
+        os << std::setw(wkey) << "depth_m" << std::endl;
+        os << (alt_depth >= 0 ? alt_depth: ni->depth()) << std::endl;
+        os << std::setw(wkey) << "pitch_r" << std::endl;
+        os << std::setw(wval) << ai->pitch() << std::endl;
+        os << std::setw(wkey) << "roll_r" << std::endl;
+        os << std::setw(wval) << ai->roll() << std::endl;
+        os << std::setw(wkey) << "heading_r" << std::endl;
+        os << std::setw(wval) << ai->heading() << std::endl;
+
+        if (fmt == FMT_STANFORD) {
+            os << std::setw(wkey) << "flag[0]" << std::endl;
+            os << std::setw(wval) << 0 << std::endl;
+            os << std::setw(wkey) << "flag[1]" << std::endl;
+            os << std::setw(wval) << 0 << std::endl;
+            os << std::setw(wkey) << "flag[2]" << std::endl;
+            os << std::setw(wval) << 0 << std::endl;
+        }
+
+        if(vi != nullptr){
+            os << std::setw(wkey) << "vx_ms" << std::endl;
+            os << std::setw(wval) << vi->vx_ms() << std::endl;
+            os << std::setw(wkey) << "vy_ms" << std::endl;
+            os << std::setw(wval) << vi->vy_ms() << std::endl;
+            os << std::setw(wkey) << "vz_ms" << std::endl;
+            os << std::setw(wval) << vi->vz_ms() << std::endl;
+        }else{
+            os << std::setw(wkey) << "vx_ms" << std::endl;
+            os << std::setw(wval) << 0. << std::endl;
+            os << std::setw(wkey) << "vx_ms" << std::endl;
+            os << std::setw(wval) << 0. << std::endl;
+            os << std::setw(wkey) << "vx_ms" << std::endl;
+            os << std::setw(wval) << 0. << std::endl;
+        }
+        // sounding valid flag
+        os << std::setw(wkey) << "valid" << std::endl;
+        os << std::setw(wval) << (bi->flags().is_set(trn::BF_VALID) ? 1 : 0) << std::endl;
+        // bottom lock flag
+        os << std::setw(wkey) << "lock" << std::endl;
+        os << std::setw(wval) << (bi->flags().is_set(trn::BF_BLOCK) ? 1 : 0) << std::endl;
+        os << std::setw(wkey) << "beams" << std::endl;
+        os << std::setw(wval) << bi->beam_count() << std::endl;
+
+        std::list<trn::beam_tup> mBeamList = bi->beams_raw();
+        std::list<trn::beam_tup>::iterator it;
+        int k=0;
+        for(it=mBeamList.begin(); it!=mBeamList.end(); k++)
+        {
+            trn::beam_tup bt = static_cast<trn::beam_tup> (*it);
+            os << std::setw(wkey) << "[" << std::get<0>(bt) << "]";
+            os << std::setw(wval) << std::get<1>(bt) << std::endl;
+            it++;
+        }
     }
 
-    static std::string rawbath_tostring(trn::bath_info *bi, trn::nav_info *ni, trn::att_info *ai, long int utm, double alt_depth=-1., int wkey=15, int wval=18)
+    static std::string rawbath_tostring(trn::bath_info *bi, trn::nav_info *ni, trn::att_info *ai, trn::vel_info *vi, long int utm, int format=0, double alt_depth=-1., int wkey=15, int wval=18)
     {
         std::ostringstream ss;
-        rawbath_tostream(ss, bi, ni, ai, alt_depth=-1., wkey, wval);
+        rawbath_tostream(ss, bi, ni, ai, vi, utm, format, alt_depth, wkey, wval);
         return ss.str();
     }
 
-    static void rawbath_show(trn::bath_info *bi, trn::nav_info *ni, trn::att_info *ai, long int utm, double alt_depth=-1., int wkey=15, int wval=18)
+    static void rawbath_show(trn::bath_info *bi, trn::nav_info *ni, trn::att_info *ai, trn::vel_info *vi, long int utm, int format=0, double alt_depth=-1., int wkey=15, int wval=18)
     {
-        rawbath_tostream(std::cerr, bi, ni, ai, alt_depth=-1., wkey, wval);
+        rawbath_tostream(std::cerr, bi, ni, ai, vi, utm, format, alt_depth=-1., wkey, wval);
     }
 
     static std::string mbest_tocsv(trnu_pub_t &mbest)
