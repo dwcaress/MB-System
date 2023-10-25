@@ -118,7 +118,7 @@ public:
         os << "--- trnxpp ---" << "\n";
         os << std::setw(wkey) << "addr" << std::setw(wval) << this <<"\n";
         os << std::setw(wkey) << "lcm" << std::setw(wval) << &mLcm <<"\n";
-        os << std::setw(wkey) << "inputs"  << std::setw(wval) << mInputList.size() << "\n";
+        os << std::setw(wkey) << "Inputs"  << std::setw(wval) << mInputList.size() << "\n";
         if(mInputList.size()>0){
             std::list<lcm_input>::iterator it;
             int i=0;
@@ -131,7 +131,7 @@ public:
             }
         }
         os << std::dec << std::setfill(' ');
-        os << std::setw(wkey) << "geo"  << std::setw(wval) << mGeoList.size() << "\n";
+        os << std::setw(wkey) << "Geo"  << std::setw(wval) << mGeoList.size() << "\n";
         std::list<beam_geo>::iterator it;
         if(mGeoList.size() > 0){
             int i = 0;
@@ -151,7 +151,7 @@ public:
             os << "\n";
         }
         os << std::setw(wkey) << std::dec << std::setfill(' ');
-        os << std::setw(wkey) << "semaphores" << std::setw(wval) << mSemList.size() << "\n";
+        os << std::setw(wkey) << "Semaphores" << std::setw(wval) << mSemList.size() << "\n";
         if(mSemList.size()>0){
             std::list<sem_reg>::iterator it;
             int i=0;
@@ -175,7 +175,7 @@ public:
             os << "\n";
         }
 
-        os << std::setw(wkey) << "contexts" << std::setw(wval) << mCtx.size() << "\n";
+        os << std::setw(wkey) << "Contexts" << std::setw(wval) << mCtx.size() << "\n";
         if(mCtx.size()>0){
             std::vector<trnxpp_ctx *>::iterator it;
             int i=0;
@@ -1032,14 +1032,6 @@ public:
                     opt_s = strtok_r(NULL, ",", &cur);
                 }
 
-//
-//                if( (cur != NULL) && strstr(cur,"geo") != NULL )
-//                {
-//                    // geo contains ',', so parse to '*' geo terminator
-//                    opt_s = strtok_r(NULL, "*", &cur);
-//                } else {
-//                    opt_s = strtok_r(NULL, ",", &cur);
-//                }
             } // while
 
             if(flags == 0){
@@ -1214,6 +1206,45 @@ public:
         return retval;
     }
 
+    int parse_ctx_imap(const char *map_spec, std::map<std::string, int64_t>& kvmap)
+    {
+        int retval = -1;
+        if(NULL != map_spec){
+            // parse extra parameters:
+            // - comma-separated key=value pairs
+            // - keys may contain [a-zA-Z0-9_-.]
+            // - values are type double (parsed using %g)
+            // - trims leading/trailing whitespace
+            TRN_NDPRINT(5,  "%s:%d - parsing map_spec[%s]\n", __func__, __LINE__, map_spec);
+            const char *kvdel="/";
+            char *acpy = strdup(map_spec);
+            char *next_pair = strtok_r(acpy, ":", &acpy);
+            TRN_NDPRINT(5,  "%s:%d - next_pair[%s]\n", __func__, __LINE__, next_pair);
+            while (next_pair != NULL) {
+                char *kcpy = strdup(next_pair);
+                char *skey = strtok(kcpy, kvdel);
+                char *sval = strtok(NULL, kvdel);
+                if(skey != NULL && sval != NULL) {
+                    char *tkey = beam_geometry::trim(skey);
+                    char *tval = beam_geometry::trim(sval);
+                    TRN_NDPRINT(5,  "%s:%d - tkey[%s] tval[%s]\n", __func__, __LINE__, tkey, tval);
+                    if (tkey != NULL && tval != NULL){
+                        int64_t val = 0.0;
+                        if (sscanf(tval, "%" PRId64 "", &val) == 1){
+                            kvmap[tkey] = val;
+                            TRN_NDPRINT(5,  "%s:%d - added key[%s] val[%" PRId64 "]\n", __func__, __LINE__, tkey, val);                   }
+                    }
+                }
+                free(kcpy);
+                next_pair = strtok_r(acpy, ":", &acpy);
+                TRN_NDPRINT(5,  "%s:%d - next_pair[%s]\n", __func__, __LINE__, next_pair);
+            }
+            free(acpy);
+            retval = 0;
+        }
+        return retval;
+    }
+
     // note: r_chan, r_sem return dynamically allocated strings, caller must free
     int parse_ctx_input(char *opt_s, const char *key, int *r_idx, char **r_chan, char **r_cb=NULL, int *r_tmout=NULL)
     {
@@ -1333,7 +1364,7 @@ public:
             char *cur = NULL;
             char *opt_s = strtok_r(cpy, ",", &cur);
 
-            enum {BATH=0x1, MB1=0x2, NAV=0x4, ATT=0x8, VEL=0x10, TRN=0x20, CB=0x40, KEY=0x80, LCM=0x100, DEPTH=0x200, UMAP=0x400, DMAP=0x800, ERR=0x1000};
+            enum {BATH=0x1, MB1=0x2, NAV=0x4, ATT=0x8, VEL=0x10, TRN=0x20, CB=0x40, KEY=0x80, LCM=0x100, DEPTH=0x200, UMAP=0x400, DMAP=0x800, IMAP=0x1000, ERR=0x2000};
 
             // set required flag values
             // required NAV, ATT, CB, TRN, BATH and/or MB1
@@ -1721,7 +1752,7 @@ public:
                         flags |= ERR;
                     }
 
-                }  else if(strstr(opt_s, "dmap:") != NULL)  {
+                } else if(strstr(opt_s, "dmap:") != NULL)  {
                     // discard option "dmap:"
                     strtok(opt_s,":");
                     char *key_s = strtok(NULL,",");
@@ -1736,6 +1767,25 @@ public:
                         ctx->mDmap = map;
 
                         flags &= ~DMAP;
+                    } else {
+                        flags |= ERR;
+                    }
+
+                }  else if(strstr(opt_s, "imap:") != NULL)  {
+                    // discard option "imap:"
+                    strtok(opt_s,":");
+                    char *key_s = strtok(NULL,",");
+                    char *val_key = trnxpp_cfg::trim(key_s);
+
+                    std::map<std::string, int64_t> map;
+
+                    if(parse_ctx_imap(val_key, map) == 0){
+
+                        TRN_NDPRINT(5,  "%s:%d - imap\n", __func__, __LINE__);
+
+                        ctx->mImap = map;
+
+                        flags &= ~IMAP;
                     } else {
                         flags |= ERR;
                     }

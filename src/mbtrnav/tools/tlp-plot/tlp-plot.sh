@@ -79,6 +79,7 @@ source ${QP_PLOT_HOME}/qp-shared.conf.sh
 # keep intermediate files and directories
 # unset by default
 unset QX_KEEP_FLAG
+QX_OPT_KEEP=""
 
 #################################
 # Function Definitions
@@ -238,6 +239,7 @@ while getopts hf:i:j:Kk:ls:v Option
             j ) QX_JOB_DIR=$OPTARG
             ;;
             K) QX_KEEP_FLAG="Y"
+                QX_OPT_KEEP="-D"
             ;;
 			k ) key=$OPTARG
              	key_valid=""
@@ -310,7 +312,7 @@ plot_trno(){
         vout " processing ${TRNO_LOG}"
         cp ${TRNO_LOG} ${QP_PLOT_DATA_DIR}/${QU_TRNO_CSV}
         # use qplot to generate plot set
-        ${QPLOT_CMD} -f ${QP_PLOT_HOME}/${TRNO_QPCONF}
+        ${QPLOT_CMD} ${QX_OPT_KEEP} -f ${QP_PLOT_HOME}/${TRNO_QPCONF}
     else
         echo "ERR - TRNO_LOG log not found ${TRNO_LOG}"
         echo "ERR - TRNO_QPCONF log not found ${QP_PLOT_HOME}/${TRNO_QPCONF}"
@@ -373,10 +375,14 @@ run_jobs(){
 
         if [ -d ${QX_JOB_N_DIR} ] && [ -d ${QP_OUTPUT_DIR} ]  && [ -d ${QP_PLOT_DATA_DIR} ]
         then
-            mv ${QP_OUTPUT_DIR}/*png ${QX_JOB_N_DIR}
-            mv ${QP_OUTPUT_DIR}/*pdf ${QX_JOB_N_DIR}
-            mv ${QP_PLOT_DATA_DIR}/*csv ${QX_JOB_N_DIR}
-            mv ${QP_OUTPUT_DIR}/*gp ${QX_JOB_N_DIR} &> /dev/null
+            cp ${QP_OUTPUT_DIR}/*png ${QX_JOB_N_DIR}
+            cp ${QP_OUTPUT_DIR}/*pdf ${QX_JOB_N_DIR}
+            if [ ! -z ${QX_KEEP_FLAG} ]
+            then
+            cp ${QP_PLOT_DATA_DIR}/*csv ${QX_JOB_N_DIR}
+            cp ${QP_OUTPUT_DIR}/*gp ${QX_JOB_N_DIR} &> /dev/null
+            fi
+
             echo "QU_LOG_PATH    - $QU_LOG_PATH" > ${QX_JOB_N_DIR}/README
             echo "QU_SESSION_ID  - $QU_SESSION_ID" >> ${QX_JOB_N_DIR}/README
             echo "QU_DATA_SET_ID - $QU_DATA_SET_ID" >> ${QX_JOB_N_DIR}/README
@@ -457,11 +463,10 @@ fi
 # process jobs
 run_jobs
 
-if [ -z $QX_KEEP_FLAG ]
-then
+# remove temporary directories
 rm -r ${QP_PLOT_DATA_DIR}
 rm -r ${QP_OUTPUT_DIR}
-fi
+
 vout ""
 
 exit 0

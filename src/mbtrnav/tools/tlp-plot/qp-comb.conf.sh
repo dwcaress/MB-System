@@ -19,14 +19,16 @@ QU_COMB_IMG_NAME="mbtrnpp-comb"
 export QU_TRNO_OFS_OIMG_NAME="trno-$QU_SESSION_ID-ofs"
 export QU_TRNO_NOR_OIMG_NAME="trno-$QU_SESSION_ID-nor"
 export QU_TRNO_EAS_OIMG_NAME="trno-$QU_SESSION_ID-eas"
+export QU_TRNO_POS_OIMG_NAME="trno-$QU_SESSION_ID-pos"
 
 # define image paths (uses environment from qp-shared.conf)
 TRNO_OFS="${QP_OUTPUT_DIR}/${QU_TRNO_OFS_OIMG_NAME}.${QU_IMG_TYPE}"
 TRNO_NOR="${QP_OUTPUT_DIR}/${QU_TRNO_NOR_OIMG_NAME}.${QU_IMG_TYPE}"
 TRNO_EAS="${QP_OUTPUT_DIR}/${QU_TRNO_EAS_OIMG_NAME}.${QU_IMG_TYPE}"
+TRNO_POS="${QP_OUTPUT_DIR}/${QU_TRNO_POS_OIMG_NAME}.${QU_IMG_TYPE}"
 
 # list of images to combine, in specified order
-QU_FILE_LIST="${TRNO_OFS}|${TRNO_NOR}|${TRNO_EAS}"
+QU_FILE_LIST="${TRNO_OFS}|${TRNO_NOR}|${TRNO_EAS}|${TRNO_POS}"
 
 # Set some job name (key)
 declare -a QU_KEYS=( "comb-all" )

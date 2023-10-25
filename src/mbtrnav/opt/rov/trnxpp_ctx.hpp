@@ -219,8 +219,9 @@ public:
         wx = (alen > wval ? alen+1 : wval);
         os << std::setw(wkey) << "rawBath_csv_path" << std::setw(wx) << mRawBathCsvPath.c_str() <<"\n";
 
-        std::list<trn_host>::iterator hit;
+        os << std::endl;
         os << std::setw(wkey) << "MB1Servers" << std::setw(wval) << mMB1SvrList.size() <<"\n";
+        std::list<trn_host>::iterator hit;
         int i=0;
         for(i=0, hit = mMB1SvrList.begin(); hit != mMB1SvrList.end(); hit++){
             ostringstream ss;
@@ -263,7 +264,7 @@ public:
             os << std::setw(wkey-3) << "trncli[" << std::setw(2) << i << "]" << std::setw(wx) << ss.str().c_str() << std::endl;
         }
 
-        os << std::setw(wkey) << "TrnClients" << std::setw(wval) << mTrnCliList.size() <<"\n";
+        os << std::setw(wkey) << "TrnClients" << std::setw(wval) << mTrnCliList.size() << std::endl;
         for(i=0, hit = mTrnCliList.begin(); hit != mTrnCliList.end(); hit++){
             ostringstream ss;
             std::string key = std::get<0>(*hit);
@@ -283,6 +284,9 @@ public:
             wx = (alen > wval ? alen+1 : wval);
             os << std::setw(wkey-3) << "trncli[" << std::setw(2) << i << "]" << std::setw(wx) << ss.str().c_str() << std::endl;
         }
+
+        os << std::endl;
+        os << std::setw(wkey) << "Inputs" << std::setw(wval) << std::endl;
 
         std::vector<std::string>::iterator vit;
 
@@ -329,8 +333,11 @@ public:
             os << std::setw(wkey-2) << "callback[" << i << "]" << std::setw(wx) << st <<"\n";
         }
 
-        os << std::setw(wkey) << "mUmap";
-        os << std::setw(wval) << mUmap.size() << "\n";
+        os << std::endl;
+        os << std::setw(wkey) << "Maps" << std::setw(wval) << std::endl;
+
+        os << std::setw(wkey) << ": mUmap :";
+        os << std::setw(wval - 2) << "[" << mUmap.size() << "]" << "\n";
         std::map<std::string, uint64_t>::iterator umit = mUmap.begin();
         while (umit != mUmap.end()) {
             os << std::setw(wkey) << umit->first;
@@ -338,13 +345,22 @@ public:
             ++umit;
         }
 
-        os << std::setw(wkey) << "mDmap";
-        os << std::setw(wval) << mDmap.size() << "\n";
+        os << std::setw(wkey) << ": mDmap :";
+        os << std::setw(wval - 2) << "[" << mDmap.size() << "]" << "\n";
         std::map<std::string, double>::iterator dmit = mDmap.begin();
         while (dmit != mDmap.end()) {
             os << std::setw(wkey) << dmit->first;
             os << std::setw(wval) << static_cast<double>(dmit->second) << "\n";
             ++dmit;
+        }
+
+        os << std::setw(wkey) << ": mImap :";
+        os << std::setw(wval - 2) << "[" << mImap.size() << "]" << "\n";
+        std::map<std::string, int64_t>::iterator imit = mImap.begin();
+        while (imit != mImap.end()) {
+            os << std::setw(wkey) << imit->first;
+            os << std::setw(wval) << static_cast<double>(imit->second) << "\n";
+            ++imit;
         }
 
         os << "\n";
@@ -1829,6 +1845,7 @@ public:
     // keys may contain [a-zA-Z0-9_-.]
     std::map<std::string, double> mDmap;
     std::map<std::string, uint64_t> mUmap;
+    std::map<std::string, int64_t> mImap;
 
 protected:
 private:
