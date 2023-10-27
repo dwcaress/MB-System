@@ -772,7 +772,7 @@ public:
         // vi optional, valid if NULL
         if(nullptr != mMB1CsvFile && nullptr != snd && nullptr != ai && nullptr != bi){
 
-            std::string ss = trnx_utils::mb1_to_csv(snd, bi, ai, vi);
+            std::string ss = trnx_utils::mb1_to_csv(snd, bi, ai, mUmap["MBFMT"], vi);
             if(ss.length() > 1){
                 fprintf(mMB1CsvFile, "%s\n", ss.c_str());
             }
@@ -794,7 +794,7 @@ public:
         // vi optional, valid if NULL
         if(nullptr != mMB1CsvFile && nullptr != snd && nullptr != ai && nullptr != bi){
 
-            std::string ss = trnx_utils::mb1_to_csv(snd, bi, ai, vi);
+            std::string ss = trnx_utils::mb1_to_csv(snd, bi, ai, mUmap["MBFMT"], vi);
             if(ss.length() > 1){
                 fprintf(mMB1CsvFile, "%s\n", ss.c_str());
             }

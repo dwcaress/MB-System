@@ -260,7 +260,7 @@ public:
             os << bi->ping_number() << ",";
         }
 
-        os << std::fixed << std::setprecision(5);
+        os << std::fixed << std::setprecision(7);
 
         if (fmt == FMT_STANDARD) {
             os << ni->lat() << ",";
@@ -1485,12 +1485,19 @@ public:
         return pt;
     }    
 
-    static std::string mb1_to_csv(mb1_t *snd, trn::bath_info *bi, trn::att_info *ai, trn::vel_info *vi=nullptr)
+    static std::string mb1_to_csv(mb1_t *snd, trn::bath_info *bi, trn::att_info *ai, int format=0, trn::vel_info *vi=nullptr)
     {
 
         std::ostringstream ss;
         if(nullptr != snd && nullptr != ai)
         {
+            typedef enum {
+                FMT_STANDARD = 0,
+                FMT_STANFORD
+            } fmt_t;
+
+            fmt_t fmt = (format != 0 ? FMT_STANFORD : FMT_STANDARD);
+
             double lat = snd->lat;
             double lon = snd->lon;
             double pos_N=0;
@@ -1523,18 +1530,35 @@ public:
             // ...
             // NEWLINE
 
-            ss << std::dec << std::setfill(' ') << std::fixed << std::setprecision(7);
+            ss << std::dec << std::setfill(' ') << std::fixed << std::setprecision(6);
             ss << snd->ts << ",";
+
+            if (fmt == FMT_STANDARD) {
+                ss << bi->ping_number() << ",";
+            }
+
             ss << std::setprecision(7);
-            ss << pos_N << ",";
-            ss << pos_E << ",";
+
+            if(fmt == FMT_STANDARD){
+                ss << lat << ",";
+                ss << lon << ",";
+            } else {
+                ss << pos_N << ",";
+                ss << pos_E << ",";
+            }
+
+            ss << std::fixed << std::setprecision(3);
             ss << snd->depth << ",";
             ss << snd->hdg << ",";
             ss << ai->pitch() << ",";
             ss << ai->roll() << ",";
-            ss << 0 << ",";
-            ss << 0 << ",";
-            ss << 0 << ",";
+
+            if (fmt == FMT_STANFORD) {
+                ss << 0 << ",";
+                ss << 0 << ",";
+                ss << 0 << ",";
+            }
+
             if(vi != nullptr){
                 ss << vi->vx_ms() << ",";
                 ss << vi->vy_ms() << ",";
@@ -1556,13 +1580,23 @@ public:
             {
                 // beam number
                 ss <<  snd->beams[i].beam_num << ",";
-                // valid (set to 1)
-                ss << 1 << ",";
-                // range
-                double comp[3] = {snd->beams[i].rhox, snd->beams[i].rhoz, snd->beams[i].rhoz};
+
+                double comp[3] = {snd->beams[i].rhox, snd->beams[i].rhoy, snd->beams[i].rhoz};
                 double range = vnorm(comp);
 
-                ss << range;
+                // valid (set to 1)
+                ss << (range <= 0. ? 0 : 1) << ",";
+
+                if (fmt == FMT_STANFORD) {
+                    // range
+                    ss << range;
+
+                } else if (fmt == FMT_STANDARD){
+                    ss << snd->beams[i].rhox << ",";
+                    ss << snd->beams[i].rhoy << ",";
+                    ss << snd->beams[i].rhoz;
+                }
+
                 if(i < (snd->nbeams-1))
                     ss << ",";
             }
@@ -1570,12 +1604,41 @@ public:
         return ss.str();
     }
 
-    static std::string mb1_to_csv(mb1_t *snd, trn::mb1_info *bi, trn::att_info *ai, trn::vel_info *vi=nullptr)
+    static std::string mb1_to_csv(mb1_t *snd, trn::mb1_info *bi, trn::att_info *ai, int format=0, trn::vel_info *vi=nullptr)
     {
+        // Note that TRN uses N,E,D frame (i.e. N:x E:y D:z)
+        // [ 0] time POSIX epoch sec
+        // [ 1] northings
+        // [ 2] eastings
+        // [ 3] depth
+        // [ 4] heading
+        // [ 5] pitch
+        // [ 6] roll
+        // [ 7] flag (0)
+        // [ 8] flag (0)
+        // [ 9] flag (0)
+        // [10] vx (0)
+        // [11] xy (0)
+        // [12] vz (0)
+        // [13] sounding valid flag (1)
+        // [14] bottom lock valid flag (1)
+        // [15] number of beams
+        // beam[16 + i*3] number
+        // beam[17 + i*3] valid (always 1)
+        // beam[18 + i*3] range
+        // ...
+        // NEWLINE
 
         std::ostringstream ss;
         if(nullptr != snd && nullptr != ai)
         {
+            typedef enum {
+                FMT_STANDARD = 0,
+                FMT_STANFORD
+            } fmt_t;
+
+            fmt_t fmt = (format != 0 ? FMT_STANFORD : FMT_STANDARD);
+
             double lat = snd->lat;
             double lon = snd->lon;
             double pos_N=0;
@@ -1585,41 +1648,36 @@ public:
 
             // NavUtils::geoToUtm(latitude, longitude, utmZone, *northing, *easting)
             NavUtils::geoToUtm(Math::degToRad(lat), Math::degToRad(lon), utm, &pos_N, &pos_E);
-            // Note that TRN uses N,E,D frame (i.e. N:x E:y D:z)
-            // [ 0] time POSIX epoch sec
-            // [ 1] northings
-            // [ 2] eastings
-            // [ 3] depth
-            // [ 4] heading
-            // [ 5] pitch
-            // [ 6] roll
-            // [ 7] flag (0)
-            // [ 8] flag (0)
-            // [ 9] flag (0)
-            // [10] vx (0)
-            // [11] xy (0)
-            // [12] vz (0)
-            // [13] sounding valid flag (1)
-            // [14] bottom lock valid flag (1)
-            // [15] number of beams
-            // beam[16 + i*3] number
-            // beam[17 + i*3] valid (always 1)
-            // beam[18 + i*3] range
-            // ...
-            // NEWLINE
 
-            ss << std::dec << std::setfill(' ') << std::fixed << std::setprecision(7);
+            ss << std::dec << std::setfill(' ') << std::fixed << std::setprecision(6);
             ss << snd->ts << ",";
+
+            if (fmt == FMT_STANDARD) {
+                ss << bi->ping_number() << ",";
+            }
+
             ss << std::setprecision(7);
-            ss << pos_N << ",";
-            ss << pos_E << ",";
+
+            if(fmt == FMT_STANDARD){
+                ss << lat << ",";
+                ss << lon << ",";
+            } else {
+                ss << pos_N << ",";
+                ss << pos_E << ",";
+            }
+
+            ss << std::fixed << std::setprecision(3);
             ss << snd->depth << ",";
             ss << snd->hdg << ",";
             ss << ai->pitch() << ",";
             ss << ai->roll() << ",";
-            ss << 0 << ",";
-            ss << 0 << ",";
-            ss << 0 << ",";
+
+            if (fmt == FMT_STANFORD) {
+                ss << 0 << ",";
+                ss << 0 << ",";
+                ss << 0 << ",";
+            }
+
             if(vi != nullptr){
                 ss << vi->vx_ms() << ",";
                 ss << vi->vy_ms() << ",";
@@ -1641,13 +1699,22 @@ public:
             {
                 // beam number
                 ss <<  snd->beams[i].beam_num << ",";
-                // valid (set to 1)
-                ss << 1 << ",";
-                // range
-                double comp[3] = {snd->beams[i].rhox, snd->beams[i].rhoz, snd->beams[i].rhoz};
+
+                double comp[3] = {snd->beams[i].rhox, snd->beams[i].rhoy, snd->beams[i].rhoz};
                 double range = vnorm(comp);
 
-                ss << range;
+                // valid (set to 1)
+                ss << (range <= 0. ? 0 : 1) << ",";
+
+                if (fmt == FMT_STANFORD) {
+                    // range
+                    ss << range;
+                } else if (fmt == FMT_STANDARD){
+                    ss << snd->beams[i].rhox << ",";
+                    ss << snd->beams[i].rhoy << ",";
+                    ss << snd->beams[i].rhoz;
+                }
+
                 if(i < (snd->nbeams-1))
                     ss << ",";
             }
@@ -1657,6 +1724,29 @@ public:
 
     static std::string lcm_to_csv_raw(trn::bath_info *bi, trn::att_info *ai, trn::nav_info *ni, trn::vel_info *vi=nullptr)
     {
+        // Note that TRN uses N,E,D frame (i.e. N:x E:y D:z)
+        // [ 0] time POSIX epoch sec
+        // [ 1] northings
+        // [ 2] eastings
+        // [ 3] depth
+        // [ 4] heading
+        // [ 5] pitch
+        // [ 6] roll
+        // [ 7] flag (0)
+        // [ 8] flag (0)
+        // [ 9] flag (0)
+        // [10] vx (0)
+        // [11] xy (0)
+        // [12] vz (0)
+        // [13] sounding valid flag
+        // [14] bottom lock valid flag
+        // [15] number of beams
+        // beam[16 + i*3] number
+        // beam[17 + i*3] valid (always 1)
+        // beam[18 + i*3] range
+        // ...
+        // NEWLINE
+
         std::ostringstream ss;
         if(nullptr != bi && nullptr != ai && nullptr != ni)
         {
@@ -1669,28 +1759,6 @@ public:
 
             // NavUtils::geoToUtm(latitude, longitude, utmZone, *northing, *easting)
             NavUtils::geoToUtm(Math::degToRad(lat), Math::degToRad(lon), utm, &pos_N, &pos_E);
-            // Note that TRN uses N,E,D frame (i.e. N:x E:y D:z)
-            // [ 0] time POSIX epoch sec
-            // [ 1] northings
-            // [ 2] eastings
-            // [ 3] depth
-            // [ 4] heading
-            // [ 5] pitch
-            // [ 6] roll
-            // [ 7] flag (0)
-            // [ 8] flag (0)
-            // [ 9] flag (0)
-            // [10] vx (0)
-            // [11] xy (0)
-            // [12] vz (0)
-            // [13] sounding valid flag
-            // [14] bottom lock valid flag
-            // [15] number of beams
-            // beam[16 + i*3] number
-            // beam[17 + i*3] valid (always 1)
-            // beam[18 + i*3] range
-            // ...
-            // NEWLINE
 
             ss << std::dec << std::setfill(' ') << std::fixed << std::setprecision(7);
             ss << bi->time_usec()/1000000. << ",";
@@ -1724,12 +1792,13 @@ public:
             for(it=beam_list.begin(); it!=beam_list.end(); k++)
             {
                 trn::beam_tup bt = static_cast<trn::beam_tup> (*it);
+                double range = std::get<1>(bt);
                 // beam number
                 ss <<  std::get<0>(bt) << ",";
                 // valid (set to 1)
-                ss << 1 << ",";
+                ss << ( range != 0. ? 1 : 0) << ",";
                 // range
-                ss << std::get<1>(bt);
+                ss << range;
                 it++;
                 if(it != beam_list.end())
                     ss << ",";

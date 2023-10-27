@@ -541,6 +541,8 @@ public:
         "    umap:k/v:... key: string value: uint64\n"
         "    imap:k/v:... key: string value: int64\n"
         "    dmap:k/v:... key: string value: double\n"
+        "    umap: RBFMT -  rbcsv fmt - 0:standard format 1:stanford\n"
+        "    umap: MBFMT -  mbcsv fmt - 0:standard format 1:stanford\n"
         "\n"
         "\n"
         "  Supported Input channels\n"
