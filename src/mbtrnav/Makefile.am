@@ -685,7 +685,7 @@ lcm_rovtrn.jar: ${TRN_JCLS}
 
 endif
 
-bin_PROGRAMS =  trn-server trn-replay trnclient-test mmcpub mmcsub trnu-cli trn-cli trnif-test trnusvr-test netif-test trnifsvr-test mb1rs  trnlog-player mb1log-player ${ROVTRN_APPS} #  readlog writelog
+bin_PROGRAMS =  trn-server trn-replay trnclient-test mmcpub mmcsub trnu-cli trn-cli trnif-test trnusvr-test netif-test trnifsvr-test mb1rs  trnlog-player mb1log-player csvlog-player ${ROVTRN_APPS} #  readlog writelog
 
 trn_server_SOURCES = utils/trn_server.cpp
 trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
@@ -730,6 +730,9 @@ trnlog_player_LDADD = libtnav.la libnewmat.la libtrncli.la
 
 mb1log_player_SOURCES = utils/mb1log_player.cpp
 mb1log_player_LDADD = libtnav.la libnewmat.la libtrncli.la
+
+csvlog_player_SOURCES = utils/csvlog_player.cpp
+csvlog_player_LDADD = libtnav.la libnewmat.la libtrncli.la
 
 dist_bin_SCRIPTS =
 
