@@ -11,8 +11,8 @@ dnl    See README file for copying and redistribution conditions.
 dnl--------------------------------------------------------------------
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.9beta60],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
-AC_DEFINE(VERSION_DATE, ["22 October 2023"], [Set VERSION_DATE define in mb_config.h])
+AC_INIT([mbsystem],[5.7.9beta61],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_DEFINE(VERSION_DATE, ["28 October 2023"], [Set VERSION_DATE define in mb_config.h])
 
 AS_ECHO([" "])
 AS_ECHO(["------------------------------------------------------------------------------"])
@@ -411,7 +411,9 @@ else
             FOUND_PROJ_LIB=yes
         fi
     else
-        AC_MSG_ERROR([Did not find PROJ library pkg-config package...])
+        if test "$FOUND_PROJ4" != "yes"; then
+            AC_MSG_ERROR([Did not find PROJ library pkg-config package...])
+        fi
     fi
     libproj_LIBS="-lproj"
     libproj_LDFLAGS=""

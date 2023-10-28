@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta61    October 28, 2023
 - Version 5.7.9beta60    October 22, 2023
 - Version 5.7.9beta59    September 19, 2023
 - Version 5.7.9beta58    August 30, 2023
@@ -433,6 +434,18 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta61 (October 27)
+
+Read functions mb_get_all(), mb_get(), mb_read(): Fixed bug in handling the vertical dimension
+while applying alternate navigation. Bathymetry were being corrected wrongly for changes
+in the sensordepth.
+
+Datalists: Fixed problem in which processed files would not be read when the raw files do
+not conform to MB-System suffix conventions.
+
+Mbbackangle: Changed to not set parameter files when the swath files do not contain the
+expected amplitude and/or sidescan data. 
 
 #### 5.7.9beta60 (October 22)
 

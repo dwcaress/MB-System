@@ -881,7 +881,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 		strcpy(process->mbp_ifile, file);
 	}
 	mb_get_shortest_path(verbose, process->mbp_ifile, error);
-  assert(strlen(process->mbp_ifile) < MB_PATH_MAXLINE - 8);
+  	assert(strlen(process->mbp_ifile) < MB_PATH_MAXLINE - 8);
 
 	/* figure out data format or output filename if required */
 	if (!process->mbp_format_specified || !process->mbp_ofile_specified) {
@@ -1930,7 +1930,7 @@ int mb_pr_default_output(int verbose, struct mb_process_struct *process, int *er
 	mb_path fileroot;
 	int format;
 	int status = mb_get_format(verbose, process->mbp_ifile, fileroot, &format, error);
-  assert(strlen(fileroot) < MB_PATH_MAXLINE - 12);
+  	assert(strlen(fileroot) < MB_PATH_MAXLINE - 12);
 
 	/* deal with format */
 	if (status == MB_SUCCESS && format > 0) {

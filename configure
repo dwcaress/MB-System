@@ -21340,7 +21340,9 @@ fi
             FOUND_PROJ_LIB=yes
         fi
     else
-        as_fn_error $? "Did not find PROJ library pkg-config package..." "$LINENO" 5
+        if test "$FOUND_PROJ4" != "yes"; then
+            as_fn_error $? "Did not find PROJ library pkg-config package..." "$LINENO" 5
+        fi
     fi
     libproj_LIBS="-lproj"
     libproj_LDFLAGS=""

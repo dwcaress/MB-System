@@ -3674,6 +3674,11 @@ int mb_datalist_read3(int verbose, void *datalist_ptr,
                 strcat(pfile, tmpstr);
               }
 
+              if (!pfile_specified && *format > 0) {
+                sprintf(pfile, "%sp.mb%d", path, *format);
+                pfile_specified = MB_YES;
+              }
+
               if (pfile_specified) {
                 if ((/* fstat = */ stat(pfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR &&
                     file_status.st_size > 0) {
