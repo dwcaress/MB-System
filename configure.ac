@@ -411,7 +411,9 @@ else
             FOUND_PROJ_LIB=yes
         fi
     else
-        AC_MSG_ERROR([Did not find PROJ library pkg-config package...])
+        if test "$FOUND_PROJ4" != "yes"; then
+            AC_MSG_ERROR([Did not find PROJ library pkg-config package...])
+        fi
     fi
     libproj_LIBS="-lproj"
     libproj_LDFLAGS=""

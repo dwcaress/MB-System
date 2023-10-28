@@ -139,20 +139,22 @@ int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], d
 			/* if alternative nav is available use it for survey records */
 			if (status == MB_SUCCESS && mb_io_ptr->new_kind == MB_DATA_DATA && mb_io_ptr->alternative_navigation) {
 				double zoffset = 0.0;
+				double tsensordepth = 0.0;
 				int inavadjtime = 0;
 				mb_linear_interp_longitude(	verbose, mb_io_ptr->nav_alt_time_d - 1, mb_io_ptr->nav_alt_navlon - 1,      mb_io_ptr->nav_alt_num, mb_io_ptr->new_time_d, &mb_io_ptr->new_lon,     &inavadjtime, error);
 		        mb_linear_interp_latitude(	verbose, mb_io_ptr->nav_alt_time_d - 1, mb_io_ptr->nav_alt_navlat - 1,      mb_io_ptr->nav_alt_num, mb_io_ptr->new_time_d, &mb_io_ptr->new_lat,     &inavadjtime, error);
 		        mb_linear_interp(			verbose, mb_io_ptr->nav_alt_time_d - 1, mb_io_ptr->nav_alt_speed - 1,       mb_io_ptr->nav_alt_num, mb_io_ptr->new_time_d, &mb_io_ptr->new_speed,   &inavadjtime, error);
 		        mb_linear_interp_heading(	verbose, mb_io_ptr->nav_alt_time_d - 1, mb_io_ptr->nav_alt_heading - 1,     mb_io_ptr->nav_alt_num, mb_io_ptr->new_time_d, &mb_io_ptr->new_heading, &inavadjtime, error);
-		      	mb_linear_interp(           verbose, mb_io_ptr->nav_alt_time_d - 1, mb_io_ptr->nav_alt_sensordepth - 1, mb_io_ptr->nav_alt_num, mb_io_ptr->new_time_d, sensordepth, 			&inavadjtime, error);
+		      	mb_linear_interp(           verbose, mb_io_ptr->nav_alt_time_d - 1, mb_io_ptr->nav_alt_sensordepth - 1, mb_io_ptr->nav_alt_num, mb_io_ptr->new_time_d, &tsensordepth, 			&inavadjtime, error);
 		        mb_linear_interp(           verbose, mb_io_ptr->nav_alt_time_d - 1, mb_io_ptr->nav_alt_zoffset - 1,     mb_io_ptr->nav_alt_num, mb_io_ptr->new_time_d, &zoffset,     			&inavadjtime, error);
 		        if (mb_io_ptr->new_heading < 0.0)
 		          mb_io_ptr->new_heading += 360.0;
 		        else if (mb_io_ptr->new_heading > 360.0)
 		          mb_io_ptr->new_heading -= 360.0;
-		      	*sensordepth += zoffset;
+    			double bath_correction = tsensordepth - *sensordepth + zoffset;
+    			*sensordepth = tsensordepth + zoffset;
 		      	for (int ibeam=0; ibeam<mb_io_ptr->new_beams_bath; ibeam++) {
-		      		mb_io_ptr->new_bath[ibeam] += zoffset;
+		      		mb_io_ptr->new_bath[ibeam] += bath_correction;
 		      	}
 			}
 

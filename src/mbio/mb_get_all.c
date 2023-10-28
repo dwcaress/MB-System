@@ -139,20 +139,22 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int tim
 	/* if alternative nav is available use it for survey records */
 	if (status == MB_SUCCESS && *kind == MB_DATA_DATA && mb_io_ptr->alternative_navigation) {
 		double zoffset = 0.0;
+		double tsensordepth = 0.0;
 		int inavadjtime = 0;
 		mb_linear_interp_longitude(	verbose, mb_io_ptr->nav_alt_time_d - 1, mb_io_ptr->nav_alt_navlon - 1,      mb_io_ptr->nav_alt_num, *time_d, navlon,      &inavadjtime, error);
     mb_linear_interp_latitude(	verbose, mb_io_ptr->nav_alt_time_d - 1, mb_io_ptr->nav_alt_navlat - 1,      mb_io_ptr->nav_alt_num, *time_d, navlat,      &inavadjtime, error);
     mb_linear_interp(						verbose, mb_io_ptr->nav_alt_time_d - 1, mb_io_ptr->nav_alt_speed - 1,       mb_io_ptr->nav_alt_num, *time_d, speed,       &inavadjtime, error);
     mb_linear_interp_heading(		verbose, mb_io_ptr->nav_alt_time_d - 1, mb_io_ptr->nav_alt_heading - 1,     mb_io_ptr->nav_alt_num, *time_d, heading,     &inavadjtime, error);
-  	mb_linear_interp(           verbose, mb_io_ptr->nav_alt_time_d - 1, mb_io_ptr->nav_alt_sensordepth - 1, mb_io_ptr->nav_alt_num, *time_d, sensordepth, &inavadjtime, error);
+  	mb_linear_interp(           verbose, mb_io_ptr->nav_alt_time_d - 1, mb_io_ptr->nav_alt_sensordepth - 1, mb_io_ptr->nav_alt_num, *time_d, &tsensordepth, &inavadjtime, error);
     mb_linear_interp(           verbose, mb_io_ptr->nav_alt_time_d - 1, mb_io_ptr->nav_alt_zoffset - 1,     mb_io_ptr->nav_alt_num, *time_d, &zoffset,     &inavadjtime, error);
     if (*heading < 0.0)
       *heading += 360.0;
     else if (*heading > 360.0)
       *heading -= 360.0;
-  	*sensordepth += zoffset;
+    double bath_correction = tsensordepth - *sensordepth + zoffset;
+    *sensordepth = tsensordepth + zoffset;
   	for (int ibeam=0; ibeam<*nbath; ibeam++) {
-  		bath[ibeam] += zoffset;
+  		bath[ibeam] += bath_correction;
   	}
 	}
 
