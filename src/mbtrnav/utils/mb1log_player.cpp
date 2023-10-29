@@ -268,14 +268,14 @@ public:
     ~MB1LogPlayer()
     {
         if(mFile != NULL){
-            fclose(mFile);
+            std::fclose(mFile);
         }
 
         if(mTrnInCsvFile != NULL){
-            fclose(mTrnInCsvFile);
+            std::fclose(mTrnInCsvFile);
         }
         if(mTrnOutCsvFile != NULL){
-            fclose(mTrnOutCsvFile);
+            std::fclose(mTrnOutCsvFile);
         }
 
         if(NULL != mTrn)
@@ -308,10 +308,10 @@ public:
 
 
         if(mFile != NULL){
-            fclose(mFile);
+            std::fclose(mFile);
         }
 
-        if( (mFile = fopen(src.c_str(), "r")) == NULL)
+        if( (mFile = std::fopen(src.c_str(), "r")) == NULL)
         {
             fprintf(stderr, "%s:%d - could not open file[%s] [%d:%s]\n", __func__, __LINE__, src.c_str(), errno, strerror(errno));
             return retval;
@@ -320,6 +320,7 @@ public:
         byte ibuf[MB1_MAX_SOUNDING_BYTES]={0};
 
         while (!mQuit && next_record(ibuf, MB1_MAX_SOUNDING_BYTES) == 0) {
+            TRN_TRACE();
             this->stats().mRecordsFound++;
 
             if(NULL!=quit && *quit)
@@ -357,7 +358,7 @@ public:
             measT *mt = NULL;
             if(read_meas(&mt, ibuf, mConfig.trn_sensor()) == 0 && mt != NULL){
 
-                this->stats().mMeaiRead++;
+               this->stats().mMeaiRead++;
 
                 if(mConfig.oflag_set(MB1LogConfig::MEAS))
                 {
@@ -632,7 +633,7 @@ protected:
         {
             TRN_DPRINT("%s:%d INFO - opening trni_csv file[%s]\n", __func__, __LINE__, mConfig.trni_csv_path().c_str());
 
-            *fp = fopen(mConfig.trni_csv_path().c_str(), "a");
+            *fp = std::fopen(mConfig.trni_csv_path().c_str(), "a");
         }
 
         if(NULL != *fp){
@@ -718,7 +719,7 @@ protected:
     {
         if(NULL == *fp)
         {
-            *fp = fopen(mConfig.trno_csv_path().c_str(),"a");
+            *fp = std::fopen(mConfig.trno_csv_path().c_str(),"a");
         }
 
         if(NULL != *fp){
@@ -970,27 +971,29 @@ protected:
 
         size_t msg_buf_len = MB1_MAX_SOUNDING_BYTES + sizeof(mb1_t);
         byte msg_buf[msg_buf_len];
+
         while(stat != OK && stat != EEOF && stat != ERR)
         {
             memset(msg_buf, 0, msg_buf_len);
             mb1_t *mb1 = (mb1_t *) &msg_buf[0];
             byte *ptype = (byte *)(&(mb1->type));
 
-            bool ferror=false;
+            bool ferr=false;
             int64_t rbytes=0;
             bool sync_valid=false;
 
             byte *sp = (byte *)mb1;
             bool header_valid=false;
             bool rec_valid=false;
+
             while (!sync_valid) {
-                if( ((rbytes = fread((void *)sp, 1, 1, mFile)) == 1) && *sp=='M') {
+                if( ((rbytes = std::fread((void *)sp, 1, 1, mFile)) == 1) && *sp=='M') {
                     sp++;
-                    if( ((rbytes = fread((void *)sp, 1, 1, mFile)) == 1) && *sp=='B'){
+                    if( ((rbytes = std::fread((void *)sp, 1, 1, mFile)) == 1) && *sp=='B'){
                         sp++;
-                        if( ((rbytes = fread((void *)sp, 1, 1, mFile)) == 1) && *sp=='1'){
+                        if( ((rbytes = std::fread((void *)sp, 1, 1, mFile)) == 1) && *sp=='1'){
                             sp++;
-                            if( ((rbytes = fread((void *)sp, 1, 1, mFile)) == 1) && *sp=='\0'){
+                            if( ((rbytes = std::fread((void *)sp, 1, 1, mFile)) == 1) && *sp=='\0'){
                                 sync_valid=true;
                                 TRN_NDPRINT(2, "sync read slen[%d]\n", MB1_TYPE_BYTES);
                                 TRN_NDPRINT(2, "  sync     ['%c''%c''%c''%c']/[%02X %02X %02X %02X]\n",
@@ -1014,21 +1017,21 @@ protected:
                     }
                 }
                 if(rbytes<=0){
-                    TRN_NDPRINT(1, "reached EOF looking for sync\n");
-                    ferror=true;
+                    TRN_NDPRINT(1, "reached EOF looking for sync buf[%s] rbytes[%ld] err[%d:%s] fpos[%ld] feof[%d] ferr[%d]\n", msg_buf, rbytes, errno, strerror(errno), ftell(mFile), std::feof(mFile), std::ferror(mFile));
+                    ferr = true;
                     break;
                 }
             }
 
             if(g_interrupt)
-                ferror = true;
+                ferr = true;
 
-            if (sync_valid && !ferror) {
+            if (sync_valid && !ferr) {
 
                 // read the rest of the sounding header
                 byte *psnd = (byte *)&mb1->size;
                 uint32_t readlen =(MB1_HEADER_BYTES-MB1_TYPE_BYTES);
-                if((rbytes = fread((void *)psnd, 1, readlen, mFile)) == readlen){
+                if((rbytes = std::fread((void *)psnd, 1, readlen, mFile)) == readlen){
 
                     int32_t cmplen = MB1_SOUNDING_BYTES(mb1->nbeams);
 
@@ -1049,20 +1052,20 @@ protected:
 
                 } else {
                     fprintf(stderr, "could not read header bytes [%" PRId64 "/%" PRIu32 "]\n", rbytes, readlen);
-                    ferror=true;
+                    ferr=true;
                 }
             }
 
             if(g_interrupt)
-                ferror = true;
+                ferr = true;
 
-            if (header_valid && ferror == false ) {
+            if (header_valid && ferr == false ) {
 
                 if(mb1->nbeams > 0){
                     // read beam data
                     byte *bp = (byte *)mb1->beams;
                     uint32_t readlen = MB1_BEAM_ARRAY_BYTES(mb1->nbeams);
-                    if((rbytes = fread((void *)bp, 1, readlen, mFile)) == readlen){
+                    if((rbytes = std::fread((void *)bp, 1, readlen, mFile)) == readlen){
 
                         TRN_NDPRINT(2, "beams read blen[%d/%" PRId64 "]\n", readlen, rbytes);
 
@@ -1076,7 +1079,7 @@ protected:
 
                 byte *cp = (byte *)MB1_PCHECKSUM(mb1);
 
-                if((rbytes = fread((void *)cp, 1, MB1_CHECKSUM_BYTES, mFile)) == MB1_CHECKSUM_BYTES){
+                if((rbytes = std::fread((void *)cp, 1, MB1_CHECKSUM_BYTES, mFile)) == MB1_CHECKSUM_BYTES){
                     //                                    TRN_NDPRINT(2, "chksum read clen[%" PRId64 "]\n", rbytes);
                     //                                    TRN_NDPRINT(3, "  chksum [%0X]\n", pmessage->chksum);
 
@@ -1090,15 +1093,15 @@ protected:
             }
 
             if(g_interrupt)
-                ferror = true;
+                ferr = true;
 
-            if (rec_valid && ferror == false) {
+            if (rec_valid && ferr == false) {
 
                 // TODO : update stats?
                 stat = OK;
             } else {
 
-                if(feof(mFile)){
+                if(std::feof(mFile)){
                     stat = EEOF;
                     TRN_NDPRINT(2, "end of data file\n");
                 } else {
@@ -1115,6 +1118,7 @@ protected:
             memcpy(dest, msg_buf, MB1_SOUNDING_BYTES(snd->nbeams));
             retval = 0;
         }
+
         return retval;
     }
 
@@ -1174,62 +1178,6 @@ protected:
         return retval;
     }
 
-    // src points to rec_id (already read by next_record)
-//    int read_meas(measT **pdest, byte *src)
-//    {
-//        int retval = -1;
-//        // read data from file to buffer
-//        byte *bp = (byte *)src+TL_RID_SIZE;
-//        size_t readlen = TL_MEAI_HDR_SIZE;
-//
-//        TRN_NDPRINT(2, "%s:%d readlen[%lu]\n", __func__, __LINE__, (unsigned long)readlen);
-//        if(fread(bp, readlen, 1, mFile) == 1)
-//        {
-//            bp += readlen;
-//            meas_in_t *measin =  (meas_in_t *)src;
-//            readlen = TL_MEAI_BEAM_SIZE(measin->num_meas);
-//
-//            TRN_NDPRINT(2, "%s:%d readlen[%lu] num_meas[%d]\n", __func__, __LINE__, (unsigned long)readlen, measin->num_meas);
-//            if((bp + readlen) > (src + MB1_MAX_SOUNDING_BYTES)){
-//                TRN_NDPRINT(2, "%s:%d ERR: readlen exceeds buffer size [%lu/%d]\n", __func__, __LINE__, (bp + readlen - src), MB1_MAX_SOUNDING_BYTES);
-//                return retval;
-//            }
-//
-//            if(fread(bp, readlen, 1, mFile) == 1)
-//            {
-//                measT *dest = new measT(measin->num_meas, measin->data_type);
-//                if(NULL != dest){
-//                    dest->time = measin->time;
-//                    dest->dataType = measin->data_type;
-//                    dest->x = measin->x;
-//                    dest->y = measin->y;
-//                    dest->z = measin->z;
-//                    dest->ping_number = measin->ping_number;
-//                    dest->numMeas = measin->num_meas;
-//
-//                    meas_beam_t *beams = TrnLog::meaiBeamData(measin);
-//                    for(int i=0; i<dest->numMeas; i++)
-//                    {
-//                        dest->beamNums[i] = beams[i].beam_num;
-//                        dest->measStatus[i] = beams[i].status;
-//                        dest->ranges[i] = beams[i].range;
-//                        dest->crossTrack[i] = beams[i].cross_track;
-//                        dest->alongTrack[i] = beams[i].along_track;
-//                        dest->altitudes[i] = beams[i].altitude;
-//                    }
-//                    *pdest = dest;
-//                    retval = 0;
-//                } // else error
-//            } else {
-//                TRN_DPRINT("meas data read failed bp[%p] readlen[%zu] num_meas[%d]\n", bp, readlen, measin->num_meas);
-//            }
-//        } else {
-//            TRN_DPRINT("meas header read failed bp[%p] readlen[%zu]\n", bp, readlen);
-//        } // else error
-//
-//        return retval;
-//    }
-
     // read MB1 to poseT
     int read_pose(poseT **pdest, byte *src)
     {
@@ -1263,94 +1211,6 @@ protected:
 
         return retval;
     }
-
-    // src points to rec_id (already read by next_record)
-//    int read_pose(poseT **pdest, byte *src)
-//    {
-//        int retval = -1;
-//        // read data from file to buffer
-//        byte *bp = (byte *)src+TL_RID_SIZE;
-//        size_t readlen = TL_MTNI_SIZE;
-//        if(fread(bp, readlen, 1, mFile) == 1)
-//        {
-//            poseT *dest = new poseT();
-//            if(NULL != dest)
-//            {
-//                bp += readlen;
-//                motn_in_t *motnin =  (motn_in_t *)src;
-//
-//                dest->time = motnin->time;
-//                dest->x = motnin->x;
-//                dest->y = motnin->y;
-//                dest->z = motnin->z;
-//                dest->vx = motnin->vx;
-//                dest->vy = motnin->vy;
-//                dest->vz = motnin->vz;
-//                dest->phi = motnin->phi;
-//                dest->theta = motnin->theta;
-//                dest->psi = motnin->psi;
-//                dest->dvlValid = (motnin->dvl_valid != 0);
-//                dest->gpsValid = (motnin->gps_valid != 0);
-//                dest->bottomLock = (motnin->bottom_lock != 0);
-//                *pdest = dest;
-//                retval = 0;
-//            }
-//        }
-//        return retval;
-//    }
-
-    // src points to rec_id (already read by next_record)
-//    int read_est(poseT **pdest, byte *src)
-//    {
-//        int retval = -1;
-//        // read data from file to buffer
-//        byte *bp = (byte *)src+TL_RID_SIZE;
-//        size_t readlen = TL_MSEO_SIZE;
-//        if(fread(bp, readlen, 1, mFile) == 1)
-//        {
-//            poseT *dest = new poseT();
-//            if(NULL != dest)
-//            {
-//                bp += readlen;
-//                est_out_t *est =  (est_out_t *)src;
-//
-//                dest->time = est->time;
-//                dest->x = est->x;
-//                dest->y = est->y;
-//                dest->z = est->z;
-//                dest->vx = est->vx;
-//                dest->vy = est->vy;
-//                dest->vz = est->vz;
-//                dest->ve = est->ve;
-//                dest->vw_x = est->vw_x;
-//                dest->vw_y = est->vw_y;
-//                dest->vw_z = est->vw_z;
-//                dest->vn_x = est->vn_x;
-//                dest->vn_y = est->vn_y;
-//                dest->vn_z = est->vn_z;
-//                dest->wx = est->wx;
-//                dest->wy = est->wy;
-//                dest->wz = est->wz;
-//                dest->ax = est->ax;
-//                dest->ay = est->ay;
-//                dest->az = est->az;
-//                dest->phi = est->phi;
-//                dest->theta = est->theta;
-//                dest->psi = est->psi;
-//                dest->psi_berg = est->psi_berg;
-//                dest->psi_dot_berg = est->psi_dot_berg;
-//
-//                dest->dvlValid = (est->dvl_valid != 0);
-//                dest->gpsValid = (est->gps_valid != 0);
-//                dest->bottomLock = (est->bottom_lock != 0);
-//                memcpy(dest->covariance,est->covariance, N_COVAR*sizeof(double));
-//
-//                *pdest = dest;
-//                retval = 0;
-//            }
-//        }
-//        return retval;
-//    }
 
 private:
     MB1LogConfig mConfig;

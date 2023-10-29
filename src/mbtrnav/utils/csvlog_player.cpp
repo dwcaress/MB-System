@@ -1607,7 +1607,7 @@ protected:
             memset(msg_buf, 0, msg_buf_len);
             memset(str_buf, 0, STRBUF_BYTES);
 
-            bool ferror=false;
+            bool ferr=false;
             bool rec_valid = false;
 
             // read CSV record
@@ -1638,7 +1638,7 @@ protected:
                 toks = NULL;
             }
 
-            if (rec_valid && ferror == false) {
+            if (rec_valid && ferr == false) {
                 // TODO : update stats?
                 stat = OK;
            } else {
