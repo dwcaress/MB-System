@@ -316,7 +316,7 @@ Post-Installation Actions:
 CentOs 7 and 8
 #------------------------------------------------------------------------------
 
-Note that the photomosaicing tools utilising OpenCV cannot be built under Ubuntu 18.
+Note that the photomosaicing tools utilising OpenCV cannot be built under CentOs 7.
 
 Install CentOs 7 or 8 from ISO, and then update the starting packages:
     sudo yum upgrade
