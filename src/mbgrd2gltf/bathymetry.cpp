@@ -1,7 +1,10 @@
-#include "bathymetry.h"
 
 // local includes
+#include "bathymetry.h"
 #include "compression.h"
+
+// standard library
+#include <cmath>
 
 // external libraries
 #include <netcdf.h>
