@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta62    November 3, 2023
 - Version 5.7.9beta61    November 2, 2023
 - Version 5.7.9beta60    October 22, 2023
 - Version 5.7.9beta59    September 19, 2023
@@ -435,7 +436,15 @@ or beta, are equally accessible as tarballs through the Github interface.
 ### MB-System Version 5.7 Release Notes:
 --
 
-#### 5.7.9beta61 (November 2)
+#### 5.7.9beta62 (November 3, 2023)
+
+Fixed the Cmake build system so that all components of the current MB-System source can be
+built, installed, and run on MacOs using CMake.
+
+Updated the copyright notices in the several hundred source files.
+
+
+#### 5.7.9beta61 (November 2, 2023)
 
 Read functions mb_get_all(), mb_get(), mb_read(): Fixed bug in handling the vertical dimension
 while applying alternate navigation. Bathymetry were being corrected wrongly for changes
@@ -451,7 +460,7 @@ Mbgrd2gltf: Added "#include <cmath>" to src/mbgrd2gltf/bathymetry.cpp to enable 
 
 Configure.ac and Configure: Modified to find Proj on CentOs 7 systems.
 
-#### 5.7.9beta60 (October 22)
+#### 5.7.9beta60 (October 22, 2023)
 
 Mbnavadjust: Added an application or use mode to MBnavadjust projects. Projects can now be primary,
 secondary, or tertiary, with the setting found in the Controls diaglog brought up
@@ -532,7 +541,7 @@ approach of modifying the original functions. This choice is to avoid breaking t
 existing other programs at this time. We will likely simplify the API at some point in
 the future when the consequences of an API change are understood and manageable.
 
-#### 5.7.9beta59 (September 19)
+#### 5.7.9beta59 (September 19, 2023)
 
 Mbnavadjustmerge: Made copying of mbnavadjust projects more efficient.
 
@@ -543,7 +552,7 @@ Mbnavadjustmerge: Add --remove-file option to remove a file from an mbnavadjust 
 
 Mbcontour: Fixed drawing of survey tracklines - restored to generate thin lines.
 
-#### 5.7.9beta58 (August 30)
+#### 5.7.9beta58 (August 30, 2023)
 
 Mbm_route2mission: Modifications to accomodate changes to Dorado AUV vehicle software.
 
@@ -572,7 +581,7 @@ the minimum or maximum values are selected (halving or doubling, respectively).
 Mbnavadjustmerge: Copying mbnavadjust projects is much more efficient due to use of
 a fast file copy function replacing a shell call of the program cp.
 
-#### 5.7.9beta57 (June 27)
+#### 5.7.9beta57 (June 27, 2023)
 
 Mbm_route2mission: Added -T option to embed use of Terrain Relative Navigation in 
 MBARI Mapping AUV missions.
@@ -582,7 +591,7 @@ data records, which caused mbtrnpp to crash by seg fault. This was 32K and is no
 
 Mbnavadjust: Fixed bug in the inversion algorithm.
 
-#### 5.7.9beta53 (June 15)
+#### 5.7.9beta53 (June 15, 2023)
 
 Rewrote the CMake build system based on the work of both Tom O'Reilly and Josch. This
 build system now works on MacOs Ventura. We will continue to augment and test using
@@ -623,7 +632,7 @@ Formats 56 (MBF_EM300RAW) and 57 (MBF_EM300MBA): Fixed catastrophic bug introduc
 5.7.9beta50 that treated many signed values (like acrosstrack distance) as unsigned.
 
 
-#### 5.7.9beta52 (March 9)
+#### 5.7.9beta52 (March 9, 2023)
 
 Formats 56 (MBF_EM300RAW) and 57 (MBF_EM300MBA): Fixed catastrophic bug introduced in 
 5.7.9beta50 that treated many signed values (like acrosstrack distance) as unsigned.
@@ -641,7 +650,7 @@ spiral descent termination altitude and mode = 0 for no start survey behavior, 1
 start survey behavior alone, and 2 for start survey plus a magnetometer calibration 
 maneuver.
 
-#### 5.7.9beta51 (February 14)
+#### 5.7.9beta51 (February 14, 2023)
 
 Format 89 (MBF_RESON7k3): Removed debug message inadvertently left active in 5.7.9beta50.
 
