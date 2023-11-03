@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------
 //    The MB-system:  mbsys_reson7k3.h  1/8/2019
 //
-//    Copyright (c) 2004-2020 by
+//    Copyright (c) 2004-2023 by
 //    David W. Caress (caress@mbari.org)
 //      Monterey Bay Aquarium Research Institute
 //      Moss Landing, CA 95039

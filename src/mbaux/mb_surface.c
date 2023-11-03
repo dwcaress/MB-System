@@ -1,19 +1,29 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_surface.c	5/2/94
  *
- *    Inclusion in MB-System:
- *    Copyright (c) 1994-2020 by
+ *    Copyright (c) 1994-2023 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *
+ *    This algorithm and the original code come from version 3
+ *    of the Generic Mapping Tools (GMT)
+ *    Copyright (c) 1991 by P. Wessel and W. H. F. Smith
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    Algorithm and original code:
- *    Copyright (c) 1991 by P. Wessel and W. H. F. Smith
- *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * SURFUNC is a function for gridding data using a minimum curvature

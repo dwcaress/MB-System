@@ -1,16 +1,30 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbstripNaN.c        8/8/02
  *
- *    Copyright (c) 2002-2020 by
- *    Mike McCann (mccann@mbari.org)
+ *    Copyright (c) 2002-2023 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *
+ *    This program mbstripNaN created by:
+ *    Mike McCann
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, California, USA
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 
 /* mbstripnan.c

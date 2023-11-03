@@ -321,8 +321,8 @@ Note that the photomosaicing tools utilising OpenCV cannot be built under CentOs
 Install CentOs 7 or 8 from ISO, and then update the starting packages:
     sudo yum upgrade
 
-Install compilers:
-sudo apt install build-essential
+Install EPEL repo:
+    sudo yum install epel-release
 
 Install MB-System prerequisites:
     sudo yum install openmotif openmotif-devel \

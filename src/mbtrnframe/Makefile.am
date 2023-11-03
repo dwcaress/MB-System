@@ -34,19 +34,19 @@ libmbtrnframe_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 libmbtrnframe_la_SOURCES = mframe.c \
         mbbuf.c \
         mcbuf.c \
-        msocket.c \
-        mthread.c \
-        mfile.c \
-        mtime.c\
-        mmdebug.c \
+        mconfig.c \
         merror.c \
-        mlog.c \
+        mfile.c \
+        mkvconf.c \
         mlist.c \
+        mlog.c \
+        mmdebug.c \
+        msocket.c \
         mstats.c \
         mswap.c \
+        mthread.c \
+        mtime.c\
         mutils.c \
-        mkvconf.c \
-        mconfig.c \
         mxdebug.cpp
 
 libmbtrnframe_la_LIBADD =

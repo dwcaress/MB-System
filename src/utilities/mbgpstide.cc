@@ -1,16 +1,33 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgpstide.c	2018-05-23
  *
- *    Copyright (c) 2020 by
+ *    Copyright (c) 2020-2023 by
  *    Gordon J. Keith (gordon@keith.id.au)
- *    and David W. Caress (caress@mbari.org)
+ *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *
+ *    This program mbgpstide was created by:
+ *    Gordon J. Keith
+ *      CSIRO Marine Research
+ *      Castray Esplanade
+ *      Battery Point TAS 7000
+ *      Australia
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * mbgpstide generates tide files from the GPS altitude data recorded in
