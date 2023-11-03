@@ -19,7 +19,7 @@
 #      Columbia University
 #      Palisades, NY 10964
 #
-#    See README file for copying and redistribution conditions.
+#    See README.md file for copying and redistribution conditions.
 #------------------------------------------------------------------------------
 #
 # To build MB-System from source using CMake do (example):
@@ -32,7 +32,7 @@
 #
 #------------------------------------------------------------------------------
 
-set(PROJECT_DATE "27 June 2023")
+set(PROJECT_DATE "3 November 2023")
 
 message("----------------------------------------------------------")
 message("MB-System")
@@ -59,7 +59,7 @@ message("----------------------------------------------------------")
 # Define minimum CMake version required
 cmake_minimum_required(VERSION 3.20)
 project(MB-System 
-        VERSION 5.7.9
+        VERSION 5.7.9.62
         DESCRIPTION "Open Source software for the processing and display of seafloor mapping data"
         HOMEPAGE_URL https://www.mbari.org/technology/mb-system/ 
         LANGUAGES C CXX )

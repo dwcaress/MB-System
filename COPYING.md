@@ -8,21 +8,30 @@ source software package for the processing and display of swath sonar data.
 This file is located at the top of the MB-System source code distribution
 directory structure.
 
-Last Updated July 18, 2023
+Last Updated November 3, 2023
 
 -------------------------------------------------------------------------------
 
 MB-System Copyright (C) 1993-2023 by
 
-David W. Caress
-(caress@mbari.org)
+David W. Caress (caress@mbari.org)
 Monterey Bay Aquarium Research Institute
-Moss Landing, CA 95039
+Moss Landing, California, USA
 
-Dale N. Chayes (dale@ccom.unh.edu)
-Center for Coastal & Ocean Mapping/Joint Hydrographic Center
+Dale N. Chayes 
+Center for Coastal and Ocean Mapping
 University of New Hampshire
-Durham, New Hampshire 03824
+Durham, New Hampshire, USA
+
+Christian dos Santos Ferreira
+MARUM
+University of Bremen
+Bremen Germany
+
+MB-System was created by Caress and Chayes in 1992 at the
+Lamont-Doherty Earth Observatory
+Columbia University
+Palisades, NY 10964
 
 All Rights Reserved
 
