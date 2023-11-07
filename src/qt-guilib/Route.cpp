@@ -4,35 +4,35 @@
 
 #include "Route.h"
 
+#define ROUTENAME_COMMENT "## ROUTENAME"
+#define ROUTEFILE_VERSION_COMMENT "## Route File Version"
+#define ROUTECOLOR_COMMENT "## ROUTECOLOR"
+#define ROUTESIZE_COMMENT "## ROUTESIZE"
+#define ROUTEEDITMODE_COMMENT "## ROUTEEDITMODE"
+#define STARTROUTE_DELIMITER "> ## STARTROUTE"
+#define ENDROUTE_DELIMITER "> ## ENDROUTE"
+
 using namespace mb_system;
 
 Route::Route() {
+  name_ = "No name";
+  color_ = 0;
 }
 
 
 Route::~Route() {
 
-  // Free vector elements
-  for (int i = 0; i < points_.size(); i++) {
-    Route::Waypoint *point =  points_[i];
-    delete point;
-  }
-
 }
 
 
-bool Route::appendPoint(Route::Waypoint *point) {
-  points_.insert(points_.end(), point);
-  return true;
-}
+std::vector<Route *> *Route::load(std::string filename) {
 
-
-
-bool Route::load(std::string filename) {
+  std::cout << "In Route::load()\n";
+  
   std::ifstream file(filename);
   if (!file.is_open()) {
     std::cerr << "Failed to open " << filename << std::endl;
-    return false;
+    return nullptr;
   }
 
   bool rawRoutefile = true;
@@ -42,41 +42,49 @@ bool Route::load(std::string filename) {
   int routeEditMode = 0;
   int nPoint = 0;
   bool pointOK = false;
+
+  std::vector<Route *> *routes = new std::vector<Route *>();
+  Route *route = nullptr;
   
   std::string line;
   while (getline(file, line)) {
+    // Trim newline, blanks 
+    line.erase(line.find_last_not_of(" \n\r\t")+1);
     std::cout << line << '\n';
     const char *buffer = line.data();
 
+    if (!strncmp(buffer, STARTROUTE_DELIMITER, strlen(STARTROUTE_DELIMITER))) {
+
+      // Create the new route and append to the routes vector
+      route = new Route();
+      routes->insert(routes->end(), route);
+    }
+      
     // deal with comments
     if (buffer[0] == '#') {
-      if (rawRoutefile && strncmp(buffer, "## Route File Version", 21) == 0) {
+      if (rawRoutefile && strncmp(buffer, ROUTEFILE_VERSION_COMMENT,
+				  strlen(ROUTEFILE_VERSION_COMMENT)) == 0) {
 	rawRoutefile = false;
       }
-      else if (strncmp(buffer, "## ROUTENAME", 12) == 0) {
-	strcpy(routename, &buffer[13]);
-	if (routename[strlen(routename) - 1] == '\n')
-	  routename[strlen(routename) - 1] = '\0';
-	if (routename[strlen(routename) - 1] == '\r')
-	  routename[strlen(routename) - 1] = '\0';
+      else if (!strncmp(buffer, ROUTENAME_COMMENT, strlen(ROUTENAME_COMMENT))) {
+	strcpy(routename, &buffer[strlen(ROUTENAME_COMMENT) + 1]);
       }
-      else if (strncmp(buffer, "## ROUTECOLOR", 13) == 0) {
-	sscanf(buffer, "## ROUTECOLOR %d", &routeColor);
+      else if (!strncmp(buffer, ROUTECOLOR_COMMENT,
+			strlen(ROUTECOLOR_COMMENT))) {
+	routeColor = atoi((const char *)&buffer[strlen(ROUTECOLOR_COMMENT)+1]);
       }
-      else if (strncmp(buffer, "## ROUTESIZE", 12) == 0) {
-	sscanf(buffer, "## ROUTESIZE %d", &routeSize);
+      else if (!strncmp(buffer, ROUTESIZE_COMMENT, strlen(ROUTESIZE_COMMENT))) {
+	routeSize = atoi((const char *)&buffer[strlen(ROUTESIZE_COMMENT)+1]);
       }
-      else if (strncmp(buffer, "## ROUTEEDITMODE", 16) == 0) {
-	sscanf(buffer, "## ROUTEEDITMODE %d", &routeEditMode);
+      else if (!strncmp(buffer, ROUTEEDITMODE_COMMENT,
+			strlen(ROUTEEDITMODE_COMMENT))) {
+	routeEditMode =
+	  atoi((const char *)&buffer[strlen(ROUTEEDITMODE_COMMENT)+1]);
       }
     }
 
-    // deal with route segment marker
-    else if (buffer[0] == '>') {
-      // if data accumulated, add the route
-      if (nPoint > 0) {
-	std::cout << "TBD: Add the route\n";
-      }
+    // Deal with route end
+    if (!strncmp(buffer, ENDROUTE_DELIMITER, strlen(ENDROUTE_DELIMITER))) {    
     }
 
     else {
@@ -94,13 +102,13 @@ bool Route::load(std::string filename) {
 
       // add good point to route
       if (pointOK) {
-	Route::Waypoint *point = new Route::Waypoint();
+	DataPointsOverlay::Point *point = new DataPointsOverlay::Point();
 	point->easting = lon;
 	point->northing = lat;
 	point->elevation = elev;
 	point->type = (Route::PointType )waypointType;
 	  
-	appendPoint(point);
+	route->appendPoint(point);
 	
 	nPoint++;
       }
@@ -108,7 +116,7 @@ bool Route::load(std::string filename) {
   }
 
   file.close();
-  return true;
-  
 
+  // Return routes vector pointer
+  return routes;
 }

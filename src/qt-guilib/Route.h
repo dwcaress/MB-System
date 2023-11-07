@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <string>
+#include "DataPointsOverlay.h"
 
 namespace mb_system {
 
@@ -12,7 +13,7 @@ namespace mb_system {
       points were specified by the user, others are interpolated between
       user-specified points.
    */
-  class Route {
+  class Route : public mb_system::DataPointsOverlay {
 
   public:
 
@@ -20,48 +21,31 @@ namespace mb_system {
     Route();
     
     /// Destructor
-    ~Route();
+    virtual ~Route();
 
-    /** Route is defined by series of points, each
-	point classified by PointType.
-    */
-    enum PointType {Interpolated=0,
-		    UserSpecified,
-		    Transit,
-		    StartSurvey,
-		    EndSurvey,
-		    StartSurvey2,
-		    EndSurvey2,
-		    StartSurvey3,
-		    EndSurvey3,
-		    StartSurvey4,
-		    EndSurvey4,
-		    StartSurvey5,
-		    EndSurvey5
-    };
+    /// Return vector of routes defined in specified file, else nullptr
+    /// if file open error or no routes defined in file.
+    static std::vector<Route *> *load(std::string routefileName);
 
+    /// Set route name
+    void setName(char *name) {
+      name_.assign(name);
+    }
 
+    /// Set route color (mb-system scheme)
+    void setColor(int color) {
+      color_ = color;
+    }
 
     
-    /// Route consists of waypoints
-    struct Waypoint {
-      double easting;
-      double northing;
-      double elevation;
-      PointType type;
-    };
-
-    /// Append a waypoint; returns true if no error, else false
-    bool appendPoint(Route::Waypoint *point);
-
-    /// Load route from a route file
-    bool load(std::string routefileName);
-
-
-
   protected:
-    std::vector<Route::Waypoint *> points_;
 
+    /// Route name
+    std::string name_;
+
+    /// Route render color (mb-system color scheme)
+    int color_;
+        
   };
 
 };
