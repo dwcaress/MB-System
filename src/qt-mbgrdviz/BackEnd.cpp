@@ -3,11 +3,15 @@
 #include <QQmlContext>
 #include "BackEnd.h"
 #include "QVtkItem.h"
+#include "SharedConstants.h"
 
 #define VERTICAL_EXAGG "verticalExagg"
 #define SHOW_AXES "showAxes"
 #define COLORMAP "colormap"
 #define SITE_FILE "sitefile"
+#define ROUTE_FILE "routefile"
+
+using namespace sharedQmlCpp;
 
 /// Initialize singleton to null
 BackEnd *BackEnd::singleInstance_ = nullptr;
@@ -21,6 +25,9 @@ BackEnd::BackEnd(QQmlApplicationEngine *engine,
     QObject::connect(rootObject, SIGNAL(qmlSignal(QString)),
                      this, SLOT(qmlSlot(QString)));
 
+    QObject::connect(rootObject, SIGNAL(sig(int, QString)),
+                     this, SLOT(sigSlot(int, QString)));
+    
     
     qVtkItem_ = rootObject->findChild<mb_system::QVtkItem *>("qVtkItem");
     if (!qVtkItem_) {
@@ -103,13 +110,6 @@ bool BackEnd::setGridFile(QUrl fileURL) {
 }
 
 
-bool BackEnd::setSiteFile(QUrl fileURL) {
-    qDebug() << "*** setSiteFile() - " << fileURL;
-    return true;
-}
-
-
-
 void BackEnd::qmlSlot(const QString &qmsg) {
     qDebug() << "qmlSlot() qmsg: " << qmsg;
 
@@ -157,4 +157,85 @@ void BackEnd::qmlSlot(const QString &qmsg) {
       qVtkItem_->setSiteFile(siteFile);
       qVtkItem_->update();
     }
+    else if (!strncmp(msg, ROUTE_FILE, strlen(ROUTE_FILE))) {
+      qDebug() << "open route file " << (strchr(msg, ' ') + 1);
+      char *routeFile = strchr(msg, ' ') + 1;
+      // Remove file URL prefix      
+      routeFile += strlen("file://"); 
+      /// qVtkItem_->setRouteFile(routeFile);
+      qVtkItem_->update();
+    }    
   }
+
+
+void BackEnd::sigSlot(const int param, const QString &qval) {
+  qDebug() << "sigSlot(): param=" << param << ", value=" << qval;
+  QByteArray a;
+  a.append(qval);
+  char *value = a.data();
+
+  switch (param) {
+
+  case (int )Const::Cmd::VerticalExag:
+    {
+      float verticalExag = atof(value);
+      std::cout << "vertical exagg: " << verticalExag << std::endl;
+      qVtkItem_->setVerticalExagg(verticalExag);
+      qVtkItem_->update();
+    }
+    break;
+
+  case (int )Const::Cmd::ShowAxes:
+    if (strstr(value, "true")) {
+      qVtkItem_->showAxes(true);
+    }
+    else {
+      qVtkItem_->showAxes(false);
+    }
+    qVtkItem_->update();        
+    break;
+    
+  case (int )Const::Cmd::ColorMap:
+    {
+      char *schemeName = value;
+      qDebug() << "colormap schemeName: " << schemeName;
+      if (!qVtkItem_->setColorMapScheme(schemeName)) {
+	qCritical() << "Unknown colormap scheme: " << schemeName;
+      }
+      else {
+	qDebug() << "Set colormap scheme to " << schemeName;
+      }
+      qVtkItem_->update();
+    }
+    break;
+
+  case (int )Const::Cmd::SiteFile:
+    {
+      qDebug() << "open site file " << value;
+      char *siteFile = value;
+      // Remove file URL prefix      
+      siteFile += strlen("file://"); 
+      qVtkItem_->setSiteFile(siteFile);
+      qVtkItem_->update();
+    }
+    break;
+
+  case (int )Const::Cmd::RouteFile:
+    {
+      qDebug() << "open route file " << value;
+      char *routeFile = value;
+      // Remove file URL prefix      
+      routeFile += strlen("file://"); 
+      /// qVtkItem_->setRouteFile(routeFile);
+      qVtkItem_->update();
+    }
+    break;
+
+  default:
+    qCritical() << "Unhandled param: " << param;
+  }
+
+  return;
+  
+}
+

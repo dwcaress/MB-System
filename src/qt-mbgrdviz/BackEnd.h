@@ -13,26 +13,37 @@
 class BackEnd : public QObject
 {
   Q_OBJECT
+  
 public:
+
+  enum EnumTest {
+		 State0,
+		 State1,
+		 State2 };
+
+  Q_ENUM(EnumTest)
+
   explicit BackEnd(QQmlApplicationEngine *engine,
 		   QObject *parent = nullptr);
 
   /// Create and register singleton
   static bool registerSingleton(int argc, char **argv,
                                 QQmlApplicationEngine *engine);
-  
+
   /// Specify grid file to display
   Q_INVOKABLE bool setGridFile(QUrl file);
 
-  /// Specify site file to display
-  Q_INVOKABLE bool setSiteFile(QUrl file);
-  
+					 
 public slots:
+  
   // Slot for qml-generated signals
   void qmlSlot(const QString &msg);
+
+  void sigSlot(const int param, const QString &value);
   
 signals:
-
+  
+  
 protected:
 
   /// Singleton
@@ -43,6 +54,10 @@ protected:
 
   /// Selected file name item
   QObject *selectedFileItem_;
+
+private:
+  /// Constant string member test
+  inline static const std::string testString_ = "test string member";
 
 };
 
