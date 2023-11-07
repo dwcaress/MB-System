@@ -5,44 +5,87 @@
 
 using namespace mb_system;
 
+const int TopoColorMap::NSchemes = 4;
+
+/// Supported color schemes
+const struct TopoColorMap::SchemeStruct colorScheme[TopoColorMap::NSchemes] =
+  {"Haxby", TopoColorMap::Haxby,
+   /// red
+   {0.950, 1.000, 1.000, 1.000, 0.941, 0.804, 0.541, 0.416, 0.196,
+    0.157, 0.145},
+   /// green
+   {0.950, 0.729, 0.631, 0.741, 0.925, 1.000, 0.925, 0.922, 0.745,
+    0.498, 0.224},
+   /// blue
+   {0.950, 0.522, 0.267, 0.341, 0.475, 0.635, 0.682, 1.000, 1.000,
+    0.984, 0.686},
+		  
+   "BrightRainbow", TopoColorMap::BrightRainbow,
+   /// red
+   {1.000, 1.000, 1.000, 1.000, 0.500, 0.000, 0.000, 0.000, 0.000,
+    0.500, 1.000},
+   /// green
+   {0.000, 0.250, 0.500, 1.000, 1.000, 1.000, 1.000, 0.500, 0.000,
+    0.000, 0.000},
+   /// blue
+   {0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 1.000, 1.000, 1.000,
+    1.000, 1.000},
+
+   "MutedRainbow", TopoColorMap::MutedRainbow,
+   /// red
+   {0.784, 0.761, 0.702, 0.553, 0.353, 0.000, 0.000, 0.000, 0.000,
+    0.353, 0.553},
+   /// green
+   {0.000, 0.192, 0.353, 0.553, 0.702, 0.784, 0.553, 0.353, 0.000,
+    0.000, 0.000},
+   /// blue
+   {0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.553, 0.702, 0.784,
+    0.702, 0.553},
+   
+   "Grayscale", TopoColorMap::Grayscale,
+   /// red
+   {0.000, 0.100, 0.200, 0.300, 0.400, 0.500, 0.600, 0.700, 0.800,
+     0.900, 1.000},
+   /// green
+   {0.000, 0.100, 0.200, 0.300, 0.400, 0.500, 0.600, 0.700, 0.800,
+    0.900, 1.000},
+   /// blue
+   {0.000, 0.100, 0.200, 0.300, 0.400, 0.500, 0.600, 0.700, 0.800,
+    0.900, 1.000}};  
+		  
+
+
+void TopoColorMap::schemeNames(std::vector<const char *> *names) {
+  names->clear();
+  for (int i = 0; i < NSchemes; i++) {
+    names->push_back(colorScheme[i].name_);
+  }
+}
+
+
+
 bool TopoColorMap::makeLUT(TopoColorMap::Scheme scheme,
                            vtkLookupTable *lut) {
 
   const float *red = nullptr, *green = nullptr, *blue = nullptr;
-  int nColors = NTopoMapColors;  
+  int nColors = NSchemeColors;  
 
-  switch (scheme) {
-    
-  case TopoColorMap::Haxby:
-    red = haxbyRed;
-    green = haxbyGreen;
-    blue = haxbyBlue;
-    break;
-
-  case TopoColorMap::BrightRainbow:
-    red = brightRainbowRed;
-    green = brightRainbowGreen;
-    blue = brightRainbowBlue;
-    break;
-
-  case TopoColorMap::MutedRainbow:
-    red = mutedRainbowRed;
-    green = mutedRainbowGreen;
-    blue = mutedRainbowBlue;
-    break;
-
-  case TopoColorMap::Grayscale:
-    red = grayscaleRed;
-    green = grayscaleGreen;
-    blue = grayscaleBlue;
-    break;    
-
-  default:
-    std::cerr << "Unsupported colormap scheme" << std::endl;
-    return false;
-  };
-
+  bool found = false;
+  for (int i = 0; i < TopoColorMap::NSchemes; i++) {
+    if (scheme == colorScheme[i].scheme_) {
+      red = colorScheme[i].red_;
+      green = colorScheme[i].green_;
+      blue = colorScheme[i].blue_;
+      found = true;
+    }
+  }
   
+  if (!found) {
+    // Scheme not found
+    std::cout << "Could not find scheme #" << scheme << "\n";
+    return false;
+  }
+
   vtkNew<vtkColorTransferFunction> ctf;
   for (int i = 0; i < nColors; i++) {
     // x ranges from 0. (i=0) to 1. (i=nColors-1)
@@ -69,21 +112,16 @@ bool TopoColorMap::makeLUT(TopoColorMap::Scheme scheme,
 
 
 TopoColorMap::Scheme TopoColorMap::schemeFromName(const char *name) {
-  if (!strcmp(name, "Haxby")) {
-    return Scheme::Haxby;
+
+  for (int i = 0; i < TopoColorMap::NSchemes; i++) {
+    if (!strcmp(name, colorScheme[i].name_)) {
+      return colorScheme[i].scheme_;
+    }
   }
-  else if (!strcmp(name, "BrightRainbow")) {
-    return Scheme::BrightRainbow;
-  }
-  else if (!strcmp(name, "MutedRainbow")) {
-    return Scheme::MutedRainbow;
-  }
-  else if (!strcmp(name, "Grayscale")) {
-    return Scheme::Grayscale;
-  }
-  else {
-    return Scheme::Unknown;
-  }
+
+  return TopoColorMap::Scheme::Unknown;
 }
 
 
+  
+ 
