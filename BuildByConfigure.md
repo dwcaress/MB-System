@@ -3,28 +3,34 @@
 ---
 
 David W. Caress  
-August 9, 2023
+November 5, 2023
 
 ---
 ### General Advice for Building and Installing MB-System
 ---
 
-MB-System is an open source software package intended for Unix-like operating systems, including a build system based on the GNU Autotools incorporating Autoconf, Automake, Libtool, and Make. In order to build and install MB-System, one first runs a script named "configure" included at the top level directory of the MB-System source code that generates files named "Makefile" throughout the source code structure. In turn, these Make files determine how the libraries and programs are compiled, linked, and installed using the Make utility. 
+MB-System is an open source software package intended for Unix-like operating systems which is distributed as source code. In order to install MB-System, a source distribution must be downloaded, unpacked, compiled, linked, and installed locally. MB-System now includes two methods for building and installing the software, the first based on GNU Autotools and the second using the CMake package.
+
+The GNU Autotools build system consists of a script named "configure" at the top of the distribution structure which, when executed, generates a set of files named "Makefile" throughout the structure that hold compilation and linkage instructions used by the program make. These compilation and linkage instructions vary depending on the operating system and which versions of prerequisite software packages are installed, and in some cases special arguments must be included in the configure command. Once configure has been successfully executed, running the program make at the top level then actually invokes the local compiler and linker to build and install MB-System. Several Autotools programs, including autoconf, automake, and libtool, are used to generate the configure script included in each distribution. This build system has been the sole means by which MB-System could be built since 2011.
+
+The sequence of commands by which one builds and installs a package using CMake is very different from Autotools. One creates a new directory to hold the package build (commonly named "build" by convention) in the top level of the source structure, then cd's into that directory, and then executes cmake with the argument "..", which provides cmake the path to the top level of the source directory. CMake then copies much of the source into a build tree and generates Makefiles in that tree to enable compilation, linkage, and installation, again using the program make.
+
+The CMake build system is new to MB-System with version 5.8.0, and is intended to replace the older Autotools approach for current and future operating systems. The old Autotools build system will continue to be included in MB-System distributions for the forseeable future to enable building and installation on legacy operating systems. The Autotools build system will not be maintained to enable it's use on current or future operating systems, and the CMake build system will not be modified to support building on legacy systems.
 
 MB-System depends on a number of other software packages. For some operating systems, special arguments to the configure script are required to integrate the MB-System source to prerequisite software packages. 
 
 Among the software packages that are prerequisite for MB-System are:  
 
-        * GMT (Generic Mapping Tools)   
-        * Proj  
-        * GDAL  
-        * netCDF  
-        * FFTW (Fastest Fourier Transform in the West)  
-        * X11  
-        * OpenMotif  
-        * OpenGL  
-        * OpenCV  
-        * PCL (Point Cloud Library) (planned, not yet in release 5.7.9)  
+* GMT (Generic Mapping Tools)   
+* Proj  
+* GDAL  
+* netCDF  
+* FFTW (Fastest Fourier Transform in the West)  
+* X11  
+* OpenMotif  
+* OpenGL  
+* OpenCV  
+* PCL (Point Cloud Library) (planned, not yet in release 5.8.0)  
 
 The sections below provide some instructions for building MB-System on a few 
 common operating system distributions, including MacOs, Ubuntu Linux, 
@@ -38,7 +44,7 @@ the configure script.
 ---
 
 The source code for MB-System is available from a repository on Github:  
-    <https://github.com/dwcaress/MB-System>  
+<https://github.com/dwcaress/MB-System>  
 
 This link will open the page for the most recent stable release of MB-System. The source code distribution can be downloaded as zip or tar.gz archives from the "Assets" section at the bottom.  
     <https://github.com/dwcaress/MB-System/releases/latest>
@@ -54,102 +60,152 @@ This link will download the current state of the master branch of the MB-System 
 ### MacOS 13 Ventura (and MacOs 10 High Sierra, 11 Big Sur, and 12 Monterey)
 ---
 
-The use of MacPorts to install the MB-System prerequisite packages is recommended on Apple Mac computers, particularly because this approach enables cleanly building with a complete X11 + Motif + OpenGL infrastructure separate from the libraries and header files associated with the XQuartz package. One usually still installs XQuartz and uses it as the X11 display server, but confining the MB-System compilation and linking to headers and libraries within the MacPorts structure avoids several issues.
+The use of MacPorts to install the MB-System prerequisite packages is recommended on Apple Mac computers, particularly because this approach enables cleanly building with a complete X11 + Motif + OpenGL infrastructure separate from the libraries and header files associated with the XQuartz package. One usually still installs XQuartz and uses it as the X11 display server, but confining the MB-System compilation and linking to headers and libraries within the MacPorts structure avoids several issues. At present, we are not able to successfully run the MB-System graphical utilities when the prerequisite packages have been installed using the Fink or Homebrew package managers.
 
 This example is relevant for MacOs 10.13 High Sierra to the current MacOs 13 Ventura on both Intel and ARM (Apple Silicon) architecture computers.
 
-        * Install Xcode and the Xcode command line tools, which includes the LLVM compiler suite.
+* Install Xcode and the Xcode command line tools, which includes the LLVM compiler suite.
 
-        * Install the XQuartz X11 server from  
-               https://www.xquartz.org
-          XQuartz 2.8.5 or later is required for all MB-System installations.
+* Install the XQuartz X11 server from  
+  <https://www.xquartz.org>  
+  XQuartz 2.8.5 or later is required for all MB-System installations.
 
-        * Install MacPorts using the appropriate downloadable installer package from:
-               <https://www.macports.org/install.php>
+* Install MacPorts using the appropriate downloadable installer package from:  
+  <https://www.macports.org/install.php>
 
-        * After MacPorts installation, first make sure the default port packages are 
-          current by running selfupdate and then install the MB-System prerequisites.
-               sudo port -v selfupdate  
-               sudo port install gmt6 fftw-3 mesa libGLU openmotif  
+* After MacPorts installation, first make sure the default port packages are 
+  current by running selfupdate and then install the MB-System prerequisites.  
 
-        * Also make sure that a current version of Python3 is available. First list  
-          the available Python3 versions, install the most recent, and then set port  
-          to link that version to python3:  
-               port select --list python
-          Result as of July 18, 2023:
-               Available versions for python:
-                    none
-                    python27
-                    python30
-                    python311 (active)
-                    python38  
-          The most recent version is python311, so install it:
-               sudo port install python311
-               sudo port select --set python python311
-               sudo port select --set python3 python311
-          Also install the most recent Python imaging library Pillow
-               sudo port install py311-Pillow
+        sudo port -v selfupdate    
+        sudo port install gmt6 fftw-3 mesa libGLU openmotif opencv4  
 
-Download the MB-System source package from the repository at GitHub:
-  https://github.com/dwcaress/MB-System
-There are often beta releases that are more recent than the current stable release. For instance, to download 5.7.9.beta42 go to:
-    https://github.com/dwcaress/MB-System/archive/refs/tags/5.7.9beta58.tar.gz
+* Also make sure that a current version of Python3 is available. First list  
+  the available Python3 versions, install the most recent, and then set port  
+  to link that version to python3:  
+  
+        port select --list python
+           
+  Versions of Python available through MacPorts (November 6, 2023):
+	* python27
+	* python310
+	* python311
+	* python38
+            
+  The most recent version is python311, so install it and make it the active installation:
+  
+        sudo port install python311  
+        sudo port select --set python python311  
+        sudo port select --set python3 python311  
+       
+  Also install the most recent Python imaging library Pillow:  
+  
+        sudo port install py311-Pillow
 
-Recommend using Chrome for the above, not Safari, and placing the tarball in /usr/local/src.
+* Download the MB-System source package from the repository at GitHub:  
+  &nbsp;&nbsp;&nbsp;&nbsp;https://github.com/dwcaress/MB-System  
+  There are often beta releases that are more recent than the current stable 
+  release. The most recent beta release will be at the top of this page:  
+  &nbsp;&nbsp;&nbsp;&nbsp;https://github.com/dwcaress/MB-System/releases  
+  We recommend using Chrome for the download rather than Safari,
+  because Chrome does not prematurely unpack the tarball.
+  Although MB-System can be installed from a source tree located anywhere, we
+  generally place the tarball in /usr/local/src and then unpack and build
+  MB-System there.
+  
+* Unpack the MB-System distribution tarball
 
-Unpack the MB-System distribution tarball, and then cd into the top directory of the resulting structure. This will typically be named something like "MB-System-5.7.9". At that location, execute the configure script, named "configure", with the options necessary for your context. The XCode compiler tools do not look for header files or libraries in the locations used by MacPorts, and so it is necessary to specify these locations for several of the prerequisite packages.
+        cd /usr/local/src
+        tar xvzf MB-System.5.7.9.tar.gz  
+      
+  and then cd into the top directory of the resulting structure:
+  
+        cd MB-System-5.7.9
+  
+* Option 1: **CMake Build System**  
+  At that location, create a working directory named "build", cd into "build", and then execute cmake.
+  This command should successfully enable building the entire current MB-System 
+  (5.8.0  or later) on any Mac computer with the prerequisites installed through 
+  MacPorts. This has been tested with computers running Ventura.
+  
+	    cmake ..
+  
+* Option 2: **Autotools Build System**  
+  At that location, execute the configure script, named "configure", with the 
+  options necessary for your context. The XCode compiler tools do not look for 
+  header files or libraries in the locations used by MacPorts, and so it is 
+  necessary to specify these locations for several of the prerequisite packages.
+  This command should successfully enable building the current core MB-System 
+  (5.7.9  or later) on any Mac computer with the prerequisites installed through 
+  MacPorts. This has been tested with computers running Ventura and Monterey.
+  
+	    ./configure \
+	      --prefix=/usr/local \
+	      --disable-static \
+	      --enable-shared \
+	      --enable-hardening \
+	      --enable-test \
+	      --with-proj-lib=/opt/local/lib/proj9/lib \
+	      --with-proj-include=/opt/local/lib/proj9/include \
+	      --with-gmt-config=/opt/local/lib/gmt6/bin \
+	      --with-fftw-lib=/opt/local/lib \
+	      --with-fftw-include=/opt/local/include \
+	      --with-x11-lib=/opt/local/lib \
+	      --with-x11-include=/opt/local/include \
+	      --with-motif-lib=/opt/local/lib \
+	      --with-motif-include=/opt/local/include \
+	      --with-opengl-include=/opt/local/include \
+	      --with-opengl-lib=/opt/local/lib \
+	      --with-otps-dir=/usr/local/src/otps
+  
+  The MB-System codebase includes some components that are optional when using 
+  the Autotools build system, such as OpenCV based 
+  photomosaicing (enabled with --enable-opencv) and  a realtime Terrain Relative 
+  Navigation infrastructure and toolset (--enable-mtrn and --enable-mbtnav). 
+  This configure command should enable building the entire MB-System package, 
+  including these optional tools:
+	
+	    ./configure \
+	      --prefix=/usr/local \
+	      --disable-static \
+	      --enable-shared \
+	      --enable-hardening \
+	      --enable-test \
+	      --with-proj-lib=/opt/local/lib/proj9/lib \
+	      --with-proj-include=/opt/local/lib/proj9/include \
+	      --with-gmt-config=/opt/local/lib/gmt6/bin \
+	      --with-fftw-lib=/opt/local/lib \
+	      --with-fftw-include=/opt/local/include \
+	      --with-x11-lib=/opt/local/lib \
+	      --with-x11-include=/opt/local/include \
+	      --with-motif-lib=/opt/local/lib \
+	      --with-motif-include=/opt/local/include \
+	      --with-opengl-include=/opt/local/include \
+	      --with-opengl-lib=/opt/local/lib \
+	      --enable-mbtrn \
+	      --enable-mbtnav \
+	      --enable-opencv \
+	      --with-opencv-include=/opt/local/include/opencv4 \
+	      --with-opencv-lib=/opt/local/lib/opencv4 \
+	      --with-otps-dir=/usr/local/src/otps
 
-This command should successfully enable building the current MB-System (5.7.9 or later) on any Mac computer with the prerequisites installed through MacPorts. This has been tested with computers running Ventura and Monterey.
-  ./configure \
-      --prefix=/usr/local \
-      --disable-static \
-      --enable-shared \
-      --enable-hardening \
-      --enable-test \
-      --with-proj-lib=/opt/local/lib/proj9/lib \
-      --with-proj-include=/opt/local/lib/proj9/include \
-      --with-gmt-config=/opt/local/lib/gmt6/bin \
-      --with-fftw-lib=/opt/local/lib \
-      --with-fftw-include=/opt/local/include \
-      --with-x11-lib=/opt/local/lib \
-      --with-x11-include=/opt/local/include \
-      --with-motif-lib=/opt/local/lib \
-      --with-motif-include=/opt/local/include \
-      --with-opengl-include=/opt/local/include \
-      --with-opengl-lib=/opt/local/lib \
-      --with-otps-dir=/usr/local/src/otps
+* Once the makefiles have been generated by cmake or configure, build and install MB-System using:
 
-Once the makefiles have been generated by configure, build and install MB-System using:
-  make
-  make check
-  sudo make install
+	    make
+	    make check
+	    sudo make install
 
-The MB-System codebase includes some optional components, such as OpenCV based photomosaicing (enabled with --enable-opencv) and  a realtime Terrain Relative Navigation infrastructure and toolset (--enable-mtrn and --enable-mbtnav). An additional prerequisite for the photomosaicing is OpenCV4, which can be installed by:
-  sudo port install gmt6 fftw-3 libGLU openmotif opencv4
-This configure command should enable building the entire MB-System package, including these optional tools.
-  ./configure \
-      --prefix=/usr/local \
-      --disable-static \
-      --enable-shared \
-      --enable-hardening \
-      --enable-test \
-      --with-proj-lib=/opt/local/lib/proj9/lib \
-      --with-proj-include=/opt/local/lib/proj9/include \
-      --with-gmt-config=/opt/local/lib/gmt6/bin \
-      --with-fftw-lib=/opt/local/lib \
-      --with-fftw-include=/opt/local/include \
-      --with-x11-lib=/opt/local/lib \
-      --with-x11-include=/opt/local/include \
-      --with-motif-lib=/opt/local/lib \
-      --with-motif-include=/opt/local/include \
-      --with-opengl-include=/opt/local/include \
-      --with-opengl-lib=/opt/local/lib \
-      --enable-mbtrn \
-      --enable-mbtnav \
-      --enable-opencv \
-      --with-opencv-include=/opt/local/include/opencv4 \
-      --with-opencv-lib=/opt/local/lib/opencv4 \
-      --with-otps-dir=/usr/local/src/otps
+  Unless one specifies otherwise, the MB-System executable programs, libraries, and header files will be installed in directories named /usr/local/bin /usr/local/lib and /usr/local/include respectively. In order for the MB-System programs to execute from a command line, the /usr/local/bin directory must be included in a user’s \$PATH environment variable. This is typically accomplished by including a statement like:  
+  
+         export PATH=/usr/local/bin:$PATH
+       
+  in an environment file in the user’s home directory named .zprofile  (if using the zsh shell), or .profile (if using the base shell). Other user environment files can be used, such as .zshrc for zsh or .bashrc for bash.
+
+When one updates to a new MB-System version, we recommend uninstalling the previous version before installing the next. In the directory for the previous version (e.g., /usr/local/src/MB-System5.7.9beta52 if using Autotools or /usr/local/src/MB-System5.7.9beta52/build if using CMake), use the following command whether using the Autotools or the CMake build system:
+
+	    sudo make uninstall
+	    sudo make clean
+  
+Then follow the steps above starting with downloading the next version from GitHub.
 
 ---
 ### Ubuntu Jammy Jellyfish 22.04
