@@ -8,7 +8,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-add_executable(qt-mbgrdviz BackEnd.cpp main.cpp qml.qrc)
+add_executable(qt-mbgrdviz SharedConstants.cpp BackEnd.cpp main.cpp qml.qrc)
 
 target_link_libraries(qt-mbgrdviz PRIVATE MBGui Qt5::Core Qt5::Quick
                                           mbeditvizlib)
