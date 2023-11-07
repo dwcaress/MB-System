@@ -27,6 +27,7 @@ set(src
     MBQuickItem.cpp
     QVtkRenderer.cpp
     GmtGridSurface.cpp
+    DataPointsOverlay.cpp
     Route.cpp
     Surface.cpp
     SwathGridData.cpp
