@@ -2,14 +2,15 @@
 #define SHAREDCONSTANTS_H
 #include <QObject>
 
+namespace sharedQmlCpp {
 /// Constants shared between C++ and QML code
-class SharedConstants : public QObject
+class Const : public QObject
 {
     Q_OBJECT
 
 public:
 
-  enum EditState {
+  enum class EditState {
 		  Unknown,
 		  Pointing,
 		  EditRoute,
@@ -19,17 +20,17 @@ public:
 
   Q_ENUM(EditState)
 
-  enum GuiParameter {ColorMap,
-		     ShowAxes,
-		     RouteFile,
-		     SiteFile
-  };
-  
-  Q_ENUM(GuiParameter)
 
+  /// Command issued from GUI
+  enum class Cmd : int {ColorMap,
+			ShowAxes,
+			VerticalExag,
+			RouteFile,
+			SiteFile};
   
-  
-  
+  Q_ENUM(Cmd)
+
+    
   /// Define read-only QString property called "testString"
   Q_PROPERTY(QString testString READ getTestString)
 
@@ -46,4 +47,5 @@ public:
 
 };
 
+}
 #endif

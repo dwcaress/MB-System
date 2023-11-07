@@ -1,5 +1,7 @@
 #include <iostream>
 #include "SharedConstants.h"
 
-const QString SharedConstants::testString_ = QString("this is a test");
+using namespace sharedQmlCpp;
+
+const QString Const::testString_ = QString("Hello sailor!");
 
