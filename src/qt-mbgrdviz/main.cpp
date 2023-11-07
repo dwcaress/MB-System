@@ -1,8 +1,11 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QQmlContext>
 #include <QVTKOpenGLWindow.h>
 #include "BackEnd.h"
 #include "QVtkItem.h"
+#include "SharedConstants.h"
+#include "TopoColorMap.h"
 
 // These first three lines address
 // issue described at
@@ -14,7 +17,9 @@ VTK_MODULE_INIT(vtkRenderingFreeType)
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+  using namespace sharedQmlCpp;
+  
+  QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     QGuiApplication app(argc, argv);
 
@@ -33,11 +38,28 @@ int main(int argc, char *argv[])
     }, Qt::QueuedConnection);
 
     qmlRegisterType<mb_system::QVtkItem>("QVtk", 1, 0, "QVtkItem");
+
+
+    // Register SharedConstants so QML can access its C++ enums and other
+    // constants.
+    qmlRegisterType<Const>("SharedConstants", 1, 0,
+			   "Const");
+
+    
     engine.load(url);
 
+    
     if (!BackEnd::registerSingleton(argc, argv, &engine)) {
         qCritical("Couldn't create/register BackEnd");
         exit(1);
+    }
+
+    /// TEST TEST - print supported color maps
+    std::vector<const char *> names;
+    mb_system::TopoColorMap::schemeNames(&names);
+    
+    for (int i = 0; i < names.size(); i++) {
+      std::cout << "colorMap " << names[i] << "\n";
     }
 
     return app.exec();
