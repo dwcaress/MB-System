@@ -1,5 +1,16 @@
-find_package(GDAL REQUIRED)
-find_package(GMT REQUIRED)
+message(STATUS "In src/mbaux: CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
+
+find_package(GDAL CONFIG)
+if (NOT GDAL_FOUND)
+  message(STATUS "Package GDAL config not found, looking for FindGDAL.cmake file...")
+  find_package(GDAL REQUIRED)
+endif (NOT GDAL_FOUND)
+
+find_package(GMT CONFIG)
+if (NOT GMT_FOUND)
+  message(STATUS "Package GMT config not found, looking for FindGMT.cmake file...")
+  find_package(GMT REQUIRED)
+endif (NOT GMT_FOUND)
 
 add_library(
   mbaux
