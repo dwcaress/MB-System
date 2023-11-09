@@ -1,7 +1,7 @@
 dnl--------------------------------------------------------------------
 dnl    The MB-system:    configure.ac    12/7/2011
 dnl
-dnl    Copyright (c) 2011-2022 by
+dnl    Copyright (c) 2011-2023 by
 dnl    D. W. Caress (caress@lamont.ldgo.columbia.edu)
 dnl    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
 dnl    Lamont-Doherty Earth Observatory
@@ -11,8 +11,8 @@ dnl    See README file for copying and redistribution conditions.
 dnl--------------------------------------------------------------------
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.9beta61],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
-AC_DEFINE(VERSION_DATE, ["2 November 2023"], [Set VERSION_DATE define in mb_config.h])
+AC_INIT([mbsystem],[5.7.9beta63],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_DEFINE(VERSION_DATE, ["8 November 2023"], [Set VERSION_DATE define in mb_config.h])
 
 AS_ECHO([" "])
 AS_ECHO(["------------------------------------------------------------------------------"])
@@ -69,7 +69,7 @@ AS_ECHO(["----------------------------------------------------------------------
 AS_ECHO(["    To generate the makefiles needed to build MB-System, run ./configure"])
 AS_ECHO(["    with the options appropriate for your situation. These options are"])
 AS_ECHO(["    listed here:"])
-AS_ECHO(["        --prefix=install      - location for mbsystem (/usr/local/mbsystem) (optional)"])
+AS_ECHO(["        --prefix=install      - location for mbsystem (/usr/local) (optional)"])
 AS_ECHO(["        --with-netcdf-config  - location of NetCDF config script nc-config (optional)"])
 AS_ECHO(["        --with-gdal-config    - location of GDAL config script gdal-config (optional)"])
 AS_ECHO(["        --with-gmt-config     - location of GMT config script gmt-config (optional)"])
@@ -343,7 +343,7 @@ dnl--------------------------------------------------------------------
 
 dnl Use OTPS (OSU Tidal Prediction Software) location if specified with --with-otps-dir, use default otherwise
 AS_ECHO(["Use OTPS (OSU Tidal Prediction Software) location if specified with --with-otps-dir, use default otherwise"])
-OTPS_DIR="/usr/local/OTPS2"
+OTPS_DIR="/usr/local/src/otps"
 AC_ARG_WITH(otps_dir, [ --with-otps-dir=DIR    Location of OSU Tidal Prediction Software], [OTPS_DIR=${withval}])
 AC_SUBST(OTPS_DIR)
 
