@@ -1,3 +1,5 @@
+message("In src/gsf")
+
 add_library(
   mbgsf
   dump_gsf.c

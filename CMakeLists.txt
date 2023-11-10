@@ -32,8 +32,6 @@
 #
 #------------------------------------------------------------------------------
 
-set(PROJECT_DATE "3 November 2023")
-
 message("----------------------------------------------------------")
 message("MB-System")
 message("CMake Build System")
@@ -44,7 +42,6 @@ message("${PROJECT_DATE}")
 message ("CMake version: ${CMAKE_VERSION}")
 message("The default build mode is release (optimized for performance).")
 message("  -To obtain a debug-able build invoke cmake with -DCMAKE_BUILD_TYPE=debug")
-message("Specify OTPS install location with -DotpsDir=directory")
 message("Specify OTPS install location with -DotpsDir=directory")
 message("Set install directory with -DCMAKE_INSTALL_PREFIX=directory")
 message("Enable debugging with -DCMAKE_BUILD_TYPE=Debug")
@@ -58,8 +55,11 @@ message("----------------------------------------------------------")
 
 # Define minimum CMake version required
 cmake_minimum_required(VERSION 3.20)
+
+# Define date and version
+set(PROJECT_DATE "10 November 2023")
 project(MB-System 
-        VERSION 5.7.9.62
+        VERSION 5.7.9.63
         DESCRIPTION "Open Source software for the processing and display of seafloor mapping data"
         HOMEPAGE_URL https://www.mbari.org/technology/mb-system/ 
         LANGUAGES C CXX )
@@ -145,6 +145,8 @@ add_subdirectory(src/gmt)
 add_subdirectory(src/utilities)
 add_subdirectory(src/deprecated)
 add_subdirectory(src/macros)
+add_subdirectory(src/mbgrd2gltf)
+add_subdirectory(src/otps)
 if(buildGUIs)
   add_subdirectory(src/mbview)
   add_subdirectory(src/mbedit)

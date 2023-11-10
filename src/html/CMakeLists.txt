@@ -1,3 +1,5 @@
+message("In src/html")
+
 set(HTML
     caress2001.gif
     caress_chayes_ferreira_Feb2014.jpg

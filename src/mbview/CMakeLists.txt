@@ -1,3 +1,5 @@
+message("In src/mbview")
+
 find_package(X11 REQUIRED)
 find_package(Motif REQUIRED)
 find_package(OpenGL REQUIRED)

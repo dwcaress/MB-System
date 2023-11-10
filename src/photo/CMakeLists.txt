@@ -1,3 +1,4 @@
+message("In src/photo")
 
 set(executables mbphotomosaic mbgetphotocorrection mbphotogrammetry
                   mbimagecorrect mbtiff2png)

@@ -1,3 +1,5 @@
+message("In src/ps")
+
 set(PS
     mb7k2jstar.ps
     mb7k2ss.ps

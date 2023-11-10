@@ -10,7 +10,6 @@ find_path(LibPROJ_INCLUDE_DIR
         /opt/csw
         /opt
         /usr/local)
-message(STATUS "LibPROJ_INCLUDE_DIR: ${LibPROJ_INCLUDE_DIR}")
 mark_as_advanced(LibPROJ_INCLUDE_DIR)
 
 find_library(LibPROJ_LIBRARY_RELEASE
@@ -25,7 +24,6 @@ find_library(LibPROJ_LIBRARY_RELEASE
         /opt/csw
         /opt
         /usr/local)
-message(STATUS "LibPROJ_LIBRARY_RELEASE: ${LibPROJ_LIBRARY_RELEASE}")
 mark_as_advanced(LibPROJ_LIBRARY_RELEASE)
 
 find_library(LibPROJ_LIBRARY_DEBUG
@@ -40,7 +38,6 @@ find_library(LibPROJ_LIBRARY_DEBUG
         /opt/csw # Blastwave
         /opt
         /usr/local)
-message(STATUS "LibPROJ_LIBRARY_DEBUG: ${LibPROJ_LIBRARY_DEBUG}")
 mark_as_advanced(LibPROJ_LIBRARY_DEBUG)
 
 include(SelectLibraryConfigurations)

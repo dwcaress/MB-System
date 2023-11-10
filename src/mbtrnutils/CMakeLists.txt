@@ -11,7 +11,7 @@
 # GMT grid into an octree, and mbgrdtilemaker generates tiled octrees needed
 # for handling very large models.
 #
-message("In mbtrnutils")
+message("In src/mbtrnutils")
 #
 #------------------------------------------------------------------------------
 
