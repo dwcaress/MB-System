@@ -1,3 +1,5 @@
+message("In src/deprecated")
+
 set(executables
     mb7k2jstar
     mb7k2ss

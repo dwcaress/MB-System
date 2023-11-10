@@ -26,7 +26,6 @@
 # This makes the presumption that you include gmt.h like
 #
 # include "gmt.h"
-message(STATUS "29 GMT_FOUND: ${GMT_FOUND}  GMT_LIBRARY: ${GMT_LIBRARY}")
 
 if(UNIX AND NOT GMT_FOUND)
   # Use gmt-config to obtain the libraries
@@ -42,7 +41,6 @@ if(UNIX AND NOT GMT_FOUND)
           /opt/csw # Blastwave
           /opt
           /usr/local)
-message(STATUS "${CMAKE_CURRENT_LIST_LINE}: GMT_CONFIG: ${GMT_CONFIG}")
 
   if(GMT_CONFIG)
     execute_process(
@@ -62,40 +60,26 @@ message(STATUS "${CMAKE_CURRENT_LIST_LINE}: GMT_CONFIG: ${GMT_CONFIG}")
     if(GMT_CONFIG_LIBS)
       # Ensure -l is precedeced by whitespace to not match '-l' in
       # '-L/usr/lib/x86_64-linux-gnu/hdf5/serial'
-message(STATUS "${CMAKE_CURRENT_LIST_LINE}: GMT_CONFIG_CFLAGS: ${GMT_CONFIG_CFLAGS}")
       string(REGEX MATCHALL "(^| )-l[^ ]+" _gmt_dashl ${GMT_CONFIG_LIBS})
-message(STATUS "${CMAKE_CURRENT_LIST_LINE}: _gmt_dashl: ${_gmt_dashl}")
       string(REGEX REPLACE "(^| )-l" "" _gmt_lib "${_gmt_dashl}")
-message(STATUS "${CMAKE_CURRENT_LIST_LINE}: _gmt_lib: ${_gmt_lib}")
       string(REGEX MATCHALL "(^| )-L[^ ]+" _gmt_dashL ${GMT_CONFIG_LIBS})
-message(STATUS "${CMAKE_CURRENT_LIST_LINE}: _gmt_dashL: ${_gmt_dashL}")
       string(REGEX REPLACE "(^| )-L" "" _gmt_libpath "${_gmt_dashL}")
-message(STATUS "${CMAKE_CURRENT_LIST_LINE}: _gmt_libpath: ${_gmt_libpath}")
     endif(GMT_CONFIG_LIBS)
-    message(STATUS "70 GMT_CONFIG_CFLAGS: ${GMT_CONFIG_CFLAGS}")
-    message(STATUS "71 GMT_CONFIG_LIBS: ${GMT_CONFIG_LIBS}")
   endif(GMT_CONFIG)
   if(_gmt_lib)
     list(REMOVE_DUPLICATES _gmt_lib)
   endif(_gmt_lib)
 endif(UNIX AND NOT GMT_FOUND)
-message(STATUS "${CMAKE_CURRENT_LIST_LINE}: _gmt_libpath:   ${_gmt_libpath}")
-message(STATUS "${CMAKE_CURRENT_LIST_LINE}: _gmt_lib:       ${_gmt_lib}")
-message(STATUS "${CMAKE_CURRENT_LIST_LINE}: GMT_FOUND: ${GMT_FOUND}  GMT_LIBRARY: ${GMT_LIBRARY}")
 
 # find all libs that gmt-config reports (which is just libgmt, not libpostscriptlight)
 foreach(_extralib ${_gmt_lib})
-  message(STATUS "_extralib: ${_extralib}    _gmt_lib:   ${_gmt_lib} ")
   find_library(
     _found_lib_${_extralib}
     NAMES ${_extralib}
     PATHS ${_gmt_libpath})
   list(APPEND GMT_LIBRARY ${_found_lib_${_extralib}})
-  message(STATUS "${CMAKE_CURRENT_LIST_LINE}: GMT_LIBRARY: ${GMT_LIBRARY}")
 endforeach(_extralib)
-message(STATUS "${CMAKE_CURRENT_LIST_LINE}: GMT_LIBRARY: ${GMT_LIBRARY}")
 list(REMOVE_DUPLICATES GMT_LIBRARY)
-message(STATUS "${CMAKE_CURRENT_LIST_LINE}: GMT_LIBRARY: ${GMT_LIBRARY}")
 
 find_path(
   GMT_INCLUDE_DIR gmt.h
@@ -109,7 +93,6 @@ find_path(
         /opt/csw # Blastwave
         /opt
         /usr/local)
-message(STATUS "${CMAKE_CURRENT_LIST_LINE}: GMT_INCLUDE_DIR: ${GMT_INCLUDE_DIR}")
 
 if (NOT GMT_LIBRARY)
   find_library(
@@ -126,7 +109,6 @@ if (NOT GMT_LIBRARY)
           /opt
           /usr/local)
 endif (NOT GMT_LIBRARY)
-message(STATUS "${CMAKE_CURRENT_LIST_LINE}: GMT_LIBRARY: ${GMT_LIBRARY}")
 
 find_library(
   PSL_LIBRARY
@@ -141,7 +123,6 @@ find_library(
         /opt/csw # Blastwave
         /opt
         /usr/local)
-message(STATUS "${CMAKE_CURRENT_LIST_LINE}: PSL_LIBRARY: ${PSL_LIBRARY}")
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(GMT DEFAULT_MSG GMT_LIBRARY PSL_LIBRARY GMT_INCLUDE_DIR)

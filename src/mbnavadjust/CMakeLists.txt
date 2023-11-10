@@ -1,3 +1,5 @@
+message("In src/mbnavadjust")
+
 find_package(X11 REQUIRED)
 find_package(Motif REQUIRED)
 

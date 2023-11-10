@@ -22,11 +22,7 @@
 #.   mb1r_test
 #.   mb1-cli
 #
-message("In mbtrnav")
-#
-#------------------------------------------------------------------------------
-#
-message("In mbtrn CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR} CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
+message("In src/mbtrn")
 #
 #------------------------------------------------------------------------------
 #

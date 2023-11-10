@@ -1,3 +1,5 @@
+message("In src/surf")
+
 if(CMAKE_SYSTEM_NAME STREQUAL Linux)
   find_package(TIRPC REQUIRED)
 else()

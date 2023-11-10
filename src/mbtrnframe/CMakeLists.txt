@@ -4,7 +4,7 @@
 # here named mbtrnframe (mbsystem/src/mbtrnframe) and used by code in
 # mbsystem/src/mbtrn mbsystem/src/mbtrnav mbsystem/src/mbtrnutils
 #
-message("In mbtrnutils")
+message("In mbtrnframe")
 #
 #------------------------------------------------------------------------------
 message("In mbtrnframe")
