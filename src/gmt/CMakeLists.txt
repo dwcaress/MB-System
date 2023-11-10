@@ -10,17 +10,17 @@ if (NOT GMT_FOUND)
   find_package(GMT REQUIRED)
 endif (NOT GMT_FOUND)
 
-add_library(mbgmtmodules 
+add_library(mbsystem 
     mbcontour.c 
     mbgrd2obj.c 
     #mbgrdtiff.c NOTE: new version doesn't work, still using pre-GMT6 version
     mbgrdtifforg.c 
     mbswath.c)
 
-set_target_properties(mbgmtmodules PROPERTIES VERSION "0" SOVERSION "0")
-target_compile_definitions(mbgmtmodules PUBLIC MB_PACKAGE_VERSION="${PROJECT_VERSION}"
+set_target_properties(mbsystem PROPERTIES VERSION "0" SOVERSION "0" PREFIX "" OUTPUT_NAME mbsystem)
+target_compile_definitions(mbsystem PUBLIC MB_PACKAGE_VERSION="${PROJECT_VERSION}"
                                        MB_PACKAGE_DATE="${PROJECT_DATE}")
-target_include_directories(mbgmtmodules PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(mbgmtmodules GMT::GMT GMT::PSL mbio mbaux)
+target_include_directories(mbsystem PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mbsystem GMT::GMT GMT::PSL mbio mbaux)
 
-install(TARGETS mbgmtmodules DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS mbsystem DESTINATION ${CMAKE_INSTALL_LIBDIR})
