@@ -543,7 +543,7 @@ void do_mbnavadjust_init(int argc, char **argv) {
 
   /* put up info text */
   mb_path string = "";
-  snprintf(string, sizeof(string), "Program MBnavadjust initialized.\nMB-System Release %s %s\n", MB_VERSION, MB_BUILD_DATE);
+  snprintf(string, sizeof(string), "Program MBnavadjust initialized.\nMB-System Release %s %s\n", MB_VERSION, MB_VERSION_DATE);
   do_info_add(string, true);
 
   /* initialize mbnavadjust proper */
@@ -559,7 +559,7 @@ void do_set_controls() {
   char value_text[128];
 
   /* set about version label */
-  sprintf(value_text, ":::t\"MB-System Release %s\":t\"%s\"", MB_VERSION, MB_BUILD_DATE);
+  sprintf(value_text, ":::t\"MB-System Release %s\":t\"%s\"", MB_VERSION, MB_VERSION_DATE);
   set_label_multiline_string(label_about_version, value_text);
 
   /* set value of format text item */

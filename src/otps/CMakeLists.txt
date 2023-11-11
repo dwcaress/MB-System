@@ -2,8 +2,8 @@ message("In src/otps")
 
 add_executable(mbotps mbotps.c otps.h)
 
-file(GENERATE OUTPUT otps.h
-	CONTENT "char *otps_location = \"${otpsDir}\";")
+file(WRITE otps.h
+	"char *otps_location = \"${otpsDir}\";")
  
 target_link_libraries(mbotps PRIVATE mbio)
 

@@ -11,8 +11,7 @@ dnl    See README file for copying and redistribution conditions.
 dnl--------------------------------------------------------------------
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.9.63],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
-AC_DEFINE(VERSION_DATE, ["10 November 2023"], [Set VERSION_DATE define in mb_config.h])
+AC_INIT([mbsystem],[5.7.9],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AS_ECHO([" "])
 AS_ECHO(["------------------------------------------------------------------------------"])

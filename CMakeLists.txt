@@ -38,7 +38,6 @@ message("CMake Build System")
 message("Johannes Schauer (University of Weurzburg")
 message("Tom O'Reilly (Monterey Bay Aquarium Research Institute")
 message("David Caress (Monterey Bay Aquarium Research Institute")
-message("${PROJECT_DATE}")
 message ("CMake version: ${CMAKE_VERSION}")
 message("The default build mode is release (optimized for performance).")
 message("  -To obtain a debug-able build invoke cmake with -DCMAKE_BUILD_TYPE=debug")
@@ -56,10 +55,8 @@ message("----------------------------------------------------------")
 # Define minimum CMake version required
 cmake_minimum_required(VERSION 3.20)
 
-# Define date and version
-set(PROJECT_DATE "10 November 2023")
+# Define project
 project(MB-System 
-        VERSION 5.7.9.63
         DESCRIPTION "Open Source software for the processing and display of seafloor mapping data"
         HOMEPAGE_URL https://www.mbari.org/technology/mb-system/ 
         LANGUAGES C CXX )

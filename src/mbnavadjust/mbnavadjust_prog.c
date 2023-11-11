@@ -11081,7 +11081,7 @@ int mbnavadjust_updategrid() {
           fprintf(afp, "%s", ostring);
           snprintf(ostring, sizeof(ostring), "# MB-System version:        %s\n", MB_VERSION);
           fprintf(afp, "%s", ostring);
-          snprintf(ostring, sizeof(ostring), "# MB-System build data:     %s\n", MB_BUILD_DATE);
+          snprintf(ostring, sizeof(ostring), "# MB-System build data:     %s\n", MB_VERSION_DATE);
           fprintf(afp, "%s", ostring);
           snprintf(ostring, sizeof(ostring), "# MBnavadjust project name: %s\n", project.name);
           fprintf(afp, "%s", ostring);
@@ -11299,7 +11299,7 @@ int mbnavadjust_applynav() {
         fprintf(ofp, "%s", ostring);
         snprintf(ostring, sizeof(ostring), "# MB-System version:        %s\n", MB_VERSION);
         fprintf(ofp, "%s", ostring);
-        snprintf(ostring, sizeof(ostring), "# MB-System build data:     %s\n", MB_BUILD_DATE);
+        snprintf(ostring, sizeof(ostring), "# MB-System build data:     %s\n", MB_VERSION_DATE);
         fprintf(ofp, "%s", ostring);
         snprintf(ostring, sizeof(ostring), "# MBnavadjust project name: %s\n", project.name);
         fprintf(ofp, "%s", ostring);

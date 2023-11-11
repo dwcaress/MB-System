@@ -125,9 +125,6 @@
 /* Version number of package */
 #undef VERSION
 
-/* Set VERSION_DATE define in mb_config.h */
-#undef VERSION_DATE
-
 /* 0 */
 #undef WITH_DEBUG
 
