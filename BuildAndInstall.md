@@ -1,4 +1,4 @@
-# How to Download and Install MB-System
+# How to Download, Build, and Install MB-System
 
 ---
 
@@ -11,9 +11,9 @@ November 5, 2023
 
 MB-System is an open source software package intended for Unix-like operating systems which is distributed as source code. In order to install MB-System, a source distribution must be downloaded, unpacked, compiled, linked, and installed locally. MB-System now includes two methods for building and installing the software, the first based on GNU Autotools and the second using the CMake package.
 
-The GNU Autotools build system consists of a script named "configure" at the top of the distribution structure which, when executed, generates a set of files named "Makefile" throughout the structure that hold compilation and linkage instructions used by the program make. These compilation and linkage instructions vary depending on the operating system and which versions of prerequisite software packages are installed, and in some cases special arguments must be included in the configure command. Once configure has been successfully executed, running the program make at the top level then actually invokes the local compiler and linker to build and install MB-System. Several Autotools programs, including autoconf, automake, and libtool, are used to generate the configure script included in each distribution. This build system has been the sole means by which MB-System could be built since 2011.
+The GNU Autotools build system includes a script named **configure** at the top of the distribution structure which, when executed, generates a set of files named "Makefile" throughout the structure that hold compilation and linkage instructions used by the program **make**. These compilation and linkage instructions vary depending on the operating system and which versions of prerequisite software packages are installed, and in some cases special arguments must be included in the configure command. Once configure has been successfully executed, running the program **make** at the top level then actually invokes the local compiler and linker to build and install MB-System. Several Autotools programs, including autoconf, automake, and libtool, are used to generate the configure script included in each distribution. This build system has been the sole means by which MB-System could be built since 2011.
 
-The sequence of commands by which one builds and installs a package using CMake is very different from Autotools. One creates a new directory to hold the package build (commonly named "build" by convention) in the top level of the source structure, then cd's into that directory, and then executes cmake with the argument "..", which provides cmake the path to the top level of the source directory. CMake then copies much of the source into a build tree and generates Makefiles in that tree to enable compilation, linkage, and installation, again using the program make.
+The sequence of commands by which one builds and installs a package using CMake is very different from Autotools. One creates a new directory to hold the package build (commonly named "build" by convention) in the top level of the source structure, then cd's into that directory, and then executes **cmake** with the argument "..", which provides **cmake** the path to the top level of the source directory. **Cmake** then copies the source into a build tree and generates Makefiles in that tree to enable compilation, linkage, and installation, again using the program **make**.
 
 The CMake build system is new to MB-System with version 5.8.0, and is intended to replace the older Autotools approach for current and future operating systems. The old Autotools build system will continue to be included in MB-System distributions for the forseeable future to enable building and installation on legacy operating systems. The Autotools build system will not be maintained to enable it's use on current or future operating systems, and the CMake build system will not be modified to support building on legacy systems.
 
@@ -122,21 +122,14 @@ This example is relevant for MacOs 10.13 High Sierra to the current MacOs 13 Ven
         cd MB-System-5.7.9
   
 * Option 1: **CMake Build System**  
-  At that location, create a working directory named "build", cd into "build", and then execute cmake.
-  This command should successfully enable building the entire current MB-System 
-  (5.8.0  or later) on any Mac computer with the prerequisites installed through 
-  MacPorts. This has been tested with computers running Ventura.
+  At that location, create a working directory named "build", **cd** into "build", and then execute **cmake**. This command should successfully enable building the entire current MB-System (5.8.0  or later) on any Mac computer with the prerequisites installed through MacPorts. This has been tested with computers running Ventura.
   
+	    mkdir build
+	    cd build
 	    cmake ..
   
 * Option 2: **Autotools Build System**  
-  At that location, execute the configure script, named "configure", with the 
-  options necessary for your context. The XCode compiler tools do not look for 
-  header files or libraries in the locations used by MacPorts, and so it is 
-  necessary to specify these locations for several of the prerequisite packages.
-  This command should successfully enable building the current core MB-System 
-  (5.7.9  or later) on any Mac computer with the prerequisites installed through 
-  MacPorts. This has been tested with computers running Ventura and Monterey.
+  At that location, execute the configure script, named **configure**, with the options necessary for your context. The XCode compiler tools do not look for header files or libraries in the locations used by MacPorts, and so it is  necessary to specify these locations for several of the prerequisite packages. This command should successfully enable building the current core MB-System (5.7.9  or later) on any Mac computer with the prerequisites installed through MacPorts. This has been tested with computers running Ventura and Monterey.
   
 	    ./configure \
 	      --prefix=/usr/local \
@@ -198,7 +191,7 @@ This example is relevant for MacOs 10.13 High Sierra to the current MacOs 13 Ven
   
          export PATH=/usr/local/bin:$PATH
        
-  in an environment file in the user’s home directory named .zprofile  (if using the zsh shell), or .profile (if using the base shell). Other user environment files can be used, such as .zshrc for zsh or .bashrc for bash.
+  in an environment file in the user’s home directory named .zshenv  (if using the zsh shell), or .profile (if using the bash shell). Other user environment files can be used, such as .zshrc for zsh or .bashrc for bash.
 
 When one updates to a new MB-System version, we recommend uninstalling the previous version before installing the next. In the directory for the previous version (e.g., /usr/local/src/MB-System5.7.9beta52 if using Autotools or /usr/local/src/MB-System5.7.9beta52/build if using CMake), use the following command whether using the Autotools or the CMake build system:
 

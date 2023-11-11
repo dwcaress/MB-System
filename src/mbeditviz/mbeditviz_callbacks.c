@@ -197,7 +197,7 @@ int do_mbeditviz_init(Widget parentwidget, XtAppContext appcon) {
 #endif
 
   // set about version label
-  sprintf(value_text, "::#TimesMedium14:t\"MB-System Release %s\"#TimesMedium14\"%s\"", MB_VERSION, MB_BUILD_DATE);
+  sprintf(value_text, "::#TimesMedium14:t\"MB-System Release %s\"#TimesMedium14\"%s\"", MB_VERSION, MB_VERSION_DATE);
   set_mbview_label_multiline_string(label_about_version, value_text);
 
   // set file selection widgets

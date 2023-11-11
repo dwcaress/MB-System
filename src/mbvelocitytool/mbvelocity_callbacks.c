@@ -500,7 +500,7 @@ void do_set_controls() {
 	                &format_gui);
 
 	/* set about version label */
-	sprintf(message_str, ":::t\"MB-System Release %s\":t\"%s\"", MB_VERSION, MB_BUILD_DATE);
+	sprintf(message_str, ":::t\"MB-System Release %s\":t\"%s\"", MB_VERSION, MB_VERSION_DATE);
 	set_label_multiline_string(label_about_version, message_str);
 
 	if (ndisplay_gui < 1)

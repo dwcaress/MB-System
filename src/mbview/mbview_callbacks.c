@@ -2036,7 +2036,7 @@ int mbview_open(int verbose, size_t instance, int *error) {
 
 	/* set about version label */
   mb_path value_text;
-	sprintf(value_text, "::#TimesMedium14:t\"MB-System Release %s\"#TimesMedium14\"%s\"", MB_VERSION, MB_BUILD_DATE);
+	sprintf(value_text, "::#TimesMedium14:t\"MB-System Release %s\"#TimesMedium14\"%s\"", MB_VERSION, MB_VERSION_DATE);
 	set_mbview_label_multiline_string(view->mb3dview.mbview_label_about_version, value_text);
 
 	/* set widgets */

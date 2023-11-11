@@ -688,7 +688,7 @@ void do_load_specific_file(int i_file) {
 void do_set_controls() {
 	/* set about version label */
 	char value_text[MB_PATH_MAXLINE];
-	sprintf(value_text, ":::t\"MB-System Release %s\":t\"%s\"", MB_VERSION, MB_BUILD_DATE);
+	sprintf(value_text, ":::t\"MB-System Release %s\":t\"%s\"", MB_VERSION, MB_VERSION_DATE);
 	set_label_multiline_string(label_about_version, value_text);
 
 	/* set value of format text item */
