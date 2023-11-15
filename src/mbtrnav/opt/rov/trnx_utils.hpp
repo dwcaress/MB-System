@@ -253,18 +253,20 @@ public:
         fmt_t fmt = (format != 0 ? FMT_STANFORD : FMT_STANDARD);
 
         ostringstream os;
-        os << std::fixed << std::setprecision(6);
+        os << std::dec << std::setfill(' ') << std::fixed << std::setprecision(7);
+
         os << bi->time_usec()/1e6 << ",";
 
         if (fmt == FMT_STANDARD) {
             os << bi->ping_number() << ",";
         }
 
-        os << std::fixed << std::setprecision(7);
 
         if (fmt == FMT_STANDARD) {
+            os << std::fixed << std::setprecision(12);
             os << ni->lat() << ",";
             os << ni->lon() << ",";
+            os << std::fixed << std::setprecision(7);
         } else {
             double posN=0., posE=0.;
 
@@ -276,12 +278,12 @@ public:
             os << posE << ",";
         }
 
-        os << std::fixed << std::setprecision(3);
         os << (alt_depth >= 0 ? alt_depth: ni->depth()) << ",";
         os << ai->pitch() << ",";
         os << ai->roll() << ",";
         os << ai->heading() << ",";
 
+        os << std::setprecision(1);
         if (fmt == FMT_STANFORD) {
             os << 0 << ",";
             os << 0 << ",";
@@ -289,9 +291,11 @@ public:
         }
 
         if(vi != nullptr){
+            os << std::setprecision(7);
             os << vi->vx_ms() << ",";
             os << vi->vy_ms() << ",";
             os << vi->vz_ms() << ",";
+            os << std::setprecision(1);
         }else{
             os << 0. << ",";
             os << 0. << ",";
@@ -302,6 +306,8 @@ public:
         // bottom lock flag
         os << (bi->flags().is_set(trn::BF_BLOCK) ? 1 : 0) << ",";
         os << bi->beam_count() << ",";
+
+        os << std::setprecision(12);
 
         std::list<trn::beam_tup> mBeamList = bi->beams_raw();
         std::list<trn::beam_tup>::iterator it;
@@ -516,9 +522,9 @@ public:
         os << std::setw(5) << "OFS" << std::setw(21) << " [t, x, y, z] ";
         os << std::setprecision(3);
         os << std::setw(13) << mbest->est[2].time << ", ";
-        os << std::setw(7) << mbest->est[2].x - mbest->est[0].x << ", ";
-        os << std::setw(7) << mbest->est[2].y - mbest->est[0].y << ", ";
-        os << std::setw(7) << mbest->est[2].z - mbest->est[0].z << "\n";
+        os << std::setw(7) << mbest->est[3].x << ", ";
+        os << std::setw(7) << mbest->est[3].y << ", ";
+        os << std::setw(7) << mbest->est[3].z << "\n";
 
         os << std::setw(5) << "COV" << std::setw(21) << " [t, x, y, z, xy, m] ";
         os << std::setprecision(3);
@@ -960,7 +966,7 @@ public:
 
             // beam yaw, pitch angles (sensor frame)
             double yd = 0;
-            double xd = (K + (b * e));
+            double xd = (K + S - (b * e));
             double pd = xd;
 
             if(xd > 90.) {
@@ -969,7 +975,7 @@ public:
                 pd = 180. - xd;
             }
 
-            // psi (yaw), phi (pitch) to radians
+            // psi (yaw), theta (pitch) to radians
             double yr = DTR(yd);
             double pr = DTR(pd);
 
@@ -1383,7 +1389,7 @@ public:
         snd->size = MB1_SOUNDING_BYTES(n_beams);
         snd->nbeams = n_beams;
         snd->ping_number = bi->ping_number();//ping_number;
-        snd->ts = ni->time_usec()/1e6;
+        snd->ts = bi->time_usec()/1e6;
         retval = snd;
 
 
@@ -1438,8 +1444,8 @@ public:
         // TRN requires vx != 0 to initialize
         // vy, vz not strictly required
         double vx = vi->vx_ms();
-        double vy = 0.;
-        double vz = 0.;
+        double vy = vi->vy_ms();
+        double vz = vi->vz_ms();
         double time = ni->time_usec()/1e6;
         bool dvlValid = bi->flags().is_set(trn::BF_VALID);
         bool gpsValid = (z < 2 ? true : false);// ni->flags().is_set(trn::NF_POS_VALID);
@@ -1477,7 +1483,7 @@ public:
         pt->wy = 0.;
         pt->wz = 0.;
         // doesn't work if v* not set - why?
-        // OK for v* all the same (e.g.0.01 as in mbtrnpp)?
+        // OK for v* all the same (e.g.0.1 as in mbtrnpp)?
         pt->vx = vx;
         pt->vy = vy;
         pt->vz = vz;
@@ -1507,47 +1513,71 @@ public:
 
             // NavUtils::geoToUtm(latitude, longitude, utmZone, *northing, *easting)
             NavUtils::geoToUtm(Math::degToRad(lat), Math::degToRad(lon), utm, &pos_N, &pos_E);
-            // Note that TRN uses N,E,D frame (i.e. N:x E:y D:z)
-            // [ 0] time POSIX epoch sec
-            // [ 1] northings
-            // [ 2] eastings
-            // [ 3] depth
-            // [ 4] heading
-            // [ 5] pitch
-            // [ 6] roll
-            // [ 7] flag (0)
-            // [ 8] flag (0)
-            // [ 9] flag (0)
-            // [10] vx (0)
-            // [11] xy (0)
-            // [12] vz (0)
-            // [13] sounding valid flag (1)
-            // [14] bottom lock valid flag (1)
-            // [15] number of beams
-            // beam[16 + i*3] number
-            // beam[17 + i*3] valid (always 1)
-            // beam[18 + i*3] range
+
+            // STANDARD Format
+            // time POSIX epoch sec
+            // ping_number
+            // northings
+            // eastings
+            // depth
+            // heading
+            // pitch
+            // roll
+            // vx (0)
+            // xy (0)
+            // vz (0)
+            // sounding valid flag (1)
+            // bottom lock valid flag (1)
+            // number of beams
+            // ...
+            // beam number
+            // valid (0:invalid)
+            // range
             // ...
             // NEWLINE
 
-            ss << std::dec << std::setfill(' ') << std::fixed << std::setprecision(6);
+            // STANFORD Format
+            // Note that TRN uses N,E,D frame (i.e. N:x E:y D:z)
+            // time POSIX epoch sec
+            // northings
+            // eastings
+            // depth
+            // heading
+            // pitch
+            // roll
+            // flag (0)
+            // flag (0)
+            // flag (0)
+            // vx (0)
+            // xy (0)
+            // vz (0)
+            // sounding valid flag (1)
+            // bottom lock valid flag (1)
+            // number of beams
+            // beam number
+            // valid (0:invalid)
+            // range
+            // ...
+            // NEWLINE
+
+            ss << std::dec << std::setfill(' ') << std::fixed << std::setprecision(7);
+
             ss << snd->ts << ",";
 
             if (fmt == FMT_STANDARD) {
                 ss << bi->ping_number() << ",";
             }
 
-            ss << std::setprecision(7);
-
             if(fmt == FMT_STANDARD){
+                ss << std::setprecision(12);
                 ss << lat << ",";
                 ss << lon << ",";
+                ss << std::setprecision(7);
             } else {
                 ss << pos_N << ",";
                 ss << pos_E << ",";
             }
 
-            ss << std::fixed << std::setprecision(3);
             ss << snd->depth << ",";
             ss << snd->hdg << ",";
             ss << ai->pitch() << ",";
@@ -1574,10 +1604,10 @@ public:
             // bottom lock flag
             ss << (bi->flags().is_set(trn::BF_BLOCK)?1:0) << ",";
             ss << snd->nbeams << ",";
-            ss << std::setprecision(4);
 
             for(int i=0; i < snd->nbeams; i++)
             {
+                ss << std::setprecision(1);
                 // beam number
                 ss <<  snd->beams[i].beam_num << ",";
 
@@ -1587,6 +1617,7 @@ public:
                 // valid (set to 1)
                 ss << (range <= 0. ? 0 : 1) << ",";
 
+                ss << std::setprecision(12);
                 if (fmt == FMT_STANFORD) {
                     // range
                     ss << range;
@@ -1606,26 +1637,51 @@ public:
 
     static std::string mb1_to_csv(mb1_t *snd, trn::mb1_info *bi, trn::att_info *ai, int format=0, trn::vel_info *vi=nullptr)
     {
+        // STANDARD Format
+        // time POSIX epoch sec
+        // ping_number
+        // northings
+        // eastings
+        // depth
+        // heading
+        // pitch
+        // roll
+        // vx (0)
+        // xy (0)
+        // vz (0)
+        // sounding valid flag (1)
+        // bottom lock valid flag (1)
+        // number of beams
+        // ...
+        // beam number
+        // valid (0:invalid)
+        // rhox
+        // rhoy
+        // rhoz
+        // ...
+        // NEWLINE
+
+        // STANFORD Format
         // Note that TRN uses N,E,D frame (i.e. N:x E:y D:z)
-        // [ 0] time POSIX epoch sec
-        // [ 1] northings
-        // [ 2] eastings
-        // [ 3] depth
-        // [ 4] heading
-        // [ 5] pitch
-        // [ 6] roll
-        // [ 7] flag (0)
-        // [ 8] flag (0)
-        // [ 9] flag (0)
-        // [10] vx (0)
-        // [11] xy (0)
-        // [12] vz (0)
-        // [13] sounding valid flag (1)
-        // [14] bottom lock valid flag (1)
-        // [15] number of beams
-        // beam[16 + i*3] number
-        // beam[17 + i*3] valid (always 1)
-        // beam[18 + i*3] range
+        // time POSIX epoch sec
+        // northings
+        // eastings
+        // depth
+        // heading
+        // pitch
+        // roll
+        // flag (0)
+        // flag (0)
+        // flag (0)
+        // vx (0)
+        // xy (0)
+        // vz (0)
+        // sounding valid flag (1)
+        // bottom lock valid flag (1)
+        // number of beams
+        // beam number
+        // valid (0:invalid)
+        // range
         // ...
         // NEWLINE
 
@@ -1649,24 +1705,23 @@ public:
             // NavUtils::geoToUtm(latitude, longitude, utmZone, *northing, *easting)
             NavUtils::geoToUtm(Math::degToRad(lat), Math::degToRad(lon), utm, &pos_N, &pos_E);
 
-            ss << std::dec << std::setfill(' ') << std::fixed << std::setprecision(6);
+            ss << std::dec << std::fixed << std::setprecision(7);
             ss << snd->ts << ",";
 
             if (fmt == FMT_STANDARD) {
                 ss << bi->ping_number() << ",";
             }
 
-            ss << std::setprecision(7);
-
             if(fmt == FMT_STANDARD){
+                ss << std::setprecision(12);
                 ss << lat << ",";
                 ss << lon << ",";
+                ss << std::setprecision(7);
             } else {
                 ss << pos_N << ",";
                 ss << pos_E << ",";
             }
 
-            ss << std::fixed << std::setprecision(3);
             ss << snd->depth << ",";
             ss << snd->hdg << ",";
             ss << ai->pitch() << ",";
@@ -1693,10 +1748,10 @@ public:
             // bottom lock flag
             ss << (bi->flags().is_set(trn::BF_BLOCK)?1:0) << ",";
             ss << snd->nbeams << ",";
-            ss << std::setprecision(4);
 
             for(int i=0; i < snd->nbeams; i++)
             {
+                ss << std::setprecision(1);
                 // beam number
                 ss <<  snd->beams[i].beam_num << ",";
 
@@ -1706,6 +1761,7 @@ public:
                 // valid (set to 1)
                 ss << (range <= 0. ? 0 : 1) << ",";
 
+                ss << std::setprecision(12);
                 if (fmt == FMT_STANFORD) {
                     // range
                     ss << range;
@@ -1888,39 +1944,77 @@ public:
     }
 
     // returns new poseT; caller must release
+    // no vi arg for backwards compatibility with older handlers
+    // TODO: bring old handlers up to date with new mb1_to_pose
     static poseT *mb1_to_pose(mb1_t *src, trn::att_info *ai, long int utmZone)
+    {
+        return mb1_to_pose(src, ai, NULL, utmZone);
+
+    }
+
+    static poseT *mb1_to_pose(mb1_t *src, trn::att_info *ai, trn::vel_info *vi, long int utmZone)
     {
         if(nullptr == src)
             return nullptr;
 
         poseT *obj = new poseT();
 
-        if(nullptr != obj){
+        if (nullptr != obj) {
 
-           obj->time = src->ts;
+            obj->time = src->ts;
 
-           NavUtils::geoToUtm( Math::degToRad(src->lat),
-                              Math::degToRad(src->lon),
-                              utmZone, &(obj->x), &(obj->y));
+            NavUtils::geoToUtm( Math::degToRad(src->lat),
+                               Math::degToRad(src->lon),
+                               utmZone, &(obj->x), &(obj->y));
 
-           obj->z = src->depth;
-           obj->phi = ai->roll();
-           obj->theta = ai->pitch();
-           obj->psi = src->hdg;
-           obj->gpsValid = (obj->z < 2 ? true : false);
-           obj->bottomLock = true;
-           obj->dvlValid = true;
-           // TRN can't intialize if vx == 0
-           obj->vx = 0.01;
-           obj->vy = 0.;
-           obj->vz = 0.;
-           // wx not required; can use these (how determined?)
-           // obj->wx = -3.332e-002;
-           // obj->wy = -9.155e-003;
-           // obj->wz = -3.076e-002;
-           obj->wx = 0.;
-           obj->wy = 0.;
-           obj->wz = 0.;
+            obj->z = src->depth;
+            obj->phi = ai->roll();
+            obj->theta = ai->pitch();
+            obj->psi = src->hdg;
+
+            if(obj->z < 2.) {
+                // on surface
+                obj->gpsValid = true;
+                obj->bottomLock = false;
+                obj->dvlValid = false;
+            } else {
+                obj->gpsValid = false;
+                obj->bottomLock = true;
+                obj->dvlValid = true;
+            }
+
+            if(vi != NULL) {
+                // use velocity if provided
+                obj->vx = vi->vx_ms();
+                obj->vy = vi->vy_ms();
+                obj->vz = vi->vz_ms();
+            } else {
+                // TRN can't intialize if vx == 0
+                obj->vx = 0.1;
+                obj->vy = 0.;
+                obj->vz = 0.;
+            }
+
+            obj->ve = 0.;
+
+            obj->vw_x = 0.;
+            obj->vw_y = 0.;
+            obj->vw_z = 0.;
+
+            obj->vn_x = 0.;
+            obj->vn_y = 0.;
+            obj->vn_z = 0.;
+
+            obj->wx = 0.;
+            obj->wy = 0.;
+            obj->wz = 0.;
+
+            obj->ax = 0.;
+            obj->ay = 0.;
+            obj->az = 0.;
+
+            obj->psi_berg = 0.;
+            obj->psi_dot_berg = 0.;
 
         }
         return obj;
@@ -1958,7 +2052,6 @@ public:
                 double rho[3] = {obj->alongTrack[i], obj->crossTrack[i], obj->altitudes[i]};
                 double rhoNorm = vnorm( rho );
                 obj->ranges[i] = rhoNorm;
-                // [rhoNorm = sqrt(ax^2 + ay^2 + az^2)] (i.e. range magnitude)
                 obj->measStatus[i] = rhoNorm > 1 ? true : false;
                 //                obj->covariance[i] = 0.0;
                 //                obj->alphas[i]     = 0.0;

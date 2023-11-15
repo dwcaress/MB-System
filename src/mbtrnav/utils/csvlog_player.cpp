@@ -63,7 +63,7 @@
 
 
 #define TRN_SERVER_PORT_DFL 27027
-#define STRBUF_BYTES 4096
+#define STRBUF_BYTES 8096
 
 #ifndef DTR
 #define DTR(x) ((x) * M_PI/180.)
@@ -77,13 +77,16 @@
 
 typedef uint8_t byte;
 
-// /////////////////
-// Module variables
-static int g_signal=0;
-static bool g_interrupt=false;
-
-// /////////////////
-// Declarations
+typedef struct geo_s {
+    // nominal number of beams
+    double beam_count;
+    // nominal angle subtended
+    double swath_deg;
+    // rotation vector (321Euler, phi/theta/psi radians)
+    double rot_r[3];
+    // translation vector (x/y/z m)
+    double tran_m[3];
+}geo_t;
 
 typedef struct token_s {
     const char *key;
@@ -102,9 +105,9 @@ token_t mb1_header_fmt[] = {
     {"posx", 2, "%lf"},
     {"posy", 3, "%lf"},
     {"depth", 4, "%lf"},
-    {"pitch", 5, "%lf"},
-    {"roll", 6, "%lf"},
-    {"heading", 7, "%lf"},
+    {"heading", 5, "%lf"},
+    {"pitch", 6, "%lf"},
+    {"roll", 7, "%lf"},
     {"vx", 8, "%lf"},
     {"vy", 9, "%lf"},
     {"vz", 10, "%lf"},
@@ -115,8 +118,8 @@ token_t mb1_header_fmt[] = {
     {"b_fields", 5, NULL},
     {"b_number", 0, "%d"},
     {"b_valid", 1, "%lf"},
-    {"b_across", 2, "%lf"},
-    {"b_along", 3, "%lf"},
+    {"b_along", 2, "%lf"},
+    {"b_across", 3, "%lf"},
     {"b_down", 4, "%lf"},
     {NULL, -1, NULL}
 };
@@ -145,6 +148,14 @@ token_t idt_header_fmt[] = {
     {NULL, -1, NULL}
 };
 
+// /////////////////
+// Module variables
+static int g_signal=0;
+static bool g_interrupt=false;
+
+// /////////////////
+// Declarations
+
 class CSVLogConfig
 {
 public:
@@ -168,15 +179,15 @@ public:
 
 
    CSVLogConfig()
-    : mDebug(0), mVerbose(false), mHost("localhost"), mTrnCfg(), mPort(TRN_SERVER_PORT_DFL), mServer(false), mTrnInCsvEn(false), mTrnOutCsvEn(false), mTrnInCsvPath(), mTrnOutCsvPath(), mTrnSensor(TRN_SENSOR_MB), mOFlags(), mFmtFlags(), mUtmZone(10), mBeams(11)
+    : mDebug(0), mVerbose(false), mHost("localhost"), mTrnCfg(), mPort(TRN_SERVER_PORT_DFL), mServer(false), mTrnInCsvEn(false), mTrnOutCsvEn(false), mTrnInCsvPath(), mTrnOutCsvPath(), mTrnSensor(TRN_SENSOR_MB), mOFlags(0), mFmtFlags(0), mUtmZone(10), mBeams(0), mStep(false), mSwath(0.)
     {
-
+        memset(mSFRot,0,3*sizeof(double));
     }
 
     CSVLogConfig(const CSVLogConfig &other)
-    : mDebug(other.mDebug), mVerbose(other.mVerbose), mHost(other.mHost), mTrnCfg(other.mTrnCfg), mPort(other.mPort), mServer(other.mServer),  mTrnInCsvEn(other.mTrnInCsvEn), mTrnOutCsvEn(other.mTrnOutCsvEn), mTrnInCsvPath(other.mTrnInCsvPath), mTrnOutCsvPath(other.mTrnOutCsvPath), mTrnSensor(other.mTrnSensor), mOFlags(other.mOFlags),  mFmtFlags(other.mFmtFlags), mUtmZone(other.mUtmZone), mBeams(other.mBeams)
+    : mDebug(other.mDebug), mVerbose(other.mVerbose), mHost(other.mHost), mTrnCfg(other.mTrnCfg), mPort(other.mPort), mServer(other.mServer),  mTrnInCsvEn(other.mTrnInCsvEn), mTrnOutCsvEn(other.mTrnOutCsvEn), mTrnInCsvPath(other.mTrnInCsvPath), mTrnOutCsvPath(other.mTrnOutCsvPath), mTrnSensor(other.mTrnSensor), mOFlags(other.mOFlags),  mFmtFlags(other.mFmtFlags), mUtmZone(other.mUtmZone), mBeams(other.mBeams), mStep(other.mStep), mSwath(other.mSwath)
     {
-
+        memset(mSFRot,0,3*sizeof(double));
     }
 
    ~CSVLogConfig()
@@ -196,6 +207,9 @@ public:
     bool fflag_set(CSVLogConfig::FmtFlags mask){return mFmtFlags.all_set(mask);}
     long utm_zone(){return mUtmZone;}
     uint32_t beams(){return mBeams;}
+    double *sfrot(){return mSFRot;}
+    bool step(){return mStep;}
+    double swath(){return mSwath;}
 
     void set_server(bool enable){mServer = enable;}
     void set_trni_csv(bool enable){mTrnInCsvEn = enable;}
@@ -212,11 +226,19 @@ public:
     void set_fflags(uint32_t flags){mFmtFlags = flags;}
     void set_utm(long utmZone){mUtmZone = utmZone;}
     void set_beams(uint32_t beams){mBeams = beams;}
+    void set_sfrot(double phi_deg, double theta_deg, double psi_deg) {
+        mSFRot[0] = Math::degToRad(phi_deg);
+        mSFRot[1] = Math::degToRad(theta_deg);
+        mSFRot[2] = Math::degToRad(psi_deg);
+    }
+    void set_step(bool step){mStep = step;}
+    void set_swath(double swath){mSwath = swath;}
 
     void tostream(std::ostream &os, int wkey=15, int wval=18)
     {
         os << std::setw(wkey) << "debug" << std::setw(wval) << mDebug << std::endl;
         os << std::setw(wkey) << "verbose" << std::setw(wval) << mVerbose << std::endl;
+        os << std::setw(wkey) << "step" << std::setw(wval) << mStep << std::endl;
         os << std::setw(wkey) << "mHost" << std::setw(wval) << mHost.c_str() << std::endl;
         int alen = mTrnCfg.length();
         int wx = (alen >= wval ? alen + 1 : wval);
@@ -234,6 +256,8 @@ public:
         os << std::setw(wkey) << "mTrnSensor" << std::setw(wval) << mTrnSensor << std::endl;
         os << std::setw(wkey) << "mUtmZone" << std::setw(wval) << mUtmZone << std::endl;
         os << std::setw(wkey) << "mBeams" << std::setw(wval) << mBeams << std::endl;
+        os << std::setw(wkey) << "mSwath" << std::setw(wval) << mSwath << std::endl;
+        os << std::setw(wkey) << "mSFRot" << std::setw(wval) << "[" << mSFRot[0] << "," <<mSFRot[1] << "," <<mSFRot[2] << "]" << std::endl;
         os << std::setw(wkey) << "mOFlags" << std::hex << std::setw(wval) << (uint32_t)mOFlags.get() << std::endl;
         os << std::setw(wkey) << "mFmtFlags" << std::hex << std::setw(wval) << (uint32_t)mFmtFlags.get() << std::endl;
         os << dec;
@@ -268,7 +292,9 @@ private:
     flag_var<uint32_t> mFmtFlags;
     long int mUtmZone;
     uint32_t mBeams;
-
+    double mSFRot[3];
+    bool mStep;
+    double mSwath;
 };
 
 class MLPStats
@@ -362,7 +388,7 @@ public:
     int play(const std::string &src, bool *quit=NULL)
     {
         int retval = -1;
-        static poseT lastPT;
+        static poseT *lastPT = NULL;
         static bool client_initialized = false;
 
         TRN_DPRINT("%s:%d - playing file [%s]\n", __func__, __LINE__, src.c_str());
@@ -404,19 +430,14 @@ public:
             if(test < 0)
                 continue;
 
+            this->stats().mRecordsFound++;
+
             if(NULL!=quit && *quit){
                 break;
             }
 
-            measT *mt = new measT(pmt->numMeas, pmt->dataType);
-            poseT *pt = new poseT();
-            *mt = *pmt;
-            *pt = *ppt;
-
-            release_pose(&ppt);
-            release_meas(&pmt);
-
-            this->stats().mRecordsFound++;
+            measT *mt = pmt;
+            poseT *pt = ppt;
 
             if(pt != NULL){
 
@@ -437,9 +458,15 @@ public:
                         fprintf(stderr,"%s - caught exception [%s]\n",__func__, e.what());
                     }
                 }
-                lastPT = *pt;
+                if(lastPT != NULL)
+                    delete lastPT;
+                lastPT = new poseT();
+                *lastPT = *pt;
             } else {
                 TRN_NDPRINT(2,"read_pose failed\n");
+                if(lastPT != NULL)
+                    delete lastPT;
+                lastPT = NULL;
             }
 
             if (mt != NULL) {
@@ -452,17 +479,19 @@ public:
                     std::cerr << "\n";
                 }
 
+                if(lastPT != NULL && mConfig.trni_csv()){
+                    trni_csv_tofile(&mTrnInCsvFile, *lastPT, *mt);
+                    this->stats().mTrniCsvWrite++;
+                }
+
+                if(lastPT != NULL && mConfig.oflag_set(CSVLogConfig::TRNI_CSV))
+                {
+                    trni_csv_tostream(std::cout, *lastPT, *mt);
+                }
+
                 if(mConfig.server())
                 {
                     try{
-                        if(mConfig.trni_csv()){
-                            trni_csv_tofile(&mTrnInCsvFile, lastPT, *mt);
-                            this->stats().mTrniCsvWrite++;
-                        }
-                        if(mConfig.oflag_set(CSVLogConfig::TRNI_CSV))
-                        {
-                            show_trni_csv(lastPT, *mt);
-                        }
 
                         mTrn->measUpdate(mt, mConfig.trn_sensor());
                         this->stats().mMeasUpdate++;
@@ -481,29 +510,33 @@ public:
                             mTrn->estimatePose(&mle, TRN_EST_MLE);
                             this->stats().mEstMLE++;
 
-                            if(mConfig.oflag_set(CSVLogConfig::EST)){
+                            if(lastPT != NULL && mConfig.oflag_set(CSVLogConfig::EST)){
                                 fprintf(stderr, "%s:%d --- EST --- \n",__func__, __LINE__);
-                                show_est(ts, lastPT, mle, mmse);
+                                show_est(ts, *lastPT, mle, mmse);
                             }
 
-                            if(mConfig.trno_csv()){
-                                trno_csv_tofile(&mTrnOutCsvFile, ts, lastPT, mle, mmse);
+                            if(lastPT != NULL && mConfig.trno_csv()){
+                                trno_csv_tofile(&mTrnOutCsvFile, ts, *lastPT, mle, mmse);
                                 this->stats().mTrnoCsvWrite++;
                             }
-                            if(mConfig.oflag_set(CSVLogConfig::TRNO_CSV))
+                            if(lastPT != NULL && mConfig.oflag_set(CSVLogConfig::TRNO_CSV))
                             {
-                                show_trno_csv(ts, lastPT, mle, mmse);
+                                trno_csv_tostream(std::cout, ts, *lastPT, mle, mmse);
                             }
                         }else{
-                            fprintf(stderr,"%s:%d - last meas unsuccessful\n",__func__, __LINE__);
+                            TRN_NDPRINT(1, "%s:%d - last meas unsuccessful\n",__func__, __LINE__);
                         }
 
                     }catch(Exception e) {
                         fprintf(stderr,"%s - caught exception [%s]\n",__func__, e.what());
                     }
                 }
+                if(lastPT != NULL)
+                    delete lastPT;
+                lastPT = NULL;
+
             } else {
-                TRN_NDPRINT(2,"read_meas failed\n");
+                TRN_NDPRINT(2, "read_meas failed\n");
             }
 
             if(pt != NULL)
@@ -512,6 +545,12 @@ public:
                 delete mt;
 
             memset(ibuf, 0, MB1_MAX_SOUNDING_BYTES);
+
+            if(mConfig.step()) {
+                char c = '\0';
+                cin.get(c);
+                if (c == 'q') mQuit = true;
+            }
         }
         return retval;
     }
@@ -536,21 +575,22 @@ protected:
     {
         // Note that TRN uses N,E,D frame (i.e. N:x E:y D:z)
         // [ 0] time POSIX epoch sec
-        // [ 1] northings
-        // [ 2] eastings
-        // [ 3] depth
-        // [ 4] heading
-        // [ 5] pitch
-        // [ 6] roll
-        // [ 7] flag (0)
+        // [ 1] ping_number
+        // [ 2] northings
+        // [ 3] eastings
+        // [ 4] depth
+        // [ 5] heading
+        // [ 6] pitch
+        // [ 7] roll
         // [ 8] flag (0)
         // [ 9] flag (0)
-        // [10] vx (0)
-        // [11] xy (0)
-        // [12] vz (0)
-        // [13] sounding valid flag
-        // [14] bottom lock valid flag
-        // [15] number of beams
+        // [10] flag (0)
+        // [11] vx (0)
+        // [12] xy (0)
+        // [13] vz (0)
+        // [14] sounding valid flag
+        // [15] bottom lock valid flag
+        // [16] number of beams
         // beam[i] number
         // beam[i] valid (1)
         // beam[i] range
@@ -559,7 +599,7 @@ protected:
 
         os << std::dec << std::setfill(' ') << std::fixed << std::setprecision(7);
         os << pt.time << ",";
-        os << std::setprecision(7);
+        os << mt.ping_number << ",";
         os << pt.x << ",";
         os << pt.y << ",";
         os << pt.z << ",";
@@ -576,12 +616,15 @@ protected:
         os << (pt.dvlValid?1:0) << ",";
         os << (pt.bottomLock?1:0) << ",";
         os << mt.numMeas << ",";
-        os << std::setprecision(4);
+        os << std::setprecision(6);
         for(int i=0; i< mt.numMeas; i++)
         {
             os << mt.beamNums[i] << ",";
             os << mt.measStatus[i] << ",";
-            os << mt.ranges[i];
+            os << mt.ranges[i] << ",";
+            os << mt.alongTrack[i] << ",";
+            os << mt.crossTrack[i] << ",";
+            os << mt.altitudes[i];
             if(i != mt.numMeas-1)
                 os << ",";
 
@@ -656,7 +699,7 @@ protected:
         os << std::fixed << std::setprecision(3);
         os << pt.time << ",";
         os << std::setprecision(4);
-        os << pt.x-mmse.x << "," << pt.y-mmse.y << "," << pt.z-mmse.z << ",";
+        os << mmse.x - pt.x << "," << mmse.y - pt.y << "," << mmse.z - pt.z << ",";
 
         // cov
         os << std::fixed << std::setprecision(3);
@@ -703,7 +746,6 @@ protected:
     void show_trno_csv(double ts, poseT &pt, poseT &mle, poseT &mmse)
     {
         trno_csv_tostream(std::cerr, ts, pt, mle, mmse);
-        std::cerr << "\n";
     }
 
     void est_tostream(std::ostream &os, double ts, poseT &pt, poseT &mle, poseT &mmse, int wkey=15, int wval=18)
@@ -723,7 +765,7 @@ protected:
         os << std::setprecision(2);
         os << mmse.time << ", ";
         os << std::setprecision(4);
-        os << pt.x-mmse.x << ", " << pt.y-mmse.y << ", " << pt.z-mmse.z << "\n";
+        os << mmse.x - pt.x << "," << mmse.y - pt.y << "," << mmse.z - pt.z << "\n";
 
         os << "COV[t, x, y, z, m]   ";
         os << std::setprecision(3);
@@ -813,20 +855,23 @@ protected:
         os << std::fixed << std::setprecision(3);
         os << std::setw(wkey) <<  "time" << std::setw(wval) << mt.time << "\n";
         os << std::setw(wkey) <<  "dataType" << std::setw(wval) << mt.dataType << "\n";
+        os << std::setw(wkey) <<  "ping_number" << std::setw(wval) << mt.ping_number << "\n";
         os << std::setw(wkey) <<  "x" << std::setw(wval) << mt.x << "\n";
         os << std::setw(wkey) <<  "y" << std::setw(wval) << mt.y << "\n";
         os << std::setw(wkey) <<  "z" << std::setw(wval) << mt.z << "\n";
-        os << std::setw(wkey) <<  "ping_number" << std::setw(wval) << mt.ping_number << "\n";
+        os << std::setw(wkey) <<  "phi" << std::setw(wval) << mt.phi << "\n";
+        os << std::setw(wkey) <<  "theta" << std::setw(wval) << mt.theta << "\n";
+        os << std::setw(wkey) <<  "psi" << std::setw(wval) << mt.psi << "\n";
         os << std::setw(wkey) <<  "num_meas" << std::setw(wval) << mt.numMeas << "\n";
         os << std::setw(wkey) <<  "beams" << std::setw(wval) << "[stat, range]" << "\n";
         os << std::setprecision(2) ;
         for(int i=0; i<mt.numMeas; i++){
             os << std::setw(wkey-4) <<  "[" << std::setw(3) << mt.beamNums[i] << "]";
             os << std::setw(wval-9) << "[" << (mt.measStatus[i] ? 1 : 0) << ", ";
-            os << std::fixed << std::setprecision(2) << setw(6) << mt.ranges[i] << ", ";
-            os << mt.crossTrack[i] << ", ";
-            os << mt.alongTrack[i] << ", ";
-            os << mt.altitudes[i] << "]\n";
+            os << std::fixed << std::setfill(' ') << std::setprecision(2) << std::setw(7) << mt.ranges[i] << ", ";
+            os << std::setw(7) << mt.crossTrack[i] << ", ";
+            os << std::setw(7) << mt.alongTrack[i] << ", ";
+            os << std::setw(7) << mt.altitudes[i] << "]\n";
         }
     }
 
@@ -1051,11 +1096,10 @@ protected:
         // Validity flag for DVL lock onto seafloor
         // bool bottomLock
 
-        poseT *dest = (poseT *)malloc(sizeof(poseT));
+
+        poseT *dest = new poseT();
         if(dest == NULL)
             return NULL;
-
-        memset(dest, 0, sizeof(poseT));
 
         parse_kv_t dval_map[] {
             {"time", &dest->time},
@@ -1077,18 +1121,14 @@ protected:
             {NULL, NULL}
         };
 
-        dest->dvlValid = true;
-        dest->gpsValid = false;
-        dest->bottomLock = true;
-
         dest->ve = 0.;
 
         dest->vw_x = 0.;
-        dest->vw_z = 0.;
+        dest->vw_y = 0.;
         dest->vw_z = 0.;
 
         dest->vn_x = 0.;
-        dest->vn_z = 0.;
+        dest->vn_y = 0.;
         dest->vn_z = 0.;
 
         dest->wx = 0.;
@@ -1141,6 +1181,17 @@ protected:
             i++;
         }
 
+        if(dest->z < 2.) {
+            // on surface
+            dest->gpsValid = true;
+            dest->bottomLock = false;
+            dest->dvlValid = false;
+        } else {
+            dest->gpsValid = false;
+            dest->bottomLock = true;
+            dest->dvlValid = true;
+        }
+
         if(mConfig.fflag_set(CSVLogConfig::FMT_MB1)) {
 
             double pos_N=0., pos_E=0.;
@@ -1148,21 +1199,19 @@ protected:
             NavUtils::geoToUtm(Math::degToRad(lat), Math::degToRad(lon), mConfig.utm_zone(), &pos_N, &pos_E);
             dest->x = pos_N;
             dest->y = pos_E;
+            // for MB1, phi/theta have already been applied
+            dest->phi = 0.;
+            dest->theta = 0.;
+            // force velocity to dummy values to match mb1 binary
+            dest->vx = 0.1;
+            dest->vy = 0.0;
+            dest->vz = 0.0;
+
         }
 
         return dest;
     }
 
-    typedef struct geo_s {
-        // nominal number of beams
-        double beam_count;
-        // nominal angle subtended
-        double swath_deg;
-        // rotation vector (321Euler, phi/theta/psi radians)
-        double rot_r[3];
-        // translation vector (x/y/z m)
-        double tran_m[3];
-    }geo_t;
 
     static void matrix_show(Matrix m, const char *name=nullptr, int width=7, int precision=3, int wkey=5)
     {
@@ -1280,7 +1329,7 @@ protected:
 
             // beam yaw, pitch angles (sensor frame)
             double yd = 0;
-            double xd = (K + (b * e));
+            double xd = (K + S - (b * e));
             double pd = xd;
 
             if(xd > 90.) {
@@ -1336,18 +1385,44 @@ protected:
         // For use in sensors that vary the number of beams (e.g., MB-system)
         // int* beamNums
 
-        measT *dest = (measT *)malloc(sizeof(measT));
+        // parse number of beams
+        // to make measT instance
+        int src_beams = 0;
+        const char *fx = map_fmt(map, "numMeas");
+        int ix = map_idx(map, "numMeas");
+        sscanf(src[ix], fx, &src_beams);
+
+        if(src_beams < 0 || src_beams > MB1_MAX_BEAMS){
+            fprintf(stderr, "%s:%d ERR numMeas %d\n", __func__, __LINE__, src_beams);
+            return NULL;
+        }
+
+        // use source beams by default, config beams if set
+        int dest_beams = ((mConfig.beams() > 0) ? mConfig.beams() : src_beams);
+
+        measT *dest = new measT(dest_beams, mConfig.trn_sensor());
+
+        double swath_lim = mConfig.swath()/2.;
+        int mod = 1;
+        if(mConfig.beams() > 0){
+            if(mConfig.swath() > 0.) {
+                mod = mConfig.swath() / mConfig.beams();
+            } else {
+                mod = src_beams / mConfig.beams();
+            }
+        }
+
+        if(mod <= 0)
+            mod = 1;
+
+//        fprintf(stderr, "%s:%d src_beams %d mConfig.beams %d dest_beams %d dest.numMeas %d mod %d\n", __func__, __LINE__, src_beams, mConfig.beams(), dest_beams, dest->numMeas, mod);
+
         if(dest == NULL){
             fprintf(stderr, "%s:%d ERR malloc\n", __func__, __LINE__);
             return NULL;
         }
 
-        // initialize struct, defer member allocation
-        // until numMeas established
-        memset(dest, 0, sizeof(measT));
-
         parse_kv_t dval_map[] {
-            {"time", &dest->time},
             {"time", &dest->time},
             {"posx", &dest->x},
             {"posy", &dest->y},
@@ -1356,11 +1431,6 @@ protected:
             {"roll", &dest->theta},
             {"heading", &dest->psi},
           {NULL, NULL}
-        };
-
-        parse_kv_t ival_map[] {
-            {"numMeas", &dest->numMeas},
-            {NULL, NULL}
         };
 
         parse_kv_t uval_map[] {
@@ -1388,24 +1458,6 @@ protected:
             i++;
         }
 
-        cur = ival_map;
-        i=0;
-        while(cur->key != NULL) {
-            const char *fmt = map_fmt(map, cur->key);
-            int idx = map_idx(map, cur->key);
-
-            if(fmt != NULL && idx >= 0){
-                if(sscanf(src[idx], fmt, cur->pval) != 1){
-                    fprintf(stderr, "%s:%d - ERR (ifields) scan %s from %s fmt %s var %p val %d\n", __func__, __LINE__, cur->key, src[idx], fmt, cur->pval, *((int *)cur->pval));
-                }
-            } else {
-                fprintf(stderr, "%s:%d - ERR (ifields) invalid arg fmt %p idx %d\n", __func__, __LINE__, fmt, idx);
-            }
-
-            cur++;
-            i++;
-        }
-
         cur = uval_map;
         i=0;
         while(cur->key != NULL) {
@@ -1424,47 +1476,23 @@ protected:
             i++;
         }
 
-        if(dest->numMeas < 0 || dest->numMeas > MB1_MAX_BEAMS){
+
+        if (dest->numMeas <= 0 || dest->numMeas > MB1_MAX_BEAMS) {
             fprintf(stderr, "%s:%d ERR numMeas %d\n", __func__, __LINE__, dest->numMeas);
             free(dest);
             return NULL;
-        }
-        if(dest->time <= 0){
+        } else if (dest->time <= 0) {
             fprintf(stderr, "%s:%d ERR time %.3lf\n", __func__, __LINE__, dest->time);
             free(dest);
             return NULL;
-        }
-        if(dest->numMeas <= 0){
-            fprintf(stderr, "%s:%d ERR numMeas %d\n", __func__, __LINE__, dest->numMeas);
+        } else if ((dest->x > -1. && dest->x < 1.)  || (dest->y > -1. && dest->y < 1.) || (dest->z > -1. && dest->z < 1.)) {
+            fprintf(stderr, "%s:%d ERR x,y,z [%.3lf, %.3lf, %.3lf]\n", __func__, __LINE__, dest->x, dest->y, dest->z);
             free(dest);
             return NULL;
         }
 
-        int mod = dest->numMeas/mConfig.beams();
-
-        dest->numMeas = mConfig.beams();
-
-        size_t asz = dest->numMeas*sizeof(double);
-        size_t iasz = dest->numMeas*sizeof(int);
-        size_t basz = dest->numMeas*sizeof(bool);
-        dest->covariance = (double *)malloc(asz);
-        memset(dest->covariance, 0, asz);
-        dest->ranges = (double *)malloc(asz);
-        memset(dest->ranges, 0, asz);
-        dest->crossTrack = (double *)malloc(asz);
-        memset(dest->crossTrack, 0, asz);
-        dest->alongTrack = (double *)malloc(asz);
-        memset(dest->alongTrack, 0, asz);
-        dest->altitudes = (double *)malloc(asz);
-        memset(dest->altitudes, 0, asz);
-        dest->alphas = (double *)malloc(asz);
-        memset(dest->alphas, 0, asz);
-        dest->measStatus = (bool *)malloc(basz);
-        memset(dest->measStatus, 0, basz);
-        dest->beamNums = (int *)malloc(iasz);
-        memset(dest->beamNums, 0, iasz);
-
         if(mConfig.fflag_set(CSVLogConfig::FMT_IDT)) {
+
             double pos_N=0., pos_E=0.;
             double lat=dest->x, lon=dest->y;
             NavUtils::geoToUtm(Math::degToRad(lat), Math::degToRad(lon), mConfig.utm_zone(), &pos_N, &pos_E);
@@ -1475,17 +1503,76 @@ protected:
             int b_fields = map_idx(map, "b_fields");
             int b_num = map_idx(map, "b_number");
             int b_range = map_idx(map, "b_range");
-            int f_end = b_start + b_fields * mod * dest->numMeas;
+            int x=mod * b_fields;
+            int f_end = b_start + x * dest->numMeas;
 
-//            fprintf(stderr, "%s:%d - b_start %d nmeas %d bfields %d bnofs %d brofs %d f_end %d\n", __func__, __LINE__, b_start, dest->numMeas, b_fields, b_num, b_range, f_end);
+            fprintf(stderr, "%s:%d - b_start %d nmeas %d bfields %d bnofs %d brofs %d f_end %d\n", __func__, __LINE__, b_start, dest->numMeas, b_fields, b_num, b_range, f_end);
 
-            if(b_start >= 0) {
-                for (int i = b_start; i < f_end; i += (mod * b_fields)) {
+            if(b_start >= 0 ) {
+
+                // parse status, beam numbers, ranges
+                // needed for components
+                int idx[2] = {0, 1};
+
+                for (int i = b_start; i < f_end; i += (x)) {
                     int beam_n = 0;
                     double range = 0;
+                    int valid = 1;
+
                     sscanf(src[i+b_num], "%d", &beam_n);
                     sscanf(src[i+b_range], "%lf", &range);
-                    //                fprintf(stderr, "%s:%d - beam[%d] n %d range %lf\n", __func__, __LINE__, i, beam_n, range);
+
+                    if(range <= 0.){
+                        valid = 0;
+                    }
+
+                    dest->measStatus[idx[0]] = (valid != 0 ? true : false);
+                    dest->beamNums[idx[0]] = beam_n;
+                    dest->ranges[idx[0]] = range;
+                    idx[0]++;
+                }
+
+                geo_t sf_geo = {120, 120, {0.,0.,0.}, {0.,0.,0.}};
+                Matrix sf_comp = mb_sframe_components(dest, &sf_geo);
+
+                idx[0]=0;
+                idx[1]=1;
+
+                if(mConfig.trn_sensor() == TRN_SENSOR_DELTAT) {
+
+                    for (int i = b_start; i < f_end; i += (x)) {
+                        dest->alongTrack[idx[0]] = dest->ranges[idx[0]] * sf_comp(1, idx[1]);
+                        dest->crossTrack[idx[0]] = dest->ranges[idx[0]] * sf_comp(2, idx[1]);
+                        dest->altitudes[idx[0]] = dest->ranges[idx[0]] * sf_comp(3, idx[1]);
+
+                        //                    fprintf(stderr, "%s:%d - field[%d] beam_n[%d] r,x,y,z[%.2lf, %.2lf, %.2lf, %.2lf] sfc[%.2lf, %.2lf, %.2lf]\n", __func__, __LINE__, i, dest->beamNums[idx[0]], dest->ranges[idx[0]], dest->crossTrack[idx[0]], dest->alongTrack[idx[0]], dest->altitudes[idx[0]], sf_comp(1, idx[1]), sf_comp(2, idx[1]), sf_comp(3, idx[1]));
+                        idx[0]++;
+                        idx[1]++;
+                    }
+
+                } else {
+                    double v_att[3] = {dest->phi, dest->theta, 0.};
+                    Matrix m_att = affine321Rotation(v_att).t();
+                    Matrix m_dr = affine321Rotation(mConfig.sfrot());
+                    Matrix m_all = m_dr * m_att * m_dr.t() * sf_comp;
+//                    Matrix m_all = sf_comp;
+
+                    for (int i = b_start; i < f_end; i += (x)) {
+
+                        dest->alongTrack[idx[0]] = dest->ranges[idx[0]] * m_all(1, idx[1]);
+                        dest->crossTrack[idx[0]] = dest->ranges[idx[0]] * m_all(2, idx[1]);
+                        dest->altitudes[idx[0]] = dest->ranges[idx[0]] * m_all(3, idx[1]);
+
+                        int b = dest->beamNums[idx[0]];
+                        if( (b < 30) || (b > 90) || (b % 6 != 0))
+                        {
+                            dest->measStatus[idx[0]] = false;
+                        }
+
+                        //                    fprintf(stderr, "%s:%d - field[%d] beam_n[%d] r,x,y,z[%.2lf, %.2lf, %.2lf, %.2lf] sfc[%.2lf, %.2lf, %.2lf]\n", __func__, __LINE__, i, dest->beamNums[idx[0]], dest->ranges[idx[0]], dest->crossTrack[idx[0]], dest->alongTrack[idx[0]], dest->altitudes[idx[0]], sf_comp(1, idx[1]), sf_comp(2, idx[1]), sf_comp(3, idx[1]));
+                        idx[0]++;
+                        idx[1]++;
+                    }
                 }
             }
         } else if(mConfig.fflag_set(CSVLogConfig::FMT_MB1)) {
@@ -1495,6 +1582,9 @@ protected:
             NavUtils::geoToUtm(Math::degToRad(lat), Math::degToRad(lon), mConfig.utm_zone(), &pos_N, &pos_E);
             dest->x = pos_N;
             dest->y = pos_E;
+            dest->phi = 0.;
+            dest->theta = 0.;
+            dest->psi = 0.;
 
             int b_start = map_idx(map, "b_start");
             int b_fields = map_idx(map, "b_fields");
@@ -1503,71 +1593,64 @@ protected:
             int b_across = map_idx(map, "b_across");
             int b_along = map_idx(map, "b_along");
             int b_down = map_idx(map, "b_down");
-            int f_end = b_start + (b_fields * mod * dest->numMeas);
+//            int x = b_fields * mod ;
+//            int f_end = b_start + ( x * dest->numMeas);
+            int x = b_fields ;
+            int f_end = b_start + ( x * src_beams);
 
 //            fprintf(stderr, "%s:%d - b_start %d nmeas %d bfields %d bnum %d bval %d bacross %d balong %d bdown %d f_end %d\n", __func__, __LINE__, b_start, dest->numMeas, b_fields, b_num, b_valid, b_across, b_along, b_down, f_end);
-//            fprintf(stderr, "%s:%d - dest %p dest->numMeas %p/%d\n", __func__, __LINE__, dest, &dest->numMeas,dest->numMeas);
+//            fprintf(stderr, "%s:%d - src_beams[%d] dest %p dest->numMeas %p/%d\n", __func__, __LINE__, src_beams, dest, &dest->numMeas,dest->numMeas);
+
+
 
             int j = 0;
-
             if(b_start >= 0) {
-                for (int i = b_start; i < f_end; i += (mod * b_fields), j++ ) {
+                for (int i = b_start; i < f_end; i += (x) ) {
                     int beam_n = 0;
                     double rho[3] = {0., 0., 0.};
-
                     int valid = 0;
+
                     sscanf(src[i + b_num], "%d", &beam_n);
-                    sscanf(src[i + b_across], "%lf", &rho[0]);
-                    sscanf(src[i + b_along], "%lf", &rho[1]);
-                    sscanf(src[i + b_down], "%lf", &rho[2]);
                     sscanf(src[i + b_valid], "%d", &valid);
+                    sscanf(src[i + b_along], "%lf", &rho[0]);
+                    sscanf(src[i + b_across], "%lf", &rho[1]);
+                    sscanf(src[i + b_down], "%lf", &rho[2]);
 
                     double range = vnorm(rho);
 
-//                    fprintf(stderr, "%s:%d - field[%d] beam[%d] r[%.2lf] across/along/down[%.3lf / %.3lf / %.3lf]\n", __func__, __LINE__, i, beam_n, range, rho[0], rho[1], rho[2]);
                     if(range <= 0.){
-                        valid = false;
+                        valid = 0;
                     }
 
-                    dest->measStatus[j] = valid ? true : false;
-                    dest->beamNums[j] = beam_n;
-                    dest->crossTrack[j] = rho[0];
-                    dest->alongTrack[j] = rho[1];
-                    dest->altitudes[j] = rho[2];
-                    dest->ranges[j] = range;
+                    bool use_beam = false;
+                    double wb = 0.;
+                    if ((beam_n % mod) == 0) {
+
+                        wb = RTD(atan2(rho[1], rho[2]));
+
+                        if(mConfig.swath() <= 0. || fabs(wb) <= swath_lim){
+                            use_beam = true;
+                        }
+                    }
+//                    fprintf(stderr, "%s:%d beam[%3d] x,y,z,r,w[%+8.3lf, %+8.3lf, %+8.3lf, %+8.3lf, %+8.3lf] swath_max[%+8.3lf] %c\n", __func__, __LINE__, beam_n, rho[0], rho[1], rho[2], range, wb, swath_lim, (use_beam?'Y':'N'));
+
+                    if(valid && use_beam){
+                        dest->measStatus[j] = true;
+                        dest->beamNums[j] = beam_n;
+                        dest->alongTrack[j] = rho[0];
+                        dest->crossTrack[j] = rho[1];
+                        dest->altitudes[j] = rho[2];
+                        dest->ranges[j] = range;
+                        j++;
+                    }
+
+                    if(j >= dest_beams)
+                        break;
                 }
             }
         }
 
        return dest;
-    }
-
-    void release_pose(poseT **pp) {
-        if(NULL != pp) {
-            poseT *ppose = *pp;
-            if(NULL != ppose){
-                free(ppose);
-                *pp= NULL;
-            }
-        }
-    }
-
-    void release_meas(measT **pp) {
-        if(NULL != pp) {
-            measT *pmeas = *pp;
-            if(NULL != pmeas){
-                free(pmeas->covariance);
-                free(pmeas->ranges);
-                free(pmeas->crossTrack);
-                free(pmeas->alongTrack);
-                free(pmeas->altitudes);
-                free(pmeas->alphas);
-                free(pmeas->measStatus);
-                free(pmeas->beamNums);
-                free(pmeas);
-                *pp= NULL;
-            }
-        }
     }
 
     void release_toks(char ***pp, int ntoks) {
@@ -1628,8 +1711,15 @@ protected:
                         rec_valid = true;
                     } else {
                         fprintf(stderr, "%s:%d invalid record (pose:%p meas:%p] : %s\n", __func__, __LINE__, ppose, pmeas, str_buf);
-                        release_meas(pmeas);
-                        release_pose(ppose);
+
+                        if(*pmeas != NULL)
+                            delete(*pmeas);
+                        if(*ppose != NULL)
+                            delete(*ppose);
+
+                        *ppose = NULL;
+                        *pmeas = NULL;
+
                         mStats.mInvalidRecords++;
                     }
 
@@ -1740,6 +1830,9 @@ public:
             {"noserver", no_argument, NULL, 0},
             {"logdir", required_argument, NULL, 0},
             {"format", required_argument, NULL, 0},
+            {"sfrot", required_argument, NULL, 0},
+            {"step", no_argument, NULL, 0},
+            {"swath", required_argument, NULL, 0},
             {NULL, 0, NULL, 0}
         };
         // reset optind
@@ -1890,6 +1983,13 @@ public:
                             mTBConfig.set_trno_csv(true);
                             mTBConfig.set_trno_csv_path(std::string(optarg));
                         }
+                        // sfrot
+                        else if (strcmp("sfrot", options[option_index].name) == 0) {
+                            double tmp[3] = {0., 0., 0.};
+                            if(sscanf(optarg, "%lf,%lf,%lf", &tmp[0], &tmp[1], &tmp[2]) == 3){
+                                mTBConfig.set_sfrot(tmp[0], tmp[1], tmp[2]);
+                            }
+                        }
                         // format
                         else if (strcmp("format", options[option_index].name) == 0) {
                             uint32_t flags = 0;
@@ -1900,9 +2000,19 @@ public:
                                 flags |= CSVLogConfig::FMT_MB1;
                             }
                             if(flags>0){
+                                mTBConfig.set_fflags(0x0);
                                 mTBConfig.set_fflags(flags);
                             }
-
+                        }
+                        // step
+                        else if (strcmp("step", options[option_index].name) == 0) {
+                            mTBConfig.set_step(true);
+                        }
+                        // swath
+                        else if (strcmp("swath", options[option_index].name) == 0) {
+                            double swath_deg =0.;
+                            if(sscanf(optarg, "%lf", &swath_deg) == 1)
+                                mTBConfig.set_swath(swath_deg);
                         }
                     }
                     break;
@@ -1935,11 +2045,14 @@ public:
         " --help                 : output help message\n"
         " --cfg=s                : app config file\n"
         " --version              : output version info\n"
+        " --format=d             : input CSV format: mb1|idt\n"
         " --trn-host=addr[:port] : send output to TRN server\n"
         " --trn-cfg=s            : TRN config file\n"
         " --trn-sensor=n         : TRN sensor type\n"
         " --utm=n                : UTM zone\n"
         " --beams=n              : number of output beams\n"
+        " --swath=f              : limit beams to center swath degrees\n"
+        " --sfrot=d,d,d          : sensor frame rotation (phi, theta, psi; deg)\n"
         " --input=s              : specify input file path (may be used multiple times)\n"
         " --show=s               : specify console outputs\n"
         "                           trni     : TRN inputs (motion/poseT, meas/measT)\n"
@@ -1953,7 +2066,18 @@ public:
         " --trno-csv=s           : write TRN outputs (estimates) to CSV file\n"
         " --server               : enable output to server\n"
         " --noserver             : disable output to server\n"
+        " --step                 : step through entries\n"
         " Notes:\n"
+        "  [1] beams option\n"
+        "      unset : beams_out = input source beams\n"
+        "      <= 0  : beams_out = input source beams\n"
+        "       > 0  : beams_out = specified number of beams\n"
+        "              modulus   = INT(max(src_beams / beams_out, 1))\n"
+        "\n"
+        "  [2] swath option\n"
+        "      unset : no swath mask applied"
+        "      >= 0  : mask beams outside of swath/2 either side of center beam\n"
+        "              use modulus max(swath / beams_out, 1)\n"
         "\n"
         " Examples:\n"
         "\n";

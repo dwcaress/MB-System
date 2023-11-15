@@ -124,6 +124,8 @@ int transform_idtlass(trn::bath_info **bi, trn::att_info **ai, beam_geometry **b
     // 3-2-1 euler angles, r/p/y  (phi/theta/psi)
     // wrt sensor mounted across track, b[0] port, downward facing
     double vIDT_ROT[3] = { DTR(mb_geo[0]->svr_deg[0]), DTR(mb_geo[0]->svr_deg[1]), DTR(mb_geo[0]->svr_deg[2])};
+    // Use transpose of sensor frame rotation
+    // (passive rotation: rotate coordinate system, not vector)
     Matrix mIDT_ROT = trnx_utils::affine321Rotation(vIDT_ROT);
 
     // sensor mounting translation offsets (relative to INS in vehicle frame, meters)
@@ -131,12 +133,12 @@ int transform_idtlass(trn::bath_info **bi, trn::att_info **ai, beam_geometry **b
     double vIDT_TRAN[3] = { -(mb_geo[0]->svt_m[0] + dX), -(mb_geo[0]->svt_m[1] + dY), -(mb_geo[0]->svt_m[2] + dZ)};
     Matrix mIDT_TRAN = trnx_utils::affineTranslation(vIDT_TRAN);
 
-    // vehicle attitude (pitch, roll, heading)
+    // vehicle attitude (pitch, roll, heading(=0))
     Matrix mATT = trnx_utils::affine321Rotation(vATT);
 
     // apply IDT sensor frame rotation, vehicle attitude transforms
     // to get (unscaled) beam components in vehicle frame, i.e. direction cosines
-    Matrix mBcompVF = mATT * mIDT_ROT * mBcompSF;
+    Matrix mBcompVF = mATT.t() * mIDT_ROT.t() * mBcompSF;
 
     // adjust sounding depth (Z+ down)
     // should not be needed
@@ -220,7 +222,6 @@ int transform_idtlass(trn::bath_info **bi, trn::att_info **ai, beam_geometry **b
         }
 
         if(trn_debug::get()->debug() >= TRNDL_PLUGIDTLASS){
-
 
             double range = sqrt(rho[0] * rho[0] + rho[1] * rho[1] + rho[2] * rho[2]);
 
@@ -431,11 +432,6 @@ int cb_proto_idtlass(void *pargs)
                     fprintf(stderr,"%s:%d ERR - NULL bath input; skipping transforms\n", __func__, __LINE__);
                 }
                 mb1_set_checksum(snd);
-            }
-
-
-            // check modulus
-            if (ctx->decmod() <= 0 || (ctx->cbcount() % ctx->decmod()) == 0) {
 
                 TRN_NDPRINT(3, "%s - >>>>>>> Publishing MB1\n", __func__);
                 mb1_show(snd, (cfg->debug()>=4 ? true: false), 5);
@@ -448,9 +444,12 @@ int cb_proto_idtlass(void *pargs)
 
                 if (ctx->trncli_count() > 0) {
 
-                    // publish poseT/measT to trn-server
+                    // if TRN clients configured
+                    // generate poseT/measT
+                    // and publish to trn-server
 
-                    poseT *pt = trnx_utils::mb1_to_pose(snd, ai[0], (long)ctx->utm_zone());
+                    poseT *pt = trnx_utils::mb1_to_pose(snd, ai[0], vi[0], (long)ctx->utm_zone());
+
                     measT *mt = trnx_utils::mb1_to_meas(snd, ai[0], trn_type[0], (long)ctx->utm_zone());
 
 
@@ -463,7 +462,7 @@ int cb_proto_idtlass(void *pargs)
                             trnx_utils::meas_show(*mt);
                         }
 
-                        double nav_time = ni[0]->time_usec()/1e6;
+                        double nav_time = ni[0]->time_usec()/1.e6;
 
                         // publish update TRN, publish estimate to TRN, LCM
                         ctx->pub_trn(nav_time, pt, mt, trn_type[0], xpp->pub_list(), cfg);
