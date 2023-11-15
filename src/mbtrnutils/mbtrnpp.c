@@ -3973,20 +3973,29 @@ int main(int argc, char **argv) {
           threshold_tangent = tan(DTR * 0.5 * mbtrn_cfg->swath_width);
           beam_start = ping[i_ping_process].beams_bath - 1;
           beam_end = 0;
-          for (int j = 0; j < ping[i_ping_process].beams_bath; j++) {
-            if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
-              tangent = ping[i_ping_process].bathacrosstrack[j] /
+
+            for (int j = 0; j < ping[i_ping_process].beams_bath; j++) {
+                if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
+
+                    if(ping[i_ping_process].bath[j] = ping[i_ping_process].sonardepth){
+                        // invalidate atan  (denominator zero)
+                        tangent = threshold_tangent + 1;
+                    } else {
+                        tangent = ping[i_ping_process].bathacrosstrack[j] /
                         (ping[i_ping_process].bath[j] - ping[i_ping_process].sonardepth);
-              if (fabs(tangent) > threshold_tangent && mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
-                ping[i_ping_process].beamflag_filter[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
-                n_soundings_trimmed++;
-              }
-              else {
-                beam_start = MIN(beam_start, j);
-                beam_end = MAX(beam_end, j);
-              }
+                    }
+
+                    if (fabs(tangent) > threshold_tangent && mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
+                        ping[i_ping_process].beamflag_filter[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+                        n_soundings_trimmed++;
+                    }
+                    else {
+                        beam_start = MIN(beam_start, j);
+                        beam_end = MAX(beam_end, j);
+                    }
+                }
             }
-          }
+
           if(beam_start<0 || beam_end<0)
           mlog_tprintf(mbtrnpp_mlog_id,"e,ping array boundary violation beam_start/end[%d/%d] n_pings_read[%d]\n",beam_start,beam_end,n_pings_read);
 
@@ -3998,7 +4007,9 @@ int main(int argc, char **argv) {
             if(mbtrn_cfg->n_output_soundings == 0) {
                 mlog_tprintf(mbtrnpp_mlog_id,"e,n_outputsoundings == 0 - invalid\n", beam_start, beam_end, n_pings_read);
             }
-          beam_decimation = ((beam_end - beam_start + 1) / mbtrn_cfg->n_output_soundings);
+
+            beam_decimation = ((beam_end - beam_start + 1) / mbtrn_cfg->n_output_soundings);
+
             if(beam_decimation <= 0) {
                 beam_decimation = 1;
                 static bool warned = false;
