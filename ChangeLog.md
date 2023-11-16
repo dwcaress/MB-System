@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta64    November 16, 2023
 - Version 5.7.9beta63    November 10, 2023
 - Version 5.7.9beta62    November 3, 2023
 - Version 5.7.9beta61    November 2, 2023
@@ -436,6 +437,16 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta64 (November 16, 2023)
+
+Reading GMT grids: Fixed a very significant bug that caused GMT grids to be read into 
+memory incorrectly by mb_read_gmt_grd() in src/mbaux/mb_readwritegrd.c. The problem was 
+that the GMT default padding of grids by 2 grid cells around all edges was applied 
+incorrectly, with a result that the topography (or other data) in the grid was shifted 
+two grid cell widths north. The creation of grids by mbgrid or mbmosaic was correct; 
+the problem came when the grids were read in by mbgrdviz, mbanglecorrect, mbprocess, 
+and mbnavadjust.
 
 #### 5.7.9beta63 (November 10, 2023)
 
