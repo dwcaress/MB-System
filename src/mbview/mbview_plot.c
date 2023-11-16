@@ -462,7 +462,7 @@ int mbview_drawdata(size_t instance, int rez) {
 #endif
 
 	/* draw the triangle outlines */
-/*	glColor3f(1.0, 0.0, 0.0);
+    /* glColor3f(1.0, 0.0, 0.0);
 	for (int i = 0;i<data->primary_n_columns-1;i++) {
     	for (int j = 0;j<data->primary_n_rows-1;j++) {
     	    int k = i * data->primary_n_rows + j;
