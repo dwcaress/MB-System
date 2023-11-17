@@ -3977,7 +3977,7 @@ int main(int argc, char **argv) {
             for (int j = 0; j < ping[i_ping_process].beams_bath; j++) {
                 if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
 
-                    if(ping[i_ping_process].bath[j] = ping[i_ping_process].sonardepth){
+                    if(ping[i_ping_process].bath[j] == ping[i_ping_process].sonardepth){
                         // invalidate atan  (denominator zero)
                         tangent = threshold_tangent + 1;
                     } else {
