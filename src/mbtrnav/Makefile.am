@@ -374,7 +374,7 @@ opt/rov/gss/pcomms_t.hpp : opt/rov/lcm_types/pcomms_t.lcm
 	lcm-gen -x --cpp-hpath=opt/rov  $<
 	@echo
 
-opt/rov/gss/pcomms_t.hpp : opt/rov/lcm_types/parosci_stat_t.lcm
+opt/rov/gss/parosci_stat_t.hpp : opt/rov/lcm_types/parosci_stat_t.lcm
 	@ echo compiling $@...
 	lcm-gen -x --cpp-hpath=opt/rov  $<
 	@echo
