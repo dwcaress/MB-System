@@ -165,8 +165,8 @@ static bool g_signal=0;
 // Function Definitions
 /////////////////////////
 static const char *s_unit_str(int unit_flag){
-   static const char *g_unit_names[2]={"degrees","radians"};
-    const char *retval;
+   static const char *g_unit_names[3]={"degrees", "radians", "units?"};
+    const char *retval = NULL;
     switch (unit_flag) {
         case CF_UNITS_DEG:
             retval=g_unit_names[0];
@@ -175,7 +175,7 @@ static const char *s_unit_str(int unit_flag){
             retval=g_unit_names[1];
             break;
         default:
-            retval=NULL;
+            retval=g_unit_names[2];
             break;
     }
     return retval;
