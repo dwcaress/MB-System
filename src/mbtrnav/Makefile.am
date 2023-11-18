@@ -1,4 +1,8 @@
-lib_LTLIBRARIES = libgeolib.la libnewmat.la libqnx.la libtnav.la libtrnw.la libnetif.la libmb1.la
+lib_LTLIBRARIES = libgeolib.la libnewmat.la libqnx.la libtnav.la libtrnw.la libnetif.la libmb1.la libtrncli.la
+
+if BUILD_ROVTRN
+lib_LTLIBRARIES += libudpms.la  libtrnxplug.la
+endif
 
 LIBMBTRNFRAME = $(top_builddir)/src/mbtrnframe/libmbtrnframe.la
 MBTRNFRAME_INC = -I${top_srcdir}/src/mbtrnframe
@@ -29,7 +33,8 @@ AM_CPPFLAGS += -DMST_STATS_EN
 AM_CPPFLAGS += -DWITH_TNAVPF_CEP_CORRECTION
 AM_CPPFLAGS += -DWITH_TRNLOG
 AM_CPPFLAGS += -DWITH_TRNLOG_EST_OUT
-#AM_CPPFLAGS += -DTRN_NORAND
+AM_CPPFLAGS += -DWITH_TNAVPF_CEP_CORRECTION
+AM_CPPFLAGS += -DTRN_NORAND
 
 libgeolib_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
@@ -220,6 +225,15 @@ libmb1_la_SOURCES += trnw/mb1_msg.c
 
 libmb1_la_LIBADD =
 
+
+libtrncli_la_LDFLAGS =  -no-undefined -version-info 0:0:0
+
+libtrncli_la_SOURCES =
+libtrncli_la_SOURCES += utils/TerrainNavClient.cpp
+libtrncli_la_SOURCES += utils/TrnClient.cpp
+
+libtrncli_la_LIBADD = -lnewmat -lgeolib -ltrnw -lqnx -lmb1 -ltnav -lnetcdf
+
 if BUILD_ROVTRN
 
 include_HEADERS = \
@@ -236,27 +250,55 @@ opt/rov/gss/analog_t.hpp \
 opt/rov/gss/digital_t.hpp \
 opt/rov/gss/dvl_stat_t.hpp \
 opt/rov/gss/pcomms_t.hpp \
+opt/rov/gss/parosci_stat_t.hpp \
 opt/rov/oi/idt_t.hpp \
 opt/rov/oi/lcm_header_t.hpp \
+opt/rov/oi/ctd_t.hpp \
+opt/rov/oi/octans_t.hpp \
 opt/rov/trn/mb1_beam_t.hpp \
 opt/rov/trn/trnu_estimate_t.hpp \
 opt/rov/trn/trn_stat_t.hpp \
 opt/rov/trn/trn_meas_t.hpp \
 opt/rov/trn/trn_pose_t.hpp \
 opt/rov/trn/trnupub_t.hpp \
-opt/rov/trn/trn_mb1_t.hpp
+opt/rov/trn/trn_mb1_t.hpp \
+opt/rov/trnx_utils.hpp \
+opt/rov/trnx_plugin.hpp \
+opt/rov/trnxpp_cfg.hpp \
+opt/rov/trnxpp.hpp
 
 LCM_JAR=/usr/local/share/java/lcm.jar
+
+
+libudpms_la_LDFLAGS =  -no-undefined -version-info 0:0:0
+
+libudpms_la_SOURCES =
+libudpms_la_SOURCES += opt/rov/udpm_sub.c
+
+libudpms_la_LIBADD =
+
+
+libtrnxplug_la_LDFLAGS =  -no-undefined -version-info 0:0:0
+
+libtrnxplug_la_SOURCES =
+libtrnxplug_la_SOURCES += opt/rov/plug-common.cpp
+libtrnxplug_la_SOURCES += opt/rov/plug-oisledx.cpp
+libtrnxplug_la_SOURCES += opt/rov/plug-dvl.cpp
+libtrnxplug_la_SOURCES += opt/rov/plug-idt.cpp
+libtrnxplug_la_SOURCES += opt/rov/plug-oisled.cpp
+libtrnxplug_la_SOURCES += opt/rov/plug-oisled2.cpp
+libtrnxplug_la_SOURCES += opt/rov/plug-lassmb.cpp
+libtrnxplug_la_SOURCES += opt/rov/plug-xmb1.cpp
+libtrnxplug_la_SOURCES += opt/rov/plug-idtlass.cpp
+
+libtrnxplug_la_LIBADD = -lnewmat -lgeolib -ltrnw -lqnx -lmb1 -ltnav -lnetcdf -llcm -ltrncli -ludpms
 
 ROVTRN_APPS = trnxpp
 
 trnxpp_SOURCES = \
-opt/rov/udpm_sub.c \
-opt/rov/trnxpp_app.cpp \
-utils/TrnClient.cpp \
-utils/TerrainNavClient.cpp
+opt/rov/trnxpp_app.cpp
 
-trnxpp_LDADD = -llcm libmb1.la libtnav.la libnewmat.la libqnx.la
+trnxpp_LDADD = -llcm -lgeolib libmb1.la libtnav.la libnewmat.la libqnx.la libtrncli.la libudpms.la libtrnxplug.la
 
 TRN_HPP = opt/rov/lcm_pcf/signal_t.hpp
 TRN_HPP += opt/rov/lcm_pcf/string_t.hpp
@@ -266,6 +308,8 @@ TRN_HPP += opt/rov/gss/analog_t.hpp
 TRN_HPP += opt/rov/gss/digital_t.hpp
 TRN_HPP += opt/rov/gss/dvl_stat_t.hpp
 TRN_HPP += opt/rov/gss/pcomms_t.hpp
+TRN_HPP += opt/rov/gss/parosci_stat_t.hpp
+TRN_HPP += opt/rov/oi/ctd_t.hpp
 TRN_HPP += opt/rov/oi/idt_t.hpp
 TRN_HPP += opt/rov/oi/lcm_header_t.hpp
 TRN_HPP += opt/rov/oi/rdi_pd4_t.hpp
@@ -330,7 +374,17 @@ opt/rov/gss/pcomms_t.hpp : opt/rov/lcm_types/pcomms_t.lcm
 	lcm-gen -x --cpp-hpath=opt/rov  $<
 	@echo
 
+opt/rov/gss/parosci_stat_t.hpp : opt/rov/lcm_types/parosci_stat_t.lcm
+	@ echo compiling $@...
+	lcm-gen -x --cpp-hpath=opt/rov  $<
+	@echo
+
 opt/rov/oi/idt_t.hpp : opt/rov/lcm_types/idt_t.lcm
+	@ echo compiling $@...
+	lcm-gen -x --cpp-hpath=opt/rov  $<
+	@echo
+
+opt/rov/oi/ctd_t.hpp : opt/rov/lcm_types/ctd_t.lcm
 	@ echo compiling $@...
 	lcm-gen -x --cpp-hpath=opt/rov  $<
 	@echo
@@ -432,6 +486,16 @@ opt/rov/gss/dvl_stat_t.java : opt/rov/lcm_types/dvl_stat_t.lcm
 	@echo
 
 opt/rov/gss/pcomms_t.java : opt/rov/lcm_types/pcomms_t.lcm
+	@ echo compiling $@...
+	lcm-gen -j --jpath=opt/rov $<
+	@echo
+
+opt/rov/gss/parosci_stat_t.java : opt/rov/lcm_types/parosci_stat_t.lcm
+	@ echo compiling $@...
+	lcm-gen -j --jpath=opt/rov $<
+	@echo
+
+opt/rov/oi/ctd_t.java : opt/rov/lcm_types/ctd_t.lcm
 	@ echo compiling $@...
 	lcm-gen -j --jpath=opt/rov $<
 	@echo
@@ -543,7 +607,17 @@ opt/rov/gss/pcomms_t.class : opt/rov/gss/pcomms_t.java  opt/rov/gss/message_t.ja
 	javac -cp $(LCM_JAR) $^
 	@echo
 
+opt/rov/gss/parosci_stat_t.class : opt/rov/gss/parosci_stat_t.java
+	@ echo compiling $@...
+	javac -cp $(LCM_JAR) $^
+	@echo
+
 opt/rov/oi/idt_t.class : opt/rov/oi/idt_t.java opt/rov/oi/lcm_header_t.java
+	@ echo compiling $@...
+	javac -cp $(LCM_JAR) $^
+	@echo
+
+opt/rov/oi/ctd_t.class : opt/rov/oi/ctd_t.java opt/rov/oi/lcm_header_t.java
 	@ echo compiling $@...
 	javac -cp $(LCM_JAR) $^
 	@echo
@@ -611,16 +685,18 @@ lcm_rovtrn.jar: ${TRN_JCLS}
 
 endif
 
-bin_PROGRAMS =  trn-server trn-replay trnclient-test mmcpub mmcsub trnu-cli trn-cli trnif-test trnusvr-test netif-test trnifsvr-test mb1rs  trnlog-player ${ROVTRN_APPS} #  readlog writelog
+bin_PROGRAMS =  trn-server trn-replay trnclient-test mmcpub mmcsub trnu-cli trn-cli trnif-test trnusvr-test netif-test trnifsvr-test mb1rs  trnlog-player mb1log-player csvlog-player ${ROVTRN_APPS} #  readlog writelog
 
 trn_server_SOURCES = utils/trn_server.cpp
 trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
 
-trn_replay_SOURCES = opt/dorado/Replay.cpp opt/dorado/trn_replay.cpp utils/TerrainNavClient.cpp
-trn_replay_LDADD = -ltnav  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeolib 
+trn_replay_SOURCES = opt/dorado/Replay.cpp opt/dorado/trn_replay.cpp
 
-trnclient_test_SOURCES =  utils/trnclient_test.cpp utils/TrnClient.cpp utils/TerrainNavClient.cpp
-trnclient_test_LDADD = libtnav.la libnewmat.la
+trn_replay_LDADD = -ltnav  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeolib libtrncli.la
+
+trnclient_test_SOURCES =  utils/trnclient_test.cpp
+
+trnclient_test_LDADD = libtnav.la libnewmat.la libtrncli.la
 
 mmcpub_SOURCES = trnw/mmcpub.c
 mmcpub_LDADD = ${LIBMBTRNFRAME}
@@ -649,8 +725,14 @@ trnifsvr_test_LDADD = ${LIBMBTRNFRAME} libnetif.la  libtrnw.la
 mb1rs_SOURCES = trnw/mb1rs.c trnw/mb1rs-app.c
 mb1rs_LDADD = ${LIBMBTRNFRAME} libmb1.la
 
-trnlog_player_SOURCES = utils/trnlog_player.cpp utils/TrnClient.cpp utils/TerrainNavClient.cpp
-trnlog_player_LDADD = libtnav.la libnewmat.la
+trnlog_player_SOURCES = utils/trnlog_player.cpp
+trnlog_player_LDADD = libtnav.la libnewmat.la libtrncli.la
+
+mb1log_player_SOURCES = utils/mb1log_player.cpp
+mb1log_player_LDADD = libtnav.la libnewmat.la libtrncli.la
+
+csvlog_player_SOURCES = utils/csvlog_player.cpp
+csvlog_player_LDADD = libtnav.la libnewmat.la libtrncli.la
 
 dist_bin_SCRIPTS =
 

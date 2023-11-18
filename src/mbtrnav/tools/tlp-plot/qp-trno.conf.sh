@@ -34,8 +34,20 @@ QU_TRNO_EASTINGS_STITLE=${QU_STITLE:-$TMP_STR}
 export QU_TRNO_EASTINGS_OIMG_NAME="trno-${QU_SESSION_ID}-eas"
 QU_OFILE_NAME="trno-${QU_SESSION_ID}-eas"
 
+QU_TRNO_DEPTH_PTITLE=${QU_PTITLE:-"TRN Depth (mmse vs nav)"}
+TMP_STR="\n${QU_SESSION_ID} : ${QU_DATA_SET_ID}"
+QU_TRNO_DEPTH_STITLE=${QU_STITLE:-$TMP_STR}
+export QU_TRNO_DEPTH_OIMG_NAME="trno-${QU_SESSION_ID}-dep"
+QU_OFILE_NAME="trno-${QU_SESSION_ID}-dep"
+
+QU_TRNO_POS_PTITLE=${QU_PTITLE:-"TRN Position (mmse vs nav)"}
+TMP_STR="\n${QU_SESSION_ID} : ${QU_DATA_SET_ID}"
+QU_TRNO_POS_STITLE=${QU_STITLE:-$TMP_STR}
+export QU_TRNO_POS_OIMG_NAME="trno-${QU_SESSION_ID}-pos"
+QU_OFILE_NAME="trno-${QU_SESSION_ID}-pos"
+
 # Define job names to use in the configuration
-declare -a QU_KEYS=( "trno-${QU_SESSION_ID}-ofs" "trno-${QU_SESSION_ID}-nor" "trno-${QU_SESSION_ID}-eas" "comb-all" )
+declare -a QU_KEYS=( "trno-${QU_SESSION_ID}-ofs" "trno-${QU_SESSION_ID}-nor" "trno-${QU_SESSION_ID}-eas"  "trno-${QU_SESSION_ID}-dep" "trno-${QU_SESSION_ID}-pos" "comb-all" )
 
 # Set time formats for data and plots
 # time format strings conform to gnuplot syntax
@@ -53,6 +65,8 @@ QU_OTIME="%Y-%m-%dT%H:%M:%SZ"
 QP_JOB_DEFS["${QU_KEYS[0]}"]="plot,${QU_OTERM},${QU_KEYS[0]}"
 QP_JOB_DEFS["${QU_KEYS[1]}"]="plot,${QU_OTERM},${QU_KEYS[1]}"
 QP_JOB_DEFS["${QU_KEYS[2]}"]="plot,${QU_OTERM},${QU_KEYS[2]}"
+QP_JOB_DEFS["${QU_KEYS[3]}"]="plot,${QU_OTERM},${QU_KEYS[3]}"
+QP_JOB_DEFS["${QU_KEYS[4]}"]="plot,${QU_OTERM},${QU_KEYS[4]}"
 # local combiner job (e.g. make PDF containing plots in this configuration)
 #QP_JOB_DEFS["${QU_KEYS[2]}"]="combine,png,plot-output/${QU_OFILE_NAME}${QU_SESSION_ID}.pdf,./plot-output/*png"
 
@@ -61,6 +75,8 @@ QP_JOB_DEFS["${QU_KEYS[2]}"]="plot,${QU_OTERM},${QU_KEYS[2]}"
 QP_JOB_ORDER[${#QP_JOB_ORDER[*]}]="${QU_KEYS[0]}"
 QP_JOB_ORDER[${#QP_JOB_ORDER[*]}]="${QU_KEYS[1]}"
 QP_JOB_ORDER[${#QP_JOB_ORDER[*]}]="${QU_KEYS[2]}"
+QP_JOB_ORDER[${#QP_JOB_ORDER[*]}]="${QU_KEYS[3]}"
+QP_JOB_ORDER[${#QP_JOB_ORDER[*]}]="${QU_KEYS[4]}"
 #QP_JOB_ORDER[${#QP_JOB_ORDER[*]}]="${QU_KEYS[2]}"
 
 # Plot configuration parameters
@@ -200,3 +216,93 @@ QP_EXPR["$QU_KEY"]="Y"
 QP_SPECDEL["$QU_KEY"]="|"
 QP_PLOT_SPECS["$QU_KEY"]="${QU_TRNO_CSV},${QU_BLUE},2,,1,4,,mmse.E"
 QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNO_CSV},${QU_ORANGE},2,,1,15,,nav.E"
+
+QU_KEY=${QU_KEYS[3]}
+QP_OFILE_NAME["$QU_KEY"]="${QU_TRNO_DEPTH_OIMG_NAME}"
+QP_PTITLE["$QU_KEY"]="${QU_TRNO_DEPTH_PTITLE}${QU_TRNO_DEPTH_STITLE}"
+QP_TFMT["$QU_KEY"]=${QU_ITIME}
+QP_XTFMT["$QU_KEY"]=${QU_OTIME}
+QP_ISTIME["$QU_KEY"]="Y"
+QP_YFMT["$QU_KEY"]="%g" #${QU_OTIME}
+QP_DSEP["$QU_KEY"]=","
+#QP_KEY_FONT["$QU_KEY"]="arial"
+#QP_KEY_SIZE["$QU_KEY"]="9"
+##QP_KEY_MAX_COL["$QU_KEY"]="8"
+QP_TERM_FONT["$QU_KEY"]="arial"
+#QP_TERM_SIZE["$QU_KEY"]="10"
+QP_TERM_OSIZE["$QU_KEY"]=${QU_TERM_OSIZE[${QU_OTERM}]}
+QP_XTITLE["$QU_KEY"]="Time (h:m:s)"
+#QP_XRANGE_MIN["$QU_KEY"]="\"2019-11-10T00:00:00Z\""
+#QP_XRANGE_MAX["$QU_KEY"]="\"2019-11-15T00:00:00Z\""
+QP_YTITLE["$QU_KEY"]="Depth (m)"
+#QP_YRANGE_MIN["$QU_KEY"]=6.5
+#QP_YRANGE_MAX["$QU_KEY"]=10
+#QP_X2TITLE["$QU_KEY"]=""
+#QP_X2RANGE_MIN["$QU_KEY"]=0
+#QP_X2RANGE_MAX["$QU_KEY"]=10
+#QP_Y2TITLE["$QU_KEY"]="Time (s)"
+#QP_Y2RANGE_MIN["$QU_KEY"]=6.5
+#QP_Y2RANGE_MAX["$QU_KEY"]=8.8
+#QP_XSCALE["$QU_KEY"]=1.0
+#QP_YSCALE["$QU_KEY"]=1.0
+#QP_XOFS["$QU_KEY"]=0.0
+#QP_YOFS["$QU_KEY"]=0.0
+QP_PLOT_STYLE["$QU_KEY"]="linespoints" #lines
+QP_POINTSIZE["$QU_KEY"]=${QU_POINT_SIZE}
+QP_POINTTYPE["$QU_KEY"]=${QU_POINT_TYPE}
+QP_POINTCOLOR["$QU_KEY"]=${QU_POINT_COLOR}
+QP_INC_POINTTYPE["$QU_KEY"]="N"
+QP_INC_POINTCOLOR["$QU_KEY"]="N"
+QP_USE_LINETYPES["$QU_KEY"]="N"
+QP_LINETYPE["$QU_KEY"]=1
+QP_INC_LINETYPE["$QU_KEY"]="N"
+#QP_LINE_TYPES["$QU_KEY"]="${QU_LINE_TYPE_DFL}"
+QP_EXPR["$QU_KEY"]="Y"
+QP_SPECDEL["$QU_KEY"]="|"
+QP_PLOT_SPECS["$QU_KEY"]="${QU_TRNO_CSV},${QU_BLUE},2,,1,5,,mmse.Z"
+QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNO_CSV},${QU_ORANGE},2,,1,16,,nav.Z"
+
+QU_KEY=${QU_KEYS[4]}
+QP_OFILE_NAME["$QU_KEY"]="${QU_TRNO_POS_OIMG_NAME}"
+QP_PTITLE["$QU_KEY"]="${QU_TRNO_POS_PTITLE}${QU_TRNO_POS_STITLE}"
+QP_TFMT["$QU_KEY"]="" #${QU_ITIME}
+QP_XTFMT["$QU_KEY"]="%g" #${QU_OTIME}
+QP_ISTIME["$QU_KEY"]="N"
+QP_YFMT["$QU_KEY"]="%g" #${QU_OTIME}
+QP_DSEP["$QU_KEY"]=","
+#QP_KEY_FONT["$QU_KEY"]="arial"
+#QP_KEY_SIZE["$QU_KEY"]="9"
+##QP_KEY_MAX_COL["$QU_KEY"]="8"
+QP_TERM_FONT["$QU_KEY"]="arial"
+#QP_TERM_SIZE["$QU_KEY"]="10"
+QP_TERM_OSIZE["$QU_KEY"]=${QU_TERM_OSIZE[${QU_OTERM}]}
+QP_XTITLE["$QU_KEY"]="Northings (m)"
+#QP_XRANGE_MIN["$QU_KEY"]="\"2019-11-10T00:00:00Z\""
+#QP_XRANGE_MAX["$QU_KEY"]="\"2019-11-15T00:00:00Z\""
+QP_YTITLE["$QU_KEY"]="Eastings (m)"
+#QP_YRANGE_MIN["$QU_KEY"]=6.5
+#QP_YRANGE_MAX["$QU_KEY"]=10
+#QP_X2TITLE["$QU_KEY"]=""
+#QP_X2RANGE_MIN["$QU_KEY"]=0
+#QP_X2RANGE_MAX["$QU_KEY"]=10
+#QP_Y2TITLE["$QU_KEY"]="Time (s)"
+#QP_Y2RANGE_MIN["$QU_KEY"]=6.5
+#QP_Y2RANGE_MAX["$QU_KEY"]=8.8
+QP_XSCALE["$QU_KEY"]=-1.0
+QP_YSCALE["$QU_KEY"]=-1.0
+#QP_XOFS["$QU_KEY"]=0.0
+#QP_YOFS["$QU_KEY"]=0.0
+QP_PLOT_STYLE["$QU_KEY"]="points" #lines
+QP_POINTSIZE["$QU_KEY"]=${QU_POINT_SIZE}
+QP_POINTTYPE["$QU_KEY"]=${QU_POINT_TYPE}
+QP_POINTCOLOR["$QU_KEY"]=${QU_POINT_COLOR}
+QP_INC_POINTTYPE["$QU_KEY"]="N"
+QP_INC_POINTCOLOR["$QU_KEY"]="N"
+QP_USE_LINETYPES["$QU_KEY"]="N"
+QP_LINETYPE["$QU_KEY"]=1
+QP_INC_LINETYPE["$QU_KEY"]="Y"
+#QP_LINE_TYPES["$QU_KEY"]="${QU_LINE_TYPE_DFL}"
+QP_EXPR["$QU_KEY"]="Y"
+QP_SPECDEL["$QU_KEY"]="|"
+QP_PLOT_SPECS["$QU_KEY"]="${QU_TRNO_CSV},${QU_BLUE},3,,1,4,,mmse.pos"
+QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNO_CSV},${QU_ORANGE},14,,1,15,,nav.pos"

@@ -1,8 +1,8 @@
-/// @file trnlog_player.cpp
+/// @file csvlog_player.cpp
 /// @authors k. headley
 /// @date 21mar2022
 
-/// Summary: play back TrnBin.log to console and/or TRN server
+/// Summary: play back CSV TRN log to console and/or TRN server
 
 // ///////////////////////
 // Copyright 2022  Monterey Bay Aquarium Research Institute
@@ -21,17 +21,18 @@
 #include <string.h>
 #include <memory.h>
 #include <libgen.h>
-#include <inttypes.h>
 #include <sstream>
 #include <fstream>
 #include <iostream>
 #include <list>
 #include <chrono>
+
 #include "structDefs.h"
-#include "TrnLog.h"
+#include "mb1_msg.h"
 #include "TrnClient.h"
 #include "trn_debug.hpp"
 #include "flag_utils.hpp"
+#include "NavUtils.h"
 
 // /////////////////
 // Macros
@@ -43,26 +44,26 @@
 /// @brief version string macro.
 #define VERSION_STRING(s) VERSION_HELPER(s)
 
-#define TRNLOG_PLAYER_NAME "trnxpp"
-#ifndef TRNLOG_PLAYER_BUILD
-/// @def TRNLOG_PLAYER_BUILD
+#define CSVLOG_PLAYER_NAME "trnxpp"
+#ifndef CSVLOG_PLAYER_BUILD
+/// @def CSVLOG_PLAYER_BUILD
 /// @brief module build date.
 /// Sourced from CFLAGS in Makefile
 /// w/ -DMBTRN_BUILD=`date`
-#define TRNLOG_PLAYER_BUILD "" VERSION_STRING(APP_BUILD)
+#define CSVLOG_PLAYER_BUILD "" VERSION_STRING(APP_BUILD)
 #endif
-#ifndef TRNLOG_PLAYER_VERSION
-/// @def TRNLOG_PLAYER_BUILD
+#ifndef CSVLOG_PLAYER_VERSION
+/// @def CSVLOG_PLAYER_BUILD
 /// @brief module build date.
 /// Sourced from CFLAGS in Makefile
 /// w/ -DMBTRN_BUILD=`date`
-#define TRNLOG_PLAYER_VERSION "" VERSION_STRING(TRNLOG_PLAYER_VER)
+#define CSVLOG_PLAYER_VERSION "" VERSION_STRING(CSVLOG_PLAYER_VER)
 #endif
 
 
 
 #define TRN_SERVER_PORT_DFL 27027
-#define IBUF_LEN_BYTES 4800
+#define STRBUF_BYTES 8096
 
 #ifndef DTR
 #define DTR(x) ((x) * M_PI/180.)
@@ -76,6 +77,77 @@
 
 typedef uint8_t byte;
 
+typedef struct geo_s {
+    // nominal number of beams
+    double beam_count;
+    // nominal angle subtended
+    double swath_deg;
+    // rotation vector (321Euler, phi/theta/psi radians)
+    double rot_r[3];
+    // translation vector (x/y/z m)
+    double tran_m[3];
+}geo_t;
+
+typedef struct token_s {
+    const char *key;
+    int idx;
+    const char *fmt;
+}token_t;
+
+typedef struct parse_kv_s {
+    const char *key;
+    void *pval;
+}parse_kv_t;
+
+token_t mb1_header_fmt[] = {
+    {"time", 0, "%lf"},
+    {"ping_number", 1, "%u"},
+    {"posx", 2, "%lf"},
+    {"posy", 3, "%lf"},
+    {"depth", 4, "%lf"},
+    {"heading", 5, "%lf"},
+    {"pitch", 6, "%lf"},
+    {"roll", 7, "%lf"},
+    {"vx", 8, "%lf"},
+    {"vy", 9, "%lf"},
+    {"vz", 10, "%lf"},
+    {"dvlValid", 11, "%d"},
+    {"bottomLock", 12, "%d"},
+    {"numMeas", 13, "%d"},
+    {"b_start", 14, NULL},
+    {"b_fields", 5, NULL},
+    {"b_number", 0, "%d"},
+    {"b_valid", 1, "%lf"},
+    {"b_along", 2, "%lf"},
+    {"b_across", 3, "%lf"},
+    {"b_down", 4, "%lf"},
+    {NULL, -1, NULL}
+};
+
+token_t idt_header_fmt[] = {
+    {"time", 0, "%lf"},
+    {"posx", 1, "%lf"},
+    {"posy", 2, "%lf"},
+    {"depth", 3, "%lf"},
+    {"pitch", 4, "%lf"},
+    {"roll", 5, "%lf"},
+    {"heading", 6, "%lf"},
+    {"flag0", 7, "%d"},
+    {"flag1", 8, "%d"},
+    {"flag2", 9, "%d"},
+    {"vx", 10, "%lf"},
+    {"vy", 11, "%lf"},
+    {"vz", 12, "%lf"},
+    {"dvlValid", 13, "%d"},
+    {"bottomLock", 14, "%d"},
+    {"numMeas", 15, "%d"},
+    {"b_start", 16, NULL},
+    {"b_fields", 2, NULL},
+    {"b_number", 0, "%d"},
+    {"b_range", 1, "%lf"},
+    {NULL, -1, NULL}
+};
+
 // /////////////////
 // Module variables
 static int g_signal=0;
@@ -84,7 +156,7 @@ static bool g_interrupt=false;
 // /////////////////
 // Declarations
 
-class TrnLogConfig
+class CSVLogConfig
 {
 public:
 
@@ -100,19 +172,25 @@ public:
         ALL_CSV=0x18
     }OFlags;
 
-   TrnLogConfig()
-    : mDebug(0), mVerbose(false), mHost("localhost"), mTrnCfg(), mPort(TRN_SERVER_PORT_DFL), mServer(false), mTrnInCsvEn(false), mTrnOutCsvEn(false), mTrnInCsvPath(), mTrnOutCsvPath(), mTrnSensor(TRN_SENSOR_MB), mOFlags(),  mBeams(0), mStep(false), mSwath(0.)
-    {
+    typedef enum {
+        FMT_MB1=0x01,
+        FMT_IDT=0x02,
+    } FmtFlags;
 
+
+   CSVLogConfig()
+    : mDebug(0), mVerbose(false), mHost("localhost"), mTrnCfg(), mPort(TRN_SERVER_PORT_DFL), mServer(false), mTrnInCsvEn(false), mTrnOutCsvEn(false), mTrnInCsvPath(), mTrnOutCsvPath(), mTrnSensor(TRN_SENSOR_MB), mOFlags(0), mFmtFlags(0), mUtmZone(10), mBeams(0), mStep(false), mSwath(0.)
+    {
+        memset(mSFRot,0,3*sizeof(double));
     }
 
-    TrnLogConfig(const TrnLogConfig &other)
-    : mDebug(other.mDebug), mVerbose(other.mVerbose), mHost(other.mHost), mTrnCfg(other.mTrnCfg), mPort(other.mPort), mServer(other.mServer),  mTrnInCsvEn(other.mTrnInCsvEn), mTrnOutCsvEn(other.mTrnOutCsvEn), mTrnInCsvPath(other.mTrnInCsvPath), mTrnOutCsvPath(other.mTrnOutCsvPath), mTrnSensor(other.mTrnSensor), mOFlags(other.mOFlags), mBeams(other.mBeams), mStep(other.mStep), mSwath(other.mSwath)
+    CSVLogConfig(const CSVLogConfig &other)
+    : mDebug(other.mDebug), mVerbose(other.mVerbose), mHost(other.mHost), mTrnCfg(other.mTrnCfg), mPort(other.mPort), mServer(other.mServer),  mTrnInCsvEn(other.mTrnInCsvEn), mTrnOutCsvEn(other.mTrnOutCsvEn), mTrnInCsvPath(other.mTrnInCsvPath), mTrnOutCsvPath(other.mTrnOutCsvPath), mTrnSensor(other.mTrnSensor), mOFlags(other.mOFlags),  mFmtFlags(other.mFmtFlags), mUtmZone(other.mUtmZone), mBeams(other.mBeams), mStep(other.mStep), mSwath(other.mSwath)
     {
-
+        memset(mSFRot,0,3*sizeof(double));
     }
 
-   ~TrnLogConfig()
+   ~CSVLogConfig()
     {
     }
 
@@ -125,8 +203,11 @@ public:
     std::string trni_csv_path(){return mTrnInCsvPath;}
     std::string trno_csv_path(){return mTrnOutCsvPath;}
     int port(){return mPort;}
-    bool oflag_set(TrnLogConfig::OFlags mask){return mOFlags.all_set(mask);}
+    bool oflag_set(CSVLogConfig::OFlags mask){return mOFlags.all_set(mask);}
+    bool fflag_set(CSVLogConfig::FmtFlags mask){return mFmtFlags.all_set(mask);}
+    long utm_zone(){return mUtmZone;}
     uint32_t beams(){return mBeams;}
+    double *sfrot(){return mSFRot;}
     bool step(){return mStep;}
     double swath(){return mSwath;}
 
@@ -142,7 +223,14 @@ public:
     void set_debug(int debug){mDebug = debug;}
     void set_verbose(bool verbose){mVerbose = verbose;}
     void set_oflags(uint32_t flags){mOFlags = flags;}
+    void set_fflags(uint32_t flags){mFmtFlags = flags;}
+    void set_utm(long utmZone){mUtmZone = utmZone;}
     void set_beams(uint32_t beams){mBeams = beams;}
+    void set_sfrot(double phi_deg, double theta_deg, double psi_deg) {
+        mSFRot[0] = Math::degToRad(phi_deg);
+        mSFRot[1] = Math::degToRad(theta_deg);
+        mSFRot[2] = Math::degToRad(psi_deg);
+    }
     void set_step(bool step){mStep = step;}
     void set_swath(double swath){mSwath = swath;}
 
@@ -166,9 +254,12 @@ public:
         wx = (alen >= wval ? alen + 1 : wval);
         os << std::setw(wkey) << "mTrnOutCsvPath" << std::setw(wx) << mTrnOutCsvPath.c_str() << std::endl;
         os << std::setw(wkey) << "mTrnSensor" << std::setw(wval) << mTrnSensor << std::endl;
+        os << std::setw(wkey) << "mUtmZone" << std::setw(wval) << mUtmZone << std::endl;
         os << std::setw(wkey) << "mBeams" << std::setw(wval) << mBeams << std::endl;
         os << std::setw(wkey) << "mSwath" << std::setw(wval) << mSwath << std::endl;
+        os << std::setw(wkey) << "mSFRot" << std::setw(wval) << "[" << mSFRot[0] << "," <<mSFRot[1] << "," <<mSFRot[2] << "]" << std::endl;
         os << std::setw(wkey) << "mOFlags" << std::hex << std::setw(wval) << (uint32_t)mOFlags.get() << std::endl;
+        os << std::setw(wkey) << "mFmtFlags" << std::hex << std::setw(wval) << (uint32_t)mFmtFlags.get() << std::endl;
         os << dec;
     }
 
@@ -198,16 +289,19 @@ private:
     std::string mTrnOutCsvPath;
     int mTrnSensor;
     flag_var<uint32_t> mOFlags;
+    flag_var<uint32_t> mFmtFlags;
+    long int mUtmZone;
     uint32_t mBeams;
+    double mSFRot[3];
     bool mStep;
     double mSwath;
 };
 
-class TLPStats
+class MLPStats
 {
 public:
-    TLPStats()
-    :mFilesPlayed(0), mRecordsFound(0), mMtniRead(0), mMeaiRead(0), mMseoRead(0), mMleoRead(0), mMotnUpdate(0), mMeasUpdate(0), mEstMMSE(0), mEstMLE(0), mLastMeasSuccess(0), mTrniCsvWrite(0), mTrnoCsvWrite(0)
+    MLPStats()
+    :mFilesPlayed(0), mRecordsFound(0),mInvalidRecords(0), mMtniRead(0), mMeaiRead(0), mMseoRead(0), mMleoRead(0), mMotnUpdate(0), mMeasUpdate(0), mEstMMSE(0), mEstMLE(0), mLastMeasSuccess(0), mTrniCsvWrite(0), mTrnoCsvWrite(0)
     {}
 
     void stat_tostream(ostream &os, int wkey=18, int wval=15)
@@ -215,6 +309,7 @@ public:
         os << std::setw(wkey) << "-- stats --\n";
         os << std::setw(wkey) << "mFilesPlayed" << std::setw(wkey) << mFilesPlayed << "\n";
         os << std::setw(wkey) << "mRecordsFound" << std::setw(wkey) << mRecordsFound << "\n";
+        os << std::setw(wkey) << "mInvalidRecords" << std::setw(wkey) << mInvalidRecords << "\n";
         os << std::setw(wkey) << "mMtniRead" << std::setw(wkey) << mMtniRead << "\n";
         os << std::setw(wkey) << "mMeaiRead" << std::setw(wkey) << mMeaiRead << "\n";
         os << std::setw(wkey) << "mMseoRead" << std::setw(wkey) << mMseoRead << "\n";
@@ -241,6 +336,7 @@ public:
 
     uint32_t mFilesPlayed;
     uint32_t mRecordsFound;
+    uint32_t mInvalidRecords;
     uint32_t mMtniRead;
     uint32_t mMeaiRead;
     uint32_t mMseoRead;
@@ -255,21 +351,21 @@ public:
 
 };
 
-class TrnLogPlayer
+class CSVLogPlayer
 {
 public:
 
-    TrnLogPlayer()
+    CSVLogPlayer()
     :mConfig(), mTrn(NULL), mFile(NULL), mTrnInCsvFile(NULL), mTrnOutCsvFile(NULL), mQuit(false)
     {
     }
 
-    TrnLogPlayer(const TrnLogConfig &cfg)
+    CSVLogPlayer(const CSVLogConfig &cfg)
     :mConfig(cfg), mTrn(NULL), mFile(NULL), mTrnInCsvFile(NULL), mTrnOutCsvFile(NULL), mQuit(false)
     {
     }
 
-    ~TrnLogPlayer()
+    ~CSVLogPlayer()
     {
         if(mFile != NULL){
             fclose(mFile);
@@ -321,155 +417,134 @@ public:
             return retval;
         }
 
-        if(skip_header() != 0)
-        {
-            fprintf(stderr, "%s:%d - data start not found in file[%s] [%d:%s]\n", __func__, __LINE__, src.c_str(), errno, strerror(errno));
-            return retval;
-        }
+        byte ibuf[MB1_MAX_SOUNDING_BYTES]={0};
 
-        TrnLog::TrnRecID rec_type = TrnLog::RT_INVALID;
-        byte ibuf[IBUF_LEN_BYTES]={0};
+        poseT *ppt = NULL;
+        measT *pmt = NULL;
 
-        while (!mQuit && next_record(ibuf, IBUF_LEN_BYTES, rec_type) == 0) {
+        while (!mQuit && !g_interrupt) {
+
+            int test = next_record(&ppt, &pmt);
+            if(test > 0)
+                break;
+            if(test < 0)
+                continue;
+
             this->stats().mRecordsFound++;
 
-            if(NULL!=quit && *quit)
+            if(NULL!=quit && *quit){
                 break;
-
-            if(rec_type == TrnLog::MOTN_IN) {
-
-                poseT *pt = NULL;
-                if(read_pose(&pt, ibuf) == 0 && pt != NULL){
-
-                    this->stats().mMtniRead++;
-
-                    if(mConfig.oflag_set(TrnLogConfig::MOTN))
-                    {
-                        show_pt(*pt);
-                        std::cerr << "\n";
-                    }
-
-                    if(mConfig.server() && mTrn != NULL)
-                    {
-                        try{
-                            mTrn->motionUpdate(pt);
-                            this->stats().mMotnUpdate++;
-                        }catch(Exception e) {
-                            fprintf(stderr,"%s - caught exception [%s]\n",__func__, e.what());
-                        }
-                    }
-                    if(lastPT != NULL)
-                        delete lastPT;
-                    lastPT = new poseT();
-                    *lastPT = *pt;
-                    delete pt;
-                } else {
-                    TRN_NDPRINT(2,"read_pose failed\n");
-                    if(lastPT != NULL)
-                        delete lastPT;
-                    lastPT = NULL;
-                }
-            } else if(rec_type == TrnLog::MEAS_IN) {
-
-                measT *mt = NULL;
-                if(read_meas(&mt, ibuf) == 0 && mt != NULL){
-
-                    this->stats().mMeaiRead++;
-
-                    if(mConfig.oflag_set(TrnLogConfig::MEAS))
-                    {
-                        show_mt(*mt);
-                        std::cerr << "\n";
-                    }
-
-
-                    if(lastPT != NULL && mConfig.trni_csv()){
-                        trni_csv_tofile(&mTrnInCsvFile, *lastPT, *mt);
-                        this->stats().mTrniCsvWrite++;
-                    }
-
-                    if(lastPT != NULL && mConfig.oflag_set(TrnLogConfig::TRNI_CSV))
-                    {
-                        trni_csv_tostream(std::cout, *lastPT, *mt);
-                    }
-
-                    if(mConfig.server())
-                    {
-                        try{
-
-                            mTrn->measUpdate(mt, mConfig.trn_sensor());
-                            this->stats().mMeasUpdate++;
-
-                            if(mTrn->lastMeasSuccessful()){
-                                this->stats().mLastMeasSuccess++;
-
-                                auto ts_now = std::chrono::system_clock::now();
-                                std::chrono::duration<double> epoch_time = ts_now.time_since_epoch();
-                                poseT mle, mmse;
-                                double ts = epoch_time.count();
-
-                                mTrn->estimatePose(&mmse, TRN_EST_MMSE);
-                                this->stats().mEstMMSE++;
-                                mTrn->estimatePose(&mle, TRN_EST_MLE);
-                                this->stats().mEstMLE++;
-
-                                if(lastPT != NULL && mConfig.oflag_set(TrnLogConfig::EST)){
-                                    show_est(ts, *lastPT, mle, mmse);
-                                }
-
-                                if(lastPT != NULL && mConfig.trno_csv()){
-                                    trno_csv_tofile(&mTrnOutCsvFile, ts, *lastPT, mle, mmse);
-                                    this->stats().mTrnoCsvWrite++;
-                                }
-                                if(lastPT != NULL && mConfig.oflag_set(TrnLogConfig::TRNO_CSV))
-                                {
-                                    trno_csv_tostream(std::cout, ts, *lastPT, mle, mmse);
-                                }
-                            }else{
-                                fprintf(stderr,"%s:%d - last meas unsuccessful\n",__func__, __LINE__);
-                            }
-
-                        }catch(Exception e) {
-                            fprintf(stderr,"%s - caught exception [%s]\n",__func__, e.what());
-                        }
-                    }
-                    delete mt;
-                    if(lastPT != NULL)
-                        delete lastPT;
-                    lastPT = NULL;
-
-                } else {
-                    TRN_NDPRINT(2,"read_meas failed\n");
-                }
-            } else if(rec_type == TrnLog::MSE_OUT) {
-
-                poseT *pt = NULL;
-                if(read_est(&pt, ibuf) == 0 && pt != NULL){
-
-                    this->stats().mMseoRead++;
-
-                    if(mConfig.oflag_set(TrnLogConfig::MMSE))
-                        show_esto(*pt);
-                }else {
-                    TRN_NDPRINT(2,"read_est failed\n");
-                }
-                delete pt;
-            } else if(rec_type == TrnLog::MLE_OUT) {
-                
-                poseT *pt = NULL;
-                if(read_est(&pt, ibuf) == 0 && pt != NULL){
-                    this->stats().mMleoRead++;
-                    if(mConfig.oflag_set(TrnLogConfig::MLE))
-                        show_esto(*pt);
-                }else {
-                    TRN_NDPRINT(2,"read_est failed\n");
-                }
-                delete pt;
-            }else {
-                TRN_NDPRINT(2,"invalid record type[%d]\n",rec_type);
             }
 
-            memset(ibuf, 0, IBUF_LEN_BYTES);
+            measT *mt = pmt;
+            poseT *pt = ppt;
+
+            if(pt != NULL){
+
+                this->stats().mMtniRead++;
+
+                if(mConfig.oflag_set(CSVLogConfig::MOTN))
+                {
+                    show_pt(*pt);
+                    std::cerr << "\n";
+                }
+
+                if(mConfig.server() && mTrn != NULL)
+                {
+                    try{
+                        mTrn->motionUpdate(pt);
+                        this->stats().mMotnUpdate++;
+                    }catch(Exception e) {
+                        fprintf(stderr,"%s - caught exception [%s]\n",__func__, e.what());
+                    }
+                }
+                if(lastPT != NULL)
+                    delete lastPT;
+                lastPT = new poseT();
+                *lastPT = *pt;
+            } else {
+                TRN_NDPRINT(2,"read_pose failed\n");
+                if(lastPT != NULL)
+                    delete lastPT;
+                lastPT = NULL;
+            }
+
+            if (mt != NULL) {
+
+                this->stats().mMeaiRead++;
+
+                if(mConfig.oflag_set(CSVLogConfig::MEAS))
+                {
+                    show_mt(*mt);
+                    std::cerr << "\n";
+                }
+
+                if(lastPT != NULL && mConfig.trni_csv()){
+                    trni_csv_tofile(&mTrnInCsvFile, *lastPT, *mt);
+                    this->stats().mTrniCsvWrite++;
+                }
+
+                if(lastPT != NULL && mConfig.oflag_set(CSVLogConfig::TRNI_CSV))
+                {
+                    trni_csv_tostream(std::cout, *lastPT, *mt);
+                }
+
+                if(mConfig.server())
+                {
+                    try{
+
+                        mTrn->measUpdate(mt, mConfig.trn_sensor());
+                        this->stats().mMeasUpdate++;
+
+                        if(mTrn->lastMeasSuccessful()){
+
+                            this->stats().mLastMeasSuccess++;
+
+                            auto ts_now = std::chrono::system_clock::now();
+                            std::chrono::duration<double> epoch_time = ts_now.time_since_epoch();
+                            poseT mle, mmse;
+                            double ts = epoch_time.count();
+
+                            mTrn->estimatePose(&mmse, TRN_EST_MMSE);
+                            this->stats().mEstMMSE++;
+                            mTrn->estimatePose(&mle, TRN_EST_MLE);
+                            this->stats().mEstMLE++;
+
+                            if(lastPT != NULL && mConfig.oflag_set(CSVLogConfig::EST)){
+                                fprintf(stderr, "%s:%d --- EST --- \n",__func__, __LINE__);
+                                show_est(ts, *lastPT, mle, mmse);
+                            }
+
+                            if(lastPT != NULL && mConfig.trno_csv()){
+                                trno_csv_tofile(&mTrnOutCsvFile, ts, *lastPT, mle, mmse);
+                                this->stats().mTrnoCsvWrite++;
+                            }
+                            if(lastPT != NULL && mConfig.oflag_set(CSVLogConfig::TRNO_CSV))
+                            {
+                                trno_csv_tostream(std::cout, ts, *lastPT, mle, mmse);
+                            }
+                        }else{
+                            TRN_NDPRINT(1, "%s:%d - last meas unsuccessful\n",__func__, __LINE__);
+                        }
+
+                    }catch(Exception e) {
+                        fprintf(stderr,"%s - caught exception [%s]\n",__func__, e.what());
+                    }
+                }
+                if(lastPT != NULL)
+                    delete lastPT;
+                lastPT = NULL;
+
+            } else {
+                TRN_NDPRINT(2, "read_meas failed\n");
+            }
+
+            if(pt != NULL)
+                delete pt;
+            if(mt != NULL)
+                delete mt;
+
+            memset(ibuf, 0, MB1_MAX_SOUNDING_BYTES);
 
             if(mConfig.step()) {
                 char c = '\0';
@@ -481,12 +556,13 @@ public:
     }
 
     void set_server(bool enable){mConfig.set_server(enable);}
+
     void quit(){
         TRN_DPRINT("setting player quit flag\n");
         mQuit = true;
     }
 
-    TLPStats &stats(){return mStats;}
+    MLPStats &stats(){return mStats;}
 
     void show_cfg()
     {
@@ -499,21 +575,22 @@ protected:
     {
         // Note that TRN uses N,E,D frame (i.e. N:x E:y D:z)
         // [ 0] time POSIX epoch sec
-        // [ 1] northings
-        // [ 2] eastings
-        // [ 3] depth
-        // [ 4] heading
-        // [ 5] pitch
-        // [ 6] roll
-        // [ 7] flag (0)
+        // [ 1] ping_number
+        // [ 2] northings
+        // [ 3] eastings
+        // [ 4] depth
+        // [ 5] heading
+        // [ 6] pitch
+        // [ 7] roll
         // [ 8] flag (0)
         // [ 9] flag (0)
-        // [10] vx (0)
-        // [11] xy (0)
-        // [12] vz (0)
-        // [13] sounding valid flag
-        // [14] bottom lock valid flag
-        // [15] number of beams
+        // [10] flag (0)
+        // [11] vx (0)
+        // [12] xy (0)
+        // [13] vz (0)
+        // [14] sounding valid flag
+        // [15] bottom lock valid flag
+        // [16] number of beams
         // beam[i] number
         // beam[i] valid (1)
         // beam[i] range
@@ -669,7 +746,6 @@ protected:
     void show_trno_csv(double ts, poseT &pt, poseT &mle, poseT &mmse)
     {
         trno_csv_tostream(std::cerr, ts, pt, mle, mmse);
-        std::cerr << "\n";
     }
 
     void est_tostream(std::ostream &os, double ts, poseT &pt, poseT &mle, poseT &mmse, int wkey=15, int wval=18)
@@ -890,220 +966,792 @@ protected:
                 mTrn->loadCfgAttributes(mConfig.trn_cfg().c_str());
                 retval = 0;
             }
-
-        }
-
-        return retval;
-    }
-
-    // finds and reads next record ID
-    int skip_header()
-    {
-        int retval = -1;
-        byte buf[8]={0}, *cur = buf;
-        typedef enum{
-            START,
-            B,E,G,I,N,
-            OK, EEOF, ERR
-        }state_t;
-        state_t stat = START;
-
-        while(stat != OK && stat != EEOF && stat != ERR)
-        {
-            if(fread(cur,1,1,mFile) == 1)
-            {
-                if(*cur == 'b'){
-                    if(stat==START){
-                        stat=B;
-                        cur++;
-                    } else {
-                        stat=START;
-                        cur=buf;
-                    }
-                } else if(*cur == 'e'){
-                    if(stat==B){
-                        stat=E;
-                        cur++;
-                    } else {
-                        stat=START;
-                        cur=buf;
-                    }
-                } else if(*cur == 'g'){
-                    if(stat==E){
-                        stat=G;
-                        cur++;
-                    } else {
-                        stat=START;
-                        cur=buf;
-                    }
-                } else if(*cur == 'i'){
-                    if(stat==G){
-                        stat=I;
-                        cur++;
-                    } else {
-                        stat=START;
-                        cur=buf;
-                    }
-                } else if(*cur == 'n'){
-                    if(stat==I){
-                        stat=OK;
-                        cur++;
-                    } else {
-                        stat=START;
-                        cur=buf;
-                    }
-                } else {
-                    stat=START;
-                    cur=buf;
-                }
-            } else {
-                if(feof(mFile)){
-                    stat = EEOF;
-                    TRN_NDPRINT(2, "end of data file\n");
-                } else {
-                    stat = ERR;
-                    fprintf(stderr,"%s:%d - ERR data file read failed [%d:%s]\n",__func__, __LINE__, errno, strerror(errno));
-                }
-            }
-        }
-
-        if(stat == OK)
-        {
-            TRN_NDPRINT(2,"%s:%d - stat OK %s\n", __func__, __LINE__, buf);
-            retval = 0;
         }
         return retval;
     }
 
-    // finds and reads next record ID
-    int next_record(byte *dest, size_t len, TrnLog::TrnRecID &r_type)
+
+    int parse_tokens(char *src, char ***dest, int start, int len, const char *del)
     {
-        int retval = -1;
-        byte buf[5]={0}, *cur = buf;
-        typedef enum{
-            START,
-            MTN, MEA, MSE, MLE,
-            OK, EEOF, ERR
-        }state_t;
-        state_t stat = START;
+        int i = 0;
+        int TA_INC = 128;
 
-        while(stat != OK && stat != EEOF && stat != ERR)
-        {
-            if(fread(cur,1,1,mFile) == 1)
-            {
-                switch (*cur) {
-                    case 'M':
-                        if(stat==START){
-                            cur++;
-                        } else {
-                            cur = buf;
-                            stat = START;
-                        }
-                        break;
-                    case 'T':
-                        if(stat==START){
-                            cur++;
-                            stat = MTN;
-                        } else {
-                            cur = buf;
-                            stat = START;
-                        }
-                        break;
-                    case 'N':
-                        if(stat==MTN){
-                            cur++;
-                        } else {
-                            cur = buf;
-                            stat = START;
-                        }
-                        break;
-                    case 'E':
-                        if(stat==START){
-                            cur++;
-                            stat = MEA;
-                        } else if(stat == MSE || stat == MLE){
-                            cur++;
-                        } else {
-                            cur = buf;
-                            stat = START;
-                        }
-                        break;
-                    case 'A':
-                        if(stat==MEA){
-                            cur++;
-                        } else {
-                            cur = buf;
-                            stat = START;
-                        }
-                        break;
-                    case 'I':
-                        if(stat==MTN){
-                            cur++;
-                            stat = OK;
-                            r_type = TrnLog::MOTN_IN;
-                        } else if(stat==MEA){
-                            cur++;
-                            stat = OK;
-                            r_type = TrnLog::MEAS_IN;
-                        } else {
-                            cur = buf;
-                            stat = START;
-                        }
-                        break;
-                    case 'O':
-                        if(stat==MSE){
-                            cur++;
-                            stat = OK;
-                            r_type = TrnLog::MSE_OUT;
-                        }  else if(stat==MLE){
-                            cur++;
-                            stat = OK;
-                            r_type = TrnLog::MLE_OUT;
-                        } else {
-                            cur = buf;
-                            stat = START;
-                        }
-                        break;
+        int ta_len = TA_INC;
+        char **toks = (char **)malloc(ta_len * sizeof(char *));
 
-                    case 'S':
-                        if(stat==START){
-                            cur++;
-                            stat = MSE;
-                        } else {
-                            cur = buf;
-                            stat = START;
-                        }
+        if (NULL != src && NULL != toks && NULL != del) {
+            memset(toks, 0, ta_len*sizeof(char *));
+
+            char *scpy = strdup(src);
+
+            // skip start tokens
+            int cur = 0;
+            while ( cur < start) {
+                strtok((cur++ == 0 ? scpy : NULL), del);
+            }
+
+            while (len <= 0 || i < len) {
+
+                char *tok = strtok((cur == 0 ? scpy : NULL), del);
+
+                // stop if no more tokens
+                if (NULL == tok) {
+                    break;
+                }
+
+                toks[i] = strdup(tok);
+
+                i++;
+                cur++;
+
+                if( (i >= ta_len)) {
+
+                    char **tmp = (char **)realloc(toks, (ta_len + TA_INC) * sizeof(char *));
+
+                    if(tmp != NULL) {
+                        memset(tmp+ta_len, 0, TA_INC*sizeof(char *));
+                        ta_len += TA_INC;
+                        toks = tmp;
+
+                    } else {
+                        fprintf(stderr, "%s:%d - ERR: token array resize failed [%d:%s]\n", __func__, __LINE__, errno, strerror(errno));
                         break;
-                    case 'L':
-                        if(stat==START){
-                            cur++;
-                            stat = MLE;
-                        } else {
-                            cur = buf;
-                            stat = START;
-                        }
-                        break;
-                    default:
-                        cur = buf;
-                        stat = START;
-                        break;
+                    }
+                }
+            }
+
+            // release source copy
+            free(scpy);
+
+            if (i > 0) {
+
+                if (*dest == NULL) {
+                    // dest NULL
+                    // assign toks to dest
+                    *dest = toks;
+                } else {
+                    *dest = toks;
+                    // dest exists, copy toks
+                    char **cp_start = toks;
+                    int cp_entries = ( (len <= 0) || (len > i) ? i : len);
+                    int cp_size = cp_entries * sizeof(char *);
+                    memcpy(*dest, cp_start, cp_size);
+                    free(toks);
+                }
+            }
+        }
+        return i;
+    }
+
+    const char *map_fmt(token_t *map, const char *key) {
+        token_t *cur = map;
+        while(cur != NULL && cur->idx >= 0) {
+            if(strcmp(key, cur->key) == 0)
+                return cur->fmt;
+            cur++;
+        }
+        return NULL;
+    }
+
+    int map_idx(token_t *map, const char *key) {
+        token_t *cur = map;
+        while(cur != NULL && cur->idx >= 0) {
+            if(strcmp(key, cur->key) == 0)
+                return cur->idx;
+            cur++;
+        }
+        return -1;
+    }
+
+
+    poseT *parse_pose(char **src, token_t *map)
+    {
+        // struct poseT
+
+        // North, East, Down position (m)
+        // double x, y, z
+
+        // Vehicle velocity wrt iceberg, Body Frame(m/s)
+        // double vx, vy, vz, ve
+        // Vehicle velocity wrt iceberg, Body Frame(m/s)
+        // was Vehicle velocity wrt an inertial frame, Body (m/s)
+        // double vw_x, vw_y, vw_z
+        // Vehicle velocity wrt iceberg, Body Frame(m/s)
+        // double vn_x, vn_y, vn_z
+        // Vehicle velocity wrt iceberg, Body Frame(m/s)
+        // double wx, wy, wz
+        // Vehicle aceleration wrt an inertial frame Body (m/s^2)
+        // double ax, ay, az
+
+        // 3-2-1 Euler angles relating the B frame to an inertial NED frame (rad).
+        // double phi, theta, psi
+        // TRN states
+        // double psi_berg, psi_dot_berg
+        // Time (s)
+        // double time
+        // Validity flag for dvl motion measurement
+        // bool dvlValid
+        // Validity flag for GPS measurement
+        // bool gpsValid
+        // Validity flag for DVL lock onto seafloor
+        // bool bottomLock
+
+
+        poseT *dest = new poseT();
+        if(dest == NULL)
+            return NULL;
+
+        parse_kv_t dval_map[] {
+            {"time", &dest->time},
+            {"posx", &dest->x},
+            {"posy", &dest->y},
+            {"depth", &dest->z},
+            {"pitch", &dest->phi},
+            {"roll", &dest->theta},
+            {"heading", &dest->psi},
+            {"vx", &dest->vx},
+            {"vy", &dest->vy},
+            {"vz", &dest->vz},
+            {NULL, NULL}
+        };
+
+        parse_kv_t bval_map[] {
+            {"dvlValid", &dest->dvlValid},
+            {"bottomLock", &dest->bottomLock},
+            {NULL, NULL}
+        };
+
+        dest->ve = 0.;
+
+        dest->vw_x = 0.;
+        dest->vw_y = 0.;
+        dest->vw_z = 0.;
+
+        dest->vn_x = 0.;
+        dest->vn_y = 0.;
+        dest->vn_z = 0.;
+
+        dest->wx = 0.;
+        dest->wy = 0.;
+        dest->wz = 0.;
+
+        dest->ax = 0.;
+        dest->ay = 0.;
+        dest->az = 0.;
+
+        dest->psi_berg = 0.;
+        dest->psi_dot_berg = 0.;
+
+        const parse_kv_t *pcur = dval_map;
+        int i=0;
+        while(pcur->key != NULL) {
+            const char *fmt = map_fmt(map, pcur->key);
+            int idx = map_idx(map, pcur->key);
+
+            if(fmt != NULL && idx >= 0){
+                if (sscanf(src[idx], fmt, pcur->pval) != 1) {
+                    fprintf(stderr, "%s:%d - ERR (dfields) scan %s from %s fmt %s var %p val %lf\n", __func__, __LINE__, pcur->key, src[idx], fmt, pcur->pval, *((double *)pcur->pval));
                 }
             } else {
-                if(feof(mFile)){
-                    stat = EEOF;
-                    TRN_NDPRINT(2, "end of data file\n");
+                fprintf(stderr, "%s:%d - ERR (dfields) invalid arg fmt %p idx %d\n", __func__, __LINE__, fmt, idx);
+            }
+
+            pcur++;
+            i++;
+        }
+
+        pcur = bval_map;
+        i=0;
+        while(pcur->key != NULL) {
+            const char *fmt = map_fmt(map, pcur->key);
+            int idx = map_idx(map, pcur->key);
+
+            if(fmt != NULL && idx >= 0){
+                int ival = -1;
+                if(sscanf(src[idx], fmt, &ival) ==1) {
+                    *((bool *)pcur->pval) = (ival != 0 ? true : false);
                 } else {
-                    stat = ERR;
-                    fprintf(stderr,"%s:%d - ERR data file read failed [%d:%s]\n",__func__, __LINE__, errno, strerror(errno));
+                    fprintf(stderr, "%s:%d - ERR (bfields) scan %s from %s fmt %s var %p val %d\n", __func__, __LINE__, pcur->key, src[idx], fmt, pcur->pval, *((bool *)pcur->pval));
+                }
+            } else {
+                fprintf(stderr, "%s:%d - ERR (bfields) invalid arg fmt %p idx %d\n", __func__, __LINE__, fmt, idx);
+            }
+
+            pcur++;
+            i++;
+        }
+
+        if(dest->z < 2.) {
+            // on surface
+            dest->gpsValid = true;
+            dest->bottomLock = false;
+            dest->dvlValid = false;
+        } else {
+            dest->gpsValid = false;
+            dest->bottomLock = true;
+            dest->dvlValid = true;
+        }
+
+        if(mConfig.fflag_set(CSVLogConfig::FMT_MB1)) {
+
+            double pos_N=0., pos_E=0.;
+            double lat = dest->x, lon=dest->y;
+            NavUtils::geoToUtm(Math::degToRad(lat), Math::degToRad(lon), mConfig.utm_zone(), &pos_N, &pos_E);
+            dest->x = pos_N;
+            dest->y = pos_E;
+            // for MB1, phi/theta have already been applied
+            dest->phi = 0.;
+            dest->theta = 0.;
+            // force velocity to dummy values to match mb1 binary
+            dest->vx = 0.1;
+            dest->vy = 0.0;
+            dest->vz = 0.0;
+
+        }
+
+        return dest;
+    }
+
+
+    static void matrix_show(Matrix m, const char *name=nullptr, int width=7, int precision=3, int wkey=5)
+    {
+        matrix_tostream(std::cerr, m, name, width, precision, wkey);
+    }
+
+    static void matrix_tostream(std::ostream &os, Matrix m, const char *name=nullptr, int width=7, int precision=3, int wkey=5)
+    {
+
+        std::ios_base::fmtflags orig_settings = std::cout.flags();
+
+        if(name != nullptr)
+            os << std::setw(wkey) << name << " [" << m.Nrows() << "r " << m.Ncols() << "c]" << std::endl;
+
+        os << std::fixed << std::setprecision(precision);
+
+        for(int i = 1 ; i <= m.Nrows() ; i++ ){
+            os << std::setw(wkey) << " [" << i << "] :";
+            for(int j = 1 ; j <= m.Ncols() ; j++ ){
+                os << " " << std::setw(width) << m(i, j);
+            }
+            os << std::endl;
+        }
+
+        std::cout.flags(orig_settings);
+    }
+
+    // 321 euler rotation R(phi, theta, psi)
+    // where
+    // phi: roll (rotation about X)
+    // theta: pitch (rotation about Y)
+    // psi: yaw (rotation about Z)
+    // expects
+    // rot_rad[0]: phi / roll (rad)
+    // rot_rad[1]: theta / pitch (rad)
+    // rot_rad[2]: psi / yaw (rad)
+    static Matrix affine321Rotation(double *rot_rad)
+    {
+        Matrix mat(4,4);
+
+        double cphi = cos(rot_rad[0]);
+        double sphi = sin(rot_rad[0]);
+        double ctheta = cos(rot_rad[1]);
+        double stheta = sin(rot_rad[1]);
+        double cpsi = cos(rot_rad[2]);
+        double spsi = sin(rot_rad[2]);
+        double stheta_sphi = stheta * sphi;
+        double stheta_cphi = stheta * cphi;
+
+        mat(1, 1) = cpsi * ctheta;
+        mat(1, 2) = spsi * ctheta;
+        mat(1, 3) = -stheta;
+        mat(1, 4) = 0.;
+        mat(2, 1) = -spsi * cphi + cpsi * stheta_sphi;
+        mat(2, 2) = cpsi * cphi + spsi * stheta_sphi;
+        mat(2, 3) = ctheta * sphi;
+        mat(2, 4) = 0.;
+        mat(3, 1) = spsi * sphi + cpsi * stheta_cphi;
+        mat(3, 2) = -cpsi * sphi + spsi * stheta_cphi;
+        mat(3, 3) = ctheta * cphi;
+        mat(3, 4) = 0.;
+        mat(4, 1) = 0.;
+        mat(4, 2) = 0.;
+        mat(4, 3) = 0.;
+        mat(4, 4) = 1.;
+
+        return mat;
+    }
+
+    static Matrix affineTranslation(double *tran_m)
+    {
+        Matrix mat(4,4);
+
+        mat(1, 1) = 1.;
+        mat(1, 2) = 0.;
+        mat(1, 3) = 0.;
+        mat(1, 4) = tran_m[0];
+        mat(2, 1) = 0.;
+        mat(2, 2) = 1.;
+        mat(2, 3) = 0.;
+        mat(2, 4) = tran_m[1];
+        mat(3, 1) = 0.;
+        mat(3, 2) = 0.;
+        mat(3, 3) = 1.;
+        mat(3, 4) = tran_m[2];
+        mat(4, 1) = 0.;
+        mat(4, 2) = 0.;
+        mat(4, 3) = 0.;
+        mat(4, 4) = 1.;
+
+        return mat;
+    }
+
+    Matrix mb_sframe_components(measT *mt, geo_t *geo) {
+
+        if(mt == nullptr || geo == NULL){
+            Matrix err_ret = Matrix(4,1);
+        }
+
+      // number of beams read (<= nominal beams)
+        int nbeams = mt->numMeas;
+        Matrix sf_comp = Matrix(4, nbeams);
+
+        double S = geo->swath_deg;
+        double K = (180. - S)/2.;
+        double e = S/geo->beam_count;
+
+        // zero- and one-based indexs
+        int idx[2] = {0, 1};
+
+        for (int i = 0; i < nbeams; i++)
+        {
+            // beam number (0-indexed)
+            int b = mt->beamNums[i];
+
+            // beam yaw, pitch angles (sensor frame)
+            double yd = 0;
+            double xd = (K + S - (b * e));
+            double pd = xd;
+
+            if(xd > 90.) {
+                // normalize pitch to +/- 90 deg
+                yd = 180.;
+                pd = 180. - xd;
+            }
+
+            // psi (yaw), phi (pitch) to radians
+            double yr = DTR(yd);
+            double pr = DTR(pd);
+
+            // beam components (reference orientation, sensor frame)
+            // 1: along (x) 2: across (y) 3: down (z)
+            sf_comp(1, idx[1]) = cos(pr)*cos(yr);
+            sf_comp(2, idx[1]) = cos(pr)*sin(yr);
+            sf_comp(3, idx[1]) = sin(pr);
+            // set M[4,i]
+            // 1.: points
+            // 0.: vectors
+            sf_comp(4, idx[1]) = 1;
+
+            idx[0]++;
+            idx[1]++;
+        }
+        return sf_comp;
+    }
+
+    measT *parse_meas(char **src, token_t *map)
+    {
+        // struct measT
+
+        // double time
+        // 1: DVL
+        // 2: Multibeam
+        // 3: Single Beam
+        // 4: Homer Relative Measurement
+        // 5: Imagenex multibeam
+        // 6: Side-looking DVL
+        // int dataType
+        // double phi, theta, psi
+        // double x, y, z
+        // double* covariance
+        // double* ranges
+        // double* crossTrack
+        // double* alongTrack
+        // double* altitudes
+        // double* alphas
+        // bool* measStatus
+        // unsigned int ping_number
+        // number of beams
+        // int numMeas
+        // For use in sensors that vary the number of beams (e.g., MB-system)
+        // int* beamNums
+
+        // parse number of beams
+        // to make measT instance
+        int src_beams = 0;
+        const char *fx = map_fmt(map, "numMeas");
+        int ix = map_idx(map, "numMeas");
+        sscanf(src[ix], fx, &src_beams);
+
+        if(src_beams < 0 || src_beams > MB1_MAX_BEAMS){
+            fprintf(stderr, "%s:%d ERR numMeas %d\n", __func__, __LINE__, src_beams);
+            return NULL;
+        }
+
+        // use source beams by default, config beams if set
+        int dest_beams = ((mConfig.beams() > 0) ? mConfig.beams() : src_beams);
+
+        measT *dest = new measT(dest_beams, mConfig.trn_sensor());
+
+        double swath_lim = mConfig.swath()/2.;
+        int mod = 1;
+        if(mConfig.beams() > 0){
+            if(mConfig.swath() > 0.) {
+                mod = mConfig.swath() / mConfig.beams();
+            } else {
+                mod = src_beams / mConfig.beams();
+            }
+        }
+
+        if(mod <= 0)
+            mod = 1;
+
+//        fprintf(stderr, "%s:%d src_beams %d mConfig.beams %d dest_beams %d dest.numMeas %d mod %d\n", __func__, __LINE__, src_beams, mConfig.beams(), dest_beams, dest->numMeas, mod);
+
+        if(dest == NULL){
+            fprintf(stderr, "%s:%d ERR malloc\n", __func__, __LINE__);
+            return NULL;
+        }
+
+        parse_kv_t dval_map[] {
+            {"time", &dest->time},
+            {"posx", &dest->x},
+            {"posy", &dest->y},
+            {"depth", &dest->z},
+            {"pitch", &dest->phi},
+            {"roll", &dest->theta},
+            {"heading", &dest->psi},
+          {NULL, NULL}
+        };
+
+        parse_kv_t uval_map[] {
+            {"ping_number", &dest->ping_number},
+            {NULL, NULL}
+        };
+
+        dest->dataType = mConfig.trn_sensor();
+
+        parse_kv_t *cur = dval_map;
+        int i=0;
+        while(cur->key != NULL) {
+            const char *fmt = map_fmt(map, cur->key);
+            int idx = map_idx(map, cur->key);
+
+            if(fmt != NULL && idx >= 0){
+                if (sscanf(src[idx], fmt, cur->pval) != 1){
+                    fprintf(stderr, "%s:%d - ERR (dfields) scan %s from %s fmt %s var %p val %lf\n", __func__, __LINE__, cur->key, src[idx], fmt, cur->pval, *((double *)cur->pval));
+                }
+            } else {
+                fprintf(stderr, "%s:%d - ERR (ifields) invalid arg fmt %p idx %d\n", __func__, __LINE__, fmt, idx);
+            }
+
+            cur++;
+            i++;
+        }
+
+        cur = uval_map;
+        i=0;
+        while(cur->key != NULL) {
+            const char *fmt = map_fmt(map, cur->key);
+            int idx = map_idx(map, cur->key);
+
+            if(fmt != NULL && idx >= 0){
+                if(sscanf(src[idx], fmt, cur->pval) != 1){
+                    fprintf(stderr, "%s:%d - ERR (ufields) scan %s from %s fmt %s var %p val %u\n", __func__, __LINE__, cur->key, src[idx], fmt, cur->pval, *((unsigned int *)cur->pval));
+                }
+            } else {
+                fprintf(stderr, "%s:%d - ERR (ufields) invalid arg fmt %p idx %d\n", __func__, __LINE__, fmt, idx);
+            }
+
+            cur++;
+            i++;
+        }
+
+
+        if (dest->numMeas <= 0 || dest->numMeas > MB1_MAX_BEAMS) {
+            fprintf(stderr, "%s:%d ERR numMeas %d\n", __func__, __LINE__, dest->numMeas);
+            free(dest);
+            return NULL;
+        } else if (dest->time <= 0) {
+            fprintf(stderr, "%s:%d ERR time %.3lf\n", __func__, __LINE__, dest->time);
+            free(dest);
+            return NULL;
+        } else if ((dest->x > -1. && dest->x < 1.)  || (dest->y > -1. && dest->y < 1.) || (dest->z > -1. && dest->z < 1.)) {
+            fprintf(stderr, "%s:%d ERR x,y,z [%.3lf, %.3lf, %.3lf]\n", __func__, __LINE__, dest->x, dest->y, dest->z);
+            free(dest);
+            return NULL;
+        }
+
+        if(mConfig.fflag_set(CSVLogConfig::FMT_IDT)) {
+
+            double pos_N=0., pos_E=0.;
+            double lat=dest->x, lon=dest->y;
+            NavUtils::geoToUtm(Math::degToRad(lat), Math::degToRad(lon), mConfig.utm_zone(), &pos_N, &pos_E);
+            dest->x = pos_N;
+            dest->y = pos_E;
+
+            int b_start = map_idx(map, "b_start");
+            int b_fields = map_idx(map, "b_fields");
+            int b_num = map_idx(map, "b_number");
+            int b_range = map_idx(map, "b_range");
+            int x=mod * b_fields;
+            int f_end = b_start + x * dest->numMeas;
+
+            fprintf(stderr, "%s:%d - b_start %d nmeas %d bfields %d bnofs %d brofs %d f_end %d\n", __func__, __LINE__, b_start, dest->numMeas, b_fields, b_num, b_range, f_end);
+
+            if(b_start >= 0 ) {
+
+                // parse status, beam numbers, ranges
+                // needed for components
+                int idx[2] = {0, 1};
+
+                for (int i = b_start; i < f_end; i += (x)) {
+                    int beam_n = 0;
+                    double range = 0;
+                    int valid = 1;
+
+                    sscanf(src[i+b_num], "%d", &beam_n);
+                    sscanf(src[i+b_range], "%lf", &range);
+
+                    if(range <= 0.){
+                        valid = 0;
+                    }
+
+                    dest->measStatus[idx[0]] = (valid != 0 ? true : false);
+                    dest->beamNums[idx[0]] = beam_n;
+                    dest->ranges[idx[0]] = range;
+                    idx[0]++;
+                }
+
+                geo_t sf_geo = {120, 120, {0.,0.,0.}, {0.,0.,0.}};
+                Matrix sf_comp = mb_sframe_components(dest, &sf_geo);
+
+                idx[0]=0;
+                idx[1]=1;
+
+                if(mConfig.trn_sensor() == TRN_SENSOR_DELTAT) {
+
+                    for (int i = b_start; i < f_end; i += (x)) {
+                        dest->alongTrack[idx[0]] = dest->ranges[idx[0]] * sf_comp(1, idx[1]);
+                        dest->crossTrack[idx[0]] = dest->ranges[idx[0]] * sf_comp(2, idx[1]);
+                        dest->altitudes[idx[0]] = dest->ranges[idx[0]] * sf_comp(3, idx[1]);
+
+                        //                    fprintf(stderr, "%s:%d - field[%d] beam_n[%d] r,x,y,z[%.2lf, %.2lf, %.2lf, %.2lf] sfc[%.2lf, %.2lf, %.2lf]\n", __func__, __LINE__, i, dest->beamNums[idx[0]], dest->ranges[idx[0]], dest->crossTrack[idx[0]], dest->alongTrack[idx[0]], dest->altitudes[idx[0]], sf_comp(1, idx[1]), sf_comp(2, idx[1]), sf_comp(3, idx[1]));
+                        idx[0]++;
+                        idx[1]++;
+                    }
+
+                } else {
+                    double v_att[3] = {dest->phi, dest->theta, 0.};
+                    Matrix m_att = affine321Rotation(v_att).t();
+                    Matrix m_dr = affine321Rotation(mConfig.sfrot());
+                    Matrix m_all = m_dr * m_att * m_dr.t() * sf_comp;
+//                    Matrix m_all = sf_comp;
+
+                    for (int i = b_start; i < f_end; i += (x)) {
+
+                        dest->alongTrack[idx[0]] = dest->ranges[idx[0]] * m_all(1, idx[1]);
+                        dest->crossTrack[idx[0]] = dest->ranges[idx[0]] * m_all(2, idx[1]);
+                        dest->altitudes[idx[0]] = dest->ranges[idx[0]] * m_all(3, idx[1]);
+
+                        int b = dest->beamNums[idx[0]];
+                        if( (b < 30) || (b > 90) || (b % 6 != 0))
+                        {
+                            dest->measStatus[idx[0]] = false;
+                        }
+
+                        //                    fprintf(stderr, "%s:%d - field[%d] beam_n[%d] r,x,y,z[%.2lf, %.2lf, %.2lf, %.2lf] sfc[%.2lf, %.2lf, %.2lf]\n", __func__, __LINE__, i, dest->beamNums[idx[0]], dest->ranges[idx[0]], dest->crossTrack[idx[0]], dest->alongTrack[idx[0]], dest->altitudes[idx[0]], sf_comp(1, idx[1]), sf_comp(2, idx[1]), sf_comp(3, idx[1]));
+                        idx[0]++;
+                        idx[1]++;
+                    }
+                }
+            }
+        } else if(mConfig.fflag_set(CSVLogConfig::FMT_MB1)) {
+
+            double pos_N=0., pos_E=0.;
+            double lat=dest->x, lon=dest->y;
+            NavUtils::geoToUtm(Math::degToRad(lat), Math::degToRad(lon), mConfig.utm_zone(), &pos_N, &pos_E);
+            dest->x = pos_N;
+            dest->y = pos_E;
+            dest->phi = 0.;
+            dest->theta = 0.;
+            dest->psi = 0.;
+
+            int b_start = map_idx(map, "b_start");
+            int b_fields = map_idx(map, "b_fields");
+            int b_num = map_idx(map, "b_number");
+            int b_valid = map_idx(map, "b_valid");
+            int b_across = map_idx(map, "b_across");
+            int b_along = map_idx(map, "b_along");
+            int b_down = map_idx(map, "b_down");
+//            int x = b_fields * mod ;
+//            int f_end = b_start + ( x * dest->numMeas);
+            int x = b_fields ;
+            int f_end = b_start + ( x * src_beams);
+
+//            fprintf(stderr, "%s:%d - b_start %d nmeas %d bfields %d bnum %d bval %d bacross %d balong %d bdown %d f_end %d\n", __func__, __LINE__, b_start, dest->numMeas, b_fields, b_num, b_valid, b_across, b_along, b_down, f_end);
+//            fprintf(stderr, "%s:%d - src_beams[%d] dest %p dest->numMeas %p/%d\n", __func__, __LINE__, src_beams, dest, &dest->numMeas,dest->numMeas);
+
+
+
+            int j = 0;
+            if(b_start >= 0) {
+                for (int i = b_start; i < f_end; i += (x) ) {
+                    int beam_n = 0;
+                    double rho[3] = {0., 0., 0.};
+                    int valid = 0;
+
+                    sscanf(src[i + b_num], "%d", &beam_n);
+                    sscanf(src[i + b_valid], "%d", &valid);
+                    sscanf(src[i + b_along], "%lf", &rho[0]);
+                    sscanf(src[i + b_across], "%lf", &rho[1]);
+                    sscanf(src[i + b_down], "%lf", &rho[2]);
+
+                    double range = vnorm(rho);
+
+                    if(range <= 0.){
+                        valid = 0;
+                    }
+
+                    bool use_beam = false;
+                    double wb = 0.;
+                    if ((beam_n % mod) == 0) {
+
+                        wb = RTD(atan2(rho[1], rho[2]));
+
+                        if(mConfig.swath() <= 0. || fabs(wb) <= swath_lim){
+                            use_beam = true;
+                        }
+                    }
+//                    fprintf(stderr, "%s:%d beam[%3d] x,y,z,r,w[%+8.3lf, %+8.3lf, %+8.3lf, %+8.3lf, %+8.3lf] swath_max[%+8.3lf] %c\n", __func__, __LINE__, beam_n, rho[0], rho[1], rho[2], range, wb, swath_lim, (use_beam?'Y':'N'));
+
+                    if(valid && use_beam){
+                        dest->measStatus[j] = true;
+                        dest->beamNums[j] = beam_n;
+                        dest->alongTrack[j] = rho[0];
+                        dest->crossTrack[j] = rho[1];
+                        dest->altitudes[j] = rho[2];
+                        dest->ranges[j] = range;
+                        j++;
+                    }
+
+                    if(j >= dest_beams)
+                        break;
                 }
             }
         }
 
-        if(stat == OK)
+       return dest;
+    }
+
+    void release_toks(char ***pp, int ntoks) {
+        if(NULL != pp) {
+            char **ptoks = *pp;
+            if(NULL != ptoks){
+                // release token memory
+                for(int i = 0; i < ntoks; i++ ) {
+                    free(ptoks[i]);
+                }
+                free(ptoks);
+                *pp= NULL;
+            }
+        }
+    }
+
+    // finds and reads next record ID
+    int next_record(poseT **ppose, measT **pmeas)
+    {
+        int retval = -1;
+
+        typedef enum{
+            START,
+            CSV,
+            OK, EEOF, ERR
+        }state_t;
+        state_t stat = START;
+
+        size_t msg_buf_len = MB1_MAX_SOUNDING_BYTES + sizeof(mb1_t);
+        byte msg_buf[msg_buf_len];
+
+        char str_buf[STRBUF_BYTES] = {0};
+
+
+        while(stat != OK && stat != EEOF && stat != ERR)
         {
-            TRN_NDPRINT(2,"%s:%d - stat OK %s/%X\n", __func__, __LINE__, buf, r_type);
-            memcpy(dest,buf,TL_RID_SIZE);
+            memset(msg_buf, 0, msg_buf_len);
+            memset(str_buf, 0, STRBUF_BYTES);
+
+            bool ferr=false;
+            bool rec_valid = false;
+
+            // read CSV record
+            if (fgets(str_buf, STRBUF_BYTES, mFile) == str_buf) {
+
+                char **toks = NULL;
+                int ntoks = parse_tokens(str_buf, &toks, 0, 0, ",");
+
+                if (  ntoks > 1) {
+
+                    token_t *format_map = mConfig.fflag_set(CSVLogConfig::FMT_IDT) ? idt_header_fmt : mb1_header_fmt;
+
+                    *ppose = parse_pose(toks, format_map);
+                    *pmeas = parse_meas(toks, format_map);
+
+                    if(*ppose != NULL && *pmeas != NULL) {
+                        TRN_NDPRINT(5, "%s:%d parsed line %s\n", __func__, __LINE__, str_buf);
+                        rec_valid = true;
+                    } else {
+                        fprintf(stderr, "%s:%d invalid record (pose:%p meas:%p] : %s\n", __func__, __LINE__, ppose, pmeas, str_buf);
+
+                        if(*pmeas != NULL)
+                            delete(*pmeas);
+                        if(*ppose != NULL)
+                            delete(*ppose);
+
+                        *ppose = NULL;
+                        *pmeas = NULL;
+
+                        mStats.mInvalidRecords++;
+                    }
+
+                    release_toks(&toks, ntoks);
+                }
+                toks = NULL;
+            }
+
+            if (rec_valid && ferr == false) {
+                // TODO : update stats?
+                stat = OK;
+           } else {
+
+                if(feof(mFile)){
+                    TRN_NDPRINT(2,"%s:%d - EOF\n", __func__, __LINE__);
+                    stat = EEOF;
+                } else {
+                    TRN_NDPRINT(2,"%s:%d - ERR\n", __func__, __LINE__);
+                    stat = ERR;
+                }
+            }
+        }
+
+        if (stat == OK) {
+            TRN_NDPRINT(2,"%s:%d - stat OK\n", __func__, __LINE__);
             retval = 0;
+        } else if (stat == ERR) {
+            TRN_NDPRINT(2,"%s:%d - stat ERR\n", __func__, __LINE__);
+
+        } else if (stat == EEOF) {
+            TRN_NDPRINT(2,"%s:%d - stat EEOF (end of input file)\n", __func__, __LINE__);
+            retval = 1;
         }
         return retval;
     }
@@ -1116,203 +1764,14 @@ protected:
         return( sqrt( vnorm2 ) );
     }
 
-    // src points to rec_id (already read by next_record)
-    int read_meas(measT **pdest, byte *src)
-    {
-        int retval = -1;
-        // read data from file to buffer
-        byte *bp = (byte *)src+TL_RID_SIZE;
-        size_t readlen = TL_MEAI_HDR_SIZE;
-
-        TRN_NDPRINT(2, "%s:%d readlen[%lu]\n", __func__, __LINE__, (unsigned long)readlen);
-        if(fread(bp, readlen, 1, mFile) == 1)
-        {
-            bp += readlen;
-            meas_in_t *measin =  (meas_in_t *)src;
-            readlen = TL_MEAI_BEAM_SIZE(measin->num_meas);
-
-            TRN_NDPRINT(2, "%s:%d readlen[%lu] num_meas[%d]\n", __func__, __LINE__, (unsigned long)readlen, measin->num_meas);
-            if((bp + readlen) > (src + IBUF_LEN_BYTES)){
-                TRN_NDPRINT(2, "%s:%d ERR: readlen exceeds buffer size [%lu/%d]\n", __func__, __LINE__, (bp + readlen - src), IBUF_LEN_BYTES);
-                return retval;
-            }
-
-            if(fread(bp, readlen, 1, mFile) == 1)
-            {
-                int src_beams = measin->num_meas;
-                int dest_beams = ((mConfig.beams() > 0) ? mConfig.beams() : src_beams);
-
-                measT *dest = new measT(dest_beams, measin->data_type);
-                if(NULL != dest){
-                    dest->time = measin->time;
-                    dest->dataType = measin->data_type;
-                    dest->x = measin->x;
-                    dest->y = measin->y;
-                    dest->z = measin->z;
-                    dest->ping_number = measin->ping_number;
-
-                    double swath_lim = mConfig.swath()/2.;
-                    int mod = 1;
-                    if(mConfig.beams() > 0){
-                        if(src_beams > dest_beams){
-                            if(mConfig.swath() > 0.) {
-                                mod = mConfig.swath() / dest_beams;
-                            } else {
-                                mod = src_beams / dest_beams;
-                            }
-                        } // else use all beams (mod = 1)
-                    }
-
-                    if(mod <= 0)
-                        mod = 1;
-
-                    meas_beam_t *beams = TrnLog::meaiBeamData(measin);
-                    int j = 0;
-                    for(int i = 0; i < measin->num_meas; i++)
-                    {
-                        bool use_beam = false;
-
-                        int bx=0;
-                        double wb=0.;
-                        if(beams[i].cross_track != 0. && beams[i].altitude != 0.) {
-
-                            bx = beams[i].beam_num;
-
-                            if ((bx % mod) == 0) {
-
-                                wb = RTD(atan2(beams[i].cross_track, beams[i].altitude));
-
-                                if(mConfig.swath() <= 0. || fabs(wb) <= swath_lim){
-                                    use_beam = true;
-                                }
-                            }
-                        }
-
-                        double rho[3] = {beams[i].along_track, beams[i].cross_track, beams[i].altitude};
-                        double range = vnorm(rho);
-
-                        if (range > 0. && use_beam) {
-                            dest->beamNums[j] = beams[i].beam_num;
-                            dest->measStatus[j] = beams[i].status;
-                            dest->ranges[j] = beams[i].range;
-                            dest->crossTrack[j] = beams[i].cross_track;
-                            dest->alongTrack[j] = beams[i].along_track;
-                            dest->altitudes[j] = beams[i].altitude;
-                            j++;
-                        }
-                        if(j >= dest_beams)
-                            break;
-                    }
-                    *pdest = dest;
-                    retval = 0;
-                } // else error
-            } else {
-                TRN_DPRINT("meas data read failed bp[%p] readlen[%zu] num_meas[%d]\n", bp, readlen, measin->num_meas);
-            }
-        } else {
-            TRN_DPRINT("meas header read failed bp[%p] readlen[%zu]\n", bp, readlen);
-        } // else error
-
-        return retval;
-    }
-
-    // src points to rec_id (already read by next_record)
-    int read_pose(poseT **pdest, byte *src)
-    {
-        int retval = -1;
-        // read data from file to buffer
-        byte *bp = (byte *)src+TL_RID_SIZE;
-        size_t readlen = TL_MTNI_SIZE;
-        if(fread(bp, readlen, 1, mFile) == 1)
-        {
-            poseT *dest = new poseT();
-            if(NULL != dest)
-            {
-                bp += readlen;
-                motn_in_t *motnin =  (motn_in_t *)src;
-
-                dest->time = motnin->time;
-                dest->x = motnin->x;
-                dest->y = motnin->y;
-                dest->z = motnin->z;
-                dest->vx = motnin->vx;
-                dest->vy = motnin->vy;
-                dest->vz = motnin->vz;
-                dest->phi = motnin->phi;
-                dest->theta = motnin->theta;
-                dest->psi = motnin->psi;
-                dest->dvlValid = (motnin->dvl_valid != 0);
-                dest->gpsValid = (motnin->gps_valid != 0);
-                dest->bottomLock = (motnin->bottom_lock != 0);
-                *pdest = dest;
-                retval = 0;
-            }
-        }
-        return retval;
-    }
-
-    // src points to rec_id (already read by next_record)
-    int read_est(poseT **pdest, byte *src)
-    {
-        int retval = -1;
-        // read data from file to buffer
-        byte *bp = (byte *)src+TL_RID_SIZE;
-        size_t readlen = TL_MSEO_SIZE;
-        if(fread(bp, readlen, 1, mFile) == 1)
-        {
-            poseT *dest = new poseT();
-            if(NULL != dest)
-            {
-                bp += readlen;
-                est_out_t *est =  (est_out_t *)src;
-
-                dest->time = est->time;
-                dest->x = est->x;
-                dest->y = est->y;
-                dest->z = est->z;
-                dest->vx = est->vx;
-                dest->vy = est->vy;
-                dest->vz = est->vz;
-                dest->ve = est->ve;
-                dest->vw_x = est->vw_x;
-                dest->vw_y = est->vw_y;
-                dest->vw_z = est->vw_z;
-                dest->vn_x = est->vn_x;
-                dest->vn_y = est->vn_y;
-                dest->vn_z = est->vn_z;
-                dest->wx = est->wx;
-                dest->wy = est->wy;
-                dest->wz = est->wz;
-                dest->ax = est->ax;
-                dest->ay = est->ay;
-                dest->az = est->az;
-                dest->phi = est->phi;
-                dest->theta = est->theta;
-                dest->psi = est->psi;
-                dest->psi_berg = est->psi_berg;
-                dest->psi_dot_berg = est->psi_dot_berg;
-
-                dest->dvlValid = (est->dvl_valid != 0);
-                dest->gpsValid = (est->gps_valid != 0);
-                dest->bottomLock = (est->bottom_lock != 0);
-                memcpy(dest->covariance,est->covariance, N_COVAR*sizeof(double));
-
-                *pdest = dest;
-                retval = 0;
-            }
-        }
-        return retval;
-    }
-
 private:
-    TrnLogConfig mConfig;
+    CSVLogConfig mConfig;
     TrnClient *mTrn;
     FILE *mFile;
     FILE *mTrnInCsvFile;
     FILE *mTrnOutCsvFile;
     bool mQuit;
-    TLPStats mStats;
-
+    MLPStats mStats;
 };
 
 
@@ -1364,11 +1823,14 @@ public:
             {"trn-sensor", required_argument, NULL, 0},
             {"trni-csv", required_argument, NULL, 0},
             {"trno-csv", required_argument, NULL, 0},
+            {"utm", required_argument, NULL, 0},
+            {"beams", required_argument, NULL, 0},
             {"show", required_argument, NULL, 0},
             {"server", no_argument, NULL, 0},
             {"noserver", no_argument, NULL, 0},
             {"logdir", required_argument, NULL, 0},
-            {"beams", required_argument, NULL, 0},
+            {"format", required_argument, NULL, 0},
+            {"sfrot", required_argument, NULL, 0},
             {"step", no_argument, NULL, 0},
             {"swath", required_argument, NULL, 0},
             {NULL, 0, NULL, 0}
@@ -1439,6 +1901,18 @@ public:
                         else if (strcmp("trn-cfg", options[option_index].name) == 0) {
                             mTBConfig.set_trn_cfg(std::string(optarg));
                         }
+                        // utm
+                        else if (strcmp("utm", options[option_index].name) == 0) {
+                            long int utm=0;
+                            if(sscanf(optarg,"%ld", &utm) == 1)
+                                mTBConfig.set_utm(utm);
+                        }
+                        // beams
+                        else if (strcmp("beams", options[option_index].name) == 0) {
+                            uint32_t beams=0;
+                            if(sscanf(optarg,"%" PRIu32 "", &beams) == 1)
+                                mTBConfig.set_beams(beams);
+                        }
                         // input
                         else if (strcmp("input", options[option_index].name) == 0) {
                             std::list<std::string>::iterator it;
@@ -1458,34 +1932,34 @@ public:
                         else if (strcmp("show", options[option_index].name) == 0) {
                             uint32_t oflags=0;
                             if(strstr(optarg,"trni") != NULL){
-                                oflags |= TrnLogConfig::TRNI;
+                                oflags |= CSVLogConfig::TRNI;
                             }
                             if(strstr(optarg,"trno") != NULL){
-                                oflags |= TrnLogConfig::EST;
+                                oflags |= CSVLogConfig::EST;
                             }
                             if(strstr(optarg,"est") != NULL){
-                                oflags |= TrnLogConfig::EST;
+                                oflags |= CSVLogConfig::EST;
                             }
                             if(strstr(optarg,"mmse") != NULL){
-                                oflags |= TrnLogConfig::MMSE;
+                                oflags |= CSVLogConfig::MMSE;
                             }
                             if(strstr(optarg,"mle") != NULL){
-                                oflags |= TrnLogConfig::MLE;
+                                oflags |= CSVLogConfig::MLE;
                             }
                             if(strstr(optarg,"motn") != NULL){
-                                oflags |= TrnLogConfig::MOTN;
+                                oflags |= CSVLogConfig::MOTN;
                             }
                             if(strstr(optarg,"meas") != NULL){
-                                oflags |= TrnLogConfig::MEAS;
+                                oflags |= CSVLogConfig::MEAS;
                             }
                             if(strstr(optarg,"icsv") != NULL){
-                                oflags |= TrnLogConfig::TRNI_CSV;
+                                oflags |= CSVLogConfig::TRNI_CSV;
                             }
                             if(strstr(optarg,"ocsv") != NULL){
-                                oflags |= TrnLogConfig::TRNO_CSV;
+                                oflags |= CSVLogConfig::TRNO_CSV;
                             }
                             if(strstr(optarg,"*csv") != NULL){
-                                oflags |= TrnLogConfig::ALL_CSV;
+                                oflags |= CSVLogConfig::ALL_CSV;
                            }
                             if(oflags>0){
                                 mTBConfig.set_oflags(oflags);
@@ -1509,11 +1983,26 @@ public:
                             mTBConfig.set_trno_csv(true);
                             mTBConfig.set_trno_csv_path(std::string(optarg));
                         }
-                        // beams
-                        else if (strcmp("beams", options[option_index].name) == 0) {
-                            uint32_t beams=0;
-                            if(sscanf(optarg,"%" PRIu32 "", &beams) == 1)
-                                mTBConfig.set_beams(beams);
+                        // sfrot
+                        else if (strcmp("sfrot", options[option_index].name) == 0) {
+                            double tmp[3] = {0., 0., 0.};
+                            if(sscanf(optarg, "%lf,%lf,%lf", &tmp[0], &tmp[1], &tmp[2]) == 3){
+                                mTBConfig.set_sfrot(tmp[0], tmp[1], tmp[2]);
+                            }
+                        }
+                        // format
+                        else if (strcmp("format", options[option_index].name) == 0) {
+                            uint32_t flags = 0;
+                            if(strstr(optarg, "idt") != NULL) {
+                                flags |= CSVLogConfig::FMT_IDT;
+                            }
+                            if(strstr(optarg, "mb1") != NULL) {
+                                flags |= CSVLogConfig::FMT_MB1;
+                            }
+                            if(flags>0){
+                                mTBConfig.set_fflags(0x0);
+                                mTBConfig.set_fflags(flags);
+                            }
                         }
                         // step
                         else if (strcmp("step", options[option_index].name) == 0) {
@@ -1533,7 +2022,7 @@ public:
             }
 
             if (version) {
-                fprintf(stderr, "%s: version %s build %s\n", TRNLOG_PLAYER_NAME, TRNLOG_PLAYER_VERSION, TRNLOG_PLAYER_BUILD);
+                fprintf(stderr, "%s: version %s build %s\n", CSVLOG_PLAYER_NAME, CSVLOG_PLAYER_VERSION, CSVLOG_PLAYER_BUILD);
                 exit(0);
             }
             if (help) {
@@ -1548,7 +2037,7 @@ public:
     {
         // monitor mode:
         char help_message[] = "\n TRN Log Player\n";
-        char usage_message[] = "\n use: trnlog_player [options]\n"
+        char usage_message[] = "\n use: csvlog_player [options]\n"
         "\n"
         " Options\n"
         " --verbose              : verbose output\n"
@@ -1556,11 +2045,14 @@ public:
         " --help                 : output help message\n"
         " --cfg=s                : app config file\n"
         " --version              : output version info\n"
+        " --format=d             : input CSV format: mb1|idt\n"
         " --trn-host=addr[:port] : send output to TRN server\n"
         " --trn-cfg=s            : TRN config file\n"
         " --trn-sensor=n         : TRN sensor type\n"
+        " --utm=n                : UTM zone\n"
         " --beams=n              : number of output beams\n"
         " --swath=f              : limit beams to center swath degrees\n"
+        " --sfrot=d,d,d          : sensor frame rotation (phi, theta, psi; deg)\n"
         " --input=s              : specify input file path (may be used multiple times)\n"
         " --show=s               : specify console outputs\n"
         "                           trni     : TRN inputs (motion/poseT, meas/measT)\n"
@@ -1585,7 +2077,7 @@ public:
         "  [2] swath option\n"
         "      unset : no swath mask applied"
         "      >= 0  : mask beams outside of swath/2 either side of center beam\n"
-        "              use modulus max(swath/beams_out, 1)\n"
+        "              use modulus max(swath / beams_out, 1)\n"
         "\n"
         " Examples:\n"
         "\n";
@@ -1771,7 +2263,7 @@ public:
         }
     }
 
-    const TrnLogConfig &tb_config()
+    const CSVLogConfig &tb_config()
     {
         return mTBConfig;
     }
@@ -1796,7 +2288,7 @@ private:
     std::string mAppCfg;
     std::string mSessionStr;
     std::list<std::string> mInputList;
-    TrnLogConfig mTBConfig;
+    CSVLogConfig mTBConfig;
     bool mConfigSet;
 };
 
@@ -1861,7 +2353,7 @@ int main(int argc, char **argv)
     TRN_NDPRINT(1,"session env[%s]\n",getenv("TLP_SESSION"));
 
     // get log player
-    TrnLogPlayer tbplayer(cfg.tb_config());
+    CSVLogPlayer tbplayer(cfg.tb_config());
 
     if(cfg.verbose()){
         std::cerr << "App Player Config:" << std::endl;

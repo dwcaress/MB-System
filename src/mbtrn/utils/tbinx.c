@@ -830,10 +830,10 @@ int s_process_file(app_cfg_t *cfg)
 
                 double prev_time =0.0;
                 
-                bool ferror=false;
+                bool ferr=false;
                 int64_t rbytes=0;
                 bool sync_valid=false;
-                while (!ferror) {
+                while (!ferr) {
                     byte *sp = (byte *)mb1;
                     bool header_valid=false;
                     bool rec_valid=false;
@@ -869,20 +869,20 @@ int s_process_file(app_cfg_t *cfg)
                         }
                         if(rbytes<=0){
                             MX_LMSG(TBINX, 1, "reached EOF looking for sync\n");
-                            ferror=true;
+                            ferr=true;
                             break;
                         }
                     }
 
                     if(g_interrupt)
-                        ferror = true;
+                        ferr = true;
 
-//                    if( (sync_valid && !ferror && (rbytes=mfile_read(ifile,(byte *)psize,4))==4)){
+//                    if( (sync_valid && !ferr && (rbytes=mfile_read(ifile,(byte *)psize,4))==4)){
 //                        // read size
 //                        header_valid=true;
 //                    }
 
-                    if (sync_valid && !ferror) {
+                    if (sync_valid && !ferr) {
                         // read the rest of the sounding header
                         byte *psnd = (byte *)&mb1->size;
                         uint32_t readlen =(MB1_HEADER_BYTES-MB1_TYPE_BYTES);
@@ -906,14 +906,14 @@ int s_process_file(app_cfg_t *cfg)
                             }
                         }else{
                             MX_ERROR("could not read header bytes [%"PRId64"]\n", rbytes);
-                            ferror=true;
+                            ferr=true;
                         }
                     }
                     
                     if(g_interrupt)
-                        ferror = true;
+                        ferr = true;
 
-                    if (header_valid && ferror==false ) {
+                    if (header_valid && ferr==false ) {
                         
                         if(mb1->nbeams>0){
                             // read beam data
@@ -945,9 +945,9 @@ int s_process_file(app_cfg_t *cfg)
                     }
 
                     if(g_interrupt)
-                        ferror = true;
+                        ferr = true;
 
-                    if (rec_valid && ferror==false) {
+                    if (rec_valid && ferr==false) {
 
                         trn_msg_bytes+=mb1->size;
                         trn_msg_count++;
