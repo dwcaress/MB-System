@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mb_process.h  9/11/00
  *
- *    Copyright (c) 2000-2020 by
+ *    Copyright (c) 2000-2023 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /**
  * @file
@@ -143,25 +153,25 @@
  *                                  # - pitch = positive forward up, degrees
  *                                  # - heave = positive up, meters
  *
- * SONARDEPTH MERGING:
- *   SONARDEPTHMODE mode            # sets sonardepth merging [0]
- *                                  # - note: sonardepth merged before
+ * SENSORDEPTH MERGING:
+ *   SENSORDEPTHMODE mode           # sets sensordepth merging [0]
+ *                                  # - note: sensordepth merged before
  *                                  #   draft corrections applied
- *                                  # - note: sonardepth merging from a separate file
+ *                                  # - note: sensordepth merging from a separate file
  *                                  #   supersedes draft merging from a navigation file
- *                                  #   0: sonardepth merging off
- *                                  #   1: sonardepth merging on
- *   SONARDEPTHFILE filename        # sets sonardepth file path
- *   SONARDEPTHFORMAT constant      # sets sonardepth file format [1]
- *                                  # - sonardepth files can be in one of four ASCII
+ *                                  #   0: sensordepth merging off
+ *                                  #   1: sensordepth merging on
+ *   SENSORDEPTHFILE filename       # sets sensordepth file path
+ *   SENSORDEPTHFORMAT constant     # sets sensordepth file format [1]
+ *                                  # - sensordepth files can be in one of four ASCII
  *                                  #   table formats
- *                                  #   1: format is <time_d sonardepth>
- *                                  #   2: format is <yr mon day hour min sec sonardepth>
- *                                  #   3: format is <yr jday hour min sec sonardepth>
- *                                  #   4: format is <yr jday daymin sec sonardepth>
+ *                                  #   1: format is <time_d sensordepth>
+ *                                  #   2: format is <yr mon day hour min sec sensordepth>
+ *                                  #   3: format is <yr jday hour min sec sensordepth>
+ *                                  #   4: format is <yr jday daymin sec sensordepth>
  *                                  # - time_d = decimal seconds since 1/1/1970
  *                                  # - daymin = decimal minutes start of day
- *                                  # - sonardepth = depth of sonar, positive down, meters
+ *                                  # - sensordepth = depth of sonar, positive down, meters
  *
  * DATA CUTTING:
  *   DATACUTCLEAR                   # clears all data cutting commands
@@ -578,8 +588,8 @@
 #define MBP_NAV_SPLINE 1
 #define MBP_ATTITUDE_OFF 0
 #define MBP_ATTITUDE_ON 1
-#define MBP_SONARDEPTH_OFF 0
-#define MBP_SONARDEPTH_ON 1
+#define MBP_SENSORDEPTH_OFF 0
+#define MBP_SENSORDEPTH_ON 1
 #define MBP_CUT_DATA_BATH 0
 #define MBP_CUT_DATA_AMP 1
 #define MBP_CUT_DATA_SS 2
@@ -701,7 +711,7 @@
 #define MB_PR_KLUGE_FIXWISSLTIMESTAMPS 5
 #define MB_PR_KLUGE_AUVSENTRYSENSORDEPTH 6
 #define MB_PR_KLUGE_IGNORESNIPPETS 7
-#define MB_PR_KLUGE_SONARDEPTHFROMHEAVE 8
+#define MB_PR_KLUGE_SENSORDEPTHFROMHEAVE 8
 
 /** structure holding mbpreprocess parameters to be passed to preprocess
  * functions of i/o modules */
@@ -807,10 +817,10 @@ struct mb_process_struct {
   char mbp_attitudefile[MBP_FILENAMESIZE];
   int mbp_attitude_format;
 
-  /* sonardepth merging */
-  int mbp_sonardepth_mode;
-  char mbp_sonardepthfile[MBP_FILENAMESIZE];
-  int mbp_sonardepth_format;
+  /* sensordepth merging */
+  int mbp_sensordepth_mode;
+  char mbp_sensordepthfile[MBP_FILENAMESIZE];
+  int mbp_sensordepth_format;
 
   /* data cutting */
   int mbp_cut_num;
@@ -998,7 +1008,7 @@ int mb_pr_update_nav(int verbose, char *file, int mbp_nav_mode, char *mbp_navfil
                      int *error);
 int mb_pr_update_attitude(int verbose, char *file, int mbp_attitude_mode, char *mbp_attitudefile, int mbp_attitude_format,
                           int *error);
-int mb_pr_update_sonardepth(int verbose, char *file, int mbp_sonardepth_mode, char *mbp_sonardepthfile, int mbp_sonardepth_format,
+int mb_pr_update_sensordepth(int verbose, char *file, int mbp_sensordepth_mode, char *mbp_sensordepthfile, int mbp_sensordepth_format,
                             int *error);
 int mb_pr_update_navshift(int verbose, char *file, int mbp_nav_shift, double mbp_nav_offsetx, double mbp_nav_offsety,
                           double mbp_nav_offsetz, double mbp_nav_shiftlon, double mbp_nav_shiftlat, double mbp_nav_shiftx,
@@ -1047,7 +1057,7 @@ int mb_pr_get_nav(int verbose, char *file, int *mbp_nav_mode, char *mbp_navfile,
                   double *mbp_nav_timeshift, int *error);
 int mb_pr_get_attitude(int verbose, char *file, int *mbp_attitude_mode, char *mbp_attitudefile, int *mbp_attitude_format,
                        int *error);
-int mb_pr_get_sonardepth(int verbose, char *file, int *mbp_sonardepth_mode, char *mbp_sonardepthfile, int *mbp_sonardepth_format,
+int mb_pr_get_sensordepth(int verbose, char *file, int *mbp_sensordepth_mode, char *mbp_sensordepthfile, int *mbp_sensordepth_format,
                          int *error);
 int mb_pr_get_navshift(int verbose, char *file, int *mbp_nav_shift, double *mbp_nav_offsetx, double *mbp_nav_offsety,
                        double *mbp_nav_offsetz, double *mbp_nav_shiftlon, double *mbp_nav_shiftlat, double *mbp_nav_shiftx,

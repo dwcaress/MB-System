@@ -1,3 +1,5 @@
+message("In src/utilities")
+
 find_package(FFTW REQUIRED)
 find_package(LibPROJ REQUIRED)
 

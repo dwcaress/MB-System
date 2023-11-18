@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------
 //    The MB-system:  mbsys_reson7k3.h  1/8/2019
 //
-//    Copyright (c) 2004-2020 by
+//    Copyright (c) 2004-2023 by
 //    David W. Caress (caress@mbari.org)
 //      Monterey Bay Aquarium Research Institute
 //      Moss Landing, CA 95039
@@ -108,7 +108,7 @@
 #define R7KRECID_Tide 1005
 #define R7KRECID_Altitude 1006                    // MB_DATA_ALTITUDE
 #define R7KRECID_MotionOverGround 1007
-#define R7KRECID_Depth 1008                       // MB_DATA_SONARDEPTH
+#define R7KRECID_Depth 1008                       // MB_DATA_SENSORDEPTH
 #define R7KRECID_SoundVelocityProfile 1009        // MB_DATA_SSV
 #define R7KRECID_CTD 1010
 #define R7KRECID_Geodesy 1011
@@ -916,7 +916,7 @@ typedef struct s7k3_ProcessedSideScan_struct {
                                 // acrosstrack = (ipixel - number_pixels / 2) * pixelwidth
                                 // where i = pixel number and N is the total number
                                 // of pixels, counting from port to starboard starting at 0
-  f64 sonardepth;                          // Sonar depth in m
+  f64 sensordepth;                          // Sonar depth in m
   f64 altitude;                            // Sonar nadir altitude in m
   f32 sidescan[MBSYS_RESON7K_MAX_PIXELS];   // sidescan values
   f32 alongtrack[MBSYS_RESON7K_MAX_PIXELS]; // Alongtrack distance in meters

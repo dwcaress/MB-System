@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit.h	6/24/95
  *
- *    Copyright (c) 1995-2020 by
+ *    Copyright (c) 1995-2023 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * MBNAVEDIT is an interactive navigation editor for swath sonar data.
@@ -138,7 +148,7 @@ void do_toggle_lon(Widget w, XtPointer client_data, XtPointer call_data);
 void do_toggle_lat(Widget w, XtPointer client_data, XtPointer call_data);
 void do_toggle_heading(Widget w, XtPointer client_data, XtPointer call_data);
 void do_toggle_speed(Widget w, XtPointer client_data, XtPointer call_data);
-void do_toggle_sonardepth(Widget w, XtPointer client_data, XtPointer call_data);
+void do_toggle_sensordepth(Widget w, XtPointer client_data, XtPointer call_data);
 void do_toggle_org_time(Widget w, XtPointer client_data, XtPointer call_data);
 void do_toggle_org_lon(Widget w, XtPointer client_data, XtPointer call_data);
 void do_toggle_org_lat(Widget w, XtPointer client_data, XtPointer call_data);
@@ -157,7 +167,7 @@ void do_driftlat(Widget w, XtPointer client_data, XtPointer call_data);
 void do_offset_apply(Widget w, XtPointer client_data, XtPointer call_data);
 void do_toggle_show_smg(Widget w, XtPointer client_data, XtPointer call_data);
 void do_toggle_org_heading(Widget w, XtPointer client_data, XtPointer call_data);
-void do_toggle_org_sonardepth(Widget w, XtPointer client_data, XtPointer call_data);
+void do_toggle_org_sensordepth(Widget w, XtPointer client_data, XtPointer call_data);
 void do_toggle_show_cmg(Widget w, XtPointer client_data, XtPointer call_data);
 void do_button_use_dr(Widget w, XtPointer client_data, XtPointer call_data);
 void do_button_use_smg(Widget w, XtPointer client_data, XtPointer call_data);

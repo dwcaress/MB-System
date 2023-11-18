@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mb_fileio.c  5/23/2012
  *
- *    Copyright (c) 2012-2020 by
+ *    Copyright (c) 2012-2023 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * mb_fileio.c contains the functions handling reading and writing of bytes to and from
@@ -40,12 +50,17 @@ int mb_fileio_open(int verbose, void *mbio_ptr, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
+    fprintf(stderr, "dbg2       mbio_ptr:           %p\n", (void *)mbio_ptr);
   }
 
   /* get mbio descriptor */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "dbg2       mbio_ptr->filemode: %d\n", mb_io_ptr->filemode);
+    fprintf(stderr, "dbg2       mbio_ptr->file:     %s\n", mb_io_ptr->file);
+  }
 
   int status = MB_SUCCESS;
 
@@ -224,6 +239,18 @@ int mb_copyfile(int verbose, const char *src, const char *dst, int *error)
         https://stackoverflow.com/questions/66362309/proper-methods-to-copy-files-folders-\
               programmatically-in-c-using-posix-functions
   */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       src:        %p\n", (void *)src);
+    fprintf(stderr, "dbg2       dst:        %p\n", (void *)dst);
+    if (src != NULL)
+      fprintf(stderr, "dbg2       src:        %s\n", src);
+    if (dst != NULL)
+      fprintf(stderr, "dbg2       dst:        %s\n", dst);
+  }
+
     int status = MB_SUCCESS;
     *error = MB_ERROR_NO_ERROR;
     const int bufsz = 65536;
@@ -269,6 +296,15 @@ int mb_copyfile(int verbose, const char *src, const char *dst, int *error)
         *error = MB_ERROR_WRITE_FAIL;
     }
     fclose(hout);
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:  %d\n", status);
+  }
+
     return(status);
 }
 /*--------------------------------------------------------------------*/
@@ -279,6 +315,18 @@ int mb_catfiles(int verbose, const char *src1, const char *src2, const char *dst
         https://stackoverflow.com/questions/66362309/proper-methods-to-copy-files-folders-\
               programmatically-in-c-using-posix-functions
   */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       src1:       %p\n", (void *)src1);
+    fprintf(stderr, "dbg2       src2:       %p\n", (void *)src2);
+    fprintf(stderr, "dbg2       dst:        %p\n", (void *)dst);
+    if (src1 != NULL)
+      fprintf(stderr, "dbg2       src1:       %s\n", src1);
+    if (src2 != NULL)
+      fprintf(stderr, "dbg2       src2:       %s\n", src2);
+  }
     int status = MB_SUCCESS;
     *error = MB_ERROR_NO_ERROR;
     const int bufsz = 65536;
@@ -395,6 +443,18 @@ int mb_catfiles(int verbose, const char *src1, const char *src2, const char *dst
       fclose(hout);
 
     }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       dst:        %p\n", (void *)dst);
+    if (dst != NULL)
+      fprintf(stderr, "dbg2       dst:        %s\n", dst);
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:  %d\n", status);
+  }
+
     return(status);
 }
 /*--------------------------------------------------------------------*/

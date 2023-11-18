@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbcopy.c  2/4/93
  *
- *    Copyright (c) 1993-2020 by
+ *    Copyright (c) 1993-2023 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * MBcopy copies an input swath sonar data file to an output
@@ -1857,7 +1867,7 @@ int main(int argc, char **argv) {
   double heading;
   double distance;
   double altitude;
-  double sonardepth;
+  double sensordepth;
   char *ibeamflag = nullptr;
   double *ibath = nullptr;
   double *ibathacrosstrack = nullptr;
@@ -1890,7 +1900,7 @@ int main(int argc, char **argv) {
   double mheading;
   double mdistance;
   double maltitude;
-  double msonardepth;
+  double msensordepth;
 
   int sensorhead_error = MB_ERROR_NO_ERROR;
   int sensorhead = 0;
@@ -2275,12 +2285,12 @@ int main(int argc, char **argv) {
     inbounds = true;
     if (copymode != MBCOPY_PARTIAL) {
       status = mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
-                          &distance, &altitude, &sonardepth, &nbath, &namp, &nss, ibeamflag, ibath, iamp, ibathacrosstrack,
+                          &distance, &altitude, &sensordepth, &nbath, &namp, &nss, ibeamflag, ibath, iamp, ibathacrosstrack,
                           ibathalongtrack, iss, issacrosstrack, issalongtrack, comment, &error);
     }
     else {
       status = mb_get(verbose, imbio_ptr, &kind, &pings, time_i, &time_d, &navlon, &navlat, &speed, &heading, &distance,
-                      &altitude, &sonardepth, &nbath, &namp, &nss, ibeamflag, ibath, iamp, ibathacrosstrack,
+                      &altitude, &sensordepth, &nbath, &namp, &nss, ibeamflag, ibath, iamp, ibathacrosstrack,
                       ibathalongtrack, iss, issacrosstrack, issalongtrack, comment, &error);
     }
 
@@ -2310,7 +2320,7 @@ int main(int argc, char **argv) {
 
         /* int mstatus = */
         mb_get(verbose, mmbio_ptr, &mkind, &mpings, mtime_i, &mtime_d, &mnavlon, &mnavlat, &mspeed, &mheading,
-               &mdistance, &maltitude, &msonardepth, &mnbath, &mnamp, &mnss, mbeamflag, mbath, mamp,
+               &mdistance, &maltitude, &msensordepth, &mnbath, &mnamp, &mnss, mbeamflag, mbath, mamp,
                mbathacrosstrack, mbathalongtrack, mss, mssacrosstrack, mssalongtrack, mcomment, &merror);
       }
 

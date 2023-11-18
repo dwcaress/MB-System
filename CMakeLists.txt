@@ -19,7 +19,7 @@
 #      Columbia University
 #      Palisades, NY 10964
 #
-#    See README file for copying and redistribution conditions.
+#    See README.md file for copying and redistribution conditions.
 #------------------------------------------------------------------------------
 #
 # To build MB-System from source using CMake do (example):
@@ -32,19 +32,15 @@
 #
 #------------------------------------------------------------------------------
 
-set(PROJECT_DATE "27 June 2023")
-
 message("----------------------------------------------------------")
 message("MB-System")
 message("CMake Build System")
 message("Johannes Schauer (University of Weurzburg")
 message("Tom O'Reilly (Monterey Bay Aquarium Research Institute")
 message("David Caress (Monterey Bay Aquarium Research Institute")
-message("${PROJECT_DATE}")
 message ("CMake version: ${CMAKE_VERSION}")
 message("The default build mode is release (optimized for performance).")
 message("  -To obtain a debug-able build invoke cmake with -DCMAKE_BUILD_TYPE=debug")
-message("Specify OTPS install location with -DotpsDir=directory")
 message("Specify OTPS install location with -DotpsDir=directory")
 message("Set install directory with -DCMAKE_INSTALL_PREFIX=directory")
 message("Enable debugging with -DCMAKE_BUILD_TYPE=Debug")
@@ -58,8 +54,9 @@ message("----------------------------------------------------------")
 
 # Define minimum CMake version required
 cmake_minimum_required(VERSION 3.20)
+
+# Define project
 project(MB-System 
-        VERSION 5.7.9
         DESCRIPTION "Open Source software for the processing and display of seafloor mapping data"
         HOMEPAGE_URL https://www.mbari.org/technology/mb-system/ 
         LANGUAGES C CXX )
@@ -92,6 +89,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/build-utils")
 option(BUILD_SHARED_LIBS "Build and link with shared libraries" ON)
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
 option(buildGSF "build GSF library" ON)
 option(buildGUIs "build graphical tools" ON)
@@ -101,22 +99,13 @@ option(buildPCL "build point-cloud-library" OFF)
 option(buildQt "build Qt tools" OFF)
 option(buildTests "build unit tests exercised by make check" OFF)
 
-if(APPLE)
-  set(CMAKE_INSTALL_MANPAGES /usr/local/share/man) 
-  set(CMAKE_INSTALL_DOC /usr/local/share/doc) 
-  set(CMAKE_INSTALL_SHARE /usr/local/share) 
-else()
-  set(CMAKE_INSTALL_MANPAGES /usr/local/share/man) 
-  set(CMAKE_INSTALL_DOC /usr/local/share/doc) 
-  set(CMAKE_INSTALL_SHARE /usr/local/share) 
-endif()
-if(APPLE)
-  set(otpsDir /usr/local/opt/otps) 
-else()
-  set(otpsDir /local/opt/otps)
-endif()
+set(CMAKE_INSTALL_MANPAGES /usr/local/share/man) 
+set(CMAKE_INSTALL_DOC /usr/local/share/doc) 
+set(CMAKE_INSTALL_SHARE /usr/local/share) 
+set(otpsDir /usr/local/src/otps) 
 set(levitusDir ${CMAKE_INSTALL_PREFIX}/share/mbsystem)
 
+message("CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
 message("CMAKE_C_COMPILER_ID: ${CMAKE_C_COMPILER_ID}")
 message("CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
 message("CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
@@ -127,7 +116,7 @@ message("CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES: ${CMAKE_CXX_IMPLICIT_INCLUDE_DI
 message("BYTESWAPPED: ${BYTESWAPPED}")
 message("CMAKE_C_FLAGS: ${CMAKE_C_FLAGS}")
 message("CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
-
+message("CMAKE_INSTALL_RPATH: ${CMAKE_INSTALL_RPATH}")
 
 include(GNUInstallDirs)
 include(CTest)
@@ -137,24 +126,24 @@ if(NOT TARGET uninstall)
   add_custom_target(uninstall COMMAND xargs rm -vf < install_manifest.txt)
 endif()
 
-# Utilities and libraries
+# Libraries
 if(buildGSF)
   add_subdirectory(src/gsf)
 endif()
-
 add_subdirectory(src/mbaux)
 add_subdirectory(src/mbio)
 add_subdirectory(src/bsio)
 add_subdirectory(src/surf)
 
-if(buildTRN)
-  add_subdirectory(src/mbtrnframe)
-  add_subdirectory(src/mbtrn)
-  add_subdirectory(src/mbtrnav)
-  add_subdirectory(src/mbtrnutils)
-endif()
+# GMT modules
+add_subdirectory(src/gmt)
 
 # Executables
+add_subdirectory(src/utilities)
+add_subdirectory(src/deprecated)
+add_subdirectory(src/macros)
+add_subdirectory(src/mbgrd2gltf)
+add_subdirectory(src/otps)
 if(buildGUIs)
   add_subdirectory(src/mbview)
   add_subdirectory(src/mbedit)
@@ -164,19 +153,19 @@ if(buildGUIs)
   add_subdirectory(src/mbnavedit)
   add_subdirectory(src/mbvelocitytool)
 endif()
-
-add_subdirectory(src/utilities)
-add_subdirectory(src/deprecated)
-add_subdirectory(src/macros)
-
+if(buildOpenCV)
+  add_subdirectory(src/photo)
+endif()
+if(buildTRN)
+  add_subdirectory(src/mbtrnframe)
+  add_subdirectory(src/mbtrn)
+  add_subdirectory(src/mbtrnav)
+  add_subdirectory(src/mbtrnutils)
+endif()
 if(buildQt)
   add_subdirectory(src/qt-guilib)
   add_subdirectory(src/qt-mbgrdviz)
   add_subdirectory(src/qt-mbgrdviz-3)
-endif()
-
-if(buildOpenCV)
-  add_subdirectory(src/photo)
 endif()
 
 if(buildTests)

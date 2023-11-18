@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbgrdviz_callbacks.c    10/9/2002
  *
- *    Copyright (c) 2002-2020 by
+ *    Copyright (c) 2002-2023 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 
 #include <ctype.h>
@@ -412,7 +422,7 @@ int do_mbgrdviz_init(int argc, char **argv, int verbosity) {
 
   /* set about version label */
   char value_text[MB_PATH_MAXLINE];
-  sprintf(value_text, "::#TimesMedium14:t\"MB-System Release %s\"#TimesMedium14\"%s\"", MB_VERSION, MB_BUILD_DATE);
+  sprintf(value_text, "::#TimesMedium14:t\"MB-System Release %s\"#TimesMedium14\"%s\"", MB_VERSION, MB_VERSION_DATE);
   set_mbview_label_multiline_string(label_about_version, value_text);
 
   /* get additional widgets */
@@ -4536,6 +4546,8 @@ int do_mbgrdviz_opennav(size_t instance, bool swathbounds, char *input_file_ptr)
   mb_path swathfileraw;
   mb_path swathfileprocessed;
   mb_path dfile;
+  int astatus = MB_ALTNAV_USE;
+  mb_path apath;
   int format;
   int formatorg;
   double weight;
@@ -4558,7 +4570,8 @@ int do_mbgrdviz_opennav(size_t instance, bool swathbounds, char *input_file_ptr)
     while (!done) {
       if ((status = mb_datalist_open(verbose, &datalist, input_file_ptr, MB_DATALIST_LOOK_UNSET, &error)) == MB_SUCCESS) {
         while (!done) {
-          if ((status = mb_datalist_read2(verbose, datalist, &swathfilestatus, swathfileraw, swathfileprocessed, dfile,
+          if ((status = mb_datalist_read3(verbose, datalist, &swathfilestatus, swathfileraw, swathfileprocessed, 
+                                          &astatus, apath, dfile,
                                           &format, &weight, &error)) == MB_SUCCESS) {
             nfiledatalist++;
             if (format != MBF_ASCIIXYZ && format != MBF_ASCIIYXZ && format != MBF_ASCIIXYT &&
@@ -4649,7 +4662,7 @@ int do_mbgrdviz_readnav(size_t instance, char *swathfile, int pathstatus, char *
   double heading;
   double distance;
   double altitude;
-  double sonardepth;
+  double sensordepth;
   char *beamflag = NULL;
   double *bath = NULL;
   double *bathacrosstrack = NULL;
@@ -4813,7 +4826,7 @@ int do_mbgrdviz_readnav(size_t instance, char *swathfile, int pathstatus, char *
     while (*error <= MB_ERROR_NO_ERROR) {
       /* read a ping of data */
       status = mb_get_all(verbose, mbio_ptr, &store_ptr, &kind, time_i, &time_d, &lon, &lat, &speed, &heading, &distance,
-                          &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp, bathacrosstrack,
+                          &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp, bathacrosstrack,
                           bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
 
       /* ignore minor errors */
@@ -4940,7 +4953,7 @@ int do_mbgrdviz_readnav(size_t instance, char *swathfile, int pathstatus, char *
         navtime_d[npoint] = time_d;
         navlon[npoint] = lon;
         navlat[npoint] = lat;
-        navz[npoint] = -sonardepth;
+        navz[npoint] = -sensordepth;
         navheading[npoint] = heading;
         navspeed[npoint] = speed;
 

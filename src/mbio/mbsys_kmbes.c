@@ -1,15 +1,25 @@
-/*--------------------------------------------------------------------
+ /*--------------------------------------------------------------------
  *    The MB-system:  mbsys_kmbes.c  3.00  5/25/2018
  *
- *    Copyright (c) 2018-2020 by
+ *    Copyright (c) 2018-2023 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * mbsys_kmbes.c contains the MBIO functions for handling data from
@@ -1076,7 +1086,7 @@ if (verbose >= 2) {
   }
 
   /* extract data from structure */
-  else if (*kind == MB_DATA_SONARDEPTH) {
+  else if (*kind == MB_DATA_SENSORDEPTH) {
     /* get time */
     for (int i = 0; i < 7; i++)
       time_i[i] = store->time_i[i];
@@ -1465,7 +1475,7 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
   }
 
   /* insert data in nav structure */
-  else if (store->kind == MB_DATA_SONARDEPTH) {
+  else if (store->kind == MB_DATA_SENSORDEPTH) {
 
   }
 
@@ -2117,7 +2127,7 @@ int mbsys_kmbes_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
   }
 
   /* extract data from nav record */
-  else if (*kind == MB_DATA_SONARDEPTH) {
+  else if (*kind == MB_DATA_SENSORDEPTH) {
     /* get time */
     for (int i = 0; i < 7; i++)
       time_i[i] = store->time_i[i];
@@ -2377,7 +2387,7 @@ int mbsys_kmbes_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int n
   }
 
   /* extract data from nav record */
-  else if (*kind == MB_DATA_SONARDEPTH) {
+  else if (*kind == MB_DATA_SENSORDEPTH) {
     *n = 1;
 
     /* get time */

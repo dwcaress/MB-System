@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
  *
- *    Copyright (c) 1993-2020 by
+ *    Copyright (c) 1993-2023 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * mb_read_init.c opens and initializes a multibeam data file
@@ -152,8 +162,8 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 
 	/* quit if there is a problem */
 	if (status == MB_FAILURE) {
-    // had to be a bad time value
-    *error = MB_ERROR_BAD_TIME;
+    	// had to be a bad time value
+    	*error = MB_ERROR_BAD_TIME;
 
 		/* free memory for mbio descriptor */
 		if (mbio_ptr != NULL) {
@@ -592,7 +602,7 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 	mb_io_ptr->nfix = 0;
 	mb_io_ptr->nattitude = 0;
 	mb_io_ptr->nheading = 0;
-	mb_io_ptr->nsonardepth = 0;
+	mb_io_ptr->nsensordepth = 0;
 	mb_io_ptr->naltitude = 0;
 	for (int i = 0; i < MB_ASYNCH_SAVE_MAX; i++) {
 		mb_io_ptr->fix_time_d[i] = 0.0;
@@ -604,8 +614,8 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 		mb_io_ptr->attitude_pitch[i] = 0.0;
 		mb_io_ptr->heading_time_d[i] = 0.0;
 		mb_io_ptr->heading_heading[i] = 0.0;
-		mb_io_ptr->sonardepth_time_d[i] = 0.0;
-		mb_io_ptr->sonardepth_sonardepth[i] = 0.0;
+		mb_io_ptr->sensordepth_time_d[i] = 0.0;
+		mb_io_ptr->sensordepth_sensordepth[i] = 0.0;
 		mb_io_ptr->altitude_time_d[i] = 0.0;
 		mb_io_ptr->altitude_altitude[i] = 0.0;
 	}
@@ -662,6 +672,213 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 		fprintf(stderr, "dbg2       beams_bath: %d\n", *beams_bath);
 		fprintf(stderr, "dbg2       beams_amp:  %d\n", *beams_amp);
 		fprintf(stderr, "dbg2       pixels_ss:  %d\n", *pixels_ss);
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mb_read_init_altnav(int verbose, char *file, int format, int pings, 
+						int lonflip, double bounds[4], int btime_i[7], int etime_i[7],
+                 		double speedmin, double timegap, int astatus, char *apath, 
+                 		void **mbio_ptr, double *btime_d, double *etime_d, 
+                 		int *beams_bath, int *beams_amp, int *pixels_ss, int *error) {
+	struct mb_io_struct *mb_io_ptr = NULL;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       file:       %s\n", file);
+		fprintf(stderr, "dbg2       format:     %d\n", format);
+		fprintf(stderr, "dbg2       pings:      %d\n", pings);
+		fprintf(stderr, "dbg2       lonflip:    %d\n", lonflip);
+		fprintf(stderr, "dbg2       bounds[0]:  %f\n", bounds[0]);
+		fprintf(stderr, "dbg2       bounds[1]:  %f\n", bounds[1]);
+		fprintf(stderr, "dbg2       bounds[2]:  %f\n", bounds[2]);
+		fprintf(stderr, "dbg2       bounds[3]:  %f\n", bounds[3]);
+		fprintf(stderr, "dbg2       btime_i[0]: %d\n", btime_i[0]);
+		fprintf(stderr, "dbg2       btime_i[1]: %d\n", btime_i[1]);
+		fprintf(stderr, "dbg2       btime_i[2]: %d\n", btime_i[2]);
+		fprintf(stderr, "dbg2       btime_i[3]: %d\n", btime_i[3]);
+		fprintf(stderr, "dbg2       btime_i[4]: %d\n", btime_i[4]);
+		fprintf(stderr, "dbg2       btime_i[5]: %d\n", btime_i[5]);
+		fprintf(stderr, "dbg2       btime_i[6]: %d\n", btime_i[6]);
+		fprintf(stderr, "dbg2       etime_i[0]: %d\n", etime_i[0]);
+		fprintf(stderr, "dbg2       etime_i[1]: %d\n", etime_i[1]);
+		fprintf(stderr, "dbg2       etime_i[2]: %d\n", etime_i[2]);
+		fprintf(stderr, "dbg2       etime_i[3]: %d\n", etime_i[3]);
+		fprintf(stderr, "dbg2       etime_i[4]: %d\n", etime_i[4]);
+		fprintf(stderr, "dbg2       etime_i[5]: %d\n", etime_i[5]);
+		fprintf(stderr, "dbg2       etime_i[6]: %d\n", etime_i[6]);
+		fprintf(stderr, "dbg2       speedmin:   %f\n", speedmin);
+		fprintf(stderr, "dbg2       timegap:    %f\n", timegap);
+		fprintf(stderr, "dbg2       astatus:    %d\n", astatus);
+		fprintf(stderr, "dbg2       apath:      %s\n", apath);
+	}
+//if (astatus == MB_ALTNAV_USE)
+//fprintf(stderr, "%s:%d:%s: altnav enabled for file:%s   altnavpath:%s\n", __FILE__, __LINE__, __FUNCTION__, file, apath);
+//else
+//fprintf(stderr, "%s:%d:%s: altnav disabled for file:%s\n", __FILE__, __LINE__, __FUNCTION__, file);
+
+	/* call the original mb_read_init() */
+	int status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i,
+                 		speedmin, timegap, mbio_ptr, btime_d, etime_d, 
+                 		beams_bath, beams_amp, pixels_ss, error);
+
+	/* if possible load the alternative navigation */
+	if (status == MB_SUCCESS && *error == MB_ERROR_NO_ERROR && astatus == MB_ALTNAV_USE) {
+		mb_io_ptr = (struct mb_io_struct *) *mbio_ptr;
+//fprintf(stderr, "%s:%d:%s: Loading apath:      %s\n", __FILE__, __LINE__, __FUNCTION__, apath);
+
+		mb_io_ptr->alternative_navigation = false;
+		mb_io_ptr->nav_alt_num = 0;
+		mb_io_ptr->nav_alt_num_alloc = 0;
+		mb_io_ptr->nav_alt_time_d = NULL;
+		mb_io_ptr->nav_alt_navlon = NULL;
+		mb_io_ptr->nav_alt_navlat = NULL;
+		mb_io_ptr->nav_alt_heading = NULL;
+		mb_io_ptr->nav_alt_speed = NULL;
+		mb_io_ptr->nav_alt_sensordepth = NULL;
+		mb_io_ptr->nav_alt_roll = NULL;
+		mb_io_ptr->nav_alt_pitch = NULL;
+		mb_io_ptr->nav_alt_heave = NULL;
+		mb_io_ptr->nav_alt_zoffset = NULL;
+
+		FILE *afp = NULL;
+	    if ((afp = fopen(apath, "r")) == NULL) {
+	      	*error = MB_ERROR_OPEN_FAIL;
+	      	status = MB_FAILURE;
+	    } else {
+			char *result;
+			mb_path buffer;
+			int n_alt_nav = 0;
+			while ((result = fgets(buffer, sizeof(mb_path), afp)) == buffer) {
+	      		if (buffer[0] != '#') {
+	        		n_alt_nav++;
+	     		}
+			}
+
+		    /* allocate arrays for adjusted nav */
+		    if (n_alt_nav > 1) {
+		      /* status = */ mb_mallocd(verbose, __FILE__, __LINE__, n_alt_nav * sizeof(double), (void **)&mb_io_ptr->nav_alt_time_d, error);
+		      /* status = */ mb_mallocd(verbose, __FILE__, __LINE__, n_alt_nav * sizeof(double), (void **)&mb_io_ptr->nav_alt_navlon, error);
+		      /* status = */ mb_mallocd(verbose, __FILE__, __LINE__, n_alt_nav * sizeof(double), (void **)&mb_io_ptr->nav_alt_navlat, error);
+		      /* status = */ mb_mallocd(verbose, __FILE__, __LINE__, n_alt_nav * sizeof(double), (void **)&mb_io_ptr->nav_alt_heading, error);
+		      /* status = */ mb_mallocd(verbose, __FILE__, __LINE__, n_alt_nav * sizeof(double), (void **)&mb_io_ptr->nav_alt_speed, error);
+		      /* status = */ mb_mallocd(verbose, __FILE__, __LINE__, n_alt_nav * sizeof(double), (void **)&mb_io_ptr->nav_alt_sensordepth, error);
+		      /* status = */ mb_mallocd(verbose, __FILE__, __LINE__, n_alt_nav * sizeof(double), (void **)&mb_io_ptr->nav_alt_roll, error);
+		      /* status = */ mb_mallocd(verbose, __FILE__, __LINE__, n_alt_nav * sizeof(double), (void **)&mb_io_ptr->nav_alt_pitch, error);
+		      /* status = */ mb_mallocd(verbose, __FILE__, __LINE__, n_alt_nav * sizeof(double), (void **)&mb_io_ptr->nav_alt_heave, error);
+		      /* status = */ mb_mallocd(verbose, __FILE__, __LINE__, n_alt_nav * sizeof(double), (void **)&mb_io_ptr->nav_alt_zoffset, error);
+
+		      /* if error initializing memory then quit */
+		      if (*error != MB_ERROR_NO_ERROR) {
+		        status = MB_FAILURE;
+		      } else {
+		      	mb_io_ptr->nav_alt_num_alloc = n_alt_nav;
+		      }
+		    }
+
+	    	if (status == MB_SUCCESS && n_alt_nav > 0) {
+		    	rewind(afp);
+
+			    n_alt_nav = 0;
+			    while ((result = fgets(buffer, sizeof(mb_path), afp)) == buffer) {
+			      	if (buffer[0] != '#') {
+				      	int time_i[7];
+				      	double sec;
+				        const int nget = sscanf(buffer, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", 
+				        							&time_i[0], &time_i[1], &time_i[2], &time_i[3], &time_i[4], &sec, 
+				                      &mb_io_ptr->nav_alt_time_d[n_alt_nav], 
+				                      &mb_io_ptr->nav_alt_navlon[n_alt_nav],
+				                      &mb_io_ptr->nav_alt_navlat[n_alt_nav], 
+				                      &mb_io_ptr->nav_alt_heading[n_alt_nav], 
+				                      &mb_io_ptr->nav_alt_speed[n_alt_nav], 
+				                      &mb_io_ptr->nav_alt_sensordepth[n_alt_nav], 
+				                      &mb_io_ptr->nav_alt_roll[n_alt_nav], 
+				                      &mb_io_ptr->nav_alt_pitch[n_alt_nav], 
+				                      &mb_io_ptr->nav_alt_heave[n_alt_nav], 
+				                      &mb_io_ptr->nav_alt_zoffset[n_alt_nav]);
+				        if (nget >= 16) {
+
+						      /* make sure longitude is defined according to lonflip */
+					        if (lonflip == -1 && mb_io_ptr->nav_alt_navlon[n_alt_nav] > 0.0)
+					          mb_io_ptr->nav_alt_navlon[n_alt_nav] -= 360.0;
+					        else if (lonflip == 0 && mb_io_ptr->nav_alt_navlon[n_alt_nav] < -180.0)
+					          mb_io_ptr->nav_alt_navlon[n_alt_nav] += 360.0;
+					        else if (lonflip == 0 && mb_io_ptr->nav_alt_navlon[n_alt_nav] > 180.0)
+					          mb_io_ptr->nav_alt_navlon[n_alt_nav] -= 360.0;
+					        else if (lonflip == 1 && mb_io_ptr->nav_alt_navlon[n_alt_nav] < 0.0)
+					          mb_io_ptr->nav_alt_navlon[n_alt_nav] += 360.0;
+
+				          n_alt_nav++;
+			        	}
+		      		}
+		    	}
+		  	}
+		  	fclose(afp);
+
+		  	if (status == MB_SUCCESS && n_alt_nav > 1) {
+			  	mb_io_ptr->nav_alt_num = n_alt_nav;
+			  	mb_io_ptr->alternative_navigation = true;
+	    	} else {
+				mb_io_ptr->nav_alt_num = 0;
+				mb_io_ptr->nav_alt_num_alloc = 0;
+				mb_io_ptr->alternative_navigation = false;
+				if (mb_io_ptr->nav_alt_time_d != NULL)
+	      	mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->nav_alt_time_d, error);
+	      if (mb_io_ptr->nav_alt_navlon != NULL)
+	      	mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->nav_alt_navlon, error);
+	      if (mb_io_ptr->nav_alt_navlat != NULL)
+	      	mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->nav_alt_navlat, error);
+	      if (mb_io_ptr->nav_alt_heading != NULL)
+	      	mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->nav_alt_heading, error);
+	      if (mb_io_ptr->nav_alt_speed != NULL)
+	      	mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->nav_alt_speed, error);
+	      if (mb_io_ptr->nav_alt_sensordepth != NULL)
+	      	mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->nav_alt_sensordepth, error);
+	      if (mb_io_ptr->nav_alt_roll != NULL)
+	      	mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->nav_alt_roll, error);
+	      if (mb_io_ptr->nav_alt_pitch != NULL)
+	      	mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->nav_alt_pitch, error);
+	      if (mb_io_ptr->nav_alt_heave != NULL)
+	      	mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->nav_alt_heave, error);
+	      if (mb_io_ptr->nav_alt_zoffset != NULL)
+	      	mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->nav_alt_zoffset, error);
+	    }
+	  }
+//fprintf(stderr, "%s:%d:%s: Altnav loaded: %d\n", __FILE__, __LINE__, __FUNCTION__, mb_io_ptr->nav_alt_num);
+
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)*mbio_ptr);
+		fprintf(stderr, "dbg2       ->numfile:  %d\n", mb_io_ptr->numfile);
+		fprintf(stderr, "dbg2       ->file:     %s\n", mb_io_ptr->file);
+		if (mb_io_ptr->numfile >= 2 || mb_io_ptr->numfile <= -2)
+			fprintf(stderr, "dbg2       ->file2:    %s\n", mb_io_ptr->file2);
+		if (mb_io_ptr->numfile >= 3 || mb_io_ptr->numfile <= -3)
+			fprintf(stderr, "dbg2       ->file3:    %s\n", mb_io_ptr->file3);
+		fprintf(stderr, "dbg2       ->mbfp:     %p\n", (void *)mb_io_ptr->mbfp);
+		if (mb_io_ptr->numfile >= 2 || mb_io_ptr->numfile <= -2)
+			fprintf(stderr, "dbg2       ->mbfp2:    %p\n", (void *)mb_io_ptr->mbfp2);
+		if (mb_io_ptr->numfile >= 3 || mb_io_ptr->numfile <= -3)
+			fprintf(stderr, "dbg2       ->mbfp3:    %p\n", (void *)mb_io_ptr->mbfp3);
+		fprintf(stderr, "dbg2       btime_d:    %f\n", *btime_d);
+		fprintf(stderr, "dbg2       etime_d:    %f\n", *etime_d);
+		fprintf(stderr, "dbg2       beams_bath: %d\n", *beams_bath);
+		fprintf(stderr, "dbg2       beams_amp:  %d\n", *beams_amp);
+		fprintf(stderr, "dbg2       pixels_ss:  %d\n", *pixels_ss);
+		fprintf(stderr, "dbg2       alternative_navigation:  %d\n", mb_io_ptr->alternative_navigation);
+		if (mb_io_ptr->alternative_navigation) {
+			fprintf(stderr, "dbg2       nav_alt_num:             %d\n", mb_io_ptr->nav_alt_num);
+			fprintf(stderr, "dbg2       nav_alt_num_alloc:       %d\n", mb_io_ptr->nav_alt_num_alloc);
+		}
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
@@ -1044,7 +1261,7 @@ int mb_input_init(int verbose, char *socket_definition, int format,
 	mb_io_ptr->nfix = 0;
 	mb_io_ptr->nattitude = 0;
 	mb_io_ptr->nheading = 0;
-	mb_io_ptr->nsonardepth = 0;
+	mb_io_ptr->nsensordepth = 0;
 	mb_io_ptr->naltitude = 0;
 	for (int i = 0; i < MB_ASYNCH_SAVE_MAX; i++) {
 		mb_io_ptr->fix_time_d[i] = 0.0;
@@ -1056,8 +1273,8 @@ int mb_input_init(int verbose, char *socket_definition, int format,
 		mb_io_ptr->attitude_pitch[i] = 0.0;
 		mb_io_ptr->heading_time_d[i] = 0.0;
 		mb_io_ptr->heading_heading[i] = 0.0;
-		mb_io_ptr->sonardepth_time_d[i] = 0.0;
-		mb_io_ptr->sonardepth_sonardepth[i] = 0.0;
+		mb_io_ptr->sensordepth_time_d[i] = 0.0;
+		mb_io_ptr->sensordepth_sensordepth[i] = 0.0;
 		mb_io_ptr->altitude_time_d[i] = 0.0;
 		mb_io_ptr->altitude_altitude[i] = 0.0;
 	}

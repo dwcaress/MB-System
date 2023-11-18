@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbclean.c  2/26/93
  *
- *    Copyright (c) 1993-2020 by
+ *    Copyright (c) 1993-2023 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * mbclean identifies and flags artifacts in swath sonar bathymetry data.
@@ -602,7 +612,7 @@ int main(int argc, char **argv) {
   int traveltime;
   double distance;
   double altitude;
-  double sonardepth;
+  double sensordepth;
   int beams_bath;
   int beams_amp;
   int pixels_ss;
@@ -872,7 +882,7 @@ int main(int argc, char **argv) {
         /* read next record */
         error = MB_ERROR_NO_ERROR;
         status = mb_get(verbose, mbio_ptr, &kind, &pingsread, ping[nrec].time_i, &ping[nrec].time_d, &ping[nrec].navlon,
-                        &ping[nrec].navlat, &ping[nrec].speed, &ping[nrec].heading, &distance, &altitude, &sonardepth,
+                        &ping[nrec].navlat, &ping[nrec].speed, &ping[nrec].heading, &distance, &altitude, &sensordepth,
                         &ping[nrec].beams_bath, &beams_amp, &pixels_ss, ping[nrec].beamflag, ping[nrec].bath, amp,
                         ping[nrec].bathacrosstrack, ping[nrec].bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment,
                         &error);
@@ -1061,7 +1071,7 @@ int main(int argc, char **argv) {
               if (mb_beam_ok(ping[irec].beamflag[i])) {
                 const double xx = ping[irec].bathacrosstrack[i];
                 const double yy = ping[irec].bathalongtrack[i];
-                const double zz = ping[irec].bath[i] - sonardepth;
+                const double zz = ping[irec].bath[i] - sensordepth;
                 mb_xyz_to_takeoff(verbose, xx, yy, zz, &theta, &phi, &error);
                 mb_takeoff_to_rollpitch(verbose, theta, phi, &pitch, &roll, &error);
                 roll = 90.0 - roll;
@@ -1091,7 +1101,7 @@ int main(int argc, char **argv) {
               if (ping[irec].beamflag[i] != MB_FLAG_NULL && !mb_beam_ok(ping[irec].beamflag[i])) {
                 const double xx = ping[irec].bathacrosstrack[i];
                 const double yy = ping[irec].bathalongtrack[i];
-                const double zz = ping[irec].bath[i] - sonardepth;
+                const double zz = ping[irec].bath[i] - sensordepth;
                 mb_xyz_to_takeoff(verbose, xx, yy, zz, &theta, &phi, &error);
                 mb_takeoff_to_rollpitch(verbose, theta, phi, &pitch, &roll, &error);
                 roll = 90.0 - roll;
@@ -1189,7 +1199,7 @@ int main(int argc, char **argv) {
               if (mb_beam_ok(ping[irec].beamflag[i]) &&
                   sqrt(ping[irec].bathacrosstrack[i] * ping[irec].bathacrosstrack[i] +
                        ping[irec].bathalongtrack[i] * ping[irec].bathalongtrack[i] +
-                       (ping[irec].bath[i] - sonardepth) * (ping[irec].bath[i] - sonardepth)) < range_min) {
+                       (ping[irec].bath[i] - sensordepth) * (ping[irec].bath[i] - sensordepth)) < range_min) {
                 if (verbose >= 1)
                   fprintf(stderr, "k: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f\n", ping[irec].time_i[0],
                           ping[irec].time_i[1], ping[irec].time_i[2], ping[irec].time_i[3],

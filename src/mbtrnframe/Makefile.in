@@ -145,9 +145,9 @@ am__uninstall_files_from_dir = { \
   }
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libmbtrnframe_la_DEPENDENCIES =
-am_libmbtrnframe_la_OBJECTS = mframe.lo mbbuf.lo mcbuf.lo msocket.lo \
-	mthread.lo mfile.lo mtime.lo mmdebug.lo merror.lo mlog.lo \
-	mlist.lo mstats.lo mswap.lo mutils.lo mkvconf.lo mconfig.lo \
+am_libmbtrnframe_la_OBJECTS = mframe.lo mbbuf.lo mcbuf.lo mconfig.lo \
+	merror.lo mfile.lo mkvconf.lo mlist.lo mlog.lo mmdebug.lo \
+	msocket.lo mstats.lo mswap.lo mthread.lo mtime.lo mutils.lo \
 	mxdebug.lo
 libmbtrnframe_la_OBJECTS = $(am_libmbtrnframe_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -502,19 +502,19 @@ libmbtrnframe_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmbtrnframe_la_SOURCES = mframe.c \
         mbbuf.c \
         mcbuf.c \
-        msocket.c \
-        mthread.c \
-        mfile.c \
-        mtime.c\
-        mmdebug.c \
+        mconfig.c \
         merror.c \
-        mlog.c \
+        mfile.c \
+        mkvconf.c \
         mlist.c \
+        mlog.c \
+        mmdebug.c \
+        msocket.c \
         mstats.c \
         mswap.c \
+        mthread.c \
+        mtime.c\
         mutils.c \
-        mkvconf.c \
-        mconfig.c \
         mxdebug.cpp
 
 libmbtrnframe_la_LIBADD = 

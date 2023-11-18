@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbnavadjust_io.h  4/18/2014
 
- *    Copyright (c) 2014-2020 by
+ *    Copyright (c) 2014-2023 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * Mbnavadjustmerge merges two existing mbnavadjust projects. The result
@@ -34,9 +44,13 @@
 
 /* Current MBnavadjust project file verion is 3.13 */
 #define MBNA_FILE_VERSION_MAJOR 3
-#define MBNA_FILE_VERSION_MINOR 14
+#define MBNA_FILE_VERSION_MINOR 15
 
 /* mbnavadjust global defines */
+#define MBNA_USE_MODE_NONE 0
+#define MBNA_USE_MODE_PRIMARY 1
+#define MBNA_USE_MODE_SECONDARY 2
+#define MBNA_USE_MODE_TERTIARY 3
 #define ALLOC_NUM 10
 #define MBNA_REFGRID_NUM_MAX  25
 #define MBNA_SNAV_NUM 11
@@ -367,6 +381,7 @@ struct mbna_project {
   mb_path refgrid_names[MBNA_REFGRID_NUM_MAX];
   double refgrid_bounds[4][MBNA_REFGRID_NUM_MAX];
 
+  int use_mode;
   double section_length;
   int section_soundings;
   int bin_beams_bath;

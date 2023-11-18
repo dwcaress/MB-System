@@ -1,3 +1,27 @@
+/*--------------------------------------------------------------------
+ *    The MB-system:	mbnavedit_creation.h	6/24/95
+ *
+ *    Copyright (c) 1995-2023 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
+ *      Lamont-Doherty Earth Observatory
+ *      Columbia University
+ *      Palisades, NY 10964
+ *
+ *    See README.md file for copying and redistribution conditions.
+ *--------------------------------------------------------------------*/
+
 #ifndef MBNAVEDIT_MBNAVEDIT_CREATION_H_
 #define MBNAVEDIT_MBNAVEDIT_CREATION_H_
 
@@ -57,8 +81,8 @@ EXTERNAL Widget pushButton_unflag;
 EXTERNAL Widget pushButton_flag;
 EXTERNAL Widget pushButton_controls_timeinterpolation;
 EXTERNAL Widget pushButton_controls_deletebadtimetag;
-EXTERNAL Widget toggleButton_org_sonardepth;
-EXTERNAL Widget toggleButton_sonardepth;
+EXTERNAL Widget toggleButton_org_sensordepth;
+EXTERNAL Widget toggleButton_sensordepth;
 EXTERNAL Widget pushButton_solution;
 EXTERNAL Widget toggleButton_dr_lat;
 EXTERNAL Widget toggleButton_dr_lon;

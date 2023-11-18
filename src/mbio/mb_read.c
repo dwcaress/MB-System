@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read.c	2/20/93
  *
- *    Copyright (c) 1993-2020 by
+ *    Copyright (c) 1993-2023 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * mb_read.c reads and averages multibeam data from a file
@@ -32,7 +42,7 @@
 
 /*--------------------------------------------------------------------*/
 int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], double *time_d, double *navlon, double *navlat,
-            double *speed, double *heading, double *distance, double *altitude, double *sonardepth, int *nbath, int *namp,
+            double *speed, double *heading, double *distance, double *altitude, double *sensordepth, int *nbath, int *namp,
             int *nss, char *beamflag, double *bath, double *amp, double *bathlon, double *bathlat, double *ss, double *sslon,
             double *sslat, char *comment, int *error) {
 	if (verbose >= 2) {
@@ -133,7 +143,29 @@ int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], d
 				                    mb_io_ptr->new_ss_acrosstrack, mb_io_ptr->new_ss_alongtrack, mb_io_ptr->new_comment, error);
 			}
 			if (status == MB_SUCCESS && mb_io_ptr->new_kind == MB_DATA_DATA) {
-				status = mb_extract_altitude(verbose, mbio_ptr, store_ptr, &mb_io_ptr->new_kind, sonardepth, altitude, error);
+				status = mb_extract_altitude(verbose, mbio_ptr, store_ptr, &mb_io_ptr->new_kind, sensordepth, altitude, error);
+			}
+
+			/* if alternative nav is available use it for survey records */
+			if (status == MB_SUCCESS && mb_io_ptr->new_kind == MB_DATA_DATA && mb_io_ptr->alternative_navigation) {
+				double zoffset = 0.0;
+				double tsensordepth = 0.0;
+				int inavadjtime = 0;
+				mb_linear_interp_longitude(	verbose, mb_io_ptr->nav_alt_time_d - 1, mb_io_ptr->nav_alt_navlon - 1,      mb_io_ptr->nav_alt_num, mb_io_ptr->new_time_d, &mb_io_ptr->new_lon,     &inavadjtime, error);
+		        mb_linear_interp_latitude(	verbose, mb_io_ptr->nav_alt_time_d - 1, mb_io_ptr->nav_alt_navlat - 1,      mb_io_ptr->nav_alt_num, mb_io_ptr->new_time_d, &mb_io_ptr->new_lat,     &inavadjtime, error);
+		        mb_linear_interp(			verbose, mb_io_ptr->nav_alt_time_d - 1, mb_io_ptr->nav_alt_speed - 1,       mb_io_ptr->nav_alt_num, mb_io_ptr->new_time_d, &mb_io_ptr->new_speed,   &inavadjtime, error);
+		        mb_linear_interp_heading(	verbose, mb_io_ptr->nav_alt_time_d - 1, mb_io_ptr->nav_alt_heading - 1,     mb_io_ptr->nav_alt_num, mb_io_ptr->new_time_d, &mb_io_ptr->new_heading, &inavadjtime, error);
+		      	mb_linear_interp(           verbose, mb_io_ptr->nav_alt_time_d - 1, mb_io_ptr->nav_alt_sensordepth - 1, mb_io_ptr->nav_alt_num, mb_io_ptr->new_time_d, &tsensordepth, 			&inavadjtime, error);
+		        mb_linear_interp(           verbose, mb_io_ptr->nav_alt_time_d - 1, mb_io_ptr->nav_alt_zoffset - 1,     mb_io_ptr->nav_alt_num, mb_io_ptr->new_time_d, &zoffset,     			&inavadjtime, error);
+		        if (mb_io_ptr->new_heading < 0.0)
+		          mb_io_ptr->new_heading += 360.0;
+		        else if (mb_io_ptr->new_heading > 360.0)
+		          mb_io_ptr->new_heading -= 360.0;
+    			double bath_correction = tsensordepth - *sensordepth + zoffset;
+    			*sensordepth = tsensordepth + zoffset;
+		      	for (int ibeam=0; ibeam<mb_io_ptr->new_beams_bath; ibeam++) {
+		      		mb_io_ptr->new_bath[ibeam] += bath_correction;
+		      	}
 			}
 
 			/* set errors if not survey data */
@@ -547,7 +579,7 @@ int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], d
 			fprintf(stderr, "dbg4       old lat:      %f\n", mb_io_ptr->old_lat);
 			fprintf(stderr, "dbg4       distance:     %f\n", *distance);
 			fprintf(stderr, "dbg4       altitude:     %f\n", *altitude);
-			fprintf(stderr, "dbg4       sonardepth:   %f\n", *sonardepth);
+			fprintf(stderr, "dbg4       sensordepth:  %f\n", *sensordepth);
 			fprintf(stderr, "dbg4       delta_time:   %f\n", delta_time);
 			fprintf(stderr, "dbg4       speed:        %f\n", *speed);
 			fprintf(stderr, "dbg4       error:        %d\n", *error);
@@ -649,7 +681,7 @@ int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], d
 		fprintf(stderr, "dbg2       heading:    %f\n", *heading);
 		fprintf(stderr, "dbg2       distance:   %f\n", *distance);
 		fprintf(stderr, "dbg2       altitude:   %f\n", *altitude);
-		fprintf(stderr, "dbg2       sonardepth: %f\n", *sonardepth);
+		fprintf(stderr, "dbg2       sensordepth:%f\n", *sensordepth);
 		fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);
 		if (verbose >= 3 && *nbath > 0) {
 			fprintf(stderr, "dbg3       beam   nbath flag bath  crosstrack alongtrack\n");

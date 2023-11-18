@@ -1,3 +1,26 @@
+/*--------------------------------------------------------------------
+ *    The MB-system:	mbnavedit_creation.c	6/24/95
+ *
+ *    Copyright (c) 1995-2023 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
+ *      Lamont-Doherty Earth Observatory
+ *      Columbia University
+ *      Palisades, NY 10964
+ *
+ *    See README.md file for copying and redistribution conditions.
+ *--------------------------------------------------------------------*/
 #ifndef SANS
 #define SANS "helvetica"
 #endif
@@ -86,8 +109,8 @@ void do_start(Widget, XtPointer, XtPointer);
 void do_interpolationrepeats(Widget, XtPointer, XtPointer);
 void do_unflag(Widget, XtPointer, XtPointer);
 void do_flag(Widget, XtPointer, XtPointer);
-void do_toggle_org_sonardepth(Widget, XtPointer, XtPointer);
-void do_toggle_sonardepth(Widget, XtPointer, XtPointer);
+void do_toggle_org_sensordepth(Widget, XtPointer, XtPointer);
+void do_toggle_sensordepth(Widget, XtPointer, XtPointer);
 void do_button_use_dr(Widget, XtPointer, XtPointer);
 void do_toggle_dr_lat(Widget, XtPointer, XtPointer);
 void do_toggle_dr_lon(Widget, XtPointer, XtPointer);
@@ -655,13 +678,13 @@ Widget CreatemainWindow(Widget parent) {
 		ac++;
 		XtSetArg(args[ac], XmNheight, 20);
 		ac++;
-		toggleButton_org_sonardepth = XmCreateToggleButton(bulletinBoard, (char *)"toggleButton_org_sonardepth", args, ac);
-		XtManageChild(toggleButton_org_sonardepth);
+		toggleButton_org_sensordepth = XmCreateToggleButton(bulletinBoard, (char *)"toggleButton_org_sensordepth", args, ac);
+		XtManageChild(toggleButton_org_sensordepth);
 
 		XmStringFree((XmString)tmp0);
 	}
 
-	XtAddCallback(toggleButton_org_sonardepth, XmNvalueChangedCallback, do_toggle_org_sonardepth, (XtPointer)0);
+	XtAddCallback(toggleButton_org_sensordepth, XmNvalueChangedCallback, do_toggle_org_sensordepth, (XtPointer)0);
 
 	ac = 0;
 	{
@@ -687,13 +710,13 @@ Widget CreatemainWindow(Widget parent) {
 		ac++;
 		XtSetArg(args[ac], XmNheight, 20);
 		ac++;
-		toggleButton_sonardepth = XmCreateToggleButton(bulletinBoard, (char *)"toggleButton_sonardepth", args, ac);
-		XtManageChild(toggleButton_sonardepth);
+		toggleButton_sensordepth = XmCreateToggleButton(bulletinBoard, (char *)"toggleButton_sensordepth", args, ac);
+		XtManageChild(toggleButton_sensordepth);
 
 		XmStringFree((XmString)tmp0);
 	}
 
-	XtAddCallback(toggleButton_sonardepth, XmNvalueChangedCallback, do_toggle_sonardepth, (XtPointer)0);
+	XtAddCallback(toggleButton_sensordepth, XmNvalueChangedCallback, do_toggle_sensordepth, (XtPointer)0);
 
 	ac = 0;
 	{

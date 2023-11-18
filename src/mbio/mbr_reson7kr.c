@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbr_reson7kr.c  4/4/2004
  *
- *    Copyright (c) 2004-2020 by
+ *    Copyright (c) 2004-2023 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * mbr_reson7kr.c contains the functions for reading and writing
@@ -1516,7 +1526,7 @@ int mbr_reson7kr_rd_depth(int verbose, char *buffer, void *store_ptr, int *error
   /* set kind */
   if (status == MB_SUCCESS) {
     /* set kind */
-    store->kind = MB_DATA_SONARDEPTH;
+    store->kind = MB_DATA_SENSORDEPTH;
     store->type = R7KRECID_Depth;
 
     /* get the time */
@@ -3897,7 +3907,7 @@ int mbr_reson7kr_rd_processedsidescan(int verbose, char *buffer, void *store_ptr
   index += 4;
   mb_get_binary_float(true, &buffer[index], &(processedsidescan->pixelwidth));
   index += 4;
-  mb_get_binary_double(true, &buffer[index], &(processedsidescan->sonardepth));
+  mb_get_binary_double(true, &buffer[index], &(processedsidescan->sensordepth));
   index += 8;
   mb_get_binary_double(true, &buffer[index], &(processedsidescan->altitude));
   index += 8;
@@ -9021,8 +9031,8 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
       mb_attint_add(verbose, mbio_ptr, (double)(bluefin->nav[i].position_time), (double)(0.0),
                     (double)(RTD * bluefin->nav[i].roll), (double)(RTD * bluefin->nav[i].pitch), error);
       mb_hedint_add(verbose, mbio_ptr, (double)(bluefin->nav[i].position_time), (double)(RTD * bluefin->nav[i].yaw), error);
-      if (mb_io_ptr->nsonardepth == 0 ||
-          (bluefin->nav[i].depth != mb_io_ptr->sonardepth_sonardepth[mb_io_ptr->nsonardepth - 1])) {
+      if (mb_io_ptr->nsensordepth == 0 ||
+          (bluefin->nav[i].depth != mb_io_ptr->sensordepth_sensordepth[mb_io_ptr->nsensordepth - 1])) {
         if (bluefin->nav[i].depth_time <= 0.0)
           bluefin->nav[i].depth_time = bluefin->nav[i].position_time;
         mb_depint_add(verbose, mbio_ptr, (double)(bluefin->nav[i].depth_time), (double)(bluefin->nav[i].depth), error);
@@ -9102,8 +9112,8 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     mb_altint_add(verbose, mbio_ptr, (double)(store->time_d), (double)(altitude->altitude), error);
   }
 
-  /* save sonardepth if depth record */
-  if (status == MB_SUCCESS && store->kind == MB_DATA_SONARDEPTH && store->type == R7KRECID_Depth) {
+  /* save sensordepth if depth record */
+  if (status == MB_SUCCESS && store->kind == MB_DATA_SENSORDEPTH && store->type == R7KRECID_Depth) {
     /* get attitude structure */
     depth = &(store->depth);
 
@@ -12509,7 +12519,7 @@ int mbr_reson7kr_wr_processedsidescan(int verbose, unsigned int *bufferalloc, ch
     index += 4;
     mb_put_binary_float(true, processedsidescan->pixelwidth, &buffer[index]);
     index += 4;
-    mb_put_binary_double(true, processedsidescan->sonardepth, &buffer[index]);
+    mb_put_binary_double(true, processedsidescan->sensordepth, &buffer[index]);
     index += 8;
     mb_put_binary_double(true, processedsidescan->altitude, &buffer[index]);
     index += 8;

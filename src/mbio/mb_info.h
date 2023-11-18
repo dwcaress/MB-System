@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_info.h			8/21/2006
  *
- *    Copyright (c) 2006-2020 by
+ *    Copyright (c) 2006-2023 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /**
    @file
@@ -62,7 +72,7 @@ struct mb_info_struct {
 	double depth_start;
 	double heading_start;
 	double speed_start;
-	double sonardepth_start;
+	double sensordepth_start;
 	double sonaraltitude_start;
 
 	double time_end;
@@ -71,15 +81,15 @@ struct mb_info_struct {
 	double depth_end;
 	double heading_end;
 	double speed_end;
-	double sonardepth_end;
+	double sensordepth_end;
 	double sonaraltitude_end;
 
 	double lon_min;
 	double lon_max;
 	double lat_min;
 	double lat_max;
-	double sonardepth_min;
-	double sonardepth_max;
+	double sensordepth_min;
+	double sensordepth_max;
 	double altitude_min;
 	double altitude_max;
 	double depth_min;

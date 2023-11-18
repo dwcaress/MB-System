@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hysweep.c	3.00	12/23/2011
  *
- *    Copyright (c) 2011-2020 by
+ *    Copyright (c) 2011-2023 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * mbsys_hysweep.c contains the MBIO functions for handling data logged
@@ -2122,8 +2132,8 @@ int mbsys_hysweep_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 		}
 
 		/* get draft  */
-		if (mb_io_ptr->nsonardepth > 0) {
-			if (mb_io_ptr->nsonardepth > 0)
+		if (mb_io_ptr->nsensordepth > 0) {
+			if (mb_io_ptr->nsensordepth > 0)
 				mb_depint_interp(verbose, mbio_ptr, store->time_d, draft, error);
 			*heave = 0.0;
 		}
@@ -2154,8 +2164,8 @@ int mbsys_hysweep_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 		*heave = store->HCP_heave;
 
 		/* get draft  */
-		if (mb_io_ptr->nsonardepth > 0) {
-			if (mb_io_ptr->nsonardepth > 0)
+		if (mb_io_ptr->nsensordepth > 0) {
+			if (mb_io_ptr->nsensordepth > 0)
 				mb_depint_interp(verbose, mbio_ptr, store->time_d, draft, error);
 			*heave = 0.0;
 		}

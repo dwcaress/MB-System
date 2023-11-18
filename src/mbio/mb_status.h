@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
  *
- *    Copyright (c) 1993-2020 by
+ *    Copyright (c) 1993-2023 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /**
  * @file
@@ -114,7 +124,7 @@
 #define MB_DATA_ATTITUDE1 56             /* ancillary attitude system 1 */
 #define MB_DATA_ATTITUDE2 57             /* ancillary attitude system 2 */
 #define MB_DATA_ATTITUDE3 58             /* ancillary attitude system 3 */
-#define MB_DATA_SONARDEPTH 59            /* HYSWEEP dynamic draft */
+#define MB_DATA_SENSORDEPTH 59            /* HYSWEEP dynamic draft */
 #define MB_DATA_ALTITUDE 60              /* HYSWEEP single beam echosounder */
 #define MB_DATA_GEN_SENS 61              /* WASSP generic sensor data */
 #define MB_DATA_WC_PICKS 62              /* WASSP water column picks */
@@ -195,10 +205,12 @@
 #define MB_PROBLEM_TOO_DEEP 5
 #define MB_PROBLEM_BAD_DATAGRAM 6
 
-/* processing status values returned by mb_datalist_read2() */
+/* processing status values returned by mb_datalist_read3() */
 #define MB_PROCESSED_NONE 0
 #define MB_PROCESSED_EXIST 1
 #define MB_PROCESSED_USE 2
+#define MB_ALTNAV_NONE 0
+#define MB_ALTNAV_USE 1
 
 /* image status values returned by mb_imagelist_read() */
 #define MB_IMAGESTATUS_NONE             0x00
@@ -302,7 +314,7 @@ const char *notice_msg[] = {
     "MB_DATA_NMEA_ZDA (ID=52): NMEA ZDA record", "MB_DATA_NMEA_GLL (ID=53): NMEA GLL record",
     "MB_DATA_NMEA_GGA (ID=54): NMEA GGA record", "MB_DATA_SURVEY_LINE (ID=55): Survey line record",
     "MB_DATA_ATTITUDE1 (56): ancillary attitude system 1", "MB_DATA_ATTITUDE2 (57): ancillary attitude system 2",
-    "MB_DATA_ATTITUDE3 (58): ancillary attitude system 3", "MB_DATA_SONARDEPTH (59): HYSWEEP dynamic draft",
+    "MB_DATA_ATTITUDE3 (58): ancillary attitude system 3", "MB_DATA_SENSORDEPTH (59): HYSWEEP dynamic draft",
     "MB_DATA_ALTITUDE (60): HYSWEEP single beam echosounder",
     "MB_DATA_GEN_SENS (61): WASSP generic sensor data",
     "MB_DATA_WC_PICKS (62): WASSP water column picks",

@@ -1,3 +1,27 @@
+/*------------------------------------------------------------------------------
+ *    The MB-system:	MBpedit.c	10/28/2003
+ *
+ *    Copyright (c) 2003-2023 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
+ *      Lamont-Doherty Earth Observatory
+ *      Columbia University
+ *      Palisades, NY 10964
+ *
+ *    See README.md file for copying and redistribution conditions.
+ *--------------------------------------------------------------------*/
+
 #include <stdbool.h>
 
 #ifndef SANS
@@ -642,9 +666,9 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 		                    XmRFontList, 0, &argok));
 		if (argok)
 			ac++;
-		class_in->mbpingedit_toggleButton_show_sonardepth = XmCreateToggleButton(
-		    class_in->mbpingedit_pulldownMenu_view, (char *)"mbpingedit_toggleButton_show_sonardepth", args, ac);
-		XtManageChild(class_in->mbpingedit_toggleButton_show_sonardepth);
+		class_in->mbpingedit_toggleButton_show_sensordepth = XmCreateToggleButton(
+		    class_in->mbpingedit_pulldownMenu_view, (char *)"mbpingedit_toggleButton_show_sensordepth", args, ac);
+		XtManageChild(class_in->mbpingedit_toggleButton_show_sensordepth);
 
 		/**
 		 * Free any memory allocated for resources.
@@ -652,7 +676,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 		XmStringFree((XmString)tmp0);
 	}
 
-	XtAddCallback(class_in->mbpingedit_toggleButton_show_sonardepth, XmNvalueChangedCallback, do_mbpingedit_show_time,
+	XtAddCallback(class_in->mbpingedit_toggleButton_show_sensordepth, XmNvalueChangedCallback, do_mbpingedit_show_time,
 	              (XtPointer)0);
 
 	ac = 0;

@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavlist.c	2/1/93
  *
- *    Copyright (c) 1993-2020 by
- *    David W. Caress (caress@mbari.org)
+ *    Copyright (c) 1993-2023 by
+  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * mbnavlist prints the specified contents of navigation records
@@ -504,9 +514,9 @@ int main(int argc, char **argv) {
 			double heading;
 			double distance;
 			double altitude;
-			double sonardepth;
+			double sensordepth;
 			status = mb_get_all(verbose, mbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
-			                    &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
+			                    &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
 			                    bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
 
 			/* time gaps are not a problem here */
@@ -576,7 +586,7 @@ int main(int argc, char **argv) {
 					roll = aroll[inav];
 					pitch = apitch[inav];
 					heave = aheave[inav];
-					sonardepth = draft - heave;
+					sensordepth = draft - heave;
 
 					/* calculate course made good and distance */
 					mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
@@ -667,7 +677,7 @@ int main(int argc, char **argv) {
 								signflip_next_value = true;
 								break;
 							case 'c': /* Sonar transducer depth (m) */
-								printsimplevalue(verbose, sonardepth, 0, 4, ascii, &invert_next_value, &signflip_next_value,
+								printsimplevalue(verbose, sensordepth, 0, 4, ascii, &invert_next_value, &signflip_next_value,
 								                 &error);
 								break;
 							case 'H': /* heading */

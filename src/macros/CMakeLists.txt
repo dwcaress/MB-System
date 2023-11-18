@@ -1,3 +1,5 @@
+message("In src/macros")
+
 set(executables
     mbm_arc2grd
     mbm_bpr

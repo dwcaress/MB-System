@@ -220,7 +220,8 @@ add_library(netif
        trnw/trnif_proto.c
 )
 target_include_directories(netif PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnframe
-                                          ${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav)
+                                          ${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav 
+                                          ${CMAKE_SOURCE_DIR}/src/mbtrnutils)
 target_link_libraries(netif PRIVATE mbtrnframe tnav trnw)
 #
 #------------------------------------------------------------------------------

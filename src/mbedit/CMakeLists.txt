@@ -1,3 +1,5 @@
+message("In src/mbedit")
+
 find_package(X11 REQUIRED)
 find_package(Motif REQUIRED)
 

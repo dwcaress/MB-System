@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_kmbes.h	5/25/2018
  *
- *    Copyright (c) 2018-2020 by
+ *    Copyright (c) 2018-2023 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * mbsys_kmbes.h defines the MBIO data structures for handling data from
@@ -1533,7 +1543,7 @@ struct mbsys_kmbes_struct {
         MB_DATA_VELOCITY_PROFILE  =  6: #SVP datagram
         MB_DATA_SSV               = 19: #SVT datagram
         MB_DATA_CLOCK             = 14: #SCL datagram
-        MB_DATA_SONARDEPTH        = 59: #SDE datagram
+        MB_DATA_SENSORDEPTH       = 59: #SDE datagram
         MB_DATA_HEIGHT            = 16: #SHI datagram
         MB_DATA_HEADING           = 17: #SHA datagram
         MB_DATA_DATA              = 12: #MRZ datagram

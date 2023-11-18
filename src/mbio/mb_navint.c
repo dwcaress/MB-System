@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_time.c	10/30/2000
   *
- *    Copyright (c) 2000-2020 by
+ *    Copyright (c) 2000-2023 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * mb_navint.c includes the "mb_" functions used to interpolate
@@ -866,46 +876,46 @@ int mb_hedint_interp(int verbose, void *mbio_ptr, double time_d, double *heading
 /*--------------------------------------------------------------------*/
 /* 	function mb_depint_add adds a sonar depth fix to the internal
         list used for interpolation/extrapolation. */
-int mb_depint_add(int verbose, void *mbio_ptr, double time_d, double sonardepth, int *error) {
+int mb_depint_add(int verbose, void *mbio_ptr, double time_d, double sensordepth, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       time_d:     %f\n", time_d);
-		fprintf(stderr, "dbg2       sonardepth: %f\n", sonardepth);
+		fprintf(stderr, "dbg2       sensordepth: %f\n", sensordepth);
 	}
 
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* add another fix only if time stamp has changed */
-	if (mb_io_ptr->nsonardepth == 0 || (time_d > mb_io_ptr->sonardepth_time_d[mb_io_ptr->nsonardepth - 1])) {
-		/* if list if full make room for another sonardepth fix */
-		if (mb_io_ptr->nsonardepth >= MB_ASYNCH_SAVE_MAX) {
+	if (mb_io_ptr->nsensordepth == 0 || (time_d > mb_io_ptr->sensordepth_time_d[mb_io_ptr->nsensordepth - 1])) {
+		/* if list if full make room for another sensordepth fix */
+		if (mb_io_ptr->nsensordepth >= MB_ASYNCH_SAVE_MAX) {
 			int shift = MB_ASYNCH_SAVE_MAX / 2;
-			for (int i = 0; i < mb_io_ptr->nsonardepth - shift; i++) {
-				mb_io_ptr->sonardepth_time_d[i] = mb_io_ptr->sonardepth_time_d[i + shift];
-				mb_io_ptr->sonardepth_sonardepth[i] = mb_io_ptr->sonardepth_sonardepth[i + shift];
+			for (int i = 0; i < mb_io_ptr->nsensordepth - shift; i++) {
+				mb_io_ptr->sensordepth_time_d[i] = mb_io_ptr->sensordepth_time_d[i + shift];
+				mb_io_ptr->sensordepth_sensordepth[i] = mb_io_ptr->sensordepth_sensordepth[i + shift];
 			}
-			mb_io_ptr->nsonardepth -= shift;
+			mb_io_ptr->nsensordepth -= shift;
 		}
 
 		/* add new fix to list */
-		mb_io_ptr->sonardepth_time_d[mb_io_ptr->nsonardepth] = time_d;
-		mb_io_ptr->sonardepth_sonardepth[mb_io_ptr->nsonardepth] = sonardepth;
-		mb_io_ptr->nsonardepth++;
+		mb_io_ptr->sensordepth_time_d[mb_io_ptr->nsensordepth] = time_d;
+		mb_io_ptr->sensordepth_sensordepth[mb_io_ptr->nsensordepth] = sensordepth;
+		mb_io_ptr->nsensordepth++;
 #ifdef MB_DEPINT_DEBUG
-		fprintf(stderr, "mb_depint_add:    sonardepth fix %d %f added\n", mb_io_ptr->nsonardepth, sonardepth);
+		fprintf(stderr, "mb_depint_add:    sensordepth fix %d %f added\n", mb_io_ptr->nsensordepth, sensordepth);
 #endif
 
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Sonar depth fix added to list by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  New fix values:\n");
-			fprintf(stderr, "dbg4       nsonardepth:       %d\n", mb_io_ptr->nsonardepth);
-			fprintf(stderr, "dbg4       time_d:     %f\n", mb_io_ptr->sonardepth_time_d[mb_io_ptr->nsonardepth - 1]);
-			fprintf(stderr, "dbg4       sonardepth_sonardepth:  %f\n",
-			        mb_io_ptr->sonardepth_sonardepth[mb_io_ptr->nsonardepth - 1]);
+			fprintf(stderr, "dbg4       nsensordepth:       %d\n", mb_io_ptr->nsensordepth);
+			fprintf(stderr, "dbg4       time_d:     %f\n", mb_io_ptr->sensordepth_time_d[mb_io_ptr->nsensordepth - 1]);
+			fprintf(stderr, "dbg4       sensordepth_sensordepth:  %f\n",
+			        mb_io_ptr->sensordepth_sensordepth[mb_io_ptr->nsensordepth - 1]);
 		}
 	}
 
@@ -926,7 +936,7 @@ int mb_depint_add(int verbose, void *mbio_ptr, double time_d, double sonardepth,
 /*--------------------------------------------------------------------*/
 /* 	function mb_depint_interp interpolates or extrapolates a
         sonar depth fix from the internal list. */
-int mb_depint_interp(int verbose, void *mbio_ptr, double time_d, double *sonardepth, int *error) {
+int mb_depint_interp(int verbose, void *mbio_ptr, double time_d, double *sensordepth, int *error) {
 	double factor;
 	int ifix;
 
@@ -944,62 +954,62 @@ int mb_depint_interp(int verbose, void *mbio_ptr, double time_d, double *sonarde
 	int status = MB_SUCCESS;
 
 	/* interpolate if possible */
-	if (mb_io_ptr->nsonardepth > 1 && (mb_io_ptr->sonardepth_time_d[mb_io_ptr->nsonardepth - 1] >= time_d) &&
-	    (mb_io_ptr->sonardepth_time_d[0] <= time_d)) {
+	if (mb_io_ptr->nsensordepth > 1 && (mb_io_ptr->sensordepth_time_d[mb_io_ptr->nsensordepth - 1] >= time_d) &&
+	    (mb_io_ptr->sensordepth_time_d[0] <= time_d)) {
 		/* get interpolated position */
-		ifix = (mb_io_ptr->nsonardepth - 1) * (time_d - mb_io_ptr->sonardepth_time_d[0]) /
-		       (mb_io_ptr->sonardepth_time_d[mb_io_ptr->nsonardepth - 1] - mb_io_ptr->sonardepth_time_d[0]);
-		while (time_d > mb_io_ptr->sonardepth_time_d[ifix])
+		ifix = (mb_io_ptr->nsensordepth - 1) * (time_d - mb_io_ptr->sensordepth_time_d[0]) /
+		       (mb_io_ptr->sensordepth_time_d[mb_io_ptr->nsensordepth - 1] - mb_io_ptr->sensordepth_time_d[0]);
+		while (time_d > mb_io_ptr->sensordepth_time_d[ifix])
 			ifix++;
-		while (time_d < mb_io_ptr->sonardepth_time_d[ifix - 1])
+		while (time_d < mb_io_ptr->sensordepth_time_d[ifix - 1])
 			ifix--;
 
-		factor = (time_d - mb_io_ptr->sonardepth_time_d[ifix - 1]) /
-		         (mb_io_ptr->sonardepth_time_d[ifix] - mb_io_ptr->sonardepth_time_d[ifix - 1]);
-		*sonardepth = mb_io_ptr->sonardepth_sonardepth[ifix - 1] +
-		              factor * (mb_io_ptr->sonardepth_sonardepth[ifix] - mb_io_ptr->sonardepth_sonardepth[ifix - 1]);
+		factor = (time_d - mb_io_ptr->sensordepth_time_d[ifix - 1]) /
+		         (mb_io_ptr->sensordepth_time_d[ifix] - mb_io_ptr->sensordepth_time_d[ifix - 1]);
+		*sensordepth = mb_io_ptr->sensordepth_sensordepth[ifix - 1] +
+		              factor * (mb_io_ptr->sensordepth_sensordepth[ifix] - mb_io_ptr->sensordepth_sensordepth[ifix - 1]);
 		status = MB_SUCCESS;
 #ifdef MB_DEPINT_DEBUG
-		fprintf(stderr, "mb_depint_interp: sonardepth %f interpolated at fix %d of %d with factor:%f\n", *sonardepth, ifix,
-		        mb_io_ptr->nsonardepth, factor);
+		fprintf(stderr, "mb_depint_interp: sensordepth %f interpolated at fix %d of %d with factor:%f\n", *sensordepth, ifix,
+		        mb_io_ptr->nsensordepth, factor);
 #endif
 	}
 
 	/* extrapolate from last value */
-	else if (mb_io_ptr->nsonardepth > 1 && (mb_io_ptr->sonardepth_time_d[mb_io_ptr->nsonardepth - 1] < time_d)) {
+	else if (mb_io_ptr->nsensordepth > 1 && (mb_io_ptr->sensordepth_time_d[mb_io_ptr->nsensordepth - 1] < time_d)) {
 		/* extrapolated depth using last value */
-		*sonardepth = mb_io_ptr->sonardepth_sonardepth[mb_io_ptr->nsonardepth - 1];
+		*sensordepth = mb_io_ptr->sensordepth_sensordepth[mb_io_ptr->nsensordepth - 1];
 		status = MB_SUCCESS;
 #ifdef MB_DEPINT_DEBUG
-		fprintf(stderr, "mb_depint_interp: sonardepth %f extrapolated from last fix of %d\n", *sonardepth,
-		        mb_io_ptr->nsonardepth);
+		fprintf(stderr, "mb_depint_interp: sensordepth %f extrapolated from last fix of %d\n", *sensordepth,
+		        mb_io_ptr->nsensordepth);
 #endif
 	}
 
 	/* extrapolate from first fix */
-	else if (mb_io_ptr->nsonardepth >= 1) {
-		*sonardepth = mb_io_ptr->sonardepth_sonardepth[0];
+	else if (mb_io_ptr->nsensordepth >= 1) {
+		*sensordepth = mb_io_ptr->sensordepth_sensordepth[0];
 		status = MB_SUCCESS;
 #ifdef MB_DEPINT_DEBUG
-		fprintf(stderr, "mb_depint_interp: sonardepth %f extrapolated from first fix of %d\n", *sonardepth,
-		        mb_io_ptr->nsonardepth);
+		fprintf(stderr, "mb_depint_interp: sensordepth %f extrapolated from first fix of %d\n", *sensordepth,
+		        mb_io_ptr->nsensordepth);
 #endif
 	}
 
 	/* else no fix */
 	else {
-		*sonardepth = 0.0;
+		*sensordepth = 0.0;
 		status = MB_FAILURE;
 		*error = MB_ERROR_NOT_ENOUGH_DATA;
 #ifdef MB_DEPINT_DEBUG
-		fprintf(stderr, "mb_depint_interp: sonardepth zeroed\n");
+		fprintf(stderr, "mb_depint_interp: sensordepth zeroed\n");
 #endif
 	}
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
-		fprintf(stderr, "dbg2       sonardepth:   %f\n", *sonardepth);
+		fprintf(stderr, "dbg2       sensordepth:   %f\n", *sensordepth);
 		fprintf(stderr, "dbg2       error:        %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:       %d\n", status);

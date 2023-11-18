@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbr_imagemba.c  7/18/2008
  *
- *    Copyright (c) 2008-2020 by
+ *    Copyright (c) 2008-2023 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * mbr_imagemba.c contains the functions for reading and writing
@@ -59,7 +69,7 @@
  *      either as a static draft on a surface vessel or a pressure depth on a
  *      submerged AUV or ROV platform. Heave is positive up and sonar depth is
  *      positive down. In some cases on submerged platforms the pressure depth is
- *      recorded into the heave field. In that case the --kluge-sonardepth-from-heave
+ *      recorded into the heave field. In that case the --kluge-sensordepth-from-heave
  *      argument to mbpreprocess will cause the heave value to be moved to the
  *      sonar_depth field in the output MBF_IMAGEMBA format files.
  *   9. Comment records are supported for both formats - this is specific to MB-System.

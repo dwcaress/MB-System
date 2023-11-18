@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbotps.c  7/30/2009
  *
- *    Copyright (c) 2009-2020 by
+ *    Copyright (c) 2009-2023 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * MBotps predicts tides using methods and data derived
@@ -71,14 +81,8 @@
 #include "mb_process.h"
 #include "mb_status.h"
 
-// OTPS installation location in CMake build system
-#ifdef CMAKE_BUILD_SYSTEM
-const char *otps_location = "$(otpsDir)";
-
-// OTPS installation location in Autotools build system
-#else
+/* OTPS installation location */
 #include "otps.h"
-#endif
 
 #define MBOTPS_MODE_POSITION            0x00
 #define MBOTPS_MODE_NAVIGATION          0x01
@@ -743,7 +747,7 @@ int main(int argc, char **argv) {
   double heading;
   double distance;
   double altitude;
-  double sonardepth;
+  double sensordepth;
   char *beamflag = NULL;
   double *bath = NULL;
   double *bathacrosstrack = NULL;
@@ -1191,7 +1195,7 @@ int main(int argc, char **argv) {
             &heading,
             &distance,
             &altitude,
-            &sonardepth,
+            &sensordepth,
             &beams_bath,
             &beams_amp,
             &pixels_ss,

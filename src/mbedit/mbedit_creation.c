@@ -1,3 +1,27 @@
+/*--------------------------------------------------------------------
+ *    The MB-system:	mbedit_creation.c	1993
+ *
+ *    Copyright (c) 1993-2023 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
+ *      Lamont-Doherty Earth Observatory
+ *      Columbia University
+ *      Palisades, NY 10964
+ *
+ *    See README.md file for copying and redistribution conditions.
+ *--------------------------------------------------------------------*/
+
 #include <Xm/Xm.h>
 #include <Xm/MainW.h>
 #include <Xm/DialogS.h>
@@ -768,13 +792,13 @@ Widget Createwindow_mbedit(Widget parent) {
 		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
 		if (argok)
 			ac++;
-		toggleButton_show_sonardepth = XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_show_sonardepth", args, ac);
-		XtManageChild(toggleButton_show_sonardepth);
+		toggleButton_show_sensordepth = XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_show_sensordepth", args, ac);
+		XtManageChild(toggleButton_show_sensordepth);
 
 		XmStringFree(tmp0);
 	}
 
-	XtAddCallback(toggleButton_show_sonardepth, XmNvalueChangedCallback, do_show_time, (XtPointer)0);
+	XtAddCallback(toggleButton_show_sensordepth, XmNvalueChangedCallback, do_show_time, (XtPointer)0);
 
 	ac = 0;
 	{

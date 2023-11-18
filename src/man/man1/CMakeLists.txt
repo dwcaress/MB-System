@@ -1,3 +1,5 @@
+message("In src/man/man1")
+
 set(manpages
     geod.1
     mb7k2jstar.1

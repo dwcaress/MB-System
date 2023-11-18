@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbinfo.c  2/1/93
  *
- *    Copyright (c) 1993-2020 by
+ *    Copyright (c) 1993-2023 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * MBINFO reads a swath sonar data file and outputs
@@ -363,7 +373,7 @@ int main(int argc, char **argv) {
   double file_weight;
   double btime_d;
   double etime_d;
-  char dfile[MB_PATH_MAXLINE];
+  char dpath[MB_PATH_MAXLINE];
   int beams_bath_alloc = 0;
   int beams_amp_alloc = 0;
   int pixels_ss_alloc = 0;
@@ -385,7 +395,7 @@ int main(int argc, char **argv) {
   double heading;
   double distance;
   double altitude;
-  double sonardepth;
+  double sensordepth;
   char *beamflag = nullptr;
   double *bath = nullptr;
   double *bathlon = nullptr;
@@ -439,7 +449,7 @@ int main(int argc, char **argv) {
   int irec = 0;
   int isbtmrec = 0;
   double timbegfile = 0.0;
-  double timendfile = 0.0;
+  double timendpath = 0.0;
   double distotfile = 0.0;
   double timtotfile = 0.0;
   double spdavgfile = 0.0;
@@ -534,7 +544,12 @@ int main(int argc, char **argv) {
     bool done = false;
     while (!done) {
       /* open file list */
-      char file[MB_PATH_MAXLINE];
+      char path[MB_PATH_MAXLINE];
+      char ppath[MB_PATH_MAXLINE] = "";
+      char apath[MB_PATH_MAXLINE] = "";
+      char dpath[MB_PATH_MAXLINE] = "";
+      int pstatus;
+      int astatus;
       if (read_datalist) {
         const int look_processed = MB_DATALIST_LOOK_UNSET;
         if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
@@ -542,10 +557,11 @@ int main(int argc, char **argv) {
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
         }
-        read_data = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS;
+        read_data = mb_datalist_read3(verbose, datalist, &pstatus, path, ppath, 
+                                  &astatus, apath, dpath, &format, &file_weight, &error) == MB_SUCCESS;
       } else {
         // else copy single filename to be read
-        strcpy(file, read_file);
+        strcpy(path, read_file);
         read_data = true;
       }
 
@@ -554,13 +570,13 @@ int main(int argc, char **argv) {
 
         void *mbio_ptr = nullptr;
         /* initialize reading the swath file */
-        if (mb_read_init(verbose, file, format, pings_get, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
-                                   &mbio_ptr, &btime_d, &etime_d, &beams_bath_alloc, &beams_amp_alloc, &pixels_ss_alloc,
+        if (mb_read_init_altnav(verbose, path, format, pings_get, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
+                                   astatus, apath, &mbio_ptr, &btime_d, &etime_d, &beams_bath_alloc, &beams_amp_alloc, &pixels_ss_alloc,
                                    &error) != MB_SUCCESS) {
           char *message;
           mb_error(verbose, error, &message);
           fprintf(stream, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
-          fprintf(stream, "\nSwath File <%s> not initialized for reading\n", file);
+          fprintf(stream, "\nSwath File <%s> not initialized for reading\n", path);
           fprintf(stream, "\nProgram <%s> Terminated\n", program_name);
           exit(error);
         }
@@ -708,10 +724,10 @@ int main(int argc, char **argv) {
 
         /* printf out file and format */
         if (pass == 0) {
-          if (strrchr(file, '/') == nullptr)
-            fileprint = file;
+          if (strrchr(path, '/') == nullptr)
+            fileprint = path;
           else
-            fileprint = strrchr(file, '/') + 1;
+            fileprint = strrchr(path, '/') + 1;
           mb_format_description(verbose, &format, format_description, &error);
           switch (output_format) {
           case FREE_TEXT:
@@ -788,7 +804,7 @@ int main(int argc, char **argv) {
             /* read a ping of data */
             datacur = &data[nread];
             status = mb_read(verbose, mbio_ptr, &kind, &pings, time_i, &time_d, &navlon, &navlat, &speed, &heading,
-                             &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, datacur->beamflag,
+                             &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, datacur->beamflag,
                              datacur->bath, datacur->amp, datacur->bathlon, datacur->bathlat, datacur->ss, datacur->sslon,
                              datacur->sslat, comment, &error);
 
@@ -817,7 +833,7 @@ int main(int argc, char **argv) {
                 if (icomment == 0) {
                   switch (output_format) {
                   case FREE_TEXT:
-                    fprintf(output, "\nComments in file %s:\n", file);
+                    fprintf(output, "\nComments in file %s:\n", path);
                     icomment++;
                     break;
                   case JSON:
@@ -1341,7 +1357,7 @@ int main(int argc, char **argv) {
                   if (mb_beam_ok(beamflag[beams_bath / 2]))
                     bathbeg = bath[beams_bath / 2];
                   else
-                    bathbeg = altitude + sonardepth;
+                    bathbeg = altitude + sensordepth;
                 }
                 lonbeg = navlon;
                 latbeg = navlat;
@@ -1351,7 +1367,7 @@ int main(int argc, char **argv) {
                   timbeg_i[i] = time_i[i];
                 spdbeg = speed;
                 hdgbeg = heading;
-                sdpbeg = sonardepth;
+                sdpbeg = sensordepth;
                 altbeg = altitude;
               }
               else if (good_nav_only) {
@@ -1361,15 +1377,15 @@ int main(int argc, char **argv) {
                     if (mb_beam_ok(beamflag[beams_bath / 2]))
                       bathbeg = bath[beams_bath / 2];
                     else
-                      bathbeg = altitude + sonardepth;
+                      bathbeg = altitude + sensordepth;
                   }
                   latbeg = navlat;
                   if (spdbeg == 0.0 && speed != 0.0)
                     spdbeg = speed;
                   if (hdgbeg == 0.0 && heading != 0.0)
                     hdgbeg = heading;
-                  if (sdpbeg == 0.0 && sonardepth != 0.0)
-                    sdpbeg = sonardepth;
+                  if (sdpbeg == 0.0 && sensordepth != 0.0)
+                    sdpbeg = sensordepth;
                   if (altbeg == 0.0 && altitude != 0.0)
                     altbeg = altitude;
                 }
@@ -1381,16 +1397,16 @@ int main(int argc, char **argv) {
                 if (mb_beam_ok(beamflag[beams_bath / 2]))
                   bathend = bath[beams_bath / 2];
                 else
-                  bathend = altitude + sonardepth;
+                  bathend = altitude + sensordepth;
               }
               lonend = navlon;
               latend = navlat;
               spdend = speed;
               hdgend = heading;
-              sdpend = sonardepth;
+              sdpend = sensordepth;
               altend = altitude;
               timend = time_d;
-              timendfile = time_d;
+              timendpath = time_d;
               for (int i = 0; i < 7; i++)
                 timend_i[i] = time_i[i];
 
@@ -1420,9 +1436,9 @@ int main(int argc, char **argv) {
                 latmax = navlat;
                 beginnav = true;
               }
-              if (!beginsdp && sonardepth > 0.0) {
-                sdpmin = sonardepth;
-                sdpmax = sonardepth;
+              if (!beginsdp && sensordepth > 0.0) {
+                sdpmin = sensordepth;
+                sdpmax = sensordepth;
                 beginsdp = true;
               }
               if (!beginalt && altitude > 0.0) {
@@ -1460,8 +1476,8 @@ int main(int argc, char **argv) {
                 latmax = std::max(latmax, navlat);
               }
               if (beginsdp) {
-                sdpmin = std::min(sdpmin, sonardepth);
-                sdpmax = std::max(sdpmax, sonardepth);
+                sdpmin = std::min(sdpmin, sensordepth);
+                sdpmax = std::max(sdpmax, sensordepth);
               }
               if (beginalt) {
                 altmin = std::min(altmin, altitude);
@@ -1686,7 +1702,7 @@ int main(int argc, char **argv) {
         }
 
         /* look for problems */
-        timtotfile = (timendfile - timbegfile) / 3600.0;
+        timtotfile = (timendpath - timbegfile) / 3600.0;
         if (timtotfile > 0.0) {
           timtot += timtotfile;
           spdavgfile = distotfile / timtotfile;
@@ -1796,7 +1812,7 @@ int main(int argc, char **argv) {
 
         /* figure out whether and what to read next */
         if (read_datalist) {
-          read_data = (mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS);
+          read_data = (mb_datalist_read(verbose, datalist, path, dpath, &format, &file_weight, &error) == MB_SUCCESS);
         } else {
           read_data = false;
         }
@@ -1854,7 +1870,7 @@ int main(int argc, char **argv) {
       bathbeg = mb_info.depth_start;
       hdgbeg = mb_info.heading_start;
       spdbeg = mb_info.speed_start;
-      sdpbeg = mb_info.sonardepth_start;
+      sdpbeg = mb_info.sensordepth_start;
       altbeg = mb_info.sonaraltitude_start;
 
       timend = mb_info.time_end;
@@ -1864,15 +1880,15 @@ int main(int argc, char **argv) {
       bathend = mb_info.depth_end;
       hdgend = mb_info.heading_end;
       spdend = mb_info.speed_end;
-      sdpend = mb_info.sonardepth_end;
+      sdpend = mb_info.sensordepth_end;
       altend = mb_info.sonaraltitude_end;
 
       lonmin = mb_info.lon_min;
       lonmax = mb_info.lon_max;
       latmin = mb_info.lat_min;
       latmax = mb_info.lat_max;
-      sdpmin = mb_info.sonardepth_min;
-      sdpmax = mb_info.sonardepth_max;
+      sdpmin = mb_info.sensordepth_min;
+      sdpmax = mb_info.sensordepth_max;
       altmin = mb_info.altitude_min;
       altmax = mb_info.altitude_max;
       bathmin = mb_info.depth_min;

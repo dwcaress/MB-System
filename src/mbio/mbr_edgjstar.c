@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_edgjstar.c	5/2/2005
  *
- *    Copyright (c) 2005-2020 by
+ *    Copyright (c) 2005-2023 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * mbr_edgjstar.c contains the functions for reading
@@ -268,7 +278,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   bool obsolete_header = false;
 	double time_d;
 	double navlon, navlat, heading;
-	double speed, sonardepth, altitude;
+	double speed, sensordepth, altitude;
 	double heave, roll, pitch;
 	double rawvalue;
 	int time_i[7];
@@ -307,13 +317,17 @@ __FILE__, __LINE__, __FUNCTION__, ftell(mb_io_ptr->mbfp));
 	while (!done) {
 		/* read message header */
 		char buffer[MBSYS_JSTAR_SYSINFO_MAX];
+#ifdef MBF_EDGJSTAR_DEBUG
     int skip = 0;
+#endif
 		read_status = fread(buffer, MBSYS_JSTAR_MESSAGE_SIZE, 1, mb_io_ptr->mbfp);
     while (read_status == 1 && !(buffer[0] == 0x01 && buffer[1] == 0x16)) {
       for (int i = 0; i < MBSYS_JSTAR_MESSAGE_SIZE - 1; i++)
         buffer[i] = buffer[i + 1];
       read_status = fread(&buffer[MBSYS_JSTAR_MESSAGE_SIZE-1], 1, 1, mb_io_ptr->mbfp);
+#ifdef MBF_EDGJSTAR_DEBUG
       skip++;
+#endif
     }
     if (read_status == 1) {
 			/* extract the message header values */
@@ -630,9 +644,9 @@ __FILE__, __LINE__, __FUNCTION__, ftell(mb_io_ptr->mbfp));
 					mb_altint_interp(verbose, mbio_ptr, time_d, &altitude, error);
 					sbp->sonarAltitude = altitude / 1000.0;
 				}
-				if (sbp->sonarDepth == 0 && mb_io_ptr->nsonardepth > 0) {
-					mb_depint_interp(verbose, mbio_ptr, time_d, &sonardepth, error);
-					sbp->sonarDepth = sonardepth / 1000.0;
+				if (sbp->sonarDepth == 0 && mb_io_ptr->nsensordepth > 0) {
+					mb_depint_interp(verbose, mbio_ptr, time_d, &sensordepth, error);
+					sbp->sonarDepth = sensordepth / 1000.0;
 				}
 
 				/* set kind */
@@ -892,9 +906,9 @@ __FILE__, __LINE__, __FUNCTION__, ftell(mb_io_ptr->mbfp));
 					mb_altint_interp(verbose, mbio_ptr, time_d, &altitude, error);
 					ss->sonarAltitude = 1000 * altitude;
 				}
-				if (ss->sonarDepth == 0 && mb_io_ptr->nsonardepth > 0) {
-					mb_depint_interp(verbose, mbio_ptr, time_d, &sonardepth, error);
-					ss->sonarDepth = 1000 * sonardepth;
+				if (ss->sonarDepth == 0 && mb_io_ptr->nsensordepth > 0) {
+					mb_depint_interp(verbose, mbio_ptr, time_d, &sensordepth, error);
+					ss->sonarDepth = 1000 * sensordepth;
 				}
 
 				/* set kind */
@@ -1154,9 +1168,9 @@ __FILE__, __LINE__, __FUNCTION__, ftell(mb_io_ptr->mbfp));
 					mb_altint_interp(verbose, mbio_ptr, time_d, &altitude, error);
 					sbp->sonarAltitude = altitude / 1000.0;
 				}
-				if (sbp->sonarDepth == 0 && mb_io_ptr->nsonardepth > 0) {
-					mb_depint_interp(verbose, mbio_ptr, time_d, &sonardepth, error);
-					sbp->sonarDepth = sonardepth / 1000.0;
+				if (sbp->sonarDepth == 0 && mb_io_ptr->nsensordepth > 0) {
+					mb_depint_interp(verbose, mbio_ptr, time_d, &sensordepth, error);
+					sbp->sonarDepth = sensordepth / 1000.0;
 				}
 
 				/* set kind */
@@ -1400,9 +1414,9 @@ __FILE__, __LINE__, __FUNCTION__, ftell(mb_io_ptr->mbfp));
 					mb_altint_interp(verbose, mbio_ptr, time_d, &altitude, error);
 					ss->sonarAltitude = 1000 * altitude;
 				}
-				if (ss->sonarDepth == 0 && mb_io_ptr->nsonardepth > 0) {
-					mb_depint_interp(verbose, mbio_ptr, time_d, &sonardepth, error);
-					ss->sonarDepth = 1000 * sonardepth;
+				if (ss->sonarDepth == 0 && mb_io_ptr->nsensordepth > 0) {
+					mb_depint_interp(verbose, mbio_ptr, time_d, &sensordepth, error);
+					ss->sonarDepth = 1000 * sensordepth;
 				}
 
 				/* set kind */
@@ -1580,13 +1594,13 @@ __FILE__, __LINE__, __FUNCTION__, ftell(mb_io_ptr->mbfp));
 				else if (strncmp(&(nargv[0][3]), "DPT", 3) == 0) {
 					depthofsensor = strtod(nargv[1], NULL);
 					offset = strtod(nargv[2], NULL);
-					sonardepth = depthofsensor + offset;
-					mb_depint_add(verbose, mbio_ptr, time_d, sonardepth, error);
+					sensordepth = depthofsensor + offset;
+					mb_depint_add(verbose, mbio_ptr, time_d, sensordepth, error);
 #ifdef MBF_EDGJSTAR_DEBUG
 					fprintf(stderr,
-					        "DPT: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d depthofsensor:%f offset:%f sonardepth:%f    %s\n",
+					        "DPT: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d depthofsensor:%f offset:%f sensordepth:%f    %s\n",
 					        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], depthofsensor, offset,
-					        sonardepth, nmea->nmea);
+					        sensordepth, nmea->nmea);
 #endif
 
 					store->kind = MB_DATA_NMEA_DPT;
