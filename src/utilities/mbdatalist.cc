@@ -433,13 +433,13 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
 		}
-		mb_path file;
-		mb_path dfile;
-		mb_path dfilelast;
+		mb_path file = "";
+		mb_path dfile = "";
+		mb_path dfilelast = "";
 		while (mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS) {
 			nfile++;
-			mb_path pwd;
-      assert(getcwd(pwd, MB_PATH_MAXLINE) != NULL);
+			mb_path pwd = "";
+      		assert(getcwd(pwd, MB_PATH_MAXLINE) != NULL);
 			mb_get_relative_path(verbose, file, pwd, &error);
 			mb_get_relative_path(verbose, dfile, pwd, &error);
 
