@@ -298,7 +298,7 @@ ROVTRN_APPS = trnxpp
 trnxpp_SOURCES = \
 opt/rov/trnxpp_app.cpp
 
-trnxpp_LDADD = -llcm -lgeolib libmb1.la libtnav.la libnewmat.la libqnx.la libtrncli.la libudpms.la libtrnxplug.la
+trnxpp_LDADD = -llcm -lgeolib libmb1.la libtnav.la libnewmat.la libqnx.la libtrncli.la  libudpms.la libtrnxplug.la
 
 TRN_HPP = opt/rov/lcm_pcf/signal_t.hpp
 TRN_HPP += opt/rov/lcm_pcf/string_t.hpp
@@ -729,10 +729,10 @@ trnlog_player_SOURCES = utils/trnlog_player.cpp
 trnlog_player_LDADD = libtnav.la libnewmat.la libtrncli.la
 
 mb1log_player_SOURCES = utils/mb1log_player.cpp
-mb1log_player_LDADD = libtnav.la libnewmat.la libtrncli.la
+mb1log_player_LDADD = libtnav.la libnewmat.la libtrncli.la libqnx.la
 
 csvlog_player_SOURCES = utils/csvlog_player.cpp
-csvlog_player_LDADD = libtnav.la libnewmat.la libtrncli.la
+csvlog_player_LDADD = libtnav.la libnewmat.la libtrncli.la libqnx.la
 
 dist_bin_SCRIPTS =
 
