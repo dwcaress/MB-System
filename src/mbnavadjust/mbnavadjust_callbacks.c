@@ -601,7 +601,7 @@ void do_update_status() {
   if (project.refgrid_select >= 0 && project.refgrid_select < project.num_refgrids)
     strcpy(refgrid_name, project.refgrid_names[project.refgrid_select]);
   else
-    strcpy(refgrid_name, "NONE");
+    strcpy(refgrid_name, "<Previously Selected Reference Grid>");
   mb_command string = "";
   snprintf(string, sizeof(string), 
     ":::t\"Project: %s\""
@@ -682,20 +682,23 @@ void do_update_status() {
     if (mbna_verbose > 0)
       fprintf(stderr, "%s\n", string);
     if (project.num_refgrids > 0) {
-      XmString *xstr = (XmString *)malloc(project.num_refgrids * sizeof(XmString));
+      XmString *xstr = (XmString *)malloc((project.num_refgrids + 1) * sizeof(XmString));
+      xstr[0] = XmStringCreateLocalized("<Previously Selected Grid>");
+      if (mbna_verbose > 0)
+        fprintf(stderr, "<Previously Selected Grid>\n");
       for (int i = 0; i < project.num_refgrids; i++) {
-        xstr[i] = XmStringCreateLocalized(project.refgrid_names[i]);
+        xstr[i+1] = XmStringCreateLocalized(project.refgrid_names[i]);
         if (mbna_verbose > 0)
           fprintf(stderr, "%s\n", project.refgrid_names[i]);
       }
-      XmListAddItems(list_data, xstr, project.num_refgrids, 0);
-      for (int i = 0; i < project.num_refgrids; i++) {
+      XmListAddItems(list_data, xstr, project.num_refgrids + 1, 0);
+      for (int i = 0; i < project.num_refgrids + 1; i++) {
         XmStringFree(xstr[i]);
       }
       free(xstr);
     }
-    XmListSelectPos(list_data, project.refgrid_select + 1, 0);
-    XmListSetPos(list_data, MAX(project.refgrid_select + 1 - 5, 1));
+    XmListSelectPos(list_data, project.refgrid_select + 2, 0);
+    XmListSetPos(list_data, MAX(project.refgrid_select + 2 - 5, 1));
   }
   else if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS) {
     snprintf(string, sizeof(string), "Surveys:");
@@ -1718,19 +1721,19 @@ void do_update_status() {
   }
   else if (mbna_view_list == MBNA_VIEW_LIST_GLOBALTIES) {
     if (mbna_view_mode == MBNA_VIEW_MODE_ALL)
-      snprintf(string, sizeof(string), "Global Ties:  Xing Tie Stat Sur1:Fil1:Sec1:Nv1 Sur2:Fil2:Sec2:Nv2 Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr");
+      snprintf(string, sizeof(string), "Global Ties:  Sur:File:Sec:Nv Stat RefGrid  Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr");
     else if (mbna_view_mode == MBNA_VIEW_MODE_SURVEY)
-      snprintf(string, sizeof(string), "Global Ties of Survey %d:  Xing Tie Stat Sur1:Fil1:Sec1:Nv1 Sur2:Fil2:Sec2:Nv2 Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select);
+      snprintf(string, sizeof(string), "Global Ties of Survey %d:  Sur:File:Sec:Nv Stat RefGrid  Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_BLOCK)
-      snprintf(string, sizeof(string), "Global Ties of Survey-vs-Survey Block %d:  Xing Tie Stat Sur1:Fil1:Sec1:Nv1 Sur2:Fil2:Sec2:Nv2 Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_block_select);
+      snprintf(string, sizeof(string), "Global Ties of Survey-vs-Survey Block %d:  Sur:File:Sec:Nv Stat RefGrid  Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_block_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_FILE)
-      snprintf(string, sizeof(string), "Global Ties of File %d:%d:  Xing Tie Stat Sur1:Fil1:Sec1:Nv1 Sur2:Fil2:Sec2:Nv2 Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select, mbna_file_select);
+      snprintf(string, sizeof(string), "Global Ties of File %d:%d:  Sur:File:Sec:Nv Stat RefGrid  Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select, mbna_file_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY)
-      snprintf(string, sizeof(string), "Global Ties with Survey %d:  Xing Tie Stat Sur1:Fil1:Sec1:Nv1 Sur2:Fil2:Sec2:Nv2 Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select);
+      snprintf(string, sizeof(string), "Global Ties with Survey %d:  Sur:File:Sec:Nv Stat RefGrid  Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE)
-      snprintf(string, sizeof(string), "Global Ties of File %d:%d:  Xing Tie Stat Sur1:Fil1:Sec1:Nv1 Sur2:Fil2:Sec2:Nv2 Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select, mbna_file_select);
+      snprintf(string, sizeof(string), "Global Ties of File %d:%d:  Sur:File:Sec:Nv Stat RefGrid  Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select, mbna_file_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION)
-      snprintf(string, sizeof(string), "Global Ties of Section %d:%d:%d:  Xing Tie Stat Sur1:Fil1:Sec1:Nv1 Sur2:Fil2:Sec2:Nv2 Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select, mbna_file_select, mbna_section_select);
+      snprintf(string, sizeof(string), "Global Ties of Section %d:%d:%d:  Sur:File:Sec:Nv Stat RefGrid  Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select, mbna_file_select, mbna_section_select);
     else
       snprintf(string, sizeof(string), "Global Ties:");
     set_label_string(label_listdata, string);
@@ -1791,24 +1794,24 @@ void do_update_status() {
               tiestatus = tiestatus_z_f;
             if (section->globaltie.inversion_status == MBNA_INVERSION_CURRENT)
               sprintf(string,
-                "%2.2d:%4.4d:%3.3d:%2.2d %s %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f",
-                project.files[i].block, i, j, section->globaltie.snav, tiestatus,
+                "%2.2d:%4.4d:%3.3d:%2.2d %s %2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f",
+                project.files[i].block, i, j, section->globaltie.snav, tiestatus, section->globaltie.refgrid_id, 
                 section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
                 section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3,
                 section->globaltie.dx_m, section->globaltie.dy_m, section->globaltie.dz_m,
                 section->globaltie.sigma_m, section->globaltie.rsigma_m);
             else if (section->globaltie.inversion_status == MBNA_INVERSION_OLD)
               sprintf(string,
-                "%2.2d:%4.4d:%3.3d:%2.2d %s %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f ***",
-                project.files[i].block, i, j, section->globaltie.snav, tiestatus,
+                "%2.2d:%4.4d:%3.3d:%2.2d %s %2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f ***",
+                project.files[i].block, i, j, section->globaltie.snav, tiestatus, section->globaltie.refgrid_id,
                 section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
                 section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3,
                 section->globaltie.dx_m, section->globaltie.dy_m, section->globaltie.dz_m,
                 section->globaltie.sigma_m, section->globaltie.rsigma_m);
             else
               sprintf(string,
-                "%2.2d:%4.4d:%3.3d:%2.2d %s %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f",
-                project.files[i].block, i, j, section->globaltie.snav, tiestatus,
+                "%2.2d:%4.4d:%3.3d:%2.2d %s %2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f",
+                project.files[i].block, i, j, section->globaltie.snav, tiestatus, section->globaltie.refgrid_id,
                 section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
                 section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3);
             xstr[num_globalties] = XmStringCreateLocalized(string);
@@ -1834,19 +1837,19 @@ void do_update_status() {
   }
   else if (mbna_view_list == MBNA_VIEW_LIST_GLOBALTIESSORTED) {
     if (mbna_view_mode == MBNA_VIEW_MODE_ALL)
-      snprintf(string, sizeof(string), "Global Ties:  Xing Tie Stat Sur1:Fil1:Sec1:Nv1 Sur2:Fil2:Sec2:Nv2 Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr");
+      snprintf(string, sizeof(string), "Global Ties:  Sur:File:Sec:Nv Stat RefGrid  Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr");
     else if (mbna_view_mode == MBNA_VIEW_MODE_SURVEY)
-      snprintf(string, sizeof(string), "Global Ties of Survey %d:  Xing Tie Stat Sur1:Fil1:Sec1:Nv1 Sur2:Fil2:Sec2:Nv2 Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select);
+      snprintf(string, sizeof(string), "Global Ties of Survey %d:  Sur:File:Sec:Nv Stat RefGrid  Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_BLOCK)
-      snprintf(string, sizeof(string), "Global Ties of Survey-vs-Survey Block %d:  Xing Tie Stat Sur1:Fil1:Sec1:Nv1 Sur2:Fil2:Sec2:Nv2 Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_block_select);
+      snprintf(string, sizeof(string), "Global Ties of Survey-vs-Survey Block %d:  Sur:File:Sec:Nv Stat RefGrid  Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_block_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_FILE)
-      snprintf(string, sizeof(string), "Global Ties of File %d:%d:  Xing Tie Stat Sur1:Fil1:Sec1:Nv1 Sur2:Fil2:Sec2:Nv2 Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select, mbna_file_select);
+      snprintf(string, sizeof(string), "Global Ties of File %d:%d:  Sur:File:Sec:Nv Stat RefGrid  Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select, mbna_file_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY)
-      snprintf(string, sizeof(string), "Global Ties with Survey %d:  Xing Tie Stat Sur1:Fil1:Sec1:Nv1 Sur2:Fil2:Sec2:Nv2 Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select);
+      snprintf(string, sizeof(string), "Global Ties with Survey %d:  Sur:File:Sec:Nv Stat RefGrid  Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE)
-      snprintf(string, sizeof(string), "Global Ties of File %d:%d:  Xing Tie Stat Sur1:Fil1:Sec1:Nv1 Sur2:Fil2:Sec2:Nv2 Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select, mbna_file_select);
+      snprintf(string, sizeof(string), "Global Ties of File %d:%d:  Sur:File:Sec:Nv Stat RefGrid  Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select, mbna_file_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION)
-      snprintf(string, sizeof(string), "Global Ties of Section %d:%d:%d:  Xing Tie Stat Sur1:Fil1:Sec1:Nv1 Sur2:Fil2:Sec2:Nv2 Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select, mbna_file_select, mbna_section_select);
+      snprintf(string, sizeof(string), "Global Ties of Section %d:%d:%d:  Sur:File:Sec:Nv Stat RefGrid  Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select, mbna_file_select, mbna_section_select);
     else
       snprintf(string, sizeof(string), "Global Ties:");
     set_label_string(label_listdata, string);
@@ -1921,30 +1924,30 @@ void do_update_status() {
           tiestatus = tiestatus_z_f;
         if (section->globaltie.inversion_status == MBNA_INVERSION_CURRENT)
           sprintf(string,
-            "%2.2d:%4.4d:%3.3d:%2.2d %s %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f",
+            "%2.2d:%4.4d:%3.3d:%2.2d %s %2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f",
             project.files[section->file_id].block,
             section->file_id, section->section_id,
-            section->globaltie.snav, tiestatus,
+            section->globaltie.snav, tiestatus, section->globaltie.refgrid_id,
             section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
             section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3,
             section->globaltie.dx_m, section->globaltie.dy_m, section->globaltie.dz_m,
             section->globaltie.sigma_m, section->globaltie.rsigma_m);
         else if (section->globaltie.inversion_status == MBNA_INVERSION_OLD)
           sprintf(string,
-            "%2.2d:%4.4d:%3.3d:%2.2d %s %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f ***",
+            "%2.2d:%4.4d:%3.3d:%2.2d %s %2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f ***",
             project.files[section->file_id].block,
             section->file_id, section->section_id,
-            section->globaltie.snav, tiestatus,
+            section->globaltie.snav, tiestatus, section->globaltie.refgrid_id,
             section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
             section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3,
             section->globaltie.dx_m, section->globaltie.dy_m, section->globaltie.dz_m,
             section->globaltie.sigma_m, section->globaltie.rsigma_m);
         else
           sprintf(string,
-            "%2.2d:%4.4d:%3.3d:%2.2d %s %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f",
+            "%2.2d:%4.4d:%3.3d:%2.2d %s %2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f",
             project.files[section->file_id].block,
             section->file_id, section->section_id,
-            section->globaltie.snav, tiestatus,
+            section->globaltie.snav, tiestatus, section->globaltie.refgrid_id,
             section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
             section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3);
         xstr[kk] = XmStringCreateLocalized(string);
@@ -2914,7 +2917,7 @@ void do_list_data_select(Widget w, XtPointer client_data, XtPointer call_data) {
     bool found = true;
 
     if (mbna_view_list == MBNA_VIEW_LIST_REFERENCEGRIDS) {
-      project.refgrid_select = position_list[0] - 1;
+      project.refgrid_select = position_list[0] - 2;
 fprintf(stderr,"mbna_referencegrid_select:%d of %d\n", project.refgrid_select, project.num_refgrids);
     }
     else if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS) {

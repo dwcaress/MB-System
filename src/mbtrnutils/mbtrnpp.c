@@ -3985,8 +3985,13 @@ int main(int argc, char **argv) {
           beam_end = 0;
           for (int j = 0; j < ping[i_ping_process].beams_bath; j++) {
             if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
-              tangent = ping[i_ping_process].bathacrosstrack[j] /
-                        (ping[i_ping_process].bath[j] - ping[i_ping_process].sensordepth);
+              if(ping[i_ping_process].bath[j] <= ping[i_ping_process].sensordepth) {
+                // invalidate tangent calculation because the denominator zero or negative
+                tangent = threshold_tangent + 1.0;
+              } else {
+                tangent = ping[i_ping_process].bathacrosstrack[j]
+                            / (ping[i_ping_process].bath[j] - ping[i_ping_process].sensordepth);
+              }
               if (fabs(tangent) > threshold_tangent && mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
                 ping[i_ping_process].beamflag_filter[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
                 n_soundings_trimmed++;
