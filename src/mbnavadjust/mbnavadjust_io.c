@@ -198,6 +198,7 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
       project->triangle_scale = 0.0;
       project->inversion_status = MBNA_INVERSION_NONE;
       project->refgrid_status = MBNA_REFGRID_UNLOADED;
+      project->refgrid_loaded = 0;
       project->refgrid_select = 0;
       project->grid_status = MBNA_GRID_NONE;
       project->modelplot = false;
@@ -1576,6 +1577,66 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
               project->num_goodcrossings++;
           }
         }
+
+        /* check if any global ties are set that are tied to invalid reference grid ids */
+        for (int ifile = 0; ifile < project->num_files; ifile++) {
+          struct mbna_file *file = &(project->files[ifile]);
+          for (int isection = 0; isection < project->files[ifile].num_sections; isection++) {
+            struct mbna_section *section = &(file->sections[isection]);
+            if (section->globaltie.status == MBNA_TIE_NONE) {
+              section->globaltie.refgrid_id = -1;
+            }
+            if (section->globaltie.refgrid_id < -1 
+                || section->globaltie.refgrid_id >= project->num_refgrids) {
+              section->globaltie.refgrid_id = -1;
+            }
+          }
+        }
+
+        /* finally, check for any redundant reference grids, removing extras from the project */
+        if (project->num_refgrids > 1) {
+          int num_refgrids_deleted = 0;
+          bool refgrid_delete[MBNA_REFGRID_NUM_MAX];
+          int refgrid_renumber[MBNA_REFGRID_NUM_MAX];
+          for (int irefgrid = 0; irefgrid < project->num_refgrids; irefgrid++) {
+            refgrid_delete[irefgrid] = false;
+            refgrid_renumber[irefgrid] = irefgrid;
+          }
+          for (int irefgrid = project->num_refgrids - 1; irefgrid > 0; irefgrid--) {
+            for (int jrefgrid = 0; jrefgrid < irefgrid && !refgrid_delete[irefgrid]; jrefgrid++) {
+              if (strncmp(project->refgrid_names[irefgrid], project->refgrid_names[jrefgrid], sizeof(mb_path)) == 0) {
+                refgrid_delete[irefgrid] = true;
+                refgrid_renumber[irefgrid] = jrefgrid;
+                num_refgrids_deleted++;
+                for (int krefgrid = irefgrid + 1; krefgrid < project->num_refgrids; krefgrid++) {
+                  if (refgrid_renumber[krefgrid] > irefgrid) {
+                    refgrid_renumber[krefgrid]--;
+                  }
+                }
+              }
+            }
+          }
+          if (num_refgrids_deleted > 0) {
+            for (int irefgrid = 1; irefgrid < project->num_refgrids; irefgrid++) {
+              if (refgrid_delete[irefgrid]) {
+                for (int jrefgrid = irefgrid; jrefgrid < project->num_refgrids - 1; jrefgrid++) {
+                  strncpy(project->refgrid_names[jrefgrid], project->refgrid_names[jrefgrid + 1], sizeof(mb_path));
+                }
+              }
+            }
+            project->num_refgrids -= num_refgrids_deleted;
+            for (int ifile = 0; ifile < project->num_files; ifile++) {
+              struct mbna_file *file = &(project->files[ifile]);
+              for (int isection = 0; isection < project->files[ifile].num_sections; isection++) {
+                struct mbna_section *section = &(file->sections[isection]);
+                if (section->globaltie.refgrid_id >= 0) {
+                  section->globaltie.refgrid_id = refgrid_renumber[section->globaltie.refgrid_id];
+                }
+              }
+            }
+          }
+        }
+
       }
 
       /* else set error */
@@ -6388,13 +6449,13 @@ int mbnavadjust_reference_load(int verbose, struct mbna_project *project, int re
 
   /* unload reference grid if necessary */
   if (project->refgrid_status == MBNA_REFGRID_LOADED
-      && refgrid_select != project->refgrid_select) {
+      && refgrid_select != project->refgrid_loaded) {
     if (project->refgrid.val != NULL) {
       free(project->refgrid.val);
       project->refgrid.val = NULL;
     }
     project->refgrid_status = MBNA_REFGRID_UNLOADED;
-    project->refgrid_select = 0;
+    project->refgrid_loaded = 0;
   }
 
   /* load reference grid if needed */
@@ -6402,8 +6463,8 @@ int mbnavadjust_reference_load(int verbose, struct mbna_project *project, int re
     mb_pathplusplus path;
     int grid_projection_mode;
     int nxy;
-    project->refgrid_select = refgrid_select;
-    snprintf(path, sizeof(mb_pathplusplus), "%s/%s", project->datadir, project->refgrid_names[project->refgrid_select]);
+    project->refgrid_loaded = refgrid_select;
+    snprintf(path, sizeof(mb_pathplusplus), "%s/%s", project->datadir, project->refgrid_names[project->refgrid_loaded]);
     status = mb_read_gmt_grd(verbose, path, &grid_projection_mode,
                project->refgrid.projection_id,
                &project->refgrid.nodatavalue, &nxy,
@@ -6693,8 +6754,8 @@ int mbnavadjust_refgrid_unload(int verbose, struct mbna_project *project, int *e
     fprintf(stderr, "dbg2       verbose:                            %d\n", verbose);
     fprintf(stderr, "dbg2       project:                            %p\n", project);
     fprintf(stderr, "dbg2       project->datadir:                   %s\n", project->datadir);
-    fprintf(stderr, "dbg2       project->refgrid_select:            %d\n", project->refgrid_select);
-    fprintf(stderr, "dbg2       project->refgrid_names[selected]:   %s\n", project->refgrid_names[project->refgrid_select]);
+    fprintf(stderr, "dbg2       project->refgrid_loaded:            %d\n", project->refgrid_loaded);
+    fprintf(stderr, "dbg2       project->refgrid_names[loaded]:     %s\n", project->refgrid_names[project->refgrid_loaded]);
   }
 
   /* unload reference grid if necessary */
@@ -6704,7 +6765,7 @@ int mbnavadjust_refgrid_unload(int verbose, struct mbna_project *project, int *e
       project->refgrid.val = NULL;
     }
     project->refgrid_status = MBNA_REFGRID_UNLOADED;
-    project->refgrid_select = 0;
+    project->refgrid_loaded = 0;
   }
 
   if (verbose >= 2) {

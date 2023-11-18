@@ -409,6 +409,7 @@ struct mbna_project {
   int inversion_status;
 
   int refgrid_status;
+  int refgrid_loaded;
   int refgrid_select;
   struct mbna_grid refgrid;
   struct mbna_section reference_section;

@@ -4041,7 +4041,7 @@ int mbnavadjust_referencesection_replot() {
 }
 /*--------------------------------------------------------------------*/
 int mbnavadjust_referenceplussection_load() {
-  if (mbna_verbose >= 2) {
+  if (mbna_verbose >= 0) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
 
@@ -4068,6 +4068,7 @@ int mbnavadjust_referenceplussection_load() {
     /* put up message */
     snprintf(message, sizeof(message), "Loading file %d section %d...", mbna_current_file, mbna_current_section);
     do_message_update(message);
+    fprintf(stderr, "%s\n", message);
 
     struct mbna_section *section2 = &project.files[mbna_current_file].sections[mbna_current_section];
     struct mbna_globaltie *globaltie = &section2->globaltie;
@@ -4076,6 +4077,13 @@ int mbnavadjust_referenceplussection_load() {
     mbna_file_id_2 = mbna_current_file;
     mbna_section_2 = mbna_current_section;
     int refgrid_id = project.refgrid_select;
+    if (project.refgrid_select >= 0) {
+      fprintf(stderr, "Current selected reference grid: %d %s\n", 
+        project.refgrid_select, project.refgrid_names[project.refgrid_select]);
+    }
+    else {
+      fprintf(stderr, "No selected reference grid\n");
+    }
 
     if (section2->status == MBNA_CROSSING_STATUS_SET ) {
       mbna_current_tie = 0;
@@ -4089,7 +4097,11 @@ int mbnavadjust_referenceplussection_load() {
       mbna_offset_x = globaltie->offset_x;
       mbna_offset_y = globaltie->offset_y;
       mbna_offset_z = globaltie->offset_z_m;
-      refgrid_id = globaltie->refgrid_id;
+      if (globaltie->refgrid_id >= 0 && project.refgrid_select < 0) {
+        refgrid_id = globaltie->refgrid_id;
+        fprintf(stderr, "Using previously used global tie reference grid: %d %s\n", 
+                globaltie->refgrid_id, project.refgrid_names[globaltie->refgrid_id]);
+      }
     } else if (project.inversion_status != MBNA_INVERSION_NONE) {
       mbna_current_tie = -1;
       mbna_snav_1 = 0;
@@ -4158,45 +4170,57 @@ int mbnavadjust_referenceplussection_load() {
     mbna_lat_min = section2->latmin + mbna_offset_y;
     mbna_lat_max = section2->latmax + mbna_offset_y;
 
-    /* calculate the desired area for the reference grid subset to be loaded */
-    double length_meters = MAX((section2->lonmax - section2->lonmin) / mbna_mtodeglon,
-                                (section2->latmax - section2->latmin) / mbna_mtodeglat);
-    double lon_size_deg = length_meters * mbna_mtodeglon;
-    double lat_size_deg = length_meters * mbna_mtodeglat;
-    project.reference_section.lonmin = mbna_lon_min - 2.0 * lon_size_deg;
-    project.reference_section.lonmax = mbna_lon_max + 2.0 * lon_size_deg;
-    project.reference_section.latmin = mbna_lat_min - 2.0 * lat_size_deg;
-    project.reference_section.latmax = mbna_lat_max + 2.0 * lat_size_deg;
+    /* if the desired reference grid is selected or the loaded section has an exising 
+       global tie with a previously selected reference grid, load that reference grid */
+    if (refgrid_id >= 0) {
 
-    /* load the specified reference grid if overlaps the desired area */
-    if (!(project.refgrid_bounds[1][refgrid_id] < project.reference_section.lonmin
-        || project.refgrid_bounds[0][refgrid_id] > project.reference_section.lonmax
-        || project.refgrid_bounds[3][refgrid_id] < project.reference_section.latmin
-        || project.refgrid_bounds[2][refgrid_id] > project.reference_section.latmax)) {
-      snprintf(message, sizeof(message), "Reading reference grid: %s/%s\n", project.datadir, project.refgrid_names[refgrid_id]);
-      do_message_update(message);
-      int refgrid_status = mbnavadjust_reference_load(mbna_verbose, &project, refgrid_id,
-                                &project.reference_section, (void **)&swath1, &error);
-      if (refgrid_status == MB_SUCCESS) {
-        project.refgrid_status = MBNA_REFGRID_LOADED;
-        project.refgrid_select = refgrid_id;
-        snprintf(message, sizeof(message), "Read reference grid: %s/%s",
-                          project.datadir, project.refgrid_names[refgrid_id]);
+      /* calculate the desired area for the reference grid subset to be loaded */
+      double length_meters = MAX((section2->lonmax - section2->lonmin) / mbna_mtodeglon,
+                                  (section2->latmax - section2->latmin) / mbna_mtodeglat);
+      double lon_size_deg = length_meters * mbna_mtodeglon;
+      double lat_size_deg = length_meters * mbna_mtodeglat;
+      project.reference_section.lonmin = mbna_lon_min - 2.0 * lon_size_deg;
+      project.reference_section.lonmax = mbna_lon_max + 2.0 * lon_size_deg;
+      project.reference_section.latmin = mbna_lat_min - 2.0 * lat_size_deg;
+      project.reference_section.latmax = mbna_lat_max + 2.0 * lat_size_deg;
+
+      /* load the specified reference grid if overlaps the desired area */
+      fprintf(stderr, "Will load reference grid %d if bounds overlap desired area: \n", refgrid_id);
+      fprintf(stderr, "   refgrid_bounds: %f %f %f %f    section bounds: %f %f %f %f\n",
+        project.refgrid_bounds[0][refgrid_id], project.refgrid_bounds[1][refgrid_id], 
+        project.refgrid_bounds[2][refgrid_id], project.refgrid_bounds[3][refgrid_id],
+        project.reference_section.lonmin, project.reference_section.lonmax, 
+        project.reference_section.latmin, project.reference_section.latmax);
+      if (!(project.refgrid_bounds[1][refgrid_id] < project.reference_section.lonmin
+          || project.refgrid_bounds[0][refgrid_id] > project.reference_section.lonmax
+          || project.refgrid_bounds[3][refgrid_id] < project.reference_section.latmin
+          || project.refgrid_bounds[2][refgrid_id] > project.reference_section.latmax)) {
+        snprintf(message, sizeof(message), "Reading reference grid: %s/%s\n", project.datadir, project.refgrid_names[refgrid_id]);
         do_message_update(message);
-        snprintf(message, sizeof(message), "Read reference grid: %s/%s \n\t Dimensions: %d %d\n\tBounds: %f %f   %f %f\n",
-                          project.datadir, project.refgrid_names[refgrid_id],
-                          project.refgrid.nx, project.refgrid.ny,
-                          project.refgrid.bounds[0], project.refgrid.bounds[1],
-                          project.refgrid.bounds[2], project.refgrid.bounds[3]);
         fprintf(stderr, "%s\n", message);
-        mbna_lon_min = MIN(project.reference_section.lonmin, section2->lonmin + mbna_offset_x);
-        mbna_lon_max = MAX(project.reference_section.lonmax, section2->lonmax + mbna_offset_x);
-        mbna_lat_min = MIN(project.reference_section.latmin, section2->latmin + mbna_offset_y);
-        mbna_lat_max = MAX(project.reference_section.latmax, section2->latmax + mbna_offset_y);
-      } else {
-        snprintf(message, sizeof(message), "Failed to read reference grid: %s/%s",
-                          project.datadir, project.refgrid_names[refgrid_id]);
-        do_message_update(message);
+        int refgrid_status = mbnavadjust_reference_load(mbna_verbose, &project, refgrid_id,
+                                  &project.reference_section, (void **)&swath1, &error);
+        if (refgrid_status == MB_SUCCESS) {
+          project.refgrid_status = MBNA_REFGRID_LOADED;
+          project.refgrid_select = refgrid_id;
+          snprintf(message, sizeof(message), "Read reference grid: %s/%s",
+                            project.datadir, project.refgrid_names[refgrid_id]);
+          do_message_update(message);
+          snprintf(message, sizeof(message), "Read reference grid: %s/%s \n\t Dimensions: %d %d\n\tBounds: %f %f   %f %f\n",
+                            project.datadir, project.refgrid_names[refgrid_id],
+                            project.refgrid.nx, project.refgrid.ny,
+                            project.refgrid.bounds[0], project.refgrid.bounds[1],
+                            project.refgrid.bounds[2], project.refgrid.bounds[3]);
+          fprintf(stderr, "%s\n", message);
+          mbna_lon_min = MIN(project.reference_section.lonmin, section2->lonmin + mbna_offset_x);
+          mbna_lon_max = MAX(project.reference_section.lonmax, section2->lonmax + mbna_offset_x);
+          mbna_lat_min = MIN(project.reference_section.latmin, section2->latmin + mbna_offset_y);
+          mbna_lat_max = MAX(project.reference_section.latmax, section2->latmax + mbna_offset_y);
+        } else {
+          snprintf(message, sizeof(message), "Failed to read reference grid: %s/%s",
+                            project.datadir, project.refgrid_names[refgrid_id]);
+          do_message_update(message);
+        }
       }
     }
 

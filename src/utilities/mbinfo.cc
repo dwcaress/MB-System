@@ -549,7 +549,7 @@ int main(int argc, char **argv) {
       char apath[MB_PATH_MAXLINE] = "";
       char dpath[MB_PATH_MAXLINE] = "";
       int pstatus;
-      int astatus;
+      int astatus = 0;
       if (read_datalist) {
         const int look_processed = MB_DATALIST_LOOK_UNSET;
         if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
@@ -563,6 +563,7 @@ int main(int argc, char **argv) {
         // else copy single filename to be read
         strcpy(path, read_file);
         read_data = true;
+        astatus = 0;
       }
 
       /* loop over all files to be read */

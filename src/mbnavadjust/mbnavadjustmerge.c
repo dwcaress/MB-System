@@ -1997,26 +1997,30 @@ int main(int argc, char **argv) {
 
     /* copy the actual reference grid files from the input project to the new output project */
     for (int irefgrid = 0; irefgrid < project_inputadd.num_refgrids; irefgrid++) {
-        /* copy the ref_grid file */
-        mb_command srcfile = "";
-        mb_command dstfile = "";
-        sprintf(srcfile, "%s/%s", project_inputadd.datadir, project_inputadd.refgrid_names[irefgrid]);
-        sprintf(dstfile, "%s/%s", project_output.datadir, project_inputadd.refgrid_names[irefgrid]);
-        mb_copyfile(verbose, srcfile, dstfile, &error);
-        //mb_command command = "";
-        //sprintf(command, "cp %s/%s %s", project_inputadd.datadir, 
-        //      project_inputadd.refgrid_names[irefgrid], project_output.datadir);
-        // fprintf(stderr, "Executing in shell: %s\n", command);
-        ///* int shellstatus = */ system(command);
-        strncpy(project_output.refgrid_names[project_output.num_refgrids + irefgrid], 
-                project_inputadd.refgrid_names[irefgrid], sizeof(mb_path));
+      /* copy the ref_grid file */
+      mb_command srcfile = "";
+      mb_command dstfile = "";
+      sprintf(srcfile, "%s/%s", project_inputadd.datadir, project_inputadd.refgrid_names[irefgrid]);
+      sprintf(dstfile, "%s/%s", project_output.datadir, project_inputadd.refgrid_names[irefgrid]);
+      mb_copyfile(verbose, srcfile, dstfile, &error);
+      //mb_command command = "";
+      //sprintf(command, "cp %s/%s %s", project_inputadd.datadir, 
+      //      project_inputadd.refgrid_names[irefgrid], project_output.datadir);
+      // fprintf(stderr, "Executing in shell: %s\n", command);
+      ///* int shellstatus = */ system(command);
+      strncpy(project_output.refgrid_names[project_output.num_refgrids + irefgrid], 
+              project_inputadd.refgrid_names[irefgrid], sizeof(mb_path));
+      project_output.refgrid_bounds[0][project_output.num_refgrids + irefgrid] = project_inputadd.refgrid_bounds[0][irefgrid];
+      project_output.refgrid_bounds[1][project_output.num_refgrids + irefgrid] = project_inputadd.refgrid_bounds[1][irefgrid];
+      project_output.refgrid_bounds[2][project_output.num_refgrids + irefgrid] = project_inputadd.refgrid_bounds[2][irefgrid];
+      project_output.refgrid_bounds[3][project_output.num_refgrids + irefgrid] = project_inputadd.refgrid_bounds[3][irefgrid];
     }
 
     fprintf(stderr, "\nCopied input add project to output project:\n\t%s\n", project_output_path);
     fprintf(stderr, "\t%d files\n\t%d crossings\n\t%d ties\n", project_output.num_files, project_output.num_crossings,
             project_output.num_ties);
 
-    /* finally update all of the global counters */
+    /* update all of the global counters */
     project_output.num_files += project_inputadd.num_files;
     project_output.num_surveys += project_inputadd.num_surveys;
     project_output.num_snavs += project_inputadd.num_snavs;
@@ -2031,6 +2035,50 @@ int main(int argc, char **argv) {
     project_output.num_globalties += project_inputadd.num_globalties;
     project_output.num_globalties_analyzed += project_inputadd.num_globalties_analyzed;
     project_output.num_refgrids += project_inputadd.num_refgrids;
+
+    /* finally, check for any redundant reference grids, removing extras from the project */
+    if (project_output.num_refgrids > 1) {
+      int num_refgrids_deleted = 0;
+      bool refgrid_delete[MBNA_REFGRID_NUM_MAX];
+      int refgrid_renumber[MBNA_REFGRID_NUM_MAX];
+      for (int irefgrid = 0; irefgrid < project_output.num_refgrids; irefgrid++) {
+        refgrid_delete[irefgrid] = false;
+        refgrid_renumber[irefgrid] = irefgrid;
+      }
+      for (int irefgrid = project_output.num_refgrids - 1; irefgrid > 0; irefgrid--) {
+        for (int jrefgrid = 0; jrefgrid < irefgrid && !refgrid_delete[irefgrid]; jrefgrid++) {
+          if (strncmp(project_output.refgrid_names[irefgrid], project_output.refgrid_names[jrefgrid], sizeof(mb_path)) == 0) {
+            refgrid_delete[irefgrid] = true;
+            refgrid_renumber[irefgrid] = jrefgrid;
+            num_refgrids_deleted++;
+            for (int krefgrid = irefgrid + 1; krefgrid < project_output.num_refgrids; krefgrid++) {
+              if (refgrid_renumber[krefgrid] > irefgrid) {
+                refgrid_renumber[krefgrid]--;
+              }
+            }
+          }
+        }
+      }
+      if (num_refgrids_deleted > 0) {
+        for (int irefgrid = 1; irefgrid < project_output.num_refgrids; irefgrid++) {
+          if (refgrid_delete[irefgrid]) {
+            for (int jrefgrid = irefgrid; jrefgrid < project_output.num_refgrids - 1; jrefgrid++) {
+              strncpy(project_output.refgrid_names[jrefgrid], project_output.refgrid_names[jrefgrid + 1], sizeof(mb_path));
+            }
+          }
+        }
+        project_output.num_refgrids -= num_refgrids_deleted;
+        for (int ifile = 0; ifile < project_output.num_files; ifile++) {
+          struct mbna_file *file = &(project_output.files[ifile]);
+          for (int isection = 0; isection < project_output.files[ifile].num_sections; isection++) {
+            struct mbna_section *section = &(file->sections[isection]);
+            if (section->globaltie.refgrid_id >= 0) {
+              section->globaltie.refgrid_id = refgrid_renumber[section->globaltie.refgrid_id];
+            }
+          }
+        }
+      }
+    }
   }
 
   struct mbna_file *file1;

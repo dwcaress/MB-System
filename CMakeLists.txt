@@ -48,12 +48,12 @@ message("Build shared/static libraries with -DBUILD_SHARED_LIBS=ON/OFF")
 message("Disable building TRN software with -DbuildTRN=OFF")
 message("Disable building photomosaicing software with -DbuildOpenCV=OFF")
 message("Build Qt-based GUIs with -DbuildQt=ON")
-message("Build unit tests with -DbuildTests=ON")
+message("Disable unit tests with -DbuildTests=OFF (run unit tests with make test)")
 message("Print out all CMake variables with -Dverbose=1")
 message("----------------------------------------------------------")
 
 # Define minimum CMake version required
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.16)
 
 # Define project
 project(MB-System 
@@ -97,7 +97,7 @@ option(buildOpenCV "build OpenCV tools" ON)
 option(buildTRN "build MBTRN tools" ON)
 option(buildPCL "build point-cloud-library" OFF)
 option(buildQt "build Qt tools" OFF)
-option(buildTests "build unit tests exercised by make check" OFF)
+option(buildTests "build unit tests exercised by make test" ON)
 
 set(CMAKE_INSTALL_MANPAGES /usr/local/share/man) 
 set(CMAKE_INSTALL_DOC /usr/local/share/doc) 
