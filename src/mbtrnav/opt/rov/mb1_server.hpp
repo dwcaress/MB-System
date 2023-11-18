@@ -349,7 +349,7 @@ public:
                             if(_debug>=4){
                                 // data is expected to be an MB1 record(mb1_t)
                                 mb1_t *snd = (mb1_t *)data;
-                                MB1SVR_DBG(stderr,"%s: sending frame fd[%d] p[%p] len[%lu]\n", __func__, i,  data, len);
+                                MB1SVR_NDBG(5, stderr,"%s: sending frame fd[%d] p[%p] len[%lu]\n", __func__, i,  data, len);
                                 mb1_show(snd, (_debug>=5?true:false), true);
                                 if(_debug>=5)
                                     mb1_hex_show((byte *)snd,snd->size,16,true,5);

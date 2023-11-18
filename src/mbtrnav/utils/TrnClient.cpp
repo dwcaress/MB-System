@@ -507,7 +507,7 @@ TerrainNav* TrnClient::connectTRN()
 {
     TerrainNav *_tercom = NULL;
     
-    fprintf(stdout, "TrnClient - Using TerrainNav [%s:%ld]\n",
+    fprintf(stderr, "TrnClient - Using TerrainNav [%s:%ld]\n",
             _trn_attr->_terrainNavServer, _trn_attr->_terrainNavPort);
     
     try
@@ -565,7 +565,7 @@ TerrainNav* TrnClient::connectTRN()
 
         // If we reach here then we've connected
         //
-        fprintf(stdout, "TrnClient - connected to server if no error messages...\n");
+        fprintf(stderr, "TrnClient - connected to server if no error messages...\n");
 
     } else{
         fprintf(stderr, "TrnClient - Not initialized. skipInit(%c) See trn_server error messages...\n", _trn_attr->_skipInit ? 'Y' : 'N');
