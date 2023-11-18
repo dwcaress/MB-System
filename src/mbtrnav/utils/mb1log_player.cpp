@@ -1,4 +1,4 @@
-/// @file trnlog_player.cpp
+/// @file mb1log_player.cpp
 /// @authors k. headley
 /// @date 21mar2022
 
@@ -27,11 +27,13 @@
 #include <iostream>
 #include <list>
 #include <chrono>
+
 #include "structDefs.h"
-#include "TrnLog.h"
+#include "mb1_msg.h"
 #include "TrnClient.h"
 #include "trn_debug.hpp"
 #include "flag_utils.hpp"
+#include "NavUtils.h"
 
 // /////////////////
 // Macros
@@ -43,26 +45,23 @@
 /// @brief version string macro.
 #define VERSION_STRING(s) VERSION_HELPER(s)
 
-#define TRNLOG_PLAYER_NAME "trnxpp"
-#ifndef TRNLOG_PLAYER_BUILD
-/// @def TRNLOG_PLAYER_BUILD
+#define MB1LOG_PLAYER_NAME "trnxpp"
+#ifndef MB1LOG_PLAYER_BUILD
+/// @def MB1LOG_PLAYER_BUILD
 /// @brief module build date.
 /// Sourced from CFLAGS in Makefile
 /// w/ -DMBTRN_BUILD=`date`
-#define TRNLOG_PLAYER_BUILD "" VERSION_STRING(APP_BUILD)
+#define MB1LOG_PLAYER_BUILD "" VERSION_STRING(APP_BUILD)
 #endif
-#ifndef TRNLOG_PLAYER_VERSION
-/// @def TRNLOG_PLAYER_BUILD
+#ifndef MB1LOG_PLAYER_VERSION
+/// @def MB1LOG_PLAYER_BUILD
 /// @brief module build date.
 /// Sourced from CFLAGS in Makefile
 /// w/ -DMBTRN_BUILD=`date`
-#define TRNLOG_PLAYER_VERSION "" VERSION_STRING(TRNLOG_PLAYER_VER)
+#define MB1LOG_PLAYER_VERSION "" VERSION_STRING(MB1LOG_PLAYER_VER)
 #endif
-
-
 
 #define TRN_SERVER_PORT_DFL 27027
-#define IBUF_LEN_BYTES 4800
 
 #ifndef DTR
 #define DTR(x) ((x) * M_PI/180.)
@@ -84,7 +83,7 @@ static bool g_interrupt=false;
 // /////////////////
 // Declarations
 
-class TrnLogConfig
+class MB1LogConfig
 {
 public:
 
@@ -100,19 +99,19 @@ public:
         ALL_CSV=0x18
     }OFlags;
 
-   TrnLogConfig()
-    : mDebug(0), mVerbose(false), mHost("localhost"), mTrnCfg(), mPort(TRN_SERVER_PORT_DFL), mServer(false), mTrnInCsvEn(false), mTrnOutCsvEn(false), mTrnInCsvPath(), mTrnOutCsvPath(), mTrnSensor(TRN_SENSOR_MB), mOFlags(),  mBeams(0), mStep(false), mSwath(0.)
+   MB1LogConfig()
+    : mDebug(0), mVerbose(false), mHost("localhost"), mTrnCfg(), mPort(TRN_SERVER_PORT_DFL), mServer(false), mTrnInCsvEn(false), mTrnOutCsvEn(false), mTrnInCsvPath(), mTrnOutCsvPath(), mTrnSensor(TRN_SENSOR_MB), mOFlags(), mUtmZone(10), mBeams(0), mStep(false), mSwath(0.)
     {
 
     }
 
-    TrnLogConfig(const TrnLogConfig &other)
-    : mDebug(other.mDebug), mVerbose(other.mVerbose), mHost(other.mHost), mTrnCfg(other.mTrnCfg), mPort(other.mPort), mServer(other.mServer),  mTrnInCsvEn(other.mTrnInCsvEn), mTrnOutCsvEn(other.mTrnOutCsvEn), mTrnInCsvPath(other.mTrnInCsvPath), mTrnOutCsvPath(other.mTrnOutCsvPath), mTrnSensor(other.mTrnSensor), mOFlags(other.mOFlags), mBeams(other.mBeams), mStep(other.mStep), mSwath(other.mSwath)
+    MB1LogConfig(const MB1LogConfig &other)
+    : mDebug(other.mDebug), mVerbose(other.mVerbose), mHost(other.mHost), mTrnCfg(other.mTrnCfg), mPort(other.mPort), mServer(other.mServer),  mTrnInCsvEn(other.mTrnInCsvEn), mTrnOutCsvEn(other.mTrnOutCsvEn), mTrnInCsvPath(other.mTrnInCsvPath), mTrnOutCsvPath(other.mTrnOutCsvPath), mTrnSensor(other.mTrnSensor), mOFlags(other.mOFlags), mUtmZone(other.mUtmZone), mBeams(other.mBeams), mStep(other.mStep), mSwath(other.mSwath)
     {
 
     }
 
-   ~TrnLogConfig()
+   ~MB1LogConfig()
     {
     }
 
@@ -125,7 +124,8 @@ public:
     std::string trni_csv_path(){return mTrnInCsvPath;}
     std::string trno_csv_path(){return mTrnOutCsvPath;}
     int port(){return mPort;}
-    bool oflag_set(TrnLogConfig::OFlags mask){return mOFlags.all_set(mask);}
+    bool oflag_set(MB1LogConfig::OFlags mask){return mOFlags.all_set(mask);}
+    long utm_zone(){return mUtmZone;}
     uint32_t beams(){return mBeams;}
     bool step(){return mStep;}
     double swath(){return mSwath;}
@@ -142,6 +142,7 @@ public:
     void set_debug(int debug){mDebug = debug;}
     void set_verbose(bool verbose){mVerbose = verbose;}
     void set_oflags(uint32_t flags){mOFlags = flags;}
+    void set_utm(long utmZone){mUtmZone = utmZone;}
     void set_beams(uint32_t beams){mBeams = beams;}
     void set_step(bool step){mStep = step;}
     void set_swath(double swath){mSwath = swath;}
@@ -166,6 +167,7 @@ public:
         wx = (alen >= wval ? alen + 1 : wval);
         os << std::setw(wkey) << "mTrnOutCsvPath" << std::setw(wx) << mTrnOutCsvPath.c_str() << std::endl;
         os << std::setw(wkey) << "mTrnSensor" << std::setw(wval) << mTrnSensor << std::endl;
+        os << std::setw(wkey) << "mUtmZone" << std::setw(wval) << mUtmZone << std::endl;
         os << std::setw(wkey) << "mBeams" << std::setw(wval) << mBeams << std::endl;
         os << std::setw(wkey) << "mSwath" << std::setw(wval) << mSwath << std::endl;
         os << std::setw(wkey) << "mOFlags" << std::hex << std::setw(wval) << (uint32_t)mOFlags.get() << std::endl;
@@ -198,15 +200,16 @@ private:
     std::string mTrnOutCsvPath;
     int mTrnSensor;
     flag_var<uint32_t> mOFlags;
+    long int mUtmZone;
     uint32_t mBeams;
     bool mStep;
     double mSwath;
 };
 
-class TLPStats
+class MLPStats
 {
 public:
-    TLPStats()
+    MLPStats()
     :mFilesPlayed(0), mRecordsFound(0), mMtniRead(0), mMeaiRead(0), mMseoRead(0), mMleoRead(0), mMotnUpdate(0), mMeasUpdate(0), mEstMMSE(0), mEstMLE(0), mLastMeasSuccess(0), mTrniCsvWrite(0), mTrnoCsvWrite(0)
     {}
 
@@ -255,31 +258,31 @@ public:
 
 };
 
-class TrnLogPlayer
+class MB1LogPlayer
 {
 public:
 
-    TrnLogPlayer()
+    MB1LogPlayer()
     :mConfig(), mTrn(NULL), mFile(NULL), mTrnInCsvFile(NULL), mTrnOutCsvFile(NULL), mQuit(false)
     {
     }
 
-    TrnLogPlayer(const TrnLogConfig &cfg)
+    MB1LogPlayer(const MB1LogConfig &cfg)
     :mConfig(cfg), mTrn(NULL), mFile(NULL), mTrnInCsvFile(NULL), mTrnOutCsvFile(NULL), mQuit(false)
     {
     }
 
-    ~TrnLogPlayer()
+    ~MB1LogPlayer()
     {
         if(mFile != NULL){
-            fclose(mFile);
+            std::fclose(mFile);
         }
 
         if(mTrnInCsvFile != NULL){
-            fclose(mTrnInCsvFile);
+            std::fclose(mTrnInCsvFile);
         }
         if(mTrnOutCsvFile != NULL){
-            fclose(mTrnOutCsvFile);
+            std::fclose(mTrnOutCsvFile);
         }
 
         if(NULL != mTrn)
@@ -312,164 +315,135 @@ public:
 
 
         if(mFile != NULL){
-            fclose(mFile);
+            std::fclose(mFile);
         }
 
-        if( (mFile = fopen(src.c_str(), "r")) == NULL)
+        if( (mFile = std::fopen(src.c_str(), "r")) == NULL)
         {
             fprintf(stderr, "%s:%d - could not open file[%s] [%d:%s]\n", __func__, __LINE__, src.c_str(), errno, strerror(errno));
             return retval;
         }
 
-        if(skip_header() != 0)
-        {
-            fprintf(stderr, "%s:%d - data start not found in file[%s] [%d:%s]\n", __func__, __LINE__, src.c_str(), errno, strerror(errno));
-            return retval;
-        }
+        byte ibuf[MB1_MAX_SOUNDING_BYTES]={0};
 
-        TrnLog::TrnRecID rec_type = TrnLog::RT_INVALID;
-        byte ibuf[IBUF_LEN_BYTES]={0};
+        while (!mQuit && next_record(ibuf, MB1_MAX_SOUNDING_BYTES) == 0) {
 
-        while (!mQuit && next_record(ibuf, IBUF_LEN_BYTES, rec_type) == 0) {
             this->stats().mRecordsFound++;
 
             if(NULL!=quit && *quit)
                 break;
 
-            if(rec_type == TrnLog::MOTN_IN) {
+//            fprintf(stderr, "%s:%d - read MB1 record [%d]\n", __func__, __LINE__, this->stats().mRecordsFound);
 
-                poseT *pt = NULL;
-                if(read_pose(&pt, ibuf) == 0 && pt != NULL){
+            poseT *pt = NULL;
+            measT *mt = NULL;
 
-                    this->stats().mMtniRead++;
+            if(read_pose(&pt, ibuf) == 0 && pt != NULL){
 
-                    if(mConfig.oflag_set(TrnLogConfig::MOTN))
-                    {
-                        show_pt(*pt);
-                        std::cerr << "\n";
-                    }
+                this->stats().mMtniRead++;
 
-                    if(mConfig.server() && mTrn != NULL)
-                    {
-                        try{
-                            mTrn->motionUpdate(pt);
-                            this->stats().mMotnUpdate++;
-                        }catch(Exception e) {
-                            fprintf(stderr,"%s - caught exception [%s]\n",__func__, e.what());
-                        }
-                    }
-                    if(lastPT != NULL)
-                        delete lastPT;
-                    lastPT = new poseT();
-                    *lastPT = *pt;
-                    delete pt;
-                } else {
-                    TRN_NDPRINT(2,"read_pose failed\n");
-                    if(lastPT != NULL)
-                        delete lastPT;
-                    lastPT = NULL;
+                if(mConfig.oflag_set(MB1LogConfig::MOTN))
+                {
+                    show_pt(*pt);
+                    std::cerr << "\n";
                 }
-            } else if(rec_type == TrnLog::MEAS_IN) {
 
-                measT *mt = NULL;
-                if(read_meas(&mt, ibuf) == 0 && mt != NULL){
-
-                    this->stats().mMeaiRead++;
-
-                    if(mConfig.oflag_set(TrnLogConfig::MEAS))
-                    {
-                        show_mt(*mt);
-                        std::cerr << "\n";
+                if(mConfig.server() && mTrn != NULL)
+                {
+                    try{
+                        mTrn->motionUpdate(pt);
+                        this->stats().mMotnUpdate++;
+                    }catch(Exception e) {
+                        fprintf(stderr,"%s - caught exception [%s]\n",__func__, e.what());
                     }
-
-
-                    if(lastPT != NULL && mConfig.trni_csv()){
-                        trni_csv_tofile(&mTrnInCsvFile, *lastPT, *mt);
-                        this->stats().mTrniCsvWrite++;
-                    }
-
-                    if(lastPT != NULL && mConfig.oflag_set(TrnLogConfig::TRNI_CSV))
-                    {
-                        trni_csv_tostream(std::cout, *lastPT, *mt);
-                    }
-
-                    if(mConfig.server())
-                    {
-                        try{
-
-                            mTrn->measUpdate(mt, mConfig.trn_sensor());
-                            this->stats().mMeasUpdate++;
-
-                            if(mTrn->lastMeasSuccessful()){
-                                this->stats().mLastMeasSuccess++;
-
-                                auto ts_now = std::chrono::system_clock::now();
-                                std::chrono::duration<double> epoch_time = ts_now.time_since_epoch();
-                                poseT mle, mmse;
-                                double ts = epoch_time.count();
-
-                                mTrn->estimatePose(&mmse, TRN_EST_MMSE);
-                                this->stats().mEstMMSE++;
-                                mTrn->estimatePose(&mle, TRN_EST_MLE);
-                                this->stats().mEstMLE++;
-
-                                if(lastPT != NULL && mConfig.oflag_set(TrnLogConfig::EST)){
-                                    show_est(ts, *lastPT, mle, mmse);
-                                }
-
-                                if(lastPT != NULL && mConfig.trno_csv()){
-                                    trno_csv_tofile(&mTrnOutCsvFile, ts, *lastPT, mle, mmse);
-                                    this->stats().mTrnoCsvWrite++;
-                                }
-                                if(lastPT != NULL && mConfig.oflag_set(TrnLogConfig::TRNO_CSV))
-                                {
-                                    trno_csv_tostream(std::cout, ts, *lastPT, mle, mmse);
-                                }
-                            }else{
-                                fprintf(stderr,"%s:%d - last meas unsuccessful\n",__func__, __LINE__);
-                            }
-
-                        }catch(Exception e) {
-                            fprintf(stderr,"%s - caught exception [%s]\n",__func__, e.what());
-                        }
-                    }
-                    delete mt;
-                    if(lastPT != NULL)
-                        delete lastPT;
-                    lastPT = NULL;
-
-                } else {
-                    TRN_NDPRINT(2,"read_meas failed\n");
                 }
-            } else if(rec_type == TrnLog::MSE_OUT) {
+                if(lastPT != NULL)
+                    delete lastPT;
+                lastPT = new poseT();
+                *lastPT = *pt;
+            } else {
+                TRN_NDPRINT(2,"read_pose failed\n");
+                if(lastPT != NULL)
+                    delete lastPT;
+                lastPT = NULL;
 
-                poseT *pt = NULL;
-                if(read_est(&pt, ibuf) == 0 && pt != NULL){
-
-                    this->stats().mMseoRead++;
-
-                    if(mConfig.oflag_set(TrnLogConfig::MMSE))
-                        show_esto(*pt);
-                }else {
-                    TRN_NDPRINT(2,"read_est failed\n");
-                }
-                delete pt;
-            } else if(rec_type == TrnLog::MLE_OUT) {
-                
-                poseT *pt = NULL;
-                if(read_est(&pt, ibuf) == 0 && pt != NULL){
-                    this->stats().mMleoRead++;
-                    if(mConfig.oflag_set(TrnLogConfig::MLE))
-                        show_esto(*pt);
-                }else {
-                    TRN_NDPRINT(2,"read_est failed\n");
-                }
-                delete pt;
-            }else {
-                TRN_NDPRINT(2,"invalid record type[%d]\n",rec_type);
             }
 
-            memset(ibuf, 0, IBUF_LEN_BYTES);
+            if(read_meas(&mt, ibuf, mConfig.trn_sensor()) == 0 && mt != NULL){
+
+               this->stats().mMeaiRead++;
+
+                if(mConfig.oflag_set(MB1LogConfig::MEAS))
+                {
+                    show_mt(*mt);
+                    std::cerr << "\n";
+                }
+
+
+                if(lastPT != NULL && mConfig.trni_csv()){
+                    trni_csv_tofile(&mTrnInCsvFile, *lastPT, *mt);
+                    this->stats().mTrniCsvWrite++;
+                }
+
+                if(lastPT != NULL && mConfig.oflag_set(MB1LogConfig::TRNI_CSV))
+                {
+                    trni_csv_tostream(std::cout, *lastPT, *mt);
+                }
+
+                if(mConfig.server())
+                {
+                    try{
+
+                        mTrn->measUpdate(mt, mConfig.trn_sensor());
+                        this->stats().mMeasUpdate++;
+
+                        if(mTrn->lastMeasSuccessful()){
+                            this->stats().mLastMeasSuccess++;
+
+                            auto ts_now = std::chrono::system_clock::now();
+                            std::chrono::duration<double> epoch_time = ts_now.time_since_epoch();
+                            poseT mle, mmse;
+                            double ts = epoch_time.count();
+
+                            mTrn->estimatePose(&mmse, TRN_EST_MMSE);
+                            this->stats().mEstMMSE++;
+                            mTrn->estimatePose(&mle, TRN_EST_MLE);
+                            this->stats().mEstMLE++;
+
+                            if(lastPT != NULL && mConfig.oflag_set(MB1LogConfig::EST)){
+                                fprintf(stderr, "%s:%d --- EST --- \n",__func__, __LINE__);
+                                show_est(ts, *lastPT, mle, mmse);
+                            }
+
+                            if(lastPT != NULL && mConfig.trno_csv()){
+                                trno_csv_tofile(&mTrnOutCsvFile, ts, *lastPT, mle, mmse);
+                                this->stats().mTrnoCsvWrite++;
+                            }
+                            if( lastPT != NULL && mConfig.oflag_set(MB1LogConfig::TRNO_CSV))
+                            {
+                                trno_csv_tostream(std::cout, ts, *lastPT, mle, mmse);
+                            }
+                        }else{
+                            TRN_NDPRINT(1, "%s:%d - last meas unsuccessful\n",__func__, __LINE__);
+                        }
+
+                    }catch(Exception e) {
+                        fprintf(stderr,"%s - caught exception [%s]\n",__func__, e.what());
+                    }
+                }
+                if(lastPT != NULL)
+                    delete lastPT;
+                lastPT = NULL;
+            } else {
+                TRN_NDPRINT(2, "read_meas failed\n");
+            }
+
+            if(mt != NULL)
+                delete mt;
+            if(pt != NULL)
+                delete pt;
+
+            memset(ibuf, 0, MB1_MAX_SOUNDING_BYTES);
 
             if(mConfig.step()) {
                 char c = '\0';
@@ -486,7 +460,7 @@ public:
         mQuit = true;
     }
 
-    TLPStats &stats(){return mStats;}
+    MLPStats &stats(){return mStats;}
 
     void show_cfg()
     {
@@ -499,21 +473,22 @@ protected:
     {
         // Note that TRN uses N,E,D frame (i.e. N:x E:y D:z)
         // [ 0] time POSIX epoch sec
-        // [ 1] northings
-        // [ 2] eastings
-        // [ 3] depth
-        // [ 4] heading
-        // [ 5] pitch
-        // [ 6] roll
-        // [ 7] flag (0)
+        // [ 1] ping_number
+        // [ 2] northings
+        // [ 3] eastings
+        // [ 4] depth
+        // [ 5] heading
+        // [ 6] pitch
+        // [ 7] roll
         // [ 8] flag (0)
         // [ 9] flag (0)
-        // [10] vx (0)
-        // [11] xy (0)
-        // [12] vz (0)
-        // [13] sounding valid flag
-        // [14] bottom lock valid flag
-        // [15] number of beams
+        // [10] flag (0)
+        // [11] vx (0)
+        // [12] xy (0)
+        // [13] vz (0)
+        // [14] sounding valid flag
+        // [15] bottom lock valid flag
+        // [16] number of beams
         // beam[i] number
         // beam[i] valid (1)
         // beam[i] range
@@ -569,7 +544,7 @@ protected:
         {
             TRN_DPRINT("%s:%d INFO - opening trni_csv file[%s]\n", __func__, __LINE__, mConfig.trni_csv_path().c_str());
 
-            *fp = fopen(mConfig.trni_csv_path().c_str(), "a");
+            *fp = std::fopen(mConfig.trni_csv_path().c_str(), "a");
         }
 
         if(NULL != *fp){
@@ -655,7 +630,7 @@ protected:
     {
         if(NULL == *fp)
         {
-            *fp = fopen(mConfig.trno_csv_path().c_str(),"a");
+            *fp = std::fopen(mConfig.trno_csv_path().c_str(),"a");
         }
 
         if(NULL != *fp){
@@ -669,7 +644,6 @@ protected:
     void show_trno_csv(double ts, poseT &pt, poseT &mle, poseT &mmse)
     {
         trno_csv_tostream(std::cerr, ts, pt, mle, mmse);
-        std::cerr << "\n";
     }
 
     void est_tostream(std::ostream &os, double ts, poseT &pt, poseT &mle, poseT &mmse, int wkey=15, int wval=18)
@@ -897,214 +871,184 @@ protected:
     }
 
     // finds and reads next record ID
-    int skip_header()
+    int next_record(byte *dest, size_t len)
     {
         int retval = -1;
-        byte buf[8]={0}, *cur = buf;
+
         typedef enum{
             START,
-            B,E,G,I,N,
+            MB1,
             OK, EEOF, ERR
         }state_t;
         state_t stat = START;
 
+        size_t msg_buf_len = MB1_MAX_SOUNDING_BYTES + sizeof(mb1_t);
+        byte msg_buf[msg_buf_len];
+
         while(stat != OK && stat != EEOF && stat != ERR)
         {
-            if(fread(cur,1,1,mFile) == 1)
-            {
-                if(*cur == 'b'){
-                    if(stat==START){
-                        stat=B;
-                        cur++;
-                    } else {
-                        stat=START;
-                        cur=buf;
+            memset(msg_buf, 0, msg_buf_len);
+            mb1_t *mb1 = (mb1_t *) &msg_buf[0];
+            byte *ptype = (byte *)(&(mb1->type));
+
+            bool ferr=false;
+            int64_t rbytes=0;
+            bool sync_valid=false;
+
+            byte *sp = (byte *)mb1;
+            bool header_valid=false;
+            bool rec_valid=false;
+            bool data_valid = true;
+
+            while (!sync_valid) {
+                if( ((rbytes = std::fread((void *)sp, 1, 1, mFile)) == 1) && *sp=='M') {
+                    sp++;
+                    if( ((rbytes = std::fread((void *)sp, 1, 1, mFile)) == 1) && *sp=='B'){
+                        sp++;
+                        if( ((rbytes = std::fread((void *)sp, 1, 1, mFile)) == 1) && *sp=='1'){
+                            sp++;
+                            if( ((rbytes = std::fread((void *)sp, 1, 1, mFile)) == 1) && *sp=='\0'){
+                                sync_valid=true;
+                                TRN_NDPRINT(2, "sync read slen[%d]\n", MB1_TYPE_BYTES);
+                                TRN_NDPRINT(2, "  sync     ['%c''%c''%c''%c']/[%02X %02X %02X %02X]\n",
+                                          ptype[0],
+                                          ptype[1],
+                                          ptype[2],
+                                          ptype[3],
+                                          ptype[0],
+                                          ptype[1],
+                                          ptype[2],
+                                          ptype[3]);
+                                break;
+                            }else{
+                                sp=ptype;
+                            }
+                        }else{
+                            sp=ptype;
+                        }
+                    }else{
+                        sp=ptype;
                     }
-                } else if(*cur == 'e'){
-                    if(stat==B){
-                        stat=E;
-                        cur++;
-                    } else {
-                        stat=START;
-                        cur=buf;
-                    }
-                } else if(*cur == 'g'){
-                    if(stat==E){
-                        stat=G;
-                        cur++;
-                    } else {
-                        stat=START;
-                        cur=buf;
-                    }
-                } else if(*cur == 'i'){
-                    if(stat==G){
-                        stat=I;
-                        cur++;
-                    } else {
-                        stat=START;
-                        cur=buf;
-                    }
-                } else if(*cur == 'n'){
-                    if(stat==I){
-                        stat=OK;
-                        cur++;
-                    } else {
-                        stat=START;
-                        cur=buf;
-                    }
-                } else {
-                    stat=START;
-                    cur=buf;
                 }
+                if(rbytes<=0){
+                    TRN_NDPRINT(1, "reached EOF looking for sync buf[%s] rbytes[%ld] err[%d:%s] fpos[%ld] feof[%d] ferr[%d]\n", msg_buf, rbytes, errno, strerror(errno), ftell(mFile), std::feof(mFile), std::ferror(mFile));
+                    ferr = true;
+                    break;
+                }
+            }
+
+            if(g_interrupt)
+                ferr = true;
+
+            if (sync_valid && !ferr) {
+
+                // read the rest of the sounding header
+                byte *psnd = (byte *)&mb1->size;
+                uint32_t readlen =(MB1_HEADER_BYTES-MB1_TYPE_BYTES);
+                if((rbytes = std::fread((void *)psnd, 1, readlen, mFile)) == readlen){
+
+                    int32_t cmplen = MB1_SOUNDING_BYTES(mb1->nbeams);
+
+                    if ((int32_t)mb1->size == cmplen ) {
+                        header_valid=true;
+                        TRN_NDPRINT(2, "sounding header read len[%" PRIu32 "/%" PRId64 "]\n", (uint32_t)readlen, rbytes);
+                        TRN_NDPRINT(3, "  size   [%d]\n", mb1->size);
+                        TRN_NDPRINT(3, "  time   [%.3f]\n", mb1->ts);
+                        TRN_NDPRINT(3, "  lat    [%.3f]\n", mb1->lat);
+                        TRN_NDPRINT(3, "  lon    [%.3f]\n", mb1->lon);
+                        TRN_NDPRINT(3, "  depth  [%.3f]\n", mb1->depth);
+                        TRN_NDPRINT(3, "  hdg    [%.3f]\n", mb1->hdg);
+                        TRN_NDPRINT(3, "  ping   [%06d]\n", mb1->ping_number);
+                        TRN_NDPRINT(3, "  nbeams [%d]\n", mb1->nbeams);
+                    } else {
+                        TRN_DPRINT( "message len invalid l[%d] l*[%d]\n", mb1->size, cmplen);
+                    }
+
+                } else {
+                    fprintf(stderr, "could not read header bytes [%" PRId64 "/%" PRIu32 "]\n", rbytes, readlen);
+                    ferr=true;
+                }
+            }
+
+            if(g_interrupt)
+                ferr = true;
+
+            if (header_valid && ferr == false ) {
+
+                if(mb1->nbeams > 0){
+                    // read beam data
+                    byte *bp = (byte *)mb1->beams;
+                    uint32_t readlen = MB1_BEAM_ARRAY_BYTES(mb1->nbeams);
+                    if((rbytes = std::fread((void *)bp, 1, readlen, mFile)) == readlen){
+
+                        TRN_NDPRINT(2, "beams read blen[%d/%" PRId64 "]\n", readlen, rbytes);
+
+                    } else {
+                        TRN_NDPRINT(2, "beam read failed pb[%p] read[%" PRId64 "]\n", bp, rbytes);
+                    }
+
+                } else {
+                    TRN_NDPRINT(2, "no beams read [%" PRIu32 "]\n", mb1->nbeams);
+                }
+
+                byte *cp = (byte *)MB1_PCHECKSUM(mb1);
+
+                if((rbytes = std::fread((void *)cp, 1, MB1_CHECKSUM_BYTES, mFile)) == MB1_CHECKSUM_BYTES){
+                    //                                    TRN_NDPRINT(2, "chksum read clen[%" PRId64 "]\n", rbytes);
+                    //                                    TRN_NDPRINT(3, "  chksum [%0X]\n", pmessage->chksum);
+
+                    if(mb1->nbeams <= 0 || mb1->nbeams > MB1_MAX_BEAMS)
+                    {
+                        fprintf(stderr, "%s:%d ERR nbeams %d\n", __func__, __LINE__, mb1->nbeams);
+                        data_valid = false;
+                    } else if(mb1->ts <= 0)
+                    {
+                        fprintf(stderr, "%s:%d ERR time %.3lf\n", __func__, __LINE__, mb1->ts);
+                        data_valid = false;
+                    } else if ((mb1->lat > -1. && mb1->lat < 1.)  || (mb1->lon > -1. && mb1->lon < 1.) || (mb1->depth > -1. && mb1->depth < 1.)) {
+                        fprintf(stderr, "%s:%d ERR lat,lon,depth [%.3lf, %.3lf, %.3lf]\n", __func__, __LINE__, mb1->lat, mb1->lon, mb1->depth);
+                        data_valid = false;
+                    }else {
+                        rec_valid=true;
+                    }
+
+                }else{
+                    TRN_DPRINT( "chksum read failed [%" PRId64 "]\n", rbytes);
+                }
+
+            }else{
+                TRN_DPRINT( "header read failed [%" PRId64 "]\n", rbytes);
+            }
+
+            if(g_interrupt)
+                ferr = true;
+
+
+            if (rec_valid && ferr == false) {
+
+                // TODO : update stats?
+                stat = OK;
             } else {
-                if(feof(mFile)){
+                if(std::feof(mFile)){
                     stat = EEOF;
                     TRN_NDPRINT(2, "end of data file\n");
+                } else if(!data_valid) {
+                    fprintf(stderr,"%s:%d - ERR data invalid [%d:%s]\n",__func__, __LINE__, errno, strerror(errno));
                 } else {
                     stat = ERR;
-                    fprintf(stderr,"%s:%d - ERR data file read failed [%d:%s]\n",__func__, __LINE__, errno, strerror(errno));
+                    fprintf(stderr,"%s:%d - ERR read failed [%d:%s]\n",__func__, __LINE__, errno, strerror(errno));
                 }
             }
         }
 
         if(stat == OK)
         {
-            TRN_NDPRINT(2,"%s:%d - stat OK %s\n", __func__, __LINE__, buf);
+            TRN_NDPRINT(2,"%s:%d - stat OK %p\n", __func__, __LINE__, dest);
+            mb1_t *snd = (mb1_t *)msg_buf;
+            memcpy(dest, msg_buf, MB1_SOUNDING_BYTES(snd->nbeams));
             retval = 0;
         }
-        return retval;
-    }
 
-    // finds and reads next record ID
-    int next_record(byte *dest, size_t len, TrnLog::TrnRecID &r_type)
-    {
-        int retval = -1;
-        byte buf[5]={0}, *cur = buf;
-        typedef enum{
-            START,
-            MTN, MEA, MSE, MLE,
-            OK, EEOF, ERR
-        }state_t;
-        state_t stat = START;
-
-        while(stat != OK && stat != EEOF && stat != ERR)
-        {
-            if(fread(cur,1,1,mFile) == 1)
-            {
-                switch (*cur) {
-                    case 'M':
-                        if(stat==START){
-                            cur++;
-                        } else {
-                            cur = buf;
-                            stat = START;
-                        }
-                        break;
-                    case 'T':
-                        if(stat==START){
-                            cur++;
-                            stat = MTN;
-                        } else {
-                            cur = buf;
-                            stat = START;
-                        }
-                        break;
-                    case 'N':
-                        if(stat==MTN){
-                            cur++;
-                        } else {
-                            cur = buf;
-                            stat = START;
-                        }
-                        break;
-                    case 'E':
-                        if(stat==START){
-                            cur++;
-                            stat = MEA;
-                        } else if(stat == MSE || stat == MLE){
-                            cur++;
-                        } else {
-                            cur = buf;
-                            stat = START;
-                        }
-                        break;
-                    case 'A':
-                        if(stat==MEA){
-                            cur++;
-                        } else {
-                            cur = buf;
-                            stat = START;
-                        }
-                        break;
-                    case 'I':
-                        if(stat==MTN){
-                            cur++;
-                            stat = OK;
-                            r_type = TrnLog::MOTN_IN;
-                        } else if(stat==MEA){
-                            cur++;
-                            stat = OK;
-                            r_type = TrnLog::MEAS_IN;
-                        } else {
-                            cur = buf;
-                            stat = START;
-                        }
-                        break;
-                    case 'O':
-                        if(stat==MSE){
-                            cur++;
-                            stat = OK;
-                            r_type = TrnLog::MSE_OUT;
-                        }  else if(stat==MLE){
-                            cur++;
-                            stat = OK;
-                            r_type = TrnLog::MLE_OUT;
-                        } else {
-                            cur = buf;
-                            stat = START;
-                        }
-                        break;
-
-                    case 'S':
-                        if(stat==START){
-                            cur++;
-                            stat = MSE;
-                        } else {
-                            cur = buf;
-                            stat = START;
-                        }
-                        break;
-                    case 'L':
-                        if(stat==START){
-                            cur++;
-                            stat = MLE;
-                        } else {
-                            cur = buf;
-                            stat = START;
-                        }
-                        break;
-                    default:
-                        cur = buf;
-                        stat = START;
-                        break;
-                }
-            } else {
-                if(feof(mFile)){
-                    stat = EEOF;
-                    TRN_NDPRINT(2, "end of data file\n");
-                } else {
-                    stat = ERR;
-                    fprintf(stderr,"%s:%d - ERR data file read failed [%d:%s]\n",__func__, __LINE__, errno, strerror(errno));
-                }
-            }
-        }
-
-        if(stat == OK)
-        {
-            TRN_NDPRINT(2,"%s:%d - stat OK %s/%X\n", __func__, __LINE__, buf, r_type);
-            memcpy(dest,buf,TL_RID_SIZE);
-            retval = 0;
-        }
         return retval;
     }
 
@@ -1116,202 +1060,142 @@ protected:
         return( sqrt( vnorm2 ) );
     }
 
-    // src points to rec_id (already read by next_record)
-    int read_meas(measT **pdest, byte *src)
+    // read mb1 to measT
+    int read_meas(measT **pdest, byte *src, int data_type)
     {
         int retval = -1;
-        // read data from file to buffer
-        byte *bp = (byte *)src+TL_RID_SIZE;
-        size_t readlen = TL_MEAI_HDR_SIZE;
 
-        TRN_NDPRINT(2, "%s:%d readlen[%lu]\n", __func__, __LINE__, (unsigned long)readlen);
-        if(fread(bp, readlen, 1, mFile) == 1)
-        {
-            bp += readlen;
-            meas_in_t *measin =  (meas_in_t *)src;
-            readlen = TL_MEAI_BEAM_SIZE(measin->num_meas);
+        mb1_t *snd = (mb1_t *)src;
+        int src_beams = snd->nbeams;
+        int dest_beams = ((mConfig.beams() > 0) ? mConfig.beams() : src_beams);
 
-            TRN_NDPRINT(2, "%s:%d readlen[%lu] num_meas[%d]\n", __func__, __LINE__, (unsigned long)readlen, measin->num_meas);
-            if((bp + readlen) > (src + IBUF_LEN_BYTES)){
-                TRN_NDPRINT(2, "%s:%d ERR: readlen exceeds buffer size [%lu/%d]\n", __func__, __LINE__, (bp + readlen - src), IBUF_LEN_BYTES);
-                return retval;
+        measT *dest = new measT(dest_beams, data_type);
+
+        if(NULL != dest){
+
+            TRN_NDPRINT(2, "%s:%d dest_beams[%lu] src_beams[%d]\n", __func__, __LINE__, dest_beams, src_beams);
+
+            dest->time = snd->ts;
+            dest->dataType = data_type;
+
+            double pos_N=0., pos_E=0.;
+            double lat=snd->lat, lon=snd->lon;
+
+            NavUtils::geoToUtm( Math::degToRad(lat),
+                               Math::degToRad(lon),
+                               mConfig.utm_zone(), &pos_N, &pos_E);
+            dest->x = pos_N;
+            dest->y = pos_E;
+            dest->z = snd->depth;
+            dest->ping_number = snd->ping_number;
+
+            double swath_lim = mConfig.swath()/2.;
+            int mod = 1;
+            if(mConfig.beams() > 0){
+                if(src_beams > dest_beams){
+                    if(mConfig.swath() > 0.) {
+                        mod = mConfig.swath() / dest_beams;
+                    } else {
+                        mod = src_beams / dest_beams;
+                    }
+                } // else use all beams (mod = 1)
             }
 
-            if(fread(bp, readlen, 1, mFile) == 1)
+            if(mod <= 0)
+                mod = 1;
+
+            int j = 0;
+            for(int i=0; i < snd->nbeams; i++)
             {
-                int src_beams = measin->num_meas;
-                int dest_beams = ((mConfig.beams() > 0) ? mConfig.beams() : src_beams);
+                bool use_beam = false;
 
-                measT *dest = new measT(dest_beams, measin->data_type);
-                if(NULL != dest){
-                    dest->time = measin->time;
-                    dest->dataType = measin->data_type;
-                    dest->x = measin->x;
-                    dest->y = measin->y;
-                    dest->z = measin->z;
-                    dest->ping_number = measin->ping_number;
+                int bx=0;
+                double wb=0.;
+                if(snd->beams[i].rhoy != 0. && snd->beams[i].rhoz != 0.) {
 
-                    double swath_lim = mConfig.swath()/2.;
-                    int mod = 1;
-                    if(mConfig.beams() > 0){
-                        if(src_beams > dest_beams){
-                            if(mConfig.swath() > 0.) {
-                                mod = mConfig.swath() / dest_beams;
-                            } else {
-                                mod = src_beams / dest_beams;
-                            }
-                        } // else use all beams (mod = 1)
-                    }
+                    bx = snd->beams[i].beam_num;
 
-                    if(mod <= 0)
-                        mod = 1;
+                    if ((bx % mod) == 0) {
 
-                    meas_beam_t *beams = TrnLog::meaiBeamData(measin);
-                    int j = 0;
-                    for(int i = 0; i < measin->num_meas; i++)
-                    {
-                        bool use_beam = false;
+                        wb = RTD(atan2(snd->beams[i].rhoy, snd->beams[i].rhoz));
 
-                        int bx=0;
-                        double wb=0.;
-                        if(beams[i].cross_track != 0. && beams[i].altitude != 0.) {
-
-                            bx = beams[i].beam_num;
-
-                            if ((bx % mod) == 0) {
-
-                                wb = RTD(atan2(beams[i].cross_track, beams[i].altitude));
-
-                                if(mConfig.swath() <= 0. || fabs(wb) <= swath_lim){
-                                    use_beam = true;
-                                }
-                            }
+                        if(mConfig.swath() <= 0. || fabs(wb) <= swath_lim){
+                            use_beam = true;
                         }
-
-                        double rho[3] = {beams[i].along_track, beams[i].cross_track, beams[i].altitude};
-                        double range = vnorm(rho);
-
-                        if (range > 0. && use_beam) {
-                            dest->beamNums[j] = beams[i].beam_num;
-                            dest->measStatus[j] = beams[i].status;
-                            dest->ranges[j] = beams[i].range;
-                            dest->crossTrack[j] = beams[i].cross_track;
-                            dest->alongTrack[j] = beams[i].along_track;
-                            dest->altitudes[j] = beams[i].altitude;
-                            j++;
-                        }
-                        if(j >= dest_beams)
-                            break;
                     }
-                    *pdest = dest;
-                    retval = 0;
-                } // else error
-            } else {
-                TRN_DPRINT("meas data read failed bp[%p] readlen[%zu] num_meas[%d]\n", bp, readlen, measin->num_meas);
+                }
+
+
+                double rho[3] = {snd->beams[i].rhox, snd->beams[i].rhoy, snd->beams[i].rhoz};
+                double range = vnorm(rho);
+
+//                fprintf(stderr, "%s:%d beam[%3d] x,y,z,r,w[%+8.3lf, %+8.3lf, %+8.3lf, %+8.3lf, %+8.3lf] swath_max[%+8.3lf] %c\n", __func__, __LINE__, bx, snd->beams[i].rhox, snd->beams[i].rhoy, snd->beams[i].rhoz, range, wb, swath_lim, (use_beam?'Y':'N'));
+
+                if (range > 0. && use_beam) {
+                    dest->beamNums[j] = bx;
+                    dest->alongTrack[j] = snd->beams[i].rhox;
+                    dest->crossTrack[j] = snd->beams[i].rhoy;
+                    dest->altitudes[j]  = snd->beams[i].rhoz;
+                    dest->ranges[j] = range;
+                    dest->measStatus[j] = true;
+                    j++;
+                }
+
+                if(j >= dest_beams)
+                    break;
             }
-        } else {
-            TRN_DPRINT("meas header read failed bp[%p] readlen[%zu]\n", bp, readlen);
+
+            *pdest = dest;
+            retval = 0;
         } // else error
 
         return retval;
     }
 
-    // src points to rec_id (already read by next_record)
+    // read MB1 to poseT
     int read_pose(poseT **pdest, byte *src)
     {
         int retval = -1;
-        // read data from file to buffer
-        byte *bp = (byte *)src+TL_RID_SIZE;
-        size_t readlen = TL_MTNI_SIZE;
-        if(fread(bp, readlen, 1, mFile) == 1)
+
+        poseT *dest = new poseT();
+        if(NULL != dest)
         {
-            poseT *dest = new poseT();
-            if(NULL != dest)
-            {
-                bp += readlen;
-                motn_in_t *motnin =  (motn_in_t *)src;
+            mb1_t *snd =  (mb1_t *)src;
 
-                dest->time = motnin->time;
-                dest->x = motnin->x;
-                dest->y = motnin->y;
-                dest->z = motnin->z;
-                dest->vx = motnin->vx;
-                dest->vy = motnin->vy;
-                dest->vz = motnin->vz;
-                dest->phi = motnin->phi;
-                dest->theta = motnin->theta;
-                dest->psi = motnin->psi;
-                dest->dvlValid = (motnin->dvl_valid != 0);
-                dest->gpsValid = (motnin->gps_valid != 0);
-                dest->bottomLock = (motnin->bottom_lock != 0);
-                *pdest = dest;
-                retval = 0;
-            }
+            dest->time = snd->ts;
+            NavUtils::geoToUtm( Math::degToRad(snd->lat),
+                               Math::degToRad(snd->lon),
+                               mConfig.utm_zone(), &(dest->x), &(dest->y));
+            dest->z = snd->depth;
+            // MB1 doesn't contain vx, vy, vz
+            // set vx !=0 to enable TRN motion initialization
+            dest->vx = 0.1;
+            dest->vy = 0.;
+            dest->vz = 0.;
+            dest->wx = 0.;
+            dest->wy = 0.;
+            dest->wz = 0.;
+            dest->phi = 0.;
+            dest->theta = 0.;
+            dest->psi = snd->hdg;
+            dest->gpsValid = (snd->depth < 2 ? true : false);
+            dest->dvlValid = true;
+            dest->bottomLock = true;
+            *pdest = dest;
+            retval = 0;
         }
-        return retval;
-    }
 
-    // src points to rec_id (already read by next_record)
-    int read_est(poseT **pdest, byte *src)
-    {
-        int retval = -1;
-        // read data from file to buffer
-        byte *bp = (byte *)src+TL_RID_SIZE;
-        size_t readlen = TL_MSEO_SIZE;
-        if(fread(bp, readlen, 1, mFile) == 1)
-        {
-            poseT *dest = new poseT();
-            if(NULL != dest)
-            {
-                bp += readlen;
-                est_out_t *est =  (est_out_t *)src;
-
-                dest->time = est->time;
-                dest->x = est->x;
-                dest->y = est->y;
-                dest->z = est->z;
-                dest->vx = est->vx;
-                dest->vy = est->vy;
-                dest->vz = est->vz;
-                dest->ve = est->ve;
-                dest->vw_x = est->vw_x;
-                dest->vw_y = est->vw_y;
-                dest->vw_z = est->vw_z;
-                dest->vn_x = est->vn_x;
-                dest->vn_y = est->vn_y;
-                dest->vn_z = est->vn_z;
-                dest->wx = est->wx;
-                dest->wy = est->wy;
-                dest->wz = est->wz;
-                dest->ax = est->ax;
-                dest->ay = est->ay;
-                dest->az = est->az;
-                dest->phi = est->phi;
-                dest->theta = est->theta;
-                dest->psi = est->psi;
-                dest->psi_berg = est->psi_berg;
-                dest->psi_dot_berg = est->psi_dot_berg;
-
-                dest->dvlValid = (est->dvl_valid != 0);
-                dest->gpsValid = (est->gps_valid != 0);
-                dest->bottomLock = (est->bottom_lock != 0);
-                memcpy(dest->covariance,est->covariance, N_COVAR*sizeof(double));
-
-                *pdest = dest;
-                retval = 0;
-            }
-        }
         return retval;
     }
 
 private:
-    TrnLogConfig mConfig;
+    MB1LogConfig mConfig;
     TrnClient *mTrn;
     FILE *mFile;
     FILE *mTrnInCsvFile;
     FILE *mTrnOutCsvFile;
     bool mQuit;
-    TLPStats mStats;
+    MLPStats mStats;
 
 };
 
@@ -1364,6 +1248,7 @@ public:
             {"trn-sensor", required_argument, NULL, 0},
             {"trni-csv", required_argument, NULL, 0},
             {"trno-csv", required_argument, NULL, 0},
+            {"utm", required_argument, NULL, 0},
             {"show", required_argument, NULL, 0},
             {"server", no_argument, NULL, 0},
             {"noserver", no_argument, NULL, 0},
@@ -1439,6 +1324,12 @@ public:
                         else if (strcmp("trn-cfg", options[option_index].name) == 0) {
                             mTBConfig.set_trn_cfg(std::string(optarg));
                         }
+                        // utm
+                        else if (strcmp("utm", options[option_index].name) == 0) {
+                            long int utm=0;
+                            if(sscanf(optarg,"%ld", &utm) == 1)
+                                mTBConfig.set_utm(utm);
+                        }
                         // input
                         else if (strcmp("input", options[option_index].name) == 0) {
                             std::list<std::string>::iterator it;
@@ -1458,34 +1349,34 @@ public:
                         else if (strcmp("show", options[option_index].name) == 0) {
                             uint32_t oflags=0;
                             if(strstr(optarg,"trni") != NULL){
-                                oflags |= TrnLogConfig::TRNI;
+                                oflags |= MB1LogConfig::TRNI;
                             }
                             if(strstr(optarg,"trno") != NULL){
-                                oflags |= TrnLogConfig::EST;
+                                oflags |= MB1LogConfig::EST;
                             }
                             if(strstr(optarg,"est") != NULL){
-                                oflags |= TrnLogConfig::EST;
+                                oflags |= MB1LogConfig::EST;
                             }
                             if(strstr(optarg,"mmse") != NULL){
-                                oflags |= TrnLogConfig::MMSE;
+                                oflags |= MB1LogConfig::MMSE;
                             }
                             if(strstr(optarg,"mle") != NULL){
-                                oflags |= TrnLogConfig::MLE;
+                                oflags |= MB1LogConfig::MLE;
                             }
                             if(strstr(optarg,"motn") != NULL){
-                                oflags |= TrnLogConfig::MOTN;
+                                oflags |= MB1LogConfig::MOTN;
                             }
                             if(strstr(optarg,"meas") != NULL){
-                                oflags |= TrnLogConfig::MEAS;
+                                oflags |= MB1LogConfig::MEAS;
                             }
                             if(strstr(optarg,"icsv") != NULL){
-                                oflags |= TrnLogConfig::TRNI_CSV;
+                                oflags |= MB1LogConfig::TRNI_CSV;
                             }
                             if(strstr(optarg,"ocsv") != NULL){
-                                oflags |= TrnLogConfig::TRNO_CSV;
+                                oflags |= MB1LogConfig::TRNO_CSV;
                             }
                             if(strstr(optarg,"*csv") != NULL){
-                                oflags |= TrnLogConfig::ALL_CSV;
+                                oflags |= MB1LogConfig::ALL_CSV;
                            }
                             if(oflags>0){
                                 mTBConfig.set_oflags(oflags);
@@ -1523,7 +1414,7 @@ public:
                         else if (strcmp("swath", options[option_index].name) == 0) {
                             double swath_deg =0.;
                             if(sscanf(optarg, "%lf", &swath_deg) == 1)
-                                mTBConfig.set_swath(swath_deg);
+                            mTBConfig.set_swath(swath_deg);
                         }
                     }
                     break;
@@ -1533,7 +1424,7 @@ public:
             }
 
             if (version) {
-                fprintf(stderr, "%s: version %s build %s\n", TRNLOG_PLAYER_NAME, TRNLOG_PLAYER_VERSION, TRNLOG_PLAYER_BUILD);
+                fprintf(stderr, "%s: version %s build %s\n", MB1LOG_PLAYER_NAME, MB1LOG_PLAYER_VERSION, MB1LOG_PLAYER_BUILD);
                 exit(0);
             }
             if (help) {
@@ -1548,7 +1439,7 @@ public:
     {
         // monitor mode:
         char help_message[] = "\n TRN Log Player\n";
-        char usage_message[] = "\n use: trnlog_player [options]\n"
+        char usage_message[] = "\n use: mb1log_player [options]\n"
         "\n"
         " Options\n"
         " --verbose              : verbose output\n"
@@ -1559,6 +1450,7 @@ public:
         " --trn-host=addr[:port] : send output to TRN server\n"
         " --trn-cfg=s            : TRN config file\n"
         " --trn-sensor=n         : TRN sensor type\n"
+        " --utm=n                : UTM zone\n"
         " --beams=n              : number of output beams\n"
         " --swath=f              : limit beams to center swath degrees\n"
         " --input=s              : specify input file path (may be used multiple times)\n"
@@ -1771,7 +1663,7 @@ public:
         }
     }
 
-    const TrnLogConfig &tb_config()
+    const MB1LogConfig &tb_config()
     {
         return mTBConfig;
     }
@@ -1796,7 +1688,7 @@ private:
     std::string mAppCfg;
     std::string mSessionStr;
     std::list<std::string> mInputList;
-    TrnLogConfig mTBConfig;
+    MB1LogConfig mTBConfig;
     bool mConfigSet;
 };
 
@@ -1861,7 +1753,7 @@ int main(int argc, char **argv)
     TRN_NDPRINT(1,"session env[%s]\n",getenv("TLP_SESSION"));
 
     // get log player
-    TrnLogPlayer tbplayer(cfg.tb_config());
+    MB1LogPlayer tbplayer(cfg.tb_config());
 
     if(cfg.verbose()){
         std::cerr << "App Player Config:" << std::endl;

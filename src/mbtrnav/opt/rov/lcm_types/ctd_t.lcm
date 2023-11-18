@@ -1,0 +1,22 @@
+package oi;
+
+struct ctd_t
+{
+    // message header
+  lcm_header_t header;
+
+  // conductivity
+  double conductivity_sm;
+
+  // temp
+  double temperature_degc;
+
+  // pressure
+  double pressure_decibar;
+
+  // salinity
+  double salinity_psu;
+
+  // sound velocity
+  double sound_velocity_ms;
+}

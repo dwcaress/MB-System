@@ -43,6 +43,8 @@ src/mbtrn/r7kr_test
 src/mbtrnav/trn-cli
 src/mbtrnav/trn-server
 src/mbtrnav/trnlog-player
+src/mbtrnav/mb1log-player
+src/mbtrnav/csvlog-player
 src/mbtrnav/trnxpp
 src/mbtrnav/mmcpub
 src/mbtrnav/mmcsub

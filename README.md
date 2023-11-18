@@ -16,10 +16,10 @@ Installation instructions are found in the file *NOTES*.
 
 The primary source of information about MB-System is the project website at [https://www.mbari.org/products/research-software/mb-system/](https://www.mbari.org/products/research-software/mb-system/), which includes sections on:
 
-- [FAQ](https://www.mbari.org/products/research-software/mb-system/mb-system-faq/)
-- [Download and installation](https://www.mbari.org/products/research-software/mb-system/how-to-download-and-install-mb-system/)
-- [Documentation](https://www.mbari.org/products/research-software/mb-system/mb-system-documentation/)
-- [User and developer email discussion lists](https://www.mbari.org/products/research-software/mb-system/mb-system-discussion-lists/)
+- [FAQ](https://www.mbari.org/technology/mb-system/faq/)
+- [Download and installation](https://www.mbari.org/technology/mb-system/installation/)
+- [Documentation](https://www.mbari.org/technology/mb-system/documentation/)
+- [User and developer email discussion lists](https://www.mbari.org/technology/mb-system/discussion/)
 
 Although the GitHub interface includes functionality for raising issues and messaging, these are seen only by the small number of developers that are currently contributing and modifying the code base, and should be used only for short term code-specific issues. 
 
