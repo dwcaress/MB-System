@@ -17,10 +17,11 @@
 #include "oi/kearfott_t.hpp"
 #include "nav_input.hpp"
 #include "att_input.hpp"
+#include "vel_input.hpp"
 
 namespace trn
 {
-class kearfott_input : public nav_input, public att_input
+class kearfott_input : public nav_input, public att_input, public vel_input
 {
 public:
 
@@ -59,7 +60,7 @@ public:
             oi::kearfott_t msg;
             msg.decode((void *)dcon.data_bytes(), 0, dcon.data_len());
 
-            double time = msg.time_unix_sec * 1000000UL;
+            double time = msg.time_unix_sec * 1.e6;
             dcon.set_data_time(time);
 
             nav_input::mDataInstMutex.lock();
@@ -71,7 +72,7 @@ public:
             double pitch = msg.pitch_rad;
             double roll = msg.roll_rad;
             double heading = msg.heading_rad;
-
+            
             // TODO: check doubles[] parameters? (not documented...)
             nav_flags_t nflags = 0;
             bool pos_valid = ((msg.monitor&GPS_REJ)==0);
@@ -85,6 +86,14 @@ public:
             bool att_valid = true;
             aflags |= (att_valid ? AF_VALID : 0);
             mAttInst = att_info(time, pitch, roll, heading, aflags);
+
+            vel_flags_t vflags = 0;
+            aflags |= (AF_VALID | VF_BLOCK | VF_RLOCK);
+            double vx = msg.vbodyx_ms;
+            double vy = msg.vbodyy_ms;
+            double vz = msg.vbodyz_ms;
+            mVelInst = vel_info(time, vx, vy, vz, vflags);
+
             nav_input::mDataInstMutex.unlock();
 
 #ifdef WITH_SHOW_DCON
@@ -105,20 +114,25 @@ public:
         }
     }
 
+    virtual void tostream(std::ostream &os, int wkey=15, int wval=28) override
+    {
+        trn_lcm_input::tostream(os, wkey, wval);
+        os << std::setw(wkey) << "lat" << std::setw(wval) << mNavInst.lat() << "\n";
+        os << std::setw(wkey) << "lon" << std::setw(wval) << mNavInst.lon() << "\n";
+        os << std::setw(wkey) << "depth" << std::setw(wval) << mNavInst.depth() << "\n";
+        os << std::setw(wkey) << "nflags" << std::setw(wval-8) << "x";
+        os << std::setw(8) << std::hex << std::setfill('0') << mNavInst.flags().get() << "\n";
+        os << std::setfill(' ');
+        os << std::setw(wkey) << "pitch" << std::setw(wval) << mAttInst.pitch() << "\n";
+        os << std::setw(wkey) << "roll" << std::setw(wval) << mAttInst.roll() << "\n";
+        os << std::setw(wkey) << "heading" << std::setw(wval) << mAttInst.heading() << "\n";
+        os << std::setw(wkey) << "aflags" << std::setw(wval-8) << "x";
+        os << std::setw(8) << std::hex << std::setfill('0') << mAttInst.flags().get() << "\n";
+    }
+
     virtual void show(int wkey=15, int wval=28) override
     {
-        trn_lcm_input::show(wkey, wval);
-        std::cerr << std::setw(wkey) << "lat" << std::setw(wval) << mNavInst.lat() << "\n";
-        std::cerr << std::setw(wkey) << "lon" << std::setw(wval) << mNavInst.lon() << "\n";
-        std::cerr << std::setw(wkey) << "depth" << std::setw(wval) << mNavInst.depth() << "\n";
-        std::cerr << std::setw(wkey) << "nflags" << std::setw(wval-8) << "x";
-        std::cerr << std::setw(8) << std::hex << std::setfill('0') << mNavInst.flags().get() << "\n";
-        std::cerr << std::setfill(' ');
-        std::cerr << std::setw(wkey) << "pitch" << std::setw(wval) << mAttInst.pitch() << "\n";
-        std::cerr << std::setw(wkey) << "roll" << std::setw(wval) << mAttInst.roll() << "\n";
-        std::cerr << std::setw(wkey) << "heading" << std::setw(wval) << mAttInst.heading() << "\n";
-        std::cerr << std::setw(wkey) << "aflags" << std::setw(wval-8) << "x";
-        std::cerr << std::setw(8) << std::hex << std::setfill('0') << mAttInst.flags().get() << "\n";
+        tostream(std::cerr, wkey, wval);
     }
 
 protected:

@@ -204,13 +204,13 @@ int trncli_send_update(trncli_t *self, mb1_t *src, wposet_t **pt_out, wmeast_t *
 
     if(NULL!=self && NULL!=src && NULL!=pt_out && NULL!=mt_out){
         int test=-1;
-        if( (test=wmeast_mb1_to_meas(mt_out, src, self->utm_zone)) == 0){
+        if( (test = wmeast_mb1_to_meas(mt_out, src, self->utm_zone)) == 0){
 
-            if( (test=wposet_mb1_to_pose(pt_out, src, self->utm_zone)) == 0){
+            if( (test = wposet_mb1_to_pose(pt_out, src, self->utm_zone)) == 0){
                 // must do motion update first if pt time <= mt time
 
-                if(trncli_update_motion(self,*pt_out)>0){
-                    if(trncli_update_measurement(self, *mt_out)>0){
+                if(trncli_update_motion(self, *pt_out) > 0){
+                    if(trncli_update_measurement(self, *mt_out) > 0){
                         retval=0;
                     }else{
                         fprintf(stderr,"trncli_update_measurement failed [%d]\n",test);
@@ -242,9 +242,11 @@ int trncli_get_bias_estimates(trncli_t *self, wposet_t *pt, pt_cdata_t **pt_out,
     if(NULL!=self && NULL!=pt && NULL!=mle_out && NULL!=mse_out){
 
         int32_t uret = trncli_estimate_pose(self, &mle, TRN_MSG_MLE);
+
         if(uret > 0){
 
             uret = trncli_estimate_pose(self, &mse, TRN_MSG_MMSE);
+
             if(uret > 0){
                 retval=0;
             }else{
@@ -277,6 +279,8 @@ int trncli_get_bias_estimates(trncli_t *self, wposet_t *pt, pt_cdata_t **pt_out,
         wposet_destroy(mle);
         wposet_destroy(mse);
 
+    } else {
+        fprintf(stderr,"%s:%d ERR - invalid input cli[%p] pt[%p] mle_out[%p] mse_out[%p] \n", __func__, __LINE__, self, pt, mle_out, mse_out);
     }
 
     return retval;

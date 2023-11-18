@@ -1,0 +1,25 @@
+package gss;
+
+struct parosci_stat_t
+{
+  /* Unix timestamp in microseconds */
+  double unix_time;
+  
+  /* Are we able to talk to the device? */
+  boolean have_comms;
+  
+  /* The number of times data has been published */
+  int64_t count_publish;  
+  
+  /* The number of publish errors */
+  int64_t count_publish_errors;  
+  
+  /* Pressure read from the sensor*/
+  double pressure;
+  
+  /* Pressure units reported from sensor */
+  string units;
+  
+
+  
+}

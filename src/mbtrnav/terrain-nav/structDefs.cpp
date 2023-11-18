@@ -571,6 +571,7 @@ measT::measT() {
 measT::measT(unsigned int nummeas, int datatype)
 {
     time = phi = theta = psi = x = y = z = 0.;
+    // TODO: handle nummeas==0
     dataType = datatype;
     numMeas = nummeas;
     ping_number = 0;
