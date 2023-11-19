@@ -1159,7 +1159,7 @@ int main(int argc, char **argv) {
   char dpath[MB_PATH_MAXLINE] = "";
   double file_weight;
   int pstatus;
-  int astatus;
+  int astatus = 0;
 
   /* open file list */
   if (read_datalist) {
@@ -1175,6 +1175,7 @@ int main(int argc, char **argv) {
     // else copy single filename to be read
     strcpy(path, read_file);
     read_data = true;
+    astatus = 0;
   }
 
   double btime_d;

@@ -266,11 +266,11 @@ software for MB-System.
 
 * Install MB-System prerequisites:
 
-	    sudo apt install libnetcdf-bin libnetcdf-dev libgdal-dev \
+	    sudo apt install netcdf-bin libnetcdf-dev libgdal-dev \
 	      gmt libgmt6 libgmt-dev libproj-dev \
 	      libfftw3-3 libfftw3-dev libmotif-dev \
 	      xfonts-100dpi libglu1-mesa-dev \
-	      libopencv-dev gfortran
+	      libopencv-dev cmake gfortran
 
   MB-System also requires Python3 and the Pillow library for Python3. Both of these packages
   are installed by default in Ubuntu 20 and 22.
@@ -784,7 +784,7 @@ Once Cygwin and the prerequisite packages are installed, proceed as follows:
 	    
 
 ---
-### Updating an MB-System installation
+### Updating an MB-System Installation
 ---
 
 When one updates to a new MB-System version, we recommend uninstalling the previous 
@@ -799,7 +799,6 @@ whether using the Autotools or the CMake build system:
 Then follow the appropriate installation instructions starting with downloading the next 
 version from GitHub.
 
-
 ---
 ### Docker Container with MB-System
 ---
@@ -812,6 +811,13 @@ The MB-System docker image is available at
 Documentation is available at:
     https://github.com/dwcaress/MB-System/tree/master/docker/user
     https://github.com/dwcaress/MB-System/blob/master/docker/user/README-win11.md
+
+
+---
+### Packaged MB-System Distributions
+---
+
+There currently are no packaged distributions of MB-System. We are working on establishing them again.
 
 
 ---

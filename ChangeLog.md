@@ -23,6 +23,8 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta66    November 18, 2023
+- Version 5.7.9beta65    November 17, 2023
 - Version 5.7.9beta64    November 16, 2023
 - Version 5.7.9beta63    November 10, 2023
 - Version 5.7.9beta62    November 3, 2023
@@ -437,6 +439,28 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta66 (November 18, 2023)
+
+Mbdatalist: Fixed an unitialized string causing intermittent failure.
+
+#### 5.7.9beta65 (November 17, 2023)
+
+Mbinfo and mblist: Fixed bug introduced with the alternate navigation capability that
+caused mbinfo and mblist to fail when running on single files rather than through datalists.
+
+Mbnavadjust: Improved handling of reference grids. The list of reference grids now starts
+with an option "<Previously Selected Reference Grid>" that will cause loading a section 
+with a global tie set to also load the reference grid (if any) loaded when the tie was
+created. If a specific reference grid is selected from the reference grid list, then that
+reference grid will be loaded when any section is loaded, regardless of whether a prior
+global tie already exists. 
+
+Mbtrnpp: Fixed bug identified by Kent Headley that caused divide by zeros when calculating swath
+width filtering of soundings.
+
+CMake build system: Fixed the unit testing, and enabled building unit tests by default.
+After "make all" is run, the unit tests can be run with "make test".
 
 #### 5.7.9beta64 (November 16, 2023)
 
