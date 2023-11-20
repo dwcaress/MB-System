@@ -247,6 +247,26 @@ target_link_libraries(trnucli PRIVATE mbtrnframe netif)
 #
 #------------------------------------------------------------------------------
 #
+# build trncli component library
+
+# specify library
+add_library(trncli
+       utils/TerrainNavClient.cpp
+       utils/TrnClient.cpp
+)
+
+target_include_directories(trncli PRIVATE
+${CMAKE_SOURCE_DIR}/src/mbtrnframe
+${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
+${CMAKE_SOURCE_DIR}/src/mbtrnav/newmat
+${CMAKE_SOURCE_DIR}/src/mbtrnav/qnx-utils
+${NetCDF_INCLUDE_DIRS}
+)
+
+target_link_libraries(trncli PRIVATE newmat geolib trnw qnx mb1 tnav NetCDF::NetCDF)
+#
+#------------------------------------------------------------------------------
+#
 # build trnucli-test (TRNU client app)
 
 # specify build target
