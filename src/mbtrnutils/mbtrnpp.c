@@ -5157,9 +5157,9 @@ char *mbtrnpp_trn_updatestr(char *dest, int len, trn_update_t *update, int inden
                  (update->mse_dat->y-update->pt_dat->y),
                  (update->mse_dat->z-update->pt_dat->z),
                  indent,"",
-                 sqrt(update->mse_dat->covariance[0]),
-                 sqrt(update->mse_dat->covariance[2]),
-                 sqrt(update->mse_dat->covariance[5]),
+                 update->mse_dat->covariance[0],
+                 update->mse_dat->covariance[2],
+                 update->mse_dat->covariance[5],
                  indent,"",
                  update->reinit_count,
                  update->filter_state,
@@ -5250,9 +5250,9 @@ int mbtrnpp_trn_pub_olog(trn_update_t *update,
                          (update->mse_dat->x-update->pt_dat->x),
                          (update->mse_dat->y-update->pt_dat->y),
                          (update->mse_dat->z-update->pt_dat->z),
-                         sqrt(update->mse_dat->covariance[0]),
-                         sqrt(update->mse_dat->covariance[2]),
-                         sqrt(update->mse_dat->covariance[5]));
+                         (update->mse_dat->covariance[0]),
+                         (update->mse_dat->covariance[2]),
+                         (update->mse_dat->covariance[5]));
         mlog_tprintf(log_id,"trn_state,reinit_flag,%d,fstate,%d,success,%d,cycle,%d,ping,%d,mb1_time,%0.3lf,update_time,%0.3lf,isconv,%hd,isval,%hd\n",update->reinit_count,update->filter_state,update->success,update->mb1_cycle,update->ping_number,update->mb1_time,update->update_time,update->is_converged,update->is_valid);
     }
 
@@ -5921,15 +5921,15 @@ int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg)
           double offset_e = pstate->mse_dat->y - pstate->pt_dat->y;
           double offset_z = pstate->mse_dat->z - pstate->pt_dat->z;
           double covariance_mag = sqrt(pstate->mse_dat->covariance[0] * pstate->mse_dat->covariance[0]
-                    + pstate->mse_dat->covariance[1] * pstate->mse_dat->covariance[1]
-                    + pstate->mse_dat->covariance[2] * pstate->mse_dat->covariance[2]);
+                    + pstate->mse_dat->covariance[2] * pstate->mse_dat->covariance[2]
+                    + pstate->mse_dat->covariance[5] * pstate->mse_dat->covariance[5]);
 
           // NOTE: TRN convention is x:northing y:easting z:down
           //       Output here is in order easting northing z
           if ((n_converged_tot + n_unconverged_tot - 1) % 25 == 0) {
-            fprintf(stderr, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
-            fprintf(stderr, "YYYY/MM/DD-HH:MM:SS.SSSSSS TTTTTTTTTT.TTTTTT | Nav: Easting  Northing     Z     | TRN: Easting  Northing     Z     | Off: East   North     Z   | Cov: East     North       Z   :     Mag   | Best Off: T      E      N      Z    |   Ncs   Nct   Nus   Nut  Nr | Use \n");
-            fprintf(stderr, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
+            fprintf(stderr, "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
+            fprintf(stderr, "YYYY/MM/DD-HH:MM:SS.SSSSSS TTTTTTTTTT.TTTTTT | Nav: Easting  Northing     Z     | TRN: Easting  Northing     Z     | Off: East   North     Z   | Cov: East     North       Z   :     Mag   | Best Off: T      E      N      Z    |   Ncs   Nct   Nus   Nut  Nr | CNV USE \n");
+            fprintf(stderr, "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
           }
           fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
                           "| %11.3f %11.3f %8.3f | %11.3f %11.3f %8.3f "
@@ -5939,7 +5939,7 @@ int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg)
           pstate->pt_dat->y, pstate->pt_dat->x, pstate->pt_dat->z,
           pstate->mse_dat->y, pstate->mse_dat->x, pstate->mse_dat->z,
           offset_e, offset_n, offset_z,
-          pstate->mse_dat->covariance[1], pstate->mse_dat->covariance[0], pstate->mse_dat->covariance[2], covariance_mag,
+          pstate->mse_dat->covariance[2], pstate->mse_dat->covariance[0], pstate->mse_dat->covariance[5], covariance_mag,
           pstate->pt_dat->time - use_offset_time, use_offset_e, use_offset_n, use_offset_z,
           n_converged_streak, n_converged_tot, n_unconverged_streak, n_unconverged_tot, n_reinit,
           convergedornot[convergestate], useornot[use_trn_offset]);
@@ -5971,7 +5971,7 @@ int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg)
           pstate->pt_dat->y, pstate->pt_dat->x, pstate->pt_dat->z,
           pstate->mse_dat->y, pstate->mse_dat->x, pstate->mse_dat->z,
           offset_e, offset_n, offset_z,
-          pstate->mse_dat->covariance[1], pstate->mse_dat->covariance[0], pstate->mse_dat->covariance[2], covariance_mag,
+          pstate->mse_dat->covariance[2], pstate->mse_dat->covariance[0], pstate->mse_dat->covariance[5], covariance_mag,
           pstate->pt_dat->time - use_offset_time, use_offset_e, use_offset_n, use_offset_z,
           n_converged_streak, n_converged_tot, n_unconverged_streak, n_unconverged_tot, n_reinit,
           convergedornot[convergestate], useornot[use_trn_offset]);
