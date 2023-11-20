@@ -27,6 +27,20 @@ message("In mbtrnav")
 #------------------------------------------------------------------------------
 
 find_package(NetCDF REQUIRED)
+add_compile_definitions(
+HAVE_CONFIG_H
+WITH_TESTS
+WITH_MMDEBUG
+#_GNU_SOURCE
+WITH_MST_MSTATS
+MST_STATS_EN
+#WITH_ALT_DELTAT_VALIDATION
+WITH_TNAVPF_CEP_CORRECTION
+WITH_TRNLOG
+WITH_TRNLOG_EST_OUT
+WITH_TNAVPF_CEP_CORRECTION
+#TRN_NORAND
+)
 
 #------------------------------------------------------------------------------
 #
@@ -180,6 +194,7 @@ add_library(tnav
        terrain-nav/TerrainNavLog.cpp
        terrain-nav/mapio.cpp
        terrain-nav/structDefs.cpp
+       terrain-nav/TrnLog.cpp
        terrain-nav/trn_log.cpp
        terrain-nav/myOutput.cpp
        terrain-nav/matrixArrayCalcs.cpp
