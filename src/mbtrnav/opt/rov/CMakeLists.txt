@@ -26,7 +26,6 @@ if(JAVA_FOUND)
   include(UseJava)
   set(java_args JAVA_SOURCES java_sources)
 endif()
-
 #------------------------------------------------------------------------------
 # generate LCM source
 
@@ -91,7 +90,6 @@ if(JAVA_FOUND)
     SOURCES ${java_sources}
   )
 endif()
-
 #
 #------------------------------------------------------------------------------
 #
@@ -99,9 +97,7 @@ endif()
 
 # specify library
 add_library(udpms
-       udpm_sub.c
-)
-
+       udpm_sub.c)
 #
 #------------------------------------------------------------------------------
 #
@@ -142,7 +138,6 @@ trncli
 NetCDF::NetCDF
 lcm
 )
-
 #
 #------------------------------------------------------------------------------
 #
@@ -163,53 +158,50 @@ ${NetCDF_INCLUDE_DIRS}
 )
 
 target_link_libraries(trnxpp PRIVATE lcm stdc++ mb1 trncli tnav newmat qnx m geolib udpms trnxplug NetCDF::NetCDF)
-
 #
 #------------------------------------------------------------------------------
 #
 # build trnlcm-test (TRN LCM test)
 
 # specify build target
-add_executable(trnlcm-test
-       trnlcm_test.cpp
-)
-
-target_include_directories(trnlcm-test PRIVATE
-${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
-${CMAKE_SOURCE_DIR}/src/mbtrnav/qnx-utils
-${CMAKE_SOURCE_DIR}/src/mbtrnav/newmat
-${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
-${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw
-${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/rov
-${NetCDF_INCLUDE_DIRS}
-)
+#add_executable(trnlcm-test
+#       trnlcm_test.cpp
+#)
+#
+#target_include_directories(trnlcm-test PRIVATE
+#${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
+#${CMAKE_SOURCE_DIR}/src/mbtrnav/qnx-utils
+#${CMAKE_SOURCE_DIR}/src/mbtrnav/newmat
+#${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
+#${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw
+#${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/rov
+#${NetCDF_INCLUDE_DIRS}
+#)
 
 # may need rt (librt) in Linux
-target_link_libraries(trnlcm-test PRIVATE lcm stdc++ pthread)
-
+#target_link_libraries(trnlcm-test PRIVATE lcm stdc++ pthread)
 #
 #------------------------------------------------------------------------------
 #
 # build fv-test (flag variable test)
 
 # specify build target
-add_executable(fv-test
-       flag_var_test.cpp
-)
-
-target_include_directories(fv-test PRIVATE
-${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
-${CMAKE_SOURCE_DIR}/src/mbtrnav/qnx-utils
-${CMAKE_SOURCE_DIR}/src/mbtrnav/newmat
-${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
-${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw
-${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/rov
-${NetCDF_INCLUDE_DIRS}
-)
+#add_executable(fv-test
+#       flag_var_test.cpp
+#)
+#
+#target_include_directories(fv-test PRIVATE
+#${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
+#${CMAKE_SOURCE_DIR}/src/mbtrnav/qnx-utils
+#${CMAKE_SOURCE_DIR}/src/mbtrnav/newmat
+#${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
+#${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw
+#${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/rov
+#${NetCDF_INCLUDE_DIRS}
+#)
 
 # may need rt (librt) in Linux
-target_link_libraries(fv-test PRIVATE stdc++ )
-
+#target_link_libraries(fv-test PRIVATE stdc++)
 #------------------------------------------------------------------------------
 # install it all
 #
