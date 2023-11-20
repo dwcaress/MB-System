@@ -1,37 +1,37 @@
-/***************************************************************************
- *   CONFIDENTIAL - PROPERTY OF GREENSEA SYSTEMS, INC.                     *
- *                                                                         *
- *   Copyright 2013 Greensea Systems, Inc.                                 *
- *   All Rights Reserved by Greensea Systems, Inc.                         *
- *                                                                         *
- *   NOTICE:  This is proprietary and confidential software.  The source   *
- *   code and intellectual property contained within this file is          *
- *   protected by one or more licenses and is NOT "free" or "open source". *
- *   This software may not be duplicated, copied either literally or in    *
- *   spirit,  modified, or used in any way not explicitly granted in       *
- *   writing by Greensea Systems, Inc.                                     *
- *                                                                         *
- *   A copy of the governing software license for the program              *
- *   including this file should have accompanied its distribution.  Please *
- *   contact Greensea Systems, Inc. to receive a copy of the license.      *
- *                                                                         *
- *          Greensea Systems, Inc.                                         *
- *          10 East Main Street                                            *
- *          PO Box 959                                                     *
- *          Richmond, Vermont  05477  USA                                  *
- *          www.greenseainc.com :: info@greenseainc.com                    *
- *                                                                         *
- *                                                                         *
- ***************************************************************************/
+///***************************************************************************
+// *   CONFIDENTIAL - PROPERTY OF GREENSEA SYSTEMS, INC.                     *
+// *                                                                         *
+// *   Copyright 2013 Greensea Systems, Inc.                                 *
+// *   All Rights Reserved by Greensea Systems, Inc.                         *
+// *                                                                         *
+// *   NOTICE:  This is proprietary and confidential software.  The source   *
+// *   code and intellectual property contained within this file is          *
+// *   protected by one or more licenses and is NOT "free" or "open source". *
+// *   This software may not be duplicated, copied either literally or in    *
+// *   spirit,  modified, or used in any way not explicitly granted in       *
+// *   writing by Greensea Systems, Inc.                                     *
+// *                                                                         *
+// *   A copy of the governing software license for the program              *
+// *   including this file should have accompanied its distribution.  Please *
+// *   contact Greensea Systems, Inc. to receive a copy of the license.      *
+// *                                                                         *
+// *          Greensea Systems, Inc.                                         *
+// *          10 East Main Street                                            *
+// *          PO Box 959                                                     *
+// *          Richmond, Vermont  05477  USA                                  *
+// *          www.greenseainc.com :: info@greenseainc.com                    *
+// *                                                                         *
+// *                                                                         *
+// ***************************************************************************/
 
-/**
-  The digital_t has two data elements, name and value.  The name is used to 
-  identify the value to system implementers. 
-    
-  \b Standards \n
-  This type adheres to the Generic Typing System (GTS) guidelines.  For 
-  more information on GTS see the GTS handbook.
-*/
+///**
+//  The digital_t has two data elements, name and value.  The name is used to 
+//  identify the value to system implementers. 
+//    
+//  \b Standards \n
+//  This type adheres to the Generic Typing System (GTS) guidelines.  For 
+//  more information on GTS see the GTS handbook.
+//*/
 
 package gss;
 

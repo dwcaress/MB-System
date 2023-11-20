@@ -23,6 +23,15 @@
 #.   mb1-cli
 #
 message("In src/mbtrn")
+add_compile_definitions(
+HAVE_CONFIG_H
+_GNU_SOURCE
+WITH_TESTS
+WITH_R7KR_TEST
+WITH_MB1R_TEST
+WITH_MST_MSTATS
+MST_STATS_EN
+WITH_MMDEBUG)
 #
 #------------------------------------------------------------------------------
 #

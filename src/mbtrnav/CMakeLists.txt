@@ -27,6 +27,19 @@ message("In mbtrnav")
 #------------------------------------------------------------------------------
 
 find_package(NetCDF REQUIRED)
+add_compile_definitions(
+HAVE_CONFIG_H
+_GNU_SOURCE
+#TRN_NORAND
+WITH_TESTS
+WITH_MMDEBUG
+DWITH_MST_MSTATS
+MST_STATS_EN
+#WITH_ALT_DELTAT_VALIDATION
+WITH_TNAVPF_CEP_CORRECTION
+WITH_TRNLOG
+WITH_TRNLOG_EST_OUT
+WITH_TNAVPF_CEP_CORRECTION)
 
 #------------------------------------------------------------------------------
 #
@@ -180,6 +193,7 @@ add_library(tnav
        terrain-nav/TerrainNavLog.cpp
        terrain-nav/mapio.cpp
        terrain-nav/structDefs.cpp
+       terrain-nav/TrnLog.cpp
        terrain-nav/trn_log.cpp
        terrain-nav/myOutput.cpp
        terrain-nav/matrixArrayCalcs.cpp
@@ -244,6 +258,26 @@ add_library(trnucli
 target_include_directories(trnucli PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnframe
                                           ${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav)
 target_link_libraries(trnucli PRIVATE mbtrnframe netif)
+#
+#------------------------------------------------------------------------------
+#
+# build trncli component library
+
+# specify library
+add_library(trncli
+       utils/TerrainNavClient.cpp
+       utils/TrnClient.cpp
+)
+
+target_include_directories(trncli PRIVATE
+${CMAKE_SOURCE_DIR}/src/mbtrnframe
+${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
+${CMAKE_SOURCE_DIR}/src/mbtrnav/newmat
+${CMAKE_SOURCE_DIR}/src/mbtrnav/qnx-utils
+${NetCDF_INCLUDE_DIRS}
+)
+
+target_link_libraries(trncli PRIVATE newmat geolib trnw qnx mb1 tnav NetCDF::NetCDF)
 #
 #------------------------------------------------------------------------------
 #
