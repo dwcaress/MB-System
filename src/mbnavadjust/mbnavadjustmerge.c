@@ -64,53 +64,55 @@
 #define MOD_MODE_SET_ALL_GLOBAL_TIES_Z 8
 #define MOD_MODE_UNSET_GLOBAL_TIE 9
 #define MOD_MODE_UNSET_ALL_GLOBAL_TIES 10
-#define MOD_MODE_ADD_CROSSING 11
-#define MOD_MODE_SET_TIE_VALUES_ALL 12
-#define MOD_MODE_SET_TIE_VALUES_XYZ 13
-#define MOD_MODE_SET_TIE_VALUES_Z 14
-#define MOD_MODE_SET_TIE_XYZ 15
-#define MOD_MODE_SET_TIE_XY 16
-#define MOD_MODE_SET_TIE_Z 17
-#define MOD_MODE_SET_TIES_XYZ_ALL 18
-#define MOD_MODE_SET_TIES_XY_ALL 19
-#define MOD_MODE_SET_TIES_Z_ALL 20
-#define MOD_MODE_SET_TIES_XYZ_FILE 21
-#define MOD_MODE_SET_TIES_XY_FILE 22
-#define MOD_MODE_SET_TIES_Z_FILE 23
-#define MOD_MODE_SET_TIES_XYZ_SURVEY 24
-#define MOD_MODE_SET_TIES_XY_SURVEY 25
-#define MOD_MODE_SET_TIES_Z_SURVEY 26
-#define MOD_MODE_SET_TIES_XYZ_BYSURVEY 27
-#define MOD_MODE_SET_TIES_XY_BYSURVEY 28
-#define MOD_MODE_SET_TIES_Z_BYSURVEY 29
-#define MOD_MODE_SET_TIES_XYZ_BLOCK 30
-#define MOD_MODE_SET_TIES_XY_BLOCK 31
-#define MOD_MODE_SET_TIES_Z_BLOCK 32
-#define MOD_MODE_SET_TIES_ZOFFSET_BLOCK 33
-#define MOD_MODE_SET_TIES_XY_BY_TIME 34
-#define MOD_MODE_UNSET_TIE 35
-#define MOD_MODE_UNSET_TIES_FILE 36
-#define MOD_MODE_UNSET_TIES_SURVEY 37
-#define MOD_MODE_UNSET_TIES_BYSURVEY 38
-#define MOD_MODE_UNSET_TIES_BLOCK 39
-#define MOD_MODE_UNSET_TIES_ALL 40
-#define MOD_MODE_SKIP_UNSET_CROSSINGS 41
-#define MOD_MODE_UNSET_SKIPPED_CROSSINGS 42
-#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BLOCK 43
-#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BETWEEN_SURVEYS 44
-#define MOD_MODE_INSERT_DISCONTINUITY 45
-#define MOD_MODE_REMOVE_DISCONTINUITY 46
-#define MOD_MODE_MERGE_SURVEYS 47
-#define MOD_MODE_REIMPORT_FILE 48
-#define MOD_MODE_REIMPORT_ALL_FILES 49
-#define MOD_MODE_TRIANGULATE 50
-#define MOD_MODE_TRIANGULATE_SECTION 51
-#define MOD_MODE_UNSET_SHORT_SECTION_TIES 52
-#define MOD_MODE_SKIP_SHORT_SECTION_CROSSINGS 53
-#define MOD_MODE_REMOVE_SHORT_SECTIONS 54
-#define MOD_MODE_REMOVE_FILE 55
-#define MOD_MODE_REMAKE_MB166_FILES 56
-#define MOD_MODE_FIX_SENSORDEPTH 57
+#define MOD_MODE_SHIFT_GLOBAL_TIE 11
+#define MOD_MODE_SHIFT_ALL_GLOBAL_TIES 12
+#define MOD_MODE_ADD_CROSSING 13
+#define MOD_MODE_SET_TIE_VALUES_ALL 14
+#define MOD_MODE_SET_TIE_VALUES_XYZ 15
+#define MOD_MODE_SET_TIE_VALUES_Z 16
+#define MOD_MODE_SET_TIE_XYZ 17
+#define MOD_MODE_SET_TIE_XY 18
+#define MOD_MODE_SET_TIE_Z 19
+#define MOD_MODE_SET_TIES_XYZ_ALL 20
+#define MOD_MODE_SET_TIES_XY_ALL 21
+#define MOD_MODE_SET_TIES_Z_ALL 22
+#define MOD_MODE_SET_TIES_XYZ_FILE 23
+#define MOD_MODE_SET_TIES_XY_FILE 24
+#define MOD_MODE_SET_TIES_Z_FILE 25
+#define MOD_MODE_SET_TIES_XYZ_SURVEY 26
+#define MOD_MODE_SET_TIES_XY_SURVEY 27
+#define MOD_MODE_SET_TIES_Z_SURVEY 28
+#define MOD_MODE_SET_TIES_XYZ_BYSURVEY 29
+#define MOD_MODE_SET_TIES_XY_BYSURVEY 30
+#define MOD_MODE_SET_TIES_Z_BYSURVEY 31
+#define MOD_MODE_SET_TIES_XYZ_BLOCK 32
+#define MOD_MODE_SET_TIES_XY_BLOCK 33
+#define MOD_MODE_SET_TIES_Z_BLOCK 34
+#define MOD_MODE_SET_TIES_ZOFFSET_BLOCK 35
+#define MOD_MODE_SET_TIES_XY_BY_TIME 36
+#define MOD_MODE_UNSET_TIE 37
+#define MOD_MODE_UNSET_TIES_FILE 38
+#define MOD_MODE_UNSET_TIES_SURVEY 39
+#define MOD_MODE_UNSET_TIES_BYSURVEY 40
+#define MOD_MODE_UNSET_TIES_BLOCK 41
+#define MOD_MODE_UNSET_TIES_ALL 42
+#define MOD_MODE_SKIP_UNSET_CROSSINGS 43
+#define MOD_MODE_UNSET_SKIPPED_CROSSINGS 44
+#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BLOCK 45
+#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BETWEEN_SURVEYS 46
+#define MOD_MODE_INSERT_DISCONTINUITY 47
+#define MOD_MODE_REMOVE_DISCONTINUITY 48
+#define MOD_MODE_MERGE_SURVEYS 49
+#define MOD_MODE_REIMPORT_FILE 50
+#define MOD_MODE_REIMPORT_ALL_FILES 51
+#define MOD_MODE_TRIANGULATE 52
+#define MOD_MODE_TRIANGULATE_SECTION 53
+#define MOD_MODE_UNSET_SHORT_SECTION_TIES 54
+#define MOD_MODE_SKIP_SHORT_SECTION_CROSSINGS 55
+#define MOD_MODE_REMOVE_SHORT_SECTIONS 56
+#define MOD_MODE_REMOVE_FILE 57
+#define MOD_MODE_REMAKE_MB166_FILES 58
+#define MOD_MODE_FIX_SENSORDEPTH 59
 #define IMPORT_NONE 0
 #define IMPORT_TIE 1
 #define IMPORT_GLOBALTIE 2
@@ -153,6 +155,8 @@ static char usage_message[] =
     "\t--set-all-global-ties-zonly\n"
     "\t--unset-global-tie=file:section\n"
     "\t--unset-all-global-ties\n"
+    "\t--shift-global-tie=file:section/shiftx/shifty/shiftz\n"
+    "\t--shift-all-global-ties=shiftx/shifty/shiftz\n"
     "\t--add-crossing=file1:section1/file2:section2\n"
     "\t--set-tie=file1/file2/xoffset/yoffset/zoffset\n"
     "\t--set-tie=file1:section1/file2:section2/xoffset/yoffset/zoffset\n"
@@ -204,6 +208,7 @@ static char usage_message[] =
     "\t--remove-file=file\n"
     "\t--remake-mb166-files\n"
     "\t--fix-sensordepth\n"
+    "\t--shift-global-ties=shiftx/shifty\n"
     "\t--verbose --help]\n";
 
 /*--------------------------------------------------------------------*/
@@ -249,6 +254,8 @@ int main(int argc, char **argv) {
                                     {"set-all-global-ties-zonly", no_argument, NULL, 0},
                                     {"unset-global-tie", required_argument, NULL, 0},
                                     {"unset-all-global-ties", no_argument, NULL, 0},
+                                    {"shift-global-tie", required_argument, NULL, 0},
+                                    {"shift-all-global-ties", required_argument, NULL, 0},
                                     {"add-crossing", required_argument, NULL, 0},
                                     {"set-tie", required_argument, NULL, 0},
                                     {"set-tie-xyz", required_argument, NULL, 0},
@@ -578,6 +585,46 @@ int main(int argc, char **argv) {
         if (num_mods < NUMBER_MODS_MAX) {
           mods[num_mods].mode = MOD_MODE_UNSET_ALL_GLOBAL_TIES;
           num_mods++;
+        }
+        else {
+          fprintf(stderr, "Maximum number of mod commands reached:\n\tunset-all-global-ties command ignored\n\n");
+        }
+      }
+
+      /*-------------------------------------------------------
+       * shift global ties
+          --shift-global-tie=file:section/shiftx/shifty/shiftz
+          --shift-all-global-ties=section/shiftx/shifty/shiftz  */
+      else if (strcmp("shift-global-tie", options[option_index].name) == 0) {
+        if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
+          if ((nscan = sscanf(optarg, "%d:%d/%lf/%lf/%lf", 
+                              &mods[num_mods].file1, &mods[num_mods].section1, 
+                              &mods[num_mods].xoffset, &mods[num_mods].yoffset, 
+                              &mods[num_mods].zoffset)) == 5) {
+            mods[num_mods].mode = MOD_MODE_SHIFT_GLOBAL_TIE;
+            num_mods++;
+          }
+          else {
+            fprintf(stderr, "Failure to parse --shift-global-tie=%s\n\tmod command ignored\n\n", optarg);
+          }
+        }
+        else {
+          fprintf(stderr, "Maximum number of mod commands reached:\n\t--set-global-tie=%s command ignored\n\n", optarg);
+        }
+      }
+      else if (strcmp("shift-all-global-ties", options[option_index].name) == 0) {
+        if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
+          if ((nscan = sscanf(optarg, "%lf/%lf/%lf", 
+                              &mods[num_mods].xoffset, &mods[num_mods].yoffset, 
+                              &mods[num_mods].zoffset)) == 3) {
+            mods[num_mods].mode = MOD_MODE_SHIFT_ALL_GLOBAL_TIES;
+            num_mods++;
+          }
+          else {
+            fprintf(stderr, "Failure to parse --shift-all-global-ties=%s\n\tmod command ignored\n\n", optarg);
+          }
         }
         else {
           fprintf(stderr, "Maximum number of mod commands reached:\n\tunset-all-global-ties command ignored\n\n");
@@ -1465,7 +1512,6 @@ int main(int argc, char **argv) {
         if (num_mods < NUMBER_MODS_MAX) {
           mods[num_mods].mode = MOD_MODE_FIX_SENSORDEPTH;
           num_mods++;
-          fprintf(stderr, "called fix-sensordepth\n");
         }
         else {
           fprintf(stderr,
@@ -2449,6 +2495,52 @@ int main(int argc, char **argv) {
                   section1->globaltie.dr2_m = 0.0;
                   section1->globaltie.dr3_m = 0.0;
                   section1->globaltie.rsigma_m = 0.0;
+              }
+          }
+      }
+      break;
+
+    case MOD_MODE_SHIFT_GLOBAL_TIE:
+      fprintf(stderr, "\nCommand shift-global-tie=%4.4d:%4.4d/%.3f/%.3f/%.3f\n", 
+                      mods[imod].file1, mods[imod].section1, 
+                      mods[imod].xoffset, mods[imod].yoffset, mods[imod].zoffset);
+
+      /* if this file and section exists and global tie exists shift the global tie */
+      if (mods[imod].file1 >= 0 && mods[imod].file1 < project_output.num_files) {
+        file1 = (struct mbna_file *)&project_output.files[mods[imod].file1];
+        if (mods[imod].section1 >= 0 && mods[imod].section1 < file1->num_sections) {
+          section1 = (struct mbna_section *)&file1->sections[mods[imod].section1];
+          if (section1->globaltie.status != MBNA_TIE_NONE) {
+            section1->globaltie.offset_x_m += mods[imod].xoffset;
+            section1->globaltie.offset_y_m += mods[imod].yoffset;
+            section1->globaltie.offset_z_m += mods[imod].zoffset;
+            mb_coor_scale(verbose, 0.5 * (section1->latmin + section1->latmax),
+                                    &mtodeglon, &mtodeglat);
+            section1->globaltie.offset_x = section1->globaltie.offset_x_m * mtodeglon;
+            section1->globaltie.offset_y = section1->globaltie.offset_y_m * mtodeglat;
+          }
+        }
+      }
+      break;
+
+    case MOD_MODE_SHIFT_ALL_GLOBAL_TIES:
+      fprintf(stderr, "\nCommand shift-all-global-ties=%.3f/%.3f/%.3f\n", 
+                      mods[imod].xoffset, mods[imod].yoffset, mods[imod].zoffset);
+
+      /* loop over all sections shifting any global ties */
+      for (int ifile = 0; ifile < project_output.num_files; ifile++) {
+          file1 = &project_output.files[ifile];
+          for (int isection = 0; isection < file1->num_sections; isection++) {
+              section1 = &file1->sections[isection];
+
+              if (section1->globaltie.status != MBNA_TIE_NONE) {
+                section1->globaltie.offset_x_m += mods[imod].xoffset;
+                section1->globaltie.offset_y_m += mods[imod].yoffset;
+                section1->globaltie.offset_z_m += mods[imod].zoffset;
+                mb_coor_scale(verbose, 0.5 * (section1->latmin + section1->latmax),
+                                        &mtodeglon, &mtodeglat);
+                section1->globaltie.offset_x = section1->globaltie.offset_x_m * mtodeglon;
+                section1->globaltie.offset_y = section1->globaltie.offset_y_m * mtodeglat;
               }
           }
       }
