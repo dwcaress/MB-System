@@ -440,6 +440,11 @@ or beta, are equally accessible as tarballs through the Github interface.
 ### MB-System Version 5.7 Release Notes:
 --
 
+Mbnavadjustmerge: Added options to shift global ties singly or all together.
+
+Mbtrnpp: Fixed use of covariances from TRN: to get x y z covariances use covariance[2], 
+covariance[0], covariance[5] rather than 0, 1, and 2.
+
 #### 5.7.9beta66 (November 18, 2023)
 
 Mbdatalist: Fixed an unitialized string causing intermittent failure.
