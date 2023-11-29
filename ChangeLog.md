@@ -23,7 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.9beta67    November 27, 2023
+- Version 5.7.9beta68    November 30, 2023
 - Version 5.7.9beta66    November 18, 2023
 - Version 5.7.9beta65    November 17, 2023
 - Version 5.7.9beta64    November 16, 2023
@@ -441,7 +441,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ### MB-System Version 5.7 Release Notes:
 --
 
-#### 5.7.9beta67 (November 27, 2023)
+#### 5.7.9beta68 (November 30, 2023)
 
 CMake build system: It turns out that the GSF i/o module was not getting built and 
 used by default. The build system has been fixed so that the GSF format i/o module 
