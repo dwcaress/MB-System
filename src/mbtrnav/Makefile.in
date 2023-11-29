@@ -253,7 +253,8 @@ libtnav_la_OBJECTS = $(am_libtnav_la_OBJECTS)
 libtnav_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(libtnav_la_LDFLAGS) $(LDFLAGS) -o $@
-libtrncli_la_DEPENDENCIES =
+libtrncli_la_DEPENDENCIES = libnewmat.la libgeolib.la libqnx.la \
+	libtrnw.la libmb1.la libtnav.la
 am_libtrncli_la_OBJECTS = utils/TerrainNavClient.lo utils/TrnClient.lo
 libtrncli_la_OBJECTS = $(am_libtrncli_la_OBJECTS)
 libtrncli_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
@@ -898,7 +899,9 @@ libmb1_la_SOURCES = trnw/mb1_msg.c
 libmb1_la_LIBADD = 
 libtrncli_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libtrncli_la_SOURCES = utils/TerrainNavClient.cpp utils/TrnClient.cpp
-libtrncli_la_LIBADD = -lnewmat -lgeolib -ltrnw -lqnx -lmb1 -ltnav -lnetcdf
+
+#libtrncli_la_LIBADD = -lnewmat -lgeolib -ltrnw -lqnx -lmb1 -ltnav -lnetcdf
+libtrncli_la_LIBADD = -lnetcdf libnewmat.la libgeolib.la libqnx.la libtrnw.la libmb1.la libtnav.la 
 @BUILD_ROVTRN_TRUE@include_HEADERS = \
 @BUILD_ROVTRN_TRUE@trnw/netif.h \
 @BUILD_ROVTRN_TRUE@trnw/trnw.h \
