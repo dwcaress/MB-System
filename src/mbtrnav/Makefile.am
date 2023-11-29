@@ -232,7 +232,9 @@ libtrncli_la_SOURCES =
 libtrncli_la_SOURCES += utils/TerrainNavClient.cpp
 libtrncli_la_SOURCES += utils/TrnClient.cpp
 
-libtrncli_la_LIBADD = -lnewmat -lgeolib -ltrnw -lqnx -lmb1 -ltnav -lnetcdf
+#libtrncli_la_LIBADD = -lnewmat -lgeolib -ltrnw -lqnx -lmb1 -ltnav -lnetcdf
+libtrncli_la_LIBADD = -lnetcdf libnewmat.la libgeolib.la libqnx.la libtrnw.la libmb1.la libtnav.la 
+
 
 if BUILD_ROVTRN
 
