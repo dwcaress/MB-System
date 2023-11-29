@@ -5250,9 +5250,9 @@ int mbtrnpp_trn_pub_olog(trn_update_t *update,
                          (update->mse_dat->x-update->pt_dat->x),
                          (update->mse_dat->y-update->pt_dat->y),
                          (update->mse_dat->z-update->pt_dat->z),
-                         sqrt(update->mse_dat->covariance[0]),
-                         sqrt(update->mse_dat->covariance[2]),
-                         sqrt(update->mse_dat->covariance[5]));
+                         (update->mse_dat->covariance[0]),
+                         (update->mse_dat->covariance[2]),
+                         (update->mse_dat->covariance[5]));
         mlog_tprintf(log_id,"trn_state,reinit_flag,%d,fstate,%d,success,%d,cycle,%d,ping,%d,mb1_time,%0.3lf,update_time,%0.3lf,isconv,%hd,isval,%hd\n",update->reinit_count,update->filter_state,update->success,update->mb1_cycle,update->ping_number,update->mb1_time,update->update_time,update->is_converged,update->is_valid);
     }
 
