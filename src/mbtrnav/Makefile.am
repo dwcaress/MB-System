@@ -300,7 +300,7 @@ ROVTRN_APPS = trnxpp
 trnxpp_SOURCES = \
 opt/rov/trnxpp_app.cpp
 
-trnxpp_LDADD = -llcm -lgeolib libmb1.la libtnav.la libnewmat.la libqnx.la libtrncli.la  libudpms.la libtrnxplug.la
+trnxpp_LDADD = libgeolib.la libmb1.la libtnav.la libnewmat.la libqnx.la libtrncli.la  libudpms.la libtrnxplug.la -llcm 
 
 TRN_HPP = opt/rov/lcm_pcf/signal_t.hpp
 TRN_HPP += opt/rov/lcm_pcf/string_t.hpp
@@ -694,7 +694,7 @@ trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
 
 trn_replay_SOURCES = opt/dorado/Replay.cpp opt/dorado/trn_replay.cpp
 
-trn_replay_LDADD = -ltnav  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeolib libtrncli.la
+trn_replay_LDADD = libtnav.la  libnewmat.la libqnx.la libgeolib.la libtrncli.la -lnetcdf -lm -lpthread 
 
 trnclient_test_SOURCES =  utils/trnclient_test.cpp
 

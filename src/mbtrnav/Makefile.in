@@ -312,7 +312,8 @@ trn_cli_DEPENDENCIES = $(LIBMBTRNFRAME) libtrnw.la
 am_trn_replay_OBJECTS = opt/dorado/Replay.$(OBJEXT) \
 	opt/dorado/trn_replay.$(OBJEXT)
 trn_replay_OBJECTS = $(am_trn_replay_OBJECTS)
-trn_replay_DEPENDENCIES = libtrncli.la
+trn_replay_DEPENDENCIES = libtnav.la libnewmat.la libqnx.la \
+	libgeolib.la libtrncli.la
 am_trn_server_OBJECTS = utils/trn_server.$(OBJEXT)
 trn_server_OBJECTS = $(am_trn_server_OBJECTS)
 trn_server_DEPENDENCIES = libtnav.la libqnx.la libnewmat.la libtnav.la \
@@ -338,9 +339,9 @@ trnusvr_test_OBJECTS = $(am_trnusvr_test_OBJECTS)
 trnusvr_test_DEPENDENCIES = $(LIBMBTRNFRAME) libnetif.la libtrnw.la
 @BUILD_ROVTRN_TRUE@am_trnxpp_OBJECTS = opt/rov/trnxpp_app.$(OBJEXT)
 trnxpp_OBJECTS = $(am_trnxpp_OBJECTS)
-@BUILD_ROVTRN_TRUE@trnxpp_DEPENDENCIES = libmb1.la libtnav.la \
-@BUILD_ROVTRN_TRUE@	libnewmat.la libqnx.la libtrncli.la \
-@BUILD_ROVTRN_TRUE@	libudpms.la libtrnxplug.la
+@BUILD_ROVTRN_TRUE@trnxpp_DEPENDENCIES = libgeolib.la libmb1.la \
+@BUILD_ROVTRN_TRUE@	libtnav.la libnewmat.la libqnx.la \
+@BUILD_ROVTRN_TRUE@	libtrncli.la libudpms.la libtrnxplug.la
 SCRIPTS = $(dist_bin_SCRIPTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -816,8 +817,8 @@ AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrnav/trnw \
 	${libnetcdf_CPPFLAGS} -DHAVE_CONFIG_H -DWITH_TESTS \
 	-DWITH_MMDEBUG -D_GNU_SOURCE -DWITH_MST_MSTATS -DMST_STATS_EN \
 	-DWITH_TNAVPF_CEP_CORRECTION -DWITH_TRNLOG \
-	-DWITH_TRNLOG_EST_OUT -DWITH_TNAVPF_CEP_CORRECTION \
-	-DTRN_NORAND
+	-DWITH_TRNLOG_EST_OUT -DWITH_TNAVPF_CEP_CORRECTION
+#AM_CPPFLAGS += -DTRN_NORAND
 libgeolib_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libgeolib_la_SOURCES = gctp/source/gctp.c gctp/source/alberfor.c \
 	gctp/source/alberinv.c gctp/source/alconfor.c \
@@ -951,7 +952,7 @@ libtrncli_la_LIBADD = -lnetcdf libnewmat.la libgeolib.la libqnx.la libtrnw.la li
 @BUILD_ROVTRN_TRUE@trnxpp_SOURCES = \
 @BUILD_ROVTRN_TRUE@opt/rov/trnxpp_app.cpp
 
-@BUILD_ROVTRN_TRUE@trnxpp_LDADD = -llcm -lgeolib libmb1.la libtnav.la libnewmat.la libqnx.la libtrncli.la  libudpms.la libtrnxplug.la
+@BUILD_ROVTRN_TRUE@trnxpp_LDADD = libgeolib.la libmb1.la libtnav.la libnewmat.la libqnx.la libtrncli.la  libudpms.la libtrnxplug.la -llcm 
 @BUILD_ROVTRN_TRUE@TRN_HPP = opt/rov/lcm_pcf/signal_t.hpp \
 @BUILD_ROVTRN_TRUE@	opt/rov/lcm_pcf/string_t.hpp \
 @BUILD_ROVTRN_TRUE@	opt/rov/gss/nav_solution_t.hpp \
@@ -982,7 +983,7 @@ libtrncli_la_LIBADD = -lnetcdf libnewmat.la libgeolib.la libqnx.la libtrnw.la li
 trn_server_SOURCES = utils/trn_server.cpp
 trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
 trn_replay_SOURCES = opt/dorado/Replay.cpp opt/dorado/trn_replay.cpp
-trn_replay_LDADD = -ltnav  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeolib libtrncli.la
+trn_replay_LDADD = libtnav.la  libnewmat.la libqnx.la libgeolib.la libtrncli.la -lnetcdf -lm -lpthread 
 trnclient_test_SOURCES = utils/trnclient_test.cpp
 trnclient_test_LDADD = libtnav.la libnewmat.la libtrncli.la
 mmcpub_SOURCES = trnw/mmcpub.c
