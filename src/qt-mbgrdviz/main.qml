@@ -177,18 +177,43 @@ ApplicationWindow {
             MenuSeparator {}
             Menu {
                 title: "Color table"
-                Action {checkable: true; checked: true; text: qsTr("Haxby"); ActionGroup.group: colorActions
-                onTriggered: {mainWindow.sig(Const.ColorMap, "Haxby")}}
-                
-                Action {checkable: true; text: qsTr("BrightRainbow"); ActionGroup.group: colorActions
-                onTriggered: {mainWindow.sig(Const.ColorMap, "BrightRainbow")}}
-                
-                Action {checkable: true; text: qsTr("MutedRainbow"); ActionGroup.group: colorActions
-                onTriggered: {mainWindow.sig(Const.ColorMap, "MutedRainbow")}}
-                
-                Action {checkable: true; text: qsTr("Grayscale"); ActionGroup.group: colorActions
-                onTriggered: {mainWindow.sig(Const.ColorMap, "Grayscale")}}
+		id: colorTableMenu
+		
+		// Create and add Actions to menu
+	     	Component.onCompleted: {
+	       	// Insert menu items here, with number of items and
+	       	// item names as specified in the cmaps[] array that was
+	       	// retrieved from C++
+	       	var cmd = Const.ColorMap;
+	       	for (var i = 0; i < cmaps.length; i++)  {
+	       	    console.log("map: ", cmaps[i]);
+		    // Build QML string that specifies menu Action to insert
+		    var qmlStr = "import QtQuick.Controls 2.3; " + 
+		    	"Action {id: myAction; checkable: true; ";
+		   
+		    // First item is checked
+		    if (i == 0) { qmlStr += "checked: true; "; }
+
+		    qmlStr += "ActionGroup.group: colorActions; ";
+		    qmlStr += "text: \"" + cmaps[i] + "\"; ";
+		    qmlStr += "onTriggered: {mainWindow.sig(" + cmd +  ", " +
+		   	  "\"" + cmaps[i] + "\")}}";
+
+		    console.log("qmlStr: " , qmlStr);
+		   
+		    // Create the menu Action
+		    var obj =
+		    	Qt.createQmlObject(qmlStr,
+                      	colorTableMenu,
+                      	"dynamicAction");
+		      
+                    // Add created Action to the menu    
+		    colorTableMenu.addAction(obj);
+
+	       	  }
+		
             }
+	    }
             MenuSeparator {}
             Menu {
                 title: "Overlays"
@@ -278,46 +303,6 @@ ApplicationWindow {
             }
         }
 
-	Menu {
-	     title: "TEST"
-	     id: testMenu
-
-	     // Create and add Actions to menu
-	     Component.onCompleted: {
-	       // Insert menu items here, with number of items and
-	       // item names as specified in the cmaps[] array that was
-	       // retrieved from C++
-	       var cmd = Const.ColorMap;
-	       for (var i = 0; i < cmaps.length; i++)  {
-	       	   console.log("map: ", cmaps[i]);
-		   // Build QML string that specifies menu Action to insert
-		   var qmlStr = "import QtQuick.Controls 2.3; " + 
-		     "Action {id: myAction; checkable: true; ";
-		   
-		   // First item is checked
-		   if (i == 0) { qmlStr += "checked: true; "; }
-
-		   qmlStr += "ActionGroup.group: colorActions; ";
-		   qmlStr += "text: \"" + cmaps[i] + "\"; ";
-		   qmlStr += "onTriggered: {mainWindow.sig(" + cmd +  ", " +
-		   	  "\"" + cmaps[i] + "\")}}";
-
-		   console.log("qmlStr: " , qmlStr);
-		   
-		   // Create the menu Action
-		   var obj =
-		      Qt.createQmlObject(qmlStr,
-                      testMenu,
-                      "dynamicAction");
-		      
-                   // Add created Action to the menu    
-		   testMenu.addAction(obj);
-
-	       }
-	
-	     }
-
-	}
     }
 
     FileDialog {
