@@ -281,19 +281,38 @@ ApplicationWindow {
 	Menu {
 	     title: "TEST"
 	     id: testMenu
+
+	     // Create and add Actions to menu
 	     Component.onCompleted: {
-	       // Want to insert menu items here, with number of items and
-	       // item names specified in C++
-				   
+	       // Insert menu items here, with number of items and
+	       // item names as specified in the cmaps[] array that was
+	       // retrieved from C++
+	       var cmd = Const.ColorMap;
 	       for (var i = 0; i < cmaps.length; i++)  {
 	       	   console.log("map: ", cmaps[i]);
-		   var qmlStr = "import QtQuick.Controls 2.3; Action {id: myAction; text: \"" + cmaps[i] + "\"}";
+		   // Build QML string that specifies menu Action to insert
+		   var qmlStr = "import QtQuick.Controls 2.3; " + 
+		     "Action {id: myAction; checkable: true; ";
+		   
+		   // First item is checked
+		   if (i == 0) { qmlStr += "checked: true; "; }
 
-	      var obj = Qt.createQmlObject(qmlStr,
+		   qmlStr += "ActionGroup.group: colorActions; ";
+		   qmlStr += "text: \"" + cmaps[i] + "\"; ";
+		   qmlStr += "onTriggered: {mainWindow.sig(" + cmd +  ", " +
+		   	  "\"" + cmaps[i] + "\")}}";
+
+		   console.log("qmlStr: " , qmlStr);
+		   
+		   // Create the menu Action
+		   var obj =
+		      Qt.createQmlObject(qmlStr,
                       testMenu,
-                      "dynamicSnippet1");
+                      "dynamicAction");
+		      
+                   // Add created Action to the menu    
+		   testMenu.addAction(obj);
 
-		      testMenu.addAction(obj);
 	       }
 	
 	     }

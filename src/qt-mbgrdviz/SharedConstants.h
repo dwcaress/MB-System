@@ -1,6 +1,7 @@
 #ifndef SHAREDCONSTANTS_H
 #define SHAREDCONSTANTS_H
 #include <QObject>
+#include <QStringList>
 
 namespace sharedQmlCpp {
 /// Constants shared between C++ and QML code
@@ -10,6 +11,8 @@ class Const : public QObject
 
 public:
 
+  Const();
+  
   enum class EditState {
 		  Unknown,
 		  Pointing,
@@ -19,7 +22,6 @@ public:
   };
 
   Q_ENUM(EditState)
-
 
   /// Command issued from GUI
   enum class Cmd : int {ColorMap,
@@ -40,11 +42,15 @@ public:
       return testString_;
   }
 
-
-    protected:
+  Q_PROPERTY(QStringList cmaps MEMBER colorMapsList_)
+  
+protected:
       
-      static const QString testString_;
+  static const QString testString_;
 
+  QStringList colorMapsList_;
+  
+  
 };
 
 }

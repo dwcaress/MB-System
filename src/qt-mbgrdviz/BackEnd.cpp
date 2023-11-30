@@ -4,14 +4,10 @@
 #include "BackEnd.h"
 #include "QVtkItem.h"
 #include "SharedConstants.h"
-
-#define VERTICAL_EXAGG "verticalExagg"
-#define SHOW_AXES "showAxes"
-#define COLORMAP "colormap"
-#define SITE_FILE "sitefile"
-#define ROUTE_FILE "routefile"
+#include "TopoColorMap.h"
 
 using namespace sharedQmlCpp;
+using namespace mb_system;
 
 /// Initialize singleton to null
 BackEnd *BackEnd::singleInstance_ = nullptr;
@@ -21,9 +17,6 @@ BackEnd::BackEnd(QQmlApplicationEngine *engine,
   qVtkItem_(nullptr)
 {
     QObject *rootObject = engine->rootObjects().first();
-
-    QObject::connect(rootObject, SIGNAL(qmlSignal(QString)),
-                     this, SLOT(qmlSlot(QString)));
 
     QObject::connect(rootObject, SIGNAL(sig(int, QString)),
                      this, SLOT(sigSlot(int, QString)));
@@ -40,6 +33,22 @@ BackEnd::BackEnd(QQmlApplicationEngine *engine,
         qCritical() << "Could not find \"selectedFile\" in QML";
         exit(1);      
     }
+
+    // Get colormap names to be displayed by QML GUI
+    std::vector<const char *> colorMapNames;
+    
+    TopoColorMap::schemeNames(&colorMapNames);
+
+    qDebug() << "ColorMaps:";
+    for (int i = 0; i < colorMapNames.size(); i++) {
+      qDebug() << colorMapNames[i];
+      // Append name to QStringList
+      colorMapsList_.append(colorMapNames[i]);
+    }
+
+    // Set color map names in model
+    /// colorMapsModel_.setStringList(colorMapsList_);
+    
 }
 
 bool BackEnd::registerSingleton(int argc, char **argv,
@@ -108,64 +117,6 @@ bool BackEnd::setGridFile(QUrl fileURL) {
 
     return true;
 }
-
-
-void BackEnd::qmlSlot(const QString &qmsg) {
-    qDebug() << "qmlSlot() qmsg: " << qmsg;
-
-    QByteArray a;
-    a.append(qmsg);
-    char *msg = a.data();
-    std::cout << "msg: " << msg << std::endl;
-
-    if (!strncmp(msg, VERTICAL_EXAGG, strlen(VERTICAL_EXAGG))) {
-      float verticalExagg = atof(msg + strlen(VERTICAL_EXAGG));
-      std::cout << "vertical exagg: " << verticalExagg << std::endl;
-      qVtkItem_->setVerticalExagg(verticalExagg);
-      qVtkItem_->update();
-    }
-    else if (!strncmp(msg, SHOW_AXES, strlen(SHOW_AXES))) {
-      if (strstr(msg, "true")) {
-        qVtkItem_->showAxes(true);
-      }
-      else {
-        qVtkItem_->showAxes(false);
-      }
-      qVtkItem_->update();        
-    }
-    else if (!strncmp(msg, COLORMAP, strlen(COLORMAP))) {
-      // Scheme name is second token
-      char *schemeName = strchr(msg, ' ') + 1;
-      if (!schemeName) {
-        qCritical() << "Couldn't find colormap scheme name in " << msg;
-        return;
-      }
-      qDebug() << "colormap schemeName: " << schemeName;
-      if (!qVtkItem_->setColorMapScheme(schemeName)) {
-        qCritical() << "Unknown colormap scheme: " << schemeName;
-      }
-      else {
-        qDebug() << "Set colormap scheme to " << schemeName;
-      }
-      qVtkItem_->update();
-    }
-    else if (!strncmp(msg, SITE_FILE, strlen(SITE_FILE))) {
-      qDebug() << "open site file " << (strchr(msg, ' ') + 1);
-      char *siteFile = strchr(msg, ' ') + 1;
-      // Remove file URL prefix      
-      siteFile += strlen("file://"); 
-      qVtkItem_->setSiteFile(siteFile);
-      qVtkItem_->update();
-    }
-    else if (!strncmp(msg, ROUTE_FILE, strlen(ROUTE_FILE))) {
-      qDebug() << "open route file " << (strchr(msg, ' ') + 1);
-      char *routeFile = strchr(msg, ' ') + 1;
-      // Remove file URL prefix      
-      routeFile += strlen("file://"); 
-      /// qVtkItem_->setRouteFile(routeFile);
-      qVtkItem_->update();
-    }    
-  }
 
 
 void BackEnd::sigSlot(const int param, const QString &qval) {

@@ -1,9 +1,10 @@
 #ifndef BACKEND_H
 #define BACKEND_H
-
+#include <vector>
 #include <QObject>
 #include <QQmlApplicationEngine>
 #include <QQuickWindow>
+#include <QStringListModel>
 #include "QVtkItem.h"
 
 /**
@@ -33,15 +34,20 @@ public:
   /// Specify grid file to display
   Q_INVOKABLE bool setGridFile(QUrl file);
 
+
+  Q_INVOKABLE QStringList getColorMaps() const {
+    std::cerr << "*** getColorMaps()\n";
+    return colorMapsList_;
+  }
+  
 					 
 public slots:
-  
-  // Slot for qml-generated signals
-  void qmlSlot(const QString &msg);
 
   void sigSlot(const int param, const QString &value);
   
+	      
 signals:
+  void listChanged(QString m);
   
   
 protected:
@@ -55,6 +61,10 @@ protected:
   /// Selected file name item
   QObject *selectedFileItem_;
 
+  ///  std::vector<const char *> colorMapNames_;
+  /// QStringListModel colorMapsModel_;
+  QStringList colorMapsList_;  
+  
 private:
   /// Constant string member test
   inline static const std::string testString_ = "test string member";
