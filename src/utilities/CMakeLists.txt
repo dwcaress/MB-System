@@ -46,8 +46,7 @@ set(executables
 
 foreach(executable ${executables})
   add_executable(${executable} ${executable}.cc)
-  target_link_libraries(${executable} PRIVATE mbio mbbsio mbaux mbsapi m
-                                              pthread)
+  target_link_libraries(${executable} PRIVATE mbio mbbsio mbaux mbsapi mbgsf m pthread)
 endforeach()
 
 target_link_libraries(mbsvpselect PRIVATE LibPROJ::LibPROJ)

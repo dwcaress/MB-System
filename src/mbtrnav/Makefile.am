@@ -234,7 +234,6 @@ libtrncli_la_SOURCES += utils/TrnClient.cpp
 
 libtrncli_la_LIBADD = libnewmat.la libgeolib.la libqnx.la libtrnw.la libmb1.la libtnav.la -lnetcdf 
 
-
 if BUILD_ROVTRN
 
 include_HEADERS = \

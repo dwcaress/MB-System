@@ -1676,6 +1676,8 @@ int main(int argc, char **argv) {
     }
 
     /* copy the input base project to the output project */
+    int num_tri_copied = 0;
+    int num_sections_copied = 0;
     // project_output.open = project_inputbase.open;
     // strcpy(project_output.name, project_inputbase.name);
     // strcpy(project_output.path, project_inputbase.path);
@@ -1828,6 +1830,18 @@ int main(int argc, char **argv) {
         sprintf(srcfile, "%s/nvs_%4.4d_%4.4d.mb71", project_inputbase.datadir, i, j);
         sprintf(dstfile, "%s/nvs_%4.4d_%4.4d.mb71", project_output.datadir, i, j);
         mb_copyfile(verbose, srcfile, dstfile, &error);
+        num_sections_copied++;
+
+        /* copy the triangle file if it exists */
+        struct stat file_status;
+        sprintf(srcfile, "%s/nvs_%4.4d_%4.4d.mb71.tri", project_inputadd.datadir, i, j);
+        sprintf(dstfile, "%s/nvs_%4.4d_%4.4d.mb71.tri", project_output.datadir, i, j);
+        const int fstat = stat(srcfile, &file_status);
+        if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR
+                      && file_status.st_size > 0) {
+          mb_copyfile(verbose, srcfile, dstfile, &error);
+          num_tri_copied++;
+        }
         //mb_command command = "";
         //sprintf(command, "cp %s/nvs_%4.4d_%4.4d.mb71* %s", project_inputbase.datadir, i, j, project_output.datadir);
         // fprintf(stderr, "Executing in shell: %s\n", command);
@@ -1853,6 +1867,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "\nCopied input base project to output project:\n\t%s\n", project_output_path);
     fprintf(stderr, "\t%d files\n\t%d crossings\n\t%d ties\n", project_output.num_files, project_output.num_crossings,
             project_output.num_ties);
+    fprintf(stderr, "\t%d triangle files out of %d sections copied\n", num_tri_copied, num_sections_copied);
   }
 
   /* else if adding the second project to the first, or just modifying the first,
@@ -1909,6 +1924,8 @@ int main(int argc, char **argv) {
     project_output.num_files_alloc = project_output.num_files + project_inputadd.num_files;
     memcpy(&project_output.files[project_output.num_files], project_inputadd.files,
            project_inputadd.num_files * sizeof(struct mbna_file));
+    int num_tri_copied = 0;
+    int num_sections_copied = 0;
 
     /* copy the sections in the files */
     for (int i = 0; i < project_inputadd.num_files && status == MB_SUCCESS; i++) {
@@ -2014,6 +2031,7 @@ int main(int argc, char **argv) {
         sprintf(srcfile, "%s/nvs_%4.4d_%4.4d.mb71", project_inputadd.datadir, i, j);
         sprintf(dstfile, "%s/nvs_%4.4d_%4.4d.mb71", project_output.datadir, k, j);
         mb_copyfile(verbose, srcfile, dstfile, &error);
+        num_sections_copied++;
         //mb_command command = "";
         //sprintf(command, "cp %s/nvs_%4.4d_%4.4d.mb71 %s/nvs_%4.4d_%4.4d.mb71", project_inputadd.datadir, i, j,
         //        project_output.datadir, k, j);
@@ -2028,6 +2046,7 @@ int main(int argc, char **argv) {
         if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR
                       && file_status.st_size > 0) {
           mb_copyfile(verbose, srcfile, dstfile, &error);
+          num_tri_copied++;
         }
         //sprintf(command, "%s/nvs_%4.4d_%4.4d.mb71.tri", project_inputadd.datadir, i, j);
         //const int fstat = stat(command, &file_status);
@@ -2065,6 +2084,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "\nCopied input add project to output project:\n\t%s\n", project_output_path);
     fprintf(stderr, "\t%d files\n\t%d crossings\n\t%d ties\n", project_output.num_files, project_output.num_crossings,
             project_output.num_ties);
+    fprintf(stderr, "\t%d triangle files out of %d sections copied\n", num_tri_copied, num_sections_copied);
 
     /* update all of the global counters */
     project_output.num_files += project_inputadd.num_files;
