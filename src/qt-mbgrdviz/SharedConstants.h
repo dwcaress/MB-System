@@ -13,12 +13,11 @@ public:
 
   Const();
   
-  enum class EditState {
-		  Unknown,
-		  Pointing,
-		  EditRoute,
-		  EditPoints,
-		  EditOverlay
+  enum class EditState : int {
+			      ViewOnly,
+			      EditRoute,
+			      EditPoints,
+			      EditOverlay
   };
 
   Q_ENUM(EditState)
@@ -28,7 +27,9 @@ public:
 			ShowAxes,
 			VerticalExag,
 			RouteFile,
-			SiteFile};
+			SiteFile,
+			EditState
+  };
   
   Q_ENUM(Cmd)
 
