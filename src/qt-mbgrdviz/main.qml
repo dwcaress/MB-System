@@ -176,7 +176,7 @@ ApplicationWindow {
             Action { checkable: true; text: qsTr("&2D only") }            
             MenuSeparator {}
             Menu {
-                title: "Color table"
+                title: "Color map"
 		id: colorTableMenu
 		
 		// Create and add Actions to menu
