@@ -5,7 +5,7 @@
 
 using namespace mb_system;
 
-const int TopoColorMap::NSchemes = 4;
+const int TopoColorMap::NSchemes = 5;
 
 /// Supported color schemes
 const struct TopoColorMap::SchemeStruct colorScheme[TopoColorMap::NSchemes] =
@@ -51,9 +51,20 @@ const struct TopoColorMap::SchemeStruct colorScheme[TopoColorMap::NSchemes] =
     0.900, 1.000},
    /// blue
    {0.000, 0.100, 0.200, 0.300, 0.400, 0.500, 0.600, 0.700, 0.800,
-    0.900, 1.000}};  
-		  
+    0.900, 1.000},
 
+   "FlatGrayscale", TopoColorMap::FlatGrayscale,
+   /// red
+   {0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 0.500,
+    0.500, 0.500},
+   /// green
+   {0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 0.500,
+    0.500, 0.500},
+   /// blue
+   {0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 0.500,
+    0.500, 0.500}
+   
+  };
 
 void TopoColorMap::schemeNames(std::vector<const char *> *names) {
   names->clear();

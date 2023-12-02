@@ -19,7 +19,9 @@ namespace mb_system {
                   Haxby,
                   BrightRainbow,
                   MutedRainbow,
-                  Grayscale };
+                  Grayscale,
+		  FlatGrayscale
+    };
 
     /// Number of defined map schemes
     static const int NSchemes;
