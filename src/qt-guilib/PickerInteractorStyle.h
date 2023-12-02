@@ -59,6 +59,9 @@ namespace mb_system {
     /// Pick cell
     virtual void OnLeftButtonDown() override;
 
+    /// Pick cell
+    virtual void OnLeftButtonUp() override;    
+
     vtkSmartPointer<vtkPolyData> polyData_;
     vtkSmartPointer<vtkDataSetMapper> selectedMapper_;
     vtkSmartPointer<vtkActor> selectedActor_;
@@ -73,7 +76,10 @@ namespace mb_system {
   
     /// Associated interactor
     vtkRenderWindowInteractor *interactor_;
-  
+
+    /// Staring mouse position when left button down
+    int startMousePos_[2];
+    
   };
 
 

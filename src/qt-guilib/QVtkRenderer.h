@@ -23,8 +23,6 @@
 #include "PickerInteractorStyle.h"
 #include "Route.h"
 
-#define SELECTED_POINT_FILE "selectedPoint.txt"
-
 namespace mb_system {
 
   class QVtkItem;
@@ -98,9 +96,15 @@ namespace mb_system {
       return gridReader_;
     }
 
-    /// Set picked point coordinates
+    /// Get world cooordinates of latest picked point. Return false if no
+    /// point has been picked.
+    bool getPickedPoint(double *worldXYZ);
+    
+    /// Set picked point coordinates, string representation
     void setPickedPoint(double *worldXYZ);
 
+
+					 
   public slots:
 
     /// Called when worker thread finishes
@@ -198,18 +202,20 @@ namespace mb_system {
     std::shared_ptr<QMouseEvent> mouseMoveEvent_;
 
     /// Coordinates of latest selected point
-    vtkSmartPointer<vtkPolyData> pickedPoint_;
+    double pickedCoords_[3];
 
     /// Indicate whether pickedPoint_ has been selected
     bool pointPicked_;
 
-    bool newPointPicked_;
+    /// Force render on next call to update()
+    bool forceRender_;
 
-
+    /// true during first render of particular grid
+    bool firstRender_;
+    
     /// Routes to be overlaid on topography
     std::vector<Route> routes_;
 
-    
     /// Worker thread class to load grid file with TopoGridReader
     class LoadFileWorker : public QThread {
 

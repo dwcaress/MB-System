@@ -16,6 +16,8 @@
 #include <vtkParticleReader.h>
 #include <vtkAxisActor2D.h>
 #include <vtkProperty2D.h>
+#include <vtkSphereSource.h>
+#include <vtkCoordinate.h>
 #include "QVtkRenderer.h"
 #include "QVtkItem.h"
 #include "TopoColorMap.h"
@@ -30,8 +32,9 @@ QVtkRenderer::QVtkRenderer() :
   mouseButtonEvent_(nullptr),
   mouseMoveEvent_(nullptr),
   pointPicked_(false),
-  newPointPicked_(true)
-{
+  forceRender_(false),
+  firstRender_(true) {
+  
     worker_ = new LoadFileWorker(*this);
 
     // Handle things when worker thread finishes
@@ -59,7 +62,7 @@ void QVtkRenderer::render() {
   }
 
   if (!renderWindow_ || !windowInteractor_) {
-    qDebug() << "renderWindow not yet defined";
+    qDebug() << "renderWindow/windowInteractor not yet defined";
     return;
   }
 
@@ -72,13 +75,13 @@ void QVtkRenderer::render() {
   
   axesActor_->SetVisibility(displayProperties_->showAxes());
 
-  if (displayProperties_->changed()) {
-    // Some property changed - rebuild pipeline
+  if (displayProperties_->changed() || forceRender_) {
+    // Some property changed, or force re-render - rebuild pipeline
     qDebug() <<
-      "QVtkRenderer::render() displayProperties changed, assemblePipeline";
+      "QVtkRenderer::render(), assemblePipeline()";
     assemblePipeline();
+    forceRender_ = false;
     item_->clearPropertyChangedFlag();
-    newPointPicked_ = false;
   }
 
   if (wheelEvent_ && !wheelEvent_->isAccepted()) {
@@ -275,18 +278,6 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   elevLookupTable_ =
     vtkSmartPointer<vtkLookupTable>::New();
 
-  // Last selected point coordinates
-  pickedPoint_ =
-    vtkSmartPointer<vtkPolyData>::New();
-
-  // Allocate a single selected point
-  pickedPoint_->Allocate(1);
-  pickedPoint_->Reset();
-
-  // Point hasn't been picked yet
-  pointPicked_ = false;
-
-  
   // Create VTK renderer (not the same as QT renderer)
   qDebug() << "create vtk renderer";
   renderer_ =
@@ -327,7 +318,9 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   // Invoke callback when renderWindow_ is made current
   renderWindow_->AddObserver(vtkCommand::WindowMakeCurrentEvent,
                              this, &QVtkRenderer::makeCurrentCallback);
-    
+
+  firstRender_ = true;
+  
   return assemblePipeline();
 }
 
@@ -442,7 +435,7 @@ bool QVtkRenderer::assemblePipeline() {
   renderer_->RemoveAllViewProps();
   
   qDebug() << "renderer_ has " << renderer_->GetActors()->GetNumberOfItems() << " actors";
-    
+
   double gridBounds[6];
   gridReader_->gridBounds(&gridBounds[0], &gridBounds[1],
                           &gridBounds[2], &gridBounds[3],
@@ -506,24 +499,44 @@ bool QVtkRenderer::assemblePipeline() {
     siteActor->GetProperty()->SetPointSize(25);
     renderer_->AddActor(siteActor);
   }
-  
-  /* ***
+
+  qDebug() << "ready to check pointPicked_";
+  qDebug() << "pointPicked_: " << pointPicked_;
   if (pointPicked_) {
     std::cerr << "add picked point to scene" << std::endl;
-    vtkNew<vtkParticleReader> reader;
-    reader->SetFileName(SELECTED_POINT_FILE);
-    reader->Update();
+
+    int *size = renderWindow_->GetSize();
+    std::cerr << "window w: " << size[0] << "  h: " << size[1] << "\n";
+
+    vtkNew<vtkCoordinate> coords;
+    coords->SetCoordinateSystemToDisplay();
+    coords->SetValue(size[0], size[1], 0.);
+    double *worldSize = coords->GetComputedWorldValue(renderer_);
+    std::cerr << "world x: " << worldSize[0] << "  world y: " <<
+      worldSize[1] << "  world z: " << worldSize[2] << "\n";
     
-    vtkNew<vtkPolyDataMapper> pickedPointMapper;
-    // pickedPointMapper->SetInputData(pickedPoint_);
-    pickedPointMapper->SetInputConnection(reader->GetOutputPort());
-    vtkNew<vtkActor> pickedPointActor;
+    vtkSmartPointer<vtkSphereSource>pickedPoint =
+      vtkSmartPointer<vtkSphereSource>::New();
+
+    double radius = worldSize[0] / 30000;
+    pickedPoint->SetRadius(radius);
+    pickedPoint->SetCenter(pickedCoords_[0], pickedCoords_[1],
+			   pickedCoords_[2]);
+    
+    vtkSmartPointer<vtkPolyDataMapper> pickedPointMapper =
+      vtkSmartPointer<vtkPolyDataMapper>::New();
+    
+    pickedPointMapper->SetInputConnection(pickedPoint->GetOutputPort());
+
+    vtkSmartPointer<vtkActor> pickedPointActor =
+      vtkSmartPointer<vtkActor>::New();
+    
     pickedPointActor->SetMapper(pickedPointMapper);
-    pickedPointActor->GetProperty()->SetPointSize(25);
+
     renderer_->AddActor(pickedPointActor);
+
   }
-  *** */
-  
+
   // Add renderer to the renderWindow
   qDebug() << "add renderer to renderWindow";
   renderWindow_->AddRenderer(renderer_);
@@ -551,11 +564,19 @@ bool QVtkRenderer::assemblePipeline() {
 
   renderer_->AddActor(axesActor_);    
 
-  renderer_->ResetCamera();
+  if (firstRender_) {
+    // Reset on first rendering of this grid
+    renderer_->ResetCamera();
+  }
+
+  // Don't reset on subsequent rendering of this grid
+  firstRender_ = false;
+  
+
 
   // Initialize displayed picked coordinates to blank
-  QString msg("");
-  item_->setPickedPoint(msg);
+  // QString msg("");
+  // item_->setPickedPoint(msg);
   
   qDebug() << "pipeline assembled";  
   return true;
@@ -662,19 +683,27 @@ void QVtkRenderer::makeCurrentCallback(vtkObject *, unsigned long eid,
 
 
 void QVtkRenderer::setPickedPoint(double *worldCoords) {
-  std::cerr << "setPickedPoint(): x=" << worldCoords[0] << ", y=" << worldCoords[1] <<
-    ", z=" << worldCoords[2] << std::endl;
 
-  newPointPicked_ = true;
   pointPicked_ = true;
 
-  vtkSmartPointer<vtkPoints> point = vtkSmartPointer<vtkPoints>::New();
-  point->Allocate(1);
-  vtkIdType pointId[1];
-  pointId[0] = point->InsertNextPoint(worldCoords[0], worldCoords[1],
-                                      worldCoords[2]);
-  
-  pickedPoint_->Reset();
-  pickedPoint_->InsertNextCell(VTK_VERTEX, 1, pointId);
+  pickedCoords_[0] = worldCoords[0];
+  pickedCoords_[1] = worldCoords[1];
+  pickedCoords_[2] = worldCoords[2];
+
+  /// Force render on next update
+  forceRender_ = true;
 }
 
+
+bool QVtkRenderer::getPickedPoint(double *worldCoords) {
+  if (!pointPicked_) {
+    return false;
+  }
+
+  worldCoords[0] = pickedCoords_[0];
+  worldCoords[1] = pickedCoords_[1];
+  worldCoords[2] = pickedCoords_[2];
+
+  return true;
+}
+  
