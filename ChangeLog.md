@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta69    December 17, 2023
 - Version 5.7.9beta68    November 30, 2023
 - Version 5.7.9beta66    November 18, 2023
 - Version 5.7.9beta65    November 17, 2023
@@ -440,6 +441,22 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta69 (December 17, 2023)
+
+Format 192 (MBR_IMAGEMBA): Fixed correction of beam amplitude values (previously
+corrected values were not successfully inserted into the data structure).
+
+Mbauvloglist: Program altered so that time and utcTime fields are printed by
+default in format %17.6f and %12.6f, respectively, even though the MBARI Dorado AUV
+log files have default formats of %8.8e instead. Now by default the timestamps are
+printed usefully with precision to microseconds.
+
+Mbbackangle: Fixed bug in which mbbackangle did not process sidescan or amplitude
+data from files in formats that support variable numbers of beams and pixels.
+
+Mbsslayout: Fixed bug in which a command to swap the starboard and port sidescan
+channels was ignored.
 
 #### 5.7.9beta68 (November 30, 2023)
 

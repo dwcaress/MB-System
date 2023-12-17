@@ -1045,6 +1045,7 @@ int mbsys_image83p_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
 		for (int i = 0; i < nbath; i++) {
 			store->beamflag[i] = beamflag[i];
 			store->bath[i] = bath[i];
+      store->amp[i] = amp[i];
 			store->bathacrosstrack[i] = bathacrosstrack[i];
 			store->bathalongtrack[i] = bathalongtrack[i];
 		}

@@ -985,7 +985,7 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
     fprintf(stderr, "\nSidescan Corrections:\n");
     if (process->mbp_sscorr_mode == MBP_SSCORR_ON) {
       fprintf(stderr, "  Amplitude vs grazing angle corrections applied to sidescan.\n");
-      fprintf(stderr, "  Sidescan correction file:      %s m\n", process->mbp_sscorrfile);
+      fprintf(stderr, "  Sidescan correction file:      %s\n", process->mbp_sscorrfile);
       if (process->mbp_sscorr_type == MBP_SSCORR_SUBTRACTION)
         fprintf(stderr, "  Sidescan correction by subtraction (dB scale)\n");
       else
@@ -999,7 +999,7 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
         fprintf(stderr, "  Sidescan correction uses swath bathymetry in file\n");
       else {
         fprintf(stderr, "  Sidescan correction uses topography grid\n");
-        fprintf(stderr, "  Topography grid file:      %s m\n", process->mbp_ampsscorr_topofile);
+        fprintf(stderr, "  Topography grid file:      %s\n", process->mbp_ampsscorr_topofile);
       }
       if (process->mbp_sscorr_slope == MBP_SSCORR_IGNORESLOPE || process->mbp_sscorr_slope == MBP_SSCORR_USETOPO)
         fprintf(stderr, "  Sidescan correction ignores seafloor slope\n");
@@ -5153,10 +5153,12 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
             /* apply correction */
             *status = get_anglecorr(verbose, ampcorrtableuse.nangle, ampcorrtableuse.angle,
                                    ampcorrtableuse.amplitude, angle, &correction, error);
-            if (process->mbp_ampcorr_type == MBP_AMPCORR_SUBTRACTION)
+            if (process->mbp_ampcorr_type == MBP_AMPCORR_SUBTRACTION) {
               amp[i] = amp[i] - correction + reference_amp;
-            else
+            }
+            else {
               amp[i] = amp[i] / correction * reference_amp;
+            }
           }
         }
       }
@@ -5465,12 +5467,13 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
               esf.edit[i].beam, esf.edit[i].action, esf.edit[i].use);
       }
     }
-  }
-  if (verbose >= 1) {
-    fprintf(stderr, "          %d flags used\n", neditused);
-    fprintf(stderr, "          %d flags not used\n", neditnotused);
-    fprintf(stderr, "          %d flags tied to null beams\n", neditnull);
-    fprintf(stderr, "          %d duplicate flags\n", neditduplicate);
+    if (verbose >= 1) {
+      fprintf(stderr, "\nBathymetry edit use:\n");
+      fprintf(stderr, "  %d flags used\n", neditused);
+      fprintf(stderr, "  %d flags not used\n", neditnotused);
+      fprintf(stderr, "  %d flags tied to null beams\n", neditnull);
+      fprintf(stderr, "  %d duplicate flags\n", neditduplicate);
+    }
   }
 
   /*--------------------------------------------
