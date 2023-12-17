@@ -661,6 +661,7 @@ int main(int argc, char **argv) {
 				fields[nfields].type = TYPE_TIMETAG;
 				fields[nfields].size = 8;
 				fields[nfields].scale = 1.0;
+				strcpy(fields[nfields].format, "%17.6f"); /* reset printing format from "%8.8e" */
 				recordsize += 8;
 			}
 			else if (strcmp(type, "angle") == 0) {
@@ -677,8 +678,10 @@ int main(int argc, char **argv) {
 			}
 
       /* check if kearfott time is in this file */
-      if (strcmp(fields[nfields].name, "utcTime") == 0)
-          ktime_available = true;
+      if (strcmp(fields[nfields].name, "utcTime") == 0) {
+        ktime_available = true;
+				strcpy(fields[nfields].format, "%12.6f"); /* reset printing format from "%8.8e" */
+      }
 
       /* check if kearfott velocity vector is in this file */
       if (strcmp(fields[nfields].name, "mVbodyxK") == 0)

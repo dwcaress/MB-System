@@ -308,6 +308,7 @@ if ($help)
   print "\t\t-MNA[name_hgt[/P] | P] -MNFformat -MNIdatalist\n";
   print "\t\t-MNN[time_tick/time_annot/date_annot/time_tick_len[/name_hgt] | F | FP]\n";
   print "\t\t-MNP[pingnumber_tick/pingnumber_annot/pingnumber_tick_len]\n";
+  print "\t\t-MNWpen\n";
   print "\t\t-MTCfill -MTDresolution -MTGfill -MTIriver[/pen]\n";
   print "\t\t-MTNborder[/pen] -MTSfill -MTWpen\n";
   print "\t\t-MXGfill -MXIxy_file -MXM -MXSsymbol/size -MXWpen]\n";
@@ -611,6 +612,13 @@ if ($misc)
       $pingnumber_tick_len = 0.10;
       $pingnumber_annot = 100;
       $pingnumber_tick = 50;
+      }
+
+    # set swath navigation pen
+    if ($cmd =~ /^[Nn][Ww]./)
+      {
+      ($nav_pen) = $cmd =~
+        /^[Nn][Ww](\S+)/;
       }
 
     # deal with pscoast options
@@ -2872,6 +2880,14 @@ if ($swathnavdatalist)
     {
     printf FCMD "-M$pingnumber_control \\\n\t";
     }
+  if ($nav_pen)
+    {
+    # Note: This doesn't work because mbcontour is not using the GMT pen attributes but
+    # instead setting PSL postscript values directly with mboncontour_setline() 
+    # and mbcontour_newpen()
+    printf FCMD "-W$nav_pen \\\n\t";
+    }
+
   if ($portrait)
     {
     printf FCMD "-P ";
@@ -3344,6 +3360,10 @@ if ($verbose)
         print "    Name annotation style:    Parallel\n";
         }
       }
+    if ($nav_pen)
+      {
+      print "    Navigation pen:             $nav_pen\n";
+       }
     }
   if (@xyfiles)
     {

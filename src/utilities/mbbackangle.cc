@@ -885,11 +885,11 @@ int main(int argc, char **argv) {
 	                   &cvariable_beams, &ctraveltime, &cbeam_flagging, &cplatform_source, &cnav_source,
 	                   &csensordepth_source, &cheading_source, &cattitude_source, &csvp_source, &cbeamwidth_xtrack,
 	                   &cbeamwidth_ltrack, &error);
-			if (amplitude_on && cbeams_amp_max <= 0) {
+			if (amplitude_on && cbeams_amp_max <= 0 && !cvariable_beams) {
 				ok_to_process = false;
 				fprintf(stderr, "Skipping swath file: %s because format %d does not include amplitude data\n", swathfile, format);
 			}
-			if (sidescan_on && cpixels_ss_max <= 0) {
+			if (sidescan_on && cpixels_ss_max <= 0 && !cvariable_beams) {
 				ok_to_process = false;
 				fprintf(stderr, "Skipping swath file: %s because format %d does not include sidescan data\n", swathfile, format);
 			}
