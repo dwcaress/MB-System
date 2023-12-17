@@ -34,7 +34,7 @@ AM_CPPFLAGS += -DWITH_TNAVPF_CEP_CORRECTION
 AM_CPPFLAGS += -DWITH_TRNLOG
 AM_CPPFLAGS += -DWITH_TRNLOG_EST_OUT
 AM_CPPFLAGS += -DWITH_TNAVPF_CEP_CORRECTION
-AM_CPPFLAGS += -DTRN_NORAND
+#AM_CPPFLAGS += -DTRN_NORAND
 
 libgeolib_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
@@ -232,12 +232,7 @@ libtrncli_la_SOURCES =
 libtrncli_la_SOURCES += utils/TerrainNavClient.cpp
 libtrncli_la_SOURCES += utils/TrnClient.cpp
 
-libtrncli_la_LIBADD = libnewmat.la
-libtrncli_la_LIBADD += libgeolib.la
-libtrncli_la_LIBADD += libqnx.la
-libtrncli_la_LIBADD += libmb1.la
-libtrncli_la_LIBADD += libtnav.la
-libtrncli_la_LIBADD += -lnetcdf
+libtrncli_la_LIBADD = libnewmat.la libgeolib.la libqnx.la libtrnw.la libmb1.la libtnav.la -lnetcdf 
 
 if BUILD_ROVTRN
 
@@ -282,7 +277,6 @@ libudpms_la_SOURCES += opt/rov/udpm_sub.c
 
 libudpms_la_LIBADD =
 
-
 libtrnxplug_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
 libtrnxplug_la_SOURCES =
@@ -296,14 +290,14 @@ libtrnxplug_la_SOURCES += opt/rov/plug-lassmb.cpp
 libtrnxplug_la_SOURCES += opt/rov/plug-xmb1.cpp
 libtrnxplug_la_SOURCES += opt/rov/plug-idtlass.cpp
 
-libtrnxplug_la_LIBADD = -lnewmat -lgeolib -ltrnw -lqnx -lmb1 -ltnav -lnetcdf -llcm -ltrncli -ludpms
+libtrnxplug_la_LIBADD = libnewmat.la libgeolib.la libtrnw.la libqnx.la libmb1.la libtnav.la libtrncli.la libudpms.la  -lnetcdf -llcm
 
 ROVTRN_APPS = trnxpp
 
 trnxpp_SOURCES = \
 opt/rov/trnxpp_app.cpp
 
-trnxpp_LDADD = -llcm -lgeolib libmb1.la libtnav.la libnewmat.la libqnx.la libtrncli.la  libudpms.la libtrnxplug.la
+trnxpp_LDADD = libgeolib.la libmb1.la libtnav.la libnewmat.la libqnx.la libtrncli.la  libudpms.la libtrnxplug.la -llcm 
 
 TRN_HPP = opt/rov/lcm_pcf/signal_t.hpp
 TRN_HPP += opt/rov/lcm_pcf/string_t.hpp
@@ -697,7 +691,7 @@ trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
 
 trn_replay_SOURCES = opt/dorado/Replay.cpp opt/dorado/trn_replay.cpp
 
-trn_replay_LDADD = -ltnav  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeolib libtrncli.la
+trn_replay_LDADD = libtnav.la  libnewmat.la libqnx.la libgeolib.la libtrncli.la -lnetcdf -lm -lpthread 
 
 trnclient_test_SOURCES =  utils/trnclient_test.cpp
 
