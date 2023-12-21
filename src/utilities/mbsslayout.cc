@@ -252,7 +252,7 @@ int main(int argc, char **argv) {
 	int layout_mode = MBSSLAYOUT_LAYOUT_FLATBOTTOM;
 	int ss_altitude_mode = MBSSLAYOUT_ALTITUDE_ALTITUDE;
 	double bottompick_threshold = 0.5;
-  double bottompick_blank = 0.0;
+    double bottompick_blank = 0.0;
 	bool channel_swap = false;
 	double swath_width = 0.0;
 	int swath_mode = MBSSLAYOUT_SWATHWIDTH_VARIABLE;
@@ -2217,9 +2217,16 @@ int main(int argc, char **argv) {
 				}
 
 				/* call mb_extract_rawss() */
-				/* status = */ mb_extract_rawss(verbose, imbio_ptr, istore_ptr, &kind, &sidescan_type, &sample_interval,
+				if (channel_swap) {
+					/* status = */ mb_extract_rawss(verbose, imbio_ptr, istore_ptr, &kind, &sidescan_type, &sample_interval,
+				                          &beamwidth_xtrack, &beamwidth_ltrack, &num_samples_stbd, raw_samples_stbd,
+				                          &num_samples_port, raw_samples_port, &error);
+				}
+				else {
+					/* status = */ mb_extract_rawss(verbose, imbio_ptr, istore_ptr, &kind, &sidescan_type, &sample_interval,
 				                          &beamwidth_xtrack, &beamwidth_ltrack, &num_samples_port, raw_samples_port,
 				                          &num_samples_stbd, raw_samples_stbd, &error);
+				}
 
 				/* call mb_extract_nav to get attitude */
 				/* status = */ mb_extract_nav(verbose, imbio_ptr, istore_ptr, &kind, time_i, &time_d, &navlon_org, &navlat_org,
@@ -2309,7 +2316,7 @@ int main(int argc, char **argv) {
 
 				/* if specified get altitude from raw sidescan */
 				if (ss_altitude_mode == MBSSLAYOUT_ALTITUDE_BOTTOMPICK) {
-          int istart = bottompick_blank / sample_interval;
+                    int istart = bottompick_blank / sample_interval;
 
 					/* get bottom arrival in port trace */
 					channelmax = 0.0;

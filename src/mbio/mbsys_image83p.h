@@ -460,7 +460,7 @@ struct mbsys_image83p_struct {
 	float bath[MBSYS_IMAGE83P_BEAMS];
 	float bathacrosstrack[MBSYS_IMAGE83P_BEAMS];
 	float bathalongtrack[MBSYS_IMAGE83P_BEAMS];
-  float amp[MBSYS_IMAGE83P_BEAMS];
+    float amp[MBSYS_IMAGE83P_BEAMS];
 	char beamflag[MBSYS_IMAGE83P_BEAMS];
 
 	/* comment */
