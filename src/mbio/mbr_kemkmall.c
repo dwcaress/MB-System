@@ -8646,7 +8646,7 @@ int mbr_register_kemkmall(int verbose, void *mbio_ptr, int *error) {
   mb_io_ptr->mb_io_extract = &mbsys_kmbes_extract;
   mb_io_ptr->mb_io_insert = &mbsys_kmbes_insert;
   mb_io_ptr->mb_io_extract_nav = &mbsys_kmbes_extract_nav;
-//  mb_io_ptr->mb_io_extract_nnav = &mbsys_kmbes_extract_nnav;
+  mb_io_ptr->mb_io_extract_nnav = &mbsys_kmbes_extract_nnav;
   mb_io_ptr->mb_io_insert_nav = &mbsys_kmbes_insert_nav;
   mb_io_ptr->mb_io_extract_altitude = &mbsys_kmbes_extract_altitude;
   mb_io_ptr->mb_io_insert_altitude = NULL;

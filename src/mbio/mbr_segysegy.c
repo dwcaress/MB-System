@@ -213,7 +213,7 @@ int mbr_rt_segysegy(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->timezone = 0;
 		//store->longitude = ((double)traceheader.src_long) / 360000.0;
 		//store->latitude = ((double)traceheader.src_lat) / 360000.0;
-	double factor;
+		double factor;
         if (traceheader.coord_scalar < 0)
             factor = 1.0 / ((float)(-traceheader.coord_scalar)) / 3600.0;
         else

@@ -1684,13 +1684,13 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 int mbsys_kmbes_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                                      double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                                      double *pitch, double *heave, int *error);
-// int mbsys_kmbes_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
-//			int nmax, int *kind, int *n,
-//			int *time_i, double *time_d,
-//			double *navlon, double *navlat,
-//			double *speed, double *heading, double *draft,
-//			double *roll, double *pitch, double *heave,
-//			int *error);
+int mbsys_kmbes_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
+			int nmax, int *kind, int *n,
+			int *time_i, double *time_d,
+			double *navlon, double *navlat,
+			double *speed, double *heading, double *draft,
+			double *roll, double *pitch, double *heave,
+			int *error);
 int mbsys_kmbes_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                                     double navlat, double speed, double heading, double draft, double roll, double pitch,
                                     double heave, int *error);
