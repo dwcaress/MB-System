@@ -43,7 +43,7 @@
 #include "mb_format.h"
 #include "mb_status.h"
 
-constexpr int MAX_OPTIONS = 25;
+constexpr int MAX_OPTIONS = 100;
 typedef enum {
     MBNAVLIST_SEGMENT_MODE_NONE = 0,
     MBNAVLIST_SEGMENT_MODE_TAG = 1,

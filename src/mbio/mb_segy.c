@@ -22,8 +22,7 @@
  *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mb_segy.c includes the functions used to read, write, and use
- * edit save files.
+ * mb_segy.c includes the functions used to read and write segy files.
  *
  * Author:	D. W. Caress
  * Date:	May 25, 2004
