@@ -21,7 +21,6 @@ set(executables
     mbsslayout
     mbbackangle
     mbextractsegy
-    mblevitus
     mbrolltimelag
     mbsvplist
     mbclean
@@ -29,7 +28,6 @@ set(executables
     mblist
     mbroutetime
     mbsvpselect
-    mbconfig
     mbformat
     mbmakeplatform
     mbsegygrid
@@ -49,15 +47,24 @@ foreach(executable ${executables})
   target_link_libraries(${executable} PRIVATE mbio mbbsio mbaux mbsapi mbgsf m pthread)
 endforeach()
 
+add_executable(mblevitus mblevitus.cc levitus.h)
+target_link_libraries(mblevitus PRIVATE mbio mbbsio mbaux mbsapi mbgsf m pthread)
+
+add_executable(mbconfig mbconfig.cc levitus.h)
+target_link_libraries(mbconfig PRIVATE mbio mbbsio mbaux mbsapi mbgsf m pthread)
+
+file(WRITE levitus.h
+  "const char *levitusfile = \"${levitusDir}/LevitusAnnual82.dat\";\nconst char *otps_location = \"${otpsDir}\";\n")
+
 target_link_libraries(mbsvpselect PRIVATE LibPROJ::LibPROJ)
 target_link_libraries(mbgrid PRIVATE mbaux)
 target_link_libraries(mbsegypsd PRIVATE FFTW::Double)
 target_compile_definitions(
   mbconfig
   PRIVATE MBSYSTEM_INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}"
-          otpsDir="${otpsDir}"
-          LevitusAnnual82="${levitusDir}/LevitusAnnual82.dat")
+          ENV_OTPSDIR="${otpsDir}"
+          ENV_LEVITUSANNUAL82="${levitusDir}/LevitusAnnual82.dat")
 target_compile_definitions(
-  mblevitus PRIVATE LevitusAnnual82="${levitusDir}/LevitusAnnual82.dat")
+  mblevitus PRIVATE ENV_LEVITUSANNUAL82="${levitusDir}/LevitusAnnual82.dat")
 
-install(TARGETS ${executables} DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS ${executables} mbconfig mblevitus DESTINATION ${CMAKE_INSTALL_BINDIR})
