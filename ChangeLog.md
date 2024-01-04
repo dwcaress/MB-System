@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta71    January 3, 2024
 - Version 5.7.9beta70    January 2, 2024
 - Version 5.7.9beta69    December 17, 2023
 - Version 5.7.9beta68    November 30, 2023
@@ -442,6 +443,12 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta71 (January 3, 2024)
+
+CMake build system: Fixed creating the levitus.h header file used by mblevitus
+and mbconfig to define the location of the Levitus database and the OTPS 
+installation, thereby making mblevitus and mbconfig work properly.
 
 #### 5.7.9beta70 (January 2, 2024)
 
