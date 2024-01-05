@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavlist.c	2/1/93
  *
- *    Copyright (c) 1993-2023 by
-  *    David W. Caress (caress@mbari.org)
+ *    Copyright (c) 1993-2024 by
+ *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
  *    Dale N. Chayes 

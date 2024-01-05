@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbphotomosaic.cpp    10/17/2013
  *
- *    Copyright (c) 1993-2023 by
+ *    Copyright (c) 1993-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA

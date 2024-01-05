@@ -417,3 +417,9 @@ mark_as_advanced(
     FFTW_DOUBLE_MPI_LIB
     FFTW_LONGDOUBLE_MPI_LIB
     )
+
+if (FFTW_FOUND)
+    message("-- FFTW found!")
+else()
+  message("-- FFTW NOT found...")
+endif()

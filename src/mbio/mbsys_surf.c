@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_surf.c	3.00	6/25/01
  *
- *    Copyright (c) 2001-2023 by
+ *    Copyright (c) 2001-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA

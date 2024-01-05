@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_benthos.c	3.00	3/29/2011
  *
- *    Copyright (c) 2012-2023 by
+ *    Copyright (c) 2012-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA

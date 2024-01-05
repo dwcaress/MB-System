@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbkongsbergpreprocess.c	1/1/2012
  *
- *    Copyright (c) 2012-2023 by
+ *    Copyright (c) 2012-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA

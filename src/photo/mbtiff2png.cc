@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbtiff2png.cpp    6/6/2021
  *
- *    Copyright (c) 2021-2023 by
+ *    Copyright (c) 2021-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
