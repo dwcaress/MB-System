@@ -30,6 +30,7 @@ add_compile_definitions(
 HAVE_CONFIG_H
 _GNU_SOURCE
 )
+
 #------------------------------------------------------------------------------
 # generate LCM source
 
@@ -127,6 +128,7 @@ target_include_directories(trnxplug PRIVATE
     ${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
     ${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw
     ${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/rov
+    ${CMAKE_BINARY_DIR}/src/mbtrnav/opt/rov
     ${NetCDF_INCLUDE_DIRS}
 )
 
@@ -158,6 +160,7 @@ target_include_directories(trnxpp PRIVATE
     ${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
     ${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw
     ${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/rov
+    ${CMAKE_BINARY_DIR}/src/mbtrnav/opt/rov
     ${NetCDF_INCLUDE_DIRS}
 )
 
