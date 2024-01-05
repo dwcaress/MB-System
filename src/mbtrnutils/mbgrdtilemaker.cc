@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbgrdtilemaker.cc     6/11/2022
  *
- *    Copyright (c) 2022-2023 by
+ *    Copyright (c) 2022-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA

@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mblevitus.c  4/15/93
  *
- *    Copyright (c) 1993-2023 by
+ *    Copyright (c) 1993-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -50,19 +50,12 @@
 #include <time.h>
 #include <unistd.h>
 
-// CMake build system
-#ifdef CMAKE_BUILD_SYSTEM
-const char *levitusfile = "$(levitusDir)/LevitusAnnual82.dat";
+#include "mb_define.h"
+#include "mb_status.h"
 
-// Autotools build system
-#else
 #ifndef _WIN32
 #include "levitus.h"
 #endif
-#endif
-
-#include "mb_define.h"
-#include "mb_status.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -72,8 +65,7 @@ constexpr double MBLEVITUS_NO_DATA = -1000000000.0;;
 constexpr int NDEPTH_MAX = 46;
 constexpr int NLEVITUS_MAX = 33;
 
-// TODO(schwehr): warning: excess elements in array initializer
-constexpr float depth[48 /* NDEPTH_MAX + 2 */] =
+constexpr float depth[NDEPTH_MAX] =
     {0.0,    10.0,    20.0,    30.0,    50.0,    75.0,   100.0,  125.0,
      150.0,  200.0,   250.0,   300.0,   400.0,   500.0,  600.0,  700.0,
      800.0,  900.0,   1000.0,  1100.0,  1200.0,  1300.0, 1400.0, 1500.0,

@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_segy.c	5/25/2004
  *
- *    Copyright (c) 2004-2023 by
+ *    Copyright (c) 2004-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -22,8 +22,7 @@
  *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mb_segy.c includes the functions used to read, write, and use
- * edit save files.
+ * mb_segy.c includes the functions used to read and write segy files.
  *
  * Author:	D. W. Caress
  * Date:	May 25, 2004

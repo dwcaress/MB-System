@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_util.c	6/24/95
  *
- *    Copyright (c) 1995-2023 by
+ *    Copyright (c) 1995-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
