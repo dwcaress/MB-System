@@ -7,10 +7,6 @@ else()
 endif()
 
 find_package(LibPROJ REQUIRED)
-message(STATUS "  LibPROJ_INCLUDE_DIR: ${LibPROJ_INCLUDE_DIR}")
-message(STATUS "  LibPROJ_LIBRARY_RELEASE: ${LibPROJ_LIBRARY_RELEASE}")
-message(STATUS "  LibPROJ_LIBRARY_DEBUG: ${LibPROJ_LIBRARY_DEBUG}")
-
 find_package(NetCDF REQUIRED)
 
 set(SRC
