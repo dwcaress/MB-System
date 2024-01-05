@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_segysegy.c	10/27/2006
  *
- *    Copyright (c) 2006-2023 by
+ *    Copyright (c) 2006-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -213,7 +213,7 @@ int mbr_rt_segysegy(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->timezone = 0;
 		//store->longitude = ((double)traceheader.src_long) / 360000.0;
 		//store->latitude = ((double)traceheader.src_lat) / 360000.0;
-	double factor;
+		double factor;
         if (traceheader.coord_scalar < 0)
             factor = 1.0 / ((float)(-traceheader.coord_scalar)) / 3600.0;
         else

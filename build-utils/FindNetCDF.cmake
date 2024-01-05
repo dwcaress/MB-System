@@ -128,4 +128,7 @@ if (NetCDF_FOUND)
       IMPORTED_LOCATION "${NetCDF_LIBRARY}"
       INTERFACE_INCLUDE_DIRECTORIES "${NetCDF_INCLUDE_DIR}")
   endif ()
+  message(-- NetCDF found!)
+else()
+  message("-- NetCDF NOT found...")
 endif ()

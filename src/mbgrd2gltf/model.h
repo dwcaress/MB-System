@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	model.h	5/11/2023
  *
- *    Copyright (c) 2023-2023 by
+ *    Copyright (c) 2023-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -13,14 +13,6 @@
  *      MARUM
  *      University of Bremen
  *      Bremen Germany
- *
- *    The program MBgrd2gltf, including this source file, was created
- *    by a Capstone Project team at the California State University 
- *    Monterey Bay (CSUMB) including Kyle Dowling, Julian Fortin, 
- *    Jesse Benavides, Nicolas Porras Falconio. This team was mentored by:
- *    Mike McCann
- *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, California, USA
  *     
  *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
@@ -28,6 +20,15 @@
  *      Palisades, NY 10964
  *
  *    See README.md file for copying and redistribution conditions.
+ *--------------------------------------------------------------------*/
+/*
+ *    The program MBgrd2gltf, including this source file, was created
+ *    by a Capstone Project team at the California State University 
+ *    Monterey Bay (CSUMB) including Kyle Dowling, Julian Fortin, 
+ *    Jesse Benavides, Nicolas Porras Falconio. This team was mentored by:
+ *    Mike McCann
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, California, USA
  *--------------------------------------------------------------------*/
 
 #ifndef MODEL_H

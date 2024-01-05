@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mblist</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  17 July 2023 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  1 January 2024 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -588,56 +588,82 @@ for line number (only defined for SEGY files)
 <B>z</B>  for depth (positive downwards) (m)
 <DT><DD>
 <B>#</B>  for beam or pixel number
+<P>
+<DT><DD>
+<B> ,</B>
+Special character: this causes the next character to be
+interpreted from the following list rather than the above list.
+These values allow access to values specific to the calculation of bathymetry from
+beam travel times and raytracing angles.
+<DT><DD>
+<B> ,A</B>  Beam depression angle measured from vertical down (degrees)
+<DT><DD>
+<B> ,a</B>  Beam azimuthal angle (angle_forward) measured counterclockwise from starboard (degrees)
+<DT><DD>
+<B> ,D</B>  Sensordepth measured positive down (m)
+<DT><DD>
+<B> ,H</B>  Beam heave (m)
+<DT><DD>
+<B> ,N</B>  Beam null angle measured from vertical down (degrees)
+<DT><DD>
+<B> ,O</B>  Beam alongtrack offset distance positive forward (m)
+<DT><DD>
+<B> ,R</B>  Beam range (m)
+<DT><DD>
+<B> ,S</B>  Sound speed used for beamforming (surface sound velocity, or SSV) (m/s)
+<DT><DD>
+<B> ,T</B>  Beam two way travel time (seconds)
+<P>
 <DT><DD>
 <B> .</B>
-special character: this causes the next character to be
-interpretted from the following list rather than the above list.
+Special character: this causes the next character to be
+interpreted from the following list rather than the above list.
 Most of these allow access to raw values in format specific form and are
 not be supported by all formats. The &quot;.NNC&quot; case allows printing values
 from the &quot;NN&quot;th column of a secondary data table file specified using <B>-Y</B>.
 <DT><DD>
-<B> .A</B>  Amplitude (backscatter) in dB (formats 56 &amp; 67 - Simrad multibeam only)
+<B> .A</B>  Amplitude (backscatter) in dB (formats 56 &amp; 57 - Simrad multibeam only)
 <DT><DD>
-<B> .a</B>  Mean absorption coefficient in dB/km (formats 56 &amp; 67 - Simrad multibeam some versions only)
+<B> .a</B>  Mean absorption coefficient in dB/km (formats 56 &amp; 57 - Simrad multibeam some versions only)
 <DT><DD>
-<B> .B</B>  Normal incidence backscatter in dB (formats 56 &amp; 67 - Simrad multibeam only)
+<B> .B</B>  Normal incidence backscatter in dB (formats 56 &amp; 57 - Simrad multibeam only)
 <DT><DD>
-<B> .b</B>  Oblique backscatter in dB (formats 56 &amp; 67 - Simrad multibeam only)
+<B> .b</B>  Oblique backscatter in dB (formats 56 &amp; 57 - Simrad multibeam only)
 <DT><DD>
-<B> .c</B>  Mean backscatter, one value per ping (formats 56 &amp; 67 - Simrad multibeam only)
+<B> .c</B>  Mean backscatter, one value per ping (formats 56 &amp; 57 - Simrad multibeam only)
 <DT><DD>
 <B> .NNC</B> In which &quot;NN&quot; is a number from 1 to 19, which prints the value from 
 &quot;NN&quot; column in a secondary file specified using <B>-Y</B>.
 <DT><DD>
-<B> .d</B>  Beam depression angle (formats 56 &amp; 67 - Simrad multibeam only)
+<B> .d</B>  Beam depression angle (formats 56 &amp; 57 - Simrad multibeam only)
 <DT><DD>
 <B> .F</B>  Filename
 <DT><DD>
 <B> .f</B>  File format
 <DT><DD>
-<B> .G</B>  Start of TVG ramp in samples (formats 56 &amp; 67 - Simrad multibeam only)
+<B> .G</B>  Start of TVG ramp in samples (formats 56 &amp; 57 - Simrad multibeam only)
 <DT><DD>
-<B> .g</B>  Stop of TVG ramp in samples (formats 56 &amp; 67 - Simrad multibeam only)
+<B> .g</B>  Stop of TVG ramp in samples (formats 56 &amp; 57 - Simrad multibeam only)
 <DT><DD>
-<B> .L</B>  Transmit pulse length (usec) (formats 56 &amp; 67 - Simrad multibeam only)
+<B> .L</B>  Transmit pulse length (usec) (formats 56 &amp; 57 - Simrad multibeam only)
 <DT><DD>
 <B> .l</B>  Transmit pulse length (sec)
 <DT><DD>
-<B> .M</B>  Sounder mode (formats 56 &amp; 67 - Simrad multibeam only)
+<B> .M</B>  Sounder mode (formats 56 &amp; 57 - Simrad multibeam only)
 <DT><DD>
-<B> .N</B>  Ping number according to sounder (formats 56 &amp; 67 - Simrad multibeam only)
+<B> .N</B>  Ping number according to sounder (formats 56 &amp; 57 - Simrad multibeam only)
 <DT><DD>
-<B> .p</B>  Raw sidescan pixels in dB (formats 56 &amp; 67 - Simrad multibeam only).
+<B> .p</B>  Raw sidescan pixels in dB (formats 56 &amp; 57 - Simrad multibeam only).
 May be preceded by a number to give the first n pixels (NaN padded) of the beam,
 for example<B> .30p</B> will give the first 30 sidescan pixels of each beam.
 <DT><DD>
-<B> .R</B>  Range in samples (formats 56 &amp; 67 - Simrad multibeam only)
+<B> .R</B>  Range in samples (formats 56 &amp; 57 - Simrad multibeam only)
 <DT><DD>
-<B> .r</B>  Sampling rate in Hz (formats 56 &amp; 67 - Simrad multibeam only)
+<B> .r</B>  Sampling rate in Hz (formats 56 &amp; 57 - Simrad multibeam only)
 <DT><DD>
-<B> .S</B>  Number of raw sidescan pixels per ping (formats 56 &amp; 67 - Simrad multibeam only)
+<B> .S</B>  Number of raw sidescan pixels per ping (formats 56 &amp; 57 - Simrad multibeam only)
 <DT><DD>
-<B> .s</B>  Number of raw sidescan pixels per beam (formats 56 &amp; 67 - Simrad multibeam only)
+<B> .s</B>  Number of raw sidescan pixels per beam (formats 56 &amp; 57 - Simrad multibeam only)
 <DT><DD>
 <B> .T</B>  Transmit gain (dB)
 <DT><DD>
@@ -8463,7 +8489,7 @@ the <B>-J</B> option, e.g. <B>-J</B><I>UTM10N</I> or <B>-J</B><I>epsg32749</I>.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 17 July 2023</P></CENTER>
+Last Updated: 1 January 2024</P></CENTER>
 
 <HR>
 <center>

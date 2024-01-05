@@ -144,4 +144,7 @@ if(GMT_FOUND)
       GMT::PSL PROPERTIES IMPORTED_LOCATION "${PSL_LIBRARY}"
                           INTERFACE_INCLUDE_DIRECTORIES "${GMT_INCLUDE_DIR}")
   endif()
+  message("-- GMT Found!")
+else()
+  message("-- GMT NOT found...")
 endif()

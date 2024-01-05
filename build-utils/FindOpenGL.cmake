@@ -768,3 +768,10 @@ set(OPENGL_INCLUDE_PATH ${OPENGL_INCLUDE_DIR})
 
 mark_as_advanced(${_OpenGL_CACHE_VARS})
 unset(_OpenGL_CACHE_VARS)
+
+if (OPENGL_FOUND)
+  message("-- OpenGL found!")
+else()
+  message("-- OpenGL NOT found...")
+endif()
+

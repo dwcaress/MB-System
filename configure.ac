@@ -2,12 +2,30 @@ dnl--------------------------------------------------------------------
 dnl    The MB-system:    configure.ac    12/7/2011
 dnl
 dnl    Copyright (c) 2011-2023 by
-dnl    D. W. Caress (caress@lamont.ldgo.columbia.edu)
-dnl    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
-dnl    Lamont-Doherty Earth Observatory
-dnl    Palisades, NY  10964
+dnl------------------------------------------------------------------------------
+dnl    The MB-system:  CMakeLists.txt   27 June 2023
 dnl
-dnl    See README file for copying and redistribution conditions.
+dnl    Copyright (c) 2023-2024 by
+dnl    David W. Caress (caress@mbari.org)
+dnl      Monterey Bay Aquarium Research Institute
+dnl      Moss Landing, California, USA
+dnl    Dale N. Chayes 
+dnl      Center for Coastal and Ocean Mapping
+dnl      University of New Hampshire
+dnl      Durham, New Hampshire, USA
+dnl    Christian dos Santos Ferreira
+dnl      MARUM
+dnl      University of Bremen
+dnl      Bremen Germany
+dnl      
+dnl    MB-System was created by Caress and Chayes in 1992 at the
+dnl      Lamont-Doherty Earth Observatory
+dnl      Columbia University
+dnl      Palisades, NY 10964
+dnl
+dnl    See README.md file for copying and redistribution conditions.
+dnl------------------------------------------------------------------------------
+
 dnl--------------------------------------------------------------------
 
 dnl Initialize and set version and version date

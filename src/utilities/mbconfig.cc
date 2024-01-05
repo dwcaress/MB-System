@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbpreprocess.c	1/8/2014
  *
- *    Copyright (c) 2014-2023 by
+ *    Copyright (c) 2014-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -38,15 +38,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-// CMake build system
-#ifdef CMAKE_BUILD_SYSTEM
-const char *levitusfile = "$(levitusDir)/LevitusAnnual82.dat";
-const char *otps_location = "$(otpsDir)";
-
-// Autotools build system
-#else
 #include "levitus.h"
-#endif
 
 #include "mb_define.h"
 #include "mb_format.h"

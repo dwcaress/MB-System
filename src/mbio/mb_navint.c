@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_time.c	10/30/2000
   *
- *    Copyright (c) 2000-2023 by
+ *    Copyright (c) 2000-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA

@@ -8,11 +8,11 @@ source software package for the processing and display of swath sonar data.
 This file is located at the top of the MB-System source code distribution
 directory structure.
 
-Last Updated November 3, 2023
+Last Updated January 4, 2024
 
 -------------------------------------------------------------------------------
 
-MB-System Copyright (C) 1993-2023 by
+MB-System Copyright (C) 1993-2024 by
 
 David W. Caress (caress@mbari.org)
 Monterey Bay Aquarium Research Institute

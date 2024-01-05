@@ -1,4 +1,4 @@
-.TH mblist 1 "17 July 2023" "MB-System 5.0" "MB-System 5.0"
+.TH mblist 1 "1 January 2024" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmblist\fP \- List data in swath data files.
 
@@ -511,56 +511,82 @@ for line number (only defined for SEGY files)
 \fBz\fP  for depth (positive downwards) (m)
 .IP
 \fB#\fP  for beam or pixel number
+
+.IP
+\fB ,\fP
+Special character: this causes the next character to be
+interpreted from the following list rather than the above list.
+These values allow access to values specific to the calculation of bathymetry from
+beam travel times and raytracing angles.
+.IP
+\fB ,A\fP  Beam depression angle measured from vertical down (degrees)
+.IP
+\fB ,a\fP  Beam azimuthal angle (angle_forward) measured counterclockwise from starboard (degrees)
+.IP
+\fB ,D\fP  Sensordepth measured positive down (m)
+.IP
+\fB ,H\fP  Beam heave (m)
+.IP
+\fB ,N\fP  Beam null angle measured from vertical down (degrees)
+.IP
+\fB ,O\fP  Beam alongtrack offset distance positive forward (m)
+.IP
+\fB ,R\fP  Beam range (m)
+.IP
+\fB ,S\fP  Sound speed used for beamforming (surface sound velocity, or SSV) (m/s)
+.IP
+\fB ,T\fP  Beam two way travel time (seconds)
+
 .IP
 \fB .\fP
-special character: this causes the next character to be
-interpretted from the following list rather than the above list.
+Special character: this causes the next character to be
+interpreted from the following list rather than the above list.
 Most of these allow access to raw values in format specific form and are
 not be supported by all formats. The ".NNC" case allows printing values
 from the "NN"th column of a secondary data table file specified using \fB-Y\fP.
 .IP
-\fB .A\fP  Amplitude (backscatter) in dB (formats 56 & 67 \- Simrad multibeam only)
+\fB .A\fP  Amplitude (backscatter) in dB (formats 56 & 57 \- Simrad multibeam only)
 .IP
-\fB .a\fP  Mean absorption coefficient in dB/km (formats 56 & 67 \- Simrad multibeam some versions only)
+\fB .a\fP  Mean absorption coefficient in dB/km (formats 56 & 57 \- Simrad multibeam some versions only)
 .IP
-\fB .B\fP  Normal incidence backscatter in dB (formats 56 & 67 \- Simrad multibeam only)
+\fB .B\fP  Normal incidence backscatter in dB (formats 56 & 57 \- Simrad multibeam only)
 .IP
-\fB .b\fP  Oblique backscatter in dB (formats 56 & 67 \- Simrad multibeam only)
+\fB .b\fP  Oblique backscatter in dB (formats 56 & 57 \- Simrad multibeam only)
 .IP
-\fB .c\fP  Mean backscatter, one value per ping (formats 56 & 67 \- Simrad multibeam only)
+\fB .c\fP  Mean backscatter, one value per ping (formats 56 & 57 \- Simrad multibeam only)
 .IP
 \fB .NNC\fP In which "NN" is a number from 1 to 19, which prints the value from 
 "NN" column in a secondary file specified using \fB-Y\fP.
 .IP
-\fB .d\fP  Beam depression angle (formats 56 & 67 \- Simrad multibeam only)
+\fB .d\fP  Beam depression angle (formats 56 & 57 \- Simrad multibeam only)
 .IP
 \fB .F\fP  Filename
 .IP
 \fB .f\fP  File format
 .IP
-\fB .G\fP  Start of TVG ramp in samples (formats 56 & 67 \- Simrad multibeam only)
+\fB .G\fP  Start of TVG ramp in samples (formats 56 & 57 \- Simrad multibeam only)
 .IP
-\fB .g\fP  Stop of TVG ramp in samples (formats 56 & 67 \- Simrad multibeam only)
+\fB .g\fP  Stop of TVG ramp in samples (formats 56 & 57 \- Simrad multibeam only)
 .IP
-\fB .L\fP  Transmit pulse length (usec) (formats 56 & 67 \- Simrad multibeam only)
+\fB .L\fP  Transmit pulse length (usec) (formats 56 & 57 \- Simrad multibeam only)
 .IP
 \fB .l\fP  Transmit pulse length (sec)
 .IP
-\fB .M\fP  Sounder mode (formats 56 & 67 \- Simrad multibeam only)
+\fB .M\fP  Sounder mode (formats 56 & 57 \- Simrad multibeam only)
 .IP
-\fB .N\fP  Ping number according to sounder (formats 56 & 67 \- Simrad multibeam only)
+\fB .N\fP  Ping number according to sounder (formats 56 & 57 \- Simrad multibeam only)
 .IP
-\fB .p\fP  Raw sidescan pixels in dB (formats 56 & 67 \- Simrad multibeam only).
+\fB .p\fP  Raw sidescan pixels in dB (formats 56 & 57 \- Simrad multibeam only).
 May be preceded by a number to give the first n pixels (NaN padded) of the beam,
 for example\fB .30p\fP will give the first 30 sidescan pixels of each beam.
 .IP
-\fB .R\fP  Range in samples (formats 56 & 67 \- Simrad multibeam only)
+\fB .R\fP  Range in samples (formats 56 & 57 \- Simrad multibeam only)
 .IP
-\fB .r\fP  Sampling rate in Hz (formats 56 & 67 \- Simrad multibeam only)
+\fB .r\fP  Sampling rate in Hz (formats 56 & 57 \- Simrad multibeam only)
 .IP
-\fB .S\fP  Number of raw sidescan pixels per ping (formats 56 & 67 \- Simrad multibeam only)
+\fB .S\fP  Number of raw sidescan pixels per ping (formats 56 & 57 \- Simrad multibeam only)
 .IP
-\fB .s\fP  Number of raw sidescan pixels per beam (formats 56 & 67 \- Simrad multibeam only)
+\fB .s\fP  Number of raw sidescan pixels per beam (formats 56 & 57 \- Simrad multibeam only)
 .IP
 \fB .T\fP  Transmit gain (dB)
 .IP
