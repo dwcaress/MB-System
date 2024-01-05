@@ -1,8 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgpstide.c	2018-05-23
  *
- *    Copyright (c) 2020-2023 by
- *    Gordon J. Keith (gordon@keith.id.au)
+ *    Copyright (c) 2020-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -14,13 +13,6 @@
  *      MARUM
  *      University of Bremen
  *      Bremen Germany
- *
- *    This program mbgpstide was created by:
- *    Gordon J. Keith
- *      CSIRO Marine Research
- *      Castray Esplanade
- *      Battery Point TAS 7000
- *      Australia
  *     
  *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
@@ -30,8 +22,18 @@
  *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
+ *    This program mbgpstide was created by:
+ *    Gordon J. Keith
+ *      CSIRO Marine Research
+ *      Castray Esplanade
+ *      Battery Point TAS 7000
+ *      Australia
+ *
+ *--------------------------------------------------------------------*/
+/*
  * mbgpstide generates tide files from the GPS altitude data recorded in
  * the input files.
+
  *
  * Input (-I) may be a single data file or a datalist. The format of the input file may be specified
  * using the -F option. Default is -Idatalist.mb-1.

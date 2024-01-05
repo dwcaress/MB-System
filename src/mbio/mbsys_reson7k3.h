@@ -1,91 +1,102 @@
-//--------------------------------------------------------------------
-//    The MB-system:  mbsys_reson7k3.h  1/8/2019
-//
-//    Copyright (c) 2004-2023 by
-//    David W. Caress (caress@mbari.org)
-//      Monterey Bay Aquarium Research Institute
-//      Moss Landing, CA 95039
-//    and Dale N. Chayes (dale@ldeo.columbia.edu)
-//      Lamont-Doherty Earth Observatory
-//      Palisades, NY 10964
-//
-//    See README file for copying and redistribution conditions.
-//----------------------------------------------------------------------
-//
-// mbsys_reson7k3.h defines the MBIO data structures for handling data from
-// Teledyne Reson 7k series, Teledyne Odom MB2, Teledyne BlueView ProScan
-// software, Hydrosweep 3rd generation (HS3) sonars and other applications
-// and sonars using 7k data record formats:
-//      MBF_RESON7K3 : MBIO ID 89 - Teledyne Reson 3rd generation 7K data format
-//
-// Authors:  C. S. Ferreira & D. W. Caress
-// Date:  March 2019
-//
-// Notes on the mbsys_reson7k3 data structure:
-//   1. This format is defined by the 7k Data Format Definition (DFD)
-//      document for Teledyne RESON SeaBat 7k Data Format Version 3.10.
-//   2. Reson 7k series multibeam sonars output bathymetry, per beam
-//      amplitude, sidescan data and water column.
-//   3. Reson 7k format is used also to log sidescan and subbottom
-//      data from other sonars.
-//   4. The 7k record consists of a data record frame (header and checksum),
-//      a record  type header, an optional record data field and an optional
-//      data field for extra  information. The optional data field typically
-//      holds sensor specific data and third party developer
-//      embedded data.
-//   5. The format specification includes  a number of data record types
-//      that have been part of the data format in the past but are now
-//      deprecated. Data including deprecated records should be read using
-//      the MBF_RESON7KR (88) i/o module. The data supported by this
-//      MBF_RESON7K3 (89) i/o module is expected to use the following
-//      data records for each ping:
-//        Sonar Settings
-//          7000 – Sonar Settings
-//        Receiver Beam Geometry
-//          7004 – Beam Geometry
-//        Bathymetry
-//          7027 – Raw Detections (+ optional calculated bathymetry)
-//          7047 – Segmented Raw Detections (+ optional calculated bathymetry)
-//        Sidescan time series
-//          7007 – Side-scan data
-//        Backscatter samples (snippets)
-//          7028 – Snippet
-//        Water column beamformed time series
-//          7018 – Beamformed data
-//          7041 – Compressed beamformed intensity data
-//          7042 – Compressed Water Column data
-//   6. MB-System stores beamflags used for bathymetry editing in the
-//      RawDetection quality values for each beam. The 7k 3.10 DFD
-//      defines use of only the first two bits of these 32 bit
-//      values. MB-System embeds the 8-bit beamflag values in bits 24-31.
-//   7. The maximum dimensions defined below
-//          #define MBSYS_RESON7K_MAX_BEAMS 512
-//          #define MBSYS_RESON7K_MAX_SOUNDINGS 2560
-//          #define MBSYS_RESON7K_MAX_SEGMENTS 3
-//          #define MBSYS_RESON7K_MAX_PIXELS 4096
-//      reflect the various Teledyne mapping sonars.
-//      The Reson SeaBat T50 multibeams have a maximum of 512 formed beams
-//      and can produce up to five multi-pick soundings per beam, resulting
-//      in the maximum soundings of 2560. These are reported in 7027 Raw Detections
-//      records. The Hydrosweep MD/30 multibeam produces 320 formed beams with
-//      three soundings per beam produced by split beam processing for 960
-//      soundings. These are reported in the 7047 Segmented Raw Detections
-//      records.
-//   ?. Questions/decisions to be resolved before this i/o module is
-//      finalized:
-//        - The beamflag can be embedded in either the quality value or the
-//          flags value - we've chosen the quality value - is this best?
-//        - It's clear that the RawDetection optional data exists when the
-//          optional data offset is nonzero in the RawDetection record header
-//          is nonzero. How does PDS set the the optional data identifier value?
-//          All the DFD states is that this identifier is user defined.
-//        - We want to augment the RawDetection optional data space with the
-//          usual MB-System laid-out pseudosidescan, but need to use a different
-//          optional data identifier than PDS so that the code knows this.
-//        - How complete are the attitude time series that can be constructed
-//          from the ping motion records? How do these relate to the data stored
-//          in the asynchronous RollPitchHeave, Attitude, CustomAttitude, and
-//          Heading records?
+/*--------------------------------------------------------------------
+ *    The MB-system:  mbsys_reson7k3.h  1/8/2019
+ *
+ *    Copyright (c) 2019-2024 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
+ *      Lamont-Doherty Earth Observatory
+ *      Columbia University
+ *      Palisades, NY 10964
+ *
+ *    See README file for copying and redistribution conditions.
+ *----------------------------------------------------------------------*/
+/*
+ * mbsys_reson7k3.h defines the MBIO data structures for handling data from
+ * Teledyne Reson 7k series, Teledyne Odom MB2, Teledyne BlueView ProScan
+ * software, Hydrosweep 3rd generation (HS3) sonars and other applications
+ * and sonars using 7k data record formats:
+ *      MBF_RESON7K3 : MBIO ID 89 - Teledyne Reson 3rd generation 7K data format
+ *
+ * Authors:  C. S. Ferreira & D. W. Caress
+ * Date:  March 2019
+ *
+ * Notes on the mbsys_reson7k3 data structure:
+ *   1. This format is defined by the 7k Data Format Definition (DFD)
+ *      document for Teledyne RESON SeaBat 7k Data Format Version 3.10.
+ *   2. Reson 7k series multibeam sonars output bathymetry, per beam
+ *      amplitude, sidescan data and water column.
+ *   3. Reson 7k format is used also to log sidescan and subbottom
+ *      data from other sonars.
+ *   4. The 7k record consists of a data record frame (header and checksum),
+ *      a record  type header, an optional record data field and an optional
+ *      data field for extra  information. The optional data field typically
+ *      holds sensor specific data and third party developer
+ *      embedded data.
+ *   5. The format specification includes  a number of data record types
+ *      that have been part of the data format in the past but are now
+ *      deprecated. Data including deprecated records should be read using
+ *      the MBF_RESON7KR (88) i/o module. The data supported by this
+ *      MBF_RESON7K3 (89) i/o module is expected to use the following
+ *      data records for each ping:
+ *        Sonar Settings
+ *          7000 – Sonar Settings
+ *        Receiver Beam Geometry
+ *          7004 – Beam Geometry
+ *        Bathymetry
+ *          7027 – Raw Detections (+ optional calculated bathymetry)
+ *          7047 – Segmented Raw Detections (+ optional calculated bathymetry)
+ *        Sidescan time series
+ *          7007 – Side-scan data
+ *        Backscatter samples (snippets)
+ *          7028 – Snippet
+ *        Water column beamformed time series
+ *          7018 – Beamformed data
+ *          7041 – Compressed beamformed intensity data
+ *          7042 – Compressed Water Column data
+ *   6. MB-System stores beamflags used for bathymetry editing in the
+ *      RawDetection quality values for each beam. The 7k 3.10 DFD
+ *      defines use of only the first two bits of these 32 bit
+ *      values. MB-System embeds the 8-bit beamflag values in bits 24-31.
+ *   7. The maximum dimensions defined below
+ *          #define MBSYS_RESON7K_MAX_BEAMS 512
+ *          #define MBSYS_RESON7K_MAX_SOUNDINGS 2560
+ *          #define MBSYS_RESON7K_MAX_SEGMENTS 3
+ *          #define MBSYS_RESON7K_MAX_PIXELS 4096
+ *      reflect the various Teledyne mapping sonars.
+ *      The Reson SeaBat T50 multibeams have a maximum of 512 formed beams
+ *      and can produce up to five multi-pick soundings per beam, resulting
+ *      in the maximum soundings of 2560. These are reported in 7027 Raw Detections
+ *      records. The Hydrosweep MD/30 multibeam produces 320 formed beams with
+ *      three soundings per beam produced by split beam processing for 960
+ *      soundings. These are reported in the 7047 Segmented Raw Detections
+ *      records.
+ *   ?. Questions/decisions to be resolved before this i/o module is
+ *      finalized:
+ *        - The beamflag can be embedded in either the quality value or the
+ *          flags value - we've chosen the quality value - is this best?
+ *        - It's clear that the RawDetection optional data exists when the
+ *          optional data offset is nonzero in the RawDetection record header
+ *          is nonzero. How does PDS set the the optional data identifier value?
+ *          All the DFD states is that this identifier is user defined.
+ *        - We want to augment the RawDetection optional data space with the
+ *          usual MB-System laid-out pseudosidescan, but need to use a different
+ *          optional data identifier than PDS so that the code knows this.
+ *        - How complete are the attitude time series that can be constructed
+ *          from the ping motion records? How do these relate to the data stored
+ *          in the asynchronous RollPitchHeave, Attitude, CustomAttitude, and
+ *          Heading records?
+ */
 
 #ifndef MBSYS_RESON7K3_H_
 #define MBSYS_RESON7K3_H_
@@ -93,7 +104,7 @@
 #include <stdint.h>
 #include "mb_define.h"
 
-//-----------------------------------------------------------------
+/*-----------------------------------------------------------------*/
 // Record ID definitions
 
 // 0 means no record at all

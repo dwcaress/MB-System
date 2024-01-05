@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_stereopair.h	11/22/2014
  *
- *    Copyright (c) 2014-2023 by
+ *    Copyright (c) 2014-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA

@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbnavadjust_icp.c          8/4/2018
  *
- *    Copyright (c) 2018-2023 by
+ *    Copyright (c) 2018-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
