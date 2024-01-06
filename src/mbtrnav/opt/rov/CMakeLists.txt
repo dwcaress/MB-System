@@ -14,17 +14,20 @@
 #   udpms
 # The application(s) are:
 #   trnxpp
-message("In mbtrnav/opt/rov")
+#
+message("In src/mbtrnav/opt/rov")
 #------------------------------------------------------------------------------
 
 find_package(NetCDF REQUIRED)
 find_package(lcm REQUIRED)
 include(${LCM_USE_FILE})
+message("-- LCM found! (please ignore any warnings about CMake version deprecation...)")
 
 find_package(Java)
 if(JAVA_FOUND)
     include(UseJava)
     set(java_args JAVA_SOURCES java_sources)
+    message("-- Java found!")
 endif()
 add_compile_definitions(
 HAVE_CONFIG_H
@@ -83,17 +86,17 @@ target_include_directories(trnlcm-cpp INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 
 lcm_install_headers(DESTINATION include
-${c_install_headers}
-${cpp_install_headers}
-)
+    ${c_install_headers}
+    ${cpp_install_headers}
+    )
 
 # TRN LCM types jar
 if(JAVA_FOUND)
-  add_jar(trnlcm-jar
-    OUTPUT_NAME lcm_rovtrn
-    INCLUDE_JARS lcm-java
-    SOURCES ${java_sources}
-  )
+    add_jar(trnlcm-jar
+        OUTPUT_NAME lcm_rovtrn
+        INCLUDE_JARS lcm-java
+        SOURCES ${java_sources}
+        )
 endif()
 #
 #------------------------------------------------------------------------------
@@ -109,7 +112,7 @@ add_library(udpms
 # build trnxplug
 
 # specify library
-    add_library(trnxplug
+add_library(trnxplug
     plug-common.cpp
     plug-idtlass.cpp
     plug-oisledx.cpp
@@ -230,3 +233,4 @@ install(TARGETS
 if(JAVA_FOUND)
     install_jar(trnlcm-jar share/java)
 endif()
+#------------------------------------------------------------------------------
