@@ -46,7 +46,7 @@
 #    trnucli-test
 #.   trnusvr-test
 #
-message("In mbtrnav")
+message("In src/mbtrnav")
 #
 #------------------------------------------------------------------------------
 
