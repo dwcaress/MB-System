@@ -45,3 +45,10 @@ foreach(executable ${executables})
 endforeach()
 
 install(TARGETS ${executables} DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+set(macros
+    mbm_fmtvel
+    mbm_grd2geovrml
+    mbm_grid)
+
+install(PROGRAMS ${macros} DESTINATION ${CMAKE_INSTALL_BINDIR})

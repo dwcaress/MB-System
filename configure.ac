@@ -106,8 +106,8 @@ AS_ECHO(["        --with-vtk-lib        - location of VTK8.2+ libraries (require
 AS_ECHO(["        --enable-opencv       - enable building tools using OpenCV (optional)"])
 AS_ECHO(["        --enable-mbtrn        - enable building terrain relative navigation (TRN) tools (optional)"])
 AS_ECHO(["        --enable-mbtnav       - enable building terrain relative navigation (TRN) tools (optional)"])
-AS_ECHO(["        --enable-rovtrn       - enable building terrain relative navigation (TRN) ROV tools
- (optional)"])
+AS_ECHO(["        --enable-rovtrn       - enable building terrain relative navigation (TRN) ROV tools (optional)"])
+AS_ECHO(["        --enable-deprecated   - enable building deprecated programs (optional)"])
 AS_ECHO(["        --disable-mbtools     - disable building graphical tools (use with --enable-mbtrn and --enable-mbtnav)"])
 AS_ECHO(["        --enable-hardening    - Enable compiler and linker options to frustrate memory corruption exploits  (e.g. -fPIE and -pie) (optional)"])
 AS_ECHO(["        --enable-test         - Enable building unit tests in test/ and third-party/"])
@@ -351,8 +351,6 @@ mbsystemdatadir="$datadir/$PACKAGE"
 AC_SUBST(mbsystemdatadir)
 mbsystemhtmldir="$docdir/html"
 AC_SUBST(mbsystemhtmldir)
-mbsystempsdir="$docdir/ps"
-AC_SUBST(mbsystempsdir)
 
 dnl--------------------------------------------------------------------
 dnl OTPS Section
@@ -1430,6 +1428,21 @@ if test "$build_pcltools" = "yes" ; then
 fi
 
 dnl--------------------------------------------------------------------
+dnl Deprecated Section - optionally build and install deprecated programs
+dnl using --enable-deprecated
+dnl--------------------------------------------------------------------
+AS_ECHO(["Check if deprecated programs should be built"])
+AC_ARG_ENABLE(deprecated, [AS_HELP_STRING([--enable-deprecated],
+        [build deprecated programs])], [build_deprecated=yes], [build_deprecated=no])
+AM_CONDITIONAL([BUILD_DEPRECATED], [test $build_deprecated = yes])
+if test "$build_deprecated" = "yes" ; then
+    AS_ECHO(["Build deprecated programs"])
+    AC_DEFINE(DEPRECATED_ENABLED, 1, [Build deprecated programs])
+else
+    AS_ECHO(["Not building deprecated programs"])
+fi
+
+dnl--------------------------------------------------------------------
 dnl Test Section - optionally build unit tests in mbsystem/test and mbsystem/third-party
 dnl--------------------------------------------------------------------
 
@@ -1495,18 +1508,21 @@ AC_CONFIG_FILES([\
     src/bsio/Makefile \
     src/mbaux/Makefile \
     src/utilities/Makefile \
-    src/deprecated/Makefile \
     src/gmt/Makefile \
     src/macros/Makefile \
     src/otps/Makefile \
+    src/mbgrd2gltf/Makefile \
     src/man/Makefile \
     src/man/man1/Makefile \
     src/man/man3/Makefile \
     src/html/Makefile \
-    src/ps/Makefile \
     src/share/Makefile \
-    src/mbgrd2gltf/Makefile \
     ])
+if test "$enable_deprecated" = "yes" ; then
+    AC_CONFIG_FILES([\
+        src/deprecated/Makefile \
+        ])
+fi
 if test "$enable_gsf" = "yes" ; then
     AC_CONFIG_FILES([\
         src/gsf/Makefile \
@@ -1572,8 +1588,12 @@ if test "$build_test" = "yes" ; then
           test/Makefile \
           test/mbio/Makefile \
           test/utilities/Makefile \
-          test/deprecated/Makefile \
           ])
+    if test "$enable_deprecated" = "yes" ; then
+        AC_CONFIG_FILES([\
+            test/deprecated/Makefile \
+            ])
+    fi
 fi
 
 AC_OUTPUT
@@ -1703,6 +1723,11 @@ if test "$enable_gsf" = "yes" ; then
 else
     AS_ECHO(["Build driver gsf: Disabled"])
 fi
+if test "$enable_deprecated" = "yes" ; then
+    AS_ECHO(["Build deprecated: Enabled"])
+else
+    AS_ECHO(["Build deprecated: Disabled"])
+fi
 
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO(["Key Variables:"])
@@ -1718,7 +1743,6 @@ AS_ECHO(["    header files:             ${includedir}"])
 AS_ECHO(["    data files:               ${mbsystemdatadir}"])
 AS_ECHO(["    man pages:                ${mandir}"])
 AS_ECHO(["    Html documentation:       ${mbsystemhtmldir}"])
-AS_ECHO(["    Postscript documentation: ${mbsystempsdir}"])
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO(["See config.log for details of configure results"])
 AS_ECHO(["See INSTALL for further build instructions and hints"])
