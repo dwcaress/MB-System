@@ -49,6 +49,7 @@ message("Disable building TRN software with -DbuildTRN=OFF")
 message("Disable building photomosaicing software with -DbuildOpenCV=OFF")
 message("Disable supporting GSF format data with -DbuildGSF=OFF")
 message("Build Qt-based GUIs with -DbuildQt=ON")
+message("Build deprecated programs with -DbuildDeprecated=ON")
 message("Disable unit tests with -DbuildTests=OFF (run unit tests with make test)")
 message("Print out all CMake variables with -Dverbose=1")
 message("----------------------------------------------------------")
@@ -145,7 +146,6 @@ add_subdirectory(src/gmt)
 
 # Executables
 add_subdirectory(src/utilities)
-add_subdirectory(src/deprecated)
 add_subdirectory(src/macros)
 add_subdirectory(src/mbgrd2gltf)
 add_subdirectory(src/otps)
@@ -175,6 +175,9 @@ if(buildQt)
   add_subdirectory(src/qt-mbgrdviz)
   add_subdirectory(src/qt-mbgrdviz-3)
 endif()
+if(buildDeprecated)
+  add_subdirectory(src/deprecated)
+endif()
 
 if(buildTests)
   add_subdirectory(third_party)
@@ -185,7 +188,6 @@ endif()
 
 add_subdirectory(src/man)
 add_subdirectory(src/html)
-add_subdirectory(src/ps)
 add_subdirectory(src/share)
 
 # For debugging: print all set variables

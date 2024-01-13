@@ -889,7 +889,7 @@ int mbview_deleteroute(int verbose, size_t instance, int iroute, int *error);
 int mbview_deleteallroutes(int verbose, size_t instance, int *error);
 int mbview_getroute(int verbose, size_t instance, int route, int *npointtotal, double *routelon, double *routelat, int *waypoint,
                     double *routetopo, double *routebearing, double *distlateral, double *distovertopo, double *slope,
-                    int *routecolor, int *routesize, mb_path routename, int *error);
+                    int *routecolor, int *routesize, int *routeeditmode, mb_path routename, int *error);
 int mbview_enableviewroutes(int verbose, size_t instance, int *error);
 int mbview_enableeditroutes(int verbose, size_t instance, int *error);
 int mbview_enableviewties(int verbose, size_t instance, int *error);

@@ -552,6 +552,28 @@ while ($line = <RFILE>)
 		{
 #		printf "Route: $line";
 		}
+	elsif ($line =~ /(\S+),(\S+),(\S+),(\S+),(\S+),(\S+),(\S+),/)
+		{
+		#extract route data
+		($lon, $lat, $topo, $waypoint, $bearing, $distance, $distonbottom, $slope)
+			= $line
+			=~ /(\S+),(\S+),(\S+),(\S+),(\S+),(\S+),(\S+),/;
+		$output = 0;
+		$length = 0;
+		push(@lons, $lon);
+		push(@lats, $lat);
+		push(@topos, $topo);
+		push(@waypoints, $waypoint);
+		push(@bearings, $bearing);
+		push(@distances, $distance);
+		push(@lengths, $length);
+		push(@distonbottoms, $distonbottom);
+		push(@slopes, $slope);
+		push(@outputs, $output);
+
+		# increment counter
+		$cnt++;
+		}
 	elsif ($line =~ /(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/)
 		{
 		#extract route data

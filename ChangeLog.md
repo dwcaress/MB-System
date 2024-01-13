@@ -1,4 +1,4 @@
---
+---
 ## MB-System ChangeLog File:
 
 This file lists changes to the source code of the MB-System open
@@ -6,10 +6,10 @@ source software package for the processing and display of swath sonar data.
 This file is located at the top of the MB-System source code distribution
 directory structure.
 
---
+---
 ### MB-System Version 5 Releases:
 
---
+---
 In the list below, releases shown in bold type are major, announced releases.
 The other entries are test or "beta" releases that were not announced and generally
 not widely distributed. Prior to 5.7.1, the MB-System source code repository was
@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta72    January 13, 2024
 - Version 5.7.9beta71    January 3, 2024
 - Version 5.7.9beta70    January 2, 2024
 - Version 5.7.9beta69    December 17, 2023
@@ -87,7 +88,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 - Version 5.7.9beta03    February 7, 2021
 - Version 5.7.9beta02    January 27, 2021
 - Version 5.7.9beta01    January 18, 2021
-- **Version 5.7.8        January 17, 2021
+- **Version 5.7.8        January 17, 2021**
 - Version 5.7.7          January 17, 2021 (flawed, quickly superceded)
 - Version 5.7.7beta09    January 17, 2021
 - Version 5.7.7beta08    January 6, 2021
@@ -97,7 +98,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 - Version 5.7.7beta03    October 27, 2020
 - Version 5.7.7beta02    October 8, 2020
 - Version 5.7.7beta01    October 7, 2020
-- **Version 5.7.6        October 5, 2020
+- **Version 5.7.6        October 5, 2020**
 - Version 5.7.6beta56    September 28, 2020
 - Version 5.7.6beta55    September 16, 2020
 - Version 5.7.6beta54    September 14, 2020
@@ -440,9 +441,21 @@ or beta, are equally accessible as tarballs through the Github interface.
 - Version 5.0.beta01     June 8, 2001
 - Version 5.0.beta00     April 6, 2001
 
---
+---
 ### MB-System Version 5.7 Release Notes:
---
+---
+
+#### 5.7.9beta72 (January 13, 2024)
+
+Build Systems: Made building and installing deprecated programs optional for both
+the CMake and Autoconf build systems.
+
+Man pages: Restructured the web page versions of the manual pages installed with
+MB-System. Recast the postscript versions of the manual pages into Pdf files.
+
+Mbgrdviz: Generated a new version of the MB-System Route files.
+
+Mbm_route2mission: Now works with both old and new format route files.
 
 #### 5.7.9beta71 (January 3, 2024)
 
@@ -845,10 +858,12 @@ always been created without any comment records. Many MB-System programs read
 fnv files directly without using the MBF_MBPRONAV i/o module. Now all format
 166 files will be written with a first record documenting the contents of the
 file:
+
     fprintf(mb_io_ptr->mbfp,  "## <yyyy mm dd hh mm ss.ssssss> <epoch seconds> "
                   "<longitude (deg)> <latitude (deg)> <heading (deg)> <speed (km/hr)> "
                   "<draft (m)> <roll (deg)> <pitch (deg)> <heave (m)> <portlon (deg)> "
                   "<portlat (deg)> <stbdlon (deg)> <stbdlat (deg)>\n");
+                  
 whether they are written by the MBF_MBPRONAV i/o module or by functions in
 applications like mbprocess or mbpreprocess. All instances reading these files
 will ignore these file header records.
@@ -1076,13 +1091,21 @@ correction tables for color as well as intensity. Since we are using the YCbCr
 color space this means generating tables of average chroma (color) difference
 in red and blue as well as a 3D table of average luma (intensity).
 If RGB and YCbCr values have ranges 0-255, then:
+
   Y  = 0.299R + 0.587G + 0.114B (Luminance, intensity, B/W signal)
+  
   Cb = 0.564(B - Y) + 128 (blue color difference)
+  
   Cr = 0.713(R - Y) + 128 (red color difference)
+  
 and
+
   B = (Y + 1.773 * (Cb - 128));
+  
   G = (Y - 0.714 * (Cr - 128) - 0.344 * (Cb - 128));
+  
   R = (Y + 1.403 * (Cr - 128));
+  
 If the specified color correction file includes the Cr and Cb tables, then the
 --correct-color command will cause mbphotomosaic to use those tables to correct
 for color. Each source image pixel being corrected has a lateral location within
@@ -1162,9 +1185,10 @@ that are good. These fractions are by definition bounded by 0 and 1.
 
 Mbphotomosaic, mbgetphotocorrection, mbphotogrammetry: Added capability to load
 a time series of image quality values through new options:
-  --image-quality-file=file
-  --image-quality-threshold=value
-  --image-quality-filter-length=value
+
+-   --image-quality-file=file
+-   --image-quality-threshold=value
+-   --image-quality-filter-length=value
 
 #### 5.7.9beta19 (November 7, 2021)
 
@@ -1690,12 +1714,13 @@ release include:
 Many bug fixes to programs and data format i/o modules.
 
 New programs in optional photomosaicing section:
-  mbgrd2obj
-  mbphotomosaic
-  mbgetphotocorrection
-  mbphotogrammetry
-  mbgrd2octree
-  mbm_makeimagelist
+
+- mbgrd2obj
+- mbphotomosaic
+- mbgetphotocorrection
+- mbphotogrammetry
+- mbgrd2octree
+- mbm_makeimagelist
 
 New program in optional Terrain Relative Navigation section:
   mbtrnpp
@@ -1715,19 +1740,21 @@ Deprecated programs:
 Several programs that are no longer part of the current data
 processing approach have been declared deprecated and have been moved from
 src/utilities to a new directory src/deprecated. These programs are:
-    mb7k2jstar
-    mb7k2ss
-    mb7kpreprocess
-    mbauvnavusbl
-    mbhsdump
-    mbhysweeppreprocess
-    mbinsreprocess
-    mbkongsbergpreprocess
-    mbneptune2esf
-    mbrollbias
-    mbrphsbias
-    mbstripnan
-    mbswplspreprocess
+
+- mb7k2jstar
+- mb7k2ss
+- mb7kpreprocess
+- mbauvnavusbl
+- mbhsdump
+- mbhysweeppreprocess
+- mbinsreprocess
+- mbkongsbergpreprocess
+- mbneptune2esf
+- mbrollbias
+- mbrphsbias
+- mbstripnan
+- mbswplspreprocess
+    
 The deprecated programs have also been converted to C++ and are still built and
 installed as part of MB-System. We tentatively plan to remove these programs
 entirely from MB-System distributions at the time of the 6.0 release.
@@ -1867,16 +1894,18 @@ which had a variety of problems. Now, the pseudo-sidescan reported by MB-System
 as sidescan can be recalculated by mbprocess from the desired backscatter
 source. The default is to use the best source of backscatter available, with
 the order of "bestness" being:
-  1. Calibrated snippets
-  2. Snippets
-  3. Calibrated sidescan
-  4. Sidescan
-You can force mbpreprocess to use a desired backscatter source with the
-  --multibeam-sidescan-source option, where:
-  --multibeam-sidescan-source=C ==> Calibrated snippet records
-  --multibeam-sidescan-source=S ==> Snippet records
-  --multibeam-sidescan-source=W ==> Calibrated sidescan records
-  --multibeam-sidescan-source=B ==> Sidescan records
+
+1. Calibrated snippets
+1. Snippets
+1. Calibrated sidescan
+1. Sidescan
+
+You can force mbpreprocess to use a desired backscatter source with the --multibeam-sidescan-source option, where:
+
+-  --multibeam-sidescan-source=C ==> Calibrated snippet records
+-  --multibeam-sidescan-source=S ==> Snippet records
+-  --multibeam-sidescan-source=W ==> Calibrated sidescan records
+-  --multibeam-sidescan-source=B ==> Sidescan records
 
 Format 89 (MBF_RESON7K3): Added support for additional informational data
 records.
@@ -2389,19 +2418,21 @@ src/utilities: All programs in src/utilities have been migrated to C++.
 Deprecated programs: Several programs that are no longer part of the current data
 processing approach have been declared deprecated and have been moved from
 src/utilities to a new directory src/deprecated. These programs are:
-    mb7k2jstar
-    mb7k2ss
-    mb7kpreprocess
-    mbauvnavusbl
-    mbhsdump
-    mbhysweeppreprocess
-    mbinsreprocess
-    mbkongsbergpreprocess
-    mbneptune2esf
-    mbrollbias
-    mbrphsbias
-    mbstripnan
-    mbswplspreprocess
+
+- mb7k2jstar
+- mb7k2ss
+- mb7kpreprocess
+- mbauvnavusbl
+- mbhsdump
+- mbhysweeppreprocess
+- mbinsreprocess
+- mbkongsbergpreprocess
+- mbneptune2esf
+- mbrollbias
+- mbrphsbias
+- mbstripnan
+- mbswplspreprocess
+
 The deprecated programs have also been converted to C++ and are still built and
 installed as part of MB-System. We tentatively plan to remove these programs
 entirely from MB-System distributions at the time of the 6.0 release.
@@ -2930,9 +2961,9 @@ program is "open". On Cygwin systems, this program is "cygstart".
 
 Initiated use of version tagging in Git.
 
---
+---
 ### MB-System Version 5.6 Release Notes:
---
+---
 
 #### 5.6.20181218 (December 18, 2018)
 
@@ -3020,9 +3051,9 @@ in which the interpolated and time latency corrected attitude values calculated
 for each beam bottom return time were not fully corrected for the receive head
 angular offsets.
 
---
+---
 ### MB-System Version 5.5 Release Notes:
---
+---
 
 #### 5.5.2350 (September 6, 2018)
 
@@ -4369,9 +4400,9 @@ Major changes made to integrate MB-System with GMT5:
 
 Format 88 (MBF_RESON7KR): Update Reson 7k i/o module to handle TVG records.
 
---
+---
 ### MB-System Version 5.4 Release Notes:
---
+---
 
 #### 5.4.2219 (December 11, 2014)
 
@@ -5189,9 +5220,9 @@ configure script, following on the initial work by Bob Covill and others.
 The man page and web page documentation have been moved into the source
 tree. The old install_makefiles build system has been updated to still work.
 
---
+---
 ### MB-System Version 5.3 Release Notes:
---
+---
 
 #### 5.3.2062 (May 17, 2013)
 
@@ -5565,11 +5596,12 @@ are binned and averaged into 1-degree wide "pseudo-beams" to allow reasonable
 
 Added MBIO function mb_sonartype() that returns the type of sonar associated
 with some data, using the definitions:
-  #define    MB_SONARTYPE_UNKNOWN        0
-  #define    MB_SONARTYPE_ECHOSOUNDER    1
-  #define    MB_SONARTYPE_MULTIBEAM        2
-  #define    MB_SONARTYPE_SIDESCAN        3
-  #define    MB_SONARTYPE_INTERFEROMETRIC    4
+
+- #define    MB_SONARTYPE_UNKNOWN        0
+- #define    MB_SONARTYPE_ECHOSOUNDER    1
+- #define    MB_SONARTYPE_MULTIBEAM        2
+- #define    MB_SONARTYPE_SIDESCAN        3
+- #define    MB_SONARTYPE_INTERFEROMETRIC    4
 
 Added function to mbnavadjust that will estimate vertical offset between surveys
 and then set relevant ties accordingly.
@@ -5594,13 +5626,15 @@ Improved performance of navigation and attitude merging for both mb7kpreprocess
 and mbkongsbergpreprocess
 
 Added new functionality to mbkongsbergpreprocess (contributed by Suzanne O'Hara):
-  -Added -D<outputDirectory> argument to allow users to set new directory for
+
+- Added -D<outputDirectory> argument to allow users to set new directory for
     output files; original code always created output in input directory.
     This is a problem where users should not be modifying original directories.
     Using this flag allows the user to use the datalist option and is easier
     than copying the original mb58 data to a different directory or to using a
     script that loops through all the data using the -D option
-  -Added -C flag to output counts. Current code always outputs many rows of
+    
+- Added -C flag to output counts. Current code always outputs many rows of
     information that can be confusing. The default now is to work silently
     unless there is a problem.
 
@@ -6616,9 +6650,9 @@ Incorporates all changes listed above.
 
 Fixed memory management bug for formats 56 and 57 (Simrad EM3002 etc).
 
---
+---
 ### MB-System Version 5.1.1 Release Notes:
---
+---
 
 Fixed longstanding error in src/mbio/mb_angle.c in the application
 of roll and pitch angles. Previously, the pitch rotation was applied
@@ -6839,9 +6873,9 @@ The following are no longer distributed with MB-System:
      mbtide
      mbunclean
 
---
+---
 ### MB-System Version 5.1.0 Release Notes:
---
+---
 
 The version 5.1.0 release of MB-System contains both bug fixes
 and new capabilities relative to the 5.0.9 release.
@@ -6962,9 +6996,9 @@ mbm_plot.
 Fixed problem reading some Simrad multibeam data with slightly broken
 bathymetry records.
 
---
+---
 ### MB-System Version 5.0.9 Release Notes:
---
+---
 
 The version 5.0.9 release of MB-System is purely a bug fix
 release, and includes only a few changes relative to the 5.0.8
@@ -6984,9 +7018,9 @@ MBnavedit has been altered so that speed and acceleration weighting
 values in the smooth inversion function can be less than 1.0.
 
 
---
+---
 ### MB-System Version 5.0.8 Release Notes:
---
+---
 
 The version 5.0.8 release of MB-System includes several changes
 relative to the 5.0.7 release.
@@ -7103,12 +7137,14 @@ the "inf" files to include listings of easily identified data problems.
 The -q option of mbdatalist now extracts and lists these data problems
 as well as problems with the processing parameters.The possible data problems
 include:
-        No survey data found
-        Zero longitude or latitude in survey data
-        Instantaneous speed exceeds 25 km/hr
-        Average speed exceeds 25 km/hr
-        Sounding depth exceeds 11000 m
-        Unsupported Simrad datagram
+
+- No survey data found
+- Zero longitude or latitude in survey data
+- Instantaneous speed exceeds 25 km/hr
+- Average speed exceeds 25 km/hr
+- Sounding depth exceeds 11000 m
+- Unsupported Simrad datagram
+
 To populate the "inf" files of existing datalist structures with data problem
 notices, use mbdatalist with the -n option.
 
@@ -7145,9 +7181,9 @@ SUSE 10 systems, use of the smooth inversion function causes the first
 line of the output edited navigation to have NaN values for the
 longitude and latitude.
 
---
+---
 ### MB-System Version 5.0.7 Release Notes:
---
+---
 
 The version 5.0.7 release of MB-System includes several changes
 relative to the 5.0.6 release.
@@ -7215,9 +7251,9 @@ Added option to mbm_grdplot allowing the user to specify
 a separate grid file to be contoured. This code was
 contributed by Gordon Keith.
 
---
+---
 ### MB-System Version 5.0.6 Release Notes:
---
+---
 
 The version 5.0.6 release of MB-System includes several changes
 relative to the 5.0.5 release.
@@ -7282,9 +7318,9 @@ mbgrdviz.
 Improved the ability of mbgrid to embed background
 datasets.
 
---
+---
 ### MB-System Version 5.0.5 Release Notes:
---
+---
 
 The version 5.0.5 release of MB-System includes several changes
 relative to the 5.0.4 release.
@@ -7401,9 +7437,9 @@ travel times from the bathymetry when data files lacking travel time
 records are read. This allows users to recalculate bathymetry by
 raytracing even if the travel times are not recorded.
 
---
+---
 ### MB-System Version 5.0.3 Release Notes:
---
+---
 
 The version 5.0.3 release of MB-System includes two bug fixes
 relative to the 5.0.2 release.
@@ -7420,7 +7456,7 @@ We have fixed a bug in the i/o modules for binary SeaBeam 2100
 data (formats 42 and 43) that caused data to be written incorrectly
 on byteswapped systems (e.g. Intel processors running Linux).
 
---
+---
 ### MB-System Version 5.0.2 Release Notes:
 ---
 
@@ -7434,9 +7470,9 @@ bathymetry values when new data files were written.
 We have also fixed problems related to reading and writing
 SeaBeam 2100 data in the binary formats 42 and 43.
 
---
+---
 ### MB-System Version 5.0.1 Release Notes:
---
+---
 
 The version 5.0.1 release of MB-System includes two bug fixes
 relative to the 5.0.0 release. The program mbgrid has been
@@ -7451,15 +7487,16 @@ older MB-System installation. Users can then rename the directory to
 mbsystem or create a soft link to mbsystem-5.0.1 named mbsystem
 (e.g. ln -s mbsystem-5.0.1 mbsystem).
 
---
+---
 ### MB-System Version 5.0.0 Release Notes:
---
+---
 
 The version 5.0 release of MB-System includes a number of
 changes and improvements relative to the version 4 releases.
 The most significant changes include:
 
 A new approach to managing data processing.
+
 - Many tools - one output file.
     In previous versions of MB-System, each processing
     program read an input swath data file and
@@ -7488,6 +7525,7 @@ A new approach to managing data processing.
     gridding, mosaicing, and automated plotting.
 
 New tools.
+
 - mbnavadjust.
     This new tool allows users to adjust poorly
     navigated surveys by matching features in overlapping
@@ -7521,6 +7559,7 @@ New tools.
     within each bin.
 
 Improved bathymetry and navigation editors.
+
 - MBedit and MBnavedit now swallow data files whole rather than
     reading in limited size buffers.
 - MBedit now outputs beam edit events rather than an entire swath
@@ -7536,6 +7575,7 @@ Improved bathymetry and navigation editors.
     navigation by penalizing speed and acceleration.
 
 Support for Projected Coordinate Systems
+
 - MB-System now incorporates the source code for the PROJ.4
     Cartographic Projections library, providing support for
    (apparently) all commonly used geodetic coordinate systems.
@@ -7564,6 +7604,7 @@ Support for Projected Coordinate Systems
     imported into ESRI ArcGIS or other GIS packages.
 
 Restructuring the code.
+
 - All of the C code now conforms to the ANSI C standard.
 - The underlying input/output library (MBIO) has been
     substantially rewritten. The structure has been streamlined,
@@ -7571,6 +7612,7 @@ Restructuring the code.
     existing code. The MBIO API has been greatly modified.
 
 Handling of old Simrad multibeam data.
+
 - Vendor format data from the old Simrad multibeams (pre-
     1997 sonars) are now supported by a single format id (51)
     rather than a separate format id for each sonar model. The
@@ -7588,6 +7630,7 @@ Handling of old Simrad multibeam data.
     multibeam sonars.
 
 Streamlining of MB-System Default Parameters.
+
 - Prior to version 5.0, the MB-System defaults set by mbdefaults
     included the format id, a control for ping averaging,
     longitude and latitude bounds for windowing by area, and
@@ -7602,6 +7645,7 @@ Streamlining of MB-System Default Parameters.
     command line arguments.
 
 New Data Formats
+
 - Furuno HS10 multibeam bathymetry is supported as format 171.
 - SeaBeam 2120 multibeam data in the L3 Communications XSE format
     are supported as format 94 (already used to support Elac

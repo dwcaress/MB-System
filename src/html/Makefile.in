@@ -339,7 +339,6 @@ localstatedir = @localstatedir@
 mandir = @mandir@
 mbsystemdatadir = @mbsystemdatadir@
 mbsystemhtmldir = @mbsystemhtmldir@
-mbsystempsdir = @mbsystempsdir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
 opencv4_CPPFLAGS = @opencv4_CPPFLAGS@
@@ -366,107 +365,94 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 dist_mbsystemhtml_DATA = \
-caress2001.gif \
-caress_chayes_ferreira_Feb2014.jpg \
-ChayesJul2003.gif \
-Christina_d_S_Ferreira_crop.jpg \
-Christina_d_S_Ferreira_2012_crop.jpg \
-ChangeLog.txt \
-gpl.html \
-index.html \
-KrystleAnderson2013.gif \
-mb7k2jstar.html \
-mb7k2ss.html \
-mb7kpreprocess.html \
-mbabsorption.html \
-mbareaclean.html \
-mbauvloglist.html \
-mbauvnavusbl.html \
-mbbackangle.html \
-mbclean.html \
-mbcontour.html \
-mbcopy.html \
-mbctdlist.html \
-mbdatalist.html \
-mbdefaults.html \
-mbdumpesf.html \
-mbedit.html \
-mbeditviz.html \
-mbextractsegy.html \
-mbfilter.html \
-mbformat.html \
-mbgetesf.html \
-mbgrdtiff.html \
-mbgrdviz.html \
-mbgrid.html \
-mbhistogram.html \
-mbhsdump.html \
-mbhysweeppreprocess.html \
-mbinfo.html \
-mbio.html \
-mbkongsbergpreprocess.html \
-mblevitus.html \
-mblist.html \
-mbm_arc2grd.html \
-mbm_bpr.html \
-mbm_copy.html \
-mbm_grd2arc.html \
-mbm_grd2geovrml.html \
-mbm_grd3dplot.html \
-mbm_grdcut.html \
-mbm_grdinfo.html \
-mbm_grdplot.html \
-mbm_grdtiff.html \
-mbm_grid.html \
-mbm_histplot.html \
-mbm_makedatalist.html \
-mbm_multicopy.html \
-mbm_multidatalist.html \
-mbm_multiprocess.html \
-mbmosaic.html \
-mbm_plot.html \
-mbm_route2mission.html \
-mbm_stat.html \
-mbm_utm.html \
-mbm_xbt.html \
-mbm_xyplot.html \
-mbnavadjust.html \
-mbnavadjustmerge.html \
-mbnavedit.html \
-mbnavlist.html \
-mbneptune2esf.html \
-mbotps.html \
-mbprocess.html \
-mbps.html \
-mbrollbias.html \
-mbrolltimelag.html \
-mbroutetime.html \
-mbsegygrid.html \
-mbsegyinfo.html \
-mbsegylist.html \
-mbsegypsd.html \
-mbset.html \
-mbstripnan.html \
-mbsvplist.html \
-mbsvpselect.html \
-mbswath.html \
-mbsystem_capabilities.html \
-mbsystem_copyright.html \
-mbsystem_faq.html \
-mbsystem_formats.html \
-mbsystem_future.html \
-mbsystem_home.html \
-mbsystem_how_to_get.html \
-mbsystem.html \
-mbsystem_logo.gif \
-mbsystem_logo_small.gif \
-mbsystem_man_list.html \
-mbsystem_version.txt \
-mbsystem_whatsnew.html \
-MBTeamJul2003.jpg \
-mbtime.html \
-mbvelocitytool.html \
-ValJul2003.gif
+    index.html \
+    ChangeLog.html \
+    COPYING.html \
+    GPL.html \
+    mbsystem_logo_small.gif \
+    mbsystem_logo.gif \
+    mbsystem_version.txt \
+    mbsystem_capabilities.html \
+    mbsystem_man_list.html \
+    mbsystem_formats.html \
+    mbsystem.html \
+    mb7k2jstar.html \
+    mb7k2ss.html \
+    mb7kpreprocess.html \
+    mbabsorption.html \
+    mbareaclean.html \
+    mbauvloglist.html \
+    mbauvnavusbl.html \
+    mbbackangle.html \
+    mbclean.html \
+    mbcontour.html \
+    mbcopy.html \
+    mbctdlist.html \
+    mbdatalist.html \
+    mbdefaults.html \
+    mbdumpesf.html \
+    mbedit.html \
+    mbeditviz.html \
+    mbextractsegy.html \
+    mbfilter.html \
+    mbformat.html \
+    mbgetesf.html \
+    mbgrdtiff.html \
+    mbgrdviz.html \
+    mbgrid.html \
+    mbhistogram.html \
+    mbhsdump.html \
+    mbhysweeppreprocess.html \
+    mbinfo.html \
+    mbio.html \
+    mbkongsbergpreprocess.html \
+    mblevitus.html \
+    mblist.html \
+    mbm_arc2grd.html \
+    mbm_bpr.html \
+    mbm_copy.html \
+    mbm_fmtvel.html \
+    mbm_grd2arc.html \
+    mbm_grd2geovrml.html \
+    mbm_grd3dplot.html \
+    mbm_grdcut.html \
+    mbm_grdinfo.html \
+    mbm_grdplot.html \
+    mbm_grdtiff.html \
+    mbm_grid.html \
+    mbm_histplot.html \
+    mbm_makedatalist.html \
+    mbm_multicopy.html \
+    mbm_multidatalist.html \
+    mbm_multiprocess.html \
+    mbm_plot.html \
+    mbm_route2mission.html \
+    mbm_stat.html \
+    mbm_utm.html \
+    mbm_xbt.html \
+    mbm_xyplot.html \
+    mbmosaic.html \
+    mbnavadjust.html \
+    mbnavadjustmerge.html \
+    mbnavedit.html \
+    mbnavlist.html \
+    mbneptune2esf.html \
+    mbotps.html \
+    mbprocess.html \
+    mbps.html \
+    mbrollbias.html \
+    mbrolltimelag.html \
+    mbroutetime.html \
+    mbsegygrid.html \
+    mbsegyinfo.html \
+    mbsegylist.html \
+    mbsegypsd.html \
+    mbset.html \
+    mbstripnan.html \
+    mbsvplist.html \
+    mbswath.html \
+    mbtime.html \
+    mbvelocitytool.html
 
 all: all-am
 

@@ -1440,7 +1440,7 @@ int main(int argc, char **argv) {
       }
 
       char variable[MB_PATH_MAXLINE] = "";  // TODO(schwehr): Localize to all the use sites.
-      if (!raw_next_value) {
+      if (!raw_next_value && !ttimes_next_value) {
         switch (list[i]) {
         case '/': /* Inverts next simple value */
           invert_next_value = true;
@@ -2272,7 +2272,284 @@ int main(int argc, char **argv) {
           break;
         }
       }
-      else {
+
+      else if (ttimes_next_value) {
+        switch (list[i]) {
+        case '/': /* Inverts next simple value */
+          invert_next_value = true;
+          break;
+
+        case '-': /* Flip sign on next simple value */
+          signflip_next_value = true;
+          break;
+
+        case '_': /* Print sensor position rather than beam or pixel position - applies to XxYy */
+          sensornav_next_value = true;
+          break;
+
+        case '@': /* Print beam or pixel position and depth values relative to sensor - applies to XYZz */
+          sensorrelative_next_value = true;
+          break;
+
+        case '^': /* Print position values in projected coordinates
+                   * - easting northing rather than lon lat
+                   * - applies to XY */
+          projectednav_next_value = true;
+          break;
+
+        case ',': /* Ttimes value next field */
+          ttimes_next_value = true;
+          count = 0;
+          break;
+
+        case '.': /* Raw value next field */
+          raw_next_value = true;
+          count = 0;
+          break;
+
+        case '=': /* Port-most value next field -ignored here */
+          break;
+
+        case '+': /* Starboard-most value next field - ignored here*/
+          break;
+
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+          count = count * 10 + list[i] - '0';
+          break;
+
+        case 'A': /* tt_angles[k] */
+          strcpy(variable, "tt_angles");
+          if (signflip_next_value)
+            strcat(variable, "-");
+          if (invert_next_value)
+            strcat(variable, "_");
+
+          fprintf(output[i], "\t%s = ", variable);
+
+          fprintf(outfile, "\tfloat %s(data);\n", variable);
+          fprintf(outfile, "\t\t%s:long_name = \"Beam Angle\";\n", variable);
+          fprintf(outfile, "\t\t%s:units = \"", variable);
+          if (signflip_next_value)
+            fprintf(outfile, "-");
+          if (invert_next_value)
+            fprintf(outfile, "1/");
+          fprintf(outfile, "degrees\";\n");
+
+          signflip_next_value = false;
+          invert_next_value = false;
+          ttimes_next_value = false;
+          raw_next_value = false;
+          break;
+
+        case 'a': /* tt_angles_forward */
+          strcpy(variable, "tt_angles_forward");
+          if (signflip_next_value)
+            strcat(variable, "-");
+          if (invert_next_value)
+            strcat(variable, "_");
+
+          fprintf(output[i], "\t%s = ", variable);
+
+          fprintf(outfile, "\tfloat %s(data);\n", variable);
+          fprintf(outfile, "\t\t%s:long_name = \"Beam angle forward\";\n", variable);
+          fprintf(outfile, "\t\t%s:units = \"", variable);
+          if (signflip_next_value)
+            fprintf(outfile, "-");
+          if (invert_next_value)
+            fprintf(outfile, "1/");
+          fprintf(outfile, "degrees\";\n");
+
+          signflip_next_value = false;
+          invert_next_value = false;
+          ttimes_next_value = false;
+          raw_next_value = false;
+          break;
+
+        case 'D': /* tt_sensordepth */
+          strcpy(variable, "tt_sensordepth");
+          if (signflip_next_value)
+            strcat(variable, "-");
+          if (invert_next_value)
+            strcat(variable, "_");
+
+          fprintf(output[i], "\t%s = ", variable);
+
+          fprintf(outfile, "\tfloat %s(data);\n", variable);
+          fprintf(outfile, "\t\t%s:long_name = \"Beam sensor depth\";\n", variable);
+          fprintf(outfile, "\t\t%s:units = \"", variable);
+          if (signflip_next_value)
+            fprintf(outfile, "-");
+          if (invert_next_value)
+            fprintf(outfile, "1/");
+          fprintf(outfile, "meters\";\n");
+
+          signflip_next_value = false;
+          invert_next_value = false;
+          ttimes_next_value = false;
+          raw_next_value = false;
+          break;
+
+        case 'H': /* tt_heave */
+          strcpy(variable, "tt_heave");
+          if (signflip_next_value)
+            strcat(variable, "-");
+          if (invert_next_value)
+            strcat(variable, "_");
+
+          fprintf(output[i], "\t%s = ", variable);
+
+          fprintf(outfile, "\tfloat %s(data);\n", variable);
+          fprintf(outfile, "\t\t%s:long_name = \"Beam heave\";\n", variable);
+          fprintf(outfile, "\t\t%s:units = \"", variable);
+          if (signflip_next_value)
+            fprintf(outfile, "-");
+          if (invert_next_value)
+            fprintf(outfile, "1/");
+          fprintf(outfile, "meters\";\n");
+
+          signflip_next_value = false;
+          invert_next_value = false;
+          ttimes_next_value = false;
+          raw_next_value = false;
+          break;
+
+        case 'N': /* tt_angles_null */
+          strcpy(variable, "tt_angles_null");
+          if (signflip_next_value)
+            strcat(variable, "-");
+          if (invert_next_value)
+            strcat(variable, "_");
+
+          fprintf(output[i], "\t%s = ", variable);
+
+          fprintf(outfile, "\tfloat %s(data);\n", variable);
+          fprintf(outfile, "\t\t%s:long_name = \"Beam angle null\";\n", variable);
+          fprintf(outfile, "\t\t%s:units = \"", variable);
+          if (signflip_next_value)
+            fprintf(outfile, "-");
+          if (invert_next_value)
+            fprintf(outfile, "1/");
+          fprintf(outfile, "degrees\";\n");
+
+          signflip_next_value = false;
+          invert_next_value = false;
+          ttimes_next_value = false;
+          raw_next_value = false;
+          break;
+
+        case 'O': /* tt_alongtrack_offset */
+          strcpy(variable, "tt_alongtrack_offset");
+          if (signflip_next_value)
+            strcat(variable, "-");
+          if (invert_next_value)
+            strcat(variable, "_");
+
+          fprintf(output[i], "\t%s = ", variable);
+
+          fprintf(outfile, "\tfloat %s(data);\n", variable);
+          fprintf(outfile, "\t\t%s:long_name = \"Beam alongtrack offset\";\n", variable);
+          fprintf(outfile, "\t\t%s:units = \"", variable);
+          if (signflip_next_value)
+            fprintf(outfile, "-");
+          if (invert_next_value)
+            fprintf(outfile, "1/");
+          fprintf(outfile, "meters\";\n");
+
+          signflip_next_value = false;
+          invert_next_value = false;
+          ttimes_next_value = false;
+          raw_next_value = false;
+          break;
+
+        case 'R': /* tt_range */
+          strcpy(variable, "tt_range");
+          if (signflip_next_value)
+            strcat(variable, "-");
+          if (invert_next_value)
+            strcat(variable, "_");
+
+          fprintf(output[i], "\t%s = ", variable);
+
+          fprintf(outfile, "\tfloat %s(data);\n", variable);
+          fprintf(outfile, "\t\t%s:long_name = \"Beam range\";\n", variable);
+          fprintf(outfile, "\t\t%s:units = \"", variable);
+          if (signflip_next_value)
+            fprintf(outfile, "-");
+          if (invert_next_value)
+            fprintf(outfile, "1/");
+          fprintf(outfile, "meters\";\n");
+
+          signflip_next_value = false;
+          invert_next_value = false;
+          ttimes_next_value = false;
+          raw_next_value = false;
+          break;
+
+        case 'S': /* tt_ssv */
+          strcpy(variable, "tt_ssv");
+          if (signflip_next_value)
+            strcat(variable, "-");
+          if (invert_next_value)
+            strcat(variable, "_");
+
+          fprintf(output[i], "\t%s = ", variable);
+
+          fprintf(outfile, "\tfloat %s(data);\n", variable);
+          fprintf(outfile, "\t\t%s:long_name = \"Survey sound velocity\";\n", variable);
+          fprintf(outfile, "\t\t%s:units = \"", variable);
+          if (signflip_next_value)
+            fprintf(outfile, "-");
+          if (invert_next_value)
+            fprintf(outfile, "1/");
+          fprintf(outfile, "meters/second\";\n");
+
+          signflip_next_value = false;
+          invert_next_value = false;
+          ttimes_next_value = false;
+          raw_next_value = false;
+          break;
+
+        case 'T': /* tt_ttimes */
+          strcpy(variable, "tt_ttimes");
+          if (signflip_next_value)
+            strcat(variable, "-");
+          if (invert_next_value)
+            strcat(variable, "_");
+
+          fprintf(output[i], "\t%s = ", variable);
+
+          fprintf(outfile, "\tfloat %s(data);\n", variable);
+          fprintf(outfile, "\t\t%s:long_name = \"Beam travel time\";\n", variable);
+          fprintf(outfile, "\t\t%s:units = \"", variable);
+          if (signflip_next_value)
+            fprintf(outfile, "-");
+          if (invert_next_value)
+            fprintf(outfile, "1/");
+          fprintf(outfile, "seconds\";\n");
+
+          signflip_next_value = false;
+          invert_next_value = false;
+          ttimes_next_value = false;
+          raw_next_value = false;
+          break;
+
+        default:
+          ttimes_next_value = false;
+          raw_next_value = false;
+          break;
+        }
+      }
+
+      else /* raw_next_value */ {
         switch (list[i]) {
         case '/': /* Inverts next simple value */
           invert_next_value = true;

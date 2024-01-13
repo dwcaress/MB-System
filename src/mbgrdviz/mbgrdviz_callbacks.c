@@ -95,8 +95,10 @@
 #define GCS_WGS_84 4326
 
 /* Site and route file versions */
-#define MBGRDVIZ_SITE_VERSION "1.00"
-#define MBGRDVIZ_ROUTE_VERSION "1.00"
+#define MBGRDVIZ_SITE_VERSION_MAJOR 2
+#define MBGRDVIZ_SITE_VERSION_MINOR 0
+#define MBGRDVIZ_ROUTE_VERSION_MAJOR 2
+#define MBGRDVIZ_ROUTE_VERSION_MINOR 0
 #define MBGRDVIZ_PROFILE_VERSION "1.00"
 #define MBGRDVIZ_RISISCRIPT_VERSION "1.00"
 
@@ -2051,6 +2053,8 @@ int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr) {
   int nget;
   bool site_ok;
   double londeg, lonmin, latdeg, latmin;
+  int site_version_major = 0;
+  int site_version_minor = 0;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2112,9 +2116,20 @@ int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr) {
         site_ok = false;
 
         /* deal with site in form: lon lat topo color size name */
-        if (buffer[0] != '#') {
-          nget = sscanf(buffer, "%s %s %lf %d %d %[^\n]", lonstring, latstring, &sitetopo[nsite],
+        if (strncmp(buffer, "## Site File Version", 2) == 0) {
+          nget = sscanf(buffer, "## Site File Version %d.%d", &site_version_major, &site_version_minor);
+        }
+        else if (buffer[0] != '#') {
+          if (site_version_major > 1) {
+            nget = sscanf(buffer, "%s,%s,%lf,%d,%d,%[^\n]", 
+                        lonstring, latstring, &sitetopo[nsite],
                         &sitecolor[nsite], &sitesize[nsite], sitename[nsite]);
+          }
+          else {
+            nget = sscanf(buffer, "%s %s %lf %d %d %[^\n]", 
+                        lonstring, latstring, &sitetopo[nsite],
+                        &sitecolor[nsite], &sitesize[nsite], sitename[nsite]);
+          }
           if (nget >= 2) {
             if (strchr(lonstring, ':') != NULL) {
               if (sscanf(lonstring, "%lf:%lf", &londeg,&lonmin) == 2) {
@@ -2252,7 +2267,7 @@ int do_mbgrdviz_savesite(size_t instance, char *output_file_ptr) {
       /* open the output file */
       if ((sfp = fopen(output_file_ptr, "w")) != NULL) {
         /* write the site file header */
-        fprintf(sfp, "## Site File Version %s\n", MBGRDVIZ_SITE_VERSION);
+        fprintf(sfp, "## Site File Version %d.%2.2d\n", MBGRDVIZ_SITE_VERSION_MAJOR, MBGRDVIZ_SITE_VERSION_MINOR);
         fprintf(sfp, "## Output by Program %s\n", program_name);
         fprintf(sfp, "## MB-System Version %s\n", MB_VERSION);
         char user[256], host[256], date[32];
@@ -2269,11 +2284,11 @@ int do_mbgrdviz_savesite(size_t instance, char *output_file_ptr) {
         fprintf(sfp, "##   COLOR_BLUE      6\n");
         fprintf(sfp, "##   COLOR_PURPLE    7\n");
         fprintf(sfp, "## Site point format:\n");
-        fprintf(sfp, "##   <longitude (deg)> <latitude (deg)> <topography (m)> <color> <size> <name>\n");
+        fprintf(sfp, "##   <longitude (deg)>,<latitude (deg)>,<topography (m)>,<color>,<size>,<name>\n");
 
         /* loop over the sites */
         for (i = 0; i < nsite; i++) {
-          fprintf(sfp, "%12.7f %12.7f %10.3f %2d %2d %s\n", sitelon[i], sitelat[i], sitetopo[i], sitecolor[i],
+          fprintf(sfp, "%12.7f,%12.7f,%10.3f,%2d,%2d,%s\n", sitelon[i], sitelat[i], sitetopo[i], sitecolor[i],
                   sitesize[i], sitename[i]);
         }
 
@@ -2363,7 +2378,7 @@ int do_mbgrdviz_savesitewpt(size_t instance, char *output_file_ptr) {
       /* open the output file */
       if ((sfp = fopen(output_file_ptr, "w")) != NULL) {
         /* write the site file header */
-        fprintf(sfp, "## Site File Version %s\n", MBGRDVIZ_SITE_VERSION);
+        fprintf(sfp, "## Winfrog WPT file\n");
         fprintf(sfp, "## Output by Program %s\n", program_name);
         fprintf(sfp, "## MB-System Version %s\n", MB_VERSION);
         char user[256], host[256], date[32];
@@ -2420,6 +2435,8 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr) {
   char *result;
   int nget;
   bool point_ok;
+  int route_version_major = 0;
+  int route_version_minor = 0;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2454,6 +2471,8 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr) {
         if (buffer[0] == '#') {
           if (rawroutefile && strncmp(buffer, "## Route File Version", 21) == 0) {
             rawroutefile = false;
+            sscanf(buffer, "## Route File Version %d.%d", 
+                    &route_version_major, &route_version_minor);
           }
           else if (strncmp(buffer, "## ROUTENAME", 12) == 0) {
             strcpy(routename, &buffer[13]);
@@ -2475,6 +2494,12 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr) {
 
         /* deal with route segment marker */
         else if (buffer[0] == '>') {
+          if (strncmp(buffer, "> ## STARTROUTE", 14) == 0 && route_version_major > 1) {
+            int np = 0;
+            nget = sscanf(buffer, "> ## STARTROUTE %d,%d,%d,%d,%[^\n]", 
+                          &np, &routecolor, &routesize, &routeeditmode, routename);
+          }
+
           /* if data accumulated call mbview_addroute() */
           if (npoint > 0) {
             status = mbview_addroute(verbose, instance, npoint, routelon, routelat, routewaypoint, routecolor,
@@ -2486,7 +2511,11 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr) {
         /* deal with data */
         else {
           /* read the data from the buffer */
-          nget = sscanf(buffer, "%lf %lf %lf %d", &lon, &lat, &topo, &waypoint);
+          if (route_version_major > 1) {
+            nget = sscanf(buffer, "%lf,%lf,%lf,%d", &lon, &lat, &topo, &waypoint);
+          } else {
+            nget = sscanf(buffer, "%lf %lf %lf %d", &lon, &lat, &topo, &waypoint);
+          }
           if ((rawroutefile && nget >= 2) ||
               (!rawroutefile && nget >= 3 && waypoint > MBV_ROUTE_WAYPOINT_NONE))
             point_ok = true;
@@ -2561,6 +2590,7 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr) {
   double *slope = NULL;
   int routecolor;
   int routesize;
+  int routeeditmode;
   mb_path routename;
   bool selected;
   int iroute, j;
@@ -2595,13 +2625,36 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr) {
       /* open the output file */
       if ((sfp = fopen(output_file_ptr, "w")) != NULL) {
         /* write the route file header */
-        fprintf(sfp, "## Route File Version %s\n", MBGRDVIZ_ROUTE_VERSION);
+        fprintf(sfp, "## Route File Version %d.%2.2d\n", 
+                      MBGRDVIZ_ROUTE_VERSION_MAJOR, MBGRDVIZ_ROUTE_VERSION_MINOR);
         fprintf(sfp, "## Output by Program %s\n", program_name);
         fprintf(sfp, "## MB-System Version %s\n", MB_VERSION);
         char user[256], host[256], date[32];
         status = mb_user_host_date(verbose, user, host, date, &error);
         fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
-        fprintf(sfp, "## Number of routes: %d\n", nroutewrite);
+        fprintf(sfp, "##\n");
+        fprintf(sfp, "## Each route starts with a line of the form:\n");
+        fprintf(sfp, "##   > ## STARTROUTE np,c,s,m,String\n");
+        fprintf(sfp, "## where:\n");
+        fprintf(sfp, "##   np:                   Number of points in route (waypoints plus topography points)\n");
+        fprintf(sfp, "##   c:                    Color\n");
+        fprintf(sfp, "##   s:                    Size\n");
+        fprintf(sfp, "##   m:                    Edit mode\n");
+        fprintf(sfp, "##   String:               Survey name (can have spaces)\n");
+        fprintf(sfp, "## Each route ends with a line of the form:\n");
+        fprintf(sfp, "##   > ## ENDROUTE\n");
+        fprintf(sfp, "## Route color definitions:\n");
+        fprintf(sfp, "##   BLACK                 0\n");
+        fprintf(sfp, "##   WHITE                 1\n");
+        fprintf(sfp, "##   RED                   2\n");
+        fprintf(sfp, "##   YELLOW                3\n");
+        fprintf(sfp, "##   GREEN                 4\n");
+        fprintf(sfp, "##   BLUEGREEN             5\n");
+        fprintf(sfp, "##   BLUE                  6\n");
+        fprintf(sfp, "##   PURPLE                7\n");
+        fprintf(sfp, "##\n");
+        fprintf(sfp, "## Route point format:\n");
+        fprintf(sfp, "##   <longitude (deg)>,<latitude (deg)>,<topography (m)>,<waypoint type>,<bearing (deg)>,<lateral distance (m)>,<distance along topography (m)>,<slope (m/m)>\n");
         fprintf(sfp, "## Route waypoint type definitions:\n");
         fprintf(sfp, "##   WAYPOINT_NONE         0  Defines topography between waypoints\n");
         fprintf(sfp, "##   WAYPOINT_SIMPLE       1  Waypoint along survey line\n");
@@ -2616,9 +2669,8 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr) {
         fprintf(sfp, "##   WAYPOINT_ENDLINE4    10  End survey line type 4\n");
         fprintf(sfp, "##   WAYPOINT_STARTLINE5  11  Start survey line type 5\n");
         fprintf(sfp, "##   WAYPOINT_ENDLINE5    12  End survey line type 5\n");
-        fprintf(sfp, "## Route point format:\n");
-        fprintf(sfp, "##   <longitude (deg)> <latitude (deg)> <topography (m)> <waypoint type> <bearing (deg)> "
-                     "<lateral distance (m)> <distance along topography (m)> <slope (m/m)>\n");
+        fprintf(sfp, "##\n");
+        fprintf(sfp, "## Number of routes: %d\n", nroutewrite);
       }
 
       /* output error message */
@@ -2668,18 +2720,15 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr) {
           /* extract data for route */
           status = mbview_getroute(verbose, instance, iroute, &npointtotal, routelon, routelat, routewaypoint,
                                    routetopo, routebearing, distlateral, distovertopo, slope, &routecolor, &routesize,
-                                   routename, &error);
+                                   &routeeditmode, routename, &error);
 
           /* write the route header */
-          fprintf(sfp, "## ROUTENAME %s\n", routename);
-          fprintf(sfp, "## ROUTESIZE %d\n", routesize);
-          fprintf(sfp, "## ROUTECOLOR %d\n", routecolor);
-          fprintf(sfp, "## ROUTEPOINTS %d\n", npointtotal);
-          fprintf(sfp, "> ## STARTROUTE\n");
+          fprintf(sfp, "> ## STARTROUTE %d,%d,%d,%d,%s\n", 
+                      npointtotal, routecolor, routesize, routeeditmode, routename);
 
           /* write the route points */
           for (j = 0; j < npointtotal; j++) {
-            fprintf(sfp, "%f %f %f %d %f %f %f %f", routelon[j], routelat[j], routetopo[j], routewaypoint[j],
+            fprintf(sfp, "%f,%f,%f,%d,%f,%f,%f,%f", routelon[j], routelat[j], routetopo[j], routewaypoint[j],
                     routebearing[j], distlateral[j], distovertopo[j], slope[j]);
             if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_SIMPLE)
               fprintf(sfp, " ## WAYPOINT\n");
@@ -2749,6 +2798,7 @@ int do_mbgrdviz_saveroutereversed(size_t instance, char *output_file_ptr) {
   double *slope = NULL;
   int routecolor;
   int routesize;
+  int routeeditmode;
   mb_path routename;
   bool selected;
   int iroute, j;
@@ -2783,13 +2833,36 @@ int do_mbgrdviz_saveroutereversed(size_t instance, char *output_file_ptr) {
       /* open the output file */
       if ((sfp = fopen(output_file_ptr, "w")) != NULL) {
         /* write the route file header */
-        fprintf(sfp, "## Route File Version %s\n", MBGRDVIZ_ROUTE_VERSION);
+        fprintf(sfp, "## Route File Version %d.%2.2d\n", 
+                      MBGRDVIZ_ROUTE_VERSION_MAJOR, MBGRDVIZ_ROUTE_VERSION_MINOR);
         fprintf(sfp, "## Output by Program %s\n", program_name);
         fprintf(sfp, "## MB-System Version %s\n", MB_VERSION);
         char user[256], host[256], date[32];
         status = mb_user_host_date(verbose, user, host, date, &error);
         fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
-        fprintf(sfp, "## Number of routes: %d\n", nroutewrite);
+        fprintf(sfp, "##\n");
+        fprintf(sfp, "## Each route starts with a line of the form:\n");
+        fprintf(sfp, "##   > ## STARTROUTE np,c,s,m,String\n");
+        fprintf(sfp, "## where:\n");
+        fprintf(sfp, "##   np:                   Number of points in route (waypoints plus topography points)\n");
+        fprintf(sfp, "##   c:                    Color\n");
+        fprintf(sfp, "##   s:                    Size\n");
+        fprintf(sfp, "##   m:                    Edit mode\n");
+        fprintf(sfp, "##   String:               Survey name (can have spaces)\n");
+        fprintf(sfp, "## Each route ends with a line of the form:\n");
+        fprintf(sfp, "##   > ## ENDROUTE\n");
+        fprintf(sfp, "## Route color definitions:\n");
+        fprintf(sfp, "##   BLACK                 0\n");
+        fprintf(sfp, "##   WHITE                 1\n");
+        fprintf(sfp, "##   RED                   2\n");
+        fprintf(sfp, "##   YELLOW                3\n");
+        fprintf(sfp, "##   GREEN                 4\n");
+        fprintf(sfp, "##   BLUEGREEN             5\n");
+        fprintf(sfp, "##   BLUE                  6\n");
+        fprintf(sfp, "##   PURPLE                7\n");
+        fprintf(sfp, "##\n");
+        fprintf(sfp, "## Route point format:\n");
+        fprintf(sfp, "##   <longitude (deg)>,<latitude (deg)>,<topography (m)>,<waypoint type>,<bearing (deg)>,<lateral distance (m)>,<distance along topography (m)>,<slope (m/m)>\n");
         fprintf(sfp, "## Route waypoint type definitions:\n");
         fprintf(sfp, "##   WAYPOINT_NONE         0  Defines topography between waypoints\n");
         fprintf(sfp, "##   WAYPOINT_SIMPLE       1  Waypoint along survey line\n");
@@ -2804,9 +2877,8 @@ int do_mbgrdviz_saveroutereversed(size_t instance, char *output_file_ptr) {
         fprintf(sfp, "##   WAYPOINT_ENDLINE4    10  End survey line type 4\n");
         fprintf(sfp, "##   WAYPOINT_STARTLINE5  11  Start survey line type 5\n");
         fprintf(sfp, "##   WAYPOINT_ENDLINE5    12  End survey line type 5\n");
-        fprintf(sfp, "## Route point format:\n");
-        fprintf(sfp, "##   <longitude (deg)> <latitude (deg)> <topography (m)> <waypoint type> <bearing (deg)> "
-                     "<lateral distance (m)> <distance along topography (m)> <slope (m/m)>\n");
+        fprintf(sfp, "##\n");
+        fprintf(sfp, "## Number of routes: %d\n", nroutewrite);
       }
 
       /* output error message */
@@ -2856,21 +2928,18 @@ int do_mbgrdviz_saveroutereversed(size_t instance, char *output_file_ptr) {
           /* extract data for route */
           status = mbview_getroute(verbose, instance, iroute, &npointtotal, routelon, routelat, routewaypoint,
                                    routetopo, routebearing, distlateral, distovertopo, slope, &routecolor, &routesize,
-                                   routename, &error);
+                                   &routeeditmode, routename, &error);
 
-          /* write the route header */
-          fprintf(sfp, "## ROUTENAME %s\n", routename);
-          fprintf(sfp, "## ROUTESIZE %d\n", routesize);
-          fprintf(sfp, "## ROUTECOLOR %d\n", routecolor);
-          fprintf(sfp, "## ROUTEPOINTS %d\n", npointtotal);
-          fprintf(sfp, "> ## STARTROUTE\n");
+           /* write the route header */
+          fprintf(sfp, "> ## STARTROUTE %d,%d,%d,%d,%s\n", 
+                      npointtotal, routecolor, routesize, routeeditmode, routename);
 
           /* write the route points */
           for (j = npointtotal - 1; j >= 0; j-- ) {
             double bearing = *routebearing - 180.0;
             if (bearing < 0.0)
               bearing += 360.0;
-            fprintf(sfp, "%f %f %f %d %f %f %f %f", routelon[j], routelat[j], routetopo[j], routewaypoint[j],
+            fprintf(sfp, "%f,%f,%f,%d,%f,%f,%f,%f", routelon[j], routelat[j], routetopo[j], routewaypoint[j],
                     routebearing[j], distlateral[j], distovertopo[j], slope[j]);
             if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_SIMPLE)
               fprintf(sfp, " ## WAYPOINT\n");
@@ -2940,6 +3009,7 @@ int do_mbgrdviz_saverisiscriptheading(size_t instance, char *output_file_ptr) {
   double *slope = NULL;
   int routecolor;
   int routesize;
+  int routeeditmode;
   mb_path routename;
   bool selected;
   int iroute, j;
@@ -3043,7 +3113,7 @@ int do_mbgrdviz_saverisiscriptheading(size_t instance, char *output_file_ptr) {
           /* extract data for route */
           status = mbview_getroute(verbose, instance, iroute, &npointtotal, routelon, routelat, routewaypoint,
                                    routetopo, routebearing, distlateral, distovertopo, slope, &routecolor, &routesize,
-                                   routename, &error);
+                                   &routeeditmode, routename, &error);
 
           /* if this the first route define the projection */
           if (pjptr == NULL && npointtotal > 0) {
@@ -3195,6 +3265,7 @@ int do_mbgrdviz_saverisiscriptnoheading(size_t instance, char *output_file_ptr) 
   double *slope = NULL;
   int routecolor;
   int routesize;
+  int routeeditmode;
   mb_path routename;
   bool selected;
   int iroute, j;
@@ -3298,7 +3369,7 @@ int do_mbgrdviz_saverisiscriptnoheading(size_t instance, char *output_file_ptr) 
           /* extract data for route */
           status = mbview_getroute(verbose, instance, iroute, &npointtotal, routelon, routelat, routewaypoint,
                                    routetopo, routebearing, distlateral, distovertopo, slope, &routecolor, &routesize,
-                                   routename, &error);
+                                   &routeeditmode, routename, &error);
 
           /* if this the first route define the projection using the starting point */
           if (pjptr == NULL && npointtotal > 0) {
@@ -3449,6 +3520,7 @@ int do_mbgrdviz_savewinfrogpts(size_t instance, char *output_file_ptr) {
   double *slope = NULL;
   int routecolor;
   int routesize;
+  int routeeditmode;
   mb_path routename;
   int iroute, j;
 
@@ -3511,7 +3583,8 @@ int do_mbgrdviz_savewinfrogpts(size_t instance, char *output_file_ptr) {
         /* extract data for route */
         status =
             mbview_getroute(verbose, instance, iroute, &npointtotal, routelon, routelat, routewaypoint, routetopo,
-                            routebearing, distlateral, distovertopo, slope, &routecolor, &routesize, routename, &error);
+                            routebearing, distlateral, distovertopo, slope, &routecolor, &routesize, 
+                            &routeeditmode, routename, &error);
 
         /* write the route header */
         fprintf(sfp, "0,%s,0,0.000,0.000,1,2,65280,0,0.200,0,0,1.000\r\n", routename);
@@ -3557,6 +3630,7 @@ int do_mbgrdviz_savewinfrogwpt(size_t instance, char *output_file_ptr) {
   double *slope = NULL;
   int routecolor;
   int routesize;
+  int routeeditmode;
   mb_path routename;
   int iroute, j, n;
 
@@ -3619,7 +3693,8 @@ int do_mbgrdviz_savewinfrogwpt(size_t instance, char *output_file_ptr) {
         /* extract data for route */
         status =
             mbview_getroute(verbose, instance, iroute, &npointtotal, routelon, routelat, routewaypoint, routetopo,
-                            routebearing, distlateral, distovertopo, slope, &routecolor, &routesize, routename, &error);
+                            routebearing, distlateral, distovertopo, slope, &routecolor, &routesize, 
+                            &routeeditmode, routename, &error);
 
         /* write the route points */
         n = 0;
@@ -3665,6 +3740,7 @@ int do_mbgrdviz_savedegdecmin(size_t instance, char *output_file_ptr) {
   double *slope = NULL;
   int routecolor;
   int routesize;
+  int routeeditmode;
   mb_path routename;
   char latNS, lonEW;
   int latDeg, lonDeg;
@@ -3730,7 +3806,8 @@ int do_mbgrdviz_savedegdecmin(size_t instance, char *output_file_ptr) {
         /* extract data for route */
         status =
             mbview_getroute(verbose, instance, iroute, &npointtotal, routelon, routelat, routewaypoint, routetopo,
-                            routebearing, distlateral, distovertopo, slope, &routecolor, &routesize, routename, &error);
+                            routebearing, distlateral, distovertopo, slope, &routecolor, &routesize, 
+                            &routeeditmode, routename, &error);
 
         /* write the route points */
         n = 0;
@@ -3797,6 +3874,7 @@ int do_mbgrdviz_savelnw(size_t instance, char *output_file_ptr) {
   double *slope = NULL;
   int routecolor;
   int routesize;
+  int routeeditmode;
   mb_path routename;
   char *error_message;
   char projection_id[MB_PATH_MAXLINE];
@@ -3869,7 +3947,8 @@ int do_mbgrdviz_savelnw(size_t instance, char *output_file_ptr) {
         /* extract data for route */
         status =
             mbview_getroute(verbose, instance, iroute, &npointtotal, routelon, routelat, routewaypoint, routetopo,
-                            routebearing, distlateral, distovertopo, slope, &routecolor, &routesize, routename, &error);
+                            routebearing, distlateral, distovertopo, slope, &routecolor, &routesize, 
+                            &routeeditmode, routename, &error);
 
         /* if this the first route define the projection */
         if (pjptr == NULL && npointtotal > 0) {
@@ -3960,6 +4039,7 @@ int do_mbgrdviz_savegreenseayml(size_t instance, char *output_file_ptr) {
   double *slope = NULL;
   int routecolor;
   int routesize;
+  int routeeditmode;
   mb_path routename;
   bool selected;
   // char *error_message;
@@ -4051,7 +4131,7 @@ int do_mbgrdviz_savegreenseayml(size_t instance, char *output_file_ptr) {
       status = mbview_getroute(verbose, instance, iroutewrite, &npointtotal,
                                 routelon, routelat, routewaypoint, routetopo,
                                 routebearing, distlateral, distovertopo, slope,
-                                &routecolor, &routesize, routename, &error);
+                                &routecolor, &routesize, &routeeditmode, routename, &error);
 
       /* output header of mission */
       fprintf(sfp, "mission_data:\n");
@@ -4144,6 +4224,7 @@ int do_mbgrdviz_savetecdislst(size_t instance, char *output_file_ptr) {
   double *slope = NULL;
   int routecolor;
   int routesize;
+  int routeeditmode;
   mb_path routename;
   char latNS, lonEW;
   int latDeg, lonDeg;
@@ -4209,7 +4290,8 @@ int do_mbgrdviz_savetecdislst(size_t instance, char *output_file_ptr) {
         /* extract data for route */
         status =
             mbview_getroute(verbose, instance, iroute, &npointtotal, routelon, routelat, routewaypoint, routetopo,
-                            routebearing, distlateral, distovertopo, slope, &routecolor, &routesize, routename, &error);
+                            routebearing, distlateral, distovertopo, slope, &routecolor, &routesize, 
+                            &routeeditmode, routename, &error);
 
         /* write the route points */
         n = 0;
