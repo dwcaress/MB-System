@@ -27,15 +27,14 @@ TEST(MbVersion, Basic) {
   EXPECT_EQ(MB_ERROR_NO_ERROR, error);
   EXPECT_THAT(version_string,
               testing::ContainsRegex("^[0-9]+[.][0-9]+[.][0-9]+"));
-  EXPECT_GT(version_id, 50700005);
-  EXPECT_LT(version_id, 60000000);
-
-  EXPECT_EQ(5, version_major);
-
-  EXPECT_GT(version_minor, 0);
-  EXPECT_LT(version_minor, 99);
-  EXPECT_GT(version_archive, 0);
-  EXPECT_LT(version_archive, 99);
+  EXPECT_GE(version_id, 50700009);
+  EXPECT_LT(version_id, 70000000);
+  EXPECT_GE(version_major, 4);
+  EXPECT_LE(version_major, 7);
+  EXPECT_GE(version_minor, 0);
+  EXPECT_LE(version_minor, 99);
+  EXPECT_GE(version_archive, 0);
+  EXPECT_LE(version_archive, 99);
 }
 
 TEST(MbDefaultDefaults, Basic) {

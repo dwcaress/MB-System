@@ -1,14 +1,9 @@
 message("In src/man/man1")
 
 set(manpages
-    geod.1
-    mb7k2jstar.1
-    mb7k2ss.1
-    mb7kpreprocess.1
     mbabsorption.1
     mbareaclean.1
     mbauvloglist.1
-    mbauvnavusbl.1
     mbbackangle.1
     mbclean.1
     mbconfig.1
@@ -30,10 +25,7 @@ set(manpages
     mbgrdviz.1
     mbgrid.1
     mbhistogram.1
-    mbhsdump.1
-    mbhysweeppreprocess.1
     mbinfo.1
-    mbkongsbergpreprocess.1
     mblevitus.1
     mblist.1
     mbm_arc2grd.1
@@ -68,12 +60,10 @@ set(manpages
     mbnavadjustmerge.1
     mbnavedit.1
     mbnavlist.1
-    mbneptune2esf.1
     mbotps.1
     mbpreprocess.1
     mbprocess.1
     mbps.1
-    mbrollbias.1
     mbrolltimelag.1
     mbroutetime.1
     mbsegygrid.1
@@ -82,19 +72,31 @@ set(manpages
     mbsegypsd.1
     mbset.1
     mbsslayout.1
-    mbstripnan.1
     mbsvplist.1
     mbsvpselect.1
     mbswath.1
-    mbswplspreprocess.1
     mbsystem.1
     mbtiff2png.1
     mbtime.1
     mbvelocitytool.1
-    mbvoxelclean.1
-    proj.1)
+    mbvoxelclean.1)
 
-install(FILES ${manpages} DESTINATION ${CMAKE_INSTALL_MANPAGES}/man1)
+if(buildDeprecated)
+    set(deprecated
+        mb7k2jstar.1
+        mb7k2ss.1
+        mb7kpreprocess.1
+        mbauvnavusbl.1
+        mbhsdump.1
+        mbhysweeppreprocess.1
+        mbkongsbergpreprocess.1
+        mbneptune2esf.1
+        mbrollbias.1
+        mbstripnan.1
+        mbswplspreprocess.1)
+endif()
+
+install(FILES ${manpages} ${deprecated} DESTINATION ${CMAKE_INSTALL_MANPAGES}/man1)
 
 message(STATUS "Installed man pages to ${CMAKE_INSTALL_MANPAGES}/man1")
 

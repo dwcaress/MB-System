@@ -155,7 +155,7 @@ am__define_uniq_tagged_files = \
   unique=`for i in $$list; do \
     if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
   done | $(am__uniquify_input)`
-DIST_SUBDIRS = $(SUBDIRS)
+DIST_SUBDIRS = mbio utilities deprecated
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
@@ -366,7 +366,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = mbio utilities deprecated
+@BUILD_DEPRECATED_TRUE@XBUILD_SUB_DEPRECATED = deprecated
+SUBDIRS = mbio utilities $(XBUILD_SUB_DEPRECATED)
 CLEANFILES = 
 DISTCLEANFILES = 
 all: all-recursive
