@@ -1,15 +1,15 @@
 dist_mbsystemhtml_DATA = \
-    index.html \
     ChangeLog.html \
     COPYING.html \
     GPL.html \
     mbsystem_logo_small.gif \
     mbsystem_logo.gif \
     mbsystem_version.txt \
-    mbsystem_capabilities.html \
+    mbsystem_index.html \
     mbsystem_man_list.html \
     mbsystem_formats.html \
     mbsystem.html \
+    mbio.html \
     mb7k2jstar.html \
     mb7k2ss.html \
     mb7kpreprocess.html \
@@ -38,7 +38,6 @@ dist_mbsystemhtml_DATA = \
     mbhsdump.html \
     mbhysweeppreprocess.html \
     mbinfo.html \
-    mbio.html \
     mbkongsbergpreprocess.html \
     mblevitus.html \
     mblist.html \
