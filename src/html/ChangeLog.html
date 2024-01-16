@@ -4,9 +4,6 @@
 source software package for the processing and display of swath sonar
 data. This file is located at the top of the MB-System source code
 distribution directory structure.</p>
-<hr />
-<h3 id="mb-system-version-5-releases">MB-System Version 5 Releases:</h3>
-<hr />
 <p>In the list below, releases shown in bold type are major, announced
 releases. The other entries are test or "beta" releases that were not
 announced and generally not widely distributed. Prior to 5.7.1, the
@@ -21,8 +18,56 @@ generally not announced. Distributions that do not include "beta" in the
 tag name correspond to the major, announced releases. The source
 distributions associated with all releases, major or beta, are equally
 accessible as tarballs through the Github interface.</p>
+<hr />
+<h3 id="mb-system-version-58-releases-and-release-notes">MB-System
+Version 5.8 Releases and Release Notes:</h3>
+<hr />
 <ul>
-<li>Version 5.7.9beta72 January 13, 2024</li>
+<li><strong>Version 5.8.0 January 15, 2024</strong></li>
+</ul>
+<hr />
+<p><strong>Version 5.8.0</strong> is now the current release of
+MB-System.</p>
+<p>The source code distribution can be downloaded from the MB-System
+Github repository at:<br />
+<a
+href="https://github.com/dwcaress/MB-System/archive/refs/tags/5.7.9beta71.tar.gz">https://github.com/dwcaress/MB-System/archive/refs/tags/5.7.9beta71.tar.gz</a></p>
+<p>In addition to many bug fixes, the changes of 5.8.0 relative to the
+prior major release (5.7.8) include:</p>
+<p><strong>New build system:</strong><br />
+MB-System is now built and installed using the CMake package, rather
+than GNU Autotools. The old build system is still present and can be
+used to install MB-System on old operating systems (e.g. Ubuntu 18.04),
+but all support for building on recent, current and future operating
+systems will be for use of CMake. See the Download and Install (<a
+href="https://www.mbari.org/technology/mb-system/installation/">https://www.mbari.org/technology/mb-system/installation/</a>)
+instructions page for details.</p>
+<p><strong>Global ties to reference grids in MBnavadjust:</strong><br />
+MBnavadjust is a toolset used adjust navigation of submerged platform
+(e.g. AUV or ROV) surveys so that features match where swaths overlap
+and cross. The primary information comes from measuring the navigation
+offsets required to match features using cross correlation of the
+bathymetry data. MBnavadjust now also allows the survey navigation to be
+tied to reference bathymetry models, typically from GPS-navigated hull
+mounted surveys, so that the navigation can be tied to the world frame
+of reference.</p>
+<p><strong>Realtime Terrain Relative Navigation:</strong><br />
+MB-System now includes a Terrain Relative Navigation (TRN) codebase
+developed at Stanford and MBARI that uses realtime topography
+information to where a platform is located on a pre-existing topography
+map. The MB-System tool mbtrnpp implements TRN in the case of an AUV or
+ROV equipped with a multibeam sonar.</p>
+<p><strong>Photomosaicing tools available:</strong><br />
+Tools for generating photomosaics from sets of still seafloor
+photographs are now built as part of MB-System. Documentation and
+examples are being developed but are not available at the time of this
+release.</p>
+<hr />
+<h3 id="mb-system-version-57-releases-and-release-notes">MB-System
+Version 5.7 Releases and Release Notes:</h3>
+<hr />
+<ul>
+<li>Version 5.7.9beta72 January 14, 2024</li>
 <li>Version 5.7.9beta71 January 3, 2024</li>
 <li>Version 5.7.9beta70 January 2, 2024</li>
 <li>Version 5.7.9beta69 December 17, 2023</li>
@@ -164,286 +209,7 @@ accessible as tarballs through the Github interface.</p>
 <li><strong>Version 5.7.3 February 8, 2019</strong></li>
 <li>Version 5.7.2 February 4, 2019</li>
 <li><strong>Version 5.7.1 December 19, 2018</strong></li>
-<li>Version 5.6.20181218 December 18, 2018</li>
-<li><strong>Version 5.6.20181217 December 17, 2018</strong></li>
-<li>Version 5.6.20181214 December 14, 2018</li>
-<li>Version 5.6.20181129 November 29, 2018</li>
-<li>Version 5.6.20181016 October 16, 2018</li>
-<li>Version 5.6.002 September 14, 2018</li>
-<li>Version 5.6.002 September 11, 2018</li>
-<li>Version 5.5.2350 September 6, 2018</li>
-<li>Version 5.5.2348 August 20, 2018</li>
-<li>Version 5.5.2347 August 17, 2018</li>
-<li>Version 5.5.2346 August 13, 2018</li>
-<li>Version 5.5.2345 August 10, 2018</li>
-<li>Version 5.5.2344 August 3, 2018</li>
-<li>Version 5.5.2343 July 10, 2018</li>
-<li><strong>Version 5.5.2342 June 29, 2018</strong></li>
-<li>Version 5.5.2340 June 26, 2018</li>
-<li>Version 5.5.2339 June 25, 2018</li>
-<li><strong>Version 5.5.2336 June 6, 2018</strong></li>
-<li>Version 5.5.2335 May 6, 2018</li>
-<li>Version 5.5.2334 April 18, 2018</li>
-<li>Version 5.5.2333 April 18, 2018</li>
-<li>Version 5.5.2332 April 17, 2018</li>
-<li>Version 5.5.2331 April 10, 2018</li>
-<li>Version 5.5.2330 March 7, 2018</li>
-<li>Version 5.5.2329 February 12, 2018</li>
-<li>Version 5.5.2328 January 31, 2018</li>
-<li><strong>Version 5.5.2327 January 23, 2018</strong></li>
-<li>Version 5.5.2324 January 18, 2018</li>
-<li>Version 5.5.2323 December 7, 2017</li>
-<li>Version 5.5.2322 November 25, 2017</li>
-<li><strong>Version 5.5.2321 October 26, 2017</strong></li>
-<li>Version 5.5.2320 October 18, 2017</li>
-<li><strong>Version 5.5.2319 October 16, 2017</strong></li>
-<li><strong>Version 5.5.2318 September 29, 2017</strong></li>
-<li><strong>Version 5.5.2314 August 24, 2017</strong></li>
-<li><strong>Version 5.5.2313 August 9, 2017</strong></li>
-<li>Version 5.5.2312 July 14, 2017</li>
-<li>Version 5.5.2311 June 20, 2017</li>
-<li><strong>Version 5.5.2309 June 4, 2017</strong></li>
-<li>Version 5.5.2306 May 27, 2017</li>
-<li>Version 5.5.2305 May 13, 2017</li>
-<li>Version 5.5.2304 May 6, 2017</li>
-<li>Version 5.5.2303 April 28, 2017</li>
-<li>Version 5.5.2302 April 20, 2017</li>
-<li>Version 5.5.2301 April 17, 2017</li>
-<li>Version 5.5.2300 April 15, 2017</li>
-<li>Version 5.5.2299 April 10, 2017</li>
-<li>Version 5.5.2297 April 5, 2017</li>
-<li>Version 5.5.2296 March 31, 2017</li>
-<li>Version 5.5.2295 March 26, 2017</li>
-<li>Version 5.5.2294 March 21, 2017</li>
-<li>Version 5.5.2293 March 6, 2017</li>
-<li>Version 5.5.2290 January 2, 2017</li>
-<li>Version 5.5.2289 December 2, 2016</li>
-<li>Version 5.5.2287 November 29, 2016</li>
-<li>Version 5.5.2286 November 8, 2016</li>
-<li>Version 5.5.2285 November 3, 2016</li>
-<li><strong>Version 5.5.2284 October 23, 2016</strong></li>
-<li>Version 5.5.2282 August 25, 2016</li>
-<li>Version 5.5.2281 August 7, 2016</li>
-<li><strong>Version 5.5.2279 July 8, 2016</strong></li>
-<li><strong>Version 5.5.2278 July 1, 2016</strong></li>
-<li>Version 5.5.2277 June 25, 2016</li>
-<li>Version 5.5.2275 May 17, 2016</li>
-<li><strong>Version 5.5.2274 May 5, 2016</strong></li>
-<li>Version 5.5.2271 April 1, 2016</li>
-<li><strong>Version 5.5.2270 March 24, 2016</strong></li>
-<li>Version 5.5.2268 March 14, 2016</li>
-<li><strong>Version 5.5.2267 February 11, 2016</strong></li>
-<li>Version 5.5.2265 February 11, 2016</li>
-<li>Version 5.5.2264 February 2, 2016</li>
-<li><strong>Version 5.5.2263 January 7, 2016</strong></li>
-<li>Version 5.5.2260 December 22, 2015</li>
-<li>Version 5.5.2259 October 27, 2015</li>
-<li>Version 5.5.2258 October 5, 2015</li>
-<li>Version 5.5.2257 September 1, 2015</li>
-<li>Version 5.5.2256 August 24, 2015</li>
-<li>Version 5.5.2255 August 11, 2015</li>
-<li>Version 5.5.2254 July 23, 2015</li>
-<li><strong>Version 5.5.2252 July 1, 2015</strong></li>
-<li><strong>Version 5.5.2251 June 30, 2015</strong></li>
-<li>Version 5.5.2250 June 29, 2015</li>
-<li>Version 5.5.2249 June 26, 2015</li>
-<li><strong>Version 5.5.2248 May 31, 2015</strong></li>
-<li>Version 5.5.2247 May 29, 2015</li>
-<li><strong>Version 5.5.2246 May 27, 2015</strong></li>
-<li><strong>Version 5.5.2243 May 22, 2015</strong></li>
-<li><strong>Version 5.5.2242 May 16, 2015</strong></li>
-<li>Version 5.5.2241 May 12, 2015</li>
-<li>Version 5.5.2240 May 8, 2015</li>
-<li>Version 5.5.2239 May 6, 2015</li>
-<li>Version 5.5.2238 April 14, 2015</li>
-<li>Version 5.5.2237 March 23, 2015</li>
-<li>Version 5.5.2234 March 5, 2015</li>
-<li><strong>Version 5.5.2233 February 23, 2015</strong></li>
-<li>Version 5.5.2232 February 21, 2015</li>
-<li>Version 5.5.2231 February 20, 2015</li>
-<li>Version 5.5.2230 February 18, 2015</li>
-<li>Version 5.5.2229 February 14, 2015</li>
-<li>Version 5.5.2228 February 6, 2015</li>
-<li><strong>Version 5.4.2220 January 22, 2015 (Last GMT4-compatible
-archive revision)</strong></li>
-<li>Version 5.4.2219 December 11, 2014</li>
-<li>Version 5.4.2218 December 4, 2014</li>
-<li>Version 5.4.2217 December 1, 2014</li>
-<li><strong>Version 5.4.2213 November 13, 2014</strong></li>
-<li>Version 5.4.2210 November 10, 2014</li>
-<li><strong>Version 5.4.2209 November 4, 2014</strong></li>
-<li><strong>Version 5.4.2208 October 29, 2014</strong></li>
-<li>Version 5.4.2204 September 5, 2014</li>
-<li><strong>Version 5.4.2202 August 25, 2014</strong></li>
-<li>Version 5.4.2201 August 20, 2014</li>
-<li><strong>Version 5.4.2200 July 24, 2014</strong></li>
-<li><strong>Version 5.4.2199 July 19, 2014</strong></li>
-<li>Version 5.4.2196 July 14, 2014</li>
-<li>Version 5.4.2195 July 9, 2014</li>
-<li>Version 5.4.2194 July 8, 2014</li>
-<li><strong>Version 5.4.2191 June 4, 2014</strong></li>
-<li><strong>Version 5.4.2188 May 31, 2014</strong></li>
-<li>Version 5.4.2187 May 28, 2014</li>
-<li>Version 5.4.2186 May 26, 2014</li>
-<li>Version 5.4.2185 May 11, 2014</li>
-<li><strong>Version 5.4.2183 April 16, 2014</strong></li>
-<li>Version 5.4.2182 April 8, 2014</li>
-<li>Version 5.4.2181 April 4, 2014</li>
-<li><strong>Version 5.4.2176 March 18, 2014</strong></li>
-<li><strong>Version 5.4.2168 February 19, 2014</strong></li>
-<li><strong>Version 5.4.2163 January 31, 2014</strong></li>
-<li>Version 5.4.2162 January 24, 2014</li>
-<li><strong>Version 5.4.2159 January 18, 2014</strong></li>
-<li>Version 5.4.2158 January 18, 2014</li>
-<li><strong>Version 5.4.2157 October 14, 2013</strong></li>
-<li>Version 5.4.2155 October 13, 2013</li>
-<li>Version 5.4.2154 September 26, 2013</li>
-<li>Version 5.4.2153 September 22, 2013</li>
-<li><strong>Version 5.4.2152 September 16, 2013</strong></li>
-<li>Version 5.4.2151 September 12, 2013</li>
-<li>Version 5.4.2149 September 2, 2013</li>
-<li>Version 5.4.2148 August 28, 2013</li>
-<li>Version 5.4.2147 August 27, 2013</li>
-<li>Version 5.4.2144 August 26, 2013</li>
-<li>Version 5.4.2143 August 24, 2013</li>
-<li>Version 5.4.2141 August 24, 2013</li>
-<li>Version 5.4.2139 August 19, 2013</li>
-<li>Version 5.4.2138 August 18, 2013</li>
-<li>Version 5.4.2137 August 9, 2013</li>
-<li>Version 5.4.2136 August 8, 2013</li>
-<li><strong>Version 5.4.2135 August 7, 2013</strong></li>
-<li>Version 5.4.2133 July 29, 2013</li>
-<li>Version 5.4.2132 July 26, 2013</li>
-<li>Version 5.4.2130 July 20, 2013</li>
-<li>Version 5.4.2129 July 8, 2013</li>
-<li>Version 5.4.2128 June 18, 2013</li>
-<li>Version 5.4.2123 June 10, 2013</li>
-<li>Version 5.4.2082 May 24, 2013</li>
-<li>Version 5.3.2053 April 4, 2013</li>
-<li>Version 5.3.2051 March 20, 2013</li>
-<li>Version 5.3.2042 March 12, 2013</li>
-<li><strong>Version 5.3.2017 March 3, 2013</strong></li>
-<li><strong>Version 5.3.2013 January 29, 2013</strong></li>
-<li><strong>Version 5.3.2012 January 25, 2013</strong></li>
-<li><strong>Version 5.3.2011 January 17, 2013</strong></li>
-<li>Version 5.3.2010 January 14, 2013</li>
-<li><strong>Version 5.3.2009 January 10, 2013</strong></li>
-<li><strong>Version 5.3.2008 January 6, 2013</strong></li>
-<li>Version 5.3.2007 January 5, 2013</li>
-<li>Version 5.3.2006 January 4, 2013</li>
-<li>Version 5.3.2005 December 31, 2012</li>
-<li>Version 5.3.2004 December 12, 2012</li>
-<li>Version 5.3.2000 November 14, 2012</li>
-<li>Version 5.3.1999 November 13, 2012</li>
-<li>Version 5.3.1998 November 6, 2012</li>
-<li>Version 5.3.1994 October 27, 2012</li>
-<li>Version 5.3.1988 September 29, 2012</li>
-<li>Version 5.3.1986 September 12, 2012</li>
-<li><strong>Version 5.3.1982 August 15, 2012</strong></li>
-<li>Version 5.3.1981 August 2, 2012</li>
-<li><strong>Version 5.3.1980 July 13, 2012</strong></li>
-<li><strong>Version 5.3.1955 May 16, 2012</strong></li>
-<li>Version 5.3.1941 March 6, 2012</li>
-<li><strong>Version 5.3.1917 January 10, 2012</strong></li>
-<li><strong>Version 5.3.1912 November 19, 2011</strong></li>
-<li><strong>Version 5.3.1909 November 16, 2011</strong></li>
-<li><strong>Version 5.3.1907 November 9, 2011</strong></li>
-<li><strong>Version 5.3.1906 September 28, 2011</strong></li>
-<li><strong>Version 5.2.1880 December 30, 2010</strong></li>
-<li>Version 5.1.3beta1875 November 23, 2010</li>
-<li>Version 5.1.3beta1874 November 7, 2010</li>
-<li>Version 5.1.3beta1862 June 7, 2010</li>
-<li>Version 5.1.3beta1858 May 18, 2010</li>
-<li>Version 5.1.3beta1855 May 4, 2010</li>
-<li>Version 5.1.3beta1851 April 14, 2010</li>
-<li>Version 5.1.3beta1844 March 30, 2010</li>
-<li>Version 5.1.3beta1843 March 29, 2010</li>
-<li>Version 5.1.3beta1829 February 5, 2010</li>
-<li><strong>Version 5.1.2 December 31, 2009</strong></li>
-<li>Version 5.1.2beta15 December 30, 2009</li>
-<li>Version 5.1.2beta14 December 28, 2009</li>
-<li>Version 5.1.2beta13 December 28, 2009</li>
-<li>Version 5.1.2beta12 December 26, 2009</li>
-<li>Version 5.1.2beta11 Ausust 26, 2009</li>
-<li>Version 5.1.2beta10 Ausust 12, 2009</li>
-<li>Version 5.1.2beta09 Ausust 7, 2009</li>
-<li>Version 5.1.2beta08 Ausust 5, 2009</li>
-<li>Version 5.1.2beta06 July 2, 2009</li>
-<li>Version 5.1.2beta05 June 14, 2009</li>
-<li>Version 5.1.2beta02 March 13, 2009</li>
-<li>Version 5.1.2beta01 March 9, 2009</li>
-<li><strong>Version 5.1.1 December 31, 2008</strong></li>
-<li>Version 5.1.1beta26 November 18, 2008</li>
-<li>Version 5.1.1beta25 September 28, 2008</li>
-<li>Version 5.1.1beta23 September 19, 2008</li>
-<li>Version 5.1.1beta21 July 20, 2008</li>
-<li>Version 5.1.1beta20 July 10, 2008</li>
-<li>Version 5.1.1beta19 June 6, 2008</li>
-<li>Version 5.1.1beta18 May 16, 2008</li>
-<li>Version 5.1.1beta17 March 21, 2008</li>
-<li>Version 5.1.1beta16 March 14, 2008</li>
-<li>Version 5.1.1beta15 February 8, 2008</li>
-<li>Version 5.1.1beta14 January 15, 2008</li>
-<li>Version 5.1.1beta13 November 16, 2007</li>
-<li>Version 5.1.1beta12 November 2, 2007</li>
-<li>Version 5.1.1beta11 October 17, 2007</li>
-<li>Version 5.1.1beta10 October 8, 2007</li>
-<li>Version 5.1.1beta5 July 5, 2007</li>
-<li><strong>Version 5.1.0 November 26, 2006</strong></li>
-<li>Version 5.1.0beta4 October 5, 2006</li>
-<li>Version 5.1.0beta3 September 11, 2006</li>
-<li>Version 5.1.0beta2 August 9, 2006</li>
-<li>Version 5.1.0beta July 5, 2006</li>
-<li><strong>Version 5.0.9 February 20, 2006</strong></li>
-<li><strong>Version 5.0.8 February 8, 2006</strong></li>
-<li>Version 5.0.8beta5 February 3, 2006</li>
-<li>Version 5.0.8beta4 February 1, 2006</li>
-<li>Version 5.0.8beta3 February 1, 2006</li>
-<li>Version 5.0.8beta2 January 27, 2006</li>
-<li>Version 5.0.8beta January 24, 2006</li>
-<li><strong>Version 5.0.7 April 7, 2005</strong></li>
-<li><strong>Version 5.0.6 February 19, 2005</strong></li>
-<li><strong>Version 5.0.5 October 6, 2004</strong></li>
-<li><strong>Version 5.0.4 May 22, 2004</strong></li>
-<li><strong>Version 5.0.3 February 27, 2004</strong></li>
-<li><strong>Version 5.0.2 December 24, 2003</strong></li>
-<li><strong>Version 5.0.1 December 12, 2003</strong></li>
-<li><strong>Version 5.0.0 December 5, 2003</strong></li>
-<li>Version 5.0.beta31 April 29, 2003</li>
-<li>Version 5.0.beta30 April 25, 2003</li>
-<li>Version 5.0.beta29 March 10, 2003</li>
-<li>Version 5.0.beta28 January 14, 2003</li>
-<li>Version 5.0.beta27 November 13, 2002</li>
-<li>Version 5.0.beta26 November 3, 2002</li>
-<li>Version 5.0.beta25 October 15, 2002</li>
-<li>Version 5.0.beta24 October 4, 2002</li>
-<li>Version 5.0.beta23 September 20, 2002</li>
-<li>Version 5.0.beta22 August 30, 2002</li>
-<li>Version 5.0.beta21 July 25, 2002</li>
-<li>Version 5.0.beta20 July 20, 2002</li>
-<li>Version 5.0.beta18 May 31, 2002</li>
-<li>Version 5.0.beta17 May 1, 2002</li>
-<li>Version 5.0.beta16 April 5, 2002</li>
-<li>Version 5.0.beta15 March 26, 2002</li>
-<li>Version 5.0.beta14 February 25, 2002</li>
-<li>Version 5.0.beta13 February 22, 2002</li>
-<li>Version 5.0.beta12 January 2, 2002</li>
-<li>Version 5.0.beta11 December 20, 2001</li>
-<li>Version 5.0.beta10 November 20, 2001</li>
-<li>Version 5.0.beta09 November 6, 2001</li>
-<li>Version 5.0.beta08 October 19, 2001</li>
-<li>Version 5.0.beta07 August 10, 2001</li>
-<li>Version 5.0.beta06 July 30, 2001</li>
-<li>Version 5.0.beta05 July 23, 2001</li>
-<li>Version 5.0.beta04 July 20, 2001</li>
-<li>Version 5.0.beta03 July 19, 2001</li>
-<li>Version 5.0.beta02 June 30, 2001</li>
-<li>Version 5.0.beta01 June 8, 2001</li>
-<li>Version 5.0.beta00 April 6, 2001</li>
 </ul>
-<hr />
-<h3 id="mb-system-version-57-release-notes">MB-System Version 5.7
-Release Notes:</h3>
 <hr />
 <h4 id="579beta72-january-13-2024">5.7.9beta72 (January 13, 2024)</h4>
 <p>Build Systems: Made building and installing deprecated programs
@@ -2579,8 +2345,18 @@ program is "cygstart".</p>
 <h4 id="571-december-19-2018">5.7.1 (December 19, 2018)</h4>
 <p>Initiated use of version tagging in Git.</p>
 <hr />
-<h3 id="mb-system-version-56-release-notes">MB-System Version 5.6
-Release Notes:</h3>
+<h3 id="mb-system-version-56-releases-and-release-notes">MB-System
+Version 5.6 Releases and Release Notes:</h3>
+<hr />
+<ul>
+<li>Version 5.6.20181218 December 18, 2018</li>
+<li><strong>Version 5.6.20181217 December 17, 2018</strong></li>
+<li>Version 5.6.20181214 December 14, 2018</li>
+<li>Version 5.6.20181129 November 29, 2018</li>
+<li>Version 5.6.20181016 October 16, 2018</li>
+<li>Version 5.6.002 September 14, 2018</li>
+<li>Version 5.6.002 September 11, 2018</li>
+</ul>
 <hr />
 <h4 id="5620181218-december-18-2018">5.6.20181218 (December 18,
 2018)</h4>
@@ -2657,8 +2433,104 @@ mbsys_reson7k_preprocess() function in which the interpolated and time
 latency corrected attitude values calculated for each beam bottom return
 time were not fully corrected for the receive head angular offsets.</p>
 <hr />
-<h3 id="mb-system-version-55-release-notes">MB-System Version 5.5
-Release Notes:</h3>
+<h3 id="mb-system-version-55-releases-and-release-notes">MB-System
+Version 5.5 Releases and Release Notes:</h3>
+<hr />
+<ul>
+<li>Version 5.5.2350 September 6, 2018</li>
+<li>Version 5.5.2348 August 20, 2018</li>
+<li>Version 5.5.2347 August 17, 2018</li>
+<li>Version 5.5.2346 August 13, 2018</li>
+<li>Version 5.5.2345 August 10, 2018</li>
+<li>Version 5.5.2344 August 3, 2018</li>
+<li>Version 5.5.2343 July 10, 2018</li>
+<li><strong>Version 5.5.2342 June 29, 2018</strong></li>
+<li>Version 5.5.2340 June 26, 2018</li>
+<li>Version 5.5.2339 June 25, 2018</li>
+<li><strong>Version 5.5.2336 June 6, 2018</strong></li>
+<li>Version 5.5.2335 May 6, 2018</li>
+<li>Version 5.5.2334 April 18, 2018</li>
+<li>Version 5.5.2333 April 18, 2018</li>
+<li>Version 5.5.2332 April 17, 2018</li>
+<li>Version 5.5.2331 April 10, 2018</li>
+<li>Version 5.5.2330 March 7, 2018</li>
+<li>Version 5.5.2329 February 12, 2018</li>
+<li>Version 5.5.2328 January 31, 2018</li>
+<li><strong>Version 5.5.2327 January 23, 2018</strong></li>
+<li>Version 5.5.2324 January 18, 2018</li>
+<li>Version 5.5.2323 December 7, 2017</li>
+<li>Version 5.5.2322 November 25, 2017</li>
+<li><strong>Version 5.5.2321 October 26, 2017</strong></li>
+<li>Version 5.5.2320 October 18, 2017</li>
+<li><strong>Version 5.5.2319 October 16, 2017</strong></li>
+<li><strong>Version 5.5.2318 September 29, 2017</strong></li>
+<li><strong>Version 5.5.2314 August 24, 2017</strong></li>
+<li><strong>Version 5.5.2313 August 9, 2017</strong></li>
+<li>Version 5.5.2312 July 14, 2017</li>
+<li>Version 5.5.2311 June 20, 2017</li>
+<li><strong>Version 5.5.2309 June 4, 2017</strong></li>
+<li>Version 5.5.2306 May 27, 2017</li>
+<li>Version 5.5.2305 May 13, 2017</li>
+<li>Version 5.5.2304 May 6, 2017</li>
+<li>Version 5.5.2303 April 28, 2017</li>
+<li>Version 5.5.2302 April 20, 2017</li>
+<li>Version 5.5.2301 April 17, 2017</li>
+<li>Version 5.5.2300 April 15, 2017</li>
+<li>Version 5.5.2299 April 10, 2017</li>
+<li>Version 5.5.2297 April 5, 2017</li>
+<li>Version 5.5.2296 March 31, 2017</li>
+<li>Version 5.5.2295 March 26, 2017</li>
+<li>Version 5.5.2294 March 21, 2017</li>
+<li>Version 5.5.2293 March 6, 2017</li>
+<li>Version 5.5.2290 January 2, 2017</li>
+<li>Version 5.5.2289 December 2, 2016</li>
+<li>Version 5.5.2287 November 29, 2016</li>
+<li>Version 5.5.2286 November 8, 2016</li>
+<li>Version 5.5.2285 November 3, 2016</li>
+<li><strong>Version 5.5.2284 October 23, 2016</strong></li>
+<li>Version 5.5.2282 August 25, 2016</li>
+<li>Version 5.5.2281 August 7, 2016</li>
+<li><strong>Version 5.5.2279 July 8, 2016</strong></li>
+<li><strong>Version 5.5.2278 July 1, 2016</strong></li>
+<li>Version 5.5.2277 June 25, 2016</li>
+<li>Version 5.5.2275 May 17, 2016</li>
+<li><strong>Version 5.5.2274 May 5, 2016</strong></li>
+<li>Version 5.5.2271 April 1, 2016</li>
+<li><strong>Version 5.5.2270 March 24, 2016</strong></li>
+<li>Version 5.5.2268 March 14, 2016</li>
+<li><strong>Version 5.5.2267 February 11, 2016</strong></li>
+<li>Version 5.5.2265 February 11, 2016</li>
+<li>Version 5.5.2264 February 2, 2016</li>
+<li><strong>Version 5.5.2263 January 7, 2016</strong></li>
+<li>Version 5.5.2260 December 22, 2015</li>
+<li>Version 5.5.2259 October 27, 2015</li>
+<li>Version 5.5.2258 October 5, 2015</li>
+<li>Version 5.5.2257 September 1, 2015</li>
+<li>Version 5.5.2256 August 24, 2015</li>
+<li>Version 5.5.2255 August 11, 2015</li>
+<li>Version 5.5.2254 July 23, 2015</li>
+<li><strong>Version 5.5.2252 July 1, 2015</strong></li>
+<li><strong>Version 5.5.2251 June 30, 2015</strong></li>
+<li>Version 5.5.2250 June 29, 2015</li>
+<li>Version 5.5.2249 June 26, 2015</li>
+<li><strong>Version 5.5.2248 May 31, 2015</strong></li>
+<li>Version 5.5.2247 May 29, 2015</li>
+<li><strong>Version 5.5.2246 May 27, 2015</strong></li>
+<li><strong>Version 5.5.2243 May 22, 2015</strong></li>
+<li><strong>Version 5.5.2242 May 16, 2015</strong></li>
+<li>Version 5.5.2241 May 12, 2015</li>
+<li>Version 5.5.2240 May 8, 2015</li>
+<li>Version 5.5.2239 May 6, 2015</li>
+<li>Version 5.5.2238 April 14, 2015</li>
+<li>Version 5.5.2237 March 23, 2015</li>
+<li>Version 5.5.2234 March 5, 2015</li>
+<li><strong>Version 5.5.2233 February 23, 2015</strong></li>
+<li>Version 5.5.2232 February 21, 2015</li>
+<li>Version 5.5.2231 February 20, 2015</li>
+<li>Version 5.5.2230 February 18, 2015</li>
+<li>Version 5.5.2229 February 14, 2015</li>
+<li>Version 5.5.2228 February 6, 2015</li>
+</ul>
 <hr />
 <h4 id="552350-september-6-2018">5.5.2350 (September 6, 2018)</h4>
 <p>Mbnavadjust: Added a sorted ties list view for which the list of ties
@@ -3722,8 +3594,66 @@ plot macros (e.g. mbm_grdplot) that make use of GMT</p>
 <p>Format 88 (MBF_RESON7KR): Update Reson 7k i/o module to handle TVG
 records.</p>
 <hr />
-<h3 id="mb-system-version-54-release-notes">MB-System Version 5.4
-Release Notes:</h3>
+<h3 id="mb-system-version-54-releases-and-release-notes">MB-System
+Version 5.4 Releases and Release Notes:</h3>
+<hr />
+<ul>
+<li><strong>Version 5.4.2220 January 22, 2015 (Last GMT4-compatible
+archive revision)</strong></li>
+<li>Version 5.4.2219 December 11, 2014</li>
+<li>Version 5.4.2218 December 4, 2014</li>
+<li>Version 5.4.2217 December 1, 2014</li>
+<li><strong>Version 5.4.2213 November 13, 2014</strong></li>
+<li>Version 5.4.2210 November 10, 2014</li>
+<li><strong>Version 5.4.2209 November 4, 2014</strong></li>
+<li><strong>Version 5.4.2208 October 29, 2014</strong></li>
+<li>Version 5.4.2204 September 5, 2014</li>
+<li><strong>Version 5.4.2202 August 25, 2014</strong></li>
+<li>Version 5.4.2201 August 20, 2014</li>
+<li><strong>Version 5.4.2200 July 24, 2014</strong></li>
+<li><strong>Version 5.4.2199 July 19, 2014</strong></li>
+<li>Version 5.4.2196 July 14, 2014</li>
+<li>Version 5.4.2195 July 9, 2014</li>
+<li>Version 5.4.2194 July 8, 2014</li>
+<li><strong>Version 5.4.2191 June 4, 2014</strong></li>
+<li><strong>Version 5.4.2188 May 31, 2014</strong></li>
+<li>Version 5.4.2187 May 28, 2014</li>
+<li>Version 5.4.2186 May 26, 2014</li>
+<li>Version 5.4.2185 May 11, 2014</li>
+<li><strong>Version 5.4.2183 April 16, 2014</strong></li>
+<li>Version 5.4.2182 April 8, 2014</li>
+<li>Version 5.4.2181 April 4, 2014</li>
+<li><strong>Version 5.4.2176 March 18, 2014</strong></li>
+<li><strong>Version 5.4.2168 February 19, 2014</strong></li>
+<li><strong>Version 5.4.2163 January 31, 2014</strong></li>
+<li>Version 5.4.2162 January 24, 2014</li>
+<li><strong>Version 5.4.2159 January 18, 2014</strong></li>
+<li>Version 5.4.2158 January 18, 2014</li>
+<li><strong>Version 5.4.2157 October 14, 2013</strong></li>
+<li>Version 5.4.2155 October 13, 2013</li>
+<li>Version 5.4.2154 September 26, 2013</li>
+<li>Version 5.4.2153 September 22, 2013</li>
+<li><strong>Version 5.4.2152 September 16, 2013</strong></li>
+<li>Version 5.4.2151 September 12, 2013</li>
+<li>Version 5.4.2149 September 2, 2013</li>
+<li>Version 5.4.2148 August 28, 2013</li>
+<li>Version 5.4.2147 August 27, 2013</li>
+<li>Version 5.4.2144 August 26, 2013</li>
+<li>Version 5.4.2143 August 24, 2013</li>
+<li>Version 5.4.2141 August 24, 2013</li>
+<li>Version 5.4.2139 August 19, 2013</li>
+<li>Version 5.4.2138 August 18, 2013</li>
+<li>Version 5.4.2137 August 9, 2013</li>
+<li>Version 5.4.2136 August 8, 2013</li>
+<li><strong>Version 5.4.2135 August 7, 2013</strong></li>
+<li>Version 5.4.2133 July 29, 2013</li>
+<li>Version 5.4.2132 July 26, 2013</li>
+<li>Version 5.4.2130 July 20, 2013</li>
+<li>Version 5.4.2129 July 8, 2013</li>
+<li>Version 5.4.2128 June 18, 2013</li>
+<li>Version 5.4.2123 June 10, 2013</li>
+<li>Version 5.4.2082 May 24, 2013</li>
+</ul>
 <hr />
 <h4 id="542219-december-11-2014">5.4.2219 (December 11, 2014)</h4>
 <p>Mbnavadjust: Fixed fixed memory management issue related to fbt
@@ -4351,8 +4281,41 @@ others. The man page and web page documentation have been moved into the
 source tree. The old install_makefiles build system has been updated to
 still work.</p>
 <hr />
-<h3 id="mb-system-version-53-release-notes">MB-System Version 5.3
-Release Notes:</h3>
+<h3 id="mb-system-version-53-releases-and-release-notes">MB-System
+Version 5.3 Releases and Release Notes:</h3>
+<hr />
+<ul>
+<li>Version 5.3.2053 April 4, 2013</li>
+<li>Version 5.3.2051 March 20, 2013</li>
+<li>Version 5.3.2042 March 12, 2013</li>
+<li><strong>Version 5.3.2017 March 3, 2013</strong></li>
+<li><strong>Version 5.3.2013 January 29, 2013</strong></li>
+<li><strong>Version 5.3.2012 January 25, 2013</strong></li>
+<li><strong>Version 5.3.2011 January 17, 2013</strong></li>
+<li>Version 5.3.2010 January 14, 2013</li>
+<li><strong>Version 5.3.2009 January 10, 2013</strong></li>
+<li><strong>Version 5.3.2008 January 6, 2013</strong></li>
+<li>Version 5.3.2007 January 5, 2013</li>
+<li>Version 5.3.2006 January 4, 2013</li>
+<li>Version 5.3.2005 December 31, 2012</li>
+<li>Version 5.3.2004 December 12, 2012</li>
+<li>Version 5.3.2000 November 14, 2012</li>
+<li>Version 5.3.1999 November 13, 2012</li>
+<li>Version 5.3.1998 November 6, 2012</li>
+<li>Version 5.3.1994 October 27, 2012</li>
+<li>Version 5.3.1988 September 29, 2012</li>
+<li>Version 5.3.1986 September 12, 2012</li>
+<li><strong>Version 5.3.1982 August 15, 2012</strong></li>
+<li>Version 5.3.1981 August 2, 2012</li>
+<li><strong>Version 5.3.1980 July 13, 2012</strong></li>
+<li><strong>Version 5.3.1955 May 16, 2012</strong></li>
+<li>Version 5.3.1941 March 6, 2012</li>
+<li><strong>Version 5.3.1917 January 10, 2012</strong></li>
+<li><strong>Version 5.3.1912 November 19, 2011</strong></li>
+<li><strong>Version 5.3.1909 November 16, 2011</strong></li>
+<li><strong>Version 5.3.1907 November 9, 2011</strong></li>
+<li><strong>Version 5.3.1906 September 28, 2011</strong></li>
+</ul>
 <hr />
 <h4 id="532062-may-17-2013">5.3.2062 (May 17, 2013)</h4>
 <p>Mbprocess: Fixed a couple more mistakes on lines 5659 and 5662 in
@@ -5037,9 +5000,13 @@ mbeditviz_prog.c to reset global status to MB_SUCCESS on entry.</p>
 to mbclean. Not yet tested.</p>
 <p>Program mbnavedit: Increased verbosity of mbnavedit for -X
 option.</p>
-<p>--</p>
-<h3 id="mb-system-version-52-release-notes">MB-System Version 5.2
-Release Notes:</h3>
+<hr />
+<h3 id="mb-system-version-52-releases-and-release-notes">MB-System
+Version 5.2 Releases and Release Notes:</h3>
+<hr />
+<ul>
+<li><strong>Version 5.2.1880 December 30, 2010</strong></li>
+</ul>
 <p>--</p>
 <h4 id="521880-december-30-2010">5.2.1880 (December 30, 2010)</h4>
 <p>Augmented mbotps to output tide in both time_d tide and year month
@@ -5063,6 +5030,57 @@ data.</p>
 MB-System to be more easily built on Solaris systems.</p>
 <p>Fixed mbset so that it recognizes sidescan cutting commands
 (SSCUTNUMBER, SSCUTDISTANCE, SSCUTSPEED).</p>
+<hr />
+<h3 id="mb-system-version-51-releases-and-release-notes">MB-System
+Version 5.1 Releases and Release Notes:</h3>
+<hr />
+<ul>
+<li>Version 5.1.3beta1875 November 23, 2010</li>
+<li>Version 5.1.3beta1874 November 7, 2010</li>
+<li>Version 5.1.3beta1862 June 7, 2010</li>
+<li>Version 5.1.3beta1858 May 18, 2010</li>
+<li>Version 5.1.3beta1855 May 4, 2010</li>
+<li>Version 5.1.3beta1851 April 14, 2010</li>
+<li>Version 5.1.3beta1844 March 30, 2010</li>
+<li>Version 5.1.3beta1843 March 29, 2010</li>
+<li>Version 5.1.3beta1829 February 5, 2010</li>
+<li><strong>Version 5.1.2 December 31, 2009</strong></li>
+<li>Version 5.1.2beta15 December 30, 2009</li>
+<li>Version 5.1.2beta14 December 28, 2009</li>
+<li>Version 5.1.2beta13 December 28, 2009</li>
+<li>Version 5.1.2beta12 December 26, 2009</li>
+<li>Version 5.1.2beta11 Ausust 26, 2009</li>
+<li>Version 5.1.2beta10 Ausust 12, 2009</li>
+<li>Version 5.1.2beta09 Ausust 7, 2009</li>
+<li>Version 5.1.2beta08 Ausust 5, 2009</li>
+<li>Version 5.1.2beta06 July 2, 2009</li>
+<li>Version 5.1.2beta05 June 14, 2009</li>
+<li>Version 5.1.2beta02 March 13, 2009</li>
+<li>Version 5.1.2beta01 March 9, 2009</li>
+<li><strong>Version 5.1.1 December 31, 2008</strong></li>
+<li>Version 5.1.1beta26 November 18, 2008</li>
+<li>Version 5.1.1beta25 September 28, 2008</li>
+<li>Version 5.1.1beta23 September 19, 2008</li>
+<li>Version 5.1.1beta21 July 20, 2008</li>
+<li>Version 5.1.1beta20 July 10, 2008</li>
+<li>Version 5.1.1beta19 June 6, 2008</li>
+<li>Version 5.1.1beta18 May 16, 2008</li>
+<li>Version 5.1.1beta17 March 21, 2008</li>
+<li>Version 5.1.1beta16 March 14, 2008</li>
+<li>Version 5.1.1beta15 February 8, 2008</li>
+<li>Version 5.1.1beta14 January 15, 2008</li>
+<li>Version 5.1.1beta13 November 16, 2007</li>
+<li>Version 5.1.1beta12 November 2, 2007</li>
+<li>Version 5.1.1beta11 October 17, 2007</li>
+<li>Version 5.1.1beta10 October 8, 2007</li>
+<li>Version 5.1.1beta5 July 5, 2007</li>
+<li><strong>Version 5.1.0 November 26, 2006</strong></li>
+<li>Version 5.1.0beta4 October 5, 2006</li>
+<li>Version 5.1.0beta3 September 11, 2006</li>
+<li>Version 5.1.0beta2 August 9, 2006</li>
+<li>Version 5.1.0beta July 5, 2006</li>
+</ul>
+<hr />
 <h4 id="513beta1875">5.1.3beta1875</h4>
 <p>Altered -P option in mbsvplist. Previously this option (which turns
 on bathymetry recalculation by raytracing in mbprocess using the water
@@ -5700,6 +5718,58 @@ annotation of navigation tracks is now supported by mbcontour and
 mbm_plot.</p>
 <p>Fixed problem reading some Simrad multibeam data with slightly broken
 bathymetry records.</p>
+<hr />
+<h3 id="mb-system-version-50-releases-and-release-notes">MB-System
+Version 5.0 Releases and Release Notes:</h3>
+<hr />
+<ul>
+<li><strong>Version 5.0.9 February 20, 2006</strong></li>
+<li><strong>Version 5.0.8 February 8, 2006</strong></li>
+<li>Version 5.0.8beta5 February 3, 2006</li>
+<li>Version 5.0.8beta4 February 1, 2006</li>
+<li>Version 5.0.8beta3 February 1, 2006</li>
+<li>Version 5.0.8beta2 January 27, 2006</li>
+<li>Version 5.0.8beta January 24, 2006</li>
+<li><strong>Version 5.0.7 April 7, 2005</strong></li>
+<li><strong>Version 5.0.6 February 19, 2005</strong></li>
+<li><strong>Version 5.0.5 October 6, 2004</strong></li>
+<li><strong>Version 5.0.4 May 22, 2004</strong></li>
+<li><strong>Version 5.0.3 February 27, 2004</strong></li>
+<li><strong>Version 5.0.2 December 24, 2003</strong></li>
+<li><strong>Version 5.0.1 December 12, 2003</strong></li>
+<li><strong>Version 5.0.0 December 5, 2003</strong></li>
+<li>Version 5.0.beta31 April 29, 2003</li>
+<li>Version 5.0.beta30 April 25, 2003</li>
+<li>Version 5.0.beta29 March 10, 2003</li>
+<li>Version 5.0.beta28 January 14, 2003</li>
+<li>Version 5.0.beta27 November 13, 2002</li>
+<li>Version 5.0.beta26 November 3, 2002</li>
+<li>Version 5.0.beta25 October 15, 2002</li>
+<li>Version 5.0.beta24 October 4, 2002</li>
+<li>Version 5.0.beta23 September 20, 2002</li>
+<li>Version 5.0.beta22 August 30, 2002</li>
+<li>Version 5.0.beta21 July 25, 2002</li>
+<li>Version 5.0.beta20 July 20, 2002</li>
+<li>Version 5.0.beta18 May 31, 2002</li>
+<li>Version 5.0.beta17 May 1, 2002</li>
+<li>Version 5.0.beta16 April 5, 2002</li>
+<li>Version 5.0.beta15 March 26, 2002</li>
+<li>Version 5.0.beta14 February 25, 2002</li>
+<li>Version 5.0.beta13 February 22, 2002</li>
+<li>Version 5.0.beta12 January 2, 2002</li>
+<li>Version 5.0.beta11 December 20, 2001</li>
+<li>Version 5.0.beta10 November 20, 2001</li>
+<li>Version 5.0.beta09 November 6, 2001</li>
+<li>Version 5.0.beta08 October 19, 2001</li>
+<li>Version 5.0.beta07 August 10, 2001</li>
+<li>Version 5.0.beta06 July 30, 2001</li>
+<li>Version 5.0.beta05 July 23, 2001</li>
+<li>Version 5.0.beta04 July 20, 2001</li>
+<li>Version 5.0.beta03 July 19, 2001</li>
+<li>Version 5.0.beta02 June 30, 2001</li>
+<li>Version 5.0.beta01 June 8, 2001</li>
+<li>Version 5.0.beta00 April 6, 2001</li>
+</ul>
 <hr />
 <h3 id="mb-system-version-509-release-notes">MB-System Version 5.0.9
 Release Notes:</h3>
