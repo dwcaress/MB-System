@@ -2591,37 +2591,37 @@ __FILE__, __LINE__, __FUNCTION__, file->block, ifile, isection, section->distanc
         /* concatenate the *.mb71 and *.fnv files */
         mb_path shortsectionfile, priorsectionfile;
 
-        sprintf(shortsectionfile, "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, ifile, isection);
-        sprintf(priorsectionfile, "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, ifile, isection-1);
+        snprintf(shortsectionfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, ifile, isection);
+        snprintf(priorsectionfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, ifile, isection-1);
         mb_catfiles(verbose, priorsectionfile, shortsectionfile, priorsectionfile, error);
         mbnavadjust_coverage_mask(verbose, project, ifile, isection-1, error);
 
         mb_path deletefile;
-        sprintf(deletefile, "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, ifile, isection-1);
+        snprintf(deletefile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, ifile, isection-1);
         remove(deletefile);
 
-        sprintf(deletefile, "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, ifile, isection);
+        snprintf(deletefile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, ifile, isection);
         remove(deletefile);
 
-        sprintf(deletefile, "%s/nvs_%4.4d_%4.4d.mb71.fnv", project->datadir, ifile, isection);
+        snprintf(deletefile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71.fnv", project->datadir, ifile, isection);
         remove(deletefile);
 
-        sprintf(deletefile, "%s/nvs_%4.4d_%4.4d.mb71.inf", project->datadir, ifile, isection);
+        snprintf(deletefile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71.inf", project->datadir, ifile, isection);
         remove(deletefile);
 
-        sprintf(deletefile, "%s/nvs_%4.4d_%4.4d.mb71.resf", project->datadir, ifile, isection);
+        snprintf(deletefile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71.resf", project->datadir, ifile, isection);
         remove(deletefile);
 
-        sprintf(deletefile, "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, ifile, isection);
+        snprintf(deletefile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, ifile, isection);
         remove(deletefile);
 
-        sprintf(deletefile, "%s/nvs_%4.4d_%4.4dp.mb71", project->datadir, ifile, isection);
+        snprintf(deletefile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4dp.mb71", project->datadir, ifile, isection);
         remove(deletefile);
 
-        sprintf(deletefile, "%s/nvs_%4.4d_%4.4dp.mb71.fnv", project->datadir, ifile, isection);
+        snprintf(deletefile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4dp.mb71.fnv", project->datadir, ifile, isection);
         remove(deletefile);
 
-        sprintf(deletefile, "%s/nvs_%4.4d_%4.4dp.mb71.inf", project->datadir, ifile, isection);
+        snprintf(deletefile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4dp.mb71.inf", project->datadir, ifile, isection);
         remove(deletefile);
 
         mb_make_info(verbose, true, priorsectionfile, 71, error);
@@ -2632,36 +2632,36 @@ __FILE__, __LINE__, __FUNCTION__, file->block, ifile, isection, section->distanc
 
           mb_path oldfile, newfile;
           
-          sprintf(newfile, "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, ifile, jsection);
-          sprintf(oldfile, "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, ifile, jsection+1);
+          snprintf(newfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, ifile, jsection);
+          snprintf(oldfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, ifile, jsection+1);
           rename(oldfile, newfile);
 
-          sprintf(newfile, "%s/nvs_%4.4d_%4.4d.mb71.fnv", project->datadir, ifile, jsection);
-          sprintf(oldfile, "%s/nvs_%4.4d_%4.4d.mb71.fnv", project->datadir, ifile, jsection+1);
+          snprintf(newfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71.fnv", project->datadir, ifile, jsection);
+          snprintf(oldfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71.fnv", project->datadir, ifile, jsection+1);
           rename(oldfile, newfile);
 
-          sprintf(newfile, "%s/nvs_%4.4d_%4.4d.mb71.inf", project->datadir, ifile, jsection);
-          sprintf(oldfile, "%s/nvs_%4.4d_%4.4d.mb71.inf", project->datadir, ifile, jsection+1);
+          snprintf(newfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71.inf", project->datadir, ifile, jsection);
+          snprintf(oldfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71.inf", project->datadir, ifile, jsection+1);
           rename(oldfile, newfile);
 
-          sprintf(newfile, "%s/nvs_%4.4d_%4.4d.mb71.resf", project->datadir, ifile, jsection);
-          sprintf(oldfile, "%s/nvs_%4.4d_%4.4d.mb71.resf", project->datadir, ifile, jsection+1);
+          snprintf(newfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71.resf", project->datadir, ifile, jsection);
+          snprintf(oldfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71.resf", project->datadir, ifile, jsection+1);
           rename(oldfile, newfile);
 
-          sprintf(newfile, "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, ifile, jsection);
-          sprintf(oldfile, "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, ifile, jsection+1);
+          snprintf(newfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, ifile, jsection);
+          snprintf(oldfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, ifile, jsection+1);
           rename(oldfile, newfile);
 
-          sprintf(newfile, "%s/nvs_%4.4d_%4.4dp.mb71", project->datadir, ifile, jsection);
-          sprintf(oldfile, "%s/nvs_%4.4d_%4.4dp.mb71", project->datadir, ifile, jsection+1);
+          snprintf(newfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4dp.mb71", project->datadir, ifile, jsection);
+          snprintf(oldfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4dp.mb71", project->datadir, ifile, jsection+1);
           rename(oldfile, newfile);
 
-          sprintf(newfile, "%s/nvs_%4.4d_%4.4dp.mb71.fnv", project->datadir, ifile, jsection);
-          sprintf(oldfile, "%s/nvs_%4.4d_%4.4dp.mb71.fnv", project->datadir, ifile, jsection+1);
+          snprintf(newfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4dp.mb71.fnv", project->datadir, ifile, jsection);
+          snprintf(oldfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4dp.mb71.fnv", project->datadir, ifile, jsection+1);
           rename(oldfile, newfile);
 
-          sprintf(newfile, "%s/nvs_%4.4d_%4.4dp.mb71.inf", project->datadir, ifile, jsection);
-          sprintf(oldfile, "%s/nvs_%4.4d_%4.4dp.mb71.inf", project->datadir, ifile, jsection+1);
+          snprintf(newfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4dp.mb71.inf", project->datadir, ifile, jsection);
+          snprintf(oldfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4dp.mb71.inf", project->datadir, ifile, jsection+1);
           rename(oldfile, newfile);
 
         }
@@ -3102,66 +3102,66 @@ int mbnavadjust_remove_file_by_id(int verbose, struct mbna_project *project,
     status = mb_freed(verbose, __FILE__, __LINE__, (void **)&file->sections, error);
   }
   mb_pathplusplus deletefile, oldfile, newfile;
-  sprintf(deletefile, "%s/nvs_%4.4d.mb166", project->datadir, ifile);
+  snprintf(deletefile, sizeof(mb_path), "%s/nvs_%4.4d.mb166", project->datadir, ifile);
   remove(deletefile);
-  sprintf(deletefile, "%s/nvs_%4.4d.na0", project->datadir, ifile);
+  snprintf(deletefile, sizeof(mb_path), "%s/nvs_%4.4d.na0", project->datadir, ifile);
   remove(deletefile);
   for (int isection=0; isection < file->num_sections; isection++) {
-    sprintf(deletefile, "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, ifile, isection);
+    snprintf(deletefile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, ifile, isection);
     remove(deletefile);
-    sprintf(deletefile, "%s/nvs_%4.4d_%4.4d.mb71.fnv", project->datadir, ifile, isection);
+    snprintf(deletefile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71.fnv", project->datadir, ifile, isection);
     remove(deletefile);
-    sprintf(deletefile, "%s/nvs_%4.4d_%4.4d.mb71.inf", project->datadir, ifile, isection);
+    snprintf(deletefile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71.inf", project->datadir, ifile, isection);
     remove(deletefile);
-    sprintf(deletefile, "%s/nvs_%4.4d_%4.4d.mb71.par", project->datadir, ifile, isection);
+    snprintf(deletefile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71.par", project->datadir, ifile, isection);
     remove(deletefile);
-    sprintf(deletefile, "%s/nvs_%4.4d_%4.4d.mb71.resf", project->datadir, ifile, isection);
+    snprintf(deletefile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71.resf", project->datadir, ifile, isection);
     remove(deletefile);
-    sprintf(deletefile, "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, ifile, isection);
+    snprintf(deletefile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, ifile, isection);
     remove(deletefile);
-    sprintf(deletefile, "%s/nvs_%4.4d_%4.4dp.mb71", project->datadir, ifile, isection);
+    snprintf(deletefile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4dp.mb71", project->datadir, ifile, isection);
     remove(deletefile);
-    sprintf(deletefile, "%s/nvs_%4.4d_%4.4dp.mb71.fnv", project->datadir, ifile, isection);
+    snprintf(deletefile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4dp.mb71.fnv", project->datadir, ifile, isection);
     remove(deletefile);
-    sprintf(deletefile, "%s/nvs_%4.4d_%4.4dp.mb71.inf", project->datadir, ifile, isection);
+    snprintf(deletefile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4dp.mb71.inf", project->datadir, ifile, isection);
     remove(deletefile);
   }
   for (int jfile = ifile; jfile < project->num_files - 1; jfile++) {
     project->files[jfile] = project->files[jfile+1];
     file = &project->files[jfile];
     file->id--;
-    sprintf(oldfile, "%s/nvs_%4.4d.mb166", project->datadir, jfile+1);
-    sprintf(newfile, "%s/nvs_%4.4d.mb166", project->datadir, jfile);
+    snprintf(oldfile, sizeof(mb_path), "%s/nvs_%4.4d.mb166", project->datadir, jfile+1);
+    snprintf(newfile, sizeof(mb_path), "%s/nvs_%4.4d.mb166", project->datadir, jfile);
     rename(oldfile, newfile);
-    sprintf(oldfile, "%s/nvs_%4.4d.na0", project->datadir, jfile+1);
-    sprintf(newfile, "%s/nvs_%4.4d.na0", project->datadir, jfile);
+    snprintf(oldfile, sizeof(mb_path), "%s/nvs_%4.4d.na0", project->datadir, jfile+1);
+    snprintf(newfile, sizeof(mb_path), "%s/nvs_%4.4d.na0", project->datadir, jfile);
     rename(oldfile, newfile);
     for (int jsection=0; jsection < file->num_sections; jsection++) {
-      sprintf(oldfile, "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, jfile+1, jsection);
-      sprintf(newfile, "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, jfile, jsection);
+      snprintf(oldfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, jfile+1, jsection);
+      snprintf(newfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, jfile, jsection);
       rename(oldfile, newfile);
-      sprintf(oldfile, "%s/nvs_%4.4d_%4.4d.mb71.fnv", project->datadir, jfile+1, jsection);
-      sprintf(newfile, "%s/nvs_%4.4d_%4.4d.mb71.fnv", project->datadir, jfile, jsection);
+      snprintf(oldfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71.fnv", project->datadir, jfile+1, jsection);
+      snprintf(newfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71.fnv", project->datadir, jfile, jsection);
       rename(oldfile, newfile);
-      sprintf(oldfile, "%s/nvs_%4.4d_%4.4d.mb71.inf", project->datadir, jfile+1, jsection);
-      sprintf(newfile, "%s/nvs_%4.4d_%4.4d.mb71.inf", project->datadir, jfile, jsection);
+      snprintf(oldfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71.inf", project->datadir, jfile+1, jsection);
+      snprintf(newfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71.inf", project->datadir, jfile, jsection);
       rename(oldfile, newfile);
-      sprintf(oldfile, "%s/nvs_%4.4d_%4.4d.mb71.par", project->datadir, jfile+1, jsection);
+      snprintf(oldfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71.par", project->datadir, jfile+1, jsection);
       remove(oldfile);
-      sprintf(oldfile, "%s/nvs_%4.4d_%4.4d.mb71.resf", project->datadir, jfile+1, jsection);
-      sprintf(newfile, "%s/nvs_%4.4d_%4.4d.mb71.resf", project->datadir, jfile, jsection);
+      snprintf(oldfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71.resf", project->datadir, jfile+1, jsection);
+      snprintf(newfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71.resf", project->datadir, jfile, jsection);
       rename(oldfile, newfile);
-      sprintf(oldfile, "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, jfile+1, jsection);
-      sprintf(newfile, "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, jfile, jsection);
+      snprintf(oldfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, jfile+1, jsection);
+      snprintf(newfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, jfile, jsection);
       rename(oldfile, newfile);
-      sprintf(oldfile, "%s/nvs_%4.4d_%4.4dp.mb71", project->datadir, jfile+1, jsection);
-      sprintf(newfile, "%s/nvs_%4.4d_%4.4dp.mb71", project->datadir, jfile, jsection);
+      snprintf(oldfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4dp.mb71", project->datadir, jfile+1, jsection);
+      snprintf(newfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4dp.mb71", project->datadir, jfile, jsection);
       rename(oldfile, newfile);
-      sprintf(oldfile, "%s/nvs_%4.4d_%4.4dp.mb71.fnv", project->datadir, jfile+1, jsection);
-      sprintf(newfile, "%s/nvs_%4.4d_%4.4dp.mb71.fnv", project->datadir, jfile, jsection);
+      snprintf(oldfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4dp.mb71.fnv", project->datadir, jfile+1, jsection);
+      snprintf(newfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4dp.mb71.fnv", project->datadir, jfile, jsection);
       rename(oldfile, newfile);
-      sprintf(oldfile, "%s/nvs_%4.4d_%4.4dp.mb71.inf", project->datadir, jfile+1, jsection);
-      sprintf(newfile, "%s/nvs_%4.4d_%4.4dp.mb71.inf", project->datadir, jfile, jsection);
+      snprintf(oldfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4dp.mb71.inf", project->datadir, jfile+1, jsection);
+      snprintf(newfile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4dp.mb71.inf", project->datadir, jfile, jsection);
       rename(oldfile, newfile);
     }
 
@@ -3170,7 +3170,7 @@ int mbnavadjust_remove_file_by_id(int verbose, struct mbna_project *project,
   project->num_files--;
 
   /* update datalist files and mbgrid commands */
-  snprintf(newfile, sizeof(newfile), "%s/datalist.mb-1", project->datadir);
+  snprintf(newfile, sizeof(mb_path), "%s/datalist.mb-1", project->datadir);
   FILE *ofp = NULL;
   if ((ofp = fopen(newfile, "w")) != NULL) {
     for (int jfile = 0; jfile < project->num_files; jfile++) {
@@ -3182,7 +3182,7 @@ int mbnavadjust_remove_file_by_id(int verbose, struct mbna_project *project,
     fclose(ofp);
   }
   for (int isurvey = 0; isurvey < project->num_surveys; isurvey++) {
-    snprintf(newfile, sizeof(newfile), "%s/datalist_%4.4d.mb-1", project->datadir, isurvey);
+    snprintf(newfile, sizeof(mb_path), "%s/datalist_%4.4d.mb-1", project->datadir, isurvey);
     if ((ofp = fopen(newfile, "w")) != NULL) {
       for (int jfile = 0; jfile < project->num_files; jfile++) {
         if (project->files[jfile].block == isurvey) {
@@ -3202,7 +3202,7 @@ int mbnavadjust_remove_file_by_id(int verbose, struct mbna_project *project,
   double lon_max = project->lon_max + dlon;
   double lat_min = project->lat_min - dlat;
   double lat_max = project->lat_max + dlat;
-  snprintf(newfile, sizeof(newfile), "%s/mbgrid_adj.cmd", project->datadir);
+  snprintf(newfile, sizeof(mb_path), "%s/mbgrid_adj.cmd", project->datadir);
   if ((ofp = fopen(newfile, "w")) != NULL) {
     fprintf(ofp, "mbgrid -I datalistp.mb-1 \\\n\t-R%.8f/%.8f/%.8f/%.8f \\\n\t-A2 -F5 -N -C2 \\\n\t-O ProjectTopoAdj\n\n",
             lon_min, lon_max, lat_min, lat_max);
