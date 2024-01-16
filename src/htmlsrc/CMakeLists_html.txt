@@ -114,6 +114,8 @@ set(HTML
     mbvelocitytool.html)
 
 set(PDF
+    GPL.pdf
+    COPYING.pdf
     mbsystem.pdf
     mbio.pdf
     mb7k2jstar.pdf

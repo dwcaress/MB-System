@@ -1,15 +1,14 @@
 dist_mbsystemhtml_DATA = \
-    index.html \
     ChangeLog.html \
     COPYING.html \
     GPL.html \
     mbsystem_logo_small.gif \
     mbsystem_logo.gif \
     mbsystem_version.txt \
-    mbsystem_capabilities.html \
     mbsystem_man_list.html \
     mbsystem_formats.html \
     mbsystem.html \
+    mbio.html \
     mb7k2jstar.html \
     mb7k2ss.html \
     mb7kpreprocess.html \
@@ -38,7 +37,6 @@ dist_mbsystemhtml_DATA = \
     mbhsdump.html \
     mbhysweeppreprocess.html \
     mbinfo.html \
-    mbio.html \
     mbkongsbergpreprocess.html \
     mblevitus.html \
     mblist.html \
@@ -86,5 +84,84 @@ dist_mbsystemhtml_DATA = \
     mbsvplist.html \
     mbswath.html \
     mbtime.html \
-    mbvelocitytool.html
-    
+    mbvelocitytool.html \
+    GPL.pdf \
+    COPYING.pdf \
+    mbsystem.pdf \
+    mbio.pdf \
+    mb7k2jstar.pdf \
+    mb7k2ss.pdf \
+    mb7kpreprocess.pdf \
+    mbabsorption.pdf \
+    mbareaclean.pdf \
+    mbauvloglist.pdf \
+    mbauvnavusbl.pdf \
+    mbbackangle.pdf \
+    mbclean.pdf \
+    mbcontour.pdf \
+    mbcopy.pdf \
+    mbctdlist.pdf \
+    mbdatalist.pdf \
+    mbdefaults.pdf \
+    mbdumpesf.pdf \
+    mbedit.pdf \
+    mbeditviz.pdf \
+    mbextractsegy.pdf \
+    mbfilter.pdf \
+    mbformat.pdf \
+    mbgetesf.pdf \
+    mbgrdtiff.pdf \
+    mbgrdviz.pdf \
+    mbgrid.pdf \
+    mbhistogram.pdf \
+    mbhsdump.pdf \
+    mbhysweeppreprocess.pdf \
+    mbinfo.pdf \
+    mbkongsbergpreprocess.pdf \
+    mblevitus.pdf \
+    mblist.pdf \
+    mbm_arc2grd.pdf \
+    mbm_bpr.pdf \
+    mbm_copy.pdf \
+    mbm_fmtvel.pdf \
+    mbm_grd2arc.pdf \
+    mbm_grd2geovrml.pdf \
+    mbm_grd3dplot.pdf \
+    mbm_grdcut.pdf \
+    mbm_grdinfo.pdf \
+    mbm_grdplot.pdf \
+    mbm_grdtiff.pdf \
+    mbm_grid.pdf \
+    mbm_histplot.pdf \
+    mbm_makedatalist.pdf \
+    mbm_multicopy.pdf \
+    mbm_multidatalist.pdf \
+    mbm_multiprocess.pdf \
+    mbm_plot.pdf \
+    mbm_route2mission.pdf \
+    mbm_stat.pdf \
+    mbm_utm.pdf \
+    mbm_xbt.pdf \
+    mbm_xyplot.pdf \
+    mbmosaic.pdf \
+    mbnavadjust.pdf \
+    mbnavadjustmerge.pdf \
+    mbnavedit.pdf \
+    mbnavlist.pdf \
+    mbneptune2esf.pdf \
+    mbotps.pdf \
+    mbprocess.pdf \
+    mbps.pdf \
+    mbrollbias.pdf \
+    mbrolltimelag.pdf \
+    mbroutetime.pdf \
+    mbsegygrid.pdf \
+    mbsegyinfo.pdf \
+    mbsegylist.pdf \
+    mbsegypsd.pdf \
+    mbset.pdf \
+    mbstripnan.pdf \
+    mbsvplist.pdf \
+    mbswath.pdf \
+    mbtime.pdf \
+    mbvelocitytool.pdf
