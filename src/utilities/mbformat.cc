@@ -251,6 +251,11 @@ int main(int argc, char **argv) {
 
 		printf("\n<CENTER><P><BR>\n");
 		printf("\n<P>\n<HR WIDTH=\"67%%\"></P>\n\n");
+    printf("<center>\n");
+    printf("\t<a href=\"https://www.mbari.org/products/research-software/mb-system/\"><< MB-System website</a> ");
+    printf("| <a href=\"https://www.mbari.org/technology/mb-system/documentation/\"> Online MB-System Documenation>></a> ");
+    printf("| <a href=\"index.html\">MB-System Information in Local Installation</a></p>\n");
+    printf("</center>\n");
 		printf("\n</BODY>\n</HTML>\n");
 
 		status = MB_SUCCESS;

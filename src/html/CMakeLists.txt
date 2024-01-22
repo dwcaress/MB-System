@@ -28,10 +28,10 @@ set(HTML
     ChangeLog.html
     COPYING.html
     GPL.html
+    index.html
     mbsystem_logo_small.gif
     mbsystem_logo.gif
     mbsystem_version.txt
-    mbsystem_index.html
     mbsystem_man_list.html
     mbsystem_formats.html
     mbsystem.html
@@ -45,6 +45,7 @@ set(HTML
     mbauvnavusbl.html
     mbbackangle.html
     mbclean.html
+    mbconfig.html
     mbcontour.html
     mbcopy.html
     mbctdlist.html
@@ -57,6 +58,8 @@ set(HTML
     mbfilter.html
     mbformat.html
     mbgetesf.html
+    mbgpstide.html
+    mbgrd2obj.html
     mbgrdtiff.html
     mbgrdviz.html
     mbgrid.html
@@ -81,6 +84,8 @@ set(HTML
     mbm_grid.html
     mbm_histplot.html
     mbm_makedatalist.html
+    mbmakeplatform.html
+    mbm_makesvp.html
     mbm_multicopy.html
     mbm_multidatalist.html
     mbm_multiprocess.html
@@ -97,6 +102,7 @@ set(HTML
     mbnavlist.html
     mbneptune2esf.html
     mbotps.html
+    mbpreprocess.html
     mbprocess.html
     mbps.html
     mbrollbias.html
@@ -107,13 +113,18 @@ set(HTML
     mbsegylist.html
     mbsegypsd.html
     mbset.html
+    mbsslayout.html
     mbstripnan.html
     mbsvplist.html
+    mbsvpselect.html
     mbswath.html
+    mbswplspreprocess.html
     mbtime.html
-    mbvelocitytool.html)
+    mbvelocitytool.html
+    mbvoxelclean.html)
 
 set(PDF
+    ChangeLog.pdf
     GPL.pdf
     COPYING.pdf
     mbsystem.pdf
@@ -127,6 +138,7 @@ set(PDF
     mbauvnavusbl.pdf
     mbbackangle.pdf
     mbclean.pdf
+    mbconfig.pdf
     mbcontour.pdf
     mbcopy.pdf
     mbctdlist.pdf
@@ -139,6 +151,8 @@ set(PDF
     mbfilter.pdf
     mbformat.pdf
     mbgetesf.pdf
+    mbgpstide.pdf
+    mbgrd2obj.pdf
     mbgrdtiff.pdf
     mbgrdviz.pdf
     mbgrid.pdf
@@ -149,6 +163,7 @@ set(PDF
     mbkongsbergpreprocess.pdf
     mblevitus.pdf
     mblist.pdf
+    mbmakeplatform.pdf
     mbm_arc2grd.pdf
     mbm_bpr.pdf
     mbm_copy.pdf
@@ -163,6 +178,7 @@ set(PDF
     mbm_grid.pdf
     mbm_histplot.pdf
     mbm_makedatalist.pdf
+    mbm_makesvp.pdf
     mbm_multicopy.pdf
     mbm_multidatalist.pdf
     mbm_multiprocess.pdf
@@ -179,6 +195,7 @@ set(PDF
     mbnavlist.pdf
     mbneptune2esf.pdf
     mbotps.pdf
+    mbpreprocess.pdf
     mbprocess.pdf
     mbps.pdf
     mbrollbias.pdf
@@ -189,10 +206,14 @@ set(PDF
     mbsegylist.pdf
     mbsegypsd.pdf
     mbset.pdf
+    mbsslayout.pdf
     mbstripnan.pdf
     mbsvplist.pdf
+    mbsvpselect.pdf
     mbswath.pdf
+    mbswplspreprocess.pdf
     mbtime.pdf
-    mbvelocitytool.pdf)
+    mbvelocitytool.pdf
+    mbvoxelclean.pdf)
 
 install(FILES ${HTML} ${PDF} DESTINATION ${CMAKE_INSTALL_DOC}/mbsystem/html)
