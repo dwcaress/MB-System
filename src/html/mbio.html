@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbio</H1>
-Section:  MB-System 5.0  (3)<BR>Updated:  19 February 2021 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (3)<BR>Updated:  22 January 2024 <BR><A HREF="#index">Index</A>
 <HR>
 
 <P>
@@ -37,18 +37,32 @@ programs which are independent of particular data formats and to provide
 a standard approach to swath mapping sonar data i/o.
 <P>
 <A NAME="lbAE">&nbsp;</A>
-<H2>AUTHORSHIP</H2>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
 
-David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+David W. Caress
 <BR>
 
 <BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
 <BR>
 
-Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+Christian do Santos Ferreira
 <BR>
 
-<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences&nbsp;(MARUM)
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
+<BR>
+
+Dale N. Chayes
+<BR>
+
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
 <P>
 <A NAME="lbAF">&nbsp;</A>
 <H2>DATA TERMINOLOGY</H2>
@@ -71,34 +85,6 @@ the amplitude) data to be flagged as bad. The details of the
 beamflagging scheme are presented below.
 <P>
 <A NAME="lbAG">&nbsp;</A>
-<H2>VERSION 5 CHANGES</H2>
-
-This document describes version 5 releases of <B>MBIO</B>.
-The source code structure used in version 4 <B>MBIO</B> had grown
-complex and difficult to support. In particular, the addition
-of new i/o modules had become excessively time consuming.
-Consequently, we have restructured and rewritten much of the library.
-Most of the changes are internal, but two  function calls have
-disappeared (<B>mb_put()</B> and <B>mb_write()</B>), and a
-number of new functions have been added.
-<P>
-A further significant architectural change was implemented for
-release 5.0.8 in order to support data formats that have no
-explicit maximum number of beams or pixels. The memory management
-of arrays used to hold bathymetry, amplitude, and sidescan data
-has been made dynamic. Now, when data records are encountered that
-include larger numbers of beams or pixels than will fit in the
-arrays previously allocated, those arrays are reallocated to
-the required size. This is handled automatically for all of the
-internal arrays used by <B>MBIO</B> functions. Of course,
-applications using <B>MBIO</B> must allocate arrays that are
-passed into functions like <B>mb_read</B>, <B>mb_get_all</B>, and
-<B>mb_get</B> to be populated by the desired data. In order for
-these arrays to be managed dynamically, the application must
-first register each array by passing the location of the array
-pointer to a new function called <B>mb_register_array</B>.
-<P>
-<A NAME="lbAH">&nbsp;</A>
 <H2>OVERVIEW</H2>
 
 <B>MBIO</B> opens and initializes sonar data files for reading
@@ -237,7 +223,7 @@ A number of other <B>MBIO</B> functions dealing with default values for
 important parameters, error messages, memory management, and time conversions
 also exist and are discussed below.
 <P>
-<A NAME="lbAI">&nbsp;</A>
+<A NAME="lbAH">&nbsp;</A>
 <H2>SUPPORTED SWATH SONAR SYSTEMS</H2>
 
 Each swath mapping sonar system outputs a data stream which includes some values
@@ -273,7 +259,7 @@ The sonars and other sensors associated with supported formats include:
 <BR>&nbsp;&nbsp;R2Sonic&nbsp;multibeam
 <BR>&nbsp;&nbsp;3D&nbsp;at&nbsp;Depth&nbsp;subsea&nbsp;lidars&nbsp;(SL-1,&nbsp;SL-2,&nbsp;WiSSL)
 <P>
-<A NAME="lbAJ">&nbsp;</A>
+<A NAME="lbAI">&nbsp;</A>
 <H2>SUPPORTED FORMATS</H2>
 
 The following swath mapping sonar data formats are supported in this version of
@@ -840,7 +826,7 @@ The institutional acronyms used above have the following meanings:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>for&nbsp;operation&nbsp;of&nbsp;French&nbsp;oceanographic<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>research&nbsp;fleet.<BR>
 <P>
-<A NAME="lbAK">&nbsp;</A>
+<A NAME="lbAJ">&nbsp;</A>
 <H2>FUNCTION STATUS AND ERROR CODES</H2>
 
 All of the <B>MBIO</B> functions return an integer status value with the
@@ -900,7 +886,7 @@ In general, programs should treat negative error values as non-fatal
 files should be closed and the program terminated).
 <BR>
 
-<A NAME="lbAL">&nbsp;</A>
+<A NAME="lbAK">&nbsp;</A>
 <H2>FUNCTION VERBOSITY</H2>
 
 All of the <B>MBIO</B> functions are passed a <I>verbose</I> parameter which
@@ -921,7 +907,7 @@ using <B>MBIO</B> functions should adopt the following verbosity conventions:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>verbose</I>&nbsp;&gt;=&nbsp;2:<TT>&nbsp;&nbsp;&nbsp;</TT>debug&nbsp;mode&nbsp;with&nbsp;copious&nbsp;output<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>including&nbsp;every&nbsp;function&nbsp;call<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>and&nbsp;status&nbsp;listings<BR>
-<A NAME="lbAM">&nbsp;</A>
+<A NAME="lbAL">&nbsp;</A>
 <H2>INITIALIZATION AND CLOSING FUNCTIONS</H2>
 
 <P>
@@ -1184,7 +1170,7 @@ The <I>verbose</I> value controls the standard error output verbosity
 of the function. A status value indicating success or failure is
 returned; an error value argument passes more detailed information
 about failures.
-<A NAME="lbAN">&nbsp;</A>
+<A NAME="lbAM">&nbsp;</A>
 <H2>LEVEL 1 FUNCTIONS</H2>
 
 <P>
@@ -1369,7 +1355,7 @@ A status value indicating success or failure is returned; the error value
 argument <I>error</I> passes more detailed information about
 read failures.
 <P>
-<A NAME="lbAO">&nbsp;</A>
+<A NAME="lbAN">&nbsp;</A>
 <H2>LEVEL 2 FUNCTIONS</H2>
 
 <P>
@@ -2492,7 +2478,7 @@ A status value indicating success or failure is returned; the error value
 argument <I>error</I> passes more detailed information about
 data copy failures.
 <P>
-<A NAME="lbAP">&nbsp;</A>
+<A NAME="lbAO">&nbsp;</A>
 <H2>LEVEL 3 FUNCTIONS</H2>
 
 <P>
@@ -3167,7 +3153,7 @@ A status value indicating success or failure is returned; the error value
 argument <I>error</I> passes more detailed information about
 buffer failures.
 <P>
-<A NAME="lbAQ">&nbsp;</A>
+<A NAME="lbAP">&nbsp;</A>
 <H2>MISCELLANEOUS FUNCTIONS</H2>
 
 <P>
@@ -4108,7 +4094,7 @@ The function <B>mb_int_compare</B>
 is used with the <B>qsort</B> function.
 This function returns 1 if a &gt; b and -1 if a &lt;= b.
 <P>
-<A NAME="lbAR">&nbsp;</A>
+<A NAME="lbAQ">&nbsp;</A>
 <H2>COORDINATE SYSTEMS USED IN MB-SYSTEM</H2>
 
 I. Introduction
@@ -4256,7 +4242,7 @@ converted to roll-pitch coordinates, corrected, and then
 converted back prior to raytracing.
 <P>
 <P>
-<A NAME="lbAS">&nbsp;</A>
+<A NAME="lbAR">&nbsp;</A>
 <H2>BEAM FLAGS USED IN MB-SYSTEM</H2>
 
 <B>MB-System</B> uses arrays of 1-byte &quot;beamflag&quot; values to indicate
@@ -4293,15 +4279,15 @@ Selection modes:
 <BR>&nbsp;&nbsp;x1xxxx10&nbsp;=&gt;&nbsp;Selected,&nbsp;spare.
 <BR>&nbsp;&nbsp;1xxxxx10&nbsp;=&gt;&nbsp;Selected,&nbsp;spare.
 <P>
-<A NAME="lbAT">&nbsp;</A>
+<A NAME="lbAS">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
 <B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbformat.html">mbformat</A></B>(l)
 <P>
-<A NAME="lbAU">&nbsp;</A>
+<A NAME="lbAT">&nbsp;</A>
 <H2>BUGS</H2>
 
-What could go wrong in a mere 204,289 lines of code?
+What could go wrong in a mere 374,852 lines of C code?
 <BR>
 
 Let us know...
@@ -4313,29 +4299,28 @@ Let us know...
 <DT><A HREF="#lbAB">NAME</A><DD>
 <DT><A HREF="#lbAC">VERSION</A><DD>
 <DT><A HREF="#lbAD">DESCRIPTION</A><DD>
-<DT><A HREF="#lbAE">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAE">MB-SYSTEM AUTHORSHIP</A><DD>
 <DT><A HREF="#lbAF">DATA TERMINOLOGY</A><DD>
-<DT><A HREF="#lbAG">VERSION 5 CHANGES</A><DD>
-<DT><A HREF="#lbAH">OVERVIEW</A><DD>
-<DT><A HREF="#lbAI">SUPPORTED SWATH SONAR SYSTEMS</A><DD>
-<DT><A HREF="#lbAJ">SUPPORTED FORMATS</A><DD>
-<DT><A HREF="#lbAK">FUNCTION STATUS AND ERROR CODES</A><DD>
-<DT><A HREF="#lbAL">FUNCTION VERBOSITY</A><DD>
-<DT><A HREF="#lbAM">INITIALIZATION AND CLOSING FUNCTIONS</A><DD>
-<DT><A HREF="#lbAN">LEVEL 1 FUNCTIONS</A><DD>
-<DT><A HREF="#lbAO">LEVEL 2 FUNCTIONS</A><DD>
-<DT><A HREF="#lbAP">LEVEL 3 FUNCTIONS</A><DD>
-<DT><A HREF="#lbAQ">MISCELLANEOUS FUNCTIONS</A><DD>
-<DT><A HREF="#lbAR">COORDINATE SYSTEMS USED IN MB-SYSTEM</A><DD>
-<DT><A HREF="#lbAS">BEAM FLAGS USED IN MB-SYSTEM</A><DD>
-<DT><A HREF="#lbAT">SEE ALSO</A><DD>
-<DT><A HREF="#lbAU">BUGS</A><DD>
+<DT><A HREF="#lbAG">OVERVIEW</A><DD>
+<DT><A HREF="#lbAH">SUPPORTED SWATH SONAR SYSTEMS</A><DD>
+<DT><A HREF="#lbAI">SUPPORTED FORMATS</A><DD>
+<DT><A HREF="#lbAJ">FUNCTION STATUS AND ERROR CODES</A><DD>
+<DT><A HREF="#lbAK">FUNCTION VERBOSITY</A><DD>
+<DT><A HREF="#lbAL">INITIALIZATION AND CLOSING FUNCTIONS</A><DD>
+<DT><A HREF="#lbAM">LEVEL 1 FUNCTIONS</A><DD>
+<DT><A HREF="#lbAN">LEVEL 2 FUNCTIONS</A><DD>
+<DT><A HREF="#lbAO">LEVEL 3 FUNCTIONS</A><DD>
+<DT><A HREF="#lbAP">MISCELLANEOUS FUNCTIONS</A><DD>
+<DT><A HREF="#lbAQ">COORDINATE SYSTEMS USED IN MB-SYSTEM</A><DD>
+<DT><A HREF="#lbAR">BEAM FLAGS USED IN MB-SYSTEM</A><DD>
+<DT><A HREF="#lbAS">SEE ALSO</A><DD>
+<DT><A HREF="#lbAT">BUGS</A><DD>
 </DL>
 <HR>
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 19 February 2021</P></CENTER>
+Last Updated: 22 January 2024</P></CENTER>
 
 <HR>
 <center>

@@ -2,6 +2,7 @@ dist_mbsystemhtml_DATA = \
     ChangeLog.html \
     COPYING.html \
     GPL.html \
+    index.html \
     mbsystem_logo_small.gif \
     mbsystem_logo.gif \
     mbsystem_version.txt \
@@ -18,6 +19,7 @@ dist_mbsystemhtml_DATA = \
     mbauvnavusbl.html \
     mbbackangle.html \
     mbclean.html \
+    mbconfig.html \
     mbcontour.html \
     mbcopy.html \
     mbctdlist.html \
@@ -30,6 +32,8 @@ dist_mbsystemhtml_DATA = \
     mbfilter.html \
     mbformat.html \
     mbgetesf.html \
+    mbgpstide.html \
+    mbgrd2obj.html \
     mbgrdtiff.html \
     mbgrdviz.html \
     mbgrid.html \
@@ -54,6 +58,8 @@ dist_mbsystemhtml_DATA = \
     mbm_grid.html \
     mbm_histplot.html \
     mbm_makedatalist.html \
+    mbmakeplatform.html \
+    mbm_makesvp.html \
     mbm_multicopy.html \
     mbm_multidatalist.html \
     mbm_multiprocess.html \
@@ -70,6 +76,7 @@ dist_mbsystemhtml_DATA = \
     mbnavlist.html \
     mbneptune2esf.html \
     mbotps.html \
+    mbpreprocess.html \
     mbprocess.html \
     mbps.html \
     mbrollbias.html \
@@ -80,11 +87,16 @@ dist_mbsystemhtml_DATA = \
     mbsegylist.html \
     mbsegypsd.html \
     mbset.html \
+    mbsslayout.html \
     mbstripnan.html \
     mbsvplist.html \
+    mbsvpselect.html \
     mbswath.html \
+    mbswplspreprocess.html \
     mbtime.html \
     mbvelocitytool.html \
+    mbvoxelclean.html \
+    ChangeLog.pdf \
     GPL.pdf \
     COPYING.pdf \
     mbsystem.pdf \
@@ -98,6 +110,7 @@ dist_mbsystemhtml_DATA = \
     mbauvnavusbl.pdf \
     mbbackangle.pdf \
     mbclean.pdf \
+    mbconfig.pdf \
     mbcontour.pdf \
     mbcopy.pdf \
     mbctdlist.pdf \
@@ -110,6 +123,8 @@ dist_mbsystemhtml_DATA = \
     mbfilter.pdf \
     mbformat.pdf \
     mbgetesf.pdf \
+    mbgpstide.pdf \
+    mbgrd2obj.pdf \
     mbgrdtiff.pdf \
     mbgrdviz.pdf \
     mbgrid.pdf \
@@ -120,6 +135,7 @@ dist_mbsystemhtml_DATA = \
     mbkongsbergpreprocess.pdf \
     mblevitus.pdf \
     mblist.pdf \
+    mbmakeplatform.pdf \
     mbm_arc2grd.pdf \
     mbm_bpr.pdf \
     mbm_copy.pdf \
@@ -134,6 +150,7 @@ dist_mbsystemhtml_DATA = \
     mbm_grid.pdf \
     mbm_histplot.pdf \
     mbm_makedatalist.pdf \
+    mbm_makesvp.pdf \
     mbm_multicopy.pdf \
     mbm_multidatalist.pdf \
     mbm_multiprocess.pdf \
@@ -150,6 +167,7 @@ dist_mbsystemhtml_DATA = \
     mbnavlist.pdf \
     mbneptune2esf.pdf \
     mbotps.pdf \
+    mbpreprocess.pdf \
     mbprocess.pdf \
     mbps.pdf \
     mbrollbias.pdf \
@@ -160,8 +178,15 @@ dist_mbsystemhtml_DATA = \
     mbsegylist.pdf \
     mbsegypsd.pdf \
     mbset.pdf \
+    mbsslayout.pdf \
     mbstripnan.pdf \
     mbsvplist.pdf \
+    mbsvpselect.pdf \
     mbswath.pdf \
+    mbswplspreprocess.pdf \
     mbtime.pdf \
-    mbvelocitytool.pdf
+    mbvelocitytool.pdf \
+    mbvoxelclean.pdf
+
+CLEANFILES =
+DISTCLEANFILES =

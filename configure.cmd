@@ -17,9 +17,6 @@
     make -j uninstall
     make -j clean
 
-# Generate contents of src/html and src/pdf
-    cd src/htmlsrc ; ./make_mbhtml.cmd ; cd ../..
-
 # Reconstruct the build system, including the Makefile.in files and the configure script
     glibtoolize --force --copy
     aclocal
