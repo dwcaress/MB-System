@@ -1181,6 +1181,7 @@ int main(int argc, char **argv) {
   int n_rt_att2 = 0;
   int n_rt_att3 = 0;
   int n_rt_files = 0;
+  int n_rt_dup_timestamp = 0;
 
   int n_wt_data = 0;
   int n_wt_comment = 0;
@@ -2318,8 +2319,10 @@ int main(int argc, char **argv) {
   int n_rf_att1 = 0;
   int n_rf_att2 = 0;
   int n_rf_att3 = 0;
+  int n_rf_dup_timestamp = 0;
   n_rt_data = 0;
   n_rt_files = 0;
+  n_rt_dup_timestamp = 0;
 
   int n_wf_data = 0;
   int n_wf_comment = 0;
@@ -2676,6 +2679,9 @@ int main(int argc, char **argv) {
       if (kluge_fix_wissl_timestamps)
         kluge_fix_wissl_timestamps_setup2 = false;
 
+      double last_survey_time_d[MB_SUBSENSOR_NUM_MAX];
+      memset(last_survey_time_d, 0, MB_SUBSENSOR_NUM_MAX * sizeof(double));
+
       /* ------------------------------- */
       /* write comments to output file   */
 
@@ -2698,7 +2704,7 @@ int main(int argc, char **argv) {
           status = MB_SUCCESS;
         }
 
-        /* detect multiple pings with the same time stamps */
+        /* obtain sensorhead and sensortype */
         int sensorhead = 0;
         int sensortype = 0;
         if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
@@ -2757,6 +2763,7 @@ int main(int argc, char **argv) {
           (kind == MB_DATA_DATA || kind == MB_DATA_SUBBOTTOM_MCS || kind == MB_DATA_SUBBOTTOM_CNTRBEAM ||
            kind == MB_DATA_SUBBOTTOM_SUBBOTTOM || kind == MB_DATA_SIDESCAN2 || kind == MB_DATA_SIDESCAN3 ||
            kind == MB_DATA_WATER_COLUMN)) {
+
           /* call mb_extract_nav to get attitude */
           status = mb_extract_nav(verbose, imbio_ptr, istore_ptr, &kind, time_i, &time_d, &navlon_org, &navlat_org,
                       &speed_org, &heading_org, &draft_org, &roll_org, &pitch_org, &heave_org, &error);
@@ -2764,8 +2771,22 @@ int main(int argc, char **argv) {
           /* call mb_extract_altitude to get altitude */
           status &= mb_extract_altitude(verbose, imbio_ptr, istore_ptr, &kind, &sensordepth_org, &altitude_org, &error);
 
-          /* apply time jump fix to survey record time stamps */
+          /* detect multiple data records from the same subsensor with the same time stamps 
+              - if found adjust new timestamp so it is different than the prior */
           bool timestamp_changed = false;
+          if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
+            if (sensorhead >= 0 && sensorhead < MB_SUBSENSOR_NUM_MAX) {
+              if (fabs(time_d - last_survey_time_d[sensorhead]) < MB_ESF_MAXTIMEDIFF) {
+                time_d += 3 * MB_ESF_MAXTIMEDIFF;
+                timestamp_changed = true;
+                n_rf_dup_timestamp++;
+                n_rt_dup_timestamp++;
+              }
+              last_survey_time_d[sensorhead] = time_d;
+            }
+          }
+
+          /* apply time jump fix to survey record time stamps */
           double dtime_d_expect = 0.0;
           double dtime_d_raw = 0.0;
           double dtime_d = 0.0;
@@ -3266,6 +3287,9 @@ int main(int argc, char **argv) {
         fprintf(stderr, "     %d att1 records\n", n_rf_att1);
         fprintf(stderr, "     %d att2 records\n", n_rf_att2);
         fprintf(stderr, "     %d att3 records\n", n_rf_att3);
+        if (n_rf_dup_timestamp > 0) {
+          fprintf(stderr, "     %d duplicate timestamps fixed ****\n", n_rf_dup_timestamp);
+        }
         fprintf(stderr, "Pass 2: Records written to output file %d: %s\n", n_wt_files, ofile);
         fprintf(stderr, "     %d survey records\n", n_wf_data);
         fprintf(stderr, "     %d comment records\n", n_wf_comment);
@@ -3453,6 +3477,9 @@ int main(int argc, char **argv) {
     fprintf(stderr, "     %d att1 records\n", n_rt_att1);
     fprintf(stderr, "     %d att2 records\n", n_rt_att2);
     fprintf(stderr, "     %d att3 records\n", n_rt_att3);
+        if (n_rt_dup_timestamp > 0) {
+          fprintf(stderr, "     %d duplicate timestamps fixed ****\n", n_rt_dup_timestamp);
+        }
     fprintf(stderr, "Pass 2: Total records written to %d output files\n", n_wt_files);
     fprintf(stderr, "     %d survey records\n", n_wt_data);
     fprintf(stderr, "     %d comment records\n", n_wt_comment);
