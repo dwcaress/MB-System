@@ -3219,6 +3219,7 @@ int mbeditviz_destroy_grid() {
               action = MBP_EDIT_FLAG;
             else
               action = MBP_EDIT_ZERO;
+            
             /* save the edits to the esf stream */
             if (file->esf_open) {
               if (mbev_verbose > 0)

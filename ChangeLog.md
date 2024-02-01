@@ -23,9 +23,24 @@ or beta, are equally accessible as tarballs through the Github interface.
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
 
-- **Version 5.8.0    January 22, 2024**
+- Version 5.8.1beta01    February 1, 2024
+- **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.1beta01 (February 1, 2024)
+
+Mbpreprocess: Now checks for successive pings/scans with the same timestamp, and 
+adds enough time to the second timestamp (0.0000033 seconds) that these pings/scans 
+are seen as different by the beam edit flag handling code. For dual head sensors 
+this logic only compares timestamps for the same subsensor, so simultaneous operation
+of the two subsensors (sonar or lidar heads) is allowed.
+
+Mbvoxelclean: Fixed bug in which previously beamflags from previously existing esf
+files were ignored. Also fixed a non-initialized pointer bug that produced occasional
+crashes.
+
+#### 5.8.0 (January 22, 2024)
 
 **Version 5.8.0** is now the current release of MB-System. 
 

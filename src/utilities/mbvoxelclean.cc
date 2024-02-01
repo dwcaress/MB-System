@@ -335,7 +335,7 @@ int main(int argc, char **argv) {
       fprintf(outfp, "dbg2       etime_i[6]:                  %d\n", etime_i[6]);
       fprintf(outfp, "dbg2       speedmin:                    %f\n", speedmin);
       fprintf(outfp, "dbg2       timegap:                     %f\n", timegap);
-      fprintf(outfp, "dbg2       file:                        %s\n", read_file);
+      fprintf(outfp, "dbg2       read_file:                   %s\n", read_file);
       fprintf(outfp, "dbg2       format:                      %d\n", format);
       fprintf(outfp, "dbg2       voxel_size_xy:               %f\n", voxel_size_xy);
       fprintf(outfp, "dbg2       voxel_size_z:                %f\n", voxel_size_z);
@@ -375,8 +375,8 @@ int main(int argc, char **argv) {
 
   /* determine whether to read one file or a list of files */
   const bool read_datalist = format < 0;
-  bool read_data;
-  void *datalist;
+  bool read_data = false;
+  void *datalist = nullptr;
   char swathfile[MB_PATH_MAXLINE];
   char dfile[MB_PATH_MAXLINE];
   double file_weight;
@@ -434,11 +434,12 @@ int main(int argc, char **argv) {
   struct mbvoxelclean_ping_struct *pings = nullptr;
 
   /* voxel storage */
-  unsigned char *voxel_count = nullptr;  // TODO(schwehr): Make this a bool
+  unsigned char *voxel_count = nullptr;
 
   /* save file control variables */
   char esffile[MB_PATH_MAXLINE];
   struct mb_esf_struct esf;
+  memset((void *)&esf, 0, sizeof(esf));
 
   int n_files_tot = 0;
   int n_pings_tot = 0;
@@ -543,7 +544,7 @@ int main(int argc, char **argv) {
     /* proceed if file locked and format ok */
     if (oktoprocess) {
       /* check for *inf file, create if necessary, and load metadata */
-      int formatread;
+      int formatread = format;
       struct mb_info_struct mb_info;
       status = mb_get_info_datalist(verbose, swathfile, &formatread, &mb_info, lonflip, &error);
 
@@ -610,7 +611,7 @@ int main(int argc, char **argv) {
       mb_get_fbt(verbose, swathfileread, &formatread, &error);
 
       /* if verbose output status */
-      if (verbose >= 0) {
+      if (verbose > 0) {
         fprintf(stderr, "---------------------------------\n");
         fprintf(stderr, "Processing %s...\n\tActually reading %s...\n", swathfile, swathfileread);
       }
@@ -831,7 +832,7 @@ int main(int argc, char **argv) {
                   if (apply_amplitude_minimum && amp[j] < amplitude_minimum) {
                     pings[n_pings].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
                     const int action = MBP_EDIT_FILTER;
-                    mb_esf_save(verbose, &esf, pings[n_pings].time_d,
+                    mb_ess_save(verbose, &esf, pings[n_pings].time_d,
                         j + pings[n_pings].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
                         action, &error);
                     n_minamplitude_flag++;
@@ -839,7 +840,7 @@ int main(int argc, char **argv) {
                   if (apply_amplitude_maximum && amp[j] > amplitude_maximum) {
                     pings[n_pings].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
                     const int action = MBP_EDIT_FILTER;
-                    mb_esf_save(verbose, &esf, pings[n_pings].time_d,
+                    mb_ess_save(verbose, &esf, pings[n_pings].time_d,
                         j + pings[n_pings].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
                         action, &error);
                     n_maxamplitude_flag++;
@@ -917,7 +918,7 @@ int main(int argc, char **argv) {
                 && pings[i].bathacrosstrack[j] < acrosstrack_minimum) {
                 pings[i].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
                 const int action = MBP_EDIT_FILTER;
-                mb_esf_save(verbose, &esf, pings[i].time_d,
+                mb_ess_save(verbose, &esf, pings[i].time_d,
                     j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
                     action, &error);
                 n_minacrosstrack_flag++;
@@ -926,7 +927,7 @@ int main(int argc, char **argv) {
                 && pings[i].bathacrosstrack[j] > acrosstrack_maximum) {
                 pings[i].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
                 const int action = MBP_EDIT_FILTER;
-                mb_esf_save(verbose, &esf, pings[i].time_d,
+                mb_ess_save(verbose, &esf, pings[i].time_d,
                     j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
                     action, &error);
                 n_maxacrosstrack_flag++;
@@ -946,7 +947,7 @@ int main(int argc, char **argv) {
                 && pings[i].bathr[j] < range_minimum) {
                 pings[i].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
                 const int action = MBP_EDIT_FILTER;
-                mb_esf_save(verbose, &esf, pings[i].time_d,
+                mb_ess_save(verbose, &esf, pings[i].time_d,
                     j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
                     action, &error);
                 n_minrange_flag++;
@@ -955,7 +956,7 @@ int main(int argc, char **argv) {
                 && pings[i].bathr[j] > range_maximum) {
                 pings[i].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
                 const int action = MBP_EDIT_FILTER;
-                mb_esf_save(verbose, &esf, pings[i].time_d,
+                mb_ess_save(verbose, &esf, pings[i].time_d,
                     j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
                     action, &error);
                 n_maxrange_flag++;
@@ -1071,7 +1072,7 @@ int main(int argc, char **argv) {
                 && !mb_beam_ok(pings[i].beamflag[j])) {
                 pings[i].beamflag[j] = MB_FLAG_NONE;
                 const int action = MBP_EDIT_UNFLAG;
-                mb_esf_save(verbose, &esf, pings[i].time_d,
+                mb_ess_save(verbose, &esf, pings[i].time_d,
                     j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
                     action, &error);
                 n_density_unflag++;
@@ -1081,7 +1082,7 @@ int main(int argc, char **argv) {
                 && mb_beam_ok(pings[i].beamflag[j])) {
                 pings[i].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
                 const int action = MBP_EDIT_FILTER;
-                mb_esf_save(verbose, &esf, pings[i].time_d,
+                mb_ess_save(verbose, &esf, pings[i].time_d,
                       j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
                       action, &error);
                 n_density_flag++;
@@ -1101,7 +1102,7 @@ int main(int argc, char **argv) {
                 && pings[i].bathacrosstrack[j] < acrosstrack_minimum) {
                 pings[i].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
                 const int action = MBP_EDIT_FILTER;
-                mb_esf_save(verbose, &esf, pings[i].time_d,
+                mb_ess_save(verbose, &esf, pings[i].time_d,
                     j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
                     action, &error);
                 n_minacrosstrack_flag++;
@@ -1110,7 +1111,7 @@ int main(int argc, char **argv) {
                 && pings[i].bathacrosstrack[j] > acrosstrack_maximum) {
                 pings[i].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
                 const int action = MBP_EDIT_FILTER;
-                mb_esf_save(verbose, &esf, pings[i].time_d,
+                mb_ess_save(verbose, &esf, pings[i].time_d,
                     j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
                     action, &error);
                 n_maxacrosstrack_flag++;
@@ -1130,7 +1131,7 @@ int main(int argc, char **argv) {
                 && pings[i].bathr[j] < range_minimum) {
                 pings[i].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
                 const int action = MBP_EDIT_FILTER;
-                mb_esf_save(verbose, &esf, pings[i].time_d,
+                mb_ess_save(verbose, &esf, pings[i].time_d,
                     j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
                     action, &error);
                 n_minrange_flag++;
@@ -1139,12 +1140,38 @@ int main(int argc, char **argv) {
                 && pings[i].bathr[j] > range_maximum) {
                 pings[i].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
                 const int action = MBP_EDIT_FILTER;
-                mb_esf_save(verbose, &esf, pings[i].time_d,
+                mb_ess_save(verbose, &esf, pings[i].time_d,
                     j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
                     action, &error);
                 n_maxrange_flag++;
               }
             }
+          }
+        }
+      }
+
+      /* write out edits for beamflags that have changed  */
+      for (int i = 0; i < n_pings; i++) {
+        for (int j = 0; j< pings[i].beams_bath; j++) {
+          if (pings[i].beamflag[j] != pings[i].beamflagorg[j]) {
+            int action = MBP_EDIT_ZERO;
+            if (mb_beam_ok(pings[i].beamflag[j])) {
+              action = MBP_EDIT_UNFLAG;
+            }
+            else if (mb_beam_check_flag_filter2(pings[i].beamflag[j])) {
+              action = MBP_EDIT_FILTER;
+            }
+            else if (mb_beam_check_flag_filter(pings[i].beamflag[j])) {
+              action = MBP_EDIT_FILTER;
+            }
+            else if (pings[i].beamflag[j] != MB_FLAG_NULL) {
+              action = MBP_EDIT_FLAG;
+            }
+            else {
+              action = MBP_EDIT_ZERO;
+            }
+            mb_esf_save(verbose, &esf, pings[i].time_d,
+                        j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, action, &error);
           }
         }
       }
@@ -1221,7 +1248,7 @@ int main(int argc, char **argv) {
     mb_datalist_close(verbose, &datalist, &error);
 
   /* give the total statistics */
-  if (verbose >= 0) {
+  if (verbose > 0) {
     fprintf(stderr, "\n---------------------------------\n");
     fprintf(stderr, "MBvoxelclean Processing Totals:\n");
     fprintf(stderr, "---------------------------------\n");

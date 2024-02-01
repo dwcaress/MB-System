@@ -24,7 +24,7 @@
 
 message("In src/macros")
 
-set(executables
+set(scripts
     mbm_arc2grd
     mbm_bpr
     mbm_copy
@@ -49,4 +49,4 @@ set(executables
     mbm_xbt
     mbm_xyplot)
 
-install(PROGRAMS ${executables} DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(PROGRAMS ${scripts} DESTINATION ${CMAKE_INSTALL_BINDIR})
