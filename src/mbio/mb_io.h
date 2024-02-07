@@ -324,6 +324,9 @@ extern const char *mb_sensor_type_string[];
 #define mb_check_sensor_capability2_unused30(F) ((int)(F & MB_SENSOR_CAPABILITY2_UNUSED30))
 #define mb_check_sensor_capability2_unused31(F) ((int)(F & MB_SENSOR_CAPABILITY2_UNUSED31))
 
+/* Maximum number of subsensors (e.g. two sonar heads, two lidar heads, two cameras) */
+#define MB_SUBSENSOR_NUM_MAX 2
+
 /* survey platform definition structures */
 struct mb_sensor_offset_struct {
   int position_offset_mode;

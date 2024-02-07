@@ -27,8 +27,9 @@
     autoreconf --force --install
 
 # Run the configure script - here the prerequisites have been installed with
-# MacPorts, and the experimental OpenCV based photomosaicing and Terrain relative
+# MacPorts, and the OpenCV based photomosaicing and Terrain relative
 # Navigation are all enabled
+# Add --enable-deprecated to also build the deprecated programs
     CFLAGS="-g -Wall -Wextra" CPPFLAGS="-g" ./configure \
       --prefix=/usr/local \
       --disable-static \
@@ -56,10 +57,6 @@
     make
     make check
     make install
-
-    cd src/htmlsrc ; ./make_mbhtml ; cd ../..
-
-    make -j install
 
 #
 #------------------------------------------------------------------------------

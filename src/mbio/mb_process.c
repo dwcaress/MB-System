@@ -1954,18 +1954,18 @@ int mb_pr_default_output(int verbose, struct mb_process_struct *process, int *er
 		if (!process->mbp_ofile_specified && process->mbp_format_specified) {
 			/* use p.mbXXX suffix if already edited MBARI ROV navigation */
 			if (process->mbp_format == MBF_MBARIROV
-        && strlen(fileroot) > 6
-        && strncmp(&fileroot[strlen(fileroot)-6], "edited", 6) == 0) {
-				sprintf(process->mbp_ofile, "%sp.mb%d", fileroot, process->mbp_format);
-      }
+        		&& strlen(fileroot) > 6
+        		&& strncmp(&fileroot[strlen(fileroot)-6], "edited", 6) == 0) {
+				snprintf(process->mbp_ofile, MBP_FILENAMESIZE, "%sp.mb%d", fileroot, process->mbp_format);
+      		}
 			/* else use .txt suffix if unedited MBARI ROV navigation */
 			else if (process->mbp_format == MBF_MBARIROV) {
-        sprintf(process->mbp_ofile, "%sedited.txt", fileroot);
-      }
+        		snprintf(process->mbp_ofile, MBP_FILENAMESIZE, "%sedited.txt", fileroot);
+      		}
 			/* else use standard .mbXXX suffix */
 			else {
-				sprintf(process->mbp_ofile, "%sp.mb%d", fileroot, process->mbp_format);
-      }
+				snprintf(process->mbp_ofile, MBP_FILENAMESIZE, "%sp.mb%d", fileroot, process->mbp_format);
+      		}
 			process->mbp_ofile_specified = true;
 		}
 	}

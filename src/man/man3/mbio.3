@@ -1,4 +1,4 @@
-.TH mbio 3 "19 February 2021" "MB-System 5.0" "MB-System 5.0"
+.TH mbio 3 "22 January 2024" "MB-System 5.0" "MB-System 5.0"
 
 .SH NAME
 \fBmbio\fP \- Format independent input/output library for swath mapping sonar data.
@@ -15,14 +15,23 @@ The purpose of \fBMBIO\fP is to allow users to write processing and display
 programs which are independent of particular data formats and to provide
 a standard approach to swath mapping sonar data i/o.
 
-.SH AUTHORSHIP
-David W. Caress (caress@mbari.org)
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
 .br
   Monterey Bay Aquarium Research Institute
 .br
-Dale N. Chayes (dale@ldeo.columbia.edu)
+Christian do Santos Ferreira
 .br
-  Lamont-Doherty Earth Observatory
+  Center for Marine Environmental Sciences (MARUM)
+.br
+  University of Bremen
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
 
 .SH DATA TERMINOLOGY
 \fBMBIO\fP handles three types of swath mapping data:  beam bathymetry,
@@ -41,32 +50,6 @@ data involves data flagging. An array of "beamflags" is carried by
 \fBMBIO\fP functions which allows the bathymetry (and by extension
 the amplitude) data to be flagged as bad. The details of the
 beamflagging scheme are presented below.
-
-.SH VERSION 5 CHANGES
-This document describes version 5 releases of \fBMBIO\fP.
-The source code structure used in version 4 \fBMBIO\fP had grown
-complex and difficult to support. In particular, the addition
-of new i/o modules had become excessively time consuming.
-Consequently, we have restructured and rewritten much of the library.
-Most of the changes are internal, but two  function calls have
-disappeared (\fBmb_put()\fP and \fBmb_write()\fP), and a
-number of new functions have been added.
-
-A further significant architectural change was implemented for
-release 5.0.8 in order to support data formats that have no
-explicit maximum number of beams or pixels. The memory management
-of arrays used to hold bathymetry, amplitude, and sidescan data
-has been made dynamic. Now, when data records are encountered that
-include larger numbers of beams or pixels than will fit in the
-arrays previously allocated, those arrays are reallocated to
-the required size. This is handled automatically for all of the
-internal arrays used by \fBMBIO\fP functions. Of course,
-applications using \fBMBIO\fP must allocate arrays that are
-passed into functions like \fBmb_read\fP, \fBmb_get_all\fP, and
-\fBmb_get\fP to be populated by the desired data. In order for
-these arrays to be managed dynamically, the application must
-first register each array by passing the location of the array
-pointer to a new function called \fBmb_register_array\fP.
 
 .SH OVERVIEW
 \fBMBIO\fP opens and initializes sonar data files for reading
@@ -4126,6 +4109,6 @@ Selection modes:
 \fBmbsystem\fP(l), \fBmbformat\fP(l)
 
 .SH BUGS
-What could go wrong in a mere 204,289 lines of code?
+What could go wrong in a mere 374,852 lines of C code?
 .br
 Let us know...

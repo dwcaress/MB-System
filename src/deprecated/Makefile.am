@@ -51,3 +51,8 @@ mbrphsbias_SOURCES = mbrphsbias.cc
 mbstripnan_SOURCES = mbstripnan.cc
 mbswplspreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbswplspreprocess_SOURCES = mbswplspreprocess.cc
+
+bin_SCRIPTS = \
+	mbm_fmtvel \
+	mbm_grid \
+	mbm_grd2geovrml

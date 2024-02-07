@@ -283,7 +283,7 @@ int mbsys_ldeoih_sensorhead(int verbose, void *mbio_ptr, void *store_ptr,
   /* get data structure pointer */
   struct mbsys_ldeoih_struct *store = (struct mbsys_ldeoih_struct *)store_ptr;
 
-  /* if survey data extract which lidar head used for this scan */
+  /* if survey data extract which sensor head used for this scan */
   if (store->kind == MB_DATA_DATA) {
     *sensorhead = store->sensorhead;
   } else {

@@ -25,15 +25,17 @@
 message("In src/html")
 
 set(HTML
-    caress2001.gif
-    caress_chayes_ferreira_Feb2014.jpg
-    ChayesJul2003.gif
-    Christina_d_S_Ferreira_crop.jpg
-    Christina_d_S_Ferreira_2012_crop.jpg
-    ChangeLog.txt
-    gpl.html
+    ChangeLog.html
+    COPYING.html
+    GPL.html
     index.html
-    KrystleAnderson2013.gif
+    mbsystem_logo_small.gif
+    mbsystem_logo.gif
+    mbsystem_version.txt
+    mbsystem_man_list.html
+    mbsystem_formats.html
+    mbsystem.html
+    mbio.html
     mb7k2jstar.html
     mb7k2ss.html
     mb7kpreprocess.html
@@ -43,6 +45,7 @@ set(HTML
     mbauvnavusbl.html
     mbbackangle.html
     mbclean.html
+    mbconfig.html
     mbcontour.html
     mbcopy.html
     mbctdlist.html
@@ -55,6 +58,8 @@ set(HTML
     mbfilter.html
     mbformat.html
     mbgetesf.html
+    mbgpstide.html
+    mbgrd2obj.html
     mbgrdtiff.html
     mbgrdviz.html
     mbgrid.html
@@ -62,13 +67,13 @@ set(HTML
     mbhsdump.html
     mbhysweeppreprocess.html
     mbinfo.html
-    mbio.html
     mbkongsbergpreprocess.html
     mblevitus.html
     mblist.html
     mbm_arc2grd.html
     mbm_bpr.html
     mbm_copy.html
+    mbm_fmtvel.html
     mbm_grd2arc.html
     mbm_grd2geovrml.html
     mbm_grd3dplot.html
@@ -79,22 +84,25 @@ set(HTML
     mbm_grid.html
     mbm_histplot.html
     mbm_makedatalist.html
+    mbmakeplatform.html
+    mbm_makesvp.html
     mbm_multicopy.html
     mbm_multidatalist.html
     mbm_multiprocess.html
-    mbmosaic.html
     mbm_plot.html
     mbm_route2mission.html
     mbm_stat.html
     mbm_utm.html
     mbm_xbt.html
     mbm_xyplot.html
+    mbmosaic.html
     mbnavadjust.html
     mbnavadjustmerge.html
     mbnavedit.html
     mbnavlist.html
     mbneptune2esf.html
     mbotps.html
+    mbpreprocess.html
     mbprocess.html
     mbps.html
     mbrollbias.html
@@ -105,26 +113,107 @@ set(HTML
     mbsegylist.html
     mbsegypsd.html
     mbset.html
+    mbsslayout.html
     mbstripnan.html
     mbsvplist.html
     mbsvpselect.html
     mbswath.html
-    mbsystem_capabilities.html
-    mbsystem_copyright.html
-    mbsystem_faq.html
-    mbsystem_formats.html
-    mbsystem_future.html
-    mbsystem_home.html
-    mbsystem_how_to_get.html
-    mbsystem.html
-    mbsystem_logo.gif
-    mbsystem_logo_small.gif
-    mbsystem_man_list.html
-    mbsystem_version.txt
-    mbsystem_whatsnew.html
-    MBTeamJul2003.jpg
+    mbswplspreprocess.html
     mbtime.html
     mbvelocitytool.html
-    ValJul2003.gif)
+    mbvoxelclean.html)
 
-install(FILES ${HTML} DESTINATION ${CMAKE_INSTALL_DOC}/mbsystem/html)
+set(PDF
+    ChangeLog.pdf
+    GPL.pdf
+    COPYING.pdf
+    mbsystem.pdf
+    mbio.pdf
+    mb7k2jstar.pdf
+    mb7k2ss.pdf
+    mb7kpreprocess.pdf
+    mbabsorption.pdf
+    mbareaclean.pdf
+    mbauvloglist.pdf
+    mbauvnavusbl.pdf
+    mbbackangle.pdf
+    mbclean.pdf
+    mbconfig.pdf
+    mbcontour.pdf
+    mbcopy.pdf
+    mbctdlist.pdf
+    mbdatalist.pdf
+    mbdefaults.pdf
+    mbdumpesf.pdf
+    mbedit.pdf
+    mbeditviz.pdf
+    mbextractsegy.pdf
+    mbfilter.pdf
+    mbformat.pdf
+    mbgetesf.pdf
+    mbgpstide.pdf
+    mbgrd2obj.pdf
+    mbgrdtiff.pdf
+    mbgrdviz.pdf
+    mbgrid.pdf
+    mbhistogram.pdf
+    mbhsdump.pdf
+    mbhysweeppreprocess.pdf
+    mbinfo.pdf
+    mbkongsbergpreprocess.pdf
+    mblevitus.pdf
+    mblist.pdf
+    mbmakeplatform.pdf
+    mbm_arc2grd.pdf
+    mbm_bpr.pdf
+    mbm_copy.pdf
+    mbm_fmtvel.pdf
+    mbm_grd2arc.pdf
+    mbm_grd2geovrml.pdf
+    mbm_grd3dplot.pdf
+    mbm_grdcut.pdf
+    mbm_grdinfo.pdf
+    mbm_grdplot.pdf
+    mbm_grdtiff.pdf
+    mbm_grid.pdf
+    mbm_histplot.pdf
+    mbm_makedatalist.pdf
+    mbm_makesvp.pdf
+    mbm_multicopy.pdf
+    mbm_multidatalist.pdf
+    mbm_multiprocess.pdf
+    mbm_plot.pdf
+    mbm_route2mission.pdf
+    mbm_stat.pdf
+    mbm_utm.pdf
+    mbm_xbt.pdf
+    mbm_xyplot.pdf
+    mbmosaic.pdf
+    mbnavadjust.pdf
+    mbnavadjustmerge.pdf
+    mbnavedit.pdf
+    mbnavlist.pdf
+    mbneptune2esf.pdf
+    mbotps.pdf
+    mbpreprocess.pdf
+    mbprocess.pdf
+    mbps.pdf
+    mbrollbias.pdf
+    mbrolltimelag.pdf
+    mbroutetime.pdf
+    mbsegygrid.pdf
+    mbsegyinfo.pdf
+    mbsegylist.pdf
+    mbsegypsd.pdf
+    mbset.pdf
+    mbsslayout.pdf
+    mbstripnan.pdf
+    mbsvplist.pdf
+    mbsvpselect.pdf
+    mbswath.pdf
+    mbswplspreprocess.pdf
+    mbtime.pdf
+    mbvelocitytool.pdf
+    mbvoxelclean.pdf)
+
+install(FILES ${HTML} ${PDF} DESTINATION ${CMAKE_INSTALL_DOC}/mbsystem/html)

@@ -6,7 +6,7 @@
   <meta name="Title" content="MB-System: Mapping the Seafloor">
   <meta name="Author" content="David Caress, Dale Chayes">
   <meta name="Description"
- content="open source software for processing bathymetry and backscatter data from multibeam and sidescan sonar">
+ content="open source software for processing seafloor mapping data, particularly bathymetry and backscatter data from multibeam and sidescan sonar">
   <meta name="Keywords"
  content="seafloor,mapping,multibeam,sonar,bathymetry,sidescan,swath processing,open,source,software">
 </head>
@@ -17,17 +17,17 @@
   <img src="mbsystem_logo.gif" height="207" width="616"></a></h2>
 <center>
 <dl>
-  <dt><b><font size="+2">Seafloor Mapping Software:</font></b></dt>
+  <dt><b><font size="+2">Open Source Software</font></b></dt>
 </dl>
 </center>
 <center>
 <dl>
-  <dt><b><font size="+2">Processing and Display</font></b></dt>
+  <dt><b><font size="+2">For the Processing and Display</font></b></dt>
 </dl>
 </center>
 <center>
 <dl>
-  <dt><b><font size="+2">of Swath Sonar Data</font></b></dt>
+  <dt><b><font size="+2">of Seafloor Mapping Data</font></b></dt>
 </dl>
 </center>
 <center>
@@ -37,21 +37,18 @@
 </center>
 <center>
 <dl>
-  <dt><b><font size="+1"><a href="http://www.mbari.org/staff/caress">David
-W. Caress</a> (1), <a href="http://ccom.unh.edu/user/dale">Dale N. Chayes</a> (2, 3) and
-<a href="https://www.marum.de/en/Christian_dos_Santos_Ferreira.html">Christian dos Santos Ferreira</a>(4)</font></b></dt>
+  <dt><b><font size="+1"><a href="https://www.mbari.org/person/dave-caress/">David
+W. Caress</a> (1), <a href="https://www.marum.de/en/Christian_dos_Santos_Ferreira.html">Christian dos Santos Ferreira</a>(2), and <a href="http://ccom.unh.edu/user/dale">Dale N. Chayes</a> (3)
+</font></b></dt>
 </dl>
 <dl>
   <dt><b>1. <a href="http://www.mbari.org/">Monterey Bay Aquarium
 Research Institute</a></b></dt>
-  <dt><b>2. <a href="http://ccom.unh.edu/">Center for Coastal and Ocean Mapping/Joint Hydrographic Center</a> </b></dt>
-  <dt><b>of the <a href="http://www.unh.edu">University of New Hampshire</a></b></dt>
-  <dt><b>3. <a href="http://www.ldeo.columbia.edu/">Lamont-Doherty
-Earth Observatory</a> </b></dt>
-  <dt><b>of <a href="http://www.columbia.edu/">Columbia University</a></b></dt>
-  <dt><b>4. <a href="https://www.marum.de/en/">MARUM</a> (Zentrum fur Marine Umweltwissenschaften) </b></dt>
+  <dt><b>2. <a href="https://www.marum.de/en/">MARUM</a> (Zentrum fur Marine Umweltwissenschaften) </b></dt>
   <dt><b>(Center for Marine Environmental Sciences) </b></dt>
   <dt><b>of <a href="http://www.uni-bremen.de/">Universitat Bremen</a></b></dt>
+  <dt><b>3. <a href="http://ccom.unh.edu/">Center for Coastal and Ocean Mapping/Joint Hydrographic Center</a> </b></dt>
+  <dt><b>of the <a href="http://www.unh.edu">University of New Hampshire</a></b></dt>
 </dl>
 <p></p>
 <hr width="67%">
@@ -62,68 +59,14 @@ Earth Observatory</a> </b></dt>
   <dt><b><font size="+1">Introduction</font></b></dt>
 </dl>
 </center>
-<p>MB-System is an open source software package for the processing and
-display of bathymetry and backscatter imagery data derived from
-multibeam,
-interferometry, and sidescan sonars. This software is distributed
-freely (and
-for free) in the form of source code for Unix and Linux platforms. The heart of
-the
-system is an input/output library called MBIO which allows programs to
-work
-transparently with any of a number of supported swath sonar data
-formats.
-This approach has allowed the creation of "generic" utilities which can
-be
-applied in a uniform manner to sonar data from a variety of sources.
-Most of
-the programs are command-line tools, but the package does include
-graphical
-tools for editing swath bathymetry, editing navigation, modeling
-bathymetry
-calculation, and adjusting survey navigation.</p>
-<p>The acronym MB stands for MultiBeam; this reflects the fact that the
-early
-development of MB-System focused on processing data from deep sea multibeam sonars (which were the only kind around back then). However, MB-System now supports several data formats from
-sidescan
-and interferometric sonars and works with data from all depth ranges.</p>
-<p>The <a href="http://www.nsf.gov">National Science Foundation</a>
-(NSF) has
-been the primary supporter of MB-System development. NSF initially
-provided
-grants to the authors at the <a href="http://www.ldeo.columbia.edu">
-Lamont-Doherty Earth Observatory</a> in 1993 (two years), and 1995
-(five
-years). <a href="http://www.seabeam.com/"> SeaBeam Instruments</a>
-also
-contributed significant effort from 1994 to 1999. This support has been
-renewed
-through successive parallel five year grants (2001-2006, 2006-2011, 2013-2017) to Caress at the <a
- href="http://www.mbari.org"> Monterey Bay Aquarium Research Institute</a>
-(MBARI) and to Chayes at Lamont. Since 2001, MBARI, with support from the Packard Foundation, has matched
-the NSF support as part of its seafloor mapping program. </p>
-<p>The original NSF mandate was to create a set of generic tools which
-would
-work with all of the sonar data used in NSF-supported projects. Not
-surprisingly, the core of the MB-System user community consists of
-NSF-supported researchers at U.S. institutions such as the
-Lamont-Doherty
-Earth Observatory, the Scripps Institution of Oceanography, and the
-Woods
-Hole Oceanographic Institution. However, MB-System has also come to be
-used
-widely in the international marine geological community.</p>
-<p>The MB-System source code is distributed under the <a
- href="gpl.html"> GNU
-General Public License</a> as formulated by the <a
- href="http://www.gnu.org/">GNU&nbsp;Project.</a> MB-System
-installation depends on
-some other software packages (e.g. <a
- href="http://gmt.soest.hawaii.edu/"> GMT</a> and <a
- href="http://www.unidata.ucar.edu/software/netcdf/">netCDF</a> ), all of
-which are freely available as source code.</p>
-<p>This documention is distributed with and refers to the MB-System release
-with <a href="mbsystem_version.txt">this version</a>.</p>
+<p><a href="https://www.mbari.org/technology/mb-system/">MB-System</a> is an open source software package for the processing and display of seafloor mapping data, particularly bathymetry and backscatter imagery data derived from multibeam, interferometry, and sidescan sonars. MB-System is freely available for download as source code that can be  built and installed on Linux and OS-X computers. This page and the documents it links to are included in each MB-System distribution, along with Unix-style command line interface manual pages, in order to provide basic documentation of the capabilities and operation of programs included with MB-System.</p>
+	
+<p><a href="https://www.mbari.org/products/research-software/mb-system/mb-system-documentation/">More complete documentation</a>, <a href="https://www.mbari.org/products/research-software/mb-system/mb-system-youtube-tutorials/">tutorials</a>, and <a href="https://www.mbari.org/products/research-software/mb-system/mb-system-faq/">FAQ</a> are provided in the <a href="https://www.mbari.org/technology/mb-system/">MB-System website</a> hosted by the Monterey Bay Aquarium Research Institute (MBARI). The <a href="https://www.mbari.org/products/research-software/mb-system/mb-system-discussion-lists/">MB-System discussion email lists</a> allows users to engage with MB-System developers and other users from around the world.</p>
+
+<p>MB-System was originally developed in 1993 at the <a href="https://lamont.columbia.edu">Lamont-Doherty Earth Observatory (L-DEO)</a> of <a href="https://www.columbia.edu">Columbia University</a> by David W. Caress and Dale N. Chayes with support from the <a href="https://new.nsf.gov/funding/opportunities/marine-geology-geophysics-mgg">Marine Geology and Geophysics  program of the U.S. National Science Foundation (NSF)</a>.</p>
+
+<p>MB-System is now a collaborative effort between the Monterey Bay Aquarium Research Institute (MBARI), the Center of Marine Environmental Science (MARUM) at Universität Bremen, and the Center for Coastal and Ocean Mapping (CCOM) at the University of New Hampshire. The David and Lucile Packard Foundation has provided the primary support for MB-System through MBARI since 1998. NSF supported MB-System development from its inception in 1993 through 2018. Development efforts at MARUM are supported by the <a href="https://www.research-in-germany.org/en/research-funding/funding-organisations/deutsche-forschungsgemeinschaft.html">Deutsche Forschungsgemeinschaft (German Research Foundation, DFG)</a>.</p>
+
 <center>
 <p></p>
 <hr width="67%">
@@ -131,23 +74,43 @@ with <a href="mbsystem_version.txt">this version</a>.</p>
 </center>
 <center>
 <dl>
-  <dt><b><font size="+1">Information About MB-System:</font></b></dt>
+  <dt><b><font size="+1">Distribution Version</font></b></dt>
 </dl>
 </center>
 <ul>
-  <li><a href="mbsystem_whatsnew.html">What's new in MB-System version 5</a></li>
-  <li><a href="mbsystem_capabilities.html">Short list of capabilities</a></li>
-  <li><a href="mbsystem_man_list.html">List of MB-System programs and
-links to manual pages</a></li>
-  <li><a href="mbsystem_formats.html">List of supported swath data
-formats</a></li>
-  <li><a href="mbsystem_how_to_get.html">How to get and install
-MB-System</a></li>
-  <li><a href="mbsystem_faq.html">Frequently Asked Questions (and
-answers)</a></li>
-  <li><a href="mbsystem_future.html">Future MB-System development plans</a></li>
-  <li><a href="mbsystem_copyright.html">Copyright and Caveat</a></li>
+  <li>The version of this MB-System source distribution is given in this link: <a href="mbsystem_version.txt">MB-System version</a></li>
+  <li>Log of source code changes included in this distribution: (<a href="ChangeLog.html">html</a>) (<a href="ChangeLog.pdf">pdf</a>)</li>
 </ul>
+<center>
+<p></p>
+<hr width="67%">
+<p></p>
+</center>
+<center>
+<dl>
+  <dt><b><font size="+1">MB-System Program Manual Pages</font></b></dt>
+</dl>
+</center>
+<ul>
+  <li><a href="mbsystem_man_list.html">Unix-style manual pages for MB-System programs</a></li>
+  <li><a href="mbsystem_formats.html">List of seafloor mapping data formats supported by MB-System</a></li>
+</ul>
+<center>
+<p></p>
+<hr width="67%">
+<p></p>
+</center>
+<center>
+<dl>
+  <dt><b><font size="+1">MB-System Copyright and Licensing</font></b></dt>
+</dl>
+</center>
+<ul>
+   <li><a href="COPYING.html">MB-System copyright and license statement</a> (<a href="COPYING.pdf">pdf</a>)</li>
+   <li><a href="GPL.html">GNU General Public License Version 3</a> (<a href="GPL.pdf">pdf</a>) as formulated by the <a
+ href="https://www.fsf.org">Free Software Foundation.</a></li>
+</ul>
+<div style="text-align: justify;">
 <center>
 <p></p>
 <hr width="67%">
@@ -160,181 +123,17 @@ answers)</a></li>
 </dl>
 </center>
 <div style="text-align: justify;">
-Although the MB-System authors' personal email addresses are listed
-below, we
-greatly prefer that all inquiries, requests, and problem reports
-regarding
-MB-System be directed to the <a
+<p>Please direct inquiries, requests, and problem reports
+regarding MB-System to the <a
  href="http://listserver.mbari.org/sympa/arc/mbsystem">MB-System
-Discussion list</a>.<br>
-<br>
-<span style="text-decoration: underline;"></span></div>
-<center>
-<hr width="67%"></center>
-<dl>
-  <dt><a name="MB-authors"></a> <b><font size="+1">The MB-System Core Team</font><font size="+1">:
-    </font></b></dt>
-</dl>
-</center>
-<center>
-<table cellpadding="0" cellspacing="0" width="100%">
-  <tbody>
-    <tr>
-      <td align="center" valign="top">
-      <dt><img alt="David W. Caress 2001" src="caress2001.gif" width="120"></dt>
-        <dt><b><a href="http://www.mbari.org/staff/caress">David W. Caress</a></b></dt>
-        <dt><a href="mailto:caress@mbari.org">caress@mbari.org</a></dt>
-        <dt>Software Engineer</dt>
-        <dt><a href="http://www.mbari.org">Monterey Bay Aquarium Research Institute</a></dt>
-        <dt>7700 Sandholdt Road</dt>
-        <dt>Moss Landing, CA 95039</dt>
-        <dt>&nbsp;</dt>
-      </td>
-    </tr>
-    <tr>
-      <td align="center" valign="top">
-      <dl>
-     <dt><img alt="Dale N. Chayes 2003" src="ChayesJul2003.gif" width="120"></dt>
-      <dt><b><a href="http://ccom.unh.edu/user/dale">Dale N. Chayes</a></b></dt>
-        <dt><a href="mailto:dale@ccom.unh.edu">dale@ccom.unh.edu</a></dt>
-        <dt>Affiliate Professor</dt>
-        <dt><a href="http://ccom.unh.edu/">Center for Coastal and Ocean Mapping/Joint Hydrographic Center</a></dt>
-        <dt> of the <a href="http://www.unh.edu">University of New Hampshire</a></dt>
-        <dt>Durham, NH 03824</dt>
-        <dd>&nbsp;</dd>
-      </dl>
-      </td>
-    </tr>
-    <tr>
-      <td align="center" valign="top">
-      <dt><img src="Christina_d_S_Ferreira_2012_crop.jpg" width="120" alt="Christian dos Santos Ferreira 2012"></dt>
-      <dt><b><a href="https://www.marum.de/en/Christian_dos_Santos_Ferreira.html">Christian dos Santos Ferreira</a></b></dt>
-        <dt><a href="mailto:cferreira@marum.de">cferreira@marum.de</a></dt>
-        <dt>Seafloor Imaging Specialist<br>
-          <a href="http://www.marum.de">MARUM - Center for Marine Environmental Sciences</a><br>
-          <a href="http://www.uni-bremen.de">University of Bremen</a>, </dt>
-        <dt>Bremen, Germany</dt>
-        <dt>&nbsp;</dt>
-      </td>
-    </tr>
-  </tbody>
-</table>
-</center>
-<dd><br>
-</dd>
-<center>
-<p></p>
-<hr width="67%">
-<p></p>
-</center>
-
-<center>
-<dl>
-  <dt><a name="MB-documentors"></a> <b><font size="+1"> Documentation Support:</font></b></dt>
-</dl>
-</center>
-<center>
-
-<table cellpadding="0" cellspacing="0" width="100%">
-  <tbody>
-    <tr>
-      <td height="384" align="center" valign="top">
-      <div align="center">
-      <dt><img alt="Jenny Paduan 2017" src="Paduan_IMG_6172.jpg" width="120"></dt>
-        <dt><b>Jennifer Paduan</b></dt>
-        <dt><a href="mailto:paje@mbari.org">paje@mbari.org</a></dt>
-        <dt>Senior Research Specialist</dt>
-        <dt><a href="http://www.mbari.org">Monterey Bay Aquarium Research Institute</a></dt>
-        <dt>7700 Sandholdt Road</dt>
-        <dt>Moss Landing, CA 95039</dt>
-      </div>
-      </td>
-    </tr>
-  </tbody>
-</table>
-</center>
-
-<center>
-<hr width="67%">
-<p></p>
-</center>
-<center>
-<dl>
-  <dt><a name="MB-emeritus"></a> <b><font size="+1"> Emeritus Team Members:</font></b></dt>
-</dl>
-</center>
-<center>
-
-<table cellpadding="0" cellspacing="0" width="100%">
-  <tbody>
-    <tr>
-      <td height="384" align="center" valign="top">
-      <div align="center">
-      <dt><img alt="Krystle Anderson 2013" src="KrystleAnderson2013.gif" width="120"></dt>
-        <dt><b>Krystle Anderson</b></dt>
-        <dt><a href="mailto:krystle@mbari.org">krystle@mbari.org</a></dt>
-        <dt>Research Technician</dt>
-        <dt><a href="http://www.mbari.org">Monterey Bay Aquarium Research Institute</a></dt>
-        <dt>7700 Sandholdt Road</dt>
-        <dt>Moss Landing, CA 95039</dt>
-        <dt>&nbsp;</dt>
-        <dt></dt>
-      </div>
-      <div align="center">
-      <dt><img alt="Val Schmidt at LDEO in July 2003" src="ValJul2003.gif" width="120"></dt>
-        <dt><b>Val Schmidt</b></dt>
-        <dt>(Emeritus)</dt>
-        <dt><a href="mailto:vschmidt@ccom.unh.edu">vschmidt@ccom.unh.edu</a></dt>
-        <dt>Research Engineer</dt>
-        <dt><a href="http://www.ccom.unh.edu">Center of Coastal and Ocean Mapping</a></dt>
-        <dt><a href="http://www.ccom.unh.edu">Joint Hydrographic Center</a> of</dt>
-        <dt><a href="http://www.unh.edu">University of New Hampshire</a></dt>
-        <dt>Durham, NH 03824</dt>
-      </div>
-      </td>
-    </tr>
-  </tbody>
-</table>
-</center>
-<center>
-<hr width="67%">
-<p></p>
-</center>
-<center>
-<dl>
-  <dt><a name="MB-team"></a> <b><font size="+1">The MB-System Team 2014:</font></b></dt>
-</dl>
-</center>
-<center>
-<dl>
-  <dt><b><font size="+1"><img alt="Ferreira, Caress, Chayes at MBARI February 2014" src="caress_chayes_ferreira_Feb2014.jpg"> </font></b></dt>
-</dl>
-</center>
-<center>
-<dl>
-  <dt><a name="MB-team"></a> <b><font size="+1">The MB-System Team circa 2003:</font></b></dt>
-</dl>
-</center>
-<center>
-<dl>
-  <dt><b><font size="+1"><img alt="July 2003 at IRI Building, LDEO" src="MBTeamJul2003.jpg"> </font></b></dt>
-</dl>
-</center>
-<dl>
-  <dt><br>
-  </dt>
-</dl>
-<center>
-<p>Last Updated: $Id$</p>
-</center>
-<p></p>
+Discussion list</a>.</p>
 <div align="center">
 <hr width="67%"></div>
 <br>
 
 <center>
 <p>
-<a href="mbsystem.html"><< Manual page for the MB-System package</a> | <a href="https://www.mbari.org/products/research-software/mb-system/">MB-System website >></a></p>
+<a href="https://www.mbari.org/products/research-software/mb-system/"><< MB-System website</a> | <a href="https://www.mbari.org/technology/mb-system/documentation/"> MB-System Documentation>></a></p>
 </center>
 </body>
 </html>

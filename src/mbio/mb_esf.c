@@ -775,6 +775,22 @@ int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error) {
 
 	int status = MB_SUCCESS;
 
+    /* check for edits read in that were never used */
+	/* if (verbose > 0) {
+      if (esf->edit != NULL && esf->nedit > 0) {
+        bool unused_output = false;
+        for (int i=0; i<esf->nedit; i++) {
+          if (!esf->edit[i].use) {
+            if (!unused_output) {
+              unused_output = true;
+              fprintf(stderr, "\nUnused beam flags in %s:\n", __FUNCTION__);
+            }
+            fprintf(stderr, "%3d  %14.6f %4d %d %d\n", i, esf->edit[i].time_d, esf->edit[i].beam, esf->edit[i].action, esf->edit[i].use);
+          }
+        }
+      }
+	}*/
+
 	/* deallocate the arrays */
 	if (esf->edit != NULL)
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(esf->edit), error);
