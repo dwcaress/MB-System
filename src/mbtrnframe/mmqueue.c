@@ -1,5 +1,5 @@
 ///
-/// @file mqueue.c
+/// @file mmqueue.c
 /// @authors k. Headley
 /// @date 06 nov 2012
 /// 
@@ -62,7 +62,7 @@
 // Headers 
 /////////////////////////
 
-#include "mqueue.h"
+#include "mmqueue.h"
 #include "mmem.h"
 
 /////////////////////////

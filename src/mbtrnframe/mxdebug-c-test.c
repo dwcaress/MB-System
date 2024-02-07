@@ -131,7 +131,6 @@ static int mxdebug_c_test(int argc, char **argv)
     init_debug();
 
     MX_MPRINT(MFOO, "%s:%d MFOO MPRINT\n", __func__, __LINE__);
-
     test_fn();
 
     MX_MPRINT(MBAR, "%s:%d MBAZ level: %d\n", __func__, __LINE__, mxd_level(MBAZ));

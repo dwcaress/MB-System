@@ -1,5 +1,5 @@
 ///
-/// @file mqueue.h
+/// @file mmqueue.h
 /// @authors k. headley
 /// @date 06 nov 2012
 /// 
