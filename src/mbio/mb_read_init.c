@@ -729,8 +729,12 @@ int mb_read_init_altnav(int verbose, char *file, int format, int pings,
                  		beams_bath, beams_amp, pixels_ss, error);
 
 	/* if possible load the alternative navigation */
-	if (status == MB_SUCCESS && *error == MB_ERROR_NO_ERROR && astatus == MB_ALTNAV_USE) {
+	if (status == MB_SUCCESS && *error == MB_ERROR_NO_ERROR) {
 		mb_io_ptr = (struct mb_io_struct *) *mbio_ptr;
+	}
+
+	/* if possible load the alternative navigation */
+	if (status == MB_SUCCESS && *error == MB_ERROR_NO_ERROR && astatus == MB_ALTNAV_USE) {
 //fprintf(stderr, "%s:%d:%s: Loading apath:      %s\n", __FILE__, __LINE__, __FUNCTION__, apath);
 
 		mb_io_ptr->alternative_navigation = false;

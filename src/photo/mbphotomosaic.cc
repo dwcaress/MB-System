@@ -70,6 +70,10 @@ using namespace cv;
 #define MBPM_PRIORITY_CENTRALITY_ONLY               1
 #define MBPM_PRIORITY_CENTRALITY_PLUS_STANDOFF      2
 
+#define MBPM_HEADING_PRIORITY_OFF         0
+#define MBPM_HEADING_PRIORITY_SINGLE      1
+#define MBPM_HEADING_PRIORITY_DOUBLE      2
+
 /* Image correction modes: */
 /*   MBPM_CORRECTION_NONE: use images as is, no correction at all */
 /*   MBPM_CORRECTION_BRIGHTNESS: correct image so that the average magnitude */
@@ -110,9 +114,10 @@ char usage_message[] = "mbphotomosaic \n"
                         "\t--image-spacing=dx/dy[/units]\n"
                         "\t--fov-fudgefactor=factor\n"
                         "\t--projection=projection_pars\n"
-                        "\t--altitude=standoff_target/standoff_range\n"
-                        "\t--standoff=standoff_target/standoff_range\n"
+                        "\t--altitude=target/standoff_range\n"
+                        "\t--standoff=target/standoff_range\n"
                         "\t--priority-weight=weight\n"
+                        "\t--heading=target/factor/mode\n"
                         "\t--trim=trim_pixels\n"
                         "\t--section=section_pixels\n"
                         "\t--section-length-max=section_length_max\n"
@@ -129,6 +134,8 @@ char usage_message[] = "mbphotomosaic \n"
                         "\t--reference-exposure=exposure\n"
                         "\t--reference-intensity=intensity\n"
                         "\t--reference-crcb=intensity/intensity\n"
+                        "\t--dark-images-ignore=threshold\n"
+                        "\t--dark-images-multiply=threshold/factor\n"
                         "\t--platform-file=platform.plf\n"
                         "\t--camera-sensor=camera_sensor_id\n"
                         "\t--nav-sensor=nav_sensor_id\n"
@@ -216,6 +223,13 @@ struct mbpm_control_struct {
     Point2d principalPoint[2];
     double aspectRatio[2];
 
+    // Dark image
+    bool dark_ignore_set;
+    double dark_ignore_threshold;
+    bool dark_multiply_set;
+    double dark_multiply_threshold;
+    double dark_multiply_factor;
+
     // Image correction
     int corr_mode;
     double reference_gain;
@@ -260,9 +274,14 @@ struct mbpm_control_struct {
     bool use_topography;
     void *topogrid_ptr;
 
-    // Input pixel priority
-    int priority_mode;
+    // Image priority
     double priority_weight;
+    int heading_mode;
+    double heading_target;
+    double heading_factor;
+
+    // Pixel priority
+    int priority_mode;
     double standoff_target;
     double standoff_range;
     double range_max;
@@ -897,6 +916,7 @@ void process_image(int verbose, struct mbpm_process_struct *process,
     Mat imageProcess;
     Mat imageUndistort;
     Mat imageUndistortYCrCb;
+    Scalar avgPixelIntensity;
 
     /* output stream (stdout if verbose <= 1, stderr if verbose > 1) */
     FILE *stream = NULL;
@@ -906,17 +926,50 @@ void process_image(int verbose, struct mbpm_process_struct *process,
         stream = stderr;
 
     /* read the image */
+    bool image_ignore = false;
+    bool image_multiply = false;
     imageProcess = imread(process->imageFile);
     if (!imageProcess.empty()) {
-
-        double fov_x, fov_y;
-        double center_x, center_y;
-        double intensityCorrection;
 
         /* undistort the image */
         undistort(imageProcess, imageUndistort, control->cameraMatrix[process->image_camera], control->distCoeffs[process->image_camera], noArray());
         cvtColor(imageUndistort, imageUndistortYCrCb, COLOR_BGR2YCrCb);
         imageProcess.release();
+
+        /* Calculate the average intensity of the image */
+        avgPixelIntensity = mean(imageUndistortYCrCb);
+
+        /* set ignore flag if required */
+        if (control->dark_ignore_set && avgPixelIntensity.val[0] < control->dark_ignore_threshold) {
+            image_ignore = true;
+            int time_i[7];
+            mb_get_date(verbose, process->time_d, time_i);
+            fprintf(stream,"%4d Camera:%d %s %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d LLZ: %.8f %.8f %8.3f HRP: %6.2f %6.2f %6.2f A:%.3f Q:%.2f G:%.0f/%.0f E:%.0f/%.0f *** ignored too dark\n",
+                    process->image_count, process->image_camera, process->imageFile,
+                    time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
+                    process->camera_navlon, process->camera_navlat, process->camera_sensordepth,
+                    process->camera_heading, process->camera_roll, process->camera_pitch,
+                    avgPixelIntensity.val[0], process->image_quality,
+                    process->image_gain, control->reference_gain,
+                    process->image_exposure, control->reference_exposure);
+        }
+
+        /* multiply factor times image if required */
+        if (!image_ignore && control->dark_multiply_set 
+            && avgPixelIntensity.val[0] < control->dark_multiply_threshold) {
+            image_multiply = true;
+            multiply(imageUndistort, control->dark_multiply_factor, imageUndistort);
+            cvtColor(imageUndistort, imageUndistortYCrCb, COLOR_BGR2YCrCb);
+            avgPixelIntensity = mean(imageUndistortYCrCb);
+        }
+    }
+
+    /* process the image */
+    if (!imageUndistortYCrCb.empty() && !image_ignore) {
+
+        double fov_x, fov_y;
+        double center_x, center_y;
+        double intensityCorrection;
 
         /* get field of view, offsets, and principal point to use */
         fov_x = control->fovx[process->image_camera];
@@ -951,9 +1004,6 @@ void process_image(int verbose, struct mbpm_process_struct *process,
         double xx = MAX(center_x, imageUndistort.cols - center_x);
         double yy = MAX(center_y, imageUndistort.rows - center_y);
         double rrxymax = sqrt(xx * xx + yy * yy);
-
-        /* Calculate the average intensity of the image */
-        Scalar avgPixelIntensity = mean(imageUndistortYCrCb);
 
         /* get unit vector (cx, cy, cz) for direction camera is pointing */
         /* (1) rotate center pixel location using attitude and zzref */
@@ -1095,10 +1145,41 @@ void process_image(int verbose, struct mbpm_process_struct *process,
             }
         }
 
+        /* set image priority to be multiplied by pixel priority */
+        double image_priority = control->priority_weight;
+        if (control->heading_mode != MBPM_HEADING_PRIORITY_OFF) {
+            double heading_priority = 0.0;
+            double dheading = process->camera_heading - control->heading_target;
+            if (dheading > 180.0)
+                dheading -= 360.0;
+            else if (dheading < -180.0)
+                dheading += 360.0;
+            double fdheading = control->heading_factor * dheading;
+            if (fdheading >= -90.0 && fdheading <= 90.0) {
+                heading_priority = cos(DTR * fdheading);
+            }
+            else if (control->heading_mode == MBPM_HEADING_PRIORITY_DOUBLE) {
+                if (dheading < 0.0)
+                    dheading += 180.0;
+                else
+                    dheading -= 180.0;
+                fdheading = control->heading_factor * dheading;
+                if (fdheading >= -90.0 && fdheading <= 90.0) {
+                    heading_priority = cos(DTR * fdheading);
+                }
+            }
+            image_priority *= heading_priority;
+        }
+
         /* Print information for image to be processed */
         int time_i[7];
         mb_get_date(verbose, process->time_d, time_i);
-        fprintf(stream,"%4d Camera:%d %s %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d LLZ: %.8f %.8f %8.3f HRP: %6.2f %5.2f %5.2f A:%.3f Q:%.2f G:%.0f/%.0f E:%.0f/%.0f S:%.3f C:%.3f %.3f\n",
+        mb_longname end_str;
+        if (control->dark_multiply_set && image_multiply)
+            snprintf(end_str, sizeof(mb_longname), " X %.2f\n", control->dark_multiply_factor);
+        else
+            snprintf(end_str, sizeof(mb_longname), "\n");
+        fprintf(stream,"%4d Camera:%d %s %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d LLZ: %.8f %.8f %8.3f HRP: %6.2f %6.2f %6.2f A:%.3f Q:%.2f G:%.0f/%.0f E:%.0f/%.0f S:%.3f C:%.3f %.3f P:%4.2f%s",
                 process->image_count, process->image_camera, process->imageFile,
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
                 process->camera_navlon, process->camera_navlat, process->camera_sensordepth,
@@ -1106,7 +1187,8 @@ void process_image(int verbose, struct mbpm_process_struct *process,
                 avgPixelIntensity.val[0], process->image_quality,
                 process->image_gain, control->reference_gain,
                 process->image_exposure, control->reference_exposure,
-                image_center_standoff, imageIntensityCorrection, center_yCorrection);
+                image_center_standoff, imageIntensityCorrection, center_yCorrection,
+                image_priority, end_str);
 
         /* Loop over the pixels in the undistorted image. If trim is nonzero then
             that number of pixels are ignored around the margins. This solves the
@@ -1166,7 +1248,7 @@ void process_image(int verbose, struct mbpm_process_struct *process,
                     rrxysq = xx * xx + yy * yy;
                     rrxy = sqrt(rrxysq);
                     rr = sqrt(rrxysq + zzref * zzref);
-                    pixel_priority = control->priority_weight * (rrxymax - rrxy) / rrxymax;
+                    pixel_priority = image_priority * (rrxymax - rrxy) / rrxymax;
     //if (debugprint == MB_YES) {
     //fprintf(stream,"\nPRIORITY xx:%f yy:%f zzref:%f rr:%f rrxy:%f rrxymax:%f pixel_priority:%f\n",
     //xx,yy,zzref,rr,rrxy,rrxymax,pixel_priority);
@@ -1576,10 +1658,12 @@ void process_image(int verbose, struct mbpm_process_struct *process,
                 }
             }
         }
-        imageUndistortYCrCb.release();
-        imageUndistort.release();
-
     }
+    if (!imageUndistort.empty())
+        imageUndistort.release();
+    if (!imageUndistortYCrCb.empty())
+        imageUndistortYCrCb.release();
+
 }
 /*--------------------------------------------------------------------*/
 void process_image_sectioned(int verbose, struct mbpm_process_struct *process,
@@ -1589,6 +1673,7 @@ void process_image_sectioned(int verbose, struct mbpm_process_struct *process,
     Mat imageProcess;
     Mat imageUndistort;
     Mat imageUndistortYCrCb;
+    Scalar avgPixelIntensity;
 
     /* output stream (stdout if verbose <= 1, stderr if verbose > 1) */
     FILE *stream = NULL;
@@ -1598,18 +1683,51 @@ void process_image_sectioned(int verbose, struct mbpm_process_struct *process,
         stream = stderr;
 
     /* read the image */
+    bool image_ignore = false;
+    bool image_multiply = false;
     imageProcess = imread(process->imageFile);
     if (!imageProcess.empty()) {
-
-        double fov_x, fov_y;
-        double center_x, center_y;
-        double intensityCorrection;
-        bool image_use = false;
 
         /* undistort the image */
         undistort(imageProcess, imageUndistort, control->cameraMatrix[process->image_camera], control->distCoeffs[process->image_camera], noArray());
         cvtColor(imageUndistort, imageUndistortYCrCb, COLOR_BGR2YCrCb);
         imageProcess.release();
+
+        /* Calculate the average intensity of the image */
+        avgPixelIntensity = mean(imageUndistortYCrCb);
+
+        /* set ignore flag if required */
+        if (control->dark_ignore_set && avgPixelIntensity.val[0] < control->dark_ignore_threshold) {
+            image_ignore = true;
+            int time_i[7];
+            mb_get_date(verbose, process->time_d, time_i);
+            fprintf(stream,"%4d Camera:%d %s %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d LLZ: %.8f %.8f %8.3f HRP: %6.2f %6.2f %6.2f A:%.3f Q:%.2f G:%.0f/%.0f E:%.0f/%.0f *** ignored too dark\n",
+                    process->image_count, process->image_camera, process->imageFile,
+                    time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
+                    process->camera_navlon, process->camera_navlat, process->camera_sensordepth,
+                    process->camera_heading, process->camera_roll, process->camera_pitch,
+                    avgPixelIntensity.val[0], process->image_quality,
+                    process->image_gain, control->reference_gain,
+                    process->image_exposure, control->reference_exposure);
+        }
+
+        /* multiply factor times image if required */
+        if (!image_ignore && control->dark_multiply_set 
+            && avgPixelIntensity.val[0] < control->dark_multiply_threshold) {
+            image_multiply = true;
+            multiply(imageUndistort, control->dark_multiply_factor, imageUndistort);
+            cvtColor(imageUndistort, imageUndistortYCrCb, COLOR_BGR2YCrCb);
+            avgPixelIntensity = mean(imageUndistortYCrCb);
+        }
+    }
+
+    /* process the image */
+    if (!imageUndistortYCrCb.empty() && !image_ignore) {
+
+        double fov_x, fov_y;
+        double center_x, center_y;
+        double intensityCorrection;
+        bool image_use = false;
 
         /* get field of view, offsets, and principal point to use */
         fov_x = control->fovx[process->image_camera];
@@ -1645,10 +1763,7 @@ void process_image_sectioned(int verbose, struct mbpm_process_struct *process,
         double yy = MAX(center_y, imageUndistort.rows - center_y);
         double rrxymax = sqrt(xx * xx + yy * yy);
 
-        /* Calculate the average intensity of the image */
-        Scalar avgPixelIntensity = mean(imageUndistortYCrCb);
-
-        /* get unit vector (cx, cy, cz) for direction camera is pointing */
+         /* get unit vector (cx, cy, cz) for direction camera is pointing */
         /* (1) rotate center pixel location using attitude and zzref */
         double zz;
         mb_platform_math_attitude_rotate_beam(verbose,
@@ -1788,6 +1903,32 @@ void process_image_sectioned(int verbose, struct mbpm_process_struct *process,
             }
         }
 
+        /* set image priority to be multiplied by pixel priority */
+        double image_priority = control->priority_weight;
+        if (control->heading_mode != MBPM_HEADING_PRIORITY_OFF) {
+            double heading_priority = 0.0;
+            double dheading = process->camera_heading - control->heading_target;
+            if (dheading > 180.0)
+                dheading -= 360.0;
+            else if (dheading < -180.0)
+                dheading += 360.0;
+            double fdheading = control->heading_factor * dheading;
+            if (fdheading >= -90.0 && fdheading <= 90.0) {
+                heading_priority = cos(DTR * fdheading);
+            }
+            else if (control->heading_mode == MBPM_HEADING_PRIORITY_DOUBLE) {
+                if (dheading < 0.0)
+                    dheading += 180.0;
+                else
+                    dheading -= 180.0;
+                fdheading = control->heading_factor * dheading;
+                if (fdheading >= -90.0 && fdheading <= 90.0) {
+                    heading_priority = cos(DTR * fdheading);
+                }
+            }
+            image_priority *= heading_priority;
+        }
+
         /* Loop over sections of the undistorted image, and map those onto the
            destination image as continuous quads. The priority determining if the
            section is mapped is calculated for the center pixel of the section. */
@@ -1922,7 +2063,7 @@ void process_image_sectioned(int verbose, struct mbpm_process_struct *process,
                             if (icorner == 4) {
                                 /* calculate the section priority based on the distance
                                     from the image center and if specified the standoff */
-                                section_priority = control->priority_weight * (rrxymax - rrxy) / rrxymax;
+                                section_priority = image_priority * (rrxymax - rrxy) / rrxymax;
                                 if (control->priority_mode == MBPM_PRIORITY_CENTRALITY_PLUS_STANDOFF)  {
                                     double dstandoff = (standoff[icorner] - control->standoff_target) / control->standoff_range;
                                     double standoff_priority = (float) (exp(-dstandoff * dstandoff));
@@ -1966,7 +2107,12 @@ void process_image_sectioned(int verbose, struct mbpm_process_struct *process,
                         image_use = true;
                         int time_i[7];
                         mb_get_date(verbose, process->time_d, time_i);
-                        fprintf(stream,"%4d Camera:%d %s %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d LLZ: %.8f %.8f %8.3f HRP: %6.2f %5.2f %5.2f A:%.3f Q:%.2f G:%.0f/%.0f E:%.0f/%.0f S:%.3f C:%.3f %.3f\n",
+                        mb_longname end_str;
+                        if (control->dark_multiply_set && image_multiply)
+                            snprintf(end_str, sizeof(mb_longname), " X %.2f\n", control->dark_multiply_factor);
+                        else
+                            snprintf(end_str, sizeof(mb_longname), "\n");
+                        fprintf(stream,"%4d Camera:%d %s %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d LLZ: %.8f %.8f %8.3f HRP: %6.2f %6.2f %6.2f A:%.3f Q:%.2f G:%.0f/%.0f E:%.0f/%.0f S:%.3f C:%.3f %.3f P:%4.2f%s",
                                 process->image_count, process->image_camera, process->imageFile,
                                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
                                 process->camera_navlon, process->camera_navlat, process->camera_sensordepth,
@@ -1974,7 +2120,8 @@ void process_image_sectioned(int verbose, struct mbpm_process_struct *process,
                                 avgPixelIntensity.val[0], process->image_quality,
                                 process->image_gain, control->reference_gain,
                                 process->image_exposure, control->reference_exposure,
-                                image_center_standoff, imageIntensityCorrection, center_yCorrection);
+                                image_center_standoff, imageIntensityCorrection, center_yCorrection,
+                                image_priority, end_str);
                     }
 
                     /* widen the quad in the destination image to avoid missing some pixels */
@@ -2299,10 +2446,12 @@ void process_image_sectioned(int verbose, struct mbpm_process_struct *process,
                 }
             }
         }
-        imageUndistortYCrCb.release();
-        imageUndistort.release();
-
     }
+    if (!imageUndistort.empty())
+        imageUndistort.release();
+    if (!imageUndistortYCrCb.empty())
+        imageUndistortYCrCb.release();
+
 }
 
 /*--------------------------------------------------------------------*/
@@ -2335,6 +2484,9 @@ int main(int argc, char** argv)
     int       output_format = MBPM_FORMAT_NONE;
     control.priority_mode = MBPM_PRIORITY_CENTRALITY_ONLY;
     control.priority_weight = 1.0;
+    control.heading_mode = MBPM_HEADING_PRIORITY_OFF;
+    control.heading_target = 0.0;
+    control.heading_factor = 1.0;
     control.standoff_target = 3.0;
     control.standoff_range = 1.0;
     control.range_max = 200.0;
@@ -2436,6 +2588,11 @@ int main(int argc, char** argv)
     control.reference_crcb_set = false;
     control.reference_cr = 0.0;
     control.reference_cb = 0.0;
+    control.dark_ignore_set = false;
+    control.dark_ignore_threshold = 0.0;
+    control.dark_multiply_set = false;
+    control.dark_multiply_threshold = 0.0;
+    control.dark_multiply_factor = 0.0;
     control.ncorr_x = 21;
     control.ncorr_y = 21;
     control.ncorr_z = 100;
@@ -2518,6 +2675,7 @@ int main(int argc, char** argv)
      *    --altitude=standoff_target/standoff_range
      *    --standoff=standoff_target/standoff_range
      *    --priority-weight=weight
+     *    --heading=target/factor/mode
      *    --trim=trim_pixels
      *    --section=section_pixels
      *    --section-length-max=length
@@ -2534,6 +2692,8 @@ int main(int argc, char** argv)
      *    --reference-exposure=exposure
      *    --reference-intensity=intensity
      *    --reference-crcb=intensity/intensity
+     *    --dark-images-ignore=threshold
+     *    --dark-images-multiply=threshold/factor
      *    --platform-file=platform.plf
      *    --camera-sensor=camera_sensor_id
      *    --nav-sensor=nav_sensor_id
@@ -2570,6 +2730,7 @@ int main(int argc, char** argv)
         {"altitude",                    required_argument,      NULL,         0},
         {"standoff",                    required_argument,      NULL,         0},
         {"priority-weight",             required_argument,      NULL,         0},
+        {"heading",                     required_argument,      NULL,         0},
         {"trim",                        required_argument,      NULL,         0},
         {"section",                     required_argument,      NULL,         0},
         {"section-length-max",          required_argument,      NULL,         0},
@@ -2586,6 +2747,8 @@ int main(int argc, char** argv)
         {"reference-exposure",          required_argument,      NULL,         0},
         {"reference-intensity",         required_argument,      NULL,         0},
         {"reference-crcb",              required_argument,      NULL,         0},
+        {"dark-image-ignore",          required_argument,       NULL,         0},
+        {"dark-image-multiply",        required_argument,       NULL,         0},
         {"platform-file",               required_argument,      NULL,         0},
         {"camera-sensor",               required_argument,      NULL,         0},
         {"nav-sensor",                  required_argument,      NULL,         0},
@@ -2763,6 +2926,22 @@ int main(int argc, char** argv)
                 const int n = sscanf (optarg,"%lf", &control.priority_weight);
                 }
 
+            /* heading */
+            else if (strcmp("heading", options[option_index].name) == 0)
+                {
+                const int n = sscanf (optarg,"%lf/%lf/%d", &control.heading_target, &control.heading_factor, &control.heading_mode);
+                if (n == 1) {
+                    control.heading_factor = 1.0;
+                    control.heading_mode = MBPM_HEADING_PRIORITY_SINGLE;
+                }
+                else if (n == 2) {
+                    control.heading_mode = MBPM_HEADING_PRIORITY_SINGLE;
+                }
+                else if (n == 0) {
+                    control.heading_mode = MBPM_HEADING_PRIORITY_OFF;
+                }
+                }
+
             /* trim */
             else if (strcmp("trim", options[option_index].name) == 0)
                 {
@@ -2875,6 +3054,22 @@ int main(int argc, char** argv)
                 int n = sscanf (optarg,"%lf/%lf", &control.reference_cr, &control.reference_cb);
                 if (n == 2 && control.reference_cr > 0.0 && control.reference_cb > 0.0)
                     control.reference_crcb_set = true;
+                }
+
+            /* dark-image-ignore */
+            else if (strcmp("dark-image-ignore", options[option_index].name) == 0)
+                {
+                int n = sscanf (optarg,"%lf", &control.dark_ignore_threshold);
+                if (n == 1 && control.dark_ignore_threshold > 0.0)
+                    control.dark_ignore_set = true;
+                }
+
+            /* dark-image-multiply */
+            else if (strcmp("dark-image-multiply", options[option_index].name) == 0)
+                {
+                int n = sscanf (optarg,"%lf/%lf", &control.dark_multiply_threshold, &control.dark_multiply_factor);
+                if (n == 2 && control.dark_multiply_threshold > 0.0 && control.dark_multiply_factor > 0.0)
+                    control.dark_multiply_set = true;
                 }
 
             /* platform-file */
@@ -3120,6 +3315,15 @@ int main(int argc, char** argv)
         fprintf(stream,"%s     control.reference_crcb_set:       %d\n", first, control.reference_crcb_set);
         fprintf(stream,"%s     control.reference_cr:             %f\n", first, control.reference_cr);
         fprintf(stream,"%s     control.reference_cb:             %f\n", first, control.reference_cb);
+        fprintf(stream,"%s     control.dark_ignore_set:          %d\n", first, control.dark_ignore_set);
+        if (control.dark_ignore_set) {
+            fprintf(stream,"%s     control.dark_ignore_threshold:    %f\n", first, control.dark_ignore_threshold);
+        }
+        fprintf(stream,"%s     control.dark_multiply_set:        %d\n", first, control.dark_multiply_set);
+        if (control.dark_multiply_set) {
+            fprintf(stream,"%s     control.dark_multiply_threshold:  %f\n", first, control.dark_multiply_threshold);
+            fprintf(stream,"%s     control.dark_multiply_factor:     %f\n", first, control.dark_multiply_factor);
+        }
         fprintf(stream,"%s     PlatformFile:                     %s\n", first, PlatformFile);
         fprintf(stream,"%s     platform_specified:               %d\n", first, platform_specified);
         fprintf(stream,"%s     camera_sensor:                    %d\n", first, camera_sensor);
@@ -3128,13 +3332,17 @@ int main(int argc, char** argv)
         fprintf(stream,"%s     heading_sensor:                   %d\n", first, heading_sensor);
         fprintf(stream,"%s     altitude_sensor:                  %d\n", first, altitude_sensor);
         fprintf(stream,"%s     attitude_sensor:                  %d\n", first, attitude_sensor);
+        fprintf(stream,"%s     control.priority_weight:          %f\n", first, control.priority_weight);
+        if (control.heading_mode != MBPM_HEADING_PRIORITY_OFF) {
+            fprintf(stream,"%s     control.heading_mode:             %d\n", first, control.heading_mode);
+            fprintf(stream,"%s     control.heading_target:           %f\n", first, control.heading_target);
+            fprintf(stream,"%s     control.heading_factor:           %f\n", first, control.heading_factor);
+        }
         if (control.priority_mode == MBPM_PRIORITY_CENTRALITY_ONLY) {
             fprintf(stream,"%s     control.priority_mode:            %d (priority by centrality in source image only)\n", first, control.priority_mode);
-            fprintf(stream,"%s     control.priority_weight:          %f\n", first, control.priority_weight);
         }
         else {
             fprintf(stream,"%s     control.priority_mode:            %d (priority by centrality in source image and difference from target standoff)\n", first, control.priority_mode);
-            fprintf(stream,"%s     control.priority_weight:          %f\n", first, control.priority_weight);
             fprintf(stream,"%s     control.standoff_target:          %f\n", first, control.standoff_target);
             fprintf(stream,"%s     control.standoff_range:           %f\n", first, control.standoff_range);
         }
@@ -3568,6 +3776,22 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
                 }
             }
 
+            /* heading */
+            else if (strncmp(imageLeftFile, "--heading", 10) == 0)
+                {
+                const int n = sscanf (imageLeftFile,"%lf/%lf/%d", &control.heading_target, &control.heading_factor, &control.heading_mode);
+                if (n == 1) {
+                    control.heading_factor = 1.0;
+                    control.heading_mode = MBPM_HEADING_PRIORITY_SINGLE;
+                }
+                else if (n == 2) {
+                    control.heading_mode = MBPM_HEADING_PRIORITY_SINGLE;
+                }
+                else {
+                    control.heading_mode = MBPM_HEADING_PRIORITY_OFF;
+                }
+                }
+
             /* trim */
             else if (strncmp(imageLeftFile, "--trim=", 7) == 0) {
                 if (sscanf(imageLeftFile, "--trim=%d", &control.trimPixels) == 1) {
@@ -3727,6 +3951,22 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
                             control.reference_cr, control.reference_cb);
                 }
             }
+
+            /* dark-image-ignore */
+            else if (strncmp(imageLeftFile, "--dark-image-ignore", 19) == 0)
+                {
+                int n = sscanf (imageLeftFile,"%lf", &control.dark_ignore_threshold);
+                if (n == 1 && control.dark_ignore_threshold > 0.0)
+                    control.dark_ignore_set = true;
+                }
+
+            /* dark-image-multiply */
+            else if (strncmp(imageLeftFile, "--dark-image-multiply", 21) == 0)
+                {
+                int n = sscanf (imageLeftFile,"%lf/%lf", &control.dark_multiply_threshold, &control.dark_multiply_factor);
+                if (n == 2 && control.dark_multiply_threshold > 0.0 && control.dark_multiply_factor > 0.0)
+                    control.dark_multiply_set = true;
+                }
 
             /* platform-file */
             else if (strncmp(imageLeftFile, "--platform-file=", 16) == 0) {
