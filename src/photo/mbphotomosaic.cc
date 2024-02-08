@@ -117,7 +117,7 @@ char usage_message[] = "mbphotomosaic \n"
                         "\t--altitude=target/standoff_range\n"
                         "\t--standoff=target/standoff_range\n"
                         "\t--priority-weight=weight\n"
-                        "\t--heading=target/factor/mode\n"
+                        "\t--priority-heading=target/factor/mode\n"
                         "\t--trim=trim_pixels\n"
                         "\t--section=section_pixels\n"
                         "\t--section-length-max=section_length_max\n"
@@ -2675,7 +2675,7 @@ int main(int argc, char** argv)
      *    --altitude=standoff_target/standoff_range
      *    --standoff=standoff_target/standoff_range
      *    --priority-weight=weight
-     *    --heading=target/factor/mode
+     *    --priority-heading=target/factor/mode
      *    --trim=trim_pixels
      *    --section=section_pixels
      *    --section-length-max=length
@@ -2730,7 +2730,7 @@ int main(int argc, char** argv)
         {"altitude",                    required_argument,      NULL,         0},
         {"standoff",                    required_argument,      NULL,         0},
         {"priority-weight",             required_argument,      NULL,         0},
-        {"heading",                     required_argument,      NULL,         0},
+        {"priority-heading",            required_argument,      NULL,         0},
         {"trim",                        required_argument,      NULL,         0},
         {"section",                     required_argument,      NULL,         0},
         {"section-length-max",          required_argument,      NULL,         0},
@@ -2926,8 +2926,8 @@ int main(int argc, char** argv)
                 const int n = sscanf (optarg,"%lf", &control.priority_weight);
                 }
 
-            /* heading */
-            else if (strcmp("heading", options[option_index].name) == 0)
+            /* priority-heading */
+            else if (strcmp("priority-heading", options[option_index].name) == 0)
                 {
                 const int n = sscanf (optarg,"%lf/%lf/%d", &control.heading_target, &control.heading_factor, &control.heading_mode);
                 if (n == 1) {
@@ -2937,7 +2937,7 @@ int main(int argc, char** argv)
                 else if (n == 2) {
                     control.heading_mode = MBPM_HEADING_PRIORITY_SINGLE;
                 }
-                else if (n == 0) {
+                else if (n <= 0) {
                     control.heading_mode = MBPM_HEADING_PRIORITY_OFF;
                 }
                 }
@@ -3776,10 +3776,11 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
                 }
             }
 
-            /* heading */
-            else if (strncmp(imageLeftFile, "--heading", 10) == 0)
+            /* priority-heading */
+            else if (strncmp(imageLeftFile, "--priority-heading", 18) == 0)
                 {
-                const int n = sscanf (imageLeftFile,"%lf/%lf/%d", &control.heading_target, &control.heading_factor, &control.heading_mode);
+                const int n = sscanf(imageLeftFile,"--priority-heading=%lf/%lf/%d", 
+                    &control.heading_target, &control.heading_factor, &control.heading_mode);
                 if (n == 1) {
                     control.heading_factor = 1.0;
                     control.heading_mode = MBPM_HEADING_PRIORITY_SINGLE;
@@ -3787,8 +3788,16 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
                 else if (n == 2) {
                     control.heading_mode = MBPM_HEADING_PRIORITY_SINGLE;
                 }
-                else {
+                else if (n <= 0) {
                     control.heading_mode = MBPM_HEADING_PRIORITY_OFF;
+                }
+                if (verbose > 0) {
+                    if (control.heading_mode != MBPM_HEADING_PRIORITY_OFF)
+                        fprintf(stream, "    Parameter reset: heading_mode: %d heading_target: %f heading_factor: %f\n",
+                            control.heading_mode, control.heading_target, control.heading_factor);
+                    else
+                        fprintf(stream, "    Failure to reset parameter: heading_mode: %d heading_target: %f heading_factor: %f\n",
+                            control.heading_mode, control.heading_target, control.heading_factor);
                 }
                 }
 
