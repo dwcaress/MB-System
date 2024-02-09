@@ -357,7 +357,7 @@ trnw/trncli_test.c
 trnw/mb1_msg.c
 )
 
-target_link_libraries(trncli-test PRIVATE mbtrnframe trnwcli newmat geolib trnw qnx mb1 tnav NetCDF::NetCDF)
+target_link_libraries(trncli-test PRIVATE mbtrnframe trnwcli newmat geolib trnw qnx mb1 tnav NetCDF::NetCDF m)
 
 target_include_directories(trncli-test PRIVATE ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/src/mbtrnframe trnw terrain-nav)
 #
@@ -429,7 +429,7 @@ trnw/mb1rs.c
 trnw/mb1rs-app.c
 )
 
-target_link_libraries(mb1rs PRIVATE mbtrnframe)
+target_link_libraries(mb1rs PRIVATE mbtrnframe m)
 target_include_directories(mb1rs PRIVATE ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/src/mbtrnframe trnw terrain-nav)
 
 #------------------------------------------------------------------------------
