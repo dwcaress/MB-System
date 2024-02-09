@@ -157,7 +157,7 @@ TRNCLI_TEST_LIBS = -lmframe -ltrnw -lpthread -lm -lqnx -lnewmat -ltrn -ltrncli -
 LIBTRNUCLI=libtrnucli.a
 LIBTRNUCLI_SRC=trnu_cli.c
 LIBTRNUCLI_OBJ=$(LIBTRNUCLI_SRC:%.c=$(BUILD_DIR)/%.o)
-LIBTRNUCLI_LIBS = -lmframe -lpthread -lm
+LIBTRNUCLI_LIBS = -lstdc++ -lmframe -lpthread -lm
 
 # libnetif: TRN network interface lib
 LIBNETIF=libnetif.a
@@ -193,13 +193,13 @@ MCSUB_LIBS =
 MMCPUB=mmcpub
 MMCPUB_SRC=mmcpub.c
 MMCPUB_OBJ=$(MMCPUB_SRC:%.c=$(BUILD_DIR)/%.o)
-MMCPUB_LIBS = $(MFRAME_LIB) -lmframe -lm
+MMCPUB_LIBS = $(MFRAME_LIB) -lmframe -lm -lstdc++
 
 # mmcsub: multicast test publisher  (uses mframe)
 MMCSUB=mmcsub
 MMCSUB_SRC=mmcsub.c
 MMCSUB_OBJ=$(MMCSUB_SRC:%.c=$(BUILD_DIR)/%.o)
-MMCSUB_LIBS = $(MFRAME_LIB) -lmframe -lm
+MMCSUB_LIBS = $(MFRAME_LIB) -lmframe -lm -lstdc++
 
 TRNIF_TEST=trnif-test
 TRNIF_TEST_SRC=trnif_test.c trnif_proto.c trnif_msg.c
@@ -209,7 +209,7 @@ TRNIF_TEST_LIBS = -lnetif -lmframe -ltrnw -lpthread -lm -lqnx -lnewmat -ltrn -ln
 MB1RS=mb1rs
 MB1RS_SRC=mb1_msg.c mb1rs.c mb1rs-app.c
 MB1RS_OBJ=$(MB1RS_SRC:%.c=$(BUILD_DIR)/%.o)
-MB1RS_LIBS = $(MFRAME_LIB) -lmframe -lm -lpthread
+MB1RS_LIBS = $(MFRAME_LIB) -lmframe -lm -lpthread -lstdc++
 
 # TRN clients
 TRNC_SRC+= $(LIBTRNCLI_SRC) \
@@ -218,9 +218,9 @@ $(LIBTRNUCLI_SRC) \
 $(TRNUCLI_TEST_SRC) \
 $(TRNUSVR_TEST_SRC) \
 $(MMCPUB_SRC) \
-$(MMCPUB_SRC) \
+$(MMCSUB_SRC) \
 $(MCPUB_SRC) \
-$(MCPUB_SRC) \
+$(MCSUB_SRC) \
 $(TRNCLI_TEST_SRC) \
 $(TRNIF_TEST_SRC) \
 $(MB1RS_SRC)
