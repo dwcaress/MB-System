@@ -23,10 +23,23 @@ or beta, are equally accessible as tarballs through the Github interface.
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
 
+- Version 5.8.1beta03    February 8, 2024
+- Version 5.8.1beta02    February 7, 2024
 - Version 5.8.1beta01    February 1, 2024
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.1beta03 (February 8, 2024)
+
+Mbphotomosaic: Fixed priority-heading option that allows image prioritization on
+the basis of camera heading.
+
+#### 5.8.1beta02 (February 7, 2024)
+
+Mbphotomosaic: Added options to detect and correct dark images (for when strobe lights
+partially drop out), to ignore dark images, and to allow image prioritization on
+the basis of camera heading.
 
 #### 5.8.1beta01 (February 1, 2024)
 
