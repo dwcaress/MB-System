@@ -119,6 +119,7 @@ using namespace lrauv_lcm_tools;
 #define LCMTRN_DEFAULT_LOWGRADE false
 #define LCMTRN_DEFAULT_ALLOW true
 
+class TrnLcmDecoder;
 namespace lcmTrn
 {
 
@@ -130,8 +131,7 @@ typedef struct lcmconfig_ {
         *valid;
     const char *nav, *lat, *lon;
     const char *depth, *veh_depth, *pressure;
-    const char *trn, *mle, *mmse, *var, *reinits, *filter, *updatetime;
-    const char *cmd, *reinit, *estimate;
+    const char *trn, *cmd, *reinit, *estimate;
 } LcmConfig;
 
 typedef struct trnconfig_ {
@@ -165,7 +165,6 @@ class LcmTrn
 
     void initTrn();
     bool verifyTrnConfig();
-    void initTrnState();
 
     void cleanTrn();
     void initLcm();
@@ -173,7 +172,7 @@ class LcmTrn
     void cleanLcm();
     int handleMessages();
     int getLcmTimeout(unsigned int initial_timeout, unsigned int max_timeout);
-    void publishEstimates();
+    void publishEstimatesDecoder();
 
     void handleAhrs(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
                     const LrauvLcmMessage *msg);
@@ -207,6 +206,7 @@ class LcmTrn
     poseT _thisPose, _lastPose, _mle, _mmse;
     measT _thisMeas, _lastMeas;
     int _filterstate, _numreinits;
+    int _lastUtmZone;
     int64_t _seqNo;
 
     double _lastAHRSTimestamp;
@@ -219,7 +219,7 @@ class LcmTrn
     bool _good;
 
     LcmMessageReader _msg_reader;
-    LcmMessageWriter<std::string> _msg_writer;
+    TrnLcmDecoder* _trn_decoder;
 };
 
 } // namespace lcmTrn
