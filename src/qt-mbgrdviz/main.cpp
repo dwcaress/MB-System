@@ -45,7 +45,6 @@ int main(int argc, char *argv[])
     qmlRegisterType<Const>("SharedConstants", 1, 0,
 			   "Const");
 
-    
     engine.load(url);
 
     
