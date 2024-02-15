@@ -6,7 +6,9 @@ using namespace mb_system;
 
 QVtkItem::QVtkItem() :
   gridFilename_(nullptr),
-  appTaskBusy_(false)
+  appTaskBusy_(false),
+  editState_(EditState::ViewOnly),
+  testInt_(999)
 {
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
     qDebug() << "mirrorVertically: " << mirrorVertically();
