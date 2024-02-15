@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QString>
 #include <QQuickFramebufferObject>
+#include <qqml.h>
 #include "QVtkRenderer.h"
 #include "DisplayProperties.h"
 
@@ -34,8 +35,23 @@ namespace mb_system {
     /// Indicate whether app task is busy
     Q_PROPERTY(bool busy READ getAppBusy WRITE setAppBusy NOTIFY busyChanged)
 
-    
+    Q_PROPERTY(QVtkItem::EditState editState READ getEditState
+	       WRITE setEditState
+	       NOTIFY editStateChanged)
+
+    Q_PROPERTY(int testInt READ getTestInt WRITE setTestInt
+	       NOTIFY testIntChanged)
+
   public:
+    enum class EditState : int {
+				ViewOnly,
+				EditRoute,
+				EditPoints,
+				EditOverlay
+    };
+
+    Q_ENUM(EditState)
+
 
     QVtkItem();
 
@@ -109,8 +125,15 @@ namespace mb_system {
     /// User picked a point on the vtk surface
     void pickedPointChanged(QString msg);
 
+    /// App busy state changed
     void busyChanged(bool busy);
 
+    /// Edit state changed
+    void editStateChanged(int state);
+
+    /// Test int state changed
+    void testIntChanged(int val);
+    
   public slots:
 
   public:
@@ -126,7 +149,31 @@ namespace mb_system {
 
     /// Get app busy status; return true if busy, else false
     bool getAppBusy();
-    
+
+    /// Get edit statte
+    EditState getEditState() {
+      return editState_;
+    }
+
+    /// Set edit state
+    void setEditState(EditState state) {
+      editState_ = state;
+      std::cout << "setEditState() to " << (int )state << "\n";
+      emit editStateChanged((int )state);
+    }
+
+    ///  TEST 
+    void setTestInt(int val) {
+      testInt_ = val;
+      std::cout << "setTestInt() to " << val << "\n";
+      emit testIntChanged(val);
+    }
+
+    /// TEST
+    int getTestInt() {
+      return testInt_;
+    }
+
     
   protected:
 
@@ -163,6 +210,15 @@ namespace mb_system {
 
     /// Indicate to gui whether app task is busy
     bool appTaskBusy_;
+
+
+    /// Editing state
+    EditState editState_;
+
+    /// TEST 
+    int testInt_;
+    
+    
   };
 
 
