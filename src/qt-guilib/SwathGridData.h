@@ -37,6 +37,7 @@ namespace mb_system {
     /// Invoked by mbeditviz_prog C functions    
     static int hideMessage() {
       std::cout << "hideMessage() " << std::endl;
+      return 0;
     }
 
     /// Invoked by mbeditviz_prog C functions    
