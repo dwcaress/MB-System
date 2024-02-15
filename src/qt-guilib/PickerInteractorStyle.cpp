@@ -19,8 +19,13 @@ PickerInteractorStyle::PickerInteractorStyle():
 
 void PickerInteractorStyle::OnLeftButtonDown() {
   // Get starting mouse position
-  interactor_->GetMousePosition(&startMousePos_[0],
-				&startMousePos_[1]);
+  /* *** Always returns 0! 
+  this->Interactor->GetMousePosition(&startMousePos_[0],
+				     &startMousePos_[1]);
+				     *** */
+  
+  startMousePos_[0] = this->Interactor->GetEventPosition()[0];
+  startMousePos_[1] = this->Interactor->GetEventPosition()[1];
   
   // Forward event
   vtkInteractorStyleTrackballCamera::OnLeftButtonDown();
@@ -29,25 +34,7 @@ void PickerInteractorStyle::OnLeftButtonDown() {
 
 void PickerInteractorStyle::OnLeftButtonUp() {
 
-  // If mouse was dragged, don't do anything
-  int mousePos[2];
-  
-  interactor_->GetMousePosition(&mousePos[0], &mousePos[1]);
 
-  std::cerr << "startPosX: " << startMousePos_[0] << "   startPosY: "
-	    << startMousePos_[1] << "\n";
-  
-  std::cerr << "mouseX: " << mousePos[0] << "   mouseY: "
-	    << mousePos[1] << "\n";
-  
-  if (mousePos[0] != startMousePos_[0] ||
-      mousePos[1] != startMousePos_[1]) {
-
-    // Forward event and return
-    vtkInteractorStyleTrackballCamera::OnLeftButtonUp();
-    return;
-  }
-  
   int x = this->Interactor->GetEventPosition()[0];
   int y = this->Interactor->GetEventPosition()[1];
   int z = this->Interactor->GetEventPosition()[2];
@@ -55,6 +42,18 @@ void PickerInteractorStyle::OnLeftButtonUp() {
   std::cout << "Pixel x,y,z: " << x
             << " " << y << " " << z << std::endl;
 
+  std::cout << "startMouseX: " << startMousePos_[0] <<
+    "  startMouseY: " << startMousePos_[1] << "\n";
+  
+  if (x != startMousePos_[0] ||
+      y != startMousePos_[1]) {
+
+    // Mouse-drag, not a pixel pick; Forward event and return
+    std::cerr << "End of mouse drag event, not a pixel pick\n";
+    vtkInteractorStyleTrackballCamera::OnLeftButtonUp();
+    return;
+  }
+  
   vtkRenderer *renderer = GetDefaultRenderer();
   int *rendererSize = renderer->GetSize();
   
