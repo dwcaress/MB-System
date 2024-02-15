@@ -28,6 +28,7 @@ bool DataPointsOverlay::appendPoint(DataPointsOverlay::Point *point) {
 
 
 std::vector<DataPointsOverlay *> *load(std::string fileName) {
+  return nullptr;
 }
 
 
