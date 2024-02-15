@@ -45,19 +45,28 @@ ApplicationWindow {
     Const {
        id: constants
     }
-    
+
+
+    QVtkItem {
+      id: qVtkTest
+    }
+
+
     //// TEST TEST TEST
-    property int editState: Const.EditState.EditRoute
+    /// property int editState: QVtkItem.EditState.EditOverlay
+    property int editState: qVtkItem.editState
     property string testString: constants.testString
     property int siteFile: Const.Cmd.SiteFile
     property variant cmaps: constants.cmaps
     
     Component.onCompleted: {console.log("onCompleted");
-                            console.log("editState: ", editState);
+                            console.log("*** editState: ", editState);
 			    console.log("testString: ", testString);
 			    console.log("siteFile: ", siteFile);
-			    console.log("cmaps: ", cmaps)
-			    console.log("cmaps[2]: ", cmaps[2])
+			    console.log("cmaps: ", cmaps);
+			    console.log("cmaps[2]: ", cmaps[2]);
+			    console.log("qVtkItem.testInt: ", qVtkItem.testInt);
+			    qVtkItem.testInt = 111;
 			    }
 
     property int selectedAxisLabel: -1
@@ -166,7 +175,12 @@ ApplicationWindow {
 	    }
             Action { text: qsTr("Edit route") ;
                 onTriggered: { console.log("edit route")
-                    editRouteDialog.open()}
+                    editRouteDialog.open();
+		    console.log("qVtkItem.testInt: ", qVtkItem.testInt)
+		    qVtkTest.editState = QVtkItem.EditState.EditRoute
+		    var i = QVtkItem.EditState.EditRoute;
+		    console.log("new editState: ", i)
+		    }
             }	    
             Action {text: qsTr("Navigation list")}
         }
