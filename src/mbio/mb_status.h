@@ -140,6 +140,7 @@
 #define MB_DATA_PIPE 72                  /* Reson 7k */
 #define MB_DATA_CONTACT 73               /* Reson 7k */
 #define MB_DATA_GATES 74                 /* Reson 7k */
+#define MB_DATA_DATUM 75                 /* Kongsberg SPD Sensor Position Datum */
 
 /* MBIO function status convention */
 #define MB_SUCCESS 1
