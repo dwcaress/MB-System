@@ -68,6 +68,7 @@
 
 #include "gitversion.h"
 #include "LcmTrn.h"
+#include "TrnLcmDecoder.h"
 #include "MathP.h"
 #include "NavUtils.h"
 
@@ -88,16 +89,13 @@
 #define MMSE_VECTOR     1
 #define VAR_VECTOR      2
 #define SCALAR          0 // Indices into output vectors
-#define POSE_X          0
-#define POSE_Y          1
-#define POSE_Z          2
-#define POSE_PSI        3
 #define COVAR_X         0
 #define COVAR_Y         2
 #define COVAR_Z         5
 #define COVAR_PSI       44
 #define TRN_MLE_EST     1
 #define TRN_MMSE_EST    2
+#define NUM_EXPECTED_DVL_ITEMS 16
 // clang-format on
 
 static const int tl_both = TL_OMASK(TL_TRN_SERVER, TL_BOTH);
@@ -140,7 +138,8 @@ LcmTrn::LcmTrn(const char *configfilepath)
     : _configfile(NULL), _cfg(NULL), _lcm(NULL), _tnav(NULL),
       _lastAHRSTimestamp(-1.0), _lastDvlTimestamp(-1.0),
       _lastNavTimestamp(-1.0), _lastDepthTimestamp(-1.0),
-      _lastCmdTimestamp(-1.0), _lastUpdateTimestamp(-1.0), _good(false)
+      _lastCmdTimestamp(-1.0), _lastUpdateTimestamp(-1.0), _good(false),
+      _trn_decoder(NULL)
 {
     logs(tl_both, "LcmTrn::LcmTrn() version %s built %s %s - config file %s\n",
         __GIT_VERSION__, __DATE__, __TIME__, configfilepath);
@@ -164,7 +163,7 @@ LcmTrn::LcmTrn(const char *configfilepath)
     _lcmc.dvl = _lcmc.xvel = _lcmc.yvel = _lcmc.zvel = _lcmc.beam1 = NULL;
     _lcmc.beam2 = _lcmc.beam3 = _lcmc.beam4 = NULL;
     _lcmc.nav = _lcmc.lat = _lcmc.lon = _lcmc.depth = _lcmc.trn = NULL;
-    _lcmc.cmd = _lcmc.reinit = _lcmc.estimate = _lcmc.updatetime = NULL;
+    _lcmc.cmd = _lcmc.estimate = NULL;
     _lcmc.initial_timeout_msec = _lcmc.max_timeout_msec = 0;
 
     // Set config filename
@@ -193,6 +192,7 @@ LcmTrn::~LcmTrn()
 void LcmTrn::cleanTrn()
 {
     DELOBJ(_tnav);
+    DELOBJ(_trn_decoder);
     _lastUpdateTimestamp = -1.0;
 }
 
@@ -224,52 +224,12 @@ void LcmTrn::init()
     //
     initTrn();
 
-    // Initialize the LCM structure used for publishing the TRN state
-    //
-    initTrnState();
-
     // Initialize the LCM part
     //
     initLcm();
-}
 
-// Initialize a DataVectors object representing the TRN state.
-//
-void LcmTrn::initTrnState()
-{
-    Dim sdim(0, 0);
-    // scalar int value num reinits
-    if (!_msg_writer.addArray(Int, _lcmc.reinits, _lcmc.reinits, "", sdim)) {
-        logs(tl_both, "LcmTrn::initTrnState() - failed to add reinits");
-    }
-
-    // scalar int value filter state
-    if (!_msg_writer.addArray(Int, _lcmc.filter, _lcmc.filter, "", sdim)) {
-        logs(tl_both, "LcmTrn::initTrnState() - failed to add filter");
-    }
-
-    // scalar float value updatetime
-    if (!_msg_writer.addArray(Float, _lcmc.updatetime, _lcmc.updatetime, "",
-                              sdim)) {
-        logs(tl_both, "LcmTrn::initTrnState() - failed to add updatetime");
-    }
-
-    // MLE x,y,z offsets
-    Dim mdim(1, 3); // 1-dimension, size 3
-    if (!_msg_writer.addArray(Float, _lcmc.mle, _lcmc.mle, "meter", mdim)) {
-        logs(tl_both, "LcmTrn::initTrnState() - failed to add mle");
-    }
-
-    // MMSE x,y,z offsets
-    if (!_msg_writer.addArray(Float, _lcmc.mmse, _lcmc.mmse, "meter", mdim)) {
-        logs(tl_both, "LcmTrn::initTrnState() - failed to add mmse");
-    }
-
-    //  Covars
-    Dim cdim(1, 4); // 1-dimension, size 4
-    if (!_msg_writer.addArray(Float, _lcmc.var, _lcmc.var, "meter", cdim)) {
-        logs(tl_both, "LcmTrn::initTrnState() - failed to add covar");
-    }
+    _trn_decoder = new TrnLcmDecoder();
+    _lastUtmZone = 10;
 }
 
 // Run the app. As long as the status is good continue to perform
@@ -293,7 +253,6 @@ void LcmTrn::run()
 // Returns true if an update was performed. Otherwise false.
 // Use the latest state of the poseT and measT data objects to
 // determine if a TRN update should be performed.
-//
 bool LcmTrn::updateTrn()
 {
     // Return here unless the timing required for a trn update has been met
@@ -304,9 +263,6 @@ bool LcmTrn::updateTrn()
     logs(tl_both,
          "LcmTrn::updateTrn() >>>> pose time %.2f, meas time %.2f <<<<\n",
          _thisPose.time, _thisMeas.time);
-
-    // Note latest TRN update time is the timestamp that triggered this update
-    _lastUpdateTimestamp = fmax(_thisPose.time, _thisMeas.time);
 
     // If the timestamps are within 100 ms, call them equal for TRN to process
     if (fabs(_thisPose.time - _thisMeas.time) < TRN_TIMES_EQUIVALENT_SEC) {
@@ -322,22 +278,26 @@ bool LcmTrn::updateTrn()
 
     // Execute motion and measure updates
     if (_thisPose.time <= _thisMeas.time) {
-        logs(tl_both, "LcmTrn::updateTrn() motionUpdate first");
-
+        _lastUpdateTimestamp =  _thisMeas.time;
+        logs(tl_both, "LcmTrn::updateTrn() motionUpdate first last update time: %.2f", _lastUpdateTimestamp);
         _tnav->motionUpdate(&_thisPose);
         if (_thisPose.dvlValid) { // Update meas only if valid
             _tnav->measUpdate(&_thisMeas, _thisMeas.dataType);
+        } else {
+            logs(tl_both, "LcmTrn::updateTrn() measUpdate skipped due to invalid DVL");
         }
     } else {
-        logs(tl_both, "LcmTrn::updateTrn() measUpdate first");
-
+        _lastUpdateTimestamp =  _thisPose.time;
+        logs(tl_both, "LcmTrn::updateTrn() measUpdate first last update time: %.2f", _lastUpdateTimestamp);
         if (_thisPose.dvlValid) { // Update meas only if valid
             _tnav->measUpdate(&_thisMeas, _thisMeas.dataType);
+        } else {
+            logs(tl_both, "LcmTrn::updateTrn() measUpdate skipped due to invalid DVL");
         }
         _tnav->motionUpdate(&_thisPose);
     }
 
-    // Keep this data around for the next round
+    // Keep this data around for the next round and reset timestamps
     _lastMeas      = _thisMeas;
     _lastPose      = _thisPose;
     _thisPose.time = _thisMeas.time = 0.;
@@ -402,7 +362,7 @@ int LcmTrn::handleMessages()
     struct timeval spec;
     gettimeofday(&spec, NULL);
     double startsec = (spec.tv_sec * 1.0) + (spec.tv_usec / 1000000.);
-    double nowsec = 0., acc = 0.;
+    double acc = 0.;
     double thensec = startsec;
     int nmsgs      = 0; // # messages handled in one call to handleTimeout
     int totalmsgs  = 0; // # messages handled in all handleTimeout calls
@@ -414,6 +374,7 @@ int LcmTrn::handleMessages()
         handled++;
         totalmsgs += nmsgs;
 
+        double nowsec = 0.;
         // what time is after the last call to handleTimeout
         gettimeofday(&spec, NULL);
         nowsec = (spec.tv_sec * 1.0) + (spec.tv_usec / 1000000.);
@@ -468,77 +429,63 @@ void LcmTrn::cycle()
     // and retrieves lastest position estimates. We just need to push those
     // out here as the updated TRN state.
     if (updateTrn()) {
-        publishEstimates();
+        publishEstimatesDecoder();
     }
 }
 
 // Use the latest MLE and MMSE estimates to populate LCM output message
-// and publish on the TRN LCM channel.
-void LcmTrn::publishEstimates()
+// and publish on the configured TRN LCM channel.
+void LcmTrn::publishEstimatesDecoder()
 {
-    // set scalar values
-    if (!_msg_writer.set(_lcmc.reinits, _numreinits)) {
-        logs(tl_both, "LcmTrn::publishEstimates() - failed to set reinits");
-    }
-    if (!_msg_writer.set(_lcmc.filter, _filterstate)) {
-        logs(tl_both,
-             "LcmTrn::publishEstimates() - failed to set filter state");
-    }
-    if (!_msg_writer.set(_lcmc.updatetime, (float)getTimeMillisec())) {
-        logs(tl_both, "LcmTrn::publishEstimates() - failed to set updatetime");
-    }
-
-    // set mle values
-    if (!_msg_writer.set(_lcmc.mle, (float)_mle.x, POSE_X)) {
-        logs(tl_both, "LcmTrn::publishEstimates() - failed to set mle x");
-    }
-    if (!_msg_writer.set(_lcmc.mle, (float)_mle.y, POSE_Y)) {
-        logs(tl_both, "LcmTrn::publishEstimates() - failed to set mle y");
-    }
-    if (!_msg_writer.set(_lcmc.mle, (float)_mle.z, POSE_Z)) {
-        logs(tl_both, "LcmTrn::publishEstimates() - failed to set mle z");
-    }
-
-    // set mmse values
-    if (!_msg_writer.set(_lcmc.mmse, (float)_mmse.x, POSE_X)) {
-        logs(tl_both, "LcmTrn::publishEstimates() - failed to set mmse x");
-    }
-    if (!_msg_writer.set(_lcmc.mmse, (float)_mmse.y, POSE_Y)) {
-        logs(tl_both, "LcmTrn::publishEstimates() - failed to set mmse y");
-    }
-    if (!_msg_writer.set(_lcmc.mmse, (float)_mmse.z, POSE_Z)) {
-        logs(tl_both, "LcmTrn::publishEstimates() - failed to set mmse z");
-    }
-
-    // set covar values
-    if (!_msg_writer.set(_lcmc.var, (float)_mmse.covariance[COVAR_X], POSE_X)) {
-        logs(tl_both, "LcmTrn::publishEstimates() - failed to set covar x");
-    }
-    if (!_msg_writer.set(_lcmc.var, (float)_mmse.covariance[COVAR_Y], POSE_Y)) {
-        logs(tl_both, "LcmTrn::publishEstimates() - failed to set covar y");
-    }
-    if (!_msg_writer.set(_lcmc.var, (float)_mmse.covariance[COVAR_Z], POSE_Z)) {
-        logs(tl_both, "LcmTrn::publishEstimates() - failed to set covar z");
-    }
-    if (!_msg_writer.set(_lcmc.var, (float)_mmse.covariance[COVAR_PSI],
-                         POSE_PSI)) {
-        logs(tl_both, "LcmTrn::publishEstimates() - failed to set covar psi");
-    }
+    // Place most updated values into a trndata object and publish
+    // using _trn_decoder.
+    logs(tl_both, "publishEstimatesDecoder() - at %.2f sec", _lastUpdateTimestamp);
+    TrnLcmDecoder::trndata data;
+    data.reinits = _numreinits;
+    data.filterstate = _filterstate;
+    data.updatetime = _lastUpdateTimestamp;
+    data.mle_x = _mle.x;
+    data.mle_y = _mle.y;
+    data.mle_z = _mle.z;
+    data.mle_offset_x = _lastPose.x - _mle.x;
+    data.mle_offset_y = _lastPose.y - _mle.y;
+    data.mle_offset_z = _lastPose.z - _mle.z;
+    data.mmse_x = _mmse.x;
+    data.mmse_y = _mmse.y;
+    data.mmse_z = _mmse.z;
+    data.mmse_offset_x = _lastPose.x - _mmse.x;
+    data.mmse_offset_y = _lastPose.y - _mmse.y;
+    data.mmse_offset_z = _lastPose.z - _mmse.z;
+    data.covar_x = _mmse.covariance[COVAR_X];
+    data.covar_y = _mmse.covariance[COVAR_Y];
+    data.covar_z = _mmse.covariance[COVAR_Z];
+    data.covar_psi = _mmse.covariance[COVAR_PSI];
+    // Provide lat/lon of the last position estimate
+    double lat_rads = 0, lon_rads = 0;
+    NavUtils::utmToGeo(data.mmse_x, data.mmse_y, _lastUtmZone, &lat_rads, &lon_rads);
+    data.mmse_lat = Math::radToDeg(lat_rads);
+    data.mmse_lon = Math::radToDeg(lon_rads);
 
     // ship it
-    if (!_msg_writer.publish(*_lcm, _lcmc.trn, getTimeMillisec())) {
-        logs(tl_both, "LcmTrn::publishEstimates() - failed to publish message");
+    if (_trn_decoder) {
+        _trn_decoder->dump(data, std::cerr);
+        if (!_trn_decoder->publish(*_lcm, _lcmc.trn, data)) {
+            logs(tl_both, "LcmTrn::publishEstimatesDecoder() - failed to publish message");
+        }
+
+        logs(tl_both, "LcmTrn::publishEstimatesDecoder() - reinits:%d filterstate:%d",
+            _numreinits, _filterstate);
+        logs(tl_both, "LcmTrn::publishEstimatesDecoder() - MLE  : %.2f %.2f %.2f", _mle.x,
+            _mle.y, _mle.z);
+        logs(tl_both, "LcmTrn::publishEstimatesDecoder() - MMSE : %.2f %.2f %.2f", _mmse.x,
+            _mmse.y, _mmse.z);
+        logs(tl_both, "LcmTrn::publishEstimatesDecoder() - COVAR: %.2f %.2f %.2f %.2f",
+            _mmse.covariance[COVAR_X], _mmse.covariance[COVAR_Y],
+            _mmse.covariance[COVAR_Z], _mmse.covariance[COVAR_PSI]);
+    } else {
+        logs(tl_both, "LcmTrn::publishEstimatesDecoder() - no LCM decoder");
     }
 
-    logs(tl_both, "LcmTrn::publishEstimates() - reinits:%d filterstate:%d",
-         _numreinits, _filterstate);
-    logs(tl_both, "LcmTrn::publishEstimates() - MLE  : %.2f %.2f %.2f", _mle.x,
-         _mle.y, _mle.z);
-    logs(tl_both, "LcmTrn::publishEstimates() - MMSE : %.2f %.2f %.2f", _mmse.x,
-         _mmse.y, _mmse.z);
-    logs(tl_both, "LcmTrn::publishEstimates() - COVAR: %.2f %.2f %.2f %.2f",
-         _mmse.covariance[COVAR_X], _mmse.covariance[COVAR_Y],
-         _mmse.covariance[COVAR_Z], _mmse.covariance[COVAR_PSI]);
 }
 
 // This is used in a motionUpdate. Read and populate the poseT object fields.
@@ -546,15 +493,14 @@ void LcmTrn::handleAhrs(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
                         const LrauvLcmMessage *msg)
 {
     _msg_reader.setMsg(msg);
-    std::vector<const char *> names = _msg_reader.listNames();
 
+    // std::vector<const char *> names = _msg_reader.listNames();
     // for (size_t i = 0; i < names.size(); ++i)
     //     logs(tl_both, "item %zu: %s", i, names[i]);
 
     // The timestamp recorded in the poseT object is that associated with the
     // AHRS data, not the position data from the DVL.
-    _thisPose.time     = (double)msg->epochMillisec / 1000;
-    _lastAHRSTimestamp = (double)msg->epochMillisec / 1000;
+    _lastAHRSTimestamp = _thisPose.time = (double)msg->epochMillisec / 1000;
 
     // Get heading, pitch, and roll from AHRS message
     const DoubleArray *da = NULL;
@@ -592,13 +538,12 @@ void LcmTrn::handleNav(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
                        const LrauvLcmMessage *msg)
 {
     _msg_reader.setMsg(msg);
-    std::vector<const char *> names = _msg_reader.listNames();
+    // std::vector<const char *> names = _msg_reader.listNames();
     // for (size_t i = 0; i < names.size(); ++i) {
     //     logs(tl_both, "item %d: %s", i, names[i]);
     // }
 
-    _thisPose.time    = (double)msg->epochMillisec / 1000;
-    _lastNavTimestamp = (double)msg->epochMillisec / 1000;
+    _lastNavTimestamp = _thisPose.time = (double)msg->epochMillisec / 1000;
 
     // Get lat, lon, and depth from nav message, assume units are degrees.
     // Convert to radians and/or UTM if necessary using NavUtils.
@@ -618,9 +563,8 @@ void LcmTrn::handleNav(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
     }
 
     // Convert to UTM for use in TNav
-    NavUtils::geoToUtm(lat_rads, lon_rads,
-                       NavUtils::geoToUtmZone(lat_rads, lon_rads), &_thisPose.x,
-                       &_thisPose.y);
+    _lastUtmZone = NavUtils::geoToUtmZone(lat_rads, lon_rads);
+    NavUtils::geoToUtm(lat_rads, lon_rads, _lastUtmZone, &_thisPose.x, &_thisPose.y);
     logs(tl_both,
          "handleNav() - %s msg: %.2f epoch sec; seqNo:%lld; %.2f north; %.2f "
          "east\n",
@@ -636,11 +580,15 @@ void LcmTrn::handleDvl(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
                        const LrauvLcmMessage *msg)
 {
     _msg_reader.setMsg(msg);
+    std::vector<const char *> names = _msg_reader.listNames();
+    if (names.size() < NUM_EXPECTED_DVL_ITEMS) {
+        cerr << "handleDVL() - rejecting for insufficient number of items: " << names.size() << endl;
+        return;
+    }
 
     // The timestamp recorded in the measT object is that associated with the
     // DVL beam data.
-    _thisMeas.time    = (double)msg->epochMillisec / 1000;
-    _lastDvlTimestamp = (double)msg->epochMillisec / 1000;
+    _lastDvlTimestamp = _thisMeas.time = (double)msg->epochMillisec / 1000;
 
     if (_lastMeas.time < 1.) {
         _lastMeas.time = _thisMeas.time;
@@ -648,31 +596,39 @@ void LcmTrn::handleDvl(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
 
     _thisMeas.numMeas  = 4;
     _thisPose.dvlValid = _thisPose.bottomLock = _thisPose.gpsValid = false;
-    _thisMeas.ranges[0] = _thisMeas.ranges[1] = _thisMeas.ranges[2] =
-        _thisMeas.ranges[3]                   = 0.;
-    _thisMeas.measStatus[0]                   = _thisMeas.measStatus[1] =
-        _thisMeas.measStatus[2] = _thisMeas.measStatus[3] = false;
+    _thisMeas.ranges[0] = _thisMeas.ranges[1] = _thisMeas.ranges[2]
+                        = _thisMeas.ranges[3] = 0.;
+    _thisMeas.measStatus[0] = _thisMeas.measStatus[1] = _thisMeas.measStatus[2]
+                            = _thisMeas.measStatus[3] = false;
 
-    // Get beam data from DVL message
+    // Get Pose data from DVL message
     const FloatArray *fa = NULL;
     if ((fa = _msg_reader.getFloatArray(_lcmc.xvel))) {
         _thisPose.vx = fa->data[SCALAR];
     } else {
         logs(tl_both, "handleDVL() - %s item not found in dvl msg", _lcmc.xvel);
     }
-
     if ((fa = _msg_reader.getFloatArray(_lcmc.yvel))) {
         _thisPose.vy = fa->data[SCALAR];
     } else {
         logs(tl_both, "handleDVL() - %s item not found in dvl msg", _lcmc.yvel);
     }
-
     if ((fa = _msg_reader.getFloatArray(_lcmc.zvel))) {
         _thisPose.vz = fa->data[SCALAR];
     } else {
         logs(tl_both, "handleDVL() - %s item not found in dvl msg", _lcmc.zvel);
     }
+    const IntArray *ia = NULL;
+    if ((ia = _msg_reader.getIntArray(_lcmc.valid))) {
+        _thisPose.bottomLock = ia->data[SCALAR];
+    } else {
+        _thisPose.bottomLock = 0;
+        logs(tl_both, "handleDVL() - %s item not found in dvl msg",
+             _lcmc.valid);
+    }
+    _thisPose.dvlValid = (_thisPose.bottomLock != 0);
 
+    // Get beam data from DVL message
     const char *keys[] = {_lcmc.beam1, _lcmc.beam2, _lcmc.beam3, _lcmc.beam4};
     for (int b = 0; b < N_DVL_BEAMS; b++) {
         if ((fa = _msg_reader.getFloatArray(keys[b]))) {
@@ -685,16 +641,6 @@ void LcmTrn::handleDvl(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
                  keys[b]);
         }
     }
-
-    const IntArray *ia = NULL;
-    if ((ia = _msg_reader.getIntArray(_lcmc.valid))) {
-        _thisPose.bottomLock = ia->data[SCALAR];
-    } else {
-        _thisPose.bottomLock = 0;
-        logs(tl_both, "handleDVL() - %s item not found in dvl msg",
-             _lcmc.valid);
-    }
-    _thisPose.dvlValid = (_thisPose.bottomLock != 0);
 
     logs(tl_both, "handleDvl() - %s msg: %.2f epoch sec; seqNo:%lld\n",
          _lcmc.dvl, _thisMeas.time, msg->seqNo);
@@ -715,9 +661,7 @@ void LcmTrn::handleDepth(const lcm::ReceiveBuffer *rbuf,
 {
     _msg_reader.setMsg(msg);
 
-    long long sec = msg->epochMillisec;
     long long seq = msg->seqNo;
-
     _lastDepthTimestamp = (double)msg->epochMillisec / 1000;
 
     // Get depth data from message
@@ -733,8 +677,8 @@ void LcmTrn::handleDepth(const lcm::ReceiveBuffer *rbuf,
     _thisPose.gpsValid = (_thisPose.z < 0.6);
 
     logs(tl_both,
-         "handleDepth()-%s msg: %lld epoch sec; seqNo:%lld; depth %.2f\n",
-         _lcmc.depth, sec, seq, _thisPose.z);
+         "handleDepth()- %s msg: %.2f epoch sec; seqNo:%lld; depth %.2f\n",
+         _lcmc.depth, _lastDepthTimestamp, seq, _thisPose.z);
 
     return;
 }
@@ -756,8 +700,8 @@ void LcmTrn::handleCmd(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
     }
 
     // Publish latest estimates now
-    if ((ia = _msg_reader.getIntArray(_lcmc.estimate))) {
-        publishEstimates();
+    if ((_msg_reader.getIntArray(_lcmc.estimate))) {
+        publishEstimatesDecoder();
     }
 
     return;
@@ -894,13 +838,7 @@ bool LcmTrn::verifyLcmConfig()
                       "and pressure names are all required.\n");
         isgood = false;
     }
-    if (!(_lcmc.trn && _lcmc.mle && _lcmc.mmse && _lcmc.var && _lcmc.reinits &&
-          _lcmc.filter)) {
-        logs(tl_both, "LcmTrn::verifyLcmConfig() - trn channel, mle, mmse, "
-                      "var, filter, and reinits names are all required.\n");
-        isgood = false;
-    }
-    if (!(_lcmc.cmd && _lcmc.reinit && _lcmc.estimate)) {
+    if (!(_lcmc.trn && _lcmc.cmd && _lcmc.reinit && _lcmc.estimate)) {
         logs(tl_both, "LcmTrn::verifyLcmConfig() - cmd channel, reinit, and "
                       "estimate are all required.\n");
         isgood = false;
@@ -952,9 +890,8 @@ bool LcmTrn::verifyTrnConfig()
     if (_trnc.filtertype != TRN_FILTER_PM &&
         _trnc.filtertype != TRN_FILTER_PF) {
         logs(tl_both,
-             "LcmTrn::verifyTrnConfig() - Unrecognized filter type specified "
-             "in %s.\n",
-             _configfile);
+             "LcmTrn::verifyTrnConfig() - Unrecognized filter type %d specified "
+             "in %s.\n", _trnc.filtertype, _configfile);
         isgood = false;
     }
 
@@ -1109,27 +1046,6 @@ void LcmTrn::loadConfig()
     if (!_cfg->lookupValue(STR_LCM_TRNNAME, _lcmc.trn)) {
         _lcmc.trn = NULL;
     }
-    if (!_cfg->lookupValue("lcm.trn_mle", _lcmc.mle)) {
-        _lcmc.mle = NULL;
-    }
-    if (!_cfg->lookupValue("lcm.trn_mmse", _lcmc.mmse)) {
-        _lcmc.mmse = NULL;
-    }
-    if (!_cfg->lookupValue("lcm.trn_var", _lcmc.var)) {
-        _lcmc.var = NULL;
-    }
-    if (!_cfg->lookupValue("lcm.trn_reinits", _lcmc.reinits)) {
-        _lcmc.reinits = NULL;
-    }
-    if (!_cfg->lookupValue("lcm.trn_filter", _lcmc.filter)) {
-        _lcmc.filter = NULL;
-    }
-    if (!_cfg->lookupValue("lcm.trn_updatetime", _lcmc.updatetime)) {
-        _lcmc.updatetime = NULL;
-    }
-    logs(tl_log, "trn config: %s, %s, %s, %s, %s, %s\n", _lcmc.trn, _lcmc.mle,
-         _lcmc.mmse, _lcmc.var, _lcmc.reinits, _lcmc.filter);
-
     if (!_cfg->lookupValue(STR_LCM_CMDNAME, _lcmc.cmd)) {
         _lcmc.cmd = NULL;
     }
@@ -1190,7 +1106,7 @@ bool LcmTrn::time2Update()
     // If the TRN period has passed since the last TRN update, then yes.
     double now  = fmax(_thisPose.time, _thisMeas.time);
     bool period = ((_lastUpdateTimestamp + _trnc.period) <= now);
-    logs(tl_log, "waiting for %.2f, time is %.2f\n",
+    logs(tl_both, "waiting for %.2f, time is %.2f\n",
          (_lastUpdateTimestamp + _trnc.period), now);
 
     // We might want to place more requirements on this in the future.
