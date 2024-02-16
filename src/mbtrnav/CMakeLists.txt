@@ -326,11 +326,117 @@ add_executable(trnusvr-test
 target_include_directories(trnusvr-test PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnframe
                                           ${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav)
 target_link_libraries(trnusvr-test PRIVATE mbtrnframe netif tnav trnw newmat qnx geolib NetCDF::NetCDF)
+
+
+##################################
+# extra TRN clients
+
+#
+#------------------------------------------------------------------------------
+#
+#  build libtrnwcli
+
+add_library(trnwcli STATIC
+trnw/trn_cli.c
+)
+target_include_directories(trnwcli PRIVATE
+${CMAKE_SOURCE_DIR}/src/mbtrnframe
+${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
+${CMAKE_SOURCE_DIR}/src/mbtrnav/newmat
+${CMAKE_SOURCE_DIR}/src/mbtrnav/qnx-utils
+${NetCDF_INCLUDE_DIRS}
+)
+target_link_libraries(trnwcli PRIVATE newmat geolib trnw qnx mb1 tnav NetCDF::NetCDF)
+#
+#------------------------------------------------------------------------------
+#
+#  build trncli-test
+
+add_executable(trncli-test
+trnw/trncli_test.c
+trnw/mb1_msg.c
+)
+
+target_link_libraries(trncli-test PRIVATE mbtrnframe trnwcli newmat geolib trnw qnx mb1 tnav NetCDF::NetCDF m)
+
+target_include_directories(trncli-test PRIVATE ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/src/mbtrnframe trnw terrain-nav)
+#
+#------------------------------------------------------------------------------
+#
+#  build mmcpub
+
+add_executable(mmcpub
+trnw/mmcpub.c
+)
+
+target_link_libraries(mmcpub PRIVATE mbtrnframe)
+target_include_directories(mmcpub PRIVATE ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/src/mbtrnframe trnw terrain-nav)
+#
+#------------------------------------------------------------------------------
+#
+#  build mmcsub
+
+add_executable(mmcsub
+trnw/mmcsub.c
+)
+
+target_link_libraries(mmcsub PRIVATE mbtrnframe)
+target_include_directories(mmcsub PRIVATE ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/src/mbtrnframe trnw terrain-nav)
+#
+#------------------------------------------------------------------------------
+#
+#  build mcpub
+
+add_executable(mcpub
+trnw/mcpub.c
+)
+
+target_include_directories(mcpub PRIVATE ${CMAKE_SOURCE_DIR} trnw terrain-nav)
+#
+#------------------------------------------------------------------------------
+#
+#  build mcsub
+
+# specify build target
+add_executable(mcsub
+trnw/mcsub.c
+)
+
+target_include_directories(mcsub PRIVATE ${CMAKE_SOURCE_DIR} trnw terrain-nav)
+#
+#------------------------------------------------------------------------------
+#
+#  build trnif-test
+
+# specify build target
+add_executable(trnif-test
+trnw/trnif_test.c
+trnw/trnif_proto.c
+trnw/trnif_msg.c
+)
+
+target_link_libraries(trnif-test PRIVATE mbtrnframe netif newmat geolib trnw qnx mb1 tnav NetCDF::NetCDF)
+
+target_include_directories(trnif-test PRIVATE ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/src/mbtrnframe trnw terrain-nav)
+#
+#------------------------------------------------------------------------------
+#
+#  build mb1rs
+
+add_executable(mb1rs
+trnw/mb1_msg.c
+trnw/mb1rs.c
+trnw/mb1rs-app.c
+)
+
+target_link_libraries(mb1rs PRIVATE mbtrnframe m)
+target_include_directories(mb1rs PRIVATE ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/src/mbtrnframe trnw terrain-nav)
+
 #------------------------------------------------------------------------------
 # install it all
 #
-install(TARGETS geolib newmat tnav qnx trnw netif mb1 trnucli DESTINATION ${CMAKE_INSTALL_LIBDIR})
-install(TARGETS trnucli-test trnusvr-test DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS geolib newmat tnav qnx trnw netif mb1 trnucli trnwcli DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS trnucli-test trnusvr-test trncli-test mmcpub mmcsub mcpub mcsub trnif-test mb1rs DESTINATION ${CMAKE_INSTALL_BINDIR})
 #
 #------------------------------------------------------------------------------
 
