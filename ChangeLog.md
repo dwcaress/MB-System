@@ -34,7 +34,10 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 #### 5.8.1beta05 (February 23, 2024)
 
-Mbotps: Fixed ability to set OTPS location in cmake build system.
+CMake build system: Fixed ability to set OTPS location in cmake build system.
+
+CMake build system: Added installation of header files required for external programs to
+utilize MB-System libraries.
 
 #### 5.8.1beta04 (February 16, 2024)
 

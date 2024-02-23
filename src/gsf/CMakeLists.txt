@@ -37,4 +37,10 @@ add_library(
 target_compile_definitions(mbgsf PRIVATE USE_DEFAULT_FILE_FUNCTIONS=1)
 target_include_directories(mbgsf PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
+add_executable(dump_gsf dump_gsf.c gsf.h)
+target_link_libraries(dump_gsf PRIVATE mbgsf)
+
 install(TARGETS mbgsf DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS dump_gsf DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(FILES gsf.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
