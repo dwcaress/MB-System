@@ -23,7 +23,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
 
-- Version 5.8.1beta06    February 24, 2024
+- Version 5.8.1beta07    February 24, 2024
 - Version 5.8.1beta04    February 16, 2024
 - Version 5.8.1beta03    February 8, 2024
 - Version 5.8.1beta02    February 7, 2024
@@ -32,7 +32,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 ---
 
-#### 5.8.1beta06 (February 24, 2024)
+#### 5.8.1beta07 (February 24, 2024)
 
 CMake build system: Fixed ability to set OTPS location in cmake build system.
 
