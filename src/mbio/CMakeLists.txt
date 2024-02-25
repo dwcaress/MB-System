@@ -192,7 +192,6 @@ if(buildGSF)
 endif()
 
 set(HEADERS 
-    mb_config.h
     mb_define.h
     mb_format.h
     mb_info.h
