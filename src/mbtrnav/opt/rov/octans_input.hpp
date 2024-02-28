@@ -48,15 +48,15 @@ public:
             msg.decode((void *)dcon.data_bytes(), 0, dcon.data_len());
 
             // TODO: this time may not be epoch sec
-            double time = msg.uptime_sec * 1000000UL;
+            double time = msg.header.timestamp * 1.e6;
             dcon.set_data_time(time);
 
             att_input::mDataInstMutex.lock();
 
             // set (Instantaneous) nav values
-            double pitch = msg.pitch_deg;
-            double roll = msg.roll_deg;
-            double heading = msg.heading_deg;
+            double pitch = Math::degToRad(msg.pitch_deg);
+            double roll = Math::degToRad(msg.roll_deg);
+            double heading = Math::degToRad(msg.heading_deg);
 
             // TODO: check status byte (undocumented...)
             att_flags_t aflags = 0;

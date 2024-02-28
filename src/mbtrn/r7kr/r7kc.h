@@ -69,16 +69,7 @@
 // Includes
 /////////////////////////
 
-//#include <stdint.h>
-//#include <stdbool.h>
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <memory.h>
-//#include "iowrap.h"
-
 #include "msocket.h"
-#include "mmdebug.h"
-
 
 // MB System 7k center structure
 // definitions and record types

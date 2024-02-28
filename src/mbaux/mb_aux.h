@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mb_aux.h  5/16/94
  *
- *    Copyright (c); 1993-2020 by
- *    David W. Caress (caress@mbari.org);
+ *    Copyright (c); 1993-2024 by
+ *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu);
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * mb_aux.h defines data structures used by swath contouring
@@ -251,11 +261,11 @@ int mb_topogrid_init(int verbose, mb_path topogridfile, int *lonflip, void **top
 int mb_topogrid_deall(int verbose, void **topogrid_ptr, int *error);
 int mb_topogrid_bounds(int verbose, void *topogrid_ptr, double bounds[4], int *error);
 int mb_topogrid_topo(int verbose, void *topogrid_ptr, double navlon, double navlat, double *topo, int *error);
-int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double navlat, double altitude, double sonardepth,
+int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double navlat, double altitude, double sensordepth,
                           double mtodeglon, double mtodeglat, double vx, double vy, double vz, double *lon, double *lat,
                           double *topo, double *range, int *error);
 int mb_topogrid_getangletable(int verbose, void *topogrid_ptr, int nangle, double angle_min, double angle_max, double navlon,
-                              double navlat, double heading, double altitude, double sonardepth, double pitch,
+                              double navlat, double heading, double altitude, double sensordepth, double pitch,
                               double *table_angle, double *table_xtrack, double *table_ltrack, double *table_altitude,
                               double *table_range, int *error);
 

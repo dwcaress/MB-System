@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbeditviz_prog.c    5/1/2007
  *
- *    Copyright (c) 2007-2020 by
+ *    Copyright (c) 2007-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * MBeditviz is an interactive swath bathymetry editor and patch
@@ -216,7 +226,6 @@ int mbeditviz_init(int argc, char **argv,
   int errflg = 0;
   int c;
   int help = 0;
-  int flag = 0;
 
   while ((c = getopt(argc, argv, "VvHhF:f:GgI:i:Rr")) != -1)
     switch (c) {
@@ -231,23 +240,19 @@ int mbeditviz_init(int argc, char **argv,
     case 'F':
     case 'f':
       sscanf(optarg, "%d", &mbdef_format);
-      flag++;
       break;
     case 'G':
     case 'g':
       mbev_grid_algorithm = MBEV_GRID_ALGORITHM_SIMPLEMEAN;
-      flag++;
       break;
     case 'I':
     case 'i':
       sscanf(optarg, "%s", ifile);
       input_file_set = true;
-      flag++;
       break;
     case 'R':
     case 'r':
       delete_input_file = true;
-      flag++;
       break;
     case '?':
       errflg++;
@@ -726,7 +731,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
     int sensorhead_error = MB_ERROR_NO_ERROR;
     int time_i[7];
     double mtodeglon, mtodeglat;
-    double heading, sonardepth;
+    double heading, sensordepth;
     double rolldelta, pitchdelta;
     int icenter, iport, istbd;
     double centerdistance, portdistance, stbddistance;
@@ -745,7 +750,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
         /* read a ping of data */
         mbev_status = mb_get_all(mbev_verbose, imbio_ptr, &istore_ptr, &kind, ping->time_i, &ping->time_d, &ping->navlon,
                                  &ping->navlat, &ping->speed, &ping->heading, &ping->distance, &ping->altitude,
-                                 &ping->sonardepth, &ping->beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
+                                 &ping->sensordepth, &ping->beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
                                  bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &mbev_error);
 
         /* ignore minor errors */
@@ -890,7 +895,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
         /* copy data into ping arrays */
         if (mbev_error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
           mbeditviz_apply_biasesandtimelag(file, ping, mbev_rollbias, mbev_pitchbias, mbev_headingbias, mbev_timelag, &heading,
-                                  &sonardepth, &rolldelta, &pitchdelta);
+                                  &sensordepth, &rolldelta, &pitchdelta);
           mb_coor_scale(mbev_verbose, ping->navlat, &mtodeglon, &mtodeglat);
 
           for (ibeam = 0; ibeam < ping->beams_bath; ibeam++) {
@@ -919,8 +924,8 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
 
               /* apply rotations and calculate position */
               mbeditviz_beam_position(ping->navlon, ping->navlat, mtodeglon, mtodeglat,
-                                      ping->bath[ibeam] - ping->sonardepth, ping->bathacrosstrack[ibeam],
-                                      ping->bathalongtrack[ibeam], sonardepth, rolldelta, pitchdelta, heading,
+                                      ping->bath[ibeam] - ping->sensordepth, ping->bathacrosstrack[ibeam],
+                                      ping->bathalongtrack[ibeam], sensordepth, rolldelta, pitchdelta, heading,
                                       &(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
             }
           }
@@ -1254,114 +1259,114 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
           fprintf(stderr, "Loaded %d heading data from ping data of file %s\n", file->n_async_heading, file->path);
       }
 
-      /* try to load asynchronous sonardepth data from .bas file */
+      /* try to load asynchronous sensordepth data from .bas file */
       strcpy(asyncfile, file->path);
       strcat(asyncfile, ".bas");
       if (stat(asyncfile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR &&
           file_status.st_size > 0) {
-        /* allocate space for asynchronous sonardepth */
-        file->n_async_sonardepth = file_status.st_size / (sizeof(double) + sizeof(float));
-        file->n_async_sonardepth_alloc = 0;
-        if (file->n_async_sonardepth > 0) {
-          if ((file->async_sonardepth_time_d = (double *)malloc(sizeof(double) * (file->n_async_sonardepth))) != NULL &&
-              (file->async_sonardepth_sonardepth = (double *)malloc(sizeof(double) * (file->n_async_sonardepth))) !=
+        /* allocate space for asynchronous sensordepth */
+        file->n_async_sensordepth = file_status.st_size / (sizeof(double) + sizeof(float));
+        file->n_async_sensordepth_alloc = 0;
+        if (file->n_async_sensordepth > 0) {
+          if ((file->async_sensordepth_time_d = (double *)malloc(sizeof(double) * (file->n_async_sensordepth))) != NULL &&
+              (file->async_sensordepth_sensordepth = (double *)malloc(sizeof(double) * (file->n_async_sensordepth))) !=
                   NULL) {
-            file->n_async_sonardepth_alloc = file->n_async_sonardepth;
+            file->n_async_sensordepth_alloc = file->n_async_sensordepth;
           }
-          else if (file->async_sonardepth_time_d != NULL) {
-            free(file->async_sonardepth_time_d);
-            file->async_sonardepth_time_d = NULL;
+          else if (file->async_sensordepth_time_d != NULL) {
+            free(file->async_sensordepth_time_d);
+            file->async_sensordepth_time_d = NULL;
           }
         }
-        file->n_async_sonardepth = file->n_async_sonardepth_alloc;
+        file->n_async_sensordepth = file->n_async_sensordepth_alloc;
 
-        /* read the asynchronous sonardepth data */
+        /* read the asynchronous sensordepth data */
         if ((afp = fopen(asyncfile, "rb")) != NULL) {
           read_size = sizeof(double) + sizeof(float);
-          for (int i = 0; i < file->n_async_sonardepth; i++) {
+          for (int i = 0; i < file->n_async_sensordepth; i++) {
             fread(buffer, read_size, 1, afp);
             index = 0;
-            mb_get_binary_double(true, &buffer[index], &file->async_sonardepth_time_d[i]);
+            mb_get_binary_double(true, &buffer[index], &file->async_sensordepth_time_d[i]);
             index += 8;
             mb_get_binary_float(true, &buffer[index], &value_float);
             // index += 4;
-            file->async_sonardepth_sonardepth[i] = value_float;
+            file->async_sensordepth_sensordepth[i] = value_float;
           }
           fclose(afp);
         }
         if (mbev_verbose > 0)
-          fprintf(stderr, "Loaded %d sonardepth data from file %s\n", file->n_async_sonardepth, asyncfile);
+          fprintf(stderr, "Loaded %d sensordepth data from file %s\n", file->n_async_sensordepth, asyncfile);
       }
 
-      /* if necessary try to load sonardepth data from ats file */
+      /* if necessary try to load sensordepth data from ats file */
       if (file->n_async_heading <= 0) {
         strcpy(asyncfile, file->path);
         strcat(asyncfile, ".ats");
         if (stat(asyncfile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-          /* count the asynchronous sonardepth data */
-          file->n_async_sonardepth = 0;
-          file->n_async_sonardepth_alloc = 0;
+          /* count the asynchronous sensordepth data */
+          file->n_async_sensordepth = 0;
+          file->n_async_sensordepth_alloc = 0;
           if ((afp = fopen(asyncfile, "r")) != NULL) {
             while ((result = fgets(buffer, MBP_FILENAMESIZE, afp)) == buffer)
               if (buffer[0] != '#')
-                file->n_async_sonardepth++;
+                file->n_async_sensordepth++;
             fclose(afp);
           }
 
-          /* allocate space for asynchronous sonardepth */
-          if (file->n_async_sonardepth > 0) {
-            if ((file->async_sonardepth_time_d = (double *)malloc(sizeof(double) * (file->n_async_sonardepth))) !=
+          /* allocate space for asynchronous sensordepth */
+          if (file->n_async_sensordepth > 0) {
+            if ((file->async_sensordepth_time_d = (double *)malloc(sizeof(double) * (file->n_async_sensordepth))) !=
                 NULL) {
-              if ((file->async_sonardepth_sonardepth =
-                       (double *)malloc(sizeof(double) * (file->n_async_sonardepth))) != NULL) {
-                file->n_async_sonardepth_alloc = file->n_async_sonardepth;
+              if ((file->async_sensordepth_sensordepth =
+                       (double *)malloc(sizeof(double) * (file->n_async_sensordepth))) != NULL) {
+                file->n_async_sensordepth_alloc = file->n_async_sensordepth;
               }
-              else if (file->async_sonardepth_time_d != NULL) {
-                free(file->async_sonardepth_time_d);
-                file->async_sonardepth_time_d = NULL;
+              else if (file->async_sensordepth_time_d != NULL) {
+                free(file->async_sensordepth_time_d);
+                file->async_sensordepth_time_d = NULL;
               }
             }
           }
 
-          /* read the asynchronous sonardepth data */
-          file->n_async_sonardepth = 0;
+          /* read the asynchronous sensordepth data */
+          file->n_async_sensordepth = 0;
           if ((afp = fopen(asyncfile, "r")) != NULL) {
             while ((result = fgets(buffer, MBP_FILENAMESIZE, afp)) == buffer) {
               if (buffer[0] != '#') {
-                nread = sscanf(buffer, "%lf %lf", &(file->async_sonardepth_time_d[file->n_async_sonardepth]),
-                               &(file->async_sonardepth_sonardepth[file->n_async_sonardepth]));
+                nread = sscanf(buffer, "%lf %lf", &(file->async_sensordepth_time_d[file->n_async_sensordepth]),
+                               &(file->async_sensordepth_sensordepth[file->n_async_sensordepth]));
                 if (nread == 2)
-                  file->n_async_sonardepth++;
+                  file->n_async_sensordepth++;
               }
             }
             fclose(afp);
           }
         }
         if (mbev_verbose > 0)
-          fprintf(stderr, "Loaded %d sonardepth data from file %s\n", file->n_async_sonardepth, asyncfile);
+          fprintf(stderr, "Loaded %d sensordepth data from file %s\n", file->n_async_sensordepth, asyncfile);
       }
 
-      /* if sonardepth data not loaded from file extract from ping data */
-      if (file->n_async_sonardepth <= 0) {
+      /* if sensordepth data not loaded from file extract from ping data */
+      if (file->n_async_sensordepth <= 0) {
         if (file->num_pings > 0) {
-          if ((file->async_sonardepth_time_d = (double *)malloc(sizeof(double) * (file->num_pings))) != NULL) {
-            if ((file->async_sonardepth_sonardepth = (double *)malloc(sizeof(double) * (file->num_pings))) != NULL) {
-              file->n_async_sonardepth = file->num_pings;
-              file->n_async_sonardepth_alloc = file->n_async_sonardepth;
+          if ((file->async_sensordepth_time_d = (double *)malloc(sizeof(double) * (file->num_pings))) != NULL) {
+            if ((file->async_sensordepth_sensordepth = (double *)malloc(sizeof(double) * (file->num_pings))) != NULL) {
+              file->n_async_sensordepth = file->num_pings;
+              file->n_async_sensordepth_alloc = file->n_async_sensordepth;
             }
-            else if (file->async_sonardepth_time_d != NULL) {
-              free(file->async_sonardepth_time_d);
-              file->async_sonardepth_time_d = NULL;
+            else if (file->async_sensordepth_time_d != NULL) {
+              free(file->async_sensordepth_time_d);
+              file->async_sensordepth_time_d = NULL;
             }
           }
           for (iping = 0; iping < file->num_pings; iping++) {
             ping = &(file->pings[iping]);
-            file->async_sonardepth_time_d[iping] = ping->time_d;
-            file->async_sonardepth_sonardepth[iping] = ping->sonardepth;
+            file->async_sensordepth_time_d[iping] = ping->time_d;
+            file->async_sensordepth_sensordepth[iping] = ping->sensordepth;
           }
         }
         if (mbev_verbose > 0)
-          fprintf(stderr, "Loaded %d sonardepth data from ping data of file %s\n", file->n_async_sonardepth,
+          fprintf(stderr, "Loaded %d sensordepth data from ping data of file %s\n", file->n_async_sensordepth,
                   file->path);
       }
 
@@ -1684,7 +1689,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
 }
 /*--------------------------------------------------------------------*/
 int mbeditviz_apply_biasesandtimelag(struct mbev_file_struct *file, struct mbev_ping_struct *ping, double rollbias, double pitchbias,
-                            double headingbias, double timelag, double *heading, double *sonardepth, double *rolldelta,
+                            double headingbias, double timelag, double *heading, double *sensordepth, double *rolldelta,
                             double *pitchdelta) {
   if (mbev_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1699,7 +1704,7 @@ int mbeditviz_apply_biasesandtimelag(struct mbev_file_struct *file, struct mbev_
 
   double time_d;
   int iheading = 0;
-  int isonardepth = 0;
+  int isensordepth = 0;
   int iattitude = 0;
   double rollasync, pitchasync, headingasync;
 
@@ -1708,14 +1713,14 @@ int mbeditviz_apply_biasesandtimelag(struct mbev_file_struct *file, struct mbev_
     /* get adjusted time for interpolation in asyncronous time series */
     time_d = ping->time_d + timelag;
 
-    /* if asyncronous sonardepth available, interpolate new value */
+    /* if asyncronous sensordepth available, interpolate new value */
     // int intstat;
-    if (timelag != 0.0 && file->n_async_sonardepth > 0) {
-      /* intstat = */ mb_linear_interp(mbev_verbose, file->async_sonardepth_time_d - 1, file->async_sonardepth_sonardepth - 1,
-                                 file->n_async_sonardepth, time_d, sonardepth, &isonardepth, &mbev_error);
+    if (timelag != 0.0 && file->n_async_sensordepth > 0) {
+      /* intstat = */ mb_linear_interp(mbev_verbose, file->async_sensordepth_time_d - 1, file->async_sensordepth_sensordepth - 1,
+                                 file->n_async_sensordepth, time_d, sensordepth, &isensordepth, &mbev_error);
     }
     else {
-      *sonardepth = ping->sonardepth;
+      *sensordepth = ping->sensordepth;
     }
 
     /* if asyncronous heading available, interpolate new value */
@@ -1748,7 +1753,7 @@ int mbeditviz_apply_biasesandtimelag(struct mbev_file_struct *file, struct mbev_
         &mbev_error);
 
     /*
-    fprintf(stderr,"sonardepth: %f %f   %f %d\n", *sonardepth, ping->sonardepth,*sonardepth-ping->sonardepth, isonardepth);
+    fprintf(stderr,"sensordepth: %f %f   %f %d\n", *sensordepth, ping->sensordepth,*sensordepth-ping->sensordepth, isensordepth);
     fprintf(stderr,"heading:    %f %f   %f  %f %d\n", *heading, headingasync, ping->heading, *heading-ping->heading,
     iheading); fprintf(stderr,"rolldelta:  %f %f   roll:%f %f   %d\n", *rolldelta, rollbias, rollasync, ping->roll,
     iattitude); fprintf(stderr,"pitchdelta: %f %f   pitch:%f %f   %d\n", *pitchdelta, pitchbias, pitchasync, ping->pitch,
@@ -1760,7 +1765,7 @@ int mbeditviz_apply_biasesandtimelag(struct mbev_file_struct *file, struct mbev_
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", mbev_error);
     fprintf(stderr, "dbg2       heading:    %f\n", *heading);
-    fprintf(stderr, "dbg2       sonardepth: %f\n", *sonardepth);
+    fprintf(stderr, "dbg2       sensordepth: %f\n", *sensordepth);
     fprintf(stderr, "dbg2       rolldelta:  %f\n", *rolldelta);
     fprintf(stderr, "dbg2       pitchdelta: %f\n", *pitchdelta);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1860,7 +1865,7 @@ int mbeditviz_snell_correction(double snell, double roll, double *beam_xtrack,
 /*--------------------------------------------------------------------*/
 
 int mbeditviz_beam_position(double navlon, double navlat, double mtodeglon, double mtodeglat, double rawbath, double acrosstrack,
-                            double alongtrack, double sonardepth, double rolldelta, double pitchdelta, double heading,
+                            double alongtrack, double sensordepth, double rolldelta, double pitchdelta, double heading,
                             double *bathcorr, double *lon, double *lat) {
   if (mbev_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1872,7 +1877,7 @@ int mbeditviz_beam_position(double navlon, double navlat, double mtodeglon, doub
     fprintf(stderr, "dbg2       rawbath:     %f\n", rawbath);
     fprintf(stderr, "dbg2       acrosstrack: %f\n", acrosstrack);
     fprintf(stderr, "dbg2       alongtrack:  %f\n", alongtrack);
-    fprintf(stderr, "dbg2       sonardepth:  %f\n", sonardepth);
+    fprintf(stderr, "dbg2       sensordepth:  %f\n", sensordepth);
     fprintf(stderr, "dbg2       rolldelta:   %f\n", rolldelta);
     fprintf(stderr, "dbg2       pitchdelta:  %f\n", pitchdelta);
     fprintf(stderr, "dbg2       heading:     %f\n", heading);
@@ -1890,7 +1895,7 @@ int mbeditviz_beam_position(double navlon, double navlat, double mtodeglon, doub
                                         &neweasting, &newnorthing, &newbath, &mbev_error);
 
   /* add sensordepth to get full corrected bathymetry */
-  *bathcorr = newbath + sonardepth;
+  *bathcorr = newbath + sensordepth;
 
   /* locate lon lat position */
   *lon = navlon + mtodeglon * neweasting;
@@ -1905,7 +1910,7 @@ int mbeditviz_beam_position(double navlon, double navlat, double mtodeglon, doub
     fprintf(stderr, "     bath:        %f\n", rawbath);
     fprintf(stderr, "     acrosstrack: %f\n", acrosstrack);
     fprintf(stderr, "     alongtrack:  %f\n", alongtrack);
-    fprintf(stderr, "     sonardepth:  %f\n", sonardepth);
+    fprintf(stderr, "     sensordepth:  %f\n", sensordepth);
     fprintf(stderr, "     rolldelta:   %f\n", rolldelta);
     fprintf(stderr, "     pitchdelta:  %f\n", pitchdelta);
     fprintf(stderr, "     heading:     %f\n", heading);
@@ -2033,15 +2038,15 @@ int mbeditviz_unload_file(int ifile, bool assertUnlock) {
         free(file->async_heading_heading);
         file->async_heading_heading = NULL;
       }
-      file->n_async_sonardepth = 0;
-      file->n_async_sonardepth_alloc = 0;
-      if (file->async_sonardepth_time_d != NULL) {
-        free(file->async_sonardepth_time_d);
-        file->async_sonardepth_time_d = NULL;
+      file->n_async_sensordepth = 0;
+      file->n_async_sensordepth_alloc = 0;
+      if (file->async_sensordepth_time_d != NULL) {
+        free(file->async_sensordepth_time_d);
+        file->async_sensordepth_time_d = NULL;
       }
-      if (file->async_sonardepth_sonardepth != NULL) {
-        free(file->async_sonardepth_sonardepth);
-        file->async_sonardepth_sonardepth = NULL;
+      if (file->async_sensordepth_sensordepth != NULL) {
+        free(file->async_sensordepth_sensordepth);
+        file->async_sensordepth_sensordepth = NULL;
       }
       file->n_async_attitude = 0;
       file->n_async_attitude_alloc = 0;
@@ -2795,14 +2800,14 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
         foot_dyn = 0.0;
       }
       foot_range = sqrt(foot_lateral * foot_lateral + ping->altitude * ping->altitude);
-      foot_theta = RTD * atan2(foot_lateral, (ping->bathcorr[ibeam] - ping->sonardepth));
+      foot_theta = RTD * atan2(foot_lateral, (ping->bathcorr[ibeam] - ping->sensordepth));
       foot_dtheta = 0.5 * file->beamwidth_xtrack;
       foot_dphi = 0.5 * file->beamwidth_ltrack;
       if (foot_dtheta <= 0.0)
         foot_dtheta = 1.0;
       if (foot_dphi <= 0.0)
         foot_dphi = 1.0;
-      foot_hwidth = (ping->bathcorr[ibeam] - ping->sonardepth) * tan(DTR * (foot_theta + foot_dtheta)) - foot_lateral;
+      foot_hwidth = (ping->bathcorr[ibeam] - ping->sensordepth) * tan(DTR * (foot_theta + foot_dtheta)) - foot_lateral;
       foot_hlength = foot_range * tan(DTR * foot_dphi);
 
       /* get range of bins around footprint to examine */
@@ -3214,6 +3219,7 @@ int mbeditviz_destroy_grid() {
               action = MBP_EDIT_FLAG;
             else
               action = MBP_EDIT_ZERO;
+            
             /* save the edits to the esf stream */
             if (file->esf_open) {
               if (mbev_verbose > 0)
@@ -3360,11 +3366,11 @@ int mbeditviz_selectregion(size_t instance) {
         for (int iping = 0; iping < file->num_pings; iping++) {
           struct mbev_ping_struct *ping = &(file->pings[iping]);
           double heading;
-          double sonardepth;
+          double sensordepth;
           double rolldelta;
           double pitchdelta;
           mbeditviz_apply_biasesandtimelag(file, ping, mbev_rollbias, mbev_pitchbias, mbev_headingbias,
-                                  mbev_timelag, &heading, &sonardepth, &rolldelta, &pitchdelta);
+                                  mbev_timelag, &heading, &sensordepth, &rolldelta, &pitchdelta);
           double mtodeglon;
           double mtodeglat;
           mb_coor_scale(mbev_verbose, ping->navlat, &mtodeglon, &mtodeglat);
@@ -3392,7 +3398,7 @@ int mbeditviz_selectregion(size_t instance) {
                 /* get sounding relative to sonar */
                 double beam_xtrack = ping->bathacrosstrack[ibeam];
                 double beam_ltrack = ping->bathalongtrack[ibeam];
-                double beam_z = ping->bath[ibeam] - ping->sonardepth;
+                double beam_z = ping->bath[ibeam] - ping->sensordepth;
 
                 /* if beamforming sound speed correction to be applied */
                 if (mbev_snell != 1.0) {
@@ -3403,7 +3409,7 @@ int mbeditviz_selectregion(size_t instance) {
                 /* apply rotations and recalculate position */
                 mbeditviz_beam_position(
                     ping->navlon, ping->navlat, mtodeglon, mtodeglat, beam_z,
-                    beam_xtrack, beam_ltrack, sonardepth, rolldelta, pitchdelta,
+                    beam_xtrack, beam_ltrack, sensordepth, rolldelta, pitchdelta,
                     heading, &(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
                 mb_proj_forward(mbev_verbose, mbev_grid.pjptr, ping->bathlon[ibeam], ping->bathlat[ibeam],
                                 &ping->bathx[ibeam], &ping->bathy[ibeam], &mbev_error);
@@ -3518,7 +3524,7 @@ int mbeditviz_selectarea(size_t instance) {
 
     double zmin;
     double zmax;
-    // double heading, sonardepth;
+    // double heading, sensordepth;
     // double rolldelta, pitchdelta;
 
     /* loop over all files */
@@ -3528,11 +3534,11 @@ int mbeditviz_selectarea(size_t instance) {
         for (int iping = 0; iping < file->num_pings; iping++) {
           struct mbev_ping_struct *ping = &(file->pings[iping]);
           double heading;
-          double sonardepth;
+          double sensordepth;
           double rolldelta;
           double pitchdelta;
           mbeditviz_apply_biasesandtimelag(file, ping, mbev_rollbias, mbev_pitchbias, mbev_headingbias,
-                                  mbev_timelag, &heading, &sonardepth, &rolldelta, &pitchdelta);
+                                  mbev_timelag, &heading, &sensordepth, &rolldelta, &pitchdelta);
           double mtodeglon;
           double mtodeglat;
           mb_coor_scale(mbev_verbose, ping->navlat, &mtodeglon, &mtodeglat);
@@ -3564,7 +3570,7 @@ int mbeditviz_selectarea(size_t instance) {
                 /* get sounding relative to sonar */
                 double beam_xtrack = ping->bathacrosstrack[ibeam];
                 double beam_ltrack = ping->bathalongtrack[ibeam];
-                double beam_z = ping->bath[ibeam] - ping->sonardepth;
+                double beam_z = ping->bath[ibeam] - ping->sensordepth;
 
                 /* if beamforming sound speed correction to be applied */
                 if (mbev_snell != 1.0) {
@@ -3575,7 +3581,7 @@ int mbeditviz_selectarea(size_t instance) {
                 /* apply rotations and recalculate position */
                 mbeditviz_beam_position(
                     ping->navlon, ping->navlat, mtodeglon, mtodeglat, beam_z,
-                    beam_xtrack, beam_ltrack, sonardepth, rolldelta, pitchdelta,
+                    beam_xtrack, beam_ltrack, sensordepth, rolldelta, pitchdelta,
                     heading, &(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
                 mb_proj_forward(mbev_verbose, mbev_grid.pjptr, ping->bathlon[ibeam], ping->bathlat[ibeam],
                                 &ping->bathx[ibeam], &ping->bathy[ibeam], &mbev_error);
@@ -3683,7 +3689,7 @@ int mbeditviz_selectnav(size_t instance) {
     double ymax;
     double zmin;
     double zmax;
-    // double heading, sonardepth;
+    // double heading, sensordepth;
     // double rolldelta, pitchdelta;
 
     for (int ifile = 0; ifile < mbev_num_files; ifile++) {
@@ -3694,11 +3700,11 @@ int mbeditviz_selectnav(size_t instance) {
           if (navpts[iping].selected) {
             struct mbev_ping_struct *ping = &(file->pings[iping]);
             double heading;
-            double sonardepth;
+            double sensordepth;
             double rolldelta;
             double pitchdelta;
             mbeditviz_apply_biasesandtimelag(file, ping, mbev_rollbias, mbev_pitchbias, mbev_headingbias,
-                                    mbev_timelag, &heading, &sonardepth, &rolldelta, &pitchdelta);
+                                    mbev_timelag, &heading, &sensordepth, &rolldelta, &pitchdelta);
             double mtodeglon;
             double mtodeglat;
             mb_coor_scale(mbev_verbose, ping->navlat, &mtodeglon, &mtodeglat);
@@ -3724,7 +3730,7 @@ int mbeditviz_selectnav(size_t instance) {
               /* get sounding relative to sonar */
               double beam_xtrack = ping->bathacrosstrack[ibeam];
               double beam_ltrack = ping->bathalongtrack[ibeam];
-              double beam_z = ping->bath[ibeam] - ping->sonardepth;
+              double beam_z = ping->bath[ibeam] - ping->sensordepth;
 
               /* if beamforming sound speed correction to be applied */
               if (mbev_snell != 1.0) {
@@ -3735,7 +3741,7 @@ int mbeditviz_selectnav(size_t instance) {
               /* apply rotations and recalculate position */
               mbeditviz_beam_position(
                   ping->navlon, ping->navlat, mtodeglon, mtodeglat, beam_z,
-                  beam_xtrack, beam_ltrack, sonardepth, rolldelta, pitchdelta,
+                  beam_xtrack, beam_ltrack, sensordepth, rolldelta, pitchdelta,
                   heading, &(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
               mb_proj_forward(mbev_verbose, mbev_grid.pjptr, ping->bathlon[ibeam], ping->bathlat[ibeam],
                               &ping->bathx[ibeam], &ping->bathy[ibeam], &mbev_error);
@@ -3983,7 +3989,7 @@ void mbeditviz_mb3dsoundings_info(int ifile, int iping, int ibeam, char *infostr
           ibeam, ping->beams_bath, iping, file->num_pings, file->name, ping->time_i[0], ping->time_i[1], ping->time_i[2],
           ping->time_i[3], ping->time_i[4], ping->time_i[5], ping->time_i[6], ping->time_d, ping->bathlon[ibeam],
           ping->bathlat[ibeam], ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam], ping->amp[ibeam]);
-  //fprintf(stderr, "\nbathcorr:%f bath:%f sonardepth:%f", ping->bathcorr[ibeam], ping->bath[ibeam], ping->sonardepth);
+  //fprintf(stderr, "\nbathcorr:%f bath:%f sensordepth:%f", ping->bathcorr[ibeam], ping->bath[ibeam], ping->sensordepth);
 
   if (mbev_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -4022,7 +4028,7 @@ void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double head
   double zmax = 0.0;
 
   double heading = 0.0;
-  double sonardepth = 0.0;
+  double sensordepth = 0.0;
   double rolldelta = 0.0;
   double pitchdelta = 0.0;
   double mtodeglon = 0.0;
@@ -4038,7 +4044,7 @@ void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double head
 
     if (ifile != ifilelast || iping != ipinglast) {
       mbeditviz_apply_biasesandtimelag(file, ping, mbev_rollbias, mbev_pitchbias, mbev_headingbias,
-                              mbev_timelag, &heading, &sonardepth, &rolldelta, &pitchdelta);
+                              mbev_timelag, &heading, &sensordepth, &rolldelta, &pitchdelta);
       mb_coor_scale(mbev_verbose, ping->navlat, &mtodeglon, &mtodeglat);
       ifilelast = ifile;
       ipinglast = iping;
@@ -4047,7 +4053,7 @@ void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double head
     /* get sounding relative to sonar */
     double beam_xtrack = ping->bathacrosstrack[ibeam];
     double beam_ltrack = ping->bathalongtrack[ibeam];
-    double beam_z = ping->bath[ibeam] - ping->sonardepth;
+    double beam_z = ping->bath[ibeam] - ping->sensordepth;
 
     /* if beamforming sound speed correction to be applied */
     if (mbev_snell != 1.0) {
@@ -4057,7 +4063,7 @@ void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double head
 
     /* apply rotations and recalculate position */
     mbeditviz_beam_position(ping->navlon, ping->navlat, mtodeglon, mtodeglat, beam_z,
-                            beam_xtrack, beam_ltrack, sonardepth, rolldelta, pitchdelta,
+                            beam_xtrack, beam_ltrack, sensordepth, rolldelta, pitchdelta,
                             heading, &(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
     mb_proj_forward(mbev_verbose, mbev_grid.pjptr, ping->bathlon[ibeam], ping->bathlat[ibeam], &ping->bathx[ibeam],
                     &ping->bathy[ibeam], &mbev_error);
@@ -4124,7 +4130,7 @@ void mbeditviz_mb3dsoundings_biasapply(double rollbias, double pitchbias, double
           mbev_timelag, mbev_snell);
   (*showMessage)(message);
 
-  // double heading, sonardepth;
+  // double heading, sensordepth;
   // double rolldelta, pitchdelta;
   // double mtodeglon, mtodeglat;
   // double beam_xtrack, beam_ltrack, beam_z;
@@ -4135,10 +4141,10 @@ void mbeditviz_mb3dsoundings_biasapply(double rollbias, double pitchbias, double
     if (file->load_status) {
       for (int iping = 0; iping < file->num_pings; iping++) {
         struct mbev_ping_struct *ping = &(file->pings[iping]);
-        double heading, sonardepth;
+        double heading, sensordepth;
         double rolldelta, pitchdelta;
         mbeditviz_apply_biasesandtimelag(file, ping, mbev_rollbias, mbev_pitchbias, mbev_headingbias,
-                                mbev_timelag, &heading, &sonardepth, &rolldelta, &pitchdelta);
+                                mbev_timelag, &heading, &sensordepth, &rolldelta, &pitchdelta);
         double mtodeglon, mtodeglat;
         mb_coor_scale(mbev_verbose, ping->navlat, &mtodeglon, &mtodeglat);
         for (int ibeam = 0; ibeam < ping->beams_bath; ibeam++) {
@@ -4146,7 +4152,7 @@ void mbeditviz_mb3dsoundings_biasapply(double rollbias, double pitchbias, double
             /* get sounding relative to sonar */
             double beam_xtrack = ping->bathacrosstrack[ibeam];
             double beam_ltrack = ping->bathalongtrack[ibeam];
-            double beam_z = ping->bath[ibeam] - ping->sonardepth;
+            double beam_z = ping->bath[ibeam] - ping->sensordepth;
 
             /* if beamforming sound speed correction to be applied */
             if (mbev_snell != 1.0) {
@@ -4156,7 +4162,7 @@ void mbeditviz_mb3dsoundings_biasapply(double rollbias, double pitchbias, double
 
             /* apply rotations and recalculate position */
             mbeditviz_beam_position(ping->navlon, ping->navlat, mtodeglon, mtodeglat,
-                        beam_z, beam_xtrack, beam_ltrack, sonardepth, rolldelta, pitchdelta, heading,
+                        beam_z, beam_xtrack, beam_ltrack, sensordepth, rolldelta, pitchdelta, heading,
                         &(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
             mb_proj_forward(mbev_verbose, mbev_grid.pjptr, ping->bathlon[ibeam], ping->bathlat[ibeam],
                     &ping->bathx[ibeam], &ping->bathy[ibeam], &mbev_error);

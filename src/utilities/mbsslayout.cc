@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsslayout.c	1/8/2014
  *
- *    Copyright (c) 2014-2020 by
+ *    Copyright (c) 2014-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * MBsslayout reads sidescan in raw time series form, lays the sidescan
@@ -242,7 +252,7 @@ int main(int argc, char **argv) {
 	int layout_mode = MBSSLAYOUT_LAYOUT_FLATBOTTOM;
 	int ss_altitude_mode = MBSSLAYOUT_ALTITUDE_ALTITUDE;
 	double bottompick_threshold = 0.5;
-  double bottompick_blank = 0.0;
+    double bottompick_blank = 0.0;
 	bool channel_swap = false;
 	double swath_width = 0.0;
 	int swath_mode = MBSSLAYOUT_SWATHWIDTH_VARIABLE;
@@ -2207,9 +2217,16 @@ int main(int argc, char **argv) {
 				}
 
 				/* call mb_extract_rawss() */
-				/* status = */ mb_extract_rawss(verbose, imbio_ptr, istore_ptr, &kind, &sidescan_type, &sample_interval,
+				if (channel_swap) {
+					/* status = */ mb_extract_rawss(verbose, imbio_ptr, istore_ptr, &kind, &sidescan_type, &sample_interval,
+				                          &beamwidth_xtrack, &beamwidth_ltrack, &num_samples_stbd, raw_samples_stbd,
+				                          &num_samples_port, raw_samples_port, &error);
+				}
+				else {
+					/* status = */ mb_extract_rawss(verbose, imbio_ptr, istore_ptr, &kind, &sidescan_type, &sample_interval,
 				                          &beamwidth_xtrack, &beamwidth_ltrack, &num_samples_port, raw_samples_port,
 				                          &num_samples_stbd, raw_samples_stbd, &error);
+				}
 
 				/* call mb_extract_nav to get attitude */
 				/* status = */ mb_extract_nav(verbose, imbio_ptr, istore_ptr, &kind, time_i, &time_d, &navlon_org, &navlat_org,
@@ -2299,7 +2316,7 @@ int main(int argc, char **argv) {
 
 				/* if specified get altitude from raw sidescan */
 				if (ss_altitude_mode == MBSSLAYOUT_ALTITUDE_BOTTOMPICK) {
-          int istart = bottompick_blank / sample_interval;
+                    int istart = bottompick_blank / sample_interval;
 
 					/* get bottom arrival in port trace */
 					channelmax = 0.0;

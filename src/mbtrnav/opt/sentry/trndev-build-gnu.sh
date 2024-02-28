@@ -84,7 +84,7 @@ processCmdLine(){
             i ) DO_INSTALL="Y"
                 DO_BUILD="N"
             ;;
-            d ) PREFIX=${OPTARG}
+            p ) PREFIX=${OPTARG}
             ;;
             u ) DO_UNINSTALL="Y"
                 DO_BUILD="N"

@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbnavadjustmerge.c  4/14/2014
  *
- *    Copyright (c) 2014-2020 by
+ *    Copyright (c) 2014-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * Mbnavadjustmerge merges two existing mbnavadjust projects. The result
@@ -54,51 +64,55 @@
 #define MOD_MODE_SET_ALL_GLOBAL_TIES_Z 8
 #define MOD_MODE_UNSET_GLOBAL_TIE 9
 #define MOD_MODE_UNSET_ALL_GLOBAL_TIES 10
-#define MOD_MODE_ADD_CROSSING 11
-#define MOD_MODE_SET_TIE_VALUES_ALL 12
-#define MOD_MODE_SET_TIE_VALUES_XYZ 13
-#define MOD_MODE_SET_TIE_VALUES_Z 14
-#define MOD_MODE_SET_TIE_XYZ 15
-#define MOD_MODE_SET_TIE_XY 16
-#define MOD_MODE_SET_TIE_Z 17
-#define MOD_MODE_SET_TIES_XYZ_ALL 18
-#define MOD_MODE_SET_TIES_XY_ALL 19
-#define MOD_MODE_SET_TIES_Z_ALL 20
-#define MOD_MODE_SET_TIES_XYZ_FILE 21
-#define MOD_MODE_SET_TIES_XY_FILE 22
-#define MOD_MODE_SET_TIES_Z_FILE 23
-#define MOD_MODE_SET_TIES_XYZ_SURVEY 24
-#define MOD_MODE_SET_TIES_XY_SURVEY 25
-#define MOD_MODE_SET_TIES_Z_SURVEY 26
-#define MOD_MODE_SET_TIES_XYZ_BYSURVEY 27
-#define MOD_MODE_SET_TIES_XY_BYSURVEY 28
-#define MOD_MODE_SET_TIES_Z_BYSURVEY 29
-#define MOD_MODE_SET_TIES_XYZ_BLOCK 30
-#define MOD_MODE_SET_TIES_XY_BLOCK 31
-#define MOD_MODE_SET_TIES_Z_BLOCK 32
-#define MOD_MODE_SET_TIES_ZOFFSET_BLOCK 33
-#define MOD_MODE_SET_TIES_XY_BY_TIME 34
-#define MOD_MODE_UNSET_TIE 35
-#define MOD_MODE_UNSET_TIES_FILE 36
-#define MOD_MODE_UNSET_TIES_SURVEY 37
-#define MOD_MODE_UNSET_TIES_BYSURVEY 38
-#define MOD_MODE_UNSET_TIES_BLOCK 39
-#define MOD_MODE_UNSET_TIES_ALL 40
-#define MOD_MODE_SKIP_UNSET_CROSSINGS 41
-#define MOD_MODE_UNSET_SKIPPED_CROSSINGS 42
-#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BLOCK 43
-#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BETWEEN_SURVEYS 44
-#define MOD_MODE_INSERT_DISCONTINUITY 45
-#define MOD_MODE_REMOVE_DISCONTINUITY 46
-#define MOD_MODE_MERGE_SURVEYS 47
-#define MOD_MODE_REIMPORT_FILE 48
-#define MOD_MODE_REIMPORT_ALL_FILES 49
-#define MOD_MODE_TRIANGULATE 50
-#define MOD_MODE_TRIANGULATE_SECTION 51
-#define MOD_MODE_UNSET_SHORT_SECTION_TIES 52
-#define MOD_MODE_SKIP_SHORT_SECTION_CROSSINGS 53
-#define MOD_MODE_REMAKE_MB166_FILES 54
-#define MOD_MODE_FIX_SENSORDEPTH 55
+#define MOD_MODE_SHIFT_GLOBAL_TIE 11
+#define MOD_MODE_SHIFT_ALL_GLOBAL_TIES 12
+#define MOD_MODE_ADD_CROSSING 13
+#define MOD_MODE_SET_TIE_VALUES_ALL 14
+#define MOD_MODE_SET_TIE_VALUES_XYZ 15
+#define MOD_MODE_SET_TIE_VALUES_Z 16
+#define MOD_MODE_SET_TIE_XYZ 17
+#define MOD_MODE_SET_TIE_XY 18
+#define MOD_MODE_SET_TIE_Z 19
+#define MOD_MODE_SET_TIES_XYZ_ALL 20
+#define MOD_MODE_SET_TIES_XY_ALL 21
+#define MOD_MODE_SET_TIES_Z_ALL 22
+#define MOD_MODE_SET_TIES_XYZ_FILE 23
+#define MOD_MODE_SET_TIES_XY_FILE 24
+#define MOD_MODE_SET_TIES_Z_FILE 25
+#define MOD_MODE_SET_TIES_XYZ_SURVEY 26
+#define MOD_MODE_SET_TIES_XY_SURVEY 27
+#define MOD_MODE_SET_TIES_Z_SURVEY 28
+#define MOD_MODE_SET_TIES_XYZ_BYSURVEY 29
+#define MOD_MODE_SET_TIES_XY_BYSURVEY 30
+#define MOD_MODE_SET_TIES_Z_BYSURVEY 31
+#define MOD_MODE_SET_TIES_XYZ_BLOCK 32
+#define MOD_MODE_SET_TIES_XY_BLOCK 33
+#define MOD_MODE_SET_TIES_Z_BLOCK 34
+#define MOD_MODE_SET_TIES_ZOFFSET_BLOCK 35
+#define MOD_MODE_SET_TIES_XY_BY_TIME 36
+#define MOD_MODE_UNSET_TIE 37
+#define MOD_MODE_UNSET_TIES_FILE 38
+#define MOD_MODE_UNSET_TIES_SURVEY 39
+#define MOD_MODE_UNSET_TIES_BYSURVEY 40
+#define MOD_MODE_UNSET_TIES_BLOCK 41
+#define MOD_MODE_UNSET_TIES_ALL 42
+#define MOD_MODE_SKIP_UNSET_CROSSINGS 43
+#define MOD_MODE_UNSET_SKIPPED_CROSSINGS 44
+#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BLOCK 45
+#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BETWEEN_SURVEYS 46
+#define MOD_MODE_INSERT_DISCONTINUITY 47
+#define MOD_MODE_REMOVE_DISCONTINUITY 48
+#define MOD_MODE_MERGE_SURVEYS 49
+#define MOD_MODE_REIMPORT_FILE 50
+#define MOD_MODE_REIMPORT_ALL_FILES 51
+#define MOD_MODE_TRIANGULATE 52
+#define MOD_MODE_TRIANGULATE_SECTION 53
+#define MOD_MODE_UNSET_SHORT_SECTION_TIES 54
+#define MOD_MODE_SKIP_SHORT_SECTION_CROSSINGS 55
+#define MOD_MODE_REMOVE_SHORT_SECTIONS 56
+#define MOD_MODE_REMOVE_FILE 57
+#define MOD_MODE_REMAKE_MB166_FILES 58
+#define MOD_MODE_FIX_SENSORDEPTH 59
 #define IMPORT_NONE 0
 #define IMPORT_TIE 1
 #define IMPORT_GLOBALTIE 2
@@ -141,6 +155,8 @@ static char usage_message[] =
     "\t--set-all-global-ties-zonly\n"
     "\t--unset-global-tie=file:section\n"
     "\t--unset-all-global-ties\n"
+    "\t--shift-global-tie=file:section/shiftx/shifty/shiftz\n"
+    "\t--shift-all-global-ties=shiftx/shifty/shiftz\n"
     "\t--add-crossing=file1:section1/file2:section2\n"
     "\t--set-tie=file1/file2/xoffset/yoffset/zoffset\n"
     "\t--set-tie=file1:section1/file2:section2/xoffset/yoffset/zoffset\n"
@@ -188,8 +204,11 @@ static char usage_message[] =
     "\t--triangulate-section=file:section\n"
     "\t--unset-short-section-ties=min_length\n"
     "\t--skip-short-section-crossings=min_length\n"
+    "\t--remove-short-sections=min_length\n"
+    "\t--remove-file=file\n"
     "\t--remake-mb166-files\n"
     "\t--fix-sensordepth\n"
+    "\t--shift-global-ties=shiftx/shifty\n"
     "\t--verbose --help]\n";
 
 /*--------------------------------------------------------------------*/
@@ -217,6 +236,8 @@ int main(int argc, char **argv) {
   int triangulate = TRIANGULATE_NONE;
   double triangle_scale = 0.0;
   double minimum_section_length = 0.0;
+  int minimum_section_soundings = 0;
+  int ifile_remove = 0;
 
   {
   static struct option options[] = {{"verbose", no_argument, NULL, 0},
@@ -233,6 +254,8 @@ int main(int argc, char **argv) {
                                     {"set-all-global-ties-zonly", no_argument, NULL, 0},
                                     {"unset-global-tie", required_argument, NULL, 0},
                                     {"unset-all-global-ties", no_argument, NULL, 0},
+                                    {"shift-global-tie", required_argument, NULL, 0},
+                                    {"shift-all-global-ties", required_argument, NULL, 0},
                                     {"add-crossing", required_argument, NULL, 0},
                                     {"set-tie", required_argument, NULL, 0},
                                     {"set-tie-xyz", required_argument, NULL, 0},
@@ -279,6 +302,8 @@ int main(int argc, char **argv) {
                                     {"triangulate-scale", required_argument, NULL, 0},
                                     {"unset-short-section-ties", required_argument, NULL, 0},
                                     {"skip-short-section-crossings", required_argument, NULL, 0},
+                                    {"remove-short-sections", required_argument, NULL, 0},
+                                    {"remove-file", required_argument, NULL, 0},
                                     {"remake-mb166-files", no_argument, NULL, 0},
                                     {"fix-sensordepth", no_argument, NULL, 0},
                                     {NULL, 0, NULL, 0}};
@@ -560,6 +585,46 @@ int main(int argc, char **argv) {
         if (num_mods < NUMBER_MODS_MAX) {
           mods[num_mods].mode = MOD_MODE_UNSET_ALL_GLOBAL_TIES;
           num_mods++;
+        }
+        else {
+          fprintf(stderr, "Maximum number of mod commands reached:\n\tunset-all-global-ties command ignored\n\n");
+        }
+      }
+
+      /*-------------------------------------------------------
+       * shift global ties
+          --shift-global-tie=file:section/shiftx/shifty/shiftz
+          --shift-all-global-ties=section/shiftx/shifty/shiftz  */
+      else if (strcmp("shift-global-tie", options[option_index].name) == 0) {
+        if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
+          if ((nscan = sscanf(optarg, "%d:%d/%lf/%lf/%lf", 
+                              &mods[num_mods].file1, &mods[num_mods].section1, 
+                              &mods[num_mods].xoffset, &mods[num_mods].yoffset, 
+                              &mods[num_mods].zoffset)) == 5) {
+            mods[num_mods].mode = MOD_MODE_SHIFT_GLOBAL_TIE;
+            num_mods++;
+          }
+          else {
+            fprintf(stderr, "Failure to parse --shift-global-tie=%s\n\tmod command ignored\n\n", optarg);
+          }
+        }
+        else {
+          fprintf(stderr, "Maximum number of mod commands reached:\n\t--set-global-tie=%s command ignored\n\n", optarg);
+        }
+      }
+      else if (strcmp("shift-all-global-ties", options[option_index].name) == 0) {
+        if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
+          if ((nscan = sscanf(optarg, "%lf/%lf/%lf", 
+                              &mods[num_mods].xoffset, &mods[num_mods].yoffset, 
+                              &mods[num_mods].zoffset)) == 3) {
+            mods[num_mods].mode = MOD_MODE_SHIFT_ALL_GLOBAL_TIES;
+            num_mods++;
+          }
+          else {
+            fprintf(stderr, "Failure to parse --shift-all-global-ties=%s\n\tmod command ignored\n\n", optarg);
+          }
         }
         else {
           fprintf(stderr, "Maximum number of mod commands reached:\n\tunset-all-global-ties command ignored\n\n");
@@ -1358,7 +1423,7 @@ int main(int argc, char **argv) {
         if (num_mods < NUMBER_MODS_MAX) {
           mods[num_mods].mode = MOD_MODE_UNSET_SHORT_SECTION_TIES;
           int nscan;
-          if ((nscan = sscanf(optarg, "%lf", &minimum_section_length)) == 1) {
+          if ((nscan = sscanf(optarg, "%lf/%d", &minimum_section_length, &minimum_section_soundings)) >= 1) {
             num_mods++;
           }
           else {
@@ -1374,7 +1439,7 @@ int main(int argc, char **argv) {
         if (num_mods < NUMBER_MODS_MAX) {
           mods[num_mods].mode = MOD_MODE_SKIP_SHORT_SECTION_CROSSINGS;
           int nscan;
-          if ((nscan = sscanf(optarg, "%lf", &minimum_section_length)) == 1) {
+          if ((nscan = sscanf(optarg, "%lf/%d", &minimum_section_length, &minimum_section_soundings)) >= 1) {
             num_mods++;
           }
           else {
@@ -1384,6 +1449,45 @@ int main(int argc, char **argv) {
         else {
           fprintf(stderr,
                   "Maximum number of mod commands reached:\n\tskip-short-section-crossings command ignored\n\n");
+        }
+      }
+
+      /*-------------------------------------------------------*/
+      // remove sections that are too short by adding them to the
+      // prior section
+      else if (strcmp("remove-short-sections", options[option_index].name) == 0) {
+        if (num_mods < NUMBER_MODS_MAX) {
+          mods[num_mods].mode = MOD_MODE_REMOVE_SHORT_SECTIONS;
+          int nscan;
+          if ((nscan = sscanf(optarg, "%lf/%d", &minimum_section_length, &minimum_section_soundings)) >= 1) {
+            num_mods++;
+          }
+          else {
+            fprintf(stderr, "Minimum section length not parsed:\n\tremove-short-sections command ignored\n\n");
+          }
+        }
+        else {
+          fprintf(stderr,
+                  "Maximum number of mod commands reached:\n\tremove-short-sections command ignored\n\n");
+        }
+      }
+
+      /*-------------------------------------------------------*/
+      // remove specified file
+      else if (strcmp("remove-file", options[option_index].name) == 0) {
+        if (num_mods < NUMBER_MODS_MAX) {
+          mods[num_mods].mode = MOD_MODE_REMOVE_FILE;
+          int nscan;
+          if ((nscan = sscanf(optarg, "%d", &ifile_remove)) == 1) {
+            num_mods++;
+          }
+          else {
+            fprintf(stderr, "Remove file not parsed:\n\tremove-file command ignored\n\n");
+          }
+        }
+        else {
+          fprintf(stderr,
+                  "Maximum number of mod commands reached:\n\tremove-file command ignored\n\n");
         }
       }
 
@@ -1408,7 +1512,6 @@ int main(int argc, char **argv) {
         if (num_mods < NUMBER_MODS_MAX) {
           mods[num_mods].mode = MOD_MODE_FIX_SENSORDEPTH;
           num_mods++;
-          fprintf(stderr, "called fix-sensordepth\n");
         }
         else {
           fprintf(stderr,
@@ -1573,6 +1676,8 @@ int main(int argc, char **argv) {
     }
 
     /* copy the input base project to the output project */
+    int num_tri_copied = 0;
+    int num_sections_copied = 0;
     // project_output.open = project_inputbase.open;
     // strcpy(project_output.name, project_inputbase.name);
     // strcpy(project_output.path, project_inputbase.path);
@@ -1725,6 +1830,18 @@ int main(int argc, char **argv) {
         sprintf(srcfile, "%s/nvs_%4.4d_%4.4d.mb71", project_inputbase.datadir, i, j);
         sprintf(dstfile, "%s/nvs_%4.4d_%4.4d.mb71", project_output.datadir, i, j);
         mb_copyfile(verbose, srcfile, dstfile, &error);
+        num_sections_copied++;
+
+        /* copy the triangle file if it exists */
+        struct stat file_status;
+        sprintf(srcfile, "%s/nvs_%4.4d_%4.4d.mb71.tri", project_inputadd.datadir, i, j);
+        sprintf(dstfile, "%s/nvs_%4.4d_%4.4d.mb71.tri", project_output.datadir, i, j);
+        const int fstat = stat(srcfile, &file_status);
+        if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR
+                      && file_status.st_size > 0) {
+          mb_copyfile(verbose, srcfile, dstfile, &error);
+          num_tri_copied++;
+        }
         //mb_command command = "";
         //sprintf(command, "cp %s/nvs_%4.4d_%4.4d.mb71* %s", project_inputbase.datadir, i, j, project_output.datadir);
         // fprintf(stderr, "Executing in shell: %s\n", command);
@@ -1750,6 +1867,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "\nCopied input base project to output project:\n\t%s\n", project_output_path);
     fprintf(stderr, "\t%d files\n\t%d crossings\n\t%d ties\n", project_output.num_files, project_output.num_crossings,
             project_output.num_ties);
+    fprintf(stderr, "\t%d triangle files out of %d sections copied\n", num_tri_copied, num_sections_copied);
   }
 
   /* else if adding the second project to the first, or just modifying the first,
@@ -1806,6 +1924,8 @@ int main(int argc, char **argv) {
     project_output.num_files_alloc = project_output.num_files + project_inputadd.num_files;
     memcpy(&project_output.files[project_output.num_files], project_inputadd.files,
            project_inputadd.num_files * sizeof(struct mbna_file));
+    int num_tri_copied = 0;
+    int num_sections_copied = 0;
 
     /* copy the sections in the files */
     for (int i = 0; i < project_inputadd.num_files && status == MB_SUCCESS; i++) {
@@ -1908,9 +2028,10 @@ int main(int argc, char **argv) {
         /* copy the section file */
         mb_command srcfile = "";
         mb_command dstfile = "";
-        sprintf(srcfile, "%s/nvs_%4.4d_%4.4d.mb71", project_inputbase.datadir, i, j);
+        sprintf(srcfile, "%s/nvs_%4.4d_%4.4d.mb71", project_inputadd.datadir, i, j);
         sprintf(dstfile, "%s/nvs_%4.4d_%4.4d.mb71", project_output.datadir, k, j);
         mb_copyfile(verbose, srcfile, dstfile, &error);
+        num_sections_copied++;
         //mb_command command = "";
         //sprintf(command, "cp %s/nvs_%4.4d_%4.4d.mb71 %s/nvs_%4.4d_%4.4d.mb71", project_inputadd.datadir, i, j,
         //        project_output.datadir, k, j);
@@ -1925,6 +2046,7 @@ int main(int argc, char **argv) {
         if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR
                       && file_status.st_size > 0) {
           mb_copyfile(verbose, srcfile, dstfile, &error);
+          num_tri_copied++;
         }
         //sprintf(command, "%s/nvs_%4.4d_%4.4d.mb71.tri", project_inputadd.datadir, i, j);
         //const int fstat = stat(command, &file_status);
@@ -1940,24 +2062,31 @@ int main(int argc, char **argv) {
 
     /* copy the actual reference grid files from the input project to the new output project */
     for (int irefgrid = 0; irefgrid < project_inputadd.num_refgrids; irefgrid++) {
-        /* copy the ref_grid file */
-        mb_command srcfile = "";
-        mb_command dstfile = "";
-        sprintf(srcfile, "%s/%s", project_inputbase.datadir, project_inputbase.refgrid_names[irefgrid]);
-        sprintf(dstfile, "%s/%s", project_output.datadir, project_inputbase.refgrid_names[irefgrid]);
-        mb_copyfile(verbose, srcfile, dstfile, &error);
-        //mb_command command = "";
-        //sprintf(command, "cp %s/%s %s", project_inputadd.datadir, 
-        //      project_inputadd.refgrid_names[irefgrid], project_output.datadir);
-        // fprintf(stderr, "Executing in shell: %s\n", command);
-        ///* int shellstatus = */ system(command);
+      /* copy the ref_grid file */
+      mb_command srcfile = "";
+      mb_command dstfile = "";
+      sprintf(srcfile, "%s/%s", project_inputadd.datadir, project_inputadd.refgrid_names[irefgrid]);
+      sprintf(dstfile, "%s/%s", project_output.datadir, project_inputadd.refgrid_names[irefgrid]);
+      mb_copyfile(verbose, srcfile, dstfile, &error);
+      //mb_command command = "";
+      //sprintf(command, "cp %s/%s %s", project_inputadd.datadir, 
+      //      project_inputadd.refgrid_names[irefgrid], project_output.datadir);
+      // fprintf(stderr, "Executing in shell: %s\n", command);
+      ///* int shellstatus = */ system(command);
+      strncpy(project_output.refgrid_names[project_output.num_refgrids + irefgrid], 
+              project_inputadd.refgrid_names[irefgrid], sizeof(mb_path));
+      project_output.refgrid_bounds[0][project_output.num_refgrids + irefgrid] = project_inputadd.refgrid_bounds[0][irefgrid];
+      project_output.refgrid_bounds[1][project_output.num_refgrids + irefgrid] = project_inputadd.refgrid_bounds[1][irefgrid];
+      project_output.refgrid_bounds[2][project_output.num_refgrids + irefgrid] = project_inputadd.refgrid_bounds[2][irefgrid];
+      project_output.refgrid_bounds[3][project_output.num_refgrids + irefgrid] = project_inputadd.refgrid_bounds[3][irefgrid];
     }
 
     fprintf(stderr, "\nCopied input add project to output project:\n\t%s\n", project_output_path);
     fprintf(stderr, "\t%d files\n\t%d crossings\n\t%d ties\n", project_output.num_files, project_output.num_crossings,
             project_output.num_ties);
+    fprintf(stderr, "\t%d triangle files out of %d sections copied\n", num_tri_copied, num_sections_copied);
 
-    /* finally update all of the global counters */
+    /* update all of the global counters */
     project_output.num_files += project_inputadd.num_files;
     project_output.num_surveys += project_inputadd.num_surveys;
     project_output.num_snavs += project_inputadd.num_snavs;
@@ -1972,6 +2101,50 @@ int main(int argc, char **argv) {
     project_output.num_globalties += project_inputadd.num_globalties;
     project_output.num_globalties_analyzed += project_inputadd.num_globalties_analyzed;
     project_output.num_refgrids += project_inputadd.num_refgrids;
+
+    /* finally, check for any redundant reference grids, removing extras from the project */
+    if (project_output.num_refgrids > 1) {
+      int num_refgrids_deleted = 0;
+      bool refgrid_delete[MBNA_REFGRID_NUM_MAX];
+      int refgrid_renumber[MBNA_REFGRID_NUM_MAX];
+      for (int irefgrid = 0; irefgrid < project_output.num_refgrids; irefgrid++) {
+        refgrid_delete[irefgrid] = false;
+        refgrid_renumber[irefgrid] = irefgrid;
+      }
+      for (int irefgrid = project_output.num_refgrids - 1; irefgrid > 0; irefgrid--) {
+        for (int jrefgrid = 0; jrefgrid < irefgrid && !refgrid_delete[irefgrid]; jrefgrid++) {
+          if (strncmp(project_output.refgrid_names[irefgrid], project_output.refgrid_names[jrefgrid], sizeof(mb_path)) == 0) {
+            refgrid_delete[irefgrid] = true;
+            refgrid_renumber[irefgrid] = jrefgrid;
+            num_refgrids_deleted++;
+            for (int krefgrid = irefgrid + 1; krefgrid < project_output.num_refgrids; krefgrid++) {
+              if (refgrid_renumber[krefgrid] > irefgrid) {
+                refgrid_renumber[krefgrid]--;
+              }
+            }
+          }
+        }
+      }
+      if (num_refgrids_deleted > 0) {
+        for (int irefgrid = 1; irefgrid < project_output.num_refgrids; irefgrid++) {
+          if (refgrid_delete[irefgrid]) {
+            for (int jrefgrid = irefgrid; jrefgrid < project_output.num_refgrids - 1; jrefgrid++) {
+              strncpy(project_output.refgrid_names[jrefgrid], project_output.refgrid_names[jrefgrid + 1], sizeof(mb_path));
+            }
+          }
+        }
+        project_output.num_refgrids -= num_refgrids_deleted;
+        for (int ifile = 0; ifile < project_output.num_files; ifile++) {
+          struct mbna_file *file = &(project_output.files[ifile]);
+          for (int isection = 0; isection < project_output.files[ifile].num_sections; isection++) {
+            struct mbna_section *section = &(file->sections[isection]);
+            if (section->globaltie.refgrid_id >= 0) {
+              section->globaltie.refgrid_id = refgrid_renumber[section->globaltie.refgrid_id];
+            }
+          }
+        }
+      }
+    }
   }
 
   struct mbna_file *file1;
@@ -2342,6 +2515,52 @@ int main(int argc, char **argv) {
                   section1->globaltie.dr2_m = 0.0;
                   section1->globaltie.dr3_m = 0.0;
                   section1->globaltie.rsigma_m = 0.0;
+              }
+          }
+      }
+      break;
+
+    case MOD_MODE_SHIFT_GLOBAL_TIE:
+      fprintf(stderr, "\nCommand shift-global-tie=%4.4d:%4.4d/%.3f/%.3f/%.3f\n", 
+                      mods[imod].file1, mods[imod].section1, 
+                      mods[imod].xoffset, mods[imod].yoffset, mods[imod].zoffset);
+
+      /* if this file and section exists and global tie exists shift the global tie */
+      if (mods[imod].file1 >= 0 && mods[imod].file1 < project_output.num_files) {
+        file1 = (struct mbna_file *)&project_output.files[mods[imod].file1];
+        if (mods[imod].section1 >= 0 && mods[imod].section1 < file1->num_sections) {
+          section1 = (struct mbna_section *)&file1->sections[mods[imod].section1];
+          if (section1->globaltie.status != MBNA_TIE_NONE) {
+            section1->globaltie.offset_x_m += mods[imod].xoffset;
+            section1->globaltie.offset_y_m += mods[imod].yoffset;
+            section1->globaltie.offset_z_m += mods[imod].zoffset;
+            mb_coor_scale(verbose, 0.5 * (section1->latmin + section1->latmax),
+                                    &mtodeglon, &mtodeglat);
+            section1->globaltie.offset_x = section1->globaltie.offset_x_m * mtodeglon;
+            section1->globaltie.offset_y = section1->globaltie.offset_y_m * mtodeglat;
+          }
+        }
+      }
+      break;
+
+    case MOD_MODE_SHIFT_ALL_GLOBAL_TIES:
+      fprintf(stderr, "\nCommand shift-all-global-ties=%.3f/%.3f/%.3f\n", 
+                      mods[imod].xoffset, mods[imod].yoffset, mods[imod].zoffset);
+
+      /* loop over all sections shifting any global ties */
+      for (int ifile = 0; ifile < project_output.num_files; ifile++) {
+          file1 = &project_output.files[ifile];
+          for (int isection = 0; isection < file1->num_sections; isection++) {
+              section1 = &file1->sections[isection];
+
+              if (section1->globaltie.status != MBNA_TIE_NONE) {
+                section1->globaltie.offset_x_m += mods[imod].xoffset;
+                section1->globaltie.offset_y_m += mods[imod].yoffset;
+                section1->globaltie.offset_z_m += mods[imod].zoffset;
+                mb_coor_scale(verbose, 0.5 * (section1->latmin + section1->latmax),
+                                        &mtodeglon, &mtodeglat);
+                section1->globaltie.offset_x = section1->globaltie.offset_x_m * mtodeglon;
+                section1->globaltie.offset_y = section1->globaltie.offset_y_m * mtodeglat;
               }
           }
       }
@@ -3436,8 +3655,10 @@ int main(int argc, char **argv) {
         file2 = &project_output.files[crossing->file_id_2];
         section2 = &file2->sections[crossing->section_2];
         if (crossing->num_ties > 0 &&
-            (section1->distance < 0.25 * minimum_section_length
-              || section2->distance < 0.25 * minimum_section_length)) {
+            ((section1->distance < 0.25 * minimum_section_length 
+                && section1->num_beams < minimum_section_soundings)
+            || (section2->distance < 0.25 * minimum_section_length 
+                && section2->num_beams < minimum_section_soundings))) {
           fprintf(stderr, "Unset tie(s) of crossing: %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", current_crossing, file1->block,
                   crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2, crossing->section_2);
           crossing->num_ties = 0;
@@ -3456,14 +3677,31 @@ int main(int argc, char **argv) {
         file2 = &project_output.files[crossing->file_id_2];
         section2 = &file2->sections[crossing->section_2];
         if (crossing->status != MBNA_CROSSING_STATUS_SKIP
-            && (section1->distance < 0.25 * minimum_section_length
-                || section2->distance < 0.25 * minimum_section_length)) {
+            && ((section1->distance < 0.25 * minimum_section_length 
+                && section1->num_beams < minimum_section_soundings)
+            || (section2->distance < 0.25 * minimum_section_length 
+                && section2->num_beams < minimum_section_soundings))) {
           fprintf(stderr, "Skip crossing: %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", icrossing, file1->block,
                   crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2, crossing->section_2);
           crossing->num_ties = 0;
           crossing->status = MBNA_CROSSING_STATUS_SKIP;
         }
       }
+      break;
+
+    case MOD_MODE_REMOVE_SHORT_SECTIONS:
+
+      // loop over all files and sections, merging short sections with the
+      // immediately prior sections
+      status = mbnavadjust_remove_short_sections(verbose, &project_output, 
+                    minimum_section_length, minimum_section_soundings, &error);
+      break;
+
+    case MOD_MODE_REMOVE_FILE:
+
+      // remove specified file
+      status = mbnavadjust_remove_file_by_id(verbose, &project_output, 
+                    ifile_remove, &error);
       break;
 
     case MOD_MODE_REMAKE_MB166_FILES:

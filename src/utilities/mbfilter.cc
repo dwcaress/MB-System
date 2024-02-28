@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbfilter.c	1/16/95
  *
- *    Copyright (c) 1995-2020 by
+ *    Copyright (c) 1995-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * mbfilter applies one or more simple filters to the specified
@@ -99,7 +109,7 @@ struct mbfilter_ping_struct {
 	double heading;
 	double distance;
 	double altitude;
-	double sonardepth;
+	double sensordepth;
 	double roll;
 	double pitch;
 	double heave;
@@ -1255,7 +1265,7 @@ int main(int argc, char **argv) {
 			while (status == MB_SUCCESS && ndata < n_buffer_max) {
 				status = mb_get_all(verbose, imbio_ptr, &store_ptr, &kind, ping[ndata].time_i, &ping[ndata].time_d,
 				                    &ping[ndata].navlon, &ping[ndata].navlat, &ping[ndata].speed, &ping[ndata].heading,
-				                    &ping[ndata].distance, &ping[ndata].altitude, &ping[ndata].sonardepth,
+				                    &ping[ndata].distance, &ping[ndata].altitude, &ping[ndata].sensordepth,
 				                    &ping[ndata].beams_bath, &ping[ndata].beams_amp, &ping[ndata].pixels_ss, ping[ndata].beamflag,
 				                    ping[ndata].bath, ping[ndata].amp, ping[ndata].bathacrosstrack, ping[ndata].bathalongtrack,
 				                    ping[ndata].ss, ping[ndata].ssacrosstrack, ping[ndata].ssalongtrack, comment, &error);
@@ -1272,9 +1282,9 @@ int main(int argc, char **argv) {
 					}
 					status = mb_extract_nav(verbose, imbio_ptr, store_ptr, &kind, ping[ndata].time_i, &ping[ndata].time_d,
 					                        &ping[ndata].navlon, &ping[ndata].navlat, &ping[ndata].speed, &ping[ndata].heading,
-					                        &ping[ndata].sonardepth, &ping[ndata].roll, &ping[ndata].pitch, &ping[ndata].heave,
+					                        &ping[ndata].sensordepth, &ping[ndata].roll, &ping[ndata].pitch, &ping[ndata].heave,
 					                        &error);
-					status &= mb_extract_altitude(verbose, imbio_ptr, store_ptr, &kind, &ping[ndata].sonardepth,
+					status &= mb_extract_altitude(verbose, imbio_ptr, store_ptr, &kind, &ping[ndata].sensordepth,
 					                             &ping[ndata].altitude, &error);
 				}
 				if (status == MB_SUCCESS && kind == MB_DATA_DATA) {
@@ -1474,7 +1484,7 @@ int main(int argc, char **argv) {
 					if (datakind == MBFILTER_BATH) {
 						status &= mbcopy_any_to_mbldeoih(
 						    verbose, system, MB_DATA_DATA, ping[j].time_i, ping[j].time_d, ping[j].navlon, ping[j].navlat,
-						    ping[j].speed, ping[j].heading, ping[j].sonardepth, ping[j].altitude, ping[j].roll, ping[j].pitch,
+						    ping[j].speed, ping[j].heading, ping[j].sensordepth, ping[j].altitude, ping[j].roll, ping[j].pitch,
 						    ping[j].heave, imb_io_ptr->beamwidth_xtrack, imb_io_ptr->beamwidth_ltrack, ping[j].beams_bath, 0, 0,
 						    ping[j].beamflag, ping[j].datasave, ping[j].amp, ping[j].bathacrosstrack, ping[j].bathalongtrack,
 						    ping[j].ss, ping[j].ssacrosstrack, ping[j].ssalongtrack, comment, static_cast<char *>(ombio_ptr), static_cast<char *>(omb_io_ptr->store_data),
@@ -1483,7 +1493,7 @@ int main(int argc, char **argv) {
 					else if (datakind == MBFILTER_AMP) {
 						status &= mbcopy_any_to_mbldeoih(
 						    verbose, system, MB_DATA_DATA, ping[j].time_i, ping[j].time_d, ping[j].navlon, ping[j].navlat,
-						    ping[j].speed, ping[j].heading, ping[j].sonardepth, ping[j].altitude, ping[j].roll, ping[j].pitch,
+						    ping[j].speed, ping[j].heading, ping[j].sensordepth, ping[j].altitude, ping[j].roll, ping[j].pitch,
 						    ping[j].heave, imb_io_ptr->beamwidth_xtrack, imb_io_ptr->beamwidth_ltrack, ping[j].beams_bath,
 						    ping[j].beams_amp, 0, ping[j].beamflag, ping[j].bath, ping[j].datasave, ping[j].bathacrosstrack,
 						    ping[j].bathalongtrack, ping[j].ss, ping[j].ssacrosstrack, ping[j].ssalongtrack, comment, static_cast<char *>(ombio_ptr),
@@ -1493,7 +1503,7 @@ int main(int argc, char **argv) {
 					else if (datakind == MBFILTER_SS) {
 						status &= mbcopy_any_to_mbldeoih(
 						    verbose, system, MB_DATA_DATA, ping[j].time_i, ping[j].time_d, ping[j].navlon, ping[j].navlat,
-						    ping[j].speed, ping[j].heading, ping[j].sonardepth, ping[j].altitude, ping[j].roll, ping[j].pitch,
+						    ping[j].speed, ping[j].heading, ping[j].sensordepth, ping[j].altitude, ping[j].roll, ping[j].pitch,
 						    ping[j].heave, imb_io_ptr->beamwidth_xtrack, imb_io_ptr->beamwidth_ltrack, ping[j].beams_bath, 0,
 						    ping[j].pixels_ss, ping[j].beamflag, ping[j].bath, ping[j].amp, ping[j].bathacrosstrack,
 						    ping[j].bathalongtrack, ping[j].datasave, ping[j].ssacrosstrack, ping[j].ssalongtrack, comment,
@@ -1522,7 +1532,7 @@ int main(int argc, char **argv) {
 					ping[j].heading = ping[jj].heading;
 					ping[j].distance = ping[jj].distance;
 					ping[j].altitude = ping[jj].altitude;
-					ping[j].sonardepth = ping[jj].sonardepth;
+					ping[j].sensordepth = ping[jj].sensordepth;
 					ping[j].roll = ping[jj].roll;
 					ping[j].pitch = ping[jj].pitch;
 					ping[j].heave = ping[jj].heave;

@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbctdlist.c	9/14/2008
  *
- *    Copyright (c) 2008-2020 by
+ *    Copyright (c) 2008-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * This program, mbctdlist, lists all ctd data records within swath data files.
@@ -318,7 +328,7 @@ int main(int argc, char **argv) {
 	double heading;
 	double distance;
 	double altitude;
-	double sonardepth;
+	double sensordepth;
 	char comment[MB_COMMENT_MAXLINE];
 
 	int nnav = 0;
@@ -326,7 +336,7 @@ int main(int argc, char **argv) {
 	double *nav_time_d = nullptr;
 	double *nav_lon = nullptr;
 	double *nav_lat = nullptr;
-	double *nav_sonardepth = nullptr;
+	double *nav_sensordepth = nullptr;
 	double *nav_heading = nullptr;
 	double *nav_speed = nullptr;
 	double *nav_altitude = nullptr;
@@ -390,7 +400,7 @@ int main(int argc, char **argv) {
 		while (error <= MB_ERROR_NO_ERROR) {
 			/* read a data record */
 			status = mb_get_all(verbose, mbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
-			                    &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
+			                    &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
 			                    bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
 
 			if (verbose >= 2) {
@@ -410,7 +420,7 @@ int main(int argc, char **argv) {
 					/* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, nnav_alloc * sizeof(double), (void **)&nav_lat, &error);
 					/* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, nnav_alloc * sizeof(double), (void **)&nav_speed, &error);
 					/* status &= */
-					    mb_reallocd(verbose, __FILE__, __LINE__, nnav_alloc * sizeof(double), (void **)&nav_sonardepth, &error);
+					    mb_reallocd(verbose, __FILE__, __LINE__, nnav_alloc * sizeof(double), (void **)&nav_sensordepth, &error);
 					/* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, nnav_alloc * sizeof(double), (void **)&nav_heading, &error);
 					/* status &= */
 					    mb_reallocd(verbose, __FILE__, __LINE__, nnav_alloc * sizeof(double), (void **)&nav_altitude, &error);
@@ -429,7 +439,7 @@ int main(int argc, char **argv) {
 					nav_lon[nnav] = navlon;
 					nav_lat[nnav] = navlat;
 					nav_speed[nnav] = speed;
-					nav_sonardepth[nnav] = sonardepth;
+					nav_sensordepth[nnav] = sensordepth;
 					nav_heading[nnav] = heading;
 					nav_altitude[nnav] = altitude;
 					nnav++;
@@ -585,7 +595,7 @@ int main(int argc, char **argv) {
 		while (error <= MB_ERROR_NO_ERROR) {
 			/* read a data record */
 			status = mb_get_all(verbose, mbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
-			                    &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
+			                    &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
 			                    bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
 
 			if (verbose >= 2) {
@@ -629,8 +639,8 @@ int main(int argc, char **argv) {
 							interp_status &= mb_linear_interp_heading(verbose, nav_time_d - 1, nav_heading - 1, nnav, time_d,
 							                                         &heading, &j, &error);
 						if (interp_status == MB_SUCCESS)
-							interp_status &= mb_linear_interp(verbose, nav_time_d - 1, nav_sonardepth - 1, nnav, time_d,
-							                                 &sonardepth, &j, &error);
+							interp_status &= mb_linear_interp(verbose, nav_time_d - 1, nav_sensordepth - 1, nnav, time_d,
+							                                 &sensordepth, &j, &error);
 						if (interp_status == MB_SUCCESS)
 							interp_status &=
 							    mb_linear_interp(verbose, nav_time_d - 1, nav_altitude - 1, nnav, time_d, &altitude, &j, &error);
@@ -741,7 +751,7 @@ int main(int argc, char **argv) {
 											printsimplevalue(verbose, temperature, 0, 5, ascii, &invert_next_value,
 											                 &signflip_next_value, &error);
 										else {
-											printsimplevalue(verbose, sonardepth, 0, 3, ascii, &invert_next_value,
+											printsimplevalue(verbose, sensordepth, 0, 3, ascii, &invert_next_value,
 											                 &signflip_next_value, &error);
 											mblist_next_value = false;
 										}
@@ -830,8 +840,8 @@ int main(int argc, char **argv) {
 										potentialtemperature =
 										    temperature -
 										    0.04 * (1.0 + 0.185 * temperature + 0.35 * (salinity - 35.0)) *
-										        (sonardepth / 1000.0) -
-										    0.0075 * (1.0 - temperature / 30.0) * (sonardepth * sonardepth / 1000000.0);
+										        (sensordepth / 1000.0) -
+										    0.0075 * (1.0 - temperature / 30.0) * (sensordepth * sensordepth / 1000000.0);
 										printsimplevalue(verbose, potentialtemperature, 0, 5, ascii, &invert_next_value,
 										                 &signflip_next_value, &error);
 										break;
@@ -1043,7 +1053,7 @@ int main(int argc, char **argv) {
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_lon, &error);
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_lat, &error);
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_speed, &error);
-		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_sonardepth, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_sensordepth, &error);
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_heading, &error);
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_altitude, &error);
 	}

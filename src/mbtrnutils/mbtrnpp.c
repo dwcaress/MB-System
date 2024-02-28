@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbtrnpp.c  2/19/2018
  *
- *    Copyright (c) 2018-2020 by
+ *    Copyright (c) 2018-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * mbtrnpp - originally mbtrnpreprocess
@@ -44,18 +54,19 @@
 #include "mbsys_ldeoih.h"
 #include "mbsys_kmbes.h"
 
+#include "mframe.h"
 #include "merror.h"
-#include "mconfig.h"
-#include "r7kc.h"
 #include "msocket.h"
 #include "mtime.h"
 #include "mlist.h"
 #include "mlog.h"
 #include "mbbuf.h"
-#include "medebug.h"
-#include "r7k-reader.h"
 #include "mstats.h"
 #include "mkvconf.h"
+#include "mxdebug.h"
+#include "mxd_app.h"
+#include "r7kc.h"
+#include "r7k-reader.h"
 #ifdef WITH_MBTNAV
 #include "trnw.h"
 #include "netif.h"
@@ -81,7 +92,7 @@ struct mbtrnpp_ping_struct {
   double heading;
   double distance;
   double altitude;
-  double sonardepth;
+  double sensordepth;
   double roll;
   double pitch;
   double heave;
@@ -688,6 +699,9 @@ s=NULL;\
 // MSF_PSTAT  : periodic stats
 // MSF_READER : r7kr reader stats
 #define MBTRNPP_STAT_FLAGS_DFL (MSF_STATUS | MSF_EVENT | MSF_ASTAT | MSF_PSTAT)
+/// @def MBTRNPP_STAT_PERIOD_SEC
+#define MBTRNPP_STAT_PERIOD_SEC ((double)20.0)
+
 
 mbtrnpp_opts_t mbtrn_opts_s, *mbtrn_opts=&mbtrn_opts_s;
 mbtrnpp_cfg_t mbtrn_cfg_s, *mbtrn_cfg=&mbtrn_cfg_s;
@@ -1222,10 +1236,10 @@ char *s_mnem_value(char **pdest, size_t len, const char *key)
             }
             if(NULL!=dest){
                 sprintf(dest,"%s",(NULL!=val ? val : alt));
-            } else {PTRACE();}
+            } else {MX_TRACE();}
 //            fprintf(stderr,"%s:%d - dest[%p/%s] pdest[%p/%s] retval[%s]\n",__func__,__LINE__,dest,dest,*pdest,*pdest,retval);
 
-        } else {PTRACE();}
+        } else {MX_TRACE();}
 
         MEM_CHKINVALIDATE(val);
     }// else invalid arg
@@ -3132,7 +3146,7 @@ int main(int argc, char **argv) {
     if(s_mbtrnpp_peek_opt_cfg(argc,argv,&cfg_path,0)!=NULL){
         fprintf(stderr,"loading config file [%s]\n",cfg_path);
         if(s_mbtrnpp_load_config(cfg_path,mbtrn_opts)!=0){
-            PTRACE();
+            MX_TRACE();
             fprintf(stderr,"ERR - error(s) in config file [%s]\n",cfg_path);
             errflg++;
         }
@@ -3274,17 +3288,16 @@ int main(int argc, char **argv) {
         mbtrnpp_init_trn(&trn_instance,mbtrn_cfg->verbose, trn_cfg);
 
         // temporarily enable module debug
-        mmd_en_mask_t olvl=0;
-
+        mx_module_t *mod_save = NULL;
         if (mbtrn_cfg->verbose!=0) {
-            olvl = mmd_get_enmask(MOD_MBTRNPP, NULL);
-            mmd_channel_en(MOD_MBTRNPP,MM_DEBUG);
+            mod_save = mxd_save(MBTRNPP_DEBUG);
+            mxd_setModule(MBTRNPP_DEBUG, 5, false, NULL);
         }
 
         // initialize socket outputs
         int test=-1;
         if( (test=mbtrnpp_init_trnsvr(&trnsvr, trn_instance, mbtrn_cfg-> trnsvr_host,mbtrn_cfg->trnsvr_port,true))==0){
-//            PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"TRN server netif OK [%s:%d]\n",mbtrn_cfg-> trnsvr_host,mbtrn_cfg->trnsvr_port));
+//            MX_DEBUG("TRN server netif OK [%s:%d]\n",mbtrn_cfg-> trnsvr_host,mbtrn_cfg->trnsvr_port);
             fprintf(stderr,"TRN server netif OK [%s:%d]\n",mbtrn_cfg-> trnsvr_host,mbtrn_cfg->trnsvr_port);
 
         } else {
@@ -3292,23 +3305,22 @@ int main(int argc, char **argv) {
         }
 
         if( (test=mbtrnpp_init_trnusvr(&trnusvr, mbtrn_cfg->trnusvr_host,mbtrn_cfg->trnusvr_port, trn_instance, true))==0){
-//            PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"TRNU server netif OK [%s:%d]\n",mbtrn_cfg->trnusvr_host,mbtrn_cfg-> trnusvr_port));
+//            MX_DEBUG("TRNU server netif OK [%s:%d]\n",mbtrn_cfg->trnusvr_host,mbtrn_cfg-> trnusvr_port);
             fprintf(stderr,"TRNU server netif OK [%s:%d]\n",mbtrn_cfg->trnusvr_host,mbtrn_cfg->trnusvr_port);
         } else {
             fprintf(stderr, "TRNU server netif init failed [%d] [%d %s]\n",test,errno,strerror(errno));
         }
 
         if( (test=mbtrnpp_init_trnumsvr(&trnumsvr, mbtrn_cfg->trnumsvr_group,mbtrn_cfg->trnumsvr_port, trn_instance, true))==0){
-            //            PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"TRNUM server netif OK [%s:%d]\n",mbtrn_cfg->trnumsvr_group,mbtrn_cfg-> trnumsvr_port));
+            //            MX_DEBUG("TRNUM server netif OK [%s:%d]\n",mbtrn_cfg->trnumsvr_group,mbtrn_cfg-> trnumsvr_port);
             fprintf(stderr,"TRNUM server netif OK [%s:%d]\n",mbtrn_cfg->trnumsvr_group,mbtrn_cfg->trnumsvr_port);
         } else {
             fprintf(stderr, "TRNUM server netif init failed [%d] [%d %s]\n",test,errno,strerror(errno));
         }
 
         if (mbtrn_cfg->verbose != 0) {
-       // restore module debug
-        mmd_channel_set(MOD_MBTRNPP,olvl);
-       }
+            mxd_restore(MBTRNPP_DEBUG, mod_save);
+        }
     } else {
         fprintf(stderr,"WARN: skipping TRN init trn_enable[%c] trn_cfg[%p]\n",(mbtrn_cfg->trn_enable?'Y':'N'),trn_cfg);
     }
@@ -3448,22 +3460,22 @@ int main(int argc, char **argv) {
   /* else open ipc to TRN */
 
  if ( OUTPUT_FLAG_SET(OUTPUT_MB1_SVR_EN) ) {
-    mmd_en_mask_t olvl= 0;
-    if (mbtrn_cfg->verbose != 0) {
-      olvl = mmd_get_enmask(MOD_MBTRNPP, NULL);
-      mmd_channel_en(MOD_MBTRNPP, MM_DEBUG);
-    }
+
+     mx_module_t *mod_save = NULL;
+     if (mbtrn_cfg->verbose!=0) {
+         mod_save = mxd_save(MBTRNPP_DEBUG);
+         mxd_setModule(MBTRNPP_DEBUG, 5, false, NULL);
+     }
 
     int test = -1;
      if( (test=mbtrnpp_init_mb1svr(&mb1svr, mbtrn_cfg->mb1svr_host,mbtrn_cfg->mb1svr_port,true))==0){
-         PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"MB1 server netif OK [%s:%d]\n",mbtrn_cfg->mb1svr_host,mbtrn_cfg->mb1svr_port));
-         fprintf(stderr,"MB1 server netif OK [%s:%d]\n",mbtrn_cfg->mb1svr_host,mbtrn_cfg->mb1svr_port);
+         MX_PRINT("MB1 server netif OK [%s:%d]\n",mbtrn_cfg->mb1svr_host,mbtrn_cfg->mb1svr_port);
       } else {
           fprintf(stderr, "MB1 server netif init failed [%d] [%d %s]\n",test,errno,strerror(errno));
       }
 
     if (mbtrn_cfg->verbose != 0) {
-      mmd_channel_set(MOD_MBTRNPP, olvl);
+        mxd_restore(MBTRNPP_DEBUG, mod_save);
     }
   }
 
@@ -3873,13 +3885,13 @@ int main(int argc, char **argv) {
       status = mb_get_all(mbtrn_cfg->verbose, imbio_ptr, &store_ptr, &kind, ping[idataread].time_i, &ping[idataread].time_d,
                           &ping[idataread].navlon, &ping[idataread].navlat, &ping[idataread].speed,
                           &ping[idataread].heading, &ping[idataread].distance, &ping[idataread].altitude,
-                          &ping[idataread].sonardepth, &ping[idataread].beams_bath, &ping[idataread].beams_amp,
+                          &ping[idataread].sensordepth, &ping[idataread].beams_bath, &ping[idataread].beams_amp,
                           &ping[idataread].pixels_ss, ping[idataread].beamflag, ping[idataread].bath, ping[idataread].amp,
                           ping[idataread].bathacrosstrack, ping[idataread].bathalongtrack, ping[idataread].ss,
                           ping[idataread].ssacrosstrack, ping[idataread].ssalongtrack, comment, &error);
 
-      //            PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"mb_get_all - status[%d] kind[%d] err[%d]\n",status, kind,
-      //            error));
+      //            MX_LPRINT(MBTRNPP, 4, "mb_get_all - status[%d] kind[%d] err[%d]\n",status, kind,
+      //            error);
       MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_GETALL_XT], mtime_dtime());
       MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_PING_XT], mtime_dtime());
       if (error <= 0) {
@@ -3922,9 +3934,9 @@ int main(int argc, char **argv) {
 
         status = mb_extract_nav(mbtrn_cfg->verbose, imbio_ptr, store_ptr, &kind, ping[idataread].time_i, &ping[idataread].time_d,
                                 &ping[idataread].navlon, &ping[idataread].navlat, &ping[idataread].speed,
-                                &ping[idataread].heading, &ping[idataread].sonardepth, &ping[idataread].roll,
+                                &ping[idataread].heading, &ping[idataread].sensordepth, &ping[idataread].roll,
                                 &ping[idataread].pitch, &ping[idataread].heave, &error);
-        status = mb_extract_altitude(mbtrn_cfg->verbose, imbio_ptr, store_ptr, &kind, &ping[idataread].sonardepth,
+        status = mb_extract_altitude(mbtrn_cfg->verbose, imbio_ptr, store_ptr, &kind, &ping[idataread].sensordepth,
                                      &ping[idataread].altitude, &error);
 
         // apply static nav offset if specified
@@ -3946,7 +3958,7 @@ int main(int argc, char **argv) {
           double tidevalue = 0.0;
           mb_linear_interp(mbtrn_cfg->verbose, tide_time_d - 1, tide_tide - 1, n_tide,
                             ping[idataread].time_d, &tidevalue, &itide_time, &error);
-          ping[idataread].sonardepth -= tidevalue;
+          ping[idataread].sensordepth -= tidevalue;
           for (int i = 0; i < ping[idataread].beams_bath; i++) {
             if (ping[idataread].beamflag[i] != MB_FLAG_NULL) {
                 ping[idataread].bath[i] -= tidevalue;
@@ -3973,8 +3985,13 @@ int main(int argc, char **argv) {
           beam_end = 0;
           for (int j = 0; j < ping[i_ping_process].beams_bath; j++) {
             if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
-              tangent = ping[i_ping_process].bathacrosstrack[j] /
-                        (ping[i_ping_process].bath[j] - ping[i_ping_process].sonardepth);
+              if(ping[i_ping_process].bath[j] <= ping[i_ping_process].sensordepth) {
+                // invalidate tangent calculation because the denominator zero or negative
+                tangent = threshold_tangent + 1.0;
+              } else {
+                tangent = ping[i_ping_process].bathacrosstrack[j]
+                            / (ping[i_ping_process].bath[j] - ping[i_ping_process].sensordepth);
+              }
               if (fabs(tangent) > threshold_tangent && mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
                 ping[i_ping_process].beamflag_filter[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
                 n_soundings_trimmed++;
@@ -4065,13 +4082,13 @@ int main(int argc, char **argv) {
           /* write out results to stdout as text */
           if ( OUTPUT_FLAG_SET(OUTPUT_MBSYS_STDOUT) ) {
             fprintf(stderr, "Ping: %.9f %.7f %.7f %.3f %.3f %4d\n", ping[i_ping_process].time_d,
-                    ping[i_ping_process].navlat, ping[i_ping_process].navlon, ping[i_ping_process].sonardepth,
+                    ping[i_ping_process].navlat, ping[i_ping_process].navlon, ping[i_ping_process].sensordepth,
                     (double)(DTR * ping[i_ping_process].heading), n_output);
             for (int j = 0; j < ping[i_ping_process].beams_bath; j++) {
               if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
                 fprintf(stderr, "%3.3d starboard:%.3f forward:%.3f down:%.3f\n", j,
                         ping[i_ping_process].bathacrosstrack[j], ping[i_ping_process].bathalongtrack[j],
-                        ping[i_ping_process].bath[j] - ping[i_ping_process].sonardepth);
+                        ping[i_ping_process].bath[j] - ping[i_ping_process].sensordepth);
                 n_soundings_written++;
               }
             }
@@ -4121,7 +4138,7 @@ int main(int argc, char **argv) {
             index += 8;
             mb_put_binary_double(true, ping[i_ping_process].navlon, &output_buffer[index]);
             index += 8;
-            mb_put_binary_double(true, ping[i_ping_process].sonardepth, &output_buffer[index]);
+            mb_put_binary_double(true, ping[i_ping_process].sensordepth, &output_buffer[index]);
             index += 8;
             mb_put_binary_double(true, (double)(DTR * ping[i_ping_process].heading), &output_buffer[index]);
             index += 8;
@@ -4132,14 +4149,13 @@ int main(int argc, char **argv) {
             mb_put_binary_int(true, n_output, &output_buffer[index]);
             index += 4;
 
-            PMPRINT(MOD_MBTRNPP, MBTRNPP_V1,
-                    (stderr,
+            MX_LPRINT(MBTRNPP, 1,
                      "\nts[%.3lf] beams[%03d] ping[%06u]\nlat[%.4lf] lon[%.4lf] hdg[%6.2lf] sd[%7.2lf]\nv[%+6.2lf] "
                      "p/r/y[%.3lf / %.3lf / %.3lf]\n",
                      ping[i_ping_process].time_d, n_output, ping_number, ping[i_ping_process].navlat,
                      ping[i_ping_process].navlon, (double)(DTR * ping[i_ping_process].heading),
-                     ping[i_ping_process].sonardepth, ping[i_ping_process].speed, ping[i_ping_process].pitch,
-                     ping[i_ping_process].roll, ping[i_ping_process].heave));
+                     ping[i_ping_process].sensordepth, ping[i_ping_process].speed, ping[i_ping_process].pitch,
+                     ping[i_ping_process].roll, ping[i_ping_process].heave);
 
             for (int j = 0; j < ping[i_ping_process].beams_bath; j++) {
               if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
@@ -4153,14 +4169,13 @@ int main(int argc, char **argv) {
                 //                                mb_put_binary_double(true, ping[i_ping_process].bath[j],
                 //                                &output_buffer[index]); index += 8;
                 // subtract sonar depth from vehicle bathy; changed 12jul18 cruises
-                mb_put_binary_double(true, (ping[i_ping_process].bath[j] - ping[i_ping_process].sonardepth),
+                mb_put_binary_double(true, (ping[i_ping_process].bath[j] - ping[i_ping_process].sensordepth),
                                      &output_buffer[index]);
                 index += 8;
 
-                PMPRINT(MOD_MBTRNPP, MBTRNPP_V2,
-                        (stderr, "n[%03d] atrk/X[%+10.3lf] ctrk/Y[%+10.3lf] dpth/Z[%+10.3lf]\n", j,
+                  MX_LPRINT(MBTRNPP, 2, "n[%03d] atrk/X[%+10.3lf] ctrk/Y[%+10.3lf] dpth/Z[%+10.3lf]\n", j,
                          ping[i_ping_process].bathalongtrack[j], ping[i_ping_process].bathacrosstrack[j],
-                         (ping[i_ping_process].bath[j] - ping[i_ping_process].sonardepth)));
+                         (ping[i_ping_process].bath[j] - ping[i_ping_process].sensordepth));
               }
             }
 
@@ -4174,7 +4189,7 @@ int main(int argc, char **argv) {
 
             mb_put_binary_int(true, checksum, &output_buffer[index]);
             index += 4;
-            PMPRINT(MOD_MBTRNPP, MBTRNPP_V3, (stderr, "mb1 record chk[%08X] idx[%zu] mb1sz[%zu]\n", checksum, index, mb1_size));
+            MX_LPRINT(MBTRNPP, 3, "mb1 record chk[%08X] idx[%zu] mb1sz[%zu]\n", checksum, index, mb1_size);
 
             MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_PING_XT], mtime_dtime());
 
@@ -4264,9 +4279,9 @@ int main(int argc, char **argv) {
                     fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
                                     "| %11.6f %11.6f %8.3f | Ping not processed - low gain condition\n",
                     time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], ping[i_ping_process].time_d,
-                    ping[i_ping_process].navlon, ping[i_ping_process].navlat, ping[i_ping_process].sonardepth);
+                    ping[i_ping_process].navlon, ping[i_ping_process].navlat, ping[i_ping_process].sensordepth);
                     mbtrnpp_trnu_pubempty_osocket(ping[i_ping_process].time_d, ping[i_ping_process].navlat,
-                      ping[i_ping_process].navlon, ping[i_ping_process].sonardepth,trnusvr);
+                      ping[i_ping_process].navlon, ping[i_ping_process].sensordepth,trnusvr);
                 }
 
 #endif // WITH_MBTNAV
@@ -4329,8 +4344,7 @@ int main(int argc, char **argv) {
       else {
 
         MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_GETFAIL_XT], mtime_dtime());
-        PMPRINT(MOD_MBTRNPP, MBTRNPP_V4,
-                (stderr, "mb_get_all failed: status[%d] kind[%d] err[%d]\n", status, kind, error));
+          MX_LPRINT(MBTRNPP, 4, "mb_get_all failed: status[%d] kind[%d] err[%d]\n", status, kind, error);
 
         // deal with fatal error > 0 - this is usually MB_ERROR_EOF
         if ((status == MB_FAILURE) && (error > 0)) {
@@ -4413,16 +4427,16 @@ int main(int argc, char **argv) {
       /* figure out whether and what to read next */
       if (read_datalist == true) {
         if ((status = mb_datalist_read(mbtrn_cfg->verbose, datalist, ifile, dfile, &mbtrn_cfg->format, &file_weight, &error)) == MB_SUCCESS) {
-          PMPRINT(MOD_MBTRNPP, MM_DEBUG, (stderr, "read_datalist status[%d] - continuing\n", status));
+          MX_DEBUG("read_datalist status[%d] - continuing\n", status);
           read_data = true;
         }
         else {
-          PMPRINT(MOD_MBTRNPP, MM_DEBUG, (stderr, "read_datalist status[%d] - done\n", status));
+          MX_DEBUG("read_datalist status[%d] - done\n", status);
           read_data = false;
         }
       }
       else {
-        PMPRINT(MOD_MBTRNPP, MM_DEBUG, (stderr, "read_datalist == NO\n"));
+       MX_MMSG(MXDEBUG, "read_datalist == NO\n");
         read_data = false;
       }
       mlog_tprintf(mbtrnpp_mlog_id,"i,read_datalist[%s] read_data[%s] status[%d] ifile[%s] dfile[%s] error[%d]\n",
@@ -4871,10 +4885,9 @@ int mbtrnpp_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags
     // update uptime
     stats->uptime = stats_now - stats->session_start;
 
-    PMPRINT(MOD_MBTRNPP, MBTRNPP_V4,
-            (stderr, "cycle_xt: stat_now[%.4lf] stat_nowd[%.4lf] start[%.4lf] stop[%.4lf] value[%.4lf]\n", stats_now,stats_nowd,
+      MX_LPRINT(MBTRNPP, 4, "cycle_xt: stat_now[%.4lf] stat_nowd[%.4lf] start[%.4lf] stop[%.4lf] value[%.4lf]\n", stats_now,stats_nowd,
              app_stats->stats->metrics[MBTPP_CH_MB_CYCLE_XT].start, app_stats->stats->metrics[MBTPP_CH_MB_CYCLE_XT].stop,
-             app_stats->stats->metrics[MBTPP_CH_MB_CYCLE_XT].value));
+             app_stats->stats->metrics[MBTPP_CH_MB_CYCLE_XT].value);
 
     // update stats
     mstats_update_stats(stats->stats, MBTPP_CH_COUNT, flags);
@@ -4887,17 +4900,15 @@ int mbtrnpp_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags
     mstats_t *trnumsvr_stats = netif_stats(trnumsvr);
     mstats_update_stats(trnumsvr_stats, NETIF_CH_COUNT, flags);
 
-    PMPRINT(MOD_MBTRNPP, MBTRNPP_V4,
-            (stderr, "cycle_xt.p: N[%"PRId64"] sum[%.3lf] min[%.3lf] max[%.3lf] avg[%.3lf]\n",
+      MX_LPRINT(MBTRNPP, 4, "cycle_xt.p: N[%"PRId64"] sum[%.3lf] min[%.3lf] max[%.3lf] avg[%.3lf]\n",
              app_stats->stats->per_stats[MBTPP_CH_MB_CYCLE_XT].n, app_stats->stats->per_stats[MBTPP_CH_MB_CYCLE_XT].sum,
              app_stats->stats->per_stats[MBTPP_CH_MB_CYCLE_XT].min, app_stats->stats->per_stats[MBTPP_CH_MB_CYCLE_XT].max,
-             app_stats->stats->per_stats[MBTPP_CH_MB_CYCLE_XT].avg));
+             app_stats->stats->per_stats[MBTPP_CH_MB_CYCLE_XT].avg);
 
-    PMPRINT(MOD_MBTRNPP, MBTRNPP_V4,
-            (stderr, "cycle_xt.a: N[%"PRId64"] sum[%.3lf] min[%.3lf] max[%.3lf] avg[%.3lf]\n",
+      MX_LPRINT(MBTRNPP, 4, "cycle_xt.a: N[%"PRId64"] sum[%.3lf] min[%.3lf] max[%.3lf] avg[%.3lf]\n",
              app_stats->stats->agg_stats[MBTPP_CH_MB_CYCLE_XT].n, app_stats->stats->agg_stats[MBTPP_CH_MB_CYCLE_XT].sum,
              app_stats->stats->agg_stats[MBTPP_CH_MB_CYCLE_XT].min, app_stats->stats->agg_stats[MBTPP_CH_MB_CYCLE_XT].max,
-             app_stats->stats->agg_stats[MBTPP_CH_MB_CYCLE_XT].avg));
+             app_stats->stats->agg_stats[MBTPP_CH_MB_CYCLE_XT].avg);
 
     if (flags & MSF_READER) {
       mstats_update_stats(reader_stats, R7KR_MET_COUNT, flags);
@@ -4959,82 +4970,114 @@ int mbtrnpp_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags
 
 int mbtrnpp_init_debug(int verbose) {
 
-    /* Open and initialize the socket based input for reading using function
-     * mbtrnpp_input_read(). Allocate an internal, hidden buffer to hold data from
-     * full s7k records while waiting to return bytes from those records as
-     * requested by the MBIO read functions.
-     * Store the relevant pointers and parameters within the
-     * mb_io_struct structure *mb_io_ptr. */
+    // enable MXERROR by default
+    mxd_setModule(MXINFO, 0, true, "info");
+    mxd_setModule(MXERROR, 1, false, "err");
+    mxd_setModule(MXDEBUG, 0, true, "debug");
+    mxd_setModule(MXWARN, 0, true, "warn");
 
-    mmd_initialize();
-    mconf_init(NULL, NULL);
-
-    fprintf(stderr, "%s:%d >>> MOD_MBTRNPP[id=%d]  en[%08X] verbose[%d]\n", __FUNCTION__, __LINE__, MOD_MBTRNPP,
-            mmd_get_enmask(MOD_MBTRNPP, NULL),verbose);
+    mxd_setModule(MBTRNPP, 0, true, "mbtrn");
+    mxd_setModule(R7KR, 0, true, "r7kr");
+    mxd_setModule(R7KR_DEBUG, 0, true, "r7kr.debug");
+    mxd_setModule(R7KR_ERROR, 0, true, "r7kr.err");
+    mxd_setModule(R7KC, 0, true, "r7kc");
+    mxd_setModule(R7KC_DEBUG, 0, true, "r7kc.debug");
+    mxd_setModule(R7KC_ERROR, 0, true, "r7kc.err");
+    mxd_setModule(R7KC_PARSER, 0, true, "r7kc.parser");
+    mxd_setModule(R7KC_DRFCON, 0, true, "r7kc.drfcon");
+    mxd_setModule(MB1R, 0, true, "mb1r");
+    mxd_setModule(MB1R_DEBUG, 0, true, "mb1r.debug");
+    mxd_setModule(MB1R_ERROR, 0, true, "mb1r.err");
 
     switch (verbose) {
         case 0:
-            mmd_channel_set(MOD_MBTRNPP, MM_NONE);
-            mmd_channel_set(MOD_R7K, MM_NONE);
-            mmd_channel_set(MOD_R7KR, MM_NONE);
-            mmd_channel_set(MOD_MB1R, MM_NONE);
-            mmd_channel_set(MOD_MSOCK, MM_NONE);
-            mmd_channel_set(MOD_NETIF, MM_NONE);
             break;
         case 1:
-            mmd_channel_en(MOD_MBTRNPP, MBTRNPP_V1);
-            mmd_channel_en(MOD_R7KR, R7KR_V1);
-            mmd_channel_set(MOD_MB1R, MB1R_V1);
+            mxd_setModule(MBTRNPP, 1, false, NULL);
+            mxd_setModule(R7KR, 5, false, NULL);
+            mxd_setModule(MB1R, 5, false, NULL);
             break;
         case 2:
-            mmd_channel_en(MOD_MBTRNPP, MM_DEBUG);
-            mmd_channel_en(MOD_R7KR, MM_DEBUG);
-            mmd_channel_en(MOD_R7K, R7K_PARSER);
-            mmd_channel_en(MOD_MB1R, MM_DEBUG);
+            mxd_setModule(MBTRNPP, 2, false, NULL);
+            mxd_setModule(R7KR, 5, false, NULL);
+            mxd_setModule(R7KR_DEBUG, 5, false, NULL);
+            mxd_setModule(MB1R, 5, false, NULL);
+            mxd_setModule(MB1R_DEBUG, 5, false, NULL);
+            mxd_setModule(R7KC_PARSER, 5, false, NULL);
             break;
         case -1:
-            mmd_channel_en(MOD_MBTRNPP, MBTRNPP_V1);
-            mmd_channel_en(MOD_R7KR, MM_DEBUG);
-            mmd_channel_set(MOD_NETIF, NETIF_V1 | NETIF_V2);
-            mmd_channel_en(MOD_MB1R, MM_DEBUG);
+            mxd_setModule(MBTRNPP, 1, false, NULL);
+            mxd_setModule(MXWARN, 5, false, NULL);
+            mxd_setModule(R7KR, 5, false, NULL);
+            mxd_setModule(R7KR_DEBUG, 5, false, NULL);
+            mxd_setModule(MB1R, 5, false, NULL);
+            mxd_setModule(MB1R_DEBUG, 5, false, NULL);
+            mxd_setModule(NETIF, 2, false, NULL);
             break;
         case -2:
-            mmd_channel_en(MOD_MBTRNPP, MBTRNPP_V1 | MBTRNPP_V2);
-            mmd_channel_set(MOD_NETIF, NETIF_V1 | NETIF_V2 | NETIF_V3 );
+            mxd_setModule(MBTRNPP, 2, false, NULL);
+            mxd_setModule(MXWARN, 5, false, NULL);
+            mxd_setModule(R7KR, 5, false, NULL);
+            mxd_setModule(R7KR_DEBUG, 5, false, NULL);
+            mxd_setModule(MB1R, 5, false, NULL);
+            mxd_setModule(MB1R_DEBUG, 5, false, NULL);
+            mxd_setModule(NETIF, 3, false, NULL);
             break;
         case -3:
-            mmd_channel_en(MOD_MBTRNPP, MM_DEBUG | MBTRNPP_V1 | MBTRNPP_V2 | MBTRNPP_V3 );
-            mmd_channel_en(MOD_R7KR, MM_DEBUG);
-            mmd_channel_en(MOD_R7K, MM_WARN | R7K_PARSER);
-            mmd_channel_en(MOD_MB1R, MM_ALL);
-            mmd_channel_set(MOD_NETIF, NETIF_V1 | NETIF_V2 | NETIF_V3 | NETIF_V4);
-            // this enables messages from msock_recv (e.g. resource temporarily unavailable)
-            msock_set_debug(1);
+            mxd_setModule(MBTRNPP, 3, false, NULL);
+            mxd_setModule(MXWARN, 5, false, NULL);
+            mxd_setModule(MXDEBUG, 5, false, NULL);
+            mxd_setModule(R7KR, 5, false, NULL);
+            mxd_setModule(R7KR_DEBUG, 5, false, NULL);
+            mxd_setModule(MB1R, 5, false, NULL);
+            mxd_setModule(MB1R_DEBUG, 5, false, NULL);
+            mxd_setModule(MB1R_ERROR, 5, false, NULL);
+            mxd_setModule(R7KC_PARSER, 5, false, NULL);
+            mxd_setModule(NETIF, 4, false, NULL);
             break;
         case -4:
-            mmd_channel_en(MOD_MBTRNPP, MM_DEBUG | MBTRNPP_V1 | MBTRNPP_V2 | MBTRNPP_V3 | MBTRNPP_V4);
-            mmd_channel_en(MOD_R7KR, MM_DEBUG);
-            mmd_channel_en(MOD_R7K, MM_WARN | R7K_PARSER | R7K_DRFCON);
-            mmd_channel_en(MOD_MB1R, MM_DEBUG);
-            mmd_channel_en(MOD_MSOCK, MM_DEBUG);
-            mmd_channel_set(MOD_NETIF, MM_DEBUG | NETIF_V1 | NETIF_V2 | NETIF_V3 | NETIF_V4);
-            msock_set_debug(1);
+            mxd_setModule(MBTRNPP, 4, false, NULL);
+            mxd_setModule(MXWARN, 5, false, NULL);
+            mxd_setModule(MXDEBUG, 5, false, NULL);
+            mxd_setModule(MBTRNPP, 5, false, NULL);
+            mxd_setModule(MXWARN, 5, false, NULL);
+            mxd_setModule(MXDEBUG, 5, false, NULL);
+            mxd_setModule(R7KR, 5, false, NULL);
+            mxd_setModule(R7KR_DEBUG, 5, false, NULL);
+            mxd_setModule(MB1R, 5, false, NULL);
+            mxd_setModule(MB1R_DEBUG, 5, false, NULL);
+            mxd_setModule(MB1R_ERROR, 5, false, NULL);
+            mxd_setModule(R7KC_PARSER, 5, false, NULL);
+            mxd_setModule(R7KC_DRFCON, 5, false, NULL);
+            mxd_setModule(NETIF, 5, false, NULL);
+            mxd_setModule(MXMSOCK, 5, false, NULL);
             break;
         case -5:
-            mmd_channel_en(MOD_MBTRNPP, MM_ALL);
-            mmd_channel_en(MOD_R7KR, MM_ALL);
-            mmd_channel_en(MOD_R7K, MM_ALL);
-            mmd_channel_en(MOD_MB1R, MM_ALL);
-            mmd_channel_en(MOD_MSOCK, MM_ALL);
-            mmd_channel_en(MOD_NETIF, MM_ALL);
-            msock_set_debug(1);
+            mxd_setModule(MBTRNPP, 5, false, NULL);
+            mxd_setModule(MXWARN, 5, false, NULL);
+            mxd_setModule(MXDEBUG, 5, false, NULL);
+            mxd_setModule(MBTRNPP, 5, false, NULL);
+            mxd_setModule(MXWARN, 5, false, NULL);
+            mxd_setModule(MXDEBUG, 5, false, NULL);
+            mxd_setModule(R7KR, 5, false, NULL);
+            mxd_setModule(R7KR_DEBUG, 5, false, NULL);
+            mxd_setModule(MB1R, 5, false, NULL);
+            mxd_setModule(MB1R_DEBUG, 5, false, NULL);
+            mxd_setModule(MB1R_ERROR, 5, false, NULL);
+            mxd_setModule(R7KC_PARSER, 5, false, NULL);
+            mxd_setModule(R7KC_DRFCON, 5, false, NULL);
+            mxd_setModule(NETIF, 5, false, NULL);
+            mxd_setModule(MXMSOCK, 5, false, NULL);
             break;
         default:
+            mxd_setModule(MXWARN, 5, false, NULL);
             break;
     }
-    fprintf(stderr, "%s:%d >>> MOD_MBTRNPP  en[%08X]\n", __FUNCTION__, __LINE__, mmd_get_enmask(MOD_MBTRNPP, NULL));
-    fprintf(stderr, "%s:%d >>> MOD_R7KR  en[%08X]\n", __FUNCTION__, __LINE__, mmd_get_enmask(MOD_R7KR, NULL));
-    fprintf(stderr, "%s:%d >>> MOD_R7K  en[%08X]\n", __FUNCTION__, __LINE__, mmd_get_enmask(MOD_R7K, NULL));
+
+    if(verbose < 0){
+        fprintf(stderr, "%s:%d verbose[%d]\n", __func__, __LINE__, verbose);
+        mxd_show();
+    }
 
     // open mb1 data log
     if ( OUTPUT_FLAG_SET(OUTPUT_MB1_BIN) ) {
@@ -5114,9 +5157,9 @@ char *mbtrnpp_trn_updatestr(char *dest, int len, trn_update_t *update, int inden
                  (update->mse_dat->y-update->pt_dat->y),
                  (update->mse_dat->z-update->pt_dat->z),
                  indent,"",
-                 sqrt(update->mse_dat->covariance[0]),
-                 sqrt(update->mse_dat->covariance[2]),
-                 sqrt(update->mse_dat->covariance[5]),
+                 update->mse_dat->covariance[0],
+                 update->mse_dat->covariance[2],
+                 update->mse_dat->covariance[5],
                  indent,"",
                  update->reinit_count,
                  update->filter_state,
@@ -5158,7 +5201,8 @@ int mbtrnpp_trn_pub_odebug(trn_update_t *update)
         char str[256]={0};
 
 
-        PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V1,(stderr,"\nTRN Update:\n%s", mbtrnpp_trn_updatestr(str,256,update,0)));
+        MX_LPRINT(MBTRNPP, 1, "\nTRN Update:\n%s", mbtrnpp_trn_updatestr(str,256,update,0));
+        MX_DEBUG("\nTRN Update:\n%s", mbtrnpp_trn_updatestr(str,256,update,0));
         retval=0;
     }
 
@@ -5206,9 +5250,9 @@ int mbtrnpp_trn_pub_olog(trn_update_t *update,
                          (update->mse_dat->x-update->pt_dat->x),
                          (update->mse_dat->y-update->pt_dat->y),
                          (update->mse_dat->z-update->pt_dat->z),
-                         sqrt(update->mse_dat->covariance[0]),
-                         sqrt(update->mse_dat->covariance[2]),
-                         sqrt(update->mse_dat->covariance[5]));
+                         (update->mse_dat->covariance[0]),
+                         (update->mse_dat->covariance[2]),
+                         (update->mse_dat->covariance[5]));
         mlog_tprintf(log_id,"trn_state,reinit_flag,%d,fstate,%d,success,%d,cycle,%d,ping,%d,mb1_time,%0.3lf,update_time,%0.3lf,isconv,%hd,isval,%hd\n",update->reinit_count,update->filter_state,update->success,update->mb1_cycle,update->ping_number,update->mb1_time,update->update_time,update->is_converged,update->is_valid);
     }
 
@@ -5431,7 +5475,7 @@ int mbtrnpp_init_trnsvr(netif_t **psvr, wtnav_t *trn, char *host, int port, bool
 {
     int retval = -1;
 
-    PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"configuring trn server socket using %s:%d\n",host,port));
+    MX_DEBUG("configuring trn server socket using %s:%d\n", host, port);
     if(NULL!=psvr && NULL!=host){
         netif_t *svr  = netif_new("trnsvr",host,
                           port,
@@ -5464,7 +5508,7 @@ int mbtrnpp_init_mb1svr(netif_t **psvr, char *host, int port, bool verbose)
 {
     int retval = -1;
    if(NULL!=psvr && NULL!=host){
-       PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"configuring MB1 server socket using %s:%d\n",host,port));
+       MX_DEBUG("configuring MB1 server socket using %s:%d\n", host, port);
        fprintf(stderr,"configuring MB1 server socket using %s:%d hbto[%lf]\n",host,port,mbtrn_cfg->mbsvr_hbto);
         netif_t *svr = netif_new("mb1svr",host,
                           port,
@@ -5624,7 +5668,7 @@ int s_mbtrnpp_trnu_reset_box_callback(double ofs_x, double ofs_y, double ofs_z, 
 int mbtrnpp_init_trnusvr(netif_t **psvr, char *host, int port, wtnav_t *trn, bool verbose)
 {
     int retval = -1;
-    PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"configuring trnu (update) server socket using %s:%d\n",host,port));
+    MX_DEBUG("configuring trnu (update) server socket using %s:%d\n", host, port);
     if(NULL!=psvr && NULL!=host){
         netif_t *svr = netif_new("trnusvr",host,
                                  port,
@@ -5664,7 +5708,7 @@ int mbtrnpp_init_trnusvr(netif_t **psvr, char *host, int port, wtnav_t *trn, boo
 int mbtrnpp_init_trnumsvr(netif_t **psvr, char *host, int port, wtnav_t *trn, bool verbose)
 {
     int retval = -1;
-    PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"configuring trnum (update) server socket using %s:%d\n",host,port));
+    MX_DEBUG("configuring trnum (update) server socket using %s:%d\n", host, port);
     if(NULL!=psvr && NULL!=host){
         netif_t *svr = netif_mcast_new("trnumsvr",host,
                                  port,
@@ -5723,7 +5767,7 @@ int mbtrnpp_trn_get_bias_estimates(wtnav_t *self, wposet_t *pt, trn_update_t *ps
             retval = 0;
         }
         else {
-            PMPRINT(MOD_MBTRNPP, MM_DEBUG, (stderr, "Last Meas Invalid\n"));
+            MX_DMSG(MXDEBUG, "Last Meas Invalid\n");
             mlog_tprintf(trnu_alog_id,"ERR: last meas invalid\n");
         }
         wposet_destroy(mle);
@@ -5877,15 +5921,15 @@ int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg)
           double offset_e = pstate->mse_dat->y - pstate->pt_dat->y;
           double offset_z = pstate->mse_dat->z - pstate->pt_dat->z;
           double covariance_mag = sqrt(pstate->mse_dat->covariance[0] * pstate->mse_dat->covariance[0]
-                    + pstate->mse_dat->covariance[1] * pstate->mse_dat->covariance[1]
-                    + pstate->mse_dat->covariance[2] * pstate->mse_dat->covariance[2]);
+                    + pstate->mse_dat->covariance[2] * pstate->mse_dat->covariance[2]
+                    + pstate->mse_dat->covariance[5] * pstate->mse_dat->covariance[5]);
 
           // NOTE: TRN convention is x:northing y:easting z:down
           //       Output here is in order easting northing z
           if ((n_converged_tot + n_unconverged_tot - 1) % 25 == 0) {
-            fprintf(stderr, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
-            fprintf(stderr, "YYYY/MM/DD-HH:MM:SS.SSSSSS TTTTTTTTTT.TTTTTT | Nav: Easting  Northing     Z     | TRN: Easting  Northing     Z     | Off: East   North     Z   | Cov: East     North       Z   :     Mag   | Best Off: T      E      N      Z    |   Ncs   Nct   Nus   Nut  Nr | Use \n");
-            fprintf(stderr, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
+            fprintf(stderr, "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
+            fprintf(stderr, "YYYY/MM/DD-HH:MM:SS.SSSSSS TTTTTTTTTT.TTTTTT | Nav: Easting  Northing     Z     | TRN: Easting  Northing     Z     | Off: East   North     Z   | Cov: East     North       Z   :     Mag   | Best Off: T      E      N      Z    |   Ncs   Nct   Nus   Nut  Nr | CNV USE \n");
+            fprintf(stderr, "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
           }
           fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
                           "| %11.3f %11.3f %8.3f | %11.3f %11.3f %8.3f "
@@ -5895,7 +5939,7 @@ int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg)
           pstate->pt_dat->y, pstate->pt_dat->x, pstate->pt_dat->z,
           pstate->mse_dat->y, pstate->mse_dat->x, pstate->mse_dat->z,
           offset_e, offset_n, offset_z,
-          pstate->mse_dat->covariance[1], pstate->mse_dat->covariance[0], pstate->mse_dat->covariance[2], covariance_mag,
+          pstate->mse_dat->covariance[2], pstate->mse_dat->covariance[0], pstate->mse_dat->covariance[5], covariance_mag,
           pstate->pt_dat->time - use_offset_time, use_offset_e, use_offset_n, use_offset_z,
           n_converged_streak, n_converged_tot, n_unconverged_streak, n_unconverged_tot, n_reinit,
           convergedornot[convergestate], useornot[use_trn_offset]);
@@ -5927,7 +5971,7 @@ int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg)
           pstate->pt_dat->y, pstate->pt_dat->x, pstate->pt_dat->z,
           pstate->mse_dat->y, pstate->mse_dat->x, pstate->mse_dat->z,
           offset_e, offset_n, offset_z,
-          pstate->mse_dat->covariance[1], pstate->mse_dat->covariance[0], pstate->mse_dat->covariance[2], covariance_mag,
+          pstate->mse_dat->covariance[2], pstate->mse_dat->covariance[0], pstate->mse_dat->covariance[5], covariance_mag,
           pstate->pt_dat->time - use_offset_time, use_offset_e, use_offset_n, use_offset_z,
           n_converged_streak, n_converged_tot, n_unconverged_streak, n_unconverged_tot, n_reinit,
           convergedornot[convergestate], useornot[use_trn_offset]);
@@ -5962,12 +6006,12 @@ int mbtrnpp_trn_update(wtnav_t *self, mb1_t *src, wposet_t **pt_out, wmeast_t **
         retval = 0;
       }
       else {
-        PMPRINT(MOD_MBTRNPP, MM_DEBUG, (stderr, "wposet_mb1_to_pose failed [%d]\n", test));
+        MX_DEBUG("wposet_mb1_to_pose failed [%d]\n", test);
           mlog_tprintf(trnu_alog_id,"ERR: mb1_to_pose failed [%d]\n", test);
       }
     }
     else {
-      PMPRINT(MOD_MBTRNPP, MM_DEBUG, (stderr, "wmeast_mb1_to_meas failed [%d]\n", test));
+      MX_DEBUG("wmeast_mb1_to_meas failed [%d]\n", test);
         mlog_tprintf(trnu_alog_id,"ERR: mb1_to_meas failed [%d]\n", test);
     }
   }
@@ -6094,7 +6138,7 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
                             retval=0;
 
                         } else {
-                            PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"ERR: pt[%p] pt_dat[%p] mle_dat[%p] mse_dat[%p]\n",pt,pstate->pt_dat,pstate->mle_dat,pstate->mse_dat));
+                            MX_DEBUG("ERR: pt[%p] pt_dat[%p] mle_dat[%p] mse_dat[%p]\n",pt,pstate->pt_dat,pstate->mle_dat,pstate->mse_dat);
                             mlog_tprintf(trnu_alog_id,"ERR: NULL data pt[%p] pt_dat[%p] mle_dat[%p] mse_dat[%p] ts[%.3lf] beams[%u] ping[%d] lat[%.5lf] lon[%.5lf] hdg[%.2lf] sd[%.1lf]\n",
                                          pt,pstate->pt_dat,pstate->mle_dat,pstate->mse_dat,
                                          mb1->ts, mb1->nbeams, mb1->ping_number,
@@ -6103,7 +6147,7 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
                     } else {
                         mlog_tprintf(trnu_alog_id,"ERR: trncli_get_bias_estimates failed [%d] [%d/%s]\n",test,errno,strerror(errno));
 
-                        PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V3,(stderr,"ERR: trn_get_bias_estimates failed [%d] [%d/%s]\n",test,errno,strerror(errno)));
+                        MX_BPRINT((mxd_level(MBTRNPP) >= 3 || mxd_level(MXDEBUG) != 0), "ERR: trn_get_bias_estimates failed [%d] [%d/%s]\n",test,errno,strerror(errno));
 
                         int time_i[7];
                         mb_get_date(0, mb1->ts, time_i);
@@ -6116,7 +6160,8 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
                     }
                 } else {
                     mlog_tprintf(trnu_alog_id,"ERR: trncli_send_update failed [%d] [%d/%s]\n",test,errno,strerror(errno));
-                    PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V3,(stderr,"ERR: trn_update failed [%d] [%d/%s]\n",test,errno,strerror(errno)));
+
+                    MX_BPRINT((mxd_level(MBTRNPP) >= 3 || mxd_level(MXDEBUG) != 0), "ERR: trn_update failed [%d] [%d/%s]\n",test,errno,strerror(errno));
 
                     int time_i[7];
                     mb_get_date(0, mb1->ts, time_i);
@@ -6189,7 +6234,7 @@ int mbtrnpp_process_mb1(char *src, size_t len, trn_config_t *cfg)
         //                (s-p)[%+6.3lf]**\n",(stime-ptime));
 
         if (mbtrn_cfg->mbtrnpp_loop_delay_msec > 0) {
-            PMPRINT(MOD_MBTRNPP, MBTRNPP_V5, (stderr, "delaying msec[%"PRId64"]\n", mbtrn_cfg->mbtrnpp_loop_delay_msec));
+            MX_LPRINT(MBTRNPP, 5, "delaying msec[%"PRId64"]\n", mbtrn_cfg->mbtrnpp_loop_delay_msec);
             mtime_delay_ms(mbtrn_cfg->mbtrnpp_loop_delay_msec);
         }
 
@@ -6259,7 +6304,7 @@ int mbtrnpp_reson7kr_input_open(int verbose, void *mbio_ptr, char *definition, i
   if (size == 0)
   size = SONAR_READER_CAPACITY_DFL;
 
-  PMPRINT(MOD_MBTRNPP, MM_DEBUG, (stderr, "configuring r7kr_reader using %s:%d\n", hostname, port));
+  MX_DEBUG("configuring r7kr_reader using %s:%d\n", hostname, port);
   r7kr_reader_t *reader = r7kr_reader_new(mbtrn_cfg->trn_dev,hostname, port, size, reson_subs, reson_nsubs);
 
   if (NULL != mb_io_ptr && NULL != reader) {
@@ -6441,23 +6486,23 @@ int mbtrnpp_reson7kr_input_read(int verbose, void *mbio_ptr, size_t *size, char 
                     // update frame read pointers
                     fb_pread = frame_buf;
                     read_frame = false;
-                    PMPRINT(MOD_MBTRNPP,MBTRNPP_V3,(stderr,"read frame len[%zu]:\n",(size_t)rbytes));
+                    MX_LPRINT(MBTRNPP, 3, "read frame len[%zu]:\n",(size_t)rbytes);
                 } else {
                     // frame invalid
                     read_err = true;
-                    PMPRINT(MOD_MBTRNPP,MBTRNPP_V3,(stderr,"invalid frame rbytes[%zu] size[%zu]\n",(size_t)rbytes, (size_t)fb_pdrf->size));
+                    MX_LPRINT(MBTRNPP, 3, "invalid frame rbytes[%zu] size[%zu]\n",(size_t)rbytes, (size_t)fb_pdrf->size);
                 }
             } else {
                 // read error
                 read_err = true;
-                PMPRINT(MOD_MBTRNPP,MBTRNPP_V3,(stderr,"r7kr_read_stripped_frame failed rbytes[%"PRId64"]\n",rbytes));
+                MX_LPRINT(MBTRNPP, 3, "r7kr_read_stripped_frame failed rbytes[%"PRId64"]\n",rbytes);
             }
 
         } else {
             // there's a frame in the buffer
             size_t bytes_rem = frame_buf + fb_pdrf->size - fb_pread;
             size_t readlen = (*size <= bytes_rem ? *size : bytes_rem);
-            PMPRINT(MOD_MBTRNPP,MBTRNPP_V3,(stderr,"reading framebuf size[%zu] rlen[%zu] rem[%zu] err[%c]\n", (size_t)*size, readlen, bytes_rem, (read_err?'Y':'N')));
+            MX_LPRINT(MBTRNPP, 3, "reading framebuf size[%zu] rlen[%zu] rem[%zu] err[%c]\n", (size_t)*size, readlen, bytes_rem, (read_err?'Y':'N'));
         }
 
         if(!read_err){
@@ -6474,7 +6519,7 @@ int mbtrnpp_reson7kr_input_read(int verbose, void *mbio_ptr, size_t *size, char 
                 bytes_rem -= readlen;
                 if(bytes_rem <= 0)
                 {
-                    PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"* buffer empty rem[%"PRId64"]\n", bytes_rem));
+                    MX_LPRINT(MBTRNPP, 4, "* buffer empty rem[%"PRId64"]\n", bytes_rem);
                     // if nothing left, read a frame next time
                     read_frame = true;
                 }
@@ -6484,7 +6529,7 @@ int mbtrnpp_reson7kr_input_read(int verbose, void *mbio_ptr, size_t *size, char 
                 *error   = MB_ERROR_EOF;
                 *size    = (size_t)-1;
                 read_frame = true;
-                PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"buffer empty readlen[%zu] rem[%"PRId64"]\n", readlen, bytes_rem));
+                MX_LPRINT(MBTRNPP, 4, "buffer empty readlen[%zu] rem[%"PRId64"]\n", readlen, bytes_rem);
             }
         }
     } else {
@@ -6499,7 +6544,7 @@ int mbtrnpp_reson7kr_input_read(int verbose, void *mbio_ptr, size_t *size, char 
         *size    = (size_t)rbytes;
 
         MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_GETFAIL_XT], mtime_dtime());
-        PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"r7kr_read_stripped_frame failed: sync_bytes[%d] status[%d] err[%d]\n",sync_bytes,status, *error));
+        MX_LPRINT(MBTRNPP, 4, "r7kr_read_stripped_frame failed: sync_bytes[%d] status[%d] err[%d]\n",sync_bytes,status, *error);
 
         MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBFRAMERD]);
         MST_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_MB_SYNC_BYTES],sync_bytes);
@@ -7091,7 +7136,7 @@ int mbtrnpp_mb1r_input_open(int verbose, void *mbio_ptr, char *definition, int *
     if (size == 0)
         size = MB1_MAX_SOUNDING_BYTES;
 
-    PMPRINT(MOD_MBTRNPP, MM_DEBUG, (stderr, "configuring mb1r_reader using %s:%d\n", hostname, port));
+    MX_DEBUG("configuring mb1r_reader using %s:%d\n", hostname, port);
 
     mb1r_reader_t *reader = mb1r_reader_new(hostname, port, size);
 
@@ -7221,26 +7266,26 @@ int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buf
                     fb_pread = frame_buf;
                     read_frame = false;
                     read_err = false;
-                    PMPRINT(MOD_MBTRNPP,MBTRNPP_V3,(stderr,"read frame len[%zu]:\n",(size_t)rbytes));
+                    MX_LPRINT(MBTRNPP, 3, "read frame len[%zu]:\n",(size_t)rbytes);
 //                   if(verbose>=2 || verbose<=-2){
 //                        mb1_show((mb1_t *)frame_buf,(verbose<-2 || verbose>=2 ? true : false),5);
 //                    }
                 } else {
                     // frame invalid
                     read_err = true;
-                    PMPRINT(MOD_MBTRNPP,MBTRNPP_V3,(stderr,"invalid frame rbytes[%zu] size[%zu]\n",(size_t)rbytes, (size_t)fb_pmb1->size));
+                    MX_LPRINT(MBTRNPP, 3, "invalid frame rbytes[%zu] size[%zu]\n",(size_t)rbytes, (size_t)fb_pmb1->size);
                 }
             } else {
                 // read error
                 read_err = true;
-                PMPRINT(MOD_MBTRNPP,MBTRNPP_V3,(stderr,"mb1r_read_frame failed rbytes[%zu]\n",(size_t)rbytes));
+                MX_LPRINT(MBTRNPP, 3, "mb1r_read_frame failed rbytes[%zu]\n",(size_t)rbytes);
             }
 
         } else {
             // there's a frame in the buffer
             size_t bytes_rem = frame_buf + fb_pmb1->size - fb_pread;
             size_t readlen = (*size <= bytes_rem ? *size : bytes_rem);
-            PMPRINT(MOD_MBTRNPP,MBTRNPP_V3,(stderr,"reading framebuf size[%zu] rlen[%zu] rem[%zu] err[%c]\n", (size_t)*size, readlen, bytes_rem, (read_err?'Y':'N')));
+            MX_LPRINT(MBTRNPP, 3, "reading framebuf size[%zu] rlen[%zu] rem[%zu] err[%c]\n", (size_t)*size, readlen, bytes_rem, (read_err?'Y':'N'));
         }
 
         if(!read_err){
@@ -7255,7 +7300,7 @@ int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buf
                 bytes_rem -= readlen;
                 if(bytes_rem <= 0)
                 {
-                    PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"* buffer empty rem[%"PRId64"]\n", bytes_rem));
+                    MX_LPRINT(MBTRNPP, 4, "* buffer empty rem[%"PRId64"]\n", bytes_rem);
                     // if nothing left, read a frame next time
                     read_frame = true;
                 }
@@ -7265,7 +7310,7 @@ int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buf
                 *error   = MB_ERROR_EOF;
                 *size    = (size_t)0;
                 read_frame = true;
-                PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"buffer empty readlen[%zu] rem[%"PRId64"]\n", readlen, bytes_rem));
+                MX_LPRINT(MBTRNPP, 4, "buffer empty readlen[%zu] rem[%"PRId64"]\n", readlen, bytes_rem);
             }
         }
     } else {
@@ -7279,7 +7324,7 @@ int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buf
         *size    = (size_t)0;
 
         MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_GETFAIL_XT], mtime_dtime());
-        PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"mb1r_read_frame failed: sync_bytes[%d] status[%d] err[%d]\n",sync_bytes,status, *error));
+        MX_LPRINT(MBTRNPP, 4, "mb1r_read_frame failed: sync_bytes[%d] status[%d] err[%d]\n",sync_bytes,status, *error);
 
         MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBFRAMERD]);
         MST_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_MB_SYNC_BYTES],sync_bytes);

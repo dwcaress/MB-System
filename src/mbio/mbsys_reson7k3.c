@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbsys_reson7k.c  3.00  1/8/2019
  *
- *    Copyright (c) 2019-2020 by
+ *    Copyright (c) 2019-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * mbsys_reson7k3.c contains the MBIO functions for handling data from
@@ -1480,7 +1490,7 @@ int mbsys_reson7k3_print_ProcessedSideScan(int verbose, s7k3_ProcessedSideScan *
   fprintf(stderr, "%s     ss_source:                  %u\n", first, ProcessedSideScan->ss_source);
   fprintf(stderr, "%s     number_pixels:              %u\n", first, ProcessedSideScan->number_pixels);
   fprintf(stderr, "%s     pixelwidth:                 %f\n", first, ProcessedSideScan->pixelwidth);
-  fprintf(stderr, "%s     sonardepth:                 %f\n", first, ProcessedSideScan->sonardepth);
+  fprintf(stderr, "%s     sensordepth:                 %f\n", first, ProcessedSideScan->sensordepth);
   fprintf(stderr, "%s     altitude:                   %f\n", first, ProcessedSideScan->altitude);
   for (unsigned int i = 0; i < ProcessedSideScan->number_pixels; i++)
     fprintf(stderr, "%s     pixel[%d]:  sidescan:%f alongtrack:%f\n", first, i, ProcessedSideScan->sidescan[i],
@@ -6812,16 +6822,16 @@ int mbsys_reson7k3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
         ProcessedSideScan->serial_number = RawDetection->serial_number;
         ProcessedSideScan->ping_number = RawDetection->ping_number;
         ProcessedSideScan->multi_ping = RawDetection->multi_ping;
-        ProcessedSideScan->sonardepth = RawDetection->vehicle_depth;
-        ProcessedSideScan->altitude = bath[nbath/2] - ProcessedSideScan->sonardepth;
+        ProcessedSideScan->sensordepth = RawDetection->vehicle_depth;
+        ProcessedSideScan->altitude = bath[nbath/2] - ProcessedSideScan->sensordepth;
       }
       else if (store->read_SegmentedRawDetection) {
         ProcessedSideScan->header = SegmentedRawDetection->header;
         ProcessedSideScan->serial_number = SegmentedRawDetection->serial_number;
         ProcessedSideScan->ping_number = SegmentedRawDetection->ping_number;
         ProcessedSideScan->multi_ping = SegmentedRawDetection->multi_ping;
-        ProcessedSideScan->sonardepth = SegmentedRawDetection->vehicle_depth;
-        ProcessedSideScan->altitude = bath[nbath/2] - ProcessedSideScan->sonardepth;
+        ProcessedSideScan->sensordepth = SegmentedRawDetection->vehicle_depth;
+        ProcessedSideScan->altitude = bath[nbath/2] - ProcessedSideScan->sensordepth;
       }
       ProcessedSideScan->header.Offset = 60;
       ProcessedSideScan->header.Size =
@@ -7579,7 +7589,7 @@ int mbsys_reson7k3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int
     }
 
     /* get draft  */
-    if (mb_io_ptr->nsonardepth > 0) {
+    if (mb_io_ptr->nsensordepth > 0) {
       mb_depint_interp(verbose, mbio_ptr, store->time_d, draft, error);
       *heave = 0.0;
     }
@@ -7613,7 +7623,7 @@ int mbsys_reson7k3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int
     }
 
     /* get draft  */
-    if (mb_io_ptr->nsonardepth > 0) {
+    if (mb_io_ptr->nsensordepth > 0) {
       mb_depint_interp(verbose, mbio_ptr, store->time_d, draft, error);
       *heave = 0.0;
     }
@@ -7646,7 +7656,7 @@ int mbsys_reson7k3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int
     *heave = (double)(Attitude->heave[0]);
 
     /* get draft  */
-    if (mb_io_ptr->nsonardepth > 0) {
+    if (mb_io_ptr->nsensordepth > 0) {
       mb_depint_interp(verbose, mbio_ptr, store->time_d, draft, error);
       *heave = 0.0;
     }
@@ -7680,7 +7690,7 @@ int mbsys_reson7k3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int
     *heave = (double)(RollPitchHeave->heave);
 
     /* get draft  */
-    if (mb_io_ptr->nsonardepth > 0) {
+    if (mb_io_ptr->nsensordepth > 0) {
       mb_depint_interp(verbose, mbio_ptr, store->time_d, draft, error);
       *heave = 0.0;
     }
@@ -7713,7 +7723,7 @@ int mbsys_reson7k3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int
     *heave = (double)(CustomAttitude->heave[0]);
 
     /* get draft  */
-    if (mb_io_ptr->nsonardepth > 0) {
+    if (mb_io_ptr->nsensordepth > 0) {
       mb_depint_interp(verbose, mbio_ptr, store->time_d, draft, error);
       *heave = 0.0;
     }
@@ -7746,7 +7756,7 @@ int mbsys_reson7k3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int
     }
 
     /* get draft  */
-    if (mb_io_ptr->nsonardepth > 0) {
+    if (mb_io_ptr->nsensordepth > 0) {
       mb_depint_interp(verbose, mbio_ptr, store->time_d, draft, error);
       *heave = 0.0;
     }
@@ -7759,7 +7769,7 @@ int mbsys_reson7k3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int
   }
 
   /* extract data from attitude structure */
-  else if (*kind == MB_DATA_SONARDEPTH) {
+  else if (*kind == MB_DATA_SENSORDEPTH) {
     /* get time */
     for (int i = 0; i < 7; i++)
       time_i[i] = store->time_i[i];
@@ -7894,7 +7904,7 @@ int mbsys_reson7k3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
       }
 
       // get draft from buffered time series
-      if (mb_io_ptr->nsonardepth > 0)
+      if (mb_io_ptr->nsensordepth > 0)
         mb_depint_interp(verbose, mbio_ptr, time_d[inav], &(draft[inav]), error);
       else
         draft[inav] = 0.0;
@@ -7934,7 +7944,7 @@ int mbsys_reson7k3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
       }
 
       // get draft from buffered time series
-      if (mb_io_ptr->nsonardepth > 0)
+      if (mb_io_ptr->nsensordepth > 0)
         mb_depint_interp(verbose, mbio_ptr, time_d[inav], &(draft[inav]), error);
       else
         draft[inav] = 0.0;
@@ -9733,9 +9743,9 @@ int mbsys_reson7k3_makess_source(
       ProcessedSideScan->ping_number = RawDetection->ping_number;
       ProcessedSideScan->multi_ping = RawDetection->multi_ping;
       ProcessedSideScan->pixelwidth = *pixel_size;
-      ProcessedSideScan->sonardepth = RawDetection->vehicle_depth;
+      ProcessedSideScan->sensordepth = RawDetection->vehicle_depth;
       ProcessedSideScan->altitude = RawDetection->bathydata[iminxtrack].depth
-                                    - ProcessedSideScan->sonardepth;
+                                    - ProcessedSideScan->sensordepth;
     }
     else if (store->read_SegmentedRawDetection) {
       ProcessedSideScan->header = SegmentedRawDetection->header;
@@ -9743,9 +9753,9 @@ int mbsys_reson7k3_makess_source(
       ProcessedSideScan->ping_number = SegmentedRawDetection->ping_number;
       ProcessedSideScan->multi_ping = SegmentedRawDetection->multi_ping;
       ProcessedSideScan->pixelwidth = *pixel_size;
-      ProcessedSideScan->sonardepth = SegmentedRawDetection->vehicle_depth;
+      ProcessedSideScan->sensordepth = SegmentedRawDetection->vehicle_depth;
       ProcessedSideScan->altitude = SegmentedRawDetection->bathydata[iminxtrack].depth
-                                    - ProcessedSideScan->sonardepth;
+                                    - ProcessedSideScan->sensordepth;
     }
     ProcessedSideScan->header.Offset = 60;
     ProcessedSideScan->header.Size = MBSYS_RESON7K_RECORDHEADER_SIZE
@@ -9802,9 +9812,9 @@ int mbsys_reson7k3_makess_source(
       ProcessedSideScan->number_pixels = MIN(2 * BeamGeometry->number_beams, MBSYS_RESON7K_MAX_PIXELS);
       ProcessedSideScan->ss_type = MB_SIDESCAN_LINEAR;
       ProcessedSideScan->pixelwidth = *pixel_size;
-      ProcessedSideScan->sonardepth = RawDetection->vehicle_depth;
+      ProcessedSideScan->sensordepth = RawDetection->vehicle_depth;
       ProcessedSideScan->altitude = RawDetection->bathydata[iminxtrack].depth
-                                    - ProcessedSideScan->sonardepth;
+                                    - ProcessedSideScan->sensordepth;
 
     }
     else if (store->read_SegmentedRawDetection) {
@@ -9832,9 +9842,9 @@ int mbsys_reson7k3_makess_source(
       ProcessedSideScan->number_pixels = MBSYS_RESON7K_MAX_PIXELS / 2;
       ProcessedSideScan->ss_type = MB_SIDESCAN_LINEAR;
       ProcessedSideScan->pixelwidth = *pixel_size;
-      ProcessedSideScan->sonardepth = SegmentedRawDetection->vehicle_depth;
+      ProcessedSideScan->sensordepth = SegmentedRawDetection->vehicle_depth;
       ProcessedSideScan->altitude = SegmentedRawDetection->bathydata[iminxtrack].depth
-                                    - ProcessedSideScan->sonardepth;
+                                    - ProcessedSideScan->sensordepth;
     }
     ProcessedSideScan->header.Offset = 60;
     ProcessedSideScan->header.Size = MBSYS_RESON7K_RECORDHEADER_SIZE

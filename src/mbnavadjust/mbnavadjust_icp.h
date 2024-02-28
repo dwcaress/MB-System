@@ -1,3 +1,32 @@
+/*--------------------------------------------------------------------
+ *    The MB-system:  mbnavadjust_icp.c                8/4/2018
+ *
+ *    Copyright (c) 2018-2024 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *
+ *    Code to utilize an ICP algorithm in Point Cloud Library (PCL) 
+ *    to match point clouds in MBnavadjust, including this source file,
+ *    was developed by MBARI summer intern Ethan Slattery, working
+ *    with David Caress, during June-August 2018.
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
+ *      Lamont-Doherty Earth Observatory
+ *      Columbia University
+ *      Palisades, NY 10964
+ *
+ *    See README.md file for copying and redistribution conditions.
+ *--------------------------------------------------------------------*/
+
 #ifndef MBNAVADJUSTTEST_ICP_H
 #define MBNAVADJUSTTEST_ICP_H
 

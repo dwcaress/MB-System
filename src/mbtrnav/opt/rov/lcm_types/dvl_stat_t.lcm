@@ -1,74 +1,72 @@
-/***************************************************************************
- *   CONFIDENTIAL - PROPERTY OF GREENSEA SYSTEMS, INC.                     *
- *                                                                         *
- *   Copyright 2013 Greensea Systems, Inc.                                 *
- *   All Rights Reserved by Greensea Systems, Inc.                         *
- *                                                                         *
- *   NOTICE:  This is proprietary and confidential software.  The source   *
- *   code and intellectual property contained within this file is          *
- *   protected by one or more licenses and is NOT "free" or "open source". *
- *   This software may not be duplicated, copied either literally or in    *
- *   spirit,  modified, or used in any way not explicitly granted in       *
- *   writing by Greensea Systems, Inc.                                     *
- *                                                                         *
- *   A copy of the governing software license for the program              *
- *   including this file should have accompanied its distribution.  Please *
- *   contact Greensea Systems, Inc. to receive a copy of the license.      *
- *                                                                         *
- *          Greensea Systems, Inc.                                         *
- *          10 East Main Street                                            *
- *          PO Box 959                                                     *
- *          Richmond, Vermont  05477  USA                                  *
- *          www.greenseainc.com :: info@greenseainc.com                    *
- *                                                                         *
- *                                                                         *
- ***************************************************************************/
-/**
-  The DVL type contains the necessary data for OpenINS to calculate 
-  both the altitude and velocities of the system
-  
-  \b Reference \b Frame \n
-  The frame of reference is relative to the device and does not follow a 
-  particular convention.  It is up to the user to know how the device 
-  reference frame relates to the system. 
-  
-  \b Type \b Expansion \n
-  This generic type can be expanded using the vector of analog_t values 
-  provided in all GTS complient types.  To add elements to this type:
-    
-  1) Create an analog_t 
-  2) Follow the GTS type expansion naming convention and add the
-     name element to your analog_t
-  3) Add the value of the analog_t
-  4) Add the new analog_t to the analogs vector 
-  5) Set the num_analogs element to the size of the analogs vector
-  6) Document the new elements of your type in the application that
-     transmits the type.
+///***************************************************************************
+// *   CONFIDENTIAL - PROPERTY OF GREENSEA SYSTEMS, INC.                     *
+// *                                                                         *
+// *   Copyright 2013 Greensea Systems, Inc.                                 *
+// *   All Rights Reserved by Greensea Systems, Inc.                         *
+// *                                                                         *
+// *   NOTICE:  This is proprietary and confidential software.  The source   *
+// *   code and intellectual property contained within this file is          *
+// *   protected by one or more licenses and is NOT "free" or "open source". *
+// *   This software may not be duplicated, copied either literally or in    *
+// *   spirit,  modified, or used in any way not explicitly granted in       *
+// *   writing by Greensea Systems, Inc.                                     *
+// *                                                                         *
+// *   A copy of the governing software license for the program              *
+// *   including this file should have accompanied its distribution.  Please *
+// *   contact Greensea Systems, Inc. to receive a copy of the license.      *
+// *                                                                         *
+// *          Greensea Systems, Inc.                                         *
+// *          10 East Main Street                                            *
+// *          PO Box 959                                                     *
+// *          Richmond, Vermont  05477  USA                                  *
+// *          www.greenseainc.com :: info@greenseainc.com                    *
+// *                                                                         *
+// *                                                                         *
+// ***************************************************************************/
 
-  For example:
-\code
-  lcm::LCM m_lcm;
-  
-  gss::dvl_stat_t txdata;
-  
-  gss::analog_t extra_info;
-  extra_info.name = "DIE_TEMPERATURE_DEG_C"
-  extra_info.value = 33.13;
-  
-  txdata.analogs.push_back(extra_info);
-  txdata.num_analogs = txdata.analogs.size(); // this is required!!
-  
-  m_lcm.publish("DVL_STAT", &txdata);
-\endcode          
-     
-  Note: This is not the only way to add elements but contains all of the
-  essential steps to adhere to the GTS guidelines.
-
-  \b Standards \n
-  This type adheres to the Generic Typing System (GTS) guidelines.  For 
-  more information on GTS see the GTS handbook.
-  
-*/
+//  The DVL type contains the necessary data for OpenINS to calculate
+//  both the altitude and velocities of the system
+//
+//  \b Reference \b Frame \n
+//  The frame of reference is relative to the device and does not follow a
+//  particular convention.  It is up to the user to know how the device
+//  reference frame relates to the system.
+//
+//  \b Type \b Expansion \n
+//  This generic type can be expanded using the vector of analog_t values
+//  provided in all GTS complient types.  To add elements to this type:
+//
+//  1) Create an analog_t
+//  2) Follow the GTS type expansion naming convention and add the
+//     name element to your analog_t
+//  3) Add the value of the analog_t
+//  4) Add the new analog_t to the analogs vector
+//  5) Set the num_analogs element to the size of the analogs vector
+//  6) Document the new elements of your type in the application that
+//     transmits the type.
+//
+//  For example:
+//\code
+//  lcm::LCM m_lcm;
+//
+//  gss::dvl_stat_t txdata;
+//
+//  gss::analog_t extra_info;
+//  extra_info.name = "DIE_TEMPERATURE_DEG_C"
+//  extra_info.value = 33.13;
+//
+//  txdata.analogs.push_back(extra_info);
+//  txdata.num_analogs = txdata.analogs.size();  this is required!!
+//
+//  m_lcm.publish("DVL_STAT", &txdata);
+//\endcode
+//
+//  Note: This is not the only way to add elements but contains all of the
+//  essential steps to adhere to the GTS guidelines.
+//
+//  \b Standards \n
+//  This type adheres to the Generic Typing System (GTS) guidelines.  For
+//  more information on GTS see the GTS handbook.
 
 package gss;
 

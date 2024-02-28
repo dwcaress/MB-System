@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_write_init.c	1/25/93
  *
- *    Copyright (c) 1993-2020 by
+ *    Copyright (c) 1993-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * mb_write_init.c opens and initializes a multibeam data file
@@ -535,7 +545,7 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 	mb_io_ptr->nfix = 0;
 	mb_io_ptr->nattitude = 0;
 	mb_io_ptr->nheading = 0;
-	mb_io_ptr->nsonardepth = 0;
+	mb_io_ptr->nsensordepth = 0;
 	mb_io_ptr->naltitude = 0;
 	for (int i = 0; i < MB_ASYNCH_SAVE_MAX; i++) {
 		mb_io_ptr->fix_time_d[i] = 0.0;
@@ -547,8 +557,8 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 		mb_io_ptr->attitude_pitch[i] = 0.0;
 		mb_io_ptr->heading_time_d[i] = 0.0;
 		mb_io_ptr->heading_heading[i] = 0.0;
-		mb_io_ptr->sonardepth_time_d[i] = 0.0;
-		mb_io_ptr->sonardepth_sonardepth[i] = 0.0;
+		mb_io_ptr->sensordepth_time_d[i] = 0.0;
+		mb_io_ptr->sensordepth_sensordepth[i] = 0.0;
 		mb_io_ptr->altitude_time_d[i] = 0.0;
 		mb_io_ptr->altitude_altitude[i] = 0.0;
 	}

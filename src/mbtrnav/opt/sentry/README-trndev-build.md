@@ -29,18 +29,18 @@ cd trndev-<version>
 ./trndev-build-cmake.sh
 ```
 
-Applications, libraries and headers are installed in /usr/local by default.
-Optionally, set DESTDIR and/or PREFIX to install in $DESTDIR/$PREFIX:
-
-```
-sudo ./trndev-build-cmake.sh -i [-d <path> -p <path>]
-```
-
 A copy of the cmake build output is automatically staged in
 
 ```
 trndev-<version>/mframe/build/pkg
 trndev-<version>/libtrnav/build/pkg 
+```
+
+After building, run again using the -i option to install applications, libraries and headers in /usr/local (default).  
+Optionally, use -d and/or -p to install in $DESTDIR/$PREFIX:
+
+```
+sudo ./trndev-build-cmake.sh -i [-d <path> -p <path>]
 ```
 
 ---
@@ -64,6 +64,14 @@ Options:
 
 ### trndev-build-gnu.sh
 
+The trndev-build-gnu.sh script may be used to build/install the packages using gnu make.  
+Applications and libraries are staged in libtrnav/bin; the gnu build includes some additional  
+utility applications.  
+
+After building, run again using the -i option to install applications, libraries and headers in /usr/local (default).  
+
+When using the -d option and -p together, add a leading slash to the -p path.
+
 ```
 Description: build/install trndev using gnu make
 
@@ -80,13 +88,12 @@ Options:
 
 ### Examples
 
-```
 
+__cmake__
+
+```
 # build using cmake
 trndev-build-cmake.sh
-
-# build using gnu
-trndev-build-gnu.sh
 
 # install to default directory /usr/local
 sudo trndev-build-cmake.sh -i
@@ -100,6 +107,71 @@ trndev-build-cmake.sh -id $PWD/stage
 # uninstall from staging directory w/ custom PREFIX (as non-root)
 trndev-build-cmake.sh -ud $PWD/stage -p /foo/bar
 ```
+
+__gnu make__
+
+```
+# build using gnu
+trndev-build-gnu.sh
+
+# install to staging directory w/ default PREFIX (as non-root)
+trndev-build-gnu.sh -id $PWD/stage
+
+# uninstall from staging directory w/ custom PREFIX (as non-root)
+# note leading slash with -p
+trndev-build-gnu.sh -ud $PWD/stage -p /foo/bar
+```
+---
+
+## Run the test apps
+
+Run TRN update client/server applications.  
+Use CTRL-C to stop either application.  
+
+It is recommended to run in separate terminals; otherwise run trnusver-test in the background.
+
+Instructions in this doc reference TRNDEV as the path to the directory containing libtrnav and mframe.  
+Detailed use notes are included below.  
+
+```
+ export TRNDEV=/path/to/trn-dev
+```
+
+### run trnu client/server test apps
+
+
+__from cmake build staging directory__
+
+```
+ cd ${TRNDEV}
+ ./libtrnav/build/pkg/bin/libtrnav-0.1.0/trnusvr-test --host=localhost
+ ./libtrnav/build/pkg/bin/libtrnav-0.1.0/trnucli-test --host=localhost --input=S --ofmt=p --async=3000 
+```
+
+__from gnu build staging directory__
+
+```
+ cd ${TRNDEV}
+ ./libtrnav/bin/trnusvr-test --host=localhost
+ ./libtrnav/bin/trnucli-test --host=localhost --input=S --ofmt=p --async=3000
+```
+
+### Test application output
+
+Log output is directed to working directory (where app was started).
+
+|  trnusvr-test Output  |        Destination      |
+| :--------------------:|:------------------------|
+| status                | stderr                  |
+| server instance data  | netif-\<session\>.log.  |
+| trnusvr-test session  | trnusvr-\<session\>.log |
+
+|  trnucli-test Output  |             Destination           |
+| :--------------------:|:--------------------------------- |
+| status                | stderr                            |
+| trnucli-test session  | trnucli-\<session\>.log           |
+| trnuli_ctx session    | trnuctx-<session\>-\<client\>.log |
+
 ---
 
 ## Get the code 
@@ -125,115 +197,30 @@ and require permission to access
 
 ---
 
-## Build/run the test apps
+# Appendices
 
-Instructions in this doc reference TRNDEV
-as the path to the directory containing libtrnav and mframe
+## Troubleshooting
 
-```
- export TRNDEV=/path/to/trn-dev
-```
+### missing libpthread or libm
 
-## Manual build using cmake [1]
+The location and packaging of the pthreads and math libraries (libpthread, libm) varies by platform.  
+On some platforms, they may exist as static or dynamic libraries, and may not have generic symbolic links (e.g. libpthread.so).
 
-### build mframe
+The simple CMakeLists.txt files used here originated for a specific application, using older versions of linux and cmake.  
+It uses cmake find\_library, which provides possible names and path hints to enable cmake to find the libraries.
 
-```
- cd ${TRNDEV}/mframe
- mkdir build
- cd build/
- cmake ..
- cmake --build .
- cmake --install . --prefix `pwd`/pkg
-```
-
-### build libtrnav 
+If cmake is unable to find a library, it may be necessary to locate it and add a new path or name to the appropriate CmakeLists.txt.
+To find libpthread on linux, try
 
 ```
- cd ${TRNDEV}/libtrnav
- mkdir build
- cd build/
- cmake ..
- cmake --build .
- cmake --install . --prefix `pwd`/pkg
-```
-### build test apps
-
-Note: These build as part of the libtrnav package
-The binaries are in ${TRNDEV}/build
-
-```
- (deprecated)
- cd ${TRNDEV}/trnapp
- mkdir build
- cd build/
- cmake .. ls
- cmake --build .
+sudo find /usr -name libpthread*
 ```
 
-### run apps [2]
+If it is not found, it may be necessary to install it.  
+For linux, package names may vary by distribution.  
+On MacOS, they may be available via Macports or Homebrew, or by installing XCode command line tools.
 
-```
- cd ${TRNDEV}
- ./libtrnav/build/trnusvr-test --host=localhost
- ./libtrnav/build/trnucli-test --host=localhost --input=S --ofmt=p --async=3000 
-```
-
-[1] cmake command may vary (cmake, cmake3, etc.)
-[2] Recommended to run in separate terminals; otherwise run trnusver-test in the background.
-
----
-
-## Manual build using gnu make
-
-### build mframe
-
-```
- cd ${TRNDEV}/mframe
- mkdir build
- make 
-```
-
-### build libtrnav
-
-```
- cd ${TRNDEV}/libtrnav
- mkdir build
- make all trnc
-```
-
-### run apps [1]
-
-```
- cd ${TRNDEV}
- ./libtrnav/bin/trnusvr-test --host=localhost
- ./libtrnav/bin/trnucli-test --host=localhost --input=S --ofmt=p --async=3000
-```
-    Use CTRL-C to stop either application
-
-[1] Recommended to run in separate terminals; otherwise run trnusver-test in the background.
-
----
-
-## Output
-
-Log output is directed to working directory (where app was started).
-
-|  trnusvr-test Output  |        Destination      |
-| :--------------------:|:------------------------|
-| status                | stderr                  |
-| server instance data  | netif-\<session\>.log.  |
-| trnusvr-test session  | trnusvr-\<session\>.log |
-
-|  trnucli-test Output  |             Destination           |
-| :--------------------:|:--------------------------------- |
-| status                | stderr                            |
-| trnucli-test session  | trnucli-\<session\>.log           |
-| trnuli_ctx session    | trnuctx-<session\>-\<client\>.log |
-
----
-
-## Use notes
+## Test app use notes 
 
 ### trnusvr-test
 
@@ -337,3 +324,78 @@ The trncli-ctx demo reads from a socket and
         log_en           Y
          ofile      stdout
 ```
+
+---
+
+## Build distribution
+
+Build libtrnav and mframe source distribution tar.gz with build scripts.  
+
+Repo(s) are in an MBARI workspace
+and require permission to access
+
+```
+git clone git@bitbucket.org:mbari/libtrnav.git
+cd libtrnav
+mkdir tmp
+cd tmp
+../opt/sentry/trndev-mkpkg.sh
+```
+
+Generates mktrndev/trndev-<version>.tar.gz
+
+---
+
+## Build manually
+
+### Using cmake
+
+The cmake command may vary by platform (cmake, cmake3, etc.) 
+
+__build mframe__
+
+```
+ cd ${TRNDEV}/mframe
+ mkdir build
+ cd build/
+ cmake ..
+ cmake --build .
+ cmake --install . --prefix `pwd`/pkg
+```
+
+__build libtrnav__
+
+```
+ cd ${TRNDEV}/libtrnav
+ mkdir build
+ cd build/
+ cmake ..
+ cmake --build .
+ cmake --install . --prefix `pwd`/pkg
+```
+
+Output is in libtrnav/build/pkg
+
+---
+
+### Using gnu make
+
+__build mframe__
+
+```
+ cd ${TRNDEV}/mframe
+ mkdir build
+ make 
+```
+
+__build libtrnav__
+
+```
+ cd ${TRNDEV}/libtrnav
+ mkdir build
+ make all trnc
+```
+
+Output is in libtrnav/bin  
+Objects are libtrnav/build
+

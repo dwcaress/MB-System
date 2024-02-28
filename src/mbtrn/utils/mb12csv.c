@@ -70,7 +70,6 @@
 #include "mb1_msg.h"
 #include "mframe.h"
 #include "mfile.h"
-#include "medebug.h"
 
 /////////////////////////
 // Macros
@@ -166,8 +165,8 @@ static bool g_signal=0;
 // Function Definitions
 /////////////////////////
 static const char *s_unit_str(int unit_flag){
-   static const char *g_unit_names[2]={"degrees","radians"};
-    const char *retval;
+   static const char *g_unit_names[3]={"degrees", "radians", "units?"};
+    const char *retval = NULL;
     switch (unit_flag) {
         case CF_UNITS_DEG:
             retval=g_unit_names[0];
@@ -176,7 +175,7 @@ static const char *s_unit_str(int unit_flag){
             retval=g_unit_names[1];
             break;
         default:
-            retval=NULL;
+            retval=g_unit_names[2];
             break;
     }
     return retval;
@@ -300,13 +299,13 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
     }// while
     
     if( cfg->verbose>0){
-        PDPRINT((stderr,"verbose   [%d]\n",(cfg->verbose)));
-        PDPRINT((stderr,"ifile     [%s]\n",cfg->ifile));
-        PDPRINT((stderr,"ofile     [%s]\n",cfg->ofile));
-        PDPRINT((stderr,"file      [%s]\n",( (CFG_FILE_EN(cfg->flags)) ?"Y":"N")));
-        PDPRINT((stderr,"csv       [%s]\n",( (CFG_CSV_EN(cfg->flags)) ?"Y":"N")));
-        PDPRINT((stderr,"units     [%s]\n",s_unit_str(CFG_UFLAGS(cfg->flags))));
-        PDPRINT((stderr,"header    [%s/%s]\n",( (CFG_HDR_EN(cfg->flags)) ?"Y":"N"),cfg->hdel));
+        fprintf(stderr, "verbose   [%d]\n", cfg->verbose);
+        fprintf(stderr, "ifile     [%s]\n", cfg->ifile);
+        fprintf(stderr, "ofile     [%s]\n", cfg->ofile);
+        fprintf(stderr, "file      [%c]\n", ((CFG_FILE_EN(cfg->flags)) ? 'Y' : 'N'));
+        fprintf(stderr, "csv       [%c]\n", ((CFG_CSV_EN(cfg->flags)) ? 'Y' : 'N'));
+        fprintf(stderr, "units     [%s]\n", s_unit_str(CFG_UFLAGS(cfg->flags)));
+        fprintf(stderr, "header    [%c/%s]\n", ((CFG_HDR_EN(cfg->flags)) ? 'Y' : 'N'), cfg->hdel);
     }
 }
 // End function parse_args
@@ -321,7 +320,6 @@ static void s_termination_handler (int signum)
         case SIGINT:
         case SIGHUP:
         case SIGTERM:
-            PDPRINT((stderr,"sig received[%d]\n",signum));
             g_interrupt=true;
             g_signal=signum;
             break;

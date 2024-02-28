@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbprocess->c  3/31/93
  *
- *    Copyright (c) 2000-2020 by
+ *    Copyright (c) 2000-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /** @file
  * mbprocess is a tool for processing swath sonar bathymetry data.
@@ -462,7 +472,7 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
   double heading;
   double distance;
   double altitude;
-  double sonardepth;
+  double sensordepth;
   double draft;
   double roll;
   double pitch;
@@ -505,7 +515,7 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
   int nnav = 0;
   int nanav = 0;
   int nattitude = 0;
-  int nsonardepth = 0;
+  int nsensordepth = 0;
   int ntide = 0;
   int nstatic = 0;
   int size, nchar;
@@ -542,8 +552,8 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
   double *attituderoll = nullptr;
   double *attitudepitch = nullptr;
   double *attitudeheave = nullptr;
-  double *fsonardepthtime = nullptr;
-  double *fsonardepth = nullptr;
+  double *fsensordepthtime = nullptr;
+  double *fsensordepth = nullptr;
   double *tidetime = nullptr;
   double *tide = nullptr;
   double tideval;
@@ -775,14 +785,14 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
     else
       fprintf(stderr, "  Attitude not merged from attitude file.\n");
 
-    fprintf(stderr, "\nSonardepth Merging:\n");
-    if (process->mbp_sonardepth_mode == MBP_SONARDEPTH_ON) {
-      fprintf(stderr, "  Sonardepth merged from sonardepth file.\n");
-      fprintf(stderr, "  Sonardepth file:                 %s\n", process->mbp_sonardepthfile);
-      fprintf(stderr, "  Sonardepth format:               %d\n", process->mbp_sonardepth_format);
+    fprintf(stderr, "\nSensordepth Merging:\n");
+    if (process->mbp_sensordepth_mode == MBP_SENSORDEPTH_ON) {
+      fprintf(stderr, "  Sensordepth merged from sensordepth file.\n");
+      fprintf(stderr, "  Sensordepth file:                 %s\n", process->mbp_sensordepthfile);
+      fprintf(stderr, "  Sensordepth format:               %d\n", process->mbp_sensordepth_format);
     }
     else
-      fprintf(stderr, "  Sonardepth not merged from sonardepth file.\n");
+      fprintf(stderr, "  Sensordepth not merged from sensordepth file.\n");
 
     fprintf(stderr, "\nData Cutting:\n");
     if (process->mbp_cut_num > 0)
@@ -975,7 +985,7 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
     fprintf(stderr, "\nSidescan Corrections:\n");
     if (process->mbp_sscorr_mode == MBP_SSCORR_ON) {
       fprintf(stderr, "  Amplitude vs grazing angle corrections applied to sidescan.\n");
-      fprintf(stderr, "  Sidescan correction file:      %s m\n", process->mbp_sscorrfile);
+      fprintf(stderr, "  Sidescan correction file:      %s\n", process->mbp_sscorrfile);
       if (process->mbp_sscorr_type == MBP_SSCORR_SUBTRACTION)
         fprintf(stderr, "  Sidescan correction by subtraction (dB scale)\n");
       else
@@ -989,7 +999,7 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
         fprintf(stderr, "  Sidescan correction uses swath bathymetry in file\n");
       else {
         fprintf(stderr, "  Sidescan correction uses topography grid\n");
-        fprintf(stderr, "  Topography grid file:      %s m\n", process->mbp_ampsscorr_topofile);
+        fprintf(stderr, "  Topography grid file:      %s\n", process->mbp_ampsscorr_topofile);
       }
       if (process->mbp_sscorr_slope == MBP_SSCORR_IGNORESLOPE || process->mbp_sscorr_slope == MBP_SSCORR_USETOPO)
         fprintf(stderr, "  Sidescan correction ignores seafloor slope\n");
@@ -1908,32 +1918,32 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
   }
 
   /*--------------------------------------------
-    get sonardepth
+    get sensordepth
     --------------------------------------------*/
 
-  /* if sonardepth merging to be done get sonardepth */
-  if (process->mbp_sonardepth_mode == MBP_SONARDEPTH_ON) {
+  /* if sensordepth merging to be done get sensordepth */
+  if (process->mbp_sensordepth_mode == MBP_SENSORDEPTH_ON) {
     /* set max number of characters to be read at a time */
     nchar = 128;
 
-    /* count the data points in the sonardepth file */
-    nsonardepth = 0;
-    if ((tfp = fopen(process->mbp_sonardepthfile, "r")) == nullptr) {
-      fprintf(stderr, "\nUnable to Open Sonardepth File <%s> for reading\n", process->mbp_sonardepthfile);
+    /* count the data points in the sensordepth file */
+    nsensordepth = 0;
+    if ((tfp = fopen(process->mbp_sensordepthfile, "r")) == nullptr) {
+      fprintf(stderr, "\nUnable to Open Sensordepth File <%s> for reading\n", process->mbp_sensordepthfile);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
       exit(MB_ERROR_OPEN_FAIL);
     }
     char *result;
     while ((result = fgets(buffer, nchar, tfp)) == buffer)
-      nsonardepth++;
+      nsensordepth++;
     fclose(tfp);
 
-    /* allocate arrays for sonardepth */
-    if (nsonardepth > 1) {
-      // size = (nsonardepth + 1) * sizeof(double);
+    /* allocate arrays for sensordepth */
+    if (nsensordepth > 1) {
+      // size = (nsensordepth + 1) * sizeof(double);
       /* status = */
-      mb_mallocd(verbose, __FILE__, __LINE__, nsonardepth * sizeof(double), (void **)&fsonardepthtime, error);
-      /* status = */ mb_mallocd(verbose, __FILE__, __LINE__, nsonardepth * sizeof(double), (void **)&fsonardepth, error);
+      mb_mallocd(verbose, __FILE__, __LINE__, nsensordepth * sizeof(double), (void **)&fsensordepthtime, error);
+      /* status = */ mb_mallocd(verbose, __FILE__, __LINE__, nsensordepth * sizeof(double), (void **)&fsensordepth, error);
 
       /* if error initializing memory then quit */
       if (*error != MB_ERROR_NO_ERROR) {
@@ -1945,120 +1955,120 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
       }
     }
 
-    /* if no sonardepth data then quit */
+    /* if no sensordepth data then quit */
     else {
-      fprintf(stderr, "\nUnable to read data from sonardepth file <%s>\n", process->mbp_sonardepthfile);
+      fprintf(stderr, "\nUnable to read data from sensordepth file <%s>\n", process->mbp_sensordepthfile);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
       exit(MB_ERROR_BAD_DATA);
     }
 
-    /* read the data points in the sonardepth file */
-    nsonardepth = 0;
-    if ((tfp = fopen(process->mbp_sonardepthfile, "r")) == nullptr) {
-      fprintf(stderr, "\nUnable to Open Sonardepth File <%s> for reading\n", process->mbp_sonardepthfile);
+    /* read the data points in the sensordepth file */
+    nsensordepth = 0;
+    if ((tfp = fopen(process->mbp_sensordepthfile, "r")) == nullptr) {
+      fprintf(stderr, "\nUnable to Open sensordepth File <%s> for reading\n", process->mbp_sensordepthfile);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
       exit(MB_ERROR_OPEN_FAIL);
     }
     while ((result = fgets(buffer, nchar, tfp)) == buffer) {
-       bool sonardepth_ok = false;
+       bool sensordepth_ok = false;
 
       /* ignore comments */
       if (buffer[0] != '#') {
 
-        /* deal with sonardepth in form: time_d sonardepth */
-        if (process->mbp_sonardepth_format == 1) {
-          const int nget = sscanf(buffer, "%lf %lf", &fsonardepthtime[nsonardepth], &fsonardepth[nsonardepth]);
+        /* deal with sensordepth in form: time_d sensordepth */
+        if (process->mbp_sensordepth_format == 1) {
+          const int nget = sscanf(buffer, "%lf %lf", &fsensordepthtime[nsensordepth], &fsensordepth[nsensordepth]);
           if (nget == 2)
-            sonardepth_ok = true;
+            sensordepth_ok = true;
         }
 
-        /* deal with sonardepth in form: yr mon day hour min sec sonardepth */
-        else if (process->mbp_sonardepth_format == 2) {
+        /* deal with sensordepth in form: yr mon day hour min sec sensordepth */
+        else if (process->mbp_sensordepth_format == 2) {
           const int nget = sscanf(buffer, "%d %d %d %d %d %lf %lf", &time_i[0], &time_i[1], &time_i[2], &time_i[3],
-                        &time_i[4], &sec, &fsonardepth[nsonardepth]);
+                        &time_i[4], &sec, &fsensordepth[nsensordepth]);
           time_i[5] = (int)sec;
           time_i[6] = 1000000 * (sec - time_i[5]);
           mb_get_time(verbose, time_i, &time_d);
-          fsonardepthtime[nsonardepth] = time_d;
+          fsensordepthtime[nsensordepth] = time_d;
           if (nget == 7)
-            sonardepth_ok = true;
+            sensordepth_ok = true;
         }
 
-        /* deal with sonardepth in form: yr jday hour min sec sonardepth */
-        else if (process->mbp_sonardepth_format == 3) {
+        /* deal with sensordepth in form: yr jday hour min sec sensordepth */
+        else if (process->mbp_sensordepth_format == 3) {
           const int nget = sscanf(buffer, "%d %d %d %d %lf %lf", &time_j[0], &time_j[1], &ihr, &time_j[2], &sec,
-                        &fsonardepth[nsonardepth]);
+                        &fsensordepth[nsensordepth]);
           time_j[2] = time_j[2] + 60 * ihr;
           time_j[3] = (int)sec;
           time_j[4] = 1000000 * (sec - time_j[3]);
           mb_get_itime(verbose, time_j, time_i);
           mb_get_time(verbose, time_i, &time_d);
-          fsonardepthtime[nsonardepth] = time_d;
+          fsensordepthtime[nsensordepth] = time_d;
           if (nget == 7)
-            sonardepth_ok = true;
+            sensordepth_ok = true;
         }
 
-        /* deal with sonardepth in form: yr jday daymin sec sonardepth */
-        else if (process->mbp_sonardepth_format == 4) {
+        /* deal with sensordepth in form: yr jday daymin sec sensordepth */
+        else if (process->mbp_sensordepth_format == 4) {
           const int nget = sscanf(buffer, "%d %d %d %lf %lf", &time_j[0], &time_j[1], &time_j[2], &sec,
-                        &fsonardepth[nsonardepth]);
+                        &fsensordepth[nsensordepth]);
           time_j[3] = (int)sec;
           time_j[4] = 1000000 * (sec - time_j[3]);
           mb_get_itime(verbose, time_j, time_i);
           mb_get_time(verbose, time_i, &time_d);
-          fsonardepthtime[nsonardepth] = time_d;
+          fsensordepthtime[nsensordepth] = time_d;
           if (nget == 5)
-            sonardepth_ok = true;
+            sensordepth_ok = true;
         }
       }
 
       /* output some debug values */
-      if (verbose >= 5 && sonardepth_ok) {
-        fprintf(stderr, "\ndbg5  New sonardepth point read in program <%s>\n", program_name);
-        fprintf(stderr, "dbg5       sonardepth[%d]: %f %f\n", nsonardepth, fsonardepthtime[nsonardepth],
-                fsonardepth[nsonardepth]);
+      if (verbose >= 5 && sensordepth_ok) {
+        fprintf(stderr, "\ndbg5  New sensordepth point read in program <%s>\n", program_name);
+        fprintf(stderr, "dbg5       sensordepth[%d]: %f %f\n", nsensordepth, fsensordepthtime[nsensordepth],
+                fsensordepth[nsensordepth]);
       }
       else if (verbose >= 5) {
-        fprintf(stderr, "\ndbg5  Error parsing line in sonardepth file in program <%s>\n", program_name);
+        fprintf(stderr, "\ndbg5  Error parsing line in sensordepth file in program <%s>\n", program_name);
         fprintf(stderr, "dbg5       line: %s\n", buffer);
       }
 
       /* check for reverses or repeats in time */
-      if (sonardepth_ok) {
-        if (nsonardepth == 0)
-          nsonardepth++;
-        else if (fsonardepthtime[nsonardepth] > fsonardepthtime[nsonardepth - 1])
-          nsonardepth++;
-        else if (nsonardepth > 0 && fsonardepthtime[nsonardepth] <= fsonardepthtime[nsonardepth - 1] &&
+      if (sensordepth_ok) {
+        if (nsensordepth == 0)
+          nsensordepth++;
+        else if (fsensordepthtime[nsensordepth] > fsensordepthtime[nsensordepth - 1])
+          nsensordepth++;
+        else if (nsensordepth > 0 && fsensordepthtime[nsensordepth] <= fsensordepthtime[nsensordepth - 1] &&
                  verbose >= 5) {
-          fprintf(stderr, "\ndbg5  sonardepth time error in program <%s>\n", program_name);
-          fprintf(stderr, "dbg5       sonardepth[%d]: %f %f\n", nsonardepth - 1,
-                  fsonardepthtime[nsonardepth - 1], fsonardepth[nsonardepth - 1]);
-          fprintf(stderr, "dbg5       sonardepth[%d]: %f %f\n", nsonardepth, fsonardepthtime[nsonardepth],
-                  fsonardepth[nsonardepth - 1]);
+          fprintf(stderr, "\ndbg5  sensordepth time error in program <%s>\n", program_name);
+          fprintf(stderr, "dbg5       sensordepth[%d]: %f %f\n", nsensordepth - 1,
+                  fsensordepthtime[nsensordepth - 1], fsensordepth[nsensordepth - 1]);
+          fprintf(stderr, "dbg5       sensordepth[%d]: %f %f\n", nsensordepth, fsensordepthtime[nsensordepth],
+                  fsensordepth[nsensordepth - 1]);
         }
       }
       strncpy(buffer, "", sizeof(buffer));
     }
     fclose(tfp);
 
-    /* check for sonardepth */
-    if (nsonardepth < 2) {
-      fprintf(stderr, "\nNo sonardepth read from file <%s>\n", process->mbp_sonardepthfile);
+    /* check for sensordepth */
+    if (nsensordepth < 2) {
+      fprintf(stderr, "\nNo sensordepth read from file <%s>\n", process->mbp_sensordepthfile);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
       exit(*error);
     }
 
-    /* get start and finish times of sonardepth */
-    mb_get_date(verbose, fsonardepthtime[0], stime_i);
-    mb_get_date(verbose, fsonardepthtime[nsonardepth - 1], ftime_i);
+    /* get start and finish times of sensordepth */
+    mb_get_date(verbose, fsensordepthtime[0], stime_i);
+    mb_get_date(verbose, fsensordepthtime[nsensordepth - 1], ftime_i);
 
     /* give the statistics */
     if (verbose >= 1) {
-      fprintf(stderr, "\n%d sonardepth records read\n", nsonardepth);
-      fprintf(stderr, "Sonardepth start time: %4.4d %2.2d %2.2d %2.2d:%2.2d:%2.2d.%6.6d\n", stime_i[0], stime_i[1],
+      fprintf(stderr, "\n%d sensordepth records read\n", nsensordepth);
+      fprintf(stderr, "sensordepth start time: %4.4d %2.2d %2.2d %2.2d:%2.2d:%2.2d.%6.6d\n", stime_i[0], stime_i[1],
               stime_i[2], stime_i[3], stime_i[4], stime_i[5], stime_i[6]);
-      fprintf(stderr, "Sonardepth end time:   %4.4d %2.2d %2.2d %2.2d:%2.2d:%2.2d.%6.6d\n", ftime_i[0], ftime_i[1],
+      fprintf(stderr, "sensordepth end time:   %4.4d %2.2d %2.2d %2.2d:%2.2d:%2.2d.%6.6d\n", ftime_i[0], ftime_i[1],
               ftime_i[2], ftime_i[3], ftime_i[4], ftime_i[5], ftime_i[6]);
     }
   }
@@ -2829,7 +2839,7 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
       /* read some data */
       *error = MB_ERROR_NO_ERROR;
       *status = mb_get_all(verbose, imbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
-                          &heading, &distance, &altitude, &sonardepth, &nbath, &namp, &nss, beamflag, bath, amp,
+                          &heading, &distance, &altitude, &sensordepth, &nbath, &namp, &nss, beamflag, bath, amp,
                           bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
 
       /* time gaps do not matter to mbprocess */
@@ -3648,22 +3658,22 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
       if (*error == MB_ERROR_NO_ERROR)
         ocomment++;
     }
-    if (process->mbp_sonardepth_mode == MBP_SONARDEPTH_OFF) {
-      snprintf(comment, sizeof(comment), "  Sonardepth merging:              OFF.");
+    if (process->mbp_sensordepth_mode == MBP_SENSORDEPTH_OFF) {
+      snprintf(comment, sizeof(comment), "  Sensordepth merging:              OFF.");
       *status = mb_put_comment(verbose, ombio_ptr, comment, error);
       if (*error == MB_ERROR_NO_ERROR)
         ocomment++;
     }
     else {
-      snprintf(comment, sizeof(comment), "  Sonardepth merging:              ON.");
+      snprintf(comment, sizeof(comment), "  Sensordepth merging:              ON.");
       *status = mb_put_comment(verbose, ombio_ptr, comment, error);
       if (*error == MB_ERROR_NO_ERROR)
         ocomment++;
-      snprintf(comment, sizeof(comment), "  Sonardepth file:                 %s", process->mbp_sonardepthfile);
+      snprintf(comment, sizeof(comment), "  Sensordepth file:                 %s", process->mbp_sensordepthfile);
       *status = mb_put_comment(verbose, ombio_ptr, comment, error);
       if (*error == MB_ERROR_NO_ERROR)
         ocomment++;
-      snprintf(comment, sizeof(comment), "  Sonardepth format:               %d", process->mbp_sonardepth_format);
+      snprintf(comment, sizeof(comment), "  Sensordepth format:               %d", process->mbp_sensordepth_format);
       *status = mb_put_comment(verbose, ombio_ptr, comment, error);
       if (*error == MB_ERROR_NO_ERROR)
         ocomment++;
@@ -3977,7 +3987,7 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
   double time_d_lastping = 0.0;
   int inavtime = 0;
   int iattitudetime = 0;
-  int isonardepthtime = 0;
+  int isensordepthtime = 0;
   int inavadjtime = 0;
   int itidetime = 0;
 
@@ -3991,7 +4001,7 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
     *error = MB_ERROR_NO_ERROR;
     *status = MB_SUCCESS;
     *status = mb_get_all(verbose, imbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
-                        &distance, &altitude, &sonardepth, &nbath, &namp, &nss, beamflag, bath, amp, bathacrosstrack,
+                        &distance, &altitude, &sensordepth, &nbath, &namp, &nss, beamflag, bath, amp, bathacrosstrack,
                         bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
 
     /* time gaps do not matter to mbprocess */
@@ -4202,15 +4212,15 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
     }
 
     /*--------------------------------------------
-      handle sonar depth merging
+      handle sensor depth merging
       --------------------------------------------*/
 
-    /* interpolate the sonardepth if desired */
-    if (*error == MB_ERROR_NO_ERROR && process->mbp_sonardepth_mode == MBP_SONARDEPTH_ON &&
+    /* interpolate the sensordepth if desired */
+    if (*error == MB_ERROR_NO_ERROR && process->mbp_sensordepth_mode == MBP_SENSORDEPTH_ON &&
         (kind == MB_DATA_DATA || kind == nav_source)) {
       /* interpolate adjusted navigation */
-      mb_linear_interp(verbose, fsonardepthtime - 1, fsonardepth - 1, nsonardepth, time_d, &draft,
-                                 &isonardepthtime, error);
+      mb_linear_interp(verbose, fsensordepthtime - 1, fsensordepth - 1, nsensordepth, time_d, &draft,
+                                 &isensordepthtime, error);
     }
 
     /*--------------------------------------------
@@ -4408,16 +4418,16 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
 
       /* estimate travel times if they don't exist */
       else {
-        draft_org = sonardepth - heave;
+        draft_org = sensordepth - heave;
         ssv = 1500.0;
         nbeams = nbath;
         for (int i = 0; i < nbath; i++) {
           if (beamflag[i] != MB_FLAG_NULL) {
-            zz = bath[i] - sonardepth;
+            zz = bath[i] - sensordepth;
             rr = sqrt(zz * zz + bathacrosstrack[i] * bathacrosstrack[i] +
                       bathalongtrack[i] * bathalongtrack[i]);
             ttimes[i] = rr / 750.0;
-            mb_xyz_to_takeoff(verbose, bathacrosstrack[i], bathalongtrack[i], (bath[i] - sonardepth),
+            mb_xyz_to_takeoff(verbose, bathacrosstrack[i], bathalongtrack[i], (bath[i] - sensordepth),
                               &angles[i], &angles_forward[i], error);
           }
           else {
@@ -4749,13 +4759,13 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
                                             slopeacrosstrack, bathacrosstrack[i], &bathy, &slope, error);
               if (bathy <= 0.0) {
                 if (altitude > 0.0)
-                  bathy = altitude + sonardepth;
+                  bathy = altitude + sensordepth;
                 else
-                  bathy = altitude_default + sonardepth;
+                  bathy = altitude_default + sensordepth;
                 slope = 0.0;
               }
               if (bathy > 0.0) {
-                altitude_use = bathy - sonardepth;
+                altitude_use = bathy - sensordepth;
                 angle = RTD * atan(bathacrosstrack[i] / altitude_use);
 
                 /* Get offset from SBO file */
@@ -4976,14 +4986,14 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
             }
             if (bathy <= 0.0) {
               if (altitude > 0.0)
-                bathy = altitude + sonardepth;
+                bathy = altitude + sensordepth;
               else
-                bathy = altitude_default + sonardepth;
+                bathy = altitude_default + sensordepth;
               slope = 0.0;
             }
 
             if (bathy > 0.0) {
-              altitude_use = bathy - sonardepth;
+              altitude_use = bathy - sensordepth;
               angle = RTD * atan(bathacrosstrack[i] / altitude_use);
               if (process->mbp_ampcorr_slope != MBP_AMPCORR_IGNORESLOPE)
                 angle += RTD * atan(slope);
@@ -5027,14 +5037,14 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
             }
             if (bathy <= 0.0) {
               if (altitude > 0.0)
-                bathy = altitude + sonardepth;
+                bathy = altitude + sensordepth;
               else
-                bathy = altitude_default + sonardepth;
+                bathy = altitude_default + sensordepth;
               slope = 0.0;
             }
 
             if (bathy > 0.0) {
-              altitude_use = bathy - sonardepth;
+              altitude_use = bathy - sensordepth;
               angle = RTD * atan(ssacrosstrack[i] / altitude_use);
               if (process->mbp_sscorr_slope != MBP_SSCORR_IGNORESLOPE) {
                 angle += RTD * atan(slope);
@@ -5096,7 +5106,7 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
                 grid->data[kgrid11] > grid->nodatavalue) {
               /* get look vector for data */
               bathy = -grid->data[kgrid];
-              r[2] = grid->data[kgrid] + sonardepth;
+              r[2] = grid->data[kgrid] + sensordepth;
               rr = -sqrt(r[0] * r[0] + r[1] * r[1] + r[2] * r[2]);
               r[0] /= rr;
               r[1] /= rr;
@@ -5136,17 +5146,19 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
                 bathy = -grid->data[kgrid];
               else
                 bathy = bath[i];
-              angle = RTD * atan(bathacrosstrack[i] / (bathy - sonardepth));
+              angle = RTD * atan(bathacrosstrack[i] / (bathy - sensordepth));
               slope = 0.0;
             }
 
             /* apply correction */
             *status = get_anglecorr(verbose, ampcorrtableuse.nangle, ampcorrtableuse.angle,
                                    ampcorrtableuse.amplitude, angle, &correction, error);
-            if (process->mbp_ampcorr_type == MBP_AMPCORR_SUBTRACTION)
+            if (process->mbp_ampcorr_type == MBP_AMPCORR_SUBTRACTION) {
               amp[i] = amp[i] - correction + reference_amp;
-            else
+            }
+            else {
               amp[i] = amp[i] / correction * reference_amp;
+            }
           }
         }
       }
@@ -5183,7 +5195,7 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
                 grid->data[kgrid11] > grid->nodatavalue) {
               /* get look vector for data */
               bathy = -grid->data[kgrid];
-              r[2] = grid->data[kgrid] + sonardepth;
+              r[2] = grid->data[kgrid] + sensordepth;
               rr = -sqrt(r[0] * r[0] + r[1] * r[1] + r[2] * r[2]);
               r[0] /= rr;
               r[1] /= rr;
@@ -5221,10 +5233,10 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
               if (ix >= 0 && ix < grid->n_columns && jy >= 0 && jy < grid->n_rows && grid->data[kgrid] > grid->nodatavalue)
                 bathy = -grid->data[kgrid];
               else if (altitude > 0.0)
-                bathy = altitude + sonardepth;
+                bathy = altitude + sensordepth;
               else
-                bathy = altitude_default + sonardepth;
-              angle = RTD * atan(bathacrosstrack[i] / (bathy - sonardepth));
+                bathy = altitude_default + sensordepth;
+              angle = RTD * atan(bathacrosstrack[i] / (bathy - sensordepth));
               slope = 0.0;
             }
 
@@ -5455,12 +5467,13 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
               esf.edit[i].beam, esf.edit[i].action, esf.edit[i].use);
       }
     }
-  }
-  if (verbose >= 1) {
-    fprintf(stderr, "          %d flags used\n", neditused);
-    fprintf(stderr, "          %d flags not used\n", neditnotused);
-    fprintf(stderr, "          %d flags tied to null beams\n", neditnull);
-    fprintf(stderr, "          %d duplicate flags\n", neditduplicate);
+    if (verbose >= 1) {
+      fprintf(stderr, "\nBathymetry edit use:\n");
+      fprintf(stderr, "  %d flags used\n", neditused);
+      fprintf(stderr, "  %d flags not used\n", neditnotused);
+      fprintf(stderr, "  %d flags tied to null beams\n", neditnull);
+      fprintf(stderr, "  %d duplicate flags\n", neditduplicate);
+    }
   }
 
   /*--------------------------------------------
@@ -5561,10 +5574,10 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
     mb_freed(verbose, __FILE__, __LINE__, (void **)&attitudeheave, error);
   }
 
-  /* deallocate arrays for sonardepth merging */
-  if (nsonardepth > 0) {
-    mb_freed(verbose, __FILE__, __LINE__, (void **)&fsonardepthtime, error);
-    mb_freed(verbose, __FILE__, __LINE__, (void **)&fsonardepth, error);
+  /* deallocate arrays for sensordepth merging */
+  if (nsensordepth > 0) {
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&fsensordepthtime, error);
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&fsensordepth, error);
   }
 
   /* deallocate arrays for tide */
@@ -5921,10 +5934,10 @@ int main(int argc, char **argv) {
           (file_status.st_mode & S_IFMT) != S_IFDIR
           ? file_status.st_mtime : 0;
 
-      /* get mod time for the sonardepth file if needed */
-      const int sonardepthfilemodtime =
-          process->mbp_sonardepth_mode != MBP_SONARDEPTH_OFF &&
-          stat(process->mbp_sonardepthfile, &file_status) == 0 &&
+      /* get mod time for the sensordepth file if needed */
+      const int sensordepthfilemodtime =
+          process->mbp_sensordepth_mode != MBP_SENSORDEPTH_OFF &&
+          stat(process->mbp_sensordepthfile, &file_status) == 0 &&
           (file_status.st_mode & S_IFMT) != S_IFDIR
           ? file_status.st_mtime : 0;
 
@@ -5946,7 +5959,7 @@ int main(int argc, char **argv) {
       const bool outofdate =
           !(ofilemodtime > 0 && ofilemodtime >= ifilemodtime && ofilemodtime >= pfilemodtime &&
             ofilemodtime >= navfilemodtime && ofilemodtime >= navadjfilemodtime && ofilemodtime >= attitudefilemodtime &&
-            ofilemodtime >= sonardepthfilemodtime && ofilemodtime >= esfmodtime && ofilemodtime >= svpmodtime);
+            ofilemodtime >= sensordepthfilemodtime && ofilemodtime >= esfmodtime && ofilemodtime >= svpmodtime);
 
       /* deal with information */
       if (outofdate || !checkuptodate) {
@@ -6075,10 +6088,10 @@ int main(int argc, char **argv) {
         else {
           fprintf(stderr, "\t\t\tSonar depth file:           None\n");
         }
-        if (sonardepthfilemodtime > 0) {
-          mb_get_date_string(verbose, (double)sonardepthfilemodtime, dummy);
+        if (sensordepthfilemodtime > 0) {
+          mb_get_date_string(verbose, (double)sensordepthfilemodtime, dummy);
           fprintf(stderr, "\t\t\tAttitude file:              %s %12d <%s>\n", dummy,
-                  ofilemodtime - sonardepthfilemodtime, process->mbp_sonardepthfile);
+                  ofilemodtime - sensordepthfilemodtime, process->mbp_sensordepthfile);
         }
         else {
           fprintf(stderr, "\t\t\tAttitude file:              None\n");

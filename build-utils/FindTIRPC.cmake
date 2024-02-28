@@ -34,4 +34,7 @@ if(TIRPC_FOUND)
       PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${TIRPC_INCLUDE_DIR}"
                  INTERFACE_LINK_LIBRARIES "${TIRPC_LIBRARY}")
   endif()
+  message("-- TIRPC found!")
+else()
+  message("-- TIRPC NOT found...")
 endif()

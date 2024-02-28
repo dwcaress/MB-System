@@ -1,3 +1,26 @@
+/*--------------------------------------------------------------------
+ *    The MB-system:  mbnavadjust_io.c  3/23/00
+ *
+ *    Copyright (c) 2000-2024 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
+ *      Lamont-Doherty Earth Observatory
+ *      Columbia University
+ *      Palisades, NY 10964
+ *
+ *    See README.md file for copying and redistribution conditions.
+ *--------------------------------------------------------------------*/
 
 /* Begin user code block <abstract> */
 /* End user code block <abstract> */
@@ -53,6 +76,11 @@ EXTERNAL Widget scale_controls_colorinterval;
 EXTERNAL Widget scale_controls_contourinterval;
 EXTERNAL Widget scale_controls_decimation;
 EXTERNAL Widget scale_controls_sectionsoundings;
+EXTERNAL Widget label_radioBox_controls_use;
+EXTERNAL Widget radioBox_controls_use;
+EXTERNAL Widget toggleButton_controls_use_primary;
+EXTERNAL Widget toggleButton_controls_use_secondary;
+EXTERNAL Widget toggleButton_controls_use_tertiary;
 EXTERNAL Widget label_about_version;
 EXTERNAL Widget pushButton_biases_applyall;
 EXTERNAL Widget scale_biases_heading2;

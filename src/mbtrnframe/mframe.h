@@ -87,12 +87,21 @@
 /// @def VERSION_STRING
 /// @brief version string macro.
 #define VERSION_STRING(s) VERSION_HELPER(s)
+#ifdef __cplusplus
+/// @def LIBMFRAME_VERSION
+/// @brief library version string macro.
+#define LIBMFRAME_VERSION "" VERSION_STRING(MFRAME_VER)
+/// @def LIBMFRAME_BUILD
+/// @brief library version build date string macro.
+#define LIBMFRAME_BUILD "" VERSION_STRING(MFRAME_BUILD)
+#else
 /// @def LIBMFRAME_VERSION
 /// @brief library version string macro.
 #define LIBMFRAME_VERSION ""VERSION_STRING(MFRAME_VER)
 /// @def LIBMFRAME_BUILD
 /// @brief library version build date string macro.
 #define LIBMFRAME_BUILD ""VERSION_STRING(MFRAME_BUILD)
+#endif
 
 /// @def MFRAME_SHOW_VERSION(app_name,app_version)
 /// @param[in] app_name application name
@@ -315,9 +324,10 @@ typedef int pthread_mutex_t;
 
 #endif
 
-/// @typedef unsigned char  byte
+/// @typedef unsigned char byte
 /// @brief typedef for byte
-typedef unsigned char  byte;
+typedef unsigned char byte;
+
 
 
 /////////////////////////

@@ -7,9 +7,11 @@
 #
 # This module defines the following CMake variables:
 #
-# GMT_FOUND - True if libgmt is found GMT_LIBRARY - A variable pointing to the
-# GMT library GMT_INCLUDE_DIR - Where to find the headers GMT_INCLUDE_DIRS -
-# Where to find the headers GMT_DEFINITIONS - Extra compiler flags
+# GMT_FOUND - True if libgmt is found 
+# GMT_LIBRARY - A variable pointing to the GMT library 
+# GMT_INCLUDE_DIR - Where to find the headers 
+# GMT_INCLUDE_DIRS - Where to find the headers 
+# GMT_DEFINITIONS - Extra compiler flags
 
 # =============================================================================
 # Inspired by FindGDAL
@@ -66,9 +68,18 @@ if(UNIX AND NOT GMT_FOUND)
   endif(GMT_CONFIG)
   if(_gmt_lib)
     list(REMOVE_DUPLICATES _gmt_lib)
-    list(REMOVE_ITEM _gmt_lib gmt)
   endif(_gmt_lib)
 endif(UNIX AND NOT GMT_FOUND)
+
+# find all libs that gmt-config reports (which is just libgmt, not libpostscriptlight)
+foreach(_extralib ${_gmt_lib})
+  find_library(
+    _found_lib_${_extralib}
+    NAMES ${_extralib}
+    PATHS ${_gmt_libpath})
+  list(APPEND GMT_LIBRARY ${_found_lib_${_extralib}})
+endforeach(_extralib)
+list(REMOVE_DUPLICATES GMT_LIBRARY)
 
 find_path(
   GMT_INCLUDE_DIR gmt.h
@@ -83,9 +94,25 @@ find_path(
         /opt
         /usr/local)
 
+if (NOT GMT_LIBRARY)
+  find_library(
+    GMT_LIBRARY
+    NAMES gmt 
+    HINTS ${_gmt_libpath} ${GMT_DIR} ${GMT_ROOT} $ENV{GMT_DIR} $ENV{GMT_ROOT}
+    PATH_SUFFIXES lib
+    PATHS /sw # Fink
+          /opt/sw # Fink
+          /opt/local # MacPorts
+          /opt/local/lib/gmt6 
+          /opt/local/lib/gmt5
+          /opt/csw # Blastwave
+          /opt
+          /usr/local)
+endif (NOT GMT_LIBRARY)
+
 find_library(
-  GMT_LIBRARY
-  NAMES gmt
+  PSL_LIBRARY
+  NAMES postscriptlight 
   HINTS ${_gmt_libpath} ${GMT_DIR} ${GMT_ROOT} $ENV{GMT_DIR} $ENV{GMT_ROOT}
   PATH_SUFFIXES lib
   PATHS /sw # Fink
@@ -97,17 +124,8 @@ find_library(
         /opt
         /usr/local)
 
-# find all libs that gmt-config reports
-foreach(_extralib ${_gmt_lib})
-  find_library(
-    _found_lib_${_extralib}
-    NAMES ${_extralib}
-    PATHS ${_gmt_libpath})
-  list(APPEND GMT_LIBRARY ${_found_lib_${_extralib}})
-endforeach(_extralib)
-
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(GMT DEFAULT_MSG GMT_LIBRARY GMT_INCLUDE_DIR)
+find_package_handle_standard_args(GMT DEFAULT_MSG GMT_LIBRARY PSL_LIBRARY GMT_INCLUDE_DIR)
 
 if(GMT_FOUND)
   set(GMT_LIBRARIES ${GMT_LIBRARY})
@@ -119,4 +137,14 @@ if(GMT_FOUND)
       GMT::GMT PROPERTIES IMPORTED_LOCATION "${GMT_LIBRARY}"
                           INTERFACE_INCLUDE_DIRECTORIES "${GMT_INCLUDE_DIR}")
   endif()
+
+  if(NOT TARGET GMT::PSL)
+    add_library(GMT::PSL UNKNOWN IMPORTED)
+    set_target_properties(
+      GMT::PSL PROPERTIES IMPORTED_LOCATION "${PSL_LIBRARY}"
+                          INTERFACE_INCLUDE_DIRECTORIES "${GMT_INCLUDE_DIR}")
+  endif()
+  message("-- GMT Found!")
+else()
+  message("-- GMT NOT found...")
 endif()

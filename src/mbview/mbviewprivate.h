@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbviewprivate.h	9/24/2003
  *
- *    Copyright (c) 2003-2020 by
+ *    Copyright (c) 2003-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * Author:	D. W. Caress
@@ -80,7 +90,7 @@
 
 #define MBV_NUM_COLORS 11
 
-#define MBV_NUM_ACTIONS 25
+#define MBV_NUM_ACTIONS 50
 
 /* Spheroid parameters */
 #define MBV_SPHEROID_RADIUS 6371000.0
@@ -675,7 +685,7 @@ int mbview_addroute(int verbose, size_t instance, int npoint, double *routelon, 
 int mbview_deleteroute(int verbose, size_t instance, int iroute, int *error);
 int mbview_getroute(int verbose, size_t instance, int route, int *npointtotal, double *routelon, double *routelat, int *waypoint,
                     double *routetopo, double *routebearing, double *distlateral, double *distovertopo, double *slope,
-                    int *routecolor, int *routesize, mb_path routename, int *error);
+                    int *routecolor, int *routesize, int *routeeditmode, mb_path routename, int *error);
 int mbview_enableviewroutes(int verbose, size_t instance, int *error);
 int mbview_enableeditroutes(int verbose, size_t instance, int *error);
 int mbview_pick_route_select(int verbose, size_t instance, int which, int xpixel, int ypixel);

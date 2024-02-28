@@ -3,6 +3,9 @@
 /* Machine is littleendian, (Byteswapping on) */
 #undef BYTESWAPPED
 
+/* Build deprecated programs */
+#undef DEPRECATED_ENABLED
+
 /* Build with GSF */
 #undef ENABLE_GSF
 
@@ -124,9 +127,6 @@
 
 /* Version number of package */
 #undef VERSION
-
-/* Set VERSION_DATE define in mb_config.h */
-#undef VERSION_DATE
 
 /* 0 */
 #undef WITH_DEBUG

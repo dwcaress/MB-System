@@ -1,3 +1,5 @@
+message("In src/man/man3")
+
 set(manpages
     mbio.3
     pj_init.3)

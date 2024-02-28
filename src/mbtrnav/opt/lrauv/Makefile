@@ -104,14 +104,20 @@ CONAV_MSG_SRC=mr_msg_app.cpp
 CONAV_MSG_OBJ = $(CONAV_MSG_SRC:%.cpp=$(BUILD_DIR)/%.o)
 CONAV_MSG_LIBS = -llcm -lzf_log -ltrn  -lnewmat -lqnx -lgeolib -lnetcdf -lm $(OS_LIBS)
 
+DECODER_TEST_APP=trn-decoder-test
+DECODER_TEST_SRC=trn-decoder-test.cpp
+DECODER_TEST_OBJ = $(DECODER_TEST_SRC:%.cpp=$(BUILD_DIR)/%.o)
+DECODER_TEST_LIBS = -llcm -lzf_log -ltrn  -lnewmat -lqnx -lgeolib -lnetcdf -lm $(OS_LIBS)
+
 ########################################
 # Build Files (mostly for cleanup)
 #SOURCES = $(LRTRN_APP) $(LRCONAV_APP) $(CONAV_MSG_APP)
-SOURCES = $(LRTRN_APP_SRC) $(LRCONAV_APP_SRC) $(CONAV_MSG_SRC)
+SOURCES = $(LRTRN_APP_SRC) $(LRCONAV_APP_SRC) $(CONAV_MSG_SRC) $(DECODER_TEST_SRC)
 
 OBJECTS = $(SOURCES:%.cpp=$(BUILD_DIR)/%.o)
 DEPENDS = $(SOURCES:%.cpp=$(BUILD_DIR)/%.d)
-BINARIES = $(OUTPUT_DIR)/$(LRTRN_APP) $(OUTPUT_DIR)/$(LRCONAV_APP) $(OUTPUT_DIR)/$(CONAV_MSG_APP)
+BINARIES = $(OUTPUT_DIR)/$(LRTRN_APP) $(OUTPUT_DIR)/$(LRCONAV_APP) $(OUTPUT_DIR)/$(CONAV_MSG_APP) \
+	$(OUTPUT_DIR)/$(DECODER_TEST_APP)
 
 
 CLEANUP = gmon.out
@@ -140,6 +146,12 @@ $(OUTPUT_DIR)/$(LRCONAV_APP): $(LRCONAV_APP_OBJ)
 $(OUTPUT_DIR)/$(CONAV_MSG_APP): $(CONAV_MSG_OBJ)
 	@echo building $@...
 	$(CXX) $(CFLAGS) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(CONAV_MSG_LIBS)
+	@echo
+
+# build decodertest program
+$(OUTPUT_DIR)/$(DECODER_TEST_APP): $(DECODER_TEST_OBJ)
+	@echo building $@...
+	$(CXX) $(CFLAGS) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(DECODER_TEST_LIBS)
 	@echo
 
 lint: $(LRTRN_APP_SRC) $(LRCONAV_APP_SRC) $(CONAV_MSG_SRC)

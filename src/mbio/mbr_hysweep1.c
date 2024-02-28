@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hysweep1.c	12/23/2011
  *
- *    Copyright (c) 2011-2020 by
+ *    Copyright (c) 2011-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * mbr_hysweep1.c contains the functions for reading and writing
@@ -1861,7 +1871,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				/* if successful this completes a sonar depth record */
 				if (status == MB_SUCCESS) {
 					done = true;
-					store->kind = MB_DATA_SONARDEPTH;
+					store->kind = MB_DATA_SENSORDEPTH;
 					store->time_d = store->TND_survey_time_d + store->DFT_time;
 					mb_get_date(verbose, store->time_d, store->time_i);
 				}
@@ -2060,8 +2070,8 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 	}
 
-	/* save sonardepth if primary data */
-	if (status == MB_SUCCESS && store->kind == MB_DATA_SONARDEPTH) {
+	/* save sensordepth if primary data */
+	if (status == MB_SUCCESS && store->kind == MB_DATA_SENSORDEPTH) {
 		/* check device for being enabled */
 		device = (struct mbsys_hysweep_device_struct *)&(store->devices[store->DFT_device_number]);
 		if (device->DV2_enabled) {
@@ -2084,7 +2094,7 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "Record returned: type:%d status:%d error:%d\n\n", store->kind, status, *error);
 #endif
 
-	/* if survey data then interpolate nav, heading, attitude, sonardepth onto ping times */
+	/* if survey data then interpolate nav, heading, attitude, sensordepth onto ping times */
 	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA) {
 		speed = 0.0;
 		interp_status = mb_hedint_interp(verbose, mbio_ptr, store->time_d, &(store->RMBint_heading), &interp_error);
@@ -3204,7 +3214,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		}
 
 		/* write DFT record */
-		else if (store->kind == MB_DATA_SONARDEPTH) {
+		else if (store->kind == MB_DATA_SENSORDEPTH) {
 			snprintf(line, MBSYS_HYSWEEP_MAXLINE, "DFT %d %.3f %.2f\r\n", store->DFT_device_number, store->DFT_time, store->DFT_draft);
 			fputs(line, mbfp);
 		}

@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbr_mbarimb1.c  2/2/93
  *
- *    Copyright (c) 2019-2020 by
+ *    Copyright (c) 2019-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * mbr_mbarimb1.c contains the functions for reading and writing
@@ -280,7 +290,7 @@ int mbr_rt_mbarimb1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   double time_d = 0.0;;
   double navlon = 0.0;;
   double navlat = 0.0;;
-  double sonardepth = 0.0;;
+  double sensordepth = 0.0;;
   double heading = 0.0;
   int ping_number = 0;
   int beams_bath = 0;
@@ -295,7 +305,7 @@ int mbr_rt_mbarimb1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     index += 8;
     mb_get_binary_double(true, &buffer[index], &navlon);
     index += 8;
-    mb_get_binary_double(true, &buffer[index], &sonardepth);
+    mb_get_binary_double(true, &buffer[index], &sensordepth);
     index += 8;
     mb_get_binary_double(true, &buffer[index], &heading);
     index += 8;
@@ -308,7 +318,7 @@ int mbr_rt_mbarimb1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     store->time_d = time_d;
     store->longitude = navlon;
     store->latitude = navlat;
-    store->sonardepth = sonardepth;
+    store->sensordepth = sensordepth;
     store->altitude = 0.0;
     store->heading = RTD * heading;
     store->speed = 0.0;
@@ -434,7 +444,7 @@ int mbr_rt_mbarimb1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     fprintf(stderr, "dbg5       time_d:           %f\n", store->time_d);
     fprintf(stderr, "dbg5       longitude:        %f\n", store->longitude);
     fprintf(stderr, "dbg5       latitude:         %f\n", store->latitude);
-    fprintf(stderr, "dbg5       sonardepth:       %f\n", store->sonardepth);
+    fprintf(stderr, "dbg5       sensordepth:       %f\n", store->sensordepth);
     fprintf(stderr, "dbg5       altitude:         %f\n", store->altitude);
     fprintf(stderr, "dbg5       heading:          %f\n", store->heading);
     fprintf(stderr, "dbg5       speed:            %f\n", store->speed);
@@ -522,7 +532,7 @@ int mbr_wt_mbarimb1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     double time_d = store->time_d;
     double navlon = store->longitude;
     double navlat = store->latitude;
-    double sonardepth = store->sonardepth;
+    double sensordepth = store->sensordepth;
     double heading = DTR * store->heading;
     int ping_number = 0;
     int beams_bath = store->beams_bath;
@@ -554,7 +564,7 @@ int mbr_wt_mbarimb1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     index += 8;
     mb_put_binary_double(true, navlon, &buffer[index]);
     index += 8;
-    mb_put_binary_double(true, sonardepth, &buffer[index]);
+    mb_put_binary_double(true, sensordepth, &buffer[index]);
     index += 8;
     mb_put_binary_double(true, heading, &buffer[index]);
     index += 8;
@@ -589,7 +599,7 @@ int mbr_wt_mbarimb1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     fprintf(stderr, "dbg5       time_d:           %f\n", time_d);
     fprintf(stderr, "dbg5       latitude:         %f\n", navlat);
     fprintf(stderr, "dbg5       longitude:        %f\n", navlon);
-    fprintf(stderr, "dbg5       sonardepth:       %f\n", sonardepth);
+    fprintf(stderr, "dbg5       sensordepth:       %f\n", sensordepth);
     fprintf(stderr, "dbg5       heading:          %f\n", heading);
     fprintf(stderr, "dbg5       ping_number:      %d\n", ping_number);
     fprintf(stderr, "dbg5       beams_bath:       %d\n", beams_bath);
@@ -597,7 +607,7 @@ int mbr_wt_mbarimb1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
       fprintf(stderr, "dbg5       beam_id:          %d\n", 0);
       fprintf(stderr, "dbg5       bathalongtrack:   %f\n", store->bath_alongtrack[i] * store->distance_scale);
       fprintf(stderr, "dbg5       bathacrosstrack:  %f\n", store->bath_acrosstrack[i] * store->distance_scale);
-      fprintf(stderr, "dbg5       bath:             %f\n", (store->bath[i] * store->depth_scale) + sonardepth);
+      fprintf(stderr, "dbg5       bath:             %f\n", (store->bath[i] * store->depth_scale) + sensordepth);
     }
   }
 

@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
  *
- *    Copyright (c) 1995-2020 by
+ *    Copyright (c) 1995-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * MBNAVEDIT is an interactive navigation editor for swath sonar data.
@@ -678,7 +688,7 @@ void do_load_specific_file(int i_file) {
 void do_set_controls() {
 	/* set about version label */
 	char value_text[MB_PATH_MAXLINE];
-	sprintf(value_text, ":::t\"MB-System Release %s\":t\"%s\"", MB_VERSION, MB_BUILD_DATE);
+	sprintf(value_text, ":::t\"MB-System Release %s\":t\"%s\"", MB_VERSION, MB_VERSION_DATE);
 	set_label_multiline_string(label_about_version, value_text);
 
 	/* set value of format text item */
@@ -730,8 +740,8 @@ void do_set_controls() {
 	XmToggleButtonSetState(toggleButton_heading, plot_heading, TRUE);
 	XmToggleButtonSetState(toggleButton_org_heading, plot_heading_org, TRUE);
 	XmToggleButtonSetState(toggleButton_show_cmg, plot_cmg, TRUE);
-	XmToggleButtonSetState(toggleButton_sonardepth, plot_draft, TRUE);
-	XmToggleButtonSetState(toggleButton_org_sonardepth, plot_draft_org, TRUE);
+	XmToggleButtonSetState(toggleButton_sensordepth, plot_draft, TRUE);
+	XmToggleButtonSetState(toggleButton_org_sensordepth, plot_draft_org, TRUE);
 
 	/* hide or display items according to toggle states */
 	if (plot_tint)
@@ -803,10 +813,10 @@ void do_set_controls() {
 		XtUnmanageChild(pushButton_heading_cmg);
 	}
 	if (plot_draft) {
-		XtManageChild(toggleButton_org_sonardepth);
+		XtManageChild(toggleButton_org_sensordepth);
 	}
 	else {
-		XtUnmanageChild(toggleButton_org_sonardepth);
+		XtUnmanageChild(toggleButton_org_sensordepth);
 	}
 
 	/* get and set size of canvas */
@@ -1614,16 +1624,16 @@ void do_toggle_speed(Widget w, XtPointer client_data, XtPointer call_data) {
 
 /*--------------------------------------------------------------------*/
 
-void do_toggle_sonardepth(Widget w, XtPointer client_data, XtPointer call_data) {
+void do_toggle_sensordepth(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	plot_draft = XmToggleButtonGetState(toggleButton_sonardepth);
+	plot_draft = XmToggleButtonGetState(toggleButton_sensordepth);
 	if (plot_draft) {
-		XtManageChild(toggleButton_org_sonardepth);
+		XtManageChild(toggleButton_org_sensordepth);
 	}
 	else {
-		XtUnmanageChild(toggleButton_org_sonardepth);
+		XtUnmanageChild(toggleButton_org_sensordepth);
 		mbnavedit_action_deselect_all(PLOT_DRAFT);
 	}
 
@@ -1950,11 +1960,11 @@ void do_toggle_org_heading(Widget w, XtPointer client_data, XtPointer call_data)
 }
 /*--------------------------------------------------------------------*/
 
-void do_toggle_org_sonardepth(Widget w, XtPointer client_data, XtPointer call_data) {
+void do_toggle_org_sensordepth(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	plot_draft_org = XmToggleButtonGetState(toggleButton_org_sonardepth);
+	plot_draft_org = XmToggleButtonGetState(toggleButton_org_sensordepth);
 
 	/* replot */
 	mbnavedit_plot_all();

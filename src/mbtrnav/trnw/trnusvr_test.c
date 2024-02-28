@@ -73,8 +73,6 @@
 #include "trnif_proto.h"
 
 #include "mframe.h"
-#include "medebug.h"
-#include "mmdebug.h"
 
 /////////////////////////
 // Macros
@@ -109,6 +107,7 @@
 #define TRNUST_VERBOSE_DFL 0
 #define SESSION_BUF_LEN 80
 #define TRNUSVR_CMD_LINE_BYTES 2048
+#define HOSTNAME_BUF_LEN 256
 
 /////////////////////////
 // Declarations
@@ -261,6 +260,25 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         }
     }// while
 
+    // use this host if unset
+    if(NULL==cfg->host){
+        // if unset, use local IP
+        char host[HOSTNAME_BUF_LEN]={0};
+        if(gethostname(host, HOSTNAME_BUF_LEN)==0 && strlen(host)>0){
+            struct hostent *host_entry;
+
+            if( (host_entry = gethostbyname(host))!=NULL){
+                //Convert into IP string
+                char *s =inet_ntoa(*((struct in_addr*) host_entry->h_addr_list[0]));
+                cfg->host = strdup(s);
+            } //find host information
+        }
+
+        if(NULL==cfg->host){
+            cfg->host=strdup("localhost");
+        }
+    }
+
     fprintf(stderr,"verbose   [%d]\n",cfg->verbose);
     fprintf(stderr,"host      [%s]\n",cfg->host);
     fprintf(stderr,"port      [%d]\n",cfg->port);
@@ -300,7 +318,7 @@ static app_cfg_t *app_cfg_new()
         memset(instance,0,sizeof(app_cfg_t));
         instance->netif=NULL;
         instance->logdir=strdup(TRNUST_LOGDIR_DFL);
-        instance->host=strdup(TRNUST_HOST_DFL);
+        instance->host=NULL;
         instance->port=TRNUST_PORT_DFL;
         instance->verbose=TRNUST_VERBOSE_DFL;
         instance->update_period_sec=TRNUST_UPDATE_DFL;
@@ -559,13 +577,13 @@ static int s_app_main(app_cfg_t *cfg)
         if(NULL!=cfg->netif ){
 
             // enable module debug
-            netif_init_mmd();
+            netif_configure_debug(NULL, cfg->verbose);
 
             // test trn_server/commsT protocol
             s_run(cfg);
 
             // release module debug resources
-            mmd_release();
+            mxd_release();
 
             // log session end
             double now=mtime_etime();

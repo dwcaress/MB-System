@@ -46,7 +46,7 @@
 #########################################
 QP_PLOT_HOME=${QP_PLOT_HOME:-.}
 QP_PLOT_DATA_DIR_DFL="${QP_PLOT_DATA_DIR_DFL:-.}"
-QP_OUTPUT_DIR_DFL="${QP_PLOT_HOME}/plot-output"
+QP_OUTPUT_DIR_DFL="${QP_PLOT_HOME}/qplot-output"
 
 declare -A QP_GS_DEV=( [png]="png16m" [pdf]="pdfwrite" )
 

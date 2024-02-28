@@ -1,4 +1,4 @@
---
+---
 ## MB-System ChangeLog File:
 
 This file lists changes to the source code of the MB-System open
@@ -6,10 +6,6 @@ source software package for the processing and display of swath sonar data.
 This file is located at the top of the MB-System source code distribution
 directory structure.
 
---
-### MB-System Version 5 Releases:
-
---
 In the list below, releases shown in bold type are major, announced releases.
 The other entries are test or "beta" releases that were not announced and generally
 not widely distributed. Prior to 5.7.1, the MB-System source code repository was
@@ -23,7 +19,84 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.9beta58    July 18, 2023
+---
+### MB-System Version 5.8 Releases and Release Notes:
+---
+
+- Version 5.8.1beta04    February 16, 2024
+- Version 5.8.1beta03    February 8, 2024
+- Version 5.8.1beta02    February 7, 2024
+- Version 5.8.1beta01    February 1, 2024
+- **Version 5.8.0          January 22, 2024**
+
+---
+
+#### 5.8.1beta04 (February 16, 2024)
+
+Format 261 (MBF_KEMKMALL): Updated support for Kongsberg Kmall format to match updated specification J.
+
+#### 5.8.1beta03 (February 8, 2024)
+
+Mbphotomosaic: Fixed priority-heading option that allows image prioritization on
+the basis of camera heading.
+
+#### 5.8.1beta02 (February 7, 2024)
+
+Mbphotomosaic: Added options to detect and correct dark images (for when strobe lights
+partially drop out), to ignore dark images, and to allow image prioritization on
+the basis of camera heading.
+
+#### 5.8.1beta01 (February 1, 2024)
+
+Mbpreprocess: Now checks for successive pings/scans with the same timestamp, and 
+adds enough time to the second timestamp (0.0000033 seconds) that these pings/scans 
+are seen as different by the beam edit flag handling code. For dual head sensors 
+this logic only compares timestamps for the same subsensor, so simultaneous operation
+of the two subsensors (sonar or lidar heads) is allowed.
+
+Mbvoxelclean: Fixed bug in which previously beamflags from previously existing esf
+files were ignored. Also fixed a non-initialized pointer bug that produced occasional
+crashes.
+
+#### 5.8.0 (January 22, 2024)
+
+**Version 5.8.0** is now the current release of MB-System. 
+
+The source code distribution can be downloaded from the MB-System Github repository at:  
+[https://github.com/dwcaress/MB-System/archive/refs/tags/5.8.0.tar.gz]()
+
+In addition to many bug fixes, the changes of 5.8.0 relative to the prior major release (5.7.8) include:
+
+**New build system:**  
+MB-System is now built and installed using the CMake package, rather than GNU Autotools. The old build system is still present and can be used to install MB-System on old operating systems (e.g. Ubuntu 18.04), but all support for building on recent, current and future operating systems will be for use of CMake. See the Download and Install (https://www.mbari.org/technology/mb-system/installation/) instructions page for details.
+
+**Global ties to reference grids in MBnavadjust:**  
+MBnavadjust is a toolset used adjust navigation of submerged platform (e.g. AUV or ROV) surveys so that features match where swaths overlap and cross. The primary information comes from measuring the navigation offsets required to match features using cross correlation of the bathymetry data. MBnavadjust now also allows the survey navigation to be tied to reference bathymetry models, typically from GPS-navigated hull mounted surveys, so that the navigation can be tied to the world frame of reference.
+
+**Realtime Terrain Relative Navigation:**  
+MB-System now includes a Terrain Relative Navigation (TRN) codebase developed at Stanford and MBARI that uses realtime topography information to where a platform is located on a pre-existing topography map. The MB-System tool mbtrnpp implements TRN in the case of an AUV or ROV equipped with a multibeam sonar. 
+
+**Photomosaicing tools available:**  
+Tools for generating photomosaics from sets of still seafloor photographs are now built as part of MB-System. Documentation and examples are being developed but are not available at the time of this release.
+
+---
+### MB-System Version 5.7 Releases and Release Notes:
+---
+
+- Version 5.7.9beta72    January 14, 2024
+- Version 5.7.9beta71    January 3, 2024
+- Version 5.7.9beta70    January 2, 2024
+- Version 5.7.9beta69    December 17, 2023
+- Version 5.7.9beta68    November 30, 2023
+- Version 5.7.9beta66    November 18, 2023
+- Version 5.7.9beta65    November 17, 2023
+- Version 5.7.9beta64    November 16, 2023
+- Version 5.7.9beta63    November 10, 2023
+- Version 5.7.9beta62    November 3, 2023
+- Version 5.7.9beta61    November 2, 2023
+- Version 5.7.9beta60    October 22, 2023
+- Version 5.7.9beta59    September 19, 2023
+- Version 5.7.9beta58    August 30, 2023
 - Version 5.7.9beta57    June 27, 2023
 - Version 5.7.9beta53    June 15, 2023
 - Version 5.7.9beta52    March 9, 2023
@@ -75,7 +148,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 - Version 5.7.9beta03    February 7, 2021
 - Version 5.7.9beta02    January 27, 2021
 - Version 5.7.9beta01    January 18, 2021
-- **Version 5.7.8        January 17, 2021
+- **Version 5.7.8        January 17, 2021**
 - Version 5.7.7          January 17, 2021 (flawed, quickly superceded)
 - Version 5.7.7beta09    January 17, 2021
 - Version 5.7.7beta08    January 6, 2021
@@ -85,7 +158,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 - Version 5.7.7beta03    October 27, 2020
 - Version 5.7.7beta02    October 8, 2020
 - Version 5.7.7beta01    October 7, 2020
-- **Version 5.7.6        October 5, 2020
+- **Version 5.7.6        October 5, 2020**
 - Version 5.7.6beta56    September 28, 2020
 - Version 5.7.6beta55    September 16, 2020
 - Version 5.7.6beta54    September 14, 2020
@@ -152,287 +225,238 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.7.3          February 8, 2019**
 - Version 5.7.2          February 4, 2019
 - **Version 5.7.1          December 19, 2018**
-- Version 5.6.20181218   December 18, 2018
-- **Version 5.6.20181217   December 17, 2018**
-- Version 5.6.20181214   December 14, 2018
-- Version 5.6.20181129   November 29, 2018
-- Version 5.6.20181016   October 16, 2018
-- Version 5.6.002        September 14, 2018
-- Version 5.6.002        September 11, 2018
-- Version 5.5.2350       September 6, 2018
-- Version 5.5.2348       August 20, 2018
-- Version 5.5.2347       August 17, 2018
-- Version 5.5.2346       August 13, 2018
-- Version 5.5.2345       August 10, 2018
-- Version 5.5.2344       August 3, 2018
-- Version 5.5.2343       July 10, 2018
-- **Version 5.5.2342       June 29, 2018**
-- Version 5.5.2340       June 26, 2018
-- Version 5.5.2339       June 25, 2018
-- **Version 5.5.2336       June 6, 2018**
-- Version 5.5.2335       May 6, 2018
-- Version 5.5.2334       April 18, 2018
-- Version 5.5.2333       April 18, 2018
-- Version 5.5.2332       April 17, 2018
-- Version 5.5.2331       April 10, 2018
-- Version 5.5.2330       March 7, 2018
-- Version 5.5.2329       February 12, 2018
-- Version 5.5.2328       January 31, 2018
-- **Version 5.5.2327       January 23, 2018**
-- Version 5.5.2324       January 18, 2018
-- Version 5.5.2323       December 7, 2017
-- Version 5.5.2322       November 25, 2017
-- **Version 5.5.2321       October 26, 2017**
-- Version 5.5.2320       October 18, 2017
-- **Version 5.5.2319       October 16, 2017**
-- **Version 5.5.2318       September 29, 2017**
-- **Version 5.5.2314       August 24, 2017**
-- **Version 5.5.2313       August 9, 2017**
-- Version 5.5.2312       July 14, 2017
-- Version 5.5.2311       June 20, 2017
-- **Version 5.5.2309       June 4, 2017**
-- Version 5.5.2306       May 27, 2017
-- Version 5.5.2305       May 13, 2017
-- Version 5.5.2304       May 6, 2017
-- Version 5.5.2303       April 28, 2017
-- Version 5.5.2302       April 20, 2017
-- Version 5.5.2301       April 17, 2017
-- Version 5.5.2300       April 15, 2017
-- Version 5.5.2299       April 10, 2017
-- Version 5.5.2297       April 5, 2017
-- Version 5.5.2296       March 31, 2017
-- Version 5.5.2295       March 26, 2017
-- Version 5.5.2294       March 21, 2017
-- Version 5.5.2293       March 6, 2017
-- Version 5.5.2290       January 2, 2017
-- Version 5.5.2289       December 2, 2016
-- Version 5.5.2287       November 29, 2016
-- Version 5.5.2286       November 8, 2016
-- Version 5.5.2285       November 3, 2016
-- **Version 5.5.2284       October 23, 2016**
-- Version 5.5.2282       August 25, 2016
-- Version 5.5.2281       August 7, 2016
-- **Version 5.5.2279       July 8, 2016**
-- **Version 5.5.2278       July 1, 2016**
-- Version 5.5.2277       June 25, 2016
-- Version 5.5.2275       May 17, 2016
-- **Version 5.5.2274       May 5, 2016**
-- Version 5.5.2271       April 1, 2016
-- **Version 5.5.2270       March 24, 2016**
-- Version 5.5.2268       March 14, 2016
-- **Version 5.5.2267       February 11, 2016**
-- Version 5.5.2265       February 11, 2016
-- Version 5.5.2264       February 2, 2016
-- **Version 5.5.2263       January 7, 2016**
-- Version 5.5.2260       December 22, 2015
-- Version 5.5.2259       October 27, 2015
-- Version 5.5.2258       October 5, 2015
-- Version 5.5.2257       September 1, 2015
-- Version 5.5.2256       August 24, 2015
-- Version 5.5.2255       August 11, 2015
-- Version 5.5.2254       July 23, 2015
-- **Version 5.5.2252       July 1, 2015**
-- **Version 5.5.2251       June 30, 2015**
-- Version 5.5.2250       June 29, 2015
-- Version 5.5.2249       June 26, 2015
-- **Version 5.5.2248       May 31, 2015**
-- Version 5.5.2247       May 29, 2015
-- **Version 5.5.2246       May 27, 2015**
-- **Version 5.5.2243       May 22, 2015**
-- **Version 5.5.2242       May 16, 2015**
-- Version 5.5.2241       May 12, 2015
-- Version 5.5.2240       May 8, 2015
-- Version 5.5.2239       May 6, 2015
-- Version 5.5.2238       April 14, 2015
-- Version 5.5.2237       March 23, 2015
-- Version 5.5.2234       March 5, 2015
-- **Version 5.5.2233       February 23, 2015**
-- Version 5.5.2232       February 21, 2015
-- Version 5.5.2231       February 20, 2015
-- Version 5.5.2230       February 18, 2015
-- Version 5.5.2229       February 14, 2015
-- Version 5.5.2228       February 6, 2015
-- **Version 5.4.2220       January 22, 2015 (Last GMT4-compatible archive revision)**
-- Version 5.4.2219       December 11, 2014
-- Version 5.4.2218       December 4, 2014
-- Version 5.4.2217       December 1, 2014
-- **Version 5.4.2213       November 13, 2014**
-- Version 5.4.2210       November 10, 2014
-- **Version 5.4.2209       November 4, 2014**
-- **Version 5.4.2208       October 29, 2014**
-- Version 5.4.2204       September 5, 2014
-- **Version 5.4.2202       August 25, 2014**
-- Version 5.4.2201       August 20, 2014
-- **Version 5.4.2200       July 24, 2014**
-- **Version 5.4.2199       July 19, 2014**
-- Version 5.4.2196       July 14, 2014
-- Version 5.4.2195       July 9, 2014
-- Version 5.4.2194       July 8, 2014
-- **Version 5.4.2191       June 4, 2014**
-- **Version 5.4.2188       May 31, 2014**
-- Version 5.4.2187       May 28, 2014
-- Version 5.4.2186       May 26, 2014
-- Version 5.4.2185       May 11, 2014
-- **Version 5.4.2183       April 16, 2014**
-- Version 5.4.2182       April 8, 2014
-- Version 5.4.2181       April 4, 2014
-- **Version 5.4.2176       March 18, 2014**
-- **Version 5.4.2168       February 19, 2014**
-- **Version 5.4.2163       January 31, 2014**
-- Version 5.4.2162       January 24, 2014
-- **Version 5.4.2159       January 18, 2014**
-- Version 5.4.2158       January 18, 2014
-- **Version 5.4.2157       October 14, 2013**
-- Version 5.4.2155       October 13, 2013
-- Version 5.4.2154       September 26, 2013
-- Version 5.4.2153       September 22, 2013
-- **Version 5.4.2152       September 16, 2013**
-- Version 5.4.2151       September 12, 2013
-- Version 5.4.2149       September 2, 2013
-- Version 5.4.2148       August 28, 2013
-- Version 5.4.2147       August 27, 2013
-- Version 5.4.2144       August 26, 2013
-- Version 5.4.2143       August 24, 2013
-- Version 5.4.2141       August 24, 2013
-- Version 5.4.2139       August 19, 2013
-- Version 5.4.2138       August 18, 2013
-- Version 5.4.2137       August 9, 2013
-- Version 5.4.2136       August 8, 2013
-- **Version 5.4.2135       August 7, 2013**
-- Version 5.4.2133       July 29, 2013
-- Version 5.4.2132       July 26, 2013
-- Version 5.4.2130       July 20, 2013
-- Version 5.4.2129       July 8, 2013
-- Version 5.4.2128       June 18, 2013
-- Version 5.4.2123       June 10, 2013
-- Version 5.4.2082       May 24, 2013
-- Version 5.3.2053       April 4, 2013
-- Version 5.3.2051       March 20, 2013
-- Version 5.3.2042       March 12, 2013
-- **Version 5.3.2017       March 3, 2013**
-- **Version 5.3.2013       January 29, 2013**
-- **Version 5.3.2012       January 25, 2013**
-- **Version 5.3.2011       January 17, 2013**
-- Version 5.3.2010       January 14, 2013
-- **Version 5.3.2009       January 10, 2013**
-- **Version 5.3.2008       January 6, 2013**
-- Version 5.3.2007       January 5, 2013
-- Version 5.3.2006       January 4, 2013
-- Version 5.3.2005       December 31, 2012
-- Version 5.3.2004       December 12, 2012
-- Version 5.3.2000       November 14, 2012
-- Version 5.3.1999       November 13, 2012
-- Version 5.3.1998       November 6, 2012
-- Version 5.3.1994       October 27, 2012
-- Version 5.3.1988       September 29, 2012
-- Version 5.3.1986       September 12, 2012
-- **Version 5.3.1982       August 15, 2012**
-- Version 5.3.1981       August 2, 2012
-- **Version 5.3.1980       July 13, 2012**
-- **Version 5.3.1955       May 16, 2012**
-- Version 5.3.1941       March 6, 2012
-- **Version 5.3.1917       January 10, 2012**
-- **Version 5.3.1912       November 19, 2011**
-- **Version 5.3.1909       November 16, 2011**
-- **Version 5.3.1907       November 9, 2011**
-- **Version 5.3.1906       September 28, 2011**
-- **Version 5.2.1880       December 30, 2010**
-- Version 5.1.3beta1875  November 23, 2010
-- Version 5.1.3beta1874  November 7, 2010
-- Version 5.1.3beta1862  June 7, 2010
-- Version 5.1.3beta1858  May 18, 2010
-- Version 5.1.3beta1855  May 4, 2010
-- Version 5.1.3beta1851  April 14, 2010
-- Version 5.1.3beta1844  March 30, 2010
-- Version 5.1.3beta1843  March 29, 2010
-- Version 5.1.3beta1829  February 5, 2010
-- **Version 5.1.2          December 31, 2009**
-- Version 5.1.2beta15    December 30, 2009
-- Version 5.1.2beta14    December 28, 2009
-- Version 5.1.2beta13    December 28, 2009
-- Version 5.1.2beta12    December 26, 2009
-- Version 5.1.2beta11    Ausust 26, 2009
-- Version 5.1.2beta10    Ausust 12, 2009
-- Version 5.1.2beta09    Ausust 7, 2009
-- Version 5.1.2beta08    Ausust 5, 2009
-- Version 5.1.2beta06    July 2, 2009
-- Version 5.1.2beta05    June 14, 2009
-- Version 5.1.2beta02    March 13, 2009
-- Version 5.1.2beta01    March 9, 2009
-- **Version 5.1.1          December 31, 2008**
-- Version 5.1.1beta26    November 18, 2008
-- Version 5.1.1beta25    September 28, 2008
-- Version 5.1.1beta23    September 19, 2008
-- Version 5.1.1beta21    July 20, 2008
-- Version 5.1.1beta20    July 10, 2008
-- Version 5.1.1beta19    June 6, 2008
-- Version 5.1.1beta18    May 16, 2008
-- Version 5.1.1beta17    March 21, 2008
-- Version 5.1.1beta16    March 14, 2008
-- Version 5.1.1beta15    February 8, 2008
-- Version 5.1.1beta14    January 15, 2008
-- Version 5.1.1beta13    November 16, 2007
-- Version 5.1.1beta12    November 2, 2007
-- Version 5.1.1beta11    October 17, 2007
-- Version 5.1.1beta10    October 8, 2007
-- Version 5.1.1beta5     July 5, 2007
-- **Version 5.1.0          November 26, 2006**
-- Version 5.1.0beta4     October 5, 2006
-- Version 5.1.0beta3     September 11, 2006
-- Version 5.1.0beta2     August 9, 2006
-- Version 5.1.0beta      July 5, 2006
-- **Version 5.0.9          February 20, 2006**
-- **Version 5.0.8          February 8, 2006**
-- Version 5.0.8beta5     February 3, 2006
-- Version 5.0.8beta4     February 1, 2006
-- Version 5.0.8beta3     February 1, 2006
-- Version 5.0.8beta2     January 27, 2006
-- Version 5.0.8beta      January 24, 2006
-- **Version 5.0.7          April 7, 2005**
-- **Version 5.0.6          February 19, 2005**
-- **Version 5.0.5          October 6, 2004**
-- **Version 5.0.4          May 22, 2004**
-- **Version 5.0.3          February 27, 2004**
-- **Version 5.0.2          December 24, 2003**
-- **Version 5.0.1          December 12, 2003**
-- **Version 5.0.0          December 5, 2003**
-- Version 5.0.beta31     April 29, 2003
-- Version 5.0.beta30     April 25, 2003
-- Version 5.0.beta29     March 10, 2003
-- Version 5.0.beta28     January 14, 2003
-- Version 5.0.beta27     November 13, 2002
-- Version 5.0.beta26     November 3, 2002
-- Version 5.0.beta25     October 15, 2002
-- Version 5.0.beta24     October 4, 2002
-- Version 5.0.beta23     September 20, 2002
-- Version 5.0.beta22     August 30, 2002
-- Version 5.0.beta21     July 25, 2002
-- Version 5.0.beta20     July 20, 2002
-- Version 5.0.beta18     May 31, 2002
-- Version 5.0.beta17     May 1, 2002
-- Version 5.0.beta16     April 5, 2002
-- Version 5.0.beta15     March 26, 2002
-- Version 5.0.beta14     February 25, 2002
-- Version 5.0.beta13     February 22, 2002
-- Version 5.0.beta12     January 2, 2002
-- Version 5.0.beta11     December 20, 2001
-- Version 5.0.beta10     November 20, 2001
-- Version 5.0.beta09     November 6, 2001
-- Version 5.0.beta08     October 19, 2001
-- Version 5.0.beta07     August 10, 2001
-- Version 5.0.beta06     July 30, 2001
-- Version 5.0.beta05     July 23, 2001
-- Version 5.0.beta04     July 20, 2001
-- Version 5.0.beta03     July 19, 2001
-- Version 5.0.beta02     June 30, 2001
-- Version 5.0.beta01     June 8, 2001
-- Version 5.0.beta00     April 6, 2001
 
---
-### MB-System Version 5.7 Release Notes:
---
+---
 
-#### 5.7.9beta58 (July 18)
+#### 5.7.9beta72 (January 13, 2024)
+
+Build Systems: Made building and installing deprecated programs optional for both
+the CMake and Autoconf build systems.
+
+Man pages: Restructured the web page versions of the manual pages installed with
+MB-System. Recast the postscript versions of the manual pages into Pdf files.
+
+Mbgrdviz: Generated a new version of the MB-System Route files.
+
+Mbm_route2mission: Now works with both old and new format route files.
+
+#### 5.7.9beta71 (January 3, 2024)
+
+CMake build system: Fixed creating the levitus.h header file used by mblevitus
+and mbconfig to define the location of the Levitus database and the OTPS 
+installation, thereby making mblevitus and mbconfig work properly.
+
+#### 5.7.9beta70 (January 2, 2024)
+
+Mblist: Added capability to output beam travel times, angles and other values
+needed to recaclulate bathymetry by raytracing.
+
+Format 261 (MBF_KEMKMALL): Fixed recalculation of bathymetry by raytracing - the 
+problem was that the interpolation of attitude data onto the beam receive time
+was faulty, so an incorrect roll value was used in calculating the beam raytracing
+takeoff angles.
+
+#### 5.7.9beta69 (December 17, 2023)
+
+Format 192 (MBF_IMAGEMBA): Fixed correction of beam amplitude values (previously
+corrected values were not successfully inserted into the data structure).
+
+Mbauvloglist: Program altered so that time and utcTime fields are printed by
+default in format %17.6f and %12.6f, respectively, even though the MBARI Dorado AUV
+log files have default formats of %8.8e instead. Now by default the timestamps are
+printed usefully with precision to microseconds.
+
+Mbbackangle: Fixed bug in which mbbackangle did not process sidescan or amplitude
+data from files in formats that support variable numbers of beams and pixels.
+
+Mbsslayout: Fixed bug in which a command to swap the starboard and port sidescan
+channels was ignored.
+
+#### 5.7.9beta68 (November 30, 2023)
+
+CMake build system: It turns out that the GSF i/o module was not getting built and 
+used by default. The build system has been fixed so that the GSF format i/o module 
+is built and linked unless the cmake command includes -DbuildGSF=OFF, as in:
+    cmake -DbuildGSF=OFF ..
+
+Mbnavadjustmerge: Added options to shift global ties singly or all together.
+
+Mbtrnpp: Fixed use of covariances from TRN: to get x y z covariances use covariance[2], 
+covariance[0], covariance[5] rather than 0, 1, and 2.
+
+#### 5.7.9beta66 (November 18, 2023)
+
+Mbdatalist: Fixed an unitialized string causing intermittent failure.
+
+#### 5.7.9beta65 (November 17, 2023)
+
+Mbinfo and mblist: Fixed bug introduced with the alternate navigation capability that
+caused mbinfo and mblist to fail when running on single files rather than through datalists.
+
+Mbnavadjust: Improved handling of reference grids. The list of reference grids now starts
+with an option "<Previously Selected Reference Grid>" that will cause loading a section 
+with a global tie set to also load the reference grid (if any) loaded when the tie was
+created. If a specific reference grid is selected from the reference grid list, then that
+reference grid will be loaded when any section is loaded, regardless of whether a prior
+global tie already exists. 
+
+Mbtrnpp: Fixed bug identified by Kent Headley that caused divide by zeros when calculating swath
+width filtering of soundings.
+
+CMake build system: Fixed the unit testing, and enabled building unit tests by default.
+After "make all" is run, the unit tests can be run with "make test".
+
+#### 5.7.9beta64 (November 16, 2023)
+
+Reading GMT grids: Fixed a very significant bug that caused GMT grids to be read into 
+memory incorrectly by mb_read_gmt_grd() in src/mbaux/mb_readwritegrd.c. The problem was 
+that the GMT default padding of grids by 2 grid cells around all edges was applied 
+incorrectly, with a result that the topography (or other data) in the grid was shifted 
+two grid cell widths north. The creation of grids by mbgrid or mbmosaic was correct; 
+the problem came when the grids were read in by mbgrdviz, mbanglecorrect, mbprocess, 
+and mbnavadjust.
+
+#### 5.7.9beta63 (November 10, 2023)
+
+Further fixes to the CMake build system, which now actually builds all components of
+MB-System on MacOs Ventura, Debian 11 and 12, and Ubuntu 20 and 22.
+
+Moved the MB-System version tag and version date variables from the build system
+files CMakeLists.txt and configure.ac into src/mbio/mb_define.h so that there is only
+one place to edit the versioning.
+
+#### 5.7.9beta62 (November 3, 2023)
+
+Fixed the Cmake build system so that all components of the current MB-System source can be
+built, installed, and run on MacOs using CMake.
+
+Updated the copyright notices in the several hundred source files.
+
+
+#### 5.7.9beta61 (November 2, 2023)
+
+Read functions mb_get_all(), mb_get(), mb_read(): Fixed bug in handling the vertical dimension
+while applying alternate navigation. Bathymetry were being corrected wrongly for changes
+in the sensordepth.
+
+Datalists: Fixed problem in which processed files would not be read when the raw files do
+not conform to MB-System suffix conventions.
+
+Mbbackangle: Changed to not set parameter files when the swath files do not contain the
+expected amplitude and/or sidescan data. 
+
+Mbgrd2gltf: Added "#include <cmath>" to src/mbgrd2gltf/bathymetry.cpp to enable compiling on CentOs 7.
+
+Configure.ac and Configure: Modified to find Proj on CentOs 7 systems.
+
+#### 5.7.9beta60 (October 22, 2023)
+
+Mbnavadjust: Added an application or use mode to MBnavadjust projects. Projects can now be primary,
+secondary, or tertiary, with the setting found in the Controls diaglog brought up
+via the Options menu. A primary project behaves as MBnavadjust projects have always
+behaved, so that applying the navigation model writes the adjusted navigation model to \*.na0
+files parallel to the swath files and sets the \*.par parameter files so that mbprocess merges
+the adjusted navigation as it generates the processed swath files. In a secondary project, 
+applying the adjusted navigation model writes \*.na1 files parallel to the processed swath
+files (not the raw swath files), and in a tertiary project the output is in \*.na2 files.
+The purpose for this change is to allow the existence of multiple navigation adjustment models
+for the same swath data, generally because there may be reasons to have different vertical
+adjustments. The secondary and tertiary navigation models are termed alternative navigation
+models. A specific example is for repeated surveys of an active volcano experiencing
+deformation - one may want to adjust surveys so that vertical offsets over time are removed
+to allow a seamless topographic map, and to also adjust surveys so that the vertical changes
+betweeen surveys are revealed by differencing the topographic models.
+The MBnavadjust project file version has been updated to 3.15 with the addition of the 
+USEMODE parameters (primary=0, secondary=1, tertiary=2). MBnavadjust will read all old format
+projects but only write out the current format.
+
+Mbgrid, mbmosaic, and mblist: These programs are now capable of accessing alternative 
+navigation for processed swath data if such files exist and a datalist structure is set
+to enable use of the alternative navigation, as described above. The internal changes
+made to enable this capability are described below.
+
+Datalists and a mechanism for alternative navigation: 
+A new specialized datalist tag has been implemented to allow use of the alternative
+navigations files (\*.na1 and \*.na2) introduced above. Adding this tag to a datalist is the
+only way to access alternative navigation when reading swath files. If the following line appears
+in a datalist:
+    $ALTNAVSUFFIX:.na1
+then following this tag the new datalist parsing function will look for a \*.na1 file parallel
+to each processed file, and return a flag and the path to that file. This functionality works
+recursively, as all things do in datalist structures - a top level use of this tag sets the
+behavior for all datalist parsing down through a recursive datalist file structure. To use this
+functionality, a program must use a new function mb_datalist_read3() in place of mb_datalist_read()
+or mb_datalist_read2():
+
+    int mb_datalist_read(int verbose, void *datalist_ptr, char *path, char *dpath, 
+                            int *format, double *weight, int *error);
+
+    int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path, 
+                            char *ppath, char *dpath, int *format,
+                            double *weight, int *error);
+
+    int mb_datalist_read3(int verbose, void *datalist_ptr, int *pstatus, char *path, 
+                            char *ppath, int *astatus, char *apath, 
+                            char *dpath, int *format, double *weight, int *error);
+
+Here the new astatus is a boolean indicating that an alternative navigation file exists for 
+this swath file, and apath is a string containing the path for that alternative navigation file.
+In order to have the MBIO library calls actually use the alternative navigation in place of the
+navigation embedded in processed swath files, the program must use another new function 
+mb_read_init_altnav() to initialize reading (instead of mb_read_init()) - here the change is 
+to pass in the astatus and apath values obtained from mb_datalist_read3(). 
+
+    int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, 
+                            double bounds[4], int btime_i[7], int etime_i[7],
+                            double speedmin, double timegap, void **mbio_ptr, 
+                            double *btime_d, double *etime_d, int *beams_bath,
+                            int *beams_amp, int *pixels_ss, int *error);
+
+    int mb_read_init_altnav(int verbose, char *file, int format, int pings, 
+                      int lonflip, double bounds[4], int btime_i[7], int etime_i[7],
+                      double speedmin, double timegap, int astatus, char *apath, 
+                      void **mbio_ptr, double *btime_d, double *etime_d, 
+                      int *beams_bath, int *beams_amp, int *pixels_ss, int *error);
+
+If mb_read_init_altnav() is used, astatus is true, and apath is a valid alternative
+navigation file, then calls to mb_get_all(), mb_get(), and mb_read() will return survey
+records with the alternative navigation merged in place of the embedded navigation.
+
+The only programs utilizing this capability are mbgrid, mbmosaic, and mblist - this allows
+generating data products utilizing the alternative navigation.
+
+We have chosen to implement these features using new MBIO functions rather than the simpler
+approach of modifying the original functions. This choice is to avoid breaking the MBIO API for
+existing other programs at this time. We will likely simplify the API at some point in
+the future when the consequences of an API change are understood and manageable.
+
+#### 5.7.9beta59 (September 19, 2023)
+
+Mbnavadjustmerge: Made copying of mbnavadjust projects more efficient.
+
+Mbnavadjustmerge: Add --remove-short-sections option to eliminate undesirably
+short sections by merging them with their prior section.
+
+Mbnavadjustmerge: Add --remove-file option to remove a file from an mbnavadjust project.
+
+Mbcontour: Fixed drawing of survey tracklines - restored to generate thin lines.
+
+#### 5.7.9beta58 (August 30, 2023)
+
+Mbm_route2mission: Modifications to accomodate changes to Dorado AUV vehicle software.
+
+Mbinfo: Added -Q option which causes mbinfo to read statistics from existing \*.inf 
+files rather than to read the actual swath files. Variances, record types, nonfatal error messages
+and mask output cannot be generated with this option.
+
+Mbnavadjustmerge: Fixed bug in merging projects.
+
+Docker: Added a lightweight (945 MB) MB-System Dockerfile build based on alpine 
+Linux distribution. The image contains full MB-System, including TRN and graphical tools.
+Runs on MacOS 12 (Monterey) and Ubuntu 22.04.
+
+TRN tools: Minor changes to .gitignore (add binaries) and mbtrn/utils/tbinx.cpp (add signal 
+handler, reconnect timing, bug fix).
 
 Mblist: Added option to merge data from a secondary file and allow printing those
 secondary data values. The secondary file is columnar text in which the first column
@@ -446,7 +470,7 @@ the minimum or maximum values are selected (halving or doubling, respectively).
 Mbnavadjustmerge: Copying mbnavadjust projects is much more efficient due to use of
 a fast file copy function replacing a shell call of the program cp.
 
-#### 5.7.9beta57 (June 27)
+#### 5.7.9beta57 (June 27, 2023)
 
 Mbm_route2mission: Added -T option to embed use of Terrain Relative Navigation in 
 MBARI Mapping AUV missions.
@@ -456,7 +480,7 @@ data records, which caused mbtrnpp to crash by seg fault. This was 32K and is no
 
 Mbnavadjust: Fixed bug in the inversion algorithm.
 
-#### 5.7.9beta53 (June 15)
+#### 5.7.9beta53 (June 15, 2023)
 
 Rewrote the CMake build system based on the work of both Tom O'Reilly and Josch. This
 build system now works on MacOs Ventura. We will continue to augment and test using
@@ -497,7 +521,7 @@ Formats 56 (MBF_EM300RAW) and 57 (MBF_EM300MBA): Fixed catastrophic bug introduc
 5.7.9beta50 that treated many signed values (like acrosstrack distance) as unsigned.
 
 
-#### 5.7.9beta52 (March 9)
+#### 5.7.9beta52 (March 9, 2023)
 
 Formats 56 (MBF_EM300RAW) and 57 (MBF_EM300MBA): Fixed catastrophic bug introduced in 
 5.7.9beta50 that treated many signed values (like acrosstrack distance) as unsigned.
@@ -515,7 +539,7 @@ spiral descent termination altitude and mode = 0 for no start survey behavior, 1
 start survey behavior alone, and 2 for start survey plus a magnetometer calibration 
 maneuver.
 
-#### 5.7.9beta51 (February 14)
+#### 5.7.9beta51 (February 14, 2023)
 
 Format 89 (MBF_RESON7k3): Removed debug message inadvertently left active in 5.7.9beta50.
 
@@ -617,10 +641,12 @@ always been created without any comment records. Many MB-System programs read
 fnv files directly without using the MBF_MBPRONAV i/o module. Now all format
 166 files will be written with a first record documenting the contents of the
 file:
+
     fprintf(mb_io_ptr->mbfp,  "## <yyyy mm dd hh mm ss.ssssss> <epoch seconds> "
                   "<longitude (deg)> <latitude (deg)> <heading (deg)> <speed (km/hr)> "
                   "<draft (m)> <roll (deg)> <pitch (deg)> <heave (m)> <portlon (deg)> "
                   "<portlat (deg)> <stbdlon (deg)> <stbdlat (deg)>\n");
+                  
 whether they are written by the MBF_MBPRONAV i/o module or by functions in
 applications like mbprocess or mbpreprocess. All instances reading these files
 will ignore these file header records.
@@ -848,13 +874,21 @@ correction tables for color as well as intensity. Since we are using the YCbCr
 color space this means generating tables of average chroma (color) difference
 in red and blue as well as a 3D table of average luma (intensity).
 If RGB and YCbCr values have ranges 0-255, then:
+
   Y  = 0.299R + 0.587G + 0.114B (Luminance, intensity, B/W signal)
+  
   Cb = 0.564(B - Y) + 128 (blue color difference)
+  
   Cr = 0.713(R - Y) + 128 (red color difference)
+  
 and
+
   B = (Y + 1.773 * (Cb - 128));
+  
   G = (Y - 0.714 * (Cr - 128) - 0.344 * (Cb - 128));
+  
   R = (Y + 1.403 * (Cr - 128));
+  
 If the specified color correction file includes the Cr and Cb tables, then the
 --correct-color command will cause mbphotomosaic to use those tables to correct
 for color. Each source image pixel being corrected has a lateral location within
@@ -934,9 +968,10 @@ that are good. These fractions are by definition bounded by 0 and 1.
 
 Mbphotomosaic, mbgetphotocorrection, mbphotogrammetry: Added capability to load
 a time series of image quality values through new options:
-  --image-quality-file=file
-  --image-quality-threshold=value
-  --image-quality-filter-length=value
+
+-   --image-quality-file=file
+-   --image-quality-threshold=value
+-   --image-quality-filter-length=value
 
 #### 5.7.9beta19 (November 7, 2021)
 
@@ -1462,12 +1497,13 @@ release include:
 Many bug fixes to programs and data format i/o modules.
 
 New programs in optional photomosaicing section:
-  mbgrd2obj
-  mbphotomosaic
-  mbgetphotocorrection
-  mbphotogrammetry
-  mbgrd2octree
-  mbm_makeimagelist
+
+- mbgrd2obj
+- mbphotomosaic
+- mbgetphotocorrection
+- mbphotogrammetry
+- mbgrd2octree
+- mbm_makeimagelist
 
 New program in optional Terrain Relative Navigation section:
   mbtrnpp
@@ -1487,19 +1523,21 @@ Deprecated programs:
 Several programs that are no longer part of the current data
 processing approach have been declared deprecated and have been moved from
 src/utilities to a new directory src/deprecated. These programs are:
-    mb7k2jstar
-    mb7k2ss
-    mb7kpreprocess
-    mbauvnavusbl
-    mbhsdump
-    mbhysweeppreprocess
-    mbinsreprocess
-    mbkongsbergpreprocess
-    mbneptune2esf
-    mbrollbias
-    mbrphsbias
-    mbstripnan
-    mbswplspreprocess
+
+- mb7k2jstar
+- mb7k2ss
+- mb7kpreprocess
+- mbauvnavusbl
+- mbhsdump
+- mbhysweeppreprocess
+- mbinsreprocess
+- mbkongsbergpreprocess
+- mbneptune2esf
+- mbrollbias
+- mbrphsbias
+- mbstripnan
+- mbswplspreprocess
+    
 The deprecated programs have also been converted to C++ and are still built and
 installed as part of MB-System. We tentatively plan to remove these programs
 entirely from MB-System distributions at the time of the 6.0 release.
@@ -1639,16 +1677,18 @@ which had a variety of problems. Now, the pseudo-sidescan reported by MB-System
 as sidescan can be recalculated by mbprocess from the desired backscatter
 source. The default is to use the best source of backscatter available, with
 the order of "bestness" being:
-  1. Calibrated snippets
-  2. Snippets
-  3. Calibrated sidescan
-  4. Sidescan
-You can force mbpreprocess to use a desired backscatter source with the
-  --multibeam-sidescan-source option, where:
-  --multibeam-sidescan-source=C ==> Calibrated snippet records
-  --multibeam-sidescan-source=S ==> Snippet records
-  --multibeam-sidescan-source=W ==> Calibrated sidescan records
-  --multibeam-sidescan-source=B ==> Sidescan records
+
+1. Calibrated snippets
+1. Snippets
+1. Calibrated sidescan
+1. Sidescan
+
+You can force mbpreprocess to use a desired backscatter source with the --multibeam-sidescan-source option, where:
+
+-  --multibeam-sidescan-source=C ==> Calibrated snippet records
+-  --multibeam-sidescan-source=S ==> Snippet records
+-  --multibeam-sidescan-source=W ==> Calibrated sidescan records
+-  --multibeam-sidescan-source=B ==> Sidescan records
 
 Format 89 (MBF_RESON7K3): Added support for additional informational data
 records.
@@ -2161,19 +2201,21 @@ src/utilities: All programs in src/utilities have been migrated to C++.
 Deprecated programs: Several programs that are no longer part of the current data
 processing approach have been declared deprecated and have been moved from
 src/utilities to a new directory src/deprecated. These programs are:
-    mb7k2jstar
-    mb7k2ss
-    mb7kpreprocess
-    mbauvnavusbl
-    mbhsdump
-    mbhysweeppreprocess
-    mbinsreprocess
-    mbkongsbergpreprocess
-    mbneptune2esf
-    mbrollbias
-    mbrphsbias
-    mbstripnan
-    mbswplspreprocess
+
+- mb7k2jstar
+- mb7k2ss
+- mb7kpreprocess
+- mbauvnavusbl
+- mbhsdump
+- mbhysweeppreprocess
+- mbinsreprocess
+- mbkongsbergpreprocess
+- mbneptune2esf
+- mbrollbias
+- mbrphsbias
+- mbstripnan
+- mbswplspreprocess
+
 The deprecated programs have also been converted to C++ and are still built and
 installed as part of MB-System. We tentatively plan to remove these programs
 entirely from MB-System distributions at the time of the 6.0 release.
@@ -2702,9 +2744,19 @@ program is "open". On Cygwin systems, this program is "cygstart".
 
 Initiated use of version tagging in Git.
 
---
-### MB-System Version 5.6 Release Notes:
---
+---
+### MB-System Version 5.6 Releases and Release Notes:
+---
+
+- Version 5.6.20181218   December 18, 2018
+- **Version 5.6.20181217   December 17, 2018**
+- Version 5.6.20181214   December 14, 2018
+- Version 5.6.20181129   November 29, 2018
+- Version 5.6.20181016   October 16, 2018
+- Version 5.6.002        September 14, 2018
+- Version 5.6.002        September 11, 2018
+
+---
 
 #### 5.6.20181218 (December 18, 2018)
 
@@ -2792,9 +2844,105 @@ in which the interpolated and time latency corrected attitude values calculated
 for each beam bottom return time were not fully corrected for the receive head
 angular offsets.
 
---
-### MB-System Version 5.5 Release Notes:
---
+---
+### MB-System Version 5.5 Releases and Release Notes:
+---
+
+- Version 5.5.2350       September 6, 2018
+- Version 5.5.2348       August 20, 2018
+- Version 5.5.2347       August 17, 2018
+- Version 5.5.2346       August 13, 2018
+- Version 5.5.2345       August 10, 2018
+- Version 5.5.2344       August 3, 2018
+- Version 5.5.2343       July 10, 2018
+- **Version 5.5.2342       June 29, 2018**
+- Version 5.5.2340       June 26, 2018
+- Version 5.5.2339       June 25, 2018
+- **Version 5.5.2336       June 6, 2018**
+- Version 5.5.2335       May 6, 2018
+- Version 5.5.2334       April 18, 2018
+- Version 5.5.2333       April 18, 2018
+- Version 5.5.2332       April 17, 2018
+- Version 5.5.2331       April 10, 2018
+- Version 5.5.2330       March 7, 2018
+- Version 5.5.2329       February 12, 2018
+- Version 5.5.2328       January 31, 2018
+- **Version 5.5.2327       January 23, 2018**
+- Version 5.5.2324       January 18, 2018
+- Version 5.5.2323       December 7, 2017
+- Version 5.5.2322       November 25, 2017
+- **Version 5.5.2321       October 26, 2017**
+- Version 5.5.2320       October 18, 2017
+- **Version 5.5.2319       October 16, 2017**
+- **Version 5.5.2318       September 29, 2017**
+- **Version 5.5.2314       August 24, 2017**
+- **Version 5.5.2313       August 9, 2017**
+- Version 5.5.2312       July 14, 2017
+- Version 5.5.2311       June 20, 2017
+- **Version 5.5.2309       June 4, 2017**
+- Version 5.5.2306       May 27, 2017
+- Version 5.5.2305       May 13, 2017
+- Version 5.5.2304       May 6, 2017
+- Version 5.5.2303       April 28, 2017
+- Version 5.5.2302       April 20, 2017
+- Version 5.5.2301       April 17, 2017
+- Version 5.5.2300       April 15, 2017
+- Version 5.5.2299       April 10, 2017
+- Version 5.5.2297       April 5, 2017
+- Version 5.5.2296       March 31, 2017
+- Version 5.5.2295       March 26, 2017
+- Version 5.5.2294       March 21, 2017
+- Version 5.5.2293       March 6, 2017
+- Version 5.5.2290       January 2, 2017
+- Version 5.5.2289       December 2, 2016
+- Version 5.5.2287       November 29, 2016
+- Version 5.5.2286       November 8, 2016
+- Version 5.5.2285       November 3, 2016
+- **Version 5.5.2284       October 23, 2016**
+- Version 5.5.2282       August 25, 2016
+- Version 5.5.2281       August 7, 2016
+- **Version 5.5.2279       July 8, 2016**
+- **Version 5.5.2278       July 1, 2016**
+- Version 5.5.2277       June 25, 2016
+- Version 5.5.2275       May 17, 2016
+- **Version 5.5.2274       May 5, 2016**
+- Version 5.5.2271       April 1, 2016
+- **Version 5.5.2270       March 24, 2016**
+- Version 5.5.2268       March 14, 2016
+- **Version 5.5.2267       February 11, 2016**
+- Version 5.5.2265       February 11, 2016
+- Version 5.5.2264       February 2, 2016
+- **Version 5.5.2263       January 7, 2016**
+- Version 5.5.2260       December 22, 2015
+- Version 5.5.2259       October 27, 2015
+- Version 5.5.2258       October 5, 2015
+- Version 5.5.2257       September 1, 2015
+- Version 5.5.2256       August 24, 2015
+- Version 5.5.2255       August 11, 2015
+- Version 5.5.2254       July 23, 2015
+- **Version 5.5.2252       July 1, 2015**
+- **Version 5.5.2251       June 30, 2015**
+- Version 5.5.2250       June 29, 2015
+- Version 5.5.2249       June 26, 2015
+- **Version 5.5.2248       May 31, 2015**
+- Version 5.5.2247       May 29, 2015
+- **Version 5.5.2246       May 27, 2015**
+- **Version 5.5.2243       May 22, 2015**
+- **Version 5.5.2242       May 16, 2015**
+- Version 5.5.2241       May 12, 2015
+- Version 5.5.2240       May 8, 2015
+- Version 5.5.2239       May 6, 2015
+- Version 5.5.2238       April 14, 2015
+- Version 5.5.2237       March 23, 2015
+- Version 5.5.2234       March 5, 2015
+- **Version 5.5.2233       February 23, 2015**
+- Version 5.5.2232       February 21, 2015
+- Version 5.5.2231       February 20, 2015
+- Version 5.5.2230       February 18, 2015
+- Version 5.5.2229       February 14, 2015
+- Version 5.5.2228       February 6, 2015
+
+---
 
 #### 5.5.2350 (September 6, 2018)
 
@@ -4141,9 +4289,66 @@ Major changes made to integrate MB-System with GMT5:
 
 Format 88 (MBF_RESON7KR): Update Reson 7k i/o module to handle TVG records.
 
---
-### MB-System Version 5.4 Release Notes:
---
+---
+### MB-System Version 5.4 Releases and Release Notes:
+---
+
+- **Version 5.4.2220       January 22, 2015 (Last GMT4-compatible archive revision)**
+- Version 5.4.2219       December 11, 2014
+- Version 5.4.2218       December 4, 2014
+- Version 5.4.2217       December 1, 2014
+- **Version 5.4.2213       November 13, 2014**
+- Version 5.4.2210       November 10, 2014
+- **Version 5.4.2209       November 4, 2014**
+- **Version 5.4.2208       October 29, 2014**
+- Version 5.4.2204       September 5, 2014
+- **Version 5.4.2202       August 25, 2014**
+- Version 5.4.2201       August 20, 2014
+- **Version 5.4.2200       July 24, 2014**
+- **Version 5.4.2199       July 19, 2014**
+- Version 5.4.2196       July 14, 2014
+- Version 5.4.2195       July 9, 2014
+- Version 5.4.2194       July 8, 2014
+- **Version 5.4.2191       June 4, 2014**
+- **Version 5.4.2188       May 31, 2014**
+- Version 5.4.2187       May 28, 2014
+- Version 5.4.2186       May 26, 2014
+- Version 5.4.2185       May 11, 2014
+- **Version 5.4.2183       April 16, 2014**
+- Version 5.4.2182       April 8, 2014
+- Version 5.4.2181       April 4, 2014
+- **Version 5.4.2176       March 18, 2014**
+- **Version 5.4.2168       February 19, 2014**
+- **Version 5.4.2163       January 31, 2014**
+- Version 5.4.2162       January 24, 2014
+- **Version 5.4.2159       January 18, 2014**
+- Version 5.4.2158       January 18, 2014
+- **Version 5.4.2157       October 14, 2013**
+- Version 5.4.2155       October 13, 2013
+- Version 5.4.2154       September 26, 2013
+- Version 5.4.2153       September 22, 2013
+- **Version 5.4.2152       September 16, 2013**
+- Version 5.4.2151       September 12, 2013
+- Version 5.4.2149       September 2, 2013
+- Version 5.4.2148       August 28, 2013
+- Version 5.4.2147       August 27, 2013
+- Version 5.4.2144       August 26, 2013
+- Version 5.4.2143       August 24, 2013
+- Version 5.4.2141       August 24, 2013
+- Version 5.4.2139       August 19, 2013
+- Version 5.4.2138       August 18, 2013
+- Version 5.4.2137       August 9, 2013
+- Version 5.4.2136       August 8, 2013
+- **Version 5.4.2135       August 7, 2013**
+- Version 5.4.2133       July 29, 2013
+- Version 5.4.2132       July 26, 2013
+- Version 5.4.2130       July 20, 2013
+- Version 5.4.2129       July 8, 2013
+- Version 5.4.2128       June 18, 2013
+- Version 5.4.2123       June 10, 2013
+- Version 5.4.2082       May 24, 2013
+
+---
 
 #### 5.4.2219 (December 11, 2014)
 
@@ -4961,9 +5166,42 @@ configure script, following on the initial work by Bob Covill and others.
 The man page and web page documentation have been moved into the source
 tree. The old install_makefiles build system has been updated to still work.
 
---
-### MB-System Version 5.3 Release Notes:
---
+---
+### MB-System Version 5.3 Releases and Release Notes:
+---
+
+- Version 5.3.2053       April 4, 2013
+- Version 5.3.2051       March 20, 2013
+- Version 5.3.2042       March 12, 2013
+- **Version 5.3.2017       March 3, 2013**
+- **Version 5.3.2013       January 29, 2013**
+- **Version 5.3.2012       January 25, 2013**
+- **Version 5.3.2011       January 17, 2013**
+- Version 5.3.2010       January 14, 2013
+- **Version 5.3.2009       January 10, 2013**
+- **Version 5.3.2008       January 6, 2013**
+- Version 5.3.2007       January 5, 2013
+- Version 5.3.2006       January 4, 2013
+- Version 5.3.2005       December 31, 2012
+- Version 5.3.2004       December 12, 2012
+- Version 5.3.2000       November 14, 2012
+- Version 5.3.1999       November 13, 2012
+- Version 5.3.1998       November 6, 2012
+- Version 5.3.1994       October 27, 2012
+- Version 5.3.1988       September 29, 2012
+- Version 5.3.1986       September 12, 2012
+- **Version 5.3.1982       August 15, 2012**
+- Version 5.3.1981       August 2, 2012
+- **Version 5.3.1980       July 13, 2012**
+- **Version 5.3.1955       May 16, 2012**
+- Version 5.3.1941       March 6, 2012
+- **Version 5.3.1917       January 10, 2012**
+- **Version 5.3.1912       November 19, 2011**
+- **Version 5.3.1909       November 16, 2011**
+- **Version 5.3.1907       November 9, 2011**
+- **Version 5.3.1906       September 28, 2011**
+
+---
 
 #### 5.3.2062 (May 17, 2013)
 
@@ -5337,11 +5575,12 @@ are binned and averaged into 1-degree wide "pseudo-beams" to allow reasonable
 
 Added MBIO function mb_sonartype() that returns the type of sonar associated
 with some data, using the definitions:
-  #define    MB_SONARTYPE_UNKNOWN        0
-  #define    MB_SONARTYPE_ECHOSOUNDER    1
-  #define    MB_SONARTYPE_MULTIBEAM        2
-  #define    MB_SONARTYPE_SIDESCAN        3
-  #define    MB_SONARTYPE_INTERFEROMETRIC    4
+
+- #define    MB_SONARTYPE_UNKNOWN        0
+- #define    MB_SONARTYPE_ECHOSOUNDER    1
+- #define    MB_SONARTYPE_MULTIBEAM        2
+- #define    MB_SONARTYPE_SIDESCAN        3
+- #define    MB_SONARTYPE_INTERFEROMETRIC    4
 
 Added function to mbnavadjust that will estimate vertical offset between surveys
 and then set relevant ties accordingly.
@@ -5366,13 +5605,15 @@ Improved performance of navigation and attitude merging for both mb7kpreprocess
 and mbkongsbergpreprocess
 
 Added new functionality to mbkongsbergpreprocess (contributed by Suzanne O'Hara):
-  -Added -D<outputDirectory> argument to allow users to set new directory for
+
+- Added -D<outputDirectory> argument to allow users to set new directory for
     output files; original code always created output in input directory.
     This is a problem where users should not be modifying original directories.
     Using this flag allows the user to use the datalist option and is easier
     than copying the original mb58 data to a different directory or to using a
     script that loops through all the data using the -D option
-  -Added -C flag to output counts. Current code always outputs many rows of
+    
+- Added -C flag to output counts. Current code always outputs many rows of
     information that can be confusing. The default now is to work silently
     unless there is a problem.
 
@@ -5856,8 +6097,12 @@ Incomplete implementation of Dana Yoerger's changes to mbclean. Not yet tested.
 Program mbnavedit:
 Increased verbosity of mbnavedit for -X option.
 
---
-### MB-System Version 5.2 Release Notes:
+---
+### MB-System Version 5.2 Releases and Release Notes:
+---
+
+- **Version 5.2.1880       December 30, 2010**
+
 --
 
 #### 5.2.1880 (December 30, 2010)
@@ -5894,6 +6139,57 @@ MB-System to be more easily built on Solaris systems.
 
 Fixed mbset so that it recognizes sidescan cutting commands (SSCUTNUMBER,
 SSCUTDISTANCE, SSCUTSPEED).
+
+---
+### MB-System Version 5.1 Releases and Release Notes:
+---
+
+- Version 5.1.3beta1875  November 23, 2010
+- Version 5.1.3beta1874  November 7, 2010
+- Version 5.1.3beta1862  June 7, 2010
+- Version 5.1.3beta1858  May 18, 2010
+- Version 5.1.3beta1855  May 4, 2010
+- Version 5.1.3beta1851  April 14, 2010
+- Version 5.1.3beta1844  March 30, 2010
+- Version 5.1.3beta1843  March 29, 2010
+- Version 5.1.3beta1829  February 5, 2010
+- **Version 5.1.2          December 31, 2009**
+- Version 5.1.2beta15    December 30, 2009
+- Version 5.1.2beta14    December 28, 2009
+- Version 5.1.2beta13    December 28, 2009
+- Version 5.1.2beta12    December 26, 2009
+- Version 5.1.2beta11    Ausust 26, 2009
+- Version 5.1.2beta10    Ausust 12, 2009
+- Version 5.1.2beta09    Ausust 7, 2009
+- Version 5.1.2beta08    Ausust 5, 2009
+- Version 5.1.2beta06    July 2, 2009
+- Version 5.1.2beta05    June 14, 2009
+- Version 5.1.2beta02    March 13, 2009
+- Version 5.1.2beta01    March 9, 2009
+- **Version 5.1.1          December 31, 2008**
+- Version 5.1.1beta26    November 18, 2008
+- Version 5.1.1beta25    September 28, 2008
+- Version 5.1.1beta23    September 19, 2008
+- Version 5.1.1beta21    July 20, 2008
+- Version 5.1.1beta20    July 10, 2008
+- Version 5.1.1beta19    June 6, 2008
+- Version 5.1.1beta18    May 16, 2008
+- Version 5.1.1beta17    March 21, 2008
+- Version 5.1.1beta16    March 14, 2008
+- Version 5.1.1beta15    February 8, 2008
+- Version 5.1.1beta14    January 15, 2008
+- Version 5.1.1beta13    November 16, 2007
+- Version 5.1.1beta12    November 2, 2007
+- Version 5.1.1beta11    October 17, 2007
+- Version 5.1.1beta10    October 8, 2007
+- Version 5.1.1beta5     July 5, 2007
+- **Version 5.1.0          November 26, 2006**
+- Version 5.1.0beta4     October 5, 2006
+- Version 5.1.0beta3     September 11, 2006
+- Version 5.1.0beta2     August 9, 2006
+- Version 5.1.0beta      July 5, 2006
+
+---
 
 #### 5.1.3beta1875
 
@@ -6388,9 +6684,9 @@ Incorporates all changes listed above.
 
 Fixed memory management bug for formats 56 and 57 (Simrad EM3002 etc).
 
---
+---
 ### MB-System Version 5.1.1 Release Notes:
---
+---
 
 Fixed longstanding error in src/mbio/mb_angle.c in the application
 of roll and pitch angles. Previously, the pitch rotation was applied
@@ -6611,9 +6907,9 @@ The following are no longer distributed with MB-System:
      mbtide
      mbunclean
 
---
+---
 ### MB-System Version 5.1.0 Release Notes:
---
+---
 
 The version 5.1.0 release of MB-System contains both bug fixes
 and new capabilities relative to the 5.0.9 release.
@@ -6734,9 +7030,60 @@ mbm_plot.
 Fixed problem reading some Simrad multibeam data with slightly broken
 bathymetry records.
 
---
+----
+### MB-System Version 5.0 Releases and Release Notes:
+---
+
+- **Version 5.0.9          February 20, 2006**
+- **Version 5.0.8          February 8, 2006**
+- Version 5.0.8beta5     February 3, 2006
+- Version 5.0.8beta4     February 1, 2006
+- Version 5.0.8beta3     February 1, 2006
+- Version 5.0.8beta2     January 27, 2006
+- Version 5.0.8beta      January 24, 2006
+- **Version 5.0.7          April 7, 2005**
+- **Version 5.0.6          February 19, 2005**
+- **Version 5.0.5          October 6, 2004**
+- **Version 5.0.4          May 22, 2004**
+- **Version 5.0.3          February 27, 2004**
+- **Version 5.0.2          December 24, 2003**
+- **Version 5.0.1          December 12, 2003**
+- **Version 5.0.0          December 5, 2003**
+- Version 5.0.beta31     April 29, 2003
+- Version 5.0.beta30     April 25, 2003
+- Version 5.0.beta29     March 10, 2003
+- Version 5.0.beta28     January 14, 2003
+- Version 5.0.beta27     November 13, 2002
+- Version 5.0.beta26     November 3, 2002
+- Version 5.0.beta25     October 15, 2002
+- Version 5.0.beta24     October 4, 2002
+- Version 5.0.beta23     September 20, 2002
+- Version 5.0.beta22     August 30, 2002
+- Version 5.0.beta21     July 25, 2002
+- Version 5.0.beta20     July 20, 2002
+- Version 5.0.beta18     May 31, 2002
+- Version 5.0.beta17     May 1, 2002
+- Version 5.0.beta16     April 5, 2002
+- Version 5.0.beta15     March 26, 2002
+- Version 5.0.beta14     February 25, 2002
+- Version 5.0.beta13     February 22, 2002
+- Version 5.0.beta12     January 2, 2002
+- Version 5.0.beta11     December 20, 2001
+- Version 5.0.beta10     November 20, 2001
+- Version 5.0.beta09     November 6, 2001
+- Version 5.0.beta08     October 19, 2001
+- Version 5.0.beta07     August 10, 2001
+- Version 5.0.beta06     July 30, 2001
+- Version 5.0.beta05     July 23, 2001
+- Version 5.0.beta04     July 20, 2001
+- Version 5.0.beta03     July 19, 2001
+- Version 5.0.beta02     June 30, 2001
+- Version 5.0.beta01     June 8, 2001
+- Version 5.0.beta00     April 6, 2001
+
+---
 ### MB-System Version 5.0.9 Release Notes:
---
+---
 
 The version 5.0.9 release of MB-System is purely a bug fix
 release, and includes only a few changes relative to the 5.0.8
@@ -6756,9 +7103,9 @@ MBnavedit has been altered so that speed and acceleration weighting
 values in the smooth inversion function can be less than 1.0.
 
 
---
+---
 ### MB-System Version 5.0.8 Release Notes:
---
+---
 
 The version 5.0.8 release of MB-System includes several changes
 relative to the 5.0.7 release.
@@ -6875,12 +7222,14 @@ the "inf" files to include listings of easily identified data problems.
 The -q option of mbdatalist now extracts and lists these data problems
 as well as problems with the processing parameters.The possible data problems
 include:
-        No survey data found
-        Zero longitude or latitude in survey data
-        Instantaneous speed exceeds 25 km/hr
-        Average speed exceeds 25 km/hr
-        Sounding depth exceeds 11000 m
-        Unsupported Simrad datagram
+
+- No survey data found
+- Zero longitude or latitude in survey data
+- Instantaneous speed exceeds 25 km/hr
+- Average speed exceeds 25 km/hr
+- Sounding depth exceeds 11000 m
+- Unsupported Simrad datagram
+
 To populate the "inf" files of existing datalist structures with data problem
 notices, use mbdatalist with the -n option.
 
@@ -6917,9 +7266,9 @@ SUSE 10 systems, use of the smooth inversion function causes the first
 line of the output edited navigation to have NaN values for the
 longitude and latitude.
 
---
+---
 ### MB-System Version 5.0.7 Release Notes:
---
+---
 
 The version 5.0.7 release of MB-System includes several changes
 relative to the 5.0.6 release.
@@ -6987,9 +7336,9 @@ Added option to mbm_grdplot allowing the user to specify
 a separate grid file to be contoured. This code was
 contributed by Gordon Keith.
 
---
+---
 ### MB-System Version 5.0.6 Release Notes:
---
+---
 
 The version 5.0.6 release of MB-System includes several changes
 relative to the 5.0.5 release.
@@ -7054,9 +7403,9 @@ mbgrdviz.
 Improved the ability of mbgrid to embed background
 datasets.
 
---
+---
 ### MB-System Version 5.0.5 Release Notes:
---
+---
 
 The version 5.0.5 release of MB-System includes several changes
 relative to the 5.0.4 release.
@@ -7173,9 +7522,9 @@ travel times from the bathymetry when data files lacking travel time
 records are read. This allows users to recalculate bathymetry by
 raytracing even if the travel times are not recorded.
 
---
+---
 ### MB-System Version 5.0.3 Release Notes:
---
+---
 
 The version 5.0.3 release of MB-System includes two bug fixes
 relative to the 5.0.2 release.
@@ -7192,7 +7541,7 @@ We have fixed a bug in the i/o modules for binary SeaBeam 2100
 data (formats 42 and 43) that caused data to be written incorrectly
 on byteswapped systems (e.g. Intel processors running Linux).
 
---
+---
 ### MB-System Version 5.0.2 Release Notes:
 ---
 
@@ -7206,9 +7555,9 @@ bathymetry values when new data files were written.
 We have also fixed problems related to reading and writing
 SeaBeam 2100 data in the binary formats 42 and 43.
 
---
+---
 ### MB-System Version 5.0.1 Release Notes:
---
+---
 
 The version 5.0.1 release of MB-System includes two bug fixes
 relative to the 5.0.0 release. The program mbgrid has been
@@ -7223,15 +7572,16 @@ older MB-System installation. Users can then rename the directory to
 mbsystem or create a soft link to mbsystem-5.0.1 named mbsystem
 (e.g. ln -s mbsystem-5.0.1 mbsystem).
 
---
+---
 ### MB-System Version 5.0.0 Release Notes:
---
+---
 
 The version 5.0 release of MB-System includes a number of
 changes and improvements relative to the version 4 releases.
 The most significant changes include:
 
 A new approach to managing data processing.
+
 - Many tools - one output file.
     In previous versions of MB-System, each processing
     program read an input swath data file and
@@ -7260,6 +7610,7 @@ A new approach to managing data processing.
     gridding, mosaicing, and automated plotting.
 
 New tools.
+
 - mbnavadjust.
     This new tool allows users to adjust poorly
     navigated surveys by matching features in overlapping
@@ -7293,6 +7644,7 @@ New tools.
     within each bin.
 
 Improved bathymetry and navigation editors.
+
 - MBedit and MBnavedit now swallow data files whole rather than
     reading in limited size buffers.
 - MBedit now outputs beam edit events rather than an entire swath
@@ -7308,6 +7660,7 @@ Improved bathymetry and navigation editors.
     navigation by penalizing speed and acceleration.
 
 Support for Projected Coordinate Systems
+
 - MB-System now incorporates the source code for the PROJ.4
     Cartographic Projections library, providing support for
    (apparently) all commonly used geodetic coordinate systems.
@@ -7336,6 +7689,7 @@ Support for Projected Coordinate Systems
     imported into ESRI ArcGIS or other GIS packages.
 
 Restructuring the code.
+
 - All of the C code now conforms to the ANSI C standard.
 - The underlying input/output library (MBIO) has been
     substantially rewritten. The structure has been streamlined,
@@ -7343,6 +7697,7 @@ Restructuring the code.
     existing code. The MBIO API has been greatly modified.
 
 Handling of old Simrad multibeam data.
+
 - Vendor format data from the old Simrad multibeams (pre-
     1997 sonars) are now supported by a single format id (51)
     rather than a separate format id for each sonar model. The
@@ -7360,6 +7715,7 @@ Handling of old Simrad multibeam data.
     multibeam sonars.
 
 Streamlining of MB-System Default Parameters.
+
 - Prior to version 5.0, the MB-System defaults set by mbdefaults
     included the format id, a control for ping averaging,
     longitude and latitude bounds for windowing by area, and
@@ -7374,6 +7730,7 @@ Streamlining of MB-System Default Parameters.
     command line arguments.
 
 New Data Formats
+
 - Furuno HS10 multibeam bathymetry is supported as format 171.
 - SeaBeam 2120 multibeam data in the L3 Communications XSE format
     are supported as format 94 (already used to support Elac

@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
  *
- *    Copyright (c) 1993-2020 by
+ *    Copyright (c) 1993-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * MBEDIT is an interactive beam editor for multibeam bathymetry data.
@@ -77,7 +87,7 @@
 #define MBEDIT_PLOT_SPEED 6
 #define MBEDIT_PLOT_DEPTH 7
 #define MBEDIT_PLOT_ALTITUDE 8
-#define MBEDIT_PLOT_SONARDEPTH 9
+#define MBEDIT_PLOT_SENSORDEPTH 9
 #define MBEDIT_PLOT_ROLL 10
 #define MBEDIT_PLOT_PITCH 11
 #define MBEDIT_PLOT_HEAVE 12
@@ -116,7 +126,7 @@ struct mbedit_ping_struct {
 	double speed;
 	double heading;
 	double altitude;
-	double sonardepth;
+	double sensordepth;
 	double roll;
 	double pitch;
 	double heave;
@@ -341,7 +351,6 @@ int mbedit_init(int argc, char **argv, int *startup_file) {
 	int errflg = 0;
 	int c;
 	int help = 0;
-	int flag = 0;
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "VvHhB:b:DdE:e:F:f:GgI:i:SsXx")) != -1) {
@@ -358,40 +367,33 @@ int mbedit_init(int argc, char **argv, int *startup_file) {
 		case 'b':
 			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);
 			btime_i[6] = 0;
-			flag++;
 			break;
 		case 'D':
 		case 'd':
 			output_mode = MBEDIT_OUTPUT_BROWSE;
-			flag++;
 			break;
 		case 'E':
 		case 'e':
 			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
 			etime_i[6] = 0;
-			flag++;
 			break;
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d", &format);
-			flag++;
 			break;
 		case 'G':
 		case 'g':
 			gui_mode = true;
-			flag++;
 			break;
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", ifile);
 			do_parse_datalist(ifile, format);
-			flag++;
 			fileflag++;
 			break;
 		case 'X':
 		case 'x':
 			run_mbprocess = true;
-			flag++;
 			break;
 		case '?':
 			errflg++;
@@ -3933,7 +3935,7 @@ int mbedit_load_data(int buffer_size, int *nloaded, int *nbuffer, int *ngood, in
 		error = MB_ERROR_NO_ERROR;
 		status = mb_get_all(verbose, imbio_ptr, &store_ptr, &kind, ping[nbuff].time_i, &ping[nbuff].time_d, &ping[nbuff].navlon,
 		                    &ping[nbuff].navlat, &ping[nbuff].speed, &ping[nbuff].heading, &distance, &ping[nbuff].altitude,
-		                    &ping[nbuff].sonardepth, &ping[nbuff].beams_bath, &namp, &nss, beamflag, bath, amp, bathacrosstrack,
+		                    &ping[nbuff].sensordepth, &ping[nbuff].beams_bath, &namp, &nss, beamflag, bath, amp, bathacrosstrack,
 		                    bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
 		if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
 			if (nbuff > 0)
@@ -4787,7 +4789,7 @@ int mbedit_plot_ping_label(int iping, bool save) {
 		else if (ping[iping].beams_bath > 0)
 			sprintf(string, "%5d %2.2d/%2.2d/%4.4d %2.2d:%2.2d:%2.2d.%3.3d %10.3f", ping[iping].record + 1, ping[iping].time_i[1],
 			        ping[iping].time_i[2], ping[iping].time_i[0], ping[iping].time_i[3], ping[iping].time_i[4],
-			        ping[iping].time_i[5], (int)(0.001 * ping[iping].time_i[6]), ping[iping].altitude + ping[iping].sonardepth);
+			        ping[iping].time_i[5], (int)(0.001 * ping[iping].time_i[6]), ping[iping].altitude + ping[iping].sensordepth);
 		else
 			sprintf(string, "%5d %2.2d/%2.2d/%4.4d %2.2d:%2.2d:%2.2d.%3.3d %10.3f", ping[iping].record + 1, ping[iping].time_i[1],
 			        ping[iping].time_i[2], ping[iping].time_i[0], ping[iping].time_i[3], ping[iping].time_i[4],
@@ -5223,7 +5225,7 @@ int mbedit_tslabel(int data_id, char *label) {
 	case MBEDIT_PLOT_ALTITUDE:
 		strcpy(label, "Sonar Altitude (m)");
 		break;
-	case MBEDIT_PLOT_SONARDEPTH:
+	case MBEDIT_PLOT_SENSORDEPTH:
 		strcpy(label, "Sonar Depth (m)");
 		break;
 	case MBEDIT_PLOT_ROLL:
@@ -5289,8 +5291,8 @@ int mbedit_tsvalue(int iping, int data_id, double *value) {
 		case MBEDIT_PLOT_ALTITUDE:
 			*value = ping[iping].altitude;
 			break;
-		case MBEDIT_PLOT_SONARDEPTH:
-			*value = ping[iping].sonardepth;
+		case MBEDIT_PLOT_SENSORDEPTH:
+			*value = ping[iping].sensordepth;
 			break;
 		case MBEDIT_PLOT_ROLL:
 			*value = ping[iping].roll;
@@ -5405,7 +5407,7 @@ int mbedit_tsminmax(int iping, int nping, int data_id, double *tsmin, double *ts
 		*tsmax = center + halfwidth;
 		break;
 	}
-	case MBEDIT_PLOT_SONARDEPTH:
+	case MBEDIT_PLOT_SENSORDEPTH:
 	{
 		const double halfwidth = MAX(1.0, 0.55 * (*tsmax - *tsmin));
 		const double center = 0.5 * (*tsmin + *tsmax);

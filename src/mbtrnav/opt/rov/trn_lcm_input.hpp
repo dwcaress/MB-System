@@ -236,6 +236,9 @@ public:
     virtual bool provides_bath(){return false;}
     virtual bool provides_nav(){return false;}
     virtual bool provides_vel(){return false;}
+    virtual bool provides_mb1(){return false;}
+    virtual bool provides_depth(){return false;}
+    
 protected:
 
     void buffer_data()
@@ -276,7 +279,7 @@ protected:
         // behavior, i.e. defer notification until processing
         // is complete
         if(!mDelegateNotify){
-            TRN_NDPRINT(3, "TRN_LCM::%s:%d  NOTIFY SEM\n", __func__, __LINE__);
+            TRN_NDPRINT(TRNDL_TRNLCMINPUT_NOTIFYSEM, "TRN_LCM::%s:%d  NOTIFY SEM\n", __func__, __LINE__);
             notify_sem_list();
         }
     }

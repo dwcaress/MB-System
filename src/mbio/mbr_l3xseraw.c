@@ -1,13 +1,23 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_l3xseraw.c	3/27/2000
  *
- *    Copyright (c) 2000-2020 by
- *    D. W. Caress (caress@mbari.org)
+ *    Copyright (c) 2000-2024 by
+ *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
- *      Palisades, NY  10964
+ *      Columbia University
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -196,7 +206,9 @@ int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_
 	int byte_count = 0;
 	int group_id = 0;
 	int index = 0;
+#ifdef MB_DEBUG
 	int skip = 0;
+#endif
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -225,11 +237,15 @@ int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_
 	bool done = false;
 	while (index <= buffer_size && status == MB_SUCCESS && !done) {
 		/* look for group start or frame end */
+#ifdef MB_DEBUG
 		skip = 0;
+#endif
 #ifdef DATAINPCBYTEORDER
 		while (index < buffer_size && strncmp(&buffer[index], "GSH$", 4) && strncmp(&buffer[index], "FSH#", 4)) {
 			index++;
+#ifdef MB_DEBUG
 			skip++;
+#endif
 		}
 		if (index >= buffer_size || !strncmp(&buffer[index], "FSH#", 4))
 			done = true;
@@ -238,7 +254,9 @@ int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_
 #else
 		while (index < buffer_size && strncmp(&buffer[index], "$HSG", 4) && strncmp(&buffer[index], "#HSF", 4)) {
 			index++;
+#ifdef MB_DEBUG
 			skip++;
+#endif
 		}
 		if (index >= buffer_size || !strncmp(&buffer[index], "#HSF", 4))
 			done = true;
@@ -450,7 +468,9 @@ int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store
 	int byte_count = 0;
 	int group_id = 0;
 	int index = 0;
+#ifdef MB_DEBUG
 	int skip = 0;
+#endif
 	int nchar = 0;
 
 	if (verbose >= 2) {
@@ -480,11 +500,15 @@ int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store
 	bool done = false;
 	while (index <= buffer_size && status == MB_SUCCESS && !done) {
 		/* look for group start or frame end */
+#ifdef MB_DEBUG
 		skip = 0;
+#endif
 #ifdef DATAINPCBYTEORDER
 		while (index < buffer_size && strncmp(&buffer[index], "GSH$", 4) && strncmp(&buffer[index], "FSH#", 4)) {
 			index++;
+#ifdef MB_DEBUG
 			skip++;
+#endif
 		}
 		if (index >= buffer_size || !strncmp(&buffer[index], "FSH#", 4))
 			done = true;
@@ -493,7 +517,9 @@ int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store
 #else
 		while (index < buffer_size && strncmp(&buffer[index], "$HSG", 4) && strncmp(&buffer[index], "#HSF", 4)) {
 			index++;
+#ifdef MB_DEBUG
 			skip++;
+#endif
 		}
 		if (index >= buffer_size || !strncmp(&buffer[index], "#HSF", 4))
 			done = true;
@@ -793,7 +819,9 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 	int index = 0;
 	int ngoodss;
 	double xmin, xmax, binsize;
+#ifdef MB_DEBUG
 	int skip = 0;
+#endif
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -822,11 +850,15 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 	bool done = false;
 	while (index <= buffer_size && status == MB_SUCCESS && !done) {
 		/* look for group start or frame end */
+#ifdef MB_DEBUG
 		skip = 0;
+#endif
 #ifdef DATAINPCBYTEORDER
 		while (index < buffer_size && strncmp(&buffer[index], "GSH$", 4) && strncmp(&buffer[index], "FSH#", 4)) {
 			index++;
+#ifdef MB_DEBUG
 			skip++;
+#endif
 		}
 		if (index >= buffer_size || !strncmp(&buffer[index], "FSH#", 4))
 			done = true;
@@ -835,7 +867,9 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 #else
 		while (index < buffer_size && strncmp(&buffer[index], "$HSG", 4) && strncmp(&buffer[index], "#HSF", 4)) {
 			index++;
+#ifdef MB_DEBUG
 			skip++;
+#endif
 		}
 		if (index >= buffer_size || !strncmp(&buffer[index], "#HSF", 4))
 			done = true;
@@ -1232,7 +1266,9 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 	double rr, xx, zz;
 	double xmin, xmax, binsize;
 	int ngoodss;
+#ifdef MB_DEBUG
 	int skip = 0;
+#endif
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1284,11 +1320,15 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 	bool done = false;
 	while (index <= buffer_size && status == MB_SUCCESS && !done) {
 		/* look for group start or frame end */
+#ifdef MB_DEBUG
 		skip = 0;
+#endif
 #ifdef DATAINPCBYTEORDER
 		while (index < buffer_size && strncmp(&buffer[index], "GSH$", 4) && strncmp(&buffer[index], "FSH#", 4)) {
 			index++;
+#ifdef MB_DEBUG
 			skip++;
+#endif
 		}
 		if (index >= buffer_size || !strncmp(&buffer[index], "FSH#", 4))
 			done = true;
@@ -1297,7 +1337,9 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 #else
 		while (index < buffer_size && strncmp(&buffer[index], "$HSG", 4) && strncmp(&buffer[index], "#HSF", 4)) {
 			index++;
+#ifdef MB_DEBUG
 			skip++;
+#endif
 		}
 		if (index >= buffer_size || !strncmp(&buffer[index], "#HSF", 4))
 			done = true;
@@ -2019,7 +2061,9 @@ int mbr_l3xseraw_rd_seabeam(int verbose, int buffer_size, char *buffer, void *st
   int byte_count = 0;
 	int group_id = 0;
 	int index = 0;
+#ifdef MB_DEBUG
 	int skip = 0;
+#endif
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2048,11 +2092,15 @@ int mbr_l3xseraw_rd_seabeam(int verbose, int buffer_size, char *buffer, void *st
 	bool done = false;
 	while (index <= buffer_size && status == MB_SUCCESS && !done) {
 		/* look for group start or frame end */
+#ifdef MB_DEBUG
 		skip = 0;
+#endif
 #ifdef DATAINPCBYTEORDER
 		while (index < buffer_size && strncmp(&buffer[index], "GSH$", 4) && strncmp(&buffer[index], "FSH#", 4)) {
 			index++;
+#ifdef MB_DEBUG
 			skip++;
+#endif
 		}
 		if (index >= buffer_size || !strncmp(&buffer[index], "FSH#", 4))
 			done = true;
@@ -2061,7 +2109,9 @@ int mbr_l3xseraw_rd_seabeam(int verbose, int buffer_size, char *buffer, void *st
 #else
 		while (index < buffer_size && strncmp(&buffer[index], "$HSG", 4) && strncmp(&buffer[index], "#HSF", 4)) {
 			index++;
+#ifdef MB_DEBUG
 			skip++;
+#endif
 		}
 		if (index >= buffer_size || !strncmp(&buffer[index], "#HSF", 4))
 			done = true;
@@ -2420,8 +2470,9 @@ int mbr_l3xseraw_rd_comment(int verbose, int buffer_size, char *buffer, void *st
 	int byte_count = 0;
 	int group_id = 0;
 	int index = 0;
+#ifdef MB_DEBUG
 	int skip = 0;
-
+#endif
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2449,11 +2500,15 @@ int mbr_l3xseraw_rd_comment(int verbose, int buffer_size, char *buffer, void *st
 	bool done = false;
 	while (index <= buffer_size && status == MB_SUCCESS && !done) {
 		/* look for group start or frame end */
+#ifdef MB_DEBUG
 		skip = 0;
+#endif
 #ifdef DATAINPCBYTEORDER
 		while (index < buffer_size && strncmp(&buffer[index], "GSH$", 4) && strncmp(&buffer[index], "FSH#", 4)) {
 			index++;
+#ifdef MB_DEBUG
 			skip++;
+#endif
 		}
 		if (index >= buffer_size || !strncmp(&buffer[index], "FSH#", 4))
 			done = true;
@@ -2462,7 +2517,9 @@ int mbr_l3xseraw_rd_comment(int verbose, int buffer_size, char *buffer, void *st
 #else
 		while (index < buffer_size && strncmp(&buffer[index], "$HSG", 4) && strncmp(&buffer[index], "#HSF", 4)) {
 			index++;
+#ifdef MB_DEBUG
 			skip++;
+#endif
 		}
 		if (index >= buffer_size || !strncmp(&buffer[index], "#HSF", 4))
 			done = true;
@@ -2523,7 +2580,9 @@ int mbr_l3xseraw_rd_nav(int verbose, int buffer_size, char *buffer, void *store_
 	int byte_count = 0;
 	int group_id = 0;
 	int index = 0;
+#ifdef MB_DEBUG
 	int skip = 0;
+#endif
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2567,11 +2626,15 @@ int mbr_l3xseraw_rd_nav(int verbose, int buffer_size, char *buffer, void *store_
 	bool done = false;
 	while (index <= buffer_size && status == MB_SUCCESS && !done) {
 		/* look for group start or frame end */
+#ifdef MB_DEBUG
 		skip = 0;
+#endif
 #ifdef DATAINPCBYTEORDER
 		while (index < buffer_size && strncmp(&buffer[index], "GSH$", 4) && strncmp(&buffer[index], "FSH#", 4)) {
 			index++;
+#ifdef MB_DEBUG
 			skip++;
+#endif
 		}
 		if (index >= buffer_size || !strncmp(&buffer[index], "FSH#", 4))
 			done = true;
@@ -2580,7 +2643,9 @@ int mbr_l3xseraw_rd_nav(int verbose, int buffer_size, char *buffer, void *store_
 #else
 		while (index < buffer_size && strncmp(&buffer[index], "$HSG", 4) && strncmp(&buffer[index], "#HSF", 4)) {
 			index++;
+#ifdef MB_DEBUG
 			skip++;
+#endif
 		}
 		if (index >= buffer_size || !strncmp(&buffer[index], "#HSF", 4))
 			done = true;
@@ -2878,7 +2943,9 @@ int mbr_l3xseraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int frame_size;
 	int index = 0;
 	int read_len;
+#ifdef MB_DEBUG
 	int skip = 0;
+#endif
 	int status = MB_SUCCESS;
 
 	/* read until done */
@@ -2898,7 +2965,9 @@ int mbr_l3xseraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		else {
 
 			/* look for the next frame start */
+#ifdef MB_DEBUG
 			skip = 0;
+#endif
 			if ((read_len = fread(&label[0], 1, 4, mb_io_ptr->mbfp)) != 4) {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
@@ -2925,8 +2994,8 @@ int mbr_l3xseraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					*error = MB_ERROR_EOF;
 				}
 				else {
-					skip++;
 #ifdef MB_DEBUG
+					skip++;
 					fprintf(stderr, "Byte: %d %c %o %x\n", label[3], label[3], label[3], label[3]);
 #endif
 				}

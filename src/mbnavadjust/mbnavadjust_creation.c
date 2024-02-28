@@ -1,3 +1,26 @@
+/*--------------------------------------------------------------------
+ *    The MB-system:  mbnavadjust_creation.c  2/22/2000
+ *
+ *    Copyright (c) 2000-2024 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
+ *      Lamont-Doherty Earth Observatory
+ *      Columbia University
+ *      Palisades, NY 10964
+ *
+ *    See README.md file for copying and redistribution conditions.
+ *--------------------------------------------------------------------*/
 
 /* Begin user code block <abstract> */
 /* End user code block <abstract> */
@@ -101,11 +124,13 @@ extern void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
  * Declarations for callbacks and handlers.
  */
 extern void BxExitCB(Widget, XtPointer, XtPointer);
+extern void BxManageCB(Widget, XtPointer, XtPointer);
+extern void BxUnmanageCB(Widget, XtPointer, XtPointer);
+extern void BxSetValuesCB(Widget, XtPointer, XtPointer);
 extern void do_modelplot_clearblock(Widget, XtPointer, XtPointer);
 extern void do_modelplot_fullsize(Widget, XtPointer, XtPointer);
 extern void do_modelplot_input(Widget, XtPointer, XtPointer);
 extern void do_modelplot_expose(Widget, XtPointer, XtPointer);
-extern void BxUnmanageCB(Widget, XtPointer, XtPointer);
 extern void do_modelplot_dismiss(Widget, XtPointer, XtPointer);
 extern void do_modelplot_timeseries(Widget, XtPointer, XtPointer);
 extern void do_modelplot_perturbation(Widget, XtPointer, XtPointer);
@@ -116,6 +141,7 @@ extern void do_scale_controls_sectionlength(Widget, XtPointer, XtPointer);
 extern void do_scale_controls_tickinterval(Widget, XtPointer, XtPointer);
 extern void do_controls_scale_colorinterval(Widget, XtPointer, XtPointer);
 extern void do_scale_contourinterval(Widget, XtPointer, XtPointer);
+extern void do_controls_show(Widget, XtPointer, XtPointer);
 extern void do_controls_apply(Widget, XtPointer, XtPointer);
 extern void do_scale_controls_decimation(Widget, XtPointer, XtPointer);
 extern void do_scale_controls_sectionsoundings(Widget, XtPointer, XtPointer);
@@ -145,12 +171,10 @@ extern void do_naverr_minmisfit(Widget, XtPointer, XtPointer);
 extern void do_naverr_next(Widget, XtPointer, XtPointer);
 extern void do_naverr_previous(Widget, XtPointer, XtPointer);
 extern void do_naverr_setnone(Widget, XtPointer, XtPointer);
-extern void BxManageCB(Widget, XtPointer, XtPointer);
 extern void do_biases_init(Widget, XtPointer, XtPointer);
 extern void do_naverr_misfitcenter(Widget, XtPointer, XtPointer);
 extern void do_fileselection_mode(Widget, XtPointer, XtPointer);
 extern void do_fileselection_ok(Widget, XtPointer, XtPointer);
-extern void BxSetValuesCB(Widget, XtPointer, XtPointer);
 extern void do_file_close(Widget, XtPointer, XtPointer);
 extern void do_quit(Widget, XtPointer, XtPointer);
 extern void do_list_showreferencegrids(Widget, XtPointer, XtPointer);
@@ -614,6 +638,8 @@ Widget CreatemainWindow(Widget parent) {
 		 */
 		XmStringFree((XmString)tmp0);
 	}
+
+	XtAddCallback(pushButton_controls, XmNactivateCallback, do_controls_show, (XtPointer)0);
 
 	XtAddCallback(pushButton_controls, XmNactivateCallback, BxManageCB, (XtPointer) "form_controls");
 
@@ -4250,7 +4276,7 @@ Widget CreatemainWindow(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNwidth, 635);
 	ac++;
-	XtSetArg(args[ac], XmNheight, 438);
+	XtSetArg(args[ac], XmNheight, 638);
 	ac++;
 	dialogShell_controls = XmCreateDialogShell(mainWindow, (char *)"dialogShell_controls", args, ac);
 
@@ -4263,9 +4289,171 @@ Widget CreatemainWindow(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNwidth, 635);
 	ac++;
-	XtSetArg(args[ac], XmNheight, 438);
+	XtSetArg(args[ac], XmNheight, 525);
 	ac++;
 	form_controls = XtCreateWidget((char *)"form_controls", xmFormWidgetClass, dialogShell_controls, args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(form_controls, (char *)"Max Section Length (km):", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 20);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 160);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 20);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(form_controls, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		label_controls_sectionlength = XmCreateLabel(form_controls, (char *)"label_controls_sectionlength", args, ac);
+		XtManageChild(label_controls_sectionlength);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNminimum, 1);
+	ac++;
+	XtSetArg(args[ac], XmNdecimalPoints, 2);
+	ac++;
+	XtSetArg(args[ac], XmNvalue, 2000);
+	ac++;
+	XtSetArg(args[ac], XmNmaximum, 5000);
+	ac++;
+	XtSetArg(args[ac], XmNshowArrows, TRUE);
+	ac++;
+	XtSetArg(args[ac], XmNshowValue, TRUE);
+	ac++;
+	XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+	ac++;
+	XtSetArg(args[ac], XmNx, 190);
+	ac++;
+	XtSetArg(args[ac], XmNy, 0);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 438);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 36);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(form_controls, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	scale_controls_sectionlength = XmCreateScale(form_controls, (char *)"scale_controls_sectionlength", args, ac);
+	XtManageChild(scale_controls_sectionlength);
+	XtAddCallback(scale_controls_sectionlength, XmNvalueChangedCallback, do_scale_controls_sectionlength, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(form_controls, (char *)"Max # Soundings in Section:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 60);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 180);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 20);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(form_controls, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		label_controls_sectionsoundings = XmCreateLabel(form_controls, (char *)"label_controls_sectionsoundings", args, ac);
+		XtManageChild(label_controls_sectionsoundings);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNminimum, 1000);
+	ac++;
+	XtSetArg(args[ac], XmNdecimalPoints, 0);
+	ac++;
+	XtSetArg(args[ac], XmNvalue, 10000);
+	ac++;
+	XtSetArg(args[ac], XmNmaximum, 100000);
+	ac++;
+	XtSetArg(args[ac], XmNshowArrows, TRUE);
+	ac++;
+	XtSetArg(args[ac], XmNscaleMultiple, 499);
+	ac++;
+	XtSetArg(args[ac], XmNshowValue, TRUE);
+	ac++;
+	XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+	ac++;
+	XtSetArg(args[ac], XmNx, 190);
+	ac++;
+	XtSetArg(args[ac], XmNy, 40);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 439);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 43);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(form_controls, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	scale_controls_sectionsoundings = XmCreateScale(form_controls, (char *)"scale_controls_sectionsoundings", args, ac);
+	XtManageChild(scale_controls_sectionsoundings);
+	XtAddCallback(scale_controls_sectionsoundings, XmNvalueChangedCallback, do_scale_controls_sectionsoundings, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 13);
+	ac++;
+	XtSetArg(args[ac], XmNy, 88);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 616);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 20);
+	ac++;
+	separator4 = XmCreateSeparator(form_controls, (char *)"separator4", args, ac);
+	XtManageChild(separator4);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 430);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 618);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 20);
+	ac++;
+	separator5 = XmCreateSeparator(form_controls, (char *)"separator5", args, ac);
+	XtManageChild(separator5);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 310);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 613);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 20);
+	ac++;
+	separator12 = XmCreateSeparator(form_controls, (char *)"separator12", args, ac);
+	XtManageChild(separator12);
 
 	ac = 0;
 	XtSetArg(args[ac], XmNx, 10);
@@ -4278,6 +4466,135 @@ Widget CreatemainWindow(Widget parent) {
 	ac++;
 	separator14 = XmCreateSeparator(form_controls, (char *)"separator14", args, ac);
 	XtManageChild(separator14);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(form_controls, (char *)":::t\"MB-System Use of\"\"Navigation Adjustment Model:\"", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 400);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 200);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 40);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(form_controls, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		label_radioBox_controls_use = XmCreateLabel(form_controls, (char *)"label_radioBox_controls_use", args, ac);
+		XtManageChild(label_radioBox_controls_use);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+	ac++;
+	XtSetArg(args[ac], XmNx, 50);
+	ac++;
+	XtSetArg(args[ac], XmNy, 500);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 400);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 34);
+	ac++;
+	XtSetArg(args[ac], XmNisHomogeneous, False);
+	ac++;
+	radioBox_controls_use =
+	    XmCreateRadioBox(form_controls, (char *)"radioBox_controls_use", args, ac);
+	XtManageChild(radioBox_controls_use);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(radioBox_controls_use, (char *)"Primary", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNwidth, 109);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 28);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(radioBox_controls_use, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		toggleButton_controls_use_primary = XmCreateToggleButton(
+		    radioBox_controls_use, (char *)"toggleButton_controls_use_primary", args, ac);
+		XtManageChild(toggleButton_controls_use_primary);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(radioBox_controls_use, (char *)"Secondary", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNwidth, 109);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 28);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(radioBox_controls_use, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		toggleButton_controls_use_secondary = XmCreateToggleButton(
+		    radioBox_controls_use, (char *)"toggleButton_controls_use_secondary", args, ac);
+		XtManageChild(toggleButton_controls_use_secondary);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(radioBox_controls_use, (char *)"Tertiary", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNwidth, 109);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 28);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(radioBox_controls_use, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		toggleButton_controls_use_tertiary = XmCreateToggleButton(
+		    radioBox_controls_use, (char *)"toggleButton_controls_use_tertiary", args, ac);
+		XtManageChild(toggleButton_controls_use_tertiary);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
 
 	ac = 0;
 	XtSetArg(args[ac], XmNminimum, 1);
@@ -4402,80 +4719,6 @@ Widget CreatemainWindow(Widget parent) {
 	scale_controls_smoothing = XmCreateScale(form_controls, (char *)"scale_controls_smoothing", args, ac);
 	XtManageChild(scale_controls_smoothing);
 	XtAddCallback(scale_controls_smoothing, XmNvalueChangedCallback, do_scale_controls_smoothing, (XtPointer)0);
-
-	ac = 0;
-	XtSetArg(args[ac], XmNx, 10);
-	ac++;
-	XtSetArg(args[ac], XmNy, 310);
-	ac++;
-	XtSetArg(args[ac], XmNwidth, 613);
-	ac++;
-	XtSetArg(args[ac], XmNheight, 20);
-	ac++;
-	separator12 = XmCreateSeparator(form_controls, (char *)"separator12", args, ac);
-	XtManageChild(separator12);
-
-	ac = 0;
-	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(form_controls, (char *)"Max Section Length (km):", XmRXmString, 0, &argok);
-		XtSetArg(args[ac], XmNlabelString, tmp0);
-		if (argok)
-			ac++;
-		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
-		ac++;
-		XtSetArg(args[ac], XmNx, 10);
-		ac++;
-		XtSetArg(args[ac], XmNy, 20);
-		ac++;
-		XtSetArg(args[ac], XmNwidth, 160);
-		ac++;
-		XtSetArg(args[ac], XmNheight, 20);
-		ac++;
-		XtSetArg(args[ac], XmNfontList,
-		         BX_CONVERT(form_controls, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
-		if (argok)
-			ac++;
-		label_controls_sectionlength = XmCreateLabel(form_controls, (char *)"label_controls_sectionlength", args, ac);
-		XtManageChild(label_controls_sectionlength);
-
-		/**
-		 * Free any memory allocated for resources.
-		 */
-		XmStringFree((XmString)tmp0);
-	}
-
-	ac = 0;
-	XtSetArg(args[ac], XmNminimum, 1);
-	ac++;
-	XtSetArg(args[ac], XmNdecimalPoints, 2);
-	ac++;
-	XtSetArg(args[ac], XmNvalue, 2000);
-	ac++;
-	XtSetArg(args[ac], XmNmaximum, 5000);
-	ac++;
-	XtSetArg(args[ac], XmNshowArrows, TRUE);
-	ac++;
-	XtSetArg(args[ac], XmNshowValue, TRUE);
-	ac++;
-	XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
-	ac++;
-	XtSetArg(args[ac], XmNx, 190);
-	ac++;
-	XtSetArg(args[ac], XmNy, 0);
-	ac++;
-	XtSetArg(args[ac], XmNwidth, 438);
-	ac++;
-	XtSetArg(args[ac], XmNheight, 36);
-	ac++;
-	XtSetArg(args[ac], XmNfontList,
-	         BX_CONVERT(form_controls, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
-	if (argok)
-		ac++;
-	scale_controls_sectionlength = XmCreateScale(form_controls, (char *)"scale_controls_sectionlength", args, ac);
-	XtManageChild(scale_controls_sectionlength);
-	XtAddCallback(scale_controls_sectionlength, XmNvalueChangedCallback, do_scale_controls_sectionlength, (XtPointer)0);
 
 	ac = 0;
 	XtSetArg(args[ac], XmNminimum, 1);
@@ -4695,30 +4938,6 @@ Widget CreatemainWindow(Widget parent) {
 	XtAddCallback(pushButton_controls_apply, XmNactivateCallback, do_controls_apply, (XtPointer)0);
 
 	ac = 0;
-	XtSetArg(args[ac], XmNx, 13);
-	ac++;
-	XtSetArg(args[ac], XmNy, 88);
-	ac++;
-	XtSetArg(args[ac], XmNwidth, 616);
-	ac++;
-	XtSetArg(args[ac], XmNheight, 20);
-	ac++;
-	separator4 = XmCreateSeparator(form_controls, (char *)"separator4", args, ac);
-	XtManageChild(separator4);
-
-	ac = 0;
-	XtSetArg(args[ac], XmNx, 10);
-	ac++;
-	XtSetArg(args[ac], XmNy, 264);
-	ac++;
-	XtSetArg(args[ac], XmNwidth, 618);
-	ac++;
-	XtSetArg(args[ac], XmNheight, 20);
-	ac++;
-	separator5 = XmCreateSeparator(form_controls, (char *)"separator5", args, ac);
-	XtManageChild(separator5);
-
-	ac = 0;
 	XtSetArg(args[ac], XmNminimum, 1);
 	ac++;
 	XtSetArg(args[ac], XmNvalue, 1);
@@ -4777,70 +4996,6 @@ Widget CreatemainWindow(Widget parent) {
 		 */
 		XmStringFree((XmString)tmp0);
 	}
-
-	ac = 0;
-	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(form_controls, (char *)"Max # Soundings in Section:", XmRXmString, 0, &argok);
-		XtSetArg(args[ac], XmNlabelString, tmp0);
-		if (argok)
-			ac++;
-		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
-		ac++;
-		XtSetArg(args[ac], XmNx, 10);
-		ac++;
-		XtSetArg(args[ac], XmNy, 60);
-		ac++;
-		XtSetArg(args[ac], XmNwidth, 180);
-		ac++;
-		XtSetArg(args[ac], XmNheight, 20);
-		ac++;
-		XtSetArg(args[ac], XmNfontList,
-		         BX_CONVERT(form_controls, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
-		if (argok)
-			ac++;
-		label_controls_sectionsoundings = XmCreateLabel(form_controls, (char *)"label_controls_sectionsoundings", args, ac);
-		XtManageChild(label_controls_sectionsoundings);
-
-		/**
-		 * Free any memory allocated for resources.
-		 */
-		XmStringFree((XmString)tmp0);
-	}
-
-	ac = 0;
-	XtSetArg(args[ac], XmNminimum, 1000);
-	ac++;
-	XtSetArg(args[ac], XmNdecimalPoints, 0);
-	ac++;
-	XtSetArg(args[ac], XmNvalue, 10000);
-	ac++;
-	XtSetArg(args[ac], XmNmaximum, 100000);
-	ac++;
-	XtSetArg(args[ac], XmNshowArrows, TRUE);
-	ac++;
-	XtSetArg(args[ac], XmNscaleMultiple, 499);
-	ac++;
-	XtSetArg(args[ac], XmNshowValue, TRUE);
-	ac++;
-	XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
-	ac++;
-	XtSetArg(args[ac], XmNx, 190);
-	ac++;
-	XtSetArg(args[ac], XmNy, 40);
-	ac++;
-	XtSetArg(args[ac], XmNwidth, 439);
-	ac++;
-	XtSetArg(args[ac], XmNheight, 43);
-	ac++;
-	XtSetArg(args[ac], XmNfontList,
-	         BX_CONVERT(form_controls, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
-	if (argok)
-		ac++;
-	scale_controls_sectionsoundings = XmCreateScale(form_controls, (char *)"scale_controls_sectionsoundings", args, ac);
-	XtManageChild(scale_controls_sectionsoundings);
-	XtAddCallback(scale_controls_sectionsoundings, XmNvalueChangedCallback, do_scale_controls_sectionsoundings, (XtPointer)0);
 
 	ac = 0;
 	{
@@ -5153,67 +5308,8 @@ Widget CreatemainWindow(Widget parent) {
 
 	XtAddCallback(pushButton_modelplot_dismiss, XmNactivateCallback, BxUnmanageCB, (XtPointer) "bulletinBoard_modelplot");
 	XtAddCallback(pushButton_modelplot_dismiss, XmNactivateCallback, do_modelplot_dismiss, (XtPointer)0);
-	ac = 0;
-	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
-	ac++;
-	XtSetArg(args[ac], XmNleftOffset, 10);
-	ac++;
-	XtSetArg(args[ac], XmNtopOffset, 370);
-	ac++;
-	XtSetValues(separator14, args, ac);
 
-	ac = 0;
-	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
-	ac++;
-	XtSetArg(args[ac], XmNleftOffset, 140);
-	ac++;
-	XtSetArg(args[ac], XmNtopOffset, 330);
-	ac++;
-	XtSetValues(scale_controls_zoffset, args, ac);
-
-	ac = 0;
-	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
-	ac++;
-	XtSetArg(args[ac], XmNleftOffset, 10);
-	ac++;
-	XtSetArg(args[ac], XmNtopOffset, 340);
-	ac++;
-	XtSetValues(label_controls_zoffset, args, ac);
-
-	ac = 0;
-	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
-	ac++;
-	XtSetArg(args[ac], XmNleftOffset, 10);
-	ac++;
-	XtSetArg(args[ac], XmNtopOffset, 270);
-	ac++;
-	XtSetValues(label_controls_smoothing, args, ac);
-
-	ac = 0;
-	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
-	ac++;
-	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
-	ac++;
-	XtSetArg(args[ac], XmNleftOffset, 140);
-	ac++;
-	XtSetArg(args[ac], XmNrightOffset, 7);
-	ac++;
-	XtSetArg(args[ac], XmNtopOffset, 270);
-	ac++;
-	XtSetValues(scale_controls_smoothing, args, ac);
-
-	ac = 0;
-	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
-	ac++;
-	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
-	ac++;
-	XtSetArg(args[ac], XmNleftOffset, 10);
-	ac++;
-	XtSetArg(args[ac], XmNrightOffset, 12);
-	ac++;
-	XtSetArg(args[ac], XmNtopOffset, 310);
-	ac++;
-	XtSetValues(separator12, args, ac);
+//--------------------------------------------------------------------------
 
 	ac = 0;
 	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM);
@@ -5244,107 +5340,32 @@ Widget CreatemainWindow(Widget parent) {
 	XtSetValues(scale_controls_sectionlength, args, ac);
 
 	ac = 0;
-	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
-	ac++;
-	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
-	ac++;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM);
+	ac = 0;
 	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
 	ac++;
 	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
 	ac++;
-	XtSetArg(args[ac], XmNbottomOffset, 0);
+	XtSetArg(args[ac], XmNleftOffset, 10);
 	ac++;
-	XtSetArg(args[ac], XmNleftOffset, 140);
+	XtSetArg(args[ac], XmNtopOffset, 60);
 	ac++;
-	XtSetArg(args[ac], XmNrightOffset, 6);
-	ac++;
-	XtSetArg(args[ac], XmNtopOffset, 4);
-	ac++;
-	XtSetArg(args[ac], XmNtopWidget, scale_controls_colorinterval);
-	ac++;
-	XtSetValues(scale_controls_tickinterval, args, ac);
+	XtSetValues(label_controls_sectionsoundings, args, ac);
 
-	ac = 0;
-	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
 	ac++;
 	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
 	ac++;
-	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_WIDGET);
 	ac++;
-	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
+	XtSetArg(args[ac], XmNleftOffset, 20);
 	ac++;
-	XtSetArg(args[ac], XmNbottomOffset, 0);
+	XtSetArg(args[ac], XmNrightOffset, 7);
 	ac++;
-	XtSetArg(args[ac], XmNleftOffset, 140);
+	XtSetArg(args[ac], XmNtopOffset, 60);
 	ac++;
-	XtSetArg(args[ac], XmNrightOffset, 6);
+	XtSetArg(args[ac], XmNleftWidget, label_controls_sectionsoundings);
 	ac++;
-	XtSetArg(args[ac], XmNtopOffset, 4);
-	ac++;
-	XtSetArg(args[ac], XmNtopWidget, scale_controls_contourinterval);
-	ac++;
-	XtSetValues(scale_controls_colorinterval, args, ac);
-
-	ac = 0;
-	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
-	ac++;
-	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
-	ac++;
-	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
-	ac++;
-	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
-	ac++;
-	XtSetArg(args[ac], XmNbottomOffset, 0);
-	ac++;
-	XtSetArg(args[ac], XmNleftOffset, 140);
-	ac++;
-	XtSetArg(args[ac], XmNrightOffset, 6);
-	ac++;
-	XtSetArg(args[ac], XmNtopOffset, 4);
-	ac++;
-	XtSetArg(args[ac], XmNtopWidget, scale_controls_decimation);
-	ac++;
-	XtSetValues(scale_controls_contourinterval, args, ac);
-
-	ac = 0;
-	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
-	ac++;
-	XtSetArg(args[ac], XmNleftOffset, 10);
-	ac++;
-	XtSetArg(args[ac], XmNtopOffset, 160);
-	ac++;
-	XtSetValues(label_controls_contourinterval, args, ac);
-
-	ac = 0;
-	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
-	ac++;
-	XtSetArg(args[ac], XmNleftOffset, 10);
-	ac++;
-	XtSetArg(args[ac], XmNtopOffset, 200);
-	ac++;
-	XtSetValues(label_controls_colorinterval, args, ac);
-
-	ac = 0;
-	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
-	ac++;
-	XtSetArg(args[ac], XmNleftOffset, 10);
-	ac++;
-	XtSetArg(args[ac], XmNtopOffset, 240);
-	ac++;
-	XtSetValues(label_controls_tickinterval, args, ac);
-
-	ac = 0;
-	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_NONE);
-	ac++;
-	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
-	ac++;
-	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_FORM);
-	ac++;
-	XtSetArg(args[ac], XmNbottomOffset, 19);
-	ac++;
-	XtSetArg(args[ac], XmNleftOffset, 200);
-	ac++;
-	XtSetValues(pushButton_controls_apply, args, ac);
+	XtSetValues(scale_controls_sectionsoundings, args, ac);
 
 	ac = 0;
 	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
@@ -5366,25 +5387,13 @@ Widget CreatemainWindow(Widget parent) {
 	XtSetValues(separator4, args, ac);
 
 	ac = 0;
-	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
-	ac++;
-	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
-	ac++;
 	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
-	ac++;
-	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
-	ac++;
-	XtSetArg(args[ac], XmNbottomOffset, 0);
 	ac++;
 	XtSetArg(args[ac], XmNleftOffset, 10);
 	ac++;
-	XtSetArg(args[ac], XmNrightOffset, 7);
+	XtSetArg(args[ac], XmNtopOffset, 120);
 	ac++;
-	XtSetArg(args[ac], XmNtopOffset, 4);
-	ac++;
-	XtSetArg(args[ac], XmNtopWidget, scale_controls_tickinterval);
-	ac++;
-	XtSetValues(separator5, args, ac);
+	XtSetValues(label_controls_decimation, args, ac);
 
 	ac = 0;
 	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
@@ -5412,18 +5421,197 @@ Widget CreatemainWindow(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNleftOffset, 10);
 	ac++;
-	XtSetArg(args[ac], XmNtopOffset, 120);
+	XtSetArg(args[ac], XmNtopOffset, 160);
 	ac++;
-	XtSetValues(label_controls_decimation, args, ac);
+	XtSetValues(label_controls_contourinterval, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
+	ac++;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNbottomOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 140);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 6);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 4);
+	ac++;
+	XtSetArg(args[ac], XmNtopWidget, scale_controls_decimation);
+	ac++;
+	XtSetValues(scale_controls_contourinterval, args, ac);
 
 	ac = 0;
 	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
 	ac++;
 	XtSetArg(args[ac], XmNleftOffset, 10);
 	ac++;
-	XtSetArg(args[ac], XmNtopOffset, 60);
+	XtSetArg(args[ac], XmNtopOffset, 200);
 	ac++;
-	XtSetValues(label_controls_sectionsoundings, args, ac);
+	XtSetValues(label_controls_colorinterval, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
+	ac++;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNbottomOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 140);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 6);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 4);
+	ac++;
+	XtSetArg(args[ac], XmNtopWidget, scale_controls_contourinterval);
+	ac++;
+	XtSetValues(scale_controls_colorinterval, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 240);
+	ac++;
+	XtSetValues(label_controls_tickinterval, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
+	ac++;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNbottomOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 140);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 6);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 4);
+	ac++;
+	XtSetArg(args[ac], XmNtopWidget, scale_controls_colorinterval);
+	ac++;
+	XtSetValues(scale_controls_tickinterval, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 270);
+	ac++;
+	XtSetValues(label_controls_smoothing, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 140);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 7);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 270);
+	ac++;
+	XtSetValues(scale_controls_smoothing, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
+	ac++;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNbottomOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 7);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 4);
+	ac++;
+	XtSetArg(args[ac], XmNtopWidget, scale_controls_smoothing);
+	ac++;
+	XtSetValues(separator5, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 340);
+	ac++;
+	XtSetValues(label_controls_zoffset, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
+	ac++;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNbottomOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 140);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 6);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 4);
+	ac++;
+	XtSetArg(args[ac], XmNtopWidget, separator5);
+	ac++;
+	XtSetValues(scale_controls_zoffset, args, ac);
+
+    ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
+	ac++;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNbottomOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 7);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 4);
+	ac++;
+	XtSetArg(args[ac], XmNtopWidget, scale_controls_zoffset);
+	ac++;
+	XtSetValues(separator14, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
+	ac = 0;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 4);
+	ac++;
+	XtSetArg(args[ac], XmNtopWidget, separator14);
+	ac++;
+	XtSetValues(label_radioBox_controls_use, args, ac);
 
 	ac = 0;
 	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
@@ -5432,40 +5620,82 @@ Widget CreatemainWindow(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_WIDGET);
 	ac++;
-	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_POSITION);
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
 	ac++;
-	XtSetArg(args[ac], XmNbottomPosition, 19);
+	XtSetArg(args[ac], XmNbottomOffset, 0);
 	ac++;
-	XtSetArg(args[ac], XmNleftOffset, 0);
+	XtSetArg(args[ac], XmNleftOffset, 10);
 	ac++;
-	XtSetArg(args[ac], XmNrightOffset, 6);
+	XtSetArg(args[ac], XmNrightOffset, 10);
 	ac++;
 	XtSetArg(args[ac], XmNtopOffset, 4);
 	ac++;
-	XtSetArg(args[ac], XmNleftWidget, label_controls_sectionsoundings);
+	XtSetArg(args[ac], XmNleftWidget, label_radioBox_controls_use);
 	ac++;
-	XtSetArg(args[ac], XmNtopWidget, scale_controls_sectionlength);
+	XtSetArg(args[ac], XmNtopWidget, separator14);
 	ac++;
-	XtSetValues(scale_controls_sectionsoundings, args, ac);
+	XtSetValues(radioBox_controls_use, args, ac);
 
-	ac = 0;
-	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_NONE);
+    ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
 	ac++;
 	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
 	ac++;
-	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_WIDGET);
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
 	ac++;
-	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_FORM);
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
 	ac++;
-	XtSetArg(args[ac], XmNbottomOffset, 19);
+	XtSetArg(args[ac], XmNbottomOffset, 0);
 	ac++;
-	XtSetArg(args[ac], XmNleftOffset, 30);
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 7);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 4);
+	ac++;
+	XtSetArg(args[ac], XmNtopWidget, label_radioBox_controls_use);
+	ac++;
+	XtSetValues(separator12, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_WIDGET);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 200);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 30);
+	ac++;
+	XtSetArg(args[ac], XmNrightWidget, pushButton_controls_dismiss);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 4);
+	ac++;
+	XtSetArg(args[ac], XmNtopWidget, separator12);
+	ac++;
+	XtSetValues(pushButton_controls_apply, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
+	ac++;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
 	ac++;
 	XtSetArg(args[ac], XmNrightOffset, 227);
 	ac++;
-	XtSetArg(args[ac], XmNleftWidget, pushButton_controls_apply);
+	XtSetArg(args[ac], XmNtopOffset, 4);
+	ac++;
+	XtSetArg(args[ac], XmNtopWidget, separator12);
 	ac++;
 	XtSetValues(pushButton_controls_dismiss, args, ac);
+
+//--------------------------------------------------------------------------
 
 	ac = 0;
 	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);

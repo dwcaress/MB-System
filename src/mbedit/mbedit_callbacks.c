@@ -1,12 +1,22 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
  *
- *    Copyright (c) 1993-2020 by
+ *    Copyright (c) 1993-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
@@ -608,7 +618,7 @@ int do_setup_data() {
 
 	/* set about version label */
 	char value_text[MB_PATH_MAXLINE];
-	sprintf(value_text, ":::t\"MB-System Release %s\":t\"%s\"", MB_VERSION, MB_BUILD_DATE);
+	sprintf(value_text, ":::t\"MB-System Release %s\":t\"%s\"", MB_VERSION, MB_VERSION_DATE);
 	set_label_multiline_string(label_about_version, value_text);
 
 	/* set values of number of pings slider */
@@ -735,7 +745,7 @@ int do_setup_data() {
 	XmToggleButtonSetState(toggleButton_show_speed, false, FALSE);
 	XmToggleButtonSetState(toggleButton_show_depth, false, FALSE);
 	XmToggleButtonSetState(toggleButton_show_altitude, false, FALSE);
-	XmToggleButtonSetState(toggleButton_show_sonardepth, false, FALSE);
+	XmToggleButtonSetState(toggleButton_show_sensordepth, false, FALSE);
 	XmToggleButtonSetState(toggleButton_show_roll, false, FALSE);
 	XmToggleButtonSetState(toggleButton_show_pitch, false, FALSE);
 	XmToggleButtonSetState(toggleButton_show_heave, false, FALSE);
@@ -760,7 +770,7 @@ int do_setup_data() {
 	else if (mshow_time == 8)
 		XmToggleButtonSetState(toggleButton_show_altitude, true, FALSE);
 	else if (mshow_time == 9)
-		XmToggleButtonSetState(toggleButton_show_sonardepth, true, FALSE);
+		XmToggleButtonSetState(toggleButton_show_sensordepth, true, FALSE);
 	else if (mshow_time == 10)
 		XmToggleButtonSetState(toggleButton_show_roll, true, FALSE);
 	else if (mshow_time == 11)
@@ -2225,7 +2235,7 @@ void do_show_time(Widget w, XtPointer client_data, XtPointer call_data) {
 	XmToggleButtonSetState(toggleButton_show_speed, false, FALSE);
 	XmToggleButtonSetState(toggleButton_show_depth, false, FALSE);
 	XmToggleButtonSetState(toggleButton_show_altitude, false, FALSE);
-	XmToggleButtonSetState(toggleButton_show_sonardepth, false, FALSE);
+	XmToggleButtonSetState(toggleButton_show_sensordepth, false, FALSE);
 	XmToggleButtonSetState(toggleButton_show_roll, false, FALSE);
 	XmToggleButtonSetState(toggleButton_show_pitch, false, FALSE);
 	XmToggleButtonSetState(toggleButton_show_heave, false, FALSE);
@@ -2252,7 +2262,7 @@ void do_show_time(Widget w, XtPointer client_data, XtPointer call_data) {
 		mshow_time = 7;
 	else if (w == toggleButton_show_altitude)
 		mshow_time = 8;
-	else if (w == toggleButton_show_sonardepth)
+	else if (w == toggleButton_show_sensordepth)
 		mshow_time = 9;
 	else if (w == toggleButton_show_roll)
 		mshow_time = 10;

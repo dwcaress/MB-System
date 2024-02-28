@@ -145,18 +145,19 @@ am__uninstall_files_from_dir = { \
   }
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libmbtrnframe_la_DEPENDENCIES =
-am_libmbtrnframe_la_OBJECTS = mframe.lo mbbuf.lo mcbuf.lo msocket.lo \
-	mthread.lo mfile.lo mtime.lo mmdebug.lo merror.lo mlog.lo \
-	mlist.lo mstats.lo mswap.lo mutils.lo mkvconf.lo mconfig.lo
+am_libmbtrnframe_la_OBJECTS = mframe.lo mbbuf.lo mcbuf.lo mconfig.lo \
+	merror.lo mfile.lo mkvconf.lo mlist.lo mlog.lo mmdebug.lo \
+	msocket.lo mstats.lo mswap.lo mthread.lo mtime.lo mutils.lo \
+	mxdebug.lo
 libmbtrnframe_la_OBJECTS = $(am_libmbtrnframe_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-libmbtrnframe_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(libmbtrnframe_la_LDFLAGS) $(LDFLAGS) \
-	-o $@
+libmbtrnframe_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CXXLD) \
+	$(AM_CXXFLAGS) $(CXXFLAGS) $(libmbtrnframe_la_LDFLAGS) \
+	$(LDFLAGS) -o $@
 SCRIPTS = $(bin_SCRIPTS) $(dist_bin_SCRIPTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -180,7 +181,8 @@ am__depfiles_remade = ./$(DEPDIR)/mbbuf.Plo ./$(DEPDIR)/mcbuf.Plo \
 	./$(DEPDIR)/mlog.Plo ./$(DEPDIR)/mmdebug.Plo \
 	./$(DEPDIR)/msocket.Plo ./$(DEPDIR)/mstats.Plo \
 	./$(DEPDIR)/mswap.Plo ./$(DEPDIR)/mthread.Plo \
-	./$(DEPDIR)/mtime.Plo ./$(DEPDIR)/mutils.Plo
+	./$(DEPDIR)/mtime.Plo ./$(DEPDIR)/mutils.Plo \
+	./$(DEPDIR)/mxdebug.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -200,6 +202,24 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CXXFLAGS) $(CXXFLAGS)
+AM_V_CXX = $(am__v_CXX_@AM_V@)
+am__v_CXX_ = $(am__v_CXX_@AM_DEFAULT_V@)
+am__v_CXX_0 = @echo "  CXX     " $@;
+am__v_CXX_1 = 
+CXXLD = $(CXX)
+CXXLINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+AM_V_CXXLD = $(am__v_CXXLD_@AM_V@)
+am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
+am__v_CXXLD_0 = @echo "  CXXLD   " $@;
+am__v_CXXLD_1 = 
 SOURCES = $(libmbtrnframe_la_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
@@ -424,7 +444,6 @@ localstatedir = @localstatedir@
 mandir = @mandir@
 mbsystemdatadir = @mbsystemdatadir@
 mbsystemhtmldir = @mbsystemhtmldir@
-mbsystempsdir = @mbsystempsdir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
 opencv4_CPPFLAGS = @opencv4_CPPFLAGS@
@@ -475,26 +494,27 @@ AM_CFLAGS =
 BUILD_DATE = `date +%Y/%m/%dT%H:%M:%S%z`
 MFRAME_VERSIONS = -DMFRAME_BUILD="${BUILD_DATE}" -DTRNC_VER=1.0 -DFRAMES7K_VER=1.0 -DSTREAM7K_VER=1.0 -DTBINX_VER=1.0 -DEMU7K_VER=1.0
 MFRAME_TESTS = -DWITH_TESTS -DWITH_R7KR_TEST -DWITH_MB1R_TEST
-MFRAME_FEATURES = -DWITH_MST_MSTATS -DMST_STATS_EN -DWITH_MMDEBUG
+MFRAME_FEATURES = -DWITH_MST_MSTATS -DMST_STATS_EN -DMXDEBUG_C_API 
 MFRAME_OPTS = $(MFRAME_VERSIONS) $(MFRAME_FEATURES) $(MFRAME_TESTS)
 AM_CPPFLAGS = -g -O0 -DHAVE_CONFIG_H  -D_GNU_SOURCE $(MFRAME_OPTS)
 libmbtrnframe_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmbtrnframe_la_SOURCES = mframe.c \
         mbbuf.c \
         mcbuf.c \
-        msocket.c \
-        mthread.c \
-        mfile.c \
-        mtime.c\
-        mmdebug.c \
+        mconfig.c \
         merror.c \
-        mlog.c \
+        mfile.c \
+        mkvconf.c \
         mlist.c \
+        mlog.c \
+        mmdebug.c \
+        msocket.c \
         mstats.c \
         mswap.c \
+        mthread.c \
+        mtime.c\
         mutils.c \
-        mkvconf.c \
-        mconfig.c
+        mxdebug.cpp
 
 libmbtrnframe_la_LIBADD = 
 dist_bin_SCRIPTS = 
@@ -505,7 +525,7 @@ DISTCLEANFILES =
 all: all-recursive
 
 .SUFFIXES:
-.SUFFIXES: .c .lo .o .obj
+.SUFFIXES: .c .cpp .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -621,7 +641,7 @@ clean-libLTLIBRARIES:
 	}
 
 libmbtrnframe.la: $(libmbtrnframe_la_OBJECTS) $(libmbtrnframe_la_DEPENDENCIES) $(EXTRA_libmbtrnframe_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(libmbtrnframe_la_LINK) -rpath $(libdir) $(libmbtrnframe_la_OBJECTS) $(libmbtrnframe_la_LIBADD) $(LIBS)
+	$(AM_V_CXXLD)$(libmbtrnframe_la_LINK) -rpath $(libdir) $(libmbtrnframe_la_OBJECTS) $(libmbtrnframe_la_LIBADD) $(LIBS)
 install-binSCRIPTS: $(bin_SCRIPTS)
 	@$(NORMAL_INSTALL)
 	@list='$(bin_SCRIPTS)'; test -n "$(bindir)" || list=; \
@@ -715,6 +735,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mthread.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mtime.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mutils.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mxdebug.Plo@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -745,6 +766,30 @@ am--depfiles: $(am__depfiles_remade)
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
+
+.cpp.o:
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCXX_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXXCOMPILE) -c -o $@ $<
+
+.cpp.obj:
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.obj$$||'`;\
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ `$(CYGPATH_W) '$<'` &&\
+@am__fastdepCXX_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+.cpp.lo:
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.lo$$||'`;\
+@am__fastdepCXX_TRUE@	$(LTCXXCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCXX_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LTCXXCOMPILE) -c -o $@ $<
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -935,6 +980,7 @@ distclean: distclean-recursive
 	-rm -f ./$(DEPDIR)/mthread.Plo
 	-rm -f ./$(DEPDIR)/mtime.Plo
 	-rm -f ./$(DEPDIR)/mutils.Plo
+	-rm -f ./$(DEPDIR)/mxdebug.Plo
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -997,6 +1043,7 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f ./$(DEPDIR)/mthread.Plo
 	-rm -f ./$(DEPDIR)/mtime.Plo
 	-rm -f ./$(DEPDIR)/mutils.Plo
+	-rm -f ./$(DEPDIR)/mxdebug.Plo
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

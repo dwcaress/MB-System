@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_jstar.h	2/21/2005
  *
- *    Copyright (c) 2005-2020 by
+ *    Copyright (c) 2005-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * mbsys_jstar.h  defines the data structure used by MBIO functions
@@ -701,7 +711,7 @@ struct mbsys_jstar_channel_struct {
 	/* MB-System-only parameters from 236-239                               */
 	/* -------------------------------------------------------------------- */
 	//int depth;         /* 227-231 : Seafloor depth in 0.001 m */
-	//int sonardepth;    /* 232-235 : Sonar depth in 0.001 m */
+	//int sensordepth;   /* 232-235 : Sonar depth in 0.001 m */
 	//int sonaraltitude; /* 236-239 : Sonar altitude in 0.001 m */
 
 	/* trace data stored as shorts */
@@ -804,7 +814,7 @@ struct mbsys_jstar_channel_old_struct {
 	/* MB-System-only parameters from 236-239                               */
 	/* -------------------------------------------------------------------- */
 	int depth;         /* 227-231 : Seafloor depth in 0.001 m */
-	int sonardepth;    /* 236-235 : Sonar depth in 0.001 m */
+	int sensordepth;   /* 236-235 : Sonar depth in 0.001 m */
 	int sonaraltitude; /* 236-239 : Sonar altitude in 0.001 m */
 
 	/* trace data stored as shorts */

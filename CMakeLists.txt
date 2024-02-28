@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 #    The MB-system:  CMakeLists.txt   27 June 2023
 #
-#    Copyright (c) 2023-2023 by
+#    Copyright (c) 2023-2024 by
 #    David W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, California, USA
@@ -19,7 +19,7 @@
 #      Columbia University
 #      Palisades, NY 10964
 #
-#    See README file for copying and redistribution conditions.
+#    See README.md file for copying and redistribution conditions.
 #------------------------------------------------------------------------------
 #
 # To build MB-System from source using CMake do (example):
@@ -32,34 +32,33 @@
 #
 #------------------------------------------------------------------------------
 
-set(PROJECT_DATE "27 June 2023")
-
 message("----------------------------------------------------------")
 message("MB-System")
 message("CMake Build System")
 message("Johannes Schauer (University of Weurzburg")
 message("Tom O'Reilly (Monterey Bay Aquarium Research Institute")
 message("David Caress (Monterey Bay Aquarium Research Institute")
-message("${PROJECT_DATE}")
 message ("CMake version: ${CMAKE_VERSION}")
 message("The default build mode is release (optimized for performance).")
 message("  -To obtain a debug-able build invoke cmake with -DCMAKE_BUILD_TYPE=debug")
-message("Specify OTPS install location with -DotpsDir=directory")
 message("Specify OTPS install location with -DotpsDir=directory")
 message("Set install directory with -DCMAKE_INSTALL_PREFIX=directory")
 message("Enable debugging with -DCMAKE_BUILD_TYPE=Debug")
 message("Build shared/static libraries with -DBUILD_SHARED_LIBS=ON/OFF")
 message("Disable building TRN software with -DbuildTRN=OFF")
 message("Disable building photomosaicing software with -DbuildOpenCV=OFF")
+message("Disable supporting GSF format data with -DbuildGSF=OFF")
 message("Build Qt-based GUIs with -DbuildQt=ON")
-message("Build unit tests with -DbuildTests=ON")
+message("Build deprecated programs with -DbuildDeprecated=ON")
+message("Disable unit tests with -DbuildTests=OFF (run unit tests with make test)")
 message("Print out all CMake variables with -Dverbose=1")
 message("----------------------------------------------------------")
 
 # Define minimum CMake version required
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.16)
+
+# Define project
 project(MB-System 
-        VERSION 5.7.9
         DESCRIPTION "Open Source software for the processing and display of seafloor mapping data"
         HOMEPAGE_URL https://www.mbari.org/technology/mb-system/ 
         LANGUAGES C CXX )
@@ -77,9 +76,8 @@ endif (${srcdir} STREQUAL ${bindir})
 
 add_compile_definitions(CMAKE_BUILD_SYSTEM=1)
 if (CMAKE_C_BYTE_ORDER STREQUAL "LITTLE_ENDIAN")
-  set(BYTESWAPPED 1)
-else()
-  set(BYTESWAPPED 0)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DBYTESWAPPED")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBYTESWAPPED")
 endif()
 
 option(buildGSF "build GSF library" ON)
@@ -92,31 +90,25 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/build-utils")
 option(BUILD_SHARED_LIBS "Build and link with shared libraries" ON)
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+set(CMAKE_MACOSX_RPATH ON)
 
 option(buildGSF "build GSF library" ON)
 option(buildGUIs "build graphical tools" ON)
 option(buildOpenCV "build OpenCV tools" ON)
 option(buildTRN "build MBTRN tools" ON)
+option(buildTRNLCM "build MBTRN LCM tools" OFF)
 option(buildPCL "build point-cloud-library" OFF)
-option(buildQt "build Qt tools" ON)
-option(buildTests "build unit tests exercised by make check" OFF)
+option(buildQt "build Qt tools" OFF)
+option(buildTests "build unit tests exercised by make test" ON)
 
-if(APPLE)
-  set(CMAKE_INSTALL_MANPAGES /usr/local/share/man) 
-  set(CMAKE_INSTALL_DOC /usr/local/share/doc) 
-  set(CMAKE_INSTALL_SHARE /usr/local/share) 
-else()
-  set(CMAKE_INSTALL_MANPAGES /usr/local/share/man) 
-  set(CMAKE_INSTALL_DOC /usr/local/share/doc) 
-  set(CMAKE_INSTALL_SHARE /usr/local/share) 
-endif()
-if(APPLE)
-  set(otpsDir /usr/local/opt/otps) 
-else()
-  set(otpsDir /local/opt/otps)
-endif()
-set(levitusDir ${CMAKE_INSTALL_PREFIX}/share/mbsystem)
+set(CMAKE_INSTALL_SHARE share) 
+set(CMAKE_INSTALL_MANPAGES share/man)
+set(CMAKE_INSTALL_DOC share/doc) 
+set(otpsDir src/otps) 
+set(levitusDir share/mbsystem)
 
+message("CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
 message("CMAKE_C_COMPILER_ID: ${CMAKE_C_COMPILER_ID}")
 message("CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
 message("CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
@@ -127,7 +119,8 @@ message("CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES: ${CMAKE_CXX_IMPLICIT_INCLUDE_DI
 message("BYTESWAPPED: ${BYTESWAPPED}")
 message("CMAKE_C_FLAGS: ${CMAKE_C_FLAGS}")
 message("CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
-
+message("CMAKE_INSTALL_RPATH: ${CMAKE_INSTALL_RPATH}")
+message("CMAKE_MACOSX_RPATH: ${CMAKE_MACOSX_RPATH}")
 
 include(GNUInstallDirs)
 include(CTest)
@@ -137,24 +130,25 @@ if(NOT TARGET uninstall)
   add_custom_target(uninstall COMMAND xargs rm -vf < install_manifest.txt)
 endif()
 
-# Utilities and libraries
+# Libraries
 if(buildGSF)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DENABLE_GSF")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DENABLE_GSF")
   add_subdirectory(src/gsf)
 endif()
-
 add_subdirectory(src/mbaux)
 add_subdirectory(src/mbio)
 add_subdirectory(src/bsio)
 add_subdirectory(src/surf)
 
-if(buildTRN)
-  add_subdirectory(src/mbtrnframe)
-  add_subdirectory(src/mbtrn)
-  add_subdirectory(src/mbtrnav)
-  add_subdirectory(src/mbtrnutils)
-endif()
+# GMT modules
+add_subdirectory(src/gmt)
 
 # Executables
+add_subdirectory(src/utilities)
+add_subdirectory(src/macros)
+add_subdirectory(src/mbgrd2gltf)
+add_subdirectory(src/otps)
 if(buildGUIs)
   add_subdirectory(src/mbview)
   add_subdirectory(src/mbedit)
@@ -164,31 +158,38 @@ if(buildGUIs)
   add_subdirectory(src/mbnavedit)
   add_subdirectory(src/mbvelocitytool)
 endif()
-
-add_subdirectory(src/utilities)
-add_subdirectory(src/deprecated)
-add_subdirectory(src/macros)
-
+if(buildOpenCV)
+  add_subdirectory(src/photo)
+endif()
+if(buildTRN)
+  add_subdirectory(src/mbtrnframe)
+  add_subdirectory(src/mbtrn)
+  add_subdirectory(src/mbtrnav)
+  add_subdirectory(src/mbtrnutils)
+  if(buildTRNLCM)
+    add_subdirectory(src/mbtrnav/opt/rov)
+  endif()
+endif()
 if(buildQt)
   add_subdirectory(src/qt-guilib)
   add_subdirectory(src/qt-mbgrdviz)
   add_subdirectory(src/qt-mbgrdviz-3)
 endif()
-
-if(buildOpenCV)
-  add_subdirectory(src/photo)
+if(buildDeprecated)
+  add_subdirectory(src/deprecated)
 endif()
 
 if(buildTests)
   add_subdirectory(third_party)
   add_subdirectory(test/mbio)
   add_subdirectory(test/utilities)
-  add_subdirectory(test/deprecated)
+  if(buildDeprecated)
+    add_subdirectory(test/deprecated)
+  endif()
 endif()
 
 add_subdirectory(src/man)
 add_subdirectory(src/html)
-add_subdirectory(src/ps)
 add_subdirectory(src/share)
 
 # For debugging: print all set variables

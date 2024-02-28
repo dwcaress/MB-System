@@ -62,7 +62,7 @@
 /// Headers
 #include <fcntl.h>
 #include "mkvconf.h"
-#include "medebug.h"
+#include "mxdebug.h"
 
 /// Macros
 
@@ -244,7 +244,9 @@ int mkvc_parse_kx(char *line, const char *del, char **pkey, char **pval, bool va
                 MF_MEM_CHKFREE(*pval);
                 *pval=strdup(tok);
             }
-        }else{PTRACE();}
+        }else{
+            MX_TRACE();
+        }
 
         MF_MEM_CHKFREE(lcopy);
 
@@ -274,7 +276,7 @@ int mkvc_parse_kx(char *line, const char *del, char **pkey, char **pval, bool va
         }else{
             MF_MEM_CHKINVALIDATE(*pkey);
             MF_MEM_CHKINVALIDATE(*pval);
-            PTRACE();
+            MX_TRACE();
         }
     }
     return retval;

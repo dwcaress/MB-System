@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_intersectgrid.c	10/20/2012
  *
- *    Copyright (c) 2012-2020 by
+ *    Copyright (c) 2012-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * Functions to handle reading a topographic grid and then calculate
@@ -268,7 +278,7 @@ int mb_topogrid_bounds(int verbose, void *topogrid_ptr, double bounds[4], int *e
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double navlat, double altitude, double sonardepth,
+int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double navlat, double altitude, double sensordepth,
                           double mtodeglon, double mtodeglat, double vx, double vy, double vz, double *lon, double *lat,
                           double *topo, double *range, int *error) {
 	struct mb_topogrid_struct *topogrid = (struct mb_topogrid_struct *)topogrid_ptr;
@@ -280,7 +290,7 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double
 		fprintf(stderr, "dbg2       navlon:                    %f\n", navlon);
 		fprintf(stderr, "dbg2       navlat:                    %f\n", navlat);
 		fprintf(stderr, "dbg2       altitude:                  %f\n", altitude);
-		fprintf(stderr, "dbg2       sonardepth:                %f\n", sonardepth);
+		fprintf(stderr, "dbg2       sensordepth:               %f\n", sensordepth);
 		fprintf(stderr, "dbg2       mtodeglon:                 %f\n", mtodeglon);
 		fprintf(stderr, "dbg2       mtodeglat:                 %f\n", mtodeglat);
 		fprintf(stderr, "dbg2       vx:                        %f\n", vx);
@@ -334,7 +344,7 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double
 		}
 		if (nfound > 0) {
 			topog /= (double)nfound;
-			altitude = -sonardepth - topog;
+			altitude = -sensordepth - topog;
 			dr = altitude / 20;
 			r = altitude / vz - dr;
 			rmax = 4 * altitude / vz;
@@ -359,7 +369,7 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double
 		/* get position of range estimate projected along the vector */
 		const double lontest = navlon + mtodeglon * vx * r;
 		const double lattest = navlat + mtodeglat * vy * r;
-		const double topotest = -sonardepth - vz * r;
+		const double topotest = -sensordepth - vz * r;
 
 		/* get topography value at that point */
 		int nfound = 0;
@@ -418,7 +428,7 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double
 	/* if success return the result */
 	*lon = navlon + mtodeglon * vx * r;
 	*lat = navlat + mtodeglat * vy * r;
-	*topo = -sonardepth - vz * r;
+	*topo = -sensordepth - vz * r;
 	*range = r;
 
 	if (verbose >= 2) {
@@ -437,7 +447,7 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double
 }
 /*--------------------------------------------------------------------*/
 int mb_topogrid_getangletable(int verbose, void *topogrid_ptr, int nangle, double angle_min, double angle_max, double navlon,
-                              double navlat, double heading, double altitude, double sonardepth, double pitch,
+                              double navlat, double heading, double altitude, double sensordepth, double pitch,
                               double *table_angle, double *table_xtrack, double *table_ltrack, double *table_altitude,
                               double *table_range, int *error) {
 	struct mb_topogrid_struct *topogrid = (struct mb_topogrid_struct *)topogrid_ptr;
@@ -453,7 +463,7 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr, int nangle, doubl
 		fprintf(stderr, "dbg2       navlat:                    %f\n", navlat);
 		fprintf(stderr, "dbg2       heading:                   %f\n", heading);
 		fprintf(stderr, "dbg2       altitude:                  %f\n", altitude);
-		fprintf(stderr, "dbg2       sonardepth:                %f\n", sonardepth);
+		fprintf(stderr, "dbg2       sensordepth:               %f\n", sensordepth);
 		fprintf(stderr, "dbg2       pitch:                     %f\n", pitch);
 		fprintf(stderr, "dbg2       topogrid:                  %p\n", topogrid);
 		fprintf(stderr, "dbg2       topogrid->projection_mode: %d\n", topogrid->projection_mode);
@@ -504,7 +514,7 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr, int nangle, doubl
 		double topo;
 		double rr;
 		/* find the range where this vector intersects the grid */
-		status = mb_topogrid_intersect(verbose, topogrid_ptr, navlon, navlat, altitude, sonardepth, mtodeglon, mtodeglat, vx, vy,
+		status = mb_topogrid_intersect(verbose, topogrid_ptr, navlon, navlat, altitude, sensordepth, mtodeglon, mtodeglat, vx, vy,
 		                               vz, &lon, &lat, &topo, &rr, error);
 
 		/* get the position from successful intersection with the grid */

@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_esf.c	4/10/2003
  *
- *    Copyright (c) 2003-2020 by
+ *    Copyright (c) 2003-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * mb_esf.c includes the functions used to read, write, and use
@@ -764,6 +774,22 @@ int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error) {
 	}
 
 	int status = MB_SUCCESS;
+
+    /* check for edits read in that were never used */
+	/* if (verbose > 0) {
+      if (esf->edit != NULL && esf->nedit > 0) {
+        bool unused_output = false;
+        for (int i=0; i<esf->nedit; i++) {
+          if (!esf->edit[i].use) {
+            if (!unused_output) {
+              unused_output = true;
+              fprintf(stderr, "\nUnused beam flags in %s:\n", __FUNCTION__);
+            }
+            fprintf(stderr, "%3d  %14.6f %4d %d %d\n", i, esf->edit[i].time_d, esf->edit[i].beam, esf->edit[i].action, esf->edit[i].use);
+          }
+        }
+      }
+	}*/
 
 	/* deallocate the arrays */
 	if (esf->edit != NULL)

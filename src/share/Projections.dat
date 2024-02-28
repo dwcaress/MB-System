@@ -2,15 +2,25 @@
 #    The MB-system:	Projections.dat		9/19/2002
 #    $ID: $
 #
-#    Copyright (c) 2002-2014 by
-#    David W. Caress (caress@mbari.org)
-#      Monterey Bay Aquarium Research Institute
-#      Moss Landing, CA 95039
-#    and Dale N. Chayes (dale@ldeo.columbia.edu)
-#      Lamont-Doherty Earth Observatory
-#      Palisades, NY 10964
-#
-#    See README file for copying and redistribution conditions.
+*    Copyright (c) 2002-2024 by
+*    David W. Caress (caress@mbari.org)
+*      Monterey Bay Aquarium Research Institute
+*      Moss Landing, California, USA
+*    Dale N. Chayes 
+*      Center for Coastal and Ocean Mapping
+*      University of New Hampshire
+*      Durham, New Hampshire, USA
+*    Christian dos Santos Ferreira
+*      MARUM
+*      University of Bremen
+*      Bremen Germany
+*     
+*    MB-System was created by Caress and Chayes in 1992 at the
+*      Lamont-Doherty Earth Observatory
+*      Columbia University
+*      Palisades, NY 10964
+*
+*    See README.md file for copying and redistribution conditions.
 #
 #######################################################################
 #
@@ -20,7 +30,8 @@
 #
 # $Log: Projections.dat,v $
 # Revision 5.3  2008/11/16 21:51:17  caress
-# Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
+# Updating all recent changes, including time lag analysis using mbeditviz 
+# and improvements to the mbgrid footprint gridding algorithm.
 #
 # Revision 5.2  2008/05/26 04:43:15  caress
 # Getting ready for release 5.1.1beta19.

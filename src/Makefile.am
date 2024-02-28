@@ -26,6 +26,10 @@ if BUILD_QTTOOLS
 XBUILD_SUB_QTTOOLS = qt-mbgrdviz qt-mbgrdviz-2 qt-guilib qt-mbgrdviz-3
 endif
 
+if BUILD_DEPRECATED
+XBUILD_SUB_DEPRECATED = deprecated
+endif
+
 SUBDIRS =
 if BUILD_GSF
   SUBDIRS += gsf
@@ -38,20 +42,19 @@ SUBDIRS += $(XBUILD_SUB_MBTRN)
 SUBDIRS += mbio
 SUBDIRS += mbaux
 SUBDIRS += utilities
-SUBDIRS += deprecated
 SUBDIRS += $(XBUILD_SUB_MBTRNBIN)
 SUBDIRS += gmt
 SUBDIRS += otps
+SUBDIRS += mbgrd2gltf
 SUBDIRS += macros
 SUBDIRS += share
 SUBDIRS += man
 SUBDIRS += html
-SUBDIRS += ps
 SUBDIRS += $(XBUILD_SUB_MOTIF)
 SUBDIRS += $(XBUILD_SUB_GL)
 SUBDIRS += $(XBUILD_SUB_OPENCVTOOLS)
 SUBDIRS += $(XBUILD_SUB_QTTOOLS)
-SUBDIRS += mbgrd2gltf
+SUBDIRS += $(XBUILD_SUB_DEPRECATED)
 
 CLEANFILES =
 DISTCLEANFILES =

@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbgrid.cc  5/2/94
  *
- *    Copyright (c) 1993-2020 by
+ *    Copyright (c) 1993-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /**
   @file
@@ -806,8 +816,10 @@ int main(int argc, char **argv) {
   float outclipvalue = NO_DATA_FLAG;
   int rformat;
   int pstatus;
+  int astatus = MB_ALTNAV_NONE;
   char path[MB_PATH_MAXLINE] = "";
   char ppath[MB_PATH_MAXLINE] = "";
+  char apath[MB_PATH_MAXLINE] = "";
   char dpath[MB_PATH_MAXLINE] = "";
   char rfile[MB_PATH_MAXLINE] = "";
   char ofile[2*MB_PATH_MAXLINE+100] = "";
@@ -826,7 +838,7 @@ int main(int argc, char **argv) {
   double heading;
   double distance;
   double altitude;
-  double sonardepth;
+  double sensordepth;
   char *beamflag = nullptr;
   double *bath = nullptr;
   double *bathlon = nullptr;
@@ -1778,7 +1790,7 @@ int main(int argc, char **argv) {
       mb_memory_clear(verbose, &memclear_error);
       exit(MB_ERROR_OPEN_FAIL);
     }
-    while (mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error) ==
+    while (mb_datalist_read3(verbose, datalist, &pstatus, path, ppath, &astatus, apath, dpath, &format, &file_weight, &error) ==
            MB_SUCCESS) {
       ndatafile = 0;
 
@@ -1810,13 +1822,14 @@ int main(int argc, char **argv) {
             mb_get_fbt(verbose, rfile, &rformat, &error);
           }
 
-          /* call mb_read_init() */
-          if (mb_read_init(verbose, rfile, rformat, pings, lonflip, bounds, btime_i, etime_i, speedmin,
-                                     timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss,
+          /* call mb_read_init_altnav() */
+          if (mb_read_init_altnav(verbose, rfile, rformat, pings, lonflip, bounds, btime_i, etime_i, speedmin,
+                                     timegap, astatus, apath, &mbio_ptr, &btime_d, &etime_d, 
+                                     &beams_bath, &beams_amp, &pixels_ss,
                                      &error) != MB_SUCCESS) {
             char *message = nullptr;
             mb_error(verbose, error, &message);
-            fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
+            fprintf(outfp, "\nMBIO Error returned from function <mb_read_init_altnav>:\n%s\n", message);
             fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", rfile);
             fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
             mb_memory_clear(verbose, &memclear_error);
@@ -1867,7 +1880,7 @@ int main(int argc, char **argv) {
           /* loop over reading */
           while (error <= MB_ERROR_NO_ERROR) {
             status = mb_read(verbose, mbio_ptr, &kind, &rpings, time_i, &time_d, &navlon, &navlat, &speed, &heading,
-                             &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath,
+                             &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath,
                              amp, bathlon, bathlat, ss, sslon, sslat, comment, &error);
 
             /* time gaps are not a problem here */
@@ -1938,11 +1951,12 @@ int main(int argc, char **argv) {
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
-          if (pstatus == MB_PROCESSED_USE)
-            fprintf(dfp, "P:");
+          if (pstatus == MB_PROCESSED_USE && astatus == MB_ALTNAV_USE)
+            fprintf(dfp, "A:%s %d %f %s\n", path, format, file_weight, apath);
+          else if (pstatus == MB_PROCESSED_USE)
+            fprintf(dfp, "P:%s %d %f\n", path, format, file_weight);
           else
-            fprintf(dfp, "R:");
-          fprintf(dfp, "%s %d %f\n", path, format, file_weight);
+            fprintf(dfp, "R:%s %d %f\n", path, format, file_weight);
           fflush(dfp);
         }
       } /* end if (format > 0) */
@@ -2112,7 +2126,7 @@ int main(int argc, char **argv) {
       mb_memory_clear(verbose, &memclear_error);
       exit(error);
     }
-    while (mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error) ==
+    while (mb_datalist_read3(verbose, datalist, &pstatus, path, ppath, &astatus, apath, dpath, &format, &file_weight, &error) ==
            MB_SUCCESS) {
       ndatafile = 0;
 
@@ -2144,13 +2158,14 @@ int main(int argc, char **argv) {
             mb_get_fbt(verbose, rfile, &rformat, &error);
           }
 
-          /* call mb_read_init() */
-          if (mb_read_init(verbose, rfile, rformat, pings, lonflip, bounds, btime_i, etime_i, speedmin,
-                                     timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss,
+          /* call mb_read_init_altnav() */
+          if (mb_read_init_altnav(verbose, rfile, rformat, pings, lonflip, bounds, btime_i, etime_i, speedmin,
+                                     timegap, astatus, apath, &mbio_ptr, &btime_d, &etime_d, 
+                                     &beams_bath, &beams_amp, &pixels_ss,
                                      &error) != MB_SUCCESS) {
             char *message = nullptr;
             mb_error(verbose, error, &message);
-            fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
+            fprintf(outfp, "\nMBIO Error returned from function <mb_read_init_altnav>:\n%s\n", message);
             fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", rfile);
             fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
             mb_memory_clear(verbose, &memclear_error);
@@ -2201,7 +2216,7 @@ int main(int argc, char **argv) {
           /* loop over reading */
           while (error <= MB_ERROR_NO_ERROR) {
             status = mb_read(verbose, mbio_ptr, &kind, &rpings, time_i, &time_d, &navlon, &navlat, &speed, &heading,
-                             &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath,
+                             &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath,
                              amp, bathlon, bathlat, ss, sslon, sslat, comment, &error);
 
             /* time gaps are not a problem here */
@@ -2361,7 +2376,7 @@ int main(int argc, char **argv) {
                         foot_dxn = 1.0;
                         foot_dyn = 0.0;
                       }
-                      beam_altitude = bath[ib] - sonardepth;
+                      beam_altitude = bath[ib] - sensordepth;
                       foot_range = sqrt(foot_lateral * foot_lateral + beam_altitude * beam_altitude);
                       foot_theta = RTD * atan2(foot_lateral, beam_altitude);
                       if (foot_range > 0.0 && foot_theta < FOOT_THETA_MAX) {
@@ -2372,7 +2387,7 @@ int main(int argc, char **argv) {
                           foot_dtheta = 1.0;
                         if (foot_dphi <= 0.0)
                           foot_dphi = 1.0;
-                        foot_hwidth = (bath[ib] - sonardepth) * tan(DTR * (foot_theta + foot_dtheta)) -
+                        foot_hwidth = (bath[ib] - sensordepth) * tan(DTR * (foot_theta + foot_dtheta)) -
                                       foot_lateral;
                         foot_hlength = foot_range * tan(DTR * foot_dphi);
                       } else {
@@ -2566,7 +2581,7 @@ int main(int argc, char **argv) {
       mb_memory_clear(verbose, &memclear_error);
       exit(error);
     }
-    while (mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error) ==
+    while (mb_datalist_read3(verbose, datalist, &pstatus, path, ppath, &astatus, apath, dpath, &format, &file_weight, &error) ==
            MB_SUCCESS) {
       ndatafile = 0;
 
@@ -2598,13 +2613,14 @@ int main(int argc, char **argv) {
             mb_get_fbt(verbose, rfile, &rformat, &error);
           }
 
-          /* call mb_read_init() */
-          if (mb_read_init(verbose, rfile, rformat, pings, lonflip, bounds, btime_i, etime_i, speedmin,
-                                     timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss,
+          /* call mb_read_init_altnav() */
+          if (mb_read_init_altnav(verbose, rfile, rformat, pings, lonflip, bounds, btime_i, etime_i, speedmin,
+                                     timegap, astatus, apath, &mbio_ptr, &btime_d, &etime_d, 
+                                     &beams_bath, &beams_amp, &pixels_ss,
                                      &error) != MB_SUCCESS) {
             char *message = nullptr;
             mb_error(verbose, error, &message);
-            fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
+            fprintf(outfp, "\nMBIO Error returned from function <mb_read_init_altnav>:\n%s\n", message);
             fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", rfile);
             fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
             mb_memory_clear(verbose, &memclear_error);
@@ -2655,7 +2671,7 @@ int main(int argc, char **argv) {
           /* loop over reading */
           while (error <= MB_ERROR_NO_ERROR) {
             status = mb_read(verbose, mbio_ptr, &kind, &rpings, time_i, &time_d, &navlon, &navlat, &speed, &heading,
-                             &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath,
+                             &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath,
                              amp, bathlon, bathlat, ss, sslon, sslat, comment, &error);
 
             /* time gaps are not a problem here */
@@ -2791,14 +2807,14 @@ int main(int argc, char **argv) {
                       }
                       foot_range = sqrt(foot_lateral * foot_lateral + altitude * altitude);
                       if (foot_range > 0.0) {
-                        foot_theta = RTD * atan2(foot_lateral, (bath[ib] - sonardepth));
+                        foot_theta = RTD * atan2(foot_lateral, (bath[ib] - sensordepth));
                         foot_dtheta = 0.5 * scale * mb_io_ptr->beamwidth_xtrack;
                         foot_dphi = 0.5 * scale * mb_io_ptr->beamwidth_ltrack;
                         if (foot_dtheta <= 0.0)
                           foot_dtheta = 1.0;
                         if (foot_dphi <= 0.0)
                           foot_dphi = 1.0;
-                        foot_hwidth = (bath[ib] - sonardepth) * tan(DTR * (foot_theta + foot_dtheta)) -
+                        foot_hwidth = (bath[ib] - sensordepth) * tan(DTR * (foot_theta + foot_dtheta)) -
                                       foot_lateral;
                         foot_hlength = foot_range * tan(DTR * foot_dphi);
 
@@ -2929,11 +2945,12 @@ int main(int argc, char **argv) {
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
-          if (pstatus == MB_PROCESSED_USE)
-            fprintf(dfp, "P:");
+          if (pstatus == MB_PROCESSED_USE && astatus == MB_ALTNAV_USE)
+            fprintf(dfp, "A:%s %d %f %s\n", path, format, file_weight, apath);
+          else if (pstatus == MB_PROCESSED_USE)
+            fprintf(dfp, "P:%s %d %f\n", path, format, file_weight);
           else
-            fprintf(dfp, "R:");
-          fprintf(dfp, "%s %d %f\n", path, format, file_weight);
+            fprintf(dfp, "R:%s %d %f\n", path, format, file_weight);
           fflush(dfp);
         }
       } /* end if (format > 0) */
@@ -3012,7 +3029,7 @@ int main(int argc, char **argv) {
       mb_memory_clear(verbose, &memclear_error);
       exit(error);
     }
-    while (mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error) ==
+    while (mb_datalist_read3(verbose, datalist, &pstatus, path, ppath, &astatus, apath, dpath, &format, &file_weight, &error) ==
            MB_SUCCESS) {
       ndatafile = 0;
 
@@ -3044,13 +3061,14 @@ int main(int argc, char **argv) {
             mb_get_fbt(verbose, rfile, &rformat, &error);
           }
 
-          /* call mb_read_init() */
-          if (mb_read_init(verbose, rfile, rformat, pings, lonflip, bounds, btime_i, etime_i, speedmin,
-                                     timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss,
+          /* call mb_read_init_altnav() */
+          if (mb_read_init_altnav(verbose, rfile, rformat, pings, lonflip, bounds, btime_i, etime_i, speedmin,
+                                     timegap, astatus, apath, &mbio_ptr, &btime_d, &etime_d, 
+                                     &beams_bath, &beams_amp, &pixels_ss,
                                      &error) != MB_SUCCESS) {
             char *message = nullptr;
             mb_error(verbose, error, &message);
-            fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
+            fprintf(outfp, "\nMBIO Error returned from function <mb_read_init_altnav>:\n%s\n", message);
             fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", rfile);
             fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
             mb_memory_clear(verbose, &memclear_error);
@@ -3095,7 +3113,7 @@ int main(int argc, char **argv) {
           /* loop over reading */
           while (error <= MB_ERROR_NO_ERROR) {
             status = mb_read(verbose, mbio_ptr, &kind, &rpings, time_i, &time_d, &navlon, &navlat, &speed, &heading,
-                             &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath,
+                             &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath,
                              amp, bathlon, bathlat, ss, sslon, sslat, comment, &error);
 
             /* time gaps are not a problem here */
@@ -3362,11 +3380,12 @@ int main(int argc, char **argv) {
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
-          if (pstatus == MB_PROCESSED_USE)
-            fprintf(dfp, "P:");
+          if (pstatus == MB_PROCESSED_USE && astatus == MB_ALTNAV_USE)
+            fprintf(dfp, "A:%s %d %f %s\n", path, format, file_weight, apath);
+          else if (pstatus == MB_PROCESSED_USE)
+            fprintf(dfp, "P:%s %d %f\n", path, format, file_weight);
           else
-            fprintf(dfp, "R:");
-          fprintf(dfp, "%s %d %f\n", path, format, file_weight);
+            fprintf(dfp, "R:%s %d %f\n", path, format, file_weight);
           fflush(dfp);
         }
       } /* end if (format > 0) */
@@ -3455,11 +3474,12 @@ int main(int argc, char **argv) {
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
-          if (pstatus == MB_PROCESSED_USE)
-            fprintf(dfp, "P:");
+          if (pstatus == MB_PROCESSED_USE && astatus == MB_ALTNAV_USE)
+            fprintf(dfp, "A:%s %d %f %s\n", path, format, file_weight, apath);
+          else if (pstatus == MB_PROCESSED_USE)
+            fprintf(dfp, "P:%s %d %f\n", path, format, file_weight);
           else
-            fprintf(dfp, "R:");
-          fprintf(dfp, "%s %d %f\n", path, format, file_weight);
+            fprintf(dfp, "R:%s %d %f\n", path, format, file_weight);
           fflush(dfp);
         }
       } /* end if (format == 0) */
@@ -3555,7 +3575,7 @@ int main(int argc, char **argv) {
       mb_memory_clear(verbose, &memclear_error);
       exit(error);
     }
-    while (mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error) ==
+    while (mb_datalist_read3(verbose, datalist, &pstatus, path, ppath, &astatus, apath, dpath, &format, &file_weight, &error) ==
            MB_SUCCESS) {
       ndatafile = 0;
 
@@ -3587,13 +3607,14 @@ int main(int argc, char **argv) {
             mb_get_fbt(verbose, rfile, &rformat, &error);
           }
 
-          /* call mb_read_init() */
-          if (mb_read_init(verbose, rfile, rformat, pings, lonflip, bounds, btime_i, etime_i, speedmin,
-                                     timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss,
+          /* call mb_read_init_altnav() */
+          if (mb_read_init_altnav(verbose, rfile, rformat, pings, lonflip, bounds, btime_i, etime_i, speedmin,
+                                     timegap, astatus, apath, &mbio_ptr, &btime_d, &etime_d, 
+                                     &beams_bath, &beams_amp, &pixels_ss,
                                      &error) != MB_SUCCESS) {
             char *message = nullptr;
             mb_error(verbose, error, &message);
-            fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
+            fprintf(outfp, "\nMBIO Error returned from function <mb_read_init_altnav>:\n%s\n", message);
             fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", rfile);
             fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
             mb_memory_clear(verbose, &memclear_error);
@@ -3638,7 +3659,7 @@ int main(int argc, char **argv) {
           /* loop over reading */
           while (error <= MB_ERROR_NO_ERROR) {
             status = mb_read(verbose, mbio_ptr, &kind, &rpings, time_i, &time_d, &navlon, &navlat, &speed, &heading,
-                             &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath,
+                             &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath,
                              amp, bathlon, bathlat, ss, sslon, sslat, comment, &error);
 
             /* time gaps are not a problem here */
@@ -3982,11 +4003,12 @@ int main(int argc, char **argv) {
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
-          if (pstatus == MB_PROCESSED_USE)
-            fprintf(dfp, "P:");
+          if (pstatus == MB_PROCESSED_USE && astatus == MB_ALTNAV_USE)
+            fprintf(dfp, "A:%s %d %f %s\n", path, format, file_weight, apath);
+          else if (pstatus == MB_PROCESSED_USE)
+            fprintf(dfp, "P:%s %d %f\n", path, format, file_weight);
           else
-            fprintf(dfp, "R:");
-          fprintf(dfp, "%s %d %f\n", path, format, file_weight);
+            fprintf(dfp, "R:%s %d %f\n", path, format, file_weight);
           fflush(dfp);
         }
       } /* end if (format > 0) */
@@ -4082,11 +4104,12 @@ int main(int argc, char **argv) {
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
-          if (pstatus == MB_PROCESSED_USE)
-            fprintf(dfp, "P:");
+          if (pstatus == MB_PROCESSED_USE && astatus == MB_ALTNAV_USE)
+            fprintf(dfp, "A:%s %d %f %s\n", path, format, file_weight, apath);
+          else if (pstatus == MB_PROCESSED_USE)
+            fprintf(dfp, "P:%s %d %f\n", path, format, file_weight);
           else
-            fprintf(dfp, "R:");
-          fprintf(dfp, "%s %d %f\n", path, format, file_weight);
+            fprintf(dfp, "R:%s %d %f\n", path, format, file_weight);
           fflush(dfp);
         }
       } /* end if (format == 0) */
@@ -4174,7 +4197,7 @@ int main(int argc, char **argv) {
       mb_memory_clear(verbose, &memclear_error);
       exit(error);
     }
-    while (mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error) ==
+    while (mb_datalist_read3(verbose, datalist, &pstatus, path, ppath, &astatus, apath, dpath, &format, &file_weight, &error) ==
            MB_SUCCESS) {
       ndatafile = 0;
 
@@ -4206,13 +4229,14 @@ int main(int argc, char **argv) {
             mb_get_fbt(verbose, rfile, &rformat, &error);
           }
 
-          /* call mb_read_init() */
-          if (mb_read_init(verbose, rfile, rformat, pings, lonflip, bounds, btime_i, etime_i, speedmin,
-                                     timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss,
+          /* call mb_read_init_altnav() */
+          if (mb_read_init_altnav(verbose, rfile, rformat, pings, lonflip, bounds, btime_i, etime_i, speedmin,
+                                     timegap, astatus, apath, &mbio_ptr, &btime_d, &etime_d, 
+                                     &beams_bath, &beams_amp, &pixels_ss,
                                      &error) != MB_SUCCESS) {
             char *message = nullptr;
             mb_error(verbose, error, &message);
-            fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
+            fprintf(outfp, "\nMBIO Error returned from function <mb_read_init_altnav>:\n%s\n", message);
             fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", rfile);
             fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
             mb_memory_clear(verbose, &memclear_error);
@@ -4257,7 +4281,7 @@ int main(int argc, char **argv) {
           /* loop over reading */
           while (error <= MB_ERROR_NO_ERROR) {
             status = mb_read(verbose, mbio_ptr, &kind, &rpings, time_i, &time_d, &navlon, &navlat, &speed, &heading,
-                             &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath,
+                             &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath,
                              amp, bathlon, bathlat, ss, sslon, sslat, comment, &error);
 
             /* time gaps are not a problem here */
@@ -4522,11 +4546,12 @@ int main(int argc, char **argv) {
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
-          if (pstatus == MB_PROCESSED_USE)
-            fprintf(dfp, "P:");
+          if (pstatus == MB_PROCESSED_USE && astatus == MB_ALTNAV_USE)
+            fprintf(dfp, "A:%s %d %f %s\n", path, format, file_weight, apath);
+          else if (pstatus == MB_PROCESSED_USE)
+            fprintf(dfp, "P:%s %d %f\n", path, format, file_weight);
           else
-            fprintf(dfp, "R:");
-          fprintf(dfp, "%s %d %f\n", path, format, file_weight);
+            fprintf(dfp, "R:%s %d %f\n", path, format, file_weight);
           fflush(dfp);
         }
       } /* end if (format > 0) */
@@ -4563,7 +4588,7 @@ int main(int argc, char **argv) {
       mb_memory_clear(verbose, &memclear_error);
       exit(error);
     }
-    while (mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error) ==
+    while (mb_datalist_read3(verbose, datalist, &pstatus, path, ppath, &astatus, apath, dpath, &format, &file_weight, &error) ==
            MB_SUCCESS) {
       ndatafile = 0;
 
@@ -4595,13 +4620,14 @@ int main(int argc, char **argv) {
             mb_get_fbt(verbose, rfile, &rformat, &error);
           }
 
-          /* call mb_read_init() */
-          if (mb_read_init(verbose, rfile, rformat, pings, lonflip, bounds, btime_i, etime_i, speedmin,
-                                     timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss,
+          /* call mb_read_init_altnav() */
+          if (mb_read_init_altnav(verbose, rfile, rformat, pings, lonflip, bounds, btime_i, etime_i, speedmin,
+                                     timegap, astatus, apath, &mbio_ptr, &btime_d, &etime_d, 
+                                     &beams_bath, &beams_amp, &pixels_ss,
                                      &error) != MB_SUCCESS) {
             char *message = nullptr;
             mb_error(verbose, error, &message);
-            fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
+            fprintf(outfp, "\nMBIO Error returned from function <mb_read_init_altnav>:\n%s\n", message);
             fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", rfile);
             fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
             mb_memory_clear(verbose, &memclear_error);
@@ -4646,7 +4672,7 @@ int main(int argc, char **argv) {
           /* loop over reading */
           while (error <= MB_ERROR_NO_ERROR) {
             status = mb_read(verbose, mbio_ptr, &kind, &rpings, time_i, &time_d, &navlon, &navlat, &speed, &heading,
-                             &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath,
+                             &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath,
                              amp, bathlon, bathlat, ss, sslon, sslat, comment, &error);
 
             /* time gaps are not a problem here */
@@ -4948,11 +4974,12 @@ int main(int argc, char **argv) {
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
-          if (pstatus == MB_PROCESSED_USE)
-            fprintf(dfp, "P:");
+          if (pstatus == MB_PROCESSED_USE && astatus == MB_ALTNAV_USE)
+            fprintf(dfp, "A:%s %d %f %s\n", path, format, file_weight, apath);
+          else if (pstatus == MB_PROCESSED_USE)
+            fprintf(dfp, "P:%s %d %f\n", path, format, file_weight);
           else
-            fprintf(dfp, "R:");
-          fprintf(dfp, "%s %d %f\n", path, format, file_weight);
+            fprintf(dfp, "R:%s %d %f\n", path, format, file_weight);
           fflush(dfp);
         }
       } /* end if (format > 0) */

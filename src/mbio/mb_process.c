@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
  *
- *    Copyright (c) 2000-2020 by
+ *    Copyright (c) 2000-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * mb_process.c contains functions for reading and writing
@@ -103,11 +113,11 @@ int mb_pr_checkstatus(int verbose, char *file, int *prstatus, int *error) {
 		    (file_status.st_mode & S_IFMT) != S_IFDIR)
 			attitudefilemodtime = file_status.st_mtime;
 
-		/* get mod time for the sonardepth file if needed */
-		int sonardepthfilemodtime = 0;
-		if (process.mbp_sonardepth_mode != MBP_SONARDEPTH_OFF && (fstat = stat(process.mbp_sonardepthfile, &file_status)) == 0 &&
+		/* get mod time for the sensordepth file if needed */
+		int sensordepthfilemodtime = 0;
+		if (process.mbp_sensordepth_mode != MBP_SENSORDEPTH_OFF && (fstat = stat(process.mbp_sensordepthfile, &file_status)) == 0 &&
 		    (file_status.st_mode & S_IFMT) != S_IFDIR)
-			sonardepthfilemodtime = file_status.st_mtime;
+			sensordepthfilemodtime = file_status.st_mtime;
 
 		/* get mod time for the edit save file if needed */
 		int esfmodtime = 0;
@@ -123,7 +133,7 @@ int mb_pr_checkstatus(int verbose, char *file, int *prstatus, int *error) {
 
 		/* now check if processed file is out of date */
 		if (ofilemodtime > 0 && ofilemodtime >= ifilemodtime && ofilemodtime >= pfilemodtime && ofilemodtime >= navfilemodtime &&
-		    ofilemodtime >= navadjfilemodtime && ofilemodtime >= attitudefilemodtime && ofilemodtime >= sonardepthfilemodtime &&
+		    ofilemodtime >= navadjfilemodtime && ofilemodtime >= attitudefilemodtime && ofilemodtime >= sensordepthfilemodtime &&
 		    ofilemodtime >= esfmodtime && ofilemodtime >= svpmodtime) {
 			*prstatus = MB_PR_FILE_UP_TO_DATE;
 		}
@@ -197,10 +207,10 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 	process->mbp_attitudefile[0] = '\0';
 	process->mbp_attitude_format = 1;
 
-	/* sonardepth merging */
-	process->mbp_sonardepth_mode = 0;
-	process->mbp_sonardepthfile[0] = '\0';
-	process->mbp_sonardepth_format = 1;
+	/* sensordepth merging */
+	process->mbp_sensordepth_mode = 0;
+	process->mbp_sensordepthfile[0] = '\0';
+	process->mbp_sensordepth_format = 1;
 
 	/* data cutting */
 	process->mbp_cut_num = 0;
@@ -447,18 +457,18 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 					sscanf(buffer, "%s %d", dummy, &process->mbp_attitude_format);
 				}
 
-				/* sonardepth merging */
-				else if (strncmp(buffer, "SONARDEPTHMODE", 12) == 0) {
-					sscanf(buffer, "%s %d", dummy, &process->mbp_sonardepth_mode);
+				/* sensordepth merging */
+				else if (strncmp(buffer, "sensordepthMODE", 12) == 0) {
+					sscanf(buffer, "%s %d", dummy, &process->mbp_sensordepth_mode);
 				}
-				else if (strncmp(buffer, "SONARDEPTHFILE", 12) == 0) {
-					sscanf(buffer, "%s %s", dummy, process->mbp_sonardepthfile);
+				else if (strncmp(buffer, "sensordepthFILE", 12) == 0) {
+					sscanf(buffer, "%s %s", dummy, process->mbp_sensordepthfile);
 					if (!explicit) {
-						process->mbp_sonardepth_mode = MBP_SONARDEPTH_ON;
+						process->mbp_sensordepth_mode = MBP_SENSORDEPTH_ON;
 					}
 				}
-				else if (strncmp(buffer, "SONARDEPTHFORMAT", 14) == 0) {
-					sscanf(buffer, "%s %d", dummy, &process->mbp_sonardepth_format);
+				else if (strncmp(buffer, "sensordepthFORMAT", 14) == 0) {
+					sscanf(buffer, "%s %d", dummy, &process->mbp_sensordepth_format);
 				}
 
 				/* data cutting */
@@ -881,7 +891,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 		strcpy(process->mbp_ifile, file);
 	}
 	mb_get_shortest_path(verbose, process->mbp_ifile, error);
-  assert(strlen(process->mbp_ifile) < MB_PATH_MAXLINE - 8);
+  	assert(strlen(process->mbp_ifile) < MB_PATH_MAXLINE - 8);
 
 	/* figure out data format or output filename if required */
 	if (!process->mbp_format_specified || !process->mbp_ofile_specified) {
@@ -1007,10 +1017,10 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 			strcpy(process->mbp_attitudefile, dummy);
 		}
 
-		/* reset sonardepth file */
-		if ((lastslash = strrchr(process->mbp_sonardepthfile, '/')) != NULL && strlen(lastslash) > 1) {
+		/* reset sensordepth file */
+		if ((lastslash = strrchr(process->mbp_sensordepthfile, '/')) != NULL && strlen(lastslash) > 1) {
 			strcpy(dummy, &(lastslash[1]));
-			strcpy(process->mbp_sonardepthfile, dummy);
+			strcpy(process->mbp_sensordepthfile, dummy);
 		}
 
 		/* reset tide file */
@@ -1068,13 +1078,13 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 		strcat(process->mbp_attitudefile, dummy);
 	}
 
-	/* reset sonardepth file */
-	if (len > 1 && strlen(process->mbp_sonardepthfile) > 1 && process->mbp_sonardepthfile[0] != '/' &&
-	    process->mbp_sonardepthfile[1] != ':') {
-		strcpy(dummy, process->mbp_sonardepthfile);
-		strncpy(process->mbp_sonardepthfile, process->mbp_ifile, len);
-		process->mbp_sonardepthfile[len] = '\0';
-		strcat(process->mbp_sonardepthfile, dummy);
+	/* reset sensordepth file */
+	if (len > 1 && strlen(process->mbp_sensordepthfile) > 1 && process->mbp_sensordepthfile[0] != '/' &&
+	    process->mbp_sensordepthfile[1] != ':') {
+		strcpy(dummy, process->mbp_sensordepthfile);
+		strncpy(process->mbp_sensordepthfile, process->mbp_ifile, len);
+		process->mbp_sensordepthfile[len] = '\0';
+		strcat(process->mbp_sensordepthfile, dummy);
 	}
 
 	/* reset svp file */
@@ -1141,7 +1151,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 	mb_get_shortest_path(verbose, process->mbp_navadjfile, error);
 	mb_get_shortest_path(verbose, process->mbp_navfile, error);
 	mb_get_shortest_path(verbose, process->mbp_attitudefile, error);
-	mb_get_shortest_path(verbose, process->mbp_sonardepthfile, error);
+	mb_get_shortest_path(verbose, process->mbp_sensordepthfile, error);
 	mb_get_shortest_path(verbose, process->mbp_svpfile, error);
 	mb_get_shortest_path(verbose, process->mbp_editfile, error);
 	mb_get_shortest_path(verbose, process->mbp_staticfile, error);
@@ -1194,9 +1204,9 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 		fprintf(stderr, "dbg2       mbp_attitude_mode:      %d\n", process->mbp_attitude_mode);
 		fprintf(stderr, "dbg2       mbp_attitudefile:       %s\n", process->mbp_attitudefile);
 		fprintf(stderr, "dbg2       mbp_attitude_format:    %d\n", process->mbp_attitude_format);
-		fprintf(stderr, "dbg2       mbp_sonardepth_mode:    %d\n", process->mbp_sonardepth_mode);
-		fprintf(stderr, "dbg2       mbp_sonardepthfile:     %s\n", process->mbp_sonardepthfile);
-		fprintf(stderr, "dbg2       mbp_sonardepth_format:  %d\n", process->mbp_sonardepth_format);
+		fprintf(stderr, "dbg2       mbp_sensordepth_mode:    %d\n", process->mbp_sensordepth_mode);
+		fprintf(stderr, "dbg2       mbp_sensordepthfile:     %s\n", process->mbp_sensordepthfile);
+		fprintf(stderr, "dbg2       mbp_sensordepth_format:  %d\n", process->mbp_sensordepth_format);
 		fprintf(stderr, "dbg2       mbp_cut_num:            %d\n", process->mbp_cut_num);
 		for (int i = 0; i < process->mbp_cut_num; i++) {
 			fprintf(stderr, "dbg2           cut %d:\n", i);
@@ -1333,9 +1343,9 @@ int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, i
 		fprintf(stderr, "dbg2       mbp_attitudefile:       %s\n", process->mbp_attitudefile);
 		fprintf(stderr, "dbg2       mbp_attitude_format:    %d\n", process->mbp_attitude_format);
 		fprintf(stderr, "dbg2       mbp_cut_num:            %d\n", process->mbp_cut_num);
-		fprintf(stderr, "dbg2       mbp_sonardepth_mode:    %d\n", process->mbp_sonardepth_mode);
-		fprintf(stderr, "dbg2       mbp_sonardepthfile:     %s\n", process->mbp_sonardepthfile);
-		fprintf(stderr, "dbg2       mbp_sonardepth_format:  %d\n", process->mbp_sonardepth_format);
+		fprintf(stderr, "dbg2       mbp_sensordepth_mode:    %d\n", process->mbp_sensordepth_mode);
+		fprintf(stderr, "dbg2       mbp_sensordepthfile:     %s\n", process->mbp_sensordepthfile);
+		fprintf(stderr, "dbg2       mbp_sensordepth_format:  %d\n", process->mbp_sensordepth_format);
 		fprintf(stderr, "dbg2       mbp_cut_num:            %d\n", process->mbp_cut_num);
 		for (int i = 0; i < process->mbp_cut_num; i++) {
 			fprintf(stderr, "dbg2           cut %d:\n", i);
@@ -1538,13 +1548,13 @@ int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, i
 		fprintf(fp, "ATTITUDEFILE %s\n", relative_path);
 		fprintf(fp, "ATTITUDEFORMAT %d\n", process->mbp_attitude_format);
 
-		/* sonardepth merging */
-		fprintf(fp, "##\n## Sonardepth Merging:\n");
-		fprintf(fp, "SONARDEPTHMODE %d\n", process->mbp_sonardepth_mode);
-		strcpy(relative_path, process->mbp_sonardepthfile);
+		/* sensordepth merging */
+		fprintf(fp, "##\n## sensordepth Merging:\n");
+		fprintf(fp, "sensordepthMODE %d\n", process->mbp_sensordepth_mode);
+		strcpy(relative_path, process->mbp_sensordepthfile);
 		status = mb_get_relative_path(verbose, relative_path, pwd, error);
-		fprintf(fp, "SONARDEPTHFILE %s\n", relative_path);
-		fprintf(fp, "SONARDEPTHFORMAT %d\n", process->mbp_sonardepth_format);
+		fprintf(fp, "sensordepthFILE %s\n", relative_path);
+		fprintf(fp, "sensordepthFORMAT %d\n", process->mbp_sensordepth_format);
 
 		/* data cutting */
 		fprintf(fp, "##\n## Data cutting:\n");
@@ -1771,9 +1781,9 @@ int mb_pr_compare(int verbose, struct mb_process_struct *process1,
 	if (strncmp(process1->mbp_attitudefile, process2->mbp_attitudefile, MBP_FILENAMESIZE) != 0) (*num_difference)++;
 	if (process1->mbp_attitude_format != process2->mbp_attitude_format) (*num_difference)++;
 	if (process1->mbp_cut_num != process2->mbp_cut_num) (*num_difference)++;
-	if (process1->mbp_sonardepth_mode != process2->mbp_sonardepth_mode) (*num_difference)++;
-	if (strncmp(process1->mbp_sonardepthfile, process2->mbp_sonardepthfile, MBP_FILENAMESIZE) != 0) (*num_difference)++;
-	if (process1->mbp_sonardepth_format != process2->mbp_sonardepth_format) (*num_difference)++;
+	if (process1->mbp_sensordepth_mode != process2->mbp_sensordepth_mode) (*num_difference)++;
+	if (strncmp(process1->mbp_sensordepthfile, process2->mbp_sensordepthfile, MBP_FILENAMESIZE) != 0) (*num_difference)++;
+	if (process1->mbp_sensordepth_format != process2->mbp_sensordepth_format) (*num_difference)++;
 	if (process1->mbp_cut_num != process2->mbp_cut_num) (*num_difference)++;
 	for (int i = 0; i < process1->mbp_cut_num; i++) {
 		if (process1->mbp_cut_kind[i] != process2->mbp_cut_kind[i]) (*num_difference)++;
@@ -1895,7 +1905,7 @@ int mb_pr_bathmode(int verbose, struct mb_process_struct *process, int *error) {
 		process->mbp_bathrecalc_mode = MBP_BATHRECALC_ROTATE;
 	else if (process->mbp_svp_mode != MBP_SVP_ON && process->mbp_rollbias_mode == MBP_ROLLBIAS_OFF &&
 	         (process->mbp_draft_mode != MBP_DRAFT_OFF || process->mbp_nav_draft != MBP_NAV_OFF ||
-	          process->mbp_sonardepth_mode != MBP_SONARDEPTH_OFF || process->mbp_lever_mode != MBP_LEVER_OFF ||
+	          process->mbp_sensordepth_mode != MBP_SENSORDEPTH_OFF || process->mbp_lever_mode != MBP_LEVER_OFF ||
 	          process->mbp_svp_mode == MBP_SVP_SOUNDSPEEDREF))
 		process->mbp_bathrecalc_mode = MBP_BATHRECALC_OFFSET;
 	else
@@ -1930,7 +1940,7 @@ int mb_pr_default_output(int verbose, struct mb_process_struct *process, int *er
 	mb_path fileroot;
 	int format;
 	int status = mb_get_format(verbose, process->mbp_ifile, fileroot, &format, error);
-  assert(strlen(fileroot) < MB_PATH_MAXLINE - 12);
+  	assert(strlen(fileroot) < MB_PATH_MAXLINE - 12);
 
 	/* deal with format */
 	if (status == MB_SUCCESS && format > 0) {
@@ -1944,18 +1954,18 @@ int mb_pr_default_output(int verbose, struct mb_process_struct *process, int *er
 		if (!process->mbp_ofile_specified && process->mbp_format_specified) {
 			/* use p.mbXXX suffix if already edited MBARI ROV navigation */
 			if (process->mbp_format == MBF_MBARIROV
-        && strlen(fileroot) > 6
-        && strncmp(&fileroot[strlen(fileroot)-6], "edited", 6) == 0) {
-				sprintf(process->mbp_ofile, "%sp.mb%d", fileroot, process->mbp_format);
-      }
+        		&& strlen(fileroot) > 6
+        		&& strncmp(&fileroot[strlen(fileroot)-6], "edited", 6) == 0) {
+				snprintf(process->mbp_ofile, MBP_FILENAMESIZE, "%sp.mb%d", fileroot, process->mbp_format);
+      		}
 			/* else use .txt suffix if unedited MBARI ROV navigation */
 			else if (process->mbp_format == MBF_MBARIROV) {
-        sprintf(process->mbp_ofile, "%sedited.txt", fileroot);
-      }
+        		snprintf(process->mbp_ofile, MBP_FILENAMESIZE, "%sedited.txt", fileroot);
+      		}
 			/* else use standard .mbXXX suffix */
 			else {
-				sprintf(process->mbp_ofile, "%sp.mb%d", fileroot, process->mbp_format);
-      }
+				snprintf(process->mbp_ofile, MBP_FILENAMESIZE, "%sp.mb%d", fileroot, process->mbp_format);
+      		}
 			process->mbp_ofile_specified = true;
 		}
 	}
@@ -2005,21 +2015,21 @@ int mb_pr_get_output(int verbose, int *format, char *ifile, char *ofile, int *er
 			*format = tformat;
 
 		/* use .txt suffix if unedited MBARI ROV navigation, p.mbXXX suffix
-        if already edited and processed */
+       	if already edited and processed */
 		if (*format == MBF_MBARIROV) {
-      if (strlen(fileroot) > 6
-          && strncmp(&fileroot[strlen(fileroot)-6], "edited", 6) == 0) {
+      		if (strlen(fileroot) > 6
+          		&& strncmp(&fileroot[strlen(fileroot)-6], "edited", 6) == 0) {
 				sprintf(ofile, "%sp.mb%d", fileroot, *format);
-      }
-      else {
-			  sprintf(ofile, "%sedited.txt", fileroot);
-      }
-    }
+      		}
+      		else {
+			  	sprintf(ofile, "%sedited.txt", fileroot);
+      		}
+    	}
 
 		/* else use standard .mbXXX suffix */
 		else {
 			sprintf(ofile, "%sp.mb%d", fileroot, *format);
-    }
+    	}
 	}
 
 	/* else just add suffix */
@@ -2081,7 +2091,7 @@ int mb_pr_check(int verbose, char *ifile, int *nparproblem, int *ndataproblem, i
 	bool missing_navfile = false;
 	bool missing_navadjfile = false;
 	bool missing_attitudefile = false;
-	bool missing_sonardepthfile = false;
+	bool missing_sensordepthfile = false;
 	bool missing_svpfile = false;
 	bool missing_editfile = false;
 	bool missing_tidefile = false;
@@ -2141,9 +2151,9 @@ int mb_pr_check(int verbose, char *ifile, int *nparproblem, int *ndataproblem, i
 			(*nparproblem)++;
 		}
 
-		/* check if sonardepth file specified but does not exist */
-		if (process.mbp_sonardepth_mode == MBP_SONARDEPTH_ON && stat(process.mbp_sonardepthfile, &statbuf) != 0) {
-			missing_sonardepthfile = true;
+		/* check if sensordepth file specified but does not exist */
+		if (process.mbp_sensordepth_mode == MBP_SENSORDEPTH_ON && stat(process.mbp_sensordepthfile, &statbuf) != 0) {
+			missing_sensordepthfile = true;
 			(*nparproblem)++;
 		}
 
@@ -2203,8 +2213,8 @@ int mb_pr_check(int verbose, char *ifile, int *nparproblem, int *ndataproblem, i
 			fprintf(output, "\tMissing navadj file: %s does not exist\n", process.mbp_navadjfile);
 		if (missing_attitudefile)
 			fprintf(output, "\tMissing attitude file: %s does not exist\n", process.mbp_attitudefile);
-		if (missing_sonardepthfile)
-			fprintf(output, "\tMissing sonardepth file: %s does not exist\n", process.mbp_sonardepthfile);
+		if (missing_sensordepthfile)
+			fprintf(output, "\tMissing sensordepth file: %s does not exist\n", process.mbp_sensordepthfile);
 		if (missing_svpfile)
 			fprintf(output, "\tMissing svp file: %s does not exist\n", process.mbp_svpfile);
 		if (missing_editfile)
@@ -2227,8 +2237,8 @@ int mb_pr_check(int verbose, char *ifile, int *nparproblem, int *ndataproblem, i
 			fprintf(output, "%s : Missing navadj file : %s\n", process.mbp_ifile, process.mbp_navadjfile);
 		if (missing_attitudefile)
 			fprintf(output, "%s : Missing attitude file : %s\n", process.mbp_ifile, process.mbp_attitudefile);
-		if (missing_sonardepthfile)
-			fprintf(output, "%s : Missing sonardepth file : %s\n", process.mbp_ifile, process.mbp_sonardepthfile);
+		if (missing_sensordepthfile)
+			fprintf(output, "%s : Missing sensordepth file : %s\n", process.mbp_ifile, process.mbp_sensordepthfile);
 		if (missing_svpfile)
 			fprintf(output, "%s : Missing svp file : %s\n", process.mbp_ifile, process.mbp_svpfile);
 		if (missing_editfile)
@@ -2778,16 +2788,16 @@ int mb_pr_update_attitude(int verbose, char *file, int mbp_attitude_mode, char *
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_update_sonardepth(int verbose, char *file, int mbp_sonardepth_mode, char *mbp_sonardepthfile, int mbp_sonardepth_format,
+int mb_pr_update_sensordepth(int verbose, char *file, int mbp_sensordepth_mode, char *mbp_sensordepthfile, int mbp_sensordepth_format,
                             int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:               %d\n", verbose);
 		fprintf(stderr, "dbg2       file:                  %s\n", file);
-		fprintf(stderr, "dbg2       mbp_sonardepth_mode:   %d\n", mbp_sonardepth_mode);
-		fprintf(stderr, "dbg2       mbp_sonardepthfile:    %s\n", mbp_sonardepthfile);
-		fprintf(stderr, "dbg2       mbp_sonardepth_format: %d\n", mbp_sonardepth_format);
+		fprintf(stderr, "dbg2       mbp_sensordepth_mode:   %d\n", mbp_sensordepth_mode);
+		fprintf(stderr, "dbg2       mbp_sensordepthfile:    %s\n", mbp_sensordepthfile);
+		fprintf(stderr, "dbg2       mbp_sensordepth_format: %d\n", mbp_sensordepth_format);
 	}
 
 	/* get known process parameters */
@@ -2795,10 +2805,10 @@ int mb_pr_update_sonardepth(int verbose, char *file, int mbp_sonardepth_mode, ch
 	int status = mb_pr_readpar(verbose, file, true, &process, error);
 
 	/* set lever values */
-	process.mbp_sonardepth_mode = mbp_sonardepth_mode;
-	if (mbp_sonardepthfile != NULL)
-		strcpy(process.mbp_sonardepthfile, mbp_sonardepthfile);
-	process.mbp_sonardepth_format = mbp_sonardepth_format;
+	process.mbp_sensordepth_mode = mbp_sensordepth_mode;
+	if (mbp_sensordepthfile != NULL)
+		strcpy(process.mbp_sensordepthfile, mbp_sensordepthfile);
+	process.mbp_sensordepth_format = mbp_sensordepth_format;
 
 	/* update bathymetry recalculation mode */
 	mb_pr_bathmode(verbose, &process, error);
@@ -3746,7 +3756,7 @@ int mb_pr_get_attitude(int verbose, char *file, int *mbp_attitude_mode, char *mb
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_get_sonardepth(int verbose, char *file, int *mbp_sonardepth_mode, char *mbp_sonardepthfile, int *mbp_sonardepth_format,
+int mb_pr_get_sensordepth(int verbose, char *file, int *mbp_sensordepth_mode, char *mbp_sensordepthfile, int *mbp_sensordepth_format,
                          int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -3760,17 +3770,17 @@ int mb_pr_get_sonardepth(int verbose, char *file, int *mbp_sonardepth_mode, char
 	int status = mb_pr_readpar(verbose, file, true, &process, error);
 
 	/* set lever values */
-	*mbp_sonardepth_mode = process.mbp_sonardepth_mode;
-	if (mbp_sonardepthfile != NULL)
-		strcpy(mbp_sonardepthfile, process.mbp_sonardepthfile);
-	*mbp_sonardepth_format = process.mbp_sonardepth_format;
+	*mbp_sensordepth_mode = process.mbp_sensordepth_mode;
+	if (mbp_sensordepthfile != NULL)
+		strcpy(mbp_sensordepthfile, process.mbp_sensordepthfile);
+	*mbp_sensordepth_format = process.mbp_sensordepth_format;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
-		fprintf(stderr, "dbg2       mbp_sonardepth_mode:   %d\n", *mbp_sonardepth_mode);
-		fprintf(stderr, "dbg2       mbp_sonardepthfile:    %s\n", mbp_sonardepthfile);
-		fprintf(stderr, "dbg2       mbp_sonardepth_format: %d\n", *mbp_sonardepth_format);
+		fprintf(stderr, "dbg2       mbp_sensordepth_mode:   %d\n", *mbp_sensordepth_mode);
+		fprintf(stderr, "dbg2       mbp_sensordepthfile:    %s\n", mbp_sensordepthfile);
+		fprintf(stderr, "dbg2       mbp_sensordepth_format: %d\n", *mbp_sensordepth_format);
 		fprintf(stderr, "dbg2       error:                 %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:                %d\n", status);

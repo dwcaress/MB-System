@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	5/30/93
  *
- *    Copyright (c) 1993-2020 by
+ *    Copyright (c) 1993-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * MBCONTOUR is a GMT compatible utility which creates a color postscript
@@ -305,7 +315,6 @@ void *New_mbcontour_Ctrl(struct GMT_CTRL *GMT) { /* Allocate and initialize a ne
 	Ctrl->W.cpt_effect = false;
 	Ctrl->W.set_color = false;
 	Ctrl->W.sequential = 0;
-	//Ctrl->W.pen;
 	Ctrl->Z.active = false;
 	Ctrl->Z.contour_algorithm = MB_CONTOUR_OLD;
 

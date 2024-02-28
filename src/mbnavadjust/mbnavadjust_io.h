@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbnavadjust_io.h  4/18/2014
 
- *    Copyright (c) 2014-2020 by
+ *    Copyright (c) 2014-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * Mbnavadjustmerge merges two existing mbnavadjust projects. The result
@@ -34,9 +44,13 @@
 
 /* Current MBnavadjust project file verion is 3.13 */
 #define MBNA_FILE_VERSION_MAJOR 3
-#define MBNA_FILE_VERSION_MINOR 14
+#define MBNA_FILE_VERSION_MINOR 15
 
 /* mbnavadjust global defines */
+#define MBNA_USE_MODE_NONE 0
+#define MBNA_USE_MODE_PRIMARY 1
+#define MBNA_USE_MODE_SECONDARY 2
+#define MBNA_USE_MODE_TERTIARY 3
 #define ALLOC_NUM 10
 #define MBNA_REFGRID_NUM_MAX  25
 #define MBNA_SNAV_NUM 11
@@ -367,6 +381,7 @@ struct mbna_project {
   mb_path refgrid_names[MBNA_REFGRID_NUM_MAX];
   double refgrid_bounds[4][MBNA_REFGRID_NUM_MAX];
 
+  int use_mode;
   double section_length;
   int section_soundings;
   int bin_beams_bath;
@@ -394,6 +409,7 @@ struct mbna_project {
   int inversion_status;
 
   int refgrid_status;
+  int refgrid_loaded;
   int refgrid_select;
   struct mbna_grid refgrid;
   struct mbna_section reference_section;
@@ -459,10 +475,14 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
                             double col_int, double tick_int, double label_int, int decimation, double smoothing,
                             double zoffsetwidth, struct mbna_project *project, int *error);
 int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project *project, int *error);
+int mbnavadjust_close_project(int verbose, struct mbna_project *project, int *error);
 int mbnavadjust_write_project(int verbose, struct mbna_project *project,
                               const char *calling_file, int calling_line, const char *calling_function,
                               int *error);
-int mbnavadjust_close_project(int verbose, struct mbna_project *project, int *error);
+int mbnavadjust_remove_short_sections(int verbose, struct mbna_project *project, 
+                              double minimum_section_length, int minimum_section_soundings, int *error);
+int mbnavadjust_remove_file_by_name(int verbose, struct mbna_project *project, char *path, int *error);
+int mbnavadjust_remove_file_by_id(int verbose, struct mbna_project *project, int ifile, int *error);
 int mbnavadjust_crossing_overlap(int verbose, struct mbna_project *project, int crossing_id, int *error);
 int mbnavadjust_crossing_overlapbounds(int verbose, struct mbna_project *project, int crossing_id, double offset_x,
                                        double offset_y, double *lonmin, double *lonmax, double *latmin, double *latmax,
@@ -493,6 +513,8 @@ int mbnavadjust_reference_unload(int verbose, void **swath, int *error);
 int mbnavadjust_refgrid_unload(int verbose, struct mbna_project *project, int *error);
 int mbnavadjust_import_data(int verbose, struct mbna_project *project, char *path, int format, int *error);
 int mbnavadjust_import_file(int verbose, struct mbna_project *project, char *path, int format, bool firstfile, int *error);
+int mbnavadjust_coverage_mask(int verbose, struct mbna_project *project,
+                                int ifile, int isection, int *error);
 int mbnavadjust_import_reference(int verbose, struct mbna_project *project, char *path, int *error);
 int mbnavadjust_findcrossings(int verbose, struct mbna_project *project, int *error);
 int mbnavadjust_findcrossingsfile(int verbose, struct mbna_project *project, int ifile, int *error);

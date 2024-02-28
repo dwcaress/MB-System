@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbdatalist.c	10/10/2001
  *
- *    Copyright (c) 2001-2020 by
+ *    Copyright (c) 2001-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * MBdatalist parses recursive datalist files and outputs the
@@ -423,13 +433,13 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
 		}
-		mb_path file;
-		mb_path dfile;
-		mb_path dfilelast;
+		mb_path file = "";
+		mb_path dfile = "";
+		mb_path dfilelast = "";
 		while (mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS) {
 			nfile++;
-			mb_path pwd;
-      assert(getcwd(pwd, MB_PATH_MAXLINE) != NULL);
+			mb_path pwd = "";
+      		assert(getcwd(pwd, MB_PATH_MAXLINE) != NULL);
 			mb_get_relative_path(verbose, file, pwd, &error);
 			mb_get_relative_path(verbose, dfile, pwd, &error);
 

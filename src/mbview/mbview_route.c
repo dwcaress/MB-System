@@ -1,16 +1,26 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_route.c	9/25/2003
  *
- *    Copyright (c) 2003-2020 by
+ *    Copyright (c) 2003-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
- *------------------------------------------------------------------------------*/
+ *    See README.md file for copying and redistribution conditions.
+ *--------------------------------------------------------------------*/
 /*
  *
  * Author:	D. W. Caress
@@ -680,7 +690,7 @@ int mbview_deleteallroutes(int verbose, size_t instance, int *error) {
 /*------------------------------------------------------------------------------*/
 int mbview_getroute(int verbose, size_t instance, int route, int *npointtotal, double *routelon, double *routelat, int *waypoint,
                     double *routetopo, double *routebearing, double *distlateral, double *distovertopo, double *slope,
-                    int *routecolor, int *routesize, mb_path routename, int *error) {
+                    int *routecolor, int *routesize, int *routeeditmode, mb_path routename, int *error) {
 	/* local variables */
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
@@ -708,6 +718,7 @@ int mbview_getroute(int verbose, size_t instance, int route, int *npointtotal, d
 		fprintf(stderr, "dbg2       slope:                     %p\n", slope);
 		fprintf(stderr, "dbg2       routecolor:                %p\n", routecolor);
 		fprintf(stderr, "dbg2       routesize:                 %p\n", routesize);
+		fprintf(stderr, "dbg2       routeeditmode:             %p\n", routeeditmode);
 		fprintf(stderr, "dbg2       routename:                 %p\n", routename);
 	}
 
@@ -821,6 +832,7 @@ int mbview_getroute(int verbose, size_t instance, int route, int *npointtotal, d
 		/* get color size and name */
 		*routecolor = shared.shareddata.routes[route].color;
 		*routesize = shared.shareddata.routes[route].size;
+		*routeeditmode = shared.shareddata.routes[route].editmode;
 		strcpy(routename, shared.shareddata.routes[route].name);
 
 		/* recalculate slope */
@@ -856,6 +868,7 @@ int mbview_getroute(int verbose, size_t instance, int route, int *npointtotal, d
 		fprintf(stderr, "dbg2       npointtotal:               %d\n", *npointtotal);
 		fprintf(stderr, "dbg2       routecolor:                %d\n", *routecolor);
 		fprintf(stderr, "dbg2       routesize:                 %d\n", *routesize);
+		fprintf(stderr, "dbg2       routeeditmode:             %d\n", *routeeditmode);
 		fprintf(stderr, "dbg2       routename:                 %s\n", routename);
 		for (i = 0; i < *npointtotal; i++) {
 			fprintf(

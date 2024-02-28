@@ -8,7 +8,7 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Motif REQUIRED_VARS MOTIF_INCLUDE_DIR
                                                       MOTIF_LIBRARY)
 
-if(MOTIF_FOUND)
+if (MOTIF_FOUND)
   set(MOTIF_LIBRARIES ${MOTIF_LIBRARY})
   set(MOTIF_INCLUDE_DIRS ${MOTIF_INCLUDE_DIR})
   if(NOT TARGET Motif::Motif)
@@ -18,4 +18,7 @@ if(MOTIF_FOUND)
       PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${MOTIF_INCLUDE_DIR}"
                  INTERFACE_LINK_LIBRARIES "${MOTIF_LIBRARY}")
   endif()
+  message("-- Motif found!")
+else()
+  message("-- Motif NOT found...")
 endif()

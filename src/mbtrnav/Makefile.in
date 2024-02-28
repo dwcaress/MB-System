@@ -91,12 +91,13 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+@BUILD_ROVTRN_TRUE@am__append_1 = libudpms.la  libtrnxplug.la
 bin_PROGRAMS = trn-server$(EXEEXT) trn-replay$(EXEEXT) \
 	trnclient-test$(EXEEXT) mmcpub$(EXEEXT) mmcsub$(EXEEXT) \
 	trnu-cli$(EXEEXT) trn-cli$(EXEEXT) trnif-test$(EXEEXT) \
 	trnusvr-test$(EXEEXT) netif-test$(EXEEXT) \
 	trnifsvr-test$(EXEEXT) mb1rs$(EXEEXT) trnlog-player$(EXEEXT) \
-	$(am__EXEEXT_1)
+	mb1log-player$(EXEEXT) csvlog-player$(EXEEXT) $(am__EXEEXT_1)
 subdir = src/mbtrnav
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
@@ -252,12 +253,49 @@ libtnav_la_OBJECTS = $(am_libtnav_la_OBJECTS)
 libtnav_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(libtnav_la_LDFLAGS) $(LDFLAGS) -o $@
+libtrncli_la_DEPENDENCIES = libnewmat.la libgeolib.la libqnx.la \
+	libtrnw.la libmb1.la libtnav.la
+am_libtrncli_la_OBJECTS = utils/TerrainNavClient.lo utils/TrnClient.lo
+libtrncli_la_OBJECTS = $(am_libtrncli_la_OBJECTS)
+libtrncli_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(libtrncli_la_LDFLAGS) $(LDFLAGS) -o $@
 libtrnw_la_DEPENDENCIES = libtnav.la libqnx.la libnewmat.la
 am_libtrnw_la_OBJECTS = trnw/trnw.lo trnw/mb1_msg.lo trnw/trnif_msg.lo
 libtrnw_la_OBJECTS = $(am_libtrnw_la_OBJECTS)
 libtrnw_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(libtrnw_la_LDFLAGS) $(LDFLAGS) -o $@
+@BUILD_ROVTRN_TRUE@libtrnxplug_la_DEPENDENCIES = libnewmat.la \
+@BUILD_ROVTRN_TRUE@	libgeolib.la libtrnw.la libqnx.la libmb1.la \
+@BUILD_ROVTRN_TRUE@	libtnav.la libtrncli.la libudpms.la
+@BUILD_ROVTRN_TRUE@am_libtrnxplug_la_OBJECTS = opt/rov/plug-common.lo \
+@BUILD_ROVTRN_TRUE@	opt/rov/plug-oisledx.lo opt/rov/plug-dvl.lo \
+@BUILD_ROVTRN_TRUE@	opt/rov/plug-idt.lo opt/rov/plug-oisled.lo \
+@BUILD_ROVTRN_TRUE@	opt/rov/plug-oisled2.lo \
+@BUILD_ROVTRN_TRUE@	opt/rov/plug-lassmb.lo opt/rov/plug-xmb1.lo \
+@BUILD_ROVTRN_TRUE@	opt/rov/plug-idtlass.lo
+libtrnxplug_la_OBJECTS = $(am_libtrnxplug_la_OBJECTS)
+libtrnxplug_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CXXLD) \
+	$(AM_CXXFLAGS) $(CXXFLAGS) $(libtrnxplug_la_LDFLAGS) \
+	$(LDFLAGS) -o $@
+@BUILD_ROVTRN_TRUE@am_libtrnxplug_la_rpath = -rpath $(libdir)
+libudpms_la_DEPENDENCIES =
+@BUILD_ROVTRN_TRUE@am_libudpms_la_OBJECTS = opt/rov/udpm_sub.lo
+libudpms_la_OBJECTS = $(am_libudpms_la_OBJECTS)
+libudpms_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(libudpms_la_LDFLAGS) $(LDFLAGS) -o $@
+@BUILD_ROVTRN_TRUE@am_libudpms_la_rpath = -rpath $(libdir)
+am_csvlog_player_OBJECTS = utils/csvlog_player.$(OBJEXT)
+csvlog_player_OBJECTS = $(am_csvlog_player_OBJECTS)
+csvlog_player_DEPENDENCIES = libtnav.la libnewmat.la libtrncli.la \
+	libqnx.la
+am_mb1log_player_OBJECTS = utils/mb1log_player.$(OBJEXT)
+mb1log_player_OBJECTS = $(am_mb1log_player_OBJECTS)
+mb1log_player_DEPENDENCIES = libtnav.la libnewmat.la libtrncli.la \
+	libqnx.la
 am_mb1rs_OBJECTS = trnw/mb1rs.$(OBJEXT) trnw/mb1rs-app.$(OBJEXT)
 mb1rs_OBJECTS = $(am_mb1rs_OBJECTS)
 mb1rs_DEPENDENCIES = $(LIBMBTRNFRAME) libmb1.la
@@ -274,28 +312,26 @@ am_trn_cli_OBJECTS = trnw/trncli_test.$(OBJEXT) trnw/trn_cli.$(OBJEXT)
 trn_cli_OBJECTS = $(am_trn_cli_OBJECTS)
 trn_cli_DEPENDENCIES = $(LIBMBTRNFRAME) libtrnw.la
 am_trn_replay_OBJECTS = opt/dorado/Replay.$(OBJEXT) \
-	opt/dorado/trn_replay.$(OBJEXT) \
-	utils/TerrainNavClient.$(OBJEXT)
+	opt/dorado/trn_replay.$(OBJEXT)
 trn_replay_OBJECTS = $(am_trn_replay_OBJECTS)
-trn_replay_DEPENDENCIES =
+trn_replay_DEPENDENCIES = libtnav.la libnewmat.la libqnx.la \
+	libgeolib.la libtrncli.la
 am_trn_server_OBJECTS = utils/trn_server.$(OBJEXT)
 trn_server_OBJECTS = $(am_trn_server_OBJECTS)
 trn_server_DEPENDENCIES = libtnav.la libqnx.la libnewmat.la libtnav.la \
 	libgeolib.la
-am_trnclient_test_OBJECTS = utils/trnclient_test.$(OBJEXT) \
-	utils/TrnClient.$(OBJEXT) utils/TerrainNavClient.$(OBJEXT)
+am_trnclient_test_OBJECTS = utils/trnclient_test.$(OBJEXT)
 trnclient_test_OBJECTS = $(am_trnclient_test_OBJECTS)
-trnclient_test_DEPENDENCIES = libtnav.la libnewmat.la
+trnclient_test_DEPENDENCIES = libtnav.la libnewmat.la libtrncli.la
 am_trnif_test_OBJECTS = trnw/trnif_test.$(OBJEXT)
 trnif_test_OBJECTS = $(am_trnif_test_OBJECTS)
 trnif_test_DEPENDENCIES = $(LIBMBTRNFRAME) libnetif.la libtrnw.la
 am_trnifsvr_test_OBJECTS = utils/trnifsvr-test.$(OBJEXT)
 trnifsvr_test_OBJECTS = $(am_trnifsvr_test_OBJECTS)
 trnifsvr_test_DEPENDENCIES = $(LIBMBTRNFRAME) libnetif.la libtrnw.la
-am_trnlog_player_OBJECTS = utils/trnlog_player.$(OBJEXT) \
-	utils/TrnClient.$(OBJEXT) utils/TerrainNavClient.$(OBJEXT)
+am_trnlog_player_OBJECTS = utils/trnlog_player.$(OBJEXT)
 trnlog_player_OBJECTS = $(am_trnlog_player_OBJECTS)
-trnlog_player_DEPENDENCIES = libtnav.la libnewmat.la
+trnlog_player_DEPENDENCIES = libtnav.la libnewmat.la libtrncli.la
 am_trnu_cli_OBJECTS = trnw/trnucli_test.$(OBJEXT) \
 	trnw/trnu_cli.$(OBJEXT)
 trnu_cli_OBJECTS = $(am_trnu_cli_OBJECTS)
@@ -303,13 +339,11 @@ trnu_cli_DEPENDENCIES = $(LIBMBTRNFRAME) libtrnw.la libnetif.la
 am_trnusvr_test_OBJECTS = trnw/trnusvr_test.$(OBJEXT)
 trnusvr_test_OBJECTS = $(am_trnusvr_test_OBJECTS)
 trnusvr_test_DEPENDENCIES = $(LIBMBTRNFRAME) libnetif.la libtrnw.la
-@BUILD_ROVTRN_TRUE@am_trnxpp_OBJECTS = opt/rov/udpm_sub.$(OBJEXT) \
-@BUILD_ROVTRN_TRUE@	opt/rov/trnxpp_app.$(OBJEXT) \
-@BUILD_ROVTRN_TRUE@	utils/TrnClient.$(OBJEXT) \
-@BUILD_ROVTRN_TRUE@	utils/TerrainNavClient.$(OBJEXT)
+@BUILD_ROVTRN_TRUE@am_trnxpp_OBJECTS = opt/rov/trnxpp_app.$(OBJEXT)
 trnxpp_OBJECTS = $(am_trnxpp_OBJECTS)
-@BUILD_ROVTRN_TRUE@trnxpp_DEPENDENCIES = libmb1.la libtnav.la \
-@BUILD_ROVTRN_TRUE@	libnewmat.la libqnx.la
+@BUILD_ROVTRN_TRUE@trnxpp_DEPENDENCIES = libgeolib.la libmb1.la \
+@BUILD_ROVTRN_TRUE@	libtnav.la libnewmat.la libqnx.la \
+@BUILD_ROVTRN_TRUE@	libtrncli.la libudpms.la libtrnxplug.la
 SCRIPTS = $(dist_bin_SCRIPTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -407,7 +441,15 @@ am__depfiles_remade = gctp/source/$(DEPDIR)/alberfor.Plo \
 	newmat/$(DEPDIR)/sort.Plo newmat/$(DEPDIR)/submat.Plo \
 	newmat/$(DEPDIR)/svd.Plo opt/dorado/$(DEPDIR)/Replay.Po \
 	opt/dorado/$(DEPDIR)/trn_replay.Po \
-	opt/rov/$(DEPDIR)/trnxpp_app.Po opt/rov/$(DEPDIR)/udpm_sub.Po \
+	opt/rov/$(DEPDIR)/plug-common.Plo \
+	opt/rov/$(DEPDIR)/plug-dvl.Plo opt/rov/$(DEPDIR)/plug-idt.Plo \
+	opt/rov/$(DEPDIR)/plug-idtlass.Plo \
+	opt/rov/$(DEPDIR)/plug-lassmb.Plo \
+	opt/rov/$(DEPDIR)/plug-oisled.Plo \
+	opt/rov/$(DEPDIR)/plug-oisled2.Plo \
+	opt/rov/$(DEPDIR)/plug-oisledx.Plo \
+	opt/rov/$(DEPDIR)/plug-xmb1.Plo \
+	opt/rov/$(DEPDIR)/trnxpp_app.Po opt/rov/$(DEPDIR)/udpm_sub.Plo \
 	qnx-utils/$(DEPDIR)/AngleData.Plo \
 	qnx-utils/$(DEPDIR)/AsciiFile.Plo \
 	qnx-utils/$(DEPDIR)/BinaryFile.Plo \
@@ -455,8 +497,9 @@ am__depfiles_remade = gctp/source/$(DEPDIR)/alberfor.Plo \
 	trnw/$(DEPDIR)/trnif_proto.Plo trnw/$(DEPDIR)/trnif_test.Po \
 	trnw/$(DEPDIR)/trnu_cli.Po trnw/$(DEPDIR)/trnucli_test.Po \
 	trnw/$(DEPDIR)/trnusvr_test.Po trnw/$(DEPDIR)/trnw.Plo \
-	utils/$(DEPDIR)/TerrainNavClient.Po \
-	utils/$(DEPDIR)/TrnClient.Po utils/$(DEPDIR)/netif-test.Po \
+	utils/$(DEPDIR)/TerrainNavClient.Plo \
+	utils/$(DEPDIR)/TrnClient.Plo utils/$(DEPDIR)/csvlog_player.Po \
+	utils/$(DEPDIR)/mb1log_player.Po utils/$(DEPDIR)/netif-test.Po \
 	utils/$(DEPDIR)/trn_server.Po \
 	utils/$(DEPDIR)/trnclient_test.Po \
 	utils/$(DEPDIR)/trnifsvr-test.Po \
@@ -501,12 +544,15 @@ am__v_CXXLD_1 =
 SOURCES = $(libgeolib_la_SOURCES) $(libmb1_la_SOURCES) \
 	$(libnetif_la_SOURCES) $(libnewmat_la_SOURCES) \
 	$(libqnx_la_SOURCES) $(libtnav_la_SOURCES) \
-	$(libtrnw_la_SOURCES) $(mb1rs_SOURCES) $(mmcpub_SOURCES) \
-	$(mmcsub_SOURCES) $(netif_test_SOURCES) $(trn_cli_SOURCES) \
-	$(trn_replay_SOURCES) $(trn_server_SOURCES) \
-	$(trnclient_test_SOURCES) $(trnif_test_SOURCES) \
-	$(trnifsvr_test_SOURCES) $(trnlog_player_SOURCES) \
-	$(trnu_cli_SOURCES) $(trnusvr_test_SOURCES) $(trnxpp_SOURCES)
+	$(libtrncli_la_SOURCES) $(libtrnw_la_SOURCES) \
+	$(libtrnxplug_la_SOURCES) $(libudpms_la_SOURCES) \
+	$(csvlog_player_SOURCES) $(mb1log_player_SOURCES) \
+	$(mb1rs_SOURCES) $(mmcpub_SOURCES) $(mmcsub_SOURCES) \
+	$(netif_test_SOURCES) $(trn_cli_SOURCES) $(trn_replay_SOURCES) \
+	$(trn_server_SOURCES) $(trnclient_test_SOURCES) \
+	$(trnif_test_SOURCES) $(trnifsvr_test_SOURCES) \
+	$(trnlog_player_SOURCES) $(trnu_cli_SOURCES) \
+	$(trnusvr_test_SOURCES) $(trnxpp_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -517,11 +563,15 @@ am__include_HEADERS_DIST = trnw/netif.h trnw/trnw.h trnw/trnif_proto.h \
 	opt/rov/lcm_pcf/string_t.hpp opt/rov/gss/nav_solution_t.hpp \
 	opt/rov/gss/message_t.hpp opt/rov/gss/analog_t.hpp \
 	opt/rov/gss/digital_t.hpp opt/rov/gss/dvl_stat_t.hpp \
-	opt/rov/gss/pcomms_t.hpp opt/rov/oi/idt_t.hpp \
-	opt/rov/oi/lcm_header_t.hpp opt/rov/trn/mb1_beam_t.hpp \
-	opt/rov/trn/trnu_estimate_t.hpp opt/rov/trn/trn_stat_t.hpp \
-	opt/rov/trn/trn_meas_t.hpp opt/rov/trn/trn_pose_t.hpp \
-	opt/rov/trn/trnupub_t.hpp opt/rov/trn/trn_mb1_t.hpp
+	opt/rov/gss/pcomms_t.hpp opt/rov/gss/parosci_stat_t.hpp \
+	opt/rov/oi/idt_t.hpp opt/rov/oi/lcm_header_t.hpp \
+	opt/rov/oi/ctd_t.hpp opt/rov/oi/octans_t.hpp \
+	opt/rov/trn/mb1_beam_t.hpp opt/rov/trn/trnu_estimate_t.hpp \
+	opt/rov/trn/trn_stat_t.hpp opt/rov/trn/trn_meas_t.hpp \
+	opt/rov/trn/trn_pose_t.hpp opt/rov/trn/trnupub_t.hpp \
+	opt/rov/trn/trn_mb1_t.hpp opt/rov/trnx_utils.hpp \
+	opt/rov/trnx_plugin.hpp opt/rov/trnxpp_cfg.hpp \
+	opt/rov/trnxpp.hpp
 HEADERS = $(include_HEADERS)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 # Read a list of newline-separated strings from the standard input,
@@ -725,7 +775,6 @@ localstatedir = @localstatedir@
 mandir = @mandir@
 mbsystemdatadir = @mbsystemdatadir@
 mbsystemhtmldir = @mbsystemhtmldir@
-mbsystempsdir = @mbsystempsdir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
 opencv4_CPPFLAGS = @opencv4_CPPFLAGS@
@@ -751,7 +800,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-lib_LTLIBRARIES = libgeolib.la libnewmat.la libqnx.la libtnav.la libtrnw.la libnetif.la libmb1.la
+lib_LTLIBRARIES = libgeolib.la libnewmat.la libqnx.la libtnav.la \
+	libtrnw.la libnetif.la libmb1.la libtrncli.la $(am__append_1)
 LIBMBTRNFRAME = $(top_builddir)/src/mbtrnframe/libmbtrnframe.la
 MBTRNFRAME_INC = -I${top_srcdir}/src/mbtrnframe
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
@@ -764,10 +814,11 @@ AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrnav/trnw \
 	-I${top_srcdir}/src/mbtrnav/gctp/source \
 	-I${top_srcdir}/src/mbtrnav/opt/rov \
 	-I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mb1r \
-	-I${top_srcdir}/src/mbtrnframe ${libnetcdf_CPPFLAGS} \
-	-DHAVE_CONFIG_H -DWITH_TESTS -DWITH_MMDEBUG -D_GNU_SOURCE \
-	-DWITH_MST_MSTATS -DMST_STATS_EN -DWITH_TNAVPF_CEP_CORRECTION \
-	-DWITH_TRNLOG -DWITH_TRNLOG_EST_OUT
+	-I${top_srcdir}/src/mbtrnframe -I${top_srcdir}/src/mbtrnutils \
+	${libnetcdf_CPPFLAGS} -DHAVE_CONFIG_H -DWITH_TESTS \
+	-DWITH_MMDEBUG -D_GNU_SOURCE -DWITH_MST_MSTATS -DMST_STATS_EN \
+	-DWITH_TNAVPF_CEP_CORRECTION -DWITH_TRNLOG \
+	-DWITH_TRNLOG_EST_OUT -DWITH_TNAVPF_CEP_CORRECTION
 #AM_CPPFLAGS += -DTRN_NORAND
 libgeolib_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libgeolib_la_SOURCES = gctp/source/gctp.c gctp/source/alberfor.c \
@@ -848,6 +899,9 @@ libnetif_la_LIBADD = ${LIBMBTRNFRAME} libtrnw.la -lm -lpthread
 libmb1_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmb1_la_SOURCES = trnw/mb1_msg.c
 libmb1_la_LIBADD = 
+libtrncli_la_LDFLAGS = -no-undefined -version-info 0:0:0
+libtrncli_la_SOURCES = utils/TerrainNavClient.cpp utils/TrnClient.cpp
+libtrncli_la_LIBADD = libnewmat.la libgeolib.la libqnx.la libtrnw.la libmb1.la libtnav.la -lnetcdf 
 @BUILD_ROVTRN_TRUE@include_HEADERS = \
 @BUILD_ROVTRN_TRUE@trnw/netif.h \
 @BUILD_ROVTRN_TRUE@trnw/trnw.h \
@@ -862,25 +916,42 @@ libmb1_la_LIBADD =
 @BUILD_ROVTRN_TRUE@opt/rov/gss/digital_t.hpp \
 @BUILD_ROVTRN_TRUE@opt/rov/gss/dvl_stat_t.hpp \
 @BUILD_ROVTRN_TRUE@opt/rov/gss/pcomms_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/gss/parosci_stat_t.hpp \
 @BUILD_ROVTRN_TRUE@opt/rov/oi/idt_t.hpp \
 @BUILD_ROVTRN_TRUE@opt/rov/oi/lcm_header_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/oi/ctd_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/oi/octans_t.hpp \
 @BUILD_ROVTRN_TRUE@opt/rov/trn/mb1_beam_t.hpp \
 @BUILD_ROVTRN_TRUE@opt/rov/trn/trnu_estimate_t.hpp \
 @BUILD_ROVTRN_TRUE@opt/rov/trn/trn_stat_t.hpp \
 @BUILD_ROVTRN_TRUE@opt/rov/trn/trn_meas_t.hpp \
 @BUILD_ROVTRN_TRUE@opt/rov/trn/trn_pose_t.hpp \
 @BUILD_ROVTRN_TRUE@opt/rov/trn/trnupub_t.hpp \
-@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_mb1_t.hpp
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_mb1_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/trnx_utils.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/trnx_plugin.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/trnxpp_cfg.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/trnxpp.hpp
 
 @BUILD_ROVTRN_TRUE@LCM_JAR = /usr/local/share/java/lcm.jar
+@BUILD_ROVTRN_TRUE@libudpms_la_LDFLAGS = -no-undefined -version-info 0:0:0
+@BUILD_ROVTRN_TRUE@libudpms_la_SOURCES = opt/rov/udpm_sub.c
+@BUILD_ROVTRN_TRUE@libudpms_la_LIBADD = 
+@BUILD_ROVTRN_TRUE@libtrnxplug_la_LDFLAGS = -no-undefined -version-info 0:0:0
+@BUILD_ROVTRN_TRUE@libtrnxplug_la_SOURCES = opt/rov/plug-common.cpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/plug-oisledx.cpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/plug-dvl.cpp opt/rov/plug-idt.cpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/plug-oisled.cpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/plug-oisled2.cpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/plug-lassmb.cpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/plug-xmb1.cpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/plug-idtlass.cpp
+@BUILD_ROVTRN_TRUE@libtrnxplug_la_LIBADD = libnewmat.la libgeolib.la libtrnw.la libqnx.la libmb1.la libtnav.la libtrncli.la libudpms.la  -lnetcdf -llcm
 @BUILD_ROVTRN_TRUE@ROVTRN_APPS = trnxpp
 @BUILD_ROVTRN_TRUE@trnxpp_SOURCES = \
-@BUILD_ROVTRN_TRUE@opt/rov/udpm_sub.c \
-@BUILD_ROVTRN_TRUE@opt/rov/trnxpp_app.cpp \
-@BUILD_ROVTRN_TRUE@utils/TrnClient.cpp \
-@BUILD_ROVTRN_TRUE@utils/TerrainNavClient.cpp
+@BUILD_ROVTRN_TRUE@opt/rov/trnxpp_app.cpp
 
-@BUILD_ROVTRN_TRUE@trnxpp_LDADD = -llcm libmb1.la libtnav.la libnewmat.la libqnx.la
+@BUILD_ROVTRN_TRUE@trnxpp_LDADD = libgeolib.la libmb1.la libtnav.la libnewmat.la libqnx.la libtrncli.la  libudpms.la libtrnxplug.la -llcm 
 @BUILD_ROVTRN_TRUE@TRN_HPP = opt/rov/lcm_pcf/signal_t.hpp \
 @BUILD_ROVTRN_TRUE@	opt/rov/lcm_pcf/string_t.hpp \
 @BUILD_ROVTRN_TRUE@	opt/rov/gss/nav_solution_t.hpp \
@@ -889,7 +960,8 @@ libmb1_la_LIBADD =
 @BUILD_ROVTRN_TRUE@	opt/rov/gss/digital_t.hpp \
 @BUILD_ROVTRN_TRUE@	opt/rov/gss/dvl_stat_t.hpp \
 @BUILD_ROVTRN_TRUE@	opt/rov/gss/pcomms_t.hpp \
-@BUILD_ROVTRN_TRUE@	opt/rov/oi/idt_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/gss/parosci_stat_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/oi/ctd_t.hpp opt/rov/oi/idt_t.hpp \
 @BUILD_ROVTRN_TRUE@	opt/rov/oi/lcm_header_t.hpp \
 @BUILD_ROVTRN_TRUE@	opt/rov/oi/rdi_pd4_t.hpp \
 @BUILD_ROVTRN_TRUE@	opt/rov/oi/kearfott_t.hpp \
@@ -909,10 +981,10 @@ libmb1_la_LIBADD =
 @BUILD_ROVTRN_TRUE@	lcm_rovtrn.jar
 trn_server_SOURCES = utils/trn_server.cpp
 trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
-trn_replay_SOURCES = opt/dorado/Replay.cpp opt/dorado/trn_replay.cpp utils/TerrainNavClient.cpp
-trn_replay_LDADD = -ltnav  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeolib 
-trnclient_test_SOURCES = utils/trnclient_test.cpp utils/TrnClient.cpp utils/TerrainNavClient.cpp
-trnclient_test_LDADD = libtnav.la libnewmat.la
+trn_replay_SOURCES = opt/dorado/Replay.cpp opt/dorado/trn_replay.cpp
+trn_replay_LDADD = libtnav.la  libnewmat.la libqnx.la libgeolib.la libtrncli.la -lnetcdf -lm -lpthread 
+trnclient_test_SOURCES = utils/trnclient_test.cpp
+trnclient_test_LDADD = libtnav.la libnewmat.la libtrncli.la
 mmcpub_SOURCES = trnw/mmcpub.c
 mmcpub_LDADD = ${LIBMBTRNFRAME}
 mmcsub_SOURCES = trnw/mmcsub.c
@@ -931,8 +1003,12 @@ trnifsvr_test_SOURCES = utils/trnifsvr-test.c
 trnifsvr_test_LDADD = ${LIBMBTRNFRAME} libnetif.la  libtrnw.la
 mb1rs_SOURCES = trnw/mb1rs.c trnw/mb1rs-app.c
 mb1rs_LDADD = ${LIBMBTRNFRAME} libmb1.la
-trnlog_player_SOURCES = utils/trnlog_player.cpp utils/TrnClient.cpp utils/TerrainNavClient.cpp
-trnlog_player_LDADD = libtnav.la libnewmat.la
+trnlog_player_SOURCES = utils/trnlog_player.cpp
+trnlog_player_LDADD = libtnav.la libnewmat.la libtrncli.la
+mb1log_player_SOURCES = utils/mb1log_player.cpp
+mb1log_player_LDADD = libtnav.la libnewmat.la libtrncli.la libqnx.la
+csvlog_player_SOURCES = utils/csvlog_player.cpp
+csvlog_player_LDADD = libtnav.la libnewmat.la libtrncli.la libqnx.la
 dist_bin_SCRIPTS = 
 CLEANFILES = ${BUILT_SOURCES} #${ROVTRN_CLEANFILES}
 DISTCLEANFILES = 
@@ -1370,11 +1446,68 @@ terrain-nav/TRNUtils.lo: terrain-nav/$(am__dirstamp) \
 
 libtnav.la: $(libtnav_la_OBJECTS) $(libtnav_la_DEPENDENCIES) $(EXTRA_libtnav_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(libtnav_la_LINK) -rpath $(libdir) $(libtnav_la_OBJECTS) $(libtnav_la_LIBADD) $(LIBS)
+utils/$(am__dirstamp):
+	@$(MKDIR_P) utils
+	@: > utils/$(am__dirstamp)
+utils/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) utils/$(DEPDIR)
+	@: > utils/$(DEPDIR)/$(am__dirstamp)
+utils/TerrainNavClient.lo: utils/$(am__dirstamp) \
+	utils/$(DEPDIR)/$(am__dirstamp)
+utils/TrnClient.lo: utils/$(am__dirstamp) \
+	utils/$(DEPDIR)/$(am__dirstamp)
+
+libtrncli.la: $(libtrncli_la_OBJECTS) $(libtrncli_la_DEPENDENCIES) $(EXTRA_libtrncli_la_DEPENDENCIES) 
+	$(AM_V_CXXLD)$(libtrncli_la_LINK) -rpath $(libdir) $(libtrncli_la_OBJECTS) $(libtrncli_la_LIBADD) $(LIBS)
 trnw/trnw.lo: trnw/$(am__dirstamp) trnw/$(DEPDIR)/$(am__dirstamp)
 trnw/trnif_msg.lo: trnw/$(am__dirstamp) trnw/$(DEPDIR)/$(am__dirstamp)
 
 libtrnw.la: $(libtrnw_la_OBJECTS) $(libtrnw_la_DEPENDENCIES) $(EXTRA_libtrnw_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(libtrnw_la_LINK) -rpath $(libdir) $(libtrnw_la_OBJECTS) $(libtrnw_la_LIBADD) $(LIBS)
+opt/rov/$(am__dirstamp):
+	@$(MKDIR_P) opt/rov
+	@: > opt/rov/$(am__dirstamp)
+opt/rov/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) opt/rov/$(DEPDIR)
+	@: > opt/rov/$(DEPDIR)/$(am__dirstamp)
+opt/rov/plug-common.lo: opt/rov/$(am__dirstamp) \
+	opt/rov/$(DEPDIR)/$(am__dirstamp)
+opt/rov/plug-oisledx.lo: opt/rov/$(am__dirstamp) \
+	opt/rov/$(DEPDIR)/$(am__dirstamp)
+opt/rov/plug-dvl.lo: opt/rov/$(am__dirstamp) \
+	opt/rov/$(DEPDIR)/$(am__dirstamp)
+opt/rov/plug-idt.lo: opt/rov/$(am__dirstamp) \
+	opt/rov/$(DEPDIR)/$(am__dirstamp)
+opt/rov/plug-oisled.lo: opt/rov/$(am__dirstamp) \
+	opt/rov/$(DEPDIR)/$(am__dirstamp)
+opt/rov/plug-oisled2.lo: opt/rov/$(am__dirstamp) \
+	opt/rov/$(DEPDIR)/$(am__dirstamp)
+opt/rov/plug-lassmb.lo: opt/rov/$(am__dirstamp) \
+	opt/rov/$(DEPDIR)/$(am__dirstamp)
+opt/rov/plug-xmb1.lo: opt/rov/$(am__dirstamp) \
+	opt/rov/$(DEPDIR)/$(am__dirstamp)
+opt/rov/plug-idtlass.lo: opt/rov/$(am__dirstamp) \
+	opt/rov/$(DEPDIR)/$(am__dirstamp)
+
+libtrnxplug.la: $(libtrnxplug_la_OBJECTS) $(libtrnxplug_la_DEPENDENCIES) $(EXTRA_libtrnxplug_la_DEPENDENCIES) 
+	$(AM_V_CXXLD)$(libtrnxplug_la_LINK) $(am_libtrnxplug_la_rpath) $(libtrnxplug_la_OBJECTS) $(libtrnxplug_la_LIBADD) $(LIBS)
+opt/rov/udpm_sub.lo: opt/rov/$(am__dirstamp) \
+	opt/rov/$(DEPDIR)/$(am__dirstamp)
+
+libudpms.la: $(libudpms_la_OBJECTS) $(libudpms_la_DEPENDENCIES) $(EXTRA_libudpms_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(libudpms_la_LINK) $(am_libudpms_la_rpath) $(libudpms_la_OBJECTS) $(libudpms_la_LIBADD) $(LIBS)
+utils/csvlog_player.$(OBJEXT): utils/$(am__dirstamp) \
+	utils/$(DEPDIR)/$(am__dirstamp)
+
+csvlog-player$(EXEEXT): $(csvlog_player_OBJECTS) $(csvlog_player_DEPENDENCIES) $(EXTRA_csvlog_player_DEPENDENCIES) 
+	@rm -f csvlog-player$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(csvlog_player_OBJECTS) $(csvlog_player_LDADD) $(LIBS)
+utils/mb1log_player.$(OBJEXT): utils/$(am__dirstamp) \
+	utils/$(DEPDIR)/$(am__dirstamp)
+
+mb1log-player$(EXEEXT): $(mb1log_player_OBJECTS) $(mb1log_player_DEPENDENCIES) $(EXTRA_mb1log_player_DEPENDENCIES) 
+	@rm -f mb1log-player$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(mb1log_player_OBJECTS) $(mb1log_player_LDADD) $(LIBS)
 trnw/mb1rs.$(OBJEXT): trnw/$(am__dirstamp) \
 	trnw/$(DEPDIR)/$(am__dirstamp)
 trnw/mb1rs-app.$(OBJEXT): trnw/$(am__dirstamp) \
@@ -1395,12 +1528,6 @@ trnw/mmcsub.$(OBJEXT): trnw/$(am__dirstamp) \
 mmcsub$(EXEEXT): $(mmcsub_OBJECTS) $(mmcsub_DEPENDENCIES) $(EXTRA_mmcsub_DEPENDENCIES) 
 	@rm -f mmcsub$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(mmcsub_OBJECTS) $(mmcsub_LDADD) $(LIBS)
-utils/$(am__dirstamp):
-	@$(MKDIR_P) utils
-	@: > utils/$(am__dirstamp)
-utils/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) utils/$(DEPDIR)
-	@: > utils/$(DEPDIR)/$(am__dirstamp)
 utils/netif-test.$(OBJEXT): utils/$(am__dirstamp) \
 	utils/$(DEPDIR)/$(am__dirstamp)
 
@@ -1425,8 +1552,6 @@ opt/dorado/Replay.$(OBJEXT): opt/dorado/$(am__dirstamp) \
 	opt/dorado/$(DEPDIR)/$(am__dirstamp)
 opt/dorado/trn_replay.$(OBJEXT): opt/dorado/$(am__dirstamp) \
 	opt/dorado/$(DEPDIR)/$(am__dirstamp)
-utils/TerrainNavClient.$(OBJEXT): utils/$(am__dirstamp) \
-	utils/$(DEPDIR)/$(am__dirstamp)
 
 trn-replay$(EXEEXT): $(trn_replay_OBJECTS) $(trn_replay_DEPENDENCIES) $(EXTRA_trn_replay_DEPENDENCIES) 
 	@rm -f trn-replay$(EXEEXT)
@@ -1438,8 +1563,6 @@ trn-server$(EXEEXT): $(trn_server_OBJECTS) $(trn_server_DEPENDENCIES) $(EXTRA_tr
 	@rm -f trn-server$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(trn_server_OBJECTS) $(trn_server_LDADD) $(LIBS)
 utils/trnclient_test.$(OBJEXT): utils/$(am__dirstamp) \
-	utils/$(DEPDIR)/$(am__dirstamp)
-utils/TrnClient.$(OBJEXT): utils/$(am__dirstamp) \
 	utils/$(DEPDIR)/$(am__dirstamp)
 
 trnclient-test$(EXEEXT): $(trnclient_test_OBJECTS) $(trnclient_test_DEPENDENCIES) $(EXTRA_trnclient_test_DEPENDENCIES) 
@@ -1477,14 +1600,6 @@ trnw/trnusvr_test.$(OBJEXT): trnw/$(am__dirstamp) \
 trnusvr-test$(EXEEXT): $(trnusvr_test_OBJECTS) $(trnusvr_test_DEPENDENCIES) $(EXTRA_trnusvr_test_DEPENDENCIES) 
 	@rm -f trnusvr-test$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(trnusvr_test_OBJECTS) $(trnusvr_test_LDADD) $(LIBS)
-opt/rov/$(am__dirstamp):
-	@$(MKDIR_P) opt/rov
-	@: > opt/rov/$(am__dirstamp)
-opt/rov/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) opt/rov/$(DEPDIR)
-	@: > opt/rov/$(DEPDIR)/$(am__dirstamp)
-opt/rov/udpm_sub.$(OBJEXT): opt/rov/$(am__dirstamp) \
-	opt/rov/$(DEPDIR)/$(am__dirstamp)
 opt/rov/trnxpp_app.$(OBJEXT): opt/rov/$(am__dirstamp) \
 	opt/rov/$(DEPDIR)/$(am__dirstamp)
 
@@ -1535,6 +1650,7 @@ mostlyclean-compile:
 	-rm -f newmat/*.lo
 	-rm -f opt/dorado/*.$(OBJEXT)
 	-rm -f opt/rov/*.$(OBJEXT)
+	-rm -f opt/rov/*.lo
 	-rm -f qnx-utils/*.$(OBJEXT)
 	-rm -f qnx-utils/*.lo
 	-rm -f terrain-nav/*.$(OBJEXT)
@@ -1542,6 +1658,7 @@ mostlyclean-compile:
 	-rm -f trnw/*.$(OBJEXT)
 	-rm -f trnw/*.lo
 	-rm -f utils/*.$(OBJEXT)
+	-rm -f utils/*.lo
 
 distclean-compile:
 	-rm -f *.tab.c
@@ -1639,8 +1756,17 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@newmat/$(DEPDIR)/svd.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@opt/dorado/$(DEPDIR)/Replay.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@opt/dorado/$(DEPDIR)/trn_replay.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@opt/rov/$(DEPDIR)/plug-common.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@opt/rov/$(DEPDIR)/plug-dvl.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@opt/rov/$(DEPDIR)/plug-idt.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@opt/rov/$(DEPDIR)/plug-idtlass.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@opt/rov/$(DEPDIR)/plug-lassmb.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@opt/rov/$(DEPDIR)/plug-oisled.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@opt/rov/$(DEPDIR)/plug-oisled2.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@opt/rov/$(DEPDIR)/plug-oisledx.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@opt/rov/$(DEPDIR)/plug-xmb1.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@opt/rov/$(DEPDIR)/trnxpp_app.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@opt/rov/$(DEPDIR)/udpm_sub.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@opt/rov/$(DEPDIR)/udpm_sub.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@qnx-utils/$(DEPDIR)/AngleData.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@qnx-utils/$(DEPDIR)/AsciiFile.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@qnx-utils/$(DEPDIR)/BinaryFile.Plo@am__quote@ # am--include-marker
@@ -1698,8 +1824,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@trnw/$(DEPDIR)/trnucli_test.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@trnw/$(DEPDIR)/trnusvr_test.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@trnw/$(DEPDIR)/trnw.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/TerrainNavClient.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/TrnClient.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/TerrainNavClient.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/TrnClient.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/csvlog_player.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/mb1log_player.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/netif-test.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/trn_server.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/trnclient_test.Po@am__quote@ # am--include-marker
@@ -1791,9 +1919,11 @@ clean-libtool:
 	-rm -rf .libs _libs
 	-rm -rf gctp/source/.libs gctp/source/_libs
 	-rm -rf newmat/.libs newmat/_libs
+	-rm -rf opt/rov/.libs opt/rov/_libs
 	-rm -rf qnx-utils/.libs qnx-utils/_libs
 	-rm -rf terrain-nav/.libs terrain-nav/_libs
 	-rm -rf trnw/.libs trnw/_libs
+	-rm -rf utils/.libs utils/_libs
 install-includeHEADERS: $(include_HEADERS)
 	@$(NORMAL_INSTALL)
 	@list='$(include_HEADERS)'; test -n "$(includedir)" || list=; \
@@ -2027,8 +2157,17 @@ distclean: distclean-am
 	-rm -f newmat/$(DEPDIR)/svd.Plo
 	-rm -f opt/dorado/$(DEPDIR)/Replay.Po
 	-rm -f opt/dorado/$(DEPDIR)/trn_replay.Po
+	-rm -f opt/rov/$(DEPDIR)/plug-common.Plo
+	-rm -f opt/rov/$(DEPDIR)/plug-dvl.Plo
+	-rm -f opt/rov/$(DEPDIR)/plug-idt.Plo
+	-rm -f opt/rov/$(DEPDIR)/plug-idtlass.Plo
+	-rm -f opt/rov/$(DEPDIR)/plug-lassmb.Plo
+	-rm -f opt/rov/$(DEPDIR)/plug-oisled.Plo
+	-rm -f opt/rov/$(DEPDIR)/plug-oisled2.Plo
+	-rm -f opt/rov/$(DEPDIR)/plug-oisledx.Plo
+	-rm -f opt/rov/$(DEPDIR)/plug-xmb1.Plo
 	-rm -f opt/rov/$(DEPDIR)/trnxpp_app.Po
-	-rm -f opt/rov/$(DEPDIR)/udpm_sub.Po
+	-rm -f opt/rov/$(DEPDIR)/udpm_sub.Plo
 	-rm -f qnx-utils/$(DEPDIR)/AngleData.Plo
 	-rm -f qnx-utils/$(DEPDIR)/AsciiFile.Plo
 	-rm -f qnx-utils/$(DEPDIR)/BinaryFile.Plo
@@ -2086,8 +2225,10 @@ distclean: distclean-am
 	-rm -f trnw/$(DEPDIR)/trnucli_test.Po
 	-rm -f trnw/$(DEPDIR)/trnusvr_test.Po
 	-rm -f trnw/$(DEPDIR)/trnw.Plo
-	-rm -f utils/$(DEPDIR)/TerrainNavClient.Po
-	-rm -f utils/$(DEPDIR)/TrnClient.Po
+	-rm -f utils/$(DEPDIR)/TerrainNavClient.Plo
+	-rm -f utils/$(DEPDIR)/TrnClient.Plo
+	-rm -f utils/$(DEPDIR)/csvlog_player.Po
+	-rm -f utils/$(DEPDIR)/mb1log_player.Po
 	-rm -f utils/$(DEPDIR)/netif-test.Po
 	-rm -f utils/$(DEPDIR)/trn_server.Po
 	-rm -f utils/$(DEPDIR)/trnclient_test.Po
@@ -2232,8 +2373,17 @@ maintainer-clean: maintainer-clean-am
 	-rm -f newmat/$(DEPDIR)/svd.Plo
 	-rm -f opt/dorado/$(DEPDIR)/Replay.Po
 	-rm -f opt/dorado/$(DEPDIR)/trn_replay.Po
+	-rm -f opt/rov/$(DEPDIR)/plug-common.Plo
+	-rm -f opt/rov/$(DEPDIR)/plug-dvl.Plo
+	-rm -f opt/rov/$(DEPDIR)/plug-idt.Plo
+	-rm -f opt/rov/$(DEPDIR)/plug-idtlass.Plo
+	-rm -f opt/rov/$(DEPDIR)/plug-lassmb.Plo
+	-rm -f opt/rov/$(DEPDIR)/plug-oisled.Plo
+	-rm -f opt/rov/$(DEPDIR)/plug-oisled2.Plo
+	-rm -f opt/rov/$(DEPDIR)/plug-oisledx.Plo
+	-rm -f opt/rov/$(DEPDIR)/plug-xmb1.Plo
 	-rm -f opt/rov/$(DEPDIR)/trnxpp_app.Po
-	-rm -f opt/rov/$(DEPDIR)/udpm_sub.Po
+	-rm -f opt/rov/$(DEPDIR)/udpm_sub.Plo
 	-rm -f qnx-utils/$(DEPDIR)/AngleData.Plo
 	-rm -f qnx-utils/$(DEPDIR)/AsciiFile.Plo
 	-rm -f qnx-utils/$(DEPDIR)/BinaryFile.Plo
@@ -2291,8 +2441,10 @@ maintainer-clean: maintainer-clean-am
 	-rm -f trnw/$(DEPDIR)/trnucli_test.Po
 	-rm -f trnw/$(DEPDIR)/trnusvr_test.Po
 	-rm -f trnw/$(DEPDIR)/trnw.Plo
-	-rm -f utils/$(DEPDIR)/TerrainNavClient.Po
-	-rm -f utils/$(DEPDIR)/TrnClient.Po
+	-rm -f utils/$(DEPDIR)/TerrainNavClient.Plo
+	-rm -f utils/$(DEPDIR)/TrnClient.Plo
+	-rm -f utils/$(DEPDIR)/csvlog_player.Po
+	-rm -f utils/$(DEPDIR)/mb1log_player.Po
 	-rm -f utils/$(DEPDIR)/netif-test.Po
 	-rm -f utils/$(DEPDIR)/trn_server.Po
 	-rm -f utils/$(DEPDIR)/trnclient_test.Po
@@ -2381,7 +2533,17 @@ uninstall-am: uninstall-binPROGRAMS uninstall-dist_binSCRIPTS \
 @BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
 @BUILD_ROVTRN_TRUE@	@echo
 
+@BUILD_ROVTRN_TRUE@opt/rov/gss/parosci_stat_t.hpp : opt/rov/lcm_types/parosci_stat_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
 @BUILD_ROVTRN_TRUE@opt/rov/oi/idt_t.hpp : opt/rov/lcm_types/idt_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/ctd_t.hpp : opt/rov/lcm_types/ctd_t.lcm
 @BUILD_ROVTRN_TRUE@	@ echo compiling $@...
 @BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
 @BUILD_ROVTRN_TRUE@	@echo
@@ -2483,6 +2645,16 @@ uninstall-am: uninstall-binPROGRAMS uninstall-dist_binSCRIPTS \
 @BUILD_ROVTRN_TRUE@	@echo
 
 @BUILD_ROVTRN_TRUE@opt/rov/gss/pcomms_t.java : opt/rov/lcm_types/pcomms_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/parosci_stat_t.java : opt/rov/lcm_types/parosci_stat_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/ctd_t.java : opt/rov/lcm_types/ctd_t.lcm
 @BUILD_ROVTRN_TRUE@	@ echo compiling $@...
 @BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
 @BUILD_ROVTRN_TRUE@	@echo
@@ -2593,7 +2765,17 @@ uninstall-am: uninstall-binPROGRAMS uninstall-dist_binSCRIPTS \
 @BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
 @BUILD_ROVTRN_TRUE@	@echo
 
+@BUILD_ROVTRN_TRUE@opt/rov/gss/parosci_stat_t.class : opt/rov/gss/parosci_stat_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
 @BUILD_ROVTRN_TRUE@opt/rov/oi/idt_t.class : opt/rov/oi/idt_t.java opt/rov/oi/lcm_header_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/ctd_t.class : opt/rov/oi/ctd_t.java opt/rov/oi/lcm_header_t.java
 @BUILD_ROVTRN_TRUE@	@ echo compiling $@...
 @BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
 @BUILD_ROVTRN_TRUE@	@echo

@@ -1,4 +1,26 @@
 #------------------------------------------------------------------------------
+#    The MB-system:  CMakeLists.txt   27 June 2023
+#
+#    Copyright (c) 2023-2024 by
+#    David W. Caress (caress@mbari.org)
+#      Monterey Bay Aquarium Research Institute
+#      Moss Landing, California, USA
+#    Dale N. Chayes 
+#      Center for Coastal and Ocean Mapping
+#      University of New Hampshire
+#      Durham, New Hampshire, USA
+#    Christian dos Santos Ferreira
+#      MARUM
+#      University of Bremen
+#      Bremen Germany
+#      
+#    MB-System was created by Caress and Chayes in 1992 at the
+#      Lamont-Doherty Earth Observatory
+#      Columbia University
+#      Palisades, NY 10964
+#
+#    See README.md file for copying and redistribution conditions.
+#------------------------------------------------------------------------------
 #
 # MBtrn libraries and test programs
 #
@@ -22,11 +44,16 @@
 #.   mb1r_test
 #.   mb1-cli
 #
-message("In mbtrnav")
-#
-#------------------------------------------------------------------------------
-#
-message("In mbtrn CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR} CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
+message("In src/mbtrn")
+add_compile_definitions(
+HAVE_CONFIG_H
+_GNU_SOURCE
+WITH_TESTS
+WITH_R7KR_TEST
+WITH_MB1R_TEST
+WITH_MST_MSTATS
+MST_STATS_EN
+WITH_MMDEBUG)
 #
 #------------------------------------------------------------------------------
 #
@@ -35,7 +62,7 @@ add_library(r7kr
 	r7kr/r7kc.c 
 	r7kr/r7k-reader.c
 )
-target_include_directories(r7kr PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnframe)
+target_include_directories(r7kr PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnframe ${CMAKE_SOURCE_DIR}/src/mbtrnutils)
 target_link_libraries(r7kr PRIVATE mbtrnframe trnw)
 #
 #------------------------------------------------------------------------------
@@ -44,7 +71,9 @@ add_library(mb1r
 	utils/mb71_msg.c
 	mb1r/mb1-reader.c 
 )
-target_include_directories(mb1r PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnframe ${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw)
+target_include_directories(mb1r PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnframe 
+                              ${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw 
+                              ${CMAKE_SOURCE_DIR}/src/mbtrnutils)
 target_link_libraries(mb1r PRIVATE mbtrnframe trnw)
 
 install(TARGETS r7kr mb1r DESTINATION ${CMAKE_INSTALL_LIBDIR})
@@ -66,21 +95,24 @@ target_link_libraries(udpc PRIVATE mbtrnframe m pthread)
 add_executable(mbtnav_cli utils/mbtnav_cli.c)
 target_include_directories(mbtnav_cli PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnframe 
 							${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw 
-							${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav)
+							${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
+							${CMAKE_SOURCE_DIR}/src/mbtrnutils)
 target_link_libraries(mbtnav_cli PRIVATE mbtrnframe m pthread)
 #
 #------------------------------------------------------------------------------
 #
 add_executable(stream7k utils/stream7k.c)
 target_include_directories(stream7k PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnframe 
-							${CMAKE_SOURCE_DIR}/src/mbtrn/r7kr)
+							${CMAKE_SOURCE_DIR}/src/mbtrn/r7kr
+							${CMAKE_SOURCE_DIR}/src/mbtrnutils)
 target_link_libraries(stream7k PRIVATE mbtrnframe r7kr)
 #
 #------------------------------------------------------------------------------
 #
 add_executable(emu7k utils/emu7k.c)
 target_include_directories(emu7k PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnframe 
-							${CMAKE_SOURCE_DIR}/src/mbtrn/r7kr)
+							${CMAKE_SOURCE_DIR}/src/mbtrn/r7kr
+							${CMAKE_SOURCE_DIR}/src/mbtrnutils)
 target_link_libraries(emu7k PRIVATE mbtrnframe r7kr m pthread)
 #
 #------------------------------------------------------------------------------
@@ -95,7 +127,8 @@ target_link_libraries(r7kr_test PRIVATE r7kr)
 add_executable(trnc utils/trnc.c)
 target_include_directories(trnc PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnframe 
 							${CMAKE_SOURCE_DIR}/src/mbtrn/r7kr 
-							${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw)
+							${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw 
+                            ${CMAKE_SOURCE_DIR}/src/mbtrnutils)
 target_link_libraries(trnc PRIVATE mbtrnframe mb1r)
 #
 #------------------------------------------------------------------------------
@@ -103,7 +136,8 @@ target_link_libraries(trnc PRIVATE mbtrnframe mb1r)
 add_executable(tbinx utils/tbinx.c)
 target_include_directories(tbinx PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnframe 
 							${CMAKE_SOURCE_DIR}/src/mbtrn/r7kr 
-							${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw)
+							${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw 
+                            ${CMAKE_SOURCE_DIR}/src/mbtrnutils)
 target_link_libraries(tbinx PRIVATE mbtrnframe mb1r r7kr m pthread)
 #
 #------------------------------------------------------------------------------

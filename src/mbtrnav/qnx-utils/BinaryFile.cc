@@ -27,6 +27,9 @@
 #include "DoubleData.h"
 #include "StringData.h"
 
+// comment out value to compile out
+#define BF_ERR() fprintf(stderr, "%s:%d - error[%d:%s]\n", __func__, __LINE__, errno, strerror(errno))
+
 BinaryFile::BinaryFile(FILE *file)
   : FileData(file)
 {
@@ -37,7 +40,12 @@ BinaryFile::BinaryFile(FILE *file)
 
 BinaryFile::~BinaryFile()
 {
-  if (_bufferNBytes != 0) write(_fd, (void *)_buffer, _bufferNBytes);
+    if (_bufferNBytes != 0){
+        ssize_t test = write(_fd, (void *)_buffer, _bufferNBytes);
+        if(test < 0){
+            BF_ERR();
+        }
+    }
 }
 
 
@@ -46,8 +54,11 @@ void BinaryFile::set(CharData *charData)
   char value = charData->value();
 
   if ((_bufferNBytes + 1) > _WRITE_BUFFER_SIZE) {
-	write(_fd, (void *)_buffer, _bufferNBytes);
-	_bufferNBytes = 0;
+      ssize_t test = write(_fd, (void *)_buffer, _bufferNBytes);
+      if(test < 0){
+          BF_ERR();
+      }
+      _bufferNBytes = 0;
   }
 
   memcpy(_buffer+_bufferNBytes, &value, 1); _bufferNBytes++;
@@ -67,7 +78,12 @@ void BinaryFile::set(ShortData *shortData)
   short value = shortData->value();
 
   if ((_bufferNBytes + sizeof(short) ) > _WRITE_BUFFER_SIZE) {
-        write(_fd, (void *)_buffer, _bufferNBytes);
+
+      ssize_t test = write(_fd, (void *)_buffer, _bufferNBytes);
+
+      if(test < 0){
+          BF_ERR();
+      }
         _bufferNBytes = 0;
   }
 
@@ -89,8 +105,13 @@ void BinaryFile::set(IntegerData *integerData)
   int value = integerData->value();
 
   if ((_bufferNBytes + sizeof(int)) > _WRITE_BUFFER_SIZE) {
-        write(_fd, (void *)_buffer, _bufferNBytes);
-        _bufferNBytes = 0;
+      ssize_t test = write(_fd, (void *)_buffer, _bufferNBytes);
+
+      if(test < 0){
+          BF_ERR();
+      }
+
+      _bufferNBytes = 0;
   }
 
   memcpy(_buffer+_bufferNBytes, &value, sizeof(int));
@@ -111,8 +132,14 @@ void BinaryFile::set(FloatData *floatData)
   float value = floatData->value();
 
   if ((_bufferNBytes + sizeof(float)) > _WRITE_BUFFER_SIZE) {
-        write(_fd, (void *)_buffer, _bufferNBytes);
-        _bufferNBytes = 0;
+
+      ssize_t test = write(_fd, (void *)_buffer, _bufferNBytes);
+
+      if(test < 0){
+          BF_ERR();
+      }
+
+      _bufferNBytes = 0;
   }
 
   memcpy(_buffer+_bufferNBytes, &value, sizeof(float));
@@ -133,8 +160,14 @@ void BinaryFile::set(DoubleData *doubleData)
   double value = doubleData->value();
 
   if ((_bufferNBytes + sizeof(double)) > _WRITE_BUFFER_SIZE) {
-        write(_fd, (void *)_buffer, _bufferNBytes);
-        _bufferNBytes = 0;
+
+      ssize_t test = write(_fd, (void *)_buffer, _bufferNBytes);
+
+      if(test < 0){
+          BF_ERR();
+      }
+
+      _bufferNBytes = 0;
   }
 
   memcpy(_buffer+_bufferNBytes, &value, sizeof(double));
@@ -302,8 +335,13 @@ void BinaryFile::get(StringData *stringData)
 
 void BinaryFile::endRecord()
 {
-  write(_fd, _buffer, _bufferNBytes);
-  _bufferNBytes = 0;
+    ssize_t test = write(_fd, _buffer, _bufferNBytes);
+
+    if(test < 0){
+        BF_ERR();
+    }
+
+    _bufferNBytes = 0;
   // Does nothing
 //  fflush(_file);
   return;

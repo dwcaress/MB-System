@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbvelocitytool.c        6/6/93
  *
- *    Copyright (c) 1993-2020 by
+ *    Copyright (c) 1993-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * MBVELOCITYTOOL is an interactive water velocity profile editor
@@ -206,7 +216,6 @@ int mbvt_init(int argc, char **argv) {
 	int errflg = 0;
 	int c;
 	int help = 0;
-	int flag = 0;
 
 	/* set default values */
 	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -250,33 +259,27 @@ int mbvt_init(int argc, char **argv) {
 		case 'b':
 			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);
 			btime_i[6] = 0;
-			flag++;
 			break;
 		case 'E':
 		case 'e':
 			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
 			etime_i[6] = 0;
-			flag++;
 			break;
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d", &format);
-			flag++;
 			break;
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", ifile);
-			flag++;
 			break;
 		case 'S':
 		case 's':
 			sscanf(optarg, "%s", sfile);
-			flag++;
 			break;
 		case 'W':
 		case 'w':
 			sscanf(optarg, "%s", wfile);
-			flag++;
 			break;
 		case '?':
 			errflg++;
@@ -1890,7 +1893,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 	double navlon_levitus, navlat_levitus;
 	double distance;
 	double altitude;
-	double sonardepth;
+	double sensordepth;
 	int variable_beams;
 	int traveltime;  // TODO(schwehr): bool
 	int beam_flagging;
@@ -2012,7 +2015,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 	do {
 		status = mb_get_all(verbose, mbio_ptr, &store_ptr, &kind, ping[nbuffer].time_i, &ping[nbuffer].time_d,
 		                    &ping[nbuffer].navlon, &ping[nbuffer].navlat, &ping[nbuffer].speed, &ping[nbuffer].heading, &distance,
-		                    &altitude, &sonardepth, &ping[nbuffer].beams_bath, &namp, &nss, beamflag, bath, amp, bathacrosstrack,
+		                    &altitude, &sensordepth, &ping[nbuffer].beams_bath, &namp, &nss, beamflag, bath, amp, bathacrosstrack,
 		                    bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
 		if (error <= MB_ERROR_NO_ERROR && (kind == MB_DATA_DATA) &&
 		    (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP || error == MB_ERROR_OUT_BOUNDS ||
@@ -2079,18 +2082,18 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 			if (traveltime) {
 				status = mb_ttimes(verbose, mbio_ptr, store_ptr, &kind, &nbeams, ping[nbuffer].ttimes, ping[nbuffer].angles,
 				                   ping[nbuffer].angles_forward, ping[nbuffer].angles_null, ping[nbuffer].heave,
-				                   ping[nbuffer].alongtrack_offset, &ping[nbuffer].sonardepth, &ping[nbuffer].ssv, &error);
+				                   ping[nbuffer].alongtrack_offset, &ping[nbuffer].sensordepth, &ping[nbuffer].ssv, &error);
 			}
 			else {
 				nbeams = ping[nbuffer].beams_bath;
-				ping[nbuffer].sonardepth = sonardepth;
+				ping[nbuffer].sensordepth = sensordepth;
 				ping[nbuffer].ssv = 1500.0;
 				for (i = 0; i < ping[nbuffer].beams_bath; i++) {
 					if (mb_beam_ok(ping[nbuffer].beamflag[i])) {
-						zz = bath[i] - sonardepth;
+						zz = bath[i] - sensordepth;
 						rr = sqrt(zz * zz + bathacrosstrack[i] * bathacrosstrack[i] + bathalongtrack[i] * bathalongtrack[i]);
 						ping[nbuffer].ttimes[i] = rr / 750.0;
-						mb_xyz_to_takeoff(verbose, bathacrosstrack[i], bathalongtrack[i], (bath[i] - sonardepth),
+						mb_xyz_to_takeoff(verbose, bathacrosstrack[i], bathalongtrack[i], (bath[i] - sensordepth),
 						                  &ping[nbuffer].angles[i], &ping[nbuffer].angles_forward[i], &error);
 						ping[nbuffer].angles_null[i] = 0.0;
 						ping[nbuffer].heave[i] = 0.0;
@@ -2161,7 +2164,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 		/* loop over the beams */
 		for (i = 0; i < ping[k].beams_bath; i++) {
 			if (mb_beam_ok(ping[k].beamflag[i])) {
-				depth[i] = 750 * ping[k].ttimes[i] * cos(DTR * ping[k].angles[i]) + ping[k].sonardepth + ping[k].heave[i];
+				depth[i] = 750 * ping[k].ttimes[i] * cos(DTR * ping[k].angles[i]) + ping[k].sensordepth + ping[k].heave[i];
 
 				/* get min max depths */
 				if (depth[i] < bath_min)
@@ -2363,7 +2366,7 @@ int mbvt_process_multibeam() {
 	double delta, a, b;
 	int ns;
 	double depth_predict, res;
-	double sonardepth, sonardepthshift, heave_use;
+	double sensordepth, sensordepthshift, heave_use;
 	bool found;
 	int i, j, k;
 
@@ -2438,13 +2441,13 @@ int mbvt_process_multibeam() {
 			}
 		}
 
-		sonardepth = heave_use + ping[k].sonardepth;
-		sonardepthshift = 0.0;
+		sensordepth = heave_use + ping[k].sensordepth;
+		sensordepthshift = 0.0;
 		if (first)
-			raydepthmin = MIN(raydepthmin, sonardepth);
-		if (sonardepth < 0.0) {
-			sonardepthshift = sonardepth;
-			sonardepth = 0.0;
+			raydepthmin = MIN(raydepthmin, sensordepth);
+		if (sensordepth < 0.0) {
+			sensordepthshift = sensordepth;
+			sensordepth = 0.0;
 		}
 
 		/* loop over the beams */
@@ -2463,13 +2466,13 @@ int mbvt_process_multibeam() {
 					/* call raytracing without keeping
 					plotting list */
 					status =
-					    mb_rt(verbose, rt_svp, sonardepth, ping[k].angles[i], 0.5 * ping[k].ttimes[i], anglemode, ping[k].ssv,
+					    mb_rt(verbose, rt_svp, sensordepth, ping[k].angles[i], 0.5 * ping[k].ttimes[i], anglemode, ping[k].ssv,
 					          ping[k].angles_null[i], 0, NULL, NULL, NULL, NULL, &acrosstrack[i], &depth[i], &ttime, &ray_stat, &error);
 				}
 				else {
 					/* call raytracing keeping
 					plotting list */
-					status = mb_rt(verbose, rt_svp, sonardepth, ping[k].angles[i], 0.5 * ping[k].ttimes[i],
+					status = mb_rt(verbose, rt_svp, sensordepth, ping[k].angles[i], 0.5 * ping[k].ttimes[i],
                          anglemode, ping[k].ssv, ping[k].angles_null[i],
                          nraypathmax, &nraypath[i], raypathx[i], raypathy[i], raypatht[i],
 					               &acrosstrack[i], &depth[i], &ttime, &ray_stat, &error);
@@ -2483,7 +2486,7 @@ int mbvt_process_multibeam() {
 				acrosstrack[i] = factor * acrosstrack[i];
 
 				/* add to depth if needed */
-				depth[i] += sonardepthshift;
+				depth[i] += sensordepthshift;
 
 				/* get min max depths */
 				if (depth[i] < bath_min)
@@ -2498,7 +2501,7 @@ int mbvt_process_multibeam() {
 				/* output some debug values */
 				if (verbose >= 5)
 					fprintf(stderr, "dbg5       %3d %3d %6.3f %6.3f %8.2f %8.2f %8.2f %8.2f\n", k, i, 0.5 * ping[k].ttimes[i],
-					        ping[k].angles[i], acrosstrack[i], ping[k].heave[i], ping[k].sonardepth, depth[i]);
+					        ping[k].angles[i], acrosstrack[i], ping[k].heave[i], ping[k].sensordepth, depth[i]);
 
 				/* get sums for linear fit */
 				sx += acrosstrack[i];
@@ -2531,7 +2534,7 @@ int mbvt_process_multibeam() {
 					depth_predict = a + b * acrosstrack[i];
 					res = depth[i] - depth_predict;
 					angle[i] += ping[k].angles[i];
-					residual_altitude[i] += depth[i] - sonardepth;
+					residual_altitude[i] += depth[i] - sensordepth;
 					residual_acrosstrack[i] += acrosstrack[i];
 					residual[i] += res;
 					res_sd[i] += res * res;

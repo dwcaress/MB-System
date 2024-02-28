@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbr_kemkmall.c  5/25/2018
  *
- *    Copyright (c) 2018-2020 by
+ *    Copyright (c) 2018-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * mbr_kemkmall.c contains the functions for reading and writing
@@ -554,6 +564,12 @@ int mbr_kemkmall_rd_hdr(int verbose, char *buffer, void *header_ptr, void *emdgm
   else if (strncmp((const char *)header->dgmType, MBSYS_KMBES_S_POSITION, 4) == 0) {
     *emdgm_type = SPO;
   }
+  else if (strncmp((const char *)header->dgmType, MBSYS_KMBES_S_POSITION_ERROR, 4) == 0) {
+    *emdgm_type = SPE;
+  }
+  else if (strncmp((const char *)header->dgmType, MBSYS_KMBES_S_POSITION_DATUM, 4) == 0) {
+    *emdgm_type = SPD;
+  }
   else if (strncmp((const char *)header->dgmType, MBSYS_KMBES_S_KM_BINARY, 4) == 0) {
     *emdgm_type = SKM;
   }
@@ -723,6 +739,227 @@ int mbr_kemkmall_rd_spo(int verbose, char *buffer, void *store_ptr, void *header
   if (status == MB_SUCCESS) {
     /* set kind */
     store->kind = MB_DATA_NAV;
+  }
+  else {
+    store->kind = MB_DATA_NONE;
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:  %d\n", status);
+  }
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType,header->time_sec, header->time_nanosec, status, *error);
+#endif
+
+  /* return status */
+  return (status);
+};
+
+/*--------------------------------------------------------------------*/
+
+int mbr_kemkmall_rd_spe(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
+  size_t numBytesRawSensorData = 0;
+  int index = 0;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
+    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+    fprintf(stderr, "dbg2       header_ptr: %p\n", (void *)header_ptr);
+  }
+
+  /* get pointer to raw data structure */
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_header *header = (struct mbsys_kmbes_header *)header_ptr;
+  struct mbsys_kmbes_spe *spe = &(store->spe);
+
+  /* copy the header */
+  spe->header = *header;
+
+  /* calc number of bytes for raw sensor data */
+  numBytesRawSensorData = spe->header.numBytesDgm - MBSYS_KMBES_SPE_VAR_OFFSET;
+
+  /* extract the data */
+  index = MBSYS_KMBES_HEADER_SIZE;
+
+  /* common part */
+  mb_get_binary_short(true, &buffer[index], &(spe->cmnPart.numBytesCmnPart));
+  index += 2;
+  mb_get_binary_short(true, &buffer[index], &(spe->cmnPart.sensorSystem));
+  index += 2;
+  mb_get_binary_short(true, &buffer[index], &(spe->cmnPart.sensorStatus));
+  index += 2;
+  mb_get_binary_short(true, &buffer[index], &(spe->cmnPart.padding));
+  index += 2;
+
+  /* sensor data block */
+  mb_get_binary_int(true, &buffer[index], &(spe->sensorData.timeFromSensor_sec));
+  index += 4;
+  mb_get_binary_int(true, &buffer[index], &(spe->sensorData.timeFromSensor_nanosec));
+  index += 4;
+  mb_get_binary_float(true, &buffer[index], &(spe->sensorData.rangeInputRms));
+  index += 4;
+  mb_get_binary_float(true, &buffer[index], &(spe->sensorData.ellipseSemiMajorAxisError_m));
+  index += 4;
+  mb_get_binary_float(true, &buffer[index], &(spe->sensorData.ellipseSemiMinorAxisError_m));
+  index += 4;
+  mb_get_binary_float(true, &buffer[index], &(spe->sensorData.ellipseOrientationError_deg));
+  index += 4;
+  mb_get_binary_float(true, &buffer[index], &(spe->sensorData.latitudeError_m));
+  index += 4;
+  mb_get_binary_float(true, &buffer[index], &(spe->sensorData.longitudeError_m));
+  index += 4;
+  mb_get_binary_float(true, &buffer[index], &(spe->sensorData.heightError_m));
+  index += 4;
+  memcpy(&(spe->sensorData.posErrorDataFromSensor), &buffer[index], numBytesRawSensorData);
+
+  if (verbose >= 5) {
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
+    fprintf(stderr, "dbg5       numBytesDgm:                 %u\n", spe->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:                     %s\n", spe->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:                  %u\n", spe->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:                    %u\n", spe->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:               %u\n", spe->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:                    %u\n", spe->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:                %u\n", spe->header.time_nanosec);
+
+    fprintf(stderr, "dbg5       numBytesCmnPart:             %u\n", spe->cmnPart.numBytesCmnPart);
+    fprintf(stderr, "dbg5       sensorSystem:                %u\n", spe->cmnPart.sensorSystem);
+    fprintf(stderr, "dbg5       sensorStatus:                %u\n", spe->cmnPart.sensorStatus);
+    fprintf(stderr, "dbg5       padding:                     %u\n", spe->cmnPart.padding);
+
+    fprintf(stderr, "dbg5       timeFromSensor_sec:          %u\n", spe->sensorData.timeFromSensor_sec);
+    fprintf(stderr, "dbg5       timeFromSensor_nanosec:      %u\n", spe->sensorData.timeFromSensor_nanosec);
+    fprintf(stderr, "dbg5       rangeInputRms:               %f\n", spe->sensorData.rangeInputRms);
+    fprintf(stderr, "dbg5       ellipseSemiMajorAxisError_m: %f\n", spe->sensorData.ellipseSemiMajorAxisError_m);
+    fprintf(stderr, "dbg5       ellipseSemiMinorAxisError_m: %f\n", spe->sensorData.ellipseSemiMinorAxisError_m);
+    fprintf(stderr, "dbg5       ellipseOrientationError_deg: %f\n", spe->sensorData.ellipseOrientationError_deg);
+    fprintf(stderr, "dbg5       latitudeError_m:             %f\n", spe->sensorData.latitudeError_m);
+    fprintf(stderr, "dbg5       longitudeError_m:            %f\n", spe->sensorData.longitudeError_m);
+    fprintf(stderr, "dbg5       heightError_m:               %f\n", spe->sensorData.heightError_m);
+    fprintf(stderr, "dbg5       posErrorDataFromSensor:      %s\n", spe->sensorData.posErrorDataFromSensor);
+  }
+
+  int status = MB_SUCCESS;
+
+  /* set kind */
+  if (status == MB_SUCCESS) {
+    /* set kind */
+    store->kind = MB_DATA_NAVIGATION_ERROR;
+  }
+  else {
+    store->kind = MB_DATA_NONE;
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:  %d\n", status);
+  }
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType,header->time_sec, header->time_nanosec, status, *error);
+#endif
+
+  /* return status */
+  return (status);
+};
+
+/*--------------------------------------------------------------------*/
+
+int mbr_kemkmall_rd_spd(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
+  size_t numBytesRawSensorData = 0;
+  int index = 0;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
+    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+    fprintf(stderr, "dbg2       header_ptr: %p\n", (void *)header_ptr);
+  }
+
+  /* get pointer to raw data structure */
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_header *header = (struct mbsys_kmbes_header *)header_ptr;
+  struct mbsys_kmbes_spd *spd = &(store->spd);
+
+  /* copy the header */
+  spd->header = *header;
+
+  /* calc number of bytes for raw sensor data */
+  numBytesRawSensorData = spd->header.numBytesDgm - MBSYS_KMBES_SPD_VAR_OFFSET;
+
+  /* extract the data */
+  index = MBSYS_KMBES_HEADER_SIZE;
+
+  /* common part */
+  mb_get_binary_short(true, &buffer[index], &(spd->cmnPart.numBytesCmnPart));
+  index += 2;
+  mb_get_binary_short(true, &buffer[index], &(spd->cmnPart.sensorSystem));
+  index += 2;
+  mb_get_binary_short(true, &buffer[index], &(spd->cmnPart.sensorStatus));
+  index += 2;
+  mb_get_binary_short(true, &buffer[index], &(spd->cmnPart.padding));
+  index += 2;
+
+  /* sensor data block */
+  memcpy(&(spd->sensorData.localDatumCode), &buffer[index], 16);
+  index += 16;
+  memcpy(&(spd->sensorData.localDatumSubCode), &buffer[index], 16);
+  index += 16;
+  mb_get_binary_double(true, &buffer[index], &(spd->sensorData.latitudeOffset_deg));
+  index += 8;
+  mb_get_binary_double(true, &buffer[index], &(spd->sensorData.longitudeOffset_deg));
+  index += 8;
+  mb_get_binary_float(true, &buffer[index], &(spd->sensorData.altitudeOffset_m));
+  index += 4;
+  memcpy(&(spd->sensorData.datumName), &buffer[index], 32);
+  index += 32;
+  memcpy(&(spd->sensorData.posDatumDataFromSensor), &buffer[index], numBytesRawSensorData);
+
+  if (verbose >= 5) {
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
+    fprintf(stderr, "dbg5       numBytesDgm:                 %u\n", spd->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:                     %s\n", spd->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:                  %u\n", spd->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:                    %u\n", spd->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:               %u\n", spd->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:                    %u\n", spd->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:                %u\n", spd->header.time_nanosec);
+
+    fprintf(stderr, "dbg5       numBytesCmnPart:             %u\n", spd->cmnPart.numBytesCmnPart);
+    fprintf(stderr, "dbg5       sensorSystem:                %u\n", spd->cmnPart.sensorSystem);
+    fprintf(stderr, "dbg5       sensorStatus:                %u\n", spd->cmnPart.sensorStatus);
+    fprintf(stderr, "dbg5       padding:                     %u\n", spd->cmnPart.padding);
+
+    fprintf(stderr, "dbg5       localDatumCode:              %s\n", spd->sensorData.localDatumCode);
+    fprintf(stderr, "dbg5       localDatumSubCode:           %s\n", spd->sensorData.localDatumSubCode);
+    fprintf(stderr, "dbg5       latitudeOffset_deg:          %f\n", spd->sensorData.latitudeOffset_deg);
+    fprintf(stderr, "dbg5       longitudeOffset_deg:         %f\n", spd->sensorData.longitudeOffset_deg);
+    fprintf(stderr, "dbg5       altitudeOffset_m:            %f\n", spd->sensorData.altitudeOffset_m);
+    fprintf(stderr, "dbg5       datumName:                   %s\n", spd->sensorData.datumName);
+    fprintf(stderr, "dbg5       posDatumDataFromSensor:      %s\n", spd->sensorData.posDatumDataFromSensor);
+  }
+
+  int status = MB_SUCCESS;
+
+  /* set kind */
+  if (status == MB_SUCCESS) {
+    /* set kind */
+    store->kind = MB_DATA_DATUM;
   }
   else {
     store->kind = MB_DATA_NONE;
@@ -1340,7 +1577,7 @@ int mbr_kemkmall_rd_sde(int verbose, char *buffer, void *store_ptr, void *header
   /* set kind */
   if (status == MB_SUCCESS) {
     /* set kind */
-    store->kind = MB_DATA_SONARDEPTH;
+    store->kind = MB_DATA_SENSORDEPTH;
   }
   else {
     store->kind = MB_DATA_NONE;
@@ -4329,56 +4566,70 @@ numOfDgms, dgmNum, header.numBytesDgm, dgm_index->index_org, dgm_index->ping_num
       switch (emdgm_type) {
 
         case IIP:
-            /* #IIP - Info Installation PU */
+          /* #IIP - Info Installation PU */
           status = mbr_kemkmall_rd_iip(verbose, buffer, store_ptr, (void *)&header, error);
           if (status == MB_SUCCESS)
             done = true;
           break;
 
         case IOP:
-            /* #IOP -  Runtime datagram */
+          /* #IOP -  Runtime datagram */
           status = mbr_kemkmall_rd_iop(verbose, buffer, store_ptr, (void *)&header, error);
           if (status == MB_SUCCESS)
             done = true;
           break;
 
         case IBE:
-            /* #IBE -  BIST error report */
+          /* #IBE -  BIST error report */
           status = mbr_kemkmall_rd_ibe(verbose, buffer, store_ptr, (void *)&header, error);
           if (status == MB_SUCCESS)
             done = true;
           break;
 
         case IBR:
-            /* #IBR -  BIST reply */
+          /* #IBR -  BIST reply */
           status = mbr_kemkmall_rd_ibr(verbose, buffer, store_ptr, (void *)&header, error);
           if (status == MB_SUCCESS)
             done = true;
           break;
 
         case IBS:
-            /* #IBS -  BIST short reply */
+          /* #IBS -  BIST short reply */
           status = mbr_kemkmall_rd_ibs(verbose, buffer, store_ptr, (void *)&header, error);
           if (status == MB_SUCCESS)
             done = true;
           break;
 
         case SPO:
-            /* #SPO - Sensor POsition data */
+          /* #SPO - Sensor POsition data */
           status = mbr_kemkmall_rd_spo(verbose, buffer, store_ptr, (void *)&header, error);
           if (status == MB_SUCCESS)
             done = true;
           break;
 
+        case SPE:
+          /* #SPE - Sensor Position Error data */
+          status = mbr_kemkmall_rd_spe(verbose, buffer, store_ptr, (void *)&header, error);
+          if (status == MB_SUCCESS)
+            done = true;
+          break;
+
+        case SPD:
+          /* #SPD - Sensor Position Datum data */
+          status = mbr_kemkmall_rd_spd(verbose, buffer, store_ptr, (void *)&header, error);
+          if (status == MB_SUCCESS)
+            done = true;
+          break;
+
         case SKM:
-            /* #SKM - KM binary sensor data */
+          /* #SKM - KM binary sensor data */
           status = mbr_kemkmall_rd_skm(verbose, buffer, store_ptr, (void *)&header, error);
           if (status == MB_SUCCESS)
             done = true;
           break;
 
         case SVP:
-            /* #SVP - Sound Velocity Profile */
+          /* #SVP - Sound Velocity Profile */
           status = mbr_kemkmall_rd_svp(verbose, buffer, store_ptr, (void *)&header, error);
           if (status == MB_SUCCESS)
             done = true;
@@ -4392,7 +4643,7 @@ numOfDgms, dgmNum, header.numBytesDgm, dgm_index->index_org, dgm_index->ping_num
           break;
 
         case SCL:
-            /* #SCL - Sensor CLock datagram */
+          /* #SCL - Sensor CLock datagram */
           status = mbr_kemkmall_rd_scl(verbose, buffer, store_ptr, (void *)&header, error);
           if (status == MB_SUCCESS)
             done = true;
@@ -4755,12 +5006,12 @@ int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
                       cpo->sensorData.correctedLat_deg, error);
       }
     }
-    else if (store->kind == MB_DATA_SONARDEPTH) {
+    else if (store->kind == MB_DATA_SENSORDEPTH) {
       struct mbsys_kmbes_sde *sde = &store->sde;
       if (*sensordepth_saved == MB_DATA_NONE) {
-        *sensordepth_saved = MB_DATA_SONARDEPTH;
+        *sensordepth_saved = MB_DATA_SENSORDEPTH;
       }
-      if (*sensordepth_saved == MB_DATA_SONARDEPTH) {
+      if (*sensordepth_saved == MB_DATA_SENSORDEPTH) {
         const double sde_time_d = sde->header.time_sec + 0.000000001 * sde->header.time_nanosec;
         mb_depint_add(verbose, mbio_ptr, sde_time_d, sde->sensorData.depthUsed_m, error);
       }
@@ -4811,9 +5062,9 @@ int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     preprocess_pars_ptr->nav_lon = mb_io_ptr->fix_lon;
     preprocess_pars_ptr->nav_lat = mb_io_ptr->fix_lat;
     preprocess_pars_ptr->nav_speed = NULL;
-    preprocess_pars_ptr->n_sensordepth = mb_io_ptr->nsonardepth;
-    preprocess_pars_ptr->sensordepth_time_d = mb_io_ptr->sonardepth_time_d;
-    preprocess_pars_ptr->sensordepth_sensordepth = mb_io_ptr->sonardepth_sonardepth;
+    preprocess_pars_ptr->n_sensordepth = mb_io_ptr->nsensordepth;
+    preprocess_pars_ptr->sensordepth_time_d = mb_io_ptr->sensordepth_time_d;
+    preprocess_pars_ptr->sensordepth_sensordepth = mb_io_ptr->sensordepth_sensordepth;
     preprocess_pars_ptr->n_heading = mb_io_ptr->nheading;
     preprocess_pars_ptr->heading_time_d = mb_io_ptr->heading_time_d;
     preprocess_pars_ptr->heading_heading = mb_io_ptr->heading_heading;
@@ -5067,6 +5318,263 @@ int mbr_kemkmall_wr_spo(int verbose, size_t *bufferalloc, char **bufferptr, void
 #ifdef MBR_KEMKMALL_DEBUG
   fprintf(stderr, "KEMKMALL datagram type %.4s written - time: %d.%9.9d status:%d error:%d\n",
           spo->header.dgmType, spo->header.time_sec, spo->header.time_nanosec, status, *error);
+#endif
+
+  /* return status */
+  return (status);
+};
+
+/*--------------------------------------------------------------------*/
+
+int mbr_kemkmall_wr_spe(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
+  size_t numBytesRawSensorData = 0;
+  char *buffer = NULL;
+  unsigned int index = 0;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
+    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+  }
+
+  /* get pointer to raw data structure */
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_spe *spe = &(store->spe);
+
+  /* datagram version being written */
+  spe->header.dgmVersion = MBSYS_KMBES_SPE_VERSION;
+
+  if (verbose >= 5) {
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
+    fprintf(stderr, "dbg5       numBytesDgm:                 %u\n", spe->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:                     %s\n", spe->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:                  %u\n", spe->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:                    %u\n", spe->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:               %u\n", spe->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:                    %u\n", spe->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:                %u\n", spe->header.time_nanosec);
+
+    fprintf(stderr, "dbg5       numBytesCmnPart:             %u\n", spe->cmnPart.numBytesCmnPart);
+    fprintf(stderr, "dbg5       sensorSystem:                %u\n", spe->cmnPart.sensorSystem);
+    fprintf(stderr, "dbg5       sensorStatus:                %u\n", spe->cmnPart.sensorStatus);
+    fprintf(stderr, "dbg5       padding:                     %u\n", spe->cmnPart.padding);
+
+    fprintf(stderr, "dbg5       timeFromSensor_sec:          %u\n", spe->sensorData.timeFromSensor_sec);
+    fprintf(stderr, "dbg5       timeFromSensor_nanosec:      %u\n", spe->sensorData.timeFromSensor_nanosec);
+    fprintf(stderr, "dbg5       rangeInputRms:               %f\n", spe->sensorData.rangeInputRms);
+    fprintf(stderr, "dbg5       ellipseSemiMajorAxisError_m: %f\n", spe->sensorData.ellipseSemiMajorAxisError_m);
+    fprintf(stderr, "dbg5       ellipseSemiMinorAxisError_m: %f\n", spe->sensorData.ellipseSemiMinorAxisError_m);
+    fprintf(stderr, "dbg5       ellipseOrientationError_deg: %f\n", spe->sensorData.ellipseOrientationError_deg);
+    fprintf(stderr, "dbg5       latitudeError_m:             %f\n", spe->sensorData.latitudeError_m);
+    fprintf(stderr, "dbg5       longitudeError_m:            %f\n", spe->sensorData.longitudeError_m);
+    fprintf(stderr, "dbg5       heightError_m:               %f\n", spe->sensorData.heightError_m);
+    fprintf(stderr, "dbg5       posErrorDataFromSensor:      %s\n", spe->sensorData.posErrorDataFromSensor);
+  }
+
+  /* size of output record */
+  *size = (size_t) spe->header.numBytesDgm;
+
+  int status = MB_SUCCESS;
+
+  /* allocate memory to write rest of record if necessary */
+  if (*bufferalloc < *size) {
+    status = mb_reallocd(verbose, __FILE__, __LINE__, *size, (void **)bufferptr, error);
+    if (status != MB_SUCCESS)
+      *bufferalloc = 0;
+    else
+      *bufferalloc = *size;
+  }
+
+  /* proceed to write if buffer allocated */
+  if (status == MB_SUCCESS) {
+    /* get buffer for writing */
+    buffer = (char *)*bufferptr;
+
+    /* calc number of bytes for raw sensor data */
+    numBytesRawSensorData = spe->header.numBytesDgm - MBSYS_KMBES_SPE_VAR_OFFSET;
+
+    /* insert the header */
+    mbr_kemkmall_wr_header(verbose, bufferptr, (void *)&(spe->header), error);
+
+    /* insert the data */
+    index = MBSYS_KMBES_HEADER_SIZE;
+
+    /* common part */
+    mb_put_binary_short(true, spe->cmnPart.numBytesCmnPart, &buffer[index]);
+    index += 2;
+    mb_put_binary_short(true, spe->cmnPart.sensorSystem, &buffer[index]);
+    index += 2;
+    mb_put_binary_short(true, spe->cmnPart.sensorStatus, &buffer[index]);
+    index += 2;
+    mb_put_binary_short(true, spe->cmnPart.padding, &buffer[index]);
+    index += 2;
+
+    /* sensor data block */
+    mb_put_binary_int(true, spe->sensorData.timeFromSensor_sec, &buffer[index]);
+    index += 4;
+    mb_put_binary_int(true, spe->sensorData.timeFromSensor_nanosec, &buffer[index]);
+    index += 4;
+    mb_put_binary_float(true, spe->sensorData.rangeInputRms, &buffer[index]);
+    index += 4;
+    mb_put_binary_float(true, spe->sensorData.ellipseSemiMajorAxisError_m, &buffer[index]);
+    index += 4;
+    mb_put_binary_float(true, spe->sensorData.ellipseSemiMinorAxisError_m, &buffer[index]);
+    index += 4;
+    mb_put_binary_float(true, spe->sensorData.ellipseOrientationError_deg, &buffer[index]);
+    index += 4;
+    mb_put_binary_float(true, spe->sensorData.latitudeError_m, &buffer[index]);
+    index += 4;
+    mb_put_binary_float(true, spe->sensorData.longitudeError_m, &buffer[index]);
+    index += 4;
+    mb_put_binary_float(true, spe->sensorData.heightError_m, &buffer[index]);
+    index += 4;
+
+    /* raw data msg from sensor */
+    memcpy(&buffer[index], &(spe->sensorData.posErrorDataFromSensor), numBytesRawSensorData);
+    index += numBytesRawSensorData;
+
+    /* insert closing byte count */
+    mb_put_binary_int(true, spe->header.numBytesDgm, &buffer[index]);
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:  %d\n", status);
+  }
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %.4s written - time: %d.%9.9d status:%d error:%d\n",
+          spe->header.dgmType, spe->header.time_sec, spe->header.time_nanosec, status, *error);
+#endif
+
+  /* return status */
+  return (status);
+};
+
+/*--------------------------------------------------------------------*/
+
+int mbr_kemkmall_wr_spd(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
+  size_t numBytesRawSensorData = 0;
+  char *buffer = NULL;
+  unsigned int index = 0;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
+    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+  }
+
+  /* get pointer to raw data structure */
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_spd *spd = &(store->spd);
+
+  /* datagram version being written */
+  spd->header.dgmVersion = MBSYS_KMBES_SPD_VERSION;
+
+  if (verbose >= 5) {
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
+    fprintf(stderr, "dbg5       numBytesDgm:                 %u\n", spd->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:                     %s\n", spd->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:                  %u\n", spd->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:                    %u\n", spd->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:               %u\n", spd->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:                    %u\n", spd->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:                %u\n", spd->header.time_nanosec);
+
+    fprintf(stderr, "dbg5       numBytesCmnPart:             %u\n", spd->cmnPart.numBytesCmnPart);
+    fprintf(stderr, "dbg5       sensorSystem:                %u\n", spd->cmnPart.sensorSystem);
+    fprintf(stderr, "dbg5       sensorStatus:                %u\n", spd->cmnPart.sensorStatus);
+    fprintf(stderr, "dbg5       padding:                     %u\n", spd->cmnPart.padding);
+
+    fprintf(stderr, "dbg5       localDatumCode:              %s\n", spd->sensorData.localDatumCode);
+    fprintf(stderr, "dbg5       localDatumSubCode:           %s\n", spd->sensorData.localDatumSubCode);
+    fprintf(stderr, "dbg5       latitudeOffset_deg:          %f\n", spd->sensorData.latitudeOffset_deg);
+    fprintf(stderr, "dbg5       longitudeOffset_deg:         %f\n", spd->sensorData.longitudeOffset_deg);
+    fprintf(stderr, "dbg5       altitudeOffset_m:            %f\n", spd->sensorData.altitudeOffset_m);
+    fprintf(stderr, "dbg5       datumName:                   %s\n", spd->sensorData.datumName);
+    fprintf(stderr, "dbg5       posDatumDataFromSensor:      %s\n", spd->sensorData.posDatumDataFromSensor);
+  }
+
+  /* size of output record */
+  *size = (size_t) spd->header.numBytesDgm;
+
+  int status = MB_SUCCESS;
+
+  /* allocate memory to write rest of record if necessary */
+  if (*bufferalloc < *size) {
+    status = mb_reallocd(verbose, __FILE__, __LINE__, *size, (void **)bufferptr, error);
+    if (status != MB_SUCCESS)
+      *bufferalloc = 0;
+    else
+      *bufferalloc = *size;
+  }
+
+  /* proceed to write if buffer allocated */
+  if (status == MB_SUCCESS) {
+    /* get buffer for writing */
+    buffer = (char *)*bufferptr;
+
+    /* calc number of bytes for raw sensor data */
+    numBytesRawSensorData = spd->header.numBytesDgm - MBSYS_KMBES_SPD_VAR_OFFSET;
+
+    /* insert the header */
+    mbr_kemkmall_wr_header(verbose, bufferptr, (void *)&(spd->header), error);
+
+    /* insert the data */
+    index = MBSYS_KMBES_HEADER_SIZE;
+
+    /* common part */
+    mb_put_binary_short(true, spd->cmnPart.numBytesCmnPart, &buffer[index]);
+    index += 2;
+    mb_put_binary_short(true, spd->cmnPart.sensorSystem, &buffer[index]);
+    index += 2;
+    mb_put_binary_short(true, spd->cmnPart.sensorStatus, &buffer[index]);
+    index += 2;
+    mb_put_binary_short(true, spd->cmnPart.padding, &buffer[index]);
+    index += 2;
+
+    /* sensor data block */
+    memcpy(&buffer[index], &(spd->sensorData.localDatumCode), 16);
+    index += 16;
+    memcpy(&buffer[index], &(spd->sensorData.localDatumSubCode), 16);
+    index += 16;
+    mb_put_binary_double(true, spd->sensorData.latitudeOffset_deg, &buffer[index]);
+    index += 8;
+    mb_put_binary_double(true, spd->sensorData.longitudeOffset_deg, &buffer[index]);
+    index += 8;
+    mb_put_binary_float(true, spd->sensorData.altitudeOffset_m, &buffer[index]);
+    index += 4;
+    memcpy(&buffer[index], &(spd->sensorData.datumName), 32);
+    index += 32;
+
+    /* raw data msg from sensor */
+    memcpy(&buffer[index], &(spd->sensorData.posDatumDataFromSensor), numBytesRawSensorData);
+    index += numBytesRawSensorData;
+
+    /* insert closing byte count */
+    mb_put_binary_int(true, spd->header.numBytesDgm, &buffer[index]);
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:  %d\n", status);
+  }
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %.4s written - time: %d.%9.9d status:%d error:%d\n",
+          spd->header.dgmType, spd->header.time_sec, spd->header.time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -8421,6 +8929,20 @@ int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
         status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
       break;
 
+    case MB_DATA_NAVIGATION_ERROR:
+      /* #SPE - Sensor Position Error data */
+      status = mbr_kemkmall_wr_spe(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      if (status == MB_SUCCESS)
+        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
+      break;
+
+    case MB_DATA_DATUM:
+      /* #SPD - Sensor Position Datum data */
+      status = mbr_kemkmall_wr_spd(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      if (status == MB_SUCCESS)
+        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
+      break;
+
     case MB_DATA_NAV1:
       /* #SKM - KM binary sensor data */
       status = mbr_kemkmall_wr_skm(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -8449,7 +8971,7 @@ int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
         status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
       break;
 
-    case MB_DATA_SONARDEPTH:
+    case MB_DATA_SENSORDEPTH:
       /* #SDE - Sensor DEpth data */
       status = mbr_kemkmall_wr_sde(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
       if (status == MB_SUCCESS)
@@ -8545,6 +9067,7 @@ int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     default:
         /* should never get here */
         status = MB_FAILURE;
+        *error = MB_ERROR_BAD_DATA;
         break;
   }
 
@@ -8636,7 +9159,7 @@ int mbr_register_kemkmall(int verbose, void *mbio_ptr, int *error) {
   mb_io_ptr->mb_io_extract = &mbsys_kmbes_extract;
   mb_io_ptr->mb_io_insert = &mbsys_kmbes_insert;
   mb_io_ptr->mb_io_extract_nav = &mbsys_kmbes_extract_nav;
-//  mb_io_ptr->mb_io_extract_nnav = &mbsys_kmbes_extract_nnav;
+  mb_io_ptr->mb_io_extract_nnav = &mbsys_kmbes_extract_nnav;
   mb_io_ptr->mb_io_insert_nav = &mbsys_kmbes_insert_nav;
   mb_io_ptr->mb_io_extract_altitude = &mbsys_kmbes_extract_altitude;
   mb_io_ptr->mb_io_insert_altitude = NULL;

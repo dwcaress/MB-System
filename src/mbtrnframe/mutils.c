@@ -311,7 +311,9 @@ void mfu_fmt_xml(int fd,const char *buf, const char *del, int indent)
         while(*ip!='<' && ip<end )ip++;
         
         for(i=0;i<(level+indent);i++){
-            write(fd," ",1);
+            if(write(fd," ",1) < 0){
+                fprintf(stderr,"%s:%d write error [%d/%s]\n", __func__, __LINE__, errno, strerror(errno));
+            }
         }
 
         while(ip>=buf && ip<end ){
@@ -368,16 +370,22 @@ void mfu_fmt_xml(int fd,const char *buf, const char *del, int indent)
                     break;
             }
             if ( (action&PRINT_BYTE) !=0 ) {
-                write(fd,ip++,1);
+                if(write(fd,ip++,1) < 0){
+                    fprintf(stderr,"%s:%d write error [%d/%s]\n", __func__, __LINE__, errno, strerror(errno));
+                }
             }
 
             if ( (action&NEWLINE) !=0 ) {
 	            int j=0;
                 if(NULL!=del){
-                    write(fd,del,strlen(del));
+                    if(write(fd,del,strlen(del)) < 0){
+                        fprintf(stderr,"%s:%d write error [%d/%s]\n", __func__, __LINE__, errno, strerror(errno));
+                    }
                 }
                 for(j=0;j<(level+indent);j++){
-                    write(fd," ",1);
+                    if(write(fd," ",1) < 0){
+                        fprintf(stderr,"%s:%d write error [%d/%s]\n", __func__, __LINE__, errno, strerror(errno));
+                    }
                 }
             }
             
@@ -386,7 +394,9 @@ void mfu_fmt_xml(int fd,const char *buf, const char *del, int indent)
             }
         }
         if(NULL!=del){
-            write(fd,del,strlen(del));
+            if(write(fd,del,strlen(del)) < 0){
+                fprintf(stderr,"%s:%d write error [%d/%s]\n", __func__, __LINE__, errno, strerror(errno));
+            }
         }
 
     }else{
@@ -402,7 +412,8 @@ int mfu_test(int verbose)
     
     char buf[64]={0};
     char *bp=buf;
-    sprintf(buf,"ABCDEFGHIJK0123456789\n");
+
+    snprintf(buf, 64, "ABCDEFGHIJK0123456789\n");
     mfu_hex_show((byte *)buf,64,16,true,5);
 
     memset(buf,0x02,64);
@@ -421,7 +432,7 @@ int mfu_test(int verbose)
     if(strcmp(buf,"test vbprint")!=0)err_count|=(1<<3);
     fprintf(stderr,"trim[%s]\n",buf);
 
-    sprintf(buf,"<a> foo <b> bar <c>baz\n<\\c><\\b><\\a>\n");
+    snprintf(buf, 64, "<a> foo <b> bar <c>baz\n<\\c><\\b><\\a>\n");
      mfu_fmt_xml(1, buf,"\n", 5);
 
     retval=err_count;

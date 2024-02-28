@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbpronav.c	5/20/99
  *
- *    Copyright (c) 1999-2020 by
+ *    Copyright (c) 1999-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * mbr_mbpronav.c contains the functions for reading and writing
@@ -128,7 +138,7 @@ int mbr_zero_mbpronav(int verbose, char *data_ptr, int *error) {
 		data->latitude = 0.0;
 		data->heading = 0.0;
 		data->speed = 0.0;
-		data->sonardepth = 0.0;
+		data->sensordepth = 0.0;
 		data->roll = 0.0;
 		data->pitch = 0.0;
 		data->heave = 0.0;
@@ -283,7 +293,7 @@ int mbr_mbpronav_rd_data(int verbose, void *mbio_ptr, int *error) {
 			data->latitude = d3;
 			data->heading = 0.0;
 			data->speed = 0.0;
-			data->sonardepth = 0.0;
+			data->sensordepth = 0.0;
 			data->roll = 0.0;
 			data->pitch = 0.0;
 			data->heave = 0.0;
@@ -299,7 +309,7 @@ int mbr_mbpronav_rd_data(int verbose, void *mbio_ptr, int *error) {
 		if (nread >= 11)
 			data->speed = d5;
 		if (nread >= 12)
-			data->sonardepth = d6;
+			data->sensordepth = d6;
 		if (nread >= 15) {
 			data->roll = d7;
 			data->pitch = d8;
@@ -336,7 +346,7 @@ int mbr_mbpronav_rd_data(int verbose, void *mbio_ptr, int *error) {
 				fprintf(stderr, "dbg4       longitude:      %f\n", data->longitude);
 				fprintf(stderr, "dbg4       heading:        %f\n", data->heading);
 				fprintf(stderr, "dbg4       speed:          %f\n", data->speed);
-				fprintf(stderr, "dbg4       sonardepth:     %f\n", data->sonardepth);
+				fprintf(stderr, "dbg4       sensordepth:     %f\n", data->sensordepth);
 				fprintf(stderr, "dbg4       roll:           %f\n", data->roll);
 				fprintf(stderr, "dbg4       pitch:          %f\n", data->pitch);
 				fprintf(stderr, "dbg4       heave:          %f\n", data->heave);
@@ -397,7 +407,7 @@ int mbr_rt_mbpronav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->latitude = data->latitude;
 		store->heading = data->heading;
 		store->speed = data->speed;
-		store->sonar_depth = data->sonardepth;
+		store->sonar_depth = data->sensordepth;
 		store->roll = data->roll;
 		store->pitch = data->pitch;
 		store->heave = data->heave;
@@ -504,7 +514,7 @@ int mbr_mbpronav_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			fprintf(stderr, "dbg4       longitude:    %f\n", data->longitude);
 			fprintf(stderr, "dbg4       heading:      %f\n", data->heading);
 			fprintf(stderr, "dbg4       speed:        %f\n", data->speed);
-			fprintf(stderr, "dbg4       sonardepth:   %f\n", data->sonardepth);
+			fprintf(stderr, "dbg4       sensordepth:   %f\n", data->sensordepth);
 			fprintf(stderr, "dbg4       roll:         %f\n", data->roll);
 			fprintf(stderr, "dbg4       pitch:        %f\n", data->pitch);
 			fprintf(stderr, "dbg4       heave:        %f\n", data->heave);
@@ -518,7 +528,7 @@ int mbr_mbpronav_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 		sprintf(line,
 		        "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n",
 		        data->time_i[0], data->time_i[1], data->time_i[2], data->time_i[3], data->time_i[4], data->time_i[5],
-		        data->time_i[6], data->time_d, data->longitude, data->latitude, data->heading, data->speed, data->sonardepth,
+		        data->time_i[6], data->time_d, data->longitude, data->latitude, data->heading, data->speed, data->sensordepth,
 		        data->roll, data->pitch, data->heave, data->portlon, data->portlat, data->stbdlon, data->stbdlat);
 	}
 
@@ -575,7 +585,7 @@ int mbr_wt_mbpronav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->latitude = store->latitude;
 		data->heading = store->heading;
 		data->speed = store->speed;
-		data->sonardepth = store->sonar_depth;
+		data->sensordepth = store->sonar_depth;
 		data->roll = store->roll;
 		data->pitch = store->pitch;
 		data->heave = store->heave;

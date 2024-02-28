@@ -2,15 +2,25 @@
 #--------------------------------------------------------------------
 #    The MB-system: mbm_route2mission.perl   7/18/2004
 #
-#    Copyright (c) 2004-2020 by
-#    D. W. Caress (caress@mbari.org)
+#    Copyright (c) 2004-2024 by
+#    David W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
-#      Moss Landing, CA
-#    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+#      Moss Landing, California, USA
+#    Dale N. Chayes 
+#      Center for Coastal and Ocean Mapping
+#      University of New Hampshire
+#      Durham, New Hampshire, USA
+#    Christian dos Santos Ferreira
+#      MARUM
+#      University of Bremen
+#      Bremen Germany
+#      
+#    MB-System was created by Caress and Chayes in 1992 at the
 #      Lamont-Doherty Earth Observatory
-#      Palisades, NY  10964
+#      Columbia University
+#      Palisades, NY 10964
 #
-#    See README file for copying and redistribution conditions.
+#    See README.md file for copying and redistribution conditions.
 #--------------------------------------------------------------------
 #
 # Command:
@@ -62,6 +72,31 @@ $program_name = "mbm_route2mission";
 #     Use 3.0 * expected duration for waypoint behaviors
 #     Use 1.3 * expected duration the mission as a whole
 #     Abort time must not be greater than battery life of 8 hours = 28800 seconds
+#
+# Definition of behavior id's
+$BEHAVIOR_getgps				= 1;
+$BEHAVIOR_setpoint				= 2;
+$BEHAVIOR_descend				= 3;
+$BEHAVIOR_ascend				= 4;
+$BEHAVIOR_acousticUpdate		= 5;
+$BEHAVIOR_waypoint				= 6;
+$BEHAVIOR_waypoint_depth		= 7;
+$BEHAVIOR_waypoint_wall			= 8;
+$BEHAVIOR_waypoint_bottom		= 9;
+$BEHAVIOR_kearfott				= 20;
+$BEHAVIOR_battery				= 21;
+$BEHAVIOR_trn					= 22;
+$BEHAVIOR_StartSurvey			= 23;
+$BEHAVIOR_StartSurveyAvtrack	= 24;
+$BEHAVIOR_reson					= 30;
+$BEHAVIOR_edgetech				= 31;
+$BEHAVIOR_delta_t				= 32;
+$BEHAVIOR_startCamera			= 33;
+$BEHAVIOR_stopCamera			= 34;
+
+$behavior_id = 0;
+$behavior_count = 1;
+#
 $durationfactorwaypoint = 6.0;
 $durationfactormission = 1.5;
 $durationmax = 28800;
@@ -101,15 +136,16 @@ $gpsmode = 0;
 $setpointtime = 30;
 
 # behavior descend
-$descendpitch = -45;
-$descendrudder = 2;
+$descendpitch = -45.0;
+$descendrudder = 2.0;
 $descentdepth = 3.0;
+$magcalrudder = 3.0;
 $initialdescendtime = 300;
 
 # behavior ascend
-$ascendrudder = 3;
-$ascendpitch = 45;
-$ascendenddepth = 2;
+$ascendrudder = 3.0;
+$ascendpitch = 45.0;
+$ascendenddepth = 2.0;
 
 # behavior reson
 $resonduration = 6;
@@ -515,6 +551,28 @@ while ($line = <RFILE>)
 	elsif ($line =~ /^> ## ENDROUTE/)
 		{
 #		printf "Route: $line";
+		}
+	elsif ($line =~ /(\S+),(\S+),(\S+),(\S+),(\S+),(\S+),(\S+),/)
+		{
+		#extract route data
+		($lon, $lat, $topo, $waypoint, $bearing, $distance, $distonbottom, $slope)
+			= $line
+			=~ /(\S+),(\S+),(\S+),(\S+),(\S+),(\S+),(\S+),/;
+		$output = 0;
+		$length = 0;
+		push(@lons, $lon);
+		push(@lats, $lat);
+		push(@topos, $topo);
+		push(@waypoints, $waypoint);
+		push(@bearings, $bearing);
+		push(@distances, $distance);
+		push(@lengths, $length);
+		push(@distonbottoms, $distonbottom);
+		push(@slopes, $slope);
+		push(@outputs, $output);
+
+		# increment counter
+		$cnt++;
 		}
 	elsif ($line =~ /(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/)
 		{
@@ -1390,6 +1448,7 @@ if (!$outputoff)
 	printf MFILE "#define ASCENDENDDEPTH             %f\r\n", $ascendenddepth;
 	printf MFILE "#define DESCENDRUDDER              %f\r\n", $descendrudder;
 	printf MFILE "#define DESCENDPITCH               %f\r\n", $descendpitch;
+	printf MFILE "#define MAGCALRUDDER               %f\r\n", $magcalrudder;
 	printf MFILE "#define RESON_DURATION             %d\r\n", $resonduration;
 	print MFILE "# \r\n";
 	print MFILE "#######################################################\r\n";
@@ -1418,6 +1477,9 @@ if (!$outputoff)
 	print MFILE "# zero speed setpoint on surface\r\n";
 	print MFILE "behavior setpoint \r\n";
 	print MFILE "{ \r\n";
+	$behavior_id = $BEHAVIOR_setpoint + 0 * $behavior_count;
+	$behavior_count = $behavior_count + 1;
+	print MFILE "id     = $behavior_id; \r\n";
 	print MFILE "duration     = 3600; \r\n";
 	print MFILE "heading      = 0.0; \r\n";
 	print MFILE "speed        = 0.0; \r\n";
@@ -1428,6 +1490,9 @@ if (!$outputoff)
 	print MFILE "# acquire gps fix \r\n";
 	print MFILE "behavior getgps  \r\n";
 	print MFILE "{ \r\n";
+	$behavior_id = $BEHAVIOR_getgps + 0 * $behavior_count;
+	$behavior_count = $behavior_count + 1;
+	print MFILE "id     = $behavior_id; \r\n";
 	print MFILE "duration = GPS_DURATION; \r\n";
 	print MFILE "minHits = GPSMINHITS; \r\n";
 	print MFILE "abortOnTimeout = True; \r\n";
@@ -1437,6 +1502,9 @@ if (!$outputoff)
 	print MFILE "# ascend behavior \r\n";
 	print MFILE "behavior ascend  \r\n";
 	print MFILE "{ \r\n";
+	$behavior_id = $BEHAVIOR_ascend + 0 * $behavior_count;
+	$behavior_count = $behavior_count + 1;
+	print MFILE "id     = $behavior_id; \r\n";
 	$i = $nmissionpoints - 1;
 	printf MFILE "duration  = %d; \r\n", $ascendtimes[$i];
 	print MFILE "horizontalMode   = rudder; \r\n";
@@ -1449,18 +1517,21 @@ if (!$outputoff)
 	print MFILE "# \r\n";
 	print MFILE "# Acoustic update 1 - sent status ping after end of survey \r\n";
 	print MFILE "# \r\n";
-	print MFILE "behavior acousticUpdate \r\n";
-	print MFILE "{ \r\n";
-	print MFILE "duration  = 2; \r\n";
-	print MFILE "dummy  = 1; \r\n";
-	print MFILE "} \r\n";
+	print MFILE "# behavior acousticUpdate \r\n";
+	print MFILE "# { \r\n";
+	print MFILE "# duration  = 2; \r\n";
+	print MFILE "# dummy  = 1; \r\n";
+	print MFILE "# } \r\n";
 	print MFILE "# \r\n";
-    print "Behavior: acousticUpdate\r\n";
+    # print "Behavior: acousticUpdate\r\n";
     if ($trnenable)
     	{
 	    print MFILE "# trn behavior \r\n";
 		print MFILE "behavior trn \r\n";
 		print MFILE "{ \r\n";
+		$behavior_id = $BEHAVIOR_trn + 0 * $behavior_count;
+		$behavior_count = $behavior_count + 1;
+		print MFILE "id     = $behavior_id; \r\n";
 		print MFILE "duration  = 2; \r\n";
 		print MFILE "enableOffsets  = False; \r\n";
 		print MFILE "} \r\n";
@@ -1472,12 +1543,18 @@ if (!$outputoff)
 		print MFILE "# Stop data logging on sonars and then turn off power to sonars\r\n";
 		print MFILE "behavior battery \r\n";
 		print MFILE "{ \r\n";
+		$behavior_id = $BEHAVIOR_battery + 0 * $behavior_count;
+		$behavior_count = $behavior_count + 1;
+		print MFILE "id     = $behavior_id; \r\n";
 		print MFILE "	duration = 10; \r\n";
 		print MFILE "	disableAuxLoads = 1; \r\n";
 		print MFILE "} \r\n";
 		print MFILE "# ascend behavior for 30 seconds to give time for sonars to stop logging \r\n";
 		print MFILE "behavior ascend  \r\n";
 		print MFILE "{ \r\n";
+		$behavior_id = $BEHAVIOR_ascend + 0 * $behavior_count;
+		$behavior_count = $behavior_count + 1;
+		print MFILE "id     = $behavior_id; \r\n";
 		printf MFILE "duration  = 30; \r\n", $ascendtimes[$i];
 		print MFILE "horizontalMode   = rudder; \r\n";
 		print MFILE "horizontal       = ASCENDRUDDER; \r\n";
@@ -1488,6 +1565,9 @@ if (!$outputoff)
 		print "Behavior: ascend\r\n";
 		print MFILE "behavior edgetech \r\n";
 		print MFILE "{ \r\n";
+		$behavior_id = $BEHAVIOR_edgetech + 0 * $behavior_count;
+		$behavior_count = $behavior_count + 1;
+		print MFILE "id     = $behavior_id; \r\n";
 		print MFILE "duration  = RESON_DURATION; \r\n";
 		print MFILE "SBP_Mode  = 0; \r\n";
 		print MFILE "LoSS_Mode = 0; \r\n";
@@ -1495,6 +1575,9 @@ if (!$outputoff)
 		print MFILE "} \r\n";
 		print MFILE "behavior reson \r\n";
 		print MFILE "{ \r\n";
+		$behavior_id = $BEHAVIOR_reson + 0 * $behavior_count;
+		$behavior_count = $behavior_count + 1;
+		print MFILE "id     = $behavior_id; \r\n";
 		print MFILE "duration  = RESON_DURATION; \r\n";
 		print MFILE "MB_Power = 0; \r\n";
 		print MFILE "Log_Mode  = 0; \r\n";
@@ -1507,6 +1590,9 @@ if (!$outputoff)
 		print MFILE "# by setting the value of the mode attribute to 0 (used to be False). \r\n";
 		print MFILE "behavior delta_t \r\n";
 		print MFILE "{ \r\n";
+		$behavior_id = $BEHAVIOR_delta_t + 0 * $behavior_count;
+		$behavior_count = $behavior_count + 1;
+		print MFILE "id     = $behavior_id; \r\n";
 		print MFILE "duration  = RESON_DURATION; \r\n";
 		print MFILE "logMode  = 0; \r\n";
 		print MFILE "} \r\n";
@@ -1519,6 +1605,9 @@ print "Behavior: delta_t (stop, logMode = 0)\r\n";
 		print MFILE "#   Distance along survey: $mdistances[$nmissionpoints-1]\r\n";
 		print MFILE "behavior stopCamera \r\n";
 		print MFILE "{ \r\n";
+		$behavior_id = $BEHAVIOR_stopCamera + 0 * $behavior_count;
+		$behavior_count = $behavior_count + 1;
+		print MFILE "id     = $behavior_id; \r\n";
 		print MFILE "duration  = 1; \r\n";
 		print MFILE "} \r\n";
 printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$nmissionpoints-1];
@@ -1618,6 +1707,9 @@ print "GPS ASCENT!!\n";
           {
   				print MFILE "behavior edgetech \r\n";
   				print MFILE "{ \r\n";
+				$behavior_id = $BEHAVIOR_edgetech + 0 * $behavior_count;
+				$behavior_count = $behavior_count + 1;
+				print MFILE "id     = $behavior_id; \r\n";
   				print MFILE "duration  = RESON_DURATION; \r\n";
   				if ($subbottom && $mstartstops[$i] == 2)
   					{
@@ -1641,6 +1733,9 @@ print "GPS ASCENT!!\n";
           }
 				print MFILE "behavior reson \r\n";
 				print MFILE "{ \r\n";
+				$behavior_id = $BEHAVIOR_reson + 0 * $behavior_count;
+				$behavior_count = $behavior_count + 1;
+				print MFILE "id     = $behavior_id; \r\n";
 				print MFILE "Log_Mode  = $logmode; \r\n";
 				print MFILE "duration  = RESON_DURATION; \r\n";
 				print MFILE "MB_Power = $mb_transmitgain; \r\n";
@@ -1654,6 +1749,9 @@ print "Behavior: reson (start, Log_Mode = $logmode)\r\n";
 				print MFILE "# Turn on power to sonars and restart logging on the PLC \r\n";
 				print MFILE "behavior delta_t \r\n";
 				print MFILE "{ \r\n";
+				$behavior_id = $BEHAVIOR_delta_t + 0 * $behavior_count;
+				$behavior_count = $behavior_count + 1;
+				print MFILE "id     = $behavior_id; \r\n";
 				print MFILE "logMode  = $logmode; \r\n";
 				print MFILE "duration  = RESON_DURATION; \r\n";
 				print MFILE "} \r\n";
@@ -1674,6 +1772,9 @@ print "Behavior: delta_t (start, logMode = $logmode)\r\n";
 					print MFILE "#   Number of photos: $nphotos\r\n";
 					print MFILE "behavior startCamera \r\n";
 					print MFILE "{ \r\n";
+					$behavior_id = $BEHAVIOR_startCamera + 0 * $behavior_count;
+					$behavior_count = $behavior_count + 1;
+					print MFILE "id     = $behavior_id; \r\n";
 					print MFILE "duration  = 1; \r\n";
 					#print MFILE "nPhotos = $nphotos; \r\n";
 					print MFILE "nSamplePeriods = 10; \r\n";
@@ -1690,6 +1791,9 @@ printf "Behavior: startCamera (distance:%.2f m, run length:%.2f m, nphotos:%d)\n
 					print MFILE "#   Distance along survey: $mdistances[$i]\r\n";
 					print MFILE "behavior stopCamera \r\n";
 					print MFILE "{ \r\n";
+					$behavior_id = $BEHAVIOR_stopCamera + 0 * $behavior_count;
+					$behavior_count = $behavior_count + 1;
+					print MFILE "id     = $behavior_id; \r\n";
 					print MFILE "duration  = 1; \r\n";
 					print MFILE "} \r\n";
 printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$i];
@@ -1697,17 +1801,20 @@ printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$i];
 				}
 			print MFILE "# Acoustic update 2 - sent status ping before resuming logging \r\n";
 			print MFILE "# \r\n";
-			print MFILE "behavior acousticUpdate \r\n";
-			print MFILE "{ \r\n";
-			print MFILE "duration  = 2; \r\n";
-			print MFILE "dummy  = 1; \r\n";
-			print MFILE "} \r\n";
+			print MFILE "# behavior acousticUpdate \r\n";
+			print MFILE "# { \r\n";
+			print MFILE "# duration  = 2; \r\n";
+			print MFILE "# dummy  = 1; \r\n";
+			print MFILE "# } \r\n";
 			print MFILE "# \r\n";
-print "Behavior: acousticUpdate\n";
+# print "Behavior: acousticUpdate\n";
 			print MFILE "# \r\n";
 			print MFILE "# Descend behavior \r\n";
 			print MFILE "behavior descend  \r\n";
 			print MFILE "{ \r\n";
+			$behavior_id = $BEHAVIOR_stopCamera + 0 * $behavior_count;
+			$behavior_count = $behavior_descend + 1;
+			print MFILE "id     = $behavior_id; \r\n";
 			print MFILE "horizontalMode = heading; \r\n";
 			printf MFILE "horizontal      = %f; \r\n", $mbearings[$i];
 			print MFILE "pitch           = DESCENDPITCH; \r\n";
@@ -1721,6 +1828,9 @@ print "Behavior: descend\r\n";
 			print MFILE "# setpoint on surface to gather momentum \r\n";
 			print MFILE "behavior setpoint \r\n";
 			print MFILE "{ \r\n";
+			$behavior_id = $BEHAVIOR_setpoint + 0 * $behavior_count;
+			$behavior_count = $behavior_count + 1;
+			print MFILE "id     = $behavior_id; \r\n";
 			print MFILE "duration        = SETPOINT_DURATION; \r\n";
 			printf MFILE "heading         = %f; \r\n", $mbearings[$i];
 			print MFILE "speed           = ASCENTDESCENT_SPEED; \r\n";
@@ -1732,6 +1842,9 @@ print "Behavior: setpoint\r\n";
 			print MFILE "# acquire gps fix \r\n";
 			print MFILE "behavior getgps  \r\n";
 			print MFILE "{ \r\n";
+			$behavior_id = $BEHAVIOR_getgps + 0 * $behavior_count;
+			$behavior_count = $behavior_count + 1;
+			print MFILE "id     = $behavior_id; \r\n";
 			print MFILE "duration = GPS_DURATION; \r\n";
 			print MFILE "minHits = GPSMINHITS; \r\n";
 			print MFILE "abortOnTimeout = True; \r\n";
@@ -1741,6 +1854,9 @@ print "Behavior: gps\r\n";
 			print MFILE "# ascend behavior \r\n";
 			print MFILE "behavior ascend  \r\n";
 			print MFILE "{ \r\n";
+			$behavior_id = $BEHAVIOR_ascend + 0 * $behavior_count;
+			$behavior_count = $behavior_count + 1;
+			print MFILE "id     = $behavior_id; \r\n";
 			printf MFILE "duration  = %d; \r\n", $ascendtimes[$i];
 			print MFILE "horizontalMode   = rudder; \r\n";
 			print MFILE "horizontal       = ASCENDRUDDER; \r\n";
@@ -1751,13 +1867,16 @@ print "Behavior: gps\r\n";
 print "Behavior: ascend\r\n";
 			print MFILE "# Acoustic update 3 - sent status ping before ascent \r\n";
 			print MFILE "# \r\n";
-			print MFILE "behavior acousticUpdate \r\n";
-			print MFILE "{ \r\n";
-			print MFILE "duration  = 2; \r\n";
-			print MFILE "dummy  = 1; \r\n";
-			print MFILE "} \r\n";
+			print MFILE "# behavior acousticUpdate \r\n";
+			print MFILE "# { \r\n";
+			$behavior_id = $BEHAVIOR_acousticUpdate + 0 * $behavior_count;
+			$behavior_count = $behavior_count + 1;
+			print MFILE "id     = $behavior_id; \r\n";
+			print MFILE "# duration  = 2; \r\n";
+			print MFILE "# dummy  = 1; \r\n";
+			print MFILE "# } \r\n";
 			print MFILE "# \r\n";
-print "Behavior: acousticUpdate\n";
+# print "Behavior: acousticUpdate\n";
 
 			print MFILE "# \r\n";
 			if ($mappingsonar)
@@ -1765,12 +1884,18 @@ print "Behavior: acousticUpdate\n";
     			print MFILE "# Stop data logging on sonars and then turn off power to sonars\r\n";
     			print MFILE "behavior battery \r\n";
     			print MFILE "{ \r\n";
+				$behavior_id = $BEHAVIOR_battery + 0 * $behavior_count;
+				$behavior_count = $behavior_count + 1;
+				print MFILE "id     = $behavior_id; \r\n";
     			print MFILE "	duration = 10; \r\n";
     			print MFILE "	disableAuxLoads = 1; \r\n";
     			print MFILE "} \r\n";
 				print MFILE "# ascend behavior for 30 seconds to give time for sonars to stop logging \r\n";
 				print MFILE "behavior ascend  \r\n";
 				print MFILE "{ \r\n";
+				$behavior_id = $BEHAVIOR_ascend + 0 * $behavior_count;
+				$behavior_count = $behavior_count + 1;
+				print MFILE "id     = $behavior_id; \r\n";
 				printf MFILE "duration  = 30; \r\n", $ascendtimes[$i];
 				print MFILE "horizontalMode   = rudder; \r\n";
 				print MFILE "horizontal       = ASCENDRUDDER; \r\n";
@@ -1783,6 +1908,9 @@ print "Behavior: ascend\r\n";
           			{
   					print MFILE "behavior edgetech \r\n";
   					print MFILE "{ \r\n";
+					$behavior_id = $BEHAVIOR_edgetech + 0 * $behavior_count;
+					$behavior_count = $behavior_count + 1;
+					print MFILE "id     = $behavior_id; \r\n";
   					print MFILE "duration  = RESON_DURATION; \r\n";
   					if ($subbottom)
   						{
@@ -1800,6 +1928,9 @@ print "Behavior: ascend\r\n";
           			}
 				print MFILE "behavior reson \r\n";
 				print MFILE "{ \r\n";
+				$behavior_id = $BEHAVIOR_reson + 0 * $behavior_count;
+				$behavior_count = $behavior_count + 1;
+				print MFILE "id     = $behavior_id; \r\n";
 				print MFILE "duration  = RESON_DURATION; \r\n";
 				print MFILE "Log_Mode  = 0; \r\n";
 				print MFILE "MB_Power = 0.0; \r\n";
@@ -1814,6 +1945,9 @@ print "Behavior: reson (stop, Log_Mode = 0)\r\n";
 				print MFILE "# by setting the value of the mode attribute to 0 (used to be False). \r\n";
 				print MFILE "behavior delta_t \r\n";
 				print MFILE "{ \r\n";
+				$behavior_id = $BEHAVIOR_delta_t + 0 * $behavior_count;
+				$behavior_count = $behavior_count + 1;
+				print MFILE "id     = $behavior_id; \r\n";
 				print MFILE "duration  = RESON_DURATION; \r\n";
 				print MFILE "logMode  = 0; \r\n";
 				print MFILE "} \r\n";
@@ -1826,6 +1960,9 @@ print "Behavior: delta_t (stop, logMode = 0)\r\n";
 				print MFILE "# Turn off camera imaging \r\n";
 				print MFILE "#   Distance along survey: $mdistances[$i]\r\n";
 				print MFILE "behavior stopCamera \r\n";
+				$behavior_id = $BEHAVIOR_stopCamera + 0 * $behavior_count;
+				$behavior_count = $behavior_count + 1;
+				print MFILE "id     = $behavior_id; \r\n";
 				print MFILE "{ \r\n";
 				print MFILE "duration  = 1; \r\n";
 				print MFILE "} \r\n";
@@ -1845,6 +1982,9 @@ printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$i];
 		    	print MFILE "# trn behavior \r\n";
 				print MFILE "behavior trn \r\n";
 				print MFILE "{ \r\n";
+				$behavior_id = $BEHAVIOR_trn + 0 * $behavior_count;
+				$behavior_count = $behavior_count + 1;
+				print MFILE "id     = $behavior_id; \r\n";
 				print MFILE "duration  = 2; \r\n";
 				print MFILE "enableOffsets  = True; \r\n";
 				print MFILE "} \r\n";
@@ -1854,6 +1994,9 @@ printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$i];
 			print MFILE "# \r\n";
 			print MFILE "behavior reson \r\n";
 			print MFILE "{ \r\n";
+			$behavior_id = $BEHAVIOR_reson + 0 * $behavior_count;
+			$behavior_count = $behavior_count + 1;
+			print MFILE "id     = $behavior_id; \r\n";
 			print MFILE "duration  = RESON_DURATION; \r\n";
 			print MFILE "Log_Mode  = $logmode; \r\n";
 			print MFILE "} \r\n";
@@ -1869,7 +2012,10 @@ print "Behavior: reson (startup, Log_Mode = $logmode)\r\n";
         {
   			print MFILE "behavior edgetech \r\n";
   			print MFILE "{ \r\n";
-  			print MFILE "duration  = RESON_DURATION; \r\n";
+		 	$behavior_id = $BEHAVIOR_edgetech + 0 * $behavior_count;
+			$behavior_count = $behavior_count + 1;
+			print MFILE "id     = $behavior_id; \r\n";
+ 			print MFILE "duration  = RESON_DURATION; \r\n";
   			if ($subbottom && $mstartstops[$i] == 2)
   				{
   				print MFILE "SBP_Mode = 1; \r\n";
@@ -1903,6 +2049,9 @@ print "Behavior: reson (startup, Log_Mode = $logmode)\r\n";
         }
 			print MFILE "behavior reson \r\n";
 			print MFILE "{ \r\n";
+			$behavior_id = $BEHAVIOR_reson + 0 * $behavior_count;
+			$behavior_count = $behavior_count + 1;
+			print MFILE "id     = $behavior_id; \r\n";
 			print MFILE "duration  = RESON_DURATION; \r\n";
 			print MFILE "MB_Power = $mb_transmitgain; \r\n";
 			printf MFILE "MB_Range = %.2f; \r\n", $mb_range;
@@ -1930,6 +2079,9 @@ print "Behavior: reson (startup, Log_Mode = $logmode)\r\n";
 			print MFILE "# \r\n";
 			print MFILE "behavior delta_t \r\n";
 			print MFILE "{ \r\n";
+			$behavior_id = $BEHAVIOR_delta_t + 0 * $behavior_count;
+			$behavior_count = $behavior_count + 1;
+			print MFILE "id     = $behavior_id; \r\n";
 			print MFILE "duration  = RESON_DURATION; \r\n";
 			print MFILE "logMode  = $logmode; \r\n";
 			print MFILE "} \r\n";
@@ -1943,6 +2095,9 @@ print "Behavior: reson (startup, Log_Mode = $logmode)\r\n";
 			print MFILE "# \r\n";
 			print MFILE "behavior delta_t \r\n";
 			print MFILE "{ \r\n";
+			$behavior_id = $BEHAVIOR_delta_t + 0 * $behavior_count;
+			$behavior_count = $behavior_count + 1;
+			print MFILE "id     = $behavior_id; \r\n";
 			print MFILE "duration  = RESON_DURATION; \r\n";
 			print MFILE "logMode = 0; \r\n";
 			print MFILE "receiveGain = 10; \r\n";  # Range is 1 to 20dB
@@ -1980,6 +2135,9 @@ print "Behavior: reson (startup, Log_Mode = $logmode)\r\n";
 			printf MFILE "#   Vehicle depth: %f meters\r\n", $mmissiondepths[$i];
 			print MFILE "behavior waypoint  \r\n";
 			print MFILE "{ \r\n";
+			$behavior_id = $BEHAVIOR_waypoint + 0 * $behavior_count;
+			$behavior_count = $behavior_count + 1;
+			print MFILE "id     = $behavior_id; \r\n";
 			printf MFILE "latitude     = %f; \r\n", $mlats[$i];
 			printf MFILE "longitude    = %f; \r\n", $mlons[$i];
 			printf MFILE "duration     = TIME_TO_FIRST_WAYPOINT; \r\n";
@@ -1992,19 +2150,22 @@ print "Behavior: waypoint\n";
 			print MFILE "# This modem squawk was added following the suggestion of Jordan Caress \r\n";
 			print MFILE "# (at the insistence of Eric Martin) \r\n";
 			print MFILE "# \r\n";
-			print MFILE "behavior acousticUpdate \r\n";
-			print MFILE "{ \r\n";
-			print MFILE "duration  = 2; \r\n";
-			print MFILE "dummy  = 1; \r\n";
-			print MFILE "} \r\n";
-print "Behavior: acousticUpdate\n";
+			print MFILE "# behavior acousticUpdate \r\n";
+			print MFILE "# { \r\n";
+			print MFILE "# duration  = 2; \r\n";
+			print MFILE "# dummy  = 1; \r\n";
+			print MFILE "# } \r\n";
+# print "Behavior: acousticUpdate\n";
 			print MFILE "# \r\n";
       		if ($startsurvey == 1)
         		{
   				print MFILE "# Zero speed hang to allow final nav updates over acoustic modem\r\n";
   				print MFILE "# - must get start survey command over acoustic modem or mission aborts\r\n";
-  				print MFILE "behavior StartSurvey  \r\n";
+  				print MFILE "behavior StartSurveyAvtrak  \r\n";
   				print MFILE "{ \r\n";
+				$behavior_id = $BEHAVIOR_StartSurveyAvtrak + 0 * $behavior_count;
+				$behavior_count = $behavior_count + 1;
+				print MFILE "id     = $behavior_id; \r\n";
   				print MFILE "duration     = 300; \r\n";
   				print MFILE "} \r\n";
 print "Behavior: startsurvey\n";
@@ -2016,6 +2177,9 @@ print "Behavior: startsurvey\n";
 				printf MFILE "#   Vehicle depth: %f meters\r\n", $mmissiondepths[$i];
 				print MFILE "behavior waypoint  \r\n";
 				print MFILE "{ \r\n";
+				$behavior_id = $BEHAVIOR_waypoint + 0 * $behavior_count;
+				$behavior_count = $behavior_count + 1;
+				print MFILE "id     = $behavior_id; \r\n";
 				printf MFILE "latitude     = %f; \r\n", $mlats[$i];
 				printf MFILE "longitude    = %f; \r\n", $mlons[$i];
 				printf MFILE "duration     = 120; \r\n";
@@ -2027,12 +2191,12 @@ print "Behavior: waypoint\n";
   			print MFILE "# \r\n";
 			print MFILE "# Acoustic update 4 - sent status ping at end of spiral descent \r\n";
 			print MFILE "# \r\n";
-			print MFILE "behavior acousticUpdate \r\n";
-			print MFILE "{ \r\n";
-			print MFILE "duration  = 2; \r\n";
-			print MFILE "dummy  = 1; \r\n";
-			print MFILE "} \r\n";
-print "Behavior: acousticUpdate\n";
+			print MFILE "# behavior acousticUpdate \r\n";
+			print MFILE "# { \r\n";
+			print MFILE "# duration  = 2; \r\n";
+			print MFILE "# dummy  = 1; \r\n";
+			print MFILE "# } \r\n";
+# print "Behavior: acousticUpdate\n";
   			print MFILE "# \r\n";
   			print MFILE "# Spiral descend behavior to get to proper depth at start of line 1 \r\n";
 			if ($maxdepthapplied == 0)
@@ -2047,6 +2211,9 @@ print "Behavior: acousticUpdate\n";
 				{
 				print MFILE "behavior descend  \r\n";
 				print MFILE "{ \r\n";
+				$behavior_id = $BEHAVIOR_descend + 0 * $behavior_count;
+				$behavior_count = $behavior_count + 1;
+				print MFILE "id     = $behavior_id; \r\n";
 				printf MFILE "duration         = %d; \r\n", (0.5 * $descendtimes[$i]);
 				print MFILE "horizontalMode   = rudder; \r\n";
 				print MFILE "horizontal       = DESCENDRUDDER; \r\n";
@@ -2059,9 +2226,12 @@ print "Behavior: acousticUpdate\n";
 				
 				print MFILE "behavior descend  \r\n";
 				print MFILE "{ \r\n";
+				$behavior_id = $BEHAVIOR_descend + 0 * $behavior_count;
+				$behavior_count = $behavior_count + 1;
+				print MFILE "id     = $behavior_id; \r\n";
 				printf MFILE "duration         = 240; \r\n";
 				print MFILE "horizontalMode   = rudder; \r\n";
-				print MFILE "horizontal       = -DESCENDRUDDER; \r\n";
+				print MFILE "horizontal       = -MAGCALRUDDER; \r\n";
 				print MFILE "pitch            = 0.0; \r\n";
 				print MFILE "speed            = ASCENTDESCENT_SPEED; \r\n";
 				print MFILE "maxDepth         = SPIRAL_DESCENT_DEPTH; \r\n";
@@ -2071,9 +2241,12 @@ print "Behavior: acousticUpdate\n";
 				
 				print MFILE "behavior descend  \r\n";
 				print MFILE "{ \r\n";
+				$behavior_id = $BEHAVIOR_descend + 0 * $behavior_count;
+				$behavior_count = $behavior_count + 1;
+				print MFILE "id     = $behavior_id; \r\n";
 				printf MFILE "duration         = 240; \r\n";
 				print MFILE "horizontalMode   = rudder; \r\n";
-				print MFILE "horizontal       = DESCENDRUDDER; \r\n";
+				print MFILE "horizontal       = MAGCALRUDDER; \r\n";
 				print MFILE "pitch            = 0.0; \r\n";
 				print MFILE "speed            = ASCENTDESCENT_SPEED; \r\n";
 				print MFILE "maxDepth         = SPIRAL_DESCENT_DEPTH; \r\n";
@@ -2083,6 +2256,9 @@ print "Behavior: acousticUpdate\n";
 				
 				print MFILE "behavior descend  \r\n";
 				print MFILE "{ \r\n";
+				$behavior_id = $BEHAVIOR_descend + 0 * $behavior_count;
+				$behavior_count = $behavior_count + 1;
+				print MFILE "id     = $behavior_id; \r\n";
 				printf MFILE "duration         = %d; \r\n", (0.5 * $descendtimes[$i]);
 				print MFILE "horizontalMode   = rudder; \r\n";
 				print MFILE "horizontal       = DESCENDRUDDER; \r\n";
@@ -2099,6 +2275,9 @@ print "Behavior: spiral descend\n";
 				{
 				print MFILE "behavior descend  \r\n";
 				print MFILE "{ \r\n";
+				$behavior_id = $BEHAVIOR_descend + 0 * $behavior_count;
+				$behavior_count = $behavior_count + 1;
+				print MFILE "id     = $behavior_id; \r\n";
 				printf MFILE "duration         = %d; \r\n", $descendtimes[$i];
 				print MFILE "horizontalMode   = rudder; \r\n";
 				print MFILE "horizontal       = DESCENDRUDDER; \r\n";
@@ -2116,6 +2295,9 @@ print "Behavior: spiral descend\n";
   				print MFILE "# \r\n";
   				print MFILE "behavior kearfott \r\n";
   				print MFILE "{ \r\n";
+				$behavior_id = $BEHAVIOR_kearfott + 0 * $behavior_count;
+				$behavior_count = $behavior_count + 1;
+				print MFILE "id     = $behavior_id; \r\n";
   				print MFILE "duration  = 2; \r\n";
   				print MFILE "enableDopAid = False; \r\n";
   				print MFILE "} \r\n";
@@ -2123,12 +2305,12 @@ print "Behavior: kearfott (disable DVL aiding)\n";
       			}
 			print MFILE "# Acoustic update 3 - sent status ping at start of descent \r\n";
 			print MFILE "# \r\n";
-			print MFILE "behavior acousticUpdate \r\n";
-			print MFILE "{ \r\n";
-			print MFILE "duration  = 2; \r\n";
-			print MFILE "dummy  = 1; \r\n";
-			print MFILE "} \r\n";
-print "Behavior: acousticUpdate\n";
+			print MFILE "# behavior acousticUpdate \r\n";
+			print MFILE "# { \r\n";
+			print MFILE "# duration  = 2; \r\n";
+			print MFILE "# dummy  = 1; \r\n";
+			print MFILE "# } \r\n";
+# print "Behavior: acousticUpdate\n";
 			print MFILE "# \r\n";
 			print MFILE "# Waypoint behavior to get to start of line 1\r\n";
 			printf MFILE "#   Segment length %f meters\r\n", $distance;
@@ -2137,6 +2319,9 @@ print "Behavior: acousticUpdate\n";
 			printf MFILE "#   Vehicle depth: %f meters\r\n", $approachdepth;
 			print MFILE "behavior waypoint  \r\n";
 			print MFILE "{ \r\n";
+			$behavior_id = $BEHAVIOR_waypoint + 0 * $behavior_count;
+			$behavior_count = $behavior_count + 1;
+			print MFILE "id     = $behavior_id; \r\n";
 			printf MFILE "latitude     = %f; \r\n", $mlats[$i];
 			printf MFILE "longitude    = %f; \r\n", $mlons[$i];
 			printf MFILE "duration     = TIME_TO_FIRST_WAYPOINT; \r\n";
@@ -2216,6 +2401,9 @@ print "waypoint [$i] $mwaypoints[$i] line:$iwaypoint Depth:$mmissiondepths[$i]\n
 				}
 			print MFILE "behavior waypoint  \r\n";
 			print MFILE "{ \r\n";
+			$behavior_id = $BEHAVIOR_waypoint + 0 * $behavior_count;
+			$behavior_count = $behavior_count + 1;
+			print MFILE "id     = $behavior_id; \r\n";
 			printf MFILE "latitude     = %f; \r\n", $mlats[$i];
 			printf MFILE "longitude    = %f; \r\n", $mlons[$i];
 			if ($mwaypoints[$i] != 0 && $iwaypoint == 0)
@@ -2311,6 +2499,9 @@ print "waypoint [$i] $mwaypoints[$i] line:$iwaypoint Depth:$mmissiondepths[$i]\n
 				}
 			print MFILE "behavior waypoint_depth  \r\n";
 			print MFILE "{ \r\n";
+			$behavior_id = $BEHAVIOR_waypoint_depth + 0 * $behavior_count;
+			$behavior_count = $behavior_count + 1;
+			print MFILE "id     = $behavior_id; \r\n";
 			printf MFILE "latitude           = %f; \r\n", $mlats[$i];
 			printf MFILE "longitude          = %f; \r\n", $mlons[$i];
 			if ($mwaypoints[$i] != 0 && $iwaypoint == 0)
@@ -2417,6 +2608,9 @@ printf " Segment length: %.2f m ",$mlengths[$i];
 				}
 			print MFILE "behavior waypoint_wall  \r\n";
 			print MFILE "{ \r\n";
+			$behavior_id = $BEHAVIOR_waypoint_wall + 0 * $behavior_count;
+			$behavior_count = $behavior_count + 1;
+			print MFILE "id     = $behavior_id; \r\n";
 			printf MFILE "latitude           = %f; \r\n", $mlats[$i];
 			printf MFILE "longitude          = %f; \r\n", $mlons[$i];
 			printf MFILE "lastLatitude       = %f; \r\n", $mlats[$i-1];
@@ -2543,6 +2737,9 @@ printf " Mode 5 DesiredDepth: $depthconstant2 DesiredAltitude: $altitude ComDept
 				}
 			print MFILE "behavior waypoint_bottom  \r\n";
 			print MFILE "{ \r\n";
+			$behavior_id = $BEHAVIOR_waypoint_bottom + 0 * $behavior_count;
+			$behavior_count = $behavior_count + 1;
+			print MFILE "id     = $behavior_id; \r\n";
 			printf MFILE "latitude           = %f; \r\n", $mlats[$i];
 			printf MFILE "longitude          = %f; \r\n", $mlons[$i];
 			printf MFILE "lastLatitude       = %f; \r\n", $mlats[$i-1];
@@ -2581,13 +2778,13 @@ printf " Mode 5 DesiredDepth: $depthconstant2 DesiredAltitude: $altitude ComDept
 			print MFILE "#######################################################\r\n";
 			print MFILE "# Acoustic update 6 - sent status ping after end of line \r\n";
 			print MFILE "# \r\n";
-			print MFILE "behavior acousticUpdate \r\n";
-			print MFILE "{ \r\n";
-			print MFILE "duration  = 2; \r\n";
-			print MFILE "dummy  = 1; \r\n";
-			print MFILE "} \r\n";
+			print MFILE "# behavior acousticUpdate \r\n";
+			print MFILE "# { \r\n";
+			print MFILE "# duration  = 2; \r\n";
+			print MFILE "# dummy  = 1; \r\n";
+			print MFILE "# } \r\n";
 			print MFILE "# \r\n";
-print "Behavior: acousticUpdate\n";
+# print "Behavior: acousticUpdate\n";
 			}
 
 		# reset sonar parameters
@@ -2615,6 +2812,9 @@ print "Behavior: acousticUpdate\n";
 #				}
 			print MFILE "behavior reson \r\n";
 			print MFILE "{ \r\n";
+			$behavior_id = $BEHAVIOR_reson + 0 * $behavior_count;
+			$behavior_count = $behavior_count + 1;
+			print MFILE "id     = $behavior_id; \r\n";
 			print MFILE "duration  = RESON_DURATION; \r\n";
 			printf MFILE "MB_Range = %.2f; \r\n", $mb_range;
 			print MFILE "MB_Sound_Velocity = 0.0; \r\n";
@@ -2638,6 +2838,9 @@ print "Behavior: acousticUpdate\n";
 			print MFILE "# \r\n";
 			print MFILE "behavior delta_t \r\n";
 			print MFILE "{ \r\n";
+			$behavior_id = $BEHAVIOR_waypoint_delta_t + 0 * $behavior_count;
+			$behavior_count = $behavior_count + 1;
+			print MFILE "id     = $behavior_id; \r\n";
 			print MFILE "duration  = RESON_DURATION; \r\n";
 			print MFILE "receiveGain = 10; \r\n";  # Range is 1 to 20dB
 			print MFILE "gainEq = 0; \r\n";   # Gain equalization (0=Off, 1=On)
@@ -2665,6 +2868,9 @@ print "Behavior: acousticUpdate\n";
 			print MFILE "#   Number of photos: $nphotos\r\n";
 			print MFILE "behavior startCamera \r\n";
 			print MFILE "{ \r\n";
+			$behavior_id = $BEHAVIOR_startCamera + 0 * $behavior_count;
+			$behavior_count = $behavior_count + 1;
+			print MFILE "id     = $behavior_id; \r\n";
 			print MFILE "duration  = 1; \r\n";
 			#print MFILE "nPhotos = $nphotos; \r\n";
 			print MFILE "nSamplePeriods = $nsampleperiods; \r\n";
@@ -2682,6 +2888,9 @@ printf "Behavior: startCamera (distance:%.2f m, run length:%.2f m, nphotos:%d)\n
 			print MFILE "#   Distance along survey: $mdistances[$i-1]\r\n";
 			print MFILE "behavior stopCamera \r\n";
 			print MFILE "{ \r\n";
+			$behavior_id = $BEHAVIOR_stopCamera + 0 * $behavior_count;
+			$behavior_count = $behavior_count + 1;
+			print MFILE "id     = $behavior_id; \r\n";
 			print MFILE "duration  = 1; \r\n";
 			print MFILE "} \r\n";
 			print MFILE "# \r\n";
@@ -2694,14 +2903,14 @@ printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$i-1];
 			{
 			print MFILE "# Acoustic update 7 - sent status ping before start of line \r\n";
 			print MFILE "# \r\n";
-			print MFILE "behavior acousticUpdate \r\n";
-			print MFILE "{ \r\n";
-			print MFILE "duration  = 2; \r\n";
-			print MFILE "dummy  = 1; \r\n";
-			print MFILE "} \r\n";
+			print MFILE "# behavior acousticUpdate \r\n";
+			print MFILE "# { \r\n";
+			print MFILE "# duration  = 2; \r\n";
+			print MFILE "# dummy  = 1; \r\n";
+			print MFILE "# } \r\n";
 			print MFILE "# \r\n";
 			print MFILE "#######################################################\r\n";
-print "Behavior: acousticUpdate\n";
+# print "Behavior: acousticUpdate\n";
 			}
 
 		# put comment break in at waypoint
@@ -2718,6 +2927,9 @@ print "Behavior: acousticUpdate\n";
 	print MFILE "# Descend behavior \r\n";
 	print MFILE "behavior descend  \r\n";
 	print MFILE "{ \r\n";
+	$behavior_id = $BEHAVIOR_descend + 0 * $behavior_count;
+	$behavior_count = $behavior_count + 1;
+	print MFILE "id     = $behavior_id; \r\n";
 	print MFILE "horizontalMode   = heading; \r\n";
 	printf MFILE "horizontal   = %f; \r\n", $mbearings[0];
 	print MFILE "pitch        = DESCENDPITCH; \r\n";
@@ -2731,6 +2943,9 @@ print "Behavior: descend\r\n";
 	print MFILE "# setpoint on surface to gather momentum \r\n";
 	print MFILE "behavior setpoint \r\n";
 	print MFILE "{ \r\n";
+	$behavior_id = $BEHAVIOR_setpoint + 0 * $behavior_count;
+	$behavior_count = $behavior_count + 1;
+	print MFILE "id     = $behavior_id; \r\n";
 	print MFILE "duration     = SETPOINT_DURATION; \r\n";
 	printf MFILE "heading      = %f; \r\n", $mbearings[0];
 	print MFILE "speed        = ASCENTDESCENT_SPEED; \r\n";
@@ -2742,6 +2957,9 @@ print "Behavior: setpoint\r\n";
 	print MFILE "# acquire gps fix \r\n";
 	print MFILE "behavior getgps  \r\n";
 	print MFILE "{ \r\n";
+	$behavior_id = $BEHAVIOR_getgps + 0 * $behavior_count;
+	$behavior_count = $behavior_count + 1;
+	print MFILE "id     = $behavior_id; \r\n";
 	print MFILE "duration = GPS_DURATION; \r\n";
 	print MFILE "minHits = GPSMINHITS; \r\n";
 	print MFILE "abortOnTimeout = True; \r\n";
@@ -2776,6 +2994,9 @@ print "Behavior: gps\r\n";
       {
   		print MFILE "behavior edgetech \r\n";
   		print MFILE "{ \r\n";
+		$behavior_id = $BEHAVIOR_edgetech + 0 * $behavior_count;
+		$behavior_count = $behavior_count + 1;
+		print MFILE "id     = $behavior_id; \r\n";
   		print MFILE "duration  = RESON_DURATION; \r\n";
   		print MFILE "SBP_Mode = 0; \r\n";
   		print MFILE "SBP_Power = 0.0; \r\n";
@@ -2791,6 +3012,9 @@ print "Behavior: gps\r\n";
       }
 		print MFILE "behavior reson \r\n";
 		print MFILE "{ \r\n";
+		$behavior_id = $BEHAVIOR_reson + 0 * $behavior_count;
+		$behavior_count = $behavior_count + 1;
+		print MFILE "id     = $behavior_id; \r\n";
 		print MFILE "duration  = RESON_DURATION; \r\n";
 		print MFILE "MB_Mode  = 1; \r\n";
 		print MFILE "Log_Mode  = 0; \r\n";
@@ -2841,6 +3065,9 @@ print "Behavior: reson (start, reset, Log_Mode = 0)\r\n";
 		print MFILE "# \r\n";
 		print MFILE "behavior delta_t \r\n";
 		print MFILE "{ \r\n";
+		$behavior_id = $BEHAVIOR_delta_t + 0 * $behavior_count;
+		$behavior_count = $behavior_count + 1;
+		print MFILE "id     = $behavior_id; \r\n";
 		print MFILE "duration  = RESON_DURATION; \r\n";
 		print MFILE "logMode  = 0; \r\n";
 		print MFILE "receiveGain = 10; \r\n";  # Range is 1 to 20dB

@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_image83p.c	5/5/2008
  *
- *    Copyright (c) 2008-2020 by
+ *    Copyright (c) 2008-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * mbsys_image83p.c contains the functions for handling the data structure
@@ -238,7 +248,7 @@ int mbsys_image83p_preprocess(int verbose,     /* in: verbosity level set on com
   bool kluge_soundspeedsnell = false;
   bool kluge_zeroAttitudecorrection = false;
   bool kluge_zeroalongtrackangles = false;
-  bool kluge_sonardepthfromheave = false;
+  bool kluge_sensordepthfromheave = false;
 
   /* get kluges */
   for (int i = 0; i < pars->n_kluge; i++) {
@@ -256,8 +266,8 @@ int mbsys_image83p_preprocess(int verbose,     /* in: verbosity level set on com
     else if (pars->kluge_id[i] == MB_PR_KLUGE_ZEROALONGTRACKANGLES) {
       kluge_zeroalongtrackangles = true;
     }
-    else if (pars->kluge_id[i] == MB_PR_KLUGE_SONARDEPTHFROMHEAVE) {
-      kluge_sonardepthfromheave = true;
+    else if (pars->kluge_id[i] == MB_PR_KLUGE_SENSORDEPTHFROMHEAVE) {
+      kluge_sensordepthfromheave = true;
     }
   }
 
@@ -308,8 +318,8 @@ int mbsys_image83p_preprocess(int verbose,     /* in: verbosity level set on com
       else if (pars->kluge_id[i] == MB_PR_KLUGE_ZEROALONGTRACKANGLES) {
         fprintf(stderr, "dbg2       kluge_zeroalongtrackangles:    %d\n", kluge_zeroalongtrackangles);
       }
-      else if (pars->kluge_id[i] == MB_PR_KLUGE_SONARDEPTHFROMHEAVE) {
-        fprintf(stderr, "dbg2       kluge_sonardepthfromheave:     %d\n", kluge_sonardepthfromheave);
+      else if (pars->kluge_id[i] == MB_PR_KLUGE_SENSORDEPTHFROMHEAVE) {
+        fprintf(stderr, "dbg2       kluge_sensordepthfromheave:     %d\n", kluge_sensordepthfromheave);
       }
     }
   }
@@ -375,10 +385,10 @@ int mbsys_image83p_preprocess(int verbose,     /* in: verbosity level set on com
       pitch = 0.0;
     }
 
-    /* case in which sonardepth has been encoded as the external heave - move the
+    /* case in which sensordepth has been encoded as the external heave - move the
         value from the heave_external parameter to the sonar_depth parameter and
         set the heave_external to zero. */
-    if (kluge_sonardepthfromheave) {
+    if (kluge_sensordepthfromheave) {
       sensordepth = store->heave_external;
       store->sonar_depth = sensordepth;
       heave = 0.0;
@@ -1035,6 +1045,7 @@ int mbsys_image83p_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
 		for (int i = 0; i < nbath; i++) {
 			store->beamflag[i] = beamflag[i];
 			store->bath[i] = bath[i];
+      store->amp[i] = amp[i];
 			store->bathacrosstrack[i] = bathacrosstrack[i];
 			store->bathalongtrack[i] = bathalongtrack[i];
 		}

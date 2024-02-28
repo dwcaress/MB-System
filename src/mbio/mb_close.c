@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mb_close.c  1/25/93
  *
- *    Copyright (c) 1993-2020 by
+ *    Copyright (c) 1993-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * mb_close.c closes a multibeam data file which had been opened for
@@ -114,6 +124,33 @@ int mb_close(int verbose, void **mbio_ptr, int *error) {
   if (mb_io_ptr->projection_initialized) {
     mb_io_ptr->projection_initialized = false;
     mb_proj_free(verbose, &(mb_io_ptr->pjptr), error);
+  }
+
+  /* deallocate alternative navigation arrays if initialized */
+  if (mb_io_ptr->alternative_navigation && mb_io_ptr->nav_alt_num_alloc > 0) {
+    mb_io_ptr->nav_alt_num = 0;
+    mb_io_ptr->nav_alt_num_alloc = 0;
+    mb_io_ptr->alternative_navigation = false;
+    if (mb_io_ptr->nav_alt_time_d != NULL)
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->nav_alt_time_d, error);
+    if (mb_io_ptr->nav_alt_navlon != NULL)
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->nav_alt_navlon, error);
+    if (mb_io_ptr->nav_alt_navlat != NULL)
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->nav_alt_navlat, error);
+    if (mb_io_ptr->nav_alt_heading != NULL)
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->nav_alt_heading, error);
+    if (mb_io_ptr->nav_alt_speed != NULL)
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->nav_alt_speed, error);
+    if (mb_io_ptr->nav_alt_sensordepth != NULL)
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->nav_alt_sensordepth, error);
+    if (mb_io_ptr->nav_alt_roll != NULL)
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->nav_alt_roll, error);
+    if (mb_io_ptr->nav_alt_pitch != NULL)
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->nav_alt_pitch, error);
+    if (mb_io_ptr->nav_alt_heave != NULL)
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->nav_alt_heave, error);
+    if (mb_io_ptr->nav_alt_zoffset != NULL)
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->nav_alt_zoffset, error);
   }
 
   /* deallocate the mbio descriptor */

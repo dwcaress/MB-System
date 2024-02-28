@@ -6,7 +6,7 @@
 
 # Boolean options are specified as option=0 or option=1
 validBoolOptions=(buildGUIs buildOpenCV buildPCL
-                  buildTRN buildTNav buildQt buildGSF buildTest)
+                  buildTRN buildTRNLCM buildTNav buildQt buildGSF buildTest)
 
 # Module include directories and library files options are specified as
 # <module>_include=<DIR> and <module>_lib=<LIBS>, respectively
@@ -17,7 +17,7 @@ validDirParams=(otpsDir installDir)
 
 help() {
     echo "$1"
-    echo "specify boolean options as option=0 or option=1, where option is one of:"
+    echo "specify boolean options as option=OFF or option=ON, where option is one of:"
     for opt in ${validBoolOptions[@]}; do
         echo $opt
     done
@@ -44,7 +44,7 @@ help() {
     }
 
 # Process commad-line options, convert each to format recognized by cmake
-options=
+declare -a options
 error=false
 
 while (( "$#" )); do
@@ -53,7 +53,7 @@ while (( "$#" )); do
     # Is arg a valid boolean option?
     for opt in ${validBoolOptions[@]}; do
         if [[ "$1" =~ ${opt}=.* ]]; then
-            options=${options} \"-D${1}=1\"
+            options[${#options[@]}]="-D${1}"
             found=true
             break
         fi
@@ -68,7 +68,7 @@ while (( "$#" )); do
         hdrParam=${module}_include='.+'
         libParam=${module}_lib='.+'
         if [[ "$1" =~ $hdrParam ]] || [[ "$1" =~ $libParam ]]; then
-            options=${options} \"-D$1\"
+            options[${#options[@]}]="-D${1}"
             found=true
             break
         fi
@@ -82,7 +82,7 @@ while (( "$#" )); do
     for param in ${validDirParams[@]}; do
         pattern=${param}'.+'
         if [[ "$1" =~ $pattern ]]; then
-            options=${options} \"-D$1\"
+            options[${#options[@]}]="-D${1}"
             found=true
             break
         fi
@@ -93,17 +93,23 @@ while (( "$#" )); do
     fi    
 
     if [[ "$1" =~ -DCMAKE_BUILD_TYPE=.* ]]; then
-        options=${options} "-DCMAKE_BUILD_TYPE=Debug"
+        options[${#options[@]}]="-DCMAKE_BUILD_TYPE=Debug"
         echo OK
         shift
         continue
     fi
 
     if [[ "$1" =~ -DBUILD_SHARED_LIBS=.* ]]; then
-        options=${options} "-DBUILD_SHARED_LIBS=ON"
+        options[${#options[@]}]="-DBUILD_SHARED_LIBS=ON"
         shift
         continue
     fi    
+
+    if [[ "$1" =~ verbose ]]; then
+        options[${#options[@]}]="-Dverbose=1"
+        shift
+        continue
+    fi
 
     # If we get here, then unknown option
     error=true
@@ -117,9 +123,9 @@ if [ "$error" == true ]; then
     exit 1
 fi
 
-echo options: $options
+echo options: ${options[*]}
 
 echo run cmake
 # Go to build and invoke cmake
 cd build
-cmake $options ..
+cmake ${options[*]} ..

@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbinfo</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  31 December 2019 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  24 August 2023 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -30,7 +30,7 @@ Version 5.0
 <B>mbinfo</B> [<B>-B</B><I>yr/mo/da/hr/mn/sc</I> <B>-C -E</B><I>yr/mo/da/hr/mn/sc</I>
 <B>-F</B><I>format</I> <B>-G</B> <B>-I</B><I>filename</I> <B>-L</B><I>lonflip</I>
 <B>-M</B><I>londim/latdim[/lonmin/lonmax/latmin/latmax]</I>
-<B>-N</B> <B>-O</B> <B>-P</B><I>ping</I>
+<B>-N</B> <B>-O</B> <B>-P</B><I>ping</I> <B>-Q</B>
 <B>-R</B><I>west/east/south/north</I> <B>-S</B><I>speed</I> <B>-W</B>
 <B>-X</B><I>outputformat</I> <B>-V -H</B>]
 <P>
@@ -314,6 +314,14 @@ Sets the longitude and latitude bounds within which swath sonar
 data will be read. Only the data which lies within these bounds will
 be read.
 Default: <I>west</I>=-360, east<I>=360</I>, <I>south</I>=-90, <I>north</I>=90.
+<DT><B>-Q</B>
+
+<DD>
+<BR>
+
+Causes <B>mbinfo</B> to read statistics from existing *.inf files rather
+than to read the actual swath files. Variances, record types, nonfatal error
+messages and mask output cannot bebgenerated with this option.
 <DT><B>-S</B>
 
 <DD>
@@ -572,12 +580,12 @@ No currently known bugs.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 31 December 2019</P></CENTER>
+Last Updated: 24 August 2023</P></CENTER>
 
 <HR>
 <center>
 <p>
-<a href="mbsystem.html"><< Manual page for the MB-System package</a> | <a href="https://www.mbari.org/products/research-software/mb-system/">MB-System website >></a></p>
+<a href="https://www.mbari.org/products/research-software/mb-system/"><< MB-System website</a> | <a href="https://www.mbari.org/technology/mb-system/documentation/"> MB-System Documenation>></a> | <a href="mbsystem_man_list.html">MB-System Manual Page List</a></p>
 </center>
 </BODY>
 </HTML>

@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_check_info.c	1/25/93
  *
- *    Copyright (c) 1993-2020 by
+ *    Copyright (c) 1993-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * mb_check_info.c checks if a file has data within the specified
@@ -305,7 +315,7 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 					nscan = sscanf(line, "  Number of Flagged Beams: %d", &mb_info->nbeams_bath_flagged);
 			}
 
-			else if (strncmp(line, "Amplitude Data (", 17) == 0) {
+			else if (strncmp(line, "Amplitude Data (", 16) == 0) {
 				nscan = sscanf(line, "Amplitude Data (%d beams):", &mb_info->nbeams_amp);
 				if (fgets(line, MB_PATH_MAXLINE, fp) != NULL)
 					nscan = sscanf(line, "  Number of Beams: %d", &mb_info->nbeams_amp_total);
@@ -356,7 +366,7 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 					               &mb_info->heading_start);
 				}
 				if ((startptr = fgets(line, MB_PATH_MAXLINE, fp)) != NULL) {
-					nscan = sscanf(line, "Sonar Depth:  %lf m  Sonar Altitude:   %lf m", &mb_info->sonardepth_start,
+					nscan = sscanf(line, "Sonar Depth:  %lf m  Sonar Altitude:   %lf m", &mb_info->sensordepth_start,
 					               &mb_info->sonaraltitude_start);
 				}
 			}
@@ -378,7 +388,7 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 					               &mb_info->heading_end);
 				}
 				if ((startptr = fgets(line, MB_PATH_MAXLINE, fp)) != NULL) {
-					nscan = sscanf(line, "Sonar Depth:  %lf m  Sonar Altitude:   %lf m", &mb_info->sonardepth_end,
+					nscan = sscanf(line, "Sonar Depth:  %lf m  Sonar Altitude:   %lf m", &mb_info->sensordepth_end,
 					               &mb_info->sonaraltitude_end);
 				}
 			}
@@ -389,8 +399,8 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 				sscanf(line, "Minimum Latitude: %lf Maximum Latitude: %lf", &mb_info->lat_min, &mb_info->lat_max);
 
 			else if (strncmp(line, "Minimum Sonar Depth:", 20) == 0)
-				sscanf(line, "Minimum Sonar Depth: %lf Maximum Sonar Depth: %lf", &mb_info->sonardepth_min,
-				       &mb_info->sonardepth_max);
+				sscanf(line, "Minimum Sonar Depth: %lf Maximum Sonar Depth: %lf", &mb_info->sensordepth_min,
+				       &mb_info->sensordepth_max);
 
 			else if (strncmp(line, "Minimum Altitude:", 17) == 0)
 				sscanf(line, "Minimum Altitude: %lf Maximum Altitude: %lf", &mb_info->altitude_min, &mb_info->altitude_max);
@@ -495,7 +505,7 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 		fprintf(stderr, "dbg2       depth_start:              %f\n", mb_info->depth_start);
 		fprintf(stderr, "dbg2       heading_start:            %f\n", mb_info->heading_start);
 		fprintf(stderr, "dbg2       speed_start:              %f\n", mb_info->speed_start);
-		fprintf(stderr, "dbg2       sonardepth_start:         %f\n", mb_info->sonardepth_start);
+		fprintf(stderr, "dbg2       sensordepth_start:         %f\n", mb_info->sensordepth_start);
 		fprintf(stderr, "dbg2       sonaraltitude_start:      %f\n", mb_info->sonaraltitude_start);
 		fprintf(stderr, "dbg2       time_end:                 %f\n", mb_info->time_end);
 		fprintf(stderr, "dbg2       lon_end:                  %f\n", mb_info->lon_end);
@@ -503,14 +513,14 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 		fprintf(stderr, "dbg2       depth_end:                %f\n", mb_info->depth_end);
 		fprintf(stderr, "dbg2       heading_end:              %f\n", mb_info->heading_end);
 		fprintf(stderr, "dbg2       speed_end:                %f\n", mb_info->speed_end);
-		fprintf(stderr, "dbg2       sonardepth_end:           %f\n", mb_info->sonardepth_end);
+		fprintf(stderr, "dbg2       sensordepth_end:           %f\n", mb_info->sensordepth_end);
 		fprintf(stderr, "dbg2       sonaraltitude_end:        %f\n", mb_info->sonaraltitude_end);
 		fprintf(stderr, "dbg2       lon_min:                  %f\n", mb_info->lon_min);
 		fprintf(stderr, "dbg2       lon_max:                  %f\n", mb_info->lon_max);
 		fprintf(stderr, "dbg2       lat_min:                  %f\n", mb_info->lat_min);
 		fprintf(stderr, "dbg2       lat_max:                  %f\n", mb_info->lat_max);
-		fprintf(stderr, "dbg2       sonardepth_min:           %f\n", mb_info->sonardepth_min);
-		fprintf(stderr, "dbg2       sonardepth_max:           %f\n", mb_info->sonardepth_max);
+		fprintf(stderr, "dbg2       sensordepth_min:           %f\n", mb_info->sensordepth_min);
+		fprintf(stderr, "dbg2       sensordepth_max:           %f\n", mb_info->sensordepth_max);
 		fprintf(stderr, "dbg2       altitude_min:             %f\n", mb_info->altitude_min);
 		fprintf(stderr, "dbg2       altitude_max:             %f\n", mb_info->altitude_max);
 		fprintf(stderr, "dbg2       depth_min:                %f\n", mb_info->depth_min);
@@ -1030,7 +1040,7 @@ int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error) {
 	mb_info->depth_start = 0.0;
 	mb_info->heading_start = 0.0;
 	mb_info->speed_start = 0.0;
-	mb_info->sonardepth_start = 0.0;
+	mb_info->sensordepth_start = 0.0;
 	mb_info->sonaraltitude_start = 0.0;
 
 	mb_info->time_end = 0.0;
@@ -1039,15 +1049,15 @@ int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error) {
 	mb_info->depth_end = 0.0;
 	mb_info->heading_end = 0.0;
 	mb_info->speed_end = 0.0;
-	mb_info->sonardepth_end = 0.0;
+	mb_info->sensordepth_end = 0.0;
 	mb_info->sonaraltitude_end = 0.0;
 
 	mb_info->lon_min = 0.0;
 	mb_info->lon_max = 0.0;
 	mb_info->lat_min = 0.0;
 	mb_info->lat_max = 0.0;
-	mb_info->sonardepth_min = 0.0;
-	mb_info->sonardepth_max = 0.0;
+	mb_info->sensordepth_min = 0.0;
+	mb_info->sensordepth_max = 0.0;
 	mb_info->altitude_min = 0.0;
 	mb_info->altitude_max = 0.0;
 	mb_info->depth_min = 0.0;
@@ -1148,17 +1158,17 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 			mb_info->nrecords_ss1 += mb_info_file.nrecords_ss1;
 			mb_info->nrecords_ss2 += mb_info_file.nrecords_ss2;
 			mb_info->nrecords_sbp += mb_info_file.nrecords_sbp;
-			mb_info->nbeams_bath += mb_info_file.nbeams_bath;
+			mb_info->nbeams_bath = MAX(mb_info->nbeams_bath, mb_info_file.nbeams_bath);
 			mb_info->nbeams_bath_total += mb_info_file.nbeams_bath_total;
 			mb_info->nbeams_bath_good += mb_info_file.nbeams_bath_good;
 			mb_info->nbeams_bath_zero += mb_info_file.nbeams_bath_zero;
 			mb_info->nbeams_bath_flagged += mb_info_file.nbeams_bath_flagged;
-			mb_info->nbeams_amp += mb_info_file.nbeams_amp;
+			mb_info->nbeams_amp = MAX(mb_info->nbeams_amp, mb_info_file.nbeams_amp);
 			mb_info->nbeams_amp_total += mb_info_file.nbeams_amp_total;
 			mb_info->nbeams_amp_good += mb_info_file.nbeams_amp_good;
 			mb_info->nbeams_amp_zero += mb_info_file.nbeams_amp_zero;
 			mb_info->nbeams_amp_flagged += mb_info_file.nbeams_amp_flagged;
-			mb_info->npixels_ss += mb_info_file.npixels_ss;
+			mb_info->npixels_ss = MAX(mb_info->npixels_ss, mb_info_file.npixels_ss);
 			mb_info->npixels_ss_total += mb_info_file.npixels_ss_total;
 			mb_info->npixels_ss_good += mb_info_file.npixels_ss_good;
 			mb_info->npixels_ss_zero += mb_info_file.npixels_ss_zero;
@@ -1175,7 +1185,7 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 				mb_info->depth_start += mb_info_file.depth_start;
 				mb_info->heading_start += mb_info_file.heading_start;
 				mb_info->speed_start += mb_info_file.speed_start;
-				mb_info->sonardepth_start += mb_info_file.sonardepth_start;
+				mb_info->sensordepth_start += mb_info_file.sensordepth_start;
 				mb_info->sonaraltitude_start += mb_info_file.sonaraltitude_start;
 			}
 
@@ -1185,7 +1195,7 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 			mb_info->depth_end += mb_info_file.depth_end;
 			mb_info->heading_end += mb_info_file.heading_end;
 			mb_info->speed_end += mb_info_file.speed_end;
-			mb_info->sonardepth_end += mb_info_file.sonardepth_end;
+			mb_info->sensordepth_end += mb_info_file.sensordepth_end;
 			mb_info->sonaraltitude_end += mb_info_file.sonaraltitude_end;
 
 			if (nfile == 0) {
@@ -1193,8 +1203,8 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 				mb_info->lon_max = mb_info_file.lon_max;
 				mb_info->lat_min = mb_info_file.lat_min;
 				mb_info->lat_max = mb_info_file.lat_max;
-				mb_info->sonardepth_min = mb_info_file.sonardepth_min;
-				mb_info->sonardepth_max = mb_info_file.sonardepth_max;
+				mb_info->sensordepth_min = mb_info_file.sensordepth_min;
+				mb_info->sensordepth_max = mb_info_file.sensordepth_max;
 				mb_info->altitude_min = mb_info_file.altitude_min;
 				mb_info->altitude_max = mb_info_file.altitude_max;
 				mb_info->depth_min = mb_info_file.depth_min;
@@ -1221,8 +1231,8 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 					mb_info->lat_max = mb_info_file.lat_max;
 				else
 					mb_info->lat_max = MAX(mb_info_file.lat_max, mb_info->lat_max);
-				mb_info->sonardepth_min = MIN(mb_info_file.sonardepth_min, mb_info->sonardepth_min);
-				mb_info->sonardepth_max = MAX(mb_info_file.sonardepth_max, mb_info->sonardepth_max);
+				mb_info->sensordepth_min = MIN(mb_info_file.sensordepth_min, mb_info->sensordepth_min);
+				mb_info->sensordepth_max = MAX(mb_info_file.sensordepth_max, mb_info->sensordepth_max);
 				mb_info->altitude_min = MIN(mb_info_file.altitude_min, mb_info->altitude_min);
 				mb_info->altitude_max = MAX(mb_info_file.altitude_max, mb_info->altitude_max);
 				mb_info->depth_min = MIN(mb_info_file.depth_min, mb_info->depth_min);
@@ -1305,7 +1315,7 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 		fprintf(stderr, "dbg2       depth_start:              %f\n", mb_info->depth_start);
 		fprintf(stderr, "dbg2       heading_start:            %f\n", mb_info->heading_start);
 		fprintf(stderr, "dbg2       speed_start:              %f\n", mb_info->speed_start);
-		fprintf(stderr, "dbg2       sonardepth_start:         %f\n", mb_info->sonardepth_start);
+		fprintf(stderr, "dbg2       sensordepth_start:         %f\n", mb_info->sensordepth_start);
 		fprintf(stderr, "dbg2       sonaraltitude_start:      %f\n", mb_info->sonaraltitude_start);
 		fprintf(stderr, "dbg2       time_end:                 %f\n", mb_info->time_end);
 		fprintf(stderr, "dbg2       lon_end:                  %f\n", mb_info->lon_end);
@@ -1313,14 +1323,14 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 		fprintf(stderr, "dbg2       depth_end:                %f\n", mb_info->depth_end);
 		fprintf(stderr, "dbg2       heading_end:              %f\n", mb_info->heading_end);
 		fprintf(stderr, "dbg2       speed_end:                %f\n", mb_info->speed_end);
-		fprintf(stderr, "dbg2       sonardepth_end:           %f\n", mb_info->sonardepth_end);
+		fprintf(stderr, "dbg2       sensordepth_end:           %f\n", mb_info->sensordepth_end);
 		fprintf(stderr, "dbg2       sonaraltitude_end:        %f\n", mb_info->sonaraltitude_end);
 		fprintf(stderr, "dbg2       lon_min:                  %f\n", mb_info->lon_min);
 		fprintf(stderr, "dbg2       lon_max:                  %f\n", mb_info->lon_max);
 		fprintf(stderr, "dbg2       lat_min:                  %f\n", mb_info->lat_min);
 		fprintf(stderr, "dbg2       lat_max:                  %f\n", mb_info->lat_max);
-		fprintf(stderr, "dbg2       sonardepth_min:           %f\n", mb_info->sonardepth_min);
-		fprintf(stderr, "dbg2       sonardepth_max:           %f\n", mb_info->sonardepth_max);
+		fprintf(stderr, "dbg2       sensordepth_min:           %f\n", mb_info->sensordepth_min);
+		fprintf(stderr, "dbg2       sensordepth_max:           %f\n", mb_info->sensordepth_max);
 		fprintf(stderr, "dbg2       altitude_min:             %f\n", mb_info->altitude_min);
 		fprintf(stderr, "dbg2       altitude_max:             %f\n", mb_info->altitude_max);
 		fprintf(stderr, "dbg2       depth_min:                %f\n", mb_info->depth_min);

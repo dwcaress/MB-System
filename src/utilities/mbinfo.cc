@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbinfo.c  2/1/93
  *
- *    Copyright (c) 1993-2020 by
+ *    Copyright (c) 1993-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * MBINFO reads a swath sonar data file and outputs
@@ -35,8 +45,9 @@
 #include <unistd.h>
 
 #include "mb_define.h"
-#include "mb_status.h"
+#include "mb_info.h"
 #include "mb_io.h"
+#include "mb_status.h"
 
 constexpr int MBINFO_MAXPINGS = 50;
 
@@ -79,6 +90,7 @@ int main(int argc, char **argv) {
   int status = mb_defaults(verbose, &format, &pings_get, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
   char read_file[MB_PATH_MAXLINE] = "stdin";
+  bool quick = false;
   bool comments = false;
   bool good_nav_only = false;
   bool lonflip_set = false;
@@ -99,7 +111,7 @@ int main(int argc, char **argv) {
   bool help = false;
   {
     int c;
-    while ((c = getopt(argc, argv, "VvHhB:b:CcE:e:F:f:GgI:i:L:l:M:m:NnOoP:p:R:r:S:s:T:t:WwX:x:")) != -1) {
+    while ((c = getopt(argc, argv, "VvHhB:b:CcE:e:F:f:GgI:i:L:l:M:m:NnOoP:p:QqR:r:S:s:T:t:WwX:x:")) != -1) {
       switch (c) {
         case 'B':
         case 'b':
@@ -165,6 +177,10 @@ int main(int argc, char **argv) {
             pings_read = 1;
           if (pings_read > MBINFO_MAXPINGS)
             pings_read = MBINFO_MAXPINGS;
+          break;
+        case 'Q':
+        case 'q':
+          quick = true;
           break;
         case 'R':
         case 'r':
@@ -249,6 +265,7 @@ int main(int argc, char **argv) {
     fprintf(stream, "dbg2       good_nav:   %d\n", good_nav_only);
     fprintf(stream, "dbg2       comments:   %d\n", comments);
     fprintf(stream, "dbg2       file:       %s\n", read_file);
+    fprintf(stream, "dbg2       quick:      %d\n", quick);
     fprintf(stream, "dbg2       bathy meters:%d\n", bathy_in_meters);
     fprintf(stream, "dbg2       lonflip_set:%d\n", lonflip_set);
     fprintf(stream, "dbg2       coverage:   %d\n", coverage_mask);
@@ -304,9 +321,9 @@ int main(int argc, char **argv) {
   const bool read_datalist = format < 0;
   bool read_data;
 
-  /* if reading from datalist then variance calculations
-      are disabled */
-  if (read_datalist)
+  /* if reading from datalist or reading in quick mode then variance 
+      calculations are disabled */
+  if (read_datalist || quick)
     pings_read = 1;
 
   /* output stream for basic stuff (stdout if verbose <= 1,
@@ -356,7 +373,7 @@ int main(int argc, char **argv) {
   double file_weight;
   double btime_d;
   double etime_d;
-  char dfile[MB_PATH_MAXLINE];
+  char dpath[MB_PATH_MAXLINE];
   int beams_bath_alloc = 0;
   int beams_amp_alloc = 0;
   int pixels_ss_alloc = 0;
@@ -378,7 +395,7 @@ int main(int argc, char **argv) {
   double heading;
   double distance;
   double altitude;
-  double sonardepth;
+  double sensordepth;
   char *beamflag = nullptr;
   double *bath = nullptr;
   double *bathlon = nullptr;
@@ -426,12 +443,13 @@ int main(int argc, char **argv) {
   double timend = 0.0;
   int timbeg_j[5];
   int timend_j[5];
+  double timtot = 0.0;
   double distot = 0.0;
   double spdavg = 0.0;
   int irec = 0;
   int isbtmrec = 0;
   double timbegfile = 0.0;
-  double timendfile = 0.0;
+  double timendpath = 0.0;
   double distotfile = 0.0;
   double timtotfile = 0.0;
   double spdavgfile = 0.0;
@@ -521,1283 +539,1374 @@ int main(int argc, char **argv) {
 
   void *datalist;
 
-  bool done = false;
-  while (!done) {
-    /* open file list */
-    char file[MB_PATH_MAXLINE];
-    if (read_datalist) {
-      const int look_processed = MB_DATALIST_LOOK_UNSET;
-      if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
-        fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
-        fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-        exit(MB_ERROR_OPEN_FAIL);
-      }
-      read_data = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS;
-    } else {
-      // else copy single filename to be read
-      strcpy(file, read_file);
-      read_data = true;
-    }
-
-    /* loop over all files to be read */
-    while (read_data) {
-
-      void *mbio_ptr = nullptr;
-      /* initialize reading the swath file */
-      if (mb_read_init(verbose, file, format, pings_get, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
-                                 &mbio_ptr, &btime_d, &etime_d, &beams_bath_alloc, &beams_amp_alloc, &pixels_ss_alloc,
-                                 &error) != MB_SUCCESS) {
-        char *message;
-        mb_error(verbose, error, &message);
-        fprintf(stream, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
-        fprintf(stream, "\nSwath File <%s> not initialized for reading\n", file);
-        fprintf(stream, "\nProgram <%s> Terminated\n", program_name);
-        exit(error);
-      }
-
-      /* allocate memory for data arrays */
-      memset(data, 0, MBINFO_MAXPINGS * sizeof(struct ping));
-      for (int i = 0; i < pings_read; i++) {
-        datacur = &data[i];
-        if (error == MB_ERROR_NO_ERROR)
-          status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char),
-                                     (void **)&datacur->beamflag, &error);
-        if (error == MB_ERROR_NO_ERROR)
-          status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&datacur->bath,
-                                     &error);
-        if (error == MB_ERROR_NO_ERROR)
-          status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&datacur->amp,
-                                     &error);
-        if (error == MB_ERROR_NO_ERROR)
-          status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
-                                     (void **)&datacur->bathlon, &error);
-        if (error == MB_ERROR_NO_ERROR)
-          status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
-                                     (void **)&datacur->bathlat, &error);
-        if (error == MB_ERROR_NO_ERROR)
-          status =
-              mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&datacur->ss, &error);
-        if (error == MB_ERROR_NO_ERROR)
-          status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&datacur->sslon,
-                                     &error);
-        if (error == MB_ERROR_NO_ERROR)
-          status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&datacur->sslat,
-                                     &error);
-      }
-      if (pings_read > 1 && pass == 0) {
-        if (error == MB_ERROR_NO_ERROR)
-          status =
-              mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathmean, &error);
-        if (error == MB_ERROR_NO_ERROR)
-          status =
-              mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathvar, &error);
-        if (error == MB_ERROR_NO_ERROR)
-          status =
-              mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(int), (void **)&nbathvar, &error);
-        if (error == MB_ERROR_NO_ERROR)
-          status =
-              mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&ampmean, &error);
-        if (error == MB_ERROR_NO_ERROR)
-          status =
-              mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&ampvar, &error);
-        if (error == MB_ERROR_NO_ERROR)
-          status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(int), (void **)&nampvar, &error);
-        if (error == MB_ERROR_NO_ERROR)
-          status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssmean, &error);
-        if (error == MB_ERROR_NO_ERROR)
-          status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssvar, &error);
-        if (error == MB_ERROR_NO_ERROR)
-          status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(int), (void **)&nssvar, &error);
-      }
-
-      /* if coverage mask requested get cell sizes */
-      if (coverage_mask && (coverage_mask_bounds || pass == 1)) {
-        if (pass == 1) {
-          maskbounds[0] = lonmin;
-          maskbounds[1] = lonmax;
-          maskbounds[2] = latmin;
-          maskbounds[3] = latmax;
+  /* if quick not set read data normally */
+  if (!quick) {
+    bool done = false;
+    while (!done) {
+      /* open file list */
+      char path[MB_PATH_MAXLINE];
+      char ppath[MB_PATH_MAXLINE] = "";
+      char apath[MB_PATH_MAXLINE] = "";
+      char dpath[MB_PATH_MAXLINE] = "";
+      int pstatus;
+      int astatus = 0;
+      if (read_datalist) {
+        const int look_processed = MB_DATALIST_LOOK_UNSET;
+        if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
+          fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
+          fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+          exit(MB_ERROR_OPEN_FAIL);
         }
-        if (mask_nx > 1 && mask_ny <= 0) {
-          if ((maskbounds[1] - maskbounds[0]) > (maskbounds[3] - maskbounds[2])) {
-            mask_ny = mask_nx * (maskbounds[3] - maskbounds[2]) / (maskbounds[1] - maskbounds[0]);
+        read_data = mb_datalist_read3(verbose, datalist, &pstatus, path, ppath, 
+                                  &astatus, apath, dpath, &format, &file_weight, &error) == MB_SUCCESS;
+      } else {
+        // else copy single filename to be read
+        strcpy(path, read_file);
+        read_data = true;
+        astatus = 0;
+      }
+
+      /* loop over all files to be read */
+      while (read_data) {
+
+        void *mbio_ptr = nullptr;
+        /* initialize reading the swath file */
+        if (mb_read_init_altnav(verbose, path, format, pings_get, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
+                                   astatus, apath, &mbio_ptr, &btime_d, &etime_d, &beams_bath_alloc, &beams_amp_alloc, &pixels_ss_alloc,
+                                   &error) != MB_SUCCESS) {
+          char *message;
+          mb_error(verbose, error, &message);
+          fprintf(stream, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
+          fprintf(stream, "\nSwath File <%s> not initialized for reading\n", path);
+          fprintf(stream, "\nProgram <%s> Terminated\n", program_name);
+          exit(error);
+        }
+
+        /* allocate memory for data arrays */
+        memset(data, 0, MBINFO_MAXPINGS * sizeof(struct ping));
+        for (int i = 0; i < pings_read; i++) {
+          datacur = &data[i];
+          if (error == MB_ERROR_NO_ERROR)
+            status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char),
+                                       (void **)&datacur->beamflag, &error);
+          if (error == MB_ERROR_NO_ERROR)
+            status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&datacur->bath,
+                                       &error);
+          if (error == MB_ERROR_NO_ERROR)
+            status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&datacur->amp,
+                                       &error);
+          if (error == MB_ERROR_NO_ERROR)
+            status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
+                                       (void **)&datacur->bathlon, &error);
+          if (error == MB_ERROR_NO_ERROR)
+            status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
+                                       (void **)&datacur->bathlat, &error);
+          if (error == MB_ERROR_NO_ERROR)
+            status =
+                mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&datacur->ss, &error);
+          if (error == MB_ERROR_NO_ERROR)
+            status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&datacur->sslon,
+                                       &error);
+          if (error == MB_ERROR_NO_ERROR)
+            status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&datacur->sslat,
+                                       &error);
+        }
+        if (pings_read > 1 && pass == 0) {
+          if (error == MB_ERROR_NO_ERROR)
+            status =
+                mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathmean, &error);
+          if (error == MB_ERROR_NO_ERROR)
+            status =
+                mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathvar, &error);
+          if (error == MB_ERROR_NO_ERROR)
+            status =
+                mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(int), (void **)&nbathvar, &error);
+          if (error == MB_ERROR_NO_ERROR)
+            status =
+                mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&ampmean, &error);
+          if (error == MB_ERROR_NO_ERROR)
+            status =
+                mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&ampvar, &error);
+          if (error == MB_ERROR_NO_ERROR)
+            status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(int), (void **)&nampvar, &error);
+          if (error == MB_ERROR_NO_ERROR)
+            status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssmean, &error);
+          if (error == MB_ERROR_NO_ERROR)
+            status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssvar, &error);
+          if (error == MB_ERROR_NO_ERROR)
+            status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(int), (void **)&nssvar, &error);
+        }
+
+        /* if coverage mask requested get cell sizes */
+        if (coverage_mask && (coverage_mask_bounds || pass == 1)) {
+          if (pass == 1) {
+            maskbounds[0] = lonmin;
+            maskbounds[1] = lonmax;
+            maskbounds[2] = latmin;
+            maskbounds[3] = latmax;
           }
-          else {
-            mask_ny = mask_nx;
-            mask_nx = mask_ny * (maskbounds[1] - maskbounds[0]) / (maskbounds[3] - maskbounds[2]);
-            if (mask_ny < 2)
-              mask_ny = 2;
+          if (mask_nx > 1 && mask_ny <= 0) {
+            if ((maskbounds[1] - maskbounds[0]) > (maskbounds[3] - maskbounds[2])) {
+              mask_ny = mask_nx * (maskbounds[3] - maskbounds[2]) / (maskbounds[1] - maskbounds[0]);
+            }
+            else {
+              mask_ny = mask_nx;
+              mask_nx = mask_ny * (maskbounds[1] - maskbounds[0]) / (maskbounds[3] - maskbounds[2]);
+              if (mask_ny < 2)
+                mask_ny = 2;
+            }
+          }
+          if (mask_nx < 2)
+            mask_nx = 2;
+          if (mask_ny < 2)
+            mask_ny = 2;
+          mask_dx = (maskbounds[1] - maskbounds[0]) / mask_nx;
+          mask_dy = (maskbounds[3] - maskbounds[2]) / mask_ny;
+
+          /* allocate mask */
+          status = mb_mallocd(verbose, __FILE__, __LINE__, mask_nx * mask_ny * sizeof(int), (void **)&mask, &error);
+        }
+
+        /* if error initializing memory then quit */
+        if (error != MB_ERROR_NO_ERROR) {
+          char *message;
+          mb_error(verbose, error, &message);
+          fprintf(stream, "\nMBIO Error allocating data arrays:\n%s\n", message);
+          fprintf(stream, "\nProgram <%s> Terminated\n", program_name);
+          exit(error);
+        }
+
+        /* initialize data arrays */
+        irecfile = 0;
+        distotfile = 0.0;
+        timtotfile = 0.0;
+        spdavgfile = 0.0;
+        if (pass == 0 && pings_read > 1) {
+          for (int i = 0; i < beams_bath_alloc; i++) {
+            bathmean[i] = 0.0;
+            bathvar[i] = 0.0;
+            nbathvar[i] = 0;
+          }
+          for (int i = 0; i < beams_amp_alloc; i++) {
+            ampmean[i] = 0.0;
+            ampvar[i] = 0.0;
+            nampvar[i] = 0;
+          }
+          for (int i = 0; i < pixels_ss_alloc; i++) {
+            ssmean[i] = 0.0;
+            ssvar[i] = 0.0;
+            nssvar[i] = 0;
           }
         }
-        if (mask_nx < 2)
-          mask_nx = 2;
-        if (mask_ny < 2)
-          mask_ny = 2;
-        mask_dx = (maskbounds[1] - maskbounds[0]) / mask_nx;
-        mask_dy = (maskbounds[3] - maskbounds[2]) / mask_ny;
-
-        /* allocate mask */
-        status = mb_mallocd(verbose, __FILE__, __LINE__, mask_nx * mask_ny * sizeof(int), (void **)&mask, &error);
-      }
-
-      /* if error initializing memory then quit */
-      if (error != MB_ERROR_NO_ERROR) {
-        char *message;
-        mb_error(verbose, error, &message);
-        fprintf(stream, "\nMBIO Error allocating data arrays:\n%s\n", message);
-        fprintf(stream, "\nProgram <%s> Terminated\n", program_name);
-        exit(error);
-      }
-
-      /* initialize data arrays */
-      irecfile = 0;
-      distotfile = 0.0;
-      timtotfile = 0.0;
-      spdavgfile = 0.0;
-      if (pass == 0 && pings_read > 1) {
-        for (int i = 0; i < beams_bath_alloc; i++) {
-          bathmean[i] = 0.0;
-          bathvar[i] = 0.0;
-          nbathvar[i] = 0;
+        if (coverage_mask && (coverage_mask_bounds || pass == 1)) {
+          for (int i = 0; i < mask_nx * mask_ny; i++)
+            mask[i] = false;
         }
-        for (int i = 0; i < beams_amp_alloc; i++) {
-          ampmean[i] = 0.0;
-          ampvar[i] = 0.0;
-          nampvar[i] = 0;
-        }
-        for (int i = 0; i < pixels_ss_alloc; i++) {
-          ssmean[i] = 0.0;
-          ssvar[i] = 0.0;
-          nssvar[i] = 0;
-        }
-      }
-      if (coverage_mask && (coverage_mask_bounds || pass == 1)) {
-        for (int i = 0; i < mask_nx * mask_ny; i++)
-          mask[i] = false;
-      }
 
-      /* initialize metadata counters */
-      meta_vessel = 0;
-      meta_institution = 0;
-      meta_platform = 0;
-      meta_sonar = 0;
-      meta_sonarversion = 0;
-      meta_cruiseid = 0;
-      meta_cruisename = 0;
-      meta_pi = 0;
-      meta_piinstitution = 0;
-      meta_client = 0;
-      meta_svcorrected = 0;
-      meta_tidecorrected = 0;
-      meta_batheditmanual = 0;
-      meta_batheditauto = 0;
-      meta_rollbias = 0;
-      meta_pitchbias = 0;
-      meta_headingbias = 0;
-      meta_draft = 0;
+        /* initialize metadata counters */
+        meta_vessel = 0;
+        meta_institution = 0;
+        meta_platform = 0;
+        meta_sonar = 0;
+        meta_sonarversion = 0;
+        meta_cruiseid = 0;
+        meta_cruisename = 0;
+        meta_pi = 0;
+        meta_piinstitution = 0;
+        meta_client = 0;
+        meta_svcorrected = 0;
+        meta_tidecorrected = 0;
+        meta_batheditmanual = 0;
+        meta_batheditauto = 0;
+        meta_rollbias = 0;
+        meta_pitchbias = 0;
+        meta_headingbias = 0;
+        meta_draft = 0;
 
-      /* printf out file and format */
-      if (pass == 0) {
-        if (strrchr(file, '/') == nullptr)
-          fileprint = file;
-        else
-          fileprint = strrchr(file, '/') + 1;
-        mb_format_description(verbose, &format, format_description, &error);
-        switch (output_format) {
-        case FREE_TEXT:
-          fprintf(output, "\nSwath Data File:      %s\n", fileprint);
-          fprintf(output, "MBIO Data Format ID:  %d\n", format);
-          fprintf(output, "%s", format_description);
-          break;
-        case JSON:
-        {
-          fprintf(output, "\"file_info\": {\n");
-          fprintf(output, "\"swath_data_file\": \"%s\",\n", fileprint);
-          fprintf(output, "\"mbio_data_format_id\": \"%d\",\n", format);
-          size_t len1 = strspn(format_description, "Formatname: ");
-          size_t len2 = strcspn(&format_description[len1], "\n");
-          strncpy(string, &format_description[len1], len2);
-          string[len2] = '\0';
-          fprintf(output, "\"format_name\": \"%s\",\n", string);
-          len1 += len2 + 1;
-          len1 += strspn(&format_description[len1], "InformalDescription: ");
-          len2 = strcspn(&format_description[len1], "\n");
-          strncpy(string, &format_description[len1], len2);
-          string[len2] = '\0';
-          fprintf(output, "\"informal_description\": \"%s\",\n", string);
-          len1 += len2 + 1;
-          len1 += strspn(&format_description[len1], "Attributes: ");
-          // len2 = strlen(format_description);
-          format_description[strlen(format_description) - 1] = '\0';
-          for (len2 = len1; len2 <= strlen(format_description); len2++)
-            if (format_description[len2] == 10)
-              format_description[len2] = ';';
-          fprintf(output, "\"attributes\": \"%s\"\n", &format_description[len1]);
-          fprintf(output, "},\n");
-          break;
-        }
-        case XML:
-        {
-          fprintf(output, "\t<file_info>\n");
-          fprintf(output, "\t\t<swath_data_file>%s</swath_data_file>\n", fileprint);
-          fprintf(output, "\t\t<mbio_data_format_id>%d</mbio_data_format_id>\n", format);
-          size_t len1 = strspn(format_description, "Formatname: ");
-          size_t len2 = strcspn(&format_description[len1], "\n");
-          strncpy(string, &format_description[len1], len2);
-          string[len2] = '\0';
-          fprintf(output, "\t\t<format_name>%s</format_name>\n", string);
-          len1 += len2 + 1;
-          len1 += strspn(&format_description[len1], "InformalDescription: ");
-          len2 = strcspn(&format_description[len1], "\n");
-          strncpy(string, &format_description[len1], len2);
-          string[len2] = '\0';
-          fprintf(output, "\t\t<informal_description>%s</informal_description>\n", string);
-          len1 += len2 + 1;
-          len1 += strspn(&format_description[len1], "Attributes: ");
-          // len2 = strlen(format_description);
-          format_description[strlen(format_description) - 1] = '\0';
-          for (len2 = len1; len2 <= strlen(format_description); len2++)
-            if (format_description[len2] == 10)
-              format_description[len2] = ' ';
-          fprintf(output, "\t\t<attributes>%s</attributes>\n", &format_description[len1]);
-          fprintf(output, "\t</file_info>\n");
-          break;
-        }
-        default:
-          errflg = true;
-        }
-      }
-
-      /* read and process data */
-      while (error <= MB_ERROR_NO_ERROR) {
-        nread = 0;
-        error = MB_ERROR_NO_ERROR;
-        while (nread < pings_read && error == MB_ERROR_NO_ERROR) {
-
-          int kind;
-          /* read a ping of data */
-          datacur = &data[nread];
-          status = mb_read(verbose, mbio_ptr, &kind, &pings, time_i, &time_d, &navlon, &navlat, &speed, &heading,
-                           &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, datacur->beamflag,
-                           datacur->bath, datacur->amp, datacur->bathlon, datacur->bathlat, datacur->ss, datacur->sslon,
-                           datacur->sslat, comment, &error);
-
-          /* use local pointers for convenience - do not set these before the
-              mb_read call because registered arrays can be dynamically
-              reallocated during mb_read, mb_get, and mb_get_all calls */
-          beamflag = datacur->beamflag;
-          bath = datacur->bath;
-          amp = datacur->amp;
-          bathlon = datacur->bathlon;
-          bathlat = datacur->bathlat;
-          ss = datacur->ss;
-          sslon = datacur->sslon;
-          sslat = datacur->sslat;
-
-          /* increment counters */
-          if (pass == 0 && (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP)) {
-            irec++;
-            irecfile++;
-            nread++;
+        /* printf out file and format */
+        if (pass == 0) {
+          if (strrchr(path, '/') == nullptr)
+            fileprint = path;
+          else
+            fileprint = strrchr(path, '/') + 1;
+          mb_format_description(verbose, &format, format_description, &error);
+          switch (output_format) {
+          case FREE_TEXT:
+            fprintf(output, "\nSwath Data File:      %s\n", fileprint);
+            fprintf(output, "MBIO Data Format ID:  %d\n", format);
+            fprintf(output, "%s", format_description);
+            break;
+          case JSON:
+          {
+            fprintf(output, "\"file_info\": {\n");
+            fprintf(output, "\"swath_data_file\": \"%s\",\n", fileprint);
+            fprintf(output, "\"mbio_data_format_id\": \"%d\",\n", format);
+            size_t len1 = strspn(format_description, "Formatname: ");
+            size_t len2 = strcspn(&format_description[len1], "\n");
+            strncpy(string, &format_description[len1], len2);
+            string[len2] = '\0';
+            fprintf(output, "\"format_name\": \"%s\",\n", string);
+            len1 += len2 + 1;
+            len1 += strspn(&format_description[len1], "InformalDescription: ");
+            len2 = strcspn(&format_description[len1], "\n");
+            strncpy(string, &format_description[len1], len2);
+            string[len2] = '\0';
+            fprintf(output, "\"informal_description\": \"%s\",\n", string);
+            len1 += len2 + 1;
+            len1 += strspn(&format_description[len1], "Attributes: ");
+            // len2 = strlen(format_description);
+            format_description[strlen(format_description) - 1] = '\0';
+            for (len2 = len1; len2 <= strlen(format_description); len2++)
+              if (format_description[len2] == 10)
+                format_description[len2] = ';';
+            fprintf(output, "\"attributes\": \"%s\"\n", &format_description[len1]);
+            fprintf(output, "},\n");
+            break;
           }
+          case XML:
+          {
+            fprintf(output, "\t<file_info>\n");
+            fprintf(output, "\t\t<swath_data_file>%s</swath_data_file>\n", fileprint);
+            fprintf(output, "\t\t<mbio_data_format_id>%d</mbio_data_format_id>\n", format);
+            size_t len1 = strspn(format_description, "Formatname: ");
+            size_t len2 = strcspn(&format_description[len1], "\n");
+            strncpy(string, &format_description[len1], len2);
+            string[len2] = '\0';
+            fprintf(output, "\t\t<format_name>%s</format_name>\n", string);
+            len1 += len2 + 1;
+            len1 += strspn(&format_description[len1], "InformalDescription: ");
+            len2 = strcspn(&format_description[len1], "\n");
+            strncpy(string, &format_description[len1], len2);
+            string[len2] = '\0';
+            fprintf(output, "\t\t<informal_description>%s</informal_description>\n", string);
+            len1 += len2 + 1;
+            len1 += strspn(&format_description[len1], "Attributes: ");
+            // len2 = strlen(format_description);
+            format_description[strlen(format_description) - 1] = '\0';
+            for (len2 = len1; len2 <= strlen(format_description); len2++)
+              if (format_description[len2] == 10)
+                format_description[len2] = ' ';
+            fprintf(output, "\t\t<attributes>%s</attributes>\n", &format_description[len1]);
+            fprintf(output, "\t</file_info>\n");
+            break;
+          }
+          default:
+            errflg = true;
+          }
+        }
 
-          /* print comment records */
-          if (pass == 0 && error == MB_ERROR_COMMENT && comments) {
-            if (strncmp(comment, "META", 4) != 0) {
-              if (icomment == 0) {
+        /* read and process data */
+        while (error <= MB_ERROR_NO_ERROR) {
+          nread = 0;
+          error = MB_ERROR_NO_ERROR;
+          while (nread < pings_read && error == MB_ERROR_NO_ERROR) {
+
+            int kind;
+            /* read a ping of data */
+            datacur = &data[nread];
+            status = mb_read(verbose, mbio_ptr, &kind, &pings, time_i, &time_d, &navlon, &navlat, &speed, &heading,
+                             &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, datacur->beamflag,
+                             datacur->bath, datacur->amp, datacur->bathlon, datacur->bathlat, datacur->ss, datacur->sslon,
+                             datacur->sslat, comment, &error);
+
+            /* use local pointers for convenience - do not set these before the
+                mb_read call because registered arrays can be dynamically
+                reallocated during mb_read, mb_get, and mb_get_all calls */
+            beamflag = datacur->beamflag;
+            bath = datacur->bath;
+            amp = datacur->amp;
+            bathlon = datacur->bathlon;
+            bathlat = datacur->bathlat;
+            ss = datacur->ss;
+            sslon = datacur->sslon;
+            sslat = datacur->sslat;
+
+            /* increment counters */
+            if (pass == 0 && (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP)) {
+              irec++;
+              irecfile++;
+              nread++;
+            }
+
+            /* print comment records */
+            if (pass == 0 && error == MB_ERROR_COMMENT && comments) {
+              if (strncmp(comment, "META", 4) != 0) {
+                if (icomment == 0) {
+                  switch (output_format) {
+                  case FREE_TEXT:
+                    fprintf(output, "\nComments in file %s:\n", path);
+                    icomment++;
+                    break;
+                  case JSON:
+                  case XML:
+                  default:
+                    break;
+                  }
+                }
                 switch (output_format) {
                 case FREE_TEXT:
-                  fprintf(output, "\nComments in file %s:\n", file);
-                  icomment++;
+                  fprintf(output, "  %s\n", comment);
                   break;
                 case JSON:
+                  fprintf(output, "\"comment\": \"%s\",\n", comment);
+                  break;
                 case XML:
+                  fprintf(output, "\t<comment>%s</comment>\n", comment);
+                  break;
                 default:
                   break;
                 }
               }
+            }
+
+            /* print metadata */
+            if (pass == 0 && error == MB_ERROR_COMMENT && strncmp(comment, "META", 4) == 0) {
               switch (output_format) {
               case FREE_TEXT:
-                fprintf(output, "  %s\n", comment);
+                if (imetadata == 0) {
+                  fprintf(output, "\nMetadata:\n");
+                  imetadata++;
+                }
+                if (strncmp(comment, "METAVESSEL:", 11) == 0) {
+                  if (meta_vessel == 0)
+                    fprintf(output, "Vessel:                 %s\n", &comment[11]);
+                  meta_vessel++;
+                }
+                else if (strncmp(comment, "METAINSTITUTION:", 16) == 0) {
+                  if (meta_institution == 0)
+                    fprintf(output, "Institution:            %s\n", &comment[16]);
+                  meta_institution++;
+                }
+                else if (strncmp(comment, "METAPLATFORM:", 13) == 0) {
+                  if (meta_platform == 0)
+                    fprintf(output, "Platform:               %s\n", &comment[13]);
+                  meta_platform++;
+                }
+                else if (strncmp(comment, "METASONARVERSION:", 17) == 0) {
+                  if (meta_sonarversion == 0)
+                    fprintf(output, "Sonar Version:          %s\n", &comment[17]);
+                  meta_sonarversion++;
+                }
+                else if (strncmp(comment, "METASONAR:", 10) == 0) {
+                  if (meta_sonar == 0)
+                    fprintf(output, "Sonar:                  %s\n", &comment[10]);
+                  meta_sonar++;
+                }
+                else if (strncmp(comment, "METACRUISEID:", 13) == 0) {
+                  if (meta_cruiseid == 0)
+                    fprintf(output, "Cruise ID:              %s\n", &comment[13]);
+                  meta_cruiseid++;
+                }
+                else if (strncmp(comment, "METACRUISENAME:", 15) == 0) {
+                  if (meta_cruisename == 0)
+                    fprintf(output, "Cruise Name:            %s\n", &comment[15]);
+                  meta_cruisename++;
+                }
+                else if (strncmp(comment, "METAPI:", 7) == 0) {
+                  if (meta_pi == 0)
+                    fprintf(output, "PI:                     %s\n", &comment[7]);
+                  meta_pi++;
+                }
+                else if (strncmp(comment, "METAPIINSTITUTION:", 18) == 0) {
+                  if (meta_piinstitution == 0)
+                    fprintf(output, "PI Institution:         %s\n", &comment[18]);
+                  meta_piinstitution++;
+                }
+                else if (strncmp(comment, "METACLIENT:", 11) == 0) {
+                  if (meta_client == 0)
+                    fprintf(output, "Client:                 %s\n", &comment[11]);
+                  meta_client++;
+                }
+                else if (strncmp(comment, "METASVCORRECTED:", 16) == 0) {
+                  if (meta_svcorrected == 0) {
+                    int val_int;
+                    sscanf(comment, "METASVCORRECTED:%d", &val_int);
+                    if (val_int)
+                      fprintf(output, "Corrected Depths:       YES\n");
+                    else
+                      fprintf(output, "Corrected Depths:       NO\n");
+                  }
+                  meta_svcorrected++;
+                }
+                else if (strncmp(comment, "METATIDECORRECTED:", 18) == 0) {
+                  if (meta_tidecorrected == 0) {
+                    int val_int;
+                    sscanf(comment, "METATIDECORRECTED:%d", &val_int);
+                    if (val_int)
+                      fprintf(output, "Tide Corrected:         YES\n");
+                    else
+                      fprintf(output, "Tide Corrected:         NO\n");
+                  }
+                  meta_tidecorrected++;
+                }
+                else if (strncmp(comment, "METABATHEDITMANUAL:", 19) == 0) {
+                  if (meta_batheditmanual == 0) {
+                    int val_int;
+                    sscanf(comment, "METABATHEDITMANUAL:%d", &val_int);
+                    if (val_int)
+                      fprintf(output, "Depths Manually Edited: YES\n");
+                    else
+                      fprintf(output, "Depths Manually Edited: NO\n");
+                  }
+                  meta_batheditmanual++;
+                }
+                else if (strncmp(comment, "METABATHEDITAUTO:", 17) == 0) {
+                  if (meta_batheditauto == 0) {
+                    int val_int;
+                    sscanf(comment, "METABATHEDITAUTO:%d", &val_int);
+                    if (val_int)
+                      fprintf(output, "Depths Auto-Edited:     YES\n");
+                    else
+                      fprintf(output, "Depths Auto-Edited:     NO\n");
+                  }
+                  meta_batheditauto++;
+                }
+                else if (strncmp(comment, "METAROLLBIAS:", 13) == 0) {
+                  if (meta_rollbias == 0) {
+                    sscanf(comment, "METAROLLBIAS:%lf", &val_double);
+                    fprintf(output, "Roll Bias:              %f degrees\n", val_double);
+                  }
+                  meta_rollbias++;
+                }
+                else if (strncmp(comment, "METAPITCHBIAS:", 14) == 0) {
+                  if (meta_pitchbias == 0) {
+                    sscanf(comment, "METAPITCHBIAS:%lf", &val_double);
+                    fprintf(output, "Pitch Bias:             %f degrees\n", val_double);
+                  }
+                  meta_pitchbias++;
+                }
+                else if (strncmp(comment, "METAHEADINGBIAS:", 16) == 0) {
+                  if (meta_headingbias == 0) {
+                    sscanf(comment, "METAHEADINGBIAS:%lf", &val_double);
+                    fprintf(output, "Heading Bias:           %f degrees\n", val_double);
+                  }
+                  meta_headingbias++;
+                }
+                else if (strncmp(comment, "METADRAFT:", 10) == 0) {
+                  if (meta_draft == 0) {
+                    sscanf(comment, "METADRAFT:%lf", &val_double);
+                    fprintf(output, "Draft:                  %f m\n", val_double);
+                  }
+                  meta_draft++;
+                }
                 break;
               case JSON:
-                fprintf(output, "\"comment\": \"%s\",\n", comment);
+                if (strncmp(comment, "METAVESSEL:", 11) == 0) {
+                  if (meta_vessel == 0)
+                    fprintf(output, "\"vessel\":\"%s\",\n", &comment[11]);
+                  meta_vessel++;
+                }
+                else if (strncmp(comment, "METAINSTITUTION:", 16) == 0) {
+                  if (meta_institution == 0)
+                    fprintf(output, "\"institution\":\"%s\",\n", &comment[16]);
+                  meta_institution++;
+                }
+                else if (strncmp(comment, "METAPLATFORM:", 13) == 0) {
+                  if (meta_platform == 0)
+                    fprintf(output, "\"platform\": \"%s \",\n", &comment[13]);
+                  meta_platform++;
+                }
+                else if (strncmp(comment, "METASONARVERSION:", 17) == 0) {
+                  if (meta_sonarversion == 0)
+                    fprintf(output, "\"sonar_version\": \"%s\",\n", &comment[17]);
+                  meta_sonarversion++;
+                }
+                else if (strncmp(comment, "METASONAR:", 10) == 0) {
+                  if (meta_sonar == 0)
+                    fprintf(output, "\"sonar\": \"%s\",\n", &comment[10]);
+                  meta_sonar++;
+                }
+                else if (strncmp(comment, "METACRUISEID:", 13) == 0) {
+                  if (meta_cruiseid == 0)
+                    fprintf(output, "\"cruise_id\": \"%s\",\n", &comment[13]);
+                  meta_cruiseid++;
+                }
+                else if (strncmp(comment, "METACRUISENAME:", 15) == 0) {
+                  if (meta_cruisename == 0)
+                    fprintf(output, "\"cruise_name\": \"%s\",\n", &comment[15]);
+                  meta_cruisename++;
+                }
+                else if (strncmp(comment, "METAPI:", 7) == 0) {
+                  if (meta_pi == 0)
+                    fprintf(output, "\"pi\": \"%s\",\n", &comment[7]);
+                  meta_pi++;
+                }
+                else if (strncmp(comment, "METAPIINSTITUTION:", 18) == 0) {
+                  if (meta_piinstitution == 0)
+                    fprintf(output, "\"pi_institution\": \"%s\",\n", &comment[18]);
+                  meta_piinstitution++;
+                }
+                else if (strncmp(comment, "METACLIENT:", 11) == 0) {
+                  if (meta_client == 0)
+                    fprintf(output, "\"client\": \"%s\",\n", &comment[11]);
+                  meta_client++;
+                }
+                else if (strncmp(comment, "METASVCORRECTED:", 16) == 0) {
+                  if (meta_svcorrected == 0) {
+                    int val_int;
+                    sscanf(comment, "METASVCORRECTED:%d", &val_int);
+                    if (val_int)
+                      fprintf(output, "\"corrected_depths\": \"YES\",\n");
+                    else
+                      fprintf(output, "\"corrected_depths\": \"NO\",\n");
+                  }
+                  meta_svcorrected++;
+                }
+                else if (strncmp(comment, "METATIDECORRECTED:", 18) == 0) {
+                  if (meta_tidecorrected == 0) {
+                    int val_int;
+                    sscanf(comment, "METATIDECORRECTED:%d", &val_int);
+                    if (val_int)
+                      fprintf(output, "\"tide_corrected\": \"YES\",\n");
+                    else
+                      fprintf(output, "\"tide_corrected\": \"NO\",\n");
+                  }
+                  meta_tidecorrected++;
+                }
+                else if (strncmp(comment, "METABATHEDITMANUAL:", 19) == 0) {
+                  if (meta_batheditmanual == 0) {
+                    int val_int;
+                    sscanf(comment, "METABATHEDITMANUAL:%d", &val_int);
+                    if (val_int)
+                      fprintf(output, "\"depths_manually_edited\": \"YES\",\n");
+                    else
+                      fprintf(output, "\"depths_manually_edited\": \"NO\",\n");
+                  }
+                  meta_batheditmanual++;
+                }
+                else if (strncmp(comment, "METABATHEDITAUTO:", 17) == 0) {
+                  if (meta_batheditauto == 0) {
+                    int val_int;
+                    sscanf(comment, "METABATHEDITAUTO:%d", &val_int);
+                    if (val_int)
+                      fprintf(output, "\"depths_auto-edited\": \"YES\",\n");
+                    else
+                      fprintf(output, "\"depths_auto-edited\": \"NO\",\n");
+                  }
+                  meta_batheditauto++;
+                }
+                else if (strncmp(comment, "METAROLLBIAS:", 13) == 0) {
+                  if (meta_rollbias == 0) {
+                    sscanf(comment, "METAROLLBIAS:%lf", &val_double);
+                    fprintf(output, "\"roll_bias\": \"%f\",\n", val_double);
+                  }
+                  meta_rollbias++;
+                }
+                else if (strncmp(comment, "METAPITCHBIAS:", 14) == 0) {
+                  if (meta_pitchbias == 0) {
+                    sscanf(comment, "METAPITCHBIAS:%lf", &val_double);
+                    fprintf(output, "\"pitch_bias\": \"%f\",\n", val_double);
+                  }
+                  meta_pitchbias++;
+                }
+                else if (strncmp(comment, "METAHEADINGBIAS:", 16) == 0) {
+                  if (meta_headingbias == 0) {
+                    sscanf(comment, "METAHEADINGBIAS:%lf", &val_double);
+                    fprintf(output, "\"heading_bias\": \"%f\",\n", val_double);
+                  }
+                  meta_headingbias++;
+                }
+                else if (strncmp(comment, "METADRAFT:", 10) == 0) {
+                  if (meta_draft == 0) {
+                    sscanf(comment, "METADRAFT:%lf", &val_double);
+                    fprintf(output, "\"draft\": \"%f\",\n", val_double);
+                  }
+                  meta_draft++;
+                }
                 break;
               case XML:
-                fprintf(output, "\t<comment>%s</comment>\n", comment);
+                if (imetadata == 0) {
+                  fprintf(output, "\t<metadata>\n");
+                  imetadata++;
+                }
+                if (strncmp(comment, "METAVESSEL:", 11) == 0) {
+                  if (meta_vessel == 0)
+                    fprintf(output, "\t\t<vessel>%s</vessel>\n", &comment[11]);
+                  meta_vessel++;
+                }
+                else if (strncmp(comment, "METAINSTITUTION:", 16) == 0) {
+                  if (meta_institution == 0)
+                    fprintf(output, "\t\t<institution>%s</institution>\n", &comment[16]);
+                  meta_institution++;
+                }
+                else if (strncmp(comment, "METAPLATFORM:", 13) == 0) {
+                  if (meta_platform == 0)
+                    fprintf(output, "\t\t<platform>%s</platform>\n", &comment[13]);
+                  meta_platform++;
+                }
+                else if (strncmp(comment, "METASONARVERSION:", 17) == 0) {
+                  if (meta_sonarversion == 0)
+                    fprintf(output, "\t\t<sonar_version>%s</sonar_version>\n", &comment[17]);
+                  meta_sonarversion++;
+                }
+                else if (strncmp(comment, "METASONAR:", 10) == 0) {
+                  if (meta_sonar == 0)
+                    fprintf(output, "\t\t<sonar>%s</sonar>\n", &comment[10]);
+                  meta_sonar++;
+                }
+                else if (strncmp(comment, "METACRUISEID:", 13) == 0) {
+                  if (meta_cruiseid == 0)
+                    fprintf(output, "\t\t<cruise_id>%s</cruise_id>\n", &comment[13]);
+                  meta_cruiseid++;
+                }
+                else if (strncmp(comment, "METACRUISENAME:", 15) == 0) {
+                  if (meta_cruisename == 0)
+                    fprintf(output, "\t\t<cruise_name>%s</cruise_name>\n", &comment[15]);
+                  meta_cruisename++;
+                }
+                else if (strncmp(comment, "METAPI:", 7) == 0) {
+                  if (meta_pi == 0)
+                    fprintf(output, "\t\t<pi>%s</pi>\n", &comment[7]);
+                  meta_pi++;
+                }
+                else if (strncmp(comment, "METAPIINSTITUTION:", 18) == 0) {
+                  if (meta_piinstitution == 0)
+                    fprintf(output, "\t\t<pi_institution>%s</pi_institution>\n", &comment[18]);
+                  meta_piinstitution++;
+                }
+                else if (strncmp(comment, "METACLIENT:", 11) == 0) {
+                  if (meta_client == 0)
+                    fprintf(output, "\t\t<client>%s</client>\n", &comment[11]);
+                  meta_client++;
+                }
+                else if (strncmp(comment, "METASVCORRECTED:", 16) == 0) {
+                  if (meta_svcorrected == 0) {
+                    int val_int;
+                    sscanf(comment, "METASVCORRECTED:%d", &val_int);
+                    if (val_int)
+                      fprintf(output, "\t\t<corrected_depths>YES</corrected_depths>\n");
+                    else
+                      fprintf(output, "\t\t<corrected_depths>NO</corrected_depths>\n");
+                  }
+                  meta_svcorrected++;
+                }
+                else if (strncmp(comment, "METATIDECORRECTED:", 18) == 0) {
+                  if (meta_tidecorrected == 0) {
+                    int val_int;
+                    sscanf(comment, "METATIDECORRECTED:%d", &val_int);
+                    if (val_int)
+                      fprintf(output, "\t\t<tide_corrected>YES</tide_corrected>\n");
+                    else
+                      fprintf(output, "\t\t<tide_corrected>NO</tide_corrected>\n");
+                  }
+                  meta_tidecorrected++;
+                }
+                else if (strncmp(comment, "METABATHEDITMANUAL:", 19) == 0) {
+                  if (meta_batheditmanual == 0) {
+                    int val_int;
+                    sscanf(comment, "METABATHEDITMANUAL:%d", &val_int);
+                    if (val_int)
+                      fprintf(output, "\t\t<depths_manually_edited>YES</depths_manually_edited>\n");
+                    else
+                      fprintf(output, "\t\t<depths_manually_edited>NO</depths_manually_edited>\n");
+                  }
+                  meta_batheditmanual++;
+                }
+                else if (strncmp(comment, "METABATHEDITAUTO:", 17) == 0) {
+                  if (meta_batheditauto == 0) {
+                    int val_int;
+                    sscanf(comment, "METABATHEDITAUTO:%d", &val_int);
+                    if (val_int)
+                      fprintf(output, "\t\t<depths_auto_edited>YES</depths_auto_edited>\n");
+                    else
+                      fprintf(output, "\t\t<depths_auto_edited>NO</depths_auto_edited>\n");
+                  }
+                  meta_batheditauto++;
+                }
+                else if (strncmp(comment, "METAROLLBIAS:", 13) == 0) {
+                  if (meta_rollbias == 0) {
+                    sscanf(comment, "METAROLLBIAS:%lf\n", &val_double);
+                    fprintf(output, "\t\t<roll_bias>%f</roll_bias>\n", val_double);
+                  }
+                  meta_rollbias++;
+                }
+                else if (strncmp(comment, "METAPITCHBIAS:", 14) == 0) {
+                  if (meta_pitchbias == 0) {
+                    sscanf(comment, "METAPITCHBIAS:%lf", &val_double);
+                    fprintf(output, "\t\t<pitch_bias>%f</pitch_bias>\n", val_double);
+                  }
+                  meta_pitchbias++;
+                }
+                else if (strncmp(comment, "METAHEADINGBIAS:", 16) == 0) {
+                  if (meta_headingbias == 0) {
+                    sscanf(comment, "METAHEADINGBIAS:%lf", &val_double);
+                    fprintf(output, "\t\t<heading_bias>%f</heading_bias>\n", val_double);
+                  }
+                  meta_headingbias++;
+                }
+                else if (strncmp(comment, "METADRAFT:", 10) == 0) {
+                  if (meta_draft == 0) {
+                    sscanf(comment, "METADRAFT:%lf", &val_double);
+                    fprintf(output, "\t\t<draft>%fm</draft>\n\t</metadata>\n", val_double);
+                  }
+                  meta_draft++;
+                }
                 break;
               default:
                 break;
               }
             }
-          }
 
-          /* print metadata */
-          if (pass == 0 && error == MB_ERROR_COMMENT && strncmp(comment, "META", 4) == 0) {
-            switch (output_format) {
-            case FREE_TEXT:
-              if (imetadata == 0) {
-                fprintf(output, "\nMetadata:\n");
-                imetadata++;
-              }
-              if (strncmp(comment, "METAVESSEL:", 11) == 0) {
-                if (meta_vessel == 0)
-                  fprintf(output, "Vessel:                 %s\n", &comment[11]);
-                meta_vessel++;
-              }
-              else if (strncmp(comment, "METAINSTITUTION:", 16) == 0) {
-                if (meta_institution == 0)
-                  fprintf(output, "Institution:            %s\n", &comment[16]);
-                meta_institution++;
-              }
-              else if (strncmp(comment, "METAPLATFORM:", 13) == 0) {
-                if (meta_platform == 0)
-                  fprintf(output, "Platform:               %s\n", &comment[13]);
-                meta_platform++;
-              }
-              else if (strncmp(comment, "METASONARVERSION:", 17) == 0) {
-                if (meta_sonarversion == 0)
-                  fprintf(output, "Sonar Version:          %s\n", &comment[17]);
-                meta_sonarversion++;
-              }
-              else if (strncmp(comment, "METASONAR:", 10) == 0) {
-                if (meta_sonar == 0)
-                  fprintf(output, "Sonar:                  %s\n", &comment[10]);
-                meta_sonar++;
-              }
-              else if (strncmp(comment, "METACRUISEID:", 13) == 0) {
-                if (meta_cruiseid == 0)
-                  fprintf(output, "Cruise ID:              %s\n", &comment[13]);
-                meta_cruiseid++;
-              }
-              else if (strncmp(comment, "METACRUISENAME:", 15) == 0) {
-                if (meta_cruisename == 0)
-                  fprintf(output, "Cruise Name:            %s\n", &comment[15]);
-                meta_cruisename++;
-              }
-              else if (strncmp(comment, "METAPI:", 7) == 0) {
-                if (meta_pi == 0)
-                  fprintf(output, "PI:                     %s\n", &comment[7]);
-                meta_pi++;
-              }
-              else if (strncmp(comment, "METAPIINSTITUTION:", 18) == 0) {
-                if (meta_piinstitution == 0)
-                  fprintf(output, "PI Institution:         %s\n", &comment[18]);
-                meta_piinstitution++;
-              }
-              else if (strncmp(comment, "METACLIENT:", 11) == 0) {
-                if (meta_client == 0)
-                  fprintf(output, "Client:                 %s\n", &comment[11]);
-                meta_client++;
-              }
-              else if (strncmp(comment, "METASVCORRECTED:", 16) == 0) {
-                if (meta_svcorrected == 0) {
-                  int val_int;
-                  sscanf(comment, "METASVCORRECTED:%d", &val_int);
-                  if (val_int)
-                    fprintf(output, "Corrected Depths:       YES\n");
-                  else
-                    fprintf(output, "Corrected Depths:       NO\n");
-                }
-                meta_svcorrected++;
-              }
-              else if (strncmp(comment, "METATIDECORRECTED:", 18) == 0) {
-                if (meta_tidecorrected == 0) {
-                  int val_int;
-                  sscanf(comment, "METATIDECORRECTED:%d", &val_int);
-                  if (val_int)
-                    fprintf(output, "Tide Corrected:         YES\n");
-                  else
-                    fprintf(output, "Tide Corrected:         NO\n");
-                }
-                meta_tidecorrected++;
-              }
-              else if (strncmp(comment, "METABATHEDITMANUAL:", 19) == 0) {
-                if (meta_batheditmanual == 0) {
-                  int val_int;
-                  sscanf(comment, "METABATHEDITMANUAL:%d", &val_int);
-                  if (val_int)
-                    fprintf(output, "Depths Manually Edited: YES\n");
-                  else
-                    fprintf(output, "Depths Manually Edited: NO\n");
-                }
-                meta_batheditmanual++;
-              }
-              else if (strncmp(comment, "METABATHEDITAUTO:", 17) == 0) {
-                if (meta_batheditauto == 0) {
-                  int val_int;
-                  sscanf(comment, "METABATHEDITAUTO:%d", &val_int);
-                  if (val_int)
-                    fprintf(output, "Depths Auto-Edited:     YES\n");
-                  else
-                    fprintf(output, "Depths Auto-Edited:     NO\n");
-                }
-                meta_batheditauto++;
-              }
-              else if (strncmp(comment, "METAROLLBIAS:", 13) == 0) {
-                if (meta_rollbias == 0) {
-                  sscanf(comment, "METAROLLBIAS:%lf", &val_double);
-                  fprintf(output, "Roll Bias:              %f degrees\n", val_double);
-                }
-                meta_rollbias++;
-              }
-              else if (strncmp(comment, "METAPITCHBIAS:", 14) == 0) {
-                if (meta_pitchbias == 0) {
-                  sscanf(comment, "METAPITCHBIAS:%lf", &val_double);
-                  fprintf(output, "Pitch Bias:             %f degrees\n", val_double);
-                }
-                meta_pitchbias++;
-              }
-              else if (strncmp(comment, "METAHEADINGBIAS:", 16) == 0) {
-                if (meta_headingbias == 0) {
-                  sscanf(comment, "METAHEADINGBIAS:%lf", &val_double);
-                  fprintf(output, "Heading Bias:           %f degrees\n", val_double);
-                }
-                meta_headingbias++;
-              }
-              else if (strncmp(comment, "METADRAFT:", 10) == 0) {
-                if (meta_draft == 0) {
-                  sscanf(comment, "METADRAFT:%lf", &val_double);
-                  fprintf(output, "Draft:                  %f m\n", val_double);
-                }
-                meta_draft++;
-              }
-              break;
-            case JSON:
-              if (strncmp(comment, "METAVESSEL:", 11) == 0) {
-                if (meta_vessel == 0)
-                  fprintf(output, "\"vessel\":\"%s\",\n", &comment[11]);
-                meta_vessel++;
-              }
-              else if (strncmp(comment, "METAINSTITUTION:", 16) == 0) {
-                if (meta_institution == 0)
-                  fprintf(output, "\"institution\":\"%s\",\n", &comment[16]);
-                meta_institution++;
-              }
-              else if (strncmp(comment, "METAPLATFORM:", 13) == 0) {
-                if (meta_platform == 0)
-                  fprintf(output, "\"platform\": \"%s \",\n", &comment[13]);
-                meta_platform++;
-              }
-              else if (strncmp(comment, "METASONARVERSION:", 17) == 0) {
-                if (meta_sonarversion == 0)
-                  fprintf(output, "\"sonar_version\": \"%s\",\n", &comment[17]);
-                meta_sonarversion++;
-              }
-              else if (strncmp(comment, "METASONAR:", 10) == 0) {
-                if (meta_sonar == 0)
-                  fprintf(output, "\"sonar\": \"%s\",\n", &comment[10]);
-                meta_sonar++;
-              }
-              else if (strncmp(comment, "METACRUISEID:", 13) == 0) {
-                if (meta_cruiseid == 0)
-                  fprintf(output, "\"cruise_id\": \"%s\",\n", &comment[13]);
-                meta_cruiseid++;
-              }
-              else if (strncmp(comment, "METACRUISENAME:", 15) == 0) {
-                if (meta_cruisename == 0)
-                  fprintf(output, "\"cruise_name\": \"%s\",\n", &comment[15]);
-                meta_cruisename++;
-              }
-              else if (strncmp(comment, "METAPI:", 7) == 0) {
-                if (meta_pi == 0)
-                  fprintf(output, "\"pi\": \"%s\",\n", &comment[7]);
-                meta_pi++;
-              }
-              else if (strncmp(comment, "METAPIINSTITUTION:", 18) == 0) {
-                if (meta_piinstitution == 0)
-                  fprintf(output, "\"pi_institution\": \"%s\",\n", &comment[18]);
-                meta_piinstitution++;
-              }
-              else if (strncmp(comment, "METACLIENT:", 11) == 0) {
-                if (meta_client == 0)
-                  fprintf(output, "\"client\": \"%s\",\n", &comment[11]);
-                meta_client++;
-              }
-              else if (strncmp(comment, "METASVCORRECTED:", 16) == 0) {
-                if (meta_svcorrected == 0) {
-                  int val_int;
-                  sscanf(comment, "METASVCORRECTED:%d", &val_int);
-                  if (val_int)
-                    fprintf(output, "\"corrected_depths\": \"YES\",\n");
-                  else
-                    fprintf(output, "\"corrected_depths\": \"NO\",\n");
-                }
-                meta_svcorrected++;
-              }
-              else if (strncmp(comment, "METATIDECORRECTED:", 18) == 0) {
-                if (meta_tidecorrected == 0) {
-                  int val_int;
-                  sscanf(comment, "METATIDECORRECTED:%d", &val_int);
-                  if (val_int)
-                    fprintf(output, "\"tide_corrected\": \"YES\",\n");
-                  else
-                    fprintf(output, "\"tide_corrected\": \"NO\",\n");
-                }
-                meta_tidecorrected++;
-              }
-              else if (strncmp(comment, "METABATHEDITMANUAL:", 19) == 0) {
-                if (meta_batheditmanual == 0) {
-                  int val_int;
-                  sscanf(comment, "METABATHEDITMANUAL:%d", &val_int);
-                  if (val_int)
-                    fprintf(output, "\"depths_manually_edited\": \"YES\",\n");
-                  else
-                    fprintf(output, "\"depths_manually_edited\": \"NO\",\n");
-                }
-                meta_batheditmanual++;
-              }
-              else if (strncmp(comment, "METABATHEDITAUTO:", 17) == 0) {
-                if (meta_batheditauto == 0) {
-                  int val_int;
-                  sscanf(comment, "METABATHEDITAUTO:%d", &val_int);
-                  if (val_int)
-                    fprintf(output, "\"depths_auto-edited\": \"YES\",\n");
-                  else
-                    fprintf(output, "\"depths_auto-edited\": \"NO\",\n");
-                }
-                meta_batheditauto++;
-              }
-              else if (strncmp(comment, "METAROLLBIAS:", 13) == 0) {
-                if (meta_rollbias == 0) {
-                  sscanf(comment, "METAROLLBIAS:%lf", &val_double);
-                  fprintf(output, "\"roll_bias\": \"%f\",\n", val_double);
-                }
-                meta_rollbias++;
-              }
-              else if (strncmp(comment, "METAPITCHBIAS:", 14) == 0) {
-                if (meta_pitchbias == 0) {
-                  sscanf(comment, "METAPITCHBIAS:%lf", &val_double);
-                  fprintf(output, "\"pitch_bias\": \"%f\",\n", val_double);
-                }
-                meta_pitchbias++;
-              }
-              else if (strncmp(comment, "METAHEADINGBIAS:", 16) == 0) {
-                if (meta_headingbias == 0) {
-                  sscanf(comment, "METAHEADINGBIAS:%lf", &val_double);
-                  fprintf(output, "\"heading_bias\": \"%f\",\n", val_double);
-                }
-                meta_headingbias++;
-              }
-              else if (strncmp(comment, "METADRAFT:", 10) == 0) {
-                if (meta_draft == 0) {
-                  sscanf(comment, "METADRAFT:%lf", &val_double);
-                  fprintf(output, "\"draft\": \"%f\",\n", val_double);
-                }
-                meta_draft++;
-              }
-              break;
-            case XML:
-              if (imetadata == 0) {
-                fprintf(output, "\t<metadata>\n");
-                imetadata++;
-              }
-              if (strncmp(comment, "METAVESSEL:", 11) == 0) {
-                if (meta_vessel == 0)
-                  fprintf(output, "\t\t<vessel>%s</vessel>\n", &comment[11]);
-                meta_vessel++;
-              }
-              else if (strncmp(comment, "METAINSTITUTION:", 16) == 0) {
-                if (meta_institution == 0)
-                  fprintf(output, "\t\t<institution>%s</institution>\n", &comment[16]);
-                meta_institution++;
-              }
-              else if (strncmp(comment, "METAPLATFORM:", 13) == 0) {
-                if (meta_platform == 0)
-                  fprintf(output, "\t\t<platform>%s</platform>\n", &comment[13]);
-                meta_platform++;
-              }
-              else if (strncmp(comment, "METASONARVERSION:", 17) == 0) {
-                if (meta_sonarversion == 0)
-                  fprintf(output, "\t\t<sonar_version>%s</sonar_version>\n", &comment[17]);
-                meta_sonarversion++;
-              }
-              else if (strncmp(comment, "METASONAR:", 10) == 0) {
-                if (meta_sonar == 0)
-                  fprintf(output, "\t\t<sonar>%s</sonar>\n", &comment[10]);
-                meta_sonar++;
-              }
-              else if (strncmp(comment, "METACRUISEID:", 13) == 0) {
-                if (meta_cruiseid == 0)
-                  fprintf(output, "\t\t<cruise_id>%s</cruise_id>\n", &comment[13]);
-                meta_cruiseid++;
-              }
-              else if (strncmp(comment, "METACRUISENAME:", 15) == 0) {
-                if (meta_cruisename == 0)
-                  fprintf(output, "\t\t<cruise_name>%s</cruise_name>\n", &comment[15]);
-                meta_cruisename++;
-              }
-              else if (strncmp(comment, "METAPI:", 7) == 0) {
-                if (meta_pi == 0)
-                  fprintf(output, "\t\t<pi>%s</pi>\n", &comment[7]);
-                meta_pi++;
-              }
-              else if (strncmp(comment, "METAPIINSTITUTION:", 18) == 0) {
-                if (meta_piinstitution == 0)
-                  fprintf(output, "\t\t<pi_institution>%s</pi_institution>\n", &comment[18]);
-                meta_piinstitution++;
-              }
-              else if (strncmp(comment, "METACLIENT:", 11) == 0) {
-                if (meta_client == 0)
-                  fprintf(output, "\t\t<client>%s</client>\n", &comment[11]);
-                meta_client++;
-              }
-              else if (strncmp(comment, "METASVCORRECTED:", 16) == 0) {
-                if (meta_svcorrected == 0) {
-                  int val_int;
-                  sscanf(comment, "METASVCORRECTED:%d", &val_int);
-                  if (val_int)
-                    fprintf(output, "\t\t<corrected_depths>YES</corrected_depths>\n");
-                  else
-                    fprintf(output, "\t\t<corrected_depths>NO</corrected_depths>\n");
-                }
-                meta_svcorrected++;
-              }
-              else if (strncmp(comment, "METATIDECORRECTED:", 18) == 0) {
-                if (meta_tidecorrected == 0) {
-                  int val_int;
-                  sscanf(comment, "METATIDECORRECTED:%d", &val_int);
-                  if (val_int)
-                    fprintf(output, "\t\t<tide_corrected>YES</tide_corrected>\n");
-                  else
-                    fprintf(output, "\t\t<tide_corrected>NO</tide_corrected>\n");
-                }
-                meta_tidecorrected++;
-              }
-              else if (strncmp(comment, "METABATHEDITMANUAL:", 19) == 0) {
-                if (meta_batheditmanual == 0) {
-                  int val_int;
-                  sscanf(comment, "METABATHEDITMANUAL:%d", &val_int);
-                  if (val_int)
-                    fprintf(output, "\t\t<depths_manually_edited>YES</depths_manually_edited>\n");
-                  else
-                    fprintf(output, "\t\t<depths_manually_edited>NO</depths_manually_edited>\n");
-                }
-                meta_batheditmanual++;
-              }
-              else if (strncmp(comment, "METABATHEDITAUTO:", 17) == 0) {
-                if (meta_batheditauto == 0) {
-                  int val_int;
-                  sscanf(comment, "METABATHEDITAUTO:%d", &val_int);
-                  if (val_int)
-                    fprintf(output, "\t\t<depths_auto_edited>YES</depths_auto_edited>\n");
-                  else
-                    fprintf(output, "\t\t<depths_auto_edited>NO</depths_auto_edited>\n");
-                }
-                meta_batheditauto++;
-              }
-              else if (strncmp(comment, "METAROLLBIAS:", 13) == 0) {
-                if (meta_rollbias == 0) {
-                  sscanf(comment, "METAROLLBIAS:%lf\n", &val_double);
-                  fprintf(output, "\t\t<roll_bias>%f</roll_bias>\n", val_double);
-                }
-                meta_rollbias++;
-              }
-              else if (strncmp(comment, "METAPITCHBIAS:", 14) == 0) {
-                if (meta_pitchbias == 0) {
-                  sscanf(comment, "METAPITCHBIAS:%lf", &val_double);
-                  fprintf(output, "\t\t<pitch_bias>%f</pitch_bias>\n", val_double);
-                }
-                meta_pitchbias++;
-              }
-              else if (strncmp(comment, "METAHEADINGBIAS:", 16) == 0) {
-                if (meta_headingbias == 0) {
-                  sscanf(comment, "METAHEADINGBIAS:%lf", &val_double);
-                  fprintf(output, "\t\t<heading_bias>%f</heading_bias>\n", val_double);
-                }
-                meta_headingbias++;
-              }
-              else if (strncmp(comment, "METADRAFT:", 10) == 0) {
-                if (meta_draft == 0) {
-                  sscanf(comment, "METADRAFT:%lf", &val_double);
-                  fprintf(output, "\t\t<draft>%fm</draft>\n\t</metadata>\n", val_double);
-                }
-                meta_draft++;
-              }
-              break;
-            default:
-              break;
+            /* output error messages */
+            if (pass != 0 || error == MB_ERROR_COMMENT) {
+              /* do nothing */
             }
-          }
-
-          /* output error messages */
-          if (pass != 0 || error == MB_ERROR_COMMENT) {
-            /* do nothing */
-          }
-          else if (error == MB_ERROR_SUBBOTTOM) {
-            /* do nothing */
-          }
-          else if (verbose >= 1 && error < MB_ERROR_NO_ERROR && error >= MB_ERROR_OTHER) {
-            char *message;
-            mb_error(verbose, error, &message);
-            fprintf(stream, "\nNonfatal MBIO Error:\n%s\n", message);
-            fprintf(stream, "Time: %d %d %d %d %d %d %d\n", time_i[0], time_i[1], time_i[2], time_i[3], time_i[4],
-                    time_i[5], time_i[6]);
-          }
-          else if (verbose >= 1 && error < MB_ERROR_NO_ERROR) {
-            char *message;
-            mb_error(verbose, error, &message);
-            fprintf(stream, "\nNonfatal MBIO Error:\n%s\n", message);
-            fprintf(stream, "Number of good records so far: %d\n", irecfile);
-          }
-          else if (verbose >= 1 && error > MB_ERROR_NO_ERROR && error != MB_ERROR_EOF) {
-            char *message;
-            mb_error(verbose, error, &message);
-            fprintf(stream, "\nFatal MBIO Error:\n%s\n", message);
-            fprintf(stream, "Last Good Time: %d %d %d %d %d %d %d\n", time_i[0], time_i[1], time_i[2], time_i[3],
-                    time_i[4], time_i[5], time_i[6]);
-          }
-
-          /* take note of min and maxes */
-          beams_bath_max = std::max(beams_bath_max, beams_bath);
-          beams_amp_max = std::max(beams_amp_max, beams_amp);
-          pixels_ss_max = std::max(pixels_ss_max, pixels_ss);
-          if (pass == 0 && (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP)) {
-            /* update data counts */
-            ntdbeams += beams_bath;
-            ntabeams += beams_amp;
-            ntsbeams += pixels_ss;
-
-            /* set lonflip if needed */
-            if (!lonflip_set && (navlon != 0.0 || navlat != 0.0)) {
-              lonflip_set = true;
-              if (navlon < -270.0)
-                lonflip_use = 0;
-              else if (navlon >= -270.0 && navlon < -90.0)
-                lonflip_use = -1;
-              else if (navlon >= -90.0 && navlon < 90.0)
-                lonflip_use = 0;
-              else if (navlon >= 90.0 && navlon < 270.0)
-                lonflip_use = 1;
-              else if (navlon >= 270.0)
-                lonflip_use = 0;
-
-              /* change and apply lonflip if needed */
-              if (lonflip_use != lonflip) {
-                /* change lonflip used in reading */
-                struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-                mb_io_ptr->lonflip = lonflip_use;
-                lonflip = lonflip_use;
-
-                /* apply lonflip to data already read */
-                if (lonflip_use == -1) {
-                  if (navlon > 0.0)
-                    navlon -= 360.0;
-                  for (int i = 0; i < beams_bath; i++) {
-                    if (bathlon[i] > 0.0)
-                      bathlon[i] -= 360.0;
-                  }
-                  for (int i = 0; i < pixels_ss; i++) {
-                    if (sslon[i] > 0.0)
-                      sslon[i] -= 360.0;
-                  }
-                }
-                else if (lonflip_use == 1) {
-                  if (navlon < 0.0)
-                    navlon += 360.0;
-                  for (int i = 0; i < beams_bath; i++) {
-                    if (bathlon[i] < 0.0)
-                      bathlon[i] += 360.0;
-                  }
-                  for (int i = 0; i < pixels_ss; i++) {
-                    if (sslon[i] < 0.0)
-                      sslon[i] += 360.0;
-                  }
-                }
-                else if (lonflip_use == 0) {
-                  if (navlon < -180.0)
-                    navlon += 360.0;
-                  if (navlon > 180.0)
-                    navlon -= 360.0;
-                  for (int i = 0; i < beams_bath; i++) {
-                    if (bathlon[i] < -180.0)
-                      bathlon[i] += 360.0;
-                    if (bathlon[i] > 180.0)
-                      bathlon[i] -= 360.0;
-                  }
-                  for (int i = 0; i < pixels_ss; i++) {
-                    if (sslon[i] < -180.0)
-                      sslon[i] += 360.0;
-                    if (sslon[i] > 180.0)
-                      sslon[i] -= 360.0;
-                  }
-                }
-              }
+            else if (error == MB_ERROR_SUBBOTTOM) {
+              /* do nothing */
+            }
+            else if (verbose >= 1 && error < MB_ERROR_NO_ERROR && error >= MB_ERROR_OTHER) {
+              char *message;
+              mb_error(verbose, error, &message);
+              fprintf(stream, "\nNonfatal MBIO Error:\n%s\n", message);
+              fprintf(stream, "Time: %d %d %d %d %d %d %d\n", time_i[0], time_i[1], time_i[2], time_i[3], time_i[4],
+                      time_i[5], time_i[6]);
+            }
+            else if (verbose >= 1 && error < MB_ERROR_NO_ERROR) {
+              char *message;
+              mb_error(verbose, error, &message);
+              fprintf(stream, "\nNonfatal MBIO Error:\n%s\n", message);
+              fprintf(stream, "Number of good records so far: %d\n", irecfile);
+            }
+            else if (verbose >= 1 && error > MB_ERROR_NO_ERROR && error != MB_ERROR_EOF) {
+              char *message;
+              mb_error(verbose, error, &message);
+              fprintf(stream, "\nFatal MBIO Error:\n%s\n", message);
+              fprintf(stream, "Last Good Time: %d %d %d %d %d %d %d\n", time_i[0], time_i[1], time_i[2], time_i[3],
+                      time_i[4], time_i[5], time_i[6]);
             }
 
-            /* get beginning values */
-            if (irec == 1) {
-              if (beams_bath > 0) {
-                if (mb_beam_ok(beamflag[beams_bath / 2]))
-                  bathbeg = bath[beams_bath / 2];
-                else
-                  bathbeg = altitude + sonardepth;
+            /* take note of min and maxes */
+            beams_bath_max = std::max(beams_bath_max, beams_bath);
+            beams_amp_max = std::max(beams_amp_max, beams_amp);
+            pixels_ss_max = std::max(pixels_ss_max, pixels_ss);
+            if (pass == 0 && (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP)) {
+              /* update data counts */
+              ntdbeams += beams_bath;
+              ntabeams += beams_amp;
+              ntsbeams += pixels_ss;
+
+              /* set lonflip if needed */
+              if (!lonflip_set && (navlon != 0.0 || navlat != 0.0)) {
+                lonflip_set = true;
+                if (navlon < -270.0)
+                  lonflip_use = 0;
+                else if (navlon >= -270.0 && navlon < -90.0)
+                  lonflip_use = -1;
+                else if (navlon >= -90.0 && navlon < 90.0)
+                  lonflip_use = 0;
+                else if (navlon >= 90.0 && navlon < 270.0)
+                  lonflip_use = 1;
+                else if (navlon >= 270.0)
+                  lonflip_use = 0;
+
+                /* change and apply lonflip if needed */
+                if (lonflip_use != lonflip) {
+                  /* change lonflip used in reading */
+                  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+                  mb_io_ptr->lonflip = lonflip_use;
+                  lonflip = lonflip_use;
+
+                  /* apply lonflip to data already read */
+                  if (lonflip_use == -1) {
+                    if (navlon > 0.0)
+                      navlon -= 360.0;
+                    for (int i = 0; i < beams_bath; i++) {
+                      if (bathlon[i] > 0.0)
+                        bathlon[i] -= 360.0;
+                    }
+                    for (int i = 0; i < pixels_ss; i++) {
+                      if (sslon[i] > 0.0)
+                        sslon[i] -= 360.0;
+                    }
+                  }
+                  else if (lonflip_use == 1) {
+                    if (navlon < 0.0)
+                      navlon += 360.0;
+                    for (int i = 0; i < beams_bath; i++) {
+                      if (bathlon[i] < 0.0)
+                        bathlon[i] += 360.0;
+                    }
+                    for (int i = 0; i < pixels_ss; i++) {
+                      if (sslon[i] < 0.0)
+                        sslon[i] += 360.0;
+                    }
+                  }
+                  else if (lonflip_use == 0) {
+                    if (navlon < -180.0)
+                      navlon += 360.0;
+                    if (navlon > 180.0)
+                      navlon -= 360.0;
+                    for (int i = 0; i < beams_bath; i++) {
+                      if (bathlon[i] < -180.0)
+                        bathlon[i] += 360.0;
+                      if (bathlon[i] > 180.0)
+                        bathlon[i] -= 360.0;
+                    }
+                    for (int i = 0; i < pixels_ss; i++) {
+                      if (sslon[i] < -180.0)
+                        sslon[i] += 360.0;
+                      if (sslon[i] > 180.0)
+                        sslon[i] -= 360.0;
+                    }
+                  }
+                }
               }
-              lonbeg = navlon;
-              latbeg = navlat;
-              timbeg = time_d;
-              timbegfile = time_d;
-              for (int i = 0; i < 7; i++)
-                timbeg_i[i] = time_i[i];
-              spdbeg = speed;
-              hdgbeg = heading;
-              sdpbeg = sonardepth;
-              altbeg = altitude;
-            }
-            else if (good_nav_only) {
-              if (lonbeg == 0.0 && latbeg == 0.0 && navlon != 0.0 && navlat != 0.0) {
-                lonbeg = navlon;
+
+              /* get beginning values */
+              if (irec == 1) {
                 if (beams_bath > 0) {
                   if (mb_beam_ok(beamflag[beams_bath / 2]))
                     bathbeg = bath[beams_bath / 2];
                   else
-                    bathbeg = altitude + sonardepth;
+                    bathbeg = altitude + sensordepth;
                 }
+                lonbeg = navlon;
                 latbeg = navlat;
-                if (spdbeg == 0.0 && speed != 0.0)
-                  spdbeg = speed;
-                if (hdgbeg == 0.0 && heading != 0.0)
-                  hdgbeg = heading;
-                if (sdpbeg == 0.0 && sonardepth != 0.0)
-                  sdpbeg = sonardepth;
-                if (altbeg == 0.0 && altitude != 0.0)
-                  altbeg = altitude;
+                timbeg = time_d;
+                timbegfile = time_d;
+                for (int i = 0; i < 7; i++)
+                  timbeg_i[i] = time_i[i];
+                spdbeg = speed;
+                hdgbeg = heading;
+                sdpbeg = sensordepth;
+                altbeg = altitude;
               }
-            }
-
-            /* reset ending values each time */
-            if (beams_bath > 0) {
-              if (mb_beam_ok(beamflag[beams_bath / 2]))
-                bathend = bath[beams_bath / 2];
-              else
-                bathend = altitude + sonardepth;
-            }
-            lonend = navlon;
-            latend = navlat;
-            spdend = speed;
-            hdgend = heading;
-            sdpend = sonardepth;
-            altend = altitude;
-            timend = time_d;
-            timendfile = time_d;
-            for (int i = 0; i < 7; i++)
-              timend_i[i] = time_i[i];
-
-            /* check for good nav */
-            speed_apparent = 3600.0 * distance / (time_d - time_d_last);
-            bool good_nav = true;
-            if (good_nav_only) {
-              if ((navlon > -0.005 && navlon < 0.005) && (navlat > -0.005 && navlat < 0.005)) {
-                good_nav = false;
+              else if (good_nav_only) {
+                if (lonbeg == 0.0 && latbeg == 0.0 && navlon != 0.0 && navlat != 0.0) {
+                  lonbeg = navlon;
+                  if (beams_bath > 0) {
+                    if (mb_beam_ok(beamflag[beams_bath / 2]))
+                      bathbeg = bath[beams_bath / 2];
+                    else
+                      bathbeg = altitude + sensordepth;
+                  }
+                  latbeg = navlat;
+                  if (spdbeg == 0.0 && speed != 0.0)
+                    spdbeg = speed;
+                  if (hdgbeg == 0.0 && heading != 0.0)
+                    hdgbeg = heading;
+                  if (sdpbeg == 0.0 && sensordepth != 0.0)
+                    sdpbeg = sensordepth;
+                  if (altbeg == 0.0 && altitude != 0.0)
+                    altbeg = altitude;
+                }
               }
-              else if (beginnav && speed_apparent >= speed_threshold) {
-                good_nav = false;
+
+
+              /* reset ending values each time */
+              if (beams_bath > 0) {
+                if (mb_beam_ok(beamflag[beams_bath / 2]))
+                  bathend = bath[beams_bath / 2];
+                else
+                  bathend = altitude + sensordepth;
+              }
+              lonend = navlon;
+              latend = navlat;
+              spdend = speed;
+              hdgend = heading;
+              sdpend = sensordepth;
+              altend = altitude;
+              timend = time_d;
+              timendpath = time_d;
+              for (int i = 0; i < 7; i++)
+                timend_i[i] = time_i[i];
+
+              /* check for good nav */
+              speed_apparent = 3600.0 * distance / (time_d - time_d_last);
+              bool good_nav = true;
+              if (good_nav_only) {
+                if ((navlon > -0.005 && navlon < 0.005) && (navlat > -0.005 && navlat < 0.005)) {
+                  good_nav = false;
+                }
+                else if (beginnav && speed_apparent >= speed_threshold) {
+                  good_nav = false;
+                } // else { good_nav = true; }
               } // else { good_nav = true; }
-            } // else { good_nav = true; }
 
-            /* get total distance */
-            if (!good_nav_only || (good_nav && speed_apparent < speed_threshold)) {
-              distot += distance;
-              distotfile += distance;
-            }
+              /* get total distance */
+              if (!good_nav_only || (good_nav && speed_apparent < speed_threshold)) {
+                distot += distance;
+                distotfile += distance;
+              }
 
-            /* get starting mins and maxs */
-            if (!beginnav && good_nav) {
-              lonmin = navlon;
-              lonmax = navlon;
-              latmin = navlat;
-              latmax = navlat;
-              beginnav = true;
-            }
-            if (!beginsdp && sonardepth > 0.0) {
-              sdpmin = sonardepth;
-              sdpmax = sonardepth;
-              beginsdp = true;
-            }
-            if (!beginalt && altitude > 0.0) {
-              altmin = altitude;
-              altmax = altitude;
-              beginalt = true;
-            }
-            if (!beginbath && beams_bath > 0)
-              for (int i = 0; i < beams_bath; i++)
+              /* get starting mins and maxs */
+              if (!beginnav && good_nav) {
+                lonmin = navlon;
+                lonmax = navlon;
+                latmin = navlat;
+                latmax = navlat;
+                beginnav = true;
+              }
+              if (!beginsdp && sensordepth > 0.0) {
+                sdpmin = sensordepth;
+                sdpmax = sensordepth;
+                beginsdp = true;
+              }
+              if (!beginalt && altitude > 0.0) {
+                altmin = altitude;
+                altmax = altitude;
+                beginalt = true;
+              }
+              if (!beginbath && beams_bath > 0)
+                for (int i = 0; i < beams_bath; i++)
+                  if (mb_beam_ok(beamflag[i])) {
+                    bathmin = bath[i];
+                    bathmax = bath[i];
+                    beginbath = true;
+                  }
+              if (!beginamp && beams_amp > 0)
+                for (int i = 0; i < beams_amp; i++)
+                  if (mb_beam_ok(beamflag[i])) {
+                    ampmin = amp[i];
+                    ampmax = amp[i];
+                    beginamp = true;
+                  }
+              if (!beginss && pixels_ss > 0)
+                for (int i = 0; i < pixels_ss; i++)
+                  if (ss[i] > MB_SIDESCAN_NULL) {
+                    ssmin = ss[i];
+                    ssmax = ss[i];
+                    beginss = true;
+                  }
+
+              /* get mins and maxs */
+              if (good_nav && beginnav) {
+                lonmin = std::min(lonmin, navlon);
+                lonmax = std::max(lonmax, navlon);
+                latmin = std::min(latmin, navlat);
+                latmax = std::max(latmax, navlat);
+              }
+              if (beginsdp) {
+                sdpmin = std::min(sdpmin, sensordepth);
+                sdpmax = std::max(sdpmax, sensordepth);
+              }
+              if (beginalt) {
+                altmin = std::min(altmin, altitude);
+                altmax = std::max(altmax, altitude);
+              }
+              for (int i = 0; i < beams_bath; i++) {
                 if (mb_beam_ok(beamflag[i])) {
-                  bathmin = bath[i];
-                  bathmax = bath[i];
-                  beginbath = true;
+                  if (good_nav && beginnav) {
+                    lonmin = std::min(lonmin, bathlon[i]);
+                    lonmax = std::max(lonmax, bathlon[i]);
+                    latmin = std::min(latmin, bathlat[i]);
+                    latmax = std::max(latmax, bathlat[i]);
+                  }
+                  bathmin = std::min(bathmin, bath[i]);
+                  bathmax = std::max(bathmax, bath[i]);
+                  ngdbeams++;
                 }
-            if (!beginamp && beams_amp > 0)
-              for (int i = 0; i < beams_amp; i++)
+                else if (beamflag[i] == MB_FLAG_NULL)
+                  nzdbeams++;
+                else
+                  nfdbeams++;
+              }
+              for (int i = 0; i < beams_amp; i++) {
                 if (mb_beam_ok(beamflag[i])) {
-                  ampmin = amp[i];
-                  ampmax = amp[i];
-                  beginamp = true;
+                  ampmin = std::min(ampmin, amp[i]);
+                  ampmax = std::max(ampmax, amp[i]);
+                  ngabeams++;
                 }
-            if (!beginss && pixels_ss > 0)
-              for (int i = 0; i < pixels_ss; i++)
+                else if (beamflag[i] == MB_FLAG_NULL)
+                  nzabeams++;
+                else
+                  nfabeams++;
+              }
+              for (int i = 0; i < pixels_ss; i++) {
                 if (ss[i] > MB_SIDESCAN_NULL) {
-                  ssmin = ss[i];
-                  ssmax = ss[i];
-                  beginss = true;
+                  if (good_nav && beginnav) {
+                    lonmin = std::min(lonmin, sslon[i]);
+                    lonmax = std::max(lonmax, sslon[i]);
+                    latmin = std::min(latmin, sslat[i]);
+                    latmax = std::max(latmax, sslat[i]);
+                  }
+                  ssmin = std::min(ssmin, ss[i]);
+                  ssmax = std::max(ssmax, ss[i]);
+                  ngsbeams++;
                 }
+                else if (ss[i] == 0.0)
+                  nzsbeams++;
+                else
+                  nfsbeams++;
+              }
 
-            /* get mins and maxs */
-            if (good_nav && beginnav) {
-              lonmin = std::min(lonmin, navlon);
-              lonmax = std::max(lonmax, navlon);
-              latmin = std::min(latmin, navlat);
-              latmax = std::max(latmax, navlat);
-            }
-            if (beginsdp) {
-              sdpmin = std::min(sdpmin, sonardepth);
-              sdpmax = std::max(sdpmax, sonardepth);
-            }
-            if (beginalt) {
-              altmin = std::min(altmin, altitude);
-              altmax = std::max(altmax, altitude);
-            }
-            for (int i = 0; i < beams_bath; i++) {
-              if (mb_beam_ok(beamflag[i])) {
-                if (good_nav && beginnav) {
-                  lonmin = std::min(lonmin, bathlon[i]);
-                  lonmax = std::max(lonmax, bathlon[i]);
-                  latmin = std::min(latmin, bathlat[i]);
-                  latmax = std::max(latmax, bathlat[i]);
-                }
-                bathmin = std::min(bathmin, bath[i]);
-                bathmax = std::max(bathmax, bath[i]);
-                ngdbeams++;
-              }
-              else if (beamflag[i] == MB_FLAG_NULL)
-                nzdbeams++;
-              else
-                nfdbeams++;
-            }
-            for (int i = 0; i < beams_amp; i++) {
-              if (mb_beam_ok(beamflag[i])) {
-                ampmin = std::min(ampmin, amp[i]);
-                ampmax = std::max(ampmax, amp[i]);
-                ngabeams++;
-              }
-              else if (beamflag[i] == MB_FLAG_NULL)
-                nzabeams++;
-              else
-                nfabeams++;
-            }
-            for (int i = 0; i < pixels_ss; i++) {
-              if (ss[i] > MB_SIDESCAN_NULL) {
-                if (good_nav && beginnav) {
-                  lonmin = std::min(lonmin, sslon[i]);
-                  lonmax = std::max(lonmax, sslon[i]);
-                  latmin = std::min(latmin, sslat[i]);
-                  latmax = std::max(latmax, sslat[i]);
-                }
-                ssmin = std::min(ssmin, ss[i]);
-                ssmax = std::max(ssmax, ss[i]);
-                ngsbeams++;
-              }
-              else if (ss[i] == 0.0)
-                nzsbeams++;
-              else
-                nfsbeams++;
+              /* reset time of last ping */
+              time_d_last = time_d;
             }
 
-            /* reset time of last ping */
-            time_d_last = time_d;
-          }
-
-          /* update coverage mask */
-          if ((coverage_mask && (coverage_mask_bounds || pass == 1))
-              && (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP)) {
-            int ix = (int)((navlon - maskbounds[0]) / mask_dx);
-            int iy = (int)((navlat - maskbounds[2]) / mask_dy);
-            if (ix >= 0 && ix < mask_nx && iy >= 0 && iy < mask_ny) {
-              mask[ix + iy * mask_nx] = true;
-            }
-            for (int i = 0; i < beams_bath; i++) {
-              if (mb_beam_ok(beamflag[i])) {
-                ix = (int)((bathlon[i] - maskbounds[0]) / mask_dx);
-                iy = (int)((bathlat[i] - maskbounds[2]) / mask_dy);
-                if (ix >= 0 && ix < mask_nx && iy >= 0 && iy < mask_ny) {
-                  mask[ix + iy * mask_nx] = true;
+            /* update coverage mask */
+            if ((coverage_mask && (coverage_mask_bounds || pass == 1))
+                && (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP)) {
+              int ix = (int)((navlon - maskbounds[0]) / mask_dx);
+              int iy = (int)((navlat - maskbounds[2]) / mask_dy);
+              if (ix >= 0 && ix < mask_nx && iy >= 0 && iy < mask_ny) {
+                mask[ix + iy * mask_nx] = true;
+              }
+              for (int i = 0; i < beams_bath; i++) {
+                if (mb_beam_ok(beamflag[i])) {
+                  ix = (int)((bathlon[i] - maskbounds[0]) / mask_dx);
+                  iy = (int)((bathlat[i] - maskbounds[2]) / mask_dy);
+                  if (ix >= 0 && ix < mask_nx && iy >= 0 && iy < mask_ny) {
+                    mask[ix + iy * mask_nx] = true;
+                  }
+                }
+              }
+              for (int i = 0; i < pixels_ss; i++) {
+                if (ss[i] > MB_SIDESCAN_NULL) {
+                  ix = (int)((sslon[i] - maskbounds[0]) / mask_dx);
+                  iy = (int)((sslat[i] - maskbounds[2]) / mask_dy);
+                  if (ix >= 0 && ix < mask_nx && iy >= 0 && iy < mask_ny) {
+                    mask[ix + iy * mask_nx] = true;
+                  }
                 }
               }
             }
-            for (int i = 0; i < pixels_ss; i++) {
-              if (ss[i] > MB_SIDESCAN_NULL) {
-                ix = (int)((sslon[i] - maskbounds[0]) / mask_dx);
-                iy = (int)((sslat[i] - maskbounds[2]) / mask_dy);
-                if (ix >= 0 && ix < mask_nx && iy >= 0 && iy < mask_ny) {
-                  mask[ix + iy * mask_nx] = true;
+
+            /* look for problems */
+            if (pass == 0 && (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP)) {
+              if (navlon == 0.0 || navlat == 0.0)
+                mb_notice_log_problem(verbose, mbio_ptr, MB_PROBLEM_ZERO_NAV);
+              else if (beginnav && speed_apparent >= speed_threshold)
+                mb_notice_log_problem(verbose, mbio_ptr, MB_PROBLEM_TOO_FAST);
+              for (int i = 0; i < beams_bath; i++) {
+                if (mb_beam_ok(beamflag[i])) {
+                  if (bath[i] > 11000.0)
+                    mb_notice_log_problem(verbose, mbio_ptr, MB_PROBLEM_TOO_DEEP);
                 }
               }
             }
           }
 
-          /* look for problems */
-          if (pass == 0 && (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP)) {
-            if (navlon == 0.0 || navlat == 0.0)
-              mb_notice_log_problem(verbose, mbio_ptr, MB_PROBLEM_ZERO_NAV);
-            else if (beginnav && speed_apparent >= speed_threshold)
-              mb_notice_log_problem(verbose, mbio_ptr, MB_PROBLEM_TOO_FAST);
-            for (int i = 0; i < beams_bath; i++) {
-              if (mb_beam_ok(beamflag[i])) {
-                if (bath[i] > 11000.0)
-                  mb_notice_log_problem(verbose, mbio_ptr, MB_PROBLEM_TOO_DEEP);
-              }
-            }
+          if (verbose >= 2) {
+            fprintf(stream, "\ndbg2  Reading loop finished in program <%s>\n", program_name);
+            fprintf(stream, "dbg2       status:     %d\n", status);
+            fprintf(stream, "dbg2       error:      %d\n", error);
+            fprintf(stream, "dbg2       nread:      %d\n", nread);
+            fprintf(stream, "dbg2       pings_read: %d\n", pings_read);
           }
-        }
 
-        if (verbose >= 2) {
-          fprintf(stream, "\ndbg2  Reading loop finished in program <%s>\n", program_name);
-          fprintf(stream, "dbg2       status:     %d\n", status);
-          fprintf(stream, "dbg2       error:      %d\n", error);
-          fprintf(stream, "dbg2       nread:      %d\n", nread);
-          fprintf(stream, "dbg2       pings_read: %d\n", pings_read);
-        }
+          /* process the pings */
+          if (pass == 0 && pings_read > 2 && nread == pings_read &&
+              (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP)) {
 
-        /* process the pings */
-        if (pass == 0 && pings_read > 2 && nread == pings_read &&
-            (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP)) {
-
-          /* do the bathymetry */
-          for (int i = 0; i < beams_bath; i++) {
-            /* fit line to depths */
-            int nbath = 0;
-            double sumx = 0.0;
-            double sumxx = 0.0;
-            double sumy = 0.0;
-            double sumxy = 0.0;
-            for (int j = 0; j < nread; j++) {
-              datacur = &data[j];
-              bath = datacur->bath;
-              beamflag = datacur->beamflag;
-              if (mb_beam_ok(beamflag[i])) {
-                nbath++;
-                sumx = sumx + j;
-                sumxx = sumxx + j * j;
-                sumy = sumy + bath[i];
-                sumxy = sumxy + j * bath[i];
-              }
-            }
-            if (nbath == pings_read) {
-              double variance = 0.0;
-              delta = nbath * sumxx - sumx * sumx;
-              a = (sumxx * sumy - sumx * sumxy) / delta;
-              b = (nbath * sumxy - sumx * sumy) / delta;
+            /* do the bathymetry */
+            for (int i = 0; i < beams_bath; i++) {
+              /* fit line to depths */
+              int nbath = 0;
+              double sumx = 0.0;
+              double sumxx = 0.0;
+              double sumy = 0.0;
+              double sumxy = 0.0;
               for (int j = 0; j < nread; j++) {
                 datacur = &data[j];
                 bath = datacur->bath;
                 beamflag = datacur->beamflag;
                 if (mb_beam_ok(beamflag[i])) {
-                  dev = bath[i] - a - b * j;
-                  variance = variance + dev * dev;
+                  nbath++;
+                  sumx = sumx + j;
+                  sumxx = sumxx + j * j;
+                  sumy = sumy + bath[i];
+                  sumxy = sumxy + j * bath[i];
                 }
               }
-              bathmean[i] = bathmean[i] + sumy;
-              bathvar[i] = bathvar[i] + variance;
-              nbathvar[i] = nbathvar[i] + nbath;
-            }
-          }
-
-          /* do the amplitude */
-          for (int i = 0; i < beams_amp; i++) {
-
-            /* get mean amplitude */
-            namp = 0;
-            mean = 0.0;
-            for (int j = 0; j < nread; j++) {
-              datacur = &data[j];
-              amp = datacur->amp;
-              beamflag = datacur->beamflag;
-              if (mb_beam_ok(beamflag[i])) {
-                namp++;
-                mean = mean + amp[i];
+              if (nbath == pings_read) {
+                double variance = 0.0;
+                delta = nbath * sumxx - sumx * sumx;
+                a = (sumxx * sumy - sumx * sumxy) / delta;
+                b = (nbath * sumxy - sumx * sumy) / delta;
+                for (int j = 0; j < nread; j++) {
+                  datacur = &data[j];
+                  bath = datacur->bath;
+                  beamflag = datacur->beamflag;
+                  if (mb_beam_ok(beamflag[i])) {
+                    dev = bath[i] - a - b * j;
+                    variance = variance + dev * dev;
+                  }
+                }
+                bathmean[i] = bathmean[i] + sumy;
+                bathvar[i] = bathvar[i] + variance;
+                nbathvar[i] = nbathvar[i] + nbath;
               }
             }
-            if (namp == pings_read) {
-              double variance = 0.0;
-              mean = mean / namp;
+
+            /* do the amplitude */
+            for (int i = 0; i < beams_amp; i++) {
+
+              /* get mean amplitude */
+              namp = 0;
+              mean = 0.0;
               for (int j = 0; j < nread; j++) {
                 datacur = &data[j];
                 amp = datacur->amp;
+                beamflag = datacur->beamflag;
                 if (mb_beam_ok(beamflag[i])) {
-                  dev = amp[i] - mean;
-                  variance = variance + dev * dev;
+                  namp++;
+                  mean = mean + amp[i];
                 }
               }
-              ampmean[i] = ampmean[i] + namp * mean;
-              ampvar[i] = ampvar[i] + variance;
-              nampvar[i] = nampvar[i] + namp;
-            }
-          }
-
-          /* do the sidescan */
-          for (int i = 0; i < pixels_ss; i++) {
-
-            /* get mean sidescan */
-            nss = 0;
-            mean = 0.0;
-            for (int j = 0; j < nread; j++) {
-              datacur = &data[j];
-              ss = datacur->ss;
-              if (ss[i] > MB_SIDESCAN_NULL) {
-                nss++;
-                mean = mean + ss[i];
+              if (namp == pings_read) {
+                double variance = 0.0;
+                mean = mean / namp;
+                for (int j = 0; j < nread; j++) {
+                  datacur = &data[j];
+                  amp = datacur->amp;
+                  if (mb_beam_ok(beamflag[i])) {
+                    dev = amp[i] - mean;
+                    variance = variance + dev * dev;
+                  }
+                }
+                ampmean[i] = ampmean[i] + namp * mean;
+                ampvar[i] = ampvar[i] + variance;
+                nampvar[i] = nampvar[i] + namp;
               }
             }
-            if (nss == pings_read) {
-              double variance = 0.0;
-              mean = mean / nss;
+
+            /* do the sidescan */
+            for (int i = 0; i < pixels_ss; i++) {
+
+              /* get mean sidescan */
+              nss = 0;
+              mean = 0.0;
               for (int j = 0; j < nread; j++) {
                 datacur = &data[j];
                 ss = datacur->ss;
                 if (ss[i] > MB_SIDESCAN_NULL) {
-                  dev = ss[i] - mean;
-                  variance = variance + dev * dev;
+                  nss++;
+                  mean = mean + ss[i];
                 }
               }
-              ssmean[i] = ssmean[i] + nss * mean;
-              ssvar[i] = ssvar[i] + variance;
-              nssvar[i] = nssvar[i] + nss;
+              if (nss == pings_read) {
+                double variance = 0.0;
+                mean = mean / nss;
+                for (int j = 0; j < nread; j++) {
+                  datacur = &data[j];
+                  ss = datacur->ss;
+                  if (ss[i] > MB_SIDESCAN_NULL) {
+                    dev = ss[i] - mean;
+                    variance = variance + dev * dev;
+                  }
+                }
+                ssmean[i] = ssmean[i] + nss * mean;
+                ssvar[i] = ssvar[i] + variance;
+                nssvar[i] = nssvar[i] + nss;
+              }
             }
           }
-        }
 
-        if (verbose >= 2) {
-          fprintf(stream, "\ndbg2  Processing loop finished in program <%s>\n", program_name);
-          fprintf(stream, "dbg2       status:     %d\n", status);
-          fprintf(stream, "dbg2       error:      %d\n", error);
-          fprintf(stream, "dbg2       nread:      %d\n", nread);
-          fprintf(stream, "dbg2       pings_read: %d\n", pings_read);
-        }
-      }
-
-      /* look for problems */
-      timtotfile = (timendfile - timbegfile) / 3600.0;
-      if (timtotfile > 0.0)
-        spdavgfile = distotfile / timtotfile;
-      if (irecfile <= 0)
-        mb_notice_log_problem(verbose, mbio_ptr, MB_PROBLEM_NO_DATA);
-      else if (timtotfile > 0.0 && spdavgfile >= speed_threshold)
-        mb_notice_log_problem(verbose, mbio_ptr, MB_PROBLEM_AVG_TOO_FAST);
-
-      /* get notices if desired */
-      if (print_notices && pass == 0) {
-        status = mb_notice_get_list(verbose, mbio_ptr, notice_list);
-        for (int i = 0; i < MB_NOTICE_MAX; i++)
-          notice_list_tot[i] += notice_list[i];
-      }
-
-      /* deal with statistics */
-      if (pings_read > 2) {
-        /* allocate total statistics arrays if needed */
-        if (nbathtot_alloc < beams_bath_max) {
-          status =
-              mb_reallocd(verbose, __FILE__, __LINE__, beams_bath_max * sizeof(double), (void **)&bathmeantot, &error);
-          status &=
-              mb_reallocd(verbose, __FILE__, __LINE__, beams_bath_max * sizeof(double), (void **)&bathvartot, &error);
-          status &=
-              mb_reallocd(verbose, __FILE__, __LINE__, beams_bath_max * sizeof(int), (void **)&nbathvartot, &error);
-          if (error != MB_ERROR_NO_ERROR) {
-            char *message;
-            mb_error(verbose, error, &message);
-            fprintf(stream, "\nMBIO Error allocating data arrays:\n%s\n", message);
-            fprintf(stream, "\nProgram <%s> Terminated\n", program_name);
-            exit(error);
+          if (verbose >= 2) {
+            fprintf(stream, "\ndbg2  Processing loop finished in program <%s>\n", program_name);
+            fprintf(stream, "dbg2       status:     %d\n", status);
+            fprintf(stream, "dbg2       error:      %d\n", error);
+            fprintf(stream, "dbg2       nread:      %d\n", nread);
+            fprintf(stream, "dbg2       pings_read: %d\n", pings_read);
           }
-          else {
-            for (int i = nbathtot_alloc; i < beams_bath_max; i++) {
-              bathmeantot[i] = 0.0;
-              bathvartot[i] = 0.0;
-              nbathvartot[i] = 0;
+        }
+
+        /* look for problems */
+        timtotfile = (timendpath - timbegfile) / 3600.0;
+        if (timtotfile > 0.0) {
+          timtot += timtotfile;
+          spdavgfile = distotfile / timtotfile;
+        }
+        if (irecfile <= 0)
+          mb_notice_log_problem(verbose, mbio_ptr, MB_PROBLEM_NO_DATA);
+        else if (timtotfile > 0.0 && spdavgfile >= speed_threshold)
+          mb_notice_log_problem(verbose, mbio_ptr, MB_PROBLEM_AVG_TOO_FAST);
+
+        /* get notices if desired */
+        if (print_notices && pass == 0) {
+          status = mb_notice_get_list(verbose, mbio_ptr, notice_list);
+          for (int i = 0; i < MB_NOTICE_MAX; i++)
+            notice_list_tot[i] += notice_list[i];
+        }
+
+        /* deal with statistics */
+        if (pings_read > 2) {
+          /* allocate total statistics arrays if needed */
+          if (nbathtot_alloc < beams_bath_max) {
+            status =
+                mb_reallocd(verbose, __FILE__, __LINE__, beams_bath_max * sizeof(double), (void **)&bathmeantot, &error);
+            status &=
+                mb_reallocd(verbose, __FILE__, __LINE__, beams_bath_max * sizeof(double), (void **)&bathvartot, &error);
+            status &=
+                mb_reallocd(verbose, __FILE__, __LINE__, beams_bath_max * sizeof(int), (void **)&nbathvartot, &error);
+            if (error != MB_ERROR_NO_ERROR) {
+              char *message;
+              mb_error(verbose, error, &message);
+              fprintf(stream, "\nMBIO Error allocating data arrays:\n%s\n", message);
+              fprintf(stream, "\nProgram <%s> Terminated\n", program_name);
+              exit(error);
             }
-            nbathtot_alloc = beams_bath_max;
-          }
-        }
-        if (namptot_alloc < beams_amp_max) {
-          status =
-              mb_reallocd(verbose, __FILE__, __LINE__, beams_amp_max * sizeof(double), (void **)&ampmeantot, &error);
-          status &=
-              mb_reallocd(verbose, __FILE__, __LINE__, beams_amp_max * sizeof(double), (void **)&ampvartot, &error);
-          status &= mb_reallocd(verbose, __FILE__, __LINE__, beams_amp_max * sizeof(int), (void **)&nampvartot, &error);
-          if (error != MB_ERROR_NO_ERROR) {
-            char *message;
-            mb_error(verbose, error, &message);
-            fprintf(stream, "\nMBIO Error allocating data arrays:\n%s\n", message);
-            fprintf(stream, "\nProgram <%s> Terminated\n", program_name);
-            exit(error);
-          }
-          else {
-            for (int i = namptot_alloc; i < beams_amp_max; i++) {
-              ampmeantot[i] = 0.0;
-              ampvartot[i] = 0.0;
-              nampvartot[i] = 0;
+            else {
+              for (int i = nbathtot_alloc; i < beams_bath_max; i++) {
+                bathmeantot[i] = 0.0;
+                bathvartot[i] = 0.0;
+                nbathvartot[i] = 0;
+              }
+              nbathtot_alloc = beams_bath_max;
             }
-            namptot_alloc = beams_amp_max;
           }
-        }
-        if (nsstot_alloc < pixels_ss_max) {
-          status =
-              mb_reallocd(verbose, __FILE__, __LINE__, pixels_ss_max * sizeof(double), (void **)&ssmeantot, &error);
-          status &= mb_reallocd(verbose, __FILE__, __LINE__, pixels_ss_max * sizeof(double), (void **)&ssvartot, &error);
-          status &= mb_reallocd(verbose, __FILE__, __LINE__, pixels_ss_max * sizeof(int), (void **)&nssvartot, &error);
-          if (error != MB_ERROR_NO_ERROR) {
-            char *message;
-            mb_error(verbose, error, &message);
-            fprintf(stream, "\nMBIO Error allocating data arrays:\n%s\n", message);
-            fprintf(stream, "\nProgram <%s> Terminated\n", program_name);
-            exit(error);
-          }
-          else {
-            for (int i = nsstot_alloc; i < pixels_ss_max; i++) {
-              ssmeantot[i] = 0.0;
-              ssvartot[i] = 0.0;
-              nssvartot[i] = 0;
+          if (namptot_alloc < beams_amp_max) {
+            status =
+                mb_reallocd(verbose, __FILE__, __LINE__, beams_amp_max * sizeof(double), (void **)&ampmeantot, &error);
+            status &=
+                mb_reallocd(verbose, __FILE__, __LINE__, beams_amp_max * sizeof(double), (void **)&ampvartot, &error);
+            status &= mb_reallocd(verbose, __FILE__, __LINE__, beams_amp_max * sizeof(int), (void **)&nampvartot, &error);
+            if (error != MB_ERROR_NO_ERROR) {
+              char *message;
+              mb_error(verbose, error, &message);
+              fprintf(stream, "\nMBIO Error allocating data arrays:\n%s\n", message);
+              fprintf(stream, "\nProgram <%s> Terminated\n", program_name);
+              exit(error);
             }
-            nsstot_alloc = pixels_ss_max;
+            else {
+              for (int i = namptot_alloc; i < beams_amp_max; i++) {
+                ampmeantot[i] = 0.0;
+                ampvartot[i] = 0.0;
+                nampvartot[i] = 0;
+              }
+              namptot_alloc = beams_amp_max;
+            }
+          }
+          if (nsstot_alloc < pixels_ss_max) {
+            status =
+                mb_reallocd(verbose, __FILE__, __LINE__, pixels_ss_max * sizeof(double), (void **)&ssmeantot, &error);
+            status &= mb_reallocd(verbose, __FILE__, __LINE__, pixels_ss_max * sizeof(double), (void **)&ssvartot, &error);
+            status &= mb_reallocd(verbose, __FILE__, __LINE__, pixels_ss_max * sizeof(int), (void **)&nssvartot, &error);
+            if (error != MB_ERROR_NO_ERROR) {
+              char *message;
+              mb_error(verbose, error, &message);
+              fprintf(stream, "\nMBIO Error allocating data arrays:\n%s\n", message);
+              fprintf(stream, "\nProgram <%s> Terminated\n", program_name);
+              exit(error);
+            }
+            else {
+              for (int i = nsstot_alloc; i < pixels_ss_max; i++) {
+                ssmeantot[i] = 0.0;
+                ssvartot[i] = 0.0;
+                nssvartot[i] = 0;
+              }
+              nsstot_alloc = pixels_ss_max;
+            }
+          }
+
+          /* copy statistics to total statistics */
+          for (int i = 0; i < beams_bath; i++) {
+            bathmeantot[i] += bathmean[i];
+            bathvartot[i] += bathvar[i];
+            nbathvartot[i] += nbathvar[i];
+          }
+          for (int i = 0; i < beams_amp; i++) {
+            ampmeantot[i] += ampmean[i];
+            ampvartot[i] += ampvar[i];
+            nampvartot[i] += nampvar[i];
+          }
+          for (int i = 0; i < pixels_ss; i++) {
+            ssmeantot[i] += ssmean[i];
+            ssvartot[i] += ssvar[i];
+            nssvartot[i] += nssvar[i];
           }
         }
 
-        /* copy statistics to total statistics */
-        for (int i = 0; i < beams_bath; i++) {
-          bathmeantot[i] += bathmean[i];
-          bathvartot[i] += bathvar[i];
-          nbathvartot[i] += nbathvar[i];
+        /* close the swath file */
+        status &= mb_close(verbose, &mbio_ptr, &error);
+
+        /* figure out whether and what to read next */
+        if (read_datalist) {
+          read_data = (mb_datalist_read(verbose, datalist, path, dpath, &format, &file_weight, &error) == MB_SUCCESS);
+        } else {
+          read_data = false;
         }
-        for (int i = 0; i < beams_amp; i++) {
-          ampmeantot[i] += ampmean[i];
-          ampvartot[i] += ampvar[i];
-          nampvartot[i] += nampvar[i];
-        }
-        for (int i = 0; i < pixels_ss; i++) {
-          ssmeantot[i] += ssmean[i];
-          ssvartot[i] += ssvar[i];
-          nssvartot[i] += nssvar[i];
-        }
+
+        /* end loop over files in list */
       }
+      if (read_datalist)
+        mb_datalist_close(verbose, &datalist, &error);
 
-      /* close the swath file */
-      status &= mb_close(verbose, &mbio_ptr, &error);
+      if (pass > 0 || !coverage_mask || (coverage_mask && coverage_mask_bounds))
+        done = true;
 
-      /* figure out whether and what to read next */
-      if (read_datalist) {
-        read_data = (mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS);
-      } else {
-        read_data = false;
-      }
+      pass++;
+    }  /* end loop over reading passes */
+  } /* end !quick */
 
-      /* end loop over files in list */
+  /* if quick then use mb_get_info_datalist() */
+  else {
+    struct mb_info_struct mb_info;
+    status = mb_get_info_datalist(verbose, read_file, &format, &mb_info, lonflip_use, &error);
+
+    if (status == MB_SUCCESS) {
+      irec = mb_info.nrecords;
+
+      notice_list_tot[MB_DATA_SIDESCAN2] = mb_info.nrecords_ss1;
+      notice_list_tot[MB_DATA_SIDESCAN3] = mb_info.nrecords_ss2;
+      notice_list_tot[MB_DATA_SUBBOTTOM_SUBBOTTOM] = mb_info.nrecords_sbp;
+      notice_list_tot[MB_DATA_SUBBOTTOM_MCS] = 0;
+      notice_list_tot[MB_DATA_SUBBOTTOM_CNTRBEAM] = 0;
+      notice_list_tot[MB_DATA_WATER_COLUMN] = 0;
+      beams_bath_max = mb_info.nbeams_bath;
+      ntdbeams = mb_info.nbeams_bath_total;
+      ngdbeams = mb_info.nbeams_bath_good;
+      nzdbeams = mb_info.nbeams_bath_zero;
+      nfdbeams = mb_info.nbeams_bath_flagged;
+      beams_amp_max = mb_info.nbeams_amp;
+      ntabeams = mb_info.nbeams_amp_total;
+      ngabeams = mb_info.nbeams_amp_good;
+      nzabeams = mb_info.nbeams_amp_zero;
+      nfabeams = mb_info.nbeams_amp_flagged;
+      pixels_ss_max = mb_info.npixels_ss;
+      ntsbeams = mb_info.npixels_ss_total;
+      ngsbeams = mb_info.npixels_ss_good;
+      nzsbeams = mb_info.npixels_ss_zero;
+      nfsbeams = mb_info.npixels_ss_flagged;
+
+      timtot = mb_info.time_total;
+      distot = mb_info.dist_total;
+      spdavg = mb_info.speed_avg;
+
+      timbeg = mb_info.time_start;
+      mb_get_date(verbose, timbeg, timbeg_i);
+      lonbeg = mb_info.lon_start;
+      latbeg = mb_info.lat_start;
+      bathbeg = mb_info.depth_start;
+      hdgbeg = mb_info.heading_start;
+      spdbeg = mb_info.speed_start;
+      sdpbeg = mb_info.sensordepth_start;
+      altbeg = mb_info.sonaraltitude_start;
+
+      timend = mb_info.time_end;
+      mb_get_date(verbose, timend, timend_i);
+      lonend = mb_info.lon_end;
+      latend = mb_info.lat_end;
+      bathend = mb_info.depth_end;
+      hdgend = mb_info.heading_end;
+      spdend = mb_info.speed_end;
+      sdpend = mb_info.sensordepth_end;
+      altend = mb_info.sonaraltitude_end;
+
+      lonmin = mb_info.lon_min;
+      lonmax = mb_info.lon_max;
+      latmin = mb_info.lat_min;
+      latmax = mb_info.lat_max;
+      sdpmin = mb_info.sensordepth_min;
+      sdpmax = mb_info.sensordepth_max;
+      altmin = mb_info.altitude_min;
+      altmax = mb_info.altitude_max;
+      bathmin = mb_info.depth_min;
+      bathmax = mb_info.depth_max;
+      ampmin = mb_info.amp_min;
+      ampmax = mb_info.amp_max;
+      ssmin = mb_info.ss_min;
+      ssmax = mb_info.ss_max;
+
+      notice_list_tot[MB_PROBLEM_NO_DATA + MB_DATA_KINDS - (MB_ERROR_MIN)] = mb_info.problem_nodata;
+      notice_list_tot[MB_PROBLEM_ZERO_NAV + MB_DATA_KINDS - (MB_ERROR_MIN)] = mb_info.problem_zeronav;
+      notice_list_tot[MB_PROBLEM_TOO_FAST + MB_DATA_KINDS - (MB_ERROR_MIN)] = mb_info.problem_toofast;
+      notice_list_tot[MB_PROBLEM_AVG_TOO_FAST + MB_DATA_KINDS - (MB_ERROR_MIN)] = mb_info.problem_avgtoofast;
+      notice_list_tot[MB_PROBLEM_TOO_DEEP + MB_DATA_KINDS - (MB_ERROR_MIN)] = mb_info.problem_toodeep;
+      notice_list_tot[MB_PROBLEM_BAD_DATAGRAM + MB_DATA_KINDS - (MB_ERROR_MIN)] = mb_info.problem_baddatagram;
     }
-    if (read_datalist)
-      mb_datalist_close(verbose, &datalist, &error);
-
-    if (pass > 0 || !coverage_mask || (coverage_mask && coverage_mask_bounds))
-      done = true;
-
-    pass++;
-  }  /* end loop over reading passes */
+  }
 
   /* calculate final variances */
   if (pings_read > 2) {
@@ -1847,7 +1956,8 @@ int main(int argc, char **argv) {
   }
 
   /* now print out the results */
-  const double timtot = (timend - timbeg) / 3600.0;
+  if (!quick)
+    timtot = (timend - timbeg) / 3600.0;
   if (timtot > 0.0)
     spdavg = distot / timtot;
   mb_get_jtime(verbose, timbeg_i, timbeg_j);

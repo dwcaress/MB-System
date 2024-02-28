@@ -1,15 +1,25 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbpreprocess.c  1/8/2014
  *
- *    Copyright (c) 2014-2020 by
+ *    Copyright (c) 2014-2024 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes 
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *     
+ *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
+ *      Columbia University
  *      Palisades, NY 10964
  *
- *    See README file for copying and redistribution conditions.
+ *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
  * MBpreprocess handles preprocessing of swath sonar data as part of setting
@@ -134,7 +144,7 @@ constexpr char usage_message[] =
     "\t--kluge-fix-wissl-timestamps\n"
     "\t--kluge-auv-sentry-sensordepth\n"
     "\t--kluge-ignore-snippets\n"
-    "\t--kluge-sonardepth-from-heave\n";
+    "\t--kluge-sensordepth-from-heave\n";
 
 /*--------------------------------------------------------------------*/
 
@@ -166,7 +176,7 @@ int main(int argc, char **argv) {
   bool kluge_fix_wissl_timestamps = false;
   bool kluge_auv_sentry_sensordepth = false;
   bool kluge_ignore_snippets = false;
-  bool kluge_sonardepth_from_heave = false;
+  bool kluge_sensordepth_from_heave = false;
 
   mb_path sensordepth_file;
   memset(sensordepth_file, 0, sizeof(mb_path));
@@ -298,7 +308,7 @@ int main(int argc, char **argv) {
                                       {"kluge-fix-wissl-timestamps", no_argument, nullptr, 0},
                                       {"kluge-auv-sentry-sensordepth", no_argument, nullptr, 0},
                                       {"kluge-ignore-snippets", no_argument, nullptr, 0},
-                                      {"kluge-sonardepth-from-heave", no_argument, nullptr, 0},
+                                      {"kluge-sensordepth-from-heave", no_argument, nullptr, 0},
                                       {nullptr, 0, nullptr, 0}};
 
     int option_index;
@@ -672,10 +682,10 @@ int main(int argc, char **argv) {
           preprocess_pars.n_kluge++;
           kluge_ignore_snippets = true;
         }
-        else if (strcmp("kluge-sonardepth-from-heave", options[option_index].name) == 0) {
-          preprocess_pars.kluge_id[preprocess_pars.n_kluge] = MB_PR_KLUGE_SONARDEPTHFROMHEAVE;
+        else if (strcmp("kluge-sensordepth-from-heave", options[option_index].name) == 0) {
+          preprocess_pars.kluge_id[preprocess_pars.n_kluge] = MB_PR_KLUGE_SENSORDEPTHFROMHEAVE;
           preprocess_pars.n_kluge++;
-          kluge_sonardepth_from_heave = true;
+          kluge_sensordepth_from_heave = true;
         }
 
         break;
@@ -855,7 +865,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "dbg2       kluge_fix_wissl_timestamps:   %d\n", kluge_fix_wissl_timestamps);
     fprintf(stderr, "dbg2       kluge_auv_sentry_sensordepth: %d\n", kluge_auv_sentry_sensordepth);
     fprintf(stderr, "dbg2       kluge_ignore_snippets:        %d\n", kluge_ignore_snippets);
-    fprintf(stderr, "dbg2       kluge_sonardepth_from_heave   %d\n", kluge_sonardepth_from_heave);
+    fprintf(stderr, "dbg2       kluge_sensordepth_from_heave   %d\n", kluge_sensordepth_from_heave);
     fprintf(stderr, "dbg2  Additional output:\n");
     fprintf(stderr, "dbg2       output_sensor_fnv:            %d\n", output_sensor_fnv);
     fprintf(stderr, "dbg2  Skip existing output files:\n");
@@ -965,7 +975,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "     kluge_fix_wissl_timestamps:   %d\n", kluge_fix_wissl_timestamps);
     fprintf(stderr, "     kluge_auv_sentry_sensordepth: %d\n", kluge_auv_sentry_sensordepth);
     fprintf(stderr, "     kluge_ignore_snippets:        %d\n", kluge_ignore_snippets);
-    fprintf(stderr, "     kluge_sonardepth_from_heave:  %d\n", kluge_sonardepth_from_heave);
+    fprintf(stderr, "     kluge_sensordepth_from_heave:  %d\n", kluge_sensordepth_from_heave);
     fprintf(stderr, "Additional output:\n");
     fprintf(stderr, "     output_sensor_fnv:            %d\n", output_sensor_fnv);
     fprintf(stderr, "Skip existing output files:\n");
@@ -1171,6 +1181,7 @@ int main(int argc, char **argv) {
   int n_rt_att2 = 0;
   int n_rt_att3 = 0;
   int n_rt_files = 0;
+  int n_rt_dup_timestamp = 0;
 
   int n_wt_data = 0;
   int n_wt_comment = 0;
@@ -1379,11 +1390,11 @@ int main(int argc, char **argv) {
       }
       else if (iformat == MBF_KEMKMALL) {
         sensordepth_mode = MBPREPROCESS_MERGE_ASYNC;
-        sensordepth_async = MB_DATA_SONARDEPTH;
+        sensordepth_async = MB_DATA_SENSORDEPTH;
       }
       else if (iformat == MBF_RESON7KR) {
         sensordepth_mode = MBPREPROCESS_MERGE_ASYNC;
-        sensordepth_async = MB_DATA_SONARDEPTH;
+        sensordepth_async = MB_DATA_SENSORDEPTH;
       }
       else if (iformat == MBF_RESON7K3) {
         sensordepth_mode = MBPREPROCESS_MERGE_ASYNC;
@@ -2308,8 +2319,10 @@ int main(int argc, char **argv) {
   int n_rf_att1 = 0;
   int n_rf_att2 = 0;
   int n_rf_att3 = 0;
+  int n_rf_dup_timestamp = 0;
   n_rt_data = 0;
   n_rt_files = 0;
+  n_rt_dup_timestamp = 0;
 
   int n_wf_data = 0;
   int n_wf_comment = 0;
@@ -2666,6 +2679,9 @@ int main(int argc, char **argv) {
       if (kluge_fix_wissl_timestamps)
         kluge_fix_wissl_timestamps_setup2 = false;
 
+      double last_survey_time_d[MB_SUBSENSOR_NUM_MAX];
+      memset(last_survey_time_d, 0, MB_SUBSENSOR_NUM_MAX * sizeof(double));
+
       /* ------------------------------- */
       /* write comments to output file   */
 
@@ -2688,7 +2704,7 @@ int main(int argc, char **argv) {
           status = MB_SUCCESS;
         }
 
-        /* detect multiple pings with the same time stamps */
+        /* obtain sensorhead and sensortype */
         int sensorhead = 0;
         int sensortype = 0;
         if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
@@ -2747,6 +2763,7 @@ int main(int argc, char **argv) {
           (kind == MB_DATA_DATA || kind == MB_DATA_SUBBOTTOM_MCS || kind == MB_DATA_SUBBOTTOM_CNTRBEAM ||
            kind == MB_DATA_SUBBOTTOM_SUBBOTTOM || kind == MB_DATA_SIDESCAN2 || kind == MB_DATA_SIDESCAN3 ||
            kind == MB_DATA_WATER_COLUMN)) {
+
           /* call mb_extract_nav to get attitude */
           status = mb_extract_nav(verbose, imbio_ptr, istore_ptr, &kind, time_i, &time_d, &navlon_org, &navlat_org,
                       &speed_org, &heading_org, &draft_org, &roll_org, &pitch_org, &heave_org, &error);
@@ -2754,8 +2771,22 @@ int main(int argc, char **argv) {
           /* call mb_extract_altitude to get altitude */
           status &= mb_extract_altitude(verbose, imbio_ptr, istore_ptr, &kind, &sensordepth_org, &altitude_org, &error);
 
-          /* apply time jump fix to survey record time stamps */
+          /* detect multiple data records from the same subsensor with the same time stamps 
+              - if found adjust new timestamp so it is different than the prior */
           bool timestamp_changed = false;
+          if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
+            if (sensorhead >= 0 && sensorhead < MB_SUBSENSOR_NUM_MAX) {
+              if (fabs(time_d - last_survey_time_d[sensorhead]) < MB_ESF_MAXTIMEDIFF) {
+                time_d += 3 * MB_ESF_MAXTIMEDIFF;
+                timestamp_changed = true;
+                n_rf_dup_timestamp++;
+                n_rt_dup_timestamp++;
+              }
+              last_survey_time_d[sensorhead] = time_d;
+            }
+          }
+
+          /* apply time jump fix to survey record time stamps */
           double dtime_d_expect = 0.0;
           double dtime_d_raw = 0.0;
           double dtime_d = 0.0;
@@ -3256,6 +3287,9 @@ int main(int argc, char **argv) {
         fprintf(stderr, "     %d att1 records\n", n_rf_att1);
         fprintf(stderr, "     %d att2 records\n", n_rf_att2);
         fprintf(stderr, "     %d att3 records\n", n_rf_att3);
+        if (n_rf_dup_timestamp > 0) {
+          fprintf(stderr, "     %d duplicate timestamps fixed ****\n", n_rf_dup_timestamp);
+        }
         fprintf(stderr, "Pass 2: Records written to output file %d: %s\n", n_wt_files, ofile);
         fprintf(stderr, "     %d survey records\n", n_wf_data);
         fprintf(stderr, "     %d comment records\n", n_wf_comment);
@@ -3443,6 +3477,9 @@ int main(int argc, char **argv) {
     fprintf(stderr, "     %d att1 records\n", n_rt_att1);
     fprintf(stderr, "     %d att2 records\n", n_rt_att2);
     fprintf(stderr, "     %d att3 records\n", n_rt_att3);
+        if (n_rt_dup_timestamp > 0) {
+          fprintf(stderr, "     %d duplicate timestamps fixed ****\n", n_rt_dup_timestamp);
+        }
     fprintf(stderr, "Pass 2: Total records written to %d output files\n", n_wt_files);
     fprintf(stderr, "     %d survey records\n", n_wt_data);
     fprintf(stderr, "     %d comment records\n", n_wt_comment);

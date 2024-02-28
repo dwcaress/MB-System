@@ -103,6 +103,7 @@ GNU General Public License for more details
 
 
 char *mmd_ch_names[MM_CHANNEL_COUNT]={
+    "none.mm",
     "trace.mm",
     "debug.mm",
     "warn.mm",
@@ -193,16 +194,19 @@ void mmd_module_config_destroy(mmd_module_config_t **pself)
 void mmd_config_show(mmd_module_config_t *self, bool verbose, uint16_t indent)
 {
     if (NULL != self) {
-        fprintf(stderr,"%*s[self         %10p]\n",indent,(indent>0?" ":""), self);
-        fprintf(stderr,"%*s[id    %10u]\n",indent,(indent>0?" ":""), self->id);
-        fprintf(stderr,"%*s[name %10s]\n",indent,(indent>0?" ":""), self->name);
-        fprintf(stderr,"%*s[channel_count     %10u]\n",indent,(indent>0?" ":""), self->channel_count);
-        fprintf(stderr,"%*s[en_mask     %10u]\n",indent,(indent>0?" ":""), self->en_mask);
-        fprintf(stderr,"%*s[channel_names     %10p]\n",indent,(indent>0?" ":""), self->channel_names);
+        int wkey = 15;
+        int wval = 15;
+
+        fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""), wkey, "self", wval, self);
+        fprintf(stderr,"%*s%*s %*u\n",indent,(indent>0?" ":""), wkey, "id", wval, self->id);
+        fprintf(stderr,"%*s%*s %*s\n",indent,(indent>0?" ":""), wkey, "name", wval, self->name);
+        fprintf(stderr,"%*s%*s %*u\n",indent,(indent>0?" ":""), wkey, "channel_count", wval, self->channel_count);
+        fprintf(stderr,"%*s%*s %*s%04x\n",indent,(indent>0?" ":""), wkey, "en_mask", wval-4, "", self->en_mask);
+        fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""), wkey, "channel_names", wval, self->channel_names);
         if(verbose){
             uint32_t i=0;
             for(i=0;i<self->channel_count;i++){
-                fprintf(stderr,"%*s[ ch[%u]     %10s]\n",indent+1,(indent>0?" ":""), i,self->channel_names[i]);
+                fprintf(stderr,"%*s%*s[%u] %*s %0X\n",indent+2,(indent>0?" ":""), wkey-3, "ch", i, wval, self->channel_names[i], CHMSK(i));
             }
         }
     }
@@ -351,6 +355,17 @@ char *mmd_channel_name(mmd_module_id_t id, mmd_channel_id_t ch_id)
         retval=mod->channel_names[ch_id];
     }
     return retval;
+}
+
+uint32_t mmd_channel_count(mmd_module_id_t id)
+{
+    uint32_t retval=-1;
+    mmd_module_config_t *mod=s_lookup_module(id);
+    if(NULL!=mod){
+        retval = mod->channel_count - MM_CHANNEL_COUNT;
+    }
+    return retval;
+
 }
 
 #ifdef WITH_MMDEBUG_TEST
