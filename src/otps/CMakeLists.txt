@@ -26,6 +26,7 @@ message("In src/otps")
 
 add_executable(mbotps mbotps.c otps.h)
 
+message("-- Setting otpsDir to ${otpsDir}")
 file(WRITE otps.h
 	"const char *otps_location = \"${otpsDir}\";")
  
