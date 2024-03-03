@@ -7096,11 +7096,11 @@ int mbtrnpp_kemkmall_input_close(int verbose, void *mbio_ptr, int *error) {
 
 int mbtrnpp_em710raw_input_open(int verbose, void *mbio_ptr, char *definition, int *error) {
 
-    /* local variables */
+    // local variables
     int status = MB_SUCCESS;
     struct mb_io_struct *mb_io_ptr;
 
-    /* print input debug statements */
+    // print input debug statements
     if (verbose >= 2) {
         fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
         fprintf(stderr, "dbg2  Input arguments:\n");
@@ -7109,13 +7109,13 @@ int mbtrnpp_em710raw_input_open(int verbose, void *mbio_ptr, char *definition, i
         fprintf(stderr, "dbg2       definition: %s\n", definition);
     }
 
-    /* get pointer to mbio descriptor */
+    // get pointer to mbio descriptor
     mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-    /* set initial status */
+    // set initial status
     status = MB_SUCCESS;
 
-    /* set flag to enable Sentry sensordepth kluge */
+    // set flag to enable Sentry sensordepth kluge
     int *kluge_set = (int *)&mb_io_ptr->save10;
     *kluge_set = 1;
 
@@ -7126,10 +7126,10 @@ int mbtrnpp_em710raw_input_open(int verbose, void *mbio_ptr, char *definition, i
     int port=-1;
     mb_path bcastGrp;
     mb_path hostInterface;
-//    struct sockaddr_in localSock;
     struct ip_mreq group;
     char *token;
     char *saveptr;
+
     if ((token = strtok_r(definition, ":", &saveptr)) != NULL) {
         strncpy(hostInterface, token, sizeof(mb_path));
     }
@@ -7146,7 +7146,7 @@ int mbtrnpp_em710raw_input_open(int verbose, void *mbio_ptr, char *definition, i
     fprintf(stderr, "  hostInterface: %s\n  bcastGrp: %s\n  port: %d\n",
             hostInterface, bcastGrp, port);
 
-    /* Create a datagram socket on which to receive. */
+    // Create a datagram socket on which to receive.
     int sd = -1;
     sd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sd < 0)
@@ -7159,9 +7159,9 @@ int mbtrnpp_em710raw_input_open(int verbose, void *mbio_ptr, char *definition, i
         return status;
     }
 
-    /* Enable SO_REUSEADDR to allow multiple instances of this */
-    /* application to receive copies of the multicast datagrams. */
-//    fcntl(sd, F_SETFL, O_NONBLOCK);
+    // Enable SO_REUSEADDR to allow multiple instances of this
+    // application to receive copies of the multicast datagrams.
+
     int reuse = 1;
     if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse)) < 0)
     {
@@ -7173,8 +7173,7 @@ int mbtrnpp_em710raw_input_open(int verbose, void *mbio_ptr, char *definition, i
         return status;
     }
 
-    /* Bind to the proper port number with the IP address */
-    /* specified as INADDR_ANY. */
+    // Bind to the proper port number with the IP address
     memset(&em_sock_addr, 0, sizeof(em_sock_addr));
     em_sock_addr.sin_family = AF_INET;
     em_sock_addr.sin_port = htons(port);
@@ -7218,148 +7217,7 @@ int mbtrnpp_em710raw_input_open(int verbose, void *mbio_ptr, char *definition, i
 
 /*--------------------------------------------------------------------*/
 
-//int mbtrnpp_kemall_rd_hdr(int verbose, char *buffer, void *header_ptr, void *emdgm_type_ptr, int *error) {
-//    struct mbsys_simrad3_header *header = NULL;
-//    mbsys_simrad3_emdgm_type *emdgm_type = NULL;
-//    int index = 0;
-//
-//    if (verbose >= 2) {
-//        fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-//        fprintf(stderr, "dbg2  Input arguments:\n");
-//        fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
-//        fprintf(stderr, "dbg2       buffer:         %p\n", (void *)buffer);
-//        fprintf(stderr, "dbg2       header_ptr:     %p\n", (void *)header_ptr);
-//        fprintf(stderr, "dbg2       emdgm_type_ptr: %p\n", (void *)emdgm_type_ptr);
-//    }
-//
-//    /* get pointer to header structure */
-//    header = (struct mbsys_simrad3_header *)header_ptr;
-//    emdgm_type = (mbsys_simrad3_emdgm_type *)emdgm_type_ptr;
-//
-//    /* extract the data */
-//    index = 0;
-//    mb_get_binary_int(true, &buffer[index], &(header->numBytesDgm));
-//    index += 4;
-//    header->dgmSTX = buffer[index];
-//    index++;
-//    header->dgmType = buffer[index];
-//    index++;
-//    mb_get_binary_short(true, &buffer[index], &(header->emModeNum));
-//    index += 2;
-//    mb_get_binary_int(true, &buffer[index], &(header->date));
-//    index += 4;
-//    mb_get_binary_int(true, &buffer[index], &(header->timeMs));
-//    index += 4;
-//    mb_get_binary_short(true, &buffer[index], &(header->counter));
-//    index += 2;
-//    mb_get_binary_short(true, &buffer[index], &(header->sysSerialNum));
-//    index += 2;
-//    mb_get_binary_short(true, &buffer[index], &(header->secHeadSerialNum));
-//    index += 2;
-//
-//    /* identify/validate the datagram type */
-//    switch(header->typeDatagram){
-//
-//        case ALL_INSTALLATION_U:
-//        case ALL_INSTALLATION_L:
-//        case ALL_REMOTE:
-//        case ALL_RUNTIME:
-//        case ALL_RAW_RANGE_BEAM_ANGLE:
-//        case ALL_XYZ88:
-//        case ALL_CLOCK:
-//        case ALL_ATTITUDE:
-//        case ALL_POSITION:
-//        case ALL_SURFACE_SOUND_SPEED:
-//            *emdgm_type = header->typeDatagram;
-//            break;
-//        default:
-//            *emdgm_type = UNKNOWN;
-//            break;
-//    };
-//
-//
-//    if (verbose >= 5) {
-//        fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
-//        fprintf(stderr, "dbg5       numBytesDgm:      %u\n", header->numBytesDgm);
-//        fprintf(stderr, "dbg5       dgmSTX :          %02X\n", header->dgmSTX);
-//        fprintf(stderr, "dbg5       dgmType:          %02X\n", header->dgmType);
-//        fprintf(stderr, "dbg5       emModeNum:        %hu\n", header->emModeNum);
-//        fprintf(stderr, "dbg5       date:             %u\n", header->date);
-//        fprintf(stderr, "dbg5       timeMs:           %u\n", header->timeMs);
-//        fprintf(stderr, "dbg5       counter:          %hu\n", header->counter);
-//        fprintf(stderr, "dbg5       sysSerialNum:     %hu\n", header->sysSerialNum);
-//        fprintf(stderr, "dbg5       secHeadSerialNum: %hu\n", header->secHeadSerialNum);
-//    }
-//
-//    int status = MB_SUCCESS;
-//
-//    if (verbose >= 2) {
-//        fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-//        fprintf(stderr, "dbg2  Return values:\n");
-//        fprintf(stderr, "dbg2       dgmType:    %.4s\n", header->dgmType);
-//        fprintf(stderr, "dbg2       emdgm_type: %d\n", *emdgm_type);
-//        fprintf(stderr, "dbg2       error:      %d\n", *error);
-//        fprintf(stderr, "dbg2  Return status:\n");
-//        fprintf(stderr, "dbg2       status:  %d\n", status);
-//    }
-//
-//    /* return status */
-//    return (status);
-//};
-
-/*--------------------------------------------------------------------*/
-
-/* read footer */
-//int mbtrnpp_kemall_rd_ftr(int verbose, char *buffer, void *footer_ptr, void *emdgm_checksum_ptr, int *error) {
-//    struct mbsys_simrad3_footer *footer = NULL;
-//    short unsigned int *emdgm_checksum_ptr = (short unsigned int)emdgm_checksum_ptr;
-//    int index = 0;
-//
-//    if (verbose >= 2) {
-//        fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-//        fprintf(stderr, "dbg2  Input arguments:\n");
-//        fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
-//        fprintf(stderr, "dbg2       buffer:         %p\n", (void *)buffer);
-//        fprintf(stderr, "dbg2       footer_ptr:     %p\n", (void *)footer_ptr);
-//    }
-//
-//    /* get pointer to header structure */
-//    footer = (struct mbsys_simrad3_header *)footer_ptr;
-//
-//    /* extract the data */
-//    index = 0;
-//    footer->dgmETX = buffer[index];
-//    index++;
-//    mb_get_binary_short(true, &buffer[index], &(footer->checksum));
-//    index += 2;
-//
-//    *emdgm_checksum_ptr = footer->checksum;
-//
-//    if (verbose >= 5) {
-//        fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
-//        fprintf(stderr, "dbg5       dgmSTX :        %02X\n", footer->dgmSTX);
-//        fprintf(stderr, "dbg5       checksum :      %04X\n", footer->checksum);
-//    }
-//
-//    int status = MB_SUCCESS;
-//
-//    if (verbose >= 2) {
-//        fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-//        fprintf(stderr, "dbg2  Return values:\n");
-//        fprintf(stderr, "dbg2       dgmETX:     %02X\n", footer->dgmETX);
-//        fprintf(stderr, "dbg2       checksum:   %04X\n", *emdgm_checksum_ptr);
-//        fprintf(stderr, "dbg2       error:      %d\n", *error);
-//        fprintf(stderr, "dbg2  Return status:\n");
-//        fprintf(stderr, "dbg2       status:  %d\n", status);
-//    }
-//
-//    /* return status */
-//    return (status);
-//};
-
-/*--------------------------------------------------------------------*/
-
-static void em710_frame_show(byte *frame_buf)
+static void em710_frame_show(byte *frame_buf, int verbose)
 {
     struct mbsys_simrad3_header *header = (struct mbsys_simrad3_header *)frame_buf;
 
@@ -7377,14 +7235,18 @@ static void em710_frame_show(byte *frame_buf)
     byte *pchk = (petx+1);
     fprintf(stderr, "dgmETX           %02X\n", *((unsigned char *)petx));
     fprintf(stderr, "chksum           %04X\n", *((unsigned short *)pchk));
-    fprintf(stderr, "\nframe bytes:\n");
-    for (int i=0;i<header->numBytesDgm + 4;i++)
-    {
-        if(i%16 == 0)
-            fprintf(stderr, "\n%08X: ",i);
-        fprintf(stderr, "%02x ",bp[i]);
+
+    if(verbose >= 2 || verbose <= -2){
+        fprintf(stderr, "\nframe bytes:\n");
+        for (int i=0;i<header->numBytesDgm + 4;i++)
+        {
+            if(i%16 == 0)
+                fprintf(stderr, "\n%08X: ",i);
+            fprintf(stderr, "%02x ",bp[i]);
+        }
+        fprintf(stderr, "\n");
     }
-    fprintf(stderr, "\n\n");
+    fprintf(stderr, "\n");
 }
 
 int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size,
@@ -7404,15 +7266,19 @@ int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size,
         fprintf(stderr, "dbg2       buffer:     %p\n", buffer);
     }
 
-    // Read the requested number of bytes (= size) off the input and  place
-    // those bytes into the buffer.
-    // This requires reading full MB1 records from the socket, storing the data
-    // in buffer (implemented here), and parceling those bytes out as requested.
+    // Read the requested number of bytes (= size) off the input and
+    // place those bytes into the buffer.
+    // This requires reading full MB1 records from the socket,
+    // storing the data in buffer (implemented here), and parceling
+    // those bytes out as requested.
 
     // use the socket reader
     // read and return single frame
     int64_t rbytes=-1;
     uint32_t sync_bytes=0;
+    static uint64_t frame_count = 0;
+    static uint64_t frame_invalid = 0;
+    static uint64_t frame_read_err = 0;
 
     // mbsp points to UDP socket
     int *mbsp = (int *)mb_io_ptr->mbsp;
@@ -7448,13 +7314,6 @@ int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size,
             // UDP datagrams don't include 4-byte total size
             // we'll calculate it and include it at the start of the buffer.
 
-//            struct sockaddr_in localSock;
-//            memset((char *) &localSock, 0, sizeof(localSock));
-//            localSock.sin_family = AF_INET;
-//            localSock.sin_port = htons(10001);
-//            localSock.sin_addr.s_addr = INADDR_ANY;
-//            socklen_t len;
-            MX_PRINT("%s - recv frame fd %d\n", __func__, *mbsp);
 
             if ( (rbytes = recvfrom(*mbsp, (void *) (frame_buf + 4), MB_UDP_SIZE_MAX, 0, (struct sockaddr *)&em_sock_addr, &em_sock_len)) >= 0)
             {
@@ -7462,15 +7321,14 @@ int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size,
 
                 // set datagram size (first 4 bytes of buffer)
                 unsigned int *pDgmSize = (unsigned int *)frame_buf;
-                //*pDgmSize = rbytes + 4;
                 *pDgmSize = rbytes;
 
 
                 int errors = 0;
+
                 // validate
                 uint16_t checksum = 0;
                 byte *pstx = (byte *)&fb_phdr->dgmSTX;
-//                byte *petx = frame_buf + 4 + rbytes - 2;
                 byte *petx = frame_buf + (header->numBytesDgm + 1);
                 byte *cur = pstx + 1;
                 uint16_t *pchk = (uint16_t *)(petx + 1);
@@ -7501,7 +7359,11 @@ int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size,
                     }
                 }
 
-                em710_frame_show(frame_buf);
+                frame_count++;
+
+                if(verbose >= 5 || verbose <= -5 )
+                    em710_frame_show(frame_buf, verbose);
+
                 if(errors == 0)
                 {
                     // update frame read pointers
@@ -7511,19 +7373,25 @@ int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size,
                     MX_LPRINT(MBTRNPP, 3, "read frame len[%zu]:\n",(size_t)rbytes);
                 } else {
                     // frame invalid
+                    frame_invalid++;
                     read_err = true;
                     MX_LPRINT(MBTRNPP, 3, "invalid frame rbytes[%zu] checksum[%hu/%hu]\n",(size_t)rbytes, checksum, *pchk);
                 }
             } else {
                 // read error
+                frame_read_err++;
                 read_err = true;
                 MX_LPRINT(MBTRNPP, 3, "mb1r_read_frame failed rbytes[%zu]\n",(size_t)rbytes);
             }
+
+            MX_LPRINT(MBTRNPP, 2, "%s - read frame fd %3d len[%6u] n[%8llu] invalid[%8llu] read_err[%8llu] \n", __func__, *mbsp, rbytes, frame_count, frame_invalid, frame_read_err);
+
         } else {
             // there's a frame in the buffer
             size_t bytes_rem = frame_buf + fb_phdr->numBytesDgm - fb_pread;
             size_t readlen = (*size <= bytes_rem ? *size : bytes_rem);
-//            MX_LPRINT(MBTRNPP, 3, "reading framebuf size[%zu] rlen[%zu] rem[%zu] err[%c]\n", (size_t)*size, readlen, bytes_rem, (read_err?'Y':'N'));
+
+            MX_LPRINT(MBTRNPP, 4, "reading framebuf size[%2zu] rlen[%2zu] rem[%6zu] err[%c]\n", (size_t)*size, readlen, bytes_rem, (read_err?'Y':'N'));
         }
 
         if(!read_err){
@@ -7567,8 +7435,8 @@ int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size,
         MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBFRAMERD]);
         MST_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_MB_SYNC_BYTES],sync_bytes);
 
-        // TODO: check connection status, only reconnect if disconnected
-        // ...
+        // TODO: check connection status, only reconnect if disconnected...
+
         MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_GETFAIL_XT], mtime_dtime());
     }
 
@@ -7585,155 +7453,6 @@ int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size,
 
     return (status);
 }
-
-//int mbtrnpp_kemall_input_read_orig(int verbose, void *mbio_ptr, size_t *size,
-//                                char *buffer, int *error) {
-//
-//    /* local variables */
-//
-//    /* print input debug statements */
-//    if (verbose >= 2) {
-//        fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-//        fprintf(stderr, "dbg2  Input arguments:\n");
-//        fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-//        fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
-//        fprintf(stderr, "dbg2       size:       %zu\n", *size);
-//        fprintf(stderr, "dbg2       buffer:     %p\n", buffer);
-//    }
-//
-//    /* get pointer to mbio descriptor */
-//    struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-//
-//    /* set initial status */
-//    status = MB_SUCCESS;
-//
-//    // Read from the socket.
-//    int *sd_ptr = (int *)mb_io_ptr->mbsp;
-//    struct mbsys_simrad3_header header;
-//    unsigned int num_bytes_dgm_checksum=0;
-//    mbsys_simrad3_emdgm_type emdgm_type=UNKNOWN;
-//    memset(buffer, 0, *size);
-//    int readlen = read(*sd_ptr, buffer, *size);
-//    if (readlen <= 0) {
-//        status = MB_FAILURE;
-//        *error = MB_ERROR_EOF;
-//    }
-//
-//    if (status == MB_SUCCESS) {
-//
-//        status = mbtrnpp_kemall_rd_hdr(verbose, buffer, (void *)&header, (void *)&emdgm_type, error);
-//
-//        if (status == MB_SUCCESS && emdgm_type != UNKNOWN && header.numBytesDgm <= *size) {
-//
-//            // read checksum (which indicates bytes between STX and ETX)
-//            mb_get_binary_int(true, &buffer[header.numBytesDgm-2], &num_bytes_dgm_checksum);
-//
-//            // checksum should equal numBytes - size of fields: numBytes(4) + STX(1) + ETX(1) + checksum(2)
-//            if (num_bytes_dgm_checksum != header.numBytesDgm - 8) {
-//                status = MB_FAILURE;
-//                *error = MB_ERROR_UNINTELLIGIBLE;
-//            }
-//        } else {
-//            status = MB_FAILURE;
-//            *error = MB_ERROR_UNINTELLIGIBLE;
-//        }
-//    }
-//
-//    if (status == MB_SUCCESS) {
-//        *size = header.numBytesDgm;
-//    }
-//    else {
-//        *size = 0;
-//    }
-//
-//#if 0
-//    /*handle multi-packet MRZ and MWC records*/
-//    if (emdgm_type == MRZ || emdgm_type == MWC) {
-//        unsigned short numOfDgms=0;
-//        unsigned short dgmNum=0;
-//
-//        mb_get_binary_short(true, &buffer[MBSYS_KMBES_HEADER_SIZE], &numOfDgms);
-//        mb_get_binary_short(true, &buffer[MBSYS_KMBES_HEADER_SIZE+2], &dgmNum);
-//        if (numOfDgms > 1) {
-//            static int dgmsReceived=0;
-//            static unsigned int pingSecs, pingNanoSecs;
-//            static int totalDgms;
-//
-//            /* if we get a M record of a multi-packet sequence, and its numOfDgms
-//             or ping time don't match the ping we are looking for, flush the
-//             current read and start over with this packet */
-//            if (header.time_sec != pingSecs
-//                || header.time_nanosec != pingNanoSecs
-//                || numOfDgms != totalDgms) {
-//                dgmsReceived = 0;
-//            }
-//
-//            if (!dgmsReceived){
-//                pingSecs = header.time_sec;
-//                pingNanoSecs = header.time_nanosec;
-//                totalDgms = numOfDgms;
-//                dgmsReceived = 1;
-//            }
-//            else {
-//                dgmsReceived++;
-//            }
-//            if(dgmNum>0){
-//                memcpy(mRecordBuf[dgmNum-1], buffer, header.numBytesDgm);
-//            } else {
-//                fprintf(stderr,"%s: ERR - dgNum<0\n",__func__);
-//            }
-//
-//            if (dgmsReceived == totalDgms) {
-//
-//                int totalSize = sizeof(struct mbsys_kmbes_m_partition)
-//                + sizeof(struct mbsys_kmbes_header) + 4;
-//                int rsize = 0;
-//                for (int dgm = 0; dgm < totalDgms; dgm++) {
-//                    mb_get_binary_int(true, mRecordBuf[dgm], &rsize);
-//                    totalSize += rsize - sizeof(struct mbsys_kmbes_m_partition)
-//                    - sizeof(struct mbsys_kmbes_header) - 4;
-//                }
-//
-//                /*copy data into new buffer*/
-//                if (status == MB_SUCCESS) {
-//                    int index = 0;
-//                    status = mbtrnpp_kemkmall_rd_hdr(verbose, mRecordBuf[0], (void *)&header, (void *)&emdgm_type, error);
-//                    memcpy(buffer, mRecordBuf[0], header.numBytesDgm);
-//                    index = header.numBytesDgm - 4;
-//
-//                    for (int dgm=1; dgm < totalDgms; dgm++) {
-//                        status = mbtrnpp_kemkmall_rd_hdr(verbose, mRecordBuf[dgm], (void *)&header, (void *)&emdgm_type, error);
-//                        int copy_len = header.numBytesDgm - sizeof(struct mbsys_kmbes_m_partition)
-//                        - sizeof(struct mbsys_kmbes_header) - 4;
-//                        void *ptr = (void *)(mRecordBuf[dgm]+
-//                                             sizeof(struct mbsys_kmbes_m_partition)+
-//                                             sizeof(struct mbsys_kmbes_header));
-//                        memcpy(&buffer[index], ptr, copy_len);
-//                        index += copy_len;
-//                    }
-//                    mb_put_binary_int(true, totalSize, &buffer[0]);
-//                    mb_put_binary_short(true, 1, &buffer[sizeof(struct mbsys_kmbes_header)]);
-//                    mb_put_binary_short(true, 1, &buffer[sizeof(struct mbsys_kmbes_header)+2]);
-//                    mb_put_binary_int(true, totalSize, &buffer[index]);
-//                    dgmsReceived = 0; /*reset received counter back to 0*/
-//                }
-//            }
-//        }
-//    }
-//#endif
-//
-//    /* print output debug statements */
-//    if (verbose >= 2) {
-//        fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-//        fprintf(stderr, "dbg2  Return values:\n");
-//        fprintf(stderr, "dbg2       error:              %d\n", *error);
-//        fprintf(stderr, "dbg2  Return status:\n");
-//        fprintf(stderr, "dbg2       status:             %d\n", status);
-//    }
-//
-//    /* return */
-//    return (status);
-//}
 
 /*--------------------------------------------------------------------*/
 

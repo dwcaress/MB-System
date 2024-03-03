@@ -743,12 +743,15 @@ int main(int argc, char **argv)
 
     int error = MB_ERROR_NO_ERROR;
     int status = connect_udp(cfg, &error);
+    int flist_n = 0;
+    int flist_len = mlist_size(cfg->file_list);
 
     mfile_file_t *file = (mfile_file_t *)mlist_first(cfg->file_list);
 
     while(file != NULL){
         int status = mfile_open(file, MFILE_RONLY);
         if(status >= 0){
+            MX_BPRINT( (cfg->verbose > 0), "publishing file %s %d/%d stat %d\n", file->path, ++flist_n, flist_len, status);
             pub_file(file, cfg);
             mfile_close(file);
         } else {
