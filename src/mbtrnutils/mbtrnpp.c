@@ -752,6 +752,9 @@ FILE *output_trn_fp = NULL;
 
 #endif // WITH_MBTNAV
 
+struct sockaddr_in em_sock_addr;
+socklen_t em_sock_len;
+
 typedef enum{RF_NONE=0,RF_FORCE_UPDATE=0x1,RF_RELEASE=0x2}mb_resource_flag_t;
 
 // profiling - event channels
@@ -7123,7 +7126,7 @@ int mbtrnpp_em710raw_input_open(int verbose, void *mbio_ptr, char *definition, i
     int port=-1;
     mb_path bcastGrp;
     mb_path hostInterface;
-    struct sockaddr_in localSock;
+//    struct sockaddr_in localSock;
     struct ip_mreq group;
     char *token;
     char *saveptr;
@@ -7144,7 +7147,8 @@ int mbtrnpp_em710raw_input_open(int verbose, void *mbio_ptr, char *definition, i
             hostInterface, bcastGrp, port);
 
     /* Create a datagram socket on which to receive. */
-    int sd = socket(AF_INET, SOCK_DGRAM, 0);
+    int sd = -1;
+    sd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sd < 0)
     {
         perror("Opening datagram socket error");
@@ -7157,6 +7161,7 @@ int mbtrnpp_em710raw_input_open(int verbose, void *mbio_ptr, char *definition, i
 
     /* Enable SO_REUSEADDR to allow multiple instances of this */
     /* application to receive copies of the multicast datagrams. */
+//    fcntl(sd, F_SETFL, O_NONBLOCK);
     int reuse = 1;
     if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse)) < 0)
     {
@@ -7170,12 +7175,14 @@ int mbtrnpp_em710raw_input_open(int verbose, void *mbio_ptr, char *definition, i
 
     /* Bind to the proper port number with the IP address */
     /* specified as INADDR_ANY. */
-    memset((char *) &localSock, 0, sizeof(localSock));
-    localSock.sin_family = AF_INET;
-    localSock.sin_port = htons(port);
-    localSock.sin_addr.s_addr = INADDR_ANY;
-    if (bind(sd, (struct sockaddr*)&localSock, sizeof(localSock))) {
-        perror("Binding datagram socket error");
+    memset(&em_sock_addr, 0, sizeof(em_sock_addr));
+    em_sock_addr.sin_family = AF_INET;
+    em_sock_addr.sin_port = htons(port);
+    em_sock_addr.sin_addr.s_addr = inet_addr(hostInterface);
+
+
+    if (bind(sd, (struct sockaddr*)&em_sock_addr, sizeof(em_sock_addr))) {
+        perror("bind datagram socket error");
         close(sd);
         mlog_tprintf(mbtrnpp_mlog_id,"e,bind [%d/%s]\n",errno,strerror(errno));
         status=MB_FAILURE;
@@ -7183,22 +7190,7 @@ int mbtrnpp_em710raw_input_open(int verbose, void *mbio_ptr, char *definition, i
         return status;
     }
 
-    /* Join the multicast group on the specified */
-    /* interface. Note that this IP_ADD_MEMBERSHIP option must be */
-    /* called for each local interface over which the multicast */
-    /* datagrams are to be received. */
-//    group.imr_multiaddr.s_addr = inet_addr(bcastGrp);
-//    group.imr_interface.s_addr = inet_addr(hostInterface);
-//
-//    if(setsockopt(sd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
-//                  (char *)&group, sizeof(group)) < 0) {
-//        perror("Adding multicast group error");
-//        close(sd);
-//        mlog_tprintf(mbtrnpp_mlog_id,"e,setsockopt IP_ADD_MEMBERSHIP [%d/%s]\n",errno,strerror(errno));
-//        status=MB_FAILURE;
-//        *error=MB_ERROR_OPEN_FAIL;
-//        return status;
-//    }
+    fprintf(stderr, "%s connected fd %d %s:%d\n", __func__, sd, hostInterface, port);
 
     // save the socket within the mb_io structure
     int *sd_ptr = NULL;
@@ -7366,6 +7358,35 @@ int mbtrnpp_em710raw_input_open(int verbose, void *mbio_ptr, char *definition, i
 //};
 
 /*--------------------------------------------------------------------*/
+
+static void em710_frame_show(byte *frame_buf)
+{
+    struct mbsys_simrad3_header *header = (struct mbsys_simrad3_header *)frame_buf;
+
+    fprintf(stderr, "numBytesDgm      %08u/x%08X\n", header->numBytesDgm, header->numBytesDgm);
+    fprintf(stderr, "dgmSTX           %02X\n", header->dgmSTX);
+    fprintf(stderr, "dgmType          %02X/%c\n", header->dgmType, header->dgmType);
+    fprintf(stderr, "emModeNum        %04hu/x%04X\n", header->emModeNum, header->emModeNum);
+    fprintf(stderr, "date             %08u/x%08X\n", header->date, header->date);
+    fprintf(stderr, "timeMs           %08u/x%08X\n", header->timeMs, header->timeMs);
+    fprintf(stderr, "counter          %04hu/x%04X\n", header->counter, header->counter);
+    fprintf(stderr, "sysSerialNum     %04hu/x%04X\n", header->sysSerialNum, header->sysSerialNum);
+    fprintf(stderr, "secHeadSerialNum %04hu/x%04X\n", header->secHeadSerialNum, header->secHeadSerialNum);
+    byte *bp = (byte *)frame_buf;
+    byte *petx = (bp + (header->numBytesDgm + 1));
+    byte *pchk = (petx+1);
+    fprintf(stderr, "dgmETX           %02X\n", *((unsigned char *)petx));
+    fprintf(stderr, "chksum           %04X\n", *((unsigned short *)pchk));
+    fprintf(stderr, "\nframe bytes:\n");
+    for (int i=0;i<header->numBytesDgm + 4;i++)
+    {
+        if(i%16 == 0)
+            fprintf(stderr, "\n%08X: ",i);
+        fprintf(stderr, "%02x ",bp[i]);
+    }
+    fprintf(stderr, "\n\n");
+}
+
 int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size,
                               char *buffer, int *error)
 {
@@ -7413,7 +7434,6 @@ int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size,
         bytes_read = 0;
     }
 
-
     // if valid reader...
     if(NULL != mbsp && NULL != frame_buf)
     {
@@ -7427,23 +7447,37 @@ int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size,
             // returns number of bytes read or -1 error
             // UDP datagrams don't include 4-byte total size
             // we'll calculate it and include it at the start of the buffer.
-            if ( (rbytes = recv(*mbsp, (void *) (frame_buf + 4), MB_UDP_SIZE_MAX, 0)) >= 0)
+
+//            struct sockaddr_in localSock;
+//            memset((char *) &localSock, 0, sizeof(localSock));
+//            localSock.sin_family = AF_INET;
+//            localSock.sin_port = htons(10001);
+//            localSock.sin_addr.s_addr = INADDR_ANY;
+//            socklen_t len;
+            MX_PRINT("%s - recv frame fd %d\n", __func__, *mbsp);
+
+            if ( (rbytes = recvfrom(*mbsp, (void *) (frame_buf + 4), MB_UDP_SIZE_MAX, 0, (struct sockaddr *)&em_sock_addr, &em_sock_len)) >= 0)
             {
+                struct mbsys_simrad3_header *header = (struct mbsys_simrad3_header *)frame_buf;
+
                 // set datagram size (first 4 bytes of buffer)
                 unsigned int *pDgmSize = (unsigned int *)frame_buf;
-                *pDgmSize = rbytes + 4;
+                //*pDgmSize = rbytes + 4;
+                *pDgmSize = rbytes;
+
 
                 int errors = 0;
                 // validate
                 uint16_t checksum = 0;
                 byte *pstx = (byte *)&fb_phdr->dgmSTX;
-                byte *petx = frame_buf + 4 + rbytes - 2;
+//                byte *petx = frame_buf + 4 + rbytes - 2;
+                byte *petx = frame_buf + (header->numBytesDgm + 1);
                 byte *cur = pstx + 1;
                 uint16_t *pchk = (uint16_t *)(petx + 1);
 
                 if(rbytes > 0 && rbytes <= MB_UDP_SIZE_MAX){
 
-                    while(cur < pstx){
+                    while(cur < petx){
                         checksum += *cur;
                         cur++;
                     }
@@ -7467,6 +7501,7 @@ int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size,
                     }
                 }
 
+                em710_frame_show(frame_buf);
                 if(errors == 0)
                 {
                     // update frame read pointers
@@ -7488,7 +7523,7 @@ int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size,
             // there's a frame in the buffer
             size_t bytes_rem = frame_buf + fb_phdr->numBytesDgm - fb_pread;
             size_t readlen = (*size <= bytes_rem ? *size : bytes_rem);
-            MX_LPRINT(MBTRNPP, 3, "reading framebuf size[%zu] rlen[%zu] rem[%zu] err[%c]\n", (size_t)*size, readlen, bytes_rem, (read_err?'Y':'N'));
+//            MX_LPRINT(MBTRNPP, 3, "reading framebuf size[%zu] rlen[%zu] rem[%zu] err[%c]\n", (size_t)*size, readlen, bytes_rem, (read_err?'Y':'N'));
         }
 
         if(!read_err){

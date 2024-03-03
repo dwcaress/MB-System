@@ -3961,6 +3961,355 @@ int mbr_em710raw_rd_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 	return (status);
 }
 /*--------------------------------------------------------------------*/
+int mbr_em710raw_rd_hdr(int verbose, char *buffer, void *header_ptr, void *emdgm_type_ptr, int *error) {
+    struct mbsys_simrad3_header *header = NULL;
+    mbsys_simrad3_emdgm_type *emdgm_type = NULL;
+
+    int index = 0;
+
+    if (verbose >= 2) {
+        fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+        fprintf(stderr, "dbg2  Input arguments:\n");
+        fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
+        fprintf(stderr, "dbg2       buffer:         %p\n", (void *)buffer);
+        fprintf(stderr, "dbg2       header_ptr:     %p\n", (void *)header_ptr);
+        fprintf(stderr, "dbg2       emdgm_type_ptr: %p\n", (void *)emdgm_type_ptr);
+    }
+
+    // get pointer to header structure
+    header = (struct mbsys_simrad3_header *)header_ptr;
+    emdgm_type = (mbsys_simrad3_emdgm_type *)emdgm_type_ptr;
+
+    index = 0;
+    mb_get_binary_int(true, &buffer[index], &(header->numBytesDgm));
+    index += 4;
+    header->dgmSTX = buffer[index];
+    index ++;
+    header->dgmType = buffer[index];
+    index ++;
+    mb_get_binary_short(true, &buffer[index], &(header->emModeNum));
+    index += 2;
+    mb_get_binary_int(true, &buffer[index], &(header->date));
+    index += 4;
+    mb_get_binary_int(true, &buffer[index], &(header->timeMs));
+    index += 4;
+    mb_get_binary_short(true, &buffer[index], &(header->counter));
+    index += 2;
+    mb_get_binary_short(true, &buffer[index], &(header->sysSerialNum));
+    index += 2;
+    mb_get_binary_short(true, &buffer[index], &(header->secHeadSerialNum));
+    index += 2;
+
+    switch(header->dgmType){
+
+
+        case ALL_UNKNOWN:
+        case ALL_INSTALLATION_U:
+        case ALL_INSTALLATION_L:
+        case ALL_REMOTE:
+        case ALL_RUNTIME:
+        case ALL_RAW_RANGE_BEAM_ANGLE:
+        case ALL_XYZ88:
+        case ALL_CLOCK:
+        case ALL_ATTITUDE:
+        case ALL_POSITION:
+        case ALL_SURFACE_SOUND_SPEED:
+            *emdgm_type = header->dgmType;
+           break;
+        default:
+            *emdgm_type = ALL_UNKNOWN;
+            break;
+    };
+
+    if (verbose >= 5) {
+        fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
+        fprintf(stderr, "dbg5       numBytesDgm:    %u\n", header->numBytesDgm);
+    }
+
+    int status = MB_SUCCESS;
+
+    if (verbose >= 2) {
+        fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+        fprintf(stderr, "dbg2  Return values:\n");
+        fprintf(stderr, "dbg2       dgmType:    %02x/%c\n", header->dgmType, header->dgmType);
+        fprintf(stderr, "dbg2       emdgm_type: %d\n", *emdgm_type);
+        fprintf(stderr, "dbg2       error:      %d\n", *error);
+        fprintf(stderr, "dbg2  Return status:\n");
+        fprintf(stderr, "dbg2       status:  %d\n", status);
+    }
+
+    /* return status */
+    return (status);
+
+}
+
+//int mbr_em710raw_rd_udp_data(int verbose, void *mbio_ptr, void *store_ptr, int *error)
+//{
+//    int *databyteswapped;
+//    int record_size;
+//    int *record_size_save;
+//    int bytes_read;
+//    char *label;
+//    int *label_save_flag;
+//    char *record_size_char;
+//    bool *ignore_snippets;
+//    short type;
+//    short sonar;
+//    int *version;
+//    short *typelast;
+//    short *sonarlast;
+//    int *nbadrec;
+//    int good_end_bytes;
+//    size_t read_len;
+//    int skip = 0;
+//    int *num_sonars;
+//    char junk;
+//
+//    if (verbose >= 2) {
+//        fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+//        fprintf(stderr, "dbg2  Input arguments:\n");
+//        fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+//        fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+//        fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+//    }
+//
+//    // get pointer to mbio descriptor
+//    struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+//
+//    // get pointer to raw data structure
+//    struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
+//    int *mbsp = mb_io_ptr->mbsp;
+//
+//    // get saved values
+//    databyteswapped = (int *)&mb_io_ptr->save1;
+//    record_size_save = (int *)&mb_io_ptr->save2;
+//    label = (char *)mb_io_ptr->save_label;
+//    version = (int *)(&mb_io_ptr->save3);
+//    label_save_flag = (int *)&mb_io_ptr->save_label_flag;
+//    typelast = (short *)&mb_io_ptr->save6;
+//    sonarlast = (short *)&mb_io_ptr->save7;
+//    nbadrec = (int *)&mb_io_ptr->save8;
+//    num_sonars = (int *)&mb_io_ptr->save10;
+//    record_size_char = (char *)&record_size;
+//    ignore_snippets = (bool *)&mb_io_ptr->save4;
+//    //  *ignore_snippets = true;
+//
+//    // set file position
+////    mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
+//
+//    // set flag to swap bytes if necessary
+//    int swap = *databyteswapped;
+//
+//    // if a ping structure was previously flagged as complete then reset the structure to empty
+//    for (int i = 0; i < MBSYS_SIMRAD3_NUM_PING_STRUCTURES; i++) {
+//        if (store->pings[i].read_status == MBSYS_SIMRAD3_PING_COMPLETE) {
+//            store->pings[i].read_status = MBSYS_SIMRAD3_PING_NO_DATA;
+//            store->pings[i].png_bath_read = false;
+//            store->pings[i].png_raw_read = false;
+//            store->pings[i].png_quality_read = false;
+//            store->pings[i].png_ss_read = false;
+//        }
+//    }
+//
+//    int status = MB_SUCCESS;
+//
+//    // loop over reading data until a record is ready for return
+//    *error = MB_ERROR_NO_ERROR;
+//    bool done = false;
+//    struct
+//    static unsigned char *dgm_buffer = NULL;
+//    char **bufferptr = NULL;
+//    char *buffer = NULL;
+//    size_t *bufferalloc = NULL;
+//
+//    bufferptr = (char **)&mb_io_ptr->raw_data;
+//    bufferalloc = (size_t *)&mb_io_ptr->structure_size;
+//    buffer = (char *)*bufferptr;
+//    struct mbsys_simrad3_header header;
+//    mbsys_simrad3_emdgm_type emdgm_type;
+//
+//    while (!done) {
+//        read_len = MB_UDP_SIZE_MAX;
+//
+//        if (*bufferalloc <= read_len) {
+//            status = mb_reallocd(verbose, __FILE__, __LINE__, read_len, (void **)bufferptr, error);
+//            if (status != MB_SUCCESS) {
+//                *bufferalloc = 0;
+//                done = true;
+//            }
+//            else {
+//                buffer = (char *)*bufferptr;
+//                *bufferalloc = read_len;
+//            }
+//        }
+//
+//        // read the next valid datagram
+//        memset(buffer, 0, read_len);
+//        read_len = *bufferalloc;
+//        status = mb_fileio_get(verbose, mbio_ptr, (void *)buffer, &read_len, error);
+//
+//        // save datagram bytes read
+//        size_t dgm_bytes = read_len;
+//
+//        if (status == MB_SUCCESS) {
+//            dgm_bytes = read_len;
+//            mb_io_ptr->file_pos += read_len;
+//            status = mbr_em710raw_rd_hdr(verbose, buffer, (void *)&header, (void *)&emdgm_type, error);
+//            store->time_d = 0; // TODO: parse time
+//            mb_get_date(verbose, store->time_d, store->time_i);
+//        }
+//
+//        // datagram should be in buffer
+//#ifdef MBR_EM710RAW_DEBUG
+//        fprintf(stderr, "\nabove mbr_em710raw_rd_data loop:\n");
+//        fprintf(stderr, "label_save_flag:%d status:%d\n", *label_save_flag, status);
+//#endif
+//
+//        if (!*label_save_flag) {
+//            // set read len (same for both record body size and label)
+//            read_len = 4;
+//
+//            // point cursor to start of datagram body
+//            unsigned char *cur = buffer + sizeof(mbsys_simrad3_header);
+//            // read record size
+//            memcpy(record_size, cur, read_len);
+//            // read label
+//            memcpy(label, (cur + read_len), read_len);
+//            status = MB_SUCCESS;
+//#ifdef MBR_EM710RAW_DEBUG
+//            fprintf(stderr, "read label:%x%x%x%x skip:%d status:%d\n", label[0], label[1], label[2], label[3], skip, status);
+//#endif
+//            while (status == MB_SUCCESS && mbr_em710raw_chk_label(verbose, mbio_ptr, label, &type, &sonar) !=
+//                   MB_SUCCESS){
+//                cur++;
+//                if( dgm_bytes - (cur - buffer) >= 2*read_len){
+//                    // stop if bytes remaining < (record_size + label)
+//                    status = MB_ERROR_UNINTELLIGIBLE;
+//                    continue;
+//                } else {
+//                    status = MB_SUCCESS;
+//                }
+//                memcpy(record_size, cur, read_len);
+//                memcpy(label, (cur + read_len), read_len);
+//                skip++;
+//#ifdef MBR_EM710RAW_DEBUG
+//                fprintf(stderr, "read label:%x%x%x%x skip:%d status:%d\n", label[0], label[1], label[2], label[3], skip, status);
+//#endif
+//            }
+//            // report problem
+//            if (skip > 0 && verbose > 0) {
+//                if (*nbadrec == 0)
+//                    fprintf(stderr, "\nThe MBF_EM710RAW module skipped data between identified\n\
+//data records. Something is broken, most probably the data...\n\
+//However, the data may include a data record type that we\n\
+//haven't seen yet, or there could be an error in the code.\n\
+//If skipped data are reported multiple times, \n\
+//we recommend you send a data sample and problem \n\
+//description to the MB-System team \n\
+//(caress@mbari.org and dale@ldeo.columbia.edu)\n\
+//Have a nice day...\n");
+//                fprintf(stderr, "MBF_EM710RAW skipped %d bytes between records %4.4hX:%d and %4.4hX:%d\n", skip, *typelast,
+//                        *typelast, type, type);
+//                (*nbadrec)++;
+//            }
+//
+//            *typelast = type;
+//            *sonarlast = sonar;
+//
+//            // set flag to swap bytes if necessary
+//            swap = *databyteswapped;
+//
+//            // get record_size
+//            if (*databyteswapped != mb_io_ptr->byteswapped)
+//                record_size = mb_swap_int(record_size);
+//            *record_size_save = record_size;
+//
+//        } else {
+//            // use saved label
+//            *label_save_flag = false;
+//            type = *typelast;
+//            sonar = *sonarlast;
+//            record_size = *record_size_save;
+//#ifdef MBR_EM710RAW_DEBUG
+//            fprintf(stderr, "use previously read label:%x%x%x%x skip:%d status:%d\n", label[0], label[1], label[2], label[3],
+//                    skip, status);
+//#endif
+//        }
+//
+//#ifdef MBR_EM710RAW_DEBUG
+//        fprintf(stderr, "\nstart of mbr_em710raw_rd_data loop:\n");
+//        fprintf(stderr, "skip:%d type:%x sonar:%d recsize:%u done:%d\n", skip, type, sonar, *record_size_save, done);
+//#endif
+//#ifdef MBR_EM710RAW_DEBUG3
+//        if (skip > 0)
+//            fprintf(stderr, "SKIPPED BYTES: %d\n", skip);
+//        fprintf(stderr, "type:%x sonar:%d recsize:%u done:%d   ", type, sonar, *record_size_save, done);
+//#endif
+//
+//        // allocate secondary data structure for  extraparameters data if needed
+//        if (status == MB_SUCCESS && (type == EM3_EXTRAPARAMETERS) && store->extraparameters == NULL) {
+//            status = mbsys_simrad3_extraparameters_alloc(verbose, mbio_ptr, store_ptr, error);
+//        }
+//
+//        // allocate secondary data structure for heading data if needed
+//        if (status == MB_SUCCESS && (type == EM3_HEADING) && store->heading == NULL) {
+//            status = mbsys_simrad3_heading_alloc(verbose, mbio_ptr, store_ptr, error);
+//        }
+//
+//        // allocate secondary data structure for attitude data if needed
+//        if (status == MB_SUCCESS && (type == EM3_ATTITUDE) && store->attitude == NULL) {
+//            status = mbsys_simrad3_attitude_alloc(verbose, mbio_ptr, store_ptr, error);
+//        }
+//
+//        // allocate secondary data structure for netattitude data if needed
+//        if (status == MB_SUCCESS && (type == EM3_NETATTITUDE) && store->netattitude == NULL) {
+//            status = mbsys_simrad3_netattitude_alloc(verbose, mbio_ptr, store_ptr, error);
+//        }
+//
+//        // allocate secondary data structure for ssv data if needed
+//        if (status == MB_SUCCESS && (type == EM3_SSV) && store->ssv == NULL) {
+//            status = mbsys_simrad3_ssv_alloc(verbose, mbio_ptr, store_ptr, error);
+//        }
+//
+//        // allocate secondary data structure for tilt data if needed
+//        if (status == MB_SUCCESS && (type == EM3_TILT) && store->tilt == NULL) {
+//            status = mbsys_simrad3_tilt_alloc(verbose, mbio_ptr, store_ptr, error);
+//        }
+//
+//        // allocate secondary data structure for water column data if needed
+//        if (status == MB_SUCCESS && (type == EM3_WATERCOLUMN)) {
+//            if (store->wc == NULL)
+//                status = mbsys_simrad3_wc_alloc(verbose, mbio_ptr, store_ptr, error);
+//        }
+//
+//
+//        // read the appropriate data records
+//        if (status == MB_FAILURE) {
+//#ifdef MBR_EM710RAW_DEBUG
+//            fprintf(stderr, "call nothing, read failure\n");
+//#endif
+//            done = true;
+//            record_size = 0;
+//            *record_size_save = record_size;
+//        }
+//        else if (type != EM3_PU_ID && type != EM3_PU_STATUS && type != EM3_PU_BIST && type != EM3_EXTRAPARAMETERS &&
+//                 type != EM3_ATTITUDE && type != EM3_CLOCK && type != EM3_BATH && type != EM3_SBDEPTH && type != EM3_RAWBEAM &&
+//                 type != EM3_SSV && type != EM3_HEADING && type != EM3_START && type != EM3_TILT && type != EM3_CBECHO &&
+//                 type != EM3_RAWBEAM4 && type != EM3_QUALITY && type != EM3_POS && type != EM3_RUN_PARAMETER && type != EM3_SS &&
+//                 type != EM3_TIDE && type != EM3_SVP2 && type != EM3_SVP && type != EM3_SSPINPUT && type != EM3_BATH2 &&
+//                 type != EM3_SS2 && type != EM3_RAWBEAM2 && type != EM3_RAWBEAM3 && type != EM3_HEIGHT && type != EM3_STOP &&
+//                 type != EM3_WATERCOLUMN && type != EM3_NETATTITUDE && type != EM3_REMOTE && type != EM3_SSP &&
+//                 type != EM3_BATH_MBA && type != EM3_SS_MBA && type != EM3_BATH2_MBA && type != EM3_SS2_MBA &&
+//                 type != EM3_BATH3_MBA) {
+//#ifdef MBR_EM710RAW_DEBUG
+//            fprintf(stderr, "call nothing, try again\n");
+//#endif
+//            done = false;
+//        }
+//
+//    } // while(!done)
+//}
+    /*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int *databyteswapped;
 	int record_size;
@@ -4529,7 +4878,17 @@ store->pings[store->ping_index].png_ss_count);
 			done = true;
 
 		/* if necessary read over unread but expected bytes */
-		bytes_read = ftell(mbfp) - mb_io_ptr->file_bytes - 4;
+        if(mbfp != NULL){
+            // reading from file
+            bytes_read = ftell(mbfp) - mb_io_ptr->file_bytes - 4;
+        }
+//        else if(mbsp != NULL) {
+//            // reading from socket
+//            bytes_read = 0;
+//        } else {
+//            // error: neither file nor socket set
+//        }
+
 		if (!*label_save_flag && !good_end_bytes && bytes_read < record_size) {
 #ifdef MBR_EM710RAW_DEBUG
 			fprintf(stderr, "skip over %d unread bytes of supported datagram type %x\n", record_size - bytes_read, type);
@@ -4541,8 +4900,8 @@ store->pings[store->ping_index].png_ss_count);
 		}
 
 #ifdef MBR_EM710RAW_DEBUG
-		fprintf(stderr, "record_size:%d bytes read:%ld file_pos old:%ld new:%ld\n", record_size,
-		        ftell(mbfp) - mb_io_ptr->file_bytes, mb_io_ptr->file_bytes, ftell(mbfp));
+        if(mbfp != NULL)
+            fprintf(stderr, "record_size:%d bytes read:%ld file_pos old:%ld new:%ld\n", record_size, ftell(mbfp) - mb_io_ptr->file_bytes, mb_io_ptr->file_bytes, ftell(mbfp));
 		fprintf(stderr, "done:%d status:%d error:%d\n", done, status, *error);
 		fprintf(stderr, "end of mbr_em710raw_rd_data loop:\n\n");
 #endif
@@ -4552,10 +4911,15 @@ store->pings[store->ping_index].png_ss_count);
 #endif
 
 		/* get file position */
-		if (*label_save_flag)
-			mb_io_ptr->file_bytes = ftell(mbfp) - 2;
-		else
-			mb_io_ptr->file_bytes = ftell(mbfp);
+        if (*label_save_flag) {
+            if(mbfp != NULL) {
+                mb_io_ptr->file_bytes = ftell(mbfp) - 2;
+            }
+        } else {
+            if(mbfp != NULL){
+                mb_io_ptr->file_bytes = ftell(mbfp);
+            }
+        }
 	}
 
 	if (verbose >= 2) {

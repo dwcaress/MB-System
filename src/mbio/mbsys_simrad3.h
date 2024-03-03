@@ -394,7 +394,7 @@
 #define EM3_INVALID_INT 0x7FFFFFFF
 
 /* M3 datagram types */
-
+#pragma pack(push,1)
 struct mbsys_simrad3_header {
     /* Definition of general datagram header */
     unsigned int numBytesDgm;       /* Datagram length in bytes.
@@ -425,6 +425,7 @@ struct mbsys_simrad3_footer {
     mb_u_char dgmETX;        /*End identifier, always 03h*/
     unsigned short checksum; /*Sum of bytes between STX and ETX*/
 };
+#pragma pack(pop)
 
 // Enumerate EM datagram types
 typedef enum {
