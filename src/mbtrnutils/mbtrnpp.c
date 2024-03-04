@@ -7321,10 +7321,15 @@ int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size,
 
             // read UDP datagram from the socket
             // returns number of bytes read or -1 error
-            // UDP datagrams don't include 4-byte total size
+
+            // UDP datagrams don't include 4-byte size field (numBytesDgm),
             // but valid .ALL datagrams must include it.
             // We'll calculate it and include it at the start of the buffer.
 
+            // The datagram size field (numBytesDgm) reflects the number of bytes
+            // from STX to the end of the footer (inclusive).
+            // This enables it to be read, then
+            // used to read the remainder of the datagram, *including* the footer.
 
             if ( (rbytes = recvfrom(*mbsp, (void *) (frame_buf + 4), MB_UDP_SIZE_MAX, 0, (struct sockaddr *)&em_sock_addr, &em_sock_len)) >= 0)
             {
@@ -7333,7 +7338,6 @@ int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size,
                 // set datagram size (first 4 bytes of buffer)
                 unsigned int *pDgmSize = (unsigned int *)frame_buf;
                 *pDgmSize = rbytes;
-
 
                 int errors = 0;
 

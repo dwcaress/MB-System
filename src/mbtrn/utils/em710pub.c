@@ -354,6 +354,7 @@ static void pub_file(mfile_file_t *src, app_cfg_t *cfg)
                     read_len = header->numBytesDgm;
                     if( (rbytes = mfile_read(src, frame_buf + fb_cur, read_len)) == read_len) {
 
+                        // fb_cur points to byte AFTER footer
                         fb_cur += read_len;
 
                         if(cfg->verbose > 1){
@@ -368,12 +369,16 @@ static void pub_file(mfile_file_t *src, app_cfg_t *cfg)
                             byte *pchk = petx + 1;
 
                             // datagram valid, publish to socket
-                            size_t send_len = fb_cur - 4;//header->numBytesDgm;
+
+                            // send length reflects all datagram bytes, less the numBytesDgm field
+                            size_t send_len = fb_cur - 4;
 
                             MX_BPRINT( (cfg->verbose > 0), "sending frame len[%zd/%04X] petx fbofs[%zd/%04X] (%02x) pchk fbofs[%zd/%04X] (%04X)\n", send_len, send_len, (petx-frame_buf), (petx-frame_buf), *petx, (pchk-frame_buf), (pchk-frame_buf), *((unsigned short *)pchk) );
+
                             if(cfg->verbose > 4)
                                 frame_show(header, cfg);
 
+                            // send frame starting starting at STX (omit numBytesDgm)
                             ssize_t status = send(cfg->sock_fd, frame_buf + 4, send_len, 0);
 
                             if( status != send_len){
@@ -722,8 +727,8 @@ static void pub_file(mfile_file_t *src, app_cfg_t *cfg)
 
                     // a LOG frame length is numBytesDgm+4, so you can read the length,
                     // then read that number of bytes.
-                    // numBytesDgm should be the number of bytes from STX to the end of the footer
-                    // a UDP frame length doesn't include the length field (4 bytes)
+                    // numBytesDgm reflects the number of bytes from STX to the end of the footer (inclusive).
+                    // published UDP frames don't include the length field (4 bytes)
                     size_t send_len = header->numBytesDgm;
 
                     ssize_t status = send(cfg->sock_fd, frame_buf + 4, send_len, 0);
