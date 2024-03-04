@@ -471,7 +471,7 @@ static void pub_file(mfile_file_t *src, app_cfg_t *cfg)
 
                     // find STX (datagram start)
 
-                    MX_BPRINT( (cfg->verbose > 0), "state %s\n", st_names[state]);
+                    MX_BPRINT( (cfg->verbose > 3), "state %s\n", st_names[state]);
 
                     // initialize state
                     memset(frame_buf, 0, MB_UDP_SIZE_MAX);
@@ -530,7 +530,7 @@ static void pub_file(mfile_file_t *src, app_cfg_t *cfg)
 
                     // find datagram type
 
-                    MX_BPRINT( (cfg->verbose > 0), "state %s\n", st_names[state]);
+                    MX_BPRINT( (cfg->verbose > 3), "state %s\n", st_names[state]);
 
                     read_len = 1;
                     rbytes = mfile_read(src, bp, read_len);
@@ -581,7 +581,7 @@ static void pub_file(mfile_file_t *src, app_cfg_t *cfg)
 
                     // find model
 
-                    MX_BPRINT( (cfg->verbose > 0), "state %s\n", st_names[state]);
+                    MX_BPRINT( (cfg->verbose > 3), "state %s\n", st_names[state]);
 
                     read_len = 2;
                     rbytes = mfile_read(src, bp, read_len);
@@ -622,7 +622,7 @@ static void pub_file(mfile_file_t *src, app_cfg_t *cfg)
                     // find ETX
                     // or stop if max datagram size exceeded
 
-                    MX_BPRINT( (cfg->verbose > 0), "state %s\n", st_names[state]);
+                    MX_BPRINT( (cfg->verbose > 3), "state %s\n", st_names[state]);
 
                     petx = NULL;
                     read_len = 1;
@@ -678,7 +678,7 @@ static void pub_file(mfile_file_t *src, app_cfg_t *cfg)
 
                     // read, validate checksum
 
-                    MX_BPRINT( (cfg->verbose > 0), "state %s\n", st_names[state]);
+                    MX_BPRINT( (cfg->verbose > 3), "state %s\n", st_names[state]);
 
                     read_len = 2;
                     rbytes = mfile_read(src, bp, read_len);
@@ -724,7 +724,7 @@ static void pub_file(mfile_file_t *src, app_cfg_t *cfg)
 
                     // datagram valid, publish to socket
 
-                    MX_BPRINT( (cfg->verbose > 0), "state %s\n", st_names[state]);
+                    MX_BPRINT( (cfg->verbose > 3), "state %s\n", st_names[state]);
 
                     header->numBytesDgm = (petx - frame_buf)-1;//dgram_bytes;
                     MX_BPRINT( (cfg->verbose > 0), "sending frame len[%zd/%04X] petx ofs[%zd/%04X] (%02X)\n", dgram_bytes, dgram_bytes, (petx-frame_buf), (petx-frame_buf), *petx);

@@ -755,9 +755,15 @@ FILE *output_trn_fp = NULL;
 struct sockaddr_in em_sock_addr;
 socklen_t em_sock_len;
 
-#ifdef WITH_EM710_FRAME_LOG
-// log em710 UDP frames (debug)
-FILE *em_bin_log = NULL;
+#ifdef WITH_EM710_ALL_LOG
+// log em710 frames (debug)
+FILE *em_all_log = NULL;
+const char *em_all_name="em-all.bin";
+#endif
+
+#ifdef WITH_EM710_UDP_LOG
+FILE *em_udp_log = NULL;
+const char *em_udp_name="em-udp.bin";
 #endif
 
 typedef enum{RF_NONE=0,RF_FORCE_UPDATE=0x1,RF_RELEASE=0x2}mb_resource_flag_t;
@@ -7196,8 +7202,11 @@ int mbtrnpp_em710raw_input_open(int verbose, void *mbio_ptr, char *definition, i
 
     fprintf(stderr, "%s connected fd %d %s:%d\n", __func__, sd, hostInterface, port);
 
-#ifdef WITH_EM710_FRAME_LOG
-    em_bin_log = fopen("em710-raw.bin", "w+");
+#ifdef WITH_EM710_ALL_LOG
+    em_all_log = fopen(em_all_name, "w+");
+#endif
+#ifdef WITH_EM710_UDP_LOG
+    em_all_log = fopen(em_udp_name, "w+");
 #endif
 
     // save the socket within the mb_io structure
@@ -7381,9 +7390,15 @@ int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size,
                 frame_len = header->numBytesDgm + 4;
                 frame_count++;
                 // write frame to log (debug only)
-#ifdef WITH_EM710_FRAME_LOG
-                fwrite(frame_buf, frame_len, 1, em_bin_log);
-                fflush(em_bin_log);
+#ifdef WITH_EM710_ALL_LOG
+                // write .ALL frame
+                fwrite(frame_buf, frame_len, 1, em_all_log);
+                fflush(em_all_log);
+#endif
+#ifdef WITH_EM710_UDP_LOG
+                // write UDP frame
+                fwrite(frame_buf+4, frame_len-4, 1, em_udp_log);
+                fflush(em_udp_log);
 #endif
 
                 if(verbose >= 5 || verbose <= -5 )
@@ -7515,8 +7530,11 @@ int mbtrnpp_em710raw_input_close(int verbose, void *mbio_ptr, int *error) {
         fprintf(stderr, "dbg2       status:             %d\n", status);
     }
 
-#ifdef WITH_EM710_FRAME_LOG
-    fclose(em_bin_log);
+#ifdef WITH_EM710_ALL_LOG
+    fclose(em_all_log);
+#endif
+#ifdef WITH_EM710_UDP_LOG
+    fclose(em_udp_log);
 #endif
 
     /* return */
