@@ -7316,7 +7316,8 @@ int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size,
             // read UDP datagram from the socket
             // returns number of bytes read or -1 error
             // UDP datagrams don't include 4-byte total size
-            // we'll calculate it and include it at the start of the buffer.
+            // but valid .ALL datagrams must include it.
+            // We'll calculate it and include it at the start of the buffer.
 
 
             if ( (rbytes = recvfrom(*mbsp, (void *) (frame_buf + 4), MB_UDP_SIZE_MAX, 0, (struct sockaddr *)&em_sock_addr, &em_sock_len)) >= 0)
