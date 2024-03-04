@@ -7370,8 +7370,9 @@ int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size,
 
                 frame_len = header->numBytesDgm + 4;
                 frame_count++;
-                fwrite(frame_buf, frame_len, 1, em_bin_log);
-                fflush(em_bin_log);
+                // write frame to log (debug only)
+//                fwrite(frame_buf, frame_len, 1, em_bin_log);
+//                fflush(em_bin_log);
 
                 if(verbose >= 5 || verbose <= -5 )
                     em710_frame_show(frame_buf, verbose);
