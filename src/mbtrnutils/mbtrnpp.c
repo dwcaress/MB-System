@@ -754,6 +754,7 @@ FILE *output_trn_fp = NULL;
 
 struct sockaddr_in em_sock_addr;
 socklen_t em_sock_len;
+FILE *em_bin_log = NULL;
 
 typedef enum{RF_NONE=0,RF_FORCE_UPDATE=0x1,RF_RELEASE=0x2}mb_resource_flag_t;
 
@@ -7191,6 +7192,8 @@ int mbtrnpp_em710raw_input_open(int verbose, void *mbio_ptr, char *definition, i
 
     fprintf(stderr, "%s connected fd %d %s:%d\n", __func__, sd, hostInterface, port);
 
+    em_bin_log = fopen("em710-raw.bin", "w+");
+
     // save the socket within the mb_io structure
     int *sd_ptr = NULL;
     status &= mb_mallocd(verbose, __FILE__, __LINE__, sizeof(sd), (void **)&sd_ptr, error);
@@ -7285,6 +7288,7 @@ int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size,
 
     // frame buffer for byte-wise reads
     static byte *frame_buf = NULL;
+    static size_t frame_len = 0;
     static struct mbsys_simrad3_header *fb_phdr = NULL;
     static byte *fb_pread=NULL;
     static size_t bytes_read=0;
@@ -7305,7 +7309,7 @@ int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size,
     {
         if(read_frame)
         {
-            // read frame into buffer
+             // read frame into buffer
             memset(frame_buf, 0, MB_UDP_SIZE_MAX);
             fb_pread = frame_buf;
 
@@ -7327,7 +7331,7 @@ int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size,
                 int errors = 0;
 
                 // validate
-                uint16_t checksum = 0;
+                uint16_t sum = 0;
                 byte *pstx = (byte *)&fb_phdr->dgmSTX;
                 byte *petx = frame_buf + (header->numBytesDgm + 1);
                 byte *cur = pstx + 1;
@@ -7336,14 +7340,17 @@ int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size,
                 if(rbytes > 0 && rbytes <= MB_UDP_SIZE_MAX){
 
                     while(cur < petx){
-                        checksum += *cur;
+                        sum += *cur;
                         cur++;
                     }
-                    if(checksum != *pchk)
-                        errors++;
+                    if(sum != *pchk) {
+                        MX_LPRINT(MBTRNPP, 3, "invalid checksum %04X/%04X\n", sum, *pchk);
+                       errors++;
+                    }
 
                     switch(fb_phdr->dgmType){
                         case ALL_INSTALLATION_L:
+                        case ALL_INSTALLATION_U:
                         case ALL_REMOTE:
                         case ALL_RUNTIME:
                         case ALL_RAW_RANGE_BEAM_ANGLE:
@@ -7355,11 +7362,15 @@ int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size,
                             // is valid type
                             break;
                         default:
+                            MX_LPRINT(MBTRNPP, 3, "invalid type x%02X\n", fb_phdr->dgmType);
                             errors++;
                     }
                 }
 
+                frame_len = header->numBytesDgm + 4;
                 frame_count++;
+                fwrite(frame_buf, frame_len, 1, em_bin_log);
+                fflush(em_bin_log);
 
                 if(verbose >= 5 || verbose <= -5 )
                     em710_frame_show(frame_buf, verbose);
@@ -7370,32 +7381,32 @@ int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size,
                     fb_pread = frame_buf;
                     read_frame = false;
                     read_err = false;
-                    MX_LPRINT(MBTRNPP, 3, "read frame len[%zu]:\n",(size_t)rbytes);
+                    MX_LPRINT(MBTRNPP, 3, "read frame len[%zu]\n", frame_len);
                 } else {
                     // frame invalid
                     frame_invalid++;
                     read_err = true;
-                    MX_LPRINT(MBTRNPP, 3, "invalid frame rbytes[%zu] checksum[%hu/%hu]\n",(size_t)rbytes, checksum, *pchk);
+                    MX_LPRINT(MBTRNPP, 3, "invalid frame len[%llu] sum[%hu/%04X] chksum[%hu/%04X]\n", frame_len, sum, sum, *pchk, *pchk);
                 }
             } else {
                 // read error
                 frame_read_err++;
                 read_err = true;
-                MX_LPRINT(MBTRNPP, 3, "mb1r_read_frame failed rbytes[%zu]\n",(size_t)rbytes);
+                MX_LPRINT(MBTRNPP, 3, "em710_read_frame failed rbytes[%lluu]\n", frame_len);
             }
 
-            MX_LPRINT(MBTRNPP, 2, "%s - read frame fd %3d len[%6u] n[%8llu] invalid[%8llu] read_err[%8llu] \n", __func__, *mbsp, rbytes, frame_count, frame_invalid, frame_read_err);
+            MX_LPRINT(MBTRNPP, 3, "%s - read frame fd %3d len[%6llu] n[%8llu] invalid[%8llu] read_err[%8llu] \n", __func__, *mbsp, frame_len, frame_count, frame_invalid, frame_read_err);
 
         } else {
             // there's a frame in the buffer
-            size_t bytes_rem = frame_buf + fb_phdr->numBytesDgm - fb_pread;
+            size_t bytes_rem = frame_buf + frame_len - fb_pread;
             size_t readlen = (*size <= bytes_rem ? *size : bytes_rem);
 
-            MX_LPRINT(MBTRNPP, 4, "reading framebuf size[%2zu] rlen[%2zu] rem[%6zu] err[%c]\n", (size_t)*size, readlen, bytes_rem, (read_err?'Y':'N'));
+            MX_LPRINT(MBTRNPP, 4, "reading framebuf size[%2zu] frame_len[%6zu] rem[%6zu] err[%c]\n", (size_t)*size, frame_len, bytes_rem, (read_err?'Y':'N'));
         }
 
         if(!read_err){
-            int64_t bytes_rem = frame_buf + fb_phdr->numBytesDgm - fb_pread;
+            int64_t bytes_rem = frame_buf + frame_len - fb_pread;
             size_t readlen = (*size <= bytes_rem ? *size : bytes_rem);
             if(readlen > 0){
                 memcpy(buffer, fb_pread, readlen);
@@ -7430,7 +7441,7 @@ int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size,
         *size    = (size_t)0;
 
         MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_GETFAIL_XT], mtime_dtime());
-        MX_LPRINT(MBTRNPP, 4, "read kemall UDP socket failed: sync_bytes[%d] status[%d] err[%d]\n",sync_bytes,status, *error);
+        MX_LPRINT(MBTRNPP, 4, "read em710raw UDP socket failed: sync_bytes[%d] status[%d] err[%d]\n",sync_bytes,status, *error);
 
         MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBFRAMERD]);
         MST_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_MB_SYNC_BYTES],sync_bytes);
@@ -7490,6 +7501,7 @@ int mbtrnpp_em710raw_input_close(int verbose, void *mbio_ptr, int *error) {
         fprintf(stderr, "dbg2       status:             %d\n", status);
     }
 
+    fclose(em_bin_log);
     /* return */
     return (status);
 }

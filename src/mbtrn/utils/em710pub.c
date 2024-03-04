@@ -217,7 +217,7 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
 
 }
 
-static void header_show(struct mbsys_simrad3_header *header)
+static void frame_show(struct mbsys_simrad3_header *header, app_cfg_t *cfg)
 {
     fprintf(stderr, "numBytesDgm      %08u/x%08X\n", header->numBytesDgm, header->numBytesDgm);
     fprintf(stderr, "dgmSTX           %02X\n", header->dgmSTX);
@@ -233,26 +233,28 @@ static void header_show(struct mbsys_simrad3_header *header)
     byte *pchk = (petx+1);
     fprintf(stderr, "dgmETX           %02X\n", *((unsigned char *)petx));
     fprintf(stderr, "chksum           %04X\n", *((unsigned short *)pchk));
-    fprintf(stderr, "\nframe bytes:\n");
-    for (int i=0;i<header->numBytesDgm + 4;i++)
-    {
-        if(i%16 == 0)
-            fprintf(stderr, "\n%08X: ",i);
-        fprintf(stderr, "%02x ",bp[i]);
+    if(cfg != NULL && cfg->verbose > 2){
+        fprintf(stderr, "\nframe bytes:\n");
+        for (int i=0;i<header->numBytesDgm + 4;i++)
+        {
+            if(i%16 == 0)
+                fprintf(stderr, "\n%08X: ",i);
+            fprintf(stderr, "%02x ",bp[i]);
+        }
+        fprintf(stderr, "\n");
     }
-    fprintf(stderr, "\n\n");
+    fprintf(stderr, "\n");
 }
 
-static bool validate(byte *src, unsigned int len, app_cfg_t *cfg)
+static bool validate_frame(byte *src, unsigned int len, app_cfg_t *cfg)
 {
     bool retval = true;
     struct mbsys_simrad3_header *header = (struct mbsys_simrad3_header *)src;
 
-    if(cfg->verbose > 1)
-        header_show(header);
-
     byte *petx = src + header->numBytesDgm + 1;
     byte *psum = (byte *)&header->dgmSTX + 1;
+    byte *pbchk = (byte *)petx+1;
+    unsigned short *pchk = (unsigned short *)pbchk;
 
     switch(header->dgmType){
 
@@ -285,15 +287,19 @@ static bool validate(byte *src, unsigned int len, app_cfg_t *cfg)
         return false;
     }
     short unsigned int sum = 0;
-    short unsigned int chk =  *((short unsigned int *)(petx + 1));
 
     while(psum < petx){
         sum += *psum;
         psum++;
     }
-    if(sum != chk){
-        fprintf(stderr, "%s - ERR: invalid checksum %04hu/%04hu\n", __func__, sum, chk);
+    if(sum != *pchk){
+        fprintf(stderr, "%s - ERR: invalid checksum %04hu/%04hu\n", __func__, sum, *pchk);
         return false;
+    } else {
+        if(cfg->verbose > 1){
+            fprintf(stderr, "%s - petx ofs(%04lX) pchk ofs (%04lx)  etx %02X\n", __func__, petx-src, pbchk-src, *petx);
+            fprintf(stderr, "%s - sum %04hu/%04X  checksum %04hu/%04X \n", __func__, sum, sum, *pchk, *pchk);
+        }
     }
 
     return retval;
@@ -329,34 +335,57 @@ static void pub_file(mfile_file_t *src, app_cfg_t *cfg)
 
             struct mbsys_simrad3_header *header = (struct mbsys_simrad3_header *)frame_buf;
 
+            // iterate over file to find valid datagrams
             while(file_cur < file_end) {
+
+                // intialize state
                 memset(frame_buf, 0, MB_UDP_SIZE_MAX);
                 fb_cur = 0;
                 uint32_t read_len = 4;
                 int64_t rbytes = 0;
                 off_t file_cur_save = file_cur;
+
                 // read datagram size (4 bytes)
                 if( (rbytes = mfile_read(src, frame_buf, read_len)) == read_len) {
+
                     fb_cur += read_len;
+
                     // read the rest of the datagram
                     read_len = header->numBytesDgm;
                     if( (rbytes = mfile_read(src, frame_buf + fb_cur, read_len)) == read_len) {
+
                         fb_cur += read_len;
 
                         if(cfg->verbose > 1){
+                            // show header (verbose/debug)
                             fprintf(stderr, "\n");
-                            header_show(header);
+                            frame_show(header, cfg);
                         }
-                        if(validate(frame_buf, (header->numBytesDgm + 4), cfg)){
-                            size_t send_len = header->numBytesDgm;
-                            ssize_t status = send(cfg->sock_fd, frame_buf+4, send_len, 0);
+
+                        if(validate_frame(frame_buf, (fb_cur), cfg)) {
+
+                            byte *petx = frame_buf + fb_cur - 3;
+                            byte *pchk = petx + 1;
+
+                            // datagram valid, publish to socket
+                            size_t send_len = fb_cur - 4;//header->numBytesDgm;
+
+                            MX_BPRINT( (cfg->verbose > 0), "sending frame len[%zd/%04X] petx fbofs[%zd/%04X] (%02x) pchk fbofs[%zd/%04X] (%04X)\n", send_len, send_len, (petx-frame_buf), (petx-frame_buf), *petx, (pchk-frame_buf), (pchk-frame_buf), *((unsigned short *)pchk) );
+                            if(cfg->verbose > 4)
+                                frame_show(header, cfg);
+
+                            ssize_t status = send(cfg->sock_fd, frame_buf + 4, send_len, 0);
+
                             if( status != send_len){
                                 fprintf(stderr, "ERR - send failed ret[%zd] %d/%s\n", status, errno, strerror(errno));
                             }
-
+                        }else {
+                            fprintf(stderr, "ERR - invalid frame\n");
                         }
                     }
+
                     if(cfg->delay_ms > 0){
+                        // delay if set
                         struct timespec delay_ms = {
                             (time_t)(cfg->delay_ms / 1000),
                             (long)(1000L * (cfg->delay_ms % 1000))
@@ -364,12 +393,25 @@ static void pub_file(mfile_file_t *src, app_cfg_t *cfg)
                         nanosleep(&delay_ms, NULL);
                     }
                 }
+
+                // update file pointer
                 file_cur = mfile_seek(src, 0, MFILE_CUR);
             }
         } else if(cfg->fmt == EM710_UDP) {
 
+            // records are raw UDP (record size ommitted)
+            // must parse using state machine:
+            // if record has valid STX, datagram type, model
+            // then find ETX and checksum.
+            // if header and checksum are valid, publish datagram
+            // Since STX and ETX can appear in data payloads,
+            // must detect and resync appropriately (without violating)
+            // datagram max size or buffer length).
+
             struct mbsys_simrad3_header *header = (struct mbsys_simrad3_header *)frame_buf;
 
+            // state machine states
+            // note: indexes state names array
             typedef enum {
                 ST_START = 0,
                 ST_STX_VALID,
@@ -380,6 +422,8 @@ static void pub_file(mfile_file_t *src, app_cfg_t *cfg)
                 ST_ERROR,
                 ST_COUNT
             }state_t;
+
+            // state names (indexed using state values)
             char *st_names[ST_COUNT] = {
                 "ST_START",
                 "ST_STX_VALID",
@@ -389,6 +433,8 @@ static void pub_file(mfile_file_t *src, app_cfg_t *cfg)
                 "ST_CHKSUM_VALID",
                 "ST_ERROR"
             };
+
+            // initialize state machine
             state_t state = ST_START;
 
             int64_t rbytes = 0;
@@ -396,6 +442,8 @@ static void pub_file(mfile_file_t *src, app_cfg_t *cfg)
             byte *bp = frame_buf + 4;
             byte *pstx = frame_buf + 5;
             byte *petx = NULL;
+            uint64_t stx_ofs = 0;
+            uint64_t etx_ofs = 0;
             bool found_stx = false;
             bool found_type = false;
             bool found_model = false;
@@ -405,14 +453,18 @@ static void pub_file(mfile_file_t *src, app_cfg_t *cfg)
             uint64_t fpos_start = 0;
             unsigned short int chksum = 0;
 
+            // iterate over file to find valid datagrams
             while(file_cur < file_end) {
 
-                // read until STX
 
                 if(state == ST_START) {
-                    memset(frame_buf, 0, MB_UDP_SIZE_MAX);
+
+                    // find STX (datagram start)
+
                     MX_BPRINT( (cfg->verbose > 0), "state %s\n", st_names[state]);
+
                     // initialize state
+                    memset(frame_buf, 0, MB_UDP_SIZE_MAX);
                     rbytes = 0;
                     dgram_bytes = 0;
                     chksum = 0;
@@ -423,33 +475,38 @@ static void pub_file(mfile_file_t *src, app_cfg_t *cfg)
                     found_stx = false;
                     found_type = false;
                     found_model = false;
-                    //fpos_start = mfile_seek(src, 0, MFILE_CUR);
                     mfile_seek(src, fpos_start, MFILE_SET);
+                    uint64_t skipped_bytes = 0;
+
                     MX_BPRINT( (cfg->verbose > 0), "file_pos %llu/x%0llX\n", fpos_start, fpos_start);
 
-                    // find STX (datagram start)
+                    // read until STX found
 
-                    uint64_t skipped = 0;
                     while(!found_stx) {
                         read_len = 1;
                         rbytes = mfile_read(src, bp, read_len);
 
-                        if(rbytes > 0)
-                            file_cur += rbytes;
-
                         if(rbytes == read_len){
                             if( *bp == EM3_START_BYTE){
+
                                 int64_t fpos = mfile_seek(src, 0, MFILE_CUR) - read_len;
-//                                fprintf(stderr, "found STX %02X file_pos x%0llX bp %p ofs %zd\n", *bp, fpos, bp, (bp - frame_buf));
-                                dgram_bytes = read_len;
+
+                                // set point to STX
                                 pstx = bp;
+                                // update state
                                 found_stx = true;
+                                dgram_bytes = read_len;
                                 bp += read_len;
                                 state = ST_STX_VALID;
+
+                                // update file pointer start location
                                 fpos_start = mfile_seek(src, 0, MFILE_CUR);
-                                MX_BPRINT( (cfg->verbose > 0),"(skipped %llu bytes)\n", skipped);
+                                stx_ofs = fpos_start - 1;
+
+                                MX_BPRINT( (cfg->verbose > 0),"STX ofs[%llu/%0X] (skipped_bytes %llu)\n", stx_ofs, stx_ofs, skipped_bytes);
                             } else {
-                                skipped++;
+                                // skip byte
+                                skipped_bytes++;
                             }
                         } else {
                             fprintf(stderr, "ERR - file read failed on STX\n");
@@ -460,8 +517,11 @@ static void pub_file(mfile_file_t *src, app_cfg_t *cfg)
                 } // state START
 
                 if(state == ST_STX_VALID) {
+
+                    // find datagram type
+
                     MX_BPRINT( (cfg->verbose > 0), "state %s\n", st_names[state]);
-                   // find type
+
                     read_len = 1;
                     rbytes = mfile_read(src, bp, read_len);
 
@@ -490,24 +550,28 @@ static void pub_file(mfile_file_t *src, app_cfg_t *cfg)
 
                     if(state != ST_ERROR){
                        if(found_type) {
-                           int64_t fpos = mfile_seek(src, 0, MFILE_CUR) - read_len;
-                           MX_BPRINT( (cfg->verbose > 1), "found TYPE %02X file_pos x%0llX bp %p ofs %zd\n", *bp, fpos, bp, (bp - frame_buf));
+                           if(cfg->verbose > 1){
+                               int64_t fpos = mfile_seek(src, 0, MFILE_CUR) - read_len;
 
+                               MX_PRINT("found TYPE %02X file_pos x%0llX bp %p ofs %zd\n", *bp, fpos, bp, (bp - frame_buf));
+                           }
+
+                           // update state
                             bp += read_len;
                             dgram_bytes += read_len;
                             state = ST_TYPE_VALID;
                         } else {
-                            // invalid type, reset just after original start position
-//                            fpos_start++;
+                            // invalid type, return to start state
                             state = ST_START;
                         }
                     }
                 }
 
                 if(state == ST_TYPE_VALID) {
+
                     // find model
+
                     MX_BPRINT( (cfg->verbose > 0), "state %s\n", st_names[state]);
-//                    fprintf(stderr, "type %02X/%c\n", header->dgmType, header->dgmType);
 
                     read_len = 2;
                     rbytes = mfile_read(src, bp, read_len);
@@ -537,7 +601,7 @@ static void pub_file(mfile_file_t *src, app_cfg_t *cfg)
                             dgram_bytes += read_len;
                             state = ST_MODEL_VALID;
                         } else {
-                            // invalid model, reset just after original start position
+                            // invalid model, return to start state
                             state = ST_START;
                         }
                     }
@@ -546,9 +610,9 @@ static void pub_file(mfile_file_t *src, app_cfg_t *cfg)
                 if(state == ST_MODEL_VALID) {
 
                     // find ETX
-                    // or exceed max datagram size
+                    // or stop if max datagram size exceeded
+
                     MX_BPRINT( (cfg->verbose > 0), "state %s\n", st_names[state]);
-//                    fprintf(stderr, "frame_buf %p bp %p bp-frame_buf(%zd) fpos[%llu]\n", frame_buf, bp, (bp - frame_buf), mfile_seek(src, 0, MFILE_CUR));
 
                     petx = NULL;
                     read_len = 1;
@@ -581,15 +645,19 @@ static void pub_file(mfile_file_t *src, app_cfg_t *cfg)
                             if(found_etx) {
                                 state = ST_ETX_VALID;
                             } else {
-                                // invalid ETX, reset just after original start position
+                                // invalid ETX, return to start state
                                 state = ST_START;
                             }
                         }
 
                         if( dgram_bytes >= MB_UDP_SIZE_MAX ||
-                           (bp - frame_buf) >= MB_UDP_SIZE_MAX){
+                           (bp - frame_buf) >= MB_UDP_SIZE_MAX) {
+
                             fprintf(stderr, "ERR - buffer length exceeded type (%02X) dgram_bytes(%zd) bp-frame_buf(%zd)\n", header->dgmType, dgram_bytes, (bp - frame_buf));
-                            // invalid ETX, reset just after original start position
+
+                            // buffer length or max datagram size exceeded
+                            // return to start state
+
                             state = ST_START;
                             break;
                         }
@@ -597,10 +665,11 @@ static void pub_file(mfile_file_t *src, app_cfg_t *cfg)
                 }
 
                 if(state == ST_ETX_VALID) {
-                    MX_BPRINT( (cfg->verbose > 0), "state %s\n", st_names[state]);
-//                    fprintf(stderr, "frame_buf %p bp %p bp-frame_buf(%zd)\n", frame_buf, bp, (bp - frame_buf));
 
-                    // read checksum
+                    // read, validate checksum
+
+                    MX_BPRINT( (cfg->verbose > 0), "state %s\n", st_names[state]);
+
                     read_len = 2;
                     rbytes = mfile_read(src, bp, read_len);
                     unsigned int *pchk = NULL;
@@ -615,11 +684,12 @@ static void pub_file(mfile_file_t *src, app_cfg_t *cfg)
                             state = ST_ERROR;
                         }
 
+                        // calculate checksum (sum of bytes between STX and ETX, exclusive)
+                        // and compare to datagram
                         byte *pcs = pstx + 1;
                         chksum = 0;
                         while(pcs < petx){
                             chksum += *pcs;
-//                            fprintf(stderr, "pcs %p petx %p *pcs %02X chksum %04X\n", pcs, petx, *pcs, chksum);
                             pcs++;
                         }
 
@@ -628,7 +698,8 @@ static void pub_file(mfile_file_t *src, app_cfg_t *cfg)
                         } else {
                             found_chk = false;
                             found_etx = false;
-                            // keep looking for ETX
+
+                            // may have found ETX char in data, keep looking
                             state = ST_MODEL_VALID;
                         }
                         dgram_bytes += read_len;
@@ -640,38 +711,50 @@ static void pub_file(mfile_file_t *src, app_cfg_t *cfg)
                 }
 
                 if(state == ST_CHKSUM_VALID){
+
+                    // datagram valid, publish to socket
+
                     MX_BPRINT( (cfg->verbose > 0), "state %s\n", st_names[state]);
-                   // done, success
-                    header->numBytesDgm = dgram_bytes;
-                    MX_BPRINT( (cfg->verbose > 0), "validating frame len[%zd]\n", dgram_bytes);
 
-                    if(validate(frame_buf, dgram_bytes, cfg)){
-                        size_t send_len = header->numBytesDgm;
+                    header->numBytesDgm = (petx - frame_buf)-1;//dgram_bytes;
+                    MX_BPRINT( (cfg->verbose > 0), "sending frame len[%zd/%04X] petx ofs[%zd/%04X] (%02X)\n", dgram_bytes, dgram_bytes, (petx-frame_buf), (petx-frame_buf), *petx);
 
-                        ssize_t status = send(cfg->sock_fd, frame_buf + 4, send_len, 0);
 
-                        if( status != send_len){
-                            int serr = errno;
-                            fprintf(stderr, "ERR - send failed ret[%zd] %d/%s\n", status, errno, strerror(errno));
-                        }
+                    // a LOG frame length is numBytesDgm+4, so you can read the length,
+                    // then read that number of bytes.
+                    // numBytesDgm should be the number of bytes from STX to the end of the footer
+                    // a UDP frame length doesn't include the length field (4 bytes)
+                    size_t send_len = header->numBytesDgm;
+
+                    ssize_t status = send(cfg->sock_fd, frame_buf + 4, send_len, 0);
+
+                    if( status != send_len){
+                        int serr = errno;
+                        fprintf(stderr, "ERR - send failed ret[%zd] %d/%s\n", status, errno, strerror(errno));
                     }
 
                     if(cfg->delay_ms > 0){
+                        // delay if set
                         struct timespec delay_ms = {
                             (time_t)(cfg->delay_ms / 1000),
                             (long)(1000000L * (cfg->delay_ms % 1000UL))
                         };
                         nanosleep(&delay_ms, NULL);
                     }
+
+                    // return to start state
+                    fpos_start = mfile_seek(src, 0, MFILE_CUR);
                     state = ST_START;
                 }
 
                 if(state == ST_ERROR){
-                    MX_BPRINT( (cfg->verbose > 0), "state %s\n", st_names[state]);
                     // error (EOF)
                     fprintf(stderr, "ERR - EOF or buffer length exceeded; quitting\n");
                     break;
                 }
+
+                // update file pointer
+                file_cur = mfile_seek(src, 0, MFILE_CUR);
             }
         } // if EM710_UDP
     }
