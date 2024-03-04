@@ -754,7 +754,11 @@ FILE *output_trn_fp = NULL;
 
 struct sockaddr_in em_sock_addr;
 socklen_t em_sock_len;
+
+#ifdef WITH_EM710_FRAME_LOG
+// log em710 UDP frames (debug)
 FILE *em_bin_log = NULL;
+#endif
 
 typedef enum{RF_NONE=0,RF_FORCE_UPDATE=0x1,RF_RELEASE=0x2}mb_resource_flag_t;
 
@@ -7192,7 +7196,9 @@ int mbtrnpp_em710raw_input_open(int verbose, void *mbio_ptr, char *definition, i
 
     fprintf(stderr, "%s connected fd %d %s:%d\n", __func__, sd, hostInterface, port);
 
+#ifdef WITH_EM710_FRAME_LOG
     em_bin_log = fopen("em710-raw.bin", "w+");
+#endif
 
     // save the socket within the mb_io structure
     int *sd_ptr = NULL;
@@ -7371,8 +7377,10 @@ int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size,
                 frame_len = header->numBytesDgm + 4;
                 frame_count++;
                 // write frame to log (debug only)
-//                fwrite(frame_buf, frame_len, 1, em_bin_log);
-//                fflush(em_bin_log);
+#ifdef WITH_EM710_FRAME_LOG
+                fwrite(frame_buf, frame_len, 1, em_bin_log);
+                fflush(em_bin_log);
+#endif
 
                 if(verbose >= 5 || verbose <= -5 )
                     em710_frame_show(frame_buf, verbose);
@@ -7503,7 +7511,10 @@ int mbtrnpp_em710raw_input_close(int verbose, void *mbio_ptr, int *error) {
         fprintf(stderr, "dbg2       status:             %d\n", status);
     }
 
+#ifdef WITH_EM710_FRAME_LOG
     fclose(em_bin_log);
+#endif
+
     /* return */
     return (status);
 }
