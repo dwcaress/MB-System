@@ -333,6 +333,10 @@ static void pub_file(mfile_file_t *src, app_cfg_t *cfg)
 
         if(cfg->fmt == EM710_LOG) {
 
+            // records are .ALL format
+            // read the datagrams and publish them
+            // as UDP frames (w/o the numBytesDgm field)
+
             struct mbsys_simrad3_header *header = (struct mbsys_simrad3_header *)frame_buf;
 
             // iterate over file to find valid datagrams
@@ -355,6 +359,7 @@ static void pub_file(mfile_file_t *src, app_cfg_t *cfg)
                     if( (rbytes = mfile_read(src, frame_buf + fb_cur, read_len)) == read_len) {
 
                         // fb_cur points to byte AFTER footer
+                        // i.e. fb_cur - frame_buf = total frame bytes (including size field)
                         fb_cur += read_len;
 
                         if(cfg->verbose > 1){
@@ -379,7 +384,7 @@ static void pub_file(mfile_file_t *src, app_cfg_t *cfg)
                                 frame_show(header, cfg);
 
                             // send frame starting starting at STX (omit numBytesDgm)
-                            ssize_t status = send(cfg->sock_fd, frame_buf + 4, send_len, 0);
+                            ssize_t status = send(cfg->sock_fd, (frame_buf + 4), send_len, 0);
 
                             if( status != send_len){
                                 fprintf(stderr, "ERR - send failed ret[%zd] %d/%s\n", status, errno, strerror(errno));
