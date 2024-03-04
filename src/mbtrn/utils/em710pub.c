@@ -56,14 +56,14 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg);
 
 static void s_show_help()
 {
-    char help_message[] = "\n publish em710 raw UDP data\n";
+    char help_message[] = "\n publish em710 .ALL or UDP capture data (emulate M3 UDP output)\n";
     char usage_message[] = "\n em710pub [options] file [file...]\n"
     "\n Options:\n"
     "  --verbose=n    : verbose output level\n"
     "  --help         : show this help message\n"
     "  --host=s       : host IP address or name\n"
     "  --port=n       : TCP/IP port\n"
-    "  --format=s     : log or udp\n"
+    "  --format=s     : log (.ALL file) or udp (M3 UDP stream capture)\n"
     "  --delay=n      : delay (msec)\n"
     "\n";
     printf("%s",help_message);
