@@ -45,6 +45,13 @@
 #.   mb1-cli
 #
 message("In src/mbtrn")
+
+if(CMAKE_SYSTEM_NAME STREQUAL Linux)
+  find_package(TIRPC REQUIRED)
+else()
+  add_library(TIRPC::TIRPC INTERFACE IMPORTED)
+endif()
+
 add_compile_definitions(
 HAVE_CONFIG_H
 _GNU_SOURCE
@@ -174,7 +181,7 @@ add_executable(empub utils/em710pub.c)
 target_include_directories(empub PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnframe
                             ${CMAKE_SOURCE_DIR}/src/mbio
 							${CMAKE_SOURCE_DIR}/src/mbtrnutils)
-target_link_libraries(empub PRIVATE mbtrnframe m pthread)
+target_link_libraries(empub PRIVATE TIRPC::TIRPC mbtrnframe m pthread)
 #
 #------------------------------------------------------------------------------
 #
