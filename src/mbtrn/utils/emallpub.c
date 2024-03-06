@@ -215,6 +215,9 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
         fprintf(stderr,"ERR - no input files\n");
     }
 
+    if(help) {
+        s_show_help();
+    }
 }
 
 static void frame_show(struct mbsys_simrad3_header *header, app_cfg_t *cfg)
