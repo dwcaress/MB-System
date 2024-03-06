@@ -9,6 +9,7 @@
 //
 #include "structDefs.h"
 #include "TrnLog.h"
+#include <cstdint>
 
 #define _STR(x) #x
 #define STR(x) _STR(x)
