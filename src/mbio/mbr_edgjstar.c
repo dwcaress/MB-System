@@ -1823,500 +1823,502 @@ __FILE__, __LINE__, __FUNCTION__, ftell(mb_io_ptr->mbfp));
 	fprintf(stderr, "kind:%d error:%d status:%d\n", store->kind, *error, status);
 #endif
 
-	if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_COMMENT) {
-		fprintf(stderr, "\ndbg5  New comment read by MBIO function <%s>\n", __func__);
-		fprintf(stderr, "dbg5  Subsystem ID:\n");
-		fprintf(stderr, "dbg5       subsystem:        %d ", store->subsystem);
-		if (store->subsystem == 0)
-			fprintf(stderr, "(subbottom)\n");
-		else if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSLOW)
-			fprintf(stderr, "(75 or 120 kHz sidescan)\n");
-		else if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSHIGH)
-			fprintf(stderr, "(410 kHz sidescan)\n");
+	if (verbose >= 5) {
+		if (status == MB_SUCCESS && store->kind == MB_DATA_COMMENT) {
+			fprintf(stderr, "\ndbg5  New comment read by MBIO function <%s>\n", __func__);
+			fprintf(stderr, "dbg5  Subsystem ID:\n");
+			fprintf(stderr, "dbg5       subsystem:        %d ", store->subsystem);
+			if (store->subsystem == 0)
+				fprintf(stderr, "(subbottom)\n");
+			else if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSLOW)
+				fprintf(stderr, "(75 or 120 kHz sidescan)\n");
+			else if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSHIGH)
+				fprintf(stderr, "(410 kHz sidescan)\n");
 
-		fprintf(stderr, "\ndbg5  Comment:\n");
-		comment = (struct mbsys_jstar_comment_struct *)&(store->comment);
-		fprintf(stderr, "dbg5     start_marker:                %d\n", comment->message.start_marker);
-		fprintf(stderr, "dbg5     version:                     %d\n", comment->message.version);
-		fprintf(stderr, "dbg5     session:                     %d\n", comment->message.session);
-		fprintf(stderr, "dbg5     type:                        %d\n", comment->message.type);
-		fprintf(stderr, "dbg5     command:                     %d\n", comment->message.command);
-		fprintf(stderr, "dbg5     subsystem:                   %d\n", comment->message.subsystem);
-		fprintf(stderr, "dbg5     channel:                     %d\n", comment->message.channel);
-		fprintf(stderr, "dbg5     sequence:                    %d\n", comment->message.sequence);
-		fprintf(stderr, "dbg5     reserved:                    %d\n", comment->message.reserved);
-		fprintf(stderr, "dbg5     size:                        %d\n", comment->message.size);
+			fprintf(stderr, "\ndbg5  Comment:\n");
+			comment = (struct mbsys_jstar_comment_struct *)&(store->comment);
+			fprintf(stderr, "dbg5     start_marker:                %d\n", comment->message.start_marker);
+			fprintf(stderr, "dbg5     version:                     %d\n", comment->message.version);
+			fprintf(stderr, "dbg5     session:                     %d\n", comment->message.session);
+			fprintf(stderr, "dbg5     type:                        %d\n", comment->message.type);
+			fprintf(stderr, "dbg5     command:                     %d\n", comment->message.command);
+			fprintf(stderr, "dbg5     subsystem:                   %d\n", comment->message.subsystem);
+			fprintf(stderr, "dbg5     channel:                     %d\n", comment->message.channel);
+			fprintf(stderr, "dbg5     sequence:                    %d\n", comment->message.sequence);
+			fprintf(stderr, "dbg5     reserved:                    %d\n", comment->message.reserved);
+			fprintf(stderr, "dbg5     size:                        %d\n", comment->message.size);
 
-		fprintf(stderr, "dbg5     comment:                     %s\n", store->comment.comment);
-	}
-	else if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_SUBBOTTOM_SUBBOTTOM) {
-		sbp = (struct mbsys_jstar_channel_struct *)&(store->sbp);
-		fprintf(stderr, "\ndbg5  New subbottom data record read by MBIO function <%s>\n", __func__);
-		fprintf(stderr, "dbg5  Subsystem ID:\n");
-		fprintf(stderr, "dbg5       subsystem:        %d (subbottom)\n", store->subsystem);
-		fprintf(stderr, "\ndbg5  Channel:\n");
-		fprintf(stderr, "dbg5     start_marker:                %d\n", sbp->message.start_marker);
-		fprintf(stderr, "dbg5     version:                     %d\n", sbp->message.version);
-		fprintf(stderr, "dbg5     session:                     %d\n", sbp->message.session);
-		fprintf(stderr, "dbg5     type:                        %d\n", sbp->message.type);
-		fprintf(stderr, "dbg5     command:                     %d\n", sbp->message.command);
-		fprintf(stderr, "dbg5     subsystem:                   %d\n", sbp->message.subsystem);
-		fprintf(stderr, "dbg5     channel:                     %d\n", sbp->message.channel);
-		fprintf(stderr, "dbg5     sequence:                    %d\n", sbp->message.sequence);
-		fprintf(stderr, "dbg5     reserved:                    %d\n", sbp->message.reserved);
-		fprintf(stderr, "dbg5     size:                        %d\n", sbp->message.size);
-
-		fprintf(stderr, "dbg5     pingTime:                    %d\n", sbp->pingTime);
-		fprintf(stderr, "dbg5     startDepth:                  %d\n", sbp->startDepth);
-		fprintf(stderr, "dbg5     pingNum:                     %d\n", sbp->pingNum);
-		for (int i = 0; i < 2; i++)
-            fprintf(stderr, "dbg5     reserved1[%d]:               %d\n", i, sbp->reserved1[i]);
-		fprintf(stderr, "dbg5     msb:                         %d\n", sbp->msb);
-		fprintf(stderr, "dbg5     lsb1:                        %d\n", sbp->lsb1);
-		fprintf(stderr, "dbg5     lsb2:                        %d\n", sbp->lsb2);
-		for (int i = 0; i < 3; i++)
-            fprintf(stderr, "dbg5     reserved2[%d]:               %d\n", i, sbp->reserved2[i]);
-		fprintf(stderr, "dbg5     validityFlag:                %d\n", sbp->validityFlag);
-		fprintf(stderr, "dbg5     reserved3:                   %d\n", sbp->reserved3);
-		fprintf(stderr, "dbg5     dataFormat:                  %d\n", sbp->dataFormat);
-		fprintf(stderr, "dbg5     NMEAantennaeR:               %d\n", sbp->NMEAantennaeR);
-		fprintf(stderr, "dbg5     NMEAantennaeO:               %d\n", sbp->NMEAantennaeO);
-		for (int i = 0; i < 2; i++)
-			fprintf(stderr, "dbg5     reserved4[%d]:               %d\n", i, sbp->reserved4[i]);
-		fprintf(stderr, "dbg5     kmOfPipe:                    %f\n", sbp->kmOfPipe);
-		for (int i = 0; i < 16; i++)
-			fprintf(stderr, "dbg5     reserved5[%d]:               %d\n", i, sbp->reserved5[i]);
-		fprintf(stderr, "dbg5     coordX:                      %d\n", sbp->coordX);
-		fprintf(stderr, "dbg5     coordY:                      %d\n", sbp->coordY);
-		fprintf(stderr, "dbg5     coordUnits:                  %d\n", sbp->coordUnits);
-		fprintf(stderr, "dbg5     annotation:                  %s\n", sbp->annotation);
-		fprintf(stderr, "dbg5     samples:                     %d\n", sbp->samples);
-		fprintf(stderr, "dbg5     sampleInterval:              %d\n", sbp->sampleInterval);
-		fprintf(stderr, "dbg5     ADCGain:                     %d\n", sbp->ADCGain);
-		fprintf(stderr, "dbg5     pulsePower:                  %d\n", sbp->pulsePower);
-		fprintf(stderr, "dbg5     reserved6:                   %d\n", sbp->reserved6);
-		fprintf(stderr, "dbg5     startFreq:                   %d\n", sbp->startFreq);
-		fprintf(stderr, "dbg5     endFreq:                     %d\n", sbp->endFreq);
-		fprintf(stderr, "dbg5     sweepLength:                 %d\n", sbp->sweepLength);
-		fprintf(stderr, "dbg5     pressure:                    %d\n", sbp->pressure);
-		fprintf(stderr, "dbg5     sonarDepth:                  %d\n", sbp->sonarDepth);
-		fprintf(stderr, "dbg5     sampleFreq:                  %d\n", sbp->sampleFreq);
-		fprintf(stderr, "dbg5     pulseID:                     %d\n", sbp->pulseID);
-		fprintf(stderr, "dbg5     sonarAltitude:               %d\n", sbp->sonarAltitude);
-		fprintf(stderr, "dbg5     soundspeed:                  %f\n", sbp->soundspeed);
-		fprintf(stderr, "dbg5     mixerFrequency:              %f\n", sbp->mixerFrequency);
-		fprintf(stderr, "dbg5     year:                        %d\n", sbp->year);
-		fprintf(stderr, "dbg5     day:                         %d\n", sbp->day);
-		fprintf(stderr, "dbg5     hour:                        %d\n", sbp->hour);
-		fprintf(stderr, "dbg5     minute:                      %d\n", sbp->minute);
-		fprintf(stderr, "dbg5     second:                      %d\n", sbp->second);
-		fprintf(stderr, "dbg5     timeBasis:                   %d\n", sbp->timeBasis);
-		fprintf(stderr, "dbg5     weightingFactor:             %d\n", sbp->weightingFactor);
-		fprintf(stderr, "dbg5     numberPulses:                %d\n", sbp->numberPulses);
-		fprintf(stderr, "dbg5     heading:                     %d\n", sbp->heading);
-		fprintf(stderr, "dbg5     pitch:                       %d\n", sbp->pitch);
-		fprintf(stderr, "dbg5     roll:                        %d\n", sbp->roll);
-		fprintf(stderr, "dbg5     reserved8:                   %d\n", sbp->reserved8);
-		fprintf(stderr, "dbg5     reserved9:                   %d\n", sbp->reserved9);
-		fprintf(stderr, "dbg5     triggerSource:               %d\n", sbp->triggerSource);
-		fprintf(stderr, "dbg5     markNumber:                  %d\n", sbp->markNumber);
-		fprintf(stderr, "dbg5     NMEAHour:                    %d\n", sbp->NMEAHour);
-		fprintf(stderr, "dbg5     NMEAMinutes:                 %d\n", sbp->NMEAMinutes);
-		fprintf(stderr, "dbg5     NMEASeconds:                 %d\n", sbp->NMEASeconds);
-		fprintf(stderr, "dbg5     NMEACourse:                  %d\n", sbp->NMEACourse);
-		fprintf(stderr, "dbg5     NMEASpeed:                   %d\n", sbp->NMEASpeed);
-		fprintf(stderr, "dbg5     NMEADay:                     %d\n", sbp->NMEADay);
-		fprintf(stderr, "dbg5     NMEAYear:                    %d\n", sbp->NMEAYear);
-		fprintf(stderr, "dbg5     millisecondsToday:           %d\n", sbp->millisecondsToday);
-		fprintf(stderr, "dbg5     ADCMax:                      %d\n", sbp->ADCMax);
-		fprintf(stderr, "dbg5     reserved10:                  %d\n", sbp->reserved10);
-		fprintf(stderr, "dbg5     reserved10:                  %d\n", sbp->reserved11);
-		fprintf(stderr, "dbg5     softwareVersion:             %s\n", sbp->softwareVersion);
-		fprintf(stderr, "dbg5     sphericalCorrection:         %d\n", sbp->sphericalCorrection);
-		fprintf(stderr, "dbg5     packetNum:                   %d\n", sbp->packetNum);
-		fprintf(stderr, "dbg5     ADCDecimation:               %d\n", sbp->ADCDecimation);
-		fprintf(stderr, "dbg5     reserved12:                  %d\n", sbp->reserved12);
-		fprintf(stderr, "dbg5     temperature:                 %d\n", sbp->temperature);
-		fprintf(stderr, "dbg5     layback:                     %f\n", sbp->layback);
-		fprintf(stderr, "dbg5     reserved13:                  %d\n", sbp->reserved13);
-		fprintf(stderr, "dbg5     cableOut:                    %d\n", sbp->cableOut);
-		fprintf(stderr, "dbg5     reserved14:                  %d\n", sbp->reserved14);
-		if (sbp->dataFormat == 1) {
-			for (int i = 0; i < sbp->samples; i++)
-				fprintf(stderr, "dbg5     Channel[%d]: %10d %10d\n", i, sbp->trace[2 * i], sbp->trace[2 * i + 1]);
+			fprintf(stderr, "dbg5     comment:                     %s\n", store->comment.comment);
 		}
-		else {
-			for (int i = 0; i < sbp->samples; i++)
-				fprintf(stderr, "dbg5     Channel[%d]: %10d\n", i, sbp->trace[i]);
+		else if (status == MB_SUCCESS && store->kind == MB_DATA_SUBBOTTOM_SUBBOTTOM) {
+			sbp = (struct mbsys_jstar_channel_struct *)&(store->sbp);
+			fprintf(stderr, "\ndbg5  New subbottom data record read by MBIO function <%s>\n", __func__);
+			fprintf(stderr, "dbg5  Subsystem ID:\n");
+			fprintf(stderr, "dbg5       subsystem:        %d (subbottom)\n", store->subsystem);
+			fprintf(stderr, "\ndbg5  Channel:\n");
+			fprintf(stderr, "dbg5     start_marker:                %d\n", sbp->message.start_marker);
+			fprintf(stderr, "dbg5     version:                     %d\n", sbp->message.version);
+			fprintf(stderr, "dbg5     session:                     %d\n", sbp->message.session);
+			fprintf(stderr, "dbg5     type:                        %d\n", sbp->message.type);
+			fprintf(stderr, "dbg5     command:                     %d\n", sbp->message.command);
+			fprintf(stderr, "dbg5     subsystem:                   %d\n", sbp->message.subsystem);
+			fprintf(stderr, "dbg5     channel:                     %d\n", sbp->message.channel);
+			fprintf(stderr, "dbg5     sequence:                    %d\n", sbp->message.sequence);
+			fprintf(stderr, "dbg5     reserved:                    %d\n", sbp->message.reserved);
+			fprintf(stderr, "dbg5     size:                        %d\n", sbp->message.size);
+
+			fprintf(stderr, "dbg5     pingTime:                    %d\n", sbp->pingTime);
+			fprintf(stderr, "dbg5     startDepth:                  %d\n", sbp->startDepth);
+			fprintf(stderr, "dbg5     pingNum:                     %d\n", sbp->pingNum);
+			for (int i = 0; i < 2; i++)
+	            fprintf(stderr, "dbg5     reserved1[%d]:               %d\n", i, sbp->reserved1[i]);
+			fprintf(stderr, "dbg5     msb:                         %d\n", sbp->msb);
+			fprintf(stderr, "dbg5     lsb1:                        %d\n", sbp->lsb1);
+			fprintf(stderr, "dbg5     lsb2:                        %d\n", sbp->lsb2);
+			for (int i = 0; i < 3; i++)
+	            fprintf(stderr, "dbg5     reserved2[%d]:               %d\n", i, sbp->reserved2[i]);
+			fprintf(stderr, "dbg5     validityFlag:                %d\n", sbp->validityFlag);
+			fprintf(stderr, "dbg5     reserved3:                   %d\n", sbp->reserved3);
+			fprintf(stderr, "dbg5     dataFormat:                  %d\n", sbp->dataFormat);
+			fprintf(stderr, "dbg5     NMEAantennaeR:               %d\n", sbp->NMEAantennaeR);
+			fprintf(stderr, "dbg5     NMEAantennaeO:               %d\n", sbp->NMEAantennaeO);
+			for (int i = 0; i < 2; i++)
+				fprintf(stderr, "dbg5     reserved4[%d]:               %d\n", i, sbp->reserved4[i]);
+			fprintf(stderr, "dbg5     kmOfPipe:                    %f\n", sbp->kmOfPipe);
+			for (int i = 0; i < 16; i++)
+				fprintf(stderr, "dbg5     reserved5[%d]:               %d\n", i, sbp->reserved5[i]);
+			fprintf(stderr, "dbg5     coordX:                      %d\n", sbp->coordX);
+			fprintf(stderr, "dbg5     coordY:                      %d\n", sbp->coordY);
+			fprintf(stderr, "dbg5     coordUnits:                  %d\n", sbp->coordUnits);
+			fprintf(stderr, "dbg5     annotation:                  %s\n", sbp->annotation);
+			fprintf(stderr, "dbg5     samples:                     %d\n", sbp->samples);
+			fprintf(stderr, "dbg5     sampleInterval:              %d\n", sbp->sampleInterval);
+			fprintf(stderr, "dbg5     ADCGain:                     %d\n", sbp->ADCGain);
+			fprintf(stderr, "dbg5     pulsePower:                  %d\n", sbp->pulsePower);
+			fprintf(stderr, "dbg5     reserved6:                   %d\n", sbp->reserved6);
+			fprintf(stderr, "dbg5     startFreq:                   %d\n", sbp->startFreq);
+			fprintf(stderr, "dbg5     endFreq:                     %d\n", sbp->endFreq);
+			fprintf(stderr, "dbg5     sweepLength:                 %d\n", sbp->sweepLength);
+			fprintf(stderr, "dbg5     pressure:                    %d\n", sbp->pressure);
+			fprintf(stderr, "dbg5     sonarDepth:                  %d\n", sbp->sonarDepth);
+			fprintf(stderr, "dbg5     sampleFreq:                  %d\n", sbp->sampleFreq);
+			fprintf(stderr, "dbg5     pulseID:                     %d\n", sbp->pulseID);
+			fprintf(stderr, "dbg5     sonarAltitude:               %d\n", sbp->sonarAltitude);
+			fprintf(stderr, "dbg5     soundspeed:                  %f\n", sbp->soundspeed);
+			fprintf(stderr, "dbg5     mixerFrequency:              %f\n", sbp->mixerFrequency);
+			fprintf(stderr, "dbg5     year:                        %d\n", sbp->year);
+			fprintf(stderr, "dbg5     day:                         %d\n", sbp->day);
+			fprintf(stderr, "dbg5     hour:                        %d\n", sbp->hour);
+			fprintf(stderr, "dbg5     minute:                      %d\n", sbp->minute);
+			fprintf(stderr, "dbg5     second:                      %d\n", sbp->second);
+			fprintf(stderr, "dbg5     timeBasis:                   %d\n", sbp->timeBasis);
+			fprintf(stderr, "dbg5     weightingFactor:             %d\n", sbp->weightingFactor);
+			fprintf(stderr, "dbg5     numberPulses:                %d\n", sbp->numberPulses);
+			fprintf(stderr, "dbg5     heading:                     %d\n", sbp->heading);
+			fprintf(stderr, "dbg5     pitch:                       %d\n", sbp->pitch);
+			fprintf(stderr, "dbg5     roll:                        %d\n", sbp->roll);
+			fprintf(stderr, "dbg5     reserved8:                   %d\n", sbp->reserved8);
+			fprintf(stderr, "dbg5     reserved9:                   %d\n", sbp->reserved9);
+			fprintf(stderr, "dbg5     triggerSource:               %d\n", sbp->triggerSource);
+			fprintf(stderr, "dbg5     markNumber:                  %d\n", sbp->markNumber);
+			fprintf(stderr, "dbg5     NMEAHour:                    %d\n", sbp->NMEAHour);
+			fprintf(stderr, "dbg5     NMEAMinutes:                 %d\n", sbp->NMEAMinutes);
+			fprintf(stderr, "dbg5     NMEASeconds:                 %d\n", sbp->NMEASeconds);
+			fprintf(stderr, "dbg5     NMEACourse:                  %d\n", sbp->NMEACourse);
+			fprintf(stderr, "dbg5     NMEASpeed:                   %d\n", sbp->NMEASpeed);
+			fprintf(stderr, "dbg5     NMEADay:                     %d\n", sbp->NMEADay);
+			fprintf(stderr, "dbg5     NMEAYear:                    %d\n", sbp->NMEAYear);
+			fprintf(stderr, "dbg5     millisecondsToday:           %d\n", sbp->millisecondsToday);
+			fprintf(stderr, "dbg5     ADCMax:                      %d\n", sbp->ADCMax);
+			fprintf(stderr, "dbg5     reserved10:                  %d\n", sbp->reserved10);
+			fprintf(stderr, "dbg5     reserved10:                  %d\n", sbp->reserved11);
+			fprintf(stderr, "dbg5     softwareVersion:             %s\n", sbp->softwareVersion);
+			fprintf(stderr, "dbg5     sphericalCorrection:         %d\n", sbp->sphericalCorrection);
+			fprintf(stderr, "dbg5     packetNum:                   %d\n", sbp->packetNum);
+			fprintf(stderr, "dbg5     ADCDecimation:               %d\n", sbp->ADCDecimation);
+			fprintf(stderr, "dbg5     reserved12:                  %d\n", sbp->reserved12);
+			fprintf(stderr, "dbg5     temperature:                 %d\n", sbp->temperature);
+			fprintf(stderr, "dbg5     layback:                     %f\n", sbp->layback);
+			fprintf(stderr, "dbg5     reserved13:                  %d\n", sbp->reserved13);
+			fprintf(stderr, "dbg5     cableOut:                    %d\n", sbp->cableOut);
+			fprintf(stderr, "dbg5     reserved14:                  %d\n", sbp->reserved14);
+			if (sbp->dataFormat == 1) {
+				for (int i = 0; i < sbp->samples; i++)
+					fprintf(stderr, "dbg5     Channel[%d]: %10d %10d\n", i, sbp->trace[2 * i], sbp->trace[2 * i + 1]);
+			}
+			else {
+				for (int i = 0; i < sbp->samples; i++)
+					fprintf(stderr, "dbg5     Channel[%d]: %10d\n", i, sbp->trace[i]);
+			}
 		}
-	}
-	else if (status == MB_SUCCESS && verbose >= 5 && (store->kind == MB_DATA_DATA || store->kind == MB_DATA_SIDESCAN2)) {
-		fprintf(stderr, "\ndbg5  New sidescan data record read by MBIO function <%s>\n", __func__);
-		fprintf(stderr, "dbg5  Subsystem ID:\n");
-		fprintf(stderr, "dbg5       subsystem:        %d ", store->subsystem);
-		if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSLOW)
-			fprintf(stderr, "(75 or 120 kHz sidescan)\n");
-		else if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSHIGH)
-			fprintf(stderr, "(410 kHz sidescan)\n");
+		else if (status == MB_SUCCESS && (store->kind == MB_DATA_DATA || store->kind == MB_DATA_SIDESCAN2)) {
+			fprintf(stderr, "\ndbg5  New sidescan data record read by MBIO function <%s>\n", __func__);
+			fprintf(stderr, "dbg5  Subsystem ID:\n");
+			fprintf(stderr, "dbg5       subsystem:        %d ", store->subsystem);
+			if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSLOW)
+				fprintf(stderr, "(75 or 120 kHz sidescan)\n");
+			else if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSHIGH)
+				fprintf(stderr, "(410 kHz sidescan)\n");
 
-		ss = (struct mbsys_jstar_channel_struct *)&(store->ssport);
-		fprintf(stderr, "\ndbg5  Channel 0 (Port):\n");
-		fprintf(stderr, "dbg5     start_marker:                %d\n", ss->message.start_marker);
-		fprintf(stderr, "dbg5     version:                     %d\n", ss->message.version);
-		fprintf(stderr, "dbg5     session:                     %d\n", ss->message.session);
-		fprintf(stderr, "dbg5     type:                        %d\n", ss->message.type);
-		fprintf(stderr, "dbg5     command:                     %d\n", ss->message.command);
-		fprintf(stderr, "dbg5     subsystem:                   %d\n", ss->message.subsystem);
-		fprintf(stderr, "dbg5     channel:                     %d\n", ss->message.channel);
-		fprintf(stderr, "dbg5     sequence:                    %d\n", ss->message.sequence);
-		fprintf(stderr, "dbg5     reserved:                    %d\n", ss->message.reserved);
-		fprintf(stderr, "dbg5     size:                        %d\n", ss->message.size);
+			ss = (struct mbsys_jstar_channel_struct *)&(store->ssport);
+			fprintf(stderr, "\ndbg5  Channel 0 (Port):\n");
+			fprintf(stderr, "dbg5     start_marker:                %d\n", ss->message.start_marker);
+			fprintf(stderr, "dbg5     version:                     %d\n", ss->message.version);
+			fprintf(stderr, "dbg5     session:                     %d\n", ss->message.session);
+			fprintf(stderr, "dbg5     type:                        %d\n", ss->message.type);
+			fprintf(stderr, "dbg5     command:                     %d\n", ss->message.command);
+			fprintf(stderr, "dbg5     subsystem:                   %d\n", ss->message.subsystem);
+			fprintf(stderr, "dbg5     channel:                     %d\n", ss->message.channel);
+			fprintf(stderr, "dbg5     sequence:                    %d\n", ss->message.sequence);
+			fprintf(stderr, "dbg5     reserved:                    %d\n", ss->message.reserved);
+			fprintf(stderr, "dbg5     size:                        %d\n", ss->message.size);
 
-		fprintf(stderr, "dbg5     pingTime:                    %d\n", ss->pingTime);
-		fprintf(stderr, "dbg5     startDepth:                  %d\n", ss->startDepth);
-		fprintf(stderr, "dbg5     pingNum:                     %d\n", ss->pingNum);
-		for (int i = 0; i < 2; i++)
-            fprintf(stderr, "dbg5     reserved1[%d]:               %d\n", i, ss->reserved1[i]);
-		fprintf(stderr, "dbg5     msb:                         %d\n", ss->msb);
-		fprintf(stderr, "dbg5     lsb1:                        %d\n", ss->lsb1);
-		fprintf(stderr, "dbg5     lsb2:                        %d\n", ss->lsb2);
-		for (int i = 0; i < 3; i++)
-            fprintf(stderr, "dbg5     reserved2[%d]:               %d\n", i, ss->reserved2[i]);
-		fprintf(stderr, "dbg5     validityFlag:                %d\n", ss->validityFlag);
-		fprintf(stderr, "dbg5     reserved3:                   %d\n", ss->reserved3);
-		fprintf(stderr, "dbg5     dataFormat:                  %d\n", ss->dataFormat);
-		fprintf(stderr, "dbg5     NMEAantennaeR:               %d\n", ss->NMEAantennaeR);
-		fprintf(stderr, "dbg5     NMEAantennaeO:               %d\n", ss->NMEAantennaeO);
-		for (int i = 0; i < 2; i++)
-			fprintf(stderr, "dbg5     reserved4[%d]:               %d\n", i, ss->reserved4[i]);
-		fprintf(stderr, "dbg5     kmOfPipe:                    %f\n", ss->kmOfPipe);
-		for (int i = 0; i < 16; i++)
-			fprintf(stderr, "dbg5     reserved5[%d]:               %d\n", i, ss->reserved5[i]);
-		fprintf(stderr, "dbg5     coordX:                      %d\n", ss->coordX);
-		fprintf(stderr, "dbg5     coordY:                      %d\n", ss->coordY);
-		fprintf(stderr, "dbg5     coordUnits:                  %d\n", ss->coordUnits);
-		fprintf(stderr, "dbg5     annotation:                  %s\n", ss->annotation);
-		fprintf(stderr, "dbg5     samples:                     %d\n", ss->samples);
-		fprintf(stderr, "dbg5     sampleInterval:              %d\n", ss->sampleInterval);
-		fprintf(stderr, "dbg5     ADCGain:                     %d\n", ss->ADCGain);
-		fprintf(stderr, "dbg5     pulsePower:                  %d\n", ss->pulsePower);
-		fprintf(stderr, "dbg5     reserved6:                   %d\n", ss->reserved6);
-		fprintf(stderr, "dbg5     startFreq:                   %d\n", ss->startFreq);
-		fprintf(stderr, "dbg5     endFreq:                     %d\n", ss->endFreq);
-		fprintf(stderr, "dbg5     sweepLength:                 %d\n", ss->sweepLength);
-		fprintf(stderr, "dbg5     pressure:                    %d\n", ss->pressure);
-		fprintf(stderr, "dbg5     sonarDepth:                  %d\n", ss->sonarDepth);
-		fprintf(stderr, "dbg5     sampleFreq:                  %d\n", ss->sampleFreq);
-		fprintf(stderr, "dbg5     pulseID:                     %d\n", ss->pulseID);
-		fprintf(stderr, "dbg5     sonarAltitude:               %d\n", ss->sonarAltitude);
-		fprintf(stderr, "dbg5     soundspeed:                  %f\n", ss->soundspeed);
-		fprintf(stderr, "dbg5     mixerFrequency:              %f\n", ss->mixerFrequency);
-		fprintf(stderr, "dbg5     year:                        %d\n", ss->year);
-		fprintf(stderr, "dbg5     day:                         %d\n", ss->day);
-		fprintf(stderr, "dbg5     hour:                        %d\n", ss->hour);
-		fprintf(stderr, "dbg5     minute:                      %d\n", ss->minute);
-		fprintf(stderr, "dbg5     second:                      %d\n", ss->second);
-		fprintf(stderr, "dbg5     timeBasis:                   %d\n", ss->timeBasis);
-		fprintf(stderr, "dbg5     weightingFactor:             %d\n", ss->weightingFactor);
-		fprintf(stderr, "dbg5     numberPulses:                %d\n", ss->numberPulses);
-		fprintf(stderr, "dbg5     heading:                     %d\n", ss->heading);
-		fprintf(stderr, "dbg5     pitch:                       %d\n", ss->pitch);
-		fprintf(stderr, "dbg5     roll:                        %d\n", ss->roll);
-		fprintf(stderr, "dbg5     reserved8:                   %d\n", ss->reserved8);
-		fprintf(stderr, "dbg5     reserved9:                   %d\n", ss->reserved9);
-		fprintf(stderr, "dbg5     triggerSource:               %d\n", ss->triggerSource);
-		fprintf(stderr, "dbg5     markNumber:                  %d\n", ss->markNumber);
-		fprintf(stderr, "dbg5     NMEAHour:                    %d\n", ss->NMEAHour);
-		fprintf(stderr, "dbg5     NMEAMinutes:                 %d\n", ss->NMEAMinutes);
-		fprintf(stderr, "dbg5     NMEASeconds:                 %d\n", ss->NMEASeconds);
-		fprintf(stderr, "dbg5     NMEACourse:                  %d\n", ss->NMEACourse);
-		fprintf(stderr, "dbg5     NMEASpeed:                   %d\n", ss->NMEASpeed);
-		fprintf(stderr, "dbg5     NMEADay:                     %d\n", ss->NMEADay);
-		fprintf(stderr, "dbg5     NMEAYear:                    %d\n", ss->NMEAYear);
-		fprintf(stderr, "dbg5     millisecondsToday:           %d\n", ss->millisecondsToday);
-		fprintf(stderr, "dbg5     ADCMax:                      %d\n", ss->ADCMax);
-		fprintf(stderr, "dbg5     reserved10:                  %d\n", ss->reserved10);
-		fprintf(stderr, "dbg5     reserved10:                  %d\n", ss->reserved11);
-		fprintf(stderr, "dbg5     softwareVersion:             %s\n", ss->softwareVersion);
-		fprintf(stderr, "dbg5     sphericalCorrection:         %d\n", ss->sphericalCorrection);
-		fprintf(stderr, "dbg5     packetNum:                   %d\n", ss->packetNum);
-		fprintf(stderr, "dbg5     ADCDecimation:               %d\n", ss->ADCDecimation);
-		fprintf(stderr, "dbg5     reserved12:                  %d\n", ss->reserved12);
-		fprintf(stderr, "dbg5     temperature:                 %d\n", ss->temperature);
-		fprintf(stderr, "dbg5     layback:                     %f\n", ss->layback);
-		fprintf(stderr, "dbg5     reserved13:                  %d\n", ss->reserved13);
-		fprintf(stderr, "dbg5     cableOut:                    %d\n", ss->cableOut);
-		fprintf(stderr, "dbg5     reserved14:                  %d\n", ss->reserved14);
-		if (ss->dataFormat == 1) {
-			for (int i = 0; i < ss->samples; i++)
-				fprintf(stderr, "dbg5     Channel 0[%d]: %10d %10d\n", i, ss->trace[2 * i], ss->trace[2 * i + 1]);
+			fprintf(stderr, "dbg5     pingTime:                    %d\n", ss->pingTime);
+			fprintf(stderr, "dbg5     startDepth:                  %d\n", ss->startDepth);
+			fprintf(stderr, "dbg5     pingNum:                     %d\n", ss->pingNum);
+			for (int i = 0; i < 2; i++)
+	            fprintf(stderr, "dbg5     reserved1[%d]:               %d\n", i, ss->reserved1[i]);
+			fprintf(stderr, "dbg5     msb:                         %d\n", ss->msb);
+			fprintf(stderr, "dbg5     lsb1:                        %d\n", ss->lsb1);
+			fprintf(stderr, "dbg5     lsb2:                        %d\n", ss->lsb2);
+			for (int i = 0; i < 3; i++)
+	            fprintf(stderr, "dbg5     reserved2[%d]:               %d\n", i, ss->reserved2[i]);
+			fprintf(stderr, "dbg5     validityFlag:                %d\n", ss->validityFlag);
+			fprintf(stderr, "dbg5     reserved3:                   %d\n", ss->reserved3);
+			fprintf(stderr, "dbg5     dataFormat:                  %d\n", ss->dataFormat);
+			fprintf(stderr, "dbg5     NMEAantennaeR:               %d\n", ss->NMEAantennaeR);
+			fprintf(stderr, "dbg5     NMEAantennaeO:               %d\n", ss->NMEAantennaeO);
+			for (int i = 0; i < 2; i++)
+				fprintf(stderr, "dbg5     reserved4[%d]:               %d\n", i, ss->reserved4[i]);
+			fprintf(stderr, "dbg5     kmOfPipe:                    %f\n", ss->kmOfPipe);
+			for (int i = 0; i < 16; i++)
+				fprintf(stderr, "dbg5     reserved5[%d]:               %d\n", i, ss->reserved5[i]);
+			fprintf(stderr, "dbg5     coordX:                      %d\n", ss->coordX);
+			fprintf(stderr, "dbg5     coordY:                      %d\n", ss->coordY);
+			fprintf(stderr, "dbg5     coordUnits:                  %d\n", ss->coordUnits);
+			fprintf(stderr, "dbg5     annotation:                  %s\n", ss->annotation);
+			fprintf(stderr, "dbg5     samples:                     %d\n", ss->samples);
+			fprintf(stderr, "dbg5     sampleInterval:              %d\n", ss->sampleInterval);
+			fprintf(stderr, "dbg5     ADCGain:                     %d\n", ss->ADCGain);
+			fprintf(stderr, "dbg5     pulsePower:                  %d\n", ss->pulsePower);
+			fprintf(stderr, "dbg5     reserved6:                   %d\n", ss->reserved6);
+			fprintf(stderr, "dbg5     startFreq:                   %d\n", ss->startFreq);
+			fprintf(stderr, "dbg5     endFreq:                     %d\n", ss->endFreq);
+			fprintf(stderr, "dbg5     sweepLength:                 %d\n", ss->sweepLength);
+			fprintf(stderr, "dbg5     pressure:                    %d\n", ss->pressure);
+			fprintf(stderr, "dbg5     sonarDepth:                  %d\n", ss->sonarDepth);
+			fprintf(stderr, "dbg5     sampleFreq:                  %d\n", ss->sampleFreq);
+			fprintf(stderr, "dbg5     pulseID:                     %d\n", ss->pulseID);
+			fprintf(stderr, "dbg5     sonarAltitude:               %d\n", ss->sonarAltitude);
+			fprintf(stderr, "dbg5     soundspeed:                  %f\n", ss->soundspeed);
+			fprintf(stderr, "dbg5     mixerFrequency:              %f\n", ss->mixerFrequency);
+			fprintf(stderr, "dbg5     year:                        %d\n", ss->year);
+			fprintf(stderr, "dbg5     day:                         %d\n", ss->day);
+			fprintf(stderr, "dbg5     hour:                        %d\n", ss->hour);
+			fprintf(stderr, "dbg5     minute:                      %d\n", ss->minute);
+			fprintf(stderr, "dbg5     second:                      %d\n", ss->second);
+			fprintf(stderr, "dbg5     timeBasis:                   %d\n", ss->timeBasis);
+			fprintf(stderr, "dbg5     weightingFactor:             %d\n", ss->weightingFactor);
+			fprintf(stderr, "dbg5     numberPulses:                %d\n", ss->numberPulses);
+			fprintf(stderr, "dbg5     heading:                     %d\n", ss->heading);
+			fprintf(stderr, "dbg5     pitch:                       %d\n", ss->pitch);
+			fprintf(stderr, "dbg5     roll:                        %d\n", ss->roll);
+			fprintf(stderr, "dbg5     reserved8:                   %d\n", ss->reserved8);
+			fprintf(stderr, "dbg5     reserved9:                   %d\n", ss->reserved9);
+			fprintf(stderr, "dbg5     triggerSource:               %d\n", ss->triggerSource);
+			fprintf(stderr, "dbg5     markNumber:                  %d\n", ss->markNumber);
+			fprintf(stderr, "dbg5     NMEAHour:                    %d\n", ss->NMEAHour);
+			fprintf(stderr, "dbg5     NMEAMinutes:                 %d\n", ss->NMEAMinutes);
+			fprintf(stderr, "dbg5     NMEASeconds:                 %d\n", ss->NMEASeconds);
+			fprintf(stderr, "dbg5     NMEACourse:                  %d\n", ss->NMEACourse);
+			fprintf(stderr, "dbg5     NMEASpeed:                   %d\n", ss->NMEASpeed);
+			fprintf(stderr, "dbg5     NMEADay:                     %d\n", ss->NMEADay);
+			fprintf(stderr, "dbg5     NMEAYear:                    %d\n", ss->NMEAYear);
+			fprintf(stderr, "dbg5     millisecondsToday:           %d\n", ss->millisecondsToday);
+			fprintf(stderr, "dbg5     ADCMax:                      %d\n", ss->ADCMax);
+			fprintf(stderr, "dbg5     reserved10:                  %d\n", ss->reserved10);
+			fprintf(stderr, "dbg5     reserved10:                  %d\n", ss->reserved11);
+			fprintf(stderr, "dbg5     softwareVersion:             %s\n", ss->softwareVersion);
+			fprintf(stderr, "dbg5     sphericalCorrection:         %d\n", ss->sphericalCorrection);
+			fprintf(stderr, "dbg5     packetNum:                   %d\n", ss->packetNum);
+			fprintf(stderr, "dbg5     ADCDecimation:               %d\n", ss->ADCDecimation);
+			fprintf(stderr, "dbg5     reserved12:                  %d\n", ss->reserved12);
+			fprintf(stderr, "dbg5     temperature:                 %d\n", ss->temperature);
+			fprintf(stderr, "dbg5     layback:                     %f\n", ss->layback);
+			fprintf(stderr, "dbg5     reserved13:                  %d\n", ss->reserved13);
+			fprintf(stderr, "dbg5     cableOut:                    %d\n", ss->cableOut);
+			fprintf(stderr, "dbg5     reserved14:                  %d\n", ss->reserved14);
+			if (ss->dataFormat == 1) {
+				for (int i = 0; i < ss->samples; i++)
+					fprintf(stderr, "dbg5     Channel 0[%d]: %10d %10d\n", i, ss->trace[2 * i], ss->trace[2 * i + 1]);
+			}
+			else {
+				for (int i = 0; i < ss->samples; i++)
+					fprintf(stderr, "dbg5     Channel 0[%d]: %10d\n", i, ss->trace[i]);
+			}
+
+			ss = (struct mbsys_jstar_channel_struct *)&(store->ssstbd);
+			fprintf(stderr, "\ndbg5  Channel 1 (Starboard):\n");
+			fprintf(stderr, "dbg5     start_marker:                %d\n", ss->message.start_marker);
+			fprintf(stderr, "dbg5     version:                     %d\n", ss->message.version);
+			fprintf(stderr, "dbg5     session:                     %d\n", ss->message.session);
+			fprintf(stderr, "dbg5     type:                        %d\n", ss->message.type);
+			fprintf(stderr, "dbg5     command:                     %d\n", ss->message.command);
+			fprintf(stderr, "dbg5     subsystem:                   %d\n", ss->message.subsystem);
+			fprintf(stderr, "dbg5     channel:                     %d\n", ss->message.channel);
+			fprintf(stderr, "dbg5     sequence:                    %d\n", ss->message.sequence);
+			fprintf(stderr, "dbg5     reserved:                    %d\n", ss->message.reserved);
+			fprintf(stderr, "dbg5     size:                        %d\n", ss->message.size);
+
+			fprintf(stderr, "dbg5     pingTime:                    %d\n", ss->pingTime);
+			fprintf(stderr, "dbg5     startDepth:                  %d\n", ss->startDepth);
+			fprintf(stderr, "dbg5     pingNum:                     %d\n", ss->pingNum);
+			for (int i = 0; i < 2; i++)
+	            fprintf(stderr, "dbg5     reserved1[%d]:               %d\n", i, ss->reserved1[i]);
+			fprintf(stderr, "dbg5     msb:                         %d\n", ss->msb);
+			fprintf(stderr, "dbg5     lsb1:                        %d\n", ss->lsb1);
+			fprintf(stderr, "dbg5     lsb2:                        %d\n", ss->lsb2);
+			for (int i = 0; i < 3; i++)
+	            fprintf(stderr, "dbg5     reserved2[%d]:               %d\n", i, ss->reserved2[i]);
+			fprintf(stderr, "dbg5     validityFlag:                %d\n", ss->validityFlag);
+			fprintf(stderr, "dbg5     reserved3:                   %d\n", ss->reserved3);
+			fprintf(stderr, "dbg5     dataFormat:                  %d\n", ss->dataFormat);
+			fprintf(stderr, "dbg5     NMEAantennaeR:               %d\n", ss->NMEAantennaeR);
+			fprintf(stderr, "dbg5     NMEAantennaeO:               %d\n", ss->NMEAantennaeO);
+			for (int i = 0; i < 2; i++)
+				fprintf(stderr, "dbg5     reserved4[%d]:               %d\n", i, ss->reserved4[i]);
+			fprintf(stderr, "dbg5     kmOfPipe:                    %f\n", ss->kmOfPipe);
+			for (int i = 0; i < 16; i++)
+				fprintf(stderr, "dbg5     reserved5[%d]:               %d\n", i, ss->reserved5[i]);
+			fprintf(stderr, "dbg5     coordX:                      %d\n", ss->coordX);
+			fprintf(stderr, "dbg5     coordY:                      %d\n", ss->coordY);
+			fprintf(stderr, "dbg5     coordUnits:                  %d\n", ss->coordUnits);
+			fprintf(stderr, "dbg5     annotation:                  %s\n", ss->annotation);
+			fprintf(stderr, "dbg5     samples:                     %d\n", ss->samples);
+			fprintf(stderr, "dbg5     sampleInterval:              %d\n", ss->sampleInterval);
+			fprintf(stderr, "dbg5     ADCGain:                     %d\n", ss->ADCGain);
+			fprintf(stderr, "dbg5     pulsePower:                  %d\n", ss->pulsePower);
+			fprintf(stderr, "dbg5     reserved6:                   %d\n", ss->reserved6);
+			fprintf(stderr, "dbg5     startFreq:                   %d\n", ss->startFreq);
+			fprintf(stderr, "dbg5     endFreq:                     %d\n", ss->endFreq);
+			fprintf(stderr, "dbg5     sweepLength:                 %d\n", ss->sweepLength);
+			fprintf(stderr, "dbg5     pressure:                    %d\n", ss->pressure);
+			fprintf(stderr, "dbg5     sonarDepth:                  %d\n", ss->sonarDepth);
+			fprintf(stderr, "dbg5     sampleFreq:                  %d\n", ss->sampleFreq);
+			fprintf(stderr, "dbg5     pulseID:                     %d\n", ss->pulseID);
+			fprintf(stderr, "dbg5     sonarAltitude:               %d\n", ss->sonarAltitude);
+			fprintf(stderr, "dbg5     soundspeed:                  %f\n", ss->soundspeed);
+			fprintf(stderr, "dbg5     mixerFrequency:              %f\n", ss->mixerFrequency);
+			fprintf(stderr, "dbg5     year:                        %d\n", ss->year);
+			fprintf(stderr, "dbg5     day:                         %d\n", ss->day);
+			fprintf(stderr, "dbg5     hour:                        %d\n", ss->hour);
+			fprintf(stderr, "dbg5     minute:                      %d\n", ss->minute);
+			fprintf(stderr, "dbg5     second:                      %d\n", ss->second);
+			fprintf(stderr, "dbg5     timeBasis:                   %d\n", ss->timeBasis);
+			fprintf(stderr, "dbg5     weightingFactor:             %d\n", ss->weightingFactor);
+			fprintf(stderr, "dbg5     numberPulses:                %d\n", ss->numberPulses);
+			fprintf(stderr, "dbg5     heading:                     %d\n", ss->heading);
+			fprintf(stderr, "dbg5     pitch:                       %d\n", ss->pitch);
+			fprintf(stderr, "dbg5     roll:                        %d\n", ss->roll);
+			fprintf(stderr, "dbg5     reserved8:                   %d\n", ss->reserved8);
+			fprintf(stderr, "dbg5     reserved9:                   %d\n", ss->reserved9);
+			fprintf(stderr, "dbg5     triggerSource:               %d\n", ss->triggerSource);
+			fprintf(stderr, "dbg5     markNumber:                  %d\n", ss->markNumber);
+			fprintf(stderr, "dbg5     NMEAHour:                    %d\n", ss->NMEAHour);
+			fprintf(stderr, "dbg5     NMEAMinutes:                 %d\n", ss->NMEAMinutes);
+			fprintf(stderr, "dbg5     NMEASeconds:                 %d\n", ss->NMEASeconds);
+			fprintf(stderr, "dbg5     NMEACourse:                  %d\n", ss->NMEACourse);
+			fprintf(stderr, "dbg5     NMEASpeed:                   %d\n", ss->NMEASpeed);
+			fprintf(stderr, "dbg5     NMEADay:                     %d\n", ss->NMEADay);
+			fprintf(stderr, "dbg5     NMEAYear:                    %d\n", ss->NMEAYear);
+			fprintf(stderr, "dbg5     millisecondsToday:           %d\n", ss->millisecondsToday);
+			fprintf(stderr, "dbg5     ADCMax:                      %d\n", ss->ADCMax);
+			fprintf(stderr, "dbg5     reserved10:                  %d\n", ss->reserved10);
+			fprintf(stderr, "dbg5     reserved10:                  %d\n", ss->reserved11);
+			fprintf(stderr, "dbg5     softwareVersion:             %s\n", ss->softwareVersion);
+			fprintf(stderr, "dbg5     sphericalCorrection:         %d\n", ss->sphericalCorrection);
+			fprintf(stderr, "dbg5     packetNum:                   %d\n", ss->packetNum);
+			fprintf(stderr, "dbg5     ADCDecimation:               %d\n", ss->ADCDecimation);
+			fprintf(stderr, "dbg5     reserved12:                  %d\n", ss->reserved12);
+			fprintf(stderr, "dbg5     temperature:                 %d\n", ss->temperature);
+			fprintf(stderr, "dbg5     layback:                     %f\n", ss->layback);
+			fprintf(stderr, "dbg5     reserved13:                  %d\n", ss->reserved13);
+			fprintf(stderr, "dbg5     cableOut:                    %d\n", ss->cableOut);
+			fprintf(stderr, "dbg5     reserved14:                  %d\n", ss->reserved14);
+			if (ss->dataFormat == 1) {
+				for (int i = 0; i < ss->samples; i++)
+					fprintf(stderr, "dbg5     Channel 1[%d]: %10d %10d\n", i, ss->trace[2 * i], ss->trace[2 * i + 1]);
+			}
+			else {
+				for (int i = 0; i < ss->samples; i++)
+					fprintf(stderr, "dbg5     Channel 1[%d]: %10d\n", i, ss->trace[i]);
+			}
 		}
-		else {
-			for (int i = 0; i < ss->samples; i++)
-				fprintf(stderr, "dbg5     Channel 0[%d]: %10d\n", i, ss->trace[i]);
+		else if (status == MB_SUCCESS && store->kind == MB_DATA_ATTITUDE) {
+			fprintf(stderr, "\ndbg5  New roll pitch data record read by MBIO function <%s>\n", __func__);
+			fprintf(stderr, "dbg5  Subsystem ID:\n");
+			fprintf(stderr, "dbg5       subsystem:        %d ", store->subsystem);
+			if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSLOW)
+				fprintf(stderr, "(75 or 120 kHz sidescan)\n");
+			else if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSHIGH)
+				fprintf(stderr, "(410 kHz sidescan)\n");
+
+			pitchroll = (struct mbsys_jstar_pitchroll_struct *)&(store->pitchroll);
+			fprintf(stderr, "\ndbg5  Roll and Pitch:\n");
+			fprintf(stderr, "dbg5     start_marker:                %d\n", pitchroll->message.start_marker);
+			fprintf(stderr, "dbg5     version:                     %d\n", pitchroll->message.version);
+			fprintf(stderr, "dbg5     session:                     %d\n", pitchroll->message.session);
+			fprintf(stderr, "dbg5     type:                        %d\n", pitchroll->message.type);
+			fprintf(stderr, "dbg5     command:                     %d\n", pitchroll->message.command);
+			fprintf(stderr, "dbg5     subsystem:                   %d\n", pitchroll->message.subsystem);
+			fprintf(stderr, "dbg5     channel:                     %d\n", pitchroll->message.channel);
+			fprintf(stderr, "dbg5     sequence:                    %d\n", pitchroll->message.sequence);
+			fprintf(stderr, "dbg5     reserved:                    %d\n", pitchroll->message.reserved);
+			fprintf(stderr, "dbg5     size:                        %d\n", pitchroll->message.size);
+
+			fprintf(stderr, "dbg5     seconds:                     %d\n", pitchroll->seconds);
+			fprintf(stderr, "dbg5     milliseconds:                %d\n", pitchroll->milliseconds);
+			fprintf(stderr, "dbg5     reserve1[0]:                 %d\n", pitchroll->reserve1[0]);
+			fprintf(stderr, "dbg5     reserve1[1]:                 %d\n", pitchroll->reserve1[1]);
+			fprintf(stderr, "dbg5     reserve1[2]:                 %d\n", pitchroll->reserve1[2]);
+			fprintf(stderr, "dbg5     reserve1[3]:                 %d\n", pitchroll->reserve1[3]);
+			fprintf(stderr, "dbg5     accelerationx:               %d\n", pitchroll->accelerationx);
+			fprintf(stderr, "dbg5     accelerationy:               %d\n", pitchroll->accelerationy);
+			fprintf(stderr, "dbg5     accelerationz:               %d\n", pitchroll->accelerationz);
+			fprintf(stderr, "dbg5     gyroratex:                   %d\n", pitchroll->gyroratex);
+			fprintf(stderr, "dbg5     gyroratey:                   %d\n", pitchroll->gyroratey);
+			fprintf(stderr, "dbg5     gyroratez:                   %d\n", pitchroll->gyroratez);
+			fprintf(stderr, "dbg5     pitch:                       %d\n", pitchroll->pitch);
+			fprintf(stderr, "dbg5     roll:                        %d\n", pitchroll->roll);
+			fprintf(stderr, "dbg5     temperature:                 %d\n", pitchroll->temperature);
+			fprintf(stderr, "dbg5     deviceinfo:                  %d\n", pitchroll->deviceinfo);
+			fprintf(stderr, "dbg5     heave:                       %d\n", pitchroll->heave);
+			fprintf(stderr, "dbg5     heading:                     %d\n", pitchroll->heading);
+			fprintf(stderr, "dbg5     datavalidflags:              %d\n", pitchroll->datavalidflags);
+			fprintf(stderr, "dbg5     reserve2:                    %d\n", pitchroll->reserve2);
 		}
+		else if (status == MB_SUCCESS && store->kind == MB_DATA_DVL) {
+			fprintf(stderr, "\ndbg5  New dvl data record read by MBIO function <%s>\n", __func__);
+			fprintf(stderr, "dbg5  Subsystem ID:\n");
+			fprintf(stderr, "dbg5       subsystem:        %d ", store->subsystem);
+			if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSLOW)
+				fprintf(stderr, "(75 or 120 kHz sidescan)\n");
+			else if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSHIGH)
+				fprintf(stderr, "(410 kHz sidescan)\n");
 
-		ss = (struct mbsys_jstar_channel_struct *)&(store->ssstbd);
-		fprintf(stderr, "\ndbg5  Channel 1 (Starboard):\n");
-		fprintf(stderr, "dbg5     start_marker:                %d\n", ss->message.start_marker);
-		fprintf(stderr, "dbg5     version:                     %d\n", ss->message.version);
-		fprintf(stderr, "dbg5     session:                     %d\n", ss->message.session);
-		fprintf(stderr, "dbg5     type:                        %d\n", ss->message.type);
-		fprintf(stderr, "dbg5     command:                     %d\n", ss->message.command);
-		fprintf(stderr, "dbg5     subsystem:                   %d\n", ss->message.subsystem);
-		fprintf(stderr, "dbg5     channel:                     %d\n", ss->message.channel);
-		fprintf(stderr, "dbg5     sequence:                    %d\n", ss->message.sequence);
-		fprintf(stderr, "dbg5     reserved:                    %d\n", ss->message.reserved);
-		fprintf(stderr, "dbg5     size:                        %d\n", ss->message.size);
+			dvl = (struct mbsys_jstar_dvl_struct *)&(store->dvl);
+			fprintf(stderr, "\ndbg5  Roll and Pitch:\n");
+			fprintf(stderr, "dbg5     start_marker:                %d\n", dvl->message.start_marker);
+			fprintf(stderr, "dbg5     version:                     %d\n", dvl->message.version);
+			fprintf(stderr, "dbg5     session:                     %d\n", dvl->message.session);
+			fprintf(stderr, "dbg5     type:                        %d\n", dvl->message.type);
+			fprintf(stderr, "dbg5     command:                     %d\n", dvl->message.command);
+			fprintf(stderr, "dbg5     subsystem:                   %d\n", dvl->message.subsystem);
+			fprintf(stderr, "dbg5     channel:                     %d\n", dvl->message.channel);
+			fprintf(stderr, "dbg5     sequence:                    %d\n", dvl->message.sequence);
+			fprintf(stderr, "dbg5     reserved:                    %d\n", dvl->message.reserved);
+			fprintf(stderr, "dbg5     size:                        %d\n", dvl->message.size);
 
-		fprintf(stderr, "dbg5     pingTime:                    %d\n", ss->pingTime);
-		fprintf(stderr, "dbg5     startDepth:                  %d\n", ss->startDepth);
-		fprintf(stderr, "dbg5     pingNum:                     %d\n", ss->pingNum);
-		for (int i = 0; i < 2; i++)
-            fprintf(stderr, "dbg5     reserved1[%d]:               %d\n", i, ss->reserved1[i]);
-		fprintf(stderr, "dbg5     msb:                         %d\n", ss->msb);
-		fprintf(stderr, "dbg5     lsb1:                        %d\n", ss->lsb1);
-		fprintf(stderr, "dbg5     lsb2:                        %d\n", ss->lsb2);
-		for (int i = 0; i < 3; i++)
-            fprintf(stderr, "dbg5     reserved2[%d]:               %d\n", i, ss->reserved2[i]);
-		fprintf(stderr, "dbg5     validityFlag:                %d\n", ss->validityFlag);
-		fprintf(stderr, "dbg5     reserved3:                   %d\n", ss->reserved3);
-		fprintf(stderr, "dbg5     dataFormat:                  %d\n", ss->dataFormat);
-		fprintf(stderr, "dbg5     NMEAantennaeR:               %d\n", ss->NMEAantennaeR);
-		fprintf(stderr, "dbg5     NMEAantennaeO:               %d\n", ss->NMEAantennaeO);
-		for (int i = 0; i < 2; i++)
-			fprintf(stderr, "dbg5     reserved4[%d]:               %d\n", i, ss->reserved4[i]);
-		fprintf(stderr, "dbg5     kmOfPipe:                    %f\n", ss->kmOfPipe);
-		for (int i = 0; i < 16; i++)
-			fprintf(stderr, "dbg5     reserved5[%d]:               %d\n", i, ss->reserved5[i]);
-		fprintf(stderr, "dbg5     coordX:                      %d\n", ss->coordX);
-		fprintf(stderr, "dbg5     coordY:                      %d\n", ss->coordY);
-		fprintf(stderr, "dbg5     coordUnits:                  %d\n", ss->coordUnits);
-		fprintf(stderr, "dbg5     annotation:                  %s\n", ss->annotation);
-		fprintf(stderr, "dbg5     samples:                     %d\n", ss->samples);
-		fprintf(stderr, "dbg5     sampleInterval:              %d\n", ss->sampleInterval);
-		fprintf(stderr, "dbg5     ADCGain:                     %d\n", ss->ADCGain);
-		fprintf(stderr, "dbg5     pulsePower:                  %d\n", ss->pulsePower);
-		fprintf(stderr, "dbg5     reserved6:                   %d\n", ss->reserved6);
-		fprintf(stderr, "dbg5     startFreq:                   %d\n", ss->startFreq);
-		fprintf(stderr, "dbg5     endFreq:                     %d\n", ss->endFreq);
-		fprintf(stderr, "dbg5     sweepLength:                 %d\n", ss->sweepLength);
-		fprintf(stderr, "dbg5     pressure:                    %d\n", ss->pressure);
-		fprintf(stderr, "dbg5     sonarDepth:                  %d\n", ss->sonarDepth);
-		fprintf(stderr, "dbg5     sampleFreq:                  %d\n", ss->sampleFreq);
-		fprintf(stderr, "dbg5     pulseID:                     %d\n", ss->pulseID);
-		fprintf(stderr, "dbg5     sonarAltitude:               %d\n", ss->sonarAltitude);
-		fprintf(stderr, "dbg5     soundspeed:                  %f\n", ss->soundspeed);
-		fprintf(stderr, "dbg5     mixerFrequency:              %f\n", ss->mixerFrequency);
-		fprintf(stderr, "dbg5     year:                        %d\n", ss->year);
-		fprintf(stderr, "dbg5     day:                         %d\n", ss->day);
-		fprintf(stderr, "dbg5     hour:                        %d\n", ss->hour);
-		fprintf(stderr, "dbg5     minute:                      %d\n", ss->minute);
-		fprintf(stderr, "dbg5     second:                      %d\n", ss->second);
-		fprintf(stderr, "dbg5     timeBasis:                   %d\n", ss->timeBasis);
-		fprintf(stderr, "dbg5     weightingFactor:             %d\n", ss->weightingFactor);
-		fprintf(stderr, "dbg5     numberPulses:                %d\n", ss->numberPulses);
-		fprintf(stderr, "dbg5     heading:                     %d\n", ss->heading);
-		fprintf(stderr, "dbg5     pitch:                       %d\n", ss->pitch);
-		fprintf(stderr, "dbg5     roll:                        %d\n", ss->roll);
-		fprintf(stderr, "dbg5     reserved8:                   %d\n", ss->reserved8);
-		fprintf(stderr, "dbg5     reserved9:                   %d\n", ss->reserved9);
-		fprintf(stderr, "dbg5     triggerSource:               %d\n", ss->triggerSource);
-		fprintf(stderr, "dbg5     markNumber:                  %d\n", ss->markNumber);
-		fprintf(stderr, "dbg5     NMEAHour:                    %d\n", ss->NMEAHour);
-		fprintf(stderr, "dbg5     NMEAMinutes:                 %d\n", ss->NMEAMinutes);
-		fprintf(stderr, "dbg5     NMEASeconds:                 %d\n", ss->NMEASeconds);
-		fprintf(stderr, "dbg5     NMEACourse:                  %d\n", ss->NMEACourse);
-		fprintf(stderr, "dbg5     NMEASpeed:                   %d\n", ss->NMEASpeed);
-		fprintf(stderr, "dbg5     NMEADay:                     %d\n", ss->NMEADay);
-		fprintf(stderr, "dbg5     NMEAYear:                    %d\n", ss->NMEAYear);
-		fprintf(stderr, "dbg5     millisecondsToday:           %d\n", ss->millisecondsToday);
-		fprintf(stderr, "dbg5     ADCMax:                      %d\n", ss->ADCMax);
-		fprintf(stderr, "dbg5     reserved10:                  %d\n", ss->reserved10);
-		fprintf(stderr, "dbg5     reserved10:                  %d\n", ss->reserved11);
-		fprintf(stderr, "dbg5     softwareVersion:             %s\n", ss->softwareVersion);
-		fprintf(stderr, "dbg5     sphericalCorrection:         %d\n", ss->sphericalCorrection);
-		fprintf(stderr, "dbg5     packetNum:                   %d\n", ss->packetNum);
-		fprintf(stderr, "dbg5     ADCDecimation:               %d\n", ss->ADCDecimation);
-		fprintf(stderr, "dbg5     reserved12:                  %d\n", ss->reserved12);
-		fprintf(stderr, "dbg5     temperature:                 %d\n", ss->temperature);
-		fprintf(stderr, "dbg5     layback:                     %f\n", ss->layback);
-		fprintf(stderr, "dbg5     reserved13:                  %d\n", ss->reserved13);
-		fprintf(stderr, "dbg5     cableOut:                    %d\n", ss->cableOut);
-		fprintf(stderr, "dbg5     reserved14:                  %d\n", ss->reserved14);
-		if (ss->dataFormat == 1) {
-			for (int i = 0; i < ss->samples; i++)
-				fprintf(stderr, "dbg5     Channel 1[%d]: %10d %10d\n", i, ss->trace[2 * i], ss->trace[2 * i + 1]);
+			fprintf(stderr, "dbg5     seconds:                     %d\n", dvl->seconds);
+			fprintf(stderr, "dbg5     milliseconds:                %d\n", dvl->milliseconds);
+			fprintf(stderr, "dbg5     reserve1[0]:                 %d\n", dvl->reserve1[0]);
+			fprintf(stderr, "dbg5     reserve1[1]:                 %d\n", dvl->reserve1[1]);
+			fprintf(stderr, "dbg5     reserve1[2]:                 %d\n", dvl->reserve1[2]);
+			fprintf(stderr, "dbg5     reserve1[3]:                 %d\n", dvl->reserve1[3]);
+			fprintf(stderr, "dbg5     datavalidflags:              %d\n", dvl->datavalidflags);
+			fprintf(stderr, "dbg5     beam1range:                  %d\n", dvl->beam1range);
+			fprintf(stderr, "dbg5     beam2range:                  %d\n", dvl->beam2range);
+			fprintf(stderr, "dbg5     beam3range:                  %d\n", dvl->beam3range);
+			fprintf(stderr, "dbg5     beam4range:                  %d\n", dvl->beam4range);
+			fprintf(stderr, "dbg5     velocitybottomx:             %d\n", dvl->velocitybottomx);
+			fprintf(stderr, "dbg5     velocitybottomy:             %d\n", dvl->velocitybottomy);
+			fprintf(stderr, "dbg5     velocitybottomz:             %d\n", dvl->velocitybottomz);
+			fprintf(stderr, "dbg5     velocitywaterx:              %d\n", dvl->velocitywaterx);
+			fprintf(stderr, "dbg5     velocitywatery:              %d\n", dvl->velocitywatery);
+			fprintf(stderr, "dbg5     velocitywaterz:              %d\n", dvl->velocitywaterz);
+			fprintf(stderr, "dbg5     depth:                       %d\n", dvl->depth);
+			fprintf(stderr, "dbg5     pitch:                       %d\n", dvl->pitch);
+			fprintf(stderr, "dbg5     roll:                        %d\n", dvl->roll);
+			fprintf(stderr, "dbg5     heading:                     %d\n", dvl->heading);
+			fprintf(stderr, "dbg5     salinity:                    %d\n", dvl->salinity);
+			fprintf(stderr, "dbg5     temperature:                 %d\n", dvl->temperature);
+			fprintf(stderr, "dbg5     soundspeed:                  %d\n", dvl->soundspeed);
+			for (int i = 0; i < 7; i++)
+				fprintf(stderr, "dbg5     reserve2[%d]:                %d\n", i, dvl->reserve2[i]);
 		}
-		else {
-			for (int i = 0; i < ss->samples; i++)
-				fprintf(stderr, "dbg5     Channel 1[%d]: %10d\n", i, ss->trace[i]);
+		else if (status == MB_SUCCESS && store->kind == MB_DATA_CTD) {
+			pressure = (struct mbsys_jstar_pressure_struct *)&(store->pressure);
+			fprintf(stderr, "\ndbg5  New pressure data record read by MBIO function <%s>\n", __func__);
+			fprintf(stderr, "dbg5     start_marker:                %d\n", pressure->message.start_marker);
+			fprintf(stderr, "dbg5     version:                     %d\n", pressure->message.version);
+			fprintf(stderr, "dbg5     session:                     %d\n", pressure->message.session);
+			fprintf(stderr, "dbg5     type:                        %d\n", pressure->message.type);
+			fprintf(stderr, "dbg5     command:                     %d\n", pressure->message.command);
+			fprintf(stderr, "dbg5     subsystem:                   %d\n", pressure->message.subsystem);
+			fprintf(stderr, "dbg5     channel:                     %d\n", pressure->message.channel);
+			fprintf(stderr, "dbg5     sequence:                    %d\n", pressure->message.sequence);
+			fprintf(stderr, "dbg5     reserved:                    %d\n", pressure->message.reserved);
+			fprintf(stderr, "dbg5     size:                        %d\n", pressure->message.size);
+
+			fprintf(stderr, "dbg5     seconds:                     %d\n", pressure->seconds);
+			fprintf(stderr, "dbg5     milliseconds:                %d\n", pressure->milliseconds);
+			fprintf(stderr, "dbg5     reserve1[0]:                 %d\n", pressure->reserve1[0]);
+			fprintf(stderr, "dbg5     reserve1[1]:                 %d\n", pressure->reserve1[1]);
+			fprintf(stderr, "dbg5     reserve1[2]:                 %d\n", pressure->reserve1[2]);
+			fprintf(stderr, "dbg5     reserve1[3]:                 %d\n", pressure->reserve1[3]);
+			fprintf(stderr, "dbg5     pressure:                    %d\n", pressure->pressure);
+			fprintf(stderr, "dbg5     salinity:                    %d\n", pressure->salinity);
+			fprintf(stderr, "dbg5     datavalidflags:              %d\n", pressure->datavalidflags);
+			fprintf(stderr, "dbg5     conductivity:                %d\n", pressure->conductivity);
+			fprintf(stderr, "dbg5     soundspeed:                  %d\n", pressure->soundspeed);
+			for (int i = 0; i < 10; i++)
+				fprintf(stderr, "dbg5     reserve2[%2d]:                 %d\n", i, pressure->reserve2[i]);
 		}
-	}
-	else if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_ATTITUDE) {
-		fprintf(stderr, "\ndbg5  New roll pitch data record read by MBIO function <%s>\n", __func__);
-		fprintf(stderr, "dbg5  Subsystem ID:\n");
-		fprintf(stderr, "dbg5       subsystem:        %d ", store->subsystem);
-		if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSLOW)
-			fprintf(stderr, "(75 or 120 kHz sidescan)\n");
-		else if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSHIGH)
-			fprintf(stderr, "(410 kHz sidescan)\n");
+		else if (status == MB_SUCCESS &&
+		         (store->kind == MB_DATA_NMEA_RMC || store->kind == MB_DATA_NMEA_DBT || store->kind == MB_DATA_NMEA_DPT)) {
+			nmea = (struct mbsys_jstar_nmea_struct *)&(store->nmea);
+			fprintf(stderr, "\ndbg5  New NMEA data record read by MBIO function <%s>\n", __func__);
+			fprintf(stderr, "dbg5     start_marker:                %d\n", nmea->message.start_marker);
+			fprintf(stderr, "dbg5     version:                     %d\n", nmea->message.version);
+			fprintf(stderr, "dbg5     session:                     %d\n", nmea->message.session);
+			fprintf(stderr, "dbg5     type:                        %d\n", nmea->message.type);
+			fprintf(stderr, "dbg5     command:                     %d\n", nmea->message.command);
+			fprintf(stderr, "dbg5     subsystem:                   %d\n", nmea->message.subsystem);
+			fprintf(stderr, "dbg5     channel:                     %d\n", nmea->message.channel);
+			fprintf(stderr, "dbg5     sequence:                    %d\n", nmea->message.sequence);
+			fprintf(stderr, "dbg5     reserved:                    %d\n", nmea->message.reserved);
+			fprintf(stderr, "dbg5     size:                        %d\n", nmea->message.size);
 
-		pitchroll = (struct mbsys_jstar_pitchroll_struct *)&(store->pitchroll);
-		fprintf(stderr, "\ndbg5  Roll and Pitch:\n");
-		fprintf(stderr, "dbg5     start_marker:                %d\n", pitchroll->message.start_marker);
-		fprintf(stderr, "dbg5     version:                     %d\n", pitchroll->message.version);
-		fprintf(stderr, "dbg5     session:                     %d\n", pitchroll->message.session);
-		fprintf(stderr, "dbg5     type:                        %d\n", pitchroll->message.type);
-		fprintf(stderr, "dbg5     command:                     %d\n", pitchroll->message.command);
-		fprintf(stderr, "dbg5     subsystem:                   %d\n", pitchroll->message.subsystem);
-		fprintf(stderr, "dbg5     channel:                     %d\n", pitchroll->message.channel);
-		fprintf(stderr, "dbg5     sequence:                    %d\n", pitchroll->message.sequence);
-		fprintf(stderr, "dbg5     reserved:                    %d\n", pitchroll->message.reserved);
-		fprintf(stderr, "dbg5     size:                        %d\n", pitchroll->message.size);
+			fprintf(stderr, "dbg5     seconds:                     %d\n", nmea->seconds);
+			fprintf(stderr, "dbg5     milliseconds:                %d\n", nmea->milliseconds);
+			fprintf(stderr, "dbg5     source:                      %d\n", nmea->source);
+			fprintf(stderr, "dbg5     reserve[0]:                  %d\n", nmea->reserve[0]);
+			fprintf(stderr, "dbg5     reserve[1]:                  %d\n", nmea->reserve[1]);
+			fprintf(stderr, "dbg5     reserve[2]:                  %d\n", nmea->reserve[2]);
+			fprintf(stderr, "dbg5     nmea:                        %s\n", nmea->nmea);
+		}
+		else if (status == MB_SUCCESS && (store->kind == MB_DATA_HEADER)) {
+			sysinfo = (struct mbsys_jstar_sysinfo_struct *)&(store->sysinfo);
+			fprintf(stderr, "\ndbg5  New sysinfo data record read by MBIO function <%s>\n", __func__);
+			fprintf(stderr, "dbg5     start_marker:                %d\n", sysinfo->message.start_marker);
+			fprintf(stderr, "dbg5     version:                     %d\n", sysinfo->message.version);
+			fprintf(stderr, "dbg5     session:                     %d\n", sysinfo->message.session);
+			fprintf(stderr, "dbg5     type:                        %d\n", sysinfo->message.type);
+			fprintf(stderr, "dbg5     command:                     %d\n", sysinfo->message.command);
+			fprintf(stderr, "dbg5     subsystem:                   %d\n", sysinfo->message.subsystem);
+			fprintf(stderr, "dbg5     channel:                     %d\n", sysinfo->message.channel);
+			fprintf(stderr, "dbg5     sequence:                    %d\n", sysinfo->message.sequence);
+			fprintf(stderr, "dbg5     reserved:                    %d\n", sysinfo->message.reserved);
+			fprintf(stderr, "dbg5     size:                        %d\n", sysinfo->message.size);
 
-		fprintf(stderr, "dbg5     seconds:                     %d\n", pitchroll->seconds);
-		fprintf(stderr, "dbg5     milliseconds:                %d\n", pitchroll->milliseconds);
-		fprintf(stderr, "dbg5     reserve1[0]:                 %d\n", pitchroll->reserve1[0]);
-		fprintf(stderr, "dbg5     reserve1[1]:                 %d\n", pitchroll->reserve1[1]);
-		fprintf(stderr, "dbg5     reserve1[2]:                 %d\n", pitchroll->reserve1[2]);
-		fprintf(stderr, "dbg5     reserve1[3]:                 %d\n", pitchroll->reserve1[3]);
-		fprintf(stderr, "dbg5     accelerationx:               %d\n", pitchroll->accelerationx);
-		fprintf(stderr, "dbg5     accelerationy:               %d\n", pitchroll->accelerationy);
-		fprintf(stderr, "dbg5     accelerationz:               %d\n", pitchroll->accelerationz);
-		fprintf(stderr, "dbg5     gyroratex:                   %d\n", pitchroll->gyroratex);
-		fprintf(stderr, "dbg5     gyroratey:                   %d\n", pitchroll->gyroratey);
-		fprintf(stderr, "dbg5     gyroratez:                   %d\n", pitchroll->gyroratez);
-		fprintf(stderr, "dbg5     pitch:                       %d\n", pitchroll->pitch);
-		fprintf(stderr, "dbg5     roll:                        %d\n", pitchroll->roll);
-		fprintf(stderr, "dbg5     temperature:                 %d\n", pitchroll->temperature);
-		fprintf(stderr, "dbg5     deviceinfo:                  %d\n", pitchroll->deviceinfo);
-		fprintf(stderr, "dbg5     heave:                       %d\n", pitchroll->heave);
-		fprintf(stderr, "dbg5     heading:                     %d\n", pitchroll->heading);
-		fprintf(stderr, "dbg5     datavalidflags:              %d\n", pitchroll->datavalidflags);
-		fprintf(stderr, "dbg5     reserve2:                    %d\n", pitchroll->reserve2);
-	}
-	else if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_DVL) {
-		fprintf(stderr, "\ndbg5  New dvl data record read by MBIO function <%s>\n", __func__);
-		fprintf(stderr, "dbg5  Subsystem ID:\n");
-		fprintf(stderr, "dbg5       subsystem:        %d ", store->subsystem);
-		if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSLOW)
-			fprintf(stderr, "(75 or 120 kHz sidescan)\n");
-		else if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSHIGH)
-			fprintf(stderr, "(410 kHz sidescan)\n");
-
-		dvl = (struct mbsys_jstar_dvl_struct *)&(store->dvl);
-		fprintf(stderr, "\ndbg5  Roll and Pitch:\n");
-		fprintf(stderr, "dbg5     start_marker:                %d\n", dvl->message.start_marker);
-		fprintf(stderr, "dbg5     version:                     %d\n", dvl->message.version);
-		fprintf(stderr, "dbg5     session:                     %d\n", dvl->message.session);
-		fprintf(stderr, "dbg5     type:                        %d\n", dvl->message.type);
-		fprintf(stderr, "dbg5     command:                     %d\n", dvl->message.command);
-		fprintf(stderr, "dbg5     subsystem:                   %d\n", dvl->message.subsystem);
-		fprintf(stderr, "dbg5     channel:                     %d\n", dvl->message.channel);
-		fprintf(stderr, "dbg5     sequence:                    %d\n", dvl->message.sequence);
-		fprintf(stderr, "dbg5     reserved:                    %d\n", dvl->message.reserved);
-		fprintf(stderr, "dbg5     size:                        %d\n", dvl->message.size);
-
-		fprintf(stderr, "dbg5     seconds:                     %d\n", dvl->seconds);
-		fprintf(stderr, "dbg5     milliseconds:                %d\n", dvl->milliseconds);
-		fprintf(stderr, "dbg5     reserve1[0]:                 %d\n", dvl->reserve1[0]);
-		fprintf(stderr, "dbg5     reserve1[1]:                 %d\n", dvl->reserve1[1]);
-		fprintf(stderr, "dbg5     reserve1[2]:                 %d\n", dvl->reserve1[2]);
-		fprintf(stderr, "dbg5     reserve1[3]:                 %d\n", dvl->reserve1[3]);
-		fprintf(stderr, "dbg5     datavalidflags:              %d\n", dvl->datavalidflags);
-		fprintf(stderr, "dbg5     beam1range:                  %d\n", dvl->beam1range);
-		fprintf(stderr, "dbg5     beam2range:                  %d\n", dvl->beam2range);
-		fprintf(stderr, "dbg5     beam3range:                  %d\n", dvl->beam3range);
-		fprintf(stderr, "dbg5     beam4range:                  %d\n", dvl->beam4range);
-		fprintf(stderr, "dbg5     velocitybottomx:             %d\n", dvl->velocitybottomx);
-		fprintf(stderr, "dbg5     velocitybottomy:             %d\n", dvl->velocitybottomy);
-		fprintf(stderr, "dbg5     velocitybottomz:             %d\n", dvl->velocitybottomz);
-		fprintf(stderr, "dbg5     velocitywaterx:              %d\n", dvl->velocitywaterx);
-		fprintf(stderr, "dbg5     velocitywatery:              %d\n", dvl->velocitywatery);
-		fprintf(stderr, "dbg5     velocitywaterz:              %d\n", dvl->velocitywaterz);
-		fprintf(stderr, "dbg5     depth:                       %d\n", dvl->depth);
-		fprintf(stderr, "dbg5     pitch:                       %d\n", dvl->pitch);
-		fprintf(stderr, "dbg5     roll:                        %d\n", dvl->roll);
-		fprintf(stderr, "dbg5     heading:                     %d\n", dvl->heading);
-		fprintf(stderr, "dbg5     salinity:                    %d\n", dvl->salinity);
-		fprintf(stderr, "dbg5     temperature:                 %d\n", dvl->temperature);
-		fprintf(stderr, "dbg5     soundspeed:                  %d\n", dvl->soundspeed);
-		for (int i = 0; i < 7; i++)
-			fprintf(stderr, "dbg5     reserve2[%d]:                %d\n", i, dvl->reserve2[i]);
-	}
-	else if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_CTD) {
-		pressure = (struct mbsys_jstar_pressure_struct *)&(store->pressure);
-		fprintf(stderr, "\ndbg5  New pressure data record read by MBIO function <%s>\n", __func__);
-		fprintf(stderr, "dbg5     start_marker:                %d\n", pressure->message.start_marker);
-		fprintf(stderr, "dbg5     version:                     %d\n", pressure->message.version);
-		fprintf(stderr, "dbg5     session:                     %d\n", pressure->message.session);
-		fprintf(stderr, "dbg5     type:                        %d\n", pressure->message.type);
-		fprintf(stderr, "dbg5     command:                     %d\n", pressure->message.command);
-		fprintf(stderr, "dbg5     subsystem:                   %d\n", pressure->message.subsystem);
-		fprintf(stderr, "dbg5     channel:                     %d\n", pressure->message.channel);
-		fprintf(stderr, "dbg5     sequence:                    %d\n", pressure->message.sequence);
-		fprintf(stderr, "dbg5     reserved:                    %d\n", pressure->message.reserved);
-		fprintf(stderr, "dbg5     size:                        %d\n", pressure->message.size);
-
-		fprintf(stderr, "dbg5     seconds:                     %d\n", pressure->seconds);
-		fprintf(stderr, "dbg5     milliseconds:                %d\n", pressure->milliseconds);
-		fprintf(stderr, "dbg5     reserve1[0]:                 %d\n", pressure->reserve1[0]);
-		fprintf(stderr, "dbg5     reserve1[1]:                 %d\n", pressure->reserve1[1]);
-		fprintf(stderr, "dbg5     reserve1[2]:                 %d\n", pressure->reserve1[2]);
-		fprintf(stderr, "dbg5     reserve1[3]:                 %d\n", pressure->reserve1[3]);
-		fprintf(stderr, "dbg5     pressure:                    %d\n", pressure->pressure);
-		fprintf(stderr, "dbg5     salinity:                    %d\n", pressure->salinity);
-		fprintf(stderr, "dbg5     datavalidflags:              %d\n", pressure->datavalidflags);
-		fprintf(stderr, "dbg5     conductivity:                %d\n", pressure->conductivity);
-		fprintf(stderr, "dbg5     soundspeed:                  %d\n", pressure->soundspeed);
-		for (int i = 0; i < 10; i++)
-			fprintf(stderr, "dbg5     reserve2[%2d]:                 %d\n", i, pressure->reserve2[i]);
-	}
-	else if (status == MB_SUCCESS && verbose >= 5 &&
-	         (store->kind == MB_DATA_NMEA_RMC || store->kind == MB_DATA_NMEA_DBT || store->kind == MB_DATA_NMEA_DPT)) {
-		nmea = (struct mbsys_jstar_nmea_struct *)&(store->nmea);
-		fprintf(stderr, "\ndbg5  New NMEA data record read by MBIO function <%s>\n", __func__);
-		fprintf(stderr, "dbg5     start_marker:                %d\n", nmea->message.start_marker);
-		fprintf(stderr, "dbg5     version:                     %d\n", nmea->message.version);
-		fprintf(stderr, "dbg5     session:                     %d\n", nmea->message.session);
-		fprintf(stderr, "dbg5     type:                        %d\n", nmea->message.type);
-		fprintf(stderr, "dbg5     command:                     %d\n", nmea->message.command);
-		fprintf(stderr, "dbg5     subsystem:                   %d\n", nmea->message.subsystem);
-		fprintf(stderr, "dbg5     channel:                     %d\n", nmea->message.channel);
-		fprintf(stderr, "dbg5     sequence:                    %d\n", nmea->message.sequence);
-		fprintf(stderr, "dbg5     reserved:                    %d\n", nmea->message.reserved);
-		fprintf(stderr, "dbg5     size:                        %d\n", nmea->message.size);
-
-		fprintf(stderr, "dbg5     seconds:                     %d\n", nmea->seconds);
-		fprintf(stderr, "dbg5     milliseconds:                %d\n", nmea->milliseconds);
-		fprintf(stderr, "dbg5     source:                      %d\n", nmea->source);
-		fprintf(stderr, "dbg5     reserve[0]:                  %d\n", nmea->reserve[0]);
-		fprintf(stderr, "dbg5     reserve[1]:                  %d\n", nmea->reserve[1]);
-		fprintf(stderr, "dbg5     reserve[2]:                  %d\n", nmea->reserve[2]);
-		fprintf(stderr, "dbg5     nmea:                        %s\n", nmea->nmea);
-	}
-	else if (status == MB_SUCCESS && verbose >= 5 && (store->kind == MB_DATA_HEADER)) {
-		sysinfo = (struct mbsys_jstar_sysinfo_struct *)&(store->sysinfo);
-		fprintf(stderr, "\ndbg5  New sysinfo data record read by MBIO function <%s>\n", __func__);
-		fprintf(stderr, "dbg5     start_marker:                %d\n", sysinfo->message.start_marker);
-		fprintf(stderr, "dbg5     version:                     %d\n", sysinfo->message.version);
-		fprintf(stderr, "dbg5     session:                     %d\n", sysinfo->message.session);
-		fprintf(stderr, "dbg5     type:                        %d\n", sysinfo->message.type);
-		fprintf(stderr, "dbg5     command:                     %d\n", sysinfo->message.command);
-		fprintf(stderr, "dbg5     subsystem:                   %d\n", sysinfo->message.subsystem);
-		fprintf(stderr, "dbg5     channel:                     %d\n", sysinfo->message.channel);
-		fprintf(stderr, "dbg5     sequence:                    %d\n", sysinfo->message.sequence);
-		fprintf(stderr, "dbg5     reserved:                    %d\n", sysinfo->message.reserved);
-		fprintf(stderr, "dbg5     size:                        %d\n", sysinfo->message.size);
-
-		fprintf(stderr, "dbg5     system_type:                 %d\n", sysinfo->system_type);
-		fprintf(stderr, "dbg5     reserved1:                   %d\n", sysinfo->reserved1);
-		fprintf(stderr, "dbg5     version:                     %d\n", sysinfo->version);
-		fprintf(stderr, "dbg5     reserved2:                   %d\n", sysinfo->reserved2);
-		fprintf(stderr, "dbg5     platformserialnumber:        %d\n", sysinfo->platformserialnumber);
-		fprintf(stderr, "dbg5     sysinfosize:                 %d\n", sysinfo->sysinfosize);
-		fprintf(stderr, "dbg5     sysinfo:                     \n%s\n", sysinfo->sysinfo);
+			fprintf(stderr, "dbg5     system_type:                 %d\n", sysinfo->system_type);
+			fprintf(stderr, "dbg5     reserved1:                   %d\n", sysinfo->reserved1);
+			fprintf(stderr, "dbg5     version:                     %d\n", sysinfo->version);
+			fprintf(stderr, "dbg5     reserved2:                   %d\n", sysinfo->reserved2);
+			fprintf(stderr, "dbg5     platformserialnumber:        %d\n", sysinfo->platformserialnumber);
+			fprintf(stderr, "dbg5     sysinfosize:                 %d\n", sysinfo->sysinfosize);
+			fprintf(stderr, "dbg5     sysinfo:                     \n%s\n", sysinfo->sysinfo);
+		}
 	}
 
 	if (verbose >= 2) {
