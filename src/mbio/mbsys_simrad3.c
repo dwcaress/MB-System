@@ -876,7 +876,7 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		fprintf(stderr, "dbg2       preprocess_pars_ptr:        %p\n", (void *)preprocess_pars_ptr);
 	}
 
-  *error = MB_ERROR_NO_ERROR;
+  	*error = MB_ERROR_NO_ERROR;
 
 	/* check for non-null data */
 	assert(mbio_ptr != NULL);
@@ -885,8 +885,8 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 	/* get mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-  /* get preprocessing parameters */
-  struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
+  	/* get preprocessing parameters */
+  	struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
 
 	/* get data structure pointers */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -922,22 +922,27 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 
 	int status = MB_SUCCESS;
 
-  /* if called with store_ptr == NULL then called after mb_read_init() but before
-      any data are read - for some formats this allows kluge options to set special
-      reading conditions/behaviors */
-  if (store_ptr == NULL) {
-		for (int i = 0; i < pars->n_kluge; i++)
+	/* if called with store_ptr == NULL then called after mb_read_init() but before
+	  any data are read - for some formats this allows kluge options to set special
+	  reading conditions/behaviors */
+	if (store_ptr == NULL) {
+		for (int i = 0; i < pars->n_kluge; i++){
 			if (pars->kluge_id[i] == MB_PR_KLUGE_IGNORESNIPPETS) {
-        bool *ignore_snippets = (bool *)&mb_io_ptr->save4;
-        *ignore_snippets = true;
-      }
-  }
+	    		bool *ignore_snippets = (bool *)&mb_io_ptr->save4;
+	    		*ignore_snippets = true;
+	  		}
+			if (pars->kluge_id[i] == MB_PR_KLUGE_AUVSENTRYSENSORDEPTH) {
+	    		bool *sensordepth_only = (bool *)&mb_io_ptr->save5;
+	    		*sensordepth_only = true;
+	  		}
+	  	}
+	}
 
 	/* deal with a survey record */
 	else if (store->kind == MB_DATA_DATA) {
 
-  	/* get data structure pointers */
-    struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
+  		/* get data structure pointers */
+    	struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 
 		/* depth sensor offsets - used in place of heave for underwater platforms */
 		int depthsensor_mode = MBSYS_SIMRAD3_ZMODE_UNKNOWN;
@@ -1058,130 +1063,134 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		/* get transducer offsets */
 		/*--------------------------------------------------------------*/
 		/* transmit and receive array offsets */
-		// double tx_x, tx_y, tx_z;
+		double tx_x, tx_y, tx_z;
 		double tx_h, tx_r, tx_p;
-		// double rx_x, rx_y, rx_z;
+		double rx_x, rx_y, rx_z;
 		double rx_h, rx_r, rx_p;
 
 		if (store->par_stc == 0) {
-			// tx_x = store->par_s1x;
-			// tx_y = store->par_s1y;
-			// tx_z = store->par_s1z;
+			tx_x = store->par_s1x;
+			tx_y = store->par_s1y;
+			tx_z = store->par_s1z;
 			tx_h = store->par_s1h;
 			tx_r = store->par_s1r;
 			tx_p = store->par_s1p;
-			// rx_x = store->par_s2x;
-			// rx_y = store->par_s2y;
-			// rx_z = store->par_s2z;
+			rx_x = store->par_s2x;
+			rx_y = store->par_s2y;
+			rx_z = store->par_s2z;
 			rx_h = store->par_s2h;
 			rx_r = store->par_s2r;
 			rx_p = store->par_s2p;
 		}
 		else if (store->par_stc == 1) {
-			// tx_x = store->par_s1x;
-			// tx_y = store->par_s1y;
-			// tx_z = store->par_s1z;
+			tx_x = store->par_s1x;
+			tx_y = store->par_s1y;
+			tx_z = store->par_s1z;
 			tx_h = store->par_s1h;
 			tx_r = store->par_s1r;
 			tx_p = store->par_s1p;
-			// rx_x = store->par_s1x;
-			// rx_y = store->par_s1y;
-			// rx_z = store->par_s1z;
+			rx_x = store->par_s1x;
+			rx_y = store->par_s1y;
+			rx_z = store->par_s1z;
 			rx_h = store->par_s1h;
 			rx_r = store->par_s1r;
 			rx_p = store->par_s1p;
 		}
 		else if (store->par_stc == 2 && ping->png_serial == store->par_serial_1) {
-			// tx_x = store->par_s1x;
-			// tx_y = store->par_s1y;
-			// tx_z = store->par_s1z;
+			tx_x = store->par_s1x;
+			tx_y = store->par_s1y;
+			tx_z = store->par_s1z;
 			tx_h = store->par_s1h;
 			tx_r = store->par_s1r;
 			tx_p = store->par_s1p;
-			// rx_x = store->par_s1x;
-			// rx_y = store->par_s1y;
-			// rx_z = store->par_s1z;
+			rx_x = store->par_s1x;
+			rx_y = store->par_s1y;
+			rx_z = store->par_s1z;
 			rx_h = store->par_s1h;
 			rx_r = store->par_s1r;
 			rx_p = store->par_s1p;
 		}
 		else if (store->par_stc == 2 && ping->png_serial == store->par_serial_2) {
-			// tx_x = store->par_s2x;
-			// tx_y = store->par_s2y;
-			// tx_z = store->par_s2z;
+			tx_x = store->par_s2x;
+			tx_y = store->par_s2y;
+			tx_z = store->par_s2z;
 			tx_h = store->par_s2h;
 			tx_r = store->par_s2r;
 			tx_p = store->par_s2p;
-			// rx_x = store->par_s2x;
-			// rx_y = store->par_s2y;
-			// rx_z = store->par_s2z;
+			rx_x = store->par_s2x;
+			rx_y = store->par_s2y;
+			rx_z = store->par_s2z;
 			rx_h = store->par_s2h;
 			rx_r = store->par_s2r;
 			rx_p = store->par_s2p;
 		}
 		else if (store->par_stc == 3 && ping->png_serial == store->par_serial_1) {
-			// tx_x = store->par_s1x;
-			// tx_y = store->par_s1y;
-			// tx_z = store->par_s1z;
+			tx_x = store->par_s1x;
+			tx_y = store->par_s1y;
+			tx_z = store->par_s1z;
 			tx_h = store->par_s1h;
 			tx_r = store->par_s1r;
 			tx_p = store->par_s1p;
-			// rx_x = store->par_s2x;
-			// rx_y = store->par_s2y;
-			// rx_z = store->par_s2z;
+			rx_x = store->par_s2x;
+			rx_y = store->par_s2y;
+			rx_z = store->par_s2z;
 			rx_h = store->par_s2h;
 			rx_r = store->par_s2r;
 			rx_p = store->par_s2p;
 		}
 		else if (store->par_stc == 3 && ping->png_serial == store->par_serial_2) {
-			// tx_x = store->par_s1x;
-			// tx_y = store->par_s1y;
-			// tx_z = store->par_s1z;
+			tx_x = store->par_s1x;
+			tx_y = store->par_s1y;
+			tx_z = store->par_s1z;
 			tx_h = store->par_s1h;
 			tx_r = store->par_s1r;
 			tx_p = store->par_s1p;
-			// rx_x = store->par_s3x;
-			// rx_y = store->par_s3y;
-			// rx_z = store->par_s3z;
+			rx_x = store->par_s3x;
+			rx_y = store->par_s3y;
+			rx_z = store->par_s3z;
 			rx_h = store->par_s3h;
 			rx_r = store->par_s3r;
 			rx_p = store->par_s3p;
 		}
 		else if (store->par_stc == 4 && ping->png_serial == store->par_serial_1) {
-			// tx_x = store->par_s0x;
-			// tx_y = store->par_s0y;
-			// tx_z = store->par_s0z;
+			tx_x = store->par_s0x;
+			tx_y = store->par_s0y;
+			tx_z = store->par_s0z;
 			tx_h = store->par_s0h;
 			tx_r = store->par_s0r;
 			tx_p = store->par_s0p;
-			// rx_x = store->par_s2x;
-			// rx_y = store->par_s2y;
-			// rx_z = store->par_s2z;
+			rx_x = store->par_s2x;
+			rx_y = store->par_s2y;
+			rx_z = store->par_s2z;
 			rx_h = store->par_s2h;
 			rx_r = store->par_s2r;
 			rx_p = store->par_s2p;
 		}
 		else if (store->par_stc == 4 && ping->png_serial == store->par_serial_2) {
-			// tx_x = store->par_s1x;
-			// tx_y = store->par_s1y;
-			// tx_z = store->par_s1z;
+			tx_x = store->par_s1x;
+			tx_y = store->par_s1y;
+			tx_z = store->par_s1z;
 			tx_h = store->par_s1h;
 			tx_r = store->par_s1r;
 			tx_p = store->par_s1p;
-			// rx_x = store->par_s3x;
-			// rx_y = store->par_s3y;
-			// rx_z = store->par_s3z;
+			rx_x = store->par_s3x;
+			rx_y = store->par_s3y;
+			rx_z = store->par_s3z;
 			rx_h = store->par_s3h;
 			rx_r = store->par_s3r;
 			rx_p = store->par_s3p;
 		}
 
-		/* insert sensordepth if requested */
-		// if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY) {
-			// ping->png_xducer_depth = sensordepth;
-		// } else {
-			// ping->png_xducer_depth = 0.5 * (tx_z + rx_z) - store->par_wlz + heave;
-		// }
+		/* insert sensordepth */
+		if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY) {
+			ping->png_xducer_depth = sensordepth;
+		} 
+		else if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_AND_HEAVE) {
+			ping->png_xducer_depth = sensordepth + heave;
+		}
+		else if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_HEAVE_ONLY) {
+			ping->png_xducer_depth = 0.5 * (tx_z + rx_z) - store->par_wlz + heave;
+		}
 
 		double transmit_heading, transmit_heave, transmit_roll, transmit_pitch;
 		double receive_heading, receive_heave, receive_roll, receive_pitch;
@@ -1323,7 +1332,6 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 				}
 				else if ((detection_mask & 15) == 3) {
 					ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
-					;
 				}
 				else if ((detection_mask & 15) == 4) {
 					ping->png_beamflag[i] = MB_FLAG_NULL;
@@ -1338,8 +1346,8 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 
 			/* check for NaN value */
 			if (isnan(ping->png_depth[i])
-          || isnan(ping->png_acrosstrack[i])
-          || isnan(ping->png_alongtrack[i])) {
+          		|| isnan(ping->png_acrosstrack[i])
+          		|| isnan(ping->png_alongtrack[i])) {
 				ping->png_beamflag[i] = MB_FLAG_NULL;
 			}
 		}
@@ -1349,10 +1357,10 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		swath_width = (double *)&mb_io_ptr->saved2;
 		ping->png_pixel_size = 0;
 		ping->png_pixels_ss = 0;
-    if (ping->png_ss_read)
-		  status = mbsys_simrad3_makess(verbose, mbio_ptr, store_ptr, false, pixel_size, false, swath_width, 1, error);
-    else
-      status = mbsys_simrad3_zero_ss(verbose, store_ptr, error);
+    	if (ping->png_ss_read)
+		  	status = mbsys_simrad3_makess(verbose, mbio_ptr, store_ptr, false, pixel_size, false, swath_width, 1, error);
+    	else
+      		status = mbsys_simrad3_zero_ss(verbose, store_ptr, error);
 	}
 
 	if (verbose >= 2) {
@@ -3919,7 +3927,7 @@ int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		bool ss_ok = true;
 		if (ping->png_nbeams < ping->png_nbeams_ss || ping->png_nbeams > ping->png_nbeams_ss + 1) {
 			ss_ok = false;
-			if (verbose > 0)
+			if (verbose > 0 && ping->png_nbeams_ss > 0)
 				fprintf(stderr,
 				        "%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan ignored: num bath beams != num ss beams: %d %d\n",
 				        __func__, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],

@@ -23,6 +23,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
 
+- Version 5.8.1beta08    March 10, 2024
 - Version 5.8.1beta07    February 24, 2024
 - Version 5.8.1beta04    February 16, 2024
 - Version 5.8.1beta03    February 8, 2024
@@ -31,6 +32,39 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.1beta08 (March 10, 2024)
+
+Mbm_grdplot: Added colortable 10, which runs from blue to red and can be used for
+plots of seismic reflection or subbottom profiler data when the trace signals are
+both positive or negative.
+
+SEGY format data: Changed MB-System SEGY traceheader to include a sensordepthtime 
+float value in bytes 216-219. This will be used to hold the two-way traveltime in
+seconds corresponding to the source depth assuming a 1500 m/sec water sound speed.
+This value can be used as a trace start delay time in plotting to account for the
+source location of subbottom profiler data collected from submerged platforms like
+AUVs and ROVs. The MB-System programs mbsegygrid and mbm_grdplot use the source 
+depth value in meters, but some external packages need the delay time.
+
+SEGY format data: MB-System now recognizes file suffixes *.sgy and *.SGY in addition
+to *.segy *.SEGY *.seg and *.SEG
+
+Mbsegyinfo: Fixed calculation and reporting of trace minimum and maximum values.
+
+Mbextractsegy: Now allows output of subbottom analytic data as well as envelope data.
+Use of the -S4 command will output three separate segy files, one with the envelope
+function, one with the subbottom correlate, and one with the correlate conjugant
+(i.e. the Hilbert transform of the correlate). The section plot script generated now
+will create plots of all three trace types.
+
+Mbpreprocess and mbprocess: Now support merging navigation and attitude from Schmidt
+Ocean Institute RVDAS format ROV navigation.
+
+Mbpreprocess and format MBF_EM710RAW (58): The command --kluge-auv-sentry-sensordepth 
+now works for format 58 files (3rd generation Kongsberg multibeam data in *.all files)
+such that available sensordepth values are embedded in the output format MBF_EM710MBA
+(59) files.
 
 #### 5.8.1beta07 (February 24, 2024)
 

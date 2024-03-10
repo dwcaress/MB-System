@@ -1920,7 +1920,7 @@ int mb_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr, int
     fprintf(stderr, "dbg2       dummy1:            %f\n", mb_segytraceheader_ptr->dummy1);
     fprintf(stderr, "dbg2       dummy2:            %f\n", mb_segytraceheader_ptr->dummy2);
     fprintf(stderr, "dbg2       dummy3:            %f\n", mb_segytraceheader_ptr->dummy3);
-    fprintf(stderr, "dbg2       dummy4:            %f\n", mb_segytraceheader_ptr->dummy4);
+    fprintf(stderr, "dbg2       sensordepthtime:   %f\n", mb_segytraceheader_ptr->sensordepthtime);
     fprintf(stderr, "dbg2       soundspeed:        %f\n", mb_segytraceheader_ptr->soundspeed);
     fprintf(stderr, "dbg2       distance:          %f\n", mb_segytraceheader_ptr->distance);
     fprintf(stderr, "dbg2       dummy7:            %f\n", mb_segytraceheader_ptr->roll);
@@ -2025,7 +2025,7 @@ int mb_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *samplefor
     fprintf(stderr, "dbg2       dummy1:         %f\n", mb_segytraceheader_ptr->dummy1);
     fprintf(stderr, "dbg2       dummy2:         %f\n", mb_segytraceheader_ptr->dummy2);
     fprintf(stderr, "dbg2       dummy3:         %f\n", mb_segytraceheader_ptr->dummy3);
-    fprintf(stderr, "dbg2       dummy4:         %f\n", mb_segytraceheader_ptr->dummy4);
+    fprintf(stderr, "dbg2       sensordepthtime:%f\n", mb_segytraceheader_ptr->sensordepthtime);
     fprintf(stderr, "dbg2       soundspeed:     %f\n", mb_segytraceheader_ptr->soundspeed);
     fprintf(stderr, "dbg2       distance:       %f\n", mb_segytraceheader_ptr->distance);
     fprintf(stderr, "dbg2       dummy7:         %f\n", mb_segytraceheader_ptr->roll);
@@ -2114,7 +2114,7 @@ int mb_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int kind, void 
     fprintf(stderr, "dbg2       dummy1:         %f\n", mb_segytraceheader_ptr->dummy1);
     fprintf(stderr, "dbg2       dummy2:         %f\n", mb_segytraceheader_ptr->dummy2);
     fprintf(stderr, "dbg2       dummy3:         %f\n", mb_segytraceheader_ptr->dummy3);
-    fprintf(stderr, "dbg2       dummy4:         %f\n", mb_segytraceheader_ptr->dummy4);
+    fprintf(stderr, "dbg2       sensordepthtime:%f\n", mb_segytraceheader_ptr->sensordepthtime);
     fprintf(stderr, "dbg2       soundspeed:     %f\n", mb_segytraceheader_ptr->soundspeed);
     fprintf(stderr, "dbg2       distance:       %f\n", mb_segytraceheader_ptr->distance);
     fprintf(stderr, "dbg2       roll:           %f\n", mb_segytraceheader_ptr->roll);

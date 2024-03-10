@@ -2233,7 +2233,7 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 		mb_segytraceheader_ptr->dummy1 = 0.0;
 		mb_segytraceheader_ptr->dummy2 = 0.0;
 		mb_segytraceheader_ptr->dummy3 = 0.0;
-		mb_segytraceheader_ptr->dummy4 = 0.0;
+		mb_segytraceheader_ptr->sensordepthtime = 2.0 * sensordepth / watersoundspeed;
 		mb_segytraceheader_ptr->soundspeed = watersoundspeed;
 		mb_segytraceheader_ptr->distance = 0.0;
 		mb_segytraceheader_ptr->roll = 180.0 / 32768.0 * (double)sbp->roll;
@@ -2320,7 +2320,7 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 		fprintf(stderr, "dbg2       dummy1:            %f\n", mb_segytraceheader_ptr->dummy1);
 		fprintf(stderr, "dbg2       dummy2:            %f\n", mb_segytraceheader_ptr->dummy2);
 		fprintf(stderr, "dbg2       dummy3:            %f\n", mb_segytraceheader_ptr->dummy3);
-		fprintf(stderr, "dbg2       dummy4:            %f\n", mb_segytraceheader_ptr->dummy4);
+		fprintf(stderr, "dbg2       sensordepthtime:   %f\n", mb_segytraceheader_ptr->sensordepthtime);
 		fprintf(stderr, "dbg2       soundspeed:        %f\n", mb_segytraceheader_ptr->soundspeed);
 		fprintf(stderr, "dbg2       distance:          %f\n", mb_segytraceheader_ptr->distance);
 		fprintf(stderr, "dbg2       roll:              %f\n", mb_segytraceheader_ptr->roll);
@@ -2511,7 +2511,7 @@ int mbsys_jstar_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *
 		fprintf(stderr, "dbg2       dummy1:            %f\n", mb_segytraceheader_ptr->dummy1);
 		fprintf(stderr, "dbg2       dummy2:            %f\n", mb_segytraceheader_ptr->dummy2);
 		fprintf(stderr, "dbg2       dummy3:            %f\n", mb_segytraceheader_ptr->dummy3);
-		fprintf(stderr, "dbg2       dummy4:            %f\n", mb_segytraceheader_ptr->dummy4);
+		fprintf(stderr, "dbg2       sensordepthtime:   %f\n", mb_segytraceheader_ptr->sensordepthtime);
 		fprintf(stderr, "dbg2       soundspeed:        %f\n", mb_segytraceheader_ptr->soundspeed);
 		fprintf(stderr, "dbg2       distance:          %f\n", mb_segytraceheader_ptr->distance);
 		fprintf(stderr, "dbg2       roll:              %f\n", mb_segytraceheader_ptr->roll);
@@ -2732,7 +2732,7 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int ki
 		fprintf(stderr, "dbg2       dummy1:            %f\n", mb_segytraceheader_ptr->dummy1);
 		fprintf(stderr, "dbg2       dummy2:            %f\n", mb_segytraceheader_ptr->dummy2);
 		fprintf(stderr, "dbg2       dummy3:            %f\n", mb_segytraceheader_ptr->dummy3);
-		fprintf(stderr, "dbg2       dummy4:            %f\n", mb_segytraceheader_ptr->dummy4);
+		fprintf(stderr, "dbg2       sensordepthtime:   %f\n", mb_segytraceheader_ptr->sensordepthtime);
 		fprintf(stderr, "dbg2       soundspeed:        %f\n", mb_segytraceheader_ptr->soundspeed);
 		fprintf(stderr, "dbg2       distance:          %f\n", mb_segytraceheader_ptr->distance);
 		fprintf(stderr, "dbg2       roll:              %f\n", mb_segytraceheader_ptr->roll);
