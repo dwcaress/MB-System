@@ -53,6 +53,7 @@
 #include "mb_io.h"
 #include "mbsys_ldeoih.h"
 #include "mbsys_kmbes.h"
+#include "mbsys_simrad3.h"
 
 #include "mframe.h"
 #include "merror.h"
@@ -751,6 +752,20 @@ FILE *output_trn_fp = NULL;
 
 #endif // WITH_MBTNAV
 
+struct sockaddr_in em_sock_addr;
+socklen_t em_sock_len;
+
+#ifdef WITH_EM710_ALL_LOG
+// log em710 frames (debug)
+FILE *em_all_log = NULL;
+const char *em_all_name="em-all.bin";
+#endif
+
+#ifdef WITH_EM710_UDP_LOG
+FILE *em_udp_log = NULL;
+const char *em_udp_name="em-udp.bin";
+#endif
+
 typedef enum{RF_NONE=0,RF_FORCE_UPDATE=0x1,RF_RELEASE=0x2}mb_resource_flag_t;
 
 // profiling - event channels
@@ -887,6 +902,9 @@ int mbtrnpp_reson7kr_input_close(int verbose, void *mbio_ptr, int *error);
 int mbtrnpp_kemkmall_input_open(int verbose, void *mbio_ptr, char *definition, int *error);
 int mbtrnpp_kemkmall_input_read(int verbose, void *mbio_ptr, size_t *size, char *buffer, int *error);
 int mbtrnpp_kemkmall_input_close(int verbose, void *mbio_ptr, int *error);
+int mbtrnpp_em710raw_input_open(int verbose, void *mbio_ptr, char *definition, int *error);
+int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size, char *buffer, int *error);
+int mbtrnpp_em710raw_input_close(int verbose, void *mbio_ptr, int *error);
 #ifdef WITH_MB1_READER
 int mbtrnpp_mb1r_input_open(int verbose, void *mbio_ptr, char *definition, int *error);
 int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buffer, int *error);
@@ -3684,6 +3702,11 @@ int main(int argc, char **argv) {
           mbtrnpp_input_close = &mbtrnpp_mb1r_input_close;
       }
 #endif // WITH_MB1_READER
+      else if (mbtrn_cfg->format == MBF_EM710RAW) {
+          mbtrnpp_input_open = &mbtrnpp_em710raw_input_open;
+          mbtrnpp_input_read = &mbtrnpp_em710raw_input_read;
+          mbtrnpp_input_close = &mbtrnpp_em710raw_input_close;
+      }
       else{
           fprintf(stderr,"ERR - Invalid output format [%d]\n",mbtrn_cfg->format);
       }
@@ -7078,6 +7101,446 @@ int mbtrnpp_kemkmall_input_close(int verbose, void *mbio_ptr, int *error) {
   /* return */
   return (status);
 }
+
+
+/*--------------------------------------------------------------------*/
+
+int mbtrnpp_em710raw_input_open(int verbose, void *mbio_ptr, char *definition, int *error) {
+
+    // local variables
+    int status = MB_SUCCESS;
+    struct mb_io_struct *mb_io_ptr;
+
+    // print input debug statements
+    if (verbose >= 2) {
+        fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+        fprintf(stderr, "dbg2  Input arguments:\n");
+        fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+        fprintf(stderr, "dbg2       mbio_ptr:   %p,%p\n", mbio_ptr, &mbio_ptr);
+        fprintf(stderr, "dbg2       definition: %s\n", definition);
+    }
+
+    // get pointer to mbio descriptor
+    mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+    // set initial status
+    status = MB_SUCCESS;
+
+    // set flag to enable Sentry sensordepth kluge
+    int *kluge_set = (int *)&mb_io_ptr->save10;
+    *kluge_set = 1;
+
+    // Open and initialize the socket based input for reading using function
+    // mbtrnpp_kemall_input_read().
+    // - use mb_io_ptr->mbsp to hold pointer to socket i/o structure
+    // - the socket definition = "hostInterface:broadcastGroup:port"
+    int port=-1;
+    mb_path bcastGrp;
+    mb_path hostInterface;
+    struct ip_mreq group;
+    char *token;
+    char *saveptr;
+
+    if ((token = strtok_r(definition, ":", &saveptr)) != NULL) {
+        strncpy(hostInterface, token, sizeof(mb_path));
+    }
+    if ((token = strtok_r(NULL, ":", &saveptr)) != NULL) {
+        strncpy(bcastGrp, token, sizeof(mb_path));
+    }
+    if ((token = strtok_r(NULL, ":", &saveptr)) != NULL) {
+        sscanf(token, "%d", &port);
+    }
+
+    //sscanf(definition, "%s:%s:%d", hostInterface, bcastGrp, &port);
+    fprintf(stderr, "Attempting to open socket to Kongsberg sonar multicast at:\n");
+    fprintf(stderr, "  Definition: %s\n", definition);
+    fprintf(stderr, "  hostInterface: %s\n  bcastGrp: %s\n  port: %d\n",
+            hostInterface, bcastGrp, port);
+
+    // Create a datagram socket on which to receive.
+    int sd = -1;
+    sd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sd < 0)
+    {
+        perror("Opening datagram socket error");
+
+        mlog_tprintf(mbtrnpp_mlog_id,"e,datagram socket [%d/%s]\n",errno,strerror(errno));
+        status=MB_FAILURE;
+        *error=MB_ERROR_OPEN_FAIL;
+        return status;
+    }
+
+    // Enable SO_REUSEADDR to allow multiple instances of this
+    // application to receive copies of the multicast datagrams.
+
+    int reuse = 1;
+    if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse)) < 0)
+    {
+        perror("Setting SO_REUSEADDR error");
+        close(sd);
+        mlog_tprintf(mbtrnpp_mlog_id,"e,setsockopt SO_REUSEADDR [%d/%s]\n",errno,strerror(errno));
+        status=MB_FAILURE;
+        *error=MB_ERROR_OPEN_FAIL;
+        return status;
+    }
+
+    // Bind to the proper port number with the IP address
+    memset(&em_sock_addr, 0, sizeof(em_sock_addr));
+    em_sock_addr.sin_family = AF_INET;
+    em_sock_addr.sin_port = htons(port);
+    em_sock_addr.sin_addr.s_addr = inet_addr(hostInterface);
+
+
+    if (bind(sd, (struct sockaddr*)&em_sock_addr, sizeof(em_sock_addr))) {
+        perror("bind datagram socket error");
+        close(sd);
+        mlog_tprintf(mbtrnpp_mlog_id,"e,bind [%d/%s]\n",errno,strerror(errno));
+        status=MB_FAILURE;
+        *error=MB_ERROR_OPEN_FAIL;
+        return status;
+    }
+
+    fprintf(stderr, "%s connected fd %d %s:%d\n", __func__, sd, hostInterface, port);
+
+#ifdef WITH_EM710_ALL_LOG
+    em_all_log = fopen(em_all_name, "w+");
+#endif
+#ifdef WITH_EM710_UDP_LOG
+    em_all_log = fopen(em_udp_name, "w+");
+#endif
+
+    // save the socket within the mb_io structure
+    int *sd_ptr = NULL;
+    status &= mb_mallocd(verbose, __FILE__, __LINE__, sizeof(sd), (void **)&sd_ptr, error);
+    *sd_ptr = sd;
+    mb_io_ptr->mbsp = (void *) sd_ptr;
+
+    /*initialize buffer for fragmented MWZ and MRC datagrams*/
+    memset(mRecordBuf, 0, sizeof(mRecordBuf));
+
+    /* print output debug statements */
+    if (verbose >= 2) {
+        fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+        fprintf(stderr, "dbg2  Return values:\n");
+        fprintf(stderr, "dbg2       error:              %d\n", *error);
+        fprintf(stderr, "dbg2  Return status:\n");
+        fprintf(stderr, "dbg2       status:             %d\n", status);
+    }
+
+    MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_CONN]);
+
+    /* return */
+    return (status);
+}
+
+/*--------------------------------------------------------------------*/
+
+static void em710_frame_show(byte *frame_buf, int verbose)
+{
+    struct mbsys_simrad3_header *header = (struct mbsys_simrad3_header *)frame_buf;
+
+    fprintf(stderr, "numBytesDgm      %08u/x%08X\n", header->numBytesDgm, header->numBytesDgm);
+    fprintf(stderr, "dgmSTX           %02X\n", header->dgmSTX);
+    fprintf(stderr, "dgmType          %02X/%c\n", header->dgmType, header->dgmType);
+    fprintf(stderr, "emModeNum        %04hu/x%04X\n", header->emModeNum, header->emModeNum);
+    fprintf(stderr, "date             %08u/x%08X\n", header->date, header->date);
+    fprintf(stderr, "timeMs           %08u/x%08X\n", header->timeMs, header->timeMs);
+    fprintf(stderr, "counter          %04hu/x%04X\n", header->counter, header->counter);
+    fprintf(stderr, "sysSerialNum     %04hu/x%04X\n", header->sysSerialNum, header->sysSerialNum);
+    fprintf(stderr, "secHeadSerialNum %04hu/x%04X\n", header->secHeadSerialNum, header->secHeadSerialNum);
+    byte *bp = (byte *)frame_buf;
+    byte *petx = (bp + (header->numBytesDgm + 1));
+    byte *pchk = (petx+1);
+    fprintf(stderr, "dgmETX           %02X\n", *((unsigned char *)petx));
+    fprintf(stderr, "chksum           %04X\n", *((unsigned short *)pchk));
+
+    if(verbose >= 2 || verbose <= -2){
+        fprintf(stderr, "\nframe bytes:\n");
+        for (int i=0;i<header->numBytesDgm + 4;i++)
+        {
+            if(i%16 == 0)
+                fprintf(stderr, "\n%08X: ",i);
+            fprintf(stderr, "%02x ",bp[i]);
+        }
+        fprintf(stderr, "\n");
+    }
+    fprintf(stderr, "\n");
+}
+
+int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size,
+                              char *buffer, int *error)
+{
+    // local variables
+    int status = MB_SUCCESS;
+    struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+    // print input debug statements
+    if (verbose >= 2) {
+        fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+        fprintf(stderr, "dbg2  Input arguments:\n");
+        fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+        fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
+        fprintf(stderr, "dbg2       size:       %zu\n", *size);
+        fprintf(stderr, "dbg2       buffer:     %p\n", buffer);
+    }
+
+    // Read the requested number of bytes (= size) off the input and
+    // place those bytes into the buffer.
+    // This requires reading full MB1 records from the socket,
+    // storing the data in buffer (implemented here), and parceling
+    // those bytes out as requested.
+
+    // use the socket reader
+    // read and return single frame
+    int64_t rbytes=-1;
+    uint32_t sync_bytes=0;
+    static uint64_t frame_count = 0;
+    static uint64_t frame_invalid = 0;
+    static uint64_t frame_read_err = 0;
+
+    // mbsp points to UDP socket
+    int *mbsp = (int *)mb_io_ptr->mbsp;
+
+    // frame buffer for byte-wise reads
+    static byte *frame_buf = NULL;
+    static size_t frame_len = 0;
+    static struct mbsys_simrad3_header *fb_phdr = NULL;
+    static byte *fb_pread=NULL;
+    static size_t bytes_read=0;
+    static bool read_frame=true;
+    bool read_err = false;
+
+    if(NULL == frame_buf)
+    {
+        frame_buf = (byte *)malloc(MB_UDP_SIZE_MAX);
+        memset(frame_buf, 0, MB_UDP_SIZE_MAX);
+        fb_pread = frame_buf;
+        fb_phdr = (struct mbsys_simrad3_header *)frame_buf;
+        bytes_read = 0;
+    }
+
+    // if valid reader...
+    if(NULL != mbsp && NULL != frame_buf)
+    {
+        if(read_frame)
+        {
+             // read frame into buffer
+            memset(frame_buf, 0, MB_UDP_SIZE_MAX);
+            fb_pread = frame_buf;
+
+            // read UDP datagram from the socket
+            // returns number of bytes read or -1 error
+
+            // UDP datagrams don't include 4-byte size field (numBytesDgm),
+            // but valid .ALL datagrams must include it.
+            // We'll calculate it and include it at the start of the buffer.
+
+            // The datagram size field (numBytesDgm) reflects the number of bytes
+            // from STX to the end of the footer (inclusive).
+            // This enables it to be read, then
+            // used to read the remainder of the datagram, *including* the footer.
+
+            if ( (rbytes = recvfrom(*mbsp, (void *) (frame_buf + 4), MB_UDP_SIZE_MAX, 0, (struct sockaddr *)&em_sock_addr, &em_sock_len)) >= 0)
+            {
+                struct mbsys_simrad3_header *header = (struct mbsys_simrad3_header *)frame_buf;
+
+                // set datagram size (first 4 bytes of buffer)
+                unsigned int *pDgmSize = (unsigned int *)frame_buf;
+                *pDgmSize = rbytes;
+
+                int errors = 0;
+
+                // validate
+                uint16_t sum = 0;
+                byte *pstx = (byte *)&fb_phdr->dgmSTX;
+                byte *petx = frame_buf + (header->numBytesDgm + 1);
+                byte *cur = pstx + 1;
+                uint16_t *pchk = (uint16_t *)(petx + 1);
+
+                if(rbytes > 0 && rbytes <= MB_UDP_SIZE_MAX){
+
+                    while(cur < petx){
+                        sum += *cur;
+                        cur++;
+                    }
+                    if(sum != *pchk) {
+                        MX_LPRINT(MBTRNPP, 3, "invalid checksum %04X/%04X\n", sum, *pchk);
+                       errors++;
+                    }
+
+                    switch(fb_phdr->dgmType){
+                        case ALL_INSTALLATION_L:
+                        case ALL_INSTALLATION_U:
+                        case ALL_REMOTE:
+                        case ALL_RUNTIME:
+                        case ALL_RAW_RANGE_BEAM_ANGLE:
+                        case ALL_XYZ88:
+                        case ALL_CLOCK:
+                        case ALL_ATTITUDE:
+                        case ALL_POSITION:
+                        case ALL_SURFACE_SOUND_SPEED:
+                            // is valid type
+                            break;
+                        default:
+                            MX_LPRINT(MBTRNPP, 3, "invalid type x%02X\n", fb_phdr->dgmType);
+                            errors++;
+                    }
+                }
+
+                frame_len = header->numBytesDgm + 4;
+                frame_count++;
+                // write frame to log (debug only)
+#ifdef WITH_EM710_ALL_LOG
+                // write .ALL frame
+                fwrite(frame_buf, frame_len, 1, em_all_log);
+                fflush(em_all_log);
+#endif
+#ifdef WITH_EM710_UDP_LOG
+                // write UDP frame
+                fwrite(frame_buf+4, frame_len-4, 1, em_udp_log);
+                fflush(em_udp_log);
+#endif
+
+                if(verbose >= 5 || verbose <= -5 )
+                    em710_frame_show(frame_buf, verbose);
+
+                if(errors == 0)
+                {
+                    // update frame read pointers
+                    fb_pread = frame_buf;
+                    read_frame = false;
+                    read_err = false;
+                    MX_LPRINT(MBTRNPP, 3, "read frame len[%zu]\n", frame_len);
+                } else {
+                    // frame invalid
+                    frame_invalid++;
+                    read_err = true;
+                    MX_LPRINT(MBTRNPP, 3, "invalid frame len[%llu] sum[%hu/%04X] chksum[%hu/%04X]\n", frame_len, sum, sum, *pchk, *pchk);
+                }
+            } else {
+                // read error
+                frame_read_err++;
+                read_err = true;
+                MX_LPRINT(MBTRNPP, 3, "em710_read_frame failed rbytes[%lluu]\n", frame_len);
+            }
+
+            MX_LPRINT(MBTRNPP, 3, "%s - read frame fd %3d len[%6llu] n[%8llu] invalid[%8llu] read_err[%8llu] \n", __func__, *mbsp, frame_len, frame_count, frame_invalid, frame_read_err);
+
+        } else {
+            // there's a frame in the buffer
+            size_t bytes_rem = frame_buf + frame_len - fb_pread;
+            size_t readlen = (*size <= bytes_rem ? *size : bytes_rem);
+
+            MX_LPRINT(MBTRNPP, 4, "reading framebuf size[%2zu] frame_len[%6zu] rem[%6zu] err[%c]\n", (size_t)*size, frame_len, bytes_rem, (read_err?'Y':'N'));
+        }
+
+        if(!read_err){
+            int64_t bytes_rem = frame_buf + frame_len - fb_pread;
+            size_t readlen = (*size <= bytes_rem ? *size : bytes_rem);
+            if(readlen > 0){
+                memcpy(buffer, fb_pread, readlen);
+                *size = (size_t)readlen;
+                *error = MB_ERROR_NO_ERROR;
+                // update frame cursor
+                fb_pread += readlen;
+                bytes_rem -= readlen;
+                if(bytes_rem <= 0)
+                {
+                    MX_LPRINT(MBTRNPP, 4, "* buffer empty rem[%"PRId64"]\n", bytes_rem);
+                    // if nothing left, read a frame next time
+                    read_frame = true;
+                }
+            } else {
+                // buffer empty
+                status   = MB_FAILURE;
+                *error   = MB_ERROR_EOF;
+                *size    = (size_t)0;
+                read_frame = true;
+                MX_LPRINT(MBTRNPP, 4, "buffer empty readlen[%zu] rem[%"PRId64"]\n", readlen, bytes_rem);
+            }
+        }
+    } else {
+        fprintf(stderr, "%s : ERR - frame buffer or socket is NULL\n", __func__);
+    }
+
+    if(read_err)
+    {
+        status   = MB_FAILURE;
+        *error   = MB_ERROR_EOF;
+        *size    = (size_t)0;
+
+        MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_GETFAIL_XT], mtime_dtime());
+        MX_LPRINT(MBTRNPP, 4, "read em710raw UDP socket failed: sync_bytes[%d] status[%d] err[%d]\n",sync_bytes,status, *error);
+
+        MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBFRAMERD]);
+        MST_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_MB_SYNC_BYTES],sync_bytes);
+
+        // TODO: check connection status, only reconnect if disconnected...
+
+        MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_GETFAIL_XT], mtime_dtime());
+    }
+
+    // print output debug statements
+    if (verbose >= 2) {
+        fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+        fprintf(stderr, "dbg2  Return values:\n");
+        fprintf(stderr, "dbg2       size:       %zu\n", *size);
+        fprintf(stderr, "dbg2       buffer:     %p\n", buffer);
+        fprintf(stderr, "dbg2       error:              %d\n", *error);
+        fprintf(stderr, "dbg2  Return status:\n");
+        fprintf(stderr, "dbg2       status:             %d\n", status);
+    }
+
+    return (status);
+}
+
+/*--------------------------------------------------------------------*/
+
+int mbtrnpp_em710raw_input_close(int verbose, void *mbio_ptr, int *error) {
+
+    /* local variables */
+    int status = MB_SUCCESS;
+    struct mb_io_struct *mb_io_ptr;
+
+    /* print input debug statements */
+    if (verbose >= 2) {
+        fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+        fprintf(stderr, "dbg2  Input arguments:\n");
+        fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+        fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
+    }
+
+    /* get pointer to mbio descriptor */
+    mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+    /* set initial status */
+    status = MB_SUCCESS;
+
+    // Close the socket based input
+    int *sd_ptr = (int *)mb_io_ptr->mbsp;
+    close(*sd_ptr);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&sd_ptr, error);
+
+    /* print output debug statements */
+    if (verbose >= 2) {
+        fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+        fprintf(stderr, "dbg2  Return values:\n");
+        fprintf(stderr, "dbg2       error:              %d\n", *error);
+        fprintf(stderr, "dbg2  Return status:\n");
+        fprintf(stderr, "dbg2       status:             %d\n", status);
+    }
+
+#ifdef WITH_EM710_ALL_LOG
+    fclose(em_all_log);
+#endif
+#ifdef WITH_EM710_UDP_LOG
+    fclose(em_udp_log);
+#endif
+
+    /* return */
+    return (status);
+}
+
 #ifdef WITH_MB1_READER
 /*--------------------------------------------------------------------*/
 int mbtrnpp_mb1r_input_open(int verbose, void *mbio_ptr, char *definition, int *error)

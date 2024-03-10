@@ -4542,7 +4542,17 @@ store->pings[store->ping_index].png_ss_count);
 			done = true;
 
 		/* if necessary read over unread but expected bytes */
-		bytes_read = ftell(mbfp) - mb_io_ptr->file_bytes - 4;
+        if(mbfp != NULL){
+            // reading from file
+            bytes_read = ftell(mbfp) - mb_io_ptr->file_bytes - 4;
+        }
+//        else if(mbsp != NULL) {
+//            // reading from socket
+//            bytes_read = 0;
+//        } else {
+//            // error: neither file nor socket set
+//        }
+
 		if (!*label_save_flag && !good_end_bytes && bytes_read < record_size) {
 #ifdef MBR_EM710RAW_DEBUG
 			fprintf(stderr, "skip over %d unread bytes of supported datagram type %x\n", record_size - bytes_read, type);
@@ -4554,8 +4564,8 @@ store->pings[store->ping_index].png_ss_count);
 		}
 
 #ifdef MBR_EM710RAW_DEBUG
-		fprintf(stderr, "record_size:%d bytes read:%ld file_pos old:%ld new:%ld\n", record_size,
-		        ftell(mbfp) - mb_io_ptr->file_bytes, mb_io_ptr->file_bytes, ftell(mbfp));
+        if(mbfp != NULL)
+            fprintf(stderr, "record_size:%d bytes read:%ld file_pos old:%ld new:%ld\n", record_size, ftell(mbfp) - mb_io_ptr->file_bytes, mb_io_ptr->file_bytes, ftell(mbfp));
 		fprintf(stderr, "done:%d status:%d error:%d\n", done, status, *error);
 		fprintf(stderr, "end of mbr_em710raw_rd_data loop:\n\n");
 #endif
@@ -4565,10 +4575,15 @@ store->pings[store->ping_index].png_ss_count);
 #endif
 
 		/* get file position */
-		if (*label_save_flag)
-			mb_io_ptr->file_bytes = ftell(mbfp) - 2;
-		else
-			mb_io_ptr->file_bytes = ftell(mbfp);
+        if (*label_save_flag) {
+            if(mbfp != NULL) {
+                mb_io_ptr->file_bytes = ftell(mbfp) - 2;
+            }
+        } else {
+            if(mbfp != NULL){
+                mb_io_ptr->file_bytes = ftell(mbfp);
+            }
+        }
 	}
 
 	if (verbose >= 2) {
