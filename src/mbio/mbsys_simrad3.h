@@ -393,6 +393,56 @@
 #define EM3_INVALID_U_INT 0xFFFFFFFF
 #define EM3_INVALID_INT 0x7FFFFFFF
 
+/* M3 datagram types */
+#pragma pack(push,1)
+struct mbsys_simrad3_header {
+    /* Definition of general datagram header */
+    unsigned int numBytesDgm;       /* Datagram length in bytes.
+                                     * The length field at the start (4 bytes) and end of the datagram (4 bytes)
+                                     * are included in the length count. */
+    mb_u_char dgmSTX;               /* start ID e.g. 0x02 */
+    mb_u_char dgmType;              /* datagram type definition, e.g.
+                                     Installation (I or i) or r (Remote information): Start = 049h Stop = 069h Remote info = 070h Runtime (R): 052h
+                                     Raw range and beam angle 78 (N): 04eh
+                                     XYZ88 (X): 058h, or 88d Clock (C): 043h
+                                     Attitude (A): 041h
+                                     Position (P): 050h
+                                     Surface sound speed (G): 047h
+                                     */
+    unsigned short emModeNum;       /* EM model number For M3, use 30. For M3 dual head, use 30D */
+    unsigned int date;              /* Date (in binary format) = year*10000+Month*100+day (example: April 26, 2016 = 20160426) */
+    unsigned int timeMs;            /* Time since midnight in milliseconds  */
+    unsigned short counter;            /* Sequential counter associated with each datagram. In M3, it
+                                      is the ping sequential counter associated with data. Only
+                                      exception is the counter in the installation datagram, where
+                                      the counter starts from 0 and increases by 1 whenever a new
+                                      installation datagram is received.  */
+    unsigned short sysSerialNum;       /* System serial number. Set it to the lower two bytes of the first M3 head sonar info.*/
+    unsigned short secHeadSerialNum;   /* Secondary system serial number and only used by Installation parameter. Set it to the lower two bytes of the second M3 sonar info. Currently it is always 0. */
+};
+
+struct mbsys_simrad3_footer {
+    mb_u_char dgmETX;        /*End identifier, always 03h*/
+    unsigned short checksum; /*Sum of bytes between STX and ETX*/
+};
+#pragma pack(pop)
+
+// Enumerate EM datagram types
+typedef enum {
+    /* unknown datagram */
+    ALL_UNKNOWN = 0,
+    ALL_INSTALLATION_U = 'I',
+    ALL_INSTALLATION_L = 'i',
+    ALL_REMOTE = 'r',
+    ALL_RUNTIME = 'R',
+    ALL_RAW_RANGE_BEAM_ANGLE = 'N',
+    ALL_XYZ88 = 'X',
+    ALL_CLOCK = 'C',
+    ALL_ATTITUDE = 'A',
+    ALL_POSITION = 'P',
+    ALL_SURFACE_SOUND_SPEED = 'G'
+} mbsys_simrad3_emdgm_type;
+
 /* internal data structure for survey data */
 struct mbsys_simrad3_ping_struct {
 	int read_status; /* read status for this structure:

@@ -45,6 +45,13 @@
 #.   mb1-cli
 #
 message("In src/mbtrn")
+
+if(CMAKE_SYSTEM_NAME STREQUAL Linux)
+  find_package(TIRPC REQUIRED)
+else()
+  add_library(TIRPC::TIRPC INTERFACE IMPORTED)
+endif()
+
 add_compile_definitions(
 HAVE_CONFIG_H
 _GNU_SOURCE
@@ -170,8 +177,17 @@ target_link_libraries(mb1-cli PRIVATE mbtrnframe mb1r mb1 m pthread)
 #
 #------------------------------------------------------------------------------
 #
-install(TARGETS r7kr mb1r DESTINATION ${CMAKE_INSTALL_LIBDIR})
-#
-install(TARGETS udps udpc mbtnav_cli stream7k emu7k r7kr_test trnc tbinx mb1conv mb12csv mb1r_test mb1-cli DESTINATION ${CMAKE_INSTALL_BINDIR})
+add_executable(emallpub utils/emallpub.c)
+target_include_directories(emallpub PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnframe
+                            ${CMAKE_SOURCE_DIR}/src/mbio
+							${CMAKE_SOURCE_DIR}/src/mbtrnutils)
+target_link_libraries(emallpub PRIVATE TIRPC::TIRPC mbtrnframe m pthread)
 #
 #------------------------------------------------------------------------------
+#
+install(TARGETS r7kr mb1r DESTINATION ${CMAKE_INSTALL_LIBDIR})
+#
+install(TARGETS udps udpc mbtnav_cli stream7k emu7k r7kr_test trnc tbinx mb1conv mb12csv mb1r_test mb1-cli emallpub DESTINATION ${CMAKE_INSTALL_BINDIR})
+#
+#------------------------------------------------------------------------------
+#
