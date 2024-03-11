@@ -235,6 +235,11 @@ $ncpt = 11;
   @cptbg9 = (255, 200, 160, 145, 130, 100, 107, 123, 140, 160, 230);
   @cptbb9 = (100,  75,  50,  45,  40,  30,  24,   7,   0,   0,   0);
 
+# color palette 10 - Seismic (blue to white to red)
+  @cptbr10 = (  0,  51, 102, 153, 204, 255, 255, 255, 255, 255, 255);
+  @cptbg10 = (  0,  51, 102, 153, 204, 255, 204, 153, 102,  51,   0);
+  @cptbb10 = (255, 255, 255, 255, 255, 255, 204, 153, 102,  51,   0);
+
 # Determine the GMT version
 $gmt_version = `gmt --version`;
 
@@ -826,7 +831,7 @@ if ($color_control)
     ($color_style, $color_palette, $ncolors)
       = $color_control =~  /(\S+)\/(\S+)\/(\S+)/;
     if ($color_palette < 1
-      || $color_palette > 9)
+      || $color_palette > 10)
       {
       $color_palette = 1;
       }
@@ -840,7 +845,7 @@ if ($color_control)
     ($color_style, $color_palette) = $color_control
       =~  /(\S+)\/(\S+)/;
     if ($color_palette < 1
-      || $color_palette > 9)
+      || $color_palette > 10)
       {
       $color_palette = 1;
       }
@@ -1716,7 +1721,7 @@ elsif ($color_mode)
 if ($color_mode)
   {
   # deal with single colormap (not sealevel)
-  if ($color_palette < 8)
+  if ($color_palette < 8 || $color_palette == 10)
     {
     # set selected color palette
     eval "\@cptbr = \@cptbr$color_palette;";

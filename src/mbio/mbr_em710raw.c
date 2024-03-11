@@ -729,6 +729,12 @@ int mbr_em710raw_rd_start(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 		fprintf(stderr, "dbg2       sonar:      %d\n", sonar);
 	}
 
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get sensordepth_only flag */
+	bool *sensordepth_only = (bool *)&mb_io_ptr->save5;
+
 	/* set goodend false until a good end is found */
 	*goodend = false;
 
@@ -1097,6 +1103,12 @@ int mbr_em710raw_rd_start(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 		else if (status == MB_SUCCESS && line[len - 1] == ',' && len <= 5) {
 			len = 0;
 		}
+	}
+
+	/* if specified from mbpreprocess then reset sensor depth mode */
+	if (*sensordepth_only) {
+		store->par_dsh[0] = 'I';
+		store->par_dsh[1] = 'N';
 	}
 
 	/* now set the data kind */
@@ -3970,6 +3982,7 @@ int mbr_em710raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int *label_save_flag;
 	char *record_size_char;
   bool *ignore_snippets;
+  bool *sensordepth_only;
 	short type;
 	short sonar;
 	int *version;
@@ -4009,7 +4022,7 @@ int mbr_em710raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	num_sonars = (int *)&mb_io_ptr->save10;
 	record_size_char = (char *)&record_size;
   ignore_snippets = (bool *)&mb_io_ptr->save4;
-//  *ignore_snippets = true;
+	sensordepth_only = (bool *)&mb_io_ptr->save5;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;

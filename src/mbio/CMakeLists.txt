@@ -191,6 +191,16 @@ if(buildGSF)
   set(SRC ${SRC} mbsys_gsf.c mbr_gsfgenmb.c)
 endif()
 
+set(HEADERS 
+    mb_define.h
+    mb_format.h
+    mb_info.h
+    mb_io.h
+    mb_process.h
+    mb_segy.h
+    mb_status.h
+    mb_swap.h)
+
 add_library(mbio ${SRC})
 set_target_properties(mbio PROPERTIES VERSION "0" SOVERSION "0")
 if(LibPROJ_VERSION VERSION_LESS 5)
@@ -211,3 +221,5 @@ target_link_libraries(
   PUBLIC TIRPC::TIRPC m)
 
 install(TARGETS mbio DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})

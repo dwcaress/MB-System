@@ -7718,7 +7718,7 @@ int mbtrnpp_em710raw_input_open_ser(int verbose, void *mbio_ptr, char *definitio
 
 /*--------------------------------------------------------------------*/
 
-int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t MB_UDP_SIZE_MAX)
+int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t len)
 {
 
     // records are raw UDP (record size ommitted)
@@ -7730,7 +7730,11 @@ int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t MB_UDP_SIZE_M
     // must detect and resync appropriately (without violating)
     // datagram max size or buffer length).
 
+    int verbose=3;
     struct mbsys_simrad3_header *header = (struct mbsys_simrad3_header *)frame_buf;
+    off_t file_end = len-1;//mfile_seek(src, 0, MFILE_END);
+    off_t file_cur = 0;//mfile_seek(src, 0, MFILE_CUR);
+    off_t fb_cur = 0;
 
     // state machine states
     // note: indexes state names array
@@ -7782,7 +7786,7 @@ int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t MB_UDP_SIZE_M
 
             // find STX (datagram start)
 
-            MX_BPRINT( (cfg->verbose > 3), "state %s\n", st_names[state]);
+            MX_BPRINT( (verbose > 3), "state %s\n", st_names[state]);
 
             // initialize state
             memset(frame_buf, 0, MB_UDP_SIZE_MAX);
@@ -7799,7 +7803,7 @@ int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t MB_UDP_SIZE_M
 //            mfile_seek(src, fpos_start, MFILE_SET);
             uint64_t skipped_bytes = 0;
 
-            MX_BPRINT( (cfg->verbose > 0), "file_pos %llu/x%0llX\n", fpos_start, fpos_start);
+            MX_BPRINT( (verbose > 0), "file_pos %llu/x%0llX\n", fpos_start, fpos_start);
 
             // read until STX found
 
@@ -7811,7 +7815,7 @@ int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t MB_UDP_SIZE_M
                 if(rbytes == read_len){
                     if( *bp == EM3_START_BYTE){
 
-//                        int64_t fpos = mfile_seek(src, 0, MFILE_CUR) - read_len;
+                        int64_t fpos = 0;//mfile_seek(src, 0, MFILE_CUR) - read_len;
 
                         // set point to STX
                         pstx = bp;
@@ -7825,7 +7829,7 @@ int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t MB_UDP_SIZE_M
 //                        fpos_start = mfile_seek(src, 0, MFILE_CUR);
                         stx_ofs = fpos_start - 1;
 
-                        MX_BPRINT( (cfg->verbose > 0),"STX ofs[%llu/%0X] (skipped_bytes %llu)\n", stx_ofs, stx_ofs, skipped_bytes);
+                        MX_BPRINT( (verbose > 0),"STX ofs[%llu/%0X] (skipped_bytes %llu)\n", stx_ofs, stx_ofs, skipped_bytes);
                     } else {
                         // skip byte
                         skipped_bytes++;
@@ -7842,10 +7846,10 @@ int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t MB_UDP_SIZE_M
 
             // find datagram type
 
-            MX_BPRINT( (cfg->verbose > 3), "state %s\n", st_names[state]);
+            MX_BPRINT( (verbose > 3), "state %s\n", st_names[state]);
 
             read_len = 1;
-            rbytes = mfile_read(src, bp, read_len);
+//            rbytes = mfile_read(src, bp, read_len);
 
             if(rbytes == read_len) {
                 switch(*bp){
@@ -7872,8 +7876,8 @@ int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t MB_UDP_SIZE_M
 
             if(state != ST_ERROR){
                 if(found_type) {
-                    if(cfg->verbose > 1){
-                        int64_t fpos = mfile_seek(src, 0, MFILE_CUR) - read_len;
+                    if(verbose > 1){
+                        int64_t fpos = 0;//mfile_seek(src, 0, MFILE_CUR) - read_len;
 
                         MX_PRINT("found TYPE %02X file_pos x%0llX bp %p ofs %zd\n", *bp, fpos, bp, (bp - frame_buf));
                     }
@@ -7893,10 +7897,10 @@ int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t MB_UDP_SIZE_M
 
             // find model
 
-            MX_BPRINT( (cfg->verbose > 3), "state %s\n", st_names[state]);
+            MX_BPRINT( (verbose > 3), "state %s\n", st_names[state]);
 
             read_len = 2;
-            rbytes = mfile_read(src, bp, read_len);
+            rbytes = 0;//mfile_read(src, bp, read_len);
 
             if(rbytes == read_len) {
                 short unsigned *model = (short unsigned *)bp;
@@ -7916,8 +7920,8 @@ int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t MB_UDP_SIZE_M
 
             if(state != ST_ERROR){
                 if(found_model) {
-                    int64_t fpos = mfile_seek(src, 0, MFILE_CUR) - read_len;
-                    MX_BPRINT( (cfg->verbose > 1), "found MODEL %04X file_pos x%0llX bp %p ofs %zd\n", *((unsigned short *)bp), fpos, bp, (bp - frame_buf));
+                    int64_t fpos = 0;//mfile_seek(src, 0, MFILE_CUR) - read_len;
+                    MX_BPRINT( (verbose > 1), "found MODEL %04X file_pos x%0llX bp %p ofs %zd\n", *((unsigned short *)bp), fpos, bp, (bp - frame_buf));
 
                     bp += read_len;
                     dgram_bytes += read_len;
@@ -7934,7 +7938,7 @@ int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t MB_UDP_SIZE_M
             // find ETX
             // or stop if max datagram size exceeded
 
-            MX_BPRINT( (cfg->verbose > 3), "state %s\n", st_names[state]);
+            MX_BPRINT( (verbose > 3), "state %s\n", st_names[state]);
 
             petx = NULL;
             read_len = 1;
@@ -7945,8 +7949,8 @@ int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t MB_UDP_SIZE_M
                     // read/store next byte
                     if(rbytes == read_len) {
                         if(*bp == EM3_END_BYTE){
-                            int64_t fpos = mfile_seek(src, 0, MFILE_CUR) - read_len;
-                            MX_BPRINT( (cfg->verbose > 1), "found ETX %02X file_pos x%0llX bp %p ofs %zd\n", *bp, fpos, bp, (bp - frame_buf));
+                            int64_t fpos = 0;//mfile_seek(src, 0, MFILE_CUR) - read_len;
+                            MX_BPRINT( (verbose > 1), "found ETX %02X file_pos x%0llX bp %p ofs %zd\n", *bp, fpos, bp, (bp - frame_buf));
                             petx = bp;
 
                             found_etx = true;
@@ -7990,10 +7994,10 @@ int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t MB_UDP_SIZE_M
 
             // read, validate checksum
 
-            MX_BPRINT( (cfg->verbose > 3), "state %s\n", st_names[state]);
+            MX_BPRINT( (verbose > 3), "state %s\n", st_names[state]);
 
             read_len = 2;
-            rbytes = mfile_read(src, bp, read_len);
+            rbytes = 0;//mfile_read(src, bp, read_len);
             unsigned int *pchk = NULL;
 
             if(rbytes > 0){
@@ -8036,10 +8040,10 @@ int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t MB_UDP_SIZE_M
 
             // datagram valid, publish to socket
 
-            MX_BPRINT( (cfg->verbose > 3), "state %s\n", st_names[state]);
+            MX_BPRINT( (verbose > 3), "state %s\n", st_names[state]);
 
             header->numBytesDgm = (petx - frame_buf)-1;//dgram_bytes;
-            MX_BPRINT( (cfg->verbose > 0), "returning frame len[%zd/%04X] petx ofs[%zd/%04X] (%02X)\n", dgram_bytes, dgram_bytes, (petx-frame_buf), (petx-frame_buf), *petx);
+            MX_BPRINT( (verbose > 0), "returning frame len[%zd/%04X] petx ofs[%zd/%04X] (%02X)\n", dgram_bytes, dgram_bytes, (petx-frame_buf), (petx-frame_buf), *petx);
 
 
             // a LOG frame length is numBytesDgm+4, so you can read the length,
