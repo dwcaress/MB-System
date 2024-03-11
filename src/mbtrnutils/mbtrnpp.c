@@ -113,7 +113,8 @@ struct mbtrnpp_ping_struct {
 
 typedef enum {
     INPUT_MODE_SOCKET = 1,
-    INPUT_MODE_FILE = 2
+    INPUT_MODE_FILE = 2,
+    INPUT_MODE_SERIAL = 3
 } input_mode_t;
 
 typedef enum{
@@ -905,6 +906,9 @@ int mbtrnpp_kemkmall_input_close(int verbose, void *mbio_ptr, int *error);
 int mbtrnpp_em710raw_input_open(int verbose, void *mbio_ptr, char *definition, int *error);
 int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size, char *buffer, int *error);
 int mbtrnpp_em710raw_input_close(int verbose, void *mbio_ptr, int *error);
+int mbtrnpp_em710raw_input_open_ser(int verbose, void *mbio_ptr, char *definition, int *error);
+int mbtrnpp_em710raw_input_read_ser(int verbose, void *mbio_ptr, size_t *size, char *buffer, int *error);
+int mbtrnpp_em710raw_input_close_ser(int verbose, void *mbio_ptr, int *error);
 #ifdef WITH_MB1_READER
 int mbtrnpp_mb1r_input_open(int verbose, void *mbio_ptr, char *definition, int *error);
 int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buffer, int *error);
@@ -2175,7 +2179,8 @@ static int s_parse_opt_input(mbtrnpp_cfg_t *cfg, char *opt_str)
             if ((psdef=strstr(opt_str, "socket:"))!=NULL) {
 
                 size_t sdef_len=strlen(psdef);
-                if(sdef_len>0 && sdef_len<MB_PATH_SIZE){
+
+                if(sdef_len > 0 && sdef_len < MB_PATH_SIZE){
                     psdef+=strlen("socket:");
                     // set socket mode and definition
                     cfg->input_mode = INPUT_MODE_SOCKET;
@@ -2185,6 +2190,18 @@ static int s_parse_opt_input(mbtrnpp_cfg_t *cfg, char *opt_str)
                 }
 //            fprintf(stderr, "socket_definition|%s\n", cfg->socket_definition);
 
+            } else  if ((psdef=strstr(opt_str, "serial:"))!=NULL) {
+
+                size_t sdef_len=strlen(psdef);
+
+                if(sdef_len > 0 && sdef_len < MB_PATH_SIZE){
+                    psdef+=strlen("serial:");
+                    // set socket mode and definition
+                    cfg->input_mode = INPUT_MODE_SERIAL;
+                    sprintf(cfg->socket_definition,"%s",psdef);
+                } else {
+                    fprintf(stderr,"serial definition length invalid [%s/%zu/%zu]\n",psdef,sdef_len,(size_t)MB_PATH_SIZE);
+                }
             } else {
                 // cfg->input is input file name
                 cfg->input_mode = INPUT_MODE_FILE;
@@ -2770,6 +2787,12 @@ static int s_mbtrnpp_validate_config(mbtrnpp_cfg_t *cfg)
                 if(strlen(cfg->socket_definition)==0){
                     err_count++;
                     fprintf(stderr,"ERR - socket_definition not set\n");
+                }
+                break;
+            case INPUT_MODE_SERIAL:
+                if(strlen(cfg->socket_definition)==0){
+                    err_count++;
+                    fprintf(stderr,"ERR - serial_definition not set\n");
                 }
                 break;
             default:
@@ -3759,10 +3782,18 @@ int main(int argc, char **argv) {
         if (mbtrn_cfg->verbose > 0)
           fprintf(stderr, "%s\n", log_message);
       }
-    }
+    } else if (strncmp(mbtrn_cfg->input, "serial", 6) == 0) {
 
-    /* otherwised open swath data files as is normal for MB-System programs */
-    else {
+        if (mbtrn_cfg->format == MBF_EM710RAW) {
+            mbtrnpp_input_open = &mbtrnpp_em710raw_input_open_ser;
+            mbtrnpp_input_read = &mbtrnpp_em710raw_input_read_ser;
+            mbtrnpp_input_close = &mbtrnpp_em710raw_input_close_ser;
+        }
+        else{
+            fprintf(stderr,"ERR - Invalid output format [%d]\n",mbtrn_cfg->format);
+        }
+    }else {
+        /* otherwised open swath data files as is normal for MB-System programs */
 
       if ((status = mb_read_init(mbtrn_cfg->verbose, ifile, mbtrn_cfg->format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
                                  &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) !=
@@ -4371,15 +4402,23 @@ int main(int argc, char **argv) {
 
         // deal with fatal error > 0 - this is usually MB_ERROR_EOF
         if ((status == MB_FAILURE) && (error > 0)) {
-          if (mbtrn_cfg->input_mode == INPUT_MODE_SOCKET) {
+            if (mbtrn_cfg->input_mode == INPUT_MODE_SOCKET) {
 
-            MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBGETALL]);
+                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBGETALL]);
 
-            fprintf(stderr, "EOF (input socket) - clear status/error\n");
-            status = MB_SUCCESS;
-            error = MB_ERROR_NO_ERROR;
+                fprintf(stderr, "EOF (input socket) - clear status/error\n");
+                status = MB_SUCCESS;
+                error = MB_ERROR_NO_ERROR;
 
-          }
+            } else if (mbtrn_cfg->input_mode == INPUT_MODE_SERIAL) {
+
+                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBGETALL]);
+
+                fprintf(stderr, "EOF (input serial) - clear status/error\n");
+                status = MB_SUCCESS;
+                error = MB_ERROR_NO_ERROR;
+
+            }
           else {
             done = true;
             status = MB_SUCCESS;
@@ -4415,14 +4454,21 @@ int main(int argc, char **argv) {
     } // while(!done) [main loop]
 
     /* close the files */
-    if (mbtrn_cfg->input_mode == INPUT_MODE_SOCKET) {
-      fprintf(stderr, "socket input mode - continue (probably shouldn't be here)\n");
-        mlog_tprintf(mbtrnpp_mlog_id,"e,invalid code path - socket input mode\n");
-      read_data = true;
+      if (mbtrn_cfg->input_mode == INPUT_MODE_SOCKET) {
+          fprintf(stderr, "socket input mode - continue (probably shouldn't be here)\n");
+          mlog_tprintf(mbtrnpp_mlog_id,"e,invalid code path - socket input mode\n");
+          read_data = true;
 
-      // empty the ring buffer
-      ndata = 0;
-    }
+          // empty the ring buffer
+          ndata = 0;
+      } else if (mbtrn_cfg->input_mode == INPUT_MODE_SERIAL) {
+          fprintf(stderr, "serial input mode - continue (probably shouldn't be here)\n");
+          mlog_tprintf(mbtrnpp_mlog_id,"e,invalid code path - serial input mode\n");
+          read_data = true;
+
+          // empty the ring buffer
+          ndata = 0;
+      }
     else {
       status = mb_close(mbtrn_cfg->verbose, &imbio_ptr, &error);
 
@@ -7102,7 +7148,6 @@ int mbtrnpp_kemkmall_input_close(int verbose, void *mbio_ptr, int *error) {
   return (status);
 }
 
-
 /*--------------------------------------------------------------------*/
 
 int mbtrnpp_em710raw_input_open(int verbose, void *mbio_ptr, char *definition, int *error) {
@@ -7536,6 +7581,761 @@ int mbtrnpp_em710raw_input_close(int verbose, void *mbio_ptr, int *error) {
 #ifdef WITH_EM710_UDP_LOG
     fclose(em_udp_log);
 #endif
+
+    /* return */
+    return (status);
+}
+
+/*--------------------------------------------------------------------*/
+
+int mbtrnpp_em710raw_input_open_ser(int verbose, void *mbio_ptr, char *definition, int *error) {
+
+    // local variables
+    int status = MB_SUCCESS;
+    struct mb_io_struct *mb_io_ptr;
+
+    // print input debug statements
+    if (verbose >= 2) {
+        fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+        fprintf(stderr, "dbg2  Input arguments:\n");
+        fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+        fprintf(stderr, "dbg2       mbio_ptr:   %p,%p\n", mbio_ptr, &mbio_ptr);
+        fprintf(stderr, "dbg2       definition: %s\n", definition);
+    }
+
+    // get pointer to mbio descriptor
+    mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+    // set initial status
+    status = MB_SUCCESS;
+
+    // set flag to enable Sentry sensordepth kluge
+    int *kluge_set = (int *)&mb_io_ptr->save10;
+    *kluge_set = 1;
+
+    // Open and initialize the socket based input for reading using function
+    // mbtrnpp_kemall_input_read().
+    // - use mb_io_ptr->mbsp to hold pointer to socket i/o structure
+    // - the socket definition = "hostInterface:broadcastGroup:port"
+    int port=-1;
+    unsigned int ser_baud=115200;
+    mb_path ser_device;
+    struct ip_mreq group;
+    char *token;
+    char *saveptr;
+
+    if ((token = strtok_r(definition, ":", &saveptr)) != NULL) {
+        strncpy(ser_device, token, sizeof(mb_path));
+    }
+    if ((token = strtok_r(NULL, ":", &saveptr)) != NULL) {
+        sscanf(token, "%u", &ser_baud);
+    }
+    if ((token = strtok_r(NULL, ":", &saveptr)) != NULL) {
+        sscanf(token, "%d", &port);
+    }
+
+    //sscanf(definition, "%s:%s:%d", hostInterface, bcastGrp, &port);
+    fprintf(stderr, "Attempting to open serial port to Kongsberg sonar output at:\n");
+    fprintf(stderr, "  Definition: %s\n", definition);
+    fprintf(stderr, "  ser_device: %s\n  ser_baud: %u\n  port: %d\n",
+            ser_device, ser_baud, port);
+
+    // Create a datagram socket on which to receive.
+    int sd = -1;
+    sd = open(ser_device, O_RDWR);
+
+    if (sd < 0)
+    {
+        perror("Opening datagram serial port error");
+
+        mlog_tprintf(mbtrnpp_mlog_id,"e,serial port [%d/%s]\n",errno,strerror(errno));
+        status=MB_FAILURE;
+        *error=MB_ERROR_OPEN_FAIL;
+        return status;
+    }
+
+    // configure serial port
+    struct termios tty;
+    if(tcgetattr(sd, &tty) != 0) {
+        fprintf(stderr, "Error %i from tcgetattr: %s\n", errno, strerror(errno));
+    }
+
+    tty.c_cflag &= ~PARENB; // Clear parity bit
+    tty.c_cflag &= ~CSTOPB; // Clear stop field (one stop bit)
+    tty.c_cflag |= CS8;     // 8 bits per byte
+    tty.c_cflag &= ~CRTSCTS; // Disable RTS/CTS hardware flow control
+    tty.c_cflag |= CREAD | CLOCAL; // Turn on READ & ignore ctrl lines
+    tty.c_lflag &= ~ICANON;
+    tty.c_lflag &= ~ECHO; // Disable echo
+    tty.c_lflag &= ~ECHOE; // Disable erasure
+    tty.c_lflag &= ~ECHONL; // Disable new-line echo
+    tty.c_lflag &= ~ISIG; // Disable interpretation of INTR, QUIT and SUSP
+    tty.c_iflag &= ~(IXON | IXOFF | IXANY); // Turn off s/w flow ctrl
+    tty.c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL); // Disable any special handling of received bytes
+    tty.c_oflag &= ~OPOST; // Prevent special interpretation of output bytes (e.g. newline chars)
+    tty.c_oflag &= ~ONLCR; // Prevent conversion of newline to carriage return/line feed
+    // tty.c_oflag &= ~OXTABS; // Prevent conversion of tabs to spaces (NOT PRESENT IN LINUX)
+    // tty.c_oflag &= ~ONOEOT; // Prevent removal of C-d chars (0x004) in output (NOT PRESENT IN LINUX)
+    tty.c_cc[VTIME] = 10;    // Wait for up to 1s (10 deciseconds), returning as soon as any data is received.
+    tty.c_cc[VMIN] = 0;
+
+    fprintf(stderr, "%s connected fd %d %s:%d\n", __func__, sd, ser_device, ser_baud);
+
+    // Set in/out baud rate to be 9600
+    cfsetispeed(&tty, ser_baud);
+    cfsetospeed(&tty, ser_baud);
+
+#ifdef WITH_EM710_ALL_LOG
+    em_all_log = fopen(em_all_name, "w+");
+#endif
+#ifdef WITH_EM710_UDP_LOG
+    em_all_log = fopen(em_udp_name, "w+");
+#endif
+
+    // save the socket within the mb_io structure
+    int *sd_ptr = NULL;
+    status &= mb_mallocd(verbose, __FILE__, __LINE__, sizeof(sd), (void **)&sd_ptr, error);
+    *sd_ptr = sd;
+    mb_io_ptr->mbsp = (void *) sd_ptr;
+
+    /*initialize buffer for fragmented MWZ and MRC datagrams*/
+    memset(mRecordBuf, 0, sizeof(mRecordBuf));
+
+    /* print output debug statements */
+    if (verbose >= 2) {
+        fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+        fprintf(stderr, "dbg2  Return values:\n");
+        fprintf(stderr, "dbg2       error:              %d\n", *error);
+        fprintf(stderr, "dbg2  Return status:\n");
+        fprintf(stderr, "dbg2       status:             %d\n", status);
+    }
+
+    MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_CONN]);
+
+    /* return */
+    return (status);
+}
+
+/*--------------------------------------------------------------------*/
+
+int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t MB_UDP_SIZE_MAX)
+{
+
+    // records are raw UDP (record size ommitted)
+    // must parse using state machine:
+    // if record has valid STX, datagram type, model
+    // then find ETX and checksum.
+    // if header and checksum are valid, publish datagram
+    // Since STX and ETX can appear in data payloads,
+    // must detect and resync appropriately (without violating)
+    // datagram max size or buffer length).
+
+    struct mbsys_simrad3_header *header = (struct mbsys_simrad3_header *)frame_buf;
+
+    // state machine states
+    // note: indexes state names array
+    typedef enum {
+        ST_START = 0,
+        ST_STX_VALID,
+        ST_TYPE_VALID,
+        ST_MODEL_VALID,
+        ST_ETX_VALID,
+        ST_CHKSUM_VALID,
+        ST_ERROR,
+        ST_COUNT
+    }state_t;
+
+    // state names (indexed using state values)
+    char *st_names[ST_COUNT] = {
+        "ST_START",
+        "ST_STX_VALID",
+        "ST_TYPE_VALID",
+        "ST_MODEL_VALID",
+        "ST_ETX_VALID",
+        "ST_CHKSUM_VALID",
+        "ST_ERROR"
+    };
+
+    // initialize state machine
+    state_t state = ST_START;
+
+    int64_t rbytes = 0;
+    size_t dgram_bytes = 0;
+    byte *bp = frame_buf + 4;
+    byte *pstx = frame_buf + 5;
+    byte *petx = NULL;
+    uint64_t stx_ofs = 0;
+    uint64_t etx_ofs = 0;
+    bool found_stx = false;
+    bool found_type = false;
+    bool found_model = false;
+    bool found_etx = false;
+    bool found_chk = false;
+    uint32_t read_len = 1;
+    uint64_t fpos_start = 0;
+    unsigned short int chksum = 0;
+
+    // iterate over file to find valid datagrams
+    while(file_cur < file_end) {
+
+        if(state == ST_START) {
+
+            // find STX (datagram start)
+
+            MX_BPRINT( (cfg->verbose > 3), "state %s\n", st_names[state]);
+
+            // initialize state
+            memset(frame_buf, 0, MB_UDP_SIZE_MAX);
+            rbytes = 0;
+            dgram_bytes = 0;
+            chksum = 0;
+            bp = frame_buf + 4;
+            fb_cur = 0;
+            found_etx = false;
+            found_chk = false;
+            found_stx = false;
+            found_type = false;
+            found_model = false;
+//            mfile_seek(src, fpos_start, MFILE_SET);
+            uint64_t skipped_bytes = 0;
+
+            MX_BPRINT( (cfg->verbose > 0), "file_pos %llu/x%0llX\n", fpos_start, fpos_start);
+
+            // read until STX found
+
+            while(!found_stx) {
+                read_len = 1;
+//                rbytes = mfile_read(src, bp, read_len);
+                rbytes = read(src, bp, read_len);
+
+                if(rbytes == read_len){
+                    if( *bp == EM3_START_BYTE){
+
+//                        int64_t fpos = mfile_seek(src, 0, MFILE_CUR) - read_len;
+
+                        // set point to STX
+                        pstx = bp;
+                        // update state
+                        found_stx = true;
+                        dgram_bytes = read_len;
+                        bp += read_len;
+                        state = ST_STX_VALID;
+
+                        // update file pointer start location
+//                        fpos_start = mfile_seek(src, 0, MFILE_CUR);
+                        stx_ofs = fpos_start - 1;
+
+                        MX_BPRINT( (cfg->verbose > 0),"STX ofs[%llu/%0X] (skipped_bytes %llu)\n", stx_ofs, stx_ofs, skipped_bytes);
+                    } else {
+                        // skip byte
+                        skipped_bytes++;
+                    }
+                } else {
+                    fprintf(stderr, "ERR - file read failed on STX\n");
+                    state = ST_ERROR;
+                    break;
+                }
+            }
+        } // state START
+
+        if(state == ST_STX_VALID) {
+
+            // find datagram type
+
+            MX_BPRINT( (cfg->verbose > 3), "state %s\n", st_names[state]);
+
+            read_len = 1;
+            rbytes = mfile_read(src, bp, read_len);
+
+            if(rbytes == read_len) {
+                switch(*bp){
+                    case ALL_INSTALLATION_U:
+                    case ALL_INSTALLATION_L:
+                    case ALL_REMOTE:
+                    case ALL_RUNTIME:
+                    case ALL_RAW_RANGE_BEAM_ANGLE:
+                    case ALL_XYZ88:
+                    case ALL_CLOCK:
+                    case ALL_ATTITUDE:
+                    case ALL_POSITION:
+                    case ALL_SURFACE_SOUND_SPEED:
+                        found_type = true;
+                        break;
+                    default:
+                        fprintf(stderr, "ERR - invalid type %02X bp=%p fp=%p\n", *bp, bp, frame_buf);
+                        break;
+                };
+            } else {
+                fprintf(stderr, "ERR - file read failed on STX\n");
+                state = ST_ERROR;
+            }
+
+            if(state != ST_ERROR){
+                if(found_type) {
+                    if(cfg->verbose > 1){
+                        int64_t fpos = mfile_seek(src, 0, MFILE_CUR) - read_len;
+
+                        MX_PRINT("found TYPE %02X file_pos x%0llX bp %p ofs %zd\n", *bp, fpos, bp, (bp - frame_buf));
+                    }
+
+                    // update state
+                    bp += read_len;
+                    dgram_bytes += read_len;
+                    state = ST_TYPE_VALID;
+                } else {
+                    // invalid type, return to start state
+                    state = ST_START;
+                }
+            }
+        }
+
+        if(state == ST_TYPE_VALID) {
+
+            // find model
+
+            MX_BPRINT( (cfg->verbose > 3), "state %s\n", st_names[state]);
+
+            read_len = 2;
+            rbytes = mfile_read(src, bp, read_len);
+
+            if(rbytes == read_len) {
+                short unsigned *model = (short unsigned *)bp;
+                switch(*model){
+                    case 0x1E:
+                    case 0x1ED:
+                        found_model = true;
+                        break;
+                    default:
+                        fprintf(stderr, "ERR - invalid model %04X bp=%p fp=%p\n", *model, bp, frame_buf);
+                        break;
+                };
+            } else {
+                fprintf(stderr, "ERR - file read failed on MODEL\n");
+                state = ST_ERROR;
+            }
+
+            if(state != ST_ERROR){
+                if(found_model) {
+                    int64_t fpos = mfile_seek(src, 0, MFILE_CUR) - read_len;
+                    MX_BPRINT( (cfg->verbose > 1), "found MODEL %04X file_pos x%0llX bp %p ofs %zd\n", *((unsigned short *)bp), fpos, bp, (bp - frame_buf));
+
+                    bp += read_len;
+                    dgram_bytes += read_len;
+                    state = ST_MODEL_VALID;
+                } else {
+                    // invalid model, return to start state
+                    state = ST_START;
+                }
+            }
+        }
+
+        if(state == ST_MODEL_VALID) {
+
+            // find ETX
+            // or stop if max datagram size exceeded
+
+            MX_BPRINT( (cfg->verbose > 3), "state %s\n", st_names[state]);
+
+            petx = NULL;
+            read_len = 1;
+            while(!found_etx) {
+                rbytes = mfile_read(src, bp, read_len);
+
+                if(rbytes > 0){
+                    // read/store next byte
+                    if(rbytes == read_len) {
+                        if(*bp == EM3_END_BYTE){
+                            int64_t fpos = mfile_seek(src, 0, MFILE_CUR) - read_len;
+                            MX_BPRINT( (cfg->verbose > 1), "found ETX %02X file_pos x%0llX bp %p ofs %zd\n", *bp, fpos, bp, (bp - frame_buf));
+                            petx = bp;
+
+                            found_etx = true;
+                        } else {
+                            chksum += *bp;
+                        }
+                        bp += read_len;
+                        dgram_bytes += read_len;
+                    }
+
+                } else {
+                    fprintf(stderr, "ERR - file read failed on ETX\n");
+                    state = ST_ERROR;
+                    break;
+                }
+
+                if(state != ST_ERROR){
+                    if(found_etx) {
+                        state = ST_ETX_VALID;
+                    } else {
+                        // invalid ETX, return to start state
+                        state = ST_START;
+                    }
+                }
+
+                if( dgram_bytes >= MB_UDP_SIZE_MAX ||
+                   (bp - frame_buf) >= MB_UDP_SIZE_MAX) {
+
+                    fprintf(stderr, "ERR - buffer length exceeded type (%02X) dgram_bytes(%zd) bp-frame_buf(%zd)\n", header->dgmType, dgram_bytes, (bp - frame_buf));
+
+                    // buffer length or max datagram size exceeded
+                    // return to start state
+
+                    state = ST_START;
+                    break;
+                }
+            }
+        }
+
+        if(state == ST_ETX_VALID) {
+
+            // read, validate checksum
+
+            MX_BPRINT( (cfg->verbose > 3), "state %s\n", st_names[state]);
+
+            read_len = 2;
+            rbytes = mfile_read(src, bp, read_len);
+            unsigned int *pchk = NULL;
+
+            if(rbytes > 0){
+                // read/store next byte
+                if(rbytes == read_len) {
+                    pchk = (unsigned int *)bp;
+                    found_chk = true;
+                } else {
+                    fprintf(stderr, "ERR - file read failed on CHKSUM\n");
+                    state = ST_ERROR;
+                }
+
+                // calculate checksum (sum of bytes between STX and ETX, exclusive)
+                // and compare to datagram
+                byte *pcs = pstx + 1;
+                chksum = 0;
+                while(pcs < petx){
+                    chksum += *pcs;
+                    pcs++;
+                }
+
+                if(pchk != NULL && *pchk == chksum){
+                    state = ST_CHKSUM_VALID;
+                } else {
+                    found_chk = false;
+                    found_etx = false;
+
+                    // may have found ETX char in data, keep looking
+                    state = ST_MODEL_VALID;
+                }
+                dgram_bytes += read_len;
+                bp += read_len;
+            } else {
+                fprintf(stderr, "ERR - file read failed on CHKSUM\n");
+                state = ST_ERROR;
+            }
+        }
+
+        if(state == ST_CHKSUM_VALID){
+
+            // datagram valid, publish to socket
+
+            MX_BPRINT( (cfg->verbose > 3), "state %s\n", st_names[state]);
+
+            header->numBytesDgm = (petx - frame_buf)-1;//dgram_bytes;
+            MX_BPRINT( (cfg->verbose > 0), "returning frame len[%zd/%04X] petx ofs[%zd/%04X] (%02X)\n", dgram_bytes, dgram_bytes, (petx-frame_buf), (petx-frame_buf), *petx);
+
+
+            // a LOG frame length is numBytesDgm+4, so you can read the length,
+            // then read that number of bytes.
+            // numBytesDgm reflects the number of bytes from STX to the end of the footer (inclusive).
+            // published UDP frames don't include the length field (4 bytes)
+            size_t send_len = header->numBytesDgm;
+
+            return send_len;
+
+//            ssize_t status = send(cfg->sock_fd, frame_buf + 4, send_len, 0);
+//
+//            if( status != send_len){
+//                int serr = errno;
+//                fprintf(stderr, "ERR - send failed ret[%zd] %d/%s\n", status, errno, strerror(errno));
+//            }
+//
+//            if(cfg->delay_ms > 0){
+//                // delay if set
+//                struct timespec delay_ms = {
+//                    (time_t)(cfg->delay_ms / 1000),
+//                    (long)(1000000L * (cfg->delay_ms % 1000UL))
+//                };
+//                nanosleep(&delay_ms, NULL);
+//            }
+
+            // return to start state
+//            fpos_start = mfile_seek(src, 0, MFILE_CUR);
+            state = ST_START;
+        }
+
+        if(state == ST_ERROR){
+            // error (EOF)
+            fprintf(stderr, "ERR - EOF or buffer length exceeded; quitting\n");
+            break;
+        }
+
+        // update file pointer
+//        file_cur = mfile_seek(src, 0, MFILE_CUR);
+    }
+    return -1;
+}
+
+/*--------------------------------------------------------------------*/
+
+int mbtrnpp_em710raw_input_read_ser(int verbose, void *mbio_ptr, size_t *size,
+                                char *buffer, int *error)
+{
+    // local variables
+    int status = MB_SUCCESS;
+    struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+    // print input debug statements
+    if (verbose >= 2) {
+        fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+        fprintf(stderr, "dbg2  Input arguments:\n");
+        fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+        fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
+        fprintf(stderr, "dbg2       size:       %zu\n", *size);
+        fprintf(stderr, "dbg2       buffer:     %p\n", buffer);
+    }
+
+    // Read the requested number of bytes (= size) off the input and
+    // place those bytes into the buffer.
+    // This requires reading full MB1 records from the socket,
+    // storing the data in buffer (implemented here), and parceling
+    // those bytes out as requested.
+
+    // use the socket reader
+    // read and return single frame
+    int64_t rbytes=-1;
+    uint32_t sync_bytes=0;
+    static uint64_t frame_count = 0;
+    static uint64_t frame_invalid = 0;
+    static uint64_t frame_read_err = 0;
+
+    // mbsp points to UDP socket
+    int *mbsp = (int *)mb_io_ptr->mbsp;
+
+    // frame buffer for byte-wise reads
+    static byte *frame_buf = NULL;
+    static size_t frame_len = 0;
+    static struct mbsys_simrad3_header *fb_phdr = NULL;
+    static byte *fb_pread=NULL;
+    static size_t bytes_read=0;
+    static bool read_frame=true;
+    bool read_err = false;
+
+    if(NULL == frame_buf)
+    {
+        frame_buf = (byte *)malloc(MB_UDP_SIZE_MAX);
+        memset(frame_buf, 0, MB_UDP_SIZE_MAX);
+        fb_pread = frame_buf;
+        fb_phdr = (struct mbsys_simrad3_header *)frame_buf;
+        bytes_read = 0;
+    }
+
+    // if valid reader...
+    if(NULL != mbsp && NULL != frame_buf)
+    {
+        if(read_frame)
+        {
+            // read frame into buffer
+            memset(frame_buf, 0, MB_UDP_SIZE_MAX);
+            fb_pread = frame_buf;
+
+            // read UDP datagram from the socket
+            // returns number of bytes read or -1 error
+
+            // UDP datagrams don't include 4-byte size field (numBytesDgm),
+            // but valid .ALL datagrams must include it.
+            // We'll calculate it and include it at the start of the buffer.
+
+            // The datagram size field (numBytesDgm) reflects the number of bytes
+            // from STX to the end of the footer (inclusive).
+            // This enables it to be read, then
+            // used to read the remainder of the datagram, *including* the footer.
+
+            if ( (rbytes = mbtrnpp_em710raw_recv_ser(*mbsp, (void *) (frame_buf + 4), MB_UDP_SIZE_MAX)) >= 0)
+            {
+                struct mbsys_simrad3_header *header = (struct mbsys_simrad3_header *)frame_buf;
+
+                // set datagram size (first 4 bytes of buffer)
+                unsigned int *pDgmSize = (unsigned int *)frame_buf;
+                *pDgmSize = rbytes;
+
+                int errors = 0;
+
+                // validate
+                uint16_t sum = 0;
+                byte *pstx = (byte *)&fb_phdr->dgmSTX;
+                byte *petx = frame_buf + (header->numBytesDgm + 1);
+                byte *cur = pstx + 1;
+                uint16_t *pchk = (uint16_t *)(petx + 1);
+
+                if(rbytes > 0 && rbytes <= MB_UDP_SIZE_MAX){
+
+                    while(cur < petx){
+                        sum += *cur;
+                        cur++;
+                    }
+                    if(sum != *pchk) {
+                        MX_LPRINT(MBTRNPP, 3, "invalid checksum %04X/%04X\n", sum, *pchk);
+                        errors++;
+                    }
+
+                    switch(fb_phdr->dgmType){
+                        case ALL_INSTALLATION_L:
+                        case ALL_INSTALLATION_U:
+                        case ALL_REMOTE:
+                        case ALL_RUNTIME:
+                        case ALL_RAW_RANGE_BEAM_ANGLE:
+                        case ALL_XYZ88:
+                        case ALL_CLOCK:
+                        case ALL_ATTITUDE:
+                        case ALL_POSITION:
+                        case ALL_SURFACE_SOUND_SPEED:
+                            // is valid type
+                            break;
+                        default:
+                            MX_LPRINT(MBTRNPP, 3, "invalid type x%02X\n", fb_phdr->dgmType);
+                            errors++;
+                    }
+                }
+
+                frame_len = header->numBytesDgm + 4;
+                frame_count++;
+                // write frame to log (debug only)
+#ifdef WITH_EM710_ALL_LOG
+                // write .ALL frame
+                fwrite(frame_buf, frame_len, 1, em_all_log);
+                fflush(em_all_log);
+#endif
+#ifdef WITH_EM710_UDP_LOG
+                // write UDP frame
+                fwrite(frame_buf+4, frame_len-4, 1, em_udp_log);
+                fflush(em_udp_log);
+#endif
+
+                if(verbose >= 5 || verbose <= -5 )
+                    em710_frame_show(frame_buf, verbose);
+
+                if(errors == 0)
+                {
+                    // update frame read pointers
+                    fb_pread = frame_buf;
+                    read_frame = false;
+                    read_err = false;
+                    MX_LPRINT(MBTRNPP, 3, "read frame len[%zu]\n", frame_len);
+                } else {
+                    // frame invalid
+                    frame_invalid++;
+                    read_err = true;
+                    MX_LPRINT(MBTRNPP, 3, "invalid frame len[%llu] sum[%hu/%04X] chksum[%hu/%04X]\n", frame_len, sum, sum, *pchk, *pchk);
+                }
+            } else {
+                // read error
+                frame_read_err++;
+                read_err = true;
+                MX_LPRINT(MBTRNPP, 3, "em710_read_frame failed rbytes[%lluu]\n", frame_len);
+            }
+
+            MX_LPRINT(MBTRNPP, 3, "%s - read frame fd %3d len[%6llu] n[%8llu] invalid[%8llu] read_err[%8llu] \n", __func__, *mbsp, frame_len, frame_count, frame_invalid, frame_read_err);
+
+        } else {
+            // there's a frame in the buffer
+            size_t bytes_rem = frame_buf + frame_len - fb_pread;
+            size_t readlen = (*size <= bytes_rem ? *size : bytes_rem);
+
+            MX_LPRINT(MBTRNPP, 4, "reading framebuf size[%2zu] frame_len[%6zu] rem[%6zu] err[%c]\n", (size_t)*size, frame_len, bytes_rem, (read_err?'Y':'N'));
+        }
+
+        if(!read_err){
+            int64_t bytes_rem = frame_buf + frame_len - fb_pread;
+            size_t readlen = (*size <= bytes_rem ? *size : bytes_rem);
+            if(readlen > 0){
+                memcpy(buffer, fb_pread, readlen);
+                *size = (size_t)readlen;
+                *error = MB_ERROR_NO_ERROR;
+                // update frame cursor
+                fb_pread += readlen;
+                bytes_rem -= readlen;
+                if(bytes_rem <= 0)
+                {
+                    MX_LPRINT(MBTRNPP, 4, "* buffer empty rem[%"PRId64"]\n", bytes_rem);
+                    // if nothing left, read a frame next time
+                    read_frame = true;
+                }
+            } else {
+                // buffer empty
+                status   = MB_FAILURE;
+                *error   = MB_ERROR_EOF;
+                *size    = (size_t)0;
+                read_frame = true;
+                MX_LPRINT(MBTRNPP, 4, "buffer empty readlen[%zu] rem[%"PRId64"]\n", readlen, bytes_rem);
+            }
+        }
+    } else {
+        fprintf(stderr, "%s : ERR - frame buffer or socket is NULL\n", __func__);
+    }
+
+    if(read_err)
+    {
+        status   = MB_FAILURE;
+        *error   = MB_ERROR_EOF;
+        *size    = (size_t)0;
+
+        MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_GETFAIL_XT], mtime_dtime());
+        MX_LPRINT(MBTRNPP, 4, "read em710raw UDP socket failed: sync_bytes[%d] status[%d] err[%d]\n",sync_bytes,status, *error);
+
+        MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBFRAMERD]);
+        MST_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_MB_SYNC_BYTES],sync_bytes);
+
+        // TODO: check connection status, only reconnect if disconnected...
+
+        MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_GETFAIL_XT], mtime_dtime());
+    }
+
+    // print output debug statements
+    if (verbose >= 2) {
+        fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+        fprintf(stderr, "dbg2  Return values:\n");
+        fprintf(stderr, "dbg2       size:       %zu\n", *size);
+        fprintf(stderr, "dbg2       buffer:     %p\n", buffer);
+        fprintf(stderr, "dbg2       error:              %d\n", *error);
+        fprintf(stderr, "dbg2  Return status:\n");
+        fprintf(stderr, "dbg2       status:             %d\n", status);
+    }
+
+    return (status);
+}
+
+/*--------------------------------------------------------------------*/
+
+int mbtrnpp_em710raw_input_close_ser(int verbose, void *mbio_ptr, int *error) {
+
+    /* local variables */
+    int status = mbtrnpp_em710raw_input_close_ser(verbose, mbio_ptr, error);
+    struct mb_io_struct *mb_io_ptr;
+
+    /* print input debug statements */
+    if (verbose >= 2) {
+        fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+        fprintf(stderr, "dbg2  Input arguments:\n");
+        fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+        fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
+    }
+
+    /* print output debug statements */
+    if (verbose >= 2) {
+        fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+        fprintf(stderr, "dbg2  Return values:\n");
+        fprintf(stderr, "dbg2       error:              %d\n", *error);
+        fprintf(stderr, "dbg2  Return status:\n");
+        fprintf(stderr, "dbg2       status:             %d\n", status);
+    }
 
     /* return */
     return (status);
