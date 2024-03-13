@@ -5,7 +5,7 @@
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
- *    Dale N. Chayes 
+ *    Dale N. Chayes
  *      Center for Coastal and Ocean Mapping
  *      University of New Hampshire
  *      Durham, New Hampshire, USA
@@ -15,13 +15,13 @@
  *      Bremen Germany
  *
  *    The program MBgrd2gltf, including this source file, was created
- *    by a Capstone Project team at the California State University 
- *    Monterey Bay (CSUMB) including Kyle Dowling, Julian Fortin, 
+ *    by a Capstone Project team at the California State University
+ *    Monterey Bay (CSUMB) including Kyle Dowling, Julian Fortin,
  *    Jesse Benavides, Nicolas Porras Falconio. This team was mentored by:
  *    Mike McCann
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
- *     
+ *
  *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
  *      Columbia University
@@ -33,7 +33,7 @@
 #ifndef GEOMETRY_H
 #define GEOMETRY_H
 
-// local includes
+ // local includes
 #include "vertex.h"
 #include "triangle.h"
 #include "matrix.h"
@@ -42,10 +42,8 @@
 // standard library
 #include <vector>
 
-namespace mbgrd2gltf
-{
-	class Geometry
-	{
+namespace mbgrd2gltf {
+	class Geometry {
 	private: // members
 
 		Matrix<Vertex> _vertices;
@@ -60,12 +58,15 @@ namespace mbgrd2gltf
 		static Matrix<Vertex> get_vertices(const Bathymetry& bathymetry, double vertical_exaggeration);
 		static std::vector<Triangle> get_triangles(const Matrix<Vertex>& vertices);
 
+
 	public: // methods
 
 		Geometry(const Bathymetry& bathymetry, const Options& options);
 
 		const Matrix<Vertex>& vertices() const { return _vertices; }
 		const std::vector<Triangle>& triangles() const { return _triangles; }
+		std::vector<float> ConvertMatrixToVector(const Matrix<Vertex>& matrix) const;
+		std::vector<int> ConvertTrianglesToVector(const std::vector<Triangle>& triangles) const;
 	};
 }
 
