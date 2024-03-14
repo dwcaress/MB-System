@@ -201,35 +201,36 @@ namespace mbgrd2gltf {
 		}
 
 
-		void EncodeGeometryWithDraco(const std::vector<float>& vertices, const std::vector<int>& faces,
+		void EncodeGeometryWithDraco(const std::vector<float>& vertices, const std::vector<int>& faces, int quantization,
 			std::vector<char>& compressed_data) {
 			// Step 1: Create a Draco mesh
 			draco::Mesh mesh;
 
 			// Step 2: Prepare and add vertices to the Draco mesh
+			// The vertices are added to the mesh by creating a new attribute and adding the attribute to the mesh.
 			const int num_vertices = vertices.size() / 3;
 			draco::PointCloud& pc = mesh;
 			draco::GeometryAttribute pos_att;
-			/*
-			// The attribute id is set to 0, which is the default attribute id for position attribute.
-			// The attribute id is used to identify the attribute in the mesh.
-			// The number of components in the attribute is 3, which is the number of components in the position attribute (x, y, z).
-			// The data type of the attribute is set to DT_FLOAT32, which is the data type of the position attribute.
-			// The attribute is not quantized, so the normalized flag is set to false.
-			// The byte stride is set to 0, which is the default value for the byte stride.
-			// The byte offset is set to 0, which is the default value for the byte offset.
-			*/
+
+			// The attribute is a set of data that is associated with a specific geometry.
 			pos_att.Init(draco::GeometryAttribute::POSITION, nullptr, 3, draco::DT_FLOAT32, false, 0, 0);
 			const uint32_t pos_att_id = pc.AddAttribute(pos_att, true, num_vertices);
 
 			for (int i = 0; i < num_vertices; ++i) {
+				// Get the vertex from the vertices array and add the vertex to the Draco mesh.
+				// i*3 is the index of the x coordinate of the vertex in the vertices array.
 				const float* const vertex = &vertices[i * 3];
+				// The SetAttributeValue function is used to set the value of the attribute at the specified position.
 				pc.attribute(pos_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), vertex);
 			}
 
 			// Step 3: Add faces to the Draco mesh
+			// The faces are added to the mesh by creating a new face and adding the face to the mesh.
 			const int num_faces = faces.size() / 3;
 			for (int i = 0; i < num_faces; ++i) {
+				// The face is created by adding the three vertices of the face to the mesh::face.
+				// The vertices are added to the face by creating a new PointIndex and adding the PointIndex to the face.
+				// in simpler terms a face is a triangle in the mesh and the vertices are the points that make up the triangle.
 				mesh.AddFace({draco::PointIndex(faces[i * 3]), draco::PointIndex(faces[i * 3 + 1]), draco::PointIndex(faces[i * 3 + 2])});
 			}
 
@@ -238,9 +239,10 @@ namespace mbgrd2gltf {
 
 			// Step 5: Set the desired encoding quantization
 			// The quantization bit is the number of bits used to store the quantized value.
-			// The quantization bit can be set to 14, 16, 18, 20, 22, 24, 26, 28, 30, or 32.
-			// The default value for the quantization bit is 14.
-			encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, 14);
+			// The quantization bit can be set to 0 to 30.
+			// The default value for the quantization bit is 11.
+			// Lower quantization can result in smaller file sizes but lower precision.
+			encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, quantization);
 
 			// Step 6: Encode the geometry data
 			// The encoded data will be stored in the buffer
@@ -271,18 +273,29 @@ namespace mbgrd2gltf {
 			if (options.is_draco_compressed()) {
 				// Encode geometry with Draco if the option is enabled
 				std::vector<char> draco_compressed_data;
-				EncodeGeometryWithDraco(geometry.ConvertMatrixToVector(geometry.vertices()), geometry.ConvertTrianglesToVector(geometry.triangles()), draco_compressed_data);
+				EncodeGeometryWithDraco(geometry.ConvertMatrixToVector(geometry.vertices()), geometry.ConvertTrianglesToVector(geometry.triangles()), options.draco_quantization(), draco_compressed_data);
 
 				tinygltf::Buffer buffer;
 				buffer.data.assign(draco_compressed_data.begin(), draco_compressed_data.end());
 				buffer.name = "Draco_Compressed";
 
+				// The bufferView is a view into the buffer.
+				// It specifies the portion of the buffer that contains the data for the attribute.
+				// BufferView.buffer is the index of the buffer in the glTF.buffers array.
+				// BufferView.byteOffset is the offset into the buffer in bytes.
+				// BufferView.byteLength is the length of the bufferView in bytes.
+				// BufferView.target is the target that the GPU buffer should be bound to.
 				tinygltf::BufferView bufferView;
 				bufferView.buffer = 0;
 				bufferView.byteOffset = 0;
 				bufferView.byteLength = buffer.data.size();
 				bufferView.target = 0;
 
+				// The accessor is a typed view into a bufferView.
+				// Accessor.bufferView is the index of the bufferView in the glTF.bufferViews array.
+				// Accessor.byteOffset is the offset into the bufferView in bytes.
+				// Accessor.componentType is the datatype of components in the attribute.
+				// Accessor.count is the number of attributes referenced by this accessor.
 				tinygltf::Accessor accessor;
 				accessor.bufferView = 0;
 				accessor.byteOffset = 0;
@@ -290,6 +303,10 @@ namespace mbgrd2gltf {
 				accessor.count = buffer.data.size();
 				accessor.type = TINYGLTF_TYPE_SCALAR;
 
+				// The primitive is a single part of a mesh with a single material.
+				// Primitive.indices is the index of the accessor that contains the indices.
+				// Primitive.attributes is a dictionary object, where each key corresponds to 
+				// mesh attribute semantic and each value is the index of the accessor containing attribute data.
 				tinygltf::Primitive primitive;
 				primitive.indices = 0;
 				primitive.attributes = {};
@@ -331,7 +348,9 @@ namespace mbgrd2gltf {
 			model.materials = {tinygltf::Material()};
 
 			tinygltf::TinyGLTF gltf;
-			gltf.WriteGltfSceneToFile(&model, output_filepath, false, true, true, options.is_binary_output());
+			// Options for writing the GLTF file.
+			bool embedImages = false, embedBuffers = true, prettyPrint = true;
+			gltf.WriteGltfSceneToFile(&model, output_filepath, embedImages, embedBuffers, prettyPrint, options.is_binary_output());
 		}
 	}
 }
