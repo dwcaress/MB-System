@@ -61,7 +61,24 @@ bool SwathGridData::readDatafile(char *swathFile) {
   
   int verbose = 1;
   int error = 0;
+
+  // Verify that accompanying .inf file exists;
+  // append extension .inf and check...
+  std::cerr << "readDataFile() " << swathFile << "\n";
+  char *infFile = strdup(swathFile);
+  strcat(infFile, ".inf");
   
+  // Check that inf file exists
+  std::cerr << "try to access infFile: " << infFile << "\n";
+  if (access(infFile, F_OK) != 0) {
+    // File does not exist
+    std::cerr << "File " << infFile << " not found\n";
+    free((void *)infFile);    
+    return false;
+  }
+
+  free((void *)infFile);
+
   // Call mbeditviz functions to read data from file
   int sonarFormat = 0;
   if (mb_get_format(verbose, (char *)swathFile, NULL, &sonarFormat, &error) !=
