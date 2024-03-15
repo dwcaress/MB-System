@@ -126,7 +126,7 @@ int TopoGridReader::RequestData(vtkInformation* request,
   grid_ = readGridfile(fileName_);
   
   if (!grid_) {
-    std::cerr << "error while reading " << fileName_ << std::endl;
+    std::cerr << "Error while reading " << fileName_ << ": SetErrorCode\n";
     SetErrorCode(vtkErrorCode::CannotOpenFileError);
     return 0;
   }
