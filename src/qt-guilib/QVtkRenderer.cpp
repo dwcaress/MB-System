@@ -223,7 +223,7 @@ void QVtkRenderer::synchronize(QQuickFramebufferObject *item) {
   if (gridFilenameChanged(item_->getGridFilename())) {
 
     gridReader_ = vtkSmartPointer<TopoGridReader>::New();
-    
+
     qDebug() << "synchronize(): change busy state to true";
     item_->setAppBusy(true);
 
@@ -431,6 +431,12 @@ bool QVtkRenderer::assemblePipeline() {
 
   qDebug() << "QVtkRenderer::assemblePipeline() for " << gridFilename_;
 
+  if (gridReader_->GetErrorCode() != 0) {
+    std::cerr << "gridReader_ error code: " << gridReader_->GetErrorCode() <<
+      "\n";
+    return false;
+  }
+  
   // Clear actor list
   renderer_->RemoveAllViewProps();
   
@@ -616,7 +622,7 @@ bool QVtkRenderer::gridFilenameChanged(char *filename) {
 void QVtkRenderer::handleFileLoaded() {
   // Called when worker thread is finished
 
-  
+
   qDebug() << "handleFileLoaded() current thread: ";
   qDebug() << QThread::currentThread();
 
@@ -643,19 +649,29 @@ void QVtkRenderer::LoadFileWorker::run() {
   okToRender_ = true;
   qDebug() << "QVtkRenderer::LoadFileLoader::run()";
 
+  qDebug() << "before gridReader->SetFileName(): ErrorCode: " <<
+    parent_.gridReader_->GetErrorCode();
+  
   parent_.gridReader_->SetFileName(parent_.gridFilename_);
+
+  qDebug() << "after gridReader->SetFileName(): ErrorCode: " <<
+    parent_.gridReader_->GetErrorCode();
+  
   TopoGridType gridType =
     TopoGridReader::getGridType(parent_.gridFilename_);
 
   parent_.gridReader_->setGridType(gridType);
-    
+
+  qDebug() << "before gridReader->Update(): ErrorCode: " <<
+    parent_.gridReader_->GetErrorCode();
+  
   parent_.gridReader_->Update();
 
   if (parent_.gridReader_->GetErrorCode()) {
     std::cerr << "Error during gridReader Update(): " <<
       parent_.gridReader_->GetErrorCode() << std::endl;
-    
-    return;
+
+    parent_.gridReader_->SetFileName("");
   }
 
   // Critical region - don't render during this phase
