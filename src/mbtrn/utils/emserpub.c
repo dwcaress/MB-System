@@ -241,10 +241,16 @@ void config_ser(int fd, app_cfg_t *cfg)
     if(tcgetattr(fd, &tty) != 0) {
         fprintf(stderr, "Error %i from tcgetattr: %s\n", errno, strerror(errno));
     }
+    cfmakeraw(&tty);
 
     tty.c_cflag &= ~(CSIZE|PARENB); // Clear parity bit
     tty.c_cflag &= ~CSTOPB; // Clear stop field (one stop bit)
     tty.c_cflag |= CS8;     // 8 bits per byte
+    if(cfg->flow == 'R'){
+        tty.c_cflag |= CRTSCTS; // Disable RTS/CTS hardware flow control
+    }
+
+#if 0
     tty.c_cflag |= CREAD; // Turn on READ & ignore ctrl lines
     tty.c_cflag |= CLOCAL; // Turn on READ & ignore ctrl lines
     tty.c_lflag &= ~ICANON;
@@ -262,16 +268,14 @@ void config_ser(int fd, app_cfg_t *cfg)
     tty.c_cc[VTIME] = 0;    // Wait for up to 1s (10 deciseconds), returning as soon as any data is received.
     tty.c_cc[VMIN] = 0;
 
-    if(cfg->flow == 'R'){
-        tty.c_cflag |= CRTSCTS; // Disable RTS/CTS hardware flow control
-    }
-
     if(cfg->flow == 'X'){
-        tty.c_iflag |= (IXON); // Enable s/w flow ctrl
+        tty.c_iflag &= (IXON); // Enable s/w flow ctrl
         tty.c_iflag &= ~(IXOFF | IXANY); // Enable s/w flow ctrl
         tty.c_cc[VSTOP] = XOFF;
         tty.c_cc[VSTART] = XON;
     }
+#endif
+
 
     // Set in/out baud rate
     switch(cfg->ser_baud){
@@ -335,7 +339,7 @@ int main(int argc, char **argv)
     s_cfg_show(cfg);
 
     // open output port
-    int fd = open(cfg->ser_device, O_RDWR);
+    int fd = open(cfg->ser_device, O_RDWR|O_NOCTTY);
 
     if(fd < 0){
         fprintf(stderr, "could not open %s %d/%s\n", cfg->ser_device, errno, strerror(errno));
@@ -365,10 +369,11 @@ int main(int argc, char **argv)
             fprintf(stderr, "ftell %zd fend %lld\n", ftell(fp), fend);
         }
 
-        const size_t IBUF_LEN = 1;
+        const size_t IBUF_LEN = 4096;
         unsigned char ibuf[IBUF_LEN]={0};
         bool do_quit=false;
         bool do_tx=true;
+        int64_t burst_count = 0;
 
         while(!do_quit && !g_interrupt) {
 
@@ -391,11 +396,13 @@ int main(int argc, char **argv)
                     if((modstat&TIOCM_CTS) != 0){
                         fprintf(stderr, "\nENABLE TX\n");
                         do_tx = true;
+                        burst_count = 0;
                         break;
                     }
                     usleep(10000);
                 }
             }
+
 
             while(do_tx && !g_interrupt){
 
@@ -406,7 +413,7 @@ int main(int argc, char **argv)
                         fprintf(stderr, "ERR TIOCMGET- %d/%s\n", errno, strerror(errno));
 
                     if((modstat&TIOCM_CTS) == 0){
-                        fprintf(stderr, "\nDISABLE TX\n");
+                        fprintf(stderr, "\nDISABLE TX (%lld bytes)\n", burst_count);
                         do_tx = false;
                         break;
                     }
@@ -418,11 +425,16 @@ int main(int argc, char **argv)
 
                     if( rbytes > 0) {
 
+                        burst_count += rbytes;
+
                         // write byte(s) to output (should block until sent)
                         ssize_t wb = write(fd, ibuf, rbytes);
+                        tcdrain(fd);
 
                         if(wb <= 0) {
                             fprintf(stderr, "\nERR - write returned %zd %d/%s\n", wb, errno, strerror(errno));
+                        } else if(wb < rbytes){
+                            fprintf(stderr, "\nWARN - write returned %zd/%zd\n", wb, rbytes);
                         }
 
                         // display bytes

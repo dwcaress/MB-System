@@ -7721,7 +7721,7 @@ int mbtrnpp_em710raw_input_open_ser(int verbose, void *mbio_ptr, char *definitio
 
     // Create a datagram socket on which to receive.
     int sd = -1;
-    sd = open(ser_device, O_RDWR);
+    sd = open(ser_device, O_RDWR|O_NOCTTY);
 
     if (sd < 0)
     {
@@ -7738,11 +7738,13 @@ int mbtrnpp_em710raw_input_open_ser(int verbose, void *mbio_ptr, char *definitio
     if(tcgetattr(sd, &tty) != 0) {
         fprintf(stderr, "Error %i from tcgetattr: %s\n", errno, strerror(errno));
     }
+    cfmakeraw(&tty);
 
     tty.c_cflag &= ~(CSIZE|PARENB); // Clear parity bit
     tty.c_cflag &= ~CSTOPB; // Clear stop field (one stop bit)
     tty.c_cflag |= CS8;     // 8 bits per byte
     tty.c_cflag |= CRTSCTS; // Enable RTS/CTS hardware flow control
+#if 0
     tty.c_cflag |= CREAD; // Turn on READ & ignore ctrl lines
     tty.c_cflag |= CLOCAL; // Turn on READ & ignore ctrl lines
     tty.c_lflag &= ~ICANON;
@@ -7752,7 +7754,7 @@ int mbtrnpp_em710raw_input_open_ser(int verbose, void *mbio_ptr, char *definitio
     tty.c_lflag &= ~ISIG; // Disable interpretation of INTR, QUIT and SUSP
     tty.c_lflag &= ~IEXTEN; // Disable implementation-defined input processing
 //    tty.c_iflag &= ~(IXON | IXOFF | IXANY); // Enable s/w flow ctrl
-    tty.c_iflag &= ~(IXON); // Enable output s/w flow ctrl
+    tty.c_iflag &= ~(IXON); // Disable output s/w flow ctrl
     tty.c_iflag &= ~(IXOFF | IXANY); // Disable input s/w flow ctrl
     tty.c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL); // Disable any special handling of received bytes
     tty.c_oflag &= ~OPOST; // Prevent special interpretation of output bytes (e.g. newline chars)
@@ -7763,7 +7765,7 @@ int mbtrnpp_em710raw_input_open_ser(int verbose, void *mbio_ptr, char *definitio
     tty.c_cc[VMIN] = 0;
 //    tty.c_cc[VSTOP] = XOFF; //0x13
 //    tty.c_cc[VSTART] = XON; //0x11
-
+#endif
     fprintf(stderr, "%s connected fd %d %s:%d\n", __func__, sd, ser_device, ser_baud);
 
     // Set in/out baud rate to be 9600
@@ -8023,11 +8025,15 @@ int64_t mbtrnpp_em710raw_update_buffer(int fd, byte *buf, size_t len, const byte
 
 //    // enable sender transmit
 //    mbtrnpp_em710raw_set_cts(fd, false);
+    int availBytes=0;
+    int istat = ioctl(fd, FIONREAD, &availBytes);
+    fprintf(stderr,"FIONREAD stat %d availBytes %d %d/%s\n", istat, availBytes, errno, strerror(errno));
 
     byte *cur = wr_ptr;
     size_t rem_bytes = wr_len;
     size_t bytes_added = 0;
     bool tx_en = false;
+    int64_t burst_bytes = 0;
     while(rem_bytes > 0) {
 
         fd_set rd_fds;
@@ -8051,6 +8057,7 @@ int64_t mbtrnpp_em710raw_update_buffer(int fd, byte *buf, size_t len, const byte
             // no sets ready
             if(!tx_en){
                 tx_en = true;
+                burst_bytes = 0;
                 fprintf(stderr, "ENABLE CTS\n");
                 // enable sender transmit
                 mbtrnpp_em710raw_set_rts(fd, true);
@@ -8068,16 +8075,17 @@ int64_t mbtrnpp_em710raw_update_buffer(int fd, byte *buf, size_t len, const byte
                     rem_bytes -= rb;
                     cur += rb;
                     bytes_added += rb;
+                    burst_bytes += rb;
                     if(r_stream_ofs != NULL)
                         *r_stream_ofs += rb;
-//                    fprintf(stderr, "ser read wr_len %zd rem %4zd rq %4zd rb %4zd\n", wr_len, rem_bytes, rq, rb);
+                    fprintf(stderr, "ser read wr_len %zd rem %4zd rq %4zd rb %4zd\n", wr_len, rem_bytes, rq, rb);
                 }
             }
         }
     }
 
     // disable sender transmit
-    fprintf(stderr, "DISABLE CTS\n");
+    fprintf(stderr, "DISABLE CTS (%lld bytes)\n", burst_bytes);
     mbtrnpp_em710raw_set_rts(fd, false);
 
 //    int64_t sofs = (r_stream_ofs != NULL ? *r_stream_ofs : -1);
@@ -8166,7 +8174,7 @@ int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t len, int *r_e
         ser_buffer = (ser_buf_t *)malloc(sizeof(ser_buf_t));
         if(ser_buffer != NULL){
             ser_buffer->fd = src;
-            ser_buffer->size = 1024;//MB_UDP_SIZE_MAX;
+            ser_buffer->size = 4096;//1024;//MB_UDP_SIZE_MAX;
             ser_buffer->data = NULL;
             ser_buffer->pread = NULL;
             ser_buffer->pend = NULL;
