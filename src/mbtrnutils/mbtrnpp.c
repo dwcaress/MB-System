@@ -756,6 +756,9 @@ FILE *output_trn_fp = NULL;
 
 #endif // WITH_MBTNAV
 
+#define XON 0x11
+#define XOFF 0x13
+
 typedef enum{
     EM710_EOK = 0,
     EM710_ETYPE = 1,
@@ -782,6 +785,7 @@ const char *em_frame_err_str[]={"EM_EOK","EM_ETYPE","EM_ESTX","EM_EETX","EM_ECHK
 
 struct sockaddr_in em_sock_addr;
 socklen_t em_sock_len;
+unsigned char em_ser_flow = 'R';
 
 #ifdef WITH_EM710_ALL_LOG
 // log em710 frames (debug)
@@ -7698,6 +7702,7 @@ int mbtrnpp_em710raw_input_open_ser(int verbose, void *mbio_ptr, char *definitio
     // - the socket definition = "hostInterface:broadcastGroup:port"
     int port=-1;
     unsigned int ser_baud=115200;
+    unsigned char ser_flow='R';
     mb_path in_type;
     mb_path ser_device;
     struct ip_mreq group;
@@ -7707,18 +7712,24 @@ int mbtrnpp_em710raw_input_open_ser(int verbose, void *mbio_ptr, char *definitio
     if ((token = strtok_r(definition, ":", &saveptr)) != NULL) {
         strncpy(ser_device, token, sizeof(mb_path));
     }
-//    if ((token = strtok_r(NULL, ":", &saveptr)) != NULL) {
-//        strncpy(ser_device, token, sizeof(mb_path));
-//    }
     if ((token = strtok_r(NULL, ":", &saveptr)) != NULL) {
         sscanf(token, "%u", &ser_baud);
     }
+    if ((token = strtok_r(NULL, ":", &saveptr)) != NULL) {
+        if(toupper(token[0]) == 'X')
+            ser_flow = 'X';
+        if(toupper(token[0]) == 'R')
+            ser_flow = 'R';
+        if(toupper(token[0]) == 'N')
+            ser_flow = 'N';
+    }
+    em_ser_flow = ser_flow;
 
     //sscanf(definition, "%s:%s:%d", hostInterface, bcastGrp, &port);
     fprintf(stderr, "Attempting to open serial port to Kongsberg sonar output at:\n");
     fprintf(stderr, "  Definition: %s\n", definition);
-    fprintf(stderr, "  ser_device: %s\n  ser_baud: %u\n \n",
-            ser_device, ser_baud);
+    fprintf(stderr, "  ser_device: %s\n  ser_baud: %u \nser_flow %c\n",
+            ser_device, ser_baud, ser_flow);
 
     // Create a datagram socket on which to receive.
     int sd = -1;
@@ -7741,11 +7752,20 @@ int mbtrnpp_em710raw_input_open_ser(int verbose, void *mbio_ptr, char *definitio
     }
     cfmakeraw(&tty);
 
+    if(ser_flow == 'R'){
+        tty.c_cflag |= CRTSCTS; // Enable RTS/CTS hardware flow control
+    } else if(ser_flow == 'X'){
+        tty.c_iflag |= (IXON); // Enable s/w flow ctrl input
+        tty.c_iflag |= (IXOFF); // Enable s/w flow ctrl output
+        tty.c_iflag &= ~(IXANY); // Enable s/w flow ctrl
+        tty.c_cc[VSTART] = XON;
+        tty.c_cc[VSTOP] = XOFF;
+    }
+
+#if 0
     tty.c_cflag &= ~(CSIZE|PARENB); // Clear parity bit
     tty.c_cflag &= ~CSTOPB; // Clear stop field (one stop bit)
     tty.c_cflag |= CS8;     // 8 bits per byte
-    tty.c_cflag |= CRTSCTS; // Enable RTS/CTS hardware flow control
-#if 0
     tty.c_cflag |= CREAD; // Turn on READ & ignore ctrl lines
     tty.c_cflag |= CLOCAL; // Turn on READ & ignore ctrl lines
     tty.c_lflag &= ~ICANON;
@@ -7814,6 +7834,9 @@ int mbtrnpp_em710raw_input_open_ser(int verbose, void *mbio_ptr, char *definitio
             baud_valid = false;
             break;
     };
+
+    if(tcsetattr(sd, TCSANOW, &tty) != 0)
+        fprintf(stderr, "ERR - tcsetattr failed %d/%s\n", errno, strerror(errno));
 
 #ifdef WITH_EM710_ALL_LOG
     em_all_log = fopen(em_all_name, "w+");
@@ -8020,11 +8043,10 @@ int64_t mbtrnpp_em710raw_update_buffer(int fd, byte *buf, size_t len, const byte
 //    fprintf(stderr, "%s: save_prt %p save_len %lld  \n", __func__, save_ptr, save_len);
 //    fprintf(stderr, "%s: wr_ptr %p wr_len %zd \n", __func__, wr_ptr, wr_len);
 
-//    // enable sender transmit
-//    mbtrnpp_em710raw_set_cts(fd, false);
-    int availBytes=0;
-    int istat = ioctl(fd, FIONREAD, &availBytes);
-    fprintf(stderr,"FIONREAD stat %d availBytes %d %d/%s\n", istat, availBytes, errno, strerror(errno));
+
+    //    int availBytes=0;
+//    int istat = ioctl(fd, FIONREAD, &availBytes);
+//    fprintf(stderr,"FIONREAD stat %d availBytes %d %d/%s\n", istat, availBytes, errno, strerror(errno));
 
     byte *cur = wr_ptr;
     size_t rem_bytes = wr_len;
@@ -8055,9 +8077,16 @@ int64_t mbtrnpp_em710raw_update_buffer(int fd, byte *buf, size_t len, const byte
             if(!tx_en){
                 tx_en = true;
                 burst_bytes = 0;
-                fprintf(stderr, "ENABLE CTS\n");
-                // enable sender transmit
-                mbtrnpp_em710raw_set_rts(fd, true);
+
+                if(em_ser_flow == 'R'){
+                    fprintf(stderr, "ENABLE CTS\n");
+                    // enable sender transmit
+                    mbtrnpp_em710raw_set_rts(fd, true);
+                } else if(em_ser_flow == 'X'){
+                    fprintf(stderr, "ENABLE XON\n");
+                    unsigned char c[1] = {XON};
+                    write(fd, c, 1);
+                }
             }
         } else {
 
@@ -8075,15 +8104,22 @@ int64_t mbtrnpp_em710raw_update_buffer(int fd, byte *buf, size_t len, const byte
                     burst_bytes += rb;
                     if(r_stream_ofs != NULL)
                         *r_stream_ofs += rb;
-                    fprintf(stderr, "ser read wr_len %zd rem %4zd rq %4zd rb %4zd\n", wr_len, rem_bytes, rq, rb);
+//                    fprintf(stderr, "ser read wr_len %zd rem %4zd rq %4zd rb %4zd\n", wr_len, rem_bytes, rq, rb);
                 }
             }
         }
     }
 
     // disable sender transmit
-    fprintf(stderr, "DISABLE CTS (%lld bytes)\n", burst_bytes);
-    mbtrnpp_em710raw_set_rts(fd, false);
+    if(em_ser_flow == 'R'){
+        fprintf(stderr, "DISABLE CTS (%lld bytes)\n", burst_bytes);
+        mbtrnpp_em710raw_set_rts(fd, false);
+    } else if(em_ser_flow == 'X'){
+        unsigned char c[1] = {XOFF};
+        write(fd, c, 1);
+        fprintf(stderr, "DISABLE XOFF (%lld bytes)\n", burst_bytes);
+
+    }
 
 //    int64_t sofs = (r_stream_ofs != NULL ? *r_stream_ofs : -1);
 //    fprintf(stderr, "%s: stream_ofs %llX (%llu) \n", __func__, sofs, sofs);
@@ -8171,7 +8207,7 @@ int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t len, int *r_e
         ser_buffer = (ser_buf_t *)malloc(sizeof(ser_buf_t));
         if(ser_buffer != NULL){
             ser_buffer->fd = src;
-            ser_buffer->size = 8192;//4096;//1024;//MB_UDP_SIZE_MAX;
+            ser_buffer->size = 4096;//4096;//1024;//MB_UDP_SIZE_MAX;
             ser_buffer->data = NULL;
             ser_buffer->pread = NULL;
             ser_buffer->pend = NULL;
@@ -8240,22 +8276,17 @@ int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t len, int *r_e
                         state = ST_FRAME_END;
                         break;
                     default:
-                        fprintf(stderr, "ERR - invalid type %02X bp=%p fp=%p\n", *bp, bp, frame_buf);
                         fill_stx = false;
                         state = ST_START;
+
+                        if(verbose >= 3)
+                            fprintf(stderr, "INFO - invalid type %02X bp=%p fp=%p\n", *bp, bp, frame_buf);
                         break;
                 };
 
             } else if(rbytes <= 0){
                 if(r_err != NULL)
                     *r_err = EM710_EREAD;
-                state = ST_ERROR;
-            }
-            if((bp - frame_buf) >= len){
-                fprintf(stderr,"%s: ERR - buffer length exceeded looking for STX2\n", __func__);
-                fill_stx = false;
-                if(r_err != NULL)
-                    *r_err = EM710_EOFLOW;
                 state = ST_ERROR;
             }
         }
@@ -8278,7 +8309,7 @@ int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t len, int *r_e
                     fill_stx = false;
                 }
                 if((bp - frame_buf) >= len){
-                    fprintf(stderr,"%s: ERR - buffer length exceeded looking for STX2\n", __func__);
+                    fprintf(stderr,"%s: ERR - buffer length exceeded (Frame End))\n", __func__);
                     fill_stx = false;
                     if(r_err != NULL)
                         *r_err = EM710_EOFLOW;
@@ -8361,8 +8392,6 @@ int64_t mbtrnpp_em710raw_recv_ser_orig(int src, byte *frame_buf, size_t len, int
     static uint64_t stream_ofs = 0;
 
     state_t state = ST_START;
-    unsigned char XOFF[1]={0x13};
-    unsigned char XON[1]={0x11};
 
     while(! (state == ST_ERROR)){
 //        fprintf(stderr, "state %s fstx %c b %02X\n", state_names[state], (fill_stx ? 'Y' : 'N'), *(bp-1));

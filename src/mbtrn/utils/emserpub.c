@@ -101,7 +101,7 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
                 // ibuf
                 else if (strcmp("ibuf", options[option_index].name) == 0) {
                     uint64_t x = 0;
-                    if(sscanf(optarg,"%llu",&x) == 1 && x > 0){
+                    if(sscanf(optarg,"%llu", &x) == 1 && x > 0){
                         cfg->ibuf_sz = x;
 
                         unsigned char *bp = (unsigned char *)realloc(cfg->ibuf, x);
@@ -159,9 +159,12 @@ static app_cfg_t *s_cfg_new()
         new_cfg->flow = 'R';
         new_cfg->ibuf_sz = IBUF_BYTES_DFL;
         new_cfg->ibuf = (unsigned char *)malloc(IBUF_BYTES_DFL);
-        if(new_cfg->ibuf)
-            perror("ibuf alloc failed");
-        memset(new_cfg->ibuf, 0, new_cfg->ibuf_sz);
+        if(new_cfg->ibuf != NULL){
+            memset(new_cfg->ibuf, 0, new_cfg->ibuf_sz);
+        } else {
+            fprintf(stderr, "ibuf alloc failed %p len %d %d/%s\n", new_cfg->ibuf, IBUF_BYTES_DFL, errno, strerror(errno));
+            exit(-1);
+        }
     }
     return new_cfg;
 }
@@ -272,16 +275,26 @@ void config_ser(int fd, app_cfg_t *cfg)
     if(tcgetattr(fd, &tty) != 0) {
         fprintf(stderr, "Error %i from tcgetattr: %s\n", errno, strerror(errno));
     }
+
     cfmakeraw(&tty);
 
-    tty.c_cflag &= ~(CSIZE|PARENB); // Clear parity bit
-    tty.c_cflag &= ~CSTOPB; // Clear stop field (one stop bit)
-    tty.c_cflag |= CS8;     // 8 bits per byte
     if(cfg->flow == 'R'){
         tty.c_cflag |= CRTSCTS; // Disable RTS/CTS hardware flow control
+    }else if(cfg->flow == 'X'){
+        tty.c_iflag |= (IXON); // Enable s/w flow ctrl input
+        tty.c_iflag |= (IXOFF); // Enable s/w flow ctrl output
+        tty.c_iflag &= ~(IXANY); // Enable s/w flow ctrl
+        tty.c_cc[VSTART] = XON;
+        tty.c_cc[VSTOP] = XOFF;
+        tty.c_cc[VTIME] = 1;    // Wait for up to 1s (10 deciseconds), returning as soon as any data is received.
+        tty.c_cc[VMIN] = 0;
+
     }
 
 #if 0
+    tty.c_cflag &= ~(CSIZE|PARENB); // Clear parity bit
+    tty.c_cflag &= ~CSTOPB; // Clear stop field (one stop bit)
+    tty.c_cflag |= CS8;     // 8 bits per byte
     tty.c_cflag |= CREAD; // Turn on READ & ignore ctrl lines
     tty.c_cflag |= CLOCAL; // Turn on READ & ignore ctrl lines
     tty.c_lflag &= ~ICANON;
@@ -350,6 +363,10 @@ void config_ser(int fd, app_cfg_t *cfg)
             fprintf(stderr, "ERR - invalid ser_baud %u\n", cfg->ser_baud);
             break;
     };
+
+    if(tcsetattr(fd, TCSANOW, &tty) != 0)
+        fprintf(stderr, "ERR - tcsetattr failed %d/%s\n", errno, strerror(errno));
+
     return;
 }
 
@@ -366,7 +383,7 @@ int main(int argc, char **argv)
     s_cfg_show(cfg);
 
     // open output port
-    int fd = open(cfg->ser_device, O_RDWR);
+    int fd = open(cfg->ser_device, O_RDWR|O_NOCTTY);
 
     if(fd < 0){
         fprintf(stderr, "could not open %s %d/%s\n", cfg->ser_device, errno, strerror(errno));
@@ -380,6 +397,8 @@ int main(int argc, char **argv)
     FILE *fp = fopen(cfg->ifile, "rb");
 
     uint64_t obytes = 0;
+    int64_t total_rbytes=0;
+    int64_t total_wbytes=0;
 
     if(fp != NULL){
 
@@ -419,7 +438,19 @@ int main(int argc, char **argv)
                         fprintf(stderr, "ERR TIOCMGET- %d/%s\n", errno, strerror(errno));
 
                     if((modstat&TIOCM_CTS) != 0){
-                        fprintf(stderr, "\nENABLE TX\n");
+                        fprintf(stderr, "\nENABLE TX (CTS)\n");
+                        do_tx = true;
+                        burst_count = 0;
+                        break;
+                    }
+                    usleep(10000);
+                }
+            } else if(cfg->flow == 'X'){
+                while(!g_interrupt){
+                    unsigned char flow_stat = 0;
+                    if(read(fd, &flow_stat, 1) == 1 && flow_stat == XON){
+                        fprintf(stderr, "\nENABLE TX (XON)\n");
+                        tcflush(fd, TCIFLUSH);
                         do_tx = true;
                         burst_count = 0;
                         break;
@@ -427,7 +458,6 @@ int main(int argc, char **argv)
                     usleep(10000);
                 }
             }
-
 
             while(do_tx && !g_interrupt){
 
@@ -438,7 +468,15 @@ int main(int argc, char **argv)
                         fprintf(stderr, "ERR TIOCMGET- %d/%s\n", errno, strerror(errno));
 
                     if((modstat&TIOCM_CTS) == 0){
-                        fprintf(stderr, "\nDISABLE TX (%lld bytes)\n", burst_count);
+                        fprintf(stderr, "\nDISABLE TX (CTS %lld bytes)\n", burst_count);
+                        do_tx = false;
+                        break;
+                    }
+                } else if(cfg->flow == 'X'){
+                    unsigned char flow_stat = 0;
+                    if(read(fd, &flow_stat, 1) == 1 && flow_stat == XOFF){
+                        fprintf(stderr, "\nDISABLE TX (XOFF %lld bytes)\n", burst_count);
+                        tcflush(fd, TCIFLUSH);
                         do_tx = false;
                         break;
                     }
@@ -446,10 +484,10 @@ int main(int argc, char **argv)
 
                 if(do_tx){
                     // read byte(s) from input file
-                    size_t rbytes = fread(&cfg->ibuf, 1, cfg->ibuf_sz, fp);
+                    size_t rbytes = fread(cfg->ibuf, 1, cfg->ibuf_sz, fp);
 
                     if( rbytes > 0) {
-
+                        total_rbytes += rbytes;
                         burst_count += rbytes;
 
                         // write byte(s) to output (should block until sent)
@@ -457,9 +495,12 @@ int main(int argc, char **argv)
                         tcdrain(fd);
 
                         if(wb <= 0) {
-                            fprintf(stderr, "\nERR - write returned %zd %d/%s\n", wb, errno, strerror(errno));
-                        } else if(wb < rbytes){
-                            fprintf(stderr, "\nWARN - write returned %zd/%zd\n", wb, rbytes);
+                            fprintf(stderr, "\nERR - write returned %zd ibuf %p len %llu %d/%s\n", wb, cfg->ibuf, cfg->ibuf_sz, errno, strerror(errno));
+                        } else{
+                            total_wbytes += wb;
+                            if(wb < rbytes){
+                                fprintf(stderr, "\nWARN - write returned %zd/%zd\n", wb, rbytes);
+                            }
                         }
 
                         // display bytes
@@ -488,7 +529,7 @@ int main(int argc, char **argv)
     }
 
     if(cfg->verbose > 0 ){
-        fprintf(stderr, "\nwrote %llu/%08llX bytes\n", obytes, obytes);
+        fprintf(stderr, "\n read %llu/%08llX wrote %llu/%08llX bytes\n", total_rbytes, total_rbytes, total_wbytes, total_wbytes);
     }
 
     close(fd);
