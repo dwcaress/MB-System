@@ -7897,7 +7897,7 @@ static bool mbtrnpp_em710raw_validate_frame(byte *src, unsigned int len, int *r_
         case ALL_SURFACE_SOUND_SPEED:
             break;
         default:
-            fprintf(stderr, "%s - ERR: invalid type %02x\n", __func__, header->dgmType);
+            MX_BPRINT((verbose < -2), "%s: invalid type %02x\n", __func__, header->dgmType);
             if(r_err != NULL) *r_err = EM710_ETYPE;
             return false;
             break;
@@ -7905,12 +7905,12 @@ static bool mbtrnpp_em710raw_validate_frame(byte *src, unsigned int len, int *r_
 
     if(header->dgmSTX !=  EM3_START_BYTE) {
         if(r_err != NULL) *r_err = EM710_ESTX;
-        fprintf(stderr, "%s - ERR: invalid STX %02X/%02X\n", __func__, header->dgmSTX, EM3_START_BYTE);
+        MX_BPRINT((verbose < -2), "%s: invalid STX %02X/%02X\n", __func__, header->dgmSTX, EM3_START_BYTE);
         return false;
     }
 
     if(*petx !=  EM3_END_BYTE) {
-        fprintf(stderr, "%s - ERR: invalid ETX %02X/%02X len(%u)\n", __func__, *petx, EM3_END_BYTE, len);
+        MX_BPRINT((verbose < -2), "%s: invalid ETX %02X/%02X len(%u)\n", __func__, *petx, EM3_END_BYTE, len);
         if(r_err != NULL) *r_err = EM710_EETX;
         return false;
     }
@@ -7922,14 +7922,12 @@ static bool mbtrnpp_em710raw_validate_frame(byte *src, unsigned int len, int *r_
         psum++;
     }
     if(sum != *pchk){
-        fprintf(stderr, "%s - ERR: invalid checksum sum %04X/%04hu  chk %04X/%04hu\n", __func__, sum, sum, *pchk, *pchk);
+        MX_BPRINT((verbose < -2), "%s: invalid checksum sum %04X/%04hu  chk %04X/%04hu\n", __func__, sum, sum, *pchk, *pchk);
         if(r_err != NULL) *r_err = EM710_ECHK;
         return false;
     } else {
-        if(verbose > 1){
-            fprintf(stderr, "%s - petx ofs(%04lX) pchk ofs (%04lx)  etx %02X\n", __func__, petx-src, pbchk-src, *petx);
-            fprintf(stderr, "%s - sum %04hu/%04X  checksum %04hu/%04X \n", __func__, sum, sum, *pchk, *pchk);
-        }
+        MX_BPRINT((verbose > 1), "%s - petx ofs(%04lX) pchk ofs (%04lx)  etx %02X\n", __func__, petx-src, pbchk-src, *petx);
+        MX_BPRINT((verbose > 1), "%s - sum %04hu/%04X  checksum %04hu/%04X \n", __func__, sum, sum, *pchk, *pchk);
     }
     if(r_err != NULL) *r_err = EM710_EOK;
 
@@ -8079,11 +8077,11 @@ int64_t mbtrnpp_em710raw_update_buffer(int fd, byte *buf, size_t len, const byte
                 burst_bytes = 0;
 
                 if(em_ser_flow == 'R'){
-                    fprintf(stderr, "ENABLE CTS\n");
+                    MX_BMSG((verbose < -2), "ENABLE CTS\n");
                     // enable sender transmit
                     mbtrnpp_em710raw_set_rts(fd, true);
                 } else if(em_ser_flow == 'X'){
-                    fprintf(stderr, "ENABLE XON\n");
+                    MX_BMSG((verbose < -2), "ENABLE XON\n");
                     unsigned char c[1] = {XON};
                     write(fd, c, 1);
                 }
@@ -8112,12 +8110,12 @@ int64_t mbtrnpp_em710raw_update_buffer(int fd, byte *buf, size_t len, const byte
 
     // disable sender transmit
     if(em_ser_flow == 'R'){
-        fprintf(stderr, "DISABLE CTS (%lld bytes)\n", burst_bytes);
+        MX_BPRINT((verbose < -2), "DISABLE CTS (%lld bytes)\n", burst_bytes);
         mbtrnpp_em710raw_set_rts(fd, false);
     } else if(em_ser_flow == 'X'){
         unsigned char c[1] = {XOFF};
         write(fd, c, 1);
-        fprintf(stderr, "DISABLE XOFF (%lld bytes)\n", burst_bytes);
+        MX_BPRINT((verbose < -2), "DISABLE XOFF (%lld bytes)\n", burst_bytes);
 
     }
 
@@ -8200,7 +8198,7 @@ int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t len, int *r_e
     byte *petx = NULL;
     static bool fill_stx = false;
     static uint64_t stream_ofs = 0;
-
+    static uint64_t frame_count[3]={0};
     static ser_buf_t *ser_buffer = NULL;
 
     if(ser_buffer == NULL){
@@ -8326,14 +8324,20 @@ int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t len, int *r_e
 
             header->numBytesDgm = (petx - frame_buf)-1;
 
-            MX_BPRINT( (verbose != 0), "validating frame stream_bytes[%010llX] len[%4zd/%04X] petx ofs[%5zd/%04X] (%02X)\n", stream_ofs, dgram_bytes, dgram_bytes, (petx-frame_buf), (petx-frame_buf), *petx);
+//            MX_BPRINT( (verbose != 0), "validating frame stream_bytes[%010llX] len[%4zd/%04X] petx ofs[%5zd/%04X] (%02X)\n", stream_ofs, dgram_bytes, dgram_bytes, (petx-frame_buf), (petx-frame_buf), *petx);
+
 
             int verr = 0;
 
+            frame_count[0]++;
+
             if(mbtrnpp_em710raw_validate_frame(frame_buf, dgram_bytes, &verr, verbose)){
 
+                frame_count[1]++;
 
-                MX_BPRINT( (verbose > 0), "returning frame len[%zd/%04X] petx ofs[%5zd/%04X] (%02X)\n", dgram_bytes, dgram_bytes, (petx-frame_buf), (petx-frame_buf), *petx);
+                MX_BPRINT( (verbose < -2), "frame stream_bytes[%010llX] len[%4zd/%04X] N/valid/invalid[%6lld %6lld %6lld] \n", stream_ofs, dgram_bytes, dgram_bytes, frame_count[0], frame_count[1], frame_count[2]);
+
+//                MX_BPRINT( (verbose > 0), "returning frame len[%zd/%04X] petx ofs[%5zd/%04X] (%02X)\n", dgram_bytes, dgram_bytes, (petx-frame_buf), (petx-frame_buf), *petx);
 
                 size_t send_len = header->numBytesDgm;
 
@@ -8352,6 +8356,7 @@ int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t len, int *r_e
 
                 return send_len;
             } else {
+                frame_count[2]++;
                 if(verr == EM710_ECHK || verr == EM710_ETYPE){
                     // checksum or type error, restart
                     // (should already be handled in state machine)
@@ -8363,6 +8368,8 @@ int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t len, int *r_e
                     fill_stx = false;
                     state = ST_FRAME_END;
                 }
+                MX_BPRINT( (verbose < -2), "frame stream_bytes[%010llX] len[%4zd/%04X] N/valid/invalid[%6lld %6lld %6lld] err[%d/%s]\n", stream_ofs, dgram_bytes, dgram_bytes,  frame_count[0], frame_count[1], frame_count[2], verr, em_frame_err_str[verr%EM710_ECOUNT]);
+
             }
         }
     }
@@ -8702,7 +8709,7 @@ int mbtrnpp_em710raw_input_read_ser(int verbose, void *mbio_ptr, size_t *size,
                 //MX_LPRINT(MBTRNPP, 3, "em710_read_frame failed rbytes[%lld] errors(%d)\n", rbytes, frame_read_err);
             }
 
-            MX_BPRINT(((!read_err || (frame_read_err % 100) == 0) && abs(verbose) >= 3), "%s - read frame fd %3d len[%6llu] n[%8llu] invalid[%8llu] read_err[%8llu/%s] \n", __func__, *mbsp, frame_len, frame_count, frame_invalid, frame_read_err, em_frame_err_str[frame_err%EM710_ECOUNT]);
+//            MX_BPRINT(((!read_err || (frame_read_err % 100) == 0) && abs(verbose) >= 3), "%s - read frame fd %3d len[%6llu] n[%8llu] invalid[%8llu] read_err[%8llu/%s] \n", __func__, *mbsp, frame_len, frame_count, frame_invalid, frame_read_err, em_frame_err_str[frame_err%EM710_ECOUNT]);
 
         } else {
             // there's a frame in the buffer

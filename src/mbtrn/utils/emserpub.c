@@ -438,7 +438,8 @@ int main(int argc, char **argv)
                         fprintf(stderr, "ERR TIOCMGET- %d/%s\n", errno, strerror(errno));
 
                     if((modstat&TIOCM_CTS) != 0){
-                        fprintf(stderr, "\nENABLE TX (CTS)\n");
+                        if(cfg->verbose >= 1)
+                            fprintf(stderr, "\nENABLE TX (CTS)\n");
                         do_tx = true;
                         burst_count = 0;
                         break;
@@ -449,7 +450,8 @@ int main(int argc, char **argv)
                 while(!g_interrupt){
                     unsigned char flow_stat = 0;
                     if(read(fd, &flow_stat, 1) == 1 && flow_stat == XON){
-                        fprintf(stderr, "\nENABLE TX (XON)\n");
+                        if(cfg->verbose >= 1)
+                            fprintf(stderr, "\nENABLE TX (XON)\n");
                         tcflush(fd, TCIFLUSH);
                         do_tx = true;
                         burst_count = 0;
@@ -468,14 +470,16 @@ int main(int argc, char **argv)
                         fprintf(stderr, "ERR TIOCMGET- %d/%s\n", errno, strerror(errno));
 
                     if((modstat&TIOCM_CTS) == 0){
-                        fprintf(stderr, "\nDISABLE TX (CTS %lld bytes)\n", burst_count);
+                        if(cfg->verbose >= 1)
+                            fprintf(stderr, "\nDISABLE TX (CTS %lld bytes)\n", burst_count);
                         do_tx = false;
                         break;
                     }
                 } else if(cfg->flow == 'X'){
                     unsigned char flow_stat = 0;
                     if(read(fd, &flow_stat, 1) == 1 && flow_stat == XOFF){
-                        fprintf(stderr, "\nDISABLE TX (XOFF %lld bytes)\n", burst_count);
+                        if(cfg->verbose >= 1)
+                            fprintf(stderr, "\nDISABLE TX (XOFF %lld bytes)\n", burst_count);
                         tcflush(fd, TCIFLUSH);
                         do_tx = false;
                         break;
