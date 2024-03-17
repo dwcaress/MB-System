@@ -40,6 +40,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/time.h>
@@ -7804,10 +7805,6 @@ int mbtrnpp_em710raw_input_open_ser(int verbose, void *mbio_ptr, char *definitio
             cfsetispeed(&tty, B57600);
             cfsetospeed(&tty, B57600);
             break;
-        case 76800:
-            cfsetispeed(&tty, B76800);
-            cfsetospeed(&tty, B76800);
-            break;
         case 115200:
             cfsetispeed(&tty, B115200);
             cfsetospeed(&tty, B115200);
@@ -8174,7 +8171,7 @@ int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t len, int *r_e
         ser_buffer = (ser_buf_t *)malloc(sizeof(ser_buf_t));
         if(ser_buffer != NULL){
             ser_buffer->fd = src;
-            ser_buffer->size = 4096;//1024;//MB_UDP_SIZE_MAX;
+            ser_buffer->size = 8192;//4096;//1024;//MB_UDP_SIZE_MAX;
             ser_buffer->data = NULL;
             ser_buffer->pread = NULL;
             ser_buffer->pend = NULL;

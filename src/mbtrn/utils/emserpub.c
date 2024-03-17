@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <termios.h>
 #include <string.h>
 #include <unistd.h>
@@ -21,6 +22,7 @@
 #undef EMS_WITH_XONXOFF
 #define XON 0x11
 #define XOFF 0x13
+#define IBUF_BYTES_DFL 4096
 
 typedef struct app_cfg_s {
     int verbose;
@@ -29,6 +31,8 @@ typedef struct app_cfg_s {
     unsigned int ser_delay_us;
     char *ifile;
     int flow;
+    uint64_t ibuf_sz;
+    unsigned char *ibuf;
 }app_cfg_t;
 
 static void s_show_help();
@@ -54,6 +58,7 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"baud", required_argument, NULL, 0},
         {"delay", required_argument, NULL, 0},
         {"flow", required_argument, NULL, 0},
+        {"ibuf", required_argument, NULL, 0},
         {NULL, 0, NULL, 0}};
 
     // process argument list
@@ -93,6 +98,19 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
                     else if(toupper(flow) == 'N')
                         cfg->flow = 'N';
                 }
+                // ibuf
+                else if (strcmp("ibuf", options[option_index].name) == 0) {
+                    uint64_t x = 0;
+                    if(sscanf(optarg,"%llu",&x) == 1 && x > 0){
+                        cfg->ibuf_sz = x;
+
+                        unsigned char *bp = (unsigned char *)realloc(cfg->ibuf, x);
+                        memset(bp, 0, x);
+
+                        cfg->ibuf = bp;
+                    }
+
+                }
             default:
                 break;
         }
@@ -104,6 +122,11 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
 //        mlist_add(cfg->file_paths,strdup(argv[i]));
     }
 
+    if(help){
+        s_show_help();
+        s_cfg_destroy(&cfg);
+        exit(0);
+    }
     return;
 }
 
@@ -115,8 +138,9 @@ static void s_show_help()
     "  --verbose=n    : verbose output level\n"
     "  --help         : show this help message\n"
     "  --device=s     : serial port device\n"
-    "  --baud=n       : serial comms rate\n"
-    "  --delay=n      : interchacter delay (usec)\n"
+    "  --baud=u       : serial comms rate\n"
+    "  --ibuf=u       : inbuf size (bytes)\n"
+    "  --delay=u      : interchacter delay (usec)\n"
     "\n";
     printf("%s",help_message);
     printf("%s",usage_message);
@@ -133,6 +157,11 @@ static app_cfg_t *s_cfg_new()
         new_cfg->ser_delay_us = 0;
         new_cfg->ifile = NULL;
         new_cfg->flow = 'R';
+        new_cfg->ibuf_sz = IBUF_BYTES_DFL;
+        new_cfg->ibuf = (unsigned char *)malloc(IBUF_BYTES_DFL);
+        if(new_cfg->ibuf)
+            perror("ibuf alloc failed");
+        memset(new_cfg->ibuf, 0, new_cfg->ibuf_sz);
     }
     return new_cfg;
 }
@@ -145,6 +174,7 @@ static void s_cfg_destroy(app_cfg_t **pself)
 
             free(self->ser_device);
             free(self->ifile);
+            free(self->ibuf);
             free(self);
         }
         *pself = NULL;
@@ -159,6 +189,7 @@ static void s_cfg_show(app_cfg_t *self)
     fprintf(stderr,"flow      %c\n", self->flow);
     fprintf(stderr,"delay_us  %u\n", self->ser_delay_us);
     fprintf(stderr,"ifile     %s\n", self->ifile);
+    fprintf(stderr,"ibuf_sz   %llu\n", self->ibuf_sz);
     fprintf(stderr,"verbose   %d\n", self->verbose);
     fprintf(stderr,"\n");
 }
@@ -311,10 +342,6 @@ void config_ser(int fd, app_cfg_t *cfg)
             cfsetispeed(&tty, B57600);
             cfsetospeed(&tty, B57600);
             break;
-        case 76800:
-            cfsetispeed(&tty, B76800);
-            cfsetospeed(&tty, B76800);
-            break;
         case 115200:
             cfsetispeed(&tty, B115200);
             cfsetospeed(&tty, B115200);
@@ -339,7 +366,7 @@ int main(int argc, char **argv)
     s_cfg_show(cfg);
 
     // open output port
-    int fd = open(cfg->ser_device, O_RDWR|O_NOCTTY);
+    int fd = open(cfg->ser_device, O_RDWR);
 
     if(fd < 0){
         fprintf(stderr, "could not open %s %d/%s\n", cfg->ser_device, errno, strerror(errno));
@@ -369,15 +396,13 @@ int main(int argc, char **argv)
             fprintf(stderr, "ftell %zd fend %lld\n", ftell(fp), fend);
         }
 
-        const size_t IBUF_LEN = 4096;
-        unsigned char ibuf[IBUF_LEN]={0};
         bool do_quit=false;
         bool do_tx=true;
         int64_t burst_count = 0;
 
         while(!do_quit && !g_interrupt) {
 
-            memset(ibuf, 0 , IBUF_LEN);
+            memset(cfg->ibuf, 0, cfg->ibuf_sz);
 
             // quit if end of input
             if(ftell(fp) >= fend)
@@ -421,14 +446,14 @@ int main(int argc, char **argv)
 
                 if(do_tx){
                     // read byte(s) from input file
-                    size_t rbytes = fread(&ibuf, 1, IBUF_LEN, fp);
+                    size_t rbytes = fread(&cfg->ibuf, 1, cfg->ibuf_sz, fp);
 
                     if( rbytes > 0) {
 
                         burst_count += rbytes;
 
                         // write byte(s) to output (should block until sent)
-                        ssize_t wb = write(fd, ibuf, rbytes);
+                        ssize_t wb = write(fd, cfg->ibuf, rbytes);
                         tcdrain(fd);
 
                         if(wb <= 0) {
@@ -442,7 +467,7 @@ int main(int argc, char **argv)
                             for(int i = 0; i < rbytes; i++){
                                 if((obytes % 16) == 0)
                                     fprintf(stderr, "\n%08llx: ", obytes);
-                                fprintf(stderr, "%02X ", ibuf[i]);
+                                fprintf(stderr, "%02X ", cfg->ibuf[i]);
                                 obytes++;
                             }
                         }
@@ -469,7 +494,7 @@ int main(int argc, char **argv)
     close(fd);
     fclose(fp);
 
-    free(cfg->ser_device);
-    free(cfg->ifile);
+    s_cfg_destroy(&cfg);
+
     return 0;
 }
