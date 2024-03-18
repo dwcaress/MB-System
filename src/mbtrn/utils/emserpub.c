@@ -442,8 +442,6 @@ int main(int argc, char **argv)
                         if(cfg->verbose >= 1)
                             fprintf(stderr, "\nENABLE TX (CTS)\n");
 
-                        fprintf(stderr, "%d : ftell %ld fend %ld\n", __LINE__, ftell(fp), fend);
-
                         do_tx = true;
                         burst_count = 0;
                         break;
