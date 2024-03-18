@@ -19,7 +19,9 @@
 #define WIN_DECLSPEC
 #endif
 
-#undef EMS_WITH_XONXOFF
+// XON/XOFF doesn't make sense with binary data
+#define EMS_WITH_XONXOFF 0
+
 #define XON 0x11
 #define XOFF 0x13
 #define IBUF_BYTES_DFL 4096
@@ -52,17 +54,17 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
     bool version=false;
 
     static struct option options[] = {
-        {"verbose", required_argument, NULL, 0},
-        {"help", no_argument, NULL, 0},
-        {"device", required_argument, NULL, 0},
-        {"baud", required_argument, NULL, 0},
-        {"delay", required_argument, NULL, 0},
-        {"flow", required_argument, NULL, 0},
-        {"ibuf", required_argument, NULL, 0},
+        {"verbose", required_argument, NULL, 'v'},
+        {"help", no_argument, NULL, 'h'},
+        {"device", required_argument, NULL, 'd'},
+        {"baud", required_argument, NULL, 'b'},
+        {"delay", required_argument, NULL, 'D'},
+        {"flow", required_argument, NULL, 'f'},
+        {"ibuf", required_argument, NULL, 'i'},
         {NULL, 0, NULL, 0}};
 
     // process argument list
-    while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1){
+    while ((c = getopt_long(argc, argv, "hd:b:D:f:i:v:", options, &option_index)) != -1){
         switch (c) {
                 // long options all return c=0
             case 0:
@@ -91,12 +93,16 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
                 else if (strcmp("flow", options[option_index].name) == 0) {
                     int flow=0;
                     sscanf(optarg,"%c", (char *)&flow);
-                    if(toupper(flow) == 'R')
+                    if(toupper(flow) == 'N')
+                        cfg->flow = 'N';
+                    else if(toupper(flow) == 'R')
                         cfg->flow = 'R';
+#if EMS_WITH_XONXOFF
                     else if(toupper(flow) == 'X')
                         cfg->flow = 'X';
-                    else if(toupper(flow) == 'N')
-                        cfg->flow = 'N';
+#endif
+                    else
+                        fprintf(stderr, "WARN: flow control (%c) not supported\n", flow);
                 }
                 // ibuf
                 else if (strcmp("ibuf", options[option_index].name) == 0) {
@@ -111,6 +117,51 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
                     }
 
                 }
+            case 'v':
+                sscanf(optarg,"%d",&cfg->verbose);
+                break;
+            case 'h':
+                help = true;
+                break;
+            case 'd':
+                free(cfg->ser_device);
+                cfg->ser_device = strdup(optarg);
+                break;
+            case 'b':
+                sscanf(optarg,"%u",&cfg->ser_baud);
+               break;
+            case 'D':
+                sscanf(optarg,"%u",&cfg->ser_delay_us);
+                break;
+            case 'f':
+            {
+                int flow=0;
+                sscanf(optarg,"%c", (char *)&flow);
+                if(toupper(flow) == 'N')
+                    cfg->flow = 'N';
+                else if(toupper(flow) == 'R')
+                    cfg->flow = 'R';
+#if EMS_WITH_XONXOFF
+                else if(toupper(flow) == 'X')
+                    cfg->flow = 'X';
+#endif
+                else
+                    fprintf(stderr, "WARN: flow control (%c) not supported\n", flow);
+            }
+                break;
+            case 'i':
+            {
+                uint64_t x = 0;
+                if(sscanf(optarg,"%llu", &x) == 1 && x > 0){
+                    cfg->ibuf_sz = x;
+
+                    unsigned char *bp = (unsigned char *)realloc(cfg->ibuf, x);
+                    memset(bp, 0, x);
+
+                    cfg->ibuf = bp;
+                }
+            }
+                break;
             default:
                 break;
         }
@@ -135,12 +186,13 @@ static void s_show_help()
     char help_message[] = "\n publish em710 UDP capture data to serial port (emulate M3 serial output)\n";
     char usage_message[] = "\n emserpub [options] file [file...]\n"
     "\n Options:\n"
-    "  --verbose=n    : verbose output level\n"
-    "  --help         : show this help message\n"
-    "  --device=s     : serial port device\n"
-    "  --baud=u       : serial comms rate\n"
-    "  --ibuf=u       : inbuf size (bytes)\n"
-    "  --delay=u      : interchacter delay (usec)\n"
+    "  -v, --verbose=n : verbose output level\n"
+    "  -h, --help      : show this help message\n"
+    "  -d, --device=s  : serial port device\n"
+    "  -b, --baud=u    : serial comms rate\n"
+    "  -f, --flow=c    : serial flow control (N: none R: RTS/CTS)\n"
+    "  -i. --ibuf=u    : inbuf size (bytes)\n"
+    "  -D, --delay=u   : interchacter delay (usec)\n"
     "\n";
     printf("%s",help_message);
     printf("%s",usage_message);
@@ -448,7 +500,9 @@ int main(int argc, char **argv)
                     }
                     usleep(10000);
                 }
-            } else if(cfg->flow == 'X'){
+            }
+#if EMS_WITH_XONXOFF
+            else if(cfg->flow == 'X'){
                 while(!g_interrupt){
                     unsigned char flow_stat = 0;
                     if(read(fd, &flow_stat, 1) == 1 && flow_stat == XON){
@@ -462,7 +516,7 @@ int main(int argc, char **argv)
                     usleep(10000);
                 }
             }
-
+#endif
             while(do_tx && !g_interrupt && !do_quit){
 
                 // quit if end of input
@@ -482,7 +536,9 @@ int main(int argc, char **argv)
                         do_tx = false;
                         break;
                     }
-                } else if(cfg->flow == 'X'){
+                }
+#if EMS_WITH_XONXOFF
+                else if(cfg->flow == 'X'){
                     unsigned char flow_stat = 0;
                     if(read(fd, &flow_stat, 1) == 1 && flow_stat == XOFF){
                         if(cfg->verbose >= 1)
@@ -492,7 +548,7 @@ int main(int argc, char **argv)
                         break;
                     }
                 }
-
+#endif
                 // do output when enabled
                 if(do_tx){
 
@@ -542,8 +598,6 @@ int main(int argc, char **argv)
                             do_quit = true;
 
                         clearerr(fp);
-                        // read error (EOF?)
-//                        do_quit = true;
                     }
                 }
             }
