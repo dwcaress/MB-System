@@ -219,6 +219,8 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
 
     if(help) {
         s_show_help();
+        s_cfg_destroy(&cfg);
+        exit(0);
     }
 }
 
