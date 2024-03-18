@@ -8203,7 +8203,7 @@ int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t len, int *r_e
         ser_buffer = (ser_buf_t *)malloc(sizeof(ser_buf_t));
         if(ser_buffer != NULL){
             ser_buffer->fd = src;
-            ser_buffer->size = 4096;//4096;//1024;//MB_UDP_SIZE_MAX;
+            ser_buffer->size = 4096;
             ser_buffer->data = NULL;
             ser_buffer->pread = NULL;
             ser_buffer->pend = NULL;

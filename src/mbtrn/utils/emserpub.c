@@ -426,6 +426,7 @@ int main(int argc, char **argv)
             if(ftell(fp) >= fend)
                 break;
 
+            // monitor flow control, enable output on start
             if(cfg->flow == 'R'){
                 // set RTS
                 s_set_rts(fd, true);
@@ -470,7 +471,7 @@ int main(int argc, char **argv)
                 if(ftell(fp) >= fend)
                     break;
 
-                // monitor flow control, enable output
+                // monitor flow control, disable output on stop
                 if(cfg->flow == 'R'){
                     // check CTS, stop sending if asserted
                     int modstat=0;
