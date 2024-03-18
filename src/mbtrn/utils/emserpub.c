@@ -470,6 +470,7 @@ int main(int argc, char **argv)
                 if(ftell(fp) >= fend)
                     break;
 
+                // monitor flow control, enable output
                 if(cfg->flow == 'R'){
                     // check CTS, stop sending if asserted
                     int modstat=0;
@@ -493,6 +494,7 @@ int main(int argc, char **argv)
                     }
                 }
 
+                // do output when enabled
                 if(do_tx){
 
                     // read byte(s) from input file
@@ -513,7 +515,7 @@ int main(int argc, char **argv)
                                 total_wbytes += wb;
                                 rem_bytes -= wb;
                                 op += wb;
-                                
+
                                 if(wb < rbytes){
                                     fprintf(stderr, "\nWARN - write returned %zd/%zd\n", wb, rbytes);
                                 }
