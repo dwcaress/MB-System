@@ -768,8 +768,11 @@ typedef enum{
     EM710_EREAD = 5,
     EM710_EOFLOW = 6,
     EM710_EMEM = 7,
+    EM710_EINVAL = 8,
     EM710_ECOUNT
 }em710_frame_err_t;
+
+const char *em_frame_err_str[]={"EM_EOK","EM_ETYPE","EM_ESTX","EM_EETX","EM_ECHK","EM_EREAD","EM_EOFLOW","EM_EMEM","EM_EINVAL"};
 
 typedef struct ser_buf_s{
     int fd;
@@ -781,7 +784,18 @@ typedef struct ser_buf_s{
     byte *pend;
 } ser_buf_t;
 
-const char *em_frame_err_str[]={"EM_EOK","EM_ETYPE","EM_ESTX","EM_EETX","EM_ECHK","EM_EREAD","EM_EOFLOW","EM_EMEM"};
+typedef struct em_ser_ctx_s {
+
+    bool fill_stx;
+    uint64_t stream_ofs;
+    uint64_t frame_count[3];
+    ser_buf_t *ser_buffer;
+    size_t dgram_bytes;
+    byte *bp;
+    byte *pstx;
+    byte *petx;
+    struct mbsys_simrad3_header *header;
+}em_ser_ctx_t;
 
 struct sockaddr_in em_sock_addr;
 socklen_t em_sock_len;
@@ -7871,6 +7885,63 @@ int mbtrnpp_em710raw_input_open_ser(int verbose, void *mbio_ptr, char *definitio
 
 /*--------------------------------------------------------------------*/
 
+// allocate a serial buffer instance
+ser_buf_t *ser_buf_new(int fd, uint64_t size){
+    ser_buf_t *instance = (ser_buf_t *)malloc(sizeof(ser_buf_t));
+    if(instance != NULL){
+        instance->fd = fd;
+        instance->size = size;
+        instance->data = NULL;
+        instance->pread = NULL;
+        instance->pend = NULL;
+    }
+    return instance;
+}
+
+// release serial buffer resources
+void ser_buf_destroy(ser_buf_t **ppself)
+{
+    if(ppself != NULL){
+        ser_buf_t *self = *(ppself);
+        if(self != NULL){
+            free(self->data);
+            *ppself = NULL;
+        }
+    }
+}
+
+// allocate a serial IO context instance
+em_ser_ctx_t *em710_ser_ctx_new(int fd, int64_t size)
+{
+    em_ser_ctx_t *instance = (em_ser_ctx_t *)malloc(sizeof(em_ser_ctx_t));
+    if(instance != NULL){
+        instance->fill_stx = false;
+        instance->stream_ofs = 0;
+        for(int i = 0; i < 3; i++)
+            instance->frame_count[i] = 0;
+        instance->dgram_bytes = 0;
+        instance->bp = NULL;
+        instance->pstx = NULL;
+        instance->petx = NULL;
+        instance->header = NULL;
+        instance->ser_buffer = ser_buf_new(fd, size);
+    }
+    return instance;
+};
+
+// release a serial IO context resources
+void em710_ser_ctx_destroy(em_ser_ctx_t **ppself)
+{
+    if(ppself != NULL){
+        em_ser_ctx_t *self = *(ppself);
+        if(self != NULL){
+            ser_buf_destroy(&self->ser_buffer);
+            *ppself = NULL;
+        }
+    }
+};
+
+/*--------------------------------------------------------------------*/
 
 static bool mbtrnpp_em710raw_validate_frame(byte *src, unsigned int len, int *r_err, int verbose)
 {
@@ -7934,6 +8005,8 @@ static bool mbtrnpp_em710raw_validate_frame(byte *src, unsigned int len, int *r_
     return retval;
 }
 
+/*--------------------------------------------------------------------*/
+
 // start/stop sender RTS (RTS/CTS)
 int mbtrnpp_em710raw_set_rts(int fd, bool state)
 {
@@ -7964,6 +8037,8 @@ int mbtrnpp_em710raw_set_rts(int fd, bool state)
     return (errors == 0 ? 0 : -1);
 }
 
+/*--------------------------------------------------------------------*/
+
 int mbtrnpp_em710raw_set_cts(int fd, bool state)
 {
     int errors = 0;
@@ -7993,6 +8068,10 @@ int mbtrnpp_em710raw_set_cts(int fd, bool state)
     return (errors == 0 ? 0 : -1);
 }
 
+/*--------------------------------------------------------------------*/
+
+// check and refill serial buffer as needed
+// handles serial IO, flow control, and buffering
 int64_t mbtrnpp_em710raw_update_buffer(int fd, byte *buf, size_t len, const byte *save_ptr, uint64_t *r_stream_ofs, int verbose)
 {
 
@@ -8116,15 +8195,21 @@ int64_t mbtrnpp_em710raw_update_buffer(int fd, byte *buf, size_t len, const byte
     return bytes_added;
 }
 
+/*--------------------------------------------------------------------*/
 
-int64_t mbtrnpp_em710raw_ser_buf_read(ser_buf_t *src, byte *dest, int64_t read_len, uint64_t *r_stream_ofs, int verbose)
+// maintain serial IO buffer
+// return requested bytes from buffer, request refill when empty
+int64_t mbtrnpp_em710raw_read_buffer(ser_buf_t *src, byte *dest, int64_t read_len, uint64_t *r_stream_ofs, int verbose)
 {
 
     int64_t retval = -1;
 
     // read from buffer and refill as needed
     if(src == NULL || src->fd < 0 || src->size <= 0 || dest == NULL || read_len <= 0){
-        fprintf(stderr, "%s: ERR - invalid argument\n",__func__);
+        fprintf(stderr, "%s: ERR - invalid argument ser_buf %p\n",__func__, src);
+        if(src != NULL){
+            fprintf(stderr,"fd %d size %lld dest %p readlen %lld\n", src->fd, src->size, dest, read_len);
+        }
         return retval;
     }
 
@@ -8141,7 +8226,7 @@ int64_t mbtrnpp_em710raw_ser_buf_read(ser_buf_t *src, byte *dest, int64_t read_l
         src->pend = src->data;
     }
 
-    // if not enough characters remaining, refill
+    // request refill if not enough characters remaining
     int64_t rem_bytes = (src->pend - src->pread);
     if( rem_bytes < read_len){
 
@@ -8154,6 +8239,7 @@ int64_t mbtrnpp_em710raw_ser_buf_read(ser_buf_t *src, byte *dest, int64_t read_l
         }// else error
     }
 
+    // read bytes into destination
     if(rem_bytes >= read_len){
         memcpy(dest, src->pread, read_len);
         src->pread += read_len;
@@ -8165,7 +8251,18 @@ int64_t mbtrnpp_em710raw_ser_buf_read(ser_buf_t *src, byte *dest, int64_t read_l
     return retval;
 }
 
-int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t len, int *r_err, int verbose)
+// read one .ALL frame
+// handles stream errors/resync
+// return frame length or -1 and sets r_err
+// The raw .ALL format does not include frame length and the
+// start/end sync bytes may be present in valid frame data.
+// Basic algorithm
+//  - find a record start (STX)
+//  - find and validate type (if type invalid restart)
+//  - find next record start (STX2)
+//  - check for ETX at STX2-3 (if no ETX, continue)
+//  - validate checksum (return if OK, else restart)
+int64_t mbtrnpp_em710raw_read_frame(em_ser_ctx_t *ctx, byte *frame_buf, size_t len, int *r_err, int verbose)
 {
 
     typedef enum {
@@ -8181,66 +8278,49 @@ int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t len, int *r_e
 
     state_t state = ST_START;
 
-    // frame state variables
-    // TODO: create in caller and pass in with serial IO state (i.e. as read context)
-    struct mbsys_simrad3_header *header = (struct mbsys_simrad3_header *)frame_buf;
     int64_t rbytes = 0;
-    size_t dgram_bytes = 0;
-    byte *bp = frame_buf + 4;
-    byte *pstx = frame_buf + 5;
-    byte *petx = NULL;
-    static bool fill_stx = false;
-    static uint64_t stream_ofs = 0;
-    static uint64_t frame_count[3]={0};
-    static ser_buf_t *ser_buffer = NULL;
 
-    // This serial buffer persists across calls,
-    // buffering serial data and maintaining the serial IO state.
-    // the ser_buf_read method handles reading and returning data,
-    // and refilling the buffer when it is empty.
-    // TODO: create in caller, pass in along with frame state (i.e. as read context)
-    if(ser_buffer == NULL){
-        ser_buffer = (ser_buf_t *)malloc(sizeof(ser_buf_t));
-        if(ser_buffer != NULL){
-            ser_buffer->fd = src;
-            ser_buffer->size = 4096;
-            ser_buffer->data = NULL;
-            ser_buffer->pread = NULL;
-            ser_buffer->pend = NULL;
-        } else {
-            state = ST_ERROR;
-            if(r_err != NULL)
-                *r_err = EM710_EMEM;
-        }
+
+    if(ctx != NULL) {
+        // intiailze serial IO context
+        ctx->dgram_bytes = 0;
+        ctx->header = (struct mbsys_simrad3_header *)frame_buf;
+        ctx->bp = frame_buf + 4;
+        ctx->pstx = frame_buf + 5;
+        ctx->petx = NULL;
+    } else {
+        state = ST_ERROR;
+        if(r_err != NULL)
+            *r_err = EM710_EINVAL;
     }
 
     while(! (state == ST_ERROR)){
 
-//         fprintf(stderr, "state %s fstx %c b %02X\n", state_names[state], (fill_stx ? 'Y' : 'N'), *(bp-1));
-//         fprintf(stderr, "state %s bp %04lX:%02X %04lX:%02X \n", state_names[state], ((bp-1)-frame_buf), *(bp-1), (bp-frame_buf), *bp);
+        //         fprintf(stderr, "state %s fstx %c b %02X\n", state_names[state], (fill_stx ? 'Y' : 'N'), *(bp-1));
+        //         fprintf(stderr, "state %s bp %04lX:%02X %04lX:%02X \n", state_names[state], ((bp-1)-frame_buf), *(bp-1), (bp-frame_buf), *bp);
 
         if(state == ST_START){
             memset(frame_buf, 0, len);
-            if(fill_stx)
-                header->dgmSTX = 0x02;
-            bp = frame_buf + 4;
-            fill_stx = false;
+            if(ctx->fill_stx)
+                ctx->header->dgmSTX = 0x02;
+            ctx->bp = frame_buf + 4;
+            ctx->fill_stx = false;
             state = ST_FRAME_START;
-            dgram_bytes = 0;
+            ctx->dgram_bytes = 0;
         }
 
         if(state == ST_FRAME_START){
-            if(header->dgmSTX == EM3_START_BYTE){
-                bp++;
+            if(ctx->header->dgmSTX == EM3_START_BYTE){
+                ctx->bp++;
                 state = ST_FRAME_END;
-                dgram_bytes++;
+                ctx->dgram_bytes++;
             } else {
-                rbytes = mbtrnpp_em710raw_ser_buf_read(ser_buffer, bp, 1, &stream_ofs, verbose);
+                rbytes = mbtrnpp_em710raw_read_buffer(ctx->ser_buffer, ctx->bp, 1, &ctx->stream_ofs, verbose);
                 if( rbytes == 1){
 
-                    if(*bp == EM3_START_BYTE){
-                        bp++;
-                        dgram_bytes++;
+                    if(*ctx->bp == EM3_START_BYTE){
+                        ctx->bp++;
+                        ctx->dgram_bytes++;
                         state = ST_FRAME_TYPE;
                     }
                 } else if(rbytes <= 0){
@@ -8253,11 +8333,11 @@ int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t len, int *r_e
 
         if(state == ST_FRAME_TYPE){
 
-            rbytes = mbtrnpp_em710raw_ser_buf_read(ser_buffer, bp, 1, &stream_ofs, verbose);
+            rbytes = mbtrnpp_em710raw_read_buffer(ctx->ser_buffer, ctx->bp, 1, &ctx->stream_ofs, verbose);
 
             if( rbytes == 1){
 
-                switch(*bp){
+                switch(*ctx->bp){
                     case ALL_INSTALLATION_U:
                     case ALL_INSTALLATION_L:
                     case ALL_REMOTE:
@@ -8268,16 +8348,16 @@ int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t len, int *r_e
                     case ALL_ATTITUDE:
                     case ALL_POSITION:
                     case ALL_SURFACE_SOUND_SPEED:
-                        bp++;
-                        dgram_bytes++;
+                        ctx->bp++;
+                        ctx->dgram_bytes++;
                         state = ST_FRAME_END;
                         break;
                     default:
-                        fill_stx = false;
+                        ctx->fill_stx = false;
                         state = ST_START;
 
                         if(verbose >= 3)
-                            fprintf(stderr, "INFO - invalid type %02X bp=%p fp=%p\n", *bp, bp, frame_buf);
+                            fprintf(stderr, "INFO - invalid type %02X bp=%p fp=%p\n", *ctx->bp, ctx->bp, frame_buf);
                         break;
                 };
 
@@ -8290,24 +8370,24 @@ int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t len, int *r_e
 
         if(state == ST_FRAME_END){
 
-            rbytes = mbtrnpp_em710raw_ser_buf_read(ser_buffer, bp, 1, &stream_ofs, verbose);
+            rbytes = mbtrnpp_em710raw_read_buffer(ctx->ser_buffer, ctx->bp, 1, &ctx->stream_ofs, verbose);
 
             if(rbytes  == 1){
 
-                if(*bp == EM3_START_BYTE && *(bp-3) == EM3_END_BYTE){
+                if(*ctx->bp == EM3_START_BYTE && *(ctx->bp-3) == EM3_END_BYTE){
                     // buffer may contain complete frame + next start byte
                     // bp points to next start byte
-                    petx = bp - 3;
-                    fill_stx = true;
+                    ctx->petx = ctx->bp - 3;
+                    ctx->fill_stx = true;
                     state = ST_VALIDATE;
                 } else {
-                    bp++;
-                    dgram_bytes++;
-                    fill_stx = false;
+                    ctx->bp++;
+                    ctx->dgram_bytes++;
+                    ctx->fill_stx = false;
                 }
-                if((bp - frame_buf) >= len){
+                if((ctx->bp - frame_buf) >= len){
                     fprintf(stderr,"%s: ERR - buffer length exceeded (Frame End))\n", __func__);
-                    fill_stx = false;
+                    ctx->fill_stx = false;
                     if(r_err != NULL)
                         *r_err = EM710_EOFLOW;
                     state = ST_ERROR;
@@ -8321,26 +8401,26 @@ int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t len, int *r_e
 
         if(state == ST_VALIDATE){
 
-            header->numBytesDgm = (petx - frame_buf)-1;
+            ctx->header->numBytesDgm = (ctx->petx - frame_buf)-1;
 
             int verr = 0;
 
-            frame_count[0]++;
+            ctx->frame_count[0]++;
 
-            if(mbtrnpp_em710raw_validate_frame(frame_buf, dgram_bytes, &verr, verbose)){
+            if(mbtrnpp_em710raw_validate_frame(frame_buf, ctx->dgram_bytes, &verr, verbose)){
 
-                frame_count[1]++;
+                ctx->frame_count[1]++;
 
-                MX_BPRINT( (verbose < -2), "frame stream_bytes[%010llX] len[%4zd/%04X] N/valid/invalid[%6lld %6lld %6lld] \n", stream_ofs, dgram_bytes, dgram_bytes, frame_count[0], frame_count[1], frame_count[2]);
+                MX_BPRINT( (verbose < -2), "frame stream_bytes[%010llX] len[%4zd/%04X] N/valid/invalid[%6lld %6lld %6lld] \n", ctx->stream_ofs, ctx->dgram_bytes, ctx->dgram_bytes, ctx->frame_count[0], ctx->frame_count[1], ctx->frame_count[2]);
 
-                size_t send_len = header->numBytesDgm;
+                size_t send_len = ctx->header->numBytesDgm;
 
                 if(verbose >= 3){
-                    for (int i=0;i<header->numBytesDgm + 4;i++)
+                    for (int i = 0; i < ctx->header->numBytesDgm + 4; i++)
                     {
                         if(i%16 == 0)
                             fprintf(stderr, "\n%08X: ",i);
-                        fprintf(stderr, "%02x ",frame_buf[i]);
+                        fprintf(stderr, "%02x ", frame_buf[i]);
                     }
                     fprintf(stderr, "\n");
                 }
@@ -8350,19 +8430,19 @@ int64_t mbtrnpp_em710raw_recv_ser(int src, byte *frame_buf, size_t len, int *r_e
 
                 return send_len;
             } else {
-                frame_count[2]++;
+                ctx->frame_count[2]++;
                 if(verr == EM710_ECHK || verr == EM710_ETYPE){
                     // checksum or type error, restart
                     // (should already be handled in state machine)
-                    fill_stx = false;
+                    ctx->fill_stx = false;
                     state = ST_START;
                 } else {
                     // frame invalid, keep going
-                    bp++;
-                    fill_stx = false;
+                    ctx->bp++;
+                    ctx->fill_stx = false;
                     state = ST_FRAME_END;
                 }
-                MX_BPRINT( (verbose < -2), "frame stream_bytes[%010llX] len[%4zd/%04X] N/valid/invalid[%6lld %6lld %6lld] err[%d/%s]\n", stream_ofs, dgram_bytes, dgram_bytes,  frame_count[0], frame_count[1], frame_count[2], verr, em_frame_err_str[verr%EM710_ECOUNT]);
+                MX_BPRINT( (verbose < -2), "frame stream_bytes[%010llX] len[%4zd/%04X] N/valid/invalid[%6lld %6lld %6lld] err[%d/%s]\n", ctx->stream_ofs, ctx->dgram_bytes, ctx->dgram_bytes, ctx->frame_count[0], ctx->frame_count[1], ctx->frame_count[2], verr, em_frame_err_str[verr%EM710_ECOUNT]);
 
             }
         }
@@ -8403,7 +8483,7 @@ int mbtrnpp_em710raw_input_read_ser(int verbose, void *mbio_ptr, size_t *size,
     static uint64_t frame_invalid = 0;
     static uint64_t frame_read_err = 0;
 
-    // mbsp points to UDP socket
+    // mbsp points to serial port file descriptor
     int *mbsp = (int *)mb_io_ptr->mbsp;
 
     // frame buffer for byte-wise reads
@@ -8414,6 +8494,8 @@ int mbtrnpp_em710raw_input_read_ser(int verbose, void *mbio_ptr, size_t *size,
     static size_t bytes_read=0;
     static bool read_frame=true;
     bool read_err = false;
+
+    static em_ser_ctx_t *ctx = NULL;
 
     if(NULL == frame_buf)
     {
@@ -8427,8 +8509,17 @@ int mbtrnpp_em710raw_input_read_ser(int verbose, void *mbio_ptr, size_t *size,
     // if valid reader...
     if(NULL != mbsp && NULL != frame_buf)
     {
+        if(ctx == NULL){
+            // This serial context persists across calls,
+            // buffering serial data and maintaining the serial IO state.
+            // the ser_buf_read method handles reading and returning data,
+            // and refilling the buffer when it is empty.
+            ctx = em710_ser_ctx_new(*mbsp, 4096);
+        }
+
         if(read_frame)
         {
+
             // read frame into buffer
             memset(frame_buf, 0, MB_UDP_SIZE_MAX);
             fb_pread = frame_buf;
@@ -8446,7 +8537,7 @@ int mbtrnpp_em710raw_input_read_ser(int verbose, void *mbio_ptr, size_t *size,
             // used to read the remainder of the datagram, *including* the footer.
 
             int frame_err = 0;
-            if ( (rbytes = mbtrnpp_em710raw_recv_ser(*mbsp, (void *) (frame_buf), MB_UDP_SIZE_MAX, &frame_err, verbose) ) >= 0)
+            if ( (rbytes = mbtrnpp_em710raw_read_frame(ctx, (void *) (frame_buf), MB_UDP_SIZE_MAX, &frame_err, verbose) ) >= 0)
             {
                 struct mbsys_simrad3_header *header = (struct mbsys_simrad3_header *)frame_buf;
 
