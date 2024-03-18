@@ -278,9 +278,9 @@ void config_ser(int fd, app_cfg_t *cfg)
 
     cfmakeraw(&tty);
 
-    if(cfg->flow == 'R'){
+    if(cfg->flow == 'R') {
         tty.c_cflag |= CRTSCTS; // Disable RTS/CTS hardware flow control
-    }else if(cfg->flow == 'X'){
+    } else if(cfg->flow == 'X') {
         tty.c_iflag |= (IXON); // Enable s/w flow ctrl input
         tty.c_iflag |= (IXOFF); // Enable s/w flow ctrl output
         tty.c_iflag &= ~(IXANY); // Enable s/w flow ctrl
@@ -288,7 +288,6 @@ void config_ser(int fd, app_cfg_t *cfg)
         tty.c_cc[VSTOP] = XOFF;
         tty.c_cc[VTIME] = 1;    // Wait for up to 1s (10 deciseconds), returning as soon as any data is received.
         tty.c_cc[VMIN] = 0;
-
     }
 
 #if 0
@@ -394,7 +393,7 @@ int main(int argc, char **argv)
     config_ser(fd, cfg);
 
     // open input file
-    FILE *fp = fopen(cfg->ifile, "rb");
+    FILE *fp = fopen(cfg->ifile, "r");
 
     uint64_t obytes = 0;
     int64_t total_rbytes=0;
@@ -408,11 +407,11 @@ int main(int argc, char **argv)
         }
 
         fseek(fp, 0, SEEK_END);
-        off_t fend = ftell(fp);
+        long fend = ftell(fp);
         fseek(fp, 0, SEEK_SET);
 
         if(cfg->verbose > 0 ){
-            fprintf(stderr, "ftell %zd fend %lld\n", ftell(fp), fend);
+            fprintf(stderr, "ftell %ld fend %ld\n", ftell(fp), fend);
         }
 
         bool do_quit=false;
@@ -433,6 +432,7 @@ int main(int argc, char **argv)
 
                 // wait for CTS
                 while( !g_interrupt){
+
                     int modstat=0;
                     if(ioctl(fd, TIOCMGET, &modstat) != 0)
                         fprintf(stderr, "ERR TIOCMGET- %d/%s\n", errno, strerror(errno));
@@ -440,6 +440,9 @@ int main(int argc, char **argv)
                     if((modstat&TIOCM_CTS) != 0){
                         if(cfg->verbose >= 1)
                             fprintf(stderr, "\nENABLE TX (CTS)\n");
+
+                        fprintf(stderr, "%d : ftell %ld fend %ld\n", __LINE__, ftell(fp), fend);
+
                         do_tx = true;
                         burst_count = 0;
                         break;
@@ -461,7 +464,11 @@ int main(int argc, char **argv)
                 }
             }
 
-            while(do_tx && !g_interrupt){
+            while(do_tx && !g_interrupt && !do_quit){
+
+                // quit if end of input
+                if(ftell(fp) >= fend)
+                    break;
 
                 if(cfg->flow == 'R'){
                     // check CTS, stop sending if asserted
@@ -487,28 +494,36 @@ int main(int argc, char **argv)
                 }
 
                 if(do_tx){
+
                     // read byte(s) from input file
-                    size_t rbytes = fread(cfg->ibuf, 1, cfg->ibuf_sz, fp);
+                    size_t rbytes = fread(cfg->ibuf, 1, (size_t)cfg->ibuf_sz, fp);
 
                     if( rbytes > 0) {
                         total_rbytes += rbytes;
                         burst_count += rbytes;
 
-                        // write byte(s) to output (should block until sent)
-                        ssize_t wb = write(fd, cfg->ibuf, rbytes);
-                        tcdrain(fd);
+                        unsigned char *op = cfg->ibuf;
+                        ssize_t rem_bytes = rbytes;
+                        while(rem_bytes > 0){
+                            // write byte(s) to output (should block until sent)
+                            ssize_t wb = write(fd, op, rem_bytes);
+                            tcdrain(fd);
 
-                        if(wb <= 0) {
-                            fprintf(stderr, "\nERR - write returned %zd ibuf %p len %llu %d/%s\n", wb, cfg->ibuf, cfg->ibuf_sz, errno, strerror(errno));
-                        } else{
-                            total_wbytes += wb;
-                            if(wb < rbytes){
-                                fprintf(stderr, "\nWARN - write returned %zd/%zd\n", wb, rbytes);
+                            if(wb > 0) {
+                                total_wbytes += wb;
+                                rem_bytes -= wb;
+                                op += wb;
+                                
+                                if(wb < rbytes){
+                                    fprintf(stderr, "\nWARN - write returned %zd/%zd\n", wb, rbytes);
+                                }
+                            } else{
+                                fprintf(stderr, "\nERR - write returned %zd ibuf %p len %llu %d/%s\n", wb, cfg->ibuf, cfg->ibuf_sz, errno, strerror(errno));
                             }
                         }
 
                         // display bytes
-                        if(cfg->verbose >= 2 ){
+                        if(cfg->verbose >= 4 ){
                             for(int i = 0; i < rbytes; i++){
                                 if((obytes % 16) == 0)
                                     fprintf(stderr, "\n%08llx: ", obytes);
@@ -520,9 +535,14 @@ int main(int argc, char **argv)
                         if(cfg->ser_delay_us > 0)
                             usleep(cfg->ser_delay_us);
 
-                    } else if (rbytes < 0) {
+                    } else {
+                        fprintf(stderr, "ERR - fread returned %zd feof %d ferr %d %d/%s\n",  rbytes, feof(fp), ferror(fp), errno, strerror(errno));
+                        if(feof(fp))
+                            do_quit = true;
+
+                        clearerr(fp);
                         // read error (EOF?)
-                        do_quit = true;
+//                        do_quit = true;
                     }
                 }
             }

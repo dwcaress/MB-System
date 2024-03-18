@@ -7728,7 +7728,7 @@ int mbtrnpp_em710raw_input_open_ser(int verbose, void *mbio_ptr, char *definitio
     //sscanf(definition, "%s:%s:%d", hostInterface, bcastGrp, &port);
     fprintf(stderr, "Attempting to open serial port to Kongsberg sonar output at:\n");
     fprintf(stderr, "  Definition: %s\n", definition);
-    fprintf(stderr, "  ser_device: %s\n  ser_baud: %u \nser_flow %c\n",
+    fprintf(stderr, "  ser_device: %s\n  ser_baud: %u\n  nser_flow %c\n",
             ser_device, ser_baud, ser_flow);
 
     // Create a datagram socket on which to receive.
@@ -8011,16 +8011,6 @@ int64_t mbtrnpp_em710raw_update_buffer(int fd, byte *buf, size_t len, const byte
         fprintf(stderr, "%s: ERR - invalid save_ptr\n", __func__);
         return -1;
     }
-
-
-//    while(1){
-//        fprintf(stderr, "ENABLE RTS\n");
-//        mbtrnpp_em710raw_set_rts(fd, true);
-//        sleep(2);
-//        fprintf(stderr, "DISABLE RTS\n");
-//        mbtrnpp_em710raw_set_rts(fd, false);
-//        sleep(10);
-//    }
 
     byte *end_ptr = buf + len;
 
