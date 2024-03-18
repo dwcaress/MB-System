@@ -787,7 +787,7 @@ struct sockaddr_in em_sock_addr;
 socklen_t em_sock_len;
 unsigned char em_ser_flow = 'R';
 
-#ifdef WITH_EM710_ALL_LOG
+#if WITH_EM710_ALL_LOG
 // log em710 frames (debug)
 FILE *em_all_log = NULL;
 const char *em_all_name="em-all.bin";
@@ -795,7 +795,7 @@ const char *em_all_name="em-all.bin";
 
 #define WITH_EM710_UDP_LOG 1
 
-#ifdef WITH_EM710_UDP_LOG
+#if WITH_EM710_UDP_LOG
 FILE *em_udp_log = NULL;
 const char *em_udp_name="em-udp.bin";
 #endif
