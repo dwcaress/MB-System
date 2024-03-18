@@ -8142,7 +8142,7 @@ int64_t ser_buf_read(ser_buf_t *src, byte *dest, int64_t read_len, uint64_t *r_s
     }
 
     // if not enough characters remaining, refill
-    int64_t rem_bytes = (src->pend - src->pread + 1);
+    int64_t rem_bytes = (src->pend - src->pread);
     if( rem_bytes < read_len){
 //        fprintf(stderr, "%s: buffering...\n",__func__);
         int64_t new_bytes = mbtrnpp_em710raw_update_buffer(src->fd, src->data, src->size, src->pend, r_stream_ofs, verbose);
