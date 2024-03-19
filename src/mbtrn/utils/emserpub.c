@@ -13,6 +13,13 @@
 #include <signal.h>
 #include <ctype.h>
 
+#include "mframe.h"
+#include "mlist.h"
+#include "mfile.h"
+//#include "mlog.h"
+#include "mxdebug.h"
+#include "mxd_app.h"
+
 #if defined(__CYGWIN__)
 #define WIN_DECLSPEC __declspec(dllimport)
 #else
@@ -34,10 +41,10 @@ typedef struct app_cfg_s {
     char *ser_device;
     unsigned int ser_baud;
     unsigned int ser_delay_us;
-    char *ifile;
     int flow;
     uint64_t ibuf_sz;
     unsigned char *ibuf;
+    mlist_t *file_paths;
 }app_cfg_t;
 
 // app state
@@ -195,9 +202,7 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
     }
 
     for (int i=optind; i<argc; i++) {
-        free(cfg->ifile);
-        cfg->ifile = strdup(argv[i]);
-//        mlist_add(cfg->file_paths,strdup(argv[i]));
+        mlist_add(cfg->file_paths,strdup(argv[i]));
     }
 
     if(help){
@@ -236,7 +241,7 @@ static void s_termination_handler (int signum)
             g_interrupt=true;
             break;
         default:
-            //            MX_ERROR_MSG("not handled[%d]\n",signum);
+//            MX_ERROR_MSG("not handled[%d]\n",signum);
             break;
     }
 }
@@ -251,7 +256,6 @@ static app_cfg_t *app_cfg_new()
         new_cfg->ser_device = strdup("/dev/ttyUSB0");
         new_cfg->ser_baud = 115200;
         new_cfg->ser_delay_us = 0;
-        new_cfg->ifile = NULL;
         new_cfg->flow = 'R';
         new_cfg->ibuf_sz = IBUF_BYTES_DFL;
         new_cfg->ibuf = (unsigned char *)malloc(IBUF_BYTES_DFL);
@@ -261,6 +265,8 @@ static app_cfg_t *app_cfg_new()
             fprintf(stderr, "ibuf alloc failed %p len %d %d/%s\n", new_cfg->ibuf, IBUF_BYTES_DFL, errno, strerror(errno));
             exit(-1);
         }
+        new_cfg->file_paths = mlist_new();
+        mlist_autofree(new_cfg->file_paths, free);
     }
     return new_cfg;
 }
@@ -272,8 +278,8 @@ static void app_cfg_destroy(app_cfg_t **pself)
         app_cfg_t *self = *pself;
         if (self != NULL) {
 
+            mlist_destroy(&self->file_paths);
             free(self->ser_device);
-            free(self->ifile);
             free(self->ibuf);
             free(self);
         }
@@ -289,9 +295,15 @@ static void app_cfg_show(app_cfg_t *self)
     fprintf(stderr,"baud      %u\n", self->ser_baud);
     fprintf(stderr,"flow      %c\n", self->flow);
     fprintf(stderr,"delay_us  %u\n", self->ser_delay_us);
-    fprintf(stderr,"ifile     %s\n", self->ifile);
     fprintf(stderr,"ibuf_sz   %llu\n", self->ibuf_sz);
     fprintf(stderr,"verbose   %d\n", self->verbose);
+    fprintf(stderr,"files:\n");
+    char *path = (char *)mlist_first(self->file_paths);
+    int i = 0;
+    while (NULL != path) {
+        fprintf(stderr, "[%3d]      %s\n", i++, path);
+        path = (char *)mlist_next(self->file_paths);
+    }
     fprintf(stderr,"\n");
 }
 
@@ -318,7 +330,8 @@ static void app_ctx_destroy(app_ctx_t **pself)
     if(pself != NULL){
         app_ctx_t *self = *pself;
         if(self != NULL){
-            fclose(self->fp);
+            if(self->fp != NULL)
+                fclose(self->fp);
             close(self->fd);
         }
         free(self);
@@ -335,21 +348,10 @@ static int init_ctx(app_ctx_t *ctx, app_cfg_t *cfg)
 
     if(ctx->fd < 0){
         fprintf(stderr, "could not open %s %d/%s\n", cfg->ser_device, errno, strerror(errno));
-        //        s_cfg_destroy(&cfg);
         return -1;
     }
 
     config_serial(ctx->fd, cfg);
-    // open input file
-    ctx->fp = fopen(cfg->ifile, "r");
-
-    if(ctx->fp != NULL){
-        fseek(ctx->fp, 0, SEEK_END);
-        ctx->fend = ftell(ctx->fp);
-        fseek(ctx->fp, 0, SEEK_SET);
-    } else {
-        retval = -1;
-    }
 
     return retval;
 }
@@ -625,37 +627,66 @@ int main(int argc, char **argv)
         // if context valid, process input file
 
         if(cfg->verbose > 0 ){
-            fprintf(stderr, "%s input file %s open fp %p\n", __func__, cfg->ifile, ctx->fp);
             fprintf(stderr, "%s output device %s connected fd %d %u bps\n", __func__, cfg->ser_device, ctx->fd, cfg->ser_baud);
-            fprintf(stderr, "%s ftell %ld fend %ld\n", __func__, ftell(ctx->fp), ctx->fend);
         }
 
-        while(!ctx->quit_flag && !g_interrupt) {
+        // iterate over input file path list
+        char *path = (char *)mlist_first(cfg->file_paths);
+        
+        while (NULL != path) {
 
-            memset(cfg->ibuf, 0, cfg->ibuf_sz);
+            // open next input file
+            ctx->fp = fopen(path, "r");
 
-            // quit if end of input
-            if(ftell(ctx->fp) >= ctx->fend)
-                break;
+            if(ctx->fp != NULL){
+                // get file size, end pointer
+                fseek(ctx->fp, 0, SEEK_END);
+                ctx->fend = ftell(ctx->fp);
+                fseek(ctx->fp, 0, SEEK_SET);
 
-            // wait for flow control enable
-            wait_flow_on(ctx, cfg);
+                if(cfg->verbose > 0 ){
+                    fprintf(stderr, "%s input file %s open fp %p\n", __func__, path, ctx->fp);
+                    fprintf(stderr, "%s ftell %ld fend %ld\n", __func__, ftell(ctx->fp), ctx->fend);
+                }
+            } else {
+                fprintf(stderr, "ERR - fopen failed file %s %d/%s\n", path, errno, strerror(errno));
+            }
 
-            while(ctx->tx_flag && !g_interrupt && !ctx->quit_flag){
+            // process file
+            while(ctx->fp != NULL && !ctx->quit_flag && !g_interrupt) {
+
+                memset(cfg->ibuf, 0, cfg->ibuf_sz);
 
                 // quit if end of input
                 if(ftell(ctx->fp) >= ctx->fend)
                     break;
 
-                // check flow control, disable output on stop
-                check_flow_on(ctx, cfg);
+                // wait for flow control enable
+                wait_flow_on(ctx, cfg);
 
-                // do output when enabled
-                write_data(ctx, cfg);
+                while(ctx->tx_flag && !g_interrupt && !ctx->quit_flag){
+
+                    // quit if end of input
+                    if(ftell(ctx->fp) >= ctx->fend)
+                        break;
+
+                    // check flow control, disable output on stop
+                    check_flow_on(ctx, cfg);
+
+                    // do output when enabled
+                    write_data(ctx, cfg);
+                }
             }
+
+            // close file, get next
+            if(ctx->fp != NULL)
+                fclose(ctx->fp);
+
+            path = (char *)mlist_next(cfg->file_paths);
         }
+
     } else {
-        fprintf(stderr, "ERR - init_ctx failed; file %s %d/%s\n", cfg->ifile, errno, strerror(errno));
+        fprintf(stderr, "ERR - init_ctx failed; %d/%s\n", errno, strerror(errno));
     }
 
     if(cfg->verbose > 0 ){
