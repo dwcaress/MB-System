@@ -186,7 +186,7 @@ target_link_libraries(emallpub PRIVATE TIRPC::TIRPC mbtrnframe m pthread)
 #------------------------------------------------------------------------------
 #
 add_executable(emserpub utils/emserpub.c)
-target_include_directories(emallpub PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnframe
+target_include_directories(emserpub PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnframe
                             ${CMAKE_SOURCE_DIR}/src/mbio
 							${CMAKE_SOURCE_DIR}/src/mbtrnutils)
 target_link_libraries(emserpub PRIVATE TIRPC::TIRPC mbtrnframe m pthread)
