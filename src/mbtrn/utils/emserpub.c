@@ -12,6 +12,7 @@
 #include <getopt.h>
 #include <signal.h>
 #include <ctype.h>
+#include <inttypes.h>
 
 #include "mframe.h"
 #include "mlist.h"
@@ -141,7 +142,7 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
                 // ibuf
                 else if (strcmp("ibuf", options[option_index].name) == 0) {
                     uint64_t x = 0;
-                    if(sscanf(optarg,"%llu", &x) == 1 && x > 0){
+                    if(sscanf(optarg,"%" PRIu64 "", &x) == 1 && x > 0){
                         cfg->ibuf_sz = x;
 
                         unsigned char *bp = (unsigned char *)realloc(cfg->ibuf, x);
@@ -186,7 +187,7 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
             case 'i':
             {
                 uint64_t x = 0;
-                if(sscanf(optarg,"%llu", &x) == 1 && x > 0){
+                if(sscanf(optarg,"%" PRIu64 "", &x) == 1 && x > 0){
                     cfg->ibuf_sz = x;
 
                     unsigned char *bp = (unsigned char *)realloc(cfg->ibuf, x);
@@ -295,7 +296,7 @@ static void app_cfg_show(app_cfg_t *self)
     fprintf(stderr,"baud      %u\n", self->ser_baud);
     fprintf(stderr,"flow      %c\n", self->flow);
     fprintf(stderr,"delay_us  %u\n", self->ser_delay_us);
-    fprintf(stderr,"ibuf_sz   %llu\n", self->ibuf_sz);
+    fprintf(stderr,"ibuf_sz   %" PRIu64 "\n", self->ibuf_sz);
     fprintf(stderr,"verbose   %d\n", self->verbose);
     fprintf(stderr,"files:\n");
     char *path = (char *)mlist_first(self->file_paths);
@@ -573,7 +574,7 @@ static int write_data(app_ctx_t *ctx, app_cfg_t *cfg)
                     fprintf(stderr, "\nWARN - write returned %zd/%zd\n", wb, rbytes);
                 }
             } else{
-                fprintf(stderr, "\nERR - write returned %zd ibuf %p len %llu %d/%s\n", wb, cfg->ibuf, cfg->ibuf_sz, errno, strerror(errno));
+                fprintf(stderr, "\nERR - write returned %zd ibuf %p len %" PRIu64 " %d/%s\n", wb, cfg->ibuf, cfg->ibuf_sz, errno, strerror(errno));
             }
         }
 
@@ -581,7 +582,7 @@ static int write_data(app_ctx_t *ctx, app_cfg_t *cfg)
         if(cfg->verbose >= 4 ){
             for(int i = 0; i < rbytes; i++){
                 if((obytes % 16) == 0)
-                    fprintf(stderr, "\n%08llx: ", obytes);
+                    fprintf(stderr, "\n%08llx: ", (long long unsigned)obytes);
                 fprintf(stderr, "%02X ", cfg->ibuf[i]);
                 obytes++;
             }
@@ -632,7 +633,7 @@ int main(int argc, char **argv)
 
         // iterate over input file path list
         char *path = (char *)mlist_first(cfg->file_paths);
-        
+
         while (NULL != path) {
 
             // open next input file
@@ -690,7 +691,7 @@ int main(int argc, char **argv)
     }
 
     if(cfg->verbose > 0 ){
-        fprintf(stderr, "\n read %llu/%08llX wrote %llu/%08llX bytes\n", ctx->total_rbytes, ctx->total_rbytes, ctx->total_wbytes, ctx->total_wbytes);
+        fprintf(stderr, "\n read %" PRIu64 "/%08llX wrote %" PRIu64 "/%08llX bytes\n", ctx->total_rbytes, (long long unsigned)ctx->total_rbytes, ctx->total_wbytes, (long long unsigned)ctx->total_wbytes);
     }
 
     app_cfg_destroy(&cfg);
