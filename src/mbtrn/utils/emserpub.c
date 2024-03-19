@@ -19,13 +19,16 @@
 #define WIN_DECLSPEC
 #endif
 
-// XON/XOFF doesn't make sense with binary data
-#define EMS_WITH_XONXOFF 0
-
-#define XON 0x11
-#define XOFF 0x13
+// default IO buffer size
 #define IBUF_BYTES_DFL 4096
 
+// XON/XOFF doesn't make sense with binary data
+#define EMS_WITH_XONXOFF 0
+#define XON 0x11
+#define XOFF 0x13
+
+
+// app configuration
 typedef struct app_cfg_s {
     int verbose;
     char *ser_device;
@@ -37,14 +40,38 @@ typedef struct app_cfg_s {
     unsigned char *ibuf;
 }app_cfg_t;
 
-static void s_show_help();
-static app_cfg_t *s_cfg_new();
-static void s_cfg_destroy(app_cfg_t **pself);
-static void s_cfg_show(app_cfg_t *self);
-static void s_parse_args(int argc, char **argv, app_cfg_t *cfg);
+// app state
+typedef struct app_ctx_s {
+    FILE *fp;
+    int fd;
+    int64_t total_rbytes;
+    int64_t total_wbytes;
+    int64_t burst_count;
+    long fend;
+    bool tx_flag;
+    bool quit_flag;
 
+} app_ctx_t;
+
+static void s_parse_args(int argc, char **argv, app_cfg_t *cfg);
+static void s_show_help();
+static void s_termination_handler (int signum);
+static app_cfg_t *app_cfg_new();
+static void app_cfg_destroy(app_cfg_t **pself);
+static void app_cfg_show(app_cfg_t *self);
+static app_ctx_t *app_ctx_new();
+static void app_ctx_destroy(app_ctx_t **pself);
+static int init_ctx(app_ctx_t *ctx, app_cfg_t *cfg);
+static void config_serial(int fd, app_cfg_t *cfg);
+static bool cts_is_set(int fd);
+static bool wait_flow_on(app_ctx_t *ctx, app_cfg_t *cfg);
+static bool check_flow_on(app_ctx_t *ctx, app_cfg_t *cfg);
+static int write_data(app_ctx_t *ctx, app_cfg_t *cfg);
+
+// user interrupt flag (SIGINT)
 static bool g_interrupt=false;
 
+// parse command line options
 static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
 {
     extern char WIN_DECLSPEC *optarg;
@@ -175,12 +202,13 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
 
     if(help){
         s_show_help();
-        s_cfg_destroy(&cfg);
+        app_cfg_destroy(&cfg);
         exit(0);
     }
     return;
 }
 
+// show help message
 static void s_show_help()
 {
     char help_message[] = "\n publish em710 UDP capture data to serial port (emulate M3 serial output)\n";
@@ -198,7 +226,23 @@ static void s_show_help()
     printf("%s",usage_message);
 }
 
-static app_cfg_t *s_cfg_new()
+// signal handler
+static void s_termination_handler (int signum)
+{
+    switch (signum) {
+        case SIGINT:
+        case SIGHUP:
+        case SIGTERM:
+            g_interrupt=true;
+            break;
+        default:
+            //            MX_ERROR_MSG("not handled[%d]\n",signum);
+            break;
+    }
+}
+
+// allocate app_cfg_t resources
+static app_cfg_t *app_cfg_new()
 {
     app_cfg_t *new_cfg = (app_cfg_t *)malloc(sizeof(app_cfg_t));
     if ( new_cfg != NULL) {
@@ -221,7 +265,8 @@ static app_cfg_t *s_cfg_new()
     return new_cfg;
 }
 
-static void s_cfg_destroy(app_cfg_t **pself)
+// release app_cfg_t resources
+static void app_cfg_destroy(app_cfg_t **pself)
 {
     if(pself != NULL) {
         app_cfg_t *self = *pself;
@@ -236,7 +281,8 @@ static void s_cfg_destroy(app_cfg_t **pself)
     }
 }
 
-static void s_cfg_show(app_cfg_t *self)
+// show app_cfg_t
+static void app_cfg_show(app_cfg_t *self)
 {
     fprintf(stderr,"\n");
     fprintf(stderr,"device    %s\n", self->ser_device);
@@ -249,79 +295,67 @@ static void s_cfg_show(app_cfg_t *self)
     fprintf(stderr,"\n");
 }
 
-static void s_termination_handler (int signum)
+// allocate app_ctx_t resources
+static app_ctx_t *app_ctx_new()
 {
-    switch (signum) {
-        case SIGINT:
-        case SIGHUP:
-        case SIGTERM:
-            g_interrupt=true;
-            break;
-        default:
-//            MX_ERROR_MSG("not handled[%d]\n",signum);
-            break;
+    app_ctx_t *instance = (app_ctx_t *)malloc(sizeof(app_ctx_t));
+    if(instance != NULL){
+        instance->fp = NULL;
+        instance->fd = -1;
+        instance->total_rbytes = 0;
+        instance->total_wbytes = 0;
+        instance->burst_count = 0;
+        instance->fend = 0;
+        instance->tx_flag = true;
+        instance->quit_flag = false;
     }
+    return instance;
 }
 
-int s_set_rts(int fd, bool state)
+// release app_ctx_t resources
+static void app_ctx_destroy(app_ctx_t **pself)
 {
-    int errors = 0;
-
-    int modstat = 0;
-
-    if(ioctl(fd, TIOCMGET, &modstat) != 0){
-        fprintf(stderr, "ERR TIOCMGET- %d/%s\n", errno, strerror(errno));
-        errors++;
-    }
-
-    if(errors == 0){
-
-        // assert RTS (active low)
-        if(state)
-            modstat |= TIOCM_RTS;
-        else
-            modstat &= ~TIOCM_RTS;
-
-        if(ioctl(fd, TIOCMSET, &modstat) != 0) {
-            fprintf(stderr, "ERR TIOCMSET- %d/%s\n", errno, strerror(errno));
-            errors++;
+    if(pself != NULL){
+        app_ctx_t *self = *pself;
+        if(self != NULL){
+            fclose(self->fp);
+            close(self->fd);
         }
+        free(self);
+        *pself = NULL;
     }
-    //    fprintf(stderr, "%s: fd %d state %c errors %d\n", __func__, fd, (start_flow ? 'Y' : 'N'), errors);
-
-    return (errors == 0 ? 0 : -1);
 }
 
-int s_set_cts(int fd, bool state)
+// initialze state
+static int init_ctx(app_ctx_t *ctx, app_cfg_t *cfg)
 {
-    int errors = 0;
+    int retval = 0;
+    // open output port
+    ctx->fd = open(cfg->ser_device, O_RDWR|O_NOCTTY);
 
-    int modstat = 0;
-
-    if(ioctl(fd, TIOCMGET, &modstat) != 0){
-        fprintf(stderr, "ERR TIOCMGET- %d/%s\n", errno, strerror(errno));
-        errors++;
+    if(ctx->fd < 0){
+        fprintf(stderr, "could not open %s %d/%s\n", cfg->ser_device, errno, strerror(errno));
+        //        s_cfg_destroy(&cfg);
+        return -1;
     }
 
-    if(errors == 0){
+    config_serial(ctx->fd, cfg);
+    // open input file
+    ctx->fp = fopen(cfg->ifile, "r");
 
-        // assert RTS (active low)
-        if(state)
-            modstat |= TIOCM_CTS;
-        else
-            modstat &= ~TIOCM_CTS;
-
-        if(ioctl(fd, TIOCMSET, &modstat) != 0) {
-            fprintf(stderr, "ERR TIOCMSET- %d/%s\n", errno, strerror(errno));
-            errors++;
-        }
+    if(ctx->fp != NULL){
+        fseek(ctx->fp, 0, SEEK_END);
+        ctx->fend = ftell(ctx->fp);
+        fseek(ctx->fp, 0, SEEK_SET);
+    } else {
+        retval = -1;
     }
-    //    fprintf(stderr, "%s: fd %d state %c errors %d\n", __func__, fd, (start_flow ? 'Y' : 'N'), errors);
 
-    return (errors == 0 ? 0 : -1);
+    return retval;
 }
 
-void config_ser(int fd, app_cfg_t *cfg)
+// configure serial terminal
+static void config_serial(int fd, app_cfg_t *cfg)
 {
     struct termios tty;
     if(tcgetattr(fd, &tty) != 0) {
@@ -421,200 +455,215 @@ void config_ser(int fd, app_cfg_t *cfg)
     return;
 }
 
+// return true of CTS is set
+static bool cts_is_set(int fd)
+{
+    int modstat=0;
+    if(ioctl(fd, TIOCMGET, &modstat) != 0)
+        fprintf(stderr, "ERR TIOCMGET- %d/%s\n", errno, strerror(errno));
+
+    return ((modstat&TIOCM_CTS) != 0);
+}
+
+// wait for flow control to enable output
+static bool wait_flow_on(app_ctx_t *ctx, app_cfg_t *cfg)
+{
+
+    // monitor flow control, enable output on start
+    if(cfg->flow == 'R'){
+
+        // wait for CTS
+        while( !g_interrupt){
+
+            if(cts_is_set(ctx->fd)) {
+
+                if(cfg->verbose >= 1)
+                    fprintf(stderr, "\nENABLE TX (CTS)\n");
+                ctx->tx_flag = true;
+                ctx->burst_count = 0;
+                return true;
+            }
+            usleep(10000);
+        }
+    }
+#if EMS_WITH_XONXOFF
+    else if(cfg->flow == 'X'){
+        while(!g_interrupt){
+            unsigned char flow_stat = 0;
+            if(read(fd, &flow_stat, 1) == 1 && flow_stat == XON){
+                if(cfg->verbose >= 1)
+                    fprintf(stderr, "\nENABLE TX (XON)\n");
+                tcflush(fd, TCIFLUSH);
+
+                ctx->tx_flag = true;
+                ctx->burst_count = 0;
+                return true;
+            }
+            usleep(10000);
+        }
+    }
+#endif
+
+    return false;
+}
+
+// check flow control, return false on stop
+static bool check_flow_on(app_ctx_t *ctx, app_cfg_t *cfg)
+{
+    // monitor flow control, disable output on stop
+    if(cfg->flow == 'R'){
+        // check CTS, stop sending if asserted
+        if(!cts_is_set(ctx->fd)){
+            if(cfg->verbose >= 1)
+                fprintf(stderr, "\nDISABLE TX (CTS)\n");
+            ctx->tx_flag = false;
+            return false;
+        }
+    }
+#if EMS_WITH_XONXOFF
+    else if(cfg->flow == 'X'){
+        unsigned char flow_stat = 0;
+        if(read(ctx->fd, &flow_stat, 1) == 1 && flow_stat == XOFF){
+            if(cfg->verbose >= 1)
+                fprintf(stderr, "\nDISABLE TX (XOFF)\n");
+            tcflush(ctx->fd, TCIFLUSH);
+            ctx->tx_flag = false;
+            return false;
+        }
+    }
+#endif
+
+    ctx->tx_flag = true;
+    return true;
+}
+
+// read from input file and write to serial port
+// and delay (if > 0)
+// transfer size set by IO buffer size (ibuf)
+static int write_data(app_ctx_t *ctx, app_cfg_t *cfg)
+{
+    int retval = 0;
+    static uint64_t obytes = 0;
+
+    if(!ctx->tx_flag)
+        return 0;
+
+    // read byte(s) from input file
+    size_t rbytes = fread(cfg->ibuf, 1, (size_t)cfg->ibuf_sz, ctx->fp);
+
+    if( rbytes > 0) {
+        ctx->total_rbytes += rbytes;
+        ctx->burst_count += rbytes;
+
+        unsigned char *op = cfg->ibuf;
+        ssize_t rem_bytes = rbytes;
+        while(rem_bytes > 0){
+            // write byte(s) to output (should block until sent)
+            ssize_t wb = write(ctx->fd, op, rem_bytes);
+            tcdrain(ctx->fd);
+
+            if(wb > 0) {
+                ctx->total_wbytes += wb;
+                rem_bytes -= wb;
+                op += wb;
+
+                if(wb < rbytes){
+                    fprintf(stderr, "\nWARN - write returned %zd/%zd\n", wb, rbytes);
+                }
+            } else{
+                fprintf(stderr, "\nERR - write returned %zd ibuf %p len %llu %d/%s\n", wb, cfg->ibuf, cfg->ibuf_sz, errno, strerror(errno));
+            }
+        }
+
+        // display bytes
+        if(cfg->verbose >= 4 ){
+            for(int i = 0; i < rbytes; i++){
+                if((obytes % 16) == 0)
+                    fprintf(stderr, "\n%08llx: ", obytes);
+                fprintf(stderr, "%02X ", cfg->ibuf[i]);
+                obytes++;
+            }
+        }
+
+        // delay per configuration
+        if(cfg->ser_delay_us > 0)
+            usleep(cfg->ser_delay_us);
+
+    } else {
+        fprintf(stderr, "ERR - fread returned %zd feof %d ferr %d %d/%s\n",  rbytes, feof(ctx->fp), ferror(ctx->fp), errno, strerror(errno));
+        if(feof(ctx->fp)){
+            ctx->quit_flag = true;
+            retval = -1;
+        }
+
+        clearerr(ctx->fp);
+    }
+    return retval;
+}
+
 int main(int argc, char **argv)
 {
+    // configure signal handling
     struct sigaction saStruct;
     sigemptyset(&saStruct.sa_mask);
     saStruct.sa_flags = 0;
     saStruct.sa_handler = s_termination_handler;
     sigaction(SIGINT, &saStruct, NULL);
 
-    app_cfg_t *cfg = s_cfg_new();
+    // get default configuration
+    app_cfg_t *cfg = app_cfg_new();
+
+    // parse options
     s_parse_args(argc, argv, cfg);
-    s_cfg_show(cfg);
+    app_cfg_show(cfg);
 
-    // open output port
-    int fd = open(cfg->ser_device, O_RDWR|O_NOCTTY);
+    // get context, initilize
+    app_ctx_t *ctx = app_ctx_new();
 
-    if(fd < 0){
-        fprintf(stderr, "could not open %s %d/%s\n", cfg->ser_device, errno, strerror(errno));
-        s_cfg_destroy(&cfg);
-        return -1;
-    }
+    if(init_ctx(ctx, cfg) == 0){
 
-    config_ser(fd, cfg);
-
-    // open input file
-    FILE *fp = fopen(cfg->ifile, "r");
-
-    uint64_t obytes = 0;
-    int64_t total_rbytes=0;
-    int64_t total_wbytes=0;
-
-    if(fp != NULL){
+        // if context valid, process input file
 
         if(cfg->verbose > 0 ){
-            fprintf(stderr, "%s input file %s open fp %p\n", __func__, cfg->ifile, fp);
-            fprintf(stderr, "%s output device %s connected fd %d %u bps\n", __func__, cfg->ser_device, fd, cfg->ser_baud);
+            fprintf(stderr, "%s input file %s open fp %p\n", __func__, cfg->ifile, ctx->fp);
+            fprintf(stderr, "%s output device %s connected fd %d %u bps\n", __func__, cfg->ser_device, ctx->fd, cfg->ser_baud);
+            fprintf(stderr, "%s ftell %ld fend %ld\n", __func__, ftell(ctx->fp), ctx->fend);
         }
 
-        fseek(fp, 0, SEEK_END);
-        long fend = ftell(fp);
-        fseek(fp, 0, SEEK_SET);
-
-        if(cfg->verbose > 0 ){
-            fprintf(stderr, "ftell %ld fend %ld\n", ftell(fp), fend);
-        }
-
-        bool do_quit=false;
-        bool do_tx=true;
-        int64_t burst_count = 0;
-
-        while(!do_quit && !g_interrupt) {
+        while(!ctx->quit_flag && !g_interrupt) {
 
             memset(cfg->ibuf, 0, cfg->ibuf_sz);
 
             // quit if end of input
-            if(ftell(fp) >= fend)
+            if(ftell(ctx->fp) >= ctx->fend)
                 break;
 
-            // monitor flow control, enable output on start
-            if(cfg->flow == 'R'){
-                // set RTS
-                s_set_rts(fd, true);
+            // wait for flow control enable
+            wait_flow_on(ctx, cfg);
 
-                // wait for CTS
-                while( !g_interrupt){
-
-                    int modstat=0;
-                    if(ioctl(fd, TIOCMGET, &modstat) != 0)
-                        fprintf(stderr, "ERR TIOCMGET- %d/%s\n", errno, strerror(errno));
-
-                    if((modstat&TIOCM_CTS) != 0){
-                        if(cfg->verbose >= 1)
-                            fprintf(stderr, "\nENABLE TX (CTS)\n");
-
-                        do_tx = true;
-                        burst_count = 0;
-                        break;
-                    }
-                    usleep(10000);
-                }
-            }
-#if EMS_WITH_XONXOFF
-            else if(cfg->flow == 'X'){
-                while(!g_interrupt){
-                    unsigned char flow_stat = 0;
-                    if(read(fd, &flow_stat, 1) == 1 && flow_stat == XON){
-                        if(cfg->verbose >= 1)
-                            fprintf(stderr, "\nENABLE TX (XON)\n");
-                        tcflush(fd, TCIFLUSH);
-                        do_tx = true;
-                        burst_count = 0;
-                        break;
-                    }
-                    usleep(10000);
-                }
-            }
-#endif
-            while(do_tx && !g_interrupt && !do_quit){
+            while(ctx->tx_flag && !g_interrupt && !ctx->quit_flag){
 
                 // quit if end of input
-                if(ftell(fp) >= fend)
+                if(ftell(ctx->fp) >= ctx->fend)
                     break;
 
-                // monitor flow control, disable output on stop
-                if(cfg->flow == 'R'){
-                    // check CTS, stop sending if asserted
-                    int modstat=0;
-                    if(ioctl(fd, TIOCMGET, &modstat) != 0)
-                        fprintf(stderr, "ERR TIOCMGET- %d/%s\n", errno, strerror(errno));
+                // check flow control, disable output on stop
+                check_flow_on(ctx, cfg);
 
-                    if((modstat&TIOCM_CTS) == 0){
-                        if(cfg->verbose >= 1)
-                            fprintf(stderr, "\nDISABLE TX (CTS %lld bytes)\n", burst_count);
-                        do_tx = false;
-                        break;
-                    }
-                }
-#if EMS_WITH_XONXOFF
-                else if(cfg->flow == 'X'){
-                    unsigned char flow_stat = 0;
-                    if(read(fd, &flow_stat, 1) == 1 && flow_stat == XOFF){
-                        if(cfg->verbose >= 1)
-                            fprintf(stderr, "\nDISABLE TX (XOFF %lld bytes)\n", burst_count);
-                        tcflush(fd, TCIFLUSH);
-                        do_tx = false;
-                        break;
-                    }
-                }
-#endif
                 // do output when enabled
-                if(do_tx){
-
-                    // read byte(s) from input file
-                    size_t rbytes = fread(cfg->ibuf, 1, (size_t)cfg->ibuf_sz, fp);
-
-                    if( rbytes > 0) {
-                        total_rbytes += rbytes;
-                        burst_count += rbytes;
-
-                        unsigned char *op = cfg->ibuf;
-                        ssize_t rem_bytes = rbytes;
-                        while(rem_bytes > 0){
-                            // write byte(s) to output (should block until sent)
-                            ssize_t wb = write(fd, op, rem_bytes);
-                            tcdrain(fd);
-
-                            if(wb > 0) {
-                                total_wbytes += wb;
-                                rem_bytes -= wb;
-                                op += wb;
-
-                                if(wb < rbytes){
-                                    fprintf(stderr, "\nWARN - write returned %zd/%zd\n", wb, rbytes);
-                                }
-                            } else{
-                                fprintf(stderr, "\nERR - write returned %zd ibuf %p len %llu %d/%s\n", wb, cfg->ibuf, cfg->ibuf_sz, errno, strerror(errno));
-                            }
-                        }
-
-                        // display bytes
-                        if(cfg->verbose >= 4 ){
-                            for(int i = 0; i < rbytes; i++){
-                                if((obytes % 16) == 0)
-                                    fprintf(stderr, "\n%08llx: ", obytes);
-                                fprintf(stderr, "%02X ", cfg->ibuf[i]);
-                                obytes++;
-                            }
-                        }
-
-                        if(cfg->ser_delay_us > 0)
-                            usleep(cfg->ser_delay_us);
-
-                    } else {
-                        fprintf(stderr, "ERR - fread returned %zd feof %d ferr %d %d/%s\n",  rbytes, feof(fp), ferror(fp), errno, strerror(errno));
-                        if(feof(fp))
-                            do_quit = true;
-
-                        clearerr(fp);
-                    }
-                }
+                write_data(ctx, cfg);
             }
-
         }
     } else {
-        fprintf(stderr, "ERR - file %s %d/%s\n", cfg->ifile, errno, strerror(errno));
+        fprintf(stderr, "ERR - init_ctx failed; file %s %d/%s\n", cfg->ifile, errno, strerror(errno));
     }
 
     if(cfg->verbose > 0 ){
-        fprintf(stderr, "\n read %llu/%08llX wrote %llu/%08llX bytes\n", total_rbytes, total_rbytes, total_wbytes, total_wbytes);
+        fprintf(stderr, "\n read %llu/%08llX wrote %llu/%08llX bytes\n", ctx->total_rbytes, ctx->total_rbytes, ctx->total_wbytes, ctx->total_wbytes);
     }
 
-    close(fd);
-    fclose(fp);
-
-    s_cfg_destroy(&cfg);
+    app_cfg_destroy(&cfg);
+    app_ctx_destroy(&ctx);
 
     return 0;
 }
