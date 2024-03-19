@@ -334,8 +334,8 @@ static void app_ctx_destroy(app_ctx_t **pself)
             if(self->fp != NULL)
                 fclose(self->fp);
             close(self->fd);
+            free(self);
         }
-        free(self);
         *pself = NULL;
     }
 }
@@ -680,8 +680,10 @@ int main(int argc, char **argv)
             }
 
             // close file, get next
-            if(ctx->fp != NULL)
+            if(ctx->fp != NULL){
                 fclose(ctx->fp);
+                ctx->fp = NULL;
+            }
 
             path = (char *)mlist_next(cfg->file_paths);
         }
