@@ -185,9 +185,17 @@ target_link_libraries(emallpub PRIVATE TIRPC::TIRPC mbtrnframe m pthread)
 #
 #------------------------------------------------------------------------------
 #
+add_executable(emserpub utils/emserpub.c)
+target_include_directories(emserpub PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnframe
+                            ${CMAKE_SOURCE_DIR}/src/mbio
+							${CMAKE_SOURCE_DIR}/src/mbtrnutils)
+target_link_libraries(emserpub PRIVATE TIRPC::TIRPC mbtrnframe m pthread)
+#
+#------------------------------------------------------------------------------
+#
 install(TARGETS r7kr mb1r DESTINATION ${CMAKE_INSTALL_LIBDIR})
 #
-install(TARGETS udps udpc mbtnav_cli stream7k emu7k r7kr_test trnc tbinx mb1conv mb12csv mb1r_test mb1-cli emallpub DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS udps udpc mbtnav_cli stream7k emu7k r7kr_test trnc tbinx mb1conv mb12csv mb1r_test mb1-cli emallpub emserpub DESTINATION ${CMAKE_INSTALL_BINDIR})
 #
 #------------------------------------------------------------------------------
 #

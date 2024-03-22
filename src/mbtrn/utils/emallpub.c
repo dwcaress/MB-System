@@ -197,6 +197,8 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
                 else if (strcmp("delay", options[option_index].name) == 0) {
                     sscanf(optarg,"%lu",&cfg->delay_ms);
                 }
+            default:
+                break;
         }
     }
 
@@ -217,6 +219,8 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
 
     if(help) {
         s_show_help();
+        s_cfg_destroy(&cfg);
+        exit(0);
     }
 }
 
