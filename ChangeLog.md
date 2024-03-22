@@ -23,6 +23,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
 
+- Version 5.8.1beta09    March 22, 2024
 - Version 5.8.1beta08    March 10, 2024
 - Version 5.8.1beta07    February 24, 2024
 - Version 5.8.1beta04    February 16, 2024
@@ -32,6 +33,27 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.1beta09 (March 22, 2024)
+
+Format 16 (MBF_SBSIOSWB): Fixed bug that became evident when processing old Scripps
+SeaBeam Classic data in format 16 on a MacOs Sonoma machine. This turned out to be
+a poorly formed preprocessor macro for rounding floating point values in code dating 
+from 1992. 
+
+Formats 58 (MBF_EM710RAW) and 59 (MBF_EM710MBA):  Fixed bug in which some bathymetry 
+edits were applied to the wrong pings. Third generation Kongsberg multibeams produce
+two cross profiles with each ping cycle, but represent these as two separate pings
+with the same ping time. MB-System distinguishes between pings using the timestamps
+rather than ping numbers (because not all sonars produce ping numbers), so pings
+with the same timestamp confuse the beam flag handling code. The solution is to add
+a small amount of time to the timestamp of the second ping in each pair. The bug was
+that the amount of time added by mbpreprocess was 33 microseconds, but the datagrams
+in Kongsberg *.all files specify timestamps only to the millisecond level, and so
+the added time was not large enough to be recorded differently in the output files.
+
+Mbgrid: Improved output to shell so that it shows the min max values from each 
+contributing input file whether verbose is specified or not.
 
 #### 5.8.1beta08 (March 10, 2024)
 
