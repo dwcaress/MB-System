@@ -491,13 +491,13 @@ struct mbsys_simrad3_ping_struct {
 	int png_spare;         /* spare */
 	float png_depth[MBSYS_SIMRAD3_MAXBEAMS];
 	/* depths relative to sonar (m)
-The beam data are given re the transmit
-transducer or sonar head depth and the
-horizontal location (x,y) of the active
-positioning systems reference point.
-Heave, roll, pitch, sound speed at the
-transducer depth and ray bending through
-the water column have been applied. */
+		The beam data are given re the transmit
+		transducer or sonar head depth and the
+		horizontal location (x,y) of the active
+		positioning systems reference point.
+		Heave, roll, pitch, sound speed at the
+		transducer depth and ray bending through
+		the water column have been applied. */
 	float png_acrosstrack[MBSYS_SIMRAD3_MAXBEAMS];
 	/* acrosstrack distances (m) */
 	float png_alongtrack[MBSYS_SIMRAD3_MAXBEAMS];

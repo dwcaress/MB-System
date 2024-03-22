@@ -979,7 +979,7 @@ int mb_tcontour(int verbose, struct swath *data, int *error) {
 
       else {
         const double ratio = data->level_list[i] / data->tick_int;
-        if (fabs(ROUND(ratio) - ratio) < 0.005 * data->contour_int)
+        if (fabs(round(ratio) - ratio) < 0.005 * data->contour_int)
           data->tick_list[i] = 1;
         else
           data->tick_list[i] = 0;
@@ -988,7 +988,7 @@ int mb_tcontour(int verbose, struct swath *data, int *error) {
         data->label_list[i] = 0;
       else {
         const double ratio = data->level_list[i] / data->label_int;
-        if (fabs(ROUND(ratio) - ratio) < 0.005 * data->contour_int)
+        if (fabs(round(ratio) - ratio) < 0.005 * data->contour_int)
           data->label_list[i] = 1;
         else
           data->label_list[i] = 0;
@@ -1529,7 +1529,7 @@ int mb_ocontour(int verbose, struct swath *data, int *error) {
         data->tick_list[i] = 0;
       else {
         const double ratio = data->level_list[i] / data->tick_int;
-        if (fabs(ROUND(ratio) - ratio) < 0.005 * data->contour_int)
+        if (fabs(round(ratio) - ratio) < 0.005 * data->contour_int)
           data->tick_list[i] = 1;
         else
           data->tick_list[i] = 0;
@@ -1538,7 +1538,7 @@ int mb_ocontour(int verbose, struct swath *data, int *error) {
         data->label_list[i] = 0;
       else {
         const double ratio = data->level_list[i] / data->label_int;
-        if (fabs(ROUND(ratio) - ratio) < 0.005 * data->contour_int)
+        if (fabs(round(ratio) - ratio) < 0.005 * data->contour_int)
           data->label_list[i] = 1;
         else
           data->label_list[i] = 0;

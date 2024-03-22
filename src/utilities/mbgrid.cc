@@ -1944,10 +1944,7 @@ int main(int argc, char **argv) {
         }
         if (verbose >= 2)
           fprintf(outfp, "\n");
-        if (verbose > 0)
-          fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
-        else if (file_in_bounds)
-          fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
+        fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
@@ -1963,8 +1960,7 @@ int main(int argc, char **argv) {
     }
     if (datalist != nullptr)
       mb_datalist_close(verbose, &datalist, &error);
-    if (verbose > 0)
-      fprintf(outfp, "\n%d total data points processed\n", ndata);
+    fprintf(outfp, "\n%d total data points processed\n", ndata);
 
     /* close datalist if necessary */
     if (dfp != nullptr) {
@@ -2515,16 +2511,13 @@ int main(int argc, char **argv) {
         }
         if (verbose >= 2)
           fprintf(outfp, "\n");
-        if (verbose > 0)
+        if (verbose > 0 || file_in_bounds)
           fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
-        else if (file_in_bounds)
-          fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
       } /* end if (format > 0) */
     }
     if (datalist != nullptr)
       mb_datalist_close(verbose, &datalist, &error);
-    if (verbose > 0)
-      fprintf(outfp, "\n%d total data points processed\n", ndata);
+    fprintf(outfp, "\n%d total data points processed\n", ndata);
 
     /* now loop over all points in the output grid */
     if (verbose >= 1)
@@ -2938,10 +2931,8 @@ int main(int argc, char **argv) {
         }
         if (verbose >= 2)
           fprintf(outfp, "\n");
-        if (verbose > 0)
+        if (verbose > 0 || file_in_bounds)
           fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
-        else if (file_in_bounds)
-          fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
@@ -2957,8 +2948,7 @@ int main(int argc, char **argv) {
     }
     if (datalist != nullptr)
       mb_datalist_close(verbose, &datalist, &error);
-    if (verbose > 0)
-      fprintf(outfp, "\n%d total data points processed\n", ndata);
+    fprintf(outfp, "\n%d total data points processed\n", ndata);
 
     /* close datalist if necessary */
     if (dfp != nullptr) {
@@ -3373,10 +3363,8 @@ int main(int argc, char **argv) {
         }
         if (verbose >= 2)
           fprintf(outfp, "\n");
-        if (verbose > 0)
+        if (verbose > 0 || file_in_bounds)
           fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
-        else if (file_in_bounds)
-          fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
@@ -3467,10 +3455,8 @@ int main(int argc, char **argv) {
         error = MB_ERROR_NO_ERROR;
         if (verbose >= 2)
           fprintf(outfp, "\n");
-        if (verbose > 0)
+        if (verbose > 0 || ndatafile > 0)
           fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, file, dmin, dmax);
-        else if (ndatafile > 0)
-          fprintf(outfp, "%d data points processed in %s\n", ndatafile, file);
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
@@ -3486,8 +3472,7 @@ int main(int argc, char **argv) {
     }
     if (datalist != nullptr)
       mb_datalist_close(verbose, &datalist, &error);
-    if (verbose > 0)
-      fprintf(outfp, "\n%d total data points processed\n", ndata);
+    fprintf(outfp, "\n%d total data points processed\n", ndata);
 
     /* close datalist if necessary */
     if (dfp != nullptr) {
@@ -3996,10 +3981,8 @@ int main(int argc, char **argv) {
         }
         if (verbose >= 2)
           fprintf(outfp, "\n");
-        if (verbose > 0)
+        if (verbose > 0 || file_in_bounds)
           fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
-        else if (file_in_bounds)
-          fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
@@ -4097,10 +4080,8 @@ int main(int argc, char **argv) {
         error = MB_ERROR_NO_ERROR;
         if (verbose >= 2)
           fprintf(outfp, "\n");
-        if (verbose > 0)
+        if (verbose > 0 || ndatafile > 0)
           fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, file, dmin, dmax);
-        else if (ndatafile > 0)
-          fprintf(outfp, "%d data points processed in %s\n", ndatafile, file);
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
@@ -4116,8 +4097,7 @@ int main(int argc, char **argv) {
     }
     if (datalist != nullptr)
       mb_datalist_close(verbose, &datalist, &error);
-    if (verbose > 0)
-      fprintf(outfp, "\n%d total data points processed\n", ndata);
+    fprintf(outfp, "\n%d total data points processed\n", ndata);
 
     /* close datalist if necessary */
     if (dfp != nullptr) {
@@ -4539,10 +4519,8 @@ int main(int argc, char **argv) {
         }
         if (verbose >= 2)
           fprintf(outfp, "\n");
-        if (verbose > 0)
+        if (verbose > 0 || file_in_bounds)
           fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
-        else if (file_in_bounds)
-          fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
@@ -4559,8 +4537,7 @@ int main(int argc, char **argv) {
     }
     if (datalist != nullptr)
       mb_datalist_close(verbose, &datalist, &error);
-    if (verbose > 0)
-      fprintf(outfp, "\n%d total data points processed\n", ndata);
+    fprintf(outfp, "\n%d total data points processed\n", ndata);
 
     /* close datalist if necessary */
     if (dfp != nullptr) {
@@ -4967,10 +4944,8 @@ int main(int argc, char **argv) {
         }
         if (verbose >= 2)
           fprintf(outfp, "\n");
-        if (verbose > 0)
+        if (verbose > 0 || file_in_bounds)
           fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
-        else if (file_in_bounds)
-          fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
@@ -4987,8 +4962,7 @@ int main(int argc, char **argv) {
     }
     if (datalist != nullptr)
       mb_datalist_close(verbose, &datalist, &error);
-    if (verbose > 0)
-      fprintf(outfp, "\n%d total data points processed\n", ndata);
+    fprintf(outfp, "\n%d total data points processed\n", ndata);
 
     /* close datalist if necessary */
     if (dfp != nullptr) {

@@ -2663,6 +2663,7 @@ int main(int argc, char **argv) {
       n_rf_att1 = 0;
       n_rf_att2 = 0;
       n_rf_att3 = 0;
+	  n_rf_dup_timestamp = 0;
       n_wf_data = 0;
       n_wf_comment = 0;
       n_wf_nav = 0;
@@ -2777,7 +2778,7 @@ int main(int argc, char **argv) {
           if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
             if (sensorhead >= 0 && sensorhead < MB_SUBSENSOR_NUM_MAX) {
               if (fabs(time_d - last_survey_time_d[sensorhead]) < MB_ESF_MAXTIMEDIFF) {
-                time_d += 3 * MB_ESF_MAXTIMEDIFF;
+                time_d += MB_ESF_MAXTIMEDIFF_X10;
                 timestamp_changed = true;
                 n_rf_dup_timestamp++;
                 n_rt_dup_timestamp++;
@@ -2922,6 +2923,11 @@ int main(int argc, char **argv) {
           roll = roll_org;
           pitch = pitch_org;
           heave = heave_org;
+		  
+		  /* reset time_i */
+		  if (timestamp_changed) {
+			  mb_get_date(verbose, time_d, time_i);
+		  }
 
           /* set up preprocess structure */
           preprocess_pars.target_sensor = target_sensor;
