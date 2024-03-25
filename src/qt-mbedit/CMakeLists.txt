@@ -27,14 +27,28 @@ find_package(
   COMPONENTS Gui Widgets Quick
   REQUIRED)
 
+if(CMAKE_SYSTEM_NAME STREQUAL Linux)
+  find_package(TIRPC REQUIRED)
+else()
+  add_library(TIRPC::TIRPC INTERFACE IMPORTED)
+endif()
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-add_executable(qt-mbedit main.cpp mainwindow.cpp mainwindow.ui)
+message("In CMakeLists.txt!!! CMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR}")
 
-target_link_libraries(qt-mbedit PRIVATE MBGui Qt5::Core Qt5::Quick
-                               	           mbeditvizlib)
+add_executable(qt-mbedit main.cpp mainwindow.cpp mainwindow.h mainwindow.ui)
+
+# If header directories specified with ${CMAKE_SOURCE_DIR}, qtcreator cannot
+# find them!
+target_include_directories(qt-mbedit PUBLIC /home/oreilly/MB-System/src/mbio/
+                                     /home/oreilly/MB-System/src/mbaux
+                                     /home/oreilly/MB-System/src/mbedit)
+
+target_link_libraries(qt-mbedit PRIVATE MBGui Qt5::Core Qt5::Widgets Qt5::Quick
+                               	           mbeditvizlib mbio
+					   PUBLIC TIRPC::TIRPC)
 
 install(TARGETS qt-mbedit DESTINATION ${CMAKE_INSTALL_BINDIR})
