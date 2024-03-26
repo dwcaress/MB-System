@@ -235,8 +235,8 @@
    <widget class="QLabel" name="swathCanvas">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>310</y>
+      <x>10</x>
+      <y>280</y>
       <width>601</width>
       <height>301</height>
      </rect>
