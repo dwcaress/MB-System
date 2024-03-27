@@ -50,9 +50,6 @@ ARG LCM_BUILD_OPTS="CMAKE_BUILD_TYPE=RELEASE \
     -DLCM_ENABLE_LUA=OFF \
     -DLCM_ENABLE_EXAMPLES=ON"
 
-#ARG MB_PAT="ATCTT3xFfGN0GimkqhsikY9nY7oTXez74wobYHNcOuIBMG4DI6JCdD25P9urnWzR83d6v9q0QxCVyxEvN2Mk9oKQKWdA_gW53SAwr4-kTC-sCCVmVe233R_E6rdRd9fJzSG_ypeGPmLqlEnCbWZxe1x8cz0vzRITyPuPNBYkphywmwTsAr9sTuM=012AA319"
-#ARG MF_PAT="ATCTT3xFfGN0ndfNYTNTfVPQLzeYe3SD_AHrJxvqExcPKPRTvOhlwf0KUdLvtxhkCe2uvpRKC3EvcsV5vATFyNeQH1ZyG6t_DX2EI5BsP_6x1sYyV2nPIDPi7rmrCMLhCYVTg4TAIXON6gRnlOD83lsz4viO4VGMadhjGOAxHmqYmO_XgPYF0JY=7A143707"
-
 ARG BUILD_DIR=/tmp/build
 
 ENV CLASSPATH="/usr/local/share/java/jchart2d-3.2.2.jar:\
@@ -91,16 +88,6 @@ RUN apk -U upgrade --no-cache && \
     rm -rf ${BUILD_DIR} && \
     ldconfig / && \
     ldconfig /usr/local/lib && ldconfig /usr/local/lib/gmt5 
-
-#    cd ${BUILD_DIR} && \
-#    git clone https://x-token-auth:${MB_PAT}@bitbucket.org/mbari/mb1stream.git && \
-#    cd mb1stream && \
-#    git clone https://x-token-auth:${MF_PAT}@bitbucket.org/mbari/mframe.git && \
-#    cd mframe && \
-#    make && \
-#    cd .. && \
-#    make MFRAME_BUILD=mframe && \
-#    make install && 
 
 # EXPOSE ports
 #EXPOSE 80/tcp
