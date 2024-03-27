@@ -1,3 +1,5 @@
+
+
 # Alpine is smaller than Ubuntu
 FROM alpine:latest AS builder
 
@@ -19,8 +21,11 @@ ARG LCM_DEPS="glib-dev \
     ttf-liberation \
     openjdk11 "
 
+ARG MBSYS_BRANCH="master"
+
 ARG MBSYS_DEPS="proj-dev \
     gdal-dev \
+    hdf5-dev \
     netcdf-dev \
     fftw-dev  \
     gnuplot \
@@ -29,9 +34,10 @@ ARG MBSYS_DEPS="proj-dev \
     libxt-dev \
     libtirpc-dev \
     glu-dev \
-    motif-dev"
+    motif-dev \
+    libxml2-dev \
+    opencv-dev"
 
-ARG MBSYS_BRANCH="master"
 
 ARG COMMON_DEPS="libgcc libstdc++ bash mesa-dev mesa-dri-gallium"
 
@@ -44,8 +50,8 @@ ARG LCM_BUILD_OPTS="CMAKE_BUILD_TYPE=RELEASE \
     -DLCM_ENABLE_LUA=OFF \
     -DLCM_ENABLE_EXAMPLES=ON"
 
-ARG MB_PAT="ATCTT3xFfGN0GimkqhsikY9nY7oTXez74wobYHNcOuIBMG4DI6JCdD25P9urnWzR83d6v9q0QxCVyxEvN2Mk9oKQKWdA_gW53SAwr4-kTC-sCCVmVe233R_E6rdRd9fJzSG_ypeGPmLqlEnCbWZxe1x8cz0vzRITyPuPNBYkphywmwTsAr9sTuM=012AA319"
-ARG MF_PAT="ATCTT3xFfGN0ndfNYTNTfVPQLzeYe3SD_AHrJxvqExcPKPRTvOhlwf0KUdLvtxhkCe2uvpRKC3EvcsV5vATFyNeQH1ZyG6t_DX2EI5BsP_6x1sYyV2nPIDPi7rmrCMLhCYVTg4TAIXON6gRnlOD83lsz4viO4VGMadhjGOAxHmqYmO_XgPYF0JY=7A143707"
+#ARG MB_PAT="ATCTT3xFfGN0GimkqhsikY9nY7oTXez74wobYHNcOuIBMG4DI6JCdD25P9urnWzR83d6v9q0QxCVyxEvN2Mk9oKQKWdA_gW53SAwr4-kTC-sCCVmVe233R_E6rdRd9fJzSG_ypeGPmLqlEnCbWZxe1x8cz0vzRITyPuPNBYkphywmwTsAr9sTuM=012AA319"
+#ARG MF_PAT="ATCTT3xFfGN0ndfNYTNTfVPQLzeYe3SD_AHrJxvqExcPKPRTvOhlwf0KUdLvtxhkCe2uvpRKC3EvcsV5vATFyNeQH1ZyG6t_DX2EI5BsP_6x1sYyV2nPIDPi7rmrCMLhCYVTg4TAIXON6gRnlOD83lsz4viO4VGMadhjGOAxHmqYmO_XgPYF0JY=7A143707"
 
 ARG BUILD_DIR=/tmp/build
 
@@ -74,38 +80,27 @@ RUN apk -U upgrade --no-cache && \
     cd ${BUILD_DIR} && \
     git clone https://github.com/dwcaress/MB-System.git && \
     cd MB-System && \
-    echo "!!! Building MBSYS_BRANCH ${MBSYS_BRANCH}" && \
     git checkout ${MBSYS_BRANCH} && \
-    libtoolize --force --copy && \
-    aclocal && \
-    autoheader && \
-    automake --add-missing --include-deps && \
-    autoconf && \
-    autoupdate && \
-    autoreconf --force --install --warnings=all && \
-    echo "!!! Fixing \${bits} refrences in MB-System configure script" && \
-    cp configure configure.auto && \
-    cat configure | sed -e "s/\${bits}/64/g" > configure.new && \
-    mv configure.new configure && \
-    chmod 775 configure && \
-    ./configure --enable-mbtrn --enable-mbtnav && \
-    make CFLAGS="-I/usr/local/include/gmt" LDFLAGS="-L/usr/local/lib/gmt5/lib -lgmt" && make install && \
+    echo "!!! Building MBSYS_BRANCH ${MBSYS_BRANCH}" && sleep 3 && \
+    mkdir build && cd build && \
+    cmake -DbuildOpenCV=ON -DCMAKE_BUILD_TYPE=Debug .. && make && make install && \
     mkdir -p /opt/mbsys && \
     cp -r ${BUILD_DIR}/MB-System/src/mbtrn/tools/* /opt/mbsys/ && \
-    cd ${BUILD_DIR} && \
-    git clone https://x-token-auth:${MB_PAT}@bitbucket.org/mbari/mb1stream.git && \
-    cd mb1stream && \
-    git clone https://x-token-auth:${MF_PAT}@bitbucket.org/mbari/mframe.git && \
-    cd mframe && \
-    make && \
-    cd .. && \
-    make MFRAME_BUILD=mframe && \
-    make install && \
     apk del ${BUILD_ONLY}  && \
     apk -v cache clean && \
     rm -rf ${BUILD_DIR} && \
     ldconfig / && \
     ldconfig /usr/local/lib && ldconfig /usr/local/lib/gmt5 
+
+#    cd ${BUILD_DIR} && \
+#    git clone https://x-token-auth:${MB_PAT}@bitbucket.org/mbari/mb1stream.git && \
+#    cd mb1stream && \
+#    git clone https://x-token-auth:${MF_PAT}@bitbucket.org/mbari/mframe.git && \
+#    cd mframe && \
+#    make && \
+#    cd .. && \
+#    make MFRAME_BUILD=mframe && \
+#    make install && 
 
 # EXPOSE ports
 #EXPOSE 80/tcp
