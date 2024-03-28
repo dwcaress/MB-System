@@ -30,9 +30,6 @@ ARG MBSYS_BRANCH="master"
 
 ARG MBSYS_DEPS="libproj-dev \
     libgdal-dev \
-    gmt-common \
-    libgmt6 \
-    libgmt-dev \
     gdal-bin \
     libgdal-dev \
     libhdf5-dev \
@@ -52,7 +49,9 @@ ARG MBSYS_DEPS="libproj-dev \
     libglu1-mesa-dev \
     libmotif-dev \
     libxml2-dev \
-    libopencv-dev"
+    libopencv-dev \
+    xdg-utils \
+    gv"
 
 ARG BUILD_DEPS="${COMMON_DEPS} ${LCM_DEPS} ${MBSYS_DEPS}"
 
@@ -65,6 +64,8 @@ ARG LCM_BUILD_OPTS="CMAKE_BUILD_TYPE=RELEASE \
 
 ARG BUILD_DIR=/tmp/build
 
+ARG DEBIAN_FRONTEND=noninteractive
+
 ENV JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF8"
 
 ENV CLASSPATH="/usr/local/share/java/jchart2d-3.2.2.jar:\
@@ -76,11 +77,18 @@ ENV CLASSPATH="/usr/local/share/java/jchart2d-3.2.2.jar:\
 /usr/local/share/java/lcmtypes_stdlcm.jar:\
 /usr/local/share/java/xmlgraphics-commons-1.3.1.jar"
 
-ARG DEBIAN_FRONTEND=noninteractive
+ENV XDG_CONFIG_HOME=/home/ops/.config
+
 RUN apt-get update && \
     apt-get install -y ${BUILD_ONLY} ${BUILD_DEPS} && \
     mkdir -p ${BUILD_DIR} && \
     mkdir -p -m 775 /.gmt/server && \
+    cd ${BUILD_DIR} && \
+    wget https://github.com/GenericMappingTools/gmt/releases/download/6.1.1/gmt-6.1.1-src.tar.xz && \
+    tar -xvf gmt-6.1.1-src.tar.xz && \
+    cd gmt-6.1.1 && \
+    mkdir build && cd build && \
+    cmake -DCMAKE_INSTALL_PREFIX=/usr/local .. && make && make install && \
     cd ${BUILD_DIR} && \
     git clone https://github.com/lcm-proj/lcm.git && \
     cd lcm && [ -d build ] || mkdir build && \
@@ -98,6 +106,13 @@ RUN apt-get update && \
     rm -rf ${BUILD_DIR} && \
     ldconfig / && \
     ldconfig /usr/local/lib && ldconfig /usr/local/lib/gmt5
+
+RUN groupadd -r ops && useradd -r -m -g ops ops && \
+    mkdir -p $XDG_CONFIG_HOME && gio mime application/postscript gv.desktop && \
+    chown ops:ops $XDG_CONFIG_HOME/mimeapps.list
+
+ENV PATH=$PATH:.
+USER ops
 
 # EXPOSE ports
 #EXPOSE 80/tcp
