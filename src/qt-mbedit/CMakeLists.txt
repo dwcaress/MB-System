@@ -48,7 +48,7 @@ target_include_directories(qt-mbedit PUBLIC /home/oreilly/MB-System/src/mbio/
                                      /home/oreilly/MB-System/src/mbedit)
 
 target_link_libraries(qt-mbedit PRIVATE MBGui Qt5::Core Qt5::Widgets Qt5::Quick
-                               	           mbeditvizlib mbio
+                               	           mbeditLib mbio
 					   PUBLIC TIRPC::TIRPC)
 
 install(TARGETS qt-mbedit DESTINATION ${CMAKE_INSTALL_BINDIR})
