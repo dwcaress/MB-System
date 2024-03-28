@@ -6,26 +6,15 @@
 #include <QPainter>
 #include <QString>
 #include <QColor>
+#include <QFontMetrics>
 
-
-#include "/home/oreilly/MB-System/src/qt-guilib/SwathGridData.h"
+extern "C" {
+#include "mbedit_prog.h"
+}
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
-
-
-
-/// Colors
-typedef enum {
-  WHITE = 0,
-  BLACK = 1,
-  RED = 2,
-  GREEN = 3,
-  BLUE = 4,
-  CORAL = 5,
-  LIGHTGREY = 6,
-} Color;
 
 class MainWindow : public QMainWindow
 {
@@ -35,86 +24,103 @@ public:
   MainWindow(QWidget *parent = nullptr);
   ~MainWindow();
 
-  /// Initialize app
-  int mbedit_init(int argc, char **argv, bool *inputFileSpecd);
+  /// Get canvas width and height
+  void canvasSize(int *width, int *height) {
+    *width = canvas_->width();
+    *height = canvas_->height();
+  }
+  
+  static void drawLine(void *dummy, int x1, int y1, int x2, int y2,
+		       mbedit_color_t color, int style);
+  
+  static void drawRect(void *dummy, int x, int y, int width, int height,
+		       mbedit_color_t color, int style);
+  
+  static void fillRect(void *dummy, int x, int y, int width, int height,
+		       mbedit_color_t color, int style);
+
+  static void drawString(void *dummy, int x, int y, char *string,
+			 mbedit_color_t color, int style);
+  
+  static void justifyString(void *dummy, char *string, int *width,
+			    int *ascent, int *descent);
 
 
+  static void parseDataList(char *file, int format) {
+    return;
+  }
+
+  static int showError(char *s1, char *s2, char *s3) {
+    std::cerr << "showError(): " << s1 << "\n" << s2 << "\n" << s3 << "\n";
+    return 0;
+  }
+
+  static int showMessage(char *message) {
+    std::cerr << "showMessage(): " << message << "\n";
+    return 0;
+  }
+
+  static int hideMessage(void) {
+    std::cerr << "hideMessage()\n";
+    return 0;
+  }
+
+  static void enableFileButton(void) {
+    std::cerr << "enableFileButton\n";
+  }
+
+  static void disableFileButton(void) {
+    std::cerr << "disableFileButton\n";
+  }
+
+  static void enableNextButton(void) {
+    std::cerr << "enableNextButton\n";
+  }
+
+  static void disableNextButton(void) {
+    std::cerr << "disableNextButton\n";
+  }
+
+  static int resetScaleX(int pwidth, int maxx,
+			 int xInterval, int yInterval) {
+    std::cerr << "resetScaleX() - TBD!!!\n";
+    return 0;
+  }
+  
 protected:
 
   /// Process and plot specified swath file
   bool processSwathfile(char *filename);
-  
-  /// Plot swath data
-  bool plot(mb_system::SwathGridData *grid);
 
-  /// Adaptation of mbedit_plot_all (mbedit_prog.c)
-  int mbedit_plot(int plotWidth, int vExagg, int xInterval, int yInterval,
-		  int plotSize, int showMode, int showTime,
-		  bool autoScale);
+  /// Test drawing to canvas
+  bool plotTest(void);
   
-  // Replacement for X11-based MB graphics functions
-  void xg_drawline(void *dummy, int x1, int y1, int x2, int y2,
-		   Color color, int style);
-  
-  void xg_drawrectangle(void *dummy, int x, int y, int width, int height,
-			Color color, int style);
-  
-  void xg_fillrectangle(void *dummy, int x, int y, int width, int height,
-			Color color, int style);
-
-  void xg_drawstring(void *dummy, int x, int y, char *string,
-		     Color color, int style);
-  
-  void xg_justify(void *dummy, char *string, int *width,
-		  int *ascent, int *descent);
-
-
   /// Set QPainter pen color and style
-  void setPenColorAndStyle(Color color, int style);
+  static void setPenColorAndStyle(mbedit_color_t color, int style);
 
+  /// Reset x-scale slider min/max values
+  static void resetScaleXSlider(int width, int xMax,
+				int xInterval, int yInterval);
 
-  /// Dummy first argument to xg_ member funtions
+  /// Dummy first argument to canvas-drawing member funtions
   void *dummy_;
 
-  /// Used within xg_ member functions
-  QString qTextBuf_;
+  /// Used within static member functions
+  static QString staticTextBuf_;
 
-  /// Used witin xg_ member functions
-  QColor qColorBuf_;
-    
-  int verbose_;
-  int lonflip_;
-  bool uselockfiles_;
-  int output_mode_;
-  bool gui_mode_;
-  bool run_mbprocess_;
-  int error_;
-
-  
-  // MBIO control parameters
-  int format_;
-  int pings_;
-  double bounds_[4];
-  int btime_i_[7];
-  int etime_i_[7];
-  double btime_d_;
-  double etime_d_;
-  double speedmin_;
-  double timegap_;
-
+  /// Input swath file name
   char inputFilename_[256];
 
-  
-  mb_system::SwathGridData grid_;
-  
   QPixmap *canvas_;
   QPainter *painter_;
 
-  static const char help_message_[];
+  /// static QPainter is referenced by static functions whose pointers
+  /// are passed to mbedit 
+  static QPainter *staticPainter_;
   
-  static const char usage_message_[];
-		   
-		      
+  static QFontMetrics *staticFontMetrics_;
+
+
 private slots:
 
     void on_xtrackWidthSlider_sliderMoved(int position);
