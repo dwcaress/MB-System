@@ -58,7 +58,9 @@ QString MainWindow::staticTextBuf_;
 MainWindow::MainWindow(QWidget *parent)
   : QMainWindow(parent), ui(new Ui::MainWindow)
 {
-  // Dummy first argument to xg_* member functions
+  dataPlotted_ = false;
+  
+  // Dummy first argument to drawing functions
   dummy_ = nullptr;
   
   ui->setupUi(this);
@@ -75,6 +77,19 @@ MainWindow::MainWindow(QWidget *parent)
   
   qDebug() << "CTR: swathcanvas width: " << ui->swathCanvas->width() <<
     ", swathcanvas height: " << ui->swathCanvas->height();    
+
+
+  int plotWidth = 0;
+  
+  mbedit_get_defaults(&plotSizeMax_, &plotSize_, &showMode_,
+		      &showFlagSounding_, &showFlagProfile_,
+		      &showTime_, &buffSizeMax_, &buffSize_, &holdSize_,
+		      &format_, &plotWidth,  &verticalExagg_,
+		      &xInterval_, &yInterval_,
+		      firstDataTime_, &outMode_);
+
+  qDebug() << "format_: " << format_;
+  
 }
 
 MainWindow::~MainWindow()
@@ -96,10 +111,46 @@ void MainWindow::on_nPingsShowSlider_sliderMoved(int position)
   std::cerr << "nPingsShown = " << position << "\n";
 }
 
+void MainWindow::on_vertExaggSlider_sliderReleased()
+{
+  std::cerr << "vertExagg Released!\n";
+
+  // Can we get slider position?
+  int position = ui->vertExaggSlider->sliderPosition();
+  std::cerr << "read vertExagg = " << position << "\n";
+
+  verticalExagg_ = position;
+
+  if (dataPlotted_) {
+    int nBuffer = 0;
+    int nGood = 0;
+    int iCurrent = 0;
+    int nPlot = 0;
+  
+    // display data from selected file
+    int status = mbedit_action_plot(canvas_->width(),
+				    verticalExagg_, xInterval_, yInterval_,
+				    plotSize_, showMode_,
+				    showFlagSounding_, showFlagProfile_,
+				    showTime_, &nBuffer, &nGood,
+				    &iCurrent, &nPlot);
+    if (status != MB_SUCCESS) {
+      std::cerr << "mbedit_action_plot() failed\n";
+      return;
+    }
+  }
+}
+
 
 void MainWindow::on_vertExaggSlider_sliderMoved(int position)
 {
   std::cerr << "vertExagg = " << position << "\n";
+  verticalExagg_ = position;
+
+  // Can we get slider position?
+  int pos = ui->vertExaggSlider->sliderPosition();
+  std::cerr << "read vertExagg = " << pos << "\n";
+  
 }
 
 
@@ -117,67 +168,56 @@ void MainWindow::on_actionOpen_swath_file_triggered()
   std::cerr << "utf8_text: " << utf8_text << "\n";
   char *fname = (char *)utf8_text.c_str();
   std::cerr << "fname: " << fname << "\n";
-  if (!processSwathfile(fname)) {
-    std::cerr << "Error processing " << fname << "\n";
-  }
-  
-}
 
-
-
-bool MainWindow::processSwathfile(char *fname) {
-
-  // Clear the screen
-  painter_->eraseRect(0, 0, canvas_->width(), canvas_->height());
-
-  int status = 0;
-  qDebug() << "CALL MBEDIT FUNCTIONS HERE!!!";
   int currentFile = 0;
-  int format = 88;
   int fileID = 0;
   int numFiles = 1;
-  int exagg = 100;
   int saveMode = 1;
-  int modeOutput = 1;
-  int xInterval = 1000;
-  int yInterval = 250;
-  int plotSize = 10;
-  int showMode = 0;
-  int showFlaggedSoundings = 1;
-  int showFlaggedProfiles = 0;
-  int showTime = 1;
-  int bufferSize = 3000;
-  int holdSize = 30;
-  int nDumped, nLoaded, nBuffer, nGood, iCurrent, nPlot;
+  int nDumped;
+  int nLoaded;
+  int nBuffer;
+  int nGood;
+  int iCurrent;
+  int nPlot;
 
-  status = mbedit_action_open(fname,
-			      format,
-			      fileID, numFiles, saveMode,
-			      modeOutput, canvas_->width(),
-			      exagg, xInterval, yInterval,
-			      plotSize, showMode,
-			      showFlaggedSoundings,
-			      showFlaggedProfiles, showTime,
-			      &bufferSize, &bufferSize,
-			      &holdSize, &nDumped, &nLoaded,
-			      &nBuffer, &nGood,
-			      &iCurrent, &nPlot);
+  qDebug() << "format_ #2: " << format_;
   
+  int status = mbedit_action_open(fname,
+				  format_,
+				  fileID, numFiles, saveMode,
+				  outMode_, canvas_->width(),
+				  verticalExagg_, xInterval_, yInterval_,
+				  plotSize_, showMode_,
+				  showFlagSounding_,
+				  showFlagProfile_, showTime_,
+				  &buffSize_, &buffSizeMax_,
+				  &holdSize_, &nDumped, &nLoaded,
+				  &nBuffer, &nGood,
+				  &iCurrent, &nPlot);
+
   if (status != MB_SUCCESS) {
-    std::cerr << "mbedit_plot_all() failed\n";
-    return false;
+    std::cerr << "mbedit_action_open() failed\n";
+    return;
   }
-  // display data from chosen file
+
+  // display data from selected file
   status = mbedit_action_plot(canvas_->width(),
-			      exagg, xInterval, yInterval,
-			      plotSize, showMode,
-			      showFlaggedSoundings, showFlaggedProfiles,
-			      showTime, &nBuffer, &nGood,
+			      verticalExagg_, xInterval_, yInterval_,
+			      plotSize_, showMode_,
+			      showFlagSounding_, showFlagProfile_,
+			      showTime_, &nBuffer, &nGood,
 			      &iCurrent, &nPlot);
+  if (status != MB_SUCCESS) {
+    std::cerr << "mbedit_action_plot() failed\n";
+    return;
+  }
+  
   // Add pixmap to UI label
   qDebug() << "Draw on GUI\n";
   ui->swathCanvas->setPixmap(*canvas_);
-  return true;
+  dataPlotted_ = true;
+
+  
 }
 
 

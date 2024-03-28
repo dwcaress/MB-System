@@ -89,9 +89,6 @@ public:
   
 protected:
 
-  /// Process and plot specified swath file
-  bool processSwathfile(char *filename);
-
   /// Test drawing to canvas
   bool plotTest(void);
   
@@ -114,12 +111,34 @@ protected:
   QPixmap *canvas_;
   QPainter *painter_;
 
-  /// static QPainter is referenced by static functions whose pointers
+  /// Indicates if data is plotted
+  bool dataPlotted_;
+  
+  // Display parameters
+  int plotSizeMax_;
+  int plotSize_;
+  int showMode_;
+  int showFlagSounding_;
+  int showFlagProfile_;
+  int showTime_;
+  int buffSizeMax_;
+  int buffSize_;
+  int holdSize_;
+  int format_;
+  int verticalExagg_;
+  int xInterval_;
+  int yInterval_;
+  int outMode_;
+  int firstDataTime_[7];
+  
+
+  
+  /// static members are referenced by static functions whose pointers
   /// are passed to mbedit 
   static QPainter *staticPainter_;
-  
   static QFontMetrics *staticFontMetrics_;
 
+					 
 
 private slots:
 
@@ -128,6 +147,8 @@ private slots:
     void on_nPingsShowSlider_sliderMoved(int position);
 
     void on_vertExaggSlider_sliderMoved(int position);
+
+  void on_vertExaggSlider_sliderReleased();  
 
     void on_actionOpen_swath_file_triggered();
 
