@@ -205,6 +205,41 @@ XColor db_color;
 /* area, minus 1, located in mbedit.uil.              */
 static int mb_borders[4] = {0, 1016, 0, 525};
 
+/// Function passed to mbedit_prog which is WS-agnostic
+void drawLine(void *xgid, int x1, int y1, int x2, int y2,
+	      mbedit_color_t color, int style) {
+
+  xg_drawline(xgid, x1, y1, x2, y2, mpixel_values[color], style);
+}
+
+/// Function passed to mbedit_prog which is WS-agnostic
+void drawRect(void *xgid, int x1, int y1, int width, int height,
+	      mbedit_color_t color, int style) {
+
+  xg_drawrectangle(xgid, x1, y1, width, height, mpixel_values[color], style);
+}
+
+/// Function passed to mbedit_prog which is WS-agnostic
+void fillRect(void *xgid, int x1, int y1, int width, int height,
+	      mbedit_color_t color, int style) {
+
+  xg_fillrectangle(xgid, x1, y1, width, height, mpixel_values[color], style);
+}
+
+/// Function passed to mbedit_prog which is WS-agnostic
+void drawString(void *xgid, int x1, int y1, char *string,
+		mbedit_color_t color, int style) {
+
+  xg_drawstring(xgid, x1, y1, string, mpixel_values[color], style);
+}
+
+/// Function passed to mbedit_prog which is WS-agnostic
+void justifyString(void *xgid, char *string, int *width,
+		   int *ascent, int *descent) {
+
+  xg_justify(xgid, string, width, ascent, descent);
+}
+
 /*--------------------------------------------------------------------*/
 
 /*      Function Name: 	BxUnmanageCB
@@ -223,20 +258,20 @@ static int mb_borders[4] = {0, 1016, 0, 525};
  *		       	shell from which all other widgets are descended.
  */
 void BxUnmanageCB(Widget w, XtPointer client, XtPointer call) {
-	(void)call;
+  (void)call;
 
-	/*
-	 * This function returns a NULL terminated WidgetList.  The memory for
-	 * the list needs to be freed when it is no longer needed.
-	 */
-	WidgetList widgets = BxWidgetIdsFromNames(w, "BxUnmanageCB", (String)client);
+  /*
+   * This function returns a NULL terminated WidgetList.  The memory for
+   * the list needs to be freed when it is no longer needed.
+   */
+  WidgetList widgets = BxWidgetIdsFromNames(w, "BxUnmanageCB", (String)client);
 
-	int i = 0;
-	while (widgets && widgets[i] != NULL) {
-		XtUnmanageChild(widgets[i]);
-		i++;
-	}
-	XtFree((char *)widgets);
+  int i = 0;
+  while (widgets && widgets[i] != NULL) {
+    XtUnmanageChild(widgets[i]);
+    i++;
+  }
+  XtFree((char *)widgets);
 }
 
 /*--------------------------------------------------------------------*/
@@ -258,20 +293,20 @@ void BxUnmanageCB(Widget w, XtPointer client, XtPointer call) {
  */
 
 void BxManageCB(Widget w, XtPointer client, XtPointer call) {
-	(void)call;
+  (void)call;
 
-	/*
-	 * This function returns a NULL terminated WidgetList.  The memory for
-	 * the list needs to be freed when it is no longer needed.
-	 */
-	WidgetList widgets = BxWidgetIdsFromNames(w, "BxManageCB", (String)client);
+  /*
+   * This function returns a NULL terminated WidgetList.  The memory for
+   * the list needs to be freed when it is no longer needed.
+   */
+  WidgetList widgets = BxWidgetIdsFromNames(w, "BxManageCB", (String)client);
 
-	int i = 0;
-	while (widgets && widgets[i] != NULL) {
-		XtManageChild(widgets[i]);
-		i++;
-	}
-	XtFree((char *)widgets);
+  int i = 0;
+  while (widgets && widgets[i] != NULL) {
+    XtManageChild(widgets[i]);
+    i++;
+  }
+  XtFree((char *)widgets);
 }
 /*--------------------------------------------------------------------*/
 /*      Function Name:	BxPopupCB
@@ -296,1137 +331,1160 @@ void BxManageCB(Widget w, XtPointer client, XtPointer call) {
  */
 
 void BxPopupCB(Widget w, XtPointer client, XtPointer call) {
-	(void)call;
+  (void)call;
 
-	/*
-	 * This function returns a NULL terminated WidgetList.  The memory for
-	 * the list needs to be freed when it is no longer needed.
-	 */
-	WidgetList widgets = BxWidgetIdsFromNames(w, "BxPopupCB", (String)client);
+  /*
+   * This function returns a NULL terminated WidgetList.  The memory for
+   * the list needs to be freed when it is no longer needed.
+   */
+  WidgetList widgets = BxWidgetIdsFromNames(w, "BxPopupCB", (String)client);
 
-	int i = 0;
-	while (widgets && widgets[i] != NULL) {
-		if (XtIsShell(widgets[i])) {
-			XtPopup(widgets[i], XtGrabNone);
-		}
-		else {
-			printf("Callback Error (BxPopupCB):\n\tObject %s is not a Shell\n",
-			       XtName(widgets[i]));
-		}
-		i++;
-	}
-	XtFree((char *)widgets);
+  int i = 0;
+  while (widgets && widgets[i] != NULL) {
+    if (XtIsShell(widgets[i])) {
+      XtPopup(widgets[i], XtGrabNone);
+    }
+    else {
+      printf("Callback Error (BxPopupCB):\n\tObject %s is not a Shell\n",
+	     XtName(widgets[i]));
+    }
+    i++;
+  }
+  XtFree((char *)widgets);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_mbedit_init(int argc, char **argv) {
-	/* make sure expose plots are off */
-	expose_plot_ok = false;
+  /* make sure expose plots are off */
+  expose_plot_ok = false;
 
-	/* get additional widgets */
-	fileSelectionList = (Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_LIST);
-	fileSelectionText = (Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_TEXT);
-	XtAddCallback(fileSelectionList, XmNbrowseSelectionCallback, do_fileselection_list, NULL);
+  /* get additional widgets */
+  fileSelectionList = (Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_LIST);
+  fileSelectionText = (Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_TEXT);
+  XtAddCallback(fileSelectionList, XmNbrowseSelectionCallback, do_fileselection_list, NULL);
 
-	XtUnmanageChild((Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_HELP_BUTTON));
+  XtUnmanageChild((Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_HELP_BUTTON));
 
-	/* Setup the entire screen. */
-	display = XtDisplay(window_mbedit);
-	colormap = DefaultColormap(display, XDefaultScreen(display));
+  /* Setup the entire screen. */
+  display = XtDisplay(window_mbedit);
+  colormap = DefaultColormap(display, XDefaultScreen(display));
 
-	/* Setup just the "canvas" part of the screen. */
-	theDisplay = XtDisplay(canvas_mbedit);
-	can_screen = DefaultScreenOfDisplay(theDisplay);
-	can_xid = XtWindow(canvas_mbedit);
-	theColormap = DefaultColormap(display, XDefaultScreen(theDisplay));
+  /* Setup just the "canvas" part of the screen. */
+  theDisplay = XtDisplay(canvas_mbedit);
+  can_screen = DefaultScreenOfDisplay(theDisplay);
+  can_xid = XtWindow(canvas_mbedit);
+  theColormap = DefaultColormap(display, XDefaultScreen(theDisplay));
 
-	/* Setup the "graphics Context" for just the "canvas" */
-	xgcv.background = WhitePixelOfScreen(can_screen);
-	xgcv.foreground = BlackPixelOfScreen(can_screen);
-	xgcv.line_width = 2;
-	gc = XCreateGC(theDisplay, can_xid, GCBackground | GCForeground | GCLineWidth, &xgcv);
+  /* Setup the "graphics Context" for just the "canvas" */
+  xgcv.background = WhitePixelOfScreen(can_screen);
+  xgcv.foreground = BlackPixelOfScreen(can_screen);
+  xgcv.line_width = 2;
+  gc = XCreateGC(theDisplay, can_xid, GCBackground | GCForeground | GCLineWidth, &xgcv);
 
-	/* Setup the font for just the "canvas" screen. */
-	fontStruct = XLoadQueryFont(theDisplay, xgfont);
-	if (fontStruct == NULL) {
-		fprintf(stderr, "\nFailure to load font using XLoadQueryFont: %s\n", xgfont);
-		fprintf(stderr, "\tSource file: %s\n\tSource line: %d\n", __FILE__, __LINE__);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		exit(-1);
-	}
-	XSetFont(theDisplay, gc, fontStruct->fid);
+  /* Setup the font for just the "canvas" screen. */
+  fontStruct = XLoadQueryFont(theDisplay, xgfont);
+  if (fontStruct == NULL) {
+    fprintf(stderr, "\nFailure to load font using XLoadQueryFont: %s\n", xgfont);
+    fprintf(stderr, "\tSource file: %s\n\tSource line: %d\n", __FILE__, __LINE__);
+    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+    exit(-1);
+  }
+  XSetFont(theDisplay, gc, fontStruct->fid);
 
-	XSelectInput(theDisplay, can_xid, EV_MASK);
+  XSelectInput(theDisplay, can_xid, EV_MASK);
 
-	/* Load the colors that will be used in this program. */
-	status = XLookupColor(display, colormap, "white", &db_color, &colors[0]);
-	if ((status = XAllocColor(display, colormap, &colors[0])) == 0)
-		fprintf(stderr, "Failure to allocate color: white\n");
-	status = XLookupColor(display, colormap, "black", &db_color, &colors[1]);
-	if ((status = XAllocColor(display, colormap, &colors[1])) == 0)
-		fprintf(stderr, "Failure to allocate color: black\n");
+  /* Load the colors that will be used in this program. */
+  status = XLookupColor(display, colormap, "white", &db_color, &colors[0]);
+  if ((status = XAllocColor(display, colormap, &colors[0])) == 0)
+    fprintf(stderr, "Failure to allocate color: white\n");
+  status = XLookupColor(display, colormap, "black", &db_color, &colors[1]);
+  if ((status = XAllocColor(display, colormap, &colors[1])) == 0)
+    fprintf(stderr, "Failure to allocate color: black\n");
 #ifdef USE_ORANGE
-	status = XLookupColor(display, colormap, "orange", &db_color, &colors[2]);
-	if ((status = XAllocColor(display, colormap, &colors[2])) == 0)
-		fprintf(stderr, "Failure to allocate color: orange\n");
+  status = XLookupColor(display, colormap, "orange", &db_color, &colors[2]);
+  if ((status = XAllocColor(display, colormap, &colors[2])) == 0)
+    fprintf(stderr, "Failure to allocate color: orange\n");
 #else
-	status = XLookupColor(display, colormap, "red", &db_color, &colors[2]);
-	if ((status = XAllocColor(display, colormap, &colors[2])) == 0)
-		fprintf(stderr, "Failure to allocate color: red\n");
+  status = XLookupColor(display, colormap, "red", &db_color, &colors[2]);
+  if ((status = XAllocColor(display, colormap, &colors[2])) == 0)
+    fprintf(stderr, "Failure to allocate color: red\n");
 #endif
-	status = XLookupColor(display, colormap, "green", &db_color, &colors[3]);
-	if ((status = XAllocColor(display, colormap, &colors[3])) == 0)
-		fprintf(stderr, "Failure to allocate color: green\n");
-	status = XLookupColor(display, colormap, "blue", &db_color, &colors[4]);
-	if ((status = XAllocColor(display, colormap, &colors[4])) == 0)
-		fprintf(stderr, "Failure to allocate color: blue\n");
-	status = XLookupColor(display, colormap, "coral", &db_color, &colors[5]);
-	if ((status = XAllocColor(display, colormap, &colors[5])) == 0)
-		fprintf(stderr, "Failure to allocate color: coral\n");
-	status = XLookupColor(display, colormap, "lightgrey", &db_color, &colors[6]);
-	if ((status = XAllocColor(display, colormap, &colors[6])) == 0)
-		fprintf(stderr, "Failure to allocate color: lightgrey\n");
-	for (int i = 0; i < NCOLORS; i++) {
-		mpixel_values[i] = colors[i].pixel;
-	}
+  status = XLookupColor(display, colormap, "green", &db_color, &colors[3]);
+  if ((status = XAllocColor(display, colormap, &colors[3])) == 0)
+    fprintf(stderr, "Failure to allocate color: green\n");
+  status = XLookupColor(display, colormap, "blue", &db_color, &colors[4]);
+  if ((status = XAllocColor(display, colormap, &colors[4])) == 0)
+    fprintf(stderr, "Failure to allocate color: blue\n");
+  status = XLookupColor(display, colormap, "coral", &db_color, &colors[5]);
+  if ((status = XAllocColor(display, colormap, &colors[5])) == 0)
+    fprintf(stderr, "Failure to allocate color: coral\n");
+  status = XLookupColor(display, colormap, "lightgrey", &db_color, &colors[6]);
+  if ((status = XAllocColor(display, colormap, &colors[6])) == 0)
+    fprintf(stderr, "Failure to allocate color: lightgrey\n");
+  for (int i = 0; i < NCOLORS; i++) {
+    mpixel_values[i] = colors[i].pixel;
+  }
 
-	/* Setup initial cursor. This will be changed when changing "MODE". */
-	myCursor = XCreateFontCursor(theDisplay, XC_target);
-	XAllocNamedColor(theDisplay, colormap, "red", &closest[0], &exact[0]);
-	XAllocNamedColor(theDisplay, colormap, "coral", &closest[1], &exact[1]);
-	XRecolorCursor(theDisplay, myCursor, &closest[0], &closest[1]);
-	XDefineCursor(theDisplay, can_xid, myCursor);
+  /* Setup initial cursor. This will be changed when changing "MODE". */
+  myCursor = XCreateFontCursor(theDisplay, XC_target);
+  XAllocNamedColor(theDisplay, colormap, "red", &closest[0], &exact[0]);
+  XAllocNamedColor(theDisplay, colormap, "coral", &closest[1], &exact[1]);
+  XRecolorCursor(theDisplay, myCursor, &closest[0], &closest[1]);
+  XDefineCursor(theDisplay, can_xid, myCursor);
 
-	/* initialize graphics */
-	xg_init(theDisplay, can_xid, mb_borders, xgfont, &can_xgid);
+  /* initialize graphics */
+  xg_init(theDisplay, can_xid, mb_borders, xgfont, &can_xgid);
 
-	status = mbedit_set_graphics(can_xgid, NCOLORS, mpixel_values);
-	status = mbedit_set_scaling(mb_borders, mshow_time);
+  status = mbedit_set_graphics(can_xgid, NCOLORS, mpixel_values);
+  status = mbedit_set_scaling(mb_borders, mshow_time);
 
-	/* initialize mbedit proper */
-	status = mbedit_init(argc, argv, &startup_file);
+  /* initialize mbedit proper */
+  status = mbedit_init(argc, argv, &startup_file, can_xgid,
+		       &drawLine,
+		       &drawRect,
+		       &fillRect,
+		       &drawString,
+		       &justifyString,
+		       &do_parse_datalist,
+		       &do_error_dialog,
+		       &do_message_on,
+		       &do_message_off,
+		       &do_filebutton_on,
+		       &do_filebutton_off,
+		       &do_nextbutton_on,
+		       &do_nextbutton_off,
+		       &do_reset_scale_x);
+	
+  /* set up the widgets */
+  do_setup_data();
+  do_filebutton_on();
+  do_nextbutton_off();
 
-	/* set up the widgets */
-	do_setup_data();
-	do_filebutton_on();
-	do_nextbutton_off();
+  /* set timer for function to keep updating the filelist */
+  do_mbedit_settimer();
 
-	/* set timer for function to keep updating the filelist */
-	do_mbedit_settimer();
+  /* if startup indicated by num_files > 0 try to open first file */
+  if (startup_file && numfiles > 0) {
+    do_load_specific_file(0);
+  }
 
-	/* if startup indicated by num_files > 0 try to open first file */
-	if (startup_file && numfiles > 0) {
-		do_load_specific_file(0);
-	}
-
-	/* finally allow expose plots */
-	expose_plot_ok = true;
+  /* finally allow expose plots */
+  expose_plot_ok = true;
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_parse_datalist(char *file, int form) {
-	int format;
+  int format;
 
-	/* try to resolve format if necessary */
-	if (form == 0)
-		mbedit_get_format(file, &format);
-	else
-		format = form;
+  /* try to resolve format if necessary */
+  if (form == 0)
+    mbedit_get_format(file, &format);
+  else
+    format = form;
 
-	/* read in a single file */
-	if (format > 0 && numfiles < NUM_FILES_MAX) {
-		strcpy(filepaths[numfiles], file);
-		fileformats[numfiles] = format;
-		filelocks[numfiles] = -1;
-		fileesfs[numfiles] = -1;
-		numfiles++;
-	} else if (format == -1) {
-		/* read in datalist if forma = -1 */
-		const int verbose = 0;
-		void *datalist;
-		int error = MB_ERROR_NO_ERROR;
-                const int datalist_status = mb_datalist_open(verbose, &datalist, file, MB_DATALIST_LOOK_NO, &error);
-		if (datalist_status == MB_SUCCESS) {
-			bool done = false;
-			double weight;
-			int filestatus;
-			int fileformat;
-			char fileraw[MB_PATH_MAXLINE];
-			char fileprocessed[MB_PATH_MAXLINE];
-			char dfile[MB_PATH_MAXLINE];
-			while (!done) {
-				if ((/* datalist_status = */ mb_datalist_read2(verbose, datalist, &filestatus, fileraw, fileprocessed, dfile,
-				                                         &fileformat, &weight, &error)) == MB_SUCCESS) {
-					if (numfiles < NUM_FILES_MAX) {
-						strcpy(filepaths[numfiles], fileraw);
-						fileformats[numfiles] = fileformat;
-						filelocks[numfiles] = -1;
-						fileesfs[numfiles] = -1;
-						numfiles++;
-					}
-				} else {
-					/* datalist_status = */ mb_datalist_close(verbose, &datalist, &error);
-					done = true;
-				}
-			}
-		}
+  /* read in a single file */
+  if (format > 0 && numfiles < NUM_FILES_MAX) {
+    strcpy(filepaths[numfiles], file);
+    fileformats[numfiles] = format;
+    filelocks[numfiles] = -1;
+    fileesfs[numfiles] = -1;
+    numfiles++;
+  } else if (format == -1) {
+    /* read in datalist if forma = -1 */
+    const int verbose = 0;
+    void *datalist;
+    int error = MB_ERROR_NO_ERROR;
+    const int datalist_status = mb_datalist_open(verbose, &datalist, file, MB_DATALIST_LOOK_NO, &error);
+    if (datalist_status == MB_SUCCESS) {
+      bool done = false;
+      double weight;
+      int filestatus;
+      int fileformat;
+      char fileraw[MB_PATH_MAXLINE];
+      char fileprocessed[MB_PATH_MAXLINE];
+      char dfile[MB_PATH_MAXLINE];
+      while (!done) {
+	if ((/* datalist_status = */ mb_datalist_read2(verbose, datalist, &filestatus, fileraw, fileprocessed, dfile,
+						       &fileformat, &weight, &error)) == MB_SUCCESS) {
+	  if (numfiles < NUM_FILES_MAX) {
+	    strcpy(filepaths[numfiles], fileraw);
+	    fileformats[numfiles] = fileformat;
+	    filelocks[numfiles] = -1;
+	    fileesfs[numfiles] = -1;
+	    numfiles++;
+	  }
+	} else {
+	  /* datalist_status = */ mb_datalist_close(verbose, &datalist, &error);
+	  done = true;
 	}
+      }
+    }
+  }
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_editlistselection(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
 
-	/* turn off expose plots */
-	expose_plot_ok = false;
+  /* turn off expose plots */
+  expose_plot_ok = false;
 
-	/* get the current selection, if any, from the list */
-	Cardinal ac = 0;
-	Arg args[256];
-	int position_count = 0;
-	XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer)&position_count);
-	ac++;
-	int *position_list = NULL;
-	XtSetArg(args[ac], XmNselectedPositions, (XtPointer)&position_list);
-	ac++;
-	XtGetValues(list_filelist, args, ac);
+  /* get the current selection, if any, from the list */
+  Cardinal ac = 0;
+  Arg args[256];
+  int position_count = 0;
+  XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer)&position_count);
+  ac++;
+  int *position_list = NULL;
+  XtSetArg(args[ac], XmNselectedPositions, (XtPointer)&position_list);
+  ac++;
+  XtGetValues(list_filelist, args, ac);
 
-	fprintf(stderr, "position_count:%d\n", position_count);
-	for (int i = 0; i < position_count; i++)
-		fprintf(stderr, "  %d %d\n", i, position_list[i]);
+  fprintf(stderr, "position_count:%d\n", position_count);
+  for (int i = 0; i < position_count; i++)
+    fprintf(stderr, "  %d %d\n", i, position_list[i]);
 
-	int quit;
-	/* if the selected file is different than what's already loaded, unload the old file and load the new one */
-	if (position_count > 0 && currentfile != position_list[0] - 1) {
-		currentfile = position_list[0] - 1;
+  int quit;
+  /* if the selected file is different than what's already loaded, unload the old file and load the new one */
+  if (position_count > 0 && currentfile != position_list[0] - 1) {
+    currentfile = position_list[0] - 1;
 
-		status = mbedit_action_done(buffer_size, &ndumped, &nloaded, &nbuffer, &ngood, &icurrent, &quit);
-		if (status == 0)
-			XBell(theDisplay, 100);
+    status = mbedit_action_done(buffer_size, &ndumped, &nloaded, &nbuffer, &ngood, &icurrent, &quit);
+    if (status == 0)
+      XBell(theDisplay, 100);
 
-		if (position_count > 0)
-			currentfile = position_list[0] - 1;
-		if (currentfile < numfiles) {
-			do_load_specific_file(currentfile);
-		}
-	}
+    if (position_count > 0)
+      currentfile = position_list[0] - 1;
+    if (currentfile < numfiles) {
+      do_load_specific_file(currentfile);
+    }
+  }
 
-	/* turn on expose plots */
-	expose_plot_ok = true;
+  /* turn on expose plots */
+  expose_plot_ok = true;
 
-	do_setup_data();
+  do_setup_data();
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_filelist_remove(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
 
-	/* turn off expose plots */
-	expose_plot_ok = false;
+  /* turn off expose plots */
+  expose_plot_ok = false;
 
-	/* get the current selection, if any, from the list */
-	Cardinal ac = 0;
-	Arg args[256];
-	int position_count = 0;
-	XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer)&position_count);
-	ac++;
-	int *position_list = NULL;
-	XtSetArg(args[ac], XmNselectedPositions, (XtPointer)&position_list);
-	ac++;
-	XtGetValues(list_filelist, args, ac);
+  /* get the current selection, if any, from the list */
+  Cardinal ac = 0;
+  Arg args[256];
+  int position_count = 0;
+  XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer)&position_count);
+  ac++;
+  int *position_list = NULL;
+  XtSetArg(args[ac], XmNselectedPositions, (XtPointer)&position_list);
+  ac++;
+  XtGetValues(list_filelist, args, ac);
 
-	/* if the selected file is different than what's already loaded, remove it from the list */
-	if (position_count > 0 && currentfile != position_list[0] - 1) {
-		for (int i = position_list[0] - 1; i < numfiles - 1; i++) {
-			strcpy(filepaths[i], filepaths[i + 1]);
-			fileformats[i] = fileformats[i + 1];
-			filelocks[i] = filelocks[i + 1];
-			fileesfs[i] = fileesfs[i + 1];
-		}
-		numfiles--;
-		if (currentfile > position_list[0] - 1)
-			currentfile--;
-	}
+  /* if the selected file is different than what's already loaded, remove it from the list */
+  if (position_count > 0 && currentfile != position_list[0] - 1) {
+    for (int i = position_list[0] - 1; i < numfiles - 1; i++) {
+      strcpy(filepaths[i], filepaths[i + 1]);
+      fileformats[i] = fileformats[i + 1];
+      filelocks[i] = filelocks[i + 1];
+      fileesfs[i] = fileesfs[i + 1];
+    }
+    numfiles--;
+    if (currentfile > position_list[0] - 1)
+      currentfile--;
+  }
 
-	/* turn on expose plots */
-	expose_plot_ok = true;
+  /* turn on expose plots */
+  expose_plot_ok = true;
 
-	do_setup_data();
+  do_setup_data();
 
-	/* replot the data */
-	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
-								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
-	                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-	if (status == 0)
-		XBell(theDisplay, 100);
+  /* replot the data */
+  status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+			      mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
+			      mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+  if (status == 0)
+    XBell(theDisplay, 100);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_load_specific_file(int i_file) {
-	/* check the specified file is in the list */
-	if (numfiles > 0 && i_file >= 0 && i_file < numfiles) {
-		/* set current_file */
-		currentfile = i_file;
+  /* check the specified file is in the list */
+  if (numfiles > 0 && i_file >= 0 && i_file < numfiles) {
+    /* set current_file */
+    currentfile = i_file;
 
-		/* check for edit save file */
-		char save_file[MB_PATH_MAXLINE+10];
-		sprintf(save_file, "%s.esf", filepaths[currentfile]);
-		struct stat file_status;
-		int fstat = stat(save_file, &file_status);
-		if (fstat != 0 || (file_status.st_mode & S_IFMT) == S_IFDIR) {
-			sprintf(save_file, "%s.mbesf", filepaths[currentfile]);
-			fstat = stat(save_file, &file_status);
-		}
+    /* check for edit save file */
+    char save_file[MB_PATH_MAXLINE+10];
+    sprintf(save_file, "%s.esf", filepaths[currentfile]);
+    struct stat file_status;
+    int fstat = stat(save_file, &file_status);
+    if (fstat != 0 || (file_status.st_mode & S_IFMT) == S_IFDIR) {
+      sprintf(save_file, "%s.mbesf", filepaths[currentfile]);
+      fstat = stat(save_file, &file_status);
+    }
 
-		const int save_mode = false;
-		/* if esf file exists deal with it */
-		if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-			/* if save_mode set load data using esf */
-			if (save_mode)
-				do_load(true);  // TODO(schwehr): Can never happen
+    const int save_mode = false;
+    /* if esf file exists deal with it */
+    if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+      /* if save_mode set load data using esf */
+      if (save_mode)
+	do_load(true);  // TODO(schwehr): Can never happen
 
 			/* else bring up dialog asking
-			if esf should be used */
-			else
-				do_checkuseprevious();
-		}
+			   if esf should be used */
+      else
+	do_checkuseprevious();
+    }
 
-		/* else just try to load the data without an esf */
-		else {
-			(void)do_load(false);
-		}
-	}
+    /* else just try to load the data without an esf */
+    else {
+      (void)do_load(false);
+    }
+  }
 }
 
 /*--------------------------------------------------------------------*/
 
 int do_setup_data() {
-	/* get some default values from mbedit */
-	status = mbedit_get_defaults(&plot_size_max, &mplot_size, &mshow_beammode,
-								 &mshow_flaggedsoundings, &mshow_flaggedprofiles, &mshow_time, &buffer_size_max,
-	                             &buffer_size, &hold_size, &mformat, &mplot_width, &mexager, &mx_interval, &my_interval, ttime_i,
-	                             &mode_output);
+  /* get some default values from mbedit */
+  status = mbedit_get_defaults(&plot_size_max, &mplot_size, &mshow_beammode,
+			       &mshow_flaggedsoundings, &mshow_flaggedprofiles, &mshow_time, &buffer_size_max,
+			       &buffer_size, &hold_size, &mformat, &mplot_width, &mexager, &mx_interval, &my_interval, ttime_i,
+			       &mode_output);
 
-	/* set about version label */
-	char value_text[MB_PATH_MAXLINE];
-	sprintf(value_text, ":::t\"MB-System Release %s\":t\"%s\"", MB_VERSION, MB_VERSION_DATE);
-	set_label_multiline_string(label_about_version, value_text);
+  /* set about version label */
+  char value_text[MB_PATH_MAXLINE];
+  sprintf(value_text, ":::t\"MB-System Release %s\":t\"%s\"", MB_VERSION, MB_VERSION_DATE);
+  set_label_multiline_string(label_about_version, value_text);
 
-	/* set values of number of pings slider */
-	XtVaSetValues(slider_number_pings, XmNminimum, 1, XmNvalue, mplot_size, NULL);
+  /* set values of number of pings slider */
+  XtVaSetValues(slider_number_pings, XmNminimum, 1, XmNvalue, mplot_size, NULL);
 
-	/* set values of number of pings to step slider */
-	XtVaSetValues(slider_number_step, XmNminimum, 1, XmNvalue, step, NULL);
+  /* set values of number of pings to step slider */
+  XtVaSetValues(slider_number_step, XmNminimum, 1, XmNvalue, step, NULL);
 
-	/* set values of buffer size slider */
-	XtVaSetValues(slider_buffer_size, XmNminimum, 1, XmNmaximum, buffer_size_max, XmNvalue, buffer_size, NULL);
+  /* set values of buffer size slider */
+  XtVaSetValues(slider_buffer_size, XmNminimum, 1, XmNmaximum, buffer_size_max, XmNvalue, buffer_size, NULL);
 
-	/* set values of buffer size label */
-	sprintf(value_text, "%d", buffer_size_max);
-	set_label_string(slider_buffer_size_max_label, value_text);
+  /* set values of buffer size label */
+  sprintf(value_text, "%d", buffer_size_max);
+  set_label_string(slider_buffer_size_max_label, value_text);
 
-	/* set values of buffer hold size slider */
-	XtVaSetValues(slider_buffer_hold, XmNminimum, 1, XmNmaximum, buffer_size_max, XmNvalue, hold_size, NULL);
+  /* set values of buffer hold size slider */
+  XtVaSetValues(slider_buffer_hold, XmNminimum, 1, XmNmaximum, buffer_size_max, XmNvalue, hold_size, NULL);
 
-	/* set values of buffer hold size label */
-	sprintf(value_text, "%d", buffer_size_max);
-	set_label_string(slider_buffer_hold_max_label, value_text);
+  /* set values of buffer hold size label */
+  sprintf(value_text, "%d", buffer_size_max);
+  set_label_string(slider_buffer_hold_max_label, value_text);
 
-	/* set values of plot width slider */
-	XtVaSetValues(slider_scale_x, XmNminimum, 1, XmNvalue, mplot_width, NULL);
+  /* set values of plot width slider */
+  XtVaSetValues(slider_scale_x, XmNminimum, 1, XmNvalue, mplot_width, NULL);
 
-	/* set values of vertical exageration slider */
-	XtVaSetValues(slider_scale_y, XmNdecimalPoints, 2, XmNvalue, mexager, NULL);
+  /* set values of vertical exageration slider */
+  XtVaSetValues(slider_scale_y, XmNdecimalPoints, 2, XmNvalue, mexager, NULL);
 
-	/* set values of x interval slider */
-	XtVaSetValues(slider_x_interval, XmNvalue, mx_interval, NULL);
+  /* set values of x interval slider */
+  XtVaSetValues(slider_x_interval, XmNvalue, mx_interval, NULL);
 
-	/* set values of y interval slider */
-	XtVaSetValues(slider_y_interval, XmNvalue, my_interval, NULL);
+  /* set values of y interval slider */
+  XtVaSetValues(slider_y_interval, XmNvalue, my_interval, NULL);
 
-	/* set starting values in go to time widgets */
-	sprintf(value_text, "%4.4d", ttime_i[0]);
-	XmTextFieldSetString(textfield_year, value_text);
+  /* set starting values in go to time widgets */
+  sprintf(value_text, "%4.4d", ttime_i[0]);
+  XmTextFieldSetString(textfield_year, value_text);
 
-	sprintf(value_text, "%2.2d", ttime_i[1]);
-	XmTextFieldSetString(textfield_month, value_text);
+  sprintf(value_text, "%2.2d", ttime_i[1]);
+  XmTextFieldSetString(textfield_month, value_text);
 
-	sprintf(value_text, "%2.2d", ttime_i[2]);
-	XmTextFieldSetString(textfield_day, value_text);
+  sprintf(value_text, "%2.2d", ttime_i[2]);
+  XmTextFieldSetString(textfield_day, value_text);
 
-	sprintf(value_text, "%2.2d", ttime_i[3]);
-	XmTextFieldSetString(textfield_hour, value_text);
+  sprintf(value_text, "%2.2d", ttime_i[3]);
+  XmTextFieldSetString(textfield_hour, value_text);
 
-	sprintf(value_text, "%2.2d", ttime_i[4]);
-	XmTextFieldSetString(textfield_minute, value_text);
+  sprintf(value_text, "%2.2d", ttime_i[4]);
+  XmTextFieldSetString(textfield_minute, value_text);
 
-	sprintf(value_text, "%2.2d", ttime_i[5]);
-	XmTextFieldSetString(textfield_second, value_text);
+  sprintf(value_text, "%2.2d", ttime_i[5]);
+  XmTextFieldSetString(textfield_second, value_text);
 
-	/* set value of format text item */
-	sprintf(value_text, "%2.2d", mformat);
-	XmTextFieldSetString(textfield_format, value_text);
+  /* set value of format text item */
+  sprintf(value_text, "%2.2d", mformat);
+  XmTextFieldSetString(textfield_format, value_text);
 
-	/* set the output mode */
-	if (mode_output == OUTPUT_MODE_EDIT) {
-		XmToggleButtonSetState(setting_output_toggle_edit, TRUE, TRUE);
-		XmToggleButtonSetState(setting_output_toggle_edit_filelist, TRUE, TRUE);
-	}
-	else {
-		XmToggleButtonSetState(setting_output_toggle_browse, TRUE, TRUE);
-		XmToggleButtonSetState(setting_output_toggle_browse_filelist, TRUE, TRUE);
-	}
+  /* set the output mode */
+  if (mode_output == OUTPUT_MODE_EDIT) {
+    XmToggleButtonSetState(setting_output_toggle_edit, TRUE, TRUE);
+    XmToggleButtonSetState(setting_output_toggle_edit_filelist, TRUE, TRUE);
+  }
+  else {
+    XmToggleButtonSetState(setting_output_toggle_browse, TRUE, TRUE);
+    XmToggleButtonSetState(setting_output_toggle_browse_filelist, TRUE, TRUE);
+  }
 
-	/* set the mode toggles */
-	XmToggleButtonSetState(setting_mode_toggle_toggle, 0, FALSE);
-	XmToggleButtonSetState(setting_mode_toggle_pick, 0, FALSE);
-	XmToggleButtonSetState(setting_mode_toggle_erase, 0, FALSE);
-	XmToggleButtonSetState(setting_mode_toggle_restore, 0, FALSE);
-	XmToggleButtonSetState(setting_mode_toggle_grab, 0, FALSE);
-	XmToggleButtonSetState(setting_mode_toggle_info, 0, FALSE);
-	if (mode_pick == MODE_TOGGLE)
-		XmToggleButtonSetState(setting_mode_toggle_toggle, 1, FALSE);
-	else if (mode_pick == MODE_PICK)
-		XmToggleButtonSetState(setting_mode_toggle_pick, 1, FALSE);
-	else if (mode_pick == MODE_ERASE)
-		XmToggleButtonSetState(setting_mode_toggle_erase, 1, FALSE);
-	else if (mode_pick == MODE_RESTORE)
-		XmToggleButtonSetState(setting_mode_toggle_restore, 1, FALSE);
-	else if (mode_pick == MODE_GRAB)
-		XmToggleButtonSetState(setting_mode_toggle_grab, 1, FALSE);
-	else if (mode_pick == MODE_INFO)
-		XmToggleButtonSetState(setting_mode_toggle_info, 1, FALSE);
+  /* set the mode toggles */
+  XmToggleButtonSetState(setting_mode_toggle_toggle, 0, FALSE);
+  XmToggleButtonSetState(setting_mode_toggle_pick, 0, FALSE);
+  XmToggleButtonSetState(setting_mode_toggle_erase, 0, FALSE);
+  XmToggleButtonSetState(setting_mode_toggle_restore, 0, FALSE);
+  XmToggleButtonSetState(setting_mode_toggle_grab, 0, FALSE);
+  XmToggleButtonSetState(setting_mode_toggle_info, 0, FALSE);
+  if (mode_pick == MODE_TOGGLE)
+    XmToggleButtonSetState(setting_mode_toggle_toggle, 1, FALSE);
+  else if (mode_pick == MODE_PICK)
+    XmToggleButtonSetState(setting_mode_toggle_pick, 1, FALSE);
+  else if (mode_pick == MODE_ERASE)
+    XmToggleButtonSetState(setting_mode_toggle_erase, 1, FALSE);
+  else if (mode_pick == MODE_RESTORE)
+    XmToggleButtonSetState(setting_mode_toggle_restore, 1, FALSE);
+  else if (mode_pick == MODE_GRAB)
+    XmToggleButtonSetState(setting_mode_toggle_grab, 1, FALSE);
+  else if (mode_pick == MODE_INFO)
+    XmToggleButtonSetState(setting_mode_toggle_info, 1, FALSE);
 
-	/* set the show flagged toggle */
-	XmToggleButtonSetState(toggleButton_show_flaggedsoundings_on, mshow_flaggedsoundings, FALSE);
-	XmToggleButtonSetState(toggleButton_show_flaggedprofiles_on, mshow_flaggedprofiles, FALSE);
+  /* set the show flagged toggle */
+  XmToggleButtonSetState(toggleButton_show_flaggedsoundings_on, mshow_flaggedsoundings, FALSE);
+  XmToggleButtonSetState(toggleButton_show_flaggedprofiles_on, mshow_flaggedprofiles, FALSE);
 
-	/* turn off all view mode togglebuttons */
-	XmToggleButtonSetState(toggleButton_view_waterfall, false, FALSE);
-	XmToggleButtonSetState(toggleButton_view_alongtrack, false, FALSE);
-	XmToggleButtonSetState(toggleButton_view_acrosstrack, false, FALSE);
-	XmToggleButtonSetState(toggleButton_show_flags, FALSE, FALSE);
-	XmToggleButtonSetState(toggleButton_show_detects, FALSE, FALSE);
-	XmToggleButtonSetState(toggleButton_show_pulsetypes, FALSE, FALSE);
+  /* turn off all view mode togglebuttons */
+  XmToggleButtonSetState(toggleButton_view_waterfall, false, FALSE);
+  XmToggleButtonSetState(toggleButton_view_alongtrack, false, FALSE);
+  XmToggleButtonSetState(toggleButton_view_acrosstrack, false, FALSE);
+  XmToggleButtonSetState(toggleButton_show_flags, FALSE, FALSE);
+  XmToggleButtonSetState(toggleButton_show_detects, FALSE, FALSE);
+  XmToggleButtonSetState(toggleButton_show_pulsetypes, FALSE, FALSE);
 
-	/* now turn on the current view mode togglebutton */
-	if (mview_mode == 0)
-		XmToggleButtonSetState(toggleButton_view_waterfall, true, FALSE);
-	else if (mview_mode == 1)
-		XmToggleButtonSetState(toggleButton_view_alongtrack, true, FALSE);
-	else if (mview_mode == 2)
-		XmToggleButtonSetState(toggleButton_view_acrosstrack, true, FALSE);
-	if (mshow_beammode == BEAM_MODE_FLAG)
-		XmToggleButtonSetState(toggleButton_show_flags, TRUE, FALSE);
-	else if (mshow_beammode == BEAM_MODE_DETECT)
-		XmToggleButtonSetState(toggleButton_show_detects, TRUE, FALSE);
-	else if (mshow_beammode == BEAM_MODE_PULSE)
-		XmToggleButtonSetState(toggleButton_show_pulsetypes, TRUE, FALSE);
+  /* now turn on the current view mode togglebutton */
+  if (mview_mode == 0)
+    XmToggleButtonSetState(toggleButton_view_waterfall, true, FALSE);
+  else if (mview_mode == 1)
+    XmToggleButtonSetState(toggleButton_view_alongtrack, true, FALSE);
+  else if (mview_mode == 2)
+    XmToggleButtonSetState(toggleButton_view_acrosstrack, true, FALSE);
+  if (mshow_beammode == BEAM_MODE_FLAG)
+    XmToggleButtonSetState(toggleButton_show_flags, TRUE, FALSE);
+  else if (mshow_beammode == BEAM_MODE_DETECT)
+    XmToggleButtonSetState(toggleButton_show_detects, TRUE, FALSE);
+  else if (mshow_beammode == BEAM_MODE_PULSE)
+    XmToggleButtonSetState(toggleButton_show_pulsetypes, TRUE, FALSE);
 
-	/* reset scaling */
-	status = mbedit_set_viewmode(mview_mode);
+  /* reset scaling */
+  status = mbedit_set_viewmode(mview_mode);
 
-	/* turn off all plot mode togglebuttons */
-	XmToggleButtonSetState(toggleButton_show_wideplot, false, FALSE);
-	XmToggleButtonSetState(toggleButton_show_time, false, FALSE);
-	XmToggleButtonSetState(toggleButton_show_interval, false, FALSE);
-	XmToggleButtonSetState(toggleButton_show_lon, false, FALSE);
-	XmToggleButtonSetState(toggleButton_show_latitude, false, FALSE);
-	XmToggleButtonSetState(toggleButton_show_heading, false, FALSE);
-	XmToggleButtonSetState(toggleButton_show_speed, false, FALSE);
-	XmToggleButtonSetState(toggleButton_show_depth, false, FALSE);
-	XmToggleButtonSetState(toggleButton_show_altitude, false, FALSE);
-	XmToggleButtonSetState(toggleButton_show_sensordepth, false, FALSE);
-	XmToggleButtonSetState(toggleButton_show_roll, false, FALSE);
-	XmToggleButtonSetState(toggleButton_show_pitch, false, FALSE);
-	XmToggleButtonSetState(toggleButton_show_heave, false, FALSE);
+  /* turn off all plot mode togglebuttons */
+  XmToggleButtonSetState(toggleButton_show_wideplot, false, FALSE);
+  XmToggleButtonSetState(toggleButton_show_time, false, FALSE);
+  XmToggleButtonSetState(toggleButton_show_interval, false, FALSE);
+  XmToggleButtonSetState(toggleButton_show_lon, false, FALSE);
+  XmToggleButtonSetState(toggleButton_show_latitude, false, FALSE);
+  XmToggleButtonSetState(toggleButton_show_heading, false, FALSE);
+  XmToggleButtonSetState(toggleButton_show_speed, false, FALSE);
+  XmToggleButtonSetState(toggleButton_show_depth, false, FALSE);
+  XmToggleButtonSetState(toggleButton_show_altitude, false, FALSE);
+  XmToggleButtonSetState(toggleButton_show_sensordepth, false, FALSE);
+  XmToggleButtonSetState(toggleButton_show_roll, false, FALSE);
+  XmToggleButtonSetState(toggleButton_show_pitch, false, FALSE);
+  XmToggleButtonSetState(toggleButton_show_heave, false, FALSE);
 
-	/* now turn on the current plot mode togglebutton */
-	if (mshow_time == 0)
-		XmToggleButtonSetState(toggleButton_show_wideplot, true, FALSE);
-	else if (mshow_time == 1)
-		XmToggleButtonSetState(toggleButton_show_time, true, FALSE);
-	else if (mshow_time == 2)
-		XmToggleButtonSetState(toggleButton_show_interval, true, FALSE);
-	else if (mshow_time == 3)
-		XmToggleButtonSetState(toggleButton_show_lon, true, FALSE);
-	else if (mshow_time == 4)
-		XmToggleButtonSetState(toggleButton_show_latitude, true, FALSE);
-	else if (mshow_time == 5)
-		XmToggleButtonSetState(toggleButton_show_heading, true, FALSE);
-	else if (mshow_time == 6)
-		XmToggleButtonSetState(toggleButton_show_speed, true, FALSE);
-	else if (mshow_time == 7)
-		XmToggleButtonSetState(toggleButton_show_depth, true, FALSE);
-	else if (mshow_time == 8)
-		XmToggleButtonSetState(toggleButton_show_altitude, true, FALSE);
-	else if (mshow_time == 9)
-		XmToggleButtonSetState(toggleButton_show_sensordepth, true, FALSE);
-	else if (mshow_time == 10)
-		XmToggleButtonSetState(toggleButton_show_roll, true, FALSE);
-	else if (mshow_time == 11)
-		XmToggleButtonSetState(toggleButton_show_pitch, true, FALSE);
-	else if (mshow_time == 12)
-		XmToggleButtonSetState(toggleButton_show_heave, true, FALSE);
+  /* now turn on the current plot mode togglebutton */
+  if (mshow_time == 0)
+    XmToggleButtonSetState(toggleButton_show_wideplot, true, FALSE);
+  else if (mshow_time == 1)
+    XmToggleButtonSetState(toggleButton_show_time, true, FALSE);
+  else if (mshow_time == 2)
+    XmToggleButtonSetState(toggleButton_show_interval, true, FALSE);
+  else if (mshow_time == 3)
+    XmToggleButtonSetState(toggleButton_show_lon, true, FALSE);
+  else if (mshow_time == 4)
+    XmToggleButtonSetState(toggleButton_show_latitude, true, FALSE);
+  else if (mshow_time == 5)
+    XmToggleButtonSetState(toggleButton_show_heading, true, FALSE);
+  else if (mshow_time == 6)
+    XmToggleButtonSetState(toggleButton_show_speed, true, FALSE);
+  else if (mshow_time == 7)
+    XmToggleButtonSetState(toggleButton_show_depth, true, FALSE);
+  else if (mshow_time == 8)
+    XmToggleButtonSetState(toggleButton_show_altitude, true, FALSE);
+  else if (mshow_time == 9)
+    XmToggleButtonSetState(toggleButton_show_sensordepth, true, FALSE);
+  else if (mshow_time == 10)
+    XmToggleButtonSetState(toggleButton_show_roll, true, FALSE);
+  else if (mshow_time == 11)
+    XmToggleButtonSetState(toggleButton_show_pitch, true, FALSE);
+  else if (mshow_time == 12)
+    XmToggleButtonSetState(toggleButton_show_heave, true, FALSE);
 
-	/* get filter values and set widgets */
-	do_get_filters();
+  /* get filter values and set widgets */
+  do_get_filters();
 
-	/* build available file list */
-	do_build_filelist();
+  /* build available file list */
+  do_build_filelist();
 
-	return (1);
+  return (1);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_build_filelist() {
-	/* check for change in number of files */
-	Cardinal ac = 0;
-	Arg args[256];
-	int item_count = 0;
-	XtSetArg(args[ac], XmNitemCount, (XtPointer)&item_count);
-	ac++;
-	XtGetValues(list_filelist, args, ac);
-	// check to see if anything has changed
-	bool update_filelist = false;
-	if (item_count != numfiles)
-		update_filelist = true;
+  /* check for change in number of files */
+  Cardinal ac = 0;
+  Arg args[256];
+  int item_count = 0;
+  XtSetArg(args[ac], XmNitemCount, (XtPointer)&item_count);
+  ac++;
+  XtGetValues(list_filelist, args, ac);
+  // check to see if anything has changed
+  bool update_filelist = false;
+  if (item_count != numfiles)
+    update_filelist = true;
 
-	/* check current file shown vs loaded */
-	if (currentfile != currentfile_shown) {
-		currentfile_shown = currentfile;
-		update_filelist = true;
-	}
+  /* check current file shown vs loaded */
+  if (currentfile != currentfile_shown) {
+    currentfile_shown = currentfile;
+    update_filelist = true;
+  }
 
-	int verbose = 0;
-	char *lockedstr = "<Locked>";
-	char *unlockedstr = "        ";
+  int verbose = 0;
+  char *lockedstr = "<Locked>";
+  char *unlockedstr = "        ";
 
-	/* check for change in lock status or esf status */
-	for (int i = 0; i < numfiles; i++) {
-		/* check for locks */
-		// int lock_status =
-		bool locked = false;
-		int lock_purpose = MBP_LOCK_NONE;
-		mb_path lock_program;
-		mb_path lock_user;
-		mb_path lock_cpu;
-		char lock_date[25];
-		int lock_error = MB_ERROR_NO_ERROR;
-		mb_pr_lockinfo(verbose, filepaths[i], &locked, &lock_purpose, lock_program, lock_user, lock_cpu, lock_date,
-		                             &lock_error);
-		if (locked != filelocks[i]) {
-			filelocks[i] = locked;
-			update_filelist = true;
-		}
+  /* check for change in lock status or esf status */
+  for (int i = 0; i < numfiles; i++) {
+    /* check for locks */
+    // int lock_status =
+    bool locked = false;
+    int lock_purpose = MBP_LOCK_NONE;
+    mb_path lock_program;
+    mb_path lock_user;
+    mb_path lock_cpu;
+    char lock_date[25];
+    int lock_error = MB_ERROR_NO_ERROR;
+    mb_pr_lockinfo(verbose, filepaths[i], &locked, &lock_purpose, lock_program, lock_user, lock_cpu, lock_date,
+		   &lock_error);
+    if (locked != filelocks[i]) {
+      filelocks[i] = locked;
+      update_filelist = true;
+    }
 
-		/* check for edit save file */
-		char save_file[MB_PATH_MAXLINE+10];
-		sprintf(save_file, "%s.esf", filepaths[i]);
-		struct stat file_status;
-		const int fstat = stat(save_file, &file_status);
-		const bool esf_exists = fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR;
-		if (esf_exists != fileesfs[i]) {
-			fileesfs[i] = esf_exists;
-			update_filelist = true;
-		}
-	}
+    /* check for edit save file */
+    char save_file[MB_PATH_MAXLINE+10];
+    sprintf(save_file, "%s.esf", filepaths[i]);
+    struct stat file_status;
+    const int fstat = stat(save_file, &file_status);
+    const bool esf_exists = fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR;
+    if (esf_exists != fileesfs[i]) {
+      fileesfs[i] = esf_exists;
+      update_filelist = true;
+    }
+  }
 
-	char *loadedstr = "<loaded>";
-	char *esfyesstr = "<esf>";
-	char *esfnostr = "     ";
+  char *loadedstr = "<loaded>";
+  char *esfyesstr = "<esf>";
+  char *esfnostr = "     ";
 
-	/* only rebuild the filelist if necessary */
-	if (update_filelist) {
-		/* get the current selection, if any, from the list */
-		ac = 0;
-		XtSetArg(args[ac], XmNitemCount, (XtPointer)&item_count);
-		ac++;
-		int position_count = 0;
-		XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer)&position_count);
-		ac++;
-		int *position_list = NULL;
-		XtSetArg(args[ac], XmNselectedPositions, (XtPointer)&position_list);
-		ac++;
-		XtGetValues(list_filelist, args, ac);
-		int selection = 0;
-		if (position_count > 0)
-			selection = position_list[0];
+  /* only rebuild the filelist if necessary */
+  if (update_filelist) {
+    /* get the current selection, if any, from the list */
+    ac = 0;
+    XtSetArg(args[ac], XmNitemCount, (XtPointer)&item_count);
+    ac++;
+    int position_count = 0;
+    XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer)&position_count);
+    ac++;
+    int *position_list = NULL;
+    XtSetArg(args[ac], XmNselectedPositions, (XtPointer)&position_list);
+    ac++;
+    XtGetValues(list_filelist, args, ac);
+    int selection = 0;
+    if (position_count > 0)
+      selection = position_list[0];
 
-		/* build available file list */
-		XmListDeleteAllItems(list_filelist);
-		if (numfiles > 0) {
+    /* build available file list */
+    XmListDeleteAllItems(list_filelist);
+    if (numfiles > 0) {
 
-			/* allocate array of x strings */
-			XmString *xstr = (XmString *)malloc(numfiles * sizeof(XmString));
-			for (int i = 0; i < numfiles; i++) {
-				/* check for locks */
-				char *lockstrptr;
-				if (currentfile == i)
-					lockstrptr = loadedstr;
-				else if (filelocks[i])
-					lockstrptr = lockedstr;
-				else
-					lockstrptr = unlockedstr;
+      /* allocate array of x strings */
+      XmString *xstr = (XmString *)malloc(numfiles * sizeof(XmString));
+      for (int i = 0; i < numfiles; i++) {
+	/* check for locks */
+	char *lockstrptr;
+	if (currentfile == i)
+	  lockstrptr = loadedstr;
+	else if (filelocks[i])
+	  lockstrptr = lockedstr;
+	else
+	  lockstrptr = unlockedstr;
 
-				/* check for edit save file */
-				char *esfstrptr;
-				if (fileesfs[i])
-					esfstrptr = esfyesstr;
-				else
-					esfstrptr = esfnostr;
+	/* check for edit save file */
+	char *esfstrptr;
+	if (fileesfs[i])
+	  esfstrptr = esfyesstr;
+	else
+	  esfstrptr = esfnostr;
 
-				/* build x string item */
-				char value_text[MB_PATH_MAXLINE+10];
-				sprintf(value_text, "%s %s %s %3d", lockstrptr, esfstrptr, filepaths[i], fileformats[i]);
-				xstr[i] = XmStringCreateLocalized(value_text);
+	/* build x string item */
+	char value_text[MB_PATH_MAXLINE+10];
+	sprintf(value_text, "%s %s %s %3d", lockstrptr, esfstrptr, filepaths[i], fileformats[i]);
+	xstr[i] = XmStringCreateLocalized(value_text);
 
-				/* print out list of files */
-				/* if (currentfile == i)
-				    fprintf(stderr," *** %s %d %s %d\n",lockstrptr,i+1,filepaths[i],fileformats[i]);
-				else
-				    fprintf(stderr,"     %s %d %s %d\n",lockstrptr,i+1,filepaths[i],fileformats[i]); */
-			}
-			XmListAddItems(list_filelist, xstr, numfiles, 0);
-			for (int i = 0; i < numfiles; i++) {
-				XmStringFree(xstr[i]);
-			}
-			free(xstr);
+	/* print out list of files */
+	/* if (currentfile == i)
+	   fprintf(stderr," *** %s %d %s %d\n",lockstrptr,i+1,filepaths[i],fileformats[i]);
+	   else
+	   fprintf(stderr,"     %s %d %s %d\n",lockstrptr,i+1,filepaths[i],fileformats[i]); */
+      }
+      XmListAddItems(list_filelist, xstr, numfiles, 0);
+      for (int i = 0; i < numfiles; i++) {
+	XmStringFree(xstr[i]);
+      }
+      free(xstr);
 
-			/* reinstate selection if the number of items is the same as before */
-			if (item_count == numfiles && position_count > 0) {
-				XmListSelectPos(list_filelist, selection, False);
-			}
-		}
-	}
+      /* reinstate selection if the number of items is the same as before */
+      if (item_count == numfiles && position_count > 0) {
+	XmListSelectPos(list_filelist, selection, False);
+      }
+    }
+  }
 }
 /*--------------------------------------------------------------------*/
 
 void do_get_filters() {
-	/* get some default values from mbedit */
-	status = mbedit_get_filters(&f_beams_max, &f_distance_max, &f_medianspike, &f_medianspike_threshold, &f_medianspike_xtrack,
-	                            &f_medianspike_ltrack, &f_wrongside, &f_wrongside_threshold, &f_cutbeam, &f_cutbeam_begin,
-	                            &f_cutbeam_end, &f_cutdistance, &f_cutdistance_begin, &f_cutdistance_end, &f_cutangle,
-	                            &f_cutangle_begin, &f_cutangle_end);
+  /* get some default values from mbedit */
+  status = mbedit_get_filters(&f_beams_max, &f_distance_max, &f_medianspike, &f_medianspike_threshold, &f_medianspike_xtrack,
+			      &f_medianspike_ltrack, &f_wrongside, &f_wrongside_threshold, &f_cutbeam, &f_cutbeam_begin,
+			      &f_cutbeam_end, &f_cutdistance, &f_cutdistance_begin, &f_cutdistance_end, &f_cutangle,
+			      &f_cutangle_begin, &f_cutangle_end);
 
-	/* set values of median spike filter widgets */
-	XmToggleButtonSetState(toggleButton_filters_medianspike, f_medianspike, FALSE);
-	XtVaSetValues(scale_filters_medianspike, XmNminimum, 1, XmNmaximum, 100, XmNvalue, f_medianspike_threshold, NULL);
-	XtVaSetValues(scale_median_local_xtrack, XmNminimum, 1, XmNmaximum, f_beams_max, XmNvalue, f_medianspike_xtrack, NULL);
-	XtVaSetValues(scale_median_local_ltrack, XmNminimum, 1, XmNmaximum, f_beams_max, XmNvalue, f_medianspike_ltrack, NULL);
+  /* set values of median spike filter widgets */
+  XmToggleButtonSetState(toggleButton_filters_medianspike, f_medianspike, FALSE);
+  XtVaSetValues(scale_filters_medianspike, XmNminimum, 1, XmNmaximum, 100, XmNvalue, f_medianspike_threshold, NULL);
+  XtVaSetValues(scale_median_local_xtrack, XmNminimum, 1, XmNmaximum, f_beams_max, XmNvalue, f_medianspike_xtrack, NULL);
+  XtVaSetValues(scale_median_local_ltrack, XmNminimum, 1, XmNmaximum, f_beams_max, XmNvalue, f_medianspike_ltrack, NULL);
 
-	/* set values of wrong side filter widgets */
-	XmToggleButtonSetState(toggleButton_filters_wrongside, f_wrongside, FALSE);
-	XtVaSetValues(scale_filters_wrongside, XmNminimum, 0, XmNmaximum, f_beams_max, XmNvalue, f_wrongside_threshold, NULL);
+  /* set values of wrong side filter widgets */
+  XmToggleButtonSetState(toggleButton_filters_wrongside, f_wrongside, FALSE);
+  XtVaSetValues(scale_filters_wrongside, XmNminimum, 0, XmNmaximum, f_beams_max, XmNvalue, f_wrongside_threshold, NULL);
 
-	/* set values of cut by beam number filter widgets */
-	XmToggleButtonSetState(toggleButton_filters_cutbeam, f_cutbeam, FALSE);
-	XtVaSetValues(scale_filters_cutbeamstart, XmNminimum, 0, XmNmaximum, f_beams_max, XmNvalue, f_cutbeam_begin, NULL);
-	XtVaSetValues(scale_filters_cutbeamend, XmNminimum, 0, XmNmaximum, f_beams_max, XmNvalue, f_cutbeam_end, NULL);
+  /* set values of cut by beam number filter widgets */
+  XmToggleButtonSetState(toggleButton_filters_cutbeam, f_cutbeam, FALSE);
+  XtVaSetValues(scale_filters_cutbeamstart, XmNminimum, 0, XmNmaximum, f_beams_max, XmNvalue, f_cutbeam_begin, NULL);
+  XtVaSetValues(scale_filters_cutbeamend, XmNminimum, 0, XmNmaximum, f_beams_max, XmNvalue, f_cutbeam_end, NULL);
 
-	/* set values of cut by distance filter widgets */
-	XmToggleButtonSetState(toggleButton_filters_cutdistance, f_cutdistance, FALSE);
-	XtVaSetValues(scale_filters_cutdistancestart, XmNminimum, (int)(-100 * f_distance_max - 0.5), XmNmaximum,
-	              (int)(100 * f_distance_max + 0.5), XmNvalue, (int)(100 * f_cutdistance_begin + 0.5), NULL);
-	XtVaSetValues(scale_filters_cutdistanceend, XmNminimum, (int)(-100 * f_distance_max - 0.5), XmNmaximum,
-	              (int)(100 * f_distance_max + 0.5), XmNvalue, (int)(100 * f_cutdistance_end + 0.5), NULL);
+  /* set values of cut by distance filter widgets */
+  XmToggleButtonSetState(toggleButton_filters_cutdistance, f_cutdistance, FALSE);
+  XtVaSetValues(scale_filters_cutdistancestart, XmNminimum, (int)(-100 * f_distance_max - 0.5), XmNmaximum,
+		(int)(100 * f_distance_max + 0.5), XmNvalue, (int)(100 * f_cutdistance_begin + 0.5), NULL);
+  XtVaSetValues(scale_filters_cutdistanceend, XmNminimum, (int)(-100 * f_distance_max - 0.5), XmNmaximum,
+		(int)(100 * f_distance_max + 0.5), XmNvalue, (int)(100 * f_cutdistance_end + 0.5), NULL);
 
-	/* set values of cut by angle filter widgets */
-	XmToggleButtonSetState(toggleButton_filters_cutangle, f_cutangle, FALSE);
-	XtVaSetValues(scale_filters_cutanglestart, XmNminimum, -9000, XmNmaximum, 9000, XmNvalue, (int)(100 * f_cutangle_begin + 0.5),
-	              NULL);
-	XtVaSetValues(scale_filters_cutangleend, XmNminimum, -9000, XmNmaximum, 9000, XmNvalue, (int)(100 * f_cutangle_end + 0.5),
-	              NULL);
+  /* set values of cut by angle filter widgets */
+  XmToggleButtonSetState(toggleButton_filters_cutangle, f_cutangle, FALSE);
+  XtVaSetValues(scale_filters_cutanglestart, XmNminimum, -9000, XmNmaximum, 9000, XmNvalue, (int)(100 * f_cutangle_begin + 0.5),
+		NULL);
+  XtVaSetValues(scale_filters_cutangleend, XmNminimum, -9000, XmNmaximum, 9000, XmNvalue, (int)(100 * f_cutangle_end + 0.5),
+		NULL);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_file_selection_cancel(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	/* replot the data */
-	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
-								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
-	                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+  /* replot the data */
+  status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+			      mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
+			      mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_expose(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	/* replot the data */
-	if (expose_plot_ok)
-		status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
-									mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
-		                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+  /* replot the data */
+  if (expose_plot_ok)
+    status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+				mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
+				mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_mode_toggle(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	mode_pick = MODE_TOGGLE;
+  mode_pick = MODE_TOGGLE;
 
-	myCursor = XCreateFontCursor(theDisplay, XC_target);
-	XAllocNamedColor(theDisplay, colormap, "red", &closest[0], &exact[0]);
-	XAllocNamedColor(theDisplay, colormap, "coral", &closest[1], &exact[1]);
-	XRecolorCursor(theDisplay, myCursor, &closest[0], &closest[1]);
-	XDefineCursor(theDisplay, can_xid, myCursor);
+  myCursor = XCreateFontCursor(theDisplay, XC_target);
+  XAllocNamedColor(theDisplay, colormap, "red", &closest[0], &exact[0]);
+  XAllocNamedColor(theDisplay, colormap, "coral", &closest[1], &exact[1]);
+  XRecolorCursor(theDisplay, myCursor, &closest[0], &closest[1]);
+  XDefineCursor(theDisplay, can_xid, myCursor);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_mode_pick(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	mode_pick = MODE_PICK;
+  mode_pick = MODE_PICK;
 
-	myCursor = XCreateFontCursor(theDisplay, XC_target);
-	XAllocNamedColor(theDisplay, colormap, "red", &closest[0], &exact[0]);
-	XAllocNamedColor(theDisplay, colormap, "coral", &closest[1], &exact[1]);
-	XRecolorCursor(theDisplay, myCursor, &closest[0], &closest[1]);
-	XDefineCursor(theDisplay, can_xid, myCursor);
+  myCursor = XCreateFontCursor(theDisplay, XC_target);
+  XAllocNamedColor(theDisplay, colormap, "red", &closest[0], &exact[0]);
+  XAllocNamedColor(theDisplay, colormap, "coral", &closest[1], &exact[1]);
+  XRecolorCursor(theDisplay, myCursor, &closest[0], &closest[1]);
+  XDefineCursor(theDisplay, can_xid, myCursor);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_mode_erase(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	mode_pick = MODE_ERASE;
+  mode_pick = MODE_ERASE;
 
-	myCursor = XCreateFontCursor(theDisplay, XC_exchange);
-	XAllocNamedColor(theDisplay, colormap, "red", &closest[0], &exact[0]);
-	XAllocNamedColor(theDisplay, colormap, "coral", &closest[1], &exact[1]);
-	XRecolorCursor(theDisplay, myCursor, &closest[0], &closest[1]);
-	XDefineCursor(theDisplay, can_xid, myCursor);
+  myCursor = XCreateFontCursor(theDisplay, XC_exchange);
+  XAllocNamedColor(theDisplay, colormap, "red", &closest[0], &exact[0]);
+  XAllocNamedColor(theDisplay, colormap, "coral", &closest[1], &exact[1]);
+  XRecolorCursor(theDisplay, myCursor, &closest[0], &closest[1]);
+  XDefineCursor(theDisplay, can_xid, myCursor);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_mode_restore(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	mode_pick = MODE_RESTORE;
+  mode_pick = MODE_RESTORE;
 
-	myCursor = XCreateFontCursor(theDisplay, XC_exchange);
-	XAllocNamedColor(theDisplay, colormap, "green", &closest[0], &exact[0]);
-	XAllocNamedColor(theDisplay, colormap, "coral", &closest[1], &exact[1]);
-	XRecolorCursor(theDisplay, myCursor, &closest[0], &closest[1]);
-	XDefineCursor(theDisplay, can_xid, myCursor);
+  myCursor = XCreateFontCursor(theDisplay, XC_exchange);
+  XAllocNamedColor(theDisplay, colormap, "green", &closest[0], &exact[0]);
+  XAllocNamedColor(theDisplay, colormap, "coral", &closest[1], &exact[1]);
+  XRecolorCursor(theDisplay, myCursor, &closest[0], &closest[1]);
+  XDefineCursor(theDisplay, can_xid, myCursor);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_mode_grab(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	mode_pick = MODE_GRAB;
+  mode_pick = MODE_GRAB;
 
-	myCursor = XCreateFontCursor(theDisplay, XC_target);
-	XAllocNamedColor(theDisplay, colormap, "red", &closest[0], &exact[0]);
-	XAllocNamedColor(theDisplay, colormap, "coral", &closest[1], &exact[1]);
-	XRecolorCursor(theDisplay, myCursor, &closest[0], &closest[1]);
-	XDefineCursor(theDisplay, can_xid, myCursor);
+  myCursor = XCreateFontCursor(theDisplay, XC_target);
+  XAllocNamedColor(theDisplay, colormap, "red", &closest[0], &exact[0]);
+  XAllocNamedColor(theDisplay, colormap, "coral", &closest[1], &exact[1]);
+  XRecolorCursor(theDisplay, myCursor, &closest[0], &closest[1]);
+  XDefineCursor(theDisplay, can_xid, myCursor);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_mode_info(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	mode_pick = MODE_INFO;
+  mode_pick = MODE_INFO;
 
-	myCursor = XCreateFontCursor(theDisplay, XC_target);
-	XAllocNamedColor(theDisplay, colormap, "blue", &closest[0], &exact[0]);
-	XAllocNamedColor(theDisplay, colormap, "coral", &closest[1], &exact[1]);
-	XRecolorCursor(theDisplay, myCursor, &closest[0], &closest[1]);
-	XDefineCursor(theDisplay, can_xid, myCursor);
+  myCursor = XCreateFontCursor(theDisplay, XC_target);
+  XAllocNamedColor(theDisplay, colormap, "blue", &closest[0], &exact[0]);
+  XAllocNamedColor(theDisplay, colormap, "coral", &closest[1], &exact[1]);
+  XRecolorCursor(theDisplay, myCursor, &closest[0], &closest[1]);
+  XDefineCursor(theDisplay, can_xid, myCursor);
 }
 /*--------------------------------------------------------------------*/
 
 void do_scale_y(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
 
-	mexager = acs->value;
+  mexager = acs->value;
 
-	/* if slider set to minimum value, half the value range;
-	    if slider set to maximum value,  double the range */
-	int maxx;
-	XtVaGetValues(slider_scale_y, XmNmaximum, &maxx, NULL);
-	if (mexager == 1 || mexager == maxx) {
-		if (mexager == 1)
-			maxx = maxx / 2;
-		else
-			maxx = 2 * maxx;
-		if (maxx < 2)
-			maxx = 2;
-		XtVaSetValues(slider_scale_y, XmNmaximum, maxx, NULL);
-		char label[10];
-		sprintf(label, "%.2f", (double)(maxx / 100.));
-		set_label_string(slider_scale_y_max_label, label);
-	}
+  /* if slider set to minimum value, half the value range;
+     if slider set to maximum value,  double the range */
+  int maxx;
+  XtVaGetValues(slider_scale_y, XmNmaximum, &maxx, NULL);
+  if (mexager == 1 || mexager == maxx) {
+    if (mexager == 1)
+      maxx = maxx / 2;
+    else
+      maxx = 2 * maxx;
+    if (maxx < 2)
+      maxx = 2;
+    XtVaSetValues(slider_scale_y, XmNmaximum, maxx, NULL);
+    char label[10];
+    sprintf(label, "%.2f", (double)(maxx / 100.));
+    set_label_string(slider_scale_y_max_label, label);
+  }
 
-	/* replot the data */
-	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
-								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
-	                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-	if (status == 0)
-		XBell(theDisplay, 100);
+  /* replot the data */
+  status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+			      mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
+			      mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+  if (status == 0)
+    XBell(theDisplay, 100);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_fileselection_list(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	/* get selected text */
-	static char selection_text[MB_PATH_MAXLINE];
-	get_text_string(fileSelectionText, selection_text);
+  /* get selected text */
+  static char selection_text[MB_PATH_MAXLINE];
+  get_text_string(fileSelectionText, selection_text);
 
-	/* get output file */
-	if ((int)strlen(selection_text) > 0) {
-		/* look for MB suffix convention */
-		int form = mformat;
-		if ((status = mbedit_get_format(selection_text, &form)) == MB_SUCCESS) {
-			mformat = form;
-			char value_text[10];
-			sprintf(value_text, "%d", mformat);
-			XmTextFieldSetString(textfield_format, value_text);
-		}
-	}
+  /* get output file */
+  if ((int)strlen(selection_text) > 0) {
+    /* look for MB suffix convention */
+    int form = mformat;
+    if ((status = mbedit_get_format(selection_text, &form)) == MB_SUCCESS) {
+      mformat = form;
+      char value_text[10];
+      sprintf(value_text, "%d", mformat);
+      XmTextFieldSetString(textfield_format, value_text);
+    }
+  }
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_scale_x(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
 
-	int maxx;
+  int maxx;
 
-	mplot_width = acs->value;
+  mplot_width = acs->value;
 
-	/* if slider set to minimum value, half the value range;
-	    if slider set to maximum value,  double the range */
-	XtVaGetValues(slider_scale_x, XmNmaximum, &maxx, NULL);
-	if (mplot_width == 1 || mplot_width == maxx) {
-		if (mplot_width == 1)
-			maxx = maxx / 2;
-		else
-			maxx = 2 * maxx;
-		if (maxx < 2)
-			maxx = 2;
-		XtVaSetValues(slider_scale_x, XmNmaximum, maxx, NULL);
-		char label[10];
-		sprintf(label, "%d", maxx);
-		set_label_string(slider_scale_x_max_label, label);
-	}
+  /* if slider set to minimum value, half the value range;
+     if slider set to maximum value,  double the range */
+  XtVaGetValues(slider_scale_x, XmNmaximum, &maxx, NULL);
+  if (mplot_width == 1 || mplot_width == maxx) {
+    if (mplot_width == 1)
+      maxx = maxx / 2;
+    else
+      maxx = 2 * maxx;
+    if (maxx < 2)
+      maxx = 2;
+    XtVaSetValues(slider_scale_x, XmNmaximum, maxx, NULL);
+    char label[10];
+    sprintf(label, "%d", maxx);
+    set_label_string(slider_scale_x_max_label, label);
+  }
 
-	/* replot the data */
-	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
-								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
-	                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-	if (status == 0)
-		XBell(theDisplay, 100);
+  /* replot the data */
+  status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+			      mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
+			      mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+  if (status == 0)
+    XBell(theDisplay, 100);
 }
 
 /*--------------------------------------------------------------------*/
 
 int do_reset_scale_x(int pwidth, int maxx, int xntrvl, int yntrvl) {
-	mplot_width = pwidth;
+  mplot_width = pwidth;
 
-	/* check max value */
-	if (pwidth > maxx - 1) {
-		maxx = 2 * pwidth;
-		if (maxx < 2)
-			maxx = 2;
-	}
-	mx_interval = xntrvl;
-	my_interval = yntrvl;
+  /* check max value */
+  if (pwidth > maxx - 1) {
+    maxx = 2 * pwidth;
+    if (maxx < 2)
+      maxx = 2;
+  }
+  mx_interval = xntrvl;
+  my_interval = yntrvl;
 
-	/* set values of plot width slider */
-	XtVaSetValues(slider_scale_x, XmNvalue, mplot_width, XmNmaximum, maxx, NULL);
-	char label[10];
-	sprintf(label, "%d", maxx);
-	set_label_string(slider_scale_x_max_label, label);
+  /* set values of plot width slider */
+  XtVaSetValues(slider_scale_x, XmNvalue, mplot_width, XmNmaximum, maxx, NULL);
+  char label[10];
+  sprintf(label, "%d", maxx);
+  set_label_string(slider_scale_x_max_label, label);
 
-	/* set values of x interval slider */
-	XtVaSetValues(slider_x_interval, XmNvalue, mx_interval, NULL);
+  /* set values of x interval slider */
+  XtVaSetValues(slider_x_interval, XmNvalue, mx_interval, NULL);
 
-	/* set values of y interval slider */
-	XtVaSetValues(slider_y_interval, XmNvalue, my_interval, NULL);
+  /* set values of y interval slider */
+  XtVaSetValues(slider_y_interval, XmNvalue, my_interval, NULL);
 
-	return (1);
+  return (1);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_output_edit(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	XmToggleButtonCallbackStruct *acs = (XmToggleButtonCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  XmToggleButtonCallbackStruct *acs = (XmToggleButtonCallbackStruct *)call_data;
 
-	/* set values if needed */
-	if (acs->reason == XmCR_VALUE_CHANGED && acs->set) {
-		mode_output = OUTPUT_MODE_EDIT;
-		XmToggleButtonSetState(setting_output_toggle_edit_filelist, TRUE, TRUE);
-	}
+  /* set values if needed */
+  if (acs->reason == XmCR_VALUE_CHANGED && acs->set) {
+    mode_output = OUTPUT_MODE_EDIT;
+    XmToggleButtonSetState(setting_output_toggle_edit_filelist, TRUE, TRUE);
+  }
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_output_browse(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	XmToggleButtonCallbackStruct *acs = (XmToggleButtonCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  XmToggleButtonCallbackStruct *acs = (XmToggleButtonCallbackStruct *)call_data;
 
-	/* set values if needed */
-	if (acs->reason == XmCR_VALUE_CHANGED && acs->set) {
-		mode_output = OUTPUT_MODE_BROWSE;
-		XmToggleButtonSetState(setting_output_toggle_browse_filelist, TRUE, TRUE);
-	}
+  /* set values if needed */
+  if (acs->reason == XmCR_VALUE_CHANGED && acs->set) {
+    mode_output = OUTPUT_MODE_BROWSE;
+    XmToggleButtonSetState(setting_output_toggle_browse_filelist, TRUE, TRUE);
+  }
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_output_edit_filelist(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	XmToggleButtonCallbackStruct *acs = (XmToggleButtonCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  XmToggleButtonCallbackStruct *acs = (XmToggleButtonCallbackStruct *)call_data;
 
-	/* set values if needed */
-	if (acs->reason == XmCR_VALUE_CHANGED && acs->set) {
-		mode_output = OUTPUT_MODE_EDIT;
-		XmToggleButtonSetState(setting_output_toggle_edit, TRUE, TRUE);
-	}
+  /* set values if needed */
+  if (acs->reason == XmCR_VALUE_CHANGED && acs->set) {
+    mode_output = OUTPUT_MODE_EDIT;
+    XmToggleButtonSetState(setting_output_toggle_edit, TRUE, TRUE);
+  }
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_output_browse_filelist(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	XmToggleButtonCallbackStruct *acs = (XmToggleButtonCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  XmToggleButtonCallbackStruct *acs = (XmToggleButtonCallbackStruct *)call_data;
 
-	/* set values if needed */
-	if (acs->reason == XmCR_VALUE_CHANGED && acs->set) {
-		mode_output = OUTPUT_MODE_BROWSE;
-		XmToggleButtonSetState(setting_output_toggle_browse, TRUE, TRUE);
-	}
+  /* set values if needed */
+  if (acs->reason == XmCR_VALUE_CHANGED && acs->set) {
+    mode_output = OUTPUT_MODE_BROWSE;
+    XmToggleButtonSetState(setting_output_toggle_browse, TRUE, TRUE);
+  }
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_x_interval(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
 
-	int maxx;
+  int maxx;
 
-	mx_interval = acs->value;
+  mx_interval = acs->value;
 
-	/* if slider set to minimum value, half the value range;
-	    if slider set to maximum value,  double the range */
-	XtVaGetValues(slider_x_interval, XmNmaximum, &maxx, NULL);
-	if (mx_interval == 1 || mx_interval == maxx) {
-		if (mx_interval == 1)
-			maxx = maxx / 2;
-		else
-			maxx = 2 * maxx;
-		if (maxx < 2)
-			maxx = 2;
-		XtVaSetValues(slider_x_interval, XmNmaximum, maxx, NULL);
-		char label[10];
-		sprintf(label, "%d", maxx);
-		set_label_string(slider_x_max_interval_label, label);
-	}
+  /* if slider set to minimum value, half the value range;
+     if slider set to maximum value,  double the range */
+  XtVaGetValues(slider_x_interval, XmNmaximum, &maxx, NULL);
+  if (mx_interval == 1 || mx_interval == maxx) {
+    if (mx_interval == 1)
+      maxx = maxx / 2;
+    else
+      maxx = 2 * maxx;
+    if (maxx < 2)
+      maxx = 2;
+    XtVaSetValues(slider_x_interval, XmNmaximum, maxx, NULL);
+    char label[10];
+    sprintf(label, "%d", maxx);
+    set_label_string(slider_x_max_interval_label, label);
+  }
 
-	/* replot the data */
-	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
-								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
-	                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-	if (status == 0)
-		XBell(theDisplay, 100);
+  /* replot the data */
+  status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+			      mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
+			      mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+  if (status == 0)
+    XBell(theDisplay, 100);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_y_interval(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
 
-	my_interval = acs->value;
+  my_interval = acs->value;
 
-	/* if slider set to minimum value, half the value range;
-	    if slider set to maximum value,  double the range */
-	int maxx;
-	XtVaGetValues(slider_y_interval, XmNmaximum, &maxx, NULL);
-	if (my_interval == 1 || my_interval == maxx) {
-		if (my_interval == 1)
-			maxx = maxx / 2;
-		else
-			maxx = 2 * maxx;
-		if (maxx < 2)
-			maxx = 2;
-		XtVaSetValues(slider_y_interval, XmNmaximum, maxx, NULL);
-		char label[10];
-		sprintf(label, "%d", maxx);
-		set_label_string(slider_y_max_interval_label, label);
-	}
+  /* if slider set to minimum value, half the value range;
+     if slider set to maximum value,  double the range */
+  int maxx;
+  XtVaGetValues(slider_y_interval, XmNmaximum, &maxx, NULL);
+  if (my_interval == 1 || my_interval == maxx) {
+    if (my_interval == 1)
+      maxx = maxx / 2;
+    else
+      maxx = 2 * maxx;
+    if (maxx < 2)
+      maxx = 2;
+    XtVaSetValues(slider_y_interval, XmNmaximum, maxx, NULL);
+    char label[10];
+    sprintf(label, "%d", maxx);
+    set_label_string(slider_y_max_interval_label, label);
+  }
 
-	/* replot the data */
-	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
-				    mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
-	                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-	if (status == 0)
-		XBell(theDisplay, 100);
+  /* replot the data */
+  status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+			      mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
+			      mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+  if (status == 0)
+    XBell(theDisplay, 100);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_load(int save_mode) {
-	/* turn off expose plots */
-	expose_plot_ok = false;
+  /* turn off expose plots */
+  expose_plot_ok = false;
 
-	/* only load valid file */
-	if (currentfile >= 0) {
-		/* process input file name */
-		status = mbedit_action_open(filepaths[currentfile], fileformats[currentfile], currentfile, numfiles, save_mode,
-		                            mode_output, mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
-		                            mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time,
-									&buffer_size, &buffer_size_max, &hold_size, &ndumped, &nloaded,
-		                            &nbuffer, &ngood, &icurrent, &mnplot);
-		if (status == MB_FAILURE) {
-			XBell(theDisplay, 100);
-			currentfile = -1;
-		}
-	}
+  /* only load valid file */
+  if (currentfile >= 0) {
+    /* process input file name */
+    status = mbedit_action_open(filepaths[currentfile],
+				fileformats[currentfile],
+				currentfile, numfiles, save_mode,
+				mode_output, mplot_width,
+				mexager, mx_interval, my_interval,
+				mplot_size, mshow_beammode,
+				mshow_flaggedsoundings,
+				mshow_flaggedprofiles, mshow_time,
+				&buffer_size, &buffer_size_max,
+				&hold_size, &ndumped, &nloaded,
+				&nbuffer, &ngood,
+				&icurrent, &mnplot);
+    if (status == MB_FAILURE) {
+      XBell(theDisplay, 100);
+      currentfile = -1;
+    }
+  }
 
-	/* display data from chosen file */
-	if (status == MB_SUCCESS) {
-		status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
-								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
-		                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-		if (status == 0)
-			XBell(theDisplay, 100);
-	}
+  /* display data from chosen file */
+  if (status == MB_SUCCESS) {
+    status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+				mplot_size, mshow_beammode,
+				mshow_flaggedsoundings, mshow_flaggedprofiles,
+				mshow_time, &nbuffer, &ngood,
+				&icurrent, &mnplot);
+    if (status == 0)
+      XBell(theDisplay, 100);
+  }
 
-	/* set widget values */
-	do_setup_data();
+  /* set widget values */
+  do_setup_data();
 
-	/* turn on expose plots */
-	expose_plot_ok = true;
+  /* turn on expose plots */
+  expose_plot_ok = true;
 }
 /*--------------------------------------------------------------------*/
 
 void do_load_ok(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	/* load the current file without using edit save file */
-	do_load(false);
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  /* load the current file without using edit save file */
+  do_load(false);
 }
 /*--------------------------------------------------------------------*/
 
 void do_load_ok_with_save(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	/* load the current file using edit save file */
-	do_load(true);
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  /* load the current file using edit save file */
+  do_load(true);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_load_check(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	XmFileSelectionBoxCallbackStruct *acs = (XmFileSelectionBoxCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  XmFileSelectionBoxCallbackStruct *acs = (XmFileSelectionBoxCallbackStruct *)call_data;
 
-	char *input_file_ptr;
+  char *input_file_ptr;
 
-	/* read the input file name */
-	if (!XmStringGetLtoR(acs->value, XmSTRING_DEFAULT_CHARSET, &input_file_ptr)) {
-		fprintf(stderr, "\nno input multibeam file selected\n");
-	} else {
-		/* turn off expose plots */
-		expose_plot_ok = false;
+  /* read the input file name */
+  if (!XmStringGetLtoR(acs->value, XmSTRING_DEFAULT_CHARSET, &input_file_ptr)) {
+    fprintf(stderr, "\nno input multibeam file selected\n");
+  } else {
+    /* turn off expose plots */
+    expose_plot_ok = false;
 
-		/* close out previously open file */
-		int quit;
-		status = mbedit_action_done(buffer_size, &ndumped, &nloaded, &nbuffer, &ngood, &icurrent, &quit);
-		if (status == 0)
-			XBell(theDisplay, 100);
-		currentfile = -1;
+    /* close out previously open file */
+    int quit;
+    status = mbedit_action_done(buffer_size, &ndumped, &nloaded, &nbuffer, &ngood, &icurrent, &quit);
+    if (status == 0)
+      XBell(theDisplay, 100);
+    currentfile = -1;
 
-		/* read the input file name */
-		int numfilessave = numfiles;
-		strncpy(input_file, input_file_ptr, MB_PATH_MAXLINE);
-		XtFree(input_file_ptr);
+    /* read the input file name */
+    int numfilessave = numfiles;
+    strncpy(input_file, input_file_ptr, MB_PATH_MAXLINE);
+    XtFree(input_file_ptr);
 
-		/* read the mbio format number from the dialog */
-		static char format_text[40];
-		get_text_string(textfield_format, format_text);
-		int format;
-		sscanf(format_text, "%d", &format);
+    /* read the mbio format number from the dialog */
+    static char format_text[40];
+    get_text_string(textfield_format, format_text);
+    int format;
+    sscanf(format_text, "%d", &format);
 
-		/* try to parse the selection */
-		do_parse_datalist(input_file, format);
+    /* try to parse the selection */
+    do_parse_datalist(input_file, format);
 
-		/* load first new file in the list */
-		if (numfiles > 0 && numfilessave < numfiles) {
-			currentfile = numfilessave;
-			do_load_specific_file(numfilessave);
-		}
+    /* load first new file in the list */
+    if (numfiles > 0 && numfilessave < numfiles) {
+      currentfile = numfilessave;
+      do_load_specific_file(numfilessave);
+    }
 
-		/* turn on expose plots */
-		expose_plot_ok = true;
-	}
+    /* turn on expose plots */
+    expose_plot_ok = true;
+  }
 }
 
 /*--------------------------------------------------------------------*/
@@ -1436,40 +1494,40 @@ void do_checkuseprevious() { XtManageChild(bulletinBoard_editsave); }
 /*--------------------------------------------------------------------*/
 
 void do_filebutton_on() {
-	XtVaSetValues(pushButton_file, XmNsensitive, True, NULL);
+  XtVaSetValues(pushButton_file, XmNsensitive, True, NULL);
 
-	XtVaSetValues(pushButton_done, XmNsensitive, False, NULL);
-	Boolean argok = False;
-	XmString tmp0 = (XmString)BX_CONVERT(pushButton_done, (char *)"Done", XmRXmString, 0, &argok);
-	XtVaSetValues(pushButton_done, XmNlabelString, tmp0, NULL);
-	XmStringFree((XmString)tmp0);
+  XtVaSetValues(pushButton_done, XmNsensitive, False, NULL);
+  Boolean argok = False;
+  XmString tmp0 = (XmString)BX_CONVERT(pushButton_done, (char *)"Done", XmRXmString, 0, &argok);
+  XtVaSetValues(pushButton_done, XmNlabelString, tmp0, NULL);
+  XmStringFree((XmString)tmp0);
 
-	XtVaSetValues(pushButton_forward, XmNsensitive, False, NULL);
-	XtVaSetValues(pushButton_reverse, XmNsensitive, False, NULL);
-	XtVaSetValues(pushButton_start, XmNsensitive, False, NULL);
-	XtVaSetValues(pushButton_end, XmNsensitive, False, NULL);
+  XtVaSetValues(pushButton_forward, XmNsensitive, False, NULL);
+  XtVaSetValues(pushButton_reverse, XmNsensitive, False, NULL);
+  XtVaSetValues(pushButton_start, XmNsensitive, False, NULL);
+  XtVaSetValues(pushButton_end, XmNsensitive, False, NULL);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_filebutton_off() {
-	XtVaSetValues(pushButton_file, XmNsensitive, True, NULL);
-	XtVaSetValues(pushButton_done, XmNsensitive, True, NULL);
-	Boolean argok = False;
-	if (numfiles > 0 && currentfile >= 0 && currentfile < numfiles - 1) {
-		XmString tmp0 = (XmString)BX_CONVERT(pushButton_done, (char *)"Next File", XmRXmString, 0, &argok);
-		XtVaSetValues(pushButton_done, XmNlabelString, tmp0, NULL);
-		XmStringFree((XmString)tmp0);
-	}
-	else {
-		XmString tmp0 = (XmString)BX_CONVERT(pushButton_done, (char *)"Done", XmRXmString, 0, &argok);
-		XtVaSetValues(pushButton_done, XmNlabelString, tmp0, NULL);
-		XmStringFree((XmString)tmp0);
-	}
-	XtVaSetValues(pushButton_forward, XmNsensitive, True, NULL);
-	XtVaSetValues(pushButton_reverse, XmNsensitive, True, NULL);
-	XtVaSetValues(pushButton_start, XmNsensitive, True, NULL);
-	XtVaSetValues(pushButton_end, XmNsensitive, True, NULL);
+  XtVaSetValues(pushButton_file, XmNsensitive, True, NULL);
+  XtVaSetValues(pushButton_done, XmNsensitive, True, NULL);
+  Boolean argok = False;
+  if (numfiles > 0 && currentfile >= 0 && currentfile < numfiles - 1) {
+    XmString tmp0 = (XmString)BX_CONVERT(pushButton_done, (char *)"Next File", XmRXmString, 0, &argok);
+    XtVaSetValues(pushButton_done, XmNlabelString, tmp0, NULL);
+    XmStringFree((XmString)tmp0);
+  }
+  else {
+    XmString tmp0 = (XmString)BX_CONVERT(pushButton_done, (char *)"Done", XmRXmString, 0, &argok);
+    XtVaSetValues(pushButton_done, XmNlabelString, tmp0, NULL);
+    XmStringFree((XmString)tmp0);
+  }
+  XtVaSetValues(pushButton_forward, XmNsensitive, True, NULL);
+  XtVaSetValues(pushButton_reverse, XmNsensitive, True, NULL);
+  XtVaSetValues(pushButton_start, XmNsensitive, True, NULL);
+  XtVaSetValues(pushButton_end, XmNsensitive, True, NULL);
 }
 /*--------------------------------------------------------------------*/
 
@@ -1482,1231 +1540,1231 @@ void do_nextbutton_off() { XtVaSetValues(pushButton_next, XmNsensitive, False, N
 /*--------------------------------------------------------------------*/
 
 void do_end(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
-	fprintf(stderr, "do_end\n");
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  fprintf(stderr, "do_end\n");
 
-	status = mbedit_action_step(nbuffer - icurrent - 1, mplot_width, mexager, mx_interval, my_interval, mplot_size,
-	                            mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-	if (status == 0)
-		XBell(theDisplay, 100);
+  status = mbedit_action_step(nbuffer - icurrent - 1, mplot_width, mexager, mx_interval, my_interval, mplot_size,
+			      mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+  if (status == 0)
+    XBell(theDisplay, 100);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_forward(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	if (key_g_down == 0) {
-		status = mbedit_action_step(step, mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
-		                            mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-		if (status == 0)
-			XBell(theDisplay, 100);
-	}
-	else {
-		status = mbedit_action_step(nbuffer - icurrent - 1, mplot_width, mexager, mx_interval, my_interval, mplot_size,
-		                            mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-		if (status == 0)
-			XBell(theDisplay, 100);
-	}
+  if (key_g_down == 0) {
+    status = mbedit_action_step(step, mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+				mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+    if (status == 0)
+      XBell(theDisplay, 100);
+  }
+  else {
+    status = mbedit_action_step(nbuffer - icurrent - 1, mplot_width, mexager, mx_interval, my_interval, mplot_size,
+				mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+    if (status == 0)
+      XBell(theDisplay, 100);
+  }
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_reverse(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	if (key_g_down == 0) {
-		status = mbedit_action_step(-step, mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
-		                            mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-		if (status == 0)
-			XBell(theDisplay, 100);
-	}
-	else {
-		status = mbedit_action_step(-icurrent, mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
-		                            mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-		if (status == 0)
-			XBell(theDisplay, 100);
-	}
+  if (key_g_down == 0) {
+    status = mbedit_action_step(-step, mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+				mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+    if (status == 0)
+      XBell(theDisplay, 100);
+  }
+  else {
+    status = mbedit_action_step(-icurrent, mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+				mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+    if (status == 0)
+      XBell(theDisplay, 100);
+  }
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_start(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
-	fprintf(stderr, "do_start\n");
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  fprintf(stderr, "do_start\n");
 
-	status = mbedit_action_step(-icurrent, mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
-	                            mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-	if (status == 0)
-		XBell(theDisplay, 100);
+  status = mbedit_action_step(-icurrent, mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+			      mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+  if (status == 0)
+    XBell(theDisplay, 100);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_quit(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	status = mbedit_action_quit(buffer_size, &ndumped, &nloaded, &nbuffer, &ngood, &icurrent);
-	if (status == 0)
-		XBell(theDisplay, 100);
+  status = mbedit_action_quit(buffer_size, &ndumped, &nloaded, &nbuffer, &ngood, &icurrent);
+  if (status == 0)
+    XBell(theDisplay, 100);
 
-	exit(0);
+  exit(0);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	XmDrawingAreaCallbackStruct *acs = (XmDrawingAreaCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  XmDrawingAreaCallbackStruct *acs = (XmDrawingAreaCallbackStruct *)call_data;
 
-	/* check for data file loaded at startup */
-	if (startup_file) {
-		startup_file = 0;
-		status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
-								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
-		                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-		if (status == 0)
-			XBell(theDisplay, 100);
-	} /* end startup file */
+  /* check for data file loaded at startup */
+  if (startup_file) {
+    startup_file = 0;
+    status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+				mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
+				mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+    if (status == 0)
+      XBell(theDisplay, 100);
+  } /* end startup file */
 
-	static Position x_loc, y_loc;
+  static Position x_loc, y_loc;
 
-	XEvent *event = acs->event;
+  XEvent *event = acs->event;
 
-	KeySym keysym;
-	int root_x_return, root_y_return, win_x, win_y;
-	unsigned int mask_return;
-	time_t start_time_t;
+  KeySym keysym;
+  int root_x_return, root_y_return, win_x, win_y;
+  unsigned int mask_return;
+  time_t start_time_t;
 
-	/* If there is input in the drawing area */
-	if (acs->reason == XmCR_INPUT) {
-		/* deal with expose events by replotting the mbedit view */
-		if (event->xany.type == Expose || event->xany.type == GraphicsExpose)
-			status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
-								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
-			                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+  /* If there is input in the drawing area */
+  if (acs->reason == XmCR_INPUT) {
+    /* deal with expose events by replotting the mbedit view */
+    if (event->xany.type == Expose || event->xany.type == GraphicsExpose)
+      status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+				  mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
+				  mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 
-		char buffer[1];
-		/* Deal with KeyPress events */
-		if (event->xany.type == KeyPress) {
-			/* Get key pressed - buffer[0] */
-			/* const int actual = */ XLookupString((XKeyEvent *)event, buffer, 1, &keysym, NULL);
+    char buffer[1];
+    /* Deal with KeyPress events */
+    if (event->xany.type == KeyPress) {
+      /* Get key pressed - buffer[0] */
+      /* const int actual = */ XLookupString((XKeyEvent *)event, buffer, 1, &keysym, NULL);
 
-			/* process events */
-			switch (buffer[0]) {
-			case 'F':
-			case 'f':
-				if (key_g_down == 0) {
-					status = mbedit_action_step(step, mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
-					                            mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-					if (status == 0)
-						XBell(theDisplay, 100);
-				}
-				else {
-					status =
-					    mbedit_action_step(nbuffer - icurrent - 1, mplot_width, mexager, mx_interval, my_interval, mplot_size,
-					                       mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-					if (status == 0)
-						XBell(theDisplay, 100);
-				}
-				break;
-			case 'V':
-			case 'v':
-				if (key_g_down == 0) {
-					status = mbedit_action_step(-step, mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
-					                            mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-					if (status == 0)
-						XBell(theDisplay, 100);
-				}
-				else {
-					status = mbedit_action_step(-icurrent, mplot_width, mexager, mx_interval, my_interval, mplot_size,
-					                            mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-					if (status == 0)
-						XBell(theDisplay, 100);
-				}
-				break;
-			case 'G':
-			case 'g':
-				key_g_down = 1;
-				break;
-			case 'M':
-			case 'm':
-			case 'Z':
-			case 'z':
-				status = mbedit_action_bad_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
-				                                mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-				key_z_down = 1;
-				key_s_down = 0;
-				key_a_down = 0;
-				key_d_down = 0;
-				break;
-			case 'K':
-			case 'k':
-			case 'S':
-			case 's':
-				status = mbedit_action_good_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
-				                                 mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-				key_z_down = 0;
-				key_s_down = 1;
-				key_a_down = 0;
-				key_d_down = 0;
-				break;
-			case 'J':
-			case 'j':
-			case 'A':
-			case 'a':
-				if (!mode_reverse_keys)
-					status = mbedit_action_left_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
-					                                 mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-				else
-					status = mbedit_action_right_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
-					                                  mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-				key_z_down = 0;
-				key_s_down = 0;
-				key_a_down = 1;
-				key_d_down = 0;
-				break;
-			case 'L':
-			case 'l':
-			case 'D':
-			case 'd':
-				if (!mode_reverse_keys)
-					status = mbedit_action_right_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
-					                                  mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-				else
-					status = mbedit_action_left_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
-					                                 mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-				key_z_down = 0;
-				key_s_down = 0;
-				key_a_down = 0;
-				key_d_down = 1;
-				break;
-			case '<':
-			case ',':
-			case 'X':
-			case 'x':
-				status = mbedit_action_flag_view(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
-				                                 mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-				break;
-			case '>':
-			case '.':
-			case 'C':
-			case 'c':
-				status = mbedit_action_unflag_view(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
-				                                   mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-				break;
-			case '!':
-				status = mbedit_action_zero_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
-				                                 mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-				break;
-			case 'U':
-			case 'u':
-			case 'Q':
-			case 'q': {
-				mode_pick = MODE_TOGGLE;
-				XmToggleButtonSetState(setting_mode_toggle_toggle, 1, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_pick, 0, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_erase, 0, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_restore, 0, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_grab, 0, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_info, 0, FALSE);
+      /* process events */
+      switch (buffer[0]) {
+      case 'F':
+      case 'f':
+	if (key_g_down == 0) {
+	  status = mbedit_action_step(step, mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+				      mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+	  if (status == 0)
+	    XBell(theDisplay, 100);
+	}
+	else {
+	  status =
+	    mbedit_action_step(nbuffer - icurrent - 1, mplot_width, mexager, mx_interval, my_interval, mplot_size,
+			       mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+	  if (status == 0)
+	    XBell(theDisplay, 100);
+	}
+	break;
+      case 'V':
+      case 'v':
+	if (key_g_down == 0) {
+	  status = mbedit_action_step(-step, mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+				      mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+	  if (status == 0)
+	    XBell(theDisplay, 100);
+	}
+	else {
+	  status = mbedit_action_step(-icurrent, mplot_width, mexager, mx_interval, my_interval, mplot_size,
+				      mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+	  if (status == 0)
+	    XBell(theDisplay, 100);
+	}
+	break;
+      case 'G':
+      case 'g':
+	key_g_down = 1;
+	break;
+      case 'M':
+      case 'm':
+      case 'Z':
+      case 'z':
+	status = mbedit_action_bad_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+					mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+	key_z_down = 1;
+	key_s_down = 0;
+	key_a_down = 0;
+	key_d_down = 0;
+	break;
+      case 'K':
+      case 'k':
+      case 'S':
+      case 's':
+	status = mbedit_action_good_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+					 mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+	key_z_down = 0;
+	key_s_down = 1;
+	key_a_down = 0;
+	key_d_down = 0;
+	break;
+      case 'J':
+      case 'j':
+      case 'A':
+      case 'a':
+	if (!mode_reverse_keys)
+	  status = mbedit_action_left_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+					   mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+	else
+	  status = mbedit_action_right_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+					    mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+	key_z_down = 0;
+	key_s_down = 0;
+	key_a_down = 1;
+	key_d_down = 0;
+	break;
+      case 'L':
+      case 'l':
+      case 'D':
+      case 'd':
+	if (!mode_reverse_keys)
+	  status = mbedit_action_right_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+					    mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+	else
+	  status = mbedit_action_left_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+					   mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+	key_z_down = 0;
+	key_s_down = 0;
+	key_a_down = 0;
+	key_d_down = 1;
+	break;
+      case '<':
+      case ',':
+      case 'X':
+      case 'x':
+	status = mbedit_action_flag_view(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+					 mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+	break;
+      case '>':
+      case '.':
+      case 'C':
+      case 'c':
+	status = mbedit_action_unflag_view(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+					   mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+	break;
+      case '!':
+	status = mbedit_action_zero_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+					 mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+	break;
+      case 'U':
+      case 'u':
+      case 'Q':
+      case 'q': {
+	mode_pick = MODE_TOGGLE;
+	XmToggleButtonSetState(setting_mode_toggle_toggle, 1, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_pick, 0, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_erase, 0, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_restore, 0, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_grab, 0, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_info, 0, FALSE);
 
-				myCursor = XCreateFontCursor(theDisplay, XC_target);
-				XAllocNamedColor(theDisplay, colormap, "red", &closest[0], &exact[0]);
-				XAllocNamedColor(theDisplay, colormap, "coral", &closest[1], &exact[1]);
-				XRecolorCursor(theDisplay, myCursor, &closest[0], &closest[1]);
-				XDefineCursor(theDisplay, can_xid, myCursor);
-			} break;
-			case 'I':
-			case 'i':
-			case 'W':
-			case 'w': {
-				mode_pick = MODE_PICK;
-				XmToggleButtonSetState(setting_mode_toggle_toggle, 0, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_pick, 1, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_erase, 0, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_restore, 0, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_grab, 0, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_info, 0, FALSE);
+	myCursor = XCreateFontCursor(theDisplay, XC_target);
+	XAllocNamedColor(theDisplay, colormap, "red", &closest[0], &exact[0]);
+	XAllocNamedColor(theDisplay, colormap, "coral", &closest[1], &exact[1]);
+	XRecolorCursor(theDisplay, myCursor, &closest[0], &closest[1]);
+	XDefineCursor(theDisplay, can_xid, myCursor);
+      } break;
+      case 'I':
+      case 'i':
+      case 'W':
+      case 'w': {
+	mode_pick = MODE_PICK;
+	XmToggleButtonSetState(setting_mode_toggle_toggle, 0, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_pick, 1, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_erase, 0, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_restore, 0, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_grab, 0, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_info, 0, FALSE);
 
-				myCursor = XCreateFontCursor(theDisplay, XC_target);
-				XAllocNamedColor(theDisplay, colormap, "red", &closest[0], &exact[0]);
-				XAllocNamedColor(theDisplay, colormap, "coral", &closest[1], &exact[1]);
-				XRecolorCursor(theDisplay, myCursor, &closest[0], &closest[1]);
-				XDefineCursor(theDisplay, can_xid, myCursor);
-			} break;
-			case 'O':
-			case 'o':
-			case 'E':
-			case 'e': {
-				mode_pick = MODE_ERASE;
-				XmToggleButtonSetState(setting_mode_toggle_toggle, 0, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_pick, 0, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_erase, 1, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_restore, 0, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_grab, 0, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_info, 0, FALSE);
+	myCursor = XCreateFontCursor(theDisplay, XC_target);
+	XAllocNamedColor(theDisplay, colormap, "red", &closest[0], &exact[0]);
+	XAllocNamedColor(theDisplay, colormap, "coral", &closest[1], &exact[1]);
+	XRecolorCursor(theDisplay, myCursor, &closest[0], &closest[1]);
+	XDefineCursor(theDisplay, can_xid, myCursor);
+      } break;
+      case 'O':
+      case 'o':
+      case 'E':
+      case 'e': {
+	mode_pick = MODE_ERASE;
+	XmToggleButtonSetState(setting_mode_toggle_toggle, 0, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_pick, 0, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_erase, 1, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_restore, 0, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_grab, 0, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_info, 0, FALSE);
 
-				myCursor = XCreateFontCursor(theDisplay, XC_exchange);
-				XAllocNamedColor(theDisplay, colormap, "red", &closest[0], &exact[0]);
-				XAllocNamedColor(theDisplay, colormap, "coral", &closest[1], &exact[1]);
-				XRecolorCursor(theDisplay, myCursor, &closest[0], &closest[1]);
-				XDefineCursor(theDisplay, can_xid, myCursor);
-			} break;
-			case 'P':
-			case 'p':
-			case 'R':
-			case 'r': {
-				mode_pick = MODE_RESTORE;
-				XmToggleButtonSetState(setting_mode_toggle_toggle, 0, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_pick, 0, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_erase, 0, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_restore, 1, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_grab, 0, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_info, 0, FALSE);
+	myCursor = XCreateFontCursor(theDisplay, XC_exchange);
+	XAllocNamedColor(theDisplay, colormap, "red", &closest[0], &exact[0]);
+	XAllocNamedColor(theDisplay, colormap, "coral", &closest[1], &exact[1]);
+	XRecolorCursor(theDisplay, myCursor, &closest[0], &closest[1]);
+	XDefineCursor(theDisplay, can_xid, myCursor);
+      } break;
+      case 'P':
+      case 'p':
+      case 'R':
+      case 'r': {
+	mode_pick = MODE_RESTORE;
+	XmToggleButtonSetState(setting_mode_toggle_toggle, 0, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_pick, 0, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_erase, 0, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_restore, 1, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_grab, 0, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_info, 0, FALSE);
 
-				myCursor = XCreateFontCursor(theDisplay, XC_exchange);
-				XAllocNamedColor(theDisplay, colormap, "green", &closest[0], &exact[0]);
-				XAllocNamedColor(theDisplay, colormap, "coral", &closest[1], &exact[1]);
-				XRecolorCursor(theDisplay, myCursor, &closest[0], &closest[1]);
-				XDefineCursor(theDisplay, can_xid, myCursor);
-			} break;
-			case '{':
-			case '[':
-			case 'T':
-			case 't': {
-				mode_pick = MODE_GRAB;
-				XmToggleButtonSetState(setting_mode_toggle_toggle, 0, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_pick, 0, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_erase, 0, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_restore, 0, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_grab, 1, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_info, 0, FALSE);
+	myCursor = XCreateFontCursor(theDisplay, XC_exchange);
+	XAllocNamedColor(theDisplay, colormap, "green", &closest[0], &exact[0]);
+	XAllocNamedColor(theDisplay, colormap, "coral", &closest[1], &exact[1]);
+	XRecolorCursor(theDisplay, myCursor, &closest[0], &closest[1]);
+	XDefineCursor(theDisplay, can_xid, myCursor);
+      } break;
+      case '{':
+      case '[':
+      case 'T':
+      case 't': {
+	mode_pick = MODE_GRAB;
+	XmToggleButtonSetState(setting_mode_toggle_toggle, 0, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_pick, 0, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_erase, 0, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_restore, 0, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_grab, 1, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_info, 0, FALSE);
 
-				myCursor = XCreateFontCursor(theDisplay, XC_target);
-				XAllocNamedColor(theDisplay, colormap, "blue", &closest[0], &exact[0]);
-				XAllocNamedColor(theDisplay, colormap, "coral", &closest[1], &exact[1]);
-				XRecolorCursor(theDisplay, myCursor, &closest[0], &closest[1]);
-				XDefineCursor(theDisplay, can_xid, myCursor);
-			} break;
-			case '}':
-			case ']':
-			case 'Y':
-			case 'y': {
-				mode_pick = MODE_INFO;
-				XmToggleButtonSetState(setting_mode_toggle_toggle, 0, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_pick, 0, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_erase, 0, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_restore, 0, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_grab, 0, FALSE);
-				XmToggleButtonSetState(setting_mode_toggle_info, 1, FALSE);
+	myCursor = XCreateFontCursor(theDisplay, XC_target);
+	XAllocNamedColor(theDisplay, colormap, "blue", &closest[0], &exact[0]);
+	XAllocNamedColor(theDisplay, colormap, "coral", &closest[1], &exact[1]);
+	XRecolorCursor(theDisplay, myCursor, &closest[0], &closest[1]);
+	XDefineCursor(theDisplay, can_xid, myCursor);
+      } break;
+      case '}':
+      case ']':
+      case 'Y':
+      case 'y': {
+	mode_pick = MODE_INFO;
+	XmToggleButtonSetState(setting_mode_toggle_toggle, 0, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_pick, 0, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_erase, 0, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_restore, 0, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_grab, 0, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_info, 1, FALSE);
 
-				myCursor = XCreateFontCursor(theDisplay, XC_target);
-				XAllocNamedColor(theDisplay, colormap, "blue", &closest[0], &exact[0]);
-				XAllocNamedColor(theDisplay, colormap, "coral", &closest[1], &exact[1]);
-				XRecolorCursor(theDisplay, myCursor, &closest[0], &closest[1]);
-				XDefineCursor(theDisplay, can_xid, myCursor);
-			} break;
-			case '2':
-			case '@': {
-				/* set the view mode */
-				mview_mode = VIEW_WATERFALL;
-				mbedit_set_viewmode(mview_mode);
-				XmToggleButtonSetState(toggleButton_view_waterfall, true, FALSE);
-				XmToggleButtonSetState(toggleButton_view_alongtrack, false, FALSE);
-				XmToggleButtonSetState(toggleButton_view_acrosstrack, false, FALSE);
+	myCursor = XCreateFontCursor(theDisplay, XC_target);
+	XAllocNamedColor(theDisplay, colormap, "blue", &closest[0], &exact[0]);
+	XAllocNamedColor(theDisplay, colormap, "coral", &closest[1], &exact[1]);
+	XRecolorCursor(theDisplay, myCursor, &closest[0], &closest[1]);
+	XDefineCursor(theDisplay, can_xid, myCursor);
+      } break;
+      case '2':
+      case '@': {
+	/* set the view mode */
+	mview_mode = VIEW_WATERFALL;
+	mbedit_set_viewmode(mview_mode);
+	XmToggleButtonSetState(toggleButton_view_waterfall, true, FALSE);
+	XmToggleButtonSetState(toggleButton_view_alongtrack, false, FALSE);
+	XmToggleButtonSetState(toggleButton_view_acrosstrack, false, FALSE);
 
-				/* replot the data */
-				status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
-				                            mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-			} break;
-			case '3':
-			case '#': {
-				/* set the view mode */
-				mview_mode = VIEW_ALONGTRACK;
-				mbedit_set_viewmode(mview_mode);
-				XmToggleButtonSetState(toggleButton_view_waterfall, false, FALSE);
-				XmToggleButtonSetState(toggleButton_view_alongtrack, true, FALSE);
-				XmToggleButtonSetState(toggleButton_view_acrosstrack, false, FALSE);
+	/* replot the data */
+	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+				    mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+      } break;
+      case '3':
+      case '#': {
+	/* set the view mode */
+	mview_mode = VIEW_ALONGTRACK;
+	mbedit_set_viewmode(mview_mode);
+	XmToggleButtonSetState(toggleButton_view_waterfall, false, FALSE);
+	XmToggleButtonSetState(toggleButton_view_alongtrack, true, FALSE);
+	XmToggleButtonSetState(toggleButton_view_acrosstrack, false, FALSE);
 
-				/* replot the data */
-				status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
-				                            mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-			} break;
-			case '4':
-			case '$': {
-				/* set the view mode */
-				mview_mode = VIEW_ACROSSTRACK;
-				mbedit_set_viewmode(mview_mode);
-				XmToggleButtonSetState(toggleButton_view_waterfall, false, FALSE);
-				XmToggleButtonSetState(toggleButton_view_alongtrack, false, FALSE);
-				XmToggleButtonSetState(toggleButton_view_acrosstrack, true, FALSE);
+	/* replot the data */
+	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+				    mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+      } break;
+      case '4':
+      case '$': {
+	/* set the view mode */
+	mview_mode = VIEW_ACROSSTRACK;
+	mbedit_set_viewmode(mview_mode);
+	XmToggleButtonSetState(toggleButton_view_waterfall, false, FALSE);
+	XmToggleButtonSetState(toggleButton_view_alongtrack, false, FALSE);
+	XmToggleButtonSetState(toggleButton_view_acrosstrack, true, FALSE);
 
-				/* replot the data */
-				status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
-				                            mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-			} break;
-			default:
-				break;
-			} /* end of key switch */
-		}     /* end of key press events */
+	/* replot the data */
+	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+				    mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+      } break;
+      default:
+	break;
+      } /* end of key switch */
+    }     /* end of key press events */
 
-		/* Deal with KeyRelease events */
-		if (event->xany.type == KeyRelease) {
-			/* Get key pressed - buffer[0] */
-			/* const int actual = */ XLookupString((XKeyEvent *)event, buffer, 1, &keysym, NULL);
+    /* Deal with KeyRelease events */
+    if (event->xany.type == KeyRelease) {
+      /* Get key pressed - buffer[0] */
+      /* const int actual = */ XLookupString((XKeyEvent *)event, buffer, 1, &keysym, NULL);
 
-			/* process events */
-			switch (buffer[0]) {
-			case 'G':
-			case 'g':
-				key_g_down = 0;
-				break;
-			case 'M':
-			case 'm':
-			case 'Z':
-			case 'z':
-				key_z_down = 0;
-				break;
-			case 'K':
-			case 'k':
-			case 'S':
-			case 's':
-				key_s_down = 0;
-				break;
-			case 'J':
-			case 'j':
-			case 'A':
-			case 'a':
-				key_a_down = 0;
-				break;
-			case 'L':
-			case 'l':
-			case 'D':
-			case 'd':
-				key_d_down = 0;
-				break;
-			default:
-				break;
-			} /* end of key switch */
-		}     /* end of key release events */
+      /* process events */
+      switch (buffer[0]) {
+      case 'G':
+      case 'g':
+	key_g_down = 0;
+	break;
+      case 'M':
+      case 'm':
+      case 'Z':
+      case 'z':
+	key_z_down = 0;
+	break;
+      case 'K':
+      case 'k':
+      case 'S':
+      case 's':
+	key_s_down = 0;
+	break;
+      case 'J':
+      case 'j':
+      case 'A':
+      case 'a':
+	key_a_down = 0;
+	break;
+      case 'L':
+      case 'l':
+      case 'D':
+      case 'd':
+	key_d_down = 0;
+	break;
+      default:
+	break;
+      } /* end of key switch */
+    }     /* end of key release events */
 
-		/* Check for mouse pressed and not pressed and released. */
-		if (event->xany.type == ButtonPress) {
-			/* If left mouse button is pushed then toggle, pick, erase, restore, grab, or info. */
-			if ((event->xbutton.button == 1 && !mode_reverse_mouse) ||
-			    (event->xbutton.button == 3 && mode_reverse_mouse)) {
-				x_loc = event->xbutton.x;
-				y_loc = event->xbutton.y;
-				int grab_mode = GRAB_START;
+    /* Check for mouse pressed and not pressed and released. */
+    if (event->xany.type == ButtonPress) {
+      /* If left mouse button is pushed then toggle, pick, erase, restore, grab, or info. */
+      if ((event->xbutton.button == 1 && !mode_reverse_mouse) ||
+	  (event->xbutton.button == 3 && mode_reverse_mouse)) {
+	x_loc = event->xbutton.x;
+	y_loc = event->xbutton.y;
+	int grab_mode = GRAB_START;
 
-				int doit = 1;
-				while (doit) {
+	int doit = 1;
+	while (doit) {
 
-					if (mode_pick == MODE_TOGGLE)
-						status = mbedit_action_mouse_toggle(x_loc, y_loc, mplot_width, mexager, mx_interval, my_interval,
-						                                    mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer,
-						                                    &ngood, &icurrent, &mnplot);
-					else if (mode_pick == MODE_PICK)
-						status = mbedit_action_mouse_pick(x_loc, y_loc, mplot_width, mexager, mx_interval, my_interval,
-						                                  mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood,
-						                                  &icurrent, &mnplot);
-					else if (mode_pick == MODE_ERASE)
-						status = mbedit_action_mouse_erase(x_loc, y_loc, mplot_width, mexager, mx_interval, my_interval,
-						                                   mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer,
-						                                   &ngood, &icurrent, &mnplot);
-					else if (mode_pick == MODE_RESTORE)
-						status = mbedit_action_mouse_restore(x_loc, y_loc, mplot_width, mexager, mx_interval, my_interval,
-						                                     mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer,
-						                                     &ngood, &icurrent, &mnplot);
-					else if (mode_pick == MODE_GRAB) {
-						status = mbedit_action_mouse_grab(grab_mode, x_loc, y_loc, mplot_width, mexager, mx_interval, my_interval,
-						                                  mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood,
-						                                  &icurrent, &mnplot);
-						if (status == MB_SUCCESS)
-							grab_mode = GRAB_MOVE;
-						else
-							grab_mode = GRAB_START;
-					}
-					else if (mode_pick == MODE_INFO)
-						status = mbedit_action_mouse_info(x_loc, y_loc, mplot_width, mexager, mx_interval, my_interval,
-						                                  mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood,
-						                                  &icurrent, &mnplot);
-					if (status == 0)
-						XBell(theDisplay, 100);
-					else if (key_z_down) {
-						status =
-						    mbedit_action_bad_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
-						                           mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-					}
-					else if (key_s_down) {
-						status =
-						    mbedit_action_good_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
-						                            mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-					}
-					else if (key_a_down) {
-						if (!mode_reverse_keys)
-							status = mbedit_action_left_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size,
-							                                 mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood,
-							                                 &icurrent, &mnplot);
-						else
-							status = mbedit_action_right_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size,
-							                                  mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood,
-							                                  &icurrent, &mnplot);
-					}
-					else if (key_d_down) {
-						if (!mode_reverse_keys)
-							status = mbedit_action_right_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size,
-							                                  mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood,
-							                                  &icurrent, &mnplot);
-						else
-							status = mbedit_action_left_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size,
-							                                 mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood,
-							                                 &icurrent, &mnplot);
-					}
+	  if (mode_pick == MODE_TOGGLE)
+	    status = mbedit_action_mouse_toggle(x_loc, y_loc, mplot_width, mexager, mx_interval, my_interval,
+						mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer,
+						&ngood, &icurrent, &mnplot);
+	  else if (mode_pick == MODE_PICK)
+	    status = mbedit_action_mouse_pick(x_loc, y_loc, mplot_width, mexager, mx_interval, my_interval,
+					      mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood,
+					      &icurrent, &mnplot);
+	  else if (mode_pick == MODE_ERASE)
+	    status = mbedit_action_mouse_erase(x_loc, y_loc, mplot_width, mexager, mx_interval, my_interval,
+					       mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer,
+					       &ngood, &icurrent, &mnplot);
+	  else if (mode_pick == MODE_RESTORE)
+	    status = mbedit_action_mouse_restore(x_loc, y_loc, mplot_width, mexager, mx_interval, my_interval,
+						 mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer,
+						 &ngood, &icurrent, &mnplot);
+	  else if (mode_pick == MODE_GRAB) {
+	    status = mbedit_action_mouse_grab(grab_mode, x_loc, y_loc, mplot_width, mexager, mx_interval, my_interval,
+					      mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood,
+					      &icurrent, &mnplot);
+	    if (status == MB_SUCCESS)
+	      grab_mode = GRAB_MOVE;
+	    else
+	      grab_mode = GRAB_START;
+	  }
+	  else if (mode_pick == MODE_INFO)
+	    status = mbedit_action_mouse_info(x_loc, y_loc, mplot_width, mexager, mx_interval, my_interval,
+					      mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood,
+					      &icurrent, &mnplot);
+	  if (status == 0)
+	    XBell(theDisplay, 100);
+	  else if (key_z_down) {
+	    status =
+	      mbedit_action_bad_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+				     mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+	  }
+	  else if (key_s_down) {
+	    status =
+	      mbedit_action_good_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+				      mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+	  }
+	  else if (key_a_down) {
+	    if (!mode_reverse_keys)
+	      status = mbedit_action_left_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size,
+					       mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood,
+					       &icurrent, &mnplot);
+	    else
+	      status = mbedit_action_right_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size,
+						mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood,
+						&icurrent, &mnplot);
+	  }
+	  else if (key_d_down) {
+	    if (!mode_reverse_keys)
+	      status = mbedit_action_right_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size,
+						mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood,
+						&icurrent, &mnplot);
+	    else
+	      status = mbedit_action_left_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size,
+					       mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood,
+					       &icurrent, &mnplot);
+	  }
 
-					status = XQueryPointer(theDisplay, can_xid, &root_return, &child_return, &root_x_return, &root_y_return,
-					                       &win_x, &win_y, &mask_return);
+	  status = XQueryPointer(theDisplay, can_xid, &root_return, &child_return, &root_x_return, &root_y_return,
+				 &win_x, &win_y, &mask_return);
 
-					x_loc = win_x;
-					y_loc = win_y;
+	  x_loc = win_x;
+	  y_loc = win_y;
 
-					/* If the button is still pressed then read the location */
-					/* of the pointer and run the action mouse function again */
-					if (mode_reverse_mouse) {
-						if ((mask_return & 1024) == 1024 && mode_pick != MODE_TOGGLE && mode_pick != MODE_PICK && mode_pick != MODE_INFO)
-							doit = 1;
-						else
-							doit = 0;
-					} else /* if (!mode_reverse_mouse) */ {
-						if ((mask_return & 256) == 256 && mode_pick != MODE_TOGGLE && mode_pick != MODE_PICK && mode_pick != MODE_INFO)
-							doit = 1;
-						else
-							doit = 0;
-					}
-					// else doit = 0;
+	  /* If the button is still pressed then read the location */
+	  /* of the pointer and run the action mouse function again */
+	  if (mode_reverse_mouse) {
+	    if ((mask_return & 1024) == 1024 && mode_pick != MODE_TOGGLE && mode_pick != MODE_PICK && mode_pick != MODE_INFO)
+	      doit = 1;
+	    else
+	      doit = 0;
+	  } else /* if (!mode_reverse_mouse) */ {
+	    if ((mask_return & 256) == 256 && mode_pick != MODE_TOGGLE && mode_pick != MODE_PICK && mode_pick != MODE_INFO)
+	      doit = 1;
+	    else
+	      doit = 0;
+	  }
+	  // else doit = 0;
 
-					/* if grab on but mouse released, end grab */
-					if (grab_mode == GRAB_MOVE && doit == 0) {
-						status = mbedit_action_mouse_grab(GRAB_END, x_loc, y_loc, mplot_width, mexager, mx_interval, my_interval,
-						                                  mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood,
-						                                  &icurrent, &mnplot);
-						grab_mode = GRAB_START;
-					}
-				}
+	  /* if grab on but mouse released, end grab */
+	  if (grab_mode == GRAB_MOVE && doit == 0) {
+	    status = mbedit_action_mouse_grab(GRAB_END, x_loc, y_loc, mplot_width, mexager, mx_interval, my_interval,
+					      mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood,
+					      &icurrent, &mnplot);
+	    grab_mode = GRAB_START;
+	  }
+	}
 
-			} /* end of left button events */
+      } /* end of left button events */
 
-			/* If middle mouse button is pushed then scroll in reverse. */
-			if (event->xbutton.button == 2) {
-				time(&start_time_t);
-				int doit = 1;
-				while (doit) {
-					if (doit == 1 || difftime(time(NULL), start_time_t) > 2.0) {
-						if (key_g_down == 0) {
-							status = mbedit_action_step(-step, mplot_width, mexager, mx_interval, my_interval, mplot_size,
-							                            mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent,
-							                            &mnplot);
-							if (status == 0)
-								XBell(theDisplay, 100);
-						}
-						else {
-							status = mbedit_action_step(-icurrent, mplot_width, mexager, mx_interval, my_interval, mplot_size,
-							                            mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent,
-							                            &mnplot);
-							if (status == 0)
-								XBell(theDisplay, 100);
-						}
-					}
+      /* If middle mouse button is pushed then scroll in reverse. */
+      if (event->xbutton.button == 2) {
+	time(&start_time_t);
+	int doit = 1;
+	while (doit) {
+	  if (doit == 1 || difftime(time(NULL), start_time_t) > 2.0) {
+	    if (key_g_down == 0) {
+	      status = mbedit_action_step(-step, mplot_width, mexager, mx_interval, my_interval, mplot_size,
+					  mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent,
+					  &mnplot);
+	      if (status == 0)
+		XBell(theDisplay, 100);
+	    }
+	    else {
+	      status = mbedit_action_step(-icurrent, mplot_width, mexager, mx_interval, my_interval, mplot_size,
+					  mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent,
+					  &mnplot);
+	      if (status == 0)
+		XBell(theDisplay, 100);
+	    }
+	  }
 
-					/* If a scroll button is still pressed then scroll again */
-					status = XQueryPointer(theDisplay, can_xid, &root_return, &child_return, &root_x_return, &root_y_return,
-					                       &win_x, &win_y, &mask_return);
-					if (mask_return & 512)
-						doit++;
-					else
-						doit = 0;
-				}
-			} /* end of middle button events */
+	  /* If a scroll button is still pressed then scroll again */
+	  status = XQueryPointer(theDisplay, can_xid, &root_return, &child_return, &root_x_return, &root_y_return,
+				 &win_x, &win_y, &mask_return);
+	  if (mask_return & 512)
+	    doit++;
+	  else
+	    doit = 0;
+	}
+      } /* end of middle button events */
 
-			/* If right mouse button is pushed then scroll forward. */
-			if ((event->xbutton.button == 3 && !mode_reverse_mouse) ||
-			    (event->xbutton.button == 1 && mode_reverse_mouse)) {
-				time(&start_time_t);
-				int doit = 1;
-				while (doit) {
-					if (doit == 1 || difftime(time(NULL), start_time_t) > 2.0) {
-						if (key_g_down == 0) {
-							status = mbedit_action_step(step, mplot_width, mexager, mx_interval, my_interval, mplot_size,
-							                            mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent,
-							                            &mnplot);
-							if (status == 0)
-								XBell(theDisplay, 100);
-						}
-						else {
-							status = mbedit_action_step(nbuffer - icurrent - 1, mplot_width, mexager, mx_interval, my_interval,
-							                            mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood,
-							                            &icurrent, &mnplot);
-							if (status == 0)
-								XBell(theDisplay, 100);
-						}
-					}
+      /* If right mouse button is pushed then scroll forward. */
+      if ((event->xbutton.button == 3 && !mode_reverse_mouse) ||
+	  (event->xbutton.button == 1 && mode_reverse_mouse)) {
+	time(&start_time_t);
+	int doit = 1;
+	while (doit) {
+	  if (doit == 1 || difftime(time(NULL), start_time_t) > 2.0) {
+	    if (key_g_down == 0) {
+	      status = mbedit_action_step(step, mplot_width, mexager, mx_interval, my_interval, mplot_size,
+					  mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent,
+					  &mnplot);
+	      if (status == 0)
+		XBell(theDisplay, 100);
+	    }
+	    else {
+	      status = mbedit_action_step(nbuffer - icurrent - 1, mplot_width, mexager, mx_interval, my_interval,
+					  mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood,
+					  &icurrent, &mnplot);
+	      if (status == 0)
+		XBell(theDisplay, 100);
+	    }
+	  }
 
-					/* If a scroll button is still pressed then scroll again */
-					status = XQueryPointer(theDisplay, can_xid, &root_return, &child_return, &root_x_return, &root_y_return,
-					                       &win_x, &win_y, &mask_return);
-					if ((mode_reverse_mouse && (mask_return & 256)) ||
-					    (!mode_reverse_mouse && (mask_return & 1024)))
-						doit++;
-					else
-						doit = 0;
-				}
-			} /* end of right button events */
-		}     /* end of button pressed events */
-	}         /* end of inputs from window */
+	  /* If a scroll button is still pressed then scroll again */
+	  status = XQueryPointer(theDisplay, can_xid, &root_return, &child_return, &root_x_return, &root_y_return,
+				 &win_x, &win_y, &mask_return);
+	  if ((mode_reverse_mouse && (mask_return & 256)) ||
+	      (!mode_reverse_mouse && (mask_return & 1024)))
+	    doit++;
+	  else
+	    doit = 0;
+	}
+      } /* end of right button events */
+    }     /* end of button pressed events */
+  }         /* end of inputs from window */
 } /* end do_event function */
 
 /*--------------------------------------------------------------------*/
 
 void do_flag_view(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	status = mbedit_action_flag_view(mplot_width, mexager, mx_interval, my_interval,
-								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
-	                                 mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+  status = mbedit_action_flag_view(mplot_width, mexager, mx_interval, my_interval,
+				   mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
+				   mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_unflag_view(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	status = mbedit_action_unflag_view(mplot_width, mexager, mx_interval, my_interval,
-								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
-	                                   mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+  status = mbedit_action_unflag_view(mplot_width, mexager, mx_interval, my_interval,
+				     mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
+				     mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_unflag_all(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	status = mbedit_action_unflag_all(mplot_width, mexager, mx_interval, my_interval,
-								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
-	                                  mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+  status = mbedit_action_unflag_all(mplot_width, mexager, mx_interval, my_interval,
+				    mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
+				    mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_next_buffer(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	int quit;
+  int quit;
 
-	/* turn off expose plots */
-	expose_plot_ok = false;
+  /* turn off expose plots */
+  expose_plot_ok = false;
 
-	/* get next buffer */
-	status = mbedit_action_next_buffer(hold_size, buffer_size, mplot_width, mexager, mx_interval, my_interval, mplot_size,
-	                                   mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &ndumped, &nloaded, &nbuffer, &ngood, &icurrent,
-	                                   &mnplot, &quit);
-	if (status == 0)
-		XBell(theDisplay, 100);
+  /* get next buffer */
+  status = mbedit_action_next_buffer(hold_size, buffer_size, mplot_width, mexager, mx_interval, my_interval, mplot_size,
+				     mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &ndumped, &nloaded, &nbuffer, &ngood, &icurrent,
+				     &mnplot, &quit);
+  if (status == 0)
+    XBell(theDisplay, 100);
 
-	/* set widget values */
-	do_setup_data();
+  /* set widget values */
+  do_setup_data();
 
-	/* turn on expose plots */
-	expose_plot_ok = true;
+  /* turn on expose plots */
+  expose_plot_ok = true;
 
-	/* quit if in GUI mode */
-	if (quit)
-		exit(0);
+  /* quit if in GUI mode */
+  if (quit)
+    exit(0);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_show_flaggedsoundings(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	mshow_flaggedsoundings = XmToggleButtonGetState(toggleButton_show_flaggedsoundings_on);
+  mshow_flaggedsoundings = XmToggleButtonGetState(toggleButton_show_flaggedsoundings_on);
 
-	/* replot the data */
-	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
-								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
-	                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+  /* replot the data */
+  status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+			      mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
+			      mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_show_flaggedprofiles(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	mshow_flaggedprofiles = XmToggleButtonGetState(toggleButton_show_flaggedprofiles_on);
+  mshow_flaggedprofiles = XmToggleButtonGetState(toggleButton_show_flaggedprofiles_on);
 
-	/* replot the data */
-	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
-								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
-	                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+  /* replot the data */
+  status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+			      mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
+			      mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_view_mode(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	/* turn off all togglebuttons */
-	XmToggleButtonSetState(toggleButton_view_waterfall, false, FALSE);
-	XmToggleButtonSetState(toggleButton_view_alongtrack, false, FALSE);
-	XmToggleButtonSetState(toggleButton_view_acrosstrack, false, FALSE);
+  /* turn off all togglebuttons */
+  XmToggleButtonSetState(toggleButton_view_waterfall, false, FALSE);
+  XmToggleButtonSetState(toggleButton_view_alongtrack, false, FALSE);
+  XmToggleButtonSetState(toggleButton_view_acrosstrack, false, FALSE);
 
-	/* turn on the one that was clicked */
-	XmToggleButtonSetState(w, true, FALSE);
+  /* turn on the one that was clicked */
+  XmToggleButtonSetState(w, true, FALSE);
 
-	/* now set the data type id */
-	if (w == toggleButton_view_waterfall)
-		mview_mode = 0;
-	else if (w == toggleButton_view_alongtrack)
-		mview_mode = 1;
-	else if (w == toggleButton_view_acrosstrack)
-		mview_mode = 2;
-	else
-		mview_mode = 0;
+  /* now set the data type id */
+  if (w == toggleButton_view_waterfall)
+    mview_mode = 0;
+  else if (w == toggleButton_view_alongtrack)
+    mview_mode = 1;
+  else if (w == toggleButton_view_acrosstrack)
+    mview_mode = 2;
+  else
+    mview_mode = 0;
 
-	/* reset scaling */
-	status = mbedit_set_viewmode(mview_mode);
+  /* reset scaling */
+  status = mbedit_set_viewmode(mview_mode);
 
-	/* replot the data */
-	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
-								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
-	                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+  /* replot the data */
+  status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+			      mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
+			      mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_show_time(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	/* turn off all togglebuttons */
-	XmToggleButtonSetState(toggleButton_show_wideplot, false, FALSE);
-	XmToggleButtonSetState(toggleButton_show_time, false, FALSE);
-	XmToggleButtonSetState(toggleButton_show_interval, false, FALSE);
-	XmToggleButtonSetState(toggleButton_show_lon, false, FALSE);
-	XmToggleButtonSetState(toggleButton_show_latitude, false, FALSE);
-	XmToggleButtonSetState(toggleButton_show_heading, false, FALSE);
-	XmToggleButtonSetState(toggleButton_show_speed, false, FALSE);
-	XmToggleButtonSetState(toggleButton_show_depth, false, FALSE);
-	XmToggleButtonSetState(toggleButton_show_altitude, false, FALSE);
-	XmToggleButtonSetState(toggleButton_show_sensordepth, false, FALSE);
-	XmToggleButtonSetState(toggleButton_show_roll, false, FALSE);
-	XmToggleButtonSetState(toggleButton_show_pitch, false, FALSE);
-	XmToggleButtonSetState(toggleButton_show_heave, false, FALSE);
+  /* turn off all togglebuttons */
+  XmToggleButtonSetState(toggleButton_show_wideplot, false, FALSE);
+  XmToggleButtonSetState(toggleButton_show_time, false, FALSE);
+  XmToggleButtonSetState(toggleButton_show_interval, false, FALSE);
+  XmToggleButtonSetState(toggleButton_show_lon, false, FALSE);
+  XmToggleButtonSetState(toggleButton_show_latitude, false, FALSE);
+  XmToggleButtonSetState(toggleButton_show_heading, false, FALSE);
+  XmToggleButtonSetState(toggleButton_show_speed, false, FALSE);
+  XmToggleButtonSetState(toggleButton_show_depth, false, FALSE);
+  XmToggleButtonSetState(toggleButton_show_altitude, false, FALSE);
+  XmToggleButtonSetState(toggleButton_show_sensordepth, false, FALSE);
+  XmToggleButtonSetState(toggleButton_show_roll, false, FALSE);
+  XmToggleButtonSetState(toggleButton_show_pitch, false, FALSE);
+  XmToggleButtonSetState(toggleButton_show_heave, false, FALSE);
 
-	/* turn on the one that was clicked */
-	XmToggleButtonSetState(w, true, FALSE);
+  /* turn on the one that was clicked */
+  XmToggleButtonSetState(w, true, FALSE);
 
-	/* now set the data type id */
-	if (w == toggleButton_show_wideplot)
-		mshow_time = 0;
-	else if (w == toggleButton_show_time)
-		mshow_time = 1;
-	else if (w == toggleButton_show_interval)
-		mshow_time = 2;
-	else if (w == toggleButton_show_lon)
-		mshow_time = 3;
-	else if (w == toggleButton_show_latitude)
-		mshow_time = 4;
-	else if (w == toggleButton_show_heading)
-		mshow_time = 5;
-	else if (w == toggleButton_show_speed)
-		mshow_time = 6;
-	else if (w == toggleButton_show_depth)
-		mshow_time = 7;
-	else if (w == toggleButton_show_altitude)
-		mshow_time = 8;
-	else if (w == toggleButton_show_sensordepth)
-		mshow_time = 9;
-	else if (w == toggleButton_show_roll)
-		mshow_time = 10;
-	else if (w == toggleButton_show_pitch)
-		mshow_time = 11;
-	else if (w == toggleButton_show_heave)
-		mshow_time = 12;
-	else
-		mshow_time = 0;
+  /* now set the data type id */
+  if (w == toggleButton_show_wideplot)
+    mshow_time = 0;
+  else if (w == toggleButton_show_time)
+    mshow_time = 1;
+  else if (w == toggleButton_show_interval)
+    mshow_time = 2;
+  else if (w == toggleButton_show_lon)
+    mshow_time = 3;
+  else if (w == toggleButton_show_latitude)
+    mshow_time = 4;
+  else if (w == toggleButton_show_heading)
+    mshow_time = 5;
+  else if (w == toggleButton_show_speed)
+    mshow_time = 6;
+  else if (w == toggleButton_show_depth)
+    mshow_time = 7;
+  else if (w == toggleButton_show_altitude)
+    mshow_time = 8;
+  else if (w == toggleButton_show_sensordepth)
+    mshow_time = 9;
+  else if (w == toggleButton_show_roll)
+    mshow_time = 10;
+  else if (w == toggleButton_show_pitch)
+    mshow_time = 11;
+  else if (w == toggleButton_show_heave)
+    mshow_time = 12;
+  else
+    mshow_time = 0;
 
-	/* reset scaling */
-	status = mbedit_set_scaling(mb_borders, mshow_time);
+  /* reset scaling */
+  status = mbedit_set_scaling(mb_borders, mshow_time);
 
-	/* replot the data */
-	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
-								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
-	                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+  /* replot the data */
+  status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+			      mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
+			      mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_reverse_mouse(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	mode_reverse_mouse = XmToggleButtonGetState(toggleButton_reverse_mouse);
+  mode_reverse_mouse = XmToggleButtonGetState(toggleButton_reverse_mouse);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_reverse_keys(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	mode_reverse_keys = XmToggleButtonGetState(toggleButton_reverse_keys);
+  mode_reverse_keys = XmToggleButtonGetState(toggleButton_reverse_keys);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_show_flags(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	mshow_beammode = BEAM_MODE_FLAG;
-	XmToggleButtonSetState(toggleButton_show_flags, TRUE, FALSE);
-	XmToggleButtonSetState(toggleButton_show_detects, FALSE, FALSE);
-	XmToggleButtonSetState(toggleButton_show_pulsetypes, FALSE, FALSE);
+  mshow_beammode = BEAM_MODE_FLAG;
+  XmToggleButtonSetState(toggleButton_show_flags, TRUE, FALSE);
+  XmToggleButtonSetState(toggleButton_show_detects, FALSE, FALSE);
+  XmToggleButtonSetState(toggleButton_show_pulsetypes, FALSE, FALSE);
 
-	/* replot the data */
-	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
-								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
-	                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+  /* replot the data */
+  status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+			      mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
+			      mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_show_detects(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	mshow_beammode = BEAM_MODE_DETECT;
-	XmToggleButtonSetState(toggleButton_show_flags, FALSE, FALSE);
-	XmToggleButtonSetState(toggleButton_show_detects, TRUE, FALSE);
-	XmToggleButtonSetState(toggleButton_show_pulsetypes, FALSE, FALSE);
+  mshow_beammode = BEAM_MODE_DETECT;
+  XmToggleButtonSetState(toggleButton_show_flags, FALSE, FALSE);
+  XmToggleButtonSetState(toggleButton_show_detects, TRUE, FALSE);
+  XmToggleButtonSetState(toggleButton_show_pulsetypes, FALSE, FALSE);
 
-	/* replot the data */
-	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
-								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
-	                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+  /* replot the data */
+  status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+			      mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
+			      mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_show_pulsetypes(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	mshow_beammode = BEAM_MODE_PULSE;
-	XmToggleButtonSetState(toggleButton_show_flags, FALSE, FALSE);
-	XmToggleButtonSetState(toggleButton_show_detects, FALSE, FALSE);
-	XmToggleButtonSetState(toggleButton_show_pulsetypes, TRUE, FALSE);
+  mshow_beammode = BEAM_MODE_PULSE;
+  XmToggleButtonSetState(toggleButton_show_flags, FALSE, FALSE);
+  XmToggleButtonSetState(toggleButton_show_detects, FALSE, FALSE);
+  XmToggleButtonSetState(toggleButton_show_pulsetypes, TRUE, FALSE);
 
-	/* replot the data */
-	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
-								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
-	                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+  /* replot the data */
+  status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+			      mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
+			      mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_buffer_hold(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
 
-	hold_size = acs->value;
+  hold_size = acs->value;
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_buffer_size(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
 
-	buffer_size = acs->value;
+  buffer_size = acs->value;
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_done(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	int quit;
+  int quit;
 
-	/* turn off expose plots */
-	expose_plot_ok = false;
+  /* turn off expose plots */
+  expose_plot_ok = false;
 
-	/* close the file */
-	status = mbedit_action_done(buffer_size, &ndumped, &nloaded, &nbuffer, &ngood, &icurrent, &quit);
-	if (status == 0)
-		XBell(theDisplay, 100);
+  /* close the file */
+  status = mbedit_action_done(buffer_size, &ndumped, &nloaded, &nbuffer, &ngood, &icurrent, &quit);
+  if (status == 0)
+    XBell(theDisplay, 100);
 
-	/* if there is another file in the list open it */
-	if (currentfile >= 0 && currentfile < numfiles - 1) {
-		do_load_specific_file(currentfile + 1);
-	}
+  /* if there is another file in the list open it */
+  if (currentfile >= 0 && currentfile < numfiles - 1) {
+    do_load_specific_file(currentfile + 1);
+  }
 
-	/* else do not open a file */
-	else {
-		currentfile = -1;
-	}
+  /* else do not open a file */
+  else {
+    currentfile = -1;
+  }
 
-	/* turn on expose plots */
-	expose_plot_ok = true;
+  /* turn on expose plots */
+  expose_plot_ok = true;
 
-	if (quit)
-		exit(0);
+  if (quit)
+    exit(0);
 
-	/* set widget values */
-	do_setup_data();
+  /* set widget values */
+  do_setup_data();
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_number_pings(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
 
-	/* Save old ratio of mplot_size / step */
-	const double ratio = ((double)step) / ((double)mplot_size);
+  /* Save old ratio of mplot_size / step */
+  const double ratio = ((double)step) / ((double)mplot_size);
 
-	/* Read the value of the slider bar for number of pings displayed */
-	mplot_size = acs->value;
+  /* Read the value of the slider bar for number of pings displayed */
+  mplot_size = acs->value;
 
-	/* if slider set to minimum value, half the value range;
-	    if slider set to maximum value,  double the range */
-	int maxx;
-	XtVaGetValues(slider_number_pings, XmNmaximum, &maxx, NULL);
-	char label[10];
-	if (mplot_size == 1 || mplot_size == maxx) {
-		if (mplot_size == 1)
-			maxx = maxx / 2;
-		else
-			maxx = 2 * maxx;
-		if (maxx > plot_size_max)
-			maxx = plot_size_max;
-		if (maxx < 2)
-			maxx = 2;
-		XtVaSetValues(slider_number_pings, XmNmaximum, maxx, NULL);
-		sprintf(label, "%d", maxx);
-		set_label_string(slider_num_pings_max_label, label);
-	}
+  /* if slider set to minimum value, half the value range;
+     if slider set to maximum value,  double the range */
+  int maxx;
+  XtVaGetValues(slider_number_pings, XmNmaximum, &maxx, NULL);
+  char label[10];
+  if (mplot_size == 1 || mplot_size == maxx) {
+    if (mplot_size == 1)
+      maxx = maxx / 2;
+    else
+      maxx = 2 * maxx;
+    if (maxx > plot_size_max)
+      maxx = plot_size_max;
+    if (maxx < 2)
+      maxx = 2;
+    XtVaSetValues(slider_number_pings, XmNmaximum, maxx, NULL);
+    sprintf(label, "%d", maxx);
+    set_label_string(slider_num_pings_max_label, label);
+  }
 
-	/* set step to have same ratio with mplot_size as before
-	    also set slider maximum to the same as for mplot_size */
-	step = (int)(ratio * mplot_size);
-	if (step < 1)
-		step = 1;
-	if (step > mplot_size)
-		step = mplot_size;
-	XtVaSetValues(slider_number_step, XmNmaximum, maxx, NULL);
-	sprintf(label, "%d", maxx);
-	set_label_string(slider_number_max_step_label, label);
-	XtVaSetValues(slider_number_step, XmNvalue, step, NULL);
+  /* set step to have same ratio with mplot_size as before
+     also set slider maximum to the same as for mplot_size */
+  step = (int)(ratio * mplot_size);
+  if (step < 1)
+    step = 1;
+  if (step > mplot_size)
+    step = mplot_size;
+  XtVaSetValues(slider_number_step, XmNmaximum, maxx, NULL);
+  sprintf(label, "%d", maxx);
+  set_label_string(slider_number_max_step_label, label);
+  XtVaSetValues(slider_number_step, XmNvalue, step, NULL);
 
-	/* replot the data */
-	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
-								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
-	                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
-	if (status == 0)
-		XBell(theDisplay, 100);
+  /* replot the data */
+  status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+			      mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
+			      mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+  if (status == 0)
+    XBell(theDisplay, 100);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_number_step(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
+  (void)w;
+  (void)client_data;
 
-	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
+  XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
 
-	int maxx;
-	char label[10];
+  int maxx;
+  char label[10];
 
-	step = acs->value;
+  step = acs->value;
 
-	/* if slider set to minimum value, half the value range;
-	    if slider set to maximum value,  double the range */
-	XtVaGetValues(slider_number_step, XmNmaximum, &maxx, NULL);
-	if (step == 1 || step == maxx) {
-		if (step == 1)
-			maxx = maxx / 2;
-		else
-			maxx = 2 * maxx;
-		if (maxx > plot_size_max)
-			maxx = plot_size_max;
-		if (maxx < 2)
-			maxx = 2;
-		XtVaSetValues(slider_number_step, XmNmaximum, maxx, NULL);
-		sprintf(label, "%d", maxx);
-		set_label_string(slider_number_max_step_label, label);
-	}
-	if (step > mplot_size) {
-		mplot_size = step;
-		XtVaSetValues(slider_number_pings, XmNmaximum, maxx, NULL);
-		sprintf(label, "%d", maxx);
-		set_label_string(slider_num_pings_max_label, label);
-		XtVaSetValues(slider_number_pings, XmNvalue, mplot_size, NULL);
-	}
+  /* if slider set to minimum value, half the value range;
+     if slider set to maximum value,  double the range */
+  XtVaGetValues(slider_number_step, XmNmaximum, &maxx, NULL);
+  if (step == 1 || step == maxx) {
+    if (step == 1)
+      maxx = maxx / 2;
+    else
+      maxx = 2 * maxx;
+    if (maxx > plot_size_max)
+      maxx = plot_size_max;
+    if (maxx < 2)
+      maxx = 2;
+    XtVaSetValues(slider_number_step, XmNmaximum, maxx, NULL);
+    sprintf(label, "%d", maxx);
+    set_label_string(slider_number_max_step_label, label);
+  }
+  if (step > mplot_size) {
+    mplot_size = step;
+    XtVaSetValues(slider_number_pings, XmNmaximum, maxx, NULL);
+    sprintf(label, "%d", maxx);
+    set_label_string(slider_num_pings_max_label, label);
+    XtVaSetValues(slider_number_pings, XmNvalue, mplot_size, NULL);
+  }
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_goto_apply(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	char value_text[MB_PATH_MAXLINE];
+  char value_text[MB_PATH_MAXLINE];
 
-	get_text_string(textfield_year, value_text);
-	sscanf(value_text, "%d", &ttime_i[0]);
+  get_text_string(textfield_year, value_text);
+  sscanf(value_text, "%d", &ttime_i[0]);
 
-	get_text_string(textfield_month, value_text);
-	sscanf(value_text, "%d", &ttime_i[1]);
+  get_text_string(textfield_month, value_text);
+  sscanf(value_text, "%d", &ttime_i[1]);
 
-	get_text_string(textfield_day, value_text);
-	sscanf(value_text, "%d", &ttime_i[2]);
+  get_text_string(textfield_day, value_text);
+  sscanf(value_text, "%d", &ttime_i[2]);
 
-	get_text_string(textfield_hour, value_text);
-	sscanf(value_text, "%d", &ttime_i[3]);
+  get_text_string(textfield_hour, value_text);
+  sscanf(value_text, "%d", &ttime_i[3]);
 
-	get_text_string(textfield_minute, value_text);
-	sscanf(value_text, "%d", &ttime_i[4]);
+  get_text_string(textfield_minute, value_text);
+  sscanf(value_text, "%d", &ttime_i[4]);
 
-	get_text_string(textfield_second, value_text);
-	sscanf(value_text, "%d", &ttime_i[5]);
+  get_text_string(textfield_second, value_text);
+  sscanf(value_text, "%d", &ttime_i[5]);
 
-	ttime_i[6] = 0;
+  ttime_i[6] = 0;
 
-	/* turn off expose plots */
-	expose_plot_ok = false;
+  /* turn off expose plots */
+  expose_plot_ok = false;
 
-	status =
-	    mbedit_action_goto(ttime_i, hold_size, buffer_size, mplot_width, mexager, mx_interval, my_interval, mplot_size,
-	                       mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &ndumped, &nloaded, &nbuffer, &ngood, &icurrent, &mnplot);
-	if (status == 0)
-		XBell(theDisplay, 100);
+  status =
+    mbedit_action_goto(ttime_i, hold_size, buffer_size, mplot_width, mexager, mx_interval, my_interval, mplot_size,
+		       mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &ndumped, &nloaded, &nbuffer, &ngood, &icurrent, &mnplot);
+  if (status == 0)
+    XBell(theDisplay, 100);
 
-	/* turn on expose plots */
-	expose_plot_ok = true;
+  /* turn on expose plots */
+  expose_plot_ok = true;
 }
 /*--------------------------------------------------------------------*/
 
 void do_set_filters(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	/* get values of median spike filter widgets */
-	f_medianspike = XmToggleButtonGetState(toggleButton_filters_medianspike);
-	XtVaGetValues(scale_filters_medianspike, XmNvalue, &f_medianspike_threshold, NULL);
-	XtVaGetValues(scale_median_local_xtrack, XmNvalue, &f_medianspike_xtrack, NULL);
-	XtVaGetValues(scale_median_local_ltrack, XmNvalue, &f_medianspike_ltrack, NULL);
+  /* get values of median spike filter widgets */
+  f_medianspike = XmToggleButtonGetState(toggleButton_filters_medianspike);
+  XtVaGetValues(scale_filters_medianspike, XmNvalue, &f_medianspike_threshold, NULL);
+  XtVaGetValues(scale_median_local_xtrack, XmNvalue, &f_medianspike_xtrack, NULL);
+  XtVaGetValues(scale_median_local_ltrack, XmNvalue, &f_medianspike_ltrack, NULL);
 
-	/* get values of wrong side filter widgets */
-	f_wrongside = XmToggleButtonGetState(toggleButton_filters_wrongside);
-	XtVaGetValues(scale_filters_wrongside, XmNvalue, &f_wrongside_threshold, NULL);
+  /* get values of wrong side filter widgets */
+  f_wrongside = XmToggleButtonGetState(toggleButton_filters_wrongside);
+  XtVaGetValues(scale_filters_wrongside, XmNvalue, &f_wrongside_threshold, NULL);
 
-	/* get values of cut by beam number filter widgets */
-	f_cutbeam = XmToggleButtonGetState(toggleButton_filters_cutbeam);
-	XtVaGetValues(scale_filters_cutbeamstart, XmNvalue, &f_cutbeam_begin, NULL);
-	XtVaGetValues(scale_filters_cutbeamend, XmNvalue, &f_cutbeam_end, NULL);
+  /* get values of cut by beam number filter widgets */
+  f_cutbeam = XmToggleButtonGetState(toggleButton_filters_cutbeam);
+  XtVaGetValues(scale_filters_cutbeamstart, XmNvalue, &f_cutbeam_begin, NULL);
+  XtVaGetValues(scale_filters_cutbeamend, XmNvalue, &f_cutbeam_end, NULL);
 
-	/* get values of cut by distance filter widgets */
-	f_cutdistance = XmToggleButtonGetState(toggleButton_filters_cutdistance);
-	int ival;
-	XtVaGetValues(scale_filters_cutdistancestart, XmNvalue, &ival, NULL);
-	f_cutdistance_begin = 0.01 * ival;
-	XtVaGetValues(scale_filters_cutdistanceend, XmNvalue, &ival, NULL);
-	f_cutdistance_end = 0.01 * ival;
+  /* get values of cut by distance filter widgets */
+  f_cutdistance = XmToggleButtonGetState(toggleButton_filters_cutdistance);
+  int ival;
+  XtVaGetValues(scale_filters_cutdistancestart, XmNvalue, &ival, NULL);
+  f_cutdistance_begin = 0.01 * ival;
+  XtVaGetValues(scale_filters_cutdistanceend, XmNvalue, &ival, NULL);
+  f_cutdistance_end = 0.01 * ival;
 
-	/* get values of cut by angle filter widgets */
-	f_cutangle = XmToggleButtonGetState(toggleButton_filters_cutangle);
-	XtVaGetValues(scale_filters_cutanglestart, XmNvalue, &ival, NULL);
-	f_cutangle_begin = 0.01 * ival;
-	XtVaGetValues(scale_filters_cutangleend, XmNvalue, &ival, NULL);
-	f_cutangle_end = 0.01 * ival;
+  /* get values of cut by angle filter widgets */
+  f_cutangle = XmToggleButtonGetState(toggleButton_filters_cutangle);
+  XtVaGetValues(scale_filters_cutanglestart, XmNvalue, &ival, NULL);
+  f_cutangle_begin = 0.01 * ival;
+  XtVaGetValues(scale_filters_cutangleend, XmNvalue, &ival, NULL);
+  f_cutangle_end = 0.01 * ival;
 
-	/* set some values in mbedit */
-	status = mbedit_set_filters(f_medianspike, f_medianspike_threshold, f_medianspike_xtrack, f_medianspike_ltrack, f_wrongside,
-	                            f_wrongside_threshold, f_cutbeam, f_cutbeam_begin, f_cutbeam_end, f_cutdistance,
-	                            f_cutdistance_begin, f_cutdistance_end, f_cutangle, f_cutangle_begin, f_cutangle_end);
+  /* set some values in mbedit */
+  status = mbedit_set_filters(f_medianspike, f_medianspike_threshold, f_medianspike_xtrack, f_medianspike_ltrack, f_wrongside,
+			      f_wrongside_threshold, f_cutbeam, f_cutbeam_begin, f_cutbeam_end, f_cutdistance,
+			      f_cutdistance_begin, f_cutdistance_end, f_cutangle, f_cutangle_begin, f_cutangle_end);
 
-	status = mbedit_action_filter_all(mplot_width, mexager, mx_interval, my_interval,
-								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
-	                                  mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
+  status = mbedit_action_filter_all(mplot_width, mexager, mx_interval, my_interval,
+				    mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
+				    mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_reset_filters(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	/* get filter values and set widgets */
-	do_get_filters();
+  /* get filter values and set widgets */
+  do_get_filters();
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_check_median_xtrack(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	XtVaGetValues(scale_median_local_xtrack, XmNvalue, &f_medianspike_xtrack, NULL);
-	if (f_medianspike_xtrack % 2 == 0)
-		f_medianspike_xtrack++;
-	XtVaSetValues(scale_median_local_xtrack, XmNvalue, f_medianspike_xtrack, NULL);
+  XtVaGetValues(scale_median_local_xtrack, XmNvalue, &f_medianspike_xtrack, NULL);
+  if (f_medianspike_xtrack % 2 == 0)
+    f_medianspike_xtrack++;
+  XtVaSetValues(scale_median_local_xtrack, XmNvalue, f_medianspike_xtrack, NULL);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_check_median_ltrack(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void)w;
-	(void)client_data;
-	(void)call_data;
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  (void)w;
+  (void)client_data;
+  (void)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	XtVaGetValues(scale_median_local_ltrack, XmNvalue, &f_medianspike_ltrack, NULL);
-	if (f_medianspike_ltrack % 2 == 0)
-		f_medianspike_ltrack++;
-	XtVaSetValues(scale_median_local_ltrack, XmNvalue, f_medianspike_ltrack, NULL);
+  XtVaGetValues(scale_median_local_ltrack, XmNvalue, &f_medianspike_ltrack, NULL);
+  if (f_medianspike_ltrack % 2 == 0)
+    f_medianspike_ltrack++;
+  XtVaSetValues(scale_median_local_ltrack, XmNvalue, f_medianspike_ltrack, NULL);
 }
 
 /*--------------------------------------------------------------------*/
 /*--------------------------------------------------------------------*/
 
 int do_wait_until_viewed(XtAppContext app) {
-	Widget topshell;
-	Window topwindow;
-	XWindowAttributes xwa;
-	XEvent event;
+  Widget topshell;
+  Window topwindow;
+  XWindowAttributes xwa;
+  XEvent event;
 
-	/* set app_context */
-	app_context = app;
+  /* set app_context */
+  app_context = app;
 
-	/* find the top level shell */
-	for (topshell = window_mbedit; !XtIsTopLevelShell(topshell); topshell = XtParent(topshell))
-		;
+  /* find the top level shell */
+  for (topshell = window_mbedit; !XtIsTopLevelShell(topshell); topshell = XtParent(topshell))
+    ;
 
-	/* keep processing events until it is viewed */
-	if (XtIsRealized(topshell)) {
-		topwindow = XtWindow(topshell);
+  /* keep processing events until it is viewed */
+  if (XtIsRealized(topshell)) {
+    topwindow = XtWindow(topshell);
 
-		/* wait for the window to be mapped */
-		while (XGetWindowAttributes(XtDisplay(window_mbedit), topwindow, &xwa) && xwa.map_state != IsViewable) {
-			XtAppNextEvent(app_context, &event);
-			XtDispatchEvent(&event);
-		}
-	}
+    /* wait for the window to be mapped */
+    while (XGetWindowAttributes(XtDisplay(window_mbedit), topwindow, &xwa) && xwa.map_state != IsViewable) {
+      XtAppNextEvent(app_context, &event);
+      XtDispatchEvent(&event);
+    }
+  }
 
-	XmUpdateDisplay(topshell);
+  XmUpdateDisplay(topshell);
 
-	return (1);
+  return (1);
 }
 /*------------------------------------------------------------------------------*/
 
 void do_mbedit_workfunction(void *client_data, XtIntervalId *id) {
-	(void)client_data;
-	(void)id;
+  (void)client_data;
+  (void)id;
 
-	timer_function_set = false;
+  timer_function_set = false;
 
-	/* reset filelist */
-	if (numfiles > 0 && expose_plot_ok) {
-		do_build_filelist();
-	}
+  /* reset filelist */
+  if (numfiles > 0 && expose_plot_ok) {
+    do_build_filelist();
+  }
 
-	/* reset the timer function */
-	do_mbedit_settimer();
+  /* reset the timer function */
+  do_mbedit_settimer();
 
-	// return MB_SUCCESS;
+  // return MB_SUCCESS;
 }
 
 /*------------------------------------------------------------------------------*/
 int do_mbedit_settimer() {
-	int status = MB_SUCCESS;
+  int status = MB_SUCCESS;
 
-	/* set timer function if none set for this instance */
-	if (!timer_function_set) {
-		const unsigned long timer_timeout_time = 1000ul;
-		const int id = XtAppAddTimeOut(
-                    app_context, timer_timeout_time,
-                    do_mbedit_workfunction,
-                    (XtPointer)-1);
-		if (id > 0)
-			timer_function_set = true;
-		else
-			status = MB_FAILURE;
-	}
+  /* set timer function if none set for this instance */
+  if (!timer_function_set) {
+    const unsigned long timer_timeout_time = 1000ul;
+    const int id = XtAppAddTimeOut(
+				   app_context, timer_timeout_time,
+				   do_mbedit_workfunction,
+				   (XtPointer)-1);
+    if (id > 0)
+      timer_function_set = true;
+    else
+      status = MB_FAILURE;
+  }
 
-	return (status);
+  return (status);
 }
 
 /*--------------------------------------------------------------------*/
@@ -2714,60 +2772,60 @@ int do_mbedit_settimer() {
 /*--------------------------------------------------------------------*/
 
 int do_message_on(char *message) {
-	set_label_string(label_message, message);
-	XtManageChild(bulletinBoard_message);
+  set_label_string(label_message, message);
+  XtManageChild(bulletinBoard_message);
 
-	/* force the label to be visible */
-	Widget diashell;
-	for (diashell = label_message; !XtIsShell(diashell); diashell = XtParent(diashell))
-		;
+  /* force the label to be visible */
+  Widget diashell;
+  for (diashell = label_message; !XtIsShell(diashell); diashell = XtParent(diashell))
+    ;
 
-	Widget topshell;
-	for (topshell = diashell; !XtIsTopLevelShell(topshell); topshell = XtParent(topshell))
-		;
+  Widget topshell;
+  for (topshell = diashell; !XtIsTopLevelShell(topshell); topshell = XtParent(topshell))
+    ;
 
-	if (XtIsRealized(diashell) && XtIsRealized(topshell)) {
-		Window diawindow = XtWindow(diashell);
-		Window topwindow = XtWindow(topshell);
+  if (XtIsRealized(diashell) && XtIsRealized(topshell)) {
+    Window diawindow = XtWindow(diashell);
+    Window topwindow = XtWindow(topshell);
 
-		XEvent event;
-		XWindowAttributes xwa;
-		/* wait for the dialog to be mapped */
-		while (XGetWindowAttributes(display, diawindow, &xwa) && xwa.map_state != IsViewable) {
-			if (XGetWindowAttributes(display, topwindow, &xwa) && xwa.map_state != IsViewable)
-				break;
+    XEvent event;
+    XWindowAttributes xwa;
+    /* wait for the dialog to be mapped */
+    while (XGetWindowAttributes(display, diawindow, &xwa) && xwa.map_state != IsViewable) {
+      if (XGetWindowAttributes(display, topwindow, &xwa) && xwa.map_state != IsViewable)
+	break;
 
-			XtAppNextEvent(app_context, &event);
-			XtDispatchEvent(&event);
-		}
-	}
+      XtAppNextEvent(app_context, &event);
+      XtDispatchEvent(&event);
+    }
+  }
 
-	XmUpdateDisplay(topshell);
+  XmUpdateDisplay(topshell);
 
-	return (1);
+  return (1);
 }
 
 /*--------------------------------------------------------------------*/
 
 int do_message_off() {
-	XtUnmanageChild(bulletinBoard_message);
-	XSync(XtDisplay(bulletinBoard_message), 0);
-	XmUpdateDisplay(window_mbedit);
+  XtUnmanageChild(bulletinBoard_message);
+  XSync(XtDisplay(bulletinBoard_message), 0);
+  XmUpdateDisplay(window_mbedit);
 
-	return (1);
+  return (1);
 }
 
 /*--------------------------------------------------------------------*/
 
 int do_error_dialog(char *s1, char *s2, char *s3) {
-	set_label_string(label_error_one, s1);
-	set_label_string(label_error_two, s2);
-	set_label_string(label_error_three, s3);
-	XtManageChild(bulletinBoard_error);
-	XBell(theDisplay, 100);
-	/* fprintf(stderr,"do_error_dialog:\n\t%s\n\t%s\n\t%s\n",s1,s2,s3); */
+  set_label_string(label_error_one, s1);
+  set_label_string(label_error_two, s2);
+  set_label_string(label_error_three, s3);
+  XtManageChild(bulletinBoard_error);
+  XBell(theDisplay, 100);
+  /* fprintf(stderr,"do_error_dialog:\n\t%s\n\t%s\n\t%s\n",s1,s2,s3); */
 
-	return (1);
+  return (1);
 }
 
 /*--------------------------------------------------------------------*/
@@ -2775,37 +2833,39 @@ int do_error_dialog(char *s1, char *s2, char *s3) {
 /*--------------------------------------------------------------------*/
 
 void set_label_string(Widget w, String str) {
-	XmString xstr = XmStringCreateLocalized(str);
-	if (xstr != NULL)
-		XtVaSetValues(w, XmNlabelString, xstr, NULL);
-	else
-		XtWarning("Failed to update labelString");
+  XmString xstr = XmStringCreateLocalized(str);
+  if (xstr != NULL)
+    XtVaSetValues(w, XmNlabelString, xstr, NULL);
+  else
+    XtWarning("Failed to update labelString");
 
-	XmStringFree(xstr);
+  XmStringFree(xstr);
 }
 /*--------------------------------------------------------------------*/
 /* Change multiline label string cleanly, no memory leak */
 /*--------------------------------------------------------------------*/
 
 void set_label_multiline_string(Widget w, String str) {
-	Boolean argok;
+  Boolean argok;
 
-	XmString xstr = (XtPointer)BX_CONVERT(w, str, XmRXmString, 0, &argok);
-	if (xstr != NULL && argok)
-		XtVaSetValues(w, XmNlabelString, xstr, NULL);
-	else
-		XtWarning("Failed to update labelString");
+  XmString xstr = (XtPointer)BX_CONVERT(w, str, XmRXmString, 0, &argok);
+  if (xstr != NULL && argok)
+    XtVaSetValues(w, XmNlabelString, xstr, NULL);
+  else
+    XtWarning("Failed to update labelString");
 
-	XmStringFree(xstr);
+  XmStringFree(xstr);
 }
 /*--------------------------------------------------------------------*/
 /* Get text item string cleanly, no memory leak */
 /*--------------------------------------------------------------------*/
 
 void get_text_string(Widget w, String str) {
-	char *str_tmp = (char *)XmTextGetString(w);
-	strcpy(str, str_tmp);
-	XtFree(str_tmp);
+  char *str_tmp = (char *)XmTextGetString(w);
+  strcpy(str, str_tmp);
+  XtFree(str_tmp);
 }
 
 /*--------------------------------------------------------------------*/
+
+
