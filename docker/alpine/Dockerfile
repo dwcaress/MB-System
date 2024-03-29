@@ -118,7 +118,12 @@ RUN apk del ${BUILD_ONLY}  && \
     ldconfig / && \
     ldconfig /usr/local/lib && ldconfig /usr/local/lib/gmt5
 
-RUN addgroup -S ops && adduser -S ops -G ops
+RUN addgroup -S ops && adduser -S ops -G ops && \
+    mkdir -p $XDG_CONFIG_HOME && \
+    xdg-mime default  org.gnome.Evince.desktop application/postscript && \
+    gio mime application/postscript org.gnome.Evince.desktop && \
+    chown ops:ops $XDG_CONFIG_HOME/mimeapps.list && \
+    chown ops:ops $XDG_CONFIG_HOME
 
 ENV PATH=$PATH:.
 USER ops

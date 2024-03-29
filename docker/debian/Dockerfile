@@ -109,7 +109,7 @@ RUN apt-get update && \
 
 RUN groupadd -r ops && useradd -r -m -g ops ops && \
     mkdir -p $XDG_CONFIG_HOME && gio mime application/postscript gv.desktop && \
-    chown ops:ops $XDG_CONFIG_HOME/mimeapps.list
+    chown -R ops:ops $XDG_CONFIG_HOME
 
 ENV PATH=$PATH:.
 USER ops
