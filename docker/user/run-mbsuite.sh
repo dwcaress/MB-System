@@ -26,7 +26,7 @@ KHNET_MB1STREAM=172.18.0.3
 KHNET_MBTRNPP=172.18.0.2
 
 # config defaults
-CMD_OPTS="d:hH:i:l:n:t:vx:"
+CMD_OPTS="d:hH:i:l:n:t:u:vx:"
 DOCKER_IMG=${DOCKER_IMG:-"mbsuite"}
 DOCKER_APP=":"
 vout=":"
@@ -41,6 +41,7 @@ LOG_DIR=${LOG_DIR:-"logs"}
 LCM_TTL=${LCM_TTL:-0}
 
 OPT_RM="--rm"
+OPT_USER=ops:ops
 
 # docker host IP
 # recommended to override (use -H or set HOST_IP)
@@ -152,6 +153,7 @@ cat << EOF
    -l : set LCM TTL       [$LCM_TTL]
    -n : set NET           [$NET]
    -t : set TOP_DIR       [$TOP_DIR]
+   -u : user              [$OPT_USER]
    -v : verbose output
    -x : pass docker option
 
@@ -251,6 +253,8 @@ function parseOptions() {
             ;;
             t) TOP_DIR=$(readlink -f $OPTARG)
             ;;
+            u) OPT_USER=$OPTARG
+            ;;
             v) vout="echo"
             ;;
             x) xopts[${#xopts[*]}]=$OPTARG
@@ -279,7 +283,8 @@ done
 
 # apply options
 DOCKER_APP=$1
-CONTAINER="mbari_$DOCKER_APP"
+#CONTAINER="mbari_$DOCKER_APP"
+CONTAINER="mbari_$$"
 
 if [ $NET == "host" ] ; then
     OPT_NET="--network=$NET"
@@ -300,7 +305,7 @@ unset TRN_LOGFILES
 
 # build docker command
 DOCKER_CMD="docker run -it --name $CONTAINER \
---user $UID \
+--user $OPT_USER \
 $OPT_RM \
 $OPT_NET \
 --env=DISPLAY \
