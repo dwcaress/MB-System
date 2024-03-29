@@ -1,5 +1,3 @@
-
-
 # Alpine is smaller than Ubuntu
 FROM alpine:latest AS builder
 
@@ -14,6 +12,16 @@ ARG BUILD_ONLY="openssh cmake \
     curl \
     gpg \
     curl"
+
+ARG COMMON_DEPS="libgcc \
+    libstdc++ \
+    bash \
+    mesa-dev \
+    mesa-dri-gallium \
+    desktop-file-utils \
+    xeyes \
+    xclock \
+    xcalc"
 
 ARG LCM_DEPS="glib-dev \
     fontconfig \
@@ -36,10 +44,10 @@ ARG MBSYS_DEPS="proj-dev \
     glu-dev \
     motif-dev \
     libxml2-dev \
-    opencv-dev"
-
-
-ARG COMMON_DEPS="libgcc libstdc++ bash mesa-dev mesa-dri-gallium"
+    opencv-dev \
+    xdg-utils \
+    xpdf \
+    evince"
 
 ARG BUILD_DEPS="${COMMON_DEPS} ${LCM_DEPS} ${MBSYS_DEPS}"
 
@@ -60,6 +68,8 @@ ENV CLASSPATH="/usr/local/share/java/jchart2d-3.2.2.jar:\
 /usr/local/share/java/lcmtypes_geolcm.jar:\
 /usr/local/share/java/lcmtypes_stdlcm.jar:\
 /usr/local/share/java/xmlgraphics-commons-1.3.1.jar"
+
+ENV XDG_CONFIG_HOME=/home/ops/.config
 
 RUN apk -U upgrade --no-cache && \
     apk add --no-cache ${BUILD_ONLY} ${BUILD_DEPS} && \
@@ -82,12 +92,36 @@ RUN apk -U upgrade --no-cache && \
     mkdir build && cd build && \
     cmake -DbuildOpenCV=ON -DCMAKE_BUILD_TYPE=Debug .. && make && make install && \
     mkdir -p /opt/mbsys && \
-    cp -r ${BUILD_DIR}/MB-System/src/mbtrn/tools/* /opt/mbsys/ && \
-    apk del ${BUILD_ONLY}  && \
+    cp -r ${BUILD_DIR}/MB-System/src/mbtrn/tools/* /opt/mbsys/
+
+#RUN cd ${BUILD_DIR} && \
+#    wget  https://ftp.gnu.org/gnu/gv/gv-3.7.4.tar.gz && \
+#    tar xvzf gv-3.7.4.tar.gz && \
+#    cd gv-3.7.4 && ./configure --enable-SIGCHLD-fallback && make && make install
+
+RUN apk del ${BUILD_ONLY}  && \
     apk -v cache clean && \
     rm -rf ${BUILD_DIR} && \
     ldconfig / && \
-    ldconfig /usr/local/lib && ldconfig /usr/local/lib/gmt5 
+    ldconfig /usr/local/lib && ldconfig /usr/local/lib/gmt5
+
+RUN addgroup -S ops && adduser -S ops -G ops
+#    mkdir -p $XDG_CONFIG_HOME && gio mime application/postscript gv.desktop && \
+#    chown ops:ops $XDG_CONFIG_HOME/mimeapps.list
+
+#[Desktop Entry]
+#Name=gv
+#GenericName=PS and PDF viewer
+#Comment=View PS and/or PDF files
+#Exec=gv
+#Icon=/usr/share/pixmaps/gv_icon.xpm
+#Terminal=false
+#Type=Application
+#MimeType=application/ps;application/pdf;
+#Categories=Viewer;Graphics;
+
+ENV PATH=$PATH:.
+USER ops
 
 # EXPOSE ports
 #EXPOSE 80/tcp
