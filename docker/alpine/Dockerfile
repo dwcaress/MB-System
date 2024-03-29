@@ -36,8 +36,6 @@ ARG MBSYS_DEPS="proj-dev \
     hdf5-dev \
     netcdf-dev \
     fftw-dev  \
-    gnuplot \
-    ghostscript \
     libx11-dev \
     libxt-dev \
     libtirpc-dev \
@@ -46,6 +44,11 @@ ARG MBSYS_DEPS="proj-dev \
     libxml2-dev \
     opencv-dev \
     xdg-utils \
+    libxext-dev \
+    libxaw3d-dev \
+    perl \
+    gnuplot \
+    ghostscript \
     xpdf \
     evince"
 
@@ -94,10 +97,20 @@ RUN apk -U upgrade --no-cache && \
     mkdir -p /opt/mbsys && \
     cp -r ${BUILD_DIR}/MB-System/src/mbtrn/tools/* /opt/mbsys/
 
+# build ghostscript with X11 support [fails due to use of sprintf: https://github.com/NixOS/nixpkgs/issues/252149]
 #RUN cd ${BUILD_DIR} && \
-#    wget  https://ftp.gnu.org/gnu/gv/gv-3.7.4.tar.gz && \
-#    tar xvzf gv-3.7.4.tar.gz && \
-#    cd gv-3.7.4 && ./configure --enable-SIGCHLD-fallback && make && make install
+#    wget https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs10030/ghostscript-10.03.0.tar.gz && \
+#    tar xvzf ghostscript-10.03.0.tar.gz && \
+#    cd ghostscript-10.03.0 && ./configure --with-x --with-drivers=PS,PNG,JPEG && make && make install
+
+# Alpine doesn't have a gv package; note that it uses ghostscript,
+# which doesn't support X11 devices for output on Alpine.
+# Tried building ghostscript from source (above), but available source versions 10-9.18
+# don't build on Alpine due to use of sprintf (see  https://github.com/NixOS/nixpkgs/issues/252149)
+RUN cd ${BUILD_DIR} && \
+    wget  https://ftp.gnu.org/gnu/gv/gv-3.7.4.tar.gz && \
+    tar xvzf gv-3.7.4.tar.gz && \
+    cd gv-3.7.4 && ./configure --enable-SIGCHLD-fallback && make && make install
 
 RUN apk del ${BUILD_ONLY}  && \
     apk -v cache clean && \
@@ -106,19 +119,6 @@ RUN apk del ${BUILD_ONLY}  && \
     ldconfig /usr/local/lib && ldconfig /usr/local/lib/gmt5
 
 RUN addgroup -S ops && adduser -S ops -G ops
-#    mkdir -p $XDG_CONFIG_HOME && gio mime application/postscript gv.desktop && \
-#    chown ops:ops $XDG_CONFIG_HOME/mimeapps.list
-
-#[Desktop Entry]
-#Name=gv
-#GenericName=PS and PDF viewer
-#Comment=View PS and/or PDF files
-#Exec=gv
-#Icon=/usr/share/pixmaps/gv_icon.xpm
-#Terminal=false
-#Type=Application
-#MimeType=application/ps;application/pdf;
-#Categories=Viewer;Graphics;
 
 ENV PATH=$PATH:.
 USER ops
