@@ -56,12 +56,9 @@ ARG MBSYS_DEPS="libproj-dev \
     libopencv-dev \
     xdg-utils \
     gv \
+    ghostscript \
+    ghostscript-x \ 
     locales"
-
-#    fonts-urw-base35 \
-#    xfonts-scalable \
-#    ghostscript 
-#    ghostscript-x 
 
 ARG BUILD_DEPS="${COMMON_DEPS} ${LCM_DEPS} ${MBSYS_DEPS}"
 
@@ -111,12 +108,14 @@ RUN apt-get update && \
     mkdir build && cd build && \
     cmake -DbuildOpenCV=ON -DCMAKE_BUILD_TYPE=Debug .. && make && make install 
 
-RUN cd ${BUILD_DIR} && \
-    wget https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs10030/ghostscript-10.03.0.tar.gz && \
-    tar -xvf  ghostscript-10.03.0.tar.gz && \
-    cd ghostscript-10.03.0 && \
-    ./configure --help && ./configure --with-x --with-drivers=FILES,x11 && make && make install 
+# optionally, use ghostscript 10.03.0 (remove ghostscript, ghostscript-x above)
+#RUN cd ${BUILD_DIR} && \
+#    wget https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs10030/ghostscript-10.03.0.tar.gz && \
+#    tar -xvf  ghostscript-10.03.0.tar.gz && \
+#    cd ghostscript-10.03.0 && \
+#    ./configure --help && ./configure --with-x --with-drivers=FILES,x11 && make && make install 
 
+# cleanup: remove build dependencies, update ldconfig
 RUN mkdir -p /opt/mbsys && \
     cp -r ${BUILD_DIR}/MB-System/src/mbtrn/tools/* /opt/mbsys/ && \
     rm -rf /var/lib/apt/lists/* && \
@@ -124,6 +123,7 @@ RUN mkdir -p /opt/mbsys && \
     ldconfig / && \
     ldconfig /usr/local/lib && ldconfig /usr/local/lib/gmt5
 
+# cleanup: add ops user, configure gio mime handlers, font configs, gmt 
 RUN groupadd -r ops && useradd -r -m -g ops ops && \
     mkdir -p $XDG_CONFIG_HOME  && \
     gio mime application/postscript gv.desktop && \
