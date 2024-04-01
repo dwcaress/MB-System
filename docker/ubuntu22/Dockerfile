@@ -40,17 +40,24 @@ ARG MBSYS_DEPS="libproj-dev \
     ffmpeg \
     xdg-utils \
     gnuplot \
-    ghostscript \
-    ghostscript-x \
     x11-common \
     x11-apps \
     libxt-dev \
+    libxext-dev \
+    gsfonts \
+    gsfonts-x11 \
+    xfonts-base \ 
+    xfonts-100dpi \
+    xfonts-75dpi \ 
     libtirpc-dev \
     libglu1-mesa-dev \
     libmotif-dev \
     libxml2-dev \
     libopencv-dev \
-    gv"
+    gv \
+    ghostscript \
+    ghostscript-x \
+    locales"
 
 ARG BUILD_DEPS="${COMMON_DEPS} ${LCM_DEPS} ${MBSYS_DEPS}"
 
@@ -98,17 +105,27 @@ RUN apt-get update && \
     git checkout ${MBSYS_BRANCH} && \
     echo "!!! Building MBSYS_BRANCH ${MBSYS_BRANCH}" && sleep 3 && \
     mkdir build && cd build && \
-    cmake -DbuildOpenCV=ON -DCMAKE_BUILD_TYPE=Debug .. && make && make install && \
-    mkdir -p /opt/mbsys && \
+    cmake -DbuildOpenCV=ON -DCMAKE_BUILD_TYPE=Debug .. && make && make install 
+
+# cleanup: remove build dependencies, update ldconfig
+RUN mkdir -p /opt/mbsys && \
     cp -r ${BUILD_DIR}/MB-System/src/mbtrn/tools/* /opt/mbsys/ && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf ${BUILD_DIR} && \
     ldconfig / && \
     ldconfig /usr/local/lib && ldconfig /usr/local/lib/gmt
 
+# cleanup: add ops user, configure gio mime handlers, font configs, gmt 
 RUN groupadd -r ops && useradd -r -m -g ops ops && \
-    mkdir -p $XDG_CONFIG_HOME && gio mime application/postscript gv.desktop && \
-    chown -R ops:ops $XDG_CONFIG_HOME
+    mkdir -p $XDG_CONFIG_HOME  && \
+    gio mime application/postscript gv.desktop && \
+    gio mime image/tiff gv.desktop && \
+    chown -R ops:ops $XDG_CONFIG_HOME && \
+    rm /etc/fonts/conf.d/70-no-bitmaps.conf && \
+    fc-cache -rv && \
+    touch /home/ops/gmt.conf && chown ops:ops /home/ops/gmt.conf && chmod 664 /home/ops/gmt.conf && \
+    su -c - ops "gmt gmtset -G/home/ops/gmt.conf GMT_CUSTOM_LIBS /usr/local/lib/mbsystem.so" && \
+    echo "FontPath /usr/share/fonts/X11/100dpi\nFontPath /usr/share/fonts/X11/75dpi" >> /etc/X11/xorg.conf.d/xorg.conf
 
 ENV PATH=$PATH:.
 USER ops
