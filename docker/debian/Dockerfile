@@ -58,6 +58,11 @@ ARG MBSYS_DEPS="libproj-dev \
     gv \
     ghostscript \
     ghostscript-x \ 
+    gnome-themes-extra \
+    libcanberra-gtk-module \
+    dbus-x11 \
+    evince \
+    gimp \
     locales"
 
 ARG BUILD_DEPS="${COMMON_DEPS} ${LCM_DEPS} ${MBSYS_DEPS}"
@@ -127,7 +132,8 @@ RUN mkdir -p /opt/mbsys && \
 RUN groupadd -r ops && useradd -r -m -g ops ops && \
     mkdir -p $XDG_CONFIG_HOME  && \
     gio mime application/postscript gv.desktop && \
-    gio mime image/tiff gv.desktop && \
+    gio mime image/tiff gimp.desktop && \
+    gio mime image/jpeg gimp.desktop && \
     chown -R ops:ops $XDG_CONFIG_HOME && \
     rm /etc/fonts/conf.d/70-no-bitmaps.conf && \
     fc-cache -rv && \
