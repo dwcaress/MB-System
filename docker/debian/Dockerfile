@@ -40,18 +40,28 @@ ARG MBSYS_DEPS="libproj-dev \
     ffmpeg \
     libxdg-basedir-dev \
     gnuplot \
-    ghostscript \
-    ghostscript-x \
     x11-common \
     x11-apps \
     libxt-dev \
+    libxext-dev \
+    gsfonts \
+    gsfonts-x11 \
+    fonts-urw-base35 \
+    xfonts-base \ 
+    xfonts-scalable \
+    xfonts-100dpi \
+    xfonts-75dpi \ 
     libtirpc-dev \
     libglu1-mesa-dev \
     libmotif-dev \
     libxml2-dev \
     libopencv-dev \
     xdg-utils \
-    gv"
+    gv \
+    locales"
+
+#    ghostscript 
+#    ghostscript-x 
 
 ARG BUILD_DEPS="${COMMON_DEPS} ${LCM_DEPS} ${MBSYS_DEPS}"
 
@@ -99,8 +109,15 @@ RUN apt-get update && \
     git checkout ${MBSYS_BRANCH} && \
     echo "!!! Building MBSYS_BRANCH ${MBSYS_BRANCH}" && sleep 3 && \
     mkdir build && cd build && \
-    cmake -DbuildOpenCV=ON -DCMAKE_BUILD_TYPE=Debug .. && make && make install && \
-    mkdir -p /opt/mbsys && \
+    cmake -DbuildOpenCV=ON -DCMAKE_BUILD_TYPE=Debug .. && make && make install 
+
+RUN cd ${BUILD_DIR} && \
+    wget https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs10030/ghostscript-10.03.0.tar.gz && \
+    tar -xvf  ghostscript-10.03.0.tar.gz && \
+    cd ghostscript-10.03.0 && \
+    ./configure --help && ./configure --with-x --with-drivers=FILES,x11 && make && make install 
+
+RUN mkdir -p /opt/mbsys && \
     cp -r ${BUILD_DIR}/MB-System/src/mbtrn/tools/* /opt/mbsys/ && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf ${BUILD_DIR} && \
@@ -109,7 +126,15 @@ RUN apt-get update && \
 
 RUN groupadd -r ops && useradd -r -m -g ops ops && \
     mkdir -p $XDG_CONFIG_HOME && gio mime application/postscript gv.desktop && \
-    chown -R ops:ops $XDG_CONFIG_HOME
+    chown -R ops:ops $XDG_CONFIG_HOME && \
+    mv /etc/fonts/conf.d/70-no-bitmaps.conf /etc/fonts/conf.d/70-no-bitmaps.conf.disable && \
+    fc-cache -rv && \
+    touch /home/ops/gmt.conf && chown ops:ops /home/ops/gmt.conf && chmod 664 /home/ops/gmt.conf && \
+    su -c - ops "gmt gmtset -G/home/ops/gmt.conf GMT_CUSTOM_LIBS /usr/local/lib/mbsystem.so" && \ 
+    echo "FontPath /usr/share/fonts/X11/100dpi\nFontPath /usr/share/fonts/X11/75dpi" >> /etc/X11/xorg.conf.d/xorg.conf 
+#    echo 'LANG=en_US.UTF-8\nLC_ALL=en_US.UTF-8' > /etc/default/locale && \
+#    locale-gen en_US en_US.UTF-8 && \
+#    dpkg-reconfigure locales
 
 ENV PATH=$PATH:.
 USER ops
