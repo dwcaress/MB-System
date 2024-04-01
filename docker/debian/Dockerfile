@@ -46,9 +46,7 @@ ARG MBSYS_DEPS="libproj-dev \
     libxext-dev \
     gsfonts \
     gsfonts-x11 \
-    fonts-urw-base35 \
     xfonts-base \ 
-    xfonts-scalable \
     xfonts-100dpi \
     xfonts-75dpi \ 
     libtirpc-dev \
@@ -60,6 +58,8 @@ ARG MBSYS_DEPS="libproj-dev \
     gv \
     locales"
 
+#    fonts-urw-base35 \
+#    xfonts-scalable \
 #    ghostscript 
 #    ghostscript-x 
 
@@ -125,16 +125,15 @@ RUN mkdir -p /opt/mbsys && \
     ldconfig /usr/local/lib && ldconfig /usr/local/lib/gmt5
 
 RUN groupadd -r ops && useradd -r -m -g ops ops && \
-    mkdir -p $XDG_CONFIG_HOME && gio mime application/postscript gv.desktop && \
+    mkdir -p $XDG_CONFIG_HOME  && \
+    gio mime application/postscript gv.desktop && \
+    gio mime image/tiff gv.desktop && \
     chown -R ops:ops $XDG_CONFIG_HOME && \
-    mv /etc/fonts/conf.d/70-no-bitmaps.conf /etc/fonts/conf.d/70-no-bitmaps.conf.disable && \
+    rm /etc/fonts/conf.d/70-no-bitmaps.conf && \
     fc-cache -rv && \
     touch /home/ops/gmt.conf && chown ops:ops /home/ops/gmt.conf && chmod 664 /home/ops/gmt.conf && \
     su -c - ops "gmt gmtset -G/home/ops/gmt.conf GMT_CUSTOM_LIBS /usr/local/lib/mbsystem.so" && \ 
     echo "FontPath /usr/share/fonts/X11/100dpi\nFontPath /usr/share/fonts/X11/75dpi" >> /etc/X11/xorg.conf.d/xorg.conf 
-#    echo 'LANG=en_US.UTF-8\nLC_ALL=en_US.UTF-8' > /etc/default/locale && \
-#    locale-gen en_US en_US.UTF-8 && \
-#    dpkg-reconfigure locales
 
 ENV PATH=$PATH:.
 USER ops
