@@ -127,8 +127,8 @@ RUN mkdir -p /opt/mbsys && \
 RUN groupadd -r ops && useradd -r -m -g ops ops && \
     mkdir -p $XDG_CONFIG_HOME  && \
     gio mime application/postscript gv.desktop && \
-    gio mime image/tiff org.gnome.eog.desktop && \
-    gio mime image/jpeg org.gnome.eog.desktop && \
+    gio mime image/tiff gimp.desktop && \
+    gio mime image/jpeg gimp.desktop && \
     chown -R ops:ops $XDG_CONFIG_HOME && \
     rm /etc/fonts/conf.d/70-no-bitmaps.conf && \
     fc-cache -rv && \
