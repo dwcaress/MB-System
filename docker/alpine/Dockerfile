@@ -13,27 +13,44 @@ ARG BUILD_ONLY="openssh cmake \
     gpg \
     curl"
 
+ARG COMMON_DEPS="libgcc \
+    libstdc++ \
+    bash \
+    mesa-dev \
+    mesa-dri-gallium \
+    desktop-file-utils \
+    xeyes \
+    xclock \
+    xcalc"
+
 ARG LCM_DEPS="glib-dev \
     fontconfig \
     ttf-droid \
     ttf-liberation \
     openjdk11 "
 
+ARG MBSYS_BRANCH="master"
+
 ARG MBSYS_DEPS="proj-dev \
     gdal-dev \
+    hdf5-dev \
     netcdf-dev \
     fftw-dev  \
-    gnuplot \
-    ghostscript \
     libx11-dev \
     libxt-dev \
     libtirpc-dev \
     glu-dev \
-    motif-dev"
-
-ARG MBSYS_BRANCH="master"
-
-ARG COMMON_DEPS="libgcc libstdc++ bash mesa-dev mesa-dri-gallium"
+    motif-dev \
+    libxml2-dev \
+    opencv-dev \
+    xdg-utils \
+    libxext-dev \
+    libxaw3d-dev \
+    perl \
+    gnuplot \
+    ghostscript \
+    xpdf \
+    evince"
 
 ARG BUILD_DEPS="${COMMON_DEPS} ${LCM_DEPS} ${MBSYS_DEPS}"
 
@@ -43,9 +60,6 @@ ARG LCM_BUILD_OPTS="CMAKE_BUILD_TYPE=RELEASE \
     -DLCM_ENABLE_PYTHON=OFF \
     -DLCM_ENABLE_LUA=OFF \
     -DLCM_ENABLE_EXAMPLES=ON"
-
-ARG MB_PAT="ATCTT3xFfGN0GimkqhsikY9nY7oTXez74wobYHNcOuIBMG4DI6JCdD25P9urnWzR83d6v9q0QxCVyxEvN2Mk9oKQKWdA_gW53SAwr4-kTC-sCCVmVe233R_E6rdRd9fJzSG_ypeGPmLqlEnCbWZxe1x8cz0vzRITyPuPNBYkphywmwTsAr9sTuM=012AA319"
-ARG MF_PAT="ATCTT3xFfGN0ndfNYTNTfVPQLzeYe3SD_AHrJxvqExcPKPRTvOhlwf0KUdLvtxhkCe2uvpRKC3EvcsV5vATFyNeQH1ZyG6t_DX2EI5BsP_6x1sYyV2nPIDPi7rmrCMLhCYVTg4TAIXON6gRnlOD83lsz4viO4VGMadhjGOAxHmqYmO_XgPYF0JY=7A143707"
 
 ARG BUILD_DIR=/tmp/build
 
@@ -57,6 +71,8 @@ ENV CLASSPATH="/usr/local/share/java/jchart2d-3.2.2.jar:\
 /usr/local/share/java/lcmtypes_geolcm.jar:\
 /usr/local/share/java/lcmtypes_stdlcm.jar:\
 /usr/local/share/java/xmlgraphics-commons-1.3.1.jar"
+
+ENV XDG_CONFIG_HOME=/home/ops/.config
 
 RUN apk -U upgrade --no-cache && \
     apk add --no-cache ${BUILD_ONLY} ${BUILD_DEPS} && \
@@ -74,38 +90,43 @@ RUN apk -U upgrade --no-cache && \
     cd ${BUILD_DIR} && \
     git clone https://github.com/dwcaress/MB-System.git && \
     cd MB-System && \
-    echo "!!! Building MBSYS_BRANCH ${MBSYS_BRANCH}" && \
     git checkout ${MBSYS_BRANCH} && \
-    libtoolize --force --copy && \
-    aclocal && \
-    autoheader && \
-    automake --add-missing --include-deps && \
-    autoconf && \
-    autoupdate && \
-    autoreconf --force --install --warnings=all && \
-    echo "!!! Fixing \${bits} refrences in MB-System configure script" && \
-    cp configure configure.auto && \
-    cat configure | sed -e "s/\${bits}/64/g" > configure.new && \
-    mv configure.new configure && \
-    chmod 775 configure && \
-    ./configure --enable-mbtrn --enable-mbtnav && \
-    make CFLAGS="-I/usr/local/include/gmt" LDFLAGS="-L/usr/local/lib/gmt5/lib -lgmt" && make install && \
+    echo "!!! Building MBSYS_BRANCH ${MBSYS_BRANCH}" && sleep 3 && \
+    mkdir build && cd build && \
+    cmake -DbuildOpenCV=ON -DCMAKE_BUILD_TYPE=Debug .. && make && make install && \
     mkdir -p /opt/mbsys && \
-    cp -r ${BUILD_DIR}/MB-System/src/mbtrn/tools/* /opt/mbsys/ && \
-    cd ${BUILD_DIR} && \
-    git clone https://x-token-auth:${MB_PAT}@bitbucket.org/mbari/mb1stream.git && \
-    cd mb1stream && \
-    git clone https://x-token-auth:${MF_PAT}@bitbucket.org/mbari/mframe.git && \
-    cd mframe && \
-    make && \
-    cd .. && \
-    make MFRAME_BUILD=mframe && \
-    make install && \
-    apk del ${BUILD_ONLY}  && \
+    cp -r ${BUILD_DIR}/MB-System/src/mbtrn/tools/* /opt/mbsys/
+
+# build ghostscript with X11 support [fails due to use of sprintf: https://github.com/NixOS/nixpkgs/issues/252149]
+#RUN cd ${BUILD_DIR} && \
+#    wget https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs10030/ghostscript-10.03.0.tar.gz && \
+#    tar xvzf ghostscript-10.03.0.tar.gz && \
+#    cd ghostscript-10.03.0 && ./configure --with-x --with-drivers=PS,PNG,JPEG && make && make install
+
+# Alpine doesn't have a gv package; note that it uses ghostscript,
+# which doesn't support X11 devices for output on Alpine.
+# Tried building ghostscript from source (above), but available source versions 10-9.18
+# don't build on Alpine due to use of sprintf (see  https://github.com/NixOS/nixpkgs/issues/252149)
+RUN cd ${BUILD_DIR} && \
+    wget  https://ftp.gnu.org/gnu/gv/gv-3.7.4.tar.gz && \
+    tar xvzf gv-3.7.4.tar.gz && \
+    cd gv-3.7.4 && ./configure --enable-SIGCHLD-fallback && make && make install
+
+RUN apk del ${BUILD_ONLY}  && \
     apk -v cache clean && \
     rm -rf ${BUILD_DIR} && \
     ldconfig / && \
-    ldconfig /usr/local/lib && ldconfig /usr/local/lib/gmt5 
+    ldconfig /usr/local/lib && ldconfig /usr/local/lib/gmt5
+
+RUN addgroup -S ops && adduser -S ops -G ops && \
+    mkdir -p $XDG_CONFIG_HOME && \
+    xdg-mime default  org.gnome.Evince.desktop application/postscript && \
+    gio mime application/postscript org.gnome.Evince.desktop && \
+    chown ops:ops $XDG_CONFIG_HOME/mimeapps.list && \
+    chown ops:ops $XDG_CONFIG_HOME
+
+ENV PATH=$PATH:.
+USER ops
 
 # EXPOSE ports
 #EXPOSE 80/tcp
