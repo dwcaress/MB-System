@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
     int canvasSize[4] = {0, 0, 0, 0};
     w.canvasSize(&canvasSize[1], &canvasSize[3]);
     
-    mbedit_set_scaling(canvasSize, 0);
+    mbedit_set_scaling(canvasSize, NO_ANCILL);
     mbedit_init(argc, argv, &inputSpecified,
 		nullptr,
 		&MainWindow::drawLine,

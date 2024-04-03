@@ -23,29 +23,6 @@ extern "C" {
 #define XG_SOLIDLINE 0
 #define XG_DASHLINE 1
 
-/* plot modes */
-#define MBEDIT_PLOT_WIDE 0
-#define MBEDIT_PLOT_TIME 1
-#define MBEDIT_PLOT_INTERVAL 2
-#define MBEDIT_PLOT_LON 3
-#define MBEDIT_PLOT_LAT 4
-#define MBEDIT_PLOT_HEADING 5
-#define MBEDIT_PLOT_SPEED 6
-#define MBEDIT_PLOT_DEPTH 7
-#define MBEDIT_PLOT_ALTITUDE 8
-#define MBEDIT_PLOT_SENSORDEPTH 9
-#define MBEDIT_PLOT_ROLL 10
-#define MBEDIT_PLOT_PITCH 11
-#define MBEDIT_PLOT_HEAVE 12
-
-/* view modes */
-#define MBEDIT_VIEW_WATERFALL 0
-#define MBEDIT_VIEW_ALONGTRACK 1
-#define MBEDIT_VIEW_ACROSSTRACK 2
-#define MBEDIT_SHOW_FLAG 0
-#define MBEDIT_SHOW_DETECT 1
-#define MBEDIT_SHOW_PULSE 2
-
 /* edit outbounds defines */
 #define MBEDIT_OUTBOUNDS_NONE 0
 #define MBEDIT_OUTBOUNDS_FLAGGED 1
@@ -78,12 +55,58 @@ MainWindow::MainWindow(QWidget *parent)
   qDebug() << "CTR: swathcanvas width: " << ui->swathCanvas->width() <<
     ", swathcanvas height: " << ui->swathCanvas->height();    
 
+  /* ***
+     qtdesigner for Qt Widgets cannot add mutually exclusive menu items 
+     in a submenu!!! LAME.
+     C++ code must add actions to a QActionGroup after the actions have been 
+     created by qtdesigner
 
+     In the MainWindow constructor, create ana action group, add the actions 
+     to it, and set it exclusive:
+
+      groupTool = new QActionGroup(this);
+      groupTool.addAction(ui->actionUsePointer);
+      ...
+      groupTool.setExclusive(true);
+
+     In Qt Designer:
+
+     * set the checkable property to true for each of the actions
+     * set the checked property to true for one of the actions
+ *** */
+  QActionGroup *group = new QActionGroup(this);
+  group->addAction(ui->actionNone);
+  group->addAction(ui->actionTime);
+  group->addAction(ui->actionInterval);
+  group->addAction(ui->actionLatitude);
+  group->addAction(ui->actionLongitude);
+  group->addAction(ui->actionHeading);
+  group->addAction(ui->actionSpeed);
+  group->addAction(ui->actionDepth);
+  group->addAction(ui->actionAltitude);
+  group->addAction(ui->actionSensor_depth);
+  group->addAction(ui->actionRoll);
+  group->addAction(ui->actionPitch);
+  group->addAction(ui->actionHeave);    
+  group->setExclusive(true);
+
+  group = new QActionGroup(this);
+  group->addAction(ui->actionWaterfall_2);
+  group->addAction(ui->actionAlong_track_2);
+  group->addAction(ui->actionAcross_track_2);
+  group->setExclusive(true);
+
+  group = new QActionGroup(this);
+  group->addAction(ui->actionBottom_detect_algorithm);
+  group->addAction(ui->actionPulse_source);
+  group->addAction(ui->actionFlag_state);
+  group->setExclusive(true);
+  
   int plotWidth = 0;
   
-  mbedit_get_defaults(&plotSizeMax_, &plotSize_, &showMode_,
+  mbedit_get_defaults(&plotSizeMax_, &plotSize_, &soundColorInterpret_,
 		      &showFlagSounding_, &showFlagProfile_,
-		      &showTime_, &buffSizeMax_, &buffSize_, &holdSize_,
+		      &plotAncillData_, &buffSizeMax_, &buffSize_, &holdSize_,
 		      &format_, &plotWidth,  &verticalExagg_,
 		      &xInterval_, &yInterval_,
 		      firstDataTime_, &outMode_);
@@ -111,48 +134,143 @@ void MainWindow::on_nPingsShowSlider_sliderMoved(int position)
   std::cerr << "nPingsShown = " << position << "\n";
 }
 
+
 void MainWindow::on_vertExaggSlider_sliderReleased()
 {
   std::cerr << "vertExagg Released!\n";
 
-  // Can we get slider position?
+  // Get slider position
   int position = ui->vertExaggSlider->sliderPosition();
   std::cerr << "read vertExagg = " << position << "\n";
 
-  verticalExagg_ = position;
+  // NOTE: scaled by 100x
+  verticalExagg_ = position * 100;
 
-  if (dataPlotted_) {
-    int nBuffer = 0;
-    int nGood = 0;
-    int iCurrent = 0;
-    int nPlot = 0;
-  
-    // display data from selected file
-    int status = mbedit_action_plot(canvas_->width(),
-				    verticalExagg_, xInterval_, yInterval_,
-				    plotSize_, showMode_,
-				    showFlagSounding_, showFlagProfile_,
-				    showTime_, &nBuffer, &nGood,
-				    &iCurrent, &nPlot);
-    if (status != MB_SUCCESS) {
-      std::cerr << "mbedit_action_plot() failed\n";
-      return;
-    }
+  std::cerr << "dataPlotted_ = " << dataPlotted_ << "\n";
+
+  plotSwath();
+
+}
+
+
+
+void MainWindow::on_actionNone_triggered() {
+  std::cerr << "actionNone triggered!\n";
+  plotAncillData_ = NO_ANCILL;
+  plotSwath();  
+}
+
+void MainWindow::on_actionTime_triggered() {
+  std::cerr << "actionTime triggered!\n";
+  plotAncillData_ = TIME;
+  plotSwath();  
+}
+
+void MainWindow::on_actionInterval_triggered() {
+  std::cerr << "actionInterval triggered!\n";
+  plotAncillData_ = INTERVAL;
+  plotSwath();  
+}
+
+void MainWindow::on_actionLatitude_triggered() {
+  std::cerr << "actionLatitude triggered!\n";
+  plotAncillData_ = LATITUDE;
+  plotSwath();  
+}
+
+void MainWindow::on_actionLongitude_triggered() {
+  std::cerr << "actionLongitude triggered!\n";
+  plotAncillData_ = LONGITUDE;
+  plotSwath();  
+}
+
+void MainWindow::on_actionHeading_triggered() {
+  std::cerr << "actionHeading triggered!\n";
+  plotAncillData_ = HEADING;
+  plotSwath();  
+}
+
+void MainWindow::on_actionSpeed_triggered() {
+  std::cerr << "actionSpeed triggered!\n";
+  plotAncillData_ = SPEED;
+  plotSwath();  
+}
+
+void MainWindow::on_actionDepth_triggered() {
+  std::cerr << "actionDepth triggered!\n";
+  plotAncillData_ = DEPTH;
+  plotSwath();  
+}
+
+void MainWindow::on_actionAltitude_triggered() {
+  std::cerr << "actionAltitude triggered!\n";
+  plotAncillData_ = ALTITUDE;
+  plotSwath();
+}
+
+void MainWindow::on_actionSensor_depth_triggered() {
+  std::cerr << "actionSensor_depth triggered!\n";
+  plotAncillData_ = SPEED;
+  plotSwath();  
+}
+
+void MainWindow::on_actionRoll_triggered() {
+  std::cerr << "actionRoll triggered!\n";
+  plotAncillData_ = ROLL;
+  plotSwath();
+}
+
+void MainWindow::on_actionPitch_triggered() {
+  std::cerr << "actionPitch triggered!\n";
+  plotAncillData_ = PITCH;
+  plotSwath();  
+}
+
+void MainWindow::on_actionHeave_triggered() {
+  std::cerr << "actionHeave triggered!\n";
+  plotAncillData_ = HEAVE;
+  plotSwath();  
+}
+
+
+
+bool MainWindow::plotSwath(void) {
+  if (!dataPlotted_) {
+    std::cerr << "No data plotted yet\n";
+    return false;
   }
-}
 
-
-void MainWindow::on_vertExaggSlider_sliderMoved(int position)
-{
-  std::cerr << "vertExagg = " << position << "\n";
-  verticalExagg_ = position;
-
-  // Can we get slider position?
-  int pos = ui->vertExaggSlider->sliderPosition();
-  std::cerr << "read vertExagg = " << pos << "\n";
+  int nBuffer = 0;
+  int nGood = 0;
+  int iCurrent = 0;
+  int nPlot = 0;
   
-}
+  // display data from selected file
+  int status = mbedit_action_plot(canvas_->width(),
+				  verticalExagg_, xInterval_, yInterval_,
+				  plotSize_, soundColorInterpret_,
+				  showFlagSounding_, showFlagProfile_,
+				  plotAncillData_, &nBuffer, &nGood,
+				  &iCurrent, &nPlot);
 
+  /* ***
+  int status = mbedit_plot_all(canvas_->width(),
+			       verticalExagg_, xInterval_, yInterval_,
+			       plotSize_, soundColorInterpret_,
+			       showFlagSounding_, showFlagProfile_,
+			       plotAncillData_, &nPlot, false);
+			       *** */
+  
+  if (status != MB_SUCCESS) {
+    std::cerr << "mbedit_action_plot() failed\n";
+    return false;
+  }
+
+  // Update GUI
+  ui->swathCanvas->setPixmap(*canvas_);  
+
+  return true;
+}
 
 
 void MainWindow::on_actionOpen_swath_file_triggered()
@@ -166,30 +284,38 @@ void MainWindow::on_actionOpen_swath_file_triggered()
   qDebug() << "open swath file " << fileName;
   std::string utf8_text = fileName.toUtf8().constData();
   std::cerr << "utf8_text: " << utf8_text << "\n";
-  char *fname = (char *)utf8_text.c_str();
-  std::cerr << "fname: " << fname << "\n";
+  char *swathFile = (char *)utf8_text.c_str();
+  std::cerr << "swathFile: " << swathFile << "\n";
 
+  if (mbedit_get_format(swathFile, &format_) != MB_SUCCESS) {
+    std::cerr << "Couldn't determine sonar format of " << swathFile
+	      << "\n";
+
+    return;
+  }
+
+  qDebug() << "format_ #2: " << format_;
   int currentFile = 0;
   int fileID = 0;
   int numFiles = 1;
   int saveMode = 1;
-  int nDumped;
-  int nLoaded;
-  int nBuffer;
-  int nGood;
-  int iCurrent;
-  int nPlot;
+  int nDumped = 0;
+  int nLoaded = 0;
+  int nBuffer = 0;
+  int nGood = 0;
+  int iCurrent = 0;
+  int nPlot = 0;
 
-  qDebug() << "format_ #2: " << format_;
   
-  int status = mbedit_action_open(fname,
+  // Open swath file and plot data
+  int status = mbedit_action_open(swathFile,
 				  format_,
 				  fileID, numFiles, saveMode,
 				  outMode_, canvas_->width(),
 				  verticalExagg_, xInterval_, yInterval_,
-				  plotSize_, showMode_,
+				  plotSize_, soundColorInterpret_,
 				  showFlagSounding_,
-				  showFlagProfile_, showTime_,
+				  showFlagProfile_, plotAncillData_,
 				  &buffSize_, &buffSizeMax_,
 				  &holdSize_, &nDumped, &nLoaded,
 				  &nBuffer, &nGood,
@@ -199,27 +325,33 @@ void MainWindow::on_actionOpen_swath_file_triggered()
     std::cerr << "mbedit_action_open() failed\n";
     return;
   }
-
-  // display data from selected file
-  status = mbedit_action_plot(canvas_->width(),
-			      verticalExagg_, xInterval_, yInterval_,
-			      plotSize_, showMode_,
-			      showFlagSounding_, showFlagProfile_,
-			      showTime_, &nBuffer, &nGood,
-			      &iCurrent, &nPlot);
-  if (status != MB_SUCCESS) {
-    std::cerr << "mbedit_action_plot() failed\n";
-    return;
-  }
   
   // Add pixmap to UI label
   qDebug() << "Draw on GUI\n";
+  // Update GUI
   ui->swathCanvas->setPixmap(*canvas_);
   dataPlotted_ = true;
-
-  
 }
 
+
+
+void MainWindow::on_actionWaterfall_2_triggered() {
+  qDebug() << "on_actionWaterfall_triggered()";
+  mbedit_set_viewmode(WATERFALL);
+  plotSwath();
+}
+
+void MainWindow::on_actionAcross_track_2_triggered() {
+  qDebug() << "on_actionAcross_track_triggered()";
+  mbedit_set_viewmode(ACROSSTRACK);
+  plotSwath();
+}
+
+void MainWindow::on_actionAlong_track_2_triggered() {
+  qDebug() << "on_actionAlong_track_triggered()";
+  mbedit_set_viewmode(ALONGTRACK);
+  plotSwath();
+}
 
 
 bool MainWindow::plotTest() {
@@ -302,6 +434,10 @@ void MainWindow::fillRect(void *dummy,
     fillColor = "red";
     break;
 
+  case GREEN:
+    fillColor = "green";
+    break;
+    
   case BLUE:
     fillColor = "blue";
     break;
@@ -315,7 +451,7 @@ void MainWindow::fillRect(void *dummy,
     break;
 
   default:
-    std::cerr << "xg_fillrectange(): unknown fill color!\n";
+    std::cerr << "fillrect(): unknown fill color!\n";
     fillColor = "white";
   }  
   staticPainter_->fillRect(x, y, width, height, fillColor);

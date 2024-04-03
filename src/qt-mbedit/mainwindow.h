@@ -91,7 +91,10 @@ protected:
 
   /// Test drawing to canvas
   bool plotTest(void);
-  
+
+  /// Plot swath data
+  bool plotSwath(void);
+
   /// Set QPainter pen color and style
   static void setPenColorAndStyle(mbedit_color_t color, int style);
 
@@ -117,10 +120,10 @@ protected:
   // Display parameters
   int plotSizeMax_;
   int plotSize_;
-  int showMode_;
-  int showFlagSounding_;
-  int showFlagProfile_;
-  int showTime_;
+  SoundColorInterpret soundColorInterpret_;
+  bool showFlagSounding_;
+  bool showFlagProfile_;
+  PlotAncillData plotAncillData_;
   int buffSizeMax_;
   int buffSize_;
   int holdSize_;
@@ -142,16 +145,35 @@ protected:
 
 private slots:
 
-    void on_xtrackWidthSlider_sliderMoved(int position);
+  void on_xtrackWidthSlider_sliderMoved(int position);
 
-    void on_nPingsShowSlider_sliderMoved(int position);
+  void on_nPingsShowSlider_sliderMoved(int position);
 
-    void on_vertExaggSlider_sliderMoved(int position);
+  void on_vertExaggSlider_sliderReleased(void);  
 
-  void on_vertExaggSlider_sliderReleased();  
+  void on_actionOpen_swath_file_triggered(void);
 
-    void on_actionOpen_swath_file_triggered();
-
+  /// Ancillary data option slots
+  void on_actionNone_triggered(void);
+  void on_actionTime_triggered(void);
+  void on_actionInterval_triggered(void);
+  void on_actionLatitude_triggered(void);
+  void on_actionLongitude_triggered(void);
+  void on_actionHeading_triggered(void);
+  void on_actionSpeed_triggered(void);
+  void on_actionDepth_triggered(void);
+  void on_actionAltitude_triggered(void);
+  void on_actionSensor_depth_triggered(void);
+  void on_actionRoll_triggered(void);
+  void on_actionPitch_triggered(void);
+  void on_actionHeave_triggered(void);
+  
+  
+  /// Plot-slice slots
+  void on_actionWaterfall_2_triggered();  
+  void on_actionAcross_track_2_triggered();
+  void on_actionAlong_track_2_triggered();  
+  
 private:
     Ui::MainWindow *ui;
 };
