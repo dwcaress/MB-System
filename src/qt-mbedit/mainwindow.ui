@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="title">
-     <string>Mode</string>
+     <string>Edit mode</string>
     </property>
     <widget class="QWidget" name="horizontalLayoutWidget">
      <property name="geometry">
@@ -172,7 +172,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>110</y>
+      <y>100</y>
       <width>349</width>
       <height>78</height>
      </rect>
@@ -195,6 +195,12 @@
        </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="tickPosition">
+        <enum>QSlider::TicksBelow</enum>
+       </property>
+       <property name="tickInterval">
+        <number>1</number>
        </property>
       </widget>
      </item>
@@ -261,14 +267,51 @@
     </property>
     <addaction name="actionOpen_swath_file"/>
     <addaction name="actionShow_available_swath_files"/>
+    <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
      <string>View</string>
     </property>
-    <addaction name="actionWaterfall"/>
-    <addaction name="actionAlong_track"/>
-    <addaction name="actionCross_track"/>
+    <widget class="QMenu" name="menuAncillary_data">
+     <property name="title">
+      <string>Ancillary data</string>
+     </property>
+     <addaction name="actionNone"/>
+     <addaction name="actionTime"/>
+     <addaction name="actionInterval"/>
+     <addaction name="actionLatitude"/>
+     <addaction name="actionLongitude"/>
+     <addaction name="actionHeading"/>
+     <addaction name="actionSpeed"/>
+     <addaction name="actionDepth"/>
+     <addaction name="actionAltitude"/>
+     <addaction name="actionSensor_depth"/>
+     <addaction name="actionRoll"/>
+     <addaction name="actionPitch"/>
+     <addaction name="actionHeave"/>
+    </widget>
+    <widget class="QMenu" name="menuSlice">
+     <property name="title">
+      <string>Slice</string>
+     </property>
+     <addaction name="actionWaterfall_2"/>
+     <addaction name="actionAlong_track_2"/>
+     <addaction name="actionAcross_track_2"/>
+    </widget>
+    <widget class="QMenu" name="menuColor_coding">
+     <property name="title">
+      <string>Color-coding</string>
+     </property>
+     <addaction name="actionBottom_detect_algorithm"/>
+     <addaction name="actionPulse_source"/>
+     <addaction name="actionFlag_state"/>
+    </widget>
+    <addaction name="actionShow_flagged_soundings"/>
+    <addaction name="actionShow_flagged_profile"/>
+    <addaction name="menuAncillary_data"/>
+    <addaction name="menuSlice"/>
+    <addaction name="menuColor_coding"/>
    </widget>
    <widget class="QMenu" name="menuControl">
     <property name="title">
@@ -292,16 +335,25 @@
    </property>
   </action>
   <action name="actionWaterfall">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
-    <string>Waterfall view</string>
+    <string>Waterfall</string>
    </property>
   </action>
   <action name="actionAlong_track">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Along track</string>
    </property>
   </action>
   <action name="actionCross_track">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Cross track</string>
    </property>
@@ -344,6 +396,203 @@
   <action name="actionOpen_swath_file">
    <property name="text">
     <string>Open swath file</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionShow_flagged_soundings">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show flagged soundings</string>
+   </property>
+  </action>
+  <action name="actionShow_flagged_profile">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show flagged profile</string>
+   </property>
+  </action>
+  <action name="actionShow_flag_states">
+   <property name="text">
+    <string>Show flag states</string>
+   </property>
+  </action>
+  <action name="actionShow_bottom_detect_algorithm">
+   <property name="text">
+    <string>Show bottom detect algorithm</string>
+   </property>
+  </action>
+  <action name="actionShow_pulse_source">
+   <property name="text">
+    <string>Show pulse source</string>
+   </property>
+  </action>
+  <action name="actionNone">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>None</string>
+   </property>
+  </action>
+  <action name="actionTime">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Time</string>
+   </property>
+  </action>
+  <action name="actionInterval">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Interval</string>
+   </property>
+  </action>
+  <action name="actionLatitude">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Latitude</string>
+   </property>
+  </action>
+  <action name="actionLongitude">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Longitude</string>
+   </property>
+  </action>
+  <action name="actionHeading">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Heading</string>
+   </property>
+  </action>
+  <action name="actionSpeed">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Speed</string>
+   </property>
+  </action>
+  <action name="actionDepth">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Depth</string>
+   </property>
+  </action>
+  <action name="actionAltitude">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Altitude</string>
+   </property>
+  </action>
+  <action name="actionSensor_depth">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Sensor depth</string>
+   </property>
+  </action>
+  <action name="actionRoll">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Roll</string>
+   </property>
+  </action>
+  <action name="actionPitch">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Pitch</string>
+   </property>
+  </action>
+  <action name="actionHeave">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Heave</string>
+   </property>
+  </action>
+  <action name="actionWaterfall_2">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Waterfall</string>
+   </property>
+  </action>
+  <action name="actionAlong_track_2">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Along track</string>
+   </property>
+  </action>
+  <action name="actionAcross_track_2">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Across track</string>
+   </property>
+  </action>
+  <action name="actionBottom_detect_algorithm">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Bottom detect algorithm</string>
+   </property>
+  </action>
+  <action name="actionPulse_source">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Pulse source</string>
+   </property>
+  </action>
+  <action name="actionFlag_state">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Flag state</string>
    </property>
   </action>
  </widget>
