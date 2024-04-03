@@ -339,8 +339,8 @@ int main(int argc, char **argv) {
 			else {
 				shotmin = std::min(shotmin, traceheader.shot_num);
 				shotmax = std::max(shotmax, traceheader.shot_num);
-				shotmin = std::min(shotmin, traceheader.shot_num);
-				shotmax = std::max(shotmax, traceheader.shot_num);
+				shottracemin = std::min(shottracemin, traceheader.shot_tr);
+				shottracemax = std::max(shottracemax, traceheader.shot_tr);
 				rpmin = std::min(rpmin, traceheader.rp_num);
 				rpmax = std::max(rpmax, traceheader.rp_num);
 				rptracemin = std::min(rptracemin, traceheader.rp_tr);

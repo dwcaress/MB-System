@@ -2169,7 +2169,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
       i = strlen(filename) - 4;
     else
       i = 0;
-    if ((suffix = strstr(&filename[i], ".seg")) != NULL || (suffix = strstr(&filename[i], ".SEG")) != NULL)
+    if ((suffix = strstr(&filename[i], ".seg")) != NULL || (suffix = strstr(&filename[i], ".SEG")) != NULL 
+        || (suffix = strstr(&filename[i], ".sgy")) != NULL || (suffix = strstr(&filename[i], ".SGY")) != NULL)
       suffix_len = 4;
     else
       suffix_len = 0;

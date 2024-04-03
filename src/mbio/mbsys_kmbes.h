@@ -35,15 +35,19 @@
 /*
  * Notes on the mbsys_kmbes data structure and associated format:
  *   1. This MBIO format supports the generic interface message output
- *      by the Konsberg EM datagram format.
- *   2. Reference: Konsberg EM datagram format Reg.no. 410224 rev F, November 2018
- *   3. The Konsberg EM datagram stream consists of several different data
+ *      by the Kongsberg EM datagram format.
+ *   2. Reference: Kongsberg EM datagram format Reg. no. 410224 rev F, November 2018
+ *                 Kongsberg EM datagram format Reg. nr. 410224 rev J, 15-09-2023
+ *   3. The Kongsberg EM datagram stream consists of several different data
  *      records that can vary among models and installations
- *   4. The Konsberg EM datagram format supports the following multibeam models (September 2016):
- *      EM 710,   40-100 kHz
- *      EM 712,   40-100 kHz
- *      EM 2040,  200/300/400 kHz
- *      EM 2040C, 180-400 kHz
+ *   4. The Kongsberg EM datagram format supports the following multibeam models 
+ *      September 2016:
+ *        EM 710,   40-100 kHz
+ *        EM 712,   40-100 kHz
+ *        EM 2040,  200/300/400 kHz
+ *        EM 2040C, 180-400 kHz
+ *      September 2023:
+ *        
  *   5. Each datagram begins with a 20 byte sequence:
  *      unsigned int numBytesDgm;       // Datagram length in bytes.
  *      mb_u_char dgmType[4];           // Multi beam datagram type definition, e.g. #AAA
@@ -57,29 +61,31 @@
  *   6. All data are in little-endian form.
  *   7. The data record names include:
  *      // I - datagrams (Installation and Runtime)
- *      IIP, // Info Installation PU
- *      IOP, // Runtime datagram
- *      IBE, // BIST error report
- *      IBR, // BIST reply
- *      IBS, // BIST short reply
+ *      IIP, // Installation parameters and sensor setup.
+ *      IOP, // Runtime parameters as chosen by operator.
+ *      IBE, // Built in test (BIST) error report
+ *      IBR, // Built in test (BIST) reply
+ *      IBS, // Built in test (BIST) short reply
  *
  *      // S-datagrams (Sensors)
- *      SPO, // Sensor POsition data
- *      SKM, // KM binary sensor data
- *      SVP, // Sound Velocity Profile
- *      SVT, // Sensor data for sound Velocity at Transducer
- *      SCL, // Sensor CLock data
- *      SDE, // Sensor DEpth data
- *      SHI, // Sensor HeIght data
- *      SHA, // Sensor HeAding data
+ *      SPO, // Sensor (S) data for position (PO)
+ *      SPE, // Sensor (S) data for postion error (PE) statistics
+ *      SPD, // Sensor (S) data for position datum reference (PD)
+ *      SKM, // Sensor (S) KM binary sensor format
+ *      SVP, // Sensor (S) data from sound velocity (V) profile (P) or CTD
+ *      SVT, // Sensor (S) data for sound velocity (V) at transducer (T)
+ *      SCL, // Sensor (S) data from clock (CL)
+ *      SDE, // Sensor (S) data from depth (DE) sensor
+ *      SHI, // Sensor (S) data for height (HI)
+ *      SHA, // Sensor (S) data for heading (HA)
  *
  *      // M-datagrams (Multibeam)
- *      MRZ, // Multibeam data for raw range, depth, reflectivity, seabed image(SI) etc.
- *      MWC, // Water column multibeam data
+ *      MRZ, // Multibeam (M) raw range (R) and depth (Z) datagram
+ *      MWC, // Multibeam (M) water (W) column (C) datagram
  *
  *      // C-datagrams (Compatibility)
- *      CHE, // Compatibility heave data - store raw sensor data without modification
- *      CPO, // Compatibility position data - store raw sensor data without modification
+ *      CHE, // Compatibility (C) data for heave (HE) - store raw sensor data without modification
+ *      CPO, // Compatibility (C) data for position (PO) - store raw sensor data without modification
  *
  *      // F-datagrams (Files)
  *      FCF, // Backscatter calibration (C) file (F) datagram
@@ -108,25 +114,27 @@
 #define MBSYS_KMBES_I_BS_BIST                   "#IBS" // Built in test (BIST) short reply.
 
 /* S-datagrams */
-#define MBSYS_KMBES_S_POSITION                  "#SPO" // Sensor POsition data
-#define MBSYS_KMBES_S_KM_BINARY                 "#SKM" // KM binary sensor data
-#define MBSYS_KMBES_S_SOUND_VELOCITY_PROFILE    "#SVP" // Sound Velocity Profile
-#define MBSYS_KMBES_S_SOUND_VELOCITY_TRANSDUCER "#SVT" // Sensor data for sound Velocity at Transducer
-#define MBSYS_KMBES_S_CLOCK                     "#SCL" // Sensor CLock datagram
-#define MBSYS_KMBES_S_DEPTH                     "#SDE" // Sensor DEpth data
-#define MBSYS_KMBES_S_HEIGHT                    "#SHI" // Sensor HeIght data
-#define MBSYS_KMBES_S_HEADING                   "#SHA" // Sensor HeAding
+#define MBSYS_KMBES_S_POSITION                  "#SPO" // Sensor (S) data for position (PO)
+#define MBSYS_KMBES_S_POSITION_ERROR            "#SPE" // Sensor (S) data for position error statistics (PO)
+#define MBSYS_KMBES_S_POSITION_DATUM            "#SPD" // Sensor (S) data for position datum reference (PD)
+#define MBSYS_KMBES_S_KM_BINARY                 "#SKM" // Sensor (S) KM binary sensor format
+#define MBSYS_KMBES_S_SOUND_VELOCITY_PROFILE    "#SVP" // Sensor (S) data from sound velocity (V) profile (P) or CTD
+#define MBSYS_KMBES_S_SOUND_VELOCITY_TRANSDUCER "#SVT" // Sensor (S) data for sound velocity (V) at transducer (T)
+#define MBSYS_KMBES_S_CLOCK                     "#SCL" // Sensor (S) data from clock (CL)
+#define MBSYS_KMBES_S_DEPTH                     "#SDE" // Sensor (S) data from depth (DE) sensor
+#define MBSYS_KMBES_S_HEIGHT                    "#SHI" // Sensor (S) data for height (HI)
+#define MBSYS_KMBES_S_HEADING                   "#SHA" // Sensor (S) data for heading (HA)
 
 /* M-datagrams */
-#define MBSYS_KMBES_M_RANGE_AND_DEPTH           "#MRZ" // Multibeam data for raw range, depth, reflectivity, seabed image(SI) etc.
-#define MBSYS_KMBES_M_WATER_COLUMN              "#MWC" // Multibeam water column datagram.
+#define MBSYS_KMBES_M_RANGE_AND_DEPTH           "#MRZ" // Multibeam (M) raw range (R) and depth (Z) datagram
+#define MBSYS_KMBES_M_WATER_COLUMN              "#MWC" // Multibeam (M) water (W) column (C) datagram
 
 /* C-datagrams */
-#define MBSYS_KMBES_C_POSITION                  "#CPO"
-#define MBSYS_KMBES_C_HEAVE                     "#CHE"
+#define MBSYS_KMBES_C_POSITION                  "#CPO" // Compatibility (C) data for position (PO)
+#define MBSYS_KMBES_C_HEAVE                     "#CHE" // Compatibility (C) data for heave (HE)
 
 /* F-datagrams */
-#define MBSYS_KMBES_F_BSCALIBRATIONFILE         "#FCF"
+#define MBSYS_KMBES_F_BSCALIBRATIONFILE         "#FCF" // Backscatter calibration (C) file (F) datagram
 
 /* X-datagrams */
 #define MBSYS_KMBES_X_MBSYSTEM                  "#XMB" // Indicates these data written by MB-System (MB-System only)
@@ -145,6 +153,8 @@
 #define MBSYS_KMBES_PARITION_SIZE 4
 #define MBSYS_KMBES_END_SIZE 4
 #define MBSYS_KMBES_MAX_SPO_DATALENGTH 250
+#define MBSYS_KMBES_MAX_SPE_DATALENGTH 250
+#define MBSYS_KMBES_MAX_SPD_DATALENGTH 250
 #define MBSYS_KMBES_MAX_ATT_DATALENGTH 250
 #define MBSYS_KMBES_MAX_SVT_DATALENGTH 64
 #define MBSYS_KMBES_MAX_SCL_DATALENGTH 64
@@ -156,6 +166,8 @@
 #define MBSYS_KMBES_MAX_IIP_DATALENGTH 4096
 #define MBSYS_KMBES_MAX_IOP_DATALENGTH 4096
 #define MBSYS_KMBES_SPO_VAR_OFFSET 72
+#define MBSYS_KMBES_SPE_VAR_OFFSET 68
+#define MBSYS_KMBES_SPD_VAR_OFFSET 116
 #define MBSYS_KMBES_SCL_VAR_OFFSET 36
 #define MBSYS_KMBES_SDE_VAR_OFFSET 40
 #define MBSYS_KMBES_SHI_VAR_OFFSET 40
@@ -221,6 +233,8 @@ typedef enum {
 
     /* S-datagrams */
     SPO, // EM_DGM_S_POSITION
+    SPE, // EM_DGM_S_POSITION_ERROR
+    SPD, // EM_DGM_S_POSITION_DATUM
     SKM, // EM_DGM_S_KM_BINARY
     SVP, // EM_DGM_S_SOUND_VELOCITY_PROFILE
     SVT, // EM_DGM_S_SOUND_VELOCITY_TRANSDUCER
@@ -337,6 +351,63 @@ struct mbsys_kmbes_spo {
 };
 
  #define MBSYS_KMBES_SPO_VERSION 0
+
+/************************************
+    #SPE - Sensor Position Error statistics data
+  ************************************/
+
+struct mbsys_kmbes_spe_data_block {
+    /* #SPE - Sensor position error statistics data block. 
+       The data fields are identical to the NMEA GST datagram. 
+       The raw data as received from sensor is in text string. */
+    unsigned int timeFromSensor_sec;        /* Time from position sensor. Unit seconds. Epoch 1970-01-01.
+                                             * Ignoring leap seconds. Nanosec part to be added for more exact time. */
+    unsigned int timeFromSensor_nanosec;    /* Time from position sensor. Unit nano seconds remainder. */
+    float   rangeInputRms;                  /* Total RMS standard deviation of ranges inputs to the navigation solution */
+    float   ellipseSemiMajorAxisError_m;    /* Standard deviation (meters) of semi-major axis of error ellipse */
+    float   ellipseSemiMinorAxisError_m;    /* Standard deviation (meters) of semi-minor axis of error ellipse */
+    float   ellipseOrientationError_deg;    /* Orientation of semi-major axis of error ellipse (true north degrees) */
+    float   latitudeError_m;                /* Standard deviation (meters) of latitude error */
+    float   longitudeError_m;               /* Standard deviation (meters) of longitude error */
+    float   heightError_m;                  /* Standard deviation (meters) of altitude error */
+    int8_t  posErrorDataFromSensor [MBSYS_KMBES_MAX_SPE_DATALENGTH];    /* Position error statistics data as received from sensor */
+
+};
+
+struct mbsys_kmbes_spe {
+    /* #SPO - Struct of position sensor datagram. */
+    struct mbsys_kmbes_header header;
+    struct mbsys_kmbes_s_common cmnPart;
+    struct mbsys_kmbes_spe_data_block sensorData;
+};
+
+ #define MBSYS_KMBES_SPE_VERSION 0
+
+/************************************
+    #SPD - Sensor Position Datum data
+  ************************************/
+
+struct mbsys_kmbes_spd_data_block {
+    /* #SPD - Sensor position datum reference data block. 
+       The data fields are identical to the NMEA DTM datagram. 
+       The raw data as received from sensor is in text string. */
+    int8_t  localDatumCode [16];            /* Local datum code. E.g. W84 */
+    int8_t  localDatumSubCode [16];         /* Local datum subcode. May be blank. */
+    double  latitudeOffset_deg;             /* Latitude offset in decimal degrees. */
+    double  longitudeOffset_deg;            /* Longitude offset in decimal degrees. */
+    float   altitudeOffset_m;               /* Altitude offset in meters. */
+    int8_t  datumName [32];                 /* Datum name. What’s usually seen here is "W84", the standard WGS84 datum used by GPS. */
+    int8_t  posDatumDataFromSensor [MBSYS_KMBES_MAX_SPD_DATALENGTH];         /* Position datum data as received from sensor. */
+};
+
+struct mbsys_kmbes_spd {
+    /* #SPO - Struct of position sensor datagram. */
+    struct mbsys_kmbes_header header;
+    struct mbsys_kmbes_s_common cmnPart;
+    struct mbsys_kmbes_spd_data_block sensorData;
+};
+
+ #define MBSYS_KMBES_SPD_VERSION 0
 
 /************************************
    #SKM - KM binary sensor data
@@ -1569,6 +1640,12 @@ struct mbsys_kmbes_struct {
 
     /* #SPO - Sensor POsition data */
     struct mbsys_kmbes_spo spo;
+
+    /* #SPO - Sensor Position Error data */
+    struct mbsys_kmbes_spe spe;
+
+    /* #SPO - Sensor Position Datum data */
+    struct mbsys_kmbes_spd spd;
 
     /* #SKM - KM binary sensor data (attitude)*/
     struct mbsys_kmbes_skm skm;
