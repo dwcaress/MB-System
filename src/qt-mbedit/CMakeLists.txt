@@ -39,7 +39,8 @@ set(CMAKE_AUTOUIC ON)
 
 message("In CMakeLists.txt!!! CMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR}")
 
-add_executable(qt-mbedit main.cpp mainwindow.cpp mainwindow.h mainwindow.ui)
+add_executable(qt-mbedit main.cpp mainwindow.cpp mainwindow.h mainwindow.ui
+               ClickableLabel.h ClickableLabel.cpp)
 
 # If header directories specified with ${CMAKE_SOURCE_DIR}, qtcreator cannot
 # find them!
