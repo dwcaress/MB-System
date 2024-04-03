@@ -42,8 +42,7 @@ MainWindow::MainWindow(QWidget *parent)
   
   ui->setupUi(this);
   canvas_ = new QPixmap(ui->swathCanvas->width(),
-			ui->swathCanvas->height())
-    ;
+			ui->swathCanvas->height());
 
   painter_ = new QPainter(canvas_);
 
@@ -122,16 +121,21 @@ MainWindow::~MainWindow()
 }
 
 
-
-void MainWindow::on_xtrackWidthSlider_sliderMoved(int position)
-{
-  std::cerr << "xtrackWidth = " << position << "\n";
+void MainWindow::onCanvasMousePressed(QMouseEvent *event) {
+  std::cerr << "onCanvasMousePressed()\n";
 }
 
 
-void MainWindow::on_nPingsShowSlider_sliderMoved(int position)
+
+void MainWindow::on_xtrackWidthSlider_sliderReleased()
 {
-  std::cerr << "nPingsShown = " << position << "\n";
+  std::cerr << "xtrackWidth released\n";
+}
+
+
+void MainWindow::on_nPingsShowSlider_sliderReleased()
+{
+  std::cerr << "nPingsShown released\n";
 }
 
 
@@ -232,6 +236,9 @@ void MainWindow::on_actionHeave_triggered() {
   plotSwath();  
 }
 
+void MainWindow::on_swathCanvas_mousePressEvent(QMouseEvent *event) {
+  std::cerr << "mouse press on swath canvas\n";
+}
 
 
 bool MainWindow::plotSwath(void) {

@@ -8,6 +8,8 @@
 #include <QColor>
 #include <QFontMetrics>
 
+#include "ClickableLabel.h"
+
 extern "C" {
 #include "mbedit_prog.h"
 }
@@ -145,9 +147,9 @@ protected:
 
 private slots:
 
-  void on_xtrackWidthSlider_sliderMoved(int position);
+  void on_xtrackWidthSlider_sliderReleased(void);
 
-  void on_nPingsShowSlider_sliderMoved(int position);
+  void on_nPingsShowSlider_sliderReleased(void);
 
   void on_vertExaggSlider_sliderReleased(void);  
 
@@ -167,6 +169,12 @@ private slots:
   void on_actionRoll_triggered(void);
   void on_actionPitch_triggered(void);
   void on_actionHeave_triggered(void);
+
+  /// Capture mouse events on swath canvas label
+  void on_swathCanvas_mousePressEvent(QMouseEvent *event);
+
+  /// TEST TEST TEST Capture mouse events on canvas_ member
+  void onCanvasMousePressed(QMouseEvent *);
   
   
   /// Plot-slice slots
