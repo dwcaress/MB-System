@@ -121,11 +121,6 @@ MainWindow::~MainWindow()
 }
 
 
-void MainWindow::onCanvasMousePressed(QMouseEvent *event) {
-  std::cerr << "onCanvasMousePressed()\n";
-}
-
-
 
 void MainWindow::on_xtrackWidthSlider_sliderReleased()
 {
@@ -236,8 +231,24 @@ void MainWindow::on_actionHeave_triggered() {
   plotSwath();  
 }
 
-void MainWindow::on_swathCanvas_mousePressEvent(QMouseEvent *event) {
-  std::cerr << "mouse press on swath canvas\n";
+void MainWindow::on_swathCanvas_labelMouseEvent(QMouseEvent *event) {
+  std::cerr << "mouse event on swathCanvas: ";
+  switch (event->type()) {
+  case QEvent::MouseButtonPress:
+    std::cerr << "mouse button pressed\n";
+    break;
+
+  case QEvent::MouseButtonRelease:
+    std::cerr << "mouse button released\n";
+    break;
+
+  case QEvent::MouseMove:
+    std::cerr << "mouse moved\n";
+    break;
+
+  default:
+    std::cerr << "unhandled mouse event\n";
+  }
 }
 
 

@@ -171,11 +171,8 @@ private slots:
   void on_actionHeave_triggered(void);
 
   /// Capture mouse events on swath canvas label
-  void on_swathCanvas_mousePressEvent(QMouseEvent *event);
+  void on_swathCanvas_labelMouseEvent(QMouseEvent *event);
 
-  /// TEST TEST TEST Capture mouse events on canvas_ member
-  void onCanvasMousePressed(QMouseEvent *);
-  
   
   /// Plot-slice slots
   void on_actionWaterfall_2_triggered();  
