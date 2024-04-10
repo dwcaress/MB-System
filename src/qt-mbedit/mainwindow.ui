@@ -238,7 +238,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="QLabel" name="swathCanvas">
+   <widget class="ClickableLabel" name="swathCanvas">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -596,6 +596,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ClickableLabel</class>
+   <extends>QLabel</extends>
+   <header>/home/oreilly/MB-System/src/qt-mbedit/ClickableLabel.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
