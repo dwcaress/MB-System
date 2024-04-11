@@ -28,7 +28,9 @@ find_package(
   REQUIRED)
 
 if(CMAKE_SYSTEM_NAME STREQUAL Linux)
+  message("Find TIRPC")
   find_package(TIRPC REQUIRED)
+  message("Found TIRPC")  
 else()
   add_library(TIRPC::TIRPC INTERFACE IMPORTED)
 endif()
@@ -39,14 +41,16 @@ set(CMAKE_AUTOUIC ON)
 
 message("In CMakeLists.txt!!! CMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR}")
 
-add_executable(qt-mbedit main.cpp mainwindow.cpp mainwindow.h mainwindow.ui
-               ClickableLabel.h ClickableLabel.cpp)
+add_executable(qt-mbedit main.cpp mainwindow.cpp mainwindow.h mainwindow.ui)
+
+message("qt-mbedit CMAKE_SOURCE_DIR= ${CMAKE_SOURCE_DIR}")
 
 # If header directories specified with ${CMAKE_SOURCE_DIR}, qtcreator cannot
 # find them!
-target_include_directories(qt-mbedit PUBLIC /home/oreilly/MB-System/src/mbio/
-                                     /home/oreilly/MB-System/src/mbaux
-                                     /home/oreilly/MB-System/src/mbedit)
+target_include_directories(qt-mbedit PUBLIC ${CMAKE_SOURCE_DIR}/src/mbio/
+                                     ${CMAKE_SOURCE_DIR}/src/mbaux
+                                     ${CMAKE_SOURCE_DIR}/src/qt-guilib/
+                                     ${CMAKE_SOURCE_DIR}/src/mbedit)
 
 target_link_libraries(qt-mbedit PRIVATE MBGui Qt5::Core Qt5::Widgets Qt5::Quick
                                	           mbeditLib mbio
