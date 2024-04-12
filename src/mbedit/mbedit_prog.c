@@ -78,33 +78,6 @@
 #define MBEDIT_OUTBOUNDS_FLAGGED 1
 #define MBEDIT_OUTBOUNDS_UNFLAGGED 2
 
-/* plot modes */
-#define MBEDIT_PLOT_WIDE 0
-#define MBEDIT_PLOT_TIME 1
-#define MBEDIT_PLOT_INTERVAL 2
-#define MBEDIT_PLOT_LON 3
-#define MBEDIT_PLOT_LAT 4
-#define MBEDIT_PLOT_HEADING 5
-#define MBEDIT_PLOT_SPEED 6
-#define MBEDIT_PLOT_DEPTH 7
-#define MBEDIT_PLOT_ALTITUDE 8
-#define MBEDIT_PLOT_SENSORDEPTH 9
-#define MBEDIT_PLOT_ROLL 10
-#define MBEDIT_PLOT_PITCH 11
-#define MBEDIT_PLOT_HEAVE 12
-
-/* view modes */
-#define MBEDIT_VIEW_WATERFALL 0
-#define MBEDIT_VIEW_ALONGTRACK 1
-#define MBEDIT_VIEW_ACROSSTRACK 2
-#define MBEDIT_SHOW_FLAG 0
-#define MBEDIT_SHOW_DETECT 1
-#define MBEDIT_SHOW_PULSE 2
-
-/* grab modes */
-#define MBEDIT_GRAB_START 0
-#define MBEDIT_GRAB_MOVE 1
-#define MBEDIT_GRAB_END 2
 
 
 /* Bottom detect type names */
@@ -314,7 +287,7 @@ static double filter_cutangle_end = 0.0;
 #define MBEDIT_PICK_DISTANCE 50
 #define MBEDIT_ERASE_DISTANCE 15
 struct mbedit_ping_struct ping[MBEDIT_BUFFER_SIZE];
-static int view_mode = MBEDIT_VIEW_WATERFALL;
+static PlotSliceMode plotSliceMode = WATERFALL;
 static int plot_size = 10;
 static int nplot = 0;
 static void *mbedit_xgid;
@@ -328,10 +301,15 @@ static double xscale;
 static double yscale;
 static int x_interval = 1000;
 static int y_interval = 250;
-static int show_mode = MBEDIT_SHOW_FLAG;
-static bool show_flaggedsoundings = true;
-static bool show_flaggedprofiles = false;
-static int show_time = MBEDIT_PLOT_TIME;
+
+
+/// GUI-specified parameters
+static SoundColorCoding soundColorCoding;
+static bool showFlagSound = true;
+static bool showFlagProfile = false;
+static PlotAncillData plotAncillData = TIME;
+
+
 static bool beam_save = false;
 static int iping_save = 0;
 static int jbeam_save = 0;
@@ -548,13 +526,13 @@ int mbedit_set_graphics(void *xgid, int ncol, unsigned int *pixels) {
 }
 
 /*--------------------------------------------------------------------*/
-int mbedit_set_scaling(int *brdr, int sh_time) {
+int mbedit_set_scaling(int *brdr, PlotAncillData plot_ancill_data) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     for (int i = 0; i < 4; i++)
       fprintf(stderr, "dbg2       brdr[%d]:     %d\n", i, brdr[i]);
-    fprintf(stderr, "dbg2       show_time:      %d\n", sh_time);
+    fprintf(stderr, "dbg2       plotAncillData:      %d\n", plot_ancill_data);
   }
 
   /* set graphics bounds */
@@ -562,8 +540,8 @@ int mbedit_set_scaling(int *brdr, int sh_time) {
     borders[i] = brdr[i];
 
   /* set scaling */
-  show_time = sh_time;
-  if (show_time > MBEDIT_PLOT_WIDE) {
+  plotAncillData = plot_ancill_data;
+  if (plotAncillData != NO_ANCILL) {
     margin = (borders[1] - borders[0]) / 16;
     xmin = 5 * margin;
     xmax = borders[1] - margin;
@@ -737,8 +715,13 @@ int mbedit_get_filters(int *b_m, double *d_m, int *f_m, int *f_m_t, int *f_m_x, 
 }
 
 /*--------------------------------------------------------------------*/
-int mbedit_get_defaults(int *plt_size_max, int *plt_size, int *sh_mode, int *sh_flggdsdg, int *sh_flggdprf, int *sh_time, int *buffer_size_max,
-                        int *buffer_size, int *hold_size, int *form, int *plwd, int *exgr, int *xntrvl, int *yntrvl, int *ttime_i,
+int mbedit_get_defaults(int *plt_size_max, int *plt_size,
+			SoundColorCoding *sound_color_interpret,
+			bool *sh_flggdsdg, bool *sh_flggdprf,
+			PlotAncillData *plot_ancill_data, int *buffer_size_max,
+                        int *buffer_size, int *hold_size, int *form,
+			int *plwd, int *exgr, int *xntrvl, int *yntrvl,
+			int *ttime_i,
                         int *outmode) {
 
   if (verbose >= 2) {
@@ -750,16 +733,16 @@ int mbedit_get_defaults(int *plt_size_max, int *plt_size, int *sh_mode, int *sh_
   *plt_size = plot_size;
 
   /* get show mode flag */
-  *sh_mode = show_mode;
+  *sound_color_interpret = soundColorCoding;
 
   /* get show flagged soundings flag */
-  *sh_flggdsdg = show_flaggedsoundings;
+  *sh_flggdsdg = showFlagSound;
 
   /* get show flagged profiles flag */
-  *sh_flggdprf = show_flaggedprofiles;
+  *sh_flggdprf = showFlagProfile;
 
   /* get show time flag */
-  *sh_time = show_time;
+  *plot_ancill_data = plotAncillData;
 
   /* get maximum and starting buffer sizes */
   *buffer_size_max = buff_size_max;
@@ -798,10 +781,10 @@ int mbedit_get_defaults(int *plt_size_max, int *plt_size, int *sh_mode, int *sh_
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       plot max:               %d\n", *plt_size_max);
     fprintf(stderr, "dbg2       plot_size:              %d\n", *plt_size);
-    fprintf(stderr, "dbg2       show_mode:              %d\n", *sh_mode);
-    fprintf(stderr, "dbg2       show_flaggedsoundings:  %d\n", *sh_flggdsdg);
-    fprintf(stderr, "dbg2       show_flaggedprofiles:   %d\n", *sh_flggdprf);
-    fprintf(stderr, "dbg2       show_time:              %d\n", *sh_time);
+    fprintf(stderr, "dbg2       soundColorCoding:              %d\n", *sound_color_interpret);
+    fprintf(stderr, "dbg2       showFlagSound:  %d\n", *sh_flggdsdg);
+    fprintf(stderr, "dbg2       showFlagProfile:   %d\n", *sh_flggdprf);
+    fprintf(stderr, "dbg2       plotAncillData:              %d\n", *plot_ancill_data);
     fprintf(stderr, "dbg2       buffer max:             %d\n", *buffer_size_max);
     fprintf(stderr, "dbg2       buffer_size:            %d\n", *buffer_size);
     fprintf(stderr, "dbg2       hold_size:              %d\n", *hold_size);
@@ -821,20 +804,20 @@ int mbedit_get_defaults(int *plt_size_max, int *plt_size, int *sh_mode, int *sh_
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_get_viewmode(int *vw_mode) {
+int mbedit_get_viewmode(PlotSliceMode *vw_mode) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
 
   /* get view mode */
-  *vw_mode = view_mode;
+  *vw_mode = plotSliceMode;
 
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       view_mode:   %d\n", *vw_mode);
+    fprintf(stderr, "dbg2       plotSliceMode:   %d\n", *vw_mode);
     fprintf(stderr, "dbg2       error:       %d\n", error);
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:      %d\n", status);
@@ -842,16 +825,17 @@ int mbedit_get_viewmode(int *vw_mode) {
 
   return (status);
 }
+
 /*--------------------------------------------------------------------*/
-int mbedit_set_viewmode(int vw_mode) {
+int mbedit_set_viewmode(PlotSliceMode vw_mode) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       view_mode:   %d\n", vw_mode);
+    fprintf(stderr, "dbg2       plotSliceMode:   %d\n", vw_mode);
   }
 
   /* get view mode */
-  view_mode = vw_mode;
+  plotSliceMode = vw_mode;
 
   const int status = MB_SUCCESS;
 
@@ -866,9 +850,15 @@ int mbedit_set_viewmode(int vw_mode) {
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_open(char *file, int form, int fileid, int numfiles, int savemode, int outmode, int plwd, int exgr, int xntrvl,
-                       int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time, int *buffer_size, int *buffer_size_max,
-                       int *hold_size, int *ndumped, int *nloaded, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
+int mbedit_action_open(char *file, int form, int fileid, int numfiles,
+		       int savemode, int outmode, int plwd, int exgr,
+		       int xntrvl, int yntrvl, int plt_size,
+		       SoundColorCoding sound_color_interpret,
+		       bool sh_flggdsdg, bool sh_flggdprf,
+		       PlotAncillData plot_ancill_data,
+		       int *buffer_size, int *buffer_size_max,
+                       int *hold_size, int *ndumped, int *nloaded,
+		       int *nbuffer, int *ngood, int *icurrent, int *nplt) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -883,10 +873,10 @@ int mbedit_action_open(char *file, int form, int fileid, int numfiles, int savem
     fprintf(stderr, "dbg2       x_interval:      %d\n", xntrvl);
     fprintf(stderr, "dbg2       y_interval:      %d\n", yntrvl);
     fprintf(stderr, "dbg2       plot_size:       %d\n", plt_size);
-    fprintf(stderr, "dbg2       show_mode:       %d\n", sh_mode);
-    fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
-    fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
-    fprintf(stderr, "dbg2       show_time:       %d\n", sh_time);
+    fprintf(stderr, "dbg2       soundColorCoding:       %d\n", sound_color_interpret);
+    fprintf(stderr, "dbg2       showFlagSound:    %d\n", sh_flggdsdg);
+    fprintf(stderr, "dbg2       showFlagProfile:     %d\n", sh_flggdprf);
+    fprintf(stderr, "dbg2       plotAncillData:       %d\n", plot_ancill_data);
     fprintf(stderr, "dbg2       buffer_size:     %d\n", *buffer_size);
     fprintf(stderr, "dbg2       buffer_size_max: %d\n", *buffer_size_max);
     fprintf(stderr, "dbg2       hold_size:       %d\n", *hold_size);
@@ -929,7 +919,7 @@ int mbedit_action_open(char *file, int form, int fileid, int numfiles, int savem
     (*disableFileButton)();
 
     /* now plot it */
-    status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf, sh_time, nplt, true);
+    status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sound_color_interpret, sh_flggdsdg, sh_flggdprf, plot_ancill_data, nplt, true);
 
     /* set fileid and numfiles */
     file_id = fileid;
@@ -959,8 +949,13 @@ int mbedit_action_open(char *file, int form, int fileid, int numfiles, int savem
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_next_buffer(int hold_size, int buffer_size, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
-                              int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time, int *ndumped, int *nloaded, int *nbuffer, int *ngood,
+int mbedit_action_next_buffer(int hold_size, int buffer_size, int plwd,
+			      int exgr, int xntrvl, int yntrvl, int plt_size,
+                              SoundColorCoding sound_color_interpret,
+			      bool sh_flggdsdg, bool sh_flggdprf,
+			      PlotAncillData plot_ancill_data,
+			      int *ndumped, int *nloaded, int *nbuffer,
+			      int *ngood,
                               int *icurrent, int *nplt, int *quit) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -972,10 +967,10 @@ int mbedit_action_next_buffer(int hold_size, int buffer_size, int plwd, int exgr
     fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
     fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
     fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
-    fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-    fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
-    fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
-    fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
+    fprintf(stderr, "dbg2       soundColorCoding:   %d\n", sound_color_interpret);
+    fprintf(stderr, "dbg2       showFlagSound:    %d\n", sh_flggdsdg);
+    fprintf(stderr, "dbg2       showFlagProfile:     %d\n", sh_flggdprf);
+    fprintf(stderr, "dbg2       plotAncillData:   %d\n", plot_ancill_data);
   }
 
   /* reset info */
@@ -1022,7 +1017,7 @@ int mbedit_action_next_buffer(int hold_size, int buffer_size, int plwd, int exgr
 	fprintf(stderr, "\nQuitting MBedit\nBye Bye...\n");
     } else {
       // else set up plotting
-      status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf, sh_time, nplt, true);
+      status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sound_color_interpret, sh_flggdsdg, sh_flggdprf, plot_ancill_data, nplt, true);
     }
   } else {
     // if no file open set failure status
@@ -1224,7 +1219,10 @@ int mbedit_action_quit(int buffer_size, int *ndumped, int *nloaded, int *nbuffer
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_step(int step, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
+int mbedit_action_step(int step, int plwd, int exgr, int xntrvl, int yntrvl,
+		       int plt_size, SoundColorCoding sound_color_interpret,
+		       bool sh_flggdsdg, bool sh_flggdprf,
+		       PlotAncillData plot_ancill_data,
                        int *nbuffer, int *ngood, int *icurrent, int *nplt) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1235,10 +1233,10 @@ int mbedit_action_step(int step, int plwd, int exgr, int xntrvl, int yntrvl, int
     fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
     fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
     fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
-    fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-    fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
-    fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
-    fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
+    fprintf(stderr, "dbg2       soundColorCoding:   %d\n", sound_color_interpret);
+    fprintf(stderr, "dbg2       showFlagSound:    %d\n", sh_flggdsdg);
+    fprintf(stderr, "dbg2       showFlagProfile:     %d\n", sh_flggdprf);
+    fprintf(stderr, "dbg2       plotAncillData:   %d\n", plot_ancill_data);
   }
 
   /* reset info */
@@ -1264,7 +1262,7 @@ int mbedit_action_step(int step, int plwd, int exgr, int xntrvl, int yntrvl, int
 
     /* set the plotting list */
     if (*ngood > 0) {
-      status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf, sh_time, nplt, false);
+      status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sound_color_interpret, sh_flggdsdg, sh_flggdprf, plot_ancill_data, nplt, false);
     }
 
     /* set failure flag if no step was made */
@@ -1299,20 +1297,25 @@ int mbedit_action_step(int step, int plwd, int exgr, int xntrvl, int yntrvl, int
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_plot(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
+int mbedit_action_plot(int plwd, int exgr, int xntrvl, int yntrvl,
+		       int plt_size,
+		       SoundColorCoding sound_color_interpret,
+		       bool sh_flggdsdg, bool sh_flggdprf,
+		       PlotAncillData plot_ancill_data,
                        int *nbuffer, int *ngood, int *icurrent, int *nplt) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "\ndbg2  mbedit_action_plot()\n");
     fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
-    fprintf(stderr, "dbg2       exager:      %d\n", exgr);
-    fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
-    fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
-    fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
-    fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-    fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
-    fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
-    fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
+    fprintf(stderr, "dbg2       plwd:  %d\n", plwd);
+    fprintf(stderr, "dbg2       exgr:      %d\n", exgr);
+    fprintf(stderr, "dbg2       xntrvl:  %d\n", xntrvl);
+    fprintf(stderr, "dbg2       yntrvl:  %d\n", yntrvl);
+    fprintf(stderr, "dbg2       plt_size:   %d\n", plt_size);
+    fprintf(stderr, "dbg2       sound_color_interpret:   %d\n", sound_color_interpret);
+    fprintf(stderr, "dbg2       sh_flggdsdgd:    %d\n", sh_flggdsdg);
+    fprintf(stderr, "dbg2       sh_flggdprf:     %d\n", sh_flggdprf);
+    fprintf(stderr, "dbg2       plot_ancill_data:   %d\n", plot_ancill_data);
   }
 
   mbedit_clear_screen();
@@ -1329,7 +1332,7 @@ int mbedit_action_plot(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
 
     /* set the plotting list */
     if (*ngood > 0) {
-      status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf, sh_time, nplt, false);
+      status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sound_color_interpret, sh_flggdsdg, sh_flggdprf, plot_ancill_data, nplt, false);
     }
   } else {
     // if no file open set failure statu
@@ -1355,8 +1358,14 @@ int mbedit_action_plot(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_mouse_toggle(int x_loc, int y_loc, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode,
-                               int sh_flggdsdg, int sh_flggdprf, int sh_time, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
+int mbedit_action_mouse_toggle(int x_loc, int y_loc, int plwd, int exgr,
+			       int xntrvl, int yntrvl, int plt_size,
+			       SoundColorCoding sound_color_interpret,
+                               bool sh_flggdsdg,
+			       bool sh_flggdprf,
+			       PlotAncillData plot_ancill_data,
+			       int *nbuffer, int *ngood, int *icurrent,
+			       int *nplt) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1367,10 +1376,10 @@ int mbedit_action_mouse_toggle(int x_loc, int y_loc, int plwd, int exgr, int xnt
     fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
     fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
     fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
-    fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-    fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
-    fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
-    fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
+    fprintf(stderr, "dbg2       soundColorCoding:   %d\n", sound_color_interpret);
+    fprintf(stderr, "dbg2       showFlagSound:    %d\n", sh_flggdsdg);
+    fprintf(stderr, "dbg2       showFlagProfile:     %d\n", sh_flggdprf);
+    fprintf(stderr, "dbg2       plotAncillData:   %d\n", plot_ancill_data);
   }
 
   int status = MB_SUCCESS;
@@ -1403,7 +1412,7 @@ int mbedit_action_mouse_toggle(int x_loc, int y_loc, int plwd, int exgr, int xnt
 
     /* if a zap box has been picked call zap routine */
     if (zap_box)
-      status = mbedit_action_zap_outbounds(zap_ping, plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf, sh_time,
+      status = mbedit_action_zap_outbounds(zap_ping, plwd, exgr, xntrvl, yntrvl, plt_size, sound_color_interpret, sh_flggdsdg, sh_flggdprf, plot_ancill_data,
 					   nbuffer, ngood, icurrent, nplt);
   }
 
@@ -1519,8 +1528,13 @@ int mbedit_action_mouse_toggle(int x_loc, int y_loc, int plwd, int exgr, int xnt
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_mouse_pick(int x_loc, int y_loc, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode,
-                             int sh_flggdsdg, int sh_flggdprf, int sh_time, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
+int mbedit_action_mouse_pick(int x_loc, int y_loc, int plwd, int exgr,
+			     int xntrvl, int yntrvl, int plt_size,
+			     SoundColorCoding sound_color_interpret,
+                             bool sh_flggdsdg, bool sh_flggdprf,
+			     PlotAncillData plot_ancill_data,
+			     int *nbuffer, int *ngood, int *icurrent,
+			     int *nplt) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1531,10 +1545,10 @@ int mbedit_action_mouse_pick(int x_loc, int y_loc, int plwd, int exgr, int xntrv
     fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
     fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
     fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
-    fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-    fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
-    fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
-    fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
+    fprintf(stderr, "dbg2       soundColorCoding:   %d\n", sound_color_interpret);
+    fprintf(stderr, "dbg2       showFlagSound:    %d\n", sh_flggdsdg);
+    fprintf(stderr, "dbg2       showFlagProfile:     %d\n", sh_flggdprf);
+    fprintf(stderr, "dbg2       plotAncillData:   %d\n", plot_ancill_data);
   }
 
   int status = MB_SUCCESS;
@@ -1567,7 +1581,7 @@ int mbedit_action_mouse_pick(int x_loc, int y_loc, int plwd, int exgr, int xntrv
 
     /* if a zap box has been picked call zap routine */
     if (zap_box)
-      status = mbedit_action_zap_outbounds(zap_ping, plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf, sh_time,
+      status = mbedit_action_zap_outbounds(zap_ping, plwd, exgr, xntrvl, yntrvl, plt_size, sound_color_interpret, sh_flggdsdg, sh_flggdprf, plot_ancill_data,
 					   nbuffer, ngood, icurrent, nplt);
   }
 
@@ -1665,8 +1679,13 @@ int mbedit_action_mouse_pick(int x_loc, int y_loc, int plwd, int exgr, int xntrv
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_mouse_erase(int x_loc, int y_loc, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode,
-                              int sh_flggdsdg, int sh_flggdprf, int sh_time, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
+int mbedit_action_mouse_erase(int x_loc, int y_loc, int plwd, int exgr,
+			      int xntrvl, int yntrvl, int plt_size,
+			      SoundColorCoding sound_color_interpret,
+                              bool sh_flggdsdg, bool sh_flggdprf,
+			      PlotAncillData plot_ancill_data,
+			      int *nbuffer, int *ngood, int *icurrent,
+			      int *nplt) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1677,10 +1696,10 @@ int mbedit_action_mouse_erase(int x_loc, int y_loc, int plwd, int exgr, int xntr
     fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
     fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
     fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
-    fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-    fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
-    fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
-    fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
+    fprintf(stderr, "dbg2       soundColorCoding:   %d\n", sound_color_interpret);
+    fprintf(stderr, "dbg2       showFlagSound:    %d\n", sh_flggdsdg);
+    fprintf(stderr, "dbg2       showFlagProfile:     %d\n", sh_flggdprf);
+    fprintf(stderr, "dbg2       plotAncillData:   %d\n", plot_ancill_data);
   }
 
   int status = MB_SUCCESS;
@@ -1708,8 +1727,8 @@ int mbedit_action_mouse_erase(int x_loc, int y_loc, int plwd, int exgr, int xntr
 	  const int zap_ping = i;
 
 	  /* if a zap box has been picked call zap routine */
-	  status = mbedit_action_zap_outbounds(zap_ping, plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf,
-					       sh_time, nbuffer, ngood, icurrent, nplt);
+	  status = mbedit_action_zap_outbounds(zap_ping, plwd, exgr, xntrvl, yntrvl, plt_size, sound_color_interpret, sh_flggdsdg, sh_flggdprf,
+					       plot_ancill_data, nbuffer, ngood, icurrent, nplt);
 	}
       }
     }
@@ -1801,8 +1820,13 @@ int mbedit_action_mouse_erase(int x_loc, int y_loc, int plwd, int exgr, int xntr
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_mouse_restore(int x_loc, int y_loc, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode,
-                                int sh_flggdsdg, int sh_flggdprf, int sh_time, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
+int mbedit_action_mouse_restore(int x_loc, int y_loc, int plwd, int exgr,
+				int xntrvl, int yntrvl, int plt_size,
+				SoundColorCoding sound_color_interpret,
+                                bool sh_flggdsdg, bool sh_flggdprf,
+				PlotAncillData plot_ancill_data,
+				int *nbuffer, int *ngood, int *icurrent,
+				int *nplt) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1813,10 +1837,10 @@ int mbedit_action_mouse_restore(int x_loc, int y_loc, int plwd, int exgr, int xn
     fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
     fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
     fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
-    fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-    fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
-    fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
-    fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
+    fprintf(stderr, "dbg2       soundColorCoding:   %d\n", sound_color_interpret);
+    fprintf(stderr, "dbg2       showFlagSound:    %d\n", sh_flggdsdg);
+    fprintf(stderr, "dbg2       showFlagProfile:     %d\n", sh_flggdprf);
+    fprintf(stderr, "dbg2       plotAncillData:   %d\n", plot_ancill_data);
   }
 
   int status = MB_SUCCESS;
@@ -1845,8 +1869,8 @@ int mbedit_action_mouse_restore(int x_loc, int y_loc, int plwd, int exgr, int xn
 	  const int zap_ping = i;
 
 	  /* if a zap box has been picked call zap routine */
-	  status = mbedit_action_zap_outbounds(zap_ping, plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf,
-					       sh_time, nbuffer, ngood, icurrent, nplt);
+	  status = mbedit_action_zap_outbounds(zap_ping, plwd, exgr, xntrvl, yntrvl, plt_size, sound_color_interpret, sh_flggdsdg, sh_flggdprf,
+					       plot_ancill_data, nbuffer, ngood, icurrent, nplt);
 	}
       }
     }
@@ -1937,8 +1961,15 @@ int mbedit_action_mouse_restore(int x_loc, int y_loc, int plwd, int exgr, int xn
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_mouse_grab(int grabmode, int x_loc, int y_loc, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
-                             int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
+int mbedit_action_mouse_grab(MouseGrabMode grabmode, int x_loc, int y_loc,
+			     int plwd, int exgr, int xntrvl, int yntrvl,
+			     int plt_size,
+                             SoundColorCoding sound_color_interpret,
+			     bool sh_flggdsdg,
+			     bool sh_flggdprf,
+			     PlotAncillData plot_ancill_data,
+			     int *nbuffer, int *ngood, int *icurrent,
+			     int *nplt) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1950,10 +1981,10 @@ int mbedit_action_mouse_grab(int grabmode, int x_loc, int y_loc, int plwd, int e
     fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
     fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
     fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
-    fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-    fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
-    fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
-    fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
+    fprintf(stderr, "dbg2       soundColorCoding:   %d\n", sound_color_interpret);
+    fprintf(stderr, "dbg2       showFlagSound:    %d\n", sh_flggdsdg);
+    fprintf(stderr, "dbg2       showFlagProfile:     %d\n", sh_flggdprf);
+    fprintf(stderr, "dbg2       plotAncillData:   %d\n", plot_ancill_data);
   }
 
   int status = MB_SUCCESS;
@@ -1975,7 +2006,7 @@ int mbedit_action_mouse_grab(int grabmode, int x_loc, int y_loc, int plwd, int e
     }
 
     /* get start of grab rectangle */
-    if (grabmode == MBEDIT_GRAB_START) {
+    if (grabmode == GRAB_START) {
       grab_set = true;
       grab_start_x = x_loc;
       grab_start_y = y_loc;
@@ -2005,7 +2036,7 @@ int mbedit_action_mouse_grab(int grabmode, int x_loc, int y_loc, int plwd, int e
     }
 
     /* change grab rectangle */
-    else if (grabmode == MBEDIT_GRAB_MOVE) {
+    else if (grabmode == GRAB_MOVE) {
       /* get grab rectangle to use */
       int xgmin, xgmax;
       if (grab_start_x <= grab_end_x) {
@@ -2082,7 +2113,7 @@ int mbedit_action_mouse_grab(int grabmode, int x_loc, int y_loc, int plwd, int e
     }
 
     /* apply grab rectangle */
-    else if (grabmode == MBEDIT_GRAB_END) {
+    else if (grabmode == GRAB_END) {
       /* get final grab rectangle */
       grab_set = false;
       grab_end_x = x_loc;
@@ -2116,8 +2147,8 @@ int mbedit_action_mouse_grab(int grabmode, int x_loc, int y_loc, int plwd, int e
 	    const int zap_ping = i;
 
 	    /* if a zap box has been picked call zap routine */
-	    status = mbedit_action_zap_outbounds(zap_ping, plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf,
-						 sh_time, nbuffer, ngood, icurrent, nplt);
+	    status = mbedit_action_zap_outbounds(zap_ping, plwd, exgr, xntrvl, yntrvl, plt_size, sound_color_interpret, sh_flggdsdg, sh_flggdprf,
+						 plot_ancill_data, nbuffer, ngood, icurrent, nplt);
 	  }
 	}
       }
@@ -2164,7 +2195,7 @@ int mbedit_action_mouse_grab(int grabmode, int x_loc, int y_loc, int plwd, int e
       }
 
       /* replot everything */
-      status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf, sh_time, nplt, false);
+      status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sound_color_interpret, sh_flggdsdg, sh_flggdprf, plot_ancill_data, nplt, false);
     }
 
     /* set some return values */
@@ -2195,8 +2226,8 @@ int mbedit_action_mouse_grab(int grabmode, int x_loc, int y_loc, int plwd, int e
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_mouse_info(int x_loc, int y_loc, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode,
-                             int sh_flggdsdg, int sh_flggdprf, int sh_time, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
+int mbedit_action_mouse_info(int x_loc, int y_loc, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, SoundColorCoding sound_color_interpret,
+                             bool sh_flggdsdg, bool sh_flggdprf, PlotAncillData plot_ancill_data, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2207,10 +2238,10 @@ int mbedit_action_mouse_info(int x_loc, int y_loc, int plwd, int exgr, int xntrv
     fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
     fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
     fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
-    fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-    fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
-    fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
-    fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
+    fprintf(stderr, "dbg2       soundColorCoding:   %d\n", sound_color_interpret);
+    fprintf(stderr, "dbg2       showFlagSound:    %d\n", sh_flggdsdg);
+    fprintf(stderr, "dbg2       showFlagProfile:     %d\n", sh_flggdprf);
+    fprintf(stderr, "dbg2       plotAncillData:   %d\n", plot_ancill_data);
   }
 
   int status = MB_SUCCESS;
@@ -2313,8 +2344,8 @@ int mbedit_action_mouse_info(int x_loc, int y_loc, int plwd, int exgr, int xntrv
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_zap_outbounds(int iping, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf,
-                                int sh_time, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
+int mbedit_action_zap_outbounds(int iping, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, SoundColorCoding sound_color_interpret, bool sh_flggdsdg, bool sh_flggdprf,
+                                PlotAncillData plot_ancill_data, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2324,10 +2355,10 @@ int mbedit_action_zap_outbounds(int iping, int plwd, int exgr, int xntrvl, int y
     fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
     fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
     fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
-    fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-    fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
-    fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
-    fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
+    fprintf(stderr, "dbg2       soundColorCoding:   %d\n", sound_color_interpret);
+    fprintf(stderr, "dbg2       showFlagSound:    %d\n", sh_flggdsdg);
+    fprintf(stderr, "dbg2       showFlagProfile:     %d\n", sh_flggdprf);
+    fprintf(stderr, "dbg2       plotAncillData:   %d\n", plot_ancill_data);
   }
 
   int status = MB_SUCCESS;
@@ -2417,7 +2448,7 @@ int mbedit_action_zap_outbounds(int iping, int plwd, int exgr, int xntrvl, int y
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_bad_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
+int mbedit_action_bad_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, SoundColorCoding sound_color_interpret, bool sh_flggdsdg, bool sh_flggdprf, PlotAncillData plot_ancill_data,
                            int *nbuffer, int *ngood, int *icurrent, int *nplt) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2427,10 +2458,10 @@ int mbedit_action_bad_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_s
     fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
     fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
     fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
-    fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-    fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
-    fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
-    fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
+    fprintf(stderr, "dbg2       soundColorCoding:   %d\n", sound_color_interpret);
+    fprintf(stderr, "dbg2       showFlagSound:    %d\n", sh_flggdsdg);
+    fprintf(stderr, "dbg2       showFlagProfile:     %d\n", sh_flggdprf);
+    fprintf(stderr, "dbg2       plotAncillData:   %d\n", plot_ancill_data);
   }
 
   int status = MB_SUCCESS;
@@ -2515,7 +2546,7 @@ int mbedit_action_bad_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_s
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_good_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
+int mbedit_action_good_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, SoundColorCoding sound_color_interpret, bool sh_flggdsdg, bool sh_flggdprf, PlotAncillData plot_ancill_data,
                             int *nbuffer, int *ngood, int *icurrent, int *nplt) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2525,10 +2556,10 @@ int mbedit_action_good_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
     fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
     fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
     fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
-    fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
+    fprintf(stderr, "dbg2       soundColorCoding:   %d\n", sound_color_interpret);
     fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
-    fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
-    fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
+    fprintf(stderr, "dbg2       showFlagProfile:     %d\n", sh_flggdprf);
+    fprintf(stderr, "dbg2       plotAncillData:   %d\n", plot_ancill_data);
   }
 
   int status = MB_SUCCESS;
@@ -2602,7 +2633,7 @@ int mbedit_action_good_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_left_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
+int mbedit_action_left_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, SoundColorCoding sound_color_interpret, bool sh_flggdsdg, bool sh_flggdprf, PlotAncillData plot_ancill_data,
                             int *nbuffer, int *ngood, int *icurrent, int *nplt) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2612,10 +2643,10 @@ int mbedit_action_left_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
     fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
     fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
     fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
-    fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
+    fprintf(stderr, "dbg2       soundColorCoding:   %d\n", sound_color_interpret);
     fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
-    fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
-    fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
+    fprintf(stderr, "dbg2       showFlagProfile:     %d\n", sh_flggdprf);
+    fprintf(stderr, "dbg2       plotAncillData:   %d\n", plot_ancill_data);
   }
 
   int status = MB_SUCCESS;
@@ -2700,7 +2731,7 @@ int mbedit_action_left_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_right_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
+int mbedit_action_right_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, SoundColorCoding sound_color_interpret, bool sh_flggdsdg, bool sh_flggdprf, PlotAncillData plot_ancill_data,
                              int *nbuffer, int *ngood, int *icurrent, int *nplt) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2710,10 +2741,10 @@ int mbedit_action_right_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt
     fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
     fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
     fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
-    fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-    fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
-    fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
-    fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
+    fprintf(stderr, "dbg2       soundColorCoding:   %d\n", sound_color_interpret);
+    fprintf(stderr, "dbg2       showFlagSound:    %d\n", sh_flggdsdg);
+    fprintf(stderr, "dbg2       showFlagProfile:     %d\n", sh_flggdprf);
+    fprintf(stderr, "dbg2       plotAncillData:   %d\n", plot_ancill_data);
   }
 
   int status = MB_SUCCESS;
@@ -2798,7 +2829,7 @@ int mbedit_action_right_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_zero_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
+int mbedit_action_zero_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, SoundColorCoding sound_color_interpret, bool sh_flggdsdg, bool sh_flggdprf, PlotAncillData plot_ancill_data,
                             int *nbuffer, int *ngood, int *icurrent, int *nplt) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2808,10 +2839,10 @@ int mbedit_action_zero_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
     fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
     fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
     fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
-    fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-    fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
-    fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
-    fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
+    fprintf(stderr, "dbg2       soundColorCoding:   %d\n", sound_color_interpret);
+    fprintf(stderr, "dbg2       showFlagSound:    %d\n", sh_flggdsdg);
+    fprintf(stderr, "dbg2       showFlagProfile:     %d\n", sh_flggdprf);
+    fprintf(stderr, "dbg2       plotAncillData:   %d\n", plot_ancill_data);
   }
 
   int status = MB_SUCCESS;
@@ -2886,7 +2917,7 @@ int mbedit_action_zero_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_flag_view(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
+int mbedit_action_flag_view(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, SoundColorCoding sound_color_interpret, bool sh_flggdsdg, bool sh_flggdprf, PlotAncillData plot_ancill_data,
                             int *nbuffer, int *ngood, int *icurrent, int *nplt) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2896,10 +2927,10 @@ int mbedit_action_flag_view(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
     fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
     fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
     fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
-    fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-    fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
-    fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
-    fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
+    fprintf(stderr, "dbg2       soundColorCoding:   %d\n", sound_color_interpret);
+    fprintf(stderr, "dbg2       showFlagSound:    %d\n", sh_flggdsdg);
+    fprintf(stderr, "dbg2       showFlagProfile:     %d\n", sh_flggdprf);
+    fprintf(stderr, "dbg2       plotAncillData:   %d\n", plot_ancill_data);
   }
 
   int status = MB_SUCCESS;
@@ -2953,7 +2984,7 @@ int mbedit_action_flag_view(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
 
     /* set up plotting */
     if (*ngood > 0) {
-      status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf, sh_time, nplt, false);
+      status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sound_color_interpret, sh_flggdsdg, sh_flggdprf, plot_ancill_data, nplt, false);
     }
   } else /* if (!file_open) */ {
     // if no file open set failure status
@@ -2979,7 +3010,7 @@ int mbedit_action_flag_view(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_unflag_view(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
+int mbedit_action_unflag_view(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, SoundColorCoding sound_color_interpret, bool sh_flggdsdg, bool sh_flggdprf, PlotAncillData plot_ancill_data,
                               int *nbuffer, int *ngood, int *icurrent, int *nplt) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2989,10 +3020,10 @@ int mbedit_action_unflag_view(int plwd, int exgr, int xntrvl, int yntrvl, int pl
     fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
     fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
     fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
-    fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-    fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
-    fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
-    fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
+    fprintf(stderr, "dbg2       soundColorCoding:   %d\n", sound_color_interpret);
+    fprintf(stderr, "dbg2       showFlagSound:    %d\n", sh_flggdsdg);
+    fprintf(stderr, "dbg2       showFlagProfile:     %d\n", sh_flggdprf);
+    fprintf(stderr, "dbg2       plotAncillData:   %d\n", plot_ancill_data);
   }
 
   int status = MB_SUCCESS;
@@ -3042,7 +3073,7 @@ int mbedit_action_unflag_view(int plwd, int exgr, int xntrvl, int yntrvl, int pl
 
     /* set up plotting */
     if (*ngood > 0) {
-      status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf, sh_time, nplt, false);
+      status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sound_color_interpret, sh_flggdsdg, sh_flggdprf, plot_ancill_data, nplt, false);
     }
   } else /* if (!file_open) */ {
     // if no file open set failure status
@@ -3068,7 +3099,7 @@ int mbedit_action_unflag_view(int plwd, int exgr, int xntrvl, int yntrvl, int pl
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_unflag_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
+int mbedit_action_unflag_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, SoundColorCoding sound_color_interpret, bool sh_flggdsdg, bool sh_flggdprf, PlotAncillData plot_ancill_data,
                              int *nbuffer, int *ngood, int *icurrent, int *nplt) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -3078,10 +3109,10 @@ int mbedit_action_unflag_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt
     fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
     fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
     fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
-    fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-    fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
-    fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
-    fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
+    fprintf(stderr, "dbg2       soundColorCoding:   %d\n", sound_color_interpret);
+    fprintf(stderr, "dbg2       showFlagSound:    %d\n", sh_flggdsdg);
+    fprintf(stderr, "dbg2       showFlagProfile:     %d\n", sh_flggdprf);
+    fprintf(stderr, "dbg2       plotAncillData:   %d\n", plot_ancill_data);
   }
 
   int status = MB_SUCCESS;
@@ -3129,7 +3160,7 @@ int mbedit_action_unflag_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt
 
     /* set up plotting */
     if (*ngood > 0) {
-      status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf, sh_time, nplt, false);
+      status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sound_color_interpret, sh_flggdsdg, sh_flggdprf, plot_ancill_data, nplt, false);
     }
   } else /* if (!file_open) */ {
     // if no file open set failure status
@@ -3155,7 +3186,7 @@ int mbedit_action_unflag_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_filter_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
+int mbedit_action_filter_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, SoundColorCoding sound_color_interpret, bool sh_flggdsdg, bool sh_flggdprf, PlotAncillData plot_ancill_data,
                              int *nbuffer, int *ngood, int *icurrent, int *nplt) {
   fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   if (verbose >= 2) {
@@ -3166,10 +3197,10 @@ int mbedit_action_filter_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt
     fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
     fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
     fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
-    fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-    fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
-    fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
-    fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
+    fprintf(stderr, "dbg2       soundColorCoding:   %d\n", sound_color_interpret);
+    fprintf(stderr, "dbg2       showFlagSound:    %d\n", sh_flggdsdg);
+    fprintf(stderr, "dbg2       showFlagProfile:     %d\n", sh_flggdprf);
+    fprintf(stderr, "dbg2       plotAncillData:   %d\n", plot_ancill_data);
   }
 
   int status = MB_SUCCESS;
@@ -3212,7 +3243,7 @@ int mbedit_action_filter_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt
     /* set up plotting */
     (*hideMessage)();
     if (*ngood > 0) {
-      status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf, sh_time, nplt, false);
+      status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sound_color_interpret, sh_flggdsdg, sh_flggdprf, plot_ancill_data, nplt, false);
     }
   } else /* if (!file_open) */ {
     // if no file open set failure status
@@ -3667,7 +3698,13 @@ int mbedit_open_file(char *file, int form, bool savemode) {
       fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
       fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", ifile);
       status = MB_FAILURE;
-      (*showError)("Unable to open input file.", "You may not have read", "permission in this directory!");
+      (*showError)("Unable to open input file.",
+		   "You may not have read", "permission in this directory!");
+      
+      if (uselockfiles) {
+	mb_pr_unlockswathfile(verbose, ifile, MBP_LOCK_EDITBATHY,
+			      program_name, &error);
+      }
       return (status);
     }
 
@@ -3827,7 +3864,8 @@ int mbedit_close_file() {
 
   /* unlock the raw swath file */
   if (uselockfiles)
-    status = mb_pr_unlockswathfile(verbose, ifile, MBP_LOCK_EDITBATHY, program_name, &error);
+    status = mb_pr_unlockswathfile(verbose, ifile, MBP_LOCK_EDITBATHY,
+				   program_name, &error);
 
   /* set mbprocess parameters */
   if (output_mode == MBEDIT_OUTPUT_EDIT) {
@@ -4238,7 +4276,7 @@ int mbedit_clear_screen() {
 }
 /*--------------------------------------------------------------------*/
 int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
-                    int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
+                    SoundColorCoding sound_color_interpret, bool sh_flggdsdg, bool sh_flggdprf, PlotAncillData plot_ancill_data,
                     int *nplt, bool autoscale) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -4248,10 +4286,10 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
     fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
     fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
     fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
-    fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-    fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
-    fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
-    fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
+    fprintf(stderr, "dbg2       soundColorCoding:   %d\n", sound_color_interpret);
+    fprintf(stderr, "dbg2       showFlagSound:    %d\n", sh_flggdsdg);
+    fprintf(stderr, "dbg2       showFlagProfile:     %d\n", sh_flggdprf);
+    fprintf(stderr, "dbg2       plotAncillData:   %d\n", plot_ancill_data);
     fprintf(stderr, "dbg2       nplt:        %p\n", nplt);
     fprintf(stderr, "dbg2       autoscale:   %d\n", autoscale);
   }
@@ -4259,10 +4297,10 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
   /* set scales and tick intervals */
   plot_width = plwd;
   exager = exgr;
-  show_mode = sh_mode;
-  show_flaggedsoundings = sh_flggdsdg;
-  show_flaggedprofiles = sh_flggdprf;
-  show_time = sh_time,
+  soundColorCoding = sound_color_interpret;
+  showFlagSound = sh_flggdsdg;
+  showFlagProfile = sh_flggdprf;
+  plotAncillData = plot_ancill_data,
 
     /* figure out which pings to plot */
     plot_size = plt_size;
@@ -4404,7 +4442,7 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
   int sdescent;
   int sxstart;
 
-  if (sh_mode == MBEDIT_SHOW_FLAG) {
+  if (sound_color_interpret == FLAG) {
     sprintf(string, "Sounding Colors by Flagging:  Unflagged  Manual  Filter  Sonar");
     (*justifyString)(graphPtr, string, &swidth, &sascent, &sdescent);
     sxstart = xcen - swidth / 2;
@@ -4429,7 +4467,7 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
     (*justifyString)(graphPtr, string, &swidth, &sascent, &sdescent);
     (*drawString)(graphPtr, sxstart, ymin - margin / 2 + sascent + 5, string, GREEN, XG_SOLIDLINE);
   }
-  else if (sh_mode == MBEDIT_SHOW_DETECT) {
+  else if (sound_color_interpret == DETECT) {
     sprintf(string, "Sounding Colors by Bottom Detection:  Amplitude  Phase  Unknown");
     (*justifyString)(graphPtr, string, &swidth, &sascent, &sdescent);
     sxstart = xcen - swidth / 2;
@@ -4448,7 +4486,7 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
     (*justifyString)(graphPtr, string, &swidth, &sascent, &sdescent);
     (*drawString)(graphPtr, sxstart, ymin - margin / 2 + sascent + 5, string, GREEN, XG_SOLIDLINE);
   }
-  else if (sh_mode == MBEDIT_SHOW_PULSE) {
+  else if (sound_color_interpret == PULSE) {
     sprintf(string, "Sounding Colors by Source Type:  CW  Up-Chirp  Down-Chirp  Unknown");
     (*justifyString)(graphPtr, string, &swidth, &sascent, &sdescent);
     sxstart = xcen - swidth / 2;
@@ -4546,9 +4584,9 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
   double tsslope;
 
   /* plot time series if desired */
-  if (show_time > MBEDIT_PLOT_TIME) {
+  if (plotAncillData > TIME) {
     /* get scaling */
-    mbedit_tsminmax(current_id, nplot, show_time, &tsmin, &tsmax);
+    mbedit_tsminmax(current_id, nplot, plotAncillData, &tsmin, &tsmax);
     const double tsscale = 2.0 * margin / (tsmax - tsmin);
 
     /* draw time series plot box */
@@ -4562,7 +4600,7 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
 
     /* draw time series labels */
     /*sprintf(string,"Heading (deg)");*/
-    mbedit_tslabel(show_time, string);
+    mbedit_tslabel(plotAncillData, string);
     (*justifyString)(graphPtr, string, &swidth, &sascent, &sdescent);
     (*drawString)(graphPtr, 3 * margin / 2 - swidth / 2, ymin - sdescent, string, BLACK, XG_SOLIDLINE);
     sprintf(string, "%g", tsmin);
@@ -4573,12 +4611,12 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
     (*drawString)(graphPtr, 5 * margin / 2 - swidth / 2, ymax + sascent + 5, string, BLACK, XG_SOLIDLINE);
 
     /*x0 = margin/2 + ping[current_id].heading / 360.0 * 2 * margin;*/
-    mbedit_tsvalue(current_id, show_time, &tsvalue);
+    mbedit_tsvalue(current_id, plotAncillData, &tsvalue);
     int x0 = margin / 2 + (int)((tsvalue - tsmin) * tsscale);
     int y0 = ymax - (int)(dy / 2);
     for (int i = current_id; i < current_id + nplot; i++) {
       /*x = margin/2 + ping[i].heading / 360.0 * 2 * margin;*/
-      mbedit_tsvalue(i, show_time, &tsvalue);
+      mbedit_tsvalue(i, plotAncillData, &tsvalue);
       const int x = margin / 2 + (int)((tsvalue - tsmin) * tsscale);
       const int y = ymax - (int)(dy / 2) - (int)((i - current_id) * dy);
       (*drawLine)(graphPtr, x0, y0, x, y, BLACK, XG_SOLIDLINE);
@@ -4588,7 +4626,7 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
     }
 
     /* if plotting roll, also plot acrosstrack slope */
-    if (show_time == MBEDIT_PLOT_ROLL) {
+    if (plotAncillData == ROLL) {
       mbedit_xtrackslope(current_id, &tsslope);
       x0 = margin / 2 + (int)((tsslope - tsmin) * tsscale);
       y0 = ymax - (int)(dy / 2);
@@ -4604,16 +4642,16 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
     }
 
     /* if plotting roll, also plot acrosstrack slope - roll */
-    if (show_time == MBEDIT_PLOT_ROLL) {
+    if (plotAncillData == ROLL) {
       mbedit_xtrackslope(current_id, &tsslope);
       int i_tmp = 0;
-      mbedit_tsvalue(i_tmp, show_time, &tsvalue);
+      mbedit_tsvalue(i_tmp, plotAncillData, &tsvalue);
       x0 = margin / 2 + (int)((tsvalue - tsslope - tsmin) * tsscale);
       y0 = ymax - (int)(dy / 2);
       for (int i = current_id; i < current_id + nplot; i++) {
 	/*x = margin/2 + ping[i].heading / 360.0 * 2 * margin;*/
 	mbedit_xtrackslope(i, &tsslope);
-	mbedit_tsvalue(i, show_time, &tsvalue);
+	mbedit_tsvalue(i, plotAncillData, &tsvalue);
 	const int x = margin / 2 + (int)((tsvalue - tsslope - tsmin) * tsscale);
 	const int y = ymax - (int)(dy / 2) - (int)((i - current_id) * dy);
 	(*drawLine)(graphPtr, x0, y0, x, y, BLUE, XG_SOLIDLINE);
@@ -4634,19 +4672,28 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
     ping[i].label_y = y;
     for (int j = 0; j < ping[i].beams_bath; j++) {
       if (!mb_beam_check_flag_unusable2(ping[i].beamflag[j])) {
-	if (view_mode == MBEDIT_VIEW_WATERFALL) {
-	  ping[i].bath_x[j] = (int)(xcen + dxscale * ping[i].bathacrosstrack[j]);
-	  ping[i].bath_y[j] = (int)(y + dyscale * ((double)ping[i].bath[j] - bathmedian));
+	if (plotSliceMode == WATERFALL) {
+	  ping[i].bath_x[j] =
+	    
+	    (int)(xcen + dxscale * ping[i].bathacrosstrack[j]);
+	  ping[i].bath_y[j] =
+	    (int)(y + dyscale * ((double)ping[i].bath[j] - bathmedian));
 	}
-	else if (view_mode == MBEDIT_VIEW_ALONGTRACK) {
-	  ping[i].bath_x[j] = (int)(xcen + dxscale * ping[i].bathacrosstrack[j]);
-	  ping[i].bath_y[j] = (int)(ycen + dyscale * ((double)ping[i].bath[j] - bathmedian));
+	else if (plotSliceMode == ALONGTRACK) {
+	  ping[i].bath_x[j] =
+	    (int)(xcen + dxscale * ping[i].bathacrosstrack[j]);
+	  
+	  ping[i].bath_y[j] =
+	    (int)(ycen + dyscale * ((double)ping[i].bath[j] - bathmedian));
 	}
 	else {
 	  /* ping[i].bath_x[j] = x;*/
-	  ping[i].bath_x[j] = (int)(xcen + dxscale * (ping[i].bathalongtrack[j] +
-						      ping[i].distance - ping[current_id + nplot / 2].distance));
-	  ping[i].bath_y[j] = (int)(ycen + dyscale * ((double)ping[i].bath[j] - bathmedian));
+	  ping[i].bath_x[j] =
+	    (int)(xcen + dxscale * (ping[i].bathalongtrack[j] +
+				    ping[i].distance - ping[current_id +
+							    nplot / 2].distance));
+	  ping[i].bath_y[j] =
+	    (int)(ycen + dyscale * ((double)ping[i].bath[j] - bathmedian));
 	}
       }
       else {
@@ -4703,7 +4750,7 @@ int mbedit_plot_beam(int iping, int jbeam) {
   }
   else if (jbeam >= 0 && jbeam < ping[iping].beams_bath && !mb_beam_check_flag_unusable2(ping[iping].beamflag[jbeam])) {
     beam_color = BLACK;
-    if (show_mode == MBEDIT_SHOW_FLAG) {
+    if (soundColorCoding == FLAG) {
       if (mb_beam_ok(ping[iping].beamflag[jbeam]))
 	beam_color = BLACK;
       else if (mb_beam_check_flag_filter2(ping[iping].beamflag[jbeam]))
@@ -4718,7 +4765,7 @@ int mbedit_plot_beam(int iping, int jbeam) {
 	//jbeam,ping[iping].beamflag[jbeam],ping[iping].priority[jbeam],ping[iping].detect[jbeam]);
       }
     }
-    else if (show_mode == MBEDIT_SHOW_DETECT) {
+    else if (soundColorCoding == DETECT) {
       if (ping[iping].detect[jbeam] == MB_DETECT_AMPLITUDE)
 	beam_color = BLACK;
       else if (ping[iping].detect[jbeam] == MB_DETECT_PHASE)
@@ -4726,7 +4773,7 @@ int mbedit_plot_beam(int iping, int jbeam) {
       else
 	beam_color = GREEN;
     }
-    else if (show_mode == MBEDIT_SHOW_PULSE) {
+    else if (soundColorCoding == PULSE) {
       if (ping[iping].pulses[jbeam] == MB_PULSE_CW)
 	beam_color = BLACK;
       else if (ping[iping].pulses[jbeam] == MB_PULSE_UPCHIRP)
@@ -4739,7 +4786,7 @@ int mbedit_plot_beam(int iping, int jbeam) {
     if (mb_beam_ok(ping[iping].beamflag[jbeam]))
       (*fillRect)(graphPtr, ping[iping].bath_x[jbeam] - 2, ping[iping].bath_y[jbeam] - 2, 4, 4,
 		  beam_color, XG_SOLIDLINE);
-    else if (show_flaggedsoundings)
+    else if (showFlagSound)
       (*drawRect)(graphPtr, ping[iping].bath_x[jbeam] - 2, ping[iping].bath_y[jbeam] - 2, 4, 4,
 		  beam_color, XG_SOLIDLINE);
   }
@@ -4769,7 +4816,7 @@ int mbedit_plot_ping(int iping) {
   bool first = true;
   bool last_flagged = false;
   for (int j = 0; j < ping[iping].beams_bath; j++) {
-    if (show_flaggedprofiles && !mb_beam_ok(ping[iping].beamflag[j]) &&
+    if (showFlagProfile && !mb_beam_ok(ping[iping].beamflag[j]) &&
 	!mb_beam_check_flag_unusable2(ping[iping].beamflag[j]) && first) {
       first = false;
       last_flagged = true;
@@ -4794,7 +4841,7 @@ int mbedit_plot_ping(int iping) {
       xold = ping[iping].bath_x[j];
       yold = ping[iping].bath_y[j];
     }
-    else if (show_flaggedprofiles && !mb_beam_ok(ping[iping].beamflag[j]) &&
+    else if (showFlagProfile && !mb_beam_ok(ping[iping].beamflag[j]) &&
 	     !mb_beam_check_flag_unusable2(ping[iping].beamflag[j])) {
       if (j > 0)
 	(*drawLine)(graphPtr, xold, yold, ping[iping].bath_x[j], ping[iping].bath_y[j], RED,
@@ -4842,7 +4889,7 @@ int mbedit_plot_ping_label(int iping, bool save) {
   }
 
   /* set info string with time tag */
-  if (show_time == MBEDIT_PLOT_TIME || save) {
+  if (plotAncillData == TIME || save) {
     if (ping[iping].beams_bath > 0 && mb_beam_ok(ping[iping].beamflag[ping[iping].beams_bath / 2]))
       sprintf(string, "%5d %2.2d/%2.2d/%4.4d %2.2d:%2.2d:%2.2d.%3.3d %10.3f", ping[iping].record + 1, ping[iping].time_i[1],
 	      ping[iping].time_i[2], ping[iping].time_i[0], ping[iping].time_i[3], ping[iping].time_i[4],
@@ -4862,7 +4909,7 @@ int mbedit_plot_ping_label(int iping, bool save) {
   }
 
   /* set info string without time tag */
-  if (show_time != MBEDIT_PLOT_TIME) {
+  if (plotAncillData != TIME) {
     if (ping[iping].beams_bath > 0)
       sprintf(string, "%5d %10.3f", ping[iping].record, ping[iping].bath[ping[iping].beams_bath / 2]);
     else
@@ -5070,7 +5117,7 @@ int mbedit_unplot_info() {
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_goto(int ttime_i[7], int hold_size, int buffer_size, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
-                       int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time, int *ndumped, int *nloaded, int *nbuffer, int *ngood,
+                       SoundColorCoding sound_color_interpret, bool sh_flggdsdg, bool sh_flggdprf, PlotAncillData plot_ancill_data, int *ndumped, int *nloaded, int *nbuffer, int *ngood,
                        int *icurrent, int *nplt) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -5089,10 +5136,10 @@ int mbedit_action_goto(int ttime_i[7], int hold_size, int buffer_size, int plwd,
     fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
     fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
     fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
-    fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-    fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
-    fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
-    fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
+    fprintf(stderr, "dbg2       soundColorCoding:   %d\n", sound_color_interpret);
+    fprintf(stderr, "dbg2       showFlagSound:    %d\n", sh_flggdsdg);
+    fprintf(stderr, "dbg2       showFlagProfile:     %d\n", sh_flggdprf);
+    fprintf(stderr, "dbg2       plotAncillData:   %d\n", plot_ancill_data);
   }
 
   /* let the world know... */
@@ -5211,7 +5258,7 @@ int mbedit_action_goto(int ttime_i[7], int hold_size, int buffer_size, int plwd,
 
   /* set up plotting */
   if (*ngood > 0) {
-    status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf, sh_time, nplt, false);
+    status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sound_color_interpret, sh_flggdsdg, sh_flggdprf, plot_ancill_data, nplt, false);
   }
 
   /* let the world know... */
@@ -5250,7 +5297,7 @@ int mbedit_action_goto(int ttime_i[7], int hold_size, int buffer_size, int plwd,
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_tslabel(int data_id, char *label) {
+int mbedit_tslabel(PlotAncillData data_id, char *label) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -5259,43 +5306,43 @@ int mbedit_tslabel(int data_id, char *label) {
 
   /* get the time series label */
   switch (data_id) {
-  case MBEDIT_PLOT_WIDE:
+  case NO_ANCILL:
     strcpy(label, "WIDE PLOT");
     break;
-  case MBEDIT_PLOT_TIME:
+  case TIME:
     strcpy(label, "TIME STAMP");
     break;
-  case MBEDIT_PLOT_INTERVAL:
+  case INTERVAL:
     strcpy(label, "Ping Interval (sec)");
     break;
-  case MBEDIT_PLOT_LON:
+  case LONGITUDE:
     strcpy(label, "Longitude (deg)");
     break;
-  case MBEDIT_PLOT_LAT:
+  case LATITUDE:
     strcpy(label, "Latitude (deg)");
     break;
-  case MBEDIT_PLOT_HEADING:
+  case HEADING:
     strcpy(label, "Heading (deg)");
     break;
-  case MBEDIT_PLOT_SPEED:
+  case SPEED:
     strcpy(label, "Speed (km/hr)");
     break;
-  case MBEDIT_PLOT_DEPTH:
+  case DEPTH:
     strcpy(label, "Center Beam Depth (m)");
     break;
-  case MBEDIT_PLOT_ALTITUDE:
+  case ALTITUDE:
     strcpy(label, "Sonar Altitude (m)");
     break;
-  case MBEDIT_PLOT_SENSORDEPTH:
+  case SENSORDEPTH:
     strcpy(label, "Sonar Depth (m)");
     break;
-  case MBEDIT_PLOT_ROLL:
+  case ROLL:
     strcpy(label, "Roll (deg)");
     break;
-  case MBEDIT_PLOT_PITCH:
+  case PITCH:
     strcpy(label, "Pitch (deg)");
     break;
-  case MBEDIT_PLOT_HEAVE:
+  case HEAVE:
     strcpy(label, "Heave (m)");
     break;
   }
@@ -5314,7 +5361,7 @@ int mbedit_tslabel(int data_id, char *label) {
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_tsvalue(int iping, int data_id, double *value) {
+int mbedit_tsvalue(int iping, PlotAncillData data_id, double *value) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -5325,43 +5372,43 @@ int mbedit_tsvalue(int iping, int data_id, double *value) {
   /* get the time series value */
   if (iping >= 0 && nbuff > iping) {
     switch (data_id) {
-    case MBEDIT_PLOT_WIDE:
+    case NO_ANCILL:
       *value = 0.0;
       break;
-    case MBEDIT_PLOT_TIME:
+    case TIME:
       *value = 0.0;
       break;
-    case MBEDIT_PLOT_INTERVAL:
+    case INTERVAL:
       *value = ping[iping].time_interval;
       break;
-    case MBEDIT_PLOT_LON:
+    case LONGITUDE:
       *value = ping[iping].navlon;
       break;
-    case MBEDIT_PLOT_LAT:
+    case LATITUDE:
       *value = ping[iping].navlat;
       break;
-    case MBEDIT_PLOT_HEADING:
+    case HEADING:
       *value = ping[iping].heading;
       break;
-    case MBEDIT_PLOT_SPEED:
+    case SPEED:
       *value = ping[iping].speed;
       break;
-    case MBEDIT_PLOT_DEPTH:
+    case DEPTH:
       *value = ping[iping].bath[ping[iping].beams_bath / 2];
       break;
-    case MBEDIT_PLOT_ALTITUDE:
+    case ALTITUDE:
       *value = ping[iping].altitude;
       break;
-    case MBEDIT_PLOT_SENSORDEPTH:
+    case SENSORDEPTH:
       *value = ping[iping].sensordepth;
       break;
-    case MBEDIT_PLOT_ROLL:
+    case ROLL:
       *value = ping[iping].roll;
       break;
-    case MBEDIT_PLOT_PITCH:
+    case PITCH:
       *value = ping[iping].pitch;
       break;
-    case MBEDIT_PLOT_HEAVE:
+    case HEAVE:
       *value = ping[iping].heave;
       break;
     }
@@ -5381,7 +5428,8 @@ int mbedit_tsvalue(int iping, int data_id, double *value) {
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_tsminmax(int iping, int nping, int data_id, double *tsmin, double *tsmax) {
+int mbedit_tsminmax(int iping, int nping, PlotAncillData data_id,
+		    double *tsmin, double *tsmax) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -5403,7 +5451,7 @@ int mbedit_tsminmax(int iping, int nping, int data_id, double *tsmin, double *ts
       *tsmax = MAX(*tsmax, value);
 
       /* handle slope plotting in roll plot */
-      if (data_id == MBEDIT_PLOT_ROLL) {
+      if (data_id == ROLL) {
 	double value2;
 	mbedit_xtrackslope(i, &value2);
 	*tsmin = MIN(*tsmin, value2);
@@ -5416,19 +5464,19 @@ int mbedit_tsminmax(int iping, int nping, int data_id, double *tsmin, double *ts
 
   /* adjust the min max according to data type */
   switch (data_id) {
-  case MBEDIT_PLOT_WIDE:
+  case NO_ANCILL:
     *tsmin = 0.0;
     *tsmax = 1.0;
     break;
-  case MBEDIT_PLOT_TIME:
+  case TIME:
     *tsmin = 0.0;
     *tsmax = 1.0;
     break;
-  case MBEDIT_PLOT_INTERVAL:
+  case INTERVAL:
     *tsmin = 0.0;
     *tsmax = MAX(1.1 * (*tsmax), 0.01);
     break;
-  case MBEDIT_PLOT_LON:
+  case LONGITUDE:
     {
       const double halfwidth = MAX(0.001, 0.55 * (*tsmax - *tsmin));
       const double center = 0.5 * (*tsmin + *tsmax);
@@ -5436,7 +5484,7 @@ int mbedit_tsminmax(int iping, int nping, int data_id, double *tsmin, double *ts
       *tsmax = center + halfwidth;
       break;
     }
-  case MBEDIT_PLOT_LAT:
+  case LATITUDE:
     {
       const double halfwidth = MAX(0.001, 0.55 * (*tsmax - *tsmin));
       const double center = 0.5 * (*tsmin + *tsmax);
@@ -5444,15 +5492,15 @@ int mbedit_tsminmax(int iping, int nping, int data_id, double *tsmin, double *ts
       *tsmax = center + halfwidth;
       break;
     }
-  case MBEDIT_PLOT_HEADING:
+  case HEADING:
     *tsmin = 0.0;
     *tsmax = 360.0;
     break;
-  case MBEDIT_PLOT_SPEED:
+  case SPEED:
     *tsmin = 0.0;
     *tsmax = MAX(*tsmax, 5.0);
     break;
-  case MBEDIT_PLOT_DEPTH:
+  case DEPTH:
     {
       const double halfwidth = MAX(1.0, 0.55 * (*tsmax - *tsmin));
       const double center = 0.5 * (*tsmin + *tsmax);
@@ -5460,7 +5508,7 @@ int mbedit_tsminmax(int iping, int nping, int data_id, double *tsmin, double *ts
       *tsmax = center + halfwidth;
       break;
     }
-  case MBEDIT_PLOT_ALTITUDE:
+  case ALTITUDE:
     {
       const double halfwidth = MAX(1.0, 0.55 * (*tsmax - *tsmin));
       const double center = 0.5 * (*tsmin + *tsmax);
@@ -5468,7 +5516,7 @@ int mbedit_tsminmax(int iping, int nping, int data_id, double *tsmin, double *ts
       *tsmax = center + halfwidth;
       break;
     }
-  case MBEDIT_PLOT_SENSORDEPTH:
+  case SENSORDEPTH:
     {
       const double halfwidth = MAX(1.0, 0.55 * (*tsmax - *tsmin));
       const double center = 0.5 * (*tsmin + *tsmax);
@@ -5476,17 +5524,17 @@ int mbedit_tsminmax(int iping, int nping, int data_id, double *tsmin, double *ts
       *tsmax = center + halfwidth;
       break;
     }
-  case MBEDIT_PLOT_ROLL:
+  case ROLL:
     *tsmax = 1.1 * MAX(fabs(*tsmin), fabs(*tsmax));
     *tsmax = MAX(*tsmax, 1.0);
     *tsmin = -(*tsmax);
     break;
-  case MBEDIT_PLOT_PITCH:
+  case PITCH:
     *tsmax = 1.1 * MAX(fabs(*tsmin), fabs(*tsmax));
     *tsmax = MAX(*tsmax, 1.0);
     *tsmin = -(*tsmax);
     break;
-  case MBEDIT_PLOT_HEAVE:
+  case HEAVE:
     *tsmax = 1.1 * MAX(fabs(*tsmin), fabs(*tsmax));
     *tsmax = MAX(*tsmax, 0.25);
     *tsmin = -(*tsmax);
