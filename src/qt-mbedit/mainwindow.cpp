@@ -32,6 +32,9 @@ QPainter *MainWindow::staticPainter_ = nullptr;
 QFontMetrics *MainWindow::staticFontMetrics_ = nullptr;
 QString MainWindow::staticTextBuf_;
 
+using namespace mb_system;
+
+
 MainWindow::MainWindow(QWidget *parent)
   : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -101,16 +104,21 @@ MainWindow::MainWindow(QWidget *parent)
   group->addAction(ui->actionFlag_state);
   group->setExclusive(true);
   
-  int plotWidth = 0;
-  
-  mbedit_get_defaults(&plotSizeMax_, &plotSize_, &soundColorInterpret_,
+  mbedit_get_defaults(&maxPingsShown_, &nPingsShown_, &soundColorCoding_,
 		      &showFlagSounding_, &showFlagProfile_,
 		      &plotAncillData_, &buffSizeMax_, &buffSize_, &holdSize_,
-		      &format_, &plotWidth,  &verticalExagg_,
+		      &format_, &xTrackWidth_,  &verticalExagg_,
 		      &xInterval_, &yInterval_,
 		      firstDataTime_, &outMode_);
 
   qDebug() << "format_: " << format_;
+
+  // Set sliders to default values
+  ui->vertExaggSlider->setSliderPosition(verticalExagg_/100);  
+  ui->nPingsShowSlider->setSliderPosition(nPingsShown_);
+  ui->xtrackWidthSlider->setSliderPosition(xTrackWidth_);  
+
+  plotTest();
   
 }
 
@@ -125,12 +133,18 @@ MainWindow::~MainWindow()
 void MainWindow::on_xtrackWidthSlider_sliderReleased()
 {
   std::cerr << "xtrackWidth released\n";
+  xTrackWidth_ = ui->xtrackWidthSlider->sliderPosition();
+  std::cerr << "xTrackWidth = " << xTrackWidth_ << "\n";
+  plotSwath();
 }
 
 
 void MainWindow::on_nPingsShowSlider_sliderReleased()
 {
   std::cerr << "nPingsShown released\n";
+  nPingsShown_ = ui->nPingsShowSlider->sliderPosition();
+  std::cerr << "read nPingsShow = " << nPingsShown_ << "\n";
+  plotSwath();
 }
 
 
@@ -231,6 +245,29 @@ void MainWindow::on_actionHeave_triggered() {
   plotSwath();  
 }
 
+
+                 
+void MainWindow::on_actionBottom_detect_algorithm_triggered() {
+  std::cerr << "action bottom detected triggered\n";
+  soundColorCoding_ = DETECT;
+  plotSwath();
+}
+
+
+void MainWindow::on_actionPulse_source_triggered() {
+  std::cerr << "action pulse source detected triggered\n";  
+  soundColorCoding_ = PULSE;
+  plotSwath();
+}
+
+
+void MainWindow::on_actionFlag_state_triggered() {
+  std::cerr << "action flag state detected triggered\n";    
+  soundColorCoding_ = FLAG;
+  plotSwath();
+}
+
+
 void MainWindow::on_swathCanvas_labelMouseEvent(QMouseEvent *event) {
   std::cerr << "mouse event on swathCanvas: ";
   switch (event->type()) {
@@ -264,20 +301,12 @@ bool MainWindow::plotSwath(void) {
   int nPlot = 0;
   
   // display data from selected file
-  int status = mbedit_action_plot(canvas_->width(),
+  int status = mbedit_action_plot(xTrackWidth_,
 				  verticalExagg_, xInterval_, yInterval_,
-				  plotSize_, soundColorInterpret_,
+				  nPingsShown_, soundColorCoding_,
 				  showFlagSounding_, showFlagProfile_,
 				  plotAncillData_, &nBuffer, &nGood,
 				  &iCurrent, &nPlot);
-
-  /* ***
-  int status = mbedit_plot_all(canvas_->width(),
-			       verticalExagg_, xInterval_, yInterval_,
-			       plotSize_, soundColorInterpret_,
-			       showFlagSounding_, showFlagProfile_,
-			       plotAncillData_, &nPlot, false);
-			       *** */
   
   if (status != MB_SUCCESS) {
     std::cerr << "mbedit_action_plot() failed\n";
@@ -316,7 +345,7 @@ void MainWindow::on_actionOpen_swath_file_triggered()
   int currentFile = 0;
   int fileID = 0;
   int numFiles = 1;
-  int saveMode = 1;
+  int saveMode = 0;
   int nDumped = 0;
   int nLoaded = 0;
   int nBuffer = 0;
@@ -331,7 +360,7 @@ void MainWindow::on_actionOpen_swath_file_triggered()
 				  fileID, numFiles, saveMode,
 				  outMode_, canvas_->width(),
 				  verticalExagg_, xInterval_, yInterval_,
-				  plotSize_, soundColorInterpret_,
+				  nPingsShown_, soundColorCoding_,
 				  showFlagSounding_,
 				  showFlagProfile_, plotAncillData_,
 				  &buffSize_, &buffSizeMax_,
@@ -392,8 +421,21 @@ bool MainWindow::plotTest() {
   drawLine(dummy_, 0, 0, canvas_->width(), canvas_->height(),
 	   BLACK, XG_SOLIDLINE);
 
+  drawLine(dummy_, canvas_->width(), 0, 0, canvas_->height(),
+	   GREEN, XG_DASHLINE);  
+
   drawString(dummy_, 100, 100, (char *)"hello sailor!",
 	     BLACK, XG_SOLIDLINE);
+
+  drawString(dummy_, 300, 100, (char *)"BLUE!",
+	     BLUE, XG_SOLIDLINE);
+
+
+  drawString(dummy_, 400, 100, (char *)"GREEN",
+	     GREEN, XG_SOLIDLINE);    
+
+  // Update GUI
+  ui->swathCanvas->setPixmap(*canvas_);
   
   return true;
 }
@@ -424,9 +466,11 @@ void MainWindow::drawRect(void *dummy,
 void MainWindow::drawString(void *dummy, int x, int y, char *string,
 			    mbedit_color_t color, int style) {
 
+  QString textBuf;
+  QTextStream(&textBuf) << string;
   setPenColorAndStyle(color, style);
-  QTextStream(&staticTextBuf_) << string;
-  staticPainter_->drawText(x, y, staticTextBuf_);
+  /// staticPainter_->setPen(colorName(color));  //// TEST TEST TEST
+  staticPainter_->drawText(x, y, textBuf);
 }
 
 
@@ -437,42 +481,7 @@ void MainWindow::fillRect(void *dummy,
   setPenColorAndStyle(color, style);
 
   // Set fill color
-  const char *fillColor;
-  
-  switch (color) {
-  case WHITE:
-    fillColor = "white";
-    break;
-
-  case BLACK:
-    fillColor = "black";
-    break;
-
-  case RED:
-    fillColor = "red";
-    break;
-
-  case GREEN:
-    fillColor = "green";
-    break;
-    
-  case BLUE:
-    fillColor = "blue";
-    break;
-
-  case CORAL:
-    fillColor = "coral";
-    break;
-
-  case LIGHTGREY:
-    fillColor = "lightGray";
-    break;
-
-  default:
-    std::cerr << "fillrect(): unknown fill color!\n";
-    fillColor = "white";
-  }  
-  staticPainter_->fillRect(x, y, width, height, fillColor);
+  staticPainter_->fillRect(x, y, width, height, colorName(color));
 }
 
 
@@ -485,52 +494,48 @@ void MainWindow::justifyString(void *dummy, char *string,
   *descent = staticFontMetrics_->descent();
 }
 
+const char *MainWindow::colorName(mbedit_color_t color) {
+  switch (color) {
+  case WHITE:
+    return "white";
+
+  case BLACK:
+    return "black";
+
+  case RED:
+    return "red";
+
+  case GREEN:
+    return "green";
+    
+  case BLUE:
+    return "blue";
+
+  case CORAL:
+    return "coral";
+
+  case LIGHTGREY:
+    return "lightGray";
+
+  default:
+    std::cerr << "colorName(): unknown fill color!\n";
+    return "black";
+  }  
+
+}
+
+
 
 void MainWindow::setPenColorAndStyle(mbedit_color_t color, int style) {
 
-  QPen pen = staticPainter_->pen();
-  
-  switch (color) {
-  case WHITE:
-    pen.setColor(Qt::white);
-    break;
-
-  case BLACK:
-    pen.setColor(Qt::black);
-    break;
-
-  case RED:
-    pen.setColor(Qt::red);
-    break;
-
-  case BLUE:
-    pen.setColor(Qt::blue);
-    break;
-
-  case GREEN:
-    pen.setColor(Qt::green);
-    break;    
-
-  case CORAL:
-    pen.setColor("coral");
-    break;
-
-  case LIGHTGREY:
-    pen.setColor("lightGray");
-    break;
-
-  default:
-    std::cerr << "setPenColorAndStyle(): hey! unknown color: " << (int )color
-	      << "\n";
-  }
-
 
   if (style == XG_DASHLINE) {
-    pen.setStyle(Qt::DashLine);
+    staticPainter_->setPen(Qt::DashLine);
   }
   else {
-    pen.setStyle(Qt::SolidLine);    
+    staticPainter_->setPen(Qt::SolidLine);    
   }
+  staticPainter_->setPen(colorName(color));
   
 }
 
