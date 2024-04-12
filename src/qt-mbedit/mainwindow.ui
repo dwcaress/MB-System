@@ -151,7 +151,7 @@
           <number>1</number>
          </property>
          <property name="maximum">
-          <number>20</number>
+          <number>10</number>
          </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -238,7 +238,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="ClickableLabel" name="swathCanvas">
+   <widget class="mb_system::ClickableLabel" name="swathCanvas">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -598,9 +598,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ClickableLabel</class>
+   <class>mb_system::ClickableLabel</class>
    <extends>QLabel</extends>
-   <header>/home/oreilly/MB-System/src/qt-mbedit/ClickableLabel.h</header>
+   <header>/home/oreilly/MB-System/src/qt-guilib/ClickableLabel.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
