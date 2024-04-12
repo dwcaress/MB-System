@@ -104,6 +104,9 @@ protected:
   static void resetScaleXSlider(int width, int xMax,
 				int xInterval, int yInterval);
 
+  /// Return color name corresponding to input mbedit_color
+  static const char *colorName(mbedit_color_t color);
+  
   /// Dummy first argument to canvas-drawing member funtions
   void *dummy_;
 
@@ -120,9 +123,11 @@ protected:
   bool dataPlotted_;
   
   // Display parameters
-  int plotSizeMax_;
-  int plotSize_;
-  SoundColorInterpret soundColorInterpret_;
+  int maxPingsShown_;
+  int nPingsShown_;
+  int xTrackWidth_;
+  
+  SoundColorCoding soundColorCoding_;
   bool showFlagSounding_;
   bool showFlagProfile_;
   PlotAncillData plotAncillData_;
@@ -170,6 +175,11 @@ private slots:
   void on_actionPitch_triggered(void);
   void on_actionHeave_triggered(void);
 
+  /// Acoustic color coding slots
+  void on_actionBottom_detect_algorithm_triggered(void);
+  void on_actionPulse_source_triggered(void);
+  void on_actionFlag_state_triggered(void);
+  
   /// Capture mouse events on swath canvas label
   void on_swathCanvas_labelMouseEvent(QMouseEvent *event);
 
