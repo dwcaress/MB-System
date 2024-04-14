@@ -1,5 +1,24 @@
 # Dockerized MB-System
 
+This directory contains a Dockerfile used to automatically build an MB-System Docker image based on Debian 12 Linux and publish this image to Docker Hub, where it can be publicly accessed.
+This file documents how the MB-System Docker image can be used and how it is structured.
+
+## What are Docker images and containers?
+
+A software container provides an isolated environment in which one or more applications can be run regardless of the host operating system configuration. The Docker platform provides the capabilities needed to create containers and to run those containers on many different sorts of computers. A good overview of how this works can be found at:
+[https://docs.docker.com/get-started/overview/](https://docs.docker.com/get-started/overview/). 
+
+Basically, if one installs the Docker engine software on a computer, be it Mac, Linux, Windows, or whatever, then one should be able to load and run an application included in a Docker container on this computer without needing to install the application directly. The container is created from a Docker image, which contains all of the operating system elements and software installations needed to run the desired application.
+
+## MB-System Docker Image
+
+The MB-System Docker image is built using Debian 12 Linux and the current MB-System release, and is updated each time a new MB-System release is made. The current release is accessed using the "latest" tag in the Github repository: [https://github.com/dwcaress/MB-System/releases/latest](https://github.com/dwcaress/MB-System/releases/latest). This image is then available from the Docker Hub site at: [https://hub.docker.com/r/mbari/mbsystem](https://hub.docker.com/r/mbari/mbsystem)
+
+
+
+## Old Notes Below, this file is under construction....
+
+
 See https://github.com/dwcaress/MB-System/issues/807
 
 **NOTE**: User-oriented instructions: [user/README.md](user/README.md).
