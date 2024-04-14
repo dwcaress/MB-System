@@ -1919,8 +1919,8 @@ int do_mbgrdviz_openprimary(char *input_file_ptr) {
     if (mbv_primary_grid_projection_mode != MBV_PROJECTION_PROJECTED) {
       double mtodeglon, mtodeglat;
       mb_coor_scale(verbose, 0.5 * (mbv_primary_ymin + mbv_primary_ymax), &mtodeglon, &mtodeglat);
-      fprintf(stderr, "Geographic grid bounds: %f %f %f %f   Longitude scaling: %.8f m/deg  Latitude scaling: %.8f m/deg\n",
-          mbv_primary_xmin, mbv_primary_xmax, mbv_primary_ymin, mbv_primary_ymax, mtodeglon, mtodeglat);
+      //fprintf(stderr, "Geographic grid bounds: %f %f %f %f   Longitude scaling: %.8f m/deg  Latitude scaling: %.8f m/deg\n",
+      //    mbv_primary_xmin, mbv_primary_xmax, mbv_primary_ymin, mbv_primary_ymax, mtodeglon, mtodeglat);
     }
 
     /* set basic mbview view controls */

@@ -42,6 +42,7 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "mb_aux.h"
 #include "mb_define.h"
@@ -93,8 +94,9 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
 
   /* if project structure holds an open project close it first */
   int status = MB_SUCCESS;
-  if (project->open)
+  if (project->open) {
     status = mbnavadjust_close_project(verbose, project, error);
+  }
 
   /* check path to see if new project can be created */
   assert(projectpath != NULL && strlen(projectpath) > 0);
@@ -116,7 +118,7 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
   if (status == MB_SUCCESS) {
     strcpy(project->name, nameptr);
     if (strlen(projectpath) == strlen(nameptr)) {
-      assert(getcwd(project->path, MB_PATH_MAXLINE) != NULL);
+      getcwd(project->path, MB_PATH_MAXLINE);
       assert(strlen(project->path) > 0);
       strcat(project->path, "/");
     }
@@ -209,9 +211,11 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
 #ifdef _WIN32
       if (mkdir(project->datadir) != 0) {
 #else
-      if (mkdir(project->datadir, 00775) != 0) {
+	  int mode = mkdir(project->datadir, 00775);
+      if (mode != 0) {
 #endif
-        fprintf(stderr, "Error creating data directory %s\n", project->datadir);
+        fprintf(stderr, "Error creating data directory %s\nmode:%d errno:%d\nError: %s\n", 
+        					project->datadir, mode, errno, strerror(errno));
         *error = MB_ERROR_INIT_FAIL;
         status = MB_FAILURE;
       }

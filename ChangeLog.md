@@ -1,4 +1,4 @@
----
+--
 ## MB-System ChangeLog File:
 
 This file lists changes to the source code of the MB-System open
