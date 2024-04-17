@@ -9,7 +9,7 @@ class PixmapContainer : public QObject
     Q_OBJECT
 public:
     explicit PixmapContainer(QObject *parent = 0);
-    QPixmap pixmap;
+    QPixmap *pixmap;
 };
 
 #endif // PIXMAPCONTAINER_H
