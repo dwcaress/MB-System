@@ -32,8 +32,8 @@ int main(int argc, char *argv[]) {
     engine.rootContext()->setContextProperty("pingStepSliderObj",
 					     guiNames.pingStepSlider());
 
-    engine.rootContext()->setContextProperty("swathCanvasObj",
-					     guiNames.swathCanvas());    
+    engine.rootContext()->setContextProperty("swathPixmapObj",
+					     guiNames.swathPixmap());    
     
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,

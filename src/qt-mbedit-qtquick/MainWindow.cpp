@@ -50,12 +50,27 @@ MainWindow::MainWindow(QObject *rootObject) {
   
   const int width = 600;
   const int height = 600;
-  canvas_ = new QPixmap(width, height);
+  canvasPixmap_ = new QPixmap(width, height);
 
-  painter_ = new QPainter(canvas_);
+  painter_ = new QPainter(canvasPixmap_);
 
   // Keep static reference to painter for use by static member functions
   staticPainter_ = painter_;
+
+  // Find PixmapImage in QML object tree
+  swathPixmapImage_ = 
+    ui_->findChild<PixmapImage*>(guiNames_->swathPixmap());
+
+  if (!swathPixmapImage_) {
+    qCritical() << "Couldn't find " << guiNames_->swathPixmap() <<
+      " in QML";
+  }
+  else {
+    qDebug() << "Found " << guiNames_->swathPixmap() << " in QML";
+  }
+  
+  pixmapContainer_.pixmap = canvasPixmap_;
+  swathPixmapImage_->setImage(&pixmapContainer_);
   
   staticFontMetrics_ = new QFontMetrics(painter_->font());
   
@@ -326,7 +341,7 @@ void MainWindow::on_actionOpen_swath_file_triggered()
   int status = mbedit_action_open(swathFile,
 				  format_,
 				  fileID, numFiles, saveMode,
-				  outMode_, canvas_->width(),
+				  outMode_, canvasPixmap_->width(),
 				  verticalExagg_, xInterval_, yInterval_,
 				  nPingsShown_, soundColorCoding_,
 				  showFlagSounding_,
@@ -345,7 +360,7 @@ void MainWindow::on_actionOpen_swath_file_triggered()
   qDebug() << "TBD: Draw on GUI\n";
   // Update GUI
   /* ***
-  ui->swathCanvas->setPixmap(*canvas_);
+  ui->swathCanvas->setPixmap(*canvasPixmap_);
   *** */
   
   dataPlotted_ = true;
@@ -373,23 +388,23 @@ void MainWindow::on_actionAlong_track_2_triggered() {
 
 
 bool MainWindow::plotTest() {
-  qDebug() << "plot(): canvas width: " << canvas_->width() <<
-    ", canvas height: " << canvas_->height();
+  qDebug() << "plotTest(): canvas width: " << canvasPixmap_->width() <<
+    ", canvas height: " << canvasPixmap_->height();
 
-  painter_->eraseRect(0, 0, canvas_->width(), canvas_->height());
+  painter_->eraseRect(0, 0, canvasPixmap_->width(), canvasPixmap_->height());
 
   //// TEST TEST TEST
-  fillRect(dummy_, 0, 0, canvas_->width(), canvas_->height(),
+  fillRect(dummy_, 0, 0, canvasPixmap_->width(), canvasPixmap_->height(),
 	   WHITE, XG_SOLIDLINE);
 
   fillRect(dummy_, 100, 100,
-	   canvas_->width()-200, canvas_->height()-200,
+	   canvasPixmap_->width()-200, canvasPixmap_->height()-200,
 	   RED, XG_SOLIDLINE);  
 
-  drawLine(dummy_, 0, 0, canvas_->width(), canvas_->height(),
+  drawLine(dummy_, 0, 0, canvasPixmap_->width(), canvasPixmap_->height(),
 	   BLACK, XG_SOLIDLINE);
 
-  drawLine(dummy_, canvas_->width(), 0, 0, canvas_->height(),
+  drawLine(dummy_, canvasPixmap_->width(), 0, 0, canvasPixmap_->height(),
 	   GREEN, XG_DASHLINE);  
 
   drawString(dummy_, 100, 100, (char *)"hello sailor!",
@@ -404,8 +419,10 @@ bool MainWindow::plotTest() {
 
   // Update GUI
   qDebug() << "TBD: Update GUI";
+
   
-  /// ui->swathCanvas->setPixmap(*canvas_);
+  swathPixmapImage_->update();
+  
   
   return true;
 }
@@ -439,7 +456,6 @@ void MainWindow::drawString(void *dummy, int x, int y, char *string,
   QString textBuf;
   QTextStream(&textBuf) << string;
   setPenColorAndStyle(color, style);
-  /// staticPainter_->setPen(colorName(color));  //// TEST TEST TEST
   staticPainter_->drawText(x, y, textBuf);
 }
 

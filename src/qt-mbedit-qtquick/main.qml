@@ -211,9 +211,11 @@ ApplicationWindow {
     }
 
     PixmapImage {
-      id: swathImage
-      objectName: swathImageObj
-      anchors.fill: parent
+      id: swathPixmap
+      objectName: swathPixmapObj
+      width: 600
+      height: 600
+      /// anchors.fill: parent
     }
 
     MessageDialog {

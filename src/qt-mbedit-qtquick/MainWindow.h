@@ -10,6 +10,7 @@
 #include <QFontMetrics>
 #include <QQmlApplicationEngine>
 #include "GuiNames.h"
+#include "PixmapImage.h"
 
 extern "C" {
 #include "mbedit_prog.h"
@@ -25,8 +26,8 @@ public:
 
   /// Get canvas width and height
   void canvasSize(int *width, int *height) {
-    *width = canvas_->width();
-    *height = canvas_->height();
+    *width = canvasPixmap_->width();
+    *height = canvasPixmap_->height();
   }
   
   static void drawLine(void *dummy, int x1, int y1, int x2, int y2,
@@ -96,6 +97,10 @@ protected:
   
   /// UI root object
   QObject *ui_;
+
+  /// QML-declared PixmapImage
+  PixmapImage *swathPixmapImage_;
+  PixmapContainer pixmapContainer_;
   
   /// Test drawing to canvas
   bool plotTest(void);
@@ -122,7 +127,7 @@ protected:
   /// Input swath file name
   char inputFilename_[256];
 
-  QPixmap *canvas_;
+  QPixmap *canvasPixmap_;
   QPainter *painter_;
 
   /// Indicates if data is plotted
@@ -198,10 +203,6 @@ private slots:
   void on_actionBottom_detect_algorithm_triggered(void);
   void on_actionPulse_source_triggered(void);
   void on_actionFlag_state_triggered(void);
-  
-  /// Capture mouse events on swath canvas label
-  /// void on_swathCanvas_labelMouseEvent(QMouseEvent *event);
-
   
   /// Plot-slice slots
   void on_actionWaterfall_2_triggered();  
