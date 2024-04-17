@@ -8,9 +8,11 @@
 class PixmapImage : public QQuickPaintedItem
 {
     Q_OBJECT
-public:
+
+ public:
     PixmapImage(QQuickItem *parent = Q_NULLPTR);
-    
+
+    /// Set image to be drawn
     Q_INVOKABLE void setImage(QObject *pixmapContainer);
     
 protected:
