@@ -1,21 +1,26 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 #include <iostream>
+#include <QObject>
 #include <QString>
+#include <QQuickItem>
 #include <QColor>
 #include <QPainter>
 #include <QPixmap>
 #include <QFontMetrics>
+#include <QQmlApplicationEngine>
+#include "GuiNames.h"
 
 extern "C" {
 #include "mbedit_prog.h"
 }
 
 class MainWindow : public QObject  {
+  
     Q_OBJECT
 
 public:
-  MainWindow(QQmlApplicationEngine *engine, QObject *parent);
+  MainWindow(QObject *ui);
   ~MainWindow();
 
   /// Get canvas width and height
@@ -83,6 +88,15 @@ public:
   
 protected:
 
+  /// Read value of slider named sliderName; return false if error
+  bool sliderValue(QString sliderName, double *value);
+  
+  /// GUI item names
+  GuiNames *guiNames_;
+  
+  /// UI root object
+  QObject *ui_;
+  
   /// Test drawing to canvas
   bool plotTest(void);
 
@@ -138,7 +152,6 @@ protected:
   /// are passed to mbedit 
   static QPainter *staticPainter_;
   static QFontMetrics *staticFontMetrics_;
-
 					 
 
 public slots:
@@ -147,6 +160,13 @@ public slots:
   void cppSlot(const QString &msg) {
     qDebug() << "cppSlot() called with message: " << msg;
   }
+
+  /// GUI item callbacks/slots
+  void onXtrackSliderChanged();
+  void onPingsShownSliderChanged();
+  void onVerticalExaggSliderChanged();
+  void onPingStepSliderChanged();				     
+
     
 				  
 private slots:
@@ -180,7 +200,7 @@ private slots:
   void on_actionFlag_state_triggered(void);
   
   /// Capture mouse events on swath canvas label
-  void on_swathCanvas_labelMouseEvent(QMouseEvent *event);
+  /// void on_swathCanvas_labelMouseEvent(QMouseEvent *event);
 
   
   /// Plot-slice slots

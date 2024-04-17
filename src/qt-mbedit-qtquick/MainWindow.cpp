@@ -1,5 +1,6 @@
 #include <iostream>
 #include <QFileDialog>
+#include <QQuickItem>
 #include <QDebug>
 #include <QDir>
 #include <getopt.h>
@@ -12,7 +13,10 @@
 #include <time.h>
 #include <unistd.h>
 #include <QTextStream>
+#include <QMetaObject>
+#include <QQmlProperty>
 #include "MainWindow.h"
+#include "GuiNames.h"
 
 extern "C" {
 #include "mb_status.h"
@@ -31,19 +35,22 @@ QPainter *MainWindow::staticPainter_ = nullptr;
 QFontMetrics *MainWindow::staticFontMetrics_ = nullptr;
 QString MainWindow::staticTextBuf_;
 
-using namespace mb_system;
+/// using namespace mb_system;
 
+MainWindow::MainWindow(QObject *rootObject) {
 
-MainWindow::MainWindow() {
+  ui_ = rootObject;
+
+  guiNames_ = new GuiNames();
   
   dataPlotted_ = false;
   
   // Dummy first argument to drawing functions
   dummy_ = nullptr;
   
-  ui->setupUi(this);
-  canvas_ = new QPixmap(ui->swathCanvas->width(),
-			ui->swathCanvas->height());
+  const int width = 600;
+  const int height = 600;
+  canvas_ = new QPixmap(width, height);
 
   painter_ = new QPainter(canvas_);
 
@@ -51,56 +58,6 @@ MainWindow::MainWindow() {
   staticPainter_ = painter_;
   
   staticFontMetrics_ = new QFontMetrics(painter_->font());
-  
-  qDebug() << "CTR: swathcanvas width: " << ui->swathCanvas->width() <<
-    ", swathcanvas height: " << ui->swathCanvas->height();    
-
-  /* ***
-     qtdesigner for Qt Widgets cannot add mutually exclusive menu items 
-     in a submenu!!! LAME.
-     C++ code must add actions to a QActionGroup after the actions have been 
-     created by qtdesigner
-
-     In the MainWindow constructor, create ana action group, add the actions 
-     to it, and set it exclusive:
-
-      groupTool = new QActionGroup(this);
-      groupTool.addAction(ui->actionUsePointer);
-      ...
-      groupTool.setExclusive(true);
-
-     In Qt Designer:
-
-     * set the checkable property to true for each of the actions
-     * set the checked property to true for one of the actions
- *** */
-  QActionGroup *group = new QActionGroup(this);
-  group->addAction(ui->actionNone);
-  group->addAction(ui->actionTime);
-  group->addAction(ui->actionInterval);
-  group->addAction(ui->actionLatitude);
-  group->addAction(ui->actionLongitude);
-  group->addAction(ui->actionHeading);
-  group->addAction(ui->actionSpeed);
-  group->addAction(ui->actionDepth);
-  group->addAction(ui->actionAltitude);
-  group->addAction(ui->actionSensor_depth);
-  group->addAction(ui->actionRoll);
-  group->addAction(ui->actionPitch);
-  group->addAction(ui->actionHeave);    
-  group->setExclusive(true);
-
-  group = new QActionGroup(this);
-  group->addAction(ui->actionWaterfall_2);
-  group->addAction(ui->actionAlong_track_2);
-  group->addAction(ui->actionAcross_track_2);
-  group->setExclusive(true);
-
-  group = new QActionGroup(this);
-  group->addAction(ui->actionBottom_detect_algorithm);
-  group->addAction(ui->actionPulse_source);
-  group->addAction(ui->actionFlag_state);
-  group->setExclusive(true);
   
   mbedit_get_defaults(&maxPingsShown_, &nPingsShown_, &soundColorCoding_,
 		      &showFlagSounding_, &showFlagProfile_,
@@ -112,10 +69,13 @@ MainWindow::MainWindow() {
   qDebug() << "format_: " << format_;
 
   // Set sliders to default values
+  qDebug() << "TBD: Set sliders to default values";
+  /* ***
   ui->vertExaggSlider->setSliderPosition(verticalExagg_/100);  
   ui->nPingsShowSlider->setSliderPosition(nPingsShown_);
   ui->xtrackWidthSlider->setSliderPosition(xTrackWidth_);  
-
+  *** */
+  
   plotTest();
   
 }
@@ -123,7 +83,6 @@ MainWindow::MainWindow() {
 MainWindow::~MainWindow()
 {
   // Free unneeded memory
-  delete ui;
 }
 
 
@@ -131,8 +90,10 @@ MainWindow::~MainWindow()
 void MainWindow::on_xtrackWidthSlider_sliderReleased()
 {
   std::cerr << "xtrackWidth released\n";
+  /* ***
   xTrackWidth_ = ui->xtrackWidthSlider->sliderPosition();
   std::cerr << "xTrackWidth = " << xTrackWidth_ << "\n";
+  *** */
   plotSwath();
 }
 
@@ -140,9 +101,12 @@ void MainWindow::on_xtrackWidthSlider_sliderReleased()
 void MainWindow::on_nPingsShowSlider_sliderReleased()
 {
   std::cerr << "nPingsShown released\n";
+  /* ***
   nPingsShown_ = ui->nPingsShowSlider->sliderPosition();
   std::cerr << "read nPingsShow = " << nPingsShown_ << "\n";
+  *** */
   plotSwath();
+
 }
 
 
@@ -150,15 +114,14 @@ void MainWindow::on_vertExaggSlider_sliderReleased()
 {
   std::cerr << "vertExagg Released!\n";
 
+  /* ***
   // Get slider position
   int position = ui->vertExaggSlider->sliderPosition();
   std::cerr << "read vertExagg = " << position << "\n";
 
   // NOTE: scaled by 100x
   verticalExagg_ = position * 100;
-
-  std::cerr << "dataPlotted_ = " << dataPlotted_ << "\n";
-
+  *** */
   plotSwath();
 
 }
@@ -265,7 +228,7 @@ void MainWindow::on_actionFlag_state_triggered() {
   plotSwath();
 }
 
-
+/* ***
 void MainWindow::on_swathCanvas_labelMouseEvent(QMouseEvent *event) {
   std::cerr << "mouse event on swathCanvas: ";
   switch (event->type()) {
@@ -286,6 +249,7 @@ void MainWindow::on_swathCanvas_labelMouseEvent(QMouseEvent *event) {
   }
 }
 
+** */
 
 bool MainWindow::plotSwath(void) {
   if (!dataPlotted_) {
@@ -312,7 +276,9 @@ bool MainWindow::plotSwath(void) {
   }
 
   // Update GUI
-  ui->swathCanvas->setPixmap(*canvas_);  
+  qDebug() << "TBD: set pixmap";
+  
+  /// ui->swathCanvas->setPixmap(*canvas_);  
 
   return true;
 }
@@ -320,12 +286,16 @@ bool MainWindow::plotSwath(void) {
 
 void MainWindow::on_actionOpen_swath_file_triggered()
 {
-  std::cerr << "select swath file\n";
+  qDebug() << "select swath file\n";
+  /* ***
   QString fileName = QFileDialog::getOpenFileName(this,
 						  tr("Open swath file"),
 						  QDir::homePath(),
 						  tr("swath files (*.m*)"));
+						  *** */
 
+  QString fileName("dummy");
+  
   qDebug() << "open swath file " << fileName;
   std::string utf8_text = fileName.toUtf8().constData();
   std::cerr << "utf8_text: " << utf8_text << "\n";
@@ -372,9 +342,12 @@ void MainWindow::on_actionOpen_swath_file_triggered()
   }
   
   // Add pixmap to UI label
-  qDebug() << "Draw on GUI\n";
+  qDebug() << "TBD: Draw on GUI\n";
   // Update GUI
+  /* ***
   ui->swathCanvas->setPixmap(*canvas_);
+  *** */
+  
   dataPlotted_ = true;
 }
 
@@ -403,9 +376,6 @@ bool MainWindow::plotTest() {
   qDebug() << "plot(): canvas width: " << canvas_->width() <<
     ", canvas height: " << canvas_->height();
 
-  qDebug() << "plot(): swathcanvas width: " << ui->swathCanvas->width() <<
-    ", swathcanvas height: " << ui->swathCanvas->height();  
-
   painter_->eraseRect(0, 0, canvas_->width(), canvas_->height());
 
   //// TEST TEST TEST
@@ -433,7 +403,9 @@ bool MainWindow::plotTest() {
 	     GREEN, XG_SOLIDLINE);    
 
   // Update GUI
-  ui->swathCanvas->setPixmap(*canvas_);
+  qDebug() << "TBD: Update GUI";
+  
+  /// ui->swathCanvas->setPixmap(*canvas_);
   
   return true;
 }
@@ -547,3 +519,84 @@ void MainWindow::resetScaleXSlider(int width, int xMax,
 }
 
 
+void MainWindow::onXtrackSliderChanged() {
+  qDebug() << "onXtrackSliderChanged() slot";
+  double value;
+  if (!sliderValue(guiNames_->xTrackSlider(), &value)) {
+    qWarning() << "Couldn't get value of slider " << guiNames_->xTrackSlider();
+    return;
+  }
+  qDebug() << "onXtrackSliderChanged(): value=" << value;
+  return;
+}
+
+
+void MainWindow::onPingsShownSliderChanged() {
+  qDebug() << "onPingsShownSliderChanged() slot";
+  double value;
+  if (!sliderValue(guiNames_->pingsShownSlider(), &value)) {
+    qWarning() << "Couldn't get value of slider "
+	       << guiNames_->pingsShownSlider();
+    return;
+  }
+  qDebug() << "onPingsShownSliderChanged(): value=" << value;
+  return;
+}
+
+
+void MainWindow::onVerticalExaggSliderChanged() {
+  qDebug() << "onVerticalExaggSliderChanged() slot";
+  double value;
+  if (!sliderValue(guiNames_->verticalExaggSlider(), &value)) {
+    qWarning() << "Couldn't get value of slider "
+	       << guiNames_->verticalExaggSlider();
+    return;
+  }
+  qDebug() << "onVerticalExaggSliderChanged(): value=" << value;
+  return;
+}
+
+
+
+void MainWindow::onPingStepSliderChanged() {
+  qDebug() << "onPingStepSliderChanged() slot";
+  double value;
+  if (!sliderValue(guiNames_->pingStepSlider(), &value)) {
+    qWarning() << "Couldn't get value of slider "
+	       << guiNames_->pingStepSlider();
+    return;
+  }
+  qDebug() << "onPingStepSliderChanged(): value=" << value;
+  return;
+}
+
+
+bool MainWindow::sliderValue(QString sliderName, double *value) {
+
+    QQuickItem *slider =
+      ui_->findChild<QQuickItem*>(sliderName);
+
+    if (!slider) {
+      qWarning() << "sliderValue() couldn't find slider named " << sliderName;
+      return false;
+    }
+    
+    bool ok;
+    
+    QVariant qvar = slider->property("position");
+    double position = qvar.toDouble(&ok);
+
+    if (!ok) {
+      qDebug() << "sliderValue(): couldn't get position from QVariant";
+      return false;
+    }
+    qDebug() << sliderName << " sliderValue() position = " << qvar <<
+      " (" << position << ")";
+
+    QMetaObject::invokeMethod(slider, "valueAt",
+			      Q_RETURN_ARG(double, *value),
+			      Q_ARG(double, position));
+
+
+    return true;
+}

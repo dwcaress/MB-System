@@ -31,15 +31,10 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-add_executable(qt-mbedit-qtquick MainWindow.cpp main.cpp qml.qrc)
+add_executable(qt-mbedit-qtquick MainWindow.cpp GuiNames.cpp PixmapImage.cpp
+	       PixmapContainer.cpp main.cpp qml.qrc)
 
-target_include_directories(qt-mbedit-qtquick PUBLIC
-				    ${CMAKE_SOURCE_DIR}/src/mbio/
-                                     ${CMAKE_SOURCE_DIR}/src/mbaux
-                                     ${CMAKE_SOURCE_DIR}/src/qt-guilib/
-                                     ${CMAKE_SOURCE_DIR}/src/mbedit)
+target_link_libraries(qt-mbedit-qtquick PRIVATE MBGui Qt5::Core Qt5::Quick
+                      mbeditLib mbio)
 
-target_link_libraries(qt-mbgrdviz PRIVATE MBGui Qt5::Core Qt5::Quick
-                                         mbeditLib mbio)
-
-install(TARGETS qt-mbgrdviz DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS qt-mbedit-qtquick DESTINATION ${CMAKE_INSTALL_BINDIR})

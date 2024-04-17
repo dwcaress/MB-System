@@ -3,6 +3,7 @@ import QtQuick.Controls 2.3
 import QtQuick.Dialogs 1.1
 import QtQuick.Layouts 1.14
 import QtQuick.Window 2.14
+import bogus 1.0
 
 /* ***
 Display and edit swath file pings/beams
@@ -19,8 +20,11 @@ ApplicationWindow {
     width: 1000
     height: 880
     title: "qt-mbedit"
-
-
+    
+    signal qmlSignal(msg: string)
+		    
+    Component.onCompleted: { console.log("onCompleted");
+                             console.log("xTrackSlider: ", xTrackSliderObj) }
 
     ActionGroup {
         id: ancillaryData
@@ -77,7 +81,7 @@ ApplicationWindow {
 		Action {checkable: true; text: qsTr("Altitude");
 		   ActionGroup.group: ancillaryData }
 	   	Action {checkable: true; text: qsTr("Sensor depth");
-		   ActionGroup.group: ancillarData }
+		   ActionGroup.group: ancillaryData }
 		   Action {checkable: true; text: qsTr("Roll");
 		   ActionGroup.group: ancillaryData }
                 Action {checkable: true; text: qsTr("Pitch");
@@ -131,7 +135,6 @@ ApplicationWindow {
         }
     }
 
-    
     ColumnLayout {
         id: columnLayout
         Layout.fillHeight: false
@@ -139,37 +142,42 @@ ApplicationWindow {
 
 	Label { text: "XTrack width" }
         Slider {
-                    id: xtrackWidthSlider
+                    id: xtrackSlider
+		    objectName: xTrackSliderObj
                     Layout.fillWidth: true
                     from: 1
                     to: 300
-                    value: 1
+		    live: false  // only update value when button released
+
                 }
                 Label { text: "Pings shown" }
                 Slider {
                     id: pingsShownSlider
+		    objectName: pingsShownSliderObj
                     Layout.fillWidth: true
                     from: 1
                     to: 20
-                    value: 10
+		    live: false  // only update value when button released		    
                 }
                 Label { text: "Vertical exaggeration" }
                 Slider {
-                    id: vertExaggSlider
+                    id: verticalExaggSlider
+		    objectName: verticalExaggSliderObj
                     Layout.fillWidth: true
                     from: 0.01
                     to: 20
-                    value: 1.00
+		    live: false
                 }
-                // Set displayed decimal places on slider label
 
                 Label { text: "Ping step" }
                 Slider {
                     id: pingStepSlider
+		    objectName: pingStepSliderObj
+
                     Layout.fillWidth: true
                     from: 1
                     to: 20
-                    value: 5
+		    live: false
                 }
 
 
@@ -202,7 +210,11 @@ ApplicationWindow {
 	}
     }
 
-
+    PixmapImage {
+      id: swathImage
+      objectName: swathImageObj
+      anchors.fill: parent
+    }
 
     MessageDialog {
         id: quitDialog
@@ -225,8 +237,8 @@ ApplicationWindow {
             console.log("accepted " + fileUrl);
         }
     }
+  }
 }
-    }
 
 
 
