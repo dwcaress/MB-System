@@ -226,7 +226,7 @@ namespace mbgrd2gltf {
 			// Check if the attribute was added successfully
 			if (pos_att_id == -1) {
 				std::cerr << "Failed adding position attribute to the mesh." << std::endl;
-				return;
+				return false;
 			}
 			draco::PointAttribute* attribute = pc.attribute(pos_att_id);
 			// Add the vertices to the Draco mesh
@@ -271,7 +271,7 @@ namespace mbgrd2gltf {
 			tinygltf::Buffer buffer;
 			// Encode the geometry using Draco
 			if (!encodeGeometry(vertex_buffer, index_buffer, buffer.data, options)) {
-				std::cerr << "Failed to encode geometry using Draco." << std::endl;
+				std::cerr << "Failed to encode geometry using Draco. Falling back to regular GLTF format." << std::endl;
 				return false;
 			}
 			// Prepare the buffer for the mo
