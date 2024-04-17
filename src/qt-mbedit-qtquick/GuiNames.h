@@ -35,10 +35,10 @@ class GuiNames : public QObject {
     return "pingStepSlider";
   }
 
-  Q_PROPERTY(QString swathCanvas READ swathCanvas)
+  Q_PROPERTY(QString swathPixmap READ swathPixmap)
   
-  QString swathCanvas() const {
-    return "swathCanvas";
+  QString swathPixmap() const {
+    return "swathPixmap";
   }        
   
 };
