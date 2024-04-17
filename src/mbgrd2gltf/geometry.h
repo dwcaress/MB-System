@@ -49,8 +49,6 @@ namespace mbgrd2gltf {
 
 		Matrix<Vertex> _vertices;
 		std::vector<Triangle> _triangles;
-		std::vector<float> _min;
-		std::vector<float> _max;
 
 
 	private: // methods
