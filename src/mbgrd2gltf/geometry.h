@@ -39,6 +39,7 @@
 #include "matrix.h"
 #include "bathymetry.h"
 
+
 // standard library
 #include <vector>
 
@@ -48,6 +49,9 @@ namespace mbgrd2gltf {
 
 		Matrix<Vertex> _vertices;
 		std::vector<Triangle> _triangles;
+		std::vector<float> _min;
+		std::vector<float> _max;
+
 
 	private: // methods
 
@@ -62,11 +66,8 @@ namespace mbgrd2gltf {
 	public: // methods
 
 		Geometry(const Bathymetry& bathymetry, const Options& options);
-
 		const Matrix<Vertex>& vertices() const { return _vertices; }
 		const std::vector<Triangle>& triangles() const { return _triangles; }
-		std::vector<float> ConvertMatrixToVector(const Matrix<Vertex>& matrix) const;
-		std::vector<int> ConvertTrianglesToVector(const std::vector<Triangle>& triangles) const;
 	};
 }
 

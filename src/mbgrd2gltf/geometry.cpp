@@ -193,33 +193,4 @@ namespace mbgrd2gltf {
 		return out;
 	}
 
-	std::vector<float> Geometry::ConvertMatrixToVector(const Matrix<Vertex>& matrix) const {
-		std::vector<float> out;
-		out.reserve(matrix.size_x() * matrix.size_y() * 3);
-		for (size_t y = 0; y < matrix.size_y(); ++y) {
-			for (size_t x = 0; x < matrix.size_x(); ++x) {
-				const auto& vertex = matrix.at(x, y);
-				if (vertex.is_valid()) {
-					out.push_back(vertex.x());
-					out.push_back(vertex.y());
-					out.push_back(vertex.z());
-				}
-			}
-		}
-
-		return out;
-	}
-
-	std::vector<int> Geometry::ConvertTrianglesToVector(const std::vector<Triangle>& triangles) const {
-		std::vector<int> out;
-		out.reserve(triangles.size() * 3);
-
-		for (const auto& triangle : triangles) {
-			out.push_back(triangle.a());
-			out.push_back(triangle.b());
-			out.push_back(triangle.c());
-		}
-
-		return out;
-	}
 }

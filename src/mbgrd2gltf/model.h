@@ -41,7 +41,7 @@
 namespace mbgrd2gltf {
 	namespace model {
 		void write_gltf(const Geometry& geometry, const Options& options);
-		void EncodeGeometryWithDraco(const std::vector<float>& vertices, const std::vector<int>& faces, int quantization, std::vector<char>& compressed_data);
+		void encodeGeometry(const std::vector<float>& vertices, const std::vector<int>& faces, std::vector<unsigned char>& out, Options& options);
 	}
 }
 
