@@ -52,7 +52,6 @@ namespace mbgrd2gltf {
 
 
 	private: // methods
-
 		static double to_radians(double degrees);
 		static double get_longitude(const Bathymetry& bathymetry, size_t x);
 		static double get_latitude(const Bathymetry& bathymetry, size_t y);
@@ -60,9 +59,7 @@ namespace mbgrd2gltf {
 		static Matrix<Vertex> get_vertices(const Bathymetry& bathymetry, double vertical_exaggeration);
 		static std::vector<Triangle> get_triangles(const Matrix<Vertex>& vertices);
 
-
 	public: // methods
-
 		Geometry(const Bathymetry& bathymetry, const Options& options);
 		const Matrix<Vertex>& vertices() const { return _vertices; }
 		const std::vector<Triangle>& triangles() const { return _triangles; }

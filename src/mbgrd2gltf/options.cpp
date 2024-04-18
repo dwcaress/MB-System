@@ -184,7 +184,6 @@ namespace mbgrd2gltf {
 	void Options::arg_draco_compression(const char**, unsigned, unsigned&) {
 		if (_is_draco_compressed)
 			throw std::invalid_argument("draco compression may not be specified more than once");
-
 		_is_draco_compressed = true;
 	}
 
@@ -195,8 +194,8 @@ namespace mbgrd2gltf {
 
 		int value = (int)get_value_double(args, size, i, "quantization");
 
-		if (value < 2 || value > 30)
-			throw std::invalid_argument("expected quantization between 2 and 30 but got:"
+		if (value <= 0 || value > 30)
+			throw std::invalid_argument("expected quantization between 1 and 30 but got:"
 				+ std::to_string(value));
 
 		_draco_quantization = value;

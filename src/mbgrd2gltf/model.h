@@ -41,7 +41,12 @@
 namespace mbgrd2gltf {
 	namespace model {
 		void write_gltf(const Geometry& geometry, const Options& options);
-		void encodeGeometry(const std::vector<float>& vertices, const std::vector<int>& faces, std::vector<unsigned char>& out, Options& options);
+		bool dracoCompressed(tinygltf::Model& model, const Geometry& geometry,
+			const Options& options, const std::vector<float>& vertex_buffer,
+			const std::vector<uint32_t>& index_buffer);
+		bool dracoEncodeGeometry(const std::vector<float>& vertex_buffer,
+			const std::vector<uint32_t>& index_buffer, const Options& options,
+			std::vector<unsigned char>& out);
 	}
 }
 

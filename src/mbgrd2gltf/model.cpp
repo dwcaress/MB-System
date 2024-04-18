@@ -206,9 +206,12 @@ namespace mbgrd2gltf {
 		* @param compressed_data : Place to store the compressed data
 		* @param quantizationPosition : Quantization value for the position attribute
 		* @return bool : True if the encoding was successful, false otherwise
-		*
 		*/
-		bool encodeGeometry(const std::vector<float>& vertex_buffer, const std::vector<uint32_t>& index_buffer, std::vector<unsigned char>& out, const Options& options) {
+		bool dracoEncodeGeometry(const std::vector<float>& vertex_buffer, const std::vector<uint32_t>& index_buffer, const Options& options,
+			std::vector<unsigned char>& out) {
+			if (vertex_buffer.empty() || index_buffer.empty())
+				return false;
+
 			draco::Mesh mesh;
 			const size_t num_vertices = vertex_buffer.size() / 3;
 			mesh.set_num_points(num_vertices);
@@ -228,17 +231,15 @@ namespace mbgrd2gltf {
 				std::cerr << "Failed adding position attribute to the mesh." << std::endl;
 				return false;
 			}
-			draco::PointAttribute* attribute = pc.attribute(pos_att_id);
+			auto* attribute = pc.attribute(pos_att_id);
 			// Add the vertices to the Draco mesh
-			int point_index = 0;
 			for (size_t i = 0; i < vertex_buffer.size(); i += 3) {
-				std::array<float, 3> pos = {vertex_buffer[i], vertex_buffer[i + 1], vertex_buffer[i + 2]};
-				attribute->SetAttributeValue(draco::AttributeValueIndex(point_index), pos.data());
-				point_index++;
+				const float pos[3] = {vertex_buffer[i], vertex_buffer[i + 1], vertex_buffer[i + 2]};
+				attribute->SetAttributeValue(draco::AttributeValueIndex(i / 3), pos);
 			}
-			draco::Mesh::Face face;
+
 			for (size_t i = 0; i < index_buffer.size(); i += 3) {
-				std::array<draco::PointIndex, 3> face = {
+				const draco::Mesh::Face face = {
 					draco::PointIndex(index_buffer[i]),
 					draco::PointIndex(index_buffer[i + 1]),
 					draco::PointIndex(index_buffer[i + 2])
@@ -266,23 +267,28 @@ namespace mbgrd2gltf {
 		* @param index_buffer : The index buffer to compress
 		* @return tinygltf::Model : The compressed model
 		*/
+		bool dracoCompressed(tinygltf::Model& model, const Geometry& geometry, const Options& options, const std::vector<float>& vertex_buffer, const std::vector<uint32_t>& index_buffer) {
+			// Check if the geometry is empty or if the Draco compression is disabled or invalid (quantization value)
+			if (!options.is_draco_compressed() || vertex_buffer.empty() || index_buffer.empty() || options.draco_quantization() <= 0 || options.draco_quantization() > 30)
+				return false;
 
-		bool dracoCompressed(tinygltf::Model model, const Geometry& geometry, const Options& options, const std::vector<float>& vertex_buffer, const std::vector<uint32_t>& index_buffer) {
+			// Encode the geometry using Draco && add the compressed data to the model buffer.
 			tinygltf::Buffer buffer;
-			// Encode the geometry using Draco
-			if (!encodeGeometry(vertex_buffer, index_buffer, buffer.data, options)) {
+			std::vector<unsigned char> compressed_data;
+			if (!dracoEncodeGeometry(vertex_buffer, index_buffer, options, compressed_data) || compressed_data.empty()) {
 				std::cerr << "Failed to encode geometry using Draco. Falling back to regular GLTF format." << std::endl;
 				return false;
 			}
-			// Prepare the buffer for the mo
+
+			buffer.data.assign(compressed_data.begin(), compressed_data.end());
 			model.buffers.push_back(std::move(buffer));
+			// Prepare the buffer view for the compressed data
 			tinygltf::BufferView bufferView;
 			bufferView.buffer = 0;  // Reference to the first buffer
 			bufferView.byteOffset = 0;
-			bufferView.byteLength = static_cast<size_t>(buffer.data.size());
+			bufferView.byteLength = static_cast<size_t>(compressed_data.size());
 			model.bufferViews.push_back(std::move(bufferView));
-
-			// Prepare the accessors for the model
+			// Prepare the index and vertex accessors
 			tinygltf::Accessor indexAccessor;
 			indexAccessor.componentType = TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT; // 5125
 			indexAccessor.count = index_buffer.size(); // Count of indices
@@ -291,7 +297,7 @@ namespace mbgrd2gltf {
 
 			tinygltf::Accessor vertexAccessor;
 			vertexAccessor.componentType = TINYGLTF_COMPONENT_TYPE_FLOAT; // 5126
-			vertexAccessor.count = vertex_buffer.size() / 3; // Count of vertices
+			vertexAccessor.count = vertex_buffer.size() / 3; // Count of side
 			vertexAccessor.type = TINYGLTF_TYPE_VEC3; // VEC3
 			vertexAccessor.maxValues = get_vertex_maxes(vertex_buffer);
 			vertexAccessor.minValues = get_vertex_mins(vertex_buffer);
@@ -316,11 +322,13 @@ namespace mbgrd2gltf {
 
 			// Add the Draco extension to the primitive's extensions map
 			primitive.extensions["KHR_draco_mesh_compression"] = tinygltf::Value(dracoExtension);
-
 			// Add the prepared primitive to the model
 			tinygltf::Mesh newMesh;
 			newMesh.primitives.push_back(std::move(primitive));
 			model.meshes.push_back(std::move(newMesh));
+			// Add the required and used extensions to the model
+			model.extensionsUsed.push_back("KHR_draco_mesh_compression");
+			model.extensionsRequired.push_back("KHR_draco_mesh_compression");
 
 			return true;
 		}
@@ -331,19 +339,13 @@ namespace mbgrd2gltf {
 		* @param geometry : The geometry to write
 		* @param options : The options to use for writing the file
 		*/
-
 		void write_gltf(const Geometry& geometry, const Options& options) {
-
-			std::vector<float> vertex_buffer = get_vertex_buffer(geometry.vertices());
-			std::vector<uint32_t> index_buffer = get_index_buffer(geometry.triangles());
+			const std::vector<float> vertex_buffer = get_vertex_buffer(geometry.vertices());
+			const std::vector<uint32_t> index_buffer = get_index_buffer(geometry.triangles());
 			std::string output_filepath = options.output_filepath() + (options.is_binary_output() ? ".glb" : ".gltf");
 			tinygltf::Model model;
 
-			if (options.is_draco_compressed() && dracoCompressed(model, geometry, options, vertex_buffer, index_buffer)) {
-				model.extensionsUsed.push_back("KHR_draco_mesh_compression");
-				model.extensionsRequired.push_back("KHR_draco_mesh_compression");
-			}
-			else {
+			if (!dracoCompressed(model, geometry, options, vertex_buffer, index_buffer)) {
 				tinygltf::Buffer buffer = get_buffer(vertex_buffer, index_buffer);
 				model.buffers.push_back(std::move(buffer));
 				model.bufferViews.push_back(get_index_buffer_view(index_buffer));
@@ -354,11 +356,13 @@ namespace mbgrd2gltf {
 				mesh.primitives.push_back(get_primitive());
 				model.meshes.push_back(std::move(mesh));
 			}
+
 			// Set up the material
 			tinygltf::Material material;
 			material.doubleSided = true;
 			model.materials.push_back(material);
-			// Set up the scene
+
+			// Set up the scene and node
 			tinygltf::Scene scene;
 			tinygltf::Node node;
 			node.mesh = static_cast<int>(model.meshes.size()) - 1;
@@ -374,5 +378,6 @@ namespace mbgrd2gltf {
 				std::cerr << "Failed to write GLTF file." << std::endl;
 			}
 		}
+
 	}
 }
