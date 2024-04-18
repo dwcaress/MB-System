@@ -1,0 +1,99 @@
+.TH MBGRD2GLTF 1 "17 April, 2024" "MB-System version 5.8" "MB-System User Commands"
+.SH NAME
+mbgrd2gltf \- convert bathymetric grid data to GLTF format with optional settings, including Draco compression.
+
+.SH SYNOPSIS
+.B mbgrd2gltf
+.I <filepath>
+
+\fB\-b\fR | \-\-binary
+
+\fB\-o\fR | \-\-output
+.I <output filepath>
+
+\fB\-e\fR | \-\-exaggeration
+.I <vertical exaggeration>
+
+\fB\-m\fR | \-\-max-size
+.I <max size>
+
+\fB\-c\fR | \-\-compression
+.I <compression ratio>
+
+\fB\-d\fR | \-\-draco
+
+\fB\-q\fR | \-\-quantization
+.I <quantization number>
+
+\fB\-h\fR | \-\-help
+
+.SH DESCRIPTION
+.B mbgrd2gltf
+is a tool in the MB-System suite of software designed to convert bathymetric grid data files (specifically GMT GRD format) into GLTF (Graphics Library Transmission Format) files. It supports various options to control the output format, size, compression level, and quality, making it suitable for 3D modeling software and web applications. The optional Draco compression feature can significantly reduce the size of the 3D models while maintaining a balance between size and visual quality.
+
+.SH OPTIONS
+.TP
+.B <filepath>
+Specify the path to the input GMT GRD file.
+
+.TP
+.B \-b, \-\-binary
+Generate the output in binary GLTF format. Binary GLTF is more compact and typically loads faster in applications.
+
+.TP
+.B \-o, \-\-output
+Specify the path to the folder where the output GLTF file will be written.
+
+.TP
+.B \-e, \-\-exaggeration
+Specify the vertical exaggeration factor as a decimal number, which multiplies the vertex altitudes. This can enhance the visibility of topographic features.
+
+.TP
+.B \-m, \-\-max-size
+Specify the maximum size of the output buffer data in megabytes. This is useful for ensuring that the output files do not exceed certain size constraints. Actual size may vary based on compression settings.
+
+.TP
+.B \-c, \-\-compression
+Specify the compression ratio as a decimal number, indicating the desired ratio of uncompressed to compressed size. This setting controls the general output file size.
+
+.TP
+.B \-d, \-\-draco
+Enable Draco compression to further reduce the file size and improve loading times in 3D environments. Draco is an open-source library for compressing and decompressing 3D geometric meshes and point clouds.
+
+.TP
+.B \-q, \-\-quantization
+Specify the quantization level for Draco compression. Quantization level affects the precision of the mesh vertices. Higher values increase compression but reduce precision, potentially affecting the visual quality of the terrain.
+
+.TP
+.B \-h, \-\-help
+Display help message and exit. Provides more information on command usage and options.
+
+.SH EXAMPLES
+Convert a GMT GRD file to a GLTF file with default settings:
+.RS
+.nf
+mbgrd2gltf input.grd
+.fi
+.RE
+
+Convert a GRD file to binary GLTF with specified output folder and Draco compression at a quantization level of 10:
+.RS
+.nf
+mbgrd2gltf input.grd --binary --output /path/to/output --draco --quantization 10
+.fi
+.RE
+
+.SH "SEE ALSO"
+.B mbinfo(1),
+.B mbprocess(1),
+.B mblist(1)
+
+.SH AUTHORS
+David W. Caress - Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes - Center for Coastal and Ocean Mapping, University of New Hampshire
+.br
+Christian dos Santos Ferreira - MARUM, University of Bremen
+
+.SH BUGS
+Please report any bugs on the MB-System GitHub Issue Tracker.

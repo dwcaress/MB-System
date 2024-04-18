@@ -20,6 +20,7 @@ set(manpages
     mbformat.1
     mbgetesf.1
     mbgpstide.1
+	mbgrd2gltf.1
     mbgrd2obj.1
     mbgrdtiff.1
     mbgrdviz.1
