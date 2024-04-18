@@ -40,7 +40,6 @@
 #define TINYGLTF_NO_STB_IMAGE_WRITE
 #include "tinygltf/tiny_gltf.h"
 #include "draco/compression/encode.h"
-#include "draco/compression/decode.h"
 
 namespace mbgrd2gltf {
 	namespace model {

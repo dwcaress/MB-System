@@ -5,7 +5,7 @@
 #    David W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, California, USA
-#    Dale N. Chayes 
+#    Dale N. Chayes
 #      Center for Coastal and Ocean Mapping
 #      University of New Hampshire
 #      Durham, New Hampshire, USA
@@ -13,7 +13,7 @@
 #      MARUM
 #      University of Bremen
 #      Bremen Germany
-#      
+#
 #    MB-System was created by Caress and Chayes in 1992 at the
 #      Lamont-Doherty Earth Observatory
 #      Columbia University
@@ -45,7 +45,7 @@ file(GLOB_RECURSE DRACO_SOURCES "${DRACO_DIR}/*.cc" "${DRACO_DIR}/*.h")
 # Recursively filter out all test files
 list(FILTER DRACO_SOURCES EXCLUDE REGEX ".*/.*test.*")
 
-message(STATUS "Draco sources: ${DRACO_SOURCES}")
+#message(STATUS "Draco sources: ${DRACO_SOURCES}")
 
 add_executable(mbgrd2gltf
 	bathymetry.cpp compression.cpp geometry.cpp main.cpp model.cpp options.cpp ${DRACO_SOURCES} )
