@@ -22,7 +22,7 @@ mbgrd2gltf \- convert bathymetric grid data to GLTF format with optional setting
 
 .SH DESCRIPTION
 .B mbgrd2gltf
-is a tool in the MB-System suite of software designed to convert bathymetric grid data files (specifically GMT GRD format) into GLTF (Graphics Library Transmission Format) files. It supports various options to control the output format, size, compression level, and quality, making it suitable for 3D modeling software and web applications. The optional Draco compression feature can significantly reduce the size of the 3D models while maintaining a balance between size and visual quality.
+is a tool designed to convert grid data files (GRD) to Graphics Library Transmission Format (GLTF) files. It can generate output in: a binary to create a more compact GLTF file, exaggerate vertex altitude to enhance topographic features, and cap the max-size of the GLTF so the output files don't exceed size constraints. Furthermore, optional Draco compression can reduce the outputed GLTF file size even more while maintaining good visual quality. With Draco, one can specify the quantization level, which affects the precision of mesh vertices.
 
 .SH MB-SYSTEM AUTHORSHIP
 David W. Caress - Monterey Bay Aquarium Research Institute
