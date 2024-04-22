@@ -157,8 +157,8 @@ foreach $file (@filelist) {
     chop $format;
   }
 
-  if (($suffix eq ".all" || $suffix eq ".ALL")
-      && ($file eq "9999.all" || $file eq "9999.ALL")) {
+  if (($suffix eq ".all" || $suffix eq ".ALL" || $suffix eq ".kmall" || $suffix eq ".KMALL")
+      && ($file eq "9999.all" || $file eq "9999.ALL" || $file eq "9999.kmall" || $file eq "9999.KMALL")) {
 print "File ignored:   file:$file format:$format\n";
   } elsif ($format != 0 && ($file ne $datalist || $directory ne ".")) {
     $count++;
@@ -170,7 +170,8 @@ print "File ignored:   file:$file format:$format\n";
   }
 }
 
-# If the suffix is *.all and -T is specified, attempt to time order the filenames
+# If the data are in one of the Kongsberg formats and -T is not specified, 
+# attempt to time order the filenames
 if (($suffix eq ".all" || $suffix eq ".ALL" || $suffix eq ".mb56"
      || $suffix eq ".mb57" || $suffix eq ".mb58" || $suffix eq ".mb59"
      || $suffix eq ".kmall" || $suffix eq ".KMALL" || $suffix eq ".mb261")
@@ -182,16 +183,25 @@ if (($suffix eq ".all" || $suffix eq ".ALL" || $suffix eq ".mb56"
   # present
   $case = 0;
   for ($i = 0; $i < scalar(@outfilelist); $i++) {
+    $ok = 0;
     $file = $outfilelist[$i];
     $format = $outformatlist[$i];
     ($start, $yyyymmdd, $hhmmss, $end) = $file =~ /(\d{4})_(\d{8})_(\d{6})(\S+)/;
-    if ($yyyymmdd == "" || $hhmmss == "") {
-      ($start, $yyyymmdd, $hhmmss, $end) = $file =~ /(\d+)_(\d+)_(\d+)_(\S+)/;
-      $case = 1;
+    if ($yyyymmdd != "" && $hhmmss != "") {
+      $ok = 1;
     }
-    $tmpname = $yyyymmdd . "^" . $hhmmss . "^" . $start . "^" . $end . "^" . $i . "^" . $format;
-    push(@sortfilelist, $tmpname);
-    $count++;
+    else {
+      ($start, $yyyymmdd, $hhmmss, $end) = $file =~ /(\d+)_(\d+)_(\d+)_(\S+)/;
+      if ($yyyymmdd != "" && $hhmmss != "") {
+        $case = 1;
+        $ok = 1;
+      }
+    }
+    if ($ok == 1) {
+      $tmpname = $yyyymmdd . "^" . $hhmmss . "^" . $start . "^" . $end . "^" . $i . "^" . $format;
+      push(@sortfilelist, $tmpname);
+      $count++;
+    }
   }
   @sortedfilelist = sort @sortfilelist;
     $ii = 0;

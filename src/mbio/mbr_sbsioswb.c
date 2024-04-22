@@ -367,7 +367,7 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	if (status == MB_FAILURE && *error == MB_ERROR_UNINTELLIGIBLE) {
 		/* read rest of record into dummy */
 		for (int i = 0; i < data->sensor_size; i++) {
-      size_t read_len = 0;
+      	  	size_t read_len = 0;
 			if ((read_len = fread(dummy, 1, 1, mb_io_ptr->mbfp)) != (size_t) 1) {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
@@ -385,7 +385,7 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* read sensor record from file */
 	if (status == MB_SUCCESS && data->sensor_size > 0) {
-    size_t read_len = 0;
+    	size_t read_len = 0;
 		if ((read_len = fread(sensorptr, 1, data->sensor_size, mb_io_ptr->mbfp)) == (size_t) data->sensor_size) {
 			mb_io_ptr->file_bytes += read_len;
 			status = MB_SUCCESS;
@@ -523,10 +523,10 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			if (lon < 0.0)
 				lon = lon + 360.0;
 			store->lon2u = (unsigned short)60.0 * lon;
-			store->lon2b = (unsigned short)ROUND(600000.0 * (lon - store->lon2u / 60.0));
+			store->lon2b = (unsigned short)round(600000.0 * (lon - store->lon2u / 60.0));
 			lat = 0.0000001 * data->lat + 90.0;
 			store->lat2u = (unsigned short)60.0 * lat;
-			store->lat2b = (unsigned short)ROUND(600000.0 * (lat - store->lat2u / 60.0));
+			store->lat2b = (unsigned short)round(600000.0 * (lat - store->lat2u / 60.0));
 
 			/* time stamp */
 			store->year = data->year;
@@ -535,8 +535,8 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			store->sec = 0.01 * data->sec;
 
 			/* heading */
-			store->sbhdg = (data->heading < (short)0) ? (unsigned short)ROUND(((int)data->heading + 3600) * 18.204444444)
-			                                          : (unsigned short)ROUND(data->heading * 18.204444444);
+			store->sbhdg = (data->heading < (short)0) ? (unsigned short)round(((int)data->heading + 3600) * 18.204444444)
+			                                          : (unsigned short)round(data->heading * 18.204444444);
 
 			/* depths and distances */
 			id = data->beams_bath - 1;
@@ -685,7 +685,7 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->sec = 100 * store->sec;
 
 		/* heading */
-		data->heading = (short)ROUND(((int)store->sbhdg) * 0.054931641625);
+		data->heading = (short)round(((int)store->sbhdg) * 0.054931641625);
 
 		/* additional values */
 		data->eclipse_time = store->sbtim;

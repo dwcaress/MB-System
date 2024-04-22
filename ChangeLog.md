@@ -1,4 +1,4 @@
----
+--
 ## MB-System ChangeLog File:
 
 This file lists changes to the source code of the MB-System open
@@ -23,6 +23,8 @@ or beta, are equally accessible as tarballs through the Github interface.
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
 
+- **Version 5.8.1          March 22, 2024**
+- Version 5.8.1beta09    March 22, 2024
 - Version 5.8.1beta08    March 10, 2024
 - Version 5.8.1beta07    February 24, 2024
 - Version 5.8.1beta04    February 16, 2024
@@ -32,6 +34,107 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.1 (March 22, 2024)
+
+CMake build system: Fixed ability to set OTPS location in cmake build system.
+
+CMake build system: Added installation of header files required for external programs to
+utilize MB-System libraries.
+
+Format 261 (MBF_KEMKMALL): Updated support for Kongsberg Kmall format to match updated 
+specification J.
+
+Format 16 (MBF_SBSIOSWB): Fixed bug that became evident when processing old Scripps
+SeaBeam Classic data in format 16 on a MacOs Sonoma machine. This turned out to be
+a poorly formed preprocessor macro for rounding floating point values in code dating 
+from 1992. 
+
+Formats 58 (MBF_EM710RAW) and 59 (MBF_EM710MBA):  Fixed bug in which some bathymetry 
+edits were applied to the wrong pings. Third generation Kongsberg multibeams produce
+two cross profiles with each ping cycle, but represent these as two separate pings
+with the same ping time. MB-System distinguishes between pings using the timestamps
+rather than ping numbers (because not all sonars produce ping numbers), so pings
+with the same timestamp confuse the beam flag handling code. The solution is to add
+a small amount of time to the timestamp of the second ping in each pair. The bug was
+that the amount of time added by mbpreprocess was 33 microseconds, but the datagrams
+in Kongsberg *.all files specify timestamps only to the millisecond level, and so
+the added time was not large enough to be recorded differently in the output files.
+
+Mbpreprocess: Now checks for successive pings/scans with the same timestamp, and 
+adds enough time to the second timestamp (0.0000033 seconds) that these pings/scans 
+are seen as different by the beam edit flag handling code. For dual head sensors 
+this logic only compares timestamps for the same subsensor, so simultaneous operation
+of the two subsensors (sonar or lidar heads) is allowed.
+
+Mbpreprocess and format MBF_EM710RAW (58): The command --kluge-auv-sentry-sensordepth 
+now works for format 58 files (3rd generation Kongsberg multibeam data in *.all files)
+such that available sensordepth values are embedded in the output format MBF_EM710MBA
+(59) files.
+
+Mbpreprocess and mbprocess: Now support merging navigation and attitude from Schmidt
+Ocean Institute RVDAS format ROV navigation.
+
+Mbvoxelclean: Fixed bug in which previously beamflags from previously existing esf
+files were ignored. Also fixed a non-initialized pointer bug that produced occasional
+crashes.
+
+Mbgrid: Improved output to shell so that it shows the min max values from each 
+contributing input file whether verbose is specified or not.
+Mbm_grdplot: Added colortable 10, which runs from blue to red and can be used for
+plots of seismic reflection or subbottom profiler data when the trace signals are
+both positive or negative.
+
+Mbphotomosaic: Fixed priority-heading option that allows image prioritization on
+the basis of camera heading.
+
+Mbphotomosaic: Added options to detect and correct dark images (for when strobe lights
+partially drop out), to ignore dark images, and to allow image prioritization on
+the basis of camera heading.
+
+SEGY format data: Changed MB-System SEGY traceheader to include a sensordepthtime 
+float value in bytes 216-219. This will be used to hold the two-way traveltime in
+seconds corresponding to the source depth assuming a 1500 m/sec water sound speed.
+This value can be used as a trace start delay time in plotting to account for the
+source location of subbottom profiler data collected from submerged platforms like
+AUVs and ROVs. The MB-System programs mbsegygrid and mbm_grdplot use the source 
+depth value in meters, but some external packages need the delay time.
+
+SEGY format data: MB-System now recognizes file suffixes *.sgy and *.SGY in addition
+to *.segy *.SEGY *.seg and *.SEG
+
+Mbsegyinfo: Fixed calculation and reporting of trace minimum and maximum values.
+
+Mbextractsegy: Now allows output of subbottom analytic data as well as envelope data.
+Use of the -S4 command will output three separate segy files, one with the envelope
+function, one with the subbottom correlate, and one with the correlate conjugant
+(i.e. the Hilbert transform of the correlate). The section plot script generated now
+will create plots of all three trace types.
+
+Mbtrnpp: The optional Terrain Relative Navigation (TRN) software has been augmented 
+with code to utilize realtime format 58 (Kongsberg *.all) format multibeam accessed
+through a serial stream.
+
+#### 5.8.1beta09 (March 22, 2024)
+
+Format 16 (MBF_SBSIOSWB): Fixed bug that became evident when processing old Scripps
+SeaBeam Classic data in format 16 on a MacOs Sonoma machine. This turned out to be
+a poorly formed preprocessor macro for rounding floating point values in code dating 
+from 1992. 
+
+Formats 58 (MBF_EM710RAW) and 59 (MBF_EM710MBA):  Fixed bug in which some bathymetry 
+edits were applied to the wrong pings. Third generation Kongsberg multibeams produce
+two cross profiles with each ping cycle, but represent these as two separate pings
+with the same ping time. MB-System distinguishes between pings using the timestamps
+rather than ping numbers (because not all sonars produce ping numbers), so pings
+with the same timestamp confuse the beam flag handling code. The solution is to add
+a small amount of time to the timestamp of the second ping in each pair. The bug was
+that the amount of time added by mbpreprocess was 33 microseconds, but the datagrams
+in Kongsberg *.all files specify timestamps only to the millisecond level, and so
+the added time was not large enough to be recorded differently in the output files.
+
+Mbgrid: Improved output to shell so that it shows the min max values from each 
+contributing input file whether verbose is specified or not.
 
 #### 5.8.1beta08 (March 10, 2024)
 
