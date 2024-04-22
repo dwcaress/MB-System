@@ -37,12 +37,9 @@ QString MainWindow::staticTextBuf_;
 
 /// using namespace mb_system;
 
-MainWindow::MainWindow(QObject *rootObject) {
+MainWindow::MainWindow(QObject *rootObject, int argc, char **argv) {
 
   ui_ = rootObject;
-
-  guiNames_ = new GuiNames();
-  
   dataPlotted_ = false;
   
   // Dummy first argument to drawing functions
@@ -59,20 +56,38 @@ MainWindow::MainWindow(QObject *rootObject) {
 
   // Find PixmapImage in QML object tree
   swathPixmapImage_ = 
-    ui_->findChild<PixmapImage*>(guiNames_->swathPixmap());
+    ui_->findChild<PixmapImage*>(SWATH_PIXMAP_NAME);
 
   if (!swathPixmapImage_) {
-    qCritical() << "Couldn't find " << guiNames_->swathPixmap() <<
-      " in QML";
-  }
-  else {
-    qDebug() << "Found " << guiNames_->swathPixmap() << " in QML";
+    qCritical() << "Couldn't find " << SWATH_PIXMAP_NAME << " in QML";
   }
   
   pixmapContainer_.pixmap = canvasPixmap_;
   swathPixmapImage_->setImage(&pixmapContainer_);
   
   staticFontMetrics_ = new QFontMetrics(painter_->font());
+
+  int cSize[4] = {0, 0, 0, 0};
+  canvasSize(&cSize[1], &cSize[3]);
+  int inputSpecd = 0;
+  mbedit_set_scaling(cSize, NO_ANCILL);
+  
+  mbedit_init(argc, argv, &inputSpecd,
+	      nullptr,
+	      &MainWindow::drawLine,
+	      &MainWindow::drawRect,
+	      &MainWindow::fillRect,
+	      &MainWindow::drawString,
+	      &MainWindow::justifyString,
+	      &MainWindow::parseDataList,
+	      &MainWindow::showError,
+	      &MainWindow::showMessage,
+	      &MainWindow::hideMessage,
+	      &MainWindow::enableFileButton,
+	      &MainWindow::disableFileButton,
+	      &MainWindow::enableNextButton,
+	      &MainWindow::disableNextButton,
+	      &MainWindow::resetScaleX);
   
   mbedit_get_defaults(&maxPingsShown_, &nPingsShown_, &soundColorCoding_,
 		      &showFlagSounding_, &showFlagProfile_,
@@ -83,15 +98,30 @@ MainWindow::MainWindow(QObject *rootObject) {
 
   qDebug() << "format_: " << format_;
 
-  // Set sliders to default values
+  // Set GUI items to default values
   qDebug() << "TBD: Set sliders to default values";
   /* ***
   ui->vertExaggSlider->setSliderPosition(verticalExagg_/100);  
   ui->nPingsShowSlider->setSliderPosition(nPingsShown_);
   ui->xtrackWidthSlider->setSliderPosition(xTrackWidth_);  
   *** */
-  
-  plotTest();
+  char *swathFile = nullptr;
+  // Parse command line options
+  for (int i = 1; i < argc; i++) {
+    // Input swath file is last argument
+    if (i == argc-1) {
+      swathFile = argv[i];
+    }
+  }
+
+  if (swathFile) {
+    if (!processSwathFile(swathFile)) {
+      qWarning() << "Couldn't process " << swathFile;
+    }
+  }
+  else {
+    plotTest();
+  }
   
 }
 
@@ -102,126 +132,79 @@ MainWindow::~MainWindow()
 
 
 
-void MainWindow::on_xtrackWidthSlider_sliderReleased()
-{
-  std::cerr << "xtrackWidth released\n";
-  /* ***
-  xTrackWidth_ = ui->xtrackWidthSlider->sliderPosition();
-  std::cerr << "xTrackWidth = " << xTrackWidth_ << "\n";
-  *** */
+void MainWindow::testSlot() {
+  qDebug() << "*** testSlot() *****";
+}
+
+
+void MainWindow::onAncillDataChanged(QString msg) {
+  qDebug() << "*** onAncillDataChanged() msg: " << msg;
+
+  if (msg == NONE_ANCILLDATA) {
+    plotAncillData_ = NO_ANCILL;
+  }
+  else if (msg == TIME_ANCILLDATA) {
+    plotAncillData_ = TIME;
+  }
+  else if (msg == INTERVAL_ANCILLDATA) {
+    plotAncillData_ = INTERVAL;
+  }
+  else if (msg == LATITUDE_ANCILLDATA) {
+    plotAncillData_ = LATITUDE;
+  }
+  else if (msg == LONGITUDE_ANCILLDATA) {
+    plotAncillData_ = LONGITUDE;
+  }
+  else if (msg == HEADING_ANCILLDATA) {
+    plotAncillData_ = HEADING;
+  }
+  else if (msg == SPEED_ANCILLDATA) {
+    plotAncillData_ = SPEED;
+  }
+  else if (msg == DEPTH_ANCILLDATA) {
+    plotAncillData_ = DEPTH;
+  }
+  else if (msg == ALTITUDE_ANCILLDATA) {
+    plotAncillData_ = ALTITUDE;
+  }
+  else if (msg == SENSORDEPTH_ANCILLDATA) {
+    plotAncillData_ = SENSORDEPTH;
+  }
+  else if (msg == ROLL_ANCILLDATA) {
+    plotAncillData_ = ROLL;
+  }
+  else if (msg == PITCH_ANCILLDATA) {
+    plotAncillData_ = PITCH;
+  }
+  else if (msg == HEAVE_ANCILLDATA) {
+    plotAncillData_ = HEAVE;
+  }
+  else {
+    qWarning() << "Unknown ancillary data selected: " << msg;
+  }
+
   plotSwath();
 }
 
 
-void MainWindow::on_nPingsShowSlider_sliderReleased()
-{
-  std::cerr << "nPingsShown released\n";
-  /* ***
-  nPingsShown_ = ui->nPingsShowSlider->sliderPosition();
-  std::cerr << "read nPingsShow = " << nPingsShown_ << "\n";
-  *** */
+void MainWindow::onSliceChanged(QString slice) {
+  qDebug() << "onSliceChanged(): " << slice;
+  if (slice == ALONGTRACK_SLICE) {
+    sliceMode_ = ALONGTRACK;
+  }
+  else if (slice == CROSSTRACK_SLICE) {
+    sliceMode_ = ACROSSTRACK;
+  }
+  else if (slice == WATERFALL_SLICE) {
+    sliceMode_ = WATERFALL;
+  }
+  else {
+    qWarning() << "Unknown slice option: " << slice;
+  }
+
   plotSwath();
-
+  
 }
-
-
-void MainWindow::on_vertExaggSlider_sliderReleased()
-{
-  std::cerr << "vertExagg Released!\n";
-
-  /* ***
-  // Get slider position
-  int position = ui->vertExaggSlider->sliderPosition();
-  std::cerr << "read vertExagg = " << position << "\n";
-
-  // NOTE: scaled by 100x
-  verticalExagg_ = position * 100;
-  *** */
-  plotSwath();
-
-}
-
-
-
-void MainWindow::on_actionNone_triggered() {
-  std::cerr << "actionNone triggered!\n";
-  plotAncillData_ = NO_ANCILL;
-  plotSwath();  
-}
-
-void MainWindow::on_actionTime_triggered() {
-  std::cerr << "actionTime triggered!\n";
-  plotAncillData_ = TIME;
-  plotSwath();  
-}
-
-void MainWindow::on_actionInterval_triggered() {
-  std::cerr << "actionInterval triggered!\n";
-  plotAncillData_ = INTERVAL;
-  plotSwath();  
-}
-
-void MainWindow::on_actionLatitude_triggered() {
-  std::cerr << "actionLatitude triggered!\n";
-  plotAncillData_ = LATITUDE;
-  plotSwath();  
-}
-
-void MainWindow::on_actionLongitude_triggered() {
-  std::cerr << "actionLongitude triggered!\n";
-  plotAncillData_ = LONGITUDE;
-  plotSwath();  
-}
-
-void MainWindow::on_actionHeading_triggered() {
-  std::cerr << "actionHeading triggered!\n";
-  plotAncillData_ = HEADING;
-  plotSwath();  
-}
-
-void MainWindow::on_actionSpeed_triggered() {
-  std::cerr << "actionSpeed triggered!\n";
-  plotAncillData_ = SPEED;
-  plotSwath();  
-}
-
-void MainWindow::on_actionDepth_triggered() {
-  std::cerr << "actionDepth triggered!\n";
-  plotAncillData_ = DEPTH;
-  plotSwath();  
-}
-
-void MainWindow::on_actionAltitude_triggered() {
-  std::cerr << "actionAltitude triggered!\n";
-  plotAncillData_ = ALTITUDE;
-  plotSwath();
-}
-
-void MainWindow::on_actionSensor_depth_triggered() {
-  std::cerr << "actionSensor_depth triggered!\n";
-  plotAncillData_ = SPEED;
-  plotSwath();  
-}
-
-void MainWindow::on_actionRoll_triggered() {
-  std::cerr << "actionRoll triggered!\n";
-  plotAncillData_ = ROLL;
-  plotSwath();
-}
-
-void MainWindow::on_actionPitch_triggered() {
-  std::cerr << "actionPitch triggered!\n";
-  plotAncillData_ = PITCH;
-  plotSwath();  
-}
-
-void MainWindow::on_actionHeave_triggered() {
-  std::cerr << "actionHeave triggered!\n";
-  plotAncillData_ = HEAVE;
-  plotSwath();  
-}
-
-
                  
 void MainWindow::on_actionBottom_detect_algorithm_triggered() {
   std::cerr << "action bottom detected triggered\n";
@@ -243,28 +226,6 @@ void MainWindow::on_actionFlag_state_triggered() {
   plotSwath();
 }
 
-/* ***
-void MainWindow::on_swathCanvas_labelMouseEvent(QMouseEvent *event) {
-  std::cerr << "mouse event on swathCanvas: ";
-  switch (event->type()) {
-  case QEvent::MouseButtonPress:
-    std::cerr << "mouse button pressed\n";
-    break;
-
-  case QEvent::MouseButtonRelease:
-    std::cerr << "mouse button released\n";
-    break;
-
-  case QEvent::MouseMove:
-    std::cerr << "mouse moved\n";
-    break;
-
-  default:
-    std::cerr << "unhandled mouse event\n";
-  }
-}
-
-** */
 
 bool MainWindow::plotSwath(void) {
   if (!dataPlotted_) {
@@ -291,24 +252,20 @@ bool MainWindow::plotSwath(void) {
   }
 
   // Update GUI
-  qDebug() << "TBD: set pixmap";
-  
-  /// ui->swathCanvas->setPixmap(*canvas_);  
+  swathPixmapImage_->update();  
 
   return true;
 }
 
-
+/* **
 void MainWindow::on_actionOpen_swath_file_triggered()
 {
   qDebug() << "select swath file\n";
-  /* ***
+
   QString fileName = QFileDialog::getOpenFileName(this,
 						  tr("Open swath file"),
 						  QDir::homePath(),
 						  tr("swath files (*.m*)"));
-						  *** */
-
   QString fileName("dummy");
   
   qDebug() << "open swath file " << fileName;
@@ -316,12 +273,20 @@ void MainWindow::on_actionOpen_swath_file_triggered()
   std::cerr << "utf8_text: " << utf8_text << "\n";
   char *swathFile = (char *)utf8_text.c_str();
   std::cerr << "swathFile: " << swathFile << "\n";
+  if (!processSwathFile(swathFile)) {
+    qWarning() << "Couldn't process " << swathFile;
+  }
+  return;
+}
+*** */
 
+bool MainWindow::processSwathFile(char *swathFile) {
+  
   if (mbedit_get_format(swathFile, &format_) != MB_SUCCESS) {
     std::cerr << "Couldn't determine sonar format of " << swathFile
 	      << "\n";
 
-    return;
+    return false;
   }
 
   qDebug() << "format_ #2: " << format_;
@@ -335,7 +300,6 @@ void MainWindow::on_actionOpen_swath_file_triggered()
   int nGood = 0;
   int iCurrent = 0;
   int nPlot = 0;
-
   
   // Open swath file and plot data
   int status = mbedit_action_open(swathFile,
@@ -353,17 +317,18 @@ void MainWindow::on_actionOpen_swath_file_triggered()
 
   if (status != MB_SUCCESS) {
     std::cerr << "mbedit_action_open() failed\n";
-    return;
+    return false;
   }
   
   // Add pixmap to UI label
   qDebug() << "TBD: Draw on GUI\n";
+
+  
   // Update GUI
-  /* ***
-  ui->swathCanvas->setPixmap(*canvasPixmap_);
-  *** */
+  swathPixmapImage_->update();
   
   dataPlotted_ = true;
+  return true;
 }
 
 
@@ -419,7 +384,6 @@ bool MainWindow::plotTest() {
 
   // Update GUI
   qDebug() << "TBD: Update GUI";
-
   
   swathPixmapImage_->update();
   
@@ -538,11 +502,13 @@ void MainWindow::resetScaleXSlider(int width, int xMax,
 void MainWindow::onXtrackSliderChanged() {
   qDebug() << "onXtrackSliderChanged() slot";
   double value;
-  if (!sliderValue(guiNames_->xTrackSlider(), &value)) {
-    qWarning() << "Couldn't get value of slider " << guiNames_->xTrackSlider();
+  if (!sliderValue(XTRACK_SLIDER_NAME, &value)) {
+    qWarning() << "Couldn't get value of slider " << XTRACK_SLIDER_NAME;
     return;
   }
   qDebug() << "onXtrackSliderChanged(): value=" << value;
+  xTrackWidth_ = (int )value;
+  plotSwath();
   return;
 }
 
@@ -550,12 +516,15 @@ void MainWindow::onXtrackSliderChanged() {
 void MainWindow::onPingsShownSliderChanged() {
   qDebug() << "onPingsShownSliderChanged() slot";
   double value;
-  if (!sliderValue(guiNames_->pingsShownSlider(), &value)) {
+  if (!sliderValue(PINGS_SHOWN_SLIDER_NAME, &value)) {
     qWarning() << "Couldn't get value of slider "
-	       << guiNames_->pingsShownSlider();
+	       << PINGS_SHOWN_SLIDER_NAME;
     return;
   }
   qDebug() << "onPingsShownSliderChanged(): value=" << value;
+  nPingsShown_ = (int )value;
+  
+  plotSwath();
   return;
 }
 
@@ -563,12 +532,15 @@ void MainWindow::onPingsShownSliderChanged() {
 void MainWindow::onVerticalExaggSliderChanged() {
   qDebug() << "onVerticalExaggSliderChanged() slot";
   double value;
-  if (!sliderValue(guiNames_->verticalExaggSlider(), &value)) {
+  if (!sliderValue(VERTICAL_EXAGG_SLIDER_NAME, &value)) {
     qWarning() << "Couldn't get value of slider "
-	       << guiNames_->verticalExaggSlider();
+	       << VERTICAL_EXAGG_SLIDER_NAME;
     return;
   }
   qDebug() << "onVerticalExaggSliderChanged(): value=" << value;
+  // Note: scaled by x100
+  verticalExagg_ = (int )value * 100;
+  plotSwath();
   return;
 }
 
@@ -577,12 +549,13 @@ void MainWindow::onVerticalExaggSliderChanged() {
 void MainWindow::onPingStepSliderChanged() {
   qDebug() << "onPingStepSliderChanged() slot";
   double value;
-  if (!sliderValue(guiNames_->pingStepSlider(), &value)) {
+  if (!sliderValue(PING_STEP_SLIDER_NAME, &value)) {
     qWarning() << "Couldn't get value of slider "
-	       << guiNames_->pingStepSlider();
+	       << PING_STEP_SLIDER_NAME;
     return;
   }
   qDebug() << "onPingStepSliderChanged(): value=" << value;
+  plotSwath();
   return;
 }
 
@@ -615,4 +588,9 @@ bool MainWindow::sliderValue(QString sliderName, double *value) {
 
 
     return true;
+}
+
+
+void MainWindow::onEditModeChanged(QString msg) {
+  qDebug() << "onEditModeChanged(): " << msg;
 }

@@ -16,12 +16,14 @@ extern "C" {
 #include "mbedit_prog.h"
 }
 
+  
+
 class MainWindow : public QObject  {
   
     Q_OBJECT
 
 public:
-  MainWindow(QObject *ui);
+  MainWindow(QObject *ui, int argc, char **argv);
   ~MainWindow();
 
   /// Get canvas width and height
@@ -89,6 +91,9 @@ public:
   
 protected:
 
+  /// Open and process swath file
+  bool processSwathFile(char *swathFile);
+  
   /// Read value of slider named sliderName; return false if error
   bool sliderValue(QString sliderName, double *value);
   
@@ -137,6 +142,7 @@ protected:
   int maxPingsShown_;
   int nPingsShown_;
   int xTrackWidth_;
+  PlotSliceMode sliceMode_;
   
   SoundColorCoding soundColorCoding_;
   bool showFlagSounding_;
@@ -151,7 +157,8 @@ protected:
   int yInterval_;
   int outMode_;
   int firstDataTime_[7];
-  
+
+  MouseEditMode editMode_;
   
   /// static members are referenced by static functions whose pointers
   /// are passed to mbedit 
@@ -161,43 +168,16 @@ protected:
 
 public slots:
 
-  /// TEST SLOT
-  void cppSlot(const QString &msg) {
-    qDebug() << "cppSlot() called with message: " << msg;
-  }
-
   /// GUI item callbacks/slots
-  void onXtrackSliderChanged();
-  void onPingsShownSliderChanged();
-  void onVerticalExaggSliderChanged();
-  void onPingStepSliderChanged();				     
+  void onXtrackSliderChanged(void);
+  void onPingsShownSliderChanged(void);
+  void onVerticalExaggSliderChanged(void);
+  void onPingStepSliderChanged(void);				     
 
-    
-				  
-private slots:
-
-  void on_xtrackWidthSlider_sliderReleased(void);
-
-  void on_nPingsShowSlider_sliderReleased(void);
-
-  void on_vertExaggSlider_sliderReleased(void);  
-
-  void on_actionOpen_swath_file_triggered(void);
-
-  /// Ancillary data option slots
-  void on_actionNone_triggered(void);
-  void on_actionTime_triggered(void);
-  void on_actionInterval_triggered(void);
-  void on_actionLatitude_triggered(void);
-  void on_actionLongitude_triggered(void);
-  void on_actionHeading_triggered(void);
-  void on_actionSpeed_triggered(void);
-  void on_actionDepth_triggered(void);
-  void on_actionAltitude_triggered(void);
-  void on_actionSensor_depth_triggered(void);
-  void on_actionRoll_triggered(void);
-  void on_actionPitch_triggered(void);
-  void on_actionHeave_triggered(void);
+  void onEditModeChanged(QString msg);
+  void onAncillDataChanged(QString msg);
+  void onSliceChanged(QString msg);   
+  void testSlot(void);
 
   /// Acoustic color coding slots
   void on_actionBottom_detect_algorithm_triggered(void);
@@ -207,7 +187,26 @@ private slots:
   /// Plot-slice slots
   void on_actionWaterfall_2_triggered();  
   void on_actionAcross_track_2_triggered();
-  void on_actionAlong_track_2_triggered();  
+  void on_actionAlong_track_2_triggered();
+
+
+  void on_xtrackSliderObj_sliderReleased(void) {
+    qDebug() << "on_xPtrackWidthSlider_sliderReleased()!!!";
+  }
+  
+  void on_bogusItem_triggered(void) {
+    qDebug() << "---- on_gogusItem_triggered()!";
+  }
   
 };
+
+/// typedef void (MainWindow::*TriggeredSlot(void));
+typedef  void (MainWindow::*TriggeredMainWindowSlot)(char x, float y);
+
+/// Connect QML item that emits triggered signal
+bool connectTriggeredItem(QObject *rootObject,
+			  const char *name, MainWindow *mainWindow,
+			  TriggeredMainWindowSlot *slot);
+
+
 #endif // MAINWINDOW_H

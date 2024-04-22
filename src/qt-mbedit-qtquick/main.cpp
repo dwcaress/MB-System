@@ -36,87 +36,43 @@ int main(int argc, char *argv[]) {
     MainWindow mainWindow(rootObject, argc, argv);
 
     // MainWindow receives signals from GUI
-    /* ***
-    QQuickItem *qqItem =
-      rootObject->findChild<QQuickItem*>(XTRACK_SLIDER_NAME);
 
-    QObject::connect((QObject *)qqItem, SIGNAL(valueChanged()),
-                     &mainWindow, SLOT(onXtrackSliderChanged()));
-
-		     *** */
-
-    // Can we find and connect as just QObject type?
-    QObject *obj2 =
+    QObject *obj =
       rootObject->findChild<QObject*>(XTRACK_SLIDER_NAME);
 
-    QObject::connect((QObject *)obj2, SIGNAL(valueChanged()),
+    QObject::connect(obj, SIGNAL(valueChanged()),
                      &mainWindow, SLOT(onXtrackSliderChanged()));
     
+    obj = 
+      rootObject->findChild<QObject*>(PINGS_SHOWN_SLIDER_NAME);
     
-    QQuickItem *qqItem =
-      rootObject->findChild<QQuickItem*>(PINGS_SHOWN_SLIDER_NAME);
-    
-    QObject::connect((QObject *)qqItem, SIGNAL(valueChanged()),
+    QObject::connect(obj, SIGNAL(valueChanged()),
                      &mainWindow, SLOT(onPingsShownSliderChanged()));
     
-    qqItem =
-      rootObject->findChild<QQuickItem*>(VERTICAL_EXAGG_SLIDER_NAME);
+    obj = 
+      rootObject->findChild<QObject*>(VERTICAL_EXAGG_SLIDER_NAME);
     
-    QObject::connect((QObject *)qqItem, SIGNAL(valueChanged()),
+    QObject::connect(obj, SIGNAL(valueChanged()),
                      &mainWindow, SLOT(onVerticalExaggSliderChanged()));
 
-    qqItem =
-      rootObject->findChild<QQuickItem*>(PING_STEP_SLIDER_NAME);
+    obj = 
+      rootObject->findChild<QObject*>(PING_STEP_SLIDER_NAME);
 
-    qDebug() << "qqItem object info:";
-    qqItem->dumpObjectInfo();
-    
-    QObject::connect((QObject *)qqItem,
+    QObject::connect(obj,
 		     SIGNAL(valueChanged()),
 		     &mainWindow, SLOT(onPingStepSliderChanged()));
 
-    qDebug() << "*** TEST connect " << PING_STEP_SLIDER_NAME <<
-      " to baselineOffsetChanged(double)";
-
-    if (!QObject::connect((QObject *)qqItem,
-			  SIGNAL(baselineOffsetChanged(double)),
-			  &mainWindow, SLOT(testSlot(double)))) {
-      qWarning() << "connect() to testSlot() failed";
-    }
-    else {
-      qDebug() << "connect() to testSlot() OK";
-    }
-    
-    // NOTE: can find QButtonGroup only if cast to QObject *, for some odd
-    // reason
-    QObject *buttonGroup =
-      rootObject->findChild<QObject*>(EDIT_MODES_NAME);
-
-    if (!buttonGroup) {
-      qWarning() << "Couldn't find QML object named " << EDIT_MODES_NAME;
-    }
-
-    qDebug() << "buttonGroup object info:";
-    buttonGroup->dumpObjectInfo();
-
-    qDebug() << "connect to ButtonGroup clicked signal";
-    if (!QObject::connect((QObject *)buttonGroup,
-			  SIGNAL(clicked()),
-			  &mainWindow, SLOT(onEditModesChanged()))) {
-      qWarning() << "connect() to clicked signal failed";
-    }
 
     // Connect QML-emitted 'custom' signals
-    QObject::connect(rootObject, SIGNAL(qmlSignal(QString)),
-                     &mainWindow, SLOT(qmlSigSlot(QString)));
+    QObject::connect(rootObject, SIGNAL(editModeSignal(QString)),
+                     &mainWindow, SLOT(onEditModeChanged(QString)));
 
-    /* ***
-    MainWindow::connectRadioButton(rootObject, &mainWindow, TOGGLE_EDIT_NAME);
-    MainWindow::connectRadioButton(rootObject, &mainWindow, PICK_EDIT_NAME);
-    MainWindow::connectRadioButton(rootObject, &mainWindow, ERASE_EDIT_NAME);
-    MainWindow::connectRadioButton(rootObject, &mainWindow, RESTORE_EDIT_NAME);
-    MainWindow::connectRadioButton(rootObject, &mainWindow, GRAB_EDIT_NAME);    
-    *** */
+    QObject::connect(rootObject, SIGNAL(ancillDataSignal(QString)),
+                     &mainWindow, SLOT(onAncillDataChanged(QString)));
+
+    QObject::connect(rootObject, SIGNAL(sliceSignal(QString)),
+                     &mainWindow, SLOT(onSliceChanged(QString)));    
+    
     return app.exec();
 }
 
