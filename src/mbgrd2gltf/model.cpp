@@ -201,7 +201,6 @@ namespace mbgrd2gltf {
 
 		/*
 		* Encode the geometry using Draco
-		* The program is a
 		* @param compressed_data : Place to store the compressed data
 		* @param quantizationPosition : Quantization value for the position attribute
 		* @return bool : True if the encoding was successful, false otherwise
