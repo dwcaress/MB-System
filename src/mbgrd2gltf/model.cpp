@@ -201,8 +201,10 @@ namespace mbgrd2gltf {
 
 		/*
 		* Encode the geometry using Draco
-		* @param compressed_data : Place to store the compressed data
-		* @param quantizationPosition : Quantization value for the position attribute
+		* @param vertex_buffer : The vertex buffer to encode
+		* @param index_buffer : The index buffer to encode
+		* @param options : The options to use for the encoding
+		* @param out : The output buffer to store the encoded data
 		* @return bool : True if the encoding was successful, false otherwise
 		*/
 		bool dracoEncodeGeometry(const std::vector<float>& vertex_buffer, const std::vector<uint32_t>& index_buffer, const Options& options,
@@ -258,12 +260,13 @@ namespace mbgrd2gltf {
 		}
 
 		/*
-		* Compress the geometry using Draco
+		* Compress the geometry using Draco and add the compressed data to the model
+		* @param model : The model to add the compressed data to
 		* @param geometry : The geometry to compress
 		* @param options : The options to use for the compression
 		* @param vertex_buffer : The vertex buffer to compress
 		* @param index_buffer : The index buffer to compress
-		* @return tinygltf::Model : The compressed model
+		* @return bool : True if the compression was successful, false otherwise
 		*/
 		bool dracoCompressed(tinygltf::Model& model, const Geometry& geometry, const Options& options, const std::vector<float>& vertex_buffer, const std::vector<uint32_t>& index_buffer) {
 			// Check if the geometry is empty or if the Draco compression is disabled or invalid (quantization value)
