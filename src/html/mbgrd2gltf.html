@@ -1,0 +1,210 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbgrd2gltf</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbgrd2gltf</H1>
+Section:  MB-System 5.8  (1)
+
+<BR>Updated:  17 April 2024 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbgrd2gltf</B> - convert bathymetric grid data to GLTF format with optional settings, including Draco compression.
+
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.8
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbgrd2gltf</B>
+
+<I>&lt;filepath&gt;</I>
+
+
+[<B>-b</B> | --binary]
+[<B>-o</B> | --output
+<I>&lt;output filepath&gt;]</I>
+
+[<B>-e</B> | --exaggeration
+<I>&lt;vertical exaggeration&gt;]</I>
+
+[<B>-m</B> | --max-size
+<I>&lt;max size&gt;]</I>
+
+[<B>-c</B> | --compression
+<I>&lt;compression ratio&gt;]</I>
+
+[<B>-d</B> | --draco]
+[<B>-q</B> | --quantization
+<I>&lt;quantization number&gt;]</I>
+
+[<B>-h</B> | --help]
+
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>MBgrd2gltf</B> is a tool designed to convert grid data files (GRD) to 
+Graphics Library Transmission Format (GLTF) files. It can generate output in: 
+a binary to create a more compact GLTF file, 
+exaggerate vertex altitude to enhance topographic features, 
+and cap the max-size of the GLTF so the output files don't exceed size constraints. 
+Furthermore, optional Draco compression can reduce the outputed GLTF file size 
+even more while maintaining good visual quality. 
+With Draco, one can specify the quantization level, 
+which affects the precision of mesh vertices.
+<P>
+
+<A NAME="lbAF">&nbsp;</A>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
+
+David W. Caress
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes
+<BR>
+
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+
+<DT><B>&lt;filepath&gt;</B>
+
+   <DD>
+   Specify the path to the input GMT GRD file.
+   
+   <DT><B>-b, --binary</B>
+   
+   <DD>
+   Generate the output in binary GLTF format. Binary GLTF is more compact and typically loads faster in applications.
+   
+   <DT><B>-o, --output</B>
+   
+   <DD>
+   Specify the path to the folder where the output GLTF file will be written.
+   
+   <DT><B>-e, --exaggeration</B>
+   
+   <DD>
+   Specify the vertical exaggeration factor as a decimal number, which multiplies the vertex altitudes. This can enhance the visibility of topographic features.
+   
+   <DT><B>-m, --max-size</B>
+   
+   <DD>
+   Specify the maximum size of the output buffer data in megabytes. This is useful for ensuring that the output files do not exceed certain size constraints. Actual size may vary based on compression settings.
+   
+   <DT><B>-c, --compression</B>
+   
+   <DD>
+   Specify the compression ratio as a decimal number, indicating the desired ratio of uncompressed to compressed size. This setting controls the general output file size.
+   
+   <DT><B>-d, --draco</B>
+   
+   <DD>
+   Enable Draco compression to further reduce the file size and improve loading times in 3D environments. Draco is an open-source library for compressing and decompressing 3D geometric meshes and point clouds.
+   
+   <DT><B>-q, --quantization</B>
+   
+   <DD>
+   Specify the quantization level for Draco compression. Quantization level affects the precision of the mesh vertices. Higher values increase compression but reduce precision, potentially affecting the visual quality of the terrain.
+   
+   <DT><B>-h, --help</B>
+   
+   <DD>
+   Display help message and exit. Provides more information on command usage and options.
+
+<DD>
+
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Convert a GMT GRD file to a GLTF file with default settings:
+<DL COMPACT><DT><DD>
+<PRE>
+mbgrd2gltf input.grd
+</PRE>
+
+</DL>
+
+
+Convert a GRD file to binary GLTF with specified output folder and Draco compression at a quantization level of 10:
+<DL COMPACT><DT><DD>
+<PRE>
+mbgrd2gltf input.grd --binary --output /path/to/output --draco --quantization 10
+</PRE>
+
+</DL>
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbinfo.html">mbinfo</A></B>(1)
+<B><A HREF="mbprocess.html">mbprocess</A></B>(1)
+<B><A HREF="mblist.html">mblist</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Please report any bugs on the MB-System GitHub Issue Tracker.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 17 April 2024</P></CENTER>
+
+<HR>
+<center>
+<p>
+<a href="https://www.mbari.org/products/research-software/mb-system/"><< MB-System website</a> | <a href="https://www.mbari.org/technology/mb-system/documentation/"> MB-System Documenation>></a> | <a href="mbsystem_man_list.html">MB-System Manual Page List</a></p>
+</center>
+</BODY>
+</HTML>
