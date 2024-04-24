@@ -5,7 +5,6 @@ mbgrd2gltf \- convert bathymetric grid data to GLTF format with optional setting
 .SH SYNOPSIS
 .B mbgrd2gltf
 .I <filepath>
-
 [\fB\-b\fR | \-\-binary]
 [\fB\-o\fR | \-\-output
 .I <output filepath>]
@@ -22,7 +21,7 @@ mbgrd2gltf \- convert bathymetric grid data to GLTF format with optional setting
 
 .SH DESCRIPTION
 .B mbgrd2gltf
-is a tool designed to convert grid data files (GRD) to Graphics Library Transmission Format (GLTF) files. It can generate output in: a binary to create a more compact GLTF file, exaggerate vertex altitude to enhance topographic features, and cap the max-size of the GLTF so the output files don't exceed size constraints. Furthermore, optional Draco compression can reduce the outputed GLTF file size even more while maintaining good visual quality. With Draco, one can specify the quantization level, which affects the precision of mesh vertices.
+is a tool designed to convert grid data files (GRD) to Graphics Library Transmission Format (GLTF) files. It can generate output in: a binary to create a more compact GLTF file, exaggerate vertex altitude to enhance topographic features, and cap the max-size of the GLTF so the output files don't exceed size constraints. Furthermore, optional Draco compression can reduce the outputed GLTF file size even more while maintaining good visual quality. With Draco, one can specify the quantization level, which affects the compression level of mesh vertices.
 
 .SH MB-SYSTEM AUTHORSHIP
 David W. Caress - Monterey Bay Aquarium Research Institute
@@ -58,11 +57,11 @@ Specify the compression ratio as a decimal number, indicating the desired ratio 
 
 .TP
 .B \-d, \-\-draco
-Enable Draco compression to further reduce the file size and improve loading times in 3D environments. Draco is an open-source library for compressing and decompressing 3D geometric meshes and point clouds.
+Enable Draco compression to further reduce the file size and improve loading times in 3D environments. Draco is an open-source library, created by Google, for compressing and decompressing 3D geometric meshes and point clouds.
 
 .TP
 .B \-q, \-\-quantization
-Specify the quantization level for Draco compression. Quantization level affects the precision of the mesh vertices. Higher values increase compression but reduce precision, potentially affecting the visual quality of the terrain.
+Specify the quantization level for Draco compression. Quantization level affects the compression level of mesh vertices. Higher values increase compression but reduce precision, potentially affecting the visual quality of the terrain.
 
 .TP
 .B \-h, \-\-help

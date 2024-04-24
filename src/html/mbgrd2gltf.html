@@ -66,7 +66,7 @@ and cap the max-size of the GLTF so the output files don't exceed size constrain
 Furthermore, optional Draco compression can reduce the outputed GLTF file size 
 even more while maintaining good visual quality. 
 With Draco, one can specify the quantization level, 
-which affects the precision of mesh vertices.
+which affects the compression level of mesh vertices.
 <P>
 
 <A NAME="lbAF">&nbsp;</A>
@@ -133,12 +133,12 @@ Christian do Santos Ferreira
    <DT><B>-d, --draco</B>
    
    <DD>
-   Enable Draco compression to further reduce the file size and improve loading times in 3D environments. Draco is an open-source library for compressing and decompressing 3D geometric meshes and point clouds.
+   Enable Draco compression to further reduce the file size and improve loading times in 3D environments. Draco is an open-source library, created by Google, for compressing and decompressing 3D geometric meshes and point clouds.
    
    <DT><B>-q, --quantization</B>
    
    <DD>
-   Specify the quantization level for Draco compression. Quantization level affects the precision of the mesh vertices. Higher values increase compression but reduce precision, potentially affecting the visual quality of the terrain.
+   Specify the quantization level for Draco compression. Quantization level affects the compression level of mesh vertices. Higher values increase compression but reduce precision, potentially affecting the visual quality of the terrain.
    
    <DT><B>-h, --help</B>
    
