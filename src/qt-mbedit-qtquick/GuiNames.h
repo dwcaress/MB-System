@@ -12,23 +12,13 @@ class GuiNames : public QObject {
 
 };
 
-/// define names of C++-connected QML items
-#define EDIT_MODES_NAME "editModesObj"
-#define PING_STEP_SLIDER_NAME "pingStepSliderObj"
-#define VERTICAL_EXAGG_SLIDER_NAME "verticalExaggSliderObj"
-#define PINGS_SHOWN_SLIDER_NAME "pingsShownSliderObj"
-#define XTRACK_SLIDER_NAME "xTrackSliderObj"
+/// define names of C++-connected QML items, used when exchanging information
+/// between QML GUI and C++ code.
+
+/// Name of object created by QML, which holds swath images
 #define SWATH_PIXMAP_NAME "swathPixmapObj"
 
-
-/// define names of C++-connected QML radio buttons
-#define TOGGLE_EDIT_NAME "toggleEditObj"
-#define PICK_EDIT_NAME "pickEditObj"
-#define ERASE_EDIT_NAME "eraseEditObj"
-#define RESTORE_EDIT_NAME "restoreEditObj"
-#define GRAB_EDIT_NAME "grabEditObj"
-
-/// define names of ancillary data options
+/// Names of ancillary data options created by QML
 #define NONE_ANCILLDATA "none"
 #define TIME_ANCILLDATA "time"
 #define INTERVAL_ANCILLDATA "interval"
@@ -43,12 +33,21 @@ class GuiNames : public QObject {
 #define PITCH_ANCILLDATA "pitch"
 #define HEAVE_ANCILLDATA "heave"
 
-/// define slice option names
+/// Names of slice options created by QML
 #define ALONGTRACK_SLICE "alongTrack"
 #define WATERFALL_SLICE "waterfall"
 #define CROSSTRACK_SLICE "crossTrack"
 
+/// Names of color-coding options
+#define BOTTOM_DETECT_COLOR "bottomDetect"
+#define PULSE_SOURCE_COLOR "pulseSource"
+#define FLAG_STATE_COLOR "flagState"
 
-
+/// Names of edit modes
+#define TOGGLE_EDIT_MODE "toggleEdit"
+#define PICK_EDIT_MODE "pickEdit"
+#define ERASE_EDIT_MODE "eraseEdit"
+#define RESTORE_EDIT_MODE "restoreEdit"
+#define GRAB_EDIT_MODE "grabEdit"
 
 #endif

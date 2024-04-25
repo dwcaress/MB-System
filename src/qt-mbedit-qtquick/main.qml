@@ -22,16 +22,6 @@ ApplicationWindow {
     height: 880
     title: "qt-mbedit"
 
-    /// Emit when ancillary data option is selected
-    signal ancillDataSignal(msg: string)
-
-    /// Emit when slice option is selected
-    signal sliceSignal(msg: string)
-    
-    /// Emit when edit mode changes
-    signal editModeSignal(msg: string)
-
-
     ActionGroup {
         id: ancillaryData
         exclusive: true
@@ -67,75 +57,75 @@ ApplicationWindow {
             MenuSeparator {}
             Menu {
                 title: "Ancillary data"
-		
+
                 Action {objectName: "none"; checkable: true; checked: true;
                     text: qsTr("None");
                     ActionGroup.group: ancillaryData;
-		    onTriggered: ancillDataSignal(objectName)
-		    }
+                    onTriggered: backend.onAncillDataChanged(objectName)
+                }
 
                 Action {objectName: "time"; checkable: true; text: qsTr("Time");
                     ActionGroup.group: ancillaryData;
-		    onTriggered: ancillDataSignal(objectName)		    
-		    }
+                    onTriggered: backend.onAncillDataChanged(objectName)
+                }
 
                 Action {objectName: "interval"; checkable: true;
                     text: qsTr("Interval");
                     ActionGroup.group: ancillaryData
-		    onTriggered: ancillDataSignal(objectName)	
-		    }
-		    
+                    onTriggered: backend.onAncillDataChanged(objectName)
+                }
+
                 Action {objectName: "latitude"; checkable: true;
                     text: qsTr("Latitude");
                     ActionGroup.group: ancillaryData
-		    onTriggered: ancillDataSignal(objectName)
-		    }
+                    onTriggered: backend.onAncillDataChanged(objectName)
+                }
 
                 Action {objectName: "longitude"; checkable: true;
-                    text: qsTr("Longitude");		    
+                    text: qsTr("Longitude");
                     ActionGroup.group: ancillaryData
-		    onTriggered: ancillDataSignal(objectName)
-		    }
+                    onTriggered: backend.onAncillDataChanged(objectName)
+                }
                 Action {objectName: "heading"; checkable: true;
                     text: qsTr("Heading");
                     ActionGroup.group: ancillaryData
-		    onTriggered: ancillDataSignal(objectName)		    
-		    }
+                    onTriggered: backend.onAncillDataChanged(objectName)
+                }
                 Action {objectName: "speed"; checkable: true;
                     text: qsTr("Speed");
                     ActionGroup.group: ancillaryData
-		    onTriggered: ancillDataSignal(objectName)
-		    }
+                    onTriggered: backend.onAncillDataChanged(objectName)
+                }
                 Action {objectName: "depth"; checkable: true;
                     text: qsTr("Depth");
                     ActionGroup.group: ancillaryData
-		    onTriggered: ancillDataSignal(objectName)
-		    }
+                    onTriggered: backend.onAncillDataChanged(objectName)
+                }
                 Action {objectName: "altitude"; checkable: true;
                     text: qsTr("Altitude");
                     ActionGroup.group: ancillaryData
-		    onTriggered: ancillDataSignal(objectName)
-		    }
+                    onTriggered: backend.onAncillDataChanged(objectName)
+                }
                 Action {objectName: "sensorDepth"; checkable: true;
                     text: qsTr("Sensor depth");
                     ActionGroup.group: ancillaryData
-		    onTriggered: ancillDataSignal(objectName)
-		    }
+                    onTriggered: backend.onAncillDataChanged(objectName)
+                }
                 Action {objectName: "roll"; checkable: true;
                     text: qsTr("Roll");
                     ActionGroup.group: ancillaryData
-		    onTriggered: ancillDataSignal(objectName)
-		    }
+                    onTriggered: backend.onAncillDataChanged(objectName)
+                }
                 Action {objectName: "pitch"; checkable: true;
                     text: qsTr("Pitch");
                     ActionGroup.group: ancillaryData
-		    onTriggered: ancillDataSignal(objectName)		    
-		    }
+                    onTriggered: backend.onAncillDataChanged(objectName)
+                }
                 Action {objectName: "heave"; checkable: true;
                     text: qsTr("Heave");
                     ActionGroup.group: ancillaryData
-		    onTriggered: ancillDataSignal(objectName)		    
-		    }
+                    onTriggered: backend.onAncillDataChanged(objectName)
+                }
 
             }
             MenuSeparator {}
@@ -143,29 +133,34 @@ ApplicationWindow {
                 title: "Slice"
                 Action {objectName: "waterfall"; checkable: true; checked: true;
                     text: qsTr("Waterfall"); ActionGroup.group: slice
-		    onTriggered: sliceSignal(objectName)		    
-		    }
+                    onTriggered: backend.onSliceChanged(objectName)
+                }
                 Action {objectName: "alongTrack"; checkable: true;
                     text: qsTr("Along-track"); ActionGroup.group: slice
-		    onTriggered: sliceSignal(objectName)
-		    }
+                    onTriggered: backend.onSliceChanged(objectName)
+                }
                 Action {objectName: "crossTrack"; checkable: true;
                     text: qsTr("Cross-track"); ActionGroup.group: slice
-		    onTriggered: sliceSignal(objectName)		    
-		    }
+                    onTriggered: backend.onSliceChanged(objectName)
+                }
             }
             MenuSeparator {}
             Menu {
                 title: "Color-coding"
-                Action {checkable: true; checked: true;
+                Action {objectName: 'bottomDetect';
+                    checkable: true; checked: true;
                     text: qsTr("Bottom-detect algorithm");
-                    ActionGroup.group: colorCoding}
-                Action {checkable: true;
+                    ActionGroup.group: colorCoding;
+                    onTriggered: backend.onColorCodeChanged(objectName)}
+                Action {objectName: 'pulseSource';
+                    checkable: true;
                     text: qsTr("Pulse source");
-                    ActionGroup.group: colorCoding}
-                Action {checkable: true;
+                    ActionGroup.group: colorCoding;
+                    onTriggered: backend.onColorCodeChanged(objectName)}
+                Action {objectName: 'flagState'; checkable: true;
                     text: qsTr("Flag state");
-                    ActionGroup.group: colorCoding}
+                    ActionGroup.group: colorCoding;
+                    onTriggered: backend.onColorCodeChanged(objectName)}
             }
 
         }
@@ -202,7 +197,8 @@ ApplicationWindow {
             from: 1
             to: 300
             live: false  // only update value when button released
-
+            onValueChanged: { console.log('xTrackSlider moved');
+                backend.onXtrackChanged(value) }
         }
         Label { text: "Pings shown" }
         Slider {
@@ -212,6 +208,8 @@ ApplicationWindow {
             from: 1
             to: 20
             live: false  // only update value when button released
+            onValueChanged: { console.log('pingsShownSlider moved');
+                backend.onPingsShownChanged(value) }
         }
         Label { text: "Vertical exaggeration" }
         Slider {
@@ -221,8 +219,9 @@ ApplicationWindow {
             from: 0.01
             to: 20
             live: false
+            onValueChanged: { console.log('vericalExaggSlider moved');
+                backend.onVerticalExaggChanged(value) }
         }
-
         Label { text: "Ping step" }
         Slider {
             id: pingStepSlider
@@ -232,6 +231,8 @@ ApplicationWindow {
             from: 1
             to: 20
             live: false
+            onValueChanged: { console.log('pingStepSlider moved');
+                backend.onPingStepChanged(value) }
         }
 
 
@@ -244,53 +245,75 @@ ApplicationWindow {
             id: buttonRow
 
             RadioButton {
-                objectName: "toggleEditObj"
+                objectName: "toggleEdit"
                 checked: true
                 text: qsTr("Toggle")
                 ButtonGroup.group: editModes
-                onToggled: { editModeSignal(objectName); }
+                onToggled: { backend.onEditModeChanged(objectName); }
             }
 
             RadioButton {
-                objectName: "pickEditObj"
+                objectName: "pickEdit"
                 text: qsTr("Pick")
                 ButtonGroup.group: editModes
-                onToggled: { editModeSignal(objectName); }
+                onToggled: { backend.onEditModeChanged(objectName); }
             }
 
             RadioButton {
-                objectName: "eraseEditObj"
+                objectName: "eraseEdit"
                 text: qsTr("Erase")
                 ButtonGroup.group: editModes
-                onToggled: { editModeSignal(objectName); }
+                onToggled: { backend.onEditModeChanged(objectName); }
             }
 
             RadioButton {
-                objectName: "restoreEditObj"
+                objectName: "restoreEdit"
                 text: qsTr("Restore")
                 ButtonGroup.group: editModes
-                onToggled: { editModeSignal(objectName); }
+                onToggled: { backend.onEditModeChanged(objectName); }
             }
 
             RadioButton {
-                objectName: "grabEditObj"
+                objectName: "grabEdit"
                 text: qsTr("Grab")
                 ButtonGroup.group: editModes
-                onToggled: { editModeSignal(objectName); }
+                onToggled: { backend.onEditModeChanged(objectName); }
             }
         }
 
-        PixmapImage {
-            id: swathPixmap
-            objectName: "swathPixmapObj"
+        Rectangle {
             anchors.top: buttonRow.bottom
-            /// anchors.topMargin: 5
-            /// anchors.bottom: parent.bottom
             Layout.fillWidth: true
-            /// width: 600
             height: 600
-            /// anchors.fill: parent
+
+            PixmapImage {
+                id: swathPixmap
+                objectName: "swathPixmapObj"
+                anchors.fill: parent
+            }
+
+            MouseArea {
+                id: swathMouseArea
+                objectName: 'swathMouseAreaObj'
+                anchors.fill: parent
+                hoverEnabled: false
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+
+                onClicked: (mouse)=> {
+                               console.log("Mouse clicked")
+                               if (mouse.button == Qt.LeftButton) {
+                                   console.log('left clicked');
+                                   backend.onLeftMouseButtonClicked();
+                               }
+                               else {
+                                   console.log("right clicked");
+                                   backend.onRightMouseButtonClicked();
+                               }
+                           }
+
+            }
         }
+
     }
     MessageDialog {
         id: quitDialog

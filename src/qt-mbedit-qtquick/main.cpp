@@ -4,8 +4,9 @@
 #include <QQuickItem>
 #include <QAbstractButton>
 #include <QButtonGroup>
+#include <QQmlContext>
 #include "GuiNames.h"
-#include "MainWindow.h"
+#include "Backend.h"
 #include "PixmapImage.h"
 #include "PixmapContainer.h"
 
@@ -33,45 +34,10 @@ int main(int argc, char *argv[]) {
 
     QObject *rootObject = engine.rootObjects().value(0);
     
-    MainWindow mainWindow(rootObject, argc, argv);
-
-    // MainWindow receives signals from GUI
-
-    QObject *obj =
-      rootObject->findChild<QObject*>(XTRACK_SLIDER_NAME);
-
-    QObject::connect(obj, SIGNAL(valueChanged()),
-                     &mainWindow, SLOT(onXtrackSliderChanged()));
+    Backend backend(rootObject, argc, argv);
     
-    obj = 
-      rootObject->findChild<QObject*>(PINGS_SHOWN_SLIDER_NAME);
-    
-    QObject::connect(obj, SIGNAL(valueChanged()),
-                     &mainWindow, SLOT(onPingsShownSliderChanged()));
-    
-    obj = 
-      rootObject->findChild<QObject*>(VERTICAL_EXAGG_SLIDER_NAME);
-    
-    QObject::connect(obj, SIGNAL(valueChanged()),
-                     &mainWindow, SLOT(onVerticalExaggSliderChanged()));
-
-    obj = 
-      rootObject->findChild<QObject*>(PING_STEP_SLIDER_NAME);
-
-    QObject::connect(obj,
-		     SIGNAL(valueChanged()),
-		     &mainWindow, SLOT(onPingStepSliderChanged()));
-
-
-    // Connect QML-emitted 'custom' signals
-    QObject::connect(rootObject, SIGNAL(editModeSignal(QString)),
-                     &mainWindow, SLOT(onEditModeChanged(QString)));
-
-    QObject::connect(rootObject, SIGNAL(ancillDataSignal(QString)),
-                     &mainWindow, SLOT(onAncillDataChanged(QString)));
-
-    QObject::connect(rootObject, SIGNAL(sliceSignal(QString)),
-                     &mainWindow, SLOT(onSliceChanged(QString)));    
+    // Make backend object and methods accessible to QML
+    engine.rootContext()->setContextProperty("backend", &backend);
     
     return app.exec();
 }
