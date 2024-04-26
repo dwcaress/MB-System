@@ -1987,6 +1987,8 @@ int mbedit_action_mouse_grab(MouseGrabMode grabmode, int x_loc, int y_loc,
     fprintf(stderr, "dbg2       plotAncillData:   %d\n", plot_ancill_data);
   }
 
+  fprintf(stderr, "mbedit_action_mouse_grab(%d)\n", grabmode);
+  
   int status = MB_SUCCESS;
   // int xgmin, xgmax, ygmin, ygmax;
   // bool found;
@@ -2032,7 +2034,12 @@ int mbedit_action_mouse_grab(MouseGrabMode grabmode, int x_loc, int y_loc,
       }
 
       /* draw grab ractangle */
-      (*drawRect)(graphPtr, xgmin, ygmin, xgmax - xgmin, ygmax - ygmin, RED, XG_SOLIDLINE);
+      fprintf(stderr,
+	      "#1 xgmin: %d, ygmin: %d, xgmax-xgmin: %d, ygmax-ygmin: %d\n",
+	      xgmin, ygmin, xgmax-xgmin, ygmax-ygmin);
+      
+      (*drawRect)(graphPtr, xgmin, ygmin, xgmax - xgmin, ygmax - ygmin,
+		  RED, XG_SOLIDLINE);
     }
 
     /* change grab rectangle */
@@ -2056,8 +2063,11 @@ int mbedit_action_mouse_grab(MouseGrabMode grabmode, int x_loc, int y_loc,
       }
 
       /* undraw old grab rectangle */
-      (*drawRect)(graphPtr, xgmin, ygmin, xgmax - xgmin, ygmax - ygmin, WHITE, XG_SOLIDLINE);
+      (*drawRect)(graphPtr, xgmin, ygmin, xgmax - xgmin, ygmax - ygmin,
+		  WHITE, XG_SOLIDLINE);
 
+      fprintf(stderr, "#2 Update grab rectangle\n");
+      
       /* update grab rectangle */
       grab_set = true;
       grab_end_x = x_loc;
@@ -2082,6 +2092,12 @@ int mbedit_action_mouse_grab(MouseGrabMode grabmode, int x_loc, int y_loc,
       }
 
       /* draw grab rectangle */
+      fprintf(stderr,
+	      "#2 xgmin: %d, ygmin: %d, xgmax-xgmin: %d, ygmax-ygmin: %d\n",
+	      xgmin, ygmin, xgmax-xgmin, ygmax-ygmin);
+
+      fprintf(stderr, "drawRect()!!!\n");
+      
       (*drawRect)(graphPtr, xgmin, ygmin, xgmax - xgmin, ygmax - ygmin, RED, XG_SOLIDLINE);
 
       /* replot beams on bounds of the grab box */
