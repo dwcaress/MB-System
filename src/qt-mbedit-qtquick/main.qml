@@ -300,21 +300,59 @@ ApplicationWindow {
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
 
                 onClicked: (mouse)=> {
-                               console.log("Mouse clicked")
+                               /// console.log("Mouse clicked at ",
+                               //        mouse.x, ", ", mouse.y)
                                if (mouse.button == Qt.LeftButton) {
-                                   console.log('left clicked');
-                                   backend.onLeftMouseButtonClicked();
+                                   // console.log('left clicked');
+                                   backend.onLeftMouseButtonClicked(mouse.x,
+                                                                    mouse.y);
                                }
                                else {
-                                   console.log("right clicked");
-                                   backend.onRightMouseButtonClicked();
+                                   // console.log("right clicked");
+                                   backend.onRightMouseButtonClicked(mouse.x,
+				                                     mouse.y);
                                }
                            }
 
-            }
-        }
 
+                onPressed: (mouse) => {
+                               console.log("Mouse pressed at ",
+                                           mouse.x, ", ", mouse.y);
+			       console.log('button: ', mouse.button);
+                               if (mouse.button == Qt.LeftButton) {
+                                   backend.onLeftMouseButtonDown(mouse.x, mouse.y)
+                               }
+                           }
+
+                onReleased: (mouse) => {
+                                console.log("Mouse released at ",
+                                            mouse.x, ", ", mouse.y)
+                                if (mouse.button == Qt.LeftButton) {
+                                    backend.onLeftMouseButtonUp(mouse.x, mouse.y)
+                                }
+                            }
+
+                onPositionChanged: (mouse) => {
+                                       console.log("Mouse moved at ",
+                                                   mouse.x, ", ", mouse.y);
+				       console.log('pressed: ', pressed);
+				       console.log('button: ', mouse.button);
+				       console.log('buttons: ', mouse.buttons);				       
+                                       if (mouse.buttons == Qt.LeftButton) {
+                                           backend.onMouseMove(mouse.x, mouse.y)
+                                       }
+				       else {
+				           console.log('do not call backend')
+				       }
+                                   }
+
+
+            }
+
+        }
     }
+
+
     MessageDialog {
         id: quitDialog
         title: "Quit?"
@@ -337,6 +375,7 @@ ApplicationWindow {
         }
     }
 }
+
 
 
 

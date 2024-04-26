@@ -9,6 +9,7 @@
 #include <QPixmap>
 #include <QFontMetrics>
 #include <QQmlApplicationEngine>
+#include <QMessageBox>
 #include "GuiNames.h"
 #include "PixmapImage.h"
 
@@ -59,6 +60,11 @@ public:
 
   static int showMessage(char *message) {
     std::cerr << "showMessage(): " << message << "\n";
+    /* **
+    QMessageBox msgBox;
+    msgBox.setText(message);
+    msgBox.exec();
+    *** */
     return 0;
   }
 
@@ -110,6 +116,10 @@ protected:
   /// Plot swath data
   bool plotSwath(void);
 
+  /// Do appropriate swath edit action at specified location, depending
+  /// on edit-mode
+  bool edit(double x, double y);
+  
   /// Set QPainter pen color and style
   static void setPenColorAndStyle(mbedit_color_t color, int style);
 
@@ -156,6 +166,12 @@ protected:
   int firstDataTime_[7];
 
   MouseEditMode editMode_;
+
+  /// What do the following members mean?
+  int nGood_;     /// ????
+  int nBuffer_;   /// ???
+  int iCurrent_;  /// ???
+  int mnPlot_;    /// ???
   
   /// static members are referenced by static functions whose pointers
   /// are passed to mbedit 
@@ -176,9 +192,13 @@ public slots:
   void onSliceChanged(QString msg);
   void onColorCodeChanged(QString msg);
 
-  void onLeftMouseButtonClicked(void);
-  void onRightMouseButtonClicked(void);
-    
+  void onLeftMouseButtonClicked(double x, double y);
+  void onRightMouseButtonClicked(double x, double y);
+
+  void onLeftMouseButtonDown(double x, double y);
+  void onLeftMouseButtonUp(double x, double y);
+  void onMouseMove(double x, double y);
+  
   void testSlot(void);
 
 };

@@ -67,10 +67,11 @@ Backend::Backend(QObject *rootObject, int argc, char **argv) {
   
   staticFontMetrics_ = new QFontMetrics(painter_->font());
 
-  int cSize[4] = {0, 0, 0, 0};
+  /// Hard-coded in mbedit_callbacks; should loosen this restriction
+  int cSize[4] = {0, 1016, 0, 525};  
   canvasSize(&cSize[1], &cSize[3]);
-  int inputSpecd = 0;
   mbedit_set_scaling(cSize, NO_ANCILL);
+  int inputSpecd = 0;
   
   mbedit_init(argc, argv, &inputSpecd,
 	      nullptr,
@@ -230,18 +231,13 @@ bool Backend::plotSwath(void) {
     return false;
   }
 
-  int nBuffer = 0;
-  int nGood = 0;
-  int iCurrent = 0;
-  int nPlot = 0;
-  
   // display data from selected file
   int status = mbedit_action_plot(xTrackWidth_,
 				  verticalExagg_, xInterval_, yInterval_,
 				  nPingsShown_, soundColorCoding_,
 				  showFlagSounding_, showFlagProfile_,
-				  plotAncillData_, &nBuffer, &nGood,
-				  &iCurrent, &nPlot);
+				  plotAncillData_, &nBuffer_, &nGood_,
+				  &iCurrent_, &mnPlot_);
   
   if (status != MB_SUCCESS) {
     std::cerr << "mbedit_action_plot() failed\n";
@@ -265,16 +261,11 @@ bool Backend::processSwathFile(char *swathFile) {
   }
 
   qDebug() << "format_ #2: " << format_;
-  int currentFile = 0;
   int fileID = 0;
   int numFiles = 1;
   int saveMode = 0;
   int nDumped = 0;
   int nLoaded = 0;
-  int nBuffer = 0;
-  int nGood = 0;
-  int iCurrent = 0;
-  int nPlot = 0;
   
   // Open swath file and plot data
   int status = mbedit_action_open(swathFile,
@@ -287,8 +278,8 @@ bool Backend::processSwathFile(char *swathFile) {
 				  showFlagProfile_, plotAncillData_,
 				  &buffSize_, &buffSizeMax_,
 				  &holdSize_, &nDumped, &nLoaded,
-				  &nBuffer, &nGood,
-				  &iCurrent, &nPlot);
+				  &nBuffer_, &nGood_,
+				  &iCurrent_, &mnPlot_);
 
   if (status != MB_SUCCESS) {
     std::cerr << "mbedit_action_open() failed\n";
@@ -297,7 +288,6 @@ bool Backend::processSwathFile(char *swathFile) {
   
   // Add pixmap to UI label
   qDebug() << "TBD: Draw on GUI\n";
-
   
   // Update GUI
   swathPixmapImage_->update();
@@ -507,11 +497,122 @@ void Backend::onEditModeChanged(QString mode) {
 }
 
 
-void Backend::onLeftMouseButtonClicked() {
+void Backend::onLeftMouseButtonClicked(double x, double y) {
   qDebug() << "onLeftMouseButtonClicked()";
+  int status = 0;
+  bool ok = edit(x, y);
 }
 
-void Backend::onRightMouseButtonClicked() {
-  qDebug() << "onRightMouseButtonClicked()";  
+void Backend::onRightMouseButtonClicked(double x, double y) {
+  qDebug() << "onRightMouseButtonClicked()";
+
+}
+
+
+void Backend::onLeftMouseButtonDown(double x, double y) {
+  qDebug() << "onLeftMouseButtonDown()  x: " << x << ", y: " << y;
+
+  if (editMode_ == GRAB) {
+    // Start grabbing selected points
+    int status =
+      mbedit_action_mouse_grab(GRAB_START,
+			       (int )x, (int )y, canvasPixmap_->width(),
+			       verticalExagg_, xInterval_, yInterval_,
+			       nPingsShown_, soundColorCoding_,
+			       showFlagSounding_, showFlagProfile_,
+			       plotAncillData_,
+			       &nBuffer_,
+			       &nGood_, &iCurrent_, &mnPlot_);
+    plotSwath();
+    return;
+  }
+
+  bool ok = edit(x, y);
+}
+
+
+void Backend::onLeftMouseButtonUp(double x, double y) {
+  qDebug() << "onLeftMouseButtonUp()  x: " << x << ", y: " << y;  
+  if (editMode_ == GRAB) {
+    // Done grabbing points
+    int status =
+      mbedit_action_mouse_grab(GRAB_END,
+			       (int )x, (int )y, canvasPixmap_->width(),
+			       verticalExagg_, xInterval_, yInterval_,
+			       nPingsShown_, soundColorCoding_,
+			       showFlagSounding_, showFlagProfile_,
+			       plotAncillData_,
+			       &nBuffer_,
+			       &nGood_, &iCurrent_, &mnPlot_);
+  
+    plotSwath();
+    return;
+  }
+  
+  bool ok = edit(x, y);
+}
+
+void Backend::onMouseMove(double x, double y) {
+  qDebug() << "onMouseMove()";
+
+  bool ok = edit(x, y);
+}
+
+
+bool Backend::edit(double x, double y) {
+  int status = 0;
+
+  qDebug() << "edit(): editMode_ = " << editMode_;
+
+  switch (editMode_) {
+  case GRAB:
+    
+    status = 
+      mbedit_action_mouse_grab(GRAB_MOVE,
+			       (int )x, (int )y, canvasPixmap_->width(),
+			       verticalExagg_, xInterval_, yInterval_,
+			       nPingsShown_, soundColorCoding_,
+			       showFlagSounding_, showFlagProfile_,
+			       plotAncillData_,
+			       &nBuffer_,
+			       &nGood_, &iCurrent_, &mnPlot_);
+
+    break;
+
+  case ERASE:
+    status =
+      mbedit_action_mouse_erase((int )x, (int )y, canvasPixmap_->width(),
+				verticalExagg_, xInterval_, yInterval_,
+				nPingsShown_, soundColorCoding_,
+				showFlagSounding_, showFlagProfile_,
+				plotAncillData_,
+				&nBuffer_,
+				&nGood_, &iCurrent_, &mnPlot_);
+    break;
+
+  case RESTORE:
+    status = 
+      mbedit_action_mouse_restore((int )x, (int )y,
+				  canvasPixmap_->width(),
+				  verticalExagg_, xInterval_, yInterval_,
+				  nPingsShown_, soundColorCoding_,
+				  showFlagSounding_, showFlagProfile_,
+				  plotAncillData_, &nBuffer_,
+				  &nGood_, &iCurrent_, &mnPlot_);    
+      break;
+
+  default:
+    qWarning() << "Unsupported edit mode: " << editMode_;
+  
+  }
+  // Update display
+  plotSwath();
+  
+  if (status != MB_SUCCESS) {
+    qWarning() << "Error while editing: " << status;
+    return false;
+  }
+  return true;
+
 }
 
