@@ -47,7 +47,8 @@
 const char* const usage_str = "usage: mbgrd2gltf <filepath> [-b | --binary] [(-o | --output) <output folder>]"\
 "\n                              [(-e | --exaggeration) <vertical exaggeration>]"\
 "\n                              [(-m | --max-size) <max size>]"\
-"\n                              [(-c | --compression) <compression ratio>]";
+"\n                              [(-c | --compression) <compression ratio>]"\
+"\n                              [(-d | --draco) <draco compression>]";
 
 const char* const help_str = "\nvariables:"\
 "\n"\
@@ -67,7 +68,13 @@ const char* const help_str = "\nvariables:"\
 "\n    <compression ratio>       decimal number representing the the amount"\
 "\n                              of compression to apply to the buffer data of the"\
 "\n                              output as a ratio of uncompressed size to"\
-"\n                              compressed size";
+"\n                              compressed size"\
+"\n"\
+"\n    <draco>                   further reduce the file size and improve loading"\
+"\n                              times in 3D environments. Draco is an open-source"\
+"\n                              library, created by Google, for compressing and"\
+"\n                              decompressing 3D geometric meshes and point clouds."\
+"\n";
 
 const char* const try_help_str = "try 'mbgrd2gltf [-h | --help]' for more information";
 
