@@ -49,5 +49,6 @@ class GuiNames : public QObject {
 #define ERASE_EDIT_MODE "eraseEdit"
 #define RESTORE_EDIT_MODE "restoreEdit"
 #define GRAB_EDIT_MODE "grabEdit"
+#define INFO_EDIT_MODE "infoEdit"
 
 #endif
