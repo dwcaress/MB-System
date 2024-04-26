@@ -279,11 +279,20 @@ ApplicationWindow {
                 ButtonGroup.group: editModes
                 onToggled: { backend.onEditModeChanged(objectName); }
             }
+
+            RadioButton {
+                objectName: "infoEdit"
+                text: qsTr("Info")
+                ButtonGroup.group: editModes
+                onToggled: { backend.onEditModeChanged(objectName); }
+            }
         }
 
         Rectangle {
             anchors.top: buttonRow.bottom
-            Layout.fillWidth: true
+            // Layout.fillWidth: true
+            // Grab selection matches when w=600
+            width: 600
             height: 600
 
             PixmapImage {
