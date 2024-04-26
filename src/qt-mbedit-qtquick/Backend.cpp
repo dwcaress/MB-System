@@ -15,6 +15,7 @@
 #include <QTextStream>
 #include <QMetaObject>
 #include <QQmlProperty>
+#include <QFont>
 #include "Backend.h"
 #include "GuiNames.h"
 
@@ -49,7 +50,12 @@ Backend::Backend(QObject *rootObject, int argc, char **argv) {
   const int height = 600;
   canvasPixmap_ = new QPixmap(width, height);
 
+  // mbedit uses this font:
+  // "-*-fixed-bold-r-normal-*-13-*-75-75-c-70-iso8859-1");  
   painter_ = new QPainter(canvasPixmap_);
+  QFont myFont("Helvetica [Cronyx]", 9);
+  //  QFont myFont("-*-fixed-bold-r-normal-*-13-*-75-75-c-70-iso8859-1");  
+  painter_->setFont(myFont);
 
   // Keep static reference to painter for use by static member functions
   staticPainter_ = painter_;
@@ -98,14 +104,13 @@ Backend::Backend(QObject *rootObject, int argc, char **argv) {
 		      firstDataTime_, &outMode_);
 
   qDebug() << "format_: " << format_;
+  
+  // Initialize drag-start coordinates
+  dragStartX_ = dragStartY_ = 0.;
 
   // Set GUI items to default values
   qDebug() << "TBD: Set sliders to default values";
-  /* ***
-  ui->vertExaggSlider->setSliderPosition(verticalExagg_/100);  
-  ui->nPingsShowSlider->setSliderPosition(nPingsShown_);
-  ui->xtrackWidthSlider->setSliderPosition(xTrackWidth_);  
-  *** */
+
   char *swathFile = nullptr;
   // Parse command line options
   for (int i = 1; i < argc; i++) {
@@ -123,7 +128,7 @@ Backend::Backend(QObject *rootObject, int argc, char **argv) {
   else {
     plotTest();
   }
-  
+
 }
 
 Backend::~Backend()
@@ -491,6 +496,10 @@ void Backend::onEditModeChanged(QString mode) {
   else if (mode == GRAB_EDIT_MODE) {
     editMode_ = GRAB;
   }
+  else if (mode == INFO_EDIT_MODE) {
+    editMode_ = INFO;
+  }
+  
   else {
     qWarning() << "Unknown edit mode: " << mode;
   }
@@ -500,7 +509,7 @@ void Backend::onEditModeChanged(QString mode) {
 void Backend::onLeftMouseButtonClicked(double x, double y) {
   qDebug() << "onLeftMouseButtonClicked()";
   int status = 0;
-  bool ok = edit(x, y);
+  /// bool ok = edit(x, y);
 }
 
 void Backend::onRightMouseButtonClicked(double x, double y) {
@@ -512,6 +521,9 @@ void Backend::onRightMouseButtonClicked(double x, double y) {
 void Backend::onLeftMouseButtonDown(double x, double y) {
   qDebug() << "onLeftMouseButtonDown()  x: " << x << ", y: " << y;
 
+  dragStartX_ = x;
+  dragStartY_ = y;
+  
   if (editMode_ == GRAB) {
     // Start grabbing selected points
     int status =
@@ -546,6 +558,7 @@ void Backend::onLeftMouseButtonUp(double x, double y) {
 			       &nGood_, &iCurrent_, &mnPlot_);
   
     plotSwath();
+
     return;
   }
   
@@ -565,8 +578,33 @@ bool Backend::edit(double x, double y) {
   qDebug() << "edit(): editMode_ = " << editMode_;
 
   switch (editMode_) {
+
+  case TOGGLE:
+    status = 
+      mbedit_action_mouse_toggle((int )x, (int )y, canvasPixmap_->width(),
+				 verticalExagg_, xInterval_, yInterval_,
+				 nPingsShown_, soundColorCoding_,
+				 showFlagSounding_, showFlagProfile_,
+				 plotAncillData_,
+				 &nBuffer_,
+				 &nGood_, &iCurrent_, &mnPlot_);	    
+    break;
+
+  case INFO:
+    status = 
+      mbedit_action_mouse_info((int )x, (int )y, canvasPixmap_->width(),
+			       verticalExagg_, xInterval_, yInterval_,
+			       nPingsShown_, soundColorCoding_,
+			       showFlagSounding_, showFlagProfile_,
+			       plotAncillData_,
+			       &nBuffer_,
+			       &nGood_, &iCurrent_, &mnPlot_);
+    break;
+
+  case PICK:
+    break;
+
   case GRAB:
-    
     status = 
       mbedit_action_mouse_grab(GRAB_MOVE,
 			       (int )x, (int )y, canvasPixmap_->width(),
@@ -605,8 +643,9 @@ bool Backend::edit(double x, double y) {
     qWarning() << "Unsupported edit mode: " << editMode_;
   
   }
-  // Update display
-  plotSwath();
+  // Update display (don't call plotSwath(), it will erase intemediate
+  // graphics...)
+  swathPixmapImage_->update();    
   
   if (status != MB_SUCCESS) {
     qWarning() << "Error while editing: " << status;

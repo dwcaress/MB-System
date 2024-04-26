@@ -172,6 +172,10 @@ protected:
   int nBuffer_;   /// ???
   int iCurrent_;  /// ???
   int mnPlot_;    /// ???
+
+  /// Mouse-drag start coordinates
+  double dragStartX_;
+  double dragStartY_;
   
   /// static members are referenced by static functions whose pointers
   /// are passed to mbedit 
