@@ -246,9 +246,14 @@ namespace mbgrd2gltf {
 				};
 				mesh.SetFace(draco::FaceIndex(i / 3), face);
 			}
+
 			// Encode the mesh using Draco, return false if the encoding fails
 			draco::Encoder encoder;
-			encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, options.draco_quantization());
+			encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, options.draco_quantization(0));
+			encoder.SetAttributeQuantization(draco::GeometryAttribute::NORMAL, options.draco_quantization(1));
+			encoder.SetAttributeQuantization(draco::GeometryAttribute::TEX_COORD, options.draco_quantization(2));
+			encoder.SetAttributeQuantization(draco::GeometryAttribute::COLOR, options.draco_quantization(3));
+
 			draco::EncoderBuffer buffer;
 			if (!encoder.EncodeMeshToBuffer(mesh, &buffer).ok()) {
 				std::cerr << "Encoding failed." << std::endl;
@@ -270,7 +275,7 @@ namespace mbgrd2gltf {
 		*/
 		bool dracoCompressed(tinygltf::Model& model, const Geometry& geometry, const Options& options, const std::vector<float>& vertex_buffer, const std::vector<uint32_t>& index_buffer) {
 			// Check if the geometry is empty or if the Draco compression is disabled or invalid (quantization value)
-			if (!options.is_draco_compressed() || vertex_buffer.empty() || index_buffer.empty() || options.draco_quantization() <= 0 || options.draco_quantization() > 30)
+			if (!options.is_draco_compressed() || vertex_buffer.empty() || index_buffer.empty() || !options.draco_quantization_valid())
 				return false;
 
 			// Encode the geometry using Draco && add the compressed data to the model buffer.

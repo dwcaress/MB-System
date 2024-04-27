@@ -48,7 +48,8 @@ const char* const usage_str = "usage: mbgrd2gltf <filepath> [-b | --binary] [(-o
 "\n                              [(-e | --exaggeration) <vertical exaggeration>]"\
 "\n                              [(-m | --max-size) <max size>]"\
 "\n                              [(-c | --compression) <compression ratio>]"\
-"\n                              [(-d | --draco) <draco compression>]";
+"\n                              [(-d | --draco) <draco compression>]"\
+"\n                              [(-qp | -qn | -qt | -qc) <quantization>]";
 
 const char* const help_str = "\nvariables:"\
 "\n"\
@@ -74,6 +75,11 @@ const char* const help_str = "\nvariables:"\
 "\n                              times in 3D environments. Draco is an open-source"\
 "\n                              library, created by Google, for compressing and"\
 "\n                              decompressing 3D geometric meshes and point clouds."\
+"\n"\
+"\n    <quantization>            Draco quantization settings. The quantization"\
+"\n                              value must be between 1 and 30. The quantization"\
+"\n                              settings are applied in the following order:"\
+"\n                              -qp: Position, -qn: Normal, -qt: TexCoord, -qc: Color"\
 "\n";
 
 const char* const try_help_str = "try 'mbgrd2gltf [-h | --help]' for more information";
@@ -105,8 +111,13 @@ namespace mbgrd2gltf {
 		{ "-d", &Options::arg_draco_compression},
 		{ "--draco", &Options::arg_draco_compression},
 		{ "-qp", &Options::arg_draco_quantization},
-		{ "--quantization", &Options::arg_draco_quantization}
-
+		{ "-qn", &Options::arg_draco_quantization},
+		{ "-qt", &Options::arg_draco_quantization},
+		{ "-qc", &Options::arg_draco_quantization},
+		{ "--quantiposition", &Options::arg_draco_quantization},
+		{ "--quantinormal", &Options::arg_draco_quantization},
+		{ "--quantitexcoord", &Options::arg_draco_quantization},
+		{ "--quanticolor", &Options::arg_draco_quantization}
 	};
 
 	double parse_value(const char* token, const char* var_name) {
@@ -194,18 +205,43 @@ namespace mbgrd2gltf {
 		_is_draco_compressed = true;
 	}
 
+
 	void Options::arg_draco_quantization(const char** args, unsigned size, unsigned& i) {
-		if (!_is_draco_compressed || _is_compression_set || _is_max_size_set)
-			throw std::invalid_argument("quantization may only be set when draco compression is set and neither compression ratio nor max size are set");
+		if (!_is_draco_compressed)
+			throw std::invalid_argument("Quantization settings can only be specified if Draco compression is enabled");
 
+		std::string arg(args[i]);
+		std::string quant_type = arg.substr(0, 3);
+		int value;
 
-		int value = (int)get_value_double(args, size, i, "quantization");
+		if (arg.size() > 3) {
+			std::string value_str = arg.substr(3);
+			value = std::stoi(value_str);
+		}
+		else {
+			if (i + 1 >= size) {
+				throw std::invalid_argument("Quantization value is required after '" + quant_type + "'");
+			}
+			value = std::stoi(args[++i]);
+		}
 
 		if (value <= 0 || value > 30)
-			throw std::invalid_argument("expected quantization between 1 and 30 but got:"
-				+ std::to_string(value));
+			throw std::invalid_argument("Quantization must be between 1 and 30");
 
-		_draco_quantization = value;
+		// Apply the quantization setting based on the type
+		if (quant_type == "-qp") _draco_quantization[0] = value;
+		else if (quant_type == "-qn") _draco_quantization[1] = value;
+		else if (quant_type == "-qt") _draco_quantization[2] = value;
+		else if (quant_type == "-qc") _draco_quantization[3] = value;
+		else throw std::invalid_argument("Invalid quantization type specified: " + quant_type);
+	}
+
+
+	bool Options::draco_quantization_valid() const {
+		for (int i = 0; i < 4; i++)
+			if (_draco_quantization[i] <= 0 || _draco_quantization[i] > 30)
+				return false;
+		return true;
 	}
 
 	void Options::arg_exaggeration(const char** args, unsigned size, unsigned& i) {

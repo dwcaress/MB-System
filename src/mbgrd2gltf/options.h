@@ -58,7 +58,7 @@ namespace mbgrd2gltf {
 		bool _is_exaggeration_set = false;
 		bool _is_output_folder_set = false;
 		bool _is_draco_compressed = false;
-		int _draco_quantization = 11;
+		int _draco_quantization[4] = {11, 7, 10, 8}; // [POSITION, NORMAL, TEXCOORD, COLOR]
 
 		static const std::unordered_map<std::string, ArgCallback> arg_callbacks;
 
@@ -88,7 +88,8 @@ namespace mbgrd2gltf {
 		bool is_exaggeration_set() const { return _is_exaggeration_set; }
 		bool is_output_folder_set() const { return _is_output_folder_set; }
 		bool is_draco_compressed() const { return _is_draco_compressed; }
-		int draco_quantization() const { return _draco_quantization; }
+		int draco_quantization(int i) const { return _draco_quantization[i]; }
+		bool draco_quantization_valid() const;
 	};
 }
 
