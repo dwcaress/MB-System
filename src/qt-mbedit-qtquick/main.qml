@@ -22,6 +22,8 @@ ApplicationWindow {
     height: 880
     title: "qt-mbedit"
 
+    required property var backend
+    
     ActionGroup {
         id: ancillaryData
         exclusive: true
@@ -196,8 +198,10 @@ ApplicationWindow {
             Layout.fillWidth: true
             from: 1
             to: 300
+	    value: 150
             live: false  // only update value when button released
-            onValueChanged: { console.log('xTrackSlider moved');
+ 	    Component.onCompleted: { backend.onXtrackChanged(value) }
+	    onValueChanged: { console.log('xTrackSlider moved');
                 backend.onXtrackChanged(value) }
         }
         Label { text: "Pings shown" }
@@ -207,8 +211,10 @@ ApplicationWindow {
             Layout.fillWidth: true
             from: 1
             to: 20
+	    value: 10
             live: false  // only update value when button released
-            onValueChanged: { console.log('pingsShownSlider moved');
+	    Component.onCompleted: { backend.onPingsShownChanged(value) }
+            onValueChanged: { console.log('pingsShownSlider moved: ', value);
                 backend.onPingsShownChanged(value) }
         }
         Label { text: "Vertical exaggeration" }
@@ -219,8 +225,9 @@ ApplicationWindow {
             from: 0.01
             to: 20
             live: false
-            onValueChanged: { console.log('vericalExaggSlider moved');
-                backend.onVerticalExaggChanged(value) }
+	    value: 10
+	    Component.onCompleted: { backend.onVerticalExaggChanged(value) }
+	    onValueChanged: { backend.onVerticalExaggChanged(value) }
         }
         Label { text: "Ping step" }
         Slider {
@@ -231,6 +238,7 @@ ApplicationWindow {
             from: 1
             to: 20
             live: false
+	    Component.onCompleted: { backend.onPingStepChanged(value) }
             onValueChanged: { console.log('pingStepSlider moved');
                 backend.onPingStepChanged(value) }
         }
@@ -246,7 +254,7 @@ ApplicationWindow {
 
             RadioButton {
                 objectName: "toggleEdit"
-                checked: true
+                /// checked: true
                 text: qsTr("Toggle")
                 ButtonGroup.group: editModes
                 onToggled: { backend.onEditModeChanged(objectName); }
@@ -282,6 +290,8 @@ ApplicationWindow {
 
             RadioButton {
                 objectName: "infoEdit"
+		checked: true
+		Component.onCompleted: { backend.onEditModeChanged(objectName) }
                 text: qsTr("Info")
                 ButtonGroup.group: editModes
                 onToggled: { backend.onEditModeChanged(objectName); }
