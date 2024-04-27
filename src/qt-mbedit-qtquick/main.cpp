@@ -3,6 +3,7 @@
 #include <QQuickView>
 #include <QQuickItem>
 #include <QAbstractButton>
+#include <QList>
 #include <QButtonGroup>
 #include <QQmlContext>
 #include "GuiNames.h"
@@ -18,7 +19,14 @@ int main(int argc, char *argv[]) {
 
     QGuiApplication app(argc, argv);
 
+    Backend backend(argc, argv);
+    
     QQmlApplicationEngine engine;
+    
+    // Make backend object and methods accessible to QML
+    engine.setInitialProperties({
+	{ "backend", QVariant::fromValue(&backend) }
+      });    
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
@@ -34,10 +42,10 @@ int main(int argc, char *argv[]) {
 
     QObject *rootObject = engine.rootObjects().value(0);
     
-    Backend backend(rootObject, argc, argv);
-    
-    // Make backend object and methods accessible to QML
-    engine.rootContext()->setContextProperty("backend", &backend);
+    if (!backend.initialize(rootObject, argc, argv)) {
+      qWarning() << "failed to initialize backend";
+      exit(1);
+    }
     
     return app.exec();
 }
