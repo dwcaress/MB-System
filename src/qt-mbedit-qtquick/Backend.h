@@ -24,14 +24,12 @@ class Backend : public QObject  {
     Q_OBJECT
 
 public:
-  Backend(QObject *ui, int argc, char **argv);
+  Backend(int argc, char **argv);
   ~Backend();
 
-  /// Get canvas width and height
-  void canvasSize(int *width, int *height) {
-    *width = canvasPixmap_->width();
-    *height = canvasPixmap_->height();
-  }
+  /// Complete Backend initialization, load/display swath file if
+  /// specified on command line
+  bool initialize(QObject *loadedRoot, int argc, char **argv);
   
   static void drawLine(void *dummy, int x1, int y1, int x2, int y2,
 		       mbedit_color_t color, int style);
@@ -97,6 +95,12 @@ public:
   
 protected:
 
+  /// Get canvas width and height
+  void canvasSize(int *width, int *height) {
+    *width = canvasPixmap_->width();
+    *height = canvasPixmap_->height();
+  }
+  
   /// Open and process swath file
   bool processSwathFile(char *swathFile);
   
@@ -173,10 +177,6 @@ protected:
   int iCurrent_;  /// ???
   int mnPlot_;    /// ???
 
-  /// Mouse-drag start coordinates
-  double dragStartX_;
-  double dragStartY_;
-  
   /// static members are referenced by static functions whose pointers
   /// are passed to mbedit 
   static QPainter *staticPainter_;

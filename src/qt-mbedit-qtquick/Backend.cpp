@@ -38,9 +38,8 @@ QString Backend::staticTextBuf_;
 
 /// using namespace mb_system;
 
-Backend::Backend(QObject *rootObject, int argc, char **argv) {
+Backend::Backend(int argc, char **argv) {
 
-  ui_ = rootObject;
   dataPlotted_ = false;
   
   // Dummy first argument to drawing functions
@@ -60,17 +59,6 @@ Backend::Backend(QObject *rootObject, int argc, char **argv) {
   // Keep static reference to painter for use by static member functions
   staticPainter_ = painter_;
 
-  // Find PixmapImage in QML object tree
-  swathPixmapImage_ = 
-    ui_->findChild<PixmapImage*>(SWATH_PIXMAP_NAME);
-
-  if (!swathPixmapImage_) {
-    qCritical() << "Couldn't find " << SWATH_PIXMAP_NAME << " in QML";
-  }
-  
-  pixmapContainer_.pixmap = canvasPixmap_;
-  swathPixmapImage_->setImage(&pixmapContainer_);
-  
   staticFontMetrics_ = new QFontMetrics(painter_->font());
 
   /// Hard-coded in mbedit_callbacks; should loosen this restriction
@@ -105,12 +93,34 @@ Backend::Backend(QObject *rootObject, int argc, char **argv) {
 
   qDebug() << "format_: " << format_;
   
-  // Initialize drag-start coordinates
-  dragStartX_ = dragStartY_ = 0.;
-
-  // Set GUI items to default values
+    // Set GUI items to default values
   qDebug() << "TBD: Set sliders to default values";
 
+
+}
+
+
+Backend::~Backend()
+{
+  // Free unneeded memory
+}
+
+
+bool Backend::initialize(QObject *loadedRoot, int argc, char **argv) {
+  ui_ = loadedRoot;
+
+  // Find PixmapImage in QML object tree
+  swathPixmapImage_ = 
+    ui_->findChild<PixmapImage*>(SWATH_PIXMAP_NAME);
+
+  if (!swathPixmapImage_) {
+    qCritical() << "Couldn't find " << SWATH_PIXMAP_NAME << " in QML";
+    return false;
+  }
+  
+  pixmapContainer_.pixmap = canvasPixmap_;
+  swathPixmapImage_->setImage(&pixmapContainer_);
+  
   char *swathFile = nullptr;
   // Parse command line options
   for (int i = 1; i < argc; i++) {
@@ -129,11 +139,7 @@ Backend::Backend(QObject *rootObject, int argc, char **argv) {
     plotTest();
   }
 
-}
-
-Backend::~Backend()
-{
-  // Free unneeded memory
+  return true;
 }
 
 
@@ -521,9 +527,6 @@ void Backend::onRightMouseButtonClicked(double x, double y) {
 void Backend::onLeftMouseButtonDown(double x, double y) {
   qDebug() << "onLeftMouseButtonDown()  x: " << x << ", y: " << y;
 
-  dragStartX_ = x;
-  dragStartY_ = y;
-  
   if (editMode_ == GRAB) {
     // Start grabbing selected points
     int status =
