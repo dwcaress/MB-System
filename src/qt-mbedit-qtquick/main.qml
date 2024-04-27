@@ -22,6 +22,7 @@ ApplicationWindow {
     height: 880
     title: "qt-mbedit"
 
+    // Interface to C++ Backend methods
     required property var backend
     
     ActionGroup {
@@ -299,7 +300,6 @@ ApplicationWindow {
         }
 
         Rectangle {
-            anchors.top: buttonRow.bottom
             // Layout.fillWidth: true
             // Grab selection matches when w=600
             width: 600
