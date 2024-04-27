@@ -74,6 +74,18 @@ typedef enum {
 } SoundColorCoding;
 
 
+/// Swatch/ping mouse edit modes
+typedef enum {
+  TOGGLE,
+  PICK,
+  ERASE,
+  RESTORE,
+  GRAB,
+  INFO
+  
+} MouseEditMode;
+
+
 /// Mouse edit grab modes
 typedef enum {
   GRAB_START,
@@ -261,6 +273,7 @@ int mbedit_action_mouse_restore(int x_loc, int y_loc, int plwd, int exgr,
 				PlotAncillData ancillData, int *nbuffer,
 				int *ngood, int *icurrent, int *nplt);
 
+/// Call in response to events when editing swath in GRAB mode
 int mbedit_action_mouse_grab(MouseGrabMode grabmode, int x_loc, int y_loc,
 			     int plwd,
 			     int exgr, int xntrvl, int yntrvl, int plt_size,
