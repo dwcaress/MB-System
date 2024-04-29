@@ -192,8 +192,8 @@ ApplicationWindow {
         Layout.fillHeight: false
         width: 1000
 
-        Label { text: "XTrack width" }
-        Slider {
+        Label { text: "XTrack width (m) " + xtrackSlider.value.toFixed(0) }
+	Slider {
             id: xtrackSlider
             objectName: "xTrackSliderObj"
             Layout.fillWidth: true
@@ -205,7 +205,8 @@ ApplicationWindow {
 	    onValueChanged: { console.log('xTrackSlider moved');
                 backend.onXtrackChanged(value) }
         }
-        Label { text: "Pings shown" }
+	
+        Label { text: "Pings shown " + pingsShownSlider.value.toFixed(0) }
         Slider {
             id: pingsShownSlider
             objectName: "pingsShownSliderObj"
@@ -218,7 +219,8 @@ ApplicationWindow {
             onValueChanged: { console.log('pingsShownSlider moved: ', value);
                 backend.onPingsShownChanged(value) }
         }
-        Label { text: "Vertical exaggeration" }
+        Label { text: "Vertical exaggeration " +
+	       (verticalExaggSlider.value * 100).toFixed(1)}
         Slider {
             id: verticalExaggSlider
             objectName: "verticalExaggSliderObj"
@@ -388,9 +390,10 @@ ApplicationWindow {
     FileDialog {
         id: fileDialog
         title: "Open swath file"
-        nameFilters: ["Swath files (*.mb*)"]
+        nameFilters: ["Swath files (*.mb[0-9]*)"]
         onAccepted: {
             console.log("accepted " + fileUrl);
+	    backend.processSwathFile(fileUrl);
         }
     }
 }
