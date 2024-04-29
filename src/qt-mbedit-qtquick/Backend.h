@@ -101,9 +101,6 @@ protected:
     *height = canvasPixmap_->height();
   }
   
-  /// Open and process swath file
-  bool processSwathFile(char *swathFile);
-  
   /// GUI item names
   GuiNames *guiNames_;
   
@@ -185,6 +182,9 @@ protected:
 
 public slots:
 
+  /// Open and process swath file
+  bool processSwathFile(QUrl swathFile);
+  
   /// GUI item callbacks/slots
   void onXtrackChanged(double value);
   void onPingsShownChanged(double value);

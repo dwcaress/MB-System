@@ -93,10 +93,6 @@ Backend::Backend(int argc, char **argv) {
 
   qDebug() << "format_: " << format_;
   
-    // Set GUI items to default values
-  qDebug() << "TBD: Set sliders to default values";
-
-
 }
 
 
@@ -131,7 +127,14 @@ bool Backend::initialize(QObject *loadedRoot, int argc, char **argv) {
   }
 
   if (swathFile) {
-    if (!processSwathFile(swathFile)) {
+    char *fullPath = realpath(swathFile, nullptr);
+    if (!fullPath) {
+      qWarning() << "swath file \"%s\" not found: " <<  swathFile;
+      return false;
+    }
+    
+    QString urlString("file://" + QString(fullPath));    
+    if (!processSwathFile(urlString)) {
       qWarning() << "Couldn't process " << swathFile;
     }
   }
@@ -262,8 +265,10 @@ bool Backend::plotSwath(void) {
 }
 
 
-bool Backend::processSwathFile(char *swathFile) {
-  
+bool Backend::processSwathFile(QUrl fileUrl) {
+
+  qDebug() << "processSwathFile() " <<  fileUrl;
+  char *swathFile = strdup(fileUrl.toLocalFile().toLatin1().data());  
   if (mbedit_get_format(swathFile, &format_) != MB_SUCCESS) {
     std::cerr << "Couldn't determine sonar format of " << swathFile
 	      << "\n";
