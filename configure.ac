@@ -29,7 +29,7 @@ dnl-----------------------------------------------------------------------------
 dnl--------------------------------------------------------------------
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.9],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.8.2],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AS_ECHO([" "])
 AS_ECHO(["------------------------------------------------------------------------------"])
@@ -143,7 +143,7 @@ AS_ECHO(["----------------------------------------------------------------------
 AS_ECHO([" "])
 
 dnl Require automake 2.71 or later
-AC_PREREQ([2.71])
+AC_PREREQ([2.72])
 
 dnl Disable warnings about unrecognized options
 AC_DISABLE_OPTION_CHECKING

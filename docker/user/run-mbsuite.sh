@@ -305,6 +305,7 @@ unset TRN_LOGFILES
 
 # build docker command
 DOCKER_CMD="docker run -it --name $CONTAINER \
+--platform linux/amd64 \
 --user $OPT_USER \
 $OPT_RM \
 $OPT_NET \
