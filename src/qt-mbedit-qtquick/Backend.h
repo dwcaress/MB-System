@@ -202,8 +202,9 @@ public slots:
   void onLeftMouseButtonDown(double x, double y);
   void onLeftMouseButtonUp(double x, double y);
   void onMouseMove(double x, double y);
-  
-  void testSlot(void);
+
+  /// Invoked when main window is destroyed
+  void onMainWindowDestroyed(void);
 
 };
 

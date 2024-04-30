@@ -46,7 +46,10 @@ int main(int argc, char *argv[]) {
       qWarning() << "failed to initialize backend";
       exit(1);
     }
-    
+
+    QObject::connect(rootObject, SIGNAL(destroyed()),
+		     &backend, SLOT(onMainWindowDestroyed()));
+
     return app.exec();
 }
 

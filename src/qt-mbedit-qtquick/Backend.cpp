@@ -147,8 +147,8 @@ bool Backend::initialize(QObject *loadedRoot, int argc, char **argv) {
 
 
 
-void Backend::testSlot() {
-  qDebug() << "*** testSlot() *****";
+void Backend::onMainWindowDestroyed() {
+  qDebug() << "*** onMainWindowDestroyed() *****";
 }
 
 

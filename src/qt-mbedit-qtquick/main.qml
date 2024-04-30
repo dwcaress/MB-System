@@ -16,11 +16,11 @@ findChild() C++ calls.
 
 ApplicationWindow {
     id: applicationWindow
-    objectName: "mainWindow"
+    objectName: 'mainWindow'
     visible: true
     width: 1000
     height: 880
-    title: "qt-mbedit"
+    title: 'qt-mbedit'
 
     // Interface to C++ Backend methods
     required property var backend
