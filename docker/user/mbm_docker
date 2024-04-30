@@ -41,7 +41,7 @@ def usage():
   sys.stderr.write("usage: % s %s < path > \n" % (sname, str(longOpts)))
   print( """
   -h --help                  Print this message
-  -d --docker=image          Docker image name [mbsys-debian or mbsys-ubuntu22]
+  -d --docker=image          Docker image name [mbari/mbsystem:latest]
   -u --user=username         Username [mbuser]
   -w --workdir=path          Working directory [$PWD]
   -x --x11server=ip:0.       Set X11 server, typically ip address with ":0" appended

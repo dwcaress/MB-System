@@ -1841,6 +1841,8 @@ int main(int argc, char **argv) {
                       && file_status.st_size > 0) {
           mb_copyfile(verbose, srcfile, dstfile, &error);
           num_tri_copied++;
+        } else {
+          fprintf(stderr, "Failed to copy triangle file %s to %s fstat:%d\n", srcfile, dstfile, fstat);
         }
         //mb_command command = "";
         //sprintf(command, "cp %s/nvs_%4.4d_%4.4d.mb71* %s", project_inputbase.datadir, i, j, project_output.datadir);
@@ -2047,6 +2049,8 @@ int main(int argc, char **argv) {
                       && file_status.st_size > 0) {
           mb_copyfile(verbose, srcfile, dstfile, &error);
           num_tri_copied++;
+        } else {
+          fprintf(stderr, "Failed to copy triangle file %s to %s fstat:%d\n", srcfile, dstfile, fstat);
         }
         //sprintf(command, "%s/nvs_%4.4d_%4.4d.mb71.tri", project_inputadd.datadir, i, j);
         //const int fstat = stat(command, &file_status);

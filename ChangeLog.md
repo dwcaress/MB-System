@@ -22,7 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
-
+- Version 5.8.2beta01    April 29, 2024
 - **Version 5.8.1          March 22, 2024**
 - Version 5.8.1beta09    March 22, 2024
 - Version 5.8.1beta08    March 10, 2024
@@ -34,6 +34,15 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.2beta01 (April 29, 2024)
+
+Mbedit: Fixed display of ping profiles to handle condition where a ping contains
+two acrosstrack profiles, typically one aft and one forward of the sonar location. Now
+the connection between the end of the first acrosstrack profile and the start of the
+second is no longer plotted.
+
+MB-System Docker Container: Improved Docker documentation included in the Docker directory.
 
 #### 5.8.1 (March 22, 2024)
 
