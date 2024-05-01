@@ -36,6 +36,8 @@ QPainter *Backend::staticPainter_ = nullptr;
 QFontMetrics *Backend::staticFontMetrics_ = nullptr;
 QString Backend::staticTextBuf_;
 
+Emitter Backend::staticEmitter_;
+
 /// using namespace mb_system;
 
 Backend::Backend(int argc, char **argv) {

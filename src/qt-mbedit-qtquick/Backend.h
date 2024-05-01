@@ -12,13 +12,13 @@
 #include <QMessageBox>
 #include "GuiNames.h"
 #include "PixmapImage.h"
+#include "Emitter.h"
 
 extern "C" {
 #include "mbedit_prog.h"
 }
 
-  
-
+/** Backend application logic */
 class Backend : public QObject  {
   
     Q_OBJECT
@@ -53,16 +53,14 @@ public:
 
   static int showError(char *s1, char *s2, char *s3) {
     std::cerr << "showError(): " << s1 << "\n" << s2 << "\n" << s3 << "\n";
+    emit staticEmitter_.showMessage(QVariant(s1));
     return 0;
   }
 
   static int showMessage(char *message) {
     std::cerr << "showMessage(): " << message << "\n";
-    /* **
-    QMessageBox msgBox;
-    msgBox.setText(message);
-    msgBox.exec();
-    *** */
+    emit staticEmitter_.showMessage(QVariant(message));
+    
     return 0;
   }
 
@@ -92,6 +90,13 @@ public:
     std::cerr << "resetScaleX() - TBD!!!\n";
     return 0;
   }
+
+  /// Emit signals on behalf of static member functions
+  static Emitter staticEmitter_;
+
+
+  /// TEST TEST TEST
+  Emitter emitTest_;
   
 protected:
 
@@ -178,8 +183,8 @@ protected:
   /// are passed to mbedit 
   static QPainter *staticPainter_;
   static QFontMetrics *staticFontMetrics_;
-					 
 
+			 
 public slots:
 
   /// Open and process swath file

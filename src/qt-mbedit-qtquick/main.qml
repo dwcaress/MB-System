@@ -396,6 +396,23 @@ ApplicationWindow {
 	    backend.processSwathFile(fileUrl);
         }
     }
+
+    MessageDialog {
+        id: infoDialog
+        title: "Info"
+        icon: StandardIcon.Question
+        text: "Quit application?"
+        standardButtons: StandardButton.Yes |
+                         StandardButton.No
+        Component.onCompleted: visible = false
+        onYes: Qt.quit(0)
+        onNo: console.log("did not quit")
+    }
+
+
+    function showInfoDialog(message) {
+      console.log('showInfoDialog()', message);
+    }
 }
 
 
