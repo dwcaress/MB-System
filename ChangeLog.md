@@ -22,6 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.2beta02    May 1, 2024
 - Version 5.8.2beta01    April 29, 2024
 - **Version 5.8.1          March 22, 2024**
 - Version 5.8.1beta09    March 22, 2024
@@ -34,6 +35,10 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.2beta021 (May 1, 2024)
+
+Format 261 (MBF_KEMKMALL): Fixed bug in handing pings for which there are multiple MRZ datagrams that have different timestamps. This bug resulted in MB-System dropping many pings in some deepwater Kongsberg data (mostly EM124 data).
 
 #### 5.8.2beta01 (April 29, 2024)
 
