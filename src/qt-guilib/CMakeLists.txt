@@ -59,6 +59,7 @@ set(src
     SurfaceRenderer.cpp
     PickerInteractorStyle.cpp
     Utilities.cpp
+    ClickableLabel.cpp
     resources.qrc)
 
 add_library(MBGui ${src})
