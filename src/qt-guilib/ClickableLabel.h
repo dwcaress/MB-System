@@ -11,9 +11,9 @@ namespace mb_system {
 
   /**
      ClickableLabel is a QLabel widget that emits a signal when mouse button
-     is pressed, released, or while the mouse is dragged in it, with
-     QMouseEvent as signal payload. Typically used to display a QPixmap,
-     which the user interacts with using the mouse.
+     is pressed, released, or while the mouse is dragged within the widget, 
+     with the QMouseEvent as signal payload. ClickableLabel can display a 
+     QPixmap, which the user interacts with using the mouse.
 
    */
   class ClickableLabel : public QLabel {
