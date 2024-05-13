@@ -4170,6 +4170,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
 
               /* populate the datagram index entry */
               dgm_index.time_d = ((double)header.time_sec) + MBSYS_KMBES_NANO * header.time_nanosec;
+              dgm_index.ping_time_d = ((double)header.time_sec) + MBSYS_KMBES_NANO * header.time_nanosec;
               dgm_index.emdgm_type = emdgm_type;
               memcpy(&dgm_index.header, &header, sizeof(struct mbsys_kmbes_header));
               dgm_index.file_pos = mb_io_ptr->file_pos;
@@ -4237,6 +4238,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
 
               /* populate the datagram index entry */
               dgm_index.time_d = ((double)header.time_sec) + MBSYS_KMBES_NANO * header.time_nanosec;
+              dgm_index.ping_time_d = ((double)header.time_sec) + MBSYS_KMBES_NANO * header.time_nanosec;
               dgm_index.emdgm_type = emdgm_type;
               memcpy(&dgm_index.header, &header, sizeof(struct mbsys_kmbes_header));
               dgm_index.file_pos = mb_io_ptr->file_pos;
@@ -4285,6 +4287,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
 
               /* populate the datagram index entry */
               dgm_index.time_d = ((double)header.time_sec) + MBSYS_KMBES_NANO * header.time_nanosec;
+              dgm_index.ping_time_d = ((double)header.time_sec) + MBSYS_KMBES_NANO * header.time_nanosec;
               dgm_index.emdgm_type = emdgm_type;
               memcpy(&dgm_index.header, &header, sizeof(struct mbsys_kmbes_header));
               dgm_index.file_pos = mb_io_ptr->file_pos;
@@ -4322,6 +4325,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
 
             /* populate the datagram index entry */
             dgm_index.time_d = ((double)header.time_sec) + MBSYS_KMBES_NANO * header.time_nanosec;
+            dgm_index.ping_time_d = ((double)header.time_sec) + MBSYS_KMBES_NANO * header.time_nanosec;
             dgm_index.emdgm_type = emdgm_type;
             memcpy(&dgm_index.header, &header, sizeof(struct mbsys_kmbes_header));
             dgm_index.file_pos = mb_io_ptr->file_pos;
@@ -4410,7 +4414,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
     fprintf(stderr, "dgm: %.4s, ", dgm_index_table->indextable[i].header.dgmType);
     fprintf(stderr, "type: %2d, ", dgm_index_table->indextable[i].emdgm_type);
     fprintf(stderr, "size: %6u, ", dgm_index_table->indextable[i].header.numBytesDgm);
-    fprintf(stderr, "time: %9.3f, ", dgm_index_table->indextable[i].time_d);
+    fprintf(stderr, "time: %9.3f %9.3f, ", dgm_index_table->indextable[i].time_d, dgm_index_table->indextable[i].ping_time_d);
     fprintf(stderr, "ping: %5d, ", dgm_index_table->indextable[i].ping_num);
     fprintf(stderr, "rxIndex: %u/%u.\n", dgm_index_table->indextable[i].rx_index,
                                 dgm_index_table->indextable[i].rx_per_ping);
