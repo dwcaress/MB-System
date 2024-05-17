@@ -47,7 +47,7 @@
 const char* const usage_str = "usage: mbgrd2gltf <filepath> [-b | --binary] [(-o | --output) <output folder>]"\
 "\n                              [(-e | --exaggeration) <vertical exaggeration>]"\
 "\n                              [(-m | --max-size) <max size>]"\
-"\n                              [(-c | --compression) <compression ratio>]"\
+"\n                              [(-s | --stride) <stride ratio>]"\
 "\n                              [(-d | --draco) <draco compression>]"\
 "\n                              [(-qp | -qn | -qt | -qc) <quantization>]";
 
@@ -66,20 +66,24 @@ const char* const help_str = "\nvariables:"\
 "\n                              depending on a number of factors including whether"\
 "\n                              the output is in binary form or not)"\
 "\n"\
-"\n    <compression ratio>       decimal number representing the the amount"\
-"\n                              of compression to apply to the buffer data of the"\
-"\n                              output as a ratio of uncompressed size to"\
-"\n                              compressed size"\
+"\n    <stride ratio>       	 decimal number representing the the amount"\
+"\n                              of stride('Skip') to apply to the buffer data of the"\
+"\n                              output as a ratio of normal to"\
+"\n                              running. As you stride, you skip over portions of data."\
+"\n                              The bigger the stride, the more points are skipped."\
 "\n"\
-"\n    <draco>                   further reduce the file size and improve loading"\
-"\n                              times in 3D environments. Draco is an open-source"\
-"\n                              library, created by Google, for compressing and"\
-"\n                              decompressing 3D geometric meshes and point clouds."\
+"\n    <draco>                   reduces the file size of the output by using the"\
+"\n                              Draco compression algorithm applied to the buffer data"\
+"\n								 while encoding the mesh."\
 "\n"\
 "\n    <quantization>            Draco quantization settings. The quantization"\
-"\n                              value must be between 1 and 30. The quantization"\
+"\n                              value must be between 2 and 30. The quantization"\
 "\n                              settings are applied in the following order:"\
 "\n                              -qp: Position, -qn: Normal, -qt: TexCoord, -qc: Color"\
+"\n                              Lower quantization parameters yield higher compression,"\
+"\n                              but lower visual quality. The default quantization"\
+"\n                              value is 11 for position, 7 for normal, 10 for texcoord,"\
+"\n                              and 8 for color."\
 "\n";
 
 const char* const try_help_str = "try 'mbgrd2gltf [-h | --help]' for more information";
@@ -102,8 +106,8 @@ namespace mbgrd2gltf {
 		{ "--binary", &Options::arg_binary },
 		{ "-e", &Options::arg_exaggeration },
 		{ "--exaggeration", &Options::arg_exaggeration },
-		{ "-c", &Options::arg_compression },
-		{ "--compression", &Options::arg_compression },
+		{ "-s", &Options::arg_stride },
+		{ "--stride", &Options::arg_stride },
 		{ "-m", &Options::arg_max_size },
 		{ "--max-size", &Options::arg_max_size },
 		{ "-o", &Options::arg_output },
@@ -164,28 +168,28 @@ namespace mbgrd2gltf {
 		_is_binary_output = true;
 	}
 
-	void Options::arg_compression(const char** args, unsigned size, unsigned& i) {
-		if (_is_compression_set)
-			throw std::invalid_argument("compression ratio may not be set more than once");
+	void Options::arg_stride(const char** args, unsigned size, unsigned& i) {
+		if (_is_stride_set)
+			throw std::invalid_argument("stride ratio may not be set more than once");
 
 		if (_is_max_size_set > 0)
-			throw std::invalid_argument("compression ratio may not be set when max size is set");
+			throw std::invalid_argument("stride ratio may not be set when max size is set");
 
-		double value = get_value_double(args, size, i, "compression ratio");
+		double value = get_value_double(args, size, i, "stride ratio");
 
 		if (value < 1.0)
-			throw std::invalid_argument("expected compression ratio >= 1 but got: "
+			throw std::invalid_argument("expected stride ratio >= 1 but got: "
 				+ std::to_string(value));
 
-		_compression_ratio = value;
-		_is_compression_set = true;
+		_stride_ratio = value;
+		_is_stride_set = true;
 	}
 
 	void Options::arg_max_size(const char** args, unsigned size, unsigned& i) {
 		if (_is_max_size_set)
 			throw std::invalid_argument("max size may not be specified more than once");
 
-		if (_is_compression_set)
+		if (_is_stride_set)
 			throw std::invalid_argument("max size may not be set when compression ratio is set");
 
 

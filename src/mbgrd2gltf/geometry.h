@@ -50,7 +50,6 @@ namespace mbgrd2gltf {
 		Matrix<Vertex> _vertices;
 		std::vector<Triangle> _triangles;
 
-
 	private: // methods
 		static double to_radians(double degrees);
 		static double get_longitude(const Bathymetry& bathymetry, size_t x);
