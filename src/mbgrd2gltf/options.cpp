@@ -82,7 +82,7 @@ const char* const help_str = "\nvariables:"\
 "\n                              -qp: Position, -qn: Normal, -qt: TexCoord, -qc: Color"\
 "\n                              Lower quantization parameters yield higher compression,"\
 "\n                              but lower visual quality. The default quantization"\
-"\n                              value is 11 for position, 7 for normal, 10 for texcoord,"\
+"\n                              value is 16 for position, 7 for normal, 10 for texcoord,"\
 "\n                              and 8 for color."\
 "\n";
 
