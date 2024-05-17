@@ -129,6 +129,8 @@ Version 5.0
 .br
 \fB--kluge-time-jumps\fP=\fISECONDS\fP
 .br
+\fB--kluge-fix-7k-timestamps\fP=\fITARGETOFFSET\fP
+.br
 \fB--kluge-ancilliary-time-jumps\fP=\fISECONDS\fP
 .br
 \fB--kluge-mbaripressure-time-jumps\fP=\fITHRESHOLD\fP
@@ -832,6 +834,16 @@ to the origin for a dual head lidar system. The only relevant formats are for
 3D at Depth lidars (232 and 233).
 .TP
 .B --kluge-time-jumps=\fISECONDS\fP
+.TP
+.B --kluge-fix-7k-timestamps=\fITARGETOFFSET\fP
+This option was created to fix some Teledyne Reson T50 multibeam data (format 89) collected
+in 2024 with an MBARI Mapping AUV. The sonar ping timestamps jumped considerably (by as
+much as a day!!) while the ancillary nav, sensor depth, and attitude records maintained
+accurate timing. In good data the ping records will occur in the datastream with a fairly
+stable delay from the most recent ancillary records (0.7 seconds in this case). This
+option forces the pings records to have timestamps that have the target offset from the
+most recent ancillary records whenever the recorded offset magnitude is more than four 
+times the target offset.
 .TP
 .B --kluge-ancilliary-time-jumps=\fISECONDS\fP
 .TP

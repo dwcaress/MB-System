@@ -372,7 +372,7 @@ int mbr_kemkmall_indextable_compare(const void *a, const void *b) {
       - All other datagrams should be in time order, excepting that all datagrams
         associated with a ping should be grouped together (MRZ, XMS, MWC)
       - Within a ping datagram group, the MRZ datagrams should be first, then
-        the XMS datagram, then the MWC datagrams.
+        the XMT datagram, then the XMS datagram, and finally any MWC datagrams.
       - The MRZ datagrams in a ping should be grouped by receiver index
       - The MWC datagrams in a ping should be grouped by receiver index
       - If MRZ or MWC datagrams are partitioned (too large for a single UDP
@@ -441,7 +441,7 @@ int mbr_kemkmall_indextable_compare(const void *a, const void *b) {
   result = 1;
   }
 
-  /* deal with both datagrams being ping datagrams (MRZ, XMS, MWC) */
+  /* deal with both datagrams being ping datagrams (MRZ, XMT, XMS, MWC) */
   else if ((aa->emdgm_type == MRZ || aa->emdgm_type == XMT || aa->emdgm_type == XMS || aa->emdgm_type == MWC)
       && (bb->emdgm_type == MRZ || bb->emdgm_type == XMT|| bb->emdgm_type == XMS || bb->emdgm_type == MWC)) {
 
@@ -4170,6 +4170,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
 
               /* populate the datagram index entry */
               dgm_index.time_d = ((double)header.time_sec) + MBSYS_KMBES_NANO * header.time_nanosec;
+              dgm_index.ping_time_d = ((double)header.time_sec) + MBSYS_KMBES_NANO * header.time_nanosec;
               dgm_index.emdgm_type = emdgm_type;
               memcpy(&dgm_index.header, &header, sizeof(struct mbsys_kmbes_header));
               dgm_index.file_pos = mb_io_ptr->file_pos;
@@ -4237,6 +4238,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
 
               /* populate the datagram index entry */
               dgm_index.time_d = ((double)header.time_sec) + MBSYS_KMBES_NANO * header.time_nanosec;
+              dgm_index.ping_time_d = ((double)header.time_sec) + MBSYS_KMBES_NANO * header.time_nanosec;
               dgm_index.emdgm_type = emdgm_type;
               memcpy(&dgm_index.header, &header, sizeof(struct mbsys_kmbes_header));
               dgm_index.file_pos = mb_io_ptr->file_pos;
@@ -4285,6 +4287,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
 
               /* populate the datagram index entry */
               dgm_index.time_d = ((double)header.time_sec) + MBSYS_KMBES_NANO * header.time_nanosec;
+              dgm_index.ping_time_d = ((double)header.time_sec) + MBSYS_KMBES_NANO * header.time_nanosec;
               dgm_index.emdgm_type = emdgm_type;
               memcpy(&dgm_index.header, &header, sizeof(struct mbsys_kmbes_header));
               dgm_index.file_pos = mb_io_ptr->file_pos;
@@ -4322,6 +4325,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
 
             /* populate the datagram index entry */
             dgm_index.time_d = ((double)header.time_sec) + MBSYS_KMBES_NANO * header.time_nanosec;
+            dgm_index.ping_time_d = ((double)header.time_sec) + MBSYS_KMBES_NANO * header.time_nanosec;
             dgm_index.emdgm_type = emdgm_type;
             memcpy(&dgm_index.header, &header, sizeof(struct mbsys_kmbes_header));
             dgm_index.file_pos = mb_io_ptr->file_pos;
@@ -4363,20 +4367,42 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
   if (status == MB_SUCCESS && dgm_index_table->dgm_count > 0) {
 
     /* each ping can have multiple MRZ and MWC datagrams - the ping timestamp is
-        the timestamp of the first MRZ datagram - add ping timestamp to index entries
+        the timestamp of the first MRZ datagram but other MRZ datagrams may have later
+        timestamps - add ping timestamp to index entries
         for all MRZ and MWC datagrams */
-    /* start by sorting the index table on ping number alone, and then looping
-          over all datagrams in ping order setting the ping timestamp */
-    //qsort((void *)dgm_index_table->indextable, dgm_index_table->dgm_count,
-    //    sizeof(struct mbsys_kmbes_index), (void *)mbr_kemkmall_indextable_compare_pings);
-
-
     /* sort the datagram index table, leaving the datagrams up through the
        #IIP datagram in place at the start of the file - in practice this means
        any comment datagrams stay at the start of the file */
+    /* further sort by timestamp and place ping datagrams in order. Because multiple
+    	MRZ and MWC datagrams can have non-ping datagrams between them with intermediate
+    	timestamps, do a secondary sort that collapses the datagrams from a single ping
+    	cycle together in the list */
 
     qsort((void *)dgm_index_table->indextable, dgm_index_table->dgm_count,
         sizeof(struct mbsys_kmbes_index), (void *)mbr_kemkmall_indextable_compare);
+
+  	/* set timestamps of secondary ping datagrams to the save value as the first MRZ */
+  	for (unsigned int i=0; i<dgm_index_table->dgm_count; i++) {
+  	  struct mbsys_kmbes_index *aa = &(dgm_index_table->indextable[i]);
+  	  if (aa->emdgm_type == MRZ && aa->rx_index == 0) {
+  	  	bool done = false;
+  		for (unsigned int j=i+1; j<dgm_index_table->dgm_count && !done; j++) {
+  	  	  struct mbsys_kmbes_index *bb = &(dgm_index_table->indextable[j]);
+  	  	  if (bb->emdgm_type == MRZ || bb->emdgm_type == XMT|| bb->emdgm_type == XMS || bb->emdgm_type == MWC) {
+  	  		if (bb->ping_num == aa->ping_num) {
+  	  		  bb->time_d = aa->time_d;
+  	  		} 
+  	  		else {
+  	  		  done = true;
+  	  		}
+  	  	  }
+  	  	}
+  	  }
+  	}
+  	
+    qsort((void *)dgm_index_table->indextable, dgm_index_table->dgm_count,
+        sizeof(struct mbsys_kmbes_index), (void *)mbr_kemkmall_indextable_compare);
+
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
@@ -4388,7 +4414,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
     fprintf(stderr, "dgm: %.4s, ", dgm_index_table->indextable[i].header.dgmType);
     fprintf(stderr, "type: %2d, ", dgm_index_table->indextable[i].emdgm_type);
     fprintf(stderr, "size: %6u, ", dgm_index_table->indextable[i].header.numBytesDgm);
-    fprintf(stderr, "time: %9.3f, ", dgm_index_table->indextable[i].time_d);
+    fprintf(stderr, "time: %9.3f %9.3f, ", dgm_index_table->indextable[i].time_d, dgm_index_table->indextable[i].ping_time_d);
     fprintf(stderr, "ping: %5d, ", dgm_index_table->indextable[i].ping_num);
     fprintf(stderr, "rxIndex: %u/%u.\n", dgm_index_table->indextable[i].rx_index,
                                 dgm_index_table->indextable[i].rx_per_ping);
