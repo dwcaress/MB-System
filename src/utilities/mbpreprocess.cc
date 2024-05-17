@@ -135,7 +135,7 @@ constexpr char usage_message[] =
     "\t--head1-offsets=x/y/z/heading/roll/pitch\n"
     "\t--head2-offsets=x/y/z/heading/roll/pitch\n"
     "\t--kluge-time-jumps=threshold\n"
-    "\t--kluge-fix-7k-timestamps=threshold/targetoffset\n"
+    "\t--kluge-fix-7k-timestamps=targetoffset\n"
     "\t--kluge-ancilliary-time-jumps=threshold\n"
     "\t--kluge-mbaripressure-time-jumps=threshold\n"
     "\t--kluge-beam-tweak=factor\n"
@@ -173,7 +173,7 @@ int main(int argc, char **argv) {
   double kluge_timejumps_threshold = 0.0;
   bool kluge_timejumps = false;
   bool kluge_fix7ktimestamps = true;
-  double kluge_fix7ktimestamps_targetoffset;
+  double kluge_fix7ktimestamps_targetoffset = 0.0;
   double kluge_timejumps_anc_threshold = 0.0;
   bool kluge_timejumps_ancilliary = false;
   double kluge_timejumps_mba_threshold = 0.0;

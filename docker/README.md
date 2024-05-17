@@ -1,12 +1,13 @@
---
+---
 # Dockerized MB-System
---
+----
 
 This directory contains a Dockerfile used to automatically build an MB-System Docker image based on Debian 12 Linux and publish this image to Docker Hub, where it can be publicly accessed.
 This file documents how the MB-System Docker image can be used and how it is structured.
 
-## Version
-Modified 29 April 2024
+### Version
+Last Modified 16 May 2024
+
 
 ## What are Docker images and containers?
 
@@ -15,13 +16,17 @@ A software container provides an isolated environment in which one or more appli
 
 Basically, if one installs the Docker engine software on a computer, be it Mac, Linux, Windows, or whatever, then one should be able to load and run an application included in a Docker container on this computer without needing to install the application directly. The container is created from a Docker image, which contains all of the operating system elements and software installations needed to run the desired application.
 
-## MB-System Docker Image
+However, the interactive applications that are part of MB-System use the X11 window system plus OpenGL for windowing and graphics. Consequently, the host computer needs to be running an X11 server in order for the graphical programs to work. This includes mbedit, mbnavedit, mbvelocitytool, mbeditviz, mbgrdviz, and mbnavadjust. Also, since the client programs running within the container will appear (in terms of ip address) to be running on a different computer than the host, the X11 server must be set to allow connections from all client programs regardless of location.
+
+
+## MB-System Docker Image at Docker Hub
 
 The MB-System Docker image is built using Debian 12 Linux and the current MB-System release, and is updated each time a new MB-System release is made. The current release is accessed using the "latest" tag in the Github repository: [https://github.com/dwcaress/MB-System/releases/latest](https://github.com/dwcaress/MB-System/releases/latest). This image is then available from the Docker Hub site at: [https://hub.docker.com/r/mbari/mbsystem](https://hub.docker.com/r/mbari/mbsystem)
 
 The MB-System Docker image is run from a terminal command line on the host computer. Once the Docker container (a running Docker image) is active it presents as the command line in the same terminal window, and is accessing the same local directory as before. The difference is that the user can now run the MB-System and GMT programs installed in the Docker image.
 
-## Running the MB-System Docker Available at Docker Hub on MacOs
+---
+## Running Dockerized MB-System on MacOs
 
 The first requirement is to install and run the Docker Desktop application on your local computer, insuring that a Docker server process is running locally. In order to download the MB-System Docker Image, enter the following in a terminal shell:
 
@@ -46,6 +51,8 @@ The output to the shell should look something like:
 	
 Your Docker Desktop should now show mbari/mbsystem as one of the available local images.
 
+You must also install and run an X11 window server on your computer. The best option is to install XQuartz from: [https://www.xquartz.org](https://www.xquartz.org)
+	
 To start a Docker container using the MB-System Docker image, navigate a command line shell to a directory containing seafloor mapping data that you wish to process, and then enter a "docker run" command as described below. In order to run MB-System graphical tools such as mbedit, you must have an X Server running on the host with access control turned off using "xhost +", and have the environment variable DISPLAY in the container reference the X Server. If the local machine or host has an ip address of 192.168.25.26, then the X Server reference is "192.168.25.26:0". The following sequence of commands should work:
 
 	xhost +
@@ -127,5 +134,130 @@ will display the grid file ZTopo.grd using mbgrdviz.
 ![MBgrdviz Screen Grab](MBgrdvizScreengrab.png)
 
 All of the MB-System tools, plus GMT, can be run from the MB-System Docker container command line.
+
+---
+## Running Dockerized MB-System on Windows 11
+
+Running MB-System programs on a Windows 11 computer requires installing Docker Desktop, and also installing the Windows Subsystem for Linux (WSL) to provide both a Linux shell environment and a running X11 window server.
+
+### Key references and requirements
+
+- "Run Linux GUI apps on the Windows Subsystem for Linux"
+  : <https://docs.microsoft.com/en-us/windows/wsl/tutorials/gui-apps>
+    - "You will need to be on Windows 11 Build 22000 or later to access this feature." 
+
+- "Install Linux on Windows with WSL" 
+  : <https://docs.microsoft.com/en-us/windows/wsl/install>
+    - "must be running Windows 10 version 2004 and higher (Build 19041 and higher) or Windows 11."
+
+- "Setting up Docker Desktop for Windows with WSL 2"
+  – <https://docs.microsoft.com/en-us/windows/wsl/tutorials/wsl-containers>
+
+### Base setup
+
+In the Windows Features list, enable:
+ 
+- "Windows System for Linux."
+- "Virtual Machine Platform"
+
+In a Powershell terminal, running as Administrator: 
+
+```
+wsl --install -d Ubuntu-22.04
+```
+
+Per <https://aka.ms/wsl2kernel>, download and install "Windows Subsystem for Linux Update." 
+
+Per <https://docs.microsoft.com/en-us/windows/wsl/tutorials/wsl-containers>
+install Docker Desktop.
+- Ensure "that "Use the WSL 2 based engine" is checked in Settings > General."
+- Select the Linux distribution (Ubuntu-20.04)
+  "from your installed WSL 2 distributions which you want to enable Docker integration on
+  by going to: Settings > Resources > WSL Integration."
+- Click "Apply & Restart"
+- Open Ubuntu-20.04 (via Start menu and selecting the entry showing up there)
+
+```
+$ docker --version
+Docker version 20.10.17, build 100c701
+```
+
+As a basic test, run: `docker run hello-world`.
+
+---
+Per <https://docs.microsoft.com/en-us/windows/wsl/tutorials/gui-apps>,
+install appropriate driver for vGPU as needed. 
+In our test, we installed "Intel GPU driver for WSL"
+<https://www.intel.com/content/www/us/en/download/19344/intel-graphics-windows-dch-drivers.html>.
+
+> ...you can update to the latest [WSL] version that includes Linux GUI support by running
+> the update command from an elevated command prompt.
+> Select Start, type PowerShell, right-click Windows PowerShell, and then select Run as administrator.
+
+```
+wsl --update
+wsl --shutdown
+```
+A reboot may be needed here.
+
+Open an Ubuntu session (as done previously).
+
+```
+sudo apt update
+```
+
+As a basic test of a graphical application:
+
+```
+sudo apt install -y gedit
+gedit
+```
+
+For X11 dependant applications:
+
+```
+sudo apt install x11-apps -y
+```
+
+Typical X11 applications like `xcalc`, `xclock`, and `xeyes` should open OK.
+
+Since this base setup does not seem sufficient for the graphical MB-System applications,
+per some references (including [this one](https://jack.kawell.us/posts/ros-windows-docker/)),
+we installed VcXsrv from <https://sourceforge.net/projects/vcxsrv/>.
+
+### Running Dockerized MB-System
+
+We can now install and run the MB-System image.
+
+Download the launcher `mbsystem.sh` script from 
+<https://raw.githubusercontent.com/dwcaress/MB-System/master/docker/user/mbsystem.sh>
+
+Edit `mbsystem.sh` to indicate the concrete image to use.
+In our case we used the "latest" tag, which corresponded to a build on June 26, 2022.
+
+```
+MBSYSTEM_IMAGE=mbari/mbsystem:latest
+```
+
+Set the `DISPLAY` environment variable:
+
+```
+export DISPLAY=host.docker.internal:0.0
+```
+
+We can now run MB-System programs.
+
+```
+$ ./mbsystem.sh -L
+::: OSTYPE=linux-gnu
+::: Running as user 1000
+::: Mounting /home/mbs as /opt/MBSWorkDir in container
+::: Mounting /home/mbs/.mbsystem.bash_history as /opt/mbsystem.bash_history in container
+::: Starting container 'mbsystem-bash'
+::: Running: docker run -it --name mbsystem-bash --user 1000 -v /home/mbs:/opt/MBSWorkDir -v /home/mbs/.mbsystem.bash_history:/opt/mbsystem.bash_history -e DISPLAY --net=host mbari/mbsystem:latest bash
+
+bash-4.25$ 
+```
+We are now at the bash prompt within the container, from where we can then run any of the MB-System programs.
 
 --
