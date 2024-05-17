@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>README</title>
+
+
+<style type="text/css">
+body {
+  font-family: Helvetica, arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  background-color: white;
+  padding: 30px; }
+
+body > *:first-child {
+  margin-top: 0 !important; }
+body > *:last-child {
+  margin-bottom: 0 !important; }
+
+a {
+  color: #4183C4; }
+a.absent {
+  color: #cc0000; }
+a.anchor {
+  display: block;
+  padding-left: 30px;
+  margin-left: -30px;
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0; }
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 20px 0 10px;
+  padding: 0;
+  font-weight: bold;
+  -webkit-font-smoothing: antialiased;
+  cursor: text;
+  position: relative; }
+
+h1:hover a.anchor, h2:hover a.anchor, h3:hover a.anchor, h4:hover a.anchor, h5:hover a.anchor, h6:hover a.anchor {
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA09pVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoMTMuMCAyMDEyMDMwNS5tLjQxNSAyMDEyLzAzLzA1OjIxOjAwOjAwKSAgKE1hY2ludG9zaCkiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6OUM2NjlDQjI4ODBGMTFFMTg1ODlEODNERDJBRjUwQTQiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6OUM2NjlDQjM4ODBGMTFFMTg1ODlEODNERDJBRjUwQTQiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo5QzY2OUNCMDg4MEYxMUUxODU4OUQ4M0REMkFGNTBBNCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo5QzY2OUNCMTg4MEYxMUUxODU4OUQ4M0REMkFGNTBBNCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PsQhXeAAAABfSURBVHjaYvz//z8DJYCRUgMYQAbAMBQIAvEqkBQWXI6sHqwHiwG70TTBxGaiWwjCTGgOUgJiF1J8wMRAIUA34B4Q76HUBelAfJYSA0CuMIEaRP8wGIkGMA54bgQIMACAmkXJi0hKJQAAAABJRU5ErkJggg==) no-repeat 10px center;
+  text-decoration: none; }
+
+h1 tt, h1 code {
+  font-size: inherit; }
+
+h2 tt, h2 code {
+  font-size: inherit; }
+
+h3 tt, h3 code {
+  font-size: inherit; }
+
+h4 tt, h4 code {
+  font-size: inherit; }
+
+h5 tt, h5 code {
+  font-size: inherit; }
+
+h6 tt, h6 code {
+  font-size: inherit; }
+
+h1 {
+  font-size: 28px;
+  color: black; }
+
+h2 {
+  font-size: 24px;
+  border-bottom: 1px solid #cccccc;
+  color: black; }
+
+h3 {
+  font-size: 18px; }
+
+h4 {
+  font-size: 16px; }
+
+h5 {
+  font-size: 14px; }
+
+h6 {
+  color: #777777;
+  font-size: 14px; }
+
+p, blockquote, ul, ol, dl, li, table, pre {
+  margin: 15px 0; }
+
+hr {
+  background: transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAECAYAAACtBE5DAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6OENDRjNBN0E2NTZBMTFFMEI3QjRBODM4NzJDMjlGNDgiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6OENDRjNBN0I2NTZBMTFFMEI3QjRBODM4NzJDMjlGNDgiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo4Q0NGM0E3ODY1NkExMUUwQjdCNEE4Mzg3MkMyOUY0OCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo4Q0NGM0E3OTY1NkExMUUwQjdCNEE4Mzg3MkMyOUY0OCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PqqezsUAAAAfSURBVHjaYmRABcYwBiM2QSA4y4hNEKYDQxAEAAIMAHNGAzhkPOlYAAAAAElFTkSuQmCC) repeat-x 0 0;
+  border: 0 none;
+  color: #cccccc;
+  height: 4px;
+  padding: 0;
+}
+
+body > h2:first-child {
+  margin-top: 0;
+  padding-top: 0; }
+body > h1:first-child {
+  margin-top: 0;
+  padding-top: 0; }
+  body > h1:first-child + h2 {
+    margin-top: 0;
+    padding-top: 0; }
+body > h3:first-child, body > h4:first-child, body > h5:first-child, body > h6:first-child {
+  margin-top: 0;
+  padding-top: 0; }
+
+a:first-child h1, a:first-child h2, a:first-child h3, a:first-child h4, a:first-child h5, a:first-child h6 {
+  margin-top: 0;
+  padding-top: 0; }
+
+h1 p, h2 p, h3 p, h4 p, h5 p, h6 p {
+  margin-top: 0; }
+
+li p.first {
+  display: inline-block; }
+li {
+  margin: 0; }
+ul, ol {
+  padding-left: 30px; }
+
+ul :first-child, ol :first-child {
+  margin-top: 0; }
+
+dl {
+  padding: 0; }
+  dl dt {
+    font-size: 14px;
+    font-weight: bold;
+    font-style: italic;
+    padding: 0;
+    margin: 15px 0 5px; }
+    dl dt:first-child {
+      padding: 0; }
+    dl dt > :first-child {
+      margin-top: 0; }
+    dl dt > :last-child {
+      margin-bottom: 0; }
+  dl dd {
+    margin: 0 0 15px;
+    padding: 0 15px; }
+    dl dd > :first-child {
+      margin-top: 0; }
+    dl dd > :last-child {
+      margin-bottom: 0; }
+
+blockquote {
+  border-left: 4px solid #dddddd;
+  padding: 0 15px;
+  color: #777777; }
+  blockquote > :first-child {
+    margin-top: 0; }
+  blockquote > :last-child {
+    margin-bottom: 0; }
+
+table {
+  padding: 0;border-collapse: collapse; }
+  table tr {
+    border-top: 1px solid #cccccc;
+    background-color: white;
+    margin: 0;
+    padding: 0; }
+    table tr:nth-child(2n) {
+      background-color: #f8f8f8; }
+    table tr th {
+      font-weight: bold;
+      border: 1px solid #cccccc;
+      margin: 0;
+      padding: 6px 13px; }
+    table tr td {
+      border: 1px solid #cccccc;
+      margin: 0;
+      padding: 6px 13px; }
+    table tr th :first-child, table tr td :first-child {
+      margin-top: 0; }
+    table tr th :last-child, table tr td :last-child {
+      margin-bottom: 0; }
+
+img {
+  max-width: 100%; }
+
+span.frame {
+  display: block;
+  overflow: hidden; }
+  span.frame > span {
+    border: 1px solid #dddddd;
+    display: block;
+    float: left;
+    overflow: hidden;
+    margin: 13px 0 0;
+    padding: 7px;
+    width: auto; }
+  span.frame span img {
+    display: block;
+    float: left; }
+  span.frame span span {
+    clear: both;
+    color: #333333;
+    display: block;
+    padding: 5px 0 0; }
+span.align-center {
+  display: block;
+  overflow: hidden;
+  clear: both; }
+  span.align-center > span {
+    display: block;
+    overflow: hidden;
+    margin: 13px auto 0;
+    text-align: center; }
+  span.align-center span img {
+    margin: 0 auto;
+    text-align: center; }
+span.align-right {
+  display: block;
+  overflow: hidden;
+  clear: both; }
+  span.align-right > span {
+    display: block;
+    overflow: hidden;
+    margin: 13px 0 0;
+    text-align: right; }
+  span.align-right span img {
+    margin: 0;
+    text-align: right; }
+span.float-left {
+  display: block;
+  margin-right: 13px;
+  overflow: hidden;
+  float: left; }
+  span.float-left span {
+    margin: 13px 0 0; }
+span.float-right {
+  display: block;
+  margin-left: 13px;
+  overflow: hidden;
+  float: right; }
+  span.float-right > span {
+    display: block;
+    overflow: hidden;
+    margin: 13px auto 0;
+    text-align: right; }
+
+code, tt {
+  margin: 0 2px;
+  padding: 0 5px;
+  white-space: nowrap;
+  border: 1px solid #eaeaea;
+  background-color: #f8f8f8;
+  border-radius: 3px; }
+
+pre code {
+  margin: 0;
+  padding: 0;
+  white-space: pre;
+  border: none;
+  background: transparent; }
+
+.highlight pre {
+  background-color: #f8f8f8;
+  border: 1px solid #cccccc;
+  font-size: 13px;
+  line-height: 19px;
+  overflow: auto;
+  padding: 6px 10px;
+  border-radius: 3px; }
+
+pre {
+  background-color: #f8f8f8;
+  border: 1px solid #cccccc;
+  font-size: 13px;
+  line-height: 19px;
+  overflow: auto;
+  padding: 6px 10px;
+  border-radius: 3px; }
+  pre code, pre tt {
+    background-color: transparent;
+    border: none; }
+
+sup {
+    font-size: 0.83em;
+    vertical-align: super;
+    line-height: 0;
+}
+
+kbd {
+  display: inline-block;
+  padding: 3px 5px;
+  font-size: 11px;
+  line-height: 10px;
+  color: #555;
+  vertical-align: middle;
+  background-color: #fcfcfc;
+  border: solid 1px #ccc;
+  border-bottom-color: #bbb;
+  border-radius: 3px;
+  box-shadow: inset 0 -1px 0 #bbb
+}
+
+* {
+	-webkit-print-color-adjust: exact;
+}
+@media screen and (min-width: 914px) {
+    body {
+        width: 854px;
+        margin:0 auto;
+    }
+}
+@media print {
+	table, pre {
+		page-break-inside: avoid;
+	}
+	pre {
+		word-wrap: break-word;
+	}
+  body {
+    padding: 2cm; 
+  }
+}
+</style>
+
+
+</head>
+
+<body>
+
+<hr>
+
+<h1 id="toc_0">Dockerized MB-System</h1>
+
+<hr>
+
+<p>This directory contains a Dockerfile used to automatically build an MB-System Docker image based on Debian 12 Linux and publish this image to Docker Hub, where it can be publicly accessed.
+This file documents how the MB-System Docker image can be used and how it is structured.</p>
+
+<h3 id="toc_1">Version</h3>
+
+<p>Last Modified 16 May 2024</p>
+
+<h2 id="toc_2">What are Docker images and containers?</h2>
+
+<p>A software container provides an isolated environment in which one or more applications can be run regardless of the host operating system configuration. The Docker platform provides the capabilities needed to create containers and to run those containers on many different sorts of computers. A good overview of how this works can be found at:
+<a href="https://docs.docker.com/get-started/overview/">https://docs.docker.com/get-started/overview/</a>. </p>
+
+<p>Basically, if one installs the Docker engine software on a computer, be it Mac, Linux, Windows, or whatever, then one should be able to load and run an application included in a Docker container on this computer without needing to install the application directly. The container is created from a Docker image, which contains all of the operating system elements and software installations needed to run the desired application.</p>
+
+<p>However, the interactive applications that are part of MB-System use the X11 window system plus OpenGL for windowing and graphics. Consequently, the host computer needs to be running an X11 server in order for the graphical programs to work. This includes mbedit, mbnavedit, mbvelocitytool, mbeditviz, mbgrdviz, and mbnavadjust. Also, since the client programs running within the container will appear (in terms of ip address) to be running on a different computer than the host, the X11 server must be set to allow connections from all client programs regardless of location.</p>
+
+<h2 id="toc_3">MB-System Docker Image at Docker Hub</h2>
+
+<p>The MB-System Docker image is built using Debian 12 Linux and the current MB-System release, and is updated each time a new MB-System release is made. The current release is accessed using the &quot;latest&quot; tag in the Github repository: <a href="https://github.com/dwcaress/MB-System/releases/latest">https://github.com/dwcaress/MB-System/releases/latest</a>. This image is then available from the Docker Hub site at: <a href="https://hub.docker.com/r/mbari/mbsystem">https://hub.docker.com/r/mbari/mbsystem</a></p>
+
+<p>The MB-System Docker image is run from a terminal command line on the host computer. Once the Docker container (a running Docker image) is active it presents as the command line in the same terminal window, and is accessing the same local directory as before. The difference is that the user can now run the MB-System and GMT programs installed in the Docker image.</p>
+
+<hr>
+
+<h2 id="toc_4">Running Dockerized MB-System on MacOs</h2>
+
+<p>The first requirement is to install and run the Docker Desktop application on your local computer, insuring that a Docker server process is running locally. In order to download the MB-System Docker Image, enter the following in a terminal shell:</p>
+
+<div><pre><code class="language-none">docker pull mbari/mbsystem:latest</code></pre></div>
+
+<p>The output to the shell should look something like:</p>
+
+<div><pre><code class="language-none">user@LOCALCOMPUTER% docker pull mbari/mbsystem:latest
+latest: Pulling from mbari/mbsystem
+609c73876867: Pull complete 
+c62b5ee91c24: Pull complete 
+ad71b3e3baf8: Pull complete 
+45076d4b5a6d: Pull complete 
+Digest: sha256:8fa5a3621be6eed759a910295b972733b1f6276494ec54f41ea490523e6c4bb0
+Status: Downloaded newer image for mbari/mbsystem:latest
+docker.io/mbari/mbsystem:latest
+
+What&#39;s Next?
+  View summary of image vulnerabilities and recommendations → docker scout  quickview mbari/mbsystem:latest
+user@LOCALCOMPUTER% </code></pre></div>
+
+<p>Your Docker Desktop should now show mbari/mbsystem as one of the available local images.</p>
+
+<p>You must also install and run an X11 window server on your computer. The best option is to install XQuartz from: <a href="https://www.xquartz.org">https://www.xquartz.org</a></p>
+
+<p>To start a Docker container using the MB-System Docker image, navigate a command line shell to a directory containing seafloor mapping data that you wish to process, and then enter a &quot;docker run&quot; command as described below. In order to run MB-System graphical tools such as mbedit, you must have an X Server running on the host with access control turned off using &quot;xhost +&quot;, and have the environment variable DISPLAY in the container reference the X Server. If the local machine or host has an ip address of 192.168.25.26, then the X Server reference is &quot;192.168.25.26:0&quot;. The following sequence of commands should work:</p>
+
+<div><pre><code class="language-none">xhost +
+export IP=192.168.25.26
+docker run -it --platform linux/amd64 --rm --network=host \
+        --user mbuser \
+        --env=LIBGL_ALWAYS_INDIRECT=1 \
+        --env=DISPLAY=$IP:0 \
+        --volume=$HOME/.bash_history:/opt/.bash_history \
+        --volume=$PWD:$PWD \
+        --volume=$PWD/logs:$PWD/Docker/logs \
+        --workdir=$PWD \
+        mbari/mbsystem</code></pre></div>
+
+<p>The command line will return with a changed cursor, indicating that you are executing a shell within the now-running Docker container. Now MB-System command line tools like mbinfo can be run:</p>
+
+<div><pre><code class="language-none">mbuser@docker-desktop:/Users/caress/TestData$ mbinfo -I 0010_20230405_034803_SallyRide_EM124.kmall
+
+Swath Data File:      0010_20230405_034803_SallyRide_EM124.kmall
+MBIO Data Format ID:  261
+Format name:          MBF_KEMKMALL
+Informal Description: Kongsberg multibeam echosounder system kmall datagram format
+Attributes:           Kongsberg fourth generation multibeam sonars (EM2040, EM712, 
+                  EM304, EM124), bathymetry, amplitude, backscatter, variable beams, 
+                  binary datagrams, Kongsberg.
+
+Data Totals:
+Number of Records:                         331
+Bathymetry Data (1024 beams):
+  Number of Beams:           338944
+  Number of Good Beams:      331453     97.79%
+  Number of Zero Beams:        6008      1.77%
+  Number of Flagged Beams:     1483      0.44%
+Amplitude Data (1024 beams):
+  Number of Beams:           338944
+  Number of Good Beams:      331453     97.79%
+  Number of Zero Beams:        6008      1.77%
+  Number of Flagged Beams:     1483      0.44%
+Sidescan Data (2048 pixels):
+  Number of Pixels:          677888
+  Number of Good Pixels:     615164     90.75%
+  Number of Zero Pixels:          0      0.00%
+  Number of Flagged Pixels:   62724      9.25%
+
+Navigation Totals:
+Total Time:             0.9972 hours
+Total Track Length:    12.7035 km
+Average Speed:         12.7390 km/hr ( 6.8859 knots)
+
+Start of Data:
+Time:  04 05 2023 03:47:59.852861  JD95 (2023-04-05T03:47:59.852861)
+Lon:  -118.154674778     Lat:    32.565430607     Depth:  1912.3238 meters
+Speed:  0.0000 km/hr ( 0.0000 knots)  Heading: 134.7583 degrees
+Sonar Depth:    4.1616 m  Sonar Altitude: 1908.1622 m
+
+End of Data:
+Time:  04 05 2023 04:47:49.825473  JD95 (2023-04-05T04:47:49.825473)
+Lon:  -118.042174701     Lat:    32.532130508     Depth:  1880.0739 meters
+Speed: 11.7805 km/hr ( 6.3678 knots)  Heading:  15.4361 degrees
+Sonar Depth:    4.1512 m  Sonar Altitude: 1869.7341 m
+
+Limits:
+Minimum Longitude:    -118.192882524   Maximum Longitude:    -118.008498980
+Minimum Latitude:       32.478656229   Maximum Latitude:       32.599855176
+Minimum Sonar Depth:     3.2535   Maximum Sonar Depth:     5.2087
+Minimum Altitude:     1840.1272   Maximum Altitude:     1947.1191
+Minimum Depth:        1625.6368   Maximum Depth:        2066.8716
+Minimum Amplitude:    -109.4064   Maximum Amplitude:      20.6295
+Minimum Sidescan:     -101.6000   Maximum Sidescan:       19.9000
+
+mbuser@docker-desktop:/Users/caress/TestData$ </code></pre></div>
+
+<p>One can also run MB-System graphical tools such as mbedit, mbnavedit, mbvelocitytool, mbgrdviz, mbeditviz and mbnavadjust. The command</p>
+
+<div><pre><code class="language-none">mbgrdviz -I ZTopo.grd</code></pre></div>
+
+<p>will display the grid file ZTopo.grd using mbgrdviz.</p>
+
+<p><img src="MBgrdvizScreengrab.png" alt="MBgrdviz Screen Grab"></p>
+
+<p>All of the MB-System tools, plus GMT, can be run from the MB-System Docker container command line.</p>
+
+<hr>
+
+<h2 id="toc_5">Running Dockerized MB-System on Windows 11</h2>
+
+<p>Running MB-System programs on a Windows 11 computer requires installing Docker Desktop, and also installing the Windows Subsystem for Linux (WSL) to provide both a Linux shell environment and a running X11 window server.</p>
+
+<h3 id="toc_6">Key references and requirements</h3>
+
+<ul>
+<li><p>&quot;Run Linux GUI apps on the Windows Subsystem for Linux&quot;
+: <a href="https://docs.microsoft.com/en-us/windows/wsl/tutorials/gui-apps">https://docs.microsoft.com/en-us/windows/wsl/tutorials/gui-apps</a></p>
+
+<ul>
+<li>&quot;You will need to be on Windows 11 Build 22000 or later to access this feature.&quot; </li>
+</ul></li>
+<li><p>&quot;Install Linux on Windows with WSL&quot; 
+: <a href="https://docs.microsoft.com/en-us/windows/wsl/install">https://docs.microsoft.com/en-us/windows/wsl/install</a></p>
+
+<ul>
+<li>&quot;must be running Windows 10 version 2004 and higher (Build 19041 and higher) or Windows 11.&quot;</li>
+</ul></li>
+<li><p>&quot;Setting up Docker Desktop for Windows with WSL 2&quot;
+– <a href="https://docs.microsoft.com/en-us/windows/wsl/tutorials/wsl-containers">https://docs.microsoft.com/en-us/windows/wsl/tutorials/wsl-containers</a></p></li>
+</ul>
+
+<h3 id="toc_7">Base setup</h3>
+
+<p>In the Windows Features list, enable:</p>
+
+<ul>
+<li>&quot;Windows System for Linux.&quot;</li>
+<li>&quot;Virtual Machine Platform&quot;</li>
+</ul>
+
+<p>In a Powershell terminal, running as Administrator: </p>
+
+<div><pre><code class="language-none">wsl --install -d Ubuntu-22.04</code></pre></div>
+
+<p>Per <a href="https://aka.ms/wsl2kernel">https://aka.ms/wsl2kernel</a>, download and install &quot;Windows Subsystem for Linux Update.&quot; </p>
+
+<p>Per <a href="https://docs.microsoft.com/en-us/windows/wsl/tutorials/wsl-containers">https://docs.microsoft.com/en-us/windows/wsl/tutorials/wsl-containers</a>
+install Docker Desktop.
+- Ensure &quot;that &quot;Use the WSL 2 based engine&quot; is checked in Settings &gt; General.&quot;
+- Select the Linux distribution (Ubuntu-20.04)
+  &quot;from your installed WSL 2 distributions which you want to enable Docker integration on
+  by going to: Settings &gt; Resources &gt; WSL Integration.&quot;
+- Click &quot;Apply &amp; Restart&quot;
+- Open Ubuntu-20.04 (via Start menu and selecting the entry showing up there)</p>
+
+<div><pre><code class="language-none">$ docker --version
+Docker version 20.10.17, build 100c701</code></pre></div>
+
+<p>As a basic test, run: <code>docker run hello-world</code>.</p>
+
+<hr>
+
+<p>Per <a href="https://docs.microsoft.com/en-us/windows/wsl/tutorials/gui-apps">https://docs.microsoft.com/en-us/windows/wsl/tutorials/gui-apps</a>,
+install appropriate driver for vGPU as needed. 
+In our test, we installed &quot;Intel GPU driver for WSL&quot;
+<a href="https://www.intel.com/content/www/us/en/download/19344/intel-graphics-windows-dch-drivers.html">https://www.intel.com/content/www/us/en/download/19344/intel-graphics-windows-dch-drivers.html</a>.</p>
+
+<blockquote>
+<p>...you can update to the latest [WSL] version that includes Linux GUI support by running
+the update command from an elevated command prompt.
+Select Start, type PowerShell, right-click Windows PowerShell, and then select Run as administrator.</p>
+</blockquote>
+
+<div><pre><code class="language-none">wsl --update
+wsl --shutdown</code></pre></div>
+
+<p>A reboot may be needed here.</p>
+
+<p>Open an Ubuntu session (as done previously).</p>
+
+<div><pre><code class="language-none">sudo apt update</code></pre></div>
+
+<p>As a basic test of a graphical application:</p>
+
+<div><pre><code class="language-none">sudo apt install -y gedit
+gedit</code></pre></div>
+
+<p>For X11 dependant applications:</p>
+
+<div><pre><code class="language-none">sudo apt install x11-apps -y</code></pre></div>
+
+<p>Typical X11 applications like <code>xcalc</code>, <code>xclock</code>, and <code>xeyes</code> should open OK.</p>
+
+<p>Since this base setup does not seem sufficient for the graphical MB-System applications,
+per some references (including <a href="https://jack.kawell.us/posts/ros-windows-docker/">this one</a>),
+we installed VcXsrv from <a href="https://sourceforge.net/projects/vcxsrv/">https://sourceforge.net/projects/vcxsrv/</a>.</p>
+
+<h3 id="toc_8">Running Dockerized MB-System</h3>
+
+<p>We can now install and run the MB-System image.</p>
+
+<p>Download the launcher <code>mbsystem.sh</code> script from 
+<a href="https://raw.githubusercontent.com/dwcaress/MB-System/master/docker/user/mbsystem.sh">https://raw.githubusercontent.com/dwcaress/MB-System/master/docker/user/mbsystem.sh</a></p>
+
+<p>Edit <code>mbsystem.sh</code> to indicate the concrete image to use.
+In our case we used the &quot;latest&quot; tag, which corresponded to a build on June 26, 2022.</p>
+
+<div><pre><code class="language-none">MBSYSTEM_IMAGE=mbari/mbsystem:latest</code></pre></div>
+
+<p>Set the <code>DISPLAY</code> environment variable:</p>
+
+<div><pre><code class="language-none">export DISPLAY=host.docker.internal:0.0</code></pre></div>
+
+<p>We can now run MB-System programs.</p>
+
+<div><pre><code class="language-none">$ ./mbsystem.sh -L
+::: OSTYPE=linux-gnu
+::: Running as user 1000
+::: Mounting /home/mbs as /opt/MBSWorkDir in container
+::: Mounting /home/mbs/.mbsystem.bash_history as /opt/mbsystem.bash_history in container
+::: Starting container &#39;mbsystem-bash&#39;
+::: Running: docker run -it --name mbsystem-bash --user 1000 -v /home/mbs:/opt/MBSWorkDir -v /home/mbs/.mbsystem.bash_history:/opt/mbsystem.bash_history -e DISPLAY --net=host mbari/mbsystem:latest bash
+
+bash-4.25$ </code></pre></div>
+
+<p>We are now at the bash prompt within the container, from where we can then run any of the MB-System programs.</p>
+
+<h2 id="toc_9"></h2>
+
+
+
+
+</body>
+
+</html>
