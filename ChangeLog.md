@@ -22,6 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.2beta05    May 17, 2024
 - Version 5.8.2beta04    May 13, 2024
 - Version 5.8.2beta02    May 1, 2024
 - Version 5.8.2beta01    April 29, 2024
@@ -36,6 +37,15 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.2beta05 (May 17, 2024)
+
+MBextractsegy: changed calculation of section plot bounds to more consistently catch the
+seafloor arrival within the plot.
+
+MBpreprocess: fixed initialization of the --kluge-fix-7k-times option.
+
+Docker image: updated documentation in the Docker directory.
 
 #### 5.8.2beta04 (May 13, 2024)
 
