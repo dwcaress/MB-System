@@ -6,7 +6,7 @@ This directory contains a Dockerfile used to automatically build an MB-System Do
 This file documents how the MB-System Docker image can be used and how it is structured.
 
 ### Version
-Last Modified 16 May 2024
+Last Modified 18 May 2024
 
 
 ## What are Docker images and containers?
@@ -23,12 +23,19 @@ However, the interactive applications that are part of MB-System use the X11 win
 
 The MB-System Docker image is built using Debian 12 Linux and the current MB-System release, and is updated each time a new MB-System release is made. The current release is accessed using the "latest" tag in the Github repository: [https://github.com/dwcaress/MB-System/releases/latest](https://github.com/dwcaress/MB-System/releases/latest). This image is then available from the Docker Hub site at: [https://hub.docker.com/r/mbari/mbsystem](https://hub.docker.com/r/mbari/mbsystem)
 
-The MB-System Docker image is run from a terminal command line on the host computer. Once the Docker container (a running Docker image) is active it presents as the command line in the same terminal window, and is accessing the same local directory as before. The difference is that the user can now run the MB-System and GMT programs installed in the Docker image.
+The MB-System Docker image is run from a terminal command line on the host computer. Once the Docker container (a running Docker image) is active it presents as the command line in the same terminal window, and is accessing the same local directory as before. The difference is that the user can now run the MB-System and GMT programs installed in the Docker image. Within the container the user id is mbuser.
 
 ---
 ## Running Dockerized MB-System on MacOs
 
-The first requirement is to install and run the Docker Desktop application on your local computer, insuring that a Docker server process is running locally. In order to download the MB-System Docker Image, enter the following in a terminal shell:
+The first requirement is to install and run the Docker Desktop application on your computer, insuring that a Docker server process is running locally. Obtain Docker Desktop from:
+[https://www.docker.com/products/docker-desktop/](https://www.docker.com/products/docker-desktop/)
+
+You must also install and run an X11 window server on your computer. The best option is to install XQuartz from: [https://www.xquartz.org](https://www.xquartz.org)
+
+Start Docker Desktop, XQuartz, and the Apple Terminal application (found in Utilities under Applications in the Finder) before beginning the following. 
+
+In order to download the MB-System Docker Image, enter the following in a terminal shell:
 
 	docker pull mbari/mbsystem:latest
 
@@ -49,14 +56,21 @@ The output to the shell should look something like:
 	user@LOCALCOMPUTER% 
 
 	
-Your Docker Desktop should now show mbari/mbsystem as one of the available local images.
+Your Docker Desktop should show mbari/mbsystem as one of the available local images. You can now use a docker run command in a shell to start a Docker container from the MB-System Docker image. 
 
-You must also install and run an X11 window server on your computer. The best option is to install XQuartz from: [https://www.xquartz.org](https://www.xquartz.org)
+However, in order to run MB-System graphical tools such as mbedit, you must not only have an X Server running on the host, you must also turn off the X Server access control using "xhost +", and know an ip address for the host. This is because once the container is started, it is necessary to have the environment variable DISPLAY in the container reference the host X Server for the MB-System graphical programs to be displayed.  To find out an IP address of the local computer (there will be one for each network connection), you can open the Apple menu and click System Settings. In the System Settings dialog click Network in the left panel and then select one of the active network connections, typically Wi-Fi or Ethernet. Click the Details button, and scroll down to see the local ip address, which is a series of four integers separated by "." characters. Alternatively, the following command can be used to list the local ip addresses on a command line:
+
+	ifconfig | grep inet | grep -v inet6 | grep -v 127.0.0.1 | awk '{print $2}'
+
+If the local machine or host has an ip address of 192.168.25.26, then the X Server reference needed for the DISPLAY environment variable is that ip address with ":0" added, or "192.168.25.26:0".
+
 	
-To start a Docker container using the MB-System Docker image, navigate a command line shell to a directory containing seafloor mapping data that you wish to process, and then enter a "docker run" command as described below. In order to run MB-System graphical tools such as mbedit, you must have an X Server running on the host with access control turned off using "xhost +", and have the environment variable DISPLAY in the container reference the X Server. If the local machine or host has an ip address of 192.168.25.26, then the X Server reference is "192.168.25.26:0". The following sequence of commands should work:
+To start a Docker container using the MB-System Docker image, navigate a command line shell to a directory containing seafloor mapping data that you wish to process, and then enter a "docker run" command as described below. 
+
+The following sequence of commands for a shell in your host computer will turn off X Server access control, set a local shell variable named IP containing a local IP address, and then run the Docker image as user mbuser located in the same directory in which the "docker run" command is made.
 
 	xhost +
-	export IP=192.168.25.26
+	IP=$(ifconfig | grep inet | grep -v inet6 | grep -v 127.0.0.1 | head -n 1 | awk '{print $2}')
 	docker run -it --platform linux/amd64 --rm --network=host \
 			--user mbuser \
 			--env=LIBGL_ALWAYS_INDIRECT=1 \
@@ -67,7 +81,9 @@ To start a Docker container using the MB-System Docker image, navigate a command
 			--workdir=$PWD \
 			mbari/mbsystem
 
-The command line will return with a changed cursor, indicating that you are executing a shell within the now-running Docker container. Now MB-System command line tools like mbinfo can be run:
+The command line will return with a changed cursor, indicating that you are executing a shell within the now-running Docker container. To be sure, you can type the command "whoami", which should return mbuser rather than your login on the host computer.
+
+Now MB-System command line tools like mbinfo can be run:
 
 	mbuser@docker-desktop:/Users/caress/TestData$ mbinfo -I 0010_20230405_034803_SallyRide_EM124.kmall
 	
