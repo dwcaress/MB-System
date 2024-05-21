@@ -53,7 +53,9 @@ public:
 
   static int showError(char *s1, char *s2, char *s3) {
     std::cerr << "showError(): " << s1 << "\n" << s2 << "\n" << s3 << "\n";
-    emit staticEmitter_.showMessage(QVariant(s1));
+    char msg[256];
+    sprintf(msg, "%s\n%s\n%s\n", s1, s2, s3);
+    emit staticEmitter_.showMessage(QVariant(msg));
     return 0;
   }
 
