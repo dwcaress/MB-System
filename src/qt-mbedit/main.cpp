@@ -12,7 +12,6 @@
 #include "GuiNames.h"
 #include "Backend.h"
 #include "PixmapImage.h"
-#include "PixmapContainer.h"
 #include "Emitter.h"
 
 void interruptHandler(int sig) {
@@ -26,7 +25,7 @@ void interruptHandler(int sig) {
 
 int main(int argc, char *argv[]) {
 
-
+  // Handle interruption
   struct sigaction signalAction;
   signalAction.sa_handler = &interruptHandler;
   sigemptyset(&signalAction.sa_mask);
@@ -48,6 +47,8 @@ int main(int argc, char *argv[]) {
 	{ "backend", QVariant::fromValue(&backend) }
       });    
 
+
+    // Boilerplate...
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject *obj, const QUrl &objUrl) {
@@ -55,45 +56,19 @@ int main(int argc, char *argv[]) {
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
 
-    qmlRegisterType<PixmapContainer>("PixmapImage", 1, 0, "PixmapContainer");
+    // QML instantiates a PixmapImage in GUI, and C++ will draw to
+    // that - so register PixmapImage class with QML
     qmlRegisterType<PixmapImage>("PixmapImage", 1, 0, "PixmapImage");    
     
     engine.load(url);
 
     QObject *rootObject = engine.rootObjects().value(0);
     
-    // Notify C++ when main window is destroyed
+    // QML notifies C++ when root window is destroyed
     QObject::connect(rootObject, SIGNAL(destroyed()),
 		     &backend, SLOT(onMainWindowDestroyed()));
 
-    /* ****
-    // Notify QML when Backend has a message to display
-    if (!QObject::connect(&backend.staticEmitter_,
-			  SIGNAL(showMessage(QString &msg)),
-			  rootObject, SLOT(showInfoDialog(QString &msg)))) {
-
-      qWarning() << "*** Failed to connect showMessage() signal to QML";
-    }
-
-    *** */
-
-
-    // TEST TEST TEST
-    Emitter emitter;
-    // TEST TEST TEST - using non-static emitter
-    if (!QObject::connect(&emitter,
-			  SIGNAL(showMessage(QVariant)),
-			  rootObject, SLOT(showInfoDialog(QVariant)))) {
-
-      qWarning() << "**Failed to connect stand-alone emitter to QML";
-    }
-    else {
-      qDebug() << "connected stand-alone emitter!";
-    }
-
-    
-    // Notify QML when Backend has a message to display
-    // TEST TEST TEST - using non-static emitter
+    // Backend C++ signals QML with message to display
     if (!QObject::connect(&backend.staticEmitter_,
 			  SIGNAL(showMessage(QVariant)),
 			  rootObject, SLOT(showInfoDialog(QVariant)))) {
@@ -109,9 +84,7 @@ int main(int argc, char *argv[]) {
       exit(1);
     }
 
-    
     return app.exec();
-
 }
 
 
