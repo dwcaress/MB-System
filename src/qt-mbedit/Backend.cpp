@@ -115,9 +115,9 @@ bool Backend::initialize(QObject *loadedRoot, int argc, char **argv) {
     qCritical() << "Couldn't find " << SWATH_PIXMAP_NAME << " in QML";
     return false;
   }
-  
-  pixmapContainer_.pixmap = canvasPixmap_;
-  swathPixmapImage_->setImage(&pixmapContainer_);
+
+  // Set the pixmap of QML-declared PixmapImage
+  swathPixmapImage_->setImage(canvasPixmap_);  
   
   char *swathFile = nullptr;
   // Parse command line options
