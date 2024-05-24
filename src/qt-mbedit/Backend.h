@@ -18,10 +18,12 @@ extern "C" {
 #include "mbedit_prog.h"
 }
 
-/** Backend application logic */
+/** Backend application logic; QObject subclass, so it exchanges
+info with QML  */
 class Backend : public QObject  {
-  
-    Q_OBJECT
+
+  /// This macro needed to enable info exchange with QML
+  Q_OBJECT
 
 public:
   Backend(int argc, char **argv);
@@ -97,9 +99,6 @@ public:
   static Emitter staticEmitter_;
 
 
-  /// TEST TEST TEST
-  Emitter emitTest_;
-  
 protected:
 
   /// Get canvas width and height
@@ -116,7 +115,6 @@ protected:
 
   /// QML-declared PixmapImage
   PixmapImage *swathPixmapImage_;
-  PixmapContainer pixmapContainer_;
   
   /// Test drawing to canvas
   bool plotTest(void);
@@ -147,7 +145,10 @@ protected:
   /// Input swath file name
   char inputFilename_[256];
 
+  /// Pixmap representation of swath data graph
   QPixmap *canvasPixmap_;
+
+  /// painter_ draws into canvasPixmap_
   QPainter *painter_;
 
   /// Indicates if data is plotted
