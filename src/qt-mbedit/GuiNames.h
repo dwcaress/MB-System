@@ -14,11 +14,12 @@ class GuiNames : public QObject {
 
 /// define names of C++-connected QML items, used when exchanging information
 /// between QML GUI and C++ code.
+/// N.B. TAKE CARE THAT QML USES THE LITERAL STRINGS DEFINED HERE.
 
-/// Name of object created by QML, which holds swath images
+/// Name of PixmapImage instantiated by QML, which holds swath graphs
 #define SWATH_PIXMAP_NAME "swathPixmapObj"
 
-/// Names of ancillary data options created by QML
+/// Names of ancillary data options created by QML.
 #define NONE_ANCILLDATA "none"
 #define TIME_ANCILLDATA "time"
 #define INTERVAL_ANCILLDATA "interval"
