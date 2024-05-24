@@ -32,7 +32,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 add_executable(qt-mbedit Backend.cpp Emitter.cpp GuiNames.cpp PixmapImage.cpp
-	       PixmapContainer.cpp main.cpp qml.qrc)
+	       main.cpp qml.qrc)
 
 target_link_libraries(qt-mbedit PRIVATE MBGui Qt5::Core Qt5::Quick
                       mbeditLib mbio)
