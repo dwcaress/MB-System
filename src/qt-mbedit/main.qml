@@ -1,5 +1,6 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.3
+import QtQuick.Controls.Universal 2.3
 import QtQuick.Dialogs 1.1
 import QtQuick.Layouts 1.14
 import QtQuick.Window 2.14
@@ -400,18 +401,17 @@ ApplicationWindow {
     MessageDialog {
         id: infoDialog
         title: "Info"
-        icon: StandardIcon.Question
-        text: "Quit application?"
-        standardButtons: StandardButton.Yes |
-                         StandardButton.No
+        icon: StandardIcon.Info
+        text: "Text goes here"
+        standardButtons: StandardButton.Ok
         Component.onCompleted: visible = false
-        onYes: Qt.quit(0)
-        onNo: console.log("did not quit")
     }
 
 
     function showInfoDialog(message) {
       console.log('showInfoDialog()', message);
+      infoDialog.text = message;
+      infoDialog.open();
     }
 }
 
