@@ -3,22 +3,32 @@
 
 #include <QQuickPaintedItem>
 #include <QPainter>
-#include "PixmapContainer.h"
+#include <QPixmap>
 
+// #include "PixmapContainer.h"
+/** GUI element displays an image; can be instantiated by QML and added 
+    to the QML scene graph (inherits QQuickPaintedItem). 
+    Encapsulates QPixmap which holds data to be rendered 
+    on screen via paint().
+ */
 class PixmapImage : public QQuickPaintedItem
 {
-    Q_OBJECT
+  /// This macro needed to exchange info with QML
+  Q_OBJECT
 
  public:
     PixmapImage(QQuickItem *parent = Q_NULLPTR);
 
-    /// Set image to be drawn
-    Q_INVOKABLE void setImage(QObject *pixmapContainer);
+    /// Set pixmap to be rendered
+    void setImage(QPixmap *pixmap);  
     
 protected:
-    virtual void paint(QPainter *painter) Q_DECL_OVERRIDE;
+  /// Trigger paint of GUI elements including encapsulated pixmap
+  virtual void paint(QPainter *painter) Q_DECL_OVERRIDE;
 
-    PixmapContainer pixmapContainer_;
+  /// Data representation
+  QPixmap *pixmap_;
+  
 };
 
 #endif // PIXMAPIMAGE_H
