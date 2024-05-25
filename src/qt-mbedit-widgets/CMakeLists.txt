@@ -41,19 +41,19 @@ set(CMAKE_AUTOUIC ON)
 
 message("In CMakeLists.txt!!! CMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR}")
 
-add_executable(qt-mbedit main.cpp mainwindow.cpp mainwindow.h mainwindow.ui)
+add_executable(qt-mbedit-widgets main.cpp mainwindow.cpp mainwindow.h ClickableLabel.cpp mainwindow.ui)
 
-message("qt-mbedit CMAKE_SOURCE_DIR= ${CMAKE_SOURCE_DIR}")
+message("qt-mbedit-widgets CMAKE_SOURCE_DIR= ${CMAKE_SOURCE_DIR}")
 
 # If header directories specified with ${CMAKE_SOURCE_DIR}, qtcreator cannot
 # find them!
-target_include_directories(qt-mbedit PUBLIC ${CMAKE_SOURCE_DIR}/src/mbio/
+target_include_directories(qt-mbedit-widgets PUBLIC ${CMAKE_SOURCE_DIR}/src/mbio/
                                      ${CMAKE_SOURCE_DIR}/src/mbaux
-                                     ${CMAKE_SOURCE_DIR}/src/qt-guilib/
+                                     ${CMAKE_SOURCE_DIR}/src/qt-guilib/u
                                      ${CMAKE_SOURCE_DIR}/src/mbedit)
 
-target_link_libraries(qt-mbedit PRIVATE MBGui Qt5::Core Qt5::Widgets Qt5::Quick
+target_link_libraries(qt-mbedit-widgets PRIVATE MBGui Qt5::Core Qt5::Widgets Qt5::Quick
                                	           mbeditLib mbio
 					   PUBLIC TIRPC::TIRPC)
 
-install(TARGETS qt-mbedit DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS qt-mbedit-widgets DESTINATION ${CMAKE_INSTALL_BINDIR})
