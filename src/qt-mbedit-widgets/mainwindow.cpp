@@ -32,8 +32,7 @@ QPainter *MainWindow::staticPainter_ = nullptr;
 QFontMetrics *MainWindow::staticFontMetrics_ = nullptr;
 QString MainWindow::staticTextBuf_;
 
-using namespace mb_system;
-
+// using namespace mb_system;
 
 MainWindow::MainWindow(QWidget *parent)
   : QMainWindow(parent), ui(new Ui::MainWindow)
