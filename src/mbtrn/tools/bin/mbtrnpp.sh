@@ -336,6 +336,7 @@ while getopts a:c:d:D:e:G:hL:M:m:o:s:tvw: Option
         a ) APP_CMD=$OPTARG
         ;;
         c ) let "CYCLES=$OPTARG"
+        echo "CYCLES: $CYCLES"
         ;;
         d ) DO_CONLOG="Y"
         CONLOG_PATH=$OPTARG
@@ -518,6 +519,12 @@ do
     then
     OPT_TRN_UTM=$a
     vout "ovr OPT_TRN_UTM: $OPT_TRN_UTM"
+    fi
+
+    if [ ${a:2:7} == "trn-crs" ]
+    then
+    OPT_TRN_CRS=$a
+    vout "ovr OPT_TRN_CRS: $OPT_TRN_CRS"
     fi
 
     if [ ${a:2:7} == "trn-map" ]
@@ -728,7 +735,7 @@ done
 # set cmdline options
 APP_OPTS="$OPT_CONFIG $OPT_LOGDIR  $OPT_VERBOSE $OPT_INPUT $OPT_OUTPUT $OPT_TIDE \
 $OPT_SWATH $OPT_SOUNDINGS $OPT_FORMAT $OPT_AUV_SENTRY_EM2040 $OPT_MFILTER \
-$OPT_TRN_SEL $OPT_TRN_DEV $OPT_TRN_UTM $OPT_TRN_MAP $OPT_TRN_PAR $OPT_TRN_CFG \
+$OPT_TRN_SEL $OPT_TRN_DEV $OPT_TRN_UTM $OPT_TRN_CRS $OPT_TRN_MAP $OPT_TRN_PAR $OPT_TRN_CFG \
 $OPT_TRN_MID $OPT_TRN_DECN $OPT_TRN_DECS $OPT_TRN_MTYPE $OPT_TRN_FTYPE \
 $OPT_TRN_FGRADE $OPT_TRN_MWEIGHT $OPT_TRN_NCOV $OPT_TRN_NERR $OPT_TRN_ECOV \
 $OPT_TRN_EERR $OPT_TRN_FREINIT $OPT_REINIT_GAIN $OPT_REINIT_FILE \

@@ -758,9 +758,8 @@ int main(int argc, char **argv) {
       fprintf(outfp, "dbg2       shift_y:              %f\n", shift_y);
       fprintf(outfp, "dbg2       bathy_in_feet:        %d\n", bathy_in_feet);
       fprintf(outfp, "dbg2       projection_pars:      %s\n", projection_pars);
-      fprintf(outfp, "dbg2       proj flag 1:          %d\n", projection_pars_f);
+      fprintf(outfp, "dbg2       projection_pars_f:    %d\n", projection_pars_f);
       fprintf(outfp, "dbg2       projection_id:        %s\n", projection_id);
-      // fprintf(outfp, "dbg2       utm_zone:             %d\n", utm_zone);
       fprintf(outfp, "dbg2       minormax_weighted_mean_threshold: %f\n", minormax_weighted_mean_threshold);
 
     }
@@ -965,6 +964,7 @@ int main(int argc, char **argv) {
 
   /* deal with projected gridding */
   if (projection_pars_f) {
+  
     /* check for UTM with undefined zone */
     if (strcmp(projection_pars, "UTM") == 0 || strcmp(projection_pars, "U") == 0 || strcmp(projection_pars, "utm") == 0 ||
         strcmp(projection_pars, "u") == 0) {
@@ -979,6 +979,12 @@ int main(int argc, char **argv) {
         snprintf(projection_id, sizeof(projection_id), "UTM%2.2dN", utm_zone);
       else
         snprintf(projection_id, sizeof(projection_id), "UTM%2.2dS", utm_zone);
+    }
+    else if (strncmp(projection_pars, "LTM", 3) == 0 || strncmp(projection_pars, "ltm", 3) == 0 
+    			|| strcmp(projection_pars, "L") == 0 || strcmp(projection_pars, "l") == 0) {
+      double reference_lon = 0.5 * (gbnd[0] + gbnd[1]);
+      double reference_lat = 0.5 * (gbnd[2] + gbnd[3]);
+      snprintf(projection_id, sizeof(projection_id), "LTM%.5f/%.5f", reference_lon, reference_lat);
     }
     else
       strcpy(projection_id, projection_pars);

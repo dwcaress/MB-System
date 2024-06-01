@@ -1525,7 +1525,7 @@ int main(int argc, char **argv) {
 		/* check for UTM with undefined zone */
 		if (strcmp(projection_pars, "UTM") == 0 || strcmp(projection_pars, "U") == 0 || strcmp(projection_pars, "utm") == 0 ||
 		    strcmp(projection_pars, "u") == 0) {
-			reference_lon = 0.5 * (gbnd[0] + gbnd[1]);
+			double reference_lon = 0.5 * (gbnd[0] + gbnd[1]);
 			if (reference_lon < 180.0)
 				reference_lon += 360.0;
 			if (reference_lon >= 180.0)
@@ -1536,6 +1536,12 @@ int main(int argc, char **argv) {
 				snprintf(projection_id, sizeof(projection_id), "UTM%2.2dN", utm_zone);
 			else
 				snprintf(projection_id, sizeof(projection_id), "UTM%2.2dS", utm_zone);
+		}
+		 else if (strncmp(projection_pars, "LTM", 3) == 0 || strncmp(projection_pars, "ltm", 3) == 0 
+					|| strcmp(projection_pars, "L") == 0 || strcmp(projection_pars, "l") == 0) {
+		  double reference_lon = 0.5 * (gbnd[0] + gbnd[1]);
+		  double reference_lat = 0.5 * (gbnd[2] + gbnd[3]);
+		  snprintf(projection_id, sizeof(projection_id), "LTM%.5f/%.5f", reference_lon, reference_lat);
 		}
 		else
 			strcpy(projection_id, projection_pars);

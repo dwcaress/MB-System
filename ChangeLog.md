@@ -22,7 +22,8 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
-- Version 5.8.2beta05    May 17, 2024
+- Version 5.8.2beta06    June 3, 2024
+- Version 5.8.2beta05    May 19, 2024
 - Version 5.8.2beta04    May 13, 2024
 - Version 5.8.2beta02    May 1, 2024
 - Version 5.8.2beta01    April 29, 2024
@@ -38,7 +39,25 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 ---
 
-#### 5.8.2beta05 (May 17, 2024)
+#### 5.8.2beta06 (June 3, 2024)
+
+MBgrid and mbmosaic: Added an option to generate grids and mosaics in a projected 
+coordinate system defined as a Local Transverse Mercator (LTM) projection with the  origin 
+at the center of the grid or mosaic. 
+
+MBgrdviz, mbeditviz, mbnavadjust: The mbview visualization library now displays grids
+defined in geographic coordinates (longitude and latitude) using a Local Transverse
+Mercator projection with the origin at the center of the grid or mosaic. This replaces the
+prior use of UTM projections, which introduced rotation and distortion when the grid was
+located far from the center of the UTM zone.
+
+MBtrnpp: and TRN: Changed TerrainNav, supporting libraries, and the program mbtrnpp to
+calculate projections using the Proj package rather than the GCTP package.
+
+MBtrnpp: Now works with reference topography models defined in a Local Transverse 
+Mercator (LTM) projection.
+
+#### 5.8.2beta05 (May 19, 2024)
 
 MBextractsegy: changed calculation of section plot bounds to more consistently catch the
 seafloor arrival within the plot.
@@ -46,6 +65,9 @@ seafloor arrival within the plot.
 MBpreprocess: fixed initialization of the --kluge-fix-7k-times option.
 
 Docker image: updated documentation in the Docker directory.
+
+Formats 58 (MBF_EM710RAW) and 59 (MBF_EM710MBA):  Removed an errant debug message that
+printed out information when reading height datagrams.
 
 #### 5.8.2beta04 (May 13, 2024)
 
