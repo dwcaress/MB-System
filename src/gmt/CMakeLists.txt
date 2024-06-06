@@ -28,6 +28,12 @@ find_package(GDAL CONFIG)
 if (NOT GDAL_FOUND)
   message(STATUS "GDAL package config file GDALConfig.cmake not found, looking for FindGDAL.cmake file...")
   find_package(GDAL REQUIRED)
+  if (NOT GDAL_FOUND)
+     message(STATUS "GDAL still not found")
+  else ()
+     message(STATUS "FOUND GDAL")
+  endif (NOT GDAL_FOUND)
+  
 endif (NOT GDAL_FOUND)
 
 find_package(GMT CONFIG)
