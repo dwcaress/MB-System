@@ -44,6 +44,7 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
+#include "mbnavedit_prog.h"
 
 /* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
 #if defined(_MSC_VER) && (_MSC_VER >= 1900)
@@ -231,7 +232,7 @@ static int ncolors;
 static int pixel_values[256];
 
 /*--------------------------------------------------------------------*/
-int mbnavedit_init_globals() {
+int mbnavedit_init_globals(void) {
 	/* set default global control parameters */
 	output_mode = OUTPUT_MODE_OUTPUT;
 	run_mbprocess = false;
@@ -478,7 +479,7 @@ int mbnavedit_set_graphics(void *xgid, int ncol, unsigned int *pixels) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_open(int useprevious) {
+int mbnavedit_action_open(bool useprevious) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -533,7 +534,7 @@ int mbnavedit_action_open(int useprevious) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_open_file(int useprevious) {
+int mbnavedit_open_file(bool useprevious) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -770,7 +771,7 @@ int mbnavedit_open_file(int useprevious) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_close_file() {
+int mbnavedit_close_file(void) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -924,7 +925,7 @@ int mbnavedit_dump_data(int hold) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_load_data() {
+int mbnavedit_load_data(void) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -1103,7 +1104,7 @@ int mbnavedit_load_data() {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_clear_screen() {
+int mbnavedit_clear_screen(void) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -1124,7 +1125,7 @@ int mbnavedit_clear_screen() {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_next_buffer(int *quit) {
+int mbnavedit_action_next_buffer(bool *quit) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -1194,7 +1195,7 @@ int mbnavedit_action_next_buffer(int *quit) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_offset() {
+int mbnavedit_action_offset(void) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -1223,7 +1224,7 @@ int mbnavedit_action_offset() {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_close() {
+int mbnavedit_action_close(void) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -1281,7 +1282,7 @@ int mbnavedit_action_close() {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_done(int *quit) {
+int mbnavedit_action_done(bool *quit) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -1318,7 +1319,7 @@ int mbnavedit_action_done(int *quit) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_quit() {
+int mbnavedit_action_quit(void) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -1429,7 +1430,7 @@ int mbnavedit_action_step(int step) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_end() {
+int mbnavedit_action_end(void) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -1490,7 +1491,7 @@ int mbnavedit_action_end() {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_start() {
+int mbnavedit_action_start(void) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -2236,7 +2237,7 @@ int mbnavedit_action_set_interval(int xx, int yy, int which) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_use_dr() {
+int mbnavedit_action_use_dr(void) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -2292,7 +2293,7 @@ int mbnavedit_action_use_dr() {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_use_smg() {
+int mbnavedit_action_use_smg(void) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -2346,7 +2347,7 @@ int mbnavedit_action_use_smg() {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_use_cmg() {
+int mbnavedit_action_use_cmg(void) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -2401,7 +2402,7 @@ int mbnavedit_action_use_cmg() {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_interpolate() {
+int mbnavedit_action_interpolate(void) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -2713,7 +2714,7 @@ int mbnavedit_action_interpolate() {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_interpolaterepeats() {
+int mbnavedit_action_interpolaterepeats(void) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -2890,7 +2891,7 @@ int mbnavedit_action_interpolaterepeats() {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_revert() {
+int mbnavedit_action_revert(void) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -2980,7 +2981,7 @@ int mbnavedit_action_revert() {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_flag() {
+int mbnavedit_action_flag(void) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -3027,7 +3028,7 @@ int mbnavedit_action_flag() {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_unflag() {
+int mbnavedit_action_unflag(void) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -3074,7 +3075,7 @@ int mbnavedit_action_unflag() {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_fixtime() {
+int mbnavedit_action_fixtime(void) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -3118,7 +3119,7 @@ int mbnavedit_action_fixtime() {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_deletebadtime() {
+int mbnavedit_action_deletebadtime(void) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -3180,7 +3181,7 @@ int mbnavedit_action_deletebadtime() {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_showall() {
+int mbnavedit_action_showall(void) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -3278,7 +3279,7 @@ int mbnavedit_get_smgcmg(int i) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_get_model() {
+int mbnavedit_get_model(void) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3308,7 +3309,7 @@ int mbnavedit_get_model() {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_get_gaussianmean() {
+int mbnavedit_get_gaussianmean(void) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3400,7 +3401,7 @@ int mbnavedit_get_gaussianmean() {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_get_dr() {
+int mbnavedit_get_dr(void) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3447,7 +3448,7 @@ int mbnavedit_get_dr() {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_get_inversion() {
+int mbnavedit_get_inversion(void) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3813,7 +3814,7 @@ int mbnavedit_get_inversion() {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_plot_all() {
+int mbnavedit_plot_all(void) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
