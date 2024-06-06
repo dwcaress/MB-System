@@ -187,13 +187,16 @@ protected:
   static QPainter *staticPainter_;
   static QFontMetrics *staticFontMetrics_;
 
-			 
-public slots:
 
+   
+public slots:
+  // These 'slots' can be invoked directly by QML code, i.e. not connected by
+  // signals
+  
   /// Open and process swath file
   bool processSwathFile(QUrl swathFile);
   
-  /// GUI item callbacks/slots
+  /// Methods called by QML code
   void onXtrackChanged(double value);
   void onPingsShownChanged(double value);
   void onVerticalExaggChanged(double value);
