@@ -2,7 +2,24 @@
 #define MBNAVEDIT_PROG_H
 
 
-int mbnavedit_init(int argc, char **argv, int *startup_file);
+int mbnavedit_init(int argc, char **argv, bool *startup_file,
+		   void *gPtr,
+		   void (*drawLineArg)(void *gPtr, int x1, int y1,
+				       int x2, int y2,
+				       unsigned int color, int style),
+		   void (*drawRectArg)(void *gPtr, int x, int y,
+				       int width, int height,
+				       unsigned int color, int style),
+		   void (*fillRectArg)(void *gPtr, int x, int y,
+				       int width, int height,
+				       unsigned int color, int style),
+		   void (*drawStringArg)(void *gPtr, int x, int y, char *string,
+					 unsigned int color, int style),
+		   void (*justifyStringArg)(void *gPtr, char *string,
+					    int *width,
+					    int *ascent, int *descent));
+
+int mbnavedit_clear_screen(void);
 
 int mbnavedit_action_open(bool useprevious);
 

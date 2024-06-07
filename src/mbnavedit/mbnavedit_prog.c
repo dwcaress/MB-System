@@ -33,8 +33,6 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  */
 
-// TODO(schwehr): useprevious int boolean -> bool
-
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -55,15 +53,13 @@
 #include <windows.h>
 #endif
 
-#include <X11/Intrinsic.h>
-
-#include "mb_aux.h"
 #include "mb_define.h"
+#include "mb_aux.h"
 #include "mb_format.h"
 #include "mb_io.h"
 #include "mb_process.h"
 #include "mb_status.h"
-#include "mb_xgraphics.h"
+/// #include "mb_xgraphics.h"
 
 #include "mbnavedit.h"
 
@@ -231,6 +227,23 @@ static double file_start_time_d;
 static int ncolors;
 static int pixel_values[256];
 
+/// Pointers to graphic functions
+static void (*drawLine)(void *gPtr, int x1, int y1, int x2, int y2,
+                        unsigned int color, int style);
+
+static void (*drawRectangle)(void *gPtr, int x, int y, int width, int height,
+			     unsigned int color, int style);
+
+static void (*fillRectangle)(void *gPtr, int x, int y, int width, int height,
+			     unsigned int color, int style);
+
+static void (*drawString)(void *gPtr, int x, int y, char *string,
+                          unsigned int color, int style);
+
+static void (*justifyString)(void *gPtr, char *string, int *width,
+                             int *ascent, int *descent);
+
+
 /*--------------------------------------------------------------------*/
 int mbnavedit_init_globals(void) {
 	/* set default global control parameters */
@@ -308,8 +321,31 @@ int mbnavedit_init_globals(void) {
 }
 
 /*--------------------------------------------------------------------*/
-int mbnavedit_init(int argc, char **argv, int *startup_file) {
-	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+int mbnavedit_init(int argc, char **argv, bool *startup_file,
+		   void *gPtr,
+		   void (*drawLineArg)(void *gPtr, int x1, int y1,
+				       int x2, int y2,
+				       unsigned int color, int style),
+		   void (*drawRectArg)(void *gPtr, int x, int y,
+				       int width, int height,
+				       unsigned int color, int style),
+		   void (*fillRectArg)(void *gPtr, int x, int y,
+				       int width, int height,
+				       unsigned int color, int style),
+		   void (*drawStringArg)(void *gPtr, int x, int y, char *string,
+					 unsigned int color, int style),
+		   void (*justifyStringArg)(void *gPtr, char *string,
+					    int *width,
+					    int *ascent, int *descent)) {
+  
+  mbnavedit_xgid = gPtr;
+  drawLine = drawLineArg;
+  drawRectangle = drawRectArg;
+  fillRectangle = fillRectArg;
+  drawString = drawStringArg;
+  justifyString = justifyStringArg;
+
+  int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 	status = mb_uselockfiles(verbose, &uselockfiles);
 	pings = 1;
 	lonflip = 0;
@@ -1110,7 +1146,9 @@ int mbnavedit_clear_screen(void) {
 	}
 
 	/* clear screen */
-	xg_fillrectangle(mbnavedit_xgid, 0, 0, plot_width, NUMBER_PLOTS_MAX * plot_height, pixel_values[WHITE], XG_SOLIDLINE);
+	(*fillRectangle)(mbnavedit_xgid, 0, 0, plot_width,
+			 NUMBER_PLOTS_MAX * plot_height, pixel_values[WHITE],
+			 XG_SOLIDLINE);
 
 	const int status = MB_SUCCESS;
 
@@ -2126,7 +2164,7 @@ int mbnavedit_action_set_interval(int xx, int yy, int which) {
 			/* unplot old line on all plots */
 			if (interval_set1)
 				for (int i = 0; i < number_plots; i++) {
-					xg_drawline(mbnavedit_xgid, interval_bound1, mbnavplot[i].iymin, interval_bound1, mbnavplot[i].iymax,
+					(*drawLine)(mbnavedit_xgid, interval_bound1, mbnavplot[i].iymin, interval_bound1, mbnavplot[i].iymax,
 					            pixel_values[WHITE], XG_DASHLINE);
 				}
 
@@ -2142,7 +2180,7 @@ int mbnavedit_action_set_interval(int xx, int yy, int which) {
 
 			/* plot line on all plots */
 			for (int i = 0; i < number_plots; i++) {
-				xg_drawline(mbnavedit_xgid, interval_bound1, mbnavplot[i].iymin, interval_bound1, mbnavplot[i].iymax,
+				(*drawLine)(mbnavedit_xgid, interval_bound1, mbnavplot[i].iymin, interval_bound1, mbnavplot[i].iymax,
 				            pixel_values[RED], XG_DASHLINE);
 			}
 		}
@@ -2152,7 +2190,7 @@ int mbnavedit_action_set_interval(int xx, int yy, int which) {
 			/* unplot old line on all plots */
 			if (interval_set1)
 				for (int i = 0; i < number_plots; i++) {
-					xg_drawline(mbnavedit_xgid, interval_bound2, mbnavplot[i].iymin, interval_bound2, mbnavplot[i].iymax,
+					(*drawLine)(mbnavedit_xgid, interval_bound2, mbnavplot[i].iymin, interval_bound2, mbnavplot[i].iymax,
 					            pixel_values[WHITE], XG_DASHLINE);
 				}
 
@@ -2168,7 +2206,7 @@ int mbnavedit_action_set_interval(int xx, int yy, int which) {
 
 			/* plot line on all plots */
 			for (int i = 0; i < number_plots; i++) {
-				xg_drawline(mbnavedit_xgid, interval_bound2, mbnavplot[i].iymin, interval_bound2, mbnavplot[i].iymax,
+				(*drawLine)(mbnavedit_xgid, interval_bound2, mbnavplot[i].iymin, interval_bound2, mbnavplot[i].iymax,
 				            pixel_values[RED], XG_DASHLINE);
 			}
 		}
@@ -4274,8 +4312,8 @@ int mbnavedit_plot_all(void) {
 			int swidth;
 			int sascent;
 			int sdescent;
-			xg_justify(mbnavedit_xgid, string, &swidth, &sascent, &sdescent);
-			xg_drawstring(mbnavedit_xgid, center_x - swidth / 2, mbnavplot[iplot].iymax - 5 * sascent / 2, string,
+			(*justifyString)(mbnavedit_xgid, string, &swidth, &sascent, &sdescent);
+			(*drawString)(mbnavedit_xgid, center_x - swidth / 2, mbnavplot[iplot].iymax - 5 * sascent / 2, string,
 			              pixel_values[BLACK], XG_SOLIDLINE);
 
 			/* get bounds for position bar */
@@ -4287,30 +4325,30 @@ int mbnavedit_plot_all(void) {
 				fpx = center_x + 2 * margin_x - fpdx;
 
 			/* plot file position bar */
-			xg_drawrectangle(mbnavedit_xgid, center_x - 2 * margin_x, fpy, 4 * margin_x, fpdy, pixel_values[BLACK], XG_SOLIDLINE);
-			xg_drawrectangle(mbnavedit_xgid, center_x - 2 * margin_x - 1, fpy - 1, 4 * margin_x + 2, fpdy + 2,
+			(*drawRectangle)(mbnavedit_xgid, center_x - 2 * margin_x, fpy, 4 * margin_x, fpdy, pixel_values[BLACK], XG_SOLIDLINE);
+			(*drawRectangle)(mbnavedit_xgid, center_x - 2 * margin_x - 1, fpy - 1, 4 * margin_x + 2, fpdy + 2,
 			                 pixel_values[BLACK], XG_SOLIDLINE);
-			xg_fillrectangle(mbnavedit_xgid, fpx, fpy, fpdx, fpdy, pixel_values[LIGHTGREY], XG_SOLIDLINE);
-			xg_drawrectangle(mbnavedit_xgid, fpx, fpy, fpdx, fpdy, pixel_values[BLACK], XG_SOLIDLINE);
+			(*fillRectangle)(mbnavedit_xgid, fpx, fpy, fpdx, fpdy, pixel_values[LIGHTGREY], XG_SOLIDLINE);
+			(*drawRectangle)(mbnavedit_xgid, fpx, fpy, fpdx, fpdy, pixel_values[BLACK], XG_SOLIDLINE);
 			sprintf(string, "0 ");
-			xg_justify(mbnavedit_xgid, string, &swidth, &sascent, &sdescent);
-			xg_drawstring(mbnavedit_xgid, (int)(center_x - 2 * margin_x - swidth), fpy + sascent, string, pixel_values[BLACK],
+			(*justifyString)(mbnavedit_xgid, string, &swidth, &sascent, &sdescent);
+			(*drawString)(mbnavedit_xgid, (int)(center_x - 2 * margin_x - swidth), fpy + sascent, string, pixel_values[BLACK],
 			              XG_SOLIDLINE);
 			sprintf(string, " %d", nbuff);
-			xg_drawstring(mbnavedit_xgid, (int)(center_x + 2 * margin_x), fpy + sascent, string, pixel_values[BLACK],
+			(*drawString)(mbnavedit_xgid, (int)(center_x + 2 * margin_x), fpy + sascent, string, pixel_values[BLACK],
 			              XG_SOLIDLINE);
 
 			/* plot x label */
-			xg_justify(mbnavedit_xgid, mbnavplot[iplot].xlabel, &swidth, &sascent, &sdescent);
-			xg_drawstring(mbnavedit_xgid, (int)(center_x - swidth / 2), (int)(mbnavplot[iplot].iymin + 0.75 * margin_y),
+			(*justifyString)(mbnavedit_xgid, mbnavplot[iplot].xlabel, &swidth, &sascent, &sdescent);
+			(*drawString)(mbnavedit_xgid, (int)(center_x - swidth / 2), (int)(mbnavplot[iplot].iymin + 0.75 * margin_y),
 			              mbnavplot[iplot].xlabel, pixel_values[BLACK], XG_SOLIDLINE);
 
 			/* plot y labels */
-			xg_justify(mbnavedit_xgid, mbnavplot[iplot].ylabel1, &swidth, &sascent, &sdescent);
-			xg_drawstring(mbnavedit_xgid, (int)(mbnavplot[iplot].ixmin - swidth / 2 - 0.75 * margin_x), (int)(center_y - sascent),
+			(*justifyString)(mbnavedit_xgid, mbnavplot[iplot].ylabel1, &swidth, &sascent, &sdescent);
+			(*drawString)(mbnavedit_xgid, (int)(mbnavplot[iplot].ixmin - swidth / 2 - 0.75 * margin_x), (int)(center_y - sascent),
 			              mbnavplot[iplot].ylabel1, pixel_values[BLACK], XG_SOLIDLINE);
-			xg_justify(mbnavedit_xgid, mbnavplot[iplot].ylabel2, &swidth, &sascent, &sdescent);
-			xg_drawstring(mbnavedit_xgid, (int)(mbnavplot[iplot].ixmin - swidth / 2 - 0.75 * margin_x),
+			(*justifyString)(mbnavedit_xgid, mbnavplot[iplot].ylabel2, &swidth, &sascent, &sdescent);
+			(*drawString)(mbnavedit_xgid, (int)(mbnavplot[iplot].ixmin - swidth / 2 - 0.75 * margin_x),
 			              (int)(center_y + 2 * sascent), mbnavplot[iplot].ylabel2, pixel_values[BLACK], XG_SOLIDLINE);
 
 			/* plot x axis time annotation */
@@ -4322,14 +4360,14 @@ int mbnavedit_plot_all(void) {
 				x += file_start_time_d;
 
 				/* draw tickmarks */
-				xg_drawline(mbnavedit_xgid, ix, mbnavplot[iplot].iymin, ix, mbnavplot[iplot].iymin + 5, pixel_values[BLACK],
+				(*drawLine)(mbnavedit_xgid, ix, mbnavplot[iplot].iymin, ix, mbnavplot[iplot].iymin + 5, pixel_values[BLACK],
 				            XG_SOLIDLINE);
 
 				/* draw annotations */
 				mb_get_date(verbose, x, xtime_i);
 				sprintf(string, "%2.2d:%2.2d:%2.2d.%3.3d", xtime_i[3], xtime_i[4], xtime_i[5], (int)(0.001 * xtime_i[6]));
-				xg_justify(mbnavedit_xgid, string, &swidth, &sascent, &sdescent);
-				xg_drawstring(mbnavedit_xgid, (int)(ix - swidth / 2), (int)(mbnavplot[iplot].iymin + 5 + 1.75 * sascent), string,
+				(*justifyString)(mbnavedit_xgid, string, &swidth, &sascent, &sdescent);
+				(*drawString)(mbnavedit_xgid, (int)(ix - swidth / 2), (int)(mbnavplot[iplot].iymin + 5 + 1.75 * sascent), string,
 				              pixel_values[BLACK], XG_SOLIDLINE);
 			}
 
@@ -4340,12 +4378,12 @@ int mbnavedit_plot_all(void) {
 			else
 				strcpy(yformat, "%6.2f");
 			sprintf(string, yformat, mbnavplot[iplot].ymin);
-			xg_justify(mbnavedit_xgid, string, &swidth, &sascent, &sdescent);
-			xg_drawstring(mbnavedit_xgid, (int)(mbnavplot[iplot].ixmin - swidth - 0.03 * margin_x),
+			(*justifyString)(mbnavedit_xgid, string, &swidth, &sascent, &sdescent);
+			(*drawString)(mbnavedit_xgid, (int)(mbnavplot[iplot].ixmin - swidth - 0.03 * margin_x),
 			              (int)(mbnavplot[iplot].iymin + 0.5 * sascent), string, pixel_values[BLACK], XG_SOLIDLINE);
 			sprintf(string, yformat, mbnavplot[iplot].ymax);
-			xg_justify(mbnavedit_xgid, string, &swidth, &sascent, &sdescent);
-			xg_drawstring(mbnavedit_xgid, (int)(mbnavplot[iplot].ixmin - swidth - 0.03 * margin_x),
+			(*justifyString)(mbnavedit_xgid, string, &swidth, &sascent, &sdescent);
+			(*drawString)(mbnavedit_xgid, (int)(mbnavplot[iplot].ixmin - swidth - 0.03 * margin_x),
 			              (int)(mbnavplot[iplot].iymax + 0.5 * sascent), string, pixel_values[BLACK], XG_SOLIDLINE);
 
 			/* plot zero values */
@@ -4356,19 +4394,19 @@ int mbnavedit_plot_all(void) {
 				else
 					strcpy(yformat, "%6.2f");
 				sprintf(string, yformat, 0.0);
-				xg_justify(mbnavedit_xgid, string, &swidth, &sascent, &sdescent);
+				(*justifyString)(mbnavedit_xgid, string, &swidth, &sascent, &sdescent);
 				const int iyzero = mbnavplot[iplot].iymin - mbnavplot[iplot].yscale * mbnavplot[iplot].ymin;
-				xg_drawstring(mbnavedit_xgid, (int)(mbnavplot[iplot].ixmin - swidth - 0.03 * margin_x),
+				(*drawString)(mbnavedit_xgid, (int)(mbnavplot[iplot].ixmin - swidth - 0.03 * margin_x),
 				              (int)(iyzero + 0.5 * sascent), string, pixel_values[BLACK], XG_SOLIDLINE);
-				xg_drawline(mbnavedit_xgid, mbnavplot[iplot].ixmin, iyzero, mbnavplot[iplot].ixmax, iyzero, pixel_values[BLACK],
+				(*drawLine)(mbnavedit_xgid, mbnavplot[iplot].ixmin, iyzero, mbnavplot[iplot].ixmax, iyzero, pixel_values[BLACK],
 				            XG_DASHLINE);
 			}
 
 			/* plot bounding box */
-			xg_drawrectangle(mbnavedit_xgid, mbnavplot[iplot].ixmin, mbnavplot[iplot].iymax,
+			(*drawRectangle)(mbnavedit_xgid, mbnavplot[iplot].ixmin, mbnavplot[iplot].iymax,
 			                 mbnavplot[iplot].ixmax - mbnavplot[iplot].ixmin, mbnavplot[iplot].iymin - mbnavplot[iplot].iymax,
 			                 pixel_values[BLACK], XG_SOLIDLINE);
-			xg_drawrectangle(mbnavedit_xgid, mbnavplot[iplot].ixmin - 1, mbnavplot[iplot].iymax - 1,
+			(*drawRectangle)(mbnavedit_xgid, mbnavplot[iplot].ixmin - 1, mbnavplot[iplot].iymax - 1,
 			                 mbnavplot[iplot].ixmax - mbnavplot[iplot].ixmin + 2,
 			                 mbnavplot[iplot].iymin - mbnavplot[iplot].iymax + 2, pixel_values[BLACK], XG_SOLIDLINE);
 
@@ -4433,7 +4471,7 @@ int mbnavedit_plot_tint(int iplot) {
 		for (int i = current_id + 1; i < current_id + nplot; i++) {
 			const int tint_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
 			const int tint_y2 = iymin + yscale * (ping[i].tint_org - ymin);
-			xg_drawline(mbnavedit_xgid, tint_x1, tint_y1, tint_x2, tint_y2, pixel_values[GREEN], XG_SOLIDLINE);
+			(*drawLine)(mbnavedit_xgid, tint_x1, tint_y1, tint_x2, tint_y2, pixel_values[GREEN], XG_SOLIDLINE);
 			tint_x1 = tint_x2;
 			tint_y1 = tint_y2;
 		}
@@ -4444,11 +4482,11 @@ int mbnavedit_plot_tint(int iplot) {
 		ping[i].tint_x = ixmin + xscale * (ping[i].file_time_d - xmin);
 		ping[i].tint_y = iymin + yscale * (ping[i].tint - ymin);
 		if (ping[i].tint_select)
-			xg_drawrectangle(mbnavedit_xgid, ping[i].tint_x - 2, ping[i].tint_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
+			(*drawRectangle)(mbnavedit_xgid, ping[i].tint_x - 2, ping[i].tint_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
 		else if (ping[i].tint != ping[i].tint_org)
-			xg_drawrectangle(mbnavedit_xgid, ping[i].tint_x - 2, ping[i].tint_y - 2, 4, 4, pixel_values[PURPLE], XG_SOLIDLINE);
+			(*drawRectangle)(mbnavedit_xgid, ping[i].tint_x - 2, ping[i].tint_y - 2, 4, 4, pixel_values[PURPLE], XG_SOLIDLINE);
 		else
-			xg_fillrectangle(mbnavedit_xgid, ping[i].tint_x - 2, ping[i].tint_y - 2, 4, 4, pixel_values[BLACK], XG_SOLIDLINE);
+			(*fillRectangle)(mbnavedit_xgid, ping[i].tint_x - 2, ping[i].tint_y - 2, 4, 4, pixel_values[BLACK], XG_SOLIDLINE);
 	}
 
 	const int status = MB_SUCCESS;
@@ -4486,7 +4524,7 @@ int mbnavedit_plot_lon(int iplot) {
 		for (int i = current_id + 1; i < current_id + nplot; i++) {
 			const int lon_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
 			const int lon_y2 = iymin + yscale * (ping[i].lon_org - ymin);
-			xg_drawline(mbnavedit_xgid, lon_x1, lon_y1, lon_x2, lon_y2, pixel_values[GREEN], XG_SOLIDLINE);
+			(*drawLine)(mbnavedit_xgid, lon_x1, lon_y1, lon_x2, lon_y2, pixel_values[GREEN], XG_SOLIDLINE);
 			lon_x1 = lon_x2;
 			lon_y1 = lon_y2;
 		}
@@ -4499,7 +4537,7 @@ int mbnavedit_plot_lon(int iplot) {
 		for (int i = current_id + 1; i < current_id + nplot; i++) {
 			const int lon_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
 			const int lon_y2 = iymin + yscale * (ping[i].lon_dr - ymin);
-			xg_drawline(mbnavedit_xgid, lon_x1, lon_y1, lon_x2, lon_y2, pixel_values[BLUE], XG_SOLIDLINE);
+			(*drawLine)(mbnavedit_xgid, lon_x1, lon_y1, lon_x2, lon_y2, pixel_values[BLUE], XG_SOLIDLINE);
 			lon_x1 = lon_x2;
 			lon_y1 = lon_y2;
 		}
@@ -4510,7 +4548,7 @@ int mbnavedit_plot_lon(int iplot) {
 		ping[i].lon_x = ixmin + xscale * (ping[i].file_time_d - xmin);
 		ping[i].lon_y = iymin + yscale * (ping[i].lon - ymin);
 		if (ping[i].lonlat_flag)
-			xg_drawrectangle(mbnavedit_xgid, ping[i].lon_x - 2, ping[i].lon_y - 2, 4, 4, pixel_values[ORANGE], XG_SOLIDLINE);
+			(*drawRectangle)(mbnavedit_xgid, ping[i].lon_x - 2, ping[i].lon_y - 2, 4, 4, pixel_values[ORANGE], XG_SOLIDLINE);
 	}
 
 	/* plot basic longitude data */
@@ -4518,14 +4556,14 @@ int mbnavedit_plot_lon(int iplot) {
 		ping[i].lon_x = ixmin + xscale * (ping[i].file_time_d - xmin);
 		ping[i].lon_y = iymin + yscale * (ping[i].lon - ymin);
 		if (ping[i].lon_select)
-			xg_drawrectangle(mbnavedit_xgid, ping[i].lon_x - 2, ping[i].lon_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
+			(*drawRectangle)(mbnavedit_xgid, ping[i].lon_x - 2, ping[i].lon_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
 		else if (ping[i].lonlat_flag) {
 			;
 		}
 		else if (ping[i].lon != ping[i].lon_org)
-			xg_drawrectangle(mbnavedit_xgid, ping[i].lon_x - 2, ping[i].lon_y - 2, 4, 4, pixel_values[PURPLE], XG_SOLIDLINE);
+			(*drawRectangle)(mbnavedit_xgid, ping[i].lon_x - 2, ping[i].lon_y - 2, 4, 4, pixel_values[PURPLE], XG_SOLIDLINE);
 		else
-			xg_fillrectangle(mbnavedit_xgid, ping[i].lon_x - 2, ping[i].lon_y - 2, 4, 4, pixel_values[BLACK], XG_SOLIDLINE);
+			(*fillRectangle)(mbnavedit_xgid, ping[i].lon_x - 2, ping[i].lon_y - 2, 4, 4, pixel_values[BLACK], XG_SOLIDLINE);
 	}
 
 	const int status = MB_SUCCESS;
@@ -4563,7 +4601,7 @@ int mbnavedit_plot_lat(int iplot) {
 		for (int i = current_id + 1; i < current_id + nplot; i++) {
 			const int lat_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
 			const int lat_y2 = iymin + yscale * (ping[i].lat_org - ymin);
-			xg_drawline(mbnavedit_xgid, lat_x1, lat_y1, lat_x2, lat_y2, pixel_values[GREEN], XG_SOLIDLINE);
+			(*drawLine)(mbnavedit_xgid, lat_x1, lat_y1, lat_x2, lat_y2, pixel_values[GREEN], XG_SOLIDLINE);
 			lat_x1 = lat_x2;
 			lat_y1 = lat_y2;
 		}
@@ -4576,7 +4614,7 @@ int mbnavedit_plot_lat(int iplot) {
 		for (int i = current_id + 1; i < current_id + nplot; i++) {
 			const int lat_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
 			const int lat_y2 = iymin + yscale * (ping[i].lat_dr - ymin);
-			xg_drawline(mbnavedit_xgid, lat_x1, lat_y1, lat_x2, lat_y2, pixel_values[BLUE], XG_SOLIDLINE);
+			(*drawLine)(mbnavedit_xgid, lat_x1, lat_y1, lat_x2, lat_y2, pixel_values[BLUE], XG_SOLIDLINE);
 			lat_x1 = lat_x2;
 			lat_y1 = lat_y2;
 		}
@@ -4587,7 +4625,7 @@ int mbnavedit_plot_lat(int iplot) {
 		ping[i].lat_x = ixmin + xscale * (ping[i].file_time_d - xmin);
 		ping[i].lat_y = iymin + yscale * (ping[i].lat - ymin);
 		if (ping[i].lonlat_flag)
-			xg_drawrectangle(mbnavedit_xgid, ping[i].lat_x - 2, ping[i].lat_y - 2, 4, 4, pixel_values[ORANGE], XG_SOLIDLINE);
+			(*drawRectangle)(mbnavedit_xgid, ping[i].lat_x - 2, ping[i].lat_y - 2, 4, 4, pixel_values[ORANGE], XG_SOLIDLINE);
 	}
 
 	/* plot basic latitude data */
@@ -4595,14 +4633,14 @@ int mbnavedit_plot_lat(int iplot) {
 		ping[i].lat_x = ixmin + xscale * (ping[i].file_time_d - xmin);
 		ping[i].lat_y = iymin + yscale * (ping[i].lat - ymin);
 		if (ping[i].lat_select)
-			xg_drawrectangle(mbnavedit_xgid, ping[i].lat_x - 2, ping[i].lat_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
+			(*drawRectangle)(mbnavedit_xgid, ping[i].lat_x - 2, ping[i].lat_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
 		else if (ping[i].lonlat_flag) {
 			;
 		}
 		else if (ping[i].lat != ping[i].lat_org)
-			xg_drawrectangle(mbnavedit_xgid, ping[i].lat_x - 2, ping[i].lat_y - 2, 4, 4, pixel_values[PURPLE], XG_SOLIDLINE);
+			(*drawRectangle)(mbnavedit_xgid, ping[i].lat_x - 2, ping[i].lat_y - 2, 4, 4, pixel_values[PURPLE], XG_SOLIDLINE);
 		else
-			xg_fillrectangle(mbnavedit_xgid, ping[i].lat_x - 2, ping[i].lat_y - 2, 4, 4, pixel_values[BLACK], XG_SOLIDLINE);
+			(*fillRectangle)(mbnavedit_xgid, ping[i].lat_x - 2, ping[i].lat_y - 2, 4, 4, pixel_values[BLACK], XG_SOLIDLINE);
 	}
 
 	const int status = MB_SUCCESS;
@@ -4640,7 +4678,7 @@ int mbnavedit_plot_speed(int iplot) {
 		for (int i = current_id + 1; i < current_id + nplot; i++) {
 			const int speed_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
 			const int speed_y2 = iymin + yscale * (ping[i].speed_org - ymin);
-			xg_drawline(mbnavedit_xgid, speed_x1, speed_y1, speed_x2, speed_y2, pixel_values[GREEN], XG_SOLIDLINE);
+			(*drawLine)(mbnavedit_xgid, speed_x1, speed_y1, speed_x2, speed_y2, pixel_values[GREEN], XG_SOLIDLINE);
 			speed_x1 = speed_x2;
 			speed_y1 = speed_y2;
 		}
@@ -4653,7 +4691,7 @@ int mbnavedit_plot_speed(int iplot) {
 		for (int i = current_id + 1; i < current_id + nplot; i++) {
 			const int speed_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
 			const int speed_y2 = iymin + yscale * (ping[i].speed_made_good - ymin);
-			xg_drawline(mbnavedit_xgid, speed_x1, speed_y1, speed_x2, speed_y2, pixel_values[BLUE], XG_SOLIDLINE);
+			(*drawLine)(mbnavedit_xgid, speed_x1, speed_y1, speed_x2, speed_y2, pixel_values[BLUE], XG_SOLIDLINE);
 			speed_x1 = speed_x2;
 			speed_y1 = speed_y2;
 		}
@@ -4664,11 +4702,11 @@ int mbnavedit_plot_speed(int iplot) {
 		ping[i].speed_x = ixmin + xscale * (ping[i].file_time_d - xmin);
 		ping[i].speed_y = iymin + yscale * (ping[i].speed - ymin);
 		if (ping[i].speed_select)
-			xg_drawrectangle(mbnavedit_xgid, ping[i].speed_x - 2, ping[i].speed_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
+			(*drawRectangle)(mbnavedit_xgid, ping[i].speed_x - 2, ping[i].speed_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
 		else if (ping[i].speed != ping[i].speed_org)
-			xg_drawrectangle(mbnavedit_xgid, ping[i].speed_x - 2, ping[i].speed_y - 2, 4, 4, pixel_values[PURPLE], XG_SOLIDLINE);
+			(*drawRectangle)(mbnavedit_xgid, ping[i].speed_x - 2, ping[i].speed_y - 2, 4, 4, pixel_values[PURPLE], XG_SOLIDLINE);
 		else
-			xg_fillrectangle(mbnavedit_xgid, ping[i].speed_x - 2, ping[i].speed_y - 2, 4, 4, pixel_values[BLACK], XG_SOLIDLINE);
+			(*fillRectangle)(mbnavedit_xgid, ping[i].speed_x - 2, ping[i].speed_y - 2, 4, 4, pixel_values[BLACK], XG_SOLIDLINE);
 	}
 
 	int status = MB_SUCCESS;
@@ -4706,7 +4744,7 @@ int mbnavedit_plot_heading(int iplot) {
 		for (int i = current_id + 1; i < current_id + nplot; i++) {
 			const int heading_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
 			const int heading_y2 = iymin + yscale * (ping[i].heading_org - ymin);
-			xg_drawline(mbnavedit_xgid, heading_x1, heading_y1, heading_x2, heading_y2, pixel_values[GREEN], XG_SOLIDLINE);
+			(*drawLine)(mbnavedit_xgid, heading_x1, heading_y1, heading_x2, heading_y2, pixel_values[GREEN], XG_SOLIDLINE);
 			heading_x1 = heading_x2;
 			heading_y1 = heading_y2;
 		}
@@ -4719,7 +4757,7 @@ int mbnavedit_plot_heading(int iplot) {
 		for (int i = current_id + 1; i < current_id + nplot; i++) {
 			const int heading_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
 			const int heading_y2 = iymin + yscale * (ping[i].course_made_good - ymin);
-			xg_drawline(mbnavedit_xgid, heading_x1, heading_y1, heading_x2, heading_y2, pixel_values[BLUE], XG_SOLIDLINE);
+			(*drawLine)(mbnavedit_xgid, heading_x1, heading_y1, heading_x2, heading_y2, pixel_values[BLUE], XG_SOLIDLINE);
 			heading_x1 = heading_x2;
 			heading_y1 = heading_y2;
 		}
@@ -4730,12 +4768,12 @@ int mbnavedit_plot_heading(int iplot) {
 		ping[i].heading_x = ixmin + xscale * (ping[i].file_time_d - xmin);
 		ping[i].heading_y = iymin + yscale * (ping[i].heading - ymin);
 		if (ping[i].heading_select)
-			xg_drawrectangle(mbnavedit_xgid, ping[i].heading_x - 2, ping[i].heading_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
+			(*drawRectangle)(mbnavedit_xgid, ping[i].heading_x - 2, ping[i].heading_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
 		else if (ping[i].heading != ping[i].heading_org)
-			xg_drawrectangle(mbnavedit_xgid, ping[i].heading_x - 2, ping[i].heading_y - 2, 4, 4, pixel_values[PURPLE],
+			(*drawRectangle)(mbnavedit_xgid, ping[i].heading_x - 2, ping[i].heading_y - 2, 4, 4, pixel_values[PURPLE],
 			                 XG_SOLIDLINE);
 		else
-			xg_fillrectangle(mbnavedit_xgid, ping[i].heading_x - 2, ping[i].heading_y - 2, 4, 4, pixel_values[BLACK],
+			(*fillRectangle)(mbnavedit_xgid, ping[i].heading_x - 2, ping[i].heading_y - 2, 4, 4, pixel_values[BLACK],
 			                 XG_SOLIDLINE);
 	}
 
@@ -4774,7 +4812,7 @@ int mbnavedit_plot_draft(int iplot) {
 		for (int i = current_id + 1; i < current_id + nplot; i++) {
 			const int draft_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
 			const int draft_y2 = iymin + yscale * (ping[i].draft_org - ymin);
-			xg_drawline(mbnavedit_xgid, draft_x1, draft_y1, draft_x2, draft_y2, pixel_values[GREEN], XG_SOLIDLINE);
+			(*drawLine)(mbnavedit_xgid, draft_x1, draft_y1, draft_x2, draft_y2, pixel_values[GREEN], XG_SOLIDLINE);
 			draft_x1 = draft_x2;
 			draft_y1 = draft_y2;
 		}
@@ -4785,11 +4823,11 @@ int mbnavedit_plot_draft(int iplot) {
 		ping[i].draft_x = ixmin + xscale * (ping[i].file_time_d - xmin);
 		ping[i].draft_y = iymin + yscale * (ping[i].draft - ymin);
 		if (ping[i].draft_select)
-			xg_drawrectangle(mbnavedit_xgid, ping[i].draft_x - 2, ping[i].draft_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
+			(*drawRectangle)(mbnavedit_xgid, ping[i].draft_x - 2, ping[i].draft_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
 		else if (ping[i].draft != ping[i].draft_org)
-			xg_drawrectangle(mbnavedit_xgid, ping[i].draft_x - 2, ping[i].draft_y - 2, 4, 4, pixel_values[PURPLE], XG_SOLIDLINE);
+			(*drawRectangle)(mbnavedit_xgid, ping[i].draft_x - 2, ping[i].draft_y - 2, 4, 4, pixel_values[PURPLE], XG_SOLIDLINE);
 		else
-			xg_fillrectangle(mbnavedit_xgid, ping[i].draft_x - 2, ping[i].draft_y - 2, 4, 4, pixel_values[BLACK], XG_SOLIDLINE);
+			(*fillRectangle)(mbnavedit_xgid, ping[i].draft_x - 2, ping[i].draft_y - 2, 4, 4, pixel_values[BLACK], XG_SOLIDLINE);
 	}
 
 	const int status = MB_SUCCESS;
@@ -4827,7 +4865,7 @@ int mbnavedit_plot_roll(int iplot) {
 		for (int i = current_id + 1; i < current_id + nplot; i++) {
 			const int roll_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
 			const int roll_y2 = iymin + yscale * (ping[i].roll - ymin);
-			xg_drawline(mbnavedit_xgid, roll_x1, roll_y1, roll_x2, roll_y2, pixel_values[GREEN], XG_SOLIDLINE);
+			(*drawLine)(mbnavedit_xgid, roll_x1, roll_y1, roll_x2, roll_y2, pixel_values[GREEN], XG_SOLIDLINE);
 			roll_x1 = roll_x2;
 			roll_y1 = roll_y2;
 		}
@@ -4868,7 +4906,7 @@ int mbnavedit_plot_pitch(int iplot) {
 		for (int i = current_id + 1; i < current_id + nplot; i++) {
 			const int pitch_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
 			const int pitch_y2 = iymin + yscale * (ping[i].pitch - ymin);
-			xg_drawline(mbnavedit_xgid, pitch_x1, pitch_y1, pitch_x2, pitch_y2, pixel_values[GREEN], XG_SOLIDLINE);
+			(*drawLine)(mbnavedit_xgid, pitch_x1, pitch_y1, pitch_x2, pitch_y2, pixel_values[GREEN], XG_SOLIDLINE);
 			pitch_x1 = pitch_x2;
 			pitch_y1 = pitch_y2;
 		}
@@ -4909,7 +4947,7 @@ int mbnavedit_plot_heave(int iplot) {
 		for (int i = current_id + 1; i < current_id + nplot; i++) {
 			const int heave_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
 			const int heave_y2 = iymin + yscale * (ping[i].heave - ymin);
-			xg_drawline(mbnavedit_xgid, heave_x1, heave_y1, heave_x2, heave_y2, pixel_values[GREEN], XG_SOLIDLINE);
+			(*drawLine)(mbnavedit_xgid, heave_x1, heave_y1, heave_x2, heave_y2, pixel_values[GREEN], XG_SOLIDLINE);
 			heave_x1 = heave_x2;
 			heave_y1 = heave_y2;
 		}
@@ -4937,17 +4975,17 @@ int mbnavedit_plot_tint_value(int iplot, int iping) {
 	}
 
 	/* unplot basic expected time data value */
-	xg_drawrectangle(mbnavedit_xgid, ping[iping].tint_x - 2, ping[iping].tint_y - 2, 4, 4, pixel_values[WHITE], XG_SOLIDLINE);
-	xg_fillrectangle(mbnavedit_xgid, ping[iping].tint_x - 2, ping[iping].tint_y - 2, 4, 4, pixel_values[WHITE], XG_SOLIDLINE);
+	(*drawRectangle)(mbnavedit_xgid, ping[iping].tint_x - 2, ping[iping].tint_y - 2, 4, 4, pixel_values[WHITE], XG_SOLIDLINE);
+	(*fillRectangle)(mbnavedit_xgid, ping[iping].tint_x - 2, ping[iping].tint_y - 2, 4, 4, pixel_values[WHITE], XG_SOLIDLINE);
 
 	/* replot basic expected time data value */
 	if (ping[iping].tint_select)
-		xg_drawrectangle(mbnavedit_xgid, ping[iping].tint_x - 2, ping[iping].tint_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
+		(*drawRectangle)(mbnavedit_xgid, ping[iping].tint_x - 2, ping[iping].tint_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
 	else if (ping[iping].tint != ping[iping].tint_org)
-		xg_drawrectangle(mbnavedit_xgid, ping[iping].tint_x - 2, ping[iping].tint_y - 2, 4, 4, pixel_values[PURPLE],
+		(*drawRectangle)(mbnavedit_xgid, ping[iping].tint_x - 2, ping[iping].tint_y - 2, 4, 4, pixel_values[PURPLE],
 		                 XG_SOLIDLINE);
 	else
-		xg_fillrectangle(mbnavedit_xgid, ping[iping].tint_x - 2, ping[iping].tint_y - 2, 4, 4, pixel_values[BLACK], XG_SOLIDLINE);
+		(*fillRectangle)(mbnavedit_xgid, ping[iping].tint_x - 2, ping[iping].tint_y - 2, 4, 4, pixel_values[BLACK], XG_SOLIDLINE);
 
 	const int status = MB_SUCCESS;
 
@@ -4971,18 +5009,18 @@ int mbnavedit_plot_lon_value(int iplot, int iping) {
 	}
 
 	/* unplot basic lon data value */
-	xg_drawrectangle(mbnavedit_xgid, ping[iping].lon_x - 2, ping[iping].lon_y - 2, 4, 4, pixel_values[WHITE], XG_SOLIDLINE);
-	xg_fillrectangle(mbnavedit_xgid, ping[iping].lon_x - 2, ping[iping].lon_y - 2, 4, 4, pixel_values[WHITE], XG_SOLIDLINE);
+	(*drawRectangle)(mbnavedit_xgid, ping[iping].lon_x - 2, ping[iping].lon_y - 2, 4, 4, pixel_values[WHITE], XG_SOLIDLINE);
+	(*fillRectangle)(mbnavedit_xgid, ping[iping].lon_x - 2, ping[iping].lon_y - 2, 4, 4, pixel_values[WHITE], XG_SOLIDLINE);
 
 	/* replot basic lon data value */
 	if (ping[iping].lon_select)
-		xg_drawrectangle(mbnavedit_xgid, ping[iping].lon_x - 2, ping[iping].lon_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
+		(*drawRectangle)(mbnavedit_xgid, ping[iping].lon_x - 2, ping[iping].lon_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
 	else if (ping[iping].lonlat_flag)
-		xg_drawrectangle(mbnavedit_xgid, ping[iping].lon_x - 2, ping[iping].lon_y - 2, 4, 4, pixel_values[ORANGE], XG_SOLIDLINE);
+		(*drawRectangle)(mbnavedit_xgid, ping[iping].lon_x - 2, ping[iping].lon_y - 2, 4, 4, pixel_values[ORANGE], XG_SOLIDLINE);
 	else if (ping[iping].lon != ping[iping].lon_org)
-		xg_drawrectangle(mbnavedit_xgid, ping[iping].lon_x - 2, ping[iping].lon_y - 2, 4, 4, pixel_values[PURPLE], XG_SOLIDLINE);
+		(*drawRectangle)(mbnavedit_xgid, ping[iping].lon_x - 2, ping[iping].lon_y - 2, 4, 4, pixel_values[PURPLE], XG_SOLIDLINE);
 	else
-		xg_fillrectangle(mbnavedit_xgid, ping[iping].lon_x - 2, ping[iping].lon_y - 2, 4, 4, pixel_values[BLACK], XG_SOLIDLINE);
+		(*fillRectangle)(mbnavedit_xgid, ping[iping].lon_x - 2, ping[iping].lon_y - 2, 4, 4, pixel_values[BLACK], XG_SOLIDLINE);
 
 	const int status = MB_SUCCESS;
 
@@ -5006,18 +5044,18 @@ int mbnavedit_plot_lat_value(int iplot, int iping) {
 	}
 
 	/* unplot basic lat data value */
-	xg_drawrectangle(mbnavedit_xgid, ping[iping].lat_x - 2, ping[iping].lat_y - 2, 4, 4, pixel_values[WHITE], XG_SOLIDLINE);
-	xg_fillrectangle(mbnavedit_xgid, ping[iping].lat_x - 2, ping[iping].lat_y - 2, 4, 4, pixel_values[WHITE], XG_SOLIDLINE);
+	(*drawRectangle)(mbnavedit_xgid, ping[iping].lat_x - 2, ping[iping].lat_y - 2, 4, 4, pixel_values[WHITE], XG_SOLIDLINE);
+	(*fillRectangle)(mbnavedit_xgid, ping[iping].lat_x - 2, ping[iping].lat_y - 2, 4, 4, pixel_values[WHITE], XG_SOLIDLINE);
 
 	/* replot basic lat data value */
 	if (ping[iping].lat_select)
-		xg_drawrectangle(mbnavedit_xgid, ping[iping].lat_x - 2, ping[iping].lat_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
+		(*drawRectangle)(mbnavedit_xgid, ping[iping].lat_x - 2, ping[iping].lat_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
 	else if (ping[iping].lonlat_flag)
-		xg_drawrectangle(mbnavedit_xgid, ping[iping].lat_x - 2, ping[iping].lat_y - 2, 4, 4, pixel_values[ORANGE], XG_SOLIDLINE);
+		(*drawRectangle)(mbnavedit_xgid, ping[iping].lat_x - 2, ping[iping].lat_y - 2, 4, 4, pixel_values[ORANGE], XG_SOLIDLINE);
 	else if (ping[iping].lat != ping[iping].lat_org)
-		xg_drawrectangle(mbnavedit_xgid, ping[iping].lat_x - 2, ping[iping].lat_y - 2, 4, 4, pixel_values[PURPLE], XG_SOLIDLINE);
+		(*drawRectangle)(mbnavedit_xgid, ping[iping].lat_x - 2, ping[iping].lat_y - 2, 4, 4, pixel_values[PURPLE], XG_SOLIDLINE);
 	else
-		xg_fillrectangle(mbnavedit_xgid, ping[iping].lat_x - 2, ping[iping].lat_y - 2, 4, 4, pixel_values[BLACK], XG_SOLIDLINE);
+		(*fillRectangle)(mbnavedit_xgid, ping[iping].lat_x - 2, ping[iping].lat_y - 2, 4, 4, pixel_values[BLACK], XG_SOLIDLINE);
 
 	const int status = MB_SUCCESS;
 
@@ -5041,17 +5079,17 @@ int mbnavedit_plot_speed_value(int iplot, int iping) {
 	}
 
 	/* unplot basic speed data value */
-	xg_drawrectangle(mbnavedit_xgid, ping[iping].speed_x - 2, ping[iping].speed_y - 2, 4, 4, pixel_values[WHITE], XG_SOLIDLINE);
-	xg_fillrectangle(mbnavedit_xgid, ping[iping].speed_x - 2, ping[iping].speed_y - 2, 4, 4, pixel_values[WHITE], XG_SOLIDLINE);
+	(*drawRectangle)(mbnavedit_xgid, ping[iping].speed_x - 2, ping[iping].speed_y - 2, 4, 4, pixel_values[WHITE], XG_SOLIDLINE);
+	(*fillRectangle)(mbnavedit_xgid, ping[iping].speed_x - 2, ping[iping].speed_y - 2, 4, 4, pixel_values[WHITE], XG_SOLIDLINE);
 
 	/* replot basic speed data value */
 	if (ping[iping].speed_select)
-		xg_drawrectangle(mbnavedit_xgid, ping[iping].speed_x - 2, ping[iping].speed_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
+		(*drawRectangle)(mbnavedit_xgid, ping[iping].speed_x - 2, ping[iping].speed_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
 	else if (ping[iping].speed != ping[iping].speed_org)
-		xg_drawrectangle(mbnavedit_xgid, ping[iping].speed_x - 2, ping[iping].speed_y - 2, 4, 4, pixel_values[PURPLE],
+		(*drawRectangle)(mbnavedit_xgid, ping[iping].speed_x - 2, ping[iping].speed_y - 2, 4, 4, pixel_values[PURPLE],
 		                 XG_SOLIDLINE);
 	else
-		xg_fillrectangle(mbnavedit_xgid, ping[iping].speed_x - 2, ping[iping].speed_y - 2, 4, 4, pixel_values[BLACK],
+		(*fillRectangle)(mbnavedit_xgid, ping[iping].speed_x - 2, ping[iping].speed_y - 2, 4, 4, pixel_values[BLACK],
 		                 XG_SOLIDLINE);
 
 	const int status = MB_SUCCESS;
@@ -5076,20 +5114,20 @@ int mbnavedit_plot_heading_value(int iplot, int iping) {
 	}
 
 	/* unplot basic heading data value */
-	xg_drawrectangle(mbnavedit_xgid, ping[iping].heading_x - 2, ping[iping].heading_y - 2, 4, 4, pixel_values[WHITE],
+	(*drawRectangle)(mbnavedit_xgid, ping[iping].heading_x - 2, ping[iping].heading_y - 2, 4, 4, pixel_values[WHITE],
 	                 XG_SOLIDLINE);
-	xg_fillrectangle(mbnavedit_xgid, ping[iping].heading_x - 2, ping[iping].heading_y - 2, 4, 4, pixel_values[WHITE],
+	(*fillRectangle)(mbnavedit_xgid, ping[iping].heading_x - 2, ping[iping].heading_y - 2, 4, 4, pixel_values[WHITE],
 	                 XG_SOLIDLINE);
 
 	/* replot basic heading data value */
 	if (ping[iping].heading_select)
-		xg_drawrectangle(mbnavedit_xgid, ping[iping].heading_x - 2, ping[iping].heading_y - 2, 4, 4, pixel_values[RED],
+		(*drawRectangle)(mbnavedit_xgid, ping[iping].heading_x - 2, ping[iping].heading_y - 2, 4, 4, pixel_values[RED],
 		                 XG_SOLIDLINE);
 	else if (ping[iping].heading != ping[iping].heading_org)
-		xg_drawrectangle(mbnavedit_xgid, ping[iping].heading_x - 2, ping[iping].heading_y - 2, 4, 4, pixel_values[PURPLE],
+		(*drawRectangle)(mbnavedit_xgid, ping[iping].heading_x - 2, ping[iping].heading_y - 2, 4, 4, pixel_values[PURPLE],
 		                 XG_SOLIDLINE);
 	else
-		xg_fillrectangle(mbnavedit_xgid, ping[iping].heading_x - 2, ping[iping].heading_y - 2, 4, 4, pixel_values[BLACK],
+		(*fillRectangle)(mbnavedit_xgid, ping[iping].heading_x - 2, ping[iping].heading_y - 2, 4, 4, pixel_values[BLACK],
 		                 XG_SOLIDLINE);
 
 	const int status = MB_SUCCESS;
@@ -5114,17 +5152,17 @@ int mbnavedit_plot_draft_value(int iplot, int iping) {
 	}
 
 	/* unplot basic draft data value */
-	xg_drawrectangle(mbnavedit_xgid, ping[iping].draft_x - 2, ping[iping].draft_y - 2, 4, 4, pixel_values[WHITE], XG_SOLIDLINE);
-	xg_fillrectangle(mbnavedit_xgid, ping[iping].draft_x - 2, ping[iping].draft_y - 2, 4, 4, pixel_values[WHITE], XG_SOLIDLINE);
+	(*drawRectangle)(mbnavedit_xgid, ping[iping].draft_x - 2, ping[iping].draft_y - 2, 4, 4, pixel_values[WHITE], XG_SOLIDLINE);
+	(*fillRectangle)(mbnavedit_xgid, ping[iping].draft_x - 2, ping[iping].draft_y - 2, 4, 4, pixel_values[WHITE], XG_SOLIDLINE);
 
 	/* replot basic draft data value */
 	if (ping[iping].draft_select)
-		xg_drawrectangle(mbnavedit_xgid, ping[iping].draft_x - 2, ping[iping].draft_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
+		(*drawRectangle)(mbnavedit_xgid, ping[iping].draft_x - 2, ping[iping].draft_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
 	else if (ping[iping].draft != ping[iping].draft_org)
-		xg_drawrectangle(mbnavedit_xgid, ping[iping].draft_x - 2, ping[iping].draft_y - 2, 4, 4, pixel_values[PURPLE],
+		(*drawRectangle)(mbnavedit_xgid, ping[iping].draft_x - 2, ping[iping].draft_y - 2, 4, 4, pixel_values[PURPLE],
 		                 XG_SOLIDLINE);
 	else
-		xg_fillrectangle(mbnavedit_xgid, ping[iping].draft_x - 2, ping[iping].draft_y - 2, 4, 4, pixel_values[BLACK],
+		(*fillRectangle)(mbnavedit_xgid, ping[iping].draft_x - 2, ping[iping].draft_y - 2, 4, 4, pixel_values[BLACK],
 		                 XG_SOLIDLINE);
 
 	const int status = MB_SUCCESS;
