@@ -35,6 +35,8 @@
 #ifndef MBNAVEDIT_MBNAVEDIT_H_
 #define MBNAVEDIT_MBNAVEDIT_H_
 
+#include <X11/Intrinsic.h>
+
 #include "mb_status.h"
 #include "mbnavedit_prog.h"
 
