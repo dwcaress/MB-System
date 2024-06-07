@@ -492,7 +492,13 @@ void do_mbnavedit_init(int argc, char **argv) {
 	status = mbnavedit_set_graphics(can_xgid, NCOLORS, mpixel_values);
 
 	/* initialize mbnavedit proper */
-	status = mbnavedit_init(argc, argv, &startup_file);
+	status = mbnavedit_init(argc, argv, &startup_file,
+				can_xgid,
+				&xg_drawline, 
+			        &xg_drawrectangle,
+				&xg_fillrectangle,
+				&xg_drawstring,
+				&xg_justify);
 
 	do_set_controls();
 
