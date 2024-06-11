@@ -58,7 +58,8 @@ int main(int argc, char *argv[]) {
 
     // QML instantiates a PixmapImage in GUI, and C++ will draw to
     // that - so register PixmapImage class with QML
-    qmlRegisterType<PixmapImage>("PixmapImage", 1, 0, "PixmapImage");    
+    qmlRegisterType<mb_system::PixmapImage>("PixmapImage", 1, 0,
+					    "PixmapImage");    
     
     engine.load(url);
 

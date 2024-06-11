@@ -114,7 +114,7 @@ protected:
   QObject *ui_;
 
   /// QML-declared PixmapImage
-  PixmapImage *swathPixmapImage_;
+  mb_system::PixmapImage *swathPixmapImage_;
   
   /// Test drawing to canvas
   bool plotTest(void);

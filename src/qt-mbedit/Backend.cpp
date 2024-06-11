@@ -109,7 +109,7 @@ bool Backend::initialize(QObject *loadedRoot, int argc, char **argv) {
 
   // Find PixmapImage in QML object tree
   swathPixmapImage_ = 
-    ui_->findChild<PixmapImage*>(SWATH_PIXMAP_NAME);
+    ui_->findChild<mb_system::PixmapImage*>(SWATH_PIXMAP_NAME);
 
   if (!swathPixmapImage_) {
     qCritical() << "Couldn't find " << SWATH_PIXMAP_NAME << " in QML";
