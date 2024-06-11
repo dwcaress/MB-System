@@ -22,7 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
-- Version 5.8.2beta06    June 3, 2024
+- Version 5.8.2beta06    June 11, 2024
 - Version 5.8.2beta05    May 19, 2024
 - Version 5.8.2beta04    May 13, 2024
 - Version 5.8.2beta02    May 1, 2024
@@ -39,7 +39,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 ---
 
-#### 5.8.2beta06 (June 3, 2024)
+#### 5.8.2beta06 (June 11, 2024)
 
 MBgrid and mbmosaic: Added an option to generate grids and mosaics in a projected 
 coordinate system defined as a Local Transverse Mercator (LTM) projection with the  origin 

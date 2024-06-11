@@ -1537,11 +1537,19 @@ int main(int argc, char **argv) {
 			else
 				snprintf(projection_id, sizeof(projection_id), "UTM%2.2dS", utm_zone);
 		}
-		 else if (strncmp(projection_pars, "LTM", 3) == 0 || strncmp(projection_pars, "ltm", 3) == 0 
+		else if (strncmp(projection_pars, "LTM", 3) == 0 || strncmp(projection_pars, "ltm", 3) == 0 
 					|| strcmp(projection_pars, "L") == 0 || strcmp(projection_pars, "l") == 0) {
-		  double reference_lon = 0.5 * (gbnd[0] + gbnd[1]);
-		  double reference_lat = 0.5 * (gbnd[2] + gbnd[3]);
-		  snprintf(projection_id, sizeof(projection_id), "LTM%.5f/%.5f", reference_lon, reference_lat);
+		  double reference_lon;
+		  double reference_lat;
+		  if (sscanf(projection_pars, "LTM%lf/%lf", &reference_lon, &reference_lat) == 2
+				|| sscanf(projection_pars, "ltm%lf/%lf", &reference_lon, &reference_lat) == 2) {
+			strncpy(projection_id, projection_pars, sizeof(projection_id));
+		  }
+		  else {
+			reference_lon = 0.5 * (gbnd[0] + gbnd[1]);
+			reference_lat = 0.5 * (gbnd[2] + gbnd[3]);
+			snprintf(projection_id, sizeof(projection_id), "LTM%.5f/%.5f", reference_lon, reference_lat);
+		  }
 		}
 		else
 			strcpy(projection_id, projection_pars);
