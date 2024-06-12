@@ -392,8 +392,8 @@ void do_mbedit_init(int argc, char **argv) {
 
   XSelectInput(theDisplay, can_xid, EV_MASK);
 
-  if (!setDrawingColors(display, &colormap, &xColors, &nXColors)) {
-    fprintf(stderr, "setDrawingColors() failed\n");
+  if (!allocateDrawingColors(display, &colormap, &xColors, &nXColors)) {
+    fprintf(stderr, "allocateDrawingColors() failed\n");
     exit(1);
   }
 
