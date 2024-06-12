@@ -311,8 +311,8 @@ void xg_setclip(void *xgid, int x, int y, int width, int height) {
 
 
 /// Allocate standard drawing colors for mb-system C/X11 apps
-bool setDrawingColors(Display *display, Colormap *colormap,
-		      XColor **xColors, int *nColors) {
+bool allocateDrawingColors(Display *display, Colormap *colormap,
+			   XColor **xColors, int *nColors) {
 
   // Allocate static XColor array
   static XColor *staticXColors;
@@ -321,16 +321,16 @@ bool setDrawingColors(Display *display, Colormap *colormap,
     (XColor *)malloc(sizeof(XColor) * NDrawingColors);
 
   if (staticXColors == NULL) {
-    fprintf(stderr, "setDrawingColors(): malloc failed\n");
+    fprintf(stderr, "allocateDrawingColors(): malloc failed\n");
     return false;
   }
 
-  // Iterate through enum of std drawing colors, allocate XColor for each.
-  // Thus the array of allocated XColors will be in the same order as the enum
+  // Iterate through DrawingColors enum, allocate XColor for each.
+  // Thus the array of allocated XColors will be in the same order as
+  // DrawingColor elements.
   XColor exactColor;
   const char *colorName;
   for (DrawingColor i = WHITE; i < NDrawingColors; i++) {
-    printf("setDrawingColors(): i = %d\n", i);
     switch (i) {
     case WHITE:
       colorName = "white";

@@ -76,8 +76,8 @@ void xg_setclip(void *xgid, int x, int y, int width, int height);
 /// @param[out] colors Allocated colors
 /// @param[out] nColors Number of allocated colors
 /// @return false if error looking up or allocating a color, else true
-bool setDrawingColors(Display *display, Colormap *colormap,
-		       XColor **colors, int *nColors);
+bool allocateDrawingColors(Display *display, Colormap *colormap,
+			   XColor **colors, int *nColors);
 
 
 #endif  /* MB_XGRAPHICS_H_ */
