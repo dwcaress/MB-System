@@ -496,14 +496,12 @@ int mbedit_init(int argc, char **argv, int *startup_file,
 }
 
 /*--------------------------------------------------------------------*/
-int mbedit_set_graphics(void *xgid, int ncol, unsigned int *pixels) {
+int mbedit_set_graphics(void *xgid, int ncol) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       xgid:         %p\n", xgid);
     fprintf(stderr, "dbg2       ncolors:      %d\n", ncol);
-    for (int i = 0; i < ncol; i++)
-      fprintf(stderr, "dbg2       pixel[%d]:     %u\n", i, pixels[i]);
   }
 
   /* set graphics id */
