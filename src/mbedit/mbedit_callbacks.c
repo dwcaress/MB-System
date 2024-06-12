@@ -205,28 +205,28 @@ static int mb_borders[4] = {0, 1016, 0, 525};
 
 /// Function passed to mbedit_prog which is WS-agnostic
 void drawLine(void *xgid, int x1, int y1, int x2, int y2,
-	      mbedit_color_t color, int style) {
+	      DrawingColor color, int style) {
 
   xg_drawline(xgid, x1, y1, x2, y2, xColors[color].pixel, style);
 }
 
 /// Function passed to mbedit_prog which is WS-agnostic
 void drawRect(void *xgid, int x1, int y1, int width, int height,
-	      mbedit_color_t color, int style) {
+	      DrawingColor color, int style) {
 
   xg_drawrectangle(xgid, x1, y1, width, height, xColors[color].pixel, style);
 }
 
 /// Function passed to mbedit_prog which is WS-agnostic
 void fillRect(void *xgid, int x1, int y1, int width, int height,
-	      mbedit_color_t color, int style) {
+	      DrawingColor color, int style) {
 
   xg_fillrectangle(xgid, x1, y1, width, height, xColors[color].pixel, style);
 }
 
 /// Function passed to mbedit_prog which is WS-agnostic
 void drawString(void *xgid, int x1, int y1, char *string,
-		mbedit_color_t color, int style) {
+		DrawingColor color, int style) {
 
   xg_drawstring(xgid, x1, y1, string, xColors[color].pixel, style);
 }
