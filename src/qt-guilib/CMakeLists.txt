@@ -60,6 +60,7 @@ set(src
     PickerInteractorStyle.cpp
     Utilities.cpp
     ClickableLabel.cpp
+    PixmapImage.cpp
     resources.qrc)
 
 add_library(MBGui ${src})
