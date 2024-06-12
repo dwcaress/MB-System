@@ -35,6 +35,8 @@
 #ifndef MBEDIT_PROG_H
 #define MBEDIT_PROG_H
 
+#include "mb_color.h"
+
 /* plot modes */
 /// Ancillary data to be plotted 
 typedef enum {
@@ -93,19 +95,6 @@ typedef enum {
   GRAB_END
   
 } MouseGrabMode;
-  
-/// Plot element colors
-typedef enum {
-    WHITE = 0,
-    BLACK = 1,
-    RED = 2,
-    GREEN = 3,
-    BLUE = 4,
-    CORAL = 5,
-    LIGHTGREY = 6,
-
-} mbedit_color_t;
-
 
 /// This source code is windowing-system-agnostic, but 
 /// accepts function pointers that interact with specific windowing system
@@ -119,21 +108,21 @@ int mbedit_init(int argc, char **argv,
 
 		/// Function to draw a line on canvas
 		void (*drawLine)(void *gPtr, int x1, int y1, int x2, int y2,
-				 mbedit_color_t color, int style),
+				 DrawingColor color, int style),
 
 		/// Function to draw a rectangle on canvas
 		void (*drawRect)(void *gPtr, int x, int y,
 				 int width, int height,
-				 mbedit_color_t color, int style),
+				 DrawingColor color, int style),
 
 		/// Draw a filled rectangle on canvvas
 		void (*fillRect)(void *gPtr, int x, int y,
 				 int width, int height,
-				 mbedit_color_t color, int style),
+				 DrawingColor color, int style),
 
 		/// Draw a string on canvas
 		void (*drawString)(void *gPtr, int x, int y, char *string,
-				   mbedit_color_t color, int style),
+				   DrawingColor color, int style),
 
 		/// Get dimensions of specified string drawn with active font
 		void (*justifyString)(void *gPtr, char *string, int *width,
@@ -168,7 +157,7 @@ int mbedit_init(int argc, char **argv,
 		);
 
 
-int mbedit_set_graphics(void *xgid, int ncol, unsigned int *pixels);
+int mbedit_set_graphics(void *xgid, int ncol);
 
 int mbedit_set_scaling(int *brdr, PlotAncillData ancillData);
 
