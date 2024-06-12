@@ -32,22 +32,22 @@ public:
   /// Complete Backend initialization, load/display swath file if
   /// specified on command line
   bool initialize(QObject *loadedRoot, int argc, char **argv);
-  
+
+
   static void drawLine(void *dummy, int x1, int y1, int x2, int y2,
-		       mbedit_color_t color, int style);
+		       DrawingColor color, int style);
   
   static void drawRect(void *dummy, int x, int y, int width, int height,
-		       mbedit_color_t color, int style);
+		       DrawingColor color, int style);
   
   static void fillRect(void *dummy, int x, int y, int width, int height,
-		       mbedit_color_t color, int style);
+		       DrawingColor color, int style);
 
   static void drawString(void *dummy, int x, int y, char *string,
-			 mbedit_color_t color, int style);
+			 DrawingColor color, int style);
   
   static void justifyString(void *dummy, char *string, int *width,
 			    int *ascent, int *descent);
-
 
   static void parseDataList(char *file, int format) {
     return;
@@ -125,16 +125,16 @@ protected:
   /// Do appropriate swath edit action at specified location, depending
   /// on edit-mode
   bool edit(double x, double y);
-  
-  /// Set QPainter pen color and style
-  static void setPenColorAndStyle(mbedit_color_t color, int style);
 
+  /// Set QPainter pen color and style
+  static void setPenColorAndStyle(DrawingColor color, int style);
+  
   /// Reset x-scale slider min/max values
   static void resetScaleXSlider(int width, int xMax,
 				int xInterval, int yInterval);
 
   /// Return color name corresponding to input mbedit_color
-  static const char *colorName(mbedit_color_t color);
+  static const char *colorName(DrawingColor color);
   
   /// Dummy first argument to canvas-drawing member funtions
   void *dummy_;
@@ -182,11 +182,11 @@ protected:
   int iCurrent_;  /// ???
   int mnPlot_;    /// ???
 
+
   /// static members are referenced by static functions whose pointers
   /// are passed to mbedit 
   static QPainter *staticPainter_;
   static QFontMetrics *staticFontMetrics_;
-
 
    
 public slots:

@@ -32,6 +32,7 @@ extern "C" {
 #define MBEDIT_OUTBOUNDS_FLAGGED 1
 #define MBEDIT_OUTBOUNDS_UNFLAGGED 2
 
+
 QPainter *Backend::staticPainter_ = nullptr;
 QFontMetrics *Backend::staticFontMetrics_ = nullptr;
 QString Backend::staticTextBuf_;
@@ -359,7 +360,7 @@ bool Backend::plotTest() {
 
 void Backend::drawLine(void *dummy,
 			  int x1, int y1, int x2, int y2,
-			  mbedit_color_t color, int style) {
+			  DrawingColor color, int style) {
 
   setPenColorAndStyle(color, style);
   
@@ -369,7 +370,7 @@ void Backend::drawLine(void *dummy,
 
 void Backend::drawRect(void *dummy,
 			  int x, int y, int width, int height,
-			  mbedit_color_t color, int style) {
+			  DrawingColor color, int style) {
 
   setPenColorAndStyle(color, style);
 
@@ -378,7 +379,7 @@ void Backend::drawRect(void *dummy,
 
 
 void Backend::drawString(void *dummy, int x, int y, char *string,
-			    mbedit_color_t color, int style) {
+			    DrawingColor color, int style) {
 
   QString textBuf;
   QTextStream(&textBuf) << string;
@@ -389,7 +390,7 @@ void Backend::drawString(void *dummy, int x, int y, char *string,
 
 void Backend::fillRect(void *dummy,
 			  int x, int y, int width, int height,
-			  mbedit_color_t color, int style) {
+			  DrawingColor color, int style) {
 
   setPenColorAndStyle(color, style);
 
@@ -407,7 +408,8 @@ void Backend::justifyString(void *dummy, char *string,
   *descent = staticFontMetrics_->descent();
 }
 
-const char *Backend::colorName(mbedit_color_t color) {
+
+const char *Backend::colorName(DrawingColor color) {
   switch (color) {
   case WHITE:
     return "white";
@@ -424,6 +426,12 @@ const char *Backend::colorName(mbedit_color_t color) {
   case BLUE:
     return "blue";
 
+  case ORANGE:
+    return "orange";
+
+  case PURPLE:
+    return "purple";
+    
   case CORAL:
     return "coral";
 
@@ -431,7 +439,7 @@ const char *Backend::colorName(mbedit_color_t color) {
     return "lightGray";
 
   default:
-    std::cerr << "colorName(): unknown fill color!\n";
+    std::cerr << "colorName(): unknown color!\n";
     return "black";
   }  
 
@@ -439,7 +447,7 @@ const char *Backend::colorName(mbedit_color_t color) {
 
 
 
-void Backend::setPenColorAndStyle(mbedit_color_t color, int style) {
+void Backend::setPenColorAndStyle(DrawingColor color, int style) {
 
 
   if (style == XG_DASHLINE) {
@@ -451,9 +459,6 @@ void Backend::setPenColorAndStyle(mbedit_color_t color, int style) {
   staticPainter_->setPen(colorName(color));
   
 }
-
-
-
 
 
 void Backend::resetScaleXSlider(int width, int xMax,
