@@ -195,11 +195,9 @@ int key_s_down = 0;
 int key_a_down = 0;
 int key_d_down = 0;
 
-/* Set the colors used for this program here. */
-#define NCOLORS 7
-XColor colors[NCOLORS];
-unsigned int mpixel_values[NCOLORS];
-XColor db_color;
+// Array of drawing colors
+XColor *xColors;
+int nXColors;
 
 /* Set these to the dimensions of your canvas drawing */
 /* area, minus 1, located in mbedit.uil.              */
@@ -209,28 +207,28 @@ static int mb_borders[4] = {0, 1016, 0, 525};
 void drawLine(void *xgid, int x1, int y1, int x2, int y2,
 	      mbedit_color_t color, int style) {
 
-  xg_drawline(xgid, x1, y1, x2, y2, mpixel_values[color], style);
+  xg_drawline(xgid, x1, y1, x2, y2, xColors[color].pixel, style);
 }
 
 /// Function passed to mbedit_prog which is WS-agnostic
 void drawRect(void *xgid, int x1, int y1, int width, int height,
 	      mbedit_color_t color, int style) {
 
-  xg_drawrectangle(xgid, x1, y1, width, height, mpixel_values[color], style);
+  xg_drawrectangle(xgid, x1, y1, width, height, xColors[color].pixel, style);
 }
 
 /// Function passed to mbedit_prog which is WS-agnostic
 void fillRect(void *xgid, int x1, int y1, int width, int height,
 	      mbedit_color_t color, int style) {
 
-  xg_fillrectangle(xgid, x1, y1, width, height, mpixel_values[color], style);
+  xg_fillrectangle(xgid, x1, y1, width, height, xColors[color].pixel, style);
 }
 
 /// Function passed to mbedit_prog which is WS-agnostic
 void drawString(void *xgid, int x1, int y1, char *string,
 		mbedit_color_t color, int style) {
 
-  xg_drawstring(xgid, x1, y1, string, mpixel_values[color], style);
+  xg_drawstring(xgid, x1, y1, string, xColors[color].pixel, style);
 }
 
 /// Function passed to mbedit_prog which is WS-agnostic
@@ -394,36 +392,9 @@ void do_mbedit_init(int argc, char **argv) {
 
   XSelectInput(theDisplay, can_xid, EV_MASK);
 
-  /* Load the colors that will be used in this program. */
-  status = XLookupColor(display, colormap, "white", &db_color, &colors[0]);
-  if ((status = XAllocColor(display, colormap, &colors[0])) == 0)
-    fprintf(stderr, "Failure to allocate color: white\n");
-  status = XLookupColor(display, colormap, "black", &db_color, &colors[1]);
-  if ((status = XAllocColor(display, colormap, &colors[1])) == 0)
-    fprintf(stderr, "Failure to allocate color: black\n");
-#ifdef USE_ORANGE
-  status = XLookupColor(display, colormap, "orange", &db_color, &colors[2]);
-  if ((status = XAllocColor(display, colormap, &colors[2])) == 0)
-    fprintf(stderr, "Failure to allocate color: orange\n");
-#else
-  status = XLookupColor(display, colormap, "red", &db_color, &colors[2]);
-  if ((status = XAllocColor(display, colormap, &colors[2])) == 0)
-    fprintf(stderr, "Failure to allocate color: red\n");
-#endif
-  status = XLookupColor(display, colormap, "green", &db_color, &colors[3]);
-  if ((status = XAllocColor(display, colormap, &colors[3])) == 0)
-    fprintf(stderr, "Failure to allocate color: green\n");
-  status = XLookupColor(display, colormap, "blue", &db_color, &colors[4]);
-  if ((status = XAllocColor(display, colormap, &colors[4])) == 0)
-    fprintf(stderr, "Failure to allocate color: blue\n");
-  status = XLookupColor(display, colormap, "coral", &db_color, &colors[5]);
-  if ((status = XAllocColor(display, colormap, &colors[5])) == 0)
-    fprintf(stderr, "Failure to allocate color: coral\n");
-  status = XLookupColor(display, colormap, "lightgrey", &db_color, &colors[6]);
-  if ((status = XAllocColor(display, colormap, &colors[6])) == 0)
-    fprintf(stderr, "Failure to allocate color: lightgrey\n");
-  for (int i = 0; i < NCOLORS; i++) {
-    mpixel_values[i] = colors[i].pixel;
+  if (!setDrawingColors(display, &colormap, &xColors, &nXColors)) {
+    fprintf(stderr, "setDrawingColors() failed\n");
+    exit(1);
   }
 
   /* Setup initial cursor. This will be changed when changing "MODE". */
@@ -436,7 +407,7 @@ void do_mbedit_init(int argc, char **argv) {
   /* initialize graphics */
   xg_init(theDisplay, can_xid, mb_borders, xgfont, &can_xgid);
 
-  status = mbedit_set_graphics(can_xgid, NCOLORS, mpixel_values);
+  status = mbedit_set_graphics(can_xgid, nXColors);
   status = mbedit_set_scaling(mb_borders, mshow_time);
 
   /* initialize mbedit proper */
