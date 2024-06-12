@@ -1,5 +1,7 @@
 #include "PixmapImage.h"
 
+using namespace mb_system;
+
 PixmapImage::PixmapImage(QQuickItem *parent) :
   QQuickPaintedItem(parent) {
 }
