@@ -34,7 +34,10 @@ set(CMAKE_AUTOUIC ON)
 add_executable(qt-mbedit Backend.cpp Emitter.cpp GuiNames.cpp 
 	       main.cpp qml.qrc)
 
+target_include_directories(qt-mbedit PUBLIC ${CMAKE_SOURCE_DIR}/src/mbaux)
+				 
+
 target_link_libraries(qt-mbedit PRIVATE MBGui Qt5::Core Qt5::Quick
-                      mbeditLib mbio mbaux)
+                      mbeditLib mbio)
 
 install(TARGETS qt-mbedit DESTINATION ${CMAKE_INSTALL_BINDIR})

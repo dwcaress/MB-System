@@ -16,6 +16,7 @@
 #include <QMetaObject>
 #include <QQmlProperty>
 #include <QFont>
+#include "PixmapDrawer.h"
 #include "Backend.h"
 #include "GuiNames.h"
 
@@ -24,22 +25,14 @@ extern "C" {
 #include "mbedit_prog.h"
 }
 
-#define XG_SOLIDLINE 0
-#define XG_DASHLINE 1
-
 /* edit outbounds defines */
 #define MBEDIT_OUTBOUNDS_NONE 0
 #define MBEDIT_OUTBOUNDS_FLAGGED 1
 #define MBEDIT_OUTBOUNDS_UNFLAGGED 2
 
-
-QPainter *Backend::staticPainter_ = nullptr;
-QFontMetrics *Backend::staticFontMetrics_ = nullptr;
-QString Backend::staticTextBuf_;
-
 Emitter Backend::staticEmitter_;
 
-/// using namespace mb_system;
+using namespace mb_system;
 
 Backend::Backend(int argc, char **argv) {
 
@@ -60,9 +53,7 @@ Backend::Backend(int argc, char **argv) {
   painter_->setFont(myFont);
 
   // Keep static reference to painter for use by static member functions
-  staticPainter_ = painter_;
-
-  staticFontMetrics_ = new QFontMetrics(painter_->font());
+  PixmapDrawer::setPainter(painter_);
 
   /// Hard-coded in mbedit_callbacks; should loosen this restriction
   int cSize[4] = {0, 1016, 0, 525};  
@@ -72,11 +63,11 @@ Backend::Backend(int argc, char **argv) {
   
   mbedit_init(argc, argv, &inputSpecd,
 	      nullptr,
-	      &Backend::drawLine,
-	      &Backend::drawRect,
-	      &Backend::fillRect,
-	      &Backend::drawString,
-	      &Backend::justifyString,
+	      &PixmapDrawer::drawLine,
+	      &PixmapDrawer::drawRect,
+	      &PixmapDrawer::fillRect,
+	      &PixmapDrawer::drawString,
+	      &PixmapDrawer::justifyString,
 	      &Backend::parseDataList,
 	      &Backend::showError,
 	      &Backend::showMessage,
@@ -323,28 +314,32 @@ bool Backend::plotTest() {
   painter_->eraseRect(0, 0, canvasPixmap_->width(), canvasPixmap_->height());
 
   //// TEST TEST TEST
-  fillRect(dummy_, 0, 0, canvasPixmap_->width(), canvasPixmap_->height(),
-	   WHITE, XG_SOLIDLINE);
+  PixmapDrawer::fillRect(dummy_, 0, 0, canvasPixmap_->width(),
+			 canvasPixmap_->height(),
+			 WHITE, SOLID_LINE);
 
-  fillRect(dummy_, 100, 100,
-	   canvasPixmap_->width()-200, canvasPixmap_->height()-200,
-	   RED, XG_SOLIDLINE);  
+  PixmapDrawer::fillRect(dummy_, 100, 100,
+			 canvasPixmap_->width()-200,
+			 canvasPixmap_->height()-200,
+			 RED, SOLID_LINE);  
 
-  drawLine(dummy_, 0, 0, canvasPixmap_->width(), canvasPixmap_->height(),
-	   BLACK, XG_SOLIDLINE);
+  PixmapDrawer::drawLine(dummy_, 0, 0, canvasPixmap_->width(),
+			 canvasPixmap_->height(),
+			 BLACK, SOLID_LINE);
 
-  drawLine(dummy_, canvasPixmap_->width(), 0, 0, canvasPixmap_->height(),
-	   GREEN, XG_DASHLINE);  
+  PixmapDrawer::drawLine(dummy_, canvasPixmap_->width(), 0, 0,
+			 canvasPixmap_->height(),
+			 GREEN, DASH_LINE);  
 
-  drawString(dummy_, 100, 100, (char *)"hello sailor!",
-	     BLACK, XG_SOLIDLINE);
+  PixmapDrawer::drawString(dummy_, 100, 100, (char *)"this is coral",
+			   CORAL, SOLID_LINE);
 
-  drawString(dummy_, 300, 100, (char *)"BLUE!",
-	     BLUE, XG_SOLIDLINE);
+  PixmapDrawer::drawString(dummy_, 300, 100, (char *)"BLUE!",
+			   BLUE, SOLID_LINE);
 
 
-  drawString(dummy_, 400, 100, (char *)"GREEN",
-	     GREEN, XG_SOLIDLINE);    
+  PixmapDrawer::drawString(dummy_, 400, 100, (char *)"PURPLE",
+			   PURPLE, SOLID_LINE);    
 
   // Update GUI
   qDebug() << "TBD: Update GUI";
@@ -353,111 +348,6 @@ bool Backend::plotTest() {
   
   
   return true;
-}
-
-
-
-
-void Backend::drawLine(void *dummy,
-			  int x1, int y1, int x2, int y2,
-			  DrawingColor color, int style) {
-
-  setPenColorAndStyle(color, style);
-  
-  staticPainter_->drawLine(x1, y1, x2, y2);
-}
-
-
-void Backend::drawRect(void *dummy,
-			  int x, int y, int width, int height,
-			  DrawingColor color, int style) {
-
-  setPenColorAndStyle(color, style);
-
-  staticPainter_->drawRect(x, y, width, height);
-}
-
-
-void Backend::drawString(void *dummy, int x, int y, char *string,
-			    DrawingColor color, int style) {
-
-  QString textBuf;
-  QTextStream(&textBuf) << string;
-  setPenColorAndStyle(color, style);
-  staticPainter_->drawText(x, y, textBuf);
-}
-
-
-void Backend::fillRect(void *dummy,
-			  int x, int y, int width, int height,
-			  DrawingColor color, int style) {
-
-  setPenColorAndStyle(color, style);
-
-  // Set fill color
-  staticPainter_->fillRect(x, y, width, height, colorName(color));
-}
-
-
-
-void Backend::justifyString(void *dummy, char *string,
-			       int *width, int *ascent, int *descent) {
-
-  *width = staticFontMetrics_->width(string);
-  *ascent = staticFontMetrics_->ascent();
-  *descent = staticFontMetrics_->descent();
-}
-
-
-const char *Backend::colorName(DrawingColor color) {
-  switch (color) {
-  case WHITE:
-    return "white";
-
-  case BLACK:
-    return "black";
-
-  case RED:
-    return "red";
-
-  case GREEN:
-    return "green";
-    
-  case BLUE:
-    return "blue";
-
-  case ORANGE:
-    return "orange";
-
-  case PURPLE:
-    return "purple";
-    
-  case CORAL:
-    return "coral";
-
-  case LIGHTGREY:
-    return "lightGray";
-
-  default:
-    std::cerr << "colorName(): unknown color!\n";
-    return "black";
-  }  
-
-}
-
-
-
-void Backend::setPenColorAndStyle(DrawingColor color, int style) {
-
-
-  if (style == XG_DASHLINE) {
-    staticPainter_->setPen(Qt::DashLine);
-  }
-  else {
-    staticPainter_->setPen(Qt::SolidLine);    
-  }
-  staticPainter_->setPen(colorName(color));
-  
 }
 
 
