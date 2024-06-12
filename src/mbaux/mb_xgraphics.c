@@ -308,3 +308,86 @@ void xg_setclip(void *xgid, int x, int y, int width, int height) {
 	XSetClipRectangles(graphic->dpy, graphic->gc_solid, 0, 0, rectangle, 1, Unsorted);
 	XSetClipRectangles(graphic->dpy, graphic->gc_dash, 0, 0, rectangle, 1, Unsorted);
 }
+
+
+/// Allocate standard drawing colors for mb-system C/X11 apps
+bool setDrawingColors(Display *display, Colormap *colormap,
+		      XColor **xColors, int *nColors) {
+
+  // Allocate static XColor array
+  static XColor *staticXColors;
+
+  staticXColors =
+    (XColor *)malloc(sizeof(XColor) * NDrawingColors);
+
+  if (staticXColors == NULL) {
+    fprintf(stderr, "setDrawingColors(): malloc failed\n");
+    return false;
+  }
+
+  // Iterate through enum of std drawing colors, allocate XColor for each.
+  // Thus the array of allocated XColors will be in the same order as the enum
+  XColor exactColor;
+  const char *colorName;
+  for (DrawingColor i = White; i < NDrawingColors; i++) {
+    printf("setDrawingColors(): i = %d\n", i);
+    switch (i) {
+    case White:
+      colorName = "white";
+      break;
+
+    case Black:
+      colorName = "black";
+      break;
+
+    case Red:
+      colorName = "red";
+      break;
+
+    case Green:
+      colorName = "green";
+      break;
+
+    case Blue:
+      colorName = "blue";
+      break;
+
+    case Orange:
+      colorName = "orange";
+      break;
+
+    case Purple:
+      colorName = "purple";
+      break;
+
+    case Coral:
+      colorName = "coral";
+      break;
+
+    case LightGrey:
+      colorName = "lightgrey";
+      break;
+
+    default:
+      fprintf(stderr, "Unhandled DrawingColor: %d\n", i);
+      return false;
+    }
+
+    // Lookup color by name
+    if (!XLookupColor(display, *colormap, colorName,
+		      &exactColor, &staticXColors[i])) {
+      fprintf(stderr, "XLookupColor() failed for %s\n", colorName);
+      return false;
+    }
+    
+    // Allocate the color
+    if (!XAllocColor(display, *colormap, &staticXColors[i])) {
+      fprintf(stderr, "XAllocColor() failed for %s\n", colorName);
+      return false;
+    }    
+  }
+  
+  *nColors = NDrawingColors;
+  *xColors = staticXColors;
+  return true;
+}

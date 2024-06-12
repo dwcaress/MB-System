@@ -31,6 +31,9 @@
 #ifndef MB_XGRAPHICS_H_
 #define MB_XGRAPHICS_H_
 
+#include <stdbool.h>
+#include "mb_color.h"
+
 /* xgraphics defines */
 #define XG_SOLIDLINE 0
 #define XG_DASHLINE 1
@@ -51,6 +54,7 @@ struct xg_graphic {
 	XFontStruct *font_info; /* XFontStruct pointer */
 };
 
+
 /* xgraphics function prototypes */
 void xg_init(Display *display, Window can_xid, int *can_bounds, char *fontname, void **xgid);
 void xg_free(void *xgid);
@@ -63,5 +67,17 @@ void xg_filltriangle(void *xgid, int x1, int y1, int x2, int y2, int x3, int y3,
 void xg_drawstring(void *xgid, int x, int y, char *string, unsigned int pixel, int style);
 void xg_justify(void *xgid, char *string, int *width, int *ascent, int *descent);
 void xg_setclip(void *xgid, int x, int y, int width, int height);
+
+
+/// Allocate standard drawing colors for mb-system C/X11 apps
+/// Returns false on error, else true, with colors and nColors set
+/// @param[in] display  XWindows Display
+/// @param[in] colormap XWindows ColorMap
+/// @param[out] colors Allocated colors
+/// @param[out] nColors Number of allocated colors
+/// @return false if error looking up or allocating a color, else true
+bool setDrawingColors(Display *display, Colormap *colormap,
+		       XColor **colors, int *nColors);
+
 
 #endif  /* MB_XGRAPHICS_H_ */
