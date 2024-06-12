@@ -33,16 +33,16 @@ public:
   }
   
   static void drawLine(void *dummy, int x1, int y1, int x2, int y2,
-		       mbedit_color_t color, int style);
+		       DrawingColor color, int style);
   
   static void drawRect(void *dummy, int x, int y, int width, int height,
-		       mbedit_color_t color, int style);
+		       DrawingColor color, int style);
   
   static void fillRect(void *dummy, int x, int y, int width, int height,
-		       mbedit_color_t color, int style);
+		       DrawingColor color, int style);
 
   static void drawString(void *dummy, int x, int y, char *string,
-			 mbedit_color_t color, int style);
+			 DrawingColor color, int style);
   
   static void justifyString(void *dummy, char *string, int *width,
 			    int *ascent, int *descent);
@@ -98,14 +98,14 @@ protected:
   bool plotSwath(void);
 
   /// Set QPainter pen color and style
-  static void setPenColorAndStyle(mbedit_color_t color, int style);
+  static void setPenColorAndStyle(DrawingColor color, int style);
 
   /// Reset x-scale slider min/max values
   static void resetScaleXSlider(int width, int xMax,
 				int xInterval, int yInterval);
 
   /// Return color name corresponding to input mbedit_color
-  static const char *colorName(mbedit_color_t color);
+  static const char *colorName(DrawingColor color);
   
   /// Dummy first argument to canvas-drawing member funtions
   void *dummy_;
