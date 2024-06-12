@@ -329,42 +329,42 @@ bool setDrawingColors(Display *display, Colormap *colormap,
   // Thus the array of allocated XColors will be in the same order as the enum
   XColor exactColor;
   const char *colorName;
-  for (DrawingColor i = White; i < NDrawingColors; i++) {
+  for (DrawingColor i = WHITE; i < NDrawingColors; i++) {
     printf("setDrawingColors(): i = %d\n", i);
     switch (i) {
-    case White:
+    case WHITE:
       colorName = "white";
       break;
 
-    case Black:
+    case BLACK:
       colorName = "black";
       break;
 
-    case Red:
+    case RED:
       colorName = "red";
       break;
 
-    case Green:
+    case GREEN:
       colorName = "green";
       break;
 
-    case Blue:
+    case BLUE:
       colorName = "blue";
       break;
 
-    case Orange:
+    case ORANGE:
       colorName = "orange";
       break;
 
-    case Purple:
+    case PURPLE:
       colorName = "purple";
       break;
 
-    case Coral:
+    case CORAL:
       colorName = "coral";
       break;
 
-    case LightGrey:
+    case LIGHTGREY:
       colorName = "lightgrey";
       break;
 
