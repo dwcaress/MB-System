@@ -23,4 +23,10 @@ typedef enum {
 } DrawingColor;
 
 
+typedef enum {
+  SOLID_LINE = 0,
+  DASH_LINE
+  
+} LineStyle;
+
 #endif
