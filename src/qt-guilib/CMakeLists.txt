@@ -60,6 +60,7 @@ set(src
     PickerInteractorStyle.cpp
     Utilities.cpp
     ClickableLabel.cpp
+    PixmapDrawer.cpp
     PixmapImage.cpp
     resources.qrc)
 
@@ -71,7 +72,8 @@ if (APPLE)
                   "-undefined dynamic_lookup -flat_namespace")
 endif (APPLE)
 
-target_include_directories(MBGui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(MBGui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+				 ${CMAKE_SOURCE_DIR}/src/mbaux)
 target_link_libraries(
   MBGui
   PRIVATE Qt5::Core Qt5::Quick mbio mbeditvizlib
