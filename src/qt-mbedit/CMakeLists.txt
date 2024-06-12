@@ -35,6 +35,6 @@ add_executable(qt-mbedit Backend.cpp Emitter.cpp GuiNames.cpp
 	       main.cpp qml.qrc)
 
 target_link_libraries(qt-mbedit PRIVATE MBGui Qt5::Core Qt5::Quick
-                      mbeditLib mbio)
+                      mbeditLib mbio mbaux)
 
 install(TARGETS qt-mbedit DESTINATION ${CMAKE_INSTALL_BINDIR})
