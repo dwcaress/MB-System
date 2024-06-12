@@ -8,15 +8,15 @@ E.g. Do NOT reference X11 headers or structures within this file.
 
 /// Standard mb-system drawing colors
 typedef enum {
-  White = 0,
-  Black,
-  Red,
-  Green,
-  Blue,
-  Orange,
-  Purple,
-  Coral,
-  LightGrey,
+  WHITE = 0,
+  BLACK,
+  RED,
+  GREEN,
+  BLUE,
+  ORANGE,
+  PURPLE,
+  CORAL,
+  LIGHTGREY,
   
   NDrawingColors
 
