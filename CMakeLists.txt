@@ -205,6 +205,7 @@ message("CMAKE_C_FLAGS: ${CMAKE_C_FLAGS}")
 message("CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 message("CMAKE_INSTALL_RPATH: ${CMAKE_INSTALL_RPATH}")
 message("CMAKE_MACOSX_RPATH: ${CMAKE_MACOSX_RPATH}")
+message(OTPS directory: ${otpsDir})
 
 # For debugging: print all set variables
 message("----------------------------------------------------------")
