@@ -19,6 +19,11 @@ int mbnavedit_init(int argc, char **argv, bool *startup_file,
 					    int *width,
 					    int *ascent, int *descent));
 
+
+int mbnavedit_set_graphics(void *xgid, int ncol);
+
+int mbnavedit_init_globals(void);
+  
 int mbnavedit_clear_screen(void);
 
 int mbnavedit_action_open(bool useprevious);

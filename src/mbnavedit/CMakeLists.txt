@@ -30,6 +30,8 @@ find_package(Motif REQUIRED)
 add_executable(mbnavedit mbnavedit.c mbnavedit_callbacks.c mbnavedit_creation.c
                          mbnavedit_prog.c mbnavedit_util.c)
 
+target_include_directories(mbnavedit PUBLIC ${CMAKE_SOURCE_DIR}/src/mbaux)
+
 target_link_libraries(mbnavedit PRIVATE mbaux mbxgr
                             ${MOTIF_LIBRARIES}
 			    ${X11_LIBRARIES}
