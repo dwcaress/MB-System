@@ -60,6 +60,7 @@ set(src
     PickerInteractorStyle.cpp
     Utilities.cpp
     ClickableLabel.cpp
+    Emitter.cpp
     PixmapDrawer.cpp
     PixmapImage.cpp
     resources.qrc)
