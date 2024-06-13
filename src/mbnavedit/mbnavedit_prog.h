@@ -1,23 +1,55 @@
 #ifndef MBNAVEDIT_PROG_H
 #define MBNAVEDIT_PROG_H
 
+#include "mb_color.h"
 
 int mbnavedit_init(int argc, char **argv, bool *startup_file,
+		   /// graphics context pointer for use by referenced
+		   /// graphics function (may be null)
 		   void *gPtr,
-		   void (*drawLineArg)(void *gPtr, int x1, int y1,
-				       int x2, int y2,
-				       unsigned int color, int style),
-		   void (*drawRectArg)(void *gPtr, int x, int y,
-				       int width, int height,
-				       unsigned int color, int style),
-		   void (*fillRectArg)(void *gPtr, int x, int y,
-				       int width, int height,
-				       unsigned int color, int style),
-		   void (*drawStringArg)(void *gPtr, int x, int y, char *string,
-					 unsigned int color, int style),
-		   void (*justifyStringArg)(void *gPtr, char *string,
-					    int *width,
-					    int *ascent, int *descent));
+
+		   /// Function to draw a line on canvas
+		   void (*drawLine)(void *gPtr, int x1, int y1, int x2, int y2,
+				    DrawingColor color, int style),
+
+		   /// Function to draw a rectangle on canvas
+		   void (*drawRect)(void *gPtr, int x, int y,
+				    int width, int height,
+				    DrawingColor color, int style),
+
+		   /// Draw a filled rectangle on canvvas
+		   void (*fillRect)(void *gPtr, int x, int y,
+				    int width, int height,
+				    DrawingColor color, int style),
+
+		   /// Draw a string on canvas
+		   void (*drawString)(void *gPtr, int x, int y, char *string,
+				      DrawingColor color, int style),
+
+		   /// Get dimensions of specified string drawn with active font
+		   void (*justifyString)(void *gPtr, char *string, int *width,
+					 int *ascent, int *descent),
+
+		   /// Prepare for specified input file
+		   void (*prepForInputFile)(char *file, int format),
+
+		   /// Display error messages (e.g. with dialog)
+		   int (*showError)(char *s1, char *s2, char *s3),
+
+		   /// Display a message (e.g. with dialog)
+		   int (*showMessage)(char *),
+
+		   /// Hide message dialog
+		   int (*hideMessage)(void),
+
+		   /// Enable GUI element that specified input file
+		   void (*enableFileButton)(void),
+
+		   /// Disable GUI element that specified input file		
+		   void (*disableFileButton)(void),
+
+		   void (*setUielements)(void));
+
 
 
 int mbnavedit_set_graphics(void *xgid, int ncol);

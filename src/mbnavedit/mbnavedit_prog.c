@@ -231,6 +231,27 @@ static void (*drawString)(void *gPtr, int x, int y, char *string,
 static void (*justifyString)(void *gPtr, char *string, int *width,
                              int *ascent, int *descent);
 
+/// Prepare to process input file (or files from datalist)
+static int (*prepForInputFile)(char *file, int format);
+
+/// Show error, consisting of three strings
+int (*showError)(char *s1, char *s2, char *s3);
+
+/// Display a message (e.g. with dialog)
+int (*showMessage)(char *);
+
+/// Hide message dialog
+int (*hideMessage)(void);
+
+/// Enable GUI element that specified input file
+void (*enableFileButton)(void);
+
+/// Disable GUI element that specified input file		
+void (*disableFileButton)(void);
+
+/// Set UI to reflect parameter state
+void (*setUiElements)(void);
+
 
 /*--------------------------------------------------------------------*/
 int mbnavedit_init_globals(void) {
@@ -324,7 +345,15 @@ int mbnavedit_init(int argc, char **argv, bool *startup_file,
 					 unsigned int color, int style),
 		   void (*justifyStringArg)(void *gPtr, char *string,
 					    int *width,
-					    int *ascent, int *descent)) {
+					    int *ascent, int *descent),
+		   void (*prepForInputFileArg)(char *file, int format),
+		   int (*showErrorArg)(char *s1, char *s2, char *s3),
+		   int (*showMessageArg)(char *),
+		   int (*hideMessageArg)(void),
+		   void (*enableFileButtonArg)(void),
+		   void (*disableFileButtonArg)(void),
+		   void (setUiElementsArg)(void)
+		   ) {
   
   mbnavedit_xgid = gPtr;
   drawLine = drawLineArg;
@@ -332,7 +361,13 @@ int mbnavedit_init(int argc, char **argv, bool *startup_file,
   fillRectangle = fillRectArg;
   drawString = drawStringArg;
   justifyString = justifyStringArg;
-
+  showError = showErrorArg;
+  showMessage = showMessageArg;
+  hideMessage = hideMessageArg;
+  enableFileButton = enableFileButtonArg;
+  disableFileButton = disableFileButtonArg;
+  setUiElements = setUiElementsArg;
+  
   int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
   status = mb_uselockfiles(verbose, &uselockfiles);
   pings = 1;
@@ -403,7 +438,7 @@ int mbnavedit_init(int argc, char **argv, bool *startup_file,
     case 'I':
     case 'i':
       sscanf(optarg, "%s", ifile);
-      do_parse_datalist(ifile, format);
+      (*prepForInputFile)(ifile, format);
       fileflag++;
       break;
     case 'N':
@@ -520,7 +555,7 @@ int mbnavedit_action_open(bool useprevious) {
     data_show_size = 0;
 
     /* turn file button off */
-    do_filebutton_off();
+    (*disableFileButton)();
 
     /* now plot it */
     status = mbnavedit_plot_all();
@@ -528,7 +563,7 @@ int mbnavedit_action_open(bool useprevious) {
 
   /* if no data read show error dialog */
   else
-    do_error_dialog("No data were read from the input", "file. You may have specified an", "incorrect MB-System format id!");
+    (*showError)("No data were read from the input", "file. You may have specified an", "incorrect MB-System format id!");
 
   /* reset data_save */
   data_save = false;
@@ -583,7 +618,7 @@ int mbnavedit_open_file(bool useprevious) {
   char lock_date[25];
 
   /* reset message */
-  do_message_on("MBedit is opening a data file...");
+  (*showMessage)("MBedit is opening a data file...");
 
   /* get format if required */
   if (format == 0) {
@@ -618,7 +653,7 @@ int mbnavedit_open_file(bool useprevious) {
   /* if locked let the user know file can't be opened */
   if (status == MB_FAILURE) {
     /* turn off message */
-    do_message_off();
+    (*hideMessage)();
 
     /* if locked get lock info */
     if (error == MB_ERROR_FILE_LOCKED) {
@@ -646,7 +681,7 @@ int mbnavedit_open_file(bool useprevious) {
     }
 
     /* put up error dialog */
-    do_error_dialog(error1, error2, error3);
+    (*showError)(error1, error2, error3);
   }
 
   /* if successfully locked (or lock ignored) proceed */
@@ -664,7 +699,7 @@ int mbnavedit_open_file(bool useprevious) {
       /* const int shellstatus = */ system(command);
       fstat = stat(ifile_use, &file_status);
       if (fstat != 0 || (file_status.st_mode & S_IFMT) == S_IFDIR) {
-	do_error_dialog("Unable to copy previously edited", "navigation. You may not have read",
+	(*showError)("Unable to copy previously edited", "navigation. You may not have read",
 			"permission in this directory!");
 	status = MB_FAILURE;
 	return (status);
@@ -693,7 +728,7 @@ int mbnavedit_open_file(bool useprevious) {
       fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
       fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", ifile);
       status = MB_FAILURE;
-      do_error_dialog("Unable to open input file.", "You may not have read", "permission in this directory!");
+      (*showError)("Unable to open input file.", "You may not have read", "permission in this directory!");
       return (status);
     }
 
@@ -754,7 +789,7 @@ int mbnavedit_open_file(bool useprevious) {
       else {
 	nfile_open = false;
 	fprintf(stderr, "\nUnable to open new nav save file %s\n", nfile);
-	do_error_dialog("Unable to open new nav edit save file.", "You may not have write",
+	(*showError)("Unable to open new nav edit save file.", "You may not have write",
 			"permission in this directory!");
       }
     }
@@ -778,7 +813,7 @@ int mbnavedit_open_file(bool useprevious) {
   }
 
   /* turn off message */
-  do_message_off();
+  (*hideMessage)();
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -797,7 +832,7 @@ int mbnavedit_close_file(void) {
   }
 
   /* reset message */
-  do_message_on("MBedit is closing a data file...");
+  (*showMessage)("MBedit is closing a data file...");
 
   /* close the files */
   int status = mb_close(verbose, &imbio_ptr, &error);
@@ -822,7 +857,7 @@ int mbnavedit_close_file(void) {
     /* run mbprocess if desired */
     if (run_mbprocess) {
       /* turn message on */
-      do_message_on("Navigation edits being applied using mbprocess...");
+      (*showMessage)("Navigation edits being applied using mbprocess...");
 
       /* run mbprocess */
       char command[MB_PATH_MAXLINE+100];
@@ -835,7 +870,7 @@ int mbnavedit_close_file(void) {
       /* const int shellstatus = */ system(command);
 
       /* turn message off */
-      do_message_off();
+      (*hideMessage)();
     }
   }
 
@@ -862,10 +897,10 @@ int mbnavedit_close_file(void) {
   offset_lat_applied = offset_lat;
 
   /* turn file button on */
-  do_filebutton_on();
+  (*enableFileButton)();
 
   /* turn off message */
-  do_message_off();
+  (*hideMessage)();
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -901,7 +936,7 @@ int mbnavedit_dump_data(int hold) {
   ndump = 0;
   if (nbuff > 0) {
     /* turn message on */
-    do_message_on("MBnavedit is clearing data...");
+    (*showMessage)("MBnavedit is clearing data...");
 
     /* copy data to be held */
     for (int iping = 0; iping < hold; iping++) {
@@ -911,7 +946,7 @@ int mbnavedit_dump_data(int hold) {
     nbuff = hold;
 
     /* turn message off */
-    do_message_off();
+    (*hideMessage)();
   }
   ndump_total += ndump;
 
@@ -955,7 +990,7 @@ int mbnavedit_load_data(void) {
   timestamp_problem = false;
   char string[MB_PATH_MAXLINE];
   sprintf(string, "MBnavedit: %d records loaded so far...", nload);
-  do_message_on(string);
+  (*showMessage)(string);
 
   /* load data */
   int status = MB_SUCCESS;
@@ -1038,7 +1073,7 @@ int mbnavedit_load_data(void) {
 	/* update message every 250 records */
 	if (nload % 250 == 0) {
 	  sprintf(string, "MBnavedit: %d records loaded so far...", nload);
-	  do_message_on(string);
+	  (*showMessage)(string);
 	}
       }
     } while (error <= MB_ERROR_NO_ERROR && nbuff < MBNAVEDIT_BUFFER_SIZE);
@@ -1094,7 +1129,7 @@ int mbnavedit_load_data(void) {
   mbnavedit_get_model();
 
   /* turn message off */
-  do_message_off();
+  (*hideMessage)();
 
   /* print out information */
   if (verbose >= 1) {
@@ -1106,12 +1141,12 @@ int mbnavedit_load_data(void) {
 
   /* put up warning if timestamp problem detected */
   if (timestamp_problem) {
-    do_error_dialog("Duplicate or reverse order time", "stamps detected!! Time interpolation",
+    (*showError)("Duplicate or reverse order time", "stamps detected!! Time interpolation",
 		    "available under Controls menu.");
   }
 
   /* update controls */
-  do_set_controls();
+  (*setUiElements)();
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -3552,7 +3587,7 @@ int mbnavedit_get_inversion(void) {
     /* set message */
     char string[MB_PATH_MAXLINE];
     sprintf(string, "Setting up inversion of %d longitude points", nplot);
-    do_message_on(string);
+    (*showMessage)(string);
 
     /* initialize arrays */
     for (int i = 0; i < nrows; i++) {
@@ -3632,7 +3667,7 @@ int mbnavedit_get_inversion(void) {
 
     /* set message */
     sprintf(string, "Inverting %dX%d for smooth longitude...", nc, nr);
-    do_message_on(string);
+    (*showMessage)(string);
 
     /* compute upper bound on maximum eigenvalue */
     int ncyc = 0;
@@ -3689,7 +3724,7 @@ int mbnavedit_get_inversion(void) {
 
     /* set message */
     sprintf(string, "Setting up inversion of %d latitude points", nplot);
-    do_message_on(string);
+    (*showMessage)(string);
 
     /* initialize arrays */
     for (int i = 0; i < nrows; i++) {
@@ -3766,7 +3801,7 @@ int mbnavedit_get_inversion(void) {
 
     /* set message */
     sprintf(string, "Inverting %dX%d for smooth latitude...", nc, nr);
-    do_message_on(string);
+    (*showMessage)(string);
 
     /* compute upper bound on maximum eigenvalue */
     ncyc = 0;
@@ -3830,14 +3865,15 @@ int mbnavedit_get_inversion(void) {
     status = mb_freed(verbose, __FILE__, __LINE__, (void **)&work, &error);
 
     /* turn message off */
-    do_message_off();
+    (*hideMessage)();
   }
 
   /* if error initializing memory then don't invert */
   else if (error != MB_ERROR_NO_ERROR) {
     mb_error(verbose, error, &message);
     fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
-    do_error_dialog("Unable to invert for smooth", "navigation due to a memory", "allocation error!");
+    (*showError)("Unable to invert for smooth", "navigation due to a memory",
+		 "allocation error!");
   }
 
   if (verbose >= 2) {

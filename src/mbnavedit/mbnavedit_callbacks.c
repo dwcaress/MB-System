@@ -66,7 +66,7 @@
 #include "mb_xgraphics.h"
 #include "mbnavedit.h"
 #include "mbnavedit_extrawidgets.h"
-
+#include "mbnavedit_prog.h"
 #include "mbnavedit_creation.h"
 
 
@@ -507,7 +507,14 @@ void do_mbnavedit_init(int argc, char **argv) {
 			        &drawRect,
 				&fillRect,
 				&drawString,
-				&justifyString);
+				&justifyString,
+				&do_parse_datalist,
+				&do_error_dialog,
+				&do_message_on,
+				&do_message_off,
+				&do_filebutton_on,
+				&do_filebutton_off,
+				&do_set_controls);
 
 	do_set_controls();
 
