@@ -30,7 +30,7 @@ extern "C" {
 #define MBEDIT_OUTBOUNDS_FLAGGED 1
 #define MBEDIT_OUTBOUNDS_UNFLAGGED 2
 
-Emitter Backend::staticEmitter_;
+mb_system::Emitter Backend::staticEmitter_;
 
 using namespace mb_system;
 
@@ -68,7 +68,7 @@ Backend::Backend(int argc, char **argv) {
 	      &PixmapDrawer::fillRect,
 	      &PixmapDrawer::drawString,
 	      &PixmapDrawer::justifyString,
-	      &Backend::parseDataList,
+	      &Backend::prepareForDataInput,
 	      &Backend::showError,
 	      &Backend::showMessage,
 	      &Backend::hideMessage,

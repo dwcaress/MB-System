@@ -34,7 +34,8 @@ public:
   /// specified on command line
   bool initialize(QObject *loadedRoot, int argc, char **argv);
 
-  static void parseDataList(char *file, int format) {
+  static void prepareForDataInput(char *file, int format) {
+    std::cout << "prepareForDataInput() not implemented\n";
     return;
   }
 
@@ -81,7 +82,7 @@ public:
   }
 
   /// Emit signals on behalf of static member functions
-  static Emitter staticEmitter_;
+  static mb_system::Emitter staticEmitter_;
 
 
 protected:
