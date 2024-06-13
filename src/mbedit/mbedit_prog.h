@@ -127,7 +127,8 @@ int mbedit_init(int argc, char **argv,
 		/// Get dimensions of specified string drawn with active font
 		void (*justifyString)(void *gPtr, char *string, int *width,
 				      int *ascent, int *descent),
-		
+
+		/// Prepare for specified input file
 		void (*parseDatalist)(char *file, int format),
 
 		/// Display error messages (e.g. with dialog)
@@ -398,5 +399,6 @@ int mbedit_tsminmax(int iping, int nping, PlotAncillData data_id,
 		    double *tsmax);
 
 int mbedit_xtrackslope(int iping, double *slope);
+
 
 #endif
