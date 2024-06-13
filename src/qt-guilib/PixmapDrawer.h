@@ -17,6 +17,8 @@ namespace mb_system {
 
   public:
 
+    PixmapDrawer(QPainter *painter);
+    
     static void drawLine(void *dummy, int x1, int y1, int x2, int y2,
 		       DrawingColor color, int style);
   
@@ -35,7 +37,7 @@ namespace mb_system {
     /// Return color name corresponding to input mbedit_color
     static const char *colorName(DrawingColor color);
 
-    /// Set QPainter pointer member
+    /// Set QPainter static pointer member
     static void setPainter(QPainter *painter) {
       painter_ = painter;
     }

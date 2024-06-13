@@ -1,5 +1,6 @@
 #include <iostream>
 #include <QTextStream>
+#include <QtGlobal>
 #include "PixmapDrawer.h"
 
 
@@ -8,6 +9,17 @@ QFontMetrics *mb_system::PixmapDrawer::fontMetrics_ = nullptr;
 QString mb_system::PixmapDrawer::textBuf_;
 
 using namespace mb_system;
+
+
+PixmapDrawer::PixmapDrawer(QPainter *painter) {
+
+  if (!painter) {
+    qWarning("PixmapDrawer::PixmapDrawer(): null painter pointer");
+  }
+  
+  painter_ = painter;
+}
+
 
 void PixmapDrawer::drawLine(void *dummy,
 			  int x1, int y1, int x2, int y2,
