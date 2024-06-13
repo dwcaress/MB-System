@@ -435,7 +435,7 @@ void do_mbedit_init(int argc, char **argv) {
   /* set timer for function to keep updating the filelist */
   do_mbedit_settimer();
 
-  /* if startup indicated by num_files > 0 try to open first file */
+  /* if startup indicated by numfiles > 0 try to open first file */
   if (startup_file && numfiles > 0) {
     do_load_specific_file(0);
   }
@@ -445,29 +445,32 @@ void do_mbedit_init(int argc, char **argv) {
 }
 
 /*--------------------------------------------------------------------*/
-
+/// Add input file to list of files to be processed, or add datalist
+/// to list of files to be processed
 void do_parse_datalist(char *file, int form) {
   int format;
 
-  /* try to resolve format if necessary */
+  // try to resolve format if necessary 
   if (form == 0)
     mbedit_get_format(file, &format);
   else
     format = form;
 
-  /* read in a single file */
+  // read in a single file 
   if (format > 0 && numfiles < NUM_FILES_MAX) {
     strcpy(filepaths[numfiles], file);
     fileformats[numfiles] = format;
     filelocks[numfiles] = -1;
     fileesfs[numfiles] = -1;
     numfiles++;
+    
   } else if (format == -1) {
-    /* read in datalist if forma = -1 */
+    // read in datalist if format = -1 
     const int verbose = 0;
     void *datalist;
     int error = MB_ERROR_NO_ERROR;
-    const int datalist_status = mb_datalist_open(verbose, &datalist, file, MB_DATALIST_LOOK_NO, &error);
+    const int datalist_status = mb_datalist_open(verbose, &datalist, file,
+						 MB_DATALIST_LOOK_NO, &error);
     if (datalist_status == MB_SUCCESS) {
       bool done = false;
       double weight;
@@ -477,8 +480,9 @@ void do_parse_datalist(char *file, int form) {
       char fileprocessed[MB_PATH_MAXLINE];
       char dfile[MB_PATH_MAXLINE];
       while (!done) {
-	if ((/* datalist_status = */ mb_datalist_read2(verbose, datalist, &filestatus, fileraw, fileprocessed, dfile,
-						       &fileformat, &weight, &error)) == MB_SUCCESS) {
+	if ((mb_datalist_read2(verbose, datalist, &filestatus,
+			       fileraw, fileprocessed, dfile,
+			       &fileformat, &weight, &error)) == MB_SUCCESS) {
 	  if (numfiles < NUM_FILES_MAX) {
 	    strcpy(filepaths[numfiles], fileraw);
 	    fileformats[numfiles] = fileformat;
@@ -487,13 +491,14 @@ void do_parse_datalist(char *file, int form) {
 	    numfiles++;
 	  }
 	} else {
-	  /* datalist_status = */ mb_datalist_close(verbose, &datalist, &error);
+	  mb_datalist_close(verbose, &datalist, &error);
 	  done = true;
 	}
       }
     }
   }
 }
+
 
 /*--------------------------------------------------------------------*/
 
