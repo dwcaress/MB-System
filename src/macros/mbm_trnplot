@@ -31,8 +31,8 @@
 import sys, getopt, os
 import glob, subprocess
 
-shortOpts = "hbi:dg:"
-longOpts = ["help", "display", "input=", "grid=", "mission="]
+shortOpts = "hbi:dg:j:m"
+longOpts = ["help", "display", "input=", "grid=", "crs=", "mission="]
 
 def usage():
   pname, sname = os.path.split(sys.argv[0])
@@ -40,8 +40,9 @@ def usage():
   print( """
   -h --help                    Print this message
   -d --display                 Enable immediate display of the plots
-  -g --grid=filepath           Path to background topography grid
+  -g --grid=filepath           Path to reference topography grid
   -i --input=directory         Path to mbtrnpp session logs and results
+  -j --crs=crs                 Coordinate reference system (CRS) of reference topography
   -m --mission                 Mission name for plot title
   """ )
   sys.exit()
@@ -54,6 +55,7 @@ def main (args, opts={}):
   inputset = False
   gridfile = ""
   gridset = False
+  refcrs = "U"
   mission = ""
   missionset = False
   for o, a in opts:
@@ -67,6 +69,8 @@ def main (args, opts={}):
     elif o in ("-i", "--input"):
       inputdir = a
       inputset = True
+    elif o in ("-j", "--crs"):
+      refcrs = a
     elif o in ("-m", "--mission"):
       mission = a
       missionset = True
@@ -212,7 +216,7 @@ def main (args, opts={}):
     # Create and execute an mbgrid and mbm_grdplot command to generate a map of the TRN performance over MB1 bathymetry
     command = "cd "+inputdir+" ; mbm_makedatalist -S.mb1 -F72 -Odatalist_mb1.mb-1 ; mbdatalist -Idatalist_mb1.mb-1 -O ; cd .."
     subprocess.run(command, shell=True)
-    command = "cd "+inputdir+" ; mbgrid -Idatalist_mb1.mb-1 -A2 -N -F5 -JU -C5 -V -O TopoMB1 ; cd .."
+    command = "cd "+inputdir+" ; mbgrid -Idatalist_mb1.mb-1 -A2 -N -F5 -J"+refcrs+" -C5 -V -O TopoMB1 ; cd .."
     print("Command: "+command+"\n")
     subprocess.run(command, shell=True)
     if missionset :

@@ -160,8 +160,10 @@ typedef struct mbtrnpp_opts_s{
     // opt "output"
     char *output;
 
+#ifndef TRN_USE_PROJ
     // opt "projection"
     int projection;
+#endif
 
     // opt "swath-width"
     double swath_width;
@@ -200,9 +202,14 @@ typedef struct mbtrnpp_opts_s{
     // opt "trn-en"
     bool trn_en;
 
+#ifdef TRN_USE_PROJ
+    // opt "trn-crs"
+    char *trn_crs;
+#else
     // opt "trn-utm"
     long int trn_utm;
-
+#endif
+    
     // opt "trn-map"
     char *trn_map;
 
@@ -418,8 +425,13 @@ typedef struct mbtrnpp_cfg_s{
     // TRN processing enable
     bool trn_enable;
 
+#ifdef TRN_USE_PROJ
+    // TRN CRS
+    char *trn_crs;
+#else
     // TRN UTM zone
     long int trn_utm_zone;
+#endif
 
     // TRN map type
     int trn_mtype;
@@ -584,7 +596,11 @@ s=NULL;\
 #define OPT_STATFLAGS_DFL                 MBTRNPP_STAT_FLAGS_DFL
 #define OPT_STATFLAG_STR_DFL              "MSF_STATUS|MSF_EVENT|MSF_ASTAT|MSF_PSTAT"
 #define OPT_TRN_EN_DFL                    true
+#ifdef TRN_USE_PROJ
+#define OPT_TRN_CRS_DFL                   TRN_CRS_DFL
+#else
 #define OPT_TRN_UTM_DFL                   TRN_UTM_DFL
+#endif
 #define OPT_MAP_DFL                       NULL
 #define OPT_CFG_DFL                       NULL
 #define OPT_PAR_DFL                       NULL
@@ -657,9 +673,15 @@ s=NULL;\
 #define MB1R_BLOG_DESC    "mb1r log (binary)"
 #define MBTRNPP_LOG_EXT   ".log"
 #ifdef WITH_MBTNAV
+
+#ifdef TRN_USE_PROJ
+#define TRN_CRS_DFL      "UTM10N"
+#else
 #define UTM_MONTEREY_BAY 10L
 #define UTM_AXIAL        12L
 #define TRN_UTM_DFL      UTM_MONTEREY_BAY
+#endif
+
 #define TRN_MTYPE_DFL    TRN_MAP_BO
 #define TRN_SENSOR_TYPE_DFL TRN_SENSOR_MB
 #define TRN_FTYPE_DFL    TRN_FILT_PARTICLE
@@ -1047,6 +1069,14 @@ int mbtrnpp_trnu_pub_osocket(trn_update_t *update, netif_t *netif);
 int mbtrnpp_trnu_pubempty_osocket(double time, double lat, double lon, double depth, netif_t *netif);
 char *mbtrnpp_trn_updatestr(char *dest, int len, trn_update_t *update, int indent);
 #endif // WITH_MBTNAV
+
+#ifdef TRN_USE_PROJ
+/* TRN uses a projected coordinate system - the navigation must be transformed from 
+   geographic coordinates to the Coordinate Reference System (CRS) used for the reference 
+   map. The pointer pjptr points to a Proj context that that is used for forward and
+   inverse transforms from Geographic to the TRN CRS. */
+void *pjptr = NULL;
+#endif
 
 // TRN reinit flag - forces reinitializing the TRN filter
 bool reinit_flag=true;
@@ -1493,7 +1523,11 @@ static int s_mbtrnpp_init_cfg(mbtrnpp_cfg_t *cfg)
         cfg->trn_status_interval_sec=MBTRNPP_STAT_PERIOD_SEC;
         cfg->mbtrnpp_stat_flags=MBTRNPP_STAT_FLAGS_DFL;
         cfg->trn_enable=false;
+#ifdef TRN_USE_PROJ
+        cfg->trn_crs=strdup(TRN_CRS_DFL);
+#else
         cfg->trn_utm_zone=TRN_UTM_DFL;
+#endif
         cfg->trn_mtype=TRN_MTYPE_DFL;
         cfg->trn_sensor_type=TRN_SENSOR_TYPE_DFL;
         cfg->trn_ftype=TRN_FTYPE_DFL;
@@ -1539,7 +1573,9 @@ static int s_mbtrnpp_init_opts(mbtrnpp_opts_t *opts)
         opts->tide_model=OPT_TIDE_MODEL_DFL;
         opts->log_directory=strdup(OPT_LOG_DIRECTORY_DFL);
         opts->output=CHK_STRDUP(OPT_OUTPUT_DFL);
+#ifndef TRN_USE_PROJ
         opts->projection=OPT_PROJECTION_DFL;
+#endif
         opts->swath_width=OPT_SWATH_WIDTH_DFL;
         opts->soundings=OPT_SOUNDINGS_DFL;
         opts->median_filter=CHK_STRDUP(OPT_MEDIAN_FILTER_DFL);
@@ -1553,7 +1589,11 @@ static int s_mbtrnpp_init_opts(mbtrnpp_opts_t *opts)
         opts->statflags_str=strdup(OPT_STATFLAG_STR_DFL);
         opts->statflags=OPT_STATFLAGS_DFL;
         opts->trn_en=OPT_TRN_EN_DFL;
+#ifdef TRN_USE_PROJ
+        opts->trn_crs=strdup(OPT_TRN_CRS_DFL);
+#else
         opts->trn_utm=OPT_TRN_UTM_DFL;
+#endif
         opts->trn_map=CHK_STRDUP(OPT_MAP_DFL);
         opts->trn_cfg=CHK_STRDUP(OPT_CFG_DFL);
         opts->trn_par=CHK_STRDUP(OPT_PAR_DFL);
@@ -1680,7 +1720,11 @@ static int s_mbtrnpp_cfgstr(char **pdest, size_t olen, mbtrnpp_cfg_t *self, cons
     mbb_printf(optr, "%s%*s%*s%s%*X%s", pre, indent, (indent>0?" ":""), wkey, "mbtrnpp_stat_flags", sep, wval, self->mbtrnpp_stat_flags, del);
     mbb_printf(optr, "%s%*s%*s%s%*s/%d%s", pre, indent, (indent>0?" ":""), wkey, "trn_dev", sep, wval, r7k_devidstr(self->trn_dev), self->trn_dev, del);
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "trn_enable", sep, wval, BOOL2YNC(self->trn_enable), del);
-    mbb_printf(optr, "%s%*s%*s%s%*ld%s", pre, indent, (indent>0?" ":""), wkey, "trn_utm_zone", sep, wval, self->trn_utm_zone, del);
+#ifdef TRN_USE_PROJ
+    mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "trn_crs", sep, wval, self->trn_crs, del);
+#else
+	mbb_printf(optr, "%s%*s%*s%s%*ld%s", pre, indent, (indent>0?" ":""), wkey, "trn_utm_zone", sep, wval, self->trn_utm_zone, del);
+#endif
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "trn_mtype", sep, wval, self->trn_mtype, del);
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "trn_sensor_type", sep, wval, self->trn_sensor_type, del);
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "trn_ftype", sep, wval, self->trn_ftype, del);
@@ -1749,7 +1793,9 @@ static int s_mbtrnpp_optstr(char **pdest, size_t olen, mbtrnpp_opts_t *self, con
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "log-directory", sep, wval, self->log_directory, del);
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "tide-model", sep, wval, self->tide_model, del);
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "output", sep, wval, self->output, del);
+#ifndef TRN_USE_PROJ
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "projection", sep, wval, self->projection, del);
+#endif
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "swath-width", sep, wval, self->swath_width, del);
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "soundings", sep, wval, self->soundings, del);
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "median-filter", sep, wval, self->median_filter, del);
@@ -1763,7 +1809,11 @@ static int s_mbtrnpp_optstr(char **pdest, size_t olen, mbtrnpp_opts_t *self, con
     mbb_printf(optr, "%s%*s%*s%s%*X/%s%s", pre, indent, (indent>0?" ":""), wkey, "statflags", sep, wval, self->statflags, self->statflags_str, del);
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "trn-en", sep, wval, BOOL2YNC(self->trn_en), del);
     mbb_printf(optr, "%s%*s%*s%s%*s/%d%s", pre, indent, (indent>0?" ":""), wkey, "trn-dev", sep, wval, r7k_devidstr(self->trn_dev), self->trn_dev, del);
+#ifdef TRN_USE_PROJ
+    mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "trn-crs", sep, wval, self->trn_crs, del);
+#else
     mbb_printf(optr, "%s%*s%*s%s%*ld%s", pre, indent, (indent>0?" ":""), wkey, "trn-utm", sep, wval, self->trn_utm, del);
+#endif
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "trn-map", sep, wval, self->trn_map, del);
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "trn-cfg", sep, wval, self->trn_cfg, del);
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "trn-par", sep, wval, self->trn_par, del);
@@ -2342,11 +2392,15 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
                if( (opts->output=CHK_STRDUP(val)) != NULL){
                     retval=0;
                 }
-            } else if(strcmp(key,"projection")==0 ){
+            }
+#ifndef TRN_USE_PROJ
+            else if(strcmp(key,"projection")==0 ){
                 if(sscanf(val,"%d",&opts->projection)==1){
                     retval=0;
                 }
-            } else if(strcmp(key,"swath-width")==0 || strcmp(key,"swath")==0 ){
+            }
+#endif
+            else if(strcmp(key,"swath-width")==0 || strcmp(key,"swath")==0 ){
                 if(sscanf(val,"%lf",&opts->swath_width)==1){
                     retval=0;
                 }
@@ -2416,11 +2470,35 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
                     opts->statflags |= MSF_READER;
                     retval=0;
                 }
-            } else if(strcmp(key,"trn-utm")==0 ){
+            }
+#ifdef TRN_USE_PROJ
+            else if(strcmp(key,"trn-crs")==0 ){
+                MEM_CHKFREE(opts->trn_crs);
+                if( (opts->trn_crs=CHK_STRDUP(val)) != NULL){
+                    retval=0;
+                }
+            } 
+            else if(strcmp(key,"trn-utm")==0 ){
+            	int utm_zone;
+                if(sscanf(val,"%d",&utm_zone)==1){
+                	mb_path proj_string = "";
+                	if (utm_zone > 0 && utm_zone <= 60)
+                		sprintf(proj_string, "UTM%2.2dN", utm_zone);
+                	if (utm_zone < 0 && utm_zone >= -60)
+                		sprintf(proj_string, "UTM%2.2dS", -utm_zone);
+					if( strlen(proj_string) > 0 && (opts->trn_crs=CHK_STRDUP(proj_string)) != NULL){
+						retval=0;
+					}
+                }
+            } 
+#else
+            else if(strcmp(key,"trn-utm")==0 ){
                 if(sscanf(val,"%ld",&opts->trn_utm)==1){
                     retval=0;
                 }
-            } else if(strcmp(key,"trn-map")==0 ){
+            }
+#endif
+            else if(strcmp(key,"trn-map")==0 ){
                 MEM_CHKFREE(opts->trn_map);
                 if( (opts->trn_map=CHK_STRDUP(val)) != NULL){
                     retval=0;
@@ -2693,8 +2771,14 @@ static int s_mbtrnpp_configure(mbtrnpp_cfg_t *cfg, mbtrnpp_opts_t *opts)
         cfg->mbtrnpp_stat_flags = opts->statflags;
         // trn-en
         cfg->trn_enable = opts->trn_en;
+#ifdef TRN_USE_PROJ
+        // trn-crs
+        MEM_CHKFREE(cfg->trn_crs);
+        cfg->trn_crs = CHK_STRDUP(opts->trn_crs);
+#else
         // trn-utm
         cfg->trn_utm_zone = opts->trn_utm;
+#endif
         // trn-mtype
         cfg->trn_mtype = opts->trn_mtype;
         // trn-ftype
@@ -2872,10 +2956,17 @@ static int s_mbtrnpp_validate_config(mbtrnpp_cfg_t *cfg)
                 err_count++;
                 fprintf(stderr,"ERR - trn_cfg_file not set\n");
             }
+#ifdef TRN_USE_PROJ
+            if(NULL==cfg->trn_crs){
+                err_count++;
+                fprintf(stderr,"ERR - trn_crs not set\n");
+            }
+#else
             if(cfg->trn_utm_zone<1 || cfg->trn_utm_zone>60){
                 err_count++;
                 fprintf(stderr,"ERR - invalid trn_utm_zone [%ld] valid range 1-60\n",cfg->trn_utm_zone);
             }
+#endif
             if(cfg->trn_mtype<1 || cfg->trn_mtype>2){
                 err_count++;
                 fprintf(stderr,"ERR - invalid trn_mtype [%d] valid range 1-2\n",cfg->trn_mtype);
@@ -3349,15 +3440,19 @@ int main(int argc, char **argv) {
   mbtrnpp_init_debug(mbtrn_cfg->verbose);
 
 #ifdef WITH_MBTNAV
-    trn_cfg = trncfg_new(NULL, -1,
-                         mbtrn_cfg->trn_utm_zone,
-                         mbtrn_cfg->trn_mtype,
-                         mbtrn_cfg->trn_sensor_type, mbtrn_cfg->trn_ftype, mbtrn_cfg->trn_fgrade,
-                        mbtrn_cfg->trn_freinit,mbtrn_cfg->trn_mweight,
-                        mbtrn_cfg->trn_map_file, mbtrn_cfg->trn_cfg_file,
-                        mbtrn_cfg->trn_particles_file, mbtrn_cfg->trn_mission_id,
-                        trn_oflags,mbtrn_cfg->trn_max_ncov,mbtrn_cfg->trn_max_nerr,
-                        mbtrn_cfg->trn_max_ecov, mbtrn_cfg->trn_max_eerr);
+  trn_cfg = trncfg_new(NULL, -1,
+#ifdef TRN_USE_PROJ
+  mbtrn_cfg->trn_crs,
+#else
+  mbtrn_cfg->trn_utm_zone,
+#endif
+  mbtrn_cfg->trn_mtype,
+  mbtrn_cfg->trn_sensor_type, mbtrn_cfg->trn_ftype, mbtrn_cfg->trn_fgrade,
+  mbtrn_cfg->trn_freinit,mbtrn_cfg->trn_mweight,
+  mbtrn_cfg->trn_map_file, mbtrn_cfg->trn_cfg_file,
+  mbtrn_cfg->trn_particles_file, mbtrn_cfg->trn_mission_id,
+  trn_oflags,mbtrn_cfg->trn_max_ncov,mbtrn_cfg->trn_max_nerr,
+  mbtrn_cfg->trn_max_ecov, mbtrn_cfg->trn_max_eerr);
 
     if (mbtrn_cfg->trn_enable &&  NULL!=trn_cfg ) {
 
@@ -3540,6 +3635,13 @@ int main(int argc, char **argv) {
           exit(error);
     }
   }
+  
+#ifdef TRN_USE_PROJ
+	/* initialize Proj transformation between Geographic coordinates (longitude and
+	   latitude in WGS84) and the Coordinate Reference System (CRS) used for the
+	   TRN reference map */
+	mb_proj_init(mbtrn_cfg->verbose, mbtrn_cfg->trn_crs, &pjptr, &error);
+#endif
 
   /* initialize output */
     if ( OUTPUT_FLAG_SET(OUTPUT_MBSYS_STDOUT)) {
@@ -4662,6 +4764,10 @@ int main(int argc, char **argv) {
 #ifdef WITH_MBTNAV
   if (output_trn_fp != NULL)
     fclose(output_trn_fp);
+#endif
+
+#ifdef TRN_USE_PROJ
+	mb_proj_free(mbtrn_cfg->verbose, &pjptr, &error);
 #endif
 
   /* deallocate arrays allocated with mb_mallocd() */
@@ -5956,10 +6062,14 @@ int mbtrnpp_check_reinit(trn_update_t *pstate, trn_config_t *cfg)
           double offset_n = pstate->mse_dat->x - pstate->pt_dat->x;
           double offset_e = pstate->mse_dat->y - pstate->pt_dat->y;
           double offset_z = pstate->mse_dat->z - pstate->pt_dat->z;
+          double sdev_e = sqrt(pstate->mse_dat->covariance[2]);
+          double sdev_n = sqrt(pstate->mse_dat->covariance[0]);
+          double sdev_z = sqrt(pstate->mse_dat->covariance[5]);
+          double sdev_mag = sqrt(pstate->mse_dat->covariance[2] + pstate->mse_dat->covariance[0] + pstate->mse_dat->covariance[5]);
           double covariance_mag = sqrt(pstate->mse_dat->covariance[0] * pstate->mse_dat->covariance[0]
                     + pstate->mse_dat->covariance[1] * pstate->mse_dat->covariance[1]
                     + pstate->mse_dat->covariance[2] * pstate->mse_dat->covariance[2]);
-          if (covariance_mag <= mbtrn_cfg->covariance_magnitude_max) {
+          if (sdev_mag <= mbtrn_cfg->covariance_magnitude_max) {
             converged = true;
             n_converged_streak++;
             n_unconverged_streak = 0;
@@ -6086,15 +6196,16 @@ int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg)
           double offset_n = pstate->mse_dat->x - pstate->pt_dat->x;
           double offset_e = pstate->mse_dat->y - pstate->pt_dat->y;
           double offset_z = pstate->mse_dat->z - pstate->pt_dat->z;
-          double covariance_mag = sqrt(pstate->mse_dat->covariance[0] * pstate->mse_dat->covariance[0]
-                    + pstate->mse_dat->covariance[2] * pstate->mse_dat->covariance[2]
-                    + pstate->mse_dat->covariance[5] * pstate->mse_dat->covariance[5]);
+          double sdev_e = sqrt(pstate->mse_dat->covariance[2]);
+          double sdev_n = sqrt(pstate->mse_dat->covariance[0]);
+          double sdev_z = sqrt(pstate->mse_dat->covariance[5]);
+          double sdev_mag = sqrt(pstate->mse_dat->covariance[2] + pstate->mse_dat->covariance[0] + pstate->mse_dat->covariance[5]);
 
           // NOTE: TRN convention is x:northing y:easting z:down
           //       Output here is in order easting northing z
           if ((n_converged_tot + n_unconverged_tot - 1) % 25 == 0) {
             fprintf(stderr, "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
-            fprintf(stderr, "YYYY/MM/DD-HH:MM:SS.SSSSSS TTTTTTTTTT.TTTTTT | Nav: Easting  Northing     Z     | TRN: Easting  Northing     Z     | Off: East   North     Z   | Cov: East     North       Z   :     Mag   | Best Off: T      E      N      Z    |   Ncs   Nct   Nus   Nut  Nr | CNV USE \n");
+            fprintf(stderr, "YYYY/MM/DD-HH:MM:SS.SSSSSS TTTTTTTTTT.TTTTTT | Nav: Easting  Northing     Z     | TRN: Easting  Northing     Z     | Off: East   North     Z   | SD:  East     North       Z   :     Mag   | Best Off: T      E      N      Z    |   Ncs   Nct   Nus   Nut  Nr | CNV USE \n");
             fprintf(stderr, "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
           }
           fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
@@ -6105,7 +6216,7 @@ int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg)
           pstate->pt_dat->y, pstate->pt_dat->x, pstate->pt_dat->z,
           pstate->mse_dat->y, pstate->mse_dat->x, pstate->mse_dat->z,
           offset_e, offset_n, offset_z,
-          pstate->mse_dat->covariance[2], pstate->mse_dat->covariance[0], pstate->mse_dat->covariance[5], covariance_mag,
+          sdev_e, sdev_n, sdev_z, sdev_mag,
           pstate->pt_dat->time - use_offset_time, use_offset_e, use_offset_n, use_offset_z,
           n_converged_streak, n_converged_tot, n_unconverged_streak, n_unconverged_tot, n_reinit,
           convergedornot[convergestate], useornot[use_trn_offset]);
@@ -6126,7 +6237,7 @@ int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg)
               s_mbtrnpp_show_cfg(output_trn_fp, mbtrn_cfg,true,5);
               fprintf(output_trn_fp, "## \n");
               fprintf(output_trn_fp, "##---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
-              fprintf(output_trn_fp, "## YYYY/MM/DD-HH:MM:SS.SSSSSS TTTTTTTTTT.TTTTTT | Nav: Easting  Northing Z   | TRN: Easting  Northing     Z     | Off: East   North  Z   | Cov: East  North       Z   :    Mag   | Best Off: T    E      N      Z    | Ncs   Nct   Nus   Nut  Nr | CNV USE \n");
+              fprintf(output_trn_fp, "## YYYY/MM/DD-HH:MM:SS.SSSSSS TTTTTTTTTT.TTTTTT | Nav: Easting  Northing Z   | TRN: Easting  Northing     Z     | Off: East   North  Z   | SD:  East  North       Z   :    Mag   | Best Off: T    E      N      Z    | Ncs   Nct   Nus   Nut  Nr | CNV USE \n");
               fprintf(output_trn_fp, "##---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
             }
             fprintf(output_trn_fp, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
@@ -6137,7 +6248,7 @@ int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg)
           pstate->pt_dat->y, pstate->pt_dat->x, pstate->pt_dat->z,
           pstate->mse_dat->y, pstate->mse_dat->x, pstate->mse_dat->z,
           offset_e, offset_n, offset_z,
-          pstate->mse_dat->covariance[2], pstate->mse_dat->covariance[0], pstate->mse_dat->covariance[5], covariance_mag,
+          sdev_e, sdev_n, sdev_z, sdev_mag,
           pstate->pt_dat->time - use_offset_time, use_offset_e, use_offset_n, use_offset_z,
           n_converged_streak, n_converged_tot, n_unconverged_streak, n_unconverged_tot, n_reinit,
           convergedornot[convergestate], useornot[use_trn_offset]);
@@ -6160,9 +6271,17 @@ int mbtrnpp_trn_update(wtnav_t *self, mb1_t *src, wposet_t **pt_out, wmeast_t **
   if (NULL != self && NULL != src && NULL != pt_out && NULL != mt_out) {
       int test = -1;
 
+#ifdef TRN_USE_PROJ
+    if ((test = wmeast_mb1_to_meas(mt_out, src, pjptr)) == 0) {
+#else
     if ((test = wmeast_mb1_to_meas(mt_out, src, cfg->utm_zone)) == 0) {
+#endif
 
+#ifdef TRN_USE_PROJ
+      if ((test = wposet_mb1_to_pose(pt_out, src, pjptr)) == 0) {
+#else
       if ((test = wposet_mb1_to_pose(pt_out, src, cfg->utm_zone)) == 0) {
+#endif
         // must do motion update first if pt time <= mt time
         wtnav_motion_update(self, *pt_out);
         wtnav_meas_update(self, *mt_out, cfg->sensor_type);

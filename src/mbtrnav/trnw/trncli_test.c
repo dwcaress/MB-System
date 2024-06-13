@@ -73,6 +73,9 @@
 #include "msocket.h"
 #include "mlog.h"
 #include "mb1_msg.h"
+#ifdef TRN_USE_PROJ
+#include "proj.h"
+#endif
 
 /////////////////////////
 // Macros
@@ -118,6 +121,7 @@
 #define TRNCLI_TEST_LOG_DIR  "."
 #define TRNCLI_TEST_LOG_EXT  ".log"
 #define TRNCLI_TEST_IFILE "./test.mb1"
+#define TRNCLI_TEST_TRNCFG_CRS "UTM10N"
 #define TRNCLI_TEST_TRNCFG_MAP "PortTiles"
 #define TRNCLI_TEST_TRNCFG_CFG "mappingAUV_specs.cfg"
 #define TRNCLI_TEST_TRNCFG_PARTICLES "particles.cfg"
@@ -183,9 +187,15 @@ typedef struct app_cfg_s{
     /// @var app_cfg_s::est_n
     /// @brief TBD
     int est_n;
+#ifdef TRN_USE_PROJ
+    /// @var app_cfg_s::crs
+    /// @brief TBD
+    char *crs;
+#else
     /// @var app_cfg_s::utm
     /// @brief TBD
     long int utm;
+#endif
     /// @var app_cfg_s::log_cfg
     /// @brief TBD
     mlog_config_t *log_cfg;
@@ -242,6 +252,10 @@ static msock_socket_t **s_get_mb1_instance(app_cfg_t *cfg);
 static trncli_t **s_get_trncli_instance(app_cfg_t *cfg, bool force_new);
 static void s_init_log(int argc, char **argv, app_cfg_t *cfg);
 static int s_app_main(app_cfg_t *cfg);
+
+#ifdef TRN_USE_PROJ
+static void *pjptr = NULL;
+#endif
 
 /////////////////////////
 // Imports
@@ -307,7 +321,11 @@ static void s_show_help()
     "                  2: TRN_MWEIGHT_CROSSBEAM\n"
     "                  3: TRN_MWEIGHT_SUBCLOUD_SHANDOR\n"
     "                  4: TRN_MWEIGHT_SUBCLOUD_NISON\n"
+#ifdef TRN_USE_PROJ
+    " --trn-crs      : TRN CRS (Coordinate Reference System)\n"
+#else
     " --trn-utm      : TRN UTM zone\n"
+#endif
     " --trn-ncov     : TRN max northing covariance\n"
     " --trn-nerr     : TRN max northing error\n"
     " --trn-ecov     : TRN max easing covariance\n"
@@ -391,7 +409,11 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"logdir", required_argument, NULL, 0},
         {"trn-ftype", required_argument, NULL, 0},
         {"trn-mtype", required_argument, NULL, 0},
+#ifdef TRN_USE_PROJ
+        {"trn-crs", required_argument, NULL, 0},
+#else
         {"trn-utm", required_argument, NULL, 0},
+#endif
         {"trn-freinit", required_argument, NULL, 0},
         {"trn-fgrade", required_argument, NULL, 0},
         {"trn-mw", required_argument, NULL, 0},
@@ -492,6 +514,34 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
                         }
                     }
                 }
+#ifdef TRN_USE_PROJ
+                // crs
+                else if (strcmp("trn-crs", options[option_index].name) == 0) {
+                    if(NULL!=cfg->trn_cfg->crs){
+                        free(cfg->trn_cfg->crs);
+                    }
+                    cfg->trn_cfg->crs=strdup(optarg);
+                }
+                // utm
+                else if (strcmp("trn-utm", options[option_index].name) == 0) {
+                	int utm_zone = 0;
+					if(sscanf(optarg,"%d",&utm_zone)==1){
+						char proj_string[1024] = "";
+						if (utm_zone > 0 && utm_zone <= 60)
+							sprintf(proj_string, "UTM%2.2dN", utm_zone);
+						if (utm_zone < 0 && utm_zone >= -60)
+							sprintf(proj_string, "UTM%2.2dS", -utm_zone);
+						if( strlen(proj_string) > 0)
+							cfg->trn_cfg->crs=strdup(proj_string);
+					}
+                }
+#else
+               // utm
+                else if (strcmp("trn-utm", options[option_index].name) == 0) {
+                    if(sscanf(optarg,"%ld",&cfg->utm) == 1)
+                        cfg->trn_cfg->utm_zone=cfg->utm;
+                }
+#endif
                 // map
                 else if (strcmp("map", options[option_index].name) == 0) {
                     if(NULL!=cfg->trn_cfg->map_file){
@@ -567,11 +617,6 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
                             fprintf(stderr, "ERR - invalid trn-mtype[%c]\n", cmnem);
                             break;
                     }
-                }
-                // utm
-                else if (strcmp("trn-utm", options[option_index].name) == 0) {
-                    if(sscanf(optarg,"%ld",&cfg->utm) == 1)
-                        cfg->trn_cfg->utm_zone=cfg->utm;
                 }
                 // freinit
                 else if (strcmp("trn-freinit", options[option_index].name) == 0) {
@@ -699,6 +744,11 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
     s_dbg_printf(stderr, cfg->verbose, "mode      [%c]\n", (char)cfg->mode);
     s_dbg_printf(stderr, cfg->verbose, "host      [%s]\n", cfg->trn_cfg->trn_host);
     s_dbg_printf(stderr, cfg->verbose, "port      [%d]\n", cfg->trn_cfg->trn_port);
+#ifdef TRN_USE_PROJ
+    s_dbg_printf(stderr, cfg->verbose, "crs       [%s]\n", cfg->trn_cfg->crs);
+#else
+    s_dbg_printf(stderr, cfg->verbose, "utm       [%ld]\n", cfg->trn_cfg->utm_zone);
+#endif
     s_dbg_printf(stderr, cfg->verbose, "map       [%s]\n", cfg->trn_cfg->map_file);
     s_dbg_printf(stderr, cfg->verbose, "cfg       [%s]\n", cfg->trn_cfg->cfg_file);
     s_dbg_printf(stderr, cfg->verbose, "particles [%s]\n", cfg->trn_cfg->particles_file);
@@ -708,7 +758,6 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
     s_dbg_printf(stderr, cfg->verbose, "freinit   [%d]\n", cfg->trn_cfg->filter_reinit);
     s_dbg_printf(stderr, cfg->verbose, "fgrade    [%d]\n", cfg->trn_cfg->filter_grade);
     s_dbg_printf(stderr, cfg->verbose, "mw        [%d]\n", cfg->trn_cfg->mod_weight);
-    s_dbg_printf(stderr, cfg->verbose, "utm       [%ld]\n", cfg->trn_cfg->utm_zone);
     s_dbg_printf(stderr, cfg->verbose, "ncov      [%.3lf]\n", cfg->trn_cfg->max_northing_cov);
     s_dbg_printf(stderr, cfg->verbose, "nerr      [%.3lf]\n", cfg->trn_cfg->max_northing_err);
     s_dbg_printf(stderr, cfg->verbose, "ecov      [%.3lf]\n", cfg->trn_cfg->max_easting_cov);
@@ -764,7 +813,11 @@ static app_cfg_t *app_cfg_new()
         instance->log_name=strdup(TRNCLI_TEST_LOG_NAME);
         instance->log_dir=strdup(TRNCLI_TEST_LOG_DIR);
         instance->log_path=(char *)malloc(LOG_PATH_BYTES);
+#ifdef TRN_USE_PROJ
+        instance->crs=TRNCLI_CRS_DFL;
+#else
         instance->utm=TRNCLI_UTM_DFL;
+#endif
         instance->state_n=0;
         instance->tcli_connect_retries = TRNCLI_CONNECT_RETRIES;
         instance->mb1_read_retries = MB1_READ_RETRIES;
@@ -772,6 +825,12 @@ static app_cfg_t *app_cfg_new()
 
         instance->trn_cfg=trncfg_dnew();
         
+#ifdef TRN_USE_PROJ
+        if(NULL!=instance->trn_cfg->crs)free(instance->trn_cfg->crs);
+        instance->trn_cfg->crs = strdup(TRNCLI_TEST_TRNCFG_CRS);
+#else
+        instance->trn_cfg->utm_zone = instance->utm;
+#endif
         if(NULL!=instance->trn_cfg->map_file)free(instance->trn_cfg->map_file);
         instance->trn_cfg->map_file=strdup(TRNCLI_TEST_TRNCFG_MAP);
         if(NULL!=instance->trn_cfg->cfg_file)free(instance->trn_cfg->cfg_file);
@@ -782,7 +841,6 @@ static app_cfg_t *app_cfg_new()
         instance->trn_cfg->log_dir=strdup(TRNCLI_TEST_TRNCFG_LOGDIR);
         instance->trn_cfg->map_type = TRN_MAP_BO;
         instance->trn_cfg->filter_type = TRN_FILT_PARTICLE;
-        instance->trn_cfg->utm_zone = instance->utm;
         instance->trn_cfg->mod_weight = TRN_MWEIGHT_NONE;
         instance->trn_cfg->filter_reinit = TRN_FILT_REINIT_EN;
         instance->trn_cfg->filter_grade = TRN_GRD_HIGH;
@@ -1174,7 +1232,11 @@ static int s_trncli_show_trn_update(trncli_t *tcli, mb1_t *mb1, app_cfg_t *cfg)
             }
 
         } else {
+#ifdef TRN_USE_PROJ
+            wposet_mb1_to_pose(&pt, mb1, pjptr);
+#else
             wposet_mb1_to_pose(&pt, mb1, cfg->utm);
+#endif
         }
 
         test = trncli_get_bias_estimates(tcli, pt, &pt_dat, &mle_dat, &mse_dat);
@@ -1512,13 +1574,21 @@ static trncli_t **s_get_trncli_instance(app_cfg_t *cfg, bool force_new)
     static trncli_t *tcli_instance = NULL;
 
     if(NULL == tcli_instance){
+#ifdef TRN_USE_PROJ
+        tcli_instance = trncli_new(pjptr);
+#else
         tcli_instance = trncli_new(cfg->utm);
+#endif
         tcli_connected = false;
         tcli_initialized = false;
     } else if(force_new){
         trncli_disconnect(tcli_instance);
         trncli_destroy(&tcli_instance);
+#ifdef TRN_USE_PROJ
+        tcli_instance = trncli_new(pjptr);
+#else
         tcli_instance = trncli_new(cfg->utm);
+#endif
         tcli_connected = false;
         tcli_initialized = false;
     }
@@ -1695,8 +1765,14 @@ int main(int argc, char **argv)
     
     // parse command line args (update config)
     parse_args(argc, argv, cfg);
-
     s_init_log(argc,argv,cfg);
+    
+    // set crs
+#ifdef TRN_USE_PROJ
+	PJ *p = proj_create_crs_to_crs(PJ_DEFAULT_CTX, "EPSG:4326", cfg->crs, 0);
+	pjptr = (void *) proj_normalize_for_visualization(PJ_DEFAULT_CTX, p);
+	proj_destroy(p);
+#endif
     
     s_app_main(cfg);
 
@@ -1713,6 +1789,10 @@ int main(int argc, char **argv)
             fprintf(stderr, "ERR - could not remove log [%s] [%d:%s]\n", log_path, errno, strerror(errno));
         }
     }
+    
+#ifdef TRN_USE_PROJ
+	proj_destroy(pjptr);
+#endif
 
     app_cfg_destroy(&cfg);
 

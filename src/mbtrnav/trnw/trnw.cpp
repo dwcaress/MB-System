@@ -68,6 +68,9 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#ifdef TRN_USE_PROJ
+#include "proj.h"
+#endif
 #include "trnw.h"
 #include "TerrainNav.h"
 #include "NavUtils.h"
@@ -1149,6 +1152,53 @@ int wposet_pose_to_cdata(pt_cdata_t **dest, wposet_t *src)
     return retval;
 }
 
+#ifdef TRN_USE_PROJ
+int wposet_mb1_to_pose(wposet_t **dest, mb1_t *src, void *pjptr)
+{
+    int retval=-1;
+    if(NULL!=dest && NULL!=src && NULL!=pjptr){
+        wposet_t *pose = (wposet_t *)(*dest);
+        if(NULL==pose){
+            pose=wposet_dnew();
+            *dest=pose;
+        }
+        if(NULL!=pose){
+            poseT *obj = static_cast<poseT *>(pose->obj);
+            obj->time = src->ts;
+			PJ *p = (PJ *) pjptr;
+			PJ_COORD c;
+			c.v[0] = src->lon;
+			c.v[1] = src->lat;
+			c = proj_trans(p, PJ_FWD, c);
+			obj->x = c.v[1];
+			obj->y = c.v[0];
+            obj->z = src->depth;
+            obj->phi=0.0;
+            obj->theta=0.0;
+            obj->psi=src->hdg;
+            obj->gpsValid=(obj->z<2?true:false);
+            obj->bottomLock=true;
+            obj->dvlValid=true;
+            // TRN can't intialize if vx == 0
+            obj->vx = 0.01;
+            obj->vy = 0.;
+            obj->vz = 0.;
+            // wx not required; can use these (how determined?)
+            // obj->wx = -3.332e-002;
+            // obj->wy = -9.155e-003;
+            // obj->wz = -3.076e-002;
+            obj->wx = 0.;
+            obj->wy = 0.;
+            obj->wz = 0.;
+
+            retval=0;
+        }
+
+    }
+    return retval;
+}
+
+#else
 int wposet_mb1_to_pose(wposet_t **dest, mb1_t *src, long int utmZone)
 {
     int retval=-1;
@@ -1189,6 +1239,7 @@ int wposet_mb1_to_pose(wposet_t **dest, mb1_t *src, long int utmZone)
     }
     return retval;
 }
+#endif
 
 int wposet_msg_to_pose(wposet_t **dest, char *src)
 {
@@ -1428,6 +1479,53 @@ int wmeast_meas_to_cdata(mt_cdata_t **dest, wmeast_t *src)
     return retval;
 }
 
+#ifdef TRN_USE_PROJ
+int wmeast_mb1_to_meas(wmeast_t **dest, mb1_t *src, void *pjptr)
+{
+    int retval=-1;
+    if(NULL!=dest && NULL!=src && NULL!=pjptr){
+        wmeast_t *meas = (wmeast_t *)(*dest);
+        if(NULL==meas){
+            meas=wmeast_new(src->nbeams);
+            *dest=meas;
+        }
+        if(NULL!=meas){
+            int i=0;
+            measT *obj = static_cast<measT *>(meas->obj);
+            obj->time = src->ts;
+            obj->ping_number = src->ping_number;
+            obj->dataType=2;
+			PJ *p = (PJ *) pjptr;
+			PJ_COORD c;
+			c.v[0] = src->lon;
+			c.v[1] = src->lat;
+			c = proj_trans(p, PJ_FWD, c);
+			obj->x = c.v[1];
+			obj->y = c.v[0];
+            obj->z=src->depth;
+            for(i=0;i<obj->numMeas;i++){
+                // TODO: fill in measT from ping...
+                obj->beamNums[i] = src->beams[i].beam_num;
+                obj->alongTrack[i] = src->beams[i].rhox;
+                obj->crossTrack[i] = src->beams[i].rhoy;
+                obj->altitudes[i]  = src->beams[i].rhoz;
+                double rho[3] = {obj->alongTrack[i], obj->crossTrack[i], obj->altitudes[i]};
+                double rhoNorm = vnorm( rho );
+                obj->ranges[i] = rhoNorm;
+                // [rhoNorm = sqrt(ax^2 + ay^2 + az^2)] (i.e. range magnitude)
+                obj->measStatus[i] = rhoNorm>1?true:false;
+//                obj->covariance[i] = 0.0;
+//                obj->alphas[i]     = 0.0;
+            }
+
+            retval=0;
+        }
+
+    }
+    return retval;
+}
+
+#else
 int wmeast_mb1_to_meas(wmeast_t **dest, mb1_t *src, long int utmZone)
 {
     int retval=-1;
@@ -1469,6 +1567,8 @@ int wmeast_mb1_to_meas(wmeast_t **dest, mb1_t *src, long int utmZone)
     }
     return retval;
 }
+#endif
+
 int wmeast_msg_to_meas(wmeast_t **dest, char *src)
 {
     int retval=-1;
@@ -1748,8 +1848,14 @@ trn_config_t *trncfg_dnew()
     return instance;
 }
 
-trn_config_t *trncfg_new(char *host,int port,
-                         long int utm_zone, int map_type,
+trn_config_t *trncfg_new(char *host,
+                         int port,
+#ifdef TRN_USE_PROJ
+                         char *crs,
+#else
+                         long int utm_zone,
+#endif
+                         int map_type,
                          int sensor_type,
                          int filter_type,
                          int filter_grade,
@@ -1778,7 +1884,12 @@ trn_config_t *trncfg_new(char *host,int port,
         instance->sensor_type=sensor_type;
         instance->filter_type=filter_type;
         instance->map_type=map_type;
+#ifdef TRN_USE_PROJ
+        instance->crs=(NULL!=crs?strdup(crs):strdup("UTM10N"));
+#else
         instance->utm_zone=utm_zone;
+#endif
+
         instance->mod_weight=mod_weight;
         instance->filter_reinit=filter_reinit;
         instance->filter_grade=filter_grade;
@@ -1821,7 +1932,11 @@ void trncfg_show(trn_config_t *obj, bool verbose, int indent)
         fprintf(stderr,"%*s[self      %10p]\n",indent,(indent>0?" ":""), obj);
         fprintf(stderr,"%*s[host      %10s]\n",indent,(indent>0?" ":""), obj->trn_host);
         fprintf(stderr,"%*s[port      %10d]\n",indent,(indent>0?" ":""), obj->trn_port);
+#ifdef TRN_USE_PROJ
+        fprintf(stderr,"%*s[crs       %10s]\n",indent,(indent>0?" ":""), obj->crs);
+#else
         fprintf(stderr,"%*s[utm       %10ld]\n",indent,(indent>0?" ":""), obj->utm_zone);
+#endif
         fprintf(stderr,"%*s[mtype     %10d]\n",indent,(indent>0?" ":""), obj->map_type);
         fprintf(stderr,"%*s[ftype     %10d]\n",indent,(indent>0?" ":""), obj->filter_type);
         fprintf(stderr,"%*s[map_file  %10s]\n",indent,(indent>0?" ":""), obj->map_file);

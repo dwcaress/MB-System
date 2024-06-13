@@ -37,8 +37,8 @@
 #include <stdint.h>
 
 /* Define version and date for this release */
-#define MB_VERSION "5.8.2beta05"
-#define MB_VERSION_DATE "19 May 2024"
+#define MB_VERSION "5.8.2beta06"
+#define MB_VERSION_DATE "13 June 2024"
 
 /* CMake supports current OS's and so there is only one form of RPC and XDR and no mb_config.h file */
 #ifdef CMAKE_BUILD_SYSTEM
@@ -559,6 +559,7 @@ int mb_buffer_get_kind(int verbose, void *buff_ptr, void *mbio_ptr, int id, int 
 int mb_buffer_get_ptr(int verbose, void *buff_ptr, void *mbio_ptr, int id, void **store_ptr, int *error);
 
 int mb_coor_scale(int verbose, double latitude, double *mtodeglon, double *mtodeglat);
+int mb_alvinxy_scale(int verbose, double latitude, double *mtodeglon, double *mtodeglat);
 int mb_apply_lonflip(int verbose, int lonflip, double *longitude);
 
 int mb_error(int, int, char **);
