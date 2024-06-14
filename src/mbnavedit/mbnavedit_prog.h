@@ -4,6 +4,12 @@
 #include "mb_define.h"
 #include "mb_color.h"
 
+/**
+All definitions and prototypes in this header are windows-system agnostic,
+since this header may be included by C++/Qt apps as well as older
+C/X11/Motif apps.
+
+*/
 
 #ifdef MBNAVEDIT_DECLARE_GLOBALS
 #define MBNAVEDIT_EXTERNAL
