@@ -128,7 +128,7 @@ int mbedit_init(int argc, char **argv,
 		void (*justifyString)(void *gPtr, char *string, int *width,
 				      int *ascent, int *descent),
 
-		/// Prepare for specified input file
+		/// Prepare for specified input file(s)
 		void (*parseDatalist)(char *file, int format),
 
 		/// Display error messages (e.g. with dialog)
@@ -140,11 +140,11 @@ int mbedit_init(int argc, char **argv,
 		/// Hide message dialog
 		int (*hideMessage)(void),
 
-		/// Enable GUI element that specified input file
-		void (*enableFileButton)(void),
+		/// Enable GUI element that specifies input file
+		void (*enableFileInput)(void),
 
-		/// Disable GUI element that specified input file		
-		void (*disableFileButton)(void),
+		/// Disable GUI element that specifies input file		
+		void (*disableFileInput)(void),
 
 		/// Enable GUI element that displays next plot
 		void (*enableNextButton)(void),

@@ -156,7 +156,7 @@ static void (*drawString)(void *gPtr, int x, int y, char *string,
 static void (*justifyString)(void *gPtr, char *string, int *width,
 			     int *ascent, int *descent);
 
-void (*prepareForInputFile)(char *file, int format);
+void (*parseDataList)(char *file, int format);
 int (*showError)(char *s1, char *s2, char *s3);
 int (*showMessage)(char *);
 int (*hideMessage)(void);
@@ -333,7 +333,7 @@ int mbedit_init(int argc, char **argv, int *startup_file,
 				      unsigned int color, int style),
 		void (*justifyStringArg)(void *gPtr, char *string, int *width,
 					 int *ascent, int *descent),
-		void (*prepareForInputFileArg)(char *file, int format),
+		void (*parseDataListArg)(char *file, int format),
 		int (*showErrorArg)(char *s1, char *s2, char *s3),
 		int (*showMessageArg)(char *),
 		int (*hideMessageArg)(void),		
@@ -349,7 +349,7 @@ int mbedit_init(int argc, char **argv, int *startup_file,
   fillRect = fillRectArg;
   drawString = drawStringArg;
   justifyString = justifyStringArg;
-  prepareForInputFile = prepareForInputFileArg;
+  parseDataList = parseDataListArg;
   showError = showErrorArg;
   showMessage = showMessageArg;
   hideMessage = hideMessageArg;
@@ -430,7 +430,7 @@ int mbedit_init(int argc, char **argv, int *startup_file,
     case 'I':
     case 'i':
       sscanf(optarg, "%s", ifile);
-      (*prepareForInputFile)(ifile, format);
+      (*parseDataList)(ifile, format);
       fileflag++;
       break;
     case 'X':
