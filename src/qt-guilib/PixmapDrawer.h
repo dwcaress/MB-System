@@ -11,8 +11,8 @@
 namespace mb_system {
 
   ///
-  /// Pointers to some methods of this class are passed to C functions,
-  /// hence must be declaared static.
+  /// Pointers to static methods of this class can be passed to and invoked
+  /// by C code
   class PixmapDrawer {
 
   public:
