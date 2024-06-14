@@ -19,8 +19,8 @@ C/X11/Motif apps.
 
 /* mbnavedit global control parameters */
 MBNAVEDIT_EXTERNAL int output_mode;
-MBNAVEDIT_EXTERNAL int run_mbprocess;  // TODO(schwehr): bool
-MBNAVEDIT_EXTERNAL int gui_mode;  // TODO(schwehr): bool
+MBNAVEDIT_EXTERNAL bool run_mbprocess; 
+MBNAVEDIT_EXTERNAL bool gui_mode; 
 MBNAVEDIT_EXTERNAL int data_show_max;
 MBNAVEDIT_EXTERNAL int data_show_size;
 MBNAVEDIT_EXTERNAL int data_step_max;
