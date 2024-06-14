@@ -34,8 +34,9 @@ public:
   /// specified on command line
   bool initialize(QObject *loadedRoot, int argc, char **argv);
 
-  static void prepareForDataInput(char *file, int format) {
-    std::cout << "prepareForDataInput() not implemented\n";
+  /// Prepare for input of one or more specified swath data files
+  static void parseDataList(char *file, int format) {
+    std::cout << "parseDataList() not implemented\n";
     return;
   }
 
@@ -59,12 +60,12 @@ public:
     return 0;
   }
 
-  static void enableFileButton(void) {
-    std::cerr << "enableFileButton\n";
+  static void enableFileInput(void) {
+    std::cerr << "enableFileInput\n";
   }
 
-  static void disableFileButton(void) {
-    std::cerr << "disableFileButton\n";
+  static void disableFileInput(void) {
+    std::cerr << "disableFileInput\n";
   }
 
   static void enableNextButton(void) {
@@ -116,9 +117,6 @@ protected:
   static void resetScaleXSlider(int width, int xMax,
 				int xInterval, int yInterval);
 
-  /// Return color name corresponding to input mbedit_color
-  static const char *colorName(DrawingColor color);
-  
   /// Dummy first argument to canvas-drawing member funtions
   void *dummy_;
 
