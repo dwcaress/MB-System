@@ -232,7 +232,7 @@ static void (*justifyString)(void *gPtr, char *string, int *width,
                              int *ascent, int *descent);
 
 /// Prepare to process input file (or files from datalist)
-static int (*prepForInputFile)(char *file, int format);
+static int (*parseInputDataList)(char *file, int format);
 
 /// Show error, consisting of three strings
 int (*showError)(char *s1, char *s2, char *s3);
@@ -346,7 +346,7 @@ int mbnavedit_init(int argc, char **argv, bool *startup_file,
 		   void (*justifyStringArg)(void *gPtr, char *string,
 					    int *width,
 					    int *ascent, int *descent),
-		   void (*prepForInputFileArg)(char *file, int format),
+		   void (*parseInputDataListArg)(char *file, int format),
 		   int (*showErrorArg)(char *s1, char *s2, char *s3),
 		   int (*showMessageArg)(char *),
 		   int (*hideMessageArg)(void),
@@ -438,7 +438,7 @@ int mbnavedit_init(int argc, char **argv, bool *startup_file,
     case 'I':
     case 'i':
       sscanf(optarg, "%s", ifile);
-      (*prepForInputFile)(ifile, format);
+      (*parseInputDataList)(ifile, format);
       fileflag++;
       break;
     case 'N':
@@ -5402,3 +5402,7 @@ int mbnavedit_plot_draft_value(int iplot, int iping) {
   return (status);
 }
 /*--------------------------------------------------------------------*/
+
+void mbnavedit_set_inputfile(char *filename) {
+  strcpy(ifile, filename);
+}

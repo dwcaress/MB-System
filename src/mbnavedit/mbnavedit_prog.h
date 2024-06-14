@@ -1,8 +1,96 @@
 #ifndef MBNAVEDIT_PROG_H
 #define MBNAVEDIT_PROG_H
 
+#include "mb_define.h"
 #include "mb_color.h"
 
+
+#ifdef MBNAVEDIT_DECLARE_GLOBALS
+#define MBNAVEDIT_EXTERNAL
+#else
+#define MBNAVEDIT_EXTERNAL extern
+#endif
+
+/* mbnavedit global control parameters */
+MBNAVEDIT_EXTERNAL int output_mode;
+MBNAVEDIT_EXTERNAL int run_mbprocess;  // TODO(schwehr): bool
+MBNAVEDIT_EXTERNAL int gui_mode;  // TODO(schwehr): bool
+MBNAVEDIT_EXTERNAL int data_show_max;
+MBNAVEDIT_EXTERNAL int data_show_size;
+MBNAVEDIT_EXTERNAL int data_step_max;
+MBNAVEDIT_EXTERNAL int data_step_size;
+MBNAVEDIT_EXTERNAL int mode_pick;
+MBNAVEDIT_EXTERNAL int mode_set_interval;
+MBNAVEDIT_EXTERNAL int plot_tint;
+MBNAVEDIT_EXTERNAL int plot_tint_org;
+MBNAVEDIT_EXTERNAL int plot_lon;
+MBNAVEDIT_EXTERNAL int plot_lon_org;
+MBNAVEDIT_EXTERNAL int plot_lon_dr;
+MBNAVEDIT_EXTERNAL int plot_lat;
+MBNAVEDIT_EXTERNAL int plot_lat_org;
+MBNAVEDIT_EXTERNAL int plot_lat_dr;
+MBNAVEDIT_EXTERNAL int plot_speed;
+MBNAVEDIT_EXTERNAL int plot_speed_org;
+MBNAVEDIT_EXTERNAL int plot_smg;
+MBNAVEDIT_EXTERNAL int plot_heading;
+MBNAVEDIT_EXTERNAL int plot_heading_org;
+MBNAVEDIT_EXTERNAL int plot_cmg;
+MBNAVEDIT_EXTERNAL int plot_draft;
+MBNAVEDIT_EXTERNAL int plot_draft_org;
+MBNAVEDIT_EXTERNAL int plot_draft_dr;
+MBNAVEDIT_EXTERNAL int plot_roll;
+MBNAVEDIT_EXTERNAL int plot_pitch;
+MBNAVEDIT_EXTERNAL int plot_heave;
+MBNAVEDIT_EXTERNAL int mean_time_window;
+MBNAVEDIT_EXTERNAL int drift_lon;
+MBNAVEDIT_EXTERNAL int drift_lat;
+MBNAVEDIT_EXTERNAL int timestamp_problem;  // TODO(schwehr): bool
+MBNAVEDIT_EXTERNAL int use_ping_data;  // TODO(schwehr): bool
+MBNAVEDIT_EXTERNAL int strip_comments;  // TODO(schwehr): bool
+MBNAVEDIT_EXTERNAL int format;
+MBNAVEDIT_EXTERNAL char ifile[MB_PATH_MAXLINE];
+MBNAVEDIT_EXTERNAL char nfile[MB_PATHPLUS_MAXLINE];
+MBNAVEDIT_EXTERNAL int nfile_defined;
+MBNAVEDIT_EXTERNAL int model_mode;
+MBNAVEDIT_EXTERNAL double weight_speed;
+MBNAVEDIT_EXTERNAL double weight_acceleration;
+MBNAVEDIT_EXTERNAL int scrollcount;
+MBNAVEDIT_EXTERNAL double offset_lon;
+MBNAVEDIT_EXTERNAL double offset_lat;
+MBNAVEDIT_EXTERNAL double offset_lon_applied;
+MBNAVEDIT_EXTERNAL double offset_lat_applied;
+
+/* mbnavedit plot size parameters */
+MBNAVEDIT_EXTERNAL int plot_width;
+MBNAVEDIT_EXTERNAL int plot_height;
+MBNAVEDIT_EXTERNAL int number_plots;
+MBNAVEDIT_EXTERNAL int window_width;
+MBNAVEDIT_EXTERNAL int window_height;
+
+/* Mode value defines */
+#define PICK_MODE_PICK 0
+#define PICK_MODE_SELECT 1
+#define PICK_MODE_DESELECT 2
+#define PICK_MODE_SELECTALL 3
+#define PICK_MODE_DESELECTALL 4
+#define OUTPUT_MODE_OUTPUT 0
+#define OUTPUT_MODE_BROWSE 1
+#define PLOT_TINT 0
+#define PLOT_LONGITUDE 1
+#define PLOT_LATITUDE 2
+#define PLOT_SPEED 3
+#define PLOT_HEADING 4
+#define PLOT_DRAFT 5
+#define PLOT_ROLL 6
+#define PLOT_PITCH 7
+#define PLOT_HEAVE 8
+#define MODEL_MODE_OFF 0
+#define MODEL_MODE_MEAN 1
+#define MODEL_MODE_DR 2
+#define MODEL_MODE_INVERT 3
+#define NUM_FILES_MAX 1000
+
+// Function prototypes
 int mbnavedit_init(int argc, char **argv, bool *startup_file,
 		   /// graphics context pointer for use by referenced
 		   /// graphics function (may be null)
@@ -30,8 +118,8 @@ int mbnavedit_init(int argc, char **argv, bool *startup_file,
 		   void (*justifyString)(void *gPtr, char *string, int *width,
 					 int *ascent, int *descent),
 
-		   /// Prepare for specified input file
-		   void (*prepForInputFile)(char *file, int format),
+		   /// Prepare for specified input file(s)
+		   void (*parseInputDataList)(char *file, int format),
 
 		   /// Display error messages (e.g. with dialog)
 		   int (*showError)(char *s1, char *s2, char *s3),
@@ -164,6 +252,9 @@ int mbnavedit_plot_speed_value(int iplot, int iping);
 int mbnavedit_plot_heading_value(int iplot, int iping);
 
 int mbnavedit_plot_draft_value(int iplot, int iping);
+
+/// Set input filename
+void mbnavedit_set_inputfile(char *filename);
 
 #endif
 
