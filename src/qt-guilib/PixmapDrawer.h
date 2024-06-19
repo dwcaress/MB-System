@@ -16,7 +16,7 @@ namespace mb_system {
 
   public:
 
-    PixmapDrawer(QPainter *painter);
+    PixmapDrawer();
     
     static void drawLine(QPainter *painter, int x1, int y1, int x2, int y2,
 			 DrawingColor color, int style);
@@ -34,7 +34,8 @@ namespace mb_system {
 			      int *ascent, int *descent);
 
     /// Return color name corresponding to specified DrawingColor
-    const char colorName(DrawingColor color);
+    static const char *colorName(DrawingColor color);
+    
   protected:
 
     /// Set QPainter pen color and style

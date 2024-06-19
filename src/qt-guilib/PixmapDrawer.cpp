@@ -4,20 +4,13 @@
 #include "PixmapDrawer.h"
 
 
-QPainter *mb_system::PixmapDrawer::painter_ = nullptr;
 QFontMetrics *mb_system::PixmapDrawer::fontMetrics_ = nullptr;
 QString mb_system::PixmapDrawer::textBuf_;
 
 using namespace mb_system;
 
 
-PixmapDrawer::PixmapDrawer(QPainter *painter) {
-
-  if (!painter) {
-    qWarning("PixmapDrawer::PixmapDrawer(): null painter pointer");
-  }
-  
-  painter_ = painter;
+PixmapDrawer::PixmapDrawer() {
 }
 
 
@@ -25,7 +18,7 @@ void PixmapDrawer::drawLine(QPainter *painter,
 			    int x1, int y1, int x2, int y2,
 			    DrawingColor color, int style) {
 
-  setPenColorAndStyle(color, style);
+  setPenColorAndStyle(painter, color, style);
   
   painter->drawLine(x1, y1, x2, y2);
 }
@@ -36,7 +29,7 @@ void PixmapDrawer::drawRect(QPainter *painter,
 			  int x, int y, int width, int height,
 			  DrawingColor color, int style) {
 
-  setPenColorAndStyle(color, style);
+  setPenColorAndStyle(painter, color, style);
 
   painter->drawRect(x, y, width, height);
 }
@@ -47,7 +40,7 @@ void PixmapDrawer::drawString(QPainter *painter, int x, int y, char *string,
 
   QString textBuf;
   QTextStream(&textBuf) << string;
-  setPenColorAndStyle(color, style);
+  setPenColorAndStyle(painter, color, style);
   painter->drawText(x, y, textBuf);
 }
 
@@ -56,7 +49,7 @@ void PixmapDrawer::fillRect(QPainter *painter,
 			  int x, int y, int width, int height,
 			  DrawingColor color, int style) {
 
-  setPenColorAndStyle(color, style);
+  setPenColorAndStyle(painter, color, style);
 
   // Set fill color
   painter->fillRect(x, y, width, height, colorName(color));
