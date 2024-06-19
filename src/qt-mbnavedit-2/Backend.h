@@ -238,7 +238,6 @@ protected:
   int format_;
   char ifile_[MB_PATH_MAXLINE];
   char nfile_[MB_PATHPLUS_MAXLINE];
-  int nfileDefined_;
   int modelMode_;
   double weightSpeed_;
   double weightAccel_;
@@ -252,9 +251,6 @@ protected:
   int plotWidth_;
   int plotHeight_;
   int nPlots_;
-  int windowWidth_;
-  int windowHeight_;
-
 
   /* ------- FORMER mnavedit_prog  global variables ------- */
 /* id variables */
