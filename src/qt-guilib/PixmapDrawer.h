@@ -11,44 +11,37 @@
 namespace mb_system {
 
   ///
-  /// Pointers to static methods of this class can be passed to and invoked
-  /// by C code
+  /// Primitive methods for drawing shapes into QPixmap
   class PixmapDrawer {
 
   public:
 
     PixmapDrawer(QPainter *painter);
     
-    static void drawLine(void *dummy, int x1, int y1, int x2, int y2,
-		       DrawingColor color, int style);
+    static void drawLine(QPainter *painter, int x1, int y1, int x2, int y2,
+			 DrawingColor color, int style);
   
-    static void drawRect(void *dummy, int x, int y, int width, int height,
-		       DrawingColor color, int style);
+    static void drawRect(QPainter *painter, int x, int y, int width, int height,
+			 DrawingColor color, int style);
   
-    static void fillRect(void *dummy, int x, int y, int width, int height,
+    static void fillRect(QPainter *painter, int x, int y, int width, int height,
 			 DrawingColor color, int style);
 
-    static void drawString(void *dummy, int x, int y, char *string,
+    static void drawString(QPainter *painter, int x, int y, char *string,
 			   DrawingColor color, int style);
   
-    static void justifyString(void *dummy, char *string, int *width,
+    static void justifyString(QPainter *painter, char *string, int *width,
 			      int *ascent, int *descent);
 
-    /// Return color name corresponding to input mbedit_color
-    static const char *colorName(DrawingColor color);
-
-    /// Set QPainter static pointer member
-    static void setPainter(QPainter *painter) {
-      painter_ = painter;
-    }
-    
+    /// Return color name corresponding to specified DrawingColor
+    const char colorName(DrawingColor color);
   protected:
 
     /// Set QPainter pen color and style
-    static void setPenColorAndStyle(DrawingColor color, int style);
+    static void setPenColorAndStyle(QPainter *painter, DrawingColor color,
+				    int style);
 
     
-    static QPainter *painter_;
     static QString textBuf_;
     static QFontMetrics *fontMetrics_;    
   };

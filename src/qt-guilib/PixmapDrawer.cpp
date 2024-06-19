@@ -21,60 +21,59 @@ PixmapDrawer::PixmapDrawer(QPainter *painter) {
 }
 
 
-void PixmapDrawer::drawLine(void *dummy,
+void PixmapDrawer::drawLine(QPainter *painter,
 			    int x1, int y1, int x2, int y2,
 			    DrawingColor color, int style) {
 
   setPenColorAndStyle(color, style);
   
-  painter_->drawLine(x1, y1, x2, y2);
+  painter->drawLine(x1, y1, x2, y2);
 }
 
 
 
-void PixmapDrawer::drawRect(void *dummy,
+void PixmapDrawer::drawRect(QPainter *painter,
 			  int x, int y, int width, int height,
 			  DrawingColor color, int style) {
 
   setPenColorAndStyle(color, style);
 
-  painter_->drawRect(x, y, width, height);
+  painter->drawRect(x, y, width, height);
 }
 
 
-void PixmapDrawer::drawString(void *dummy, int x, int y, char *string,
+void PixmapDrawer::drawString(QPainter *painter, int x, int y, char *string,
 			    DrawingColor color, int style) {
 
   QString textBuf;
   QTextStream(&textBuf) << string;
   setPenColorAndStyle(color, style);
-  painter_->drawText(x, y, textBuf);
+  painter->drawText(x, y, textBuf);
 }
 
 
-void PixmapDrawer::fillRect(void *dummy,
+void PixmapDrawer::fillRect(QPainter *painter,
 			  int x, int y, int width, int height,
 			  DrawingColor color, int style) {
 
   setPenColorAndStyle(color, style);
 
   // Set fill color
-  painter_->fillRect(x, y, width, height, colorName(color));
+  painter->fillRect(x, y, width, height, colorName(color));
 }
 
 
-void PixmapDrawer::justifyString(void *dummy, char *string,
+void PixmapDrawer::justifyString(QPainter *painter, char *string,
 			       int *width, int *ascent, int *descent) {
 
   if (!fontMetrics_) {
-    fontMetrics_ = new QFontMetrics(painter_->font());
+    fontMetrics_ = new QFontMetrics(painter->font());
   }
   
   *width = fontMetrics_->width(string);
   *ascent = fontMetrics_->ascent();
   *descent = fontMetrics_->descent();
 }
-
 
 const char *PixmapDrawer::colorName(DrawingColor color) {
   switch (color) {
@@ -113,14 +112,16 @@ const char *PixmapDrawer::colorName(DrawingColor color) {
 }
 
 
-void PixmapDrawer::setPenColorAndStyle(DrawingColor color, int style) {
+
+void PixmapDrawer::setPenColorAndStyle(QPainter *painter, DrawingColor color,
+				       int style) {
 
   if (style == DASH_LINE) {
-    painter_->setPen(Qt::DashLine);
+    painter->setPen(Qt::DashLine);
   }
   else {
-    painter_->setPen(Qt::SolidLine);    
+    painter->setPen(Qt::SolidLine);    
   }
-  painter_->setPen(colorName(color));
+  painter->setPen(colorName(color));
   
 }
