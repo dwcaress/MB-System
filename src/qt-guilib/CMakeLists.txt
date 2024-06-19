@@ -61,7 +61,7 @@ set(src
     Utilities.cpp
     ClickableLabel.cpp
     Emitter.cpp
-    PixmapDrawer.cpp
+    CPixmapDrawer.cpp
     PixmapImage.cpp
     resources.qrc)
 
