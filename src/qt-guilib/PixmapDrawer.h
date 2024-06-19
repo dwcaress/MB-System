@@ -21,11 +21,13 @@ namespace mb_system {
     static void drawLine(QPainter *painter, int x1, int y1, int x2, int y2,
 			 DrawingColor color, int style);
   
-    static void drawRect(QPainter *painter, int x, int y, int width, int height,
-			 DrawingColor color, int style);
+    static void drawRectangle(QPainter *painter, int x, int y,
+			      int width, int height,
+			      DrawingColor color, int style);
   
-    static void fillRect(QPainter *painter, int x, int y, int width, int height,
-			 DrawingColor color, int style);
+    static void fillRectangle(QPainter *painter, int x, int y,
+			      int width, int height,
+			      DrawingColor color, int style);
 
     static void drawString(QPainter *painter, int x, int y, char *string,
 			   DrawingColor color, int style);

@@ -25,7 +25,7 @@ void PixmapDrawer::drawLine(QPainter *painter,
 
 
 
-void PixmapDrawer::drawRect(QPainter *painter,
+void PixmapDrawer::drawRectangle(QPainter *painter,
 			  int x, int y, int width, int height,
 			  DrawingColor color, int style) {
 
@@ -45,7 +45,7 @@ void PixmapDrawer::drawString(QPainter *painter, int x, int y, char *string,
 }
 
 
-void PixmapDrawer::fillRect(QPainter *painter,
+void PixmapDrawer::fillRectangle(QPainter *painter,
 			  int x, int y, int width, int height,
 			  DrawingColor color, int style) {
 
