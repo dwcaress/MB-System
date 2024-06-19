@@ -2,7 +2,7 @@
 #include <QTextStream>
 #include <QtGlobal>
 #include "CPixmapDrawer.h"
-
+#include "PixmapDrawer.h"
 
 QPainter *mb_system::CPixmapDrawer::painter_ = nullptr;
 QFontMetrics *mb_system::CPixmapDrawer::fontMetrics_ = nullptr;
@@ -59,7 +59,7 @@ void CPixmapDrawer::fillRect(void *dummy,
   setPenColorAndStyle(color, style);
 
   // Set fill color
-  painter_->fillRect(x, y, width, height, colorName(color));
+  painter_->fillRect(x, y, width, height, PixmapDrawer::colorName(color));
 }
 
 
@@ -76,43 +76,6 @@ void CPixmapDrawer::justifyString(void *dummy, char *string,
 }
 
 
-const char *CPixmapDrawer::colorName(DrawingColor color) {
-  switch (color) {
-  case WHITE:
-    return "white";
-
-  case BLACK:
-    return "black";
-
-  case RED:
-    return "red";
-
-  case GREEN:
-    return "green";
-    
-  case BLUE:
-    return "blue";
-
-  case ORANGE:
-    return "orange";
-
-  case PURPLE:
-    return "purple";
-    
-  case CORAL:
-    return "coral";
-
-  case LIGHTGREY:
-    return "lightGray";
-
-  default:
-    std::cerr << "colorName(): unknown color!\n";
-    return "black";
-  }  
-
-}
-
-
 void CPixmapDrawer::setPenColorAndStyle(DrawingColor color, int style) {
 
   if (style == DASH_LINE) {
@@ -121,6 +84,6 @@ void CPixmapDrawer::setPenColorAndStyle(DrawingColor color, int style) {
   else {
     painter_->setPen(Qt::SolidLine);    
   }
-  painter_->setPen(colorName(color));
+  painter_->setPen(PixmapDrawer::colorName(color));
   
 }

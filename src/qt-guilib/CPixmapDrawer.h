@@ -12,7 +12,7 @@ namespace mb_system {
 
   ///
   /// Pointers to static methods of this class can be passed to and invoked
-  /// by C code
+  /// by legacy MB-System C code
   class CPixmapDrawer {
 
   public:
@@ -33,9 +33,6 @@ namespace mb_system {
   
     static void justifyString(void *dummy, char *string, int *width,
 			      int *ascent, int *descent);
-
-    /// Return color name corresponding to input mbedit_color
-    static const char *colorName(DrawingColor color);
 
     /// Set QPainter static pointer member
     static void setPainter(QPainter *painter) {
