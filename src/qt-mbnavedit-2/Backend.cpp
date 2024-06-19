@@ -31,7 +31,7 @@ extern "C" {
 #include "mb_status.h"
 }
 
-struct Backend::Ping Backend::ping[MBNAVEDIT_BUFFER_SIZE] = {};
+Backend::Ping Backend::ping[MBNAVEDIT_BUFFER_SIZE] = {};
 
 /* Mode value defines */
 #define EDIT_MODE_PICK 0

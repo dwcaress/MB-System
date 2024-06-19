@@ -306,11 +306,13 @@ protected:
   bool firstRead_ = false;
 
   /* plotting control variables */
-  static struct Backend::Ping ping[MBNAVEDIT_BUFFER_SIZE];
+  /// Array of Ping structures; array size is very large so
+  /// make this member static to prevent memory overflow 
+  static Backend::Ping ping[MBNAVEDIT_BUFFER_SIZE];
   double plotStartTime_;
   double plotEndTime_;
   int nPlot_;
-  struct Backend::Plot plot_[NUMBER_PLOTS_MAX];
+  Backend::Plot plot_[NUMBER_PLOTS_MAX];
   int dataSave_;
   double fileStarttime_d_;
 
