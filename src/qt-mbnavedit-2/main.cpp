@@ -70,14 +70,14 @@ int main(int argc, char *argv[]) {
 		     &backend, SLOT(onMainWindowDestroyed()));
 
     // Backend C++ signals QML with message to display
-    if (!QObject::connect(&backend.staticEmitter_,
+    if (!QObject::connect(&backend.emitter_,
 			  SIGNAL(showMessage(QVariant)),
 			  rootObject, SLOT(showInfoDialog(QVariant)))) {
 
-      qWarning() << "**Failed to connect static showMessage() signal to QML";
+      qWarning() << "**Failed to connect showMessage() signal to QML";
     }
     else {
-      qDebug() << "connected to static emitter";
+      qDebug() << "connected to emitter";
     }
 
     if (!backend.initialize(rootObject, argc, argv)) {
