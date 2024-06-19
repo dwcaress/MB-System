@@ -22,13 +22,14 @@ PixmapDrawer::PixmapDrawer(QPainter *painter) {
 
 
 void PixmapDrawer::drawLine(void *dummy,
-			  int x1, int y1, int x2, int y2,
-			  DrawingColor color, int style) {
+			    int x1, int y1, int x2, int y2,
+			    DrawingColor color, int style) {
 
   setPenColorAndStyle(color, style);
   
   painter_->drawLine(x1, y1, x2, y2);
 }
+
 
 
 void PixmapDrawer::drawRect(void *dummy,
@@ -60,7 +61,6 @@ void PixmapDrawer::fillRect(void *dummy,
   // Set fill color
   painter_->fillRect(x, y, width, height, colorName(color));
 }
-
 
 
 void PixmapDrawer::justifyString(void *dummy, char *string,
