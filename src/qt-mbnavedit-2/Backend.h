@@ -25,7 +25,9 @@ extern "C" {
 #define DEFAULT_PLOT_HEIGHT 300
 #define MBNAVEDIT_PICK_DISTANCE 50
 #define MBNAVEDIT_ERASE_DISTANCE 10
+
 #define MBNAVEDIT_BUFFER_SIZE 1000000
+/// #define MBNAVEDIT_BUFFER_SIZE 10
 
 /** Backend application logic; QObject subclass, so it exchanges
     info with QML  */
@@ -48,23 +50,12 @@ public:
     return;
   }
 
-  static int showError(const char *s1, const char *s2, const char *s3) {
-    std::cerr << "showError(): " << s1 << "\n" << s2 << "\n" << s3 << "\n";
-    char msg[256];
-    sprintf(msg, "%s\n%s\n%s\n", s1, s2, s3);
-    emit staticEmitter_.showMessage(QVariant(msg));
-    return 0;
-  }
+  int showError(const char *s1, const char *s2, const char *s3);
 
-  static int showMessage(const char *message) {
-    std::cerr << "showMessage(): " << message << "\n";
-    emit staticEmitter_.showMessage(QVariant(message));
-    
-    return 0;
-  }
+  int showMessage(const char *message);
 
   static int hideMessage(void) {
-    std::cerr << "hideMessage()\n";
+    std::cerr << "hideMessage() not implemented\n";
     return 0;
   }
 
@@ -80,13 +71,13 @@ public:
     std::cerr << "setUiElements() not implemented!\n";
   }
 
-  /// Emit signals on behalf of static member functions
-  static mb_system::Emitter staticEmitter_;
+  /// Emit signals
+  mb_system::Emitter emitter_;
 
 
 protected:
 
-    struct mbnavedit_ping_struct {
+  struct Ping {
     int id;
     int record;
     int time_i[7];
@@ -135,7 +126,7 @@ protected:
   };
 
   /* plot structure definition */
-  struct mbnavedit_plot_struct {
+  struct Plot {
     int type;
     int ixmin;
     int ixmax;
@@ -183,9 +174,6 @@ protected:
   /// on edit-mode
   bool edit(double x, double y);
 
-  /// Dummy first argument to canvas-drawing member funtions
-  void *dummy_;
-
   /// Input swath file name
   char inputFilename_[256];
 
@@ -199,7 +187,7 @@ protected:
   bool dataPlotted_;
 
   /* ------- FORMER extern mbnavedit global variables ------- */
-/* mbnavedit global control parameters */
+  /* mbnavedit global control parameters */
   int outputMode_;
   bool runMBProcess_;
   bool guiMode_;
@@ -247,23 +235,23 @@ protected:
   double offsetLonApplied_;
   double offsetLatApplied_;
 
-/* mbnavedit plot size parameters */
+  /* mbnavedit plot size parameters */
   int plotWidth_;
   int plotHeight_;
   int nPlots_;
 
   /* ------- FORMER mnavedit_prog  global variables ------- */
-/* id variables */
+  /* id variables */
   const char *programName_;
   const char *helpMessage_;
   const char *usageMessage_;
 
-/* status variables */
+  /* status variables */
   int error_ = MB_ERROR_NO_ERROR;
   int verbose_ = 0;
   char *message_ = NULL;
 
-/* MBIO control parameters */
+  /* MBIO control parameters */
   int platformSource_;
   int navSource_;
   int sensorDepthSource_;
@@ -285,7 +273,7 @@ protected:
   void *imbioPtr_ = NULL;
   bool useLockFiles_ = true;
 
-/* mbio read and write values */
+  /* mbio read and write values */
   void *storePtr_ = NULL;
   int kind_;
   double distance_;
@@ -304,37 +292,27 @@ protected:
   double *ssAlongTrack_ = NULL;
   char comment_[MB_COMMENT_MAXLINE];
 
-/* buffer control variables */
-#define MBNAVEDIT_BUFFER_SIZE 1000000
-    bool fileOpen_ = false;
-    bool nfileOpen_ = false;
-    FILE *nfp_;
-    int holdSize_ = 100;
-    int nLoad_ = 0;
-    int nDump_ = 0;
-    int nBuff_ = 0;
-    int currentId_ = 0;
-    int nLoadTotal_ = 0;
-    int nDumpTotal_ = 0;
-    bool firstRead_ = false;
+  /* buffer control variables */
+  bool fileOpen_ = false;
+  bool nfileOpen_ = false;
+  FILE *nfp_;
+  int holdSize_ = 100;
+  int nLoad_ = 0;
+  int nDump_ = 0;
+  int nBuff_ = 0;
+  int currentId_ = 0;
+  int nLoadTotal_ = 0;
+  int nDumpTotal_ = 0;
+  bool firstRead_ = false;
 
-/* plotting control variables */
-#define NUMBER_PLOTS_MAX 9
-#define DEFAULT_PLOT_WIDTH 767
-#define DEFAULT_PLOT_HEIGHT 300
-#define MBNAVEDIT_PICK_DISTANCE 50
-#define MBNAVEDIT_ERASE_DISTANCE 10
- struct mbnavedit_ping_struct ping[MBNAVEDIT_BUFFER_SIZE];
-    double plotStartTime_;
- double plotEndTime_;
-    int nPlot_;
- void *mbnaveditXgid_;
- struct mbnavedit_plot_struct mbnavplot[NUMBER_PLOTS_MAX];
- int dataSave_;
- double fileStarttime_d_;
-
- int nColors_;
-  
+  /* plotting control variables */
+  static struct Backend::Ping ping[MBNAVEDIT_BUFFER_SIZE];
+  double plotStartTime_;
+  double plotEndTime_;
+  int nPlot_;
+  struct Backend::Plot plot_[NUMBER_PLOTS_MAX];
+  int dataSave_;
+  double fileStarttime_d_;
 
 
   // Member functions, formerly mbnavedit_prog stand-alone C functions 

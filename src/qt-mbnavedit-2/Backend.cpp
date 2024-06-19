@@ -31,6 +31,8 @@ extern "C" {
 #include "mb_status.h"
 }
 
+struct Backend::Ping Backend::ping[MBNAVEDIT_BUFFER_SIZE] = {};
+
 /* Mode value defines */
 #define EDIT_MODE_PICK 0
 #define EDIT_MODE_SELECT 1
@@ -59,7 +61,6 @@ using namespace mb_system;
 Backend::Backend(int argc, char **argv) {
 
   // Should give unused variable warning/error_
-  int dummy;
   programName_ = "MBNAVEDIT";
   helpMessage_ = "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data "
     "format supported by the MBIO library.\n";
@@ -211,6 +212,7 @@ bool Backend::processSwathFile(QUrl fileUrl) {
   qDebug() << "Invoke mbnavedit_prog functions to open and plot data";
 
   // Open swath file and plot data
+  strcpy(ifile_, swathFile);
   int status = mbnavedit_action_open(false);
 
   if (status != MB_SUCCESS) {
@@ -246,9 +248,9 @@ bool Backend::plotTest() {
 			 canvasPixmap_->height(),
 			 BLACK, SOLID_LINE);
 
-  CPixmapDrawer::drawLine(painter_, canvasPixmap_->width(), 0, 0,
-			  canvasPixmap_->height(),
-			  GREEN, DASH_LINE);
+  PixmapDrawer::drawLine(painter_, canvasPixmap_->width(), 0, 0,
+			 canvasPixmap_->height(),
+			 GREEN, DASH_LINE);
 
   PixmapDrawer::drawString(painter_, 100, 100, (char *)"this is coral",
 			   CORAL, SOLID_LINE);
@@ -497,12 +499,6 @@ int Backend::mbnavedit_set_graphics(void *xgid, int ncol) {
     fprintf(stderr, "dbg2       xgid:         %p\n", xgid);
     fprintf(stderr, "dbg2       ncolors:      %d\n", ncol);
   }
-
-  /* set graphics id */
-  mbnaveditXgid_ = xgid;
-
-  /* set colors */
-  nColors_ = ncol;
 
   const int status = MB_SUCCESS;
 
@@ -1645,8 +1641,8 @@ int Backend::mbnavedit_action_mouse_pick(int xx, int yy) {
   if (nPlot_ > 0) {
     /* figure out which plot the cursor is in */
     for (int iplot = 0; iplot < nPlots_; iplot++) {
-      if (xx >= mbnavplot[iplot].ixmin && xx <= mbnavplot[iplot].ixmax && yy <= mbnavplot[iplot].iymin &&
-	  yy >= mbnavplot[iplot].iymax)
+      if (xx >= plot_[iplot].ixmin && xx <= plot_[iplot].ixmax && yy <= plot_[iplot].iymin &&
+	  yy >= plot_[iplot].iymax)
 	active_plot = iplot;
     }
   }
@@ -1659,7 +1655,7 @@ int Backend::mbnavedit_action_mouse_pick(int xx, int yy) {
     bool deselect = false;
     for (int iplot = 0; iplot < nPlots_; iplot++) {
       if (iplot != active_plot) {
-	status = mbnavedit_action_deselect_all(mbnavplot[iplot].type);
+	status = mbnavedit_action_deselect_all(plot_[iplot].type);
 	if (status == MB_SUCCESS)
 	  deselect = true;
       }
@@ -1682,27 +1678,27 @@ int Backend::mbnavedit_action_mouse_pick(int xx, int yy) {
     int iy;
     for (int i = currentId_ + 1; i < currentId_ + nPlot_; i++) {
       // TODO(schwehr): Why not a switch?
-      if (mbnavplot[active_plot].type == PLOT_TINT) {
+      if (plot_[active_plot].type == PLOT_TINT) {
 	ix = xx - ping[i].tint_x;
 	iy = yy - ping[i].tint_y;
       }
-      else if (mbnavplot[active_plot].type == PLOT_LONGITUDE) {
+      else if (plot_[active_plot].type == PLOT_LONGITUDE) {
 	ix = xx - ping[i].lon_x;
 	iy = yy - ping[i].lon_y;
       }
-      else if (mbnavplot[active_plot].type == PLOT_LATITUDE) {
+      else if (plot_[active_plot].type == PLOT_LATITUDE) {
 	ix = xx - ping[i].lat_x;
 	iy = yy - ping[i].lat_y;
       }
-      else if (mbnavplot[active_plot].type == PLOT_SPEED) {
+      else if (plot_[active_plot].type == PLOT_SPEED) {
 	ix = xx - ping[i].speed_x;
 	iy = yy - ping[i].speed_y;
       }
-      else if (mbnavplot[active_plot].type == PLOT_HEADING) {
+      else if (plot_[active_plot].type == PLOT_HEADING) {
 	ix = xx - ping[i].heading_x;
 	iy = yy - ping[i].heading_y;
       }
-      else if (mbnavplot[active_plot].type == PLOT_DRAFT) {
+      else if (plot_[active_plot].type == PLOT_DRAFT) {
 	ix = xx - ping[i].draft_x;
 	iy = yy - ping[i].draft_y;
       }
@@ -1717,42 +1713,42 @@ int Backend::mbnavedit_action_mouse_pick(int xx, int yy) {
     /* if it is close enough select or unselect the value
        and replot it */
     if (range_min <= MBNAVEDIT_PICK_DISTANCE) {
-      if (mbnavplot[active_plot].type == PLOT_TINT) {
+      if (plot_[active_plot].type == PLOT_TINT) {
 	if (ping[iping].tint_select)
 	  ping[iping].tint_select = false;
 	else
 	  ping[iping].tint_select = true;
 	mbnavedit_plot_tint_value(active_plot, iping);
       }
-      else if (mbnavplot[active_plot].type == PLOT_LONGITUDE) {
+      else if (plot_[active_plot].type == PLOT_LONGITUDE) {
 	if (ping[iping].lon_select)
 	  ping[iping].lon_select = false;
 	else
 	  ping[iping].lon_select = true;
 	mbnavedit_plot_lon_value(active_plot, iping);
       }
-      else if (mbnavplot[active_plot].type == PLOT_LATITUDE) {
+      else if (plot_[active_plot].type == PLOT_LATITUDE) {
 	if (ping[iping].lat_select)
 	  ping[iping].lat_select = false;
 	else
 	  ping[iping].lat_select = true;
 	mbnavedit_plot_lat_value(active_plot, iping);
       }
-      else if (mbnavplot[active_plot].type == PLOT_SPEED) {
+      else if (plot_[active_plot].type == PLOT_SPEED) {
 	if (ping[iping].speed_select)
 	  ping[iping].speed_select = false;
 	else
 	  ping[iping].speed_select = true;
 	mbnavedit_plot_speed_value(active_plot, iping);
       }
-      else if (mbnavplot[active_plot].type == PLOT_HEADING) {
+      else if (plot_[active_plot].type == PLOT_HEADING) {
 	if (ping[iping].heading_select)
 	  ping[iping].heading_select = false;
 	else
 	  ping[iping].heading_select = true;
 	mbnavedit_plot_heading_value(active_plot, iping);
       }
-      else if (mbnavplot[active_plot].type == PLOT_DRAFT) {
+      else if (plot_[active_plot].type == PLOT_DRAFT) {
 	if (ping[iping].draft_select)
 	  ping[iping].draft_select = false;
 	else
@@ -1790,8 +1786,8 @@ int Backend::mbnavedit_action_mouse_select(int xx, int yy) {
 
     /* figure out which plot the cursor is in */
     for (int iplot = 0; iplot < nPlots_; iplot++) {
-      if (xx >= mbnavplot[iplot].ixmin && xx <= mbnavplot[iplot].ixmax && yy <= mbnavplot[iplot].iymin &&
-	  yy >= mbnavplot[iplot].iymax)
+      if (xx >= plot_[iplot].ixmin && xx <= plot_[iplot].ixmax && yy <= plot_[iplot].iymin &&
+	  yy >= plot_[iplot].iymax)
 	active_plot = iplot;
     }
   }
@@ -1805,7 +1801,7 @@ int Backend::mbnavedit_action_mouse_select(int xx, int yy) {
     bool deselect = false;
     for (int iplot = 0; iplot < nPlots_; iplot++) {
       if (iplot != active_plot) {
-	status = mbnavedit_action_deselect_all(mbnavplot[iplot].type);
+	status = mbnavedit_action_deselect_all(plot_[iplot].type);
 	if (status == MB_SUCCESS)
 	  deselect = true;
       }
@@ -1825,27 +1821,27 @@ int Backend::mbnavedit_action_mouse_select(int xx, int yy) {
     int ix;
     int iy;
     for (int i = currentId_; i < currentId_ + nPlot_; i++) {
-      if (mbnavplot[active_plot].type == PLOT_TINT) {
+      if (plot_[active_plot].type == PLOT_TINT) {
 	ix = xx - ping[i].tint_x;
 	iy = yy - ping[i].tint_y;
       }
-      else if (mbnavplot[active_plot].type == PLOT_LONGITUDE) {
+      else if (plot_[active_plot].type == PLOT_LONGITUDE) {
 	ix = xx - ping[i].lon_x;
 	iy = yy - ping[i].lon_y;
       }
-      else if (mbnavplot[active_plot].type == PLOT_LATITUDE) {
+      else if (plot_[active_plot].type == PLOT_LATITUDE) {
 	ix = xx - ping[i].lat_x;
 	iy = yy - ping[i].lat_y;
       }
-      else if (mbnavplot[active_plot].type == PLOT_SPEED) {
+      else if (plot_[active_plot].type == PLOT_SPEED) {
 	ix = xx - ping[i].speed_x;
 	iy = yy - ping[i].speed_y;
       }
-      else if (mbnavplot[active_plot].type == PLOT_HEADING) {
+      else if (plot_[active_plot].type == PLOT_HEADING) {
 	ix = xx - ping[i].heading_x;
 	iy = yy - ping[i].heading_y;
       }
-      else if (mbnavplot[active_plot].type == PLOT_DRAFT) {
+      else if (plot_[active_plot].type == PLOT_DRAFT) {
 	ix = xx - ping[i].draft_x;
 	iy = yy - ping[i].draft_y;
       }
@@ -1854,27 +1850,27 @@ int Backend::mbnavedit_action_mouse_select(int xx, int yy) {
       /* if it is close enough select the value
 	 and replot it */
       if (range <= MBNAVEDIT_ERASE_DISTANCE) {
-	if (mbnavplot[active_plot].type == PLOT_TINT) {
+	if (plot_[active_plot].type == PLOT_TINT) {
 	  ping[i].tint_select = true;
 	  mbnavedit_plot_tint_value(active_plot, i);
 	}
-	else if (mbnavplot[active_plot].type == PLOT_LONGITUDE) {
+	else if (plot_[active_plot].type == PLOT_LONGITUDE) {
 	  ping[i].lon_select = true;
 	  mbnavedit_plot_lon_value(active_plot, i);
 	}
-	else if (mbnavplot[active_plot].type == PLOT_LATITUDE) {
+	else if (plot_[active_plot].type == PLOT_LATITUDE) {
 	  ping[i].lat_select = true;
 	  mbnavedit_plot_lat_value(active_plot, i);
 	}
-	else if (mbnavplot[active_plot].type == PLOT_SPEED) {
+	else if (plot_[active_plot].type == PLOT_SPEED) {
 	  ping[i].speed_select = true;
 	  mbnavedit_plot_speed_value(active_plot, i);
 	}
-	else if (mbnavplot[active_plot].type == PLOT_HEADING) {
+	else if (plot_[active_plot].type == PLOT_HEADING) {
 	  ping[i].heading_select = true;
 	  mbnavedit_plot_heading_value(active_plot, i);
 	}
-	else if (mbnavplot[active_plot].type == PLOT_DRAFT) {
+	else if (plot_[active_plot].type == PLOT_DRAFT) {
 	  ping[i].draft_select = true;
 	  mbnavedit_plot_draft_value(active_plot, i);
 	}
@@ -1909,8 +1905,8 @@ int Backend::mbnavedit_action_mouse_deselect(int xx, int yy) {
   if (nPlot_ > 0) {
     /* figure out which plot the cursor is in */
     for (int iplot = 0; iplot < nPlots_; iplot++) {
-      if (xx >= mbnavplot[iplot].ixmin && xx <= mbnavplot[iplot].ixmax && yy <= mbnavplot[iplot].iymin &&
-	  yy >= mbnavplot[iplot].iymax)
+      if (xx >= plot_[iplot].ixmin && xx <= plot_[iplot].ixmax && yy <= plot_[iplot].iymin &&
+	  yy >= plot_[iplot].iymax)
 	active_plot = iplot;
     }
   }
@@ -1923,7 +1919,7 @@ int Backend::mbnavedit_action_mouse_deselect(int xx, int yy) {
     bool deselect = false;
     for (int iplot = 0; iplot < nPlots_; iplot++) {
       if (iplot != active_plot) {
-	status = mbnavedit_action_deselect_all(mbnavplot[iplot].type);
+	status = mbnavedit_action_deselect_all(plot_[iplot].type);
 	if (status == MB_SUCCESS)
 	  deselect = true;
       }
@@ -1943,27 +1939,27 @@ int Backend::mbnavedit_action_mouse_deselect(int xx, int yy) {
     int ix;
     int iy;
     for (int i = currentId_; i < currentId_ + nPlot_; i++) {
-      if (mbnavplot[active_plot].type == PLOT_TINT) {
+      if (plot_[active_plot].type == PLOT_TINT) {
 	ix = xx - ping[i].tint_x;
 	iy = yy - ping[i].tint_y;
       }
-      else if (mbnavplot[active_plot].type == PLOT_LONGITUDE) {
+      else if (plot_[active_plot].type == PLOT_LONGITUDE) {
 	ix = xx - ping[i].lon_x;
 	iy = yy - ping[i].lon_y;
       }
-      else if (mbnavplot[active_plot].type == PLOT_LATITUDE) {
+      else if (plot_[active_plot].type == PLOT_LATITUDE) {
 	ix = xx - ping[i].lat_x;
 	iy = yy - ping[i].lat_y;
       }
-      else if (mbnavplot[active_plot].type == PLOT_SPEED) {
+      else if (plot_[active_plot].type == PLOT_SPEED) {
 	ix = xx - ping[i].speed_x;
 	iy = yy - ping[i].speed_y;
       }
-      else if (mbnavplot[active_plot].type == PLOT_HEADING) {
+      else if (plot_[active_plot].type == PLOT_HEADING) {
 	ix = xx - ping[i].heading_x;
 	iy = yy - ping[i].heading_y;
       }
-      else if (mbnavplot[active_plot].type == PLOT_DRAFT) {
+      else if (plot_[active_plot].type == PLOT_DRAFT) {
 	ix = xx - ping[i].draft_x;
 	iy = yy - ping[i].draft_y;
       }
@@ -1972,27 +1968,27 @@ int Backend::mbnavedit_action_mouse_deselect(int xx, int yy) {
       /* if it is close enough deselect the value
 	 and replot it */
       if (range <= MBNAVEDIT_ERASE_DISTANCE) {
-	if (mbnavplot[active_plot].type == PLOT_TINT) {
+	if (plot_[active_plot].type == PLOT_TINT) {
 	  ping[i].tint_select = false;
 	  mbnavedit_plot_tint_value(active_plot, i);
 	}
-	else if (mbnavplot[active_plot].type == PLOT_LONGITUDE) {
+	else if (plot_[active_plot].type == PLOT_LONGITUDE) {
 	  ping[i].lon_select = false;
 	  mbnavedit_plot_lon_value(active_plot, i);
 	}
-	else if (mbnavplot[active_plot].type == PLOT_LATITUDE) {
+	else if (plot_[active_plot].type == PLOT_LATITUDE) {
 	  ping[i].lat_select = false;
 	  mbnavedit_plot_lat_value(active_plot, i);
 	}
-	else if (mbnavplot[active_plot].type == PLOT_SPEED) {
+	else if (plot_[active_plot].type == PLOT_SPEED) {
 	  ping[i].speed_select = false;
 	  mbnavedit_plot_speed_value(active_plot, i);
 	}
-	else if (mbnavplot[active_plot].type == PLOT_HEADING) {
+	else if (plot_[active_plot].type == PLOT_HEADING) {
 	  ping[i].heading_select = false;
 	  mbnavedit_plot_heading_value(active_plot, i);
 	}
-	else if (mbnavplot[active_plot].type == PLOT_DRAFT) {
+	else if (plot_[active_plot].type == PLOT_DRAFT) {
 	  ping[i].draft_select = false;
 	  mbnavedit_plot_draft_value(active_plot, i);
 	}
@@ -2028,8 +2024,8 @@ int Backend::mbnavedit_action_mouse_selectall(int xx, int yy) {
 
     /* figure out which plot the cursor is in */
     for (int iplot = 0; iplot < nPlots_; iplot++) {
-      if (xx >= mbnavplot[iplot].ixmin && xx <= mbnavplot[iplot].ixmax && yy <= mbnavplot[iplot].iymin &&
-	  yy >= mbnavplot[iplot].iymax)
+      if (xx >= plot_[iplot].ixmin && xx <= plot_[iplot].ixmax && yy <= plot_[iplot].iymin &&
+	  yy >= plot_[iplot].iymax)
 	active_plot = iplot;
     }
   }
@@ -2041,23 +2037,23 @@ int Backend::mbnavedit_action_mouse_selectall(int xx, int yy) {
     /* deselect everything in non-active plots */
     for (int iplot = 0; iplot < nPlots_; iplot++) {
       if (iplot != active_plot) {
-	mbnavedit_action_deselect_all(mbnavplot[iplot].type);
+	mbnavedit_action_deselect_all(plot_[iplot].type);
       }
     }
 
     /* select all data points in active plot */
     for (int i = currentId_; i < currentId_ + nPlot_; i++) {
-      if (mbnavplot[active_plot].type == PLOT_TINT)
+      if (plot_[active_plot].type == PLOT_TINT)
 	ping[i].tint_select = true;
-      else if (mbnavplot[active_plot].type == PLOT_LONGITUDE)
+      else if (plot_[active_plot].type == PLOT_LONGITUDE)
 	ping[i].lon_select = true;
-      else if (mbnavplot[active_plot].type == PLOT_LATITUDE)
+      else if (plot_[active_plot].type == PLOT_LATITUDE)
 	ping[i].lat_select = true;
-      else if (mbnavplot[active_plot].type == PLOT_SPEED)
+      else if (plot_[active_plot].type == PLOT_SPEED)
 	ping[i].speed_select = true;
-      else if (mbnavplot[active_plot].type == PLOT_HEADING)
+      else if (plot_[active_plot].type == PLOT_HEADING)
 	ping[i].heading_select = true;
-      else if (mbnavplot[active_plot].type == PLOT_DRAFT)
+      else if (plot_[active_plot].type == PLOT_DRAFT)
 	ping[i].draft_select = true;
     }
 
@@ -2215,29 +2211,29 @@ int Backend::mbnavedit_action_set_interval(int xx, int yy, int which) {
 	for (int i = 0; i < nPlots_; i++) {
 	  PixmapDrawer::drawLine(painter_,
 				 interval_bound1,
-				 mbnavplot[i].iymin,
+				 plot_[i].iymin,
 				 interval_bound1,
-				 mbnavplot[i].iymax,
+				 plot_[i].iymax,
 				 WHITE,
 				 DASH_LINE);
 	}
 
-      if (xx < mbnavplot[0].ixmin)
-	xx = mbnavplot[0].ixmin;
-      if (xx > mbnavplot[0].ixmax)
-	xx = mbnavplot[0].ixmax;
+      if (xx < plot_[0].ixmin)
+	xx = plot_[0].ixmin;
+      if (xx > plot_[0].ixmax)
+	xx = plot_[0].ixmax;
 
       /* get lower bound time and location */
       interval_bound1 = xx;
-      interval_time1 = mbnavplot[0].xmin + (xx - mbnavplot[0].ixmin) / mbnavplot[0].xscale;
+      interval_time1 = plot_[0].xmin + (xx - plot_[0].ixmin) / plot_[0].xscale;
       interval_set1 = true;
 
       /* plot line on all plots */
       for (int i = 0; i < nPlots_; i++) {
 	PixmapDrawer::drawLine(painter_, interval_bound1,
-			       mbnavplot[i].iymin,
+			       plot_[i].iymin,
 			       interval_bound1,
-			       mbnavplot[i].iymax,
+			       plot_[i].iymax,
 			       RED, DASH_LINE);
       }
     }
@@ -2249,28 +2245,28 @@ int Backend::mbnavedit_action_set_interval(int xx, int yy, int which) {
 	for (int i = 0; i < nPlots_; i++) {
 	  PixmapDrawer::drawLine(painter_,
 				 interval_bound2,
-				 mbnavplot[i].iymin,
+				 plot_[i].iymin,
 				 interval_bound2,
-				 mbnavplot[i].iymax,
+				 plot_[i].iymax,
 				 WHITE,
 				 DASH_LINE);
 	}
 
-      if (xx < mbnavplot[0].ixmin)
-	xx = mbnavplot[0].ixmin;
-      if (xx > mbnavplot[0].ixmax)
-	xx = mbnavplot[0].ixmax;
+      if (xx < plot_[0].ixmin)
+	xx = plot_[0].ixmin;
+      if (xx > plot_[0].ixmax)
+	xx = plot_[0].ixmax;
 
       /* get lower bound time and location */
       interval_bound2 = xx;
-      interval_time2 = mbnavplot[0].xmin + (xx - mbnavplot[0].ixmin) / mbnavplot[0].xscale;
+      interval_time2 = plot_[0].xmin + (xx - plot_[0].ixmin) / plot_[0].xscale;
       interval_set2 = true;
 
       /* plot line on all plots */
       for (int i = 0; i < nPlots_; i++) {
 	PixmapDrawer::drawLine(painter_, interval_bound2,
-			       mbnavplot[i].iymin,
-			       interval_bound2, mbnavplot[i].iymax,
+			       plot_[i].iymin,
+			       interval_bound2, plot_[i].iymax,
 			       RED, DASH_LINE);
       }
     }
@@ -2351,9 +2347,9 @@ int Backend::mbnavedit_action_use_dr(void) {
     /* make sure either a lon or lat plot is active */
     int active_plot = -1;
     for (int iplot = 0; iplot < nPlots_; iplot++) {
-      if (mbnavplot[iplot].type == PLOT_LONGITUDE)
+      if (plot_[iplot].type == PLOT_LONGITUDE)
 	active_plot = iplot;
-      else if (mbnavplot[iplot].type == PLOT_LATITUDE)
+      else if (plot_[iplot].type == PLOT_LATITUDE)
 	active_plot = iplot;
     }
 
@@ -2407,7 +2403,7 @@ int Backend::mbnavedit_action_use_smg(void) {
     /* figure out which plot is speed */
     int active_plot = -1;
     for (int iplot = 0; iplot < nPlots_; iplot++) {
-      if (mbnavplot[iplot].type == PLOT_SPEED)
+      if (plot_[iplot].type == PLOT_SPEED)
 	active_plot = iplot;
     }
 
@@ -2461,7 +2457,7 @@ int Backend::mbnavedit_action_use_cmg(void) {
     /* figure out which plot is heading */
     int active_plot = -1;
     for (int iplot = 0; iplot < nPlots_; iplot++) {
-      if (mbnavplot[iplot].type == PLOT_HEADING)
+      if (plot_[iplot].type == PLOT_HEADING)
 	active_plot = iplot;
     }
 
@@ -3010,7 +3006,7 @@ int Backend::mbnavedit_action_revert(void) {
     /* loop over each of the plots */
     for (int iplot = 0; iplot < nPlots_; iplot++) {
       for (int i = currentId_; i < currentId_ + nPlot_; i++) {
-	if (mbnavplot[iplot].type == PLOT_TINT) {
+	if (plot_[iplot].type == PLOT_TINT) {
 	  if (ping[i].tint_select) {
 	    ping[i].time_d = ping[i].time_d_org;
 	    ping[i].file_time_d = ping[i].time_d - fileStarttime_d_;
@@ -3021,31 +3017,31 @@ int Backend::mbnavedit_action_revert(void) {
 	    status = mb_get_date(verbose_, ping[i].time_d, ping[i].time_i);
 	  }
 	}
-	else if (mbnavplot[iplot].type == PLOT_LONGITUDE) {
+	else if (plot_[iplot].type == PLOT_LONGITUDE) {
 	  if (ping[i].lon_select) {
 	    ping[i].lon = ping[i].lon_org;
 	    timelonlat_change = true;
 	  }
 	}
-	else if (mbnavplot[iplot].type == PLOT_LATITUDE) {
+	else if (plot_[iplot].type == PLOT_LATITUDE) {
 	  if (ping[i].lat_select) {
 	    ping[i].lat = ping[i].lat_org;
 	    timelonlat_change = true;
 	  }
 	}
-	else if (mbnavplot[iplot].type == PLOT_SPEED) {
+	else if (plot_[iplot].type == PLOT_SPEED) {
 	  if (ping[i].speed_select) {
 	    ping[i].speed = ping[i].speed_org;
 	    speedheading_change = true;
 	  }
 	}
-	else if (mbnavplot[iplot].type == PLOT_HEADING) {
+	else if (plot_[iplot].type == PLOT_HEADING) {
 	  if (ping[i].heading_select) {
 	    ping[i].heading = ping[i].heading_org;
 	    speedheading_change = true;
 	  }
 	}
-	else if (mbnavplot[iplot].type == PLOT_DRAFT) {
+	else if (plot_[iplot].type == PLOT_DRAFT) {
 	  if (ping[i].draft_select) {
 	    ping[i].draft = ping[i].draft_org;
 	  }
@@ -3096,12 +3092,12 @@ int Backend::mbnavedit_action_flag(void) {
     /* loop over each of the plots */
     for (int iplot = 0; iplot < nPlots_; iplot++) {
       for (int i = currentId_; i < currentId_ + nPlot_; i++) {
-	if (mbnavplot[iplot].type == PLOT_LONGITUDE) {
+	if (plot_[iplot].type == PLOT_LONGITUDE) {
 	  if (ping[i].lon_select) {
 	    ping[i].lonlat_flag = true;
 	  }
 	}
-	else if (mbnavplot[iplot].type == PLOT_LATITUDE) {
+	else if (plot_[iplot].type == PLOT_LATITUDE) {
 	  if (ping[i].lat_select) {
 	    ping[i].lonlat_flag = true;
 	  }
@@ -3143,12 +3139,12 @@ int Backend::mbnavedit_action_unflag(void) {
     /* loop over each of the plots */
     for (int iplot = 0; iplot < nPlots_; iplot++) {
       for (int i = currentId_; i < currentId_ + nPlot_; i++) {
-	if (mbnavplot[iplot].type == PLOT_LONGITUDE) {
+	if (plot_[iplot].type == PLOT_LONGITUDE) {
 	  if (ping[i].lon_select) {
 	    ping[i].lonlat_flag = false;
 	  }
 	}
-	else if (mbnavplot[iplot].type == PLOT_LATITUDE) {
+	else if (plot_[iplot].type == PLOT_LATITUDE) {
 	  if (ping[i].lat_select) {
 	    ping[i].lonlat_flag = false;
 	  }
@@ -4165,201 +4161,201 @@ int Backend::mbnavedit_plot_all(void) {
     /* figure out how many plots to make */
     nPlots_ = 0;
     if (plotTint_) {
-      mbnavplot[nPlots_].type = PLOT_TINT;
-      mbnavplot[nPlots_].ixmin = 1.25 * margin_x;
-      mbnavplot[nPlots_].ixmax = plotWidth_ - margin_x / 2;
-      mbnavplot[nPlots_].iymin = plotHeight_ - margin_y + nPlots_ * plotHeight_;
-      mbnavplot[nPlots_].iymax = nPlots_ * plotHeight_ + margin_y;
-      mbnavplot[nPlots_].xmin = time_min;
-      mbnavplot[nPlots_].xmax = time_max;
-      mbnavplot[nPlots_].ymin = tint_min;
-      mbnavplot[nPlots_].ymax = tint_max;
-      mbnavplot[nPlots_].xscale = (mbnavplot[nPlots_].ixmax - mbnavplot[nPlots_].ixmin) /
-	(mbnavplot[nPlots_].xmax - mbnavplot[nPlots_].xmin);
-      mbnavplot[nPlots_].yscale = (mbnavplot[nPlots_].iymax - mbnavplot[nPlots_].iymin) /
-	(mbnavplot[nPlots_].ymax - mbnavplot[nPlots_].ymin);
-      mbnavplot[nPlots_].xinterval = 100.0;
-      mbnavplot[nPlots_].yinterval = 5.0;
-      sprintf(mbnavplot[nPlots_].xlabel, "Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", xtime_i[1], xtime_i[2],
+      plot_[nPlots_].type = PLOT_TINT;
+      plot_[nPlots_].ixmin = 1.25 * margin_x;
+      plot_[nPlots_].ixmax = plotWidth_ - margin_x / 2;
+      plot_[nPlots_].iymin = plotHeight_ - margin_y + nPlots_ * plotHeight_;
+      plot_[nPlots_].iymax = nPlots_ * plotHeight_ + margin_y;
+      plot_[nPlots_].xmin = time_min;
+      plot_[nPlots_].xmax = time_max;
+      plot_[nPlots_].ymin = tint_min;
+      plot_[nPlots_].ymax = tint_max;
+      plot_[nPlots_].xscale = (plot_[nPlots_].ixmax - plot_[nPlots_].ixmin) /
+	(plot_[nPlots_].xmax - plot_[nPlots_].xmin);
+      plot_[nPlots_].yscale = (plot_[nPlots_].iymax - plot_[nPlots_].iymin) /
+	(plot_[nPlots_].ymax - plot_[nPlots_].ymin);
+      plot_[nPlots_].xinterval = 100.0;
+      plot_[nPlots_].yinterval = 5.0;
+      sprintf(plot_[nPlots_].xlabel, "Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", xtime_i[1], xtime_i[2],
 	      xtime_i[0]);
-      sprintf(mbnavplot[nPlots_].ylabel1, "dT");
-      sprintf(mbnavplot[nPlots_].ylabel2, "(seconds)");
+      sprintf(plot_[nPlots_].ylabel1, "dT");
+      sprintf(plot_[nPlots_].ylabel2, "(seconds)");
       nPlots_++;
     }
     if (plotLon_) {
-      mbnavplot[nPlots_].type = PLOT_LONGITUDE;
-      mbnavplot[nPlots_].ixmin = 1.25 * margin_x;
-      mbnavplot[nPlots_].ixmax = plotWidth_ - margin_x / 2;
-      mbnavplot[nPlots_].iymin = plotHeight_ - margin_y + nPlots_ * plotHeight_;
-      mbnavplot[nPlots_].iymax = nPlots_ * plotHeight_ + margin_y;
-      mbnavplot[nPlots_].xmin = time_min;
-      mbnavplot[nPlots_].xmax = time_max;
-      mbnavplot[nPlots_].ymin = lon_min;
-      mbnavplot[nPlots_].ymax = lon_max;
-      mbnavplot[nPlots_].xscale = (mbnavplot[nPlots_].ixmax - mbnavplot[nPlots_].ixmin) /
-	(mbnavplot[nPlots_].xmax - mbnavplot[nPlots_].xmin);
-      mbnavplot[nPlots_].yscale = (mbnavplot[nPlots_].iymax - mbnavplot[nPlots_].iymin) /
-	(mbnavplot[nPlots_].ymax - mbnavplot[nPlots_].ymin);
-      mbnavplot[nPlots_].xinterval = 100.0;
-      mbnavplot[nPlots_].yinterval = 45.0;
-      sprintf(mbnavplot[nPlots_].xlabel, "Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", xtime_i[1], xtime_i[2],
+      plot_[nPlots_].type = PLOT_LONGITUDE;
+      plot_[nPlots_].ixmin = 1.25 * margin_x;
+      plot_[nPlots_].ixmax = plotWidth_ - margin_x / 2;
+      plot_[nPlots_].iymin = plotHeight_ - margin_y + nPlots_ * plotHeight_;
+      plot_[nPlots_].iymax = nPlots_ * plotHeight_ + margin_y;
+      plot_[nPlots_].xmin = time_min;
+      plot_[nPlots_].xmax = time_max;
+      plot_[nPlots_].ymin = lon_min;
+      plot_[nPlots_].ymax = lon_max;
+      plot_[nPlots_].xscale = (plot_[nPlots_].ixmax - plot_[nPlots_].ixmin) /
+	(plot_[nPlots_].xmax - plot_[nPlots_].xmin);
+      plot_[nPlots_].yscale = (plot_[nPlots_].iymax - plot_[nPlots_].iymin) /
+	(plot_[nPlots_].ymax - plot_[nPlots_].ymin);
+      plot_[nPlots_].xinterval = 100.0;
+      plot_[nPlots_].yinterval = 45.0;
+      sprintf(plot_[nPlots_].xlabel, "Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", xtime_i[1], xtime_i[2],
 	      xtime_i[0]);
-      sprintf(mbnavplot[nPlots_].ylabel1, "Longitude");
-      sprintf(mbnavplot[nPlots_].ylabel2, "(degrees)");
+      sprintf(plot_[nPlots_].ylabel1, "Longitude");
+      sprintf(plot_[nPlots_].ylabel2, "(degrees)");
       nPlots_++;
     }
     if (plotLat_) {
-      mbnavplot[nPlots_].type = PLOT_LATITUDE;
-      mbnavplot[nPlots_].ixmin = 1.25 * margin_x;
-      mbnavplot[nPlots_].ixmax = plotWidth_ - margin_x / 2;
-      mbnavplot[nPlots_].iymin = plotHeight_ - margin_y + nPlots_ * plotHeight_;
-      mbnavplot[nPlots_].iymax = nPlots_ * plotHeight_ + margin_y;
-      mbnavplot[nPlots_].xmin = time_min;
-      mbnavplot[nPlots_].xmax = time_max;
-      mbnavplot[nPlots_].ymin = lat_min;
-      mbnavplot[nPlots_].ymax = lat_max;
-      mbnavplot[nPlots_].xscale = (mbnavplot[nPlots_].ixmax - mbnavplot[nPlots_].ixmin) /
-	(mbnavplot[nPlots_].xmax - mbnavplot[nPlots_].xmin);
-      mbnavplot[nPlots_].yscale = (mbnavplot[nPlots_].iymax - mbnavplot[nPlots_].iymin) /
-	(mbnavplot[nPlots_].ymax - mbnavplot[nPlots_].ymin);
-      mbnavplot[nPlots_].xinterval = 100.0;
-      mbnavplot[nPlots_].yinterval = 45.0;
-      sprintf(mbnavplot[nPlots_].xlabel, "Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", xtime_i[1], xtime_i[2],
+      plot_[nPlots_].type = PLOT_LATITUDE;
+      plot_[nPlots_].ixmin = 1.25 * margin_x;
+      plot_[nPlots_].ixmax = plotWidth_ - margin_x / 2;
+      plot_[nPlots_].iymin = plotHeight_ - margin_y + nPlots_ * plotHeight_;
+      plot_[nPlots_].iymax = nPlots_ * plotHeight_ + margin_y;
+      plot_[nPlots_].xmin = time_min;
+      plot_[nPlots_].xmax = time_max;
+      plot_[nPlots_].ymin = lat_min;
+      plot_[nPlots_].ymax = lat_max;
+      plot_[nPlots_].xscale = (plot_[nPlots_].ixmax - plot_[nPlots_].ixmin) /
+	(plot_[nPlots_].xmax - plot_[nPlots_].xmin);
+      plot_[nPlots_].yscale = (plot_[nPlots_].iymax - plot_[nPlots_].iymin) /
+	(plot_[nPlots_].ymax - plot_[nPlots_].ymin);
+      plot_[nPlots_].xinterval = 100.0;
+      plot_[nPlots_].yinterval = 45.0;
+      sprintf(plot_[nPlots_].xlabel, "Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", xtime_i[1], xtime_i[2],
 	      xtime_i[0]);
-      sprintf(mbnavplot[nPlots_].ylabel1, "Latitude");
-      sprintf(mbnavplot[nPlots_].ylabel2, "(degrees)");
+      sprintf(plot_[nPlots_].ylabel1, "Latitude");
+      sprintf(plot_[nPlots_].ylabel2, "(degrees)");
       nPlots_++;
     }
     if (plotSpeed_) {
-      mbnavplot[nPlots_].type = PLOT_SPEED;
-      mbnavplot[nPlots_].ixmin = 1.25 * margin_x;
-      mbnavplot[nPlots_].ixmax = plotWidth_ - margin_x / 2;
-      mbnavplot[nPlots_].iymin = plotHeight_ - margin_y + nPlots_ * plotHeight_;
-      mbnavplot[nPlots_].iymax = nPlots_ * plotHeight_ + margin_y;
-      mbnavplot[nPlots_].xmin = time_min;
-      mbnavplot[nPlots_].xmax = time_max;
-      mbnavplot[nPlots_].ymin = speed_min;
-      mbnavplot[nPlots_].ymax = speed_max;
-      mbnavplot[nPlots_].xscale = (mbnavplot[nPlots_].ixmax - mbnavplot[nPlots_].ixmin) /
-	(mbnavplot[nPlots_].xmax - mbnavplot[nPlots_].xmin);
-      mbnavplot[nPlots_].yscale = (mbnavplot[nPlots_].iymax - mbnavplot[nPlots_].iymin) /
-	(mbnavplot[nPlots_].ymax - mbnavplot[nPlots_].ymin);
-      mbnavplot[nPlots_].xinterval = 100.0;
-      mbnavplot[nPlots_].yinterval = 10;
-      sprintf(mbnavplot[nPlots_].xlabel, "Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", xtime_i[1], xtime_i[2],
+      plot_[nPlots_].type = PLOT_SPEED;
+      plot_[nPlots_].ixmin = 1.25 * margin_x;
+      plot_[nPlots_].ixmax = plotWidth_ - margin_x / 2;
+      plot_[nPlots_].iymin = plotHeight_ - margin_y + nPlots_ * plotHeight_;
+      plot_[nPlots_].iymax = nPlots_ * plotHeight_ + margin_y;
+      plot_[nPlots_].xmin = time_min;
+      plot_[nPlots_].xmax = time_max;
+      plot_[nPlots_].ymin = speed_min;
+      plot_[nPlots_].ymax = speed_max;
+      plot_[nPlots_].xscale = (plot_[nPlots_].ixmax - plot_[nPlots_].ixmin) /
+	(plot_[nPlots_].xmax - plot_[nPlots_].xmin);
+      plot_[nPlots_].yscale = (plot_[nPlots_].iymax - plot_[nPlots_].iymin) /
+	(plot_[nPlots_].ymax - plot_[nPlots_].ymin);
+      plot_[nPlots_].xinterval = 100.0;
+      plot_[nPlots_].yinterval = 10;
+      sprintf(plot_[nPlots_].xlabel, "Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", xtime_i[1], xtime_i[2],
 	      xtime_i[0]);
-      sprintf(mbnavplot[nPlots_].ylabel1, "Speed");
-      sprintf(mbnavplot[nPlots_].ylabel2, "(km/hr)");
+      sprintf(plot_[nPlots_].ylabel1, "Speed");
+      sprintf(plot_[nPlots_].ylabel2, "(km/hr)");
       nPlots_++;
     }
     if (plotHeading_) {
-      mbnavplot[nPlots_].type = PLOT_HEADING;
-      mbnavplot[nPlots_].ixmin = 1.25 * margin_x;
-      mbnavplot[nPlots_].ixmax = plotWidth_ - margin_x / 2;
-      mbnavplot[nPlots_].iymin = plotHeight_ - margin_y + nPlots_ * plotHeight_;
-      mbnavplot[nPlots_].iymax = nPlots_ * plotHeight_ + margin_y;
-      mbnavplot[nPlots_].xmin = time_min;
-      mbnavplot[nPlots_].xmax = time_max;
-      mbnavplot[nPlots_].ymin = heading_min;
-      mbnavplot[nPlots_].ymax = heading_max;
-      mbnavplot[nPlots_].xscale = (mbnavplot[nPlots_].ixmax - mbnavplot[nPlots_].ixmin) /
-	(mbnavplot[nPlots_].xmax - mbnavplot[nPlots_].xmin);
-      mbnavplot[nPlots_].yscale = (mbnavplot[nPlots_].iymax - mbnavplot[nPlots_].iymin) /
-	(mbnavplot[nPlots_].ymax - mbnavplot[nPlots_].ymin);
-      mbnavplot[nPlots_].xinterval = 100.0;
-      mbnavplot[nPlots_].yinterval = 45.0;
-      sprintf(mbnavplot[nPlots_].xlabel, "Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", xtime_i[1], xtime_i[2],
+      plot_[nPlots_].type = PLOT_HEADING;
+      plot_[nPlots_].ixmin = 1.25 * margin_x;
+      plot_[nPlots_].ixmax = plotWidth_ - margin_x / 2;
+      plot_[nPlots_].iymin = plotHeight_ - margin_y + nPlots_ * plotHeight_;
+      plot_[nPlots_].iymax = nPlots_ * plotHeight_ + margin_y;
+      plot_[nPlots_].xmin = time_min;
+      plot_[nPlots_].xmax = time_max;
+      plot_[nPlots_].ymin = heading_min;
+      plot_[nPlots_].ymax = heading_max;
+      plot_[nPlots_].xscale = (plot_[nPlots_].ixmax - plot_[nPlots_].ixmin) /
+	(plot_[nPlots_].xmax - plot_[nPlots_].xmin);
+      plot_[nPlots_].yscale = (plot_[nPlots_].iymax - plot_[nPlots_].iymin) /
+	(plot_[nPlots_].ymax - plot_[nPlots_].ymin);
+      plot_[nPlots_].xinterval = 100.0;
+      plot_[nPlots_].yinterval = 45.0;
+      sprintf(plot_[nPlots_].xlabel, "Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", xtime_i[1], xtime_i[2],
 	      xtime_i[0]);
-      sprintf(mbnavplot[nPlots_].ylabel1, "Heading");
-      sprintf(mbnavplot[nPlots_].ylabel2, "(degrees)");
+      sprintf(plot_[nPlots_].ylabel1, "Heading");
+      sprintf(plot_[nPlots_].ylabel2, "(degrees)");
       nPlots_++;
     }
     if (plotDraft_) {
-      mbnavplot[nPlots_].type = PLOT_DRAFT;
-      mbnavplot[nPlots_].ixmin = 1.25 * margin_x;
-      mbnavplot[nPlots_].ixmax = plotWidth_ - margin_x / 2;
-      mbnavplot[nPlots_].iymin = plotHeight_ - margin_y + nPlots_ * plotHeight_;
-      mbnavplot[nPlots_].iymax = nPlots_ * plotHeight_ + margin_y;
-      mbnavplot[nPlots_].xmin = time_min;
-      mbnavplot[nPlots_].xmax = time_max;
-      mbnavplot[nPlots_].ymin = draft_max;
-      mbnavplot[nPlots_].ymax = draft_min;
-      mbnavplot[nPlots_].xscale = (mbnavplot[nPlots_].ixmax - mbnavplot[nPlots_].ixmin) /
-	(mbnavplot[nPlots_].xmax - mbnavplot[nPlots_].xmin);
-      mbnavplot[nPlots_].yscale = (mbnavplot[nPlots_].iymax - mbnavplot[nPlots_].iymin) /
-	(mbnavplot[nPlots_].ymax - mbnavplot[nPlots_].ymin);
-      mbnavplot[nPlots_].xinterval = 100.0;
-      mbnavplot[nPlots_].yinterval = 45.0;
-      sprintf(mbnavplot[nPlots_].xlabel, "Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", xtime_i[1], xtime_i[2],
+      plot_[nPlots_].type = PLOT_DRAFT;
+      plot_[nPlots_].ixmin = 1.25 * margin_x;
+      plot_[nPlots_].ixmax = plotWidth_ - margin_x / 2;
+      plot_[nPlots_].iymin = plotHeight_ - margin_y + nPlots_ * plotHeight_;
+      plot_[nPlots_].iymax = nPlots_ * plotHeight_ + margin_y;
+      plot_[nPlots_].xmin = time_min;
+      plot_[nPlots_].xmax = time_max;
+      plot_[nPlots_].ymin = draft_max;
+      plot_[nPlots_].ymax = draft_min;
+      plot_[nPlots_].xscale = (plot_[nPlots_].ixmax - plot_[nPlots_].ixmin) /
+	(plot_[nPlots_].xmax - plot_[nPlots_].xmin);
+      plot_[nPlots_].yscale = (plot_[nPlots_].iymax - plot_[nPlots_].iymin) /
+	(plot_[nPlots_].ymax - plot_[nPlots_].ymin);
+      plot_[nPlots_].xinterval = 100.0;
+      plot_[nPlots_].yinterval = 45.0;
+      sprintf(plot_[nPlots_].xlabel, "Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", xtime_i[1], xtime_i[2],
 	      xtime_i[0]);
-      sprintf(mbnavplot[nPlots_].ylabel1, "Sonar Depth");
-      sprintf(mbnavplot[nPlots_].ylabel2, "(meters)");
+      sprintf(plot_[nPlots_].ylabel1, "Sonar Depth");
+      sprintf(plot_[nPlots_].ylabel2, "(meters)");
       nPlots_++;
     }
     if (plotRoll_) {
-      mbnavplot[nPlots_].type = PLOT_ROLL;
-      mbnavplot[nPlots_].ixmin = 1.25 * margin_x;
-      mbnavplot[nPlots_].ixmax = plotWidth_ - margin_x / 2;
-      mbnavplot[nPlots_].iymin = plotHeight_ - margin_y + nPlots_ * plotHeight_;
-      mbnavplot[nPlots_].iymax = nPlots_ * plotHeight_ + margin_y;
-      mbnavplot[nPlots_].xmin = time_min;
-      mbnavplot[nPlots_].xmax = time_max;
-      mbnavplot[nPlots_].ymin = roll_min;
-      mbnavplot[nPlots_].ymax = roll_max;
-      mbnavplot[nPlots_].xscale = (mbnavplot[nPlots_].ixmax - mbnavplot[nPlots_].ixmin) /
-	(mbnavplot[nPlots_].xmax - mbnavplot[nPlots_].xmin);
-      mbnavplot[nPlots_].yscale = (mbnavplot[nPlots_].iymax - mbnavplot[nPlots_].iymin) /
-	(mbnavplot[nPlots_].ymax - mbnavplot[nPlots_].ymin);
-      mbnavplot[nPlots_].xinterval = 100.0;
-      mbnavplot[nPlots_].yinterval = 45.0;
-      sprintf(mbnavplot[nPlots_].xlabel, "Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", xtime_i[1], xtime_i[2],
+      plot_[nPlots_].type = PLOT_ROLL;
+      plot_[nPlots_].ixmin = 1.25 * margin_x;
+      plot_[nPlots_].ixmax = plotWidth_ - margin_x / 2;
+      plot_[nPlots_].iymin = plotHeight_ - margin_y + nPlots_ * plotHeight_;
+      plot_[nPlots_].iymax = nPlots_ * plotHeight_ + margin_y;
+      plot_[nPlots_].xmin = time_min;
+      plot_[nPlots_].xmax = time_max;
+      plot_[nPlots_].ymin = roll_min;
+      plot_[nPlots_].ymax = roll_max;
+      plot_[nPlots_].xscale = (plot_[nPlots_].ixmax - plot_[nPlots_].ixmin) /
+	(plot_[nPlots_].xmax - plot_[nPlots_].xmin);
+      plot_[nPlots_].yscale = (plot_[nPlots_].iymax - plot_[nPlots_].iymin) /
+	(plot_[nPlots_].ymax - plot_[nPlots_].ymin);
+      plot_[nPlots_].xinterval = 100.0;
+      plot_[nPlots_].yinterval = 45.0;
+      sprintf(plot_[nPlots_].xlabel, "Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", xtime_i[1], xtime_i[2],
 	      xtime_i[0]);
-      sprintf(mbnavplot[nPlots_].ylabel1, "Roll");
-      sprintf(mbnavplot[nPlots_].ylabel2, "(degrees)");
+      sprintf(plot_[nPlots_].ylabel1, "Roll");
+      sprintf(plot_[nPlots_].ylabel2, "(degrees)");
       nPlots_++;
     }
     if (plotPitch_) {
-      mbnavplot[nPlots_].type = PLOT_PITCH;
-      mbnavplot[nPlots_].ixmin = 1.25 * margin_x;
-      mbnavplot[nPlots_].ixmax = plotWidth_ - margin_x / 2;
-      mbnavplot[nPlots_].iymin = plotHeight_ - margin_y + nPlots_ * plotHeight_;
-      mbnavplot[nPlots_].iymax = nPlots_ * plotHeight_ + margin_y;
-      mbnavplot[nPlots_].xmin = time_min;
-      mbnavplot[nPlots_].xmax = time_max;
-      mbnavplot[nPlots_].ymin = pitch_min;
-      mbnavplot[nPlots_].ymax = pitch_max;
-      mbnavplot[nPlots_].xscale = (mbnavplot[nPlots_].ixmax - mbnavplot[nPlots_].ixmin) /
-	(mbnavplot[nPlots_].xmax - mbnavplot[nPlots_].xmin);
-      mbnavplot[nPlots_].yscale = (mbnavplot[nPlots_].iymax - mbnavplot[nPlots_].iymin) /
-	(mbnavplot[nPlots_].ymax - mbnavplot[nPlots_].ymin);
-      mbnavplot[nPlots_].xinterval = 100.0;
-      mbnavplot[nPlots_].yinterval = 45.0;
-      sprintf(mbnavplot[nPlots_].xlabel, "Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", xtime_i[1], xtime_i[2],
+      plot_[nPlots_].type = PLOT_PITCH;
+      plot_[nPlots_].ixmin = 1.25 * margin_x;
+      plot_[nPlots_].ixmax = plotWidth_ - margin_x / 2;
+      plot_[nPlots_].iymin = plotHeight_ - margin_y + nPlots_ * plotHeight_;
+      plot_[nPlots_].iymax = nPlots_ * plotHeight_ + margin_y;
+      plot_[nPlots_].xmin = time_min;
+      plot_[nPlots_].xmax = time_max;
+      plot_[nPlots_].ymin = pitch_min;
+      plot_[nPlots_].ymax = pitch_max;
+      plot_[nPlots_].xscale = (plot_[nPlots_].ixmax - plot_[nPlots_].ixmin) /
+	(plot_[nPlots_].xmax - plot_[nPlots_].xmin);
+      plot_[nPlots_].yscale = (plot_[nPlots_].iymax - plot_[nPlots_].iymin) /
+	(plot_[nPlots_].ymax - plot_[nPlots_].ymin);
+      plot_[nPlots_].xinterval = 100.0;
+      plot_[nPlots_].yinterval = 45.0;
+      sprintf(plot_[nPlots_].xlabel, "Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", xtime_i[1], xtime_i[2],
 	      xtime_i[0]);
-      sprintf(mbnavplot[nPlots_].ylabel1, "Pitch");
-      sprintf(mbnavplot[nPlots_].ylabel2, "(degrees)");
+      sprintf(plot_[nPlots_].ylabel1, "Pitch");
+      sprintf(plot_[nPlots_].ylabel2, "(degrees)");
       nPlots_++;
     }
     if (plotHeave_) {
-      mbnavplot[nPlots_].type = PLOT_HEAVE;
-      mbnavplot[nPlots_].ixmin = 1.25 * margin_x;
-      mbnavplot[nPlots_].ixmax = plotWidth_ - margin_x / 2;
-      mbnavplot[nPlots_].iymin = plotHeight_ - margin_y + nPlots_ * plotHeight_;
-      mbnavplot[nPlots_].iymax = nPlots_ * plotHeight_ + margin_y;
-      mbnavplot[nPlots_].xmin = time_min;
-      mbnavplot[nPlots_].xmax = time_max;
-      mbnavplot[nPlots_].ymin = heave_min;
-      mbnavplot[nPlots_].ymax = heave_max;
-      mbnavplot[nPlots_].xscale = (mbnavplot[nPlots_].ixmax - mbnavplot[nPlots_].ixmin) /
-	(mbnavplot[nPlots_].xmax - mbnavplot[nPlots_].xmin);
-      mbnavplot[nPlots_].yscale = (mbnavplot[nPlots_].iymax - mbnavplot[nPlots_].iymin) /
-	(mbnavplot[nPlots_].ymax - mbnavplot[nPlots_].ymin);
-      mbnavplot[nPlots_].xinterval = 100.0;
-      mbnavplot[nPlots_].yinterval = 45.0;
-      sprintf(mbnavplot[nPlots_].xlabel, "Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", xtime_i[1], xtime_i[2],
+      plot_[nPlots_].type = PLOT_HEAVE;
+      plot_[nPlots_].ixmin = 1.25 * margin_x;
+      plot_[nPlots_].ixmax = plotWidth_ - margin_x / 2;
+      plot_[nPlots_].iymin = plotHeight_ - margin_y + nPlots_ * plotHeight_;
+      plot_[nPlots_].iymax = nPlots_ * plotHeight_ + margin_y;
+      plot_[nPlots_].xmin = time_min;
+      plot_[nPlots_].xmax = time_max;
+      plot_[nPlots_].ymin = heave_min;
+      plot_[nPlots_].ymax = heave_max;
+      plot_[nPlots_].xscale = (plot_[nPlots_].ixmax - plot_[nPlots_].ixmin) /
+	(plot_[nPlots_].xmax - plot_[nPlots_].xmin);
+      plot_[nPlots_].yscale = (plot_[nPlots_].iymax - plot_[nPlots_].iymin) /
+	(plot_[nPlots_].ymax - plot_[nPlots_].ymin);
+      plot_[nPlots_].xinterval = 100.0;
+      plot_[nPlots_].yinterval = 45.0;
+      sprintf(plot_[nPlots_].xlabel, "Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", xtime_i[1], xtime_i[2],
 	      xtime_i[0]);
-      sprintf(mbnavplot[nPlots_].ylabel1, "Heave");
-      sprintf(mbnavplot[nPlots_].ylabel2, "(meters)");
+      sprintf(plot_[nPlots_].ylabel1, "Heave");
+      sprintf(plot_[nPlots_].ylabel2, "(meters)");
       nPlots_++;
     }
 
@@ -4369,8 +4365,8 @@ int Backend::mbnavedit_plot_all(void) {
     /* do plots */
     for (int iplot = 0; iplot < nPlots_; iplot++) {
       /* get center locations */
-      const int center_x = (mbnavplot[iplot].ixmin + mbnavplot[iplot].ixmax) / 2;
-      const int center_y = (mbnavplot[iplot].iymin + mbnavplot[iplot].iymax) / 2;
+      const int center_x = (plot_[iplot].ixmin + plot_[iplot].ixmax) / 2;
+      const int center_y = (plot_[iplot].iymin + plot_[iplot].iymax) / 2;
 
       /* plot filename */
       char string[MB_PATH_MAXLINE+30];
@@ -4380,14 +4376,14 @@ int Backend::mbnavedit_plot_all(void) {
       int sdescent;
       PixmapDrawer::justifyString(painter_, string, &swidth, &sascent, &sdescent);
       PixmapDrawer::drawString(painter_, center_x - swidth / 2,
-			       mbnavplot[iplot].iymax-5*sascent / 2,
+			       plot_[iplot].iymax-5*sascent / 2,
 			       string,
 			       BLACK, SOLID_LINE);
 
       /* get bounds for position bar */
       int fpx = center_x - 2 * margin_x + (4 * margin_x * currentId_) / nBuff_;
       const int fpdx = MAX(((4 * margin_x * nPlot_) / nBuff_), 5);
-      const int fpy = mbnavplot[iplot].iymax - 2 * sascent;
+      const int fpy = plot_[iplot].iymax - 2 * sascent;
       const int fpdy = sascent;
       if (fpdx > 4 * margin_x)
 	fpx = center_x + 2 * margin_x - fpdx;
@@ -4427,29 +4423,29 @@ int Backend::mbnavedit_plot_all(void) {
 			       SOLID_LINE);
 
       /* plot x label */
-      PixmapDrawer::justifyString(painter_, mbnavplot[iplot].xlabel, &swidth, &sascent, &sdescent);
+      PixmapDrawer::justifyString(painter_, plot_[iplot].xlabel, &swidth, &sascent, &sdescent);
       PixmapDrawer::drawString(painter_,
 			       (int)(center_x - swidth / 2),
-			       (int)(mbnavplot[iplot].iymin+
+			       (int)(plot_[iplot].iymin+
 				     0.75*margin_y),
-			       mbnavplot[iplot].xlabel,
+			       plot_[iplot].xlabel,
 			       BLACK, SOLID_LINE);
 
       /* plot y labels */
-      PixmapDrawer::justifyString(painter_, mbnavplot[iplot].ylabel1, &swidth, &sascent, &sdescent);
+      PixmapDrawer::justifyString(painter_, plot_[iplot].ylabel1, &swidth, &sascent, &sdescent);
       PixmapDrawer::drawString(painter_,
-			       (int)(mbnavplot[iplot].ixmin -
+			       (int)(plot_[iplot].ixmin -
 				     swidth / 2 - 0.75 * margin_x),
 			       (int)(center_y - sascent),
-			       mbnavplot[iplot].ylabel1,
+			       plot_[iplot].ylabel1,
 			       BLACK, SOLID_LINE);
 			
-      PixmapDrawer::justifyString(painter_, mbnavplot[iplot].ylabel2, &swidth, &sascent, &sdescent);
+      PixmapDrawer::justifyString(painter_, plot_[iplot].ylabel2, &swidth, &sascent, &sdescent);
       PixmapDrawer::drawString(painter_,
-			       (int)(mbnavplot[iplot].ixmin -
+			       (int)(plot_[iplot].ixmin -
 				     swidth / 2 - 0.75 * margin_x),
 			       (int)(center_y + 2 * sascent),
-			       mbnavplot[iplot].ylabel2,
+			       plot_[iplot].ylabel2,
 			       BLACK, SOLID_LINE);
 
       /* plot x axis time annotation */
@@ -4457,13 +4453,13 @@ int Backend::mbnavedit_plot_all(void) {
       for (int i = 0; i < 6; i++) {
 	/* get x position */
 	double x = plotStartTime_ + i * dx;
-	const int ix = mbnavplot[iplot].ixmin + mbnavplot[iplot].xscale * (x - mbnavplot[iplot].xmin);
+	const int ix = plot_[iplot].ixmin + plot_[iplot].xscale * (x - plot_[iplot].xmin);
 	x += fileStarttime_d_;
 
 	/* draw tickmarks */
 	PixmapDrawer::drawLine(painter_, ix,
-			       mbnavplot[iplot].iymin, ix,
-			       mbnavplot[iplot].iymin + 5,
+			       plot_[iplot].iymin, ix,
+			       plot_[iplot].iymin + 5,
 			       BLACK,
 			       SOLID_LINE);
 
@@ -4475,98 +4471,98 @@ int Backend::mbnavedit_plot_all(void) {
 
 	PixmapDrawer::drawString(painter_,
 				 (int)(ix - swidth / 2),
-				 (int)(mbnavplot[iplot].iymin +
+				 (int)(plot_[iplot].iymin +
 				       5 + 1.75 * sascent), string,
 				 BLACK, SOLID_LINE);
       }
 
       /* plot y min max values */
       char yformat[10];
-      if (mbnavplot[iplot].type == PLOT_LONGITUDE || mbnavplot[iplot].type == PLOT_LATITUDE)
+      if (plot_[iplot].type == PLOT_LONGITUDE || plot_[iplot].type == PLOT_LATITUDE)
 	strcpy(yformat, "%11.6f");
       else
 	strcpy(yformat, "%6.2f");
-      sprintf(string, yformat, mbnavplot[iplot].ymin);
+      sprintf(string, yformat, plot_[iplot].ymin);
       PixmapDrawer::justifyString(painter_, string, &swidth, &sascent, &sdescent);
       PixmapDrawer::drawString(painter_,
-			       (int)(mbnavplot[iplot].ixmin -
+			       (int)(plot_[iplot].ixmin -
 				     swidth - 0.03 * margin_x),
-			       (int)(mbnavplot[iplot].iymin + 0.5 *
+			       (int)(plot_[iplot].iymin + 0.5 *
 				     sascent), string,
 			       BLACK, SOLID_LINE);
 			
-      sprintf(string, yformat, mbnavplot[iplot].ymax);
+      sprintf(string, yformat, plot_[iplot].ymax);
       PixmapDrawer::justifyString(painter_, string, &swidth,
 				  &sascent, &sdescent);
 			
       PixmapDrawer::drawString(painter_,
-			       (int)(mbnavplot[iplot].ixmin - swidth -
+			       (int)(plot_[iplot].ixmin - swidth -
 				     0.03 * margin_x),
-			       (int)(mbnavplot[iplot].iymax +
+			       (int)(plot_[iplot].iymax +
 				     0.5 * sascent), string,
 			       BLACK, SOLID_LINE);
 
       /* plot zero values */
-      if ((mbnavplot[iplot].ymax > 0.0 && mbnavplot[iplot].ymin < 0.0) ||
-	  (mbnavplot[iplot].ymax < 0.0 && mbnavplot[iplot].ymin > 0.0)) {
-	if (mbnavplot[iplot].type == PLOT_LONGITUDE || mbnavplot[iplot].type == PLOT_LATITUDE)
+      if ((plot_[iplot].ymax > 0.0 && plot_[iplot].ymin < 0.0) ||
+	  (plot_[iplot].ymax < 0.0 && plot_[iplot].ymin > 0.0)) {
+	if (plot_[iplot].type == PLOT_LONGITUDE || plot_[iplot].type == PLOT_LATITUDE)
 	  strcpy(yformat, "%11.6f");
 	else
 	  strcpy(yformat, "%6.2f");
 	sprintf(string, yformat, 0.0);
 	PixmapDrawer::justifyString(painter_, string, &swidth, &sascent, &sdescent);
-	const int iyzero = mbnavplot[iplot].iymin - mbnavplot[iplot].yscale * mbnavplot[iplot].ymin;
+	const int iyzero = plot_[iplot].iymin - plot_[iplot].yscale * plot_[iplot].ymin;
 	PixmapDrawer::drawString(painter_,
-				 (int)(mbnavplot[iplot].ixmin -
+				 (int)(plot_[iplot].ixmin -
 				       swidth - 0.03 * margin_x),
 				 (int)(iyzero + 0.5 * sascent),
 				 string, BLACK,
 				 SOLID_LINE);
 				
 	PixmapDrawer::drawLine(painter_,
-			       mbnavplot[iplot].ixmin, iyzero,
-			       mbnavplot[iplot].ixmax, iyzero,
+			       plot_[iplot].ixmin, iyzero,
+			       plot_[iplot].ixmax, iyzero,
 			       BLACK,
 			       DASH_LINE);
       }
 
       /* plot bounding box */
       PixmapDrawer::drawRectangle(painter_,
-				  mbnavplot[iplot].ixmin,
-				  mbnavplot[iplot].iymax,
-				  mbnavplot[iplot].ixmax -
-				  mbnavplot[iplot].ixmin,
-				  mbnavplot[iplot].iymin -
-				  mbnavplot[iplot].iymax,
+				  plot_[iplot].ixmin,
+				  plot_[iplot].iymax,
+				  plot_[iplot].ixmax -
+				  plot_[iplot].ixmin,
+				  plot_[iplot].iymin -
+				  plot_[iplot].iymax,
 				  BLACK, SOLID_LINE);
 			
       PixmapDrawer::drawRectangle(painter_,
-				  mbnavplot[iplot].ixmin - 1,
-				  mbnavplot[iplot].iymax - 1,
-				  mbnavplot[iplot].ixmax -
-				  mbnavplot[iplot].ixmin + 2,
-				  mbnavplot[iplot].iymin -
-				  mbnavplot[iplot].iymax + 2,
+				  plot_[iplot].ixmin - 1,
+				  plot_[iplot].iymax - 1,
+				  plot_[iplot].ixmax -
+				  plot_[iplot].ixmin + 2,
+				  plot_[iplot].iymin -
+				  plot_[iplot].iymax + 2,
 				  BLACK, SOLID_LINE);
 
       /* now plot the data */
-      if (mbnavplot[iplot].type == PLOT_TINT)
+      if (plot_[iplot].type == PLOT_TINT)
 	mbnavedit_plot_tint(iplot);
-      else if (mbnavplot[iplot].type == PLOT_LONGITUDE)
+      else if (plot_[iplot].type == PLOT_LONGITUDE)
 	mbnavedit_plot_lon(iplot);
-      else if (mbnavplot[iplot].type == PLOT_LATITUDE)
+      else if (plot_[iplot].type == PLOT_LATITUDE)
 	mbnavedit_plot_lat(iplot);
-      else if (mbnavplot[iplot].type == PLOT_SPEED)
+      else if (plot_[iplot].type == PLOT_SPEED)
 	mbnavedit_plot_speed(iplot);
-      else if (mbnavplot[iplot].type == PLOT_HEADING)
+      else if (plot_[iplot].type == PLOT_HEADING)
 	mbnavedit_plot_heading(iplot);
-      else if (mbnavplot[iplot].type == PLOT_DRAFT)
+      else if (plot_[iplot].type == PLOT_DRAFT)
 	mbnavedit_plot_draft(iplot);
-      else if (mbnavplot[iplot].type == PLOT_ROLL)
+      else if (plot_[iplot].type == PLOT_ROLL)
 	mbnavedit_plot_roll(iplot);
-      else if (mbnavplot[iplot].type == PLOT_PITCH)
+      else if (plot_[iplot].type == PLOT_PITCH)
 	mbnavedit_plot_pitch(iplot);
-      else if (mbnavplot[iplot].type == PLOT_HEAVE)
+      else if (plot_[iplot].type == PLOT_HEAVE)
 	mbnavedit_plot_heave(iplot);
     }
   }
@@ -4596,12 +4592,12 @@ int Backend::mbnavedit_plot_tint(int iplot) {
   }
 
   /* get scaling values */
-  const int ixmin = mbnavplot[iplot].ixmin;
-  const int iymin = mbnavplot[iplot].iymin;
-  const double xmin = mbnavplot[iplot].xmin;
-  const double ymin = mbnavplot[iplot].ymin;
-  const double xscale = mbnavplot[iplot].xscale;
-  const double yscale = mbnavplot[iplot].yscale;
+  const int ixmin = plot_[iplot].ixmin;
+  const int iymin = plot_[iplot].iymin;
+  const double xmin = plot_[iplot].xmin;
+  const double ymin = plot_[iplot].ymin;
+  const double xscale = plot_[iplot].xscale;
+  const double yscale = plot_[iplot].yscale;
 
   /* plot original expected time data */
   if (plotTintOrg_) {
@@ -4659,12 +4655,12 @@ int Backend::mbnavedit_plot_lon(int iplot) {
   }
 
   /* get scaling values */
-  const int ixmin = mbnavplot[iplot].ixmin;
-  const int iymin = mbnavplot[iplot].iymin;
-  const double xmin = mbnavplot[iplot].xmin;
-  const double ymin = mbnavplot[iplot].ymin;
-  const double xscale = mbnavplot[iplot].xscale;
-  const double yscale = mbnavplot[iplot].yscale;
+  const int ixmin = plot_[iplot].ixmin;
+  const int iymin = plot_[iplot].iymin;
+  const double xmin = plot_[iplot].xmin;
+  const double ymin = plot_[iplot].ymin;
+  const double xscale = plot_[iplot].xscale;
+  const double yscale = plot_[iplot].yscale;
 
   /* plot original longitude data */
   if (plotLonOrg_) {
@@ -4749,12 +4745,12 @@ int Backend::mbnavedit_plot_lat(int iplot) {
   }
 
   /* get scaling values */
-  const int ixmin = mbnavplot[iplot].ixmin;
-  const int iymin = mbnavplot[iplot].iymin;
-  const double xmin = mbnavplot[iplot].xmin;
-  const double ymin = mbnavplot[iplot].ymin;
-  const double xscale = mbnavplot[iplot].xscale;
-  const double yscale = mbnavplot[iplot].yscale;
+  const int ixmin = plot_[iplot].ixmin;
+  const int iymin = plot_[iplot].iymin;
+  const double xmin = plot_[iplot].xmin;
+  const double ymin = plot_[iplot].ymin;
+  const double xscale = plot_[iplot].xscale;
+  const double yscale = plot_[iplot].yscale;
 
   /* plot original latitude data */
   if (plotLatOrg_) {
@@ -4837,12 +4833,12 @@ int Backend::mbnavedit_plot_speed(int iplot) {
   }
 
   /* get scaling values */
-  const int ixmin = mbnavplot[iplot].ixmin;
-  const int iymin = mbnavplot[iplot].iymin;
-  const double xmin = mbnavplot[iplot].xmin;
-  const double ymin = mbnavplot[iplot].ymin;
-  const double xscale = mbnavplot[iplot].xscale;
-  const double yscale = mbnavplot[iplot].yscale;
+  const int ixmin = plot_[iplot].ixmin;
+  const int iymin = plot_[iplot].iymin;
+  const double xmin = plot_[iplot].xmin;
+  const double ymin = plot_[iplot].ymin;
+  const double xscale = plot_[iplot].xscale;
+  const double yscale = plot_[iplot].yscale;
 
   /* plot original speed data */
   if (plotSpeedOrg_) {
@@ -4912,12 +4908,12 @@ int Backend::mbnavedit_plot_heading(int iplot) {
   }
 
   /* get scaling values */
-  const int ixmin = mbnavplot[iplot].ixmin;
-  const int iymin = mbnavplot[iplot].iymin;
-  const double xmin = mbnavplot[iplot].xmin;
-  const double ymin = mbnavplot[iplot].ymin;
-  const double xscale = mbnavplot[iplot].xscale;
-  const double yscale = mbnavplot[iplot].yscale;
+  const int ixmin = plot_[iplot].ixmin;
+  const int iymin = plot_[iplot].iymin;
+  const double xmin = plot_[iplot].xmin;
+  const double ymin = plot_[iplot].ymin;
+  const double xscale = plot_[iplot].xscale;
+  const double yscale = plot_[iplot].yscale;
 
   /* plot original heading data */
   if (plotHeadingOrg_) {
@@ -4990,12 +4986,12 @@ int Backend::mbnavedit_plot_draft(int iplot) {
   }
 
   /* get scaling values */
-  const int ixmin = mbnavplot[iplot].ixmin;
-  const int iymin = mbnavplot[iplot].iymin;
-  const double xmin = mbnavplot[iplot].xmin;
-  const double ymin = mbnavplot[iplot].ymin;
-  const double xscale = mbnavplot[iplot].xscale;
-  const double yscale = mbnavplot[iplot].yscale;
+  const int ixmin = plot_[iplot].ixmin;
+  const int iymin = plot_[iplot].iymin;
+  const double xmin = plot_[iplot].xmin;
+  const double ymin = plot_[iplot].ymin;
+  const double xscale = plot_[iplot].xscale;
+  const double yscale = plot_[iplot].yscale;
 
   /* plot original draft data */
   if (plotDraftOrg_) {
@@ -5051,12 +5047,12 @@ int Backend::mbnavedit_plot_roll(int iplot) {
   /* plot roll data */
   if (plotRoll_) {
     /* get scaling values */
-    const int ixmin = mbnavplot[iplot].ixmin;
-    const int iymin = mbnavplot[iplot].iymin;
-    const double xmin = mbnavplot[iplot].xmin;
-    const double ymin = mbnavplot[iplot].ymin;
-    const double xscale = mbnavplot[iplot].xscale;
-    const double yscale = mbnavplot[iplot].yscale;
+    const int ixmin = plot_[iplot].ixmin;
+    const int iymin = plot_[iplot].iymin;
+    const double xmin = plot_[iplot].xmin;
+    const double ymin = plot_[iplot].ymin;
+    const double xscale = plot_[iplot].xscale;
+    const double yscale = plot_[iplot].yscale;
 
     int roll_x1 = ixmin + xscale * (ping[currentId_].file_time_d - xmin);
     int roll_y1 = iymin + yscale * (ping[currentId_].roll - ymin);
@@ -5093,12 +5089,12 @@ int Backend::mbnavedit_plot_pitch(int iplot) {
   /* plot pitch data */
   if (plotPitch_) {
     /* get scaling values */
-    const int ixmin = mbnavplot[iplot].ixmin;
-    const int iymin = mbnavplot[iplot].iymin;
-    const double xmin = mbnavplot[iplot].xmin;
-    const double ymin = mbnavplot[iplot].ymin;
-    const double xscale = mbnavplot[iplot].xscale;
-    const double yscale = mbnavplot[iplot].yscale;
+    const int ixmin = plot_[iplot].ixmin;
+    const int iymin = plot_[iplot].iymin;
+    const double xmin = plot_[iplot].xmin;
+    const double ymin = plot_[iplot].ymin;
+    const double xscale = plot_[iplot].xscale;
+    const double yscale = plot_[iplot].yscale;
 
     int pitch_x1 = ixmin + xscale * (ping[currentId_].file_time_d - xmin);
     int pitch_y1 = iymin + yscale * (ping[currentId_].pitch - ymin);
@@ -5135,12 +5131,12 @@ int Backend::mbnavedit_plot_heave(int iplot) {
   /* plot heave data */
   if (plotHeave_) {
     /* get scaling values */
-    const int ixmin = mbnavplot[iplot].ixmin;
-    const int iymin = mbnavplot[iplot].iymin;
-    const double xmin = mbnavplot[iplot].xmin;
-    const double ymin = mbnavplot[iplot].ymin;
-    const double xscale = mbnavplot[iplot].xscale;
-    const double yscale = mbnavplot[iplot].yscale;
+    const int ixmin = plot_[iplot].ixmin;
+    const int iymin = plot_[iplot].iymin;
+    const double xmin = plot_[iplot].xmin;
+    const double ymin = plot_[iplot].ymin;
+    const double xscale = plot_[iplot].xscale;
+    const double yscale = plot_[iplot].yscale;
 
     int heave_x1 = ixmin + xscale * (ping[currentId_].file_time_d - xmin);
     int heave_y1 = iymin + yscale * (ping[currentId_].heave - ymin);
@@ -5433,4 +5429,26 @@ int Backend::mbnavedit_plot_draft_value(int iplot, int iping) {
   return (status);
 }
 /*--------------------------------------------------------------------*/
+
+
+void Backend::parseInputDataList(char *file, int dummy) {
+  std::cout << "Backend::parseInputDataList() not implemented\n";
+}
+
+
+int Backend::showError(const char *s1, const char *s2, const char *s3) {
+    std::cerr << "showError(): " << s1 << "\n" << s2 << "\n" << s3 << "\n";
+    char msg[256];
+    sprintf(msg, "%s\n%s\n%s\n", s1, s2, s3);
+    emit emitter_.showMessage(QVariant(msg));
+    return 0;
+  }
+
+
+int Backend::showMessage(const char *message) {
+  std::cerr << "showMessage(): " << message << "\n";
+  emit emitter_.showMessage(QVariant(message));
+    
+  return 0;
+}
 
