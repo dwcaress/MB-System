@@ -36,9 +36,9 @@ add_executable(qt-mbnavedit-2 Backend.cpp
 
 target_include_directories(qt-mbnavedit-2 PUBLIC ${CMAKE_SOURCE_DIR}/src/mbaux)
 
-target_link_options(qt-mbnavedit-2 PUBLIC "-Wunused-variable")
+target_compile_options(qt-mbnavedit-2 PUBLIC "-Wunused-variable")
 
 target_link_libraries(qt-mbnavedit-2 PRIVATE MBGui Qt5::Core Qt5::Quick
-                      mbio)
+                      mbaux)
 
 install(TARGETS qt-mbedit DESTINATION ${CMAKE_INSTALL_BINDIR})
