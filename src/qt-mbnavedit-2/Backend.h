@@ -22,7 +22,7 @@ extern "C" {
 
 #define NUMBER_PLOTS_MAX 9
 #define DEFAULT_PLOT_WIDTH 767
-#define DEFAULT_PLOT_HEIGHT 300
+#define DEFAULT_PLOT_HEIGHT 500
 #define MBNAVEDIT_PICK_DISTANCE 50
 #define MBNAVEDIT_ERASE_DISTANCE 10
 
@@ -197,26 +197,26 @@ protected:
   int dataStepSize_;
   int modePick_;
   int modeSetInterval_;
-  int plotTint_;
-  int plotTintOrg_;
-  int plotLon_;
-  int plotLonOrg_;
-  int plotLonDr_;
-  int plotLat_;
-  int plotLatOrg_;
-  int plotLatDr_;
-  int plotSpeed_;
-  int plotSpeedOrg_;
-  int plotSmg_;
-  int plotHeading_;
-  int plotHeadingOrg_;
-  int plotCmg_;
-  int plotDraft_;
-  int plotDraftOrg_;
-  int plotDraftDr_;
-  int plotRoll_;
-  int plotPitch_;
-  int plotHeave_;
+  bool plotTint_;
+  bool plotTintOrg_;
+  bool plotLon_;
+  bool plotLonOrg_;
+  bool plotLonDr_;
+  bool plotLat_;
+  bool plotLatOrg_;
+  bool plotLatDr_;
+  bool plotSpeed_;
+  bool plotSpeedOrg_;
+  bool plotSmg_;
+  bool plotHeading_;
+  bool plotHeadingOrg_;
+  bool plotCmg_;
+  bool plotDraft_;
+  bool plotDraftOrg_;
+  bool plotDraftDr_;
+  bool plotRoll_;
+  bool plotPitch_;
+  bool plotHeave_;
   int meanTimeWindow_;
   int driftLon_;
   int driftLat_;
@@ -319,127 +319,128 @@ protected:
 
   // Member functions, formerly mbnavedit_prog stand-alone C functions 
 
-  int mbnavedit_init(int argc, char **argv, bool *inputSpecd);
+  int init(int argc, char **argv, bool *inputSpecd);
   
-  int mbnavedit_set_graphics(void *xgid, int ncol);
+  int set_graphics(void *xgid, int ncol);
 
-  int mbnavedit_init_globals(void);
+  int init_globals(void);
   
-  int mbnavedit_clear_screen(void);
+  int clear_screen(void);
 
-  int mbnavedit_action_open(bool useprevious);
+  int action_open(bool useprevious);
 
-  int mbnavedit_open_file(bool useprevious);
+  int open_file(bool useprevious);
 
-  int mbnavedit_close_file(void);
+  int close_file(void);
 
-  int mbnavedit_dump_data(int hold);
-
-
-  int mbnavedit_load_data(void);
-
-  int mbnavedit_action_next_buffer(bool *quit);
+  int dump_data(int hold);
 
 
-  int mbnavedit_action_offset(void);
+  int load_data(void);
 
-  int mbnavedit_action_close(void);
+  int action_next_buffer(bool *quit);
 
-  int mbnavedit_action_done(bool *quit);
 
-  int mbnavedit_action_quit(void);
+  int action_offset(void);
 
-  int mbnavedit_action_step(int step);
+  int action_close(void);
 
-  int mbnavedit_action_end(void);
+  int action_done(bool *quit);
 
-  int mbnavedit_action_start(void);
+  int action_quit(void);
 
-  int mbnavedit_action_mouse_pick(int xx, int yy);
+  int action_step(int step);
 
-  int mbnavedit_action_mouse_select(int xx, int yy);
+  int action_end(void);
 
-  int mbnavedit_action_mouse_deselect(int xx, int yy);
+  int action_start(void);
 
-  int mbnavedit_action_mouse_selectall(int xx, int yy);
+  int action_mouse_pick(int xx, int yy);
 
-  int mbnavedit_action_mouse_deselectall(int xx, int yy);
+  int action_mouse_select(int xx, int yy);
 
-  int mbnavedit_action_deselect_all(int type);
+  int action_mouse_deselect(int xx, int yy);
 
-  int mbnavedit_action_set_interval(int xx, int yy, int which);
+  int action_mouse_selectall(int xx, int yy);
 
-  int mbnavedit_action_use_dr(void);
+  int action_mouse_deselectall(int xx, int yy);
 
-  int mbnavedit_action_use_smg(void);
+  int action_deselect_all(int type);
 
-  int mbnavedit_action_use_cmg(void);
+  int action_set_interval(int xx, int yy, int which);
 
-  int mbnavedit_action_interpolate(void);
+  int action_use_dr(void);
 
-  int mbnavedit_action_interpolaterepeats(void);
+  int action_use_smg(void);
 
-  int mbnavedit_action_revert(void);
+  int action_use_cmg(void);
 
-  int mbnavedit_action_flag(void);
+  int action_interpolate(void);
 
-  int mbnavedit_action_unflag(void);
+  int action_interpolaterepeats(void);
 
-  int mbnavedit_action_fixtime(void);
+  int action_revert(void);
 
-  int mbnavedit_action_deletebadtime(void);
+  int action_flag(void);
 
-  int mbnavedit_action_showall(void);
+  int action_unflag(void);
 
-  int mbnavedit_get_smgcmg(int i);
+  int action_fixtime(void);
 
-  int mbnavedit_get_model(void);
+  int action_deletebadtime(void);
 
-  int mbnavedit_get_gaussianmean(void);
+  int action_showall(void);
 
-  int mbnavedit_get_dr(void);
+  int get_smgcmg(int i);
 
-  int mbnavedit_get_inversion(void);
+  int get_model(void);
 
-  int mbnavedit_plot_all(void);
+  int get_gaussianmean(void);
 
-  int mbnavedit_plot_tint(int iplot);
+  int get_dr(void);
 
-  int mbnavedit_plot_lon(int iplot);
+  int get_inversion(void);
 
-  int mbnavedit_plot_lat(int iplot);
+  int plot_all(void);
 
-  int mbnavedit_plot_speed(int iplot);
+  int plot_tint(int iplot);
 
-  int mbnavedit_plot_heading(int iplot);
+  int plot_lon(int iplot);
 
-  int mbnavedit_plot_draft(int iplot);
+  int plot_lat(int iplot);
 
-  int mbnavedit_plot_roll(int iplot);
+  int plot_speed(int iplot);
 
-  int mbnavedit_plot_pitch(int iplot);
+  int plot_heading(int iplot);
 
-  int mbnavedit_plot_heave(int iplot);
+  int plot_draft(int iplot);
 
-  int mbnavedit_plot_tint_value(int iplot, int iping);
+  int plot_roll(int iplot);
 
-  int mbnavedit_plot_lon_value(int iplot, int iping);
+  int plot_pitch(int iplot);
 
-  int mbnavedit_plot_lat_value(int iplot, int iping);
+  int plot_heave(int iplot);
 
-  int mbnavedit_plot_speed_value(int iplot, int iping);
+  int plot_tint_value(int iplot, int iping);
 
-  int mbnavedit_plot_heading_value(int iplot, int iping);
+  int plot_lon_value(int iplot, int iping);
 
-  int mbnavedit_plot_draft_value(int iplot, int iping);
+  int plot_lat_value(int iplot, int iping);
+
+  int plot_speed_value(int iplot, int iping);
+
+  int plot_heading_value(int iplot, int iping);
+
+  int plot_draft_value(int iplot, int iping);
 
 						      
 public slots:
-  // These 'slots' can be invoked directly by QML code, i.e. not connected by
-  // signals
+  // These 'slots' can be invoked directly by QML code, i.e. not
+  // necessarily connected by signals
   
   /// Methods called by QML code
-
+  void setPlot(QString plotName, bool set);
+  
   /// Invoked when main window is destroyed
   void onMainWindowDestroyed(void);
 
