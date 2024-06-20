@@ -1,5 +1,6 @@
-import QtQuick 2.9
-import QtQuick.Controls 2.3
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Window 2.15
 import QtQuick.Controls.Universal 2.3
 import QtQuick.Dialogs 1.1
 import QtQuick.Layouts 1.14
@@ -14,20 +15,19 @@ findChild() C++ calls.
 
 *** */
 
-
-ApplicationWindow {
+Window {
     id: applicationWindow
     objectName: 'mainWindow'
     visible: true
     width: 1000
     height: 880
-    title: 'qt-mbnavedit'
+    title: 'qt-mbnavedit-2'
 
     // Interface to C++ Backend methods
     required property var backend
     
 
-    menuBar: MenuBar {
+    MenuBar {
         Menu {
             title: qsTr("File")
             Action { text: qsTr("Open swath") ;
@@ -41,80 +41,138 @@ ApplicationWindow {
         }
     }
 
+
     ColumnLayout {
         id: columnLayout
         Layout.fillHeight: false
         width: 1000
 
-        Rectangle {
-            width: 600
-            height: 600
-
-            PixmapImage {
-                id: swathPixmap
-                objectName: 'swathPixmapObj'
-                anchors.fill: parent
-            }
-
-
-            MouseArea {
-                id: swathMouseArea
-                objectName: 'swathMouseAreaObj'
-                anchors.fill: parent
-                hoverEnabled: false
-                acceptedButtons: Qt.LeftButton | Qt.RightButton
-
-                onClicked: (mouse)=> {
-                               /// console.log("Mouse clicked at ",
-                               //        mouse.x, ", ", mouse.y)
-                               if (mouse.button == Qt.LeftButton) {
-                                   // console.log('left clicked');
-                                   backend.onLeftMouseButtonClicked(mouse.x,
-                                                                    mouse.y);
-                               }
-                               else {
-                                   // console.log("right clicked");
-                                   backend.onRightMouseButtonClicked(mouse.x,
-                                                                     mouse.y);
-                               }
-                           }
-
-
-                onPressed: (mouse) => {
-                               console.log("Mouse pressed at ",
-                                           mouse.x, ", ", mouse.y);
-                               console.log('button: ', mouse.button);
-                               if (mouse.button == Qt.LeftButton) {
-                                   backend.onLeftMouseButtonDown(mouse.x, mouse.y)
-                               }
-                           }
-
-                onReleased: (mouse) => {
-                                console.log("Mouse released at ",
-                                            mouse.x, ", ", mouse.y)
-                                if (mouse.button == Qt.LeftButton) {
-                                    backend.onLeftMouseButtonUp(mouse.x, mouse.y)
-                                }
-                            }
-
-                onPositionChanged: (mouse) => {
-                                       console.log("Mouse moved at ",
-                                                   mouse.x, ", ", mouse.y);
-                                       console.log('pressed: ', pressed);
-                                       console.log('button: ', mouse.button);
-                                       console.log('buttons: ', mouse.buttons);
-                                       if (mouse.buttons == Qt.LeftButton) {
-                                           backend.onMouseMove(mouse.x, mouse.y)
-                                       }
-                                       else {
-                                           console.log('do not call backend')
-                                       }
-                                   }
-            }
-
-
+        CheckBox {
+            objectName: 'timeInt'
+            checked: true
+            text: qsTr('Time interval')
+            onToggled: backend.setPlot(objectName, checked)
+        }
+        CheckBox {
+            objectName: 'lon'
+            checked: true
+            text: qsTr('Longitude')
+            onToggled: backend.setPlot(objectName, checked)
+        }
+        CheckBox {
+            objectName: 'lat'
+            checked: true
+            text: qsTr('Latitude')
+            onToggled: backend.setPlot(objectName, checked)
+        }
+        CheckBox {
+            objectName: 'speed'
+            checked: true
+            text: qsTr('Speed')
+            onToggled: backend.setPlot(objectName, checked)
+        }
+        CheckBox {
+            objectName: 'heading'
+            checked: true
+            text: qsTr('Heading')
+            onToggled: backend.setPlot(objectName, checked)
+        }
+        CheckBox {
+            objectName: 'sensorDepth'
+            checked: true
+            text: qsTr('Sonar depth')
+            onToggled: backend.setPlot(objectName, checked)
+        }
+        CheckBox {
+            objectName: 'attitude'
+            checked: false
+            text: qsTr('Roll,pitch,heave')
+            onToggled: backend.setPlot(objectName, checked)
         }
 
+        ScrollView {
+            implicitWidth: Window.window.width
+            implicitHeight: Window.window.height
+            contentHeight: 5000
+            clip: true
+
+            ColumnLayout {
+
+                Rectangle {
+                    id: rectangle
+                    implicitWidth: Window.window.width * 0.9
+                    implicitHeight:Window.window.height * 5
+
+                    PixmapImage {
+                        id: swathPixmap
+                        objectName: 'swathPixmapObj'
+                        width: rectangle.width
+                        height: 30000
+                        anchors.fill: parent
+                    }
+
+
+                    MouseArea {
+                        id: swathMouseArea
+                        objectName: 'swathMouseAreaObj'
+                        anchors.fill: parent
+                        implicitWidth: rectangle.width
+                        implicitHeight: rectangle.height
+                        hoverEnabled: false
+                        acceptedButtons: Qt.LeftButton | Qt.RightButton
+
+                        onClicked: (mouse)=> {
+                                       /// console.log("Mouse clicked at ",
+                                       //        mouse.x, ", ", mouse.y)
+                                       if (mouse.button == Qt.LeftButton) {
+                                           // console.log('left clicked');
+                                           backend.onLeftMouseButtonClicked(mouse.x,
+                                                                            mouse.y);
+                                       }
+                                       else {
+                                           // console.log("right clicked");
+                                           backend.onRightMouseButtonClicked(mouse.x,
+                                                                             mouse.y);
+                                       }
+                                   }
+
+                        onPressed: (mouse) => {
+                                       console.log("Mouse pressed at ",
+                                                   mouse.x, ", ", mouse.y);
+                                       console.log('button: ', mouse.button);
+                                       if (mouse.button == Qt.LeftButton) {
+                                           backend.onLeftMouseButtonDown(mouse.x, mouse.y)
+                                       }
+                                   }
+
+                        onReleased: (mouse) => {
+                                        console.log("Mouse released at ",
+                                                    mouse.x, ", ", mouse.y)
+                                        if (mouse.button == Qt.LeftButton) {
+                                            backend.onLeftMouseButtonUp(mouse.x, mouse.y)
+                                        }
+                                    }
+
+                        onPositionChanged: (mouse) => {
+                                               console.log("Mouse moved at ",
+                                                           mouse.x, ", ", mouse.y);
+                                               console.log('pressed: ', pressed);
+                                               console.log('button: ', mouse.button);
+                                               console.log('buttons: ', mouse.buttons);
+                                               if (mouse.buttons == Qt.LeftButton) {
+                                                   backend.onMouseMove(mouse.x, mouse.y)
+                                               }
+                                               else {
+                                                   console.log('do not call backend')
+                                               }
+                                           }
+                    }
+
+
+                }
+
+            }
+        }
     }
     MessageDialog {
         id: quitDialog
@@ -135,7 +193,7 @@ ApplicationWindow {
         nameFilters: ["Swath files (*.mb[0-9]*)"]
         onAccepted: {
             console.log("accepted " + fileUrl);
-        backend.processSwathFile(fileUrl);
+            backend.processSwathFile(fileUrl);
         }
     }
 
@@ -150,9 +208,9 @@ ApplicationWindow {
 
 
     function showInfoDialog(message) {
-      console.log('showInfoDialog()', message);
-      infoDialog.text = message;
-      infoDialog.open();
+        console.log('showInfoDialog()', message);
+        infoDialog.text = message;
+        infoDialog.open();
     }
 }
 
