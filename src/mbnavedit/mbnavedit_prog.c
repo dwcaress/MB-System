@@ -361,6 +361,7 @@ int mbnavedit_init(int argc, char **argv, bool *startup_file,
   fillRectangle = fillRectArg;
   drawString = drawStringArg;
   justifyString = justifyStringArg;
+  parseInputDataList = parseInputDataListArg;
   showError = showErrorArg;
   showMessage = showMessageArg;
   hideMessage = hideMessageArg;
