@@ -14,35 +14,25 @@ class GuiNames : public QObject {
 
 /// define names of C++-connected QML items, used when exchanging information
 /// between QML GUI and C++ code.
-/// N.B. TAKE CARE THAT QML USES THE LITERAL STRINGS DEFINED HERE.
+///
+/// N.B. TAKE CARE THAT QML USES THE LITERAL STRINGS DEFINED HERE FOR
+/// objectName
 
 /// Name of PixmapImage instantiated by QML, which holds swath graphs
 #define SWATH_PIXMAP_NAME "swathPixmapObj"
 
-/// Names of ancillary data options created by QML.
-#define NONE_ANCILLDATA "none"
-#define TIME_ANCILLDATA "time"
-#define INTERVAL_ANCILLDATA "interval"
-#define LATITUDE_ANCILLDATA "latitude"
-#define LONGITUDE_ANCILLDATA "longitude"
-#define HEADING_ANCILLDATA "heading"
-#define SPEED_ANCILLDATA "speed"
-#define DEPTH_ANCILLDATA "depth"
-#define ALTITUDE_ANCILLDATA "altitude"
-#define SENSORDEPTH_ANCILLDATA "sensorDepth"
-#define ROLL_ANCILLDATA "roll"
-#define PITCH_ANCILLDATA "pitch"
-#define HEAVE_ANCILLDATA "heave"
+/// Plot names
+#define TIMEINT_PLOTNAME "timeInt"
+#define LAT_PLOTNAME "lat"
+#define LON_PLOTNAME "lon"
+#define SPEED_PLOTNAME "speed"
+#define HEADING_PLOTNAME "heading"
+#define SENSORDEPTH_PLOTNAME "sensorDepth"
+#define ATTITUDE_PLOTNAME "attitude"
 
-/// Names of slice options created by QML
-#define ALONGTRACK_SLICE "alongTrack"
-#define WATERFALL_SLICE "waterfall"
-#define CROSSTRACK_SLICE "crossTrack"
 
-/// Names of color-coding options
-#define BOTTOM_DETECT_COLOR "bottomDetect"
-#define PULSE_SOURCE_COLOR "pulseSource"
-#define FLAG_STATE_COLOR "flagState"
+
+
 
 /// Names of edit modes
 #define TOGGLE_EDIT_MODE "toggleEdit"
