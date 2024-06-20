@@ -12,7 +12,7 @@
 #include <QMessageBox>
 #include "GuiNames.h"
 #include "PixmapImage.h"
-#include "PixmapDrawer.h"
+#include "CPixmapDrawer.h"
 #include "Emitter.h"
 
 extern "C" {

@@ -16,7 +16,7 @@
 #include <QMetaObject>
 #include <QQmlProperty>
 #include <QFont>
-#include "PixmapDrawer.h"
+#include "CPixmapDrawer.h"
 #include "Backend.h"
 #include "GuiNames.h"
 
@@ -53,7 +53,7 @@ Backend::Backend(int argc, char **argv) {
   painter_->setFont(myFont);
 
   // Keep static reference to painter for use by static member functions
-  PixmapDrawer::setPainter(painter_);
+  CPixmapDrawer::setPainter(painter_);
 
   /// Hard-coded in mbedit_callbacks; should loosen this restriction
   int cSize[4] = {0, 1016, 0, 525};  
@@ -63,11 +63,11 @@ Backend::Backend(int argc, char **argv) {
   
   mbedit_init(argc, argv, &inputSpecd,
 	      nullptr,
-	      &PixmapDrawer::drawLine,
-	      &PixmapDrawer::drawRect,
-	      &PixmapDrawer::fillRect,
-	      &PixmapDrawer::drawString,
-	      &PixmapDrawer::justifyString,
+	      &CPixmapDrawer::drawLine,
+	      &CPixmapDrawer::drawRect,
+	      &CPixmapDrawer::fillRect,
+	      &CPixmapDrawer::drawString,
+	      &CPixmapDrawer::justifyString,
 	      &Backend::parseDataList,
 	      &Backend::showError,
 	      &Backend::showMessage,
@@ -314,32 +314,32 @@ bool Backend::plotTest() {
   painter_->eraseRect(0, 0, canvasPixmap_->width(), canvasPixmap_->height());
 
   //// TEST TEST TEST
-  PixmapDrawer::fillRect(dummy_, 0, 0, canvasPixmap_->width(),
-			 canvasPixmap_->height(),
-			 WHITE, SOLID_LINE);
+  CPixmapDrawer::fillRect(dummy_, 0, 0, canvasPixmap_->width(),
+			  canvasPixmap_->height(),
+			  WHITE, SOLID_LINE);
 
-  PixmapDrawer::fillRect(dummy_, 100, 100,
-			 canvasPixmap_->width()-200,
-			 canvasPixmap_->height()-200,
-			 RED, SOLID_LINE);  
+  CPixmapDrawer::fillRect(dummy_, 100, 100,
+			  canvasPixmap_->width()-200,
+			  canvasPixmap_->height()-200,
+			  RED, SOLID_LINE);  
 
-  PixmapDrawer::drawLine(dummy_, 0, 0, canvasPixmap_->width(),
-			 canvasPixmap_->height(),
-			 BLACK, SOLID_LINE);
+  CPixmapDrawer::drawLine(dummy_, 0, 0, canvasPixmap_->width(),
+			  canvasPixmap_->height(),
+			  BLACK, SOLID_LINE);
 
-  PixmapDrawer::drawLine(dummy_, canvasPixmap_->width(), 0, 0,
-			 canvasPixmap_->height(),
-			 GREEN, DASH_LINE);  
+  CPixmapDrawer::drawLine(dummy_, canvasPixmap_->width(), 0, 0,
+			  canvasPixmap_->height(),
+			  GREEN, DASH_LINE);  
 
-  PixmapDrawer::drawString(dummy_, 100, 100, (char *)"this is coral",
-			   CORAL, SOLID_LINE);
+  CPixmapDrawer::drawString(dummy_, 100, 100, (char *)"this is coral",
+			    CORAL, SOLID_LINE);
 
-  PixmapDrawer::drawString(dummy_, 300, 100, (char *)"BLUE!",
-			   BLUE, SOLID_LINE);
+  CPixmapDrawer::drawString(dummy_, 300, 100, (char *)"BLUE!",
+			    BLUE, SOLID_LINE);
 
 
-  PixmapDrawer::drawString(dummy_, 400, 100, (char *)"PURPLE",
-			   PURPLE, SOLID_LINE);    
+  CPixmapDrawer::drawString(dummy_, 400, 100, (char *)"PURPLE",
+			    PURPLE, SOLID_LINE);    
 
   // Update GUI
   qDebug() << "TBD: Update GUI";
@@ -352,7 +352,7 @@ bool Backend::plotTest() {
 
 
 void Backend::resetScaleXSlider(int width, int xMax,
-				   int xInterval, int yInterval) {
+				int xInterval, int yInterval) {
   return;
 }
 
@@ -542,7 +542,7 @@ bool Backend::edit(double x, double y) {
 				  showFlagSounding_, showFlagProfile_,
 				  plotAncillData_, &nBuffer_,
 				  &nGood_, &iCurrent_, &mnPlot_);    
-      break;
+    break;
 
   default:
     qWarning() << "Unsupported edit mode: " << editMode_;
