@@ -12,7 +12,7 @@
 #include <QMessageBox>
 #include "GuiNames.h"
 #include "PixmapImage.h"
-#include "PixmapDrawer.h"
+#include "CPixmapDrawer.h"
 #include "Emitter.h"
 
 /** Backend application logic; QObject subclass, so it exchanges
@@ -75,7 +75,7 @@ public:
 protected:
 
   /// Process specified swath file
-  bool processSwathFile(QUrl fileUrl);
+  Q_INVOKABLE bool processSwathFile(QUrl fileUrl);
 
   /// Plot current swath file
   bool plotSwath(void);

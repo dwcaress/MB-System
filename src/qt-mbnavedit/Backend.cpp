@@ -16,7 +16,7 @@
 #include <QMetaObject>
 #include <QQmlProperty>
 #include <QFont>
-#include "PixmapDrawer.h"
+#include "CPixmapDrawer.h"
 #include "Backend.h"
 #include "GuiNames.h"
 
@@ -47,8 +47,8 @@ Backend::Backend(int argc, char **argv) {
   QFont myFont("Helvetica [Cronyx]", 9);
   painter_->setFont(myFont);
 
-  // Set PixmapDrawer painter
-  PixmapDrawer::setPainter(painter_);
+  // Set CPixmapDrawer painter
+  CPixmapDrawer::setPainter(painter_);
 
   /// Hard-coded in mbedit_callbacks; should loosen this restriction
   int cSize[4] = {0, 1016, 0, 525};  
@@ -59,11 +59,11 @@ Backend::Backend(int argc, char **argv) {
   
   mbnavedit_init(argc, argv, &inputSpecd,
 		 nullptr,
-		 &PixmapDrawer::drawLine,
-		 &PixmapDrawer::drawRect,
-		 &PixmapDrawer::fillRect,
-		 &PixmapDrawer::drawString,
-		 &PixmapDrawer::justifyString,
+		 &CPixmapDrawer::drawLine,
+		 &CPixmapDrawer::drawRect,
+		 &CPixmapDrawer::fillRect,
+		 &CPixmapDrawer::drawString,
+		 &CPixmapDrawer::justifyString,
 		 &Backend::parseDataList,
 		 &Backend::showError,
 		 &Backend::showMessage,
@@ -198,36 +198,34 @@ bool Backend::plotTest() {
   painter_->eraseRect(0, 0, canvasPixmap_->width(), canvasPixmap_->height());
 
   //// TEST TEST TEST
-  PixmapDrawer::fillRect(dummy_, 0, 0, canvasPixmap_->width(),
+  CPixmapDrawer::fillRect(dummy_, 0, 0, canvasPixmap_->width(),
 			 canvasPixmap_->height(),
 			 WHITE, SOLID_LINE);
 
-  PixmapDrawer::fillRect(dummy_, 100, 100,
+  CPixmapDrawer::fillRect(dummy_, 100, 100,
 			 canvasPixmap_->width()-200,
 			 canvasPixmap_->height()-200,
 			 RED, SOLID_LINE);  
 
-  PixmapDrawer::drawLine(dummy_, 0, 0, canvasPixmap_->width(),
+  CPixmapDrawer::drawLine(dummy_, 0, 0, canvasPixmap_->width(),
 			 canvasPixmap_->height(),
 			 BLACK, SOLID_LINE);
 
-  PixmapDrawer::drawLine(dummy_, canvasPixmap_->width(), 0, 0,
+  CPixmapDrawer::drawLine(dummy_, canvasPixmap_->width(), 0, 0,
 			 canvasPixmap_->height(),
 			 GREEN, DASH_LINE);  
 
-  PixmapDrawer::drawString(dummy_, 100, 100, (char *)"this is coral",
+  CPixmapDrawer::drawString(dummy_, 100, 100, (char *)"this is coral",
 			   CORAL, SOLID_LINE);
 
-  PixmapDrawer::drawString(dummy_, 300, 100, (char *)"BLUE!",
+  CPixmapDrawer::drawString(dummy_, 300, 100, (char *)"BLUE!",
 			   BLUE, SOLID_LINE);
 
 
-  PixmapDrawer::drawString(dummy_, 400, 100, (char *)"PURPLE",
+  CPixmapDrawer::drawString(dummy_, 400, 100, (char *)"PURPLE",
 			   PURPLE, SOLID_LINE);    
 
   // Update GUI
-  qDebug() << "TBD: Update GUI";
-  
   swathPixmapImage_->update();
   
   
