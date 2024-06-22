@@ -2596,7 +2596,7 @@ int mbr_reson7k3_rd_Navigation(int verbose, char *buffer, void *store_ptr, int *
   index += 4;
   mb_get_binary_float(true, &buffer[index], &(Navigation->heading));
   index += 4;
-
+  
   /* set kind */
   if (status == MB_SUCCESS) {
     /* set kind */
@@ -9885,7 +9885,8 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
           store->read_ProcessedSideScan = false;
           store->read_SonarSettings = false;
           store->read_MatchFilter = false;
-          store->read_BeamGeometry = false;
+          // Do not reset BeamGeometry as it does not come for every ping when data are logged by PDS
+          // store->read_BeamGeometry = false;
           store->read_Bathymetry = false;
           store->read_SideScan = false;
           store->read_WaterColumn = false;
