@@ -1885,16 +1885,16 @@ int main(int argc, char **argv) {
 
   for (int i=0;i<n_altitude;i++) {
     mb_get_date(verbose,altitude_time_d[i],time_i);
-    fprintf(stderr,"HDG: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.3f\n",
+    fprintf(stderr,"ALT: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.3f\n",
       time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
       altitude_altitude[i]);
   }
 
   for (int i=0;i<n_attitude;i++) {
     mb_get_date(verbose,attitude_time_d[i],time_i);
-    fprintf(stderr,"RPH: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.3f %.3f\n",
+    fprintf(stderr,"RPH: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %6.3f %6.3f %6.3f\n",
       time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
-      attitude_roll[i], attitude_pitch[i]);
+      attitude_roll[i], attitude_pitch[i], attitude_heave[i]);
   }
 #endif
 

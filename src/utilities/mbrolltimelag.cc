@@ -336,7 +336,7 @@ int main(int argc, char **argv) {
 		nestimate = 0;
 		int nslope = 0;
 		double time_d_avg = 0.0;
-		snprintf(cmdfile, sizeof(cmdfile), "mblist -I%s -F%d -OMAR", swathfile, format);
+		snprintf(cmdfile, sizeof(cmdfile), "mblist -I%s -F%d -OMAR -Q", swathfile, format);
 		fprintf(stderr, "\nRunning %s...\n", cmdfile);
 		fp = popen(cmdfile, "r");
 		while ((nscan = fscanf(fp, "%lf %lf %lf", &time_d, &slope, &roll)) == 3) {
