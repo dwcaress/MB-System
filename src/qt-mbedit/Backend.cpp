@@ -110,6 +110,11 @@ bool Backend::initialize(QObject *loadedRoot, int argc, char **argv) {
 
   // Set the pixmap of QML-declared PixmapImage
   swathPixmapImage_->setImage(canvasPixmap_);  
+
+  // Set scaling between device and world coordinates
+  xScale_ = swathPixmapImage_->width() / canvasPixmap_->width();
+  yScale_ = swathPixmapImage_->height() / canvasPixmap_->height();  
+  qDebug() << "xScale_: " << xScale_ << ", yScale_: " << yScale_;
   
   char *swathFile = nullptr;
   // Parse command line options
@@ -416,19 +421,28 @@ void Backend::onEditModeChanged(QString mode) {
 
 void Backend::onLeftMouseButtonClicked(double x, double y) {
   qDebug() << "onLeftMouseButtonClicked()";
-  int status = 0;
+    // Transform from device to world coordinates
+  x = x / xScale_;
+  y = y / yScale_;
+  
   /// bool ok = edit(x, y);
 }
 
 void Backend::onRightMouseButtonClicked(double x, double y) {
   qDebug() << "onRightMouseButtonClicked()";
-
+  // Transform from device to world coordinates
+  x = x / xScale_;
+  y = y / yScale_;
 }
 
 
 void Backend::onLeftMouseButtonDown(double x, double y) {
   qDebug() << "onLeftMouseButtonDown()  x: " << x << ", y: " << y;
 
+  // Transform from device to world coordinates
+  x = x / xScale_;
+  y = y / yScale_;
+  
   if (editMode_ == GRAB) {
     // Start grabbing selected points
     int status =
@@ -449,7 +463,12 @@ void Backend::onLeftMouseButtonDown(double x, double y) {
 
 
 void Backend::onLeftMouseButtonUp(double x, double y) {
-  qDebug() << "onLeftMouseButtonUp()  x: " << x << ", y: " << y;  
+  qDebug() << "onLeftMouseButtonUp()  x: " << x << ", y: " << y;
+  // Transform from device to world coordinates
+  x = x / xScale_;
+  y = y / yScale_;
+
+  
   if (editMode_ == GRAB) {
     // Done grabbing points
     int status =
@@ -472,12 +491,17 @@ void Backend::onLeftMouseButtonUp(double x, double y) {
 
 void Backend::onMouseMove(double x, double y) {
   qDebug() << "onMouseMove()";
+  // Transform from device to world coordinates
+  x = x / xScale_;
+  y = y / yScale_;
 
   bool ok = edit(x, y);
 }
 
 
 bool Backend::edit(double x, double y) {
+  // NOTE: x and y are in world cooredinates
+
   int status = 0;
 
   qDebug() << "edit(): editMode_ = " << editMode_;

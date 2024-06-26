@@ -96,6 +96,12 @@ protected:
   
   /// GUI item names
   GuiNames *guiNames_;
+
+  /// scaling between device and world x-coordinate
+  double xScale_ = 1;
+
+  /// scaling between device and world y-coordinate
+  double yScale_ = 1;
   
   /// UI root object
   QObject *ui_;
