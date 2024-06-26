@@ -23,11 +23,8 @@ extern "C" {
 #define NUMBER_PLOTS_MAX 9
 #define DEFAULT_PLOT_WIDTH 767
 #define DEFAULT_PLOT_HEIGHT 300
-#define MBNAVEDIT_PICK_DISTANCE 50
-#define MBNAVEDIT_ERASE_DISTANCE 10
 
 #define MBNAVEDIT_BUFFER_SIZE 1000000
-/// #define MBNAVEDIT_BUFFER_SIZE 10
 
 /** Backend application logic; QObject subclass, so it exchanges
     info with QML  */
@@ -326,7 +323,7 @@ protected:
   /* plotting control variables */
   /// Array of Ping structures; array size is very large so
   /// make this member static to prevent memory overflow 
-  static Backend::Ping ping[MBNAVEDIT_BUFFER_SIZE];
+  static Backend::Ping ping_[MBNAVEDIT_BUFFER_SIZE];
   double plotStartTime_;
   double plotEndTime_;
   int nPlot_;
@@ -394,7 +391,7 @@ protected:
 
   int action_interpolate(void);
 
-  int action_interpolaterepeats(void);
+  int action_interpolate_repeats(void);
 
   int action_revert(void);
 
@@ -467,6 +464,9 @@ public slots:
 
   void onMiddleButtonClicked(int x, int y);
 
+  void onMouseMoved(int x, int y);
+
+  
   /// Reset time interval
   void onResetInterval(void);
 
@@ -481,10 +481,15 @@ public slots:
 
   /// Move swath view to end
   void onGoEnd(void);
-  
+
+  // Interpolate around selected points
+  void onInterpolate(void);
+
+  void onInterpolateRepeat();
   
   /// Invoked when main window is destroyed
   void onMainWindowDestroyed(void);
+
 
 };
 

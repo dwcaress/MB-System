@@ -31,13 +31,13 @@ extern "C" {
 #include "mb_status.h"
 }
 
-Backend::Ping Backend::ping[MBNAVEDIT_BUFFER_SIZE] = {};
+Backend::Ping Backend::ping_[MBNAVEDIT_BUFFER_SIZE] = {};
 
 /* Mode value defines */
 
 #define OUTPUT_MODE_OUTPUT 0
 #define OUTPUT_MODE_BROWSE 1
-#define PLOT_TINT 0
+#define PLOT_TINTERVAL 0
 #define PLOT_LONGITUDE 1
 #define PLOT_LATITUDE 2
 #define PLOT_SPEED 3
@@ -51,6 +51,9 @@ Backend::Ping Backend::ping[MBNAVEDIT_BUFFER_SIZE] = {};
 #define MODEL_MODE_DR 2
 #define MODEL_MODE_INVERT 3
 #define NUM_FILES_MAX 1000
+
+#define MBNAVEDIT_PICK_RADIUS 50
+#define MBNAVEDIT_SELECT_RADIUS 20
 
 using namespace mb_system;
 
@@ -988,10 +991,10 @@ int Backend::dump_data(int hold) {
     for (int iping = 0; iping < nBuff_ - hold; iping++) {
       /* write the nav out */
       fprintf(nfp_, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.3f %.3f %.4f %.3f %.3f %.4f\r\n",
-	      ping[iping].time_i[0], ping[iping].time_i[1], ping[iping].time_i[2], ping[iping].time_i[3],
-	      ping[iping].time_i[4], ping[iping].time_i[5], ping[iping].time_i[6], ping[iping].time_d, ping[iping].lon,
-	      ping[iping].lat, ping[iping].heading, ping[iping].speed, ping[iping].draft, ping[iping].roll,
-	      ping[iping].pitch, ping[iping].heave);
+	      ping_[iping].time_i[0], ping_[iping].time_i[1], ping_[iping].time_i[2], ping_[iping].time_i[3],
+	      ping_[iping].time_i[4], ping_[iping].time_i[5], ping_[iping].time_i[6], ping_[iping].time_d, ping_[iping].lon,
+	      ping_[iping].lat, ping_[iping].heading, ping_[iping].speed, ping_[iping].draft, ping_[iping].roll,
+	      ping_[iping].pitch, ping_[iping].heave);
     }
   }
 
@@ -1003,7 +1006,7 @@ int Backend::dump_data(int hold) {
 
     /* copy data to be held */
     for (int iping = 0; iping < hold; iping++) {
-      ping[iping] = ping[iping + nBuff_ - hold];
+      ping_[iping] = ping_[iping + nBuff_ - hold];
     }
     nDump_ = nBuff_ - hold;
     nBuff_ = hold;
@@ -1060,10 +1063,10 @@ int Backend::load_data(void) {
   if (status == MB_SUCCESS)
     do {
       status = mb_get_all(verbose_, imbioPtr_, &storePtr_, &kind_,
-			  ping[nBuff_].time_i, &ping[nBuff_].time_d,
-			  &ping[nBuff_].lon,
-			  &ping[nBuff_].lat, &ping[nBuff_].speed,
-			  &ping[nBuff_].heading, &distance_, &altitude_,
+			  ping_[nBuff_].time_i, &ping_[nBuff_].time_d,
+			  &ping_[nBuff_].lon,
+			  &ping_[nBuff_].lat, &ping_[nBuff_].speed,
+			  &ping_[nBuff_].heading, &distance_, &altitude_,
 			  &sensorDepth_,
 			  &nbath_, &namp_, &nss_, beamFlag_, bath_, amp_,
 			  bathAcrossTrack_, bathAlongTrack_,
@@ -1086,51 +1089,51 @@ int Backend::load_data(void) {
 	  (kind_ == navSource_ ||
 	   (kind_ == MB_DATA_DATA && usePingData_))) {
 	status = mb_extract_nav(verbose_, imbioPtr_, storePtr_, &kind_,
-				ping[nBuff_].time_i, &ping[nBuff_].time_d,
-				&ping[nBuff_].lon, &ping[nBuff_].lat,
-				&ping[nBuff_].speed, &ping[nBuff_].heading,
-				&ping[nBuff_].draft, &ping[nBuff_].roll,
-				&ping[nBuff_].pitch, &ping[nBuff_].heave,
+				ping_[nBuff_].time_i, &ping_[nBuff_].time_d,
+				&ping_[nBuff_].lon, &ping_[nBuff_].lat,
+				&ping_[nBuff_].speed, &ping_[nBuff_].heading,
+				&ping_[nBuff_].draft, &ping_[nBuff_].roll,
+				&ping_[nBuff_].pitch, &ping_[nBuff_].heave,
 				&error_);
       }
       if (status == MB_SUCCESS) {
 	/* get first time value if first record */
 	if (!firstRead_) {
-	  fileStarttime_d_ = ping[nBuff_].time_d;
+	  fileStarttime_d_ = ping_[nBuff_].time_d;
 	  firstRead_ = true;
 	}
 
 	/* get original values */
-	ping[nBuff_].id = nLoad_;
-	ping[nBuff_].record = ping[nBuff_].id + nDumpTotal_;
-	ping[nBuff_].lon_org = ping[nBuff_].lon;
-	ping[nBuff_].lat_org = ping[nBuff_].lat;
-	ping[nBuff_].speed_org = ping[nBuff_].speed;
-	ping[nBuff_].heading_org = ping[nBuff_].heading;
-	ping[nBuff_].draft_org = ping[nBuff_].draft;
-	ping[nBuff_].file_time_d = ping[nBuff_].time_d - fileStarttime_d_;
+	ping_[nBuff_].id = nLoad_;
+	ping_[nBuff_].record = ping_[nBuff_].id + nDumpTotal_;
+	ping_[nBuff_].lon_org = ping_[nBuff_].lon;
+	ping_[nBuff_].lat_org = ping_[nBuff_].lat;
+	ping_[nBuff_].speed_org = ping_[nBuff_].speed;
+	ping_[nBuff_].heading_org = ping_[nBuff_].heading;
+	ping_[nBuff_].draft_org = ping_[nBuff_].draft;
+	ping_[nBuff_].file_time_d = ping_[nBuff_].time_d - fileStarttime_d_;
 
 	/* apply offsets */
-	ping[nBuff_].lon += offsetLon_;
-	ping[nBuff_].lat += offsetLat_;
+	ping_[nBuff_].lon += offsetLon_;
+	ping_[nBuff_].lat += offsetLat_;
 
 	/* set starting dr */
-	ping[nBuff_].mean_ok = false;
-	ping[nBuff_].lon_dr = ping[nBuff_].lon;
-	ping[nBuff_].lat_dr = ping[nBuff_].lat;
+	ping_[nBuff_].mean_ok = false;
+	ping_[nBuff_].lon_dr = ping_[nBuff_].lon;
+	ping_[nBuff_].lat_dr = ping_[nBuff_].lat;
 
 	/* set everything deselected */
-	ping[nBuff_].tint_select = false;
-	ping[nBuff_].lon_select = false;
-	ping[nBuff_].lat_select = false;
-	ping[nBuff_].speed_select = false;
-	ping[nBuff_].heading_select = false;
-	ping[nBuff_].draft_select = false;
-	ping[nBuff_].lonlat_flag = false;
+	ping_[nBuff_].tint_select = false;
+	ping_[nBuff_].lon_select = false;
+	ping_[nBuff_].lat_select = false;
+	ping_[nBuff_].speed_select = false;
+	ping_[nBuff_].heading_select = false;
+	ping_[nBuff_].draft_select = false;
+	ping_[nBuff_].lonlat_flag = false;
 
 	/* select repeated data */
-	if (nBuff_ > 0 && ping[nBuff_].lon == ping[nBuff_ - 1].lon && ping[nBuff_].lat == ping[nBuff_ - 1].lat) {
-	  ping[nBuff_].lonlat_flag = true;
+	if (nBuff_ > 0 && ping_[nBuff_].lon == ping_[nBuff_ - 1].lon && ping_[nBuff_].lat == ping_[nBuff_ - 1].lat) {
+	  ping_[nBuff_].lonlat_flag = true;
 	}
 
 	if (verbose_ >= 5) {
@@ -1138,10 +1141,10 @@ int Backend::load_data(void) {
 	  fprintf(stderr,
 		  "dbg5       %4d %4d %4d  %d/%d/%d %2.2d:%2.2d:%2.2d.%6.6d  %15.10f %15.10f %6.3f %7.3f %8.4f %6.3f "
 		  "%6.3f %8.4f\n",
-		  nBuff_, ping[nBuff_].id, ping[nBuff_].record, ping[nBuff_].time_i[1], ping[nBuff_].time_i[2],
-		  ping[nBuff_].time_i[0], ping[nBuff_].time_i[3], ping[nBuff_].time_i[4], ping[nBuff_].time_i[5],
-		  ping[nBuff_].time_i[6], ping[nBuff_].lon, ping[nBuff_].lat, ping[nBuff_].speed, ping[nBuff_].heading,
-		  ping[nBuff_].draft, ping[nBuff_].roll, ping[nBuff_].pitch, ping[nBuff_].heave);
+		  nBuff_, ping_[nBuff_].id, ping_[nBuff_].record, ping_[nBuff_].time_i[1], ping_[nBuff_].time_i[2],
+		  ping_[nBuff_].time_i[0], ping_[nBuff_].time_i[3], ping_[nBuff_].time_i[4], ping_[nBuff_].time_i[5],
+		  ping_[nBuff_].time_i[6], ping_[nBuff_].lon, ping_[nBuff_].lat, ping_[nBuff_].speed, ping_[nBuff_].heading,
+		  ping_[nBuff_].draft, ping_[nBuff_].roll, ping_[nBuff_].pitch, ping_[nBuff_].heave);
 	}
 
 	/* increment counting variables */
@@ -1166,7 +1169,7 @@ int Backend::load_data(void) {
   /* check for time stamp repeats */
   timestampProblem_ = false;
   for (int i = 0; i < nBuff_ - 1; i++) {
-    if (ping[i + 1].time_d <= ping[i].time_d) {
+    if (ping_[i + 1].time_d <= ping_[i].time_d) {
       timestampProblem_ = true;
     }
   }
@@ -1174,18 +1177,18 @@ int Backend::load_data(void) {
   /* calculate expected time */
   if (nBuff_ > 1) {
     for (int i = 1; i < nBuff_; i++) {
-      ping[i].tint = ping[i].time_d - ping[i - 1].time_d;
-      ping[i].tint_org = ping[i].tint;
-      ping[i].time_d_org = ping[i].time_d;
+      ping_[i].tint = ping_[i].time_d - ping_[i - 1].time_d;
+      ping_[i].tint_org = ping_[i].tint;
+      ping_[i].time_d_org = ping_[i].time_d;
     }
-    ping[0].tint = ping[1].tint;
-    ping[0].tint_org = ping[1].tint_org;
-    ping[0].time_d_org = ping[0].time_d;
+    ping_[0].tint = ping_[1].tint;
+    ping_[0].tint_org = ping_[1].tint_org;
+    ping_[0].time_d_org = ping_[0].time_d;
   }
   else if (nBuff_ == 0) {
-    ping[0].tint = 0.0;
-    ping[0].tint_org = 0.0;
-    ping[0].time_d_org = ping[0].time_d;
+    ping_[0].tint = 0.0;
+    ping_[0].tint_org = 0.0;
+    ping_[0].time_d_org = ping_[0].time_d;
   }
 
   /* find index of current ping */
@@ -1194,8 +1197,8 @@ int Backend::load_data(void) {
   /* reset plotting time span */
   if (nBuff_ > 0) {
     dataShowSize_ = 0;
-    plotStartTime_ = ping[0].file_time_d;
-    plotEndTime_ = ping[nBuff_ - 1].file_time_d;
+    plotStartTime_ = ping_[0].file_time_d;
+    plotEndTime_ = ping_[nBuff_ - 1].file_time_d;
     nPlot_ = nBuff_;
   }
 
@@ -1340,8 +1343,8 @@ int Backend::action_offset(void) {
   if (fileOpen_) {
     /* apply position offsets to the data */
     for (int i = 0; i < nBuff_; i++) {
-      ping[i].lon += offsetLon_ - offsetLonApplied_;
-      ping[i].lat += offsetLat_ - offsetLatApplied_;
+      ping_[i].lon += offsetLon_ - offsetLonApplied_;
+      ping_[i].lat += offsetLat_ - offsetLatApplied_;
     }
   }
   offsetLonApplied_ = offsetLon_;
@@ -1497,11 +1500,11 @@ int Backend::action_step(int step) {
   if (fileOpen_ && nBuff_ > 0) {
 
     /* if current time span includes last data don't step */
-    if (step >= 0 && plotEndTime_ < ping[nBuff_ - 1].file_time_d) {
+    if (step >= 0 && plotEndTime_ < ping_[nBuff_ - 1].file_time_d) {
       plotStartTime_ = plotStartTime_ + step;
       plotEndTime_ = plotStartTime_ + dataShowSize_;
     }
-    else if (step < 0 && plotStartTime_ > ping[0].file_time_d) {
+    else if (step < 0 && plotStartTime_ > ping_[0].file_time_d) {
       plotStartTime_ = plotStartTime_ + step;
       plotEndTime_ = plotStartTime_ + dataShowSize_;
     }
@@ -1511,7 +1514,7 @@ int Backend::action_step(int step) {
     const int old_id = currentId_;
     int new_id;
     for (int i = 0; i < nBuff_; i++) {
-      if (!set && ping[i].file_time_d >= plotStartTime_) {
+      if (!set && ping_[i].file_time_d >= plotStartTime_) {
 	new_id = i;
 	set = true;
       }
@@ -1576,14 +1579,14 @@ int Backend::action_end(void) {
   /* check if a file has been opened */
   if (fileOpen_ && nBuff_ > 0) {
     /* set time span to include last data */
-    plotEndTime_ = ping[nBuff_ - 1].file_time_d;
+    plotEndTime_ = ping_[nBuff_ - 1].file_time_d;
     plotStartTime_ = plotEndTime_ - dataShowSize_;
 
     /* get current start of plotting data */
     const int old_id = currentId_;
     bool set = false;
     for (int i = 0; i < nBuff_ && !set; i++) {
-      if (ping[i].file_time_d >= plotStartTime_) {
+      if (ping_[i].file_time_d >= plotStartTime_) {
 	currentId_ = i;
 	set = true;
       }
@@ -1638,7 +1641,7 @@ int Backend::action_start(void) {
   if (fileOpen_ && nBuff_ > 0) {
     const int old_id = currentId_;
     currentId_ = 0;
-    plotStartTime_ = ping[currentId_].file_time_d;
+    plotStartTime_ = ping_[currentId_].file_time_d;
     plotEndTime_ = plotStartTime_ + dataShowSize_;
 
     /* replot */
@@ -1731,29 +1734,29 @@ int Backend::action_mouse_pick(int xx, int yy) {
     int iy;
     for (int i = currentId_ + 1; i < currentId_ + nPlot_; i++) {
       // TODO(schwehr): Why not a switch?
-      if (plot_[active_plot].type == PLOT_TINT) {
-	ix = xx - ping[i].tint_x;
-	iy = yy - ping[i].tint_y;
+      if (plot_[active_plot].type == PLOT_TINTERVAL) {
+	ix = xx - ping_[i].tint_x;
+	iy = yy - ping_[i].tint_y;
       }
       else if (plot_[active_plot].type == PLOT_LONGITUDE) {
-	ix = xx - ping[i].lon_x;
-	iy = yy - ping[i].lon_y;
+	ix = xx - ping_[i].lon_x;
+	iy = yy - ping_[i].lon_y;
       }
       else if (plot_[active_plot].type == PLOT_LATITUDE) {
-	ix = xx - ping[i].lat_x;
-	iy = yy - ping[i].lat_y;
+	ix = xx - ping_[i].lat_x;
+	iy = yy - ping_[i].lat_y;
       }
       else if (plot_[active_plot].type == PLOT_SPEED) {
-	ix = xx - ping[i].speed_x;
-	iy = yy - ping[i].speed_y;
+	ix = xx - ping_[i].speed_x;
+	iy = yy - ping_[i].speed_y;
       }
       else if (plot_[active_plot].type == PLOT_HEADING) {
-	ix = xx - ping[i].heading_x;
-	iy = yy - ping[i].heading_y;
+	ix = xx - ping_[i].heading_x;
+	iy = yy - ping_[i].heading_y;
       }
       else if (plot_[active_plot].type == PLOT_DRAFT) {
-	ix = xx - ping[i].draft_x;
-	iy = yy - ping[i].draft_y;
+	ix = xx - ping_[i].draft_x;
+	iy = yy - ping_[i].draft_y;
       }
       // TODO(schwehr): What about else?  It might get a prior value.
       const int range = (int)sqrt((double)(ix * ix + iy * iy));
@@ -1765,47 +1768,47 @@ int Backend::action_mouse_pick(int xx, int yy) {
 
     /* if it is close enough select or unselect the value
        and replot it */
-    if (range_min <= MBNAVEDIT_PICK_DISTANCE) {
-      if (plot_[active_plot].type == PLOT_TINT) {
-	if (ping[iping].tint_select)
-	  ping[iping].tint_select = false;
+    if (range_min <= MBNAVEDIT_PICK_RADIUS) {
+      if (plot_[active_plot].type == PLOT_TINTERVAL) {
+	if (ping_[iping].tint_select)
+	  ping_[iping].tint_select = false;
 	else
-	  ping[iping].tint_select = true;
+	  ping_[iping].tint_select = true;
 	plot_tint_value(active_plot, iping);
       }
       else if (plot_[active_plot].type == PLOT_LONGITUDE) {
-	if (ping[iping].lon_select)
-	  ping[iping].lon_select = false;
+	if (ping_[iping].lon_select)
+	  ping_[iping].lon_select = false;
 	else
-	  ping[iping].lon_select = true;
+	  ping_[iping].lon_select = true;
 	plot_lon_value(active_plot, iping);
       }
       else if (plot_[active_plot].type == PLOT_LATITUDE) {
-	if (ping[iping].lat_select)
-	  ping[iping].lat_select = false;
+	if (ping_[iping].lat_select)
+	  ping_[iping].lat_select = false;
 	else
-	  ping[iping].lat_select = true;
+	  ping_[iping].lat_select = true;
 	plot_lat_value(active_plot, iping);
       }
       else if (plot_[active_plot].type == PLOT_SPEED) {
-	if (ping[iping].speed_select)
-	  ping[iping].speed_select = false;
+	if (ping_[iping].speed_select)
+	  ping_[iping].speed_select = false;
 	else
-	  ping[iping].speed_select = true;
+	  ping_[iping].speed_select = true;
 	plot_speed_value(active_plot, iping);
       }
       else if (plot_[active_plot].type == PLOT_HEADING) {
-	if (ping[iping].heading_select)
-	  ping[iping].heading_select = false;
+	if (ping_[iping].heading_select)
+	  ping_[iping].heading_select = false;
 	else
-	  ping[iping].heading_select = true;
+	  ping_[iping].heading_select = true;
 	plot_heading_value(active_plot, iping);
       }
       else if (plot_[active_plot].type == PLOT_DRAFT) {
-	if (ping[iping].draft_select)
-	  ping[iping].draft_select = false;
+	if (ping_[iping].draft_select)
+	  ping_[iping].draft_select = false;
 	else
-	  ping[iping].draft_select = true;
+	  ping_[iping].draft_select = true;
 	plot_draft_value(active_plot, iping);
       }
     }
@@ -1846,7 +1849,8 @@ int Backend::action_mouse_select(int xx, int yy) {
   }
 
   int status = MB_SUCCESS;
-
+  qDebug() << "nPlot: " << nPlot_ << ", active_plot: " << active_plot;
+  
   /* don't try to do anything if no data or not in plot */
   if (nPlot_ > 0 && active_plot > -1) {
 
@@ -1861,7 +1865,7 @@ int Backend::action_mouse_select(int xx, int yy) {
     }
 
     /* if anything was actually deselected, replot */
-    if (deselect == MB_SUCCESS) {
+    if (deselect) {
       /* clear the screen */
       status = clear_screen();
 
@@ -1874,57 +1878,57 @@ int Backend::action_mouse_select(int xx, int yy) {
     int ix;
     int iy;
     for (int i = currentId_; i < currentId_ + nPlot_; i++) {
-      if (plot_[active_plot].type == PLOT_TINT) {
-	ix = xx - ping[i].tint_x;
-	iy = yy - ping[i].tint_y;
+      if (plot_[active_plot].type == PLOT_TINTERVAL) {
+	ix = xx - ping_[i].tint_x;
+	iy = yy - ping_[i].tint_y;
       }
       else if (plot_[active_plot].type == PLOT_LONGITUDE) {
-	ix = xx - ping[i].lon_x;
-	iy = yy - ping[i].lon_y;
+	ix = xx - ping_[i].lon_x;
+	iy = yy - ping_[i].lon_y;
       }
       else if (plot_[active_plot].type == PLOT_LATITUDE) {
-	ix = xx - ping[i].lat_x;
-	iy = yy - ping[i].lat_y;
+	ix = xx - ping_[i].lat_x;
+	iy = yy - ping_[i].lat_y;
       }
       else if (plot_[active_plot].type == PLOT_SPEED) {
-	ix = xx - ping[i].speed_x;
-	iy = yy - ping[i].speed_y;
+	ix = xx - ping_[i].speed_x;
+	iy = yy - ping_[i].speed_y;
       }
       else if (plot_[active_plot].type == PLOT_HEADING) {
-	ix = xx - ping[i].heading_x;
-	iy = yy - ping[i].heading_y;
+	ix = xx - ping_[i].heading_x;
+	iy = yy - ping_[i].heading_y;
       }
       else if (plot_[active_plot].type == PLOT_DRAFT) {
-	ix = xx - ping[i].draft_x;
-	iy = yy - ping[i].draft_y;
+	ix = xx - ping_[i].draft_x;
+	iy = yy - ping_[i].draft_y;
       }
       const int range = (int)sqrt((double)(ix * ix + iy * iy));
 
       /* if it is close enough select the value
 	 and replot it */
-      if (range <= MBNAVEDIT_ERASE_DISTANCE) {
-	if (plot_[active_plot].type == PLOT_TINT) {
-	  ping[i].tint_select = true;
+      if (range <= MBNAVEDIT_SELECT_RADIUS) {
+	if (plot_[active_plot].type == PLOT_TINTERVAL) {
+	  ping_[i].tint_select = true;
 	  plot_tint_value(active_plot, i);
 	}
 	else if (plot_[active_plot].type == PLOT_LONGITUDE) {
-	  ping[i].lon_select = true;
+	  ping_[i].lon_select = true;
 	  plot_lon_value(active_plot, i);
 	}
 	else if (plot_[active_plot].type == PLOT_LATITUDE) {
-	  ping[i].lat_select = true;
+	  ping_[i].lat_select = true;
 	  plot_lat_value(active_plot, i);
 	}
 	else if (plot_[active_plot].type == PLOT_SPEED) {
-	  ping[i].speed_select = true;
+	  ping_[i].speed_select = true;
 	  plot_speed_value(active_plot, i);
 	}
 	else if (plot_[active_plot].type == PLOT_HEADING) {
-	  ping[i].heading_select = true;
+	  ping_[i].heading_select = true;
 	  plot_heading_value(active_plot, i);
 	}
 	else if (plot_[active_plot].type == PLOT_DRAFT) {
-	  ping[i].draft_select = true;
+	  ping_[i].draft_select = true;
 	  plot_draft_value(active_plot, i);
 	}
       }
@@ -1992,57 +1996,57 @@ int Backend::action_mouse_deselect(int xx, int yy) {
     int ix;
     int iy;
     for (int i = currentId_; i < currentId_ + nPlot_; i++) {
-      if (plot_[active_plot].type == PLOT_TINT) {
-	ix = xx - ping[i].tint_x;
-	iy = yy - ping[i].tint_y;
+      if (plot_[active_plot].type == PLOT_TINTERVAL) {
+	ix = xx - ping_[i].tint_x;
+	iy = yy - ping_[i].tint_y;
       }
       else if (plot_[active_plot].type == PLOT_LONGITUDE) {
-	ix = xx - ping[i].lon_x;
-	iy = yy - ping[i].lon_y;
+	ix = xx - ping_[i].lon_x;
+	iy = yy - ping_[i].lon_y;
       }
       else if (plot_[active_plot].type == PLOT_LATITUDE) {
-	ix = xx - ping[i].lat_x;
-	iy = yy - ping[i].lat_y;
+	ix = xx - ping_[i].lat_x;
+	iy = yy - ping_[i].lat_y;
       }
       else if (plot_[active_plot].type == PLOT_SPEED) {
-	ix = xx - ping[i].speed_x;
-	iy = yy - ping[i].speed_y;
+	ix = xx - ping_[i].speed_x;
+	iy = yy - ping_[i].speed_y;
       }
       else if (plot_[active_plot].type == PLOT_HEADING) {
-	ix = xx - ping[i].heading_x;
-	iy = yy - ping[i].heading_y;
+	ix = xx - ping_[i].heading_x;
+	iy = yy - ping_[i].heading_y;
       }
       else if (plot_[active_plot].type == PLOT_DRAFT) {
-	ix = xx - ping[i].draft_x;
-	iy = yy - ping[i].draft_y;
+	ix = xx - ping_[i].draft_x;
+	iy = yy - ping_[i].draft_y;
       }
       const int range = (int)sqrt((double)(ix * ix + iy * iy));
 
       /* if it is close enough deselect the value
 	 and replot it */
-      if (range <= MBNAVEDIT_ERASE_DISTANCE) {
-	if (plot_[active_plot].type == PLOT_TINT) {
-	  ping[i].tint_select = false;
+      if (range <= MBNAVEDIT_SELECT_RADIUS) {
+	if (plot_[active_plot].type == PLOT_TINTERVAL) {
+	  ping_[i].tint_select = false;
 	  plot_tint_value(active_plot, i);
 	}
 	else if (plot_[active_plot].type == PLOT_LONGITUDE) {
-	  ping[i].lon_select = false;
+	  ping_[i].lon_select = false;
 	  plot_lon_value(active_plot, i);
 	}
 	else if (plot_[active_plot].type == PLOT_LATITUDE) {
-	  ping[i].lat_select = false;
+	  ping_[i].lat_select = false;
 	  plot_lat_value(active_plot, i);
 	}
 	else if (plot_[active_plot].type == PLOT_SPEED) {
-	  ping[i].speed_select = false;
+	  ping_[i].speed_select = false;
 	  plot_speed_value(active_plot, i);
 	}
 	else if (plot_[active_plot].type == PLOT_HEADING) {
-	  ping[i].heading_select = false;
+	  ping_[i].heading_select = false;
 	  plot_heading_value(active_plot, i);
 	}
 	else if (plot_[active_plot].type == PLOT_DRAFT) {
-	  ping[i].draft_select = false;
+	  ping_[i].draft_select = false;
 	  plot_draft_value(active_plot, i);
 	}
       }
@@ -2096,18 +2100,18 @@ int Backend::action_mouse_selectall(int xx, int yy) {
 
     /* select all data points in active plot */
     for (int i = currentId_; i < currentId_ + nPlot_; i++) {
-      if (plot_[active_plot].type == PLOT_TINT)
-	ping[i].tint_select = true;
+      if (plot_[active_plot].type == PLOT_TINTERVAL)
+	ping_[i].tint_select = true;
       else if (plot_[active_plot].type == PLOT_LONGITUDE)
-	ping[i].lon_select = true;
+	ping_[i].lon_select = true;
       else if (plot_[active_plot].type == PLOT_LATITUDE)
-	ping[i].lat_select = true;
+	ping_[i].lat_select = true;
       else if (plot_[active_plot].type == PLOT_SPEED)
-	ping[i].speed_select = true;
+	ping_[i].speed_select = true;
       else if (plot_[active_plot].type == PLOT_HEADING)
-	ping[i].heading_select = true;
+	ping_[i].heading_select = true;
       else if (plot_[active_plot].type == PLOT_DRAFT)
-	ping[i].draft_select = true;
+	ping_[i].draft_select = true;
     }
 
     /* clear the screen */
@@ -2148,12 +2152,12 @@ int Backend::action_mouse_deselectall(int xx, int yy) {
        - this logic follows from deselecting all
        active plots plus all non-active plots */
     for (int i = currentId_; i < currentId_ + nPlot_; i++) {
-      ping[i].tint_select = false;
-      ping[i].lon_select = false;
-      ping[i].lat_select = false;
-      ping[i].speed_select = false;
-      ping[i].heading_select = false;
-      ping[i].draft_select = false;
+      ping_[i].tint_select = false;
+      ping_[i].lon_select = false;
+      ping_[i].lat_select = false;
+      ping_[i].speed_select = false;
+      ping_[i].heading_select = false;
+      ping_[i].draft_select = false;
     }
 
     /* clear the screen */
@@ -2191,28 +2195,28 @@ int Backend::action_deselect_all(int type) {
     /* deselect all data points in specified data type */
     int ndeselect = 0;
     for (int i = 0; i < nBuff_; i++) {
-      if (type == PLOT_TINT && ping[i].tint_select) {
-	ping[i].tint_select = false;
+      if (type == PLOT_TINTERVAL && ping_[i].tint_select) {
+	ping_[i].tint_select = false;
 	ndeselect++;
       }
-      else if (type == PLOT_LONGITUDE && ping[i].lon_select) {
-	ping[i].lon_select = false;
+      else if (type == PLOT_LONGITUDE && ping_[i].lon_select) {
+	ping_[i].lon_select = false;
 	ndeselect++;
       }
-      else if (type == PLOT_LATITUDE && ping[i].lat_select) {
-	ping[i].lat_select = false;
+      else if (type == PLOT_LATITUDE && ping_[i].lat_select) {
+	ping_[i].lat_select = false;
 	ndeselect++;
       }
-      else if (type == PLOT_SPEED && ping[i].speed_select) {
-	ping[i].speed_select = false;
+      else if (type == PLOT_SPEED && ping_[i].speed_select) {
+	ping_[i].speed_select = false;
 	ndeselect++;
       }
-      else if (type == PLOT_HEADING && ping[i].heading_select) {
-	ping[i].heading_select = false;
+      else if (type == PLOT_HEADING && ping_[i].heading_select) {
+	ping_[i].heading_select = false;
 	ndeselect++;
       }
-      else if (type == PLOT_DRAFT && ping[i].draft_select) {
-	ping[i].draft_select = false;
+      else if (type == PLOT_DRAFT && ping_[i].draft_select) {
+	ping_[i].draft_select = false;
 	ndeselect++;
       }
     }
@@ -2353,7 +2357,7 @@ int Backend::action_set_interval(int xx, int yy, int which) {
       /* get current start of plotting data */
       bool set = false;
       for (int i = 0; i < nBuff_; i++) {
-	if (!set && ping[i].file_time_d >= plotStartTime_) {
+	if (!set && ping_[i].file_time_d >= plotStartTime_) {
 	  currentId_ = i;
 	  set = true;
 	}
@@ -2413,9 +2417,9 @@ int Backend::action_use_dr(void) {
     /* set lonlat to dr lonlat for selected visible data */
     if (active_plot > -1) {
       for (int i = currentId_; i < currentId_ + nPlot_; i++) {
-	if (ping[i].lon_select || ping[i].lat_select) {
-	  ping[i].lon = ping[i].lon_dr;
-	  ping[i].lat = ping[i].lat_dr;
+	if (ping_[i].lon_select || ping_[i].lat_select) {
+	  ping_[i].lon = ping_[i].lon_dr;
+	  ping_[i].lat = ping_[i].lat_dr;
 	}
       }
 
@@ -2468,8 +2472,8 @@ int Backend::action_use_smg(void) {
     if (active_plot > -1) {
       bool speedheading_change = false;
       for (int i = currentId_; i < currentId_ + nPlot_; i++) {
-	if (ping[i].speed_select) {
-	  ping[i].speed = ping[i].speed_made_good;
+	if (ping_[i].speed_select) {
+	  ping_[i].speed = ping_[i].speed_made_good;
 	  speedheading_change = true;
 	}
       }
@@ -2522,8 +2526,8 @@ int Backend::action_use_cmg(void) {
     if (active_plot > -1) {
       bool speedheading_change = false;
       for (int i = currentId_; i < currentId_ + nPlot_; i++) {
-	if (ping[i].heading_select) {
-	  ping[i].heading = ping[i].course_made_good;
+	if (ping_[i].heading_select) {
+	  ping_[i].heading = ping_[i].course_made_good;
 	  speedheading_change = true;
 	}
       }
@@ -2573,111 +2577,111 @@ int Backend::action_interpolate(void) {
 
     /* do expected time */
     for (int iping = 0; iping < nBuff_; iping++) {
-      if (ping[iping].tint_select) {
+      if (ping_[iping].tint_select) {
 	int ibefore = iping;
 	for (int i = iping - 1; i >= 0; i--) {
-	  if (!ping[i].tint_select && ibefore == iping)
+	  if (!ping_[i].tint_select && ibefore == iping)
 	    ibefore = i;
 	}
 	int iafter = iping;
 	for (int i = iping + 1; i < nBuff_; i++) {
-	  if (!ping[i].tint_select && iafter == iping)
+	  if (!ping_[i].tint_select && iafter == iping)
 	    iafter = i;
 	}
 	if (ibefore < iping && iafter > iping) {
-	  ping[iping].time_d = ping[ibefore].time_d + (ping[iafter].time_d - ping[ibefore].time_d) *
+	  ping_[iping].time_d = ping_[ibefore].time_d + (ping_[iafter].time_d - ping_[ibefore].time_d) *
 	    ((double)(iping - ibefore)) / ((double)(iafter - ibefore));
-	  ping[iping].tint = ping[iping].time_d - ping[iping - 1].time_d;
-	  ping[iping].lonlat_flag = true;
+	  ping_[iping].tint = ping_[iping].time_d - ping_[iping - 1].time_d;
+	  ping_[iping].lonlat_flag = true;
 	  timelonlat_change = true;
 	}
 	else if (ibefore < iping && ibefore > 0) {
-	  ping[iping].time_d =
-	    ping[ibefore].time_d + (ping[ibefore].time_d - ping[ibefore - 1].time_d) * (iping - ibefore);
-	  ping[iping].tint = ping[iping].time_d - ping[iping - 1].time_d;
-	  ping[iping].lonlat_flag = true;
+	  ping_[iping].time_d =
+	    ping_[ibefore].time_d + (ping_[ibefore].time_d - ping_[ibefore - 1].time_d) * (iping - ibefore);
+	  ping_[iping].tint = ping_[iping].time_d - ping_[iping - 1].time_d;
+	  ping_[iping].lonlat_flag = true;
 	  timelonlat_change = true;
 	}
 	else if (ibefore < iping) {
-	  ping[iping].time_d = ping[ibefore].time_d;
-	  ping[iping].tint = ping[iping].time_d - ping[iping - 1].time_d;
-	  ping[iping].lonlat_flag = true;
+	  ping_[iping].time_d = ping_[ibefore].time_d;
+	  ping_[iping].tint = ping_[iping].time_d - ping_[iping - 1].time_d;
+	  ping_[iping].lonlat_flag = true;
 	  timelonlat_change = true;
 	}
 	else if (iafter > iping && iafter < nBuff_ - 1) {
-	  ping[iping].time_d = ping[iafter].time_d + (ping[iafter + 1].time_d - ping[iafter].time_d) * (iping - iafter);
-	  ping[iping].tint = 0.0;
-	  ping[iping].lonlat_flag = true;
+	  ping_[iping].time_d = ping_[iafter].time_d + (ping_[iafter + 1].time_d - ping_[iafter].time_d) * (iping - iafter);
+	  ping_[iping].tint = 0.0;
+	  ping_[iping].lonlat_flag = true;
 	  timelonlat_change = true;
 	}
 	else if (iafter > iping) {
-	  ping[iping].time_d = ping[iafter].time_d;
-	  ping[iping].tint = ping[iping].time_d - ping[iping - 1].time_d;
-	  ping[iping].lonlat_flag = true;
+	  ping_[iping].time_d = ping_[iafter].time_d;
+	  ping_[iping].tint = ping_[iping].time_d - ping_[iping - 1].time_d;
+	  ping_[iping].lonlat_flag = true;
 	  timelonlat_change = true;
 	}
-	ping[iping].file_time_d = ping[iping].time_d - fileStarttime_d_;
-	status = mb_get_date(verbose_, ping[iping].time_d, ping[iping].time_i);
+	ping_[iping].file_time_d = ping_[iping].time_d - fileStarttime_d_;
+	status = mb_get_date(verbose_, ping_[iping].time_d, ping_[iping].time_i);
 	if (iping < nBuff_ - 1)
-	  if (!ping[iping + 1].tint_select)
-	    ping[iping + 1].tint = ping[iping + 1].time_d - ping[iping].time_d;
+	  if (!ping_[iping + 1].tint_select)
+	    ping_[iping + 1].tint = ping_[iping + 1].time_d - ping_[iping].time_d;
       }
     }
 
     /* do longitude */
     for (int iping = 0; iping < nBuff_; iping++) {
-      if (ping[iping].lon_select) {
+      if (ping_[iping].lon_select) {
 	int ibefore = iping;
 	for (int i = iping - 1; i >= 0; i--) {
-	  if (!ping[i].lon_select && ibefore == iping)
+	  if (!ping_[i].lon_select && ibefore == iping)
 	    ibefore = i;
 	}
 	int iafter = iping;
 	for (int i = iping + 1; i < nBuff_; i++) {
-	  if (!ping[i].lon_select && iafter == iping)
+	  if (!ping_[i].lon_select && iafter == iping)
 	    iafter = i;
 	}
 	if (ibefore < iping && iafter > iping) {
-          dtime = ping[iafter].time_d - ping[ibefore].time_d;
+          dtime = ping_[iafter].time_d - ping_[ibefore].time_d;
           if (dtime > 0.0)
-	    ping[iping].lon = ping[ibefore].lon + (ping[iafter].lon - ping[ibefore].lon) *
-	      (ping[iping].time_d - ping[ibefore].time_d) /
-	      (ping[iafter].time_d - ping[ibefore].time_d);
+	    ping_[iping].lon = ping_[ibefore].lon + (ping_[iafter].lon - ping_[ibefore].lon) *
+	      (ping_[iping].time_d - ping_[ibefore].time_d) /
+	      (ping_[iafter].time_d - ping_[ibefore].time_d);
           else
-	    ping[iping].lon = ping[ibefore].lon + 0.5 * (ping[iafter].lon - ping[ibefore].lon);
-	  ping[iping].lonlat_flag = true;
+	    ping_[iping].lon = ping_[ibefore].lon + 0.5 * (ping_[iafter].lon - ping_[ibefore].lon);
+	  ping_[iping].lonlat_flag = true;
 	  timelonlat_change = true;
 	}
 	else if (ibefore < iping && ibefore > 0) {
-          dtime = ping[iafter].time_d - ping[ibefore - 1].time_d;
+          dtime = ping_[iafter].time_d - ping_[ibefore - 1].time_d;
 	  if (dtime > 0.0)
-	    ping[iping].lon = ping[ibefore].lon + (ping[ibefore].lon - ping[ibefore - 1].lon) *
-	      (ping[iping].time_d - ping[ibefore].time_d) /
-	      (ping[ibefore].time_d - ping[ibefore - 1].time_d);
+	    ping_[iping].lon = ping_[ibefore].lon + (ping_[ibefore].lon - ping_[ibefore - 1].lon) *
+	      (ping_[iping].time_d - ping_[ibefore].time_d) /
+	      (ping_[ibefore].time_d - ping_[ibefore - 1].time_d);
           else
-            ping[iping].lon = ping[ibefore].lon;
-	  ping[iping].lonlat_flag = true;
+            ping_[iping].lon = ping_[ibefore].lon;
+	  ping_[iping].lonlat_flag = true;
 	  timelonlat_change = true;
 	}
 	else if (ibefore < iping) {
-	  ping[iping].lon = ping[ibefore].lon;
-	  ping[iping].lonlat_flag = true;
+	  ping_[iping].lon = ping_[ibefore].lon;
+	  ping_[iping].lonlat_flag = true;
 	  timelonlat_change = true;
 	}
 	else if (iafter > iping && iafter < nBuff_ - 1) {
-          dtime = ping[iafter + 1].time_d - ping[iafter].time_d;
+          dtime = ping_[iafter + 1].time_d - ping_[iafter].time_d;
 	  if (dtime > 0.0)
-	    ping[iping].lon = ping[iafter].lon + (ping[iafter + 1].lon - ping[iafter].lon) *
-	      (ping[iping].time_d - ping[iafter].time_d) /
-	      (ping[iafter + 1].time_d - ping[iafter].time_d);
+	    ping_[iping].lon = ping_[iafter].lon + (ping_[iafter + 1].lon - ping_[iafter].lon) *
+	      (ping_[iping].time_d - ping_[iafter].time_d) /
+	      (ping_[iafter + 1].time_d - ping_[iafter].time_d);
           else
-            ping[iping].lon = ping[iafter].lon;
-	  ping[iping].lonlat_flag = true;
+            ping_[iping].lon = ping_[iafter].lon;
+	  ping_[iping].lonlat_flag = true;
 	  timelonlat_change = true;
 	}
 	else if (iafter > iping) {
-	  ping[iping].lon = ping[iafter].lon;
-	  ping[iping].lonlat_flag = true;
+	  ping_[iping].lon = ping_[iafter].lon;
+	  ping_[iping].lonlat_flag = true;
 	  timelonlat_change = true;
 	}
       }
@@ -2685,58 +2689,58 @@ int Backend::action_interpolate(void) {
 
     /* do latitude */
     for (int iping = 0; iping < nBuff_; iping++) {
-      if (ping[iping].lat_select) {
+      if (ping_[iping].lat_select) {
 	int ibefore = iping;
 	for (int i = iping - 1; i >= 0; i--) {
-	  if (!ping[i].lat_select && ibefore == iping)
+	  if (!ping_[i].lat_select && ibefore == iping)
 	    ibefore = i;
 	}
 	int iafter = iping;
 	for (int i = iping + 1; i < nBuff_; i++) {
-	  if (!ping[i].lat_select && iafter == iping)
+	  if (!ping_[i].lat_select && iafter == iping)
 	    iafter = i;
 	}
 	if (ibefore < iping && iafter > iping) {
-	  dtime = ping[iafter].time_d - ping[ibefore].time_d;
+	  dtime = ping_[iafter].time_d - ping_[ibefore].time_d;
           if (dtime > 0.0)
-	    ping[iping].lat = ping[ibefore].lat + (ping[iafter].lat - ping[ibefore].lat) *
-	      (ping[iping].time_d - ping[ibefore].time_d) /
-	      (ping[iafter].time_d - ping[ibefore].time_d);
+	    ping_[iping].lat = ping_[ibefore].lat + (ping_[iafter].lat - ping_[ibefore].lat) *
+	      (ping_[iping].time_d - ping_[ibefore].time_d) /
+	      (ping_[iafter].time_d - ping_[ibefore].time_d);
           else
-	    ping[iping].lat = ping[ibefore].lat + 0.5 * (ping[iafter].lat - ping[ibefore].lat);
-	  ping[iping].lonlat_flag = true;
+	    ping_[iping].lat = ping_[ibefore].lat + 0.5 * (ping_[iafter].lat - ping_[ibefore].lat);
+	  ping_[iping].lonlat_flag = true;
 	  timelonlat_change = true;
 	}
 	else if (ibefore < iping && ibefore > 0) {
-	  dtime = ping[iafter].time_d - ping[ibefore - 1].time_d;
+	  dtime = ping_[iafter].time_d - ping_[ibefore - 1].time_d;
 	  if (dtime > 0.0)
-	    ping[iping].lat = ping[ibefore].lat + (ping[ibefore].lat - ping[ibefore - 1].lat) *
-	      (ping[iping].time_d - ping[ibefore].time_d) /
-	      (ping[ibefore].time_d - ping[ibefore - 1].time_d);
+	    ping_[iping].lat = ping_[ibefore].lat + (ping_[ibefore].lat - ping_[ibefore - 1].lat) *
+	      (ping_[iping].time_d - ping_[ibefore].time_d) /
+	      (ping_[ibefore].time_d - ping_[ibefore - 1].time_d);
           else
-            ping[iping].lat = ping[ibefore].lat;
-	  ping[iping].lonlat_flag = true;
+            ping_[iping].lat = ping_[ibefore].lat;
+	  ping_[iping].lonlat_flag = true;
 	  timelonlat_change = true;
 	}
 	else if (ibefore < iping) {
-	  ping[iping].lat = ping[ibefore].lat;
-	  ping[iping].lonlat_flag = true;
+	  ping_[iping].lat = ping_[ibefore].lat;
+	  ping_[iping].lonlat_flag = true;
 	  timelonlat_change = true;
 	}
 	else if (iafter > iping && iafter < nBuff_ - 1) {
-	  dtime = ping[iafter + 1].time_d - ping[iafter].time_d;
+	  dtime = ping_[iafter + 1].time_d - ping_[iafter].time_d;
 	  if (dtime > 0.0)
-	    ping[iping].lat = ping[iafter].lat + (ping[iafter + 1].lat - ping[iafter].lat) *
-	      (ping[iping].time_d - ping[iafter].time_d) /
-	      (ping[iafter + 1].time_d - ping[iafter].time_d);
+	    ping_[iping].lat = ping_[iafter].lat + (ping_[iafter + 1].lat - ping_[iafter].lat) *
+	      (ping_[iping].time_d - ping_[iafter].time_d) /
+	      (ping_[iafter + 1].time_d - ping_[iafter].time_d);
           else
-            ping[iping].lat = ping[iafter].lat;
-	  ping[iping].lonlat_flag = true;
+            ping_[iping].lat = ping_[iafter].lat;
+	  ping_[iping].lonlat_flag = true;
 	  timelonlat_change = true;
 	}
 	else if (iafter > iping) {
-	  ping[iping].lat = ping[iafter].lat;
-	  ping[iping].lonlat_flag = true;
+	  ping_[iping].lat = ping_[iafter].lat;
+	  ping_[iping].lonlat_flag = true;
 	  timelonlat_change = true;
 	}
       }
@@ -2744,33 +2748,33 @@ int Backend::action_interpolate(void) {
 
     /* do speed */
     for (int iping = 0; iping < nBuff_; iping++) {
-      if (ping[iping].speed_select) {
+      if (ping_[iping].speed_select) {
 	int ibefore = iping;
 	for (int i = iping - 1; i >= 0; i--) {
-	  if (!ping[i].speed_select && ibefore == iping)
+	  if (!ping_[i].speed_select && ibefore == iping)
 	    ibefore = i;
 	}
 	int iafter = iping;
 	for (int i = iping + 1; i < nBuff_; i++) {
-	  if (!ping[i].speed_select && iafter == iping)
+	  if (!ping_[i].speed_select && iafter == iping)
 	    iafter = i;
 	}
 	if (ibefore < iping && iafter > iping) {
-	  dtime = ping[iafter].time_d - ping[ibefore].time_d;
+	  dtime = ping_[iafter].time_d - ping_[ibefore].time_d;
 	  if (dtime > 0.0)
-	    ping[iping].speed = ping[ibefore].speed + (ping[iafter].speed - ping[ibefore].speed) *
-	      (ping[iping].time_d - ping[ibefore].time_d) /
-	      (ping[iafter].time_d - ping[ibefore].time_d);
+	    ping_[iping].speed = ping_[ibefore].speed + (ping_[iafter].speed - ping_[ibefore].speed) *
+	      (ping_[iping].time_d - ping_[ibefore].time_d) /
+	      (ping_[iafter].time_d - ping_[ibefore].time_d);
           else
-	    ping[iping].speed = ping[ibefore].speed + 0.5 * (ping[iafter].speed - ping[ibefore].speed);
+	    ping_[iping].speed = ping_[ibefore].speed + 0.5 * (ping_[iafter].speed - ping_[ibefore].speed);
 	  speedheading_change = true;
 	}
 	else if (ibefore < iping) {
-	  ping[iping].speed = ping[ibefore].speed;
+	  ping_[iping].speed = ping_[ibefore].speed;
 	  speedheading_change = true;
 	}
 	else if (iafter > iping) {
-	  ping[iping].speed = ping[iafter].speed;
+	  ping_[iping].speed = ping_[iafter].speed;
 	  speedheading_change = true;
 	}
       }
@@ -2778,32 +2782,32 @@ int Backend::action_interpolate(void) {
 
     /* do heading */
     for (int iping = 0; iping < nBuff_; iping++) {
-      if (ping[iping].heading_select) {
+      if (ping_[iping].heading_select) {
 	int ibefore = iping;
 	for (int i = iping - 1; i >= 0; i--) {
-	  if (!ping[i].heading_select && ibefore == iping)
+	  if (!ping_[i].heading_select && ibefore == iping)
 	    ibefore = i;
 	}
 	int iafter = iping;
 	for (int i = iping + 1; i < nBuff_; i++)
-	  if (!ping[i].heading_select && iafter == iping)
+	  if (!ping_[i].heading_select && iafter == iping)
 	    iafter = i;
 	if (ibefore < iping && iafter > iping) {
-	  dtime = ping[iafter].time_d - ping[ibefore].time_d;
+	  dtime = ping_[iafter].time_d - ping_[ibefore].time_d;
 	  if (dtime > 0.0)
-	    ping[iping].heading = ping[ibefore].heading + (ping[iafter].heading - ping[ibefore].heading) *
-	      (ping[iping].time_d - ping[ibefore].time_d) /
-	      (ping[iafter].time_d - ping[ibefore].time_d);
+	    ping_[iping].heading = ping_[ibefore].heading + (ping_[iafter].heading - ping_[ibefore].heading) *
+	      (ping_[iping].time_d - ping_[ibefore].time_d) /
+	      (ping_[iafter].time_d - ping_[ibefore].time_d);
 	  else
-	    ping[iping].heading = ping[ibefore].heading + 0.5 * (ping[iafter].heading - ping[ibefore].heading);
+	    ping_[iping].heading = ping_[ibefore].heading + 0.5 * (ping_[iafter].heading - ping_[ibefore].heading);
 	  speedheading_change = true;
 	}
 	else if (ibefore < iping) {
-	  ping[iping].heading = ping[ibefore].heading;
+	  ping_[iping].heading = ping_[ibefore].heading;
 	  speedheading_change = true;
 	}
 	else if (iafter > iping) {
-	  ping[iping].heading = ping[iafter].heading;
+	  ping_[iping].heading = ping_[iafter].heading;
 	  speedheading_change = true;
 	}
       }
@@ -2811,35 +2815,35 @@ int Backend::action_interpolate(void) {
 
     /* do draft */
     for (int iping = 0; iping < nBuff_; iping++) {
-      if (ping[iping].draft_select) {
+      if (ping_[iping].draft_select) {
 	int ibefore = iping;
 	for (int i = iping - 1; i >= 0; i--) {
-	  if (!ping[i].draft_select && ibefore == iping)
+	  if (!ping_[i].draft_select && ibefore == iping)
 	    ibefore = i;
 	}
 	int iafter = iping;
 	for (int i = iping + 1; i < nBuff_; i++)
-	  if (!ping[i].draft_select && iafter == iping)
+	  if (!ping_[i].draft_select && iafter == iping)
 	    iafter = i;
 	if (ibefore < iping && iafter > iping) {
-	  dtime = ping[iafter].time_d - ping[ibefore].time_d;
+	  dtime = ping_[iafter].time_d - ping_[ibefore].time_d;
 	  if (dtime > 0.0)
-	    ping[iping].draft = ping[ibefore].draft + (ping[iafter].draft - ping[ibefore].draft) *
-	      (ping[iping].time_d - ping[ibefore].time_d) /
-	      (ping[iafter].time_d - ping[ibefore].time_d);
+	    ping_[iping].draft = ping_[ibefore].draft + (ping_[iafter].draft - ping_[ibefore].draft) *
+	      (ping_[iping].time_d - ping_[ibefore].time_d) /
+	      (ping_[iafter].time_d - ping_[ibefore].time_d);
 	  else
-	    ping[iping].draft = ping[ibefore].draft + 0.5 * (ping[iafter].draft - ping[ibefore].draft);
-	  ping[iping].lonlat_flag = true;
+	    ping_[iping].draft = ping_[ibefore].draft + 0.5 * (ping_[iafter].draft - ping_[ibefore].draft);
+	  ping_[iping].lonlat_flag = true;
 	  timelonlat_change = true;
 	}
 	else if (ibefore < iping) {
-	  ping[iping].draft = ping[ibefore].draft;
-	  ping[iping].lonlat_flag = true;
+	  ping_[iping].draft = ping_[ibefore].draft;
+	  ping_[iping].lonlat_flag = true;
 	  timelonlat_change = true;
 	}
 	else if (iafter > iping) {
-	  ping[iping].draft = ping[iafter].draft;
-	  ping[iping].lonlat_flag = true;
+	  ping_[iping].draft = ping_[iafter].draft;
+	  ping_[iping].lonlat_flag = true;
 	  timelonlat_change = true;
 	}
       }
@@ -2869,7 +2873,7 @@ int Backend::action_interpolate(void) {
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int Backend::action_interpolaterepeats(void) {
+int Backend::action_interpolate_repeats(void) {
   if (verbose_ >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
@@ -2887,19 +2891,19 @@ int Backend::action_interpolaterepeats(void) {
 
     /* do expected time */
     for (int iping = 1; iping < nBuff_ - 1; iping++) {
-      if (ping[iping].tint_select && ping[iping].time_d == ping[iping - 1].time_d) {
+      if (ping_[iping].tint_select && ping_[iping].time_d == ping_[iping - 1].time_d) {
 	/* find next changed value */
 	bool found = false;
 	int ibefore = iping - 1;
 	for (int j = iping + 1; j < nBuff_ && !found; j++) {
-	  if (ping[iping].time_d != ping[j].time_d) {
+	  if (ping_[iping].time_d != ping_[j].time_d) {
 	    found = true;
 	    iafter = j;
 	  }
 	}
 	for (int j = iping; j < iafter; j++) {
-	  if (ping[j].tint_select) {
-	    ping[j].time_d = ping[ibefore].time_d + (ping[iafter].time_d - ping[ibefore].time_d) *
+	  if (ping_[j].tint_select) {
+	    ping_[j].time_d = ping_[ibefore].time_d + (ping_[iafter].time_d - ping_[ibefore].time_d) *
 	      ((double)(iping - ibefore)) / ((double)(iafter - ibefore));
 	    timelonlat_change = true;
 	  }
@@ -2909,21 +2913,21 @@ int Backend::action_interpolaterepeats(void) {
 
     /* do longitude */
     for (int iping = 1; iping < nBuff_ - 1; iping++) {
-      if (ping[iping].lon_select && ping[iping].lon == ping[iping - 1].lon) {
+      if (ping_[iping].lon_select && ping_[iping].lon == ping_[iping - 1].lon) {
 	/* find next changed value */
 	bool found = false;
 	int ibefore = iping - 1;
 	for (int j = iping + 1; j < nBuff_ && !found; j++) {
-	  if (ping[iping].lon != ping[j].lon) {
+	  if (ping_[iping].lon != ping_[j].lon) {
 	    found = true;
 	    iafter = j;
 	  }
 	}
 	for (int j = iping; j < iafter; j++) {
-	  if (ping[j].lon_select) {
-	    ping[j].lon = ping[ibefore].lon + (ping[iafter].lon - ping[ibefore].lon) *
-	      (ping[j].time_d - ping[ibefore].time_d) /
-	      (ping[iafter].time_d - ping[ibefore].time_d);
+	  if (ping_[j].lon_select) {
+	    ping_[j].lon = ping_[ibefore].lon + (ping_[iafter].lon - ping_[ibefore].lon) *
+	      (ping_[j].time_d - ping_[ibefore].time_d) /
+	      (ping_[iafter].time_d - ping_[ibefore].time_d);
 	    timelonlat_change = true;
 	  }
 	}
@@ -2932,21 +2936,21 @@ int Backend::action_interpolaterepeats(void) {
 
     /* do latitude */
     for (int iping = 1; iping < nBuff_ - 1; iping++) {
-      if (ping[iping].lat_select && ping[iping].lat == ping[iping - 1].lat) {
+      if (ping_[iping].lat_select && ping_[iping].lat == ping_[iping - 1].lat) {
 	/* find next changed value */
 	bool found = false;
 	int ibefore = iping - 1;
 	for (int j = iping + 1; j < nBuff_ && !found; j++) {
-	  if (ping[iping].lat != ping[j].lat) {
+	  if (ping_[iping].lat != ping_[j].lat) {
 	    found = true;
 	    iafter = j;
 	  }
 	}
 	for (int j = iping; j < iafter; j++) {
-	  if (ping[j].lat_select) {
-	    ping[j].lat = ping[ibefore].lat + (ping[iafter].lat - ping[ibefore].lat) *
-	      (ping[j].time_d - ping[ibefore].time_d) /
-	      (ping[iafter].time_d - ping[ibefore].time_d);
+	  if (ping_[j].lat_select) {
+	    ping_[j].lat = ping_[ibefore].lat + (ping_[iafter].lat - ping_[ibefore].lat) *
+	      (ping_[j].time_d - ping_[ibefore].time_d) /
+	      (ping_[iafter].time_d - ping_[ibefore].time_d);
 	    timelonlat_change = true;
 	  }
 	}
@@ -2955,21 +2959,21 @@ int Backend::action_interpolaterepeats(void) {
 
     /* do speed */
     for (int iping = 1; iping < nBuff_ - 1; iping++) {
-      if (ping[iping].speed_select && ping[iping].speed == ping[iping - 1].speed) {
+      if (ping_[iping].speed_select && ping_[iping].speed == ping_[iping - 1].speed) {
 	/* find next changed value */
 	bool found = false;
 	int ibefore = iping - 1;
 	for (int j = iping + 1; j < nBuff_ && !found; j++) {
-	  if (ping[iping].speed != ping[j].speed) {
+	  if (ping_[iping].speed != ping_[j].speed) {
 	    found = true;
 	    iafter = j;
 	  }
 	}
 	for (int j = iping; j < iafter; j++) {
-	  if (ping[j].speed_select) {
-	    ping[j].speed = ping[ibefore].speed + (ping[iafter].speed - ping[ibefore].speed) *
-	      (ping[j].time_d - ping[ibefore].time_d) /
-	      (ping[iafter].time_d - ping[ibefore].time_d);
+	  if (ping_[j].speed_select) {
+	    ping_[j].speed = ping_[ibefore].speed + (ping_[iafter].speed - ping_[ibefore].speed) *
+	      (ping_[j].time_d - ping_[ibefore].time_d) /
+	      (ping_[iafter].time_d - ping_[ibefore].time_d);
 	    speedheading_change = true;
 	  }
 	}
@@ -2978,21 +2982,21 @@ int Backend::action_interpolaterepeats(void) {
 
     /* do heading */
     for (int iping = 1; iping < nBuff_ - 1; iping++) {
-      if (ping[iping].heading_select && ping[iping].heading == ping[iping - 1].heading) {
+      if (ping_[iping].heading_select && ping_[iping].heading == ping_[iping - 1].heading) {
 	/* find next changed value */
 	bool found = false;
 	int ibefore = iping - 1;
 	for (int j = iping + 1; j < nBuff_ && !found; j++) {
-	  if (ping[iping].heading != ping[j].heading) {
+	  if (ping_[iping].heading != ping_[j].heading) {
 	    found = true;
 	    iafter = j;
 	  }
 	}
 	for (int j = iping; j < iafter; j++) {
-	  if (ping[j].heading_select) {
-	    ping[j].heading = ping[ibefore].heading + (ping[iafter].heading - ping[ibefore].heading) *
-	      (ping[j].time_d - ping[ibefore].time_d) /
-	      (ping[iafter].time_d - ping[ibefore].time_d);
+	  if (ping_[j].heading_select) {
+	    ping_[j].heading = ping_[ibefore].heading + (ping_[iafter].heading - ping_[ibefore].heading) *
+	      (ping_[j].time_d - ping_[ibefore].time_d) /
+	      (ping_[iafter].time_d - ping_[ibefore].time_d);
 	    speedheading_change = true;
 	  }
 	}
@@ -3001,21 +3005,21 @@ int Backend::action_interpolaterepeats(void) {
 
     /* do draft */
     for (int iping = 1; iping < nBuff_ - 1; iping++) {
-      if (ping[iping].draft_select && ping[iping].draft == ping[iping - 1].draft) {
+      if (ping_[iping].draft_select && ping_[iping].draft == ping_[iping - 1].draft) {
 	/* find next changed value */
 	bool found = false;
 	int ibefore = iping - 1;
 	for (int j = iping + 1; j < nBuff_ && !found; j++) {
-	  if (ping[iping].draft != ping[j].draft) {
+	  if (ping_[iping].draft != ping_[j].draft) {
 	    found = true;
 	    iafter = j;
 	  }
 	}
 	for (int j = iping; j < iafter; j++) {
-	  if (ping[j].draft_select) {
-	    ping[j].draft = ping[ibefore].draft + (ping[iafter].draft - ping[ibefore].draft) *
-	      (ping[j].time_d - ping[ibefore].time_d) /
-	      (ping[iafter].time_d - ping[ibefore].time_d);
+	  if (ping_[j].draft_select) {
+	    ping_[j].draft = ping_[ibefore].draft + (ping_[iafter].draft - ping_[ibefore].draft) *
+	      (ping_[j].time_d - ping_[ibefore].time_d) /
+	      (ping_[iafter].time_d - ping_[ibefore].time_d);
 	    timelonlat_change = true;
 	  }
 	}
@@ -3063,44 +3067,44 @@ int Backend::action_revert(void) {
     /* loop over each of the plots */
     for (int iplot = 0; iplot < nPlots_; iplot++) {
       for (int i = currentId_; i < currentId_ + nPlot_; i++) {
-	if (plot_[iplot].type == PLOT_TINT) {
-	  if (ping[i].tint_select) {
-	    ping[i].time_d = ping[i].time_d_org;
-	    ping[i].file_time_d = ping[i].time_d - fileStarttime_d_;
-	    ping[i].tint = ping[i].time_d - ping[i - 1].time_d;
+	if (plot_[iplot].type == PLOT_TINTERVAL) {
+	  if (ping_[i].tint_select) {
+	    ping_[i].time_d = ping_[i].time_d_org;
+	    ping_[i].file_time_d = ping_[i].time_d - fileStarttime_d_;
+	    ping_[i].tint = ping_[i].time_d - ping_[i - 1].time_d;
 	    timelonlat_change = true;
 	    if (i < nBuff_ - 1)
-	      ping[i + 1].tint = ping[i + 1].time_d - ping[i].time_d;
-	    status = mb_get_date(verbose_, ping[i].time_d, ping[i].time_i);
+	      ping_[i + 1].tint = ping_[i + 1].time_d - ping_[i].time_d;
+	    status = mb_get_date(verbose_, ping_[i].time_d, ping_[i].time_i);
 	  }
 	}
 	else if (plot_[iplot].type == PLOT_LONGITUDE) {
-	  if (ping[i].lon_select) {
-	    ping[i].lon = ping[i].lon_org;
+	  if (ping_[i].lon_select) {
+	    ping_[i].lon = ping_[i].lon_org;
 	    timelonlat_change = true;
 	  }
 	}
 	else if (plot_[iplot].type == PLOT_LATITUDE) {
-	  if (ping[i].lat_select) {
-	    ping[i].lat = ping[i].lat_org;
+	  if (ping_[i].lat_select) {
+	    ping_[i].lat = ping_[i].lat_org;
 	    timelonlat_change = true;
 	  }
 	}
 	else if (plot_[iplot].type == PLOT_SPEED) {
-	  if (ping[i].speed_select) {
-	    ping[i].speed = ping[i].speed_org;
+	  if (ping_[i].speed_select) {
+	    ping_[i].speed = ping_[i].speed_org;
 	    speedheading_change = true;
 	  }
 	}
 	else if (plot_[iplot].type == PLOT_HEADING) {
-	  if (ping[i].heading_select) {
-	    ping[i].heading = ping[i].heading_org;
+	  if (ping_[i].heading_select) {
+	    ping_[i].heading = ping_[i].heading_org;
 	    speedheading_change = true;
 	  }
 	}
 	else if (plot_[iplot].type == PLOT_DRAFT) {
-	  if (ping[i].draft_select) {
-	    ping[i].draft = ping[i].draft_org;
+	  if (ping_[i].draft_select) {
+	    ping_[i].draft = ping_[i].draft_org;
 	  }
 	}
       }
@@ -3150,13 +3154,13 @@ int Backend::action_flag(void) {
     for (int iplot = 0; iplot < nPlots_; iplot++) {
       for (int i = currentId_; i < currentId_ + nPlot_; i++) {
 	if (plot_[iplot].type == PLOT_LONGITUDE) {
-	  if (ping[i].lon_select) {
-	    ping[i].lonlat_flag = true;
+	  if (ping_[i].lon_select) {
+	    ping_[i].lonlat_flag = true;
 	  }
 	}
 	else if (plot_[iplot].type == PLOT_LATITUDE) {
-	  if (ping[i].lat_select) {
-	    ping[i].lonlat_flag = true;
+	  if (ping_[i].lat_select) {
+	    ping_[i].lonlat_flag = true;
 	  }
 	}
       }
@@ -3197,13 +3201,13 @@ int Backend::action_unflag(void) {
     for (int iplot = 0; iplot < nPlots_; iplot++) {
       for (int i = currentId_; i < currentId_ + nPlot_; i++) {
 	if (plot_[iplot].type == PLOT_LONGITUDE) {
-	  if (ping[i].lon_select) {
-	    ping[i].lonlat_flag = false;
+	  if (ping_[i].lon_select) {
+	    ping_[i].lonlat_flag = false;
 	  }
 	}
 	else if (plot_[iplot].type == PLOT_LATITUDE) {
-	  if (ping[i].lat_select) {
-	    ping[i].lonlat_flag = false;
+	  if (ping_[i].lat_select) {
+	    ping_[i].lonlat_flag = false;
 	  }
 	}
       }
@@ -3242,22 +3246,22 @@ int Backend::action_fixtime(void) {
   for (int i = 0; i < nBuff_; i++) {
     if (i == 0) {
       istart = i;
-      start_time_d = ping[i].time_d;
+      start_time_d = ping_[i].time_d;
     }
-    else if (ping[i].time_d > start_time_d) {
+    else if (ping_[i].time_d > start_time_d) {
       iend = i;
-      end_time_d = ping[i].time_d;
+      end_time_d = ping_[i].time_d;
       for (int j = istart + 1; j < iend; j++) {
-	ping[j].time_d = start_time_d + (j - istart) * (end_time_d - start_time_d) / (iend - istart);
-	mb_get_date(verbose_, ping[j].time_d, ping[j].time_i);
-	ping[j].file_time_d = ping[j].time_d - fileStarttime_d_;
+	ping_[j].time_d = start_time_d + (j - istart) * (end_time_d - start_time_d) / (iend - istart);
+	mb_get_date(verbose_, ping_[j].time_d, ping_[j].time_i);
+	ping_[j].file_time_d = ping_[j].time_d - fileStarttime_d_;
 	if (j > 0)
-	  ping[j - 1].tint = ping[j].time_d - ping[j - 1].time_d;
+	  ping_[j - 1].tint = ping_[j].time_d - ping_[j - 1].time_d;
 	if (j < nBuff_ - 1)
-	  ping[j].tint = ping[j + 1].time_d - ping[j].time_d;
+	  ping_[j].tint = ping_[j + 1].time_d - ping_[j].time_d;
       }
       istart = i;
-      start_time_d = ping[i].time_d;
+      start_time_d = ping_[i].time_d;
     }
   }
 
@@ -3283,40 +3287,40 @@ int Backend::action_deletebadtime(void) {
   int nbuffnew;
 
   /* loop over the data looking for bad times */
-  lastgood_time_d = ping[0].time_d;
+  lastgood_time_d = ping_[0].time_d;
   for (int i = 1; i < nBuff_; i++) {
-    if ((ping[i].time_d - lastgood_time_d) <= 0.0) {
-      ping[i].id = -1;
+    if ((ping_[i].time_d - lastgood_time_d) <= 0.0) {
+      ping_[i].id = -1;
     }
-    else if ((ping[i].time_d - lastgood_time_d) > 60.0) {
+    else if ((ping_[i].time_d - lastgood_time_d) > 60.0) {
       if (i == nBuff_ - 1)
-	ping[i].id = -1;
-      else if (ping[i + 1].time_d - ping[i].time_d <= 0.0)
-	ping[i].id = -1;
+	ping_[i].id = -1;
+      else if (ping_[i + 1].time_d - ping_[i].time_d <= 0.0)
+	ping_[i].id = -1;
       else
-	lastgood_time_d = ping[i].time_d;
+	lastgood_time_d = ping_[i].time_d;
     }
-    else if (ping[i].time_d > ping[nBuff_ - 1].time_d) {
-      ping[i].id = -1;
+    else if (ping_[i].time_d > ping_[nBuff_ - 1].time_d) {
+      ping_[i].id = -1;
     }
     else {
-      lastgood_time_d = ping[i].time_d;
+      lastgood_time_d = ping_[i].time_d;
     }
   }
 
   /* loop over the data in reverse deleting data with bad times */
   nbuffnew = nBuff_;
   for (int i = nBuff_ - 1; i >= 0; i--) {
-    if (ping[i].id == -1) {
+    if (ping_[i].id == -1) {
       for (int j = i; j < nbuffnew - 1; j++) {
-	ping[j] = ping[j + 1];
+	ping_[j] = ping_[j + 1];
       }
       if (i > 0)
-	ping[i - 1].tint = ping[i].time_d - ping[i - 1].time_d;
+	ping_[i - 1].tint = ping_[i].time_d - ping_[i - 1].time_d;
       if (i == nbuffnew - 2 && i > 0)
-	ping[i].tint = ping[i - 1].tint;
+	ping_[i].tint = ping_[i - 1].tint;
       else if (i == nbuffnew - 2 && i == 0)
-	ping[i].tint = 0.0;
+	ping_[i].tint = 0.0;
       nbuffnew--;
     }
   }
@@ -3343,8 +3347,8 @@ int Backend::action_showall(void) {
 
   /* reset plotting time span */
   if (nBuff_ > 0) {
-    plotStartTime_ = ping[0].file_time_d;
-    plotEndTime_ = ping[nBuff_ - 1].file_time_d;
+    plotStartTime_ = ping_[0].file_time_d;
+    plotEndTime_ = ping_[nBuff_ - 1].file_time_d;
     dataShowSize_ = 0;
     currentId_ = 0;
   }
@@ -3377,28 +3381,28 @@ int Backend::get_smgcmg(int i) {
     double time_d1, lon1, lat1;
     double time_d2, lon2, lat2;
     if (i == 0) {
-      time_d1 = ping[i].time_d;
-      lon1 = ping[i].lon;
-      lat1 = ping[i].lat;
-      time_d2 = ping[i + 1].time_d;
-      lon2 = ping[i + 1].lon;
-      lat2 = ping[i + 1].lat;
+      time_d1 = ping_[i].time_d;
+      lon1 = ping_[i].lon;
+      lat1 = ping_[i].lat;
+      time_d2 = ping_[i + 1].time_d;
+      lon2 = ping_[i + 1].lon;
+      lat2 = ping_[i + 1].lat;
     }
     else if (i == nBuff_ - 1) {
-      time_d1 = ping[i - 1].time_d;
-      lon1 = ping[i - 1].lon;
-      lat1 = ping[i - 1].lat;
-      time_d2 = ping[i].time_d;
-      lon2 = ping[i].lon;
-      lat2 = ping[i].lat;
+      time_d1 = ping_[i - 1].time_d;
+      lon1 = ping_[i - 1].lon;
+      lat1 = ping_[i - 1].lat;
+      time_d2 = ping_[i].time_d;
+      lon2 = ping_[i].lon;
+      lat2 = ping_[i].lat;
     }
     else {
-      time_d1 = ping[i - 1].time_d;
-      lon1 = ping[i - 1].lon;
-      lat1 = ping[i - 1].lat;
-      time_d2 = ping[i].time_d;
-      lon2 = ping[i].lon;
-      lat2 = ping[i].lat;
+      time_d1 = ping_[i - 1].time_d;
+      lon1 = ping_[i - 1].lon;
+      lat1 = ping_[i - 1].lat;
+      time_d2 = ping_[i].time_d;
+      lon2 = ping_[i].lon;
+      lat2 = ping_[i].lat;
     }
     double mtodeglon;
     double mtodeglat;
@@ -3408,15 +3412,15 @@ int Backend::get_smgcmg(int i) {
     const double dy = (lat2 - lat1) / mtodeglat;
     const double dist = sqrt(dx * dx + dy * dy);
     if (del_time > 0.0)
-      ping[i].speed_made_good = 3.6 * dist / del_time;
+      ping_[i].speed_made_good = 3.6 * dist / del_time;
     else
-      ping[i].speed_made_good = 0.0;
+      ping_[i].speed_made_good = 0.0;
     if (dist > 0.0)
-      ping[i].course_made_good = RTD * atan2(dx / dist, dy / dist);
+      ping_[i].course_made_good = RTD * atan2(dx / dist, dy / dist);
     else
-      ping[i].course_made_good = ping[i].heading;
-    if (ping[i].course_made_good < 0.0)
-      ping[i].course_made_good = ping[i].course_made_good + 360.0;
+      ping_[i].course_made_good = ping_[i].heading;
+    if (ping_[i].course_made_good < 0.0)
+      ping_[i].course_made_good = ping_[i].course_made_good + 360.0;
 
     status = MB_SUCCESS;
   }
@@ -3483,8 +3487,8 @@ int Backend::get_gaussianmean(void) {
     int npos = 0;
     int nneg = 0;
     for (int j = jstart; j < nBuff_ && dt <= timewindow; j++) {
-      dt = ping[j].time_d - ping[i].time_d;
-      if (!ping[j].lonlat_flag && fabs(dt) <= timewindow) {
+      dt = ping_[j].time_d - ping_[i].time_d;
+      if (!ping_[j].lonlat_flag && fabs(dt) <= timewindow) {
 	const double w = exp(a * dt * dt);
 	nsum++;
 	if (dt < 0.0)
@@ -3492,21 +3496,21 @@ int Backend::get_gaussianmean(void) {
 	if (dt >= 0.0)
 	  npos++;
 	weight += w;
-	sumlon += w * ping[j].lon;
-	sumlat += w * ping[j].lat;
+	sumlon += w * ping_[j].lon;
+	sumlat += w * ping_[j].lat;
 	if (nsum == 1)
 	  jstart = j;
       }
     }
     if (npos > 0 && nneg > 0) {
-      ping[i].mean_ok = true;
-      ping[i].lon_dr = sumlon / weight;
-      ping[i].lat_dr = sumlat / weight;
+      ping_[i].mean_ok = true;
+      ping_[i].lon_dr = sumlon / weight;
+      ping_[i].lat_dr = sumlat / weight;
     }
     else {
-      ping[i].mean_ok = false;
-      ping[i].lon_dr = ping[i].lon;
-      ping[i].lat_dr = ping[i].lat;
+      ping_[i].mean_ok = false;
+      ping_[i].lon_dr = ping_[i].lon;
+      ping_[i].lat_dr = ping_[i].lat;
     }
   }
 
@@ -3514,31 +3518,31 @@ int Backend::get_gaussianmean(void) {
   int jbefore = -1;
   for (int i = 0; i < nBuff_; i++) {
     /* only work on nav not smoothed in first past due to lack of nearby data */
-    if (!ping[i].mean_ok) {
+    if (!ping_[i].mean_ok) {
       /* find valid points before and after */
       int jafter = i;
       for (int j = jbefore; j < nBuff_ && jafter == i; j++) {
-	if (j < i && !ping[j].lonlat_flag)
+	if (j < i && !ping_[j].lonlat_flag)
 	  jbefore = j;
-	if (j > i && !ping[j].lonlat_flag)
+	if (j > i && !ping_[j].lonlat_flag)
 	  jafter = j;
       }
       if (jbefore >= 0 && jafter > i) {
-	const double dt = (ping[i].time_d - ping[jbefore].time_d) / (ping[jafter].time_d - ping[jbefore].time_d);
-	ping[i].lon_dr = ping[jbefore].lon + dt * (ping[jafter].lon - ping[jbefore].lon);
-	ping[i].lat_dr = ping[jbefore].lat + dt * (ping[jafter].lat - ping[jbefore].lat);
+	const double dt = (ping_[i].time_d - ping_[jbefore].time_d) / (ping_[jafter].time_d - ping_[jbefore].time_d);
+	ping_[i].lon_dr = ping_[jbefore].lon + dt * (ping_[jafter].lon - ping_[jbefore].lon);
+	ping_[i].lat_dr = ping_[jbefore].lat + dt * (ping_[jafter].lat - ping_[jbefore].lat);
       }
       else if (jbefore >= 0) {
-	ping[i].lon_dr = ping[jbefore].lon;
-	ping[i].lat_dr = ping[jbefore].lat;
+	ping_[i].lon_dr = ping_[jbefore].lon;
+	ping_[i].lat_dr = ping_[jbefore].lat;
       }
       else if (jafter > i) {
-	ping[i].lon_dr = ping[jafter].lon;
-	ping[i].lat_dr = ping[jafter].lat;
+	ping_[i].lon_dr = ping_[jafter].lon;
+	ping_[i].lat_dr = ping_[jafter].lat;
       }
       else {
-	ping[i].lon_dr = ping[i].lon;
-	ping[i].lat_dr = ping[i].lat;
+	ping_[i].lon_dr = ping_[i].lon;
+	ping_[i].lat_dr = ping_[i].lat;
       }
     }
   }
@@ -3571,21 +3575,21 @@ int Backend::get_dr(void) {
   driftlat = 0.00001 * driftLat_;
   for (int i = 0; i < nBuff_; i++) {
     if (i == 0) {
-      ping[i].lon_dr = ping[i].lon;
-      ping[i].lat_dr = ping[i].lat;
+      ping_[i].lon_dr = ping_[i].lon;
+      ping_[i].lat_dr = ping_[i].lat;
     }
     else {
-      del_time = ping[i].time_d - ping[i - 1].time_d;
+      del_time = ping_[i].time_d - ping_[i - 1].time_d;
       if (del_time < 300.0) {
-	mb_coor_scale(verbose_, ping[i].lat, &mtodeglon, &mtodeglat);
-	dx = sin(DTR * ping[i].heading) * ping[i].speed * del_time / 3.6;
-	dy = cos(DTR * ping[i].heading) * ping[i].speed * del_time / 3.6;
-	ping[i].lon_dr = ping[i - 1].lon_dr + dx * mtodeglon + del_time * driftlon / 3600.0;
-	ping[i].lat_dr = ping[i - 1].lat_dr + dy * mtodeglat + del_time * driftlat / 3600.0;
+	mb_coor_scale(verbose_, ping_[i].lat, &mtodeglon, &mtodeglat);
+	dx = sin(DTR * ping_[i].heading) * ping_[i].speed * del_time / 3.6;
+	dy = cos(DTR * ping_[i].heading) * ping_[i].speed * del_time / 3.6;
+	ping_[i].lon_dr = ping_[i - 1].lon_dr + dx * mtodeglon + del_time * driftlon / 3600.0;
+	ping_[i].lat_dr = ping_[i - 1].lat_dr + dy * mtodeglat + del_time * driftlat / 3600.0;
       }
       else {
-	ping[i].lon_dr = ping[i].lon;
-	ping[i].lat_dr = ping[i].lat;
+	ping_[i].lon_dr = ping_[i].lon;
+	ping_[i].lat_dr = ping_[i].lat;
       }
     }
   }
@@ -3625,10 +3629,10 @@ int Backend::get_inversion(void) {
   int last = currentId_;
   for (int i = currentId_; i < currentId_ + nPlot_; i++) {
     /* constrain lon unless flagged by user */
-    if (!ping[i].lonlat_flag) {
-      lon_avg += ping[i].lon;
+    if (!ping_[i].lonlat_flag) {
+      lon_avg += ping_[i].lon;
       nlon_avg++;
-      lat_avg += ping[i].lat;
+      lat_avg += ping_[i].lat;
       nlat_avg++;
       last = i;
     }
@@ -3703,9 +3707,9 @@ int Backend::get_inversion(void) {
       const int ii = i - currentId_;
 
       /* constrain lon unless flagged by user */
-      if (!ping[i].lonlat_flag) {
+      if (!ping_[i].lonlat_flag) {
 	const int k = nnz * nr;
-	d[nr] = (ping[i].lon_org - lon_avg) / mtodeglon;
+	d[nr] = (ping_[i].lon_org - lon_avg) / mtodeglon;
 	nia[nr] = 1;
 	ia[k] = ii;
 	a[k] = 1.0;
@@ -3713,9 +3717,9 @@ int Backend::get_inversion(void) {
       }
 
       /* constrain speed */
-      if (weightSpeed_ > 0.0 && ii > 0 && ping[i].time_d > ping[i - 1].time_d) {
+      if (weightSpeed_ > 0.0 && ii > 0 && ping_[i].time_d > ping_[i - 1].time_d) {
 	/* get time difference */
-	dtime_d = ping[i].time_d - ping[i - 1].time_d;
+	dtime_d = ping_[i].time_d - ping_[i - 1].time_d;
 
 	/* constrain lon speed */
 	const int k = nnz * nr;
@@ -3729,9 +3733,9 @@ int Backend::get_inversion(void) {
       }
 
       /* constrain acceleration */
-      if (weightAccel_ > 0.0 && ii > 0 && ii < nPlot_ - 1 && ping[i + 1].time_d > ping[i - 1].time_d) {
+      if (weightAccel_ > 0.0 && ii > 0 && ii < nPlot_ - 1 && ping_[i + 1].time_d > ping_[i - 1].time_d) {
 	/* get time difference */
-	dtime_d = ping[i + 1].time_d - ping[i - 1].time_d;
+	dtime_d = ping_[i + 1].time_d - ping_[i - 1].time_d;
 	dtime_d_sq = dtime_d * dtime_d;
 
 	/* constrain lon acceleration */
@@ -3792,17 +3796,17 @@ int Backend::get_inversion(void) {
     /* generate solution */
     for (int i = currentId_; i < currentId_ + nPlot_; i++) {
       const int ii = i - currentId_;
-      ping[i].lon_dr = lon_avg + mtodeglon * x[ii];
+      ping_[i].lon_dr = lon_avg + mtodeglon * x[ii];
     }
 
     /* make flagged ends of data flat */
     for (int i = currentId_; i < first; i++) {
       const int ii = first - currentId_;
-      ping[i].lon_dr = lon_avg + mtodeglon * x[ii];
+      ping_[i].lon_dr = lon_avg + mtodeglon * x[ii];
     }
     for (int i = last + 1; i < currentId_ + nPlot_; i++) {
       const int ii = last - currentId_;
-      ping[i].lon_dr = lon_avg + mtodeglon * x[ii];
+      ping_[i].lon_dr = lon_avg + mtodeglon * x[ii];
     }
 
     /* set message */
@@ -3837,9 +3841,9 @@ int Backend::get_inversion(void) {
       const int ii = i - currentId_;
 
       /* constrain lat unless flagged by user */
-      if (!ping[i].lonlat_flag) {
+      if (!ping_[i].lonlat_flag) {
 	const int k = nnz * nr;
-	d[nr] = (ping[i].lat_org - lat_avg) / mtodeglat;
+	d[nr] = (ping_[i].lat_org - lat_avg) / mtodeglat;
 	nia[nr] = 1;
 	ia[k] = ii;
 	a[k] = 1.0;
@@ -3847,9 +3851,9 @@ int Backend::get_inversion(void) {
       }
 
       /* constrain speed */
-      if (weightSpeed_ > 0.0 && ii > 0 && ping[i].time_d > ping[i - 1].time_d) {
+      if (weightSpeed_ > 0.0 && ii > 0 && ping_[i].time_d > ping_[i - 1].time_d) {
 	/* get time difference */
-	dtime_d = ping[i].time_d - ping[i - 1].time_d;
+	dtime_d = ping_[i].time_d - ping_[i - 1].time_d;
 
 	/* constrain lat speed */
 	const int k = nnz * nr;
@@ -3863,9 +3867,9 @@ int Backend::get_inversion(void) {
       }
 
       /* constrain acceleration */
-      if (weightAccel_ > 0.0 && ii > 0 && ii < nPlot_ - 1 && ping[i + 1].time_d > ping[i - 1].time_d) {
+      if (weightAccel_ > 0.0 && ii > 0 && ii < nPlot_ - 1 && ping_[i + 1].time_d > ping_[i - 1].time_d) {
 	/* get time difference */
-	dtime_d = ping[i + 1].time_d - ping[i - 1].time_d;
+	dtime_d = ping_[i + 1].time_d - ping_[i - 1].time_d;
 	dtime_d_sq = dtime_d * dtime_d;
 
 	/* constrain lat acceleration */
@@ -3923,17 +3927,17 @@ int Backend::get_inversion(void) {
     /* generate solution */
     for (int i = currentId_; i < currentId_ + nPlot_; i++) {
       const int ii = i - currentId_;
-      ping[i].lat_dr = lat_avg + mtodeglat * x[ii];
+      ping_[i].lat_dr = lat_avg + mtodeglat * x[ii];
     }
 
     /* make flagged ends of data flat */
     for (int i = currentId_; i < first; i++) {
       const int ii = first - currentId_;
-      ping[i].lat_dr = lat_avg + mtodeglat * x[ii];
+      ping_[i].lat_dr = lat_avg + mtodeglat * x[ii];
     }
     for (int i = last + 1; i < currentId_ + nPlot_; i++) {
       const int ii = last - currentId_;
-      ping[i].lat_dr = lat_avg + mtodeglat * x[ii];
+      ping_[i].lat_dr = lat_avg + mtodeglat * x[ii];
     }
 
     /* deallocate arrays */
@@ -3979,14 +3983,14 @@ int Backend::plot_all(void) {
   /* figure out which pings to plot */
   nPlot_ = 0;
   if (dataShowSize_ > 0 && nBuff_ > 0) {
-    plotStartTime_ = ping[currentId_].file_time_d;
+    plotStartTime_ = ping_[currentId_].file_time_d;
     plotEndTime_ = plotStartTime_ + dataShowSize_;
     for (int i = currentId_; i < nBuff_; i++)
-      if (ping[i].file_time_d <= plotEndTime_)
+      if (ping_[i].file_time_d <= plotEndTime_)
 	nPlot_++;
   } else if (nBuff_ > 0) {
-    plotStartTime_ = ping[0].file_time_d;
-    plotEndTime_ = ping[nBuff_ - 1].file_time_d;
+    plotStartTime_ = ping_[0].file_time_d;
+    plotEndTime_ = ping_[nBuff_ - 1].file_time_d;
     dataShowSize_ = plotEndTime_ - plotStartTime_ + 1;
     if (dataShowMax_ < dataShowSize_)
       dataShowMax_ = dataShowSize_;
@@ -3995,20 +3999,20 @@ int Backend::plot_all(void) {
 
   /* deselect data outside plots */
   for (int i = 0; i < currentId_; i++) {
-    ping[i].tint_select = false;
-    ping[i].lon_select = false;
-    ping[i].lat_select = false;
-    ping[i].speed_select = false;
-    ping[i].heading_select = false;
-    ping[i].draft_select = false;
+    ping_[i].tint_select = false;
+    ping_[i].lon_select = false;
+    ping_[i].lat_select = false;
+    ping_[i].speed_select = false;
+    ping_[i].heading_select = false;
+    ping_[i].draft_select = false;
   }
   for (int i = currentId_ + nPlot_; i < nBuff_; i++) {
-    ping[i].tint_select = false;
-    ping[i].lon_select = false;
-    ping[i].lat_select = false;
-    ping[i].speed_select = false;
-    ping[i].heading_select = false;
-    ping[i].draft_select = false;
+    ping_[i].tint_select = false;
+    ping_[i].lon_select = false;
+    ping_[i].lat_select = false;
+    ping_[i].speed_select = false;
+    ping_[i].heading_select = false;
+    ping_[i].draft_select = false;
   }
 
   /* don't try to plot if no data */
@@ -4017,83 +4021,83 @@ int Backend::plot_all(void) {
     /* find min max values */
     double time_min = plotStartTime_;
     double time_max = plotEndTime_;
-    double tint_min = ping[currentId_].tint;
-    double tint_max = ping[currentId_].tint;
-    double lon_min = ping[currentId_].lon;
-    double lon_max = ping[currentId_].lon;
-    double lat_min = ping[currentId_].lat;
-    double lat_max = ping[currentId_].lat;
+    double tint_min = ping_[currentId_].tint;
+    double tint_max = ping_[currentId_].tint;
+    double lon_min = ping_[currentId_].lon;
+    double lon_max = ping_[currentId_].lon;
+    double lat_min = ping_[currentId_].lat;
+    double lat_max = ping_[currentId_].lat;
     double speed_min = 0.0;
-    double speed_max = ping[currentId_].speed;
-    double heading_min = ping[currentId_].heading;
-    double heading_max = ping[currentId_].heading;
-    double draft_min = ping[currentId_].draft;
-    double draft_max = ping[currentId_].draft;
-    double roll_min = ping[currentId_].roll;
-    double roll_max = ping[currentId_].roll;
-    double pitch_min = ping[currentId_].pitch;
-    double pitch_max = ping[currentId_].pitch;
-    double heave_min = ping[currentId_].heave;
-    double heave_max = ping[currentId_].heave;
+    double speed_max = ping_[currentId_].speed;
+    double heading_min = ping_[currentId_].heading;
+    double heading_max = ping_[currentId_].heading;
+    double draft_min = ping_[currentId_].draft;
+    double draft_max = ping_[currentId_].draft;
+    double roll_min = ping_[currentId_].roll;
+    double roll_max = ping_[currentId_].roll;
+    double pitch_min = ping_[currentId_].pitch;
+    double pitch_max = ping_[currentId_].pitch;
+    double heave_min = ping_[currentId_].heave;
+    double heave_max = ping_[currentId_].heave;
     for (int i = currentId_ + 1; i < currentId_ + nPlot_; i++) {
-      tint_min = MIN(ping[i].tint, tint_min);
-      tint_max = MAX(ping[i].tint, tint_max);
+      tint_min = MIN(ping_[i].tint, tint_min);
+      tint_max = MAX(ping_[i].tint, tint_max);
       if (plotTintOrg_) {
-	tint_min = MIN(ping[i].tint_org, tint_min);
-	tint_max = MAX(ping[i].tint_org, tint_max);
+	tint_min = MIN(ping_[i].tint_org, tint_min);
+	tint_max = MAX(ping_[i].tint_org, tint_max);
       }
-      lon_min = MIN(ping[i].lon, lon_min);
-      lon_max = MAX(ping[i].lon, lon_max);
+      lon_min = MIN(ping_[i].lon, lon_min);
+      lon_max = MAX(ping_[i].lon, lon_max);
       if (plotLonOrg_) {
-	lon_min = MIN(ping[i].lon_org, lon_min);
-	lon_max = MAX(ping[i].lon_org, lon_max);
+	lon_min = MIN(ping_[i].lon_org, lon_min);
+	lon_max = MAX(ping_[i].lon_org, lon_max);
       }
       if (modelMode_ != MODEL_MODE_OFF && plotLonDr_) {
-	lon_min = MIN(ping[i].lon_dr, lon_min);
-	lon_max = MAX(ping[i].lon_dr, lon_max);
+	lon_min = MIN(ping_[i].lon_dr, lon_min);
+	lon_max = MAX(ping_[i].lon_dr, lon_max);
       }
-      lat_min = MIN(ping[i].lat, lat_min);
-      lat_max = MAX(ping[i].lat, lat_max);
+      lat_min = MIN(ping_[i].lat, lat_min);
+      lat_max = MAX(ping_[i].lat, lat_max);
       if (plotLatOrg_) {
-	lat_min = MIN(ping[i].lat_org, lat_min);
-	lat_max = MAX(ping[i].lat_org, lat_max);
+	lat_min = MIN(ping_[i].lat_org, lat_min);
+	lat_max = MAX(ping_[i].lat_org, lat_max);
       }
       if (modelMode_ != MODEL_MODE_OFF && plotLatDr_) {
-	lat_min = MIN(ping[i].lat_dr, lat_min);
-	lat_max = MAX(ping[i].lat_dr, lat_max);
+	lat_min = MIN(ping_[i].lat_dr, lat_min);
+	lat_max = MAX(ping_[i].lat_dr, lat_max);
       }
-      speed_min = MIN(ping[i].speed, speed_min);
-      speed_max = MAX(ping[i].speed, speed_max);
+      speed_min = MIN(ping_[i].speed, speed_min);
+      speed_max = MAX(ping_[i].speed, speed_max);
       if (plotSpeedOrg_) {
-	speed_min = MIN(ping[i].speed_org, speed_min);
-	speed_max = MAX(ping[i].speed_org, speed_max);
+	speed_min = MIN(ping_[i].speed_org, speed_min);
+	speed_max = MAX(ping_[i].speed_org, speed_max);
       }
       if (plotSmg_) {
-	speed_min = MIN(ping[i].speed_made_good, speed_min);
-	speed_max = MAX(ping[i].speed_made_good, speed_max);
+	speed_min = MIN(ping_[i].speed_made_good, speed_min);
+	speed_max = MAX(ping_[i].speed_made_good, speed_max);
       }
-      heading_min = MIN(ping[i].heading, heading_min);
-      heading_max = MAX(ping[i].heading, heading_max);
+      heading_min = MIN(ping_[i].heading, heading_min);
+      heading_max = MAX(ping_[i].heading, heading_max);
       if (plotHeadingOrg_) {
-	heading_min = MIN(ping[i].heading_org, heading_min);
-	heading_max = MAX(ping[i].heading_org, heading_max);
+	heading_min = MIN(ping_[i].heading_org, heading_min);
+	heading_max = MAX(ping_[i].heading_org, heading_max);
       }
       if (plotCmg_) {
-	heading_min = MIN(ping[i].course_made_good, heading_min);
-	heading_max = MAX(ping[i].course_made_good, heading_max);
+	heading_min = MIN(ping_[i].course_made_good, heading_min);
+	heading_max = MAX(ping_[i].course_made_good, heading_max);
       }
-      draft_min = MIN(ping[i].draft, draft_min);
-      draft_max = MAX(ping[i].draft, draft_max);
+      draft_min = MIN(ping_[i].draft, draft_min);
+      draft_max = MAX(ping_[i].draft, draft_max);
       if (plotDraftOrg_) {
-	draft_min = MIN(ping[i].draft_org, draft_min);
-	draft_max = MAX(ping[i].draft_org, draft_max);
+	draft_min = MIN(ping_[i].draft_org, draft_min);
+	draft_max = MAX(ping_[i].draft_org, draft_max);
       }
-      roll_min = MIN(ping[i].roll, roll_min);
-      roll_max = MAX(ping[i].roll, roll_max);
-      pitch_min = MIN(ping[i].pitch, pitch_min);
-      pitch_max = MAX(ping[i].pitch, pitch_max);
-      heave_min = MIN(ping[i].heave, heave_min);
-      heave_max = MAX(ping[i].heave, heave_max);
+      roll_min = MIN(ping_[i].roll, roll_min);
+      roll_max = MAX(ping_[i].roll, roll_max);
+      pitch_min = MIN(ping_[i].pitch, pitch_min);
+      pitch_max = MAX(ping_[i].pitch, pitch_max);
+      heave_min = MIN(ping_[i].heave, heave_min);
+      heave_max = MAX(ping_[i].heave, heave_max);
     }
 
     /* scale the min max a bit larger so all points fit on plots */
@@ -4201,10 +4205,10 @@ int Backend::plot_all(void) {
 	fprintf(stderr,
 		"dbg5       %4d %4d %4d  %d/%d/%d %2.2d:%2.2d:%2.2d.%6.6d  %11.6f  %11.6f  %11.6f  %11.6f %11.6f %5.2f "
 		"%5.1f %5.1f %5.1f %5.1f %5.1f\n",
-		i, ping[i].id, ping[i].record, ping[i].time_i[1], ping[i].time_i[2], ping[i].time_i[0], ping[i].time_i[3],
-		ping[i].time_i[4], ping[i].time_i[5], ping[i].time_i[6], ping[i].time_d, ping[i].file_time_d,
-		ping[i].tint, ping[i].lon, ping[i].lat, ping[i].speed, ping[i].heading, ping[i].draft, ping[i].roll,
-		ping[i].pitch, ping[i].heave);
+		i, ping_[i].id, ping_[i].record, ping_[i].time_i[1], ping_[i].time_i[2], ping_[i].time_i[0], ping_[i].time_i[3],
+		ping_[i].time_i[4], ping_[i].time_i[5], ping_[i].time_i[6], ping_[i].time_d, ping_[i].file_time_d,
+		ping_[i].tint, ping_[i].lon, ping_[i].lat, ping_[i].speed, ping_[i].heading, ping_[i].draft, ping_[i].roll,
+		ping_[i].pitch, ping_[i].heave);
     }
 
     /* get plot margins */
@@ -4218,7 +4222,7 @@ int Backend::plot_all(void) {
     /* figure out how many plots to make */
     nPlots_ = 0;
     if (plotTint_) {
-      plot_[nPlots_].type = PLOT_TINT;
+      plot_[nPlots_].type = PLOT_TINTERVAL;
       plot_[nPlots_].ixmin = 1.25 * margin_x;
       plot_[nPlots_].ixmax = plotWidth_ - margin_x / 2;
       plot_[nPlots_].iymin = plotHeight_ - margin_y + nPlots_ * plotHeight_;
@@ -4604,7 +4608,7 @@ int Backend::plot_all(void) {
 				  BLACK, SOLID_LINE);
 
       /* now plot the data */
-      if (plot_[iplot].type == PLOT_TINT)
+      if (plot_[iplot].type == PLOT_TINTERVAL)
 	plot_tint(iplot);
       else if (plot_[iplot].type == PLOT_LONGITUDE)
 	plot_lon(iplot);
@@ -4659,11 +4663,11 @@ int Backend::plot_tint(int iplot) {
 
   /* plot original expected time data */
   if (plotTintOrg_) {
-    int tint_x1 = ixmin + xscale * (ping[currentId_].file_time_d - xmin);
-    int tint_y1 = iymin + yscale * (ping[currentId_].tint_org - ymin);
+    int tint_x1 = ixmin + xscale * (ping_[currentId_].file_time_d - xmin);
+    int tint_y1 = iymin + yscale * (ping_[currentId_].tint_org - ymin);
     for (int i = currentId_ + 1; i < currentId_ + nPlot_; i++) {
-      const int tint_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
-      const int tint_y2 = iymin + yscale * (ping[i].tint_org - ymin);
+      const int tint_x2 = ixmin + xscale * (ping_[i].file_time_d - xmin);
+      const int tint_y2 = iymin + yscale * (ping_[i].tint_org - ymin);
       PixmapDrawer::drawLine(painter_, tint_x1, tint_y1,
 			     tint_x2, tint_y2, GREEN,
 			     SOLID_LINE);
@@ -4675,20 +4679,20 @@ int Backend::plot_tint(int iplot) {
 
   /* plot basic expected time data */
   for (int i = currentId_; i < currentId_ + nPlot_; i++) {
-    ping[i].tint_x = ixmin + xscale * (ping[i].file_time_d - xmin);
-    ping[i].tint_y = iymin + yscale * (ping[i].tint - ymin);
-    if (ping[i].tint_select)
-      PixmapDrawer::drawRectangle(painter_, ping[i].tint_x - 2,
-				  ping[i].tint_y - 2, 4, 4,
+    ping_[i].tint_x = ixmin + xscale * (ping_[i].file_time_d - xmin);
+    ping_[i].tint_y = iymin + yscale * (ping_[i].tint - ymin);
+    if (ping_[i].tint_select)
+      PixmapDrawer::drawRectangle(painter_, ping_[i].tint_x - 2,
+				  ping_[i].tint_y - 2, 4, 4,
 				  RED, SOLID_LINE);
 		
-    else if (ping[i].tint != ping[i].tint_org)
-      PixmapDrawer::drawRectangle(painter_, ping[i].tint_x - 2,
-				  ping[i].tint_y - 2, 4, 4,
+    else if (ping_[i].tint != ping_[i].tint_org)
+      PixmapDrawer::drawRectangle(painter_, ping_[i].tint_x - 2,
+				  ping_[i].tint_y - 2, 4, 4,
 				  PURPLE, SOLID_LINE);
     else
-      PixmapDrawer::fillRectangle(painter_, ping[i].tint_x - 2,
-				  ping[i].tint_y - 2, 4, 4,
+      PixmapDrawer::fillRectangle(painter_, ping_[i].tint_x - 2,
+				  ping_[i].tint_y - 2, 4, 4,
 				  BLACK, SOLID_LINE);
   }
 
@@ -4722,11 +4726,11 @@ int Backend::plot_lon(int iplot) {
 
   /* plot original longitude data */
   if (plotLonOrg_) {
-    int lon_x1 = ixmin + xscale * (ping[currentId_].file_time_d - xmin);
-    int lon_y1 = iymin + yscale * (ping[currentId_].lon_org - ymin);
+    int lon_x1 = ixmin + xscale * (ping_[currentId_].file_time_d - xmin);
+    int lon_y1 = iymin + yscale * (ping_[currentId_].lon_org - ymin);
     for (int i = currentId_ + 1; i < currentId_ + nPlot_; i++) {
-      const int lon_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
-      const int lon_y2 = iymin + yscale * (ping[i].lon_org - ymin);
+      const int lon_x2 = ixmin + xscale * (ping_[i].file_time_d - xmin);
+      const int lon_y2 = iymin + yscale * (ping_[i].lon_org - ymin);
       PixmapDrawer::drawLine(painter_, lon_x1, lon_y1,
 			     lon_x2, lon_y2, GREEN,
 			     SOLID_LINE);
@@ -4737,11 +4741,11 @@ int Backend::plot_lon(int iplot) {
 
   /* plot dr longitude data */
   if (modelMode_ != MODEL_MODE_OFF && plotLonDr_) {
-    int lon_x1 = ixmin + xscale * (ping[currentId_].file_time_d - xmin);
-    int lon_y1 = iymin + yscale * (ping[currentId_].lon_dr - ymin);
+    int lon_x1 = ixmin + xscale * (ping_[currentId_].file_time_d - xmin);
+    int lon_y1 = iymin + yscale * (ping_[currentId_].lon_dr - ymin);
     for (int i = currentId_ + 1; i < currentId_ + nPlot_; i++) {
-      const int lon_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
-      const int lon_y2 = iymin + yscale * (ping[i].lon_dr - ymin);
+      const int lon_x2 = ixmin + xscale * (ping_[i].file_time_d - xmin);
+      const int lon_y2 = iymin + yscale * (ping_[i].lon_dr - ymin);
       PixmapDrawer::drawLine(painter_, lon_x1, lon_y1,
 			     lon_x2, lon_y2, BLUE,
 			     SOLID_LINE);
@@ -4752,33 +4756,33 @@ int Backend::plot_lon(int iplot) {
 
   /* plot flagged longitude data first so it is overlain by all else */
   for (int i = currentId_; i < currentId_ + nPlot_; i++) {
-    ping[i].lon_x = ixmin + xscale * (ping[i].file_time_d - xmin);
-    ping[i].lon_y = iymin + yscale * (ping[i].lon - ymin);
-    if (ping[i].lonlat_flag)
+    ping_[i].lon_x = ixmin + xscale * (ping_[i].file_time_d - xmin);
+    ping_[i].lon_y = iymin + yscale * (ping_[i].lon - ymin);
+    if (ping_[i].lonlat_flag)
       PixmapDrawer::drawRectangle(painter_,
-				  ping[i].lon_x - 2,
-				  ping[i].lon_y - 2, 4, 4,
+				  ping_[i].lon_x - 2,
+				  ping_[i].lon_y - 2, 4, 4,
 				  ORANGE, SOLID_LINE);
   }
 
   /* plot basic longitude data */
   for (int i = currentId_; i < currentId_ + nPlot_; i++) {
-    ping[i].lon_x = ixmin + xscale * (ping[i].file_time_d - xmin);
-    ping[i].lon_y = iymin + yscale * (ping[i].lon - ymin);
-    if (ping[i].lon_select)
-      PixmapDrawer::drawRectangle(painter_, ping[i].lon_x - 2,
-				  ping[i].lon_y - 2, 4, 4,
+    ping_[i].lon_x = ixmin + xscale * (ping_[i].file_time_d - xmin);
+    ping_[i].lon_y = iymin + yscale * (ping_[i].lon - ymin);
+    if (ping_[i].lon_select)
+      PixmapDrawer::drawRectangle(painter_, ping_[i].lon_x - 2,
+				  ping_[i].lon_y - 2, 4, 4,
 				  RED, SOLID_LINE);
-    else if (ping[i].lonlat_flag) {
+    else if (ping_[i].lonlat_flag) {
       ;
     }
-    else if (ping[i].lon != ping[i].lon_org)
-      PixmapDrawer::drawRectangle(painter_, ping[i].lon_x - 2,
-				  ping[i].lon_y - 2, 4, 4,
+    else if (ping_[i].lon != ping_[i].lon_org)
+      PixmapDrawer::drawRectangle(painter_, ping_[i].lon_x - 2,
+				  ping_[i].lon_y - 2, 4, 4,
 				  PURPLE, SOLID_LINE);
     else
-      PixmapDrawer::fillRectangle(painter_, ping[i].lon_x - 2,
-				  ping[i].lon_y - 2, 4, 4,
+      PixmapDrawer::fillRectangle(painter_, ping_[i].lon_x - 2,
+				  ping_[i].lon_y - 2, 4, 4,
 				  BLACK, SOLID_LINE);
   }
 
@@ -4812,11 +4816,11 @@ int Backend::plot_lat(int iplot) {
 
   /* plot original latitude data */
   if (plotLatOrg_) {
-    int lat_x1 = ixmin + xscale * (ping[currentId_].file_time_d - xmin);
-    int lat_y1 = iymin + yscale * (ping[currentId_].lat_org - ymin);
+    int lat_x1 = ixmin + xscale * (ping_[currentId_].file_time_d - xmin);
+    int lat_y1 = iymin + yscale * (ping_[currentId_].lat_org - ymin);
     for (int i = currentId_ + 1; i < currentId_ + nPlot_; i++) {
-      const int lat_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
-      const int lat_y2 = iymin + yscale * (ping[i].lat_org - ymin);
+      const int lat_x2 = ixmin + xscale * (ping_[i].file_time_d - xmin);
+      const int lat_y2 = iymin + yscale * (ping_[i].lat_org - ymin);
       PixmapDrawer::drawLine(painter_, lat_x1, lat_y1, lat_x2,
 			     lat_y2, GREEN, SOLID_LINE);
       lat_x1 = lat_x2;
@@ -4826,11 +4830,11 @@ int Backend::plot_lat(int iplot) {
 
   /* plot dr latitude data */
   if (modelMode_ != MODEL_MODE_OFF && plotLatDr_) {
-    int lat_x1 = ixmin + xscale * (ping[currentId_].file_time_d - xmin);
-    int lat_y1 = iymin + yscale * (ping[currentId_].lat_dr - ymin);
+    int lat_x1 = ixmin + xscale * (ping_[currentId_].file_time_d - xmin);
+    int lat_y1 = iymin + yscale * (ping_[currentId_].lat_dr - ymin);
     for (int i = currentId_ + 1; i < currentId_ + nPlot_; i++) {
-      const int lat_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
-      const int lat_y2 = iymin + yscale * (ping[i].lat_dr - ymin);
+      const int lat_x2 = ixmin + xscale * (ping_[i].file_time_d - xmin);
+      const int lat_y2 = iymin + yscale * (ping_[i].lat_dr - ymin);
       PixmapDrawer::drawLine(painter_, lat_x1, lat_y1,
 			     lat_x2, lat_y2, BLUE,
 			     SOLID_LINE);
@@ -4841,32 +4845,32 @@ int Backend::plot_lat(int iplot) {
 
   /* plot flagged latitude data first so it is overlain by all else */
   for (int i = currentId_; i < currentId_ + nPlot_; i++) {
-    ping[i].lat_x = ixmin + xscale * (ping[i].file_time_d - xmin);
-    ping[i].lat_y = iymin + yscale * (ping[i].lat - ymin);
-    if (ping[i].lonlat_flag)
-      PixmapDrawer::drawRectangle(painter_, ping[i].lat_x - 2,
-				  ping[i].lat_y - 2, 4, 4,
+    ping_[i].lat_x = ixmin + xscale * (ping_[i].file_time_d - xmin);
+    ping_[i].lat_y = iymin + yscale * (ping_[i].lat - ymin);
+    if (ping_[i].lonlat_flag)
+      PixmapDrawer::drawRectangle(painter_, ping_[i].lat_x - 2,
+				  ping_[i].lat_y - 2, 4, 4,
 				  ORANGE, SOLID_LINE);
   }
 
   /* plot basic latitude data */
   for (int i = currentId_; i < currentId_ + nPlot_; i++) {
-    ping[i].lat_x = ixmin + xscale * (ping[i].file_time_d - xmin);
-    ping[i].lat_y = iymin + yscale * (ping[i].lat - ymin);
-    if (ping[i].lat_select)
-      PixmapDrawer::drawRectangle(painter_, ping[i].lat_x - 2,
-				  ping[i].lat_y - 2, 4, 4,
+    ping_[i].lat_x = ixmin + xscale * (ping_[i].file_time_d - xmin);
+    ping_[i].lat_y = iymin + yscale * (ping_[i].lat - ymin);
+    if (ping_[i].lat_select)
+      PixmapDrawer::drawRectangle(painter_, ping_[i].lat_x - 2,
+				  ping_[i].lat_y - 2, 4, 4,
 				  RED, SOLID_LINE);
-    else if (ping[i].lonlat_flag) {
+    else if (ping_[i].lonlat_flag) {
       ;
     }
-    else if (ping[i].lat != ping[i].lat_org)
-      PixmapDrawer::drawRectangle(painter_, ping[i].lat_x - 2,
-				  ping[i].lat_y - 2, 4, 4,
+    else if (ping_[i].lat != ping_[i].lat_org)
+      PixmapDrawer::drawRectangle(painter_, ping_[i].lat_x - 2,
+				  ping_[i].lat_y - 2, 4, 4,
 				  PURPLE, SOLID_LINE);
     else
-      PixmapDrawer::fillRectangle(painter_, ping[i].lat_x - 2,
-				  ping[i].lat_y - 2, 4, 4,
+      PixmapDrawer::fillRectangle(painter_, ping_[i].lat_x - 2,
+				  ping_[i].lat_y - 2, 4, 4,
 				  BLACK, SOLID_LINE);
   }
 
@@ -4900,11 +4904,11 @@ int Backend::plot_speed(int iplot) {
 
   /* plot original speed data */
   if (plotSpeedOrg_) {
-    int speed_x1 = ixmin + xscale * (ping[currentId_].file_time_d - xmin);
-    int speed_y1 = iymin + yscale * (ping[currentId_].speed - ymin);
+    int speed_x1 = ixmin + xscale * (ping_[currentId_].file_time_d - xmin);
+    int speed_y1 = iymin + yscale * (ping_[currentId_].speed - ymin);
     for (int i = currentId_ + 1; i < currentId_ + nPlot_; i++) {
-      const int speed_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
-      const int speed_y2 = iymin + yscale * (ping[i].speed_org - ymin);
+      const int speed_x2 = ixmin + xscale * (ping_[i].file_time_d - xmin);
+      const int speed_y2 = iymin + yscale * (ping_[i].speed_org - ymin);
       PixmapDrawer::drawLine(painter_, speed_x1, speed_y1,
 			     speed_x2, speed_y2, GREEN,
 			     SOLID_LINE);
@@ -4915,11 +4919,11 @@ int Backend::plot_speed(int iplot) {
 
   /* plot speed made good data */
   if (plotSmg_) {
-    int speed_x1 = ixmin + xscale * (ping[currentId_].file_time_d - xmin);
-    int speed_y1 = iymin + yscale * (ping[currentId_].speed_made_good - ymin);
+    int speed_x1 = ixmin + xscale * (ping_[currentId_].file_time_d - xmin);
+    int speed_y1 = iymin + yscale * (ping_[currentId_].speed_made_good - ymin);
     for (int i = currentId_ + 1; i < currentId_ + nPlot_; i++) {
-      const int speed_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
-      const int speed_y2 = iymin + yscale * (ping[i].speed_made_good - ymin);
+      const int speed_x2 = ixmin + xscale * (ping_[i].file_time_d - xmin);
+      const int speed_y2 = iymin + yscale * (ping_[i].speed_made_good - ymin);
       PixmapDrawer::drawLine(painter_, speed_x1, speed_y1,
 			     speed_x2, speed_y2, BLUE, SOLID_LINE);
       speed_x1 = speed_x2;
@@ -4929,19 +4933,19 @@ int Backend::plot_speed(int iplot) {
 
   /* plot basic speed data */
   for (int i = currentId_; i < currentId_ + nPlot_; i++) {
-    ping[i].speed_x = ixmin + xscale * (ping[i].file_time_d - xmin);
-    ping[i].speed_y = iymin + yscale * (ping[i].speed - ymin);
-    if (ping[i].speed_select)
-      PixmapDrawer::drawRectangle(painter_, ping[i].speed_x - 2,
-				  ping[i].speed_y - 2, 4, 4,
+    ping_[i].speed_x = ixmin + xscale * (ping_[i].file_time_d - xmin);
+    ping_[i].speed_y = iymin + yscale * (ping_[i].speed - ymin);
+    if (ping_[i].speed_select)
+      PixmapDrawer::drawRectangle(painter_, ping_[i].speed_x - 2,
+				  ping_[i].speed_y - 2, 4, 4,
 				  RED, SOLID_LINE);
-    else if (ping[i].speed != ping[i].speed_org)
-      PixmapDrawer::drawRectangle(painter_, ping[i].speed_x - 2,
-				  ping[i].speed_y - 2, 4, 4,
+    else if (ping_[i].speed != ping_[i].speed_org)
+      PixmapDrawer::drawRectangle(painter_, ping_[i].speed_x - 2,
+				  ping_[i].speed_y - 2, 4, 4,
 				  PURPLE, SOLID_LINE);
     else
-      PixmapDrawer::fillRectangle(painter_, ping[i].speed_x - 2,
-				  ping[i].speed_y - 2, 4, 4,
+      PixmapDrawer::fillRectangle(painter_, ping_[i].speed_x - 2,
+				  ping_[i].speed_y - 2, 4, 4,
 				  BLACK, SOLID_LINE);
   }
 
@@ -4975,11 +4979,11 @@ int Backend::plot_heading(int iplot) {
 
   /* plot original heading data */
   if (plotHeadingOrg_) {
-    int heading_x1 = ixmin + xscale * (ping[currentId_].file_time_d - xmin);
-    int heading_y1 = iymin + yscale * (ping[currentId_].heading - ymin);
+    int heading_x1 = ixmin + xscale * (ping_[currentId_].file_time_d - xmin);
+    int heading_y1 = iymin + yscale * (ping_[currentId_].heading - ymin);
     for (int i = currentId_ + 1; i < currentId_ + nPlot_; i++) {
-      const int heading_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
-      const int heading_y2 = iymin + yscale * (ping[i].heading_org - ymin);
+      const int heading_x2 = ixmin + xscale * (ping_[i].file_time_d - xmin);
+      const int heading_y2 = iymin + yscale * (ping_[i].heading_org - ymin);
       PixmapDrawer::drawLine(painter_, heading_x1, heading_y1,
 			     heading_x2, heading_y2,
 			     GREEN, SOLID_LINE);
@@ -4990,11 +4994,11 @@ int Backend::plot_heading(int iplot) {
 
   /* plot course made good data */
   if (plotCmg_) {
-    int heading_x1 = ixmin + xscale * (ping[currentId_].file_time_d - xmin);
-    int heading_y1 = iymin + yscale * (ping[currentId_].course_made_good - ymin);
+    int heading_x1 = ixmin + xscale * (ping_[currentId_].file_time_d - xmin);
+    int heading_y1 = iymin + yscale * (ping_[currentId_].course_made_good - ymin);
     for (int i = currentId_ + 1; i < currentId_ + nPlot_; i++) {
-      const int heading_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
-      const int heading_y2 = iymin + yscale * (ping[i].course_made_good - ymin);
+      const int heading_x2 = ixmin + xscale * (ping_[i].file_time_d - xmin);
+      const int heading_y2 = iymin + yscale * (ping_[i].course_made_good - ymin);
       PixmapDrawer::drawLine(painter_, heading_x1, heading_y1,
 			     heading_x2, heading_y2,
 			     BLUE, SOLID_LINE);
@@ -5005,20 +5009,20 @@ int Backend::plot_heading(int iplot) {
 
   /* plot basic heading data */
   for (int i = currentId_; i < currentId_ + nPlot_; i++) {
-    ping[i].heading_x = ixmin + xscale * (ping[i].file_time_d - xmin);
-    ping[i].heading_y = iymin + yscale * (ping[i].heading - ymin);
-    if (ping[i].heading_select)
-      PixmapDrawer::drawRectangle(painter_, ping[i].heading_x - 2,
-				  ping[i].heading_y - 2, 4, 4,
+    ping_[i].heading_x = ixmin + xscale * (ping_[i].file_time_d - xmin);
+    ping_[i].heading_y = iymin + yscale * (ping_[i].heading - ymin);
+    if (ping_[i].heading_select)
+      PixmapDrawer::drawRectangle(painter_, ping_[i].heading_x - 2,
+				  ping_[i].heading_y - 2, 4, 4,
 				  RED, SOLID_LINE);
-    else if (ping[i].heading != ping[i].heading_org)
-      PixmapDrawer::drawRectangle(painter_, ping[i].heading_x - 2,
-				  ping[i].heading_y - 2, 4, 4,
+    else if (ping_[i].heading != ping_[i].heading_org)
+      PixmapDrawer::drawRectangle(painter_, ping_[i].heading_x - 2,
+				  ping_[i].heading_y - 2, 4, 4,
 				  PURPLE,
 				  SOLID_LINE);
     else
-      PixmapDrawer::fillRectangle(painter_, ping[i].heading_x - 2,
-				  ping[i].heading_y - 2, 4, 4,
+      PixmapDrawer::fillRectangle(painter_, ping_[i].heading_x - 2,
+				  ping_[i].heading_y - 2, 4, 4,
 				  BLACK,
 				  SOLID_LINE);
   }
@@ -5053,11 +5057,11 @@ int Backend::plot_draft(int iplot) {
 
   /* plot original draft data */
   if (plotDraftOrg_) {
-    int draft_x1 = ixmin + xscale * (ping[currentId_].file_time_d - xmin);
-    int draft_y1 = iymin + yscale * (ping[currentId_].draft - ymin);
+    int draft_x1 = ixmin + xscale * (ping_[currentId_].file_time_d - xmin);
+    int draft_y1 = iymin + yscale * (ping_[currentId_].draft - ymin);
     for (int i = currentId_ + 1; i < currentId_ + nPlot_; i++) {
-      const int draft_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
-      const int draft_y2 = iymin + yscale * (ping[i].draft_org - ymin);
+      const int draft_x2 = ixmin + xscale * (ping_[i].file_time_d - xmin);
+      const int draft_y2 = iymin + yscale * (ping_[i].draft_org - ymin);
       PixmapDrawer::drawLine(painter_, draft_x1, draft_y1, draft_x2, draft_y2,
 			     GREEN, SOLID_LINE);
       draft_x1 = draft_x2;
@@ -5067,18 +5071,18 @@ int Backend::plot_draft(int iplot) {
 
   /* plot basic draft data */
   for (int i = currentId_; i < currentId_ + nPlot_; i++) {
-    ping[i].draft_x = ixmin + xscale * (ping[i].file_time_d - xmin);
-    ping[i].draft_y = iymin + yscale * (ping[i].draft - ymin);
-    if (ping[i].draft_select)
-      PixmapDrawer::drawRectangle(painter_, ping[i].draft_x - 2, ping[i].draft_y - 2,
+    ping_[i].draft_x = ixmin + xscale * (ping_[i].file_time_d - xmin);
+    ping_[i].draft_y = iymin + yscale * (ping_[i].draft - ymin);
+    if (ping_[i].draft_select)
+      PixmapDrawer::drawRectangle(painter_, ping_[i].draft_x - 2, ping_[i].draft_y - 2,
 				  4, 4, RED, SOLID_LINE);
-    else if (ping[i].draft != ping[i].draft_org)
-      PixmapDrawer::drawRectangle(painter_, ping[i].draft_x - 2,
-				  ping[i].draft_y - 2,
+    else if (ping_[i].draft != ping_[i].draft_org)
+      PixmapDrawer::drawRectangle(painter_, ping_[i].draft_x - 2,
+				  ping_[i].draft_y - 2,
 				  4, 4, PURPLE, SOLID_LINE);
     else
-      PixmapDrawer::fillRectangle(painter_, ping[i].draft_x - 2,
-				  ping[i].draft_y - 2, 4, 4, BLACK,
+      PixmapDrawer::fillRectangle(painter_, ping_[i].draft_x - 2,
+				  ping_[i].draft_y - 2, 4, 4, BLACK,
 				  SOLID_LINE);
   }
 
@@ -5112,11 +5116,11 @@ int Backend::plot_roll(int iplot) {
     const double xscale = plot_[iplot].xscale;
     const double yscale = plot_[iplot].yscale;
 
-    int roll_x1 = ixmin + xscale * (ping[currentId_].file_time_d - xmin);
-    int roll_y1 = iymin + yscale * (ping[currentId_].roll - ymin);
+    int roll_x1 = ixmin + xscale * (ping_[currentId_].file_time_d - xmin);
+    int roll_y1 = iymin + yscale * (ping_[currentId_].roll - ymin);
     for (int i = currentId_ + 1; i < currentId_ + nPlot_; i++) {
-      const int roll_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
-      const int roll_y2 = iymin + yscale * (ping[i].roll - ymin);
+      const int roll_x2 = ixmin + xscale * (ping_[i].file_time_d - xmin);
+      const int roll_y2 = iymin + yscale * (ping_[i].roll - ymin);
       PixmapDrawer::drawLine(painter_, roll_x1, roll_y1, roll_x2, roll_y2,
 			     GREEN, SOLID_LINE);
       roll_x1 = roll_x2;
@@ -5154,11 +5158,11 @@ int Backend::plot_pitch(int iplot) {
     const double xscale = plot_[iplot].xscale;
     const double yscale = plot_[iplot].yscale;
 
-    int pitch_x1 = ixmin + xscale * (ping[currentId_].file_time_d - xmin);
-    int pitch_y1 = iymin + yscale * (ping[currentId_].pitch - ymin);
+    int pitch_x1 = ixmin + xscale * (ping_[currentId_].file_time_d - xmin);
+    int pitch_y1 = iymin + yscale * (ping_[currentId_].pitch - ymin);
     for (int i = currentId_ + 1; i < currentId_ + nPlot_; i++) {
-      const int pitch_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
-      const int pitch_y2 = iymin + yscale * (ping[i].pitch - ymin);
+      const int pitch_x2 = ixmin + xscale * (ping_[i].file_time_d - xmin);
+      const int pitch_y2 = iymin + yscale * (ping_[i].pitch - ymin);
       PixmapDrawer::drawLine(painter_, pitch_x1, pitch_y1, pitch_x2, pitch_y2,
 			     GREEN, SOLID_LINE);
       pitch_x1 = pitch_x2;
@@ -5196,11 +5200,11 @@ int Backend::plot_heave(int iplot) {
     const double xscale = plot_[iplot].xscale;
     const double yscale = plot_[iplot].yscale;
 
-    int heave_x1 = ixmin + xscale * (ping[currentId_].file_time_d - xmin);
-    int heave_y1 = iymin + yscale * (ping[currentId_].heave - ymin);
+    int heave_x1 = ixmin + xscale * (ping_[currentId_].file_time_d - xmin);
+    int heave_y1 = iymin + yscale * (ping_[currentId_].heave - ymin);
     for (int i = currentId_ + 1; i < currentId_ + nPlot_; i++) {
-      const int heave_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
-      const int heave_y2 = iymin + yscale * (ping[i].heave - ymin);
+      const int heave_x2 = ixmin + xscale * (ping_[i].file_time_d - xmin);
+      const int heave_y2 = iymin + yscale * (ping_[i].heave - ymin);
       PixmapDrawer::drawLine(painter_, heave_x1, heave_y1, heave_x2, heave_y2,
 			     GREEN, SOLID_LINE);
       heave_x1 = heave_x2;
@@ -5230,25 +5234,25 @@ int Backend::plot_tint_value(int iplot, int iping) {
   }
 
   /* unplot basic expected time data value */
-  PixmapDrawer::drawRectangle(painter_, ping[iping].tint_x - 2,
-			      ping[iping].tint_y - 2, 4, 4, WHITE,
+  PixmapDrawer::drawRectangle(painter_, ping_[iping].tint_x - 2,
+			      ping_[iping].tint_y - 2, 4, 4, WHITE,
 			      SOLID_LINE);
-  PixmapDrawer::fillRectangle(painter_, ping[iping].tint_x - 2,
-			      ping[iping].tint_y - 2, 4, 4, WHITE,
+  PixmapDrawer::fillRectangle(painter_, ping_[iping].tint_x - 2,
+			      ping_[iping].tint_y - 2, 4, 4, WHITE,
 			      SOLID_LINE);
 
   /* replot basic expected time data value */
-  if (ping[iping].tint_select)
-    PixmapDrawer::drawRectangle(painter_, ping[iping].tint_x - 2,
-				ping[iping].tint_y - 2, 4, 4, RED,
+  if (ping_[iping].tint_select)
+    PixmapDrawer::drawRectangle(painter_, ping_[iping].tint_x - 2,
+				ping_[iping].tint_y - 2, 4, 4, RED,
 				SOLID_LINE);
-  else if (ping[iping].tint != ping[iping].tint_org)
-    PixmapDrawer::drawRectangle(painter_, ping[iping].tint_x - 2,
-				ping[iping].tint_y - 2, 4, 4, PURPLE,
+  else if (ping_[iping].tint != ping_[iping].tint_org)
+    PixmapDrawer::drawRectangle(painter_, ping_[iping].tint_x - 2,
+				ping_[iping].tint_y - 2, 4, 4, PURPLE,
 				SOLID_LINE);
   else
-    PixmapDrawer::fillRectangle(painter_, ping[iping].tint_x - 2,
-				ping[iping].tint_y - 2, 4, 4, BLACK,
+    PixmapDrawer::fillRectangle(painter_, ping_[iping].tint_x - 2,
+				ping_[iping].tint_y - 2, 4, 4, BLACK,
 				SOLID_LINE);
 
   const int status = MB_SUCCESS;
@@ -5273,29 +5277,29 @@ int Backend::plot_lon_value(int iplot, int iping) {
   }
 
   /* unplot basic lon data value */
-  PixmapDrawer::drawRectangle(painter_, ping[iping].lon_x - 2,
-			      ping[iping].lon_y - 2, 4, 4, WHITE,
+  PixmapDrawer::drawRectangle(painter_, ping_[iping].lon_x - 2,
+			      ping_[iping].lon_y - 2, 4, 4, WHITE,
 			      SOLID_LINE);
-  PixmapDrawer::fillRectangle(painter_, ping[iping].lon_x - 2,
-			      ping[iping].lon_y - 2, 4, 4, WHITE,
+  PixmapDrawer::fillRectangle(painter_, ping_[iping].lon_x - 2,
+			      ping_[iping].lon_y - 2, 4, 4, WHITE,
 			      SOLID_LINE);
 
   /* replot basic lon data value */
-  if (ping[iping].lon_select)
-    PixmapDrawer::drawRectangle(painter_, ping[iping].lon_x - 2,
-				ping[iping].lon_y - 2, 4, 4, RED,
+  if (ping_[iping].lon_select)
+    PixmapDrawer::drawRectangle(painter_, ping_[iping].lon_x - 2,
+				ping_[iping].lon_y - 2, 4, 4, RED,
 				SOLID_LINE);
-  else if (ping[iping].lonlat_flag)
-    PixmapDrawer::drawRectangle(painter_, ping[iping].lon_x - 2,
-				ping[iping].lon_y - 2, 4, 4, ORANGE,
+  else if (ping_[iping].lonlat_flag)
+    PixmapDrawer::drawRectangle(painter_, ping_[iping].lon_x - 2,
+				ping_[iping].lon_y - 2, 4, 4, ORANGE,
 				SOLID_LINE);
-  else if (ping[iping].lon != ping[iping].lon_org)
-    PixmapDrawer::drawRectangle(painter_, ping[iping].lon_x - 2,
-				ping[iping].lon_y - 2, 4, 4, PURPLE,
+  else if (ping_[iping].lon != ping_[iping].lon_org)
+    PixmapDrawer::drawRectangle(painter_, ping_[iping].lon_x - 2,
+				ping_[iping].lon_y - 2, 4, 4, PURPLE,
 				SOLID_LINE);
   else
-    PixmapDrawer::fillRectangle(painter_, ping[iping].lon_x - 2,
-				ping[iping].lon_y - 2, 4, 4, BLACK,
+    PixmapDrawer::fillRectangle(painter_, ping_[iping].lon_x - 2,
+				ping_[iping].lon_y - 2, 4, 4, BLACK,
 				SOLID_LINE);
 
   const int status = MB_SUCCESS;
@@ -5320,29 +5324,29 @@ int Backend::plot_lat_value(int iplot, int iping) {
   }
 
   /* unplot basic lat data value */
-  PixmapDrawer::drawRectangle(painter_, ping[iping].lat_x - 2,
-			      ping[iping].lat_y - 2, 4, 4, WHITE,
+  PixmapDrawer::drawRectangle(painter_, ping_[iping].lat_x - 2,
+			      ping_[iping].lat_y - 2, 4, 4, WHITE,
 			      SOLID_LINE);
-  PixmapDrawer::fillRectangle(painter_, ping[iping].lat_x - 2,
-			      ping[iping].lat_y - 2, 4, 4, WHITE,
+  PixmapDrawer::fillRectangle(painter_, ping_[iping].lat_x - 2,
+			      ping_[iping].lat_y - 2, 4, 4, WHITE,
 			      SOLID_LINE);
 
   /* replot basic lat data value */
-  if (ping[iping].lat_select)
-    PixmapDrawer::drawRectangle(painter_, ping[iping].lat_x - 2,
-				ping[iping].lat_y - 2, 4, 4, RED,
+  if (ping_[iping].lat_select)
+    PixmapDrawer::drawRectangle(painter_, ping_[iping].lat_x - 2,
+				ping_[iping].lat_y - 2, 4, 4, RED,
 				SOLID_LINE);
-  else if (ping[iping].lonlat_flag)
-    PixmapDrawer::drawRectangle(painter_, ping[iping].lat_x - 2,
-				ping[iping].lat_y - 2, 4, 4, ORANGE,
+  else if (ping_[iping].lonlat_flag)
+    PixmapDrawer::drawRectangle(painter_, ping_[iping].lat_x - 2,
+				ping_[iping].lat_y - 2, 4, 4, ORANGE,
 				SOLID_LINE);
-  else if (ping[iping].lat != ping[iping].lat_org)
-    PixmapDrawer::drawRectangle(painter_, ping[iping].lat_x - 2,
-				ping[iping].lat_y - 2, 4, 4, PURPLE,
+  else if (ping_[iping].lat != ping_[iping].lat_org)
+    PixmapDrawer::drawRectangle(painter_, ping_[iping].lat_x - 2,
+				ping_[iping].lat_y - 2, 4, 4, PURPLE,
 				SOLID_LINE);
   else
-    PixmapDrawer::fillRectangle(painter_, ping[iping].lat_x - 2,
-				ping[iping].lat_y - 2, 4, 4, BLACK,
+    PixmapDrawer::fillRectangle(painter_, ping_[iping].lat_x - 2,
+				ping_[iping].lat_y - 2, 4, 4, BLACK,
 				SOLID_LINE);
 
   const int status = MB_SUCCESS;
@@ -5367,25 +5371,25 @@ int Backend::plot_speed_value(int iplot, int iping) {
   }
 
   /* unplot basic speed data value */
-  PixmapDrawer::drawRectangle(painter_, ping[iping].speed_x - 2,
-			      ping[iping].speed_y - 2, 4, 4, WHITE,
+  PixmapDrawer::drawRectangle(painter_, ping_[iping].speed_x - 2,
+			      ping_[iping].speed_y - 2, 4, 4, WHITE,
 			      SOLID_LINE);
-  PixmapDrawer::fillRectangle(painter_, ping[iping].speed_x - 2,
-			      ping[iping].speed_y - 2, 4, 4, WHITE,
+  PixmapDrawer::fillRectangle(painter_, ping_[iping].speed_x - 2,
+			      ping_[iping].speed_y - 2, 4, 4, WHITE,
 			      SOLID_LINE);
 
   /* replot basic speed data value */
-  if (ping[iping].speed_select)
-    PixmapDrawer::drawRectangle(painter_, ping[iping].speed_x - 2,
-				ping[iping].speed_y - 2, 4, 4, RED,
+  if (ping_[iping].speed_select)
+    PixmapDrawer::drawRectangle(painter_, ping_[iping].speed_x - 2,
+				ping_[iping].speed_y - 2, 4, 4, RED,
 				SOLID_LINE);
-  else if (ping[iping].speed != ping[iping].speed_org)
-    PixmapDrawer::drawRectangle(painter_, ping[iping].speed_x - 2,
-				ping[iping].speed_y - 2, 4, 4, PURPLE,
+  else if (ping_[iping].speed != ping_[iping].speed_org)
+    PixmapDrawer::drawRectangle(painter_, ping_[iping].speed_x - 2,
+				ping_[iping].speed_y - 2, 4, 4, PURPLE,
 				SOLID_LINE);
   else
-    PixmapDrawer::fillRectangle(painter_, ping[iping].speed_x - 2,
-				ping[iping].speed_y - 2, 4, 4, BLACK,
+    PixmapDrawer::fillRectangle(painter_, ping_[iping].speed_x - 2,
+				ping_[iping].speed_y - 2, 4, 4, BLACK,
 				SOLID_LINE);
 
   const int status = MB_SUCCESS;
@@ -5410,25 +5414,25 @@ int Backend::plot_heading_value(int iplot, int iping) {
   }
 
   /* unplot basic heading data value */
-  PixmapDrawer::drawRectangle(painter_, ping[iping].heading_x - 2,
-			      ping[iping].heading_y - 2, 4, 4, WHITE,
+  PixmapDrawer::drawRectangle(painter_, ping_[iping].heading_x - 2,
+			      ping_[iping].heading_y - 2, 4, 4, WHITE,
 			      SOLID_LINE);
-  PixmapDrawer::fillRectangle(painter_, ping[iping].heading_x - 2,
-			      ping[iping].heading_y - 2, 4, 4, WHITE,
+  PixmapDrawer::fillRectangle(painter_, ping_[iping].heading_x - 2,
+			      ping_[iping].heading_y - 2, 4, 4, WHITE,
 			      SOLID_LINE);
 
   /* replot basic heading data value */
-  if (ping[iping].heading_select)
-    PixmapDrawer::drawRectangle(painter_, ping[iping].heading_x - 2,
-				ping[iping].heading_y - 2, 4, 4, RED,
+  if (ping_[iping].heading_select)
+    PixmapDrawer::drawRectangle(painter_, ping_[iping].heading_x - 2,
+				ping_[iping].heading_y - 2, 4, 4, RED,
 				SOLID_LINE);
-  else if (ping[iping].heading != ping[iping].heading_org)
-    PixmapDrawer::drawRectangle(painter_, ping[iping].heading_x - 2,
-				ping[iping].heading_y - 2, 4, 4, PURPLE,
+  else if (ping_[iping].heading != ping_[iping].heading_org)
+    PixmapDrawer::drawRectangle(painter_, ping_[iping].heading_x - 2,
+				ping_[iping].heading_y - 2, 4, 4, PURPLE,
 				SOLID_LINE);
   else
-    PixmapDrawer::fillRectangle(painter_, ping[iping].heading_x - 2,
-				ping[iping].heading_y - 2, 4, 4, BLACK,
+    PixmapDrawer::fillRectangle(painter_, ping_[iping].heading_x - 2,
+				ping_[iping].heading_y - 2, 4, 4, BLACK,
 				SOLID_LINE);
 
   const int status = MB_SUCCESS;
@@ -5453,25 +5457,25 @@ int Backend::plot_draft_value(int iplot, int iping) {
   }
 
   /* unplot basic draft data value */
-  PixmapDrawer::drawRectangle(painter_, ping[iping].draft_x - 2,
-			      ping[iping].draft_y - 2, 4, 4, WHITE,
+  PixmapDrawer::drawRectangle(painter_, ping_[iping].draft_x - 2,
+			      ping_[iping].draft_y - 2, 4, 4, WHITE,
 			      SOLID_LINE);
-  PixmapDrawer::fillRectangle(painter_, ping[iping].draft_x - 2,
-			      ping[iping].draft_y - 2, 4, 4, WHITE,
+  PixmapDrawer::fillRectangle(painter_, ping_[iping].draft_x - 2,
+			      ping_[iping].draft_y - 2, 4, 4, WHITE,
 			      SOLID_LINE);
 
   /* replot basic draft data value */
-  if (ping[iping].draft_select)
-    PixmapDrawer::drawRectangle(painter_, ping[iping].draft_x - 2,
-				ping[iping].draft_y - 2, 4, 4, RED,
+  if (ping_[iping].draft_select)
+    PixmapDrawer::drawRectangle(painter_, ping_[iping].draft_x - 2,
+				ping_[iping].draft_y - 2, 4, 4, RED,
 				SOLID_LINE);
-  else if (ping[iping].draft != ping[iping].draft_org)
-    PixmapDrawer::drawRectangle(painter_, ping[iping].draft_x - 2,
-				ping[iping].draft_y - 2, 4, 4, PURPLE,
+  else if (ping_[iping].draft != ping_[iping].draft_org)
+    PixmapDrawer::drawRectangle(painter_, ping_[iping].draft_x - 2,
+				ping_[iping].draft_y - 2, 4, 4, PURPLE,
 				SOLID_LINE);
   else
-    PixmapDrawer::fillRectangle(painter_, ping[iping].draft_x - 2,
-				ping[iping].draft_y - 2, 4, 4, BLACK,
+    PixmapDrawer::fillRectangle(painter_, ping_[iping].draft_x - 2,
+				ping_[iping].draft_y - 2, 4, 4, BLACK,
 				SOLID_LINE);
 
   const int status = MB_SUCCESS;
@@ -5610,18 +5614,26 @@ void Backend::onEditModeChanged(QString mode) {
 
 void Backend::onLeftButtonClicked(int x, int y) {
   qDebug() << "onLeftButtonClicked(): " << x << ", " << y;
-  
+
+  // Transform to world coordinates
+  x = x / xScale_;
+  y = y / yScale_;
+
   switch (editMode_) {
+  case Pick:
+    action_mouse_pick(x, y);
+    break;
+
   case DefineInterval:
-    action_set_interval(x / xScale_, y / yScale_, 0);
-    
-    // Update GUI
-    swathPixmapImage_->update();
+    action_set_interval(x, y, 0);
     break;
 
   default:
-    break;
+    return;
   };
+
+  // Update GUI
+  swathPixmapImage_->update();
 }
 
 void Backend::onRightButtonClicked(int x, int y) {
@@ -5630,30 +5642,60 @@ void Backend::onRightButtonClicked(int x, int y) {
   case DefineInterval:
     // Redraw new interval
     action_set_interval(0, 0, 2);
-    
-    // Update GUI
-    swathPixmapImage_->update();
     break;
 
   default:
-    break;
+    return;
   };  
+
+  // Update GUI
+  swathPixmapImage_->update();
+
 }
 
 void Backend::onMiddleButtonClicked(int x, int y) {
   qDebug() << "onMiddleButtonClicked(): " << x << ", " << y;    
+
   switch (editMode_) {
   case DefineInterval:
     action_set_interval(x / xScale_, y / yScale_, 1);
+    break;
     
-    // Update GUI
-    swathPixmapImage_->update();
+  default:
+    return;
+  };
+
+  // Update GUI
+  swathPixmapImage_->update();
+}
+
+
+void Backend::onMouseMoved(int x, int y) {
+  qDebug() << "onMouseMoved(); editMode=" << editMode_;;
+  // Transform to world coordinates
+  x = x / xScale_;
+  y = y / yScale_;
+  
+  switch (editMode_) {
+
+  case Select:
+    qDebug() << "call action_mouse_select()";
+    action_mouse_select(x, y);
+    break;
+
+  case Deselect:
+    action_mouse_deselect(x, y);
     break;
 
   default:
-    break;
-  };
+    return;
+  }
+  
+  // Update GUI
+  swathPixmapImage_->update();
 }
+
+
 
 void Backend::onResetInterval(void) {
   qDebug() << "onResetInterval()";
@@ -5680,5 +5722,25 @@ void Backend::onGoBack(void) {
 
 void Backend::onGoEnd(void) {
   action_end();
+  swathPixmapImage_->update();  
+}
+
+
+void Backend::onInterpolate() {
+  qDebug() << "onInterpolate()";
+  action_interpolate();
+  action_set_interval(0, 0, 3);
+  plot_all();
+  
+  swathPixmapImage_->update();    
+}
+
+
+void Backend::onInterpolateRepeat(void) {
+  qDebug() << "onInterpolateRepeat()";  
+  action_interpolate_repeats();
+  action_set_interval(0, 0, 3);
+  plot_all();
+  
   swathPixmapImage_->update();  
 }
