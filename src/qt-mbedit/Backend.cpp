@@ -41,8 +41,8 @@ Backend::Backend(int argc, char **argv) {
   // Dummy first argument to drawing functions
   dummy_ = nullptr;
   
-  const int width = 600;
-  const int height = 600;
+  const int width = 800;
+  const int height = 800;
   canvasPixmap_ = new QPixmap(width, height);
 
   // mbedit uses this font:
