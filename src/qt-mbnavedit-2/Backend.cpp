@@ -34,11 +34,7 @@ extern "C" {
 Backend::Ping Backend::ping[MBNAVEDIT_BUFFER_SIZE] = {};
 
 /* Mode value defines */
-#define EDIT_MODE_PICK 0
-#define EDIT_MODE_SELECT 1
-#define EDIT_MODE_DESELECT 2
-#define EDIT_MODE_SELECTALL 3
-#define EDIT_MODE_DESELECTALL 4
+
 #define OUTPUT_MODE_OUTPUT 0
 #define OUTPUT_MODE_BROWSE 1
 #define PLOT_TINT 0
@@ -101,11 +97,8 @@ Backend::Backend(int argc, char **argv) {
   QFont myFont("Helvetica [Cronyx]", 9);
   painter_->setFont(myFont);
 
-  bool inputSpecd = false;
-
   init_globals();
 
-  init(argc, argv, &inputSpecd);
 }
 
 
@@ -132,8 +125,13 @@ bool Backend::initialize(QObject *loadedRoot, int argc, char **argv) {
   // Set the pixmap of QML-declared PixmapImage
   swathPixmapImage_->setImage(canvasPixmap_);
 
-  swathPixmapImage_->setWidth(canvasPixmap_->width());
-  swathPixmapImage_->setHeight(canvasPixmap_->height());
+  // NOTE: QML-defined MouseArea must be EXACTLY fitted on PixmapImage
+  // to ensure correct mapping and scaling of mouse events
+  xScale_ = swathPixmapImage_->width() / canvasPixmap_->width();
+  yScale_ = swathPixmapImage_->height() / canvasPixmap_->height();
+
+  /// swathPixmapImage_->setWidth(canvasPixmap_->width());
+  /// swathPixmapImage_->setHeight(canvasPixmap_->height());
   
   char *swathFile = nullptr;
   // Parse command line options
@@ -151,10 +149,23 @@ bool Backend::initialize(QObject *loadedRoot, int argc, char **argv) {
       return false;
     }
 
+    bool inputSpecd = false;
+    
+    init(argc, argv, &inputSpecd);
+
+    // Update GUI
+    swathPixmapImage_->update();
+
+    dataPlotted_ = true;
+    return true;
+    
+    /* ***
     QString urlString("file://" + QString(fullPath));
     if (!processSwathFile(urlString)) {
       qWarning() << "Couldn't process_ " << swathFile;
     }
+    *** */
+
   }
   else {
     plotTest();
@@ -237,6 +248,10 @@ bool Backend::plotTest() {
 			      canvasPixmap_->width()-200,
 			      canvasPixmap_->height()-200,
 			      RED, SOLID_LINE);
+  // Draw a square
+  PixmapDrawer::fillRectangle(painter_, 0, 0,
+			      200, 200,
+			      BLUE, SOLID_LINE);  
 
   PixmapDrawer::drawLine(painter_, 0, 0, canvasPixmap_->width(),
 			 canvasPixmap_->height(),
@@ -318,7 +333,8 @@ int Backend::init_globals(void) {
   dataShowSize_ = 1000;
   dataStepMax_ = 2000;
   dataStepSize_ = 750;
-  modePick_ = EDIT_MODE_PICK;
+  // modePick_ = EDIT_MODE_PICK;
+  editMode_ = Pick;
   modeSetInterval_ = false;
   plotTint_ = true;
   plotTintOrg_ = true;
@@ -2237,6 +2253,9 @@ int Backend::action_set_interval(int xx, int yy, int which) {
     fprintf(stderr, "dbg2       which:      %d\n", which);
   }
 
+  qDebug() << "*** plot_[0].ixmin: " << plot_[0].ixmin;
+  qDebug() << "*** plot_[0].ixmax: " << plot_[0].ixmax;
+  
   int status = MB_SUCCESS;
 
   /* don't try to do anything if no data */
@@ -2267,7 +2286,8 @@ int Backend::action_set_interval(int xx, int yy, int which) {
 
       /* plot line on all plots */
       for (int i = 0; i < nPlots_; i++) {
-	PixmapDrawer::drawLine(painter_, interval_bound1,
+	PixmapDrawer::drawLine(painter_,
+			       interval_bound1,
 			       plot_[i].iymin,
 			       interval_bound1,
 			       plot_[i].iymax,
@@ -5467,11 +5487,78 @@ int Backend::plot_draft_value(int iplot, int iping) {
   return (status);
 }
 /*--------------------------------------------------------------------*/
+void Backend::parseInputDataList(char *file, int form) {
+  std::cout << "Backend::parseInputDataList() file: " << file << "\n";
+  char *fullPath = realpath(file, nullptr);
+  if (!fullPath) {
+    // File not found
+  }
+  QString urlString("file://" + QString(fullPath));
+  if (!processSwathFile(urlString)) {
+    qWarning() << "Couldn't process_ " << file;
+  }
+  
+  return;
+  
+  /* **** TBD *** LOTS TO BE DONE HERE FOR PROCESSING DATALIST
 
+    // try to resolve format if necessary
+    int verbose = 0;
+    int format = form;
+    int error = MB_ERROR_NO_ERROR;
+    if (format == 0)
+      mb_get_format(verbose, file, NULL, &format, &error);
 
-void Backend::parseInputDataList(char *file, int dummy) {
-  std::cout << "Backend::parseInputDataList() not implemented\n";
+    // read in a single file 
+    if (format > 0 && nFiles_ < NUM_FILES_MAX) {
+      strcpy(filepaths[nFiles_], file);
+      fileformats[nFiles_] = format;
+      filelocks[nFiles_] = -1;
+      filenves[nFiles_] = -1;
+      nFiles_++;
+    }
+
+    // read in datalist if format == -1
+    else if (format == -1) {
+      void *datalist;
+      int datalist_status = mb_datalist_open(verbose, &datalist,
+					     file, MB_DATALIST_LOOK_NO, &error);
+      error = MB_ERROR_NO_ERROR;
+      if (datalist_status == MB_SUCCESS) {
+	double weight;
+	int filestatus;
+	int fileformat;
+	char fileraw[MB_PATH_MAXLINE];
+	char fileprocessed[MB_PATH_MAXLINE];
+	char dfile[MB_PATH_MAXLINE];
+
+	bool done = false;
+	while (!done) {
+	  if ((datalist_status = mb_datalist_read2(verbose, datalist,
+						   &filestatus, fileraw,
+						   fileprocessed, dfile,
+						   &fileformat, &weight,
+						   &error)) == MB_SUCCESS) {
+	    if (numfiles < NUM_FILES_MAX) {
+	      strcpy(filepaths[numfiles], fileraw);
+	      fileformats[numfiles] = fileformat;
+	      filelocks[numfiles] = -1;
+	      filenves[numfiles] = -1;
+	      numfiles++;
+	    }
+	  }
+	  else {
+	    datalist_status = mb_datalist_close(verbose, &datalist, &error);
+	    done = true;
+	  }
+	}
+      }
+    }
+    **** */
 }
+    
+  
+
 
 
 int Backend::showError(const char *s1, const char *s2, const char *s3) {
@@ -5490,3 +5577,108 @@ int Backend::showMessage(const char *message) {
   return 0;
 }
 
+
+void Backend::onEditModeChanged(QString mode) {
+  qDebug() << "onEditModeChanged(): " << mode;
+  if (mode == PICK_MODENAME) {
+    editMode_ = Pick;
+  }
+  else if (mode == SELECT_MODENAME) {
+    editMode_ = Select;
+  }
+  else if (mode == DESELECT_MODENAME) {
+    editMode_ = Deselect;
+  }
+  else if (mode == SELECT_ALL_MODENAME) {
+    editMode_ = SelectAll;
+  }
+  else if (mode == DESELECT_ALL_MODENAME) {
+    editMode_ = DeselectAll;
+  }
+  else if (mode == DEFINE_INTERVAL_MODENAME) {
+    editMode_ = DefineInterval;
+  }
+  else {
+    qWarning() << "Unknown edit mode: " << mode;
+  }
+
+  return;
+	  
+}
+
+
+
+void Backend::onLeftButtonClicked(int x, int y) {
+  qDebug() << "onLeftButtonClicked(): " << x << ", " << y;
+  
+  switch (editMode_) {
+  case DefineInterval:
+    action_set_interval(x / xScale_, y / yScale_, 0);
+    
+    // Update GUI
+    swathPixmapImage_->update();
+    break;
+
+  default:
+    break;
+  };
+}
+
+void Backend::onRightButtonClicked(int x, int y) {
+  qDebug() << "onRightButtonClicked(): " << x << ", " << y;
+  switch (editMode_) {
+  case DefineInterval:
+    // Redraw new interval
+    action_set_interval(0, 0, 2);
+    
+    // Update GUI
+    swathPixmapImage_->update();
+    break;
+
+  default:
+    break;
+  };  
+}
+
+void Backend::onMiddleButtonClicked(int x, int y) {
+  qDebug() << "onMiddleButtonClicked(): " << x << ", " << y;    
+  switch (editMode_) {
+  case DefineInterval:
+    action_set_interval(x / xScale_, y / yScale_, 1);
+    
+    // Update GUI
+    swathPixmapImage_->update();
+    break;
+
+  default:
+    break;
+  };
+}
+
+void Backend::onResetInterval(void) {
+  qDebug() << "onResetInterval()";
+  action_showall();
+  swathPixmapImage_->update();
+}
+
+
+void Backend::onGoStart(void) {
+  action_start();
+  swathPixmapImage_->update();
+}
+
+void Backend::onGoForward(void) {
+  action_step(dataStepSize_);
+  swathPixmapImage_->update();
+}
+
+
+void Backend::onGoBack(void) {
+  action_step(-dataStepSize_);
+  swathPixmapImage_->update();
+}
+
+void Backend::onGoEnd(void) {
+  action_end();
+  swathPixmapImage_->update();  
+}

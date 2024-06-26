@@ -22,7 +22,7 @@ extern "C" {
 
 #define NUMBER_PLOTS_MAX 9
 #define DEFAULT_PLOT_WIDTH 767
-#define DEFAULT_PLOT_HEIGHT 500
+#define DEFAULT_PLOT_HEIGHT 300
 #define MBNAVEDIT_PICK_DISTANCE 50
 #define MBNAVEDIT_ERASE_DISTANCE 10
 
@@ -38,7 +38,7 @@ class Backend : public QObject  {
 
 public:
   Backend(int argc, char **argv);
-  ~Backend();
+  ~Backend(void);
 
   /// Complete Backend initialization, load/display swath file if
   /// specified on command line
@@ -77,6 +77,17 @@ public:
 
 protected:
 
+  /// Mutually-exclusive edit modes 
+  enum EditMode {
+    Pick,
+    Select,
+    Deselect,
+    SelectAll,
+    DeselectAll,
+    DefineInterval
+    
+  };
+  
   struct Ping {
     int id;
     int record;
@@ -160,6 +171,12 @@ protected:
     *height = canvasPixmap_->height();
   }
   
+
+  /// world -> device xScale factor
+  double xScale_ = 1;
+  
+  /// world -> device yScale factor
+  double yScale_ = 1;
   
   /// UI root object
   QObject *ui_;
@@ -186,6 +203,7 @@ protected:
   /// Indicates if data is plotted
   bool dataPlotted_;
 
+  
   /* ------- FORMER extern mbnavedit global variables ------- */
   /* mbnavedit global control parameters */
   int outputMode_;
@@ -195,7 +213,7 @@ protected:
   int dataShowSize_;
   int dataStepMax_;
   int dataStepSize_;
-  int modePick_;
+  EditMode editMode_ = Pick;
   int modeSetInterval_;
   bool plotTint_;
   bool plotTintOrg_;
@@ -240,7 +258,7 @@ protected:
   int plotHeight_;
   int nPlots_;
 
-  /* ------- FORMER mnavedit_prog  global variables ------- */
+  /* ------- FORMER mbnavedit_prog  global variables ------- */
   /* id variables */
   const char *programName_;
   const char *helpMessage_;
@@ -318,7 +336,6 @@ protected:
 
 
   // Member functions, formerly mbnavedit_prog stand-alone C functions 
-
   int init(int argc, char **argv, bool *inputSpecd);
   
   int set_graphics(void *xgid, int ncol);
@@ -440,6 +457,31 @@ public slots:
   
   /// Methods called by QML code
   void setPlot(QString plotName, bool set);
+
+  /// Called when edit mode changed
+  void onEditModeChanged(QString modeName);
+
+  void onLeftButtonClicked(int x, int y);
+
+  void onRightButtonClicked(int x, int y);
+
+  void onMiddleButtonClicked(int x, int y);
+
+  /// Reset time interval
+  void onResetInterval(void);
+
+  /// Move swath view to start
+  void onGoStart(void);
+
+  /// Move swath view forward
+  void onGoForward(void);
+
+  /// Move swath view back
+  void onGoBack(void);
+
+  /// Move swath view to end
+  void onGoEnd(void);
+  
   
   /// Invoked when main window is destroyed
   void onMainWindowDestroyed(void);
