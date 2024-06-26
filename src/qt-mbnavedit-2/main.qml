@@ -66,53 +66,6 @@ Window {
         width: 1000
 
         Row {
-
-            CheckBox {
-                objectName: 'timeInt'
-                checked: true
-                text: qsTr('Time interval')
-                onToggled: backend.setPlot(objectName, checked)
-            }
-            CheckBox {
-                objectName: 'lon'
-                checked: true
-                text: qsTr('Longitude')
-                onToggled: backend.setPlot(objectName, checked)
-            }
-            CheckBox {
-                objectName: 'lat'
-                checked: true
-                text: qsTr('Latitude')
-                onToggled: backend.setPlot(objectName, checked)
-            }
-            CheckBox {
-                objectName: 'speed'
-                checked: true
-                text: qsTr('Speed')
-                onToggled: backend.setPlot(objectName, checked)
-            }
-            CheckBox {
-                objectName: 'heading'
-                checked: true
-                text: qsTr('Heading')
-                onToggled: backend.setPlot(objectName, checked)
-            }
-            CheckBox {
-                objectName: 'sensorDepth'
-                checked: true
-                text: qsTr('Sonar depth')
-                onToggled: backend.setPlot(objectName, checked)
-            }
-            CheckBox {
-                objectName: 'attitude'
-                checked: false
-                text: qsTr('Roll,pitch,heave')
-                onToggled: backend.setPlot(objectName, checked)
-            }
-        }
-
-
-        Row {
             id: buttonRow
 
             ButtonGroup {
@@ -171,6 +124,20 @@ Window {
 
         Row {
             Button {
+                id: interpolate
+                text: 'Interp'
+                onClicked: { backend.onInterpolate() }
+            }
+
+            Button {
+                id: interpolateRep
+                text: 'Interp Rep'
+                onClicked: { backend.onInterpolateRepeat() }
+            }	
+	}
+	
+        Row {
+            Button {
                 id: swathStart
                 text: 'Start'
                 onClicked: { backend.onGoStart() }
@@ -196,6 +163,53 @@ Window {
 
 
         }
+        Row {
+
+            CheckBox {
+                objectName: 'timeInt'
+                checked: true
+                text: qsTr('Time interval')
+                onToggled: backend.setPlot(objectName, checked)
+            }
+            CheckBox {
+                objectName: 'lon'
+                checked: true
+                text: qsTr('Longitude')
+                onToggled: backend.setPlot(objectName, checked)
+            }
+            CheckBox {
+                objectName: 'lat'
+                checked: true
+                text: qsTr('Latitude')
+                onToggled: backend.setPlot(objectName, checked)
+            }
+            CheckBox {
+                objectName: 'speed'
+                checked: true
+                text: qsTr('Speed')
+                onToggled: backend.setPlot(objectName, checked)
+            }
+            CheckBox {
+                objectName: 'heading'
+                checked: true
+                text: qsTr('Heading')
+                onToggled: backend.setPlot(objectName, checked)
+            }
+            CheckBox {
+                objectName: 'sensorDepth'
+                checked: true
+                text: qsTr('Sonar depth')
+                onToggled: backend.setPlot(objectName, checked)
+            }
+            CheckBox {
+                objectName: 'attitude'
+                checked: false
+                text: qsTr('Roll,pitch,heave')
+                onToggled: backend.setPlot(objectName, checked)
+            }
+        }
+
+
 
 
         ScrollView {
@@ -228,9 +242,10 @@ Window {
 			// mapping and scaling of mouse events			
                         anchors.fill: swathPixmap
 
-                        hoverEnabled: false
+                        hoverEnabled: true
                         acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-
+			preventStealing: true
+			
                         onClicked: (mouse)=> {
                                        if (mouse.button == Qt.LeftButton) {
                                            // console.log('left clicked');
@@ -248,8 +263,8 @@ Window {
                                    }
 
                         onPressed: (mouse) => {
-                                       console.log('Mouse pressed at ',
-                                                   mouse.x, ', ', mouse.y);
+                                       // console.log('Mouse pressed at ',
+                                          //         mouse.x, ', ', mouse.y);
                                        console.log('button: ', mouse.button);
                                        if (mouse.button == Qt.LeftButton) {
                                            //   backend.onLeftMouseButtonDown(mouse.x, mouse.y)
@@ -257,24 +272,23 @@ Window {
                                    }
 
                         onReleased: (mouse) => {
-                                        console.log('Mouse released at ',
-                                                    mouse.x, ', ', mouse.y)
+                                        // console.log('Mouse released at ',
+                                           //         mouse.x, ', ', mouse.y)
                                         if (mouse.button == Qt.LeftButton) {
                                             // backend.onLeftMouseButtonUp(mouse.x, mouse.y)
                                         }
                                     }
 
                         onPositionChanged: (mouse) => {
+
                                                console.log('Mouse moved at ',
-                                                           mouse.x, ', ', mouse.y);
-                                               console.log('pressed: ', pressed);
+                                                          mouse.x, ', ', mouse.y);
+                                                console.log('pressed: ', pressed);
                                                console.log('button: ', mouse.button);
                                                console.log('buttons: ', mouse.buttons);
+
                                                if (mouse.buttons == Qt.LeftButton) {
-                                                   backend.onMouseMove(mouse.x, mouse.y)
-                                               }
-                                               else {
-                                                   console.log('do not call backend')
+                                                   backend.onMouseMoved(mouse.x, mouse.y)
                                                }
                                            }
                     }
