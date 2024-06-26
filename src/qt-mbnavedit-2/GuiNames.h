@@ -30,16 +30,14 @@ class GuiNames : public QObject {
 #define SENSORDEPTH_PLOTNAME "sensorDepth"
 #define ATTITUDE_PLOTNAME "attitude"
 
-
-
-
-
 /// Names of edit modes
-#define TOGGLE_EDIT_MODE "toggleEdit"
-#define PICK_EDIT_MODE "pickEdit"
-#define ERASE_EDIT_MODE "eraseEdit"
-#define RESTORE_EDIT_MODE "restoreEdit"
-#define GRAB_EDIT_MODE "grabEdit"
-#define INFO_EDIT_MODE "infoEdit"
+#define PICK_MODENAME "pickMode"
+#define SELECT_MODENAME "selectMode"
+#define DESELECT_MODENAME "deselectMode"
+#define SELECT_ALL_MODENAME "selectAllMode"
+#define DESELECT_ALL_MODENAME "deselectAllMode"
+#define DEFINE_INTERVAL_MODENAME "defineIntervalMode"
+
+
 
 #endif
