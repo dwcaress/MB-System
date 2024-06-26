@@ -305,8 +305,11 @@ ApplicationWindow {
         Rectangle {
             // Layout.fillWidth: true
             // Grab selection matches when w=600
-            width: 600
-            height: 600
+            // width: 600
+            // height: 600
+
+            width: 900
+            height: 900
 
             PixmapImage {
                 id: swathPixmap
@@ -317,7 +320,9 @@ ApplicationWindow {
             MouseArea {
                 id: swathMouseArea
                 objectName: 'swathMouseAreaObj'
-                anchors.fill: parent
+		// Fit exactly on PixmapImage to ensure proper scaling
+		// and mapping of mouse events
+                anchors.fill: swathPixmap
                 hoverEnabled: false
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
 
