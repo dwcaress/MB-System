@@ -280,13 +280,13 @@ Window {
                                     }
 
                         onPositionChanged: (mouse) => {
-
+                                               /* ****
                                                console.log('Mouse moved at ',
                                                           mouse.x, ', ', mouse.y);
                                                 console.log('pressed: ', pressed);
                                                console.log('button: ', mouse.button);
                                                console.log('buttons: ', mouse.buttons);
-
+                                               **** */
                                                if (mouse.buttons == Qt.LeftButton) {
                                                    backend.onMouseMoved(mouse.x, mouse.y)
                                                }
