@@ -23,11 +23,19 @@ class GuiNames : public QObject {
 
 /// Plot names
 #define TIMEINT_PLOTNAME "timeInt"
+#define TIMEINT_ORIG_PLOTNAME "timeIntOrig"
 #define LAT_PLOTNAME "lat"
+#define LAT_ORIG_PLOTNAME "latOrig"
 #define LON_PLOTNAME "lon"
+#define LON_ORIG_PLOTNAME "lonOrig"
 #define SPEED_PLOTNAME "speed"
+#define SPEED_ORIG_PLOTNAME "speedOrig"
+#define SPEED_MADEGOOD_PLOTNAME "speedMadeGood"
 #define HEADING_PLOTNAME "heading"
+#define HEADING_ORIG_PLOTNAME "headingOrig"
+#define HEADING_MADEGOOD_PLOTNAME "headingMadeGood"
 #define SENSORDEPTH_PLOTNAME "sensorDepth"
+#define SENSORDEPTH_ORIG_PLOTNAME "sensorDepthOrig"
 #define ATTITUDE_PLOTNAME "attitude"
 
 /// Names of edit modes
