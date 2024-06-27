@@ -213,21 +213,21 @@ protected:
   EditMode editMode_ = Pick;
   int modeSetInterval_;
   bool plotTint_;
-  bool plotTintOrg_;
+  bool plotTintOrig_;
   bool plotLon_;
-  bool plotLonOrg_;
+  bool plotLonOrig_;
   bool plotLonDr_;
   bool plotLat_;
-  bool plotLatOrg_;
+  bool plotLatOrig_;
   bool plotLatDr_;
   bool plotSpeed_;
-  bool plotSpeedOrg_;
+  bool plotSpeedOrig_;
   bool plotSmg_;
   bool plotHeading_;
-  bool plotHeadingOrg_;
+  bool plotHeadingOrig_;
   bool plotCmg_;
   bool plotDraft_;
-  bool plotDraftOrg_;
+  bool plotDraftOrig_;
   bool plotDraftDr_;
   bool plotRoll_;
   bool plotPitch_;
@@ -466,7 +466,9 @@ public slots:
 
   void onMouseMoved(int x, int y);
 
-  
+  /// Invoked by QML when resize occurs; sets xScale_ and yScale member values
+  void onPixmapImageResize(int width, int height);
+    
   /// Reset time interval
   void onResetInterval(void);
 

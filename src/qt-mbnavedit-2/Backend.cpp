@@ -132,9 +132,8 @@ bool Backend::initialize(QObject *loadedRoot, int argc, char **argv) {
   // to ensure correct mapping and scaling of mouse events
   xScale_ = swathPixmapImage_->width() / canvasPixmap_->width();
   yScale_ = swathPixmapImage_->height() / canvasPixmap_->height();
-
-  /// swathPixmapImage_->setWidth(canvasPixmap_->width());
-  /// swathPixmapImage_->setHeight(canvasPixmap_->height());
+  
+  qDebug() << "init: xScale_: " << xScale_ << ", yScale_: " << yScale_;
   
   char *swathFile = nullptr;
   // Parse command line options
@@ -287,21 +286,45 @@ void Backend::setPlot(QString plotName, bool set) {
   if (plotName == TIMEINT_PLOTNAME) {
     plotTint_ = set;
   }
+  else if (plotName == TIMEINT_ORIG_PLOTNAME) {
+    plotTintOrig_ = set;
+  }  
   else if (plotName == LAT_PLOTNAME) {
     plotLat_ = set;
   }
+  else if (plotName == LAT_ORIG_PLOTNAME) {
+    plotLatOrig_ = set;
+  }  
   else if (plotName == LON_PLOTNAME) {
     plotLon_ = set;
   }
+  else if (plotName == LON_ORIG_PLOTNAME) {
+    plotLonOrig_ = set;
+  }  
   else if (plotName == SPEED_PLOTNAME) {
     plotSpeed_ = set;
   }
+  else if (plotName == SPEED_ORIG_PLOTNAME) {
+    plotSpeedOrig_ = set;
+  }
+  else if (plotName == SPEED_MADEGOOD_PLOTNAME) {
+    plotSmg_ = set;
+  }    
   else if (plotName == HEADING_PLOTNAME) {
     plotHeading_ = set;
   }
+  else if (plotName == HEADING_ORIG_PLOTNAME) {
+    plotHeadingOrig_ = set;
+  }
+  else if (plotName == HEADING_MADEGOOD_PLOTNAME) {
+    plotCmg_ = set;
+  }    
   else if (plotName == SENSORDEPTH_PLOTNAME) {
     plotDraft_ = set;
   }
+  else if (plotName == SENSORDEPTH_ORIG_PLOTNAME) {
+    plotDraftOrig_ = set;
+  }  
   else if (plotName == ATTITUDE_PLOTNAME) {
     plotRoll_ = set;
     plotPitch_ = set;
@@ -340,21 +363,21 @@ int Backend::init_globals(void) {
   editMode_ = Pick;
   modeSetInterval_ = false;
   plotTint_ = true;
-  plotTintOrg_ = true;
+  plotTintOrig_ = true;
   plotLon_ = true;
-  plotLonOrg_ = true;
+  plotLonOrig_ = true;
   plotLonDr_ = false;
   plotLat_ = true;
-  plotLatOrg_ = true;
+  plotLatOrig_ = true;
   plotLatDr_ = false;
   plotSpeed_ = true;
-  plotSpeedOrg_ = true;
+  plotSpeedOrig_ = true;
   plotSmg_ = true;
   plotHeading_ = true;
-  plotHeadingOrg_ = true;
+  plotHeadingOrig_ = true;
   plotCmg_ = true;
   plotDraft_ = true;
-  plotDraftOrg_ = true;
+  plotDraftOrig_ = true;
   plotDraftDr_ = false;
   plotRoll_ = false;
   plotPitch_ = false;
@@ -4042,13 +4065,13 @@ int Backend::plot_all(void) {
     for (int i = currentId_ + 1; i < currentId_ + nPlot_; i++) {
       tint_min = MIN(ping_[i].tint, tint_min);
       tint_max = MAX(ping_[i].tint, tint_max);
-      if (plotTintOrg_) {
+      if (plotTintOrig_) {
 	tint_min = MIN(ping_[i].tint_org, tint_min);
 	tint_max = MAX(ping_[i].tint_org, tint_max);
       }
       lon_min = MIN(ping_[i].lon, lon_min);
       lon_max = MAX(ping_[i].lon, lon_max);
-      if (plotLonOrg_) {
+      if (plotLonOrig_) {
 	lon_min = MIN(ping_[i].lon_org, lon_min);
 	lon_max = MAX(ping_[i].lon_org, lon_max);
       }
@@ -4058,7 +4081,7 @@ int Backend::plot_all(void) {
       }
       lat_min = MIN(ping_[i].lat, lat_min);
       lat_max = MAX(ping_[i].lat, lat_max);
-      if (plotLatOrg_) {
+      if (plotLatOrig_) {
 	lat_min = MIN(ping_[i].lat_org, lat_min);
 	lat_max = MAX(ping_[i].lat_org, lat_max);
       }
@@ -4068,7 +4091,7 @@ int Backend::plot_all(void) {
       }
       speed_min = MIN(ping_[i].speed, speed_min);
       speed_max = MAX(ping_[i].speed, speed_max);
-      if (plotSpeedOrg_) {
+      if (plotSpeedOrig_) {
 	speed_min = MIN(ping_[i].speed_org, speed_min);
 	speed_max = MAX(ping_[i].speed_org, speed_max);
       }
@@ -4078,7 +4101,7 @@ int Backend::plot_all(void) {
       }
       heading_min = MIN(ping_[i].heading, heading_min);
       heading_max = MAX(ping_[i].heading, heading_max);
-      if (plotHeadingOrg_) {
+      if (plotHeadingOrig_) {
 	heading_min = MIN(ping_[i].heading_org, heading_min);
 	heading_max = MAX(ping_[i].heading_org, heading_max);
       }
@@ -4088,7 +4111,7 @@ int Backend::plot_all(void) {
       }
       draft_min = MIN(ping_[i].draft, draft_min);
       draft_max = MAX(ping_[i].draft, draft_max);
-      if (plotDraftOrg_) {
+      if (plotDraftOrig_) {
 	draft_min = MIN(ping_[i].draft_org, draft_min);
 	draft_max = MAX(ping_[i].draft_org, draft_max);
       }
@@ -4662,7 +4685,7 @@ int Backend::plot_tint(int iplot) {
   const double yscale = plot_[iplot].yscale;
 
   /* plot original expected time data */
-  if (plotTintOrg_) {
+  if (plotTintOrig_) {
     int tint_x1 = ixmin + xscale * (ping_[currentId_].file_time_d - xmin);
     int tint_y1 = iymin + yscale * (ping_[currentId_].tint_org - ymin);
     for (int i = currentId_ + 1; i < currentId_ + nPlot_; i++) {
@@ -4725,7 +4748,7 @@ int Backend::plot_lon(int iplot) {
   const double yscale = plot_[iplot].yscale;
 
   /* plot original longitude data */
-  if (plotLonOrg_) {
+  if (plotLonOrig_) {
     int lon_x1 = ixmin + xscale * (ping_[currentId_].file_time_d - xmin);
     int lon_y1 = iymin + yscale * (ping_[currentId_].lon_org - ymin);
     for (int i = currentId_ + 1; i < currentId_ + nPlot_; i++) {
@@ -4815,7 +4838,7 @@ int Backend::plot_lat(int iplot) {
   const double yscale = plot_[iplot].yscale;
 
   /* plot original latitude data */
-  if (plotLatOrg_) {
+  if (plotLatOrig_) {
     int lat_x1 = ixmin + xscale * (ping_[currentId_].file_time_d - xmin);
     int lat_y1 = iymin + yscale * (ping_[currentId_].lat_org - ymin);
     for (int i = currentId_ + 1; i < currentId_ + nPlot_; i++) {
@@ -4903,7 +4926,7 @@ int Backend::plot_speed(int iplot) {
   const double yscale = plot_[iplot].yscale;
 
   /* plot original speed data */
-  if (plotSpeedOrg_) {
+  if (plotSpeedOrig_) {
     int speed_x1 = ixmin + xscale * (ping_[currentId_].file_time_d - xmin);
     int speed_y1 = iymin + yscale * (ping_[currentId_].speed - ymin);
     for (int i = currentId_ + 1; i < currentId_ + nPlot_; i++) {
@@ -4978,7 +5001,7 @@ int Backend::plot_heading(int iplot) {
   const double yscale = plot_[iplot].yscale;
 
   /* plot original heading data */
-  if (plotHeadingOrg_) {
+  if (plotHeadingOrig_) {
     int heading_x1 = ixmin + xscale * (ping_[currentId_].file_time_d - xmin);
     int heading_y1 = iymin + yscale * (ping_[currentId_].heading - ymin);
     for (int i = currentId_ + 1; i < currentId_ + nPlot_; i++) {
@@ -5056,7 +5079,7 @@ int Backend::plot_draft(int iplot) {
   const double yscale = plot_[iplot].yscale;
 
   /* plot original draft data */
-  if (plotDraftOrg_) {
+  if (plotDraftOrig_) {
     int draft_x1 = ixmin + xscale * (ping_[currentId_].file_time_d - xmin);
     int draft_y1 = iymin + yscale * (ping_[currentId_].draft - ymin);
     for (int i = currentId_ + 1; i < currentId_ + nPlot_; i++) {
@@ -5743,4 +5766,14 @@ void Backend::onInterpolateRepeat(void) {
   plot_all();
   
   swathPixmapImage_->update();  
+}
+
+void Backend::onPixmapImageResize(int width, int height) {
+  qDebug() << "onPixmapImageResize(): width=" << width
+	   << ", height=" << height;
+
+  xScale_ = (double )width / canvasPixmap_->width();
+  yScale_ = (double )height / canvasPixmap_->height();
+  qDebug() << "xScale_: " << xScale_ << ", yScale_: " << yScale_;
+  
 }
