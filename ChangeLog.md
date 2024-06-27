@@ -22,6 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.2beta07    June 27, 2024
 - Version 5.8.2beta06    June 13, 2024
 - Version 5.8.2beta05    May 19, 2024
 - Version 5.8.2beta04    May 13, 2024
@@ -38,6 +39,23 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.2beta07 (June 27, 2024)
+
+Mbm_trnplot: Added extraction of TRN localization estimates in longitude and latitude.
+
+Mbtrnpp: Now includes longitude and latitude values of TRN localization estimates into
+the log file (in addition to the coordinate reference system used for the reference 
+map).
+
+Mbgrdviz: Fixed importation of non-csv raw site files.
+
+Formats 88 and 89 (MBF_RESON7KR and MBF_RESON7K3): Change to allow pings to be valid if
+a BeamGeometry record has been read earlier in the file (as opposed to having a 
+BeamGeometry record for every ping).
+
+Formats 88 and 89 (MBF_RESON7KR and MBF_RESON7K3): Fixed problem calculating sample times
+for attitude data in s7k 1016 Attitude data records.
 
 #### 5.8.2beta06 (June 13, 2024)
 

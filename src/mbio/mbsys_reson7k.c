@@ -7671,7 +7671,7 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
 
     for (int iatt=0; iatt < attitude->n; iatt++) {
       /* get time */
-      time_d[iatt] = store->time_d + attitude->delta_time[iatt];
+      time_d[iatt] = store->time_d + 0.001 * attitude->delta_time[iatt];
       mb_get_date(verbose, time_d[iatt], &(time_i[7 * iatt]));
 
       /* get interpolated nav heading and speed  */

@@ -3551,28 +3551,37 @@ int main(int argc, char **argv) {
         time_d_old = time_d;
       }
 
+if (error == MB_ERROR_NO_ERROR)
       /* now loop over beams */
       if (error == MB_ERROR_NO_ERROR && (nread - 1) % decimate == 0)
         for (int j = beam_start; j <= beam_end; j++) {
           /* check beam status */
           beam_status = MB_SUCCESS;
-          if (check_bath && check_values == MBLIST_CHECK_ON && !mb_beam_ok(beamflag[j]))
+          if (check_bath && check_values == MBLIST_CHECK_ON && !mb_beam_ok(beamflag[j])) {
             beam_status = MB_FAILURE;
-          else if (check_bath && check_values == MBLIST_CHECK_ON_NULL && beamflag[j] == MB_FLAG_NULL)
+          }
+          else if (check_bath && check_values == MBLIST_CHECK_ON_NULL && beamflag[j] == MB_FLAG_NULL) {
             beam_status = MB_FAILURE;
-          if (check_amp && check_values == MBLIST_CHECK_ON && !mb_beam_ok(beamflag[j]))
+          }
+          if (check_amp && check_values == MBLIST_CHECK_ON && !mb_beam_ok(beamflag[j])) {
             beam_status = MB_FAILURE;
-          else if (check_amp && check_values == MBLIST_CHECK_ON_NULL && beamflag[j] == MB_FLAG_NULL)
+          }
+          else if (check_amp && check_values == MBLIST_CHECK_ON_NULL && beamflag[j] == MB_FLAG_NULL) {
             beam_status = MB_FAILURE;
-          if (check_ss && j != beam_vertical)
+          }
+          if (check_ss && j != beam_vertical) {
             beam_status = MB_FAILURE;
-          else if (check_ss && j == beam_vertical)
+          }
+          else if (check_ss && j == beam_vertical) {
             if (ss[pixel_vertical] <= MB_SIDESCAN_NULL)
               beam_status = MB_FAILURE;
-          if (use_time_interval && first)
+          }
+          if (use_time_interval && first) {
             beam_status = MB_FAILURE;
-          if (check_nav && (navlon == 0.0 || navlat == 0.0))
+          }
+          if (check_nav && (navlon == 0.0 || navlat == 0.0)) {
             beam_status = MB_FAILURE;
+          }
 
           /* print out good beams */
           if (beam_status == MB_SUCCESS) {
