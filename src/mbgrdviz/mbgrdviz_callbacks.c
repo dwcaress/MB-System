@@ -2207,10 +2207,12 @@ int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr) {
           nget = sscanf(buffer, "## Site File Version %d.%d", &site_version_major, &site_version_minor);
         }
         else if (buffer[0] != '#') {
-          if (site_version_major > 1) {
-            nget = sscanf(buffer, "%s,%s,%lf,%d,%d,%[^\n]", 
+          if (site_version_major > 1 || (site_version_major == 0 && strchr(buffer, ',') != NULL)) {
+            nget = sscanf(buffer, "%[^','],%[^','],%lf,%d,%d,%[^\n]", 
                         lonstring, latstring, &sitetopo[nsite],
                         &sitecolor[nsite], &sitesize[nsite], sitename[nsite]);
+            if (nget >= 2)
+            	site_version_major = 2;
           }
           else {
             nget = sscanf(buffer, "%s %s %lf %d %d %[^\n]", 
@@ -2253,13 +2255,13 @@ int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr) {
 
         /* output some debug values */
         if (verbose > 0 && site_ok) {
-          fprintf(stderr, "\ndbg5  Site point read in program <%s>\n", program_name);
-          fprintf(stderr, "dbg5       site[%d]: %f %f %f  %d %d  %s\n", nsite, sitelon[nsite], sitelat[nsite],
+          fprintf(stderr, "\nSite point read in program <%s>\n", program_name);
+          fprintf(stderr, "     site[%d]: %f %f %f  %d %d  %s\n", nsite, sitelon[nsite], sitelat[nsite],
                   sitetopo[nsite], sitecolor[nsite], sitesize[nsite], sitename[nsite]);
         }
-        else if (verbose > 0 && !site_ok) {
-          fprintf(stderr, "\ndbg5  Unintelligible line read from site file in program <%s>\n", program_name);
-          fprintf(stderr, "dbg5       buffer:  %s\n", buffer);
+        else if (verbose > 0 && !site_ok && buffer[0] != '#') {
+          fprintf(stderr, "\nUnintelligible line read from site file in program <%s>\n", program_name);
+          fprintf(stderr, "     buffer:  %s\n", buffer);
         }
 
         strncpy(buffer, "", sizeof(buffer));
