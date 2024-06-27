@@ -19,9 +19,21 @@ Window {
     id: applicationWindow
     objectName: 'mainWindow'
     visible: true
-    width: 1000
+    width: 1200
     height: 880
     title: 'qt-mbnavedit-2'
+
+    Component.onCompleted: {
+        console.log('*** editModes.checkedButton: ', editModes.checkedButton.objectName)
+        // Syncrhonze GUI state with C++ backend
+        backend.onEditModeChanged(editModes.checkedButton.objectName);
+
+        for (var i = 0; i < plotButtons.buttons.length; ++i) {
+            console.log('plot button: ', plotButtons.buttons[i])
+            backend.setPlot(plotButtons.buttons[i].objectName, plotButtons.buttons[i].checked)
+        }
+
+    }
 
     // Interface to C++ Backend methods
     required property var backend
@@ -47,14 +59,34 @@ Window {
         }
 
         Menu {
-            title: qsTr('View')
+            title: qsTr('Graphs')
+            Action { text: qsTr('Time interval'); checkable: true }
+            Action { text: qsTr('Longitude'); checkable: true }
+            Action { text: qsTr('Latitude'); checkable: true }
+            Action { text: qsTr('Speed'); checkable: true }
+
+            Action { text: qsTr('     Original data'); checkable: true; checked: true }
+            Action { text: qsTr('     Show speed made good'); checkable: true }
+            Action { text: qsTr('     Use speed made good'); checkable: true }
+
+
+
+            Action { text: qsTr('Heading'); checkable: true }
+
+            Action { text: qsTr('     Original data'); checkable: true }
+            Action { text: qsTr('     Show course made good'); checkable: true }
+            Action { text: qsTr('     Use course made good'); checkable: true }
+
+
+
+            Action { text: qsTr('Sensor depth'); checkable: true }
+            Action { text: qsTr('Roll, pitch, heave'); checkable: true }
+
+
             Action { text: qsTr('Zoom in') ; checkable: true; ActionGroup.group: viewActions;
                 onTriggered: { swathMouseArea.cursorShape=Qt.SizeFDiagCursor }}
             Action { text: qsTr('Zoom out') ; checkable: true; ActionGroup.group: viewActions ;
                 onTriggered: { swathMouseArea.cursorShape= Qt.SizeBDiagCursor }}
-            Action { text: qsTr('Point') ; checkable: true; ActionGroup.group: viewActions;
-                onTriggered: { swathMouseArea.cursorShape=Qt.ArrowCursor }}
-
         }
     }
 
@@ -70,12 +102,13 @@ Window {
 
             ButtonGroup {
                 id: editModes
+                exclusive: true
             }
 
             RadioButton {
                 objectName: 'pickMode'
-                checked: true
                 text: qsTr('Pick')
+                checked: true
                 ButtonGroup.group: editModes
                 onToggled: { backend.onEditModeChanged(objectName); resetInterval.enabled = false }
             }
@@ -133,9 +166,9 @@ Window {
                 id: interpolateRep
                 text: 'Interp Rep'
                 onClicked: { backend.onInterpolateRepeat() }
-            }	
-	}
-	
+            }
+        }
+
         Row {
             Button {
                 id: swathStart
@@ -160,145 +193,263 @@ Window {
                 text: 'End'
                 onClicked: { backend.onGoEnd() }
             }
-
-
-        }
-        Row {
-
-            CheckBox {
-                objectName: 'timeInt'
-                checked: true
-                text: qsTr('Time interval')
-                onToggled: backend.setPlot(objectName, checked)
-            }
-            CheckBox {
-                objectName: 'lon'
-                checked: true
-                text: qsTr('Longitude')
-                onToggled: backend.setPlot(objectName, checked)
-            }
-            CheckBox {
-                objectName: 'lat'
-                checked: true
-                text: qsTr('Latitude')
-                onToggled: backend.setPlot(objectName, checked)
-            }
-            CheckBox {
-                objectName: 'speed'
-                checked: true
-                text: qsTr('Speed')
-                onToggled: backend.setPlot(objectName, checked)
-            }
-            CheckBox {
-                objectName: 'heading'
-                checked: true
-                text: qsTr('Heading')
-                onToggled: backend.setPlot(objectName, checked)
-            }
-            CheckBox {
-                objectName: 'sensorDepth'
-                checked: true
-                text: qsTr('Sonar depth')
-                onToggled: backend.setPlot(objectName, checked)
-            }
-            CheckBox {
-                objectName: 'attitude'
-                checked: false
-                text: qsTr('Roll,pitch,heave')
-                onToggled: backend.setPlot(objectName, checked)
-            }
         }
 
 
+        RowLayout {
+
+            Column {
+                id: plotSelectColumn
+                anchors.top: parent.top
+
+                Label {
+                    bottomPadding: 10
+                    text: qsTr('PLOTS')
+                }
+
+                ButtonGroup {
+                    id: plotButtons
+                    exclusive: false
+                }
+
+                CheckBox {
+                    objectName: 'timeInt'
+                    checked: true
+                    text: qsTr('Time interval')
+                    onToggled: backend.setPlot(objectName, checked)
+                    ButtonGroup.group: plotButtons
+                }
+
+                CheckBox {
+                    objectName: 'timeIntOrig'
+                    text: qsTr('Original data')
+                    checked: true
+                    leftPadding: indicator.width
+                    onToggled: backend.setPlot(objectName, checked)
+                    ButtonGroup.group: plotButtons
+
+                }
+
+                CheckBox {
+                    objectName: 'lon'
+                    checked: true
+                    text: qsTr('Longitude')
+                    onToggled: backend.setPlot(objectName, checked)
+                    ButtonGroup.group: plotButtons
+
+                }
+
+                CheckBox {
+                    objectName: 'lonOrig'
+                    checked: true
+                    text: qsTr('Original')
+                    leftPadding: indicator.width
+                    onToggled: backend.setPlot(objectName, checked)
+                    ButtonGroup.group: plotButtons
+                }
 
 
-        ScrollView {
-            implicitWidth: Window.window.width
-            implicitHeight: Window.window.height
-            contentHeight: 5000
-            clip: true
+                CheckBox {
+                    objectName: 'lat'
+                    checked: true
+                    text: qsTr('Latitude')
+                    onToggled: backend.setPlot(objectName, checked)
+                    ButtonGroup.group: plotButtons
+                }
 
-            ColumnLayout {
+                CheckBox {
+                    objectName: 'latOrig'
+                    checked: true
+                    text: qsTr('Original')
+                    leftPadding: indicator.width
+                    onToggled: backend.setPlot(objectName, checked)
+                    ButtonGroup.group: plotButtons
+                }
 
-                Rectangle {
-                    id: rectangle
-                    implicitWidth: Window.window.width * 0.9
-                    implicitHeight:Window.window.height * 5
+                CheckBox {
+                    objectName: 'speed'
+                    checked: true
+                    text: qsTr('Speed')
+                    onToggled: backend.setPlot(objectName, checked)
+                    ButtonGroup.group: plotButtons
+                }
 
-                    PixmapImage {
-                        id: swathPixmap
-                        objectName: 'swathPixmapObj'
-                        width: rectangle.width
-                        height: 30000
-                        anchors.fill: parent
-                    }
+                CheckBox {
+                    objectName: 'speedOrig'
+                    checked: true
+                    text: qsTr('Original')
+                    leftPadding: indicator.width
+                    onToggled: backend.setPlot(objectName, checked)
+                    ButtonGroup.group: plotButtons
+                }
+
+                CheckBox {
+                    objectName: 'speedMadeGood'
+                    text: qsTr('Speed made good')
+                    leftPadding: indicator.width
+                    onToggled: backend.setPlot(objectName, checked)
+                    Component.onCompleted: { checked = true }
+                    ButtonGroup.group: plotButtons
+                }
 
 
-                    MouseArea {
-                        id: swathMouseArea
-                        objectName: 'swathMouseAreaObj'
-                        // NOTE: QML-defined MouseArea must be EXACTLY
-			// fitted on PixmapImage to ensure correct
-			// mapping and scaling of mouse events			
-                        anchors.fill: swathPixmap
+                CheckBox {
+                    objectName: 'heading'
+                    checked: true
+                    text: qsTr('Heading')
+                    onToggled: backend.setPlot(objectName, checked)
+                    ButtonGroup.group: plotButtons
+                }
 
-                        hoverEnabled: true
-                        acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-			preventStealing: true
-			
-                        onClicked: (mouse)=> {
-                                       if (mouse.button == Qt.LeftButton) {
-                                           // console.log('left clicked');
-                                           backend.onLeftButtonClicked(mouse.x,
-                                                                       mouse.y);
+                CheckBox {
+                    objectName: 'headingOrig'
+                    checked: true
+                    text: qsTr('Original')
+                    leftPadding: indicator.width
+                    onToggled: backend.setPlot(objectName, checked)
+                    ButtonGroup.group: plotButtons
+                }
+
+                CheckBox {
+                    objectName: 'headingMadeGood'
+                    text: qsTr('Course made good')
+                    leftPadding: indicator.width
+                    onToggled: backend.setPlot(objectName, checked)
+                    ButtonGroup.group: plotButtons
+                }
+
+                CheckBox {
+                    objectName: 'sensorDepth'
+                    checked: true
+                    text: qsTr('Sonar depth')
+                    onToggled: backend.setPlot(objectName, checked)
+                    ButtonGroup.group: plotButtons
+                }
+
+                CheckBox {
+                    objectName: 'sensorDepthOrig'
+                    checked: true
+                    text: qsTr('Original')
+                    leftPadding: indicator.width
+                    onToggled: backend.setPlot(objectName, checked)
+                    ButtonGroup.group: plotButtons
+                }
+
+                CheckBox {
+                    objectName: 'attitude'
+                    checked: false
+                    text: qsTr('Roll,pitch,heave')
+                    onToggled: backend.setPlot(objectName, checked)
+                    ButtonGroup.group: plotButtons
+                }
+            }
+
+
+
+            ScrollView {
+                // implicitWidth: Window.window.width
+                width: 800
+                implicitHeight: Window.window.height
+                contentHeight: 5000
+                clip: true
+                anchors.left: plotSelectColumn.right
+
+                ColumnLayout {
+
+                    Rectangle {
+                        id: rectangle
+                        implicitWidth: Window.window.width * 0.9
+                        implicitHeight:Window.window.height * 5
+
+                        border.width: 3
+                        border.color: 'black'
+
+                        PixmapImage {
+                            id: swathPixmap
+                            objectName: 'swathPixmapObj'
+                            width: rectangle.width
+                            height: 30000
+                            anchors.fill: parent
+                            anchors.margins: 3
+                        }
+
+
+                        MouseArea {
+                            id: swathMouseArea
+                            objectName: 'swathMouseAreaObj'
+                            // NOTE: QML-defined MouseArea must be EXACTLY
+                            // fitted on PixmapImage to ensure correct
+                            // mapping and scaling of mouse events
+                            anchors.fill: swathPixmap
+
+                            hoverEnabled: true
+                            acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+                            preventStealing: true
+
+                            // mouseArea and pixmapImage are aligned, so notify backend of mouseArea
+                            // size change, so backend maintains proper scaling/mouse-event mapping
+                            onWidthChanged: { console.log('mouseArea width = ', swathMouseArea.width);
+                                backend.onPixmapImageResize(swathMouseArea.width, swathMouseArea.height) }
+                            onHeightChanged: { console.log('mouseArea height: ', swathMouseArea.height)
+                                backend.onPixmapImageResize(swathMouseArea.width, swathMouseArea.height)}
+
+                            onClicked: (mouse)=> {
+                                           if (mouse.button == Qt.LeftButton) {
+                                               // console.log('left clicked');
+                                               backend.onLeftButtonClicked(mouse.x,
+                                                                           mouse.y);
+                                           }
+                                           else if (mouse.button == Qt.RightButton) {
+                                               // console.log('right clicked');
+                                               backend.onRightButtonClicked(mouse.x,
+                                                                            mouse.y);
+                                           }
+                                           else if (mouse.button == Qt.MiddleButton) {
+                                               backend.onMiddleButtonClicked(mouse.x, mouse.y)
+                                           }
                                        }
-                                       else if (mouse.button == Qt.RightButton) {
-                                           // console.log('right clicked');
-                                           backend.onRightButtonClicked(mouse.x,
-                                                                        mouse.y);
-                                       }
-                                       else if (mouse.button == Qt.MiddleButton) {
-                                           backend.onMiddleButtonClicked(mouse.x, mouse.y)
-                                       }
-                                   }
 
-                        onPressed: (mouse) => {
-                                       // console.log('Mouse pressed at ',
-                                          //         mouse.x, ', ', mouse.y);
-                                       console.log('button: ', mouse.button);
-                                       if (mouse.button == Qt.LeftButton) {
-                                           //   backend.onLeftMouseButtonDown(mouse.x, mouse.y)
+                            onPressed: (mouse) => {
+                                           // console.log('Mouse pressed at ',
+                                           //         mouse.x, ', ', mouse.y);
+                                           console.log('button: ', mouse.button);
+                                           if (mouse.button == Qt.LeftButton) {
+                                               //   backend.onLeftMouseButtonDown(mouse.x, mouse.y)
+                                           }
                                        }
-                                   }
 
-                        onReleased: (mouse) => {
-                                        // console.log('Mouse released at ',
-                                           //         mouse.x, ', ', mouse.y)
-                                        if (mouse.button == Qt.LeftButton) {
-                                            // backend.onLeftMouseButtonUp(mouse.x, mouse.y)
+                            onReleased: (mouse) => {
+                                            // console.log('Mouse released at ',
+                                            //         mouse.x, ', ', mouse.y)
+                                            if (mouse.button == Qt.LeftButton) {
+                                                // backend.onLeftMouseButtonUp(mouse.x, mouse.y)
+                                            }
                                         }
-                                    }
 
-                        onPositionChanged: (mouse) => {
-                                               /* ****
+                            onPositionChanged: (mouse) => {
+                                                   /* ****
                                                console.log('Mouse moved at ',
                                                           mouse.x, ', ', mouse.y);
                                                 console.log('pressed: ', pressed);
                                                console.log('button: ', mouse.button);
                                                console.log('buttons: ', mouse.buttons);
                                                **** */
-                                               if (mouse.buttons == Qt.LeftButton) {
-                                                   backend.onMouseMoved(mouse.x, mouse.y)
+                                                   if (mouse.buttons == Qt.LeftButton) {
+                                                       backend.onMouseMoved(mouse.x, mouse.y)
+                                                   }
                                                }
-                                           }
+                        }
+
+
                     }
 
 
                 }
-
             }
         }
     }
+
+
     MessageDialog {
         id: quitDialog
         title: 'Quit?'
