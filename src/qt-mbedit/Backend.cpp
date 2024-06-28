@@ -116,25 +116,25 @@ bool Backend::initialize(QObject *loadedRoot, int argc, char **argv) {
   yScale_ = swathPixmapImage_->height() / canvasPixmap_->height();  
   qDebug() << "xScale_: " << xScale_ << ", yScale_: " << yScale_;
   
-  char *swathFile = nullptr;
+  swathFileName_ = nullptr;
   // Parse command line options
   for (int i = 1; i < argc; i++) {
     // Input swath file is last argument
     if (i == argc-1) {
-      swathFile = argv[i];
+      swathFileName_ = argv[i];
     }
   }
 
-  if (swathFile) {
-    char *fullPath = realpath(swathFile, nullptr);
+  if (swathFileName_) {
+    char *fullPath = realpath(swathFileName_, nullptr);
     if (!fullPath) {
-      qWarning() << "swath file \"%s\" not found: " <<  swathFile;
+      qWarning() << "swath file \"%s\" not found: " <<  swathFileName_;
       return false;
     }
     
     QString urlString("file://" + QString(fullPath));    
     if (!processSwathFile(urlString)) {
-      qWarning() << "Couldn't process " << swathFile;
+      qWarning() << "Couldn't process " << swathFileName_;
     }
   }
   else {
@@ -148,6 +148,11 @@ bool Backend::initialize(QObject *loadedRoot, int argc, char **argv) {
 
 void Backend::onMainWindowDestroyed() {
   qDebug() << "*** onMainWindowDestroyed() *****";
+
+  mbedit_action_close(buffSize_, &nDumped_, &nLoaded_, &nBuffer_,
+		      &nGood_, &iCurrent_);
+  
+
 }
 
 
@@ -267,9 +272,9 @@ bool Backend::plotSwath(void) {
 bool Backend::processSwathFile(QUrl fileUrl) {
 
   qDebug() << "processSwathFile() " <<  fileUrl;
-  char *swathFile = strdup(fileUrl.toLocalFile().toLatin1().data());  
-  if (mbedit_get_format(swathFile, &format_) != MB_SUCCESS) {
-    std::cerr << "Couldn't determine sonar format of " << swathFile
+  swathFileName_ = strdup(fileUrl.toLocalFile().toLatin1().data());  
+  if (mbedit_get_format(swathFileName_, &format_) != MB_SUCCESS) {
+    std::cerr << "Couldn't determine sonar format of " << swathFileName_
 	      << "\n";
 
     return false;
@@ -279,11 +284,9 @@ bool Backend::processSwathFile(QUrl fileUrl) {
   int fileID = 0;
   int numFiles = 1;
   int saveMode = 0;
-  int nDumped = 0;
-  int nLoaded = 0;
   
   // Open swath file and plot data
-  int status = mbedit_action_open(swathFile,
+  int status = mbedit_action_open(swathFileName_,
 				  format_,
 				  fileID, numFiles, saveMode,
 				  outMode_, canvasPixmap_->width(),
@@ -292,7 +295,7 @@ bool Backend::processSwathFile(QUrl fileUrl) {
 				  showFlagSounding_,
 				  showFlagProfile_, plotAncillData_,
 				  &buffSize_, &buffSizeMax_,
-				  &holdSize_, &nDumped, &nLoaded,
+				  &holdSize_, &nDumped_, &nLoaded_,
 				  &nBuffer_, &nGood_,
 				  &iCurrent_, &mnPlot_);
 
@@ -584,3 +587,13 @@ bool Backend::edit(double x, double y) {
 
 }
 
+
+void Backend::onPixmapImageResize(int width, int height) {
+  qDebug() << "onPixmapImageResize(): width=" << width
+	   << ", height=" << height;
+
+  xScale_ = (double )width / canvasPixmap_->width();
+  yScale_ = (double )height / canvasPixmap_->height();
+  qDebug() << "xScale_: " << xScale_ << ", yScale_: " << yScale_;
+  
+}

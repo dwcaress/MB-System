@@ -127,7 +127,7 @@ protected:
   void *dummy_;
 
   /// Input swath file name
-  char inputFilename_[256];
+  char *swathFileName_ = nullptr;
 
   /// Pixmap representation of swath data graph
   QPixmap *canvasPixmap_;
@@ -161,10 +161,13 @@ protected:
   MouseEditMode editMode_;
 
   /// What do the following members mean?
+  int nDumped_ = 0;
+  int nLoaded_ = 0;
   int nGood_;     /// ????
   int nBuffer_;   /// ???
   int iCurrent_;  /// ???
   int mnPlot_;    /// ???
+	     
 
 
 public slots:
@@ -192,6 +195,9 @@ public slots:
   void onLeftMouseButtonUp(double x, double y);
   void onMouseMove(double x, double y);
 
+  /// Invoked by QML when resize occurs; sets xScale_ and yScale member values
+  void onPixmapImageResize(int width, int height);
+  
   /// Invoked when main window is destroyed
   void onMainWindowDestroyed(void);
 
