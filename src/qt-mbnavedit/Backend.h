@@ -156,9 +156,6 @@ protected:
   /// Process specified swath file
   Q_INVOKABLE bool processSwathFile(QUrl fileUrl);
 
-  /// Plot current swath file
-  bool plotSwath(void);
-
   /// Parse input data file(s)
   void parseInputDataList(char *file, int format);
   
@@ -196,9 +193,6 @@ protected:
 
   /// painter_ draws into canvasPixmap_
   QPainter *painter_;
-
-  /// Indicates if data is plotted
-  bool dataPlotted_;
 
   
   /* ------- FORMER extern mbnavedit global variables ------- */

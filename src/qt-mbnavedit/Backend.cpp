@@ -90,8 +90,6 @@ Backend::Backend(int argc, char **argv) {
   nDumpTotal_ = 0;
   firstRead_ = true;
 
-  dataPlotted_ = false;
-
   const int width = DEFAULT_PLOT_WIDTH;
   const int height = NUMBER_PLOTS_MAX * DEFAULT_PLOT_HEIGHT;
   canvasPixmap_ = new QPixmap(width, height);
@@ -134,42 +132,17 @@ bool Backend::initialize(QObject *loadedRoot, int argc, char **argv) {
   yScale_ = swathPixmapImage_->height() / canvasPixmap_->height();
   
   qDebug() << "init: xScale_: " << xScale_ << ", yScale_: " << yScale_;
+
   
-  char *swathFile = nullptr;
-  // Parse command line options
-  for (int i = 1; i < argc; i++) {
-    // Input swath file is last argument
-    if (i == argc-1) {
-      swathFile = argv[i];
-    }
-  }
 
-  if (swathFile) {
-    char *fullPath = realpath(swathFile, nullptr);
-    if (!fullPath) {
-      qWarning() << "swath file \"%s\" not found: " <<  swathFile;
-      return false;
-    }
-
-    bool inputSpecd = false;
+  bool inputSpecd = false;
     
-    init(argc, argv, &inputSpecd);
+  init(argc, argv, &inputSpecd);
 
-    // Update GUI
-    swathPixmapImage_->update();
+  // Update GUI
+  swathPixmapImage_->update();
 
-    dataPlotted_ = true;
-    return true;
-    
-    /* ***
-    QString urlString("file://" + QString(fullPath));
-    if (!processSwathFile(urlString)) {
-      qWarning() << "Couldn't process_ " << swathFile;
-    }
-    *** */
-
-  }
-  else {
+  if (argc == 1) {
     plotTest();
   }
 
@@ -184,30 +157,13 @@ void Backend::onMainWindowDestroyed() {
   close_file();
 }
 
-
-bool Backend::plotSwath(void) {
-  if (!dataPlotted_) {
-    std::cerr << "No data plotted yet\n";
-    return false;
-  }
-
-  int status = MB_SUCCESS;
-
-  if (status != MB_SUCCESS) {
-    std::cerr << "mbedit_action_plot() failed\n";
-    return false;
-  }
-
-  // Update GUI
-  swathPixmapImage_->update();
-
-  return true;
-}
-
-
 bool Backend::processSwathFile(QUrl fileUrl) {
 
   qDebug() << "processSwathFile() " <<  fileUrl;
+
+  // Close any open file
+  close_file();
+  
   char *swathFile = strdup(fileUrl.toLocalFile().toLatin1().data());
   int format_;
   int format_Err;
@@ -232,7 +188,6 @@ bool Backend::processSwathFile(QUrl fileUrl) {
   // Update GUI
   swathPixmapImage_->update();
 
-  dataPlotted_ = true;
   return true;
 }
 
@@ -925,6 +880,11 @@ int Backend::close_file(void) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
 
+  if (!imbioPtr_) {
+    // No files open?
+    return MB_SUCCESS;
+  }
+    
   char msg[100];
   
   /* reset message */
@@ -4174,7 +4134,7 @@ int Backend::plot_all(void) {
     heave_max = 1.1 * MAX(fabs(heave_min), fabs(heave_max));
     heave_min = -heave_max;
 
-    /* make sure lon and lat scaled the same if both plotted */
+    // make sure lon and lat scaled the same if both plotted
     if (plotLon_ && plotLat_) {
       if ((lon_max - lon_min) > (lat_max - lat_min)) {
 	center = 0.5 * (lat_min + lat_max);
