@@ -14,12 +14,18 @@
 #include "PixmapImage.h"
 #include "Emitter.h"
 
+Backend *theBackend_ = nullptr;
+
 void interruptHandler(int sig) {
   // std::cerr << "interruptHandler(): sig " << sig << "\n";
   fprintf(stdout, "interruptHandler(): got sig %d\n", sig);
   fflush(stdout);
-  write(1,"Hello World!", 12); 
-  qWarning() << "In interrupt handler";
+  write(1,"Hello World!", 12);
+  
+  if (theBackend_) {
+    theBackend_->onMainWindowDestroyed();
+  }
+  
   exit(1);
 }
 
@@ -39,6 +45,7 @@ int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
 
     Backend backend(argc, argv);
+    theBackend_ = &backend;
     
     QQmlApplicationEngine engine;
     

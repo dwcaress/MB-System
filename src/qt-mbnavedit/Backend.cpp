@@ -179,7 +179,9 @@ bool Backend::initialize(QObject *loadedRoot, int argc, char **argv) {
 
 
 void Backend::onMainWindowDestroyed() {
-  qDebug() << "*** onMainWindowDestroyed() *****";
+  qDebug() << "*** onMainWindowDestroyed(); close files *****";
+  // Gracefully close open file(s)
+  close_file();
 }
 
 
@@ -620,11 +622,16 @@ int Backend::action_open(bool useprevious) {
   }
 
   /* if no data read show error dialog */
-  else
+  else {
+    /* ***
+    // Assume that error message already displayed -
+    // Don't overwrite those! 
     showError("No data were read from the input",
 	      "file. You may have specified an",
 	      "incorrect MB-System format id!");
-
+	      *** */
+  }
+  
   /* reset data_save */
   dataSave_ = false;
 
@@ -720,10 +727,10 @@ int Backend::open_file(bool useprevious) {
 
     /* if locked get lock info */
     if (error_ == MB_ERROR_FILE_LOCKED) {
-      // const int lock_status =
-      mb_pr_lockinfo(verbose_, ifile_, &locked, &lock_purpose, lock_program, lock_user, lock_cpu, lock_date, &error_);
+      int err;
+      mb_pr_lockinfo(verbose_, ifile_, &locked, &lock_purpose, lock_program, lock_user, lock_cpu, lock_date, &err);
 
-      sprintf(error1, "Unable to open input file:");
+      sprintf(error1, "Unable to open %s:", ifile_);
       sprintf(error2, "File locked by <%s> running <%s>", lock_user, lock_program);
       sprintf(error3, "on cpu <%s> at <%s>", lock_cpu, lock_date);
       fprintf(stderr, "\nUnable to open input file:\n");
@@ -918,8 +925,12 @@ int Backend::close_file(void) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
 
+  char msg[100];
+  
   /* reset message */
-  showMessage("MBedit is closing a data file...");
+  sprintf(msg, "%s is closing data files", programName_);
+  
+  showMessage(msg);
 
   /* close the files */
   int status = mb_close(verbose_, &imbioPtr_, &error_);
