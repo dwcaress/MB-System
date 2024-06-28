@@ -18,7 +18,7 @@ Window {
     id: applicationWindow
     objectName: 'mainWindow'
     visible: true
-    width: 1200
+    width: 1350
     height: 880
     title: 'qt-mbnavedit-2'
 
