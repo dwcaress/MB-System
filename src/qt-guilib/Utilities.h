@@ -5,7 +5,6 @@
 
 namespace mb_system {
 
-
   const int NMapColors = 11;
 
   /// Define Haxby colormap red components
@@ -34,11 +33,11 @@ namespace mb_system {
   /// Make lookup table
   void makeLookupTable(ColorMapScheme colorMap, vtkLookupTable *lut);
 
-  /// Lock MB-System file
-  bool mbLockFile(char *filename);
+  /// Lock MB-System swath file
+  bool lockSwathfile(char *filename, char *appName);
   
-  /// Unlock MB-System file
-  bool mbUnlockFile(char *filename);  
+  /// Unlock MB-System swath file
+  bool unlockSwathfile(char *filename, char *appName);  
 
 
   bool projTestUtil(char *msg);

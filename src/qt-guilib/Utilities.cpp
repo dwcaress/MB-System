@@ -5,6 +5,9 @@
 #include <vtkColorSeries.h>
 #include <vtkNamedColors.h>
 #include <vtkColorTransferFunction.h>
+#include "mb_status.h"
+#include "mb_define.h"
+#include "mb_process.h"
 #include "Utilities.h"
 
 const char *mb_system::colorMapSchemeName(mb_system::ColorMapScheme scheme) {
@@ -145,15 +148,46 @@ void mb_system::makeLookupTable(mb_system::ColorMapScheme colorScheme,
 };
 
 
-bool mb_system::mbLockFile(char *filename) {
-  std::cout << "mbLockFile() not yet implemented" << std::endl;
-  return true;
+bool mb_system::lockSwathfile(char *filename, char *appName) {
+  std::cout << "lockSwathfile()\n";
+  if (!filename) {
+
+    return false;
+  }
+
+  int error = 0;
+  int status = mb_pr_lockswathfile(0, filename,
+				   MBP_LOCK_EDITBATHY, appName, &error);
+
+  if (status == MB_SUCCESS) {
+    return true;
+  }
+  else {
+    std::cerr << "Error " << error << " from mb_pr_lockswathfile()\n";
+    return false;
+  }
 }
 
 
-bool mb_system::mbUnlockFile(char *filename) {
-  std::cout << "mbUnlockFile() not yet implemented" << std::endl;
-  return true;
+bool mb_system::unlockSwathfile(char *filename, char *appName) {
+  std::cout << "unlockSwathfile()\n";
+  if (!filename) {
+
+    return false;
+  }
+  
+  int error = 0;
+
+  int status = mb_pr_unlockswathfile(0, filename,
+				     MBP_LOCK_EDITBATHY, appName, &error);
+
+  if (status == MB_SUCCESS) {
+    return true;
+  }
+  else {
+    std::cerr << "Error " << error << " from mb_pr_unlockswathfile()\n";
+    return false;
+  }
 }
 
 
