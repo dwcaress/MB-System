@@ -14,12 +14,21 @@
 #include "PixmapImage.h"
 #include "Emitter.h"
 
+
+// Pointer to backend, to be used by signal handler 
+Backend *backend_ = nullptr;
+
 void interruptHandler(int sig) {
   // std::cerr << "interruptHandler(): sig " << sig << "\n";
   fprintf(stdout, "interruptHandler(): got sig %d\n", sig);
   fflush(stdout);
   write(1,"Hello World!", 12); 
   qWarning() << "In interrupt handler";
+
+  if (backend_) {
+    backend_->onMainWindowDestroyed();
+  }
+  
   exit(1);
 }
 
@@ -39,6 +48,9 @@ int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
 
     Backend backend(argc, argv);
+
+    // Save pointer in case needed by interrupt handler
+    backend_ = &backend;
     
     QQmlApplicationEngine engine;
     
