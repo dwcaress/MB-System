@@ -194,19 +194,19 @@ ApplicationWindow {
         width: 1000
 
         Label { text: "XTrack width (m) " + xtrackSlider.value.toFixed(0) }
-	Slider {
+        Slider {
             id: xtrackSlider
             objectName: "xTrackSliderObj"
             Layout.fillWidth: true
             from: 1
             to: 300
-	    value: 150
+            value: 150
             live: false  // only update value when button released
- 	    Component.onCompleted: { backend.onXtrackChanged(value) }
-	    onValueChanged: { console.log('xTrackSlider moved');
+            Component.onCompleted: { backend.onXtrackChanged(value) }
+            onValueChanged: { console.log('xTrackSlider moved');
                 backend.onXtrackChanged(value) }
         }
-	
+
         Label { text: "Pings shown " + pingsShownSlider.value.toFixed(0) }
         Slider {
             id: pingsShownSlider
@@ -214,14 +214,14 @@ ApplicationWindow {
             Layout.fillWidth: true
             from: 1
             to: 20
-	    value: 10
+            value: 10
             live: false  // only update value when button released
-	    Component.onCompleted: { backend.onPingsShownChanged(value) }
+            Component.onCompleted: { backend.onPingsShownChanged(value) }
             onValueChanged: { console.log('pingsShownSlider moved: ', value);
                 backend.onPingsShownChanged(value) }
         }
         Label { text: "Vertical exaggeration " +
-	       (verticalExaggSlider.value * 100).toFixed(1)}
+                      (verticalExaggSlider.value * 100).toFixed(1)}
         Slider {
             id: verticalExaggSlider
             objectName: "verticalExaggSliderObj"
@@ -229,9 +229,9 @@ ApplicationWindow {
             from: 0.01
             to: 20
             live: false
-	    value: 10
-	    Component.onCompleted: { backend.onVerticalExaggChanged(value) }
-	    onValueChanged: { backend.onVerticalExaggChanged(value) }
+            value: 10
+            Component.onCompleted: { backend.onVerticalExaggChanged(value) }
+            onValueChanged: { backend.onVerticalExaggChanged(value) }
         }
         Label { text: "Ping step" }
         Slider {
@@ -242,7 +242,7 @@ ApplicationWindow {
             from: 1
             to: 20
             live: false
-	    Component.onCompleted: { backend.onPingStepChanged(value) }
+            Component.onCompleted: { backend.onPingStepChanged(value) }
             onValueChanged: { console.log('pingStepSlider moved');
                 backend.onPingStepChanged(value) }
         }
@@ -294,90 +294,108 @@ ApplicationWindow {
 
             RadioButton {
                 objectName: "infoEdit"
-		checked: true
-		Component.onCompleted: { backend.onEditModeChanged(objectName) }
+                checked: true
+                Component.onCompleted: { backend.onEditModeChanged(objectName) }
                 text: qsTr("Info")
                 ButtonGroup.group: editModes
                 onToggled: { backend.onEditModeChanged(objectName); }
             }
         }
 
-        Rectangle {
-            // Layout.fillWidth: true
-            // Grab selection matches when w=600
-            // width: 600
-            // height: 600
 
-            width: 900
-            height: 900
+        ScrollView {
 
-            PixmapImage {
-                id: swathPixmap
-                objectName: "swathPixmapObj"
-                anchors.fill: parent
-            }
-
-            MouseArea {
-                id: swathMouseArea
-                objectName: 'swathMouseAreaObj'
-		// Fit exactly on PixmapImage to ensure proper scaling
-		// and mapping of mouse events
-                anchors.fill: swathPixmap
-                hoverEnabled: false
-                acceptedButtons: Qt.LeftButton | Qt.RightButton
-
-                onClicked: (mouse)=> {
-                               /// console.log("Mouse clicked at ",
-                               //        mouse.x, ", ", mouse.y)
-                               if (mouse.button == Qt.LeftButton) {
-                                   // console.log('left clicked');
-                                   backend.onLeftMouseButtonClicked(mouse.x,
-                                                                    mouse.y);
-                               }
-                               else {
-                                   // console.log("right clicked");
-                                   backend.onRightMouseButtonClicked(mouse.x,
-				                                     mouse.y);
-                               }
-                           }
+            implicitHeight: Window.window.height * 0.5
+            implicitWidth: Window.window.width
+            anchors.left: parent.left
+            anchors.top: buttonRow.bottom
+            contentHeight: 5000
+            clip: true
 
 
-                onPressed: (mouse) => {
-                               console.log("Mouse pressed at ",
-                                           mouse.x, ", ", mouse.y);
-			       console.log('button: ', mouse.button);
-                               if (mouse.button == Qt.LeftButton) {
-                                   backend.onLeftMouseButtonDown(mouse.x, mouse.y)
-                               }
-                           }
+            ColumnLayout {
+                Rectangle {
+                    // Layout.fillWidth: true
+                    // Grab selection matches when w=600
+                    id: swathRectangle
 
-                onReleased: (mouse) => {
-                                console.log("Mouse released at ",
-                                            mouse.x, ", ", mouse.y)
-                                if (mouse.button == Qt.LeftButton) {
-                                    backend.onLeftMouseButtonUp(mouse.x, mouse.y)
-                                }
-                            }
+                    width: Window.window.width
+                    height: Window.window.height
 
-                onPositionChanged: (mouse) => {
-                                       console.log("Mouse moved at ",
-                                                   mouse.x, ", ", mouse.y);
-				       console.log('pressed: ', pressed);
-				       console.log('button: ', mouse.button);
-				       console.log('buttons: ', mouse.buttons);				       
-                                       if (mouse.buttons == Qt.LeftButton) {
-                                           backend.onMouseMove(mouse.x, mouse.y)
+                    PixmapImage {
+                        id: swathPixmap
+                        objectName: "swathPixmapObj"
+                        anchors.fill: parent
+                    }
+
+                    MouseArea {
+                        id: swathMouseArea
+                        objectName: 'swathMouseAreaObj'
+                        // Fit exactly on PixmapImage to ensure proper scaling
+                        // and mapping of mouse events
+                        anchors.fill: swathPixmap
+                        onWidthChanged: { backend.onPixmapImageResize(swathMouseArea.width, swathMouseArea.height) }
+                        onHeightChanged: { backend.onPixmapImageResize(swathMouseArea.width, swathMouseArea.height) }
+
+
+                        preventStealing: true
+                        hoverEnabled: false
+                        acceptedButtons: Qt.LeftButton | Qt.RightButton
+
+                        onClicked: (mouse)=> {
+                                       /// console.log("Mouse clicked at ",
+                                       //        mouse.x, ", ", mouse.y)
+                                       if (mouse.button == Qt.LeftButton) {
+                                           // console.log('left clicked');
+                                           backend.onLeftMouseButtonClicked(mouse.x,
+                                                                            mouse.y);
                                        }
-				       else {
-				           console.log('do not call backend')
-				       }
+                                       else {
+                                           // console.log("right clicked");
+                                           backend.onRightMouseButtonClicked(mouse.x,
+                                                                             mouse.y);
+                                       }
                                    }
 
 
-            }
+                        onPressed: (mouse) => {
+                                       console.log("Mouse pressed at ",
+                                                   mouse.x, ", ", mouse.y);
+                                       console.log('button: ', mouse.button);
+                                       if (mouse.button == Qt.LeftButton) {
+                                           backend.onLeftMouseButtonDown(mouse.x, mouse.y)
+                                       }
+                                   }
 
+                        onReleased: (mouse) => {
+                                        console.log("Mouse released at ",
+                                                    mouse.x, ", ", mouse.y)
+                                        if (mouse.button == Qt.LeftButton) {
+                                            backend.onLeftMouseButtonUp(mouse.x, mouse.y)
+                                        }
+                                    }
+
+                        onPositionChanged: (mouse) => {
+                                               console.log("Mouse moved at ",
+                                                           mouse.x, ", ", mouse.y);
+                                               console.log('pressed: ', pressed);
+                                               console.log('button: ', mouse.button);
+                                               console.log('buttons: ', mouse.buttons);
+                                               if (mouse.buttons == Qt.LeftButton) {
+                                                   backend.onMouseMove(mouse.x, mouse.y)
+                                               }
+                                               else {
+                                                   console.log('do not call backend')
+                                               }
+                                           }
+
+
+                    }
+
+                }
+            }
         }
-    }
+    }   // ScrollView
 
 
     MessageDialog {
@@ -399,7 +417,7 @@ ApplicationWindow {
         nameFilters: ["Swath files (*.mb[0-9]*)"]
         onAccepted: {
             console.log("accepted " + fileUrl);
-	    backend.processSwathFile(fileUrl);
+            backend.processSwathFile(fileUrl);
         }
     }
 
@@ -414,12 +432,11 @@ ApplicationWindow {
 
 
     function showInfoDialog(message) {
-      console.log('showInfoDialog()', message);
-      infoDialog.text = message;
-      infoDialog.open();
+        console.log('showInfoDialog()', message);
+        infoDialog.text = message;
+        infoDialog.open();
     }
 }
-
 
 
 
