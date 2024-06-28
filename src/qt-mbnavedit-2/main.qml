@@ -8,10 +8,9 @@ import QtQuick.Window 2.14
 import PixmapImage 1.0
 
 /* ***
-Display and edit swath file pings/beams
+Display and edit swath file navigation metadata
 
-NOTE: objectName values in this file MUST match names used in
-findChild() C++ calls.
+NOTE: objectName values in this file MUST match object names used by C++ backend
 
 *** */
 
@@ -24,10 +23,12 @@ Window {
     title: 'qt-mbnavedit-2'
 
     Component.onCompleted: {
-        console.log('*** editModes.checkedButton: ', editModes.checkedButton.objectName)
-        // Syncrhonze GUI state with C++ backend
+        // Synchronize GUI input control state with C++ backend
+
+        // Synchronize edit mode with backend
         backend.onEditModeChanged(editModes.checkedButton.objectName);
 
+        // Synchronize preferred plots with backend
         for (var i = 0; i < plotButtons.buttons.length; ++i) {
             console.log('plot button: ', plotButtons.buttons[i])
             backend.setPlot(plotButtons.buttons[i].objectName, plotButtons.buttons[i].checked)
