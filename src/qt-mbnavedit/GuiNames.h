@@ -12,16 +12,17 @@ class GuiNames : public QObject {
 
 };
 
-/// define names of C++-connected QML items, used when exchanging information
+/// Define names of C++-connected QML items, used when exchanging information
 /// between QML GUI and C++ code.
-///
-/// N.B. TAKE CARE THAT QML USES THE LITERAL STRINGS DEFINED HERE FOR
+/// N.B.: Take care that QML code uses the literal strings defined here
 /// objectName
 
-/// Name of PixmapImage instantiated by QML, which holds swath graphs
+/// Name of PixmapImage C++ object instantiated by QML, which holds swath
+/// graphs; Backend C++ code draws into this object
 #define SWATH_PIXMAP_NAME "swathPixmapObj"
 
-/// Plot names
+/// Names of user-selected checkboxes that enable drawing of specific plots;
+/// passed by QML as arg to Backend C++ callbacks
 #define TIMEINT_PLOTNAME "timeInt"
 #define TIMEINT_ORIG_PLOTNAME "timeIntOrig"
 #define LAT_PLOTNAME "lat"
@@ -38,7 +39,8 @@ class GuiNames : public QObject {
 #define SENSORDEPTH_ORIG_PLOTNAME "sensorDepthOrig"
 #define ATTITUDE_PLOTNAME "attitude"
 
-/// Names of edit modes
+/// Names of edit modes selected by user; passed by QML as arg to
+/// Backend C++ callbacks
 #define PICK_MODENAME "pickMode"
 #define SELECT_MODENAME "selectMode"
 #define DESELECT_MODENAME "deselectMode"
