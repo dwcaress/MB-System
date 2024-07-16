@@ -9,11 +9,13 @@
 #include <QButtonGroup>
 #include <QQmlContext>
 #include <QVariant>
+// #include <QQuickStyle>
 #include "GuiNames.h"
 #include "Backend.h"
 #include "PixmapImage.h"
 #include "Emitter.h"
 
+// Reference for interrupt handler
 Backend *theBackend_ = nullptr;
 
 void interruptHandler(int sig) {
@@ -44,7 +46,11 @@ int main(int argc, char *argv[]) {
 
     QGuiApplication app(argc, argv);
 
+    /// QQuickStyle::setStyle("Fusion");
+    
     Backend backend(argc, argv);
+    
+    // Keep a reference for interrupt handler
     theBackend_ = &backend;
     
     QQmlApplicationEngine engine;
