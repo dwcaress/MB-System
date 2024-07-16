@@ -4,6 +4,7 @@ import QtQuick.Window 2.15
 import QtQuick.Controls.Universal 2.3
 import QtQuick.Dialogs 1.1
 import QtQuick.Layouts 1.14
+import QtQuick.Controls 2.15
 import QtQuick.Window 2.14
 import PixmapImage 1.0
 
@@ -21,6 +22,7 @@ Window {
     width: 1350
     height: 880
     title: 'qt-mbnavedit-2'
+    color: 'lightgray'
 
     Component.onCompleted: {
         // Synchronize GUI input control state with C++ backend
@@ -45,6 +47,7 @@ Window {
     }
 
 
+
     MenuBar {
         id: menuBar
 
@@ -54,40 +57,10 @@ Window {
                 onTriggered: { console.log('show file dialog')
                     fileDialog.open()} }
             Action { text: qsTr('Available swath files') ;
-                onTriggered: { console.log('available swath files') }}
+                onTriggered: { console.log('show swath list')
+                    dataList.open()} }
             Action { text: qsTr('Exit') ;
                 onTriggered: { console.log('exit'); quitDialog.open()}}
-        }
-
-        Menu {
-            title: qsTr('Graphs')
-            Action { text: qsTr('Time interval'); checkable: true }
-            Action { text: qsTr('Longitude'); checkable: true }
-            Action { text: qsTr('Latitude'); checkable: true }
-            Action { text: qsTr('Speed'); checkable: true }
-
-            Action { text: qsTr('     Original data'); checkable: true; checked: true }
-            Action { text: qsTr('     Show speed made good'); checkable: true }
-            Action { text: qsTr('     Use speed made good'); checkable: true }
-
-
-
-            Action { text: qsTr('Heading'); checkable: true }
-
-            Action { text: qsTr('     Original data'); checkable: true }
-            Action { text: qsTr('     Show course made good'); checkable: true }
-            Action { text: qsTr('     Use course made good'); checkable: true }
-
-
-
-            Action { text: qsTr('Sensor depth'); checkable: true }
-            Action { text: qsTr('Roll, pitch, heave'); checkable: true }
-
-
-            Action { text: qsTr('Zoom in') ; checkable: true; ActionGroup.group: viewActions;
-                onTriggered: { swathMouseArea.cursorShape=Qt.SizeFDiagCursor }}
-            Action { text: qsTr('Zoom out') ; checkable: true; ActionGroup.group: viewActions ;
-                onTriggered: { swathMouseArea.cursorShape= Qt.SizeBDiagCursor }}
         }
     }
 
@@ -107,8 +80,10 @@ Window {
             }
 
             RadioButton {
+	        
                 objectName: 'pickMode'
                 text: qsTr('Pick')
+
                 checked: true
                 ButtonGroup.group: editModes
                 onToggled: { backend.onEditModeChanged(objectName); resetInterval.enabled = false }
@@ -362,7 +337,7 @@ Window {
                         implicitWidth: Window.window.width * 0.9
                         implicitHeight:Window.window.height * 5
 
-                        border.width: 3
+                        border.width: 1
                         border.color: 'black'
 
                         PixmapImage {
@@ -481,6 +456,14 @@ Window {
         text: 'Text goes here'
         standardButtons: StandardButton.Ok
         Component.onCompleted: visible = false
+    }
+
+
+    // List swath files that have been opened or specified in datalist file
+    Dialog {
+        id: dataList
+	title: 'Swath file list'
+	standardButtons: StandardButton.Ok
     }
 
 
