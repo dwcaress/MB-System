@@ -5486,7 +5486,8 @@ int Backend::plot_draft_value(int iplot, int iping) {
 }
 /*--------------------------------------------------------------------*/
 void Backend::parseInputDataList(char *file, int form) {
-  std::cout << "Backend::parseInputDataList() file: " << file << "\n";
+  std::cout << "Backend::parseInputDataList() file: " << file <<
+    ", format=" << form << "\n";
   char *fullPath = realpath(file, nullptr);
   if (!fullPath) {
     // File not found
