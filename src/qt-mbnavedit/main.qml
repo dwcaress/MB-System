@@ -16,7 +16,7 @@ NOTE: objectName values in this file MUST match object names used by C++ backend
 *** */
 
 Window {
-    id: applicationWindow
+    id: appWindow
     objectName: 'mainWindow'
     visible: true
     width: 1350
@@ -67,9 +67,11 @@ Window {
 
     ColumnLayout {
         id: columnLayout
+       // anchors.fill: parent
         anchors.top: menuBar.bottom
+       anchors.right: appWindow.right
         Layout.fillHeight: false
-        width: 1000
+
 
         Row {
             id: buttonRow
@@ -80,7 +82,7 @@ Window {
             }
 
             RadioButton {
-	        
+
                 objectName: 'pickMode'
                 text: qsTr('Pick')
 
@@ -171,12 +173,26 @@ Window {
             }
         }
 
-
+        /* **
+        Rectangle {
+            id: testRectangle
+            // width: 300
+            height: 100
+            color: "red"
+            border.color: "black"
+            border.width: 5
+            radius: 10
+            Layout.fillWidth: true
+            Layout.rightMargin: 20
+        }
+        *** */
         RowLayout {
+            anchors.right: Window.window.right
 
             Column {
                 id: plotSelectColumn
-                anchors.top: parent.top
+                // anchors.top: parent.top
+                Layout.alignment: top
 
                 Label {
                     bottomPadding: 10
@@ -328,7 +344,9 @@ Window {
                 implicitHeight: Window.window.height
                 contentHeight: 5000
                 clip: true
-                anchors.left: plotSelectColumn.right
+                // anchors.left: plotSelectColumn.right
+                // anchors.right: Window.window.right
+                Layout.alignment: Qt.AlignLeft | Qt.AlignRight
 
                 ColumnLayout {
 
@@ -336,6 +354,7 @@ Window {
                         id: rectangle
                         implicitWidth: Window.window.width * 0.9
                         implicitHeight:Window.window.height * 5
+                        anchors.right: Window.window.right
 
                         border.width: 1
                         border.color: 'black'
@@ -462,8 +481,8 @@ Window {
     // List swath files that have been opened or specified in datalist file
     Dialog {
         id: dataList
-	title: 'Swath file list'
-	standardButtons: StandardButton.Ok
+        title: 'Swath file list'
+        standardButtons: StandardButton.Ok
     }
 
 
