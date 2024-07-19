@@ -46,8 +46,6 @@ Window {
         exclusive: true
     }
 
-
-
     MenuBar {
         id: menuBar
 
@@ -64,17 +62,19 @@ Window {
         }
     }
 
-
     ColumnLayout {
         id: columnLayout
-       // anchors.fill: parent
         anchors.top: menuBar.bottom
-       anchors.right: appWindow.right
-        Layout.fillHeight: false
+        anchors.right: parent.right
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
 
 
-        Row {
+        Flow {
             id: buttonRow
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.preferredHeight: 1
 
             ButtonGroup {
                 id: editModes
@@ -133,51 +133,64 @@ Window {
             }
         }
 
-        Row {
-            Button {
-                id: interpolate
-                text: 'Interp'
-                onClicked: { backend.onInterpolate() }
+        ColumnLayout {
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+            Layout.preferredHeight: 1
+
+            Flow {
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+
+                Button {
+                    id: interpolate
+                    text: 'Interp'
+                    onClicked: { backend.onInterpolate() }
+                }
+
+                Button {
+                    id: interpolateRep
+                    text: 'Interp Rep'
+                    onClicked: { backend.onInterpolateRepeat() }
+                }
             }
 
-            Button {
-                id: interpolateRep
-                text: 'Interp Rep'
-                onClicked: { backend.onInterpolateRepeat() }
+            Flow {
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+
+                Button {
+                    id: swathStart
+                    text: 'Start'
+                    onClicked: { backend.onGoStart() }
+                }
+
+                Button {
+                    id: swathForward
+                    text: 'FWD'
+                    onClicked: {backend.onGoForward() }
+                }
+
+                Button {
+                    id: swathBack
+                    text: 'REW'
+                    onClicked: { backend.onGoBack() }
+                }
+
+                Button {
+                    id: swathEnd
+                    text: 'End'
+                    onClicked: { backend.onGoEnd() }
+                }
             }
         }
 
-        Row {
-            Button {
-                id: swathStart
-                text: 'Start'
-                onClicked: { backend.onGoStart() }
-            }
 
-            Button {
-                id: swathForward
-                text: 'FWD'
-                onClicked: {backend.onGoForward() }
-            }
 
-            Button {
-                id: swathBack
-                text: 'REW'
-                onClicked: { backend.onGoBack() }
-            }
-
-            Button {
-                id: swathEnd
-                text: 'End'
-                onClicked: { backend.onGoEnd() }
-            }
-        }
-
-        /* **
         Rectangle {
             id: testRectangle
             // width: 300
-            height: 100
+            height: 20
             color: "red"
             border.color: "black"
             border.width: 5
@@ -185,14 +198,18 @@ Window {
             Layout.fillWidth: true
             Layout.rightMargin: 20
         }
-        *** */
-        RowLayout {
-            anchors.right: Window.window.right
 
-            Column {
+
+        RowLayout {
+            Layout.preferredHeight: 4
+
+            Flow {
                 id: plotSelectColumn
                 // anchors.top: parent.top
-                Layout.alignment: top
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                flow: Flow.TopToBottom
 
                 Label {
                     bottomPadding: 10
@@ -240,7 +257,6 @@ Window {
                     ButtonGroup.group: plotButtons
                 }
 
-
                 CheckBox {
                     objectName: 'lat'
                     checked: true
@@ -283,7 +299,6 @@ Window {
                     Component.onCompleted: { checked = true }
                     ButtonGroup.group: plotButtons
                 }
-
 
                 CheckBox {
                     objectName: 'heading'
@@ -337,24 +352,24 @@ Window {
             }
 
 
+            Rectangle {
+                color: white
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                Layout.preferredWidth: 3
 
-            ScrollView {
-                // implicitWidth: Window.window.width
-                width: 800
-                implicitHeight: Window.window.height
-                contentHeight: 5000
-                clip: true
-                // anchors.left: plotSelectColumn.right
-                // anchors.right: Window.window.right
-                Layout.alignment: Qt.AlignLeft | Qt.AlignRight
-
-                ColumnLayout {
+                ScrollView {
+                    anchors.fill: parent
+                    contentHeight: 5000
+                    clip: true
+                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOn
+                    ScrollBar.vertical.policy: ScrollBBar.AlwaysOn
 
                     Rectangle {
                         id: rectangle
-                        implicitWidth: Window.window.width * 0.9
-                        implicitHeight:Window.window.height * 5
-                        anchors.right: Window.window.right
+                        // Layout.fillWidth: true
+                        // Layout.fillHeight: true
+                        anchors.fill: parent
 
                         border.width: 1
                         border.color: 'black'
@@ -433,63 +448,64 @@ Window {
                                                        backend.onMouseMoved(mouse.x, mouse.y)
                                                    }
                                                }
+
+
+
                         }
 
 
                     }
-
-
                 }
             }
         }
-    }
 
 
-    MessageDialog {
-        id: quitDialog
-        title: 'Quit?'
-        icon: StandardIcon.Question
-        text: 'Quit application?'
-        standardButtons: StandardButton.Yes |
-                         StandardButton.No
-        Component.onCompleted: visible = false
-        onYes: Qt.quit(0)
-        onNo: console.log('did not quit')
-    }
-
-
-    FileDialog {
-        id: fileDialog
-        title: 'Open swath file'
-        nameFilters: ['Swath files (*.mb[0-9]*)']
-        onAccepted: {
-            console.log('accepted ' + fileUrl);
-            backend.processSwathFile(fileUrl);
+        MessageDialog {
+            id: quitDialog
+            title: 'Quit?'
+            icon: StandardIcon.Question
+            text: 'Quit application?'
+            standardButtons: StandardButton.Yes |
+                             StandardButton.No
+            Component.onCompleted: visible = false
+            onYes: Qt.quit(0)
+            onNo: console.log('did not quit')
         }
-    }
-
-    MessageDialog {
-        id: infoDialog
-        title: 'Info'
-        icon: StandardIcon.Info
-        text: 'Text goes here'
-        standardButtons: StandardButton.Ok
-        Component.onCompleted: visible = false
-    }
 
 
-    // List swath files that have been opened or specified in datalist file
-    Dialog {
-        id: dataList
-        title: 'Swath file list'
-        standardButtons: StandardButton.Ok
-    }
+        FileDialog {
+            id: fileDialog
+            title: 'Open swath file'
+            nameFilters: ['Swath files (*.mb[0-9]*)']
+            onAccepted: {
+                console.log('accepted ' + fileUrl);
+                backend.processSwathFile(fileUrl);
+            }
+        }
+
+        MessageDialog {
+            id: infoDialog
+            title: 'Info'
+            icon: StandardIcon.Info
+            text: 'Text goes here'
+            standardButtons: StandardButton.Ok
+            Component.onCompleted: visible = false
+        }
 
 
-    function showInfoDialog(message) {
-        console.log('showInfoDialog()', message);
-        infoDialog.text = message;
-        infoDialog.open();
+        // List swath files that have been opened or specified in datalist file
+        Dialog {
+            id: dataList
+            title: 'Swath file list'
+            standardButtons: StandardButton.Ok
+        }
+
+
+        function showInfoDialog(message) {
+            console.log('showInfoDialog()', message);
+            infoDialog.text = message;
+            infoDialog.open();
+        }
     }
 }
 
