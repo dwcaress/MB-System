@@ -1,4 +1,4 @@
----
+--
 ## MB-System ChangeLog File:
 
 This file lists changes to the source code of the MB-System open
@@ -22,7 +22,12 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
-
+- Version 5.8.2beta07    June 27, 2024
+- Version 5.8.2beta06    June 13, 2024
+- Version 5.8.2beta05    May 19, 2024
+- Version 5.8.2beta04    May 13, 2024
+- Version 5.8.2beta02    May 1, 2024
+- Version 5.8.2beta01    April 29, 2024
 - **Version 5.8.1          March 22, 2024**
 - Version 5.8.1beta09    March 22, 2024
 - Version 5.8.1beta08    March 10, 2024
@@ -34,6 +39,78 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.2beta07 (June 27, 2024)
+
+Mbm_trnplot: Added extraction of TRN localization estimates in longitude and latitude.
+
+Mbtrnpp: Now includes longitude and latitude values of TRN localization estimates into
+the log file (in addition to the coordinate reference system used for the reference 
+map).
+
+Mbgrdviz: Fixed importation of non-csv raw site files.
+
+Formats 88 and 89 (MBF_RESON7KR and MBF_RESON7K3): Change to allow pings to be valid if
+a BeamGeometry record has been read earlier in the file (as opposed to having a 
+BeamGeometry record for every ping).
+
+Formats 88 and 89 (MBF_RESON7KR and MBF_RESON7K3): Fixed problem calculating sample times
+for attitude data in s7k 1016 Attitude data records.
+
+#### 5.8.2beta06 (June 13, 2024)
+
+MBgrid and mbmosaic: Added an option to generate grids and mosaics in a projected 
+coordinate system defined as a Local Transverse Mercator (LTM) projection with the  origin 
+at the center of the grid or mosaic. 
+
+MBgrdviz, mbeditviz, mbnavadjust: The mbview visualization library now displays grids
+defined in geographic coordinates (longitude and latitude) using a Local Transverse
+Mercator projection with the origin at the center of the grid or mosaic. This replaces the
+prior use of UTM projections, which introduced rotation and distortion when the grid was
+located far from the center of the UTM zone.
+
+MBtrnpp: and TRN: Changed TerrainNav, supporting libraries, and the program mbtrnpp to
+calculate projections using the Proj package rather than the GCTP package.
+
+MBtrnpp: Now works with reference topography models defined in a Local Transverse 
+Mercator (LTM) projection.
+
+Mbm_trnplot: augmented to allow specifying the CRS of the reference topoography so
+that a Local Transverse Mercator (LTM) projection can be used.
+
+#### 5.8.2beta05 (May 19, 2024)
+
+MBextractsegy: changed calculation of section plot bounds to more consistently catch the
+seafloor arrival within the plot.
+
+MBpreprocess: fixed initialization of the --kluge-fix-7k-times option.
+
+Docker image: updated documentation in the Docker directory.
+
+Formats 58 (MBF_EM710RAW) and 59 (MBF_EM710MBA):  Removed an errant debug message that
+printed out information when reading height datagrams.
+
+#### 5.8.2beta04 (May 13, 2024)
+
+Mbpreprocess: Added kluge option to fix large shifts in survey record timestamps in Teledyne s7k format data (specifically MBARI Mapping AUV multibeam data collected with the sonar computer experiencing large shifts in time). This option is accessed as --kluge-fix-7k-timestamps=time
+
+Mbroutetime: Now works with the recently changed route file format.
+
+Mblevitus: Fixed problem building mblevitus with the Cmake build system. The problem was
+that the Levitus database location was incorrectly embedded in the compiled program.
+
+#### 5.8.2beta02 (May 1, 2024)
+
+Format 261 (MBF_KEMKMALL): Fixed bug in handing pings for which there are multiple MRZ datagrams that have different timestamps. This bug resulted in MB-System dropping many pings in some deepwater Kongsberg data (mostly EM124 data).
+
+#### 5.8.2beta01 (April 29, 2024)
+
+Mbedit: Fixed display of ping profiles to handle condition where a ping contains
+two acrosstrack profiles, typically one aft and one forward of the sonar location. Now
+the connection between the end of the first acrosstrack profile and the start of the
+second is no longer plotted.
+
+MB-System Docker Container: Improved Docker documentation included in the Docker directory.
 
 #### 5.8.1 (March 22, 2024)
 

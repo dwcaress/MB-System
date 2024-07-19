@@ -97,7 +97,7 @@ int mbr_info_em710raw(int verbose, int *system, int *beams_bath_max, int *beams_
 	strncpy(format_name, "EM710RAW", MB_NAME_LENGTH);
 	strncpy(system_name, "SIMRAD3", MB_NAME_LENGTH);
 	strncpy(format_description,
-	        "Format name:          MBF_EM710RAW\nInformal Description: Kongsberg current multibeam vendor format\nAttributes:    "
+	        "Format name:          MBF_EM710RAW\nInformal Description: Kongsberg 3rd generation multibeam vendor format\nAttributes:    "
 	        "       Kongsberg EM122, EM302, EM710,\n                      bathymetry, amplitude, and sidescan,\n                 "
 	        "     up to 400 beams, variable pixels, binary, Kongsberg.\n",
 	        MB_DESCRIPTION_LENGTH);
@@ -1642,7 +1642,7 @@ int mbr_em710raw_rd_height(int verbose, void *mbio_ptr, int swap, struct mbsys_s
 #endif
 	}
 
-	if (verbose >= 0) {
+	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);

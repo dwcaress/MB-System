@@ -1,4 +1,4 @@
-<hr />
+<p>--</p>
 <h2 id="mb-system-changelog-file">MB-System ChangeLog File:</h2>
 <p>This file lists changes to the source code of the MB-System open
 source software package for the processing and display of swath sonar
@@ -23,15 +23,206 @@ accessible as tarballs through the Github interface.</p>
 Version 5.8 Releases and Release Notes:</h3>
 <hr />
 <ul>
+<li>Version 5.8.2beta05 May 17, 2024</li>
+<li>Version 5.8.2beta04 May 13, 2024</li>
+<li>Version 5.8.2beta02 May 1, 2024</li>
+<li>Version 5.8.2beta01 April 29, 2024</li>
+<li><strong>Version 5.8.1 March 22, 2024</strong></li>
+<li>Version 5.8.1beta09 March 22, 2024</li>
+<li>Version 5.8.1beta08 March 10, 2024</li>
+<li>Version 5.8.1beta07 February 24, 2024</li>
+<li>Version 5.8.1beta04 February 16, 2024</li>
+<li>Version 5.8.1beta03 February 8, 2024</li>
+<li>Version 5.8.1beta02 February 7, 2024</li>
+<li>Version 5.8.1beta01 February 1, 2024</li>
 <li><strong>Version 5.8.0 January 22, 2024</strong></li>
 </ul>
 <hr />
+<h4 id="582beta05-may-17-2024">5.8.2beta05 (May 17, 2024)</h4>
+<p>MBextractsegy: changed calculation of section plot bounds to more
+consistently catch the seafloor arrival within the plot.</p>
+<p>MBpreprocess: fixed initialization of the --kluge-fix-7k-times
+option.</p>
+<p>Docker image: updated documentation in the Docker directory.</p>
+<h4 id="582beta04-may-13-2024">5.8.2beta04 (May 13, 2024)</h4>
+<p>Mbpreprocess: Added kluge option to fix large shifts in survey record
+timestamps in Teledyne s7k format data (specifically MBARI Mapping AUV
+multibeam data collected with the sonar computer experiencing large
+shifts in time). This option is accessed as
+--kluge-fix-7k-timestamps=time</p>
+<p>Mbroutetime: Now works with the recently changed route file
+format.</p>
+<p>Mblevitus: Fixed problem building mblevitus with the Cmake build
+system. The problem was that the Levitus database location was
+incorrectly embedded in the compiled program.</p>
+<h4 id="582beta02-may-1-2024">5.8.2beta02 (May 1, 2024)</h4>
+<p>Format 261 (MBF_KEMKMALL): Fixed bug in handing pings for which there
+are multiple MRZ datagrams that have different timestamps. This bug
+resulted in MB-System dropping many pings in some deepwater Kongsberg
+data (mostly EM124 data).</p>
+<h4 id="582beta01-april-29-2024">5.8.2beta01 (April 29, 2024)</h4>
+<p>Mbedit: Fixed display of ping profiles to handle condition where a
+ping contains two acrosstrack profiles, typically one aft and one
+forward of the sonar location. Now the connection between the end of the
+first acrosstrack profile and the start of the second is no longer
+plotted.</p>
+<p>MB-System Docker Container: Improved Docker documentation included in
+the Docker directory.</p>
+<h4 id="581-march-22-2024">5.8.1 (March 22, 2024)</h4>
+<p>CMake build system: Fixed ability to set OTPS location in cmake build
+system.</p>
+<p>CMake build system: Added installation of header files required for
+external programs to utilize MB-System libraries.</p>
+<p>Format 261 (MBF_KEMKMALL): Updated support for Kongsberg Kmall format
+to match updated specification J.</p>
+<p>Format 16 (MBF_SBSIOSWB): Fixed bug that became evident when
+processing old Scripps SeaBeam Classic data in format 16 on a MacOs
+Sonoma machine. This turned out to be a poorly formed preprocessor macro
+for rounding floating point values in code dating from 1992.</p>
+<p>Formats 58 (MBF_EM710RAW) and 59 (MBF_EM710MBA): Fixed bug in which
+some bathymetry edits were applied to the wrong pings. Third generation
+Kongsberg multibeams produce two cross profiles with each ping cycle,
+but represent these as two separate pings with the same ping time.
+MB-System distinguishes between pings using the timestamps rather than
+ping numbers (because not all sonars produce ping numbers), so pings
+with the same timestamp confuse the beam flag handling code. The
+solution is to add a small amount of time to the timestamp of the second
+ping in each pair. The bug was that the amount of time added by
+mbpreprocess was 33 microseconds, but the datagrams in Kongsberg *.all
+files specify timestamps only to the millisecond level, and so the added
+time was not large enough to be recorded differently in the output
+files.</p>
+<p>Mbpreprocess: Now checks for successive pings/scans with the same
+timestamp, and adds enough time to the second timestamp (0.0000033
+seconds) that these pings/scans are seen as different by the beam edit
+flag handling code. For dual head sensors this logic only compares
+timestamps for the same subsensor, so simultaneous operation of the two
+subsensors (sonar or lidar heads) is allowed.</p>
+<p>Mbpreprocess and format MBF_EM710RAW (58): The command
+--kluge-auv-sentry-sensordepth now works for format 58 files (3rd
+generation Kongsberg multibeam data in *.all files) such that available
+sensordepth values are embedded in the output format MBF_EM710MBA (59)
+files.</p>
+<p>Mbpreprocess and mbprocess: Now support merging navigation and
+attitude from Schmidt Ocean Institute RVDAS format ROV navigation.</p>
+<p>Mbvoxelclean: Fixed bug in which previously beamflags from previously
+existing esf files were ignored. Also fixed a non-initialized pointer
+bug that produced occasional crashes.</p>
+<p>Mbgrid: Improved output to shell so that it shows the min max values
+from each contributing input file whether verbose is specified or not.
+Mbm_grdplot: Added colortable 10, which runs from blue to red and can be
+used for plots of seismic reflection or subbottom profiler data when the
+trace signals are both positive or negative.</p>
+<p>Mbphotomosaic: Fixed priority-heading option that allows image
+prioritization on the basis of camera heading.</p>
+<p>Mbphotomosaic: Added options to detect and correct dark images (for
+when strobe lights partially drop out), to ignore dark images, and to
+allow image prioritization on the basis of camera heading.</p>
+<p>SEGY format data: Changed MB-System SEGY traceheader to include a
+sensordepthtime float value in bytes 216-219. This will be used to hold
+the two-way traveltime in seconds corresponding to the source depth
+assuming a 1500 m/sec water sound speed. This value can be used as a
+trace start delay time in plotting to account for the source location of
+subbottom profiler data collected from submerged platforms like AUVs and
+ROVs. The MB-System programs mbsegygrid and mbm_grdplot use the source
+depth value in meters, but some external packages need the delay
+time.</p>
+<p>SEGY format data: MB-System now recognizes file suffixes *.sgy and
+*.SGY in addition to *.segy *.SEGY *.seg and *.SEG</p>
+<p>Mbsegyinfo: Fixed calculation and reporting of trace minimum and
+maximum values.</p>
+<p>Mbextractsegy: Now allows output of subbottom analytic data as well
+as envelope data. Use of the -S4 command will output three separate segy
+files, one with the envelope function, one with the subbottom correlate,
+and one with the correlate conjugant (i.e. the Hilbert transform of the
+correlate). The section plot script generated now will create plots of
+all three trace types.</p>
+<p>Mbtrnpp: The optional Terrain Relative Navigation (TRN) software has
+been augmented with code to utilize realtime format 58 (Kongsberg *.all)
+format multibeam accessed through a serial stream.</p>
+<h4 id="581beta09-march-22-2024">5.8.1beta09 (March 22, 2024)</h4>
+<p>Format 16 (MBF_SBSIOSWB): Fixed bug that became evident when
+processing old Scripps SeaBeam Classic data in format 16 on a MacOs
+Sonoma machine. This turned out to be a poorly formed preprocessor macro
+for rounding floating point values in code dating from 1992.</p>
+<p>Formats 58 (MBF_EM710RAW) and 59 (MBF_EM710MBA): Fixed bug in which
+some bathymetry edits were applied to the wrong pings. Third generation
+Kongsberg multibeams produce two cross profiles with each ping cycle,
+but represent these as two separate pings with the same ping time.
+MB-System distinguishes between pings using the timestamps rather than
+ping numbers (because not all sonars produce ping numbers), so pings
+with the same timestamp confuse the beam flag handling code. The
+solution is to add a small amount of time to the timestamp of the second
+ping in each pair. The bug was that the amount of time added by
+mbpreprocess was 33 microseconds, but the datagrams in Kongsberg *.all
+files specify timestamps only to the millisecond level, and so the added
+time was not large enough to be recorded differently in the output
+files.</p>
+<p>Mbgrid: Improved output to shell so that it shows the min max values
+from each contributing input file whether verbose is specified or
+not.</p>
+<h4 id="581beta08-march-10-2024">5.8.1beta08 (March 10, 2024)</h4>
+<p>Mbm_grdplot: Added colortable 10, which runs from blue to red and can
+be used for plots of seismic reflection or subbottom profiler data when
+the trace signals are both positive or negative.</p>
+<p>SEGY format data: Changed MB-System SEGY traceheader to include a
+sensordepthtime float value in bytes 216-219. This will be used to hold
+the two-way traveltime in seconds corresponding to the source depth
+assuming a 1500 m/sec water sound speed. This value can be used as a
+trace start delay time in plotting to account for the source location of
+subbottom profiler data collected from submerged platforms like AUVs and
+ROVs. The MB-System programs mbsegygrid and mbm_grdplot use the source
+depth value in meters, but some external packages need the delay
+time.</p>
+<p>SEGY format data: MB-System now recognizes file suffixes *.sgy and
+*.SGY in addition to *.segy *.SEGY *.seg and *.SEG</p>
+<p>Mbsegyinfo: Fixed calculation and reporting of trace minimum and
+maximum values.</p>
+<p>Mbextractsegy: Now allows output of subbottom analytic data as well
+as envelope data. Use of the -S4 command will output three separate segy
+files, one with the envelope function, one with the subbottom correlate,
+and one with the correlate conjugant (i.e. the Hilbert transform of the
+correlate). The section plot script generated now will create plots of
+all three trace types.</p>
+<p>Mbpreprocess and mbprocess: Now support merging navigation and
+attitude from Schmidt Ocean Institute RVDAS format ROV navigation.</p>
+<p>Mbpreprocess and format MBF_EM710RAW (58): The command
+--kluge-auv-sentry-sensordepth now works for format 58 files (3rd
+generation Kongsberg multibeam data in *.all files) such that available
+sensordepth values are embedded in the output format MBF_EM710MBA (59)
+files.</p>
+<h4 id="581beta07-february-24-2024">5.8.1beta07 (February 24, 2024)</h4>
+<p>CMake build system: Fixed ability to set OTPS location in cmake build
+system.</p>
+<p>CMake build system: Added installation of header files required for
+external programs to utilize MB-System libraries.</p>
+<h4 id="581beta04-february-16-2024">5.8.1beta04 (February 16, 2024)</h4>
+<p>Format 261 (MBF_KEMKMALL): Updated support for Kongsberg Kmall format
+to match updated specification J.</p>
+<h4 id="581beta03-february-8-2024">5.8.1beta03 (February 8, 2024)</h4>
+<p>Mbphotomosaic: Fixed priority-heading option that allows image
+prioritization on the basis of camera heading.</p>
+<h4 id="581beta02-february-7-2024">5.8.1beta02 (February 7, 2024)</h4>
+<p>Mbphotomosaic: Added options to detect and correct dark images (for
+when strobe lights partially drop out), to ignore dark images, and to
+allow image prioritization on the basis of camera heading.</p>
+<h4 id="581beta01-february-1-2024">5.8.1beta01 (February 1, 2024)</h4>
+<p>Mbpreprocess: Now checks for successive pings/scans with the same
+timestamp, and adds enough time to the second timestamp (0.0000033
+seconds) that these pings/scans are seen as different by the beam edit
+flag handling code. For dual head sensors this logic only compares
+timestamps for the same subsensor, so simultaneous operation of the two
+subsensors (sonar or lidar heads) is allowed.</p>
+<p>Mbvoxelclean: Fixed bug in which previously beamflags from previously
+existing esf files were ignored. Also fixed a non-initialized pointer
+bug that produced occasional crashes.</p>
+<h4 id="580-january-22-2024">5.8.0 (January 22, 2024)</h4>
 <p><strong>Version 5.8.0</strong> is now the current release of
 MB-System.</p>
 <p>The source code distribution can be downloaded from the MB-System
 Github repository at:<br />
-<a
-href=""><span>https://github.com/dwcaress/MB-System/archive/refs/tags/5.8.0.tar.gz</span></a></p>
+[<a
+href="https://github.com/dwcaress/MB-System/archive/refs/tags/5.8.0.tar.gz]()">https://github.com/dwcaress/MB-System/archive/refs/tags/5.8.0.tar.gz]()</a></p>
 <p>In addition to many bug fixes, the changes of 5.8.0 relative to the
 prior major release (5.7.8) include:</p>
 <p><strong>New build system:</strong><br />

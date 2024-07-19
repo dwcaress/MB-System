@@ -39,16 +39,6 @@
 #include "mb_io.h"
 #include "mb_status.h"
 
-/* ellipsoid coefficients from World Geodetic System Ellipsoid of 1972
- * - see Bowditch (H.O. 9 -- American Practical Navigator). */
-const double C1 = 111412.84;
-const double C2 = -93.5;
-const double C3 = 0.118;
-const double C4 = 111132.92;
-const double C5 = -559.82;
-const double C6 = 1.175;
-const double C7 = 0.0023;
-
 /*--------------------------------------------------------------------*/
 int mb_coor_scale(int verbose, double latitude, double *mtodeglon, double *mtodeglat) {
 	if (verbose >= 2) {
@@ -57,6 +47,62 @@ int mb_coor_scale(int verbose, double latitude, double *mtodeglon, double *mtode
 		fprintf(stderr, "dbg2       verbose: %d\n", verbose);
 		fprintf(stderr, "dbg2       latitude: %f\n", latitude);
 	}
+	
+	/* ellipsoid coefficients from World Geodetic System Ellipsoid of 1972
+	 * - see Bowditch (H.O. 9 -- American Practical Navigator). */
+	const double C1 = 111412.84;
+	const double C2 = -93.5;
+	const double C3 = 0.118;
+	const double C4 = 111132.92;
+	const double C5 = -559.82;
+	const double C6 = 1.175;
+	const double C7 = 0.0023;
+
+	/* check that the latitude value is sensible */
+	int status = MB_SUCCESS;
+	if (fabs(latitude) <= 90.0) {
+		const double radlat = DTR * latitude;
+		*mtodeglon = 1. / fabs(C1 * cos(radlat) + C2 * cos(3 * radlat) + C3 * cos(5 * radlat));
+		*mtodeglat = 1. / fabs(C4 + C5 * cos(2 * radlat) + C6 * cos(4 * radlat) + C7 * cos(6 * radlat));
+	}
+
+	/* set error flag if needed */
+	else {
+		status = MB_FAILURE;
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return arguments:\n");
+		fprintf(stderr, "dbg2       mtodeglon: %g\n", *mtodeglon);
+		fprintf(stderr, "dbg2       mtodeglat: %g\n", *mtodeglat);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:    %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mb_alvinxy_scale(int verbose, double latitude, double *mtodeglon, double *mtodeglat) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose: %d\n", verbose);
+		fprintf(stderr, "dbg2       latitude: %f\n", latitude);
+	}
+	
+	/* Ellipsoid coefficients from Clark 1866 spheroid. */
+	/* Taken from: Murphy, C., Singh, H., "Rectilinear Coordinate Frames for Deep Sea Navigation"
+		C. Murphy and H. Singh, "Rectilinear coordinate frames for Deep sea navigation," 
+		2010 IEEE/OES Autonomous Underwater Vehicles, Monterey, CA, USA, 2010, pp. 1-10, 
+		doi: 10.1109/AUV.2010.5779654." */
+	const double C1 = 111415.13;
+	const double C2 = -94.55;
+	const double C3 = -0.12;
+	const double C4 = 111132.09;
+	const double C5 = -566.05;
+	const double C6 = 1.20;
+	const double C7 = -0.002;
 
 	/* check that the latitude value is sensible */
 	int status = MB_SUCCESS;

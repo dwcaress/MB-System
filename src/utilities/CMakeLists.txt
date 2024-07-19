@@ -29,42 +29,43 @@ find_package(LibPROJ REQUIRED)
 
 set(executables
     mbabsorption
-    mbdatalist
-    mbgrid
-    mbnavlist
-    mbsegypsd
     mbareaclean
+    mbauvloglist
+    mbbackangle
+    mbclean
+    mbcopy
+    mbctdlist
+    mbdatalist
     mbdefaults
+    mbdumpesf
+    mbextractsegy
+    mbfilter
+    mbformat
+    mbgetesf
+    mbgpstide
+    mbgrid
     mbhistogram
+    mbinfo
+    mblist
+    mbmakeplatform
+    mbmapscale
+    mbminirovnav
+    mbmosaic
+    mbnavlist
+    mbprocess
+    mbrolltimelag
+    mbroutetime
+    mbsegygrid
+    mbsegyinfo
+    mbsegylist
+    mbsegypsd
     mbpreprocess
     mbset
-    mbauvloglist
-    mbdumpesf
-    mbinfo
-    mbprocess
     mbsslayout
-    mbbackangle
-    mbextractsegy
-    mbrolltimelag
     mbsvplist
-    mbclean
-    mbfilter
-    mblist
-    mbroutetime
     mbsvpselect
-    mbformat
-    mbmakeplatform
-    mbsegygrid
     mbtime
-    mbcopy
-    mbgetesf
-    mbminirovnav
-    mbsegyinfo
-    mbvoxelclean
-    mbctdlist
-    mbgpstide
-    mbmosaic
-    mbsegylist)
+    mbvoxelclean)
 
 foreach(executable ${executables})
   add_executable(${executable} ${executable}.cc)
@@ -78,7 +79,7 @@ add_executable(mbconfig mbconfig.cc levitus.h)
 target_link_libraries(mbconfig PRIVATE mbio mbbsio mbaux mbsapi mbgsf m pthread)
 
 file(WRITE levitus.h
-  "const char *levitusfile = \"${levitusDir}/LevitusAnnual82.dat\";\nconst char *otps_location = \"${otpsDir}\";\n")
+  "const char *levitusfile = \"${CMAKE_INSTALL_PREFIX}/${levitusDir}/LevitusAnnual82.dat\";\nconst char *otps_location = \"${otpsDir}\";\n")
 
 target_link_libraries(mbsvpselect PRIVATE LibPROJ::LibPROJ)
 target_link_libraries(mbgrid PRIVATE mbaux)
@@ -89,6 +90,6 @@ target_compile_definitions(
           ENV_OTPSDIR="${otpsDir}"
           ENV_LEVITUSANNUAL82="${levitusDir}/LevitusAnnual82.dat")
 target_compile_definitions(
-  mblevitus PRIVATE ENV_LEVITUSANNUAL82="${levitusDir}/LevitusAnnual82.dat")
+  mblevitus PRIVATE ENV_LEVITUSANNUAL82="${CMAKE_INSTALL_PREFIX}/${levitusDir}/LevitusAnnual82.dat")
 
 install(TARGETS ${executables} mbconfig mblevitus DESTINATION ${CMAKE_INSTALL_BINDIR})

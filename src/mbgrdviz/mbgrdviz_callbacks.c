@@ -1687,8 +1687,9 @@ int do_mbgrdviz_openprimary(char *input_file_ptr) {
   char *button_name_ptr;
   size_t instance;
   char *testname = "Internal Test Grid";
-  int projectionid, utmzone;
-  double reference_lon;
+  double lon_origin;
+  double lat_origin;
+  int projectionid;
 
   /* mbview parameters */
   char mbv_title[MB_PATH_MAXLINE];
@@ -1879,18 +1880,15 @@ int do_mbgrdviz_openprimary(char *input_file_ptr) {
         sprintf(mbv_display_projection_id, "SPHEROID");
       }
 
-      /* else if grid geographic then use appropriate UTM zone for non-polar grids */
+      /* else if grid geographic then use LTM projection with origin at the center of the 
+      		grid for non-polar grids */
       else if (mbv_primary_ymax > -80.0 && mbv_primary_ymin < 84.0) {
         mbv_display_projection_mode = MBV_PROJECTION_PROJECTED;
-        reference_lon = 0.5 * (mbv_primary_xmin + mbv_primary_xmax);
-        if (reference_lon > 180.0)
-          reference_lon -= 360.0;
-        utmzone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
-        if (0.5 * (mbv_primary_ymin + mbv_primary_ymax) >= 0.0)
-          projectionid = 32600 + utmzone;
-        else
-          projectionid = 32700 + utmzone;
-        sprintf(mbv_display_projection_id, "EPSG:%d", projectionid);
+        lon_origin = 0.5 * (mbv_primary_xmin + mbv_primary_xmax);
+        lat_origin = 0.5 * (mbv_primary_ymin + mbv_primary_ymax);
+        if (lon_origin > 180.0)
+          lon_origin -= 360.0;
+        sprintf(mbv_display_projection_id, "LTM%.5f/%.5f", lon_origin, lat_origin);
       }
 
       /* else if grid geographic and more northerly than 84 deg N then use
@@ -1919,8 +1917,8 @@ int do_mbgrdviz_openprimary(char *input_file_ptr) {
     if (mbv_primary_grid_projection_mode != MBV_PROJECTION_PROJECTED) {
       double mtodeglon, mtodeglat;
       mb_coor_scale(verbose, 0.5 * (mbv_primary_ymin + mbv_primary_ymax), &mtodeglon, &mtodeglat);
-      fprintf(stderr, "Geographic grid bounds: %f %f %f %f   Longitude scaling: %.8f m/deg  Latitude scaling: %.8f m/deg\n",
-          mbv_primary_xmin, mbv_primary_xmax, mbv_primary_ymin, mbv_primary_ymax, mtodeglon, mtodeglat);
+      //fprintf(stderr, "Geographic grid bounds: %f %f %f %f   Longitude scaling: %.8f m/deg  Latitude scaling: %.8f m/deg\n",
+      //    mbv_primary_xmin, mbv_primary_xmax, mbv_primary_ymin, mbv_primary_ymax, mtodeglon, mtodeglat);
     }
 
     /* set basic mbview view controls */
@@ -2209,10 +2207,12 @@ int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr) {
           nget = sscanf(buffer, "## Site File Version %d.%d", &site_version_major, &site_version_minor);
         }
         else if (buffer[0] != '#') {
-          if (site_version_major > 1) {
-            nget = sscanf(buffer, "%s,%s,%lf,%d,%d,%[^\n]", 
+          if (site_version_major > 1 || (site_version_major == 0 && strchr(buffer, ',') != NULL)) {
+            nget = sscanf(buffer, "%[^','],%[^','],%lf,%d,%d,%[^\n]", 
                         lonstring, latstring, &sitetopo[nsite],
                         &sitecolor[nsite], &sitesize[nsite], sitename[nsite]);
+            if (nget >= 2)
+            	site_version_major = 2;
           }
           else {
             nget = sscanf(buffer, "%s %s %lf %d %d %[^\n]", 
@@ -2255,13 +2255,13 @@ int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr) {
 
         /* output some debug values */
         if (verbose > 0 && site_ok) {
-          fprintf(stderr, "\ndbg5  Site point read in program <%s>\n", program_name);
-          fprintf(stderr, "dbg5       site[%d]: %f %f %f  %d %d  %s\n", nsite, sitelon[nsite], sitelat[nsite],
+          fprintf(stderr, "\nSite point read in program <%s>\n", program_name);
+          fprintf(stderr, "     site[%d]: %f %f %f  %d %d  %s\n", nsite, sitelon[nsite], sitelat[nsite],
                   sitetopo[nsite], sitecolor[nsite], sitesize[nsite], sitename[nsite]);
         }
-        else if (verbose > 0 && !site_ok) {
-          fprintf(stderr, "\ndbg5  Unintelligible line read from site file in program <%s>\n", program_name);
-          fprintf(stderr, "dbg5       buffer:  %s\n", buffer);
+        else if (verbose > 0 && !site_ok && buffer[0] != '#') {
+          fprintf(stderr, "\nUnintelligible line read from site file in program <%s>\n", program_name);
+          fprintf(stderr, "     buffer:  %s\n", buffer);
         }
 
         strncpy(buffer, "", sizeof(buffer));
@@ -3208,39 +3208,33 @@ int do_mbgrdviz_saverisiscriptheading(size_t instance, char *output_file_ptr) {
           if (pjptr == NULL && npointtotal > 0) {
             double reference_lon = routelon[0];
             double reference_lat = routelat[0];
-
-            /* calculate eastings and northings using the appropriate UTM projection */
-            int projectionid;
             mb_path projection_id;
+
+            /* calculate eastings and northings using an LTM projection */
             if (reference_lat > -80.0 && reference_lat < 84.0) {
               if (reference_lon > 180.0)
                 reference_lon -= 360.0;
-              int utmzone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
-              if (reference_lat >= 0.0)
-                projectionid = 32600 + utmzone;
-              else
-                projectionid = 32700 + utmzone;
-              sprintf(projection_id, "EPSG:%d", projectionid);
+              sprintf(projection_id, "LTM%.5f/%.5f", reference_lon, reference_lat);
             }
 
             /* else if more northerly than 84 deg N then use
                     North Universal Polar Stereographic Projection */
             else if (reference_lat > 84.0) {
-              projectionid = 32661;
+              int projectionid = 32661;
               sprintf(projection_id, "EPSG:%d", projectionid);
             }
 
             /* else if more southerly than 80 deg S then use
                     South Universal Polar Stereographic Projection */
             else if (reference_lat < 80.0) {
-              projectionid = 32761;
+              int projectionid = 32761;
               sprintf(projection_id, "EPSG:%d", projectionid);
             }
             fprintf(stderr, "Reference longitude: %.9f latitude:%.9f Projection ID: %s\n",
                     reference_lon, reference_lat, projection_id);
 
             /* initialize projection */
-            if (mb_proj_init(2, projection_id, &(pjptr), &error) != MB_SUCCESS) {
+            if (mb_proj_init(verbose, projection_id, &(pjptr), &error) != MB_SUCCESS) {
               char *error_message = NULL;
               mb_error(verbose, error, &error_message);
               fprintf(stderr, "\nMBIO Error initializing projection:\n%s\n", error_message);
@@ -3464,32 +3458,26 @@ int do_mbgrdviz_saverisiscriptnoheading(size_t instance, char *output_file_ptr) 
           if (pjptr == NULL && npointtotal > 0) {
             double reference_lon = routelon[0];
             double reference_lat = routelat[0];
-
-            /* calculate eastings and northings using the appropriate UTM projection */
-            int projectionid;
             mb_path projection_id;
+
+            /* calculate eastings and northings using an LTM projection */
             if (reference_lat > -80.0 && reference_lat < 84.0) {
               if (reference_lon > 180.0)
                 reference_lon -= 360.0;
-              int utmzone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
-              if (reference_lat >= 0.0)
-                projectionid = 32600 + utmzone;
-              else
-                projectionid = 32700 + utmzone;
-              sprintf(projection_id, "EPSG:%d", projectionid);
+              sprintf(projection_id, "LTM%.5f/%.5f", reference_lon, reference_lat);
             }
 
             /* else if more northerly than 84 deg N then use
                     North Universal Polar Stereographic Projection */
             else if (reference_lat > 84.0) {
-              projectionid = 32661;
+              int projectionid = 32661;
               sprintf(projection_id, "EPSG:%d", projectionid);
             }
 
             /* else if more southerly than 80 deg S then use
                     South Universal Polar Stereographic Projection */
             else if (reference_lat < 80.0) {
-              projectionid = 32761;
+              int projectionid = 32761;
               sprintf(projection_id, "EPSG:%d", projectionid);
             }
             fprintf(stderr, "Reference longitude: %.9f latitude:%.9f Projection ID: %s\n",
@@ -3722,32 +3710,26 @@ int do_mbgrdviz_saverisi2scriptheading(size_t instance, char *output_file_ptr) {
           if (pjptr == NULL && npointtotal > 0) {
             double reference_lon = routelon[0];
             double reference_lat = routelat[0];
-
-            /* calculate eastings and northings using the appropriate UTM projection */
-            int projectionid;
             mb_path projection_id;
+
+            /* calculate eastings and northings using an LTM projection */
             if (reference_lat > -80.0 && reference_lat < 84.0) {
               if (reference_lon > 180.0)
                 reference_lon -= 360.0;
-              int utmzone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
-              if (reference_lat >= 0.0)
-                projectionid = 32600 + utmzone;
-              else
-                projectionid = 32700 + utmzone;
-              sprintf(projection_id, "EPSG:%d", projectionid);
+              sprintf(projection_id, "LTM%.5f/%.5f", reference_lon, reference_lat);
             }
 
             /* else if more northerly than 84 deg N then use
                     North Universal Polar Stereographic Projection */
             else if (reference_lat > 84.0) {
-              projectionid = 32661;
+              int projectionid = 32661;
               sprintf(projection_id, "EPSG:%d", projectionid);
             }
 
             /* else if more southerly than 80 deg S then use
                     South Universal Polar Stereographic Projection */
             else if (reference_lat < 80.0) {
-              projectionid = 32761;
+              int projectionid = 32761;
               sprintf(projection_id, "EPSG:%d", projectionid);
             }
             fprintf(stderr, "Reference longitude: %.9f latitude:%.9f Projection ID: %s\n",
@@ -3964,32 +3946,26 @@ int do_mbgrdviz_saverisi2scriptnoheading(size_t instance, char *output_file_ptr)
           if (pjptr == NULL && npointtotal > 0) {
             double reference_lon = routelon[0];
             double reference_lat = routelat[0];
-
-            /* calculate eastings and northings using the appropriate UTM projection */
-            int projectionid;
             mb_path projection_id;
+
+            /* calculate eastings and northings using an LTM projection */
             if (reference_lat > -80.0 && reference_lat < 84.0) {
               if (reference_lon > 180.0)
                 reference_lon -= 360.0;
-              int utmzone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
-              if (reference_lat >= 0.0)
-                projectionid = 32600 + utmzone;
-              else
-                projectionid = 32700 + utmzone;
-              sprintf(projection_id, "EPSG:%d", projectionid);
+              sprintf(projection_id, "LTM%.5f/%.5f", reference_lon, reference_lat);
             }
 
             /* else if more northerly than 84 deg N then use
                     North Universal Polar Stereographic Projection */
             else if (reference_lat > 84.0) {
-              projectionid = 32661;
+              int projectionid = 32661;
               sprintf(projection_id, "EPSG:%d", projectionid);
             }
 
             /* else if more southerly than 80 deg S then use
                     South Universal Polar Stereographic Projection */
             else if (reference_lat < 80.0) {
-              projectionid = 32761;
+              int projectionid = 32761;
               sprintf(projection_id, "EPSG:%d", projectionid);
             }
             fprintf(stderr, "Reference longitude: %.9f latitude:%.9f Projection ID: %s\n",

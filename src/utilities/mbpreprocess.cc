@@ -135,6 +135,7 @@ constexpr char usage_message[] =
     "\t--head1-offsets=x/y/z/heading/roll/pitch\n"
     "\t--head2-offsets=x/y/z/heading/roll/pitch\n"
     "\t--kluge-time-jumps=threshold\n"
+    "\t--kluge-fix-7k-timestamps=targetoffset\n"
     "\t--kluge-ancilliary-time-jumps=threshold\n"
     "\t--kluge-mbaripressure-time-jumps=threshold\n"
     "\t--kluge-beam-tweak=factor\n"
@@ -168,6 +169,15 @@ int main(int argc, char **argv) {
   /* output fnv files for each sensor */
   bool output_sensor_fnv = false;
   bool skip_existing = false;  // output files
+  
+  double kluge_timejumps_threshold = 0.0;
+  bool kluge_timejumps = false;
+  bool kluge_fix7ktimestamps = true;
+  double kluge_fix7ktimestamps_targetoffset = 0.0;
+  double kluge_timejumps_anc_threshold = 0.0;
+  bool kluge_timejumps_ancilliary = false;
+  double kluge_timejumps_mba_threshold = 0.0;
+  bool kluge_timejumps_mbaripressure = false;
 
   double kluge_beamtweak_factor = 1.0;
   bool kluge_beamtweak = false;
@@ -232,12 +242,6 @@ int main(int argc, char **argv) {
   mb_u_char time_latency_apply = MBPREPROCESS_TIME_LATENCY_APPLY_NONE;
   double filter_length = 0.0;
   mb_u_char filter_apply = MBPREPROCESS_TIME_LATENCY_APPLY_NONE;
-  double kluge_timejumps_threshold = 0.0;
-  bool kluge_timejumps = false;
-  double kluge_timejumps_anc_threshold = 0.0;
-  bool kluge_timejumps_ancilliary = false;
-  double kluge_timejumps_mba_threshold = 0.0;
-  bool kluge_timejumps_mbaripressure = false;
 
   {
     static struct option options[] = {{"verbose", no_argument, nullptr, 0},
@@ -299,6 +303,7 @@ int main(int argc, char **argv) {
                                       {"head1-offsets", required_argument, nullptr, 0},
                                       {"head2-offsets", required_argument, nullptr, 0},
                                       {"kluge-time-jumps", required_argument, nullptr, 0},
+                                      {"kluge-fix-7k-timestamps", required_argument, nullptr, 0},
                                       {"kluge-ancilliary-time-jumps", required_argument, nullptr, 0},
                                       {"kluge-mbaripressure-time-jumps", required_argument, nullptr, 0},
                                       {"kluge-beam-tweak", required_argument, nullptr, 0},
@@ -624,6 +629,15 @@ int main(int argc, char **argv) {
           if (n == 1)
             kluge_timejumps = true;
         }
+        else if (strcmp("kluge-fix-7k-timestamps", options[option_index].name) == 0) {
+          const int n = sscanf(optarg, "%lf", &kluge_fix7ktimestamps_targetoffset);
+          if (n == 1)
+            kluge_fix7ktimestamps = true;
+            preprocess_pars.kluge_id[preprocess_pars.n_kluge] = MB_PR_KLUGE_FIX7KTIMESTAMPS;
+            double *dptr = (double *)&preprocess_pars.kluge_pars[preprocess_pars.n_kluge * MB_PR_KLUGE_PAR_SIZE];
+            *dptr = kluge_fix7ktimestamps_targetoffset;
+            preprocess_pars.n_kluge++;
+        }
         else if (strcmp("kluge-ancilliary-time-jumps", options[option_index].name) == 0) {
           const int n = sscanf(optarg, "%lf", &kluge_timejumps_anc_threshold);
           if (n == 1)
@@ -852,20 +866,22 @@ int main(int argc, char **argv) {
     fprintf(stderr, "dbg2       head2_offsets_roll:           %f\n", preprocess_pars.head2_offsets_roll);
     fprintf(stderr, "dbg2       head2_offsets_pitch:          %f\n", preprocess_pars.head2_offsets_pitch);
     fprintf(stderr, "dbg2  Various data fixes (kluges):\n");
-    fprintf(stderr, "dbg2       kluge_timejumps:              %d\n", kluge_timejumps);
-    fprintf(stderr, "dbg2       kluge_timejumps_threshold:    %f\n", kluge_timejumps_threshold);
-    fprintf(stderr, "dbg2       kluge_timejumps_ancilliary:   %d\n", kluge_timejumps_ancilliary);
-    fprintf(stderr, "dbg2       kluge_timejumps_anc_threshold:%f\n", kluge_timejumps_anc_threshold);
-    fprintf(stderr, "dbg2       kluge_timejumps_mbaripressure:%d\n", kluge_timejumps_mbaripressure);
-    fprintf(stderr, "dbg2       kluge_timejumps_mba_threshold:%f\n", kluge_timejumps_mba_threshold);
-    fprintf(stderr, "dbg2       kluge_beamtweak:              %d\n", kluge_beamtweak);
-    fprintf(stderr, "dbg2       kluge_beamtweak_factor:       %f\n", kluge_beamtweak_factor);
-    fprintf(stderr, "dbg2       kluge_soundspeedtweak:        %d\n", kluge_soundspeedtweak);
-    fprintf(stderr, "dbg2       kluge_soundspeedtweak_factor: %f\n", kluge_soundspeedtweak_factor);
-    fprintf(stderr, "dbg2       kluge_fix_wissl_timestamps:   %d\n", kluge_fix_wissl_timestamps);
-    fprintf(stderr, "dbg2       kluge_auv_sentry_sensordepth: %d\n", kluge_auv_sentry_sensordepth);
-    fprintf(stderr, "dbg2       kluge_ignore_snippets:        %d\n", kluge_ignore_snippets);
-    fprintf(stderr, "dbg2       kluge_sensordepth_from_heave   %d\n", kluge_sensordepth_from_heave);
+    fprintf(stderr, "dbg2       kluge_timejumps:                     %d\n", kluge_timejumps);
+    fprintf(stderr, "dbg2       kluge_timejumps_threshold:           %f\n", kluge_timejumps_threshold);
+    fprintf(stderr, "dbg2       kluge_timejumps_ancilliary:          %d\n", kluge_timejumps_ancilliary);
+    fprintf(stderr, "dbg2       kluge_fix7ktimestamps:               %d\n", kluge_fix7ktimestamps);
+    fprintf(stderr, "dbg2       kluge_fix7ktimestamps_targetoffset:  %f\n", kluge_fix7ktimestamps_targetoffset);
+    fprintf(stderr, "dbg2       kluge_timejumps_anc_threshold:       %f\n", kluge_timejumps_anc_threshold);
+    fprintf(stderr, "dbg2       kluge_timejumps_mbaripressure:       %d\n", kluge_timejumps_mbaripressure);
+    fprintf(stderr, "dbg2       kluge_timejumps_mba_threshold:       %f\n", kluge_timejumps_mba_threshold);
+    fprintf(stderr, "dbg2       kluge_beamtweak:                     %d\n", kluge_beamtweak);
+    fprintf(stderr, "dbg2       kluge_beamtweak_factor:              %f\n", kluge_beamtweak_factor);
+    fprintf(stderr, "dbg2       kluge_soundspeedtweak:               %d\n", kluge_soundspeedtweak);
+    fprintf(stderr, "dbg2       kluge_soundspeedtweak_factor:        %f\n", kluge_soundspeedtweak_factor);
+    fprintf(stderr, "dbg2       kluge_fix_wissl_timestamps:          %d\n", kluge_fix_wissl_timestamps);
+    fprintf(stderr, "dbg2       kluge_auv_sentry_sensordepth:        %d\n", kluge_auv_sentry_sensordepth);
+    fprintf(stderr, "dbg2       kluge_ignore_snippets:               %d\n", kluge_ignore_snippets);
+    fprintf(stderr, "dbg2       kluge_sensordepth_from_heave         %d\n", kluge_sensordepth_from_heave);
     fprintf(stderr, "dbg2  Additional output:\n");
     fprintf(stderr, "dbg2       output_sensor_fnv:            %d\n", output_sensor_fnv);
     fprintf(stderr, "dbg2  Skip existing output files:\n");
@@ -962,20 +978,22 @@ int main(int argc, char **argv) {
     fprintf(stderr, "     head2_offsets_roll:           %f\n", preprocess_pars.head2_offsets_roll);
     fprintf(stderr, "     head2_offsets_pitch:          %f\n", preprocess_pars.head2_offsets_pitch);
     fprintf(stderr, "Various data fixes (kluges):\n");
-    fprintf(stderr, "     kluge_timejumps:              %d\n", kluge_timejumps);
-    fprintf(stderr, "     kluge_timejumps_threshold:    %f\n", kluge_timejumps_threshold);
-    fprintf(stderr, "     kluge_timejumps_ancilliary:   %d\n", kluge_timejumps_ancilliary);
-    fprintf(stderr, "     kluge_timejumps_anc_threshold:%f\n", kluge_timejumps_anc_threshold);
-    fprintf(stderr, "     kluge_timejumps_mbaripressure:%d\n", kluge_timejumps_mbaripressure);
-    fprintf(stderr, "     kluge_timejumps_mba_threshold:%f\n", kluge_timejumps_mba_threshold);
-    fprintf(stderr, "     kluge_beamtweak:              %d\n", kluge_beamtweak);
-    fprintf(stderr, "     kluge_beamtweak_factor:       %f\n", kluge_beamtweak_factor);
-    fprintf(stderr, "     kluge_soundspeedtweak:        %d\n", kluge_soundspeedtweak);
-    fprintf(stderr, "     kluge_soundspeedtweak_factor: %f\n", kluge_soundspeedtweak_factor);
-    fprintf(stderr, "     kluge_fix_wissl_timestamps:   %d\n", kluge_fix_wissl_timestamps);
-    fprintf(stderr, "     kluge_auv_sentry_sensordepth: %d\n", kluge_auv_sentry_sensordepth);
-    fprintf(stderr, "     kluge_ignore_snippets:        %d\n", kluge_ignore_snippets);
-    fprintf(stderr, "     kluge_sensordepth_from_heave:  %d\n", kluge_sensordepth_from_heave);
+    fprintf(stderr, "     kluge_timejumps:                     %d\n", kluge_timejumps);
+    fprintf(stderr, "     kluge_timejumps_threshold:           %f\n", kluge_timejumps_threshold);
+    fprintf(stderr, "     kluge_timejumps_ancilliary:          %d\n", kluge_timejumps_ancilliary);
+    fprintf(stderr, "     kluge_fix7ktimestamps:               %d\n", kluge_fix7ktimestamps);
+    fprintf(stderr, "     kluge_fix7ktimestamps_targetoffset:  %f\n", kluge_fix7ktimestamps_targetoffset);
+    fprintf(stderr, "     kluge_timejumps_anc_threshold:       %f\n", kluge_timejumps_anc_threshold);
+    fprintf(stderr, "     kluge_timejumps_mbaripressure:       %d\n", kluge_timejumps_mbaripressure);
+    fprintf(stderr, "     kluge_timejumps_mba_threshold:       %f\n", kluge_timejumps_mba_threshold);
+    fprintf(stderr, "     kluge_beamtweak:                     %d\n", kluge_beamtweak);
+    fprintf(stderr, "     kluge_beamtweak_factor:              %f\n", kluge_beamtweak_factor);
+    fprintf(stderr, "     kluge_soundspeedtweak:               %d\n", kluge_soundspeedtweak);
+    fprintf(stderr, "     kluge_soundspeedtweak_factor:        %f\n", kluge_soundspeedtweak_factor);
+    fprintf(stderr, "     kluge_fix_wissl_timestamps:          %d\n", kluge_fix_wissl_timestamps);
+    fprintf(stderr, "     kluge_auv_sentry_sensordepth:        %d\n", kluge_auv_sentry_sensordepth);
+    fprintf(stderr, "     kluge_ignore_snippets:               %d\n", kluge_ignore_snippets);
+    fprintf(stderr, "     kluge_sensordepth_from_heave         %d\n", kluge_sensordepth_from_heave);
     fprintf(stderr, "Additional output:\n");
     fprintf(stderr, "     output_sensor_fnv:            %d\n", output_sensor_fnv);
     fprintf(stderr, "Skip existing output files:\n");
@@ -1867,16 +1885,16 @@ int main(int argc, char **argv) {
 
   for (int i=0;i<n_altitude;i++) {
     mb_get_date(verbose,altitude_time_d[i],time_i);
-    fprintf(stderr,"HDG: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.3f\n",
+    fprintf(stderr,"ALT: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.3f\n",
       time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
       altitude_altitude[i]);
   }
 
   for (int i=0;i<n_attitude;i++) {
     mb_get_date(verbose,attitude_time_d[i],time_i);
-    fprintf(stderr,"RPH: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.3f %.3f\n",
+    fprintf(stderr,"RPH: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %6.3f %6.3f %6.3f\n",
       time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
-      attitude_roll[i], attitude_pitch[i]);
+      attitude_roll[i], attitude_pitch[i], attitude_heave[i]);
   }
 #endif
 
@@ -2792,9 +2810,6 @@ int main(int argc, char **argv) {
           double dtime_d_raw = 0.0;
           double dtime_d = 0.0;
           double time_d_raw = 0.0;
-//fprintf(stderr, "\n%s:%d:%s: kluge_timejumps:%d n_rt_data:%d kluge_first_time_d:%f kluge_last_time_d:%f time_d:%f dtime_d:%f\n",
-//__FILE__, __LINE__, __FUNCTION__,
-//kluge_timejumps, n_rt_data, kluge_first_time_d, kluge_last_time_d, time_d, time_d - kluge_last_raw_time_d);
           if (kluge_timejumps) {
             if (kind == MB_DATA_DATA) {
               if (n_rt_data == 1)
@@ -2809,15 +2824,9 @@ int main(int argc, char **argv) {
                 if (fabs(dtime_d_raw - dtime_d_expect) >= kluge_timejumps_threshold) {
                   time_d = kluge_last_time_d + dtime_d_expect;
                   timestamp_changed = true;
-//fprintf(stderr, "%s:%d:%s: kluge_timejumps:%d n_rt_data:%d kluge_first_time_d:%f kluge_last_time_d:%f time_d:%f dtime_d:%f dtime_d_raw:%f  dtime_d_expect:%f* change:%f\n",
-//__FILE__, __LINE__, __FUNCTION__,
-//kluge_timejumps, n_rt_data, kluge_first_time_d, kluge_last_time_d, time_d, dtime_d, dtime_d_raw, dtime_d_expect, time_d - time_d_raw);
                 } else {
                   time_d = kluge_last_time_d + dtime_d_raw;
                   timestamp_changed = true;
-//fprintf(stderr, "%s:%d:%s: kluge_timejumps:%d n_rt_data:%d kluge_first_time_d:%f kluge_last_time_d:%f time_d:%f dtime_d:%f dtime_d_raw:%f* dtime_d_expect:%f  change:%f\n",
-//__FILE__, __LINE__, __FUNCTION__,
-//kluge_timejumps, n_rt_data, kluge_first_time_d, kluge_last_time_d, time_d, dtime_d, dtime_d_raw, dtime_d_expect, time_d - time_d_raw);
                 }
               }
             }
@@ -2826,10 +2835,7 @@ int main(int argc, char **argv) {
               kluge_last_time_d = time_d;
               kluge_last_raw_time_d = time_d_raw;
             }
-          }
-//fprintf(stderr, "%s:%d:%s: kluge_timejumps:%d n_rt_data:%d kluge_first_time_d:%f kluge_last_time_d:%f time_d:%f dtime_d:%f\n",
-//__FILE__, __LINE__, __FUNCTION__,
-//kluge_timejumps, n_rt_data, kluge_first_time_d, kluge_last_time_d, time_d, dtime_d);
+          }          
 
           /* if the input data are WiSSL data in format MBF_3DWISSLR
            * and kluge_fix_wissl_timestamps is enabled, call special function

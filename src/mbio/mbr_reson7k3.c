@@ -2596,7 +2596,7 @@ int mbr_reson7k3_rd_Navigation(int verbose, char *buffer, void *store_ptr, int *
   index += 4;
   mb_get_binary_float(true, &buffer[index], &(Navigation->heading));
   index += 4;
-
+  
   /* set kind */
   if (status == MB_SUCCESS) {
     /* set kind */
@@ -8343,7 +8343,7 @@ int mbr_reson7k3_FileCatalog_compare(const void *a, const void *b) {
   return(result);
 };
 /*--------------------------------------------------------------------*/
-int mbr_reson7k3_rd_FileCatalog(int verbose, char *buffer, void *store_ptr, int *error){
+int mbr_reson7k3_rd_FileCatalog(int verbose, char *buffer, void *mbio_ptr, void *store_ptr, int *error){
   s7k3_filecatalogdata *filecatalogdata;
   int time_j[5], time_i[7];
 
@@ -8352,10 +8352,12 @@ int mbr_reson7k3_rd_FileCatalog(int verbose, char *buffer, void *store_ptr, int 
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
+    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
 
   /* get pointer to raw data structure */
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
   struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   s7k3_FileCatalog *FileCatalog = &(store->FileCatalog_read);
   s7k3_header *header = &(FileCatalog->header);
@@ -8433,16 +8435,62 @@ int mbr_reson7k3_rd_FileCatalog(int verbose, char *buffer, void *store_ptr, int 
     if (time_i[0] == 2014 || time_i[0] < 2030) {
     	catalog_count++;
     }
-    
   }
   
   // reset catalog n to good entries only
   FileCatalog->n = catalog_count;
+  
+  // if preprocess flag set to fix 7k ping timestamps then operate on the FileCatalog before
+  // sorting is done based on timestamps
+  int kluge_fix7ktimestamps = mb_io_ptr->save21;
+  if (kluge_fix7ktimestamps) {
+  	double kluge_fix7ktimestamps_targetoffset = mb_io_ptr->saved3;
+    bool use_last_ancilliary_timestamp = false;
+    double last_ancilliary_timestamp = 0.0;
+    double kluge_fix7ktimestamps_threshold = 4 * fabs(kluge_fix7ktimestamps_targetoffset);
+    for (unsigned int i = 0; i < FileCatalog->n; i++) {
+      s7k3_filecatalogdata *filecatalogdata = &FileCatalog->filecatalogdata[i];
+      if (filecatalogdata->record_type >= 1000
+    	&& filecatalogdata->record_type <= 1016) {
+    	last_ancilliary_timestamp = filecatalogdata->time_d;
+    	use_last_ancilliary_timestamp = true;
+// fprintf(stderr, "  i:%d record: %d %f\n", i, filecatalogdata->record_type, last_ancilliary_timestamp);
+      }
+      else if (use_last_ancilliary_timestamp 
+      	&& (filecatalogdata->record_type == R7KRECID_SonarSettings
+			|| filecatalogdata->record_type == R7KRECID_RemoteControlSonarSettings
+			|| filecatalogdata->record_type == R7KRECID_MatchFilter
+			|| filecatalogdata->record_type == R7KRECID_BeamGeometry
+			|| filecatalogdata->record_type == R7KRECID_Bathymetry
+			|| filecatalogdata->record_type == R7KRECID_RawDetection
+			|| filecatalogdata->record_type == R7KRECID_SideScan
+			|| filecatalogdata->record_type == R7KRECID_CalibratedSideScan
+			|| filecatalogdata->record_type == R7KRECID_TVG
+			|| filecatalogdata->record_type == R7KRECID_Snippet
+			|| filecatalogdata->record_type == R7KRECID_SnippetBackscatteringStrength
+			|| filecatalogdata->record_type == R7KRECID_WaterColumn
+			|| filecatalogdata->record_type == R7KRECID_CompressedWaterColumn)) {
+// fprintf(stderr, "  i:%d record: %d %f   %f", i, filecatalogdata->record_type, 
+// filecatalogdata->time_d, last_ancilliary_timestamp - filecatalogdata->time_d);
+		double diff = last_ancilliary_timestamp - filecatalogdata->time_d;
+		if (fabs(diff) > kluge_fix7ktimestamps_threshold) {
+    		filecatalogdata->time_d = last_ancilliary_timestamp + kluge_fix7ktimestamps_targetoffset;
+    		mb_get_date(verbose, filecatalogdata->time_d, time_i);
+    		mb_get_jtime(verbose, time_i, time_j);
+    		filecatalogdata->s7kTime.Year = time_i[0];
+    		filecatalogdata->s7kTime.Day = time_j[1];
+    		filecatalogdata->s7kTime.Hours = time_i[3];
+    		filecatalogdata->s7kTime.Minutes = time_i[4];
+    		filecatalogdata->s7kTime.Seconds = time_i[5] + 0.000001 * time_i[6];
+    	}
+// fprintf(stderr, "   %f\n", filecatalogdata->time_d);
+      }
+    }
+  }
 
   // sort the data records, leaving the FileHeader record in place at the start
   // of the file, any comments just after the FileHeadeer, and then ordering by
   // timestamp while keeping ping related records together for each ping
-
   qsort((void *)FileCatalog->filecatalogdata, FileCatalog->n,
         sizeof(s7k3_filecatalogdata), (void *)mbr_reson7k3_FileCatalog_compare);
 
@@ -9639,6 +9687,8 @@ int mbr_reson7k3_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   int *fileheaders = (int *)&mb_io_ptr->save12;
   double *last_7k_time_d = (double *)&mb_io_ptr->saved5;
   unsigned int *icatalog = (unsigned int *)&mb_io_ptr->save15;
+  int *kluge_fix7ktimestamps = (int *)&mb_io_ptr->save20;
+  double *kluge_fix7ktimestamps_targetoffset = (double *)&mb_io_ptr->saved1;
 
   /* set file position */
   mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
@@ -9773,7 +9823,7 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
           || *recordid == R7KRECID_CalibratedBeam
           || *recordid == R7KRECID_CalibratedSideScan
           || *recordid == R7KRECID_SnippetBackscatteringStrength) {
-
+ 
         /* check for ping number */
         ping_record = true;
         mbr_reson7k3_chk_pingnumber(verbose, *recordid, buffer, new_ping);
@@ -9835,7 +9885,8 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
           store->read_ProcessedSideScan = false;
           store->read_SonarSettings = false;
           store->read_MatchFilter = false;
-          store->read_BeamGeometry = false;
+          // Do not reset BeamGeometry as it does not come for every ping when data are logged by PDS
+          // store->read_BeamGeometry = false;
           store->read_Bathymetry = false;
           store->read_SideScan = false;
           store->read_WaterColumn = false;
@@ -10095,6 +10146,7 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
 
     /* if possible and needed parse the data record now */
     if (status == MB_SUCCESS && !done) {
+      struct s7k3_header_struct *header = NULL;
 
       if (*recordid == R7KRECID_ReferencePoint) {
         status = mbr_reson7k3_rd_ReferencePoint(verbose, buffer, store_ptr, error);
@@ -10262,6 +10314,8 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
         if (status == MB_SUCCESS) {
           store->nrec_SonarSettings++;
           store->read_SonarSettings = true;
+          s7k3_SonarSettings *SonarSettings = &(store->SonarSettings);
+          header = &(SonarSettings->header);
         }
       }
       else if (*recordid == R7KRECID_Configuration) {
@@ -10276,6 +10330,8 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
         if (status == MB_SUCCESS) {
           store->nrec_MatchFilter++;
           store->read_MatchFilter = true;
+          s7k3_MatchFilter *MatchFilter = &(store->MatchFilter);
+          header = &(MatchFilter->header);
         }
       }
       else if (*recordid == R7KRECID_FirmwareHardwareConfiguration) {
@@ -10290,6 +10346,8 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
         if (status == MB_SUCCESS) {
           store->nrec_BeamGeometry++;
           store->read_BeamGeometry = true;
+          s7k3_BeamGeometry *BeamGeometry = &(store->BeamGeometry);
+          header = &(BeamGeometry->header);
         }
       }
       else if (*recordid == R7KRECID_Bathymetry) {
@@ -10297,6 +10355,8 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
         if (status == MB_SUCCESS) {
           store->nrec_Bathymetry++;
           store->read_Bathymetry = true;
+          s7k3_Bathymetry *Bathymetry = &(store->Bathymetry);
+          header = &(Bathymetry->header);
         }
       }
       else if (*recordid == R7KRECID_SideScan) {
@@ -10304,6 +10364,8 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
         if (status == MB_SUCCESS) {
           store->nrec_SideScan++;
           store->read_SideScan = true;
+          s7k3_SideScan *SideScan = &(store->SideScan);
+          header = &(SideScan->header);
         }
       }
       else if (*recordid == R7KRECID_WaterColumn) {
@@ -10311,6 +10373,8 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
         if (status == MB_SUCCESS) {
           store->nrec_WaterColumn++;
           store->read_WaterColumn = true;
+          s7k3_WaterColumn *WaterColumn = &(store->WaterColumn);
+          header = &(WaterColumn->header);
         }
       }
       else if (*recordid == R7KRECID_VerticalDepth) {
@@ -10318,6 +10382,8 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
         if (status == MB_SUCCESS) {
           store->nrec_VerticalDepth++;
           store->read_VerticalDepth = true;
+          s7k3_VerticalDepth *VerticalDepth = &(store->VerticalDepth);
+          header = &(VerticalDepth->header);
         }
       }
       else if (*recordid == R7KRECID_TVG) {
@@ -10325,6 +10391,8 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
         if (status == MB_SUCCESS) {
           store->nrec_TVG++;
           store->read_TVG = true;
+          s7k3_TVG *TVG = &(store->TVG);
+          header = &(TVG->header);
         }
       }
       else if (*recordid == R7KRECID_Image) {
@@ -10332,6 +10400,8 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
         if (status == MB_SUCCESS) {
           store->nrec_Image++;
           store->read_Image = true;
+          s7k3_Image *Image = &(store->Image);
+          header = &(Image->header);
         }
       }
       else if (*recordid == R7KRECID_PingMotion) {
@@ -10339,6 +10409,8 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
         if (status == MB_SUCCESS) {
           store->nrec_PingMotion++;
           store->read_PingMotion = true;
+          s7k3_PingMotion *PingMotion = &(store->PingMotion);
+          header = &(PingMotion->header);
         }
       }
       else if (*recordid == R7KRECID_AdaptiveGate) {
@@ -10352,6 +10424,8 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
         if (status == MB_SUCCESS) {
           store->nrec_DetectionDataSetup++;
           store->read_DetectionDataSetup = true;
+          s7k3_DetectionDataSetup *DetectionDataSetup = &(store->DetectionDataSetup);
+          header = &(DetectionDataSetup->header);
         }
       }
       else if (*recordid == R7KRECID_Beamformed) {
@@ -10359,6 +10433,8 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
         if (status == MB_SUCCESS) {
           store->nrec_Beamformed++;
           store->read_Beamformed = true;
+          s7k3_Beamformed *Beamformed = &(store->Beamformed);
+          header = &(Beamformed->header);
         }
       }
       else if (*recordid == R7KRECID_VernierProcessingDataRaw) {
@@ -10366,6 +10442,8 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
         if (status == MB_SUCCESS) {
           store->nrec_VernierProcessingDataRaw++;
           store->read_VernierProcessingDataRaw = true;
+          s7k3_VernierProcessingDataRaw *VernierProcessingDataRaw = &(store->VernierProcessingDataRaw);
+          header = &(VernierProcessingDataRaw->header);
         }
       }
       else if (*recordid == R7KRECID_BITE) {
@@ -10394,6 +10472,8 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
         if (status == MB_SUCCESS) {
           store->nrec_RawDetection++;
           store->read_RawDetection = true;
+          RawDetection = &(store->RawDetection);
+          header = &(RawDetection->header);
         }
       }
       else if (*recordid == R7KRECID_Snippet) {
@@ -10401,6 +10481,8 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
         if (status == MB_SUCCESS) {
           store->nrec_Snippet++;
           store->read_Snippet = true;
+          s7k3_Snippet *Snippet = &(store->Snippet);
+          header = &(Snippet->header);
         }
       }
       else if (*recordid == R7KRECID_VernierProcessingDataFiltered) {
@@ -10408,6 +10490,8 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
         if (status == MB_SUCCESS) {
           store->nrec_VernierProcessingDataFiltered++;
           store->read_VernierProcessingDataFiltered = true;
+          s7k3_VernierProcessingDataFiltered *VernierProcessingDataFiltered = &(store->VernierProcessingDataFiltered);
+          header = &(VernierProcessingDataFiltered->header);
         }
       }
       else if (*recordid == R7KRECID_InstallationParameters) {
@@ -10429,6 +10513,8 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
         if (status == MB_SUCCESS) {
           store->nrec_CompressedBeamformedMagnitude++;
           store->read_CompressedBeamformedMagnitude = true;
+          s7k3_CompressedBeamformedMagnitude *CompressedBeamformedMagnitude = &(store->CompressedBeamformedMagnitude);
+          header = &(CompressedBeamformedMagnitude->header);
         }
       }
       else if (*recordid == R7KRECID_CompressedWaterColumn) {
@@ -10436,6 +10522,8 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
         if (status == MB_SUCCESS) {
           store->nrec_CompressedWaterColumn++;
           store->read_CompressedWaterColumn = true;
+          s7k3_CompressedWaterColumn *CompressedWaterColumn = &(store->CompressedWaterColumn);
+          header = &(CompressedWaterColumn->header);
         }
       }
       else if (*recordid == R7KRECID_SegmentedRawDetection) {
@@ -10443,6 +10531,8 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
         if (status == MB_SUCCESS) {
           store->nrec_SegmentedRawDetection++;
           store->read_SegmentedRawDetection = true;
+          s7k3_SegmentedRawDetection *SegmentedRawDetection = &(store->SegmentedRawDetection);
+          header = &(SegmentedRawDetection->header);
         }
       }
       else if (*recordid == R7KRECID_CalibratedBeam) {
@@ -10450,6 +10540,8 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
         if (status == MB_SUCCESS) {
           store->nrec_CalibratedBeam++;
           store->read_CalibratedBeam = true;
+          s7k3_CalibratedBeam *CalibratedBeam = &(store->CalibratedBeam);
+          header = &(CalibratedBeam->header);
         }
       }
       else if (*recordid == R7KRECID_SystemEvents) {
@@ -10499,6 +10591,8 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
         if (status == MB_SUCCESS) {
           store->nrec_CalibratedSideScan++;
           store->read_CalibratedSideScan = true;
+          s7k3_CalibratedSideScan *CalibratedSideScan = &(store->CalibratedSideScan);
+          header = &(CalibratedSideScan->header);
         }
       }
       else if (*recordid == R7KRECID_SnippetBackscatteringStrength) {
@@ -10506,6 +10600,8 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
         if (status == MB_SUCCESS) {
           store->nrec_SnippetBackscatteringStrength++;
           store->read_SnippetBackscatteringStrength = true;
+          s7k3_SnippetBackscatteringStrength *SnippetBackscatteringStrength = &(store->SnippetBackscatteringStrength);
+          header = &(SnippetBackscatteringStrength->header);
         }
       }
       else if (*recordid == R7KRECID_MB2Status) {
@@ -10574,7 +10670,7 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
           // parse the FileCatalog record
           if (status == MB_SUCCESS) {
 //mbsys_reson7k3_print_FileHeader(verbose, &store->FileHeader, error);
-            status = mbr_reson7k3_rd_FileCatalog(verbose, buffer, store_ptr, error);
+            status = mbr_reson7k3_rd_FileCatalog(verbose, buffer, mbio_ptr, store_ptr, error);
             if (status == MB_SUCCESS) {
               store->nrec_FileCatalog = 1;
             }
@@ -10592,7 +10688,7 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
         }
       }
       else if (*recordid == R7KRECID_FileCatalog) {
-        //status = mbr_reson7k3_rd_FileCatalog(verbose, buffer, store_ptr, error);
+        //status = mbr_reson7k3_rd_FileCatalog(verbose, buffer, mbio_ptr, store_ptr, error);
         //if (status == MB_SUCCESS) {
         //  done = true;
         //  store->nrec_FileCatalog = 1;
@@ -10632,6 +10728,8 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
         if (status == MB_SUCCESS) {
           store->nrec_RemoteControlSonarSettings++;
           store->read_RemoteControlSonarSettings = true;
+          s7k3_RemoteControlSonarSettings *RemoteControlSonarSettings = &(store->RemoteControlSonarSettings);
+          header = &(RemoteControlSonarSettings->header);
         }
       }
       else if (*recordid == R7KRECID_CommonSystemSettings) {
@@ -10690,6 +10788,23 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
           store->nrec_ProfileAverageTemperature++;
         }
       }
+         
+      /* if specified by kluge_fix7ktimestamps then record timestamp may have been
+         changed in the FileCatalog - if so also change the record header timestamp */
+      if (header != NULL) {
+        int kluge_fix7ktimestamps = mb_io_ptr->save21;
+  		if (kluge_fix7ktimestamps && store->FileCatalog_read.n > 0) {
+		  s7k3_FileCatalog *FileCatalog = &(store->FileCatalog_read);
+		  int iicatalog = *icatalog - 1;
+		  s7k3_filecatalogdata *filecatalogdata = &FileCatalog->filecatalogdata[iicatalog];
+		  header->s7kTime.Year = filecatalogdata->s7kTime.Year;
+		  header->s7kTime.Day = filecatalogdata->s7kTime.Day;
+		  header->s7kTime.Seconds = filecatalogdata->s7kTime.Seconds;
+		  header->s7kTime.Hours = filecatalogdata->s7kTime.Hours;
+		  header->s7kTime.Minutes = filecatalogdata->s7kTime.Minutes;
+  		}
+  	  }
+
     }
 
 #ifdef MBR_RESON7K3_DEBUG2

@@ -15687,6 +15687,8 @@ int mbnavadjust_open_visualization(int which_grid) {
   size_t instance;
   int projectionid, utmzone;
   double reference_lon;
+  double lon_origin;
+  double lat_origin;
 
   /* mbview parameters */
   mb_pathplus mbv_file_name;
@@ -15903,18 +15905,14 @@ int mbnavadjust_open_visualization(int which_grid) {
         snprintf(mbv_display_projection_id, sizeof(mbv_display_projection_id), "SPHEROID");
       }
 
-      /* else if grid geographic then use appropriate UTM zone for non-polar grids */
+      /* else if grid geographic and non-polar then use LTM projection */
       else if (mbv_primary_ymax > -80.0 && mbv_primary_ymin < 84.0) {
         mbv_display_projection_mode = MBV_PROJECTION_PROJECTED;
-        reference_lon = 0.5 * (mbv_primary_xmin + mbv_primary_xmax);
+        lon_origin = 0.5 * (mbv_primary_xmin + mbv_primary_xmax);
+        lat_origin = 0.5 * (mbv_primary_ymin + mbv_primary_ymax);
         if (reference_lon > 180.0)
           reference_lon -= 360.0;
-        utmzone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
-        if (0.5 * (mbv_primary_ymin + mbv_primary_ymax) >= 0.0)
-          projectionid = 32600 + utmzone;
-        else
-          projectionid = 32700 + utmzone;
-        snprintf(mbv_display_projection_id, sizeof(mbv_display_projection_id), "EPSG:%d", projectionid);
+        snprintf(mbv_display_projection_id, sizeof(mbv_display_projection_id), "LTM%.5f/%.5f", lon_origin, lat_origin);
       }
 
       /* else if grid geographic and more northerly than 84 deg N then use

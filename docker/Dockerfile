@@ -1,89 +1,175 @@
-FROM centos:7
+# Debian base
+FROM debian:12.5 AS builder
 
-RUN yum -y groupinstall "Development Tools" && \
-    yum install -y epel-release && \
-    yum install -y \
-            fftw \
-            fftw-devel \
-            netcdf \
-            netcdf-devel \
-            openmotif \
-            openmotif-devel \
-            openssh-server \
-            perl \
-            python3 \
-            cmake3 \
-            clang \
-            git \
-            freeglut \
-            freeglut-devel \
-            glxinfo \
-            mesa-dri-drivers \
-            gedit \
-            evince
+ARG BUILD_ONLY="openssh-server \
+    cmake \
+    build-essential \
+    autoconf \
+    automake \
+    libtool \
+    net-tools \
+    git \
+    wget \
+    curl \
+    gpg \
+    curl"
 
-# note, problems with latest 6.0.0 release at this point,
-# see https://github.com/dwcaress/MB-System/issues/807#issuecomment-632938328
-# So, trying master just as an interim
-ARG GMT_SOURCE_TAG=master
+ARG COMMON_DEPS="libgcc-11-dev \
+    libglib2.0-dev \
+    x11-apps \
+    mesa-utils \
+    bash \
+    vim"
 
-# Tried 8.2.1, but got compile error, use this stable build
-ARG PROJ_SOURCE_TAG=7.2.1
+ARG LCM_DEPS="fontconfig \
+    fonts-droid-fallback \
+    fonts-liberation \
+    openjdk-17-jdk"
 
-# TODO in general, confirm appropriate install mechanisms for PROJ and GMT on centos
-# (per .travis.yml, seems like the above tags are only defined for ubuntu.
+ARG MBSYS_BRANCH="master"
 
-COPY docker/centos/scripts/install-gmt.sh .
-RUN GMT_SOURCE_TAG=${GMT_SOURCE_TAG} ./install-gmt.sh
+ARG MBSYS_DEPS="libproj-dev \
+    libgdal-dev \
+    gdal-bin \
+    libgdal-dev \
+    libhdf5-dev \
+    libnetcdf-dev \
+    libhdf5-dev \
+    libfftw3-dev  \
+    graphicsmagick \
+    ffmpeg \
+    libxdg-basedir-dev \
+    gnuplot \
+    x11-common \
+    x11-apps \
+    libxt-dev \
+    libxext-dev \
+    gsfonts \
+    gsfonts-x11 \
+    xfonts-base \ 
+    xfonts-100dpi \
+    xfonts-75dpi \ 
+    libtirpc-dev \
+    libglu1-mesa-dev \
+    libmotif-dev \
+    libxml2-dev \
+    libopencv-dev \
+    xdg-utils \
+    gv \
+    ghostscript \
+    ghostscript-x \ 
+    gnome-icon-theme \
+    gnome-themes-extra \
+    libcanberra-gtk-module \
+    libcanberra-gtk3-module \
+    dbus-x11 \
+    eog \
+    evince \
+    gimp \
+    locales"
 
-COPY docker/centos/scripts/install-proj.sh .
-RUN PROJ_SOURCE_TAG=${PROJ_SOURCE_TAG} ./install-proj.sh
+ARG BUILD_DEPS="${COMMON_DEPS} ${LCM_DEPS} ${MBSYS_DEPS}"
 
-# Cleanup
-RUN rm -rf install-gmt.sh install-proj.sh && yum -y clean all
+ARG LCM_BUILD_OPTS="CMAKE_BUILD_TYPE=RELEASE \
+    -DCMAKE_INSTALL_PREFIX=/usr/local \
+    -DLCM_ENABLE_GO=OFF \
+    -DLCM_ENABLE_PYTHON=OFF \
+    -DLCM_ENABLE_LUA=OFF \
+    -DLCM_ENABLE_EXAMPLES=ON"
 
+ARG BUILD_DIR=/tmp/build
 
-# TODO remove the following, only added to facilitate debugging
-# during initial tests of the container
-ENV LIBGL_DEBUG=verbose
-# `glxinfo >/dev/null` will for example help spot any errors
+ARG DEBIAN_FRONTEND=noninteractive
 
+ENV JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF8"
 
-# This location, to be mounted from some file on the host, will
-# help keep the bash history upon re-starts of the container:
-ENV HISTFILE=/opt/mbsystem.bash_history
-# NOTE: not using the default HISTFILE to facilitate running
-# the container as a different user from the one by default.
+ENV CLASSPATH="/usr/local/share/java/jchart2d-3.2.2.jar:\
+/usr/local/share/java/lcm.jar:\
+/usr/local/share/java/lcmtypes_senlcm.jar:\
+/usr/local/share/java/lcmtypes_trn.jar:\
+/usr/local/share/java/jide-oss-2.9.7.jar:\
+/usr/local/share/java/lcmtypes_geolcm.jar:\
+/usr/local/share/java/lcmtypes_stdlcm.jar:\
+/usr/local/share/java/xmlgraphics-commons-1.3.1.jar"
 
-RUN mkdir -p /opt/MB-System \
-             /opt/MBSWorkDir \
- && touch $HISTFILE
+ENV XDG_CONFIG_HOME=/home/ops/.config
 
-# NOTE now with issues not resolving GDAL/OGR stuff.
-# Added the --with-gdal-config below as th sumary indicated
-# no "GDAL found" (even though was there) ...  no luck.
-COPY . /opt/MB-System/
-RUN cd /opt/MB-System/                              \
- && ./configure --with-gdal-config=/usr/local/bin      \
-                --with-proj-lib=/usr/local/lib         \
-                --with-proj-include=/usr/local/include \
- && make                                            \
- && make check                                      \
- && make install
+RUN apt-get update && \
+    apt-get install -y ${BUILD_ONLY} ${BUILD_DEPS} && \
+    mkdir -p ${BUILD_DIR} && \
+    mkdir -p -m 775 /.gmt/server && \
+    cd ${BUILD_DIR} && \
+    wget https://github.com/GenericMappingTools/gmt/releases/download/6.1.1/gmt-6.1.1-src.tar.xz && \
+    tar -xvf gmt-6.1.1-src.tar.xz && \
+    cd gmt-6.1.1 && \
+    mkdir build && cd build && \
+    cmake -DCMAKE_INSTALL_PREFIX=/usr/local .. && make && make install && \
+    cd ${BUILD_DIR} && \
+    git clone https://github.com/lcm-proj/lcm.git && \
+    cd lcm && [ -d build ] || mkdir build && \
+    cd build && cmake ${LCM_BUILD_OPTS} .. && make && make install && \
+    cd ${BUILD_DIR} && \
+    git clone https://github.com/dwcaress/MB-System.git && \
+    cd MB-System && \
+    git checkout ${MBSYS_BRANCH} && \
+    echo "!!! Building MBSYS_BRANCH ${MBSYS_BRANCH}" && sleep 3 && \
+    mkdir build && cd build && \
+    cmake -DbuildOpenCV=ON -DCMAKE_BUILD_TYPE=Debug .. && make && make install 
 
-RUN  ls /usr/local/include 
+# optionally, use ghostscript 10.03.0 (remove ghostscript, ghostscript-x above)
+#RUN cd ${BUILD_DIR} && \
+#    wget https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs10030/ghostscript-10.03.0.tar.gz && \
+#    tar -xvf  ghostscript-10.03.0.tar.gz && \
+#    cd ghostscript-10.03.0 && \
+#    ./configure --help && ./configure --with-x --with-drivers=FILES,x11 && make && make install 
 
-WORKDIR  /opt/MBSWorkDir
+# cleanup: remove build dependencies, update ldconfig
+RUN mkdir -p /opt/mbsys && \
+    cp -r ${BUILD_DIR}/MB-System/src/mbtrn/tools/* /opt/mbsys/ && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf ${BUILD_DIR} && \
+    ldconfig / && \
+    ldconfig /usr/local/lib && ldconfig /usr/local/lib/gmt5
 
-# due to programs failing to load libgmt
-ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}/usr/local/lib64
+# cleanup: add mbuser user, configure gio mime handlers, font configs, gmt 
+RUN groupadd -r mbuser && useradd -r -m -g mbuser mbuser && \
+    mkdir -p $XDG_CONFIG_HOME  && \
+    gio mime application/postscript gv.desktop && \
+    gio mime image/tiff org.gnome.eog.desktop && \
+    gio mime image/jpeg org.gnome.eog.desktop && \
+    chown -R mbuser:mbuser $XDG_CONFIG_HOME && \
+    rm /etc/fonts/conf.d/70-no-bitmaps.conf && \
+    fc-cache -rv && \
+    touch /home/mbuser/gmt.conf && chown mbuser:mbuser /home/mbuser/gmt.conf && chmod 664 /home/mbuser/gmt.conf && \
+    su -c - mbuser "gmt gmtset -G/home/mbuser/gmt.conf GMT_CUSTOM_LIBS /usr/local/lib/mbsystem.so" && \ 
+    echo "FontPath /usr/share/fonts/X11/100dpi\nFontPath /usr/share/fonts/X11/75dpi" >> /etc/X11/xorg.conf.d/xorg.conf 
 
-# Permit executing MB-System commands via ssh from another container
-RUN echo "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" >> /root/.bashrc
-# For execution of MB-System gmt modules, e.g.: gmt mbgrd2obj
-RUN echo "GMT_CUSTOM_LIBS = /usr/local/lib/mbsystem.so" >> /root/gmt.conf
-# Generate host keys
-RUN /usr/bin/ssh-keygen -A
+# add CWD to path so that autogenerated scripts can execute
+ENV PATH=$PATH:.
+# silence GTK accessiblity messages
+ENV NO_AT_BRIDGE=1
+USER mbuser
 
-# No explicit cmd or entry_point. Launcher script will typically run `bash`
-# but also allow to run any other program in the container.
+# EXPOSE ports
+#EXPOSE 80/tcp
+#EXPOSE 443/tcp
+#EXPOSE 28000/tcp
+#EXPOSE 28000/udp
+#EXPOSE 27000/tcp
+#EXPOSE 27000/udp
+#EXPOSE 27027/tcp
+#EXPOSE 27027/udp
+#EXPOSE 8000/tcp
+#EXPOSE 8000/udp
+#EXPOSE 8001/tcp
+#EXPOSE 8001/udp
+#EXPOSE 7000/tcp
+#EXPOSE 7000/udp
+#EXPOSE 7001/tcp
+#EXPOSE 7001/udp
+#EXPOSE 7667/tcp
+#EXPOSE 7667/udp
+
+# Set the entrypoint which can be overwritten by docker-compose
+#ENTRYPOINT ["/opt/mbsys/mbtrn/start.sh"]
+

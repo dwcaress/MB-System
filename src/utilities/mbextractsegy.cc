@@ -1519,7 +1519,7 @@ int mbes_generateplots(int verbose, FILE *sfp, char *output_root, char *segy_suf
   /* calculate sweep needed for all of the data in the line - if this is more than 1.0 seconds,
     then make section plots using only the sweep needed for each section alone */
   double delay = seafloordepthmin / 750.0;
-  delay = ((int)(delay / 0.05)) * 0.05;
+  delay = ((int)(delay / 0.05) - 1) * 0.05;
   double endofdata = seafloordepthmax / 750.0 + linetracelength;
   endofdata = (1 + (int)(endofdata / 0.05)) * 0.05;
   double sweep = endofdata - delay;
@@ -1539,7 +1539,7 @@ int mbes_generateplots(int verbose, FILE *sfp, char *output_root, char *segy_suf
         seafloordepthmin = seafloordepthminplot[i];
         seafloordepthmax = seafloordepthmaxplot[i];
         delay = seafloordepthmin / 750.0;
-        delay = ((int)(delay / 0.05)) * 0.05;
+        delay = ((int)(delay / 0.05) - 1) * 0.05;
         endofdata = seafloordepthmax / 750.0 + linetracelength;
         endofdata = (1 + (int)(endofdata / 0.05)) * 0.05;
         sweep = endofdata - delay;
@@ -1658,7 +1658,7 @@ int mbes_generateplots(int verbose, FILE *sfp, char *output_root, char *segy_suf
         seafloordepthmin = seafloordepthminplot[i];
         seafloordepthmax = seafloordepthmaxplot[i];
         delay = seafloordepthmin / 750.0;
-        delay = ((int)(delay / 0.05)) * 0.05;
+        delay = ((int)(delay / 0.05) - 1) * 0.05;
         endofdata = seafloordepthmax / 750.0 + linetracelength;
         endofdata = (1 + (int)(endofdata / 0.05)) * 0.05;
         sweep = endofdata - delay;
@@ -1716,7 +1716,7 @@ int mbes_generateplots(int verbose, FILE *sfp, char *output_root, char *segy_suf
         seafloordepthmin = seafloordepthminplot[i];
         seafloordepthmax = seafloordepthmaxplot[i];
         delay = seafloordepthmin / 750.0;
-        delay = ((int)(delay / 0.05)) * 0.05;
+        delay = ((int)(delay / 0.05) - 1) * 0.05;
         endofdata = seafloordepthmax / 750.0 + linetracelength;
         endofdata = (1 + (int)(endofdata / 0.05)) * 0.05;
         sweep = endofdata - delay;
@@ -1725,7 +1725,6 @@ int mbes_generateplots(int verbose, FILE *sfp, char *output_root, char *segy_suf
       char plot_type[32];
       char zbounds[32];
       char colormap[32];
-      
 
       snprintf(plot_type, sizeof(plot_type), "Trace");
       snprintf(zbounds, sizeof(zbounds),  "-%f/%f", zmax, zmax);
