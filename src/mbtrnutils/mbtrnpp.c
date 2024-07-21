@@ -79,6 +79,7 @@
 #include "mb1_msg.h"
 #include "mb1-reader.h"
 #endif // WITH_MBTNAV
+#include "GeoCon.h"
 
 // Features
 #ifndef WITHOUT_MB1_READER
@@ -160,11 +161,6 @@ typedef struct mbtrnpp_opts_s{
     // opt "output"
     char *output;
 
-#ifndef TRN_USE_PROJ
-    // opt "projection"
-    int projection;
-#endif
-
     // opt "swath-width"
     double swath_width;
 
@@ -202,14 +198,20 @@ typedef struct mbtrnpp_opts_s{
     // opt "trn-en"
     bool trn_en;
 
-#ifdef TRN_USE_PROJ
+//#ifdef TRN_USE_PROJ
+    // opt "useproj"
+    bool use_proj;
+
+    // opt "projection"
+    int projection;
+
     // opt "trn-crs"
     char *trn_crs;
-#else
+//#else
     // opt "trn-utm"
     long int trn_utm;
-#endif
-    
+//#endif
+
     // opt "trn-map"
     char *trn_map;
 
@@ -425,13 +427,19 @@ typedef struct mbtrnpp_cfg_s{
     // TRN processing enable
     bool trn_enable;
 
-#ifdef TRN_USE_PROJ
+//#ifdef TRN_USE_PROJ
+    // use proj instead of GCTP
+    bool use_proj;
+
+    // projection
+    int projection;
+
     // TRN CRS
     char *trn_crs;
-#else
+//#else
     // TRN UTM zone
     long int trn_utm_zone;
-#endif
+//#endif
 
     // TRN map type
     int trn_mtype;
@@ -582,6 +590,7 @@ s=NULL;\
 #define OPT_TIDE_MODEL_DFL                NULL
 #define OPT_LOG_DIRECTORY_DFL             "."
 #define OPT_OUTPUT_DFL                    NULL
+#define OPT_USE_PROJ_DFL                  true
 #define OPT_PROJECTION_DFL                0
 #define OPT_SWATH_WIDTH_DFL               90
 #define OPT_SOUNDINGS_DFL                 11
@@ -596,11 +605,11 @@ s=NULL;\
 #define OPT_STATFLAGS_DFL                 MBTRNPP_STAT_FLAGS_DFL
 #define OPT_STATFLAG_STR_DFL              "MSF_STATUS|MSF_EVENT|MSF_ASTAT|MSF_PSTAT"
 #define OPT_TRN_EN_DFL                    true
-#ifdef TRN_USE_PROJ
+//#ifdef TRN_USE_PROJ
 #define OPT_TRN_CRS_DFL                   TRN_CRS_DFL
-#else
+//#else
 #define OPT_TRN_UTM_DFL                   TRN_UTM_DFL
-#endif
+//#endif
 #define OPT_MAP_DFL                       NULL
 #define OPT_CFG_DFL                       NULL
 #define OPT_PAR_DFL                       NULL
@@ -674,13 +683,15 @@ s=NULL;\
 #define MBTRNPP_LOG_EXT   ".log"
 #ifdef WITH_MBTNAV
 
-#ifdef TRN_USE_PROJ
+//#ifdef TRN_USE_PROJ
+#define USE_PROJ_DFL     true
+#define PROJECTION_DFL   0
 #define TRN_CRS_DFL      "UTM10N"
-#else
+//#else
 #define UTM_MONTEREY_BAY 10L
 #define UTM_AXIAL        12L
 #define TRN_UTM_DFL      UTM_MONTEREY_BAY
-#endif
+//#endif
 
 #define TRN_MTYPE_DFL    TRN_MAP_BO
 #define TRN_SENSOR_TYPE_DFL TRN_SENSOR_MB
@@ -1070,13 +1081,14 @@ int mbtrnpp_trnu_pubempty_osocket(double time, double lat, double lon, double de
 char *mbtrnpp_trn_updatestr(char *dest, int len, trn_update_t *update, int indent);
 #endif // WITH_MBTNAV
 
-#ifdef TRN_USE_PROJ
+//#ifdef TRN_USE_PROJ
 /* TRN uses a projected coordinate system - the navigation must be transformed from 
    geographic coordinates to the Coordinate Reference System (CRS) used for the reference 
    map. The pointer pjptr points to a Proj context that that is used for forward and
    inverse transforms from Geographic to the TRN CRS. */
-void *pjptr = NULL;
-#endif
+//void *pjptr = NULL;
+wgeocon_t *geocon = NULL;
+//#endif
 
 // TRN reinit flag - forces reinitializing the TRN filter
 bool reinit_flag=true;
@@ -1523,11 +1535,13 @@ static int s_mbtrnpp_init_cfg(mbtrnpp_cfg_t *cfg)
         cfg->trn_status_interval_sec=MBTRNPP_STAT_PERIOD_SEC;
         cfg->mbtrnpp_stat_flags=MBTRNPP_STAT_FLAGS_DFL;
         cfg->trn_enable=false;
-#ifdef TRN_USE_PROJ
+//#ifdef TRN_USE_PROJ
+        cfg->use_proj=USE_PROJ_DFL;
+        cfg->projection=PROJECTION_DFL;
         cfg->trn_crs=strdup(TRN_CRS_DFL);
-#else
+//#else
         cfg->trn_utm_zone=TRN_UTM_DFL;
-#endif
+//#endif
         cfg->trn_mtype=TRN_MTYPE_DFL;
         cfg->trn_sensor_type=TRN_SENSOR_TYPE_DFL;
         cfg->trn_ftype=TRN_FTYPE_DFL;
@@ -1573,9 +1587,6 @@ static int s_mbtrnpp_init_opts(mbtrnpp_opts_t *opts)
         opts->tide_model=OPT_TIDE_MODEL_DFL;
         opts->log_directory=strdup(OPT_LOG_DIRECTORY_DFL);
         opts->output=CHK_STRDUP(OPT_OUTPUT_DFL);
-#ifndef TRN_USE_PROJ
-        opts->projection=OPT_PROJECTION_DFL;
-#endif
         opts->swath_width=OPT_SWATH_WIDTH_DFL;
         opts->soundings=OPT_SOUNDINGS_DFL;
         opts->median_filter=CHK_STRDUP(OPT_MEDIAN_FILTER_DFL);
@@ -1589,11 +1600,13 @@ static int s_mbtrnpp_init_opts(mbtrnpp_opts_t *opts)
         opts->statflags_str=strdup(OPT_STATFLAG_STR_DFL);
         opts->statflags=OPT_STATFLAGS_DFL;
         opts->trn_en=OPT_TRN_EN_DFL;
-#ifdef TRN_USE_PROJ
+//#ifdef TRN_USE_PROJ
+        opts->use_proj=OPT_USE_PROJ_DFL;
+        opts->projection=OPT_PROJECTION_DFL;
         opts->trn_crs=strdup(OPT_TRN_CRS_DFL);
-#else
+//#else
         opts->trn_utm=OPT_TRN_UTM_DFL;
-#endif
+//#endif
         opts->trn_map=CHK_STRDUP(OPT_MAP_DFL);
         opts->trn_cfg=CHK_STRDUP(OPT_CFG_DFL);
         opts->trn_par=CHK_STRDUP(OPT_PAR_DFL);
@@ -1718,13 +1731,17 @@ static int s_mbtrnpp_cfgstr(char **pdest, size_t olen, mbtrnpp_cfg_t *self, cons
     mbb_printf(optr, "%s%*s%*s%s%*"PRId64"%s", pre, indent, (indent>0?" ":""), wkey, "mbtrnpp_loop_delay_msec", sep, wval, self->mbtrnpp_loop_delay_msec, del);
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "trn_status_interval_sec", sep, wval, self->trn_status_interval_sec, del);
     mbb_printf(optr, "%s%*s%*s%s%*X%s", pre, indent, (indent>0?" ":""), wkey, "mbtrnpp_stat_flags", sep, wval, self->mbtrnpp_stat_flags, del);
+//#ifdef TRN_USE_PROJ
+    mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "use_proj", sep, wval, BOOL2YNC(self->use_proj), del);
+    mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "projection", sep, wval, self->projection, del);
+//#endif
     mbb_printf(optr, "%s%*s%*s%s%*s/%d%s", pre, indent, (indent>0?" ":""), wkey, "trn_dev", sep, wval, r7k_devidstr(self->trn_dev), self->trn_dev, del);
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "trn_enable", sep, wval, BOOL2YNC(self->trn_enable), del);
-#ifdef TRN_USE_PROJ
+//#ifdef TRN_USE_PROJ
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "trn_crs", sep, wval, self->trn_crs, del);
-#else
+//#else
 	mbb_printf(optr, "%s%*s%*s%s%*ld%s", pre, indent, (indent>0?" ":""), wkey, "trn_utm_zone", sep, wval, self->trn_utm_zone, del);
-#endif
+//#endif
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "trn_mtype", sep, wval, self->trn_mtype, del);
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "trn_sensor_type", sep, wval, self->trn_sensor_type, del);
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "trn_ftype", sep, wval, self->trn_ftype, del);
@@ -1793,9 +1810,9 @@ static int s_mbtrnpp_optstr(char **pdest, size_t olen, mbtrnpp_opts_t *self, con
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "log-directory", sep, wval, self->log_directory, del);
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "tide-model", sep, wval, self->tide_model, del);
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "output", sep, wval, self->output, del);
-#ifndef TRN_USE_PROJ
+//#ifndef TRN_USE_PROJ
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "projection", sep, wval, self->projection, del);
-#endif
+//#endif
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "swath-width", sep, wval, self->swath_width, del);
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "soundings", sep, wval, self->soundings, del);
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "median-filter", sep, wval, self->median_filter, del);
@@ -1809,11 +1826,11 @@ static int s_mbtrnpp_optstr(char **pdest, size_t olen, mbtrnpp_opts_t *self, con
     mbb_printf(optr, "%s%*s%*s%s%*X/%s%s", pre, indent, (indent>0?" ":""), wkey, "statflags", sep, wval, self->statflags, self->statflags_str, del);
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "trn-en", sep, wval, BOOL2YNC(self->trn_en), del);
     mbb_printf(optr, "%s%*s%*s%s%*s/%d%s", pre, indent, (indent>0?" ":""), wkey, "trn-dev", sep, wval, r7k_devidstr(self->trn_dev), self->trn_dev, del);
-#ifdef TRN_USE_PROJ
+//#ifdef TRN_USE_PROJ
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "trn-crs", sep, wval, self->trn_crs, del);
-#else
+//#else
     mbb_printf(optr, "%s%*s%*s%s%*ld%s", pre, indent, (indent>0?" ":""), wkey, "trn-utm", sep, wval, self->trn_utm, del);
-#endif
+//#endif
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "trn-map", sep, wval, self->trn_map, del);
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "trn-cfg", sep, wval, self->trn_cfg, del);
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "trn-par", sep, wval, self->trn_par, del);
@@ -2393,13 +2410,13 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
                     retval=0;
                 }
             }
-#ifndef TRN_USE_PROJ
+//#ifndef TRN_USE_PROJ
             else if(strcmp(key,"projection")==0 ){
                 if(sscanf(val,"%d",&opts->projection)==1){
                     retval=0;
                 }
             }
-#endif
+//#endif
             else if(strcmp(key,"swath-width")==0 || strcmp(key,"swath")==0 ){
                 if(sscanf(val,"%lf",&opts->swath_width)==1){
                     retval=0;
@@ -2471,13 +2488,21 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
                     retval=0;
                 }
             }
-#ifdef TRN_USE_PROJ
+//#ifdef TRN_USE_PROJ
+            else if(strcmp(key,"use-proj")==0 ){
+                if( mkvc_parse_bool(val,&opts->use_proj)==0){
+                    retval=0;
+                } else {
+                    opts->use_proj=true;
+                    retval=0;
+                }
+            }
             else if(strcmp(key,"trn-crs")==0 ){
                 MEM_CHKFREE(opts->trn_crs);
                 if( (opts->trn_crs=CHK_STRDUP(val)) != NULL){
                     retval=0;
                 }
-            } 
+            }
             else if(strcmp(key,"trn-utm")==0 ){
             	int utm_zone;
                 if(sscanf(val,"%d",&utm_zone)==1){
@@ -2491,13 +2516,13 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
 					}
                 }
             } 
-#else
-            else if(strcmp(key,"trn-utm")==0 ){
-                if(sscanf(val,"%ld",&opts->trn_utm)==1){
-                    retval=0;
-                }
-            }
-#endif
+//#else
+//            else if(strcmp(key,"trn-utm")==0 ){
+//                if(sscanf(val,"%ld",&opts->trn_utm)==1){
+//                    retval=0;
+//                }
+//            }
+//#endif
             else if(strcmp(key,"trn-map")==0 ){
                 MEM_CHKFREE(opts->trn_map);
                 if( (opts->trn_map=CHK_STRDUP(val)) != NULL){
@@ -2771,14 +2796,16 @@ static int s_mbtrnpp_configure(mbtrnpp_cfg_t *cfg, mbtrnpp_opts_t *opts)
         cfg->mbtrnpp_stat_flags = opts->statflags;
         // trn-en
         cfg->trn_enable = opts->trn_en;
-#ifdef TRN_USE_PROJ
+//#ifdef TRN_USE_PROJ
+        // use-proj
+        cfg->use_proj = opts->use_proj;
         // trn-crs
         MEM_CHKFREE(cfg->trn_crs);
         cfg->trn_crs = CHK_STRDUP(opts->trn_crs);
-#else
+//#else
         // trn-utm
         cfg->trn_utm_zone = opts->trn_utm;
-#endif
+//#endif
         // trn-mtype
         cfg->trn_mtype = opts->trn_mtype;
         // trn-ftype
@@ -2956,17 +2983,17 @@ static int s_mbtrnpp_validate_config(mbtrnpp_cfg_t *cfg)
                 err_count++;
                 fprintf(stderr,"ERR - trn_cfg_file not set\n");
             }
-#ifdef TRN_USE_PROJ
-            if(NULL==cfg->trn_crs){
+//#ifdef TRN_USE_PROJ
+            if(NULL==cfg->trn_crs && cfg->use_proj){
                 err_count++;
                 fprintf(stderr,"ERR - trn_crs not set\n");
             }
-#else
+//#else
             if(cfg->trn_utm_zone<1 || cfg->trn_utm_zone>60){
                 err_count++;
                 fprintf(stderr,"ERR - invalid trn_utm_zone [%ld] valid range 1-60\n",cfg->trn_utm_zone);
             }
-#endif
+//#endif
             if(cfg->trn_mtype<1 || cfg->trn_mtype>2){
                 err_count++;
                 fprintf(stderr,"ERR - invalid trn_mtype [%d] valid range 1-2\n",cfg->trn_mtype);
@@ -3441,11 +3468,14 @@ int main(int argc, char **argv) {
 
 #ifdef WITH_MBTNAV
   trn_cfg = trncfg_new(NULL, -1,
-#ifdef TRN_USE_PROJ
+//#ifdef TRN_USE_PROJ
+  mbtrn_cfg->use_proj,
+  mbtrn_cfg->projection,
+
   mbtrn_cfg->trn_crs,
-#else
+//#else
   mbtrn_cfg->trn_utm_zone,
-#endif
+//#endif
   mbtrn_cfg->trn_mtype,
   mbtrn_cfg->trn_sensor_type, mbtrn_cfg->trn_ftype, mbtrn_cfg->trn_fgrade,
   mbtrn_cfg->trn_freinit,mbtrn_cfg->trn_mweight,
@@ -3636,12 +3666,20 @@ int main(int argc, char **argv) {
     }
   }
   
-#ifdef TRN_USE_PROJ
-	/* initialize Proj transformation between Geographic coordinates (longitude and
-	   latitude in WGS84) and the Coordinate Reference System (CRS) used for the
-	   TRN reference map */
-	mb_proj_init(mbtrn_cfg->verbose, mbtrn_cfg->trn_crs, &pjptr, &error);
-#endif
+//#ifdef TRN_USE_PROJ
+    if(mbtrn_cfg->use_proj){
+        geocon = wgeocon_new_proj(mbtrn_cfg->trn_crs);
+        wgeocon_auto_delete(geocon, "XFM", false);
+
+        // initialize Proj transformation between Geographic coordinates (longitude and
+        // latitude in WGS84) and the Coordinate Reference System (CRS) used for the
+        // TRN reference map
+        void *pj_xfm =  wgeocon_get_member(geocon, "XFM");
+        mb_proj_init(mbtrn_cfg->verbose, mbtrn_cfg->trn_crs, &pj_xfm, &error);
+    } else {
+        geocon = wgeocon_new_gctp(mbtrn_cfg->trn_utm_zone);
+    }
+//#endif
 
   /* initialize output */
     if ( OUTPUT_FLAG_SET(OUTPUT_MBSYS_STDOUT)) {
@@ -4766,9 +4804,12 @@ int main(int argc, char **argv) {
     fclose(output_trn_fp);
 #endif
 
-#ifdef TRN_USE_PROJ
-	mb_proj_free(mbtrn_cfg->verbose, &pjptr, &error);
-#endif
+//#ifdef TRN_USE_PROJ
+    if(mbtrn_cfg->use_proj) {
+        void *pj_xfm = wgeocon_get_member(geocon, "XFM");
+        mb_proj_free(mbtrn_cfg->verbose, &pj_xfm, &error);
+    }
+//#endif
 
   /* deallocate arrays allocated with mb_mallocd() */
   if (median_filter_soundings != NULL) {
@@ -6206,9 +6247,9 @@ int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg)
           double trnlon;
           double trnlat;
           int proj_error = MB_ERROR_NO_ERROR;
-          
-          mb_proj_inverse(0, pjptr, pstate->pt_dat->y, pstate->pt_dat->x, &navlon, &navlat, &proj_error);
-          mb_proj_inverse(0, pjptr, pstate->mse_dat->y, pstate->mse_dat->x, &trnlon, &trnlat, &proj_error);
+          void *proj_xfm = wgeocon_get_member(geocon, "XFM");
+          mb_proj_inverse(0, proj_xfm, pstate->pt_dat->y, pstate->pt_dat->x, &navlon, &navlat, &proj_error);
+          mb_proj_inverse(0, proj_xfm, pstate->mse_dat->y, pstate->mse_dat->x, &trnlon, &trnlat, &proj_error);
 
           // NOTE: TRN convention is x:northing y:easting z:down
           //       Output here is in order easting northing z
@@ -6280,17 +6321,19 @@ int mbtrnpp_trn_update(wtnav_t *self, mb1_t *src, wposet_t **pt_out, wmeast_t **
   if (NULL != self && NULL != src && NULL != pt_out && NULL != mt_out) {
       int test = -1;
 
-#ifdef TRN_USE_PROJ
-    if ((test = wmeast_mb1_to_meas(mt_out, src, pjptr)) == 0) {
-#else
-    if ((test = wmeast_mb1_to_meas(mt_out, src, cfg->utm_zone)) == 0) {
-#endif
+      if ((test = wmeast_mb1_to_meas(mt_out, src, geocon)) == 0) {
+//#ifdef TRN_USE_PROJ
+//    if ((test = wmeast_mb1_to_meas(mt_out, src, pjptr)) == 0) {
+//#else
+//    if ((test = wmeast_mb1_to_meas(mt_out, src, cfg->utm_zone)) == 0) {
+//#endif
 
-#ifdef TRN_USE_PROJ
-      if ((test = wposet_mb1_to_pose(pt_out, src, pjptr)) == 0) {
-#else
-      if ((test = wposet_mb1_to_pose(pt_out, src, cfg->utm_zone)) == 0) {
-#endif
+          if ((test = wposet_mb1_to_pose(pt_out, src, geocon)) == 0) {
+//#ifdef TRN_USE_PROJ
+//      if ((test = wposet_mb1_to_pose(pt_out, src, pjptr)) == 0) {
+//#else
+//      if ((test = wposet_mb1_to_pose(pt_out, src, cfg->utm_zone)) == 0) {
+//#endif
         // must do motion update first if pt time <= mt time
         wtnav_motion_update(self, *pt_out);
         wtnav_meas_update(self, *mt_out, cfg->sensor_type);

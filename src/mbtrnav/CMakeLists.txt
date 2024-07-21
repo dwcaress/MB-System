@@ -236,6 +236,19 @@ target_link_libraries(tnav PRIVATE newmat qnx NetCDF::NetCDF)
 #
 #------------------------------------------------------------------------------
 #
+# build gcon
+
+# specify library
+add_library(gcon
+       trnw/GeoCon.cpp
+)
+target_include_directories(gcon PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnav/newmat
+                                          ${CMAKE_SOURCE_DIR}/src/mbtrnav/qnx-utils
+                                          ${LibPROJ_INCLUDE_DIRS})
+target_link_libraries(gcon PRIVATE newmat qnx LibPROJ::LibPROJ )
+#
+#------------------------------------------------------------------------------
+#
 # build trnw (TRN C wrapper)
 
 # specify library
@@ -250,7 +263,7 @@ target_include_directories(trnw PRIVATE ${CMAKE_SOURCE_DIR}/src/mbio
                                           ${CMAKE_SOURCE_DIR}/src/mbtrnav/newmat 
                                           ${CMAKE_SOURCE_DIR}/src/mbtrnav/qnx-utils
                                           ${NetCDF_INCLUDE_DIRS})
-target_link_libraries(trnw PRIVATE tnav newmat qnx LibPROJ::LibPROJ NetCDF::NetCDF)
+target_link_libraries(trnw PRIVATE tnav newmat qnx gcon LibPROJ::LibPROJ NetCDF::NetCDF)
 #
 #------------------------------------------------------------------------------
 #
@@ -361,7 +374,7 @@ trnw/trncli_test.c
 trnw/mb1_msg.c
 )
 
-target_link_libraries(trncli-test PRIVATE mbtrnframe trnwcli newmat geolib trnw qnx mb1 tnav LibPROJ::LibPROJ NetCDF::NetCDF m)
+target_link_libraries(trncli-test PRIVATE mbtrnframe trnwcli newmat geolib trnw qnx mb1 tnav gcon LibPROJ::LibPROJ NetCDF::NetCDF m)
 
 target_include_directories(trncli-test PRIVATE ${CMAKE_SOURCE_DIR} 
 								                ${LibPROJ_INCLUDE_DIRS}

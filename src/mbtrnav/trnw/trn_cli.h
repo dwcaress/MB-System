@@ -70,6 +70,7 @@
 #include "trnw.h"
 #include "mb1_msg.h"
 #include "msocket.h"
+#include "GeoCon.h"
 
 /////////////////////////
 // Macros
@@ -88,6 +89,7 @@ typedef struct trncli_s{
     msock_connection_t *trn;
     long int utm_zone;
     wmeast_t *measurement;
+    wgeocon_t *geocon;
 }trncli_t;
 
 /////////////////////////
@@ -98,6 +100,7 @@ typedef struct trncli_s{
 extern "C" {
 #endif
     trncli_t *trncli_new(long int utm_zone);
+    trncli_t *trncli_gcnew(wgeocon_t *gcon);
     void trncli_destroy(trncli_t **pself);
     int trncli_connect(trncli_t *self, char *host, int port);
     int trncli_disconnect(trncli_t *self);
@@ -117,7 +120,7 @@ extern "C" {
     int trncli_ptype_set(trncli_t *self, int msg_type, int param);
 
     // Conversion helper functions
-    int trncli_mb1_to_meas(wmeast_t **dest, mb1_t *src, long int utmZone);
+//    int trncli_mb1_to_meas(wmeast_t **dest, mb1_t *src, long int utmZone);
     int trncli_cdata_to_pose(wposet_t **dest, pt_cdata_t *src);
     int trncli_cdata_to_meas(wmeast_t **dest, mt_cdata_t *src);
 

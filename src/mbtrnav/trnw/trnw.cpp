@@ -1149,7 +1149,7 @@ int wposet_pose_to_cdata(pt_cdata_t **dest, wposet_t *src)
     return retval;
 }
 
-int wposet_mb1_to_pose(wposet_t **dest, mb1_t *src, long int utmZone)
+int wposet_mb1_to_pose(wposet_t **dest, mb1_t *src, wgeocon_t *geocon)
 {
     int retval=-1;
     if(NULL!=dest && NULL!=src){
@@ -1161,9 +1161,11 @@ int wposet_mb1_to_pose(wposet_t **dest, mb1_t *src, long int utmZone)
         if(NULL!=pose){
             poseT *obj = static_cast<poseT *>(pose->obj);
             obj->time = src->ts;
-            NavUtils::geoToUtm( Math::degToRad(src->lat),
+
+            wgeocon_geo_to_mp(geocon, Math::degToRad(src->lat),
                                Math::degToRad(src->lon),
-                               utmZone, &(obj->x), &(obj->y));
+                               &(obj->x), &(obj->y));
+
             obj->z = src->depth;
             obj->phi=0.0;
             obj->theta=0.0;
@@ -1428,7 +1430,7 @@ int wmeast_meas_to_cdata(mt_cdata_t **dest, wmeast_t *src)
     return retval;
 }
 
-int wmeast_mb1_to_meas(wmeast_t **dest, mb1_t *src, long int utmZone)
+int wmeast_mb1_to_meas(wmeast_t **dest, mb1_t *src, wgeocon_t *geocon)
 {
     int retval=-1;
     if(NULL!=dest && NULL!=src){
@@ -1444,9 +1446,10 @@ int wmeast_mb1_to_meas(wmeast_t **dest, mb1_t *src, long int utmZone)
             obj->ping_number = src->ping_number;
             obj->dataType=2;
             obj->z=src->depth;
-            NavUtils::geoToUtm( Math::degToRad(src->lat),
+
+            wgeocon_geo_to_mp(geocon, Math::degToRad(src->lat),
                                Math::degToRad(src->lon),
-                               utmZone, &(obj->x), &(obj->y));
+                               &(obj->x), &(obj->y));
 
             for(i=0;i<obj->numMeas;i++){
                 // TODO: fill in measT from ping...
@@ -1749,6 +1752,8 @@ trn_config_t *trncfg_dnew()
 }
 
 trn_config_t *trncfg_new(char *host,int port,
+                         bool use_proj,
+                         int projection, char *crs,
                          long int utm_zone, int map_type,
                          int sensor_type,
                          int filter_type,
@@ -1771,6 +1776,9 @@ trn_config_t *trncfg_new(char *host,int port,
     if(NULL!=instance){
         instance->trn_host=(NULL!=host?strdup(host):NULL);
         instance->trn_port=port;
+        instance->use_proj = use_proj;
+        instance->projection = projection;
+        instance->trn_crs = (NULL != crs ? strdup(crs) : NULL);
         instance->map_file=(NULL!=map_file?strdup(map_file):strdup("map.dfl"));
         instance->cfg_file=(NULL!=cfg_file?strdup(cfg_file):strdup("cfg.dfl"));
         instance->particles_file=(NULL!=particles_file?strdup(particles_file):strdup("particles.dfl"));
@@ -1800,6 +1808,8 @@ void trncfg_destroy(trn_config_t **pself)
 
             if(NULL!=self->trn_host)
                 free(self->trn_host);
+            if(NULL!=self->trn_crs)
+                free(self->trn_crs);
             if(NULL!=self->map_file)
                 free(self->map_file);
             if(NULL!=self->particles_file)
@@ -1818,41 +1828,23 @@ void trncfg_destroy(trn_config_t **pself)
 void trncfg_show(trn_config_t *obj, bool verbose, int indent)
 {
     if (NULL != obj) {
-        fprintf(stderr,"%*s[self      %10p]\n",indent,(indent>0?" ":""), obj);
-        fprintf(stderr,"%*s[host      %10s]\n",indent,(indent>0?" ":""), obj->trn_host);
-        fprintf(stderr,"%*s[port      %10d]\n",indent,(indent>0?" ":""), obj->trn_port);
-        fprintf(stderr,"%*s[utm       %10ld]\n",indent,(indent>0?" ":""), obj->utm_zone);
-        fprintf(stderr,"%*s[mtype     %10d]\n",indent,(indent>0?" ":""), obj->map_type);
-        fprintf(stderr,"%*s[ftype     %10d]\n",indent,(indent>0?" ":""), obj->filter_type);
-        fprintf(stderr,"%*s[map_file  %10s]\n",indent,(indent>0?" ":""), obj->map_file);
-        fprintf(stderr,"%*s[cfg_file  %10s]\n",indent,(indent>0?" ":""), obj->cfg_file);
-        fprintf(stderr,"%*s[part_file %10s]\n",indent,(indent>0?" ":""), obj->particles_file);
-        fprintf(stderr,"%*s[log_dir   %10s]\n",indent,(indent>0?" ":""), obj->log_dir);
-        fprintf(stderr,"%*s[maxNcov   %10s%.3lf]\n",indent,(indent>0?" ":""), "",obj->max_northing_cov);
-        fprintf(stderr,"%*s[maxNerr   %10s%.3lf]\n",indent,(indent>0?" ":""), "",obj->max_northing_err);
-        fprintf(stderr,"%*s[maxEcov   %10s%.3lf]\n",indent,(indent>0?" ":""), "",obj->max_easting_cov);
-        fprintf(stderr,"%*s[maxEerr   %10s%.3lf]\n",indent,(indent>0?" ":""), "",obj->max_easting_err);
+        fprintf(stderr,"%*s[self       %10p]\n",indent,(indent>0?" ":""), obj);
+        fprintf(stderr,"%*s[host       %10s]\n",indent,(indent>0?" ":""), obj->trn_host);
+        fprintf(stderr,"%*s[port       %10d]\n",indent,(indent>0?" ":""), obj->trn_port);
+        fprintf(stderr,"%*s[use_proj   %10c]\n",indent,(indent>0?" ":""), (obj->use_proj ? 'Y' : 'N'));
+        fprintf(stderr,"%*s[projection %10d]\n",indent,(indent>0?" ":""), obj->projection);
+        fprintf(stderr,"%*s[trn_crs    %10s]\n",indent,(indent>0?" ":""), (obj->trn_crs != NULL ? obj->trn_crs : ""));
+        fprintf(stderr,"%*s[utm        %10ld]\n",indent,(indent>0?" ":""), obj->utm_zone);
+        fprintf(stderr,"%*s[mtype      %10d]\n",indent,(indent>0?" ":""), obj->map_type);
+        fprintf(stderr,"%*s[ftype      %10d]\n",indent,(indent>0?" ":""), obj->filter_type);
+        fprintf(stderr,"%*s[map_file   %10s]\n",indent,(indent>0?" ":""), obj->map_file);
+        fprintf(stderr,"%*s[cfg_file   %10s]\n",indent,(indent>0?" ":""), obj->cfg_file);
+        fprintf(stderr,"%*s[part_file  %10s]\n",indent,(indent>0?" ":""), obj->particles_file);
+        fprintf(stderr,"%*s[log_dir    %10s]\n",indent,(indent>0?" ":""), obj->log_dir);
+        fprintf(stderr,"%*s[maxNcov    %10s%.3lf]\n",indent,(indent>0?" ":""), "",obj->max_northing_cov);
+        fprintf(stderr,"%*s[maxNerr    %10s%.3lf]\n",indent,(indent>0?" ":""), "",obj->max_northing_err);
+        fprintf(stderr,"%*s[maxEcov    %10s%.3lf]\n",indent,(indent>0?" ":""), "",obj->max_easting_cov);
+        fprintf(stderr,"%*s[maxEerr    %10s%.3lf]\n",indent,(indent>0?" ":""), "",obj->max_easting_err);
     }
 }
 
-int trnw_utm_to_geo(double northing, double easting, long utmZone,
-                       double *lat_deg, double *lon_deg)
-{
-//    return NavUtils::utmToGeo(northing,easting,utmZone,lat_rad,lon_rad);
-    double lat_rad=0.0;
-    double lon_rad=0.0;
-
-  int retval=NavUtils::utmToGeo(northing,easting,utmZone,&lat_rad,&lon_rad);
-    *lat_deg=Math::radToDeg(lat_rad);
-    *lon_deg=Math::radToDeg(lon_rad);
-    return retval;
-}
-// End function trnw_utmToGeo
-
-int trnw_geo_to_utm(double lat_deg, double lon_deg, long int utmZone, double *northing, double *easting)
-{
-    return  NavUtils::geoToUtm( Math::degToRad(lat_deg),
-                               Math::degToRad(lon_deg),
-                               utmZone, northing, easting);
-}
-// End function trnw_utmToGeo
