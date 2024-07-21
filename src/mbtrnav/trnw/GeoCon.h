@@ -93,6 +93,21 @@ protected:
 };
 
 #ifdef TRN_USE_PROJ
+// GeoConProj
+// Implementation backed by libproj coordinate transform (PJ*).
+// callers may opt to manage (initialize, destroy) the underlying transform,
+// or use the class implementation.
+//
+// get_member keys:
+// "XFM" : transform pointer (PJ*)
+//
+// auto_delete keys:
+// "XFM" : transform pointer (PJ*)
+//
+// init argments:
+// argv[0] : source CRS (const char *) optional, default GEOIF_WGS_DFL
+// argv[1] : target CRS (const char *) optional, default m_crs
+
 class GeoConProj : public GeoConIF
 {
 public:
@@ -214,6 +229,15 @@ private:
 };
 #endif
 
+// GeoConGCTP
+// implementation backed by GCTP library (via NavUtils)
+//
+// get_member keys: not implemented
+//
+// auto_delete keys: not implemented
+//
+// init argments: not implemented
+
 class GeoConGCTP : public GeoConIF
 {
 public:
@@ -258,6 +282,10 @@ private:
     long int m_utm;
 };
 
+// GeoCon
+// Concrete implementation for GeoConIF
+// The underlying implementation is determined by the
+// constructor used.
 class GeoCon : public GeoConIF
 {
 
@@ -267,6 +295,7 @@ public:
     : m_geocon(nullptr)
     {}
 
+    // implementation backed by GCTP library (via NavUtils)
     GeoCon(long int utm)
     {
         // create a GCTP instance
@@ -274,12 +303,14 @@ public:
     }
 
 #ifdef TRN_USE_PROJ
+    // implementation backed by libproj coordinate transform (PJ *)
     GeoCon(const char *crs)
     {
         // create a PROJ instance
         m_geocon = new GeoConProj(crs);
     }
 #else
+    // if libproj is not available, disable proj implementation
     GeoCon(const char *crs)
     : m_geocon(nullptr)
     {
@@ -293,6 +324,7 @@ public:
             delete m_geocon;
     }
 
+    // lat/lon to mercator projection
     int geo_to_mp(double lat_rad, double lon_rad, double *r_northing_m, double *r_easting_m) override
     {
         if(m_geocon == NULL) {
@@ -303,6 +335,7 @@ public:
         return m_geocon->geo_to_mp(lat_rad, lon_rad, r_northing_m, r_easting_m);
     }
 
+    // mercator projection to lat/lon
     int mp_to_geo(double northing_m, double easting_m, double *r_lat_rad, double *r_lon_rad) override
     {
         if(m_geocon == NULL) {
@@ -313,6 +346,7 @@ public:
         return m_geocon->mp_to_geo(northing_m, easting_m, r_lat_rad, r_lon_rad);
     }
 
+    // get a pointer to a member (optional; keys defined per implementation)
     void *get_member(const char *key) override
     {
         if(m_geocon == NULL) {
@@ -322,6 +356,7 @@ public:
         return m_geocon->get_member(key);
     }
 
+    // initialize (optional; argments defined per implementation)
     void *init(int argc, void **argv) override
     {
         if(m_geocon == NULL) {
@@ -331,6 +366,7 @@ public:
         return m_geocon->init(argc, argv);
     }
 
+    // enable/disable deletion of members (optional; keys defined per implementation)
     void auto_delete(const char *key, bool enable) override
     {
         if(m_geocon == NULL) {
@@ -341,6 +377,7 @@ public:
         m_geocon->auto_delete(key, enable);
     }
 
+    // get string representation of underlying type
     const char *typestr() override
     {
         if(m_geocon == NULL) {
@@ -350,6 +387,7 @@ public:
     }
 
 private:
+    // underlying implementation
     GeoConIF *m_geocon;
 };
 #endif
@@ -358,7 +396,7 @@ private:
 extern "C" {
 #endif
 
-// GeoConverter C API
+// GeoCon C API
 
 // GCTP instance (caller must free using wgeocon_destroy)
 wgeocon_t *wgeocon_new_gctp(long int utm);
@@ -369,14 +407,20 @@ wgeocon_t *wgeocon_new_proj(const char *crs);
 // release GeoConverter instance
 void wgeocon_destroy(wgeocon_t *self);
 
-// lat/lon to UTM
+// lat/lon to mercator projection
 int wgeocon_geo_to_mp(wgeocon_t *self, double lat_rad, double lon_rad, double *r_northing_m, double *r_easting_m);
-// UTM to lat/lon
+
+// mercator projection to lat/lon
 int wgeocon_mp_to_geo(wgeocon_t *self, double northing_m, double easting_m, double *r_lat_rad, double *r_lon_rad);
 
+// get a pointer to a member (optional; keys defined per implementation)
 void *wgeocon_get_member(wgeocon_t *self, const char *key);
-void wgeocon_auto_delete(wgeocon_t *self, const char *key, bool enable);
+
+// initialize (optional; argments defined per implementation)
 void *wgeocon_init(wgeocon_t *self, int argc, void **argv);
+
+// enable/disable deletion of members (optional; keys defined per implementation)
+void wgeocon_auto_delete(wgeocon_t *self, const char *key, bool enable);
 
 #ifdef __cplusplus
 }
