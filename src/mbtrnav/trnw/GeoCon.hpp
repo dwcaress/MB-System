@@ -21,6 +21,10 @@
 #ifndef GEOCON_HPP
 #define GEOCON_HPP
 
+// GeoConIF
+// Virtual base class (interface)
+// Wraps various implementations for
+// geo-coordinate transformation e.g. libproj, gctp
 class GeoConIF
 {
 
@@ -30,7 +34,9 @@ public:
     virtual ~GeoConIF()
     {}
 
+    // convert lat/lon to mercator projection (e.g. UTM)
     virtual int geo_to_mp(double lat_rad, double lon_rad, double *r_northing, double *r_easting) = 0;
+    // convert mercator projection to lat/lon
     virtual int mp_to_geo(double northing_m, double easting_m, double *r_lat_rad, double *r_lon_rad) = 0;
 
     // get underlying context pointer
@@ -44,8 +50,10 @@ public:
     // perform default initialization of underlying ctx
     virtual void *init(int argc, void **argv);
 
+    // implementation type ID
     GeoConType type();
 
+    // type ID name (null terminated string)
     virtual const char *typestr();
 
 protected:

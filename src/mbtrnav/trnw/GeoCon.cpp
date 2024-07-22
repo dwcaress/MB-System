@@ -103,8 +103,6 @@ int GeoConProj::geo_to_mp(double lat_rad, double lon_rad, double *r_northing, do
 
 int GeoConProj::mp_to_geo(double northing_m, double easting_m, double *r_lat_rad, double *r_lon_rad)
 {
-    std::cerr << __func__ << ":" << __LINE__ << " - PROJ not implemented crs: " << m_crs << " proj_xfm:" << m_proj_xfm << std::endl;
-
     if(r_lat_rad == NULL || r_lon_rad == NULL) {
         std::cerr << typestr() << "::" << __func__ << " ERR invalid argument (NULL)" << std::endl;
         return -1;
@@ -336,6 +334,28 @@ void wgeocon_destroy(wgeocon_t *self)
         delete static_cast<GeoCon *>(self->obj);
         free(self);
     }
+}
+
+GeoConType wgeocon_type(wgeocon_t *self)
+{
+    if(NULL!=self){
+        GeoCon *obj = static_cast<GeoCon *>(self->obj);
+        if(obj != NULL) {
+            return obj->type();
+        }
+    }
+    return GEO_UNKNOWN;
+}
+
+const char *wgeocon_typestr(wgeocon_t *self)
+{
+    if(NULL!=self){
+        GeoCon *obj = static_cast<GeoCon *>(self->obj);
+        if(obj != NULL) {
+            return obj->typestr();
+        }
+    }
+    return NULL;
 }
 
 int wgeocon_geo_to_mp(wgeocon_t *self, double lat_rad, double lon_rad, double *r_northing_m, double *r_easting_m)

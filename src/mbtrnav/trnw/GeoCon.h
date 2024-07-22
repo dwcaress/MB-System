@@ -44,6 +44,12 @@ wgeocon_t *wgeocon_new_proj(const char *crs);
 // release GeoConverter instance
 void wgeocon_destroy(wgeocon_t *self);
 
+// get implentation type ID
+GeoConType wgeocon_type(wgeocon_t *self);
+
+// get implentation type name
+const char *wgeocon_typestr(wgeocon_t *self);
+
 // lat/lon to mercator projection
 int wgeocon_geo_to_mp(wgeocon_t *self, double lat_rad, double lon_rad, double *r_northing_m, double *r_easting_m);
 
