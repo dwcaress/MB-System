@@ -310,8 +310,6 @@ int cb_proto_idtlass(void *pargs)
 
         TRN_NDPRINT(TRNDL_PLUGIDTLASS, "%s:%d processing ctx[%s]\n", __func__, __LINE__, ctx->ctx_key().c_str());
 
-        int err_count = 0;
-
         std::string *bkey[1] = {ctx->bath_input_chan(0)};
         std::string *nkey[2] = {ctx->nav_input_chan(0),ctx->nav_input_chan(1)};
         std::string *akey[2] = {ctx->att_input_chan(0), ctx->att_input_chan(1)};
@@ -330,7 +328,6 @@ int cb_proto_idtlass(void *pargs)
             ss << (nkey[1]==nullptr ? " dkey[1]" : "");
             ss << (vkey[0] == nullptr ? " vkey[0]" : "");
             TRN_NDPRINT(TRNDL_PLUGIDTLASS, "%s:%d ERR - NULL input key: %s\n", __func__, __LINE__, ss.str().c_str());
-                err_count++;
                 continue;
         }
 
@@ -351,7 +348,6 @@ int cb_proto_idtlass(void *pargs)
             ss << (ni[1] == nullptr ? " ni[1]" : "");
             ss << (vi[0] == nullptr ? " vi[0]" : "");
             TRN_NDPRINT(TRNDL_PLUGIDTLASS, "%s:%d WARN - NULL info instance: %s\n", __func__, __LINE__, ss.str().c_str());
-                err_count++;
                 continue;
         }
 
@@ -420,7 +416,6 @@ int cb_proto_idtlass(void *pargs)
                         // compute MB1 beam components in vehicle frame
                         if (transform_idtlass(bi, ai, bgeo, snd) != 0) {
                             TRN_NDPRINT(TRNDL_PLUGIDTLASS_H, "%s:%d ERR - transform_idtlass failed\n", __func__, __LINE__);
-                            err_count++;
                             cfg->stats().err_plugin_n++;
                             continue;
                         }
@@ -448,10 +443,9 @@ int cb_proto_idtlass(void *pargs)
                     // generate poseT/measT
                     // and publish to trn-server
 
-                    poseT *pt = trnx_utils::mb1_to_pose(snd, ai[0], vi[0], (long)ctx->utm_zone());
-
-                    measT *mt = trnx_utils::mb1_to_meas(snd, ai[0], trn_type[0], (long)ctx->utm_zone());
-
+                    GeoCon gcon(ctx->utm_zone());
+                    poseT *pt = trnx_utils::mb1_to_pose(snd, ai[0], vi[0], &gcon);
+                    measT *mt = trnx_utils::mb1_to_meas(snd, ai[0], trn_type[0], &gcon);
 
                     if (pt != nullptr && mt != nullptr) {
 

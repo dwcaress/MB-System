@@ -172,7 +172,8 @@ target_link_libraries(mb1r_test PRIVATE mb1r m pthread)
 #
 add_executable(mb1-cli mb1r/mb1cli-app.c)
 target_include_directories(mb1-cli PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnframe
-							${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw)
+                            ${LibPROJ_INCLUDE_DIRS}
+                            ${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw)
 target_link_libraries(mb1-cli PRIVATE mbtrnframe mb1r mb1 m pthread)
 #
 #------------------------------------------------------------------------------
