@@ -15,7 +15,7 @@ findChild() C++ calls.
 *** */
 
 
-ApplicationWindow {
+Window {
     id: applicationWindow
     objectName: 'mainWindow'
     visible: true
@@ -41,7 +41,9 @@ ApplicationWindow {
         exclusive: true
     }
 
-    menuBar: MenuBar {
+    MenuBar {
+        id: menuBar
+
         Menu {
             title: qsTr("File")
             Action { text: qsTr("Open swath") ;
@@ -190,62 +192,81 @@ ApplicationWindow {
 
     ColumnLayout {
         id: columnLayout
-        Layout.fillHeight: false
-        width: 1000
+        anchors.top: menuBar.bottom
+        anchors.right: parent.right
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
 
-        Label { text: "XTrack width (m) " + xtrackSlider.value.toFixed(0) }
-        Slider {
-            id: xtrackSlider
-            objectName: "xTrackSliderObj"
+        Flow {
+            Label { text: "Xrack width (m) " + xtrackSlider.value.toFixed(0) }
             Layout.fillWidth: true
-            from: 1
-            to: 300
-            value: 150
-            live: false  // only update value when button released
-            Component.onCompleted: { backend.onXtrackChanged(value) }
-            onValueChanged: { console.log('xTrackSlider moved');
-                backend.onXtrackChanged(value) }
+            Layout.fillHeight: true
+
+            Slider {
+                id: xtrackSlider
+                objectName: "xTrackSliderObj"
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                from: 1
+                to: 300
+                value: 150
+                live: false  // only update value when button released
+                Component.onCompleted: { backend.onXtrackChanged(value) }
+                onValueChanged: { console.log('xTrackSlider moved');
+                    backend.onXtrackChanged(value) }
+            }
+
+            Label { text: "Pings shown " + pingsShownSlider.value.toFixed(0) }
+            Slider {
+                id: pingsShownSlider
+                objectName: "pingsShownSliderObj"
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                from: 1
+                to: 20
+                value: 10
+                live: false  // only update value when button released
+                Component.onCompleted: { backend.onPingsShownChanged(value) }
+                onValueChanged: { console.log('pingsShownSlider moved: ', value);
+                    backend.onPingsShownChanged(value) }
+            }
         }
 
-        Label { text: "Pings shown " + pingsShownSlider.value.toFixed(0) }
-        Slider {
-            id: pingsShownSlider
-            objectName: "pingsShownSliderObj"
-            Layout.fillWidth: true
-            from: 1
-            to: 20
-            value: 10
-            live: false  // only update value when button released
-            Component.onCompleted: { backend.onPingsShownChanged(value) }
-            onValueChanged: { console.log('pingsShownSlider moved: ', value);
-                backend.onPingsShownChanged(value) }
-        }
-        Label { text: "Vertical exaggeration " +
-                      (verticalExaggSlider.value * 100).toFixed(1)}
-        Slider {
-            id: verticalExaggSlider
-            objectName: "verticalExaggSliderObj"
-            Layout.fillWidth: true
-            from: 0.01
-            to: 20
-            live: false
-            value: 10
-            Component.onCompleted: { backend.onVerticalExaggChanged(value) }
-            onValueChanged: { backend.onVerticalExaggChanged(value) }
-        }
-        Label { text: "Ping step" }
-        Slider {
-            id: pingStepSlider
-            objectName: "pingStepSliderObj"
 
+        Flow {
+            Label { text: "VERTICAL exaggeration " +
+                          (verticalExaggSlider.value * 100).toFixed(1)}
             Layout.fillWidth: true
-            from: 1
-            to: 20
-            live: false
-            Component.onCompleted: { backend.onPingStepChanged(value) }
-            onValueChanged: { console.log('pingStepSlider moved');
-                backend.onPingStepChanged(value) }
+            Layout.fillHeight: true
+
+            Slider {
+                id: verticalExaggSlider
+                objectName: "verticalExaggSliderObj"
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                from: 0.01
+                to: 20
+                live: false
+                value: 10
+                Component.onCompleted: { backend.onVerticalExaggChanged(value) }
+                onValueChanged: { backend.onVerticalExaggChanged(value) }
+            }
+            Label { text: "Ping step" }
+            Slider {
+                id: pingStepSlider
+                objectName: "pingStepSliderObj"
+
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                from: 1
+                to: 20
+                live: false
+                Component.onCompleted: { backend.onPingStepChanged(value) }
+                onValueChanged: { console.log('pingStepSlider moved');
+                    backend.onPingStepChanged(value) }
+            }
         }
+
 
 
         ButtonGroup {
@@ -253,8 +274,11 @@ ApplicationWindow {
             objectName: "editModesObj"
         }
 
-        Row {
+        Flow {
             id: buttonRow
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+
 
             RadioButton {
                 objectName: "toggleEdit"
@@ -395,7 +419,7 @@ ApplicationWindow {
                 }
             }
         }
-    }   // ScrollView
+    }
 
 
     MessageDialog {
