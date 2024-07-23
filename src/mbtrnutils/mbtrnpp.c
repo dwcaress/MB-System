@@ -1732,7 +1732,7 @@ static int s_mbtrnpp_cfgstr(char **pdest, size_t olen, mbtrnpp_cfg_t *self, cons
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "trn_status_interval_sec", sep, wval, self->trn_status_interval_sec, del);
     mbb_printf(optr, "%s%*s%*s%s%*X%s", pre, indent, (indent>0?" ":""), wkey, "mbtrnpp_stat_flags", sep, wval, self->mbtrnpp_stat_flags, del);
 //#ifdef TRN_USE_PROJ
-    mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "use_proj", sep, wval, BOOL2YNC(self->use_proj), del);
+    mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "use_proj", sep, wval, BOOL2YNC(self->use_proj), del);
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "projection", sep, wval, self->projection, del);
 //#endif
     mbb_printf(optr, "%s%*s%*s%s%*s/%d%s", pre, indent, (indent>0?" ":""), wkey, "trn_dev", sep, wval, r7k_devidstr(self->trn_dev), self->trn_dev, del);
