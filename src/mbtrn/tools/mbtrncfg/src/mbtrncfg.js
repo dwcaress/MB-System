@@ -219,6 +219,7 @@ help_topics["format"]="MB-System format id (datalist: -1; Teledyn 7k: 88 or 89; 
 help_topics["auv-sentry-em2040"]="Flag enabling use of special pressure depth encoding for EM2040 data collected on AUV Sentry";
 help_topics["median-filter"]="Median filter settings\n\n\
   filter_threshold/n_along/n_across";
+help_topics["platform-file"]="MB-System platform file path";
 help_topics["output"]="MB-System output\n\
 file:<file_name>\n\n\
 [filename may include SESSION for current yyyymmdd-hhmmss]\n\n\
@@ -249,6 +250,9 @@ help_topics["trn-sensor"]="TRN sensor type\n\
 3: TRN_SENSOR_PENCIL\n\
 4: TRN_SENSOR_HOMER\n\
 5: TRN_SENSOR_DELTAT";
+help_topics["use-proj"]="Use libproj for TRN coordinate transformation";
+help_topics["projection"]="TRN coordinate projection ID";
+help_topics["trn-crs"]="TRN Proj CRS specifier string";
 help_topics["trn-utm"]="TRN UTM zone (10:Monterey Bay)";
 help_topics["mb-out"]="TRN MB1 output configuration\n\n\
 Options for MB1 record output are selected using one or more comma separated values:\n\n\
@@ -427,11 +431,15 @@ function load_ctx(){
     x.elements["format"].value="88";
     x.elements["auv-sentry-em2040"].value="dis";
     x.elements["median-filter"].value="0.10/9/3";
+    x.elements["platform-file"].value="";
     x.elements["output"].value="file:mbtrnpp_SESSION.mb1";
     x.elements["statsec"].value="30";
     x.elements["statflags"].value="MSF_STATUS|MSF_EVENT|MSF_ASTAT|MSF_PSTAT";
     x.elements["delay"].value="0";
     x.elements["trn-sensor"].value="2";
+    x.elements["use-proj"].value="en";
+    x.elements["projection"].value="0";
+    x.elements["trn-crs"].value="UTM10N";
     x.elements["trn-utm"].value="10";
     x.elements["mb-out"].value="mb1svr:TRN_HOST:27000";
     x.elements["trn-map"].value="TRN_MAPFILES/PortTiles";
@@ -495,11 +503,15 @@ function init_preset(key){
     x.elements["format"].value="88";
     x.elements["auv-sentry-em2040"].value="dis";
     x.elements["median-filter"].value="0.10/9/3";
+    x.elements["platform-file"].value="";
     x.elements["output"].value="file:mbtrnpp_SESSION.mb1";
     x.elements["statsec"].value="30";
     x.elements["statflags"].value="MSF_STATUS|MSF_EVENT|MSF_ASTAT|MSF_PSTAT";
     x.elements["delay"].value="0";
     x.elements["trn-sensor"].value="2";
+    x.elements["use-proj"].value="en";
+    x.elements["projection"].value="0";
+    x.elements["trn-crs"].value="UTM10N";
     x.elements["trn-utm"].value="10";
     x.elements["mb-out"].value="mb1svr:TRN_HOST:27000";
     x.elements["trn-map"].value="TRN_MAPFILES/PortTiles";
@@ -589,6 +601,8 @@ function update(){
         text += '--auv-sentry-em2040'+" ";
     if(x.elements["median-filter"].value.length>0)
         text += '--median-filter='+x.elements["median-filter"].value+" ";
+    if(x.elements["platform-file"].value.length>0)
+        text += '--platform-file='+x.elements["platform-file"].value+" ";
     if(x.elements["statsec"].value.length>0)
         text += '--statsec='+x.elements["statsec"].value+" ";
     if(x.elements["statflags"].value.length>0)
@@ -605,6 +619,12 @@ function update(){
         text += '--trn-dev='+x.elements["trn-dev"].value+" ";
     if(x.elements["trn-sensor"].value.length>0)
         text += '--trn-sensor='+x.elements["trn-sensor"].value+" ";
+    if(x.elements["use-proj"].value=='en')
+        text += '--use-proj'+" ";
+    if(x.elements["projection"].value.length>0)
+        text += '--projection='+x.elements["projection"].value+" ";
+    if(x.elements["trn-crs"].value.length>0)
+        text += '--trn-crs='+x.elements["trn-crs"].value+" ";
     if(x.elements["trn-utm"].value.length>0)
         text += '--trn-utm='+x.elements["trn-utm"].value+" ";
     if(x.elements["trn-decn"].value.length>0)
@@ -793,6 +813,13 @@ function cfg2str(){
 
     retval+="\n";
     if(verbose){
+        retval+="// opt format [int]\n";
+        retval+="// input data format\n";
+    }
+    retval+="format="+x.elements["format"].value+"\n";
+
+    retval+="\n";
+    if(verbose){
         retval+="// opt median-filter [?]\n";
         retval+="// median filter parameters\n";
         retval+="// <threshold>/<n_across>/<n_along>\n";
@@ -801,70 +828,23 @@ function cfg2str(){
 
     retval+="\n";
     if(verbose){
-        retval+="// opt format [int]\n";
-        retval+="// input data format\n";
-    }
-    retval+="format="+x.elements["format"].value+"\n";
-
-    retval+="\n";
-    if(verbose){
-        retval+="// opt auv-sentry-em2040 [none]\n";
-        retval+="// enable/disable use of special pressure depth encoding for EM2040 data collected on AUV Sentry\n";
-    }
-    if(x.elements["auv-sentry-em2040"].value=="en")
-        retval+="auv-sentry-em2040\n";
-    else
-        retval+="#auv-sentry-em2040\n";
-
-    retval+="\n";
-    if(verbose){
         retval+="// opt platform-file [mb_path]\n";
-        retval+="// description TBD\n";
+        retval+="// specify platform file\n";
     }
-    retval+="#platform-file=\n";
+    if(x.elements["platform-file"].value.length>0)
+        retval+="platform-file="+x.elements["platform-file"].value+"\n";
+    else
+        retval+="#platform-file=\n";
 
     retval+="\n";
     if(verbose){
-        retval+="// opt platform-target-sensor [int]\n";
-        retval+="// description TBD\n";
+        retval+="// opt tide-model [path]\n";
+        retval+="// OTPS tide model file\n";
     }
-    retval+="#platform-target-sensor=\n";
-
-    retval+="\n";
-    if(verbose){
-        retval+="// opt projection\n";
-        retval+="// cartographic(?) projection ID\n";
-    }
-    retval+="#projection=\n";
-
-    retval+="\n";
-    if(verbose){
-        retval+="// opt mbhbn [int]\n";
-        retval+="// MB1 server heartbeat modulus\n";
-        retval+="// (timeout preferred, use mbhbt)\n";
-    }
-    retval+="#mbhbn\n";
-
-    retval+="\n";
-    if(verbose){
-        retval+="// opt mbhbt [double]\n";
-        retval+="// MB1 server heartbeat timeout (s)\n";
-    }
-    retval+="mbhbt="+x.elements["mbhbt"].value+"\n";
-
-    retval+="\n";
-    if(verbose){
-        retval+="// opt trnhbt [double]\n";
-        retval+="// TRN server heartbeat timeout (s)\n";
-    }
-    retval+="trnhbt="+x.elements["trnhbt"].value+"\n";
-
-    retval+="\n";
-    if(verbose){
-        retval+="// opt trnuhbt [double]\n";
-        retval+="// TRNU (udp update) server heartbeat timeout (s)\n";
-    }
-    retval+="trnuhbt="+x.elements["trnuhbt"].value+"\n";
+    if(x.elements["tide-model"].value.length>0)
+        retval+="tide-model="+x.elements["tide-model"].value+"\n";
+    else
+        retval+="#tide-model=\n";
 
     retval+="\n";
     if(verbose){
@@ -891,6 +871,24 @@ function cfg2str(){
         retval+="// MSF_READER - include R7K reader stats\n";
     }
     retval+="statflags="+x.elements["statflags"].value+"\n";
+
+
+    retval+="\n";
+    if(verbose){
+        retval+="// opt auv-sentry-em2040 [none]\n";
+        retval+="// enable/disable use of special pressure depth encoding for EM2040 data collected on AUV Sentry\n";
+    }
+    if(x.elements["auv-sentry-em2040"].value=="en")
+        retval+="auv-sentry-em2040\n";
+    else
+        retval+="#auv-sentry-em2040\n";
+
+    retval+="\n";
+    if(verbose){
+        retval+="// opt platform-target-sensor [int]\n";
+        retval+="// description TBD\n";
+    }
+    retval+="#platform-target-sensor=\n";
 
     retval+="\n";
     if(verbose){
@@ -922,6 +920,30 @@ function cfg2str(){
         retval+="// TRN_SENSOR_DELTAT  5\n";
     }
     retval+="trn-sensor="+x.elements["trn-sensor"].value+"\n";
+
+    retval+="\n";
+    if(verbose){
+        retval+="// opt use-proj [bool]\n";
+        retval+="// Use libproj for coordinate transformation\n";
+    }
+    if(x.elements["use-proj"].value=="en")
+        retval+="use-proj\n";
+    else
+        retval+="#use-proj\n";
+
+    retval+="\n";
+    if(verbose){
+        retval+="// opt projection [int]\n";
+        retval+="// cartographic? projection ID for TRN processing (>=0)\n";
+    }
+    retval+="#projection="+x.elements["projection"].value+"\n";
+
+    retval+="\n";
+    if(verbose){
+        retval+="// opt trn-crs [string]\n";
+        retval+="// Proj CRS specifier for TRN processing\n";
+    }
+    retval+="trn-crs="+x.elements["trn-crs"].value+"\n";
 
     retval+="\n";
     if(verbose){
@@ -1047,57 +1069,6 @@ function cfg2str(){
 
     retval+="\n";
     if(verbose){
-        retval+="// opt mb-out [?]\n";
-        retval+="// MB1 output specifier\n";
-        retval+="// comma delimited list including one or more of:\n";
-        retval+="// mb1svr:<ip>:<port>  - enable MB1 server\n";
-        retval+="// mb1                 - enable MB1 binary record logging\n";
-        retval+="// file:<path>         - enable MB1 binary record logging\n";
-        retval+="// file                - enable MB1 binary record logging (use default name)\n";
-        retval+="// reson               - enable reson S7K frame logging\n";
-        retval+="// nomb1               - disable MB1 binary record logging\n";
-        retval+="// noreson             - disable reson S7K frame logging\n";
-        retval+="// nomb1               - disable MB1 server\n";
-        retval+="// nombtrnpp           - disable mbtrnpp message log (not recommended)\n";
-    }
-    retval+="mb-out="+x.elements["mb-out"].value+"\n";
-
-    retval+="\n";
-    if(verbose){
-        retval+="// opt trn-out [?]\n";
-        retval+="// TRN output specifier\n";
-        retval+="// comma delimited list including one or more of:\n";
-        retval+="// trnsvr:<ip>:<port>  - enable trn server interface\n";
-        retval+="// trnu                - enable TRN update ascii logging\n";
-        retval+="// trnub               - enable TRN update binary logging\n";
-        retval+="// trnusvr:<ip>:<port> - enable TRN update server\n";
-        retval+="// trnumsvr:<group>:<port>:<ttl> - enable TRN update server (UDP multicast)\n";
-        retval+="// sout                - enable TRN output to stdout\n";
-        retval+="// serr                - enable TRN output to stderr\n";
-        retval+="// debug               - enable TRN debug output\n";
-        retval+="// notrnsvr            - disable trn server interface\n";
-        retval+="// notrnusvr           - disable TRN update server\n";
-    }
-    retval+="trn-out="+x.elements["trn-out"].value+"\n";
-
-    retval+="\n";
-    if(verbose){
-        retval+="// opt trn-decn [int]\n";
-        retval+="// TRN updpate decimation modulus\n";
-        retval+="// (update TRN every nth MB1 sample)\n";
-    }
-    retval+="trn-decn="+x.elements["trn-decn"].value+"\n";
-
-    retval+="\n";
-    if(verbose){
-        retval+="// opt trn-decs [double]\n";
-        retval+="// TRN updpate decimation interval (decimal seconds)\n";
-        retval+="// (update TRN every dec seconds)\n";
-    }
-    retval+="#trn-decs=3.0\n";
-
-    retval+="\n";
-    if(verbose){
         retval+="// opt reinit-gain [none]\n";
         retval+="// enable/disable gating TRN resets using sonar transmit gain\n";
     }
@@ -1153,13 +1124,84 @@ function cfg2str(){
 
     retval+="\n";
     if(verbose){
-        retval+="// opt tide-model [path]\n";
-        retval+="// OTPS tide model file\n";
+        retval+="// opt mb-out [?]\n";
+        retval+="// MB1 output specifier\n";
+        retval+="// comma delimited list including one or more of:\n";
+        retval+="// mb1svr:<ip>:<port>  - enable MB1 server\n";
+        retval+="// mb1                 - enable MB1 binary record logging\n";
+        retval+="// file:<path>         - enable MB1 binary record logging\n";
+        retval+="// file                - enable MB1 binary record logging (use default name)\n";
+        retval+="// reson               - enable reson S7K frame logging\n";
+        retval+="// nomb1               - disable MB1 binary record logging\n";
+        retval+="// noreson             - disable reson S7K frame logging\n";
+        retval+="// nomb1               - disable MB1 server\n";
+        retval+="// nombtrnpp           - disable mbtrnpp message log (not recommended)\n";
     }
-    if(x.elements["tide-model"].value.length>0)
-        retval+="tide-model="+x.elements["tide-model"].value+"\n";
-    else
-        retval+="#tide-model=\n";
+    retval+="mb-out="+x.elements["mb-out"].value+"\n";
+
+    retval+="\n";
+    if(verbose){
+        retval+="// opt trn-out [?]\n";
+        retval+="// TRN output specifier\n";
+        retval+="// comma delimited list including one or more of:\n";
+        retval+="// trnsvr:<ip>:<port>  - enable trn server interface\n";
+        retval+="// trnu                - enable TRN update ascii logging\n";
+        retval+="// trnub               - enable TRN update binary logging\n";
+        retval+="// trnusvr:<ip>:<port> - enable TRN update server\n";
+        retval+="// trnumsvr:<group>:<port>:<ttl> - enable TRN update server (UDP multicast)\n";
+        retval+="// sout                - enable TRN output to stdout\n";
+        retval+="// serr                - enable TRN output to stderr\n";
+        retval+="// debug               - enable TRN debug output\n";
+        retval+="// notrnsvr            - disable trn server interface\n";
+        retval+="// notrnusvr           - disable TRN update server\n";
+    }
+    retval+="trn-out="+x.elements["trn-out"].value+"\n";
+
+    retval+="\n";
+    if(verbose){
+        retval+="// opt trn-decn [int]\n";
+        retval+="// TRN updpate decimation modulus\n";
+        retval+="// (update TRN every nth MB1 sample)\n";
+    }
+    retval+="trn-decn="+x.elements["trn-decn"].value+"\n";
+
+    retval+="\n";
+    if(verbose){
+        retval+="// opt trn-decs [double]\n";
+        retval+="// TRN updpate decimation interval (decimal seconds)\n";
+        retval+="// (update TRN every dec seconds)\n";
+    }
+    retval+="#trn-decs=3.0\n";
+
+    retval+="\n";
+    if(verbose){
+        retval+="// opt mbhbn [int]\n";
+        retval+="// MB1 server heartbeat modulus\n";
+        retval+="// (timeout preferred, use mbhbt)\n";
+    }
+    retval+="#mbhbn\n";
+
+    retval+="\n";
+    if(verbose){
+        retval+="// opt mbhbt [double]\n";
+        retval+="// MB1 server heartbeat timeout (s)\n";
+    }
+    retval+="mbhbt="+x.elements["mbhbt"].value+"\n";
+
+    retval+="\n";
+    if(verbose){
+        retval+="// opt trnhbt [double]\n";
+        retval+="// TRN server heartbeat timeout (s)\n";
+    }
+    retval+="trnhbt="+x.elements["trnhbt"].value+"\n";
+
+    retval+="\n";
+    if(verbose){
+        retval+="// opt trnuhbt [double]\n";
+        retval+="// TRNU (udp update) server heartbeat timeout (s)\n";
+    }
+    retval+="trnuhbt="+x.elements["trnuhbt"].value+"\n";
+
     return retval;
 }
 
