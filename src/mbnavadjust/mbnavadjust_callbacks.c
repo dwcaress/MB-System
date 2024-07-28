@@ -2291,8 +2291,18 @@ void do_update_status() {
   }
 
   if (mbna_status == MBNA_STATUS_GUI && project.open && project.num_files > 0) {
-    XtVaSetValues(pushButton_autopick, XmNsensitive, True, NULL);
-    XtVaSetValues(pushButton_autopickhorizontal, XmNsensitive, True, NULL);
+  	if (mbna_view_list == MBNA_VIEW_LIST_CROSSINGS
+  		|| mbna_view_list == MBNA_VIEW_LIST_MEDIOCRECROSSINGS
+  		|| mbna_view_list == MBNA_VIEW_LIST_GOODCROSSINGS
+  		|| mbna_view_list == MBNA_VIEW_LIST_BETTERCROSSINGS
+  		|| mbna_view_list == MBNA_VIEW_LIST_TRUECROSSINGS) {
+    	XtVaSetValues(pushButton_autopick, XmNsensitive, True, NULL);
+    	XtVaSetValues(pushButton_autopickhorizontal, XmNsensitive, True, NULL);
+    }
+    else {
+    	XtVaSetValues(pushButton_autopick, XmNsensitive, False, NULL);
+    	XtVaSetValues(pushButton_autopickhorizontal, XmNsensitive, False, NULL);
+    }
     XtVaSetValues(pushButton_autosetsvsvertical, XmNsensitive, True, NULL);
     if (project.inversion_status == MBNA_INVERSION_CURRENT)
       XtVaSetValues(pushButton_newcrossings, XmNsensitive, True, NULL);

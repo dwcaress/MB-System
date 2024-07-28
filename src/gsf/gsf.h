@@ -154,6 +154,7 @@
 
 /* Get the required standard C library includes */
 #include <stdio.h>
+#include <stdint.h>
 #include <time.h>
 
 /* Get the required system include files */
@@ -177,8 +178,8 @@ extern          "C"
 
 /* Define this version of the GSF library (MAXIMUM 11 characters) */
 #define GSF_MAJOR_VERSION "03"
-#define GSF_MINOR_VERSION "09"
-#define GSF_VERSION      "GSF-v03.09"
+#define GSF_MINOR_VERSION "10"
+#define GSF_VERSION      "GSF-v03.10"
 
 /* Define largest ever expected record size */
 #define GSF_MAX_RECORD_SIZE    524288
@@ -258,7 +259,7 @@ gsfDataID;
  *  subrecords allowed in a GSF file.  This define dimensions the scale
  *  factors structure.
  */
-#define GSF_MAX_PING_ARRAY_SUBRECORDS 30
+#define GSF_MAX_PING_ARRAY_SUBRECORDS 31
 
 /* Specify the GSF swath bathymetry ping subrecord identifiers. The beam
  *  data definitions specify the index into the scale factor table, and
@@ -294,6 +295,7 @@ gsfDataID;
 #define GSF_SWATH_BATHY_SUBRECORD_SONAR_HORZ_UNCERT_ARRAY      28u
 #define GSF_SWATH_BATHY_SUBRECORD_DETECTION_WINDOW_ARRAY       29u
 #define GSF_SWATH_BATHY_SUBRECORD_MEAN_ABS_COEF_ARRAY          30u
+#define GSF_SWATH_BATHY_SUBRECORD_TVG_ARRAY                    31u
 
 /* Define the additional swath bathymetry subrecords, to which the scale
  * factors do not apply.
@@ -354,6 +356,7 @@ gsfDataID;
 #define GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2020_SPECIFIC     153u
 #define GSF_SWATH_BATHY_SUBRECORD_RESON_TSERIES_SPECIFIC    155u
 #define GSF_SWATH_BATHY_SUBRECORD_KMALL_SPECIFIC            156u
+#define GSF_SWATH_BATHY_SUBRECORD_ME70BO_SPECIFIC           157u
 
 
 
@@ -437,7 +440,7 @@ gsfDataID;
 /* above, does have the timespec structure defined. __APPLE__ will be set when  */
 /* compiled with Apple's gcc on OSX and other third party compilers, so we use it to */
 /* insure the definition below does not conflict. */
- #ifdef __APPLE__
+ #ifndef __APPLE__
 
     struct timespec
     {
@@ -831,8 +834,16 @@ typedef struct t_gsfResonTSeriesSpecific
     unsigned short     detection_algorithm;                    /* Detection algorithm from 7027 record */
     unsigned int       detection_flags;                        /* Detection flags from 7027 record */
     char               device_description[60];                 /* Device description (serial number) from 7001 record */
-    unsigned char      reserved_7027[420];                      /* Space space from 7027 record, for future use */
-    unsigned char      reserved_3[32];                          /* spare space, for future use */
+    unsigned char      reserved_7027[60];                      /* Space space from 7027 record, for future use */
+    unsigned int       match_filter_control;                   /* Flag that describes the match filter operation (0: Off, 1: On) [7002 record] */
+    double             match_filter_start_freq;                /* Frequency the filter starts at in Hz [7002 record] */
+    double             match_filter_end_freq;                  /* Frequency the filter ends at in Hz [7002 record] */
+    unsigned int       match_filter_window_type;               /* Match window type (0: Rect, 1: Kaiser, 2: Hamming, 3: Blackmann, 4:Triangular, 5:X-Taylor) [7002 record] */
+    double             match_filter_shading_value;             /* Match filter shading value [7002 record] */
+    double             match_filter_effect_pulse_width;        /* Match Filter Effective Pulse Width after FM compression in seconds [7002 record] */
+    unsigned int       reserved_7002[13];                      /* Match filter spare space [Filled with 0xFB in 7002 record] */
+    unsigned char      reserved_3[32];                         /* spare space, for future use */
+    unsigned char      reserved_4[288];                        /* Spare space, for future use. */
 
 }
 t_gsfResonTSeriesSpecific;
@@ -1156,12 +1167,11 @@ typedef struct t_gsfEMPUStatus
 }
 t_gsfEMPUStatus;
 
-
-/* Define sensor specific data structures for the Kongsberg 710/302/122 */
+/* Define sensor specific data structures for the Kongsberg 710/302/122/ME70BO */
 typedef struct t_gsfEM4Specific
 {
     /* values from the XYZ datagram and raw range datagram */
-    int              model_number;                  /* 122, or 302, or 710, or ... */
+    int              model_number;                  /* 122, or 302, or 710, 850 for ME70BO, or ... */
     int              ping_counter;                  /* Sequential ping counter, 1 through 65535 */
     int              serial_number;                 /* System unique serial number, 100 - ? */
     double           surface_velocity;              /* Measured sound speed near the surface in m/s */
@@ -1198,7 +1208,10 @@ typedef struct t_gsfKMALLTxSector
     double          totalSignalLength_sec;          /* seconds, transmit pulse length */
     int             pulseShading;                   /* Percent amplitude shading. Shading in time. Cos2 function used for shading */
     int             signalWaveForm;                 /* 0 = CW, 1 = FM upsweep, 2 = FM downsweep */
-    unsigned char   spare1[20];
+    float          highVoltageLevel_dB;            /* voltage level in dB */
+    float          sectorTrackiongCorr_dB;         /* Sector Tracking Correction in dB */
+    float          effectiveSignalLength_sec;      /* Effective Signal Length in seconds */
+    unsigned char   spare1[8];
 }
 t_gsfKMALLTxSector;
 
@@ -1226,7 +1239,7 @@ typedef struct t_gsfKMALLSpecific
 	int                 dgmType;                        /* a one byte integer value: 1 == #MRZ, ... */
 	int                 dgmVersion;                     /* a one byte integer value */
     int                 systemID;                       /* parameter used to identify datagrams from separate echosounders when multiple echosounders are connected */
-    int                 echoSounderID;                  /* 122, 302, 710, 712, 2040, ... */
+    int                 echoSounderID;                  /* 122, 302, 710, 712, 2040, 850 for ME70BO, ... */
     unsigned char       spare1[8];
 	/* values from the cmnPart of #MRZ */
     int                 numBytesCmnPart;                /* Size of cmnPart */
@@ -1513,7 +1526,7 @@ typedef union t_gsfSensorSpecific
     t_gsfReson8100Specific    gsfReson8100Specific;
     t_gsfReson7100Specific    gsfReson7100Specific;
 	t_gsfResonTSeriesSpecific gsfResonTSeriesSpecific; /* used for T50 and T20 */
-    t_gsfEM4Specific          gsfEM4Specific;          /* used for EM710, EM302, EM122, and EM2040 */
+    t_gsfEM4Specific          gsfEM4Specific;          /* used for EM710, EM302, EM122, EM2040, ME70BO */
     t_gsfGeoSwathPlusSpecific gsfGeoSwathPlusSpecific; /* DHG 2006/09/27 Use for GeoSwath+ interferometer */
     t_gsfKlein5410BssSpecific gsfKlein5410BssSpecific; /* Use for Klein 5410 Bathy Sidescan. */
     t_gsfDeltaTSpecific       gsfDeltaTSpecific;
@@ -1843,6 +1856,7 @@ typedef struct t_gsfSwathBathyPing
     double            *sonar_horz_uncert;  /* horizontal uncertainty provided by the sonar (Added in KMALL) */
     double            *detection_window;   /* Length of the detection window in seconds provided by the sonar (Added in KMALL) */
     double            *mean_abs_coeff;     /* Mean absolute coefficient provided by the sonar (Added in KMALL) */
+    double            *TVG_dB;             /* decibels, real time TVG applies nadir suppression and a lambertian correction */
     int                sensor_id;          /* a definition which specifies the sensor */
     gsfSensorSpecific  sensor_data;        /* union of known sensor specific data */
     gsfBRBIntensity   *brb_inten;          /* Structure containing bathymetric receive beam time series intensities */
@@ -2017,6 +2031,7 @@ typedef struct t_gsfRecords
  * Currently GSF supports tracking of up to two sets of each of the relevant offsets.
  * This is required for systems such as HydroChart II and Reson 9002 which have two sets
  * of transmit/receive arrays per installation.
+ * 
  */
 #define GSF_MAX_OFFSETS                2
 #define GSF_COMPENSATED                1
@@ -2074,6 +2089,12 @@ typedef struct t_gsfMBOffsets
     double           rx_transducer_pitch_offset[GSF_MAX_OFFSETS];  /* above will be used for the transmit array              */
     double           rx_transducer_roll_offset[GSF_MAX_OFFSETS];
     double           rx_transducer_heading_offset[GSF_MAX_OFFSETS];
+
+    double           altimeter_z_offset;
+    double           altimeter_x_offset;
+    double           altimeter_y_offset;
+
+
 } gsfMBOffsets;
 
 /* Macro definitions for roll_reference type */
@@ -2206,6 +2227,59 @@ typedef struct t_gsfMBParams
 #define GSF_V_DATUM_AMLW    21  /* Approximate Mean Low Water */
 #define GSF_V_DATUM_AISLW   22  /* Approximate Indian Springs Low Water */
 #define GSF_V_DATUM_ALLWS   23  /* Approximate Lower Low Water Springs */
+
+#define GSF_V_DATUM_MIN_INDEX    2  // The index of the first vertical datum
+#define GSF_V_DATUM_MAX_INDEX    23 // The index of the last vertical datum
+
+/* Macro definitions for the abbreviated vertical datum strings */
+#define GSF_V_DATUM_UNKNOWN_S   "UNK"
+#define GSF_V_DATUM_MLLW_S      "MLLW"
+#define GSF_V_DATUM_MLW_S       "MLW"
+#define GSF_V_DATUM_ALAT_S      "ALAT"
+#define GSF_V_DATUM_ESLW_S      "ESLW"
+#define GSF_V_DATUM_ISLW_S      "ISLW"
+#define GSF_V_DATUM_LAT_S       "LAT"
+#define GSF_V_DATUM_LLW_S       "LLW"
+#define GSF_V_DATUM_LNLW_S      "LNLW"
+#define GSF_V_DATUM_LWD_S       "LWD"
+#define GSF_V_DATUM_MLHW_S      "MLHW"
+#define GSF_V_DATUM_MLLWS_S     "MLLWS"
+#define GSF_V_DATUM_MLWN_S      "MLWN"
+#define GSF_V_DATUM_MSL_S       "MSL"
+#define GSF_V_DATUM_ALLW_S      "ALLW"
+#define GSF_V_DATUM_LNT_S         "LNT"
+#define GSF_V_DATUM_AMLWS_S       "AMLWS"
+#define GSF_V_DATUM_AMLLW_S       "AMLLW"
+#define GSF_V_DATUM_MLWS_S        "MLWS"
+#define GSF_V_DATUM_AMSL_S        "AMSL"
+#define GSF_V_DATUM_AMLW_S        "AMLW"
+#define GSF_V_DATUM_AISLW_S       "AISLW"
+#define GSF_V_DATUM_ALLWS_S       "ALLWS"
+
+/* Macro definitions for the full vertical datum strings */
+#define GSF_V_DATUM_UNKNOWN_L "Unknown Vertical Datum"
+#define GSF_V_DATUM_MLLW_L    "Mean Lower Low Water"
+#define GSF_V_DATUM_MLW_L     "Mean Low Water"
+#define GSF_V_DATUM_ALAT_L    "Aprox Lowest Astronomical Tide"
+#define GSF_V_DATUM_ESLW_L    "Equatorial Springs Low Water"
+#define GSF_V_DATUM_ISLW_L    "Indian Springs Low Water"
+#define GSF_V_DATUM_LAT_L     "Lowest Astronomical Tide"
+#define GSF_V_DATUM_LLW_L     "Lowest Low Water"
+#define GSF_V_DATUM_LNLW_L    "Lowest Normal Low Water"
+#define GSF_V_DATUM_LWD_L     "Low Water Datum"
+#define GSF_V_DATUM_MLHW_L    "Mean Lower High Water"
+#define GSF_V_DATUM_MLLWS_L   "Mean Lower Low Water Springs"
+#define GSF_V_DATUM_MLWN_L    "Mean Low Water Neap"
+#define GSF_V_DATUM_MSL_L     "Mean Sea Level"
+#define GSF_V_DATUM_ALLW_L    "Approximate Lowest Low Water"
+#define GSF_V_DATUM_LNT_L     "Lowest Normal Tide"
+#define GSF_V_DATUM_AMLWS_L   "Approximate Mean Low Water Springs"
+#define GSF_V_DATUM_AMLLW_L   "Approximate Mean Lower Low Water"
+#define GSF_V_DATUM_MLWS_L    "Mean Low Water Spring"
+#define GSF_V_DATUM_AMSL_L    "Approximate Mean Sea Level"
+#define GSF_V_DATUM_AMLW_L    "Approximate Mean Low Water"
+#define GSF_V_DATUM_AISLW_L   "Approximate Indian Springs Low Water"
+#define GSF_V_DATUM_ALLWS_L   "Approximate Lower Low Water Springs"
 
 /* Define the error codes which gsfError may be set to */
 #define GSF_NORMAL                                 0
