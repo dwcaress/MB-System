@@ -111,6 +111,7 @@
 /* Standard C Library Includes */
 #include <string.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 /* Get network byte swap functions */
 #include <sys/types.h>
@@ -202,7 +203,6 @@ static int      DecodeR2SonicImagerySpecific(gsfSensorImagery *sdata, const unsi
 static int      DecodeTypeIIISeaBeamSpecific(gsfSensorSpecific *sdata, const unsigned char *sptr);
 static int      DecodeSASSSpecific(gsfSensorSpecific *sdata, const unsigned char *sptr);
 #endif
-
 
 /********************************************************************
  *
@@ -340,11 +340,11 @@ DecodeEchotracSpecific(gsfSBSensorSpecific *sdata, const unsigned char *sptr)
     p += 2;
 
     /* Next byte contains the most probable position source navigation */
-    sdata->gsfEchotracSpecific.mpp_source = (int) *p;
+    sdata->gsfEchotracSpecific.mpp_source = (unsigned short) *p;
     p += 1;
 
     /* Next byte contains the tide source */
-    sdata->gsfEchotracSpecific.tide_source = (int) *p;
+    sdata->gsfEchotracSpecific.tide_source = (unsigned short) *p;
     p += 1;
 
     return (p - sptr);
@@ -860,6 +860,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, const unsigned char *sptr,
     ping->nominal_depth = (double *) NULL;
     ping->across_track = (double *) NULL;
     ping->along_track = (double *) NULL;
+    ping->TVG_dB = (double *) NULL;
     ping->travel_time = (double *) NULL;
     ping->beam_angle = (double *) NULL;
     ping->mc_amplitude = (double *) NULL;
@@ -943,7 +944,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, const unsigned char *sptr,
         	/* Verification check on the next sub record id and size */
         	sr_size = subrecord_size;
         	count = 0;
-        	while (((record_size - bytes - sr_size) > 4) && (count < GSF_FIELD_SIZE_COUNT))
+        	while (((record_size - bytes - sr_size) > 4) && (count <= GSF_FIELD_SIZE_COUNT))
         	{
 
             	int test_sizes[GSF_FIELD_SIZE_COUNT] = {1, 2, 4};
@@ -978,6 +979,10 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, const unsigned char *sptr,
                 	}
                 	break;
             	}
+                else if(count >= GSF_FIELD_SIZE_COUNT)
+                {
+                    break;
+                }
 
             	test_fs = test_sizes[count];
             	count += 1;
@@ -1432,7 +1437,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, const unsigned char *sptr,
                 }
                 else
                 {
-                    ret = DecodeTwoByteArray(&ft->rec.mb_ping.beam_angle_forward, p, ping->number_beams, &ft->rec.mb_ping.scaleFactors, GSF_SWATH_BATHY_SUBRECORD_BEAM_ANGLE_FORWARD_ARRAY, handle);
+                    ret = DecodeSignedTwoByteArray(&ft->rec.mb_ping.beam_angle_forward, p, ping->number_beams, &ft->rec.mb_ping.scaleFactors, GSF_SWATH_BATHY_SUBRECORD_BEAM_ANGLE_FORWARD_ARRAY, handle);
                 }
                 if (ret < 0)
                 {
@@ -1671,6 +1676,41 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, const unsigned char *sptr,
                 p += ret;
                 break;
 
+            case (GSF_SWATH_BATHY_SUBRECORD_TVG_ARRAY):
+             	if ((ft->rec.mb_ping.scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_TVG_ARRAY - 1].compressionFlag & 0x0F) == GSF_ENABLE_COMPRESSION)
+                {
+                    ret = DecodeCompressedArray(&ft->rec.mb_ping.TVG_dB, p, ping->number_beams, subrecord_size, &ft->rec.mb_ping.scaleFactors, GSF_SWATH_BATHY_SUBRECORD_TVG_ARRAY, handle);
+                }
+                else
+                {
+                    switch (field_size)
+                    {
+                        case GSF_FIELD_SIZE_ONE:
+                            ret = DecodeByteArray(&ft->rec.mb_ping.TVG_dB, p, ping->number_beams,
+                                &ft->rec.mb_ping.scaleFactors, GSF_SWATH_BATHY_SUBRECORD_TVG_ARRAY, handle);
+                            break;
+
+                        default:
+                        case GSF_FIELD_SIZE_DEFAULT:
+                        case GSF_FIELD_SIZE_TWO:
+                            ret = DecodeTwoByteArray(&ft->rec.mb_ping.TVG_dB, p, ping->number_beams,
+                                &ft->rec.mb_ping.scaleFactors, GSF_SWATH_BATHY_SUBRECORD_TVG_ARRAY, handle);
+                            break;
+
+                        case GSF_FIELD_SIZE_FOUR:
+                            ret = DecodeFourByteArray(&ft->rec.mb_ping.TVG_dB, p, ping->number_beams,
+                                &ft->rec.mb_ping.scaleFactors, GSF_SWATH_BATHY_SUBRECORD_TVG_ARRAY, handle);
+                            break;
+                    }
+                }
+                if (ret < 0)
+                {
+                    return (-1);
+                }
+                ping->TVG_dB = ft->rec.mb_ping.TVG_dB;
+                p += ret;
+                break;
+
             case (GSF_SWATH_BATHY_SUBRECORD_SEABEAM_SPECIFIC):
                 p += DecodeSeabeamSpecific(&ping->sensor_data, p);
                 ping->sensor_id = GSF_SWATH_BATHY_SUBRECORD_SEABEAM_SPECIFIC;
@@ -1842,6 +1882,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, const unsigned char *sptr,
             case (GSF_SWATH_BATHY_SUBRECORD_EM302_SPECIFIC):
             case (GSF_SWATH_BATHY_SUBRECORD_EM122_SPECIFIC):
             case (GSF_SWATH_BATHY_SUBRECORD_EM2040_SPECIFIC):
+            case (GSF_SWATH_BATHY_SUBRECORD_ME70BO_SPECIFIC):
                 p += DecodeEM4Specific(&ping->sensor_data, p);
                 ping->sensor_id = subrecord_id;
                 break;
@@ -2104,6 +2145,11 @@ DecodeTwoByteArray(double **array, const unsigned char *sptr, int num_beams,
     }
 
     /* Allocate memory for the array if none has been allocated yet */
+    if (num_beams > arraySize[handle - 1][id - 1])
+    {
+        if (*array != (double *) NULL) free (*array);
+        *array = (double *) NULL;
+    }
     if (*array == (double *) NULL)
     {
         *array = (double *) calloc(num_beams, sizeof(double));
@@ -2113,23 +2159,6 @@ DecodeTwoByteArray(double **array, const unsigned char *sptr, int num_beams,
             gsfError = GSF_MEMORY_ALLOCATION_FAILED;
             return (-1);
         }
-        arraySize[handle - 1][id - 1] = num_beams;
-    }
-
-    /* Make sure the memory allocated for the array is sufficient, some
-    *  systems have a dynamic number of beams depending on depth
-    */
-    if (num_beams > arraySize[handle - 1][id - 1])
-    {
-        *array = (double *) realloc((void *) *array, num_beams * sizeof(double));
-
-        if (*array == (double *) NULL)
-        {
-            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-            return (-1);
-        }
-        memset(*array, 0, num_beams * sizeof(double));
-
         arraySize[handle - 1][id - 1] = num_beams;
     }
 
@@ -2208,6 +2237,11 @@ DecodeSignedTwoByteArray(double **array, const unsigned char *sptr, int num_beam
     }
 
     /* Allocate memory for the array if none has been allocated yet */
+    if (num_beams > arraySize[handle - 1][id - 1])
+    {
+        if (*array != (double *) NULL) free (*array);
+        *array = (double *) NULL;
+    }
     if (*array == (double *) NULL)
     {
         *array = (double *) calloc(num_beams, sizeof(double));
@@ -2217,23 +2251,6 @@ DecodeSignedTwoByteArray(double **array, const unsigned char *sptr, int num_beam
             gsfError = GSF_MEMORY_ALLOCATION_FAILED;
             return (-1);
         }
-        arraySize[handle - 1][id - 1] = num_beams;
-    }
-
-    /* Make sure the memory allocated for the array is sufficient, some
-    *  systems have a dynamic number of beams depending on depth
-    */
-    if (num_beams > arraySize[handle - 1][id - 1])
-    {
-        *array = (double *) realloc((void *) *array, num_beams * sizeof(double));
-
-        if (*array == (double *) NULL)
-        {
-            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-            return (-1);
-        }
-        memset(*array, 0, num_beams * sizeof(double));
-
         arraySize[handle - 1][id - 1] = num_beams;
     }
 
@@ -2311,6 +2328,11 @@ DecodeFourByteArray(double **array, const unsigned char *sptr, int num_beams,
     }
 
     /* Allocate memory for the array if none has been allocated yet */
+    if (num_beams > arraySize[handle - 1][id - 1])
+    {
+        if (*array != (double *) NULL) free (*array);
+        *array = (double *) NULL;
+    }
     if (*array == (double *) NULL)
     {
         *array = (double *) calloc(num_beams, sizeof(double));
@@ -2320,23 +2342,6 @@ DecodeFourByteArray(double **array, const unsigned char *sptr, int num_beams,
             gsfError = GSF_MEMORY_ALLOCATION_FAILED;
             return (-1);
         }
-        arraySize[handle - 1][id - 1] = num_beams;
-    }
-
-    /* Make sure the memory allocated for the array is sufficient, some
-    *  systems have a dynamic number of beams depending on depth
-    */
-    if (num_beams > arraySize[handle - 1][id - 1])
-    {
-        *array = (double *) realloc((void *) *array, num_beams * sizeof(double));
-
-        if (*array == (double *) NULL)
-        {
-            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-            return (-1);
-        }
-        memset(*array, 0, num_beams * sizeof(double));
-
         arraySize[handle - 1][id - 1] = num_beams;
     }
 
@@ -2418,6 +2423,11 @@ DecodeSignedFourByteArray(double **array, const unsigned char *sptr, int num_bea
     }
 
     /* Allocate memory for the array if none has been allocated yet */
+    if (num_beams > arraySize[handle - 1][id - 1])
+    {
+        if (*array != (double *) NULL) free (*array);
+        *array = (double *) NULL;
+    }
     if (*array == (double *) NULL)
     {
         *array = (double *) calloc(num_beams, sizeof(double));
@@ -2427,23 +2437,6 @@ DecodeSignedFourByteArray(double **array, const unsigned char *sptr, int num_bea
             gsfError = GSF_MEMORY_ALLOCATION_FAILED;
             return (-1);
         }
-        arraySize[handle - 1][id - 1] = num_beams;
-    }
-
-    /* Make sure the memory allocated for the array is sufficient, some
-    *  systems have a dynamic number of beams depending on depth
-    */
-    if (num_beams > arraySize[handle - 1][id - 1])
-    {
-        *array = (double *) realloc((void *) *array, num_beams * sizeof(double));
-
-        if (*array == (double *) NULL)
-        {
-            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-            return (-1);
-        }
-        memset(*array, 0, num_beams * sizeof(double));
-
         arraySize[handle - 1][id - 1] = num_beams;
     }
 
@@ -2522,6 +2515,11 @@ DecodeByteArray(double **array, const unsigned char *sptr, int num_beams,
     }
 
     /* Allocate memory for the array if none has been allocated yet */
+    if (num_beams > arraySize[handle - 1][id - 1])
+    {
+        if (*array != (double *) NULL) free (*array);
+        *array = (double *) NULL;
+    }
     if (*array == (double *) NULL)
     {
         *array = (double *) calloc(num_beams, sizeof(double));
@@ -2531,23 +2529,6 @@ DecodeByteArray(double **array, const unsigned char *sptr, int num_beams,
             gsfError = GSF_MEMORY_ALLOCATION_FAILED;
             return (-1);
         }
-        arraySize[handle - 1][id - 1] = num_beams;
-    }
-
-    /* Make sure there memory allocated for the array is sufficient, some
-    *  system have a different number of beams depending on depth
-    */
-    if (num_beams > arraySize[handle - 1][id - 1])
-    {
-        *array = (double *) realloc((void *) *array, num_beams * sizeof(double));
-
-        if (*array == (double *) NULL)
-        {
-            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-            return (-1);
-        }
-        memset(*array, 0, num_beams * sizeof(double));
-
         arraySize[handle - 1][id - 1] = num_beams;
     }
 
@@ -2626,6 +2607,11 @@ DecodeFromByteToUnsignedShortArray(unsigned short **array, const unsigned char *
     }
 
     /* Allocate memory for the array if none has been allocated yet */
+    if (num_beams > arraySize[handle - 1][id - 1])
+    {
+        if (*array != (unsigned short *) NULL) free (*array);
+        *array = (unsigned short *) NULL;
+    }
     if (*array == (unsigned short *) NULL)
     {
         *array = (unsigned short *) calloc(num_beams, sizeof(unsigned short));
@@ -2635,23 +2621,6 @@ DecodeFromByteToUnsignedShortArray(unsigned short **array, const unsigned char *
             gsfError = GSF_MEMORY_ALLOCATION_FAILED;
             return (-1);
         }
-        arraySize[handle - 1][id - 1] = num_beams;
-    }
-
-    /* Make sure there memory allocated for the array is sufficient, some
-    *  system have a different number of beams depending on depth
-    */
-    if (num_beams > arraySize[handle - 1][id - 1])
-    {
-        *array = (unsigned short *) realloc((void *) *array, num_beams * sizeof(unsigned short));
-
-        if (*array == (unsigned short *) NULL)
-        {
-            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-            return (-1);
-        }
-        memset(*array, 0, num_beams * sizeof(unsigned short));
-
         arraySize[handle - 1][id - 1] = num_beams;
     }
 
@@ -2726,6 +2695,11 @@ DecodeSignedByteArray(double **array, const unsigned char *sptr, int num_beams,
     }
 
     /* Allocate memory for the array if none has been allocated yet */
+    if (num_beams > arraySize[handle - 1][id - 1])
+    {
+        if (*array != (double *) NULL) free (*array);
+        *array = (double *) NULL;
+    }
     if (*array == (double *) NULL)
     {
         *array = (double *) calloc(num_beams, sizeof(double));
@@ -2735,23 +2709,6 @@ DecodeSignedByteArray(double **array, const unsigned char *sptr, int num_beams,
             gsfError = GSF_MEMORY_ALLOCATION_FAILED;
             return (-1);
         }
-        arraySize[handle - 1][id - 1] = num_beams;
-    }
-
-    /* Make sure the memory allocated for the array is sufficient, some
-     * systems have a different number of beams depending on depth.
-     */
-    if (num_beams > arraySize[handle - 1][id - 1])
-    {
-        *array = (double *) realloc((void *) *array, num_beams * sizeof(double));
-
-        if (*array == (double *) NULL)
-        {
-            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-            return (-1);
-        }
-        memset(*array, 0, num_beams * sizeof(double));
-
         arraySize[handle - 1][id - 1] = num_beams;
     }
 
@@ -2810,6 +2767,11 @@ DecodeBeamFlagsArray(unsigned char **array, const unsigned char *sptr, int num_b
     }
 
     /* Allocate memory for the array if none has been allocated yet */
+    if (num_beams > arraySize[handle - 1][id - 1])
+    {
+        if (*array != (unsigned char *) NULL) free (*array);
+        *array = (unsigned char *) NULL;
+    }
     if (*array == (unsigned char *) NULL)
     {
         *array = (unsigned char *) calloc(num_beams, sizeof(unsigned char));
@@ -2819,23 +2781,6 @@ DecodeBeamFlagsArray(unsigned char **array, const unsigned char *sptr, int num_b
             gsfError = GSF_MEMORY_ALLOCATION_FAILED;
             return (-1);
         }
-        arraySize[handle - 1][id - 1] = num_beams;
-    }
-
-    /* Make sure that memory allocated for the array is sufficient, some
-    *  system have a different number of beams depending on depth.
-    */
-    if (num_beams > arraySize[handle - 1][id - 1])
-    {
-        *array = (unsigned char *) realloc((void *) *array, num_beams * sizeof(unsigned char));
-
-        if (*array == (unsigned char *) NULL)
-        {
-            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-            return (-1);
-        }
-        memset(*array, 0, num_beams * sizeof(unsigned char));
-
         arraySize[handle - 1][id - 1] = num_beams;
     }
 
@@ -2894,6 +2839,11 @@ DecodeQualityFlagsArray(unsigned char **array, const unsigned char *sptr, int nu
     }
 
     /* Allocate memory for the array if none has been allocated yet */
+    if (num_beams > arraySize[handle - 1][id - 1])
+    {
+        if (*array != (unsigned char *) NULL) free (*array);
+        *array = (unsigned char *) NULL;
+    }
     if (*array == (unsigned char *) NULL)
     {
         *array = (unsigned char *) calloc(num_beams, sizeof(unsigned char));
@@ -2903,23 +2853,6 @@ DecodeQualityFlagsArray(unsigned char **array, const unsigned char *sptr, int nu
             gsfError = GSF_MEMORY_ALLOCATION_FAILED;
             return (-1);
         }
-        arraySize[handle - 1][id - 1] = num_beams;
-    }
-
-    /* Make sure that memory allocated for the array is sufficient, some
-    *  systems have a different number of beams depending on depth
-    */
-    if (num_beams > arraySize[handle - 1][id - 1])
-    {
-        *array = (unsigned char *) realloc((void *) *array, num_beams * sizeof(unsigned char));
-
-        if (*array == (unsigned char *) NULL)
-        {
-            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-            return (-1);
-        }
-        memset(*array, 0, num_beams * sizeof(unsigned char));
-
         arraySize[handle - 1][id - 1] = num_beams;
     }
 
@@ -3667,19 +3600,19 @@ DecodeSBAmpSpecific(gsfSensorSpecific *sdata, const unsigned char *sptr)
     gsfuLong        ltemp;
 
     /* First byte contains the hour from the Eclipse */
-    sdata->gsfSBAmpSpecific.hour = (int) *p;
+    sdata->gsfSBAmpSpecific.hour = (unsigned char) *p;
     p += 1;
 
     /* Next byte contains the minutes from the Eclipse */
-    sdata->gsfSBAmpSpecific.minute = (int) *p;
+    sdata->gsfSBAmpSpecific.minute = (unsigned char) *p;
     p += 1;
 
     /* Next byte contains the seconds from the Eclipse */
-    sdata->gsfSBAmpSpecific.second = (int) *p;
+    sdata->gsfSBAmpSpecific.second = (unsigned char) *p;
     p += 1;
 
     /* Next byte contains the hundredths of seconds from the Eclipse */
-    sdata->gsfSBAmpSpecific.hundredths = (int) *p;
+    sdata->gsfSBAmpSpecific.hundredths = (unsigned char) *p;
     p += 1;
 
     /* Next four byte integer contains the block number */
@@ -4528,6 +4461,11 @@ DecodeEM3RawSpecific(gsfSensorSpecific *sdata, const unsigned char *sptr)
     memcpy(&stemp, p, 2);
     sdata->gsfEM3RawSpecific.transmit_sectors = (int) ntohs(stemp);
     p += 2;
+    if (sdata->gsfEM3RawSpecific.transmit_sectors > GSF_MAX_EM3_SECTORS)
+    {
+        // this will buffer overflow below . Should catch critical decode errors.
+        sdata->gsfEM3RawSpecific.transmit_sectors = GSF_MAX_EM3_SECTORS;
+    }
 
     for (i = 0; i < sdata->gsfEM3RawSpecific.transmit_sectors; i++)
     {
@@ -4795,13 +4733,12 @@ DecodeEM3RawSpecific(gsfSensorSpecific *sdata, const unsigned char *sptr)
     return (p - sptr);
 }
 
-
 /********************************************************************
  *
  * Function Name : DecodeEM4Specific
  *
  * Description : This function decodes the Simrad EM4 series sonar system
- *    (EM710, EM302, EM122, and EM2040) sensor specific information from
+ *    (EM710, EM302, EM122, EM2040, ME70BO) sensor specific information from
  *    the GSF byte stream.
  *
  * Inputs :
@@ -4886,6 +4823,11 @@ DecodeEM4Specific(gsfSensorSpecific *sdata, const unsigned char *sptr)
     memcpy(&stemp, p, 2);
     sdata->gsfEM4Specific.transmit_sectors = (int) ntohs(stemp);
     p += 2;
+    if (sdata->gsfEM4Specific.transmit_sectors > GSF_MAX_EM4_SECTORS)
+    {
+        // This will buffer overflow below.  Should catch critical decode errors.
+        sdata->gsfEM4Specific.transmit_sectors = GSF_MAX_EM4_SECTORS;
+    }
 
     for (i = 0; i < sdata->gsfEM4Specific.transmit_sectors; i++)
     {
@@ -5398,6 +5340,11 @@ DecodeKMALLSpecific(gsfSensorSpecific *sdata, const unsigned char *sptr)
     memcpy(&stemp,p,2);
 	sdata->gsfKMALLSpecific.numTxSectors = (int) ntohs(stemp);
     p += 2;
+    if (sdata->gsfKMALLSpecific.numTxSectors > GSF_MAX_KMALL_SECTORS)
+    {
+        // This will buffer overflow below.  Should catch critical decode errors.
+        sdata->gsfKMALLSpecific.numTxSectors = GSF_MAX_KMALL_SECTORS;
+    }
 
     /* The next two bytes contain the number of bytes per transmit sector */
     memcpy(&stemp,p,2);
@@ -5539,9 +5486,27 @@ DecodeKMALLSpecific(gsfSensorSpecific *sdata, const unsigned char *sptr)
         sdata->gsfKMALLSpecific.sector[i].signalWaveForm = (int) *p;
         p += 1;
 
-        /* The next 20 bytes are our spare for later use */
+        /* The next four bytes contain the high voltage level */
+        memcpy(&ltemp,p,4);
+	    sltemp = (gsfsLong) ntohl(ltemp);
+		sdata->gsfKMALLSpecific.sector[i].highVoltageLevel_dB = ((double) sltemp) / 1.0e6;
+        p += 4;
+
+        /* The next four bytes contain the sector tracking correction level */
+        memcpy(&ltemp,p,4);
+	    sltemp = (gsfsLong) ntohl(ltemp);
+		sdata->gsfKMALLSpecific.sector[i].sectorTrackiongCorr_dB = ((double) sltemp) / 1.0e6;
+        p += 4;
+
+        /* The next four bytes contain the effective signal length in seconds */
+        memcpy(&ltemp,p,4);
+	    sltemp = (gsfsLong) ntohl(ltemp);
+		sdata->gsfKMALLSpecific.sector[i].effectiveSignalLength_sec = ((double) sltemp) / 1.0e6;
+        p += 4;
+
+        /* The next 8 bytes are our spare for later use */
         memset(&sdata->gsfKMALLSpecific.sector[i].spare1, 0, sizeof (sdata->gsfKMALLSpecific.sector[i].spare1));
-        p += 20;
+        p += 8;
     }
 
     /* Next section is the rxInfo data */
@@ -5614,6 +5579,11 @@ DecodeKMALLSpecific(gsfSensorSpecific *sdata, const unsigned char *sptr)
     memcpy(&stemp,p,2);
     sdata->gsfKMALLSpecific.numExtraDetectionClasses = (int) ntohs(stemp);
     p += 2;
+    if (sdata->gsfKMALLSpecific.numExtraDetectionClasses > GSF_MAX_KMALL_EXTRA_CLASSES)
+    {
+        // This will cause a buffer overflow below.  Should catch critical decode errors.
+        sdata->gsfKMALLSpecific.numExtraDetectionClasses = GSF_MAX_KMALL_EXTRA_CLASSES;
+    }
 
     /* The next two bytes contain the number of bytes per extra detection class */
     memcpy(&stemp,p,2);
@@ -6217,14 +6187,16 @@ DecodeReson7100Specific(gsfSensorSpecific *sdata, const unsigned char *sptr)
     sdata->gsfReson7100Specific.projector_id = (unsigned int) ntohl(ltemp);
     p += 4;
 
-    /* Next four byte integer contains the projector angle, in deg * 100 */
-    memcpy(&sltemp, p, 4);
-    sdata->gsfReson7100Specific.projector_steer_angl_vert = ((double) ntohl(sltemp)) / 1.0e3;
+    /* Next four byte integer contains the projector angle, in deg * 1000 */
+    memcpy(&ltemp, p, 4);
+	sltemp = (gsfsLong) ntohl(ltemp);
+    sdata->gsfReson7100Specific.projector_steer_angl_vert = ((double) sltemp) / 1.0e3;
     p += 4;
 
-    /* Next four byte integer contains the projector angle, in deg * 100 */
-    memcpy(&sltemp, p, 4);
-    sdata->gsfReson7100Specific.projector_steer_angl_horz = ((double) ntohl(sltemp)) / 1.0e3;
+    /* Next four byte integer contains the projector angle, in deg * 1000 */
+    memcpy(&ltemp, p, 4);
+	sltemp = (gsfsLong) ntohl(ltemp);
+    sdata->gsfReson7100Specific.projector_steer_angl_horz = ((double) sltemp) / 1.0e3;
     p += 4;
 
     /* Next two byte value contains the fore/aft beamwidth */
@@ -6490,14 +6462,16 @@ DecodeResonTSeriesSpecific(gsfSensorSpecific * sdata, const unsigned char *sptr)
     sdata->gsfResonTSeriesSpecific.projector_id = (unsigned int) ntohl(ltemp);
     p += 4;
 
-    /* Next four byte integer contains the projector angle, in deg * 100 */
-    memcpy(&sltemp, p, 4);
-    sdata->gsfResonTSeriesSpecific.projector_steer_angl_vert = ((double) ntohl(sltemp)) / 1.0e3;
+    /* Next four byte integer contains the projector angle, in deg * 1000 */
+    memcpy(&ltemp, p, 4);
+	sltemp = (gsfsLong) ntohl(ltemp);
+    sdata->gsfResonTSeriesSpecific.projector_steer_angl_vert = ((double) sltemp) / 1.0e3;
     p += 4;
 
-    /* Next four byte integer contains the projector angle, in deg * 100 */
-    memcpy(&sltemp, p, 4);
-    sdata->gsfResonTSeriesSpecific.projector_steer_angl_horz = ((double) ntohl(sltemp)) / 1.0e3;
+    /* Next four byte integer contains the projector angle, in deg * 1000 */
+    memcpy(&ltemp, p, 4);
+	sltemp = (gsfsLong) ntohl(ltemp);
+    sdata->gsfResonTSeriesSpecific.projector_steer_angl_horz = ((double) sltemp) / 1.0e3;
     p += 4;
 
     /* Next two byte value contains the fore/aft beamwidth */
@@ -6666,13 +6640,53 @@ DecodeResonTSeriesSpecific(gsfSensorSpecific * sdata, const unsigned char *sptr)
     }
     p += 4;
 
-    /* The next 416 bytes are spare space for future growth from the 7027 record*/
-    memset(&sdata->gsfResonTSeriesSpecific.reserved_7027[0], 0, 416);
-    p += 416;
+    /* The next 60 bytes are spare space for future growth from the 7027 record*/
+    memset(&sdata->gsfResonTSeriesSpecific.reserved_7027[0], 0, 60);
+    p += 60;
+
+    /* Next byte contains the operation field for the match filter */
+    sdata->gsfResonTSeriesSpecific.match_filter_control = *p;
+    p += 1;
+
+    /* Next four byte integer contains the start frequency for the match filter in Hz */
+    memcpy(&ltemp, p, 4);
+    ltemp = (gsfuLong) ntohl(ltemp);
+    sdata->gsfResonTSeriesSpecific.match_filter_start_freq = ((double) ltemp) / 1.0e2;
+    p += 4;
+    
+    /* Next four byte integer contains the end frequency for the match filter in Hz */
+    memcpy(&ltemp, p, 4);
+    ltemp = (gsfuLong) ntohl(ltemp);
+    sdata->gsfResonTSeriesSpecific.match_filter_end_freq = ((double) ltemp) / 1.0e2;
+    p += 4;
+    
+    /* Next byte contains the window type for the match filter */
+    sdata->gsfResonTSeriesSpecific.match_filter_window_type = *p;
+    p += 1;
+    
+    /* Next four byte integer contains the shading value for the match filter */
+    memcpy(&stemp, p, 2);
+    ltemp = (gsfuLong) ntohs(stemp);
+    sdata->gsfResonTSeriesSpecific.match_filter_shading_value = ((double) ltemp) / 1.0e4;
+    p += 2;
+    
+    /* Next four byte integer contains the effective pulse width for the match filter in seconds */
+    memcpy(&ltemp, p, 4);
+    ltemp = (gsfuLong) ntohl(ltemp);
+    sdata->gsfResonTSeriesSpecific.match_filter_effect_pulse_width = ((double) ltemp) / 1.0e11;
+    p += 4;
+    
+    /* The next 52 bytes are spare space for future growth in the 7002 datagram */
+    memset(&sdata->gsfResonTSeriesSpecific.reserved_7002[0], 0, sizeof(unsigned int) * 13);
+    p += 52;
 
     /* The next 32 bytes are spare space for future growth */
     memset(&sdata->gsfResonTSeriesSpecific.reserved_3[0], 0, 32);
     p += 32;
+    
+    /* The next 264 bytes are spare space for future growth */
+    memset(&sdata->gsfResonTSeriesSpecific.reserved_4[0], 0, 288);
+    p += 288;
 
     return (p - sptr);
 }
@@ -7075,11 +7089,11 @@ DecodeSBEchotracSpecific(t_gsfSBEchotracSpecific *sdata, const unsigned char *sp
     p += 2;
 
     /* Next byte contains the most probable position source navigation */
-    sdata->mpp_source = (int) *p;
+    sdata->mpp_source = (unsigned short) *p;
     p += 1;
 
     /* Next byte contains the tide source */
-    sdata->tide_source = (int) *p;
+    sdata->tide_source = (unsigned short) *p;
     p += 1;
 
     /* Next two byte integer contains the dynamic_draft */
@@ -7467,7 +7481,7 @@ DecodeEM4ImagerySpecific(gsfSensorImagery *sdata, const unsigned char *sptr)
     sdata->gsfEM4ImagerySpecific.offset = (gsfsShort) ntohs(sstemp);
     p += 2;
 
-    /* Next two bytes contain the imagery scale value as specified by the manufacturer.  This value is 10 for the EM710/EM302/EM122/EM2040.
+    /* Next two bytes contain the imagery scale value as specified by the manufacturer.  This value is 10 for the EM710/EM302/EM122/EM2040/ME70BO.
      *  The following formula can be used to convert from the GSF positive biased value to dB:
      *  dB_value = (GSF_I_value - offset) / scale
      */
@@ -7880,6 +7894,13 @@ DecodeBRBIntensity(gsfBRBIntensity **idata, const unsigned char *sptr, int num_b
     int             bytes_per_sample;
     unsigned char   bytes_to_unpack[4];
 
+    if (num_beams <= 0)
+    {
+        gsfError = GSF_INVALID_NUM_BEAMS;
+        return(-1);
+    }
+
+        
     /* Allocate memory for the structure if none has been allocated yet */
     if (*idata == (gsfBRBIntensity *) NULL)
     {
@@ -7893,14 +7914,15 @@ DecodeBRBIntensity(gsfBRBIntensity **idata, const unsigned char *sptr, int num_b
     }
 
     /* Allocate memory for the array if none has been allocated yet */
+    if (num_beams > arraySize[handle - 1][id - 1])
+    {
+        if ((*idata)->time_series != (gsfTimeSeriesIntensity *) NULL) free ((*idata)->time_series);
+        if (samplesArraySize[handle - 1] != (short *) NULL) free (samplesArraySize[handle - 1]);
+        (*idata)->time_series = (gsfTimeSeriesIntensity *) NULL;
+        samplesArraySize[handle - 1] = (short *) NULL;
+    }
     if ((*idata)->time_series == (gsfTimeSeriesIntensity *) NULL)
     {
-        if (num_beams <= 0)
-        {
-            gsfError = GSF_INVALID_NUM_BEAMS;
-            return(-1);
-        }
-
         (*idata)->time_series = (gsfTimeSeriesIntensity *) calloc(num_beams, sizeof(gsfTimeSeriesIntensity));
 
         if ((*idata)->time_series == (gsfTimeSeriesIntensity *) NULL)
@@ -7911,29 +7933,12 @@ DecodeBRBIntensity(gsfBRBIntensity **idata, const unsigned char *sptr, int num_b
         arraySize[handle - 1][id - 1] = num_beams;
 
         /* allocate memory for array of sample counts */
-        samplesArraySize[handle - 1] = calloc (num_beams, sizeof (short));
-        /* TODO: Check return of calloc. */
-    }
-
-    /* Make sure there memory allocated for the array is sufficient, some
-    *  system have a different number of beams depending on depth
-    */
-    if (num_beams > arraySize[handle - 1][id - 1])
-    {
-        (*idata)->time_series = (gsfTimeSeriesIntensity *) realloc((void *) (*idata)->time_series, num_beams * sizeof(gsfTimeSeriesIntensity));
-
-        if ((*idata)->time_series == (gsfTimeSeriesIntensity *) NULL)
+        samplesArraySize[handle - 1] = (short *) calloc (num_beams, sizeof (short));
+        if (samplesArraySize[handle - 1] == (short *) NULL)
         {
             gsfError = GSF_MEMORY_ALLOCATION_FAILED;
             return (-1);
         }
-        memset((*idata)->time_series, 0, num_beams * sizeof(gsfTimeSeriesIntensity));
-
-        arraySize[handle - 1][id - 1] = num_beams;
-
-        /* re-allocate memory for array of sample counts */
-        samplesArraySize[handle - 1] = realloc ((void *) samplesArraySize[handle - 1], num_beams * sizeof (short));
-        memset (samplesArraySize[handle - 1], 0, num_beams * sizeof (short));
     }
 
     /* decode the bits per sample */
@@ -7993,6 +7998,7 @@ DecodeBRBIntensity(gsfBRBIntensity **idata, const unsigned char *sptr, int num_b
         case (GSF_SWATH_BATHY_SUBRECORD_EM302_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM710_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM2040_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_ME70BO_SPECIFIC):
             sensor_size = DecodeEM4ImagerySpecific(&(*idata)->sensor_imagery, ptr);
             break;
 
@@ -8042,6 +8048,11 @@ DecodeBRBIntensity(gsfBRBIntensity **idata, const unsigned char *sptr, int num_b
         ptr += 6;
 
         /* Allocate memory for the array of samples if none has been allocated yet. */
+        if ((*idata)->time_series[i].sample_count > samplesArraySize[handle - 1][i])
+        {
+            if ((*idata)->time_series[i].samples != (unsigned int *) NULL) free ((*idata)->time_series[i].samples);
+            (*idata)->time_series[i].samples = (unsigned int *) NULL;
+        }
         if ((*idata)->time_series[i].samples == (unsigned int *) NULL)
         {
             (*idata)->time_series[i].samples = (unsigned int *) calloc((*idata)->time_series[i].sample_count, sizeof(unsigned int));
@@ -8051,22 +8062,6 @@ DecodeBRBIntensity(gsfBRBIntensity **idata, const unsigned char *sptr, int num_b
                 gsfError = GSF_MEMORY_ALLOCATION_FAILED;
                 return (-1);
             }
-
-            samplesArraySize[handle - 1][i] = (*idata)->time_series[i].sample_count;
-        }
-
-        if ((*idata)->time_series[i].sample_count > samplesArraySize[handle - 1][i])
-        {
-            (*idata)->time_series[i].samples = (unsigned int *) realloc((void *) (*idata)->time_series[i].samples, (*idata)->time_series[i].sample_count * sizeof(unsigned int));
-
-            if ((*idata)->time_series[i].samples == (unsigned int *) NULL)
-            {
-                gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-                return (-1);
-            }
-
-            memset ((*idata)->time_series[i].samples, 0, (*idata)->time_series[i].sample_count * sizeof(unsigned int));
-
             samplesArraySize[handle - 1][i] = (*idata)->time_series[i].sample_count;
         }
 
@@ -8213,38 +8208,25 @@ gsfDecodeSoundVelocityProfile(gsfSVP *svp, GSF_FILE_TABLE *ft, const unsigned ch
     svp->sound_speed = (double *) NULL;
 
     /* make sure we have memory for the depth/speed pairs */
+    if (ft->rec.svp.number_points < svp->number_points)
+    {
+        if (ft->rec.svp.depth != (double *) NULL)free (ft->rec.svp.depth);
+        if (ft->rec.svp.sound_speed != (double *) NULL) free (ft->rec.svp.sound_speed);
+        ft->rec.svp.depth = (double *) NULL;
+        ft->rec.svp.sound_speed = (double *) NULL;
+    }
     if (ft->rec.svp.depth == (double *) NULL)
     {
         ft->rec.svp.depth = (double *) calloc(svp->number_points, sizeof(double));
-
         if (ft->rec.svp.depth == (double *) NULL)
         {
             gsfError = GSF_MEMORY_ALLOCATION_FAILED;
             return (-1);
         }
     }
-
-    /* Re-allocate the dynamic memory if the number of points in the profile
-     * is greater this time than it was last time.
-     */
-    else if (ft->rec.svp.number_points < svp->number_points)
-    {
-        ft->rec.svp.depth = (double *) realloc(ft->rec.svp.depth, svp->number_points * sizeof(double));
-
-        if (ft->rec.svp.depth == (double *) NULL)
-        {
-            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-            return (-1);
-        }
-        memset(ft->rec.svp.depth, 0, svp->number_points * sizeof(double));
-    }
-    /* Set the caller's pointer to this dynamic memory */
-    svp->depth = ft->rec.svp.depth;
-
     if (ft->rec.svp.sound_speed == (double *) NULL)
     {
         ft->rec.svp.sound_speed = (double *) calloc(svp->number_points, sizeof(double));
-
         if (ft->rec.svp.sound_speed == (double *) NULL)
         {
             gsfError = GSF_MEMORY_ALLOCATION_FAILED;
@@ -8252,21 +8234,8 @@ gsfDecodeSoundVelocityProfile(gsfSVP *svp, GSF_FILE_TABLE *ft, const unsigned ch
         }
     }
 
-    /* Re-allocate the dynamic memory if the number of points in the profile
-     * is greater this time than it was last time.
-     */
-    else if (ft->rec.svp.number_points < svp->number_points)
-    {
-        ft->rec.svp.sound_speed = (double *) realloc(ft->rec.svp.sound_speed, svp->number_points * sizeof(double));
-
-        if (ft->rec.svp.sound_speed == (double *) NULL)
-        {
-            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-            return (-1);
-        }
-        memset(ft->rec.svp.sound_speed, 0, svp->number_points * sizeof(double));
-    }
     /* Set the caller's pointer to this dynamic memory */
+    svp->depth = ft->rec.svp.depth;
     svp->sound_speed = ft->rec.svp.sound_speed;
 
     /* Save the number of points in this profile in the library's file table */
@@ -8348,19 +8317,15 @@ gsfDecodeProcessingParameters(gsfProcessingParameters *param, GSF_FILE_TABLE *ft
         param->param[i] = (char *) NULL;
 
         /* Make sure we have memory to hold the parameter */
+        if (ft->rec.process_parameters.param_size[i] < param->param_size[i])
+        {
+            if (ft->rec.process_parameters.param[i] != (char *) NULL) free (ft->rec.process_parameters.param[i]);
+            ft->rec.process_parameters.param[i] = (char *) NULL;
+        }
         if (ft->rec.process_parameters.param[i] == (char *) NULL)
         {
             ft->rec.process_parameters.param[i] = (char *) calloc(param->param_size[i] + 1, sizeof(char));
 
-            if (ft->rec.process_parameters.param[i] == (char *) NULL)
-            {
-                gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-                return (-1);
-            }
-        }
-        else if (ft->rec.process_parameters.param_size[i] < param->param_size[i])
-        {
-            ft->rec.process_parameters.param[i] = (char *) realloc((void *) ft->rec.process_parameters.param[i], param->param_size[i] + 1);
             if (ft->rec.process_parameters.param[i] == (char *) NULL)
             {
                 gsfError = GSF_MEMORY_ALLOCATION_FAILED;
@@ -8439,18 +8404,14 @@ gsfDecodeSensorParameters(gsfSensorParameters *param, GSF_FILE_TABLE *ft, const 
         param->param[i] = (char *) NULL;
 
         /* Make sure we have memory to hold the parameter */
+        if (ft->rec.sensor_parameters.param_size[i] < param->param_size[i])
+        {
+            if (ft->rec.sensor_parameters.param[i] != (char *) NULL) free (ft->rec.sensor_parameters.param[i]);
+            ft->rec.sensor_parameters.param[i] = (char *) NULL;
+        }
         if (ft->rec.sensor_parameters.param[i] == (char *) NULL)
         {
             ft->rec.sensor_parameters.param[i] = (char *) calloc(param->param_size[i] + 1, sizeof(char));
-            if (ft->rec.sensor_parameters.param[i] == (char *) NULL)
-            {
-                gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-                return (-1);
-            }
-        }
-        else if (ft->rec.sensor_parameters.param_size[i] < param->param_size[i])
-        {
-            ft->rec.sensor_parameters.param[i] = (char *) realloc((void *) ft->rec.sensor_parameters.param[i], param->param_size[i] + 1);
             if (ft->rec.sensor_parameters.param[i] == (char *) NULL)
             {
                 gsfError = GSF_MEMORY_ALLOCATION_FAILED;
@@ -8517,18 +8478,14 @@ gsfDecodeComment(gsfComment *comment, GSF_FILE_TABLE *ft, const unsigned char *s
     comment->comment = (char *) NULL;
 
     /* Make sure we have memory to hold the parameter */
+    if (ft->rec.comment.comment_length < comment->comment_length)
+    {
+        if (ft->rec.comment.comment != (char *) NULL) free (ft->rec.comment.comment);
+        ft->rec.comment.comment = (char *) NULL;
+    }
     if (ft->rec.comment.comment == (char *) NULL)
     {
         ft->rec.comment.comment = (char *) calloc(comment->comment_length + 1, sizeof(char));
-        if (ft->rec.comment.comment == (char *) NULL)
-        {
-            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-            return (-1);
-        }
-    }
-    else if (ft->rec.comment.comment_length < comment->comment_length)
-    {
-        ft->rec.comment.comment = (char *) realloc((void *) ft->rec.comment.comment, comment->comment_length + 1);
         if (ft->rec.comment.comment == (char *) NULL)
         {
             gsfError = GSF_MEMORY_ALLOCATION_FAILED;
@@ -8593,7 +8550,7 @@ gsfDecodeHistory(gsfHistory * history, GSF_FILE_TABLE *ft, const unsigned char *
     len = (short) ntohs(stemp);
 
     /* Next len bytes contains the host name */
-    if (len < GSF_HOST_NAME_LENGTH)
+    if (len > 0 && len < GSF_HOST_NAME_LENGTH)
     {
         memcpy(history->host_name, p, len);
         history->host_name[len] = '\0';
@@ -8608,12 +8565,12 @@ gsfDecodeHistory(gsfHistory * history, GSF_FILE_TABLE *ft, const unsigned char *
     /* two byte integer contains the size of the text to follow */
     memcpy(&stemp, p, 2);
     p += 2;
-    len = (short) ntohs(stemp);
+    len = ntohs(stemp);
 
     /* Next len bytes contains the host name */
-    if (len < GSF_OPERATOR_LENGTH)
+    if (len > 0 && len < GSF_OPERATOR_LENGTH)
     {
-        memcpy(history->operator_name, p, len);
+        memcpy(history->operator_name, p, (size_t) len);
         history->operator_name[len] = '\0';
         p += len;
     }
@@ -8629,6 +8586,11 @@ gsfDecodeHistory(gsfHistory * history, GSF_FILE_TABLE *ft, const unsigned char *
     memcpy(&stemp, p, 2);
     p += 2;
     len = ntohs(stemp);
+    if (len < 0)
+    {
+        gsfError = GSF_HISTORY_RECORD_DECODE_FAILED;
+        return(-1);
+    }
 
     /* NULL out the caller's pointer in case memory allocation fails */
     history->command_line = (char *) NULL;
@@ -8657,6 +8619,11 @@ gsfDecodeHistory(gsfHistory * history, GSF_FILE_TABLE *ft, const unsigned char *
     memcpy(&stemp, p, 2);
     p += 2;
     len = ntohs(stemp);
+    if (len < 0)
+    {
+        gsfError = GSF_HISTORY_RECORD_DECODE_FAILED;
+        return(-1);
+    }
 
     /* NULL out the caller's memory in case the allocation fails */
     history->comment = (char *) NULL;
@@ -8938,7 +8905,16 @@ gsfDecodeAttitude(gsfAttitude *attitude, GSF_FILE_TABLE *ft, const unsigned char
     p += 2;
     attitude->num_measurements = ntohs(stemp);
 
-    /* NULL out caller's memory pointers in case memory allocation fails */
+    /* verify decoded value is valid */
+    if (attitude->num_measurements <= 0 || 
+        attitude->num_measurements > SIZE_MAX / sizeof(struct timespec) ||
+		attitude->num_measurements > SIZE_MAX / sizeof(double))
+    {
+        gsfError = GSF_ATTITUDE_RECORD_DECODE_FAILED;
+        return (-1);
+    }
+
+    /* NULL out caller's memory pointers in case memory allocation fails (Memory leak?)*/
     attitude->attitude_time = (struct timespec *) NULL;
     attitude->pitch = (double *) NULL;
     attitude->roll = (double *) NULL;
@@ -8946,34 +8922,29 @@ gsfDecodeAttitude(gsfAttitude *attitude, GSF_FILE_TABLE *ft, const unsigned char
     attitude->heading = (double *) NULL;
 
     /* make sure we have memory for the attitude measurements */
+    if (ft->rec.attitude.num_measurements < attitude->num_measurements)
+    {
+        if (ft->rec.attitude.attitude_time != (struct timespec *) NULL) free (ft->rec.attitude.attitude_time);
+        ft->rec.attitude.attitude_time = (struct timespec *) NULL;
+    }
     if (ft->rec.attitude.attitude_time == (struct timespec *) NULL)
     {
-        ft->rec.attitude.attitude_time = (struct timespec *) calloc(attitude->num_measurements, sizeof(struct timespec));
-
+        ft->rec.attitude.attitude_time = (struct timespec *) calloc(attitude->num_measurements, sizeof(struct timespec));        	
         if (ft->rec.attitude.attitude_time == (struct timespec *) NULL)
         {
             gsfError = GSF_MEMORY_ALLOCATION_FAILED;
             return (-1);
         }
-    }
-    /* Re-allocate the dynamic memory if the number of measurements in the record
-     * is greater this time than it was last time.
-     */
-    else if (ft->rec.attitude.num_measurements < attitude->num_measurements)
-    {
-        ft->rec.attitude.attitude_time = (struct timespec *) realloc(ft->rec.attitude.attitude_time, attitude->num_measurements * sizeof(struct timespec));
-
-        if (ft->rec.attitude.attitude_time == (struct timespec *) NULL)
-        {
-            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-            return (-1);
-        }
-        memset(ft->rec.attitude.attitude_time, 0, attitude->num_measurements * sizeof(struct timespec));
     }
     /* Set the caller's pointer to this dynamic memory */
     attitude->attitude_time = ft->rec.attitude.attitude_time;
 
     /* make sure we have memory for the attitude measurements */
+    if (ft->rec.attitude.num_measurements < attitude->num_measurements)
+    {
+        if (ft->rec.attitude.pitch != (double *) NULL) free (ft->rec.attitude.pitch);
+        ft->rec.attitude.pitch = (double *) NULL;
+    }
     if (ft->rec.attitude.pitch == (double *) NULL)
     {
         ft->rec.attitude.pitch = (double *) calloc(attitude->num_measurements, sizeof(double));
@@ -8984,24 +8955,15 @@ gsfDecodeAttitude(gsfAttitude *attitude, GSF_FILE_TABLE *ft, const unsigned char
             return (-1);
         }
     }
-    /* Re-allocate the dynamic memory if the number of measurements in the record
-     * is greater this time than it was last time.
-     */
-    else if (ft->rec.attitude.num_measurements < attitude->num_measurements)
-    {
-        ft->rec.attitude.pitch = (double *) realloc(ft->rec.attitude.pitch, attitude->num_measurements * sizeof(double));
-
-        if (ft->rec.attitude.pitch == (double *) NULL)
-        {
-            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-            return (-1);
-        }
-        memset(ft->rec.attitude.pitch, 0, attitude->num_measurements * sizeof(double));
-    }
     /* Set the caller's pointer to this dynamic memory */
     attitude->pitch = ft->rec.attitude.pitch;
 
     /* make sure we have memory for the attitude measurements */
+    if (ft->rec.attitude.num_measurements < attitude->num_measurements)
+    {
+        if (ft->rec.attitude.roll != (double *) NULL) free (ft->rec.attitude.roll);
+        ft->rec.attitude.roll = (double *) NULL;
+    }
     if (ft->rec.attitude.roll == (double *) NULL)
     {
         ft->rec.attitude.roll = (double *) calloc(attitude->num_measurements, sizeof(double));
@@ -9012,24 +8974,15 @@ gsfDecodeAttitude(gsfAttitude *attitude, GSF_FILE_TABLE *ft, const unsigned char
             return (-1);
         }
     }
-    /* Re-allocate the dynamic memory if the number of measurements in the record
-     * is greater this time than it was last time.
-     */
-    else if (ft->rec.attitude.num_measurements < attitude->num_measurements)
-    {
-        ft->rec.attitude.roll = (double *) realloc(ft->rec.attitude.roll, attitude->num_measurements * sizeof(double));
-
-        if (ft->rec.attitude.roll == (double *) NULL)
-        {
-            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-            return (-1);
-        }
-        memset(ft->rec.attitude.roll, 0, attitude->num_measurements * sizeof(double));
-    }
     /* Set the caller's pointer to this dynamic memory */
     attitude->roll = ft->rec.attitude.roll;
 
     /* make sure we have memory for the attitude measurements */
+    if (ft->rec.attitude.num_measurements < attitude->num_measurements)
+    {
+        if (ft->rec.attitude.heave != (double *) NULL) free (ft->rec.attitude.heave);
+        ft->rec.attitude.heave = (double *) NULL;
+    }
     if (ft->rec.attitude.heave == (double *) NULL)
     {
         ft->rec.attitude.heave = (double *) calloc(attitude->num_measurements, sizeof(double));
@@ -9040,24 +8993,15 @@ gsfDecodeAttitude(gsfAttitude *attitude, GSF_FILE_TABLE *ft, const unsigned char
             return (-1);
         }
     }
-    /* Re-allocate the dynamic memory if the number of measurements in the record
-     * is greater this time than it was last time.
-     */
-    else if (ft->rec.attitude.num_measurements < attitude->num_measurements)
-    {
-        ft->rec.attitude.heave = (double *) realloc(ft->rec.attitude.heave, attitude->num_measurements * sizeof(double));
-
-        if (ft->rec.attitude.heave == (double *) NULL)
-        {
-            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-            return (-1);
-        }
-        memset(ft->rec.attitude.heave, 0, attitude->num_measurements * sizeof(double));
-    }
     /* Set the caller's pointer to this dynamic memory */
     attitude->heave = ft->rec.attitude.heave;
 
     /* make sure we have memory for the attitude measurements */
+    if (ft->rec.attitude.num_measurements < attitude->num_measurements)
+    {
+        if (ft->rec.attitude.heading != (double *) NULL) free (ft->rec.attitude.heading);
+        ft->rec.attitude.heading = (double *) NULL;
+    }
     if (ft->rec.attitude.heading == (double *) NULL)
     {
         ft->rec.attitude.heading = (double *) calloc(attitude->num_measurements, sizeof(double));
@@ -9067,20 +9011,6 @@ gsfDecodeAttitude(gsfAttitude *attitude, GSF_FILE_TABLE *ft, const unsigned char
             gsfError = GSF_MEMORY_ALLOCATION_FAILED;
             return (-1);
         }
-    }
-    /* Re-allocate the dynamic memory if the number of measurements in the record
-     * is greater this time than it was last time.
-     */
-    else if (ft->rec.attitude.num_measurements < attitude->num_measurements)
-    {
-        ft->rec.attitude.heading = (double *) realloc(ft->rec.attitude.heading, attitude->num_measurements * sizeof(double));
-
-        if (ft->rec.attitude.heading == (double *) NULL)
-        {
-            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-            return (-1);
-        }
-        memset(ft->rec.attitude.heading, 0, attitude->num_measurements * sizeof(double));
     }
     /* Set the caller's pointer to this dynamic memory */
     attitude->heading = ft->rec.attitude.heading;

@@ -626,26 +626,26 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 
 	/* check for projection specification file */
 	mb_path prjfile;
-  assert(strlen(file) < MB_PATH_MAXLINE - 4);
+	assert(strlen(file) < MB_PATH_MAXLINE - 4);
 	sprintf(prjfile, "%s.prj", file);
 	struct stat file_status;
 	const int fstat = stat(prjfile, &file_status);
 	if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR && file_status.st_size > 0) {
-  	FILE *pfp = fopen(prjfile, "r");
-  	if (pfp != NULL) {
-  		char projection_id[MB_NAME_LENGTH] = {0};;
-  		if (fscanf(pfp, "%31s", projection_id) == 1) {
-  		  const int proj_status = mb_proj_init(verbose, projection_id, &(mb_io_ptr->pjptr), error);
-  		  if (proj_status == MB_SUCCESS) {
-  			  mb_io_ptr->projection_initialized = true;
-  			  strcpy(mb_io_ptr->projection_id, projection_id);
-        }
-  		}
-  		fclose(pfp);
-      if (mb_io_ptr->projection_initialized == false) {
-      	fprintf(stderr, "Projection file %s exists but unable to initialize projection using contained id: %s\n\n", prjfile, projection_id);
-      }
-    }
+	  FILE *pfp = fopen(prjfile, "r");
+	  if (pfp != NULL) {
+		  char projection_id[MB_NAME_LENGTH] = {0};;
+		  if (fscanf(pfp, "%31s", projection_id) == 1) {
+			const int proj_status = mb_proj_init(verbose, projection_id, &(mb_io_ptr->pjptr), error);
+			if (proj_status == MB_SUCCESS) {
+				mb_io_ptr->projection_initialized = true;
+				strcpy(mb_io_ptr->projection_id, projection_id);
+			}
+		  }
+		  fclose(pfp);
+		if (mb_io_ptr->projection_initialized == false) {
+		  fprintf(stderr, "Projection file %s exists but unable to initialize projection using contained id: %s\n\n", prjfile, projection_id);
+		}
+	  }
 	}
 
 	/* set error and status (if you got here you succeeded */

@@ -113,3 +113,4 @@ typedef struct t_gsfFileTable
 GSF_FILE_TABLE;
 
 #endif   /* define __GSF_FT_H__ */
+

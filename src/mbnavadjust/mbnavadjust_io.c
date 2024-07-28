@@ -1787,6 +1787,14 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
   double mtodeglon, mtodeglat;
 
   int i, j, k, l;
+  
+  /* attempt to rename the existing *nvh file as a saved version before starting to write 
+  	  the new version */
+  mb_pathplus projectsave;
+  sprintf(projectsave, "%s.last", project->home);
+  int rename_status = rename(project->home, projectsave);
+  if (rename_status != 0 && rename_status != 2)
+  	fprintf(stderr, "Saving old project file %s as %s failed with error %d\n", project->home, projectsave, errno);
 
   /* open and write home file */
   if ((hfp = fopen(project->home, "w")) != NULL) {

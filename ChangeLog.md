@@ -22,6 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.2beta08    July 27, 2024
 - Version 5.8.2beta07    June 27, 2024
 - Version 5.8.2beta06    June 13, 2024
 - Version 5.8.2beta05    May 19, 2024
@@ -39,6 +40,64 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.2beta08 (July 27, 2024)
+
+Format 121 (MBF_GSFGENMB): Updated to use new version of libgsf (3.10) released by Leidos.
+The following change descriptions are from the libgsf 3.10 change summary:
+
+	Change request GSF_03-10_01
+	Support for ME70 sonars
+	11/8/2021 
+	Sean Donovan, Leidos 
+	Description:
+		Added GSF_SWATH_BATHY_SUBRECORD_ME70BO_SPECIFIC subrecord identifier. 
+		Added support for sonar under EM4 cases. 
+	Purpose:
+		To add support in GSF for the ME70 multibeam systems
+
+	Change request GSF_03-10_02
+	STIG Remediation to address vulnerabilities
+	3/12/2024
+	Dwight Johnson, NAVO
+	Description:
+		Various changes to safe memory allocation and usage throughout the encoding and 		
+		decoding processes
+	Purpose:
+		Improved Robustness
+
+	Change request GSF_03-10_03
+	Updates to KMALL ping level metadata
+	3/12/2024
+	Jonathon Beaudoin, Hydro Octave
+	Description:
+		Added new variables highVoltageLevelDB, sectorTrackingCorr_DB, and 
+		effectiveSignalLength_sec within the spare space of the gsfKMALLTxSector Struct. 
+		Added encoding and decoding logic for these values.
+	Purpose:
+		To support backscatter processing
+
+	Change request GSF_03-10_04
+	Resolved bug surrounding network transmission of range samples
+	3/12/2024
+	Jonathon Beaudoin, Hydro Octave
+	Description:
+		Missing htons call added to range sample processing
+	Purpose:
+		Bug Fix
+
+	Change request GSF_03-10_05
+	Added TVG DB to bathy ping structure
+	3/12/2024
+	Jonathon Beaudoin, Hydro Octave
+	Description:
+		Added new array variable TVG_DB to multibeam ping struct. Added encoding and 
+		decoding logic for this value.
+	Purpose:
+		To support backscatter processing
+
+MBnavadjust: Added autosaving the last version of a project file immediately before 
+beginning to write a new file. Also fixed some inconsistencies in the UI.
 
 #### 5.8.2beta07 (June 27, 2024)
 
