@@ -23,7 +23,7 @@
 #------------------------------------------------------------------------------
 
 find_package(
-  Qt5
+  Qt6
   COMPONENTS Gui Widgets Quick
   REQUIRED)
 
@@ -52,7 +52,7 @@ target_include_directories(qt-mbedit-widgets PUBLIC ${CMAKE_SOURCE_DIR}/src/mbio
                                      ${CMAKE_SOURCE_DIR}/src/qt-guilib/u
                                      ${CMAKE_SOURCE_DIR}/src/mbedit)
 
-target_link_libraries(qt-mbedit-widgets PRIVATE MBGui Qt5::Core Qt5::Widgets Qt5::Quick
+target_link_libraries(qt-mbedit-widgets PRIVATE MBGui Qt6::Core Qt6::Widgets Qt6::Quick
                                	           mbeditLib mbio
 					   PUBLIC TIRPC::TIRPC)
 

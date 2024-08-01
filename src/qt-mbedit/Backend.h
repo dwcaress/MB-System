@@ -44,13 +44,13 @@ public:
     std::cerr << "showError(): " << s1 << "\n" << s2 << "\n" << s3 << "\n";
     char msg[256];
     sprintf(msg, "%s\n%s\n%s\n", s1, s2, s3);
-    emit staticEmitter_.showMessage(QVariant(msg));
+    emit staticEmitter_.showMessage(QVariant((const char *)msg));
     return 0;
   }
 
   static int showMessage(char *message) {
     std::cerr << "showMessage(): " << message << "\n";
-    emit staticEmitter_.showMessage(QVariant(message));
+    emit staticEmitter_.showMessage(QVariant((const char *)message));
     
     return 0;
   }
@@ -84,6 +84,7 @@ public:
 
   /// Emit signals on behalf of static member functions
   static mb_system::Emitter staticEmitter_;
+
 
 
 protected:

@@ -1,7 +1,7 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.3
 import QtQuick.Controls.Universal 2.3
-import QtQuick.Dialogs 1.1
+import QtQuick.Dialogs
 import QtQuick.Layouts 1.14
 import QtQuick.Window 2.14
 import PixmapImage 1.0
@@ -198,25 +198,40 @@ Window {
         anchors.bottom: parent.bottom
 
         Flow {
-            Label { text: "Xrack width (m) " + xtrackSlider.value.toFixed(0) }
+
             Layout.fillWidth: true
             Layout.fillHeight: true
+            Layout.preferredHeight: 20
 
-            Slider {
-                id: xtrackSlider
-                objectName: "xTrackSliderObj"
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                from: 1
-                to: 300
-                value: 150
-                live: false  // only update value when button released
-                Component.onCompleted: { backend.onXtrackChanged(value) }
-                onValueChanged: { console.log('xTrackSlider moved');
-                    backend.onXtrackChanged(value) }
+            Label { text: 'Xrack width (m)' }
+
+            Rectangle {
+                color: 'red'
+                Slider {
+                    id: xtrackSlider
+                    objectName: "xTrackSliderObj"
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    from: 1
+                    to: 300
+                    value: 150
+                    live: false  // only update value when button released
+                    Component.onCompleted: { backend.onXtrackChanged(value) }
+                    onValueChanged: { console.log('xTrackSlider moved');
+                        backend.onXtrackChanged(value) }
+                }
+
+                Label {
+                    id: xtrackValue
+                    text: xtrackSlider.value.toFixed(0)
+                    x: xtrackSlider.handle.x + xtrackSlider.handle.width/2 - width/2
+                    anchors.top: xtrackSlider.bottom
+                }
             }
 
-            Label { text: "Pings shown " + pingsShownSlider.value.toFixed(0) }
+            Label {
+                text: "Pings shown " + pingsShownSlider.value.toFixed(0)
+            }
             Slider {
                 id: pingsShownSlider
                 objectName: "pingsShownSliderObj"
@@ -234,11 +249,13 @@ Window {
 
 
         Flow {
-            Label { text: "VERTICAL exaggeration " +
-                          (verticalExaggSlider.value * 100).toFixed(1)}
+
             Layout.fillWidth: true
             Layout.fillHeight: true
+            Layout.preferredHeight: 20
 
+            Label { text: "VERTICAL exaggeration " +
+                          (verticalExaggSlider.value * 100).toFixed(1)}
             Slider {
                 id: verticalExaggSlider
                 objectName: "verticalExaggSliderObj"
@@ -278,6 +295,7 @@ Window {
             id: buttonRow
             Layout.fillWidth: true
             Layout.fillHeight: true
+            height: 20
 
 
             RadioButton {
@@ -329,10 +347,12 @@ Window {
 
         ScrollView {
 
-            implicitHeight: Window.window.height * 0.5
-            implicitWidth: Window.window.width
-            anchors.left: parent.left
-            anchors.top: buttonRow.bottom
+            //           implicitHeight: Window.window.height * 0.5
+            //           implicitWidth: Window.window.width
+            //          anchors.left: parent.left
+            //           anchors.top: buttonRow.bottom
+            Layout.fillWidth: true
+            Layout.fillHeight: true
             contentHeight: 5000
             clip: true
 
@@ -425,13 +445,12 @@ Window {
     MessageDialog {
         id: quitDialog
         title: "Quit?"
-        icon: StandardIcon.Question
         text: "Quit application?"
-        standardButtons: StandardButton.Yes |
-                         StandardButton.No
+        buttons: MessageDialog.Yes |
+                         MessageDialog.No
         Component.onCompleted: visible = false
-        onYes: Qt.quit(0)
-        onNo: console.log("did not quit")
+        onAccepted: Qt.quit(0)
+
     }
 
 
@@ -440,17 +459,16 @@ Window {
         title: "Open swath file"
         nameFilters: ["Swath files (*.mb[0-9]*)"]
         onAccepted: {
-            console.log("accepted " + fileUrl);
-            backend.processSwathFile(fileUrl);
+            console.log("accepted " + selectedFile);
+            backend.processSwathFile(selectedFile);
         }
     }
 
     MessageDialog {
         id: infoDialog
         title: "Info"
-        icon: StandardIcon.Info
         text: "Text goes here"
-        standardButtons: StandardButton.Ok
+        buttons: MessageDialog.Ok
         Component.onCompleted: visible = false
     }
 

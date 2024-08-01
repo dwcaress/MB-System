@@ -14,6 +14,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <QTextStream>
+#include <QActionGroup>
 
 extern "C" {
 #include "mb_status.h"
@@ -488,7 +489,7 @@ void MainWindow::fillRect(void *dummy,
 void MainWindow::justifyString(void *dummy, char *string,
 			       int *width, int *ascent, int *descent) {
 
-  *width = staticFontMetrics_->width(string);
+  *width = staticFontMetrics_->boundingRect(string).width();
   *ascent = staticFontMetrics_->ascent();
   *descent = staticFontMetrics_->descent();
 }

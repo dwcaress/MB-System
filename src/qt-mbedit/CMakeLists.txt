@@ -23,8 +23,8 @@
 #------------------------------------------------------------------------------
 
 find_package(
-  Qt5
-  COMPONENTS Gui Widgets Quick
+  Qt6
+  COMPONENTS Gui Widgets Quick OpenGL
   REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
@@ -37,7 +37,7 @@ add_executable(qt-mbedit Backend.cpp GuiNames.cpp
 target_include_directories(qt-mbedit PUBLIC ${CMAKE_SOURCE_DIR}/src/mbaux)
 				 
 
-target_link_libraries(qt-mbedit PRIVATE MBGui Qt5::Core Qt5::Quick
+target_link_libraries(qt-mbedit PRIVATE MBGui Qt6::Core Qt6::Quick
                       mbeditLib mbio)
 
 install(TARGETS qt-mbedit DESTINATION ${CMAKE_INSTALL_BINDIR})
