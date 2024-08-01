@@ -63,7 +63,7 @@ void PixmapDrawer::justifyString(QPainter *painter, char *string,
     fontMetrics_ = new QFontMetrics(painter->font());
   }
   
-  *width = fontMetrics_->width(string);
+  *width = fontMetrics_->boundingRect(string).width();
   *ascent = fontMetrics_->ascent();
   *descent = fontMetrics_->descent();
 }

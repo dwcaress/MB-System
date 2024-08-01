@@ -71,19 +71,19 @@ namespace mb_system {
     /// Return latest wheel event.
     /// Called by the QVtkRenderer during QVtkRenderer::synchronize()
     QWheelEvent *latestWheelEvent() {
-      return wheelEvent_.get();
+      return wheelEvent_;
     }
 
     /// Return latest mouse button press event.
     /// Called by the QVtkRenderer during QVtkRenderer::synchronize()  
     QMouseEvent *latestMouseButtonEvent() {
-      return mouseButtonEvent_.get();
+      return mouseButtonEvent_;
     }
 
     /// Return latest mouse move event.
     /// Called by the QVtkRenderer during QVtkRenderer::synchronize()  
     QMouseEvent *latestMouseMoveEvent() {
-      return mouseMoveEvent_.get();
+      return mouseMoveEvent_;
     }
 
     /// Get display properties
@@ -197,13 +197,13 @@ namespace mb_system {
     char *gridFilename_;
  
     /// Latest wheel event
-    std::shared_ptr<QWheelEvent> wheelEvent_;
+    QWheelEvent *wheelEvent_;
 
     /// Latest mouse button event
-    std::shared_ptr<QMouseEvent> mouseButtonEvent_;
+    QMouseEvent *mouseButtonEvent_;
 
     /// Latest mouse move event
-    std::shared_ptr<QMouseEvent> mouseMoveEvent_;
+    QMouseEvent *mouseMoveEvent_;
 
     /// Latest user-picked point coordinates
     QString pickedCoords_;

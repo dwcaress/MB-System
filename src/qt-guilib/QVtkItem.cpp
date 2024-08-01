@@ -30,10 +30,12 @@ void QVtkItem::setGridFilename(char *gridFilename) {
 }
 
 
+
 void QVtkItem::wheelEvent(QWheelEvent *event) {
     qDebug() << "QVtkItem::wheelEvent()";
 
-    wheelEvent_ = std::make_shared<QWheelEvent>(*event);
+    // wheelEvent_ = std::make_shared<QWheelEvent>(*event);
+    wheelEvent_ = event;
     wheelEvent_->ignore();
     event->accept();
 
@@ -41,11 +43,13 @@ void QVtkItem::wheelEvent(QWheelEvent *event) {
     update();
 }
 
+
 void QVtkItem::mousePressEvent(QMouseEvent *event) {
   
     qDebug() << "\nQVtkItem::mousePressEvent!!!";
 
-    mouseButtonEvent_ = std::make_shared<QMouseEvent>(*event);
+    // mouseButtonEvent_ = std::make_shared<QMouseEvent>(*event);
+    mouseButtonEvent_ = event;
     mouseButtonEvent_->ignore();
     event->accept();
 
@@ -54,7 +58,8 @@ void QVtkItem::mousePressEvent(QMouseEvent *event) {
 }
 
 void QVtkItem::mouseReleaseEvent(QMouseEvent *event) {
-    mouseButtonEvent_ = std::make_shared<QMouseEvent>(*event);
+  // mouseButtonEvent_ = std::make_shared<QMouseEvent>(*event);
+  mouseButtonEvent_ = event;
     mouseButtonEvent_->ignore();
     event->accept();
 
@@ -63,7 +68,8 @@ void QVtkItem::mouseReleaseEvent(QMouseEvent *event) {
 }
 
 void QVtkItem::mouseMoveEvent(QMouseEvent *event) {
-    mouseMoveEvent_ = std::make_shared<QMouseEvent>(*event);
+  // mouseMoveEvent_ = std::make_shared<QMouseEvent>(*event);
+  mouseMoveEvent_ = event;
     mouseMoveEvent_->ignore();
     event->accept();
 

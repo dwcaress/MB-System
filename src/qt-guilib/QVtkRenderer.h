@@ -193,13 +193,13 @@ namespace mb_system {
     char *gridFilename_;
 
     /// Latest wheel event
-    std::shared_ptr<QWheelEvent> wheelEvent_;
+    QWheelEvent* wheelEvent_;
 
     /// Latest mouse button event
-    std::shared_ptr<QMouseEvent> mouseButtonEvent_;
+    QMouseEvent* mouseButtonEvent_;
 
     /// Latest mouse move event
-    std::shared_ptr<QMouseEvent> mouseMoveEvent_;
+    QMouseEvent* mouseMoveEvent_;
 
     /// Coordinates of latest selected point
     double pickedCoords_[3];

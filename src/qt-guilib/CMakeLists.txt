@@ -23,11 +23,11 @@
 #------------------------------------------------------------------------------
 
 find_package(
-  Qt5
+  Qt6
   COMPONENTS Gui Quick
   REQUIRED)
 find_package(GMT REQUIRED)
-find_package(VTK REQUIRED)
+find_package(VTK 9.3 REQUIRED)
 message("Found VTK_VERSION ${VTK_VERSION}")
 
 find_package(LibPROJ REQUIRED)
@@ -40,10 +40,8 @@ set(src
     TopoColorMap.cpp
     TopoGridReader.cpp
     Camera.cpp
-    MBQuickItem.cpp
     ColorMap.cpp
     DisplayProperties.cpp
-    MBQuickView.cpp
     QVtkItem.cpp
     GmtGridReader.cpp
     TopoGridData.cpp
@@ -78,7 +76,7 @@ target_include_directories(MBGui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 				 ${CMAKE_SOURCE_DIR}/src/mbaux)
 target_link_libraries(
   MBGui
-  PRIVATE Qt5::Core Qt5::Quick mbio mbeditvizlib
+  PRIVATE Qt6::Core Qt6::Quick mbio mbeditvizlib
   PUBLIC VTK::CommonColor
   	 VTK::CommonSystem
 	 VTK::pugixml
