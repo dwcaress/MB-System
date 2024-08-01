@@ -221,16 +221,12 @@ void MBQuickItem::renderUnderlay()
 {
   qDebug() << "MBQuickItem::renderUnderlay()";
   renderer_->render();
-  //  window()->resetOpenGLState();
-  window()->endExternalCommands();
 }
 
 
 void MBQuickItem::invalidateUnderlay()
 {
   renderer_->invalidate();
-  // window()->resetOpenGLState();
-  window()->endExternalCommands();
 }
 
 class CleanupJob : public QRunnable
