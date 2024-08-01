@@ -49,9 +49,10 @@ MBQuickItem::MBQuickItem()
     gridFilename_(nullptr),
     newSurface_(false)
 {
-  connect(this, &QQuickItem::windowChanged, this, &MBQuickItem::handleWindowChanged);
+  connect(this, &QQuickItem::windowChanged, this,
+	  &MBQuickItem::handleWindowChanged);
 
-  qDebug() << "MBQuickItem::MBQuickItem() - don't conect camera signals to QQuickItem::update()";
+  // Don't conect camera signals to QQuickItem::update()";
 
   // Find 'camera' property in QML context
   QQmlContext *context = g_appEngine->rootContext();
@@ -66,12 +67,15 @@ void MBQuickItem::handleWindowChanged(QQuickWindow *window) {
   if (window) {
     qDebug() << "MBQuickItem::handleWindowChanged(); connect signals";
     
-    // Invoke synchronizeUnderlay() when main thread is blocked before scene QML graph synchronization
-    connect(window, &QQuickWindow::beforeSynchronizing, this, &MBQuickItem::synchronizeUnderlay,
+    // Invoke synchronizeUnderlay() when main thread is blocked before scene QML
+    // graph synchronization
+    connect(window, &QQuickWindow::beforeSynchronizing, this,
+	    &MBQuickItem::synchronizeUnderlay,
 	    Qt::DirectConnection);
 
     // Clean up when GUI is being destroyed
-    connect(window, &QQuickWindow::sceneGraphInvalidated, this, &MBQuickItem::cleanup,
+    connect(window, &QQuickWindow::sceneGraphInvalidated, this,
+	    &MBQuickItem::cleanup,
 	    Qt::DirectConnection);
 
     // Trigger repaint when camera properties are changed
@@ -89,8 +93,12 @@ void MBQuickItem::handleWindowChanged(QQuickWindow *window) {
     
     // Don't clear before QML rendering, since we want surface to "underlay" the GUI, i.e.
     // will draw surface before QML is drawn.
-    window->setClearBeforeRendering(false);
-    window->setPersistentOpenGLContext(true);
+    // window->setClearBeforeRendering(false);
+    window->setPersistentGraphics(true);
+
+    ////// TEST
+    window->setColor(Qt::blue);
+    
   }
 }
 
@@ -131,7 +139,12 @@ void MBQuickItem::synchronizeUnderlay() {
 
     // Connect signal so that surface gets rendered before QML is rendered
     qDebug() << "MBQuickItem::sync() - connect SurfaceRenderer::render()";
-    connect(window(), &QQuickWindow::beforeRendering, this, &MBQuickItem::renderUnderlay,
+    connect(window(), &QQuickWindow::beforeRendering, this,
+	    &MBQuickItem::renderUnderlay,
+	    Qt::DirectConnection);
+
+    connect(window(), &QQuickWindow::beforeRenderPassRecording, this,
+	    &MBQuickItem::renderUnderlay,
 	    Qt::DirectConnection);
   }
   
@@ -195,8 +208,7 @@ void MBQuickItem::initializeUnderlay()
   }
   
     
-  renderer_->initialize(surface_);
-  window()->resetOpenGLState();
+  renderer_->initialize(this, surface_);
 
   // Calculate maximum viewing distance
   //  float maxDistance = 10 * renderer_->surface()->xSpan();
@@ -209,14 +221,16 @@ void MBQuickItem::renderUnderlay()
 {
   qDebug() << "MBQuickItem::renderUnderlay()";
   renderer_->render();
-  window()->resetOpenGLState();
+  //  window()->resetOpenGLState();
+  window()->endExternalCommands();
 }
 
 
 void MBQuickItem::invalidateUnderlay()
 {
   renderer_->invalidate();
-  window()->resetOpenGLState();
+  // window()->resetOpenGLState();
+  window()->endExternalCommands();
 }
 
 class CleanupJob : public QRunnable
