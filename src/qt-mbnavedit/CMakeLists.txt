@@ -23,7 +23,7 @@
 #------------------------------------------------------------------------------
 
 find_package(
-  Qt5
+  Qt6
   COMPONENTS Gui Widgets Quick
   REQUIRED)
 
@@ -38,7 +38,7 @@ target_include_directories(qt-mbnavedit PUBLIC ${CMAKE_SOURCE_DIR}/src/mbaux)
 
 target_compile_options(qt-mbnavedit PUBLIC "-Wunused-variable")
 
-target_link_libraries(qt-mbnavedit PRIVATE MBGui Qt5::Core Qt5::Quick
+target_link_libraries(qt-mbnavedit PRIVATE MBGui Qt6::Core Qt6::Quick
                       mbaux)
 
 install(TARGETS qt-mbnavedit DESTINATION ${CMAKE_INSTALL_BINDIR})

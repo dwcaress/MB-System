@@ -68,6 +68,12 @@ public:
     std::cerr << "setUiElements() not implemented!\n";
   }
 
+  /// Called after UI QML has been loaded
+  void setUiLoaded() {
+    uiLoaded_ = true;
+  }
+
+  
   /// Emit signals
   mb_system::Emitter emitter_;
 
@@ -165,7 +171,9 @@ protected:
     *height = canvasPixmap_->height();
   }
   
-
+  /// True when UI is loaded
+  bool uiLoaded_;
+  
   /// world -> device xScale factor
   double xScale_ = 1;
   

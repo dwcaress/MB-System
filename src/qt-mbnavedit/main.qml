@@ -2,7 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Window 2.15
 import QtQuick.Controls.Universal 2.3
-import QtQuick.Dialogs 1.1
+import QtQuick.Dialogs
 import QtQuick.Layouts 1.14
 import QtQuick.Controls 2.15
 import QtQuick.Window 2.14
@@ -21,7 +21,7 @@ Window {
     visible: true
     width: 1350
     height: 880
-    title: 'qt-mbnavedit-2'
+    title: 'qt-mbnavedit'
     color: 'lightgray'
 
     Component.onCompleted: {
@@ -33,7 +33,8 @@ Window {
         // Synchronize preferred plots with backend
         for (var i = 0; i < plotButtons.buttons.length; ++i) {
             console.log('plot button: ', plotButtons.buttons[i])
-            backend.setPlot(plotButtons.buttons[i].objectName, plotButtons.buttons[i].checked)
+            backend.setPlot(plotButtons.buttons[i].objectName,
+	                    plotButtons.buttons[i].checked)
         }
 
     }
@@ -463,13 +464,13 @@ Window {
         MessageDialog {
             id: quitDialog
             title: 'Quit?'
-            icon: StandardIcon.Question
+            // icon: StandardIcon.Question
             text: 'Quit application?'
-            standardButtons: StandardButton.Yes |
-                             StandardButton.No
+            buttons: MessageDialog.Yes |
+                             MessageDialog.No
             Component.onCompleted: visible = false
-            onYes: Qt.quit(0)
-            onNo: console.log('did not quit')
+            onAccepted: Qt.quit(0)
+            // onNoClicked: console.log('did not quit')
         }
 
 
@@ -478,26 +479,25 @@ Window {
             title: 'Open swath file'
             nameFilters: ['Swath files (*.mb[0-9]*)']
             onAccepted: {
-                console.log('accepted ' + fileUrl);
-                backend.processSwathFile(fileUrl);
+                console.log('accepted ' + selectedFile);
+                backend.processSwathFile(selectedFile);
             }
         }
 
         MessageDialog {
             id: infoDialog
             title: 'Info'
-            icon: StandardIcon.Info
             text: 'Text goes here'
-            standardButtons: StandardButton.Ok
+            buttons: MessageDialog.Ok
             Component.onCompleted: visible = false
         }
 
 
         // List swath files that have been opened or specified in datalist file
-        Dialog {
+        MessageDialog {
             id: dataList
             title: 'Swath file list'
-            standardButtons: StandardButton.Ok
+            buttons: MessageDialog.Ok
         }
 
 

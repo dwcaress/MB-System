@@ -1,6 +1,6 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.3
-import QtQuick.Dialogs 1.1
+import QtQuick.Dialogs 
 import QtQuick.Layouts 1.14
 import QtQuick.Window 2.14
 import mbsystem.MBQuickItem 1.0
@@ -463,13 +463,12 @@ ApplicationWindow {
     MessageDialog {
         id: quitDialog
         title: "Quit?"
-        icon: StandardIcon.Question
         text: "Quit application?"
-        standardButtons: StandardButton.Yes |
-                         StandardButton.No
+        buttons: MessageDialog.Yes |
+                         MessageDialog.No
         Component.onCompleted: visible = false
-        onYes: Qt.quit(0)
-        onNo: console.log("did not quit")
+        onAccepted: Qt.quit(0)
+
     }
 
     MessageDialog {
@@ -496,8 +495,8 @@ ApplicationWindow {
         title: "Open file"
         nameFilters: ["Grid files (*.grd)"]
         onAccepted: {
-            console.log("accepted " + fileUrl);
-            mbQuickItem.setGridSurface(fileUrl)
+            console.log("accepted " + selectedFile);
+            mbQuickItem.setGridSurface(selectedFile)
         }
     }
 

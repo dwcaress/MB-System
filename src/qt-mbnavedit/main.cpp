@@ -76,7 +76,12 @@ int main(int argc, char *argv[]) {
     
     engine.load(url);
 
+    // Tell backend that UI is loaded
+    backend.setUiLoaded();
+
+    
     QObject *rootObject = engine.rootObjects().value(0);
+    qDebug() << "engine.rootObjects().value(0): " << rootObject;
     
     // QML notifies C++ when root window is destroyed
     QObject::connect(rootObject, SIGNAL(destroyed()),
