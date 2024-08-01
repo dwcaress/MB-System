@@ -23,7 +23,7 @@
 #------------------------------------------------------------------------------
 
 find_package(
-  Qt5
+  Qt6
   COMPONENTS Gui Widgets Quick
   REQUIRED)
 
@@ -31,10 +31,13 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-add_executable(qt-test main.cpp qml.qrc)
+message(STATUS "**QT_MAJOR_VERSION=${QT_MAJOR_VERSION}")
+
+
+add_executable(qt-test main.cpp ToDoModel.cpp qml.qrc)
 
 target_compile_options(qt-test PUBLIC "-Wunused-variable")
 
-target_link_libraries(qt-test PRIVATE MBGui Qt5::Core Qt5::Quick
+target_link_libraries(qt-test PRIVATE MBGui Qt6::Core Qt6::Quick
                       mbaux)
 
