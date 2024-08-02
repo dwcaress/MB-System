@@ -23,10 +23,11 @@
 #------------------------------------------------------------------------------
 
 find_package(
-  Qt5
-  COMPONENTS Gui Widgets Quick
+  Qt6
+  COMPONENTS  Gui OpenGL Quick
   REQUIRED)
-find_package(VTK REQUIRED)
+
+find_package(VTK 9.3 REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -34,7 +35,7 @@ set(CMAKE_AUTOUIC ON)
 
 add_executable(qt-mbgrdviz SharedConstants.cpp BackEnd.cpp main.cpp qml.qrc)
 
-target_link_libraries(qt-mbgrdviz PRIVATE MBGui Qt5::Core Qt5::Quick
-                                          mbeditvizlib)
+target_link_libraries(qt-mbgrdviz PRIVATE MBGui Qt6::Core Qt6::Quick Qt6::Gui
+                    Qt6::OpenGL mbeditvizlib)
 
 install(TARGETS qt-mbgrdviz DESTINATION ${CMAKE_INSTALL_BINDIR})
