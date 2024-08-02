@@ -100,6 +100,9 @@ Backend::Backend(int argc, char **argv) {
 
   init_globals();
 
+  /// UI not yet loaded
+  uiLoaded_ = false;
+  
 }
 
 
@@ -300,8 +303,13 @@ void Backend::setPlot(QString plotName, bool set) {
     ", plotHeave: " << plotHeave_;
   
   plot_all();
-  
-  swathPixmapImage_->update();
+
+  qDebug() << "swathPixmapImage_->update()";
+  if (uiLoaded_) {
+    swathPixmapImage_->update();
+  }
+
+  return;
 }
 
 
@@ -5564,7 +5572,7 @@ int Backend::showError(const char *s1, const char *s2, const char *s3) {
     std::cerr << "showError(): " << s1 << "\n" << s2 << "\n" << s3 << "\n";
     char msg[256];
     sprintf(msg, "%s\n%s\n%s\n", s1, s2, s3);
-    emit emitter_.showMessage(QVariant(msg));
+    emit emitter_.showMessage(QVariant((const char*)msg));
     return 0;
   }
 
