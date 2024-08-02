@@ -28,7 +28,7 @@ BackEnd::BackEnd(QQmlApplicationEngine *engine,
         exit(1);
     }
 
-    selectedFileItem_ = rootObject->findChild<QObject *>("selectedFile");    
+    selectedFileItem_ = rootObject->findChild<QObject *>("selFile");    
     if (!selectedFileItem_) {
         qCritical() << "Could not find \"selectedFile\" in QML";
         exit(1);      
@@ -122,7 +122,7 @@ bool BackEnd::setGridFile(QUrl fileURL) {
 void BackEnd::sigSlot(const int param, const QString &qval) {
   qDebug() << "sigSlot(): param=" << param << ", value=" << qval;
   QByteArray a;
-  a.append(qval);
+  a.append(qval.toUtf8());
   char *value = a.data();
 
   switch (param) {
