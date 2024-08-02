@@ -88,7 +88,7 @@ void QVtkRenderer::render() {
   }
 
   if (wheelEvent_ && !wheelEvent_->isAccepted()) {
-    // qDebug() << "render(): handle wheelEvent";
+    qDebug() << "render(): handle wheelEvent";
     if (wheelEvent_->angleDelta().y() > 0) {
       windowInteractor_->InvokeEvent(vtkCommand::MouseWheelForwardEvent);
     }
@@ -99,7 +99,7 @@ void QVtkRenderer::render() {
   }
   
   if (mouseButtonEvent_ && !mouseButtonEvent_->isAccepted()) {
-    // qDebug() << "render(): handle mouseButtonEvent";
+    qDebug() << "render(): handle mouseButtonEvent";
 
 
     if (mouseButtonEvent_->type() == QEvent::MouseButtonPress) {
@@ -214,7 +214,7 @@ void QVtkRenderer::render() {
 
 // Copy data from item to this renderer
 void QVtkRenderer::synchronize(QQuickFramebufferObject *item) {
-  
+  qDebug() << "QVtkRenderer::synchronize()";
   if (!item_) {
     // The item argument is the QVtkItem associated with this renderer;
     // keep a copy as item_ member
