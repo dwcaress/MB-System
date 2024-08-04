@@ -22,7 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
-- Version 5.8.2beta08    August 4, 2024
+- Version 5.8.2beta09    August 4, 2024
 - Version 5.8.2beta08    July 27, 2024
 - Version 5.8.2beta07    June 27, 2024
 - Version 5.8.2beta06    June 13, 2024
