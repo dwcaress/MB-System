@@ -22,6 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.2beta08    August 4, 2024
 - Version 5.8.2beta08    July 27, 2024
 - Version 5.8.2beta07    June 27, 2024
 - Version 5.8.2beta06    June 13, 2024
@@ -40,6 +41,41 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.2beta09 (August 4, 2024)
+
+mb7k2jstar: This program extracts Edgetech sidescan and subbottom data from Reson s7k 
+files and writes current format Edgetech Jstar format files identical to what current
+Edgetech sonars record. This functionality is needed only for MBARI Mapping AUV data from
+2004-2014, as MBARI was the only user of a payload controller software package named
+6046 from Reson that logged Reson 7125 multibeam and Edgetech FSAU sidescan/subbottom
+data in the same s7k files. Recognizing that reprocessing old Mapping AUV data requires
+this capability (and much of these data are now in public archives at MGDS and NCEI), we
+are moving mb7k2jstar back into src/utilities out of src/deprecated, so that it is always
+built as part of MB-System. Also, a bug causing seg faults with 2007 data has been fixed.
+
+Mbpreprocess: Added option --kluge-early-mbari-mapping-auv to mbpreprocess. This option 
+pertains only to Reson 7125 200 kHz multibeam data collected on the first MBARI Mapping 
+AUV from 2006 through 2009. Invoking this kluge triggers \fBmbpreprocess\fP to modify the 
+beam quality factors to be consistent with the later (>2009) standard for the original 
+bathymetry records in Reson s7k format data.
+
+Mbextractsegy: Fixed bug in extracting and plotting envelope function of subbottom data.
+
+General: Added macros to src/mbio/mb_define.h enabling the printing of byte values as a
+binary bitmask using fprintf(). To print a single byte as binary (e.g. "01010101") do 
+something like:
+	char value;
+	printf("Bitmask: "MB_PRINTF_BINARY_PATTERN_INT8"\n", MB_PRINTF_BYTE_TO_BINARY_INT8(value));
+Printing of larger int types has a similar form:
+	short value;
+	printf("Bitmask: "MB_PRINTF_BINARY_PATTERN_INT16"\n", MB_PRINTF_BYTE_TO_BINARY_INT16(value));
+	int value;
+	printf("Bitmask: "MB_PRINTF_BINARY_PATTERN_INT32"\n", MB_PRINTF_BYTE_TO_BINARY_INT32(value));
+	long long value;
+	printf("Bitmask: "MB_PRINTF_BINARY_PATTERN_INT64"\n", MB_PRINTF_BYTE_TO_BINARY_INT64(value));
+These macros are taken from 
+	https://stackoverflow.com/questions/111928/is-there-a-printf-converter-to-print-in-binary-format
 
 #### 5.8.2beta08 (July 27, 2024)
 
