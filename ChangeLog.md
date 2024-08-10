@@ -22,6 +22,8 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.2beta09    August 4, 2024
+- Version 5.8.2beta08    July 27, 2024
 - Version 5.8.2beta07    June 27, 2024
 - Version 5.8.2beta06    June 13, 2024
 - Version 5.8.2beta05    May 19, 2024
@@ -39,6 +41,99 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.2beta09 (August 4, 2024)
+
+mb7k2jstar: This program extracts Edgetech sidescan and subbottom data from Reson s7k 
+files and writes current format Edgetech Jstar format files identical to what current
+Edgetech sonars record. This functionality is needed only for MBARI Mapping AUV data from
+2004-2014, as MBARI was the only user of a payload controller software package named
+6046 from Reson that logged Reson 7125 multibeam and Edgetech FSAU sidescan/subbottom
+data in the same s7k files. Recognizing that reprocessing old Mapping AUV data requires
+this capability (and much of these data are now in public archives at MGDS and NCEI), we
+are moving mb7k2jstar back into src/utilities out of src/deprecated, so that it is always
+built as part of MB-System. Also, a bug causing seg faults with 2007 data has been fixed.
+
+Mbpreprocess: Added option --kluge-early-mbari-mapping-auv to mbpreprocess. This option 
+pertains only to Reson 7125 200 kHz multibeam data collected on the first MBARI Mapping 
+AUV from 2006 through 2009. Invoking this kluge triggers \fBmbpreprocess\fP to modify the 
+beam quality factors to be consistent with the later (>2009) standard for the original 
+bathymetry records in Reson s7k format data.
+
+Mbextractsegy: Fixed bug in extracting and plotting envelope function of subbottom data.
+
+General: Added macros to src/mbio/mb_define.h enabling the printing of byte values as a
+binary bitmask using fprintf(). To print a single byte as binary (e.g. "01010101") do 
+something like:
+	char value;
+	printf("Bitmask: "MB_PRINTF_BINARY_PATTERN_INT8"\n", MB_PRINTF_BYTE_TO_BINARY_INT8(value));
+Printing of larger int types has a similar form:
+	short value;
+	printf("Bitmask: "MB_PRINTF_BINARY_PATTERN_INT16"\n", MB_PRINTF_BYTE_TO_BINARY_INT16(value));
+	int value;
+	printf("Bitmask: "MB_PRINTF_BINARY_PATTERN_INT32"\n", MB_PRINTF_BYTE_TO_BINARY_INT32(value));
+	long long value;
+	printf("Bitmask: "MB_PRINTF_BINARY_PATTERN_INT64"\n", MB_PRINTF_BYTE_TO_BINARY_INT64(value));
+These macros are taken from 
+	https://stackoverflow.com/questions/111928/is-there-a-printf-converter-to-print-in-binary-format
+
+#### 5.8.2beta08 (July 27, 2024)
+
+Format 121 (MBF_GSFGENMB): Updated to use new version of libgsf (3.10) released by Leidos.
+The following change descriptions are from the libgsf 3.10 change summary:
+
+	Change request GSF_03-10_01
+	Support for ME70 sonars
+	11/8/2021 
+	Sean Donovan, Leidos 
+	Description:
+		Added GSF_SWATH_BATHY_SUBRECORD_ME70BO_SPECIFIC subrecord identifier. 
+		Added support for sonar under EM4 cases. 
+	Purpose:
+		To add support in GSF for the ME70 multibeam systems
+
+	Change request GSF_03-10_02
+	STIG Remediation to address vulnerabilities
+	3/12/2024
+	Dwight Johnson, NAVO
+	Description:
+		Various changes to safe memory allocation and usage throughout the encoding and 		
+		decoding processes
+	Purpose:
+		Improved Robustness
+
+	Change request GSF_03-10_03
+	Updates to KMALL ping level metadata
+	3/12/2024
+	Jonathon Beaudoin, Hydro Octave
+	Description:
+		Added new variables highVoltageLevelDB, sectorTrackingCorr_DB, and 
+		effectiveSignalLength_sec within the spare space of the gsfKMALLTxSector Struct. 
+		Added encoding and decoding logic for these values.
+	Purpose:
+		To support backscatter processing
+
+	Change request GSF_03-10_04
+	Resolved bug surrounding network transmission of range samples
+	3/12/2024
+	Jonathon Beaudoin, Hydro Octave
+	Description:
+		Missing htons call added to range sample processing
+	Purpose:
+		Bug Fix
+
+	Change request GSF_03-10_05
+	Added TVG DB to bathy ping structure
+	3/12/2024
+	Jonathon Beaudoin, Hydro Octave
+	Description:
+		Added new array variable TVG_DB to multibeam ping struct. Added encoding and 
+		decoding logic for this value.
+	Purpose:
+		To support backscatter processing
+
+MBnavadjust: Added autosaving the last version of a project file immediately before 
+beginning to write a new file. Also fixed some inconsistencies in the UI.
 
 #### 5.8.2beta07 (June 27, 2024)
 

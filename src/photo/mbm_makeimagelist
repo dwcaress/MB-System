@@ -10,8 +10,8 @@ from datetime import datetime
 from collections import namedtuple
 from PIL import Image
 
-shortOpts = "hbd:f:o:g:x"
-longOpts = ["help", "check-bayer", "imdir=", "imformat=", "outfile=", "gpsfile=", "nogpsfile"]
+shortOpts = "hbd:f:o:g:xy"
+longOpts = ["help", "check-bayer", "imdir=", "imformat=", "outfile=", "gpsfile=", "nogpsfile", "nogains"]
 
 def usage():
   pname, sname = os.path.split(sys.argv[0])
@@ -24,6 +24,7 @@ def usage():
   -o --outfile=outfname      Output data to [ofname] [default 'imagelist']
   -g --gpsfile=gpsfname      GPS time data from [gpsfname] [default './../logfile_gpstime_cam_sync.csv']
   -x --nogpsfile             Avoid using GPS tigger times (just image time matching)
+  -x --nogains               Avoid using camera gain and exposure embedded in images
   """ )
   sys.exit()
 
@@ -179,6 +180,7 @@ def main (args, opts={}):
   outFname = "imagelist"
   gpsFname = "/../logfile_gpstime_cam_sync.csv"
   fGPStimes = True
+  fGains = True
   checkBayer = False
   for o, a in opts:
     if o in ("-h", "--help"):
@@ -195,6 +197,8 @@ def main (args, opts={}):
       gpsFname = a
     elif o in ("-x", "--nogpsfile"):
       fGPStimes = False
+    elif o in ("-y", "--nogains"):
+      fGains = False
     else:
       assert False, "unhandled option: "+o+" "+a
 
@@ -221,23 +225,32 @@ def main (args, opts={}):
   for f in image_list_left :
     if checkBayer:
       f = f.replace("color", "bayer", 1)
-    img = Image.open(f)
-    tagdata = img.tag.tagdata
-    img.close()
-    gain_exposure_str = tagdata[270].decode('UTF-8','ignore')
-    (gain_str, exposure_str) = re.findall(r"[-+]?\d*\.?\d+|[-+]?\d+", gain_exposure_str);
-    gain_list_left.append(float(gain_str))
-    exposure_list_left.append(float(exposure_str))
+    if fGains:
+      img = Image.open(f)
+      tagdata = img.tag.tagdata
+      img.close()
+      gain_exposure_str = tagdata[270].decode('UTF-8','ignore')
+      print(gain_exposure_str)
+      (gain_str, exposure_str) = re.findall(r"[-+]?\d*\.?\d+|[-+]?\d+", gain_exposure_str);
+      gain_list_left.append(float(gain_str))
+      exposure_list_left.append(float(exposure_str))
+    else:
+      gain_list_left.append(0.0)
+      exposure_list_left.append(0.0)
   for f in image_list_right :
     if checkBayer:
       f = f.replace("color", "bayer", 1)
-    img = Image.open(f)
-    tagdata = img.tag.tagdata
-    img.close()
-    gain_exposure_str = tagdata[270].decode('UTF-8','ignore')
-    (gain_str, exposure_str) = re.findall(r"[-+]?\d*\.?\d+|[-+]?\d+", gain_exposure_str);
-    gain_list_right.append(float(gain_str))
-    exposure_list_right.append(float(exposure_str))
+    if fGains:
+      img = Image.open(f)
+      tagdata = img.tag.tagdata
+      img.close()
+      gain_exposure_str = tagdata[270].decode('UTF-8','ignore')
+      (gain_str, exposure_str) = re.findall(r"[-+]?\d*\.?\d+|[-+]?\d+", gain_exposure_str);
+      gain_list_right.append(float(gain_str))
+      exposure_list_right.append(float(exposure_str))
+    else:
+      gain_list_right.append(0.0)
+      exposure_list_right.append(0.0)
 
   #  Use GPS Triggers?
   if fGPStimes:

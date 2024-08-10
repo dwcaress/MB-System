@@ -122,6 +122,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)*store_ptr;
 
   /* initialize everything */
+  memset(*store_ptr, 0, sizeof(struct mbsys_reson7k_struct));
 
   /* Type of data record */
   store->kind = MB_DATA_NONE;
@@ -4534,6 +4535,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
   bool kluge_soundspeedsnell = false;
   bool kluge_zeroattitudecorrection = false;
   bool kluge_zeroalongtrackangles = false;
+  bool kluge_early_mbari_mapping_auv = false;
 
   /* kluge parameters */
   double kluge_beampatternsnellfactor = 1.0;
@@ -4554,6 +4556,9 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
     }
     else if (pars->kluge_id[i] == MB_PR_KLUGE_ZEROALONGTRACKANGLES) {
       kluge_zeroalongtrackangles = true;
+    }
+    else if (pars->kluge_id[i] == MB_PR_KLUGE_EARLYMBARIMAPPINGAUV) {
+      kluge_early_mbari_mapping_auv = true;
     }
   }
 
@@ -4603,6 +4608,9 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
       }
       else if (pars->kluge_id[i] == MB_PR_KLUGE_ZEROALONGTRACKANGLES) {
         fprintf(stderr, "dbg2       kluge_zeroalongtrackangles:    %d\n", kluge_zeroalongtrackangles);
+      }
+      else if (pars->kluge_id[i] == MB_PR_KLUGE_EARLYMBARIMAPPINGAUV) {
+        fprintf(stderr, "dbg2       kluge_early_mbari_mapping_auv: %d\n", kluge_early_mbari_mapping_auv);
       }
     }
   }
@@ -4787,6 +4795,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
       /* fix version 4 quality flags */
       if (bathymetry->header.Version < 5) {
+// fprintf(stderr, "%s:%d:%s: fix version 4 quality flags: %d  year: %d  bluefinnav: %d\n", __FILE__, __LINE__, __FUNCTION__, bathymetry->header.Version, header->s7kTime.Year, store->nrec_bluefinnav);
         for (unsigned int i = 0; i < bathymetry->number_beams; i++) {
           if ((bathymetry->quality[i]) < 16) {
             if (bathymetry->range[i] > 0.007) {
@@ -4804,6 +4813,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
       /* fix early version 5 quality flags */
       else if (bathymetry->header.Version == 5 && header->s7kTime.Year < 2006) {
+// fprintf(stderr, "%s:%d:%s: fix early version 5 quality flags: %d  year: %d  bluefinnav: %d\n", __FILE__, __LINE__, __FUNCTION__, bathymetry->header.Version, header->s7kTime.Year, store->nrec_bluefinnav);
         for (unsigned int i = 0; i < bathymetry->number_beams; i++) {
           /* phase picks */
           if ((bathymetry->quality[i]) == 8) {
@@ -4816,8 +4826,10 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
       }
 
       /* fix early MBARI version 5 quality flags */
-      else if (bathymetry->header.Version == 5 && store->nrec_bluefinnav > 0 && header->s7kTime.Year < 2008) {
+      else if (bathymetry->header.Version == 5 && (kluge_early_mbari_mapping_auv || store->nrec_bluefinnav > 0) && header->s7kTime.Year < 2008) {
+// fprintf(stderr, "%s:%d:%s: fix early MBARI version 5 quality flags: %d  year: %d  bluefinnav: %d\n", __FILE__, __LINE__, __FUNCTION__, bathymetry->header.Version, header->s7kTime.Year, store->nrec_bluefinnav);
         for (unsigned int i = 0; i < bathymetry->number_beams; i++) {
+// fprintf(stderr, "    %d   %d "MB_PRINTF_BINARY_PATTERN_INT8" 0x%.8X", i, bathymetry->quality[i], MB_PRINTF_BYTE_TO_BINARY_INT8(bathymetry->quality[i]), bathymetry->quality[i]);
           /* phase picks */
           if ((bathymetry->quality[i]) == 4) {
             bathymetry->quality[i] = 32 + 15;
@@ -4825,11 +4837,13 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
           else if ((bathymetry->quality[i]) == 2) {
             bathymetry->quality[i] = 16 + 15;
           }
+// fprintf(stderr, "     %d "MB_PRINTF_BINARY_PATTERN_INT8" 0x%.8X\n", bathymetry->quality[i], MB_PRINTF_BYTE_TO_BINARY_INT8(bathymetry->quality[i]), bathymetry->quality[i]);
         }
       }
 
       /* fix upgraded MBARI version 5 quality flags */
-      else if (bathymetry->header.Version >= 5 && store->nrec_bluefinnav > 0 && header->s7kTime.Year <= 2010) {
+      else if (bathymetry->header.Version >= 5 && (kluge_early_mbari_mapping_auv || store->nrec_bluefinnav > 0) && header->s7kTime.Year <= 2010) {
+// fprintf(stderr, "%s:%d:%s: fix upgraded MBARI version 5 quality flags: %d  year: %d  bluefinnav: %d\n", __FILE__, __LINE__, __FUNCTION__, bathymetry->header.Version, header->s7kTime.Year, store->nrec_bluefinnav);
         for (unsigned int i = 0; i < bathymetry->number_beams; i++) {
           bathymetry->quality[i] = bathymetry->quality[i] & 15;
 
@@ -4850,6 +4864,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
       /* fix upgraded version 5 quality flags */
       else if (bathymetry->header.Version >= 5) {
+// fprintf(stderr, "%s:%d:%s: fix upgraded version 5 quality flags: %d  year: %d  bluefinnav: %d\n", __FILE__, __LINE__, __FUNCTION__, bathymetry->header.Version, header->s7kTime.Year, store->nrec_bluefinnav);
         for (unsigned int i = 0; i < bathymetry->number_beams; i++) {
           bathymetry->quality[i] = bathymetry->quality[i] & 15;
 
@@ -4877,6 +4892,11 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
           }
         }
       }
+
+      /* not fixing quality flags */
+      else if (bathymetry->header.Version >= 5) {
+// fprintf(stderr, "%s:%d:%s: not fixing quality flags: %d  year: %d  bluefinnav: %d\n", __FILE__, __LINE__, __FUNCTION__, bathymetry->header.Version, header->s7kTime.Year, store->nrec_bluefinnav);
+	  }
 
       /* if requested ignore water column data
        * (will not be included in any output file) */
@@ -5981,7 +6001,7 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
       else if (bathymetry->quality[i] & 128) {
         beamflag[i] = MB_FLAG_FLAG + MB_FLAG_MANUAL;
       }
-      else if (bathymetry->quality[i] & 240) {
+      else if (bathymetry->quality[i] & 48) {
         beamflag[i] = MB_FLAG_NONE;
       }
       else if ((bathymetry->quality[i] & 3) == 3) {
@@ -5998,27 +6018,7 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
       }
 #ifdef MSYS_RESON7KR_DEBUG
       fprintf(stderr, "EXTRACT: beam:%d quality:%d q&240:%d ", i, bathymetry->quality[i], bathymetry->quality[i] & 240);
-      if (bathymetry->quality[i] & 1)
-        fprintf(stderr, "1");
-      else
-        fprintf(stderr, "0");
-      if (bathymetry->quality[i] & 2)
-        fprintf(stderr, "1");
-      else
-        fprintf(stderr, "0");
-      if (bathymetry->quality[i] & 4)
-        fprintf(stderr, "1");
-      else
-        fprintf(stderr, "0");
-      if (bathymetry->quality[i] & 8)
-        fprintf(stderr, "1");
-      else
-        fprintf(stderr, "0");
-      if (bathymetry->quality[i] & 16)
-        fprintf(stderr, "1");
-      else
-        fprintf(stderr, "0");
-      if (bathymetry->quality[i] & 32)
+      if (bathymetry->quality[i] & 128)
         fprintf(stderr, "1");
       else
         fprintf(stderr, "0");
@@ -6026,7 +6026,27 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
         fprintf(stderr, "1");
       else
         fprintf(stderr, "0");
-      if (bathymetry->quality[i] & 128)
+      if (bathymetry->quality[i] & 32)
+        fprintf(stderr, "1");
+      else
+        fprintf(stderr, "0");
+      if (bathymetry->quality[i] & 16)
+        fprintf(stderr, "1");
+      else
+        fprintf(stderr, "0");
+      if (bathymetry->quality[i] & 8)
+        fprintf(stderr, "1");
+      else
+        fprintf(stderr, "0");
+      if (bathymetry->quality[i] & 4)
+        fprintf(stderr, "1");
+      else
+        fprintf(stderr, "0");
+      if (bathymetry->quality[i] & 2)
+        fprintf(stderr, "1");
+      else
+        fprintf(stderr, "0");
+      if (bathymetry->quality[i] & 1)
         fprintf(stderr, "1");
       else
         fprintf(stderr, "0");

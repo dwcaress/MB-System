@@ -37,8 +37,8 @@
 #include <stdint.h>
 
 /* Define version and date for this release */
-#define MB_VERSION "5.8.2beta07"
-#define MB_VERSION_DATE "27 June 2024"
+#define MB_VERSION "5.8.2beta09"
+#define MB_VERSION_DATE "4 August 2024"
 
 /* CMake supports current OS's and so there is only one form of RPC and XDR and no mb_config.h file */
 #ifdef CMAKE_BUILD_SYSTEM
@@ -268,6 +268,32 @@ typedef enum {
 #define MB_IS_FNAN isnan
 #define MB_IS_DNAN isnan
 #endif
+
+/* printf format for binary bitmask */
+/* from https://stackoverflow.com/questions/111928/is-there-a-printf-converter-to-print-in-binary-format */
+#define MB_PRINTF_BINARY_PATTERN_INT8 "%c%c%c%c%c%c%c%c"
+#define MB_PRINTF_BYTE_TO_BINARY_INT8(i)    \
+    (((i) & 0x80ll) ? '1' : '0'), \
+    (((i) & 0x40ll) ? '1' : '0'), \
+    (((i) & 0x20ll) ? '1' : '0'), \
+    (((i) & 0x10ll) ? '1' : '0'), \
+    (((i) & 0x08ll) ? '1' : '0'), \
+    (((i) & 0x04ll) ? '1' : '0'), \
+    (((i) & 0x02ll) ? '1' : '0'), \
+    (((i) & 0x01ll) ? '1' : '0')
+
+#define MB_PRINTF_BINARY_PATTERN_INT16 \
+    MB_PRINTF_BINARY_PATTERN_INT8              MB_PRINTF_BINARY_PATTERN_INT8
+#define MB_PRINTF_BYTE_TO_BINARY_INT16(i) \
+    MB_PRINTF_BYTE_TO_BINARY_INT8((i) >> 8),   MB_PRINTF_BYTE_TO_BINARY_INT8(i)
+#define MB_PRINTF_BINARY_PATTERN_INT32 \
+    MB_PRINTF_BINARY_PATTERN_INT16             MB_PRINTF_BINARY_PATTERN_INT16
+#define MB_PRINTF_BYTE_TO_BINARY_INT32(i) \
+    MB_PRINTF_BYTE_TO_BINARY_INT16((i) >> 16), MB_PRINTF_BYTE_TO_BINARY_INT16(i)
+#define MB_PRINTF_BINARY_PATTERN_INT64    \
+    MB_PRINTF_BINARY_PATTERN_INT32             MB_PRINTF_BINARY_PATTERN_INT32
+#define MB_PRINTF_BYTE_TO_BINARY_INT64(i) \
+    MB_PRINTF_BYTE_TO_BINARY_INT32((i) >> 32), MB_PRINTF_BYTE_TO_BINARY_INT32(i)
 
 /* default grid no data value define */
 #define MB_DEFAULT_GRID_NODATA -9999999.9
