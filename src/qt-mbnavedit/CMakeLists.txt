@@ -27,6 +27,8 @@ find_package(
   COMPONENTS Gui Widgets Quick
   REQUIRED)
 
+find_package(VTK 9.3 REQUIRED COMPONENTS GUISupportQtQuick)
+
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
@@ -39,6 +41,6 @@ target_include_directories(qt-mbnavedit PUBLIC ${CMAKE_SOURCE_DIR}/src/mbaux)
 target_compile_options(qt-mbnavedit PUBLIC "-Wunused-variable")
 
 target_link_libraries(qt-mbnavedit PRIVATE MBGui Qt6::Core Qt6::Quick
-                      mbaux)
+                      VTK::GUISupportQtQuick mbaux)
 
 install(TARGETS qt-mbnavedit DESTINATION ${CMAKE_INSTALL_BINDIR})
