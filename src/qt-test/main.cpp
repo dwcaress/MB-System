@@ -1,28 +1,18 @@
+// Copyright (C) 2023 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
+
 #include <QGuiApplication>
-#include <QQmlApplicationEngine>
-#include <QDebug>
-#include "ToDoModel.h"
+#include <QQuickView>
+#include "rhitextureitem.h"
 
+int main(int argc, char **argv)
+{
+    QGuiApplication app(argc, argv);
 
-int main(int argc, char *argv[]) {
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-	QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-#endif
-	QGuiApplication app(argc, argv);
+    QQuickView view;
+    view.setResizeMode(QQuickView::SizeRootObjectToView);
+    view.setSource(QUrl("qrc:///scenegraph/rhitextureitem/main.qml"));
+    view.show();
 
-	qDebug() << "register ToDoModel";
-	qmlRegisterType<ToDoModel> ("ToDo", 1, 0, "ToDoModel");
-	
-	QQmlApplicationEngine engine;
-	const QUrl url(QStringLiteral("qrc:/main.qml"));
-	QObject::connect(
-		&engine, &QQmlApplicationEngine::objectCreated, &app,
-		[url](QObject *obj, const QUrl &objUrl) {
-			if (!obj && url == objUrl)
-				QCoreApplication::exit(-1);
-		},
-		Qt::QueuedConnection);
-	engine.load(url);
-
-	return app.exec();
+    return QGuiApplication::exec();
 }
