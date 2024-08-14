@@ -24,7 +24,7 @@ namespace mb_system {
      can be a GMT grid file or a swath file containing data in any sonar 
      format supported by MB-System. The data is loaded into vtkPoints vertices
      and vtkCellArray triangles, which can be accesed by the VTK visualization
-     pipleline such as the one created by QVtkRenderer.
+     pipeliine such as the one created by QVtkRenderer.
   */
   class TopoGridReader : public vtkAbstractPolyDataReader {
 
