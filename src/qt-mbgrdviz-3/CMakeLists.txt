@@ -26,11 +26,13 @@ find_package(
   Qt6
   COMPONENTS Gui Widgets Quick
   REQUIRED)
-find_package(VTK 9.3 REQUIRED)
+
+find_package(VTK 9.3 REQUIRED COMPONENTS GUISupportQtQuick)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 add_executable(qt-mbgrdviz-3 main.cpp qml.qrc)
-target_link_libraries(qt-mbgrdviz-3 PRIVATE MBGui Qt6::Core Qt6::Quick)
+target_link_libraries(qt-mbgrdviz-3 PRIVATE MBGui Qt6::Core Qt6::Quick
+                      VTK::GUISupportQtQuick)
