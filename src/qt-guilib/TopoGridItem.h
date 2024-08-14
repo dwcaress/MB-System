@@ -49,7 +49,8 @@ class TopoGridItem : public QQuickVTKItem {
   TopoGridItem();
 
   
-  /// Initialize VTK pipeline and attach it to vtkRenderWindow
+  /// Initialize VTK pipeline and attach it to vtkRenderWindow, return
+  /// latest pipeline object.
   /// (Return type vtkUserData is defined in parent class)
   vtkUserData initializeVTK(vtkRenderWindow *renderWindow) override;
 
