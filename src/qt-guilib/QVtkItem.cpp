@@ -37,7 +37,6 @@ void QVtkItem::setGridFilename(char *gridFilename) {
 void QVtkItem::wheelEvent(QWheelEvent *event) {
     qDebug() << "QVtkItem::wheelEvent()";
 
-    // wheelEvent_ = std::make_shared<QWheelEvent>(*event);
     wheelEvent_ = event;
     wheelEvent_->ignore();
     event->accept();
