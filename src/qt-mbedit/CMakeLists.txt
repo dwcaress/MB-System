@@ -27,6 +27,8 @@ find_package(
   COMPONENTS Gui Widgets Quick OpenGL
   REQUIRED)
 
+find_package(VTK 9.3 REQUIRED COMPONENTS GUISupportQtQuick)
+
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
@@ -38,6 +40,7 @@ target_include_directories(qt-mbedit PUBLIC ${CMAKE_SOURCE_DIR}/src/mbaux)
 				 
 
 target_link_libraries(qt-mbedit PRIVATE MBGui Qt6::Core Qt6::Quick
+                      VTK::GUISupportQtQuick
                       mbeditLib mbio)
 
 install(TARGETS qt-mbedit DESTINATION ${CMAKE_INSTALL_BINDIR})
