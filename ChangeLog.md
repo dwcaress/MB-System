@@ -22,6 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.2beta10    August 16, 2024
 - Version 5.8.2beta09    August 4, 2024
 - Version 5.8.2beta08    July 27, 2024
 - Version 5.8.2beta07    June 27, 2024
@@ -41,6 +42,24 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.2beta10 (August 16, 2024)
+
+Mbnavadjustmerge: Added --reimport-file and --reimport-all-files options that reimport 
+swath files into an mbnavadjust project from the current processed versions of that files. 
+Each file is broken into the same sections as previously, regardless of any changes to the 
+settings for the maximum section length or the maximum number of soundings in a section.
+The original navigation and attitude data are also preserved, but the bathymetry is changed 
+to reflect the current processed values. This means that updates to the bathymetry editing 
+can now be brought into mbnavadjust projects.
+
+Format 71 (MBF_MBLDEOIH): Fixed a compression bug that occasionally resulted in corrupting
+the acrosstrack values of the outermost beams of pings when changed data are inserted into
+records using the mb_put_all() or mb_insert() functions. The only know manifestation of this
+bug was in importing swath data into mbnavadjust projects.
+
+Mbtrnpp: Fixed #ifdefs and Makefile.am files so that mbtrnpp can still be built with the
+old autoconf build system, albeit using GCTP for projections rather libproj.
 
 #### 5.8.2beta09 (August 4, 2024)
 

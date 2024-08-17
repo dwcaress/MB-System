@@ -1,4 +1,4 @@
-.TH mbrolltimelag 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
+.TH mbrolltimelag 1 "12 August 2024" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbrolltimelag\fP \- Calculates cross correlation between the apparent
 bottom slope in swath bathymetry data and the roll time series used by
@@ -110,31 +110,31 @@ will be extracted from primary or ancillary navigation records. If
 this \fB\-K\fP option is set, then the roll data will be extracted from
 data records of type \fIKrollsource\fP, where the possible values are listed
 here:
-     MB_DATA_DATA			1	/* general survey data */
-     MB_DATA_CALIBRATE		4	/* Hydrosweep DS */
-     MB_DATA_MEAN_VELOCITY	5	/* Hydrosweep DS */
-     MB_DATA_VELOCITY_PROFILE	6	/* general */
-     MB_DATA_NAV			12	/* Simrad, Reson 7k */
-     MB_DATA_HEADING		17	/* Simrad, Hypack */
-     MB_DATA_ATTITUDE		18	/* Simrad, Hypack, Reson 7k */
-     MB_DATA_SSV			19	/* Simrad */
-     MB_DATA_NAV1			28	/* ancillary nav system 1 */
-     MB_DATA_NAV2			29	/* ancillary nav system 2 */
-     MB_DATA_NAV3			30	/* ancillary nav system 3 */
-     MB_DATA_MOTION			32	/* Reson 7k */
-     MB_DATA_SIDESCAN2		37	/* Reson 7k, XTF */
-     MB_DATA_SIDESCAN3		38	/* Reson 7k, XTF */
-     MB_DATA_ROLL			40	/* Reson 7k */
-     MB_DATA_PITCH			41	/* Reson 7k */
-     MB_DATA_NMEA_RMC		48	/* NMEA */
-     MB_DATA_NMEA_DBT		49	/* NMEA */
-     MB_DATA_NMEA_DPT		50	/* NMEA */
-     MB_DATA_NMEA_ZDA		51	/* NMEA */
-     MB_DATA_NMEA_GLL		52	/* NMEA */
-     MB_DATA_NMEA_GGA		53	/* NMEA */
-     MB_DATA_ATTITUDE1		55	/* ancillary attitude system 1 */
-     MB_DATA_ATTITUDE2		56      /* ancillary attitude system 2 */
-     MB_DATA_ATTITUDE3		57	/* ancillary attitude system 3 */
+     MB_DATA_DATA 1                   /* general survey data */
+     MB_DATA_CALIBRATE 4              /* Hydrosweep DS */
+     MB_DATA_MEAN_VELOCITY 5          /* Hydrosweep DS */
+     MB_DATA_VELOCITY_PROFILE 6       /* general */
+     MB_DATA_NAV 12                   /* Simrad, Reson 7k */
+     MB_DATA_HEADING 17               /* Simrad, Hypack */
+     MB_DATA_ATTITUDE 18              /* Simrad, Hypack, Reson 7k */
+     MB_DATA_SSV 19                   /* Simrad */
+     MB_DATA_NAV1 29                  /* ancillary nav system 1 */
+     MB_DATA_NAV2 30                  /* ancillary nav system 2 */
+     MB_DATA_NAV3 31                  /* ancillary nav system 3 */
+     MB_DATA_MOTION 33                /* Reson 7k */
+     MB_DATA_SIDESCAN2 38             /* Reson 7k, XTF */
+     MB_DATA_SIDESCAN3 39             /* Reson 7k, XTF */
+     MB_DATA_ROLL 41                  /* Reson 7k */
+     MB_DATA_PITCH 42                 /* Reson 7k */
+     MB_DATA_NMEA_RMC 49              /* NMEA */
+     MB_DATA_NMEA_DBT 50              /* NMEA */
+     MB_DATA_NMEA_DPT 51              /* NMEA */
+     MB_DATA_NMEA_ZDA 52              /* NMEA */
+     MB_DATA_NMEA_GLL 53              /* NMEA */
+     MB_DATA_NMEA_GGA 54              /* NMEA */
+     MB_DATA_ATTITUDE1 56             /* ancillary attitude system 1 */
+     MB_DATA_ATTITUDE2 57             /* ancillary attitude system 2 */
+     MB_DATA_ATTITUDE3 58             /* ancillary attitude system 3 *
 .br
 A typical value is \fIKrollsource\fP=18, which specifies extraction of roll from asynchronous attitude
 data records. This option supercedes the \fB\-S\fP option.

@@ -3567,23 +3567,21 @@ int main(int argc, char **argv) {
       break;
 
     case MOD_MODE_REIMPORT_FILE:
+      fprintf(stderr, "\nCommand reimport-file=%2.2d\n", mods[imod].file1);
+      status = mbnavadjust_reimport_file(verbose, &project_output, mods[imod].file1, &error);
+      break;
+    
     case MOD_MODE_REIMPORT_ALL_FILES:
-      if (mods[imod].mode == MOD_MODE_REIMPORT_FILE)
-        fprintf(stderr, "\nCommand reimport-file=%2.2d\n", mods[imod].file1);
-      else
-        fprintf(stderr, "\nCommand reimport-all-files\n");
-
-      /* identify the file or files to be reimported */
+      fprintf(stderr, "\nCommand reimport-all-files\n");
       for (int ifile = 0; ifile < project_output.num_files; ifile++) {
-        /* either reimport a specific file or all the files */
-        if (mods[imod].mode == MOD_MODE_REIMPORT_ALL_FILES || ifile == mods[imod].file1) {
-          file = &(project_output.files[ifile]);
-
-          /* load and copy the pre-adjusted navigation */
-
-          /* open the processed data and read to the end
-           * using existing section breaks unless and until the
-           * input data extends later in time */
+        status = mbnavadjust_reimport_file(verbose, &project_output, ifile, &error);
+        if (status == MB_SUCCESS) {
+          fprintf(stderr, "Reimported file %d of %d: %s\n", 
+          			ifile, project_output.num_files, project_output.files[ifile].file);
+        }
+        else {
+          fprintf(stderr, "**FAILED to reimport file %d of %d: %s\n", 
+          			ifile, project_output.num_files, project_output.files[ifile].file);
         }
       }
       break;
