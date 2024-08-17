@@ -160,11 +160,6 @@ typedef struct mbtrnpp_opts_s{
     // opt "output"
     char *output;
 
-#ifndef TRN_USE_PROJ
-    // opt "projection"
-    int projection;
-#endif
-
     // opt "swath-width"
     double swath_width;
 
@@ -582,7 +577,6 @@ s=NULL;\
 #define OPT_TIDE_MODEL_DFL                NULL
 #define OPT_LOG_DIRECTORY_DFL             "."
 #define OPT_OUTPUT_DFL                    NULL
-#define OPT_PROJECTION_DFL                0
 #define OPT_SWATH_WIDTH_DFL               90
 #define OPT_SOUNDINGS_DFL                 11
 #define OPT_MEDIAN_FILTER_DFL             NULL
@@ -1573,9 +1567,6 @@ static int s_mbtrnpp_init_opts(mbtrnpp_opts_t *opts)
         opts->tide_model=OPT_TIDE_MODEL_DFL;
         opts->log_directory=strdup(OPT_LOG_DIRECTORY_DFL);
         opts->output=CHK_STRDUP(OPT_OUTPUT_DFL);
-#ifndef TRN_USE_PROJ
-        opts->projection=OPT_PROJECTION_DFL;
-#endif
         opts->swath_width=OPT_SWATH_WIDTH_DFL;
         opts->soundings=OPT_SOUNDINGS_DFL;
         opts->median_filter=CHK_STRDUP(OPT_MEDIAN_FILTER_DFL);
@@ -1793,9 +1784,6 @@ static int s_mbtrnpp_optstr(char **pdest, size_t olen, mbtrnpp_opts_t *self, con
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "log-directory", sep, wval, self->log_directory, del);
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "tide-model", sep, wval, self->tide_model, del);
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "output", sep, wval, self->output, del);
-#ifndef TRN_USE_PROJ
-    mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "projection", sep, wval, self->projection, del);
-#endif
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "swath-width", sep, wval, self->swath_width, del);
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "soundings", sep, wval, self->soundings, del);
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "median-filter", sep, wval, self->median_filter, del);
@@ -2393,13 +2381,6 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
                     retval=0;
                 }
             }
-#ifndef TRN_USE_PROJ
-            else if(strcmp(key,"projection")==0 ){
-                if(sscanf(val,"%d",&opts->projection)==1){
-                    retval=0;
-                }
-            }
-#endif
             else if(strcmp(key,"swath-width")==0 || strcmp(key,"swath")==0 ){
                 if(sscanf(val,"%lf",&opts->swath_width)==1){
                     retval=0;
@@ -3114,7 +3095,6 @@ int main(int argc, char **argv) {
                          "\t--platform-file=file\n"
                          "\t--platform-target-sensor=sensor_id\n"
                          "\t--tide-model=file\n"
-                         "\t--projection=projection_id\n"
                          "\t--statsec=d.d\n"
                          "\t--statflags=<MSF_STATUS:MSF_EVENT:MSF_ASTAT:MSF_PSTAT:MSF_READER>\n"
                          "\t--hbeat=n\n"
@@ -3253,7 +3233,7 @@ int main(int argc, char **argv) {
   /* mb1 output write control parameters */
   FILE *output_mb1_fp = NULL;
   char *output_buffer = NULL;
-  int n_output_buffer_alloc = 0;
+  size_t n_output_buffer_alloc = 0;
   size_t mb1_size, index;
   unsigned int checksum;
 
@@ -3771,11 +3751,6 @@ int main(int argc, char **argv) {
   bool nav_offset_init = false;
   if (mbtrn_cfg->random_offset_enable) {
       srand(time(0) / getpid());
-      // TODO: what is the intent of this loop? (klh)
-      for (int i=0; i < 100; i++) {
-          int j = rand();
-          j+=1; // silence unused variable warning
-      }
       double nav_offset_mag = mbtrn_cfg->reinit_xyoffset_max * ((double)rand()) / ((double)RAND_MAX);
       double nav_offset_bearing = 2.0 * M_PI * ((double)rand()) / ((double)RAND_MAX);
       nav_offset_east = nav_offset_mag * sin(nav_offset_bearing);
@@ -6205,10 +6180,14 @@ int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg)
           double navlat;
           double trnlon;
           double trnlat;
+#ifdef TRN_USE_PROJ
           int proj_error = MB_ERROR_NO_ERROR;
-          
           mb_proj_inverse(0, pjptr, pstate->pt_dat->y, pstate->pt_dat->x, &navlon, &navlat, &proj_error);
           mb_proj_inverse(0, pjptr, pstate->mse_dat->y, pstate->mse_dat->x, &trnlon, &trnlat, &proj_error);
+#else
+          trnw_utm_to_geo(pstate->pt_dat->x, pstate->pt_dat->y, cfg->utm_zone, &navlat, &navlon);
+          trnw_utm_to_geo(pstate->mse_dat->x, pstate->mse_dat->y, cfg->utm_zone, &trnlat, &trnlon);
+#endif
 
           // NOTE: TRN convention is x:northing y:easting z:down
           //       Output here is in order easting northing z
@@ -6802,7 +6781,7 @@ int mbtrnpp_reson7kr_input_read(int verbose, void *mbio_ptr, size_t *size, char 
         if(!read_err){
             // return bytes requested:
             // smaller of bytes read and bytes remaining
-            int64_t bytes_rem = (int64_t)(frame_buf + fb_pdrf->size - fb_pread);
+            size_t bytes_rem = (size_t)(frame_buf + fb_pdrf->size - fb_pread);
             size_t readlen = (*size <= bytes_rem ? *size : bytes_rem);
             if(readlen > 0){
                 memcpy(buffer, fb_pread, readlen);
@@ -7705,7 +7684,7 @@ int mbtrnpp_em710raw_input_read(int verbose, void *mbio_ptr, size_t *size,
         }
 
         if(!read_err){
-            int64_t bytes_rem = frame_buf + frame_len - fb_pread;
+            size_t bytes_rem = frame_buf + frame_len - fb_pread;
             size_t readlen = (*size <= bytes_rem ? *size : bytes_rem);
             if(readlen > 0){
                 memcpy(buffer, fb_pread, readlen);
@@ -8727,7 +8706,7 @@ int mbtrnpp_em710raw_input_read_ser(int verbose, void *mbio_ptr, size_t *size,
         }
 
         if(!read_err){
-            int64_t bytes_rem = frame_buf + frame_len - fb_pread;
+            size_t bytes_rem = frame_buf + frame_len - fb_pread;
             size_t readlen = (*size <= bytes_rem ? *size : bytes_rem);
             if(readlen > 0){
                 memcpy(buffer, fb_pread, readlen);
