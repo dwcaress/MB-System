@@ -104,15 +104,16 @@
 #define MOD_MODE_REMOVE_DISCONTINUITY 48
 #define MOD_MODE_MERGE_SURVEYS 49
 #define MOD_MODE_REIMPORT_FILE 50
-#define MOD_MODE_REIMPORT_ALL_FILES 51
-#define MOD_MODE_TRIANGULATE 52
-#define MOD_MODE_TRIANGULATE_SECTION 53
-#define MOD_MODE_UNSET_SHORT_SECTION_TIES 54
-#define MOD_MODE_SKIP_SHORT_SECTION_CROSSINGS 55
-#define MOD_MODE_REMOVE_SHORT_SECTIONS 56
-#define MOD_MODE_REMOVE_FILE 57
-#define MOD_MODE_REMAKE_MB166_FILES 58
-#define MOD_MODE_FIX_SENSORDEPTH 59
+#define MOD_MODE_REIMPORT_SURVEY 51
+#define MOD_MODE_REIMPORT_ALL_FILES 52
+#define MOD_MODE_TRIANGULATE 53
+#define MOD_MODE_TRIANGULATE_SECTION 54
+#define MOD_MODE_UNSET_SHORT_SECTION_TIES 55
+#define MOD_MODE_SKIP_SHORT_SECTION_CROSSINGS 56
+#define MOD_MODE_REMOVE_SHORT_SECTIONS 57
+#define MOD_MODE_REMOVE_FILE 58
+#define MOD_MODE_REMAKE_MB166_FILES 59
+#define MOD_MODE_FIX_SENSORDEPTH 60
 #define IMPORT_NONE 0
 #define IMPORT_TIE 1
 #define IMPORT_GLOBALTIE 2
@@ -195,6 +196,7 @@ static char usage_message[] =
     "\t--remove-discontinuity=file:section\n"
     "\t--merge-surveys=survey1:survey2\n"
     "\t--reimport-file=file\n"
+    "\t--reimport-survey=survey\n"
     "\t--reimport-all-files\n"
     "\t--import-tie-list=file\n"
     "\t--export-tie-list=file\n"
@@ -293,6 +295,7 @@ int main(int argc, char **argv) {
                                     {"remove-discontinuity", required_argument, NULL, 0},
                                     {"merge-surveys", required_argument, NULL, 0},
                                     {"reimport-file", required_argument, NULL, 0},
+                                    {"reimport-survey", required_argument, NULL, 0},
                                     {"reimport-all-files", no_argument, NULL, 0},
                                     {"import-tie-list", required_argument, NULL, 0},
                                     {"export-tie-list", required_argument, NULL, 0},
@@ -1323,14 +1326,27 @@ int main(int argc, char **argv) {
       }
 
       /*-------------------------------------------------------
-       * Reimport file (or files)
-          --reimport-file
+       * Reimport file (or survey or all files)
+          --reimport-file=file
+          --reimport-survey=survey
           --reimport-all-files */
       else if (strcmp("reimport-file", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
           int nscan;
           if ((nscan = sscanf(optarg, "%d", &mods[num_mods].file1)) == 2) {
             mods[num_mods].mode = MOD_MODE_REIMPORT_FILE;
+            num_mods++;
+          }
+        }
+        else {
+          fprintf(stderr, "Maximum number of mod commands reached:\n\tskip-unset-crossings command ignored\n\n");
+        }
+      }
+      else if (strcmp("reimport-survey", options[option_index].name) == 0) {
+        if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
+          if ((nscan = sscanf(optarg, "%d", &mods[num_mods].file1)) == 2) {
+            mods[num_mods].mode = MOD_MODE_REIMPORT_SURVEY;
             num_mods++;
           }
         }
@@ -3569,6 +3585,24 @@ int main(int argc, char **argv) {
     case MOD_MODE_REIMPORT_FILE:
       fprintf(stderr, "\nCommand reimport-file=%2.2d\n", mods[imod].file1);
       status = mbnavadjust_reimport_file(verbose, &project_output, mods[imod].file1, &error);
+      break;
+    
+    case MOD_MODE_REIMPORT_SURVEY:
+      fprintf(stderr, "\nCommand reimport-survey=%2.2d\n", mods[imod].file1);
+      for (int ifile = 0; ifile < project_output.num_files; ifile++) {
+        struct mbna_file *file = &project_output.files[ifile];
+        if (file->block == mods[imod].file1) {
+		  status = mbnavadjust_reimport_file(verbose, &project_output, ifile, &error);
+		  if (status == MB_SUCCESS) {
+			fprintf(stderr, "Reimported file %d of %d: %s\n", 
+					  ifile, project_output.num_files, project_output.files[ifile].file);
+		  }
+		  else {
+			fprintf(stderr, "**FAILED to reimport file %d of %d: %s\n", 
+					  ifile, project_output.num_files, project_output.files[ifile].file);
+		  }
+	    }
+      }
       break;
     
     case MOD_MODE_REIMPORT_ALL_FILES:
