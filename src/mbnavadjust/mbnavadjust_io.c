@@ -5633,6 +5633,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
   int iformat;
   int reimport_sections = 0;
   int reimport_pings = 0;
+  double reimport_ping_maxtimediff = 100.0 * MB_ESF_MAXTIMEDIFF;
   
 
   /* if specified file id is valid for the project try to identify and open the current
@@ -5719,6 +5720,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
 		
 	/* loop over reading the current processed bathymetry */
     bool section_initialized = false;
+    bool section_saved = false;
     int current_section = 0;
     int current_section_num_pings = 0;
 	while (!done) {
@@ -5966,34 +5968,65 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
 		  if (*error == MB_ERROR_NO_ERROR) {
             section_initialized = true;
             current_section = new_section;
+            section_saved = false;
 		  }
         }
 
         /* read and write next ping from existing current section file */
         if (section_initialized) {
           /* read the next section ping */
-		  status = mb_get_all(verbose, smbio_ptr, &sstore_ptr, &skind, stime_i, &stime_d, &snavlon, &snavlat, &sspeed, &sheading,
-              		&sdistance, &saltitude, &ssensordepth, &sbeams_bath, &sbeams_amp, &spixels_ss, sbeamflag, sbath, samp,
-              		sbathacrosstrack, sbathalongtrack, sss, sssacrosstrack, sssalongtrack, scomment, error);
-              		
-          /* write out the ping substituting the bathymetry arrays read from the current 
-             processed file for the arrays read from the existing section file */
-          if (status == MB_SUCCESS && fabs(stime_d - time_d) <= MB_ESF_MAXTIMEDIFF) {
-			/* write out data */
-			status = mb_put_all(verbose, ombio_ptr, sstore_ptr,
-					true, MB_DATA_DATA, stime_i, stime_d, snavlon, snavlat,
-					sspeed, sheading, beams_bath, 0, 0,
-					beamflag, bath, amp,
-					bathacrosstrack, bathalongtrack,
-					ss, ssacrosstrack, ssalongtrack, comment, error);
-			if (status == MB_SUCCESS) {
-			  current_section_num_pings++;
-			}
+          if (section_saved) {
+            section_saved = false;
           }
           else {
-            fprintf(stderr, "%s:%d:%s: Not writing ping to section: status:%d timediff:%f\n", 
-            		__FILE__, __LINE__, __FUNCTION__, status, (stime_d - time_d));
+			status = mb_get_all(verbose, smbio_ptr, &sstore_ptr, &skind, stime_i, &stime_d, &snavlon, &snavlat, &sspeed, &sheading,
+					  &sdistance, &saltitude, &ssensordepth, &sbeams_bath, &sbeams_amp, &spixels_ss, sbeamflag, sbath, samp,
+					  sbathacrosstrack, sbathalongtrack, sss, sssacrosstrack, sssalongtrack, scomment, error);
           }
+              		
+          if (status == MB_SUCCESS) {
+            /* write out the ping substituting the bathymetry arrays read from the current 
+               processed file for the arrays read from the existing section file */
+            if (fabs(stime_d - time_d) <= reimport_ping_maxtimediff) {
+			  /* write out data */
+			  status = mb_put_all(verbose, ombio_ptr, sstore_ptr,
+					  true, MB_DATA_DATA, stime_i, stime_d, snavlon, snavlat,
+					  sspeed, sheading, beams_bath, 0, 0,
+					  beamflag, bath, amp,
+					  bathacrosstrack, bathalongtrack,
+					  ss, ssacrosstrack, ssalongtrack, comment, error);
+			  if (status == MB_SUCCESS) {
+				current_section_num_pings++;
+			  }
+		    }
+		    
+		    /* if section timestamp later than processed file timestamp then save the section data */
+		    else if (stime_d > time_d) {
+		      section_saved = true;
+              fprintf(stderr, "%s:%d:%s: Skipped writing ping to section: status:%d timediff:%f\n", 
+            		__FILE__, __LINE__, __FUNCTION__, status, (stime_d - time_d));
+		    }
+		    
+		    /* if section timestamp earlier than processed file timestamp then write out the existing section data */
+		    else {
+			  /* write out data */
+			  status = mb_put_all(verbose, ombio_ptr, sstore_ptr,
+					  true, MB_DATA_DATA, stime_i, stime_d, snavlon, snavlat,
+					  sspeed, sheading, sbeams_bath, 0, 0,
+					  beamflag, bath, amp,
+					  sbathacrosstrack, sbathalongtrack,
+					  sss, sssacrosstrack, sssalongtrack, scomment, error);
+			  if (status == MB_SUCCESS) {
+				current_section_num_pings++;
+			  }
+		    }
+          }
+          
+          /* else write out ping from processed file */
+          else {
+            fprintf(stderr, "%s:%d:%s: Not writing ping to section because it is missing from the existing section file:\n", 
+            		__FILE__, __LINE__, __FUNCTION__);
+		  }
         }
       } /* kind == MB_DATA_DATA */
 
@@ -6028,6 +6061,10 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
 		current_section_num_pings = 0;
 	  }
 	} /* loop over input data and variable done */
+	
+	/* close the file that was reimported */
+	status = mb_close(verbose, &imbio_ptr, error);
+
 
 	if (verbose > 0) {
       mb_path message;

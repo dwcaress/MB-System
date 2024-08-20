@@ -22,6 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.2beta11    August 19, 2024
 - Version 5.8.2beta10    August 16, 2024
 - Version 5.8.2beta09    August 4, 2024
 - Version 5.8.2beta08    July 27, 2024
@@ -42,6 +43,11 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.2beta11 (August 19, 2024)
+
+Mbnavadjustmerge: Fixed the --reimport-all-files option so that large projects can be
+reimported with a single command. Added a --reimport-survey option.
 
 #### 5.8.2beta10 (August 16, 2024)
 
