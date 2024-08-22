@@ -1333,7 +1333,7 @@ int main(int argc, char **argv) {
       else if (strcmp("reimport-file", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
           int nscan;
-          if ((nscan = sscanf(optarg, "%d", &mods[num_mods].file1)) == 2) {
+          if ((nscan = sscanf(optarg, "%d", &mods[num_mods].file1)) == 1) {
             mods[num_mods].mode = MOD_MODE_REIMPORT_FILE;
             num_mods++;
           }
@@ -1345,7 +1345,7 @@ int main(int argc, char **argv) {
       else if (strcmp("reimport-survey", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
           int nscan;
-          if ((nscan = sscanf(optarg, "%d", &mods[num_mods].file1)) == 2) {
+          if ((nscan = sscanf(optarg, "%d", &mods[num_mods].file1)) == 1) {
             mods[num_mods].mode = MOD_MODE_REIMPORT_SURVEY;
             num_mods++;
           }
