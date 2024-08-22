@@ -5648,6 +5648,17 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
       int ofile_specified = MB_NO;
       mb_pr_get_ofile(verbose, project->files[ifile].path, &ofile_specified, ipath, error);
       if (ofile_specified == MB_YES) {
+        int len = 0;
+		if (strlen(ipath) > 0 && ipath[0] != '/' 
+			&& strrchr(project->files[ifile].path, '/') != NULL 
+			&& (len = strrchr(project->files[ifile].path, '/') - project->files[ifile].path + 1) > 1) {
+          mb_path tmpstr;
+		  strcpy(tmpstr, ipath);
+		  strncpy(ipath, project->files[ifile].path, len);
+		  ipath[len] = '\0';
+		  strcat(ipath, tmpstr);
+		}
+      	
         fstat = stat(ipath, &file_status);
         if (fstat != 0 || (file_status.st_mode & S_IFMT) == S_IFDIR) {
           ofile_specified = MB_NO;
@@ -5986,8 +5997,14 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
               		
           if (status == MB_SUCCESS) {
             /* write out the ping substituting the bathymetry arrays read from the current 
-               processed file for the arrays read from the existing section file */
+               processed file for the arrays read from the existing section file, but only
+               after correcting for any change in sensordepth between the original section
+               and the current processed data */
             if (fabs(stime_d - time_d) <= reimport_ping_maxtimediff) {
+              double sensordepthcorrection = ssensordepth - sensordepth;
+              for (int i = 0; i < beams_bath; i++) {
+                bath[i] += sensordepthcorrection;
+              }
 			  /* write out data */
 			  status = mb_put_all(verbose, ombio_ptr, sstore_ptr,
 					  true, MB_DATA_DATA, stime_i, stime_d, snavlon, snavlat,
@@ -6013,7 +6030,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
 			  status = mb_put_all(verbose, ombio_ptr, sstore_ptr,
 					  true, MB_DATA_DATA, stime_i, stime_d, snavlon, snavlat,
 					  sspeed, sheading, sbeams_bath, 0, 0,
-					  beamflag, bath, amp,
+					  sbeamflag, sbath, samp,
 					  sbathacrosstrack, sbathalongtrack,
 					  sss, sssacrosstrack, sssalongtrack, scomment, error);
 			  if (status == MB_SUCCESS) {
@@ -6064,7 +6081,6 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
 	
 	/* close the file that was reimported */
 	status = mb_close(verbose, &imbio_ptr, error);
-
 
 	if (verbose > 0) {
       mb_path message;
