@@ -2692,8 +2692,8 @@ int main(int argc, char** argv)
      *    --reference-exposure=exposure
      *    --reference-intensity=intensity
      *    --reference-crcb=intensity/intensity
-     *    --dark-images-ignore=threshold
-     *    --dark-images-multiply=threshold/factor
+     *    --dark-image-ignore=threshold
+     *    --dark-image-multiply=threshold/factor
      *    --platform-file=platform.plf
      *    --camera-sensor=camera_sensor_id
      *    --nav-sensor=nav_sensor_id
@@ -2747,8 +2747,8 @@ int main(int argc, char** argv)
         {"reference-exposure",          required_argument,      NULL,         0},
         {"reference-intensity",         required_argument,      NULL,         0},
         {"reference-crcb",              required_argument,      NULL,         0},
-        {"dark-image-ignore",          required_argument,       NULL,         0},
-        {"dark-image-multiply",        required_argument,       NULL,         0},
+        {"dark-image-ignore",           required_argument,       NULL,         0},
+        {"dark-image-multiply",         required_argument,       NULL,         0},
         {"platform-file",               required_argument,      NULL,         0},
         {"camera-sensor",               required_argument,      NULL,         0},
         {"nav-sensor",                  required_argument,      NULL,         0},
@@ -3964,7 +3964,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             /* dark-image-ignore */
             else if (strncmp(imageLeftFile, "--dark-image-ignore", 19) == 0)
                 {
-                int n = sscanf (imageLeftFile,"%lf", &control.dark_ignore_threshold);
+                int n = sscanf (imageLeftFile,"--dark-image-ignore=%lf", &control.dark_ignore_threshold);
                 if (n == 1 && control.dark_ignore_threshold > 0.0)
                     control.dark_ignore_set = true;
                 }
@@ -3972,7 +3972,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             /* dark-image-multiply */
             else if (strncmp(imageLeftFile, "--dark-image-multiply", 21) == 0)
                 {
-                int n = sscanf (imageLeftFile,"%lf/%lf", &control.dark_multiply_threshold, &control.dark_multiply_factor);
+                int n = sscanf (imageLeftFile,"--dark-image-multiply=%lf/%lf", &control.dark_multiply_threshold, &control.dark_multiply_factor);
                 if (n == 2 && control.dark_multiply_threshold > 0.0 && control.dark_multiply_factor > 0.0)
                     control.dark_multiply_set = true;
                 }
