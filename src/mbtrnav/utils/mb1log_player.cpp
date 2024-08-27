@@ -75,10 +75,14 @@
 
 typedef uint8_t byte;
 
+// TRN stream formatter function
+typedef void (*trnx_stream_fn)(std::ostream &os, poseT &pt, measT &mt);
+
 // /////////////////
 // Module variables
 static int g_signal=0;
 static bool g_interrupt=false;
+
 
 // /////////////////
 // Declarations
@@ -100,13 +104,13 @@ public:
     }OFlags;
 
    MB1LogConfig()
-    : mDebug(0), mVerbose(false), mHost("localhost"), mTrnCfg(), mPort(TRN_SERVER_PORT_DFL), mServer(false), mTrnInCsvEn(false), mTrnOutCsvEn(false), mTrnInCsvPath(), mTrnOutCsvPath(), mTrnSensor(TRN_SENSOR_MB), mOFlags(), mUtmZone(10), mBeams(0), mStep(false), mSwath(0.)
+    : mDebug(0), mVerbose(false), mHost("localhost"), mTrnCfg(), mPort(TRN_SERVER_PORT_DFL), mServer(false), mTrnInCsvEn(false), mTrnOutCsvEn(false), mTrnInCsvPath(), mTrnOutCsvPath(), mTrnSensor(TRN_SENSOR_MB), mOFlags(), mUtmZone(10), mBeams(0), mStep(false), mSwath(0.), mSkipRecs(0), mLimitRecs(0), mTrniFormat(0)
     {
 
     }
 
     MB1LogConfig(const MB1LogConfig &other)
-    : mDebug(other.mDebug), mVerbose(other.mVerbose), mHost(other.mHost), mTrnCfg(other.mTrnCfg), mPort(other.mPort), mServer(other.mServer),  mTrnInCsvEn(other.mTrnInCsvEn), mTrnOutCsvEn(other.mTrnOutCsvEn), mTrnInCsvPath(other.mTrnInCsvPath), mTrnOutCsvPath(other.mTrnOutCsvPath), mTrnSensor(other.mTrnSensor), mOFlags(other.mOFlags), mUtmZone(other.mUtmZone), mBeams(other.mBeams), mStep(other.mStep), mSwath(other.mSwath)
+    : mDebug(other.mDebug), mVerbose(other.mVerbose), mHost(other.mHost), mTrnCfg(other.mTrnCfg), mPort(other.mPort), mServer(other.mServer),  mTrnInCsvEn(other.mTrnInCsvEn), mTrnOutCsvEn(other.mTrnOutCsvEn), mTrnInCsvPath(other.mTrnInCsvPath), mTrnOutCsvPath(other.mTrnOutCsvPath), mTrnSensor(other.mTrnSensor), mOFlags(other.mOFlags), mUtmZone(other.mUtmZone), mBeams(other.mBeams), mStep(other.mStep), mSwath(other.mSwath), mSkipRecs(other.mSkipRecs), mLimitRecs(other.mLimitRecs), mTrniFormat(other.mTrniFormat)
     {
 
     }
@@ -129,6 +133,9 @@ public:
     uint32_t beams(){return mBeams;}
     bool step(){return mStep;}
     double swath(){return mSwath;}
+    uint32_t skip_recs(){return mSkipRecs;}
+    uint32_t lim_recs(){return mLimitRecs;}
+    unsigned int trni_format(){return mTrniFormat;}
 
     void set_server(bool enable){mServer = enable;}
     void set_trni_csv(bool enable){mTrnInCsvEn = enable;}
@@ -146,6 +153,9 @@ public:
     void set_beams(uint32_t beams){mBeams = beams;}
     void set_step(bool step){mStep = step;}
     void set_swath(double swath){mSwath = swath;}
+    void set_skip_recs(uint32_t skip_recs){mSkipRecs = skip_recs;}
+    void set_lim_recs(uint32_t lim){mLimitRecs = lim;}
+    void set_trni_format(unsigned int fmt){mTrniFormat = fmt;}
 
     void tostream(std::ostream &os, int wkey=15, int wval=18)
     {
@@ -172,6 +182,9 @@ public:
         os << std::setw(wkey) << "mSwath" << std::setw(wval) << mSwath << std::endl;
         os << std::setw(wkey) << "mOFlags" << std::hex << std::setw(wval) << (uint32_t)mOFlags.get() << std::endl;
         os << dec;
+        os << std::setw(wkey) << "mSkipRecs" << std::setw(wval) << mSkipRecs << std::endl;
+        os << std::setw(wkey) << "mLimitRecs" << std::setw(wval) << mLimitRecs << std::endl;
+        os << std::setw(wkey) << "mTrniFormat" << std::setw(wval) << mTrniFormat << std::endl;
     }
 
     std::string tostring(int wkey=15, int wval=18)
@@ -204,6 +217,9 @@ private:
     uint32_t mBeams;
     bool mStep;
     double mSwath;
+    uint32_t mSkipRecs;
+    uint32_t mLimitRecs;
+    unsigned int mTrniFormat;
 };
 
 class MLPStats
@@ -326,9 +342,19 @@ public:
 
         byte ibuf[MB1_MAX_SOUNDING_BYTES]={0};
 
+        uint32_t skip_records = 0;
+        uint32_t lim_records = 0;
+
         while (!mQuit && next_record(ibuf, MB1_MAX_SOUNDING_BYTES) == 0) {
 
+            if(mConfig.skip_recs() > 0 && skip_records++ < mConfig.skip_recs())
+                continue;
+
+
             this->stats().mRecordsFound++;
+
+            if(mConfig.lim_recs() > 0 && lim_records++ >= mConfig.lim_recs())
+                break;
 
             if(NULL!=quit && *quit)
                 break;
@@ -469,7 +495,69 @@ public:
 
 protected:
 
-    void trni_csv_tostream(std::ostream &os, poseT &pt, measT &mt)
+    static void trni_csv_tostream_rock(std::ostream &os, poseT &pt, measT &mt)
+    {
+        // Note that TRN uses N,E,D frame (i.e. N:x E:y D:z)
+        // no ping number
+        // pitch,roll =0
+        // v* 0.1
+
+        // [ 0] time POSIX epoch sec
+        // [ 2] northings
+        // [ 3] eastings
+        // [ 4] depth
+        // [ 5] heading
+        // [ 6] pitch
+        // [ 7] roll
+        // [ 8] flag (0)
+        // [ 9] flag (0)
+        // [10] flag (0)
+        // [11] vx (0)
+        // [12] xy (0)
+        // [13] vz (0)
+        // [14] sounding valid flag
+        // [15] bottom lock valid flag
+        // [16] number of beams
+        // beam[i] number
+        // beam[i] valid (1)
+        // beam[i] range
+        // ...
+        // NEWLINE
+
+        os << std::dec << std::setfill(' ') << std::fixed << std::setprecision(7);
+        os << pt.time << ",";
+        os << pt.x << ",";
+        os << pt.y << ",";
+        os << pt.z << ",";
+        os << pt.psi << ",";
+        os << 0 << ",";
+        os << 0 << ",";
+        os << 0 << ",";
+        os << 0 << ",";
+        os << 0 << ",";
+        os << (pt.vx == 0 ? 0.1 : pt.vx) << ",";
+        os << (pt.vy == 0 ? 0.1 : pt.vy) << ",";
+        os << (pt.vz == 0 ? 0.1 : pt.vz) << ",";
+        os << std::setprecision(1);
+        os << (pt.dvlValid?1:0) << ",";
+        os << (pt.bottomLock?1:0) << ",";
+        os << mt.numMeas << ",";
+        os << std::setprecision(6);
+        for(int i=0; i< mt.numMeas; i++)
+        {
+            os << mt.beamNums[i] << ",";
+            os << mt.measStatus[i] << ",";
+            os << mt.ranges[i] << ",";
+            os << mt.alongTrack[i] << ",";
+            os << mt.crossTrack[i] << ",";
+            os << mt.altitudes[i];
+            if(i != mt.numMeas-1)
+                os << ",";
+
+        }
+        os << "\n";
+    }
+    static void trni_csv_tostream_default(std::ostream &os, poseT &pt, measT &mt)
     {
         // Note that TRN uses N,E,D frame (i.e. N:x E:y D:z)
         // [ 0] time POSIX epoch sec
@@ -530,9 +618,16 @@ protected:
         os << "\n";
     }
 
+    void trni_csv_tostream(std::ostream &os, poseT &pt, measT &mt) 
+    {
+        int format = mConfig.trni_format() % mTrniFormatCount;
+        mTrniFormatList[format](os, pt, mt);
+    }
+
     std::string trni_csv_tostring(poseT &pt, measT &mt)
     {
         ostringstream ss;
+
         trni_csv_tostream(ss, pt, mt);
         return ss.str();
     }
@@ -965,7 +1060,7 @@ protected:
                     }
 
                 } else {
-                    fprintf(stderr, "could not read header bytes [%" PRId64 "/%" PRIu32 "]\n", rbytes, readlen);
+                    fprintf(stderr, "could not read header bytes [%" PRId64 "/%" PRIu32 "] [%d:%s]\n", rbytes, readlen, errno, strerror(errno));
                     ferr=true;
                 }
             }
@@ -973,18 +1068,20 @@ protected:
             if(g_interrupt)
                 ferr = true;
 
+            bool dflags[3] = {true,true,true};
             if (header_valid && ferr == false ) {
 
                 if(mb1->nbeams > 0){
                     // read beam data
                     byte *bp = (byte *)mb1->beams;
                     uint32_t readlen = MB1_BEAM_ARRAY_BYTES(mb1->nbeams);
+
                     if((rbytes = std::fread((void *)bp, 1, readlen, mFile)) == readlen){
 
                         TRN_NDPRINT(2, "beams read blen[%d/%" PRId64 "]\n", readlen, rbytes);
 
                     } else {
-                        TRN_NDPRINT(2, "beam read failed pb[%p] read[%" PRId64 "]\n", bp, rbytes);
+                        TRN_NDPRINT(2, "beam read failed pb[%p] read[%" PRId64 "] [%d:%s]\n", bp, rbytes,  errno, strerror(errno));
                     }
 
                 } else {
@@ -992,28 +1089,30 @@ protected:
                 }
 
                 byte *cp = (byte *)MB1_PCHECKSUM(mb1);
-
                 if((rbytes = std::fread((void *)cp, 1, MB1_CHECKSUM_BYTES, mFile)) == MB1_CHECKSUM_BYTES){
                     //                                    TRN_NDPRINT(2, "chksum read clen[%" PRId64 "]\n", rbytes);
                     //                                    TRN_NDPRINT(3, "  chksum [%0X]\n", pmessage->chksum);
 
                     if(mb1->nbeams <= 0 || mb1->nbeams > MB1_MAX_BEAMS)
                     {
-                        fprintf(stderr, "%s:%d ERR nbeams %d\n", __func__, __LINE__, mb1->nbeams);
+                        fprintf(stderr, "%s:%d ERR nbeams %d (ping %07d)\n", __func__, __LINE__, mb1->nbeams, mb1->ping_number);
                         data_valid = false;
+                        dflags[0] = false;
                     } else if(mb1->ts <= 0)
                     {
-                        fprintf(stderr, "%s:%d ERR time %.3lf\n", __func__, __LINE__, mb1->ts);
+                        fprintf(stderr, "%s:%d ERR time %.3lf (ping %07d)\n", __func__, __LINE__, mb1->ts, mb1->ping_number);
                         data_valid = false;
+                        dflags[1] = false;
                     } else if ((mb1->lat > -1. && mb1->lat < 1.)  || (mb1->lon > -1. && mb1->lon < 1.) || (mb1->depth > -1. && mb1->depth < 1.)) {
-                        fprintf(stderr, "%s:%d ERR lat,lon,depth [%.3lf, %.3lf, %.3lf]\n", __func__, __LINE__, mb1->lat, mb1->lon, mb1->depth);
+                        fprintf(stderr, "%s:%d ERR lat,lon,depth [%.3lf, %.3lf, %.3lf] (ping %07d)\n", __func__, __LINE__, mb1->lat, mb1->lon, mb1->depth, mb1->ping_number);
                         data_valid = false;
+                        dflags[2] = false;
                     }else {
                         rec_valid=true;
                     }
 
                 }else{
-                    TRN_DPRINT( "chksum read failed [%" PRId64 "]\n", rbytes);
+                    TRN_DPRINT( "chksum read failed [%" PRId64 "] [%d:%s]\n", rbytes, errno, strerror(errno));
                 }
 
             }else{
@@ -1025,7 +1124,6 @@ protected:
 
 
             if (rec_valid && ferr == false) {
-
                 // TODO : update stats?
                 stat = OK;
             } else {
@@ -1033,7 +1131,8 @@ protected:
                     stat = EEOF;
                     TRN_NDPRINT(2, "end of data file\n");
                 } else if(!data_valid) {
-                    fprintf(stderr,"%s:%d - ERR data invalid [%d:%s]\n",__func__, __LINE__, errno, strerror(errno));
+                    //fprintf(stderr,"%s:%d - ERR data invalid beams: %s time: %s lat/lon/depth: %s\n",__func__, __LINE__,  (dflags[0]?"OK":"ERR"), (dflags[1]?"OK":"ERR"), (dflags[2]?"OK":"ERR"));
+                    stat = OK;
                 } else {
                     stat = ERR;
                     fprintf(stderr,"%s:%d - ERR read failed [%d:%s]\n",__func__, __LINE__, errno, strerror(errno));
@@ -1196,10 +1295,23 @@ private:
     FILE *mTrnOutCsvFile;
     bool mQuit;
     MLPStats mStats;
+    static int mTrniFormatCount;
+    static trnx_stream_fn mTrniFormatList[];
 
 };
 
+// MB1LogPlayer static initializers
+int MB1LogPlayer::mTrniFormatCount=2;
 
+trnx_stream_fn MB1LogPlayer::mTrniFormatList[] = {
+    MB1LogPlayer::trni_csv_tostream_default,
+    MB1LogPlayer::trni_csv_tostream_rock
+};
+
+
+// application config
+// configures a MB1LogConfig instance used to
+// initialize the MB1LogPlayer instance
 class app_cfg
 {
 public:
@@ -1256,6 +1368,9 @@ public:
             {"beams", required_argument, NULL, 0},
             {"step", no_argument, NULL, 0},
             {"swath", required_argument, NULL, 0},
+            {"skip-recs", required_argument, NULL, 0},
+            {"lim-recs", required_argument, NULL, 0},
+            {"trni-fmt", required_argument, NULL, 0},
             {NULL, 0, NULL, 0}
         };
         // reset optind
@@ -1280,6 +1395,7 @@ public:
                     else if (strcmp("debug", options[option_index].name) == 0) {
                         if(sscanf(optarg,"%d",&mDebug) == 1)
                             mTBConfig.set_debug(mDebug);
+                        TRN_TRACE();
                     }
                     // help
                     else if (strcmp("help", options[option_index].name) == 0) {
@@ -1416,6 +1532,22 @@ public:
                             if(sscanf(optarg, "%lf", &swath_deg) == 1)
                             mTBConfig.set_swath(swath_deg);
                         }
+                        // skip-recs
+                        else if (strcmp("skip-recs", options[option_index].name) == 0) {
+                            uint32_t u32val =0;
+                            if(sscanf(optarg, "%" PRIu32 "", &u32val) == 1)
+                            mTBConfig.set_skip_recs(u32val);
+                        }
+                        else if (strcmp("lim-recs", options[option_index].name) == 0) {
+                            uint32_t u32val =0;
+                            if(sscanf(optarg, "%" PRIu32 "", &u32val) == 1)
+                            mTBConfig.set_lim_recs(u32val);
+                        }
+                        else if (strcmp("trni-fmt", options[option_index].name) == 0) {
+                            uint32_t u32val = 0;
+                            if(sscanf(optarg, "%" PRIu32 "", &u32val) == 1)
+                            mTBConfig.set_trni_format(u32val);
+                        }
                     }
                     break;
                 default:
@@ -1463,10 +1595,15 @@ public:
         "                           ocsv     : TRN output csv          (pose, mmse, ofs, cov, mle)\n"
         "                           *csv     : TRN input and output csv\n"
         " --trni-csv=s           : write TRN inputs to CSV file\n"
+        " --trni-fmt=d           : TRN input CSV format\n"
+        "                          0: default\n"
+        "                          1: no ping number, pitch,roll=0\n"
         " --trno-csv=s           : write TRN outputs (estimates) to CSV file\n"
         " --server               : enable output to server\n"
         " --noserver             : disable output to server\n"
         " --step                 : step through entries\n"
+        " --skip-recs            : skip records\n"
+        " --lim-recs             : number of records to process\n"
         " Notes:\n"
         "  [1] beams option\n"
         "      unset : beams_out = input source beams\n"
@@ -1663,7 +1800,7 @@ public:
         }
     }
 
-    const MB1LogConfig &tb_config()
+    MB1LogConfig &tb_config()
     {
         return mTBConfig;
     }
@@ -1751,6 +1888,8 @@ int main(int argc, char **argv)
 
     TRN_NDPRINT(1,"session [%s]\n",cfg.session_string().c_str());
     TRN_NDPRINT(1,"session env[%s]\n",getenv("TLP_SESSION"));
+
+    cfg.show_tb_config();
 
     // get log player
     MB1LogPlayer tbplayer(cfg.tb_config());
