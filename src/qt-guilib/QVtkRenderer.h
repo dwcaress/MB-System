@@ -180,6 +180,7 @@ namespace mb_system {
     /// VTK render window
     vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWindow_;
 
+
     /// VTK mouse/key interactor
     vtkSmartPointer<vtkGenericRenderWindowInteractor> windowInteractor_;
 
