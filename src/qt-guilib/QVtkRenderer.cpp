@@ -73,7 +73,7 @@ void QVtkRenderer::render() {
 
   renderWindow_->PushState(); 
   
-  renderWindow_->OpenGLInitState();
+  /// renderWindow_->OpenGLInitState();
   bool show = displayProperties_->showAxes();
   
   axesActor_->SetVisibility(displayProperties_->showAxes());
@@ -90,9 +90,11 @@ void QVtkRenderer::render() {
   if (wheelEvent_ && !wheelEvent_->isAccepted()) {
     qDebug() << "render(): handle wheelEvent";
     if (wheelEvent_->angleDelta().y() > 0) {
+      qDebug() << "forwardWheel";
       windowInteractor_->InvokeEvent(vtkCommand::MouseWheelForwardEvent);
     }
     else {
+      qDebug() << "backwardWheel";      
       windowInteractor_->InvokeEvent(vtkCommand::MouseWheelBackwardEvent);
     }
     wheelEvent_->accept();
@@ -268,6 +270,8 @@ void QVtkRenderer::synchronize(QQuickFramebufferObject *item) {
 
 bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   qDebug() << "QVtkRenderer::initializePipeline() " << gridFilename;
+  
+  item_->window()->beginExternalCommands();
 
   // Colors for axes
   namedColors_ = vtkSmartPointer<vtkNamedColors>::New();
@@ -299,8 +303,11 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
 
   // Create vtk renderWindow
   qDebug() << "create renderWindow";
+
   renderWindow_ =
     vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+
+  renderWindow_->OpenGLInitState();
 
   // Create vtk windowInteractor
   qDebug() << "create windowInteractor";
@@ -322,6 +329,8 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
                              this, &QVtkRenderer::makeCurrentCallback);
 
   firstRender_ = true;
+
+  item_->window()->beginExternalCommands();
   
   return assemblePipeline();
 }
@@ -444,6 +453,7 @@ bool QVtkRenderer::assemblePipeline() {
   
   qDebug() << "renderer_ has " << renderer_->GetActors()->GetNumberOfItems() << " actors";
 
+  // Read grid bounds
   double gridBounds[6];
   gridReader_->gridBounds(&gridBounds[0], &gridBounds[1],
                           &gridBounds[2], &gridBounds[3],
@@ -633,7 +643,7 @@ void QVtkRenderer::handleFileLoaded() {
 
   // Initialize the OpenGL context for the renderer
   qDebug() << "initialize OpenGL context for renderer";
-  renderWindow_->OpenGLInitContext();
+  /// renderWindow_->OpenGLInitContext();
   
   qDebug() << "handleFileLoaded(): change busy state to false";
   item_->setAppBusy(false);
