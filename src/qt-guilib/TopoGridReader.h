@@ -2,7 +2,6 @@
 #define TopoGridReader_h
 
 #include "vtkAbstractPolyDataReader.h"
-#include "vtkPolyData.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkSmartPointer.h"
@@ -39,9 +38,9 @@ namespace mb_system {
     }
   
     /// Set grid file name
-    virtual void SetFileName(
-                             const char *fileName ///< [in] grid file name
-                             ) override;
+    void SetFileName(
+		     const char *fileName ///< [in] grid file name
+		     ) override;
 
     /// Return pointer to gridPoints
     vtkPoints *gridPoints() { return gridPoints_; }
