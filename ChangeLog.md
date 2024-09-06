@@ -22,6 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.2beta14    September 6, 2024
 - Version 5.8.2beta13    August 23, 2024
 - Version 5.8.2beta12    August 22, 2024
 - Version 5.8.2beta11    August 19, 2024
@@ -45,6 +46,16 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.2beta14 (August 23, 2024)
+
+Mbphotomosaic: Removed unnecessary --correction-file-color option (redundant with --correction-file)
+
+mbm_grdplot: Fixed -G7 option for plotting images with geodetics defined in world files 
+rather than embedded as in GeoTiffs. Specifically allows use of png images with transparency.
+
+Formats 232 (MBF_WISSLR) and 233 (MBF_WISSLP): Fixed initial beam flagging by mbpreprocess
+for secondary sounding picks (when the lidar was operated in multipick mode)
 
 #### 5.8.2beta13 (August 23, 2024)
 
