@@ -129,7 +129,6 @@ char usage_message[] = "mbphotomosaic \n"
                         "\t--correction-range=target/coeff\n"
                         "\t--correction-standoff=target/coeff\n"
                         "\t--correction-file=imagecorrection.yaml\n"
-                        "\t--correction-file-color\n"
                         "\t--reference-gain=gain\n"
                         "\t--reference-exposure=exposure\n"
                         "\t--reference-intensity=intensity\n"
@@ -2687,7 +2686,6 @@ int main(int argc, char** argv)
      *    --correction-range=target/coeff
      *    --correction-standoff=target/coeff
      *    --correction-file=imagecorrection.yaml
-     *    --correction-file-color
      *    --reference-gain=gain
      *    --reference-exposure=exposure
      *    --reference-intensity=intensity
@@ -2742,7 +2740,6 @@ int main(int argc, char** argv)
         {"correction-range",            required_argument,      NULL,         0},
         {"correction-standoff",         required_argument,      NULL,         0},
         {"correction-file",             required_argument,      NULL,         0},
-        {"correction-file-color",       no_argument,            NULL,         0},
         {"reference-gain",              required_argument,      NULL,         0},
         {"reference-exposure",          required_argument,      NULL,         0},
         {"reference-intensity",         required_argument,      NULL,         0},
@@ -3022,12 +3019,6 @@ int main(int argc, char** argv)
                     }
                 }
 
-            /* correction-file-color */
-            else if (strcmp("correction-file-color", options[option_index].name) == 0)
-                {
-                control.corr_color_enabled = true;
-                }
-
             /* reference-gain */
             else if (strcmp("reference-gain", options[option_index].name) == 0)
                 {
@@ -3303,7 +3294,6 @@ int main(int argc, char** argv)
         else if (control.corr_mode == MBPM_CORRECTION_FILE) {
             fprintf(stream,"%s     control.corr_mode:                %d MBPM_CORRECTION_FILE\n", first, control.corr_mode);
             fprintf(stream,"%s     ImageCorrectionFile:              %s\n", first, ImageCorrectionFile);
-            fprintf(stream,"%s     control.corr_color_enabled:       %d\n", first, control.corr_color_enabled);
         }
         else {
             fprintf(stream,"%s     control.corr_mode:                %d MBPM_CORRECTION_NONE\n", first, control.corr_mode);
@@ -3667,6 +3657,10 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
         fprintf(stream,"  control.OutputDx[1]: dy:             %.9f\n",control.OutputDx[1]);
         fprintf(stream,"  control.OutputDim[0]: xdim:          %d\n",control.OutputDim[0]);
         fprintf(stream,"  control.OutputDim[1]: ydim:          %d\n",control.OutputDim[1]);
+        fprintf(stream,"  pbounds[0]: west:                    %.9f\n",pbounds[0]);
+        fprintf(stream,"  pbounds[1]: east:                    %.9f\n",pbounds[1]);
+        fprintf(stream,"  pbounds[2]: south:                   %.9f\n",pbounds[2]);
+        fprintf(stream,"  pbounds[3]: north:                   %.9f\n",pbounds[3]);
         }
 
     /* If output file specified then create an an output image and priority map
@@ -3898,11 +3892,6 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
                     correction_specified = true;
                     control.corr_mode = MBPM_CORRECTION_FILE;
                 }
-            }
-
-            /* correction-file-color */
-            else if (strncmp(imageLeftFile, "--correction-file-color", 23) == 0) {
-                control.corr_color_enabled = true;
             }
 
             /* reference-gain */
