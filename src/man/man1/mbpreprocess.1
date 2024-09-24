@@ -1,4 +1,4 @@
-.TH mbpreprocess 1 "5 November 2022" "MB-System 5.0" "MB-System 5.0"
+.TH mbpreprocess 1 "2 August 2024" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbpreprocess\fP \- performs preprocessing of swath sonar data as part of setting
 up an MB-System processing structure for a dataset.
@@ -873,6 +873,12 @@ This option causes heave values to be moved to the sonardepth (sometimes sensord
 field, leaving the heave value as zero, for each survey ping. This is currently
 only relevant to the preprocessing of Imagenex DeltaT multibeam data in the vendor
 83P format (191). The output of preprocessing format 191 data are format 192 files.
+.TP
+.B --kluge-early-mbari-mapping-auv
+This option pertains only to Reson 7125 200 kHz multibeam data collected on the first
+MBARI Mapping AUV from 2006 through 2009. Invoking this kluge triggers \fBmbpreprocess\fP
+to modify the beam quality factors to be consistent with the later (>2009) standard for
+the original bathymetry records in Reson s7k format data.
 
 .SH EXAMPLES
 To be written.....

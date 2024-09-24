@@ -1213,7 +1213,7 @@ int main(int argc, char **argv) {
 					channel->sonarDepth = 0; /* 136-139 : Depth in Millimeters (if not = 0)
                                   *           See Validity Flag (bytes 30-31). */
 					channel->sampleFreq = 0;       /* 140-141 : alias Frequency (sample frequency / 2) */
-					channel->pulseID = s7ksegyheader->pulseID;           /* 142-143 : Unique pulse identifier */
+					channel->pulseID = s7kssheader->pulseID;           /* 142-143 : Unique pulse identifier */
 					channel->sonarAltitude = 0;           /* 144-147 : Altitude in Millimeters
                                   *           A zero implies not filled. See Validity Flag (bytes 30-31) */
 					channel->soundspeed = 0.0;            /* 148-151 : Sound Speed in Meters per Second.
@@ -1265,7 +1265,7 @@ int main(int argc, char **argv) {
 					for (int i = 0; i < 6; i++)
 						channel->softwareVersion[i] = 0; /* 210-215 : Software version number */
 					/* Following items are not in X-Star */
-					channel->sphericalCorrection = s7ksegyheader->sphericalCorrection;
+					channel->sphericalCorrection = 0;
 												/* 216-219 : Initial spherical correction factor (useful for multiping /*/
 					                            /* deep application) * 100 */
 					channel->packetNum = s7kssheader->packetNum; /* 220-221 : Packet number (1 - N) (Each ping starts with packet 1) */
@@ -1481,7 +1481,7 @@ int main(int argc, char **argv) {
 					channel->sonarDepth = 0; /* 136-139 : Depth in Millimeters (if not = 0)
                                   *           See Validity Flag (bytes 30-31). */
 					channel->sampleFreq = 0;       /* 140-141 : alias Frequency (sample frequency / 2) */
-					channel->pulseID = s7ksegyheader->pulseID;           /* 142-143 : Unique pulse identifier */
+					channel->pulseID = s7kssheader->pulseID;           /* 142-143 : Unique pulse identifier */
 					channel->sonarAltitude = 0;           /* 144-147 : Altitude in Millimeters
                                   *           A zero implies not filled. See Validity Flag (bytes 30-31) */
 					channel->soundspeed = 0.0;            /* 148-151 : Sound Speed in Meters per Second.
@@ -1533,7 +1533,7 @@ int main(int argc, char **argv) {
 					for (int i = 0; i < 6; i++)
 						channel->softwareVersion[i] = 0; /* 210-215 : Software version number */
 					/* Following items are not in X-Star */
-					channel->sphericalCorrection = s7ksegyheader->sphericalCorrection;
+					channel->sphericalCorrection = 0;
 												/* 216-219 : Initial spherical correction factor (useful for multiping /*/
 					                            /* deep application) * 100 */
 					channel->packetNum = s7kssheader->packetNum; /* 220-221 : Packet number (1 - N) (Each ping starts with packet 1) */

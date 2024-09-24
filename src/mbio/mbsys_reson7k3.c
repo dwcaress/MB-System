@@ -1188,7 +1188,7 @@ int mbsys_reson7k3_print_Attitude(int verbose, s7k3_Attitude *Attitude, int *err
   fprintf(stderr, "%s     n:                          %d\n", first, Attitude->n);
   fprintf(stderr, "%s     nalloc:                     %d\n", first, Attitude->nalloc);
   for (int i = 0; i < Attitude->n; i++)
-    fprintf(stderr, "%s     i:%d delta_time:%d roll:%f pitch:%f heading:%f heave:%f\n", first, i, Attitude->delta_time[i],
+    fprintf(stderr, "%s     i:%d delta_time:%d roll:%f pitch:%f heave:%f heading:%f\n", first, i, Attitude->delta_time[i],
             Attitude->roll[i], Attitude->pitch[i], Attitude->heave[i], Attitude->heading[i]);
 
   const int status = MB_SUCCESS;
@@ -7895,7 +7895,7 @@ int mbsys_reson7k3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
     // loop over available data, up to the max that can be stored
     for (int inav = 0; inav < MIN(nmax, *n); inav++) {
       // get time - note time_i is dimensioned time_i[7*nmax]
-      time_d[inav] = store->time_d + Attitude->delta_time[inav];
+      time_d[inav] = store->time_d + 0.001 * Attitude->delta_time[inav];
       mb_get_date(verbose, time_d[inav], &time_i[7*inav]);
 
       // get attitude from the Attitude record

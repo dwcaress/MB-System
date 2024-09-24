@@ -2881,9 +2881,11 @@ int mbnavadjust_naverr_addtie() {
       }
 
       /* add info text */
-      snprintf(message, sizeof(message), "Add Tie Point %d of Crossing %d\n > Nav points: %d:%d:%d %d:%d:%d\n > Offsets: %f %f %f m\n",
-              mbna_current_tie, mbna_current_crossing, crossing->file_id_1, crossing->section_1, tie->snav_1,
-              crossing->file_id_2, crossing->section_2, tie->snav_2, tie->offset_x_m, tie->offset_y_m, tie->offset_z_m);
+      snprintf(message, sizeof(message), "Add Tie Point %d of Crossing %d\n > Nav points: %2.2d:%4.4d:%2.2d:%2.2d %2.2d:%4.4d:%2.2d:%2.2d\n > Offsets: %f %f %f m\n",
+              mbna_current_tie, mbna_current_crossing, 
+              project.files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1, tie->snav_1,
+              project.files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2, tie->snav_2, 
+              tie->offset_x_m, tie->offset_y_m, tie->offset_z_m);
       if (mbna_verbose == 0)
         fprintf(stderr, "%s", message);
       do_info_add(message, true);
@@ -14899,7 +14901,7 @@ int mbnavadjust_modelplot_plot_tieoffsets() {
       mbna_modelplot_yxmid = 0.5 * (lon_offset_max + lon_offset_min);
       mbna_modelplot_yymid = 0.5 * (lat_offset_max + lat_offset_min);
       mbna_modelplot_yzmid = 0.5 * (z_offset_max + z_offset_min);
-      mbna_modelplot_xscale = ((double)plot_width) / (mbna_modelplot_tieend - mbna_modelplot_tiestart);
+      mbna_modelplot_xscale = ((double)plot_width) / (mbna_modelplot_tieend - mbna_modelplot_tiestart + 1);
       mbna_modelplot_yscale = ((double)plot_height) / (yrange);
       mbna_modelplot_yzscale = ((double)plot_height) / (yzrange);
 
@@ -15317,7 +15319,7 @@ int mbnavadjust_modelplot_plot_tieoffsets() {
       mbna_modelplot_yxmid = 0.5 * (lon_offset_max + lon_offset_min);
       mbna_modelplot_yymid = 0.5 * (lat_offset_max + lat_offset_min);
       mbna_modelplot_yzmid = 0.5 * (z_offset_max + z_offset_min);
-      mbna_modelplot_xscale = ((double)plot_width) / (mbna_modelplot_tieend - mbna_modelplot_tiestart);
+      mbna_modelplot_xscale = ((double)plot_width) / (mbna_modelplot_tieend - mbna_modelplot_tiestart + 1);
       mbna_modelplot_yscale = ((double)plot_height) / (yrange);
       mbna_modelplot_yzscale = ((double)plot_height) / (yzrange);
       /*
@@ -15512,7 +15514,7 @@ int mbnavadjust_modelplot_plot_tieoffsets() {
                   pixel = pixel_values[BLUE];
 
                 ix = mbna_modelplot_xo +
-                     (int)(mbna_modelplot_xscale * (tie->isurveyplotindex - mbna_modelplot_tiestart + 1));
+                     (int)(mbna_modelplot_xscale * (tie->isurveyplotindex - mbna_modelplot_tiestart + 0.5));
 
                 iy = mbna_modelplot_yo_lon - (int)(mbna_modelplot_yscale * (tie->offset_x_m - mbna_modelplot_yxmid));
                 if (i == mbna_current_crossing && j == mbna_current_tie) {
@@ -15578,7 +15580,7 @@ int mbnavadjust_modelplot_plot_tieoffsets() {
                       pixel = pixel_values[BLUE];
 
                     ix = mbna_modelplot_xo +
-                         (int)(mbna_modelplot_xscale * (tie->isurveyplotindex - mbna_modelplot_tiestart + 1));
+                         (int)(mbna_modelplot_xscale * (tie->isurveyplotindex - mbna_modelplot_tiestart + 0.5));
 
                     iy = mbna_modelplot_yo_lon - (int)(mbna_modelplot_yscale * (tie->offset_x_m - mbna_modelplot_yxmid));
                     if (i == mbna_current_crossing && j == mbna_current_tie) {
@@ -15641,7 +15643,7 @@ int mbnavadjust_modelplot_plot_tieoffsets() {
                   mbna_modelplot_tiestart;
         itieend = MIN(MAX(itieend, 0), mbna_num_ties_plot - 1);
 
-        ix = mbna_modelplot_xo + (int)(mbna_modelplot_xscale * (itiestart - mbna_modelplot_tiestart + 1));
+        ix = mbna_modelplot_xo + (int)(mbna_modelplot_xscale * (itiestart - mbna_modelplot_tiestart + 0.5));
         xg_drawline(pmodp_xgid, ix, mbna_modelplot_yo_lon - plot_height / 2, ix, mbna_modelplot_yo_lon + plot_height / 2,
                     pixel_values[mbna_color_foreground], XG_DASHLINE);
         xg_drawline(pmodp_xgid, ix, mbna_modelplot_yo_lat - plot_height / 2, ix, mbna_modelplot_yo_lat + plot_height / 2,
@@ -15649,7 +15651,7 @@ int mbnavadjust_modelplot_plot_tieoffsets() {
         xg_drawline(pmodp_xgid, ix, mbna_modelplot_yo_z - plot_height / 2, ix, mbna_modelplot_yo_z + plot_height / 2,
                     pixel_values[mbna_color_foreground], XG_DASHLINE);
 
-        ix = mbna_modelplot_xo + (int)(mbna_modelplot_xscale * (itieend - mbna_modelplot_tiestart + 1));
+        ix = mbna_modelplot_xo + (int)(mbna_modelplot_xscale * (itieend - mbna_modelplot_tiestart + 0.5));
         xg_drawline(pmodp_xgid, ix, mbna_modelplot_yo_lon - plot_height / 2, ix, mbna_modelplot_yo_lon + plot_height / 2,
                     pixel_values[mbna_color_foreground], XG_DASHLINE);
         xg_drawline(pmodp_xgid, ix, mbna_modelplot_yo_lat - plot_height / 2, ix, mbna_modelplot_yo_lat + plot_height / 2,
@@ -15685,8 +15687,9 @@ int mbnavadjust_open_visualization(int which_grid) {
 
   int status = MB_SUCCESS;
   size_t instance;
-  int projectionid, utmzone;
-  double reference_lon;
+  int projectionid;
+  double lon_origin;
+  double lat_origin;
 
   /* mbview parameters */
   mb_pathplus mbv_file_name;
@@ -15903,18 +15906,12 @@ int mbnavadjust_open_visualization(int which_grid) {
         snprintf(mbv_display_projection_id, sizeof(mbv_display_projection_id), "SPHEROID");
       }
 
-      /* else if grid geographic then use appropriate UTM zone for non-polar grids */
+      /* else if grid geographic and non-polar then use LTM projection */
       else if (mbv_primary_ymax > -80.0 && mbv_primary_ymin < 84.0) {
         mbv_display_projection_mode = MBV_PROJECTION_PROJECTED;
-        reference_lon = 0.5 * (mbv_primary_xmin + mbv_primary_xmax);
-        if (reference_lon > 180.0)
-          reference_lon -= 360.0;
-        utmzone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
-        if (0.5 * (mbv_primary_ymin + mbv_primary_ymax) >= 0.0)
-          projectionid = 32600 + utmzone;
-        else
-          projectionid = 32700 + utmzone;
-        snprintf(mbv_display_projection_id, sizeof(mbv_display_projection_id), "EPSG:%d", projectionid);
+        lon_origin = 0.5 * (mbv_primary_xmin + mbv_primary_xmax);
+        lat_origin = 0.5 * (mbv_primary_ymin + mbv_primary_ymax);
+        snprintf(mbv_display_projection_id, sizeof(mbv_display_projection_id), "LTM%.5f/%.5f", lon_origin, lat_origin);
       }
 
       /* else if grid geographic and more northerly than 84 deg N then use
@@ -16377,7 +16374,9 @@ int mbnavadjust_visualization_selectcrossingfromroute(int icrossing, int itie) {
   /* load the crossing */
   if (mbna_current_crossing >= 0) {
     /* put up message */
-    snprintf(message, sizeof(message), "Loading crossing %d...", mbna_current_crossing);
+    snprintf(message, sizeof(message), "Loading crossing %d  %2.2d:%4.4d:%2.2d %2.2d:%4.4d:%2.2d...", 
+    			mbna_current_crossing, project.files[mbna_file_id_1].block, mbna_file_id_1, mbna_section_1, 
+    			project.files[mbna_file_id_2].block, mbna_file_id_2, mbna_section_2);
     do_message_on(message);
 
     mbnavadjust_crossing_load();

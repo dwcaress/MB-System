@@ -3092,8 +3092,15 @@ void do_mbview_set_projection_label(size_t instance) {
 	else if (data->display_projection_mode == MBV_PROJECTION_PROJECTED ||
 	         data->display_projection_mode == MBV_PROJECTION_ALREADYPROJECTED) {
 		int projectionid;
+		double lon_origin;
+		double lat_origin;
 		char tmptext[MB_PATH_MAXLINE*2];
-		if (sscanf(data->display_projection_id, "epsg%d", &projectionid) == 1 && projectionid == 32661) {
+		if (sscanf(data->display_projection_id, "LTM%lf/%lf", &lon_origin, &lat_origin) == 2) {
+			sprintf(tmptext, ":t\"  Projected: %s\":t\"    Local Transverse Mercator with origin %.5f %.5f\"", 
+								data->secondary_grid_projection_id, lon_origin, lat_origin);
+			strcat(value_text, tmptext);
+		}
+		else if (sscanf(data->display_projection_id, "epsg%d", &projectionid) == 1 && projectionid == 32661) {
 			sprintf(tmptext, ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->secondary_grid_projection_id);
 			strcat(value_text, tmptext);
 		}
@@ -3250,7 +3257,7 @@ void do_mbview_display_utm(Widget w, XtPointer client_data, XtPointer call_data)
 	double reference_lat;
 
 	Arg args[256];
-  Cardinal ac = 0;
+  	Cardinal ac = 0;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
 	XtGetValues(w, args, ac);
@@ -3278,6 +3285,54 @@ void do_mbview_display_utm(Widget w, XtPointer client_data, XtPointer call_data)
 		else
 			projectionid = 32700 + utmzone;
 		sprintf(data->display_projection_id, "EPSG:%d", projectionid);
+
+		/* set label */
+		do_mbview_set_projection_label(instance);
+
+		/* clear zscale for grid */
+		mbview_zscaleclear(instance);
+
+		/* project and scale data other than the grid */
+		mbview_zscale(instance);
+
+		/* draw */
+		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_display_utm\n");
+		mbview_plotlowhigh(instance);
+	}
+}
+
+/*------------------------------------------------------------------------------*/
+void do_mbview_display_ltm(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	size_t instance;
+	double lon_origin;
+	double lat_origin;
+
+	Arg args[256];
+  	Cardinal ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
+	ac++;
+	XtGetValues(w, args, ac);
+
+	fprintf(stderr, "do_mbview_display_ltm: instance:%zu\n", instance);
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+	/* reproject as LTM if the togglebutton has been set */
+	if (XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_utm)) {
+		data->display_projection_mode = MBV_PROJECTION_PROJECTED;
+		view->plot_done = false;
+		view->projected = false;
+		view->globalprojected = false;
+		view->viewboundscount = MBV_BOUNDSFREQUENCY;
+
+		mbview_projectgrid2ll(instance, 0.5 * (data->primary_xmin + data->primary_xmax),
+		                      0.5 * (data->primary_ymin + data->primary_ymax), &lon_origin, &lat_origin);
+		if (lon_origin > 180.0)
+			lon_origin -= 360.0;
+		sprintf(data->display_projection_id, "LTM%.5f/%.5f", lon_origin, lat_origin);
 
 		/* set label */
 		do_mbview_set_projection_label(instance);

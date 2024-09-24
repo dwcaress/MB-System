@@ -109,6 +109,9 @@ typedef struct app_cfg_s{
     msock_socket_t *cli;
     char *host;
     int port;
+#ifdef TRN_USE_PROJ
+    char *crs;
+#endif
     char *map;
     char *cfg;
     char *particles;
@@ -140,6 +143,9 @@ static void s_show_help()
     "--help         : output help message\n"
     "--version      : output version info\n"
     "--host=ip:n    : TRN server host:port\n"
+#ifdef TRN_USE_PROJ
+    "--crs=s        : CRS (Coordinate Reference System) used for map [*]\n"
+#endif
     "--map=s        : map file/directory [*]\n"
     "--cfg=s        : config file        [*]\n"
     "--particles=s  : particles file     [*]\n"
@@ -171,6 +177,9 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"help", no_argument, NULL, 0},
         {"version", no_argument, NULL, 0},
         {"host", required_argument, NULL, 0},
+#ifdef TRN_USE_PROJ
+        {"crs", required_argument, NULL, 0},
+#endif
         {"map", required_argument, NULL, 0},
         {"cfg", required_argument, NULL, 0},
         {"particles", required_argument, NULL, 0},
@@ -215,6 +224,13 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                         free(hsave);
                     }
                 }
+#ifdef TRN_USE_PROJ
+                // crs
+                else if (strcmp("crs", options[option_index].name) == 0) {
+                    if(NULL!=cfg->crs)free(cfg->crs);
+                    cfg->crs=(NULL==optarg?NULL:strdup(optarg));
+                }
+#endif
                 // map
                 else if (strcmp("map", options[option_index].name) == 0) {
                     if(NULL!=cfg->map)free(cfg->map);
@@ -255,10 +271,13 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
     fprintf(stderr,"verbose   [%d]\n",cfg->verbose);
     fprintf(stderr,"host      [%s]\n",cfg->host);
     fprintf(stderr,"port      [%d]\n",cfg->port);
+#ifdef TRN_USE_PROJ
+    fprintf(stderr,"crs       [%s]\n",cfg->crs);
+#endif
     fprintf(stderr,"map       [%s]\n",cfg->map);
     fprintf(stderr,"cfg       [%s]\n",cfg->cfg);
-    fprintf(stderr,"particles [%s]\n",cfg->map);
-    fprintf(stderr,"logdir    [%s]\n",cfg->map);
+    fprintf(stderr,"particles [%s]\n",cfg->particles);
+    fprintf(stderr,"logdir    [%s]\n",cfg->logdir);
 
 }
 // End function parse_args
@@ -482,7 +501,11 @@ static int s_app_main(app_cfg_t *cfg)
 
         trn_config_t *trn_cfg = trncfg_new(cfg->host,
                                            cfg->port,
+#ifdef TRN_USE_PROJ
+                                           cfg->crs,
+#else
                                            10L,
+#endif
                                            TRN_SENSOR_MB,
                                            TRN_MAP_BO,
                                            TRN_FILT_PARTICLE,
@@ -565,6 +588,9 @@ int main(int argc, char **argv)
 //    msock_socket_t *cli;
 //    char *host;
 //    int port;
+#ifdef TRN_USE_PROJ
+//    char *crs;
+#endif
 //    char *map;
 //    char *cfg;
 //    char *particles;
@@ -581,6 +607,9 @@ int main(int argc, char **argv)
         NULL,
         NULL,
         NULL,
+#ifdef TRN_USE_PROJ
+        NULL,
+#endif
         strdup("logs")
     };
     app_cfg_t *cfg = &cfg_s;
@@ -590,6 +619,9 @@ int main(int argc, char **argv)
         parse_args(argc,argv,cfg);
         s_app_main(cfg);
         if(NULL!=cfg->host)free(cfg->host);
+#ifdef TRN_USE_PROJ
+        if(NULL!=cfg->crs)free(cfg->crs);
+#endif
         if(NULL!=cfg->map)free(cfg->map);
         if(NULL!=cfg->cfg)free(cfg->cfg);
         if(NULL!=cfg->particles)free(cfg->particles);

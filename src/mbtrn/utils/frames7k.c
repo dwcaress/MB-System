@@ -123,6 +123,9 @@ typedef struct app_cfg_s{
     /// @var app_cfg_s::host
     /// @brief hostname
     char *host;
+    /// @var app_cfg_s::port
+    /// @brief S7K IP port
+    int port;
     /// @var app_cfg_s::cycles
     /// @brief number of cycles (<=0 : unlimited)
     int cycles;
@@ -157,11 +160,14 @@ static void s_show_help()
     char help_message[] = "\n Stream reson data frames to console\n";
     char usage_message[] = "\n frames7k [options]\n"
     " Options :\n"
-    "  --verbose=n : verbose output\n"
-    "  --host      : reson host name or IP address\n"
-    "  --cycles    : number of cycles (dfl 0 - until CTRL-C)\n"
-    "  --size      : reader capacity (bytes)\n"
-    "  --dev=s     : device  [e.g. T50, 7125_400]\n"
+    "  --verbose=<n>     : verbose output\n"
+    "  --host=<s>[:port] : reson host name or IP address and port\n"
+    "  --cycles=<n>      : number of cycles (dfl 0 - until CTRL-C)\n"
+    "  --dev=<s>         : device [e.g. T50, 7125_400]; options:\n"
+    "                       7125_400 : Reson 7125 400 kHz (default)"
+    "                       7125_200 : Reson 7125 200 kHz"
+    "                            T50 : Reson T50"
+    "  --size=<n>        : reader capacity (bytes)\n"
     "\n";
     printf("%s",help_message);
     printf("%s",usage_message);
@@ -213,7 +219,14 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 
                 // host
                 else if (strcmp("host", options[option_index].name) == 0) {
-                    cfg->host=strdup(optarg);
+                    char *ocopy = strdup(optarg);
+                    char *host_tok = strtok(ocopy,":");
+                    char *port_tok = strtok(NULL,":");
+                    if(host_tok != NULL)
+                        cfg->host=strdup(host_tok);
+                    if(port_tok != NULL)
+                        sscanf(port_tok, "%d", &cfg->port);
+                    free(ocopy);
                 }
                 // cycles
                 else if (strcmp("cycles", options[option_index].name) == 0) {
@@ -375,8 +388,9 @@ static int s_app_main (app_cfg_t *cfg)
         
         // initialize reader
         // create and open socket connection
-        r7kr_reader_t *reader = r7kr_reader_new(cfg->dev, cfg->host,R7K_7KCENTER_PORT,cfg->size, subs, nsubs);
-        
+        MX_LPRINT(FRAMES7K, 1, "connecting host[%s:%d] dev[%d]\n", cfg->host, cfg->port, cfg->dev);
+        r7kr_reader_t *reader = r7kr_reader_new(cfg->dev, cfg->host, cfg->port, cfg->size, subs, nsubs);
+
         // show reader config
         if (cfg->verbose>1) {
             r7kr_reader_show(reader,true, 5);
@@ -386,8 +400,8 @@ static int s_app_main (app_cfg_t *cfg)
         // test r7kr_read_frame
         byte frame_buf[MAX_FRAME_BYTES_7K]={0};
         
-        MX_LPRINT(FRAMES7K, 2, "reader connected [%s/%d] err(%s)\n", cfg->host,R7K_7KCENTER_PORT,  me_strerror(me_errno));
-        
+        MX_LPRINT(FRAMES7K, 2, "reader connected [%s/%d] err(%s)\n", cfg->host, cfg->port,  me_strerror(me_errno));
+
         retval=0;
         int read_retries=5;
         while ( (forever || (count<cfg->cycles)) && !g_stop_flag) {
@@ -457,7 +471,7 @@ int main(int argc, char **argv)
     saStruct.sa_handler = s_termination_handler;
     sigaction(SIGINT, &saStruct, NULL);
     
-    app_cfg_t cfg_s = {1,strdup(RESON_HOST_DFL),0,MAX_FRAME_BYTES_7K,R7KC_DEV_7125_400KHZ};
+    app_cfg_t cfg_s = {1, strdup(RESON_HOST_DFL), R7K_7KCENTER_PORT, 0, MAX_FRAME_BYTES_7K, R7KC_DEV_7125_400KHZ};
     app_cfg_t *cfg = &cfg_s;
 
     // parse command line options

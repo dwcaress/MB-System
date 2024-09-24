@@ -1121,7 +1121,7 @@ if (!$bounds || !$zbounds || $zmode == 1)
         /\S+\s+v_min:\s+(\S+)\s+v_max:\s+(\S+)\s+name:\s+(.+)/;
       }
     }
-  if ($color_mode != 6 && $zmin_f >= $zmax_f)
+  if ($color_mode != 6 && $color_mode != 7 && $zmin_f >= $zmax_f)
     {
     if ($zbounds)
       {
@@ -1156,7 +1156,7 @@ if (!$bounds || !$zbounds || $zmode == 1)
 
   # check that there are data
   if ($xmin_f >= $xmax_f || $ymin_f >= $ymax_f
-    || ($color_mode != 6 && $zmin_f >= $zmax_f && !$zbounds))
+    || ($color_mode != 6 && $color_mode != 7 && $zmin_f >= $zmax_f && !$zbounds))
     {
     print "\a";
     print "$xmin_f $xmax_f $ymin_f $ymax_f $zmin_f $zmax_f\n";
@@ -1222,7 +1222,7 @@ if (!$zbounds)
 
 # check that there are data
 if ((!$use_corner_points && ($xmin >= $xmax || $ymin >= $ymax))
-  || ($color_mode != 6 && $zmin >= $zmax))
+  || ($color_mode != 6 && $color_mode != 7 && $zmin >= $zmax))
   {
   print "\a";
   die "Improper data limits: x: $xmin $xmax  y: $ymin $ymax  z: $zmin $zmax\n$program_name aborted.\n"

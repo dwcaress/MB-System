@@ -31,8 +31,8 @@
 import sys, getopt, os
 import glob, subprocess
 
-shortOpts = "hbi:dg:"
-longOpts = ["help", "display", "input=", "grid=", "mission="]
+shortOpts = "hbi:dg:j:m"
+longOpts = ["help", "display", "input=", "grid=", "crs=", "mission="]
 
 def usage():
   pname, sname = os.path.split(sys.argv[0])
@@ -40,8 +40,9 @@ def usage():
   print( """
   -h --help                    Print this message
   -d --display                 Enable immediate display of the plots
-  -g --grid=filepath           Path to background topography grid
+  -g --grid=filepath           Path to reference topography grid
   -i --input=directory         Path to mbtrnpp session logs and results
+  -j --crs=crs                 Coordinate reference system (CRS) of reference topography
   -m --mission                 Mission name for plot title
   """ )
   sys.exit()
@@ -54,6 +55,7 @@ def main (args, opts={}):
   inputset = False
   gridfile = ""
   gridset = False
+  refcrs = "U"
   mission = ""
   missionset = False
   for o, a in opts:
@@ -67,6 +69,8 @@ def main (args, opts={}):
     elif o in ("-i", "--input"):
       inputdir = a
       inputset = True
+    elif o in ("-j", "--crs"):
+      refcrs = a
     elif o in ("-m", "--mission"):
       mission = a
       missionset = True
@@ -132,6 +136,11 @@ def main (args, opts={}):
     fp_TxyC = open(inputdir + "/" + sessionname + "_trn_TxyC.txt", "w")
     fp_TxyU = open(inputdir + "/" + sessionname + "_trn_TxyU.txt", "w")
     fp_TxyR = open(inputdir + "/" + sessionname + "_trn_TxyR.txt", "w")
+    fp_Nll = open(inputdir + "/" + sessionname + "_trn_Nll.txt", "w")
+    fp_Tll = open(inputdir + "/" + sessionname + "_trn_Tll.txt", "w")
+    fp_TllC = open(inputdir + "/" + sessionname + "_trn_TllC.txt", "w")
+    fp_TllU = open(inputdir + "/" + sessionname + "_trn_TllU.txt", "w")
+    fp_TllR = open(inputdir + "/" + sessionname + "_trn_TllR.txt", "w")
 
     # Open and parse the session log, outputting as desired
     xmin = 0.0
@@ -143,7 +152,7 @@ def main (args, opts={}):
     for line in fp:
       if line[0] != '#' :
         columns = line.split()
-        if (len(columns) == 26) :
+        if (len(columns) >= 26) :
           fp_Nxy.write(columns[2] + " " + columns[3] + "\n")
           fp_Txy.write(columns[5] + " " + columns[6] + "\n")
           if columns[24] == 'CNV' :
@@ -167,6 +176,15 @@ def main (args, opts={}):
             xmax = max(xmax, x1, x2)
             ymin = min(ymin, y1, y2)
             ymax = max(ymax, y1, y2)
+        if (len(columns) == 30) :
+          fp_Nll.write(columns[26] + " " + columns[27] + "\n")
+          fp_Tll.write(columns[28] + " " + columns[29] + "\n")
+          if columns[24] == 'CNV' :
+            fp_TllC.write(columns[28] + " " + columns[29] + "\n")
+          if columns[25] == 'USE' :
+            fp_TllU.write(columns[28] + " " + columns[29] + "\n")
+          if columns[24] == 'RNT' :
+            fp_TllR.write(columns[28] + " " + columns[29] + "\n")
 
     fp.close()
     fp_Nxy.close()
@@ -174,6 +192,11 @@ def main (args, opts={}):
     fp_TxyC.close()
     fp_TxyU.close()
     fp_TxyR.close()
+    fp_Nll.close()
+    fp_Tll.close()
+    fp_TllC.close()
+    fp_TllU.close()
+    fp_TllR.close()
 
     print("x: "+str(xmin)+" "+str(xmax)+"  y: "+str(ymin)+" "+str(ymax))
     xmin = xmin - 0.1 * (xmax - xmin)
@@ -212,7 +235,7 @@ def main (args, opts={}):
     # Create and execute an mbgrid and mbm_grdplot command to generate a map of the TRN performance over MB1 bathymetry
     command = "cd "+inputdir+" ; mbm_makedatalist -S.mb1 -F72 -Odatalist_mb1.mb-1 ; mbdatalist -Idatalist_mb1.mb-1 -O ; cd .."
     subprocess.run(command, shell=True)
-    command = "cd "+inputdir+" ; mbgrid -Idatalist_mb1.mb-1 -A2 -N -F5 -JU -C5 -V -O TopoMB1 ; cd .."
+    command = "cd "+inputdir+" ; mbgrid -Idatalist_mb1.mb-1 -A2 -N -F5 -J"+refcrs+" -C5 -V -O TopoMB1 ; cd .."
     print("Command: "+command+"\n")
     subprocess.run(command, shell=True)
     if missionset :

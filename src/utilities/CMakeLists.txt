@@ -28,43 +28,45 @@ find_package(FFTW REQUIRED)
 find_package(LibPROJ REQUIRED)
 
 set(executables
+    mb7k2jstar
     mbabsorption
-    mbdatalist
-    mbgrid
-    mbnavlist
-    mbsegypsd
     mbareaclean
+    mbauvloglist
+    mbbackangle
+    mbclean
+    mbcopy
+    mbctdlist
+    mbdatalist
     mbdefaults
+    mbdumpesf
+    mbextractsegy
+    mbfilter
+    mbformat
+    mbgetesf
+    mbgpstide
+    mbgrid
     mbhistogram
+    mbinfo
+    mblist
+    mbmakeplatform
+    mbmapscale
+    mbminirovnav
+    mbmosaic
+    mbnavlist
+    mbprocess
+    mbrolltimelag
+    mbroutetime
+    mbsegygrid
+    mbsegyinfo
+    mbsegylist
+    mbsegypsd
     mbpreprocess
     mbset
-    mbauvloglist
-    mbdumpesf
-    mbinfo
-    mbprocess
     mbsslayout
-    mbbackangle
-    mbextractsegy
-    mbrolltimelag
     mbsvplist
-    mbclean
-    mbfilter
-    mblist
-    mbroutetime
     mbsvpselect
-    mbformat
-    mbmakeplatform
-    mbsegygrid
     mbtime
-    mbcopy
-    mbgetesf
-    mbminirovnav
-    mbsegyinfo
-    mbvoxelclean
-    mbctdlist
-    mbgpstide
-    mbmosaic
-    mbsegylist)
+    mbvoxelclean)
 
 foreach(executable ${executables})
   add_executable(${executable} ${executable}.cc)

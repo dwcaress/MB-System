@@ -124,6 +124,9 @@ typedef struct app_cfg_s{
     /// @var app_cfg_s::host
     /// @brief hostname
     char *host;
+    /// @var app_cfg_s::port
+    /// @brief S7K IP port
+    int port;
     /// @var app_cfg_s::cycles
     /// @brief number of cycles
     int cycles;
@@ -155,10 +158,13 @@ static void s_show_help()
     char help_message[] = "\n Stream raw reson bytes to console\n";
     char usage_message[] = "\n stream7k [options]\n"
     "\n Options:\n"
-    "  --verbose=n : verbose output\n"
-    "  --host      : reson host name or IP address\n"
-    "  --cycles    : number of cycles (dfl 0 - until CTRL-C)\n"
-    "  --dev=s     : device [e.g. T50, 7125_400]\n"
+    "  --verbose=<n>     : verbose output\n"
+    "  --host=<s>[:port] : reson host name or IP address and port\n"
+    "  --cycles=<n>      : number of cycles (dfl 0 - until CTRL-C)\n"
+    "  --dev=<s>         : device [e.g. T50, 7125_400]; options:\n"
+    "                       7125_400 : Reson 7125 400 kHz (default)"
+    "                       7125_200 : Reson 7125 200 kHz"
+    "                            T50 : Reson T50"
     "\n";
     printf("%s",help_message);
     printf("%s",usage_message);
@@ -210,7 +216,14 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 
                 // host
                 else if (strcmp("host", options[option_index].name) == 0) {
-                    cfg->host=strdup(optarg);
+                    char *ocopy = strdup(optarg);
+                    char *host_tok = strtok(ocopy,":");
+                    char *port_tok = strtok(NULL,":");
+                    if(host_tok != NULL)
+                        cfg->host=strdup(host_tok);
+                    if(port_tok != NULL)
+                        sscanf(port_tok, "%d", &cfg->port);
+                    free(ocopy);
                 }
                 // cycles
                 else if (strcmp("cycles", options[option_index].name) == 0) {
@@ -325,9 +338,9 @@ static int s_app_main (app_cfg_t *cfg)
         int cycle_count=0;
         
         while (!g_stop_flag) {
-            s = msock_socket_new(cfg->host, R7K_7KCENTER_PORT, ST_TCP);
+            s = msock_socket_new(cfg->host, cfg->port, ST_TCP);
             if (NULL != s) {
-                MX_LPRINT(STREAM7K, 1, "connecting host[%s] dev[%d]\n", cfg->host, cfg->dev);
+                MX_LPRINT(STREAM7K, 1, "connecting host[%s:%d] dev[%d]\n", cfg->host, cfg->port, cfg->dev);
                 if (msock_connect(s)==0) {
                     s->status=SS_CONNECTED;
 
@@ -390,7 +403,7 @@ int main(int argc, char **argv)
     saStruct.sa_handler = s_termination_handler;
     sigaction(SIGINT, &saStruct, NULL);
 
-    app_cfg_t cfg_s = {true,strdup(RESON_HOST_DFL),0,R7KC_DEV_7125_400KHZ};
+    app_cfg_t cfg_s = {true, strdup(RESON_HOST_DFL), R7K_7KCENTER_PORT, 0, R7KC_DEV_7125_400KHZ};
     app_cfg_t *cfg = &cfg_s;
     
     // parse command line options

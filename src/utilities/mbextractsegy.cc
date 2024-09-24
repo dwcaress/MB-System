@@ -1306,8 +1306,7 @@ int main(int argc, char **argv) {
               /* envelope time series */
               index = 0;
               for (int i = 0; i < segytraceheader.nsamps; i++) {
-                float magnitude = sqrt(segydata[2 * i] * segydata[2 * i] + segydata[2 * i + 1] * segydata[2 * i + 1]);
-                mb_put_binary_float(false, magnitude, (void *)&buffer[index]);
+                mb_put_binary_float(false, segydata[i], (void *)&buffer[index]);
                 index += 4;
               }
               if (status == MB_SUCCESS &&
