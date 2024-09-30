@@ -213,7 +213,6 @@ void TopoGridItem::assemblePipeline(TopoGridItem::Pipeline *pipeline) {
 		 << pipeline->gridReader_->GetErrorCode();
     }  
 
-
     // Read grid bounds
     double gridBounds[6];
     pipeline->gridReader_->gridBounds(&gridBounds[0], &gridBounds[1],
@@ -224,36 +223,32 @@ void TopoGridItem::assemblePipeline(TopoGridItem::Pipeline *pipeline) {
       "yMin: " << gridBounds[2] << ", yMax: " << gridBounds[3] <<
       "zMin: " << gridBounds[4] << ", zMax: " << gridBounds[5];
 
-
-    double *dBounds = pipeline->gridReader_->GetOutput()->GetBounds();
+    pipeline->elevFilter_->SetInputConnection(pipeline->gridReader_->
+					      GetOutputPort());
   
-    qDebug() << "GetBounds() - xMin: " << dBounds[0] << ", xMax: " <<
-      dBounds[1] <<
-      "yMin: " << dBounds[2] << ", yMax: " << dBounds[3] <<
-      "zMin: " << dBounds[4] << ", zMax: " << dBounds[5];
-
-    pipeline->elevColorizer_->SetInputConnection(pipeline->gridReader_
-						 ->GetOutputPort());
-  
-    pipeline->elevColorizer_->SetLowPoint(0, 0, gridBounds[4]);
-    pipeline->elevColorizer_->SetHighPoint(0, 0, gridBounds[5]);
-
+    pipeline->elevFilter_->SetLowPoint(0, 0, gridBounds[4]);
+    pipeline->elevFilter_->SetHighPoint(0, 0, gridBounds[5]);
+    
     /// Scale z axis based on vertical exaggeration
     float zScale = verticalExagg_ * pipeline->gridReader_->zScaleLatLon();
 
     pipeline->transform_->Scale(1., 1., zScale);
     pipeline->transformFilter_->SetTransform(pipeline->transform_);
-    pipeline->transformFilter_->SetInputConnection(pipeline->elevColorizer_->
+    pipeline->transformFilter_->SetInputConnection(pipeline->elevFilter_->
 						   GetOutputPort());
 
     pipeline->surfaceMapper_->SetInputConnection(pipeline->transformFilter_->
 						 GetOutputPort());
 
-    pipeline->elevColorizer_->SetScalarRange(dBounds[4], dBounds[5]);
+    pipeline->elevFilter_->SetScalarRange(gridBounds[4], gridBounds[5]);    
+
+    // Call my function to make lookup table
     TopoColorMap::makeLUT(TopoColorMap::Haxby,
 			  pipeline->elevLookupTable_);
     
-    pipeline->surfaceMapper_->SetScalarRange(dBounds[4], dBounds[5]);
+    pipeline->surfaceMapper_->SetScalarRange(gridBounds[4],
+					     gridBounds[5]);    
+
     pipeline->surfaceMapper_->ScalarVisibilityOn();
     pipeline->surfaceMapper_->SetLookupTable(pipeline->elevLookupTable_);
   

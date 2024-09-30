@@ -42,7 +42,7 @@ namespace mb_system {
       /// Topo grid reader
       vtkNew<mb_system::TopoGridReader> gridReader_;
 
-      vtkNew<vtkElevationFilter> elevColorizer_;
+      vtkNew<vtkElevationFilter> elevFilter_;
       vtkNew<vtkLookupTable> elevLookupTable_;
       vtkNew<vtkActor> surfaceActor_;
       vtkNew<vtkPolyDataMapper> surfaceMapper_;
