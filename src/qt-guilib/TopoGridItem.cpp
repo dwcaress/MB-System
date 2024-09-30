@@ -228,7 +228,9 @@ void TopoGridItem::assemblePipeline(TopoGridItem::Pipeline *pipeline) {
   
     pipeline->elevFilter_->SetLowPoint(0, 0, gridBounds[4]);
     pipeline->elevFilter_->SetHighPoint(0, 0, gridBounds[5]);
-    
+    // Preserve scalar values (keep minZ/maxZ range)
+    pipeline->elevFilter_->SetScalarRange(gridBounds[4], gridBounds[5]);    
+
     /// Scale z axis based on vertical exaggeration
     float zScale = verticalExagg_ * pipeline->gridReader_->zScaleLatLon();
 
@@ -240,22 +242,21 @@ void TopoGridItem::assemblePipeline(TopoGridItem::Pipeline *pipeline) {
     pipeline->surfaceMapper_->SetInputConnection(pipeline->transformFilter_->
 						 GetOutputPort());
 
-    pipeline->elevFilter_->SetScalarRange(gridBounds[4], gridBounds[5]);    
-
     // Call my function to make lookup table
     TopoColorMap::makeLUT(TopoColorMap::Haxby,
 			  pipeline->elevLookupTable_);
     
+    // Use scalar data to color objects
+    pipeline->surfaceMapper_->ScalarVisibilityOn();
+    // Scalar values range from min to max z (depth)
     pipeline->surfaceMapper_->SetScalarRange(gridBounds[4],
 					     gridBounds[5]);    
 
-    pipeline->surfaceMapper_->ScalarVisibilityOn();
     pipeline->surfaceMapper_->SetLookupTable(pipeline->elevLookupTable_);
   
     // Assign surfaceMapper to actor
-    qDebug() << "assign surfaceMapper to actor";
     pipeline->surfaceActor_->SetMapper(pipeline->surfaceMapper_);
-  
+    
     // Add actor to renderer
     pipeline->renderer_->AddActor(pipeline->surfaceActor_);
 
@@ -278,6 +279,9 @@ void TopoGridItem::assemblePipeline(TopoGridItem::Pipeline *pipeline) {
 
     pipeline->renderer_->AddActor(pipeline->axesActor_);    
 
+    double vertExagg = 1.;
+    pipeline->surfaceActor_->SetScale(1., 1., vertExagg);  // NEW!
+    pipeline->axesActor_->SetScale(1., 1., vertExagg);  // NEW!    
 
     /* ***
     ///
