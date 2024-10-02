@@ -22,6 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.2beta15    October 1, 2024
 - Version 5.8.2beta14    September 6, 2024
 - Version 5.8.2beta13    August 23, 2024
 - Version 5.8.2beta12    August 22, 2024
@@ -47,7 +48,20 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 ---
 
-#### 5.8.2beta14 (August 23, 2024)
+#### 5.8.2beta15 (October 1, 2024)
+
+Mbmakeplatform: Fixed problems with handling sensor add and sensor modify modes.
+
+Mbgrdviz, mbeditviz, mbnavadjust: Changed the mbview display of swath bounds for selected
+navigation to be optional rather than always displayed.
+
+Formats 58 (MBF_EM710RAW) and 59 (MBF_EM710MBA): Fixed preprocessing support for the 
+Kongsberg M3 multibeam. Added capability to use an MB-System platform file in place of
+the sensor offsets embedded in the logged multibeam files.
+
+Mbphotogrammetry: Fixed use of range bounds in filtering the photogrammetric bathymetry.
+
+#### 5.8.2beta14 (September 6, 2024)
 
 Mbphotomosaic: Removed unnecessary --correction-file-color option (redundant with --correction-file)
 

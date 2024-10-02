@@ -125,12 +125,12 @@ struct mbpg_process_struct {
     // input stereo pair and camera pose
     unsigned int thread;
     int pair_count;
+    double pair_quality;
     mb_path imageLeftFile;
     double image_left_time_d;
     double image_left_gain;
     double image_left_exposure;
     double image_left_amplitude;
-    double image_left_quality;
     double image_left_navlon;
     double image_left_navlat;
     double image_left_sensordepth;
@@ -142,7 +142,6 @@ struct mbpg_process_struct {
     double image_right_gain;
     double image_right_exposure;
     double image_right_amplitude;
-    double image_right_quality;
     double image_right_navlon;
     double image_right_navlat;
     double image_right_sensordepth;
@@ -866,7 +865,9 @@ void process_stereopair(int verbose, struct mbpg_process_struct *process,
         int jstart = (int)(control->trim * dispf.cols);
         int jend = dispf.cols - (int)(control->trim * dispf.cols);
         jend = MIN(jend, dispf.cols - control->bin_size);
-       for (int i = istart; i < iend; i+=control->bin_size) {
+        double rangemin = 0.0;
+        bool rangeminset = false;
+        for (int i = istart; i < iend; i+=control->bin_size) {
             for (int j = jstart; j < jend; j+=control->bin_size) {
                 int num_bin = 0;
                 for (int ii=i;ii<i+control->bin_size;ii++)
@@ -951,6 +952,13 @@ void process_stereopair(int verbose, struct mbpg_process_struct *process,
                     /* get range and angles in
                         roll-pitch frame */
                     double range = norm(point);
+                    if (rangeminset) {
+                    	rangemin = MIN(rangemin, range);
+                    }
+                    else {
+                    	rangemin = range;
+                    	rangeminset = true;
+                    }
                     Vec3f direction = normalize(point);
                     double alphar = 0.0;
                     double betar = 0.5 * M_PI;
@@ -982,6 +990,7 @@ void process_stereopair(int verbose, struct mbpg_process_struct *process,
                 }
             }
         }
+        store->altitude = rangemin;
         mb_freed(verbose, __FILE__, __LINE__, (void **)&disparity_bin, error);
         num_bin_alloc = 0;
 
@@ -1818,13 +1827,13 @@ int main(int argc, char** argv)
             }
 
             /* check imageQuality value against threshold */
+            double pair_quality = 1.0;
             if (use_this_pair && imagequality_initialized) {
-                double image_quality = 1.0;
                 if (nquality > 1) {
                     intstat = mb_linear_interp(verbose, qtime-1, qquality-1, nquality,
-                                                image_left_time_d, &image_quality, &iqtime, &error);
+                                                image_left_time_d, &pair_quality, &iqtime, &error);
                 }
-                if (image_quality < imageQualityThreshold) {
+                if (pair_quality < imageQualityThreshold) {
                     use_this_pair = false;
                 }
             }
@@ -1908,6 +1917,7 @@ int main(int argc, char** argv)
                 process->image_right_gain = image_right_gain;
                 process->image_right_exposure = image_right_exposure;
                 process->speed = speed;
+                process->pair_quality = pair_quality;
 
                 /* calculate target sensor position - this is a stereo pair and we
                   want to navigate the center or average of the two cameras */
@@ -1998,13 +2008,13 @@ int main(int argc, char** argv)
                 /* write the output structure */
                 int time_i[7];
                 mb_get_date(verbose, process->image_left_time_d, time_i);
-                fprintf(stderr,"%d %s %s %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d LLZ: %.8f %.8f %8.3f HRP:%6.2f %5.2f %5.2f A:%.3f %3f Q:%.2f %.2f\n",
+                fprintf(stderr,"%d %s %s %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d LLZ: %.8f %.8f %8.3f HRP:%6.2f %5.2f %5.2f A:%.3f %3f Q:%.2f\n",
                         process->pair_count, process->imageLeftFile, process->imageRightFile,
                         time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
                         process->image_left_navlon, process->image_left_navlat, process->image_left_sensordepth, 
                         process->image_left_heading, process->image_left_roll, process->image_left_pitch,
                         process->image_left_amplitude, process->image_right_amplitude,
-                        process->image_left_quality, process->image_right_quality);
+                        process->pair_quality);
                 mb_write_ping(verbose, mbio_ptr, (void *)&process->store, &error);
                 npairs_output++;
                 npairs_output_tot++;

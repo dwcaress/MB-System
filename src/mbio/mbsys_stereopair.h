@@ -70,13 +70,13 @@
  *              Data record identifier              4U      (0x44445047 = "DDPG" = 1145327687)
  *              Time stamp (MB-System time_d)       8F      Decimal seconds since 1970/1/1/ 00:00:00
  *              Longitude                           8F      Decimal degrees
- *              Latitude                           8F      Decimal degrees
+ *              Latitude                            8F      Decimal degrees
  *              Sensor depth                        8F      Meters
  *              Heading                             4F      Decimal degrees
  *              Roll                                4F      Decimal degrees
  *              Pitch                               4F      Decimal degrees
- *              Speed                               4F      Decimal degrees
- *              Altitude                            4F      Decimal degrees
+ *              Speed                               4F      Meters per second
+ *              Altitude                            4F      Meters
  *              N (Number of soundings)             4U
  *              ------------------------------------------------------------
  *              Repeat N times:
@@ -104,8 +104,8 @@
  *              Heading                             4F      Decimal degrees
  *              Roll                                4F      Decimal degrees
  *              Pitch                               4F      Decimal degrees
- *              Speed                               4F      Decimal degrees
- *              Altitude                            4F      Decimal degrees
+ *              Speed                               4F      Meters per second
+ *              Altitude                            4F      Meters
  *              End identifier                      4U      (0x454E4421 = "END!" = 1162757153)
  *              Check sum of data record between    2U
  *              and including the data record and
