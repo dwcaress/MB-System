@@ -1089,7 +1089,11 @@ struct mbsys_simrad3_struct {
 	                 *       1        ----           Head           ----          ----
 	                 *       2        ----          Head 1         Head 2         ----
 	                 *       3        ----            TX            RX 1          RX 2
-	                 *       4        TX 1           TX 2           RX 1          RX 2     */
+	                 *       4        TX 1           TX 2           RX 1          RX 2     
+	                 *
+	                 * NOTE: if the sonar is an M3 (sonar == 30) then par_stc == 0 even 
+	                 *       the sonar is a single head and should be par_stc = 1 
+	                 */
 	double par_s0z; /* Transducer 0 vertical location (m) */
 	double par_s0x; /* Transducer 0 along location (m) */
 	double par_s0y; /* Transducer 0 athwart location (m) */

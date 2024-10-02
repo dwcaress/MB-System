@@ -121,6 +121,7 @@ extern void do_mbview_overlay_contour(Widget, XtPointer, XtPointer);
 extern void do_mbview_site(Widget, XtPointer, XtPointer);
 extern void do_mbview_route(Widget, XtPointer, XtPointer);
 extern void do_mbview_nav(Widget, XtPointer, XtPointer);
+extern void do_mbview_navswathbounds(Widget, XtPointer, XtPointer);
 extern void do_mbview_navdrape(Widget, XtPointer, XtPointer);
 extern void do_mbview_vector(Widget, XtPointer, XtPointer);
 extern void do_mbview_colortable_haxby(Widget, XtPointer, XtPointer);
@@ -1146,6 +1147,31 @@ MB3DViewDataPtr MB3DViewCreate(MB3DViewDataPtr class_in, Widget parent, String n
 	}
 
 	XtAddCallback(class_in->mbview_toggleButton_nav, XmNvalueChangedCallback, do_mbview_nav, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Navigation Swath Bounds", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_navswathbounds =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_view, (char *)"mbview_toggleButton_navswathbounds", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_navswathbounds);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_navswathbounds, XmNvalueChangedCallback, do_mbview_navswathbounds, (XtPointer)0);
 
 	ac = 0;
 	{

@@ -567,6 +567,7 @@ int mbview_reset(size_t instance) {
 
 		/* nav data */
 		data->nav_view_mode = MBV_VIEW_OFF;
+		data->navswathbounds_view_mode = MBV_VIEW_OFF;
 		data->navdrape_view_mode = MBV_VIEW_OFF;
 
 		/* vector data */
@@ -913,6 +914,7 @@ int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datah
 
 		/* nav data */
 		fprintf(stderr, "dbg2       nav_view_mode:             %d\n", data->nav_view_mode);
+		fprintf(stderr, "dbg2       navswathbounds_view_mode:  %d\n", data->navswathbounds_view_mode);
 		fprintf(stderr, "dbg2       navdrape_view_mode:        %d\n", data->navdrape_view_mode);
 		fprintf(stderr, "dbg2       nav_mode:                  %d\n", shared.shareddata.nav_mode);
 		fprintf(stderr, "dbg2       nnav:                      %d\n", shared.shareddata.nnav);
@@ -1305,7 +1307,7 @@ int mbview_setwindowparms(int verbose, size_t instance, int (*mbview_dismiss_not
 int mbview_setviewcontrols(int verbose, size_t instance, int display_mode, int mouse_mode, int grid_mode, int primary_histogram,
                            int primaryslope_histogram, int secondary_histogram, int primary_shade_mode, int slope_shade_mode,
                            int secondary_shade_mode, int grid_contour_mode, int site_view_mode, int route_view_mode,
-                           int nav_view_mode, int navdrape_view_mode, int vector_view_mode, double exageration,
+                           int nav_view_mode, int navswathbounds_view_mode, int navdrape_view_mode, int vector_view_mode, double exageration,
                            double modelelevation3d, double modelazimuth3d, double viewelevation3d, double viewazimuth3d,
                            double illuminate_magnitude, double illuminate_elevation, double illuminate_azimuth,
                            double slope_magnitude, double overlay_shade_magnitude, double overlay_shade_center,
@@ -1331,7 +1333,8 @@ int mbview_setviewcontrols(int verbose, size_t instance, int display_mode, int m
 		fprintf(stderr, "dbg2       site_view_mode:            %d\n", site_view_mode);
 		fprintf(stderr, "dbg2       route_view_mode:           %d\n", route_view_mode);
 		fprintf(stderr, "dbg2       nav_view_mode:             %d\n", nav_view_mode);
-		fprintf(stderr, "dbg2       navdrape_view_mode:        %d\n", navdrape_view_mode);
+		fprintf(stderr, "dbg2       nav_view_mode:             %d\n", nav_view_mode);
+		fprintf(stderr, "dbg2       navswathbounds_view_mode:  %d\n", navswathbounds_view_mode);
 		fprintf(stderr, "dbg2       vector_view_mode:          %d\n", vector_view_mode);
 		fprintf(stderr, "dbg2       exageration:               %f\n", exageration);
 		fprintf(stderr, "dbg2       modelelevation3d:          %f\n", modelelevation3d);
@@ -1367,6 +1370,7 @@ int mbview_setviewcontrols(int verbose, size_t instance, int display_mode, int m
 	data->site_view_mode = site_view_mode;
 	data->route_view_mode = route_view_mode;
 	data->nav_view_mode = nav_view_mode;
+	data->navswathbounds_view_mode = navswathbounds_view_mode;
 	data->navdrape_view_mode = navdrape_view_mode;
 	data->vector_view_mode = vector_view_mode;
 	data->exageration = exageration;
@@ -1572,14 +1576,15 @@ int mbview_open(int verbose, size_t instance, int *error) {
 		}
 
 		/* nav data */
-		fprintf(stderr, "dbg2       nav_view_mode:         %d\n", data->nav_view_mode);
-		fprintf(stderr, "dbg2       navdrape_view_mode:    %d\n", data->navdrape_view_mode);
-		fprintf(stderr, "dbg2       vector_view_mode:      %d\n", data->vector_view_mode);
-		fprintf(stderr, "dbg2       nav_mode:              %d\n", shared.shareddata.nav_mode);
-		fprintf(stderr, "dbg2       nnav:                  %d\n", shared.shareddata.nnav);
-		fprintf(stderr, "dbg2       nnav_alloc:            %d\n", shared.shareddata.nnav_alloc);
-		fprintf(stderr, "dbg2       nav_selected:          %p\n", shared.shareddata.nav_selected);
-		fprintf(stderr, "dbg2       nav_point_selected:    %p\n", shared.shareddata.nav_point_selected);
+		fprintf(stderr, "dbg2       nav_view_mode:             %d\n", data->nav_view_mode);
+		fprintf(stderr, "dbg2       navswathbounds_view_mode:  %d\n", data->navswathbounds_view_mode);
+		fprintf(stderr, "dbg2       navdrape_view_mode:        %d\n", data->navdrape_view_mode);
+		fprintf(stderr, "dbg2       vector_view_mode:          %d\n", data->vector_view_mode);
+		fprintf(stderr, "dbg2       nav_mode:                  %d\n", shared.shareddata.nav_mode);
+		fprintf(stderr, "dbg2       nnav:                      %d\n", shared.shareddata.nnav);
+		fprintf(stderr, "dbg2       nnav_alloc:                %d\n", shared.shareddata.nnav_alloc);
+		fprintf(stderr, "dbg2       nav_selected:              %p\n", shared.shareddata.nav_selected);
+		fprintf(stderr, "dbg2       nav_point_selected:        %p\n", shared.shareddata.nav_point_selected);
 		for (int i = 0; i < shared.shareddata.nnav; i++) {
 			fprintf(stderr, "dbg2       nav %d color:         %d\n", i, shared.shareddata.navs[i].color);
 			fprintf(stderr, "dbg2       nav %d size:          %d\n", i, shared.shareddata.navs[i].size);
@@ -1824,6 +1829,7 @@ int mbview_open(int verbose, size_t instance, int *error) {
 		XtSetValues(view->mb3dview.mbview_toggleButton_site, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_route, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_nav, args, ac);
+		XtSetValues(view->mb3dview.mbview_toggleButton_navswathbounds, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_navdrape, args, ac);
 		XtSetValues(view->mb3dview.mbview_separator8, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_colortable_haxby, args, ac);
@@ -2281,6 +2287,7 @@ int mbview_update_sensitivity(int verbose, size_t instance, int *error) {
 		XtSetArg(args[ac], XmNsensitive, False);
 		ac++;
 		XtSetValues(view->mb3dview.mbview_toggleButton_nav, args, ac);
+		XtSetValues(view->mb3dview.mbview_toggleButton_navswathbounds, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_navdrape, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_mode_nav, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_mode_rnav, args, ac);
@@ -2295,6 +2302,7 @@ int mbview_update_sensitivity(int verbose, size_t instance, int *error) {
 		XtSetArg(args[ac], XmNsensitive, True);
 		ac++;
 		XtSetValues(view->mb3dview.mbview_toggleButton_nav, args, ac);
+		XtSetValues(view->mb3dview.mbview_toggleButton_navswathbounds, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_navdrape, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_mode_nav, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_mode_rnav, args, ac);
@@ -2310,6 +2318,7 @@ int mbview_update_sensitivity(int verbose, size_t instance, int *error) {
 		XtSetArg(args[ac], XmNsensitive, True);
 		ac++;
 		XtSetValues(view->mb3dview.mbview_toggleButton_nav, args, ac);
+		XtSetValues(view->mb3dview.mbview_toggleButton_navswathbounds, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_navdrape, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_mode_navfile, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_mode_rnavfile, args, ac);
@@ -2567,6 +2576,7 @@ int mbview_set_widgets(int verbose, size_t instance, int *error) {
 	set_mbview_site_view_mode(instance, data->site_view_mode);
 	set_mbview_route_view_mode(instance, data->route_view_mode);
 	set_mbview_nav_view_mode(instance, data->nav_view_mode);
+	set_mbview_navswathbounds_view_mode(instance, data->navswathbounds_view_mode);
 	set_mbview_navdrape_view_mode(instance, data->navdrape_view_mode);
 	set_mbview_vector_view_mode(instance, data->vector_view_mode);
 	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY) {
@@ -5494,6 +5504,39 @@ void do_mbview_nav(Widget w, XtPointer client_data, XtPointer call_data) {
 
 /*------------------------------------------------------------------------------*/
 
+void do_mbview_navswathbounds(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+
+	Arg args[256];
+  Cardinal ac = 0;
+	size_t instance;
+	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
+	ac++;
+	XtGetValues(w, args, ac);
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+	/* get mode value */
+	Boolean value = XmToggleButtonGetState(w);
+	if (value) {
+		data->navswathbounds_view_mode = MBV_VIEW_ON;
+	} else {
+		data->navswathbounds_view_mode = MBV_VIEW_OFF;
+	}
+
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "do_mbview_navswathbounds instance:%zu mode:%d\n", instance, data->navswathbounds_view_mode);
+
+	/* draw */
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_navswathbounds\n");
+	mbview_plotlowhigh(instance);
+}
+
+/*------------------------------------------------------------------------------*/
+
 void do_mbview_navdrape(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
@@ -5550,7 +5593,7 @@ void do_mbview_vector(Widget w, XtPointer client_data, XtPointer call_data) {
 		data->vector_view_mode = MBV_VIEW_ON;
 	} else {
 		data->vector_view_mode = MBV_VIEW_OFF;
-		if (data->nav_view_mode == MBV_VIEW_OFF && (data->mouse_mode == MBV_MOUSE_NAV || data->mouse_mode == MBV_MOUSE_NAVFILE)) {
+		if (data->mouse_mode == MBV_MOUSE_VECTOR) {
 			data->mouse_mode = MBV_MOUSE_MOVE;
 			set_mbview_mouse_mode(instance, data->mouse_mode);
 		}
@@ -6329,9 +6372,21 @@ void set_mbview_nav_view_mode(size_t instance, int mode) {
 }
 
 /*------------------------------------------------------------------------------*/
+void set_mbview_navswathbounds_view_mode(size_t instance, int mode) {
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "set_mbview_navswathbounds_view_mode: instance:%zu mode:%d\n", instance, mode);
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+
+	MB3DViewData *mb3dviewptr = &(view->mb3dview);
+	Boolean value = mode == MBV_VIEW_ON;
+	XmToggleButtonSetState(mb3dviewptr->mbview_toggleButton_navswathbounds, value, False);
+}
+
+/*------------------------------------------------------------------------------*/
 void set_mbview_navdrape_view_mode(size_t instance, int mode) {
 	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_nav_view_mode: instance:%zu mode:%d\n", instance, mode);
+		fprintf(stderr, "set_mbview_navdrape_view_mode: instance:%zu mode:%d\n", instance, mode);
 
 	struct mbview_world_struct *view = &(mbviews[instance]);
 
