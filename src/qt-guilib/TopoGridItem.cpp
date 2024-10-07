@@ -185,11 +185,14 @@ bool TopoGridItem::loadGridfile(QUrl fileUrl) {
 }
 
 
-
-
 void TopoGridItem::assemblePipeline(TopoGridItem::Pipeline *pipeline) {
-    // Set TopoGridReader file name
-    qDebug() << "set filename to " << gridFilename_;
+
+  // Check that input file exists and is readable
+  if (access(gridFilename_, R_OK) == -1) {
+    qWarning() << "Can't access input file " << gridFilename_;
+    return;
+  }
+  qDebug() << "set filename to " << gridFilename_;
     pipeline->gridReader_->SetFileName(gridFilename_);
 
     if (pipeline->gridReader_->GetErrorCode() != 0) {
@@ -211,6 +214,7 @@ void TopoGridItem::assemblePipeline(TopoGridItem::Pipeline *pipeline) {
     if (pipeline->gridReader_->GetErrorCode() != 0) {
       qWarning() << "grid reader error during Update(): "
 		 << pipeline->gridReader_->GetErrorCode();
+      return;
     }  
 
     // Read grid bounds
@@ -231,15 +235,7 @@ void TopoGridItem::assemblePipeline(TopoGridItem::Pipeline *pipeline) {
     // Preserve scalar values (keep minZ/maxZ range)
     pipeline->elevFilter_->SetScalarRange(gridBounds[4], gridBounds[5]);    
 
-    /// Scale z axis based on vertical exaggeration
-    float zScale = verticalExagg_ * pipeline->gridReader_->zScaleLatLon();
-
-    pipeline->transform_->Scale(1., 1., zScale);
-    pipeline->transformFilter_->SetTransform(pipeline->transform_);
-    pipeline->transformFilter_->SetInputConnection(pipeline->elevFilter_->
-						   GetOutputPort());
-
-    pipeline->surfaceMapper_->SetInputConnection(pipeline->transformFilter_->
+    pipeline->surfaceMapper_->SetInputConnection(pipeline->elevFilter_->
 						 GetOutputPort());
 
     // Call my function to make lookup table
