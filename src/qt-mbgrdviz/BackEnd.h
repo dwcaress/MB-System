@@ -5,7 +5,7 @@
 #include <QQmlApplicationEngine>
 #include <QQuickWindow>
 #include <QStringListModel>
-#include "QVtkItem.h"
+#include "TopoGridItem.h"
 
 /**
    BackEnd is an interface between QML and C++ objects and functions.
@@ -55,8 +55,8 @@ protected:
   /// Singleton
   static BackEnd *singleInstance_;
 
-  /// QVtkItem instantiated by QML
-  mb_system::QVtkItem *qVtkItem_;
+  /// TopoGridItem instantiated by QML
+  mb_system::TopoGridItem *topoGridItem_;
 
   /// Selected file name item
   QObject *selectedFileItem_;
