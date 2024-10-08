@@ -13,7 +13,7 @@ import "ui-components"
 
 
 /* ***
-Displays bathymetry/topography in a QVtkItem 
+Displays bathymetry/topography in a TopoGridItem
 Mouse controls:
 TBD
 
@@ -45,8 +45,8 @@ Window {
 
 
     //// TEST TEST TEST
-    /// property int editState: QVtkItem.EditState.EditOverlay
-    property int editState: qVtkItem.editState
+    /// property int editState: TopoGridItem.EditState.EditOverlay
+    property int editState: topoGridItem.editState
     property string testString: constants.testString
     property int siteFile: Const.Cmd.SiteFile
     property variant cmaps: constants.cmaps
@@ -57,8 +57,8 @@ Window {
         console.log("siteFile: ", siteFile);
         console.log("cmaps: ", cmaps);
         console.log("cmaps[2]: ", cmaps[2]);
-        console.log("qVtkItem.testInt: ", qVtkItem.testInt);
-        qVtkItem.testInt = 111;
+        console.log("topoGridItem.testInt: ", topoGridItem.testInt);
+        topoGridItem.testInt = 111;
     }
 
     property int selectedAxisLabel: -1
@@ -169,8 +169,8 @@ Window {
             Action { text: qsTr("Edit route") ;
                 onTriggered: { console.log("edit route")
                     editRouteDialog.open();
-                    console.log("qVtkItem.testInt: ", qVtkItem.testInt)
-                    qVtkItem.editState = QVtkItem.EditState.EditRoute
+                    console.log("topoGridItem.testInt: ", topoGridItem.testInt)
+                    topoGridItem.editState = QVtkItem.EditState.EditRoute
                     var i = QVtkItem.EditState.EditRoute;
                     console.log("new editState: ", i)
                 }
@@ -359,13 +359,14 @@ Window {
 
 
             /// Surface rendering here
-            QVtkItem {
-                id: qVtkItem
-                objectName: "qVtkItem"
+            TopoGridItem {
+                id: topoGridItem
+                objectName: "topoGridItem"
                 anchors.fill: parent
                 width: 1000
                 height: 1000
 
+                /* ***
                 // Update picked coordinate text
                 onPickedPointChanged: {
                     pickedCoords.text = pickedPoint
@@ -376,6 +377,7 @@ Window {
                     console.log("busy state changed to " + busy)
                     busyIndicator.running = busy
                 }
+		**** */
             }
         }
     }
