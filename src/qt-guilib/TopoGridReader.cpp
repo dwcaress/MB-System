@@ -333,6 +333,7 @@ int TopoGridReader::RequestData(vtkInformation* request,
 
 void TopoGridReader::SetFileName(const char *fileName) {
   fprintf(stderr, "In TopoGridReader::SetFileName()\n");
+
   vtkAbstractPolyDataReader::SetFileName(fileName);
   if (fileName_) {
     fprintf(stderr, "TopoGridReader::SetFileName: free fileName_\n");
