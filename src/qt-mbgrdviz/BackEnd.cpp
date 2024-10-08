@@ -2,7 +2,6 @@
 #include <QDebug>
 #include <QQmlContext>
 #include "BackEnd.h"
-#include "QVtkItem.h"
 #include "SharedConstants.h"
 #include "TopoColorMap.h"
 
@@ -14,17 +13,19 @@ BackEnd *BackEnd::singleInstance_ = nullptr;
 
 BackEnd::BackEnd(QQmlApplicationEngine *engine,
 		 QObject *parent) : QObject(parent),
-  qVtkItem_(nullptr)
+  topoGridItem_(nullptr)
 {
+
     QObject *rootObject = engine->rootObjects().first();
 
     QObject::connect(rootObject, SIGNAL(sig(int, QString)),
                      this, SLOT(sigSlot(int, QString)));
     
     
-    qVtkItem_ = rootObject->findChild<mb_system::QVtkItem *>("qVtkItem");
-    if (!qVtkItem_) {
-        qCritical() << "Could not find \"qVtkItem\" in QML";
+    topoGridItem_ =
+      rootObject->findChild<mb_system::TopoGridItem *>("topoGridItem");
+    if (!topoGridItem_) {
+        qCritical() << "Could not find \"topoGridItem\" in QML";
         exit(1);
     }
 
@@ -109,10 +110,8 @@ bool BackEnd::setGridFile(QUrl fileURL) {
 
     qDebug() << "*** setGridFile() - " << fileURL;
 
-    char *gridFilename = strdup(fileURL.toLocalFile().toLatin1().data());
-    qVtkItem_->setGridFilename(gridFilename);
-    qVtkItem_->update();
-
+    topoGridItem_->loadGridfile(fileURL);
+    
     selectedFileItem_->setProperty("text", fileURL.toLocalFile());
 
     return true;
@@ -131,32 +130,30 @@ void BackEnd::sigSlot(const int param, const QString &qval) {
     {
       float verticalExag = atof(value);
       std::cout << "vertical exagg: " << verticalExag << std::endl;
-      qVtkItem_->setVerticalExagg(verticalExag);
-      qVtkItem_->update();
+      topoGridItem_->setVerticalExagg(verticalExag);
+      topoGridItem_->update();
     }
     break;
 
   case (int )Const::Cmd::ShowAxes:
     if (strstr(value, "true")) {
-      qVtkItem_->showAxes(true);
+      topoGridItem_->showAxes(true);
     }
     else {
-      qVtkItem_->showAxes(false);
+      topoGridItem_->showAxes(false);
     }
-    qVtkItem_->update();        
+    topoGridItem_->update();        
     break;
     
   case (int )Const::Cmd::ColorMap:
     {
-      char *schemeName = value;
-      qDebug() << "colormap schemeName: " << schemeName;
-      if (!qVtkItem_->setColorMapScheme(schemeName)) {
-	qCritical() << "Unknown colormap scheme: " << schemeName;
+      if (!topoGridItem_->setColormap(qval)) {
+	qCritical() << "Unknown colormap scheme: " << qval;
       }
       else {
-	qDebug() << "Set colormap scheme to " << schemeName;
+	qDebug() << "Set colormap scheme to " << qval;
       }
-      qVtkItem_->update();
+      topoGridItem_->update();
     }
     break;
 
@@ -166,8 +163,9 @@ void BackEnd::sigSlot(const int param, const QString &qval) {
       char *siteFile = value;
       // Remove file URL prefix      
       siteFile += strlen("file://"); 
-      qVtkItem_->setSiteFile(siteFile);
-      qVtkItem_->update();
+      //      topoGridItem_->setSiteFile(siteFile);
+	qDebug() << "setSiteFile() not yet implemented";
+      topoGridItem_->update();
     }
     break;
 
@@ -177,8 +175,8 @@ void BackEnd::sigSlot(const int param, const QString &qval) {
       char *routeFile = value;
       // Remove file URL prefix      
       routeFile += strlen("file://"); 
-      /// qVtkItem_->setRouteFile(routeFile);
-      qVtkItem_->update();
+      /// topoGridItem_->setRouteFile(routeFile);
+      topoGridItem_->update();
     }
     break;
 
