@@ -2,8 +2,9 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QVTKOpenGLWindow.h>
+#include <QQuickVTKItem.h>
 #include "BackEnd.h"
-#include "QVtkItem.h"
+// #include "QVtkItem.h"   // using TogoGridItem now
 #include "SharedConstants.h"
 #include "TopoColorMap.h"
 
@@ -18,13 +19,14 @@ VTK_MODULE_INIT(vtkRenderingFreeType)
 int main(int argc, char *argv[])
 {
   using namespace sharedQmlCpp;
+
+  QQuickVTKItem::setGraphicsApi();
+
   
   QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
-    QGuiApplication app(argc, argv);
+  QGuiApplication app(argc, argv);
 
-    QSurfaceFormat::setDefaultFormat(QVTKOpenGLWindow::defaultFormat());
-    
     app.setOrganizationName("MBARI");
     app.setOrganizationDomain("www.mbari.org");
     app.setApplicationName("my app");
@@ -37,8 +39,7 @@ int main(int argc, char *argv[])
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
 
-    qmlRegisterType<mb_system::QVtkItem>("QVtk", 1, 0, "QVtkItem");
-
+    qmlRegisterType<mb_system::TopoGridItem>("QVtk", 1, 0, "TopoGridItem");
 
     // Register SharedConstants so QML can access its C++ enums and other
     // constants.
