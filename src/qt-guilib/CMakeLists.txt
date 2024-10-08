@@ -63,6 +63,7 @@ set(src
     PixmapDrawer.cpp    
     CPixmapDrawer.cpp
     PixmapImage.cpp
+    SharedConstants.cpp
     resources.qrc)
 
 add_library(MBGui ${src})
