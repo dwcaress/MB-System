@@ -7,7 +7,7 @@
 
 using namespace mb_system;
 
-// Define TopoGridItem::Pipeline::New()
+/// Define TopoGridItem::Pipeline::New() (factory method)
 vtkStandardNewMacro(TopoGridItem::Pipeline);
 
 
@@ -15,6 +15,7 @@ TopoGridItem::TopoGridItem() {
   gridFilename_ = strdup("");
   verticalExagg_ = 1.;
   plotAxes_ = true;
+  scheme_ = TopoColorMap::BrightRainbow;
 }
 
 
@@ -149,32 +150,20 @@ void TopoGridItem::setupAxes(vtkCubeAxesActor *axesActor,
 }
 
 
-bool TopoGridItem::setColorMapScheme(const char *colorMapName) {
-  qDebug() << "setColormap() " << colorMapName;
-  
-  // Check for valid colorMap name
-
-  TopoColorMap::Scheme scheme = TopoColorMap::schemeFromName(colorMapName);
-  if (scheme == TopoColorMap::Scheme::Unknown) {
-    return false;
-  }
-
-  scheme_ = scheme;
-  
-  return true;
-
-}
 
 bool TopoGridItem::loadGridfile(QUrl fileUrl) {
 
   char *filename = strdup(fileUrl.toLocalFile().toLatin1().data());
   qDebug() << "loadGridfile " << filename;
+
+  // Set name of grid file to access from pipeline
   setGridFilename(filename);
 
-  // Dispatch pipeline commands to run in render thread
+  // Dispatch lambda function to run in QT render thread 
   dispatch_async([this](vtkRenderWindow *renderWindow, vtkUserData userData) {
 
     auto *pipeline = TopoGridItem::Pipeline::SafeDownCast(userData);
+    // assemble the pipeline; will read the input file specified by fileUrl
     assemblePipeline(pipeline);
     return;
 
@@ -238,8 +227,8 @@ void TopoGridItem::assemblePipeline(TopoGridItem::Pipeline *pipeline) {
     pipeline->surfaceMapper_->SetInputConnection(pipeline->elevFilter_->
 						 GetOutputPort());
 
-    // Call my function to make lookup table
-    TopoColorMap::makeLUT(TopoColorMap::Haxby,
+    // Make lookup table
+    TopoColorMap::makeLUT(scheme_,
 			  pipeline->elevLookupTable_);
     
     // Use scalar data to color objects
@@ -326,3 +315,32 @@ void TopoGridItem::assemblePipeline(TopoGridItem::Pipeline *pipeline) {
     }
     pipeline->firstRender_ = false;
 }
+
+
+
+bool TopoGridItem::setColormap(QString name) {
+
+  QByteArray ba = name.toLocal8Bit();
+  char *cname = ba.data();
+
+  TopoColorMap::Scheme scheme = TopoColorMap::schemeFromName(cname);
+  if (scheme == TopoColorMap::Unknown) {
+    return false;
+  }
+  scheme_ = scheme;
+
+  // Dispatch lambda function to run in QT render thread 
+  dispatch_async([this](vtkRenderWindow *renderWindow, vtkUserData userData) {
+
+    auto *pipeline = TopoGridItem::Pipeline::SafeDownCast(userData);
+    // assemble the pipeline; will read the input file specified by fileUrl
+    assemblePipeline(pipeline);
+    return;
+
+  });
+  
+  scheduleRender();  
+
+  return true;
+}
+

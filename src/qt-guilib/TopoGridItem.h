@@ -26,18 +26,17 @@ namespace mb_system {
   public:
 
 
-    /** 'Persistent' VTK pipeline objects, used by QQuickItem infrastructure */
+    /// 'Persistent' VTK pipeline objects, used by QQuickItem infrastructure
     struct Pipeline : vtkObject {
 
       Pipeline() {firstRender_ = true;}
       
-      /// Factory to create static Data instance 
+      /// Declare static New() method expected by VTK factory classes, that
+      /// returns a Pipeline instance
       static Pipeline* New();
-    
-      /// Add RTTI to Data
+      
+      /// Enable run-time typing to Pipeline
       vtkTypeMacro(Pipeline, vtkObject);
-
-      // Instantiate persistent VTK pipeline objects
 
       /// Topo grid reader
       vtkNew<mb_system::TopoGridReader> gridReader_;
@@ -47,8 +46,8 @@ namespace mb_system {
       vtkNew<vtkActor> surfaceActor_;
       vtkNew<vtkPolyDataMapper> surfaceMapper_;
       vtkNew<vtkRenderer> renderer_;
-      vtkNew<vtkTransform> transform_;
-      vtkNew<vtkTransformFilter> transformFilter_;
+
+      /// x,y,z axes
       vtkNew<vtkCubeAxesActor> axesActor_;
       vtkNew<vtkNamedColors>colors_;
     
@@ -59,22 +58,20 @@ namespace mb_system {
     TopoGridItem();
 
   
-    /// Initialize VTK pipeline and attach it to vtkRenderWindow, return
-    /// latest pipeline object.
+    /// Initialize and connect VTK pipeline components, attach it to
+    /// vtkRenderWindow, return latest pipeline object.
     /// (Return type vtkUserData is defined in parent class)
     vtkUserData initializeVTK(vtkRenderWindow *renderWindow) override;
 
-    /// 
+    /// Clean up and free resources as needed
     void destroyingVTK(vtkRenderWindow
 		       *renderWindow, vtkUserData userData) override;
 
-    /// Set topo colormap scheme; return true if colorMapName corresponds
-    /// to a supported colorMap, else return false.
-    bool setColorMapScheme(const char *colorMapname);
-
-
     /// Load specified grid file
     Q_INVOKABLE bool loadGridfile(QUrl file);
+
+    /// Set color map
+    Q_INVOKABLE bool setColormap(QString cmapName);    
     
     /// Set grid filename
     void setGridFilename(char *filename) {
