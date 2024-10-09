@@ -19,7 +19,7 @@ extern "C" {
 #include "mbedit_prog.h"
 }
 
-/** Backend application logic; QObject subclass, so it exchanges
+/** mbedit Backend application logic; QObject subclass, so it can exchange
 info with QML  */
 class Backend : public QObject  {
 
@@ -85,7 +85,35 @@ public:
   /// Emit signals on behalf of static member functions
   static mb_system::Emitter staticEmitter_;
 
+  // IVOKABLE methods can be invoked directly by QML code
+  
+  /// Open and process swath file
+  Q_INVOKABLE bool processSwathFile(QUrl swathFile);
+  
+  /// Methods called by QML code
+  Q_INVOKABLE void onXtrackChanged(double value);
+  Q_INVOKABLE void onPingsShownChanged(double value);
+  Q_INVOKABLE void onVerticalExaggChanged(double value);
+  Q_INVOKABLE void onPingStepChanged(double value); 
 
+  Q_INVOKABLE void onEditModeChanged(QString msg);
+  Q_INVOKABLE void onAncillDataChanged(QString msg);
+  Q_INVOKABLE void onSliceChanged(QString msg);
+  Q_INVOKABLE void onColorCodeChanged(QString msg);
+
+  Q_INVOKABLE void onLeftMouseButtonClicked(double x, double y);
+  Q_INVOKABLE void onRightMouseButtonClicked(double x, double y);
+
+  Q_INVOKABLE void onLeftMouseButtonDown(double x, double y);
+  Q_INVOKABLE void onLeftMouseButtonUp(double x, double y);
+  Q_INVOKABLE void onMouseMove(double x, double y);
+
+  /// Invoked by QML when resize occurs; sets xScale_ and yScale member values
+  Q_INVOKABLE void onPixmapImageResize(int width, int height);
+  
+  /// Invoked when main window is destroyed
+  Q_INVOKABLE void onMainWindowDestroyed(void);
+  
 
 protected:
 
@@ -169,38 +197,6 @@ protected:
   int iCurrent_;  /// ???
   int mnPlot_;    /// ???
 	     
-
-
-public slots:
-  // These 'slots' can be invoked directly by QML code, i.e. not connected by
-  // signals
-  
-  /// Open and process swath file
-  bool processSwathFile(QUrl swathFile);
-  
-  /// Methods called by QML code
-  void onXtrackChanged(double value);
-  void onPingsShownChanged(double value);
-  void onVerticalExaggChanged(double value);
-  void onPingStepChanged(double value);				     
-
-  void onEditModeChanged(QString msg);
-  void onAncillDataChanged(QString msg);
-  void onSliceChanged(QString msg);
-  void onColorCodeChanged(QString msg);
-
-  void onLeftMouseButtonClicked(double x, double y);
-  void onRightMouseButtonClicked(double x, double y);
-
-  void onLeftMouseButtonDown(double x, double y);
-  void onLeftMouseButtonUp(double x, double y);
-  void onMouseMove(double x, double y);
-
-  /// Invoked by QML when resize occurs; sets xScale_ and yScale member values
-  void onPixmapImageResize(int width, int height);
-  
-  /// Invoked when main window is destroyed
-  void onMainWindowDestroyed(void);
 
 };
 
