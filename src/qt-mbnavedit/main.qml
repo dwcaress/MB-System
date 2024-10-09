@@ -477,7 +477,7 @@ Window {
         FileDialog {
             id: fileDialog
             title: 'Open swath file'
-            nameFilters: ['Swath files (*.mb[0-9]*)']
+            nameFilters: ['Swath files (*.mb[0-9][0-9])']
             onAccepted: {
                 console.log('accepted ' + selectedFile);
                 backend.processSwathFile(selectedFile);
