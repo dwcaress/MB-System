@@ -33,8 +33,7 @@ int main(int argc, char* argv[])
   qmlRegisterType<TopoGridItem>("VTK", 9, 3, "TopoGridItem");
 
   // Register SharedConstants type
-  qmlRegisterType<SharedConstants>("SharedConstants", 1, 1, "Constants");  
-
+  qmlRegisterType<SharedConstants>("SharedConstants", 1, 1, "SharedConstants");
   
   engine.load(QUrl("qrc:/main.qml"));
  

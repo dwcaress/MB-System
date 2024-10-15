@@ -13,7 +13,8 @@ Window {
   width: 800
   height: 800
 
-  Constants {
+  // Declare instance of SharedConstants
+  SharedConstants {
     id: constants
   }
 
