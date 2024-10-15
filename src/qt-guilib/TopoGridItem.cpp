@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include <vtk/vtkProperty.h>
 #include <vtk/vtkTextProperty.h>
+#include <vtk/vtkErrorCode.h>
 
 #include "TopoGridItem.h"
 #include "TopoColorMap.h"
@@ -14,8 +15,8 @@ vtkStandardNewMacro(TopoGridItem::Pipeline);
 TopoGridItem::TopoGridItem() {
   gridFilename_ = strdup("");
   verticalExagg_ = 1.;
-  plotAxes_ = true;
-  scheme_ = TopoColorMap::BrightRainbow;
+  plotAxes_ = false;
+  scheme_ = TopoColorMap::Haxby;
 }
 
 
@@ -31,46 +32,6 @@ QQuickVTKItem::vtkUserData TopoGridItem::initializeVTK(vtkRenderWindow *renderWi
   
   // Assemble vtk pipeline
   assemblePipeline(pipeline_);
-
-  /* ***
-
-  qDebug() << "ready to check pointPicked_";
-  qDebug() << "pointPicked_: " << pointPicked_;
-  if (pointPicked_) {
-    std::cerr << "add picked point to scene" << std::endl;
-
-    int *size = renderWindow_->GetSize();
-    std::cerr << "window w: " << size[0] << "  h: " << size[1] << "\n";
-
-    vtkNew<vtkCoordinate> coords;
-    coords->SetCoordinateSystemToDisplay();
-    coords->SetValue(size[0], size[1], 0.);
-    double *worldSize = coords->GetComputedWorldValue(renderer_);
-    std::cerr << "world x: " << worldSize[0] << "  world y: " <<
-      worldSize[1] << "  world z: " << worldSize[2] << "\n";
-    
-    vtkSmartPointer<vtkSphereSource>pickedPoint =
-      vtkSmartPointer<vtkSphereSource>::New();
-
-    double radius = worldSize[0] / 30000;
-    pickedPoint->SetRadius(radius);
-    pickedPoint->SetCenter(pickedCoords_[0], pickedCoords_[1],
-			   pickedCoords_[2]);
-    
-    vtkSmartPointer<vtkPolyDataMapper> pickedPointMapper =
-      vtkSmartPointer<vtkPolyDataMapper>::New();
-    
-    pickedPointMapper->SetInputConnection(pickedPoint->GetOutputPort());
-
-    vtkSmartPointer<vtkActor> pickedPointActor =
-      vtkSmartPointer<vtkActor>::New();
-    
-    pickedPointActor->SetMapper(pickedPointMapper);
-
-    renderer_->AddActor(pickedPointActor);
-
-  }
-  *** */
 
   return pipeline_;
 }
@@ -159,96 +120,121 @@ bool TopoGridItem::loadGridfile(QUrl fileUrl) {
   // Set name of grid file to access from pipeline
   setGridFilename(filename);
 
+  // Set function to run in QT render thread
+  /// dispatch_async(&(this->reassemblePipeline));  // HOW???
+
+  reassemblePipeline();
+  
+  return true;
+}
+
+
+void TopoGridItem::reassemblePipeline() {
   // Dispatch lambda function to run in QT render thread 
   dispatch_async([this](vtkRenderWindow *renderWindow, vtkUserData userData) {
-
     auto *pipeline = TopoGridItem::Pipeline::SafeDownCast(userData);
-    // assemble the pipeline; will read the input file specified by fileUrl
     assemblePipeline(pipeline);
     return;
-
   });
-  
+
+  // Schedule update on the vtkRenderWindow
   scheduleRender();
-  return true;
+
+  return;
 }
 
 
 void TopoGridItem::assemblePipeline(TopoGridItem::Pipeline *pipeline) {
 
+  qDebug() << "assemblePipeline()";
+  
   // Check that input file exists and is readable
   if (access(gridFilename_, R_OK) == -1) {
     qWarning() << "Can't access input file " << gridFilename_;
     return;
   }
+  
   qDebug() << "set filename to " << gridFilename_;
-    pipeline->gridReader_->SetFileName(gridFilename_);
+  pipeline->gridReader_->SetFileName(gridFilename_);
 
-    if (pipeline->gridReader_->GetErrorCode() != 0) {
-      qWarning() << "grid reader error during SetFileNae(): "
-		 << pipeline->gridReader_->GetErrorCode();
-      return;
-    }  
+  unsigned long errorCode;
+  if ((errorCode = pipeline->gridReader_->GetErrorCode()) != 0) {
+    qWarning() << "grid reader error during SetFileName(): "
+	       << errorCode;
 
-    // Determine grid type
-    TopoGridType gridType =
-      TopoGridReader::getGridType(gridFilename_);
+    qWarning() << gridFilename_ << ": " <<
+      vtkErrorCode::GetStringFromErrorCode(errorCode);
 
-    pipeline->gridReader_->setGridType(gridType);
-
-    // Update TopoGridReader
-    qDebug() << "call gridReader_->Update()";
-    pipeline->gridReader_->Update();
-
-    if (pipeline->gridReader_->GetErrorCode() != 0) {
-      qWarning() << "grid reader error during Update(): "
-		 << pipeline->gridReader_->GetErrorCode();
-      return;
-    }  
-
-    // Read grid bounds
-    double gridBounds[6];
-    pipeline->gridReader_->gridBounds(&gridBounds[0], &gridBounds[1],
-				      &gridBounds[2], &gridBounds[3],
-				      &gridBounds[4], &gridBounds[5]);
+    return;
+  }
   
-    qDebug() << "xMin: " << gridBounds[0] << ", xMax: " << gridBounds[1] <<
-      "yMin: " << gridBounds[2] << ", yMax: " << gridBounds[3] <<
-      "zMin: " << gridBounds[4] << ", zMax: " << gridBounds[5];
+  // Clear actor list
+  pipeline->renderer_->RemoveAllViewProps();  
 
-    pipeline->elevFilter_->SetInputConnection(pipeline->gridReader_->
-					      GetOutputPort());
-  
-    pipeline->elevFilter_->SetLowPoint(0, 0, gridBounds[4]);
-    pipeline->elevFilter_->SetHighPoint(0, 0, gridBounds[5]);
-    // Preserve scalar values (keep minZ/maxZ range)
-    pipeline->elevFilter_->SetScalarRange(gridBounds[4], gridBounds[5]);    
+  // Determine grid type
+  TopoGridType gridType =
+    TopoGridReader::getGridType(gridFilename_);
 
-    pipeline->surfaceMapper_->SetInputConnection(pipeline->elevFilter_->
-						 GetOutputPort());
+  pipeline->gridReader_->setGridType(gridType);
 
-    // Make lookup table
-    TopoColorMap::makeLUT(scheme_,
-			  pipeline->elevLookupTable_);
+  // Update TopoGridReader
+  qDebug() << "call gridReader_->Update()";
+  pipeline->gridReader_->Update();
+
+  if ((errorCode = pipeline->gridReader_->GetErrorCode()) != 0) {
+    qWarning() << "grid reader error during Update(): "
+	       << errorCode;
     
-    // Use scalar data to color objects
-    pipeline->surfaceMapper_->ScalarVisibilityOn();
-    // Scalar values range from min to max z (depth)
-    pipeline->surfaceMapper_->SetScalarRange(gridBounds[4],
-					     gridBounds[5]);    
-
-    pipeline->surfaceMapper_->SetLookupTable(pipeline->elevLookupTable_);
-  
-    // Assign surfaceMapper to actor
-    pipeline->surfaceActor_->SetMapper(pipeline->surfaceMapper_);
+    qWarning() << gridFilename_ << ": " <<
+      vtkErrorCode::GetStringFromErrorCode(errorCode);
     
-    // Add actor to renderer
-    pipeline->renderer_->AddActor(pipeline->surfaceActor_);
+    return;
+  }  
 
-    pipeline->renderer_->SetBackground(pipeline->colors_->GetColor3d("White").
-				       GetData());
+  // Read grid bounds
+  double gridBounds[6];
+  pipeline->gridReader_->gridBounds(&gridBounds[0], &gridBounds[1],
+				    &gridBounds[2], &gridBounds[3],
+				    &gridBounds[4], &gridBounds[5]);
+  
+  qDebug() << "xMin: " << gridBounds[0] << ", xMax: " << gridBounds[1] <<
+    "yMin: " << gridBounds[2] << ", yMax: " << gridBounds[3] <<
+    "zMin: " << gridBounds[4] << ", zMax: " << gridBounds[5];
+
+  pipeline->elevFilter_->SetInputConnection(pipeline->gridReader_->
+					    GetOutputPort());
+  
+  pipeline->elevFilter_->SetLowPoint(0, 0, gridBounds[4]);
+  pipeline->elevFilter_->SetHighPoint(0, 0, gridBounds[5]);
+  // Preserve scalar values (keep minZ/maxZ range)
+  pipeline->elevFilter_->SetScalarRange(gridBounds[4], gridBounds[5]);    
+
+  pipeline->surfaceMapper_->SetInputConnection(pipeline->elevFilter_->
+					       GetOutputPort());
+
+  // Make lookup table
+  TopoColorMap::makeLUT(scheme_,
+			pipeline->elevLookupTable_);
+    
+  // Use scalar data to color objects
+  pipeline->surfaceMapper_->ScalarVisibilityOn();
+  // Scalar values range from min to max z (depth)
+  pipeline->surfaceMapper_->SetScalarRange(gridBounds[4],
+					   gridBounds[5]);    
+
+  pipeline->surfaceMapper_->SetLookupTable(pipeline->elevLookupTable_);
+  
+  // Assign surfaceMapper to actor
+  pipeline->surfaceActor_->SetMapper(pipeline->surfaceMapper_);
+    
+  // Add actor to renderer
+  pipeline->renderer_->AddActor(pipeline->surfaceActor_);
+
+  pipeline->renderer_->SetBackground(pipeline->colors_->GetColor3d("White").
+				     GetData());
   
 
+  if (plotAxes_) {
     // Set up axes
     setupAxes(pipeline->axesActor_,
 	      pipeline->colors_,
@@ -263,57 +249,15 @@ void TopoGridItem::assemblePipeline(TopoGridItem::Pipeline *pipeline) {
     pipeline->axesActor_->SetCamera(pipeline->renderer_->GetActiveCamera());
 
     pipeline->renderer_->AddActor(pipeline->axesActor_);    
-
-    double vertExagg = 1.;
-    pipeline->surfaceActor_->SetScale(1., 1., vertExagg);  // NEW!
-    pipeline->axesActor_->SetScale(1., 1., vertExagg);  // NEW!    
-
-    /* ***
-    ///
-    qDebug() << "pointPicked_: " << pointPicked_;
-    if (pointPicked_) {
-      std::cerr << "add picked point to scene" << std::endl;
-
-      int *size = renderWindow_->GetSize();
-      std::cerr << "window w: " << size[0] << "  h: " << size[1] << "\n";
-
-      vtkNew<vtkCoordinate> coords;
-      coords->SetCoordinateSystemToDisplay();
-      coords->SetValue(size[0], size[1], 0.);
-      double *worldSize = coords->GetComputedWorldValue(renderer_);
-      std::cerr << "world x: " << worldSize[0] << "  world y: " <<
-	worldSize[1] << "  world z: " << worldSize[2] << "\n";
+    pipeline->axesActor_->SetScale(1., 1., verticalExagg_);
+  }
     
-      vtkSmartPointer<vtkSphereSource>pickedPoint =
-	vtkSmartPointer<vtkSphereSource>::New();
+  pipeline->surfaceActor_->SetScale(1., 1., verticalExagg_);  // NEW!
 
-      double radius = worldSize[0] / 30000;
-      pickedPoint->SetRadius(radius);
-      pickedPoint->SetCenter(pickedCoords_[0], pickedCoords_[1],
-			     pickedCoords_[2]);
-    
-      vtkSmartPointer<vtkPolyDataMapper> pickedPointMapper =
-	vtkSmartPointer<vtkPolyDataMapper>::New();
-    
-      pickedPointMapper->SetInputConnection(pickedPoint->GetOutputPort());
-
-      vtkSmartPointer<vtkActor> pickedPointActor =
-	vtkSmartPointer<vtkActor>::New();
-    
-      pickedPointActor->SetMapper(pickedPointMapper);
-
-      renderer_->AddActor(pickedPointActor);
-
-    }
-  ////
-  *** */
-    
-    pipeline->firstRender_ = true;  /// TEST
-    
-    if (pipeline->firstRender_) {
-      pipeline->renderer_->ResetCamera();
-    }
-    pipeline->firstRender_ = false;
+  if (pipeline->firstRender_) {
+    pipeline->renderer_->ResetCamera();
+  }
+  pipeline->firstRender_ = false;
 }
 
 
@@ -329,18 +273,17 @@ bool TopoGridItem::setColormap(QString name) {
   }
   scheme_ = scheme;
 
-  // Dispatch lambda function to run in QT render thread 
-  dispatch_async([this](vtkRenderWindow *renderWindow, vtkUserData userData) {
-
-    auto *pipeline = TopoGridItem::Pipeline::SafeDownCast(userData);
-    // assemble the pipeline; will read the input file specified by fileUrl
-    assemblePipeline(pipeline);
-    return;
-
-  });
-  
-  scheduleRender();  
+  reassemblePipeline();
 
   return true;
 }
 
+
+void TopoGridItem::showAxes(bool plotAxes) {
+  qDebug() << "showAxes(): " << plotAxes;
+  plotAxes_ = plotAxes;
+
+  reassemblePipeline();
+
+  return;
+}
