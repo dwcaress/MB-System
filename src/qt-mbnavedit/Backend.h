@@ -26,7 +26,7 @@ extern "C" {
 
 #define MBNAVEDIT_BUFFER_SIZE 1000000
 
-/** Backend application logic; QObject subclass, so it exchanges
+/** mbnavedit backend application logic; QObject subclass, so it can exchange
     info with QML  */
 class Backend : public QObject  {
 
@@ -450,49 +450,47 @@ protected:
   int plot_draft_value(int iplot, int iping);
 
 						      
-public slots:
-  // These 'slots' can be invoked directly by QML code, i.e. not
-  // necessarily connected by signals
-  
-  /// Methods called by QML code
-  void setPlot(QString plotName, bool set);
+public:
+  // These methods can be invoked directly by QML code
+
+  Q_INVOKABLE void setPlot(QString plotName, bool set);
 
   /// Called when edit mode changed
-  void onEditModeChanged(QString modeName);
+  Q_INVOKABLE void onEditModeChanged(QString modeName);
 
-  void onLeftButtonClicked(int x, int y);
+  Q_INVOKABLE void onLeftButtonClicked(int x, int y);
 
-  void onRightButtonClicked(int x, int y);
+  Q_INVOKABLE void onRightButtonClicked(int x, int y);
 
-  void onMiddleButtonClicked(int x, int y);
+  Q_INVOKABLE void onMiddleButtonClicked(int x, int y);
 
-  void onMouseMoved(int x, int y);
+  Q_INVOKABLE void onMouseMoved(int x, int y);
 
   /// Invoked by QML when resize occurs; sets xScale_ and yScale member values
-  void onPixmapImageResize(int width, int height);
+  Q_INVOKABLE void onPixmapImageResize(int width, int height);
     
   /// Reset time interval
-  void onResetInterval(void);
+  Q_INVOKABLE void onResetInterval(void);
 
   /// Move swath view to start
-  void onGoStart(void);
+  Q_INVOKABLE void onGoStart(void);
 
   /// Move swath view forward
-  void onGoForward(void);
+  Q_INVOKABLE void onGoForward(void);
 
   /// Move swath view back
-  void onGoBack(void);
+  Q_INVOKABLE void onGoBack(void);
 
   /// Move swath view to end
-  void onGoEnd(void);
+  Q_INVOKABLE void onGoEnd(void);
 
   // Interpolate around selected points
-  void onInterpolate(void);
+  Q_INVOKABLE void onInterpolate(void);
 
-  void onInterpolateRepeat();
+  Q_INVOKABLE void onInterpolateRepeat();
   
   /// Invoked when main window is destroyed
-  void onMainWindowDestroyed(void);
+  Q_INVOKABLE void onMainWindowDestroyed(void);
 
 
 };
