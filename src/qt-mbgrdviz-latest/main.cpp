@@ -42,19 +42,19 @@ int main(int argc, char* argv[])
   QQuickWindow* window = qobject_cast<QQuickWindow*>(topLevel);
 
 
-  // Find the TopoGridItem
+  // Find the TopoGridItem and load specified grid input
   TopoGridItem *item = topLevel->findChild<TopoGridItem*>(TopoGridItemName);
   if (!item) {
     qFatal() << "Couldn't find TopoGridItem " << TopoGridItemName
 	     << " in QML";
     return 1;
   }
-  else {
-    qDebug() << "found TopoGridItem " << TopoGridItemName;
-  }
 
+  // Specifiy input file for TopoGridItem that was specified on command line
+  // (could be nullptr); will be loaded and displayed when item is
+  // initialized (if not nullptr)
   item->setGridFilename(gridFilename);
-  item->update();
+
   
   window->show();
 
