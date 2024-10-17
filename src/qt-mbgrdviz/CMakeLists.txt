@@ -33,9 +33,9 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-add_executable(qt-mbgrdviz-latest  main.cpp qml.qrc)
+add_executable(qt-mbgrdviz  main.cpp qml.qrc)
 
-target_link_libraries(qt-mbgrdviz-latest PRIVATE MBGui
+target_link_libraries(qt-mbgrdviz PRIVATE MBGui
                       Qt6::Core Qt6::Quick Qt6::Gui
                       Qt6::OpenGL VTK::GUISupportQtQuick)
 
