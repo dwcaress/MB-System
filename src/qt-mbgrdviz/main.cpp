@@ -1,68 +1,59 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include <QQmlContext>
-#include <QVTKOpenGLWindow.h>
-#include <QQuickVTKItem.h>
-#include "BackEnd.h"
-// #include "QVtkItem.h"   // using TogoGridItem now
+#include <QQuickWindow>
+#include <vtk-9.3/QQuickVTKItem.h>
+#include <vtk-9.3/vtkPolyDataMapper.h>
+#include <vtk-9.3/vtkActor.h>
+#include <vtk-9.3/vtkRenderer.h>
+#include <vtk-9.3/vtkConeSource.h>
+#include <vtk-9.3/vtkRenderWindow.h>
+#include "TopoGridItem.h"
 #include "SharedConstants.h"
-#include "TopoColorMap.h"
 
-// These first three lines address
-// issue described at
-// https://stackoverflow.com/questions/18642155/no-override-found-for-vtkpolydatamapper
-#include "vtkAutoInit.h"
-VTK_MODULE_INIT(vtkRenderingOpenGL2); // VTK was built with vtkRenderingOpenGL2
-VTK_MODULE_INIT(vtkInteractionStyle);
-VTK_MODULE_INIT(vtkRenderingFreeType)
+using namespace mb_system;
 
-int main(int argc, char *argv[])
+#define TopoGridItemName "topoGridItem"
+
+int main(int argc, char* argv[])
 {
-  using namespace sharedQmlCpp;
+  char *gridFilename = nullptr;
+  if (argc > 1) {
+    gridFilename = argv[1];
+  }
 
+  // Sets the graphics API to OpenGLRhi and sets up the surface format for
+  // intermixed VTK and QtQuick rendering. 
   QQuickVTKItem::setGraphicsApi();
-
   
-  QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-
   QGuiApplication app(argc, argv);
+ 
+  QQmlApplicationEngine engine;
 
-    app.setOrganizationName("MBARI");
-    app.setOrganizationDomain("www.mbari.org");
-    app.setApplicationName("my app");
+  // Register TopoGridItem type
+  qmlRegisterType<TopoGridItem>("VTK", 9, 3, "TopoGridItem");
 
-    QQmlApplicationEngine engine;
-    const QUrl url(QStringLiteral("qrc:/main.qml"));
-    QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
-                     &app, [url](QObject *obj, const QUrl &objUrl) {
-        if (!obj && url == objUrl)
-            QCoreApplication::exit(-1);
-    }, Qt::QueuedConnection);
+  // Register SharedConstants type
+  qmlRegisterType<SharedConstants>("SharedConstants", 1, 1, "SharedConstants");
+  
+  engine.load(QUrl("qrc:/main.qml"));
+ 
+  QObject* topLevel = engine.rootObjects().value(0);
 
-    qmlRegisterType<mb_system::TopoGridItem>("QVtk", 1, 0, "TopoGridItem");
+  // Find the TopoGridItem instantiatd by QML and load specified grid input
+  TopoGridItem *item = topLevel->findChild<TopoGridItem*>(TopoGridItemName);
+  if (!item) {
+    qFatal() << "Couldn't find TopoGridItem " << TopoGridItemName
+	     << " in QML";
+    return 1;
+  }
 
-    // Register SharedConstants so QML can access its C++ enums and other
-    // constants.
-    qmlRegisterType<Const>("SharedConstants", 1, 0,
-			   "Const");
+  // Specifiy input file for TopoGridItem that was specified on command line
+  // (could be nullptr); will be loaded and displayed when item is
+  // initialized (if not nullptr)
+  item->setGridFilename(gridFilename);
+  
+  QQuickWindow* window = qobject_cast<QQuickWindow*>(topLevel);
+  window->show();
 
-    engine.load(url);
-
-    
-    if (!BackEnd::registerSingleton(argc, argv, &engine)) {
-        qCritical("Couldn't create/register BackEnd");
-        exit(1);
-    }
-
-    /// TEST TEST - print supported color maps
-    std::vector<const char *> names;
-    mb_system::TopoColorMap::schemeNames(&names);
-    
-    for (int i = 0; i < names.size(); i++) {
-      std::cout << "colorMap " << names[i] << "\n";
-    }
-
-    return app.exec();
+   app.exec();
 }
-
-
