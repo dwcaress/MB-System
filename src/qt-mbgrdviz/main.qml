@@ -421,7 +421,7 @@ Window {
         text: "Quit application?"
         buttons: MessageDialog.Yes | MessageDialog.No
         Component.onCompleted: visible = false
-        onAccepted: Qt.quit(0)
+        onAccepted: Qt.quit()
     }
 
     MessageDialog {
