@@ -13,12 +13,21 @@
 #include "GeoCon.hpp"
 #include "GeoCon.h"
 
-void use_cpp(GeoCon *gcon);
-void use_c(wgeocon_t *gcon);
+//#define TEST_LAT 0.0 // 84.0 // 0.0
+//#define TEST_LON -126.0 // -120.0 // -126.0
+//#define TEST_DEBUG 1
+static const char *SOURCE_CRS_DFL = GEOIF_LONLAT_DFL;
+static const char *TARGET_CRS_DFL = GEOIF_CRS_DFL;
+static double LAT_DFL = 0.; //84.
+static double LON_DFL = -126.;//-120.
+static int DEBUG_DFL = 0;
 
-void use_cpp(GeoCon *gcon)
+void use_cpp(GeoCon *gcon, double lat_d=LAT_DFL, double lon_d=LON_DFL);
+void use_c(wgeocon_t *gcon, double lat_d=LAT_DFL, double lon_d=LON_DFL);
+
+void use_cpp(GeoCon *gcon, double lat_d, double lon_d)
 {
-    double lat_d=36.8044, lon_d=-121.7869;
+//    double lat_d=TEST_LAT, lon_d=TEST_LON;
     double lat_r=Math::degToRad(lat_d), lon_r=Math::degToRad(lon_d);
     double nor=0, eas=0;
 
@@ -44,9 +53,9 @@ void use_cpp(GeoCon *gcon)
     }
 }
 
-void use_c(wgeocon_t *gcon)
+void use_c(wgeocon_t *gcon, double lat_d, double lon_d)
 {
-    double lat_d=36.8044, lon_d=-121.7869;
+//    double lat_d=TEST_LAT, lon_d=TEST_LON;
     double lat_r=Math::degToRad(lat_d), lon_r=Math::degToRad(lon_d);
     double nor=0, eas=0;
 
@@ -74,24 +83,37 @@ void use_c(wgeocon_t *gcon)
 
 int main(int argc, char **argv)
 {
-    double lat=0, lon=0;
-    double nor=0, eas=0;
+    void **av = (void **)malloc(2 * sizeof(void *));
+    av[0] = (void *)TARGET_CRS_DFL;
+    av[1] = (void *)SOURCE_CRS_DFL;
+
+    int debug = DEBUG_DFL;
+    double lat_d = LAT_DFL;
+    double lon_d = LON_DFL;
+
+    for(int i=0; i < argc; i++) {
+        if(sscanf(argv[i], "--debug=%d", &debug) == 1) {
+        } else if(sscanf(argv[i], "--lat=%lf", &lat_d) == 1) {
+        } else if(sscanf(argv[i], "--lon=%lf", &lon_d) == 1) {
+        }
+    }
 
     // test C++ API
 
     std::cerr << "# gctp_i" << std::endl;
     GeoCon *gctp_i = new GeoCon(10);
-    gctp_i->geo_to_mp(lat, lon, &nor, &eas);
+    gctp_i->set_debug(debug);
 
-    use_cpp(gctp_i);
+    use_cpp(gctp_i, lat_d, lon_d);
 
     std::cerr << std::endl;
 
     std::cerr << "# proj_i" << std::endl;
     GeoCon *proj_i = new GeoCon(GEOIF_WGS_DFL);
-    proj_i->geo_to_mp(lat, lon, &nor, &eas);
+    proj_i->set_debug(debug);
+    proj_i->init(2, av);
 
-    use_cpp(proj_i);
+    use_cpp(proj_i, lat_d, lon_d);
 
     if(gctp_i != NULL)
         delete gctp_i;
@@ -100,19 +122,25 @@ int main(int argc, char **argv)
         delete proj_i;
 
     // test C API
+
     wgeocon_t *gctp_c = wgeocon_new_gctp(10);
+    wgeocon_set_debug(gctp_c, debug);
+
     wgeocon_t *proj_c = wgeocon_new_proj(GEOIF_WGS_DFL);
+    wgeocon_set_debug(proj_c, debug);
+    wgeocon_init(proj_c, 2, av);
 
     std::cerr << std::endl;
-    use_c(gctp_c);
+    use_c(gctp_c, lat_d, lon_d);
 
     std::cerr << std::endl;
-    use_c(proj_c);
+    use_c(proj_c, lat_d, lon_d);
 
     std::cerr << std::endl;
 
     wgeocon_destroy(gctp_c);
     wgeocon_destroy(proj_c);
 
+    free(av);
     return 0;
 }

@@ -14,8 +14,9 @@
 #ifndef GEOCON_H
 #define GEOCON_H
 
-#define GEOIF_CRS_DFL "UTM10N"
+#define GEOIF_CRS_DFL "EPSG:32610"
 #define GEOIF_WGS_DFL "EPSG:4326"
+#define GEOIF_LONLAT_DFL "+proj=lonlat +datum=WGS84"
 
 // GeoCon implentation ID type
 typedef enum {
@@ -40,6 +41,7 @@ wgeocon_t *wgeocon_new_gctp(long int utm);
 
 // PROJ instance (caller must free using wgeocon_destroy)
 wgeocon_t *wgeocon_new_proj(const char *crs);
+wgeocon_t *wgeocon_inew_proj(void *xfm, bool autodel, const char *tcrs, const char *scrs);
 
 // release GeoConverter instance
 void wgeocon_destroy(wgeocon_t *self);
@@ -49,6 +51,10 @@ GeoConType wgeocon_type(wgeocon_t *self);
 
 // get implentation type name
 const char *wgeocon_typestr(wgeocon_t *self);
+// set debug level
+void wgeocon_set_debug(wgeocon_t *self, int debug);
+// get debug level
+int wgeocon_debug(wgeocon_t *self);
 
 // lat/lon to mercator projection
 int wgeocon_geo_to_mp(wgeocon_t *self, double lat_rad, double lon_rad, double *r_northing_m, double *r_easting_m);
@@ -58,6 +64,9 @@ int wgeocon_mp_to_geo(wgeocon_t *self, double northing_m, double easting_m, doub
 
 // get a pointer to a member (optional; keys defined per implementation)
 void *wgeocon_get_member(wgeocon_t *self, const char *key);
+
+// set a member (optional; keys defined per implementation)
+int wgeocon_set_member(wgeocon_t *self, const char *key, void *value);
 
 // initialize (optional; argments defined per implementation)
 void *wgeocon_init(wgeocon_t *self, int argc, void **argv);

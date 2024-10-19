@@ -18,10 +18,16 @@ GeoConIF::GeoConIF()
 : m_type(GEO_UNKNOWN)
 {}
 
- void *GeoConIF::get_member(const char *key)
+void *GeoConIF::get_member(const char *key)
 {
-    std::cerr << __func__ << " not implemented for type " << typestr() << std::endl;
-    return nullptr;
+   std::cerr << __func__ << " not implemented for type " << typestr() << std::endl;
+   return nullptr;
+}
+
+int GeoConIF::set_member(const char *key, void *value)
+{
+   std::cerr << __func__ << " not implemented for type " << typestr() << std::endl;
+   return -1;
 }
 
  void GeoConIF::auto_delete(const char *key, bool enable)
@@ -55,27 +61,49 @@ GeoConType GeoConIF::type()
     return geotype_str[0];
 }
 
+void GeoConIF::set_debug(int level)
+{
+    m_debug = level;
+}
+int GeoConIF::debug()
+{
+    return m_debug;
+}
+
 #ifdef TRN_USE_PROJ
 
 GeoConProj::GeoConProj()
-: m_crs(nullptr)
+: m_tcrs(nullptr)
 , m_proj_xfm(nullptr)
 , m_auto_delete_xfm(true)
 {
+    m_scrs = strdup(GEOIF_LONLAT_DFL);
     m_type = GEO_PROJ;
 }
 
-GeoConProj::GeoConProj(const char *crs)
+GeoConProj::GeoConProj(const char *tcrs)
 : m_proj_xfm(nullptr)
 , m_auto_delete_xfm(true)
 {
-    m_crs = (crs == NULL ? NULL : strdup(crs));
+    m_scrs = strdup(GEOIF_LONLAT_DFL);
+    m_tcrs = (tcrs == NULL ? NULL : strdup(tcrs));
+    m_type = GEO_PROJ;
+}
+
+GeoConProj::GeoConProj(void *xfm, bool autodel, const char *tcrs, const char *scrs)
+: m_proj_xfm(xfm)
+, m_auto_delete_xfm(autodel)
+{
+    m_scrs = scrs != NULL ? strdup(scrs) : strdup(GEOIF_LONLAT_DFL);
+    m_tcrs = (tcrs == NULL ? NULL : strdup(tcrs));
     m_type = GEO_PROJ;
 }
 
 GeoConProj::~GeoConProj()
 {
-    free(m_crs);
+    free(m_tcrs);
+    free(m_scrs);
+
     if(m_auto_delete_xfm && m_proj_xfm != nullptr) {
         proj_destroy((PJ *)m_proj_xfm);
     }
@@ -88,16 +116,15 @@ int GeoConProj::geo_to_mp(double lat_rad, double lon_rad, double *r_northing, do
         return -1;
     }
 
-    PJ_COORD c;
-    c.v[0] = lon_rad;
-    c.v[1] = lat_rad;
-    c = proj_trans((PJ *)m_proj_xfm, PJ_FWD, c);
+    PJ_COORD cin = proj_coord(Math::radToDeg(lon_rad), Math::radToDeg(lat_rad), 0, 0);
+    PJ_COORD cout = proj_trans((PJ *)m_proj_xfm, PJ_FWD, cin);
 
     // set output
-    *r_easting = c.v[1];
-    *r_northing = c.v[0];
+    *r_easting = cout.v[0];
+    *r_northing = cout.v[1];
 
-    std::cerr << typestr() << "::" << __func__ << " crs:" << m_crs << " proj_xfm:" << m_proj_xfm << std::endl;
+    if(debug() != 0)
+    std::cerr << typestr() << "::" << __func__ << " E,N: " << *r_easting << ", " << *r_northing << std::endl;
     return 0;
 }
 
@@ -108,16 +135,15 @@ int GeoConProj::mp_to_geo(double northing_m, double easting_m, double *r_lat_rad
         return -1;
     }
 
-    PJ_COORD c;
-    c.v[0] = northing_m;
-    c.v[1] = northing_m;
-    c = proj_trans((PJ *)m_proj_xfm, PJ_INV, c);
+    PJ_COORD cin = proj_coord(easting_m, northing_m, 0, 0);
+    PJ_COORD cout = proj_trans((PJ *)m_proj_xfm, PJ_INV, cin);
 
     // set output
-    *r_lat_rad = c.v[1];
-    *r_lon_rad = c.v[0];
+    *r_lon_rad = Math::degToRad(cout.v[0]);
+    *r_lat_rad = Math::degToRad(cout.v[1]);
 
-    std::cerr << typestr() << "::" << __func__ << " crs:" << m_crs << " proj_xfm:" << m_proj_xfm << std::endl;
+    if(debug() != 0)
+    std::cerr << typestr() << "::" << __func__ << " lat,lon: " << Math::radToDeg(*r_lat_rad) << ", " << Math::radToDeg(*r_lon_rad) << std::endl;
 
     return 0;
 }
@@ -127,36 +153,74 @@ void *GeoConProj::get_member(const char *key)
 {
     if(strcasecmp(key, "XFM") == 0)
         return m_proj_xfm;
+    if(strcasecmp(key, "SCRS") == 0)
+        return m_scrs;
+    if(strcasecmp(key, "TCRS") == 0)
+        return m_tcrs;
     return nullptr;
 }
 
+int GeoConProj::set_member(const char *key, void *value)
+{
+    if(strcasecmp(key, "XFM") == 0) {
+        m_proj_xfm = value;
+        return 0;
+    } else if(strcasecmp(key, "SCRS") == 0) {
+        free(m_scrs);
+        m_scrs = strdup((const char *)value);
+        return 0;
+    }
+    if(strcasecmp(key, "TCRS") == 0) {
+        free(m_tcrs);
+        m_tcrs = strdup((const char *)value);
+        return 0;
+    }
+    return -1;
+}
+
 // default transform initialization
-// argv[0] : const char * : source crs
-// argv[1] : const char * : target crs (optional default: use m_crs)
+// argv[0] : const char * : target crs
+// argv[1] : const char * : source crs
 void *GeoConProj::init(int argc, void **argv)
 {
-    const char *source_crs = GEOIF_WGS_DFL;
-    const char *target_crs = (m_crs != NULL ? m_crs : GEOIF_CRS_DFL);
+    const char *source_crs = (m_scrs != NULL ? m_scrs : GEOIF_LONLAT_DFL);
+    const char *target_crs = (m_tcrs != NULL ? m_tcrs : GEOIF_CRS_DFL);
 
-    for(int i = 0; i < argc; i++)
-    {
-        if(i == 0) {
-            source_crs = (const char *)argv[i];
-        } else if(i == 1) {
-            target_crs = (const char *)argv[i];
-        } else {
-            break;
+    if(argc > 0 && argv != nullptr) {
+        for(int i = 0; i < argc; i++)
+        {
+            if(i == 0 && argv[1] != nullptr) {
+                target_crs = (const char *)argv[i];
+
+                if(m_tcrs != nullptr)
+                    free(m_tcrs);
+                m_tcrs = strdup(target_crs);
+
+            } else if(i == 1 && argv[i] != nullptr) {
+                source_crs = (const char *)argv[i];
+
+                if(m_scrs != nullptr)
+                    free(m_scrs);
+                m_scrs = strdup(source_crs);
+            } else {
+                break;
+            }
         }
     }
+
+    if(debug() != 0)
+        std::cerr << typestr() << "::" << __func__ << " scrs: " << source_crs << " tcrs: " <<  target_crs << std::endl;
 
     PJ *p = proj_create_crs_to_crs(PJ_DEFAULT_CTX, source_crs, target_crs, 0);
 
     if(p != NULL){
-        void *pjptr = (void *) proj_normalize_for_visualization(PJ_DEFAULT_CTX, p);
-        m_proj_xfm = pjptr;
-        fprintf(stderr, "%s:%d - m_proj_xfm %p\n", __func__, __LINE__, m_proj_xfm);
+        m_proj_xfm = (void *) proj_normalize_for_visualization(PJ_DEFAULT_CTX, p);
+
+        if(debug() != 0)
+            std::cerr << typestr() << "::" << __func__ << " m_proj_xfm: " << (void *)m_proj_xfm << std::endl;
+
     } else {
-        fprintf(stderr, "%s:%d - ERR proj_create_crs_to_crs failed\n", __func__, __LINE__);
+        fprintf(stderr, "%s:%d - ERR proj_create_crs_to_crs failed src: %s tgt: %s\n", __func__, __LINE__, source_crs, target_crs);
     }
     return m_proj_xfm;
 }
@@ -186,6 +250,7 @@ GeoConGCTP::~GeoConGCTP()
 
 int GeoConGCTP::geo_to_mp(double lat_rad, double lon_rad, double *r_northing, double *r_easting)
 {
+    if(debug() != 0)
     std::cerr << typestr() << "::" << __func__ << " utm:" << m_utm << std::endl;
 
     if(r_northing == NULL || r_easting == NULL) {
@@ -193,17 +258,28 @@ int GeoConGCTP::geo_to_mp(double lat_rad, double lon_rad, double *r_northing, do
         return -1;
     }
 
-    return NavUtils::geoToUtm(lat_rad, lon_rad, m_utm, r_northing, r_easting);
+    int retval = NavUtils::geoToUtm(lat_rad, lon_rad, m_utm, r_northing, r_easting);
+
+    if(debug() != 0)
+    std::cerr << typestr() << "::" << __func__ << " ret:" << retval << " E,N: " << *r_easting << ", " << *r_northing << std::endl;
+
+    return retval;
 }
 
 int GeoConGCTP::mp_to_geo(double northing_m, double easting_m, double *r_lat_rad, double *r_lon_rad)
 {
+    if(debug() != 0)
     std::cerr << typestr() << "::" << __func__ << " utm:" << m_utm << std::endl;
 
     if(r_lat_rad == NULL || r_lon_rad == NULL)
         return -1;
 
-    return NavUtils::utmToGeo(northing_m, easting_m, m_utm, r_lat_rad, r_lon_rad);
+    int retval = NavUtils::utmToGeo(northing_m, easting_m, m_utm, r_lat_rad, r_lon_rad);
+
+    if(debug() != 0)
+    std::cerr << typestr() << "::" << __func__ << " ret: " << retval << " lat,lon: " << Math::radToDeg(*r_lat_rad) << ", " << Math::radToDeg(*r_lon_rad) << std::endl;
+
+    return retval;
 }
 
 GeoCon::GeoCon()
@@ -219,14 +295,20 @@ GeoCon::GeoCon(long int utm)
 
 #ifdef TRN_USE_PROJ
 // implementation backed by libproj coordinate transform (PJ *)
-GeoCon::GeoCon(const char *crs)
+GeoCon::GeoCon(const char *tcrs)
 {
     // create a PROJ instance
-    m_geocon = new GeoConProj(crs);
+    m_geocon = new GeoConProj(tcrs);
+}
+
+GeoCon::GeoCon(void *xfm, bool autodel, const char *tcrs, const char *scrs)
+{
+    // create a PROJ instance
+    m_geocon = new GeoConProj(xfm, autodel, tcrs, scrs);
 }
 #else
 // if libproj is not available, disable proj implementation
-GeoCon::GeoCon(const char *crs)
+GeoCon::GeoCon(const char *tcrs)
 : m_geocon(nullptr)
 {
     std::cerr << __func__ << ": ERR proj not supported; build using -DTRN_USE_PROJ" << std::endl;
@@ -271,6 +353,15 @@ void *GeoCon::get_member(const char *key)
     return m_geocon->get_member(key);
 }
 
+int GeoCon::set_member(const char *key, void *value)
+{
+    if(m_geocon == NULL) {
+        std::cerr << __func__ << ": ERR NULL instance" << std::endl;
+        return -1;
+    }
+    return m_geocon->set_member(key, value);
+}
+
 // initialize (optional; argments defined per implementation)
 void *GeoCon::init(int argc, void **argv)
 {
@@ -301,6 +392,21 @@ const char *GeoCon::typestr()
     return m_geocon->typestr();
 }
 
+void GeoCon::set_debug(int level)
+{
+    if(m_geocon == NULL) {
+        return;
+    }
+    m_geocon->set_debug(level);
+}
+
+int GeoCon::debug()
+{
+    if(m_geocon == NULL) {
+        return -1;
+    }
+    return m_geocon->debug();
+}
 
 struct wgeocon_s {
     void *obj;
@@ -323,6 +429,17 @@ wgeocon_t *wgeocon_new_proj(const char *crs)
     if(NULL!=m){
         memset(m,0,sizeof(*m));
         GeoCon *obj = new GeoCon(crs);
+        m->obj = obj;
+    }
+    return m;
+}
+
+wgeocon_t *wgeocon_inew_proj(void *xfm, bool autodel, const char *tcrs, const char *scrs)
+{
+    wgeocon_t *m = (wgeocon_t *)malloc(sizeof(*m));
+    if(NULL!=m){
+        memset(m,0,sizeof(*m));
+        GeoCon *obj = new GeoCon(xfm, autodel, tcrs, scrs);
         m->obj = obj;
     }
     return m;
@@ -358,6 +475,26 @@ const char *wgeocon_typestr(wgeocon_t *self)
     return NULL;
 }
 
+void wgeocon_set_debug(wgeocon_t *self, int level)
+{
+    if(NULL!=self){
+        GeoCon *obj = static_cast<GeoCon *>(self->obj);
+        if(obj != NULL) {
+            return obj->set_debug(level);
+        }
+    }
+}
+int wgeocon_debug(wgeocon_t *self)
+{
+    if(NULL!=self){
+        GeoCon *obj = static_cast<GeoCon *>(self->obj);
+        if(obj != NULL) {
+            return obj->debug();
+        }
+    }
+    return -1;
+}
+
 int wgeocon_geo_to_mp(wgeocon_t *self, double lat_rad, double lon_rad, double *r_northing_m, double *r_easting_m)
 {
     if(NULL!=self){
@@ -389,6 +526,17 @@ void *wgeocon_get_member(wgeocon_t *self, const char *key)
         }
     }
     return NULL;
+}
+
+int wgeocon_set_member(wgeocon_t *self, const char *key, void *value)
+{
+    if(NULL!=self){
+        GeoCon *obj = static_cast<GeoCon *>(self->obj);
+        if(obj != NULL) {
+            return obj->set_member(key, value);
+        }
+    }
+    return -1;
 }
 
 void wgeocon_auto_delete(wgeocon_t *self, const char *key, bool enable)

@@ -39,10 +39,12 @@ public:
     // convert mercator projection to lat/lon
     virtual int mp_to_geo(double northing_m, double easting_m, double *r_lat_rad, double *r_lon_rad) = 0;
 
-    // get underlying context pointer
+    // get underlying context member
     // for implementations that have one.
     // Enables caller to manage context initialization/destruction
     virtual void *get_member(const char *key);
+    // set underlying member for implementations that support it
+    virtual int set_member(const char *key, void *value);
 
     // if true, caller will manage release of context resources
     virtual void auto_delete(const char *key, bool enable);
@@ -53,12 +55,17 @@ public:
     // implementation type ID
     GeoConType type();
 
+    // debug level
+    void set_debug(int level);
+    int debug();
+
     // type ID name (null terminated string)
     virtual const char *typestr();
 
 protected:
 
     GeoConType m_type;
+    int m_debug;
 };
 
 #ifdef TRN_USE_PROJ
@@ -82,7 +89,8 @@ class GeoConProj : public GeoConIF
 public:
     GeoConProj();
 
-    GeoConProj(const char *crs);
+    GeoConProj(const char *tcrs);
+    GeoConProj(void *xfm, bool autodel, const char *tcrs, const char *scrs=NULL);
 
     ~GeoConProj() override;
 
@@ -92,15 +100,17 @@ public:
 
     // "XFM" returns (PJ *) m_proj_xfm
     void *get_member(const char *key) override;
+    int set_member(const char *key, void *value) override;
 
-    // argv[0] : const char * : source crs
-    // argv[1] : const char * : target crs (optional default: use m_crs)
+    // argv[0] : const char * : target crs
+    // argv[1] : const char * : source crs
     virtual void *init(int argc, void **argv) override;
 
     void auto_delete(const char *key, bool enable) override;
 
 private:
-    char *m_crs;
+    char *m_scrs;
+    char *m_tcrs;
     void *m_proj_xfm;
     bool m_auto_delete_xfm;
 };
@@ -146,8 +156,14 @@ public:
     // implementation backed by GCTP library (via NavUtils)
     GeoCon(long int utm);
 
+    // implementation backed by PROJ library
     // if libproj is not available, disable proj implementation
     GeoCon(const char *crs);
+    // initializing PROJ implementation
+    // tcrs: target CRS
+    // scrs: source CRS
+    // autodel: delete transform when instance destroyed (else caller must destroy)
+    GeoCon(void *xfm, bool autodel, const char *tcrs, const char *scrs=NULL);
 
     ~GeoCon() override;
 
@@ -159,6 +175,7 @@ public:
 
     // get a pointer to a member (optional; keys defined per implementation)
     void *get_member(const char *key) override;
+    int set_member(const char *key, void *value) override;
 
     // initialize (optional; argments defined per implementation)
     void *init(int argc, void **argv) override;
@@ -168,6 +185,10 @@ public:
 
     // get string representation of underlying type
     const char *typestr() override;
+
+    // debug level accessors
+    void set_debug(int level);
+    int debug();
 
 private:
     // underlying implementation

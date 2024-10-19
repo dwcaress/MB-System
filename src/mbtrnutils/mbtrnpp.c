@@ -2512,6 +2512,7 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
             else if(strcmp(key,"trn-utm")==0 ){
             	int utm_zone;
                 if(sscanf(val,"%d",&utm_zone)==1){
+                    opts->trn_utm = utm_zone;
                 	mb_path proj_string = "";
                 	if (utm_zone > 0 && utm_zone <= 60)
                 		sprintf(proj_string, "UTM%2.2dN", utm_zone);
@@ -3676,17 +3677,21 @@ int main(int argc, char **argv) {
   
 //#ifdef TRN_USE_PROJ
     if(mbtrn_cfg->use_proj){
-        geocon = wgeocon_new_proj(mbtrn_cfg->trn_crs);
-        wgeocon_auto_delete(geocon, "XFM", false);
 
         // initialize Proj transformation between Geographic coordinates (longitude and
         // latitude in WGS84) and the Coordinate Reference System (CRS) used for the
         // TRN reference map
-        void *pj_xfm =  wgeocon_get_member(geocon, "XFM");
+        void *pj_xfm =  NULL;
         mb_proj_init(mbtrn_cfg->verbose, mbtrn_cfg->trn_crs, &pj_xfm, &error);
+
+        // get PROJ transform wrapper for TRN
+        geocon = wgeocon_inew_proj(pj_xfm, false, mbtrn_cfg->trn_crs, NULL);
+
     } else {
+        // get GCTP transform wrapper for TRN
         geocon = wgeocon_new_gctp(mbtrn_cfg->trn_utm_zone);
     }
+    wgeocon_set_debug(geocon, mbtrn_cfg->verbose);
 //#endif
 
   /* initialize output */
