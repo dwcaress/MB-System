@@ -90,6 +90,15 @@ GeoConProj::GeoConProj(const char *tcrs)
     m_type = GEO_PROJ;
 }
 
+GeoConProj::GeoConProj(void *xfm, bool autodel)
+: m_proj_xfm(xfm)
+, m_tcrs(NULL)
+, m_auto_delete_xfm(autodel)
+{
+    m_scrs = strdup(GEOIF_LONLAT_DFL);
+    m_type = GEO_PROJ;
+}
+
 GeoConProj::GeoConProj(void *xfm, bool autodel, const char *tcrs, const char *scrs)
 : m_proj_xfm(xfm)
 , m_auto_delete_xfm(autodel)
@@ -306,6 +315,12 @@ GeoCon::GeoCon(void *xfm, bool autodel, const char *tcrs, const char *scrs)
     // create a PROJ instance
     m_geocon = new GeoConProj(xfm, autodel, tcrs, scrs);
 }
+
+GeoCon::GeoCon(void *xfm, bool autodel)
+{
+    // create a PROJ instance
+    m_geocon = new GeoConProj(xfm, autodel);
+}
 #else
 // if libproj is not available, disable proj implementation
 GeoCon::GeoCon(const char *tcrs)
@@ -445,6 +460,16 @@ wgeocon_t *wgeocon_inew_proj(void *xfm, bool autodel, const char *tcrs, const ch
     return m;
 }
 
+wgeocon_t *wgeocon_xnew_proj(void *xfm, bool autodel)
+{
+    wgeocon_t *m = (wgeocon_t *)malloc(sizeof(*m));
+    if(NULL!=m){
+        memset(m,0,sizeof(*m));
+        GeoCon *obj = new GeoCon(xfm, autodel);
+        m->obj = obj;
+    }
+    return m;
+}
 void wgeocon_destroy(wgeocon_t *self)
 {
     if (NULL!=self){

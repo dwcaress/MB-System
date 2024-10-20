@@ -90,6 +90,7 @@ public:
     GeoConProj();
 
     GeoConProj(const char *tcrs);
+    GeoConProj(void *xfm, bool autodel);
     GeoConProj(void *xfm, bool autodel, const char *tcrs, const char *scrs=NULL);
 
     ~GeoConProj() override;
@@ -164,6 +165,7 @@ public:
     // scrs: source CRS
     // autodel: delete transform when instance destroyed (else caller must destroy)
     GeoCon(void *xfm, bool autodel, const char *tcrs, const char *scrs=NULL);
+    GeoCon(void *xfm, bool autodel);
 
     ~GeoCon() override;
 

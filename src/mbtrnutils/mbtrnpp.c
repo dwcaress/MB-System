@@ -3685,7 +3685,7 @@ int main(int argc, char **argv) {
         mb_proj_init(mbtrn_cfg->verbose, mbtrn_cfg->trn_crs, &pj_xfm, &error);
 
         // get PROJ transform wrapper for TRN
-        geocon = wgeocon_inew_proj(pj_xfm, false, mbtrn_cfg->trn_crs, NULL);
+        geocon = wgeocon_xnew_proj(pj_xfm, false);
 
     } else {
         // get GCTP transform wrapper for TRN
