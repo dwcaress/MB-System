@@ -3139,6 +3139,7 @@ static void s_sig_handler(int sig)
     switch (sig)
     {
         case SIGINT:
+            // user interrupt (CTRL-C); set flag to end processing loop(s)
             g_interrupted = true;
             break;
         default:
@@ -4834,12 +4835,13 @@ int main(int argc, char **argv) {
 #endif
 
 //#ifdef TRN_USE_PROJ
+    // release coordinate transformation resources
     if(mbtrn_cfg->use_proj) {
         void *pj_xfm = wgeocon_get_member(geocon, "XFM");
         mb_proj_free(mbtrn_cfg->verbose, &pj_xfm, &error);
     }
-    wgeocon_destroy(geocon);
 //#endif
+    wgeocon_destroy(geocon);
 
   /* deallocate arrays allocated with mb_mallocd() */
   if (median_filter_soundings != NULL) {
