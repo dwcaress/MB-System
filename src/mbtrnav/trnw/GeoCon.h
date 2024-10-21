@@ -14,9 +14,15 @@
 #ifndef GEOCON_H
 #define GEOCON_H
 
-#define GEOIF_CRS_DFL "EPSG:32610"
-#define GEOIF_WGS_DFL "EPSG:4326"
-#define GEOIF_LONLAT_DFL "+proj=lonlat +datum=WGS84"
+// CRS: UTM10N (Monterey Bay)
+#define GEOIF_TCRS_UTM10N "EPSG:32610"
+// CRS: UTM9N (Axial Seamount)
+#define GEOIF_TCRS_UTM9N "EPSG:32609"
+
+// default source CRS (lon/lat using WGS84)"
+#define GEOIF_SCRS_DFL "+proj=lonlat +datum=WGS84"
+// default target CRS (UTM zone 10N)
+#define GEOIF_TCRS_DFL GEOIF_TCRS_UTM10N
 
 // GeoCon implentation ID type
 typedef enum {

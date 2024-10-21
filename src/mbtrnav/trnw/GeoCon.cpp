@@ -77,7 +77,7 @@ GeoConProj::GeoConProj()
 , m_proj_xfm(nullptr)
 , m_auto_delete_xfm(true)
 {
-    m_scrs = strdup(GEOIF_LONLAT_DFL);
+    m_scrs = strdup(GEOIF_SCRS_DFL);
     m_type = GEO_PROJ;
 }
 
@@ -85,7 +85,7 @@ GeoConProj::GeoConProj(const char *tcrs)
 : m_proj_xfm(nullptr)
 , m_auto_delete_xfm(true)
 {
-    m_scrs = strdup(GEOIF_LONLAT_DFL);
+    m_scrs = strdup(GEOIF_SCRS_DFL);
     m_tcrs = (tcrs == NULL ? NULL : strdup(tcrs));
     m_type = GEO_PROJ;
 }
@@ -95,7 +95,7 @@ GeoConProj::GeoConProj(void *xfm, bool autodel)
 , m_tcrs(NULL)
 , m_auto_delete_xfm(autodel)
 {
-    m_scrs = strdup(GEOIF_LONLAT_DFL);
+    m_scrs = strdup(GEOIF_SCRS_DFL);
     m_type = GEO_PROJ;
 }
 
@@ -103,7 +103,7 @@ GeoConProj::GeoConProj(void *xfm, bool autodel, const char *tcrs, const char *sc
 : m_proj_xfm(xfm)
 , m_auto_delete_xfm(autodel)
 {
-    m_scrs = scrs != NULL ? strdup(scrs) : strdup(GEOIF_LONLAT_DFL);
+    m_scrs = scrs != NULL ? strdup(scrs) : strdup(GEOIF_SCRS_DFL);
     m_tcrs = (tcrs == NULL ? NULL : strdup(tcrs));
     m_type = GEO_PROJ;
 }
@@ -192,8 +192,8 @@ int GeoConProj::set_member(const char *key, void *value)
 // argv[1] : const char * : source crs
 void *GeoConProj::init(int argc, void **argv)
 {
-    const char *source_crs = (m_scrs != NULL ? m_scrs : GEOIF_LONLAT_DFL);
-    const char *target_crs = (m_tcrs != NULL ? m_tcrs : GEOIF_CRS_DFL);
+    const char *source_crs = (m_scrs != NULL ? m_scrs : GEOIF_SCRS_DFL);
+    const char *target_crs = (m_tcrs != NULL ? m_tcrs : GEOIF_TCRS_DFL);
 
     if(argc > 0 && argv != nullptr) {
         for(int i = 0; i < argc; i++)

@@ -13,11 +13,8 @@
 #include "GeoCon.hpp"
 #include "GeoCon.h"
 
-//#define TEST_LAT 0.0 // 84.0 // 0.0
-//#define TEST_LON -126.0 // -120.0 // -126.0
-//#define TEST_DEBUG 1
-static const char *SOURCE_CRS_DFL = GEOIF_LONLAT_DFL;
-static const char *TARGET_CRS_DFL = GEOIF_CRS_DFL;
+static const char *SOURCE_CRS_DFL = GEOIF_SCRS_DFL;
+static const char *TARGET_CRS_DFL = GEOIF_TCRS_DFL;
 static double LAT_DFL = 0.; //84.
 static double LON_DFL = -126.;//-120.
 static int DEBUG_DFL = 0;
@@ -109,7 +106,7 @@ int main(int argc, char **argv)
     std::cerr << std::endl;
 
     std::cerr << "# proj_i" << std::endl;
-    GeoCon *proj_i = new GeoCon(GEOIF_WGS_DFL);
+    GeoCon *proj_i = new GeoCon(GEOIF_TCRS_DFL);
     proj_i->set_debug(debug);
     proj_i->init(2, av);
 
@@ -126,7 +123,7 @@ int main(int argc, char **argv)
     wgeocon_t *gctp_c = wgeocon_new_gctp(10);
     wgeocon_set_debug(gctp_c, debug);
 
-    wgeocon_t *proj_c = wgeocon_new_proj(GEOIF_WGS_DFL);
+    wgeocon_t *proj_c = wgeocon_new_proj(GEOIF_TCRS_DFL);
     wgeocon_set_debug(proj_c, debug);
     wgeocon_init(proj_c, 2, av);
 
