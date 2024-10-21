@@ -1158,6 +1158,7 @@ int wposet_mb1_to_pose(wposet_t **dest, mb1_t *src, wgeocon_t *geocon)
             pose=wposet_dnew();
             *dest=pose;
         }
+
         if(NULL!=pose){
             poseT *obj = static_cast<poseT *>(pose->obj);
             obj->time = src->ts;
@@ -1187,7 +1188,49 @@ int wposet_mb1_to_pose(wposet_t **dest, mb1_t *src, wgeocon_t *geocon)
 
             retval=0;
         }
+    }
+    return retval;
+}
 
+int wposet_mb1_to_pose_cb(wposet_t **dest, mb1_t *src, GeoToTMCallback geocon)
+{
+    int retval=-1;
+    if(NULL!=dest && NULL!=src){
+        wposet_t *pose = (wposet_t *)(*dest);
+        if(NULL==pose){
+            pose=wposet_dnew();
+            *dest=pose;
+        }
+
+        if(NULL!=pose){
+            poseT *obj = static_cast<poseT *>(pose->obj);
+            obj->time = src->ts;
+
+            geocon(Math::degToRad(src->lat),
+                               Math::degToRad(src->lon),
+                               &(obj->x), &(obj->y));
+
+            obj->z = src->depth;
+            obj->phi=0.0;
+            obj->theta=0.0;
+            obj->psi=src->hdg;
+            obj->gpsValid=(obj->z<2?true:false);
+            obj->bottomLock=true;
+            obj->dvlValid=true;
+            // TRN can't intialize if vx == 0
+            obj->vx = 0.01;
+            obj->vy = 0.;
+            obj->vz = 0.;
+            // wx not required; can use these (how determined?)
+            // obj->wx = -3.332e-002;
+            // obj->wy = -9.155e-003;
+            // obj->wz = -3.076e-002;
+            obj->wx = 0.;
+            obj->wy = 0.;
+            obj->wz = 0.;
+
+            retval=0;
+        }
     }
     return retval;
 }
@@ -1472,6 +1515,51 @@ int wmeast_mb1_to_meas(wmeast_t **dest, mb1_t *src, wgeocon_t *geocon)
     }
     return retval;
 }
+
+int wmeast_mb1_to_meas_cb(wmeast_t **dest, mb1_t *src, GeoToTMCallback geocon)
+{
+    int retval=-1;
+    if(NULL!=dest && NULL!=src){
+        wmeast_t *meas = (wmeast_t *)(*dest);
+        if(NULL==meas){
+            meas=wmeast_new(src->nbeams);
+            *dest=meas;
+        }
+        if(NULL!=meas){
+            int i=0;
+            measT *obj = static_cast<measT *>(meas->obj);
+            obj->time = src->ts;
+            obj->ping_number = src->ping_number;
+            obj->dataType=2;
+            obj->z=src->depth;
+
+            geocon(Math::degToRad(src->lat),
+                               Math::degToRad(src->lon),
+                               &(obj->x), &(obj->y));
+
+            for(i=0;i<obj->numMeas;i++){
+                // TODO: fill in measT from ping...
+                obj->beamNums[i] = src->beams[i].beam_num;
+                obj->alongTrack[i] = src->beams[i].rhox;
+                obj->crossTrack[i] = src->beams[i].rhoy;
+                obj->altitudes[i]  = src->beams[i].rhoz;
+                double rho[3] = {obj->alongTrack[i], obj->crossTrack[i], obj->altitudes[i]};
+                double rhoNorm = vnorm( rho );
+                obj->ranges[i] = rhoNorm;
+                // [rhoNorm = sqrt(ax^2 + ay^2 + az^2)] (i.e. range magnitude)
+                obj->measStatus[i] = rhoNorm>1?true:false;
+//                obj->covariance[i] = 0.0;
+//                obj->alphas[i]     = 0.0;
+            }
+
+            retval=0;
+        }
+
+    }
+    return retval;
+}
+
+
 int wmeast_msg_to_meas(wmeast_t **dest, char *src)
 {
     int retval=-1;

@@ -257,6 +257,7 @@ extern "C" {
     int  wposet_pose_to_cdata(pt_cdata_t **dest, wposet_t *src);
     // int  wposet_mb1_to_pose(wposet_t **dest, mb1_t *src, long int utmZone);
     int  wposet_mb1_to_pose(wposet_t **dest, mb1_t *src, wgeocon_t *geocon);
+    int  wposet_mb1_to_pose_cb(wposet_t **dest, mb1_t *src, GeoToTMCallback geocon);
     int  wposet_msg_to_pose(wposet_t **dest, char *src);
     int  wposet_serialize(char **dest, wposet_t *src, int len);
     int  wposet_unserialize(wposet_t **dest, char *src, int len);
@@ -270,6 +271,7 @@ extern "C" {
     int  wmeast_meas_to_cdata(mt_cdata_t **dest, wmeast_t *src);
     // int  wmeast_mb1_to_meas(wmeast_t **dest, mb1_t *src, long int utmZone);
     int  wmeast_mb1_to_meas(wmeast_t **dest, mb1_t *src, wgeocon_t *geocon);
+    int  wmeast_mb1_to_meas_cb(wmeast_t **dest, mb1_t *src, GeoToTMCallback geocon);
     int  wmeast_msg_to_meas(wmeast_t **dest, char *src);
     int  wmeast_serialize(char **dest, wmeast_t *src, int len);
     int  wmeast_unserialize(wmeast_t **dest, char *src, int len);

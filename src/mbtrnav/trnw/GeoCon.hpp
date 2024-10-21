@@ -35,7 +35,7 @@ public:
     {}
 
     // convert lat/lon to mercator projection (e.g. UTM)
-    virtual int geo_to_mp(double lat_rad, double lon_rad, double *r_northing, double *r_easting) = 0;
+    virtual int geo_to_mp(double lat_rad, double lon_rad, double *r_northing_m, double *r_easting_m) = 0;
     // convert mercator projection to lat/lon
     virtual int mp_to_geo(double northing_m, double easting_m, double *r_lat_rad, double *r_lon_rad) = 0;
 

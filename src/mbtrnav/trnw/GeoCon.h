@@ -36,6 +36,12 @@ typedef enum {
 struct wgeocon_s;
 typedef struct wgeocon_s wgeocon_t;
 
+// GeoCon callback function types; alternative to GeoCon API and wrappers
+// supported by trnw, trn_cli
+// Application provides coordinate conversion callbacks using library of choice (GCTP, PROJ, etc.)
+typedef int (*GeoToTMCallback)(double lat_rad, double lon_rad, double *r_northing_m, double *r_easting_m);
+typedef int (*TMToGeoCallback)(double northing_m, double easting_m, double *r_lat_rad, double *r_lon_rad);
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -68,6 +74,9 @@ int wgeocon_geo_to_mp(wgeocon_t *self, double lat_rad, double lon_rad, double *r
 
 // mercator projection to lat/lon
 int wgeocon_mp_to_geo(wgeocon_t *self, double northing_m, double easting_m, double *r_lat_rad, double *r_lon_rad);
+
+// lat/lon to mercator projection (wraps NavUtils::GeoToUtm directly, w/o underlying object; for use with callbacks)
+int wgeocon_navutils_geoToUtm(double lat_rad, double lon_rad, long int utm_zone, double *r_northing_m, double *r_easting_m);
 
 // get a pointer to a member (optional; keys defined per implementation)
 void *wgeocon_get_member(wgeocon_t *self, const char *key);

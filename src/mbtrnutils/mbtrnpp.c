@@ -1089,8 +1089,19 @@ char *mbtrnpp_trn_updatestr(char *dest, int len, trn_update_t *update, int inden
    geographic coordinates to the Coordinate Reference System (CRS) used for the reference 
    map. The pointer pjptr points to a Proj context that that is used for forward and
    inverse transforms from Geographic to the TRN CRS. */
-//void *pjptr = NULL;
-wgeocon_t *geocon = NULL;
+
+void *pjptr = NULL;
+
+#define DEGTORAD(d) (d * M_PI/180.)
+#define RADTODEG(r) (r * 180./M_PI)
+
+// geographic coordinate transform callbacks (GeoToTMCallback)
+int mbtrnpp_geo_to_tm_proj(double lat_rad, double lon_rad, double *r_northing_m, double *r_easting_m);
+int mbtrnpp_geo_to_tm_gctp(double lat_rad, double lon_rad, double *r_northing_m, double *r_easting_m);
+
+// pointer to selected geographic coordinate transform callback
+GeoToTMCallback mbtrnpp_geo_to_tm = mbtrnpp_geo_to_tm_proj;
+
 //#endif
 
 // TRN reinit flag - forces reinitializing the TRN filter
@@ -3699,17 +3710,15 @@ int main(int argc, char **argv) {
         // initialize Proj transformation between Geographic coordinates (longitude and
         // latitude in WGS84) and the Coordinate Reference System (CRS) used for the
         // TRN reference map
-        void *pj_xfm =  NULL;
-        mb_proj_init(mbtrn_cfg->verbose, mbtrn_cfg->trn_crs, &pj_xfm, &error);
+        mb_proj_init(mbtrn_cfg->verbose, mbtrn_cfg->trn_crs, &pjptr, &error);
 
-        // get PROJ transform wrapper for TRN
-        geocon = wgeocon_xnew_proj(pj_xfm, false);
+        // select PROJ transform callback for TRN
+        mbtrnpp_geo_to_tm = mbtrnpp_geo_to_tm_proj;
 
     } else {
-        // get GCTP transform wrapper for TRN
-        geocon = wgeocon_new_gctp(mbtrn_cfg->trn_utm_zone);
+        // select GCTP transform callback for TRN
+        mbtrnpp_geo_to_tm = mbtrnpp_geo_to_tm_gctp;
     }
-    wgeocon_set_debug(geocon, mbtrn_cfg->verbose);
 //#endif
 
   /* initialize output */
@@ -4837,11 +4846,9 @@ int main(int argc, char **argv) {
 //#ifdef TRN_USE_PROJ
     // release coordinate transformation resources
     if(mbtrn_cfg->use_proj) {
-        void *pj_xfm = wgeocon_get_member(geocon, "XFM");
-        mb_proj_free(mbtrn_cfg->verbose, &pj_xfm, &error);
+        mb_proj_free(mbtrn_cfg->verbose, &pjptr, &error);
     }
 //#endif
-    wgeocon_delete(geocon);
 
   /* deallocate arrays allocated with mb_mallocd() */
   if (median_filter_soundings != NULL) {
@@ -4881,6 +4888,35 @@ int main(int argc, char **argv) {
   s_mbtrnpp_exit(error);
 }
 /*--------------------------------------------------------------------*/
+
+int mbtrnpp_geo_to_tm_proj(double lat_rad, double lon_rad, double *r_northing_m, double *r_easting_m)
+{
+    if(r_northing_m == NULL || r_easting_m == NULL) {
+        fprintf(stderr, "%s: ERR invalid argument (NULL)\n", __func__);
+        return -1;
+    }
+
+    PJ_COORD cin = proj_coord(RADTODEG(lon_rad), RADTODEG(lat_rad), 0, 0);
+    PJ_COORD cout = proj_trans((PJ *)pjptr, PJ_FWD, cin);
+
+    // set output
+    *r_easting_m = cout.v[0];
+    *r_northing_m = cout.v[1];
+
+    return 0;
+}
+
+int mbtrnpp_geo_to_tm_gctp(double lat_rad, double lon_rad, double *r_northing_m, double *r_easting_m)
+{
+    if(r_northing_m == NULL || r_easting_m == NULL) {
+        fprintf(stderr, "%s: ERR invalid argument (NULL)\n", __func__);
+        return -1;
+    }
+
+    int retval = wgeocon_navutils_geoToUtm(lat_rad, lon_rad, mbtrn_cfg->trn_utm_zone, r_northing_m, r_easting_m);
+    return retval;
+}
+
 
 int mbtrnpp_openlog(int verbose, mb_path log_directory, FILE **logfp, int *error) {
 
@@ -6279,9 +6315,9 @@ int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg)
           double trnlon;
           double trnlat;
           int proj_error = MB_ERROR_NO_ERROR;
-          void *proj_xfm = wgeocon_get_member(geocon, "XFM");
-          mb_proj_inverse(0, proj_xfm, pstate->pt_dat->y, pstate->pt_dat->x, &navlon, &navlat, &proj_error);
-          mb_proj_inverse(0, proj_xfm, pstate->mse_dat->y, pstate->mse_dat->x, &trnlon, &trnlat, &proj_error);
+
+            mb_proj_inverse(0, pjptr, pstate->pt_dat->y, pstate->pt_dat->x, &navlon, &navlat, &proj_error);
+            mb_proj_inverse(0, pjptr, pstate->mse_dat->y, pstate->mse_dat->x, &trnlon, &trnlat, &proj_error);
 
           // NOTE: TRN convention is x:northing y:easting z:down
           //       Output here is in order easting northing z
@@ -6353,14 +6389,14 @@ int mbtrnpp_trn_update(wtnav_t *self, mb1_t *src, wposet_t **pt_out, wmeast_t **
   if (NULL != self && NULL != src && NULL != pt_out && NULL != mt_out) {
       int test = -1;
 
-      if ((test = wmeast_mb1_to_meas(mt_out, src, geocon)) == 0) {
+      if ((test = wmeast_mb1_to_meas_cb(mt_out, src, mbtrnpp_geo_to_tm)) == 0) {
 //#ifdef TRN_USE_PROJ
 //    if ((test = wmeast_mb1_to_meas(mt_out, src, pjptr)) == 0) {
 //#else
 //    if ((test = wmeast_mb1_to_meas(mt_out, src, cfg->utm_zone)) == 0) {
 //#endif
 
-          if ((test = wposet_mb1_to_pose(pt_out, src, geocon)) == 0) {
+          if ((test = wposet_mb1_to_pose_cb(pt_out, src, mbtrnpp_geo_to_tm)) == 0) {
 //#ifdef TRN_USE_PROJ
 //      if ((test = wposet_mb1_to_pose(pt_out, src, pjptr)) == 0) {
 //#else

@@ -120,9 +120,9 @@ GeoConProj::~GeoConProj()
     }
 }
 
-int GeoConProj::geo_to_mp(double lat_rad, double lon_rad, double *r_northing, double *r_easting)
+int GeoConProj::geo_to_mp(double lat_rad, double lon_rad, double *r_northing_m, double *r_easting_m)
 {
-    if(r_northing == NULL || r_easting == NULL) {
+    if(r_northing_m == NULL || r_easting_m == NULL) {
         std::cerr << typestr() << "::" << __func__ << " ERR invalid argument (NULL)" << std::endl;
         return -1;
     }
@@ -131,11 +131,11 @@ int GeoConProj::geo_to_mp(double lat_rad, double lon_rad, double *r_northing, do
     PJ_COORD cout = proj_trans((PJ *)m_proj_xfm, PJ_FWD, cin);
 
     // set output
-    *r_easting = cout.v[0];
-    *r_northing = cout.v[1];
+    *r_easting_m = cout.v[0];
+    *r_northing_m = cout.v[1];
 
     if(debug() != 0)
-    std::cerr << typestr() << "::" << __func__ << " E,N: " << *r_easting << ", " << *r_northing << std::endl;
+    std::cerr << typestr() << "::" << __func__ << " E,N: " << *r_easting_m << ", " << *r_northing_m << std::endl;
     return 0;
 }
 
@@ -542,6 +542,11 @@ int wgeocon_mp_to_geo(wgeocon_t *self, double northing_m, double easting_m, doub
         }
     }
     return -1;
+}
+
+int wgeocon_navutils_geoToUtm(double lat_rad, double lon_rad, long int utm_zone, double *r_northing_m, double *r_easting_m)
+{
+    return NavUtils::geoToUtm(lat_rad, lon_rad, utm_zone, r_northing_m, r_easting_m);
 }
 
 void *wgeocon_get_member(wgeocon_t *self, const char *key)
