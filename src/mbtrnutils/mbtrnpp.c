@@ -49,6 +49,7 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <termios.h>
+#include <signal.h>
 
 #include "mb_status.h"
 #include "mb_format.h"
@@ -957,6 +958,8 @@ static double stats_prev_end = 0.0;
 static double stats_prev_start = 0.0;
 // system clock resolution logging enable/disable
 static bool log_clock_res = true;
+// user (signal) interrupt flag
+static bool g_interrupted = false;
 
 #ifdef MST_STATS_EN
 #define MBTRNPP_UPDATE_STATS(p, l, f) (mbtrnpp_update_stats(p, l, f))
@@ -3131,9 +3134,21 @@ static void s_mbtrnpp_exit(int error)
     exit(error);
 }
 
+static void s_sig_handler(int sig)
+{
+    switch (sig)
+    {
+        case SIGINT:
+            g_interrupted = true;
+            break;
+        default:
+            break;
+    }
+}
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
+
   char usage_message[] = "mbtrnpp \n"
                          "\t--verbose\n"
                          "\t--help\n"
@@ -3334,6 +3349,8 @@ int main(int argc, char **argv) {
   etime_i[6] = 0;
   speedmin = 0.0;
   timegap = 1000000000.0;
+
+    signal(SIGINT, s_sig_handler);
 
 #ifdef WITH_TEST_MNEM_SUB
     fprintf(stderr, "%s:%d - TODO - REMOVE MNEM-SUB TEST\n",__func__,__LINE__);
@@ -3846,7 +3863,7 @@ int main(int argc, char **argv) {
   int idataread = 0;
 
     /* loop over all files to be read */
-  while (read_data == true) {
+  while (read_data == true && !g_interrupted) {
       char log_message[LOG_MSG_BUF_SZ];
       memset(log_message,0,LOG_MSG_BUF_SZ);
 
@@ -4129,7 +4146,7 @@ int main(int argc, char **argv) {
     bool done = false;
     int num_kinds_read[MB_DATA_KINDS + 1] = { 0 };
     int num_kinds_read_tot[MB_DATA_KINDS + 1] = { 0 };
-    while (!done) {
+    while (!done && !g_interrupted) {
       /* open new log file if it is time */
       if (mbtrn_cfg->make_logs == true) {
 
@@ -4718,50 +4735,49 @@ int main(int argc, char **argv) {
 
           // empty the ring buffer
           ndata = 0;
+      } else {
+          status = mb_close(mbtrn_cfg->verbose, &imbio_ptr, &error);
+
+          // empty the ring buffer
+          ndata = 0;
+
+          sprintf(log_message, "Multibeam File <%s> of format <%d> closed", ifile, mbtrn_cfg->format);
+          mlog_tprintf(mbtrnpp_mlog_id,"i,closing file/format [%s/%d]\n", ifile, mbtrn_cfg->format);
+
+          if (logfp != NULL) {
+              mbtrnpp_postlog(mbtrn_cfg->verbose, logfp, log_message, &error);
+              fflush(logfp);
+          }
+          fprintf(stderr, "%s\n", log_message);
+
+          // force a reinit when data from the next file is opened
+          if (mbtrn_cfg->reinit_file_enable && !reinit_flag) {
+              fprintf(stderr, "--Reinit set due to closing input swath file\n");
+              mlog_tprintf(mbtrnpp_mlog_id,"i,mbtrnpp: set reinit due to closing input swath file [%s]\n", ifile);
+              MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_EOF]);
+              reinit_flag = true;
+          }
+
+          /* give the statistics */
+          /* figure out whether and what to read next */
+          if (read_datalist == true) {
+              if ((status = mb_datalist_read(mbtrn_cfg->verbose, datalist, ifile, dfile, &mbtrn_cfg->format, &file_weight, &error)) == MB_SUCCESS) {
+                  MX_DEBUG("read_datalist status[%d] - continuing\n", status);
+                  read_data = true;
+              }
+              else {
+                  MX_DEBUG("read_datalist status[%d] - done\n", status);
+                  read_data = false;
+              }
+          }
+          else {
+              MX_MMSG(MXDEBUG, "read_datalist == NO\n");
+              read_data = false;
+          }
+          mlog_tprintf(mbtrnpp_mlog_id,"i,read_datalist[%s] read_data[%s] status[%d] ifile[%s] dfile[%s] error[%d]\n",
+                       (read_datalist?"Y":"N"),(read_data?"Y":"N"),status,ifile,dfile,error );
+
       }
-    else {
-      status = mb_close(mbtrn_cfg->verbose, &imbio_ptr, &error);
-
-      // empty the ring buffer
-      ndata = 0;
-
-      sprintf(log_message, "Multibeam File <%s> of format <%d> closed", ifile, mbtrn_cfg->format);
-      mlog_tprintf(mbtrnpp_mlog_id,"i,closing file/format [%s/%d]\n", ifile, mbtrn_cfg->format);
-
-      if (logfp != NULL) {
-        mbtrnpp_postlog(mbtrn_cfg->verbose, logfp, log_message, &error);
-        fflush(logfp);
-      }
-      fprintf(stderr, "%s\n", log_message);
-
-      // force a reinit when data from the next file is opened
-      if (mbtrn_cfg->reinit_file_enable && !reinit_flag) {
-        fprintf(stderr, "--Reinit set due to closing input swath file\n");
-          mlog_tprintf(mbtrnpp_mlog_id,"i,mbtrnpp: set reinit due to closing input swath file [%s]\n", ifile);
-        MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_EOF]);
-        reinit_flag = true;
-      }
-
-      /* give the statistics */
-      /* figure out whether and what to read next */
-      if (read_datalist == true) {
-        if ((status = mb_datalist_read(mbtrn_cfg->verbose, datalist, ifile, dfile, &mbtrn_cfg->format, &file_weight, &error)) == MB_SUCCESS) {
-          MX_DEBUG("read_datalist status[%d] - continuing\n", status);
-          read_data = true;
-        }
-        else {
-          MX_DEBUG("read_datalist status[%d] - done\n", status);
-          read_data = false;
-        }
-      }
-      else {
-       MX_MMSG(MXDEBUG, "read_datalist == NO\n");
-        read_data = false;
-      }
-      mlog_tprintf(mbtrnpp_mlog_id,"i,read_datalist[%s] read_data[%s] status[%d] ifile[%s] dfile[%s] error[%d]\n",
-                     (read_datalist?"Y":"N"),(read_data?"Y":"N"),status,ifile,dfile,error );
-
-    }
     /* end loop over files in list */
   }
 
@@ -4822,6 +4838,7 @@ int main(int argc, char **argv) {
         void *pj_xfm = wgeocon_get_member(geocon, "XFM");
         mb_proj_free(mbtrn_cfg->verbose, &pj_xfm, &error);
     }
+    wgeocon_destroy(geocon);
 //#endif
 
   /* deallocate arrays allocated with mb_mallocd() */
