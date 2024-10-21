@@ -470,7 +470,7 @@ wgeocon_t *wgeocon_xnew_proj(void *xfm, bool autodel)
     }
     return m;
 }
-void wgeocon_destroy(wgeocon_t *self)
+void wgeocon_delete(wgeocon_t *self)
 {
     if (NULL!=self){
         delete static_cast<GeoCon *>(self->obj);

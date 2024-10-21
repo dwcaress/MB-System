@@ -1228,7 +1228,7 @@ static int s_trncli_show_trn_update(trncli_t *tcli, mb1_t *mb1, app_cfg_t *cfg)
                 geocon = wgeocon_new_gctp(cfg->utm);
             }
             wposet_mb1_to_pose(&pt, mb1, geocon);
-            wgeocon_destroy(geocon);
+            wgeocon_delete(geocon);
         }
 
         test = trncli_get_bias_estimates(tcli, pt, &pt_dat, &mle_dat, &mse_dat);

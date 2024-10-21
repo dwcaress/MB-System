@@ -46,12 +46,12 @@ extern "C" {
 wgeocon_t *wgeocon_new_gctp(long int utm);
 
 // PROJ instance (caller must free using wgeocon_destroy)
-wgeocon_t *wgeocon_new_proj(const char *crs);
+wgeocon_t *wgeocon_new_proj(const char *tcrs);
 wgeocon_t *wgeocon_inew_proj(void *xfm, bool autodel, const char *tcrs, const char *scrs);
 wgeocon_t *wgeocon_xnew_proj(void *xfm, bool autodel);
 
 // release GeoConverter instance
-void wgeocon_destroy(wgeocon_t *self);
+void wgeocon_delete(wgeocon_t *self);
 
 // get implentation type ID
 GeoConType wgeocon_type(wgeocon_t *self);

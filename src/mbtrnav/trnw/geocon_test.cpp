@@ -135,8 +135,8 @@ int main(int argc, char **argv)
 
     std::cerr << std::endl;
 
-    wgeocon_destroy(gctp_c);
-    wgeocon_destroy(proj_c);
+    wgeocon_delete(gctp_c);
+    wgeocon_delete(proj_c);
 
     free(av);
     return 0;

@@ -4841,7 +4841,7 @@ int main(int argc, char **argv) {
         mb_proj_free(mbtrn_cfg->verbose, &pj_xfm, &error);
     }
 //#endif
-    wgeocon_destroy(geocon);
+    wgeocon_delete(geocon);
 
   /* deallocate arrays allocated with mb_mallocd() */
   if (median_filter_soundings != NULL) {
