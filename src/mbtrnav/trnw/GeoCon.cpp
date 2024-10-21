@@ -16,6 +16,7 @@ extern "C" {
 
 GeoConIF::GeoConIF()
 : m_type(GEO_UNKNOWN)
+, m_debug(0)
 {}
 
 void *GeoConIF::get_member(const char *key)
@@ -65,6 +66,7 @@ void GeoConIF::set_debug(int level)
 {
     m_debug = level;
 }
+
 int GeoConIF::debug()
 {
     return m_debug;
