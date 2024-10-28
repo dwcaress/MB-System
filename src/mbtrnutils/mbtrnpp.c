@@ -1090,7 +1090,7 @@ char *mbtrnpp_trn_updatestr(char *dest, int len, trn_update_t *update, int inden
    map. The pointer pjptr points to a Proj context that that is used for forward and
    inverse transforms from Geographic to the TRN CRS. */
 
-void *pjptr = NULL;
+static void *pjptr = NULL;
 
 #define DEGTORAD(d) (d * M_PI/180.)
 #define RADTODEG(r) (r * 180./M_PI)
@@ -4889,9 +4889,10 @@ int main(int argc, char **argv) {
 }
 /*--------------------------------------------------------------------*/
 
+// PROJ coordinate transform callback (uses global/static var pjptr)
 int mbtrnpp_geo_to_tm_proj(double lat_rad, double lon_rad, double *r_northing_m, double *r_easting_m)
 {
-    if(r_northing_m == NULL || r_easting_m == NULL) {
+    if( pjptr == NULL || r_northing_m == NULL || r_easting_m == NULL) {
         fprintf(stderr, "%s: ERR invalid argument (NULL)\n", __func__);
         return -1;
     }
@@ -4906,6 +4907,7 @@ int mbtrnpp_geo_to_tm_proj(double lat_rad, double lon_rad, double *r_northing_m,
     return 0;
 }
 
+// GCTP coordinate transform callback (uses global/static var pjptr)
 int mbtrnpp_geo_to_tm_gctp(double lat_rad, double lon_rad, double *r_northing_m, double *r_easting_m)
 {
     if(r_northing_m == NULL || r_easting_m == NULL) {
@@ -4916,7 +4918,6 @@ int mbtrnpp_geo_to_tm_gctp(double lat_rad, double lon_rad, double *r_northing_m,
     int retval = wgeocon_navutils_geoToUtm(lat_rad, lon_rad, mbtrn_cfg->trn_utm_zone, r_northing_m, r_easting_m);
     return retval;
 }
-
 
 int mbtrnpp_openlog(int verbose, mb_path log_directory, FILE **logfp, int *error) {
 
