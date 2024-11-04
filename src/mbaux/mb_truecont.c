@@ -287,24 +287,54 @@ int mb_contour_deall(int verbose, struct swath *data, int *error) {
   int status = MB_SUCCESS;
 
   /* deallocate memory for bathymetry data */
-  for (int i = 0; i < data->npings_max; i++) {
-    struct ping *ping = &data->pings[i];
-    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&ping->beamflag, error);
-    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&ping->bath, error);
-    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&ping->bathlon, error);
-    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&ping->bathlat, error);
-    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&ping->bflag[0], error);
-    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&ping->bflag[1], error);
+  if (data->npings_max > 0) {
+    for (int i = 0; i < data->npings_max; i++) {
+      struct ping *ping = &data->pings[i];
+      status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&ping->beamflag, error);
+      status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&ping->bath, error);
+      status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&ping->bathlon, error);
+      status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&ping->bathlat, error);
+      status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&ping->bflag[0], error);
+      status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&ping->bflag[1], error);
+    }
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data->pings, error);
+    data->npings_max = 0;
   }
-  status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data->pings, error);
+  data->npings = 0;
+  data->beams_bath = 0;
 
   /* deallocate memory for contour controls */
+  data->contour_algorithm = 0;
+  data->plot_contours = 0;
+  data->plot_triangles = 0;
+  data->plot_track = 0;
+  data->plot_name = 0;
+  data->plot_pingnumber = 0;
+  data->contour_int = 0.0;
+  data->color_int = 0.0;
+  data->tick_int = 0.0;
+  data->label_int = 0.0;
+  data->tick_len = 0.0;
+  data->label_hgt = 0.0;
+  data->label_spacing = 0.0;
   if (data->nlevel > 0) {
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data->level_list, error);
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data->label_list, error);
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data->tick_list, error);
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data->color_list, error);
+    data->nlevel = 0;
   }
+  data->ncolor = 0;
+  data->nlevelset = 0;
+
+  data->time_tick_int = 0.0;
+  data->time_annot_int = 0.0;
+  data->date_annot_int = 0.0;
+  data->time_tick_len = 0.0;
+  data->name_hgt = 0.0;
+  data->pingnumber_tick_int = 0;
+  data->pingnumber_annot_int = 0;
+  data->pingnumber_tick_len = 0.0;
 
   /* deallocate memory for triangle network */
   if (data->ntri_alloc > 0) {
@@ -314,6 +344,11 @@ int mb_contour_deall(int verbose, struct swath *data, int *error) {
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data->x, error);
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data->y, error);
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data->z, error);
+    data->npts_alloc = 0;
+  }
+  data->npts = 0;
+
+  if (data->ntri_alloc > 0) {
     for (int i = 0; i < 3; i++) {
       status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data->iv[i], error);
       status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data->ct[i], error);
@@ -321,7 +356,12 @@ int mb_contour_deall(int verbose, struct swath *data, int *error) {
       status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data->ed[i], error);
       status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data->flag[i], error);
     }
+    data->ntri_alloc = 0;
   }
+  data->ntri = 0;
+  data->bath_min = 0.0;
+  data->bath_max = 0.0;
+
   if (data->ndelaun_alloc > 0) {
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data->v1, error);
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data->v2, error);
@@ -329,6 +369,7 @@ int mb_contour_deall(int verbose, struct swath *data, int *error) {
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data->istack, error);
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data->kv1, error);
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data->kv2, error);
+    data->ndelaun_alloc = 0;
   }
 
   /* deallocate memory for contour positions */
@@ -680,7 +721,6 @@ int mb_triangulate(int verbose, struct swath *data, int *error) {
       }
     }
   }
-
 
   // get extrema of preliminary soundings and the minimum  distance allowed
   // between points submitted for triangulization

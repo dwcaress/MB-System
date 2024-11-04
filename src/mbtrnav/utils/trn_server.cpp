@@ -53,6 +53,7 @@
 #define CFGNAME_BUF_BYTES 512
 #define PARTICLENAME_BUF_BYTES 512
 #define DEBUG_BUF_BYTES 512
+#define LOGBUF_BYTES 2400
 
 static TerrainNav* _tercom;
 static int _servfd;   // socket to bind
@@ -67,7 +68,7 @@ static struct commsT _sdev(TRN_GET_INITSTDDEVXYZ,0.,0.,0.);
 static struct sockaddr_in _server_addr;     // Server Socket object
 
 static char _sock_buf[TRN_MSG_SIZE];
-static char logbuf[2400];
+static char logbuf[LOGBUF_BYTES];
 
 
 // Return true/false if server has a connection to the client.
@@ -130,16 +131,15 @@ int get_msg() {
 			}
 			sl = recv(_connfd, _sock_buf + sl, TRN_MSG_SIZE - sl, 0);
 			if(sl <= 0) {
-				sprintf(logbuf,
-						"get_msg timeout, errno[%d] sl[%d] - %s", errno, sl,strerror(errno)); // or error
+				snprintf(logbuf, LOGBUF_BYTES, "get_msg timeout, errno[%d] sl[%d] - %s", errno, sl,strerror(errno)); // or error
 				//perror(logbuf);
 				logs(TL_OMASK(TL_TRN_SERVER, TL_LOG|TL_SERR),"%s\n",logbuf);
 
 				if(errno == EINTR && ntries-- > 0) {  // try again
-					sprintf(logbuf,
+					snprintf(logbuf, LOGBUF_BYTES,
 							"%d: recv call interrupt after %d bytes.\n",
 							MAX_RECV_ATTEMPTS - ntries, len);
-					logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"%s",logbuf);
+					logs(TL_OMASK(TL_TRN_SERVER, TL_LOG), "%s", logbuf);
 					continue;
 				} else {
 					return 0;
@@ -154,14 +154,16 @@ int get_msg() {
             char obuf[DEBUG_BUF_BYTES]={0};
             char *bp=obuf;
             int wbytes=0;
+            size_t rem = DEBUG_BUF_BYTES;
 			for(int i = 0; i < 100; i++) {
-                if( (wbytes=sprintf(bp,"%x ", _sock_buf[i])) > 0){
-                    bp+=wbytes;
+                if( (wbytes = snprintf(bp, rem, "%x ", _sock_buf[i])) > 0){
+                    bp += wbytes;
+                    rem -= wbytes;
                 }else{
-                    fprintf(stderr,"WARN: get_msg - debug sprintf failed\n");
+                    fprintf(stderr,"WARN: get_msg - debug snprintf failed\n");
                 }
 
-                if (bp>(obuf+DEBUG_BUF_BYTES)) {
+                if (bp > (obuf+DEBUG_BUF_BYTES)) {
                     fprintf(stderr,"WARN: get_msg - debug buffer full, truncating\n");
                     break;
                 }
@@ -177,7 +179,7 @@ int get_msg() {
 //
 size_t send_msg(commsT& msg) {
 	size_t sl = 0;
-	sprintf(logbuf, "Sending:%s", msg.to_s(_sock_buf, sizeof(_sock_buf)));
+	snprintf(logbuf, LOGBUF_BYTES, "Sending:%s", msg.to_s(_sock_buf, sizeof(_sock_buf)));
 	if (msg.msg_type == TRN_NACK) logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"%s",logbuf);
 	//logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"%s",logbuf);
 
@@ -214,7 +216,9 @@ int init() {
 	// Construct a TerrainNav object using the info from the client
 	// Use environment variables to find location of maps and datafiles.
 	//
-    char mapname[MAPNAME_BUF_BYTES], cfgname[CFGNAME_BUF_BYTES], particlename[PARTICLENAME_BUF_BYTES];//, logname[300];
+    char mapname[MAPNAME_BUF_BYTES] = {0};
+    char cfgname[CFGNAME_BUF_BYTES] = {0};
+    char particlename[PARTICLENAME_BUF_BYTES] = {0};
 	char* mapPath = getenv("TRN_MAPFILES");
     char* cfgPath = getenv("TRN_DATAFILES");
     char* logPath = getenv("TRN_LOGFILES");
@@ -230,9 +234,9 @@ int init() {
 		cfgPath = dotSlash;
 	}
 
-        sprintf(mapname, "%s/%s", mapPath, _ct.mapname);
-        sprintf(cfgname, "%s/%s", cfgPath, _ct.cfgname);
-        sprintf(particlename, "%s/%s", cfgPath, _ct.particlename);
+        snprintf(mapname, MAPNAME_BUF_BYTES, "%s/%s", mapPath, _ct.mapname);
+        snprintf(cfgname, CFGNAME_BUF_BYTES, "%s/%s", cfgPath, _ct.cfgname);
+        snprintf(particlename, PARTICLENAME_BUF_BYTES, "%s/%s", cfgPath, _ct.particlename);
 
         // Let's see if these files exist right now as
         // this will save headaaches later
@@ -286,13 +290,13 @@ int init() {
 
     if(_ct.logname == NULL)
     {
-        sprintf(logname, ".");
+        snprintf(logname, LOGNAME_BUF_BYTES, ".");
     }
     else
     {
       // Let's ensure that a unique log folder is created here
       //
-      sprintf(logname, "%s/%s",trnLogDir,_ct.logname);
+      snprintf(logname, LOGNAME_BUF_BYTES,"%s/%s",trnLogDir,_ct.logname);
       int n = 0;
 
       // mkdir() fails (!= 0) if the directory already exists
@@ -308,9 +312,11 @@ int init() {
             " [%d,%s]\n\n", logname, err,strerror(err));
             // if unable to create due to error,
             // just use current directory
-            sprintf(logname, ".");
+            snprintf(logname, LOGNAME_BUF_BYTES, ".");
          }
-         else sprintf(logname, "%s/%s-%02d", trnLogDir, _ct.logname, ++n);
+         else {
+             snprintf(logname, LOGNAME_BUF_BYTES, "%s/%s-%02d", trnLogDir, _ct.logname, ++n);
+         }
       }
     }
 #endif
@@ -647,18 +653,21 @@ int measure_update() {
 
             memset(obuf,0,256);
             bp=obuf;
-			sprintf(bp,"\nARL : Estimation Bias(Max. Likelihood): (t = %.2f)\n",
+            size_t rem = 256;
+			int wb = snprintf(bp, rem, "\nARL : Estimation Bias(Max. Likelihood): (t = %.2f)\n",
 				mleEst.time);
             bp=obuf+strlen(obuf);
-			sprintf(bp,"ARL : North: %.4f, East: %.4f, Depth: %.4f\n",
+            rem -= (wb > 0 ? wb : 0);
+			wb = snprintf(bp, rem, "ARL : North: %.4f, East: %.4f, Depth: %.4f\n",
 				mleEst.x-_currEst.x, mleEst.y-_currEst.y, mleEst.z-_currEst.z);
             bp=obuf+strlen(obuf);
-			sprintf(bp,"ARL : Estimation Bias  (Mean)         : (t = %.2f)\n",
+            rem -= (wb > 0 ? wb : 0);
+			wb = snprintf(bp, rem, "ARL : Estimation Bias  (Mean)         : (t = %.2f)\n",
 				mmseEst.time);
             bp=obuf+strlen(obuf);
-			sprintf(bp,"ARL : North: %.4f, East: %.4f, Depth: %.4f\n",
+            rem -= (wb > 0 ? wb : 0);
+			snprintf(bp, rem, "ARL : North: %.4f, East: %.4f, Depth: %.4f\n",
 				mmseEst.x-_currEst.x, mmseEst.y-_currEst.y, mmseEst.z-_currEst.z);
-            bp=obuf+strlen(obuf);
             logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"%s",obuf);
 		}
 
@@ -852,7 +861,6 @@ int is_init() {
 // exited when good-bye received or the connection is dropped by client.
 // Server returns to listening for connection.
 //
-#define LOGBUF_BYTES 1024
 int main(int argc, char** argv) {
 	char c;
 	int port = 27027;
@@ -1142,7 +1150,7 @@ int main(int argc, char** argv) {
             }
 			catch (Exception e)
 			{
-				sprintf(logbuf, "trn_server: Exception during %c msg: %s",
+				snprintf(logbuf, LOGBUF_BYTES, "trn_server: Exception during %c msg: %s",
 					_ct.msg_type, EXP_MSG);
 				fprintf(stderr, "%s\n", logbuf);
 				logs(TL_OMASK(TL_TRN_SERVER, TL_BOTH), "%s\n", logbuf);

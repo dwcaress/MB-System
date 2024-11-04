@@ -33,25 +33,47 @@
 #define __MBBS_DEFINES__
 
 #include <time.h>
-#ifndef _WIN32
-#include <sys/time.h>
-#endif
 
-#include <mb_config.h>
+/* CMake build system section */
+#ifdef CMAKE_BUILD_SYSTEM
 
-/* XDR i/o include file */
-#ifdef HAVE_RPC_RPC_H
-#include <rpc/rpc.h>
-#endif
-#ifdef HAVE_RPC_TYPES_H
-#include <rpc/types.h>
-#include <rpc/xdr.h>
-#endif
+  #include <stdint.h>
 
-#ifdef _WIN32
-#include <float.h>
-#define isnan _isnan
-#endif
+  #include <rpc/rpc.h>
+  #include <rpc/types.h>
+  #include <rpc/xdr.h>
+
+#else // Begin Autotools section supporting legacy OS's
+
+  #ifndef _WIN32
+    #include <sys/time.h>
+  #endif
+
+  #include <mb_config.h>
+
+	#ifdef _WIN32
+		#include <stdint.h> /* To get INT32_MIN, INT32_MAX, etc ... */
+	#else
+		#ifdef HAVE_STDINT_H
+			#include <stdint.h>
+		#endif
+	#endif
+
+  /* XDR i/o include file */
+  #ifdef HAVE_RPC_RPC_H
+    #include <rpc/rpc.h>
+  #endif
+  #ifdef HAVE_RPC_TYPES_H
+    #include <rpc/types.h>
+    #include <rpc/xdr.h>
+  #endif
+
+  #ifdef _WIN32
+    #include <float.h>
+    #define isnan _isnan
+  #endif
+
+#endif // End Autotools section
 
 /* Some type definitions given here are in a separate
  * header file unixversion.h in the original HMRG codebase */

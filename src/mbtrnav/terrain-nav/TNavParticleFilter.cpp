@@ -14,6 +14,13 @@
 #include "TNavPFLog.h"
 #include "mapio.h"
 
+#define _STR(x) #x
+#define STR(x) _STR(x)
+
+#ifdef WITH_TNAVPF_CEP_CORRECTION
+#pragma message( __FILE__":" STR(__LINE__) " - feature WITH_TNAVPF_CEP_CORRECTION enabled (see FEATURE_OPTIONS in Makefile)" )
+#endif
+
 #define MAX_CROSS_BEAM_COMPARISONS  5
 #define USE_CROSS_BEAM_COMPARISON   0
 
@@ -1380,7 +1387,7 @@ initParticleDist(const particleT& initialGuess) {
 
 			}
 		}else{
-			sprintf(temp, "TNavParticleFilter::initParticleDist() - Error opening file: %s\n",
+			snprintf(temp, TRN_MAX_BEAMS, "TNavParticleFilter::initParticleDist() - Error opening file: %s\n",
 				(pfname?pfname:"NULL"));
      		if(pfname!=NULL)free(pfname);
         fprintf(stderr, "%s", temp);
@@ -1756,8 +1763,20 @@ motionUpdateParticle(particleT& particle, const poseT& diffPose, double* velocit
 		//measurement
         double cep = (this->vehicle->driftRate / 100.0) * (sqrt(diffPose.x * diffPose.x + diffPose.y * diffPose.y));
 
-		//TODO:  check conversion from CEP to Stddev, I don't feel like there should be a sqrt outside the CEP
+
+#ifdef WITH_TNAVPF_CEP_CORRECTION
+        // k headley per Rock 2022-12-05
+        // removes sqrt (error)
+        // divides by sqrt of time since last sample (b/c it is discrete time)
+        // Without these, it is expected that changes to sample interval will
+        // introduce disproportionate amounts of noise, giving unreliable results.
+        double driftStddev = MOTION_NOISE_MULTIPLIER * (cep / sqrt(-2 * (log(1 - 0.5))))/sqrt(diffPose.time);
+#else
+        // original, thought to be incorrect
+        //TODO:  check conversion from CEP to Stddev, I don't feel like there should be a sqrt outside the CEP
         double driftStddev = MOTION_NOISE_MULTIPLIER * sqrt(cep / sqrt(-2 * (log(1 - 0.5))));
+#endif
+
 		//logs(TL_OMASK(TL_TNAV_PARTICLE_FILTER, TL_LOG),"MOTION UPDATE: CEP = %f\n",this->vehicle->driftRate/100.0); //TODO: Remove this (when no longer needed)
 		vehicleDisp[0] = diffPose.x + randn_zeroMean(driftStddev);
 		vehicleDisp[1] = diffPose.y + randn_zeroMean(driftStddev);

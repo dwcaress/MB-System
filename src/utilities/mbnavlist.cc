@@ -73,9 +73,9 @@ int printsimplevalue(int verbose, double value, int width, int precision, bool a
 	if (*invert)
 		strcpy(format, "%g");
 	else if (width > 0)
-		sprintf(&format[1], "%d.%df", width, precision);
+		snprintf(&format[1], 23, "%d.%df", width, precision);
 	else
-		sprintf(&format[1], ".%df", precision);
+		snprintf(&format[1], 23, ".%df", precision);
 
 	/* invert value if desired */
 	if (*invert) {
@@ -626,9 +626,9 @@ int main(int argc, char **argv) {
 								const int utm_zone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
 								reference_lat = navlat;
 								if (reference_lat >= 0.0)
-									sprintf(projection_id, "UTM%2.2dN", utm_zone);
+									snprintf(projection_id, sizeof(projection_id), "UTM%2.2dN", utm_zone);
 								else
-									sprintf(projection_id, "UTM%2.2dS", utm_zone);
+									snprintf(projection_id, sizeof(projection_id), "UTM%2.2dS", utm_zone);
 							}
 							else
 								strcpy(projection_id, projection_pars);
@@ -931,6 +931,11 @@ int main(int argc, char **argv) {
 	}
 	if (read_datalist)
 		mb_datalist_close(verbose, &datalist, &error);
+
+  /* free projection */
+  if (use_projection && pjptr != NULL) {
+    mb_proj_free(verbose, &(pjptr), &error);
+  }
 
 	/* check memory */
 	if (verbose >= 4)

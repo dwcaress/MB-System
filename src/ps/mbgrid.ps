@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:01 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:08 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 150
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -273,26 +279,26 @@ R F2<ad49>A F0 .605(\), and a)B .166
 (gion to be gridded \()-.15 F F2<ad52>A F3(west/east/south/north)A F0
 .525(\), and either the dimensions \()B F2<ad44>A F0 3.025(\)o)C 3.024
 (rn)-3.025 G .524(ode spacing)-3.024 F F2<ad45>3.024 E F0 .524(of the)
-3.024 F .964(grid, If the bounds and grid dimensions \(or spacing\) are\
- not speci\214ed, the program will select the re)108 374.4 R(gion)-.15 E
-1.082(encompassing all of the data in the input \214les and a grid spac\
-ing equi)108 386.4 R -.25(va)-.25 G 1.081
-(lent to 0.02 times the maximum).25 F .256
-(sonar altitude. The automatically calculated grid bounds will e)108
-398.4 R .256(xactly correspond to the smallest rectangular)-.15 F(re)108
-410.4 Q .319(gion including the data unless the user speci\214es a lar)
--.15 F .319(ger re)-.18 F .319(gion using)-.15 F F2<ad52>2.819 E F3
-(factor)A F0 2.819(.T)C .319(he v)-2.819 F(alue)-.25 E F3(factor)2.818 E
-F0 .318(must be)2.818 F .656(greater than one; if)108 422.4 R F3(factor)
-3.156 E F0 3.156(=1)3.156 G .657(.1 then the grid bounds will be e)
--3.156 F .657(xpanded to the east and west by an amount)-.15 F .774
+3.024 F .062(grid, If the bounds and grid dimensions \(or spacing\) are\
+ not speci\214ed, the program will select the re)108 374.4 R .062
+(gion en-)-.15 F .25(compassing all of the data in the input \214les an\
+d a grid spacing equi)108 386.4 R -.25(va)-.25 G .25
+(lent to 0.02 times the maximum sonar).25 F 1.068
+(altitude. The automatically calculated grid bounds will e)108 398.4 R
+1.069(xactly correspond to the smallest rectangular re-)-.15 F .767
+(gion including the data unless the user speci\214es a lar)108 410.4 R
+.767(ger re)-.18 F .767(gion using)-.15 F F2<ad52>3.267 E F3(factor)A F0
+3.267(.T)C .767(he v)-3.267 F(alue)-.25 E F3(factor)3.267 E F0 .767
+(must be)3.267 F .656(greater than one; if)108 422.4 R F3(factor)3.156 E
+F0 3.156(=1)3.156 G .657(.1 then the grid bounds will be e)-3.156 F .657
+(xpanded to the east and west by an amount)-.15 F .774
 (0.05 times the data bounds east-west e)108 434.4 R .773
 (xtend and to the north and south by an amount 0.05 times the data)-.15
-F .272(bounds north-south e)108 446.4 R .273
+F .067(bounds north-south e)108 446.4 R .068
 (xtent. The user can also specify the type of the input data \()-.15 F
-F2<ad41>A F0 .273(\), the width of the g)B(aus-)-.05 E .228
-(sian \214lter used for weighted a)108 458.4 R -.15(ve)-.2 G .228
-(rage gridding \().15 F F2<ad57>A F0 .228
+F2<ad41>A F0 .068(\), the width of the g)B(auss-)-.05 E .472
+(ian \214lter used for weighted a)108 458.4 R -.15(ve)-.2 G .471
+(rage gridding \().15 F F2<ad57>A F0 .471
 (\), the maximum distance from data points that the spline)B
 (interpolation is used \()108 470.4 Q F2<ad43>A F0
 (\), the format of the output \214les, and other parameters.)A .946
@@ -334,35 +340,35 @@ F -.15(ve)-.25 G 3.677(nt).15 G(hose)-3.677 E .207(with no rele)108
 (ath data \214le used for grid-)-.1 F(ding or plotting. The programs)108
 674.4 Q F2(mbswath)2.5 E F0(and)2.5 E F2(mbcontour)2.5 E F0
 (also use ".inf" \214les in the same f)2.5 E(ashion.)-.1 E(Usually)108
-698.4 Q 3.965(,t)-.65 G 1.465(he internal w)-3.965 F 1.464
+698.4 Q 3.111(,t)-.65 G .611(he internal w)-3.111 F .611
 (orking grid has the same boundaries as the output grid. Ho)-.1 F(we)
--.25 E -.15(ve)-.25 G 2.264 -.4(r, t).15 H(he).4 E F2<ad58>3.964 E F0
-(option)3.964 E(allo)108 710.4 Q 1.05(ws the size of the internal grid \
-to be increased so that data outside the grid can be used to guide the)
--.25 F 1.938(spline interpolation of data g)108 722.4 R 1.938
-(aps which happen to lie at the the edge of the grid.)-.05 F 1.937
-(This is particularly)6.937 F(MB-System 5.0)72 768 Q(31 October 2021)
-137.055 E(1)195.395 E 0 Cg EP
+-.25 E -.15(ve)-.25 G 1.41 -.4(r, t).15 H(he).4 E F2<ad58>3.11 E F0 .61
+(option al-)3.11 F(lo)108 710.4 Q .13(ws the size of the internal grid \
+to be increased so that data outside the grid can be used to guide the \
+spline)-.25 F 1.105(interpolation of data g)108 722.4 R 1.104
+(aps which happen to lie at the the edge of the grid.)-.05 F 1.104
+(This is particularly important)6.104 F(MB-System 5.0)72 768 Q
+(31 October 2021)137.055 E(1)195.395 E 0 Cg EP
 %%Page: 2 2
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 159.28(mbgrid\(1\) MB-System)72 48 R 159.28
-(5.0 mbgrid\(1\))2.5 F .339(important when adjacent grids are created w\
-hich should match along the edges.)108 84 R .339
-(The data input bounds are)5.339 F .014(set to a re)108 96 R .014
-(gion three times as lar)-.15 F .014(ge as the w)-.18 F .013
-(orking grid in both longitude and latitude.)-.1 F .013
-(The program reads all)5.013 F .075
-(pings which lie within the data input bounds, and accepts all beam v)
-108 108 R .075(alues with locations within the w)-.25 F(orking)-.1 E
-1.33(grid. In addition to sw)108 120 R 1.329
+(5.0 mbgrid\(1\))2.5 F .125
+(when adjacent grids are created which should match along the edges.)108
+84 R .126(The data input bounds are set to a re-)5.125 F .809
+(gion three times as lar)108 96 R .809(ge as the w)-.18 F .808
+(orking grid in both longitude and latitude.)-.1 F .808
+(The program reads all pings)5.808 F .255
+(which lie within the data input bounds, and accepts all beam v)108 108
+R .255(alues with locations within the w)-.25 F .255(orking grid.)-.1 F
+.923(In addition to sw)108 120 R .923
 (ath sonar data in formats supported by)-.1 F/F1 10/Times-Bold@0 SF
-(MB-System)3.829 E F0 1.329(\(see the)3.829 F F1(MB-System)3.829 E F0
-(manual)3.829 E(page\),)108 132 Q F1(mbgrid)2.772 E F0 .273
-(can also read data from ASCII te)2.773 F .273
-(xt \214les in longitude, latitude, v)-.15 F .273
-(alue triples. This allo)-.25 F .273(ws one)-.25 F(to incorporate con)
+(MB-System)3.423 E F0 .922(\(see the)3.422 F F1(MB-System)3.422 E F0
+.922(manual page\),)3.422 F F1(mbgrid)108 132 Q F0 .442
+(can also read data from ASCII te)2.942 F .442
+(xt \214les in longitude, latitude, v)-.15 F .442
+(alue triples. This allo)-.25 F .443(ws one to in-)-.25 F(corporate con)
 108 144 Q -.15(ve)-.4 G(ntional echosounder bath).15 E
 (ymetry data into the gridding.)-.05 E(The a)108 168 Q -.25(va)-.2 G
 (ilable gridding algorithms speci\214ed with the).25 E F1(-F)2.5 E F0
@@ -441,14 +447,14 @@ R .144(alues represent the fraction)-.25 F .342(of the beam contained w\
 ithin the cell. Each footprint is tilted according to the local slope; \
 the slope is esti-)108 672 R .478(mated from a lo)108 684 R 2.978(wr)
 -.25 G .478(esolution, \214rst pass grid created by simple mean \214lte\
-ring the soundings. The slope grid)-2.978 F 1.116(is generated using a \
-cell size twice that of the \214nal grid. This approach allo)108 696 R
-1.116(ws one to sensibly grid data)-.25 F .592
-(using a resolution greater than that of the ra)108 708 R 3.092(wd)-.15
-G .591(ata. Thus, if one has data with a lar)-3.092 F .591(ge depth v)
--.18 F .591(ariation, one)-.25 F .021(can generate a grid with a cell s\
-pacing appropriate for the high resolution, shallo)108 720 R 2.521(wd)
--.25 G .021(ata and still get sensible)-2.521 F(MB-System 5.0)72 768 Q
+ring the soundings. The slope grid)-2.978 F .324(is generated using a c\
+ell size twice that of the \214nal grid. This approach allo)108 696 R
+.324(ws one to sensibly grid data us-)-.25 F .207
+(ing a resolution greater than that of the ra)108 708 R 2.707(wd)-.15 G
+.207(ata. Thus, if one has data with a lar)-2.707 F .206(ge depth v)-.18
+F .206(ariation, one can)-.25 F .986(generate a grid with a cell spacin\
+g appropriate for the high resolution, shallo)108 720 R 3.486(wd)-.25 G
+.986(ata and still get sensible)-3.486 F(MB-System 5.0)72 768 Q
 (31 October 2021)137.055 E(2)195.395 E 0 Cg EP
 %%Page: 3 3
 %%BeginPageSetup
@@ -501,17 +507,17 @@ ata without application of a local slope)3.346 F(estimate.)108 156 Q
 (rlap. A).15 F -.15(ve)-.74 G 1.227(raging ba-).15 F(th)108 348 Q 1.628
 (ymetry data from o)-.05 F -.15(ve)-.15 G 1.627(rlapping sw).15 F 1.627
 (aths is usually \214ne, b)-.1 F 1.627(ut a)-.2 F -.15(ve)-.2 G 1.627
-(raging imagery data \(beam amplitude or).15 F 1.714(sidescan\) deri)108
-360 R -.15(ve)-.25 G 4.214(df).15 G 1.714(rom dif)-4.214 F 1.714
-(ferent sw)-.25 F 1.714(aths is usually undesirable. The)-.1 F F1<ad55>
-4.214 E F0 1.714(option allo)4.214 F 1.714(ws the user to force)-.25 F
-F1(mbgrid)108 372 Q F0 .917(to ignore data which o)3.417 F -.15(ve)-.15
-G .917(rlies re).15 F .917(gions already co)-.15 F -.15(ve)-.15 G .916
-(red by pre).15 F .916(vious data \(as de\214ned by a time lag)-.25 F
-.205(criterea\). Alternati)108 384 R -.15(ve)-.25 G(ly).15 E 2.705(,t)
--.65 G .206
-(he user can force the program to use only the last data in a re)-2.705
-F .206(gion, ag)-.15 F .206(ain as de\214ned)-.05 F
+(raging imagery data \(beam amplitude or).15 F .374(sidescan\) deri)108
+360 R -.15(ve)-.25 G 2.874(df).15 G .374(rom dif)-2.874 F .374
+(ferent sw)-.25 F .374(aths is usually undesirable. The)-.1 F F1<ad55>
+2.874 E F0 .375(option allo)2.874 F .375(ws the user to force)-.25 F F1
+(mb-)2.875 E(grid)108 372 Q F0 1.734(to ignore data which o)4.234 F -.15
+(ve)-.15 G 1.734(rlies re).15 F 1.734(gions already co)-.15 F -.15(ve)
+-.15 G 1.734(red by pre).15 F 1.733
+(vious data \(as de\214ned by a time lag)-.25 F .205
+(criterea\). Alternati)108 384 R -.15(ve)-.25 G(ly).15 E 2.705(,t)-.65 G
+.206(he user can force the program to use only the last data in a re)
+-2.705 F .206(gion, ag)-.15 F .206(ain as de\214ned)-.05 F
 (by a time lag. This option w)108 396 Q
 (orks best with the median \214lter scheme.)-.1 E .752(The gridding can\
  be augmented by interpolation using a 2D thin plate spline algorithm w\
@@ -548,41 +554,41 @@ F0 2.756(=1\()2.756 G .256(the def)-2.756 F .256
 (ook).15 E(lar)108 540 Q .371(ger and more complete than in reality)-.18
 F 5.371(.I)-.65 G(f)-5.371 E F2(mode)2.871 E F0 2.871(=3o)2.871 G(r)
 -2.871 E F2(clip)2.871 E F0 .371(is set to a v)2.871 F .371
-(alue greater than both dimensions)-.25 F .835
-(of the output grid, then all grid cells not set by sw)108 552 R .835
-(ath data will be \214lled by interpolation.)-.1 F(The)5.835 E F1<ad54>
-3.335 E F2(tension)A F0 .005
-(option modulates the thin plate spline algorithm.)108 564 R .005
-(Using the def)5.005 F(ault)-.1 E F2(tension)2.505 E F0 2.505(=0)2.505 G
-.005(.0 corresponds to a minimum)-2.505 F(curv)108 576 Q .036
+(alue greater than both dimensions)-.25 F .001
+(of the output grid, then all grid cells not set by sw)108 552 R .002
+(ath data will be \214lled by interpolation.)-.1 F(The)5.002 E F1<ad54>
+2.502 E F2(tension)A F0(op-)2.502 E .63
+(tion modulates the thin plate spline algorithm.)108 564 R .63
+(Using the def)5.63 F(ault)-.1 E F2(tension)3.13 E F0 3.13(=0)3.13 G .63
+(.0 corresponds to a minimum)-3.13 F(curv)108 576 Q .036
 (ature, pure Laplacian solution. If)-.25 F F2(tension)2.536 E F0 .036
 (is made lar)2.536 F .037(ge, the solution tends to)-.18 F -.1(wa)-.25 G
 .037(rd a thin plate spline and).1 F(is ef)108 588 Q(fecti)-.25 E -.15
-(ve)-.25 G(ly \215attened.).15 E(The)108 612 Q F1<ad4b>3.405 E F2(bac)A
-(kgr)-.2 E(ound)-.45 E F0 .905(option is used to underlay a bath)3.405 F
-.904(ymetry or topograph)-.05 F 3.404(yg)-.05 G .904
-(rid with a global or re)-3.404 F(gional)-.15 E(topograph)108 624 Q 4.26
-(ym)-.05 G 1.76(odel. The background data model can be read from a GMT \
-grid \214le or from a database)-4.26 F .277(accessed by the)108 636 R F1
-(GMT)2.776 E F0(program)2.776 E F1(grdraster)2.776 E F0 5.276(.I)C 2.776
-(nt)-5.276 G .276(he former case)-2.776 F F2(bac)2.776 E(kgr)-.2 E(ound)
--.45 E F0 .276(is just the \214le path for the back-)2.776 F .724
-(ground grid. In the latter case)108 648 R F2(bac)3.225 E(kgr)-.2 E
-(ound)-.45 E F0 .725
-(is an identi\214er number used to specify which dataset to e)3.225 F
-(xtract)-.15 E(using)108 660 Q F1(grdraster)3.503 E F0 3.503(.T)C 1.003
-(hese identi\214ers are user de\214ned and v)-3.503 F 1.003(ary with)
--.25 F F1(GMT)3.503 E F0 1.003(installations. When the)3.503 F F1<ad4b>
-3.502 E F2(bac)A(k-)-.2 E(gr)108 672 Q(ound)-.45 E F0(option is in)2.5 E
--.2(vo)-.4 G -.1(ke).2 G(d,).1 E F1(grd2xyz)2.5 E F0(or)2.5 E F1
-(grdraster)2.5 E F0 .001(is used to e)2.5 F .001
-(xtract all of the longitude, latitude, and topogra-)-.15 F(ph)108 684 Q
-2.924(yv)-.05 G .424(alues within the speci\214ed database that lie wit\
-hin the desired grid. These v)-3.174 F .423(alues are interpolated onto)
--.25 F .209(the desired grid locations using the thin plate spline algo\
-rithm, and then mapped onto the grid where)108 696 R -.15(ve)-.25 G 2.71
-(rt).15 G(he)-2.71 E -.25(va)108 708 S
-(lues are unde\214ned by either sw).25 E
+(ve)-.25 G(ly \215attened.).15 E(The)108 612 Q F1<ad4b>2.551 E F2(bac)A
+(kgr)-.2 E(ound)-.45 E F0 .051(option is used to underlay a bath)2.551 F
+.051(ymetry or topograph)-.05 F 2.55(yg)-.05 G .05
+(rid with a global or re)-2.55 F .05(gional to-)-.15 F(pograph)108 624 Q
+2.512(ym)-.05 G .012(odel. The background data model can be read from a\
+ GMT grid \214le or from a database accessed)-2.512 F 1.027(by the)108
+636 R F1(GMT)3.527 E F0(program)3.527 E F1(grdraster)3.527 E F0 6.027
+(.I)C 3.527(nt)-6.027 G 1.027(he former case)-3.527 F F2(bac)3.526 E
+(kgr)-.2 E(ound)-.45 E F0 1.026
+(is just the \214le path for the background)3.526 F .226
+(grid. In the latter case)108 648 R F2(bac)2.726 E(kgr)-.2 E(ound)-.45 E
+F0 .227(is an identi\214er number used to specify which dataset to e)
+2.726 F .227(xtract using)-.15 F F1(gr)2.727 E(-)-.37 E(draster)108 660
+Q F0 2.98(.T)C .48(hese identi\214ers are user de\214ned and v)-2.98 F
+.479(ary with)-.25 F F1(GMT)2.979 E F0 .479(installations. When the)
+2.979 F F1<ad4b>2.979 E F2(bac)A(kgr)-.2 E(ound)-.45 E F0(op-)2.979 E
+.09(tion is in)108 672 R -.2(vo)-.4 G -.1(ke).2 G(d,).1 E F1(grd2xyz)
+2.59 E F0(or)2.59 E F1(grdraster)2.59 E F0 .09(is used to e)2.59 F .09
+(xtract all of the longitude, latitude, and topograph)-.15 F 2.59(yv)
+-.05 G(alues)-2.84 E .371(within the speci\214ed database that lie with\
+in the desired grid. These v)108 684 R .37
+(alues are interpolated onto the desired)-.25 F .42(grid locations usin\
+g the thin plate spline algorithm, and then mapped onto the grid where)
+108 696 R -.15(ve)-.25 G 2.921(rt).15 G .421(he v)-2.921 F .421
+(alues are)-.25 F(unde\214ned by either sw)108 708 Q
 (ath data or the spline interpolation in)-.1 E -.2(vo)-.4 G -.1(ke).2 G
 2.5(dw).1 G(ith the)-2.5 E F1<ad43>2.5 E F0(option.)2.5 E(MB-System 5.0)
 72 768 Q(31 October 2021)137.055 E(3)195.395 E 0 Cg EP
@@ -599,12 +605,11 @@ BP
 (acilitate this, the)-3.321 F/F1 10/Times-Bold@0 SF<ad42>3.221 E F0 .721
 (option allo)3.221 F .722
 (ws the user to set the border of a smoothly interpolated grid to a)-.25
-F 1.511(constant v)108 108 R 1.511(alue where)-.25 F -.15(ve)-.25 G
-4.011(rn).15 G 4.011(od)-4.011 G 1.511(ata are present.)-4.011 F 1.51
-(This is useful only if the data are con\214ned to the central)6.511 F
-(re)108 120 Q
-(gion of the grid and a smooth interpolation is done with a lar)-.15 E
-(ge)-.18 E/F2 10/Times-Italic@0 SF(clip)2.5 E F0
+F .716(constant v)108 108 R .716(alue where)-.25 F -.15(ve)-.25 G 3.216
+(rn).15 G 3.216(od)-3.216 G .716(ata are present.)-3.216 F .715
+(This is useful only if the data are con\214ned to the central re-)5.715
+F(gion of the grid and a smooth interpolation is done with a lar)108 120
+Q(ge)-.18 E/F2 10/Times-Italic@0 SF(clip)2.5 E F0
 (so that the entire grid is \214lled.)2.5 E .936
 (The output grid will by def)108 144 R .936(ault contain v)-.1 F .936
 (alues of 99999.9 at cells containing no data; if the)-.25 F F1<ad4e>
@@ -650,39 +655,39 @@ F .85(of data points located within each bin, and the second \("root_sd\
 (Christian do Santos Ferreira)108 448.8 Q(MAR)113 460.8 Q
 (UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
 472.8 Q -.15(ve)-.25 G(rsity of Bremen).15 E F3(OPTIONS)72 501.6 Q F1
-<ad41>108 513.6 Q F2(datatype)23.08 E F0 .011
+<ad41>108 513.6 Q F2(datatype)144 513.6 Q F0 .011
 (Sets the type of data to be read and gridded. If)144 525.6 R F2
 (datatype)2.51 E F0 2.51(=1)2.51 G 2.51(,b)-2.51 G(ath)-2.51 E .01
-(ymetry data will be gridded \(posi-)-.05 F(ti)144 537.6 Q 3.141 -.15
-(ve d)-.25 H -.25(ow).15 G(nw).25 E 2.841(ards\). If)-.1 F F2(datatype)
-5.341 E F0 5.341(=2)5.341 G 5.341(,b)-5.341 G(ath)-5.341 E 2.842
-(ymetry data will be gridded as topograph)-.05 F 5.342(y\()-.05 G
-(positi)-5.342 E -.15(ve)-.25 G(upw)144 549.6 Q 3.098(ards\). If)-.1 F
-F2(datatype)3.098 E F0 3.098(=3)3.098 G 3.098(,a)-3.098 G .598
-(mplitude data will be gridded.)-3.098 F(If)5.598 E F2(datatype)3.098 E
-F0 3.097(=4)3.097 G 3.097(,s)-3.097 G .597(idescan data will be)-3.097 F
-(gridded. Def)144 561.6 Q(ault:)-.1 E F2(datatype)2.5 E F0 2.5(=1\()2.5
-G(bath)-2.5 E(ymetry\).)-.05 E F1<ad42>108 578.4 Q F2(bor)23.63 E(der)
--.37 E F0 1.094
+(ymetry data will be gridded \(posi-)-.05 F(ti)144 537.6 Q 1.807 -.15
+(ve d)-.25 H -.25(ow).15 G(nw).25 E 1.507(ards\). If)-.1 F F2(datatype)
+4.008 E F0 4.008(=2)4.008 G 4.008(,b)-4.008 G(ath)-4.008 E 1.508
+(ymetry data will be gridded as topograph)-.05 F 4.008(y\()-.05 G
+(positi)-4.008 E 1.808 -.15(ve u)-.25 H(p-).15 E -.1(wa)144 549.6 S
+3.686(rds\). If).1 F F2(datatype)3.686 E F0 3.686(=3)3.686 G 3.686(,a)
+-3.686 G 1.186(mplitude data will be gridded.)-3.686 F(If)6.186 E F2
+(datatype)3.686 E F0 3.686(=4)3.686 G 3.686(,s)-3.686 G 1.185
+(idescan data will be)-3.686 F(gridded. Def)144 561.6 Q(ault:)-.1 E F2
+(datatype)2.5 E F0 2.5(=1\()2.5 G(bath)-2.5 E(ymetry\).)-.05 E F1<ad42>
+108 578.4 Q F2(bor)144 578.4 Q(der)-.37 E F0 1.094
 (Sets the border of a smoothly interpolated grid to the v)144 590.4 R
 (alue)-.25 E F2(bor)3.595 E(der)-.37 E F0(where)3.595 E -.15(ve)-.25 G
 3.595(rn).15 G 3.595(od)-3.595 G 1.095(ata e)-3.595 F 1.095(xist, pro-)
 -.15 F(vided)144 602.4 Q F2(bor)2.5 E(der)-.37 E F0 2.5(>0)2.5 G 2.5
 (.0. Def)-2.5 F(ault:)-.1 E F2(bor)2.5 E(der)-.37 E F0 2.5(=0)2.5 G(.0)
--2.5 E F1<ad43>108 619.2 Q F2(clip[/mode])23.08 E F0 .091(Controls the \
-use of spline interpolation to \214ll grid cells not \214lled by sw)144
-631.2 R .091(ath data. The)-.1 F F2(clip)2.591 E F0 -.25(va)2.591 G .091
-(lue sets).25 F .605(the distance from sw)144 643.2 R .605(ath data \(i\
-n grid cells\) that the spline interpolation may be applied. If)-.1 F F2
-(clip)3.105 E F0(=0)A .811(no spline interpolation will be done.)144
+-2.5 E F1<ad43>108 619.2 Q F2(clip[/mode])144 619.2 Q F0 .091(Controls \
+the use of spline interpolation to \214ll grid cells not \214lled by sw)
+144 631.2 R .091(ath data. The)-.1 F F2(clip)2.591 E F0 -.25(va)2.591 G
+.091(lue sets).25 F .605(the distance from sw)144 643.2 R .605(ath data\
+ \(in grid cells\) that the spline interpolation may be applied. If)-.1
+F F2(clip)3.105 E F0(=0)A .811(no spline interpolation will be done.)144
 655.2 R(If)5.811 E F2(mode)3.311 E F0 .811(=1 \(the def)B .81
 (ault\), then the interpolation will \214ll data)-.1 F -.05(ga)144 667.2
-S 1.278(ps up to tw).05 F 3.779(ot)-.1 G(imes)-3.779 E F2(clip)3.779 E
-F0 1.279(grid cells in size. If)3.779 F F2(mode)3.779 E F0 1.279
-(=2 then the spline interpolation will \214ll all)B .059
-(unde\214ned cells within a distance of)144 679.2 R F2(clip)2.559 E F0
-.059(cells from data. If)2.559 F F2(mode)2.559 E F0 2.559(=3o)2.559 G(r)
--2.559 E F2(clip)2.559 E F0 .059(is set to a v)2.559 F .059
+S .378(ps up to tw).05 F 2.878(ot)-.1 G(imes)-2.878 E F2(clip)2.878 E F0
+.378(grid cells in size. If)2.878 F F2(mode)2.878 E F0 .379
+(=2 then the spline interpolation will \214ll all un-)B .536
+(de\214ned cells within a distance of)144 679.2 R F2(clip)3.035 E F0
+.535(cells from data. If)3.035 F F2(mode)3.035 E F0 3.035(=3o)3.035 G(r)
+-3.035 E F2(clip)3.035 E F0 .535(is set to a v)3.035 F .535
 (alue greater)-.25 F .643(than both dimensions of the output grid, then\
  all grid cells not set by sw)144 691.2 R .644
 (ath data will be \214lled by)-.1 F 2.5(interpolation. Def)144 703.2 R
@@ -695,49 +700,49 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 159.28(mbgrid\(1\) MB-System)72 48 R 159.28
 (5.0 mbgrid\(1\))2.5 F/F1 10/Times-Bold@0 SF<ad44>108 84 Q/F2 10
-/Times-Italic@0 SF(xdim/ydim)23.08 E F0 1.349
+/Times-Italic@0 SF(xdim/ydim)144 84 Q F0 1.349
 (Sets the dimensions of the output grid.)144 96 R 1.349
 (This option is superceded if the user speci\214es the grid)6.349 F
 (spacing with the)144 108 Q F1<ad45>2.5 E F0 2.5(option. Def)2.5 F
 (ault:)-.1 E F2(xdim)5 E F0(=)2.5 E F2(ydim)2.5 E F0 2.5(=1)2.5 G(01.)
--2.5 E F1<ad45>108 124.8 Q F2(dx/dy/units[!])23.63 E F0 .468
+-2.5 E F1<ad45>108 124.8 Q F2(dx/dy/units[!])144 124.8 Q F0 .468
 (Sets the grid cell spacing to)144 136.8 R F2(dx)2.968 E F0 .468
 (in longitude and)2.968 F F2(dy)2.968 E F0 .468(in latitude. If)2.968 F
 F2(units)2.968 E F0 .468(is not speci\214ed, the)2.968 F F2(dx)2.968 E
-F0(and)2.968 E F2(dy)144 148.8 Q F0 -.25(va)4.472 G 1.972
-(lues are assumed to be in meters. V).25 F 1.972(alid v)-1.11 F 1.972
-(alues for)-.25 F F2(units)4.472 E F0 1.972
-(include "km", "meters", "feet",)4.472 F("de)144 160.8 Q .589
-(grees", "arcmin", and "arcsec".)-.15 F .589(If not in de)5.589 F .589
-(grees, the grid cell spacing v)-.15 F .59(alues are con)-.25 F -.15(ve)
--.4 G .59(rted to).15 F(de)144 172.8 Q .746(grees. F)-.15 F .746
-(or "km" and "meters", the con)-.15 F -.15(ve)-.4 G .746(rsion to de).15
-F .746(grees is made using the distance per de)-.15 F(gree)-.15 E .087
-(latitude calculated for the Earth')144 184.8 R 2.587(ss)-.55 G(urf)
--2.587 E .087(ace at the central latitude of the grid. If)-.1 F F2(dy)
-2.588 E F0 2.588(=0)2.588 G .088(.0, then the lat-)-2.588 F 1.169(itude\
- cell spacing will be set equal to the longitude cell spacing \(after c\
-on)144 196.8 R -.15(ve)-.4 G 1.169(rsion to de).15 F 1.169(grees, if)
--.15 F 1.207(necessary\). By def)144 208.8 R 1.207(ault, the grid spaci\
-ng is calculated from the grid bounds and the grid dimen-)-.1 F .07
-(sions. When the user uses the)144 220.8 R F1<ad45>2.57 E F0 .069
-(option to set the cell spacings, the grid dimensions are calculated)
-2.57 F .305(using the grid bounds and grid cell spacings. Ho)144 232.8 R
-(we)-.25 E -.15(ve)-.25 G 1.105 -.4(r, s).15 H .306
-(light adjustments to the grid cell spacings).4 F 1.214
-(are usually required to k)144 244.8 R 1.214
+F0(and)2.968 E F2(dy)144 148.8 Q F0 -.25(va)3.14 G .64
+(lues are assumed to be in meters. V).25 F .639(alid v)-1.11 F .639
+(alues for)-.25 F F2(units)3.139 E F0 .639
+(include "km", "meters", "feet", "de-)3.139 F .433
+(grees", "arcmin", and "arcsec".)144 160.8 R .434(If not in de)5.433 F
+.434(grees, the grid cell spacing v)-.15 F .434(alues are con)-.25 F
+-.15(ve)-.4 G .434(rted to de-).15 F .117(grees. F)144 172.8 R .117
+(or "km" and "meters", the con)-.15 F -.15(ve)-.4 G .117(rsion to de).15
+F .117(grees is made using the distance per de)-.15 F .116(gree lati-)
+-.15 F .613(tude calculated for the Earth')144 184.8 R 3.113(ss)-.55 G
+(urf)-3.113 E .614(ace at the central latitude of the grid. If)-.1 F F2
+(dy)3.114 E F0 3.114(=0)3.114 G .614(.0, then the lati-)-3.114 F .105(t\
+ude cell spacing will be set equal to the longitude cell spacing \(afte\
+r con)144 196.8 R -.15(ve)-.4 G .104(rsion to de).15 F .104
+(grees, if nec-)-.15 F .817(essary\). By def)144 208.8 R .817(ault, the\
+ grid spacing is calculated from the grid bounds and the grid dimension\
+s.)-.1 F .152(When the user uses the)144 220.8 R F1<ad45>2.651 E F0 .151
+(option to set the cell spacings, the grid dimensions are calculated us\
+ing)2.651 F .936(the grid bounds and grid cell spacings. Ho)144 232.8 R
+(we)-.25 E -.15(ve)-.25 G 1.736 -.4(r, s).15 H .936
+(light adjustments to the grid cell spacings are).4 F .73
+(usually required to k)144 244.8 R .73
 (eep the grid bounds as speci\214ed. Appending an ! to the end of the)
--.1 F F1<ad45>3.713 E F0(ar)144 256.8 Q .646(guments forces)-.18 F F1
-(mbgrid)3.146 E F0 .646(to use the e)3.146 F .646
-(xact grid cell spacing v)-.15 F .646
+-.1 F F1<ad45>3.23 E F0(ar)3.23 E(gu-)-.18 E 1.818(ments forces)144
+256.8 R F1(mbgrid)4.318 E F0 1.818(to use the e)4.318 F 1.819
+(xact grid cell spacing v)-.15 F 1.819
 (alues speci\214ed by adjusting the grid)-.25 F 2.618(bounds. Def)144
 268.8 R .117(ault: If neither the)-.1 F F1<ad45>2.617 E F0(or)2.617 E F1
 <ad44>2.617 E F0 .117
 (options are speci\214ed, the program sets the grid cell spac-)2.617 F
 (ing to be 0.02 times the maximum sonar altitude in the input \214les.)
-144 280.8 Q F1<ad46>108 297.6 Q F2(mode[/thr)24.19 E(eshold])-.37 E F0
-(Sets the gridding algorithm to be used.)144 309.6 Q F2(mode)180 321.6 Q
-F0 2.5(=1)2.5 G 37.5(:G)-2.5 G(aussian W)-37.5 E(eighted Mean)-.8 E F2
+144 280.8 Q F1<ad46>108 297.6 Q F2(mode[/thr)144 297.6 Q(eshold])-.37 E
+F0(Sets the gridding algorithm to be used.)144 309.6 Q F2(mode)180 321.6
+Q F0 2.5(=1)2.5 G 37.5(:G)-2.5 G(aussian W)-37.5 E(eighted Mean)-.8 E F2
 (mode)180 333.6 Q F0 2.5(=2)2.5 G 37.5(:M)-2.5 G(edian Filter)-37.5 E F2
 (mode)180 345.6 Q F0 2.5(=3)2.5 G 37.5(:M)-2.5 G(inimum Filter)-37.5 E
 F2(mode)180 357.6 Q F0 2.5(=4)2.5 G 37.5(:M)-2.5 G(aximum Filter)-37.5 E
@@ -751,7 +756,7 @@ F0 2.5(=3+)2.5 G F2(thr)A(eshold)-.37 E F0 2.5(:M)C(inimum W)-2.5 E
 3.264 G .764(lue is de\214ned in meters. The def).25 F .765
 (ault gridding algorithm is)-.1 F F2(mode)3.265 E F0 3.265(=1)3.265 G
 (\(Gaussian W)144 429.6 Q(eighted Mean\).)-.8 E F1<ad47>108 446.4 Q F2
-(gridkind)22.52 E F0 1.064
+(gridkind)144 446.4 Q F0 1.064
 (This option sets the format of the output grid \214le.)144 458.4 R
 1.063(The def)6.063 F 1.063(ault is to output a current generation)-.1 F
 .657(GMT CO)144 470.4 R .657(ARDS-compliant netCDF 4-byte \215oat grid.)
@@ -863,9 +868,9 @@ ids will be in the ESRI ASCII grid format.)3.828 F(Arc/Info)6.329 E .525
 F1<ad45>2.5 E F0(documentation abo)2.5 E -.15(ve)-.15 G 2.5(\). Def).15
 F(ault:)-.1 E F2(gridkind)2.5 E F0 2.5(=")2.5 G(=nf".)-2.5 E F1<ad48>108
 652.8 Q F0 .162(This "help" \215ag cause the program to print out a des\
-cription of its operation and then e)22.52 F .161(xit immedi-)-.15 F
-(ately)144 664.8 Q(.)-.65 E F1<ad49>108 681.6 Q F2(datalist)26.41 E F0
-.572
+cription of its operation and then e)144 652.8 R .161(xit immedi-)-.15 F
+(ately)144 664.8 Q(.)-.65 E F1<ad49>108 681.6 Q F2(datalist)144 681.6 Q
+F0 .572
 (Sets the \214lename of the \214le containing a list of the input sw)144
 693.6 R .573(ath sonar data \214les and their formats.)-.1 F(In the)144
 705.6 Q F2(datalist)2.5 E F0(\214le, each data \214le should be follo)
@@ -900,8 +905,8 @@ Q -.15(ve)-.25 G 3.157(ni).15 G 3.157(nt)-3.157 G(he)-3.157 E F1(MBIO)
 (will attempt to read an)3.862 F
 ("fbt" \214le in lieu of the original data.)144 180 Q(Def)5 E(ault:)-.1
 E/F2 10/Times-Italic@0 SF(datalist)2.5 E F0 2.5(=d)2.5 G(atalist.mb-1)
--2.5 E F1<ad4a>108 196.8 Q F2(pr)25.3 E(ojection)-.45 E F0 .225(By def)
-2.725 F(ault,)-.1 E F1(mbgrid)2.725 E F0 .225
+-2.5 E F1<ad4a>108 196.8 Q F2(pr)144 196.8 Q(ojection)-.45 E F0 .225
+(By def)2.725 F(ault,)-.1 E F1(mbgrid)2.725 E F0 .225
 (generates grids in Geographic coordinates, meaning that position is)
 2.725 F .517(de\214ned in longitude and latitude using the WGS84 geogra\
 phic coordinate system.)144 208.8 R(The)5.517 E F1<ad4a>3.017 E F0
@@ -966,31 +971,31 @@ E F0 8.167(.T)C 3.167(hese plotting)-8.167 F .403
 (are already in a projected coordinate system. Also, the program)144
 544.8 R F1(mbgrdtiff)3.561 E F0 1.061(automatically inserts)3.561 F .786
 (the appropriate projection information into the GeoTIFF images it gene\
-rates. As a result, images)144 556.8 R .147(generated by)144 568.8 R F1
-(mbgrdtiff)2.647 E F0 .147(will be properly georeferenced when the)2.647
-F 2.647(ya)-.15 G .147(re imported into GIS softw)-2.647 F(are.)-.1 E F1
-<ad4b>108 597.6 Q F2(bac)22.52 E(kgr)-.2 E(ound)-.45 E F0 .289
+rates. As a result, images)144 556.8 R(generated by)144 568.8 Q F1
+(mbgrdtiff)2.5 E F0(will be properly georeferenced when the)2.5 E 2.5
+(ya)-.15 G(re imported into GIS softw)-2.5 E(are.)-.1 E F1<ad4b>108
+597.6 Q F2(bac)144 597.6 Q(kgr)-.2 E(ound)-.45 E F0 .29
 (Enables \214lling in all unde\214ned grid cells with bath)144 609.6 R
-.289(ymetry or topograph)-.05 F 2.79(yf)-.05 G .29(rom a global or re)
--2.79 F(gional)-.15 E 1.151(database. If raster data ha)144 621.6 R
+.289(ymetry or topograph)-.05 F 2.789(yf)-.05 G .289(rom a global or re)
+-2.789 F(gional)-.15 E 1.15(database. If raster data ha)144 621.6 R
 1.451 -.15(ve b)-.2 H 1.151(een locally made a).15 F -.25(va)-.2 G 1.151
-(ilable through the).25 F F1(GMT)3.65 E F0(program)3.65 E F1(grdraster)
-3.65 E F0(,)A .786(these can be accessed by specifying)144 633.6 R F2
-(bac)3.286 E(kgr)-.2 E(ound)-.45 E F0 .786(as the)3.286 F F1(grdraster)
-3.286 E F0 .786(dataset id number \(e.g.)3.286 F F1<ad4b>3.286 E F2(4)A
-F0<ad>3.286 E .309(note that)144 645.6 R F1(grdraster)2.809 E F0 .309
-(datasets are numbered starting at 1\).)2.809 F .309
-(Users can also use data in GMT grids as)5.309 F 3.018(ab)144 657.6 S
-.518(ackground \(including grids generated by)-3.018 F F1(mbgrid)3.018 E
-F0 3.019(\)b)C 3.019(ys)-3.019 G(pecifying)-3.019 E F2(bac)3.019 E(kgr)
--.2 E(ound)-.45 E F0 .519(as the \214le path to)3.019 F
+(ilable through the).25 F F1(GMT)3.651 E F0(program)3.651 E F1
+(grdraster)3.651 E F0(,)A .786(these can be accessed by specifying)144
+633.6 R F2(bac)3.286 E(kgr)-.2 E(ound)-.45 E F0 .786(as the)3.286 F F1
+(grdraster)3.286 E F0 .786(dataset id number \(e.g.)3.286 F F1<ad4b>
+3.286 E F2(4)A F0<ad>3.286 E .308(note that)144 645.6 R F1(grdraster)
+2.808 E F0 .309(datasets are numbered starting at 1\).)2.808 F .309
+(Users can also use data in GMT grids as)5.309 F 3.019(ab)144 657.6 S
+.519(ackground \(including grids generated by)-3.019 F F1(mbgrid)3.019 E
+F0 3.019(\)b)C 3.019(ys)-3.019 G(pecifying)-3.019 E F2(bac)3.018 E(kgr)
+-.2 E(ound)-.45 E F0 .518(as the \214le path to)3.018 F
 (the desired grid \(e.g.)144 669.6 Q F1<ad4b>2.5 E F2(/usr/local/shar)A
 (e/globaltopo.gr)-.37 E(d)-.37 E F0(\).)A F1<ad4c>108 698.4 Q F2
-(lon\215ip)23.63 E F0 .572(Sets the range of the longitude v)144 710.4 R
-.572(alues returned.)-.25 F(If)5.572 E F2(lon\215ip)3.072 E F0 .572
-(=\2551 then the longitude v)B .571(alues will be in)-.25 F .488
+(lon\215ip)144 698.4 Q F0 .572(Sets the range of the longitude v)144
+710.4 R .572(alues returned.)-.25 F(If)5.572 E F2(lon\215ip)3.072 E F0
+.572(=\2551 then the longitude v)B .572(alues will be in)-.25 F .489
 (the range from \255360 to 0 de)144 722.4 R .488(grees. If)-.15 F F2
-(lon\215ip)2.988 E F0 .488(=0 then the longitude v)B .489
+(lon\215ip)2.988 E F0 .488(=0 then the longitude v)B .488
 (alues will be in the range from)-.25 F(MB-System 5.0)72 768 Q
 (31 October 2021)137.055 E(7)195.395 E 0 Cg EP
 %%Page: 8 8
@@ -998,106 +1003,106 @@ F0 3.019(\)b)C 3.019(ys)-3.019 G(pecifying)-3.019 E F2(bac)3.019 E(kgr)
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 159.28(mbgrid\(1\) MB-System)72 48 R 159.28
-(5.0 mbgrid\(1\))2.5 F 1.383(\255180 to 180 de)144 84 R 1.383(grees. If)
--.15 F/F1 10/Times-Italic@0 SF(lon\215ip)3.882 E F0 1.382
-(=1 then the longitude v)B 1.382
-(alues will be in the range from 0 to 360)-.25 F(de)144 96 Q 2.5
-(grees. Def)-.15 F(ault:)-.1 E F1(lon\215ip)2.5 E F0 2.5(=0)2.5 G(.)-2.5
-E/F2 10/Times-Bold@0 SF<ad4d>108 112.8 Q F0 1.11(Causes tw)20.86 F 3.61
+(5.0 mbgrid\(1\))2.5 F .505(\255180 to 180 de)144 84 R .505(grees. If)
+-.15 F/F1 10/Times-Italic@0 SF(lon\215ip)3.006 E F0 .506
+(=1 then the longitude v)B .506
+(alues will be in the range from 0 to 360 de-)-.25 F 2.5(grees. Def)144
+96 R(ault:)-.1 E F1(lon\215ip)2.5 E F0 2.5(=0)2.5 G(.)-2.5 E/F2 10
+/Times-Bold@0 SF<ad4d>108 112.8 Q F0 1.111(Causes tw)144 112.8 R 3.611
 (oa)-.1 G 1.111
 (dditional grids to be output. One is a grid containing the standard de)
--3.61 F 1.111(viation of the)-.25 F .234
+-3.611 F 1.11(viation of the)-.25 F .234
 (data within each grid cell relati)144 124.8 R .534 -.15(ve t)-.25 H
 2.734(ot).15 G .234(he grid v)-2.734 F .234
 (alue, the other contains the number of data points in)-.25 F .846(each\
  grid cell. This option is ignored when the minimum or maximum \214lter\
  gridding algorithms)144 136.8 R(are used \(see the)144 148.8 Q F2(-F)
-2.5 E F0(option\).)2.5 E F2<ad4e>108 165.6 Q F0 1.458
+2.5 E F0(option\).)2.5 E F2<ad4e>108 165.6 Q F0 .621
 (Causes grid cells with no data and no interpolation to be set to a v)
-23.08 F 1.457(alue of NaN instead of the)-.25 F(def)144 177.6 Q(ault v)
--.1 E(alue of 99999.9.)-.25 E(The NaN v)5 E(alue is e)-.25 E(xpected by)
--.15 E F2(GMT)2.5 E F0(programs such)2.5 E F2(grdview)2.5 E F0(.)A F2
-<ad4f>108 194.4 Q F1 -.45(ro)22.52 G(ot).45 E F0 .524(Sets the characte\
-r string to be used as the root of the output \214lenames. F)144 206.4 R
-.524(or e)-.15 F .525(xample, if the grid is)-.15 F .074(output as a)144
-218.4 R F2(GMT)2.574 E F0 -.15(ve)2.574 G .074
-(rsion 2 GRD format \(netCDF\) \214le \(the def).15 F .073
-(ault\), then its \214lename is "root.grd".)-.1 F 1.268(If the)144 230.4
-R F2<ad47>3.768 E F1(1)A F0 1.268(option is used to specify an ascii fo\
-rmat grid, then the output grid \214lename will be)3.768 F .084
+144 165.6 R .621(alue of NaN instead of the de-)-.25 F -.1(fa)144 177.6
+S(ult v).1 E(alue of 99999.9.)-.25 E(The NaN v)5 E(alue is e)-.25 E
+(xpected by)-.15 E F2(GMT)2.5 E F0(programs such)2.5 E F2(grdview)2.5 E
+F0(.)A F2<ad4f>108 194.4 Q F1 -.45(ro)144 194.4 S(ot).45 E F0 .524(Sets\
+ the character string to be used as the root of the output \214lenames.\
+ F)144 206.4 R .524(or e)-.15 F .524(xample, if the grid is)-.15 F .073
+(output as a)144 218.4 R F2(GMT)2.573 E F0 -.15(ve)2.573 G .074
+(rsion 2 GRD format \(netCDF\) \214le \(the def).15 F .074
+(ault\), then its \214lename is "root.grd".)-.1 F 1.269(If the)144 230.4
+R F2<ad47>3.769 E F1(1)A F0 1.268(option is used to specify an ascii fo\
+rmat grid, then the output grid \214lename will be)3.769 F .083
 ("root.asc". If the)144 242.4 R F2<ad47>2.584 E F1(2)A F0 .084
 (option is used to specify a v)2.584 F .084
 (ersion 1 GRD format \(binary\) grid, then the out-)-.15 F .831
 (put grid \214lename will be "root.grd1". If the output grid is in the)
 144 254.4 R F2(GMT)3.331 E F0 -.15(ve)3.331 G .831
-(rsion 2 GRD format, a).15 F .165(shellscript which will allo)144 266.4
-R 2.665(wt)-.25 G .164(he contents of the grid to vie)-2.665 F .164
-(wed using)-.25 F F2(GMT)2.664 E F0 .164(programs is also output)2.664 F
+(rsion 2 GRD format, a).15 F .164(shellscript which will allo)144 266.4
+R 2.664(wt)-.25 G .164(he contents of the grid to vie)-2.664 F .165
+(wed using)-.25 F F2(GMT)2.665 E F0 .165(programs is also output)2.665 F
 (with the \214lename "root.grd.cmd".)144 278.4 Q F2<ad50>108 295.2 Q F1
-(pings)24.19 E F0 .55(Sets the ping a)3.05 F -.15(ve)-.2 G .55
+(pings)144 295.2 Q F0 .55(Sets the ping a)3.05 F -.15(ve)-.2 G .55
 (raging of the input data. If).15 F F1(pings)3.05 E F0 3.05(>0)3.05 G
-3.05(,t)-3.05 G .55(hen that number of input pings will)-3.05 F .643
-(be a)144 307.2 R -.15(ve)-.2 G .643(raged to produce one output ping.)
-.15 F(If)5.643 E F1(pings)3.143 E F0 3.142(=0)3.142 G 3.142(,t)-3.142 G
-.642(hen the ping a)-3.142 F -.15(ve)-.2 G .642
+3.05(,t)-3.05 G .55(hen that number of input pings will)-3.05 F .642
+(be a)144 307.2 R -.15(ve)-.2 G .642(raged to produce one output ping.)
+.15 F(If)5.642 E F1(pings)3.142 E F0 3.143(=0)3.143 G 3.143(,t)-3.143 G
+.643(hen the ping a)-3.143 F -.15(ve)-.2 G .643
 (raging will automatically).15 F 1.041(be done so that the along-track \
 ping spacing is equal to the across-track beam spacing. Def)144 319.2 R
 (ault:)-.1 E F1(pings)144 331.2 Q F0 2.5(=1)2.5 G(.)-2.5 E F2<ad51>108
-348 Q F0(Normally)22.52 E 2.512(,b)-.65 G(ath)-2.512 E .012
-(ymetry or topograph)-.05 F 2.512(yd)-.05 G .011
-(ata is gridded in meters. If this option is used, bath)-2.512 F .011
+348 Q F0(Normally)144 348 Q 2.511(,b)-.65 G(ath)-2.511 E .011
+(ymetry or topograph)-.05 F 2.511(yd)-.05 G .011
+(ata is gridded in meters. If this option is used, bath)-2.511 F .012
 (ymetry or)-.05 F(topograph)144 360 Q 2.5(yd)-.05 G
 (ata is gridded in feet.)-2.5 E F2<ad52>108 376.8 Q F1
-(west/east/south/north)23.08 E(factor)144 388.8 Q F0 2.431(The \214rst \
-form sets the longitude and latitude bounds of the output grid.)144
-400.8 R 2.432(By def)7.432 F 2.432(ault \(if the)-.1 F F2<ad52>144 412.8
+(west/east/south/north)144 376.8 Q(factor)144 388.8 Q F0 2.431(The \214\
+rst form sets the longitude and latitude bounds of the output grid.)144
+400.8 R 2.431(By def)7.431 F 2.431(ault \(if the)-.1 F F2<ad52>144 412.8
 Q F1(west/east/south/north)A F0 .003(option is not speci\214ed\) the pr\
-ogram will set the grid bounds to be the area)2.503 F .367
+ogram will set the grid bounds to be the area)2.502 F .367
 (encompassing all of the data in the input \214les. The second form \()
-144 424.8 R F2<ad52>A F1(factor)A F0 2.867(\)e)C .367
-(xpands the automati-)-3.017 F .737
+144 424.8 R F2<ad52>A F1(factor)A F0 2.866(\)e)C .366
+(xpands the automati-)-3.016 F .736
 (cally calculated bounds by the multiplicati)144 436.8 R -.15(ve)-.25 G
-F1(factor)3.387 E F0 .736(.The v)B(alue)-.25 E F1(factor)3.236 E F0 .736
-(must be greater than one; if)3.236 F F1(factor)144 448.8 Q F0 3.127(=1)
-3.127 G .628(.1 then the grid bounds will be e)-3.127 F .628
-(xpanded to the east and west by an amount 0.05 times)-.15 F 1.345
+F1(factor)3.386 E F0 .736(.The v)B(alue)-.25 E F1(factor)3.236 E F0 .737
+(must be greater than one; if)3.237 F F1(factor)144 448.8 Q F0 3.128(=1)
+3.128 G .628(.1 then the grid bounds will be e)-3.128 F .628
+(xpanded to the east and west by an amount 0.05 times)-.15 F 1.344
 (the data bounds east-west e)144 460.8 R 1.345
 (xtend and to the north and south by an amount 0.05 times the data)-.15
-F .485(bounds north-south e)144 472.8 R 2.986(xtent. If)-.15 F .486
+F .486(bounds north-south e)144 472.8 R 2.986(xtent. If)-.15 F .486
 (the user uses the)2.986 F F2<ad45>2.986 E F0 .486
 (option to set the grid spacing, then the dimen-)2.986 F .414(sions wil\
 l be calculated from the grid bounds and spacing. In these circumstance\
-s rounding errors)144 484.8 R 1.047(will usually require that the easte\
-rn and northern bounds be adjusted to \214t e)144 496.8 R 1.047
-(xactly with the grid)-.15 F .706(dimensions and spacing.)144 508.8 R
-(Def)5.706 E .706(ault: If the)-.1 F F2<ad52>3.206 E F1
-(west/east/south/north)A F0 .706(option is not speci\214ed, the pro-)
-3.206 F(gram will set the grid bounds to be the area encompassing all o\
+s rounding errors)144 484.8 R .185(will usually require that the easter\
+n and northern bounds be adjusted to \214t e)144 496.8 R .184
+(xactly with the grid di-)-.15 F 1.354(mensions and spacing.)144 508.8 R
+(Def)6.354 E 1.354(ault: If the)-.1 F F2<ad52>3.854 E F1
+(west/east/south/north)A F0 1.354(option is not speci\214ed, the pro-)
+3.854 F(gram will set the grid bounds to be the area encompassing all o\
 f the data in the input \214les.)144 520.8 Q F2<ad53>108 537.6 Q F1
-(speed)24.74 E F0 .532
+(speed)144 537.6 Q F0 .532
 (Sets the minimum speed in km/hr \(5.5 kts ~ 10 km/hr\) allo)144 549.6 R
-.532(wed in the input data; pings associated)-.25 F
+.531(wed in the input data; pings associated)-.25 F
 (with a smaller ship speed will not be output. Def)144 561.6 Q(ault:)-.1
 E F1(speed)2.5 E F0 2.5(=0)2.5 G(.)-2.5 E F2<ad54>108 578.4 Q F1
-(tension)23.63 E F0(Sets the)144 590.4 Q F1(tension)2.5 E F0 -.25(va)2.5
-G(lue used in the thin plate spline interpolation.).25 E(A)144 614.4 Q
-F1(tension)3.212 E F0 .712(of 0 gi)3.212 F -.15(ve)-.25 G 3.212(sam).15
-G .712(inimum curv)-3.212 F .712(ature surf)-.25 F .712
-(ace with free edges; this is a pure Laplacian solu-)-.1 F .319
-(tion. A nonzero)144 626.4 R F1(tension)2.819 E F0 .319(tends to suppre\
-ss spurious oscillations and \215atten the interpolation to)2.819 F -.1
-(wa)-.25 G(rd).1 E .227(the edges; a)144 638.4 R F1(tension)2.727 E F0
-.227(of in\214nity yields a pure thin plate spline solution. The)2.727 F
-F1(tension)2.726 E F0 .226(must be zero or)2.726 F(greater)144 650.4 Q 5
+(tension)144 578.4 Q F0(Sets the)144 590.4 Q F1(tension)2.5 E F0 -.25
+(va)2.5 G(lue used in the thin plate spline interpolation.).25 E(A)144
+614.4 Q F1(tension)3.211 E F0 .711(of 0 gi)3.211 F -.15(ve)-.25 G 3.212
+(sam).15 G .712(inimum curv)-3.212 F .712(ature surf)-.25 F .712
+(ace with free edges; this is a pure Laplacian solu-)-.1 F .32
+(tion. A nonzero)144 626.4 R F1(tension)2.82 E F0 .319(tends to suppres\
+s spurious oscillations and \215atten the interpolation to)2.819 F -.1
+(wa)-.25 G(rd).1 E .226(the edges; a)144 638.4 R F1(tension)2.726 E F0
+.227(of in\214nity yields a pure thin plate spline solution. The)2.726 F
+F1(tension)2.727 E F0 .227(must be zero or)2.727 F(greater)144 650.4 Q 5
 (.D)-.55 G(ef)-5 E(ault:)-.1 E F1(tension)2.5 E F0 2.5(=0)2.5 G
 (.0 \(minimum curv)-2.5 E(ature solution\).)-.25 E F2<ad55>108 667.2 Q
-F1(time)23.08 E F0 -.15(Fo)144 679.2 S(rces).15 E F2(mbgrid)4.226 E F0
-1.727(to a)4.227 F -.2(vo)-.2 G 1.727(id a).2 F -.15(ve)-.2 G 1.727
+F1(time)144 667.2 Q F0 -.15(Fo)144 679.2 S(rces).15 E F2(mbgrid)4.227 E
+F0 1.727(to a)4.227 F -.2(vo)-.2 G 1.727(id a).2 F -.15(ve)-.2 G 1.727
 (raging o).15 F -.15(ve)-.15 G 1.727(rlapping sw).15 F 1.727
 (aths by ignoring the data from later sw)-.1 F(aths.)-.1 E .242
 ("Later" data is identi\214ed using the)144 691.2 R F1(time)2.742 E F0
 -.25(va)2.742 G .242(lue. The time of the \214rst data point is sa).25 F
--.15(ve)-.2 G 2.742(df).15 G .242(or each bin)-2.742 F .468
+-.15(ve)-.2 G 2.742(df).15 G .243(or each bin)-2.742 F .469
 (in the grid; an)144 703.2 R 2.969(yo)-.15 G .469
 (ther data points which are more than)-2.969 F F1(time)2.969 E F0 .469
 (minutes before or after the initial data)2.969 F .524
@@ -1114,45 +1119,46 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 159.28(mbgrid\(1\) MB-System)72 48 R 159.28
 (5.0 mbgrid\(1\))2.5 F/F1 10/Times-Bold@0 SF<ad56>108 84 Q(-)-.74 E F0
-(Normally)20.49 E(,)-.65 E F1(mbgrid)3.857 E F0 1.357
+(Normally)144 84 Q(,)-.65 E F1(mbgrid)3.857 E F0 1.357
 (prints out information re)3.857 F -.05(ga)-.15 G 1.357
 (rding its controlling parameters during e).05 F -.15(xe)-.15 G(cution;)
 .15 E(the)144 96 Q F1<ad56>2.5 E F0(option causes the program to also p\
 rint out statements indicating its progress.)2.5 E F1<ad57>108 112.8 Q
-/F2 10/Times-Italic@0 SF(scale)20.3 E F0 .179(Sets the width of the g)
-144 124.8 R .178
-(aussian weighting function in terms of the grid spacing.)-.05 F .178
-(The distance to the)5.178 F .303
+/F2 10/Times-Italic@0 SF(scale)144 112.8 Q F0 .178
+(Sets the width of the g)144 124.8 R .178
+(aussian weighting function in terms of the grid spacing.)-.05 F .179
+(The distance to the)5.179 F .303
 (1/e point of the weighting function is gi)144 136.8 R -.15(ve)-.25 G
 2.803(nb).15 G 2.803(yh)-2.803 G .303(alf of the grid spacing times)
 -2.803 F F2(scale)2.803 E F0 5.303(.D)C(ef)-5.303 E(ault:)-.1 E F2
-(scale)2.803 E F0 2.5(=1)144 148.8 S(.0)-2.5 E F1<ad58>108 165.6 Q F2
--.2(ex)23.08 G(tend).2 E F0 .646(Extends the size of the internal grid \
-so that the output grid is a subset from the center of a lar)144 177.6 R
-(ger)-.18 E 5.273(grid. This)144 189.6 R(allo)2.773 E .274(ws data outs\
-ide the output grid to guide the spline interpolation of data g)-.25 F
-.274(aps which)-.05 F .498
-(happen to lie at the the edge of the output grid.)144 201.6 R .497
-(The amount of e)5.497 F .497(xtension is)-.15 F F2 -.2(ex)2.997 G(tend)
-.2 E F0 .497(times the grid)2.997 F .881(width/height to each side.)144
-213.6 R .881(Thus, if)5.881 F F2 -.2(ex)3.381 G(tend).2 E F0 .882
-(=1.0, then the internal grid will ha)B 1.182 -.15(ve d)-.2 H .882
+(scale)2.802 E F0 2.5(=1)144 148.8 S(.0)-2.5 E F1<ad58>108 165.6 Q F2
+-.2(ex)144 165.6 S(tend).2 E F0 .645(Extends the size of the internal g\
+rid so that the output grid is a subset from the center of a lar)144
+177.6 R(ger)-.18 E 5.274(grid. This)144 189.6 R(allo)2.774 E .274(ws da\
+ta outside the output grid to guide the spline interpolation of data g)
+-.25 F .273(aps which)-.05 F .497
+(happen to lie at the the edge of the output grid.)144 201.6 R .498
+(The amount of e)5.497 F .498(xtension is)-.15 F F2 -.2(ex)2.998 G(tend)
+.2 E F0 .498(times the grid)2.998 F .882(width/height to each side.)144
+213.6 R .882(Thus, if)5.882 F F2 -.2(ex)3.382 G(tend).2 E F0 .881
+(=1.0, then the internal grid will ha)B 1.181 -.15(ve d)-.2 H .881
 (imensions three).15 F(times the output grid.)144 225.6 Q(Def)5 E(ault:)
 -.1 E F2 -.2(ex)2.5 G(tend).2 E F0 2.5(=0)2.5 G(.0)-2.5 E F1<ad59>108
-242.4 Q F2(shiftx/shifty)23.08 E F0 1.175
+242.4 Q F2(shiftx/shifty)144 242.4 Q F0 1.174
 (This option shifts the location of the output grid bounds by)144 254.4
-R F2(shiftx)3.674 E F0 1.174(meters east and)3.674 F F2(shifty)3.674 E
-F0(meters)3.674 E 2.5(north. Def)144 266.4 R(ault:)-.1 E F2(shiftx)2.5 E
+R F2(shiftx)3.675 E F0 1.175(meters east and)3.675 F F2(shifty)3.675 E
+F0(meters)3.675 E 2.5(north. Def)144 266.4 R(ault:)-.1 E F2(shiftx)2.5 E
 F0(=)2.5 E F2(shifty)2.5 E F0 2.5(=0)2.5 G(.0)-2.5 E/F3 10.95
-/Times-Bold@0 SF(EXAMPLES)72 283.2 Q F0 .761(Suppose you w)108 295.2 R
+/Times-Bold@0 SF(EXAMPLES)72 283.2 Q F0 .762(Suppose you w)108 295.2 R
 .761(ant to grid some Hydrosweep data in six data \214les o)-.1 F -.15
 (ve)-.15 G 3.261(rar).15 G -.15(eg)-3.261 G .761
-(ion with longitude bounds of).15 F .822
+(ion with longitude bounds of).15 F .134
 (139.9W to 139.65W and latitude bounds of 9.7S to 9.45S.)108 307.2 R
-2.422 -.8(To g)5.822 H .822(et a 110 m grid spacing, you need a grid).8
-F 1.095(dimensions of 251 \(x or longitude\) and 251 \(y or latitude\).\
- First, create a datalist \214le using a te)108 319.2 R 1.095(xt editor)
--.15 F(which contains the data \214lenames follo)108 331.2 Q
+1.735 -.8(To g)5.135 H .135
+(et a 110 m grid spacing, you need a grid di-).8 F .082(mensions of 251\
+ \(x or longitude\) and 251 \(y or latitude\). First, create a datalist\
+ \214le using a te)108 319.2 R .082(xt editor which)-.15 F
+(contains the data \214lenames follo)108 331.2 Q
 (wed by the appropriate format identi\214er:)-.25 E(d123e.mb24 24)144
 355.2 Q(d126e.mb24 24)144 367.2 Q(d128e.mb24 24)144 379.2 Q
 (d129e.mb24 24)144 391.2 Q(d130e.mb24 24)144 403.2 Q(d131e.mb24 24)144
@@ -1269,15 +1275,15 @@ BP
 /F0 10/Times-Roman@0 SF 159.28(mbgrid\(1\) MB-System)72 48 R 159.28
 (5.0 mbgrid\(1\))2.5 F(Done.)110.5 84 Q .816(The names of the output \
 \214les are based on the root character string speci\214ed using the)108
-108 R/F1 10/Times-Bold@0 SF<ad4f>3.316 E F0 3.317(option. Since)3.317 F
-.994(the grid is output as a netCDF GRD format \214le, its \214lename i\
-s "urville_int.grd"; a shellscript which will)108 120 R(allo)108 132 Q
-5.956(wt)-.25 G 3.456(he contents of the grid to vie)-5.956 F 3.456
-(wed using)-.25 F F1(GMT)5.956 E F0 3.457
-(programs is also output with the \214lename)5.956 F
+108 R/F1 10/Times-Bold@0 SF<ad4f>3.316 E F0 3.316(option. Since)3.316 F
+.214(the grid is output as a netCDF GRD format \214le, its \214lename i\
+s "urville_int.grd"; a shellscript which will al-)108 120 R(lo)108 132 Q
+6.408(wt)-.25 G 3.908(he contents of the grid to vie)-6.408 F 3.908
+(wed using)-.25 F F1(GMT)6.407 E F0 3.907
+(programs is also output with the \214lename)6.407 F
 ("urville_int.grd.cmd".)108 144 Q .063(Suppose that one w)108 168 R .063
 (ants to grid the same data considered abo)-.1 F .363 -.15(ve u)-.15 H
-.063(sing the median \214ltering scheme instead of).15 F .046(the def)
+.063(sing the median \214ltering scheme instead of).15 F .047(the def)
 108 180 R .047(ault Gaussian weighted mean scheme and also outputting g\
 rids of the data density and standard de)-.1 F(vi-)-.25 E(ation v)108
 192 Q(alues. The follo)-.25 E(wing will suf)-.25 E(\214ce:)-.25 E
@@ -1287,10 +1293,10 @@ rids of the data density and standard de)-.1 F(vi-)-.25 E(ation v)108
 /Times-Bold@0 SF(SEE ALSO)72 256.8 Q F1(mbsystem)108 268.8 Q F0(\(1\),)A
 F1(mbmosaic)2.5 E F0(\(1\),)A F1(mbm_grid)2.5 E F0(\(1\),)A F1
 (mbm_grd2ar)2.5 E(c)-.18 E F0(\(1\))A F2 -.11(BU)72 297.6 S(GS).11 E F0
-.064(The options for this program ha)108 309.6 R .364 -.15(ve g)-.2 H
-(ro).15 E .063(wn a bit complicated.)-.25 F .063(If you ha)5.063 F .363
--.15(ve o)-.2 H .063(ther problems, please let us kno).15 F -.65(w.)-.25
-G F2(APPENDIX 1: PR)72 338.4 Q(OJECTED COORDIN)-.329 E -1.04(AT)-.219 G
+(The options for this program ha)108 309.6 Q .3 -.15(ve g)-.2 H(ro).15 E
+(wn a bit complicated.)-.25 E(If you ha)5 E .3 -.15(ve o)-.2 H
+(ther problems, please let us kno).15 E -.65(w.)-.25 G F2
+(APPENDIX 1: PR)72 338.4 Q(OJECTED COORDIN)-.329 E -1.04(AT)-.219 G
 2.738(ES)1.04 G(YSTEM IDENTIFIERS)-2.738 E F0 .541(The follo)108 350.4 R
 .542(wing is a list of the projected coordinate systems \(PCS')-.25 F
 .542(s\) that are supported by MB-System. The)-.55 F 2.27(full PCS de\

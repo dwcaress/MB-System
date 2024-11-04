@@ -193,9 +193,10 @@ int mbr_rt_sburivax(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	int status = MB_SUCCESS;
+  size_t read_len = 0;
 
 	/* read next record from file */
-	if ((status = fread(data, 1, mb_io_ptr->data_structure_size, mb_io_ptr->mbfp)) == mb_io_ptr->data_structure_size) {
+	if ((read_len = fread(data, 1, mb_io_ptr->data_structure_size, mb_io_ptr->mbfp)) == mb_io_ptr->data_structure_size) {
 		mb_io_ptr->file_bytes += status;
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
@@ -412,8 +413,9 @@ int mbr_wt_sburivax(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 #endif
 
 	/* write next record to file */
+  size_t read_len = 0;
 	if (dataplus->kind == MB_DATA_DATA || dataplus->kind == MB_DATA_COMMENT) {
-		if ((status = fwrite(data, 1, mb_io_ptr->data_structure_size, mb_io_ptr->mbfp)) == mb_io_ptr->data_structure_size) {
+		if ((read_len = fwrite(data, 1, mb_io_ptr->data_structure_size, mb_io_ptr->mbfp)) == mb_io_ptr->data_structure_size) {
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 			mb_io_ptr->orecord_count++;

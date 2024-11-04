@@ -24,11 +24,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "mb_config.h"
-
-#ifdef ENABLE_GSF
-#include "gsf.h"
-#endif
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
@@ -36,6 +31,9 @@
 #include "mb_status.h"
 #include "netcdf.h"
 #include "../surf/mb_sapi.h"
+#ifdef ENABLE_GSF
+#include "gsf.h"
+#endif
 
 /*--------------------------------------------------------------------*/
 int mb_close(int verbose, void **mbio_ptr, int *error) {

@@ -197,7 +197,7 @@ env:
 TRN_LOGFILES=/cygdrive/c/cygwin64/home/reson/test/logs
 TRN_DATAFILES=/cygdrive/z/win_share/test/config
 TRN_HOST=134.89.13.79
-TRN_RESON_HOST=134.89.13.75
+TRN_SOURCE_HOST=134.89.13.75
 TRN_GROUP=239.255.0.16
 TRN_MAPFILES=/cygdrive/z/win_share/test/maps
 TRN_MBTRNDIR=./src/mbtrn
@@ -245,7 +245,7 @@ configuration - default:
                         verbose                               0
                      input_mode                               2
                           input                   datalist.mb-1
-              socket_definition    socket:TRN_RESON_HOST:7000:0
+              socket_definition    socket:TRN_SOURCE_HOST:7000:0
                     output_file                          stdout
                          format                               0
                   platform-file                                
@@ -419,7 +419,8 @@ configuration - final:
                         verbose                               0
                      input_mode                               2
                           input  /Volumes/wdcs/20210609m1/20210609m1.mb89
-              socket_definition    socket:TRN_RESON_HOST:7000:0
+              socket_definition    socket:TRN_SOURCE_HOST:7000:0
+              socket_definition    socket:TRN_SOURCE_HOST:7000:0
                     output_file     mbtrnpp_20210716-232025.mb1
                          format                              -1
                   platform-file                                

@@ -54,6 +54,10 @@
 # initialize search
 set (OpenCV_FOUND FALSE)
 
+set (OPENCV_DIR /opt/local)
+set (OPENCV_INCLUDE_DIR /opt/local/include/opencv4)
+set (OPENCV_LIB_DIR /opt/local/lib/opencv4)
+
 # 1. set OpenCV_DIR from environment variables
 if (NOT OpenCV_DIR)
   if (DEFINED ENV{OpenCV_DIR})

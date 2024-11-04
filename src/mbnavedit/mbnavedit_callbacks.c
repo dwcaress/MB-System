@@ -501,7 +501,8 @@ void do_parse_datalist(char *file, int form) {
 	int verbose = 0;
 	int format = form;
 	int error = MB_ERROR_NO_ERROR;
-	mb_get_format(verbose, file, NULL, &format, &error);
+  if (format == 0)
+	   mb_get_format(verbose, file, NULL, &format, &error);
 
 	/* read in a single file */
 	if (format > 0 && numfiles < NUM_FILES_MAX) {
@@ -648,7 +649,7 @@ void do_load_specific_file(int i_file) {
 		currentfile = i_file;
 
 		/* check for edit save file */
-		char save_file[MB_PATH_MAXLINE];
+		char save_file[MB_PATH_MAXLINE+10];
 		sprintf(save_file, "%s.nve", filepaths[currentfile]);
 		struct stat file_status;
 		const int fstat = stat(save_file, &file_status);
@@ -906,7 +907,7 @@ void do_build_filelist() {
 	int *position_list = NULL;
 	int position_count = 0;
 	int selection;
-	char value_text[MB_PATH_MAXLINE];
+	char value_text[3*MB_PATH_MAXLINE];
 	XmString *xstr;
 	char *lockstrptr;
 	char *lockedstr = "<Locked>";
@@ -937,7 +938,7 @@ void do_build_filelist() {
 		}
 
 		/* check for edit save file */
-		char save_file[MB_PATH_MAXLINE];
+		char save_file[MB_PATH_MAXLINE+10];
 		sprintf(save_file, "%s.nve", filepaths[i]);
 		struct stat file_status;
 		const int fstat = stat(save_file, &file_status);

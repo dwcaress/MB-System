@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:02 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:09 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 3
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -285,18 +291,18 @@ e standard MB-System \214le suf)108 398.4 R 1.275(\214x to the)-.25 F
 G 1.25(rall command will be achie).15 F -.15(ve)-.25 G 3.75(dw).15 G
 (hen)-3.75 E F3(npr)3.75 E(ocesses)-.45 E F0(equals the number of a)108
 482.4 Q -.25(va)-.2 G(ilable CPUs or cores.).25 E(The)108 506.4 Q F2
-<ad54>4.407 E F0 1.907(option causes this macro to print out the)4.407 F
-F2(mbcopy)4.407 E F0 1.907(commands it will e)4.407 F -.15(xe)-.15 G
-1.906(cute without actually).15 F -.15(exe)108 518.4 S .545
-(cuting them. This test option allo).15 F .545
-(ws users to check the consequences of their command before actually)
--.25 F(running it.)108 530.4 Q F1(MB-SYSTEM A)72 559.2 Q(UTHORSHIP)-.548
-E F0(Da)108 571.2 Q(vid W)-.2 E 2.5(.C)-.92 G(aress)-2.5 E(Montere)113
-583.2 Q 2.5(yB)-.15 G(ay Aquarium Research Institute)-2.5 E
-(Dale N. Chayes)108 595.2 Q(Center for Coastal and Ocean Mapping)113
-607.2 Q(Uni)113 619.2 Q -.15(ve)-.25 G(rsity of Ne).15 E 2.5(wH)-.25 G
-(ampshire)-2.5 E(Christian do Santos Ferreira)108 631.2 Q(MAR)113 643.2
-Q(UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
+<ad54>3.153 E F0 .653(option causes this macro to print out the)3.153 F
+F2(mbcopy)3.153 E F0 .653(commands it will e)3.153 F -.15(xe)-.15 G .653
+(cute without actually e).15 F -.15(xe)-.15 G(-).15 E .162
+(cuting them. This test option allo)108 518.4 R .163(ws users to check \
+the consequences of their command before actually run-)-.25 F(ning it.)
+108 530.4 Q F1(MB-SYSTEM A)72 559.2 Q(UTHORSHIP)-.548 E F0(Da)108 571.2
+Q(vid W)-.2 E 2.5(.C)-.92 G(aress)-2.5 E(Montere)113 583.2 Q 2.5(yB)-.15
+G(ay Aquarium Research Institute)-2.5 E(Dale N. Chayes)108 595.2 Q
+(Center for Coastal and Ocean Mapping)113 607.2 Q(Uni)113 619.2 Q -.15
+(ve)-.25 G(rsity of Ne).15 E 2.5(wH)-.25 G(ampshire)-2.5 E
+(Christian do Santos Ferreira)108 631.2 Q(MAR)113 643.2 Q
+(UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
 655.2 Q -.15(ve)-.25 G(rsity of Bremen).15 E F1 -.548(AU)72 684 S
 (THORSHIP OF THIS PR).548 E(OGRAM)-.329 E F0
 (Christian do Santos Ferreira)108 696 Q(MAR)113 708 Q
@@ -311,12 +317,12 @@ BP
 F 122.15(5.0 mbm_multicop)2.5 F(y\(1\))-.1 E/F1 10.95/Times-Bold@0 SF
 (SIMPLE DESCRIPTION OF B)72 84 Q(ASIC OPTIONS)-.329 E/F2 10/Times-Bold@0
 SF<ad48>108 96 Q F0 .162(This "help" \215ag cause the program to print \
-out a description of its operation and then e)22.52 F .161(xit immedi-)
+out a description of its operation and then e)144 96 R .161(xit immedi-)
 -.15 F(ately)144 108 Q(.)-.65 E F2<ad43>108 124.8 Q F0 1.013(This optio\
 n causes the program to check if each output \214le already e)144 136.8
 R 1.013(xists, and to for)-.15 F 1.014(go cop)-.18 F(ying)-.1 E
 (those that do e)144 148.8 Q(xist.)-.15 E F2<ad46>108 165.6 Q/F3 10
-/Times-Italic@0 SF(outputformat)24.19 E F0 .009
+/Times-Italic@0 SF(outputformat)144 165.6 Q F0 .009
 (This option sets the output sw)144 177.6 R .008
 (ath format. All of the sw)-.1 F .008
 (ath data \214les referenced in the datalist speci-)-.1 F .825
@@ -326,9 +332,9 @@ R 1.013(xists, and to for)-.15 F 1.014(go cop)-.18 F(ying)-.1 E
 -3.326 E F2<ad46>3.326 E F0 .826(option is)3.326 F(not gi)144 201.6 Q
 -.15(ve)-.25 G
 (n, then the input \214les will be copied to their input formats.).15 E
-F2<ad49>108 218.4 Q F3(datalist)26.41 E F0 .417(Sets the input datalist\
- \214lename. A datalist is an ascii \214le containing a list of the inp\
-ut sw)144 230.4 R .416(ath sonar)-.1 F 1.005
+F2<ad49>108 218.4 Q F3(datalist)144 218.4 Q F0 .417(Sets the input data\
+list \214lename. A datalist is an ascii \214le containing a list of the\
+ input sw)144 230.4 R .416(ath sonar)-.1 F 1.005
 (data \214les to be copied and their formats.)144 242.4 R 1.005(In the)
 6.005 F F3(datalist)3.505 E F0 1.005(\214le, each sw)3.505 F 1.005
 (ath data \214le should be fol-)-.1 F(lo)144 254.4 Q
@@ -351,10 +357,10 @@ E F0 1.02(commands it will e)3.519 F -.15(xe)-.15 G 1.02(cute without)
 .15 F .016(actually e)144 367.2 R -.15(xe)-.15 G .016
 (cuting them. This test option allo).15 F .016
 (ws users to check the consequences of their command)-.25 F
-(before actually running it.)144 379.2 Q F2<ad56>108 396 Q F0(Causes)
-23.08 E F2(mbm_multicopy)3.65 E F0 1.151(to operate in "v)3.65 F 1.151
+(before actually running it.)144 379.2 Q F2<ad56>108 396 Q F0(Causes)144
+396 Q F2(mbm_multicopy)3.65 E F0 1.151(to operate in "v)3.65 F 1.151
 (erbose" mode so that it outputs more information than)-.15 F(usual.)144
-408 Q F2<ad58>108 424.8 Q F3(npr)23.08 E(ocesses)-.45 E F0
+408 Q F2<ad58>108 424.8 Q F3(npr)144 424.8 Q(ocesses)-.45 E F0
 (This option sets the number of parallel, simultaneous)144 436.8 Q F2
 (mbcopy)2.5 E F0(processes that may be run.)2.5 E F1(EXAMPLES)72 465.6 Q
 F0(Suppose one has three ra)108 477.6 Q 2.5(w\()-.15 G

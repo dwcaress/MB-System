@@ -17,7 +17,7 @@
   <script type="text/javascript" language="Javascript" SRC="src/mbtrncfg.js">
       </script>
 </head>
-  <body onload="javascript:init_preset('win.reson')">
+  <body onload="javascript:init_preset('win.reson.t50')">
     <h2>mbtrnpp Configuration Tool</h2>
     <p>Hover over parameter name for <a onmouseover="showhelp('general')">help</a></p>
 
@@ -44,8 +44,8 @@
                         </td>-->
 					</tr>
                    <tr>
-                        <td class="param" onmouseover="showhelp('TRN_RESON_HOST')"><a>TRN_RESON_HOST</a></td>
-                        <td class="entry"><input type="text" size="16" name="reson-host" id="reson_host" value=""
+                        <td class="param" onmouseover="showhelp('TRN_SOURCE_HOST')"><a>TRN_SOURCE_HOST</a></td>
+                        <td class="entry"><input type="text" size="16" name="trn-source-host" id="trn_source_host" value=""
                             </td>
                     </tr>
                     <tr>
@@ -119,6 +119,13 @@
                     <tr>
                         <td class="param" onmouseover="showhelp('format')"><a>format</a></td>
                         <td class="entry"><input type="text" size="8" name="format" value="">
+                            </td>
+                    </tr>
+                    <tr>
+                        <td class="param" onmouseover="showhelp('auv-sentry-em2040')"><a>auv-sentry-em2040</a></td>
+                        <td class="entry">
+                            Y<input type="radio" size="48" name="auv-sentry-em2040" value="en" checked>
+                            N<input type="radio" size="48" name="auv-sentry-em2040" value="dis">
                             </td>
                     </tr>
                     <tr>
@@ -223,7 +230,7 @@
                   <tr>
                       <td class="param" onmouseover="showhelp('reinit-gain')"><a>reinit-gain</a></td>
                       <td class="entry">
-                          Y<input type="radio" size="48" name="reinit-gain" value="en" checked>
+                          Y<input type="radio" size="48" name="reinit-gain" value="di" checked>
                               N<input type="radio" size="48" name="reinit-gain" value="dis">
                                   </td>
                   </tr>
@@ -316,10 +323,11 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="param" onmouseover="showhelp('reson-host')"><a>Reson Host</a></td>
+                        <td class="param" onmouseover="showhelp('trn-source-host')"><a>TRN Source Host</a></td>
                         <td class="entry">
                             <select name="ctx-rhost" id="ctx-rhost">
-                                <option value="win.reson">mapper1</option>
+                                <option value="win.reson.t50">mapper1 T50</option>
+                                <option value="win.reson.7125">mapper1 7125</option>
                                 <option value="sentry">sentry</option>
                                 <option value="linux.mbari">linux.mbari</option>
                                 <option value="linux.carson">linux.carson</option>
@@ -335,7 +343,8 @@
                         <td class="param" onmouseover="showhelp('trn-host')"><a>TRN Host</a></td>
                         <td class="entry">
                             <select name="ctx-mhost" id="ctx-mhost">
-                                <option value="win.reson">mapper1</option>
+                                <option value="win.reson.t50">mapper1 T50</option>
+                                <option value="win.reson.7125">mapper1 7125</option>
                                 <option value="sentry">sentry</option>
                                 <option value="linux.mbari">linux.mbari</option>
                                 <option value="linux.carson">linux.carson</option>

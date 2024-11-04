@@ -94,6 +94,8 @@
 #define TRNUCLI_ACK_WAIT_MSEC 150
 #define TRNUCLI_SHOW_WKEY 16
 #define TRNUCLI_SHOW_WVAL 16
+#define TRNUCLI_LOG_PATH_BYTES 512
+#define TRNUCLI_SESSION_DATE_BYTES 32
 
 /////////////////////////
 // Declarations 
@@ -690,7 +692,7 @@ static int s_update_hex(trnu_pub_t *update, char *dest, int len, bool pretty)
         for(i=0;i<TRNU_PUB_BYTES;i++){
             if(pretty){
                 if(hdr){
-                    unsigned long ofs = ( bp>(byte *)update ? (bp-(byte *)update-1) : 0);
+                    unsigned long ofs = ( bp>(byte *)update ? (bp-(byte *)update) : 0);
                     int wbytes=snprintf(dp,rem,"%08lx: ",ofs);
                     rem-=(wbytes-1);
                     dp+=wbytes;
@@ -785,12 +787,12 @@ static void s_init_log(trnucli_ctx_t *ctx)
         // Get GMT time
         gmt = gmtime(&rawtime);
         // format YYYYMMDD-HHMMSS
-        sprintf(session_date, "%04d%02d%02d-%02d%02d%02d",
+        snprintf(session_date, TRNUCLI_SESSION_DATE_BYTES, "%04d%02d%02d-%02d%02d%02d",
                 (gmt->tm_year+1900),gmt->tm_mon+1,gmt->tm_mday,
                 gmt->tm_hour,gmt->tm_min,gmt->tm_sec);
 
 
-        sprintf(ctx->log_path,"%s//%s-%s-%0lx-%s",ctx->log_dir,ctx->log_name,session_date,((unsigned long )ctx),TRNUCLI_TEST_LOG_EXT);
+        snprintf(ctx->log_path, TRNUCLI_LOG_PATH_BYTES, "%s//%s-%s-%0lx-%s",ctx->log_dir,ctx->log_name,session_date,((unsigned long )ctx),TRNUCLI_TEST_LOG_EXT);
 
         ctx->log_id = mlog_get_instance(ctx->log_path, ctx->log_cfg, ctx->log_name);
 
@@ -1042,8 +1044,8 @@ trnucli_ctx_t *trnucli_ctx_new(char *host,
         instance->log_id=MLOG_ID_INVALID;
         instance->log_name=strdup(TRNUCLI_TEST_LOG_NAME);
         instance->log_dir=strdup(TRNUCLI_TEST_LOG_DIR);
-        instance->log_path=(char *)malloc(512);
-        memset(instance->log_path,0,512);
+        instance->log_path=(char *)malloc(TRNUCLI_LOG_PATH_BYTES);
+        memset(instance->log_path, 0, TRNUCLI_LOG_PATH_BYTES);
 
         instance->rc_timer=0.0;
         instance->hb_timer=0.0;

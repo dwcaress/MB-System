@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:03 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:10 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 8
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -273,52 +279,53 @@ E F0 1.39(produced output sw)3.89 F 1.39(ath data)-.1 F .084
 (ersion only stores and outputs the na)-.15 E(vig)-.2 E(ation data.)-.05
 E .914(Once the na)108 398.4 R(vig)-.2 E .914(ation from a sw)-.05 F
 .914(ath data \214le has been read in,)-.1 F F2(MBna)3.414 E -.1(ve)-.25
-G(dit).1 E F0 .914(displays autoscaled plots of the)3.414 F 1.862(longi\
-tude, latitude, speed, heading, and sonar depth time series, along with\
- a plot of the time interv)108 410.4 R(al)-.25 E .111(between na)108
-422.4 R(vig)-.2 E .111(ation v)-.05 F .112
+G(dit).1 E F0 .914(displays autoscaled plots of the)3.414 F .854(longit\
+ude, latitude, speed, heading, and sonar depth time series, along with \
+a plot of the time interv)108 410.4 R .854(al be-)-.25 F .028(tween na)
+108 422.4 R(vig)-.2 E .028(ation v)-.05 F .028
 (alues. The user may select outliers and interpolate o)-.25 F -.15(ve)
--.15 G 2.612(rt).15 G .112(hem or)-2.612 F 2.612(,i)-.4 G 2.612(nt)
--2.612 G .112(he case of heading)-2.612 F 1.408
-(or speed data, replace the erroneous v)108 434.4 R 1.408
-(alues with estimates deri)-.25 F -.15(ve)-.25 G 3.907(df).15 G 1.407
-(rom "course-made-good" or "speed-)-3.907 F .386(made-good", respecti)
-108 446.4 R -.15(ve)-.25 G(ly).15 E 5.386(.D)-.65 G .386(ata can only b\
-e selected and altered in a single plot at a time \(this a)-5.386 F -.2
-(vo)-.2 G .387(ids con-).2 F(fusion and pre)108 458.4 Q -.15(ve)-.25 G
-(nts mistak).15 E(es\).)-.1 E .039(The nature of the na)108 482.4 R(vig)
--.2 E .039(ation data being edited depends upon the data format. Some d\
-ata formats include the)-.05 F(na)108 494.4 Q(vig)-.2 E 1.029
-(ation in the same data records as the ping or surv)-.05 F 1.329 -.15
-(ey d)-.15 H 1.029(ata. This synchronous na).15 F(vig)-.2 E 1.029
-(ation implies that)-.05 F 1.216
-(either in the sonar or in later processing, the ra)108 506.4 R 3.716
-(wn)-.15 G -.2(av)-3.716 G(ig).2 E 1.216
-(ation has been interpolated to yield v)-.05 F 1.216(alues at the)-.25 F
-.76
-(same time stamps as the sonar pings. Other data formats do not hold na)
-108 518.4 R(vig)-.2 E .76(ation v)-.05 F .76(alues in the surv)-.25 F
-1.06 -.15(ey d)-.15 H(ata).15 E .368
-(records, and instead use separate na)108 530.4 R(vig)-.2 E .368
-(ation records with dif)-.05 F .367
-(ferent time stamps. This asynchronous na)-.25 F(vig)-.2 E(a-)-.05 E
-.774(tion requires that MBIO interpolate or e)108 542.4 R .774
-(xtrapolate the na)-.15 F(vig)-.2 E .774(ation as the surv)-.05 F 1.075
--.15(ey d)-.15 H .775(ata records are read.).15 F -.15(Fo)5.775 G(r).15
-E .76(data formats with synchronous na)108 554.4 R(vig)-.2 E .76
-(ation, the na)-.05 F(vig)-.2 E .76(ation v)-.05 F .76
-(alues edited using)-.25 F F2(MBna)3.26 E -.1(ve)-.25 G(dit).1 E F0 .76
-(are those in the)3.26 F(surv)108 566.4 Q .346 -.15(ey d)-.15 H .047
-(ata records. F).15 F .047(or data formats with only asynchronous na)
--.15 F(vig)-.2 E(ation,)-.05 E F2(MBna)2.547 E -.1(ve)-.25 G(dit).1 E F0
-.047(displays and operates)2.547 F .046(on the v)108 578.4 R .046
-(alues from the na)-.25 F(vig)-.2 E .046(ation records. The)-.05 F F2
-(MBIO)2.546 E F0 .045
-(manual page includes a listing of which type of na)2.546 F(vi-)-.2 E
--.05(ga)108 590.4 S(tion is used by the supported data formats.).05 E
--.15(Fo)108 614.4 S 3.6(rs).15 G 1.1(ome data formats, the user can als\
-o inspect plots of roll, pitch, and hea)-3.6 F -.15(ve)-.2 G 3.6(dd).15
-G 1.1(ata to determine if the)-3.6 F(ship')108 626.4 Q 2.5(sv)-.55 G
+-.15 G 2.528(rt).15 G .028(hem or)-2.528 F 2.529(,i)-.4 G 2.529(nt)
+-2.529 G .029(he case of heading or)-2.529 F .345
+(speed data, replace the erroneous v)108 434.4 R .345
+(alues with estimates deri)-.25 F -.15(ve)-.25 G 2.845(df).15 G .345
+(rom "course-made-good" or "speed-made-)-2.845 F .57(good", respecti)108
+446.4 R -.15(ve)-.25 G(ly).15 E 5.57(.D)-.65 G .571(ata can only be sel\
+ected and altered in a single plot at a time \(this a)-5.57 F -.2(vo)-.2
+G .571(ids confusion).2 F(and pre)108 458.4 Q -.15(ve)-.25 G(nts mistak)
+.15 E(es\).)-.1 E .039(The nature of the na)108 482.4 R(vig)-.2 E .039(\
+ation data being edited depends upon the data format. Some data formats\
+ include the)-.05 F(na)108 494.4 Q(vig)-.2 E .2
+(ation in the same data records as the ping or surv)-.05 F .501 -.15
+(ey d)-.15 H .201(ata. This synchronous na).15 F(vig)-.2 E .201
+(ation implies that ei-)-.05 F .319
+(ther in the sonar or in later processing, the ra)108 506.4 R 2.819(wn)
+-.15 G -.2(av)-2.819 G(ig).2 E .319
+(ation has been interpolated to yield v)-.05 F .319(alues at the same)
+-.25 F .128
+(time stamps as the sonar pings. Other data formats do not hold na)108
+518.4 R(vig)-.2 E .128(ation v)-.05 F .128(alues in the surv)-.25 F .428
+-.15(ey d)-.15 H .128(ata records,).15 F 1.03
+(and instead use separate na)108 530.4 R(vig)-.2 E 1.029
+(ation records with dif)-.05 F 1.029
+(ferent time stamps. This asynchronous na)-.25 F(vig)-.2 E 1.029
+(ation re-)-.05 F .104(quires that MBIO interpolate or e)108 542.4 R
+.104(xtrapolate the na)-.15 F(vig)-.2 E .104(ation as the surv)-.05 F
+.404 -.15(ey d)-.15 H .104(ata records are read.).15 F -.15(Fo)5.104 G
+2.605(rd).15 G .105(ata for)-2.605 F(-)-.2 E .9
+(mats with synchronous na)108 554.4 R(vig)-.2 E .9(ation, the na)-.05 F
+(vig)-.2 E .9(ation v)-.05 F .9(alues edited using)-.25 F F2(MBna)3.4 E
+-.1(ve)-.25 G(dit).1 E F0 .9(are those in the surv)3.4 F -.15(ey)-.15 G
+.16(data records. F)108 566.4 R .161
+(or data formats with only asynchronous na)-.15 F(vig)-.2 E(ation,)-.05
+E F2(MBna)2.661 E -.1(ve)-.25 G(dit).1 E F0 .161
+(displays and operates on the)2.661 F -.25(va)108 578.4 S .402
+(lues from the na).25 F(vig)-.2 E .402(ation records. The)-.05 F F2
+(MBIO)2.901 E F0 .401
+(manual page includes a listing of which type of na)2.901 F(vig)-.2 E
+(ation)-.05 E(is used by the supported data formats.)108 590.4 Q -.15
+(Fo)108 614.4 S 3.6(rs).15 G 1.1(ome data formats, the user can also in\
+spect plots of roll, pitch, and hea)-3.6 F -.15(ve)-.2 G 3.6(dd).15 G
+1.1(ata to determine if the)-3.6 F(ship')108 626.4 Q 2.5(sv)-.55 G
 (ertical reference sensors were w)-2.65 E(orking properly)-.1 E(.)-.65 E
 .732(The edited data is usually output to a \214le, b)108 650.4 R .732
 (ut the program can be operated in a "bro)-.2 F .732(wse" mode where no)
@@ -350,12 +357,12 @@ BP
 ial position using the current \(possibly edited\) head-)-.1 F .265
 (ing and speed v)108 120 R .266(alues. The dead reck)-.25 F .266
 (oning na)-.1 F(vig)-.2 E .266(ation can also incorporate user)-.05 F
-.266(-speci\214ed longitude and lati-)-.2 F 1.636(tude drift rates.)108
-132 R 1.636(The third algorithm is an in)6.636 F -.15(ve)-.4 G 1.636
-(rsion for a smooth na).15 F(vig)-.2 E 1.635
-(ation that minimizes speed and)-.05 F .862
-(acceleration while \214tting the original na)108 144 R(vig)-.2 E .862
-(ation in a least squares sense. The in)-.05 F -.15(ve)-.4 G .863
+.266(-speci\214ed longitude and lati-)-.2 F .675(tude drift rates.)108
+132 R .674(The third algorithm is an in)5.674 F -.15(ve)-.4 G .674
+(rsion for a smooth na).15 F(vig)-.2 E .674
+(ation that minimizes speed and ac-)-.05 F 1.496
+(celeration while \214tting the original na)108 144 R(vig)-.2 E 1.497
+(ation in a least squares sense. The in)-.05 F -.15(ve)-.4 G 1.497
 (rsion weighting ag).15 F(ainst)-.05 E
 (speed and acceleration are user speci\214ed, and only un\215agged na)
 108 156 Q(vig)-.2 E(ation v)-.05 E(alues are used in the in)-.25 E -.15
@@ -368,17 +375,17 @@ ltiple pings with the same time stamps \(producing a)-.15 F .446
 (zero time interv)108 220.8 R .446(al v)-.25 F .446(alue\), or sequenti\
 al pings with decreasing time stamps \(resulting in ne)-.25 F -.05(ga)
 -.15 G(ti).05 E .746 -.15(ve t)-.25 H .446(ime inter).15 F(-)-.2 E -.25
-(va)108 232.8 S 3.914(lv).25 G(alues\).)-4.164 E/F2 10/Times-Bold@0 SF
-(MBna)3.914 E -.1(ve)-.25 G(dit).1 E F0(pro)3.914 E 1.414(vides tw)-.15
-F 3.914(ot)-.1 G 1.414(ools for dealing with zero or ne)-3.914 F -.05
-(ga)-.15 G(ti).05 E 1.714 -.15(ve t)-.25 H 1.414(ime interv).15 F 1.414
-(als: time stamp)-.25 F 1.635(interpolation or deletion of the af)108
-244.8 R 1.635(fected pings. Control dialogs allo)-.25 F 4.135(wu)-.25 G
-1.635(sers to apply either to the entire)-4.135 F -.2(bu)108 256.8 S
--.25(ff).2 G .538(er at once.).25 F -.35(Ti)5.538 G .539
+(va)108 232.8 S 2.975(lv).25 G(alues\).)-3.225 E/F2 10/Times-Bold@0 SF
+(MBna)2.975 E -.1(ve)-.25 G(dit).1 E F0(pro)2.975 E .475(vides tw)-.15 F
+2.975(ot)-.1 G .475(ools for dealing with zero or ne)-2.975 F -.05(ga)
+-.15 G(ti).05 E .775 -.15(ve t)-.25 H .475(ime interv).15 F .475
+(als: time stamp in-)-.25 F .439(terpolation or deletion of the af)108
+244.8 R .439(fected pings. Control dialogs allo)-.25 F 2.939(wu)-.25 G
+.439(sers to apply either to the entire b)-2.939 F(uf)-.2 E(fer)-.25 E
+.071(at once.)108 256.8 R -.35(Ti)5.071 G .071
 (me stamp interpolation may also be accomplished by selecting the rele)
-.35 F -.25(va)-.25 G .539(nt v).25 F .539(alues in the)-.25 F
-(time interv)108 268.8 Q(al display)-.25 E 2.5(,a)-.65 G
+.35 F -.25(va)-.25 G .071(nt v).25 F .072(alues in the time in-)-.25 F
+(terv)108 268.8 Q(al display)-.25 E 2.5(,a)-.65 G
 (nd then selecting interpolation.)-2.5 E .78(If the na)108 292.8 R(vig)
 -.2 E .78(ation is asynchronous, that generally means the time interv)
 -.05 F .78(al should be constant since na)-.25 F(vig)-.2 E(a-)-.05 E
@@ -395,40 +402,41 @@ Q(ed by selecting the of)-.15 E(fending point in the time interv)-.25 E
 .731(ping rate for most sonars v)108 364.8 R .731
 (aries with the sonars altitude abo)-.25 F 1.031 -.15(ve t)-.15 H .731
 (he sea\215oor).15 F 3.231(.I)-.55 G 3.231(nt)-3.231 G .731
-(his case, time stamp prob-)-3.231 F 1.442(lems will not produce spik)
-108 376.8 R 1.442(es in the speed-made-good plot because the na)-.1 F
-(vig)-.2 E 1.443(ation has been interpolated)-.05 F .997(using the e)108
-388.8 R .997(xisting time stamps. T)-.15 F .997(ime interv)-.35 F .997
-(al spik)-.25 F .997
-(es may also re\215ect problems with the sonar \(e.g. occa-)-.1 F
-(sional f)108 400.8 Q(ailure to ping at the appropriate time\) rather t\
-han erroneous time stamps.)-.1 E F1(MB-SYSTEM A)72 429.6 Q(UTHORSHIP)
--.548 E F0(Da)108 441.6 Q(vid W)-.2 E 2.5(.C)-.92 G(aress)-2.5 E
-(Montere)113 453.6 Q 2.5(yB)-.15 G(ay Aquarium Research Institute)-2.5 E
+(his case, time stamp prob-)-3.231 F .364(lems will not produce spik)108
+376.8 R .365(es in the speed-made-good plot because the na)-.1 F(vig)-.2
+E .365(ation has been interpolated us-)-.05 F .268(ing the e)108 388.8 R
+.268(xisting time stamps. T)-.15 F .268(ime interv)-.35 F .268(al spik)
+-.25 F .267
+(es may also re\215ect problems with the sonar \(e.g. occasional)-.1 F
+-.1(fa)108 400.8 S(ilure to ping at the appropriate time\) rather than \
+erroneous time stamps.).1 E F1(MB-SYSTEM A)72 429.6 Q(UTHORSHIP)-.548 E
+F0(Da)108 441.6 Q(vid W)-.2 E 2.5(.C)-.92 G(aress)-2.5 E(Montere)113
+453.6 Q 2.5(yB)-.15 G(ay Aquarium Research Institute)-2.5 E
 (Dale N. Chayes)108 465.6 Q(Center for Coastal and Ocean Mapping)113
 477.6 Q(Uni)113 489.6 Q -.15(ve)-.25 G(rsity of Ne).15 E 2.5(wH)-.25 G
 (ampshire)-2.5 E(Christian do Santos Ferreira)108 501.6 Q(MAR)113 513.6
 Q(UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
 525.6 Q -.15(ve)-.25 G(rsity of Bremen).15 E F1(OPTIONS)72 554.4 Q F2
 <ad42>108 566.4 Q/F3 10/Times-Italic@0 SF(yr/mo/da/hr/mn/sc)2.5 E F0
-.865(Sets the starting time for data allo)108 578.4 R .865(wed in the i\
-nput data; pings with times before the starting time will be)-.25 F 2.5
-(ignored. Def)108 590.4 R(ault:)-.1 E F3(yr/mo/da/hr/mn/sc)2.5 E F0 2.5
+.141(Sets the starting time for data allo)108 578.4 R .142(wed in the i\
+nput data; pings with times before the starting time will be ig-)-.25 F
+2.5(nored. Def)108 590.4 R(ault:)-.1 E F3(yr/mo/da/hr/mn/sc)2.5 E F0 2.5
 (=1)2.5 G(962/2/21/10/30/0.)-2.5 E F2<ad44>108 607.2 Q F0 .884
-(Starts up the program in "bro)23.08 F .883
+(Starts up the program in "bro)144 607.2 R .883
 (wse" mode. If a \214le is opened in bro)-.25 F .883
 (wse mode \(either at startup or)-.25 F .57
 (later\), none of the edited data will be output to a \214le. The def)
 144 619.2 R .571(ault is to output the edited data to a)-.1 F(\214le.)
-144 631.2 Q F2<ad45>108 648 Q F3(yr/mo/da/hr/mn/sc)23.63 E F0 .287
+144 631.2 Q F2<ad45>108 648 Q F3(yr/mo/da/hr/mn/sc)144 648 Q F0 .287
 (Sets the ending time for data allo)144 660 R .287
 (wed in the input data; pings with times after the ending time will)-.25
 F(be ignored.)144 672 Q(Def)5 E(ault:)-.1 E F3(yr/mo/da/hr/mn/sc)2.5 E
 F0 2.5(=2)2.5 G(062/2/21/10/30/0.)-2.5 E F2<ad46>108 688.8 Q F3(format)
-24.19 E F0 1.018(Sets the format at startup for the input and output sw)
-144 700.8 R 1.018(ath sonar data using)-.1 F F2(MBIO)3.518 E F0(inte)
-3.519 E 1.019(ger format)-.15 F .975(identi\214ers. This v)144 712.8 R
-.974(alue can also be set interacti)-.25 F -.15(ve)-.25 G .974
+144 688.8 Q F0 1.018
+(Sets the format at startup for the input and output sw)144 700.8 R
+1.018(ath sonar data using)-.1 F F2(MBIO)3.518 E F0(inte)3.519 E 1.019
+(ger format)-.15 F .975(identi\214ers. This v)144 712.8 R .974
+(alue can also be set interacti)-.25 F -.15(ve)-.25 G .974
 (ly when specifying the input \214le.).15 F .974(This program)5.974 F
 .501(uses the)144 724.8 R F2(MBIO)3.001 E F0 .501
 (library and will read or write an)3.001 F 3.001(ys)-.15 G -.1(wa)-3.001
@@ -450,21 +458,21 @@ SF(MBIO)3.157 E F0 .657(and their identi\214er v)3.157 F .657
 (alue is inferred fusing the)-.25 F F1(MB-System)2.762 E F0(con-)2.762 E
 -.15(ve)144 108 S(ntion of an ".mbXX" suf).15 E
 (\214x \(the XX corresponds to the)-.25 E F1(MBIO)2.5 E F0(format id\).)
-2.5 E F1<ad47>108 124.8 Q F0 .263(This \215ag causes)22.52 F F1(MBna)
-2.763 E -.1(ve)-.25 G(dit).1 E F0 .263(to treat the)2.763 F F1(Done)
-2.763 E F0 -.2(bu)2.763 G .262(tton as equi).2 F -.25(va)-.25 G .262
-(lent to the).25 F F1(Quit)2.762 E F0 -.2(bu)2.762 G .262
+2.5 E F1<ad47>108 124.8 Q F0 .263(This \215ag causes)144 124.8 R F1
+(MBna)2.763 E -.1(ve)-.25 G(dit).1 E F0 .263(to treat the)2.763 F F1
+(Done)2.763 E F0 -.2(bu)2.763 G .262(tton as equi).2 F -.25(va)-.25 G
+.262(lent to the).25 F F1(Quit)2.762 E F0 -.2(bu)2.762 G .262
 (tton. This option).2 F .13(is used when)144 136.8 R F1(MBna)2.63 E -.1
 (ve)-.25 G(dit).1 E F0 .13(is started automatically by some other proce\
 ss and only a single \214le is to)2.63 F(edited.)144 148.8 Q F1<ad48>108
 165.6 Q F0 .162(This "help" \215ag cause the program to print out a des\
-cription of its operation and then e)22.52 F .161(xit immedi-)-.15 F
-(ately)144 177.6 Q(.)-.65 E F1<ad49>108 194.4 Q F2(in\214le)26.41 E F0
-.075(Sets the data \214le from which the input data will be read at sta\
-rtup.)144 206.4 R .076(This v)5.076 F .076(alue can also be set inter)
--.25 F(-)-.2 E(acti)144 218.4 Q -.15(ve)-.25 G(ly).15 E(.)-.65 E F1
-<ad4e>108 235.2 Q F0(Normally)23.08 E 2.533(,a)-.65 G(ll)-2.533 E F1
-(MB-System)2.533 E F0 .033
+cription of its operation and then e)144 165.6 R .161(xit immedi-)-.15 F
+(ately)144 177.6 Q(.)-.65 E F1<ad49>108 194.4 Q F2(in\214le)144 194.4 Q
+F0 .075(Sets the data \214le from which the input data will be read at \
+startup.)144 206.4 R .076(This v)5.076 F .076
+(alue can also be set inter)-.25 F(-)-.2 E(acti)144 218.4 Q -.15(ve)-.25
+G(ly).15 E(.)-.65 E F1<ad4e>108 235.2 Q F0(Normally)144 235.2 Q 2.533
+(,a)-.65 G(ll)-2.533 E F1(MB-System)2.533 E F0 .033
 (processing programs embed comment records describing the processing)
 2.533 F .594(actions and parameters into output sw)144 247.2 R .594
 (ath data \214les.)-.1 F .594
@@ -475,20 +483,21 @@ rtup.)144 206.4 R .076(This v)5.076 F .076(alue can also be set inter)
 (option. In turn, this causes)2.791 F F1(mbpr)2.79 E(o-)-.18 E(cess)144
 271.2 Q F0(to generate an output, processed sw)2.5 E
 (ath data \214le without an)-.1 E 2.5(yc)-.15 G(omment records.)-2.5 E
-F1<ad4f>108 288 Q F2(out\214le)22.52 E F0
+F1<ad4f>108 288 Q F2(out\214le)144 288 Q F0
 (Sets the output data \214le, o)144 300 Q -.15(ve)-.15 G
 (rriding the \214le naming con).15 E -.15(ve)-.4 G(ntions discussed abo)
 .15 E .3 -.15(ve i)-.15 H 2.5(nt).15 G(he)-2.5 E F1<ad49>2.5 E F0
-(option.)2.5 E F1<ad50>108 316.8 Q F0(Causes)24.19 E F1(MBna)2.528 E -.1
-(ve)-.25 G(dit).1 E F0 .028(to load and w)2.528 F .028(ork with na)-.1 F
-(vig)-.2 E .028(ation from surv)-.05 F .328 -.15(ey d)-.15 H .028
+(option.)2.5 E F1<ad50>108 316.8 Q F0(Causes)144 316.8 Q F1(MBna)2.528 E
+-.1(ve)-.25 G(dit).1 E F0 .028(to load and w)2.528 F .028(ork with na)
+-.1 F(vig)-.2 E .028(ation from surv)-.05 F .328 -.15(ey d)-.15 H .028
 (ata records e).15 F -.15(ve)-.25 G 2.528(ni).15 G 2.528(ft)-2.528 G
-.029(he data for)-2.528 F(-)-.2 E 1.958(mat uses asynchronous na)144
-328.8 R(vig)-.2 E 1.958
-(ation records. In this case, the only edits which will actually be)-.05
-F(applied to the output data are changes to the time stamps of the surv)
-144 340.8 Q .3 -.15(ey r)-.15 H(ecords.).15 E F1<ad56>108 357.6 Q F0
-(Normally)23.08 E(,)-.65 E F1(MBna)3.636 E -.1(ve)-.25 G(dit).1 E F0
+.029(he data for)-2.528 F(-)-.2 E .81(mat uses asynchronous na)144 328.8
+R(vig)-.2 E .809
+(ation records. In this case, the only edits which will actually be ap-)
+-.05 F
+(plied to the output data are changes to the time stamps of the surv)144
+340.8 Q .3 -.15(ey r)-.15 H(ecords.).15 E F1<ad56>108 357.6 Q F0
+(Normally)144 357.6 Q(,)-.65 E F1(MBna)3.636 E -.1(ve)-.25 G(dit).1 E F0
 1.137(outputs information to the stderr stream re)3.636 F -.05(ga)-.15 G
 1.137(rding the number of records).05 F .253(loaded and dumped.)144
 369.6 R .253(If the)5.253 F F1<ad56>2.753 E F0 .253(\215ag is gi)2.753 F
@@ -498,45 +507,44 @@ F .516(puts the program v)144 381.6 R .517
 (ersion being used, all error status messages, and a lar)-.15 F .517
 (ge amount of other infor)-.18 F(-)-.2 E
 (mation including all of the beams \215agged or zeroed.)144 393.6 Q F1
-<ad58>108 410.4 Q F0 3.15(This option causes)23.08 F F1(mbpr)5.65 E
-(ocess)-.18 E F0 3.149(to run automatically on an input sw)5.65 F 3.149
-(ath data \214le when the)-.1 F F1(MBna)144 422.4 Q -.1(ve)-.25 G(dit).1
-E F0 .412(editing session is completed. The)2.912 F F1<ad58>2.912 E F0
-.413(option ef)2.913 F(fecti)-.25 E -.15(ve)-.25 G .413
-(ly means that the corresponding).15 F .902(processed sw)144 434.4 R
-.902(ath data is generated or updated immediately)-.1 F 5.901(.T)-.65 G
-.901(he program)-5.901 F F1(mbpr)3.401 E(ocess)-.18 E F0 .901
-(will not be)3.401 F(in)144 446.4 Q -.2(vo)-.4 G -.1(ke).2 G 2.5(di).1 G
-2.5(ft)-2.5 G(he editing session is in the bro)-2.5 E(wse mode.)-.25 E
-/F3 10.95/Times-Bold@0 SF(INTERA)72 475.2 Q(CTIVE CONTR)-.602 E(OLS)
--.329 E F1(File)108 487.2 Q F0(This b)19.89 E(utton accesses a pulldo)
--.2 E(wn menu with tw)-.25 E 2.5(op)-.1 G(ush b)-2.5 E(uttons:)-.2 E F1
-(Open)2.5 E F0(and)2.5 E F1(File Selection List)2.5 E F0(,)A F1
-(File->Open)108 504 Q F0 .614(This b)144 516 R .614
-(utton brings up a popup windo)-.2 F 3.115(ww)-.25 G .615(hich allo)
--3.115 F .615(ws the user to specify an input sw)-.25 F .615
-(ath sonar ba-)-.1 F(th)144 528 Q 1.868(ymetry data \214le, its)-.05 F
-F1(MBIO)4.368 E F0 1.867(format id, and the output mode.)4.368 F 1.867
-(This program uses the)6.867 F F1(MBIO)4.367 E F0 1.291
-(library and will read or write an)144 540 R 3.792(ys)-.15 G -.1(wa)
--3.792 G 1.292(th sonar format supported by).1 F F1(MBIO)3.792 E F0
-3.792(.Al)C 1.292(ist of the sw)-3.792 F(ath)-.1 E .391
-(sonar data formats currently supported by)144 552 R F1(MBIO)2.891 E F0
-.391(and their identi\214er v)2.891 F .39(alues is gi)-.25 F -.15(ve)
--.25 G 2.89(ni).15 G 2.89(nt)-2.89 G(he)-2.89 E F1(MBIO)2.89 E F0 .681
-(manual page.)144 564 R .681(If the sw)5.681 F .681
-(ath sonar data \214le is named using the)-.1 F F1(MB-System)3.182 E F0
-(suf)3.182 E .682(\214x con)-.25 F -.15(ve)-.4 G .682(ntion \(for).15 F
-(-)-.2 E .162(mat 11 \214les end with ".mb11", format 41 \214les end wi\
-th ".mb41", etc.\), then the program will auto-)144 576 R .552(maticall\
-y use the appropriate format id; otherwise the format must be set by th\
-e user)144 588 R 5.552(.T)-.55 G .552(he popup)-5.552 F(windo)144 600 Q
-2.693(wa)-.25 G .193(lso allo)-2.693 F .193
-(ws the output mode to be set to "bro)-.25 F .193
-(wse" so that no edit e)-.25 F -.15(ve)-.25 G .192(nts are output.).15 F
-(When)5.192 E 2.903(av)144 612 S .403
-(alid \214le is speci\214ed and the)-3.153 F F1(OK)2.903 E F0 -.2(bu)
-2.903 G .403(tton is click).2 F .403
+<ad58>108 410.4 Q F0 1.477(This option causes)144 410.4 R F1(mbpr)3.977
+E(ocess)-.18 E F0 1.477(to run automatically on an input sw)3.977 F
+1.476(ath data \214le when the)-.1 F F1(MB-)3.976 E(na)144 422.4 Q -.1
+(ve)-.25 G(dit).1 E F0 .146(editing session is completed. The)2.646 F F1
+<ad58>2.646 E F0 .146(option ef)2.646 F(fecti)-.25 E -.15(ve)-.25 G .146
+(ly means that the corresponding pro-).15 F .818(cessed sw)144 434.4 R
+.817(ath data is generated or updated immediately)-.1 F 5.817(.T)-.65 G
+.817(he program)-5.817 F F1(mbpr)3.317 E(ocess)-.18 E F0 .817
+(will not be in-)3.317 F -.2(vo)144 446.4 S -.1(ke).2 G 2.5(di).1 G 2.5
+(ft)-2.5 G(he editing session is in the bro)-2.5 E(wse mode.)-.25 E/F3
+10.95/Times-Bold@0 SF(INTERA)72 475.2 Q(CTIVE CONTR)-.602 E(OLS)-.329 E
+F1(File)108 487.2 Q F0(This b)144 487.2 Q(utton accesses a pulldo)-.2 E
+(wn menu with tw)-.25 E 2.5(op)-.1 G(ush b)-2.5 E(uttons:)-.2 E F1(Open)
+2.5 E F0(and)2.5 E F1(File Selection List)2.5 E F0(,)A F1(File->Open)108
+504 Q F0 .614(This b)144 516 R .614(utton brings up a popup windo)-.2 F
+3.115(ww)-.25 G .615(hich allo)-3.115 F .615
+(ws the user to specify an input sw)-.25 F .615(ath sonar ba-)-.1 F(th)
+144 528 Q 1.039(ymetry data \214le, its)-.05 F F1(MBIO)3.539 E F0 1.039
+(format id, and the output mode.)3.539 F 1.038(This program uses the)
+6.039 F F1(MBIO)3.538 E F0(li-)3.538 E .186
+(brary and will read or write an)144 540 R 2.687(ys)-.15 G -.1(wa)-2.687
+G .187(th sonar format supported by).1 F F1(MBIO)2.687 E F0 2.687(.Al)C
+.187(ist of the sw)-2.687 F .187(ath sonar)-.1 F .465
+(data formats currently supported by)144 552 R F1(MBIO)2.965 E F0 .465
+(and their identi\214er v)2.965 F .465(alues is gi)-.25 F -.15(ve)-.25 G
+2.964(ni).15 G 2.964(nt)-2.964 G(he)-2.964 E F1(MBIO)2.964 E F0(man-)
+2.964 E .191(ual page.)144 564 R .192(If the sw)5.191 F .192
+(ath sonar data \214le is named using the)-.1 F F1(MB-System)2.692 E F0
+(suf)2.692 E .192(\214x con)-.25 F -.15(ve)-.4 G .192(ntion \(format 11)
+.15 F .999(\214les end with ".mb11", format 41 \214les end with ".mb41"\
+, etc.\), then the program will automati-)144 576 R .34(cally use the a\
+ppropriate format id; otherwise the format must be set by the user)144
+588 R 5.34(.T)-.55 G .34(he popup win-)-5.34 F(do)144 600 Q 3.107(wa)
+-.25 G .607(lso allo)-3.107 F .607(ws the output mode to be set to "bro)
+-.25 F .607(wse" so that no edit e)-.25 F -.15(ve)-.25 G .607
+(nts are output.).15 F .606(When a)5.606 F -.25(va)144 612 S .789
+(lid \214le is speci\214ed and the).25 F F1(OK)3.289 E F0 -.2(bu)3.289 G
+.789(tton is click).2 F .79
 (ed, \214le will be added to an internal list of sw)-.1 F(ath)-.1 E .448
 (\214les a)144 624 R -.25(va)-.2 G .447(ilable for editing, and then th\
 at \214le will be loaded into memory for editing \(if another \214le).25
@@ -545,10 +553,10 @@ F -.1(wa)144 636 S 2.682(sa).1 G .182
 -2.682 F 2.683<778c>-.25 G .183(le is loaded\).)-2.683 F .183
 (If the speci\214ed)5.183 F 1.329(input is a datalist \(format id = \
 \2551\), then all of the \214les referenced through that datalist will \
-be)144 648 R 1.554(added to the internal list, and the \214rst of those\
- \214les loaded. When a \214le is loaded for editing,)144 660 R F1(MBna)
-144 672 Q -.1(ve)-.25 G(dit).1 E F0 .073
-(reads as much data as will \214t into the data b)2.573 F(uf)-.2 E .072
+be)144 648 R .318(added to the internal list, and the \214rst of those \
+\214les loaded. When a \214le is loaded for editing,)144 660 R F1(MB-)
+2.818 E(na)144 672 Q -.1(ve)-.25 G(dit).1 E F0 1.08
+(reads as much data as will \214t into the data b)3.58 F(uf)-.2 E 1.079
 (fer \(typically 25000 records\) and se)-.25 F -.15(ve)-.25 G(ral).15 E
 (pings are displayed as stack)144 684 Q(ed bath)-.1 E
 (ymetry pro\214les.)-.05 E F1(File->File Selection List)108 700.8 Q F0
@@ -565,11 +573,11 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF(mbna)72 48 Q -.15(ve)-.2 G 146.3
 (dit\(1\) MB-System).15 F 146.3(5.0 mbna)2.5 F -.15(ve)-.2 G(dit\(1\))
-.15 E 3.729("<loaded>". If)144 84 R 3.729<618c>3.729 G 1.229
-(le is loaded for editing by this program, it sho)-3.729 F 1.23
-(ws as "<loaded>".)-.25 F 1.23(If a \214le is)6.23 F 1.458
-(being edited or processed by another program, it sho)144 96 R 1.458
-(ws as "<lock)-.25 F 1.458(ed>". Lock)-.1 F 1.457(ed \214les cannot be)
+.15 E 2.861("<loaded>". If)144 84 R 2.861<618c>2.861 G .361
+(le is loaded for editing by this program, it sho)-2.861 F .361
+(ws as "<loaded>".)-.25 F .361(If a \214le is be-)5.361 F 2.132
+(ing edited or processed by another program, it sho)144 96 R 2.132
+(ws as "<lock)-.25 F 2.132(ed>". Lock)-.1 F 2.132(ed \214les cannot be)
 -.1 F .771(opened for editing, and an)144 108 R 3.271<798c>-.15 G .771
 (le loaded for editing by)-3.271 F/F1 10/Times-Bold@0 SF(MBna)3.271 E
 -.1(ve)-.25 G(dit).1 E F0 .771(will sho)3.271 F 3.272(wa)-.25 G 3.272
@@ -621,11 +629,11 @@ F0 1.171(This toggle b)144 372 R 1.171(utton enables na)-.2 F(vig)-.2 E
 (lution with a Gaussian k).2 F 1.172(ernel of user)-.1 F .759
 (de\214ned time width.)144 384 R .759(When this toggle b)5.759 F .758
 (utton is highlighted, a smooth na)-.2 F(vig)-.2 E .758
-(ation model is calcu-)-.05 F 1.424(lated and displayed as a blue line \
-in both the longitude and latitude plots.)144 396 R(The)6.424 E F1(Sho)
-3.924 E 3.924(wS)-.1 G(mooth)-3.924 E(In)144 408 Q -.1(ve)-.4 G(rsion).1
-E F0 1.224(toggle b)3.724 F 1.224(uttons also appear \(already enabled\
-\) for both the longitude and latitude plots)-.2 F
+(ation model is calcu-)-.05 F .441(lated and displayed as a blue line i\
+n both the longitude and latitude plots.)144 396 R(The)5.441 E F1(Sho)
+2.942 E 2.942(wS)-.1 G .442(mooth In-)-2.942 F -.1(ve)144 408 S(rsion).1
+E F0 1.92(toggle b)4.42 F 1.92(uttons also appear \(already enabled\) f\
+or both the longitude and latitude plots)-.2 F
 (among the plot display toggles on the left side of the main)144 420 Q
 F1(MBna)2.5 E -.1(ve)-.25 G(dit).1 E F0(windo)2.5 E -.65(w.)-.25 G F1
 (Contr)108 436.8 Q(ols->Na)-.18 E(vigation Modeling->Dead Reck)-.25 E
@@ -721,19 +729,19 @@ lots.)144 302.4 Q F1(Contr)108 319.2 Q(ols->Na)-.18 E
 (ime Inter)-.18 E(polation->A)-.1 E(pply)-.25 E F0 .087(This b)144 360 R
 .088(utton causes the time stamps of all data in the current b)-.2 F(uf)
 -.2 E .088(fer associated with ne)-.25 F -.05(ga)-.15 G(ti).05 E .388
--.15(ve o)-.25 H 2.588(rz).15 G(ero)-2.588 E 1.13(time interv)144 372 R
-1.13(als to be interpolated so that the time interv)-.25 F 1.13
-(als are positi)-.25 F -.15(ve)-.25 G 3.63(.T).15 G(he)-3.63 E F1 -.18
-(Ti)3.63 G 1.13(me Inter).18 F(polation)-.1 E F0
-(dialog disappears after this action is tak)144 384 Q(en.)-.1 E F1
-(Contr)108 400.8 Q(ols->T)-.18 E(ime Inter)-.18 E(polation->Dismiss)-.1
-E F0(This b)144 412.8 Q(utton causes the)-.2 E F1 -.18(Ti)2.5 G
-(me Inter).18 E(polation)-.1 E F0(dialog to disappear)2.5 E(.)-.55 E F1
-(Contr)108 429.6 Q(ols->Delete Bad T)-.18 E(imes->A)-.18 E(pply)-.25 E
-F0 .646(This b)144 441.6 R .647(utton causes all data in the current b)
--.2 F(uf)-.2 E .647(fer associated with ne)-.25 F -.05(ga)-.15 G(ti).05
-E .947 -.15(ve o)-.25 H 3.147(rz).15 G .647(ero time interv)-3.147 F
-.647(als to)-.25 F(be deleted.)144 453.6 Q(The)5 E F1(Delete Bad T)2.5 E
+-.15(ve o)-.25 H 2.588(rz).15 G(ero)-2.588 E .148(time interv)144 372 R
+.148(als to be interpolated so that the time interv)-.25 F .147
+(als are positi)-.25 F -.15(ve)-.25 G 2.647(.T).15 G(he)-2.647 E F1 -.18
+(Ti)2.647 G .147(me Inter).18 F(polation)-.1 E F0(di-)2.647 E
+(alog disappears after this action is tak)144 384 Q(en.)-.1 E F1(Contr)
+108 400.8 Q(ols->T)-.18 E(ime Inter)-.18 E(polation->Dismiss)-.1 E F0
+(This b)144 412.8 Q(utton causes the)-.2 E F1 -.18(Ti)2.5 G(me Inter).18
+E(polation)-.1 E F0(dialog to disappear)2.5 E(.)-.55 E F1(Contr)108
+429.6 Q(ols->Delete Bad T)-.18 E(imes->A)-.18 E(pply)-.25 E F0 .646
+(This b)144 441.6 R .647(utton causes all data in the current b)-.2 F
+(uf)-.2 E .647(fer associated with ne)-.25 F -.05(ga)-.15 G(ti).05 E
+.947 -.15(ve o)-.25 H 3.147(rz).15 G .647(ero time interv)-3.147 F .647
+(als to)-.25 F(be deleted.)144 453.6 Q(The)5 E F1(Delete Bad T)2.5 E
 (imes)-.18 E F0(dialog disappears after this action is tak)2.5 E(en.)-.1
 E F1(Contr)108 470.4 Q(ols->Delete Bad T)-.18 E(imes->Dismiss)-.18 E F0
 (This b)144 482.4 Q(utton causes the)-.2 E F1(Delete Bad T)2.5 E(imes)
@@ -745,19 +753,18 @@ E F1(Contr)108 470.4 Q(ols->Delete Bad T)-.18 E(imes->Dismiss)-.18 E F0
 (osition Offset->Latitude Offset)-.2 E F0(This te)144 540 Q
 (xt widget allo)-.15 E(ws the user to set the desired latitude of)-.25 E
 (fset in de)-.25 E(grees.)-.15 E F1(Contr)108 556.8 Q(ols->P)-.18 E
-(osition Offset->A)-.2 E(pply)-.25 E F0 1.357(This b)144 568.8 R 1.357
-(utton applies the current longitude and latitude of)-.2 F 1.356
-(fsets to all of the na)-.25 F(vig)-.2 E 1.356(ation data.)-.05 F(The)
-6.356 E F1 -.2(Po)144 580.8 S(sition Offset).2 E F0
+(osition Offset->A)-.2 E(pply)-.25 E F0 .226(This b)144 568.8 R .226
+(utton applies the current longitude and latitude of)-.2 F .225
+(fsets to all of the na)-.25 F(vig)-.2 E .225(ation data.)-.05 F(The)
+5.225 E F1 -.2(Po)2.725 G(-).2 E(sition Offset)144 580.8 Q F0
 (dialog disappears after this action is tak)2.5 E(en.)-.1 E F1(Contr)108
 597.6 Q(ols->P)-.18 E(osition Offset->Dismiss)-.2 E F0(This b)144 609.6
 Q(utton causes the)-.2 E F1(Delete Bad T)2.5 E(imes)-.18 E F0
-(dialog to disappear)2.5 E(.)-.55 E F1(Start)108 626.4 Q F0 1.482
-(This b)14.34 F 1.482
-(utton causes the set of displayed pings to step backw)-.2 F 1.483
-(ard to the be)-.1 F 1.483(ginning of the current)-.15 F -.2(bu)144
-638.4 S -.25(ff).2 G(er).25 E(.)-.55 E F1(Re)108 655.2 Q -.1(ve)-.15 G
-(rse).1 E F0 .964(This b)144 667.2 R .963
+(dialog to disappear)2.5 E(.)-.55 E F1(Start)108 626.4 Q F0 .28(This b)
+144 626.4 R .28(utton causes the set of displayed pings to step backw)
+-.2 F .28(ard to the be)-.1 F .28(ginning of the current b)-.15 F(uf-)
+-.2 E(fer)144 638.4 Q(.)-.55 E F1(Re)108 655.2 Q -.1(ve)-.15 G(rse).1 E
+F0 .964(This b)144 667.2 R .963
 (utton causes the set of displayed pings to step)-.2 F/F2 10
 /Times-Italic@0 SF(nstep)3.463 E F0 .963(pings backw)3.463 F .963
 (ard in the current b)-.1 F(uf)-.2 E(fer)-.25 E(.)-.55 E
@@ -774,7 +781,7 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF(mbna)72 48 Q -.15(ve)-.2 G 146.3
 (dit\(1\) MB-System).15 F 146.3(5.0 mbna)2.5 F -.15(ve)-.2 G(dit\(1\))
-.15 E/F1 10/Times-Bold@0 SF(End)108 84 Q F0(This b)18.21 E
+.15 E/F1 10/Times-Bold@0 SF(End)108 84 Q F0(This b)144 84 Q
 (utton causes the set of displayed pings to step forw)-.2 E
 (ard to the end of the current b)-.1 E(uf)-.2 E(fer)-.25 E(.)-.55 E F1
 (Next Buffer)108 100.8 Q F0 .59(This b)144 112.8 R .59
@@ -810,11 +817,11 @@ E .27(pressing the right mouse b)144 242.4 R .27
 . If the current \214le is not the last)-.05 F(one in the a)144 319.2 Q
 -.25(va)-.2 G(ilable list, then the ne).25 E(xt unlock)-.15 E
 (ed \214le will be loaded for editing.)-.1 E F1(Quit)108 336 Q F0 .933
-(This b)16.55 F .933(utton causes the program to e)-.2 F .933
+(This b)144 336 R .933(utton causes the program to e)-.2 F .933
 (xit gracefully)-.15 F 5.933(.I)-.65 G 3.433(fad)-5.933 G .933
 (ata \214le has been loaded, all of the edits)-3.433 F
 (will be output before e)144 348 Q(xiting.)-.15 E F1(About)108 364.8 Q
-F0(This b)9.33 E(utton causes a dialog to appear sho)-.2 E
+F0(This b)144 364.8 Q(utton causes a dialog to appear sho)-.2 E
 (wing some information about the program.)-.25 E F1(Inter)108 381.6 Q
 (polate)-.1 E F0 .177(This b)144 393.6 R .177(utton causes the selected\
  data to be replaced by linear interpolation of the surrounding unse-)
@@ -851,14 +858,14 @@ F1(Select All)2.5 E F0(toggle b)2.5 E(utton)-.2 E
 (re selected)-2.5 E(4\) click on the)154 648 Q F1(Use Solution)2.5 E F0
 -.2(bu)2.5 G(tton so that the).2 E(na)161.5 660 Q(vig)-.2 E
 (ation model is adopted for all longitude)-.05 E(and latitude v)161.5
-672 Q(alues)-.25 E F1(Flag)108 688.8 Q F0 1.257(This b)17.11 F 1.257
+672 Q(alues)-.25 E F1(Flag)108 688.8 Q F0 1.257(This b)144 688.8 R 1.257
 (utton only appears when either of the Gaussian mean or the smooth in)
--.2 F -.15(ve)-.4 G 1.258(rsion na).15 F(vig)-.2 E(ation)-.05 E 1.566
-(modeling algorithm is acti)144 700.8 R -.25(va)-.25 G 1.566
-(ted from the Na).25 F(vig)-.2 E 1.566(ation Modeling dialog.)-.05 F
-1.566(This b)6.566 F 1.565(utton causes an)-.2 F(y)-.15 E .232
-(selected longitude or latitude v)144 712.8 R .232
-(alues to be \215agged to be ignored by the na)-.25 F(vig)-.2 E .232
+-.2 F -.15(ve)-.4 G 1.258(rsion na).15 F(vig)-.2 E(ation)-.05 E .357
+(modeling algorithm is acti)144 700.8 R -.25(va)-.25 G .356
+(ted from the Na).25 F(vig)-.2 E .356(ation Modeling dialog.)-.05 F .356
+(This b)5.356 F .356(utton causes an)-.2 F 2.856(ys)-.15 G(e-)-2.856 E
+.787(lected longitude or latitude v)144 712.8 R .787
+(alues to be \215agged to be ignored by the na)-.25 F(vig)-.2 E .788
 (ation smoothing algo-)-.05 F(rithm. Flagged positions are sho)144 724.8
 Q(wn in orange.)-.25 E(MB-System 5.0)72 768 Q(24 No)132.205 E -.15(ve)
 -.15 G(mber 2018).15 E(6)190.545 E 0 Cg EP
@@ -868,13 +875,13 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF(mbna)72 48 Q -.15(ve)-.2 G 146.3
 (dit\(1\) MB-System).15 F 146.3(5.0 mbna)2.5 F -.15(ve)-.2 G(dit\(1\))
-.15 E/F1 10/Times-Bold@0 SF(Un\215ag)108 84 Q F0 .392(This b)7.66 F .392
-(utton only appears when the Gaussian mean or smooth in)-.2 F -.15(ve)
--.4 G .391(rsion na).15 F(vig)-.2 E .391(ation modeling algo-)-.05 F .1
-(rithm is acti)144 96 R -.25(va)-.25 G .1(ted from the Na).25 F(vig)-.2
-E .1(ation Modeling dialog.)-.05 F .1(This b)5.1 F .1(utton causes an)
--.2 F 2.6(ys)-.15 G .1(elected longitude)-2.6 F .01(or latitude v)144
-108 R .01
+.15 E/F1 10/Times-Bold@0 SF(Un\215ag)108 84 Q F0 .392(This b)144 84 R
+.392(utton only appears when the Gaussian mean or smooth in)-.2 F -.15
+(ve)-.4 G .391(rsion na).15 F(vig)-.2 E .391(ation modeling algo-)-.05 F
+.1(rithm is acti)144 96 R -.25(va)-.25 G .1(ted from the Na).25 F(vig)
+-.2 E .1(ation Modeling dialog.)-.05 F .1(This b)5.1 F .1
+(utton causes an)-.2 F 2.6(ys)-.15 G .1(elected longitude)-2.6 F .01
+(or latitude v)144 108 R .01
 (alues to be un\215agged. Flagged positions are ignored by the na)-.25 F
 (vig)-.2 E .01(ation smoothing algo-)-.05 F 2.23(rithm. An)144 120 R
 4.73(yp)-.15 G 2.231(ositions which are un\215agged will once ag)-4.73 F
@@ -885,18 +892,18 @@ E .1(ation Modeling dialog.)-.05 F .1(This b)5.1 F .1(utton causes an)
 144 144 R 2.66(yh)-.15 G -2.25 -.2(av e)-2.66 H .161
 (been altered by interpolation or application of a modeling solu-)2.861
 F(tion\).)144 156 Q F1(Pick)108 172.8 Q F0 1.046
-(Clicking on this toggle b)17.11 F 1.045(utton sets the edit mode to "p\
-ick". In this case, clicking the left mouse)-.2 F -.2(bu)144 184.8 S
+(Clicking on this toggle b)144 172.8 R 1.045(utton sets the edit mode t\
+o "pick". In this case, clicking the left mouse)-.2 F -.2(bu)144 184.8 S
 (tton will cause the nearest data v).2 E
 (alue to toggle between selected \(red\) and unselected.)-.25 E F1
-(Select)108 201.6 Q F0 .098(Clicking on this toggle b)11.01 F .098(utto\
-n sets the edit mode to "select". In this case, clicking and dragging t\
-he)-.2 F(left mouse b)144 213.6 Q(utton will cause an)-.2 E 2.5(yd)-.15
-G(ata v)-2.5 E(alue touched by the cursor to become selected.)-.25 E F1
-(Deselect)108 230.4 Q F0 .435(Clicking on this toggle b)144 242.4 R .434
-(utton sets the edit mode to "deselect". In this case, clicking and dra\
-gging)-.2 F(the left mouse b)144 254.4 Q(utton will cause an)-.2 E 2.5
-(yd)-.15 G(ata v)-2.5 E
+(Select)108 201.6 Q F0 .098(Clicking on this toggle b)144 201.6 R .098(\
+utton sets the edit mode to "select". In this case, clicking and draggi\
+ng the)-.2 F(left mouse b)144 213.6 Q(utton will cause an)-.2 E 2.5(yd)
+-.15 G(ata v)-2.5 E(alue touched by the cursor to become selected.)-.25
+E F1(Deselect)108 230.4 Q F0 .435(Clicking on this toggle b)144 242.4 R
+.434(utton sets the edit mode to "deselect". In this case, clicking and\
+ dragging)-.2 F(the left mouse b)144 254.4 Q(utton will cause an)-.2 E
+2.5(yd)-.15 G(ata v)-2.5 E
 (alue touched by the cursor to become unselected.)-.25 E F1(Select All)
 108 271.2 Q F0 .329(Clicking on this toggle b)144 283.2 R .33
 (utton sets the edit mode to "select all". In this case, clicking in an)
@@ -925,10 +932,10 @@ ncludes a green line representing the original)-.2 F(longitude v)144
 .101(utton is on, the longitude plot includes a blue line representing \
 the dead reck)-.2 F(on-)-.1 E(ing longitude v)144 516 Q(alues.)-.25 E F1
 (Sho)108 532.8 Q 2.5(wS)-.1 G(mooth In)-2.5 E -.1(ve)-.4 G
-(rsion \(Longitude Plot\)).1 E F0 1.6(When this toggle b)144 544.8 R
-1.599(utton is on, the longitude plot includes a blue line representing\
- the smooth)-.2 F(in)144 556.8 Q -.15(ve)-.4 G(rsion longitude v).15 E
-(alues.)-.25 E F1(Latitude Plot)108 573.6 Q F0(This toggle b)144 585.6 Q
+(rsion \(Longitude Plot\)).1 E F0 .649(When this toggle b)144 544.8 R
+.649(utton is on, the longitude plot includes a blue line representing \
+the smooth in-)-.2 F -.15(ve)144 556.8 S(rsion longitude v).15 E(alues.)
+-.25 E F1(Latitude Plot)108 573.6 Q F0(This toggle b)144 585.6 Q
 (utton turns the latitude plot on and of)-.2 E(f.)-.25 E F1(Sho)108
 602.4 Q 2.5(wO)-.1 G(riginal Data \(Latitude Plot\))-2.5 E F0 .406
 (When this toggle b)144 614.4 R .407(utton is on, the latitude plot inc\
@@ -1000,11 +1007,11 @@ F1 .162(Select All)2.662 F F0 2.662(,a)C(nd)-2.662 E F1(Deselect)2.662 E
 (All)144 523.2 Q F0 -.2(bu)2.5 G(ttons.).2 E F1(Middle Mouse Button)108
 540 Q F0 .059(The middle mouse b)144 552 R .058
 (utton causes the set of displayed data to step backw)-.2 F .058
-(ard in the current b)-.1 F(uf)-.2 E .058(fer by)-.25 F 1.563
-(the amount of time set on the)144 564 R F1 -.18(Ti)4.063 G 1.563
-(me Step).18 F F0(slider)4.063 E 6.563(.T)-.55 G 1.563(he control b)
--6.563 F(utton)-.2 E F1(Re)4.063 E -.1(ve)-.15 G(rse).1 E F0 1.564
-(causes the same)4.063 F(action.)144 576 Q F1(Right Mouse Button)108
+(ard in the current b)-.1 F(uf)-.2 E .058(fer by)-.25 F .606
+(the amount of time set on the)144 564 R F1 -.18(Ti)3.106 G .606
+(me Step).18 F F0(slider)3.106 E 5.606(.T)-.55 G .606(he control b)
+-5.606 F(utton)-.2 E F1(Re)3.106 E -.1(ve)-.15 G(rse).1 E F0 .606
+(causes the same ac-)3.106 F(tion.)144 576 Q F1(Right Mouse Button)108
 592.8 Q F0 .133(The right mouse b)144 604.8 R .132
 (utton causes the set of displayed data to step forw)-.2 F .132
 (ard in the current b)-.1 F(uf)-.2 E .132(fer by the)-.25 F

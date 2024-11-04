@@ -128,6 +128,7 @@
 #define TRNCLI_CONNECT_RETRIES 5
 #define MB1_READ_RETRIES 50
 #define MB1_ETO_MSEC 250
+#define LOG_PATH_BYTES 512
 
 /////////////////////////
 // Declarations
@@ -763,7 +764,7 @@ static app_cfg_t *app_cfg_new()
         instance->log_id=MLOG_ID_INVALID;
         instance->log_name=strdup(TRNCLI_TEST_LOG_NAME);
         instance->log_dir=strdup(TRNCLI_TEST_LOG_DIR);
-        instance->log_path=(char *)malloc(512);
+        instance->log_path=(char *)malloc(LOG_PATH_BYTES);
         instance->utm=TRNCLI_UTM_DFL;
         instance->state_n=0;
         instance->tcli_connect_retries = TRNCLI_CONNECT_RETRIES;
@@ -1471,19 +1472,23 @@ static msock_socket_t **s_get_mb1_instance(app_cfg_t *cfg)
         mtime_delay_ms(250);
         if(test==0){
             s_dbg_printf(stderr,cfg->debug, "%s:%d mb1svr sending REQ %s:%d\n", __func__, __LINE__, cfg->mb1_host, cfg->mb1_port);
-            byte req[4]={0};
-            sprintf((char *)req, "REQ");
-            int64_t st = msock_sendto(mb1_sock,NULL,req,4,0);
+            int REQ_BYTES=4;
+            byte req[REQ_BYTES];
+            memset(req, 0, REQ_BYTES);
+            snprintf((char *)req, REQ_BYTES, "REQ");
+            int64_t st = msock_sendto(mb1_sock,NULL,req, REQ_BYTES, 0);
             if(st == (int64_t)4){
                 s_dbg_printf(stderr,cfg->debug, "%s:%d sendto ret[%"PRId64"]\n", __func__, __LINE__, st);
                 mtime_delay_ms(250);
-                byte ack[4]={0};
-                memset(ack,0,4);
+
+                int ACK_BYTES=4;
+                byte ack[ACK_BYTES];
+                memset(ack,0,ACK_BYTES);
 
                 msock_set_blocking(mb1_sock,true);
                 s_dbg_printf(stderr,cfg->debug, "%s:%d mb1svr reading ACK %s:%d\n", __func__, __LINE__, cfg->mb1_host, cfg->mb1_port);
 
-                int64_t rf = msock_recvfrom(mb1_sock, NULL, (byte *)ack, 4, 0);
+                int64_t rf = msock_recvfrom(mb1_sock, NULL, (byte *)ack, ACK_BYTES, 0);
                 s_dbg_printf(stderr,cfg->debug, "%s:%d recvfrom ret[%"PRId64"]\n", __func__, __LINE__, rf);
 
                 if(rf==4){
@@ -1574,11 +1579,11 @@ static void s_init_log(int argc, char **argv, app_cfg_t *cfg)
     // Get GMT time
     gmt = gmtime(&rawtime);
     // format YYYYMMDD-HHMMSS
-    sprintf(session_date, "%04d%02d%02d-%02d%02d%02d",
+    snprintf(session_date, 32, "%04d%02d%02d-%02d%02d%02d",
             (gmt->tm_year+1900),gmt->tm_mon+1,gmt->tm_mday,
             gmt->tm_hour,gmt->tm_min,gmt->tm_sec);
 
-    sprintf(cfg->log_path,"%s//%s-%s-%s",cfg->log_dir,cfg->log_name,session_date,TRNCLI_TEST_LOG_EXT);
+    snprintf(cfg->log_path, LOG_PATH_BYTES, "%s//%s-%s-%s",cfg->log_dir,cfg->log_name,session_date,TRNCLI_TEST_LOG_EXT);
     cfg->log_id = mlog_get_instance(cfg->log_path, cfg->log_cfg, TRNCLI_TEST_LOG_NAME);
 
     if(!cfg->log_en){
@@ -1598,7 +1603,7 @@ static void s_init_log(int argc, char **argv, app_cfg_t *cfg)
             fprintf(stderr, "WARN - logged cmdline truncated\n");
             break;
         }
-        int ilen=sprintf(ip," %s",argv[x]);
+        int ilen=snprintf(ip, TRN_CMD_LINE_BYTES-(strlen(ip)+1), " %s",argv[x]);
         ip+=ilen;
     }
     g_cmd_line[TRN_CMD_LINE_BYTES-1]='\0';

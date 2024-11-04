@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:01 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:07 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 3
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -249,23 +255,23 @@ BP
 F2(MBgrdviz)2.759 E F0 5.259(.I)C 2.759(fau)-5.259 G .258
 (ser wishes to set def)-2.759 F .258(ault parameters dif)-.1 F .258
 (ferent from those set by the)-.25 F F2(MBIO)2.758 E F0(library)108
-254.4 Q 3.738(,t)-.65 G 1.238(hen these specialized def)-3.738 F 1.239
-(ault v)-.1 F 1.239(alues must be stored in the \214le .mbio_def)-.25 F
-1.239(aults in the users home)-.1 F(directory)108 266.4 Q 5.132(.I)-.65
-G 2.632(fa)-5.132 G .432 -.15(ny o)-2.632 H .131(ption \215ag is gi).15
-F -.15(ve)-.25 G 2.631(ni).15 G 2.631(ni)-2.631 G -1.9 -.4(nv o)-2.631 H
-(king).4 E F2(mbdefaults)2.631 E F0 2.631(,t)C .131(hen a ne)-2.631 F
-2.631(w.)-.25 G(mbio_def)-2.631 E .131(aults \214le will be written)-.1
-F 1.445(incorporating the ne)108 278.4 R 1.445
-(wly set parameters along with an)-.25 F 3.945(yo)-.15 G 1.445
-(ld parameters which ha)-3.945 F 1.745 -.15(ve n)-.2 H 1.445
-(ot been reset. If no).15 F .577(option \215ag is gi)108 290.4 R -.15
-(ve)-.25 G .577(n, then).15 F F2(mbdefaults)3.077 E F0 .577
-(will list the current def)3.077 F .577(ault v)-.1 F .577
-(alues \(set by)-.25 F F2(mbio)3.077 E F0 .577(if no .mbio_def)3.077 F
-(aults)-.1 E(\214le e)108 302.4 Q(xists\).)-.15 E F1(CHANGES FR)72 331.2
-Q(OM VERSION 4.6)-.329 E F0 .265(Note that prior to v)108 343.2 R .266
-(ersion 5.0, the)-.15 F F2(MB-System)2.766 E F0(def)2.766 E .266
+254.4 Q 2.865(,t)-.65 G .365(hen these specialized def)-2.865 F .365
+(ault v)-.1 F .365(alues must be stored in the \214le .mbio_def)-.25 F
+.366(aults in the users home di-)-.1 F(rectory)108 266.4 Q 5.589(.I)-.65
+G 3.089(fa)-5.589 G .889 -.15(ny o)-3.089 H .589(ption \215ag is gi).15
+F -.15(ve)-.25 G 3.089(ni).15 G 3.089(ni)-3.089 G -1.9 -.4(nv o)-3.089 H
+(king).4 E F2(mbdefaults)3.089 E F0 3.089(,t)C .589(hen a ne)-3.089 F
+3.089(w.)-.25 G(mbio_def)-3.089 E .588(aults \214le will be written)-.1
+F .428(incorporating the ne)108 278.4 R .429
+(wly set parameters along with an)-.25 F 2.929(yo)-.15 G .429
+(ld parameters which ha)-2.929 F .729 -.15(ve n)-.2 H .429
+(ot been reset. If no op-).15 F .252(tion \215ag is gi)108 290.4 R -.15
+(ve)-.25 G .252(n, then).15 F F2(mbdefaults)2.752 E F0 .252
+(will list the current def)2.752 F .252(ault v)-.1 F .252
+(alues \(set by)-.25 F F2(mbio)2.751 E F0 .251(if no .mbio_def)2.751 F
+.251(aults \214le)-.1 F -.15(ex)108 302.4 S(ists\).).15 E F1(CHANGES FR)
+72 331.2 Q(OM VERSION 4.6)-.329 E F0 .265(Note that prior to v)108 343.2
+R .266(ersion 5.0, the)-.15 F F2(MB-System)2.766 E F0(def)2.766 E .266
 (aults set by)-.1 F F2(mbdefaults)2.766 E F0 .266
 (included the format id, a control)2.766 F .28(for ping a)108 355.2 R
 -.15(ve)-.2 G .28(raging, longitude and latitude bounds for windo).15 F
@@ -281,7 +287,7 @@ Q(OM VERSION 4.6)-.329 E F0 .265(Note that prior to v)108 343.2 R .266
 (Christian do Santos Ferreira)108 468 Q(MAR)113 480 Q
 (UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113 492
 Q -.15(ve)-.25 G(rsity of Bremen).15 E F1(OPTIONS)72 520.8 Q F2<ad42>108
-532.8 Q F3(\214leiob)23.63 E(uf)-.2 E(fer)-.18 E F0 .049
+532.8 Q F3(\214leiob)144 532.8 Q(uf)-.2 E(fer)-.18 E F0 .049
 (Sets the \214le i/o block b)144 544.8 R(uf)-.2 E .049
 (fer size for certain formats \(currently formats 88 and 58\).)-.25 F
 (The)5.05 E F3(\214leiob)2.55 E(uf)-.2 E(fer)-.18 E F0 -.25(va)144 556.8
@@ -307,8 +313,8 @@ G 3.44(%r)-3.44 G .94(un time reduction for)-3.44 F F2(mbpr)3.44 E
 (ocess)-.18 E F0 3.44(.D)C(ef)-3.44 E(ault:)-.1 E F3(\214leiob)3.44 E
 (uf)-.2 E(fer)-.18 E F0 3.44(=0)3.44 G 3.44(,w)-3.44 G .94(hich corre-)
 -3.44 F(sponds to the system def)144 640.8 Q(ault.)-.1 E F2<ad44>108
-657.6 Q F3(psdisplay)23.08 E F0 .696(Sets the program used for displayi\
-ng Postscript graphics \214les on a screen; this f)144 669.6 R .696
+657.6 Q F3(psdisplay)144 657.6 Q F0 .696(Sets the program used for disp\
+laying Postscript graphics \214les on a screen; this f)144 669.6 R .696
 (acility is used by)-.1 F 1.352(shellscripts created through macros lik)
 144 681.6 R(e)-.1 E F2(mbm_plot)3.852 E F0 3.852(.T)C 1.352(he def)
 -3.852 F 1.351(ault Postscript display utility is)-.1 F F2(gv)3.851 E F0
@@ -324,7 +330,7 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF(mbdef)72 48 Q 143.83(aults\(1\) MB-System)-.1 F
 143.83(5.0 mbdef)2.5 F(aults\(1\))-.1 E/F1 10/Times-Bold@0 SF<ad46>108
-84 Q/F2 10/Times-Italic@0 SF(fbtver)24.19 E(sion)-.1 E F0 1.556
+84 Q/F2 10/Times-Italic@0 SF(fbtver)144 84 Q(sion)-.1 E F0 1.556
 (Set the v)144 96 R 1.556(ersion of fbt \214les created by)-.15 F F1
 (mbdatalist)4.056 E F0(and)4.056 E F1(mbpr)4.056 E(ocess)-.18 E F0 6.555
 (.I)C(f)-6.555 E F2(fbtver)4.055 E(sion)-.1 E F0 4.055(=2)4.055 G 4.055
@@ -337,26 +343,26 @@ BP
 -.15 F(71 will be used to write the "f)144 132 Q(ast bath)-.1 E
 (ymetry" or "*.fbt" \214les.)-.05 E F1<ad48>108 160.8 Q F0 .162(This "h\
 elp" \215ag cause the program to print out a description of its operati\
-on and then e)22.52 F .162(xit immedi-)-.15 F(ately)144 172.8 Q(.)-.65 E
-F1<ad49>108 189.6 Q F2(ima)26.41 E -.1(ge)-.1 G(display).1 E F0 2.817
-(Sets the program used for displaying T)144 201.6 R(if)-.35 E 5.317(fi)
--.25 G 2.817(mage \214les on a screen; this f)-5.317 F 2.816
+on and then e)144 160.8 R .162(xit immedi-)-.15 F(ately)144 172.8 Q(.)
+-.65 E F1<ad49>108 189.6 Q F2(ima)144 189.6 Q -.1(ge)-.1 G(display).1 E
+F0 2.817(Sets the program used for displaying T)144 201.6 R(if)-.35 E
+5.317(fi)-.25 G 2.817(mage \214les on a screen; this f)-5.317 F 2.816
 (acility is used by)-.1 F 1.677(shellscripts created through macros lik)
 144 213.6 R(e)-.1 E F1(mbm_grdtiff)4.177 E F0 4.177(.T)C 1.678(he def)
 -4.177 F 1.678(ault image display utility is)-.1 F F1(xv)4.178 E F0(.)A
 (Other common image display utilities are)144 225.6 Q F1(gimp)2.5 E F0
 (\(GNU image processing\) and)2.5 E F1(gqview)2.5 E F0(.)A F1<ad4c>108
-242.4 Q F2(lon\215ip)23.63 E F0 .572(Sets the range of the longitude v)
-144 254.4 R .572(alues returned.)-.25 F(If)5.572 E F2(lon\215ip)3.072 E
-F0 .572(=\2551 then the longitude v)B .571(alues will be in)-.25 F .488
-(the range from \255360 to 0 de)144 266.4 R .488(grees. If)-.15 F F2
-(lon\215ip)2.988 E F0 .488(=0 then the longitude v)B .489
-(alues will be in the range from)-.25 F 1.383(\255180 to 180 de)144
-278.4 R 1.383(grees. If)-.15 F F2(lon\215ip)3.882 E F0 1.382
-(=1 then the longitude v)B 1.382
-(alues will be in the range from 0 to 360)-.25 F(de)144 290.4 Q 2.5
-(grees. Def)-.15 F(ault:)-.1 E F2(lon\215ip)2.5 E F0 2.5(=0)2.5 G(.)-2.5
-E F1(\255MP)108 307.2 Q F2(colortable/colortable_mode/shade_mode)14.75 E
+242.4 Q F2(lon\215ip)144 242.4 Q F0 .572
+(Sets the range of the longitude v)144 254.4 R .572(alues returned.)-.25
+F(If)5.572 E F2(lon\215ip)3.072 E F0 .572(=\2551 then the longitude v)B
+.571(alues will be in)-.25 F .488(the range from \255360 to 0 de)144
+266.4 R .488(grees. If)-.15 F F2(lon\215ip)2.988 E F0 .488
+(=0 then the longitude v)B .489(alues will be in the range from)-.25 F
+.506(\255180 to 180 de)144 278.4 R .506(grees. If)-.15 F F2(lon\215ip)
+3.006 E F0 .506(=1 then the longitude v)B .506
+(alues will be in the range from 0 to 360 de-)-.25 F 2.5(grees. Def)144
+290.4 R(ault:)-.1 E F2(lon\215ip)2.5 E F0 2.5(=0)2.5 G(.)-2.5 E F1
+(\255MP)108 307.2 Q F2(colortable/colortable_mode/shade_mode)144 307.2 Q
 F0 .965(Sets the def)144 319.2 R .965
 (ault colortable, colortable mode, and shading mode for the programs)-.1
 F F1(MBgrdviz)3.466 E F0(and)3.466 E F1(MBeditviz)144 331.2 Q F0 2.5(.T)
@@ -383,31 +389,31 @@ G 2.5(l1c).15 G(olortable)-2.5 E 2.5(6=S)164 415.2 S(eale)-2.5 E -.15
 (=2)2.744 G .244(\). Shading by o)-2.744 F -.15(ve)-.15 G .244
 (rlay can-).15 F(not be a def)144 499.2 Q(ault because o)-.1 E -.15(ve)
 -.15 G(rlay data are not al).15 E -.1(wa)-.1 G(ys de\214ned.).1 E F1
-(\255MG)108 516 Q F2(slope_colortable/slope_colortable_mode)13.08 E F0
+(\255MG)108 516 Q F2(slope_colortable/slope_colortable_mode)144 516 Q F0
 .559(Sets the def)144 528 R .559(ault colortable and colortable mode fo\
 r displays of slope using the programs)-.1 F F1(MBgrd-)3.058 E(viz)144
 540 Q F0(and)3.5 E F1(MBeditviz)3.5 E F0 6(.T)C 1
 (he colortable and colortable mode identi\214ers are the same as gi)-6 F
 -.15(ve)-.25 G 3.5(na).15 G(bo)-3.5 E -.15(ve)-.15 G(for)144 552 Q F1
 (-MP)2.5 E F0(.)A F1(\255MO)108 568.8 Q F2
-(secondary_colortable/secondary_colortable_mode)13.08 E F0 1.216
+(secondary_colortable/secondary_colortable_mode)144 568.8 Q F0 1.216
 (Sets the def)144 580.8 R 1.216
 (ault colortable and colortable mode for displays of o)-.1 F -.15(ve)
 -.15 G 1.215(rlay data using the programs).15 F F1(MBgrdviz)144 592.8 Q
 F0(and)3.19 E F1(MBeditviz)3.19 E F0 5.69(.T)C .69
 (he colortable and colortable mode identi\214ers are the same as gi)
 -5.69 F -.15(ve)-.25 G(n).15 E(abo)144 604.8 Q .3 -.15(ve f)-.15 H(or)
-.15 E F1(-MP)2.5 E F0(.)A F1(\255MI)108 621.6 Q F2(ma)16.97 E
+.15 E F1(-MP)2.5 E F0(.)A F1(\255MI)108 621.6 Q F2(ma)144 621.6 Q
 (gnitude/ele)-.1 E(vation/azimuth)-.15 E F0 .195(Sets the def)144 633.6
 R .195(ault parameters for shading by illumination using the programs)
 -.1 F F1(MBgrdviz)2.694 E F0(and)2.694 E F1(MBed-)2.694 E(itviz)144
 645.6 Q F0 5(.T)C(he)-5 E F2(ele)2.5 E(vation)-.15 E F0(and)2.5 E F2
 (azimuth)2.5 E F0 -.25(va)2.5 G(lues are in de).25 E(grees.)-.15 E F1
-(\255MS)108 662.4 Q F2(ma)15.3 E(gnitude)-.1 E F0 1.648(Sets the def)144
-674.4 R 1.648
+(\255MS)108 662.4 Q F2(ma)144 662.4 Q(gnitude)-.1 E F0 1.648
+(Sets the def)144 674.4 R 1.648
 (ault parameter for shading by slope magnitude using the programs)-.1 F
 F1(MBgrdviz)4.149 E F0(and)4.149 E F1(MBeditviz)144 686.4 Q F0(.)A F1
-<ad54>108 703.2 Q F2(time)23.63 E(gap)-.4 E F0 .479
+<ad54>108 703.2 Q F2(time)144 703.2 Q(gap)-.4 E F0 .479
 (Sets the maximum time g)144 715.2 R .479
 (ap in minutes between adjacent pings allo)-.05 F .478
 (wed before the data is consid-)-.25 F(ered to ha)144 727.2 Q .3 -.15
@@ -420,7 +426,7 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF(mbdef)72 48 Q 143.83(aults\(1\) MB-System)-.1 F
 143.83(5.0 mbdef)2.5 F(aults\(1\))-.1 E/F1 10/Times-Bold@0 SF<ad55>108
-84 Q/F2 10/Times-Italic@0 SF(useloc)23.08 E(k\214les)-.2 E F0 .661
+84 Q/F2 10/Times-Italic@0 SF(useloc)144 84 Q(k\214les)-.2 E F0 .661
 (Sets whether)144 96 R F1(MB-System)3.161 E F0 .661
 (uses the \214le locking mechanism to insure that a sw)3.161 F .662
 (ath \214le is only pro-)-.1 F .016
@@ -433,15 +439,15 @@ BP
 (0)A F0(or)3.221 E F1<ad55>5.721 E F2(no)A F0 3.221(.T)C 3.221(or)-4.021
 G .721(einstate use)-3.221 F(of lock \214les, use)144 132 Q F1<ad55>2.5
 E F2(1)A F0(or)2.5 E F1<ad55>5 E F2(yes)A F0(.)A F1<ad56>108 148.8 Q F0
-(Normally)23.08 E(,)-.65 E F1(mbdefaults)2.807 E F0 .307
+(Normally)144 148.8 Q(,)-.65 E F1(mbdefaults)2.807 E F0 .307
 (outputs only a list of the def)2.807 F .306(ault v)-.1 F .306
 (alues to the stdout stream.)-.25 F .306(If the)5.306 F F1<ad56>2.806 E
 F0(\215ag)2.806 E .467(is gi)144 160.8 R -.15(ve)-.25 G .467(n, then).15
 F F1(mbdefaults)2.967 E F0 -.1(wo)2.967 G .467(rks in a "v).1 F .468
 (erbose" mode and also outputs the program v)-.15 F .468(ersion being)
--.15 F(used.)144 172.8 Q F1<ad57>108 189.6 Q F2(pr)20.3 E(oject)-.45 E
-F0 .336(Sets the name of the def)144 201.6 R .335(ault project. This wi\
-ll be used by MB-System database management utili-)-.1 F
+-.15 F(used.)144 172.8 Q F1<ad57>108 189.6 Q F2(pr)144 189.6 Q(oject)
+-.45 E F0 .336(Sets the name of the def)144 201.6 R .335(ault project. \
+This will be used by MB-System database management utili-)-.1 F
 (ties yet to be created.)144 213.6 Q(Def)5 E(ault:)-.1 E F2(pr)2.5 E
 (oject)-.45 E F0 2.5(=")2.5 G(none".)-2.5 E/F3 10.95/Times-Bold@0 SF
 (EXAMPLES)72 242.4 Q F0 .127(Suppose that one wishes the def)108 254.4 R

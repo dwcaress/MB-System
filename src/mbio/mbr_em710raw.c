@@ -450,7 +450,7 @@ int mbr_em710raw_rd_puid(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 		mb_get_binary_int(swap, &line[4], &store->pid_msec);
 		if (store->sts_date != 0)
 			store->msec = store->pid_msec;
-		unsigned short ushort_val;
+		unsigned short ushort_val = 0;
 		mb_get_binary_short(swap, &line[8], &ushort_val);
 		store->pid_byte_order_flag = (int)(ushort_val);
 		mb_get_binary_short(swap, &line[10], &ushort_val);
@@ -582,7 +582,7 @@ int mbr_em710raw_rd_status(int verbose, void *mbio_ptr, int swap, struct mbsys_s
 		mb_get_binary_int(swap, &line[4], &store->sts_msec);
 		if (store->sts_date != 0)
 			store->msec = store->sts_msec;
-		short short_val;
+		short short_val = 0;
 		mb_get_binary_short(swap, &line[8], &short_val);
 		store->sts_status_count = (int)((unsigned short)short_val);
 		mb_get_binary_short(swap, &line[10], &short_val);
@@ -702,7 +702,7 @@ int mbr_em710raw_rd_status(int verbose, void *mbio_ptr, int swap, struct mbsys_s
 int mbr_em710raw_rd_start(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short type, short sonar,
                           int *version, int *num_sonars, int *goodend, int *error) {
 	char line[MBSYS_SIMRAD3_BUFFER_SIZE];
-	short short_val;
+	short short_val = 0;
 	size_t read_len;
 	int len;
 	char *comma_ptr;
@@ -1303,7 +1303,7 @@ file will return error */
 int mbr_em710raw_rd_run_parameter(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar,
                                   int *goodend, int *error) {
 	char line[EM3_RUN_PARAMETER_SIZE];
-	short short_val;
+	short short_val = 0;
 	size_t read_len;
 
 	if (verbose >= 2) {
@@ -1422,7 +1422,7 @@ int mbr_em710raw_rd_run_parameter(int verbose, void *mbio_ptr, int swap, struct 
 int mbr_em710raw_rd_clock(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                           int *error) {
 	char line[EM3_CLOCK_SIZE];
-	short short_val;
+	short short_val = 0;
 	size_t read_len;
 
 	if (verbose >= 2) {
@@ -1498,7 +1498,7 @@ int mbr_em710raw_rd_clock(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 int mbr_em710raw_rd_tide(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                          int *error) {
 	char line[EM3_TIDE_SIZE];
-	short short_val;
+	short short_val = 0;
 	size_t read_len;
 
 	if (verbose >= 2) {
@@ -1575,7 +1575,7 @@ int mbr_em710raw_rd_tide(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 int mbr_em710raw_rd_height(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                            int *error) {
 	char line[EM3_HEIGHT_SIZE];
-	short short_val;
+	short short_val = 0;
 	size_t read_len;
 
 	if (verbose >= 2) {
@@ -1650,7 +1650,7 @@ int mbr_em710raw_rd_heading(int verbose, void *mbio_ptr, int swap, struct mbsys_
                             int *error) {
 	struct mbsys_simrad3_heading_struct *heading;
 	char line[EM3_HEADING_HEADER_SIZE];
-	short short_val;
+	short short_val = 0;
 	size_t read_len;
 
 	if (verbose >= 2) {
@@ -1764,7 +1764,7 @@ int mbr_em710raw_rd_ssv(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
                         int *error) {
 	struct mbsys_simrad3_ssv_struct *ssv;
 	char line[EM3_SSV_HEADER_SIZE];
-	short short_val;
+	short short_val = 0;
 	size_t read_len;
 
 	if (verbose >= 2) {
@@ -1874,7 +1874,7 @@ int mbr_em710raw_rd_tilt(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
                          int *error) {
 	struct mbsys_simrad3_tilt_struct *tilt;
 	char line[EM3_TILT_HEADER_SIZE];
-	short short_val;
+	short short_val = 0;
 	size_t read_len;
 
 	if (verbose >= 2) {
@@ -1984,7 +1984,7 @@ int mbr_em710raw_rd_extraparameters(int verbose, void *mbio_ptr, int swap, struc
                                     int *goodend, int *error) {
 	struct mbsys_simrad3_extraparameters_struct *extraparameters;
 	char line[EM3_EXTRAPARAMETERS_HEADER_SIZE];
-	short short_val;
+	short short_val = 0;
 	size_t read_len;
 	int *record_size_save;
 	int index;
@@ -2136,7 +2136,7 @@ int mbr_em710raw_rd_attitude(int verbose, void *mbio_ptr, int swap, struct mbsys
                              int *error) {
 	struct mbsys_simrad3_attitude_struct *attitude;
 	char line[EM3_ATTITUDE_HEADER_SIZE];
-	short short_val;
+	short short_val = 0;
 	size_t read_len;
 
 	if (verbose >= 2) {
@@ -2269,7 +2269,7 @@ int mbr_em710raw_rd_netattitude(int verbose, void *mbio_ptr, int swap, struct mb
                                 int *goodend, int *error) {
 	struct mbsys_simrad3_netattitude_struct *netattitude;
 	char line[MBSYS_SIMRAD3_BUFFER_SIZE];
-	short short_val;
+	short short_val = 0;
 	size_t read_len;
 
 	if (verbose >= 2) {
@@ -2423,7 +2423,7 @@ int mbr_em710raw_rd_netattitude(int verbose, void *mbio_ptr, int swap, struct mb
 int mbr_em710raw_rd_pos(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                         int *error) {
 	char line[MBSYS_SIMRAD3_COMMENT_LENGTH];
-	short short_val;
+	short short_val = 0;
 	size_t read_len;
 	int navchannel;
 
@@ -2581,7 +2581,7 @@ int mbr_em710raw_rd_pos(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 int mbr_em710raw_rd_svp(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                         int *error) {
 	char line[EM3_SVP_HEADER_SIZE];
-	short short_val;
+	short short_val = 0;
 	size_t read_len;
 
 	if (verbose >= 2) {
@@ -2694,7 +2694,7 @@ int mbr_em710raw_rd_svp(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 int mbr_em710raw_rd_svp2(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                          int *error) {
 	char line[EM3_SVP2_HEADER_SIZE];
-	short short_val;
+	short short_val = 0;
 	size_t read_len;
 
 	if (verbose >= 2) {
@@ -2806,9 +2806,9 @@ int mbr_em710raw_rd_bath2(int verbose, void *mbio_ptr, int swap, struct mbsys_si
                           int *goodend, int *error) {
 	struct mbsys_simrad3_ping_struct *ping;
 	char line[EM3_BATH2_HEADER_SIZE];
-	short short_val;
-	float float_val;
-	int int_val;
+	short short_val = 0;
+	float float_val = 0.0;
+	int int_val = 0;
 	size_t read_len;
 	int png_count;
 	int serial;
@@ -3002,9 +3002,9 @@ int mbr_em710raw_rd_rawbeam4(int verbose, void *mbio_ptr, int swap, struct mbsys
                              int *error) {
 	struct mbsys_simrad3_ping_struct *ping;
 	char line[EM3_RAWBEAM4_HEADER_SIZE];
-	short short_val;
-	int int_val;
-	float float_val;
+	short short_val = 0;
+	int int_val = 0;
+	float float_val = 0.0;
 	size_t read_len;
 	int png_count;
 	int serial;
@@ -3234,8 +3234,8 @@ int mbr_em710raw_rd_quality(int verbose, void *mbio_ptr, int swap, struct mbsys_
                             int *error) {
 	struct mbsys_simrad3_ping_struct *ping;
 	char line[EM3_QUALITY_HEADER_SIZE];
-	short short_val;
-	float float_val;
+	short short_val = 0;
+	float float_val = 0.0;
 	size_t read_len;
 	int png_count;
 	int serial;
@@ -3392,8 +3392,8 @@ int mbr_em710raw_rd_ss2(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
                         int *error) {
 	struct mbsys_simrad3_ping_struct *ping;
 	char line[EM3_SS2_HEADER_SIZE];
-	short short_val;
-	float float_val;
+	short short_val = 0;
+	float float_val = 0.0;
 	size_t read_len;
 	int junk_bytes;
 	int png_count;
@@ -3648,7 +3648,6 @@ int mbr_em710raw_rd_ss2(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 }
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_makenull_ss2(int verbose, void *mbio_ptr, struct mbsys_simrad3_struct *store, int *error) {
-	struct mbsys_simrad3_ping_struct *ping;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -3761,7 +3760,7 @@ int mbr_em710raw_rd_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
                        int *error) {
 	struct mbsys_simrad3_watercolumn_struct *wc;
 	char line[EM3_WC_HEADER_SIZE];
-	short short_val;
+	short short_val = 0;
 	size_t read_len;
 
 	if (verbose >= 2) {
@@ -8336,7 +8335,7 @@ int mbr_em710raw_wr_quality(int verbose, void *mbio_ptr, int swap, struct mbsys_
 
 			/* compute checksum */
 			uchar_ptr = (mb_u_char *)line;
-			for (int j = 0; j < write_len; j++)
+			for (unsigned int j = 0; j < write_len; j++)
 				checksum += uchar_ptr[j];
 
 			/* write out data */

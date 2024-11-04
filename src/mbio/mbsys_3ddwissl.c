@@ -334,7 +334,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "mb_aux.h"
+//#include "mb_aux.h"
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
@@ -655,14 +655,14 @@ int mbsys_3ddwissl_preprocess
   assert(preprocess_pars_ptr != NULL);
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  //struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get preprocessing parameters */
   struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
 
   /* get data structure pointers */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
-  struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
+  //struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
 
   /* get kluges */
   bool kluge_beampatternsnell = false;
@@ -3852,7 +3852,6 @@ int mbsys_3ddwissl_indextablefix
   double dt, dt_threshold, nearest_minute_time_d;
   int head_a_start, head_a_end, head_b_start, head_b_end;
   int first_good_timestamp, next_good_timestamp, last_good_timestamp;
-  int num_good_timestamps;
   int i;
 
   if (verbose >= 2)
@@ -3926,7 +3925,6 @@ int mbsys_3ddwissl_indextablefix
 
   /* deal with head A data - start by identifying all good timestamps */
   dt = 0.0;
-  num_good_timestamps = 0;
   first_good_timestamp = head_a_end;
   last_good_timestamp = head_a_start;
   for (int i = head_a_start; i <= head_a_end; i++)
@@ -3939,7 +3937,6 @@ int mbsys_3ddwissl_indextablefix
       ( fabs(dt) > dt_threshold) )
       {
       indextable[i].time_d_corrected = indextable[i].time_d_org;
-      num_good_timestamps++;
       if (first_good_timestamp > i)
         first_good_timestamp = i;
       last_good_timestamp = i;
@@ -3996,7 +3993,6 @@ int mbsys_3ddwissl_indextablefix
 
   /* deal with head B data - start by identifying all good timestamps */
   dt = 0.0;
-  num_good_timestamps = 0;
   first_good_timestamp = head_b_end;
   last_good_timestamp = head_b_start;
   for (int i = head_b_start; i <= head_b_end; i++)
@@ -4009,7 +4005,6 @@ int mbsys_3ddwissl_indextablefix
       ( fabs(dt) > dt_threshold) )
       {
       indextable[i].time_d_corrected = indextable[i].time_d_org;
-      num_good_timestamps++;
       if (first_good_timestamp > i)
         first_good_timestamp = i;
       last_good_timestamp = i;
@@ -4088,10 +4083,11 @@ int mbsys_3ddwissl_indextableapply
 {
   int status = MB_SUCCESS;
   struct mb_io_indextable_struct *indextable;
-  int giindex, iindex;
+  int giindex;
+  unsigned int iindex;
   int giindex_a_begin, giindex_a_end;
   int giindex_b_begin, giindex_b_end;
-  int i;
+  unsigned int i;
 
   if (verbose >= 2)
     {

@@ -1175,7 +1175,7 @@ int mbr_3dwisslp_rd_data
            follows separately */
         for (int ivalidpulse=0; ivalidpulse<store->validpulse_count; ivalidpulse++)
           {
-          unsigned short ushort_val;
+          unsigned short ushort_val = 0;
           mb_get_binary_short(true, (void *)&buffer[index], &ushort_val); index += 2;
           int ipulse = (int) ushort_val;
           struct mbsys_3ddwissl_pulse_struct *pulse = &store->pulses[ipulse];
@@ -1211,7 +1211,7 @@ int mbr_3dwisslp_rd_data
         for (int ivalidsounding = 0; ivalidsounding < store->validsounding_count;
           ivalidsounding++)
           {
-          unsigned short ushort_val;
+          unsigned short ushort_val = 0;
           mb_get_binary_short(true, (void *)&buffer[index], &ushort_val); index += 2;
           int ipulse = (int) ushort_val;
           int isounding = (int) buffer[index]; index += 1;
@@ -2195,7 +2195,7 @@ int mbr_3dwisslp_wr_data
     /* count valid (non-null) pulses and soundings */
     store->validpulse_count = 0;
     store->validsounding_count = 0;
-    for (int ipulse = 0; ipulse < store->pulse_count; ipulse++)
+    for (unsigned int ipulse = 0; ipulse < store->pulse_count; ipulse++)
       {
       struct mbsys_3ddwissl_pulse_struct *pulse = &store->pulses[ipulse];
       pulse->validsounding_count = 0;

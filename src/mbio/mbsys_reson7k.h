@@ -497,7 +497,7 @@ typedef struct s7kr_customattitude_struct {
 	mb_u_char reserved; /* reserved field */
 	unsigned short n;   /* number of fields */
 	float frequency;    /* sample rate (samples/second) */
-	int nalloc;         /* number of samples allocated */
+	unsigned int nalloc;/* number of samples allocated */
 	float *pitch;
 	float *roll;
 	float *heading;
@@ -545,7 +545,7 @@ typedef struct s7kr_motion_struct {
 	mb_u_char reserved; /* reserved field */
 	unsigned short n;   /* number of fields */
 	float frequency;    /* sample rate (samples/second) */
-	int nalloc;         /* number of samples allocated */
+	unsigned int nalloc;/* number of samples allocated */
 	float *x;
 	float *y;
 	float *z;
@@ -578,7 +578,7 @@ typedef struct s7kr_svp_struct {
 	double latitude;          /* Latitude (radians) */
 	double longitude;         /* Longitude (radians) */
 	unsigned int n;           /* number of fields */
-	int nalloc;               /* number of samples allocated */
+	unsigned int nalloc;      /* number of samples allocated */
 	float *depth;             /* depth (meters) */
 	float *sound_velocity;    /* sound velocity (meters/second) */
 } s7kr_svp;
@@ -615,7 +615,7 @@ typedef struct s7kr_ctd_struct {
 	double longitude;             /* Longitude (radians) */
 	float sample_rate;            /* Sample rate */
 	unsigned int n;               /* Number of fields */
-	int nalloc;                   /* Number of samples allocated */
+	unsigned int nalloc;          /* Number of samples allocated */
 	float *conductivity_salinity; /* Conductivity (s/m) or salinity (ppt) */
 	float *temperature;           /* Temperature (degrees celcius) */
 	float *pressure_depth;        /* Pressure (pascals) or depth (meters) */
@@ -701,7 +701,7 @@ typedef struct s7kr_surveyline_struct {
 	float turnradius;    /* Turn radius between line segments
 	                 (meters, 0 = no curvature in turns) */
 	char name[64];       /* Line name */
-	int nalloc;          /* Number of points allocated */
+	unsigned int nalloc; /* Number of points allocated */
 	double *latitude;    /* Latitude (radians, -pi/2 to pi/2) */
 	double *longitude;   /* Longitude (radians -pi to pi) */
 } s7kr_surveyline;
@@ -728,7 +728,7 @@ typedef struct s7kr_navigation_struct {
 typedef struct s7kr_attitude_struct {
 	s7k_header header;
 	mb_u_char n;                /* number of datasets */
-	int nalloc;                 /* number of samples allocated */
+	unsigned int nalloc;        /* number of samples allocated */
 	unsigned short *delta_time; /* Time difference with record timestamp (msec) */
 	float *roll;                /* Roll (radians) */
 	float *pitch;               /* Pitch (radians) */
@@ -765,7 +765,7 @@ typedef struct s7k_fsdwchannel_struct {
 	float voltage;      /* Analogue maximum amplitude. Should be -1 if not used */
 	char name[16];      /* Channel name */
 	char reserved2[20]; /* Reserved */
-	int data_alloc;     /* number of bytes allocated for data array */
+	unsigned int data_alloc; /* number of bytes allocated for data array */
 	char *data;
 } s7k_fsdwchannel;
 
@@ -1330,8 +1330,8 @@ typedef struct s7kr_backscatter_struct {
 	unsigned short current_beam; /* Beam number of this record (0 to number_beams - 1) */
 	mb_u_char sample_size;       /* Number of bytes per sample */
 	mb_u_char data_type;         /* Data type bitfield:
-	                         0: Amplitude
-	                         1: Phase */
+	                                  0: Amplitude
+	                                  1: Phase */
 	unsigned int nalloc;         /* Memory allocated in each array (bytes) */
 	char *port_data;
 	char *stbd_data;
@@ -1500,7 +1500,7 @@ typedef struct s7kr_v2pingmotion_struct {
 	               Bit 7-15: Reserved */
 	float frequency;           /* sampling frequency (Hz) */
 	float pitch;               /* Pitch value at the ping time (radians) */
-	int nalloc;                /* number of samples allocated */
+	unsigned int nalloc;       /* number of samples allocated */
 	float *roll;               /* Roll (radians) */
 	float *heading;            /* Heading (radians) */
 	float *heave;              /* Heave (m) */

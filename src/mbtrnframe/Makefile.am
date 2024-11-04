@@ -1,22 +1,22 @@
-lib_LTLIBRARIES = libmframe.la
+lib_LTLIBRARIES = libmbtrnframe.la
 
 include_HEADERS = \
-        usr/mconfig.h \
-        mframe/src/mframe.h \
-        mframe/src/mbbuf.h \
-        mframe/src/mcbuf.h \
-        mframe/src/msocket.h \
-        mframe/src/mthread.h \
-        mframe/src/mfile.h \
-        mframe/src/mtime.h\
-        mframe/src/medebug.h \
-        mframe/src/mmdebug.h \
-        mframe/src/merror.h \
-        mframe/src/mlog.h \
-        mframe/src/mlist.h \
-        mframe/src/mstats.h \
-        mframe/src/mkvconf.h \
-        mframe/src/mutils.h
+        mconfig.h \
+        mframe.h \
+        mbbuf.h \
+        mcbuf.h \
+        msocket.h \
+        mthread.h \
+        mfile.h \
+        mtime.h\
+        medebug.h \
+        mmdebug.h \
+        merror.h \
+        mlog.h \
+        mlist.h \
+        mstats.h \
+        mkvconf.h \
+        mutils.h
 
 AM_CFLAGS =
 
@@ -27,28 +27,28 @@ MFRAME_TESTS=-DWITH_TESTS -DWITH_R7KR_TEST -DWITH_MB1R_TEST
 MFRAME_FEATURES=-DWITH_MST_MSTATS -DMST_STATS_EN -DWITH_MMDEBUG
 MFRAME_OPTS=$(MFRAME_VERSIONS) $(MFRAME_FEATURES) $(MFRAME_TESTS)
 
-AM_CPPFLAGS = -g -O0 -I./usr -I./mframe/src -DHAVE_CONFIG_H  -D_GNU_SOURCE $(MFRAME_OPTS)
+AM_CPPFLAGS = -g -O0 -DHAVE_CONFIG_H  -D_GNU_SOURCE $(MFRAME_OPTS)
 
-libmframe_la_LDFLAGS =  -no-undefined -version-info 0:0:0
+libmbtrnframe_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
-libmframe_la_SOURCES = mframe/src/mframe.c \
-        mframe/src/mbbuf.c \
-        mframe/src/mcbuf.c \
-        mframe/src/msocket.c \
-        mframe/src/mthread.c \
-        mframe/src/mfile.c \
-        mframe/src/mtime.c\
-        mframe/src/mmdebug.c \
-        mframe/src/merror.c \
-        mframe/src/mlog.c \
-        mframe/src/mlist.c \
-        mframe/src/mstats.c \
-        mframe/src/mswap.c \
-        mframe/src/mutils.c \
-        mframe/src/mkvconf.c \
-        usr/mconfig.c
+libmbtrnframe_la_SOURCES = mframe.c \
+        mbbuf.c \
+        mcbuf.c \
+        msocket.c \
+        mthread.c \
+        mfile.c \
+        mtime.c\
+        mmdebug.c \
+        merror.c \
+        mlog.c \
+        mlist.c \
+        mstats.c \
+        mswap.c \
+        mutils.c \
+        mkvconf.c \
+        mconfig.c
 
-libmframe_la_LIBADD =
+libmbtrnframe_la_LIBADD =
 
 bin_PROGRAMS =
 

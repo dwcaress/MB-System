@@ -118,6 +118,7 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 		fprintf(stderr, "dbg2       npts:             %d\n", npts);
 		fprintf(stderr, "dbg2       p1:               %p\n", p1);
 		fprintf(stderr, "dbg2       p2:               %p\n", p2);
+		fprintf(stderr, "dbg2       ed:               %p\n", ed);
 		fprintf(stderr, "dbg2       ntri:             %d\n", *ntri);
 		fprintf(stderr, "dbg2       iv1:              %p\n", iv1);
 		fprintf(stderr, "dbg2       iv2:              %p\n", iv2);

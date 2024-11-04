@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:01 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:07 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 5
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -231,41 +237,42 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 144.84(mbcontour\(1\) MB-System)72 48 R 144.84
 (5.0 mbcontour\(1\))2.5 F/F1 10.95/Times-Bold@0 SF -.219(NA)72 84 S(ME)
-.219 E/F2 10/Times-Bold@0 SF(mbcontour)108 96 Q F0<ad>3.69 E F2(GMT)3.69
-E F0 1.189(plug-in module for color \214ll or color shaded relief sw)
-3.69 F 1.189(ath plots of sw)-.1 F 1.189(ath sonar data)-.1 F
-(using Postscript.)108 108 Q F1(VERSION)72 136.8 Q F0 -1.11(Ve)108 148.8
-S(rsion 5.0)1.11 E F1(SYNOPSIS)72 177.6 Q F2 68.71(gmt mbcontour \255J)
-108 189.6 R/F3 10/Times-Italic@0 SF(par)A(ameter)-.15 E(s)-.1 E F2<ad52>
-71.21 E F3(west/east/south/north)A F2([\255A)108 201.6 Q F3
+.219 E/F2 10/Times-Bold@0 SF(mbcontour)108 96 Q F0<ad>2.806 E F2(GMT)
+2.806 E F0 .306
+(plug-in module for color \214ll or color shaded relief sw)2.806 F .305
+(ath plots of sw)-.1 F .305(ath sonar data us-)-.1 F(ing Postscript.)108
+108 Q F1(VERSION)72 136.8 Q F0 -1.11(Ve)108 148.8 S(rsion 5.0)1.11 E F1
+(SYNOPSIS)72 177.6 Q F2 68.71(gmt mbcontour \255J)108 189.6 R/F3 10
+/Times-Italic@0 SF(par)A(ameter)-.15 E(s)-.1 E F2<ad52>71.21 E F3
+(west/east/south/north)A F2([\255A)108 201.6 Q F3
 (cont_int/col_int/tic_int/lab_int/tic_int/lab_hgt/lab_spacing)A F2<ad42>
 7.197 E F3(tic)A(kinfo)-.2 E F2<ad62>7.197 E F3(yr/mo/da/hr/mn/sc)A F2
 <ad43>7.196 E F3(con-)A(tour\214le)108 213.6 Q F2<ad63>11.015 E F3
 (copies)A F2<ad44>11.015 E F3(time_tic)A
 (k/time_annot/date_annot/time_tic)-.2 E(k_len)-.2 E F2<ad45>11.015 E F3
 (yr/mo/da/hr/mn/sc)A F2<ad66>11.015 E F3(format)A F2<ad46>108 225.6 Q F3
--.37(re)C(d/gr).37 E(een/blue)-.37 E F2<ad47>9.752 E F3
-(name_hgt[/name_perp])A F2<ad49>9.752 E F3(in\214le)A F2 7.252
-<ad4b20ad4c>9.752 F F3(lon\215ip)A F2<ad4d>9.752 E F3(pingnumber_tic)A
-(k/pingnum-)-.2 E(ber_annot/pingnumber_tic)108 237.6 Q(k_len)-.2 E F2
-<ad4e>2.971 E F3(nplot)A F2 .472<ad4f20ad5020ad70>2.971 F F3(pings)A F2
-.472<ad5120ad53>2.972 F F3(speed)A F2<ad54>2.972 E F3(time)A(gap)-.4 E
-F2 .472<ad5520ad5720ad58>2.972 F F3(x-shift)A F2<ad59>2.972 E F3(y-)A
-(shift)108 249.6 Q F2<ad5a>2.5 E F3(algorithm)A F2(\255V \255H])2.5 E F1
+-.37(re)C(d/gr).37 E(een/blue)-.37 E F2<ad47>4.086 E F3
+(name_hgt[/name_perp])A F2<ad49>4.086 E F3(in\214le)A F2 1.586
+<ad4b20ad4c>4.086 F F3(lon\215ip)A F2<ad4d>4.086 E F3(pingnumber_tic)A
+(k/pingnumber_an-)-.2 E(not/pingnumber_tic)108 237.6 Q(k_len)-.2 E F2
+<ad4e>3.98 E F3(nplot)A F2 1.481<ad4f20ad5020ad70>3.981 F F3(pings)A F2
+1.481<ad5120ad53>3.981 F F3(speed)A F2<ad54>3.981 E F3(time)A(gap)-.4 E
+F2 1.481<ad5520ad5720ad58>3.981 F F3(x-shift)A F2<ad59>3.981 E F3
+(y-shift)A F2<ad5a>108 249.6 Q F3(algorithm)A F2(\255V \255H])2.5 E F1
 (DESCRIPTION)72 278.4 Q F2(mbcontour)108 290.4 Q F0 2.18
 (is a plug-in module for plotting bath)4.68 F 2.179
 (ymetry contours from sw)-.05 F 2.179(ath sonar data using)-.1 F F2(GMT)
 4.679 E F0 .601(\(Generic Mapping T)108 302.4 R .601(ools\). Lik)-.8 F
 (e)-.1 E F2(mbswath)3.101 E F0(,)A F2(mbcontour)3.101 E F0 .602
 (is fully compatible with the)3.101 F F2(GMT)3.102 E F0 .602(package v)
-3.102 F(ersion)-.15 E 2.168(5. T)108 314.4 R 2.368 -.1(wo c)-.8 H 2.168
-(ontouring algorithms are a).1 F -.25(va)-.2 G 2.167(ilable; the).25 F
-F2<ad5a>4.667 E F0 2.167(option speci\214es which is used.)4.667 F 2.167
-(The \214rst, def)7.167 F(ault)-.1 E .169(approach dra)108 326.4 R .169
-(ws contours between successi)-.15 F .469 -.15(ve p)-.25 H .169
-(ings; this algorithm is simple and therefore f).15 F .17(ast b)-.1 F
-.17(ut produces)-.2 F .779(poor looking contours when beams from one pi\
-ng lie "behind" beams from a pre)108 338.4 R .779
+3.102 F(ersion)-.15 E 1.078(5. T)108 314.4 R 1.278 -.1(wo c)-.8 H 1.078
+(ontouring algorithms are a).1 F -.25(va)-.2 G 1.078(ilable; the).25 F
+F2<ad5a>3.578 E F0 1.077(option speci\214es which is used.)3.578 F 1.077
+(The \214rst, def)6.077 F 1.077(ault ap-)-.1 F .843(proach dra)108 326.4
+R .843(ws contours between successi)-.15 F 1.143 -.15(ve p)-.25 H .844
+(ings; this algorithm is simple and therefore f).15 F .844(ast b)-.1 F
+.844(ut produces)-.2 F .779(poor looking contours when beams from one p\
+ing lie "behind" beams from a pre)108 338.4 R .779
 (vious ping \(this happens)-.25 F .947(for sonars that ping at nonnull \
 pitch angles or for the "inside" beams when ships mak)108 350.4 R 3.448
 (es)-.1 G .948(harp turns\). The)-3.448 F .914
@@ -274,9 +281,9 @@ pitch angles or for the "inside" beams when ships mak)108 350.4 R 3.448
 (ilable soundings and contours the netw).25 F(ork;)-.1 E .079
 (this approach is complicated and therefore slo)108 374.4 R 2.579(wb)
 -.25 G .08(ut produces good looking contours under most conditions.)
--2.779 F .988(The contour le)108 386.4 R -.15(ve)-.25 G .987(ls and col\
+-2.779 F .129(The contour le)108 386.4 R -.15(ve)-.25 G .129(ls and col\
 ors can be controlled directly or set implicitly using contour and colo\
-r change).15 F(interv)108 398.4 Q 2.5(als. Contours)-.25 F
+r change in-).15 F(terv)108 398.4 Q 2.5(als. Contours)-.25 F
 (can also be set to ha)2.5 E .3 -.15(ve t)-.2 H(icks pointing do).15 E
 (wnhill.)-.25 E .652(Shiptracks can also be plotted using the)108 422.4
 R F2<ad44>3.152 E F0(,)A F2<ad47>3.152 E F0 3.152(,a)C(nd)-3.152 E F2
@@ -343,8 +350,8 @@ BP
 (UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113 144
 Q -.15(ve)-.25 G(rsity of Bremen).15 E/F1 10.95/Times-Bold@0 SF(OPTIONS)
 72 172.8 Q/F2 10/Times-Bold@0 SF<ad41>108 184.8 Q/F3 10/Times-Italic@0
-SF(cont_int/col_int/tic_int/lab_int/tic_len/lab_hgt/lab_spacing)23.08 E
-F0 .837(If speci\214c contour le)144 196.8 R -.15(ve)-.25 G .837
+SF(cont_int/col_int/tic_int/lab_int/tic_len/lab_hgt/lab_spacing)144
+184.8 Q F0 .837(If speci\214c contour le)144 196.8 R -.15(ve)-.25 G .837
 (ls are not speci\214ed with the).15 F F3(-C)3.338 E F0 .838
 (option, then contours will be generated in)3.338 F .956
 (four colors \(black, red, green, and blue\) with interv)144 208.8 R
@@ -355,14 +362,14 @@ F0 .837(If speci\214c contour le)144 196.8 R -.15(ve)-.25 G .837
 144 232.8 R .816(als of)-.25 F F3(col_int)3.316 E F0 3.315
 (meters. Contours)3.316 F .815(will ha)3.315 F 1.115 -.15(ve d)-.2 H
 -.25(ow).15 G .815(nhill f).25 F .815(acing tickmarks)-.1 F F3(tic_int)
-3.315 E F0(inches)3.315 E 2.01(long e)144 244.8 R -.15(ve)-.25 G(ry).15
-E F3(tic_int)4.51 E F0 2.01(meters. Contours will ha)4.51 F 2.31 -.15
-(ve a)-.2 H(nnotations).15 E F3(label_len)4.51 E F0 2.01(inches high e)
-4.51 F -.15(ve)-.25 G(ry).15 E F3(lab_int)4.51 E F0 .532
-(meters. The origins of contour labels will be separated by at least)144
-256.8 R F3(lab_spacing)3.031 E F0 .531(inches \(potentially)3.031 F -.15
-(ove)144 268.8 S 1.897(rlapping labels will be omitted\); if).15 F F3
-(lab_spacing)4.397 E F0 4.397(=0)4.397 G 1.898
+3.315 E F0(inches)3.315 E .466(long e)144 244.8 R -.15(ve)-.25 G(ry).15
+E F3(tic_int)2.967 E F0 .467(meters. Contours will ha)2.967 F .767 -.15
+(ve a)-.2 H(nnotations).15 E F3(label_len)2.967 E F0 .467(inches high e)
+2.967 F -.15(ve)-.25 G(ry).15 E F3(lab_int)2.967 E F0(me-)2.967 E 1.404
+(ters. The origins of contour labels will be separated by at least)144
+256.8 R F3(lab_spacing)3.904 E F0 1.404(inches \(potentially)3.904 F
+-.15(ove)144 268.8 S 1.897(rlapping labels will be omitted\); if).15 F
+F3(lab_spacing)4.397 E F0 4.397(=0)4.397 G 1.898
 (.0 then the spacing will be de\214ned by)-4.397 F F3(lab_hgt)144 280.8
 Q F0 3.288(.I)C 3.288(ff)-3.288 G -.25(ew)-3.288 G .788(er than se).25 F
 -.15(ve)-.25 G 3.288(np).15 G .788(arameters are speci\214ed, the def)
@@ -373,14 +380,14 @@ Q F0 3.288(.I)C 3.288(ff)-3.288 G -.25(ew)-3.288 G .788(er than se).25 F
 3.81 E F0 3.81(=1)3.81 G(00;)-3.81 E F3(tic_int)3.81 E F0 3.81(=0)3.81 G
 (.1;)-3.81 E F3(lab_hgt)144 304.8 Q F0 2.5(=0)2.5 G(.05;)-2.5 E F3
 (lab_spacing)2.5 E F0 2.5(=0)2.5 G(.0.)-2.5 E F2<ad42>108 321.6 Q F3
-(tic)23.63 E(kinfo)-.2 E F0(Sets map boundary tickmark interv)144 333.6
-Q(als. See)-.25 E F2(psbasemap)2.5 E F0(for details.)2.5 E F2<ad62>108
-350.4 Q F3(yr/mo/da/hr/mn/sc)24.74 E F0 .614
+(tic)144 321.6 Q(kinfo)-.2 E F0(Sets map boundary tickmark interv)144
+333.6 Q(als. See)-.25 E F2(psbasemap)2.5 E F0(for details.)2.5 E F2
+<ad62>108 350.4 Q F3(yr/mo/da/hr/mn/sc)144 350.4 Q F0 .614
 (Sets the starting time for data allo)144 362.4 R .614
 (wed in the input data; pings with times before the starting time)-.25 F
 (will be ignored.)144 374.4 Q(Def)5 E(ault:)-.1 E F3(yr/mo/da/hr/mn/sc)
 2.5 E F0 2.5(=1)2.5 G(962/2/21/10/30/0.)-2.5 E F2<ad43>108 391.2 Q F3
-(contour\214le)23.08 E F0 .451
+(contour\214le)144 391.2 Q F0 .451
 (Sets the \214le from which the contour le)144 403.2 R -.15(ve)-.25 G
 .451(ls and their style and color are read.).15 F .452
 (This \214le consists of)5.451 F(lines in the format:)144 415.2 Q F3(le)
@@ -398,13 +405,14 @@ G(d).37 E F0(,)A F3(gr)2.832 E(een)-.37 E F0 2.832(,a)C(nd)-2.832 E F3
 (ve)-.25 G 2.846(na).15 G(s)-2.846 E(the)144 475.2 Q F3(contour\214le)
 2.677 E F0 2.677(,t)C .178(he color boundaries speci\214ed in the cpt \
 \214le will be interpreted as contour le)-2.677 F -.15(ve)-.25 G .178
-(ls to).15 F 1.809(be plotted with unannotated, untick)144 487.2 R 1.809
-(ed, black contours.)-.1 F 1.808(If contours are speci\214ed using the)
-6.808 F F2<ad43>4.308 E F0(option, then an)144 499.2 Q 2.5(yu)-.15 G
-(se of the)-2.5 E F2<ad41>2.5 E F0(option will be ignored.)2.5 E F2
-<ad44>108 516 Q F3(time_tic)23.08 E(k/time_annot/date_annot/time_tic)-.2
-E(k_len)-.2 E F0 1.365(Sets the parameters go)144 528 R -.15(ve)-.15 G
-1.365(rning the annotation of the shiptrack.).15 F -.35(Ti)6.365 G 1.365
+(ls to).15 F .549(be plotted with unannotated, untick)144 487.2 R .549
+(ed, black contours.)-.1 F .548(If contours are speci\214ed using the)
+5.549 F F2<ad43>3.048 E F0(op-)3.048 E(tion, then an)144 499.2 Q 2.5(yu)
+-.15 G(se of the)-2.5 E F2<ad41>2.5 E F0(option will be ignored.)2.5 E
+F2<ad44>108 516 Q F3(time_tic)144 516 Q
+(k/time_annot/date_annot/time_tic)-.2 E(k_len)-.2 E F0 1.365
+(Sets the parameters go)144 528 R -.15(ve)-.15 G 1.365
+(rning the annotation of the shiptrack.).15 F -.35(Ti)6.365 G 1.365
 (me marks are made with "X").35 F .09
 (marks along the shiptrack; annotated time marks sho)144 540 R 2.589(wt)
 -.25 G .089(he time in HH:MM format ne)-2.589 F .089(xt to the time)-.15
@@ -414,22 +422,22 @@ F 1.523(marks are)144 564 R F3(time_tic)4.023 E(k_len)-.2 E F0 1.522
 (inches high for normal time marks and 1.5 times)4.023 F F3(time_tic)
 4.022 E(k_len)-.2 E F0(inches)4.022 E .428
 (high for annotated time or date marks.)144 576 R .429(The interv)5.429
-F .429(al of time ticks, annotated time ticks, and anno-)-.25 F 3.235
-(tated date ticks are gi)144 588 R -.15(ve)-.25 G 5.734(ni).15 G 5.734
-(nh)-5.734 G 3.234(ours by)-5.734 F F3(time_tic)5.734 E(k)-.2 E F0(,)A
-F3(time_annot)5.734 E F0 5.734(,a)C(nd)-5.734 E F3(date_annot)5.734 E F0
-5.734(,r)C(especti)-5.734 E -.15(ve)-.25 G(ly).15 E(.)-.65 E(Def)144 600
-Q(aults:)-.1 E F3(time_tic)2.5 E(k)-.2 E F0 2.5(=0)2.5 G(.25;)-2.5 E F3
-(time_annot)2.5 E F0 2.5(=1)2.5 G(.0;)-2.5 E F3(date_annot)2.5 E F0 2.5
-(=4)2.5 G(.0;)-2.5 E F3(time_tic)2.5 E(k_len)-.2 E F0 2.5(=0)2.5 G(.1.)
--2.5 E F2<ad45>108 616.8 Q F3(yr/mo/da/hr/mn/sc)23.63 E F0 .286
-(Sets the ending time for data allo)144 628.8 R .287
+F .429(al of time ticks, annotated time ticks, and anno-)-.25 F 1.448
+(tated date ticks are gi)144 588 R -.15(ve)-.25 G 3.948(ni).15 G 3.948
+(nh)-3.948 G 1.448(ours by)-3.948 F F3(time_tic)3.948 E(k)-.2 E F0(,)A
+F3(time_annot)3.948 E F0 3.947(,a)C(nd)-3.947 E F3(date_annot)3.947 E F0
+3.947(,r)C(especti)-3.947 E -.15(ve)-.25 G(ly).15 E 6.447(.D)-.65 G(e-)
+-6.447 E -.1(fa)144 600 S(ults:).1 E F3(time_tic)2.5 E(k)-.2 E F0 2.5
+(=0)2.5 G(.25;)-2.5 E F3(time_annot)2.5 E F0 2.5(=1)2.5 G(.0;)-2.5 E F3
+(date_annot)2.5 E F0 2.5(=4)2.5 G(.0;)-2.5 E F3(time_tic)2.5 E(k_len)-.2
+E F0 2.5(=0)2.5 G(.1.)-2.5 E F2<ad45>108 616.8 Q F3(yr/mo/da/hr/mn/sc)
+144 616.8 Q F0 .286(Sets the ending time for data allo)144 628.8 R .287
 (wed in the input data; pings with times after the ending time will)-.25
 F(be ignored.)144 640.8 Q(Def)5 E(ault:)-.1 E F3(yr/mo/da/hr/mn/sc)2.5 E
 F0 2.5(=2)2.5 G(062/2/21/10/30/0.)-2.5 E F2<ad66>108 657.6 Q F3(format)
-26.97 E F0 .22(Sets the data format used if the input is read from stdi\
-n or from a \214le. If)144 669.6 R F3(format)2.72 E F0 2.72(<0)2.72 G
-2.72(,t)-2.72 G .22(hen the input)-2.72 F .007
+144 657.6 Q F0 .22(Sets the data format used if the input is read from \
+stdin or from a \214le. If)144 669.6 R F3(format)2.72 E F0 2.72(<0)2.72
+G 2.72(,t)-2.72 G .22(hen the input)-2.72 F .007
 (\214le speci\214ed with the)144 681.6 R F2<ad49>2.507 E F0 .008
 (option will actually contain a list of input sw)2.508 F .008
 (ath sonar data \214les. This pro-)-.1 F .012(gram uses the)144 693.6 R
@@ -448,10 +456,10 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 144.84(mbcontour\(1\) MB-System)72 48 R 144.84
 (5.0 mbcontour\(1\))2.5 F/F1 10/Times-Bold@0 SF<ad46>108 84 Q/F2 10
-/Times-Italic@0 SF -.37(re)24.19 G(d/gr).37 E(een/blue)-.37 E F0
+/Times-Italic@0 SF -.37(re)144 84 S(d/gr).37 E(een/blue)-.37 E F0
 (Sets the color used for Frame and annotation. [Def)144 96 Q
-(ault is black])-.1 E F1<ad47>108 112.8 Q F2(name_hgt[/name_perp])22.52
-E F0 -.45(Tu)144 124.8 S .959(rns on sw).45 F .959
+(ault is black])-.1 E F1<ad47>108 112.8 Q F2(name_hgt[/name_perp])144
+112.8 Q F0 -.45(Tu)144 124.8 S .959(rns on sw).45 F .959
 (ath \214le name annotation. The)-.1 F F2(name_hgt)3.459 E F0 .958
 (parameter sets the height of the lettering in)3.459 F .159
 (inches. By def)144 136.8 R .159
@@ -465,8 +473,8 @@ s not also speci\214ed, then track plotting will be turned on with)3.134
 F(def)144 172.8 Q(ault parameters.)-.1 E(Def)5 E(ault:)-.1 E F2
 (name_hgt)2.5 E F0 2.5(=0)2.5 G(.1.)-2.5 E F1<ad48>108 189.6 Q F0 .162(\
 This "help" \215ag cause the program to print out a description of its \
-operation and then e)22.52 F .161(xit immedi-)-.15 F(ately)144 201.6 Q
-(.)-.65 E F1<ad49>108 218.4 Q F2(in\214le)26.41 E F0 .467
+operation and then e)144 189.6 R .161(xit immedi-)-.15 F(ately)144 201.6
+Q(.)-.65 E F1<ad49>108 218.4 Q F2(in\214le)144 218.4 Q F0 .467
 (Sets the input \214lename. If)144 230.4 R F2(format)2.967 E F0 2.967
 (>0\()2.967 G .467(set with the)-2.967 F F1<ad66>2.967 E F0 .467
 (option\) then the sw)2.967 F .468(ath sonar data contained)-.1 F(in)144
@@ -496,19 +504,20 @@ E F0(manual page.)2.5 E .706
 (ve)-.4 G .202(ntion is to add the ".fbt" or ".fbt" suf).15 F .202
 (\214x to)-.25 F 1.056(the original sw)144 374.4 R 1.056
 (ath data \214lename.)-.1 F 1.056(An "fbt" \214le contains only sw)6.056
-F 1.057(ath bath)-.1 F 1.057(ymetry information in a)-.05 F 1.171
+F 1.057(ath bath)-.1 F 1.057(ymetry information in a)-.05 F .204
 (compact format \(format 71\), and is thus quick to read. In the e)144
-386.4 R -.15(ve)-.25 G 1.17(nt that bath).15 F 1.17(ymetry contours is)
--.05 F .072(being generated,)144 398.4 R F1(mbcontour)2.573 E F0 .073
+386.4 R -.15(ve)-.25 G .203(nt that bath).15 F .203
+(ymetry contours is be-)-.05 F .628(ing generated,)144 398.4 R F1
+(mbcontour)3.128 E F0 .628
 (will attempt to read an "fbt" \214le in lieu of the original data.)
-2.573 F .073(An "fn)5.073 F(v")-.4 E 1.461(\214le contains only na)144
+3.128 F .629(An "fn)5.629 F(v")-.4 E 1.461(\214le contains only na)144
 410.4 R(vig)-.2 E 1.461(ation information in a compact ASCII format \(f\
 ormat 166\), and is thus)-.05 F -2.15 -.25(ev e)144 422.4 T 2.788(nq).25
 G(uick)-2.788 E .288(er to read.)-.1 F(When)5.288 E F1(mbcontour)2.788 E
 F0 .288(is only generating a shiptrack plot, it will attempt to read)
 2.788 F(an "fn)144 434.4 Q(v" \214le in lieu of the original data.)-.4 E
 F1<ad4a>108 463.2 Q F0 .96(Selects the map projection. Scale is inch/de)
-25.3 F .959(gree, 1:xxxxx.)-.15 F .959
+144 463.2 R .959(gree, 1:xxxxx.)-.15 F .959
 (or width in inches \(upper case modi-)5.959 F(\214er\).)144 475.2 Q F1
 (CYLINDRICAL PR)144 499.2 Q(OJECTIONS:)-.3 E(\255Jc)144 523.2 Q F2
 (lon0/lat0/scale)A F0(\(Cassini\))2.5 E F1(\255Jm)144 535.2 Q F2(scale)A
@@ -554,20 +563,20 @@ E F1(\255Jr)144 192 Q F2(lon0/scale)A F0(\(W)2.5 E(ink)-.4 E(el T)-.1 E
 (/y-scale)A F0([)A F1(l|p)A F2(pow)A F0(]] \(Linear)A 2.5(,l)-.4 G
 (og, and po)-2.5 E(wer scaling\))-.25 E
 (More details can be found in the)144 276 Q F1(psbasemap)2.5 E F0
-(manpages.)2.5 E F1<ad4b>108 292.8 Q F0(More)22.52 E F2 -.8(Po)2.5 G
+(manpages.)2.5 E F1<ad4b>108 292.8 Q F0(More)144 292.8 Q F2 -.8(Po)2.5 G
 (stScript).8 E F0(code will be appended later [Def)2.5 E
 (ault terminates the plot system].)-.1 E F1<ad4c>108 309.6 Q F2
-(lon\215ip)23.63 E F0 .458(Sets the range of the longitude v)144 321.6 R
-.459(alues returned by the sw)-.25 F .459(ath sonar i/o routines.)-.1 F
-(If)5.459 E F2(lon\215ip)2.959 E F0 .459(=\2551 then)B .892
-(the longitude v)144 333.6 R .892
+(lon\215ip)144 309.6 Q F0 .458(Sets the range of the longitude v)144
+321.6 R .459(alues returned by the sw)-.25 F .459
+(ath sonar i/o routines.)-.1 F(If)5.459 E F2(lon\215ip)2.959 E F0 .459
+(=\2551 then)B .892(the longitude v)144 333.6 R .892
 (alues will be in the range from \255360 to 0 de)-.25 F .892(grees. If)
 -.15 F F2(lon\215ip)3.391 E F0 .891(=0 then the longitude)B -.25(va)144
 345.6 S .131(lues will be in the range from \255180 to 180 de).25 F .131
 (grees. If)-.15 F F2(lon\215ip)2.631 E F0 .131(=1 then the longitude v)B
 .132(alues will be)-.25 F(in the range from 0 to 360 de)144 357.6 Q 2.5
 (grees. Def)-.15 F(ault:)-.1 E F2(lon\215ip)2.5 E F0 2.5(=0)2.5 G(.)-2.5
-E F1<ad4d>108 374.4 Q F2(pingnumber_tic)20.86 E
+E F1<ad4d>108 374.4 Q F2(pingnumber_tic)144 374.4 Q
 (k/pingnumber_annot/pingnumber_tic)-.2 E(k_len)-.2 E F0 .71
 (Sets the parameters go)144 386.4 R -.15(ve)-.15 G .709
 (rning the pingnumber annotation of the shiptrack.).15 F -.35(Ti)5.709 G
@@ -581,19 +590,20 @@ E F1<ad4d>108 374.4 Q F2(pingnumber_tic)20.86 E
 3.358 E(k)-.2 E F0 3.358(=5)3.358 G(0;)-3.358 E F2(pingnumber_annot)
 3.358 E F0 3.358(=1)3.358 G(00;)-3.358 E F2(pingnum-)3.358 E(ber_tic)144
 434.4 Q(k_len)-.2 E F0 2.5(=0)2.5 G(.1.)-2.5 E F1<ad4e>108 451.2 Q F2
-(nplot)23.08 E F0 .095(Sets the number of pings to be read in before ea\
-ch contouring episode. See the description of)2.596 F(the)144 463.2 Q F1
-<ad5a>3.252 E F2(algorithm)A F0 .752(option for advice on reasonable v)
-3.252 F .753(alues Def)-.25 F(ault:)-.1 E F2(nplot)3.253 E F0 3.253(=5)
-3.253 G 3.253(0u)-3.253 G(nless)-3.253 E F1<ad5a>3.253 E F2(1)A F0 .753
-(is speci-)3.253 F(\214ed, in which case the def)144 475.2 Q(ault is)-.1
-E F2(nplot)2.5 E F0 2.5(=5)2.5 G(.)-2.5 E F1<ad4f>108 492 Q F0
-(Selects Ov)22.52 E(erlay plot mode [Def)-.15 E(ault initializes a ne)
--.1 E 2.5(wp)-.25 G(lot system].)-2.5 E F1<ad50>108 508.8 Q F0
-(Selects Portrait plotting mode [GMT Def)24.19 E
+(nplot)144 451.2 Q F0 .095(Sets the number of pings to be read in befor\
+e each contouring episode. See the description of)2.596 F(the)144 463.2
+Q F1<ad5a>3.252 E F2(algorithm)A F0 .752
+(option for advice on reasonable v)3.252 F .753(alues Def)-.25 F(ault:)
+-.1 E F2(nplot)3.253 E F0 3.253(=5)3.253 G 3.253(0u)-3.253 G(nless)
+-3.253 E F1<ad5a>3.253 E F2(1)A F0 .753(is speci-)3.253 F
+(\214ed, in which case the def)144 475.2 Q(ault is)-.1 E F2(nplot)2.5 E
+F0 2.5(=5)2.5 G(.)-2.5 E F1<ad4f>108 492 Q F0(Selects Ov)144 492 Q
+(erlay plot mode [Def)-.15 E(ault initializes a ne)-.1 E 2.5(wp)-.25 G
+(lot system].)-2.5 E F1<ad50>108 508.8 Q F0
+(Selects Portrait plotting mode [GMT Def)144 508.8 Q
 (ault is Landscape, see gmtdef)-.1 E(aults to change this].)-.1 E F1
-<ad70>108 525.6 Q F2(pings)24.74 E F0 1.22(Sets the ping a)144 537.6 R
--.15(ve)-.2 G 1.22(raging of the input data. If).15 F F2(pings)3.719 E
+<ad70>108 525.6 Q F2(pings)144 525.6 Q F0 1.22(Sets the ping a)144 537.6
+R -.15(ve)-.2 G 1.22(raging of the input data. If).15 F F2(pings)3.719 E
 F0 3.719(=1)3.719 G 3.719(,t)-3.719 G 1.219(hen no ping a)-3.719 F -.15
 (ve)-.2 G 1.219(raging is performed. If).15 F F2(pings)144 549.6 Q F0
 2.651(>0)2.651 G 2.651(,t)-2.651 G .151
@@ -605,21 +615,21 @@ ual).15 F(to the across-track beam spacing.)144 573.6 Q(Def)5 E(ault:)
 -.1 E F2(pings)2.5 E F0 2.5(=1\()2.5 G(no ping a)-2.5 E -.15(ve)-.2 G
 (raging\).).15 E F1<ad51>108 590.4 Q F0 .262(Causes the program to plot\
  the triangles constructed as part of the contouring if the "triangle a\
-lgo-)22.52 F(rithm" is speci\214ed using the)144 602.4 Q F1<ad5a>2.5 E
-F2(1)A F0(option. This allo)2.5 E(ws the data distrib)-.25 E
+lgo-)144 590.4 R(rithm" is speci\214ed using the)144 602.4 Q F1<ad5a>2.5
+E F2(1)A F0(option. This allo)2.5 E(ws the data distrib)-.25 E
 (ution to be directly vie)-.2 E(wed.)-.25 E F1<ad52>108 619.2 Q F2
-(west/east/south/north)23.08 E F0 1.335
+(west/east/south/north)144 619.2 Q F0 1.335
 (Sets the longitude and latitude bounds within which sw)144 631.2 R
 1.334(ath sonar data will be read and plotted.)-.1 F 2.696
 (Only the data which lies within these bounds will be read.)144 643.2 R
 (Def)7.696 E(ault:)-.1 E F2(west)5.197 E F0 2.697(=\255360, east)B F2
 (=360)A F0(,)A F2(south)144 655.2 Q F0(=\25590,)A F2(north)2.5 E F0
-(=90.)A F1<ad53>108 672 Q F2(speed)24.74 E F0 .532
+(=90.)A F1<ad53>108 672 Q F2(speed)144 672 Q F0 .532
 (Sets the minimum speed in km/hr \(5.5 kts ~ 10 km/hr\) allo)144 684 R
 .531(wed in the input data; pings associated)-.25 F
 (with a smaller ship speed will not be processed. Def)144 696 Q(ault:)
 -.1 E F2(speed)2.5 E F0 2.5(=0)2.5 G(.)-2.5 E F1<ad54>108 712.8 Q F2
-(time)23.63 E(gap)-.4 E F0 2.794(Sets the maximum time g)144 724.8 R
+(time)144 712.8 Q(gap)-.4 E F0 2.794(Sets the maximum time g)144 724.8 R
 2.794(ap in minutes between adjacent pings allo)-.05 F 2.795
 (wed before the data is)-.25 F(MB-System 5.0)72 768 Q 2.5(5F)137.61 G
 (ebruary 2015)-2.5 E(4)195.95 E 0 Cg EP
@@ -631,25 +641,25 @@ BP
 (5.0 mbcontour\(1\))2.5 F(considered to ha)144 84 Q .3 -.15(ve a g)-.2 H
 (ap. Def).1 E(ault:)-.1 E/F1 10/Times-Italic@0 SF(time)2.5 E(gap)-.4 E
 F0 2.5(=1)2.5 G(.)-2.5 E/F2 10/Times-Bold@0 SF<ad55>108 100.8 Q F0(Dra)
-23.08 E 2.625(wU)-.15 G .124(nix System time stamp on plot.)-2.625 F
+144 100.8 Q 2.625(wU)-.15 G .124(nix System time stamp on plot.)-2.625 F
 (Optionally)5.124 E 2.624(,a)-.65 G .124
 (ppend a label, or 'c' which will plot the com-)-2.624 F(mand string.)
-144 112.8 Q F2<ad56>108 129.6 Q F0(Selects v)23.08 E
+144 112.8 Q F2<ad56>108 129.6 Q F0(Selects v)144 129.6 Q
 (erbose mode, which will send progress reports to stderr [Def)-.15 E
-(ault runs "silently"].)-.1 E F2<ad57>108 146.4 Q F0(Normally)20.3 E(,)
--.65 E F2(mbcontour)4.175 E F0 -.1(wo)4.175 G 1.675(rks with bath).1 F
-1.675(ymetry v)-.05 F 1.675(alues in meters.)-.25 F 1.675(If the)6.675 F
-F2<ad57>4.175 E F0 1.675(\215ag is gi)4.175 F -.15(ve)-.25 G 1.675
-(n, then).15 F F2(mbcontour)144 158.4 Q F0(will contour the bath)2.5 E
-(ymetry v)-.05 E(alues in feet.)-.25 E F2<ad5820ad59>108 175.2 Q F0
-(Shift origin of plot by \()7.66 E F1(x-shift,y-shift)A F0 2.5(\)i)C 2.5
-(nches [Def)-2.5 F(ault is \(1,1\) for ne)-.1 E 2.5(wp)-.25 G
-(lots, \(0,0\) for o)-2.5 E -.15(ve)-.15 G(rlays].).15 E F2<ad5a>108 192
-Q F1(algorithm)23.63 E F0 2.487
-(Sets the contouring algorithm to be used. If)144 204 R F1(algorithm)
-4.986 E F0 2.486(=0, a simple ping to ping contouring)B .885
-(approach is used; this algorithm is f)144 216 R .885(ast b)-.1 F .886
-(ut produces poor looking contours when used with data)-.2 F .377
+(ault runs "silently"].)-.1 E F2<ad57>108 146.4 Q F0(Normally)144 146.4
+Q(,)-.65 E F2(mbcontour)2.748 E F0 -.1(wo)2.748 G .248(rks with bath).1
+F .248(ymetry v)-.05 F .249(alues in meters.)-.25 F .249(If the)5.249 F
+F2<ad57>2.749 E F0 .249(\215ag is gi)2.749 F -.15(ve)-.25 G .249
+(n, then).15 F F2(mb-)2.749 E(contour)144 158.4 Q F0
+(will contour the bath)2.5 E(ymetry v)-.05 E(alues in feet.)-.25 E F2
+<ad5820ad59>108 175.2 Q F0(Shift origin of plot by \()144 175.2 Q F1
+(x-shift,y-shift)A F0 2.5(\)i)C 2.5(nches [Def)-2.5 F
+(ault is \(1,1\) for ne)-.1 E 2.5(wp)-.25 G(lots, \(0,0\) for o)-2.5 E
+-.15(ve)-.15 G(rlays].).15 E F2<ad5a>108 192 Q F1(algorithm)144 192 Q F0
+1.303(Sets the contouring algorithm to be used. If)144 204 R F1
+(algorithm)3.803 E F0 1.302(=0, a simple ping to ping contouring ap-)B
+1.514(proach is used; this algorithm is f)144 216 R 1.515(ast b)-.1 F
+1.515(ut produces poor looking contours when used with data)-.2 F .377
 (where beams from one ping may lie "behind" beams from pre)144 228 R
 .376(vious pings \(this happens for sonars)-.25 F .355(that ping at non\
 null pitch angles or for the "inside" beams when ships mak)144 240 R
@@ -670,9 +680,9 @@ ses with the square of the)144 276 R .804
 (ger numbers of pings may be reasonably contoured at a)-.18 F
 (time \(e.g. use)144 324 Q F2<ad4e>2.5 E F1(50)A F0 2.5(\). Def)B(ault:)
 -.1 E F1(algorithm)2.5 E F0 2.5(=0)2.5 G(.)-2.5 E F2<ad23>108 340.8 Q F0
-(Speci\214es the number of plot copies. [Def)25.3 E(ault is 1])-.1 E/F3
-10.95/Times-Bold@0 SF(EXAMPLES)72 357.6 Q F0 .792(Suppose the user has \
-a Hydrosweep data \214le in the L-DEO in-house binary format \()108
+(Speci\214es the number of plot copies. [Def)144 340.8 Q(ault is 1])-.1
+E/F3 10.95/Times-Bold@0 SF(EXAMPLES)72 357.6 Q F0 .792(Suppose the user\
+ has a Hydrosweep data \214le in the L-DEO in-house binary format \()108
 369.6 R F2(MBIO)A F0 .791(format id 24\))3.291 F 1.021(called hs_e)108
 381.6 R 1.021(w9302_161_mn.mb24 which lies in the re)-.25 F 1.021
 (gion w/s/e/n = \25532.1874/-26.6236/54.6349/56.7536.)-.15 F(The follo)

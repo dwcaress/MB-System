@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:02 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:08 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 4
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -293,12 +299,12 @@ ter using)108 530.4 R F2(mbset)3.073 E F0 .573(to turn on)3.073 F
 -.7 E(apers in Mar)-.15 E 2.5(.S)-.55 G(ci., No. 44 1983.)-2.5 E .126
 (and then calculates tidal data as the dif)108 614.4 R .126
 (ference between the observ)-.25 F .126(ed depth and a v)-.15 F .126
-(ertical reference depth. If)-.15 F 3.591(al)108 626.4 S 1.091
-(ocation is supplied using the)-3.591 F F2<ad52>3.591 E F0(option,)3.591
-E F2(mbm_bpr)3.591 E F0 1.09
-(uses the latitude in the depth calculation and also)3.591 F -.15(ex)108
-638.4 S .448(tracts a tidal model corresponding the to BPR deplo).15 F
-.448(yment site and timespan using the program)-.1 F F2(mbotps)2.948 E
+(ertical reference depth. If)-.15 F 2.69(al)108 626.4 S .19
+(ocation is supplied using the)-2.69 F F2<ad52>2.69 E F0(option,)2.69 E
+F2(mbm_bpr)2.69 E F0 .19
+(uses the latitude in the depth calculation and also e)2.69 F(x-)-.15 E
+1.067(tracts a tidal model corresponding the to BPR deplo)108 638.4 R
+1.068(yment site and timespan using the program)-.1 F F2(mbotps)3.568 E
 F0(.)A .85(The v)108 650.4 R .85(ertical reference is then the a)-.15 F
 -.15(ve)-.2 G .849(rage dif).15 F .849
 (ference between the tidal model and the observ)-.25 F .849(ed depths.)
@@ -336,10 +342,10 @@ output. If a location has been speci\214ed so that a tidal model w)108
 (Christian do Santos Ferreira)108 232.8 Q(MAR)113 244.8 Q
 (UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
 256.8 Q -.15(ve)-.25 G(rsity of Bremen).15 E F3(OPTIONS)72 285.6 Q F2
-<ad44>108 297.6 Q F1(of)23.08 E(fset)-.18 E F0(An of)144 309.6 Q
+<ad44>108 297.6 Q F1(of)144 297.6 Q(fset)-.18 E F0(An of)144 309.6 Q
 (fset to be added to the calculated tidal data, in meters. Def)-.25 E
 (ault:)-.1 E F1(of)2.5 E(fset)-.18 E F0(=0.)A F2<ad46>108 326.4 Q F1
-(format)24.19 E F0 .36
+(format)144 326.4 Q F0 .36
 (This option speci\214es the format of the input BPR data. If)144 338.4
 R F1(format)2.861 E F0 .361(=0 then input data are in the *.tid)B .673
 (format produced by Seabird softw)144 350.4 R .672
@@ -362,16 +368,16 @@ onsist of epoch time \(seconds since the start of 1970\) fol-)B(lo)144
 458.4 Q(wed by pressure v)-.25 E(alues in dbar)-.25 E 5(.D)-.55 G(ef)-5
 E(ault:)-.1 E F1(format)2.5 E F0(=0.)A F2<ad48>108 475.2 Q F0 .162(This\
  "help" \215ag cause the program to print out a description of its oper\
-ation and then e)22.52 F .161(xit immedi-)-.15 F(ately)144 487.2 Q(.)
--.65 E F2<ad49>108 504 Q F1(bpr\214le)26.41 E F0(Input pressure data fr\
-om the SBE53 pressure sensor in the Sea\255Bird *.tid format.)144 516 Q
-F2<ad4f>108 532.8 Q F1(tide\214le)22.52 E F0 1.334(Output tide data \
-\214le path. The format of the tide data controlled by the use \(or not\
-\) of the)144 544.8 R F2<ad54>3.835 E F0(option.)144 556.8 Q F2<ad52>108
-573.6 Q F1(longitude/latitude)23.08 E F0
+ation and then e)144 475.2 R .161(xit immedi-)-.15 F(ately)144 487.2 Q
+(.)-.65 E F2<ad49>108 504 Q F1(bpr\214le)144 504 Q F0(Input pressure da\
+ta from the SBE53 pressure sensor in the Sea\255Bird *.tid format.)144
+516 Q F2<ad4f>108 532.8 Q F1(tide\214le)144 532.8 Q F0 .476(Output tide\
+ data \214le path. The format of the tide data controlled by the use \(\
+or not\) of the)144 544.8 R F2<ad54>2.976 E F0(op-)2.976 E(tion.)144
+556.8 Q F2<ad52>108 573.6 Q F1(longitude/latitude)144 573.6 Q F0
 (Sets the location of the BPR deplo)144 585.6 Q(yment. Here)-.1 E F1
 (longitude)2.5 E F0(and)2.5 E F1(latitude)2.5 E F0(are in decimal de)2.5
-E(grees.)-.15 E F2<ad53>108 602.4 Q F1(window)24.74 E F0 .847
+E(grees.)-.15 E F2<ad53>108 602.4 Q F1(window)144 602.4 Q F0 .847
 (This option enables smoothing of the depth v)144 614.4 R .846
 (alues calculated from BPR pressure using a boxcar)-.25 F(windo)144
 626.4 Q 2.997(wo)-.25 G(f)-2.997 E F1(window)2.997 E F0 .497
@@ -380,8 +386,8 @@ E(grees.)-.15 E F2<ad53>108 602.4 Q F1(window)24.74 E F0 .847
 (lue depends on both the size of the windo).25 E 2.5(wa)-.25 G
 (nd the sampling interv)-2.5 E(al.)-.25 E F2<ad54>108 655.2 Q F0 .298(C\
 hanges the tide data format output. The format of the tide data are nor\
-mally in the form of a te)23.63 F(xt)-.15 E(\214le with tw)144 667.2 Q
-2.5(oc)-.1 G(olumns:)-2.5 E(time_d tide)159 679.2 Q .588
+mally in the form of a te)144 655.2 R(xt)-.15 E(\214le with tw)144 667.2
+Q 2.5(oc)-.1 G(olumns:)-2.5 E(time_d tide)159 679.2 Q .588
 (where time_d are time v)144 691.2 R .588(alues in decimal epoch second\
 s \(seconds since 1970 Jan 1 00:00:00\) and)-.25 F .02(the tide v)144
 703.2 R .02(alues are in meters.)-.25 F .02(If the)5.02 F F2<ad54>2.52 E
@@ -395,7 +401,7 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 148.125(mbm_bpr\(1\) MB\255System)72 48 R
 148.125(5.0 mbm_bpr\(1\))2.5 F/F1 10/Times-Bold@0 SF<ad56>108 84 Q F0
-(Causes)23.08 E F1(mbm_bpr)2.5 E F0(to operate in "v)2.5 E
+(Causes)144 84 Q F1(mbm_bpr)2.5 E F0(to operate in "v)2.5 E
 (erbose" mode so that it outputs more information than usual.)-.15 E/F2
 10.95/Times-Bold@0 SF(Examples)72 112.8 Q F0 .933(Suppose one has deplo)
 108 124.8 R .934(yed an SBE53 at 110 de)-.1 F 3.434(g4)-.15 G .934

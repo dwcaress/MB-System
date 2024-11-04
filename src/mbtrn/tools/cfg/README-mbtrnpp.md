@@ -51,7 +51,7 @@ The environment file is typically used before running mbtrnpp, and defines these
 
 |   variable     |               description            |              example           |  
 | -------------: | :----------------------------------- | :----------------------------- |  
-| TRN_RESON_HOST | mbtrnpp socket input IP address      | "192.168.100.1" |
+| TRN_SOURCE_HOST | mbtrnpp socket input IP address      | "192.168.100.1" |
 | TRN_HOST       | TRN server host                      | "192.168.100.100" |
 | TRN_GROUP      | TRN multicast group                  | "239.255.0.16" |
 | TRN_MBTRNDIR   | mbtrnpp executable directory         | "/usr/local/bin"|
@@ -65,7 +65,7 @@ It may be convenient to have multiple env files for different test environments,
 
 These environment variables interact with: mbtrnpp.cfg:
 
-TRN_RESON_HOST
+TRN_SOURCE_HOST
 
     Description:
      IP address of mbtrnpp socket input e.g. reson, 7k center, kongsberg
@@ -174,12 +174,13 @@ The annotated example configuration file in MB-System ```src/mbtrn/tools/mbtrnpp
 | :----- | :---------- | ------: | ----: |
 | *MB-System Options* ||||
 | log-directory=\<path\>       | path to MB-System and TRN server log output                   | /path/to/log/dir | |
-| input=\<input spec\>         | specify input source (socket, file)                           | socket:TRN_RESON_HOST:7000:0| |
+| input=\<input spec\>         | specify input source (socket, file)                           | socket:TRN_SOURCE_HOST:7000:0| |
 | output=\<output spec\>       | MB-System output                                              | file:mbtrnpp_SESSION.mb1 | |
 | swath-width=\<sonar swath\>  | Sonar swath width (decimal deg)                               | 90.0 | |
 | soundings=\<n\>              | number of sonar soundings to output (uint)                    | 11 | |
 | median-filter=\<filter spec\>| median filter parameters \<threshold\>/\<n_across\>/\<n_along\>| 0.10/9/3 | |
-| format=\<n\>                 | MB-System input format number                                 | 88 | |
+| format=\<n\>                 | MB-System input format id                                     | 88 | |
+| auv-sentry-em2040=\<n\>      | Enable special pressure depth encoding for Sentry EM2040      | default unused |use Y/1: enable N/0: disable|
 | *TRN Options* ||||
 | mbhbt=\<s\>                  | MB1 server heartbeat timeout (s)                              | 15 | |
 | trnhbt=\<s\>                 | TRN server heartbeat timeout (s)                              | 15 | |
@@ -215,7 +216,7 @@ The annotated example configuration file in MB-System ```src/mbtrn/tools/mbtrnpp
 | ping-decimate=\<n\>          | ping decimation modulus (int)                                 | 1 | |
 
 [1] map type options
-``` 
+```
 1: TRN_MAP_DEM
 2: TRN_MAP_BO
 ```

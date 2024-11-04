@@ -256,9 +256,9 @@ typedef struct swpls_sxpping_struct {
 	short int trnstime;                      /* transmit time/number of cycles */
 	short int recvtime;                      /* receive time/number of samples */
 	unsigned char samprate;                  /* receive rate micro-sec/sample */
-	int nosampsorig;                         /* num. samp. read in real time */
-	int nosampsfile;                         /* num. samp. in the processed file */
-	int nosampslots;                         /* number of sample slots */
+	unsigned int nosampsorig;                /* num. samp. read in real time */
+	unsigned int nosampsfile;                /* num. samp. in the processed file */
+	unsigned int nosampslots;                /* number of sample slots */
 	double txer_e;                           /* easting coordinate of transducer (m) */
 	double txer_n;                           /* northing coordinate of transducer (m) */
 	double txer_height;                      /* positive down (m) */
@@ -368,7 +368,7 @@ typedef struct swpls_agds_struct {
 typedef struct swpls_comment_struct {
 	int time_d;           /* start of ping time code */
 	int microsec;         /* microseconds since time_d*/
-	int nchars;           /* number of characters */
+	size_t nchars;        /* number of characters */
 	size_t message_alloc; /* number of characters allocated in storage */
 	char *message;        /* characters in the message */
 } swpls_comment;
@@ -377,7 +377,7 @@ typedef struct swpls_comment_struct {
 typedef struct swpls_projection_struct {
 	int time_d;              /* start of ping time code */
 	int microsec;            /* microseconds since time_d*/
-	int nchars;              /* number of characters */
+	size_t nchars;           /* number of characters */
 	size_t projection_alloc; /* number of characters allocated in storage */
 	char *projection_id;     /* characters in the projection id */
 } swpls_projection;

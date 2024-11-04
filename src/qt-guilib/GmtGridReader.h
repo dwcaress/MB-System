@@ -1,7 +1,7 @@
 #ifndef GmtGridReader_h
 #define GmtGridReader_h
 
-#include <gmt/gmt.h>
+#include "gmt.h"
 
 #include "vtkAbstractPolyDataReader.h"
 #include "vtkPolyData.h"

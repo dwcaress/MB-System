@@ -26,11 +26,6 @@
 #include <string.h>
 #include <sys/stat.h>
 
-#include "mb_config.h"
-
-#ifdef ENABLE_GSF
-#include "gsf.h"
-#endif
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
@@ -38,6 +33,9 @@
 #include "mb_status.h"
 #include "netcdf.h"
 #include "../surf/mb_sapi.h"
+#ifdef ENABLE_GSF
+#include "gsf.h"
+#endif
 #ifdef _WIN32
 #	include <rpc/xdr.h>
 #endif

@@ -286,9 +286,9 @@ int mbr_dem_dsl120pf(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_dsl120pf_rd_header(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 	char buffer[124];
-	int tmp_int;
-	float tmp_float;
-	int index;
+	int tmp_int = 0;
+	float tmp_float = 0.0;
+	int index = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);

@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:04 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:11 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 22
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -257,17 +263,18 @@ s an input/output library called)108 338.4 R F2(MBIO)3.21 E F0(which)
 tilities which can be applied in a uniform manner to sonar)-.25 F .264
 (data from a v)108 374.4 R .264
 (ariety of sources. Most of the programs are command-line tools, b)-.25
-F .263(ut the package does include)-.2 F 1.951
-(graphical tools for editing sw)108 386.4 R 1.952(ath bath)-.1 F(ymetry)
--.05 E 4.452(,e)-.65 G 1.952(diting na)-4.452 F(vig)-.2 E 1.952
-(ation, modeling bath)-.05 F 1.952(ymetry calculation, and)-.05 F
-(adjusting surv)108 398.4 Q .3 -.15(ey n)-.15 H -.2(av).15 G(ig).2 E
-(ation.)-.05 E 1.088(The acron)108 422.4 R 1.088
-(ym MB stands for MultiBeam; this re\215ects the f)-.15 F 1.088
-(act that the early de)-.1 F -.15(ve)-.25 G 1.088(lopment of).15 F F2
-(MB-System)3.588 E F0 .311(focused on processing deep sea bath)108 434.4
-R .311(ymetry data from ship-mounted multibeam sonars. Ho)-.05 F(we)-.25
-E -.15(ve)-.25 G -.4(r,).15 G F2(MB-Sys-)3.211 E(tem)108 446.4 Q F0(no)
+F .263(ut the package does include)-.2 F .516
+(graphical tools for editing sw)108 386.4 R .517(ath bath)-.1 F(ymetry)
+-.05 E 3.017(,e)-.65 G .517(diting na)-3.017 F(vig)-.2 E .517
+(ation, modeling bath)-.05 F .517(ymetry calculation, and ad-)-.05 F
+(justing surv)108 398.4 Q .3 -.15(ey n)-.15 H -.2(av).15 G(ig).2 E
+(ation.)-.05 E .135(The acron)108 422.4 R .135
+(ym MB stands for MultiBeam; this re\215ects the f)-.15 F .135
+(act that the early de)-.1 F -.15(ve)-.25 G .135(lopment of).15 F F2
+(MB-System)2.635 E F0(fo-)2.635 E 1.005
+(cused on processing deep sea bath)108 434.4 R 1.005
+(ymetry data from ship-mounted multibeam sonars. Ho)-.05 F(we)-.25 E
+-.15(ve)-.25 G -.4(r,).15 G F2(MB-Sys-)3.905 E(tem)108 446.4 Q F0(no)
 2.783 E 2.783(ws)-.25 G .283(upports se)-2.783 F -.15(ve)-.25 G .283
 (ral data formats from sidescan and interferometric sonars and w).15 F
 .282(orks with sonar data)-.1 F
@@ -316,16 +323,15 @@ BP
 (uted under the GNU General Public License as formulated by the)-.2 F
 .73(GNU Project. Early)108 120 R F1(MB-System)3.23 E F0(distrib)3.23 E
 .73(utions were described as "public domain", which meant there w)-.2 F
-(as)-.1 E 1.131(no restrictions whatsoe)108 132 R -.15(ve)-.25 G 3.631
-(ro).15 G 3.631(nt)-3.631 G 1.132(he use of the code. W)-3.631 F 3.632
-(ea)-.8 G 1.132(dopted the more restricti)-3.632 F 1.432 -.15(ve G)-.25
-H 1.132(NU GPL license in).15 F 1.276(order to insure that an)108 144 R
-1.276(yone who distrib)-.15 F 1.275(utes softw)-.2 F 1.275
-(are based in whole or in part on)-.1 F F1(MB-System)3.775 E F0 1.275
-(also dis-)3.775 F(trib)108 156 Q(utes the modi\214ed)-.2 E F1
-(MB-System)2.5 E F0(source code and an)2.5 E 2.5(ya)-.15 G
-(dditional source code.)-2.5 E .695
-(The GNU GPL also prohibits the distrib)108 180 R .695
+(as)-.1 E .293(no restrictions whatsoe)108 132 R -.15(ve)-.25 G 2.793
+(ro).15 G 2.793(nt)-2.793 G .293(he use of the code. W)-2.793 F 2.793
+(ea)-.8 G .293(dopted the more restricti)-2.793 F .594 -.15(ve G)-.25 H
+.294(NU GPL license in or).15 F(-)-.2 E .209(der to insure that an)108
+144 R .208(yone who distrib)-.15 F .208(utes softw)-.2 F .208
+(are based in whole or in part on)-.1 F F1(MB-System)2.708 E F0 .208
+(also distrib)2.708 F(utes)-.2 E(the modi\214ed)108 156 Q F1(MB-System)
+2.5 E F0(source code and an)2.5 E 2.5(ya)-.15 G(dditional source code.)
+-2.5 E .695(The GNU GPL also prohibits the distrib)108 180 R .695
 (ution of proprietary e)-.2 F -.15(xe)-.15 G .696(cutables link).15 F
 .696(ed with)-.1 F F1(MB-System)3.196 E F0(libraries)3.196 E 1.28
 (unless the source code is also distrib)108 192 R 1.279(uted. W)-.2 F
@@ -347,32 +353,32 @@ SF(HIST)72 290.4 Q(OR)-.197 E(Y)-.383 E F0 .767(The de)108 302.4 R -.15
 -3.267 F .768(vid Caress' research at the Lamont-Doherty)-.2 F 1.758
 (Earth Observ)108 314.4 R 1.758(atory \(LDEO\), which in)-.25 F -.2(vo)
 -.4 G(lv).2 E 1.757(ed sw)-.15 F 1.757(ath bath)-.1 F 1.757
-(ymetry data collected with SeaBeam multibeam)-.05 F 3.428(sonars. De)
-108 326.4 R -.15(ve)-.25 G 3.428(lopment w).15 F 3.428
-(as accelerated in 1991 as part of an ef)-.1 F 3.428
-(fort to support the ne)-.25 F 5.928(wS)-.25 G(TN-Atlas)-5.928 E 1.695
-(Hydrosweep DS multibeam sonar on LDEO')108 338.4 R 4.194(ss)-.55 G
-1.694(hip, the R/V Maurice Ewing.)-4.194 F 1.694(Dale Chayes, a Lamont-)
-6.694 F .502(Doherty engineer)108 350.4 R 3.002(,w)-.4 G .503
-(as responsible for the maintenance and operation of the Ewing')-3.102 F
-3.003(sH)-.55 G .503(ydrosweep. As part)-3.003 F .167(of a grant in 199\
-3 and 1994 to Chayes and Caress to upgrade the Hydrosweep operations on\
- the Ewing, the)108 362.4 R .139(National Science F)108 374.4 R .139
-(oundation pro)-.15 F .139(vided support to impro)-.15 F .439 -.15(ve a)
--.15 H .139(nd e).15 F(xtend)-.15 E F1(MB-System)2.639 E F0 2.639(.T)C
-.14(he intent of this initial)-2.639 F .855(grant w)108 386.4 R .855
-(as to pro)-.1 F .854(vide a standard "generic" set of tools for proces\
-sing and display of sw)-.15 F .854(ath sonar data that)-.1 F .766
-(could be used by the U.S. academic community)108 398.4 R 3.266(.T)-.65
-G .766(he \214rst generally released v)-3.266 F .766(ersion of)-.15 F F1
-(MB-System)3.266 E F0(\(3.0\))3.266 E -.1(wa)108 410.4 S 2.764(sm).1 G
-.264(ade a)-2.764 F -.25(va)-.2 G .263
-(ilable in the Spring of 1993. This w).25 F .263(as follo)-.1 F .263
-(wed by v)-.25 F .263(ersions 3.1 and 3.2 in July)-.15 F 2.763(,1)-.65 G
-.263(993, v)-2.763 F(ersion)-.15 E 1.693(3.3 in No)108 422.4 R -.15(ve)
--.15 G(mber).15 E 4.193(,1)-.4 G 1.693(993, and v)-4.193 F 1.693(ersion\
- 3.4 in December 1993. All of these early releases supported only)-.15 F
-(SeaBeam and Hydrosweep data.)108 434.4 Q .521
+(ymetry data collected with SeaBeam multibeam)-.05 F 2.085(sonars. De)
+108 326.4 R -.15(ve)-.25 G 2.085(lopment w).15 F 2.085
+(as accelerated in 1991 as part of an ef)-.1 F 2.086
+(fort to support the ne)-.25 F 4.586(wS)-.25 G 2.086(TN-Atlas Hy-)-4.586
+F .227(drosweep DS multibeam sonar on LDEO')108 338.4 R 2.727(ss)-.55 G
+.226(hip, the R/V Maurice Ewing.)-2.727 F .226
+(Dale Chayes, a Lamont-Doherty)5.226 F(engineer)108 350.4 Q 2.593(,w)-.4
+G .093(as responsible for the maintenance and operation of the Ewing')
+-2.693 F 2.593(sH)-.55 G .093(ydrosweep. As part of a grant)-2.593 F
+.415(in 1993 and 1994 to Chayes and Caress to upgrade the Hydrosweep op\
+erations on the Ewing, the National)108 362.4 R 1.131(Science F)108
+374.4 R 1.131(oundation pro)-.15 F 1.131(vided support to impro)-.15 F
+1.431 -.15(ve a)-.15 H 1.131(nd e).15 F(xtend)-.15 E F1(MB-System)3.631
+E F0 3.632(.T)C 1.132(he intent of this initial grant)-3.632 F -.1(wa)
+108 386.4 S 2.594(st).1 G 2.594(op)-2.594 G(ro)-2.594 E .093(vide a sta\
+ndard "generic" set of tools for processing and display of sw)-.15 F
+.093(ath sonar data that could be)-.1 F .402
+(used by the U.S. academic community)108 398.4 R 2.903(.T)-.65 G .403
+(he \214rst generally released v)-2.903 F .403(ersion of)-.15 F F1
+(MB-System)2.903 E F0 .403(\(3.0\) w)2.903 F .403(as made)-.1 F -.2(av)
+108 410.4 S .189(ailable in the Spring of 1993. This w)-.05 F .189
+(as follo)-.1 F .189(wed by v)-.25 F .189(ersions 3.1 and 3.2 in July)
+-.15 F 2.689(,1)-.65 G .189(993, v)-2.689 F .189(ersion 3.3 in No-)-.15
+F -.15(ve)108 422.4 S(mber).15 E 2.951(,1)-.4 G .451(993, and v)-2.951 F
+.452(ersion 3.4 in December 1993. All of these early releases supported\
+ only SeaBeam and)-.15 F(Hydrosweep data.)108 434.4 Q .521
 (SeaBeam Instruments and Antarctic Support Associates pro)108 458.4 R
 .521(vided additional support in 1994 for the de)-.15 F -.15(ve)-.25 G
 (l-).15 E .154(opment of)108 470.4 R F1(MB-System)2.654 E F0 2.654(,w)C
@@ -440,14 +446,14 @@ BP
 -.25 H -2.15 -.25(ev e).15 H(lopment).25 E .062
 (continued with 5.1.0 released on No)108 108 R -.15(ve)-.15 G .062
 (mber 26, 2006, 5.1.1 on December 31, 2008.).15 F .062
-(and 5.1.2 on December)5.062 F .923(31, 2009. Since the adv)108 120 R
-.923(ent of 5.0, o)-.15 F -.15(ve)-.15 G 3.423(rs).15 G .922
-(ixty "beta" and "of)-3.423 F .922(\214cial" distrib)-.25 F .922
-(utions of)-.2 F/F1 10/Times-Bold@0 SF(MB-System)3.422 E F0(ha)3.422 E
-1.222 -.15(ve b)-.2 H(een).15 E 1.122(released. Be)108 132 R 1.122
-(ginning with 5.2.1880 on December 30, 2010,)-.15 F F1(MB-System)3.622 E
-F0(distrib)3.622 E 1.122(utions are tied to the re)-.2 F(vi-)-.25 E
-(sions in the source code archi)108 144 Q .3 -.15(ve \()-.25 H
+(and 5.1.2 on December)5.062 F .069(31, 2009. Since the adv)108 120 R
+.068(ent of 5.0, o)-.15 F -.15(ve)-.15 G 2.568(rs).15 G .068
+(ixty "beta" and "of)-2.568 F .068(\214cial" distrib)-.25 F .068
+(utions of)-.2 F/F1 10/Times-Bold@0 SF(MB-System)2.568 E F0(ha)2.568 E
+.368 -.15(ve b)-.2 H .068(een re-).15 F .446(leased. Be)108 132 R .446
+(ginning with 5.2.1880 on December 30, 2010,)-.15 F F1(MB-System)2.946 E
+F0(distrib)2.947 E .447(utions are tied to the re)-.2 F(visions)-.25 E
+(in the source code archi)108 144 Q .3 -.15(ve \()-.25 H
 (the third number corresponds to the re).15 E(vision id in the archi)
 -.25 E -.15(ve)-.25 G(\).).15 E 1.129(Since 2004 a major theme of)108
 168 R F1(MB-System)3.629 E F0(de)3.629 E -.15(ve)-.25 G 1.128
@@ -462,7 +468,7 @@ F0(distrib)3.622 E 1.122(utions are tied to the re)-.2 F(vi-)-.25 E
 -2.619 F(er)-.15 E(-)-.2 E
 (sion 4 releases. The most signi\214cant changes included:)108 244.8 Q
 F1 2.5(An)87 273.6 S(ew appr)-2.5 E(oach to managing data pr)-.18 E
-(ocessing)-.18 E(.)-.15 E F0 16.5<834d>108 285.6 S(an)-16.5 E 3.354(yt)
+(ocessing)-.18 E(.)-.15 E F0<83>108 285.6 Q(Man)128 285.6 Q 3.354(yt)
 -.15 G .854(ools \255 one output \214le. In pre)-3.354 F .854(vious v)
 -.25 F .854(ersions of)-.15 F F1(MB-System)3.354 E F0 3.354(,e)C .854
 (ach processing program read an)-3.354 F .126(input sw)128 297.6 R .126
@@ -477,21 +483,21 @@ Q 2.906(w")-.25 G .406(parallel" processing scheme co)-2.906 F -.15(ve)
 -.15 G .406(rs bath).15 F .406(ymetry data processing, b)-.05 F .406
 (ut does not yet incorporate the)-.2 F(sidescan processing capabilities\
 . All of the old tools and capabilities are still part of the distrib)
-128 345.6 Q(ution.)-.2 E 16.5<8352>108 362.4 S(ecursi)-16.5 E 1.194 -.15
+128 345.6 Q(ution.)-.2 E<83>108 362.4 Q(Recursi)128 362.4 Q 1.194 -.15
 (ve d)-.25 H .893(atalists. The lists of data \214les used by gridding \
 and plotting programs can no).15 F 3.393(wb)-.25 G 3.393(er)-3.393 G
 (ecur)-3.393 E(-)-.2 E(si)128 374.4 Q -.15(ve)-.25 G 2.5(,m).15 G
 (aking it simpler to manage data from man)-2.5 E 2.5(yd)-.15 G(if)-2.5 E
-(ferent surv)-.25 E -.15(ey)-.15 G(s.).15 E 16.5<8341>108 391.2 S .409
-(utomatic format identi\214cation.)-16.5 F F1(MB-System)2.909 E F0 .409
-(programs will no)2.909 F 2.909(wa)-.25 G .409
+(ferent surv)-.25 E -.15(ey)-.15 G(s.).15 E<83>108 391.2 Q .409
+(Automatic format identi\214cation.)128 391.2 R F1(MB-System)2.909 E F0
+.409(programs will no)2.909 F 2.909(wa)-.25 G .409
 (ttempt to automatically identify the)-2.909 F(sw)128 403.2 Q
-(ath data format based on the \214lename suf)-.1 E(\214x.)-.25 E 16.5
-<8341>108 420 S 2.357(ncillary data \214les. Man)-16.5 F 4.856(yc)-.15 G
-(ommon)-4.856 E F1(MB-System)4.856 E F0 2.356(tasks \(e.g. sw)4.856 F
-2.356(ath plotting and gridding\) can be)-.1 F .106(accomplished more r\
-apidly using ancillary data \214les containing \214le statistics \(".in\
-f" \214les\), quickly read)128 432 R(bath)128 444 Q .839
+(ath data format based on the \214lename suf)-.1 E(\214x.)-.25 E<83>108
+420 Q 1.138(Ancillary data \214les. Man)128 420 R 3.637(yc)-.15 G(ommon)
+-3.637 E F1(MB-System)3.637 E F0 1.137(tasks \(e.g. sw)3.637 F 1.137
+(ath plotting and gridding\) can be ac-)-.1 F .789(complished more rapi\
+dly using ancillary data \214les containing \214le statistics \(".inf" \
+\214les\), quickly read)128 432 R(bath)128 444 Q .839
 (ymetry \(".fbt" \214les\), and \(".fn)-.05 F .838(v"\) \214les. Each o\
 f these \214les is named by adding the indicated four)-.4 F .405
 (character suf)128 456 R .405(\214x to the original sw)-.25 F .406(ath \
@@ -505,14 +511,14 @@ data \214lename. The ".inf" \214les are created by directing the output)
 -.05 F .882(These ancillary)5.882 F
 (\214les are automatically created together using the program)128 492 Q
 F1(mbdatalist)2.5 E F0(.)A F1(New tools.)87 520.8 Q F0<83>108 532.8 Q F1
-(mbna)16.5 E -.1(va)-.25 G(djust).1 E F0 3.162(.T)C .662(his ne)-3.162 F
-3.162(wt)-.25 G .662(ool allo)-3.162 F .661
+(mbna)128 532.8 Q -.1(va)-.25 G(djust).1 E F0 3.162(.T)C .662(his ne)
+-3.162 F 3.162(wt)-.25 G .662(ool allo)-3.162 F .661
 (ws users to adjust poorly na)-.25 F(vig)-.2 E .661(ated surv)-.05 F
 -.15(ey)-.15 G 3.161(sb).15 G 3.161(ym)-3.161 G .661
 (atching features in)-3.161 F -.15(ove)128 544.8 S .825(rlapping sw).15
 F .825(athes. It is particularly useful for processing surv)-.1 F -.15
 (ey)-.15 G 3.325(sc).15 G .825(onducted from submer)-3.325 F .825
-(ged plat-)-.18 F(forms.)128 556.8 Q<83>108 573.6 Q F1(mbpr)16.5 E
+(ged plat-)-.18 F(forms.)128 556.8 Q<83>108 573.6 Q F1(mbpr)128 573.6 Q
 (ocess)-.18 E F0 3.609(.T)C 1.109(his ne)-3.609 F 3.609(wt)-.25 G 1.109
 (ool performs a v)-3.609 F 1.108
 (ariety of processing tasks and produces a single output pro-)-.25 F
@@ -522,17 +528,17 @@ F .825(athes. It is particularly useful for processing surv)-.1 F -.15
 .279(ation edits from mbna)-.05 F -.15(ve)-.2 G .279(dit, sound v).15 F
 .278(elocity pro\214le changes from mb)-.15 F -.15(ve)-.15 G .278
 (locitytool, and a v).15 F .278(ariety of)-.25 F(other corrections.)128
-609.6 Q<83>108 626.4 Q F1(mbset)16.5 E F0 3.043(.T)C .543(his ne)-3.043
-F 3.043(wt)-.25 G .543(ool allo)-3.043 F .544(ws users to create and mo\
-dify the parameter \214les used to control the opera-)-.25 F
-(tion of mbprocess.)128 638.4 Q<83>108 655.2 Q F1(mbdatalist)16.5 E F0
-3.345(.T)C .845(his ne)-3.345 F 3.345(wt)-.25 G .845(ool allo)-3.345 F
-.844(ws users to list the \214les referenced by a recursi)-.25 F 1.144
+609.6 Q<83>108 626.4 Q F1(mbset)128 626.4 Q F0 3.043(.T)C .543(his ne)
+-3.043 F 3.043(wt)-.25 G .543(ool allo)-3.043 F .544(ws users to create\
+ and modify the parameter \214les used to control the opera-)-.25 F
+(tion of mbprocess.)128 638.4 Q<83>108 655.2 Q F1(mbdatalist)128 655.2 Q
+F0 3.345(.T)C .845(his ne)-3.345 F 3.345(wt)-.25 G .845(ool allo)-3.345
+F .844(ws users to list the \214les referenced by a recursi)-.25 F 1.144
 -.15(ve d)-.25 H .844(atalist structure. It).15 F .363
 (can also be used to create the ancillary ".inf", ".fbt", and ".fn)128
 667.2 R .364(v" \214les for all of the data \214les referenced)-.4 F
 (in a recursi)128 679.2 Q .3 -.15(ve d)-.25 H(atalist structure.).15 E
-<83>108 696 Q F1(mbsvplist)16.5 E F0 2.546(.T)C .046(his ne)-2.546 F
+<83>108 696 Q F1(mbsvplist)128 696 Q F0 2.546(.T)C .046(his ne)-2.546 F
 2.546(wt)-.25 G .046(ool lists w)-2.546 F .046(ater sound v)-.1 F .046
 (elocity pro\214les embedded in sw)-.15 F .046
 (ath data \214les, creating sec-)-.1 F
@@ -543,7 +549,7 @@ dify the parameter \214les used to control the opera-)-.25 F
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 147.61(mbsystem\(1\) MB-System)72 48 R 147.61
-(5.5 mbsystem\(1\))2.5 F<83>108 84 Q/F1 10/Times-Bold@0 SF(mbar)16.5 E
+(5.5 mbsystem\(1\))2.5 F<83>108 84 Q/F1 10/Times-Bold@0 SF(mbar)128 84 Q
 (eaclean)-.18 E F0 4.142(.T)C 1.642(his ne)-4.142 F 4.143(wt)-.25 G
 1.643(ool identi\214es and \215ags artif)-4.143 F 1.643(acts in sw)-.1 F
 1.643(ath sonar bath)-.1 F 1.643(ymetry data within a)-.05 F 1.161
@@ -552,67 +558,67 @@ BP
 .236(grouped according to these bins. Once all of data are read, statis\
 tical tests are applied to the soundings)128 108 R(within each bin.)128
 120 Q F1(Support f)87 148.8 Q(or Pr)-.25 E(ojected Coordinate Systems.)
--.18 E F0<83>108 160.8 Q F1(MB-System)16.5 E F0(no)3.476 E 3.476(wi)-.25
-G .976(ncorporates the source code for the PR)-3.476 F .976
+-.18 E F0<83>108 160.8 Q F1(MB-System)128 160.8 Q F0(no)3.476 E 3.476
+(wi)-.25 G .976(ncorporates the source code for the PR)-3.476 F .976
 (OJ.4 Cartographic Projections library)-.4 F 3.475(,p)-.65 G(ro-)-3.475
 E .741(viding support for \(apparently\) all commonly used geodetic coo\
 rdinate systems.)128 172.8 R F1(PR)5.741 E(OJ)-.3 E(.4)-.2 E F0 -.1(wa)
 3.241 G 3.241(sd).1 G -2.15 -.25(ev e)-3.241 H(l-).25 E .008
 (oped by Gerald Ev)128 184.8 R .008(enden \(then of the USGS\), and w)
 -.15 F .008(as obtained from the www)-.1 F(.remotesensing.or)-.65 E
-2.507(gw)-.18 G(eb-)-2.507 E(site.)128 196.8 Q 16.5<8341>108 213.6 S
-(lar)-12.239 E 1.761(ge number of commonly used projected coordinate sy\
-stems \(e.g. UTM\) are de\214ned in a \214le)-.18 F .114
-(\(mbsystem/share/projections.dat\) distrib)128 225.6 R .114(uted with)
--.2 F F1(MB-System)2.614 E F0 2.614(.T)C .114
-(hese include all of the standard UTM)-2.614 F .583(zones, all of the s\
+2.507(gw)-.18 G(eb-)-2.507 E(site.)128 196.8 Q<83>108 213.6 Q 2.78(Al)
+128 213.6 S(ar)-2.78 E .28(ge number of commonly used projected coordin\
+ate systems \(e.g. UTM\) are de\214ned in a \214le \(mb-)-.18 F 1.725
+(system/share/projections.dat\) distrib)128 225.6 R 1.725(uted with)-.2
+F F1(MB-System)4.225 E F0 4.225(.T)C 1.725
+(hese include all of the standard UTM)-4.225 F .583(zones, all of the s\
 tandard state plate coordinate systems, and most of the European Petrol\
 eum Surv)128 237.6 R -.15(ey)-.15 G
 (Group \(EPSG\) coordinate systems \(also including UTM\).)128 249.6 Q
-<83>108 266.4 Q F1(MB-System)16.5 E F0 .568(can no)3.068 F 3.068(wh)-.25
-G .568(andle sw)-3.068 F .568(ath data that is na)-.1 F(vig)-.2 E .568
-(ated in a supported projected coordinate system.)-.05 F .884
+<83>108 266.4 Q F1(MB-System)128 266.4 Q F0 .568(can no)3.068 F 3.068
+(wh)-.25 G .568(andle sw)-3.068 F .568(ath data that is na)-.1 F(vig)-.2
+E .568(ated in a supported projected coordinate system.)-.05 F .884
 (In particular)128 278.4 R 3.384(,d)-.4 G .884(ata \214les that are na)
 -3.384 F(vig)-.2 E .884
 (ated with UTM eastings and northings instead of longitude and)-.05 F
 (latitude can no)128 290.4 Q 2.5(wb)-.25 G 2.5(ep)-2.5 G
-(lotted and processed with)-2.5 E F1(MB-System)2.5 E F0(.)A 16.5<8354>
-108 307.2 S .34(he programs)-16.5 F F1(mbgrid)2.84 E F0(and)2.84 E F1
+(lotted and processed with)-2.5 E F1(MB-System)2.5 E F0(.)A<83>108 307.2
+Q .34(The programs)128 307.2 R F1(mbgrid)2.84 E F0(and)2.84 E F1
 (mbmosaic)2.84 E F0 .34(can no)2.84 F 2.84(wo)-.25 G .34
 (utput grids and mosaics in an)-2.84 F 2.84(yo)-.15 G 2.84(ft)-2.84 G
 .34(he projected coor)-2.84 F(-)-.2 E
 (dinate systems speci\214ed in mbsystem/share/projections.dat.)128 319.2
-Q 16.5<8354>108 336 S 1.566(he TIFF images generated with)-16.5 F F1
+Q<83>108 336 Q 1.566(The TIFF images generated with)128 336 R F1
 (mbm_grdtiff)4.066 E F0(and)4.066 E F1(mbgrdtiff)4.066 E F0(no)4.066 E
-4.066(wf)-.25 G 1.566(ully conform to the GeoTIFF)-4.066 F 1.21
-(standard, pro)128 348 R 1.209
+4.066(wf)-.25 G 1.566(ully conform to the GeoTIFF)-4.066 F .259
+(standard, pro)128 348 R .259
 (viding that the source grids or mosaics were generated using)-.15 F F1
-(mbgrid)3.709 E F0(or)3.709 E F1(mbmosaic)3.709 E F0(in)3.709 E .448
-(either Geographic coordinates, UTM coordinates, or an)128 360 R 2.948
-(yo)-.15 G 2.949(ft)-2.948 G .449
-(he EPSG coordinate systems speci\214ed in)-2.949 F .435(the projection\
+(mbgrid)2.758 E F0(or)2.758 E F1(mbmosaic)2.758 E F0 .258(in ei-)2.758 F
+1.004(ther Geographic coordinates, UTM coordinates, or an)128 360 R
+3.504(yo)-.15 G 3.504(ft)-3.504 G 1.004
+(he EPSG coordinate systems speci\214ed in)-3.504 F .435(the projection\
 s.dat \214le. This means, for instance, that GeoTIFF images generated w\
 ith)128 372 R F1(mbgrdtiff)2.935 E F0(will)2.935 E
 (be properly georeferenced when the)128 384 Q 2.5(ya)-.15 G
 (re imported into ESRI)-2.5 E F1(Ar)2.5 E(cGIS)-.18 E F0
 (or other GIS packages.)2.5 E F1(Restructuring the code.)87 412.8 Q F0
-16.5<8341>108 424.8 S(ll of the C code no)-16.5 E 2.5(wc)-.25 G
-(onforms to the ANSI C standard.)-2.5 E 16.5<8354>108 441.6 S .77
-(he underlying input/output library \()-16.5 F F1(MBIO)A F0 3.271(\)h)C
-.771(as been substantially re)-3.271 F .771
+<83>108 424.8 Q(All of the C code no)128 424.8 Q 2.5(wc)-.25 G
+(onforms to the ANSI C standard.)-2.5 E<83>108 441.6 Q .77
+(The underlying input/output library \()128 441.6 R F1(MBIO)A F0 3.271
+(\)h)C .771(as been substantially re)-3.271 F .771
 (written. The structure has been)-.25 F 1.075
 (streamlined, simplifying both future de)128 453.6 R -.15(ve)-.25 G
 1.075(lopment and support of the e).15 F 1.074(xisting code. The)-.15 F
 F1(MBIO)3.574 E F0(API)3.574 E(has been greatly modi\214ed.)128 465.6 Q
-F1(Handling of old Simrad multibeam data.)87 494.4 Q F0 16.5<8356>108
-506.4 S .469(endor format data from the old Simrad multibeams \(pre-199\
-7 sonars\) are no)-17.61 F 2.97(ws)-.25 G .47(upported by a single)-2.97
-F .256(format id \(51\) rather than a separate format id for each sonar\
- model. The old format id')128 518.4 R 2.755(sa)-.55 G .255
-(re automati-)-2.755 F(cally aliased to 51, so e)128 530.4 Q
-(xisting shellscripts will continue to w)-.15 E(ork.)-.1 E<83>108 547.2
-Q F1(MB-System)16.5 E F0 .701(no longer supports beam \215agging in for\
-mat 51 data. The use of mbedit and mbclean on)3.201 F .01
+F1(Handling of old Simrad multibeam data.)87 494.4 Q F0<83>108 506.4 Q
+-1.11(Ve)128 506.4 S .469(ndor format data from the old Simrad multibea\
+ms \(pre-1997 sonars\) are no)1.11 F 2.97(ws)-.25 G .47
+(upported by a single)-2.97 F .256(format id \(51\) rather than a separ\
+ate format id for each sonar model. The old format id')128 518.4 R 2.755
+(sa)-.55 G .255(re automati-)-2.755 F(cally aliased to 51, so e)128
+530.4 Q(xisting shellscripts will continue to w)-.15 E(ork.)-.1 E<83>108
+547.2 Q F1(MB-System)128 547.2 Q F0 .701(no longer supports beam \215ag\
+ging in format 51 data. The use of mbedit and mbclean on)3.201 F .01
 (format 51 data will cause the \215agged beams to be irre)128 559.2 R
 -.2(vo)-.25 G .009(cably nulled. Pre).2 F .009(vious v)-.25 F .009
 (ersions of)-.15 F F1(MB-System)2.509 E F0 .344
@@ -627,20 +633,20 @@ H .512(not obtained data with depth v)3.213 F .512
 m \215ags and supports all processing functions. F)128 607.2 R .294
 (ormat 57 is also)-.15 F
 (used for processing data from the current Simrad multibeam sonars.)128
-619.2 Q 16.5<8353>108 636 S .432
-(idescan data from old Simrad multibeams \(pre-1997 sonars\) are no)
--16.5 F 2.933(wh)-.25 G .433(andled in the same manner as)-2.933 F .23
+619.2 Q<83>108 636 Q .432
+(Sidescan data from old Simrad multibeams \(pre-1997 sonars\) are no)128
+636 R 2.933(wh)-.25 G .433(andled in the same manner as)-2.933 F .23
 (data from the ne)128 648 R .229
 (wer sonars \(e.g. EM3000, EM3000, EM120\). The ra)-.25 F 2.729(ws)-.15
 G .229(amples in the v)-2.729 F .229(endor data for)-.15 F(-)-.2 E .807
 (mat are binned, a)128 660 R -.15(ve)-.2 G .807
 (raged, and interpolated into a 1024 pix).15 F .807(el sidescan sw)-.15
-F .808(ath. This binned sidescan is)-.1 F 1.626(not sa)128 672 R -.15
-(ve)-.2 G 4.126(di).15 G 4.126(nt)-4.126 G 1.626(he v)-4.126 F 1.626
-(endor format, so \(as abo)-.15 F -.15(ve)-.15 G 4.126(\)i).15 G 4.126
-(ti)-4.126 G 4.125(sr)-4.126 G 1.625
-(ecommended that the data be translated to an)-4.125 F -.15(ex)128 684 S
-(tended format \(57\) that stores both bath).15 E
+F .808(ath. This binned sidescan is)-.1 F .745(not sa)128 672 R -.15(ve)
+-.2 G 3.245(di).15 G 3.245(nt)-3.245 G .745(he v)-3.245 F .744
+(endor format, so \(as abo)-.15 F -.15(ve)-.15 G 3.244(\)i).15 G 3.244
+(ti)-3.244 G 3.244(sr)-3.244 G .744
+(ecommended that the data be translated to an e)-3.244 F(x-)-.15 E
+(tended format \(57\) that stores both bath)128 684 Q
 (ymetry beam \215ags and processed sidescan.)-.05 E(MB-System 5.5)72 768
 Q(26 January 2015)137.61 E(4)195.95 E 0 Cg EP
 %%Page: 5 5
@@ -649,14 +655,13 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 147.61(mbsystem\(1\) MB-System)72 48 R 147.61
 (5.5 mbsystem\(1\))2.5 F/F1 10/Times-Bold@0 SF(Str)87 84 Q
-(eamlining of MB-System Default P)-.18 E(arameters.)-.1 E F0 16.5<8350>
-108 96 S .577(rior to v)-16.5 F .577(ersion 5.0, the)-.15 F F1
-(MB-System)3.077 E F0(def)3.077 E .577(aults set by)-.1 F F1(mbdefaults)
-3.078 E F0 .578(included the format id, a control for)3.078 F 1.317
-(ping a)128 108 R -.15(ve)-.2 G 1.317
-(raging, longitude and latitude bounds for windo).15 F 1.317
-(wing by area, and be)-.25 F 1.316(gin and end times for)-.15 F(windo)
-128 120 Q .79(wing in time. These v)-.25 F .79
+(eamlining of MB-System Default P)-.18 E(arameters.)-.1 E F0<83>108 96 Q
+.577(Prior to v)128 96 R .577(ersion 5.0, the)-.15 F F1(MB-System)3.077
+E F0(def)3.077 E .577(aults set by)-.1 F F1(mbdefaults)3.078 E F0 .578
+(included the format id, a control for)3.078 F 1.317(ping a)128 108 R
+-.15(ve)-.2 G 1.317(raging, longitude and latitude bounds for windo).15
+F 1.317(wing by area, and be)-.25 F 1.316(gin and end times for)-.15 F
+(windo)128 120 Q .79(wing in time. These v)-.25 F .79
 (alues are no longer set in the .mbio_def)-.25 F .79
 (aults \214le or controlled by)-.1 F F1(mbde-)3.29 E(faults)128 132 Q F0
 4.115(.A)C 4.115(sn)-4.115 G 1.615(oted abo)-4.115 F -.15(ve)-.15 G
@@ -669,26 +674,26 @@ the)128 144 R(rele)128 156 Q -.25(va)-.25 G .057(nt programs).25 F F1
 (raging and windo).15 F .056(wing in time and space)-.25 F
 (are rarely used, and must no)128 168 Q 2.5(wb)-.25 G 2.5(ee)-2.5 G
 (xplicitly set in command line ar)-2.65 E(guments.)-.18 E F1(New Data F)
-87 196.8 Q(ormats.)-.25 E F0 16.5<8346>108 208.8 S
-(uruno HS10 multibeam bath)-16.5 E(ymetry is supported as format 171.)
--.05 E 16.5<8353>108 225.6 S 1.296(eaBeam 2120 multibeam data in the L3\
- Communications XSE format are supported as format 94)-16.5 F
-(\(already used to support Elac Bottomchart MkII XSE data\).)128 237.6 Q
-16.5<8352>108 254.4 S 1.093 -.15(aw S)-16.5 H .792(TN Atlas multibeam d\
-ata generated by the upgraded Hydrosweep DS2 multibeam on the R/V).15 F
+87 196.8 Q(ormats.)-.25 E F0<83>108 208.8 Q(Furuno HS10 multibeam bath)
+128 208.8 Q(ymetry is supported as format 171.)-.05 E<83>108 225.6 Q
+.118(SeaBeam 2120 multibeam data in the L3 Communications XSE format ar\
+e supported as format 94 \(al-)128 225.6 R
+(ready used to support Elac Bottomchart MkII XSE data\).)128 237.6 Q<83>
+108 254.4 Q(Ra)128 254.4 Q 3.293(wS)-.15 G .792(TN Atlas multibeam data\
+ generated by the upgraded Hydrosweep DS2 multibeam on the R/V)-3.293 F
 .074(Ewing are supported by read-only format 182. Processing is support\
 ed using the augmented read-write)128 266.4 R(format 183.)128 278.4 Q
-16.5<8354>108 295.2 S 1.571(he IFREMER netCDF multibeam archi)-16.5 F
+<83>108 295.2 Q 1.571(The IFREMER netCDF multibeam archi)128 295.2 R
 1.571(ving data format is supported as format 75. Similarly)-.25 F 4.07
 (,t)-.65 G(he)-4.07 E(IFREMER netCDF na)128 307.2 Q(vig)-.2 E
 (ation archi)-.05 E(ving data format is supported as format 167.)-.25 E
-16.5<8354>108 324 S 1.029(he STN Atlas processing data format SURF is s\
-upported as format 181. At present, SURF is sup-)-16.5 F .485
+<83>108 324 Q 1.029(The STN Atlas processing data format SURF is suppor\
+ted as format 181. At present, SURF is sup-)128 324 R .485
 (ported as a read-only format. This allo)128 336 R .485
 (ws plotting and gridding of the SURF data, b)-.25 F .485
 (ut not processing.)-.2 F(Writing or translating the SURF data to allo)
 128 348 Q 2.5(wp)-.25 G(rocessing will be supported in a later v)-2.5 E
-(ersion.)-.15 E 16.5<8354>108 364.8 S .966(he Ha)-16.5 F -.1(wa)-.15 G
+(ersion.)-.15 E<83>108 364.8 Q .966(The Ha)128 364.8 R -.1(wa)-.15 G
 .966(ii Mapping Research Group').1 F 3.466(sn)-.55 G 1.467 -.25(ew M)
 -3.466 H .967(R1 format is supported as format 64.).25 F .967
 (This format is)5.967 F .341(used to disseminate data from both the HMR\
@@ -699,9 +704,9 @@ G interferometric sonars \(e.g. MR1\) and the WHOI DSL)128 376.8 R 1.177
 1.298(HMRG library libmr1pr in the)128 400.8 R F1 1.298(MB-System MBIO)
 3.798 F F0(library)3.798 E 3.798(.T)-.65 G 1.298(hanks to Roger Da)
 -3.798 F 1.297(vis and HMRG for)-.2 F(making the code a)128 412.8 Q -.25
-(va)-.2 G(ilable under the GPL.).25 E 16.5<8354>108 429.6 S
-(he Edgetech Jstar format for sidescan and subbottom data is no)-16.5 E
-2.5(ws)-.25 G(upported as formats 132 and 133.)-2.5 E/F3 10.95
+(va)-.2 G(ilable under the GPL.).25 E<83>108 429.6 Q
+(The Edgetech Jstar format for sidescan and subbottom data is no)128
+429.6 Q 2.5(ws)-.25 G(upported as formats 132 and 133.)-2.5 E/F3 10.95
 /Times-Bold@0 SF(THE NEW VERSION 5 D)72 458.4 Q -1.644 -1.04(AT A)-.383
 H(PR)3.778 E(OCESSING STR)-.329 E(UCTURE)-.329 E F0(Pre)108 470.4 Q .009
 (vious v)-.25 F .009(ersions of)-.15 F F1(MB-System)2.509 E F0(ha)2.509
@@ -710,11 +715,11 @@ E .309 -.15(ve e)-.2 H .009
 G .01(hat is, that read)-2.51 F .205(in an input sw)108 482.4 R .205
 (ath data \214le, modify it, and then output a second sw)-.1 F .204
 (ath data \214le. Serial processing utilities do)-.1 F(allo)108 494.4 Q
-3.488(wf)-.25 G .988(or great \215e)-3.488 F .988(xibility in processin\
-g because one uses only the programs required and, in general, the)-.15
-F .233(order in which the programs are used does matter)108 506.4 R
-2.732(.H)-.55 G -.25(ow)-2.732 G -2.15 -.25(ev e).25 H 1.032 -.4(r, o)
-.25 H .232(ne consequence of serial processing has been).4 F 1.817
+2.608(wf)-.25 G .108(or great \215e)-2.608 F .109(xibility in processin\
+g because one uses only the programs required and, in general, the or)
+-.15 F(-)-.2 E .753(der in which the programs are used does matter)108
+506.4 R 3.253(.H)-.55 G -.25(ow)-3.253 G -2.15 -.25(ev e).25 H 1.553 -.4
+(r, o).25 H .753(ne consequence of serial processing has been).4 F 1.817
 (that processing data frequently results in a lar)108 518.4 R 1.817
 (ge number of intermediate data \214les. F)-.18 F 1.817
 (or instance, if an)-.15 F 1.105
@@ -792,21 +797,19 @@ ement problems because data \214les frequently ha)108 516 R .615 -.15
 es the)-3.008 F .251(processing of most sw)108 588 R .251
 (ath data. This scheme is centered around the program)-.1 F F1(mbpr)2.75
 E(ocess)-.18 E F0 2.75(,w)C .25(hich can accom-)-2.75 F(plish the follo)
-108 600 Q(wing processing tasks in a single step:)-.25 E 16.5<834d>144
-616.8 S(er)-16.5 E(ge edited na)-.18 E(vig)-.2 E(ation generated by)-.05
-E F1(mbna)2.5 E -.1(ve)-.25 G(dit).1 E F0(.)A 16.5<8341>144 633.6 S
-(pply bath)-16.5 E(ymetry edit \215ags from)-.05 E F1(mbedit)2.5 E F0
-(and)2.5 E F1(mbclean)2.5 E F0 16.5<8352>144 650.4 S 1.904
-(ecalculate bath)-16.5 F 1.904(ymetry from ra)-.05 F 4.404(wt)-.15 G(ra)
--4.404 E -.15(ve)-.2 G 4.404(lt).15 G 1.904
-(ime and angle data by raytracing through w)-4.404 F(ater)-.1 E
-(sound speed models from)164 662.4 Q F1(mb)2.5 E -.1(ve)-.15 G
-(locitytool).1 E F0(or)2.5 E F1(mbsvplist)2.5 E F0(.)A 16.5<8341>144
-679.2 S
-(pply changes to roll bias, pitch bias, heading bias, and draft v)-16.5
-E(alues.)-.25 E 16.5<8352>144 696 S(ecalculate sidescan from ra)-16.5 E
-2.5(wb)-.15 G(ackscatter samples \(Simrad multibeam data only\).)-2.5 E
-16.5<8352>144 712.8 S(ecalculate sidescan from ra)-16.5 E 2.5(wb)-.15 G
+108 600 Q(wing processing tasks in a single step:)-.25 E<83>144 616.8 Q
+(Mer)164 616.8 Q(ge edited na)-.18 E(vig)-.2 E(ation generated by)-.05 E
+F1(mbna)2.5 E -.1(ve)-.25 G(dit).1 E F0(.)A<83>144 633.6 Q(Apply bath)
+164 633.6 Q(ymetry edit \215ags from)-.05 E F1(mbedit)2.5 E F0(and)2.5 E
+F1(mbclean)2.5 E F0<83>144 650.4 Q 1.904(Recalculate bath)164 650.4 R
+1.904(ymetry from ra)-.05 F 4.404(wt)-.15 G(ra)-4.404 E -.15(ve)-.2 G
+4.404(lt).15 G 1.904(ime and angle data by raytracing through w)-4.404 F
+(ater)-.1 E(sound speed models from)164 662.4 Q F1(mb)2.5 E -.1(ve)-.15
+G(locitytool).1 E F0(or)2.5 E F1(mbsvplist)2.5 E F0(.)A<83>144 679.2 Q
+(Apply changes to roll bias, pitch bias, heading bias, and draft v)164
+679.2 Q(alues.)-.25 E<83>144 696 Q(Recalculate sidescan from ra)164 696
+Q 2.5(wb)-.15 G(ackscatter samples \(Simrad multibeam data only\).)-2.5
+E<83>144 712.8 Q(Recalculate sidescan from ra)164 712.8 Q 2.5(wb)-.15 G
 (ackscatter samples \(Simrad multibeam data only\).)-2.5 E
 (MB-System 5.5)72 768 Q(26 January 2015)137.61 E(6)195.95 E 0 Cg EP
 %%Page: 7 7
@@ -814,9 +817,9 @@ E(alues.)-.25 E 16.5<8352>144 696 S(ecalculate sidescan from ra)-16.5 E
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 147.61(mbsystem\(1\) MB-System)72 48 R 147.61
-(5.5 mbsystem\(1\))2.5 F 16.5<8343>144 84 S
-(orrect sidescan for amplitude vs grazing angle patterns.)-16.5 E 16.5
-<8341>144 100.8 S(pply tides to bath)-16.5 E(ymetry)-.05 E(.)-.65 E .581
+(5.5 mbsystem\(1\))2.5 F<83>144 84 Q
+(Correct sidescan for amplitude vs grazing angle patterns.)164 84 Q<83>
+144 100.8 Q(Apply tides to bath)164 100.8 Q(ymetry)-.05 E(.)-.65 E .581
 (The actions of)108 112.8 R/F1 10/Times-Bold@0 SF(mbpr)3.081 E(ocess)
 -.18 E F0 .581(are controlled by te)3.081 F .581
 (xt parameter \214les. Each)-.15 F F1(mbpr)3.08 E(ocess)-.18 E F0 .58
@@ -931,14 +934,15 @@ Q(mbari_1998_524p.mb57.fbt)158 120 Q(mbari_1998_524p.mb57.fn)158 132 Q
 H .159(he processed output can be easily).4 F .665(updated if, for e)108
 168 R .665(xample, additional bath)-.15 F .665
 (ymetry editing is required. If the)-.05 F/F1 10/Times-Bold@0 SF(mbedit)
-3.165 E F0 .665(program is used ag)3.165 F .665(ain, it)-.05 F 1.52
-(will load the e)108 180 R 1.52(xisting edit e)-.15 F -.15(ve)-.25 G
-1.52(nts from the ".esf" \214le and then update the ".esf" \214le. T).15
-F 4.02(oi)-.8 G 1.52(ncorporate the)-4.02 F .803(updated bath)108 192 R
-.803(ymetry edits, one just runs)-.05 F F1(mbpr)3.303 E(ocess)-.18 E F0
-(ag)3.303 E .802(ain. One can similarly change the SVP \214le without)
--.05 F(impacting on the bath)108 204 Q(ymetry editing or na)-.05 E(vig)
--.2 E(ation editing components of the processing.)-.05 E .466
+3.165 E F0 .665(program is used ag)3.165 F .665(ain, it)-.05 F .606
+(will load the e)108 180 R .607(xisting edit e)-.15 F -.15(ve)-.25 G
+.607(nts from the ".esf" \214le and then update the ".esf" \214le. T).15
+F 3.107(oi)-.8 G .607(ncorporate the up-)-3.107 F .354(dated bath)108
+192 R .353(ymetry edits, one just runs)-.05 F F1(mbpr)2.853 E(ocess)-.18
+E F0(ag)2.853 E .353
+(ain. One can similarly change the SVP \214le without im-)-.05 F
+(pacting on the bath)108 204 Q(ymetry editing or na)-.05 E(vig)-.2 E
+(ation editing components of the processing.)-.05 E .466
 (All of the old, serial processing utilities are still distrib)108 228 R
 .466(uted with)-.2 F F1(MB-System)2.966 E F0 2.966(.H)C -.25(ow)-2.966 G
 -2.15 -.25(ev e).25 H 1.267 -.4(r, s).25 H .467(ome of the serial).4 F
@@ -964,15 +968,16 @@ F0 3.84(,a)C(nd)-3.84 E F1(mbm_plot)3.841 E F0 1.341
 (wed by a space and then the)-.25 F F1(MB-System)2.753 E F0 .253
 (format id for that)2.753 F .139(\214le. Datalist entry lines starting \
 with the character '#' are considered comments. V)108 340.8 R .14
-(ersion 5 e)-1.11 F .14(xtends the de\214-)-.15 F .963
-(nition and usage of datalists in se)108 352.8 R -.15(ve)-.25 G .963
-(ral signi\214cant w).15 F .963(ays. First, datalists may no)-.1 F 3.463
-(wb)-.25 G 3.463(er)-3.463 G(ecursi)-3.463 E -.15(ve)-.25 G 5.963(.A).15
-G(datalist)-2.5 E .279(entry may be another datalist \214le, as indicat\
-ed by a format id of \2551. Second, datalists entries may contain a)108
-364.8 R .743(third column which is interpreted as a gridding weight v)
-108 376.8 R .743(alue by)-.25 F F1(mbgird)3.243 E F0 3.243(.T)C .743
-(his third v)-3.243 F .742(alue may be used to)-.25 F .529
+(ersion 5 e)-1.11 F .14(xtends the de\214-)-.15 F .009
+(nition and usage of datalists in se)108 352.8 R -.15(ve)-.25 G .008
+(ral signi\214cant w).15 F .008(ays. First, datalists may no)-.1 F 2.508
+(wb)-.25 G 2.508(er)-2.508 G(ecursi)-2.508 E -.15(ve)-.25 G 5.008(.A).15
+G .008(datalist en-)-2.5 F .776(try may be another datalist \214le, as \
+indicated by a format id of \2551. Second, datalists entries may contai\
+n a)108 364.8 R .743
+(third column which is interpreted as a gridding weight v)108 376.8 R
+.743(alue by)-.25 F F1(mbgird)3.243 E F0 3.243(.T)C .743(his third v)
+-3.243 F .742(alue may be used to)-.25 F .529
 (weight some data higher than other data. F)108 388.8 R .529(or e)-.15 F
 .53(xample, one might weight SeaBeam 2112 data with a v)-.15 F(alue)-.25
 E .915(of 1.0 and lo)108 400.8 R .914
@@ -1518,15 +1523,15 @@ Q 2.5(.W)-.65 G 2.5(ec)-3.3 G(an start)-2.5 E F1(mbedit)2.5 E F0
 F1(mbpr)3.625 E(ocess)-.18 E F0 3.625(,o)C 3.625(ri)-3.625 G 3.625(fw)
 -3.625 G(e)-3.625 E .827(choose to run)108 288 R F1(mbedit)3.327 E F0
 (ag)3.327 E .827(ain. If this is the \214rst of the analyis programs to\
- be run on this data \214le,)-.05 F F1(mbedit)3.326 E F0 2.41
-(also creates an)108 300 R F1(mbpr)4.91 E(ocess)-.18 E F0 2.41(paramete\
-r \214le called sb199411211212.mb41.par which contains all of the)4.91 F
-.336(parameters and settings to be used by)108 312 R F1(mbpr)2.835 E
-(ocess)-.18 E F0 .335(in generating a processed sw)2.835 F .335
-(ath \214le. If the parameter \214le)-.1 F .285(already e)108 324 R
-(xisted,)-.15 E F1(mbedit)2.785 E F0 -.1(wo)2.785 G .285
-(uld modify it so that the bath).1 F .285(ymetry edits w)-.05 F .285
-(ould be applied when)-.1 F F1(mbpr)2.785 E(ocess)-.18 E F0(is)2.785 E
+ be run on this data \214le,)-.05 F F1(mbedit)3.326 E F0 1.05
+(also creates an)108 300 R F1(mbpr)3.55 E(ocess)-.18 E F0 1.05(paramete\
+r \214le called sb199411211212.mb41.par which contains all of the pa-)
+3.55 F .116(rameters and settings to be used by)108 312 R F1(mbpr)2.616
+E(ocess)-.18 E F0 .116(in generating a processed sw)2.616 F .116
+(ath \214le. If the parameter \214le al-)-.1 F .736(ready e)108 324 R
+(xisted,)-.15 E F1(mbedit)3.236 E F0 -.1(wo)3.236 G .736
+(uld modify it so that the bath).1 F .736(ymetry edits w)-.05 F .737
+(ould be applied when)-.1 F F1(mbpr)3.237 E(ocess)-.18 E F0(is)3.237 E
 (run.)108 336 Q F1(Analysis Option C)108 360 Q F0 2.5(:E)C
 (diting the na)-2.5 E(vig)-.2 E(ation.)-.05 E 2.039 -.8(We u)108 384 T
 .439(se the interacti).8 F .739 -.15(ve g)-.25 H .439(raphical tool).15
@@ -1575,23 +1580,23 @@ F F1(mble)2.911 E(vitus)-.15 E F0 .411(to e)2.911 F .411(xtract a refer)
 (ath data \214le. This SVP will be displayed)-.1 F .082
 (along with the editable SVP used for modeling. See the)108 648 R F1(mb)
 2.582 E -.1(ve)-.15 G(locitytool).1 E F0 .081
-(manual page for details on its oper)2.582 F(-)-.2 E 4.023(ation. If)108
-660 R 1.523(we conclude that the bath)4.023 F 1.524
-(ymetry data include artif)-.05 F 1.524(acts associated with ha)-.1 F
-1.524(ving been calculated)-.2 F .78(using an incorrect SVP)108 672 R
-3.28(,a)-1.11 G .78(nd we arri)-3.28 F 1.08 -.15(ve t)-.25 H .779
-(hrough modeling at an SVP which is more lik).15 F .779
-(ely correct, we sa)-.1 F -.15(ve)-.2 G .205
-(this SVP using the <File->Sa)108 684 R .505 -.15(ve s)-.2 H -.1(wa).15
-G .205(th svp \214le> menu b).1 F .205(utton. Then)-.2 F F1(mb)2.705 E
--.1(ve)-.15 G(locitytool).1 E F0(sa)2.705 E -.15(ve)-.2 G 2.705(st).15 G
-.205(he edited SVP in)-2.705 F 6.527<618c>108 696 S 4.027(le named sb19\
-9411211212.mb41.svp, and also sets \(or creates if needed\))-6.527 F
-4.027(the parameter \214le)9.027 F 1.191
-(sb199411211212.mb41.par so that)108 708 R F1(mbpr)3.692 E(ocess)-.18 E
-F0 1.192(will recalculate the bath)3.692 F 1.192
-(ymetry by raytracing through this)-.05 F(SVP)108 720 Q(.)-1.11 E
-(MB-System 5.5)72 768 Q(26 January 2015)137.61 E(16)190.95 E 0 Cg EP
+(manual page for details on its oper)2.582 F(-)-.2 E 2.94(ation. If)108
+660 R .44(we conclude that the bath)2.94 F .441
+(ymetry data include artif)-.05 F .441(acts associated with ha)-.1 F
+.441(ving been calculated us-)-.2 F .315(ing an incorrect SVP)108 672 R
+2.815(,a)-1.11 G .314(nd we arri)-2.815 F .614 -.15(ve t)-.25 H .314
+(hrough modeling at an SVP which is more lik).15 F .314
+(ely correct, we sa)-.1 F .614 -.15(ve t)-.2 H(his).15 E .83
+(SVP using the <File->Sa)108 684 R 1.13 -.15(ve s)-.2 H -.1(wa).15 G .83
+(th svp \214le> menu b).1 F .831(utton. Then)-.2 F F1(mb)3.331 E -.1(ve)
+-.15 G(locitytool).1 E F0(sa)3.331 E -.15(ve)-.2 G 3.331(st).15 G .831
+(he edited SVP in a)-3.331 F 4.941(\214le named sb199411211212.mb41.svp\
+, and also sets \(or creates if needed\))108 696 R 4.94
+(the parameter \214le)9.941 F 1.191(sb199411211212.mb41.par so that)108
+708 R F1(mbpr)3.692 E(ocess)-.18 E F0 1.192(will recalculate the bath)
+3.692 F 1.192(ymetry by raytracing through this)-.05 F(SVP)108 720 Q(.)
+-1.11 E(MB-System 5.5)72 768 Q(26 January 2015)137.61 E(16)190.95 E 0 Cg
+EP
 %%Page: 17 17
 %%BeginPageSetup
 BP
@@ -1607,23 +1612,23 @@ F 2.939(,t)-.65 G .44(he center or nadir re)-2.939 F .44(gion of the sw)
 -.15 F .44(ath is)-.1 F .689
 (characterized by high amplitudes, and the outer sw)108 132 R .689
 (ath e)-.1 F .689(xhibits much lo)-.15 F .688(wer amplitudes. This ef)
--.25 F .688(fect can be)-.25 F 1.38(corrected by)108 144 R F1(mbpr)3.88
-E(ocess)-.18 E F0(pro)3.88 E 1.38
-(vided that an appropriate model for the v)-.15 F 1.38
-(ariation in amplitude with grazing)-.25 F .514(angle is a)108 156 R
--.25(va)-.2 G 3.014(ilable. Since).25 F .514
-(the amplitude vs grazing angle function v)3.014 F .513
-(aries with the type of sea\215oor)-.25 F 3.013(,w)-.4 G 3.013(en)-3.013
-G(eed)-3.013 E .939(to construct separate amplitude vs grazing angle co\
-rrection tables at re)108 168 R .94(gular interv)-.15 F .94
-(als through each sw)-.25 F(ath)-.1 E(data \214le.)108 180 Q 1.6 -.8
-(We u)5 H(se the program).8 E F1(mb)2.5 E(backangle)-.1 E F0
-(to construct the amplitude vs.)2.5 E(grazing angle tables:)5 E
-(mbbackangle \255I sb199411211212.mb41 \\)144 192 Q
-(-P25 \255N161/80 \255V)180 204 Q .582(Here a ne)108 216 R 3.082(wt)-.25
-G .582(able is constructed e)-3.082 F -.15(ve)-.25 G .581(ry 25 pings, \
-and the tables will consist of 161 angle bins ranging from).15 F 1.219
-(\25580 de)108 228 R 1.219(grees to +80 de)-.15 F 1.219
+-.25 F .688(fect can be)-.25 F .27(corrected by)108 144 R F1(mbpr)2.77 E
+(ocess)-.18 E F0(pro)2.77 E .27
+(vided that an appropriate model for the v)-.15 F .27
+(ariation in amplitude with grazing an-)-.25 F .439(gle is a)108 156 R
+-.25(va)-.2 G 2.939(ilable. Since).25 F .438
+(the amplitude vs grazing angle function v)2.939 F .438
+(aries with the type of sea\215oor)-.25 F 2.938(,w)-.4 G 2.938(en)-2.938
+G .438(eed to)-2.938 F .305
+(construct separate amplitude vs grazing angle correction tables at re)
+108 168 R .305(gular interv)-.15 F .305(als through each sw)-.25 F .305
+(ath data)-.1 F 2.5(\214le. W)108 180 R 2.5(eu)-.8 G(se the program)-2.5
+E F1(mb)2.5 E(backangle)-.1 E F0(to construct the amplitude vs.)2.5 E
+(grazing angle tables:)5 E(mbbackangle \255I sb199411211212.mb41 \\)144
+192 Q(-P25 \255N161/80 \255V)180 204 Q .582(Here a ne)108 216 R 3.082
+(wt)-.25 G .582(able is constructed e)-3.082 F -.15(ve)-.25 G .581(ry 2\
+5 pings, and the tables will consist of 161 angle bins ranging from).15
+F 1.219(\25580 de)108 228 R 1.219(grees to +80 de)-.15 F 1.219
 (gress grazing angles. The tables are written by)-.15 F F1(mb)3.72 E
 (backangle)-.1 E F0 1.22(to an amplitude vs.)3.72 F .015
 (grazing angle \214le called sb199411211212.mb41.sg)108 240 R 2.514
@@ -1638,12 +1643,12 @@ Q F0 2.5(:P)C(rocess the data.)-2.5 E .065
 his program operates using the parameters listed in the parameter \214l\
 e sb199411211212.mb41.par)108 312 R 4.427(.T)-.55 G(o)-5.227 E
 (process the data, we run)108 324 Q(mbprocess \255I sb199411211212.mb41)
-144 336 Q 1.364(The program produces an output processed sw)108 348 R
-1.365(ath \214le called sb199411211212p.mb41 \(a 'p' character is)-.1 F
-.04(inserted in the \214lename just before the)108 360 R F1(MB-System)
-2.539 E F0(suf)2.539 E .039(\214x. The program)-.25 F F1(mbpr)2.539 E
-(ocess)-.18 E F0 .039(also automatically gen-)2.539 F
-(erates the three basic ancillary data \214les for the processed sw)108
+144 336 Q .295(The program produces an output processed sw)108 348 R
+.295(ath \214le called sb199411211212p.mb41 \(a 'p' character is in-)-.1
+F .055(serted in the \214lename just before the)108 360 R F1(MB-System)
+2.554 E F0(suf)2.554 E .054(\214x. The program)-.25 F F1(mbpr)2.554 E
+(ocess)-.18 E F0 .054(also automatically gener)2.554 F(-)-.2 E
+(ates the three basic ancillary data \214les for the processed sw)108
 372 Q(ath \214le:)-.1 E(sb199411211212.mb41.inf)144 384 Q
 (sb199411211212.mb41.fbt)144 396 Q(sb199411211212.mb41.fn)144 408 Q(v)
 -.4 E F1(Step 5)108 432 Q F0 2.5(:G)C(rid the bath)-2.5 E(ymetry)-.05 E
@@ -1762,17 +1767,17 @@ from 0 to 1\) as a function of apparent grazing angle \(ne)108 252 R
 (ntion we usually use. In order to \214x the colors, we ha).15 F .481
 -.15(ve t)-.2 H 2.681(oe).15 G .181(ither rescale the)-2.681 F .758
 (data by multiplying the bath)108 648 R .758(ymetry by \2551 \(accompli\
-shed with \255MGS-1\), or \215ip the color palette \(accom-)-.05 F 1.384
-(plished with \255D\). W)108 660 R 3.884(eu)-.8 G 1.384
-(se the latter approach.)-3.884 F(Finally)6.384 E 3.884(,b)-.65 G 1.383
-(ecause this grid is so small, the def)-3.884 F 1.383(ault shaded)-.1 F
-2.316(relief image is lik)108 672 R 2.317(ely to be grain)-.1 F 3.617
--.65(y. T)-.15 H 4.817<6f8c>-.15 G 4.817(xt)-4.817 G 2.317
-(his problem, we specify a dots per inch resolution of 72)-4.817 F .337
-(\(-MGQ72\); this will tak)108 684 R 2.837(el)-.1 G .337
-(onger and generate a lar)-2.837 F .336(ger plot\214le, b)-.18 F .336
-(ut the plot will look better)-.2 F 2.836(.W)-.55 G 2.836(ea)-3.636 G
-.336(lso use the)-2.836 F(\255L option to specify the title and color s\
+shed with \255MGS-1\), or \215ip the color palette \(accom-)-.05 F .552
+(plished with \255D\). W)108 660 R 3.051(eu)-.8 G .551
+(se the latter approach.)-3.051 F(Finally)5.551 E 3.051(,b)-.65 G .551
+(ecause this grid is so small, the def)-3.051 F .551(ault shaded re-)-.1
+F .159(lief image is lik)108 672 R .159(ely to be grain)-.1 F 1.459 -.65
+(y. T)-.15 H 2.659<6f8c>-.15 G 2.659(xt)-2.659 G .16
+(his problem, we specify a dots per inch resolution of 72 \(-MGQ72\);)
+-2.659 F .115(this will tak)108 684 R 2.615(el)-.1 G .115
+(onger and generate a lar)-2.615 F .114(ger plot\214le, b)-.18 F .114
+(ut the plot will look better)-.2 F 2.614(.W)-.55 G 2.614(ea)-3.414 G
+.114(lso use the \255L option to)-2.614 F(specify the title and color s\
 cale label for the plot. Here is the command:)108 696 Q
 (mbm_grdplot \255IZGridBath.grd \\)144 708 Q
 (-G2 \255A0.4/45 \255D \255MGQ72 \255V \\)180 720 Q(MB-System 5.5)72 768
@@ -1918,35 +1923,34 @@ hrough a datalist \214le called datalist_ra).15 F -.65(w.)-.15 G 1.383
 E F0(for each of the data referenced in the input datalist structure.)
 2.5 E .316(The problem with using)108 312 R F1(mbcopy)2.817 E F0 .317
 (for translation between formats 58 and 59 is that the na)2.817 F(vig)
--.2 E .317(ation, heading,)-.05 F 1.155(and attitude contained in forma\
-t 58 \214les are purely asynchronous, which means these v)108 324 R
-1.155(alues are de\214ned)-.25 F .235(according to their o)108 336 R
-.235(wn time stamps and not the time stamps of the multibeam sonar ping\
-s. When format 58)-.25 F 1.263(data are read, the na)108 348 R(vig)-.2 E
-1.263(ation, heading and attitude v)-.05 F 1.262
-(alues must be read from their o)-.25 F 1.262(wn data records and)-.25 F
-1.316(interpolated \(or e)108 360 R 1.316(xtrapolated\) onto the time s\
-tamps of the multibeam pings for each surv)-.15 F 1.616 -.15(ey r)-.15 H
-1.316(ecord. This).15 F -.1(wo)108 372 S .005(rks \214ne if the rele).1
-F -.25(va)-.25 G .005(nt asynchronous na).25 F(vig)-.2 E .005
-(ation and attitude data are al)-.05 F -.1(wa)-.1 G .004
-(ys found in the data \214les before).1 F .197(the surv)108 384 R .497
--.15(ey d)-.15 H .197(ata from the same time, b).15 F .198(ut that adv)
--.2 F .198(antageious timing is neither assured nor common.)-.25 F 2.698
-(Ab)5.198 G(etter)-2.698 E 1.356(approach is to use the tool)108 396 R
-F1(mbk)3.856 E(ongsber)-.15 E(gpr)-.1 E(epr)-.18 E(ocess)-.18 E F0 1.356
-(to preprocess the K)3.856 F(ongsber)-.35 E 3.856(gm)-.18 G 1.356
-(ultibeam data. This)-3.856 F .031(program mak)108 408 R .031(es tw)-.1
-F 2.531(op)-.1 G .032(asses through reading each input \214le, the \214\
-rst to read and store the na)-2.531 F(vig)-.2 E .032(ation and atti-)
--.05 F .294(tude data, and the second to properly interpolate the na)108
-420 R(vig)-.2 E .294(ation and attitude v)-.05 F .293
-(alues onto the multibeam sur)-.25 F(-)-.2 E .3 -.15(vey p)108 432 T
-(ings. The usage is of the form:).15 E(mbk)144 444 Q(ongsber)-.1 E
-(gpreprocess \255I datalist_ra)-.18 E -.65(w.)-.15 G(mb-1 \255V).65 E
-1.342(One further feature of Simrad multibeam data processing should be\
- noted.)108 468 R(Gi)6.342 E -.15(ve)-.25 G 3.842(nt).15 G 1.342
-(hat the ra)-3.842 F 3.842(ws)-.15 G(idescan)-3.842 E .65
+-.2 E .317(ation, heading,)-.05 F .164(and attitude contained in format\
+ 58 \214les are purely asynchronous, which means these v)108 324 R .163
+(alues are de\214ned ac-)-.25 F .728(cording to their o)108 336 R .728(\
+wn time stamps and not the time stamps of the multibeam sonar pings. Wh\
+en format 58)-.25 F .437(data are read, the na)108 348 R(vig)-.2 E .436
+(ation, heading and attitude v)-.05 F .436
+(alues must be read from their o)-.25 F .436(wn data records and in-)
+-.25 F .042(terpolated \(or e)108 360 R .042(xtrapolated\) onto the tim\
+e stamps of the multibeam pings for each surv)-.15 F .343 -.15(ey r)-.15
+H .043(ecord. This w).15 F(orks)-.1 E .718(\214ne if the rele)108 372 R
+-.25(va)-.25 G .718(nt asynchronous na).25 F(vig)-.2 E .718
+(ation and attitude data are al)-.05 F -.1(wa)-.1 G .717
+(ys found in the data \214les before the).1 F(surv)108 384 Q .465 -.15
+(ey d)-.15 H .165(ata from the same time, b).15 F .165(ut that adv)-.2 F
+.165(antageious timing is neither assured nor common.)-.25 F 2.666(Ab)
+5.166 G .166(etter ap-)-2.666 F .565(proach is to use the tool)108 396 R
+F1(mbk)3.065 E(ongsber)-.15 E(gpr)-.1 E(epr)-.18 E(ocess)-.18 E F0 .565
+(to preprocess the K)3.065 F(ongsber)-.35 E 3.065(gm)-.18 G .565
+(ultibeam data. This pro-)-3.065 F(gram mak)108 408 Q(es tw)-.1 E 2.5
+(op)-.1 G(asses through reading each input \214le, the \214rst to read \
+and store the na)-2.5 E(vig)-.2 E .001(ation and attitude)-.05 F .894
+(data, and the second to properly interpolate the na)108 420 R(vig)-.2 E
+.894(ation and attitude v)-.05 F .894(alues onto the multibeam surv)-.25
+F -.15(ey)-.15 G(pings. The usage is of the form:)108 432 Q(mbk)144 444
+Q(ongsber)-.1 E(gpreprocess \255I datalist_ra)-.18 E -.65(w.)-.15 G
+(mb-1 \255V).65 E 1.342(One further feature of Simrad multibeam data pr\
+ocessing should be noted.)108 468 R(Gi)6.342 E -.15(ve)-.25 G 3.842(nt)
+.15 G 1.342(hat the ra)-3.842 F 3.842(ws)-.15 G(idescan)-3.842 E .65
 (samples are deri)108 480 R -.15(ve)-.25 G 3.15(dd).15 G .65(irectly fr\
 om the bottom returns identi\214ed by the sonar for each beam, it follo)
 -3.15 F .65(ws that)-.25 F(whene)108 492 Q -.15(ve)-.25 G 3.09(rab).15 G
@@ -2003,13 +2007,13 @@ rmats 51 and 56 lack places to store some information that is important\
 (imrad formats do not store beam \215ags, so the only to apply bath)
 -2.975 F .474(ymetry edits is to null)-.05 F .526(the \215agged beams. \
 This is not recommended, as it precludes un\215agging \215agged beams l\
-ater determined to)108 132 R(be good.)108 144 Q 1.99(Also, the ra)108
-168 R 4.49(wS)-.15 G 1.99
-(imrad formats store the initial sidescan samples deri)-4.49 F -.15(ve)
--.25 G 4.49(df).15 G 1.99(rom subsampling the bottom)-4.49 F .764(retur\
-ns in each of the formed beams. The locations of these samples on the s\
-ea\215oor are irre)108 180 R(gular)-.15 E 3.265(,a)-.4 G .765(nd the)
--3.265 F .275(number of samples v)108 192 R .275
+ater determined to)108 132 R(be good.)108 144 Q .951(Also, the ra)108
+168 R 3.451(wS)-.15 G .951
+(imrad formats store the initial sidescan samples deri)-3.451 F -.15(ve)
+-.25 G 3.45(df).15 G .95(rom subsampling the bottom re-)-3.45 F 1.196(t\
+urns in each of the formed beams. The locations of these samples on the\
+ sea\215oor are irre)108 180 R(gular)-.15 E 3.697(,a)-.4 G 1.197(nd the)
+-3.697 F .275(number of samples v)108 192 R .275
 (aries greatly from ping to ping. This ra)-.25 F 2.775(ws)-.15 G .275
 (idescan is not well suited for mapmaking or)-2.775 F 1.341
 (processing because of the irre)108 204 R 1.342(gular locations.)-.15 F
@@ -2039,20 +2043,20 @@ H 5.665(or e).5 F 5.665(xample, gi)-.15 F -.15(ve)-.25 G 8.164(nar).15 G
 (all, we translate it to format 57 using:).65 E(mbcop)144 336 Q 2.5
 <79ad>-.1 G(F51/57 \255I 0021_19960714_123418_ra)-2.5 E -.65(w.)-.15 G
 (all \\).65 E(-O 0021_19960714_123418_ra)180 348 Q -.65(w.)-.15 G(mb57)
-.65 E(Similarly)108 360 Q 4.263(,g)-.65 G -2.15 -.25(iv e)-4.263 H
--6.762 4.263(na r).25 H 2.064 -.15(aw E)-4.263 H 1.764
-(M300 \214le called 0005_20020425_034057_ra).15 F -.65(w.)-.15 G 1.764
-(all, we translate it to format 57).65 F(using:)108 372 Q(mbcop)144 384
-Q 2.5<79ad>-.1 G(F56/57 \255I 0005_20020425_034057_ra)-2.5 E -.65(w.)
--.15 G(all \\).65 E(-O 0005_20020425_034057.mb57)180 396 Q 1.342(One fu\
-rther feature of Simrad multibeam data processing should be noted.)108
-420 R(Gi)6.342 E -.15(ve)-.25 G 3.842(nt).15 G 1.342(hat the ra)-3.842 F
-3.842(ws)-.15 G(idescan)-3.842 E .65(samples are deri)108 432 R -.15(ve)
--.25 G 3.15(dd).15 G .65(irectly from the bottom returns identi\214ed b\
-y the sonar for each beam, it follo)-3.15 F .65(ws that)-.25 F(whene)108
-444 Q -.15(ve)-.25 G 3.09(rab).15 G .59(ottom return pick is erroneous,\
- the sidescan samples associated with that beam are also erro-)-3.09 F
-.092(neous. Consequently)108 456 R 2.592(,t)-.65 G .092
+.65 E(Similarly)108 360 Q 3.086(,g)-.65 G -2.15 -.25(iv e)-3.086 H 3.086
+(nar).25 G .886 -.15(aw E)-3.086 H .586
+(M300 \214le called 0005_20020425_034057_ra).15 F -.65(w.)-.15 G .587
+(all, we translate it to format 57 us-).65 F(ing:)108 372 Q(mbcop)144
+384 Q 2.5<79ad>-.1 G(F56/57 \255I 0005_20020425_034057_ra)-2.5 E -.65
+(w.)-.15 G(all \\).65 E(-O 0005_20020425_034057.mb57)180 396 Q 1.342(On\
+e further feature of Simrad multibeam data processing should be noted.)
+108 420 R(Gi)6.342 E -.15(ve)-.25 G 3.842(nt).15 G 1.342(hat the ra)
+-3.842 F 3.842(ws)-.15 G(idescan)-3.842 E .65(samples are deri)108 432 R
+-.15(ve)-.25 G 3.15(dd).15 G .65(irectly from the bottom returns identi\
+\214ed by the sonar for each beam, it follo)-3.15 F .65(ws that)-.25 F
+(whene)108 444 Q -.15(ve)-.25 G 3.09(rab).15 G .59(ottom return pick is\
+ erroneous, the sidescan samples associated with that beam are also err\
+o-)-3.09 F .092(neous. Consequently)108 456 R 2.592(,t)-.65 G .092
 (he binned sidescan shoulde be reprocessed follo)-2.592 F .092
 (wing the application of beam \215ags to)-.25 F -.15(ex)108 468 S 1.396
 (clude the incorrect sidescan samples from the \214nal imagery).15 F
@@ -2066,97 +2070,97 @@ y the sonar for each beam, it follo)-3.15 F .65(ws that)-.25 F(whene)108
 (mbset \255I 0005_20020425_034057.mb57 \\)144 528 Q
 (=PSSRECALCMOD:0 \255V)180 540 Q 1.715(In practice,)108 564 R F1(mbedit)
 4.215 E F0(and)4.215 E F1(mbclean)4.215 E F0 1.716(automatically set th\
-e parameter \214le to turn on sidescan recalculation)4.216 F .204
-(when writing an "edit sa)108 576 R .503 -.15(ve \214)-.2 H .203
-(le" for format 57 data, so users should not ha).15 F .503 -.15(ve t)-.2
-H 2.703(os).15 G .203(et this parameter manually)-2.703 F(.)-.65 E/F2
-10.95/Times-Bold@0 SF(PR)72 604.8 Q(OCESSING HYDR)-.329 E(OSWEEP DS D)
--.329 E -1.644 -1.04(AT A)-.383 H F0 1.657(Hydrosweep DS sonars were us\
-ed on the R/V Maurice Ewing \(operated by the Lamont-Doherty Earth)108
-616.8 R(Observ)108 628.8 Q 1.204
+e parameter \214le to turn on sidescan recalculation)4.216 F
+(when writing an "edit sa)108 576 Q .3 -.15(ve \214)-.2 H
+(le" for format 57 data, so users should not ha).15 E .3 -.15(ve t)-.2 H
+2.5(os).15 G(et this parameter manually)-2.5 E(.)-.65 E/F2 10.95
+/Times-Bold@0 SF(PR)72 604.8 Q(OCESSING HYDR)-.329 E(OSWEEP DS D)-.329 E
+-1.644 -1.04(AT A)-.383 H F0 .343(Hydrosweep DS sonars were used on the\
+ R/V Maurice Ewing \(operated by the Lamont-Doherty Earth Ob-)108 616.8
+R(serv)108 628.8 Q 2.076
 (atory and the R/V Thomas Thompson \(operated by the Uni)-.25 F -.15(ve)
--.25 G 1.203(rsity of W).15 F 1.203(ashington\) from the early)-.8 F
-(1990')108 640.8 Q 2.747(su)-.55 G .247(ntil 2001. The ra)-2.747 F 2.747
+-.25 G 2.077(rsity of W).15 F 2.077(ashington\) from the early)-.8 F
+(1990')108 640.8 Q 2.748(su)-.55 G .248(ntil 2001. The ra)-2.748 F 2.747
 (wd)-.15 G .247(ata w)-2.747 F .247(as logged in a te)-.1 F .247
 (xt format \(21\) that is slo)-.15 F 2.747(wt)-.25 G 2.747(or)-2.747 G
-.247(ead and write.)-2.747 F 1.848 -.8(We r)5.248 H(ecom-).8 E .571(men\
-d that users confronted with format 21 data translate it to format 24 b\
-efore processing. F)108 652.8 R .57(ormat 24 is a)-.15 F .463
+.247(ead and write.)-2.747 F 1.847 -.8(We r)5.247 H(ecom-).8 E .57(mend\
+ that users confronted with format 21 data translate it to format 24 be\
+fore processing. F)108 652.8 R .571(ormat 24 is a)-.15 F .464
 (binary data format that contains all of the information in the ra)108
-664.8 R 2.963<778c>-.15 G .463(le, b)-2.963 F .464
+664.8 R 2.963<778c>-.15 G .463(le, b)-2.963 F .463
 (ut is on the order of 15 times f)-.2 F(aster)-.1 E(to read and write.)
 108 676.8 Q 1.6 -.8(We a)5 H(ccomplish the translation using).8 E F1
 (mbcopy)2.5 E F0(:)A(mbcop)144 688.8 Q 2.5<79ad>-.1 G(F21/24 \255Ihs_e)
 -2.5 E(w9204_134.mb21 \\)-.25 E(-Ohsih_e)180 700.8 Q(w9204_134.mb24)-.25
-E 1.652 -.8(We a)108 712.8 T .051(lso strongly recommend that users of \
-Hydrosweep DS data recalculate the bath).8 F .051
-(ymetry using raytracing)-.05 F 1.5(through an appropriate SVP)108 724.8
-R 4.001(,w)-1.11 G 1.501(hether obtained using)-4.001 F F1(mble)4.001 E
-(vitus)-.15 E F0(,)A F1(mb)4.001 E -.1(ve)-.15 G(locitytool).1 E F0
-4.001(,o)C 4.001(rf)-4.001 G 1.501(rom other sources.)-4.001 F
+E 1.651 -.8(We a)108 712.8 T .051(lso strongly recommend that users of \
+Hydrosweep DS data recalculate the bath).8 F .052
+(ymetry using raytracing)-.05 F 1.501(through an appropriate SVP)108
+724.8 R 4.001(,w)-1.11 G 1.501(hether obtained using)-4.001 F F1(mble)
+4.001 E(vitus)-.15 E F0(,)A F1(mb)4.001 E -.1(ve)-.15 G(locitytool).1 E
+F0 4.001(,o)C 4.001(rf)-4.001 G 1.5(rom other sources.)-4.001 F
 (MB-System 5.5)72 768 Q(26 January 2015)137.61 E(21)190.95 E 0 Cg EP
 %%Page: 22 22
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 147.61(mbsystem\(1\) MB-System)72 48 R 147.61
-(5.5 mbsystem\(1\))2.5 F 1.132(The sonar calculates the ra)108 84 R
-3.632(wb)-.15 G(ath)-3.632 E 1.132(ymetry using a homogeneous w)-.05 F
-1.132(ater v)-.1 F 1.132(elocity model, and the results are)-.15 F
-(almost al)108 96 Q -.1(wa)-.1 G(ys inferior to those obtained by doing\
- the full raytracing calculations with a correct SVP).1 E(.)-1.11 E .324
+(5.5 mbsystem\(1\))2.5 F .245(The sonar calculates the ra)108 84 R 2.745
+(wb)-.15 G(ath)-2.745 E .246(ymetry using a homogeneous w)-.05 F .246
+(ater v)-.1 F .246(elocity model, and the results are al-)-.15 F
+(most al)108 96 Q -.1(wa)-.1 G(ys inferior to those obtained by doing t\
+he full raytracing calculations with a correct SVP).1 E(.)-1.11 E .325
 (Hydrosweep DS data do not contain sidescan, b)108 120 R .324(ut the)-.2
-F 2.824(yd)-.15 G 2.824(oc)-2.824 G .325
-(ontain per beam amplitude data. The amplitude)-2.824 F .826
+F 2.824(yd)-.15 G 2.824(oc)-2.824 G .324
+(ontain per beam amplitude data. The amplitude)-2.824 F .825
 (data may be corrected in the same f)108 132 R .826
-(ashion as the sidescan. W)-.1 F 3.325(er)-.8 G(un)-3.325 E/F1 10
-/Times-Bold@0 SF(mb)3.325 E(backangle)-.1 E F0 .825(with the)3.325 F F1
-<ad41>3.325 E/F2 10/Times-Italic@0 SF(1)A F0 .825(option to)3.325 F
+(ashion as the sidescan. W)-.1 F 3.326(er)-.8 G(un)-3.326 E/F1 10
+/Times-Bold@0 SF(mb)3.326 E(backangle)-.1 E F0 .826(with the)3.326 F F1
+<ad41>3.326 E/F2 10/Times-Italic@0 SF(1)A F0 .826(option to)3.326 F
 (operate on the amplitude data:)108 144 Q
 (mbbackangle \255I sb199411211212.mb41 \\)144 156 Q
 (-A1 \255P25 \255N161/80 \255V)180 168 Q(and then run)108 180 Q F1(mbpr)
 2.5 E(ocess)-.18 E F0(as usual.)2.5 E/F3 10.95/Times-Bold@0 SF(PR)72
 208.8 Q(OCESSING HYDR)-.329 E(OSWEEP MD D)-.329 E -1.644 -1.04(AT A)
 -.383 H F0 .383(Processing Hydrosweep MD data is similar to processing \
-Hydrosweep DS data. In particular)108 220.8 R 2.884(,r)-.4 G
-(ecalculating)-2.884 E(bath)108 232.8 Q .22(ymetry from the tra)-.05 F
--.15(ve)-.2 G 2.72(lt).15 G .219
-(imes is necessary because the sonar uses a homogeneous w)-2.72 F .219
-(ater v)-.1 F .219(elocity model.)-.15 F 1.023(The dif)108 244.8 R 1.023
+Hydrosweep DS data. In particular)108 220.8 R 2.883(,r)-.4 G
+(ecalculating)-2.883 E(bath)108 232.8 Q .219(ymetry from the tra)-.05 F
+-.15(ve)-.2 G 2.719(lt).15 G .219
+(imes is necessary because the sonar uses a homogeneous w)-2.719 F .22
+(ater v)-.1 F .22(elocity model.)-.15 F 1.024(The dif)108 244.8 R 1.023
 (ference is simply in the data formats used.)-.25 F 1.023(The ra)6.023 F
 3.523(wH)-.15 G 1.023(ydrosweep MD data \214les \(typically named)-3.523
 F 1.065(with a ".R" suf)108 256.8 R 1.065(\214x\) contain only the tra)
 -.25 F -.15(ve)-.2 G 3.565(lt).15 G 1.065
 (imes; the sonar calculated bath)-3.565 F 1.065
-(ymetry is contained in parallel)-.05 F .432
+(ymetry is contained in parallel)-.05 F .433
 (\214les \(typically named with a ".P" suf)108 268.8 R .432
-(\214x\). The ".R" \214les are supported as format 101. F)-.25 F .433
+(\214x\). The ".R" \214les are supported as format 101. F)-.25 F .432
 (ormat 102 data \214les)-.15 F(contain bath)108 280.8 Q
 (ymetry in addition to the tra)-.05 E -.15(ve)-.2 G 2.5(lt).15 G
 (imes. T)-2.5 E 2.5(ot)-.8 G
 (ranslate the data from format 101 to 102 we use:)-2.5 E(mbcop)144 292.8
 Q 2.5<79ad>-.1 G(F101/102 \255Iys9409040607.R \\)-2.5 E
-(-Oys9409040607.mb102)180 304.8 Q(Bath)108 316.8 Q .756(ymetry equi)-.05
+(-Oys9409040607.mb102)180 304.8 Q(Bath)108 316.8 Q .755(ymetry equi)-.05
 F -.25(va)-.25 G .755(lent to that generated by the sonar will automati\
-cally be calculated in the cop).25 F 3.255(yp)-.1 G(rocess)-3.255 E
+cally be calculated in the cop).25 F 3.256(yp)-.1 G(rocess)-3.256 E
 (\(the data stream includes the mean w)108 328.8 Q(ater v)-.1 E
-(elocity used by the sonar\).)-.15 E .116
+(elocity used by the sonar\).)-.15 E .117
 (Hydrosweep MD data do not contain sidescan, b)108 352.8 R .116(ut the)
--.2 F 2.616(yd)-.15 G 2.616(oc)-2.616 G .117
-(ontain per beam amplitude data. The amplitude)-2.616 F .826
+-.2 F 2.616(yd)-.15 G 2.616(oc)-2.616 G .116
+(ontain per beam amplitude data. The amplitude)-2.616 F .825
 (data may be corrected in the same f)108 364.8 R .826
-(ashion as the sidescan. W)-.1 F 3.325(er)-.8 G(un)-3.325 E F1(mb)3.325
-E(backangle)-.1 E F0 .825(with the)3.325 F F1<ad41>3.325 E F2(1)A F0
-.825(option to)3.325 F(operate on the amplitude data:)108 376.8 Q
+(ashion as the sidescan. W)-.1 F 3.326(er)-.8 G(un)-3.326 E F1(mb)3.326
+E(backangle)-.1 E F0 .826(with the)3.326 F F1<ad41>3.326 E F2(1)A F0
+.826(option to)3.326 F(operate on the amplitude data:)108 376.8 Q
 (mbbackangle \255I sb199411211212.mb41 \\)144 388.8 Q
 (-A1 \255P25 \255N161/80 \255V)180 400.8 Q(and then run)108 412.8 Q F1
 (mbpr)2.5 E(ocess)-.18 E F0(as usual.)2.5 E F3(SEE ALSO)72 441.6 Q F1
-(mbio)108 453.6 Q F0(\(1\))A F3 -.11(BU)72 482.4 S(GS).11 E F0 .224
-(It doesn')108 494.4 R 2.724(td)-.18 G 2.724(oe)-2.724 G -.15(ve)-2.974
-G .224(rything we w).15 F .224(ant it to yet, it doesn')-.1 F 2.725(tw)
--.18 G .225(ork with e)-2.825 F -.15(ve)-.25 G .225(ry kind of sw).15 F
-.225(ath data e)-.1 F -.15(ve)-.25 G 2.725(rc).15 G .225(ollected, and)
--2.725 F(sometimes it breaks.)108 506.4 Q(MB-System 5.5)72 768 Q
+(mbio)108 453.6 Q F0(\(1\))A F3 -.11(BU)72 482.4 S(GS).11 E F0 .225
+(It doesn')108 494.4 R 2.725(td)-.18 G 2.725(oe)-2.725 G -.15(ve)-2.975
+G .225(rything we w).15 F .225(ant it to yet, it doesn')-.1 F 2.724(tw)
+-.18 G .224(ork with e)-2.824 F -.15(ve)-.25 G .224(ry kind of sw).15 F
+.224(ath data e)-.1 F -.15(ve)-.25 G 2.724(rc).15 G .224(ollected, and)
+-2.724 F(sometimes it breaks.)108 506.4 Q(MB-System 5.5)72 768 Q
 (26 January 2015)137.61 E(22)190.95 E 0 Cg EP
 %%Trailer
 end

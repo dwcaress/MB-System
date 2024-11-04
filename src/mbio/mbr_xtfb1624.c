@@ -1152,14 +1152,14 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 			}
 			if (status == MB_SUCCESS && read_len == read_bytes) {
 				if (fileheader->chaninfo[pingchanportheader->ChannelNumber].BytesPerSample == 1) {
-					for (int i = 0; i < pingchanportheader->NumSamples; i++) {
+					for (unsigned int i = 0; i < pingchanportheader->NumSamples; i++) {
 						mb_u_char *mb_u_char_ptr = (mb_u_char *)&line[i];
 						data->ssrawport[i] = (unsigned short)(*mb_u_char_ptr);
 					}
 				}
 				else if (fileheader->chaninfo[pingchanportheader->ChannelNumber].BytesPerSample == 2) {
 					int index = 0;
-					for (int i = 0; i < pingchanportheader->NumSamples; i++) {
+					for (unsigned int i = 0; i < pingchanportheader->NumSamples; i++) {
 						mb_get_binary_short(true, &line[index], (short *)&(data->ssrawport[i]));
 						index += 2;
 					}
@@ -1258,14 +1258,14 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 			}
 			if (status == MB_SUCCESS && read_len == read_bytes) {
 				if (fileheader->chaninfo[pingchanstbdheader->ChannelNumber].BytesPerSample == 1) {
-					for (int i = 0; i < pingchanstbdheader->NumSamples; i++) {
+					for (unsigned int i = 0; i < pingchanstbdheader->NumSamples; i++) {
 						mb_u_char *mb_u_char_ptr = (mb_u_char *)&line[i];
 						data->ssrawstbd[i] = (unsigned short)(*mb_u_char_ptr);
 					}
 				}
 				else if (fileheader->chaninfo[pingchanstbdheader->ChannelNumber].BytesPerSample == 2) {
 					int index = 0;
-					for (int i = 0; i < pingchanstbdheader->NumSamples; i++) {
+					for (unsigned int i = 0; i < pingchanstbdheader->NumSamples; i++) {
 						mb_get_binary_short(true, &line[index], (short *)&(data->ssrawstbd[i]));
 						index += 2;
 					}
@@ -1401,7 +1401,7 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 				fprintf(stderr, "dbg5       FixedVSOP:                  %f\n", pingchanstbdheader->FixedVSOP);
 				for (int i = 0; i < 6; i++)
 					fprintf(stderr, "dbg5       ReservedSpace[%2.2d]:          %d\n", i, pingchanstbdheader->ReservedSpace[i]);
-				for (int i = 0; i < MAX(pingchanportheader->NumSamples, pingchanstbdheader->NumSamples); i++)
+				for (unsigned int i = 0; i < MAX(pingchanportheader->NumSamples, pingchanstbdheader->NumSamples); i++)
 					fprintf(stderr, "dbg5       sidescan[%4.4d]: %d %d\n", i, data->ssrawport[i], data->ssrawstbd[i]);
 			}
 			/* set success */

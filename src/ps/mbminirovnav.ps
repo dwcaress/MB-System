@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:03 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:09 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 7
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -258,17 +264,17 @@ F2<adad72>108 309.6 Q -.1(ov)-.18 G(-di).1 E -.1(ve)-.1 G(-end).1 E F0
 -.25 G 2.73(.T).15 G .23(hese include USBL)-2.73 F .109
 (tracking in the form of position \214x)108 386.4 R .109(es deri)-.15 F
 -.15(ve)-.25 G 2.609(df).15 G .109(rom the W)-2.609 F .109(infrog softw)
--.4 F .108(are package, CTD data including pres-)-.1 F 1.538
-(sure depth, R)108 398.4 R 2.538 -.5(OV p)-.4 H 1.538
-(latform data including heading, roll, and pitch, and D).5 F 1.538
-(VL data including altitude and)-.4 F -.15(ve)108 410.4 S .517(locity o)
-.15 F -.15(ve)-.15 G 3.017(rb).15 G .517(ottom whene)-3.017 F -.15(ve)
--.25 G 3.017(rt).15 G .517(he Doppler V)-3.017 F .517(elocity Log \(D)
--1.11 F .516(VL\) has bottom lock. This data logging struc-)-.4 F 1.252
-(ture be)108 422.4 R -.05(ga)-.15 G 3.752(nw).05 G 1.252(ith MiniR)
--3.752 F 2.252 -.5(OV d)-.4 H -2.15 -.25(iv e).5 H 1.253
-(100 on September 5, 2017. This program)4.002 F F2(mbminir)3.753 E -.1
-(ov)-.18 G(na).1 E(v)-.25 E F0 1.253(reads the four)3.753 F(MiniR)108
+-.4 F .108(are package, CTD data including pres-)-.1 F .496
+(sure depth, R)108 398.4 R 1.497 -.5(OV p)-.4 H .497
+(latform data including heading, roll, and pitch, and D).5 F .497
+(VL data including altitude and v)-.4 F(e-)-.15 E .322(locity o)108
+410.4 R -.15(ve)-.15 G 2.822(rb).15 G .322(ottom whene)-2.822 F -.15(ve)
+-.25 G 2.822(rt).15 G .322(he Doppler V)-2.822 F .321(elocity Log \(D)
+-1.11 F .321(VL\) has bottom lock. This data logging structure)-.4 F(be)
+108 422.4 Q -.05(ga)-.15 G 5.131(nw).05 G 2.631(ith MiniR)-5.131 F 3.631
+-.5(OV d)-.4 H -2.15 -.25(iv e).5 H 2.631
+(100 on September 5, 2017. This program)5.381 F F2(mbminir)5.132 E -.1
+(ov)-.18 G(na).1 E(v)-.25 E F0 2.632(reads the four)5.132 F(MiniR)108
 434.4 Q 2.126 -.5(OV l)-.4 H 1.126(og \214les and outputs a single R).5
 F 2.125 -.5(OV n)-.4 H -.2(av).5 G(ig).2 E 1.125
 (ation \214le in the format typically used by MB)-.05 F 1.125(ARI for)
@@ -324,12 +330,13 @@ R .169(alues as estimated by an Ultra Short Baseline tracking sonar and\
 (ata log\214le to be read. This \214le includes the MiniR).5 F -.5(OV)
 -.4 G 2.318 -.55('s h).5 H(eading,).55 E(roll, and pitch v)144 213.6 Q
 (alues.)-.25 E F1(\255\255inter)108 230.4 Q(polate-position)-.1 E F0
-2.723(This option causes repeated position v)144 242.4 R 2.722
-(alues to be replaced with v)-.25 F 2.722(alues linearly interpolated)
--.25 F .795(between the occasional changed \(ne)144 254.4 R .795(w\) v)
--.25 F 3.295(alues. See)-.25 F .796(the discussion in the e)3.295 F .796
-(xample section section)-.15 F(belo)144 266.4 Q 2.5(wf)-.25 G(or wh)-2.5
-E 2.5(yt)-.05 G(his option is not recommended.)-2.5 E(TP)5 E F1
+1.339(This option causes repeated position v)144 242.4 R 1.338
+(alues to be replaced with v)-.25 F 1.338
+(alues linearly interpolated be-)-.25 F .322
+(tween the occasional changed \(ne)144 254.4 R .322(w\) v)-.25 F 2.822
+(alues. See)-.25 F .322(the discussion in the e)2.822 F .323
+(xample section section be-)-.15 F(lo)144 266.4 Q 2.5(wf)-.25 G(or wh)
+-2.5 E 2.5(yt)-.05 G(his option is not recommended.)-2.5 E(TP)5 E F1
 (\255\255inter)2.5 E -.1(va)-.1 G(l).1 E F0(=)A F2(seconds)A F0 .829
 (This option sets the time interv)144 278.4 R .829
 (al in seconds of the output format 165 R)-.25 F 1.828 -.5(OV n)-.4 H
@@ -364,10 +371,10 @@ G(na).1 E(v)-.25 E F0 .843(calculates the UTM zone)3.343 F
 F(MiniR)108 523.2 Q 2.761 -.5(OV d)-.4 H 1.761
 (ata are logged in four ASCII te).5 F 1.761
 (xt day \214les de\214ned by UTC time, with names of the form)-.15 F
-1.166(XXX_mmddyyyy000000.txt where XXX is CTD, D)108 535.2 R 1.166
-(VL, N)-.4 F -1.09 -1.35(AV ,)-.35 H 1.166(or R)5.016 F -.5(OV)-.4 G
-3.666(.F)-.79 G 1.166(or instance, the \214rst set of \214les)-3.816 F
-(associated with e)108 547.2 Q(xpedition ARA08C are listed here:)-.15 E
+.208(XXX_mmddyyyy000000.txt where XXX is CTD, D)108 535.2 R .208(VL, N)
+-.4 F -1.09 -1.35(AV ,)-.35 H .208(or R)4.058 F -.5(OV)-.4 G 2.708(.F)
+-.79 G .208(or instance, the \214rst set of \214les as-)-2.858 F
+(sociated with e)108 547.2 Q(xpedition ARA08C are listed here:)-.15 E
 (CTD_090517000000.txt)113 559.2 Q -.4(DV)113 571.2 S(L_090517000000.txt)
 .4 E -.35(NA)113 583.2 S(V_090517000000.txt)-1 E -.4(RO)113 595.2 S
 (V_090517000000.txt)-.1 E .144(The CTD \214les contain the serial outpu\
@@ -529,10 +536,10 @@ ed with the on-bottom components of each of the ten di)-.05 F -.15(ve)
 F .066(and of)108 444 R 2.566(fb)-.25 G .066
 (ottom times in UTC. Because R)-2.566 F 1.065 -.5(OV d)-.4 H -2.15 -.25
 (iv e).5 H 2.565(sc).25 G .065
-(ross the UTC day boundaries, we start by concatenating)-2.565 F 1.134
-(all of the log \214les for the e)108 456 R 1.134(xpedition into single\
- long \214les, and then use those long \214les as the inputs to)-.15 F
-F1(mbminir)108 468 Q -.1(ov)-.18 G(na).1 E(v)-.25 E F0(.)A
+(ross the UTC day boundaries, we start by concatenating)-2.565 F .186
+(all of the log \214les for the e)108 456 R .186(xpedition into single \
+long \214les, and then use those long \214les as the inputs to)-.15 F F1
+(mb-)2.687 E(minir)108 468 Q -.1(ov)-.18 G(na).1 E(v)-.25 E F0(.)A
 (The start and end times are de\214ned by the)108 492 Q F1<adad72>2.5 E
 -.1(ov)-.18 G(\255di).1 E -.1(ve)-.1 G(\255start).1 E F0(and)2.5 E F1
 <adad72>2.5 E -.1(ov)-.18 G(\255di).1 E -.1(ve)-.1 G(\255end).1 E F0
@@ -598,202 +605,201 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF(mbminiro)72 48 Q(vna)-.15 E 129.63
 (v\(1\) MB-System)-.2 F 129.63(5.0 mbminiro)2.5 F(vna)-.15 E(v\(1\))-.2
-E 1.872(only uses the unrepeated and un\215agged \214x)108 84 R 1.871
+E .157(only uses the unrepeated and un\215agged \214x)108 84 R .156
 (es. Therefore, the recommended approach is to not use the)-.15 F/F1 10
-/Times-Bold@0 SF(\255\255inter)108 96 Q(polate-position)-.1 E F0 .9
-(option in)3.4 F F1(mbminir)3.4 E -.1(ov)-.18 G(na).1 E(v)-.25 E F0 3.4
-(,a)C .9(nd to instead apply the interpolation using)-3.4 F F1(mbna)3.4
-E -.1(va)-.25 G(d-).1 E(just)108 108 Q F0(.)A 2.5(#P)118 132 S
-(rocessing MiniR)-2.5 E 1 -.5(OV l)-.4 H
-(og \214les into MB-System compatible R).5 E 1 -.5(OV n)-.4 H -.2(av).5
-G(ig).2 E(ation)-.05 E(#)118 144 Q 2.5(#W)118 156 S(rote ne)-2.5 E 2.5
-(wt)-.25 G(ool mbminiro)-2.5 E(vna)-.15 E 2.5(vt)-.2 G 2.5(ob)-2.5 G 2.5
-(ei)-2.5 G(ncluded in MB-System that outputs)-2.5 E 2.5(#f)118 168 S
-(ormat 165 R)-2.5 E 1 -.5(OV n)-.4 H -.2(av).5 G(ig).2 E(ation \214les.)
--.05 E 2.5(#D)118 180 S -2.15 -.25(iv e)-2.5 H 22.96(_# on_bottom_\(Z\))
-.25 F(of)10.89 E 10(f_bottom_\(Z\) UTM_Zone)-.25 F 2.5(#1)118 192 S 11
-(00 5-Sep)-2.5 F 10.72(16:54 5-Sep)2.67 F 15(17:56 8)12.67 F 2.5(#1)118
-204 S 11(01 5-Sep)-2.5 F 10.72(20:07 5-Sep)2.67 F 15(22:05 8)12.67 F 2.5
-(#1)118 216 S 11(02 6-Sep)-2.5 F 15.72(1:55 6-Sep)2.67 F 15(02:39 8)
-12.67 F 2.5(#1)118 228 S 11(03 6-Sep)-2.5 F 10.72(20:56 6-Sep)2.67 F 15
-(22:46 8)12.67 F 2.5(#1)118 240 S 11(04 8-Sep)-2.5 F 10.72(16:30 8-Sep)
-2.67 F 15(19:12 7)12.67 F 2.5(#1)118 252 S 11(05 8-Sep)-2.5 F 10.72
-(23:43 9-Sep)2.67 F 15(02:15 7)12.67 F 2.5(#1)118 264 S 11(06 9-Sep)-2.5
-F 10.72(18:00 9-Sep)2.67 F 15(21:19 7)12.67 F 2.5(#1)118 276 S 11
-(07 9-Sep)-2.5 F 10.72(23:38 10-Sep)2.67 F 15(02:18 7)7.67 F 2.5(#1)118
-288 S 11(08 10-Sep)-2.5 F 10.72(19:27 10-Sep)33.67 F 15(23:15 7)7.67 F
-2.5(#1)118 300 S 11(09 12-Sep)-2.5 F 10.72(16:41 12-Sep)33.67 F 15
-(19:16 8)7.67 F(#)118 312 Q 2.5(#F)118 324 S
+/Times-Bold@0 SF<adad696e2d>2.656 E(ter)108 96 Q(polate-position)-.1 E
+F0(option in)2.5 E F1(mbminir)2.5 E -.1(ov)-.18 G(na).1 E(v)-.25 E F0
+2.5(,a)C(nd to instead apply the interpolation using)-2.5 E F1(mbna)2.5
+E -.1(va)-.25 G(djust).1 E F0(.)A 2.5(#P)118 120 S(rocessing MiniR)-2.5
+E 1 -.5(OV l)-.4 H(og \214les into MB-System compatible R).5 E 1 -.5
+(OV n)-.4 H -.2(av).5 G(ig).2 E(ation)-.05 E(#)118 132 Q 2.5(#W)118 144
+S(rote ne)-2.5 E 2.5(wt)-.25 G(ool mbminiro)-2.5 E(vna)-.15 E 2.5(vt)-.2
+G 2.5(ob)-2.5 G 2.5(ei)-2.5 G(ncluded in MB-System that outputs)-2.5 E
+2.5(#f)118 156 S(ormat 165 R)-2.5 E 1 -.5(OV n)-.4 H -.2(av).5 G(ig).2 E
+(ation \214les.)-.05 E 2.5(#D)118 168 S -2.15 -.25(iv e)-2.5 H 22.96
+(_# on_bottom_\(Z\)).25 F(of)10.89 E 10(f_bottom_\(Z\) UTM_Zone)-.25 F
+2.5(#1)118 180 S 11(00 5-Sep)-2.5 F 10.72(16:54 5-Sep)2.67 F 15(17:56 8)
+12.67 F 2.5(#1)118 192 S 11(01 5-Sep)-2.5 F 10.72(20:07 5-Sep)2.67 F 15
+(22:05 8)12.67 F 2.5(#1)118 204 S 11(02 6-Sep)-2.5 F 15.72(1:55 6-Sep)
+2.67 F 15(02:39 8)12.67 F 2.5(#1)118 216 S 11(03 6-Sep)-2.5 F 10.72
+(20:56 6-Sep)2.67 F 15(22:46 8)12.67 F 2.5(#1)118 228 S 11(04 8-Sep)-2.5
+F 10.72(16:30 8-Sep)2.67 F 15(19:12 7)12.67 F 2.5(#1)118 240 S 11
+(05 8-Sep)-2.5 F 10.72(23:43 9-Sep)2.67 F 15(02:15 7)12.67 F 2.5(#1)118
+252 S 11(06 9-Sep)-2.5 F 10.72(18:00 9-Sep)2.67 F 15(21:19 7)12.67 F 2.5
+(#1)118 264 S 11(07 9-Sep)-2.5 F 10.72(23:38 10-Sep)2.67 F 15(02:18 7)
+7.67 F 2.5(#1)118 276 S 11(08 10-Sep)-2.5 F 10.72(19:27 10-Sep)33.67 F
+15(23:15 7)7.67 F 2.5(#1)118 288 S 11(09 12-Sep)-2.5 F 10.72
+(16:41 12-Sep)33.67 F 15(19:16 8)7.67 F(#)118 300 Q 2.5(#F)118 312 S
 (irst concatenate all the MiniR)-2.5 E 1 -.5(OV l)-.4 H
-(og \214les locally).5 E(cat ../MiniR)118 336 Q -.5(OV)-.4 G
+(og \214les locally).5 E(cat ../MiniR)118 324 Q -.5(OV)-.4 G
 (Arctic2017log\214les/CTD*txt > MiniR)-.85 E -.5(OV)-.4 G
-(_CTD_2017Araon_ARA8C.txt).5 E(cat ../MiniR)118 348 Q -.5(OV)-.4 G
+(_CTD_2017Araon_ARA8C.txt).5 E(cat ../MiniR)118 336 Q -.5(OV)-.4 G
 (Arctic2017log\214les/D)-.85 E(VL*txt > MiniR)-.4 E -.5(OV)-.4 G(_D).5 E
-(VL_2017Araon_ARA8C.txt)-.4 E(cat ../MiniR)118 360 Q -.5(OV)-.4 G
+(VL_2017Araon_ARA8C.txt)-.4 E(cat ../MiniR)118 348 Q -.5(OV)-.4 G
 (Arctic2017log\214les/N)-.85 E -1.35(AV)-.35 G(*txt > MiniR)1.35 E -.5
 (OV)-.4 G(_N).5 E -1.35(AV)-.35 G(_2017Araon_ARA8C.txt)1.35 E
-(cat ../MiniR)118 372 Q -.5(OV)-.4 G(Arctic2017log\214les/R)-.85 E -.5
+(cat ../MiniR)118 360 Q -.5(OV)-.4 G(Arctic2017log\214les/R)-.85 E -.5
 (OV)-.4 G(*txt > MiniR).5 E -.5(OV)-.4 G(_R).5 E -.5(OV)-.4 G
-(_2017Araon_ARA8C.txt).5 E(#)118 384 Q 2.5(#G)118 396 S(enerate R)-2.5 E
+(_2017Araon_ARA8C.txt).5 E(#)118 372 Q 2.5(#G)118 384 S(enerate R)-2.5 E
 1 -.5(OV n)-.4 H -.2(av).5 G(ig).2 E(ation for MiniR)-.05 E 1 -.5(OV d)
--.4 H -2.15 -.25(iv e).5 H(100)2.75 E(mbminiro)118 408 Q(vna)-.15 E 2.5
+-.4 H -2.15 -.25(iv e).5 H(100)2.75 E(mbminiro)118 396 Q(vna)-.15 E 2.5
 (v-)-.2 G(-input-na)-2.5 E(v-\214le=MiniR)-.2 E -.5(OV)-.4 G(_N).5 E
 -1.35(AV)-.35 G(_2017Araon_ARA8C.txt .br)1.35 E
-(--input-ctd-\214le=MiniR)158 420 Q -.5(OV)-.4 G
-(_CTD_2017Araon_ARA8C.txt .br).5 E(--input-dvl-\214le=MiniR)158 432 Q
--.5(OV)-.4 G(_D).5 E(VL_2017Araon_ARA8C.txt .br)-.4 E(--input-ro)158 444
+(--input-ctd-\214le=MiniR)158 408 Q -.5(OV)-.4 G
+(_CTD_2017Araon_ARA8C.txt .br).5 E(--input-dvl-\214le=MiniR)158 420 Q
+-.5(OV)-.4 G(_D).5 E(VL_2017Araon_ARA8C.txt .br)-.4 E(--input-ro)158 432
 Q(v-\214le=MiniR)-.15 E -.5(OV)-.4 G(_R).5 E -.5(OV)-.4 G
-(_2017Araon_ARA8C.txt .br).5 E(--output=MiniR)158 456 Q -.5(OV)-.4 G(na)
-.5 E(v_100_20170905_ARA8C.mb165 .br)-.2 E(--utm-zone=8N .br)158 468 Q
-(--ro)158 480 Q(v-di)-.15 E -.15(ve)-.25 G
-(-start=2017/09/05/16/54/00 .br).15 E(--ro)158 492 Q(v-di)-.15 E -.15
+(_2017Araon_ARA8C.txt .br).5 E(--output=MiniR)158 444 Q -.5(OV)-.4 G(na)
+.5 E(v_100_20170905_ARA8C.mb165 .br)-.2 E(--utm-zone=8N .br)158 456 Q
+(--ro)158 468 Q(v-di)-.15 E -.15(ve)-.25 G
+(-start=2017/09/05/16/54/00 .br).15 E(--ro)158 480 Q(v-di)-.15 E -.15
 (ve)-.25 G(-end=2017/09/05/17/56/00 .br).15 E
-(--interpolate-position .br)158 504 Q(--v)158 516 Q(erbose)-.15 E(#)118
-528 Q 2.5(#G)118 540 S(enerate R)-2.5 E 1 -.5(OV n)-.4 H -.2(av).5 G(ig)
+(--interpolate-position .br)158 492 Q(--v)158 504 Q(erbose)-.15 E(#)118
+516 Q 2.5(#G)118 528 S(enerate R)-2.5 E 1 -.5(OV n)-.4 H -.2(av).5 G(ig)
 .2 E(ation for MiniR)-.05 E 1 -.5(OV d)-.4 H -2.15 -.25(iv e).5 H(101)
-2.75 E(mbminiro)118 552 Q(vna)-.15 E 2.5(v-)-.2 G(-input-na)-2.5 E
+2.75 E(mbminiro)118 540 Q(vna)-.15 E 2.5(v-)-.2 G(-input-na)-2.5 E
 (v-\214le=MiniR)-.2 E -.5(OV)-.4 G(_N).5 E -1.35(AV)-.35 G
-(_2017Araon_ARA8C.txt .br)1.35 E(--input-ctd-\214le=MiniR)158 564 Q -.5
+(_2017Araon_ARA8C.txt .br)1.35 E(--input-ctd-\214le=MiniR)158 552 Q -.5
 (OV)-.4 G(_CTD_2017Araon_ARA8C.txt .br).5 E(--input-dvl-\214le=MiniR)158
-576 Q -.5(OV)-.4 G(_D).5 E(VL_2017Araon_ARA8C.txt .br)-.4 E(--input-ro)
-158 588 Q(v-\214le=MiniR)-.15 E -.5(OV)-.4 G(_R).5 E -.5(OV)-.4 G
-(_2017Araon_ARA8C.txt .br).5 E(--output=MiniR)158 600 Q -.5(OV)-.4 G(na)
-.5 E(v_101_20170905_ARA8C.mb165 .br)-.2 E(--utm-zone=8N .br)158 612 Q
-(--ro)158 624 Q(v-di)-.15 E -.15(ve)-.25 G
-(-start=2017/09/05/20/07/00 .br).15 E(--ro)158 636 Q(v-di)-.15 E -.15
+564 Q -.5(OV)-.4 G(_D).5 E(VL_2017Araon_ARA8C.txt .br)-.4 E(--input-ro)
+158 576 Q(v-\214le=MiniR)-.15 E -.5(OV)-.4 G(_R).5 E -.5(OV)-.4 G
+(_2017Araon_ARA8C.txt .br).5 E(--output=MiniR)158 588 Q -.5(OV)-.4 G(na)
+.5 E(v_101_20170905_ARA8C.mb165 .br)-.2 E(--utm-zone=8N .br)158 600 Q
+(--ro)158 612 Q(v-di)-.15 E -.15(ve)-.25 G
+(-start=2017/09/05/20/07/00 .br).15 E(--ro)158 624 Q(v-di)-.15 E -.15
 (ve)-.25 G(-end=2017/09/05/22/05/00 .br).15 E
-(--interpolate-position .br)158 648 Q(--v)158 660 Q(erbose)-.15 E(#)118
-672 Q 2.5(#G)118 684 S(enerate R)-2.5 E 1 -.5(OV n)-.4 H -.2(av).5 G(ig)
+(--interpolate-position .br)158 636 Q(--v)158 648 Q(erbose)-.15 E(#)118
+660 Q 2.5(#G)118 672 S(enerate R)-2.5 E 1 -.5(OV n)-.4 H -.2(av).5 G(ig)
 .2 E(ation for MiniR)-.05 E 1 -.5(OV d)-.4 H -2.15 -.25(iv e).5 H(102)
-2.75 E(mbminiro)118 696 Q(vna)-.15 E 2.5(v-)-.2 G(-input-na)-2.5 E
+2.75 E(mbminiro)118 684 Q(vna)-.15 E 2.5(v-)-.2 G(-input-na)-2.5 E
 (v-\214le=MiniR)-.2 E -.5(OV)-.4 G(_N).5 E -1.35(AV)-.35 G
-(_2017Araon_ARA8C.txt .br)1.35 E(--input-ctd-\214le=MiniR)158 708 Q -.5
+(_2017Araon_ARA8C.txt .br)1.35 E(--input-ctd-\214le=MiniR)158 696 Q -.5
 (OV)-.4 G(_CTD_2017Araon_ARA8C.txt .br).5 E(--input-dvl-\214le=MiniR)158
-720 Q -.5(OV)-.4 G(_D).5 E(VL_2017Araon_ARA8C.txt .br)-.4 E
-(MB-System 5.0)72 768 Q 2.5(7S)134.275 G(eptember 2019)-2.5 E(5)192.615
-E 0 Cg EP
+708 Q -.5(OV)-.4 G(_D).5 E(VL_2017Araon_ARA8C.txt .br)-.4 E(--input-ro)
+158 720 Q(v-\214le=MiniR)-.15 E -.5(OV)-.4 G(_R).5 E -.5(OV)-.4 G
+(_2017Araon_ARA8C.txt .br).5 E(MB-System 5.0)72 768 Q 2.5(7S)134.275 G
+(eptember 2019)-2.5 E(5)192.615 E 0 Cg EP
 %%Page: 6 6
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF(mbminiro)72 48 Q(vna)-.15 E 129.63
 (v\(1\) MB-System)-.2 F 129.63(5.0 mbminiro)2.5 F(vna)-.15 E(v\(1\))-.2
-E(--input-ro)158 84 Q(v-\214le=MiniR)-.15 E -.5(OV)-.4 G(_R).5 E -.5(OV)
--.4 G(_2017Araon_ARA8C.txt .br).5 E(--output=MiniR)158 96 Q -.5(OV)-.4 G
-(na).5 E(v_102_20170905_ARA8C.mb165 .br)-.2 E(--utm-zone=8N .br)158 108
-Q(--ro)158 120 Q(v-di)-.15 E -.15(ve)-.25 G
-(-start=2017/09/06/01/58/30 .br).15 E(--ro)158 132 Q(v-di)-.15 E -.15
-(ve)-.25 G(-end=2017/09/06/02/30/00 .br).15 E
-(--interpolate-position .br)158 144 Q(--v)158 156 Q(erbose)-.15 E(#)118
-168 Q 2.5(#G)118 180 S(enerate R)-2.5 E 1 -.5(OV n)-.4 H -.2(av).5 G(ig)
-.2 E(ation for MiniR)-.05 E 1 -.5(OV d)-.4 H -2.15 -.25(iv e).5 H(103)
-2.75 E(mbminiro)118 192 Q(vna)-.15 E 2.5(v-)-.2 G(-input-na)-2.5 E
-(v-\214le=MiniR)-.2 E -.5(OV)-.4 G(_N).5 E -1.35(AV)-.35 G
-(_2017Araon_ARA8C.txt .br)1.35 E(--input-ctd-\214le=MiniR)158 204 Q -.5
-(OV)-.4 G(_CTD_2017Araon_ARA8C.txt .br).5 E(--input-dvl-\214le=MiniR)158
-216 Q -.5(OV)-.4 G(_D).5 E(VL_2017Araon_ARA8C.txt .br)-.4 E(--input-ro)
-158 228 Q(v-\214le=MiniR)-.15 E -.5(OV)-.4 G(_R).5 E -.5(OV)-.4 G
-(_2017Araon_ARA8C.txt .br).5 E(--output=MiniR)158 240 Q -.5(OV)-.4 G(na)
-.5 E(v_103_20170906_ARA8C.mb165 .br)-.2 E(--utm-zone=7N .br)158 252 Q
-(--ro)158 264 Q(v-di)-.15 E -.15(ve)-.25 G
-(-start=2017/09/06/20/56/00 .br).15 E(--ro)158 276 Q(v-di)-.15 E -.15
+E(--output=MiniR)158 84 Q -.5(OV)-.4 G(na).5 E
+(v_102_20170905_ARA8C.mb165 .br)-.2 E(--utm-zone=8N .br)158 96 Q(--ro)
+158 108 Q(v-di)-.15 E -.15(ve)-.25 G(-start=2017/09/06/01/58/30 .br).15
+E(--ro)158 120 Q(v-di)-.15 E -.15(ve)-.25 G
+(-end=2017/09/06/02/30/00 .br).15 E(--interpolate-position .br)158 132 Q
+(--v)158 144 Q(erbose)-.15 E(#)118 156 Q 2.5(#G)118 168 S(enerate R)-2.5
+E 1 -.5(OV n)-.4 H -.2(av).5 G(ig).2 E(ation for MiniR)-.05 E 1 -.5
+(OV d)-.4 H -2.15 -.25(iv e).5 H(103)2.75 E(mbminiro)118 180 Q(vna)-.15
+E 2.5(v-)-.2 G(-input-na)-2.5 E(v-\214le=MiniR)-.2 E -.5(OV)-.4 G(_N).5
+E -1.35(AV)-.35 G(_2017Araon_ARA8C.txt .br)1.35 E
+(--input-ctd-\214le=MiniR)158 192 Q -.5(OV)-.4 G
+(_CTD_2017Araon_ARA8C.txt .br).5 E(--input-dvl-\214le=MiniR)158 204 Q
+-.5(OV)-.4 G(_D).5 E(VL_2017Araon_ARA8C.txt .br)-.4 E(--input-ro)158 216
+Q(v-\214le=MiniR)-.15 E -.5(OV)-.4 G(_R).5 E -.5(OV)-.4 G
+(_2017Araon_ARA8C.txt .br).5 E(--output=MiniR)158 228 Q -.5(OV)-.4 G(na)
+.5 E(v_103_20170906_ARA8C.mb165 .br)-.2 E(--utm-zone=7N .br)158 240 Q
+(--ro)158 252 Q(v-di)-.15 E -.15(ve)-.25 G
+(-start=2017/09/06/20/56/00 .br).15 E(--ro)158 264 Q(v-di)-.15 E -.15
 (ve)-.25 G(-end=2017/09/06/22/46/00 .br).15 E
-(--interpolate-position .br)158 288 Q(--v)158 300 Q(erbose)-.15 E(#)118
-312 Q 2.5(#G)118 324 S(enerate R)-2.5 E 1 -.5(OV n)-.4 H -.2(av).5 G(ig)
+(--interpolate-position .br)158 276 Q(--v)158 288 Q(erbose)-.15 E(#)118
+300 Q 2.5(#G)118 312 S(enerate R)-2.5 E 1 -.5(OV n)-.4 H -.2(av).5 G(ig)
 .2 E(ation for MiniR)-.05 E 1 -.5(OV d)-.4 H -2.15 -.25(iv e).5 H(104)
-2.75 E(mbminiro)118 336 Q(vna)-.15 E 2.5(v-)-.2 G(-input-na)-2.5 E
+2.75 E(mbminiro)118 324 Q(vna)-.15 E 2.5(v-)-.2 G(-input-na)-2.5 E
 (v-\214le=MiniR)-.2 E -.5(OV)-.4 G(_N).5 E -1.35(AV)-.35 G
-(_2017Araon_ARA8C.txt .br)1.35 E(--input-ctd-\214le=MiniR)158 348 Q -.5
+(_2017Araon_ARA8C.txt .br)1.35 E(--input-ctd-\214le=MiniR)158 336 Q -.5
 (OV)-.4 G(_CTD_2017Araon_ARA8C.txt .br).5 E(--input-dvl-\214le=MiniR)158
-360 Q -.5(OV)-.4 G(_D).5 E(VL_2017Araon_ARA8C.txt .br)-.4 E(--input-ro)
-158 372 Q(v-\214le=MiniR)-.15 E -.5(OV)-.4 G(_R).5 E -.5(OV)-.4 G
-(_2017Araon_ARA8C.txt .br).5 E(--output=MiniR)158 384 Q -.5(OV)-.4 G(na)
-.5 E(v_104_20170908_ARA8C.mb165 .br)-.2 E(--utm-zone=7N .br)158 396 Q
-(--ro)158 408 Q(v-di)-.15 E -.15(ve)-.25 G
-(-start=2017/09/08/16/30/00 .br).15 E(--ro)158 420 Q(v-di)-.15 E -.15
+348 Q -.5(OV)-.4 G(_D).5 E(VL_2017Araon_ARA8C.txt .br)-.4 E(--input-ro)
+158 360 Q(v-\214le=MiniR)-.15 E -.5(OV)-.4 G(_R).5 E -.5(OV)-.4 G
+(_2017Araon_ARA8C.txt .br).5 E(--output=MiniR)158 372 Q -.5(OV)-.4 G(na)
+.5 E(v_104_20170908_ARA8C.mb165 .br)-.2 E(--utm-zone=7N .br)158 384 Q
+(--ro)158 396 Q(v-di)-.15 E -.15(ve)-.25 G
+(-start=2017/09/08/16/30/00 .br).15 E(--ro)158 408 Q(v-di)-.15 E -.15
 (ve)-.25 G(-end=2017/09/08/19/12/00 .br).15 E
-(--interpolate-position .br)158 432 Q(--v)158 444 Q(erbose)-.15 E(#)118
-456 Q 2.5(#G)118 468 S(enerate R)-2.5 E 1 -.5(OV n)-.4 H -.2(av).5 G(ig)
+(--interpolate-position .br)158 420 Q(--v)158 432 Q(erbose)-.15 E(#)118
+444 Q 2.5(#G)118 456 S(enerate R)-2.5 E 1 -.5(OV n)-.4 H -.2(av).5 G(ig)
 .2 E(ation for MiniR)-.05 E 1 -.5(OV d)-.4 H -2.15 -.25(iv e).5 H(105)
-2.75 E(mbminiro)118 480 Q(vna)-.15 E 2.5(v-)-.2 G(-input-na)-2.5 E
+2.75 E(mbminiro)118 468 Q(vna)-.15 E 2.5(v-)-.2 G(-input-na)-2.5 E
 (v-\214le=MiniR)-.2 E -.5(OV)-.4 G(_N).5 E -1.35(AV)-.35 G
-(_2017Araon_ARA8C.txt .br)1.35 E(--input-ctd-\214le=MiniR)158 492 Q -.5
+(_2017Araon_ARA8C.txt .br)1.35 E(--input-ctd-\214le=MiniR)158 480 Q -.5
 (OV)-.4 G(_CTD_2017Araon_ARA8C.txt .br).5 E(--input-dvl-\214le=MiniR)158
-504 Q -.5(OV)-.4 G(_D).5 E(VL_2017Araon_ARA8C.txt .br)-.4 E(--input-ro)
-158 516 Q(v-\214le=MiniR)-.15 E -.5(OV)-.4 G(_R).5 E -.5(OV)-.4 G
-(_2017Araon_ARA8C.txt .br).5 E(--output=MiniR)158 528 Q -.5(OV)-.4 G(na)
-.5 E(v_105_20170908_ARA8C.mb165 .br)-.2 E(--utm-zone=7N .br)158 540 Q
-(--ro)158 552 Q(v-di)-.15 E -.15(ve)-.25 G
-(-start=2017/09/08/23/43/00 .br).15 E(--ro)158 564 Q(v-di)-.15 E -.15
+492 Q -.5(OV)-.4 G(_D).5 E(VL_2017Araon_ARA8C.txt .br)-.4 E(--input-ro)
+158 504 Q(v-\214le=MiniR)-.15 E -.5(OV)-.4 G(_R).5 E -.5(OV)-.4 G
+(_2017Araon_ARA8C.txt .br).5 E(--output=MiniR)158 516 Q -.5(OV)-.4 G(na)
+.5 E(v_105_20170908_ARA8C.mb165 .br)-.2 E(--utm-zone=7N .br)158 528 Q
+(--ro)158 540 Q(v-di)-.15 E -.15(ve)-.25 G
+(-start=2017/09/08/23/43/00 .br).15 E(--ro)158 552 Q(v-di)-.15 E -.15
 (ve)-.25 G(-end=2017/09/09/02/14/00 .br).15 E
-(--interpolate-position .br)158 576 Q(--v)158 588 Q(erbose)-.15 E(#)118
-600 Q 2.5(#G)118 612 S(enerate R)-2.5 E 1 -.5(OV n)-.4 H -.2(av).5 G(ig)
+(--interpolate-position .br)158 564 Q(--v)158 576 Q(erbose)-.15 E(#)118
+588 Q 2.5(#G)118 600 S(enerate R)-2.5 E 1 -.5(OV n)-.4 H -.2(av).5 G(ig)
 .2 E(ation for MiniR)-.05 E 1 -.5(OV d)-.4 H -2.15 -.25(iv e).5 H(106)
-2.75 E(mbminiro)118 624 Q(vna)-.15 E 2.5(v-)-.2 G(-input-na)-2.5 E
+2.75 E(mbminiro)118 612 Q(vna)-.15 E 2.5(v-)-.2 G(-input-na)-2.5 E
 (v-\214le=MiniR)-.2 E -.5(OV)-.4 G(_N).5 E -1.35(AV)-.35 G
-(_2017Araon_ARA8C.txt .br)1.35 E(--input-ctd-\214le=MiniR)158 636 Q -.5
+(_2017Araon_ARA8C.txt .br)1.35 E(--input-ctd-\214le=MiniR)158 624 Q -.5
 (OV)-.4 G(_CTD_2017Araon_ARA8C.txt .br).5 E(--input-dvl-\214le=MiniR)158
-648 Q -.5(OV)-.4 G(_D).5 E(VL_2017Araon_ARA8C.txt .br)-.4 E(--input-ro)
-158 660 Q(v-\214le=MiniR)-.15 E -.5(OV)-.4 G(_R).5 E -.5(OV)-.4 G
-(_2017Araon_ARA8C.txt .br).5 E(--output=MiniR)158 672 Q -.5(OV)-.4 G(na)
-.5 E(v_106_20170909_ARA8C.mb165 .br)-.2 E(--utm-zone=7N .br)158 684 Q
-(--ro)158 696 Q(v-di)-.15 E -.15(ve)-.25 G
-(-start=2017/09/09/18/00/00 .br).15 E(--ro)158 708 Q(v-di)-.15 E -.15
+636 Q -.5(OV)-.4 G(_D).5 E(VL_2017Araon_ARA8C.txt .br)-.4 E(--input-ro)
+158 648 Q(v-\214le=MiniR)-.15 E -.5(OV)-.4 G(_R).5 E -.5(OV)-.4 G
+(_2017Araon_ARA8C.txt .br).5 E(--output=MiniR)158 660 Q -.5(OV)-.4 G(na)
+.5 E(v_106_20170909_ARA8C.mb165 .br)-.2 E(--utm-zone=7N .br)158 672 Q
+(--ro)158 684 Q(v-di)-.15 E -.15(ve)-.25 G
+(-start=2017/09/09/18/00/00 .br).15 E(--ro)158 696 Q(v-di)-.15 E -.15
 (ve)-.25 G(-end=2017/09/10/21/19/00 .br).15 E
-(--interpolate-position .br)158 720 Q(MB-System 5.0)72 768 Q 2.5(7S)
-134.275 G(eptember 2019)-2.5 E(6)192.615 E 0 Cg EP
+(--interpolate-position .br)158 708 Q(--v)158 720 Q(erbose)-.15 E
+(MB-System 5.0)72 768 Q 2.5(7S)134.275 G(eptember 2019)-2.5 E(6)192.615
+E 0 Cg EP
 %%Page: 7 7
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF(mbminiro)72 48 Q(vna)-.15 E 129.63
 (v\(1\) MB-System)-.2 F 129.63(5.0 mbminiro)2.5 F(vna)-.15 E(v\(1\))-.2
-E(--v)158 84 Q(erbose)-.15 E(#)118 96 Q 2.5(#G)118 108 S(enerate R)-2.5
-E 1 -.5(OV n)-.4 H -.2(av).5 G(ig).2 E(ation for MiniR)-.05 E 1 -.5
-(OV d)-.4 H -2.15 -.25(iv e).5 H(107)2.75 E(mbminiro)118 120 Q(vna)-.15
-E 2.5(v-)-.2 G(-input-na)-2.5 E(v-\214le=MiniR)-.2 E -.5(OV)-.4 G(_N).5
-E -1.35(AV)-.35 G(_2017Araon_ARA8C.txt .br)1.35 E
-(--input-ctd-\214le=MiniR)158 132 Q -.5(OV)-.4 G
-(_CTD_2017Araon_ARA8C.txt .br).5 E(--input-dvl-\214le=MiniR)158 144 Q
--.5(OV)-.4 G(_D).5 E(VL_2017Araon_ARA8C.txt .br)-.4 E(--input-ro)158 156
-Q(v-\214le=MiniR)-.15 E -.5(OV)-.4 G(_R).5 E -.5(OV)-.4 G
-(_2017Araon_ARA8C.txt .br).5 E(--output=MiniR)158 168 Q -.5(OV)-.4 G(na)
-.5 E(v_107_20170909_ARA8C.mb165 .br)-.2 E(--utm-zone=7N .br)158 180 Q
-(--ro)158 192 Q(v-di)-.15 E -.15(ve)-.25 G
-(-start=2017/09/09/23/38/00 .br).15 E(--ro)158 204 Q(v-di)-.15 E -.15
+E(#)118 84 Q 2.5(#G)118 96 S(enerate R)-2.5 E 1 -.5(OV n)-.4 H -.2(av).5
+G(ig).2 E(ation for MiniR)-.05 E 1 -.5(OV d)-.4 H -2.15 -.25(iv e).5 H
+(107)2.75 E(mbminiro)118 108 Q(vna)-.15 E 2.5(v-)-.2 G(-input-na)-2.5 E
+(v-\214le=MiniR)-.2 E -.5(OV)-.4 G(_N).5 E -1.35(AV)-.35 G
+(_2017Araon_ARA8C.txt .br)1.35 E(--input-ctd-\214le=MiniR)158 120 Q -.5
+(OV)-.4 G(_CTD_2017Araon_ARA8C.txt .br).5 E(--input-dvl-\214le=MiniR)158
+132 Q -.5(OV)-.4 G(_D).5 E(VL_2017Araon_ARA8C.txt .br)-.4 E(--input-ro)
+158 144 Q(v-\214le=MiniR)-.15 E -.5(OV)-.4 G(_R).5 E -.5(OV)-.4 G
+(_2017Araon_ARA8C.txt .br).5 E(--output=MiniR)158 156 Q -.5(OV)-.4 G(na)
+.5 E(v_107_20170909_ARA8C.mb165 .br)-.2 E(--utm-zone=7N .br)158 168 Q
+(--ro)158 180 Q(v-di)-.15 E -.15(ve)-.25 G
+(-start=2017/09/09/23/38/00 .br).15 E(--ro)158 192 Q(v-di)-.15 E -.15
 (ve)-.25 G(-end=2017/09/10/02/18/00 .br).15 E
-(--interpolate-position .br)158 216 Q(--v)158 228 Q(erbose)-.15 E(#)118
-240 Q 2.5(#G)118 252 S(enerate R)-2.5 E 1 -.5(OV n)-.4 H -.2(av).5 G(ig)
+(--interpolate-position .br)158 204 Q(--v)158 216 Q(erbose)-.15 E(#)118
+228 Q 2.5(#G)118 240 S(enerate R)-2.5 E 1 -.5(OV n)-.4 H -.2(av).5 G(ig)
 .2 E(ation for MiniR)-.05 E 1 -.5(OV d)-.4 H -2.15 -.25(iv e).5 H(108)
-2.75 E(mbminiro)118 264 Q(vna)-.15 E 2.5(v-)-.2 G(-input-na)-2.5 E
+2.75 E(mbminiro)118 252 Q(vna)-.15 E 2.5(v-)-.2 G(-input-na)-2.5 E
 (v-\214le=MiniR)-.2 E -.5(OV)-.4 G(_N).5 E -1.35(AV)-.35 G
-(_2017Araon_ARA8C.txt .br)1.35 E(--input-ctd-\214le=MiniR)158 276 Q -.5
+(_2017Araon_ARA8C.txt .br)1.35 E(--input-ctd-\214le=MiniR)158 264 Q -.5
 (OV)-.4 G(_CTD_2017Araon_ARA8C.txt .br).5 E(--input-dvl-\214le=MiniR)158
-288 Q -.5(OV)-.4 G(_D).5 E(VL_2017Araon_ARA8C.txt .br)-.4 E(--input-ro)
-158 300 Q(v-\214le=MiniR)-.15 E -.5(OV)-.4 G(_R).5 E -.5(OV)-.4 G
-(_2017Araon_ARA8C.txt .br).5 E(--output=MiniR)158 312 Q -.5(OV)-.4 G(na)
-.5 E(v_108_20170910_ARA8C.mb165 .br)-.2 E(--utm-zone=7N .br)158 324 Q
-(--ro)158 336 Q(v-di)-.15 E -.15(ve)-.25 G
-(-start=2017/09/10/19/27/00 .br).15 E(--ro)158 348 Q(v-di)-.15 E -.15
+276 Q -.5(OV)-.4 G(_D).5 E(VL_2017Araon_ARA8C.txt .br)-.4 E(--input-ro)
+158 288 Q(v-\214le=MiniR)-.15 E -.5(OV)-.4 G(_R).5 E -.5(OV)-.4 G
+(_2017Araon_ARA8C.txt .br).5 E(--output=MiniR)158 300 Q -.5(OV)-.4 G(na)
+.5 E(v_108_20170910_ARA8C.mb165 .br)-.2 E(--utm-zone=7N .br)158 312 Q
+(--ro)158 324 Q(v-di)-.15 E -.15(ve)-.25 G
+(-start=2017/09/10/19/27/00 .br).15 E(--ro)158 336 Q(v-di)-.15 E -.15
 (ve)-.25 G(-end=2017/09/10/23/15/00 .br).15 E
-(--interpolate-position .br)158 360 Q(--v)158 372 Q(erbose)-.15 E(#)118
-384 Q 2.5(#G)118 396 S(enerate R)-2.5 E 1 -.5(OV n)-.4 H -.2(av).5 G(ig)
+(--interpolate-position .br)158 348 Q(--v)158 360 Q(erbose)-.15 E(#)118
+372 Q 2.5(#G)118 384 S(enerate R)-2.5 E 1 -.5(OV n)-.4 H -.2(av).5 G(ig)
 .2 E(ation for MiniR)-.05 E 1 -.5(OV d)-.4 H -2.15 -.25(iv e).5 H(109)
-2.75 E(mbminiro)118 408 Q(vna)-.15 E 2.5(v-)-.2 G(-input-na)-2.5 E
+2.75 E(mbminiro)118 396 Q(vna)-.15 E 2.5(v-)-.2 G(-input-na)-2.5 E
 (v-\214le=MiniR)-.2 E -.5(OV)-.4 G(_N).5 E -1.35(AV)-.35 G
-(_2017Araon_ARA8C.txt .br)1.35 E(--input-ctd-\214le=MiniR)158 420 Q -.5
+(_2017Araon_ARA8C.txt .br)1.35 E(--input-ctd-\214le=MiniR)158 408 Q -.5
 (OV)-.4 G(_CTD_2017Araon_ARA8C.txt .br).5 E(--input-dvl-\214le=MiniR)158
-432 Q -.5(OV)-.4 G(_D).5 E(VL_2017Araon_ARA8C.txt .br)-.4 E(--input-ro)
-158 444 Q(v-\214le=MiniR)-.15 E -.5(OV)-.4 G(_R).5 E -.5(OV)-.4 G
-(_2017Araon_ARA8C.txt .br).5 E(--output=MiniR)158 456 Q -.5(OV)-.4 G(na)
-.5 E(v_109_20170912_ARA8C.mb165 .br)-.2 E(--utm-zone=8N .br)158 468 Q
-(--ro)158 480 Q(v-di)-.15 E -.15(ve)-.25 G
-(-start=2017/09/12/16/41/00 .br).15 E(--ro)158 492 Q(v-di)-.15 E -.15
+420 Q -.5(OV)-.4 G(_D).5 E(VL_2017Araon_ARA8C.txt .br)-.4 E(--input-ro)
+158 432 Q(v-\214le=MiniR)-.15 E -.5(OV)-.4 G(_R).5 E -.5(OV)-.4 G
+(_2017Araon_ARA8C.txt .br).5 E(--output=MiniR)158 444 Q -.5(OV)-.4 G(na)
+.5 E(v_109_20170912_ARA8C.mb165 .br)-.2 E(--utm-zone=8N .br)158 456 Q
+(--ro)158 468 Q(v-di)-.15 E -.15(ve)-.25 G
+(-start=2017/09/12/16/41/00 .br).15 E(--ro)158 480 Q(v-di)-.15 E -.15
 (ve)-.25 G(-end=2017/09/12/19/16/00 .br).15 E
-(--interpolate-position .br)158 504 Q(--v)158 516 Q(erbose)-.15 E/F1
-10.95/Times-Bold@0 SF(SEE ALSO)72 544.8 Q/F2 10/Times-Bold@0 SF
-(mbsystem)108 556.8 Q F0(\(1\))A F1 -.11(BU)72 585.6 S(GS).11 E F0(Da.)
-108 597.6 Q(MB-System 5.0)72 768 Q 2.5(7S)134.275 G(eptember 2019)-2.5 E
+(--interpolate-position .br)158 492 Q(--v)158 504 Q(erbose)-.15 E/F1
+10.95/Times-Bold@0 SF(SEE ALSO)72 532.8 Q/F2 10/Times-Bold@0 SF
+(mbsystem)108 544.8 Q F0(\(1\))A F1 -.11(BU)72 573.6 S(GS).11 E F0(Da.)
+108 585.6 Q(MB-System 5.0)72 768 Q 2.5(7S)134.275 G(eptember 2019)-2.5 E
 (7)192.615 E 0 Cg EP
 %%Trailer
 end

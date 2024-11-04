@@ -1,7 +1,7 @@
 lib_LTLIBRARIES = libgeolib.la libnewmat.la libqnx.la libtnav.la libtrnw.la libnetif.la libmb1.la
 
-LIBMFRAME = $(top_builddir)/src/mbtrnframe/libmframe.la
-MFRAME_INC = -I${top_srcdir}/src/mbtrnframe/usr -I${top_srcdir}/src/mbtrnframe/mframe/src 
+LIBMBTRNFRAME = $(top_builddir)/src/mbtrnframe/libmbtrnframe.la
+MBTRNFRAME_INC = -I${top_srcdir}/src/mbtrnframe
 
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
@@ -16,8 +16,8 @@ AM_CPPFLAGS += -I${top_srcdir}/src/mbtrnav/gctp/source
 AM_CPPFLAGS += -I${top_srcdir}/src/mbtrnav/opt/rov
 AM_CPPFLAGS += -I${top_srcdir}/src/mbtrn/utils
 AM_CPPFLAGS += -I${top_srcdir}/src/mbtrn/mb1r
-AM_CPPFLAGS += -I${top_srcdir}/src/mbtrnframe/usr
-AM_CPPFLAGS += -I${top_srcdir}/src/mbtrnframe/mframe/src
+AM_CPPFLAGS += -I${top_srcdir}/src/mbtrnframe
+AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
 AM_CPPFLAGS += -DHAVE_CONFIG_H
 AM_CPPFLAGS += -DWITH_TESTS
 AM_CPPFLAGS += -DWITH_MMDEBUG
@@ -25,6 +25,7 @@ AM_CPPFLAGS += -D_GNU_SOURCE
 AM_CPPFLAGS += -DWITH_MST_MSTATS
 AM_CPPFLAGS += -DMST_STATS_EN
 #AM_CPPFLAGS += -DWITH_ALT_DELTAT_VALIDATION
+AM_CPPFLAGS += -DWITH_TNAVPF_CEP_CORRECTION
 AM_CPPFLAGS += -DWITH_TRNLOG
 AM_CPPFLAGS += -DWITH_TRNLOG_EST_OUT
 #AM_CPPFLAGS += -DTRN_NORAND
@@ -185,7 +186,8 @@ libtnav_la_SOURCES += terrain-nav/TRNUtils.cpp
 libtnav_la_LIBADD = libgeolib.la
 libtnav_la_LIBADD += libnewmat.la
 libtnav_la_LIBADD += libqnx.la
-libtnav_la_LIBADD += -lm -lnetcdf -lpthread
+libtnav_la_LIBADD += ${libnetcdf_LIBS}
+libtnav_la_LIBADD += -lm -lpthread
 
 libtrnw_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
@@ -205,7 +207,7 @@ libnetif_la_SOURCES =
 libnetif_la_SOURCES += trnw/netif.c
 libnetif_la_SOURCES += trnw/trnif_proto.c
 
-libnetif_la_LIBADD = ${LIBMFRAME}
+libnetif_la_LIBADD = ${LIBMBTRNFRAME}
 libnetif_la_LIBADD += libtrnw.la
 libnetif_la_LIBADD += -lm -lpthread
 
@@ -620,31 +622,31 @@ trnclient_test_SOURCES =  utils/trnclient_test.cpp utils/TrnClient.cpp utils/Ter
 trnclient_test_LDADD = libtnav.la libnewmat.la
 
 mmcpub_SOURCES = trnw/mmcpub.c
-mmcpub_LDADD = ${LIBMFRAME}
+mmcpub_LDADD = ${LIBMBTRNFRAME}
 
 mmcsub_SOURCES = trnw/mmcsub.c
-mmcsub_LDADD = ${LIBMFRAME}
+mmcsub_LDADD = ${LIBMBTRNFRAME}
 
 trnu_cli_SOURCES = trnw/trnucli_test.c trnw/trnu_cli.c
-trnu_cli_LDADD = ${LIBMFRAME} libtrnw.la libnetif.la
+trnu_cli_LDADD = ${LIBMBTRNFRAME} libtrnw.la libnetif.la
 
 trn_cli_SOURCES = trnw/trncli_test.c trnw/trn_cli.c
-trn_cli_LDADD = ${LIBMFRAME} libtrnw.la
+trn_cli_LDADD = ${LIBMBTRNFRAME} libtrnw.la
 
 trnif_test_SOURCES =  trnw/trnif_test.c
-trnif_test_LDADD = ${LIBMFRAME} libnetif.la  libtrnw.la
+trnif_test_LDADD = ${LIBMBTRNFRAME} libnetif.la  libtrnw.la
 
 trnusvr_test_SOURCES = trnw/trnusvr_test.c
-trnusvr_test_LDADD = ${LIBMFRAME} libnetif.la libtrnw.la
+trnusvr_test_LDADD = ${LIBMBTRNFRAME} libnetif.la libtrnw.la
 
 netif_test_SOURCES = utils/netif-test.c
 netif_test_LDADD = libnetif.la  libtrnw.la
 
 trnifsvr_test_SOURCES = utils/trnifsvr-test.c
-trnifsvr_test_LDADD = ${LIBMFRAME} libnetif.la  libtrnw.la
+trnifsvr_test_LDADD = ${LIBMBTRNFRAME} libnetif.la  libtrnw.la
 
 mb1rs_SOURCES = trnw/mb1rs.c trnw/mb1rs-app.c
-mb1rs_LDADD = ${LIBMFRAME} libmb1.la
+mb1rs_LDADD = ${LIBMBTRNFRAME} libmb1.la
 
 trnlog_player_SOURCES = utils/trnlog_player.cpp utils/TrnClient.cpp utils/TerrainNavClient.cpp
 trnlog_player_LDADD = libtnav.la libnewmat.la

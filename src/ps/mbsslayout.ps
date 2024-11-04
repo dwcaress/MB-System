@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:04 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:10 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 8
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -357,19 +363,19 @@ descan, N is the maximum number of samples in a time)-.25 F .038
 (ymetric mapping with other sensors. The gridded bath)-.05 F .362
 (ymetry data may be)-.05 F .45(collected simultaneously with the sidesc\
 an from the same platform, or it may deri)108 592.8 R .751 -.15(ve f)
--.25 H .451(rom other surv).15 F -.15(ey)-.15 G .451(s. If).15 F 1.083(\
-no topographic model is speci\214ed, then the location of each sample i\
-s calculated assuming a \215at bottom)108 604.8 R 1.381
-(according to an altitude v)108 616.8 R 1.382(alue. By def)-.25 F 1.382
-(ault this altitude deri)-.1 F -.15(ve)-.25 G 3.882(sf).15 G 1.382
-(rom the na)-3.882 F(vig)-.2 E 1.382(ation a)-.05 F -.25(va)-.2 G 1.382
-(ilable in the time).25 F .715(series sidescan \214les, b)108 628.8 R
-.715(ut it can also deri)-.2 F 1.015 -.15(ve f)-.25 H .715
-(rom picking the \214rst bottom arri).15 F -.25(va)-.25 G 3.215(li).25 G
-3.215(nt)-3.215 G .715(he time series sidescan)-3.215 F .135
-(data. In this case the altitude used is the a)108 640.8 R -.15(ve)-.2 G
-.135(rage of the bottom picks from the port and starboard time series)
-.15 F(sidescan channels.)108 652.8 Q(Na)108 676.8 Q(vig)-.2 E .332
+-.25 H .451(rom other surv).15 F -.15(ey)-.15 G .451(s. If).15 F .154(n\
+o topographic model is speci\214ed, then the location of each sample is\
+ calculated assuming a \215at bottom ac-)108 604.8 R .336
+(cording to an altitude v)108 616.8 R .336(alue. By def)-.25 F .336
+(ault this altitude deri)-.1 F -.15(ve)-.25 G 2.837(sf).15 G .337
+(rom the na)-2.837 F(vig)-.2 E .337(ation a)-.05 F -.25(va)-.2 G .337
+(ilable in the time series).25 F .298(sidescan \214les, b)108 628.8 R
+.298(ut it can also deri)-.2 F .598 -.15(ve f)-.25 H .297
+(rom picking the \214rst bottom arri).15 F -.25(va)-.25 G 2.797(li).25 G
+2.797(nt)-2.797 G .297(he time series sidescan data. In)-2.797 F .492
+(this case the altitude used is the a)108 640.8 R -.15(ve)-.2 G .493(ra\
+ge of the bottom picks from the port and starboard time series sides-)
+.15 F(can channels.)108 652.8 Q(Na)108 676.8 Q(vig)-.2 E .332
 (ation, attitude, altitude, and w)-.05 F .332(ater sound speed v)-.1 F
 .332(alues will by def)-.25 F .332(ault, if a)-.1 F -.25(va)-.2 G .332
 (ilable, deri).25 F .632 -.15(ve f)-.25 H .332(rom v).15 F(alues)-.25 E
@@ -410,12 +416,12 @@ F1(mbsslay)3.456 E(out)-.25 E F0 .955
 F1(\255\255input)108 331.2 Q F0(=)A/F3 10/Times-Italic@0 SF(datalist)A
 F0 .066(This option de\214nes the input \214les containing the time ser\
 ies sidescan data.)144 343.2 R(The)5.066 E F3(datalist)2.566 E F0 -.25
-(va)2.566 G .066(lue typi-).25 F 1.182(cally denotes a datalist)144
-355.2 R 1.181(\214le containing a list of input sw)6.182 F 1.181
-(ath data \214les and/or other datalist \214les.)-.1 F(Alternati)144
-367.2 Q -.15(ve)-.25 G(ly).15 E 2.5(,as)-.65 G(ingle sw)-2.5 E
-(ath data \214le can also be speci\214ed.)-.1 E F1<adad66>108 384 Q
-(ormat)-.25 E F0(=)A F3(format)A F0 .824(This option sets the)144 396 R
+(va)2.566 G .066(lue typi-).25 F .034(cally denotes a datalist)144 355.2
+R .034(\214le containing a list of input sw)5.034 F .033
+(ath data \214les and/or other datalist \214les.)-.1 F(Al-)5.033 E
+(ternati)144 367.2 Q -.15(ve)-.25 G(ly).15 E 2.5(,as)-.65 G(ingle sw)
+-2.5 E(ath data \214le can also be speci\214ed.)-.1 E F1<adad66>108 384
+Q(ormat)-.25 E F0(=)A F3(format)A F0 .824(This option sets the)144 396 R
 F1(MBIO)3.324 E F0 .825
 (format identi\214er for the input \214le speci\214ed with the)3.324 F
 F1(\255\255input)3.325 E F0(option.)3.325 E .452(By def)144 408 R(ault,)
@@ -432,30 +438,30 @@ F0(=)A F3(FILE)A F0 .377(This option speci\214es an)144 448.8 R F1
 .017(latform. Often the embedded na).15 F(vig)-.2 E .016(ation and)-.05
 F .126(attitude \(and other ancillary\) data are already referenced to \
 the rele)144 472.8 R -.25(va)-.25 G .127
-(nt sidescan sonar; in this case).25 F 1.392
+(nt sidescan sonar; in this case).25 F .36
 (no platform model is required during sidescan layout. Ho)144 484.8 R
-(we)-.25 E -.15(ve)-.25 G 2.191 -.4(r, i).15 H 3.891(ft).4 G 1.391(he a)
--3.891 F -.25(va)-.2 G 1.391(ilable na).25 F(vig)-.2 E 1.391(ation and)
--.05 F .278
-(attitude data are referenced to another sensor or location on the surv)
-144 496.8 R .578 -.15(ey p)-.15 H .278(latform, a platform model).15 F
+(we)-.25 E -.15(ve)-.25 G 1.16 -.4(r, i).15 H 2.86(ft).4 G .36(he a)
+-2.86 F -.25(va)-.2 G .36(ilable na).25 F(vig)-.2 E .36(ation and at-)
+-.05 F .759
+(titude data are referenced to another sensor or location on the surv)
+144 496.8 R 1.06 -.15(ey p)-.15 H .76(latform, a platform model).15 F
 (allo)144 508.8 Q 1.244(ws calculation of the actual location and orien\
 tation of the sidescan sonar during the layout)-.25 F(process.)144 520.8
 Q F1(\255\255platf)108 537.6 Q(orm-tar)-.25 E(get-sensor)-.1 E F0(=)A F3
-(SENSORID)A F0 2.153(This option speci\214es which sensor in the platfo\
-rm model speci\214ed with the)144 549.6 R F1(\255\255platf)4.654 E
-(orm\255\214le)-.25 E F0(option is the source of the time series sidesc\
-an data being processed by)144 561.6 Q F1(mbsslay)2.5 E(out)-.25 E F0(.)
-A F1(\255\255output-sour)108 578.4 Q(ce)-.18 E F0(=)A F3 -.37(re)C(cor)
-.37 E(d_kind)-.37 E F0 1.015(This option speci\214es the)144 590.4 R F1
-(MB-System)3.515 E F0 1.015
-(data record type in the input source data that contains the)3.515 F
-1.125(time series sidescan data being processed by)144 602.4 R F1
-(mbsslay)3.626 E(out)-.25 E F0 6.126(.T)C 1.126
-(he source data record type will not)-6.126 F(al)144 614.4 Q -.1(wa)-.1
-G .185(ys be considered surv).1 F .485 -.15(ey d)-.15 H .185(ata \(MB_D)
-.15 F -1.21 -1.11(AT A)-.4 H(_D)1.11 E -1.21 -1.11(AT A)-.4 H 2.685(,I)
-1.11 G .185(D=1\) and may instead by secondary sides-)-2.685 F 1.538
+(SENSORID)A F0 .77(This option speci\214es which sensor in the platform\
+ model speci\214ed with the)144 549.6 R F1(\255\255platf)3.27 E
+(orm\255\214le)-.25 E F0(op-)3.27 E
+(tion is the source of the time series sidescan data being processed by)
+144 561.6 Q F1(mbsslay)2.5 E(out)-.25 E F0(.)A F1(\255\255output-sour)
+108 578.4 Q(ce)-.18 E F0(=)A F3 -.37(re)C(cor).37 E(d_kind)-.37 E F0
+1.015(This option speci\214es the)144 590.4 R F1(MB-System)3.515 E F0
+1.015(data record type in the input source data that contains the)3.515
+F .18(time series sidescan data being processed by)144 602.4 R F1
+(mbsslay)2.681 E(out)-.25 E F0 5.181(.T)C .181
+(he source data record type will not al-)-5.181 F -.1(wa)144 614.4 S
+.779(ys be considered surv).1 F 1.079 -.15(ey d)-.15 H .778(ata \(MB_D)
+.15 F -1.21 -1.11(AT A)-.4 H(_D)1.11 E -1.21 -1.11(AT A)-.4 H 3.278(,I)
+1.11 G .778(D=1\) and may instead by secondary sides-)-3.278 F 1.538
 (can \(MB_D)144 626.4 R -1.21 -1.11(AT A)-.4 H 1.539
 (_SIDESCAN2, ID=38\) or tertiary sidescan \(MB_D)1.11 F -1.21 -1.11
 (AT A)-.4 H 1.539(_SIDESCAN2, ID=39\).)1.11 F -.15(Fo)144 638.4 S 2.555
@@ -523,23 +529,23 @@ Q(eshold)-.18 E F0(=)A F2(value)A F0 1.216
 (aypoint should decrease as the w)-.1 F(ay-)-.1 E 1.057
 (point is approached. The w)144 285.6 R 1.057
 (aypoint is considered to be reached when the range stops decreasing)-.1
-F 1.015(and starts to increase, pro)144 297.6 R 1.014
-(vided the range is less than the range threshold when that occurs. The)
--.15 F(def)144 309.6 Q(ault v)-.1 E(alue is 50 meters.)-.25 E F1
-(\255\255line-name1)108 326.4 Q F0(=)A F2(name)A F0(If)144 338.4 Q F1
-(mbsslay)3.862 E(out)-.25 E F0 1.363
-(is requested to output sidescan in \214les corresponding to surv)3.862
-F 1.663 -.15(ey l)-.15 H 1.363(ines, as de\214ned).15 F 1.383
-(either by a route \214le \(option)144 350.4 R F1<adad6c696e65ad72>3.883
-E(oute)-.18 E F0 3.883(\)o)C 3.883(ral)-3.883 G 1.383
-(ist of time stamps \(option)-3.883 F F1(\255\255line\255time\255list)
-3.882 E F0(\),)A .494(then the output \214les will ha)144 362.4 R .794
--.15(ve n)-.2 H .494
-(ames of the form "N1"_"N2"_XXXX.mb71, where "N1" is speci-).15 F .516
-(\214ed with)144 374.4 R F1(\255\255output-name1)3.016 E F0 3.016(,")C
-.516(N2" is speci\214ed with)-3.016 F F1(\255\255output-name2)3.016 E F0
-3.016(,a)C .516(nd XXXX are the sequen-)-3.016 F
-(tial line numbers \(starting with "0000"\).)144 386.4 Q F1
+F .057(and starts to increase, pro)144 297.6 R .056(vided the range is \
+less than the range threshold when that occurs. The de-)-.15 F -.1(fa)
+144 309.6 S(ult v).1 E(alue is 50 meters.)-.25 E F1(\255\255line-name1)
+108 326.4 Q F0(=)A F2(name)A F0(If)144 338.4 Q F1(mbsslay)2.902 E(out)
+-.25 E F0 .402
+(is requested to output sidescan in \214les corresponding to surv)2.902
+F .702 -.15(ey l)-.15 H .402(ines, as de\214ned ei-).15 F .458
+(ther by a route \214le \(option)144 350.4 R F1<adad6c696e65ad72>2.957 E
+(oute)-.18 E F0 2.957(\)o)C 2.957(ral)-2.957 G .457
+(ist of time stamps \(option)-2.957 F F1(\255\255line\255time\255list)
+2.957 E F0 .457(\), then)B 1.151(the output \214les will ha)144 362.4 R
+1.451 -.15(ve n)-.2 H 1.152
+(ames of the form "N1"_"N2"_XXXX.mb71, where "N1" is speci\214ed).15 F
+(with)144 374.4 Q F1(\255\255output-name1)3.795 E F0 3.795(,")C 1.295
+(N2" is speci\214ed with)-3.795 F F1(\255\255output-name2)3.795 E F0
+3.794(,a)C 1.294(nd XXXX are the sequential)-3.794 F
+(line numbers \(starting with "0000"\).)144 386.4 Q F1
 (\255\255line-name2)108 403.2 Q F0(=)A F2(name)A F0 .93(By def)144 415.2
 R(ault,)-.1 E F1(mbsslay)3.43 E(out)-.25 E F0 .93(outputs "laid-out" si\
 descan in format 71 \214les corresponding to the input)3.43 F 1.166(\
@@ -604,12 +610,12 @@ BP
 (\255\255altitude-bottompick-thr)108 84 Q(eshold)-.18 E F0(=)A/F2 10
 /Times-Italic@0 SF(thr)A(eshold[/blank])-.37 E F0 .638(Speci\214es the \
 threshold used to pick the initial bottom return in the time series sid\
-escan data. The)144 96 R(def)144 108 Q .969
-(ault threshold is 0.5. If gi)-.1 F -.15(ve)-.25 G .969(n, the v).15 F
-(alue)-.25 E F2(blank)3.469 E F0 .97(is the blanking interv)3.469 F .97
-(al in seconds that will be)-.25 F .641(ignored in looking for the \214\
-rst bottom return. This option turns the bottompick altitude mode on,)
-144 120 R(so it is unnecessary to also specify the)144 132 Q F1
+escan data. The)144 96 R(def)144 108 Q .159
+(ault threshold is 0.5. If gi)-.1 F -.15(ve)-.25 G .159(n, the v).15 F
+(alue)-.25 E F2(blank)2.659 E F0 .16(is the blanking interv)2.659 F .16
+(al in seconds that will be ig-)-.25 F .375(nored in looking for the \
+\214rst bottom return. This option turns the bottompick altitude mode o\
+n, so)144 120 R(it is unnecessary to also specify the)144 132 Q F1
 (\255\255altitude-bottomppick)2.5 E F0(option.)2.5 E F1
 (\255\255channel-swap)108 148.8 Q F0 .021(This option causes)144 160.8 R
 F1(mbsslay)2.521 E(out)-.25 E F0 .021(to sw)2.521 F .022
@@ -623,30 +629,30 @@ F1(mbsslay)2.521 E(out)-.25 E F0 .021(to sw)2.521 F .022
 See the description section for)144 213.6 R(details of the def)144 225.6
 Q(ault sw)-.1 E(ath width calculation and the sidescan layout process.)
 -.1 E F1(\255\255inter)108 242.4 Q(polation)-.1 E F0(=)A F2(value)A F0
-1.238(Speci\214es the de)144 254.4 R 1.238(gree to which g)-.15 F 1.238
-(aps in the output sw)-.05 F 1.238
-(ath sidescan are \214lled by interpolation. The)-.1 F .459
-(interpolation v)144 266.4 R .459
-(alue corresponds to the maximum number of adjacent empty pix)-.25 F .46
-(els that is \214lled by)-.15 F 1.645(interpolation; lar)144 278.4 R
-1.645(ger g)-.18 F 1.645(aps are not \214lled by interpolation and rema\
-in empty in the output sw)-.05 F(ath)-.1 E(sidescan. The def)144 290.4 Q
-(ault is to do no interpolation.)-.1 E F1<adad6e61>108 307.2 Q(v-\214le)
--.25 E F0(=)A F2(\214lename)A F0 .798(Speci\214es an e)144 319.2 R .798
-(xternal \214le from which to mer)-.15 F .799(ge sonar position \(na)
--.18 F(vig)-.2 E .799(ation\), replacing an)-.05 F 3.299(yn)-.15 G -.2
-(av)-3.299 G(ig).2 E(a-)-.05 E .85
+.31(Speci\214es the de)144 254.4 R .31(gree to which g)-.15 F .31
+(aps in the output sw)-.05 F .31
+(ath sidescan are \214lled by interpolation. The in-)-.1 F .04
+(terpolation v)144 266.4 R .04
+(alue corresponds to the maximum number of adjacent empty pix)-.25 F .04
+(els that is \214lled by in-)-.15 F .332(terpolation; lar)144 278.4 R
+.332(ger g)-.18 F .332(aps are not \214lled by interpolation and remain\
+ empty in the output sw)-.05 F .332(ath sides-)-.1 F(can. The def)144
+290.4 Q(ault is to do no interpolation.)-.1 E F1<adad6e61>108 307.2 Q
+(v-\214le)-.25 E F0(=)A F2(\214lename)A F0 .798(Speci\214es an e)144
+319.2 R .798(xternal \214le from which to mer)-.15 F .799
+(ge sonar position \(na)-.18 F(vig)-.2 E .799(ation\), replacing an)-.05
+F 3.299(yn)-.15 G -.2(av)-3.299 G(ig).2 E(a-)-.05 E .85
 (tion data included in the input time series sidescan \214les.)144 331.2
 R .85(By def)5.85 F(ault)-.1 E F1(mbsslay)3.35 E(out)-.25 E F0 .85
 (attempts to use)3.35 F(na)144 343.2 Q(vig)-.2 E(ation v)-.05 E
 (alues included in the input data.)-.25 E F1<adad6e61>108 360 Q
-(v-\214le-f)-.25 E(ormat)-.25 E F0(=)A F2(format_id)A F0 1.897
-(Speci\214es the format of an e)144 372 R 1.897(xternal na)-.15 F(vig)
--.2 E 1.897(ation \214le from which position v)-.05 F 1.897
-(alues are deri)-.25 F -.15(ve)-.25 G 4.398(d\().15 G(as)-4.398 E
-(de\214ned with)144 384 Q F1<adad6e61>2.5 E(v-\214le)-.25 E F0
-(\). Options for the)A F2(format_id)2.5 E F0 -.25(va)2.5 G(lue are:).25
-E(1: ASCCI te)151.5 396 Q(xt \214le with lines of the form:)-.15 E
+(v-\214le-f)-.25 E(ormat)-.25 E F0(=)A F2(format_id)A F0 .752
+(Speci\214es the format of an e)144 372 R .753(xternal na)-.15 F(vig)-.2
+E .753(ation \214le from which position v)-.05 F .753(alues are deri)
+-.25 F -.15(ve)-.25 G 3.253(d\().15 G .753(as de-)-3.253 F(\214ned with)
+144 384 Q F1<adad6e61>2.5 E(v-\214le)-.25 E F0(\). Options for the)A F2
+(format_id)2.5 E F0 -.25(va)2.5 G(lue are:).25 E(1: ASCCI te)151.5 396 Q
+(xt \214le with lines of the form:)-.15 E
 (time_d longitude latitude speed)164 408 Q(where time_d is time in deci\
 mal epoch seconds \(seconds since 1970\), longitude)159 420 Q
 (and latitude are in decimal de)159 432 Q
@@ -780,16 +786,16 @@ BP
 /F0 10/Times-Roman@0 SF 142.61(mbsslayout\(1\) MB-System)72 48 R 142.61
 (5.0 mbsslayout\(1\))2.5 F/F1 10/Times-Bold@0 SF
 (\255\255sensordepth-\214le)108 84 Q F0(=)A/F2 10/Times-Italic@0 SF
-(\214lename)A F0 1.995(Speci\214es an e)144 96 R 1.996
-(xternal \214le from which to mer)-.15 F 1.996
-(ge sensor depth, replacing an)-.18 F 4.496(ys)-.15 G 1.996
-(ensor depth data)-4.496 F 1.566
-(included in the input time series sidescan \214les.)144 108 R 1.566
-(By def)6.566 F(ault)-.1 E F1(mbsslay)4.066 E(out)-.25 E F0 1.565
-(attempts to use sensor)4.065 F(depth v)144 120 Q
-(alues included in the input data.)-.25 E F1
-(\255\255sensordepth-\214le-f)108 136.8 Q(ormat)-.25 E F0(=)A F2
-(format_id)A F0 .013(Speci\214es the format of an e)144 148.8 R .014
+(\214lename)A F0 .955(Speci\214es an e)144 96 R .955
+(xternal \214le from which to mer)-.15 F .955
+(ge sensor depth, replacing an)-.18 F 3.456(ys)-.15 G .956
+(ensor depth data in-)-3.456 F .332
+(cluded in the input time series sidescan \214les.)144 108 R .332
+(By def)5.332 F(ault)-.1 E F1(mbsslay)2.832 E(out)-.25 E F0 .332
+(attempts to use sensor depth)2.832 F -.25(va)144 120 S
+(lues included in the input data.).25 E F1(\255\255sensordepth-\214le-f)
+108 136.8 Q(ormat)-.25 E F0(=)A F2(format_id)A F0 .013
+(Speci\214es the format of an e)144 148.8 R .014
 (xternal sensor depth \214le from which sensor depth v)-.15 F .014
 (alues are deri)-.25 F -.15(ve)-.25 G 2.514(d\().15 G(as)-2.514 E
 (de\214ned with)144 160.8 Q F1(\255\255sensordepth-\214le)2.5 E F0

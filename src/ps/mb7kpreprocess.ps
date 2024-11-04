@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:00 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:06 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 4
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -268,8 +274,8 @@ E F1(MB-SYSTEM A)72 319.2 Q(UTHORSHIP)-.548 E F0(Da)108 331.2 Q(vid W)
 beam records occurring before the \214rst a)144 468 R -.25(va)-.2 G
 (ilable).25 E(na)144 480 Q(vig)-.2 E(ation and attitude data. Normally)
 -.05 E 2.5(,t)-.65 G(hese records are ignored.)-2.5 E F2<ad42>108 496.8
-Q F3(mode)23.63 E F0 .967(This option is only rele)144 508.8 R -.25(va)
--.25 G .968(nt to MB).25 F .968(ARI Mapping A)-.35 F .968
+Q F3(mode)144 496.8 Q F0 .967(This option is only rele)144 508.8 R -.25
+(va)-.25 G .968(nt to MB).25 F .968(ARI Mapping A)-.35 F .968
 (UV data that includes Edgetech sidescan and)-.55 F .778(subbottom pro\
 \214ler data with multibeam data in a Reson 7k format \214le, and where\
  the sonars are)144 520.8 R .102
@@ -284,13 +290,13 @@ Q F3(mode)23.63 E F0 .967(This option is only rele)144 508.8 R -.25(va)
 (alues of the multibeam data)-.25 F 1.215(records. Although the sonar c\
 omputer clocks are supposed to be synchronized, this clock disci-)144
 568.8 R(pline sometimes f)144 580.8 Q(ails.)-.1 E F2<ad43>108 597.6 Q F3
--.45(ro)23.08 G(llbias/pitc).45 E(hbias)-.15 E F0 .122(This option sets\
- the roll and pitch bias of the sonar with respect to the attitude sens\
-or in de)144 609.6 R .122(grees. If)-.15 F .075(speci\214ed, these para\
-meters are applied to the sonar attitude data prior to the calculation \
-of bath)144 621.6 R(ym-)-.05 E(etry from tra)144 633.6 Q -.15(ve)-.2 G
-2.5(lt).15 G(imes and angles.)-2.5 E F2<ad44>108 650.4 Q F3(of)23.08 E
-(fx/of)-.18 E(fz[/of)-.18 E(fdepth])-.18 E F0 .252
+-.45(ro)144 597.6 S(llbias/pitc).45 E(hbias)-.15 E F0 .122(This option \
+sets the roll and pitch bias of the sonar with respect to the attitude \
+sensor in de)144 609.6 R .122(grees. If)-.15 F .075(speci\214ed, these \
+parameters are applied to the sonar attitude data prior to the calculat\
+ion of bath)144 621.6 R(ym-)-.05 E(etry from tra)144 633.6 Q -.15(ve)-.2
+G 2.5(lt).15 G(imes and angles.)-2.5 E F2<ad44>108 650.4 Q F3(of)144
+650.4 Q(fx/of)-.18 E(fz[/of)-.18 E(fdepth])-.18 E F0 .252
 (This option sets horizontal and v)144 662.4 R .252(ertical.distance of)
 -.15 F .252(fsets between the v)-.25 F(ehicle')-.15 E 2.753(sd)-.55 G
 .253(epth sensor and the)-2.753 F .367(multibeam recei)144 674.4 R .667
@@ -301,9 +307,9 @@ of bath)144 621.6 R(ym-)-.05 E(etry from tra)144 633.6 Q -.15(ve)-.2 G
 (ehicle pitch. The)-.15 F F3(of)3.535 E(fdepth)-.18 E F0 -.25(va)3.535 G
 1.036(lue, if speci\214ed, is a static).25 F(depth of)144 698.4 Q
 (fset to be applied to the v)-.25 E(ehicle depth data.)-.15 E F2<ad46>
-108 715.2 Q F3(format)24.19 E F0 .22(Sets the data format used if the i\
-nput is read from stdin or from a \214le. If)144 727.2 R F3(format)2.72
-E F0 2.72(<0)2.72 G 2.72(,t)-2.72 G .22(hen the input)-2.72 F
+108 715.2 Q F3(format)144 715.2 Q F0 .22(Sets the data format used if t\
+he input is read from stdin or from a \214le. If)144 727.2 R F3(format)
+2.72 E F0 2.72(<0)2.72 G 2.72(,t)-2.72 G .22(hen the input)-2.72 F
 (MB-System 5.0)72 768 Q(21 October 2016)137.055 E(1)195.395 E 0 Cg EP
 %%Page: 2 2
 %%BeginPageSetup
@@ -316,9 +322,9 @@ BP
 (ath sonar data \214les. This pro-)-.1 F
 (gram only reads Reson 7k format data \214les \()144 96 Q F1(MBIO)A F0
 (format 88\).)2.5 E F1<ad48>108 112.8 Q F0 .162(This "help" \215ag caus\
-e the program to print out a description of its operation and then e)
-22.52 F .161(xit immedi-)-.15 F(ately)144 124.8 Q(.)-.65 E F1<ad49>108
-141.6 Q/F2 10/Times-Italic@0 SF(in\214le)26.41 E F0 .514
+e the program to print out a description of its operation and then e)144
+112.8 R .161(xit immedi-)-.15 F(ately)144 124.8 Q(.)-.65 E F1<ad49>108
+141.6 Q/F2 10/Times-Italic@0 SF(in\214le)144 141.6 Q F0 .514
 (Sets the input \214le path. If)144 153.6 R F2(format)3.015 E F0 3.015
 (>0\()3.015 G .515(set with the)-3.015 F F1<ad66>3.015 E F0 .515
 (option or)3.015 F F1(mbdefaults)3.015 E F0 3.015(\)t)C .515(hen the sw)
@@ -335,13 +341,13 @@ e the program to print out a description of its operation and then e)
 (wed by a data format identi\214er)-.25 E 2.5(,e)-.4 G(.g.:)-2.5 E
 (data\214le1 88)180 213.6 Q(data\214le2 88)180 225.6 Q
 (This program only reads Reson 7k format data \214les \()144 237.6 Q F1
-(MBIO)A F0(format 88\).)2.5 E F1<ad4b>108 254.4 Q F2(klug)22.52 E(emode)
--.1 E F0 .863(This option causes the program to implement one of the a)
-144 266.4 R -.25(va)-.2 G .864(ilable processing "kluge" \214x).25 F
-.864(es. This)-.15 F .316
-(are unusual steps required to \214x data with particular)144 278.4 R
-2.816(,u)-.4 G .315(nusual problems. Kluge 1 forces)-2.816 F F1(mb7kpr)
-2.815 E(e-)-.18 E(pr)144 290.4 Q(ocess)-.18 E F0 1.545
+(MBIO)A F0(format 88\).)2.5 E F1<ad4b>108 254.4 Q F2(klug)144 254.4 Q
+(emode)-.1 E F0 .863
+(This option causes the program to implement one of the a)144 266.4 R
+-.25(va)-.2 G .864(ilable processing "kluge" \214x).25 F .864(es. This)
+-.15 F .316(are unusual steps required to \214x data with particular)144
+278.4 R 2.816(,u)-.4 G .315(nusual problems. Kluge 1 forces)-2.816 F F1
+(mb7kpr)2.815 E(e-)-.18 E(pr)144 290.4 Q(ocess)-.18 E F0 1.545
 (to replace the sonar depth v)4.045 F 1.545(alue with v)-.25 F 1.545
 (alues from v)-.25 F 1.546(ertical depth data records. K)-.15 F 1.546
 (uge 2)-.15 F(forces)144 302.4 Q F1(mb7kpr)2.5 E(epr)-.18 E(ocess)-.18 E
@@ -350,7 +356,7 @@ F0(to zero the initial beam alongtrack distance v)2.5 E(alues.)-.25 E F1
 (This option causes the program to list the timetags of bath)144 331.2 R
 (ymetry)-.05 E 2.544(,s)-.65 G .044(idescan, subbottom, na)-2.544 F(vig)
 -.2 E(ation,)-.05 E(and attitude data records.)144 343.2 Q F1<ad4d>108
-360 Q F2 -.45(ro)20.86 G -.2(ck).45 G(\214le).2 E F0 1.329
+360 Q F2 -.45(ro)144 360 S -.2(ck).45 G(\214le).2 E F0 1.329
 (The program will read na)144 372 R(vig)-.2 E 1.329
 (ation and attitude from the Ste)-.05 F 1.629 -.15(ve R)-.25 H 1.33
 (ock na).15 F(vig)-.2 E 1.33(ation and attitude \214le)-.05 F F2 -.45
@@ -377,27 +383,30 @@ F2(ins\214le)A F0(and)2.849 E F1<ad57>2.849 E F2(dsl\214le)A F0 .349
 (where time_d is decimal seconds since the start of 1970, longitude, la\
 titude, heading, roll, and)144 480 R(pitch are in decimal de)144 492 Q
 (grees, and sonardepth is in meters.)-.15 E F1<ad4e>108 508.8 Q F2
-(ins\214le)23.08 E F0 1.126(The program will read na)144 520.8 R(vig)-.2
-E 1.126(ation and attitude from the MB)-.05 F 1.127(ARI A)-.35 F 1.127
-(UV na)-.55 F(vig)-.2 E 1.127(ation log \214le)-.05 F F2(ins\214le)3.627
-E F0 .138(and mer)144 532.8 R .137(ge those data with the multibeam, si\
-descan, and subbtottom data in the 7k \214le. If a timelag)-.18 F .163
-(model is speci\214ed using)144 544.8 R F1<ad54>2.663 E F2(timela)A(g)
--.1 E F0 2.663(,t)C .163(he time lag will be applied to the na)-2.663 F
-(vig)-.2 E .164(ation and attitude data)-.05 F 1.729(before mer)144
-556.8 R 1.729(ging with the sonar data. The na)-.18 F(vig)-.2 E 1.729
-(ation and attitude data from)-.05 F F2(ins\214le)4.228 E F0 1.728
-(will also be)4.228 F .423
-(embedded in asynchronous data records in the output 7k format data. An)
-144 568.8 R 2.923(yp)-.15 G(re-e)-2.923 E .424(xisting na)-.15 F(vig)-.2
-E(ation)-.05 E(data records will be replaced. MB)144 580.8 Q(ARI A)-.35
-E(UV na)-.55 E(vig)-.2 E(ation \214les are binary and speci\214c to MB)
--.05 E(ARI.)-.35 E F1<ad4f>108 597.6 Q F2(out\214le)22.52 E F0 1.796
-(This option causes)144 609.6 R F1(mb7kpr)4.296 E(epr)-.18 E(ocess)-.18
-E F0 1.795(to output all data to a single \214le speci\214ed as)4.296 F
-F2(out\214le)4.295 E F0 4.295(.B)C(y)-4.295 E(def)144 621.6 Q
-(ault, the program creates output \214les for each input \214le.)-.1 E
-F1<ad50>108 638.4 Q F2(sonar)24.19 E(depth\214le)-.37 E F0 .533
+(ins\214le)144 508.8 Q F0 1.126(The program will read na)144 520.8 R
+(vig)-.2 E 1.126(ation and attitude from the MB)-.05 F 1.127(ARI A)-.35
+F 1.127(UV na)-.55 F(vig)-.2 E 1.127(ation log \214le)-.05 F F2
+(ins\214le)3.627 E F0 .138(and mer)144 532.8 R .137(ge those data with \
+the multibeam, sidescan, and subbtottom data in the 7k \214le. If a tim\
+elag)-.18 F .163(model is speci\214ed using)144 544.8 R F1<ad54>2.663 E
+F2(timela)A(g)-.1 E F0 2.663(,t)C .163
+(he time lag will be applied to the na)-2.663 F(vig)-.2 E .164
+(ation and attitude data)-.05 F .493(before mer)144 556.8 R .493
+(ging with the sonar data. The na)-.18 F(vig)-.2 E .492
+(ation and attitude data from)-.05 F F2(ins\214le)2.992 E F0 .492
+(will also be em-)2.992 F 1.363
+(bedded in asynchronous data records in the output 7k format data. An)
+144 568.8 R 3.863(yp)-.15 G(re-e)-3.863 E 1.364(xisting na)-.15 F(vig)
+-.2 E(ation)-.05 E(data records will be replaced. MB)144 580.8 Q(ARI A)
+-.35 E(UV na)-.55 E(vig)-.2 E
+(ation \214les are binary and speci\214c to MB)-.05 E(ARI.)-.35 E F1
+<ad4f>108 597.6 Q F2(out\214le)144 597.6 Q F0 .729(This option causes)
+144 609.6 R F1(mb7kpr)3.229 E(epr)-.18 E(ocess)-.18 E F0 .729
+(to output all data to a single \214le speci\214ed as)3.229 F F2
+(out\214le)3.228 E F0 3.228(.B)C 3.228(yd)-3.228 G(e-)-3.228 E -.1(fa)
+144 621.6 S
+(ult, the program creates output \214les for each input \214le.).1 E F1
+<ad50>108 638.4 Q F2(sonar)144 638.4 Q(depth\214le)-.37 E F0 .533
 (The program will read sonar depth data from)144 650.4 R F2(sonar)3.033
 E(depth\214le)-.37 E F0 .533(and mer)3.033 F .534
 (ge those data with the multi-)-.18 F .097
@@ -414,40 +423,41 @@ E(depth\214le)-.37 E F0 .533(and mer)3.033 F .534
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 122.63(mb7kpreprocess\(1\) MB-System)72 48 R
-122.63(5.0 mb7kpreprocess\(1\))2.5 F/F1 10/Times-Bold@0 SF 15.58
-(\255PF \255PF)108 84 R/F2 10/Times-Italic@0 SF(\214lterlength/\214lter)
-A(depth)-.37 E F0 2.18(This option speci\214es Gaussian tapered time do\
-main \214ltering of the)4.68 F .986(sonar depth data to be mer)144 96 R
+122.63(5.0 mb7kpreprocess\(1\))2.5 F/F1 10/Times-Bold@0 SF(\255PF)108 84
+Q(\255PF)144 84 Q/F2 10/Times-Italic@0 SF(\214lterlength/\214lter)A
+(depth)-.37 E F0 2.18(This option speci\214es Gaussian tapered time dom\
+ain \214ltering of the)4.68 F .986(sonar depth data to be mer)144 96 R
 .986(ged with the surv)-.18 F 1.286 -.15(ey d)-.15 H .986(ata, re).15 F
 -.05(ga)-.15 G .986(rdless of source.).05 F(The)5.986 E F2
 (\214lterlength)3.486 E F0 -.25(va)3.486 G(lue).25 E .164
 (speci\214es the \214lter windo)144 108 R 2.664(wl)-.25 G .164
 (ength in seconds, and the)-2.664 F F2(\214lter)2.664 E(depth)-.37 E F0
--.25(va)2.664 G .164(lue controls the depths to which).25 F 1.423(\214l\
-tering is applied. The \214ltered sonar depth is used to depths up to t\
-wice the)144 120 R F2(\214lter)3.922 E(depth)-.37 E F0 -.25(va)3.922 G
-(lue.).25 E(Belo)144 132 Q 2.872(wt)-.25 G .372(hat threshold, the v)
--2.872 F .372(alue used transitions to un\214ltered with an e)-.25 F
-.372(xponential taper)-.15 F 2.873(.T)-.55 G .373(his \214lter)-2.873 F
-(-)-.2 E .255(ing is used in tw)144 144 R 2.754(ow)-.1 G .254(ays. Firs\
-t, one can apply short period smoothing of noisy sonar depth at all by)
--2.854 F 1.361(specifying a small)144 156 R F2(\214lterlength)3.861 E F0
-1.361(\(e.g. 2 seconds\) and a)3.861 F F2(\214lter)3.862 E(depth)-.37 E
-F0 -.25(va)3.862 G 1.362(lue deeper than the v).25 F(ehicle')-.15 E(s)
--.55 E 1.005(track. Second, when an A)144 168 R 1.005(UV or R)-.55 F
-2.005 -.5(OV i)-.4 H 3.505(so).5 G 1.005(perated at shallo)-3.505 F
-3.505(wd)-.25 G 1.005(epths, the pressure v)-3.505 F 1.005
-(alues used to)-.25 F .605(determine depth are af)144 180 R .605
-(fected by w)-.25 F -2.25 -.2(av e)-.1 H 3.105(sa).2 G 3.106(tt)-3.105 G
-.606(he sea surf)-3.106 F .606(ace. In this case, a longer period)-.1 F
-F2(\214lterlength)3.106 E F0 .981(\(e.g. 10 seconds\) and a shallo)144
-192 R(wer)-.25 E F2(\214lter)3.481 E(depth)-.37 E F0 .98
+-.25(va)2.664 G .164(lue controls the depths to which).25 F .342(\214lt\
+ering is applied. The \214ltered sonar depth is used to depths up to tw\
+ice the)144 120 R F2(\214lter)2.842 E(depth)-.37 E F0 -.25(va)2.842 G
+.342(lue. Be-).25 F(lo)144 132 Q 2.976(wt)-.25 G .476
+(hat threshold, the v)-2.976 F .476
+(alue used transitions to un\214ltered with an e)-.25 F .477
+(xponential taper)-.15 F 2.977(.T)-.55 G .477(his \214ltering)-2.977 F
+1.118(is used in tw)144 144 R 3.618(ow)-.1 G 1.117(ays. First, one can \
+apply short period smoothing of noisy sonar depth at all by)-3.718 F
+1.361(specifying a small)144 156 R F2(\214lterlength)3.861 E F0 1.361
+(\(e.g. 2 seconds\) and a)3.861 F F2(\214lter)3.862 E(depth)-.37 E F0
+-.25(va)3.862 G 1.362(lue deeper than the v).25 F(ehicle')-.15 E(s)-.55
+E .048(track. Second, when an A)144 168 R .048(UV or R)-.55 F 1.048 -.5
+(OV i)-.4 H 2.548(so).5 G .048(perated at shallo)-2.548 F 2.548(wd)-.25
+G .047(epths, the pressure v)-2.548 F .047(alues used to de-)-.25 F
+1.195(termine depth are af)144 180 R 1.195(fected by w)-.25 F -2.25 -.2
+(av e)-.1 H 3.695(sa).2 G 3.696(tt)-3.695 G 1.196(he sea surf)-3.696 F
+1.196(ace. In this case, a longer period)-.1 F F2(\214lterlength)3.696 E
+F0 .981(\(e.g. 10 seconds\) and a shallo)144 192 R(wer)-.25 E F2
+(\214lter)3.481 E(depth)-.37 E F0 .98
 (\(e.g. 50 meters\) may be used to lessen the artif)3.481 F(acts)-.1 E
 (due to surf)144 204 Q(ace swell.)-.1 E F1<ad53>108 220.8 Q F2
-(datatype/sour)24.74 E(ce)-.37 E F0 1.267(This option speci\214es which\
- data records should be the source of the na)144 232.8 R(vig)-.2 E 1.267
-(ation \()-.05 F F2(datatype)A F0 3.767(=1)3.767 G(\),)-3.767 E .322
-(heading \()144 244.8 R F2(datatype)A F0 2.822(=2)2.822 G .322
+(datatype/sour)144 220.8 Q(ce)-.37 E F0 1.267(This option speci\214es w\
+hich data records should be the source of the na)144 232.8 R(vig)-.2 E
+1.267(ation \()-.05 F F2(datatype)A F0 3.767(=1)3.767 G(\),)-3.767 E
+.322(heading \()144 244.8 R F2(datatype)A F0 2.822(=2)2.822 G .322
 (\), attitude \()-2.822 F F2(datatype)A F0 2.822(=3)2.822 G .322
 (\), and sonar depth)-2.822 F(\()5.322 E F2(datatype)A F0 2.822(=4)2.822
 G 2.821(\)d)-2.822 G .321(ata that are inter)-2.821 F(-)-.2 E .199
@@ -476,75 +486,76 @@ R -1.21 -1.11(AT A)-.4 H(_A)1.11 E 42.29(TTITUDE attitude)-1.11 F
 (data \(R7KRECID_Attitude 1016\))2.5 E 8.5(17 MB_D)159 412.8 R -1.21
 -1.11(AT A)-.4 H 81.07(_HEADING heading)1.11 F
 (data \(R7KRECID_Heading 1013\))2.5 E 8.5(16 MB_D)159 424.8 R -1.21
--1.11(AT A)-.4 H 89.4(_HEIGHT sensor)1.11 F .145
-(depth data \(R7KRECID_Depth 1008\))2.645 F(where the numbers in parent\
-heses are the Reson 7k format record type identi\214ers.)144 436.8 Q
--.15(Fo)144 460.8 S 2.5(rt).15 G(he backscatter)-2.5 E F2(sour)2.5 E(ce)
--.37 E F0 -.25(va)2.5 G(lues the options are:).25 E 5
+-1.11(AT A)-.4 H 89.4(_HEIGHT sensor)1.11 F
+(depth data \(R7KRECID_Depth 1008\))2.5 E(where the numbers in parenthe\
+ses are the Reson 7k format record type identi\214ers.)144 436.8 Q -.15
+(Fo)144 460.8 S 2.5(rt).15 G(he backscatter)-2.5 E F2(sour)2.5 E(ce)-.37
+E F0 -.25(va)2.5 G(lues the options are:).25 E 5
 (7007 R7KRECID_7kBackscatterImageData)159 472.8 R
 (\(backscatter time series for port and starboard\))2.5 E 5
 (7028 R7KRECID_7kV2SnippetData)159 484.8 R
 (\(time slice backscatter deri)2.5 E -.15(ve)-.25 G 2.5(df).15 G
 (rom bottom arri)-2.5 E -.25(va)-.25 G(ls\)).25 E 5
-(7058 R7KRECID_7kCalibratedSnippetData)159 496.8 R 1.327(By def)144
-508.8 R(ault)-.1 E F1(mb7kpr)3.827 E(epr)-.18 E(ocess)-.18 E F0 1.328
-(will attempt to construct the multibeam pseudosidescan out of the)3.827
-F .694(snippet backscatter records. Also, the pre)144 520.8 R .693
-(vious de\214nition of the)-.25 F F1(-SP)3.193 E F2(sidescansour)A(ce)
--.37 E F1 .693(option is still)3.193 F -.1(va)144 532.8 S
+(7058 R7KRECID_7kCalibratedSnippetData)159 496.8 R 1.328(By def)144
+508.8 R(ault)-.1 E F1(mb7kpr)3.828 E(epr)-.18 E(ocess)-.18 E F0 1.327
+(will attempt to construct the multibeam pseudosidescan out of the)3.828
+F .693(snippet backscatter records. Also, the pre)144 520.8 R .693
+(vious de\214nition of the)-.25 F F1(-SP)3.194 E F2(sidescansour)A(ce)
+-.37 E F1 .694(option is still)3.194 F -.1(va)144 532.8 S
 (lid, and is described immediately belo).1 E -.7(w.)-.1 G<ad53>108 549.6
-Q F2(sidescansour)24.74 E(ce)-.37 E F0 .61(This option speci\214es the \
-data record type source of the backscatter data used to generate pseudo\
--)144 561.6 R 1.465(sidescan data from Reson multibeam sonars. If)144
-573.6 R F2(sidescansour)3.965 E(ce)-.37 E F0 3.965(=')3.965 G 1.465
-(C' then the sidescan will be)-3.965 F(deri)144 585.6 Q -.15(ve)-.25 G
-3.808(df).15 G 1.308(rom calibrated "snippet" records, if the)-3.808 F
-F2(sidescansour)3.809 E(ce)-.37 E F0 3.809(=')3.809 G 1.309
-(S' then the sidescan will be)-3.809 F(deri)144 597.6 Q -.15(ve)-.25 G
-3.878(df).15 G 1.377(rom "snippet" records. If)-3.878 F F2(sidescansour)
-3.877 E(ce)-.37 E F0 3.877(=')3.877 G 1.377
-(B' then the sidescan will be deri)-3.877 F -.15(ve)-.25 G 3.877(df).15
-G(rom)-3.877 E .953("backscatter" records. The dif)144 609.6 R .953
+Q F2(sidescansour)144 549.6 Q(ce)-.37 E F0 .61(This option speci\214es \
+the data record type source of the backscatter data used to generate ps\
+eudo-)144 561.6 R .349(sidescan data from Reson multibeam sonars. If)144
+573.6 R F2(sidescansour)2.849 E(ce)-.37 E F0 2.849(=')2.849 G .35
+(C' then the sidescan will be de-)-2.849 F(ri)144 585.6 Q -.15(ve)-.25 G
+3.333(df).15 G .833(rom calibrated "snippet" records, if the)-3.333 F F2
+(sidescansour)3.333 E(ce)-.37 E F0 3.333(=')3.333 G .832
+(S' then the sidescan will be de-)-3.333 F(ri)144 597.6 Q -.15(ve)-.25 G
+4.551(df).15 G 2.051(rom "snippet" records. If)-4.551 F F2(sidescansour)
+4.551 E(ce)-.37 E F0 4.551(=')4.551 G 2.052
+(B' then the sidescan will be deri)-4.551 F -.15(ve)-.25 G 4.552(df).15
+G(rom)-4.552 E .954("backscatter" records. The dif)144 609.6 R .953
 (ference is that the "backscatter" records contain port and starboard)
--.25 F 1.68(time series deri)144 621.6 R -.15(ve)-.25 G 4.18(df).15 G
-1.679(rom beams formed with a lar)-4.18 F 1.679
+-.25 F 1.679(time series deri)144 621.6 R -.15(ve)-.25 G 4.179(df).15 G
+1.679(rom beams formed with a lar)-4.179 F 1.68
 (ge acrosstrack beamwidth, and the "snippet")-.18 F .909(records contai\
 n short sections of beamformed time series centered on the bottom retur\
 n times in)144 633.6 R(each of the v)144 645.6 Q(alid bath)-.25 E
-(ymetry beams.)-.05 E F1<ad54>108 662.4 Q F2(timela)23.63 E(g)-.1 E F0
-.832(This option speci\214es a)144 674.4 R F2(timela)3.332 E(g)-.1 E F0
--.25(va)3.331 G .831(lue in seconds to be applied to the na).25 F(vig)
--.2 E .831(ation and attitude data)-.05 F 1.066(prior to it being mer)
-144 686.4 R 1.066(ged with the bath)-.18 F(ymetry)-.05 E 3.567(.I)-.65 G
-(f)-3.567 E F2(timela)3.567 E(g)-.1 E F0 1.067(is a v)3.567 F 1.067
-(alid path to a \214le containing time)-.25 F .137(stamp and time lag p\
-airs, then these data will be read and the time lag applied to particul\
-ar records)144 698.4 R(will be interpolated by time.)144 710.4 Q
-(MB-System 5.0)72 768 Q(21 October 2016)137.055 E(3)195.395 E 0 Cg EP
+(ymetry beams.)-.05 E F1<ad54>108 662.4 Q F2(timela)144 662.4 Q(g)-.1 E
+F0 .831(This option speci\214es a)144 674.4 R F2(timela)3.331 E(g)-.1 E
+F0 -.25(va)3.331 G .831(lue in seconds to be applied to the na).25 F
+(vig)-.2 E .832(ation and attitude data)-.05 F 1.067
+(prior to it being mer)144 686.4 R 1.067(ged with the bath)-.18 F
+(ymetry)-.05 E 3.567(.I)-.65 G(f)-3.567 E F2(timela)3.567 E(g)-.1 E F0
+1.067(is a v)3.567 F 1.066(alid path to a \214le containing time)-.25 F
+.137(stamp and time lag pairs, then these data will be read and the tim\
+e lag applied to particular records)144 698.4 R
+(will be interpolated by time.)144 710.4 Q(MB-System 5.0)72 768 Q
+(21 October 2016)137.055 E(3)195.395 E 0 Cg EP
 %%Page: 4 4
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 122.63(mb7kpreprocess\(1\) MB-System)72 48 R
 122.63(5.0 mb7kpreprocess\(1\))2.5 F/F1 10/Times-Bold@0 SF<ad57>108 84 Q
-/F2 10/Times-Italic@0 SF(dsl\214le)20.3 E F0 1.102
+/F2 10/Times-Italic@0 SF(dsl\214le)144 84 Q F0 1.103
 (The program will read na)144 96 R(vig)-.2 E 1.103
-(ation and attitude from the WHOI DSL na)-.05 F(vig)-.2 E 1.103
-(ation and attitude \214le)-.05 F F2(dsl\214le)144 108 Q F0 .684
-(and mer)3.184 F .684(ge those data with the multibeam, sidescan, and s\
-ubbtottom data in the 7k \214le.If a)-.18 F .197
-(timelag model is speci\214ed using)144 120 R F1<ad54>2.697 E F2(timela)
-A(g)-.1 E F0 2.697(,t)C .198(he time lag will be applied to the na)
--2.697 F(vig)-.2 E .198(ation and atti-)-.05 F 1.419
-(tude data before mer)144 132 R 1.419(ging with the sonar data. An)-.18
-F 3.918(yp)-.15 G(re-e)-3.918 E 1.418(xisting na)-.15 F(vig)-.2 E 1.418
-(ation data records will be)-.05 F .783(replaced. The similar)144 144 R
-F1<ad4e>3.283 E F2(ins\214le)A F0(and)3.283 E F1<ad57>3.283 E F2
-(dsl\214le)A F0 .783(options cause mer)3.283 F .783
-(ging of data from MB)-.18 F .784(ARI A)-.35 F(UV)-.55 E .136
-(log\214les and WHOI DSL na)144 156 R(vig)-.2 E .136
+(ation and attitude from the WHOI DSL na)-.05 F(vig)-.2 E 1.102
+(ation and attitude \214le)-.05 F F2(dsl\214le)144 108 Q F0 .683
+(and mer)3.183 F .684(ge those data with the multibeam, sidescan, and s\
+ubbtottom data in the 7k \214le.If a)-.18 F .198
+(timelag model is speci\214ed using)144 120 R F1<ad54>2.698 E F2(timela)
+A(g)-.1 E F0 2.698(,t)C .197(he time lag will be applied to the na)
+-2.698 F(vig)-.2 E .197(ation and atti-)-.05 F .417
+(tude data before mer)144 132 R .417(ging with the sonar data. An)-.18 F
+2.917(yp)-.15 G(re-e)-2.917 E .417(xisting na)-.15 F(vig)-.2 E .418
+(ation data records will be re-)-.05 F 1.381(placed. The similar)144 144
+R F1<ad4e>3.881 E F2(ins\214le)A F0(and)3.881 E F1<ad57>3.881 E F2
+(dsl\214le)A F0 1.381(options cause mer)3.881 F 1.381
+(ging of data from MB)-.18 F 1.38(ARI A)-.35 F(UV)-.55 E .135
+(log\214les and WHOI DSL na)144 156 R(vig)-.2 E .135
 (ation \214les, respecti)-.05 F -.15(ve)-.25 G(ly).15 E 2.635(.T)-.65 G
-.135(he WHOI DSL na)-2.635 F(vig)-.2 E .135(ation and attitude \214le)
+.136(he WHOI DSL na)-2.635 F(vig)-.2 E .136(ation and attitude \214le)
 -.05 F(is a te)144 168 Q(xt \214le with ele)-.15 E -.15(ve)-.25 G 2.5
 (ns).15 G(pace delimited columns:)-2.5 E(PPL date time v)180 180 Q
 (ehicle latitude longitude depth heading pitch roll id)-.15 E(where:)144

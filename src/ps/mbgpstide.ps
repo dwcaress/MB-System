@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:01 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:07 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 3
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -277,11 +283,11 @@ a speci\214c ellipsoid or geoid rather than w)-.05 E(ater le)-.1 E -.15
 Q(UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
 619.2 Q -.15(ve)-.25 G(rsity of Bremen).15 E F1(OPTIONS)72 648 Q F2
 <ad41>108 660 Q F3(TIDEFORMA)2.5 E(T)-.37 E F0(,)A F2 .833<adad>2.5 G
-(tidef)-.833 E(ormat=)-.25 E F3(TIDEFORMA)A(T)-.37 E F0 1.442
-(This option sets the tide format of the output te)144 672 R 1.442
-(xt tide model \214les.)-.15 F(If)6.442 E F3(TIDEFORMA)3.942 E(T)-.37 E
-F0 3.942(=2\()3.942 G(the)-3.942 E(def)144 684 Q
-(ault\), the tide is output in this format:)-.1 E
+(tidef)-.833 E(ormat=)-.25 E F3(TIDEFORMA)A(T)-.37 E F0 .513
+(This option sets the tide format of the output te)144 672 R .513
+(xt tide model \214les.)-.15 F(If)5.514 E F3(TIDEFORMA)3.014 E(T)-.37 E
+F0 3.014(=2\()3.014 G .514(the de-)-3.014 F -.1(fa)144 684 S
+(ult\), the tide is output in this format:).1 E
 (year month day hour minute second tide)180 696 Q(where the tide v)144
 708 Q(alue is in meters.)-.25 E(If)5 E F3(TIDEFORMA)2.5 E(T)-.37 E F0
 2.5(=1)2.5 G 2.5(,t)-2.5 G(hen the output format is:)-2.5 E(time_d tide)

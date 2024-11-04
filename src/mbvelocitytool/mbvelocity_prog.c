@@ -1896,7 +1896,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 	int beam_flagging;
 	mb_path command;
 	mb_path string;
-	mb_path svp_file;
+	char svp_file[2048];
 	int count;
 	struct stat file_status;
 	int fstat;

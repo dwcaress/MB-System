@@ -56,7 +56,7 @@ void IntegerData::read(ExternalData *externalData)
 
 const char *IntegerData::ascii()
 {
-  sprintf(_asciiBuffer, asciiFormat(), _value);
+  snprintf(_asciiBuffer, IDATA_ASCII_BUFFER_BYTES, asciiFormat(), _value);
   return _asciiBuffer;
 }
 

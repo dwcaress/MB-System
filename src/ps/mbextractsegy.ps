@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:01 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:07 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 5
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -308,7 +314,7 @@ G(ay Aquarium Research Institute)-2.5 E(Dale N. Chayes)108 583.2 Q
 (Christian do Santos Ferreira)108 619.2 Q(MAR)113 631.2 Q
 (UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
 643.2 Q -.15(ve)-.25 G(rsity of Bremen).15 E F1(OPTIONS)72 672 Q F2
-<ad42>108 684 Q F3(yr/mo/da/hr/mn/sc)23.63 E F0 .155
+<ad42>108 684 Q F3(yr/mo/da/hr/mn/sc)144 684 Q F0 .155
 (This option sets the starting time for data allo)144 696 R .155
 (wed in the input data.)-.25 F(The)5.155 E F2<ad45>2.655 E F0 .155
 (option sets the ending)2.655 F .195
@@ -341,24 +347,24 @@ the starting time is after the ending)144 144 R .194(time, then an)144
 l be ignored. This scheme allo)-2.694 F .195(ws time)-.25 F(windo)144
 168 Q 5.376(wing both inside and outside a speci\214ed interv)-.25 F
 7.876(al. Def)-.25 F(ault:)-.1 E F1(yr/mo/da/hr/mn/sc)7.876 E F0(=)7.876
-E(2062/2/21/10/30/0.)144 180 Q F2<ad46>108 196.8 Q F1(format)24.19 E F0
-.22(Sets the data format used if the input is read from stdin or from a\
- \214le. If)144 208.8 R F1(format)2.72 E F0 2.72(<0)2.72 G 2.72(,t)-2.72
-G .22(hen the input)-2.72 F .008(\214le speci\214ed with the)144 220.8 R
-F2<ad49>2.508 E F0 .008(option will actually contain a list of input sw)
-2.508 F .007(ath sonar data \214les. This pro-)-.1 F .011(gram uses the)
-144 232.8 R F2(MBIO)2.511 E F0 .012(library and will read or write an)
-2.511 F 2.512(ys)-.15 G -.1(wa)-2.512 G .012
-(th sonar format supported by).1 F F2(MBIO)2.512 E F0 2.512(.A)C 1.297
-(list of the sw)144 244.8 R 1.297
+E(2062/2/21/10/30/0.)144 180 Q F2<ad46>108 196.8 Q F1(format)144 196.8 Q
+F0 .22(Sets the data format used if the input is read from stdin or fro\
+m a \214le. If)144 208.8 R F1(format)2.72 E F0 2.72(<0)2.72 G 2.72(,t)
+-2.72 G .22(hen the input)-2.72 F .008(\214le speci\214ed with the)144
+220.8 R F2<ad49>2.508 E F0 .008
+(option will actually contain a list of input sw)2.508 F .007
+(ath sonar data \214les. This pro-)-.1 F .011(gram uses the)144 232.8 R
+F2(MBIO)2.511 E F0 .012(library and will read or write an)2.511 F 2.512
+(ys)-.15 G -.1(wa)-2.512 G .012(th sonar format supported by).1 F F2
+(MBIO)2.512 E F0 2.512(.A)C 1.297(list of the sw)144 244.8 R 1.297
 (ath sonar data formats currently supported by)-.1 F F2(MBIO)3.797 E F0
 1.296(and their identi\214er v)3.796 F 1.296(alues is)-.25 F(gi)144
 256.8 Q -.15(ve)-.25 G 2.5(ni).15 G 2.5(nt)-2.5 G(he)-2.5 E F2(MBIO)2.5
 E F0(manual page. The def)2.5 E(ault format is set using the program)-.1
 E F2(mbdefaults)2.5 E F0(..)A F2<ad48>108 273.6 Q F0 .162(This "help" \
 \215ag cause the program to print out a description of its operation an\
-d then e)22.52 F .162(xit immedi-)-.15 F(ately)144 285.6 Q(.)-.65 E F2
-<ad49>108 302.4 Q F1(in\214le)26.41 E F0 .515
+d then e)144 273.6 R .162(xit immedi-)-.15 F(ately)144 285.6 Q(.)-.65 E
+F2<ad49>108 302.4 Q F1(in\214le)144 302.4 Q F0 .515
 (Sets the input \214le path. If)144 314.4 R F1(format)3.015 E F0 3.015
 (>0\()3.015 G .515(set with the)-3.015 F F2<ad66>3.015 E F0 .515
 (option or)3.015 F F2(mbdefaults)3.014 E F0 3.014(\)t)C .514(hen the sw)
@@ -382,21 +388,22 @@ G .568(th sonar format supported by).1 F F2(MBIO)144 410.4 Q F0 3.428
 .928(and their identi\214er)3.428 F -.25(va)144 422.4 S(lues is gi).25 E
 -.15(ve)-.25 G 2.5(ni).15 G 2.5(nt)-2.5 G(he)-2.5 E F2(MBIO)2.5 E F0
 (manual page. Def)2.5 E(ault:)-.1 E F1(in\214le)2.5 E F0 2.5(=")2.5 G
-(stdin".)-2.5 E F2<ad4a>108 439.2 Q F1(xscale/yscale/maxwidth)25.3 E F0
-1.005(Sets the scale of the def)144 451.2 R 1.005
+(stdin".)-2.5 E F2<ad4a>108 439.2 Q F1(xscale/yscale/maxwidth)144 439.2
+Q F0 1.005(Sets the scale of the def)144 451.2 R 1.005
 (ault section plots. The)-.1 F F1(xscale)3.504 E F0 -.25(va)3.504 G
 1.004(lue is in inches per shot, and the).25 F F1(yscale)3.504 E F0 -.25
-(va)144 463.2 S 1.537(lue is in inches per second.).25 F(The)6.537 E F1
-(maxwidth)4.037 E F0 -.25(va)4.037 G 1.537
-(lue sets the maximum plot width in inches. If).25 F F1(xscale)144 475.2
-Q F0 .33(and the shot range imply a width greater than)2.83 F F1
-(maxwidth)2.829 E F0 2.829(,t)C .329(hen the section will be brok)-2.829
-F .329(en up)-.1 F(into multiple plots.)144 487.2 Q(Def)5 E(ault:)-.1 E
-F1(xscale)2.5 E F0 2.5(=0)2.5 G(.01;)-2.5 E F1(yscale)2.5 E F0 2.5(=7)
-2.5 G(5;)-2.5 E F1(maxwidth)2.5 E F0 2.5(=4)2.5 G(5.0)-2.5 E F2<ad4c>108
-504 Q F1(startline/liner)23.63 E(oot)-.45 E F0 .035(This option sets th\
-e starting line number and the output \214lename root used when)144 516
-R F2<ad52>2.536 E F0 .036(is speci\214ed so)2.536 F
+(va)144 463.2 S .613(lue is in inches per second.).25 F(The)5.613 E F1
+(maxwidth)3.113 E F0 -.25(va)3.113 G .614
+(lue sets the maximum plot width in inches. If).25 F F1(xs-)3.114 E
+(cale)144 475.2 Q F0 .82(and the shot range imply a width greater than)
+3.32 F F1(maxwidth)3.319 E F0 3.319(,t)C .819
+(hen the section will be brok)-3.319 F .819(en up)-.1 F
+(into multiple plots.)144 487.2 Q(Def)5 E(ault:)-.1 E F1(xscale)2.5 E F0
+2.5(=0)2.5 G(.01;)-2.5 E F1(yscale)2.5 E F0 2.5(=7)2.5 G(5;)-2.5 E F1
+(maxwidth)2.5 E F0 2.5(=4)2.5 G(5.0)-2.5 E F2<ad4c>108 504 Q F1
+(startline/liner)144 504 Q(oot)-.45 E F0 .035(This option sets the star\
+ting line number and the output \214lename root used when)144 516 R F2
+<ad52>2.536 E F0 .036(is speci\214ed so)2.536 F
 (that data are output according to planned surv)144 528 Q .3 -.15(ey l)
 -.15 H(ines. Def).15 E(ault:)-.1 E F1(startline)2.5 E F0 2.5(=1)2.5 G(;)
 -2.5 E F1(liner)2.5 E(oot)-.45 E F0 2.5(=")2.5 G(sbp".)-2.5 E F2<ad4d>
@@ -410,10 +417,10 @@ R F2<ad52>2.536 E F0 .036(is speci\214ed so)2.536 F
 (ey l)-.15 H(ine').15 E 2.5(sb)-.55 G(earing.)-2.5 E F2<ad4f>108 597.6 Q
 F0 .591(This option sets the output SEGY \214le path. If neither)144
 609.6 R F2<ad4f>3.091 E F0(nore)3.091 E F2<ad52>3.091 E F0 .591(are in)
-3.091 F -.2(vo)-.4 G -.1(ke).2 G .591(d, the output SEGY).1 F 1.254(\
-\214lename \(or \214les if a datalist is being processed\) will be the \
-input sw)144 621.6 R 1.255(ath \214lename with ".se)-.1 F(gy")-.15 E
-(appended.)144 633.6 Q F2<ad51>108 650.4 Q F1 -.45(ro)22.52 G
+3.091 F -.2(vo)-.4 G -.1(ke).2 G .591(d, the output SEGY).1 F .282(\214\
+lename \(or \214les if a datalist is being processed\) will be the inpu\
+t sw)144 621.6 R .283(ath \214lename with ".se)-.1 F .283(gy" ap-)-.15 F
+(pended.)144 633.6 Q F2<ad51>108 650.4 Q F1 -.45(ro)144 650.4 S
 (utetime\214le).45 E F0 1.612(This option speci\214es route \214le cont\
 aining the times that the surv)144 662.4 R 1.911 -.15(ey r)-.15 H 1.611
 (eached the intended w).15 F(ay-)-.1 E(points. This te)144 674.4 Q
@@ -452,7 +459,7 @@ F1<ad4f>3.198 E F0(nore)3.198 E F1<ad52>3.198 E F0 .698(are in)3.198 F
 -.2(vo)-.4 G -.1(ke).2 G .698(d, the output).1 F 1.425(SEGY \214lename \
 \(or \214les if a datalist is being processed\) will be the input sw)144
 144 R 1.425(ath \214lename with)-.1 F(".se)144 156 Q(gy" appended.)-.15
-E F1<ad52>108 172.8 Q F2 -.45(ro)23.08 G(ute\214le).45 E F0 1.003
+E F1<ad52>108 172.8 Q F2 -.45(ro)144 172.8 S(ute\214le).45 E F0 1.003
 (This option speci\214es an)144 184.8 R F1(mbgrdviz)3.502 E F0 1.002
 (route \214le containing the intended w)3.502 F 1.002
 (aypoints of the surv)-.1 F -.15(ey)-.15 G 3.502(.I)-.5 G(f)-3.502 E F2
@@ -469,12 +476,13 @@ E F1<ad52>2.634 E F0 .691(are in)144 232.8 R -.2(vo)-.4 G -.1(ke).2 G
 .691(d, the output SEGY \214lename \(or \214les if a datalist is being \
 processed\) will be the input).1 F(sw)144 244.8 Q
 (ath \214lename with ".se)-.1 E(gy" appended.)-.15 E F1<ad53>108 261.6 Q
-F2(sampleformat)24.74 E F0(Sets the sample format desired for use in th\
-e output SEGY \214le. Options include:)144 273.6 Q(MB_SEGY_SAMPLEFORMA)
-180 285.6 Q 25(T_NONE 1)-1.11 F(MB_SEGY_SAMPLEFORMA)180 297.6 Q(T_TRA)
--1.11 E 22.5(CE 2)-.4 F(MB_SEGY_SAMPLEFORMA)180 309.6 Q 15(T_ENVELOPE 3)
--1.11 F(MB_SEGY_SAMPLEFORMA)180 321.6 Q(T_AN)-1.11 E(AL)-.35 E 15
-(YTIC 4)-1 F(MB_SEGY_SAMPLEFORMA)144 333.6 Q(T_TRA)-1.11 E 1.611
+F2(sampleformat)144 261.6 Q F0(Sets the sample format desired for use i\
+n the output SEGY \214le. Options include:)144 273.6 Q
+(MB_SEGY_SAMPLEFORMA)180 285.6 Q 25(T_NONE 1)-1.11 F
+(MB_SEGY_SAMPLEFORMA)180 297.6 Q(T_TRA)-1.11 E 22.5(CE 2)-.4 F
+(MB_SEGY_SAMPLEFORMA)180 309.6 Q 15(T_ENVELOPE 3)-1.11 F
+(MB_SEGY_SAMPLEFORMA)180 321.6 Q(T_AN)-1.11 E(AL)-.35 E 15(YTIC 4)-1 F
+(MB_SEGY_SAMPLEFORMA)144 333.6 Q(T_TRA)-1.11 E 1.611
 (CE implies that the seismic trace is in the original, most)-.4 F(ra)144
 345.6 Q 3.805(wf)-.15 G 1.305(orm with both positi)-3.805 F 1.605 -.15
 (ve a)-.25 H 1.305(nd ne).15 F -.05(ga)-.15 G(ti).05 E 1.605 -.15(ve v)
@@ -486,22 +494,22 @@ are stored in the)144 369.6 R 2.59(SEGY \214le. MB_SEGY_SAMPLEFORMA)144
 381.6 R 2.59(T_ENVELOPE implies that the analytic signal has)-1.11 F
 .912(been reduced back to a single real, positi)144 393.6 R -.15(ve)-.25
 G .912(-only en).15 F -.15(ve)-.4 G .912
-(lope signal by taking the magnitude of the).15 F 1.473
-(real and imaginary parts at e)144 405.6 R -.15(ve)-.25 G 1.473
-(ry sample.).15 F 1.473
-(It is important to note that this option only sets the)6.473 F 1.508(d\
-esired sample format, and the program may \214nd it necessary to store \
-the data in an alternate)144 417.6 R 7.278(form. F)144 429.6 R 7.279
-(or instance, if the user speci\214es MB_SEGY_SAMPLEFORMA)-.15 F(T_TRA)
--1.11 E 7.279(CE or)-.4 F(MB_SEGY_SAMPLEFORMA)144 441.6 Q(T_AN)-1.11 E
-(AL)-.35 E .914(YTIC b)-1 F .914(ut the sw)-.2 F .913
-(ath \214le only contains en)-.1 F -.15(ve)-.4 G .913(lope data, the).15
-F 2.638(data will be written in the en)144 453.6 R -.15(ve)-.4 G 2.638
-(lope form. The def).15 F 2.639(ault v)-.1 F 2.639
-(alue of MB_SEGY_SAMPLEFOR-)-.25 F(MA)144 465.6 Q(T_NONE allo)-1.11 E
-(ws the program to choose the most appropriate sample format.)-.25 E F1
-<ad55>108 482.4 Q F2 -.15(ra)23.08 G(ng).15 E(ethr)-.1 E(eshold)-.37 E
-F0 .518(If the)144 494.4 R F1<ad52>3.018 E F0 .518
+(lope signal by taking the magnitude of the).15 F .542
+(real and imaginary parts at e)144 405.6 R -.15(ve)-.25 G .543
+(ry sample.).15 F .543
+(It is important to note that this option only sets the de-)5.543 F .537
+(sired sample format, and the program may \214nd it necessary to store \
+the data in an alternate form.)144 417.6 R -.15(Fo)144 429.6 S 2.937(ri)
+.15 G .437(nstance, if the user speci\214es MB_SEGY_SAMPLEFORMA)-2.937 F
+(T_TRA)-1.11 E .438(CE or MB_SEGY_SAM-)-.4 F(PLEFORMA)144 441.6 Q(T_AN)
+-1.11 E(AL)-.35 E .121(YTIC b)-1 F .121(ut the sw)-.2 F .121
+(ath \214le only contains en)-.1 F -.15(ve)-.4 G .121
+(lope data, the data will be written).15 F 1.802(in the en)144 453.6 R
+-.15(ve)-.4 G 1.802(lope form. The def).15 F 1.802(ault v)-.1 F 1.802
+(alue of MB_SEGY_SAMPLEFORMA)-.25 F 1.802(T_NONE allo)-1.11 F 1.802
+(ws the)-.25 F(program to choose the most appropriate sample format.)144
+465.6 Q F1<ad55>108 482.4 Q F2 -.15(ra)144 482.4 S(ng).15 E(ethr)-.1 E
+(eshold)-.37 E F0 .518(If the)144 494.4 R F1<ad52>3.018 E F0 .518
 (option is speci\214ed,)3.018 F F1(mbextractsegy)3.018 E F0 .518
 (breaks up the output into \214les corresponding to sur)3.018 F(-)-.2 E
 .897 -.15(vey l)144 506.4 T .597(ines speci\214ed in a route \214le.).15
@@ -514,11 +522,11 @@ F .597(This option sets the threshold distance in meters used to deter)
 E(eshold)-.37 E F0 .685(and then ceases to)3.185 F 2.5(decrease. Def)144
 542.4 R(ault:)-.1 E F2 -.15(ra)2.5 G(ng).15 E(ethr)-.1 E(eshold)-.37 E
 F0 2.5(=2)2.5 G 2.5(5m)-2.5 G(.)-2.5 E F1<ad5a>108 559.2 Q F2(plotmax)
-23.63 E F0 1.554(Speci\214es the trace v)144 571.2 R 1.554(alue corresp\
-onding to the maximum grayscale \(black\) in the section plots.)-.25 F
-(Def)144 583.2 Q(ault:)-.1 E F2(plotmax)2.5 E F0 2.5(=5)2.5 G(0.)-2.5 E
-F1<ad56>108 600 Q F0 .749(This option increases the v)23.08 F .749
-(erbosity of)-.15 F F1(mbextractsegy)3.249 E F0 3.249(,c)C .749
+144 559.2 Q F0 .194(Speci\214es the trace v)144 571.2 R .193(alue corre\
+sponding to the maximum grayscale \(black\) in the section plots. De-)
+-.25 F -.1(fa)144 583.2 S(ult:).1 E F2(plotmax)2.5 E F0 2.5(=5)2.5 G(0.)
+-2.5 E F1<ad56>108 600 Q F0 .749(This option increases the v)144 600 R
+.749(erbosity of)-.15 F F1(mbextractsegy)3.249 E F0 3.249(,c)C .749
 (ausing it to print out messages re)-3.249 F -.05(ga)-.15 G(rding).05 E
 (its progress to stdout.)144 612 Q/F3 10.95/Times-Bold@0 SF(EXAMPLES)72
 640.8 Q F0 1.211(Suppose that one has collected a set of Reson 7k data\

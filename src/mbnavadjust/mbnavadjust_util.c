@@ -5,8 +5,6 @@
 #include <string.h>
 #include <strings.h>
 
-#include <mb_config.h>
-
 /* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
 #if defined(_MSC_VER) && (_MSC_VER >= 1900)
 #	ifndef WIN32
@@ -34,6 +32,8 @@
 #define UNSET (-1)
 
 #define XTPOINTER XtPointer
+
+#define STRING_MAX (10 * 1024)
 
 /*
  * The following enum is used to support wide character sets.
@@ -572,14 +572,14 @@ static XmString StringToXmString(char *str) {
 		 * Create the segment. Text and tag first.
 		 */
 		if (textLen) {
-			if (textBufLen <= (textLen * sizeof(wchar_t))) {
+			if (textBufLen <= (textLen * (int)sizeof(wchar_t))) {
 				textBufLen = (textLen + 1) * sizeof(wchar_t);
 				textBuf = (char *)XtRealloc(textBuf, textBufLen);
 			}
 			copyWcsToMbs(textBuf, text, textLen, True);
 
 			if (tagLen) {
-				if (tagBufLen <= (tagLen * sizeof(wchar_t))) {
+				if (tagBufLen <= (tagLen * (int)sizeof(wchar_t))) {
 					tagBufLen = (tagLen + 1) * sizeof(wchar_t);
 					tagBuf = (char *)XtRealloc(tagBuf, tagBufLen);
 				}
@@ -1097,7 +1097,7 @@ void BX_MENU_POST(Widget p, XtPointer mw, XEvent *ev, Boolean *dispatch) {
 
 	Arg args[2];
 	int argcnt = 0;
-	int button;
+	unsigned int button;
 	XtSetArg(args[argcnt], XmNwhichButton, &button);
 	argcnt++;
 	XtGetValues(m, args, argcnt);
@@ -1667,7 +1667,7 @@ LFUNC(atoui, unsigned int, (char *p, unsigned int l, unsigned int *ui_return));
 #endif
 
 static unsigned int atoui(char *p, unsigned int l, unsigned int *ui_return) {
-	int i;
+	unsigned int i;
 
 	int n = 0;
 	for (i = 0; i < l; i++)
@@ -2443,7 +2443,7 @@ static void SetImagePixels(
 	char *dst;
 	int nbytes;
 	unsigned int *iptr;
-	int x, y, i;
+	unsigned int x, y, i;
 
 	iptr = pixelindex;
 	if (image->depth == 1) {
@@ -2508,7 +2508,7 @@ static void SetImagePixels32(
 	unsigned char *addr;
 	unsigned int *paddr;
 	unsigned int *iptr;
-	int x, y;
+	unsigned int x, y;
 
 	iptr = pixelindex;
 #ifndef WORD64
@@ -2549,7 +2549,7 @@ static void SetImagePixels16(
     XImage *image, unsigned int width, unsigned int height, unsigned int *pixelindex, Pixel *pixels) {
 	unsigned char *addr;
 	unsigned int *iptr;
-	int x, y;
+	unsigned int x, y;
 
 	iptr = pixelindex;
 	if (image->byte_order == MSBFirst)
@@ -2576,7 +2576,7 @@ static void SetImagePixels8(
     XImage *image, unsigned int width, unsigned int height,
     unsigned int *pixelindex, Pixel *pixels) {
 	unsigned int *iptr;
-	int x, y;
+	unsigned int x, y;
 
 	iptr = pixelindex;
 	for (y = 0; y < height; y++)
@@ -2594,7 +2594,7 @@ static void SetImagePixels1(
 	unsigned char bit;
 	int xoff, yoff;
 	unsigned int *iptr;
-	int x, y;
+	unsigned int x, y;
 
 	if (image->byte_order != image->bitmap_bit_order)
 		SetImagePixels(image, width, height, pixelindex, pixels);
@@ -3136,8 +3136,9 @@ void SetAppDefaults(
     Widget w, UIAppDefault *defs, char *inst_name, Boolean override_inst) {
 	Display *dpy = XtDisplay(w); /*  Retrieve the display */
 	XrmDatabase rdb = NULL;      /* A resource data base */
-	char lineage[1000];
-	char buf[1000];
+	char lineage[4200];
+	char buf[4096];
+        char bigbuf[STRING_MAX];        
 	Widget parent;
 
 	/* Protect ourselves */
@@ -3161,7 +3162,8 @@ void SetAppDefaults(
 			break;
 
 		strcpy(buf, lineage);
-		sprintf(lineage, "*%s%s", XtName(parent), buf);
+
+                sprintf(lineage, "*%s%s", XtName(parent), buf);
 
 		parent = XtParent(parent);
 	}
@@ -3192,20 +3194,20 @@ void SetAppDefaults(
 			/* being affected.  */
 
 			if (*defs->cInstName != '\0') {
-				sprintf(buf, "%s*%s*%s.%s: %s", lineage, defs->wName, defs->cInstName, defs->wRsc, defs->value);
+				sprintf(bigbuf, "%s*%s*%s.%s: %s", lineage, defs->wName, defs->cInstName, defs->wRsc, defs->value);
 			}
 			else {
-				sprintf(buf, "%s*%s.%s: %s", lineage, defs->wName, defs->wRsc, defs->value);
+				sprintf(bigbuf, "%s*%s.%s: %s", lineage, defs->wName, defs->wRsc, defs->value);
 			}
 		}
 		else if (*defs->wName != '\0') {
-			sprintf(buf, "%s*%s*%s.%s: %s", lineage, inst_name, defs->wName, defs->wRsc, defs->value);
+			sprintf(bigbuf, "%s*%s*%s.%s: %s", lineage, inst_name, defs->wName, defs->wRsc, defs->value);
 		}
 		else {
-			sprintf(buf, "%s*%s.%s: %s", lineage, inst_name, defs->wRsc, defs->value);
+			sprintf(bigbuf, "%s*%s.%s: %s", lineage, inst_name, defs->wRsc, defs->value);
 		}
 
-		XrmPutLineResource(&rdb, buf);
+		XrmPutLineResource(&rdb, bigbuf);
 		defs++;
 	}
 

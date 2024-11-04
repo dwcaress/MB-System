@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:02 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:08 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 2
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -258,15 +264,15 @@ G(ampshire)-2.5 E(Christian do Santos Ferreira)108 367.2 Q(MAR)113 379.2
 Q(UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
 391.2 Q -.15(ve)-.25 G(rsity of Bremen).15 E F1(OPTIONS)72 420 Q F2
 <ad48>108 432 Q F0 .162(This "help" \215ag cause the program to print o\
-ut a description of its operation and then e)22.52 F .161(xit immedi-)
--.15 F(ately)144 444 Q(.)-.65 E F2<ad49>108 460.8 Q F3(in\214le)26.41 E
-F0(Sets the \214lename of the input GMT grid \214le. This \214le must b\
-e in the GMT NetCDF GRD format.)144 472.8 Q F2<ad52>108 489.6 Q F3
-(w/e/s/n)23.08 E F0 .289(Sets the bounds of the area of interest in the\
- grid \214le. The information reported will pertain to this)144 501.6 R
-(area only)144 513.6 Q(.)-.65 E F2<ad56>108 530.4 Q F0(The)23.08 E F2
-<ad56>2.5 E F0(option causes)2.5 E F2(mbm_grdinf)2.5 E(o)-.25 E F0
-(to print out status messages.)2.5 E F1(EXAMPLES)72 559.2 Q F0 .714
+ut a description of its operation and then e)144 432 R .161(xit immedi-)
+-.15 F(ately)144 444 Q(.)-.65 E F2<ad49>108 460.8 Q F3(in\214le)144
+460.8 Q F0(Sets the \214lename of the input GMT grid \214le. This \214l\
+e must be in the GMT NetCDF GRD format.)144 472.8 Q F2<ad52>108 489.6 Q
+F3(w/e/s/n)144 489.6 Q F0 .289(Sets the bounds of the area of interest \
+in the grid \214le. The information reported will pertain to this)144
+501.6 R(area only)144 513.6 Q(.)-.65 E F2<ad56>108 530.4 Q F0(The)144
+530.4 Q F2<ad56>2.5 E F0(option causes)2.5 E F2(mbm_grdinf)2.5 E(o)-.25
+E F0(to print out status messages.)2.5 E F1(EXAMPLES)72 559.2 Q F0 .714
 (Suppose that we ha)108 571.2 R 1.013 -.15(ve u)-.2 H(sed).15 E F2
 (mbgrid)3.213 E F0 .713(to obtain a topograph)3.213 F 3.213(yg)-.05 G
 .713(rid \214le called K)-3.213 F .713(ohalaA_bath.grd in the GMT)-.35 F

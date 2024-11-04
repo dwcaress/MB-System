@@ -1,4 +1,4 @@
-.TH mbnavadjustmerge 1 "30 September 2019" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavadjustmerge 1 "15 November 2022" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavadjustmerge\fP \- Tool to modify MBnavadjust projects,
 including merging projects, adding global ties, setting tie modes, exporting
@@ -21,6 +21,12 @@ Version 5.0
 --set-global-tie-xyonly=file:section[:snav]
 .br
 --set-global-tie-zonly=file:section[:snav]
+.br
+--set-all-global-ties-xyz
+.br
+--set-all-global-ties-xyonly
+.br
+--set-all-global-ties-zonly
 .br
 --unset-global-tie=file:section
 .br
@@ -201,6 +207,24 @@ for an optimal navigation model.
 .TP
 .B \--set-global-tie-zonly=file:section[:snav]
 This option sets the mode of the existing specified global tie in the
+\fBMBnavadjust\fP project to be "Z". This means only the vertical
+coordinate of the tie will be used as a constraint in the inversion
+for an optimal navigation model.
+.TP
+.B \--set-all-global-ties-xyz
+This option sets the mode of all global ties in the
+\fBMBnavadjust\fP project to be "XYZ". This means all three
+coordinates of the tie will be used as constraints in the inversion
+for an optimal navigation model.
+.TP
+.B \--set-all-global-ties-xyonly
+This option sets the mode of all global ties in the
+\fBMBnavadjust\fP project to be "XY". This means only the horizontal
+coordinates of the tie will be used as constraints in the inversion
+for an optimal navigation model.
+.TP
+.B \--set-all-global-ties-zonly
+This option sets the mode of all global ties in the
 \fBMBnavadjust\fP project to be "Z". This means only the vertical
 coordinate of the tie will be used as a constraint in the inversion
 for an optimal navigation model.
@@ -427,6 +451,15 @@ navigation track length less than \fImin_length\fP.
 This option sets all crossings for which one or both data sections have a
 navigation track length less than \fImin_length\fP to "skipped" mode. Any ties
 associated with these crossings are deleted.
+.TP
+.B \--remake-mb166-files
+This option causes \fBmbnavadjustmerge\fP to remake the navigation files inside
+the project, fixing problems caused by a since-fixed bug.
+.TP
+.B \--fix-sensordepth
+This option causes \fBmbnavadjustmerge\fP to recalculate the sensordepth values
+in the project file from the imported swath data, fixing problems caused by a
+since-fixed bug.
 .TP
 .B \--verbose
 This option increases the verbosity of \fBMBnavadjustmerge\fP, which

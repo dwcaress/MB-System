@@ -300,8 +300,7 @@ void BxPopupCB(Widget w, XtPointer client, XtPointer call) {
 			XtPopup(widgets[i], XtGrabNone);
 		}
 		else {
-			printf("Callback Error (BxPopupCB):\n\t\
-Object %s is not a Shell\n",
+			printf("Callback Error (BxPopupCB):\n\tObject %s is not a Shell\n",
 			       XtName(widgets[i]));
 		}
 		i++;
@@ -314,13 +313,6 @@ Object %s is not a Shell\n",
 void do_mbedit_init(int argc, char **argv) {
 	/* make sure expose plots are off */
 	expose_plot_ok = false;
-
-#ifdef PRINTING_SUPPORTED
-fprintf(stderr, "PRINTING_SUPPORTED defined %d\n", PRINTING_SUPPORTED);
-#else
-fprintf(stderr, "PRINTING_SUPPORTED not defined\n");
-#endif
-
 
 	/* get additional widgets */
 	fileSelectionList = (Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_LIST);
@@ -576,7 +568,7 @@ void do_load_specific_file(int i_file) {
 		currentfile = i_file;
 
 		/* check for edit save file */
-		char save_file[MB_PATH_MAXLINE];
+		char save_file[MB_PATH_MAXLINE+10];
 		sprintf(save_file, "%s.esf", filepaths[currentfile]);
 		struct stat file_status;
 		int fstat = stat(save_file, &file_status);
@@ -829,7 +821,7 @@ void do_build_filelist() {
 		}
 
 		/* check for edit save file */
-		char save_file[MB_PATH_MAXLINE];
+		char save_file[MB_PATH_MAXLINE+10];
 		sprintf(save_file, "%s.esf", filepaths[i]);
 		struct stat file_status;
 		const int fstat = stat(save_file, &file_status);
@@ -885,7 +877,7 @@ void do_build_filelist() {
 					esfstrptr = esfnostr;
 
 				/* build x string item */
-				char value_text[MB_PATH_MAXLINE];
+				char value_text[MB_PATH_MAXLINE+10];
 				sprintf(value_text, "%s %s %s %3d", lockstrptr, esfstrptr, filepaths[i], fileformats[i]);
 				xstr[i] = XmStringCreateLocalized(value_text);
 

@@ -209,7 +209,7 @@ int mbview_freevectorarrays(int verbose, double **veclon, double **veclat, doubl
 /*------------------------------------------------------------------------------*/
 int mbview_addvector(int verbose, size_t instance, int npoint, double *veclon, double *veclat, double *vecz, double *vecdata,
                      int veccolor, int vecsize, mb_path vecname, double vecdatamin, double vecdatamax, int *error) {
-	if (verbose >= 2) {
+	if (verbose >= 0) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -248,6 +248,7 @@ int mbview_addvector(int verbose, size_t instance, int npoint, double *veclon, d
 			shared.shareddata.nvector_alloc = 0;
 		} else {
 			for (int i = shared.shareddata.nvector; i < shared.shareddata.nvector_alloc; i++) {
+				shared.shareddata.vectors[i].active = false;
 				shared.shareddata.vectors[i].color = MBV_COLOR_RED;
 				shared.shareddata.vectors[i].size = 4;
 				shared.shareddata.vectors[i].name[0] = '\0';
@@ -284,6 +285,7 @@ int mbview_addvector(int verbose, size_t instance, int npoint, double *veclon, d
 		shared.shareddata.nvector++;
 
 		/* set color size and name for new vec */
+		shared.shareddata.vectors[ivec].active = true;
 		shared.shareddata.vectors[ivec].color = veccolor;
 		shared.shareddata.vectors[ivec].size = vecsize;
 		strcpy(shared.shareddata.vectors[ivec].name, vecname);
@@ -359,6 +361,7 @@ int mbview_addvector(int verbose, size_t instance, int npoint, double *veclon, d
 		fprintf(stderr, "dbg2       vector_selected:       %d\n", shared.shareddata.vector_selected);
 		fprintf(stderr, "dbg2       vector_point_selected: %d\n", shared.shareddata.vector_point_selected);
 		for (int i = 0; i < shared.shareddata.nvector; i++) {
+			fprintf(stderr, "dbg2       vec %d active:        %d\n", i, shared.shareddata.vectors[i].active);
 			fprintf(stderr, "dbg2       vec %d color:         %d\n", i, shared.shareddata.vectors[i].color);
 			fprintf(stderr, "dbg2       vec %d size:          %d\n", i, shared.shareddata.vectors[i].size);
 			fprintf(stderr, "dbg2       vec %d name:          %s\n", i, shared.shareddata.vectors[i].name);
@@ -485,16 +488,18 @@ int mbview_pick_vector_select(size_t instance, int select, int which, int xpixel
 			shared.shareddata.vector_point_selected = MBV_SELECT_NONE;
 
 			for (int i = 0; i < shared.shareddata.nvector; i++) {
-				for (int j = 0; j < shared.shareddata.vectors[i].npoints; j++) {
-					const double xx = xgrid - shared.shareddata.vectors[i].vectorpts[j].point.xgrid[instance];
-					const double yy = ygrid - shared.shareddata.vectors[i].vectorpts[j].point.ygrid[instance];
-					const double rr = sqrt(xx * xx + yy * yy);
-					if (rr < rrmin) {
-						rrmin = rr;
-						shared.shareddata.vector_selected = i;
-						shared.shareddata.vector_point_selected = j;
-					}
-				}
+        if (shared.shareddata.vectors[i].active) {
+  				for (int j = 0; j < shared.shareddata.vectors[i].npoints; j++) {
+  					const double xx = xgrid - shared.shareddata.vectors[i].vectorpts[j].point.xgrid[instance];
+  					const double yy = ygrid - shared.shareddata.vectors[i].vectorpts[j].point.ygrid[instance];
+  					const double rr = sqrt(xx * xx + yy * yy);
+  					if (rr < rrmin) {
+  						rrmin = rr;
+  						shared.shareddata.vector_selected = i;
+  						shared.shareddata.vector_point_selected = j;
+  					}
+  				}
+        }
 			}
 		}
 		else {
@@ -545,6 +550,7 @@ int mbview_pick_vector_select(size_t instance, int select, int which, int xpixel
 		fprintf(stderr, "dbg2       vector_selected:       %d\n", shared.shareddata.vector_selected);
 		fprintf(stderr, "dbg2       vector_point_selected: %d\n", shared.shareddata.vector_point_selected);
 		for (int i = 0; i < shared.shareddata.nvector; i++) {
+			fprintf(stderr, "dbg2       vec %d active:       %d\n", i, shared.shareddata.vectors[i].active);
 			fprintf(stderr, "dbg2       vec %d color:         %d\n", i, shared.shareddata.vectors[i].color);
 			fprintf(stderr, "dbg2       vec %d size:          %d\n", i, shared.shareddata.vectors[i].size);
 			fprintf(stderr, "dbg2       vec %d name:          %s\n", i, shared.shareddata.vectors[i].name);
@@ -623,6 +629,7 @@ int mbview_vector_delete(size_t instance, int ivec) {
 		}
 
 		/* rest last vec */
+		shared.shareddata.vectors[shared.shareddata.nvector - 1].active = false;
 		shared.shareddata.vectors[shared.shareddata.nvector - 1].color = MBV_COLOR_RED;
 		shared.shareddata.vectors[shared.shareddata.nvector - 1].size = 4;
 		shared.shareddata.vectors[shared.shareddata.nvector - 1].name[0] = '\0';
@@ -690,48 +697,50 @@ int mbview_drawvector(size_t instance, int rez) {
 
 		/* loop over the vecs plotting xyz vectors */
 		for (int ivec = 0; ivec < shared.shareddata.nvector; ivec++) {
-			// const int icolor = shared.shareddata.vectors[ivec].color;
+      if (shared.shareddata.vectors[ivec].active) {
+  			// const int icolor = shared.shareddata.vectors[ivec].color;
 
-			/* plot lines */
-			/* glLineWidth((float)(shared.shareddata.vectors[ivec].size));
-			glBegin(GL_LINE_STRIP); */
+  			/* plot lines */
+  			/* glLineWidth((float)(shared.shareddata.vectors[ivec].size));
+  			glBegin(GL_LINE_STRIP); */
 
-			/* plot balls */
-			for (int jpoint = 0; jpoint < shared.shareddata.vectors[ivec].npoints; jpoint += stride) {
-				/* set color */
-				float red;
-				float green;
-				float blue;
-				mbview_getcolor(shared.shareddata.vectors[ivec].vectorpts[jpoint].data, shared.shareddata.vectors[ivec].datamax,
-				                shared.shareddata.vectors[ivec].datamin, MBV_COLORTABLE_NORMAL, (float)0.0, (float)0.0,
-				                (float)1.0, (float)0.0, (float)0.0, (float)0.0, colortable_bright_red, colortable_bright_green,
-				                colortable_bright_blue, &red, &green, &blue);
-				if (shared.shareddata.vectors[ivec].vectorpts[jpoint].selected ||
-				    (jpoint < shared.shareddata.vectors[ivec].npoints - 1 &&
-				     shared.shareddata.vectors[ivec].vectorpts[jpoint + 1].selected)) {
-					glColor3f(colortable_object_red[MBV_COLOR_RED], colortable_object_green[MBV_COLOR_RED],
-					          colortable_object_blue[MBV_COLOR_RED]);
-				}
-				else {
-					glColor3f(red, green, blue);
-				}
+  			/* plot balls */
+  			for (int jpoint = 0; jpoint < shared.shareddata.vectors[ivec].npoints; jpoint += stride) {
+  				/* set color */
+  				float red;
+  				float green;
+  				float blue;
+  				mbview_getcolor(shared.shareddata.vectors[ivec].vectorpts[jpoint].data, shared.shareddata.vectors[ivec].datamin,
+  				                shared.shareddata.vectors[ivec].datamax, MBV_COLORTABLE_NORMAL, (float)0.0, (float)0.0,
+  				                (float)1.0, (float)0.0, (float)0.0, (float)0.0, colortable_bright_red, colortable_bright_green,
+  				                colortable_bright_blue, &red, &green, &blue);
+  				if (shared.shareddata.vectors[ivec].vectorpts[jpoint].selected ||
+  				    (jpoint < shared.shareddata.vectors[ivec].npoints - 1 &&
+  				     shared.shareddata.vectors[ivec].vectorpts[jpoint + 1].selected)) {
+  					glColor3f(colortable_object_red[MBV_COLOR_RED], colortable_object_green[MBV_COLOR_RED],
+  					          colortable_object_blue[MBV_COLOR_RED]);
+  				}
+  				else {
+  					glColor3f(red, green, blue);
+  				}
 
-				/* draw points in line */
-				/* glVertex3f((float)(shared.shareddata.vectors[ivec].vectorpts[jpoint].point.xdisplay[instance]),
-				        (float)(shared.shareddata.vectors[ivec].vectorpts[jpoint].point.ydisplay[instance]),
-				        (float)(shared.shareddata.vectors[ivec].vectorpts[jpoint].point.zdisplay[instance])); */
+  				/* draw points in line */
+  				/* glVertex3f((float)(shared.shareddata.vectors[ivec].vectorpts[jpoint].point.xdisplay[instance]),
+  				        (float)(shared.shareddata.vectors[ivec].vectorpts[jpoint].point.ydisplay[instance]),
+  				        (float)(shared.shareddata.vectors[ivec].vectorpts[jpoint].point.zdisplay[instance])); */
 
-				/* draw points as balls */
-				glTranslatef((float)(shared.shareddata.vectors[ivec].vectorpts[jpoint].point.xdisplay[instance]),
-				             (float)(shared.shareddata.vectors[ivec].vectorpts[jpoint].point.ydisplay[instance]),
-				             (float)(shared.shareddata.vectors[ivec].vectorpts[jpoint].point.zdisplay[instance]));
-				glCallList((GLuint)MBV_GLLIST_VECTORBALL);
-				glTranslatef((float)(-shared.shareddata.vectors[ivec].vectorpts[jpoint].point.xdisplay[instance]),
-				             (float)(-shared.shareddata.vectors[ivec].vectorpts[jpoint].point.ydisplay[instance]),
-				             (float)(-shared.shareddata.vectors[ivec].vectorpts[jpoint].point.zdisplay[instance]));
-			}
-			/* glEnd();*/
-		}
+  				/* draw points as balls */
+  				glTranslatef((float)(shared.shareddata.vectors[ivec].vectorpts[jpoint].point.xdisplay[instance]),
+  				             (float)(shared.shareddata.vectors[ivec].vectorpts[jpoint].point.ydisplay[instance]),
+  				             (float)(shared.shareddata.vectors[ivec].vectorpts[jpoint].point.zdisplay[instance]));
+  				glCallList((GLuint)MBV_GLLIST_VECTORBALL);
+  				glTranslatef((float)(-shared.shareddata.vectors[ivec].vectorpts[jpoint].point.xdisplay[instance]),
+  				             (float)(-shared.shareddata.vectors[ivec].vectorpts[jpoint].point.ydisplay[instance]),
+  				             (float)(-shared.shareddata.vectors[ivec].vectorpts[jpoint].point.zdisplay[instance]));
+  			}
+  			/* glEnd();*/
+  		}
+    }
 	}
 
 #ifdef MBV_GETERRORS

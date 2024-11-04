@@ -7,6 +7,15 @@
 #ifndef SURF_SURF_H_
 #define SURF_SURF_H_
 
+/* CMake build system section */
+#ifdef CMAKE_BUILD_SYSTEM
+
+#  include <rpc/rpc.h>
+#  include <rpc/types.h>
+#  include <rpc/xdr.h>
+
+#else // Begin Autotools section supporting legacy OS's
+
 #include <mb_config.h>
 
 #ifdef _WIN32
@@ -22,6 +31,8 @@
 #  endif
 # endif
 #endif
+
+#endif // End Autotools section
 
 /*
    time/date-sets are presented in ASCII-Characters

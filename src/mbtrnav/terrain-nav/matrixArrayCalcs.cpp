@@ -13,6 +13,13 @@
 #include "trn_log.h"
 #include "MathP.h"
 
+#define _STR(x) #x
+#define STR(x) _STR(x)
+
+#ifdef TRN_NORAND
+#pragma message( __FILE__":" STR(__LINE__) " - feature TRN_NORAND enabled (see FEATURE_OPTIONS in Makefile)" )
+#endif
+
 #ifdef USE_MATLAB
 Engine* matlabEng;
 #endif
@@ -725,7 +732,7 @@ double randn(double mean, double stddev) {
 
 
 char* charCat(char* dest, const char* front, const char* back) {
-	sprintf(dest, "%s%s", front, back);
+	snprintf(dest, strlen(front)+strlen(back)+1, "%s%s", front, back);
 	
 	return dest;
 }

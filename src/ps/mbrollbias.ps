@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:03 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:10 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 3
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -246,18 +252,18 @@ F(o)-.1 E(sw)108 230.4 Q .584(aths co)-.1 F -.15(ve)-.15 G .585
 .585(es tw)-.1 F 3.085(oi)-.1 G .585(nput \214les and calculates)-3.085
 F 1.231(best \214tting planes for each dataset.)108 242.4 R 1.231
 (The roll bias is calculated by solving for a common roll bias f)6.231 F
-(actor)-.1 E 1.79(which e)108 254.4 R 1.79(xplains the dif)-.15 F 1.79
-(ference between the sea\215oor slopes observ)-.25 F 1.79(ed on the tw)
--.15 F 4.29(os)-.1 G -.1(wa)-4.29 G 4.29(ths. This).1 F(approach)4.29 E
-.805(assumes that pitch bias is not a f)108 266.4 R .805
-(actor; this assumption is most correct when the heading of the tw)-.1 F
-3.304(os)-.1 G(hip-)-3.304 E .912(tracks are e)108 278.4 R .912
-(xactly opposite. The area is di)-.15 F .913
-(vided into a number of rectangular re)-.25 F .913
-(gions and calculations are)-.15 F .087(done in each re)108 290.4 R .087
-(gion containing a suf)-.15 F .087
-(\214cient number of data from both sw)-.25 F 2.586(aths. The)-.1 F .086
-(data contained in the tw)2.586 F(o)-.1 E .728
+(actor)-.1 E .726(which e)108 254.4 R .726(xplains the dif)-.15 F .727
+(ference between the sea\215oor slopes observ)-.25 F .727(ed on the tw)
+-.15 F 3.227(os)-.1 G -.1(wa)-3.227 G 3.227(ths. This).1 F .727
+(approach as-)3.227 F .162(sumes that pitch bias is not a f)108 266.4 R
+.161(actor; this assumption is most correct when the heading of the tw)
+-.1 F 2.661(os)-.1 G(hiptracks)-2.661 E .515(are e)108 278.4 R .515
+(xactly opposite. The area is di)-.15 F .515
+(vided into a number of rectangular re)-.25 F .516
+(gions and calculations are done in)-.15 F 2.112(each re)108 290.4 R
+2.112(gion containing a suf)-.15 F 2.111
+(\214cient number of data from both sw)-.25 F 4.611(aths. The)-.1 F
+2.111(data contained in the tw)4.611 F(o)-.1 E .728
 (data\214les should be processed to ensure that no artif)108 302.4 R
 .728(acts will bias the roll bias calculations.)-.1 F -.8(Ty)5.729 G
 (pically).8 E 3.229(,t)-.65 G(his)-3.229 E .748(means using)108 314.4 R
@@ -277,7 +283,7 @@ F2(mbclean)3.248 E F0 .748(and or)3.248 F F2(mbedit)3.248 E F0 .748
 (ampshire)-2.5 E(Christian do Santos Ferreira)108 439.2 Q(MAR)113 451.2
 Q(UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
 463.2 Q -.15(ve)-.25 G(rsity of Bremen).15 E F1(OPTIONS)72 492 Q F2
-<ad46>108 504 Q F3(format1/format2)24.19 E F0 1.162(Sets the)144 516 R
+<ad46>108 504 Q F3(format1/format2)144 504 Q F0 1.162(Sets the)144 516 R
 F2(MBIO)3.662 E F0 1.161
 (format identi\214ers for the \214rst and second data \214les, respecti)
 3.662 F -.15(ve)-.25 G(ly).15 E 6.161(.T)-.65 G 1.161(his program)-6.161
@@ -288,7 +294,7 @@ G .501(th sonar format supported by).1 F F2(MBIO)3.002 E F0 3.002(.Al)C
 (ath sonar data formats currently supported by)-.1 F F2(MBIO)3.157 E F0
 .657(and their identi\214er v)3.157 F .657(alues is gi)-.25 F -.15(ve)
 -.25 G(n).15 E(in the)144 552 Q F2(MBIO)2.5 E F0(manual page.)2.5 E F2
-<ad44>108 568.8 Q F3(xdim/ydim)23.08 E F0 .91
+<ad44>108 568.8 Q F3(xdim/ydim)144 568.8 Q F0 .91
 (The area speci\214ed using the)144 580.8 R F2<ad52>3.41 E F0 .91
 (option is di)3.41 F .91(vided up into a grid of rectangular re)-.25 F
 .91(gions; roll bias)-.15 F .416
@@ -301,10 +307,10 @@ G .501(th sonar format supported by).1 F F2(MBIO)3.002 E F0 3.002(.Al)C
 -2.749 F(lation for the entire area.)144 616.8 Q(Def)5 E(ault:)-.1 E F3
 (xdim)5 E F0(=)2.5 E F3(ydim)2.5 E F0 2.5(=1)2.5 G(.)-2.5 E F2<ad48>108
 633.6 Q F0 .162(This "help" \215ag cause the program to print out a des\
-cription of its operation and then e)22.52 F .161(xit immedi-)-.15 F
-(ately)144 645.6 Q(.)-.65 E F2<ad49>108 662.4 Q F3(\214le1)26.41 E F0
-(Sets the \214lename of the \214rst data \214le to be analyzed.)144
-674.4 Q F2<ad4a>108 691.2 Q F3(\214le2)25.3 E F0
+cription of its operation and then e)144 633.6 R .161(xit immedi-)-.15 F
+(ately)144 645.6 Q(.)-.65 E F2<ad49>108 662.4 Q F3(\214le1)144 662.4 Q
+F0(Sets the \214lename of the \214rst data \214le to be analyzed.)144
+674.4 Q F2<ad4a>108 691.2 Q F3(\214le2)144 691.2 Q F0
 (Sets the \214lename of the second data \214le to be analyzed.)144 703.2
 Q(MB-System 5.0)72 768 Q 2.5(3J)146.495 G(une 2013)-2.5 E(1)204.835 E 0
 Cg EP
@@ -314,19 +320,19 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 145.39(mbrollbias\(1\) MB-System)72 48 R 145.39
 (5.0 mbrollbias\(1\))2.5 F/F1 10/Times-Bold@0 SF<ad4c>108 84 Q/F2 10
-/Times-Italic@0 SF(lon\215ip)23.63 E F0 .572
+/Times-Italic@0 SF(lon\215ip)144 84 Q F0 .572
 (Sets the range of the longitude v)144 96 R .572(alues returned.)-.25 F
 (If)5.572 E F2(lon\215ip)3.072 E F0 .572(=\2551 then the longitude v)B
 .572(alues will be in)-.25 F .489(the range from \255360 to 0 de)144 108
 R .488(grees. If)-.15 F F2(lon\215ip)2.988 E F0 .488
 (=0 then the longitude v)B .488(alues will be in the range from)-.25 F
-1.382(\255180 to 180 de)144 120 R 1.382(grees. If)-.15 F F2(lon\215ip)
-3.882 E F0 1.382(=1 then the longitude v)B 1.382
-(alues will be in the range from 0 to 360)-.25 F(de)144 132 Q 2.5
-(grees. Def)-.15 F(ault:)-.1 E F2(lon\215ip)2.5 E F0 2.5(=0)2.5 G(.)-2.5
-E F1<ad52>108 148.8 Q F2(west/east/south/north)23.08 E F0(Sets the long\
-itude and latitude bounds of the area of the roll bias test.)144 160.8 Q
-F1<ad56>108 177.6 Q F0(The)23.08 E F1<ad56>2.5 E F0
+.505(\255180 to 180 de)144 120 R .505(grees. If)-.15 F F2(lon\215ip)
+3.006 E F0 .506(=1 then the longitude v)B .506
+(alues will be in the range from 0 to 360 de-)-.25 F 2.5(grees. Def)144
+132 R(ault:)-.1 E F2(lon\215ip)2.5 E F0 2.5(=0)2.5 G(.)-2.5 E F1<ad52>
+108 148.8 Q F2(west/east/south/north)144 148.8 Q F0(Sets the longitude \
+and latitude bounds of the area of the roll bias test.)144 160.8 Q F1
+<ad56>108 177.6 Q F0(The)144 177.6 Q F1<ad56>2.5 E F0
 (option causes the program to print out the program name and v)2.5 E
 (ersion during e)-.15 E -.15(xe)-.15 G(cution.).15 E/F3 10.95
 /Times-Bold@0 SF(EXAMPLE)72 194.4 Q F0 .807(Suppose you w)108 206.4 R

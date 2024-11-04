@@ -67,9 +67,15 @@
 // Includes 
 /////////////////////////
 
+#if defined (__UNIX__) || defined (__unix__) || defined (__APPLE__)
 #include "netif.h"
 #include "trnw.h"
 #include "msocket.h"
+#include "mutils.h"
+#include "medebug.h"
+#include "mmdebug.h"
+#include "mconfig.h"
+#endif
 
 /////////////////////////
 // Macros
@@ -114,13 +120,15 @@
 /////////////////////////
 // Type Definitions
 /////////////////////////
+
+#if defined (__UNIX__) || defined (__unix__) || defined (__APPLE__)
 // resource bundle points to
 // objects/data needed by message handlers, etc.
 typedef struct trnif_res_s{
     wtnav_t *trn;
 }trnif_res_t;
 
-typedef int (*trnu_reset_callback_fn)(void);
+ typedef int (*trnu_reset_callback_fn)(void);
 typedef int (*trnu_reset_ofs_callback_fn)(double ofs_x, double ofs_y, double ofs_z);
 typedef int (*trnu_reset_box_callback_fn)(double ofs_x, double ofs_y, double ofs_z, double sd_x, double sd_y, double sd_z);
 
@@ -130,6 +138,7 @@ typedef struct trnuif_res_s{
     trnu_reset_ofs_callback_fn reset_ofs_callback;
     trnu_reset_box_callback_fn reset_box_callback;
 }trnuif_res_t;
+#endif
 
 #pragma pack(push,1)
 typedef struct trnuif_msg_s
@@ -146,25 +155,29 @@ typedef struct trnuif_msg_s
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+trnuif_msg_t *trnu_msg_str(const char *mid);
+trnuif_msg_t *trnu_msg_pd(const char *mid, int n, double *darr);
+trnuif_msg_t *trnu_msg_d3(const char *mid, double d0, double d1, double d2);
+trnuif_msg_t *trnu_msg_d6(const char *mid, double d0, double d1, double d2, double d3, double d4, double d5);
+
+#if defined (__UNIX__) || defined (__unix__) || defined (__APPLE__)
     int trnif_msg_read_ct(byte **pdest, uint32_t *len, netif_t *self, msock_connection_t *peer, int *errout);
     int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int *errout);
-    
+
     int trnif_msg_read_mb(byte **pdest, uint32_t *len, netif_t *self, msock_connection_t *peer, int *errout);
     int trnif_msg_handle_mb(void *msg, netif_t *self, msock_connection_t *peer, int *errout);
     int trnif_msg_pub_mb(netif_t *self, msock_connection_t *peer, char *data, size_t len);
-    
+
     int trnif_msg_read_trnu(byte **pdest, uint32_t *len, netif_t *self, msock_connection_t *peer, int *errout);
     int trnif_msg_handle_trnu(void *msg, netif_t *self, msock_connection_t *peer, int *errout);
     int trnif_msg_pub_trnu(netif_t *self, msock_connection_t *peer, char *data, size_t len);
-    trnuif_msg_t *trnu_msg_str(const char *mid);
-    trnuif_msg_t *trnu_msg_pd(const char *mid, int n, double *darr);
-    trnuif_msg_t *trnu_msg_d3(const char *mid, double d0, double d1, double d2);
-    trnuif_msg_t *trnu_msg_d6(const char *mid, double d0, double d1, double d2, double d3, double d4, double d5);
 
     int trnif_msg_read_trnmsg(byte **pdest, uint32_t *len, netif_t *self, msock_connection_t *peer, int *errout);
     int trnif_msg_handle_trnmsg(void *msg, netif_t *self, msock_connection_t *peer, int *errout);
-    
+
     int trnif_msg_pub(netif_t *self, msock_connection_t *peer, char *data, size_t len);
+#endif
 #ifdef __cplusplus
 }
 #endif

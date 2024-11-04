@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jun  3 23:45:02 2022
+%%Creator: groff version 1.22.4
+%%CreationDate: Tue Jul 18 15:55:08 2023
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 4
 %%Pages: 4
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 4
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -259,15 +265,15 @@ F2(GMT)2.5 E F0(modules)2.5 E F2(grdcon)2.5 E -.1(ve)-.4 G(rt).1 E F0
 Q(UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
 403.2 Q -.15(ve)-.25 G(rsity of Bremen).15 E F1(OPTIONS)72 432 Q F2
 <ad48>108 444 Q F0 .162(This "help" \215ag cause the program to print o\
-ut a description of its operation and then e)22.52 F .162(xit immedi-)
--.15 F(ately)144 456 Q(.)-.65 E F2<ad49>108 472.8 Q F3(ar)26.41 E
+ut a description of its operation and then e)144 444 R .162(xit immedi-)
+-.15 F(ately)144 456 Q(.)-.65 E F2<ad49>108 472.8 Q F3(ar)144 472.8 Q
 (c\214le)-.37 E F0(Sets the \214lename of the input ArcGIS ASCII grid.)
-144 484.8 Q F2<ad4a>108 501.6 Q F3(pr)25.3 E(ojection)-.45 E F0 .385(Th\
-is option speci\214es the projected coordinate system used for the ArcG\
-IS ASCII grid to be trans-)144 513.6 R(lated to a)144 525.6 Q F2(GMT)2.5
-E F0(netCDF grid.)2.5 E .199(ArcGIS ASCII grid \214les do not internall\
-y specify the coordinate system used.)144 549.6 R F2(GMT)5.199 E F0 .199
-(grids also do)2.699 F .435
+144 484.8 Q F2<ad4a>108 501.6 Q F3(pr)144 501.6 Q(ojection)-.45 E F0
+.385(This option speci\214es the projected coordinate system used for t\
+he ArcGIS ASCII grid to be trans-)144 513.6 R(lated to a)144 525.6 Q F2
+(GMT)2.5 E F0(netCDF grid.)2.5 E .199(ArcGIS ASCII grid \214les do not \
+internally specify the coordinate system used.)144 549.6 R F2(GMT)5.199
+E F0 .199(grids also do)2.699 F .435
 (not necessarily include information about the coordinate system. Ho)144
 561.6 R(we)-.25 E -.15(ve)-.25 G -.4(r,).15 G F2(MB-System)3.335 E F0
 (generates)2.935 E F2(GMT)144 573.6 Q F0 .149(grids that do ha)2.649 F
@@ -293,10 +299,10 @@ R 1.423 -.15(ve t)-.25 H 3.623(ot).15 G 1.122
 (rsal T).15 F(ransv)-.35 E 1.122(erse Mercator is)-.15 F .5
 (the most commonly used PCS in the oceanographic community)144 669.6 R 3
 (,b)-.65 G(ut)-3.2 E F2(MB-System)3 E F0 .5(supports a lar)3 F(ge)-.18 E
-2.171(number of other PCS')144 681.6 R 4.671(sa)-.55 G 4.671(sw)-4.671 G
-2.171(ell. The underlying projection functions deri)-4.671 F 2.47 -.15
-(ve f)-.25 H 2.17(rom the PR).15 F(OJ.4)-.4 E
-(library originated by Gerald Ev)144 693.6 Q
+1.203(number of other PCS')144 681.6 R 3.702(sa)-.55 G 3.702(sw)-3.702 G
+1.202(ell. The underlying projection functions deri)-3.702 F 1.502 -.15
+(ve f)-.25 H 1.202(rom the PR).15 F 1.202(OJ.4 li-)-.4 F
+(brary originated by Gerald Ev)144 693.6 Q
 (enden, then of the U.S. Geological Surv)-.15 E -.15(ey)-.15 G(.)-.5 E
 .707(If the ArcGIS grid that is to be translated for use with MB-System\
  is in geographic components,)144 717.6 R 1.111(then no special ar)144
@@ -309,15 +315,16 @@ R 1.423 -.15(ve t)-.25 H 3.623(ot).15 G 1.122
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 132.07(mbm_arc2grd\(1\) MB-System)72 48 R 132.07
-(5.0 mbm_arc2grd\(1\))2.5 F 1.859(coordinate system, then that coordina\
-te system must be speci\214ed with the)144 84 R/F1 10/Times-Bold@0 SF
-(-J)4.36 E/F2 10/Times-Italic@0 SF(pr)A(ojection)-.45 E F0(option)4.36 E
-.385(using a PCS identi\214er from the projection de\214nition list pro)
-144 96 R .385(vided at the end of the)-.15 F F1(mbgrid)2.885 E F0(manu-)
-2.885 E(albpage.)144 108 Q -.15(Fo)144 132 S 3.256(ri).15 G .756(nstanc\
-e, to fully specify a particular northern UTM zone, set projection = UT\
-MXXN where)-3.256 F .122(XX gi)144 144 R -.15(ve)-.25 G 2.622(st).15 G
-.122(he UTM zone \(de\214ned from 01 to 60\). As an e)-2.622 F .121
+(5.0 mbm_arc2grd\(1\))2.5 F .584(coordinate system, then that coordinat\
+e system must be speci\214ed with the)144 84 R/F1 10/Times-Bold@0 SF(-J)
+3.084 E/F2 10/Times-Italic@0 SF(pr)A(ojection)-.45 E F0 .584(option us-)
+3.084 F .177
+(ing a PCS identi\214er from the projection de\214nition list pro)144 96
+R .177(vided at the end of the)-.15 F F1(mbgrid)2.676 E F0(manualb-)
+2.676 E(page.)144 108 Q -.15(Fo)144 132 S 3.256(ri).15 G .756(nstance, \
+to fully specify a particular northern UTM zone, set projection = UTMXX\
+N where)-3.256 F .122(XX gi)144 144 R -.15(ve)-.25 G 2.622(st).15 G .122
+(he UTM zone \(de\214ned from 01 to 60\). As an e)-2.622 F .121
 (xample, a northern UTM zone 12 projec-)-.15 F 1.256
 (tion can be speci\214edb using)144 156 R F1(-J)3.756 E F2(UTM12N)A F0
 3.756(.S)C 1.256(outhern UTM zones are speci\214ed as UTMXXS. The)-3.756
@@ -328,25 +335,25 @@ F .617(European Petroleum Surv)144 168 R .917 -.15(ey G)-.15 H .617
 .032
 (ach; one can also specify the northern UTM zone 12 projection using)
 -2.532 F(its EPSG designation, or)144 192 Q F1(-J)2.5 E F2(epsg32612)A
-F0(.)A F1<ad4e>108 208.8 Q F2(nodata)23.08 E F1(Ar)144 220.8 Q(cGIS)-.18
-E F0 .652(ASCII grids use a v)3.152 F .652
+F0(.)A F1<ad4e>108 208.8 Q F2(nodata)144 208.8 Q F1(Ar)144 220.8 Q(cGIS)
+-.18 E F0 .652(ASCII grids use a v)3.152 F .652
 (alue de\214ned in the grid header to delineate re)-.25 F .651
 (gions with no data. By)-.15 F(def)144 232.8 Q(ault,)-.1 E F1(mbm_ar)
 3.683 E(c2grd)-.18 E F0 1.183(translates grid v)3.683 F 1.183
 (alues that match the)-.25 F F2(nodata)3.684 E F0 -.25(va)3.684 G 1.184
-(lue in the header to NaN).25 F 1.898(\(not-a-number\) v)144 244.8 R
-1.898(alues in the output)-.25 F F1(GMT)4.398 E F0 1.897
-(grid. This option allo)4.397 F 1.897(ws the user to set a dif)-.25 F
-(ferent)-.25 E F2(nodata)144 256.8 Q F0 -.25(va)2.5 G
-(lue to be used in the translation.).25 E F1<ad4f>108 273.6 Q F2(gr)
-22.52 E(d\214le)-.37 E F0 .994(Sets the \214lename of the output GMT gr\
+(lue in the header to NaN).25 F .79(\(not-a-number\) v)144 244.8 R .79
+(alues in the output)-.25 F F1(GMT)3.29 E F0 .789
+(grid. This option allo)3.29 F .789(ws the user to set a dif)-.25 F
+(ferent)-.25 E F2(no-)3.289 E(data)144 256.8 Q F0 -.25(va)2.5 G
+(lue to be used in the translation.).25 E F1<ad4f>108 273.6 Q F2(gr)144
+273.6 Q(d\214le)-.37 E F0 .994(Sets the \214lename of the output GMT gr\
 id \214le. This \214le will be in the)144 285.6 R F1(GMT)3.494 E F0(CO)
 3.495 E .995(ARDS NetCDF)-.35 F(\215oating point format.)144 297.6 Q F1
-<ad54>108 314.4 Q F2(title)23.63 E F0
+<ad54>108 314.4 Q F2(title)144 314.4 Q F0
 (This option sets the title string to be embedded in the output)144
 326.4 Q F1(GMT)2.5 E F0(netcdf grid \214le.)2.5 E F1<ad58>108 343.2 Q F2
-(xname)23.08 E F0 .55(This option sets the)144 355.2 R F2(xname)3.05 E
-F0 .55(string to be embedded in the output)3.05 F F1(GMT)3.05 E F0 .55
+(xname)144 343.2 Q F0 .55(This option sets the)144 355.2 R F2(xname)3.05
+E F0 .55(string to be embedded in the output)3.05 F F1(GMT)3.05 E F0 .55
 (netcdf grid \214le. This string)3.05 F .109(generally pro)144 367.2 R
 .109(vides both the common name and the rele)-.15 F -.25(va)-.25 G .11
 (nt units of the x-axis of the grid. F).25 F .11(or geo-)-.15 F .494
@@ -354,7 +361,7 @@ F0 .55(string to be embedded in the output)3.05 F F1(GMT)3.05 E F0 .55
 2.994 E F0 2.994(=")2.994 G .494(Longitude \(de)-2.994 F .494
 (grees\)". F)-.15 F .493(or PCS grids this will typi-)-.15 F(cally be)
 144 391.2 Q F2(xname)2.5 E F0 2.5(=")2.5 G(Easting \(m\)".)-2.5 E F1
-<ad59>108 408 Q F2(yname)23.08 E F0 .55(This option sets the)144 420 R
+<ad59>108 408 Q F2(yname)144 408 Q F0 .55(This option sets the)144 420 R
 F2(yname)3.05 E F0 .55(string to be embedded in the output)3.05 F F1
 (GMT)3.05 E F0 .55(netcdf grid \214le. This string)3.05 F .11
 (generally pro)144 432 R .11(vides both the common name and the rele)
@@ -363,22 +370,22 @@ F2(yname)3.05 E F0 .55(string to be embedded in the output)3.05 F F1
 (ault be)-.1 F F2(yname)3.48 E F0 3.48(=")3.48 G .98(Latitude \(de)-3.48
 F .98(grees\)". F)-.15 F .98(or PCS grids this will typi-)-.15 F
 (cally be)144 456 Q F2(yname)2.5 E F0 2.5(=")2.5 G(Northing \(m\)".)-2.5
-E F1<ad5a>108 472.8 Q F2(zname)23.63 E F0 .583(This option sets the)144
-484.8 R F2(zname)3.083 E F0 .582(string to be embedded in the output)
-3.083 F F1(GMT)3.082 E F0 .582(netcdf grid \214le. This string)3.082 F
-.853(generally pro)144 496.8 R .853
-(vides both the common name and the rele)-.15 F -.25(va)-.25 G .853
+E F1<ad5a>108 472.8 Q F2(zname)144 472.8 Q F0 .583(This option sets the)
+144 484.8 R F2(zname)3.083 E F0 .582
+(string to be embedded in the output)3.083 F F1(GMT)3.082 E F0 .582
+(netcdf grid \214le. This string)3.082 F .853(generally pro)144 496.8 R
+.853(vides both the common name and the rele)-.15 F -.25(va)-.25 G .853
 (nt units of the z-axis of the grid. Com-).25 F(moon v)144 508.8 Q
 (alues include)-.25 E F2(zname)2.5 E F0 2.5(=")2.5 G -.8(To)-2.5 G
 (pograph).8 E 2.5(y\()-.05 G(m\)" or)-2.5 E F2(zname)5 E F0 2.5(=")2.5 G
-(Bath)-2.5 E(ymetry \(m\)".)-.05 E F1<ad56>108 525.6 Q F0(The)23.08 E F1
-<ad56>2.5 E F0(option causes)2.5 E F1(mbm_ar)2.5 E(c2grd)-.18 E F0
+(Bath)-2.5 E(ymetry \(m\)".)-.05 E F1<ad56>108 525.6 Q F0(The)144 525.6
+Q F1<ad56>2.5 E F0(option causes)2.5 E F1(mbm_ar)2.5 E(c2grd)-.18 E F0
 (to print out status messages.)2.5 E/F3 10.95/Times-Bold@0 SF(EXAMPLES)
-72 554.4 Q F0 1.019(Suppose that we ha)108 566.4 R 1.319 -.15(ve b)-.2 H
-1.018(een pro).15 F 1.018(vided tw)-.15 F 3.518(ov)-.1 G 1.018
-(ersions of a topograph)-3.668 F 3.518(yg)-.05 G 1.018
-(rid in ArcGIS ASCII format, one in)-3.518 F 3.958
-(geographic coordinates \(P)108 578.4 R(atchT)-.15 E 3.958
+72 554.4 Q F0 .114(Suppose that we ha)108 566.4 R .414 -.15(ve b)-.2 H
+.114(een pro).15 F .114(vided tw)-.15 F 2.613(ov)-.1 G .113
+(ersions of a topograph)-2.763 F 2.613(yg)-.05 G .113
+(rid in ArcGIS ASCII format, one in ge-)-2.613 F 4.902
+(ographic coordinates \(P)108 578.4 R(atchT)-.15 E 4.902
 (opoGeoSq.asc\) and another in UTM zone 10N coordinates \(P)-.8 F(atch-)
 -.15 E -.8(To)108 590.4 S(poUTM.asc\). W).8 E 2.5(ew)-.8 G(ould lik)-2.6
 E 2.5(et)-.1 G 2.5(ob)-2.5 G 2.5(ea)-2.5 G(ble to display both grids in)
