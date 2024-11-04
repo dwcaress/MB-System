@@ -73,8 +73,8 @@ bool SwathGridData::readDatafile(char *swathFile) {
   if (access(infFile, F_OK) != 0) {
     // File does not exist
     std::cerr << "File " << infFile << " not found\n";
-    free((void *)infFile);    
-    return false;
+    /// free((void *)infFile);    
+    /// return false;
   }
 
   free((void *)infFile);
@@ -122,13 +122,6 @@ bool SwathGridData::readDatafile(char *swathFile) {
   // Load sounding data into grid
   mbeditviz_make_grid();
 
-  // Print swath navigation UTM coords
-  std::cout << "# navEast, navWest" << std::endl;
-  for (int i = 0; i < swathData->num_pings; i++) {
-    struct mbev_ping_struct *ping = &swathData->pings[i];
-    std::cout << ping->navlonx << ", " << ping->navlaty << std::endl;
-  }
-  
   // Save pointer to grid struct
   gridData_ = &mbev_grid;
 
