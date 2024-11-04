@@ -32,6 +32,7 @@ public:
       return testString_;
   }
 
+  /// List of supported color maps
   Q_PROPERTY(QStringList cmaps MEMBER colorMapsList_)
   
 protected:
