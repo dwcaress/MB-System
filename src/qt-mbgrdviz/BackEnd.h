@@ -7,9 +7,12 @@
 #include <QStringListModel>
 #include "TopoGridItem.h"
 
+
 /**
-   BackEnd is an interface between QML and C++ objects and functions.
-   BackEnd methods handle user inputs to QML, e.g. menu selections.
+   @deprecated BackEnd is an interface between QML and C++ objects and 
+   functions.BackEnd methods handle user inputs to QML, e.g. menu selections.
+   NOT CURRENTLY NEEDED, since TopoGridItem INVOKABLE functions handle most
+   needs now.
 */
 class BackEnd : public QObject
 {
