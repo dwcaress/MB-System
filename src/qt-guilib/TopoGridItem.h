@@ -72,33 +72,43 @@ namespace mb_system {
 
     /// Set color map
     Q_INVOKABLE bool setColormap(QString cmapName);    
+
+    /// Toggle axes plot
+    Q_INVOKABLE void showAxes(bool plotAxes);
+
+    Q_INVOKABLE void setVerticalExagg(float verticalExagg) {
+      verticalExagg_ = verticalExagg;
+    }
     
+
     /// Set grid filename
     void setGridFilename(char *filename) {
       if (gridFilename_) {
         free((void *)gridFilename_);
       }
-      gridFilename_ = strdup(filename);
+      if (filename) {
+	gridFilename_ = strdup(filename);
+      }
+      else {
+	gridFilename_ = strdup("");
+      }
     }
 
 
-    void showAxes(bool plotAxes) {
-      plotAxes_ = plotAxes;
-    }
-
-    void setVerticalExagg(float verticalExagg) {
-      verticalExagg_ = verticalExagg;
-    }
-    
   
   protected:
 
     /// Assemble pipeline elements
     void assemblePipeline(Pipeline *pipeline);
-    
+
+    /// Pass pipeline reassembly lambda code to dispatch_async() 
+    /// for execution in render thread
+    void reassemblePipeline(void);
+
     /// Set up axes
     void setupAxes(vtkCubeAxesActor *axesActor,
-		   vtkNamedColors *colors,                                                    double *surfaceBounds,
+		   vtkNamedColors *colors,
+		   double *surfaceBounds,
 		   double *gridBounds,
 		   const char *xUnits, const char *yUnits,
 		   const char *zUnits,
