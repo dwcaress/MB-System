@@ -18,6 +18,7 @@ Window {
     id: constants
   }
 
+  // Short-hand reference to supported color maps
   property variant cmaps: constants.cmaps
 
   ActionGroup {

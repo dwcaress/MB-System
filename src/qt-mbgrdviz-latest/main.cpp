@@ -38,10 +38,8 @@ int main(int argc, char* argv[])
   engine.load(QUrl("qrc:/main.qml"));
  
   QObject* topLevel = engine.rootObjects().value(0);
-  QQuickWindow* window = qobject_cast<QQuickWindow*>(topLevel);
 
-
-  // Find the TopoGridItem and load specified grid input
+  // Find the TopoGridItem instantiatd by QML and load specified grid input
   TopoGridItem *item = topLevel->findChild<TopoGridItem*>(TopoGridItemName);
   if (!item) {
     qFatal() << "Couldn't find TopoGridItem " << TopoGridItemName
@@ -53,8 +51,8 @@ int main(int argc, char* argv[])
   // (could be nullptr); will be loaded and displayed when item is
   // initialized (if not nullptr)
   item->setGridFilename(gridFilename);
-
   
+  QQuickWindow* window = qobject_cast<QQuickWindow*>(topLevel);
   window->show();
 
    app.exec();
