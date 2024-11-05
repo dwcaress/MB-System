@@ -650,8 +650,6 @@ mbsvplist_SOURCES = mbsvplist.cc
 @BUILD_MBSVPSELECT_TRUE@mbsvpselect_SOURCES = mbsvpselect.cc
 mbswath2las_SOURCES = mbswath2las.cc
 mbtime_SOURCES = mbtime.cc
-#mbtransmitpattern_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
-#mbtransmitpattern_SOURCES = mbtransmitpattern.cc
 mbvoxelclean_SOURCES = mbvoxelclean.cc
 @BUILD_FFTW_TRUE@mbsegypsd_LDADD =  \
 @BUILD_FFTW_TRUE@	${top_builddir}/src/mbaux/libmbaux.la \

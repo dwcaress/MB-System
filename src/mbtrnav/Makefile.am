@@ -8,7 +8,7 @@ LIBMBTRNFRAME = $(top_builddir)/src/mbtrnframe/libmbtrnframe.la
 MBTRNFRAME_INC = -I${top_srcdir}/src/mbtrnframe
 
 
-AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
+AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS} ${libproj_CPPFLAGS}
 
 AM_CPPFLAGS = -g -O0
 AM_CPPFLAGS += -I${top_srcdir}/src/mbtrnav/trnw
@@ -23,6 +23,7 @@ AM_CPPFLAGS += -I${top_srcdir}/src/mbtrn/mb1r
 AM_CPPFLAGS += -I${top_srcdir}/src/mbtrnframe
 AM_CPPFLAGS += -I${top_srcdir}/src/mbtrnutils
 AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
+AM_CPPFLAGS += ${libproj_CPPFLAGS}
 AM_CPPFLAGS += -DHAVE_CONFIG_H
 AM_CPPFLAGS += -DWITH_TESTS
 AM_CPPFLAGS += -DWITH_MMDEBUG

@@ -576,14 +576,15 @@ int mbview_addnav(int verbose, size_t instance, int npoint, double *time_d, doub
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Nav data altered in function <%s>\n", __func__);
 		fprintf(stderr, "dbg2  Nav values:\n");
-		fprintf(stderr, "dbg2       nav_mode:           %d\n", shared.shareddata.nav_mode);
-		fprintf(stderr, "dbg2       nav_view_mode:      %d\n", data->nav_view_mode);
-		fprintf(stderr, "dbg2       navdrape_view_mode: %d\n", data->navdrape_view_mode);
-		fprintf(stderr, "dbg2       nnav:               %d\n", shared.shareddata.nnav);
-		fprintf(stderr, "dbg2       nnav_alloc:         %d\n", shared.shareddata.nnav_alloc);
-		fprintf(stderr, "dbg2       nav_selected[0]:    %d\n", shared.shareddata.nav_selected[0]);
-		fprintf(stderr, "dbg2       nav_selected[1]:    %d\n", shared.shareddata.nav_selected[1]);
-		fprintf(stderr, "dbg2       nav_point_selected: %p\n", shared.shareddata.nav_point_selected);
+		fprintf(stderr, "dbg2       nav_mode:                  %d\n", shared.shareddata.nav_mode);
+		fprintf(stderr, "dbg2       nav_view_mode:             %d\n", data->nav_view_mode);
+		fprintf(stderr, "dbg2       navswathbounds_view_mode:  %d\n", data->navswathbounds_view_mode);
+		fprintf(stderr, "dbg2       navdrape_view_mode:        %d\n", data->navdrape_view_mode);
+		fprintf(stderr, "dbg2       nnav:                      %d\n", shared.shareddata.nnav);
+		fprintf(stderr, "dbg2       nnav_alloc:                %d\n", shared.shareddata.nnav_alloc);
+		fprintf(stderr, "dbg2       nav_selected[0]:           %d\n", shared.shareddata.nav_selected[0]);
+		fprintf(stderr, "dbg2       nav_selected[1]:           %d\n", shared.shareddata.nav_selected[1]);
+		fprintf(stderr, "dbg2       nav_point_selected:        %p\n", shared.shareddata.nav_point_selected);
 		for (int i = 0; i < shared.shareddata.nnav; i++) {
 			fprintf(stderr, "dbg2       nav %d active:        %d\n", i, shared.shareddata.navs[i].active);
 			fprintf(stderr, "dbg2       nav %d color:         %d\n", i, shared.shareddata.navs[i].color);
@@ -1402,15 +1403,16 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Nav data altered in function <%s>\n", __func__);
 		fprintf(stderr, "dbg2  Nav values:\n");
-		fprintf(stderr, "dbg2       nav_mode:              %d\n", shared.shareddata.nav_mode);
-		fprintf(stderr, "dbg2       nav_view_mode:         %d\n", data->nav_view_mode);
-		fprintf(stderr, "dbg2       navdrape_view_mode:    %d\n", data->navdrape_view_mode);
-		fprintf(stderr, "dbg2       nnav:                  %d\n", shared.shareddata.nnav);
-		fprintf(stderr, "dbg2       nnav_alloc:            %d\n", shared.shareddata.nnav_alloc);
-		fprintf(stderr, "dbg2       nav_selected[0]:       %d\n", shared.shareddata.nav_selected[0]);
-		fprintf(stderr, "dbg2       nav_point_selected[0]: %d\n", shared.shareddata.nav_point_selected[0]);
-		fprintf(stderr, "dbg2       nav_selected[1]:       %d\n", shared.shareddata.nav_selected[1]);
-		fprintf(stderr, "dbg2       nav_point_selected[1]: %d\n", shared.shareddata.nav_point_selected[1]);
+		fprintf(stderr, "dbg2       nav_mode:                  %d\n", shared.shareddata.nav_mode);
+		fprintf(stderr, "dbg2       nav_view_mode:             %d\n", data->nav_view_mode);
+		fprintf(stderr, "dbg2       navswathbounds_view_mode:  %d\n", data->navswathbounds_view_mode);
+		fprintf(stderr, "dbg2       navdrape_view_mode:        %d\n", data->navdrape_view_mode);
+		fprintf(stderr, "dbg2       nnav:                      %d\n", shared.shareddata.nnav);
+		fprintf(stderr, "dbg2       nnav_alloc:                %d\n", shared.shareddata.nnav_alloc);
+		fprintf(stderr, "dbg2       nav_selected[0]:           %d\n", shared.shareddata.nav_selected[0]);
+		fprintf(stderr, "dbg2       nav_point_selected[0]:     %d\n", shared.shareddata.nav_point_selected[0]);
+		fprintf(stderr, "dbg2       nav_selected[1]:           %d\n", shared.shareddata.nav_selected[1]);
+		fprintf(stderr, "dbg2       nav_point_selected[1]:     %d\n", shared.shareddata.nav_point_selected[1]);
 		for (int i = 0; i < shared.shareddata.nnav; i++) {
 			fprintf(stderr, "dbg2       nav %d active:        %d\n", i, shared.shareddata.navs[i].active);
 			fprintf(stderr, "dbg2       nav %d color:         %d\n", i, shared.shareddata.navs[i].color);
@@ -2144,16 +2146,18 @@ int mbview_drawnav(size_t instance, int rez) {
 
 	/* draw swathbounds */
 	if (shared.shareddata.nav_mode != MBV_NAV_OFF &&
-	    (data->nav_view_mode == MBV_VIEW_ON || data->navdrape_view_mode == MBV_VIEW_ON) && shared.shareddata.nnav > 0) {
+	    (data->nav_view_mode == MBV_VIEW_ON || data->navdrape_view_mode == MBV_VIEW_ON) 
+	    && data->navswathbounds_view_mode == MBV_VIEW_ON
+	    && shared.shareddata.nnav > 0) {
 		/* initialize on the fly draping segment */
-	  struct mbview_linesegmentw_struct segment;
+	    struct mbview_linesegmentw_struct segment;
 		segment.nls = 0;
 		segment.nls_alloc = 0;
 		segment.lspoints = NULL;
 
 		/* loop over the navs plotting swathbounds */
 		for (int inav = 0; inav < shared.shareddata.nnav; inav++) {
-      if (shared.shareddata.navs[inav].active) {
+          if (shared.shareddata.navs[inav].active) {
   			const double timegapuse = 60.0 * shared.shareddata.navs[inav].decimation * view->timegap;
   			if (shared.shareddata.navs[inav].swathbounds && shared.shareddata.navs[inav].nselected > 0) {
   				glColor3f(colortable_object_red[MBV_COLOR_YELLOW], colortable_object_green[MBV_COLOR_YELLOW],
@@ -2466,15 +2470,16 @@ int mbview_picknavbyname(int verbose, size_t instance, char *name, int *error) {
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Nav data altered in function <%s>\n", __func__);
 		fprintf(stderr, "dbg2  Nav values:\n");
-		fprintf(stderr, "dbg2       nav_mode:              %d\n", shared.shareddata.nav_mode);
-		fprintf(stderr, "dbg2       nav_view_mode:         %d\n", data->nav_view_mode);
-		fprintf(stderr, "dbg2       navdrape_view_mode:    %d\n", data->navdrape_view_mode);
-		fprintf(stderr, "dbg2       nnav:                  %d\n", shared.shareddata.nnav);
-		fprintf(stderr, "dbg2       nnav_alloc:            %d\n", shared.shareddata.nnav_alloc);
-		fprintf(stderr, "dbg2       nav_selected[0]:       %d\n", shared.shareddata.nav_selected[0]);
-		fprintf(stderr, "dbg2       nav_point_selected[0]: %d\n", shared.shareddata.nav_point_selected[0]);
-		fprintf(stderr, "dbg2       nav_selected[1]:       %d\n", shared.shareddata.nav_selected[1]);
-		fprintf(stderr, "dbg2       nav_point_selected[1]: %d\n", shared.shareddata.nav_point_selected[1]);
+		fprintf(stderr, "dbg2       nav_mode:                  %d\n", shared.shareddata.nav_mode);
+		fprintf(stderr, "dbg2       nav_view_mode:             %d\n", data->nav_view_mode);
+		fprintf(stderr, "dbg2       navswathbounds_view_mode:  %d\n", data->navswathbounds_view_mode);
+		fprintf(stderr, "dbg2       navdrape_view_mode:        %d\n", data->navdrape_view_mode);
+		fprintf(stderr, "dbg2       nnav:                      %d\n", shared.shareddata.nnav);
+		fprintf(stderr, "dbg2       nnav_alloc:                %d\n", shared.shareddata.nnav_alloc);
+		fprintf(stderr, "dbg2       nav_selected[0]:           %d\n", shared.shareddata.nav_selected[0]);
+		fprintf(stderr, "dbg2       nav_point_selected[0]:     %d\n", shared.shareddata.nav_point_selected[0]);
+		fprintf(stderr, "dbg2       nav_selected[1]:           %d\n", shared.shareddata.nav_selected[1]);
+		fprintf(stderr, "dbg2       nav_point_selected[1]:     %d\n", shared.shareddata.nav_point_selected[1]);
 		for (int i = 0; i < shared.shareddata.nnav; i++) {
 			fprintf(stderr, "dbg2       nav %d active:        %d\n", i, shared.shareddata.navs[i].active);
 			fprintf(stderr, "dbg2       nav %d color:         %d\n", i, shared.shareddata.navs[i].color);
@@ -2623,15 +2628,16 @@ int mbview_setnavactivebyname(int verbose, size_t instance, char *name, bool act
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Nav data altered in function <%s>\n", __func__);
 		fprintf(stderr, "dbg2  Nav values:\n");
-		fprintf(stderr, "dbg2       nav_mode:              %d\n", shared.shareddata.nav_mode);
-		fprintf(stderr, "dbg2       nav_view_mode:         %d\n", data->nav_view_mode);
-		fprintf(stderr, "dbg2       navdrape_view_mode:    %d\n", data->navdrape_view_mode);
-		fprintf(stderr, "dbg2       nnav:                  %d\n", shared.shareddata.nnav);
-		fprintf(stderr, "dbg2       nnav_alloc:            %d\n", shared.shareddata.nnav_alloc);
-		fprintf(stderr, "dbg2       nav_selected[0]:       %d\n", shared.shareddata.nav_selected[0]);
-		fprintf(stderr, "dbg2       nav_point_selected[0]: %d\n", shared.shareddata.nav_point_selected[0]);
-		fprintf(stderr, "dbg2       nav_selected[1]:       %d\n", shared.shareddata.nav_selected[1]);
-		fprintf(stderr, "dbg2       nav_point_selected[1]: %d\n", shared.shareddata.nav_point_selected[1]);
+		fprintf(stderr, "dbg2       nav_mode:                  %d\n", shared.shareddata.nav_mode);
+		fprintf(stderr, "dbg2       nav_view_mode:             %d\n", data->nav_view_mode);
+		fprintf(stderr, "dbg2       navswathbounds_view_mode:  %d\n", data->navswathbounds_view_mode);
+		fprintf(stderr, "dbg2       navdrape_view_mode:        %d\n", data->navdrape_view_mode);
+		fprintf(stderr, "dbg2       nnav:                      %d\n", shared.shareddata.nnav);
+		fprintf(stderr, "dbg2       nnav_alloc:                %d\n", shared.shareddata.nnav_alloc);
+		fprintf(stderr, "dbg2       nav_selected[0]:           %d\n", shared.shareddata.nav_selected[0]);
+		fprintf(stderr, "dbg2       nav_point_selected[0]:     %d\n", shared.shareddata.nav_point_selected[0]);
+		fprintf(stderr, "dbg2       nav_selected[1]:           %d\n", shared.shareddata.nav_selected[1]);
+		fprintf(stderr, "dbg2       nav_point_selected[1]:     %d\n", shared.shareddata.nav_point_selected[1]);
 		for (int i = 0; i < shared.shareddata.nnav; i++) {
 			fprintf(stderr, "dbg2       nav %d active:        %d\n", i, shared.shareddata.navs[i].active);
 			fprintf(stderr, "dbg2       nav %d color:         %d\n", i, shared.shareddata.navs[i].color);

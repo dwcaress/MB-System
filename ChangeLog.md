@@ -22,6 +22,12 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.2beta15    October 1, 2024
+- Version 5.8.2beta14    September 6, 2024
+- Version 5.8.2beta13    August 23, 2024
+- Version 5.8.2beta12    August 22, 2024
+- Version 5.8.2beta11    August 19, 2024
+- Version 5.8.2beta10    August 16, 2024
 - Version 5.8.2beta09    August 4, 2024
 - Version 5.8.2beta08    July 27, 2024
 - Version 5.8.2beta07    June 27, 2024
@@ -41,6 +47,63 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.2beta15 (October 1, 2024)
+
+Mbmakeplatform: Fixed problems with handling sensor add and sensor modify modes.
+
+Mbgrdviz, mbeditviz, mbnavadjust: Changed the mbview display of swath bounds for selected
+navigation to be optional rather than always displayed.
+
+Formats 58 (MBF_EM710RAW) and 59 (MBF_EM710MBA): Fixed preprocessing support for the 
+Kongsberg M3 multibeam. Added capability to use an MB-System platform file in place of
+the sensor offsets embedded in the logged multibeam files.
+
+Mbphotogrammetry: Fixed use of range bounds in filtering the photogrammetric bathymetry.
+
+#### 5.8.2beta14 (September 6, 2024)
+
+Mbphotomosaic: Removed unnecessary --correction-file-color option (redundant with --correction-file)
+
+mbm_grdplot: Fixed -G7 option for plotting images with geodetics defined in world files 
+rather than embedded as in GeoTiffs. Specifically allows use of png images with transparency.
+
+Formats 232 (MBF_WISSLR) and 233 (MBF_WISSLP): Fixed initial beam flagging by mbpreprocess
+for secondary sounding picks (when the lidar was operated in multipick mode)
+
+#### 5.8.2beta13 (August 23, 2024)
+
+Mbphotomosaic: Fixed use of the  --dark-image-ignore and  --dark-image-multiply options
+as parameters embedded in recursive imagelist files.
+
+#### 5.8.2beta12 (August 22, 2024)
+
+Mbnavadjustmerge: Fixed (again, this time hopefully for real) the --reimport-all-files 
+option so that large projects can be reimported with a single command. Added a 
+--reimport-survey option.
+
+#### 5.8.2beta11 (August 19, 2024)
+
+Mbnavadjustmerge: Fixed the --reimport-all-files option so that large projects can be
+reimported with a single command. Added a --reimport-survey option.
+
+#### 5.8.2beta10 (August 16, 2024)
+
+Mbnavadjustmerge: Added --reimport-file and --reimport-all-files options that reimport 
+swath files into an mbnavadjust project from the current processed versions of that files. 
+Each file is broken into the same sections as previously, regardless of any changes to the 
+settings for the maximum section length or the maximum number of soundings in a section.
+The original navigation and attitude data are also preserved, but the bathymetry is changed 
+to reflect the current processed values. This means that updates to the bathymetry editing 
+can now be brought into mbnavadjust projects.
+
+Format 71 (MBF_MBLDEOIH): Fixed a compression bug that occasionally resulted in corrupting
+the acrosstrack values of the outermost beams of pings when changed data are inserted into
+records using the mb_put_all() or mb_insert() functions. The only know manifestation of this
+bug was in importing swath data into mbnavadjust projects.
+
+Mbtrnpp: Fixed #ifdefs and Makefile.am files so that mbtrnpp can still be built with the
+old autoconf build system, albeit using GCTP for projections rather libproj.
 
 #### 5.8.2beta09 (August 4, 2024)
 

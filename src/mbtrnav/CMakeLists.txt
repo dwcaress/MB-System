@@ -474,11 +474,36 @@ target_link_libraries(geocon-test PRIVATE geocon qnx)
 target_include_directories(geocon-test PRIVATE ${CMAKE_SOURCE_DIR}
 ${LibPROJ_INCLUDE_DIRS} trnw qnx-utils)
 
+# build mb1log-player
+
+# specify build target
+add_executable(mb1log-player
+utils/mb1log_player.cpp
+utils/TrnClient.cpp
+utils/TerrainNavClient.cpp
+)
+
+# specify dependency libs
+target_link_libraries(mb1log-player PRIVATE trnw trncli netif tnav qnx newmat geolib)
+
+# specify include paths
+target_include_directories(mb1log-player PUBLIC
+BEFORE
+${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/rov
+${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw
+${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
+${CMAKE_SOURCE_DIR}/src/mbtrnav/newmat
+${CMAKE_SOURCE_DIR}/src/mbtrnav/qnx-utils
+${NetCDF_INCLUDE_DIRS}
+)
+target_compile_options(mb1log-player PUBLIC
+"-std=c++11"
+)
 #------------------------------------------------------------------------------
 # install it all
 #
 install(TARGETS geolib geocon newmat tnav qnx trnw netif mb1 trnucli trnwcli DESTINATION ${CMAKE_INSTALL_LIBDIR})
-install(TARGETS trnucli-test trnusvr-test trncli-test mmcpub mmcsub mcpub mcsub trnif-test mb1rs geocon-test DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS trnucli-test trnusvr-test trncli-test mmcpub mmcsub mcpub mcsub trnif-test mb1rs mb1log-player geocon-test DESTINATION ${CMAKE_INSTALL_BINDIR})
 #
 #------------------------------------------------------------------------------
 

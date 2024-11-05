@@ -49,6 +49,7 @@
 #include "mb_io.h"
 #include "mb_process.h"
 #include "mb_status.h"
+#include "mb_format.h"
 #include "mbnavadjust_io.h"
 #include "mbsys_ldeoih.h"
 
@@ -2636,7 +2637,7 @@ __FILE__, __LINE__, __FUNCTION__, file->block, ifile, isection, section->distanc
         snprintf(deletefile, sizeof(mb_path), "%s/nvs_%4.4d_%4.4dp.mb71.inf", project->datadir, ifile, isection);
         remove(deletefile);
 
-        mb_make_info(verbose, true, priorsectionfile, 71, error);
+        mb_make_info(verbose, true, priorsectionfile, MBF_MBLDEOIH, error);
 
         /* move remaining sections in file up by one */
         for (int jsection=isection; jsection < file->num_sections - 1; jsection++) {
@@ -4008,7 +4009,7 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
     snprintf(path, sizeof(mb_pathplus), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, file_id, section_id);
     mb_pathplus tpath;
     snprintf(tpath, sizeof(mb_pathplus), "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, file_id, section_id);
-    const int iformat = 71;
+    const int iformat = MBF_MBLDEOIH;
     struct mbna_file *file = &(project->files[file_id]);
     struct mbna_section *section = &(file->sections[section_id]);
 
@@ -4384,7 +4385,7 @@ int mbnavadjust_fix_section_sensordepth(int verbose, struct mbna_project *projec
         /* set section format and path */
         mb_pathplus path;
         snprintf(path, sizeof(mb_pathplus), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, ifile, isection);
-        const int iformat = 71;
+        const int iformat = MBF_MBLDEOIH;
         file = &(project->files[ifile]);
         struct mbna_section *section = &(file->sections[isection]);
 
@@ -4830,6 +4831,9 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
 
   int sonartype = MB_TOPOGRAPHY_TYPE_UNKNOWN;
   int sensorhead = 0;
+  double beamwidth_xtrack = 0.0;
+  double beamwidth_ltrack = 0.0;
+  bool beamwidths_set = false;
   int *bin_nbath = NULL;
   double *bin_bath = NULL;
   double *bin_bathacrosstrack = NULL;
@@ -4940,7 +4944,6 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
     if (*error == MB_ERROR_NO_ERROR)
       status =
         mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, error);
-    if (*error == MB_ERROR_NO_ERROR)
 
       /* if error initializing memory then don't read the file */
       if (*error != MB_ERROR_NO_ERROR) {
@@ -4979,6 +4982,12 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
                  *error == MB_ERROR_OUT_TIME || *error == MB_ERROR_SPEED_TOO_SMALL)) {
         status = MB_SUCCESS;
         *error = MB_ERROR_NO_ERROR;
+      }
+
+      /* extract beam widths */
+      if (*error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && !beamwidths_set) {
+        status = mb_beamwidths(verbose, imbio_ptr, &beamwidth_xtrack, &beamwidth_ltrack, error);
+        beamwidths_set = true;
       }
 
       /* do not use data with null navigation or ludricous timestamp */
@@ -5301,7 +5310,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
 
         /* open output section file */
         snprintf(opath, sizeof(mb_pathplus), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, file->id, file->num_sections - 1);
-        if ((status = mb_write_init(verbose, opath, 71, &ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss,
+        if ((status = mb_write_init(verbose, opath, MBF_MBLDEOIH, &ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss,
                   error)) != MB_SUCCESS) {
           mb_error(verbose, *error, &error_message);
           fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", error_message);
@@ -5425,6 +5434,8 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
           ostore->roll = roll;
           ostore->pitch = pitch;
           ostore->heave = heave;
+          ostore->beam_xwidth = beamwidth_xtrack;
+          ostore->beam_lwidth = beamwidth_ltrack;
 
           /* write out data */
           status = mb_put_all(verbose, ombio_ptr, ostore_ptr,
@@ -5519,157 +5530,6 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavadjust_coverage_mask(int verbose, struct mbna_project *project,
-            int ifile, int isection, int *error) {
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       project:    %p\n", project);
-    fprintf(stderr, "dbg2       ifile:      %d\n", ifile);
-    fprintf(stderr, "dbg2       isection:   %d\n", isection);
-  }
-
-  int status = MB_SUCCESS;
-  struct mbna_file *file = &project->files[ifile];
-  struct mbna_section *section = &file->sections[isection];
-  mb_pathplus sectionpath;
-  snprintf(sectionpath, sizeof(mb_pathplus), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, ifile, isection);
-
-
-  /* MBIO control parameters */
-  const int lonflip = 0;
-  double bounds[4] = {-360, 360, -90, 90};
-  int btime_i[7] = {1962, 2, 21, 10, 30, 0, 0};
-  int etime_i[7] = {2062, 2, 21, 10, 30, 0, 0};
-  double btime_d = -248016600.0;
-  double etime_d = 2907743400.0;
-  double speedmin = 0.0;
-  double timegap = 1000000000.0;
-
-  /* mbio read and write values */
-  void *mbio_ptr = NULL;
-  void *store_ptr = NULL;
-  int kind = MB_DATA_NONE;
-  int time_i[7];
-  double time_d;
-  double navlon;
-  double navlat;
-  double speed;
-  double heading;
-  double distance;
-  double altitude;
-  double sensordepth;
-  int beams_bath = 0;
-  int beams_amp = 0;
-  int pixels_ss = 0;
-  char comment[MB_COMMENT_MAXLINE];
-  char *error_message = NULL;
-
-
-  /* initialize reading the swath file */
-  if ((status = mb_read_init(verbose, sectionpath, 71, 1, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
-           &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, error)) !=
-      MB_SUCCESS) {
-    mb_error(verbose, *error, &error_message);
-    fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", error_message);
-    fprintf(stderr, "\nSwath sonar File <%s> not initialized for reading\n", sectionpath);
-  }
-
-  /* allocate memory for data arrays */
-  char *beamflag = NULL;
-  double *bath = NULL;
-  double *bathacrosstrack = NULL;
-  double *bathalongtrack = NULL;
-  double *amp = NULL;
-  double *ss = NULL;
-  double *ssacrosstrack = NULL;
-  double *ssalongtrack = NULL;
-  if (status == MB_SUCCESS) {
-    if (*error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char),
-               (void **)&beamflag, error);
-    if (*error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
-               (void **)&bath, error);
-    if (*error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp,
-               error);
-    if (*error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
-               (void **)&bathacrosstrack, error);
-    if (*error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
-               (void **)&bathalongtrack, error);
-    if (*error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss,
-               error);
-    if (*error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double),
-               (void **)&ssacrosstrack, error);
-    if (*error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double),
-               (void **)&ssalongtrack, error);
-
-    /* if error initializing memory then don't read the file */
-    if (*error != MB_ERROR_NO_ERROR) {
-      mb_error(verbose, *error, &error_message);
-      fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
-    }
-  }
-
-  /* loop over reading data */
-  double dx1 = (section->lonmax - section->lonmin) / MBNA_MASK_DIM;
-  double dy1 = (section->latmax - section->latmin) / MBNA_MASK_DIM;
-  while (*error <= MB_ERROR_NO_ERROR) {
-    /* read a ping of data */
-    status =
-      mb_get_all(verbose, mbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
-           &heading, &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag,
-           bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
-
-    /* ignore minor errors */
-    if (kind == MB_DATA_DATA && (*error == MB_ERROR_TIME_GAP || *error == MB_ERROR_OUT_BOUNDS ||
-               *error == MB_ERROR_OUT_TIME || *error == MB_ERROR_SPEED_TOO_SMALL)) {
-      status = MB_SUCCESS;
-      *error = MB_ERROR_NO_ERROR;
-    }
-
-    /* check for good bathymetry */
-    if (kind == MB_DATA_DATA && *error == MB_ERROR_NO_ERROR) {
-      double mtodeglon, mtodeglat;
-      mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
-      double headingx = sin(DTR * heading);
-      double headingy = cos(DTR * heading);
-      for (int i = 0; i < beams_bath; i++) {
-        if (mb_beam_ok(beamflag[i]) && bath[i] != 0.0) {
-          double lon = navlon + headingy * mtodeglon * bathacrosstrack[i] + headingx * mtodeglon * bathalongtrack[i];
-          double lat = navlat - headingx * mtodeglat * bathacrosstrack[i] + headingy * mtodeglat * bathalongtrack[i];
-          int ii1 = (lon - section->lonmin) / dx1;
-          int jj1 = (lat - section->latmin) / dy1;
-          if (ii1 >= 0 && ii1 < MBNA_MASK_DIM && jj1 >= 0 && jj1 < MBNA_MASK_DIM) {
-            section->coverage[ii1 + jj1 * MBNA_MASK_DIM] = 1;
-          }
-        }
-      }
-    }
-  }
-
-  /* deallocate memory used for data arrays */
-  status = mb_close(verbose, &mbio_ptr, error);
-
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
-    fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       error:       %d\n", *error);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:      %d\n", status);
-  }
-
-  return (status);
-}
-
-
-/*--------------------------------------------------------------------*/
 int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
             int ifile, int *error) {
   if (verbose >= 2) {
@@ -5681,58 +5541,21 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
 
   int status = MB_SUCCESS;
   char *error_message;
-  mb_path ipath;
-  int iformat;
-
-  if (ifile <  0 || ifile >= project->num_files) {
-    *error = MB_ERROR_BAD_DATA;
-    status = MB_FAILURE;
-  } else {
-
-    /* look for raw file first, then look for processed file and use if available */
-    struct stat file_status;
-    int fstat = stat(project->files[ifile].path, &file_status);
-    if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-      int ofile_specified = MB_NO;
-      mb_pr_get_ofile(verbose, project->files[ifile].path, &ofile_specified, ipath, error);
-      if (ofile_specified == MB_YES) {
-        fstat = stat(ipath, &file_status);
-        if (fstat != 0 || (file_status.st_mode & S_IFMT) == S_IFDIR) {
-          ofile_specified = MB_NO;
-        }
-      }
-      if (ofile_specified == MB_NO) {
-        strcpy(ipath, project->files[ifile].path);
-      }
-      iformat = project->files[ifile].format;
-      *error = MB_ERROR_NO_ERROR;
-    }
-    else {
-      *error = MB_ERROR_BAD_DATA;
-      status = MB_FAILURE;
-    }
-  }
-
-  mb_pathplus npath;
-  mb_pathplus opath;
-
+  
   /* MBIO control parameters */
-  int pings;
-  int lonflip;
-  double bounds[4];
-  int btime_i[7];
-  int etime_i[7];
-  double btime_d;
-  double etime_d;
-  double speedmin;
-  double timegap;
-  status = mb_defaults(verbose, &iformat, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+  const int pings = 1;
+  const int lonflip = 0;
+  double bounds[4] = {-360, 360, -90, 90};
+  int btime_i[7] = {1962, 2, 21, 10, 30, 0, 0};
+  int etime_i[7] = {2062, 2, 21, 10, 30, 0, 0};
+  double btime_d = -248016600.0;
+  double etime_d = 2907743400.0;
+  double speedmin = 0.0;
+  double timegap = 1000000000.0;
 
   /* mbio read and write values */
   void *imbio_ptr = NULL;
-  void *ombio_ptr = NULL;
   void *istore_ptr = NULL;
-  void *ostore_ptr = NULL;
   int kind = MB_DATA_NONE;
   int time_i[7];
   double time_d;
@@ -5751,9 +5574,52 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
   int beams_amp = 0;
   int pixels_ss = 0;
   char comment[MB_COMMENT_MAXLINE];
+  char *beamflag = NULL;
+  double *bath = NULL;
+  double *bathacrosstrack = NULL;
+  double *bathalongtrack = NULL;
+  double *amp = NULL;
+  double *ss = NULL;
+  double *ssacrosstrack = NULL;
+  double *ssalongtrack = NULL;
+	
+  mb_path spath;
+  void *smbio_ptr = NULL;
+  void *sstore_ptr = NULL;
+  int skind = MB_DATA_NONE;
+  int stime_i[7];
+  double stime_d;
+  double snavlon;
+  double snavlat;
+  double sspeed;
+  double sheading;
+  double sdistance;
+  double saltitude;
+  double ssensordepth;
+  int sbeams_bath = 0;
+  int sbeams_amp = 0;
+  int spixels_ss = 0;
+  char scomment[MB_COMMENT_MAXLINE];
+  char *sbeamflag = NULL;
+  double *sbath = NULL;
+  double *sbathacrosstrack = NULL;
+  double *sbathalongtrack = NULL;
+  double *samp = NULL;
+  double *sss = NULL;
+  double *sssacrosstrack = NULL;
+  double *sssalongtrack = NULL;
+
+  mb_path opath;
+  void *ombio_ptr = NULL;
+  int obeams_bath = 0;
+  int obeams_amp = 0;
+  int opixels_ss = 0;
 
   int sonartype = MB_TOPOGRAPHY_TYPE_UNKNOWN;
   int sensorhead = 0;
+  double beamwidth_xtrack = 0.0;
+  double beamwidth_ltrack = 0.0;
+  bool beamwidths_set = false;
   int *bin_nbath = NULL;
   double *bin_bath = NULL;
   double *bin_bathacrosstrack = NULL;
@@ -5763,121 +5629,127 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
   double angle, dt, alongtrackdistance, xtrackavg, xtrackmax;
   int nxtrack;
 
-  int obeams_bath, obeams_amp, opixels_ss;
-  bool first;
-  double headingx, headingy, mtodeglon, mtodeglat;
-  double lon, lat;
-  FILE *nfp;
-  struct mbna_file *file = NULL;
-  struct mbna_section *section = NULL;
-  struct mbsys_ldeoih_struct *ostore = NULL;
-  struct mb_io_struct *omb_io_ptr = NULL;
-  double dx1, dy1;
-  int mbp_heading_mode;
-  double mbp_headingbias;
-  int mbp_rollbias_mode;
-  double mbp_rollbias;
-  double mbp_rollbias_port;
-  double mbp_rollbias_stbd;
-  double depthmax, distmax, depthscale, distscale;
-  int error_sensorhead = MB_ERROR_NO_ERROR;
-  int ii1, jj1;
+  mb_path ipath;
+  int iformat;
+  int reimport_sections = 0;
+  int reimport_pings = 0;
+  double reimport_ping_maxtimediff = 100.0 * MB_ESF_MAXTIMEDIFF;
+  
 
-  char *root = (char *)strrchr(ipath, '/');
-  if (root == NULL)
-    root = ipath;
-  mb_pathplus message;
-  snprintf(message, sizeof(mb_pathplus), "Re-importing format %d data from %s in %d sections\n", iformat, root, project->files[ifile].num_sections);
-  fprintf(stderr, "%s\n", message);
-  bool output_open = false;
-  if (project->inversion_status == MBNA_INVERSION_CURRENT)
-    project->inversion_status = MBNA_INVERSION_OLD;
-  project->grid_status = MBNA_GRID_OLD;
-  int new_sections = 0;
-  int new_pings = 0;
-  int new_crossings = 0;
+  /* if specified file id is valid for the project try to identify and open the current
+  		processed data file, using the fbt file if possible */
+  bool reimport = false;
+  if (ifile >=  0 && ifile < project->num_files) {
 
-  if (status == MB_SUCCESS) {
-    /* initialize reading the swath file */
-    if ((status = mb_read_init(verbose, ipath, iformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
-             &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, error)) != MB_SUCCESS) {
-      mb_error(verbose, *error, &error_message);
-      fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", error_message);
-      fprintf(stderr, "\nSwath sonar File <%s> not initialized for reading\n", ipath);
-    }
-  }
-
-  char *beamflag = NULL;
-  double *bath = NULL;
-  double *bathacrosstrack = NULL;
-  double *bathalongtrack = NULL;
-  double *amp = NULL;
-  double *ss = NULL;
-  double *ssacrosstrack = NULL;
-  double *ssalongtrack = NULL;
-
-  /* allocate memory for data arrays */
-  if (status == MB_SUCCESS) {
-    if (*error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, error);
-    if (*error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, error);
-    if (*error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, error);
-    if (*error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack,
-               error);
-    if (*error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack,
-               error);
-    if (*error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, error);
-    if (*error == MB_ERROR_NO_ERROR)
-      status =
-        mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, error);
-    if (*error == MB_ERROR_NO_ERROR)
-      status =
-        mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, error);
-    if (*error == MB_ERROR_NO_ERROR)
-
-      /* if error initializing memory then don't read the file */
-      if (*error != MB_ERROR_NO_ERROR) {
-        mb_error(verbose, *error, &error_message);
-        fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
+    /* look for raw file first, then look for processed file and use if available */
+    struct stat file_status;
+    int fstat = stat(project->files[ifile].path, &file_status);
+    if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+      int ofile_specified = MB_NO;
+      mb_pr_get_ofile(verbose, project->files[ifile].path, &ofile_specified, ipath, error);
+      if (ofile_specified == MB_YES) {
+        int len = 0;
+		if (strlen(ipath) > 0 && ipath[0] != '/' 
+			&& strrchr(project->files[ifile].path, '/') != NULL 
+			&& (len = strrchr(project->files[ifile].path, '/') - project->files[ifile].path + 1) > 1) {
+          mb_path tmpstr;
+		  strcpy(tmpstr, ipath);
+		  strncpy(ipath, project->files[ifile].path, len);
+		  ipath[len] = '\0';
+		  strcat(ipath, tmpstr);
+		}
+      	
+        fstat = stat(ipath, &file_status);
+        if (fstat != 0 || (file_status.st_mode & S_IFMT) == S_IFDIR) {
+          ofile_specified = MB_NO;
+        }
       }
+      if (ofile_specified == MB_NO) {
+        strcpy(ipath, project->files[ifile].path);
+      }
+      iformat = project->files[ifile].format;
+      reimport = true;
+      
+      /* now check if the fbt file is available, and open it if possible */
+      mb_path fbtpath;
+      strncpy(fbtpath, ipath, sizeof(mb_path));
+      strncat(fbtpath, ".fbt", sizeof(mb_path));
+      fstat = stat(fbtpath, &file_status);
+      if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+      	strncpy(ipath, fbtpath, sizeof(mb_path));
+      	iformat = MBF_MBLDEOIH;
+	  }
+	}
   }
+      
+	 /* if file can be reimported, do it */
+  if (reimport) {
 
-  /* open nav file */
-  if (status == MB_SUCCESS) {
-    snprintf(npath, sizeof(mb_pathplus), "%s/nvs_%4.4d.mb166", project->datadir, ifile);
-    if ((nfp = fopen(npath, "w")) == NULL) {
-      status = MB_FAILURE;
-      *error = MB_ERROR_OPEN_FAIL;
-    }
-  }
+    if (verbose > 0)
+      fprintf(stderr, "\n > Reimporting from format %d file: %s\n", iformat, ipath);
 
-  /* read data */
-  if (status == MB_SUCCESS) {
-    bool new_section = false;
-    int isection = -1;
-    first = true;
-    while (*error <= MB_ERROR_NO_ERROR) {
-      /* read a ping of data */
+	/* initialize reading the swath file */
+	*error = MB_ERROR_NO_ERROR;
+	if ((status = mb_read_init(verbose, ipath, iformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
+		  &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, error)) != MB_SUCCESS) {
+	  mb_error(verbose, *error, &error_message);
+	  fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", error_message);
+	  fprintf(stderr, "\nSwath sonar File <%s> not initialized for reading\n", ipath);
+	}
+	
+	/* register data arrays for memory allocation */
+	if (status == MB_SUCCESS) {
+	  if (*error == MB_ERROR_NO_ERROR)
+	   status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, error);
+	  if (*error == MB_ERROR_NO_ERROR)
+	   status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, error);
+	  if (*error == MB_ERROR_NO_ERROR)
+	   status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, error);
+	  if (*error == MB_ERROR_NO_ERROR)
+	   status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack, error);
+	  if (*error == MB_ERROR_NO_ERROR)
+	   status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack, error);
+	  if (*error == MB_ERROR_NO_ERROR)
+	   status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, error);
+	  if (*error == MB_ERROR_NO_ERROR)
+	   status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, error);
+	  if (*error == MB_ERROR_NO_ERROR)
+	   status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, error);
+	  if (*error == MB_ERROR_NO_ERROR)
+	  
+	  /* if error initializing memory then don't read the file */
+	  if (*error != MB_ERROR_NO_ERROR) {
+		mb_error(verbose, *error, &error_message);
+		fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
+	  }
+	}
+	bool done = false;
+	if (*error != MB_ERROR_NO_ERROR) {
+	  done = true;
+	  reimport = false;
+	}
+		
+	/* loop over reading the current processed bathymetry */
+    bool section_initialized = false;
+    bool section_saved = false;
+    int current_section = 0;
+    int current_section_num_pings = 0;
+	while (!done) {
+
+      /* read a ping of input processed data */
       status = mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
               &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
               bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
+    
+      /* if at end of file set done */
+      if (*error > 0) {
+        done = true;
+      }
 
       /* extract all nav values */
       if (*error == MB_ERROR_NO_ERROR && (kind == MB_DATA_NAV || kind == MB_DATA_DATA)) {
         status = mb_extract_nav(verbose, imbio_ptr, istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
               &heading, &draft, &roll, &pitch, &heave, error);
-      }
-
-      /* ignore minor errors - use these data */
-      if (kind == MB_DATA_DATA && (*error == MB_ERROR_TIME_GAP || *error == MB_ERROR_OUT_BOUNDS ||
-                 *error == MB_ERROR_OUT_TIME || *error == MB_ERROR_SPEED_TOO_SMALL)) {
-        status = MB_SUCCESS;
-        *error = MB_ERROR_NO_ERROR;
       }
 
       /* do not use data with null navigation or ludricous timestamp */
@@ -5888,13 +5760,26 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
           *error = MB_ERROR_IGNORE;
       }
 
+      /* ignore minor errors - use these data */
+      if (kind == MB_DATA_DATA && (*error == MB_ERROR_TIME_GAP || *error == MB_ERROR_OUT_BOUNDS ||
+                 *error == MB_ERROR_OUT_TIME || *error == MB_ERROR_SPEED_TOO_SMALL)) {
+        status = MB_SUCCESS;
+        *error = MB_ERROR_NO_ERROR;
+      }
+
+      /* extract beam widths */
+      if (*error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && !beamwidths_set) {
+        status = mb_beamwidths(verbose, imbio_ptr, &beamwidth_xtrack, &beamwidth_ltrack, error);
+        beamwidths_set = true;
+      }
+
       /* deal with survey data */
-      if (kind == MB_DATA_DATA) {
-        /* int status_sensorhead = */
-        mb_sensorhead(verbose, imbio_ptr, istore_ptr, &sensorhead, &error_sensorhead);
+      if (*error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
         if (sonartype == MB_TOPOGRAPHY_TYPE_UNKNOWN) {
           status = mb_sonartype(verbose, imbio_ptr, istore_ptr, &sonartype, error);
         }
+        int error_sensorhead = MB_ERROR_NO_ERROR;
+        mb_sensorhead(verbose, imbio_ptr, istore_ptr, &sensorhead, &error_sensorhead);
 
         /* if sonar is interferometric, bin the bathymetry */
         if (sonartype == MB_TOPOGRAPHY_TYPE_INTERFEROMETRIC) {
@@ -6006,371 +5891,211 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
           else if (side == SIDE_PORT) {
             *error = MB_ERROR_IGNORE;
           }
-        }
-      }
-
-      /* deal with start of file */
-      if (kind == MB_DATA_DATA && *error == MB_ERROR_NO_ERROR && first) {
-
-        first = false;
-        new_section = true;
-        file = &project->files[ifile];
-
-        /* get bias values */
-        mb_pr_get_heading(verbose, file->path, &mbp_heading_mode, &mbp_headingbias, error);
-        mb_pr_get_rollbias(verbose, file->path, &mbp_rollbias_mode, &mbp_rollbias, &mbp_rollbias_port,
-               &mbp_rollbias_stbd, error);
-        if (mbp_heading_mode == MBP_HEADING_OFFSET || mbp_heading_mode == MBP_HEADING_CALCOFFSET) {
-          file->heading_bias_import = mbp_headingbias;
-        }
-        else {
-          file->heading_bias_import = 0.0;
-        }
-        if (mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE) {
-          file->roll_bias_import = mbp_rollbias;
-        }
-        else if (mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE) {
-          file->roll_bias_import = 0.5 * (mbp_rollbias_port + mbp_rollbias_stbd);
-        }
-        else {
-          file->roll_bias_import = 0.0;
-        }
-      }
-
-      /* check if new section needed */
-      else if (kind == MB_DATA_DATA && *error == MB_ERROR_NO_ERROR && file != NULL
-         && time_d > section->etime_d) {
-        new_section = true;
-      }
-
-      /* deal with new section */
-      if (kind == MB_DATA_DATA && *error == MB_ERROR_NO_ERROR && new_section) {
-        new_section = false;
-
-        /* end old section */
-        if (output_open) {
-          /* close the swath file */
-          status = mb_close(verbose, &ombio_ptr, error);
-          output_open = false;
-        }
-
-        /* initialize new section */
-        isection++;
-        section = &file->sections[isection];
-        section->file_id = file->id;
-        section->section_id = isection;
-        section->num_beams = 0;
-        for (int i = 0; i < MBNA_MASK_DIM * MBNA_MASK_DIM; i++)
-          section->coverage[i] = 0;
-        section->distance = 0.0;
-        section->lonmin = navlon;
-        section->lonmax = navlon;
-        section->latmin = navlat;
-        section->latmax = navlat;
-        section->depthmin = 0.0;
-        section->depthmax = 0.0;
-        section->contoursuptodate = false;
-        section->globaltie.inversion_offset_x = 0.0;
-        section->globaltie.inversion_offset_y = 0.0;
-        section->globaltie.inversion_offset_x_m = 0.0;
-        section->globaltie.inversion_offset_y_m = 0.0;
-        section->globaltie.inversion_offset_z_m = 0.0;
-
-        /* open output section file */
-        snprintf(opath, sizeof(mb_pathplus), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, file->id, isection);
-        if ((status = mb_write_init(verbose, opath, 71, &ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss,
-                  error)) != MB_SUCCESS) {
-          mb_error(verbose, *error, &error_message);
-          fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", error_message);
-          fprintf(stderr, "\nSwath sonar File <%s> not initialized for writing\n", opath);
-        }
-        else {
-          omb_io_ptr = (struct mb_io_struct *)ombio_ptr;
-          ostore_ptr = omb_io_ptr->store_data;
-          ostore = (struct mbsys_ldeoih_struct *)ostore_ptr;
-          ostore->kind = MB_DATA_DATA;
-          ostore->beams_bath = obeams_bath;
-          ostore->beams_amp = 0;
-          ostore->pixels_ss = 0;
-          ostore->sensorhead = sensorhead;
-          ostore->topo_type = sonartype;
-          output_open = true;
-          status = mb_mallocd(verbose, __FILE__, __LINE__, obeams_bath * sizeof(char), (void **)&ostore->beamflag,
-                  error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, obeams_bath * sizeof(double), (void **)&ostore->bath,
-                  error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, obeams_bath * sizeof(double),
-                  (void **)&ostore->bath_acrosstrack, error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, obeams_bath * sizeof(double),
-                  (void **)&ostore->bath_alongtrack, error);
-
-          /* if error initializing memory then don't write the file */
-          if (*error != MB_ERROR_NO_ERROR) {
-            mb_error(verbose, *error, &error_message);
-            fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
-            status = mb_freed(verbose, __FILE__, __LINE__, (void **)&ostore->beamflag, error);
-            status = mb_freed(verbose, __FILE__, __LINE__, (void **)&ostore->bath, error);
-            status = mb_freed(verbose, __FILE__, __LINE__, (void **)&ostore->bath_acrosstrack, error);
-            status = mb_freed(verbose, __FILE__, __LINE__, (void **)&ostore->bath_alongtrack, error);
-            status = mb_close(verbose, &ombio_ptr, error);
-            output_open = false;
+        } /* interferometric */
+        
+        /* figure out which section this ping is in */
+        struct mbna_file *file = &project->files[ifile];
+        int new_section = -1;
+        for (int isection = current_section; isection < file->num_sections && new_section < 0; isection++) {
+          struct mbna_section *section = &file->sections[isection];
+          if ((time_d >= section->btime_d - MB_ESF_MAXTIMEDIFF) && (time_d <= section->etime_d + MB_ESF_MAXTIMEDIFF)) {
+          	new_section = isection;
           }
         }
-      }
 
-      /* update section distance for each data ping */
-      if (kind == MB_DATA_DATA && *error == MB_ERROR_NO_ERROR && section->num_pings > 1)
-        section->distance += distance;
-
-      /* handle good bathymetry */
-      if (kind == MB_DATA_DATA && *error == MB_ERROR_NO_ERROR) {
-        /* get statistics */
-        mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
-        headingx = sin(DTR * heading);
-        headingy = cos(DTR * heading);
-        section->num_pings++;
-        file->num_pings++;
-        new_pings++;
-        if (section->distance >= section->num_snav * project->section_length / (MBNA_SNAV_NUM - 1)) {
-          section->snav_id[section->num_snav] = section->num_pings - 1;
-          section->snav_num_ties[section->num_snav] = 0;
-          section->snav_distance[section->num_snav] = section->distance;
-          section->snav_time_d[section->num_snav] = time_d;
-          section->snav_lon[section->num_snav] = navlon;
-          section->snav_lat[section->num_snav] = navlat;
-          section->snav_sensordepth[section->num_snav] = draft - heave;;
-          section->snav_lon_offset[section->num_snav] = 0.0;
-          section->snav_lat_offset[section->num_snav] = 0.0;
-          section->snav_z_offset[section->num_snav] = 0.0;
-          section->num_snav++;
-          file->num_snavs++;
-          project->num_snavs++;
+        /* close old section if finished */
+        if (section_initialized && new_section != current_section) {
+          status = mb_close(verbose, &smbio_ptr, error);
+          status = mb_close(verbose, &ombio_ptr, error);
+		
+		  /* delete old section file and related ancilliary files */
+		  snprintf(spath, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, ifile, current_section);
+		  remove(spath);
+		  snprintf(opath, sizeof(mb_path), "%s.fnv", spath);
+		  remove(opath);
+		  snprintf(opath, sizeof(mb_path), "%s.inf", spath);
+		  remove(opath);
+		  snprintf(opath, sizeof(mb_path), "%s.tri", spath);
+		  remove(opath);
+		  
+		  /* rename the new section file and make ancilliary files */
+		  snprintf(opath, sizeof(mb_path), "%s/tmp_nvs_%4.4d_%4.4d.mb71", project->datadir, ifile, current_section);
+		  rename(opath, spath);
+		  status = mb_make_info(verbose, true, spath, MBF_MBLDEOIH, error);
+		  
+		  if (verbose > 0) {
+			struct mbna_section *section = &project->files[ifile].sections[current_section];
+			fprintf(stderr, " > Reimport section %4.4d:%4.4d - pings updated and expected: %d %d\n", 
+				  ifile, current_section, current_section_num_pings, section->num_pings);
+		  }
+		  reimport_sections++;
+		  reimport_pings += current_section_num_pings;
+		  section_initialized = false;
+		  current_section_num_pings = 0;
         }
-        for (int i = 0; i < beams_bath; i++) {
-          if (mb_beam_ok(beamflag[i]) && bath[i] != 0.0) {
-            project->num_beams++;
-            file->num_beams++;
-            section->num_beams++;
-            lon = navlon + headingy * mtodeglon * bathacrosstrack[i] + headingx * mtodeglon * bathalongtrack[i];
-            lat = navlat - headingx * mtodeglat * bathacrosstrack[i] + headingy * mtodeglat * bathalongtrack[i];
-            if (lon != 0.0)
-              section->lonmin = MIN(section->lonmin, lon);
-            if (lon != 0.0)
-              section->lonmax = MAX(section->lonmax, lon);
-            if (lat != 0.0)
-              section->latmin = MIN(section->latmin, lat);
-            if (lat != 0.0)
-              section->latmax = MAX(section->latmax, lat);
-            if (section->depthmin == 0.0)
-              section->depthmin = bath[i];
-            else
-              section->depthmin = MIN(section->depthmin, bath[i]);
-            if (section->depthmin == 0.0)
-              section->depthmax = bath[i];
-            else
-              section->depthmax = MAX(section->depthmax, bath[i]);
+        
+        /* open new section if needed */
+        if (!section_initialized && new_section >= 0) {
+          /* open existing section file for reading */
+		  snprintf(spath, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, ifile, new_section);
+		  if ((status = mb_read_init(verbose, spath, MBF_MBLDEOIH, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
+				&smbio_ptr, &btime_d, &etime_d, &sbeams_bath, &sbeams_amp, &spixels_ss, error)) != MB_SUCCESS) {
+			mb_error(verbose, *error, &error_message);
+			fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", error_message);
+			fprintf(stderr, "\nSwath sonar File <%s> not initialized for writing\n", spath);
+		  }
+		  snprintf(opath, sizeof(mb_path), "%s/tmp_nvs_%4.4d_%4.4d.mb71", project->datadir, ifile, new_section);
+		  if ((status = mb_write_init(verbose, opath, MBF_MBLDEOIH, &ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss,
+					error)) != MB_SUCCESS) {
+			mb_error(verbose, *error, &error_message);
+			fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", error_message);
+			fprintf(stderr, "\nSwath sonar File <%s> not initialized for writing\n", opath);
+		  }
+		  if (status == MB_SUCCESS) {
+			if (*error == MB_ERROR_NO_ERROR)
+			 status = mb_register_array(verbose, smbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&sbeamflag, error);
+			if (*error == MB_ERROR_NO_ERROR)
+			 status = mb_register_array(verbose, smbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&sbath, error);
+			if (*error == MB_ERROR_NO_ERROR)
+			 status = mb_register_array(verbose, smbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&samp, error);
+			if (*error == MB_ERROR_NO_ERROR)
+			 status = mb_register_array(verbose, smbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&sbathacrosstrack, error);
+			if (*error == MB_ERROR_NO_ERROR)
+			 status = mb_register_array(verbose, smbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&sbathalongtrack, error);
+			if (*error == MB_ERROR_NO_ERROR)
+			 status = mb_register_array(verbose, smbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&sss, error);
+			if (*error == MB_ERROR_NO_ERROR)
+			 status = mb_register_array(verbose, smbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&sssacrosstrack, error);
+			if (*error == MB_ERROR_NO_ERROR)
+			 status = mb_register_array(verbose, smbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&sssalongtrack, error);
+			if (*error == MB_ERROR_NO_ERROR)
+			
+			/* if error initializing memory then don't read the file */
+			if (*error != MB_ERROR_NO_ERROR) {
+			  mb_error(verbose, *error, &error_message);
+			  fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
+			}
+		  }
+		  if (*error == MB_ERROR_NO_ERROR) {
+            section_initialized = true;
+            current_section = new_section;
+            section_saved = false;
+		  }
+        }
+
+        /* read and write next ping from existing current section file */
+        if (section_initialized) {
+          /* read the next section ping */
+          if (section_saved) {
+            section_saved = false;
           }
           else {
-            beamflag[i] = MB_FLAG_NULL;
-            bath[i] = 0.0;
-            bathacrosstrack[i] = 0.0;
-            bathalongtrack[i] = 0.0;
+			status = mb_get_all(verbose, smbio_ptr, &sstore_ptr, &skind, stime_i, &stime_d, &snavlon, &snavlat, &sspeed, &sheading,
+					  &sdistance, &saltitude, &ssensordepth, &sbeams_bath, &sbeams_amp, &spixels_ss, sbeamflag, sbath, samp,
+					  sbathacrosstrack, sbathalongtrack, sss, sssacrosstrack, sssalongtrack, scomment, error);
           }
-        }
-
-        /* write out bath data only to format 71 file */
-        if (output_open) {
-
-          /* get depth and distance scaling */
-          depthmax = 0.0;
-          distmax = 0.0;
-          for (int i = 0; i < beams_bath; i++) {
-            depthmax = MAX(depthmax, fabs(bath[i]));
-            distmax = MAX(distmax, fabs(bathacrosstrack[i]));
-            distmax = MAX(distmax, fabs(bathalongtrack[i]));
-          }
-          depthscale = MAX(0.001, depthmax / 32000);
-          distscale = MAX(0.001, distmax / 32000);
-          ostore->depth_scale = depthscale;
-          ostore->distance_scale = distscale;
-          ostore->sensordepth = draft - heave;
-          ostore->roll = roll;
-          ostore->pitch = pitch;
-          ostore->heave = heave;
-
-          /* write out data */
-          status = mb_put_all(verbose, ombio_ptr, ostore_ptr,
-                  true, MB_DATA_DATA, time_i, time_d, navlon, navlat,
-                  speed, heading, beams_bath, 0, 0,
-                  beamflag, bath, amp,
-                  bathacrosstrack, bathalongtrack,
-                  ss, ssacrosstrack, ssalongtrack, comment, error);
-        }
-
-        /* write out nav data associated with bath to format 166 file */
-        if (nfp != NULL) {
-          fprintf(nfp, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.2f %.2f %.2f %.2f %.2f %.2f\r\n",
-            time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], time_d, navlon, navlat,
-            heading, speed, draft, roll, pitch, heave);
-        }
-      }
-
-      /* print debug statements */
-      if (verbose >= 2) {
-        fprintf(stderr, "\ndbg2  Ping read in program <%s>\n", program_name);
-        fprintf(stderr, "dbg2       kind:     %d\n", kind);
-        fprintf(stderr, "dbg2       error:    %d\n", *error);
-        fprintf(stderr, "dbg2       status:   %d\n", status);
-      }
-      if (verbose >= 2 && kind == MB_DATA_COMMENT) {
-        fprintf(stderr, "dbg2       comment:  %s\n", comment);
-      }
-      if (verbose >= 2 && error <= 0 && kind == MB_DATA_DATA) {
-        fprintf(stderr, "dbg2       time_i:   %4d/%2d/%2d %2.2d:%2.2d:%2.2d.%6.6d\n", time_i[0], time_i[1],
-          time_i[2], time_i[3], time_i[4], time_i[5], time_i[6]);
-        fprintf(stderr, "dbg2       time_d:   %f\n", time_d);
-        fprintf(stderr, "dbg2       navlon:   %.10f\n", navlon);
-        fprintf(stderr, "dbg2       navlat:   %.10f\n", navlat);
-        fprintf(stderr, "dbg2       speed:    %f\n", speed);
-        fprintf(stderr, "dbg2       heading:  %f\n", heading);
-        fprintf(stderr, "dbg2       distance:       %f\n", distance);
-        fprintf(stderr, "dbg2       beams_bath:     %d\n", beams_bath);
-        fprintf(stderr, "dbg2       beams_amp:      %d\n", beams_amp);
-        fprintf(stderr, "dbg2       pixels_ss:      %d\n", pixels_ss);
-      }
-    }
-
-    /* close the swath file */
-    status = mb_close(verbose, &imbio_ptr, error);
-    if (nfp != NULL)
-      fclose(nfp);
-    if (output_open) {
-      status = mb_freed(verbose, __FILE__, __LINE__, (void **)&ostore->beamflag, error);
-      status = mb_freed(verbose, __FILE__, __LINE__, (void **)&ostore->bath, error);
-      status = mb_freed(verbose, __FILE__, __LINE__, (void **)&ostore->bath_acrosstrack, error);
-      status = mb_freed(verbose, __FILE__, __LINE__, (void **)&ostore->bath_alongtrack, error);
-      status = mb_close(verbose, &ombio_ptr, error);
-    }
-
-    /* deallocate bin arrays if needed */
-    if (bin_nbath != NULL) {
-      status = mb_freed(verbose, __FILE__, __LINE__, (void **)&bin_nbath, error);
-      status = mb_freed(verbose, __FILE__, __LINE__, (void **)&bin_bath, error);
-      status = mb_freed(verbose, __FILE__, __LINE__, (void **)&bin_bathacrosstrack, error);
-      status = mb_freed(verbose, __FILE__, __LINE__, (void **)&bin_bathalongtrack, error);
-    }
-
-    /* get coverage masks for each section */
-    if (file != NULL && !first) {
-      /* loop over all sections */
-      for (int k = 0; k < file->num_sections; k++) {
-        /* set section data to be read */
-        section = (struct mbna_section *)&file->sections[k];
-        snprintf(opath, sizeof(mb_pathplus), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, file->id, k);
-
-        /* initialize reading the swath file */
-        if ((status = mb_read_init(verbose, opath, 71, 1, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
-                 &ombio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, error)) !=
-            MB_SUCCESS) {
-          mb_error(verbose, *error, &error_message);
-          fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", error_message);
-          fprintf(stderr, "\nSwath sonar File <%s> not initialized for reading\n", opath);
-        }
-
-        /* allocate memory for data arrays */
-        if (status == MB_SUCCESS) {
-          beamflag = NULL;
-          bath = NULL;
-          amp = NULL;
-          bathacrosstrack = NULL;
-          bathalongtrack = NULL;
-          ss = NULL;
-          ssacrosstrack = NULL;
-          ssalongtrack = NULL;
-          if (*error == MB_ERROR_NO_ERROR)
-            status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char),
-                     (void **)&beamflag, error);
-          if (*error == MB_ERROR_NO_ERROR)
-            status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
-                     (void **)&bath, error);
-          if (*error == MB_ERROR_NO_ERROR)
-            status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp,
-                     error);
-          if (*error == MB_ERROR_NO_ERROR)
-            status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
-                     (void **)&bathacrosstrack, error);
-          if (*error == MB_ERROR_NO_ERROR)
-            status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
-                     (void **)&bathalongtrack, error);
-          if (*error == MB_ERROR_NO_ERROR)
-            status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss,
-                     error);
-          if (*error == MB_ERROR_NO_ERROR)
-            status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double),
-                     (void **)&ssacrosstrack, error);
-          if (*error == MB_ERROR_NO_ERROR)
-            status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double),
-                     (void **)&ssalongtrack, error);
-
-          /* if error initializing memory then don't read the file */
-          if (*error != MB_ERROR_NO_ERROR) {
-            mb_error(verbose, *error, &error_message);
-            fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
-          }
-        }
-
-        /* loop over reading data */
-        dx1 = (section->lonmax - section->lonmin) / MBNA_MASK_DIM;
-        dy1 = (section->latmax - section->latmin) / MBNA_MASK_DIM;
-        while (*error <= MB_ERROR_NO_ERROR) {
-          /* read a ping of data */
-          status =
-            mb_get_all(verbose, ombio_ptr, &ostore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
-                 &heading, &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag,
-                 bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
-
-          /* ignore minor errors */
-          if (kind == MB_DATA_DATA && (*error == MB_ERROR_TIME_GAP || *error == MB_ERROR_OUT_BOUNDS ||
-                     *error == MB_ERROR_OUT_TIME || *error == MB_ERROR_SPEED_TOO_SMALL)) {
-            status = MB_SUCCESS;
-            *error = MB_ERROR_NO_ERROR;
-          }
-
-          /* check for good bathymetry */
-          if (kind == MB_DATA_DATA && *error == MB_ERROR_NO_ERROR) {
-            mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
-            headingx = sin(DTR * heading);
-            headingy = cos(DTR * heading);
-            for (int i = 0; i < beams_bath; i++) {
-              if (mb_beam_ok(beamflag[i]) && bath[i] != 0.0) {
-                lon =
-                  navlon + headingy * mtodeglon * bathacrosstrack[i] + headingx * mtodeglon * bathalongtrack[i];
-                lat =
-                  navlat - headingx * mtodeglat * bathacrosstrack[i] + headingy * mtodeglat * bathalongtrack[i];
-                ii1 = (lon - section->lonmin) / dx1;
-                jj1 = (lat - section->latmin) / dy1;
-                if (ii1 >= 0 && ii1 < MBNA_MASK_DIM && jj1 >= 0 && jj1 < MBNA_MASK_DIM) {
-                  section->coverage[ii1 + jj1 * MBNA_MASK_DIM] = 1;
-                }
+              		
+          if (status == MB_SUCCESS) {
+            /* write out the ping substituting the bathymetry arrays read from the current 
+               processed file for the arrays read from the existing section file, but only
+               after correcting for any change in sensordepth between the original section
+               and the current processed data */
+            if (fabs(stime_d - time_d) <= reimport_ping_maxtimediff) {
+              double sensordepthcorrection = ssensordepth - sensordepth;
+              for (int i = 0; i < beams_bath; i++) {
+                bath[i] += sensordepthcorrection;
               }
-            }
+			  /* write out data */
+			  status = mb_put_all(verbose, ombio_ptr, sstore_ptr,
+					  true, MB_DATA_DATA, stime_i, stime_d, snavlon, snavlat,
+					  sspeed, sheading, beams_bath, 0, 0,
+					  beamflag, bath, amp,
+					  bathacrosstrack, bathalongtrack,
+					  ss, ssacrosstrack, ssalongtrack, comment, error);
+			  if (status == MB_SUCCESS) {
+				current_section_num_pings++;
+			  }
+		    }
+		    
+		    /* if section timestamp later than processed file timestamp then save the section data */
+		    else if (stime_d > time_d) {
+		      section_saved = true;
+              fprintf(stderr, "%s:%d:%s: Skipped writing ping to section: status:%d timediff:%f\n", 
+            		__FILE__, __LINE__, __FUNCTION__, status, (stime_d - time_d));
+		    }
+		    
+		    /* if section timestamp earlier than processed file timestamp then write out the existing section data */
+		    else {
+			  /* write out data */
+			  status = mb_put_all(verbose, ombio_ptr, sstore_ptr,
+					  true, MB_DATA_DATA, stime_i, stime_d, snavlon, snavlat,
+					  sspeed, sheading, sbeams_bath, 0, 0,
+					  sbeamflag, sbath, samp,
+					  sbathacrosstrack, sbathalongtrack,
+					  sss, sssacrosstrack, sssalongtrack, scomment, error);
+			  if (status == MB_SUCCESS) {
+				current_section_num_pings++;
+			  }
+		    }
           }
+          
+          /* else write out ping from processed file */
+          else {
+            fprintf(stderr, "%s:%d:%s: Not writing ping to section because it is missing from the existing section file:\n", 
+            		__FILE__, __LINE__, __FUNCTION__);
+		  }
         }
+      } /* kind == MB_DATA_DATA */
 
-        /* deallocate memory used for data arrays */
-        status = mb_close(verbose, &ombio_ptr, error);
-      }
-    }
-  }
+	  /* close open section */
+	  if (section_initialized && done) {
+		status = mb_close(verbose, &smbio_ptr, error);
+		status = mb_close(verbose, &ombio_ptr, error);
+		
+		/* delete old section file and related ancilliary files */
+		snprintf(spath, sizeof(mb_path), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, ifile, current_section);
+		remove(spath);
+		snprintf(opath, sizeof(mb_path), "%s.fnv", spath);
+		remove(opath);
+		snprintf(opath, sizeof(mb_path), "%s.inf", spath);
+		remove(opath);
+		snprintf(opath, sizeof(mb_path), "%s.tri", spath);
+		remove(opath);
+		
+		/* rename the new section file and make ancilliary files */
+		snprintf(opath, sizeof(mb_path), "%s/tmp_nvs_%4.4d_%4.4d.mb71", project->datadir, ifile, current_section);
+		rename(opath, spath);
+		status = mb_make_info(verbose, true, spath, MBF_MBLDEOIH, error);
+		
+		if (verbose > 0) {
+          struct mbna_section *section = &project->files[ifile].sections[current_section];
+          fprintf(stderr, " > Reimport section %4.4d:%4.4d - pings updated and expected: %d %d\n", 
+				ifile, current_section, current_section_num_pings, section->num_pings);
+		}
+		reimport_sections++;
+		reimport_pings += current_section_num_pings;
+		section_initialized = false;
+		current_section_num_pings = 0;
+	  }
+	} /* loop over input data and variable done */
+	
+	/* close the file that was reimported */
+	status = mb_close(verbose, &imbio_ptr, error);
 
-  /* add info text */
-  if (status == MB_SUCCESS && new_pings > 0) {
-    snprintf(message, sizeof(mb_pathplus), "Imported format %d file: %s\n > Read %d pings\n > Added %d sections %d crossings\n", iformat, ipath,
-      new_pings, new_sections, new_crossings);
-    mbnavadjust_info_add(verbose, project, message, true, error);
-  }
+	if (verbose > 0) {
+      mb_path message;
+      snprintf(message, sizeof(mb_path), " > Updated total %d pings in %d sections\n", 
+    			reimport_pings, reimport_sections);
+      mbnavadjust_info_add(verbose, project, message, true, error);
+	}
+  } /* reimport */
+  
+  /* file cannot be reimported */
   else {
-    snprintf(message, sizeof(mb_pathplus), "Unable to import format %d file: %s\n", iformat, ipath);
+    *error = MB_ERROR_BAD_DATA;
+    status = MB_FAILURE;
+    mb_pathplus message;
+    snprintf(message, sizeof(mb_pathplus), "Unable to reimport format %d file: %s\n", iformat, ipath);
     mbnavadjust_info_add(verbose, project, message, true, error);
   }
 
@@ -6384,6 +6109,157 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
 
   return (status);
 }
+/*--------------------------------------------------------------------*/
+int mbnavadjust_coverage_mask(int verbose, struct mbna_project *project,
+            int ifile, int isection, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       project:    %p\n", project);
+    fprintf(stderr, "dbg2       ifile:      %d\n", ifile);
+    fprintf(stderr, "dbg2       isection:   %d\n", isection);
+  }
+
+  int status = MB_SUCCESS;
+  struct mbna_file *file = &project->files[ifile];
+  struct mbna_section *section = &file->sections[isection];
+  mb_pathplus sectionpath;
+  snprintf(sectionpath, sizeof(mb_pathplus), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, ifile, isection);
+
+
+  /* MBIO control parameters */
+  const int lonflip = 0;
+  double bounds[4] = {-360, 360, -90, 90};
+  int btime_i[7] = {1962, 2, 21, 10, 30, 0, 0};
+  int etime_i[7] = {2062, 2, 21, 10, 30, 0, 0};
+  double btime_d = -248016600.0;
+  double etime_d = 2907743400.0;
+  double speedmin = 0.0;
+  double timegap = 1000000000.0;
+
+  /* mbio read and write values */
+  void *mbio_ptr = NULL;
+  void *store_ptr = NULL;
+  int kind = MB_DATA_NONE;
+  int time_i[7];
+  double time_d;
+  double navlon;
+  double navlat;
+  double speed;
+  double heading;
+  double distance;
+  double altitude;
+  double sensordepth;
+  int beams_bath = 0;
+  int beams_amp = 0;
+  int pixels_ss = 0;
+  char comment[MB_COMMENT_MAXLINE];
+  char *error_message = NULL;
+
+
+  /* initialize reading the swath file */
+  if ((status = mb_read_init(verbose, sectionpath, MBF_MBLDEOIH, 1, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
+           &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, error)) !=
+      MB_SUCCESS) {
+    mb_error(verbose, *error, &error_message);
+    fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", error_message);
+    fprintf(stderr, "\nSwath sonar File <%s> not initialized for reading\n", sectionpath);
+  }
+
+  /* allocate memory for data arrays */
+  char *beamflag = NULL;
+  double *bath = NULL;
+  double *bathacrosstrack = NULL;
+  double *bathalongtrack = NULL;
+  double *amp = NULL;
+  double *ss = NULL;
+  double *ssacrosstrack = NULL;
+  double *ssalongtrack = NULL;
+  if (status == MB_SUCCESS) {
+    if (*error == MB_ERROR_NO_ERROR)
+      status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char),
+               (void **)&beamflag, error);
+    if (*error == MB_ERROR_NO_ERROR)
+      status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
+               (void **)&bath, error);
+    if (*error == MB_ERROR_NO_ERROR)
+      status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp,
+               error);
+    if (*error == MB_ERROR_NO_ERROR)
+      status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
+               (void **)&bathacrosstrack, error);
+    if (*error == MB_ERROR_NO_ERROR)
+      status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
+               (void **)&bathalongtrack, error);
+    if (*error == MB_ERROR_NO_ERROR)
+      status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss,
+               error);
+    if (*error == MB_ERROR_NO_ERROR)
+      status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double),
+               (void **)&ssacrosstrack, error);
+    if (*error == MB_ERROR_NO_ERROR)
+      status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double),
+               (void **)&ssalongtrack, error);
+
+    /* if error initializing memory then don't read the file */
+    if (*error != MB_ERROR_NO_ERROR) {
+      mb_error(verbose, *error, &error_message);
+      fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
+    }
+  }
+
+  /* loop over reading data */
+  double dx1 = (section->lonmax - section->lonmin) / MBNA_MASK_DIM;
+  double dy1 = (section->latmax - section->latmin) / MBNA_MASK_DIM;
+  while (*error <= MB_ERROR_NO_ERROR) {
+    /* read a ping of data */
+    status =
+      mb_get_all(verbose, mbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
+           &heading, &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag,
+           bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
+
+    /* ignore minor errors */
+    if (kind == MB_DATA_DATA && (*error == MB_ERROR_TIME_GAP || *error == MB_ERROR_OUT_BOUNDS ||
+               *error == MB_ERROR_OUT_TIME || *error == MB_ERROR_SPEED_TOO_SMALL)) {
+      status = MB_SUCCESS;
+      *error = MB_ERROR_NO_ERROR;
+    }
+
+    /* check for good bathymetry */
+    if (kind == MB_DATA_DATA && *error == MB_ERROR_NO_ERROR) {
+      double mtodeglon, mtodeglat;
+      mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
+      double headingx = sin(DTR * heading);
+      double headingy = cos(DTR * heading);
+      for (int i = 0; i < beams_bath; i++) {
+        if (mb_beam_ok(beamflag[i]) && bath[i] != 0.0) {
+          double lon = navlon + headingy * mtodeglon * bathacrosstrack[i] + headingx * mtodeglon * bathalongtrack[i];
+          double lat = navlat - headingx * mtodeglat * bathacrosstrack[i] + headingy * mtodeglat * bathalongtrack[i];
+          int ii1 = (lon - section->lonmin) / dx1;
+          int jj1 = (lat - section->latmin) / dy1;
+          if (ii1 >= 0 && ii1 < MBNA_MASK_DIM && jj1 >= 0 && jj1 < MBNA_MASK_DIM) {
+            section->coverage[ii1 + jj1 * MBNA_MASK_DIM] = 1;
+          }
+        }
+      }
+    }
+  }
+
+  /* deallocate memory used for data arrays */
+  status = mb_close(verbose, &mbio_ptr, error);
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:       %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:      %d\n", status);
+  }
+
+  return (status);
+}
+
+
 /*--------------------------------------------------------------------*/
 int mbnavadjust_import_reference(int verbose, struct mbna_project *project, char *path, int *error) {
   if (verbose >= 2) {

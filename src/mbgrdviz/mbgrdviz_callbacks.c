@@ -1714,6 +1714,7 @@ int do_mbgrdviz_openprimary(char *input_file_ptr) {
   int mbv_site_view_mode;
   int mbv_route_view_mode;
   int mbv_nav_view_mode;
+  int mbv_navswathbounds_view_mode;
   int mbv_navdrape_view_mode;
   int mbv_vector_view_mode;
   int mbv_primary_colortable;
@@ -1831,6 +1832,7 @@ int do_mbgrdviz_openprimary(char *input_file_ptr) {
       mbv_site_view_mode = MBV_VIEW_OFF;
       mbv_route_view_mode = MBV_VIEW_OFF;
       mbv_nav_view_mode = MBV_VIEW_OFF;
+      mbv_navswathbounds_view_mode = MBV_VIEW_OFF;
       mbv_navdrape_view_mode = MBV_VIEW_OFF;
       mbv_vector_view_mode = MBV_VIEW_OFF;
       mbv_primary_colortable = MBV_COLORTABLE_HAXBY;
@@ -1926,8 +1928,9 @@ int do_mbgrdviz_openprimary(char *input_file_ptr) {
       status = mbview_setviewcontrols(
           verbose, instance, mbv_display_mode, mbv_mouse_mode, mbv_grid_mode, mbv_primary_histogram,
           mbv_primaryslope_histogram, mbv_secondary_histogram, mbv_primary_shade_mode, mbv_slope_shade_mode,
-          mbv_secondary_shade_mode, mbv_grid_contour_mode, mbv_site_view_mode, mbv_route_view_mode, mbv_nav_view_mode,
-          mbv_navdrape_view_mode, mbv_vector_view_mode, mbv_exageration, mbv_modelelevation3d, mbv_modelazimuth3d,
+          mbv_secondary_shade_mode, mbv_grid_contour_mode, mbv_site_view_mode, mbv_route_view_mode, 
+          mbv_nav_view_mode, mbv_navswathbounds_view_mode, mbv_navdrape_view_mode, mbv_vector_view_mode, 
+          mbv_exageration, mbv_modelelevation3d, mbv_modelazimuth3d,
           mbv_viewelevation3d, mbv_viewazimuth3d, mbv_illuminate_magnitude, mbv_illuminate_elevation,
           mbv_illuminate_azimuth, mbv_slope_magnitude, mbv_overlay_shade_magnitude, mbv_overlay_shade_center,
           mbv_overlay_shade_mode, mbv_contour_interval, mbv_display_projection_mode, mbv_display_projection_id, &error);
@@ -5853,7 +5856,7 @@ void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_dat
           data_source->primary_histogram, data_source->primaryslope_histogram, data_source->secondary_histogram,
           data_source->primary_shade_mode, data_source->slope_shade_mode, data_source->secondary_shade_mode,
           data_source->grid_contour_mode, data_source->site_view_mode, data_source->route_view_mode,
-          data_source->nav_view_mode, data_source->navdrape_view_mode, data_source->vector_view_mode,
+          data_source->nav_view_mode, data_source->navswathbounds_view_mode, data_source->navdrape_view_mode, data_source->vector_view_mode,
           data_source->exageration, data_source->modelelevation3d, data_source->modelazimuth3d,
           data_source->viewelevation3d, data_source->viewazimuth3d, data_source->illuminate_magnitude,
           data_source->illuminate_elevation, data_source->illuminate_azimuth, data_source->slope_magnitude,
