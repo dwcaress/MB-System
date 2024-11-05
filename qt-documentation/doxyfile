@@ -112,7 +112,8 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # Configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT =                 mainpage.h
+INPUT = .
+INPUT +=                 mainpage.h
 INPUT +=                  ../src/qt-mbgrdviz
 INPUT +=                 ../src/qt-mbgrdviz-2
 INPUT +=                 ../src/qt-mbgrdviz-3
