@@ -37,8 +37,8 @@
 #include <stdint.h>
 
 /* Define version and date for this release */
-#define MB_VERSION "5.8.1"
-#define MB_VERSION_DATE "22 March 2024"
+#define MB_VERSION "5.8.2beta15"
+#define MB_VERSION_DATE "1 October 2024"
 
 /* CMake supports current OS's and so there is only one form of RPC and XDR and no mb_config.h file */
 #ifdef CMAKE_BUILD_SYSTEM
@@ -269,6 +269,32 @@ typedef enum {
 #define MB_IS_DNAN isnan
 #endif
 
+/* printf format for binary bitmask */
+/* from https://stackoverflow.com/questions/111928/is-there-a-printf-converter-to-print-in-binary-format */
+#define MB_PRINTF_BINARY_PATTERN_INT8 "%c%c%c%c%c%c%c%c"
+#define MB_PRINTF_BYTE_TO_BINARY_INT8(i)    \
+    (((i) & 0x80ll) ? '1' : '0'), \
+    (((i) & 0x40ll) ? '1' : '0'), \
+    (((i) & 0x20ll) ? '1' : '0'), \
+    (((i) & 0x10ll) ? '1' : '0'), \
+    (((i) & 0x08ll) ? '1' : '0'), \
+    (((i) & 0x04ll) ? '1' : '0'), \
+    (((i) & 0x02ll) ? '1' : '0'), \
+    (((i) & 0x01ll) ? '1' : '0')
+
+#define MB_PRINTF_BINARY_PATTERN_INT16 \
+    MB_PRINTF_BINARY_PATTERN_INT8              MB_PRINTF_BINARY_PATTERN_INT8
+#define MB_PRINTF_BYTE_TO_BINARY_INT16(i) \
+    MB_PRINTF_BYTE_TO_BINARY_INT8((i) >> 8),   MB_PRINTF_BYTE_TO_BINARY_INT8(i)
+#define MB_PRINTF_BINARY_PATTERN_INT32 \
+    MB_PRINTF_BINARY_PATTERN_INT16             MB_PRINTF_BINARY_PATTERN_INT16
+#define MB_PRINTF_BYTE_TO_BINARY_INT32(i) \
+    MB_PRINTF_BYTE_TO_BINARY_INT16((i) >> 16), MB_PRINTF_BYTE_TO_BINARY_INT16(i)
+#define MB_PRINTF_BINARY_PATTERN_INT64    \
+    MB_PRINTF_BINARY_PATTERN_INT32             MB_PRINTF_BINARY_PATTERN_INT32
+#define MB_PRINTF_BYTE_TO_BINARY_INT64(i) \
+    MB_PRINTF_BYTE_TO_BINARY_INT32((i) >> 32), MB_PRINTF_BYTE_TO_BINARY_INT32(i)
+
 /* default grid no data value define */
 #define MB_DEFAULT_GRID_NODATA -9999999.9
 
@@ -490,6 +516,9 @@ int mb_platform_lever(int verbose, void *platform_ptr, int targetsensor, int tar
 int mb_platform_position(int verbose, void *platform_ptr, int targetsensor, int targetsensoroffset, double navlon, double navlat,
                          double sensordepth, double heading, double roll, double pitch, double *targetlon, double *targetlat,
                          double *targetz, int *error);
+int mb_platform_position_offset(int verbose, void *platform_ptr, int targetsensor, int targetsensoroffset,
+                                   double *target_x_offset, double *target_y_offset, double *target_z_offset,
+                                   int *error);
 int mb_platform_orientation(int verbose, void *platform_ptr, double heading, double roll, double pitch, double *platform_heading,
                             double *platform_roll, double *platform_pitch, int *error);
 int mb_platform_orientation_offset(int verbose, void *platform_ptr, int targetsensor, int targetsensoroffset,
@@ -559,6 +588,7 @@ int mb_buffer_get_kind(int verbose, void *buff_ptr, void *mbio_ptr, int id, int 
 int mb_buffer_get_ptr(int verbose, void *buff_ptr, void *mbio_ptr, int id, void **store_ptr, int *error);
 
 int mb_coor_scale(int verbose, double latitude, double *mtodeglon, double *mtodeglat);
+int mb_alvinxy_scale(int verbose, double latitude, double *mtodeglon, double *mtodeglat);
 int mb_apply_lonflip(int verbose, int lonflip, double *longitude);
 
 int mb_error(int, int, char **);

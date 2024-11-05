@@ -37,11 +37,12 @@ message("In src/mbtrnutils")
 #------------------------------------------------------------------------------
 
 find_package(NetCDF REQUIRED)
+find_package(LibPROJ REQUIRED)
 
 #------------------------------------------------------------------------------
 
 add_executable(mbtrnpp mbtrnpp.c)
-target_include_directories(mbtrnpp PRIVATE ${NetCDF_INCLUDE_DIRS}
+target_include_directories(mbtrnpp PRIVATE ${NetCDF_INCLUDE_DIRS} ${libPROJ_INCLUDE_DIRS}
 										${CMAKE_SOURCE_DIR}/src/mbtrnframe
                                         ${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
                                         ${CMAKE_SOURCE_DIR}/src/mbtrn/r7kr
@@ -49,7 +50,7 @@ target_include_directories(mbtrnpp PRIVATE ${NetCDF_INCLUDE_DIRS}
 										${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
 										${CMAKE_SOURCE_DIR}/src/mbtrn/mb1r )
 target_compile_definitions(mbtrnpp PRIVATE WITH_MBTNAV)
-target_link_libraries(mbtrnpp PRIVATE mbio mbaux trnw qnx newmat tnav geolib netif r7kr mb1r qnx mbtrnframe NetCDF::NetCDF )
+target_link_libraries(mbtrnpp PRIVATE mbio mbaux trnw qnx newmat tnav geolib netif r7kr mb1r qnx mbtrnframe geocon NetCDF::NetCDF LibPROJ::LibPROJ )
 
 #------------------------------------------------------------------------------
 

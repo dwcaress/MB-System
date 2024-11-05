@@ -1,4 +1,4 @@
-.TH mbpreprocess 1 "5 November 2022" "MB-System 5.0" "MB-System 5.0"
+.TH mbpreprocess 1 "2 August 2024" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbpreprocess\fP \- performs preprocessing of swath sonar data as part of setting
 up an MB-System processing structure for a dataset.
@@ -128,6 +128,8 @@ Version 5.0
 \fB--head2-offsets\fP=\fIX/Y/Z/HEADING/ROLL/PITCH\fP
 .br
 \fB--kluge-time-jumps\fP=\fISECONDS\fP
+.br
+\fB--kluge-fix-7k-timestamps\fP=\fITARGETOFFSET\fP
 .br
 \fB--kluge-ancilliary-time-jumps\fP=\fISECONDS\fP
 .br
@@ -833,6 +835,16 @@ to the origin for a dual head lidar system. The only relevant formats are for
 .TP
 .B --kluge-time-jumps=\fISECONDS\fP
 .TP
+.B --kluge-fix-7k-timestamps=\fITARGETOFFSET\fP
+This option was created to fix some Teledyne Reson T50 multibeam data (format 89) collected
+in 2024 with an MBARI Mapping AUV. The sonar ping timestamps jumped considerably (by as
+much as a day!!) while the ancillary nav, sensor depth, and attitude records maintained
+accurate timing. In good data the ping records will occur in the datastream with a fairly
+stable delay from the most recent ancillary records (0.7 seconds in this case). This
+option forces the pings records to have timestamps that have the target offset from the
+most recent ancillary records whenever the recorded offset magnitude is more than four 
+times the target offset.
+.TP
 .B --kluge-ancilliary-time-jumps=\fISECONDS\fP
 .TP
 .B --kluge-mbaripressure-time-jumps=\fISECONDS\fP
@@ -861,6 +873,12 @@ This option causes heave values to be moved to the sonardepth (sometimes sensord
 field, leaving the heave value as zero, for each survey ping. This is currently
 only relevant to the preprocessing of Imagenex DeltaT multibeam data in the vendor
 83P format (191). The output of preprocessing format 191 data are format 192 files.
+.TP
+.B --kluge-early-mbari-mapping-auv
+This option pertains only to Reson 7125 200 kHz multibeam data collected on the first
+MBARI Mapping AUV from 2006 through 2009. Invoking this kluge triggers \fBmbpreprocess\fP
+to modify the beam quality factors to be consistent with the later (>2009) standard for
+the original bathymetry records in Reson s7k format data.
 
 .SH EXAMPLES
 To be written.....

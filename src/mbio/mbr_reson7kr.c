@@ -8029,7 +8029,8 @@ Have a nice day...\n");
           *last_ping = *new_ping;
           store->read_volatilesettings = false;
           store->read_matchfilter = false;
-          store->read_beamgeometry = false;
+          // Do not reset BeamGeometry as it does not come for every ping when data are logged by PDS
+          // store->read_BeamGeometry = false;
           store->read_bathymetry = false;
           store->read_remotecontrolsettings = false;
           store->read_backscatter = false;
@@ -16673,7 +16674,8 @@ int mbr_reson7kr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
         store->read_matchfilter = false;
         //store->read_volatilesettings;
         store->read_matchfilter = false;
-        //store->read_beamgeometry;
+        // Do not reset BeamGeometry as it does not come for every ping when data are logged by PDS
+        // store->read_BeamGeometry = false;
         store->read_remotecontrolsettings = false;
         store->read_bathymetry = false;
         store->read_backscatter = false;

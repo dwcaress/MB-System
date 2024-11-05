@@ -510,6 +510,26 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 			         mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM3002D_SPECIFIC) {
 				ss_spacing = 750.0 / ((double)mb_ping->sensor_data.gsfEM3Specific.sample_rate);
 			}
+			else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_GEOSWATH_PLUS_SPECIFIC) {
+				ss_spacing = 750.0 / ((double)mb_ping->sensor_data.gsfGeoSwathPlusSpecific.sample_rate);
+			}
+			else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_DELTA_T_SPECIFIC) {
+				double sample_rate = 0.002;
+				if (mb_ping->sensor_data.gsfDeltaTSpecific.sample_rate_flag)
+					sample_rate = 0.0002;
+				ss_spacing = 750.0 / sample_rate;
+			}
+			else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2020_SPECIFIC ||
+			         mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2022_SPECIFIC ||
+			         mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2024_SPECIFIC) {
+				ss_spacing = 750.0 / ((double)mb_ping->sensor_data.gsfR2SonicSpecific.rx_sample_rate);
+			}
+			else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_RESON_TSERIES_SPECIFIC) {
+				ss_spacing = 750.0 / ((double)mb_ping->sensor_data.gsfResonTSeriesSpecific.sample_rate);
+			}
+			else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_KMALL_SPECIFIC) {
+				ss_spacing = 750.0 / ((double)mb_ping->sensor_data.gsfKMALLSpecific.seabedImageSampleRate);
+			}
 			*nss = 0;
 			for (int i = 0; i < *nbath; i++) {
 				/* get pixel sample size */

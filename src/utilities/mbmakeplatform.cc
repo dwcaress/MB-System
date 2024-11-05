@@ -54,6 +54,7 @@ constexpr char help_message[] =
     "mbmakeplatform creates or modifies an MB-System platform file.\n";
 constexpr char usage_message[] =
     "mbmakeplatform \n"
+    "\t--output=plffile\n"
     "\t[\n"
     "\t--verbose\n"
     "\t--help\n"
@@ -61,9 +62,6 @@ constexpr char usage_message[] =
     "\t--swath=datalist\n"
     "\t--swath=swathfile\n"
     "\t--swath-format=value\n"
-    "\t]\n"
-    "\t--output=plffile\n"
-    "\t[\n"
     "\t--platform-type-surface-vessel\n"
     "\t--platform-type-tow-body\n"
     "\t--platform-type-rov\n"
@@ -73,8 +71,8 @@ constexpr char usage_message[] =
     "\t--platform-name=string\n"
     "\t--platform-organization=string\n"
     "\t--platform-documentation-url\n"
-    "\t--platform-start-time\n"
-    "\t--platform-end-time\n"
+    "\t--platform-start-time=yyyy/mm/dd/hh/mm/ss.ssssss\n"
+    "\t--platform-end-time=yyyy/mm/dd/hh/mm/ss.ssssss\n"
     "\t--add-sensor-sonar-echosounder\n"
     "\t--add-sensor-sonar-multiechosounder\n"
     "\t--add-sensor-sonar-sidescan\n"
@@ -96,7 +94,43 @@ constexpr char usage_message[] =
     "\t--add-sensor-ctd\n"
     "\t--add-sensor-pressure\n"
     "\t--add-sensor-soundspeed\n"
-    "\t--end-sensor\n"
+    "\t--modify-sensor=sensorid\n"
+    "\t--modify-sensor-bathymetry\n"
+    "\t--modify-sensor-bathymetry1\n"
+    "\t--modify-sensor-bathymetry2\n"
+    "\t--modify-sensor-bathymetry3\n"
+    "\t--modify-sensor-backscatter\n"
+    "\t--modify-sensor-backscatter1\n"
+    "\t--modify-sensor-backscatter2\n"
+    "\t--modify-sensor-backscatter3\n"
+    "\t--modify-sensor-subbottom\n"
+    "\t--modify-sensor-subbottom1\n"
+    "\t--modify-sensor-subbottom2\n"
+    "\t--modify-sensor-subbottom3\n"
+    "\t--modify-sensor-camera\n"
+    "\t--modify-sensor-camera1\n"
+    "\t--modify-sensor-camera2\n"
+    "\t--modify-sensor-camera3\n"
+    "\t--modify-sensor-position\n"
+    "\t--modify-sensor-position1\n"
+    "\t--modify-sensor-position2\n"
+    "\t--modify-sensor-position3\n"
+    "\t--modify-sensor-depth\n"
+    "\t--modify-sensor-depth1\n"
+    "\t--modify-sensor-depth2\n"
+    "\t--modify-sensor-depth3\n"
+    "\t--modify-sensor-heading\n"
+    "\t--modify-sensor-heading1\n"
+    "\t--modify-sensor-heading2\n"
+    "\t--modify-sensor-heading3\n"
+    "\t--modify-sensor-rollpitch\n"
+    "\t--modify-sensor-rollpitch1\n"
+    "\t--modify-sensor-rollpitch2\n"
+    "\t--modify-sensor-rollpitch3\n"
+    "\t--modify-sensor-heave\n"
+    "\t--modify-sensor-heave1\n"
+    "\t--modify-sensor-heave2\n"
+    "\t--modify-sensor-heave3\n"
     "\t--sensor-model=string\n"
     "\t--sensor-manufacturer=string\n"
     "\t--sensor-serialnumber=string\n"
@@ -178,48 +212,12 @@ constexpr char usage_message[] =
     "\t--sensor-source-heave1\n"
     "\t--sensor-source-heave2\n"
     "\t--sensor-source-heave3\n"
-    "\t--modify-sensor=sensorid\n"
-    "\t--modify-sensor-bathymetry\n"
-    "\t--modify-sensor-bathymetry1\n"
-    "\t--modify-sensor-bathymetry2\n"
-    "\t--modify-sensor-bathymetry3\n"
-    "\t--modify-sensor-backscatter\n"
-    "\t--modify-sensor-backscatter1\n"
-    "\t--modify-sensor-backscatter2\n"
-    "\t--modify-sensor-backscatter3\n"
-    "\t--modify-sensor-subbottom\n"
-    "\t--modify-sensor-subbottom1\n"
-    "\t--modify-sensor-subbottom2\n"
-    "\t--modify-sensor-subbottom3\n"
-    "\t--modify-sensor-camera\n"
-    "\t--modify-sensor-camera1\n"
-    "\t--modify-sensor-camera2\n"
-    "\t--modify-sensor-camera3\n"
-    "\t--modify-sensor-position\n"
-    "\t--modify-sensor-position1\n"
-    "\t--modify-sensor-position2\n"
-    "\t--modify-sensor-position3\n"
-    "\t--modify-sensor-depth\n"
-    "\t--modify-sensor-depth1\n"
-    "\t--modify-sensor-depth2\n"
-    "\t--modify-sensor-depth3\n"
-    "\t--modify-sensor-heading\n"
-    "\t--modify-sensor-heading1\n"
-    "\t--modify-sensor-heading2\n"
-    "\t--modify-sensor-heading3\n"
-    "\t--modify-sensor-rollpitch\n"
-    "\t--modify-sensor-rollpitch1\n"
-    "\t--modify-sensor-rollpitch2\n"
-    "\t--modify-sensor-rollpitch3\n"
-    "\t--modify-sensor-heave\n"
-    "\t--modify-sensor-heave1\n"
-    "\t--modify-sensor-heave2\n"
-    "\t--modify-sensor-heave3\n"
     "\t--modify-offsets=ioff/x/y/z/azimuth/roll/pitch\n"
     "\t--modify-offset-positions=ioff/x/y/z\n"
     "\t--modify-offset-angles=ioff/azimuth/roll/pitch\n"
     "\t--modify-time-latency=value\n"
     "\t--modify-time-latency-model=file\n"
+    "\t--end-sensor\n"
     "\t--set-source-bathymetry\n"
     "\t--set-source-bathymetry1\n"
     "\t--set-source-bathymetry2\n"
@@ -287,12 +285,12 @@ int main(int argc, char **argv) {
       happens in this loop and the order of arguments matters
       - the input and output arguments must be given first */
   typedef enum {
+    option_output,
     option_verbose,
     option_help,
     option_input,
     option_swath,
     option_swath_format,
-    option_output,
     option_platform_type_surface_vessel,
     option_platform_type_tow_body,
     option_platform_type_rov,
@@ -488,12 +486,12 @@ int main(int argc, char **argv) {
   } option_id;
 
   static struct option options[] = {
+    {"output", required_argument, nullptr, 0},
     {"verbose", no_argument, nullptr, 0},
     {"help", no_argument, nullptr, 0},
     {"input", required_argument, nullptr, 0},
     {"swath", required_argument, nullptr, 0},
     {"swath-format", required_argument, nullptr, 0},
-    {"output", required_argument, nullptr, 0},
     {"platform-type-surface-vessel", no_argument, nullptr, 0},
     {"platform-type-tow-body", no_argument, nullptr, 0},
     {"platform-type-rov", no_argument, nullptr, 0},
@@ -1366,6 +1364,407 @@ int main(int argc, char **argv) {
             platform_num_sensors++;
           }
           break;
+        case option_modify_sensor:
+          sscanf(optarg, "%d", &sensor_id);
+          sensor_mode = SENSOR_MODIFY;
+          active_sensor = &platform->sensors[sensor_id];
+          break;
+
+        case option_modify_sensor_bathymetry:
+          if (platform->source_bathymetry >= 0 && platform->source_bathymetry < platform_num_sensors) {
+          	sensor_id = platform->source_bathymetry;
+          	sensor_mode = SENSOR_MODIFY;
+          	active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-bathymetry failed because no sensor is defined as the source for bathymetry\n");
+          }
+          break;
+
+        case option_modify_sensor_bathymetry1:
+          if (platform->source_bathymetry1 >= 0 && platform->source_bathymetry1 < platform_num_sensors) {
+			sensor_id = platform->source_bathymetry1;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-bathymetry1 failed because no sensor is defined as the source for bathymetry1\n");
+          }
+          break;
+
+        case option_modify_sensor_bathymetry2:
+          if (platform->source_bathymetry2 >= 0 && platform->source_bathymetry2 < platform_num_sensors) {
+			sensor_id = platform->source_bathymetry2;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-bathymetry2 failed because no sensor is defined as the source for bathymetry2\n");
+          }
+          break;
+
+        case option_modify_sensor_bathymetry3:
+          if (platform->source_bathymetry3 >= 0 && platform->source_bathymetry3 < platform_num_sensors) {
+			sensor_id = platform->source_bathymetry3;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-bathymetry3 failed because no sensor is defined as the source for bathymetry3\n");
+          }
+          break;
+
+        case option_modify_sensor_backscatter:
+          if (platform->source_backscatter >= 0 && platform->source_backscatter < platform_num_sensors) {
+			sensor_id = platform->source_backscatter;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-backscatter failed because no sensor is defined as the source for backscatter\n");
+          }
+          break;
+
+        case option_modify_sensor_backscatter1:
+          if (platform->source_backscatter1 >= 0 && platform->source_backscatter1 < platform_num_sensors) {
+			sensor_id = platform->source_backscatter1;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-backscatter1 failed because no sensor is defined as the source for backscatter1\n");
+          }
+          break;
+
+        case option_modify_sensor_backscatter2:
+          if (platform->source_backscatter2 >= 0 && platform->source_backscatter2 < platform_num_sensors) {
+			sensor_id = platform->source_backscatter2;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-backscatter2 failed because no sensor is defined as the source for backscatter2\n");
+          }
+          break;
+
+        case option_modify_sensor_backscatter3:
+          if (platform->source_backscatter3 >= 0 && platform->source_backscatter3 < platform_num_sensors) {
+			sensor_id = platform->source_backscatter3;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-backscatter3 failed because no sensor is defined as the source for backscatter3\n");
+          }
+          break;
+
+        case option_modify_sensor_subbottom:
+          if (platform->source_subbottom >= 0 && platform->source_subbottom < platform_num_sensors) {
+			sensor_id = platform->source_subbottom;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-subbottom failed because no sensor is defined as the source for subbottom\n");
+          }
+          break;
+
+        case option_modify_sensor_subbottom1:
+          if (platform->source_subbottom1 >= 0 && platform->source_subbottom1 < platform_num_sensors) {
+			sensor_id = platform->source_subbottom1;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-subbottom1 failed because no sensor is defined as the source for subbottom1\n");
+          }
+          break;
+
+        case option_modify_sensor_subbottom2:
+          if (platform->source_subbottom2 >= 0 && platform->source_subbottom2 < platform_num_sensors) {
+			sensor_id = platform->source_subbottom2;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-subbottom2 failed because no sensor is defined as the source for subbottom2\n");
+          }
+          break;
+
+        case option_modify_sensor_subbottom3:
+          if (platform->source_subbottom3 >= 0 && platform->source_subbottom3 < platform_num_sensors) {
+			sensor_id = platform->source_subbottom3;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-subbottom3 failed because no sensor is defined as the source for subbottom3\n");
+          }
+          break;
+
+        case option_modify_sensor_camera:
+          if (platform->source_camera >= 0 && platform->source_camera < platform_num_sensors) {
+          sensor_id = platform->source_camera;
+          sensor_mode = SENSOR_MODIFY;
+          active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-camera failed because no sensor is defined as the source for camera\n");
+          }
+          break;
+
+        case option_modify_sensor_camera1:
+          if (platform->source_camera1 >= 0 && platform->source_camera1 < platform_num_sensors) {
+			sensor_id = platform->source_camera1;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-camera1 failed because no sensor is defined as the source for camera1\n");
+          }
+          break;
+
+        case option_modify_sensor_camera2:
+          if (platform->source_camera2 >= 0 && platform->source_camera2 < platform_num_sensors) {
+			sensor_id = platform->source_camera2;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-camera2 failed because no sensor is defined as the source for camera2\n");
+          }
+          break;
+
+        case option_modify_sensor_camera3:
+          if (platform->source_camera3 >= 0 && platform->source_camera3 < platform_num_sensors) {
+			sensor_id = platform->source_camera3;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-camera3 failed because no sensor is defined as the source for camera3\n");
+          }
+          break;
+
+        case option_modify_sensor_position:
+          if (platform->source_position >= 0 && platform->source_position < platform_num_sensors) {
+			sensor_id = platform->source_position;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-position failed because no sensor is defined as the source for position\n");
+          }
+          break;
+
+        case option_modify_sensor_position1:
+          if (platform->source_position1 >= 0 && platform->source_position1 < platform_num_sensors) {
+			sensor_id = platform->source_position1;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-position1 failed because no sensor is defined as the source for position1\n");
+          }
+          break;
+
+        case option_modify_sensor_position2:
+          if (platform->source_position2 >= 0 && platform->source_position2 < platform_num_sensors) {
+			sensor_id = platform->source_position2;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-position2 failed because no sensor is defined as the source for position2\n");
+          }
+          break;
+
+        case option_modify_sensor_position3:
+          if (platform->source_position3 >= 0 && platform->source_position3 < platform_num_sensors) {
+			sensor_id = platform->source_position3;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-position3 failed because no sensor is defined as the source for position3\n");
+          }
+          break;
+
+        case option_modify_sensor_depth:
+          if (platform->source_depth >= 0 && platform->source_depth < platform_num_sensors) {
+			sensor_id = platform->source_depth;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-depth failed because no sensor is defined as the source for depth\n");
+          }
+          break;
+
+        case option_modify_sensor_depth1:
+          if (platform->source_depth1 >= 0 && platform->source_depth1 < platform_num_sensors) {
+			sensor_id = platform->source_depth1;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-depth1 failed because no sensor is defined as the source for depth1\n");
+          }
+          break;
+
+        case option_modify_sensor_depth2:
+          if (platform->source_depth2 >= 0 && platform->source_depth2 < platform_num_sensors) {
+			sensor_id = platform->source_depth2;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-depth2 failed because no sensor is defined as the source for depth2\n");
+          }
+          break;
+
+        case option_modify_sensor_depth3:
+          if (platform->source_depth3 >= 0 && platform->source_depth3 < platform_num_sensors) {
+			sensor_id = platform->source_depth3;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-depth3 failed because no sensor is defined as the source for depth3\n");
+          }
+          break;
+
+        case option_modify_sensor_heading:
+          if (platform->source_heading >= 0 && platform->source_heading < platform_num_sensors) {
+			sensor_id = platform->source_heading;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-heading failed because no sensor is defined as the source for heading\n");
+          }
+          break;
+
+        case option_modify_sensor_heading1:
+          if (platform->source_heading1 >= 0 && platform->source_heading1 < platform_num_sensors) {
+			sensor_id = platform->source_heading1;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-heading1 failed because no sensor is defined as the source for heading1\n");
+          }
+          break;
+
+        case option_modify_sensor_heading2:
+          if (platform->source_heading2 >= 0 && platform->source_heading2 < platform_num_sensors) {
+			sensor_id = platform->source_heading2;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-heading2 failed because no sensor is defined as the source for heading2\n");
+          }
+          break;
+
+        case option_modify_sensor_heading3:
+          if (platform->source_heading3 >= 0 && platform->source_heading3 < platform_num_sensors) {
+			sensor_id = platform->source_heading3;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-heading3 failed because no sensor is defined as the source for heading3\n");
+          }
+          break;
+
+        case option_modify_sensor_rollpitch:
+          if (platform->source_rollpitch >= 0 && platform->source_rollpitch < platform_num_sensors) {
+			sensor_id = platform->source_rollpitch;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-rollpitch failed because no sensor is defined as the source for rollpitch\n");
+          }
+          break;
+
+        case option_modify_sensor_rollpitch1:
+          if (platform->source_rollpitch1 >= 0 && platform->source_rollpitch1 < platform_num_sensors) {
+			sensor_id = platform->source_rollpitch1;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-rollpitch1 failed because no sensor is defined as the source for rollpitch1\n");
+          }
+          break;
+
+        case option_modify_sensor_rollpitch2:
+          if (platform->source_rollpitch2 >= 0 && platform->source_rollpitch2 < platform_num_sensors) {
+			sensor_id = platform->source_rollpitch2;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-rollpitch2 failed because no sensor is defined as the source for rollpitch2\n");
+          }
+          break;
+
+        case option_modify_sensor_rollpitch3:
+          if (platform->source_rollpitch3 >= 0 && platform->source_rollpitch3 < platform_num_sensors) {
+			sensor_id = platform->source_rollpitch3;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-rollpitch3 failed because no sensor is defined as the source for rollpitch3\n");
+          }
+          break;
+
+        case option_modify_sensor_heave:
+          if (platform->source_heave >= 0 && platform->source_heave < platform_num_sensors) {
+			sensor_id = platform->source_heave;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-heave failed because no sensor is defined as the source for heave\n");
+          }
+          break;
+
+        case option_modify_sensor_heave1:
+          if (platform->source_heave1 >= 0 && platform->source_heave1 < platform_num_sensors) {
+			sensor_id = platform->source_heave1;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-heave1 failed because no sensor is defined as the source for heave1\n");
+          }
+          break;
+
+        case option_modify_sensor_heave2:
+          if (platform->source_heave2 >= 0 && platform->source_heave2 < platform_num_sensors) {
+			sensor_id = platform->source_heave2;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-heave2 failed because no sensor is defined as the source for heave2\n");
+          }
+          break;
+
+        case option_modify_sensor_heave3:
+          if (platform->source_heave3 >= 0 && platform->source_heave3 < platform_num_sensors) {
+			sensor_id = platform->source_heave3;
+			sensor_mode = SENSOR_MODIFY;
+			active_sensor = &platform->sensors[sensor_id];
+          }
+          else {
+            fprintf(stderr, "Option modify-sensor-heave3 failed because no sensor is defined as the source for heave3\n");
+          }
+          break;
 
         case option_sensor_model:
           strcpy(tmp_sensor.model, optarg);
@@ -1756,250 +2155,6 @@ int main(int argc, char **argv) {
           platform->source_heave3 = sensor_id;
           break;
 
-        case option_end_sensor:
-          if (sensor_mode == SENSOR_ADD) {
-            status = mb_platform_add_sensor(verbose, (void *)platform, tmp_sensor.type, tmp_sensor.model,
-                                            tmp_sensor.manufacturer, tmp_sensor.serialnumber, tmp_sensor.capability1,
-                                            tmp_sensor.capability2, tmp_sensor.num_offsets, tmp_sensor.num_time_latency,
-                                            &error);
-            for (ioffset = 0; ioffset < tmp_sensor.num_offsets; ioffset++) {
-              status = mb_platform_set_sensor_offset(
-                  verbose, (void *)platform, sensor_id, ioffset, tmp_offsets[ioffset].position_offset_mode,
-                  tmp_offsets[ioffset].position_offset_x, tmp_offsets[ioffset].position_offset_y,
-                  tmp_offsets[ioffset].position_offset_z, tmp_offsets[ioffset].attitude_offset_mode,
-                  tmp_offsets[ioffset].attitude_offset_heading, tmp_offsets[ioffset].attitude_offset_roll,
-                  tmp_offsets[ioffset].attitude_offset_pitch, &error);
-            }
-            status &= mb_platform_set_sensor_timelatency(
-                verbose, (void *)platform, sensor_id, tmp_sensor.time_latency_mode, tmp_sensor.time_latency_static,
-                tmp_sensor.num_time_latency, tmp_sensor.time_latency_time_d, tmp_sensor.time_latency_value, &error);
-            sensor_mode = SENSOR_OFF;
-            sensor_id = -1;
-          }
-          break;
-
-        case option_modify_sensor:
-          sscanf(optarg, "%d", &sensor_id);
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_bathymetry:
-          sensor_id = platform->source_bathymetry;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_bathymetry1:
-          sensor_id = platform->source_bathymetry1;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_bathymetry2:
-          sensor_id = platform->source_bathymetry2;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_bathymetry3:
-          sensor_id = platform->source_bathymetry3;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_backscatter:
-          sensor_id = platform->source_backscatter;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_backscatter1:
-          sensor_id = platform->source_backscatter1;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_backscatter2:
-          sensor_id = platform->source_backscatter2;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_backscatter3:
-          sensor_id = platform->source_backscatter3;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_subbottom:
-          sensor_id = platform->source_subbottom;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_subbottom1:
-          sensor_id = platform->source_subbottom1;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_subbottom2:
-          sensor_id = platform->source_subbottom2;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_subbottom3:
-          sensor_id = platform->source_subbottom3;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_camera:
-          sensor_id = platform->source_camera;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_camera1:
-          sensor_id = platform->source_camera1;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_camera2:
-          sensor_id = platform->source_camera2;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_camera3:
-          sensor_id = platform->source_camera3;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_position:
-          sensor_id = platform->source_position;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_position1:
-          sensor_id = platform->source_position1;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_position2:
-          sensor_id = platform->source_position2;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_position3:
-          sensor_id = platform->source_position3;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_depth:
-          sensor_id = platform->source_depth;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_depth1:
-          sensor_id = platform->source_depth1;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_depth2:
-          sensor_id = platform->source_depth2;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_depth3:
-          sensor_id = platform->source_depth3;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_heading:
-          sensor_id = platform->source_heading;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_heading1:
-          sensor_id = platform->source_heading1;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_heading2:
-          sensor_id = platform->source_heading2;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_heading3:
-          sensor_id = platform->source_heading3;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_rollpitch:
-          sensor_id = platform->source_rollpitch;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_rollpitch1:
-          sensor_id = platform->source_rollpitch1;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_rollpitch2:
-          sensor_id = platform->source_rollpitch2;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_rollpitch3:
-          sensor_id = platform->source_rollpitch3;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_heave:
-          sensor_id = platform->source_heave;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_heave1:
-          sensor_id = platform->source_heave1;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_heave2:
-          sensor_id = platform->source_heave2;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
-        case option_modify_sensor_heave3:
-          sensor_id = platform->source_heave3;
-          sensor_mode = SENSOR_MODIFY;
-          active_sensor = &platform->sensors[sensor_id];
-          break;
-
         case option_modify_offsets:
           if (sensor_mode == SENSOR_MODIFY || sensor_mode == SENSOR_ADD) {
             nscan = sscanf(optarg, "%d/%lf/%lf/%lf/%lf/%lf/%lf", &ioffset, &d1, &d2, &d3, &d4, &d5, &d6);
@@ -2096,6 +2251,28 @@ int main(int argc, char **argv) {
               }
             }
             fclose(tfp);
+          }
+          break;
+
+        case option_end_sensor:
+          if (sensor_mode == SENSOR_ADD) {
+            status = mb_platform_add_sensor(verbose, (void *)platform, tmp_sensor.type, tmp_sensor.model,
+                                            tmp_sensor.manufacturer, tmp_sensor.serialnumber, tmp_sensor.capability1,
+                                            tmp_sensor.capability2, tmp_sensor.num_offsets, tmp_sensor.num_time_latency,
+                                            &error);
+            for (ioffset = 0; ioffset < tmp_sensor.num_offsets; ioffset++) {
+              status = mb_platform_set_sensor_offset(
+                  verbose, (void *)platform, sensor_id, ioffset, tmp_offsets[ioffset].position_offset_mode,
+                  tmp_offsets[ioffset].position_offset_x, tmp_offsets[ioffset].position_offset_y,
+                  tmp_offsets[ioffset].position_offset_z, tmp_offsets[ioffset].attitude_offset_mode,
+                  tmp_offsets[ioffset].attitude_offset_heading, tmp_offsets[ioffset].attitude_offset_roll,
+                  tmp_offsets[ioffset].attitude_offset_pitch, &error);
+            }
+            status &= mb_platform_set_sensor_timelatency(
+                verbose, (void *)platform, sensor_id, tmp_sensor.time_latency_mode, tmp_sensor.time_latency_static,
+                tmp_sensor.num_time_latency, tmp_sensor.time_latency_time_d, tmp_sensor.time_latency_value, &error);
+            sensor_mode = SENSOR_OFF;
+            sensor_id = -1;
           }
           break;
 

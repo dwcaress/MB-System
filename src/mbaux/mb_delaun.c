@@ -307,7 +307,7 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 			circumcenter and circumcircle of the enclosing
 			equilateral triangle */
 			else {
-				fprintf(stderr, "\nmb_delaun Warning. Zero denominator\n");
+				fprintf(stderr, "\nmb_delaun Warning: three linear points cannot be a triangle\n");
 				fprintf(stderr, "%d %f %f\n", i1, p1[i1], p2[i1]);
 				fprintf(stderr, "%d %f %f\n", i2, p1[i2], p2[i2]);
 				fprintf(stderr, "%d %f %f\n", nuc, p1[nuc], p2[nuc]);

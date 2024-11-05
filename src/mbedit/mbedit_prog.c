@@ -131,6 +131,8 @@ struct mbedit_ping_struct {
 	double pitch;
 	double heave;
 	double distance;
+	bool dualprofile;
+	int dualprofilebeam;
 	int beams_bath;
 	char *beamflag;
 	char *beamflagorg;
@@ -4213,20 +4215,25 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
 	*nplt = nplot;
 
 	/* get data into ping arrays and find median depth value */
-	// double bathsum = 0.0;
-	int nbathsum = 0;
 	int nbathlist = 0;
+	double xtrack_min = 0.0;
 	double xtrack_max = 0.0;
+	double xtrack_absmax = 0.0;
 	for (int i = current_id; i < current_id + nplot; i++) {
 		ping[i].record = i + ndump_total;
 		ping[i].outbounds = MBEDIT_OUTBOUNDS_NONE;
 		for (int j = 0; j < ping[i].beams_bath; j++) {
 			if (mb_beam_ok(ping[i].beamflag[j])) {
-				// bathsum += ping[i].bath[j];
-				nbathsum++;
 				bathlist[nbathlist] = ping[i].bath[j];
+				if (nbathlist == 0) {
+					xtrack_min = ping[i].bathacrosstrack[j];
+					xtrack_max = ping[i].bathacrosstrack[j];
+				}
+				else {
+					xtrack_min = MIN(xtrack_min, ping[i].bathacrosstrack[j]);
+					xtrack_max = MAX(xtrack_max, ping[i].bathacrosstrack[j]);
+				}
 				nbathlist++;
-				xtrack_max = MAX(xtrack_max, fabs(ping[i].bathacrosstrack[j]));
 			}
 		}
 	}
@@ -4237,32 +4244,62 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
 		for (int i = current_id; i < current_id + nplot; i++) {
 			for (int j = 0; j < ping[i].beams_bath; j++) {
 				if (!mb_beam_ok(ping[i].beamflag[j]) && !mb_beam_check_flag_unusable2(ping[i].beamflag[j])) {
-					// bathsum += ping[i].bath[j];
-					nbathsum++;
 					bathlist[nbathlist] = ping[i].bath[j];
+					if (nbathlist == 0) {
+						xtrack_min = ping[i].bathacrosstrack[j];
+						xtrack_max = ping[i].bathacrosstrack[j];
+					}
+					else {
+						xtrack_min = MIN(xtrack_min, ping[i].bathacrosstrack[j]);
+						xtrack_max = MAX(xtrack_max, ping[i].bathacrosstrack[j]);
+					}
 					nbathlist++;
-					xtrack_max = MAX(xtrack_max, fabs(ping[i].bathacrosstrack[j]));
 				}
 			}
 		}
 	}
+	xtrack_absmax = MAX(fabs(xtrack_min), fabs(xtrack_max));
 	double bathmedian = 0.0;  // -Wmaybe-uninitialized
 	if (nbathlist > 0) {
 		qsort(bathlist, nbathlist, sizeof(double), mb_double_compare);
 		bathmedian = bathlist[nbathlist / 2];
 	}
-
-	/* reset xtrack_max if required */
-	if (autoscale && xtrack_max < 0.5) {
-		xtrack_max = 1000.0;
+	
+	/* check for dual profile condition */
+	for (int i = current_id; i < current_id + nplot; i++) {
+		ping[i].dualprofile = false;
+		ping[i].dualprofilebeam = 0;
+		bool first = true;
+		double xtrack_old = 0.0;
+		for (int j = 0; j < ping[i].beams_bath; j++) {
+			if (!mb_beam_check_flag_unusable2(ping[i].beamflag[j])) {
+				if (first) {
+					xtrack_old = ping[i].bathacrosstrack[j];
+					first = false;
+				}
+				else {
+					double xtrack_diff = ping[i].bathacrosstrack[j] - xtrack_old;
+					if (xtrack_diff < 0.0 && fabs(xtrack_diff) > 0.5 * xtrack_absmax) {
+						ping[i].dualprofile = true;
+						ping[i].dualprofilebeam = j;
+					}
+					xtrack_old = ping[i].bathacrosstrack[j];
+				}
+			}
+		}
 	}
-	else if (autoscale && xtrack_max > 100000.0) {
-		xtrack_max = 100000.0;
+
+	/* reset xtrack_absmax if required */
+	if (autoscale && xtrack_absmax < 0.5) {
+		xtrack_absmax = 1000.0;
+	}
+	else if (autoscale && xtrack_absmax > 100000.0) {
+		xtrack_absmax = 100000.0;
 	}
 
 	/* if autoscale on reset plot width */
-	if (autoscale && xtrack_max > 0.0) {
-		plot_width = (int)(2.4 * xtrack_max);
+	if (autoscale && xtrack_absmax > 0.0) {
+		plot_width = (int)(2.4 * xtrack_absmax);
 		const int ndec = MAX(1, (int)log10((double)plot_width));
 		int maxx = 1;
 		for (int i = 0; i < ndec; i++)
@@ -4307,10 +4344,9 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
 	/* print out information */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2       %d data records set for plotting (%d desired)\n", nplot, plot_size);
-		fprintf(stderr, "dbg2       xtrack_max:  %f\n", xtrack_max);
-		fprintf(stderr, "dbg2       bathmedian:  %f\n", bathmedian);
-		fprintf(stderr, "dbg2       nbathlist:   %d\n", nbathlist);
-		fprintf(stderr, "dbg2       nbathsum:    %d\n", nbathsum);
+		fprintf(stderr, "dbg2       xtrack_absmax:  %f\n", xtrack_absmax);
+		fprintf(stderr, "dbg2       bathmedian:     %f\n", bathmedian);
+		fprintf(stderr, "dbg2       nbathlist:      %d\n", nbathlist);
 		for (int i = current_id; i < current_id + nplot; i++) {
 			fprintf(stderr, "dbg2       %4d %4d %4d  %d/%d/%d %2.2d:%2.2d:%2.2d.%6.6d  %10.3f\n", i, ping[i].id, ping[i].record,
 			        ping[i].time_i[1], ping[i].time_i[2], ping[i].time_i[0], ping[i].time_i[3], ping[i].time_i[4],
@@ -4707,7 +4743,10 @@ int mbedit_plot_ping(int iping) {
 	/* plot the ping profile */
 	bool first = true;
 	bool last_flagged = false;
+	bool dualprofilebreak = false;
 	for (int j = 0; j < ping[iping].beams_bath; j++) {
+		if (ping[iping].dualprofile && ping[iping].dualprofilebeam == j)
+			dualprofilebreak = true;
 		if (show_flaggedprofiles && !mb_beam_ok(ping[iping].beamflag[j]) &&
 		    !mb_beam_check_flag_unusable2(ping[iping].beamflag[j]) && first) {
 			first = false;
@@ -4722,22 +4761,31 @@ int mbedit_plot_ping(int iping) {
 			yold = ping[iping].bath_y[j];
 		}
 		else if (!last_flagged && mb_beam_ok(ping[iping].beamflag[j])) {
-			xg_drawline(mbedit_xgid, xold, yold, ping[iping].bath_x[j], ping[iping].bath_y[j], pixel_values[BLACK], XG_SOLIDLINE);
+			if (!dualprofilebreak)
+				xg_drawline(mbedit_xgid, xold, yold, ping[iping].bath_x[j], ping[iping].bath_y[j], pixel_values[BLACK], XG_SOLIDLINE);
+			else
+				dualprofilebreak = false;
 			last_flagged = false;
 			xold = ping[iping].bath_x[j];
 			yold = ping[iping].bath_y[j];
 		}
 		else if (mb_beam_ok(ping[iping].beamflag[j])) {
-			xg_drawline(mbedit_xgid, xold, yold, ping[iping].bath_x[j], ping[iping].bath_y[j], pixel_values[RED], XG_SOLIDLINE);
+			if (!dualprofilebreak)
+				xg_drawline(mbedit_xgid, xold, yold, ping[iping].bath_x[j], ping[iping].bath_y[j], pixel_values[RED], XG_SOLIDLINE);
+			else
+				dualprofilebreak = false;
 			last_flagged = false;
 			xold = ping[iping].bath_x[j];
 			yold = ping[iping].bath_y[j];
 		}
 		else if (show_flaggedprofiles && !mb_beam_ok(ping[iping].beamflag[j]) &&
 		         !mb_beam_check_flag_unusable2(ping[iping].beamflag[j])) {
-			if (j > 0)
-				xg_drawline(mbedit_xgid, xold, yold, ping[iping].bath_x[j], ping[iping].bath_y[j], pixel_values[RED],
-				            XG_SOLIDLINE);
+			if (j > 0) {
+				if (!dualprofilebreak)
+					xg_drawline(mbedit_xgid, xold, yold, ping[iping].bath_x[j], ping[iping].bath_y[j], pixel_values[RED], XG_SOLIDLINE);
+				else
+					dualprofilebreak = false;
+			}
 			last_flagged = true;
 			xold = ping[iping].bath_x[j];
 			yold = ping[iping].bath_y[j];

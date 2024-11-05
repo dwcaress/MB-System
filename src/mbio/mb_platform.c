@@ -1739,6 +1739,75 @@ int mb_platform_position(int verbose, void *platform_ptr, int targetsensor, int 
   return (status);
 }
 /*--------------------------------------------------------------------*/
+int mb_platform_position_offset(int verbose, void *platform_ptr, int targetsensor, int targetsensoroffset,
+                                   double *target_x_offset, double *target_y_offset, double *target_z_offset,
+                                   int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+    fprintf(stderr, "dbg2       platform_ptr:    %p\n", platform_ptr);
+    fprintf(stderr, "dbg2       targetsensor:    %d\n", targetsensor);
+    fprintf(stderr, "dbg2       targetsensoroffset:  %d\n", targetsensoroffset);
+  }
+
+  int status = MB_SUCCESS;
+
+  /* work with valid platform pointer */
+  if (platform_ptr != NULL) {
+    /* get platform structure */
+    struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
+
+    /* print platform */
+    if (verbose >= 2) {
+      status = mb_platform_print(verbose, (void *)platform, error);
+    }
+
+    /* check that all sensor id's are sensible for this platform */
+    if (targetsensor < 0 || targetsensor >= platform->num_sensors || platform->source_heading < 0 ||
+        platform->source_heading >= platform->num_sensors || platform->source_rollpitch < 0 ||
+        platform->source_rollpitch >= platform->num_sensors) {
+      status = MB_FAILURE;
+      *error = MB_ERROR_BAD_PARAMETER;
+    }
+
+    /* else proceed */
+    else {
+      /* get sensor structures */
+      struct mb_sensor_struct *sensor_target = &platform->sensors[targetsensor];
+      struct mb_sensor_struct *sensor_position = &platform->sensors[platform->source_position];
+      struct mb_sensor_struct *sensor_depth = &platform->sensors[platform->source_depth];
+
+      /* get position offset */
+      *target_x_offset = sensor_target->offsets[targetsensoroffset].position_offset_x 
+      						- sensor_position->offsets[targetsensoroffset].position_offset_x;
+      *target_y_offset = sensor_target->offsets[targetsensoroffset].position_offset_y 
+      						- sensor_position->offsets[targetsensoroffset].position_offset_y;
+      *target_z_offset = sensor_target->offsets[targetsensoroffset].position_offset_z 
+      						- sensor_depth->offsets[targetsensoroffset].position_offset_z;
+    }
+  }
+
+  /* null platform pointer is an error */
+  else {
+    status = MB_FAILURE;
+    *error = MB_ERROR_BAD_DESCRIPTOR;
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       target_x_offset:    %f\n", *target_x_offset);
+    fprintf(stderr, "dbg2       target_y_offset:    %f\n", *target_y_offset);
+    fprintf(stderr, "dbg2       target_z_offset:    %f\n", *target_z_offset);
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:      %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
 int mb_platform_orientation(int verbose, void *platform_ptr, double heading, double roll, double pitch, double *platform_heading,
                             double *platform_roll, double *platform_pitch, int *error) {
   if (verbose >= 2) {

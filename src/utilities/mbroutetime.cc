@@ -185,7 +185,8 @@ int main(int argc, char **argv) {
 		exit(MB_FAILURE);
 	}
 
-	bool rawroutefile = false;
+	int route_file_version_major = 0;
+	int route_file_version_minor = 0;
 	char comment[MB_COMMENT_MAXLINE] = "";
 	double heading;
 
@@ -203,7 +204,11 @@ int main(int argc, char **argv) {
 	while ((result = fgets(comment, MB_PATH_MAXLINE, fp)) == comment) {
 		if (comment[0] == '#') {
 			if (strncmp(comment, "## Route File Version", 21) == 0) {
-				rawroutefile = false;
+				int n = sscanf(comment, "## Route File Version %d.%d", &route_file_version_major, &route_file_version_minor);
+				if (n <= 0) {
+					route_file_version_major = 0;
+					route_file_version_minor = 0;
+				}
 			}
 		}
 		else {
@@ -211,17 +216,19 @@ int main(int argc, char **argv) {
 			double lat;
 			double topo;
 			int waypoint;
-			const int nget = sscanf(comment, "%lf %lf %lf %d %lf", &lon, &lat, &topo, &waypoint, &heading);
-			if (comment[0] == '#') {
-				fprintf(stderr, "buffer:%s", comment);
-				if (strncmp(comment, "## Route File Version", 21) == 0) {
-					rawroutefile = false;
-				}
+			bool point_ok = false;
+			if (route_file_version_major <= 0) {
+				const int nget = sscanf(comment, "%lf %lf %lf %d %lf", &lon, &lat, &topo, &waypoint, &heading);
+				point_ok = (nget >= 2);
 			}
-
-			const bool point_ok =
-				(rawroutefile && nget >= 2) ||
-				(!rawroutefile && nget >= 3 && waypoint > MBES_ROUTE_WAYPOINT_TRANSIT);
+			else if (route_file_version_major == 1) {
+				const int nget = sscanf(comment, "%lf %lf %lf %d %lf", &lon, &lat, &topo, &waypoint, &heading);
+				point_ok = (nget >= 3 && waypoint > MBES_ROUTE_WAYPOINT_TRANSIT);
+			}
+			else {
+				const int nget = sscanf(comment, "%lf,%lf,%lf,%d,%lf", &lon, &lat, &topo, &waypoint, &heading);
+				point_ok = (nget >= 3 && waypoint > MBES_ROUTE_WAYPOINT_TRANSIT);
+			}
 
 			/* if good data check for need to allocate more space */
 			if (point_ok && nroutepoint + 2 > nroutepointalloc) {

@@ -1143,7 +1143,7 @@ protected:
         dest->psi_dot_berg = 0.;
 
         const parse_kv_t *pcur = dval_map;
-        int i=0;
+
         while(pcur->key != NULL) {
             const char *fmt = map_fmt(map, pcur->key);
             int idx = map_idx(map, pcur->key);
@@ -1157,11 +1157,10 @@ protected:
             }
 
             pcur++;
-            i++;
         }
 
         pcur = bval_map;
-        i=0;
+
         while(pcur->key != NULL) {
             const char *fmt = map_fmt(map, pcur->key);
             int idx = map_idx(map, pcur->key);
@@ -1178,7 +1177,6 @@ protected:
             }
 
             pcur++;
-            i++;
         }
 
         if(dest->z < 2.) {
@@ -1441,7 +1439,7 @@ protected:
         dest->dataType = mConfig.trn_sensor();
 
         parse_kv_t *cur = dval_map;
-        int i=0;
+
         while(cur->key != NULL) {
             const char *fmt = map_fmt(map, cur->key);
             int idx = map_idx(map, cur->key);
@@ -1455,11 +1453,10 @@ protected:
             }
 
             cur++;
-            i++;
         }
 
         cur = uval_map;
-        i=0;
+
         while(cur->key != NULL) {
             const char *fmt = map_fmt(map, cur->key);
             int idx = map_idx(map, cur->key);
@@ -1473,7 +1470,6 @@ protected:
             }
 
             cur++;
-            i++;
         }
 
 

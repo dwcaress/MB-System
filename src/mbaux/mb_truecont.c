@@ -678,6 +678,12 @@ int mb_triangulate(int verbose, struct swath *data, int *error) {
     status &= mb_reallocd(verbose, __FILE__, __LINE__, data->npts_alloc * sizeof(double), (void **)&data->x, error);
     status &= mb_reallocd(verbose, __FILE__, __LINE__, data->npts_alloc * sizeof(double), (void **)&data->y, error);
     status &= mb_reallocd(verbose, __FILE__, __LINE__, data->npts_alloc * sizeof(double), (void **)&data->z, error);
+    memset(data->edge, 0, data->npts_alloc * sizeof(int));
+    memset(data->pingid, 0, data->npts_alloc * sizeof(int));
+    memset(data->beamid, 0, data->npts_alloc * sizeof(int));
+    memset(data->x, 0, data->npts_alloc * sizeof(double));
+    memset(data->y, 0, data->npts_alloc * sizeof(double));
+    memset(data->z, 0, data->npts_alloc * sizeof(double));
   }
   if (ntri_cnt > data->ntri_alloc) {
     data->ntri_alloc = ntri_cnt;
@@ -687,6 +693,11 @@ int mb_triangulate(int verbose, struct swath *data, int *error) {
       status &= mb_reallocd(verbose, __FILE__, __LINE__, ntri_cnt * sizeof(int), (void **)&(data->cs[i]), error);
       status &= mb_reallocd(verbose, __FILE__, __LINE__, ntri_cnt * sizeof(int), (void **)&(data->ed[i]), error);
       status &= mb_reallocd(verbose, __FILE__, __LINE__, ntri_cnt * sizeof(int), (void **)&(data->flag[i]), error);
+      memset(data->iv[i], 0, ntri_cnt * sizeof(int));
+      memset(data->ct[i], 0, ntri_cnt * sizeof(int));
+      memset(data->cs[i], 0, ntri_cnt * sizeof(int));
+      memset(data->ed[i], 0, ntri_cnt * sizeof(int));
+      memset(data->flag[i], 0, ntri_cnt * sizeof(int));
     }
     status &= mb_reallocd(verbose, __FILE__, __LINE__, ntri_cnt * sizeof(double), (void **)&(data->v1), error);
     status &= mb_reallocd(verbose, __FILE__, __LINE__, ntri_cnt * sizeof(double), (void **)&(data->v2), error);
@@ -696,6 +707,14 @@ int mb_triangulate(int verbose, struct swath *data, int *error) {
     status &= mb_reallocd(verbose, __FILE__, __LINE__, 3 * ntri_cnt * sizeof(int), (void **)&(data->kv2), error);
     status &= mb_reallocd(verbose, __FILE__, __LINE__, (4 * ntri_cnt + 1) * sizeof(double), (void **)&(data->xsave), error);
     status &= mb_reallocd(verbose, __FILE__, __LINE__, (4 * ntri_cnt + 1) * sizeof(double), (void **)&(data->ysave), error);
+    memset(data->v1, 0, ntri_cnt * sizeof(double));
+    memset(data->v2, 0, ntri_cnt * sizeof(double));
+    memset(data->v3, 0, ntri_cnt * sizeof(double));
+    memset(data->istack, 0, ntri_cnt * sizeof(int));
+    memset(data->kv1, 0, 3 * ntri_cnt * sizeof(int));
+    memset(data->kv2, 0, 3 * ntri_cnt * sizeof(int));
+    memset(data->xsave, 0, (4 * ntri_cnt + 1) * sizeof(double));
+    memset(data->ysave, 0, (4 * ntri_cnt + 1) * sizeof(double));
   }
 
   /* construct list of good soundings */

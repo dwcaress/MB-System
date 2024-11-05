@@ -1,4 +1,4 @@
-.TH mbmakeplatform 1 "11 June 2016" "MB-System 5.0" "MB-System 5.0"
+.TH mbmakeplatform 1 "30 September 2024" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbmakeplatform\fP \- creates or modifies an MB-System platform file.
 
@@ -7,6 +7,8 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmbmakeplatform\fP
+.br
+\fB--output\fP=\fIplffile\fP
 .br
 [
 .br
@@ -21,12 +23,6 @@ Version 5.0
 \fB--swath\fP=\fIswathfile\fP
 .br
 \fB--swath-format\fP=\fIvalue\fP
-.br
-]
-.br
-\fB--output\fP=\fIplffile\fP
-.br
-[
 .br
 \fB--platform-type-surface-vessel\fP
 .br
@@ -44,11 +40,11 @@ Version 5.0
 .br
 \fB--platform-organization\fP=\fIstring\fP
 .br
-\fB--platform-documentation-url\fP
+\fB--platform-documentation-url\fP=\fIstring\fP
 .br
-\fB--platform-start-time\fP
+\fB--platform-start-time\fP=\fIyyyy/mm/dd/hh/mm/ss.ssssss\fP
 .br
-\fB--platform-end-time\fP
+\fB--platform-end-time\fP=\fIyyyy/mm/dd/hh/mm/ss.ssssss\fP
 .br
 \fB--add-sensor-sonar-echosounder\fP
 .br
@@ -92,7 +88,71 @@ Version 5.0
 .br
 \fB--add-sensor-soundspeed\fP
 .br
-\fB--end-sensor\fP
+\fB--modify-sensor\fP=\fIsensorid\fP
+.br
+\fB--modify-sensor-bathymetry\fP
+.br
+\fB--modify-sensor-bathymetry1\fP
+.br
+\fB--modify-sensor-bathymetry2\fP
+.br
+\fB--modify-sensor-bathymetry3\fP
+.br
+\fB--modify-sensor-backscatter\fP
+.br
+\fB--modify-sensor-backscatter1\fP
+.br
+\fB--modify-sensor-backscatter2\fP
+.br
+\fB--modify-sensor-backscatter3\fP
+.br
+\fB--modify-sensor-subbottom\fP
+.br
+\fB--modify-sensor-subbottom1\fP
+.br
+\fB--modify-sensor-subbottom2\fP
+.br
+\fB--modify-sensor-subbottom3\fP
+.br
+\fB--modify-sensor-position\fP
+.br
+\fB--modify-sensor-position1\fP
+.br
+\fB--modify-sensor-position2\fP
+.br
+\fB--modify-sensor-position3\fP
+.br
+\fB--modify-sensor-depth\fP
+.br
+\fB--modify-sensor-depth1\fP
+.br
+\fB--modify-sensor-depth2\fP
+.br
+\fB--modify-sensor-depth3\fP
+.br
+\fB--modify-sensor-heading\fP
+.br
+\fB--modify-sensor-heading1\fP
+.br
+\fB--modify-sensor-heading2\fP
+.br
+\fB--modify-sensor-heading3\fP
+.br
+\fB--modify-sensor-rollpitch\fP
+.br
+\fB--modify-sensor-rollpitch1\fP
+.br
+\fB--modify-sensor-rollpitch2\fP
+.br
+\fB--modify-sensor-rollpitch3\fP
+.br
+\fB--modify-sensor-heave\fP
+.br
+\fB--modify-sensor-heave1\fP
+.br
+\fB--modify-sensor-heave2\fP
+.br
+\fB--modify-sensor-heave3\fP
 .br
 \fB--sensor-model\fP=\fIstring\fP
 .br
@@ -248,72 +308,6 @@ Version 5.0
 .br
 \fB--sensor-source-heave3\fP
 .br
-\fB--modify-sensor\fP=\fIsensorid\fP
-.br
-\fB--modify-sensor-bathymetry\fP
-.br
-\fB--modify-sensor-bathymetry1\fP
-.br
-\fB--modify-sensor-bathymetry2\fP
-.br
-\fB--modify-sensor-bathymetry3\fP
-.br
-\fB--modify-sensor-backscatter\fP
-.br
-\fB--modify-sensor-backscatter1\fP
-.br
-\fB--modify-sensor-backscatter2\fP
-.br
-\fB--modify-sensor-backscatter3\fP
-.br
-\fB--modify-sensor-subbottom\fP
-.br
-\fB--modify-sensor-subbottom1\fP
-.br
-\fB--modify-sensor-subbottom2\fP
-.br
-\fB--modify-sensor-subbottom3\fP
-.br
-\fB--modify-sensor-position\fP
-.br
-\fB--modify-sensor-position1\fP
-.br
-\fB--modify-sensor-position2\fP
-.br
-\fB--modify-sensor-position3\fP
-.br
-\fB--modify-sensor-depth\fP
-.br
-\fB--modify-sensor-depth1\fP
-.br
-\fB--modify-sensor-depth2\fP
-.br
-\fB--modify-sensor-depth3\fP
-.br
-\fB--modify-sensor-heading\fP
-.br
-\fB--modify-sensor-heading1\fP
-.br
-\fB--modify-sensor-heading2\fP
-.br
-\fB--modify-sensor-heading3\fP
-.br
-\fB--modify-sensor-rollpitch\fP
-.br
-\fB--modify-sensor-rollpitch1\fP
-.br
-\fB--modify-sensor-rollpitch2\fP
-.br
-\fB--modify-sensor-rollpitch3\fP
-.br
-\fB--modify-sensor-heave\fP
-.br
-\fB--modify-sensor-heave1\fP
-.br
-\fB--modify-sensor-heave2\fP
-.br
-\fB--modify-sensor-heave3\fP
-.br
 \fB--modify-offsets\fP=\fIioff/x/y/z/azimuth/roll/pitch\fP
 .br
 \fB--modify-offset-positions\fP=\fIioff/x/y/z\fP
@@ -324,15 +318,119 @@ Version 5.0
 .br
 \fB--modify-time-latency-model\fP=\fIfile
 .br
+\fB--end-sensor\fP
+.br
+\fB--set-source-bathymetry\fP=\fIsensorid\fP
+.br
+\fB--set-source-bathymetry1\fP=\fIsensorid\fP
+.br
+\fB--set-source-bathymetry2\fP=\fIsensorid\fP
+.br
+\fB--set-source-bathymetry3\fP=\fIsensorid\fP
+.br
+\fB--set-source-backscatter\fP=\fIsensorid\fP
+.br
+\fB--set-source-backscatter1\fP=\fIsensorid\fP
+.br
+\fB--set-source-backscatter2\fP=\fIsensorid\fP
+.br
+\fB--set-source-backscatter3\fP=\fIsensorid\fP
+.br
+\fB--set-source-subbottom\fP=\fIsensorid\fP
+.br
+\fB--set-source-subbottom1\fP=\fIsensorid\fP
+.br
+\fB--set-source-subbottom2\fP=\fIsensorid\fP
+.br
+\fB--set-source-subbottom3\fP=\fIsensorid\fP
+.br
+\fB--set-source-camera\fP=\fIsensorid\fP
+.br
+\fB--set-source-camera1\fP=\fIsensorid\fP
+.br
+\fB--set-source-camera2\fP=\fIsensorid\fP
+.br
+\fB--set-source-camera3\fP=\fIsensorid\fP
+.br
+\fB--set-source-position\fP=\fIsensorid\fP
+.br
+\fB--set-source-position1\fP=\fIsensorid\fP
+.br
+\fB--set-source-position2\fP=\fIsensorid\fP
+.br
+\fB--set-source-position3\fP=\fIsensorid\fP
+.br
+\fB--set-source-depth\fP=\fIsensorid\fP
+.br
+\fB--set-source-depth1\fP=\fIsensorid\fP
+.br
+\fB--set-source-depth2\fP=\fIsensorid\fP
+.br
+\fB--set-source-depth3\fP=\fIsensorid\fP
+.br
+\fB--set-source-heading\fP=\fIsensorid\fP
+.br
+\fB--set-source-heading1\fP=\fIsensorid\fP
+.br
+\fB--set-source-heading2\fP=\fIsensorid\fP
+.br
+\fB--set-source-heading3\fP=\fIsensorid\fP
+.br
+\fB--set-source-rollpitch\fP=\fIsensorid\fP
+.br
+\fB--set-source-rollpitch1\fP=\fIsensorid\fP
+.br
+\fB--set-source-rollpitch2\fP=\fIsensorid\fP
+.br
+\fB--set-source-rollpitch3\fP=\fIsensorid\fP
+.br
+\fB--set-source-heave\fP=\fIsensorid\fP
+.br
+\fB--set-source-heave1\fP=\fIsensorid\fP
+.br
+\fB--set-source-heave2\fP=\fIsensorid\fP
+.br
+\fB--set-source-heave3\fP=\fIsensorid\fP
 ]
 
 .SH DESCRIPTION
-Mbmakeplatform handles preprocessing of swath sonar data as part of setting
-up an MB-System processing structure for a dataset. This program replaces
-the several format-specific preprocessing programs
-found in MB-System version 5 releases with a single program for version 6.
-This program is under development, and is not ready for general use at
-this time.
+\fBMbmakeplatform\fP is used to create an \fBMB-System\fP platform file, 
+which provides a complete description of the geometry 
+of sensors on a survey platform, including the relative positional and angular offsets. Platform
+files are used by \fBmbpreprocess\fP to set up an \fBMB-System\fP processing structure for swath
+data. In many cases the preprocessing consists only of creating the ancillary files 
+parallel to the raw files, but in others the data must be translated to different formats.
+The preprocessing step can also be used to merge navigation, attitude, sound speed, or 
+other ancillary data with the survey data. 
+
+Platform files are needed for preprocessing only when survey data have been 
+collected without integrating the
+asynchronous navigation and attitude data and when the positional and angular offsets 
+between the survey sensor (e.g. multibeam sonar, lidar,
+stereo camera rig) have not been specified in the various data streams. 
+Most often this situation 
+is associated with custom survey systems on submerged platforms
+like autonomous underwater vehicles (AUVs) or remotely operated vehicles (ROVs).  
+The few data formats supported with preprocessing functionality utilizing 
+platform files include the Reson 7k format 88, the Teledyne 7k3
+format 89, and the 3D at Depth lidar formats 232 and 233. 
+
+Generally platform files are created by a single execution of \fBMbmakeplatform\fP with a
+long series of command line arguments that add sensors, set sensor capabilities, and set sensor
+positional and angular offsets. For some data formats \fBMbmakeplatform\fP can initialize 
+a platform structure by  extracting the sensor offset values from swath data files. 
+In most cases the source of position data is set as the
+platform origin with zero positional and angular offset values.
+
+No platform file is needed for preprocessing when the logged datastream includes
+a full platform description. Specifically, all datasets collected using Kongsberg multibeam 
+sonars do not require use of a platform file (the only exception to
+this would be if the positional offsets between sensors were incorrectly 
+specified in the multibeam configuration).
+
+Two examples are presented below, both of which are custom submerged survey platforms
+combining a number of both mapping and ancillary sensors, including an inertial navigation
+system producing navigation and attitude.
 
 .SH MB-SYSTEM AUTHORSHIP
 David W. Caress
@@ -353,15 +451,1540 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
+\fB--output\fP=\fIplffile\fP
+Specifies the path of the output platform file.
+.TP
+[
+.TP
 .B --verbose
 By default \fBmbmakeplatform\fP outputs minimal information to the shell. This option
-causes the program to indicate it's progress as it runs. Goody.
+causes the program to indicate it's progress as it runs. 
+.TP
+\fB--help\fP
+Lists the available command options.
+.TP
+\fB--input\fP=\fIplffile\fP
+Specify an existing platform file to read and then modify with subsequent commands.
+.TP
+\fB--swath\fP=[]\fIdatalist\fP or \fIswathfile\fP]
+Specify a swath data input (a datalist file or an individual data file) from which
+\fBmbmakeplatform\fP will attempt to extract a starting platform structure, including
+the list of sensors and the sensor positional and angular offsets. If the input path
+name follows the \fBMB-System\fP convention (e.g. *.mb59 for format 59) or is otherwise 
+recognized as associated with a known format, then the format need not be specified
+separately with \fB--swath-format\fP. Only the first available definition of the platform
+structure will be parsed, typically from the beginning of the first file referenced.
+This option only works for recent Kongsberg or Teledyne data formats (e.g. Kongsberg 
+formats 58 & 59 and Teledyne formats 88 & 89).
+.TP
+\fB--swath-format\fP=\fIvalue\fP
+Specify the format of the swath file or datalist from which a starting platform structure
+should be extracted.
+.TP
+\fB--platform-type-surface-vessel\fP
+Set the platform type to be a surface vessel.
+.TP
+\fB--platform-type-tow-body\fP
+Set the platform type to be a towed body.
+.TP
+\fB--platform-type-rov\fP
+Set the platform type to be an ROV (remotely operated vehicle).
+.TP
+\fB--platform-type-auv\fP
+Set the platform type to be an AUV (autonomous underwater vehicle).
+.TP
+\fB--platform-type-aircraft\fP
+Set the platform type to be an aircraft.
+.TP
+\fB--platform-type-satellite\fP
+Set the platform type to be a satellite.
+.TP
+\fB--platform-name\fP=\fIstring\fP
+Set the platform name.
+.TP
+\fB--platform-organization\fP=\fIstring\fP
+Set the name of the platform operating organization.
+.TP
+\fB--platform-documentation-url\fP=\fIstring\fP
+Set the name of the platform documentation website url.
+.TP
+\fB--platform-start-time\fP=\fIyyyy/mm/dd/hh/mm/ss.ssssss\fP
+Set the starting time for the time interval that this platform description is valid.
+.TP
+\fB--platform-end-time\fP=\fIyyyy/mm/dd/hh/mm/ss.ssssss\fP
+Set the ending time for the time interval that this platform description is valid.
+.TP
+\fB--add-sensor-sonar-echosounder\fP
+Initiate adding a new sensor of type echosounder (sonar). All commands will pertain to this sensor
+until the command \fBend-sensor\fP is given.
+.TP
+\fB--add-sensor-sonar-multiechosounder\fP
+Initiate adding a new sensor of type multiechosounder (sonar). All commands will pertain to this sensor
+until the command \fBend-sensor\fP is given.
+.TP
+\fB--add-sensor-sonar-sidescan\fP
+Initiate adding a new sensor of type sidescan (sonar). All commands will pertain to this sensor
+until the command \fBend-sensor\fP is given.
+.TP
+\fB--add-sensor-sonar-interferometry\fP
+Initiate adding a new sensor of type interferometry sidescan (sonar). All commands will pertain to this sensor
+until the command \fBend-sensor\fP is given.
+.TP
+\fB--add-sensor-sonar-multibeam\fP
+Initiate adding a new sensor of type multibeam (sonar). All commands will pertain to this sensor
+until the command \fBend-sensor\fP is given.
+.TP
+\fB--add-sensor-sonar-multibeam-twohead\fP
+Initiate adding a new sensor of type two-head multibeam (sonar). All commands will pertain to this sensor
+until the command \fBend-sensor\fP is given.
+.TP
+\fB--add-sensor-sonar-subbottom\fP
+Initiate adding a new sensor of type subbottom (sonar). All commands will pertain to this sensor
+until the command \fBend-sensor\fP is given.
+.TP
+\fB--add-sensor-camera-mono\fP
+Initiate adding a new sensor of type single still camera. All commands will pertain to this sensor
+until the command \fBend-sensor\fP is given.
+.TP
+\fB--add-sensor-camera-stereo\fP
+Initiate adding a new sensor of type stereo still camera rig. All commands will pertain to this sensor
+until the command \fBend-sensor\fP is given.
+.TP
+\fB--add-sensor-camera-video\fP
+Initiate adding a new sensor of type video camera. All commands will pertain to this sensor
+until the command \fBend-sensor\fP is given.
+.TP
+\fB--add-sensor-lidar-scan\fP
+Initiate adding a new sensor of type 2D scanning lidar. All commands will pertain to this sensor
+until the command \fBend-sensor\fP is given.
+.TP
+\fB--add-sensor-lidar-swath\fP
+Initiate adding a new sensor of type swath lidar. All commands will pertain to this sensor
+until the command \fBend-sensor\fP is given.
+.TP
+\fB--add-sensor-position\fP
+Initiate adding a new sensor of type position. All commands will pertain to this sensor
+until the command \fBend-sensor\fP is given.
+.TP
+\fB--add-sensor-compass\fP
+Initiate adding a new sensor of type compass. All commands will pertain to this sensor
+until the command \fBend-sensor\fP is given.
+.TP
+\fB--add-sensor-vru\fP
+Initiate adding a new sensor of type vertical reference unit (VRU). All commands will pertain to this sensor
+until the command \fBend-sensor\fP is given.
+.TP
+\fB--add-sensor-imu\fP
+Initiate adding a new sensor of type inertial motion unit (IMU). All commands will pertain to this sensor
+until the command \fBend-sensor\fP is given.
+.TP
+\fB--add-sensor-ins\fP
+Initiate adding a new sensor of type inertial navigation system (INS). All commands will pertain to this sensor
+until the command \fBend-sensor\fP is given.
+.TP
+\fB--add-sensor-ins-with-pressure\fP
+Initiate adding a new sensor of type inertial navigation system (INS) with pressure. All commands will pertain to this sensor
+until the command \fBend-sensor\fP is given.
+.TP
+\fB--add-sensor-ctd\fP
+Initiate adding a new sensor of type CTD. All commands will pertain to this sensor
+until the command \fBend-sensor\fP is given.
+.TP
+\fB--add-sensor-pressure\fP
+Initiate adding a new sensor of type pressure. All commands will pertain to this sensor
+until the command \fBend-sensor\fP is given.
+.TP
+\fB--add-sensor-soundspeed\fP
+Initiate adding a new sensor of type sound speed. All commands will pertain to this sensor
+until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor\fP=\fIsensorid\fP
+Initiate modifying the existing sensor \fIsensorid\fP (where sensors ids count from 0). All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-bathymetry\fP
+Initiate modifying the existing sensor that is identified as the source for bathymetry. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-bathymetry1\fP
+Initiate modifying the existing sensor that is identified as the source for bathymetry1. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-bathymetry2\fP
+Initiate modifying the existing sensor that is identified as the source for bathymetry2. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-bathymetry3\fP
+Initiate modifying the existing sensor that is identified as the source for bathymetry3. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-backscatter\fP
+Initiate modifying the existing sensor that is identified as the source for backscatter. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-backscatter1\fP
+Initiate modifying the existing sensor that is identified as the source for backscatter1. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-backscatter2\fP
+Initiate modifying the existing sensor that is identified as the source for backscatter2. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-backscatter3\fP
+Initiate modifying the existing sensor that is identified as the source for backscatter3. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-subbottom\fP
+Initiate modifying the existing sensor that is identified as the source for subbottom. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-subbottom1\fP
+Initiate modifying the existing sensor that is identified as the source for subbottom1. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-subbottom2\fP
+Initiate modifying the existing sensor that is identified as the source for subbottom2. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-subbottom3\fP
+Initiate modifying the existing sensor that is identified as the source for subbottom3. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-position\fP
+Initiate modifying the existing sensor that is identified as the source for position. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-position1\fP
+Initiate modifying the existing sensor that is identified as the source for position1. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-position2\fP
+Initiate modifying the existing sensor that is identified as the source for position2. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-position3\fP
+Initiate modifying the existing sensor that is identified as the source for position3. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-depth\fP
+Initiate modifying the existing sensor that is identified as the source for depth. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-depth1\fP
+Initiate modifying the existing sensor that is identified as the source for depth1. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-depth2\fP
+Initiate modifying the existing sensor that is identified as the source for depth2. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-depth3\fP
+Initiate modifying the existing sensor that is identified as the source for depth3. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-heading\fP
+Initiate modifying the existing sensor that is identified as the source for heading. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-heading1\fP
+Initiate modifying the existing sensor that is identified as the source for heading1. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-heading2\fP
+Initiate modifying the existing sensor that is identified as the source for heading2. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-heading3\fP
+Initiate modifying the existing sensor that is identified as the source for heading3. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-rollpitch\fP
+Initiate modifying the existing sensor that is identified as the source for rollpitch. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-rollpitch1\fP
+Initiate modifying the existing sensor that is identified as the source for rollpitch1. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-rollpitch2\fP
+Initiate modifying the existing sensor that is identified as the source for rollpitch2. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-rollpitch3\fP
+Initiate modifying the existing sensor that is identified as the source for rollpitch3. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-heave\fP
+Initiate modifying the existing sensor that is identified as the source for heave. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-heave1\fP
+Initiate modifying the existing sensor that is identified as the source for heave1. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-heave2\fP
+Initiate modifying the existing sensor that is identified as the source for heave2. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--modify-sensor-heave3\fP
+Initiate modifying the existing sensor that is identified as the source for heave3. All
+commands will pertain to this sensor until the command \fBend-sensor\fP is given.
+.TP
+\fB--sensor-model\fP=\fIstring\fP
+Set sensor model string.
+.TP
+\fB--sensor-manufacturer\fP=\fIstring\fP
+Set sensor manufacturer string.
+.TP
+\fB--sensor-serialnumber\fP=\fIstring\fP
+Set sensor serial number string.
+.TP
+\fB--sensor-capability-position\fP
+Add position to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-depth\fP
+Add depth (typically from pressure) to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-altitude\fP
+Add altitude to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-velocity\fP
+Add velocity of motion to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-acceleration\fP
+Add acceleration of motion to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-pressure\fP
+Add pressure to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-rollpitch\fP
+Add roll and pitch to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-heading\fP
+Add heading to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-magneticfield\fP
+Add magnetic field to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-temperature\fP
+Add temperature to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-conductivity\fP
+Add conductivity to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-salinity\fP
+Add salinity to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-soundspeed\fP
+Add sound speed to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-gravity\fP
+Add gravity to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-topography-echosounder\fP
+Add topography from echosounder to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-topography-interferometry\fP
+Add topography from interferometric sidescan sonar to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-topography-sass\fP
+Add topography from synthetic aperture sidescan (SASS) sonar to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-topography-multibeam\fP
+Add topography from multibeam sonar to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-topography-photogrammetry\fP
+Add topography from photogrammetry to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-topography-structurefrommotion\fP
+Add topography from structure from motion to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-topography-lidar\fP
+Add topography from lidar to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-topography-structuredlight\fP
+Add topography from structured light to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-topography-laserscanner\fP
+Add topography from laser scanner to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-backscatter-echosounder\fP
+Add backscatter from echosounder to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-backscatter-sidescan\fP
+Add backscatter from sidescan sonar to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-backscatter-interferometry\fP
+Add backscatter from interferometric sidescan sonar to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-backscatter-sass\fP
+Add backscatter from synthetic aperture sidescan (SASS) sonar to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-backscatter-multibeam\fP
+Add backscatter from multibeam sonar to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-backscatter-lidar\fP
+Add backscatter from lidar to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-backscatter-structuredlight\fP
+Add backscatter from structured light to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-backscatter-laserscanner\fP
+Add backscatter from laser scanner to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-photography\fP
+Add single camera still photography to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-stereophotography\fP
+Add stereo camera still photography to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-video\fP
+Add video to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability-stereovideo\fP
+Add stereo video to list of sensor's measurement capabilities.
+.TP
+\fB--sensor-capability1\fP=\fIvalue\fP
+Set the first of two sensor capability 4 byte bitmasks directly. The usage of the bits
+in this mask are:
+.br
+	MB_SENSOR_CAPABILITY1_NONE 						0x00000000	All bits = 0
+.br
+	MB_SENSOR_CAPABILITY1_POSITION 					0x00000001	Bit 0 = 1
+.br
+	MB_SENSOR_CAPABILITY1_DEPTH 						0x00000002	Bit 1 = 2
+.br
+	MB_SENSOR_CAPABILITY1_ALTITUDE 					0x00000004	Bit 2 = 4
+.br
+	MB_SENSOR_CAPABILITY1_VELOCITY 					0x00000008	Bit 3 = 8
+.br
+	MB_SENSOR_CAPABILITY1_ACCELERATION 				0x00000010	Bit 4 = 16
+.br
+	MB_SENSOR_CAPABILITY1_PRESSURE 					0x00000020	Bit 5 = 32
+.br
+	MB_SENSOR_CAPABILITY1_ROLLPITCH 					0x00000040	Bit 6 = 64
+.br
+	MB_SENSOR_CAPABILITY1_HEADING 					0x00000080	Bit 7 = 128
+.br
+	MB_SENSOR_CAPABILITY1_HEAVE 						0x00000100	Bit 8 = 256
+.br
+	MB_SENSOR_CAPABILITY1_UNUSED09 					0x00000200	Bit 9 = 512
+.br
+	MB_SENSOR_CAPABILITY1_UNUSED10 					0x00000400	Bit 10 = 1024
+.br
+	MB_SENSOR_CAPABILITY1_UNUSED11 					0x00000800	Bit 11 = 2048
+.br
+	MB_SENSOR_CAPABILITY1_UNUSED12 					0x00001000	Bit 12 = 4096
+.br
+	MB_SENSOR_CAPABILITY1_TEMPERATURE 					0x00002000	Bit 13 = 8192
+.br
+	MB_SENSOR_CAPABILITY1_CONDUCTIVITY 				0x00004000	Bit 14 = 16384
+.br
+	MB_SENSOR_CAPABILITY1_SALINITY 					0x00008000	Bit 15 = 32768
+.br
+	MB_SENSOR_CAPABILITY1_SOUNDSPEED 					0x00010000	Bit 16 = 65536
+.br
+	MB_SENSOR_CAPABILITY1_UNUSED17 					0x00020000	Bit 17= 131072
+.br
+	MB_SENSOR_CAPABILITY1_UNUSED18 					0x00040000	Bit 18 = 262144
+.br
+	MB_SENSOR_CAPABILITY1_UNUSED19 					0x00080000	Bit 19 = 524288
+.br
+	MB_SENSOR_CAPABILITY1_GRAVITY 					0x00100000	Bit 20 = 1048576
+.br
+	MB_SENSOR_CAPABILITY1_UNUSED21 					0x00200000	Bit 21 = 2097152
+.br
+	MB_SENSOR_CAPABILITY1_UNUSED22 					0x00400000	Bit 22 = 4194304
+.br
+	MB_SENSOR_CAPABILITY1_UNUSED23 					0x00800000	Bit 23 = 8388608
+.br
+	MB_SENSOR_CAPABILITY1_MAGNETICFIELD 				0x01000000	Bit 24 = 16777216
+.br
+	MB_SENSOR_CAPABILITY1_UNUSED25 					0x02000000	Bit 25 = 33554432
+.br
+	MB_SENSOR_CAPABILITY1_UNUSED26 					0x04000000	Bit 26 = 67108864
+.br
+	MB_SENSOR_CAPABILITY1_UNUSED27 					0x08000000	Bit 27 = 134217728
+.br
+	MB_SENSOR_CAPABILITY1_UNUSED28 					0x10000000	Bit 28 = 268435456
+.br
+	MB_SENSOR_CAPABILITY1_UNUSED29 					0x20000000	Bit 29 = 536870912
+.br
+	MB_SENSOR_CAPABILITY1_UNUSED30 					0x40000000	Bit 30 = 1073741824
+.br
+	MB_SENSOR_CAPABILITY1_UNUSED31 					0x80000000	Bit 31 = 2147483648
+
+.TP
+\fB--sensor-capability2\fP=\fIvalue\fP
+Set the second of two sensor capability 4 byte bitmasks directly. The usage of the bits
+in this mask are:
+.br
+	MB_SENSOR_CAPABILITY2_NONE 						0x00000000	All bits = 0
+.br
+	MB_SENSOR_CAPABILITY2_TOPOGRAPHY_ECHOSOUNDER 		0x00000001	Bit 0 = 1
+.br
+	MB_SENSOR_CAPABILITY2_TOPOGRAPHY_INTERFEROMETRY 		0x00000002	Bit 1 = 2
+.br
+	MB_SENSOR_CAPABILITY2_TOPOGRAPHY_SASS 				0x00000004	Bit 2 = 4
+.br
+	MB_SENSOR_CAPABILITY2_TOPOGRAPHY_MULTIBEAM 			0x00000008	Bit 3 = 8
+.br
+	MB_SENSOR_CAPABILITY2_TOPOGRAPHY_PHOTOGRAMMETRY 		0x00000010	Bit 4 = 16
+.br
+	MB_SENSOR_CAPABILITY2_TOPOGRAPHY_STRUCTUREFROMMOTION 	0x00000020 	Bit 5 = 32
+.br
+	MB_SENSOR_CAPABILITY2_TOPOGRAPHY_LIDAR 				0x00000040	Bit 6 = 64
+.br
+	MB_SENSOR_CAPABILITY2_TOPOGRAPHY_STRUCTUREDLIGHT 		0x00000080	Bit 7 = 128
+.br
+	MB_SENSOR_CAPABILITY2_TOPOGRAPHY_LASERSCANNER 		0x00000100	Bit 8 = 256
+.br
+	MB_SENSOR_CAPABILITY2_UNUSED09 					0x00000200	Bit 9 = 512
+.br
+	MB_SENSOR_CAPABILITY2_UNUSED10 					0x00000400	Bit 10 = 1024
+.br
+	MB_SENSOR_CAPABILITY2_UNUSED11 					0x00000800	Bit 11 = 2048
+.br
+	MB_SENSOR_CAPABILITY2_BACKSCATTER_ECHOSOUNDER 		0x00001000	Bit 12 = 4096
+.br
+	MB_SENSOR_CAPABILITY2_BACKSCATTER_SIDESCAN 			0x00002000	Bit 13 = 8192
+.br
+	MB_SENSOR_CAPABILITY2_BACKSCATTER_INTERFEROMETRY 		0x00004000	Bit 14 = 16384
+.br
+	MB_SENSOR_CAPABILITY2_BACKSCATTER_SASS 				0x00008000	Bit 15 = 32768
+.br
+	MB_SENSOR_CAPABILITY2_BACKSCATTER_MULTIBEAM 			0x00010000	Bit 16 = 65536
+.br
+	MB_SENSOR_CAPABILITY2_BACKSCATTER_LIDAR 			0x00020000	Bit 17= 131072
+.br
+	MB_SENSOR_CAPABILITY2_BACKSCATTER_STRUCTUREDLIGHT 	0x00040000	Bit 18 = 262144
+.br
+	MB_SENSOR_CAPABILITY2_BACKSCATTER_LASERSCANNER 		0x00080000	Bit 19 = 524288
+.br
+	MB_SENSOR_CAPABILITY2_UNUSED20 					0x00100000	Bit 20 = 1048576
+.br
+	MB_SENSOR_CAPABILITY2_SUBBOTTOM_ECHOSOUNDER 			0x00200000	Bit 21 = 2097152
+.br
+	MB_SENSOR_CAPABILITY2_SUBBOTTOM_CHIRP 				0x00400000	Bit 22 = 4194304
+.br
+	MB_SENSOR_CAPABILITY2_UNUSED23 					0x00800000	Bit 23 = 8388608
+.br
+	MB_SENSOR_CAPABILITY2_PHOTOGRAPHY 					0x01000000	Bit 24 = 16777216
+.br
+	MB_SENSOR_CAPABILITY2_STEREOPHOTOGRAPHY 			0x02000000	Bit 25 = 33554432
+.br
+	MB_SENSOR_CAPABILITY2_VIDEO 						0x04000000	Bit 26 = 67108864
+.br
+	MB_SENSOR_CAPABILITY2_STEREOVIDEO 					0x08000000	Bit 27 = 134217728
+.br
+	MB_SENSOR_CAPABILITY2_UNUSED28 					0x10000000	Bit 28 = 268435456
+.br
+	MB_SENSOR_CAPABILITY2_UNUSED29 					0x20000000	Bit 29 = 536870912
+.br
+	MB_SENSOR_CAPABILITY2_UNUSED30 					0x40000000	Bit 30 = 1073741824
+.br
+	MB_SENSOR_CAPABILITY2_UNUSED31 					0x80000000	Bit 31 = 2147483648
+.TP
+\fB--sensor-offsets\fP=\fIx/y/z/azimuth/roll/pitch\fP
+Used to set the positional (x, y, and z) and angular (azimuth, roll, and pitch) offsets
+for the sensor currently being added. 
+To modify offsets of an existing sensor use \fB--modify-offsets\fP.
+Here x is positive to starboard,
+y is positive forward, and z is positive up. Roll is positive starboard up, pitch is 
+positive forward up, and azimuth is positive clockwise from forward. Generally one sensor
+has zero offsets and thus serves as the platform origin. For sensors with two elements
+(e.g. bistatic multibeam sonars with separate transmit and receive arrays, or stereo
+camera rigs with two cameras), two \fB--sensor_offsets\fP calls are made. In the case
+of a multibeam the first set of offsets is for the transmit array, and in the case of a
+stereo camera rig the first offsets are for the left camera.
+.TP
+\fB--sensor-offset-positions\fP=\fIx/y/z\fP
+Used to set the positional (x, y, and z) offsets
+for the sensor currently being added. 
+To modify positional offsets of an existing sensor use \fB--modify-offset-positions\fP.
+Here x is positive to starboard,
+y is positive forward, and z is positive up. Generally one sensor
+has zero offsets and thus serves as the platform origin. This command is used for sensors
+that do not make measurements dependent on orientation, and so do not have angular
+offsets (e.g. sound speed, pressure, or CTD sensors).
+.TP
+\fB--sensor-offset-angles\fP=\fIazimuth/roll/pitch\fP
+Used to set the angular (azimuth, roll, and pitch) offsets
+for the sensor currently being added. 
+To modify angular offsets of an existing sensor use \fB--modify-offset-angles\fP.
+Here roll is positive starboard up, pitch is 
+positive forward up, and azimuth is positive clockwise from forward. Generally one sensor
+has zero offsets and thus serves as the platform origin. This command is used for sensors
+that do not make measurements dependent on position, and so do not have positional
+offsets (e.g. vertical reference units (VRUs) that measure orientation only).
+.TP
+\fB--sensor-time-latency\fP=\fIvalue\fP
+Sets a static time latency in seconds for the sensor currently being added.
+.TP
+\fB--sensor-time-latency-model\fP=\fIfile\fP
+Specifies a file containing a time latency model time series for the sensor currently 
+being added. The file is in the form of two white-space delimited 
+columns with the first column being times in epoch seconds (seconds since the start of
+1970) and the second being the time latency in seconds.
+.TP
+\fB--sensor-source-bathymetry\fP
+Sets the sensor currently being either added or modified to be the source for bathymetry.
+.TP
+\fB--sensor-source-bathymetry1\fP
+Sets the sensor currently being either added or modified to be the source for bathymetry1.
+.TP
+\fB--sensor-source-bathymetry2\fP
+Sets the sensor currently being either added or modified to be the source for bathymetry2.
+.TP
+\fB--sensor-source-bathymetry3\fP
+Sets the sensor currently being either added or modified to be the source for bathymetry3.
+.TP
+\fB--sensor-source-backscatter\fP
+Sets the sensor currently being either added or modified to be the source for backscatter.
+.TP
+\fB--sensor-source-backscatter1\fP
+Sets the sensor currently being either added or modified to be the source for backscatter1.
+.TP
+\fB--sensor-source-backscatter2\fP
+Sets the sensor currently being either added or modified to be the source for backscatter2.
+.TP
+\fB--sensor-source-backscatter3\fP
+Sets the sensor currently being either added or modified to be the source for backscatter3.
+.TP
+\fB--sensor-source-subbottom\fP
+Sets the sensor currently being either added or modified to be the source for subbottom.
+.TP
+\fB--sensor-source-subbottom1\fP
+Sets the sensor currently being either added or modified to be the source for subbottom1.
+.TP
+\fB--sensor-source-subbottom2\fP
+Sets the sensor currently being either added or modified to be the source for subbottom2.
+.TP
+\fB--sensor-source-subbottom3\fP
+Sets the sensor currently being either added or modified to be the source for subbottom3.
+.TP
+\fB--sensor-source-position\fP
+Sets the sensor currently being either added or modified to be the source for position.
+.TP
+\fB--sensor-source-position1\fP
+Sets the sensor currently being either added or modified to be the source for position1.
+.TP
+\fB--sensor-source-position2\fP
+Sets the sensor currently being either added or modified to be the source for position2.
+.TP
+\fB--sensor-source-position3\fP
+Sets the sensor currently being either added or modified to be the source for position3.
+.TP
+\fB--sensor-source-depth\fP
+Sets the sensor currently being either added or modified to be the source for depth.
+.TP
+\fB--sensor-source-depth1\fP
+Sets the sensor currently being either added or modified to be the source for depth1.
+.TP
+\fB--sensor-source-depth2\fP
+Sets the sensor currently being either added or modified to be the source for depth2.
+.TP
+\fB--sensor-source-depth3\fP
+Sets the sensor currently being either added or modified to be the source for depth3.
+.TP
+\fB--sensor-source-heading\fP
+Sets the sensor currently being either added or modified to be the source for heading.
+.TP
+\fB--sensor-source-heading1\fP
+Sets the sensor currently being either added or modified to be the source for heading1.
+.TP
+\fB--sensor-source-heading2\fP
+Sets the sensor currently being either added or modified to be the source for heading2.
+.TP
+\fB--sensor-source-heading3\fP
+Sets the sensor currently being either added or modified to be the source for heading3.
+.TP
+\fB--sensor-source-rollpitch\fP
+Sets the sensor currently being either added or modified to be the source for rollpitch.
+.TP
+\fB--sensor-source-rollpitch1\fP
+Sets the sensor currently being either added or modified to be the source for rollpitch1.
+.TP
+\fB--sensor-source-rollpitch2\fP
+Sets the sensor currently being either added or modified to be the source for rollpitch2.
+.TP
+\fB--sensor-source-rollpitch3\fP
+Sets the sensor currently being either added or modified to be the source for rollpitch3.
+.TP
+\fB--sensor-source-heave\fP
+Sets the sensor currently being either added or modified to be the source for heave.
+.TP
+\fB--sensor-source-heave1\fP
+Sets the sensor currently being either added or modified to be the source for heave1.
+.TP
+\fB--sensor-source-heave2\fP
+Sets the sensor currently being either added or modified to be the source for heave2.
+.TP
+\fB--sensor-source-heave3\fP
+Sets the sensor currently being either added or modified to be the source for heave3.
+.TP
+\fB--end-sensor\fP
+Ends the commands for adding or modifying a sensor.
+.TP
+\fB--modify-offsets\fP=\fIioff/x/y/z/azimuth/roll/pitch\fP
+Used to set the positional (x, y, and z) and angular (azimuth, roll, and pitch) offsets
+for the sensor currently being modified. 
+To add offsets to a new sensor use \fB--sensor-offsets\fP.
+Here x is positive to starboard,
+y is positive forward, and z is positive up. Roll is positive starboard up, pitch is 
+positive forward up, and azimuth is positive clockwise from forward. Generally one sensor
+has zero offsets and thus serves as the platform origin. For sensors with two elements
+(e.g. bistatic multibeam sonars with separate transmit and receive arrays, or stereo
+camera rigs with two cameras), two \fB--sensor_offsets\fP calls are made. In the case
+of a multibeam the first set of offsets is for the transmit array, and in the case of a
+stereo camera rig the first offsets are for the left camera.
+.TP
+\fB--modify-offset-positions\fP=\fIioff/x/y/z\fP
+Used to set the positional (x, y, and z) offsets
+for the sensor currently being modified. 
+To add positional offsets to a new sensor use \fB--sensor-offset-positions\fP.
+Here x is positive to starboard,
+y is positive forward, and z is positive up. Generally one sensor
+has zero offsets and thus serves as the platform origin. This command is used for sensors
+that do not make measurements dependent on orientation, and so do not have angular
+offsets (e.g. sound speed, pressure, or CTD sensors).
+.TP
+\fB--modify-offset-angles\fP=\fIioff/azimuth/roll/pitch\fP
+Used to set the angular (azimuth, roll, and pitch) offsets
+for the sensor currently being modified. 
+To add angular offsets to a new sensor use \fB--sensor-offset-angles\fP.
+Here roll is positive starboard up, pitch is 
+positive forward up, and azimuth is positive clockwise from forward. Generally one sensor
+has zero offsets and thus serves as the platform origin. This command is used for sensors
+that do not make measurements dependent on position, and so do not have positional
+offsets (e.g. vertical reference units (VRUs) that measure orientation only).
+.TP
+\fB--modify-time-latency\fP=\fIvalue\fP
+Sets a static time latency in seconds for the sensor currently being modified.
+.TP
+\fB--modify-time-latency-model\fP=\fIfile
+Specifies a file containing a time latency model time series for the sensor currently 
+being modified. The file is in the form of two white-space delimited 
+columns with the first column being times in epoch seconds (seconds since the start of
+1970) and the second being the time latency in seconds.
+.TP
+\fB--set-source-bathymetry\fP=\fIsensorid\fP
+Set the specified sensor to be a source for bathymetry.
+.TP
+\fB--set-source-bathymetry1\fP=\fIsensorid\fP
+Set the specified sensor to be a source for bathymetry1.
+.TP
+\fB--set-source-bathymetry2\fP=\fIsensorid\fP
+Set the specified sensor to be a source for bathymetry2.
+.TP
+\fB--set-source-bathymetry3\fP=\fIsensorid\fP
+Set the specified sensor to be a source for bathymetry3.
+.TP
+\fB--set-source-backscatter\fP=\fIsensorid\fP
+Set the specified sensor to be a source for backscatter.
+.TP
+\fB--set-source-backscatter1\fP=\fIsensorid\fP
+Set the specified sensor to be a source for backscatter1.
+.TP
+\fB--set-source-backscatter2\fP=\fIsensorid\fP
+Set the specified sensor to be a source for backscatter2.
+.TP
+\fB--set-source-backscatter3\fP=\fIsensorid\fP
+Set the specified sensor to be a source for backscatter2.
+.TP
+\fB--set-source-subbottom\fP=\fIsensorid\fP
+Set the specified sensor to be a source for subbottom.
+.TP
+\fB--set-source-subbottom1\fP=\fIsensorid\fP
+Set the specified sensor to be a source for subbottom1.
+.TP
+\fB--set-source-subbottom2\fP=\fIsensorid\fP
+Set the specified sensor to be a source for subbottom2.
+.TP
+\fB--set-source-subbottom3\fP=\fIsensorid\fP
+Set the specified sensor to be a source for subbottom3.
+.TP
+\fB--set-source-camera\fP=\fIsensorid\fP
+Set the specified sensor to be a source for camera.
+.TP
+\fB--set-source-camera1\fP=\fIsensorid\fP
+Set the specified sensor to be a source for camera1.
+.TP
+\fB--set-source-camera2\fP=\fIsensorid\fP
+Set the specified sensor to be a source for camera2.
+.TP
+\fB--set-source-camera3\fP=\fIsensorid\fP
+Set the specified sensor to be a source for camera3.
+.TP
+\fB--set-source-position\fP=\fIsensorid\fP
+Set the specified sensor to be a source for position.
+.TP
+\fB--set-source-position1\fP=\fIsensorid\fP
+Set the specified sensor to be a source for position1.
+.TP
+\fB--set-source-position2\fP=\fIsensorid\fP
+Set the specified sensor to be a source for position2.
+.TP
+\fB--set-source-position3\fP=\fIsensorid\fP
+Set the specified sensor to be a source for position3.
+.TP
+\fB--set-source-depth\fP=\fIsensorid\fP
+Set the specified sensor to be a source for depth.
+.TP
+\fB--set-source-depth1\fP=\fIsensorid\fP
+Set the specified sensor to be a source for depth1.
+.TP
+\fB--set-source-depth2\fP=\fIsensorid\fP
+Set the specified sensor to be a source for depth2.
+.TP
+\fB--set-source-depth3\fP=\fIsensorid\fP
+Set the specified sensor to be a source for depth3.
+.TP
+\fB--set-source-heading\fP=\fIsensorid\fP
+Set the specified sensor to be a source for heading.
+.TP
+\fB--set-source-heading1\fP=\fIsensorid\fP
+Set the specified sensor to be a source for heading1.
+.TP
+\fB--set-source-heading2\fP=\fIsensorid\fP
+Set the specified sensor to be a source for heading2.
+.TP
+\fB--set-source-heading3\fP=\fIsensorid\fP
+Set the specified sensor to be a source for heading3.
+.TP
+\fB--set-source-rollpitch\fP=\fIsensorid\fP
+Set the specified sensor to be a source for rollpitch.
+.TP
+\fB--set-source-rollpitch1\fP=\fIsensorid\fP
+Set the specified sensor to be a source for rollpitch1.
+.TP
+\fB--set-source-rollpitch2\fP=\fIsensorid\fP
+Set the specified sensor to be a source for rollpitch2.
+.TP
+\fB--set-source-rollpitch3\fP=\fIsensorid\fP
+Set the specified sensor to be a source for rollpitch3.
+.TP
+\fB--set-source-heave\fP=\fIsensorid\fP
+Set the specified sensor to be a source for heave.
+.TP
+\fB--set-source-heave1\fP=\fIsensorid\fP
+Set the specified sensor to be a source for heave1.
+.TP
+\fB--set-source-heave2\fP=\fIsensorid\fP
+Set the specified sensor to be a source for heave2.
+.TP
+\fB--set-source-heave3\fP=\fIsensorid\fP
+Set the specified sensor to be a source for heave3.
+.TP
+]
 
 .SH EXAMPLES
-To be written.....
+
+The Monterey Bay Aquarium Research Institute operates a Low Altitude Survey System (LASS)
+that is mounted on Remotely Operated Vehicles (ROVs) and used for 1-cm-scale surveys of
+the seafloor. The LASS combines the following sensors:
+.br
+	Kearfott SeaDevil inertial navigation system (INS)
+.br
+	Paroscientific Digiquartz pressure sensor
+.br
+	Teledyne Reson T50 400 kHz multibeam sonar
+.br
+	3D at Depth Wide Swath Subsea Lidar (WiSSL)
+.br
+	Stereo camera rig with two Allied Vision Prosilica GX1920 color cameras
+.br
+	VectorNav VN100 inertial measurement unit (IMU) and attitude heading reference system (AHRS)
+.br
+
+\fBMB-System\fP processing of the various datasets collected by the LASS depend upon the
+platform model for the LASS, which is created by the following set of commands to 
+\fBmbmakeplatform\fP:
+
+mbmakeplatform --output=20240829ROVVentana.plf \\
+                --platform-type-rov \\
+                --platform-name="Ventana" \\
+                --platform-organization="Monterey Bay Aquarium Research Institute" \\
+                --add-sensor-ins \\
+                    --sensor-model="SeaDeViL" \\
+                    --sensor-manufacturer="Kearfott" \\
+                    --sensor-serialnumber="2" \\
+                    --sensor-capability-position \\
+                    --sensor-capability-heading \\
+                    --sensor-capability-rollpitch \\
+                    --sensor-offsets=0.0/0.0/0.0/0.0/0.0/0.0 \\
+                    --sensor-time-latency=0.0 \\
+                    --sensor-source-position \\
+                    --sensor-source-heading \\
+                    --sensor-source-rollpitch \\
+                    --sensor-source-heave \\
+                --end-sensor \\
+                --add-sensor-pressure \\
+                    --sensor-model="Digiquartz" \\
+                    --sensor-manufacturer="Paroscientific" \\
+                    --sensor-serialnumber="Unknown" \\
+                    --sensor-capability-depth \\
+                    --sensor-offset-positions=-0.2164694/-0.076170/-0.069085 \\
+                    --sensor-time-latency=0.0 \\
+                    --sensor-source-depth \\
+                --end-sensor \\
+                --add-sensor-sonar-multibeam \\
+                    --sensor-model="T50 400 kHz" \\
+                    --sensor-manufacturer="Reson" \\
+                    --sensor-serialnumber="Unknown" \\
+                    --sensor-capability-topography-multibeam \\
+                    --sensor-capability-backscatter-multibeam \\
+                    --sensor-offsets=-0.459100/0.246774/-0.180388/0.07/0.07/0.16 \\
+                    --sensor-offsets=-0.459100/0.442174/-0.211386/0.07/0.07/0.16 \\
+                    --sensor-source-bathymetry \\
+                    --sensor-source-bathymetry1 \\
+                    --sensor-source-backscatter \\
+                    --sensor-source-backscatter1 \\
+                --end-sensor \\
+                --add-sensor-lidar-swath \\
+                    --sensor-model="WiSSL" \\
+                    --sensor-manufacturer="3DatDepth" \\
+                    --sensor-serialnumber="1" \\
+                    --sensor-capability-topography-lidar \\
+                    --sensor-capability-backscatter-lidar \\
+                    --sensor-offsets=-0.4653/0.0160/-0.0952/0.0/0.0/0.0 \\
+                    --sensor-source-bathymetry2 \\
+                    --sensor-source-backscatter2 \\
+                --end-sensor \\
+                --add-sensor-camera-stereo \\
+                    --sensor-model="Prosilica GX1920" \\
+                    --sensor-manufacturer="Allied Vision" \\
+                    --sensor-serialnumber="Unknown" \\
+                    --sensor-capability-stereophotography \\
+                    --sensor-offsets=-0.559430/-0.106901/-0.136561/0.0/0.0/0.0 \\
+                    --sensor-offsets=-0.559430/-0.106901/-0.136561/0.0/0.0/0.0 \\
+                    --sensor-source-bathymetry3 \\
+                    --sensor-source-backscatter3 \\
+                --end-sensor \\
+                --add-sensor-ins \\
+                    --sensor-model="VN-100" \\
+                    --sensor-manufacturer="VectorNav" \\
+                    --sensor-serialnumber="Unknown" \\
+                    --sensor-capability-position \\
+                    --sensor-capability-heading \\
+                    --sensor-capability-rollpitch \\
+                    --sensor-offsets=--0.255900/0.231999/-0.004164/0.0/0.0/0.0 \\
+                    --sensor-time-latency=0.0 \\
+                    --sensor-source-position \\
+                    --sensor-source-heading \\
+                    --sensor-source-rollpitch \\
+                    --sensor-source-heave \\
+                --end-sensor
+
+Executing the above command produces a platform file named 20240829ROVVentana.plf, which
+has the following contents:
+
+	## MB-System Platform Definition File
+.br
+	MB-SYSTEM_VERSION        5.8.2beta13
+.br
+	FILE_VERSION             1.00
+.br
+	ORIGIN                   Generated by user <seafloor> on cpu <Morgan.local> at <Thu Aug 29 14:33:58 2024>
+.br
+	##
+.br
+	PLATFORM_TYPE            3  ## ROV
+.br
+	PLATFORM_NAME            Ventana
+.br
+	PLATFORM_ORGANIZATION    Monterey Bay Aquarium Research Institute
+.br
+	DOCUMENTATION_URL        
+.br
+	##
+.br
+	START_TIME_D             0.000000  ## 0000/00/00 00:00:00.000000
+.br
+	END_TIME_D             0.000000  ## 0000/00/00 00:00:00.000000
+.br
+	##
+.br
+	PLATFORM_NUM_SENSORS     6
+.br
+	##
+.br
+	## Defined data source sensors:
+.br
+	SOURCE_BATHYMETRY        2
+.br
+	SOURCE_BATHYMETRY1       2
+.br
+	SOURCE_BATHYMETRY2       3
+.br
+	SOURCE_BATHYMETRY3       4
+.br
+	SOURCE_BACKSCATTER       2
+.br
+	SOURCE_BACKSCATTER1      2
+.br
+	SOURCE_BACKSCATTER2      3
+.br
+	SOURCE_BACKSCATTER3      4
+.br
+	SOURCE_POSITION          5
+.br
+	SOURCE_DEPTH             1
+.br
+	SOURCE_HEADING           5
+.br
+	SOURCE_ROLLPITCH         5
+.br
+	SOURCE_HEAVE             5
+.br
+	##
+.br
+	## Undefined data sources:
+.br
+	  ## SOURCE_SUBBOTTOM
+.br
+	  ## SOURCE_SUBBOTTOM1
+.br
+	  ## SOURCE_SUBBOTTOM2
+.br
+	  ## SOURCE_SUBBOTTOM3
+.br
+	  ## SOURCE_CAMERA
+.br
+	  ## SOURCE_CAMERA1
+.br
+	  ## SOURCE_CAMERA2
+.br
+	  ## SOURCE_CAMERA3
+.br
+	  ## SOURCE_POSITION1
+.br
+	  ## SOURCE_POSITION2
+.br
+	  ## SOURCE_POSITION3
+.br
+	  ## SOURCE_DEPTH1
+.br
+	  ## SOURCE_DEPTH2
+.br
+	  ## SOURCE_DEPTH3
+.br
+	  ## SOURCE_HEADING1
+.br
+	  ## SOURCE_HEADING2
+.br
+	  ## SOURCE_HEADING3
+.br
+	  ## SOURCE_ROLLPITCH1
+.br
+	  ## SOURCE_ROLLPITCH2
+.br
+	  ## SOURCE_ROLLPITCH3
+.br
+	  ## SOURCE_HEAVE1
+.br
+	  ## SOURCE_HEAVE2
+.br
+	  ## SOURCE_HEAVE3
+.br
+	##
+.br
+	## Sensor list:
+.br
+	##
+.br
+	SENSOR_TYPE                0  101  ## INS
+.br
+	SENSOR_MODEL                 0  SeaDeViL
+.br
+	SENSOR_MANUFACTURER          0  Kearfott
+.br
+	SENSOR_SERIALNUMBER          0  2
+.br
+	SENSOR_CAPABILITY1           0         193  ## position rollpitch heading heading
+.br
+	SENSOR_CAPABILITY2           0           0  ##
+.br
+	SENSOR_NUM_OFFSETS           0   1
+.br
+	OFFSET_POSITION              0       0    0.000000    0.000000    0.000000 ## Starboard, Forward, Up (meters)
+.br
+	OFFSET_ATTITUDE              0       0    0.000000    0.000000    0.000000 ## Heading, Roll, Pitch (degrees)
+.br
+	SENSOR_TIME_LATENCY_STATIC   0        0.000000  ## Seconds
+.br
+	##
+.br
+	SENSOR_TYPE                1  111  ## Pressure
+.br
+	SENSOR_MODEL                 1  Digiquartz
+.br
+	SENSOR_MANUFACTURER          1  Paroscientific
+.br
+	SENSOR_SERIALNUMBER          1  Unknown
+.br
+	SENSOR_CAPABILITY1           1           2  ## depth
+.br
+	SENSOR_CAPABILITY2           1           0  ##
+.br
+	SENSOR_NUM_OFFSETS           1   1
+.br
+	OFFSET_POSITION              1       0   -0.216469   -0.076170   -0.069085 ## Starboard, Forward, Up (meters)
+.br
+	SENSOR_TIME_LATENCY_STATIC   1        0.000000  ## Seconds
+.br
+	##
+.br
+	SENSOR_TYPE                2   30  ## Sonar multibeam
+.br
+	SENSOR_MODEL                 2  T50 400 kHz
+.br
+	SENSOR_MANUFACTURER          2  Reson
+.br
+	SENSOR_SERIALNUMBER          2  Unknown
+.br
+	SENSOR_CAPABILITY1           2           0  ##
+.br
+	SENSOR_CAPABILITY2           2       65544  ## topography_multibeam backscatter_multibeam
+.br
+	SENSOR_NUM_OFFSETS           2   2
+.br
+	OFFSET_POSITION              2       0   -0.459100    0.246774   -0.180388 ## Starboard, Forward, Up (meters)
+.br
+	OFFSET_ATTITUDE              2       0    0.070000    0.070000    0.160000 ## Heading, Roll, Pitch (degrees)
+.br
+	OFFSET_POSITION              2       1   -0.459100    0.442174   -0.211386 ## Starboard, Forward, Up (meters)
+.br
+	OFFSET_ATTITUDE              2       1    0.070000    0.070000    0.160000 ## Heading, Roll, Pitch (degrees)
+.br
+	##
+.br
+	SENSOR_TYPE                3   61  ## Lidar swath
+.br
+	SENSOR_MODEL                 3  WiSSL
+.br
+	SENSOR_MANUFACTURER          3  3DatDepth
+.br
+	SENSOR_SERIALNUMBER          3  1
+.br
+	SENSOR_CAPABILITY1           3           0  ##
+.br
+	SENSOR_CAPABILITY2           3      131136  ## topography_lidar backscatter_lidar
+.br
+	SENSOR_NUM_OFFSETS           3   1
+.br
+	OFFSET_POSITION              3       0   -0.465300    0.016000   -0.095200 ## Starboard, Forward, Up (meters)
+.br
+	OFFSET_ATTITUDE              3       0    0.000000    0.000000    0.000000 ## Heading, Roll, Pitch (degrees)
+.br
+	##
+.br
+	SENSOR_TYPE                4   51  ## Camera stereo
+.br
+	SENSOR_MODEL                 4  Prosilica GX1920
+.br
+	SENSOR_MANUFACTURER          4  Allied Vision
+.br
+	SENSOR_SERIALNUMBER          4  Unknown
+.br
+	SENSOR_CAPABILITY1           4           0  ##
+.br
+	SENSOR_CAPABILITY2           4    33554432  ## stereophotography
+.br
+	SENSOR_NUM_OFFSETS           4   2
+.br
+	OFFSET_POSITION              4       0   -0.559430   -0.106901   -0.136561 ## Starboard, Forward, Up (meters)
+.br
+	OFFSET_ATTITUDE              4       0    0.000000    0.000000    0.000000 ## Heading, Roll, Pitch (degrees)
+.br
+	OFFSET_POSITION              4       1   -0.559430   -0.106901   -0.136561 ## Starboard, Forward, Up (meters)
+.br
+	OFFSET_ATTITUDE              4       1    0.000000    0.000000    0.000000 ## Heading, Roll, Pitch (degrees)
+.br
+	##
+.br
+	SENSOR_TYPE                5  101  ## INS
+.br
+	SENSOR_MODEL                 5  VN-100
+.br
+	SENSOR_MANUFACTURER          5  VectorNav
+.br
+	SENSOR_SERIALNUMBER          5  Unknown
+.br
+	SENSOR_CAPABILITY1           5         193  ## position rollpitch heading heading
+.br
+	SENSOR_CAPABILITY2           5           0  ##
+.br
+	SENSOR_NUM_OFFSETS           5   1
+.br
+	OFFSET_POSITION              5       0    0.000000    0.000000    0.000000 ## Starboard, Forward, Up (meters)
+.br
+	OFFSET_ATTITUDE              5       0    0.000000    0.000000    0.000000 ## Heading, Roll, Pitch (degrees)
+.br
+	SENSOR_TIME_LATENCY_STATIC   5        0.000000  ## Seconds
+.br
+	##
+.br
+
+The Monterey Bay Aquarium Research Institute operates two Dorado class autonomous 
+underwater vehicles (AUVs) optimized for seafloor mapping in the deep ocean.
+These Mapping AUVs field the following sensors:
+.br
+	Kearfott SeaDevil inertial navigation system (INS)
+.br
+	Paroscientific Digiquartz pressure sensor
+.br
+	Teledyne Reson T50 400 kHz multibeam sonar
+.br
+	Edgetech 110 kHz chirp sidescan sonar
+.br
+	Edgetech 1-6 kHz chirp subbottom profiler
+.br
+
+\fBMB-System\fP processing of the various datasets collected by the Mapping AUVs depend upon the
+platform models for these vehicles, which are created by the following set of commands to 
+\fBmbmakeplatform\fP:
+
+mbmakeplatform --output=20240510m1_MAUV2.plf \\
+.br
+               --platform-type-auv \\
+.br
+               --platform-name="MAUV2 MBARI Dorado Class Mapping AUV" \\
+.br
+               --platform-organization="Monterey Bay Aquarium Research Institute" \\
+.br
+               --add-sensor-ins \\
+.br
+                   --sensor-model="SeaDeViL" \\
+.br
+                   --sensor-manufacturer="Kearfott" \\
+.br
+                   --sensor-serialnumber="2" \\
+.br
+                   --sensor-capability-position \\
+.br
+                   --sensor-capability-heading \\
+.br
+                   --sensor-capability-rollpitch \\
+.br
+                   --sensor-offsets=0.0/0.0/0.0/0.0/0.0/0.0 \\
+.br
+                   --sensor-time-latency=0.0 \\
+.br
+                   --sensor-source-position \\
+.br
+                   --sensor-source-heading \\
+.br
+                   --sensor-source-rollpitch \\
+.br
+                   --sensor-source-heave \\
+.br
+               --end-sensor \\
+.br
+               --add-sensor-pressure \\
+.br
+                   --sensor-model="Digiquartz" \\
+.br
+                   --sensor-manufacturer="Paroscientific" \\
+.br
+                   --sensor-serialnumber="Unknown" \\
+.br
+                   --sensor-capability-depth \\
+.br
+                   --sensor-offset-positions=0.0/-0.6/0.0 \\
+.br
+                   --sensor-time-latency=0.0\\
+.br
+                   --sensor-source-depth \\
+.br
+               --end-sensor \\
+.br
+               --add-sensor-sonar-multibeam \\
+.br
+                   --sensor-model="7125 400 kHz" \\
+.br
+                   --sensor-manufacturer="Reson" \\
+.br
+                   --sensor-serialnumber="Unknown" \\
+.br
+                   --sensor-capability-topography-multibeam \\
+.br
+                   --sensor-capability-backscatter-multibeam \\
+.br
+                   --sensor-offsets=0.0/0.353/-0.18/0.50/-0.16/+0.34 \\
+.br
+                  --sensor-offsets=0.0/0.153/+0.00/0.50/-0.16/+0.34 \\
+.br
+                   --sensor-source-bathymetry \\
+.br
+                   --sensor-source-bathymetry1 \\
+.br
+                   --sensor-source-backscatter \\
+.br
+                   --sensor-source-backscatter1 \\
+.br
+               --end-sensor \\
+.br
+               --add-sensor-sonar-sidescan \\
+.br
+                   --sensor-model="FSAU chirp 110 kHz" \\
+.br
+                   --sensor-manufacturer="Edgetech" \\
+.br
+                   --sensor-serialnumber="Unknown" \\
+.br
+                   --sensor-capability-backscatter-sidescan \\
+.br
+                   --sensor-offsets=0.0/1.353/-0.10/0.0/0.0/0.0 \\
+.br
+                   --sensor-source-backscatter2 \\
+.br
+               --end-sensor \\
+.br
+               --add-sensor-sonar-subbottom \\
+.br
+                   --sensor-model="FSAU chirp 1-6 kHz" \\
+.br
+                   --sensor-manufacturer="Edgetech" \\
+.br
+                   --sensor-serialnumber="Unknown" \\
+.br
+                   --sensor-capability-backscatter-sidescan \\
+.br
+                   --sensor-offsets=0.0/1.353/-0.10/0.0/0.0/0.0 \\
+.br
+                   --sensor-source-backscatter2 \\
+.br
+               --end-sensor
+
+
+Executing the above command produces a platform file named 20240510m1_MAUV2.plf, which
+has the following contents:
+
+	## MB-System Platform Definition File
+.br
+	MB-SYSTEM_VERSION        5.8.2beta02
+.br
+	FILE_VERSION             1.00
+.br
+	ORIGIN                   Generated by user <caress> on cpu <auvrouter.rc.mbari.org> at <Sun May 12 20:48:01 2024>
+.br
+	##
+.br
+	PLATFORM_TYPE            4  ## AUV
+.br
+	PLATFORM_NAME            MAUV2 MBARI Dorado Class Mapping AUV
+.br
+	PLATFORM_ORGANIZATION    Monterey Bay Aquarium Research Institute
+.br
+	DOCUMENTATION_URL        
+.br
+	##
+.br
+	START_TIME_D             0.000000  ## 0000/00/00 00:00:00.000000
+.br
+	END_TIME_D             0.000000  ## 0000/00/00 00:00:00.000000
+.br
+	##
+.br
+	PLATFORM_NUM_SENSORS     5
+.br
+	##
+.br
+	## Defined data source sensors:
+.br
+	SOURCE_BATHYMETRY        2
+.br
+	SOURCE_BATHYMETRY1       2
+.br
+	SOURCE_BACKSCATTER       2
+.br
+	SOURCE_BACKSCATTER1      2
+.br
+	SOURCE_BACKSCATTER2      4
+.br
+	SOURCE_POSITION          0
+.br
+	SOURCE_DEPTH             1
+.br
+	SOURCE_HEADING           0
+.br
+	SOURCE_ROLLPITCH         0
+.br
+	SOURCE_HEAVE             0
+.br
+	##
+.br
+	## Undefined data sources:
+.br
+	  ## SOURCE_BATHYMETRY2
+.br
+	  ## SOURCE_BATHYMETRY3
+.br
+	  ## SOURCE_BACKSCATTER3
+.br
+	  ## SOURCE_SUBBOTTOM
+.br
+	  ## SOURCE_SUBBOTTOM1
+.br
+	  ## SOURCE_SUBBOTTOM2
+.br
+	  ## SOURCE_SUBBOTTOM3
+.br
+	  ## SOURCE_CAMERA
+.br
+	  ## SOURCE_CAMERA1
+.br
+	  ## SOURCE_CAMERA2
+.br
+	  ## SOURCE_CAMERA3
+.br
+	  ## SOURCE_POSITION1
+.br
+	  ## SOURCE_POSITION2
+.br
+	  ## SOURCE_POSITION3
+.br
+	  ## SOURCE_DEPTH1
+.br
+	  ## SOURCE_DEPTH2
+.br
+	  ## SOURCE_DEPTH3
+.br
+	  ## SOURCE_HEADING1
+.br
+	  ## SOURCE_HEADING2
+.br
+	  ## SOURCE_HEADING3
+.br
+	  ## SOURCE_ROLLPITCH1
+.br
+	  ## SOURCE_ROLLPITCH2
+.br
+	  ## SOURCE_ROLLPITCH3
+.br
+	  ## SOURCE_HEAVE1
+.br
+	  ## SOURCE_HEAVE2
+.br
+	  ## SOURCE_HEAVE3
+.br
+	##
+.br
+	## Sensor list:
+.br
+	##
+.br
+	SENSOR_TYPE                0  101  ## INS
+.br
+	SENSOR_MODEL                 0  SeaDeViL
+.br
+	SENSOR_MANUFACTURER          0  Kearfott
+.br
+	SENSOR_SERIALNUMBER          0  2
+.br
+	SENSOR_CAPABILITY1           0         193  ## position rollpitch heading heading
+.br
+	SENSOR_CAPABILITY2           0           0  ##
+.br
+	SENSOR_NUM_OFFSETS           0   1
+.br
+	OFFSET_POSITION              0       0    0.000000    0.000000    0.000000 ## Starboard, Forward, Up (meters)
+.br
+	OFFSET_ATTITUDE              0       0    0.000000    0.000000    0.000000 ## Heading, Roll, Pitch (degrees)
+.br
+	SENSOR_TIME_LATENCY_STATIC   0        0.000000  ## Seconds
+.br
+	##
+.br
+	SENSOR_TYPE                1  111  ## Pressure
+.br
+	SENSOR_MODEL                 1  Digiquartz
+.br
+	SENSOR_MANUFACTURER          1  Paroscientific
+.br
+	SENSOR_SERIALNUMBER          1  Unknown
+.br
+	SENSOR_CAPABILITY1           1           2  ## depth
+.br
+	SENSOR_CAPABILITY2           1           0  ##
+.br
+	SENSOR_NUM_OFFSETS           1   1
+.br
+	OFFSET_POSITION              1       0    0.000000   -0.600000    0.000000 ## Starboard, Forward, Up (meters)
+.br
+	SENSOR_TIME_LATENCY_STATIC   1        0.000000  ## Seconds
+.br
+	##
+.br
+	SENSOR_TYPE                2   30  ## Sonar multibeam
+.br
+	SENSOR_MODEL                 2  7125 400 kHz
+.br
+	SENSOR_MANUFACTURER          2  Reson
+.br
+	SENSOR_SERIALNUMBER          2  Unknown
+.br
+	SENSOR_CAPABILITY1           2           0  ##
+.br
+	SENSOR_CAPABILITY2           2       65544  ## topography_multibeam backscatter_multibeam
+.br
+	SENSOR_NUM_OFFSETS           2   2
+.br
+	OFFSET_POSITION              2       0    0.000000    0.353000   -0.180000 ## Starboard, Forward, Up (meters)
+.br
+	OFFSET_ATTITUDE              2       0    0.500000   -0.160000    0.340000 ## Heading, Roll, Pitch (degrees)
+.br
+	OFFSET_POSITION              2       1    0.000000    0.153000    0.000000 ## Starboard, Forward, Up (meters)
+.br
+	OFFSET_ATTITUDE              2       1    0.500000   -0.160000    0.340000 ## Heading, Roll, Pitch (degrees)
+.br
+	##
+.br
+	SENSOR_TYPE                3   20  ## Sonar sidescan
+.br
+	SENSOR_MODEL                 3  FSAU chirp 110 kHz
+.br
+	SENSOR_MANUFACTURER          3  Edgetech
+.br
+	SENSOR_SERIALNUMBER          3  Unknown
+.br
+	SENSOR_CAPABILITY1           3           0  ##
+.br
+	SENSOR_CAPABILITY2           3        8192  ## backscatter_sidescan
+.br
+	SENSOR_NUM_OFFSETS           3   1
+.br
+	OFFSET_POSITION              3       0    0.000000    1.353000   -0.100000 ## Starboard, Forward, Up (meters)
+.br
+	OFFSET_ATTITUDE              3       0    0.000000    0.000000    0.000000 ## Heading, Roll, Pitch (degrees)
+.br
+	##
+.br
+	SENSOR_TYPE                4   40  ## Sonar subbottom
+.br
+	SENSOR_MODEL                 4  FSAU chirp 1-6 kHz
+.br
+	SENSOR_MANUFACTURER          4  Edgetech
+.br
+	SENSOR_SERIALNUMBER          4  Unknown
+.br
+	SENSOR_CAPABILITY1           4           0  ##
+.br
+	SENSOR_CAPABILITY2           4        8192  ## backscatter_sidescan
+.br
+	SENSOR_NUM_OFFSETS           4   1
+.br
+	OFFSET_POSITION              4       0    0.000000    1.353000   -0.100000 ## Starboard, Forward, Up (meters)
+.br
+	OFFSET_ATTITUDE              4       0    0.000000    0.000000    0.000000 ## Heading, Roll, Pitch (degrees)
+.br
+	##
+.br
+
 
 .SH SEE ALSO
-\fBmbsystem\fP(1), \fBmbdatalist\fP(1), \fBmbprocess\fP(1)
+\fBmbsystem\fP(1), \fBmbpreprocess\fP(1), \fBmbprocess\fP(1)
 
 .SH BUGS
-Oh yeah.
+Platform files are complicated, yet inscrutable.

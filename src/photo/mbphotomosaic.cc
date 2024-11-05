@@ -129,7 +129,6 @@ char usage_message[] = "mbphotomosaic \n"
                         "\t--correction-range=target/coeff\n"
                         "\t--correction-standoff=target/coeff\n"
                         "\t--correction-file=imagecorrection.yaml\n"
-                        "\t--correction-file-color\n"
                         "\t--reference-gain=gain\n"
                         "\t--reference-exposure=exposure\n"
                         "\t--reference-intensity=intensity\n"
@@ -2687,13 +2686,12 @@ int main(int argc, char** argv)
      *    --correction-range=target/coeff
      *    --correction-standoff=target/coeff
      *    --correction-file=imagecorrection.yaml
-     *    --correction-file-color
      *    --reference-gain=gain
      *    --reference-exposure=exposure
      *    --reference-intensity=intensity
      *    --reference-crcb=intensity/intensity
-     *    --dark-images-ignore=threshold
-     *    --dark-images-multiply=threshold/factor
+     *    --dark-image-ignore=threshold
+     *    --dark-image-multiply=threshold/factor
      *    --platform-file=platform.plf
      *    --camera-sensor=camera_sensor_id
      *    --nav-sensor=nav_sensor_id
@@ -2742,13 +2740,12 @@ int main(int argc, char** argv)
         {"correction-range",            required_argument,      NULL,         0},
         {"correction-standoff",         required_argument,      NULL,         0},
         {"correction-file",             required_argument,      NULL,         0},
-        {"correction-file-color",       no_argument,            NULL,         0},
         {"reference-gain",              required_argument,      NULL,         0},
         {"reference-exposure",          required_argument,      NULL,         0},
         {"reference-intensity",         required_argument,      NULL,         0},
         {"reference-crcb",              required_argument,      NULL,         0},
-        {"dark-image-ignore",          required_argument,       NULL,         0},
-        {"dark-image-multiply",        required_argument,       NULL,         0},
+        {"dark-image-ignore",           required_argument,       NULL,         0},
+        {"dark-image-multiply",         required_argument,       NULL,         0},
         {"platform-file",               required_argument,      NULL,         0},
         {"camera-sensor",               required_argument,      NULL,         0},
         {"nav-sensor",                  required_argument,      NULL,         0},
@@ -3020,12 +3017,6 @@ int main(int argc, char** argv)
                         strcat(ImageCorrectionFile, ".yml");
                         }
                     }
-                }
-
-            /* correction-file-color */
-            else if (strcmp("correction-file-color", options[option_index].name) == 0)
-                {
-                control.corr_color_enabled = true;
                 }
 
             /* reference-gain */
@@ -3303,7 +3294,6 @@ int main(int argc, char** argv)
         else if (control.corr_mode == MBPM_CORRECTION_FILE) {
             fprintf(stream,"%s     control.corr_mode:                %d MBPM_CORRECTION_FILE\n", first, control.corr_mode);
             fprintf(stream,"%s     ImageCorrectionFile:              %s\n", first, ImageCorrectionFile);
-            fprintf(stream,"%s     control.corr_color_enabled:       %d\n", first, control.corr_color_enabled);
         }
         else {
             fprintf(stream,"%s     control.corr_mode:                %d MBPM_CORRECTION_NONE\n", first, control.corr_mode);
@@ -3667,6 +3657,10 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
         fprintf(stream,"  control.OutputDx[1]: dy:             %.9f\n",control.OutputDx[1]);
         fprintf(stream,"  control.OutputDim[0]: xdim:          %d\n",control.OutputDim[0]);
         fprintf(stream,"  control.OutputDim[1]: ydim:          %d\n",control.OutputDim[1]);
+        fprintf(stream,"  pbounds[0]: west:                    %.9f\n",pbounds[0]);
+        fprintf(stream,"  pbounds[1]: east:                    %.9f\n",pbounds[1]);
+        fprintf(stream,"  pbounds[2]: south:                   %.9f\n",pbounds[2]);
+        fprintf(stream,"  pbounds[3]: north:                   %.9f\n",pbounds[3]);
         }
 
     /* If output file specified then create an an output image and priority map
@@ -3900,11 +3894,6 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
                 }
             }
 
-            /* correction-file-color */
-            else if (strncmp(imageLeftFile, "--correction-file-color", 23) == 0) {
-                control.corr_color_enabled = true;
-            }
-
             /* reference-gain */
             else if (strncmp(imageLeftFile, "--reference-gain=", 17) == 0) {
                 if (sscanf(imageLeftFile,"--reference-gain=%lf", &control.reference_gain) == 1 ) {
@@ -3964,7 +3953,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             /* dark-image-ignore */
             else if (strncmp(imageLeftFile, "--dark-image-ignore", 19) == 0)
                 {
-                int n = sscanf (imageLeftFile,"%lf", &control.dark_ignore_threshold);
+                int n = sscanf (imageLeftFile,"--dark-image-ignore=%lf", &control.dark_ignore_threshold);
                 if (n == 1 && control.dark_ignore_threshold > 0.0)
                     control.dark_ignore_set = true;
                 }
@@ -3972,7 +3961,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             /* dark-image-multiply */
             else if (strncmp(imageLeftFile, "--dark-image-multiply", 21) == 0)
                 {
-                int n = sscanf (imageLeftFile,"%lf/%lf", &control.dark_multiply_threshold, &control.dark_multiply_factor);
+                int n = sscanf (imageLeftFile,"--dark-image-multiply=%lf/%lf", &control.dark_multiply_threshold, &control.dark_multiply_factor);
                 if (n == 2 && control.dark_multiply_threshold > 0.0 && control.dark_multiply_factor > 0.0)
                     control.dark_multiply_set = true;
                 }

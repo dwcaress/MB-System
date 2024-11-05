@@ -1188,7 +1188,7 @@ int mbsys_reson7k3_print_Attitude(int verbose, s7k3_Attitude *Attitude, int *err
   fprintf(stderr, "%s     n:                          %d\n", first, Attitude->n);
   fprintf(stderr, "%s     nalloc:                     %d\n", first, Attitude->nalloc);
   for (int i = 0; i < Attitude->n; i++)
-    fprintf(stderr, "%s     i:%d delta_time:%d roll:%f pitch:%f heading:%f heave:%f\n", first, i, Attitude->delta_time[i],
+    fprintf(stderr, "%s     i:%d delta_time:%d roll:%f pitch:%f heave:%f heading:%f\n", first, i, Attitude->delta_time[i],
             Attitude->roll[i], Attitude->pitch[i], Attitude->heave[i], Attitude->heading[i]);
 
   const int status = MB_SUCCESS;
@@ -3750,7 +3750,7 @@ int mbsys_reson7k3_print_FileCatalog(int verbose, s7k3_FileCatalog *FileCatalog,
   fprintf(stderr, "%s     list of data records (size offset type device system time count 8*reserved):\n", first);
   for (unsigned int i = 0; i < FileCatalog->n; i++) {
     filecatalogdata = &FileCatalog->filecatalogdata[i];
-    fprintf(stderr, "%s     %7d %7d %8u %llu %5u %4u %2u %4u-%3.3u-%2.2u:%2.2u:%9.6f %.6f %u %u %u %u %u %u %u %u %u\n",
+    fprintf(stderr, "%s     %6d %6d %8u %12llu %5u %4u %2u %4u-%3.3u-%2.2u:%2.2u:%9.6f %.6f %u %u %u %u %u %u %u %u %u\n",
           first, i, filecatalogdata->sequence,
           filecatalogdata->size, (long long unsigned) filecatalogdata->offset,
           filecatalogdata->record_type, filecatalogdata->device_id,
@@ -4907,15 +4907,21 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
   double *swath_width = (double *)&mb_io_ptr->saved2;
 
   /* kluge parameters */
-  double kluge_beampatternsnellfactor = 1.0;
-  double kluge_soundspeedsnellfactor = 1.0;
+  bool kluge_fix7ktimestamps = false;
+  double kluge_fix7ktimestamps_targetoffset = 0.0;
   bool kluge_beampatternsnell = false;
+  double kluge_beampatternsnellfactor = 1.0;
   bool kluge_soundspeedsnell = false;
+  double kluge_soundspeedsnellfactor = 1.0;
   bool kluge_zeroAttitudecorrection = false;
   bool kluge_zeroalongtrackangles = false;
 
   /* get kluges */
   for (int i = 0; i < pars->n_kluge; i++) {
+  	if (pars->kluge_id[i] == MB_PR_KLUGE_FIX7KTIMESTAMPS) {
+  	  kluge_fix7ktimestamps = true;
+  	  kluge_fix7ktimestamps_targetoffset = *((double *)&pars->kluge_pars[i * MB_PR_KLUGE_PAR_SIZE]);
+  	}
     if (pars->kluge_id[i] == MB_PR_KLUGE_BEAMTWEAK) {
       kluge_beampatternsnell = true;
       kluge_beampatternsnellfactor = *((double *)&pars->kluge_pars[i * MB_PR_KLUGE_PAR_SIZE]);
@@ -4964,20 +4970,24 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
     fprintf(stderr, "dbg2       ignore_water_column:           %d\n", pars->ignore_water_column);
     fprintf(stderr, "dbg2       n_kluge:                       %d\n", pars->n_kluge);
     for (int i = 0; i < pars->n_kluge; i++) {
-      fprintf(stderr, "dbg2       kluge_id[%d]:                    %d\n", i, pars->kluge_id[i]);
-      if (pars->kluge_id[i] == MB_PR_KLUGE_BEAMTWEAK) {
-        fprintf(stderr, "dbg2       kluge_beampatternsnell:        %d\n", kluge_beampatternsnell);
-        fprintf(stderr, "dbg2       kluge_beampatternsnellfactor:  %f\n", kluge_beampatternsnellfactor);
+      fprintf(stderr, "dbg2       kluge_id[%d]:                         %d\n", i, pars->kluge_id[i]);
+      if (pars->kluge_id[i] == MB_PR_KLUGE_FIX7KTIMESTAMPS) {
+        fprintf(stderr, "dbg2       kluge_fix7ktimestamps:              %d\n", kluge_fix7ktimestamps);
+        fprintf(stderr, "dbg2       kluge_fix7ktimestamps_targetoffset: %f\n", kluge_fix7ktimestamps_targetoffset);
+      }
+      else if (pars->kluge_id[i] == MB_PR_KLUGE_BEAMTWEAK) {
+        fprintf(stderr, "dbg2       kluge_beampatternsnell:             %d\n", kluge_beampatternsnell);
+        fprintf(stderr, "dbg2       kluge_beampatternsnellfactor:       %f\n", kluge_beampatternsnellfactor);
       }
       else if (pars->kluge_id[i] == MB_PR_KLUGE_SOUNDSPEEDTWEAK) {
-        fprintf(stderr, "dbg2       kluge_soundspeedsnell:         %d\n", kluge_soundspeedsnell);
-        fprintf(stderr, "dbg2       kluge_soundspeedsnellfactor:   %f\n", kluge_soundspeedsnellfactor);
+        fprintf(stderr, "dbg2       kluge_soundspeedsnell:              %d\n", kluge_soundspeedsnell);
+        fprintf(stderr, "dbg2       kluge_soundspeedsnellfactor:        %f\n", kluge_soundspeedsnellfactor);
       }
       else if (pars->kluge_id[i] == MB_PR_KLUGE_ZEROATTITUDECORRECTION) {
-        fprintf(stderr, "dbg2       kluge_zeroAttitudecorrection:  %d\n", kluge_zeroAttitudecorrection);
+        fprintf(stderr, "dbg2       kluge_zeroAttitudecorrection:       %d\n", kluge_zeroAttitudecorrection);
       }
       else if (pars->kluge_id[i] == MB_PR_KLUGE_ZEROALONGTRACKANGLES) {
-        fprintf(stderr, "dbg2       kluge_zeroalongtrackangles:    %d\n", kluge_zeroalongtrackangles);
+        fprintf(stderr, "dbg2       kluge_zeroalongtrackangles:         %d\n", kluge_zeroalongtrackangles);
       }
     }
   }
@@ -5038,7 +5048,8 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
       any data are read - for some formats this allows kluge options to set special
       reading conditions/behaviors */
   if (store_ptr == NULL) {
-
+  	  mb_io_ptr->save21 = kluge_fix7ktimestamps;
+  	  mb_io_ptr->saved3 = kluge_fix7ktimestamps_targetoffset;
   }
 
   /* deal with a survey record */
@@ -5451,11 +5462,11 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
     /*--------------------------------------------------------------*/
     /* interpolate ancillary values  */
     /*--------------------------------------------------------------*/
-bool dprint = false;
-if (store->time_i[2]== 12 && store->time_i[3]==16 && store->time_i[4]==0 && store->time_i[5]==17)
-	dprint = true;
-if (store->time_i[2]== 12 && store->time_i[3]==16 && store->time_i[4]==3 && store->time_i[5]==45)
-	dprint = true;
+	bool dprint = false;
+	if (store->time_i[2]== 12 && store->time_i[3]==16 && store->time_i[4]==0 && store->time_i[5]==17)
+		dprint = true;
+	if (store->time_i[2]== 12 && store->time_i[3]==16 && store->time_i[4]==3 && store->time_i[5]==45)
+		dprint = true;
 
     int interp_status = mb_linear_interp_longitude(verbose, pars->nav_time_d - 1, pars->nav_lon - 1, pars->n_nav, time_d,
                                                &navlon, &jnav, &interp_error);
@@ -7884,7 +7895,7 @@ int mbsys_reson7k3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
     // loop over available data, up to the max that can be stored
     for (int inav = 0; inav < MIN(nmax, *n); inav++) {
       // get time - note time_i is dimensioned time_i[7*nmax]
-      time_d[inav] = store->time_d + Attitude->delta_time[inav];
+      time_d[inav] = store->time_d + 0.001 * Attitude->delta_time[inav];
       mb_get_date(verbose, time_d[inav], &time_i[7*inav]);
 
       // get attitude from the Attitude record

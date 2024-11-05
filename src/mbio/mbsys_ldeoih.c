@@ -651,7 +651,7 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
           notdistfirst = true;
           depthmax = fabs(bath[i] - store->sensordepth);
           distmax = fabs(bathacrosstrack[i]);
-          distmax = fabs(bathalongtrack[i]);
+          distmax = MAX(distmax, fabs(bathalongtrack[i]));
         }
       }
     }

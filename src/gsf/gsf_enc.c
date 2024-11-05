@@ -1521,7 +1521,7 @@ gsfEncodeSwathBathymetryPing(unsigned char *sptr, gsfSwathBathyPing *ping, GSF_F
         }
         else
         {
-            ret = EncodeTwoByteArray(p, ping->beam_angle_forward, ping->number_beams, &ping->scaleFactors, GSF_SWATH_BATHY_SUBRECORD_BEAM_ANGLE_FORWARD_ARRAY);
+            ret = EncodeSignedTwoByteArray(p, ping->beam_angle_forward, ping->number_beams, &ping->scaleFactors, GSF_SWATH_BATHY_SUBRECORD_BEAM_ANGLE_FORWARD_ARRAY);
         }
         if (ret <= 0)
         {
@@ -1768,6 +1768,38 @@ gsfEncodeSwathBathymetryPing(unsigned char *sptr, gsfSwathBathyPing *ping, GSF_F
         }
         p += ret;
     }
+    
+    if (ping->TVG_dB != (double *) NULL)
+    {
+        if ((ft->rec.mb_ping.scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_TVG_ARRAY - 1].compressionFlag & 0x0F) == GSF_ENABLE_COMPRESSION)
+        {
+            ret = EncodeCompressedArray (p, ping->TVG_dB, ping->number_beams, &ping->scaleFactors, GSF_SWATH_BATHY_SUBRECORD_TVG_ARRAY);
+        }
+        else
+        {
+            switch (ft->rec.mb_ping.scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_TVG_ARRAY - 1].compressionFlag & 0xF0)
+            {
+                case GSF_FIELD_SIZE_ONE:
+                    ret = EncodeByteArray(p, ping->TVG_dB, ping->number_beams, &ping->scaleFactors, GSF_SWATH_BATHY_SUBRECORD_TVG_ARRAY);
+                    break;
+
+                default:
+                case GSF_FIELD_SIZE_DEFAULT:
+                case GSF_FIELD_SIZE_TWO:
+                    ret = EncodeTwoByteArray(p, ping->TVG_dB, ping->number_beams, &ping->scaleFactors, GSF_SWATH_BATHY_SUBRECORD_TVG_ARRAY);
+                    break;
+
+                case GSF_FIELD_SIZE_FOUR:
+                    ret = EncodeFourByteArray(p, ping->TVG_dB, ping->number_beams, &ping->scaleFactors, GSF_SWATH_BATHY_SUBRECORD_TVG_ARRAY);
+                    break;
+            }
+        }
+        if (ret <= 0)
+        {
+            return (-1);
+        }
+        p += ret;
+    }
 
     /* Next possible subrecord is the sensor specific subrecord. Save the
     *  current pointer, and leave room for the four byte subrecord identifier.
@@ -1925,6 +1957,7 @@ gsfEncodeSwathBathymetryPing(unsigned char *sptr, gsfSwathBathyPing *ping, GSF_F
         case (GSF_SWATH_BATHY_SUBRECORD_EM302_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM122_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM2040_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_ME70BO_SPECIFIC):
             sensor_size = EncodeEM4Specific(p, &ping->sensor_data);
             break;
 
@@ -2784,11 +2817,11 @@ EncodeEM12Specific(unsigned char *sptr, const gsfSensorSpecific *sdata)
     p += 2;
 
     /* Next byte contains the resolution */
-    *p = (int) sdata->gsfEM12Specific.resolution;
+    *p = (unsigned char)  sdata->gsfEM12Specific.resolution;
     p += 1;
 
     /* Next byte contains the ping quality factor*/
-    *p = (int) sdata->gsfEM12Specific.ping_quality;
+    *p = (unsigned char)  sdata->gsfEM12Specific.ping_quality;
     p += 1;
 
     /* Next two byte integer contains the sound velocity * 10 */
@@ -2798,7 +2831,7 @@ EncodeEM12Specific(unsigned char *sptr, const gsfSensorSpecific *sdata)
     p += 2;
 
     /* Next byte contains the operational mode */
-    *p = (int) sdata->gsfEM12Specific.mode;
+    *p = (unsigned char)  sdata->gsfEM12Specific.mode;
     p += 1;
 
     /* The next 32 bytes are spare space for future growth */
@@ -2860,23 +2893,23 @@ EncodeEM100Specific(unsigned char *sptr, const gsfSensorSpecific *sdata)
     p += 2;
 
     /* Next byte contains the sonar mode (from the em100 amplitude datagram) */
-    *p = sdata->gsfEM100Specific.mode;
+    *p = (unsigned char) sdata->gsfEM100Specific.mode;
     p += 1;
 
     /* Next byte contains the power (from the em100 amplitude datagram) */
-    *p = (char) sdata->gsfEM100Specific.power;
+    *p = (unsigned char)  sdata->gsfEM100Specific.power;
     p += 1;
 
     /* Next byte contains the attenuation (from the em100 amplitude datagram) */
-    *p = (char) sdata->gsfEM100Specific.attenuation;
+    *p = (unsigned char)  sdata->gsfEM100Specific.attenuation;
     p += 1;
 
     /* Next byte contains the tvg (from the em100 amplitude datagram) */
-    *p = (char) sdata->gsfEM100Specific.tvg;
+    *p = (unsigned char)  sdata->gsfEM100Specific.tvg;
     p += 1;
 
     /* Next byte contains the pulse length from the em100 amplitude datagram) */
-    *p = (char) sdata->gsfEM100Specific.pulse_length;
+    *p = (unsigned char)  sdata->gsfEM100Specific.pulse_length;
     p += 1;
 
     /* Next two byte integer contains the counter from the em100
@@ -4248,15 +4281,15 @@ EncodeEM3Specific(unsigned char *sptr, const gsfSensorSpecific *sdata)
         p += 1;
 
         /* The next one byte value contains the receive gain */
-        *p = sdata->gsfEM3Specific.run_time[0].receive_gain;
+        *p = (unsigned char) sdata->gsfEM3Specific.run_time[0].receive_gain;
         p += 1;
 
         /* The next one byte value contains the TVG law cross-over angle */
-        *p = sdata->gsfEM3Specific.run_time[0].cross_over_angle;
+        *p = (unsigned char) sdata->gsfEM3Specific.run_time[0].cross_over_angle;
         p += 1;
 
         /* The next one byte value contains the source of the surface sound speed value */
-        *p = sdata->gsfEM3Specific.run_time[0].ssv_source;
+        *p = (unsigned char) sdata->gsfEM3Specific.run_time[0].ssv_source;
         p += 1;
 
         /* The next two byte value contains the maximum port swath width */
@@ -4396,15 +4429,15 @@ EncodeEM3Specific(unsigned char *sptr, const gsfSensorSpecific *sdata)
             p += 1;
 
             /* The next one byte value contains the receive gain */
-            *p = sdata->gsfEM3Specific.run_time[1].receive_gain;
+            *p = (unsigned char) sdata->gsfEM3Specific.run_time[1].receive_gain;
             p += 1;
 
             /* The next one byte value contains the TVG law cross-over angle */
-            *p = sdata->gsfEM3Specific.run_time[1].cross_over_angle;
+            *p = (unsigned char) sdata->gsfEM3Specific.run_time[1].cross_over_angle;
             p += 1;
 
             /* The next one byte value contains the source of the surface sound speed value */
-            *p = sdata->gsfEM3Specific.run_time[1].ssv_source;
+            *p = (unsigned char) sdata->gsfEM3Specific.run_time[1].ssv_source;
             p += 1;
 
             /* The next two byte value contains the maximum port swath width */
@@ -4660,7 +4693,7 @@ EncodeEM3RawSpecific(unsigned char *sptr, const gsfSensorSpecific *sdata)
         p += 1;
 
         /* Next byte contains the transmit sector number */
-        *p = sdata->gsfEM3RawSpecific.sector[i].sector_number;
+        *p = (unsigned char) sdata->gsfEM3RawSpecific.sector[i].sector_number;
         p += 1;
 
         /* Next four bytes contains the signal bandwidth */
@@ -4945,7 +4978,7 @@ EncodeEM3RawSpecific(unsigned char *sptr, const gsfSensorSpecific *sdata)
  *
  * Function Name : EncodeEM4Specific
  *
- * Description : This function encodes the Kongsberg EM710/EM302/EM122/EM2040
+ * Description : This function encodes the Kongsberg EM710/EM302/EM122/EM2040/ME70BO
  *  sensor specific information into external byte stream form.
  *
  * Inputs :
@@ -5155,7 +5188,7 @@ EncodeEM4Specific(unsigned char *sptr, const gsfSensorSpecific *sdata)
         p += 1;
 
         /* Next byte contains the transmit sector number */
-        *p = sdata->gsfEM4Specific.sector[i].sector_number;
+        *p = (unsigned char) sdata->gsfEM4Specific.sector[i].sector_number;
         p += 1;
 
         /* Next four bytes contains the signal bandwidth */
@@ -6028,9 +6061,51 @@ EncodeKMALLSpecific(unsigned char *sptr, const gsfSensorSpecific *sdata)
         *p = (unsigned char) sdata->gsfKMALLSpecific.sector[i].signalWaveForm;
         p += 1;
 
-        /* The next 32 bytes are our spare for later use */
-        memset(p,0,(size_t)20);
-        p += 20;
+        /* The next four bytes contain the high voltage level */
+        dtemp = sdata->gsfKMALLSpecific.sector[i].highVoltageLevel_dB * 1.0e6;
+        if(dtemp < 0.0)
+        {
+            dtemp -= 0.501;
+        }
+        else
+        {
+            dtemp += 0.501;
+        }
+        sltemp = htonl((gsfsLong)dtemp);
+        memcpy(p,&sltemp,4);
+        p += 4;
+
+        /* The next four bytes contain the sector tracking correction level */
+        dtemp = sdata->gsfKMALLSpecific.sector[i].sectorTrackiongCorr_dB * 1.0e6;
+        if(dtemp < 0.0)
+        {
+            dtemp -= 0.501;
+        }
+        else
+        {
+            dtemp += 0.501;
+        }
+        sltemp = htonl((gsfsLong)dtemp);
+        memcpy(p,&sltemp,4);
+        p += 4;
+
+        /* The next four bytes contain the effective signal length in seconds */
+        dtemp = sdata->gsfKMALLSpecific.sector[i].effectiveSignalLength_sec * 1.0e6;
+        if(dtemp < 0.0)
+        {
+            dtemp -= 0.501;
+        }
+        else
+        {
+            dtemp += 0.501;
+        }
+        sltemp = htonl((gsfsLong)dtemp);
+        memcpy(p,&sltemp,4);
+        p += 4;
+
+        /* The next 8 bytes are our spare for later use */
+        memset(p,0,(size_t)8);
+        p += 8;
     }
 
     /* Next section is the rxInfo data */
@@ -7315,6 +7390,14 @@ EncodeResonTSeriesSpecific(unsigned char *sptr, gsfSensorSpecific *sdata)
 
     /* Next four byte integer contains the horizontal receiver steering angle in degrees * 100 */
     dtemp = (sdata->gsfResonTSeriesSpecific.horizontal_receiver_steering_angle * 1.0e2);
+    if (dtemp < 0.0)
+    {
+        dtemp = dtemp - 0.501;
+    }
+    else
+    {
+        dtemp = dtemp + 0.501;
+    }
     ltemp = htonl((gsfsLong) dtemp);
     memcpy(p, &ltemp, 4);
     p += 4;
@@ -7329,13 +7412,29 @@ EncodeResonTSeriesSpecific(unsigned char *sptr, gsfSensorSpecific *sdata)
     p += 4;
 
     /* Next four byte integer contains transmitter steering angle*/
-    dtemp = (sdata->gsfResonTSeriesSpecific.transmitter_steering_angle * 1.0e5) + 0.501;
+    dtemp = (sdata->gsfResonTSeriesSpecific.transmitter_steering_angle * 1.0e5);
+    if (dtemp < 0.0)
+    {
+        dtemp = dtemp - 0.501;
+    }
+    else
+    {
+        dtemp = dtemp + 0.501;
+    }
     sltemp = htonl((gsfsLong) dtemp);
     memcpy(p, &sltemp, 4);
     p += 4;
 
     /* Next four byte integer contains applied roll information*/
-    dtemp = (sdata->gsfResonTSeriesSpecific.applied_roll * 1.0e5) + 0.501;
+    dtemp = (sdata->gsfResonTSeriesSpecific.applied_roll * 1.0e5);
+    if (dtemp < 0.0)
+    {
+        dtemp = dtemp - 0.501;
+    }
+    else
+    {
+        dtemp = dtemp + 0.501;
+    }
     sltemp = htonl((gsfsLong) dtemp);
     memcpy(p, &sltemp, 4);
     p += 4;
@@ -7360,13 +7459,53 @@ EncodeResonTSeriesSpecific(unsigned char *sptr, gsfSensorSpecific *sdata)
     memcpy(p, &ltemp, 4);
     p += 4;
 
-    /* The next 416 bytes are spare space for future growth */
-    memset(p, 0, 416);
-    p += 416;
+    /* The next 60 bytes are spare space for future growth in the 7027 datagram*/
+    memset(p, 0, 60);
+    p += 60;
+    
+    /* Next byte contains the operation field for the match filter */
+    *p = (unsigned char)sdata->gsfResonTSeriesSpecific.match_filter_control;
+    p += 1;
+    
+    /* Next four byte integer contains the start frequency for the match filter in Hz */
+    dtemp = (sdata->gsfResonTSeriesSpecific.match_filter_start_freq * 1.0e2) + 0.501;
+    ltemp = htonl((gsfuLong) dtemp);
+    memcpy(p, &ltemp, 4);
+    p += 4;
+    
+    /* Next four byte integer contains the end frequency for the match filter in Hz */
+    dtemp = (sdata->gsfResonTSeriesSpecific.match_filter_end_freq * 1.0e2) + 0.501;
+    ltemp = htonl((gsfuLong) dtemp);
+    memcpy(p, &ltemp, 4);
+    p += 4;
+    
+    /* Next byte contains the window type for the match filter */
+    *p = (unsigned char)sdata->gsfResonTSeriesSpecific.match_filter_window_type;
+    p += 1;
+    
+    /* Next four byte integer contains the shading value for the match filter */
+    dtemp = (sdata->gsfResonTSeriesSpecific.match_filter_shading_value * 1.0e4) + 0.501;
+    stemp = htons((gsfuShort) dtemp);
+    memcpy(p, &stemp, 2);
+    p += 2;
+    
+    /* Next four byte integer contains the effective pulse width for the match filter in seconds */
+    dtemp = (sdata->gsfResonTSeriesSpecific.match_filter_effect_pulse_width * 1.0e11) + 0.501;
+    ltemp = htonl((gsfuLong) dtemp);
+    memcpy(p, &ltemp, 4);
+    p += 4;
 
+    /* The next 52 bytes are spare space for future growth in the 7002 datagram */
+    memset(p, 0, sizeof(unsigned int) * 13);
+    p += 52;
+    
     /* The next 32 bytes are spare space for future growth */
     memset(p, 0, 32);
     p += 32;
+    
+    /* The next 264 bytes are spare space for future growth */
+    memset(p, 0, 288);
+    p += 288;
     return (p - sptr);
 }
 
@@ -8291,7 +8430,7 @@ EncodeEM4ImagerySpecific(unsigned char *sptr, const gsfSensorImagery *sdata)
     memcpy(p, &stemp, 2);
     p += 2;
 
-    /* Next two bytes contain the imagery scale value as specified by the manufacturer.  This value is 10 for the EM710/EM302/EM122/EM2040.
+    /* Next two bytes contain the imagery scale value as specified by the manufacturer.  This value is 10 for the EM710/EM302/EM122/EM2040/ME70BO.
      *  The following formula can be used to convert from the GSF positive biased value to dB:
      *  dB_value = (GSF_I_value - offset) / scale
      */
@@ -8326,9 +8465,6 @@ EncodeEM4ImagerySpecific(unsigned char *sptr, const gsfSensorImagery *sdata)
 static int
 EncodeKMALLImagerySpecific(unsigned char *sptr, const gsfSensorImagery *sdata)
 {
-    // MBSYSTEM MODIFICATION
-    (void)sdata;  // Unused parameter
-
     unsigned char  *p = sptr;
 
    /* The next 32 bytes are our spare for later use */
@@ -8789,6 +8925,7 @@ EncodeBRBIntensity(unsigned char *sptr, const gsfBRBIntensity *idata, int num_be
         case (GSF_SWATH_BATHY_SUBRECORD_EM302_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM710_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM2040_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_ME70BO_SPECIFIC):
             sensor_size = EncodeEM4ImagerySpecific(ptr, &idata->sensor_imagery);
             break;
 
@@ -8833,7 +8970,7 @@ EncodeBRBIntensity(unsigned char *sptr, const gsfBRBIntensity *idata, int num_be
         ptr += 2;
 
         /* write the kmall start value */
-        stemp = idata->time_series[i].start_range_samples;
+        stemp = htons ((gsfuShort) idata->time_series[i].start_range_samples);
         memcpy(ptr, &stemp, 2);
         ptr += 2;
 
@@ -9089,14 +9226,17 @@ gsfEncodeProcessingParameters(unsigned char *sptr, gsfProcessingParameters * par
     /* Now loop to encode these parameters */
     for (i = 0; i < param->number_parameters; i++)
     {
-        /* next is the size of the parameter name as a two byte integer */
-        param->param_size[i] = strlen(param->param[i]) + 1;     /* add one to carry null */
+        if (param->param[i] != (char *) NULL) 
+        {
+            /* next is the size of the parameter name as a two byte integer */
+            param->param_size[i] = strlen(param->param[i]) + 1;     /* add one to carry null */
 
-        stemp = htons(param->param_size[i]);
-        memcpy(p, &stemp, 2);
-        p += 2;
-        memcpy(p, param->param[i], param->param_size[i]);
-        p += param->param_size[i];
+            stemp = htons(param->param_size[i]);
+            memcpy(p, &stemp, 2);
+            p += 2;
+            memcpy(p, param->param[i], param->param_size[i]);
+            p += param->param_size[i];
+        }
     }
     return (p - sptr);
 }
@@ -9146,14 +9286,17 @@ gsfEncodeSensorParameters(unsigned char *sptr, gsfSensorParameters * param)
     /* Now loop to encode these parameters */
     for (i = 0; i < param->number_parameters; i++)
     {
-        /* next is the size of the parameter name as a two byte integer */
-        param->param_size[i] = strlen(param->param[i]) + 1;     /* add one to carry null */
+        if (param->param[i] != (char *) NULL) 
+        {
+            /* next is the size of the parameter name as a two byte integer */
+            param->param_size[i] = strlen(param->param[i]) + 1;     /* add one to carry null */
 
-        stemp = htons(param->param_size[i]);
-        memcpy(p, &stemp, 2);
-        p += 2;
-        memcpy(p, param->param[i], param->param_size[i]);
-        p += param->param_size[i];
+            stemp = htons(param->param_size[i]);
+            memcpy(p, &stemp, 2);
+            p += 2;
+            memcpy(p, param->param[i], param->param_size[i]);
+            p += param->param_size[i];
+        }
     }
     return (p - sptr);
 }
@@ -9667,6 +9810,7 @@ int gsfSetDefaultScaleFactor(gsfSwathBathyPing *mb_ping)
     const double GSF_BEAM_FLAGS_ASSUMED_HIGHEST_PRECISION = 100;
     const double GSF_SIGNAL_TO_NOISE_ASSUMED_HIGHEST_PRECISION = 100;
     const double GSF_BEAM_ANGLE_FORWARD_ASSUMED_HIGHEST_PRECISION = 100;
+    const double GSF_TVG_dB_ASSUMED_HIGHEST_PRECISION = 100;
     const double GSF_VERTICAL_ERROR_ASSUMED_HIGHEST_PRECISION = 200;
     const double GSF_HORIZONTAL_ERROR_ASSUMED_HIGHEST_PRECISION = 200;
     const double GSF_SECTOR_NUMBER_ASSUMED_HIGHEST_PRECISION = 100;
@@ -9675,6 +9819,7 @@ int gsfSetDefaultScaleFactor(gsfSwathBathyPing *mb_ping)
     const double GSF_SYSTEM_CLEANING_ASSUMED_HIGHEST_PRECISION = 100;
     const double GSF_DOPPLER_CORRECTION_ASSUMED_HIGHEST_PRECISION = 100;
     const double GSF_SONAR_VERT_UNCERT_ASSUMED_HIGHEST_PRECISION = 100;
+    const double GSF_MEAN_ABS_COEFF_ASSUMED_HIGHEST_PRECISION = 100;
 
     int             i, j; /* iterators */
     double          *dptr; /* pointer to ping array */
@@ -9815,6 +9960,13 @@ int gsfSetDefaultScaleFactor(gsfSwathBathyPing *mb_ping)
                 dptr = mb_ping->beam_angle_forward;
                 highest_precision = GSF_BEAM_ANGLE_FORWARD_ASSUMED_HIGHEST_PRECISION;
                 id = GSF_SWATH_BATHY_SUBRECORD_BEAM_ANGLE_FORWARD_ARRAY;
+                max_scale_factor = SHRT_MAX;
+                min_scale_factor = SHRT_MIN;
+                break;
+            case GSF_SWATH_BATHY_SUBRECORD_TVG_ARRAY:
+                dptr = mb_ping->TVG_dB;
+                highest_precision = GSF_TVG_dB_ASSUMED_HIGHEST_PRECISION;
+                id = GSF_SWATH_BATHY_SUBRECORD_TVG_ARRAY;
                 max_scale_factor = USHRT_MAX;
                 min_scale_factor = 0;
                 break;
@@ -9871,6 +10023,13 @@ int gsfSetDefaultScaleFactor(gsfSwathBathyPing *mb_ping)
                 dptr = mb_ping->sonar_vert_uncert;
                 highest_precision = GSF_SONAR_VERT_UNCERT_ASSUMED_HIGHEST_PRECISION;
                 id = GSF_SWATH_BATHY_SUBRECORD_SONAR_VERT_UNCERT_ARRAY;
+                max_scale_factor = USHRT_MAX;
+                min_scale_factor = 0;
+                break;
+            case GSF_SWATH_BATHY_SUBRECORD_MEAN_ABS_COEF_ARRAY:
+                dptr = mb_ping->mean_abs_coeff;
+                highest_precision = GSF_MEAN_ABS_COEFF_ASSUMED_HIGHEST_PRECISION;
+                id = GSF_SWATH_BATHY_SUBRECORD_MEAN_ABS_COEF_ARRAY;
                 max_scale_factor = USHRT_MAX;
                 min_scale_factor = 0;
                 break;

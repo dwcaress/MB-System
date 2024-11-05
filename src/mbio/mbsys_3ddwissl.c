@@ -3750,12 +3750,17 @@ int mbsys_3ddwissl_calculatebathymetry
             }
 
           /* set beamflag */
-          if (sounding->amplitude * amplitude_factor >= amplitude_threshold)
-            sounding->beamflag = MB_FLAG_NONE;
-          else if (isounding_largest == isounding)
-            sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_SONAR;
-          else
-            sounding->beamflag = MB_FLAG_MULTIPICK;
+          if (isounding_largest == isounding) {
+          	if (sounding->amplitude * amplitude_factor >= amplitude_threshold)
+            	sounding->beamflag = MB_FLAG_NONE;
+            else
+            	sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_SONAR;
+          } else {
+			if (sounding->amplitude * amplitude_factor >= amplitude_threshold)
+            	sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MULTIPICK;
+			else
+            	sounding->beamflag = MB_FLAG_NULL;
+          }
 
           /* translate to takeoff coordinates */
           mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);

@@ -104,15 +104,16 @@
 #define MOD_MODE_REMOVE_DISCONTINUITY 48
 #define MOD_MODE_MERGE_SURVEYS 49
 #define MOD_MODE_REIMPORT_FILE 50
-#define MOD_MODE_REIMPORT_ALL_FILES 51
-#define MOD_MODE_TRIANGULATE 52
-#define MOD_MODE_TRIANGULATE_SECTION 53
-#define MOD_MODE_UNSET_SHORT_SECTION_TIES 54
-#define MOD_MODE_SKIP_SHORT_SECTION_CROSSINGS 55
-#define MOD_MODE_REMOVE_SHORT_SECTIONS 56
-#define MOD_MODE_REMOVE_FILE 57
-#define MOD_MODE_REMAKE_MB166_FILES 58
-#define MOD_MODE_FIX_SENSORDEPTH 59
+#define MOD_MODE_REIMPORT_SURVEY 51
+#define MOD_MODE_REIMPORT_ALL_FILES 52
+#define MOD_MODE_TRIANGULATE 53
+#define MOD_MODE_TRIANGULATE_SECTION 54
+#define MOD_MODE_UNSET_SHORT_SECTION_TIES 55
+#define MOD_MODE_SKIP_SHORT_SECTION_CROSSINGS 56
+#define MOD_MODE_REMOVE_SHORT_SECTIONS 57
+#define MOD_MODE_REMOVE_FILE 58
+#define MOD_MODE_REMAKE_MB166_FILES 59
+#define MOD_MODE_FIX_SENSORDEPTH 60
 #define IMPORT_NONE 0
 #define IMPORT_TIE 1
 #define IMPORT_GLOBALTIE 2
@@ -195,6 +196,7 @@ static char usage_message[] =
     "\t--remove-discontinuity=file:section\n"
     "\t--merge-surveys=survey1:survey2\n"
     "\t--reimport-file=file\n"
+    "\t--reimport-survey=survey\n"
     "\t--reimport-all-files\n"
     "\t--import-tie-list=file\n"
     "\t--export-tie-list=file\n"
@@ -293,6 +295,7 @@ int main(int argc, char **argv) {
                                     {"remove-discontinuity", required_argument, NULL, 0},
                                     {"merge-surveys", required_argument, NULL, 0},
                                     {"reimport-file", required_argument, NULL, 0},
+                                    {"reimport-survey", required_argument, NULL, 0},
                                     {"reimport-all-files", no_argument, NULL, 0},
                                     {"import-tie-list", required_argument, NULL, 0},
                                     {"export-tie-list", required_argument, NULL, 0},
@@ -1323,14 +1326,27 @@ int main(int argc, char **argv) {
       }
 
       /*-------------------------------------------------------
-       * Reimport file (or files)
-          --reimport-file
+       * Reimport file (or survey or all files)
+          --reimport-file=file
+          --reimport-survey=survey
           --reimport-all-files */
       else if (strcmp("reimport-file", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
           int nscan;
-          if ((nscan = sscanf(optarg, "%d", &mods[num_mods].file1)) == 2) {
+          if ((nscan = sscanf(optarg, "%d", &mods[num_mods].file1)) == 1) {
             mods[num_mods].mode = MOD_MODE_REIMPORT_FILE;
+            num_mods++;
+          }
+        }
+        else {
+          fprintf(stderr, "Maximum number of mod commands reached:\n\tskip-unset-crossings command ignored\n\n");
+        }
+      }
+      else if (strcmp("reimport-survey", options[option_index].name) == 0) {
+        if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
+          if ((nscan = sscanf(optarg, "%d", &mods[num_mods].file1)) == 1) {
+            mods[num_mods].mode = MOD_MODE_REIMPORT_SURVEY;
             num_mods++;
           }
         }
@@ -1816,10 +1832,6 @@ int main(int argc, char **argv) {
         sprintf(srcfile, "%s/nvs_%4.4d.mb166", project_inputbase.datadir, i);
         sprintf(dstfile, "%s/nvs_%4.4d.mb166", project_output.datadir, i);
         mb_copyfile(verbose, srcfile, dstfile, &error);
-        //mb_command command = "";
-        //sprintf(command, "cp %s/nvs_%4.4d.mb166 %s", project_inputbase.datadir, i, project_output.datadir);
-        // fprintf(stderr, "Executing in shell: %s\n", command);
-        ///* int shellstatus = */ system(command);
       }
 
       /* copy all the section files */
@@ -1829,23 +1841,26 @@ int main(int argc, char **argv) {
         mb_command dstfile = "";
         sprintf(srcfile, "%s/nvs_%4.4d_%4.4d.mb71", project_inputbase.datadir, i, j);
         sprintf(dstfile, "%s/nvs_%4.4d_%4.4d.mb71", project_output.datadir, i, j);
-        mb_copyfile(verbose, srcfile, dstfile, &error);
-        num_sections_copied++;
+        int copy_error = MB_ERROR_NO_ERROR;
+        int copy_status = mb_copyfile(verbose, srcfile, dstfile, &error);
+        if (copy_status != MB_SUCCESS) {
+		  fprintf(stderr, "Section file copy failure for input base project (which is also the intended output):\n\t%s\n",
+				  srcfile);
+		  fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+		  error = MB_ERROR_BAD_USAGE;
+		  exit(error);
+        } else {
+          num_sections_copied++;
+        }
 
         /* copy the triangle file if it exists */
         struct stat file_status;
-        sprintf(srcfile, "%s/nvs_%4.4d_%4.4d.mb71.tri", project_inputadd.datadir, i, j);
+        sprintf(srcfile, "%s/nvs_%4.4d_%4.4d.mb71.tri", project_inputbase.datadir, i, j);
         sprintf(dstfile, "%s/nvs_%4.4d_%4.4d.mb71.tri", project_output.datadir, i, j);
-        const int fstat = stat(srcfile, &file_status);
-        if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR
-                      && file_status.st_size > 0) {
-          mb_copyfile(verbose, srcfile, dstfile, &error);
-          num_tri_copied++;
+        copy_status = mb_copyfile(verbose, srcfile, dstfile, &copy_error);
+        if (copy_status == MB_SUCCESS) {
+		  num_tri_copied++;
         }
-        //mb_command command = "";
-        //sprintf(command, "cp %s/nvs_%4.4d_%4.4d.mb71* %s", project_inputbase.datadir, i, j, project_output.datadir);
-        // fprintf(stderr, "Executing in shell: %s\n", command);
-        ///* int shellstatus = */ system(command);
       }
     }
 
@@ -1857,17 +1872,14 @@ int main(int argc, char **argv) {
         sprintf(srcfile, "%s/%s", project_inputbase.datadir, project_inputbase.refgrid_names[irefgrid]);
         sprintf(dstfile, "%s/%s", project_output.datadir, project_inputbase.refgrid_names[irefgrid]);
         mb_copyfile(verbose, srcfile, dstfile, &error);
-        //mb_command command = "";
-        //sprintf(command, "cp %s/%s %s", project_inputbase.datadir, 
-        //      project_inputbase.refgrid_names[irefgrid], project_output.datadir);
-        // fprintf(stderr, "Executing in shell: %s\n", command);
-        ///* int shellstatus = */ system(command);
     }
 
     fprintf(stderr, "\nCopied input base project to output project:\n\t%s\n", project_output_path);
-    fprintf(stderr, "\t%d files\n\t%d crossings\n\t%d ties\n", project_output.num_files, project_output.num_crossings,
-            project_output.num_ties);
-    fprintf(stderr, "\t%d triangle files out of %d sections copied\n", num_tri_copied, num_sections_copied);
+    fprintf(stderr, "\t%d files\n\t%d sections\n\t%d crossings\n\t%d ties\n\t%d triangle files\n", 
+    				project_inputbase.num_files, num_sections_copied, 
+    				project_inputbase.num_crossings, project_inputbase.num_ties, num_tri_copied);
+    fprintf(stderr, "\t%d files total\n\t%d crossings total\n\t%d ties total\n", 
+    				project_output.num_files, project_output.num_crossings, project_output.num_ties);
   }
 
   /* else if adding the second project to the first, or just modifying the first,
@@ -1897,7 +1909,7 @@ int main(int argc, char **argv) {
   if (mbnavadjustmerge_mode == MBNAVADJUSTMERGE_MODE_ADD || mbnavadjustmerge_mode == MBNAVADJUSTMERGE_MODE_MERGE) {
     status = mbnavadjust_read_project(verbose, project_inputadd_path, &project_inputadd, &error);
     if (status == MB_SUCCESS) {
-      fprintf(stderr, "Input add project loaded:\n\t%s\n", project_inputadd_path);
+      fprintf(stderr, "\nInput add project loaded:\n\t%s\n", project_inputadd_path);
       fprintf(stderr, "\t%d files\n\t%d crossings\n\t%d ties\n", project_inputadd.num_files, project_inputadd.num_crossings,
               project_inputadd.num_ties);
     }
@@ -2017,10 +2029,6 @@ int main(int argc, char **argv) {
         sprintf(srcfile, "%s/nvs_%4.4d.mb166", project_inputadd.datadir, i);
         sprintf(dstfile, "%s/nvs_%4.4d.mb166", project_output.datadir, k);
         mb_copyfile(verbose, srcfile, dstfile, &error);
-        //mb_command command = "";
-        //sprintf(command, "cp %s/nvs_%4.4d.mb166 %s/nvs_%4.4d.mb166", project_inputadd.datadir, i, project_output.datadir, k);
-        // fprintf(stderr, "Executing in shell: %s\n", command);
-        ///* int shellstatus = */ system(command);
       }
 
       /* copy all the section files */
@@ -2030,33 +2038,26 @@ int main(int argc, char **argv) {
         mb_command dstfile = "";
         sprintf(srcfile, "%s/nvs_%4.4d_%4.4d.mb71", project_inputadd.datadir, i, j);
         sprintf(dstfile, "%s/nvs_%4.4d_%4.4d.mb71", project_output.datadir, k, j);
-        mb_copyfile(verbose, srcfile, dstfile, &error);
-        num_sections_copied++;
-        //mb_command command = "";
-        //sprintf(command, "cp %s/nvs_%4.4d_%4.4d.mb71 %s/nvs_%4.4d_%4.4d.mb71", project_inputadd.datadir, i, j,
-        //        project_output.datadir, k, j);
-        // fprintf(stderr, "Executing in shell: %s\n", command);
-        ///* int shellstatus = */ system(command);
+        int copy_error = MB_ERROR_NO_ERROR;
+        int copy_status = mb_copyfile(verbose, srcfile, dstfile, &error);
+        if (copy_status != MB_SUCCESS) {
+		  fprintf(stderr, "Section file copy failure for input add project:\n\t%s\n",
+				  srcfile);
+		  fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+		  error = MB_ERROR_BAD_USAGE;
+		  exit(error);
+        }
+        else {
+          num_sections_copied++;
+        }
 
         /* copy the triangle file if it exists */
-        struct stat file_status;
         sprintf(srcfile, "%s/nvs_%4.4d_%4.4d.mb71.tri", project_inputadd.datadir, i, j);
         sprintf(dstfile, "%s/nvs_%4.4d_%4.4d.mb71.tri", project_output.datadir, k, j);
-        const int fstat = stat(srcfile, &file_status);
-        if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR
-                      && file_status.st_size > 0) {
-          mb_copyfile(verbose, srcfile, dstfile, &error);
-          num_tri_copied++;
+        copy_status = mb_copyfile(verbose, srcfile, dstfile, &copy_error);
+        if (copy_status == MB_SUCCESS) {
+		  num_tri_copied++;
         }
-        //sprintf(command, "%s/nvs_%4.4d_%4.4d.mb71.tri", project_inputadd.datadir, i, j);
-        //const int fstat = stat(command, &file_status);
-        //if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR
-        //              && file_status.st_size > 0) {
-        //  sprintf(command, "cp %s/nvs_%4.4d_%4.4d.mb71.tri %s/nvs_%4.4d_%4.4d.mb71.tri",
-        //          project_inputadd.datadir, i, j, project_output.datadir, k, j);
-          // fprintf(stderr, "Executing in shell: %s\n", command);
-        //  /* int shellstatus = */ system(command);
-        //}
       }
     }
 
@@ -2068,11 +2069,6 @@ int main(int argc, char **argv) {
       sprintf(srcfile, "%s/%s", project_inputadd.datadir, project_inputadd.refgrid_names[irefgrid]);
       sprintf(dstfile, "%s/%s", project_output.datadir, project_inputadd.refgrid_names[irefgrid]);
       mb_copyfile(verbose, srcfile, dstfile, &error);
-      //mb_command command = "";
-      //sprintf(command, "cp %s/%s %s", project_inputadd.datadir, 
-      //      project_inputadd.refgrid_names[irefgrid], project_output.datadir);
-      // fprintf(stderr, "Executing in shell: %s\n", command);
-      ///* int shellstatus = */ system(command);
       strncpy(project_output.refgrid_names[project_output.num_refgrids + irefgrid], 
               project_inputadd.refgrid_names[irefgrid], sizeof(mb_path));
       project_output.refgrid_bounds[0][project_output.num_refgrids + irefgrid] = project_inputadd.refgrid_bounds[0][irefgrid];
@@ -2082,9 +2078,9 @@ int main(int argc, char **argv) {
     }
 
     fprintf(stderr, "\nCopied input add project to output project:\n\t%s\n", project_output_path);
-    fprintf(stderr, "\t%d files\n\t%d crossings\n\t%d ties\n", project_output.num_files, project_output.num_crossings,
-            project_output.num_ties);
-    fprintf(stderr, "\t%d triangle files out of %d sections copied\n", num_tri_copied, num_sections_copied);
+    fprintf(stderr, "\t%d files\n\t%d sections\n\t%d crossings\n\t%d ties\n\t%d triangle files\n", 
+    				project_inputadd.num_files, num_sections_copied, 
+    				project_inputadd.num_crossings, project_inputadd.num_ties, num_tri_copied);
 
     /* update all of the global counters */
     project_output.num_files += project_inputadd.num_files;
@@ -3426,6 +3422,8 @@ int main(int argc, char **argv) {
     case MOD_MODE_UNSET_TIES_ALL:
       fprintf(stderr, "\nCommand unset-ties-all\n");
 
+	  int num_crossings_unset = 0;
+	  int num_ties_unset = 0;
       for (int icrossing = 0; icrossing < project_output.num_crossings; icrossing++) {
         crossing = (struct mbna_crossing *)&project_output.crossings[icrossing];
         if (crossing->num_ties > 0) {
@@ -3433,47 +3431,57 @@ int main(int argc, char **argv) {
           file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
           fprintf(stderr, "Unset tie(s) of crossing:   %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", current_crossing, file1->block,
                   crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2, crossing->section_2);
+	  	  num_crossings_unset ++;
+	  	  num_ties_unset += crossing->num_ties;
           crossing->num_ties = 0;
         }
       }
+      fprintf(stderr, "  %d crossings unset\n", num_crossings_unset);
+      fprintf(stderr, "  %d ties unset\n", num_ties_unset);
       break;
 
     case MOD_MODE_SKIP_UNSET_CROSSINGS:
       fprintf(stderr, "\nCommand skip-unset-crossings\n");
 
+      int num_crossings_skipped = 0;
       for (int icrossing = 0; icrossing < project_output.num_crossings; icrossing++) {
         crossing = (struct mbna_crossing *)&project_output.crossings[icrossing];
         file1 = (struct mbna_file *)&project_output.files[crossing->file_id_1];
         file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
         if (crossing->num_ties == 0) {
           crossing->status = MBNA_CROSSING_STATUS_SKIP;
-          fprintf(stderr, "Set crossing status to skip:   %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", icrossing,
-                  file1->block, crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2,
-                  crossing->section_2);
+          num_crossings_skipped++;
+          //fprintf(stderr, "Set crossing status to skip:   %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", icrossing,
+          //        file1->block, crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2,
+          //        crossing->section_2);
         }
       }
+      fprintf(stderr, "  %d crossings skipped\n", num_crossings_skipped);
       break;
 
     case MOD_MODE_UNSET_SKIPPED_CROSSINGS:
       fprintf(stderr, "\nCommand unset-skipped-crossings\n");
 
+	  num_crossings_unset = 0;
       for (int icrossing = 0; icrossing < project_output.num_crossings; icrossing++) {
         crossing = &(project_output.crossings[icrossing]);
         file1 = (struct mbna_file *)&project_output.files[crossing->file_id_1];
         file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
-        if (crossing->status == MBNA_CROSSING_STATUS_SKIP)
-            crossing->status = MBNA_CROSSING_STATUS_NONE;
-        // TODO(schwehr): itie not set.
-        const int itie = -99999;
-        fprintf(stderr, "Unset skipped crossing:   %d:%d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", icrossing, itie,
-                  file1->block, crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2,
-                  crossing->section_2);
+        if (crossing->status == MBNA_CROSSING_STATUS_SKIP) {
+          crossing->status = MBNA_CROSSING_STATUS_NONE;
+	  	  num_crossings_unset++;
+          // fprintf(stderr, "Unset skipped crossing:   %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", icrossing,
+          //         file1->block, crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2,
+          //         crossing->section_2);
+        }
       }
+      fprintf(stderr, "  %d crossings unset\n", num_crossings_unset);
       break;
 
     case MOD_MODE_UNSET_SKIPPED_CROSSINGS_BLOCK:
       fprintf(stderr, "\nCommand unset-skipped-crossings-by-block=%2.2d/%2.2d\n", mods[imod].survey1, mods[imod].survey2);
 
+	  num_crossings_unset = 0;
       for (int icrossing = 0; icrossing < project_output.num_crossings; icrossing++) {
         crossing = &(project_output.crossings[icrossing]);
         file1 = (struct mbna_file *)&project_output.files[crossing->file_id_1];
@@ -3482,34 +3490,37 @@ int main(int argc, char **argv) {
              project_output.files[crossing->file_id_2].block == mods[imod].survey2) ||
             (project_output.files[crossing->file_id_2].block == mods[imod].survey1 &&
              project_output.files[crossing->file_id_1].block == mods[imod].survey2)) {
-          if (crossing->status == MBNA_CROSSING_STATUS_SKIP)
+          if (crossing->status == MBNA_CROSSING_STATUS_SKIP) {
             crossing->status = MBNA_CROSSING_STATUS_NONE;
-          // TODO(schwehr): itie not set.
-          const int itie = -99999;
-          fprintf(stderr, "Unset skipped crossing:   %d:%d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", icrossing, itie,
-                  file1->block, crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2,
-                  crossing->section_2);
+	  	    num_crossings_unset++;
+          	// fprintf(stderr, "Unset skipped crossing:   %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", icrossing,
+            //       file1->block, crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2,
+            //       crossing->section_2);
+          }
         }
       }
+      fprintf(stderr, "  %d crossings unset\n", num_crossings_unset);
       break;
 
     case MOD_MODE_UNSET_SKIPPED_CROSSINGS_BETWEEN_SURVEYS:
       fprintf(stderr, "\nCommand unset-skipped-crossings-between-surveys\n");
 
-      for (int icrossing = 0; icrossing < project_output.num_crossings; icrossing++) {
+ 	 num_crossings_unset = 0;
+     for (int icrossing = 0; icrossing < project_output.num_crossings; icrossing++) {
         crossing = &(project_output.crossings[icrossing]);
         file1 = (struct mbna_file *)&project_output.files[crossing->file_id_1];
         file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
         if (project_output.files[crossing->file_id_1].block != project_output.files[crossing->file_id_2].block) {
-          if (crossing->status == MBNA_CROSSING_STATUS_SKIP)
+          if (crossing->status == MBNA_CROSSING_STATUS_SKIP) {
             crossing->status = MBNA_CROSSING_STATUS_NONE;
-          // TODO(schwehr): itie not set.
-          const int itie = -99999;
-          fprintf(stderr, "Unset skipped crossing:   %d:%d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", icrossing, itie,
+	  	    num_crossings_unset++;
+            fprintf(stderr, "Unset skipped crossing:   %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", icrossing,
                   file1->block, crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2,
                   crossing->section_2);
+          }
         }
       }
+      fprintf(stderr, "  %d crossings unset\n", num_crossings_unset);
       break;
 
     case MOD_MODE_INSERT_DISCONTINUITY:
@@ -3572,23 +3583,39 @@ int main(int argc, char **argv) {
       break;
 
     case MOD_MODE_REIMPORT_FILE:
-    case MOD_MODE_REIMPORT_ALL_FILES:
-      if (mods[imod].mode == MOD_MODE_REIMPORT_FILE)
-        fprintf(stderr, "\nCommand reimport-file=%2.2d\n", mods[imod].file1);
-      else
-        fprintf(stderr, "\nCommand reimport-all-files\n");
-
-      /* identify the file or files to be reimported */
+      fprintf(stderr, "\nCommand reimport-file=%2.2d\n", mods[imod].file1);
+      status = mbnavadjust_reimport_file(verbose, &project_output, mods[imod].file1, &error);
+      break;
+    
+    case MOD_MODE_REIMPORT_SURVEY:
+      fprintf(stderr, "\nCommand reimport-survey=%2.2d\n", mods[imod].file1);
       for (int ifile = 0; ifile < project_output.num_files; ifile++) {
-        /* either reimport a specific file or all the files */
-        if (mods[imod].mode == MOD_MODE_REIMPORT_ALL_FILES || ifile == mods[imod].file1) {
-          file = &(project_output.files[ifile]);
-
-          /* load and copy the pre-adjusted navigation */
-
-          /* open the processed data and read to the end
-           * using existing section breaks unless and until the
-           * input data extends later in time */
+        struct mbna_file *file = &project_output.files[ifile];
+        if (file->block == mods[imod].file1) {
+		  status = mbnavadjust_reimport_file(verbose, &project_output, ifile, &error);
+		  if (status == MB_SUCCESS) {
+			fprintf(stderr, "Reimported file %d of %d: %s\n", 
+					  ifile, project_output.num_files, project_output.files[ifile].file);
+		  }
+		  else {
+			fprintf(stderr, "**FAILED to reimport file %d of %d: %s\n", 
+					  ifile, project_output.num_files, project_output.files[ifile].file);
+		  }
+	    }
+      }
+      break;
+    
+    case MOD_MODE_REIMPORT_ALL_FILES:
+      fprintf(stderr, "\nCommand reimport-all-files\n");
+      for (int ifile = 0; ifile < project_output.num_files; ifile++) {
+        status = mbnavadjust_reimport_file(verbose, &project_output, ifile, &error);
+        if (status == MB_SUCCESS) {
+          fprintf(stderr, "Reimported file %d of %d: %s\n", 
+          			ifile, project_output.num_files, project_output.files[ifile].file);
+        }
+        else {
+          fprintf(stderr, "**FAILED to reimport file %d of %d: %s\n", 
+          			ifile, project_output.num_files, project_output.files[ifile].file);
         }
       }
       break;
@@ -4383,7 +4410,7 @@ int main(int argc, char **argv) {
   if (project_output_set) {
     status = mbnavadjust_write_project(verbose, &project_output, __FILE__, __LINE__, __FUNCTION__, &error);
     if (status == MB_SUCCESS) {
-      fprintf(stderr, "Output project written:\n\t%s\n", project_output_path);
+      fprintf(stderr, "\nOutput project written:\n\t%s\n", project_output_path);
       fprintf(stderr, "\t%d files\n\t%d crossings\n\t%d ties\n", project_output.num_files, project_output.num_crossings,
               project_output.num_ties);
     }
