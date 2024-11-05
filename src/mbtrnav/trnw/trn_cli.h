@@ -70,19 +70,16 @@
 #include "trnw.h"
 #include "mb1_msg.h"
 #include "msocket.h"
+#include "GeoCon.h"
 
 /////////////////////////
 // Macros
 /////////////////////////
 #define TRNCLI_NBEAMS 25
-
-#ifdef TRN_USE_PROJ
-#define TRNCLI_CRS_DFL "UTM10N"
-#else
 #define UTM_MONTEREY_BAY 10L
 #define UTM_AXIAL        12L
+
 #define TRNCLI_UTM_DFL UTM_MONTEREY_BAY
-#endif
 
 /////////////////////////
 // Type Definitions
@@ -90,12 +87,9 @@
 
 typedef struct trncli_s{
     msock_connection_t *trn;
-#ifdef TRN_USE_PROJ
-	void *pjptr;
-#else
     long int utm_zone;
-#endif
     wmeast_t *measurement;
+    wgeocon_t *geocon;
 }trncli_t;
 
 /////////////////////////
@@ -105,12 +99,8 @@ typedef struct trncli_s{
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#ifdef TRN_USE_PROJ
-    trncli_t *trncli_new(void *pjptr);
-#else
     trncli_t *trncli_new(long int utm_zone);
-#endif
+    trncli_t *trncli_gcnew(wgeocon_t *gcon);
     void trncli_destroy(trncli_t **pself);
     int trncli_connect(trncli_t *self, char *host, int port);
     int trncli_disconnect(trncli_t *self);
@@ -130,11 +120,7 @@ extern "C" {
     int trncli_ptype_set(trncli_t *self, int msg_type, int param);
 
     // Conversion helper functions
-#ifdef TRN_USE_PROJ
-    int trncli_mb1_to_meas(wmeast_t **dest, mb1_t *src, void *pjptr);
-#else
-    int trncli_mb1_to_meas(wmeast_t **dest, mb1_t *src, long int utmZone);
-#endif
+//    int trncli_mb1_to_meas(wmeast_t **dest, mb1_t *src, long int utmZone);
     int trncli_cdata_to_pose(wposet_t **dest, pt_cdata_t *src);
     int trncli_cdata_to_meas(wmeast_t **dest, mt_cdata_t *src);
 
@@ -174,13 +160,8 @@ extern "C" {
     int trncli_set_vdr(trncli_t *self, int value);
     // set filter gradient
     int trncli_set_filter_gradient(trncli_t *self, int value);
-#ifdef TRN_USE_PROJ
-    // set CRS
-    int trncli_set_crs(trncli_t *self, void *pjptr);
-#else
     // set UTM zone
     int trncli_set_utm(trncli_t *self, long int utm_zone);
-#endif
     // get init xyz (reinit variance bounds)
     int trncli_get_init_stddev_xyz(trncli_t *self, d_triplet_t *dest);
     // set init xyz (reinit variance bounds)

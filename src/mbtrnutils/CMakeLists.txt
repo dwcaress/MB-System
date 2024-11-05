@@ -50,7 +50,7 @@ target_include_directories(mbtrnpp PRIVATE ${NetCDF_INCLUDE_DIRS} ${libPROJ_INCL
 										${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
 										${CMAKE_SOURCE_DIR}/src/mbtrn/mb1r )
 target_compile_definitions(mbtrnpp PRIVATE WITH_MBTNAV)
-target_link_libraries(mbtrnpp PRIVATE mbio mbaux trnw qnx newmat tnav geolib netif r7kr mb1r qnx mbtrnframe NetCDF::NetCDF LibPROJ::LibPROJ )
+target_link_libraries(mbtrnpp PRIVATE mbio mbaux trnw qnx newmat tnav geolib netif r7kr mb1r qnx mbtrnframe geocon NetCDF::NetCDF LibPROJ::LibPROJ )
 
 #------------------------------------------------------------------------------
 

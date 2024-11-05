@@ -146,7 +146,6 @@ void transform_dvl(trn::bath_info *bi, trn::att_info *ai, dvlgeo *geo, mb1_t *r_
 int cb_proto_dvl(void *pargs)
 {
     int retval=-1;
-    static uint32_t ping_number = 0;
 
     TRN_NDPRINT(3, "%s:%d >>> Callback triggered <<<\n", __func__, __LINE__);
 
@@ -170,8 +169,6 @@ int cb_proto_dvl(void *pargs)
 
         TRN_NDPRINT(TRNDL_PLUGOIDVL, "%s:%d processing ctx[%s]\n", __func__, __LINE__, ctx->ctx_key().c_str());
 
-        int err_count = 0;
-
         std::string *bkey[1] = {ctx->bath_input_chan(0)};
         std::string *nkey = ctx->nav_input_chan(0);
         std::string *akey[1] = {ctx->att_input_chan(0)};
@@ -180,7 +177,6 @@ int cb_proto_dvl(void *pargs)
         if(bkey[0] == nullptr || nkey == nullptr || akey[0] == nullptr || vkey == nullptr)
         {
             TRN_NDPRINT(TRNDL_PLUGOIDVL, "%s:%d WARN - NULL input key\n", __func__, __LINE__);
-            err_count++;
             continue;
         }
 
@@ -192,7 +188,6 @@ int cb_proto_dvl(void *pargs)
         if(bi == nullptr || ni == nullptr || ai == nullptr || vi == nullptr)
         {
             fprintf(stderr,"%s:%d WARN - NULL info instance\n", __func__, __LINE__);
-            err_count++;
         }
 
 
@@ -216,9 +211,9 @@ int cb_proto_dvl(void *pargs)
 
 
             // construct poseT/measT TRN inputs
-
-            poseT *pt = trnx_utils::mb1_to_pose(snd, ai, (long)ctx->utm_zone());
-            measT *mt = trnx_utils::mb1_to_meas(snd, ai, trn_type, (long)ctx->utm_zone());
+            GeoCon gcon(ctx->utm_zone());
+            poseT *pt = trnx_utils::mb1_to_pose(snd, ai, NULL, &gcon);
+            measT *mt = trnx_utils::mb1_to_meas(snd, ai, trn_type, &gcon);
 
             // publish update TRN, publish estimate to TRN, LCM
             ctx->pub_trn(nav_time, pt, mt, trn_type, xpp->pub_list(), cfg);
@@ -250,8 +245,6 @@ int cb_proto_dvl(void *pargs)
         if(vi != nullptr)
             delete vi;
     }
-
-    ping_number++;
 
     return retval;
 }

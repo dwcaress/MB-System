@@ -190,8 +190,6 @@ int cb_proto_mblass(void *pargs)
 
         TRN_NDPRINT(5, "%s:%d processing ctx[%s]\n", __func__, __LINE__, ctx->ctx_key().c_str());
 
-        int err_count = 0;
-
         std::string *bkey[2] = {ctx->bath_input_chan(0), ctx->bath_input_chan(1)};
         std::string *nkey = ctx->nav_input_chan(0);
         std::string *akey[2] = {ctx->att_input_chan(0), ctx->att_input_chan(1)};
@@ -208,7 +206,6 @@ int cb_proto_mblass(void *pargs)
             ss << (akey[1]==nullptr ? " akey[1]" : "");
             ss << (nkey==nullptr ? " nkey" : "");
             TRN_NDPRINT(5, "%s:%d WARN - NULL input key: %s\n", __func__, __LINE__, ss.str().c_str());
-            err_count++;
             continue;
         }
 
@@ -229,7 +226,6 @@ int cb_proto_mblass(void *pargs)
             ss << (ni==nullptr ? " ni" : "");
             ss << (vi==nullptr ? " vi" : "");
             TRN_NDPRINT(5, "%s:%d WARN - NULL info instance: %s\n", __func__, __LINE__, ss.str().c_str());
-            err_count++;
         }
 
         if(bkey[0] != nullptr && bi[0] != nullptr)
@@ -297,8 +293,9 @@ int cb_proto_mblass(void *pargs)
                 if(ctx->trncli_count() > 0){
 
                     // publish poseT/measT to trn-server
-                    poseT *pt = trnx_utils::mb1_to_pose(snd, ai[0], (long)ctx->utm_zone());
-                    measT *mt = trnx_utils::mb1_to_meas(snd, ai[0], trn_type[1], (long)ctx->utm_zone());
+                    GeoCon gcon(ctx->utm_zone());
+                    poseT *pt = trnx_utils::mb1_to_pose(snd, ai[0], NULL, &gcon);
+                    measT *mt = trnx_utils::mb1_to_meas(snd, ai[0], trn_type[1], &gcon);
 
                     if(pt != nullptr && mt != nullptr){
 
