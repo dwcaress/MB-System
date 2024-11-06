@@ -330,6 +330,15 @@ GeoCon::GeoCon(const char *tcrs)
 {
     std::cerr << __func__ << ": ERR proj not supported; build using -DTRN_USE_PROJ" << std::endl;
 }
+GeoCon::GeoCon(void *xfm, bool autodel, const char *tcrs, const char *scrs)
+{
+    std::cerr << __func__ << ": ERR proj not supported; build using -DTRN_USE_PROJ" << std::endl;
+}
+
+GeoCon::GeoCon(void *xfm, bool autodel)
+{
+    std::cerr << __func__ << ": ERR proj not supported; build using -DTRN_USE_PROJ" << std::endl;
+}
 #endif
 
 GeoCon::~GeoCon()
