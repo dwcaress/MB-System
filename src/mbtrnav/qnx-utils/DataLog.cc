@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <sys/stat.h>
 
 #if !defined(__APPLE__)

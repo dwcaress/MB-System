@@ -806,7 +806,7 @@ void process_stereopair(int verbose, struct mbpg_process_struct *process,
         }
 
         /* apply stereo calibration to rectify the images */
-        Mat img1g, img2g, img1r, img2r;
+        Mat img1r, img2r, img1g, img2g, img1gc, img2gc;
         Mat disp, dispf, disp8;
         remap(img1, img1r, control->map11, control->map12, INTER_LINEAR);
         remap(img2, img2r, control->map21, control->map22, INTER_LINEAR);
@@ -823,15 +823,29 @@ void process_stereopair(int verbose, struct mbpg_process_struct *process,
         /* Convert images to CV_8UC1 format */
         cvtColor(img1, img1g, COLOR_BGR2GRAY);
         cvtColor(img2, img2g, COLOR_BGR2GRAY);
-
+        
+        /* apply CLAHE filter */
+ 		cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE();
+		clahe->setClipLimit(10.0); // Default is 40.0
+		clahe->setTilesGridSize(cv::Size(8, 8)); // Default is 8x8
+		clahe->apply(img1g, img1gc);
+		clahe->apply(img2g, img2gc);
+		
+		//imwrite("TestImage-R-Raw.jpg", img1);
+		//imwrite("TestImage-R-Gray.jpg", img1g);
+		//imwrite("TestImage-R-CLAHE.jpg", img1gc);
+		//imwrite("TestImage-L-Raw.jpg", img2);
+		//imwrite("TestImage-L-Gray.jpg", img2g);
+		//imwrite("TestImage-L-CLAHE.jpg", img2gc);
+    
         /* do the photogrammetery */
         if (control->algorithm == STEREO_BM) {
-            control->bm->compute(img1g, img2g, disp);
+            control->bm->compute(img1gc, img2gc, disp);
             disp.convertTo(disp8, CV_8U, 255/(control->numberOfDisparities*16.));
             disp.convertTo(dispf, CV_32FC1, 1/16.0, 0);
         }
         else if (control->algorithm == STEREO_SGBM || control->algorithm == STEREO_HH) {
-            control->sgbm->compute(img1g, img2g, disp);
+            control->sgbm->compute(img1gc, img2gc, disp);
             disp.convertTo(disp8, CV_8U, 255/(control->numberOfDisparities*16.));
             disp.convertTo(dispf, CV_32FC1, 1/16.0, 0);
         }
