@@ -288,7 +288,12 @@ int mbr_mbpronav_rd_data(int verbose, void *mbio_ptr, int *error) {
 		data->time_i[5] = (int)sec;
 		data->time_i[6] = 1000000.0 * (sec - data->time_i[5]);
 		if (nread >= 9) {
-			mb_get_time(verbose, data->time_i, &data->time_d);
+			if (data->time_i[0] > 1962 && data->time_i[0] < 2062)
+				mb_get_time(verbose, data->time_i, &data->time_d);
+			else {
+				data->time_d = d1;
+				mb_get_date(verbose, data->time_d, data->time_i);
+				}
 			data->longitude = d2;
 			data->latitude = d3;
 			data->heading = 0.0;

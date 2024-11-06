@@ -37,8 +37,8 @@
 #include <stdint.h>
 
 /* Define version and date for this release */
-#define MB_VERSION "5.8.2beta15"
-#define MB_VERSION_DATE "1 October 2024"
+#define MB_VERSION "5.8.2beta16"
+#define MB_VERSION_DATE "6 November 2024"
 
 /* CMake supports current OS's and so there is only one form of RPC and XDR and no mb_config.h file */
 #ifdef CMAKE_BUILD_SYSTEM

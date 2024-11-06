@@ -1563,16 +1563,19 @@ if (!$outputoff)
 		print MFILE "endDepth         = ASCENDENDDEPTH; \r\n";
 		print MFILE "} \r\n";
 		print "Behavior: ascend\r\n";
-		print MFILE "behavior edgetech \r\n";
-		print MFILE "{ \r\n";
-		$behavior_id = $BEHAVIOR_edgetech + 0 * $behavior_count;
-		$behavior_count = $behavior_count + 1;
-		print MFILE "id     = $behavior_id; \r\n";
-		print MFILE "duration  = RESON_DURATION; \r\n";
-		print MFILE "SBP_Mode  = 0; \r\n";
-		print MFILE "LoSS_Mode = 0; \r\n";
-		print MFILE "HiSS_Mode = 0; \r\n";
-		print MFILE "} \r\n";
+		if (($subbottom && $mstartstops[$i] == 2) || ($subbottom && $mstartstops[$i] == 1) || $sidescanlo || $sidescanhi)
+          {
+		  print MFILE "behavior edgetech \r\n";
+		  print MFILE "{ \r\n";
+		  $behavior_id = $BEHAVIOR_edgetech + 0 * $behavior_count;
+		  $behavior_count = $behavior_count + 1;
+		  print MFILE "id     = $behavior_id; \r\n";
+		  print MFILE "duration  = RESON_DURATION; \r\n";
+		  print MFILE "SBP_Mode  = 0; \r\n";
+		  print MFILE "LoSS_Mode = 0; \r\n";
+		  print MFILE "HiSS_Mode = 0; \r\n";
+		  print MFILE "} \r\n";
+		  }
 		print MFILE "behavior reson \r\n";
 		print MFILE "{ \r\n";
 		$behavior_id = $BEHAVIOR_reson + 0 * $behavior_count;

@@ -22,6 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.2beta16    November 5, 2024
 - Version 5.8.2beta15    October 1, 2024
 - Version 5.8.2beta14    September 6, 2024
 - Version 5.8.2beta13    August 23, 2024
@@ -48,7 +49,24 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 ---
 
-#### 5.8.2beta15 (October 1, 2024)
+#### 5.8.2beta16 (November 5, 2024)
+
+Mbm_route2mission: Change so that no edgetech behaviors are output to the mission script
+if no sidescan or subbottom is enabled.
+
+Format MBF_MBPRONAV (165): code changed so that if a file has records in which the date
+fields (yyyy mm dd hh mm ss.ssssss) are all zero, then on reading the data will be set
+using the value in the time_d (epoch time in seconds) field.
+
+Mbauvloglist: Fixed bug that caused occasional crashes.
+
+Mbphotogrammetry: Now applies CLAHE equalization to images before calculating disparity map.
+
+Libtrnav (src/mbtrnav/): Many fixes by Kent Headley, including casting the code to use
+Proj for geodetic transformations when used as part of MB-System while still allowing
+use of the old GCTP library when used in other contexts lacking Proj.
+
+### 5.8.2beta15 (October 1, 2024)
 
 Mbmakeplatform: Fixed problems with handling sensor add and sensor modify modes.
 

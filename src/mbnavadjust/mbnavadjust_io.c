@@ -6373,6 +6373,7 @@ int mbnavadjust_reference_load(int verbose, struct mbna_project *project, int re
       }
     }
   }
+  fprintf(stderr, "Reference grid load status:%d\n", project->refgrid_status);
 
   if (project->refgrid_status == MBNA_REFGRID_LOADED){
 
@@ -6413,6 +6414,7 @@ int mbnavadjust_reference_load(int verbose, struct mbna_project *project, int re
     double dy1 = (section->latmax - section->latmin) / MBNA_MASK_DIM;
     bool first = true;
     memset(section->coverage, 0, MBNA_MASK_DIM * MBNA_MASK_DIM * sizeof(int));
+    fprintf(stderr, "Extracting relevant piece from reference grid\n");
     for (int i = imin; i <= imax; i++) {
       for (int j = jmin; j <= jmax; j++) {
         int k = i * project->refgrid.ny + j;
@@ -6453,6 +6455,7 @@ int mbnavadjust_reference_load(int verbose, struct mbna_project *project, int re
     section->contoursuptodate = false;
     section->status = MBNA_CROSSING_STATUS_NONE;
     memset(&section->globaltie, 0, sizeof(struct mbna_globaltie));
+    fprintf(stderr, "Done extracting relevant piece from reference grid\n");
 
     /* initialize contour controls */
     const double tick_len_map = MAX(section->lonmax - section->lonmin, section->latmax - section->latmin) / 500;
@@ -6460,6 +6463,7 @@ int mbnavadjust_reference_load(int verbose, struct mbna_project *project, int re
     const int contour_ncolor = 10;
     int contour_algorithm = MB_CONTOUR_TRIANGLES; /* not MB_CONTOUR_OLD;*/
 
+    fprintf(stderr, "Contouring piece from reference grid\n");
     status = mb_contour_init(verbose, (struct swath **)swath_ptr,
                               section->num_pings, section->num_beams, MB_CONTOUR_TRIANGLES,
                               true, false, false, false, false, project->cont_int,
@@ -6471,6 +6475,7 @@ int mbnavadjust_reference_load(int verbose, struct mbna_project *project, int re
                               project->mbnavadjust_setline, project->mbnavadjust_justify_string,
                               project->mbnavadjust_plot_string,
                               error);
+    fprintf(stderr, "Done contouring piece from reference grid\n");
     if (*error != MB_ERROR_NO_ERROR) {
       char *error_message;
       mb_error(verbose, *error, &error_message);

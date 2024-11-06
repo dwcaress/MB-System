@@ -952,8 +952,12 @@ int main(int argc, char **argv) {
             if (strcmp(fields[ii].name, "time") == 0)
               mb_get_binary_double(true, &buffer[fields[ii].index], &time_d);
           }
-          if (time_d < nav_time_d[1] || time_d > nav_time_d[nav_num-2])
+          if (nav_num < 2) {
+          	output_ok = false;
+          }
+          else if (time_d < nav_time_d[1] || time_d > nav_time_d[nav_num-2]) {
             output_ok = false;
+          }
         }
 
         /* calculate timeInterval */
