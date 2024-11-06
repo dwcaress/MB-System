@@ -15,15 +15,14 @@
 /****************************************************************************/
 #include <stdlib.h>
 #include <unistd.h>
-#include <stdlib.h>
-#include <stdint.h>
 #include <sys/stat.h>
+#include <stdint.h>
+#include <string.h>
 
 #if !defined(__APPLE__)
 #include <malloc.h>
 #endif
 
-#include <string.h>
 #include "DataLog.h"
 #include "ourTypes.h"
 #include "Exception.h"

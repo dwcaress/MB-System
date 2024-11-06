@@ -41,7 +41,7 @@
 #include "trn_debug.hpp"
 #include "geo_cfg.hpp"
 #include "NavUtils.h"
-#include "GeoCon.h"
+#include "GeoCon.hpp"
 
 // /////////////////
 // Macros
