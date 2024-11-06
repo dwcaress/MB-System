@@ -13,7 +13,7 @@ OPT_TRN_BUILD=-DLIBTRN_BUILD=$(build_date)
 mb1rs_ver ?=0.0.0b1
 OPT_MB1RS_VER=-DMB1RS_VER=$(mb1rs_ver)
 OPT_MB1RS_BUILD=-DMB1RS_BUILD=$(build_date)
-OPT_USE_PROJ=-DTRN_USE_PROJ
+OPT_USE_PROJ= #-DTRN_USE_PROJ
 
 # C standard e.g. -std=c99 -std=gnu99
 # may be needed for Cygwin (e.g. for loop declare/init)
@@ -119,8 +119,8 @@ LIB_PATHS = -L$(OUTPUT_DIR) -L$(MFRAME_LIB_DIR) -L$(PROJ_LIB_DIR) $(OS_LIB_PATH)
 ########################################
 # Target Definitions
 
-# libgcon: Geoconversion wrapper for NavUtils/GCTP, PROJ
-LIBGCON=libgcon.a
+# libgeocon: Geoconversion wrapper for NavUtils/GCTP, PROJ
+LIBGCON=libgeocon.a
 LIBGCON_SRC = GeoCon.cpp
 LIBGCON_OBJ=$(LIBGCON_SRC:%.cpp=$(BUILD_DIR)/%.o)
 LIBGCON_LIBS = -lqnx $(PROJ_LIB)
@@ -169,7 +169,7 @@ LIBTRNCLI_LIBS = -lmframe -lpthread -lm
 TRNCLI_TEST=trncli-test
 TRNCLI_TEST_SRC=trncli_test.c mb1_msg.c
 TRNCLI_TEST_OBJ=$(TRNCLI_TEST_SRC:%.c=$(BUILD_DIR)/%.o)
-TRNCLI_TEST_LIBS = -lmframe -ltrnw -lpthread -lm -lqnx -lnewmat -ltrn -ltrncli -lgcon -lnetcdf -lgeolib $(PROJ_LIB) -lstdc++
+TRNCLI_TEST_LIBS = -lmframe -ltrnw -lpthread -lm -lqnx -lnewmat -ltrn -ltrncli -lgeocon -lnetcdf -lgeolib $(PROJ_LIB) -lstdc++
 
 # libtrnucli: TRNU client lib
 LIBTRNUCLI=libtrnucli.a
@@ -222,7 +222,7 @@ MMCSUB_LIBS = $(MFRAME_LIB) -lmframe -lm -lstdc++
 TRNIF_TEST=trnif-test
 TRNIF_TEST_SRC=trnif_test.c trnif_proto.c trnif_msg.c
 TRNIF_TEST_OBJ = $(TRNIF_TEST_SRC:%.c=$(BUILD_DIR)/%.o)
-TRNIF_TEST_LIBS = -lnetif -lmframe -ltrnw -lpthread -lm -lqnx -lnewmat -ltrn -lnetcdf -lgeolib -lgcon $(PROJ_LIB) -lstdc++
+TRNIF_TEST_LIBS = -lnetif -lmframe -ltrnw -lpthread -lm -lqnx -lnewmat -ltrn -lnetcdf -lgeolib -lgeocon $(PROJ_LIB) -lstdc++
 
 MB1RS=mb1rs
 MB1RS_SRC=mb1_msg.c mb1rs.c mb1rs-app.c

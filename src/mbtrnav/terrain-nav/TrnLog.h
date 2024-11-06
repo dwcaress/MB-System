@@ -7,19 +7,19 @@
 //
 ////////////////////////////////////////////////////////////////////////////////////
 //
-
-#ifndef TRNLOG_H
-#define TRNLOG_H
-
-#define TRNLOG_NAME_DFL  "TrnIO"
-#define TRNLOG_MNEM_NAME_DFL "trn"
-
+#include <stdint.h>
 #include "DataLogWriter.h"
 #include "IntegerData.h"
 #include "DoubleData.h"
 #include "ShortData.h"
 #include "TimeTag.h"
 #include "structDefs.h"
+
+#ifndef TRNLOG_H
+#define TRNLOG_H
+
+#define TRNLOG_NAME_DFL  "TrnIO"
+#define TRNLOG_MNEM_NAME_DFL "trn"
 
 #define TRN_MAX_BEAMS_DFL TRN_MAX_BEAMS
 // size of record ID

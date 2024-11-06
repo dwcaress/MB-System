@@ -148,7 +148,7 @@ TRNXPP=trnxpp
 TRNXPP_SRC= trnxpp_app.cpp
 TRNXPP_HPP= trnxpp.hpp
 TRNXPP_OBJ = $(TRNXPP_SRC:%.cpp=$(BUILD_DIR)/%.o)
-TRNXPP_LIBS =  -llcm -lstdc++ -lmb1 -ltrncli -ltrn  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeolib -ludpms $(OS_LIBS) -ltrnxplug
+TRNXPP_LIBS =  -llcm -lstdc++ -lmb1 -ltrncli -ltrn  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeocon -lgeolib  -ludpms $(OS_LIBS) -ltrnxplug
 
 FVTEST=fv-test
 FVTEST_SRC = flag_var_test.cpp
@@ -164,7 +164,7 @@ LIBUDPMS_LIBS=
 LIBTRNXPLUG = libtrnxplug.a
 LIBTRNXPLUG_SRC = plug-common.cpp plug-idtlass.cpp plug-oisledx.cpp plug-dvl.cpp plug-idt.cpp  plug-oisled.cpp plug-oisled2.cpp plug-lassmb.cpp plug-xmb1.cpp
 LIBTRNXPLUG_OBJ = $(LIBTRNXPLUG_SRC:%.cpp=$(BUILD_DIR)/%.o)
-LIBTRNXPLUG_LIBS = -lnewmat -lgeolib -ltrnw -lqnx -lmb1 -ltrn -ludpms -ltrncli -lnetcdf -llcm
+LIBTRNXPLUG_LIBS = -lnewmat -lgeocon  -lgeolib -ltrnw -lqnx -lmb1 -ltrn -ludpms -ltrncli -lnetcdf -llcm
 
 ########################################
 # Build Files (mostly for cleanup)
