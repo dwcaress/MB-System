@@ -22,7 +22,8 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
-- Version 5.8.2beta16    November 5, 2024
+- Version 5.8.2beta17    November 7, 2024
+- Version 5.8.2beta16    November 6, 2024
 - Version 5.8.2beta15    October 1, 2024
 - Version 5.8.2beta14    September 6, 2024
 - Version 5.8.2beta13    August 23, 2024
@@ -49,7 +50,11 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 ---
 
-#### 5.8.2beta16 (November 5, 2024)
+#### 5.8.2beta16 (November 7, 2024)
+
+Libtrnav (src/mbtrnav/): Additional fixes by Kent Headley to enable building on Ubuntu 24.
+
+#### 5.8.2beta16 (November 6, 2024)
 
 Mbm_route2mission: Change so that no edgetech behaviors are output to the mission script
 if no sidescan or subbottom is enabled.
