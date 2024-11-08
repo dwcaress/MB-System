@@ -16,4 +16,3 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           folder: qt-documentation/html
           config_file: qt-documentation/doxyfile
-          target_folder: doxyOutput	  
