@@ -1,4 +1,4 @@
-name: Doxygen GitHub Pages Deploy Action
+name: Doxygen GitHub Pages Deploy Action for MB-System
 
 on:
   push:
