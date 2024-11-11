@@ -145,6 +145,7 @@ add_library(geolib
 
 target_compile_options(geolib PRIVATE
 "-Wno-deprecated-non-prototype"
+"-Wno-unused-result"
 )
 
 #
