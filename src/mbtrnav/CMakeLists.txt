@@ -142,6 +142,11 @@ add_library(geolib
        gctp/source/sphdz.c
        gctp/source/br_gctp.c
 )
+
+target_compile_options(geolib PRIVATE
+"-Wno-deprecated-non-prototype"
+)
+
 #
 #------------------------------------------------------------------------------
 #
