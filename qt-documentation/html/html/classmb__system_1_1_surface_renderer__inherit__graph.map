@@ -1,0 +1,4 @@
+<map id="mb_system::SurfaceRenderer" name="mb_system::SurfaceRenderer">
+<area shape="rect" id="node1" title="SurfaceRenderer invokes OpenGL api functions to initialize drawing and buffers, set up shaders,..." alt="" coords="5,80,220,107"/>
+<area shape="rect" id="node2" title=" " alt="" coords="75,5,150,32"/>
+</map>

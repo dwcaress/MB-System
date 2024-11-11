@@ -1,0 +1,12 @@
+<map id="mb_system::MBQuickView" name="mb_system::MBQuickView">
+<area shape="rect" id="node1" title="MBQuickView connects GUI thread with render thread by responding to signals emitted by QML renderer,..." alt="" coords="107,184,303,211"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,95,107,121"/>
+<area shape="rect" id="node3" href="$classmb__system_1_1_surface_renderer.html" title="SurfaceRenderer invokes OpenGL api functions to initialize drawing and buffers, set up shaders,..." alt="" coords="313,95,527,121"/>
+<area shape="rect" id="node6" href="$classmb__system_1_1_m_b_quick_item.html" title="MBQuickItem connects GUI thread with render thread by responding to signals emitted by QML renderer." alt="" coords="395,184,589,211"/>
+<area shape="rect" id="node4" title=" " alt="" coords="247,5,321,32"/>
+<area shape="rect" id="node10" href="$classmb__system_1_1_camera.html" title="Camera holds viewpoint properties relative to viewed surface." alt="" coords="131,95,288,121"/>
+<area shape="rect" id="node5" href="$classmb__system_1_1_surface.html" title="Surface represents a surface as vertices, normals, and triangle&#45;drawing indices." alt="" coords="381,5,536,32"/>
+<area shape="rect" id="node8" href="$classmb__system_1_1_gmt_grid_surface.html" title="GMTGridSurface represents a 3D surface based on contents of a MB&#45;System GMT grid file." alt="" coords="552,95,763,121"/>
+<area shape="rect" id="node7" title=" " alt="" coords="787,95,885,121"/>
+<area shape="rect" id="node9" href="$classmb__system_1_1_color_map.html" title="ColorMap maps data value to red, green and blue values according to a provided color scale,..." alt="" coords="573,5,741,32"/>
+</map>

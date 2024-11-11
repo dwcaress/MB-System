@@ -1,0 +1,6 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" title=" " alt="" coords="5,56,208,83"/>
+<area shape="rect" id="node2" href="$classmb__system_1_1_gmt_grid_reader.html" title="GmtGridReader reads data stored in a GMT grid file (NetCDF format), and outputs the data into a vtkPo..." alt="" coords="257,5,464,32"/>
+<area shape="rect" id="node3" href="$classmb__system_1_1_swath_reader.html" title="SwathReader reads raw data stored in a file format that is supported by MB&#45;System,..." alt="" coords="265,56,457,83"/>
+<area shape="rect" id="node4" href="$classmb__system_1_1_topo_grid_reader.html" title="TopoGridReader reads topgraphy/bathymetry data from a file, which can be a GMT grid file or a swath f..." alt="" coords="256,107,465,133"/>
+</map>

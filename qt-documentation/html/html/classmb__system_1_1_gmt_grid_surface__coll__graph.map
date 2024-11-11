@@ -1,0 +1,5 @@
+<map id="mb_system::GmtGridSurface" name="mb_system::GmtGridSurface">
+<area shape="rect" id="node1" title="GMTGridSurface represents a 3D surface based on contents of a MB&#45;System GMT grid file." alt="" coords="69,95,280,121"/>
+<area shape="rect" id="node2" href="$classmb__system_1_1_surface.html" title="Surface represents a surface as vertices, normals, and triangle&#45;drawing indices." alt="" coords="5,5,160,32"/>
+<area shape="rect" id="node3" href="$classmb__system_1_1_color_map.html" title="ColorMap maps data value to red, green and blue values according to a provided color scale,..." alt="" coords="184,5,352,32"/>
+</map>

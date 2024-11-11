@@ -1,0 +1,4 @@
+<map id="mbsys_kmbes_xms" name="mbsys_kmbes_xms">
+<area shape="rect" id="node1" title="XMS, // MB&#45;System multibeam pseudosidescan derived from multibeam backscatter (MB&#45;System only)" alt="" coords="14,95,165,121"/>
+<area shape="rect" id="node2" href="$structmbsys__kmbes__header.html" title="General datagram header." alt="" coords="5,5,173,32"/>
+</map>
