@@ -14,5 +14,5 @@ jobs:
       - uses: DenverCoder1/doxygen-github-pages-action@v2.0.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          folder: qt-documentation/html
+          folder: qt-documentation
           config_file: qt-documentation/doxyfile
