@@ -15,7 +15,7 @@ vtkStandardNewMacro(TopoGridItem::Pipeline);
 TopoGridItem::TopoGridItem() {
   gridFilename_ = strdup("");
   verticalExagg_ = 1.;
-  plotAxes_ = false;
+  showAxes_ = false;
   scheme_ = TopoColorMap::Haxby;
 }
 
@@ -234,7 +234,7 @@ void TopoGridItem::assemblePipeline(TopoGridItem::Pipeline *pipeline) {
 				     GetData());
   
 
-  if (plotAxes_) {
+  if (showAxes_) {
     // Set up axes
     setupAxes(pipeline->axesActor_,
 	      pipeline->colors_,
@@ -281,7 +281,7 @@ bool TopoGridItem::setColormap(QString name) {
 
 void TopoGridItem::showAxes(bool plotAxes) {
   qDebug() << "showAxes(): " << plotAxes;
-  plotAxes_ = plotAxes;
+  showAxes_ = plotAxes;
 
   reassemblePipeline();
 
