@@ -1,0 +1,11 @@
+<map id="mbsys_simrad2_struct" name="mbsys_simrad2_struct">
+<area shape="rect" id="node1" title=" " alt="" coords="684,209,853,235"/>
+<area shape="rect" id="node2" href="$structmbsys__simrad2__ping__struct.html" title=" " alt="" coords="322,5,482,47"/>
+<area shape="rect" id="node3" href="$structmbsys__simrad2__tilt__struct.html" title=" " alt="" coords="327,71,477,112"/>
+<area shape="rect" id="node4" href="$structmbsys__simrad2__heading__struct.html" title=" " alt="" coords="310,136,494,177"/>
+<area shape="rect" id="node5" href="$structmbsys__simrad2__watercolumn__struct.html" title=" " alt="" coords="293,201,511,243"/>
+<area shape="rect" id="node6" href="$structmbsys__simrad2__wcbeam__struct.html" title=" " alt="" coords="5,201,192,243"/>
+<area shape="rect" id="node7" href="$structmbsys__simrad2__ssv__struct.html" title=" " alt="" coords="303,267,501,294"/>
+<area shape="rect" id="node8" href="$structmbsys__simrad2__extraparameters__struct.html" title=" " alt="" coords="281,319,523,360"/>
+<area shape="rect" id="node9" href="$structmbsys__simrad2__attitude__struct.html" title=" " alt="" coords="311,384,493,425"/>
+</map>

@@ -1,0 +1,24 @@
+<map id="mbsys_jstar_struct" name="mbsys_jstar_struct">
+<area shape="rect" id="node1" title=" " alt="" coords="677,622,823,649"/>
+<area shape="rect" id="node2" href="$structmbsys__jstar__pressure__struct.html" title=" " alt="" coords="349,525,513,567"/>
+<area shape="rect" id="node3" href="$structmbsys__jstar__header__struct.html" title=" " alt="" coords="24,269,177,311"/>
+<area shape="rect" id="node7" href="$structmbsys__jstar__situation2__struct.html" title=" " alt="" coords="345,395,518,436"/>
+<area shape="rect" id="node8" href="$structmbsys__jstar__cable__struct.html" title=" " alt="" coords="338,78,525,105"/>
+<area shape="rect" id="node9" href="$structmbsys__jstar__pipe__struct.html" title=" " alt="" coords="341,143,521,170"/>
+<area shape="rect" id="node10" href="$structmbsys__jstar__filetimestamp__struct.html" title=" " alt="" coords="331,591,531,632"/>
+<area shape="rect" id="node11" href="$structmbsys__jstar__sysinfo__struct.html" title=" " alt="" coords="354,460,509,501"/>
+<area shape="rect" id="node13" href="$structmbsys__jstar__dvl__struct.html" title=" " alt="" coords="345,722,517,749"/>
+<area shape="rect" id="node14" href="$structmbsys__jstar__pitchroll__struct.html" title=" " alt="" coords="351,656,512,697"/>
+<area shape="rect" id="node18" href="$structmbsys__jstar__container__struct.html" title=" " alt="" coords="347,5,516,47"/>
+<area shape="rect" id="node21" href="$structmbsys__jstar__situation__struct.html" title=" " alt="" coords="349,224,514,265"/>
+<area shape="rect" id="node22" href="$structmbsys__jstar__nmea__struct.html" title=" " alt="" coords="337,322,526,349"/>
+<area shape="rect" id="node4" href="$structmbsys__jstar__message__struct.html" title=" " alt="" coords="17,632,184,673"/>
+<area shape="rect" id="node19" href="$structmbsys__jstar__channel__struct.html" title=" " alt="" coords="352,773,511,815"/>
+<area shape="rect" id="node20" href="$structmbsys__jstar__comment__struct.html" title=" " alt="" coords="346,839,517,880"/>
+<area shape="rect" id="node5" href="$structmbsys__jstar__attitudebathy__struct.html" title=" " alt="" coords="333,1100,529,1141"/>
+<area shape="rect" id="node6" href="$structmbsys__jstar__headerbathy__struct.html" title=" " alt="" coords="5,1040,196,1081"/>
+<area shape="rect" id="node12" href="$structmbsys__jstar__pressurebathy__struct.html" title=" " alt="" coords="331,1165,532,1207"/>
+<area shape="rect" id="node15" href="$structmbsys__jstar__statusbathy__struct.html" title=" " alt="" coords="339,904,524,945"/>
+<area shape="rect" id="node16" href="$structmbsys__jstar__altitudebathy__struct.html" title=" " alt="" coords="334,969,529,1011"/>
+<area shape="rect" id="node17" href="$structmbsys__jstar__positionbathy__struct.html" title=" " alt="" coords="333,1035,530,1076"/>
+</map>

@@ -1,0 +1,4 @@
+<map id="mb_system::DataPointsOverlay" name="mb_system::DataPointsOverlay">
+<area shape="rect" id="node1" title="DataPointsOverlay consists of individual points that can be overlaid on a map." alt="" coords="5,5,233,32"/>
+<area shape="rect" id="node2" href="$classmb__system_1_1_route.html" title="Define a route, which consists of individual points." alt="" coords="47,80,191,107"/>
+</map>

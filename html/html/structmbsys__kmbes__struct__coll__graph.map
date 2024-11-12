@@ -1,0 +1,52 @@
+<map id="mbsys_kmbes_struct" name="mbsys_kmbes_struct">
+<area shape="rect" id="node1" title="Full data storage structure." alt="" coords="685,1973,845,2000"/>
+<area shape="rect" id="node2" href="$structmbsys__kmbes__mrz.html" title=" " alt="" coords="408,233,556,260"/>
+<area shape="rect" id="node3" href="$structmbsys__kmbes__m__body.html" title=" " alt="" coords="26,1097,201,1124"/>
+<area shape="rect" id="node24" href="$structmbsys__kmbes__mwc.html" title=" " alt="" coords="405,891,559,917"/>
+<area shape="rect" id="node39" href="$structmbsys__kmbes__xmt.html" title=" " alt="" coords="407,1140,557,1167"/>
+<area shape="rect" id="node49" href="$structmbsys__kmbes__che.html" title=" " alt="" coords="409,1457,555,1484"/>
+<area shape="rect" id="node4" href="$structmbsys__kmbes__m__partition.html" title="Multibeam datagrams." alt="" coords="14,619,213,645"/>
+<area shape="rect" id="node21" href="$structmbsys__kmbes__fcf.html" title="#FCF &#45; Backscatter calibration file datagram" alt="" coords="412,644,552,671"/>
+<area shape="rect" id="node5" href="$structmbsys__kmbes__header.html" title="General datagram header." alt="" coords="29,2001,197,2028"/>
+<area shape="rect" id="node11" href="$structmbsys__kmbes__spo.html" title=" " alt="" coords="409,1571,555,1597"/>
+<area shape="rect" id="node14" href="$structmbsys__kmbes__skm.html" title=" " alt="" coords="407,505,557,532"/>
+<area shape="rect" id="node17" href="$structmbsys__kmbes__shi.html" title=" " alt="" coords="411,1707,553,1733"/>
+<area shape="rect" id="node19" href="$structmbsys__kmbes__sde.html" title=" " alt="" coords="409,1344,555,1371"/>
+<area shape="rect" id="node23" href="$structmbsys__kmbes__iop.html" title="#IOP &#45; Runtime datagram" alt="" coords="411,2024,553,2051"/>
+<area shape="rect" id="node29" href="$structmbsys__kmbes__spd.html" title=" " alt="" coords="409,1800,555,1827"/>
+<area shape="rect" id="node31" href="$structmbsys__kmbes__iip.html" title="Installation and runtime datagrams." alt="" coords="413,2377,551,2404"/>
+<area shape="rect" id="node32" href="$structmbsys__kmbes__scl.html" title=" " alt="" coords="411,2429,553,2456"/>
+<area shape="rect" id="node34" href="$structmbsys__kmbes__svp.html" title=" " alt="" coords="409,2639,555,2665"/>
+<area shape="rect" id="node36" href="$structmbsys__kmbes__spe.html" title=" " alt="" coords="409,2075,555,2101"/>
+<area shape="rect" id="node38" href="$structmbsys__kmbes__xms.html" title="XMS, // MB&#45;System multibeam pseudosidescan derived from multibeam backscatter (MB&#45;System only)" alt="" coords="407,2125,557,2152"/>
+<area shape="rect" id="node43" href="$structmbsys__kmbes__svt.html" title=" " alt="" coords="411,2588,553,2615"/>
+<area shape="rect" id="node45" href="$structmbsys__kmbes__xmb.html" title="X&#45;datagrams (extra &#45; defined only for MB&#45;System)" alt="" coords="406,2327,558,2353"/>
+<area shape="rect" id="node46" href="$structmbsys__kmbes__sha.html" title=" " alt="" coords="409,1973,555,2000"/>
+<area shape="rect" id="node47" href="$structmbsys__kmbes__xmc.html" title="XMC, // Comment datagram (MB&#45;System only)" alt="" coords="407,2483,557,2509"/>
+<area shape="rect" id="node48" href="$structmbsys__kmbes__ib.html" title="#IB &#45; BIST Error Datagrams" alt="" coords="415,2276,549,2303"/>
+<area shape="rect" id="node50" href="$structmbsys__kmbes__cpo.html" title=" " alt="" coords="409,1923,555,1949"/>
+<area shape="rect" id="node6" href="$structmbsys__kmbes__mrz__tx__sector__info.html" title=" " alt="" coords="29,57,197,98"/>
+<area shape="rect" id="node7" href="$structmbsys__kmbes__mrz__rx__info.html" title=" " alt="" coords="13,123,213,149"/>
+<area shape="rect" id="node8" href="$structmbsys__kmbes__mrz__extra__det__class__info.html" title=" " alt="" coords="19,174,208,215"/>
+<area shape="rect" id="node9" href="$structmbsys__kmbes__mrz__sounding.html" title=" " alt="" coords="6,240,221,267"/>
+<area shape="rect" id="node10" href="$structmbsys__kmbes__mrz__ping__info.html" title="#MRZ &#45; multibeam data for raw range, depth, reflectivity, seabed image(SI) etc." alt="" coords="6,5,221,32"/>
+<area shape="rect" id="node12" href="$structmbsys__kmbes__s__common.html" title="Sensor datagrams." alt="" coords="16,1797,211,1824"/>
+<area shape="rect" id="node13" href="$structmbsys__kmbes__spo__data__block.html" title="#SPO &#45; Sensor POsition data" alt="" coords="22,1405,205,1446"/>
+<area shape="rect" id="node15" href="$structmbsys__kmbes__skm__sample.html" title=" " alt="" coords="10,291,217,317"/>
+<area shape="rect" id="node16" href="$structmbsys__kmbes__skm__info.html" title="#SKM &#45; KM binary sensor data" alt="" coords="22,457,205,484"/>
+<area shape="rect" id="node18" href="$structmbsys__kmbes__shi__data__from__sensor.html" title="#SHI &#45; Sensor HeIght data" alt="" coords="24,1495,203,1537"/>
+<area shape="rect" id="node20" href="$structmbsys__kmbes__sde__data__from__sensor.html" title="#SDE &#45; Sensor DEpth data" alt="" coords="22,1269,205,1310"/>
+<area shape="rect" id="node22" href="$structmbsys__kmbes__f__common.html" title="File datagrams." alt="" coords="17,508,209,535"/>
+<area shape="rect" id="node25" href="$structmbsys__kmbes__mwc__rx__beam__data.html" title=" " alt="" coords="26,809,201,850"/>
+<area shape="rect" id="node26" href="$structmbsys__kmbes__mwc__tx__info.html" title="#MWC &#45; water column datagram Datagram Version (header&#45;&gt;dgmVersion): Format Spec Rev &lt; F ==&gt; 0 Format ..." alt="" coords="10,875,217,901"/>
+<area shape="rect" id="node27" href="$structmbsys__kmbes__mwc__rx__info.html" title=" " alt="" coords="10,925,217,952"/>
+<area shape="rect" id="node28" href="$structmbsys__kmbes__mwc__tx__sector__data.html" title=" " alt="" coords="26,743,201,785"/>
+<area shape="rect" id="node30" href="$structmbsys__kmbes__spd__data__block.html" title="#SPD &#45; Sensor Position Datum data" alt="" coords="22,1631,205,1673"/>
+<area shape="rect" id="node33" href="$structmbsys__kmbes__scl__data__from__sensor.html" title="#SCL &#45; Sensor CLock datagram" alt="" coords="25,2538,202,2579"/>
+<area shape="rect" id="node35" href="$structmbsys__kmbes__svp__point.html" title="#SVP &#45; Sound Velocity Profile" alt="" coords="20,2732,207,2759"/>
+<area shape="rect" id="node37" href="$structmbsys__kmbes__spe__data__block.html" title="#SPE &#45; Sensor Position Error statistics data" alt="" coords="22,2221,205,2262"/>
+<area shape="rect" id="node40" href="$structmbsys__kmbes__xmt__ping__info.html" title="XMT, // MB&#45;System multibeam ping navigation, attitude, travel time, and pointing angle (MB&#45;System onl..." alt="" coords="5,1047,221,1073"/>
+<area shape="rect" id="node41" href="$structmbsys__kmbes__xmt__sounding.html" title=" " alt="" coords="6,1185,221,1212"/>
+<area shape="rect" id="node42" href="$structmbsys__kmbes__unknown__struct.html" title="Unknown datagram format." alt="" coords="391,2177,573,2218"/>
+<area shape="rect" id="node44" href="$structmbsys__kmbes__svt__info.html" title="#SVT &#45; Sensor sound Velocity measured at Transducer" alt="" coords="26,2681,201,2708"/>
+</map>

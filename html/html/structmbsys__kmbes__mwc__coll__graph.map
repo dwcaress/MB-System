@@ -1,0 +1,10 @@
+<map id="mbsys_kmbes_mwc" name="mbsys_kmbes_mwc">
+<area shape="rect" id="node1" title=" " alt="" coords="348,165,503,192"/>
+<area shape="rect" id="node2" href="$structmbsys__kmbes__m__body.html" title=" " alt="" coords="21,5,196,32"/>
+<area shape="rect" id="node3" href="$structmbsys__kmbes__m__partition.html" title="Multibeam datagrams." alt="" coords="9,56,208,83"/>
+<area shape="rect" id="node4" href="$structmbsys__kmbes__header.html" title="General datagram header." alt="" coords="25,107,193,133"/>
+<area shape="rect" id="node5" href="$structmbsys__kmbes__mwc__rx__beam__data.html" title=" " alt="" coords="21,158,196,199"/>
+<area shape="rect" id="node6" href="$structmbsys__kmbes__mwc__tx__info.html" title="#MWC &#45; water column datagram Datagram Version (header&#45;&gt;dgmVersion): Format Spec Rev &lt; F ==&gt; 0 Format ..." alt="" coords="5,224,212,251"/>
+<area shape="rect" id="node7" href="$structmbsys__kmbes__mwc__rx__info.html" title=" " alt="" coords="5,275,212,301"/>
+<area shape="rect" id="node8" href="$structmbsys__kmbes__mwc__tx__sector__data.html" title=" " alt="" coords="21,326,196,367"/>
+</map>

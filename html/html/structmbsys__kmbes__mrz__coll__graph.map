@@ -1,0 +1,11 @@
+<map id="mbsys_kmbes_mrz" name="mbsys_kmbes_mrz">
+<area shape="rect" id="node1" title=" " alt="" coords="389,195,537,221"/>
+<area shape="rect" id="node2" href="$structmbsys__kmbes__m__body.html" title=" " alt="" coords="25,5,200,32"/>
+<area shape="rect" id="node3" href="$structmbsys__kmbes__m__partition.html" title="Multibeam datagrams." alt="" coords="13,56,212,83"/>
+<area shape="rect" id="node4" href="$structmbsys__kmbes__header.html" title="General datagram header." alt="" coords="29,107,197,133"/>
+<area shape="rect" id="node5" href="$structmbsys__kmbes__mrz__tx__sector__info.html" title=" " alt="" coords="29,158,197,199"/>
+<area shape="rect" id="node6" href="$structmbsys__kmbes__mrz__rx__info.html" title=" " alt="" coords="13,224,213,251"/>
+<area shape="rect" id="node7" href="$structmbsys__kmbes__mrz__extra__det__class__info.html" title=" " alt="" coords="18,275,207,317"/>
+<area shape="rect" id="node8" href="$structmbsys__kmbes__mrz__sounding.html" title=" " alt="" coords="5,341,220,368"/>
+<area shape="rect" id="node9" href="$structmbsys__kmbes__mrz__ping__info.html" title="#MRZ &#45; multibeam data for raw range, depth, reflectivity, seabed image(SI) etc." alt="" coords="5,392,220,419"/>
+</map>
