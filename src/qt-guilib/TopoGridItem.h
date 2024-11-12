@@ -7,6 +7,7 @@
 #include <vtk/vtkPolyDataMapper.h>
 #include <vtk/vtkRenderWindow.h>
 #include <vtk/vtkElevationFilter.h>
+#include <vtk/vtkGradientFilter.h>
 #include <vtk/vtkLookupTable.h>
 #include <vtk/vtkTransform.h>
 #include <vtk/vtkTransformFilter.h>
@@ -25,7 +26,6 @@ namespace mb_system {
   
   public:
 
-
     /// 'Persistent' VTK pipeline objects, used by QQuickItem infrastructure
     struct Pipeline : vtkObject {
 
@@ -42,6 +42,7 @@ namespace mb_system {
       vtkNew<mb_system::TopoGridReader> gridReader_;
 
       vtkNew<vtkElevationFilter> elevFilter_;
+      vtkNew<vtkGradientFilter> gradientFilter_;      
       vtkNew<vtkLookupTable> elevLookupTable_;
       vtkNew<vtkActor> surfaceActor_;
       vtkNew<vtkPolyDataMapper> surfaceMapper_;
@@ -54,6 +55,14 @@ namespace mb_system {
       bool firstRender_ = true;
     };
 
+    /// Type of surface to display; elevation, gradient...
+    enum class DisplayedSurface : int {
+      Elevation,
+      Gradient
+    };
+
+    Q_ENUM(DisplayedSurface)
+    
     /// Constructor
     TopoGridItem();
 
@@ -76,8 +85,16 @@ namespace mb_system {
     /// Toggle axes plot
     Q_INVOKABLE void showAxes(bool plotAxes);
 
+    /// Set vertical exaggeration
     Q_INVOKABLE void setVerticalExagg(float verticalExagg) {
       verticalExagg_ = verticalExagg;
+    }
+
+
+    /// Set type of surface to display
+    Q_INVOKABLE void setDisplayedSurface(DisplayedSurface surfaceType) {
+      qDebug() << "setDisplayedSurface to " << surfaceType;
+      displayedSurface_ = surfaceType;
     }
     
 
@@ -120,12 +137,15 @@ namespace mb_system {
     /// Vertical exaggeration
     float verticalExagg_;
 
-    /// Plot axes or not
-    bool plotAxes_;
+    /// Show axes or not
+    bool showAxes_;
 
     /// Colormap scheme
     mb_system::TopoColorMap::Scheme scheme_;
-  
+
+    /// Type of surface to display (elevation, gradient...)
+    DisplayedSurface displayedSurface_;
+    
     Pipeline *pipeline_;
     vtkRenderWindow *renderWindow_;
     
