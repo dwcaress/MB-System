@@ -49,6 +49,13 @@
 message("In src/mbtrnav")
 #
 #------------------------------------------------------------------------------
+if(buildTrnNoRand)
+    # add TRN_NORAND to disable TRN random seed.
+    add_compile_definitions(TRN_NORAND)
+    message("TRN_NORAND set : TRN random seed DISABLED")
+else()
+    message("TRN_NORAND unset : TRN random seed ENABLED")
+endif()
 
 find_package(NetCDF REQUIRED)
 find_package(LibPROJ REQUIRED)
