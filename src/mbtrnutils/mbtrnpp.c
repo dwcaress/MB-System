@@ -8329,7 +8329,7 @@ int64_t mbtrnpp_em710raw_update_buffer(int fd, byte *buf, size_t len, const byte
                 } else if(em_ser_flow == 'X'){
                     MX_BMSG((verbose < -2), "ENABLE XON\n");
                     unsigned char c[1] = {XON};
-                    write(fd, c, 1);
+                    if(write(fd, c, 1) != 1){;}
                 }
             }
         } else {
@@ -8360,7 +8360,7 @@ int64_t mbtrnpp_em710raw_update_buffer(int fd, byte *buf, size_t len, const byte
         mbtrnpp_em710raw_set_rts(fd, false);
     } else if(em_ser_flow == 'X'){
         unsigned char c[1] = {XOFF};
-        write(fd, c, 1);
+        if(write(fd, c, 1) != 1){;}
         MX_BPRINT((verbose < -2), "DISABLE XOFF (%lld bytes)\n", burst_bytes);
 
     }
@@ -8385,7 +8385,7 @@ int64_t mbtrnpp_em710raw_read_buffer(ser_buf_t *src, byte *dest, int64_t read_le
     if(src == NULL || src->fd < 0 || src->size <= 0 || dest == NULL || read_len <= 0){
         fprintf(stderr, "%s: ERR - invalid argument ser_buf %p\n",__func__, src);
         if(src != NULL){
-            fprintf(stderr,"fd %d size %lld dest %p readlen %lld\n", src->fd, src->size, dest, read_len);
+            fprintf(stderr,"fd %d size %"PRId64" dest %p readlen %"PRId64"\n", src->fd, src->size, dest, read_len);
         }
         return retval;
     }

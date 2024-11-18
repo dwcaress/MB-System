@@ -1,4 +1,5 @@
 ########################################
+# opt/rov Makefile
 # Build Environment
 # version and build configuration
 
@@ -17,28 +18,33 @@ C_STD= -std=c99
 
 # Platform-specific options
 ifeq ($(shell uname),Linux)
- OS_CFLAGS=
- OS_INC_PATH=
- OS_LIB_PATH=
- OS_LIBS=-lrt
+	 OS_CFLAGS=
+	 OS_INC_PATH=
+	 OS_LIB_PATH=
+	 OS_LIBS=-lrt
 endif
 
 ifeq ($(shell uname),Darwin)
-OS_CFLAGS=
-OS_INC_PATH=-I/opt/local/include
-OS_LIB_PATH=-L/opt/local/lib
-OS_LIBS=
+	OS_CFLAGS=
+	OS_INC_PATH=-I/opt/local/include
+	OS_LIB_PATH=-L/opt/local/lib
+	OS_LIBS=
 endif
 
 ifeq ($(shell uname),Cygwin)
-OS_CFLAGS=
-OS_INC_PATH=-I/opt/local/include
-OS_LIB_PATH=-L/opt/local/lib
-OS_LIBS=-lrt
+	OS_CFLAGS=
+	OS_INC_PATH=-I/opt/local/include
+	OS_LIB_PATH=-L/opt/local/lib
+	OS_LIBS=-lrt
 endif
 
+$(info "INFO +++ opt/rov - OPT_USE_PROJ ${OPT_USE_PROJ}")
+$(info "INFO +++ opt/rov - PROJ_LIB ${PROJ_LIB}")
+$(info "INFO +++ opt/rov - OPT_PROJ_INC ${OPT_PROJ_INC}")
+$(info "INFO +++ opt/rov - OPT_PROJ_LIB ${OPT_PROJ_LIB}")
+
 # Build options
-BUILD_OPTIONS = $(STD) -D_GNU_SOURCE $(OPT_APP_BUILD)  $(OPT_TRNXPP_VER)
+BUILD_OPTIONS = $(STD) -D_GNU_SOURCE $(OPT_APP_BUILD)  $(OPT_TRNXPP_VER) ${OPT_USE_PROJ}
 
 # Build directories
 OUTPUT_DIR=../../bin
@@ -71,11 +77,11 @@ CFLAGS = -g -O2 $(C_STD) $(SANI_FLAG) $(WARN_FLAGS) $(GPROF) $(BUILD_OPTIONS) $(
 CXXFLAGS = -g -O2 $(CXX_STD) $(SANI_FLAG) $(WARN_FLAGS) $(GPROF) $(BUILD_OPTIONS) $(OS_CFLAGS)
 CPPFLAGS += #-MM -MMD
 INC_PATHS =  -I.  -I$(NEWMAT_DIR) -I$(QNX_DIR) \
--I$(TRN_DIR) -I$(UTILS_DIR) -I$(TRNW_DIR) $(OS_INC_PATH)
+-I$(TRN_DIR) -I$(UTILS_DIR) -I$(TRNW_DIR) $(OPT_PROJ_INC) $(OS_INC_PATH)
 
 # Linker flags
 LD_FLAGS = -g $(GPROF)
-LIB_PATHS = -L$(OUTPUT_DIR) $(OS_LIB_PATH) -L/usr/local/lib
+LIB_PATHS = -L$(OUTPUT_DIR) $(OS_LIB_PATH) -L/usr/local/lib $(OPT_PROJ_LIB)
 
 ########################################
 # Target Definitions
@@ -148,7 +154,7 @@ TRNXPP=trnxpp
 TRNXPP_SRC= trnxpp_app.cpp
 TRNXPP_HPP= trnxpp.hpp
 TRNXPP_OBJ = $(TRNXPP_SRC:%.cpp=$(BUILD_DIR)/%.o)
-TRNXPP_LIBS =  -llcm -lstdc++ -lmb1 -ltrncli -ltrn  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeocon -lgeolib  -ludpms $(OS_LIBS) -ltrnxplug
+TRNXPP_LIBS = -ludpms   -ltrnxplug   -ltrncli -lmb1  -ltrn -lgeocon -lqnx -lgeolib  -lpthread  -lnewmat $(PROJ_LIB) -lnetcdf -lm -llcm -lstdc++  $(OS_LIBS)
 
 FVTEST=fv-test
 FVTEST_SRC = flag_var_test.cpp
@@ -164,7 +170,7 @@ LIBUDPMS_LIBS=
 LIBTRNXPLUG = libtrnxplug.a
 LIBTRNXPLUG_SRC = plug-common.cpp plug-idtlass.cpp plug-oisledx.cpp plug-dvl.cpp plug-idt.cpp  plug-oisled.cpp plug-oisled2.cpp plug-lassmb.cpp plug-xmb1.cpp
 LIBTRNXPLUG_OBJ = $(LIBTRNXPLUG_SRC:%.cpp=$(BUILD_DIR)/%.o)
-LIBTRNXPLUG_LIBS = -lnewmat -lgeocon  -lgeolib -ltrnw -lqnx -lmb1 -ltrn -ludpms -ltrncli -lnetcdf -llcm
+LIBTRNXPLUG_LIBS = -ludpms -ltrncli -lmb1  -ltrn -ltrnw  -lgeocon  -lqnx  -lgeolib   -lnewmat -lnetcdf -llcm
 
 ########################################
 # Build Files (mostly for cleanup)

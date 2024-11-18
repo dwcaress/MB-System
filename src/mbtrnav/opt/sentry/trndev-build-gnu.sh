@@ -10,10 +10,14 @@ DO_BUILD="Y"
 
 MAKE_CMD=${MAKE_CMD:-$(which make)}
 
-TRNDEV_TOP=${TRNDEV_TOP:-"${PWD}"}
+#TRNDEV_TOP=${TRNDEV_TOP:-"${PWD}"}
+TRNDEV_TOP=$PWD
 
 DESTDIR=${DESTDIR:-""}
 PREFIX=${PREFIX:-"/usr/local"}
+
+declare -a TRN_CMAKE_OPTS
+declare -a MF_CMAKE_OPTS
 
 ########################################
 # name: vout
@@ -43,13 +47,30 @@ printUsage(){
     echo "  -p <s> : set PREFIX for install/uninstall [${PREFIX}]"
     echo "  -i     : install"
     echo "  -u     : uninstall"
+    echo "  -m <s> : libmframe cmake options"
+    echo "  -t <s> : libtrnav cmake options"
     echo "  -h     : help message"
     echo "  -v     : verbose output"
+    echo
+    echo "Use Notes:"
+    echo " This script is typically run twice:"
+    echo "   build (optionally using -t, -m)"
+    echo "   then"
+    echo "   install (using -i, optionally -p, -d)"
+    echo "   or"
+    echo "   uninstall (using -u)"
+    echo
+    echo "   When uninstalling, use the same -p, -d options"
+    echo "   used to install"
     echo
     echo "Examples:"
     echo
     echo " # build"
     echo "   `basename $0`"
+    echo
+    echo " # build using cmake TRN options"
+    echo " # environment options should precede targets"
+    echo "   `basename $0` -t \"buildUseProj=1\" -t \"libs\" -t \"trnc\" -t \"rov\""
     echo
     echo " # install to default directory ${DESTDIR}${PREFIX}"
     echo "   sudo `basename $0` -i"
@@ -65,6 +86,8 @@ printUsage(){
     echo
 }
 
+#./trndev-build-gnu.sh -v -t "PROJ_LIB_DIR=-L/usr/lib/x86_64-linux-gnu" -t "PROJ_INC_DIR=-L/usr/include" -t "buildUseProj=1" -t "clean" -t "libs" -t "trnc" -t "rov"
+
 ########################################
 # name: processCmdLine
 # description: do command line processing
@@ -76,7 +99,7 @@ processCmdLine(){
     OPTIND=1
     vout "`basename $0` all args[$*]"
 
-    while getopts d:hip:uv Option
+    while getopts d:him:p:t:uv Option
     do
         case $Option in
             d ) DESTDIR=${OPTARG}
@@ -88,6 +111,10 @@ processCmdLine(){
             ;;
             u ) DO_UNINSTALL="Y"
                 DO_BUILD="N"
+            ;;
+            t ) TRN_CMAKE_OPTS[${#TRN_CMAKE_OPTS[@]}]=${OPTARG}
+            ;;
+            m ) MF_CMAKE_OPTS[${#MF_CMAKE_OPTS[@]}]=${OPTARG}
             ;;
             v ) VERBOSE="Y"
             ;;
@@ -111,9 +138,9 @@ processCmdLine(){
 build_pkg(){
     loc=$1
     shift
-    targets=$*
+    vout "make targets: [$#] $*"
     cd $loc
-    ${MAKE_CMD} ${targets}
+    ${MAKE_CMD} $*
 }
 
 ########################################
@@ -196,10 +223,10 @@ fi
 if [ ${DO_BUILD} == "Y" ]
 then
     vout "building mframe"
-    build_pkg ${TRNDEV_TOP}/mframe all
+    build_pkg ${TRNDEV_TOP}/mframe ${MF_CMAKE_OPTS[@]} all
 
     vout "building libtrnav"
-    build_pkg ${TRNDEV_TOP}/libtrnav all trnc
+    build_pkg ${TRNDEV_TOP}/libtrnav ${TRN_CMAKE_OPTS[@]}
 fi
 
 if [ ${DO_INSTALL} == "Y" ]

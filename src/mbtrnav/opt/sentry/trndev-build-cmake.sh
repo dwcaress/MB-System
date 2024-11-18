@@ -14,6 +14,8 @@ TRNDEV_TOP=$PWD
 
 DESTDIR=${DESTDIR:-""}
 PREFIX=${PREFIX:-"/usr/local"}
+declare -a TRN_CMAKE_OPTS
+declare -a MF_CMAKE_OPTS
 
 ########################################
 # name: vout
@@ -43,13 +45,29 @@ printUsage(){
     echo "  -p <s> : set PREFIX for install/uninstall [${PREFIX}]"
     echo "  -i     : install"
     echo "  -u     : uninstall"
+    echo "  -m <s> : libmframe cmake options"
+    echo "  -t <s> : libtrnav cmake options"
     echo "  -h     : help message"
     echo "  -v     : verbose output"
+    echo
+    echo "Use Notes:"
+    echo " This script is typically run twice:"
+    echo "   build (optionally using -t, -m)"
+    echo "   then"
+    echo "   install (using -i, optionally -p, -d)"
+    echo "   or"
+    echo "   uninstall (using -u)"
+    echo
+    echo "   When uninstalling, use the same -p, -d options"
+    echo "   used to install"
     echo
     echo "Examples:"
     echo
     echo " # build"
     echo "   `basename $0`"
+    echo
+    echo " # build using cmake TRN options"
+    echo "   `basename $0` -t \"-DbuildUseProj=ON\" -t \"-DbuildOptROV=OFF\" "
     echo
     echo " # install to default directory ${DESTDIR}${PREFIX}"
     echo "   sudo `basename $0` -i"
@@ -76,7 +94,7 @@ processCmdLine(){
     OPTIND=1
     vout "`basename $0` all args[$*]"
 
-    while getopts d:hip:uv Option
+    while getopts d:him:p:t:uv Option
     do
         case $Option in
             d ) DESTDIR=${OPTARG}
@@ -85,6 +103,10 @@ processCmdLine(){
                 DO_BUILD="N"
             ;;
             p ) PREFIX=${OPTARG}
+            ;;
+            t ) TRN_CMAKE_OPTS[${#TRN_CMAKE_OPTS}]=${OPTARG}
+            ;;
+            m ) MF_CMAKE_OPTS[${#MF_CMAKE_OPTS}]=${OPTARG}
             ;;
             u ) DO_UNINSTALL="Y"
                 DO_BUILD="N"
@@ -111,12 +133,16 @@ processCmdLine(){
 build_pkg(){
     loc=$1
 
+    # get build opts
+    shift
+    vout "build_pkg - opts[$#] $*"
+
     if [ ! -d ${loc} ]
     then
         mkdir -p ${loc}
     fi
     cd $loc
-    ${MAKE_CMD} ..
+    ${MAKE_CMD} $* ..
     ${MAKE_CMD} --build .
     # install a copy in the build directory
     ${MAKE_CMD} --install . --prefix `pwd`/pkg
@@ -181,9 +207,9 @@ fi
 if [ ${DO_BUILD} == "Y" ]
 then
     vout "building mframe"
-    build_pkg ${TRNDEV_TOP}/mframe/build
+    build_pkg ${TRNDEV_TOP}/mframe/build ${MF_CMAKE_OPTS[*]}
     vout "building libtrnav"
-    build_pkg ${TRNDEV_TOP}/libtrnav/build
+    build_pkg ${TRNDEV_TOP}/libtrnav/build ${TRN_CMAKE_OPTS[*]}
 fi
 
 if [ ${DO_INSTALL} == "Y" ]

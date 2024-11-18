@@ -20,6 +20,7 @@ TRNW_DIR=../trnw
 DOC_DIR=../doc
 DORADO_DIR=./dorado
 LRAUV_DIR=./lrauv
+ROV_DIR=./rov
 REPO_TOP_DIR=..
 
 ifeq ($(shell uname),Darwin)
@@ -99,6 +100,11 @@ CFLAGS  =       #-O (or whatever you need)
 #       dont' define these unelss they're common to all subdirectories
 LDFLAGS =      # -lm (or whatever you need)
 
+$(info "INFO +++ opt - OPT_USE_PROJ ${OPT_USE_PROJ}")
+$(info "INFO +++ opt - PROJ_LIB ${PROJ_LIB}")
+$(info "INFO +++ opt - OPT_PROJ_INC ${OPT_PROJ_INC}")
+$(info "INFO +++ opt - OPT_PROJ_LIB ${OPT_PROJ_LIB}")
+
 ########################################
 # Target Definitions
 
@@ -108,7 +114,7 @@ libs:
 	@echo "Building libs..."
 	cd $(REPO_TOP_DIR); make
 
-apps: dorado lrauv
+apps: dorado lrauv rov
 
 dorado: libs
 	@echo "Building dorado..."
@@ -118,12 +124,17 @@ lrauv: libs
 	@echo "Building lrauv..."
 	cd $(LRAUV_DIR); make
 
+rov: libs
+	@echo "Building rov..."
+	cd $(ROV_DIR); make
+
 help:
 	@echo
 	@echo "make [clean all dorado lrauv]"
 	@echo "apps        build libraries and applications"
 	@echo "dorado      build libraries and dorado apps"
 	@echo "lrauv       build libraries and lrauv apps"
+	@echo "rov         build libraries and rov apps"
 	@echo "clean       remove build products (not including doc)"
 #	@echo "dist-clean remove build products (including doc)"
 	@echo ""
@@ -155,6 +166,7 @@ install:
 .PHONY: apps
 .PHONY: dorado
 .PHONY: lrauv
+.PHONY: rov
 .PHONY: clean
 .PHONY: dist-clean
 #.PHONY: dist
@@ -164,6 +176,7 @@ clean:
 	@echo "Clean app..."
 	cd $(DORADO_DIR); make clean
 	cd $(LRAUV_DIR); make clean
+	cd $(ROV_DIR); make clean
 
 dist-clean: clean
 	@echo "Clean doc..."
