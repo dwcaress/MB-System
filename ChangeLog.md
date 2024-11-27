@@ -68,6 +68,8 @@ Miscellaneous: Removed top level files "NEWS", "NOTES", and "INSTALL.md". These 
 to conform to GNU expectations for a package structure. We are no longer trying to match the
 GNU structure, and so have removed these unnecessary files.
 
+Most SeaBeam Classic formats (MBF_SBSIOMRG, MBF_SBSIOCEN, MBF_SBSIOLSI, MBF_SBURICEN, MBF_SBURIVAX): Added code to handle rare condition where the ping timestamp has a seconds value of 60. Now the code will add one to the minutes value, and set the seconds value to 0.
+
 #### 5.8.2beta17 (November 7, 2024)
 
 Libtrnav (src/mbtrnav/): Additional fixes by Kent Headley to enable building on Ubuntu 24.

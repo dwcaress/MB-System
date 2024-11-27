@@ -407,6 +407,8 @@ to system id 1).</p>
 to conform to GNU expectations for a package structure. We are no longer trying to match the
 GNU structure, and so have removed these unnecessary files.</p>
 
+<p>Most SeaBeam Classic formats (MBF<em>SBSIOMRG, MBF</em>SBSIOCEN, MBF<em>SBSIOLSI, MBF</em>SBURICEN, MBF_SBURIVAX): Added code to handle rare condition where the ping timestamp has a seconds value of 60. Now the code will add one to the minutes value, and set the seconds value to 0.</p>
+
 <h4 id="toc_4">5.8.2beta17 (November 7, 2024)</h4>
 
 <p>Libtrnav (src/mbtrnav/): Additional fixes by Kent Headley to enable building on Ubuntu 24.</p>
