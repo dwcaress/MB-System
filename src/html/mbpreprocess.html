@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbpreprocess</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  5 November 2022 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  2 August 2024 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -1108,6 +1108,13 @@ This option causes heave values to be moved to the sonardepth (sometimes sensord
 field, leaving the heave value as zero, for each survey ping. This is currently
 only relevant to the preprocessing of Imagenex DeltaT multibeam data in the vendor
 83P format (191). The output of preprocessing format 191 data are format 192 files.
+<DT><B>--kluge-early-mbari-mapping-auv</B>
+
+<DD>
+This option pertains only to Reson 7125 200 kHz multibeam data collected on the first
+MBARI Mapping AUV from 2006 through 2009. Invoking this kluge triggers <B>mbpreprocess</B>
+to modify the beam quality factors to be consistent with the later (&gt;2009) standard for
+the original bathymetry records in Reson s7k format data.
 <P>
 </DL>
 <A NAME="lbAH">&nbsp;</A>
@@ -1143,7 +1150,7 @@ Oh yeah.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 5 November 2022</P></CENTER>
+Last Updated: 2 August 2024</P></CENTER>
 
 <HR>
 <center>

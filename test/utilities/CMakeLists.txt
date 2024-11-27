@@ -1,4 +1,5 @@
 set(tests
+    mb7k2jstar_test
     mbabsorption_test
     mbareaclean_test
     mbauvloglist_test

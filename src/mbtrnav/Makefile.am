@@ -1,4 +1,4 @@
-lib_LTLIBRARIES = libgeolib.la libnewmat.la libqnx.la libtnav.la libtrnw.la libnetif.la libmb1.la libtrncli.la
+lib_LTLIBRARIES = libgeolib.la libnewmat.la libqnx.la libtnav.la libgeocon.la libtrnw.la libnetif.la libmb1.la libtrncli.la
 
 if BUILD_ROVTRN
 lib_LTLIBRARIES += libudpms.la  libtrnxplug.la
@@ -196,6 +196,15 @@ libtnav_la_LIBADD += libqnx.la
 libtnav_la_LIBADD += ${libnetcdf_LIBS}
 libtnav_la_LIBADD += -lm -lpthread
 
+libgeocon_la_LDFLAGS =  -no-undefined -version-info 0:0:0
+
+libgeocon_la_SOURCES = trnw/GeoCon.cpp
+
+libgeocon_la_LIBADD = libqnx.la
+libgeocon_la_LIBADD += libnewmat.la
+libgeocon_la_LIBADD += ${libproj_LIBS}
+libgeocon_la_LIBADD += -lm -lpthread
+
 libtrnw_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
 libtrnw_la_SOURCES =
@@ -206,6 +215,7 @@ libtrnw_la_SOURCES += trnw/trnif_msg.c
 libtrnw_la_LIBADD = libtnav.la
 libtrnw_la_LIBADD += libqnx.la
 libtrnw_la_LIBADD += libnewmat.la
+libtrnw_la_LIBADD += libgeocon.la
 libtrnw_la_LIBADD += -lm -lpthread
 
 libnetif_la_LDFLAGS =  -no-undefined -version-info 0:0:0
