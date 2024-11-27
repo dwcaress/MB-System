@@ -292,6 +292,10 @@ int mbr_rt_sburivax(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* time stamp */
 		store->year = data->year;
 		store->day = data->day;
+		if (data->sec == 60) {
+		  data->min++;
+		  data->sec = 0;
+		}
 		store->min = data->min;
 		store->sec = data->sec;
 
