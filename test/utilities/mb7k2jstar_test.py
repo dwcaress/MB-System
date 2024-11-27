@@ -14,7 +14,7 @@ import unittest
 class Mb7k2jstarTest(unittest.TestCase):
 
   def setUp(self):
-    self.cmd = '../../src/deprecated/mb7k2jstar'
+    self.cmd = '../../src/utilities/mb7k2jstar'
 
   def testNoArgs(self):
     cmd = [self.cmd]
