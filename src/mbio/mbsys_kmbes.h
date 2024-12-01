@@ -82,6 +82,7 @@
  *      // M-datagrams (Multibeam)
  *      MRZ, // Multibeam (M) raw range (R) and depth (Z) datagram
  *      MWC, // Multibeam (M) water (W) column (C) datagram
+ *      MSC, // Multibeam (M) unknown record appearing in some EM124 data
  *
  *      // C-datagrams (Compatibility)
  *      CHE, // Compatibility (C) data for heave (HE) - store raw sensor data without modification
@@ -128,6 +129,7 @@
 /* M-datagrams */
 #define MBSYS_KMBES_M_RANGE_AND_DEPTH           "#MRZ" // Multibeam (M) raw range (R) and depth (Z) datagram
 #define MBSYS_KMBES_M_WATER_COLUMN              "#MWC" // Multibeam (M) water (W) column (C) datagram
+#define MBSYS_KMBES_M_UNKNOWN                   "#MSC" // Multibeam (M) unknown datagram
 
 /* C-datagrams */
 #define MBSYS_KMBES_C_POSITION                  "#CPO" // Compatibility (C) data for position (PO)
@@ -246,6 +248,7 @@ typedef enum {
     /* M-datagrams */
     MRZ, // EM_DGM_M_RANGE_AND_DEPTH
     MWC, // EM_DGM_M_WATER_COLUMN
+    MSC, // EM_DGM_M_UNKNOWN
 
     /* C-datagrams */
     CPO, // EM_DGM_C_POSITION
@@ -1279,6 +1282,22 @@ struct mbsys_kmbes_mwc {
 
  #define MBSYS_KMBES_MWC_VERSION 1
 
+/************************************
+    #MSC - multibeam unknown datagram
+      Datagram Version (header->dgmVersion):
+        header->dgmVersion ==> 1
+ ************************************/
+
+struct mbsys_kmbes_msc {
+    /* #MSC - Multibeam Unknown Datagram. Entire datagram containing several sub structs. */
+    struct mbsys_kmbes_header header;
+    size_t num_rawbytes_alloc;               // allocated size of rawbytes
+    size_t num_rawbytes;                     // size of rawbytes
+    char *rawbytes;
+};
+
+ #define MBSYS_KMBES_MSC_VERSION 1
+
 /*********************************************
 
  Compatibility datagrams for .all to .kmall conversion support
@@ -1641,10 +1660,10 @@ struct mbsys_kmbes_struct {
     /* #SPO - Sensor POsition data */
     struct mbsys_kmbes_spo spo;
 
-    /* #SPO - Sensor Position Error data */
+    /* #SPE - Sensor Position Error data */
     struct mbsys_kmbes_spe spe;
 
-    /* #SPO - Sensor Position Datum data */
+    /* #SPD - Sensor Position Datum data */
     struct mbsys_kmbes_spd spd;
 
     /* #SKM - KM binary sensor data (attitude)*/
@@ -1670,6 +1689,7 @@ struct mbsys_kmbes_struct {
 
     /* #MRZ - Multibeam data for raw range,
      * depth, reflectivity, seabed image(SI) etc. */
+    bool ping_returned;
     int n_mrz_read;
     int n_mrz_needed;  // Number of MRZ datagrams for the current ping = mrz[mrz.cmnPart.rxFanIndex].cmnPart.rxFansPerPing
     struct mbsys_kmbes_mrz mrz[MBSYS_KMBES_MAX_NUM_MRZ_DGMS];
@@ -1684,6 +1704,10 @@ struct mbsys_kmbes_struct {
     int n_mwc_read;
     int n_mwc_needed;  // Number of MWC datagrams for the current ping = mrz[mrz.cmnPart.rxFanIndex].cmnPart.rxFansPerPing
     struct mbsys_kmbes_mwc mwc[MBSYS_KMBES_MAX_NUM_MWC_DGMS];
+    
+    /* #MSC = Multibeam MSC unknown datagram */
+    bool msc_read;
+    struct mbsys_kmbes_msc msc;
 
     /* #CPO - Compatibility position sensor data */
     struct mbsys_kmbes_cpo cpo;

@@ -160,6 +160,11 @@ int mbsys_kmbes_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error)
       status = mb_freed(verbose, __FILE__, __LINE__, (void **)(&store->mwc[i].beamData_p), error);
       store->mwc[i].beamData_p_alloc_size = 0;
     }
+    if (store->msc.rawbytes != NULL && store->msc.num_rawbytes_alloc > 0) {
+      store->msc.num_rawbytes_alloc = 0;
+      store->msc.num_rawbytes = 0;
+      status = mb_freed(verbose, __FILE__, __LINE__, (void **)(&store->msc.rawbytes), error);
+    }
   }
 
   /* deallocate memory for data structure */
@@ -431,6 +436,44 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
       if (pars->kluge_id[i] == MB_PR_KLUGE_AUVSENTRYSENSORDEPTH) {
         fprintf(stderr, "dbg2       kluge_auvsentrysensordepth:        %d\n", kluge_auvsentrysensordepth);
       }
+    }
+  }
+  if (verbose >= 5) {
+    int time_i[7];
+    fprintf(stderr, "dbg5       n_nav:                         %d\n", pars->n_nav);
+    for (int i = 0; i < pars->n_nav; i++) {
+      mb_get_date(0, pars->nav_time_d[i], time_i);
+      fprintf(stderr, "dbg5         %d %4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %15.6f %14.10f %14.10f %6.3f\n", 
+    				i, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
+    				pars->nav_time_d[i], pars->nav_lon[i], pars->nav_lat[i], pars->nav_speed[i]);
+    }
+    fprintf(stderr, "dbg2       n_sensordepth:                 %d\n", pars->n_sensordepth);
+    for (int i = 0; i < pars->n_sensordepth; i++) {
+      mb_get_date(0, pars->sensordepth_time_d[i], time_i);
+      fprintf(stderr, "dbg5         %d %4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %15.6f %8.3f\n", 
+    				i, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
+    				pars->sensordepth_time_d[i], pars->sensordepth_sensordepth[i]);
+    }
+    fprintf(stderr, "dbg2       n_heading:                     %d\n", pars->n_heading);
+    for (int i = 0; i < pars->n_heading; i++) {
+      mb_get_date(0, pars->heading_time_d[i], time_i);
+      fprintf(stderr, "dbg5         %d %4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %15.6f %6.3f\n", 
+    				i, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
+    				pars->heading_time_d[i], pars->heading_heading[i]);
+    }
+    fprintf(stderr, "dbg2       n_altitude:                    %d\n", pars->n_altitude);
+    for (int i = 0; i < pars->n_altitude; i++) {
+      mb_get_date(0, pars->altitude_time_d[i], time_i);
+      fprintf(stderr, "dbg5         %d %4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %15.6f %6.3f\n", 
+    				i, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
+    				pars->altitude_time_d[i], pars->altitude_altitude[i]);
+    }
+    fprintf(stderr, "dbg2       n_attitude:                    %d\n", pars->n_attitude);
+    for (int i = 0; i < pars->n_attitude; i++) {
+      mb_get_date(0, pars->attitude_time_d[i], time_i);
+      fprintf(stderr, "dbg5         %d %4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %15.6f %6.3f %6.3f %6.3f\n", 
+    				i, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
+    				pars->attitude_time_d[i], pars->attitude_roll[i], pars->attitude_pitch[i], pars->attitude_heave[i]);
     }
   }
 
@@ -1047,6 +1090,53 @@ if (verbose >= 2) {
     *time_d = store->time_d;
 
     /* get navigation */
+    *navlon = skm->sample[0].KMdefault.longitude_deg;
+    *navlat = skm->sample[0].KMdefault.latitude_deg;
+
+    /* get speed */
+    *speed = 3.6 * sqrt(skm->sample[0].KMdefault.velNorth
+                          * skm->sample[0].KMdefault.velNorth
+                        + skm->sample[0].KMdefault.velEast
+                          * skm->sample[0].KMdefault.velEast);
+
+    /* get heading */
+    *heading = skm->sample[0].KMdefault.heading_deg;
+
+    /* set beam and pixel numbers */
+    *nbath = 0;
+    *namp = 0;
+    *nss = 0;
+
+    if (verbose >= 5) {
+      fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
+      fprintf(stderr, "dbg4  Extracted values:\n");
+      fprintf(stderr, "dbg4       kind:       %d\n", *kind);
+      fprintf(stderr, "dbg4       error:      %d\n", *error);
+      fprintf(stderr, "dbg4       time_i[0]:  %d\n", time_i[0]);
+      fprintf(stderr, "dbg4       time_i[1]:  %d\n", time_i[1]);
+      fprintf(stderr, "dbg4       time_i[2]:  %d\n", time_i[2]);
+      fprintf(stderr, "dbg4       time_i[3]:  %d\n", time_i[3]);
+      fprintf(stderr, "dbg4       time_i[4]:  %d\n", time_i[4]);
+      fprintf(stderr, "dbg4       time_i[5]:  %d\n", time_i[5]);
+      fprintf(stderr, "dbg4       time_i[6]:  %d\n", time_i[6]);
+      fprintf(stderr, "dbg4       time_d:     %f\n", *time_d);
+      fprintf(stderr, "dbg4       longitude:  %f\n", *navlon);
+      fprintf(stderr, "dbg4       latitude:   %f\n", *navlat);
+      fprintf(stderr, "dbg4       speed:      %f\n", *speed);
+      fprintf(stderr, "dbg4       heading:    %f\n", *heading);
+    }
+
+    /* done translating values */
+  }
+
+  /* extract data from structure */
+  else if (*kind == MB_DATA_NAV3) {
+    /* get time */
+    for (int i = 0; i < 7; i++)
+      time_i[i] = store->time_i[i];
+    *time_d = store->time_d;
+
+    /* get navigation */
     *navlon = cpo->sensorData.correctedLong_deg;
     *navlat = cpo->sensorData.correctedLat_deg;
 
@@ -1245,7 +1335,8 @@ if (verbose >= 2) {
     fprintf(stderr, "dbg2       time_i[6]:     %d\n", time_i[6]);
     fprintf(stderr, "dbg2       time_d:        %f\n", *time_d);
   }
-  if (verbose >= 2 && (*kind == MB_DATA_DATA || *kind == MB_DATA_NAV)) {
+  if (verbose >= 2 && (*kind == MB_DATA_DATA || *kind == MB_DATA_NAV 
+  		|| *kind == MB_DATA_NAV1 || *kind == MB_DATA_NAV2 || *kind == MB_DATA_NAV3)) {
     fprintf(stderr, "dbg2       longitude:     %f\n", *navlon);
     fprintf(stderr, "dbg2       latitude:      %f\n", *navlat);
     fprintf(stderr, "dbg2       speed:         %f\n", *speed);
@@ -1303,7 +1394,8 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
     fprintf(stderr, "dbg2       time_i[6]:  %d\n", time_i[6]);
     fprintf(stderr, "dbg2       time_d:     %f\n", time_d);
   }
-  if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_NAV)) {
+  if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_NAV || kind == MB_DATA_NAV1 
+  		|| kind == MB_DATA_NAV2 || kind == MB_DATA_NAV3)) {
     fprintf(stderr, "dbg2       navlon:     %f\n", navlon);
     fprintf(stderr, "dbg2       navlat:     %f\n", navlat);
     fprintf(stderr, "dbg2       speed:      %f\n", speed);
@@ -1453,6 +1545,26 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 
   /* insert data in nav structure */
   else if (store->kind == MB_DATA_NAV2) {
+    if (store->time_d != time_d) {
+      skm->header.time_sec = (unsigned int)floor(time_d);
+      skm->header.time_nanosec = (unsigned int)((time_d - (double)skm->header.time_sec) * 1.0e9);
+    }
+    for (int i = 0; i < 7; i++)
+      store->time_i[i] = time_i[i];
+    store->time_d = time_d;
+
+    /* get navigation */
+    skm->sample[0].KMdefault.longitude_deg = navlon;
+    skm->sample[0].KMdefault.latitude_deg = navlat;
+
+    /* get heading */
+    skm->sample[0].KMdefault.heading_deg = heading;
+
+    /* get speed  */
+  }
+
+  /* insert data in nav structure */
+  else if (store->kind == MB_DATA_NAV3) {
     if (store->time_d != time_d) {
       cpo->header.time_sec = (unsigned int)floor(time_d);
       cpo->header.time_nanosec = (unsigned int)((time_d - (double)cpo->header.time_sec) * 1.0e9);
@@ -2113,8 +2225,44 @@ int mbsys_kmbes_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
     /* done translating values */
   }
 
-  /* extract data from CPO record */
+  /* extract data from SKM record */
   else if (*kind == MB_DATA_NAV2) {
+    /* get time */
+    for (int i = 0; i < 7; i++)
+      time_i[i] = store->time_i[i];
+    *time_d = store->time_d;
+
+    /* get navigation */
+    *navlon = skm->sample[0].KMdefault.longitude_deg;
+    *navlat = skm->sample[0].KMdefault.latitude_deg;
+
+    /* get speed */
+    *speed = 3.6 * sqrt(skm->sample[0].KMdefault.velNorth
+                          * skm->sample[0].KMdefault.velNorth
+                        + skm->sample[0].KMdefault.velEast
+                          * skm->sample[0].KMdefault.velEast);
+
+    /* get heading */
+    *heading = skm->sample[0].KMdefault.heading_deg;
+
+    /* get draft  */
+    if (mb_io_ptr->nsensordepth > 0) {
+      mb_depint_interp(verbose, mbio_ptr, *time_d, draft, error);
+      *heave = 0.0;
+    } else {
+      *draft = mrz->pingInfo.txTransducerDepth_m;
+    }
+
+    /* get attitude  */
+    *roll = skm->sample[0].KMdefault.roll_deg;
+    *pitch = skm->sample[0].KMdefault.pitch_deg;
+    *heave = skm->sample[0].KMdefault.heave_m;
+
+    /* done translating values */
+  }
+
+  /* extract data from CPO record */
+  else if (*kind == MB_DATA_NAV3) {
     /* get time */
     for (int i = 0; i < 7; i++)
       time_i[i] = store->time_i[i];
@@ -2354,6 +2502,44 @@ int mbsys_kmbes_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int n
     /* done translating values */
   }
 
+  else if (*kind == MB_DATA_NAV2) {
+    *n = MIN(skm->infoPart.numSamplesArray, MB_NAV_MAX);
+
+    for (int i = 0; i < *n; i++) {
+      /* get time */
+      time_d[i] = skm->sample[i].KMdefault.time_sec + 0.000000001 * skm->sample[i].KMdefault.time_nanosec;
+      mb_get_date(verbose, time_d[i], &time_i[7*i]);
+
+      /* get navigation */
+      navlon[i] = skm->sample[i].KMdefault.longitude_deg;
+      navlat[i] = skm->sample[i].KMdefault.latitude_deg;
+
+      /* get speed */
+      speed[i] = 3.6 * sqrt(skm->sample[i].KMdefault.velNorth
+                            * skm->sample[i].KMdefault.velNorth
+                          + skm->sample[i].KMdefault.velEast
+                            * skm->sample[i].KMdefault.velEast);
+
+      /* get heading */
+      heading[i] = skm->sample[i].KMdefault.heading_deg;
+
+      /* get draft  */
+      if (mb_io_ptr->nsensordepth > 0) {
+        mb_depint_interp(verbose, mbio_ptr, time_d[i], &draft[i], error);
+        heave[i] = 0.0;
+      } else {
+        draft[i] = mrz->pingInfo.txTransducerDepth_m;
+      }
+
+      /* get attitude  */
+      roll[i] = skm->sample[i].KMdefault.roll_deg;
+      pitch[i] = skm->sample[i].KMdefault.pitch_deg;
+      heave[i] = skm->sample[i].KMdefault.heave_m;
+    }
+
+    /* done translating values */
+  }
+
   /* extract data from heading record */
   else if (*kind == MB_DATA_HEADING) {
     *n = sha->dataInfo.numSamplesArray;
@@ -2546,6 +2732,26 @@ int mbsys_kmbes_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 
   /* insert data in nav structure */
   else if (store->kind == MB_DATA_NAV2) {
+    if (store->time_d != time_d) {
+      skm->header.time_sec = (unsigned int)floor(time_d);
+      skm->header.time_nanosec = (unsigned int)((time_d - (double)skm->header.time_sec) * 1.0e9);
+    }
+    for (int i = 0; i < 7; i++)
+      store->time_i[i] = time_i[i];
+    store->time_d = time_d;
+
+    /* get navigation */
+    skm->sample[0].KMdefault.longitude_deg = navlon;
+    skm->sample[0].KMdefault.latitude_deg = navlat;
+
+    /* get heading */
+    skm->sample[0].KMdefault.heading_deg = heading;
+
+    /* get speed  */
+  }
+
+  /* insert data in nav structure */
+  else if (store->kind == MB_DATA_NAV3) {
     if (store->time_d != time_d) {
       cpo->header.time_sec = (unsigned int)floor(time_d);
       cpo->header.time_nanosec = (unsigned int)((time_d - (double)cpo->header.time_sec) * 1.0e9);

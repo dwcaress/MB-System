@@ -88,7 +88,7 @@
 #define MBOTPS_MODE_NAVIGATION          0x01
 #define MBOTPS_MODE_TIDESTATION         0x02
 #define MBOTPS_MODE_NAV_WRT_STATION     0x03
-#define MBOTPS_DEFAULT_MODEL "tpxo9_atlas"
+#define MBOTPS_DEFAULT_MODEL "tpxo10_atlas"
 
 static char program_name[] = "mbotps";
 static char help_message[] =
@@ -135,8 +135,12 @@ int main(int argc, char **argv) {
   strcpy(otps_location_use, otps_location);
 
   // Set defaults for the AUV survey we were running on Coaxial Segment, Juan de Fuca Ridge
+  mb_path otps_model = "";
   bool otps_model_set = false;
-  mb_path otps_model = MBOTPS_DEFAULT_MODEL;
+  bool otps_model_set_installed = false;
+  bool otps_model_default_installed = false;
+  mb_path otps_model_other = "";
+  bool otps_model_other_installed = false;
   mb_path tide_file = "tide_model.txt";
   double tidelon = -129.588618;
   double tidelat = 46.50459;
@@ -200,7 +204,7 @@ int main(int argc, char **argv) {
         case 'F':
         case 'f':
           sscanf(optarg, "%d", &format);
-      break;
+      	  break;
         case 'I':
         case 'i':
           sscanf(optarg, "%s", read_file);
@@ -264,16 +268,15 @@ int main(int argc, char **argv) {
   /* Check for available tide models */
   if (help || verbose > 0) {
     fprintf(stderr, "\nChecking for available OTPS tide models\n");
-    fprintf(stderr, "  OTPS location: %s\n  Default OTPS model name: %s\n  Possible OTPS tidal models:\n",
-            otps_location_use, MBOTPS_DEFAULT_MODEL);
+    fprintf(stderr, "  OTPS location: %s\n  Default OTPS model name: %s\n  Specified OTPS model name: %s\n  Possible OTPS tidal models:\n",
+            otps_location_use, MBOTPS_DEFAULT_MODEL, otps_model);
   }
 
   int notpsmodels = 0;
 
   {
     mb_command command = "";
-    snprintf(command, sizeof(command), "/bin/ls -1 %s/DATA | grep Model_ | sed \"s/^Model_//\"", otps_location_use);
-
+    snprintf(command, sizeof(command), "/bin/ls -1 %s/DATA 2>/dev/null | grep Model_ | sed \"s/^Model_//\"", otps_location_use);
     FILE *tfp = popen(command, "r");
     if (tfp == NULL) {
       // error = MB_ERROR_OPEN_FAIL;
@@ -285,11 +288,14 @@ int main(int argc, char **argv) {
     /* send relevant input to predict_tide through its stdin stream */
     mb_path line = "";
     while (fgets(line, sizeof(line), tfp)) {
+      line[strcspn(line, "\r\n")] = 0;
       mb_path modelname = "";
       sscanf(line, "%s", modelname);
       mb_command modelfile = "";
       snprintf(modelfile, sizeof(modelfile), "%s/DATA/Model_%s", otps_location_use, modelname);
-      fprintf(stderr, "    %s", modelname);
+	  if (help || verbose > 0) {
+        fprintf(stderr, "    %s", modelname);
+	  }
 
       /* check the files referenced in the model file */
       int nmodeldatafiles = 0;
@@ -297,6 +303,7 @@ int main(int argc, char **argv) {
       if (mfp != NULL) {
         /* stat the file referenced in each line */
         while (fgets(line, sizeof(line), mfp) != NULL) {
+          line[strcspn(line, "\r\n")] = 0;
           char modeldatafile[2*MB_PATHPLUS_MAXLINE] = "";
           sscanf(line, "%s", modeldatafile);
           if (line[0] == '/') {
@@ -315,28 +322,45 @@ int main(int argc, char **argv) {
         }
         fclose(mfp);
       }
-      if (help || verbose > 0) {
-        if (nmodeldatafiles >= 3) {
-          fprintf(stderr, " <installed>\n");
-        } else {
-          fprintf(stderr, " <not installed>\n");
-        }
-      }
       if (nmodeldatafiles >= 3) {
-        if (!otps_model_set &&
-            (notpsmodels == 0 || strcmp(modelname, MBOTPS_DEFAULT_MODEL) == 0)) {
-            strcpy(otps_model, modelname);
+        if (otps_model_set && strcmp(modelname, otps_model) == 0) {
+          otps_model_set_installed = true;
+        }
+        else if (strcmp(modelname, MBOTPS_DEFAULT_MODEL) == 0) {
+          otps_model_default_installed = true;
+        }
+        else {
+          strncpy(otps_model_other, modelname, sizeof(otps_model_other));
+          otps_model_other_installed = true;
+        }
+	    if (help || verbose > 0) {
+          fprintf(stderr, " <installed>\n");
         }
         notpsmodels++;
+      }
+      else {
+	    if (help || verbose > 0) {
+          fprintf(stderr, " <not installed>\n");
+        }
       }
     }
 
     /* close the process */
     pclose(tfp);
+    
+    /* settle which model to use */
+    if (!otps_model_set_installed) {
+      if (otps_model_default_installed) {
+        strncpy(otps_model, MBOTPS_DEFAULT_MODEL, sizeof(otps_model));
+      }
+      else if (otps_model_other_installed) {
+        strncpy(otps_model, otps_model_other, sizeof(otps_model));
+      }
+    }
   }
   if (help || verbose > 0) {
     fprintf(stderr, "  Number of available OTPS tide models: %d\n", notpsmodels);
-    fprintf(stderr, "Using OTPS tide model:                %s\n", otps_model);
+    fprintf(stderr, "\nUsing OTPS tide model:  %s\n", otps_model);
   }
 
   /* exit if no valid OTPS models can be found */

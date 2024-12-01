@@ -22,6 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.2beta18    November 26, 2024
 - Version 5.8.2beta17    November 7, 2024
 - Version 5.8.2beta16    November 6, 2024
 - Version 5.8.2beta15    October 1, 2024
@@ -50,7 +51,26 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 ---
 
-#### 5.8.2beta16 (November 7, 2024)
+#### 5.8.2beta18 (November 26, 2024)
+
+Format MBF_KEMKALL (261): Augmented the i/o module to read and write an undocumented kmall
+data record (#MSC) found in EM124 data collected by NERC. Without documentation the record
+cannot be parsed, but it is read and rewritten without modification.
+
+Format MBF_KEMKMALL (261): Fixed failure to differentiate between #SKM records from different
+navigation + heading + attitude systems. If a platform has two navation/attitude systems, then
+the first will map to MB_DATA_NAV1 type data, and the second to MB_DATA_NAV2. The default for
+mbpreprocess will be to interpolate from navigation, heading, and attitude data stored in 
+MB_DATA_NAV1 records, which for this format means #SKM datagrams with system id 0 (as opposed 
+to system id 1).
+
+Miscellaneous: Removed top level files "NEWS", "NOTES", and "INSTALL.md". These files existed
+to conform to GNU expectations for a package structure. We are no longer trying to match the
+GNU structure, and so have removed these unnecessary files.
+
+Most SeaBeam Classic formats (MBF_SBSIOMRG, MBF_SBSIOCEN, MBF_SBSIOLSI, MBF_SBURICEN, MBF_SBURIVAX): Added code to handle rare condition where the ping timestamp has a seconds value of 60. Now the code will add one to the minutes value, and set the seconds value to 0.
+
+#### 5.8.2beta17 (November 7, 2024)
 
 Libtrnav (src/mbtrnav/): Additional fixes by Kent Headley to enable building on Ubuntu 24.
 

@@ -1,5 +1,4 @@
 set(tests
-    mb7k2jstar_test
     mb7k2ss_test
     mb7kpreprocess_test
     mbauvnavusbl_test
