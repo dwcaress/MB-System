@@ -7,13 +7,14 @@
 #include <vtk/vtkPolyDataMapper.h>
 #include <vtk/vtkRenderWindow.h>
 #include <vtk/vtkElevationFilter.h>
-#include <vtk/vtkGradientFilter.h>
+//// #include <vtk/vtkGradientFilter.h>
 #include <vtk/vtkLookupTable.h>
 #include <vtk/vtkTransform.h>
 #include <vtk/vtkTransformFilter.h>
 #include <vtk/vtkCubeAxesActor.h>
 #include <vtk/vtkNamedColors.h>
 
+#include "SlopeFilter.h"
 #include "TopoGridReader.h"
 #include "TopoColorMap.h"
 
@@ -42,7 +43,7 @@ namespace mb_system {
       vtkNew<mb_system::TopoGridReader> gridReader_;
 
       vtkNew<vtkElevationFilter> elevFilter_;
-      vtkNew<vtkGradientFilter> gradientFilter_;      
+      vtkNew<SlopeFilter> slopeFilter_;      
       vtkNew<vtkLookupTable> elevLookupTable_;
       vtkNew<vtkActor> surfaceActor_;
       vtkNew<vtkPolyDataMapper> surfaceMapper_;
@@ -95,6 +96,7 @@ namespace mb_system {
     Q_INVOKABLE void setDisplayedSurface(DisplayedSurface surfaceType) {
       qDebug() << "setDisplayedSurface to " << surfaceType;
       displayedSurface_ = surfaceType;
+      reassemblePipeline();
     }
     
 
@@ -131,6 +133,11 @@ namespace mb_system {
 		   const char *zUnits,
 		   bool geographicCRS);
 
+    /// Print polydata output of pipeline algorithm
+    void printPolyDataOutput(vtkDataSetAlgorithm *algorithm,
+			     const char *outputName);
+
+    
     /// Name of source grid file
     char *gridFilename_;
 
