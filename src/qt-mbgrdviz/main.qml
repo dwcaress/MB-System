@@ -26,6 +26,11 @@ Window {
     exclusive: true
   }
 
+  ActionGroup {
+      id: exclusiveActions
+      exclusive: true
+  }
+    
   MenuBar {
      id: menuBar
      
@@ -56,7 +61,22 @@ Window {
 	   onTriggered: {topoGridItem.showAxes(checked)}
 	 }
        }
-       
+
+       Menu {
+         title: qsTr('Displayed surface')
+	 
+	 Action {
+	   text: qsTr('&Topography'); checkable: true;
+	   ActionGroup.group: exclusiveActions
+	   onTriggered: { topoGridItem.setDisplayedSurface(TopoGridItem.Elevation) }	   
+	 }
+	 Action {
+	   text: qsTr('&Slope'); checkable: true;
+	   ActionGroup.group: exclusiveActions
+	   onTriggered: { topoGridItem.setDisplayedSurface(TopoGridItem.Gradient) }
+	 }
+       }
+
        Menu {
          title: qsTr('&Color map')
 	 id: colormapMenu
