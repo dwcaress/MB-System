@@ -64,6 +64,7 @@ set(src
     CPixmapDrawer.cpp
     PixmapImage.cpp
     SharedConstants.cpp
+    SlopeFilter.cpp
     resources.qrc)
 
 add_library(MBGui ${src})
