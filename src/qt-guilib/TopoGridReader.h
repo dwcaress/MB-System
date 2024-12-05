@@ -111,14 +111,15 @@ namespace mb_system {
     /// Load data from source into vtkDataSet. This function *must* call
     /// VtkAlgorithm::SetErrorCode() in case it encounters errors,
     /// so that apps that call vtkPolyDataAlgorithm::Update() can check for
-    /// errors by calling vtkAlgorithm::GetErrorCode().
+    /// errors by calling vtkAlgorithm::GetErrorCode(). Data is provided as
+    /// vtkPoints and vtkCellArray.
     int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
 		    vtkInformationVector* outputVector) override;
   
     /// Read data from file into GridData. Returns nullptr on error
     static TopoGridData *readGridFile(const char *file);
 
-    /// Return true if specified any of the triangle vertex IDs refer to
+    /// Return true if any of the specified triangle vertex IDs refer to
     /// missing z-values
     bool triangleMissingZValues(vtkIdType *triangleVertices);
     

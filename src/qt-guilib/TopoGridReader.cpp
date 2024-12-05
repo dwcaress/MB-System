@@ -278,6 +278,7 @@ int TopoGridReader::RequestData(vtkInformation* request,
       }
     }
   }
+  std::cerr << "nValidPoints=" << nValidPoints << "\n";
   
 
   double bounds[6];
@@ -302,7 +303,7 @@ int TopoGridReader::RequestData(vtkInformation* request,
       triangleVertexId[0] = gridOffset(nRows, nColumns, row, col);
       triangleVertexId[1] = gridOffset(nRows, nColumns, row, col+1);
       triangleVertexId[2] = gridOffset(nRows, nColumns, row+1, col+1);
-      // If any of this trianagle's vertices refer to point with no z-data,
+      // If any of this triangle's vertices refer to point with no z-data,
       // then do not insert triangle into gridPolygons
       if (!gridMissingZValues || !triangleMissingZValues(triangleVertexId)) {
         gridPolygons_->InsertNextCell(3, triangleVertexId);
@@ -320,10 +321,18 @@ int TopoGridReader::RequestData(vtkInformation* request,
     }
   }
 
-  // Save to object's points and polygons
+  // Save to object's points and polygons (need to output both for
+  // downstream processing)
   polyOutput->SetPoints(gridPoints_);
   polyOutput->SetPolys(gridPolygons_);
-  // polyOutput->SetPolys(delaunay->GetOutput());
+
+  std::cerr << "TopoGridReader::RequestData() nPoints: "
+	    << gridPoints_->GetNumberOfPoints()
+    	    << std::endl;
+
+  std::cerr << "TopoGridReader::RequestData() nCells: "
+	    << gridPolygons_->GetNumberOfCells()
+    	    << std::endl;
   
   std::cerr << "TopoGridReader::RequestData() - done" << std::endl;
 
@@ -502,11 +511,12 @@ bool TopoGridReader::triangleMissingZValues(vtkIdType *vertices) {
   for (int v = 0; v < 3; v++) {
     point = gridPoints_->GetPoint(vertices[v]);
     if (point[2] == TopoGridData::NoData) {
+      // Missing at least one z-value
       return true;
     }
   }
 
-  // Vertices not missing z-values
+  // Vertices not missing any z-values
   return false;
 }
 
