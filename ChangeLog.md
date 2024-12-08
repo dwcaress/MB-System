@@ -22,7 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
-- Version 5.8.2beta18    November 26, 2024
+- Version 5.8.2beta18    December 8, 2024
 - Version 5.8.2beta17    November 7, 2024
 - Version 5.8.2beta16    November 6, 2024
 - Version 5.8.2beta15    October 1, 2024
@@ -51,7 +51,10 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 ---
 
-#### 5.8.2beta18 (November 26, 2024)
+#### 5.8.2beta18 (December 8, 2024)
+
+MBlist: Fixed a critical bug in which mblist would never output from processed files 
+specified through a datalist using the $PROCESSED tag.
 
 Format MBF_KEMKALL (261): Augmented the i/o module to read and write an undocumented kmall
 data record (#MSC) found in EM124 data collected by NERC. Without documentation the record
