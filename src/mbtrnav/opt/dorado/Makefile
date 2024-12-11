@@ -1,4 +1,5 @@
 ########################################
+# /opt/dorado Makefile
 # Build Environment
 # version and build configuration
 
@@ -10,31 +11,14 @@ trn_build=`date +%Y/%m/%dT%H:%M:%S%z`
 OPT_TRN_VER=-DLIBTRN_VERSION=$(trn_ver)
 OPT_TRN_BUILD=-DLIBTRN_BUILD=$(trn_build)
 
+LIBTRNAV_TOP = ../..
+ifndef COMMON_DEFS
+include ${LIBTRNAV_TOP}/Makefile.common
+endif
+
 # C standard e.g. -std=c99 -std=gnu99
 # may be needed for Cygwin (e.g. for loop declare/init)
 #STD= -std=c99
-
-# Platform-specific options
-ifeq ($(shell uname),Linux)
- OS_CFLAGS=
- OS_INC_PATH=
- OS_LIB_PATH=
- OS_LIBS=-lrt
-endif
-
-ifeq ($(shell uname),Darwin)
-OS_CFLAGS=
-OS_INC_PATH=-I/opt/local/include
-OS_LIB_PATH=-L/opt/local/lib
-OS_LIBS=
-endif
-
-ifeq ($(shell uname),Cygwin)
-OS_CFLAGS=
-OS_INC_PATH=-I/opt/local/include
-OS_LIB_PATH=-L/opt/local/lib
-OS_LIBS=-lrt
-endif
 
 # Build options
 BUILD_OPTIONS = $(STD) -D_GNU_SOURCE  $(OPT_TRN_VER) $(OPT_TRN_BUILD)
@@ -60,12 +44,25 @@ SANI_FLAG =
 #SANI_FLAG += -fsanitize=address
 
 # Compiler flags
-CFLAGS = -g -O2 $(SANI_FLAG) $(WARN_FLAGS) $(GPROF) $(BUILD_OPTIONS) $(OS_CFLAGS)
-INC_PATHS =  -I.  -I$(NEWMAT_DIR) -I$(QNX_DIR) -I$(TRN_DIR) -I$(UTILS_DIR) $(OS_INC_PATH)
+CFLAGS = -g -O2 $(SANI_FLAG) $(WARN_FLAGS) $(GPROF) $(BUILD_OPTIONS) $(OPT_OS_CFLAGS)
+INC_PATHS =  -I.  -I$(NEWMAT_DIR) -I$(QNX_DIR) -I$(TRN_DIR) -I$(UTILS_DIR)  $(OPT_OS_INC)
 
 # Linker flags
-LD_FLAGS = -g $(GPROF)
-LIB_PATHS = -L$(OUTPUT_DIR) $(OS_LIB_PATH) -L/usr/local/lib
+LD_FLAGS = -g $(GPROF) $(OPT_OS_LDFLAGS)
+LIB_PATHS = -L$(OUTPUT_DIR) $(OPT_OS_LIB)
+
+ifdef buildDebug
+$(info "INFO +++ dorado - OS_PREFIX          ${OS_PREFIX}")
+$(info "INFO +++ dorado - OPT_OS_CFLAGS      ${OPT_OS_CFLAGS}")
+$(info "INFO +++ dorado - OPT_OS_LDFLAGS     ${OPT_OS_LDFLAGS}")
+$(info "INFO +++ dorado - OPT_OS_INC         ${OPT_OS_INC}")
+$(info "INFO +++ dorado - OPT_OS_LIB         ${OPT_OS_LIB}")
+$(info "INFO +++ dorado - OPT_OS_LIBS        ${OPT_OS_LIBS}")
+$(info "INFO +++        - CFLAGS             ${CFLAGS}")
+$(info "INFO +++        - INC_PATHS          ${INC_PATHS}")
+$(info "INFO +++        - LD_FLAGS           ${LD_FLAGS}")
+$(info "INFO +++        - LIB_PATHS          ${LIB_PATHS}")
+endif
 
 ########################################
 # Target Definitions
@@ -76,12 +73,12 @@ LIB_TNAVC_OBJ=$(BUILD_DIR)/TerrainNavClient.o $(BUILD_DIR)/TRNUtils.o
 MBARI_MAIN=mbari-main
 MBARI_MAIN_SRC=mainMbari.cpp
 MBARI_MAIN_OBJ = $(MBARI_MAIN_SRC:%.cpp=$(BUILD_DIR)/%.o)
-MBARI_MAIN_LIBS = -ltnavc -ltrn  -lnewmat -lqnx -lnetcdf -lm -lpthread $(OS_LIBS)
+MBARI_MAIN_LIBS = -ltnavc -ltrn  -lnewmat -lqnx -lnetcdf -lm -lpthread $(OPT_OS_LIBS)
 
 REPLAY=trn-replay
 REPLAY_SRC=Replay.cpp trn_replay.cpp
 REPLAY_OBJ = $(REPLAY_SRC:%.cpp=$(BUILD_DIR)/%.o)
-REPLAY_LIBS = -ltrn  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeolib -ltrncli $(OS_LIBS)
+REPLAY_LIBS = -ltrn  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeolib -ltrncli $(OPT_OS_LIBS)
 
 ########################################
 # Build Files (mostly for cleanup)
@@ -92,7 +89,7 @@ OBJECTS = $(SOURCES:%.cpp=$(BUILD_DIR)/%.o)
 DEPENDS = $(SOURCES:%.cpp=$(BUILD_DIR)/%.d)
 LIBS = $(OUTPUT_DIR)/$(LIB_TNAVC)
 BINARIES =  $(OUTPUT_DIR)/$(MBARI_MAIN) \
-			$(OUTPUT_DIR)/$(REPLAY) \
+			$(OUTPUT_DIR)/$(REPLAY)
 
 CLEANUP = gmon.out
 # dSYMs : XCode debug symbol file folders
