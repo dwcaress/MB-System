@@ -72,7 +72,7 @@ MST_STATS_EN
 #WITH_TNAVPF_CEP_CORRECTION
 WITH_TRNLOG
 WITH_TRNLOG_EST_OUT
-WITH_TNAVPF_CEP_CORRECTION)
+)
 
 #------------------------------------------------------------------------------
 #
