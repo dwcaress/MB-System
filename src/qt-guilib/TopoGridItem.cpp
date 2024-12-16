@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <climits>
 #include <vtk/vtkProperty.h>
 #include <vtk/vtkTextProperty.h>
 #include <vtk/vtkErrorCode.h>
@@ -236,7 +237,6 @@ void TopoGridItem::assemblePipeline(TopoGridItem::Pipeline *pipeline) {
   // Preserve scalar values (keep minZ/maxZ range)
   pipeline->elevFilter_->SetScalarRange(gridBounds[4], gridBounds[5]);    
 
-
   double minVal = gridBounds[4];
   double maxVal = gridBounds[5];
   
@@ -249,35 +249,15 @@ void TopoGridItem::assemblePipeline(TopoGridItem::Pipeline *pipeline) {
     pipeline->slopeFilter_->SetInputConnection(pipeline->elevFilter_->
 					       GetOutputPort());
 
-    qDebug() << "connected slopeFilter input to gridReader output port";
-
-
-    qDebug() << "set surfaceMapper input to slopeFilter output port:";
+    qDebug() << "connected slopeFilter input to elevFilter output port";
+    
+    printPolyDataOutput(pipeline->slopeFilter_, "slopeFilter");
+    
     pipeline->surfaceMapper_->SetInputConnection(pipeline->slopeFilter_->
-					       GetOutputPort());
+						 GetOutputPort());
     
-    
-    qDebug() << "connected surfaceMapper input to slopeFilter output port";
-    
-    /// DEBUG ///
-    //    printPolyDataOutput(pipeline->slopeFilter_, "slopeFilter");
-
-    vtkDataSet *dataSet = pipeline->slopeFilter_->GetOutput();
-    vtkPointData *pointData = dataSet->GetPointData();
-    vtkCellData *cellData = dataSet->GetCellData();
-    if (pointData) {
-      std::cerr << "slopeFilter pointData:\n";      
-      pointData->Print(std::cerr);
-    }
-    else {
-      std::cerr << "no slopeFilter pointData\n";
-    }
-
-    std::cerr << "mapper->GetArrayName(): " <<
-      pipeline->surfaceMapper_->GetArrayName() << "\n";
-
     pipeline->surfaceMapper_->SetArrayAccessMode(VTK_GET_ARRAY_BY_NAME);
-    pipeline->surfaceMapper_->SelectColorArray("Gradients");
+    pipeline->surfaceMapper_->SelectColorArray("Slopes");
     
     std::cerr << "now mapper->GetArrayName(): " <<
       pipeline->surfaceMapper_->GetArrayName() << "\n";
@@ -285,10 +265,9 @@ void TopoGridItem::assemblePipeline(TopoGridItem::Pipeline *pipeline) {
     std::cerr << "surfaceMapper: ";
     pipeline->surfaceMapper_->Print(std::cerr);
     
-    
     // Bogus min/max gradient values
     minVal = 0.;
-    maxVal = 100.;
+    maxVal = RAND_MAX;  // TEST TEST TEST
   }
   else {
     std::cerr << "connect surfaceMapper to elevFilter output port\n";
@@ -374,23 +353,19 @@ void TopoGridItem::showAxes(bool plotAxes) {
 void TopoGridItem::printPolyDataOutput(vtkDataSetAlgorithm *algorithm,
 				 const char *outputName) {
 
+  std::cerr << "---- printPolyDataOutput() for " << outputName << "\n";
+    
   algorithm->Update();
+
+  algorithm->Print(std::cerr);
+
   vtkPolyData *polyData = algorithm->GetPolyDataOutput();
-  vtkCellArray *cells = polyData->GetPolys();
   vtkPoints *points = polyData->GetPoints();
+  vtkCellArray *cells = polyData->GetPolys();
 
   double bounds[6];
-  
-  if (cells) {
-    std::cerr << "#cells in " << outputName << "output: " <<
-      cells->GetNumberOfCells() << "\n";
-  }
-  else {
-    std::cerr << "no cells in " << outputName << "output\n";
-  }
-
   if (points) {
-    std::cerr << "#points in " << outputName << "output: " <<
+    std::cerr << "#points in " << outputName << " output: " <<
       points->GetNumberOfPoints() << "\n";
 
     // Compute x, y, z bounds
@@ -406,19 +381,48 @@ void TopoGridItem::printPolyDataOutput(vtkDataSetAlgorithm *algorithm,
       
   }
   else {
-    std::cerr << "no points in " << outputName << "output\n";    
-  }
-
-  vtkDataSet* dataSet = algorithm->GetOutput();
-  vtkCellData* cellData = dataSet->GetCellData();
-  vtkDataArray* dataArray = cellData->GetScalars();
-  if (dataArray) {
-    std::cerr << outputName << " cells have " <<
-      dataArray->GetNumberOfComponents() << " scalar field(s)." << "\n";
-  }
-  else {
-    std::cerr << outputName << " has no cell data scalars\n";
+    std::cerr << "no points in " << outputName << " output\n";    
   }
   
+  if (cells) {
+    std::cerr << "#cells in " << outputName << " output: " <<
+      cells->GetNumberOfCells() << "\n";
+  }
+  else {
+    std::cerr << "no cells in " << outputName << " output\n";
+  }
+
+  vtkDataArray *dataArray = nullptr;
+  vtkDataSet* dataSet = algorithm->GetOutput();
+  vtkPointData *pointData = dataSet->GetPointData();
+  
+  if (pointData) {
+    std::cerr << outputName << " pointData:\n";
+    pointData->Print(std::cerr);
+    dataArray = pointData->GetScalars();
+    if (dataArray) {
+      dataArray->Print(std::cerr);
+    }
+    else {
+      std::cerr << outputName << " has no point data scalars\n";
+    }
+  }
+  else {
+    std::cerr << outputName << " has no pointData\n";
+  }
+  
+  vtkCellData* cellData = dataSet->GetCellData();
+  if (cellData) {
+    std::cerr << outputName << " cellData:\n";
+    cellData->Print(std::cerr);
+    dataArray = cellData->GetScalars();
+    if (dataArray) {
+      dataArray->Print(std::cerr);
+    }
+    else {
+      std::cerr << outputName << " has no cell data scalars\n";
+    }
+  }
+  std::cerr << "---- printPolyDataOutput() done\n";
 }
 
