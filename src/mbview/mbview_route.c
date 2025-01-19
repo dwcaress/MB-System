@@ -1942,7 +1942,7 @@ int mbview_route_add(int verbose, size_t instance, int inew, int jnew, int waypo
 			}
 		}
 
-		/* set distance values */
+		/* set or reset distance values */
 		mbview_route_setdistance(instance, inew);
 
 		/* make routes viewable */
@@ -2292,13 +2292,12 @@ int mbview_route_setdistance(size_t instance, int working_route) {
 			routelon1 -= 360.0;
 		routelat1 = route->points[j].ylat;
 		routetopo1 = route->points[j].zdata;
-		mbview_projectdistance(instance, routelon0, routelat0, routetopo0, routelon1, routelat1, routetopo1, &distlateral,
+		if (j > 0) {
+		  mbview_projectdistance(instance, routelon0, routelat0, routetopo0, routelon1, routelat1, routetopo1, &distlateral,
 		                       &distovertopo, &routeslope);
-		route->distancelateral += distlateral;
-		route->distancetopo += distovertopo;
-		routelon0 = routelon1;
-		routelat0 = routelat1;
-		routetopo0 = routetopo1;
+		  route->distancelateral += distlateral;
+		  route->distancetopo += distovertopo;
+		}
 		route->nroutepoint++;
 
 		/* set distances for route waypoint */

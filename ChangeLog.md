@@ -22,6 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.2beta19    January 19, 2025
 - Version 5.8.2beta18    December 8, 2024
 - Version 5.8.2beta17    November 7, 2024
 - Version 5.8.2beta16    November 6, 2024
@@ -50,6 +51,26 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.2beta19 (January 19, 2025)
+
+Program mbgrdviz: Fixed bug in which routes might not be exported correctly when multiple
+routes are exported to a single route file.
+
+Program mbgrdviz: Fixed error messages indicating failed projection of some soundings.
+
+Program mbpreprocess: Fixed crash when preprocessing third generation Kongsberg 
+multibeam data (*.all files, formats 58 and 59) using a platform model defined in a
+platform file created by mbmakeplatform.
+
+Program mbgrid: Reduced the default verbosity so that the shell output only lists files
+with data actually used in the gridding.
+
+Format 121 (Generic Sensor Format (GSF)): Fixed crashes that occurred when processing GSF
+files derived from Teledyne Reson multibeam data.
+
+Format 89 (Teledyne Reson and Norbit (*.s7k)): Handles the lack of a FileHeader record in
+Norbit multibeam data recorded in the s7k format.
 
 #### 5.8.2beta18 (December 8, 2024)
 

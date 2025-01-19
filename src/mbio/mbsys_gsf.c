@@ -811,15 +811,17 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 			}
 
     	/* read multibeam sidescan into storage arrays */
-    	int k = 0;
-    	for (int i = 0; i < nbath; i++) {
-			gsfTimeSeriesIntensity *snippet = &(mb_ping->brb_inten->time_series[i]);
-			for (int j = 0; j < snippet->sample_count; j++) {
-        		if (k < nss) {
-          			snippet->samples[j] = ss[k];
-			    	k++;
-        		}
-      		}
+    	if (nss > 0 && mb_ping->brb_inten != NULL) {
+			int k = 0;
+			for (int i = 0; i < nbath; i++) {
+				gsfTimeSeriesIntensity *snippet = &(mb_ping->brb_inten->time_series[i]);
+				for (int j = 0; j < snippet->sample_count; j++) {
+					if (k < nss) {
+						snippet->samples[j] = ss[k];
+						k++;
+					}
+				}
+			}
 		}
 
 		/* reset GSF scale factors if needed */
