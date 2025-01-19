@@ -7984,66 +7984,89 @@ int mbr_reson7k3_rd_FileHeader(int verbose, char *buffer, void *store_ptr, int *
   struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   s7k3_FileHeader *FileHeader = &(store->FileHeader);
   s7k3_header *header = &(FileHeader->header);
-
+  
   /* extract the header */
   int index = 0;
   int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
-
+  
+  /* if the FileHeader record data is missing reset the values to conform to the 
+  		specification, else extract the data */
+  if (header->Size <= header->Offset + 8) {
+    FileHeader->file_identifier[0] = 0;
+    FileHeader->file_identifier[1] = 0;
+    FileHeader->version = 1;
+    FileHeader->reserved = 0;
+    FileHeader->session_identifier[0] = 0;
+    FileHeader->session_identifier[1] = 0;
+    FileHeader->record_data_size = 0;
+    FileHeader->number_devices = 0;
+    memset(FileHeader->recording_name, 0, (size_t)64);
+    memset(FileHeader->recording_version, 0, (size_t)16);
+    memset(FileHeader->user_defined_name, 0, (size_t)64);
+    memset(FileHeader->notes, 0, (size_t)128);
+    header->OptionalDataOffset = 0;
+	FileHeader->optionaldata = false;
+	FileHeader->file_catalog_size = 0;
+	FileHeader->file_catalog_offset = 0;
+  }
+  
   /* extract the data */
-  index = header->Offset + 4;
-  for (unsigned int i = 0; i < 2; i++) {
-    mb_get_binary_long(true, &buffer[index], &(FileHeader->file_identifier[i]));
-    index += 8;
-  }
-  mb_get_binary_short(true, &buffer[index], &(FileHeader->version));
-  index += 2;
-  mb_get_binary_short(true, &buffer[index], &(FileHeader->reserved));
-  index += 2;
-  for (unsigned int i = 0; i < 2; i++) {
-    mb_get_binary_long(true, &buffer[index], &(FileHeader->session_identifier[i]));
-    index += 8;
-  }
-  mb_get_binary_int(true, &buffer[index], &(FileHeader->record_data_size));
-  index += 4;
-  mb_get_binary_int(true, &buffer[index], &(FileHeader->number_devices));
-  index += 4;
-  for (unsigned int i = 0; i < 64; i++) {
-    FileHeader->recording_name[i] = buffer[index];
-    index++;
-  }
-  for (unsigned int i = 0; i < 16; i++) {
-    FileHeader->recording_version[i] = buffer[index];
-    index++;
-  }
-  for (unsigned int i = 0; i < 64; i++) {
-    FileHeader->user_defined_name[i] = buffer[index];
-    index++;
-  }
-  for (unsigned int i = 0; i < 128; i++) {
-    FileHeader->notes[i] = buffer[index];
-    index++;
-  }
-  for (unsigned int i = 0; i < FileHeader->number_devices; i++) {
-    subsystem = &(FileHeader->subsystem[i]);
-    mb_get_binary_int(true, &buffer[index], &(subsystem->device_identifier));
-    index += 4;
-    mb_get_binary_short(true, &buffer[index], &(subsystem->system_enumerator));
-    index += 2;
-  }
-
-  /* extract the optional data */
-  if (header->OptionalDataOffset > 0) {
-    index = header->OptionalDataOffset;
-    FileHeader->optionaldata = true;
-    mb_get_binary_int(true, &buffer[index], &(FileHeader->file_catalog_size));
-    index += 4;
-    mb_get_binary_long(true, &buffer[index], &(FileHeader->file_catalog_offset));
-    index += 8;
-  }
   else {
-    FileHeader->optionaldata = false;
-    FileHeader->file_catalog_size = 0;
-    FileHeader->file_catalog_offset = 0;
+	index = header->Offset + 4;
+	for (unsigned int i = 0; i < 2; i++) {
+	  mb_get_binary_long(true, &buffer[index], &(FileHeader->file_identifier[i]));
+	  index += 8;
+	}
+	mb_get_binary_short(true, &buffer[index], &(FileHeader->version));
+	index += 2;
+	mb_get_binary_short(true, &buffer[index], &(FileHeader->reserved));
+	index += 2;
+	for (unsigned int i = 0; i < 2; i++) {
+	  mb_get_binary_long(true, &buffer[index], &(FileHeader->session_identifier[i]));
+	  index += 8;
+	}
+	mb_get_binary_int(true, &buffer[index], &(FileHeader->record_data_size));
+	index += 4;
+	mb_get_binary_int(true, &buffer[index], &(FileHeader->number_devices));
+	index += 4;
+	for (unsigned int i = 0; i < 64; i++) {
+	  FileHeader->recording_name[i] = buffer[index];
+	  index++;
+	}
+	for (unsigned int i = 0; i < 16; i++) {
+	  FileHeader->recording_version[i] = buffer[index];
+	  index++;
+	}
+	for (unsigned int i = 0; i < 64; i++) {
+	  FileHeader->user_defined_name[i] = buffer[index];
+	  index++;
+	}
+	for (unsigned int i = 0; i < 128; i++) {
+	  FileHeader->notes[i] = buffer[index];
+	  index++;
+	}
+	for (unsigned int i = 0; i < FileHeader->number_devices; i++) {
+	  subsystem = &(FileHeader->subsystem[i]);
+	  mb_get_binary_int(true, &buffer[index], &(subsystem->device_identifier));
+	  index += 4;
+	  mb_get_binary_short(true, &buffer[index], &(subsystem->system_enumerator));
+	  index += 2;
+	}
+  
+	/* extract the optional data */
+	if (header->OptionalDataOffset > 0) {
+	  index = header->OptionalDataOffset;
+	  FileHeader->optionaldata = true;
+	  mb_get_binary_int(true, &buffer[index], &(FileHeader->file_catalog_size));
+	  index += 4;
+	  mb_get_binary_long(true, &buffer[index], &(FileHeader->file_catalog_offset));
+	  index += 8;
+	}
+	else {
+	  FileHeader->optionaldata = false;
+	  FileHeader->file_catalog_size = 0;
+	  FileHeader->file_catalog_offset = 0;
+	}
   }
 
   /* set kind */
