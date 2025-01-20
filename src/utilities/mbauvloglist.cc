@@ -635,11 +635,14 @@ int main(int argc, char **argv) {
 				/* TODO(schwehr): Is something missing? */
 				if (angles_in_degrees &&
 				    (strcmp(fields[nfields].name, "mLonK") == 0   || strcmp(fields[nfields].name, "mLatK") == 0 ||
-             strcmp(fields[nfields].name, "mRollK") == 0  || strcmp(fields[nfields].name, "mPitchK") == 0 ||
-             strcmp(fields[nfields].name, "mHeadK") == 0  || strcmp(fields[nfields].name, "mYawK") == 0 ||
-             strcmp(fields[nfields].name, "mLonCB") == 0  || strcmp(fields[nfields].name, "mLatCB") == 0 ||
-             strcmp(fields[nfields].name, "mRollCB") == 0 || strcmp(fields[nfields].name, "mPitchCB") == 0 ||
-             strcmp(fields[nfields].name, "mHeadCB") == 0 || strcmp(fields[nfields].name, "mYawCB") == 0))
+                    strcmp(fields[nfields].name, "mRollK") == 0  || strcmp(fields[nfields].name, "mPitchK") == 0 ||
+                    strcmp(fields[nfields].name, "mHeadK") == 0  || strcmp(fields[nfields].name, "mYawK") == 0 ||
+                    strcmp(fields[nfields].name, "mLonCB") == 0  || strcmp(fields[nfields].name, "mLatCB") == 0 ||
+                    strcmp(fields[nfields].name, "mRollCB") == 0 || strcmp(fields[nfields].name, "mPitchCB") == 0 ||
+                    strcmp(fields[nfields].name, "mHeadCB") == 0 || strcmp(fields[nfields].name, "mYawCB") == 0 ||
+				    strcmp(fields[nfields].name, "phins_lon") == 0   || strcmp(fields[nfields].name, "phins_lat") == 0 ||
+                    strcmp(fields[nfields].name, "phins_roll") == 0  || strcmp(fields[nfields].name, "phins_pitch") == 0 ||
+                    strcmp(fields[nfields].name, "phins_head") == 0))
 					fields[nfields].scale = RTD;
 				else
 					fields[nfields].scale = 1.0;
@@ -952,8 +955,12 @@ int main(int argc, char **argv) {
             if (strcmp(fields[ii].name, "time") == 0)
               mb_get_binary_double(true, &buffer[fields[ii].index], &time_d);
           }
-          if (time_d < nav_time_d[1] || time_d > nav_time_d[nav_num-2])
+          if (nav_num < 2) {
+          	output_ok = false;
+          }
+          else if (time_d < nav_time_d[1] || time_d > nav_time_d[nav_num-2]) {
             output_ok = false;
+          }
         }
 
         /* calculate timeInterval */

@@ -474,6 +474,12 @@ int mbview_addroute(int verbose, size_t instance, int npoint, double *routelon, 
 
 		/* get route positions in display coordinates */
 		status = mbview_projectll2display(instance, routelon[i], routelat[i], zdata, &xdisplay, &ydisplay, &zdisplay);
+		
+		if (isnan(xdisplay)) {
+			mbv_verbose = 5;
+			status = mbview_projectll2display(instance, routelon[i], routelat[i], zdata, &xdisplay, &ydisplay, &zdisplay);
+			mbv_verbose = 0;
+		}
 
 		/* check for reasonable coordinates */
 		if (fabs(xdisplay) < 1000.0 && fabs(ydisplay) < 1000.0 && fabs(zdisplay) < 1000.0) {
@@ -1809,11 +1815,9 @@ int mbview_route_add(int verbose, size_t instance, int inew, int jnew, int waypo
 					shared.shareddata.routes[i].segments = NULL;
 					status = mb_reallocd(mbv_verbose, __FILE__, __LINE__, shared.shareddata.routes[i].npoints_alloc * sizeof(int),
 					                     (void **)&(shared.shareddata.routes[i].waypoint), &error);
-					status =
-					    mb_reallocd(mbv_verbose, __FILE__, __LINE__, shared.shareddata.routes[i].npoints_alloc * sizeof(double),
+					status = mb_reallocd(mbv_verbose, __FILE__, __LINE__, shared.shareddata.routes[i].npoints_alloc * sizeof(double),
 					                (void **)&(shared.shareddata.routes[i].distlateral), &error);
-					status =
-					    mb_reallocd(mbv_verbose, __FILE__, __LINE__, shared.shareddata.routes[i].npoints_alloc * sizeof(double),
+					status = mb_reallocd(mbv_verbose, __FILE__, __LINE__, shared.shareddata.routes[i].npoints_alloc * sizeof(double),
 					                (void **)&(shared.shareddata.routes[i].disttopo), &error);
 					status = mb_reallocd(mbv_verbose, __FILE__, __LINE__,
 					                     shared.shareddata.routes[i].npoints_alloc * sizeof(struct mbview_pointw_struct),
@@ -1938,7 +1942,7 @@ int mbview_route_add(int verbose, size_t instance, int inew, int jnew, int waypo
 			}
 		}
 
-		/* set distance values */
+		/* set or reset distance values */
 		mbview_route_setdistance(instance, inew);
 
 		/* make routes viewable */
@@ -2288,13 +2292,12 @@ int mbview_route_setdistance(size_t instance, int working_route) {
 			routelon1 -= 360.0;
 		routelat1 = route->points[j].ylat;
 		routetopo1 = route->points[j].zdata;
-		mbview_projectdistance(instance, routelon0, routelat0, routetopo0, routelon1, routelat1, routetopo1, &distlateral,
+		if (j > 0) {
+		  mbview_projectdistance(instance, routelon0, routelat0, routetopo0, routelon1, routelat1, routetopo1, &distlateral,
 		                       &distovertopo, &routeslope);
-		route->distancelateral += distlateral;
-		route->distancetopo += distovertopo;
-		routelon0 = routelon1;
-		routelat0 = routelat1;
-		routetopo0 = routetopo1;
+		  route->distancelateral += distlateral;
+		  route->distancetopo += distovertopo;
+		}
 		route->nroutepoint++;
 
 		/* set distances for route waypoint */

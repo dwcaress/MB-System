@@ -3693,7 +3693,7 @@ int mbsys_reson7k3_print_FileHeader(int verbose, s7k3_FileHeader *FileHeader, in
     fprintf(stderr, "%llx", (long long unsigned) FileHeader->session_identifier[i]);
   fprintf(stderr, "\n");
   fprintf(stderr, "%s     record_data_size:           %d\n", first, FileHeader->record_data_size);
-  fprintf(stderr, "%s     number_subsystems:          %d\n", first, FileHeader->number_devices);
+  fprintf(stderr, "%s     number_devices:             %d\n", first, FileHeader->number_devices);
   fprintf(stderr, "%s     recording_name:             %s\n", first, FileHeader->recording_name);
   fprintf(stderr, "%s     recording_version:          %s\n", first, FileHeader->recording_version);
   fprintf(stderr, "%s     user_defined_name:          %s\n", first, FileHeader->user_defined_name);
@@ -5462,11 +5462,11 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
     /*--------------------------------------------------------------*/
     /* interpolate ancillary values  */
     /*--------------------------------------------------------------*/
-bool dprint = false;
-if (store->time_i[2]== 12 && store->time_i[3]==16 && store->time_i[4]==0 && store->time_i[5]==17)
-	dprint = true;
-if (store->time_i[2]== 12 && store->time_i[3]==16 && store->time_i[4]==3 && store->time_i[5]==45)
-	dprint = true;
+	bool dprint = false;
+	if (store->time_i[2]== 12 && store->time_i[3]==16 && store->time_i[4]==0 && store->time_i[5]==17)
+		dprint = true;
+	if (store->time_i[2]== 12 && store->time_i[3]==16 && store->time_i[4]==3 && store->time_i[5]==45)
+		dprint = true;
 
     int interp_status = mb_linear_interp_longitude(verbose, pars->nav_time_d - 1, pars->nav_lon - 1, pars->n_nav, time_d,
                                                &navlon, &jnav, &interp_error);

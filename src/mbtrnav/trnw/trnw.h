@@ -96,6 +96,7 @@
 #endif
 #include "mb1_msg.h"
 #include "trn_msg.h"
+#include "GeoCon.h"
 
 /////////////////////////
 // Macros
@@ -133,6 +134,9 @@ typedef enum {
 typedef struct trn_config_s{
     char *trn_host;
     int  trn_port;
+    bool use_proj;
+    int projection;
+    char *trn_crs;
     char *map_file;
     char *cfg_file;
     char *particles_file;
@@ -140,11 +144,7 @@ typedef struct trn_config_s{
     int  sensor_type;
     int  filter_type;
     int  map_type;
-#ifdef TRN_USE_PROJ
-    char *crs;
-#else
     long int utm_zone;
-#endif
     int mod_weight;
     int filter_reinit;
     int filter_grade;
@@ -164,11 +164,10 @@ extern "C" {
     // TRN config API
     trn_config_t *trncfg_dnew();
     trn_config_t *trncfg_new(char *host, int port,
-#ifdef TRN_USE_PROJ
-                             char *crs,
-#else
+                             bool use_proj,
+                             int projection,
+                             char *trn_crs,
                              long int utm_zone,
-#endif
                              int map_type,
                              int sensor_type,
                              int filter_type,
@@ -256,11 +255,9 @@ extern "C" {
     void wposet_show(wposet_t *self, bool verbose, int indent);
     int  wposet_cdata_to_pose(wposet_t **dest, pt_cdata_t *src);
     int  wposet_pose_to_cdata(pt_cdata_t **dest, wposet_t *src);
-#ifdef TRN_USE_PROJ
-    int  wposet_mb1_to_pose(wposet_t **dest, mb1_t *src, void *pjptr);
-#else
-    int  wposet_mb1_to_pose(wposet_t **dest, mb1_t *src, long int utmZone);
-#endif
+    // int  wposet_mb1_to_pose(wposet_t **dest, mb1_t *src, long int utmZone);
+    int  wposet_mb1_to_pose(wposet_t **dest, mb1_t *src, wgeocon_t *geocon);
+    int  wposet_mb1_to_pose_cb(wposet_t **dest, mb1_t *src, GeoToTMCallback geocon);
     int  wposet_msg_to_pose(wposet_t **dest, char *src);
     int  wposet_serialize(char **dest, wposet_t *src, int len);
     int  wposet_unserialize(wposet_t **dest, char *src, int len);
@@ -272,11 +269,9 @@ extern "C" {
     void wmeast_show(wmeast_t *self, bool verbose, int indent);
     int  wmeast_cdata_to_meas(wmeast_t **dest, mt_cdata_t *src);
     int  wmeast_meas_to_cdata(mt_cdata_t **dest, wmeast_t *src);
-#ifdef TRN_USE_PROJ
-    int  wmeast_mb1_to_meas(wmeast_t **dest, mb1_t *src, void *pjptr);
-#else
-    int  wmeast_mb1_to_meas(wmeast_t **dest, mb1_t *src, long int utmZone);
-#endif
+    // int  wmeast_mb1_to_meas(wmeast_t **dest, mb1_t *src, long int utmZone);
+    int  wmeast_mb1_to_meas(wmeast_t **dest, mb1_t *src, wgeocon_t *geocon);
+    int  wmeast_mb1_to_meas_cb(wmeast_t **dest, mb1_t *src, GeoToTMCallback geocon);
     int  wmeast_msg_to_meas(wmeast_t **dest, char *src);
     int  wmeast_serialize(char **dest, wmeast_t *src, int len);
     int  wmeast_unserialize(wmeast_t **dest, char *src, int len);
@@ -299,8 +294,8 @@ extern "C" {
     void trnw_msg_show(char *msg, bool verbose, int indent);
 
     // utils
-    int trnw_utm_to_geo(double northing, double easting, long utmZone, double *lat_deg, double *lon_deg);
-    int trnw_geo_to_utm(double lat_deg, double lon_deg, long int utmZone, double *northing, double *easting);
+//    int trnw_utm_to_geo(double northing, double easting, long utmZone, double *lat_deg, double *lon_deg);
+//    int trnw_geo_to_utm(double lat_deg, double lon_deg, long int utmZone, double *northing, double *easting);
 
 
 #ifdef __cplusplus

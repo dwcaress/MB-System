@@ -126,21 +126,6 @@ static int32_t s_trncli_send_recv(trncli_t *self, byte *msg, int32_t len, bool b
     return retval;
 }// end function s_trncli_send_recv
 
-#ifdef TRN_USE_PROJ
-trncli_t *trncli_new(void *pjptr)
-{
-    trncli_t *instance=(trncli_t *)malloc(sizeof(trncli_t));
-    if(NULL!=instance){
-        memset(instance,0,sizeof(trncli_t));
-        instance->measurement = NULL;
-        instance->pjptr=pjptr;
-        instance->trn = msock_connection_new();
-    }
-    
-    return instance;
-}// end function trncli_new
-
-#else
 trncli_t *trncli_new(long int utm_zone)
 {
     trncli_t *instance=(trncli_t *)malloc(sizeof(trncli_t));
@@ -150,10 +135,23 @@ trncli_t *trncli_new(long int utm_zone)
         instance->utm_zone=utm_zone;
         instance->trn = msock_connection_new();
     }
-    
+
     return instance;
 }// end function trncli_new
-#endif
+
+trncli_t *trncli_gcnew(wgeocon_t *gcon)
+{
+    trncli_t *instance=(trncli_t *)malloc(sizeof(trncli_t));
+    if(NULL!=instance){
+        memset(instance,0,sizeof(trncli_t));
+        instance->measurement = NULL;
+        instance->utm_zone=0;
+        instance->trn = msock_connection_new();
+        instance->geocon = gcon;
+    }
+
+    return instance;
+}// end function trncli_new
 
 void trncli_destroy(trncli_t **pself)
 {
@@ -220,16 +218,11 @@ int trncli_send_update(trncli_t *self, mb1_t *src, wposet_t **pt_out, wmeast_t *
 
     if(NULL!=self && NULL!=src && NULL!=pt_out && NULL!=mt_out){
         int test=-1;
-#ifdef TRN_USE_PROJ
-        if( (test = wmeast_mb1_to_meas(mt_out, src, self->pjptr)) == 0){
-#else
-        if( (test = wmeast_mb1_to_meas(mt_out, src, self->utm_zone)) == 0){
-#endif
-#ifdef TRN_USE_PROJ
-            if( (test = wposet_mb1_to_pose(pt_out, src, self->pjptr)) == 0){
-#else
-            if( (test = wposet_mb1_to_pose(pt_out, src, self->utm_zone)) == 0){
-#endif
+        if( (test = wmeast_mb1_to_meas(mt_out, src, self->geocon)) == 0){
+        // if( (test = wmeast_mb1_to_meas(mt_out, src, self->utm_zone)) == 0){
+
+            if( (test = wposet_mb1_to_pose(pt_out, src, self->geocon)) == 0){
+            // if( (test = wposet_mb1_to_pose(pt_out, src, self->utm_zone)) == 0){
                 // must do motion update first if pt time <= mt time
 
                 if(trncli_update_motion(self, *pt_out) > 0){
@@ -450,7 +443,7 @@ int trncli_triplet_set(trncli_t *self, int msg_type, d_triplet_t *src)
                 if( wcommst_cdata_unserialize(&ct_dat,(char *)msg)==0 && NULL!=ct_dat){
                     retval = ( (ct_dat->msg_type==TRN_MSG_ACK) ? 0 : -1);
                 }
-                // release cdata resources
+                // release cdata resourcess
                 if(NULL!=ct_dat){
                     wcommst_cdata_destroy(&ct_dat);
                 }
@@ -465,17 +458,10 @@ int trncli_triplet_set(trncli_t *self, int msg_type, d_triplet_t *src)
     return retval;
 }// end function trncli_triplet_set
 
-#ifdef TRN_USE_PROJ
-int trncli_mb1_to_meas(wmeast_t **dest, mb1_t *src, void *pjptr)
-{
-    return wmeast_mb1_to_meas(dest, src, pjptr);
-}// end function trncli_mb1_to_meas
-#else
-int trncli_mb1_to_meas(wmeast_t **dest, mb1_t *src, long int utmZone)
-{
-    return wmeast_mb1_to_meas(dest, src,utmZone);
-}// end function trncli_mb1_to_meas
-#endif
+//int trncli_mb1_to_meas(wmeast_t **dest, mb1_t *src, long int utmZone)
+//{
+//    return wmeast_mb1_to_meas(dest, src,utmZone);
+//}// end function trncli_mb1_to_meas
 
 int trncli_cdata_to_pose(wposet_t **dest, pt_cdata_t *src)
 {
@@ -693,18 +679,6 @@ int trncli_set_filter_gradient(trncli_t *self, int value)
     return trncli_ptype_set(self,TRN_MSG_FILT_GRD, value);
 } // end function
 
-#ifdef TRN_USE_PROJ
-int trncli_set_crs(trncli_t *self, void *pjptr)
-{
-    int retval=-1;
-    if(NULL!=self){
-        self->pjptr=pjptr;
-        retval=0;
-    }
-    return retval;
-} // end function
-
-#else
 int trncli_set_utm(trncli_t *self, long int utm_zone)
 {
     int retval=-1;
@@ -714,7 +688,6 @@ int trncli_set_utm(trncli_t *self, long int utm_zone)
     }
     return retval;
 } // end function
-#endif
 
 int trncli_get_init_stddev_xyz(trncli_t *self, d_triplet_t *dest)
 {

@@ -358,7 +358,7 @@ dnl--------------------------------------------------------------------
 
 dnl Use OTPS (OSU Tidal Prediction Software) location if specified with --with-otps-dir, use default otherwise
 AS_ECHO(["Use OTPS (OSU Tidal Prediction Software) location if specified with --with-otps-dir, use default otherwise"])
-OTPS_DIR="/usr/local/src/otps"
+OTPS_DIR="/usr/local/src/OTPS"
 AC_ARG_WITH(otps_dir, [ --with-otps-dir=DIR    Location of OSU Tidal Prediction Software], [OTPS_DIR=${withval}])
 AC_SUBST(OTPS_DIR)
 

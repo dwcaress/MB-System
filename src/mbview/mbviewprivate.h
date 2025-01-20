@@ -408,7 +408,7 @@ int mbview_setwindowparms(int verbose, size_t instance, int (*mbview_dismiss_not
 int mbview_setviewcontrols(int verbose, size_t instance, int display_mode, int mouse_mode, int grid_mode, int primary_histogram,
                            int primaryslope_histogram, int secondary_histogram, int primary_shade_mode, int slope_shade_mode,
                            int secondary_shade_mode, int grid_contour_mode, int site_view_mode, int route_view_mode,
-                           int nav_view_mode, int navdrape_view_mode, int vector_view_mode, double exageration,
+                           int nav_view_mode, int navswathbounds_view_mode, int navdrape_view_mode, int vector_view_mode, double exageration,
                            double modelelevation3d, double modelazimuth3d, double viewelevation3d, double viewazimuth3d,
                            double illuminate_magnitude, double illuminate_elevation, double illuminate_azimuth,
                            double slope_magnitude, double overlay_shade_magnitude, double overlay_shade_center,
@@ -474,6 +474,7 @@ void set_mbview_contour_mode(size_t instance, int mode);
 void set_mbview_site_view_mode(size_t instance, int mode);
 void set_mbview_route_view_mode(size_t instance, int mode);
 void set_mbview_nav_view_mode(size_t instance, int mode);
+void set_mbview_navswathbounds_view_mode(size_t instance, int mode);
 void set_mbview_navdrape_view_mode(size_t instance, int mode);
 void set_mbview_vector_view_mode(size_t instance, int mode);
 void set_mbview_display_mode(size_t instance, int mode);

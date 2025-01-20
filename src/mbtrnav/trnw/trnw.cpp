@@ -68,9 +68,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#ifdef TRN_USE_PROJ
-#include "proj.h"
-#endif
 #include "trnw.h"
 #include "TerrainNav.h"
 #include "NavUtils.h"
@@ -1152,94 +1149,95 @@ int wposet_pose_to_cdata(pt_cdata_t **dest, wposet_t *src)
     return retval;
 }
 
-#ifdef TRN_USE_PROJ
-int wposet_mb1_to_pose(wposet_t **dest, mb1_t *src, void *pjptr)
+static int wposet_mb1_fill_pose(poseT *dest, mb1_t *src, double easting_m, double northing_m)
 {
-    int retval=-1;
-    if(NULL!=dest && NULL!=src && NULL!=pjptr){
-        wposet_t *pose = (wposet_t *)(*dest);
-        if(NULL==pose){
-            pose=wposet_dnew();
-            *dest=pose;
-        }
-        if(NULL!=pose){
-            poseT *obj = static_cast<poseT *>(pose->obj);
-            obj->time = src->ts;
-			PJ *p = (PJ *) pjptr;
-			PJ_COORD c;
-			c.v[0] = src->lon;
-			c.v[1] = src->lat;
-			c = proj_trans(p, PJ_FWD, c);
-			obj->x = c.v[1];
-			obj->y = c.v[0];
-            obj->z = src->depth;
-            obj->phi=0.0;
-            obj->theta=0.0;
-            obj->psi=src->hdg;
-            obj->gpsValid=(obj->z<2?true:false);
-            obj->bottomLock=true;
-            obj->dvlValid=true;
-            // TRN can't intialize if vx == 0
-            obj->vx = 0.01;
-            obj->vy = 0.;
-            obj->vz = 0.;
-            // wx not required; can use these (how determined?)
-            // obj->wx = -3.332e-002;
-            // obj->wy = -9.155e-003;
-            // obj->wz = -3.076e-002;
-            obj->wx = 0.;
-            obj->wy = 0.;
-            obj->wz = 0.;
+    int retval = -1;
 
-            retval=0;
-        }
+    if(dest != NULL && src != NULL) {
+        dest->time = src->ts;
+        dest->x = easting_m;
+        dest->y = northing_m;
+        dest->z = src->depth;
+        dest->phi=0.0;
+        dest->theta=0.0;
+        dest->psi=src->hdg;
+        dest->gpsValid=(dest->z<2?true:false);
+        dest->bottomLock=true;
+        dest->dvlValid=true;
+        // TRN can't intialize if vx == 0
+        dest->vx = 0.01;
+        dest->vy = 0.;
+        dest->vz = 0.;
+        // wx not required; can use these (how determined?)
+        // dest->wx = -3.332e-002;
+        // dest->wy = -9.155e-003;
+        // dest->wz = -3.076e-002;
+        dest->wx = 0.;
+        dest->wy = 0.;
+        dest->wz = 0.;
 
+        retval = 0;
     }
     return retval;
 }
 
-#else
-int wposet_mb1_to_pose(wposet_t **dest, mb1_t *src, long int utmZone)
+int wposet_mb1_to_pose(wposet_t **dest, mb1_t *src, wgeocon_t *geocon)
 {
-    int retval=-1;
-    if(NULL!=dest && NULL!=src){
+    int retval = -1;
+
+    if(NULL != dest && NULL != src){
+
         wposet_t *pose = (wposet_t *)(*dest);
-        if(NULL==pose){
-            pose=wposet_dnew();
-            *dest=pose;
+
+        if(NULL == pose){
+            pose = wposet_dnew();
+            *dest = pose;
         }
-        if(NULL!=pose){
+
+        if(NULL != pose){
             poseT *obj = static_cast<poseT *>(pose->obj);
-            obj->time = src->ts;
-            NavUtils::geoToUtm( Math::degToRad(src->lat),
+
+            double easting_m = 0.;
+            double northing_m = 0.;
+
+            wgeocon_geo_to_mp(geocon, Math::degToRad(src->lat),
                                Math::degToRad(src->lon),
-                               utmZone, &(obj->x), &(obj->y));
-            obj->z = src->depth;
-            obj->phi=0.0;
-            obj->theta=0.0;
-            obj->psi=src->hdg;
-            obj->gpsValid=(obj->z<2?true:false);
-            obj->bottomLock=true;
-            obj->dvlValid=true;
-            // TRN can't intialize if vx == 0
-            obj->vx = 0.01;
-            obj->vy = 0.;
-            obj->vz = 0.;
-            // wx not required; can use these (how determined?)
-            // obj->wx = -3.332e-002;
-            // obj->wy = -9.155e-003;
-            // obj->wz = -3.076e-002;
-            obj->wx = 0.;
-            obj->wy = 0.;
-            obj->wz = 0.;
+                               &easting_m, &northing_m);
 
-            retval=0;
+            retval = wposet_mb1_fill_pose(obj, src, easting_m, northing_m);
         }
-
     }
     return retval;
 }
-#endif
+
+int wposet_mb1_to_pose_cb(wposet_t **dest, mb1_t *src, GeoToTMCallback geocon)
+{
+    int retval = -1;
+
+    if(NULL != dest && NULL != src){
+
+        wposet_t *pose = (wposet_t *)(*dest);
+
+        if(NULL == pose){
+            pose = wposet_dnew();
+            *dest = pose;
+        }
+
+        if(NULL != pose){
+            poseT *obj = static_cast<poseT *>(pose->obj);
+
+            double easting_m = 0.;
+            double northing_m = 0.;
+
+            geocon(Math::degToRad(src->lat),
+                   Math::degToRad(src->lon),
+                   &easting_m, &northing_m);
+
+            retval = wposet_mb1_fill_pose(obj, src, easting_m, northing_m);
+        }
+    }
+    return retval;
+}
 
 int wposet_msg_to_pose(wposet_t **dest, char *src)
 {
@@ -1479,95 +1477,99 @@ int wmeast_meas_to_cdata(mt_cdata_t **dest, wmeast_t *src)
     return retval;
 }
 
-#ifdef TRN_USE_PROJ
-int wmeast_mb1_to_meas(wmeast_t **dest, mb1_t *src, void *pjptr)
+static int wmeast_mb1_fill_meas(measT *dest, mb1_t *src, double easting_m, double northing_m)
 {
-    int retval=-1;
-    if(NULL!=dest && NULL!=src && NULL!=pjptr){
-        wmeast_t *meas = (wmeast_t *)(*dest);
-        if(NULL==meas){
-            meas=wmeast_new(src->nbeams);
-            *dest=meas;
-        }
-        if(NULL!=meas){
-            int i=0;
-            measT *obj = static_cast<measT *>(meas->obj);
-            obj->time = src->ts;
-            obj->ping_number = src->ping_number;
-            obj->dataType=2;
-			PJ *p = (PJ *) pjptr;
-			PJ_COORD c;
-			c.v[0] = src->lon;
-			c.v[1] = src->lat;
-			c = proj_trans(p, PJ_FWD, c);
-			obj->x = c.v[1];
-			obj->y = c.v[0];
-            obj->z=src->depth;
-            for(i=0;i<obj->numMeas;i++){
-                // TODO: fill in measT from ping...
-                obj->beamNums[i] = src->beams[i].beam_num;
-                obj->alongTrack[i] = src->beams[i].rhox;
-                obj->crossTrack[i] = src->beams[i].rhoy;
-                obj->altitudes[i]  = src->beams[i].rhoz;
-                double rho[3] = {obj->alongTrack[i], obj->crossTrack[i], obj->altitudes[i]};
-                double rhoNorm = vnorm( rho );
-                obj->ranges[i] = rhoNorm;
-                // [rhoNorm = sqrt(ax^2 + ay^2 + az^2)] (i.e. range magnitude)
-                obj->measStatus[i] = rhoNorm>1?true:false;
-//                obj->covariance[i] = 0.0;
-//                obj->alphas[i]     = 0.0;
-            }
+    int retval = -1;
 
-            retval=0;
-        }
+    if(dest != NULL && src != NULL) {
+        dest->time = src->ts;
+        dest->ping_number = src->ping_number;
+        dest->dataType=2;
+        dest->z=src->depth;
 
+        dest->x = easting_m;
+        dest->y = northing_m;
+
+        for(int i=0;i<dest->numMeas;i++){
+            // TODO: fill in measT from ping...
+            dest->beamNums[i] = src->beams[i].beam_num;
+            dest->alongTrack[i] = src->beams[i].rhox;
+            dest->crossTrack[i] = src->beams[i].rhoy;
+            dest->altitudes[i]  = src->beams[i].rhoz;
+            double rho[3] = {dest->alongTrack[i], dest->crossTrack[i], dest->altitudes[i]};
+            double rhoNorm = vnorm( rho );
+            dest->ranges[i] = rhoNorm;
+            // [rhoNorm = sqrt(ax^2 + ay^2 + az^2)] (i.e. range magnitude)
+            dest->measStatus[i] = (rhoNorm > 1 ? true : false);
+            // obj->covariance[i] = 0.0;
+            // obj->alphas[i]     = 0.0;
+        }
+        retval = 0;
     }
     return retval;
 }
 
-#else
-int wmeast_mb1_to_meas(wmeast_t **dest, mb1_t *src, long int utmZone)
+int wmeast_mb1_to_meas(wmeast_t **dest, mb1_t *src, wgeocon_t *geocon)
 {
     int retval=-1;
-    if(NULL!=dest && NULL!=src){
+
+    if(NULL != dest && NULL != src){
+
         wmeast_t *meas = (wmeast_t *)(*dest);
-        if(NULL==meas){
-            meas=wmeast_new(src->nbeams);
-            *dest=meas;
+
+        if(NULL == meas){
+            meas = wmeast_new(src->nbeams);
+            *dest = meas;
         }
-        if(NULL!=meas){
-            int i=0;
+
+        if(NULL != meas){
+
             measT *obj = static_cast<measT *>(meas->obj);
-            obj->time = src->ts;
-            obj->ping_number = src->ping_number;
-            obj->dataType=2;
-            obj->z=src->depth;
-            NavUtils::geoToUtm( Math::degToRad(src->lat),
+
+            double easting_m = 0.;
+            double northing_m = 0.;
+
+            wgeocon_geo_to_mp(geocon, Math::degToRad(src->lat),
                                Math::degToRad(src->lon),
-                               utmZone, &(obj->x), &(obj->y));
+                               &easting_m, &northing_m);
 
-            for(i=0;i<obj->numMeas;i++){
-                // TODO: fill in measT from ping...
-                obj->beamNums[i] = src->beams[i].beam_num;
-                obj->alongTrack[i] = src->beams[i].rhox;
-                obj->crossTrack[i] = src->beams[i].rhoy;
-                obj->altitudes[i]  = src->beams[i].rhoz;
-                double rho[3] = {obj->alongTrack[i], obj->crossTrack[i], obj->altitudes[i]};
-                double rhoNorm = vnorm( rho );
-                obj->ranges[i] = rhoNorm;
-                // [rhoNorm = sqrt(ax^2 + ay^2 + az^2)] (i.e. range magnitude)
-                obj->measStatus[i] = rhoNorm>1?true:false;
-//                obj->covariance[i] = 0.0;
-//                obj->alphas[i]     = 0.0;
-            }
+            retval = wmeast_mb1_fill_meas(obj, src, easting_m, northing_m);
+        }
+    }
+    return retval;
+}
 
-            retval=0;
+int wmeast_mb1_to_meas_cb(wmeast_t **dest, mb1_t *src, GeoToTMCallback geocon)
+{
+    int retval = -1;
+
+    if(NULL != dest && NULL != src){
+
+        wmeast_t *meas = (wmeast_t *)(*dest);
+
+        if(NULL == meas){
+            meas = wmeast_new(src->nbeams);
+            *dest = meas;
+        }
+
+        if(NULL != meas){
+
+            measT *obj = static_cast<measT *>(meas->obj);
+
+            double easting_m = 0.;
+            double northing_m = 0.;
+
+            geocon(Math::degToRad(src->lat),
+                   Math::degToRad(src->lon),
+                   &easting_m, &northing_m);
+
+            retval = wmeast_mb1_fill_meas(obj, src, easting_m, northing_m);
         }
 
     }
     return retval;
 }
-#endif
+
 
 int wmeast_msg_to_meas(wmeast_t **dest, char *src)
 {
@@ -1848,14 +1850,10 @@ trn_config_t *trncfg_dnew()
     return instance;
 }
 
-trn_config_t *trncfg_new(char *host,
-                         int port,
-#ifdef TRN_USE_PROJ
-                         char *crs,
-#else
-                         long int utm_zone,
-#endif
-                         int map_type,
+trn_config_t *trncfg_new(char *host,int port,
+                         bool use_proj,
+                         int projection, char *crs,
+                         long int utm_zone, int map_type,
                          int sensor_type,
                          int filter_type,
                          int filter_grade,
@@ -1877,6 +1875,9 @@ trn_config_t *trncfg_new(char *host,
     if(NULL!=instance){
         instance->trn_host=(NULL!=host?strdup(host):NULL);
         instance->trn_port=port;
+        instance->use_proj = use_proj;
+        instance->projection = projection;
+        instance->trn_crs = (NULL != crs ? strdup(crs) : NULL);
         instance->map_file=(NULL!=map_file?strdup(map_file):strdup("map.dfl"));
         instance->cfg_file=(NULL!=cfg_file?strdup(cfg_file):strdup("cfg.dfl"));
         instance->particles_file=(NULL!=particles_file?strdup(particles_file):strdup("particles.dfl"));
@@ -1884,12 +1885,7 @@ trn_config_t *trncfg_new(char *host,
         instance->sensor_type=sensor_type;
         instance->filter_type=filter_type;
         instance->map_type=map_type;
-#ifdef TRN_USE_PROJ
-        instance->crs=(NULL!=crs?strdup(crs):strdup("UTM10N"));
-#else
         instance->utm_zone=utm_zone;
-#endif
-
         instance->mod_weight=mod_weight;
         instance->filter_reinit=filter_reinit;
         instance->filter_grade=filter_grade;
@@ -1911,6 +1907,8 @@ void trncfg_destroy(trn_config_t **pself)
 
             if(NULL!=self->trn_host)
                 free(self->trn_host);
+            if(NULL!=self->trn_crs)
+                free(self->trn_crs);
             if(NULL!=self->map_file)
                 free(self->map_file);
             if(NULL!=self->particles_file)
@@ -1929,45 +1927,23 @@ void trncfg_destroy(trn_config_t **pself)
 void trncfg_show(trn_config_t *obj, bool verbose, int indent)
 {
     if (NULL != obj) {
-        fprintf(stderr,"%*s[self      %10p]\n",indent,(indent>0?" ":""), obj);
-        fprintf(stderr,"%*s[host      %10s]\n",indent,(indent>0?" ":""), obj->trn_host);
-        fprintf(stderr,"%*s[port      %10d]\n",indent,(indent>0?" ":""), obj->trn_port);
-#ifdef TRN_USE_PROJ
-        fprintf(stderr,"%*s[crs       %10s]\n",indent,(indent>0?" ":""), obj->crs);
-#else
-        fprintf(stderr,"%*s[utm       %10ld]\n",indent,(indent>0?" ":""), obj->utm_zone);
-#endif
-        fprintf(stderr,"%*s[mtype     %10d]\n",indent,(indent>0?" ":""), obj->map_type);
-        fprintf(stderr,"%*s[ftype     %10d]\n",indent,(indent>0?" ":""), obj->filter_type);
-        fprintf(stderr,"%*s[map_file  %10s]\n",indent,(indent>0?" ":""), obj->map_file);
-        fprintf(stderr,"%*s[cfg_file  %10s]\n",indent,(indent>0?" ":""), obj->cfg_file);
-        fprintf(stderr,"%*s[part_file %10s]\n",indent,(indent>0?" ":""), obj->particles_file);
-        fprintf(stderr,"%*s[log_dir   %10s]\n",indent,(indent>0?" ":""), obj->log_dir);
-        fprintf(stderr,"%*s[maxNcov   %10s%.3lf]\n",indent,(indent>0?" ":""), "",obj->max_northing_cov);
-        fprintf(stderr,"%*s[maxNerr   %10s%.3lf]\n",indent,(indent>0?" ":""), "",obj->max_northing_err);
-        fprintf(stderr,"%*s[maxEcov   %10s%.3lf]\n",indent,(indent>0?" ":""), "",obj->max_easting_cov);
-        fprintf(stderr,"%*s[maxEerr   %10s%.3lf]\n",indent,(indent>0?" ":""), "",obj->max_easting_err);
+        fprintf(stderr,"%*s[self       %10p]\n",indent,(indent>0?" ":""), obj);
+        fprintf(stderr,"%*s[host       %10s]\n",indent,(indent>0?" ":""), obj->trn_host);
+        fprintf(stderr,"%*s[port       %10d]\n",indent,(indent>0?" ":""), obj->trn_port);
+        fprintf(stderr,"%*s[use_proj   %10c]\n",indent,(indent>0?" ":""), (obj->use_proj ? 'Y' : 'N'));
+        fprintf(stderr,"%*s[projection %10d]\n",indent,(indent>0?" ":""), obj->projection);
+        fprintf(stderr,"%*s[trn_crs    %10s]\n",indent,(indent>0?" ":""), (obj->trn_crs != NULL ? obj->trn_crs : ""));
+        fprintf(stderr,"%*s[utm        %10ld]\n",indent,(indent>0?" ":""), obj->utm_zone);
+        fprintf(stderr,"%*s[mtype      %10d]\n",indent,(indent>0?" ":""), obj->map_type);
+        fprintf(stderr,"%*s[ftype      %10d]\n",indent,(indent>0?" ":""), obj->filter_type);
+        fprintf(stderr,"%*s[map_file   %10s]\n",indent,(indent>0?" ":""), obj->map_file);
+        fprintf(stderr,"%*s[cfg_file   %10s]\n",indent,(indent>0?" ":""), obj->cfg_file);
+        fprintf(stderr,"%*s[part_file  %10s]\n",indent,(indent>0?" ":""), obj->particles_file);
+        fprintf(stderr,"%*s[log_dir    %10s]\n",indent,(indent>0?" ":""), obj->log_dir);
+        fprintf(stderr,"%*s[maxNcov    %10s%.3lf]\n",indent,(indent>0?" ":""), "",obj->max_northing_cov);
+        fprintf(stderr,"%*s[maxNerr    %10s%.3lf]\n",indent,(indent>0?" ":""), "",obj->max_northing_err);
+        fprintf(stderr,"%*s[maxEcov    %10s%.3lf]\n",indent,(indent>0?" ":""), "",obj->max_easting_cov);
+        fprintf(stderr,"%*s[maxEerr    %10s%.3lf]\n",indent,(indent>0?" ":""), "",obj->max_easting_err);
     }
 }
 
-int trnw_utm_to_geo(double northing, double easting, long utmZone,
-                       double *lat_deg, double *lon_deg)
-{
-//    return NavUtils::utmToGeo(northing,easting,utmZone,lat_rad,lon_rad);
-    double lat_rad=0.0;
-    double lon_rad=0.0;
-
-  int retval=NavUtils::utmToGeo(northing,easting,utmZone,&lat_rad,&lon_rad);
-    *lat_deg=Math::radToDeg(lat_rad);
-    *lon_deg=Math::radToDeg(lon_rad);
-    return retval;
-}
-// End function trnw_utmToGeo
-
-int trnw_geo_to_utm(double lat_deg, double lon_deg, long int utmZone, double *northing, double *easting)
-{
-    return  NavUtils::geoToUtm( Math::degToRad(lat_deg),
-                               Math::degToRad(lon_deg),
-                               utmZone, northing, easting);
-}
-// End function trnw_utmToGeo

@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbmakeplatform</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  11 June 2016 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  30 September 2024 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -28,6 +28,9 @@ Version 5.0
 <H2>SYNOPSIS</H2>
 
 <B>mbmakeplatform</B>
+<BR>
+
+<B>--output</B>=<I>plffile</I>
 <BR>
 
 [
@@ -49,15 +52,6 @@ Version 5.0
 <BR>
 
 <B>--swath-format</B>=<I>value</I>
-<BR>
-
-]
-<BR>
-
-<B>--output</B>=<I>plffile</I>
-<BR>
-
-[
 <BR>
 
 <B>--platform-type-surface-vessel</B>
@@ -84,13 +78,13 @@ Version 5.0
 <B>--platform-organization</B>=<I>string</I>
 <BR>
 
-<B>--platform-documentation-url</B>
+<B>--platform-documentation-url</B>=<I>string</I>
 <BR>
 
-<B>--platform-start-time</B>
+<B>--platform-start-time</B>=<I>yyyy/mm/dd/hh/mm/ss.ssssss</I>
 <BR>
 
-<B>--platform-end-time</B>
+<B>--platform-end-time</B>=<I>yyyy/mm/dd/hh/mm/ss.ssssss</I>
 <BR>
 
 <B>--add-sensor-sonar-echosounder</B>
@@ -156,7 +150,103 @@ Version 5.0
 <B>--add-sensor-soundspeed</B>
 <BR>
 
-<B>--end-sensor</B>
+<B>--modify-sensor</B>=<I>sensorid</I>
+<BR>
+
+<B>--modify-sensor-bathymetry</B>
+<BR>
+
+<B>--modify-sensor-bathymetry1</B>
+<BR>
+
+<B>--modify-sensor-bathymetry2</B>
+<BR>
+
+<B>--modify-sensor-bathymetry3</B>
+<BR>
+
+<B>--modify-sensor-backscatter</B>
+<BR>
+
+<B>--modify-sensor-backscatter1</B>
+<BR>
+
+<B>--modify-sensor-backscatter2</B>
+<BR>
+
+<B>--modify-sensor-backscatter3</B>
+<BR>
+
+<B>--modify-sensor-subbottom</B>
+<BR>
+
+<B>--modify-sensor-subbottom1</B>
+<BR>
+
+<B>--modify-sensor-subbottom2</B>
+<BR>
+
+<B>--modify-sensor-subbottom3</B>
+<BR>
+
+<B>--modify-sensor-position</B>
+<BR>
+
+<B>--modify-sensor-position1</B>
+<BR>
+
+<B>--modify-sensor-position2</B>
+<BR>
+
+<B>--modify-sensor-position3</B>
+<BR>
+
+<B>--modify-sensor-depth</B>
+<BR>
+
+<B>--modify-sensor-depth1</B>
+<BR>
+
+<B>--modify-sensor-depth2</B>
+<BR>
+
+<B>--modify-sensor-depth3</B>
+<BR>
+
+<B>--modify-sensor-heading</B>
+<BR>
+
+<B>--modify-sensor-heading1</B>
+<BR>
+
+<B>--modify-sensor-heading2</B>
+<BR>
+
+<B>--modify-sensor-heading3</B>
+<BR>
+
+<B>--modify-sensor-rollpitch</B>
+<BR>
+
+<B>--modify-sensor-rollpitch1</B>
+<BR>
+
+<B>--modify-sensor-rollpitch2</B>
+<BR>
+
+<B>--modify-sensor-rollpitch3</B>
+<BR>
+
+<B>--modify-sensor-heave</B>
+<BR>
+
+<B>--modify-sensor-heave1</B>
+<BR>
+
+<B>--modify-sensor-heave2</B>
+<BR>
+
+<B>--modify-sensor-heave3</B>
 <BR>
 
 <B>--sensor-model</B>=<I>string</I>
@@ -390,105 +480,6 @@ Version 5.0
 <B>--sensor-source-heave3</B>
 <BR>
 
-<B>--modify-sensor</B>=<I>sensorid</I>
-<BR>
-
-<B>--modify-sensor-bathymetry</B>
-<BR>
-
-<B>--modify-sensor-bathymetry1</B>
-<BR>
-
-<B>--modify-sensor-bathymetry2</B>
-<BR>
-
-<B>--modify-sensor-bathymetry3</B>
-<BR>
-
-<B>--modify-sensor-backscatter</B>
-<BR>
-
-<B>--modify-sensor-backscatter1</B>
-<BR>
-
-<B>--modify-sensor-backscatter2</B>
-<BR>
-
-<B>--modify-sensor-backscatter3</B>
-<BR>
-
-<B>--modify-sensor-subbottom</B>
-<BR>
-
-<B>--modify-sensor-subbottom1</B>
-<BR>
-
-<B>--modify-sensor-subbottom2</B>
-<BR>
-
-<B>--modify-sensor-subbottom3</B>
-<BR>
-
-<B>--modify-sensor-position</B>
-<BR>
-
-<B>--modify-sensor-position1</B>
-<BR>
-
-<B>--modify-sensor-position2</B>
-<BR>
-
-<B>--modify-sensor-position3</B>
-<BR>
-
-<B>--modify-sensor-depth</B>
-<BR>
-
-<B>--modify-sensor-depth1</B>
-<BR>
-
-<B>--modify-sensor-depth2</B>
-<BR>
-
-<B>--modify-sensor-depth3</B>
-<BR>
-
-<B>--modify-sensor-heading</B>
-<BR>
-
-<B>--modify-sensor-heading1</B>
-<BR>
-
-<B>--modify-sensor-heading2</B>
-<BR>
-
-<B>--modify-sensor-heading3</B>
-<BR>
-
-<B>--modify-sensor-rollpitch</B>
-<BR>
-
-<B>--modify-sensor-rollpitch1</B>
-<BR>
-
-<B>--modify-sensor-rollpitch2</B>
-<BR>
-
-<B>--modify-sensor-rollpitch3</B>
-<BR>
-
-<B>--modify-sensor-heave</B>
-<BR>
-
-<B>--modify-sensor-heave1</B>
-<BR>
-
-<B>--modify-sensor-heave2</B>
-<BR>
-
-<B>--modify-sensor-heave3</B>
-<BR>
-
 <B>--modify-offsets</B>=<I>ioff/x/y/z/azimuth/roll/pitch</I>
 <BR>
 
@@ -504,17 +495,157 @@ Version 5.0
 <B>--modify-time-latency-model</B>=<I>file
 <BR>
 
+</I><B>--end-sensor</B>
+<BR>
+
+<B>--set-source-bathymetry</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-bathymetry1</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-bathymetry2</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-bathymetry3</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-backscatter</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-backscatter1</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-backscatter2</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-backscatter3</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-subbottom</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-subbottom1</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-subbottom2</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-subbottom3</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-camera</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-camera1</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-camera2</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-camera3</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-position</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-position1</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-position2</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-position3</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-depth</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-depth1</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-depth2</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-depth3</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-heading</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-heading1</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-heading2</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-heading3</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-rollpitch</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-rollpitch1</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-rollpitch2</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-rollpitch3</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-heave</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-heave1</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-heave2</B>=<I>sensorid</I>
+<BR>
+
+<B>--set-source-heave3</B>=<I>sensorid</I>
 ]
 <P>
-</I><A NAME="lbAE">&nbsp;</A>
+<A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
-Mbmakeplatform handles preprocessing of swath sonar data as part of setting
-up an MB-System processing structure for a dataset. This program replaces
-the several format-specific preprocessing programs
-found in MB-System version 5 releases with a single program for version 6.
-This program is under development, and is not ready for general use at
-this time.
+<B>Mbmakeplatform</B> is used to create an <B>MB-System</B> platform file, 
+which provides a complete description of the geometry 
+of sensors on a survey platform, including the relative positional and angular offsets. Platform
+files are used by <B>mbpreprocess</B> to set up an <B>MB-System</B> processing structure for swath
+data. In many cases the preprocessing consists only of creating the ancillary files 
+parallel to the raw files, but in others the data must be translated to different formats.
+The preprocessing step can also be used to merge navigation, attitude, sound speed, or 
+other ancillary data with the survey data. 
+<P>
+Platform files are needed for preprocessing only when survey data have been 
+collected without integrating the
+asynchronous navigation and attitude data and when the positional and angular offsets 
+between the survey sensor (e.g. multibeam sonar, lidar,
+stereo camera rig) have not been specified in the various data streams. 
+Most often this situation 
+is associated with custom survey systems on submerged platforms
+like autonomous underwater vehicles (AUVs) or remotely operated vehicles (ROVs).  
+The few data formats supported with preprocessing functionality utilizing 
+platform files include the Reson 7k format 88, the Teledyne 7k3
+format 89, and the 3D at Depth lidar formats 232 and 233. 
+<P>
+Generally platform files are created by a single execution of <B>Mbmakeplatform</B> with a
+long series of command line arguments that add sensors, set sensor capabilities, and set sensor
+positional and angular offsets. For some data formats <B>Mbmakeplatform</B> can initialize 
+a platform structure by  extracting the sensor offset values from swath data files. 
+In most cases the source of position data is set as the
+platform origin with zero positional and angular offset values.
+<P>
+No platform file is needed for preprocessing when the logged datastream includes
+a full platform description. Specifically, all datasets collected using Kongsberg multibeam 
+sonars do not require use of a platform file (the only exception to
+this would be if the positional offsets between sensors were incorrectly 
+specified in the multibeam configuration).
+<P>
+Two examples are presented below, both of which are custom submerged survey platforms
+combining a number of both mapping and ancillary sensors, including an inertial navigation
+system producing navigation and attitude.
 <P>
 <A NAME="lbAF">&nbsp;</A>
 <H2>MB-SYSTEM AUTHORSHIP</H2>
@@ -546,27 +677,1728 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
+<DT><B>--output</B>=<I>plffile</I><DD>
+Specifies the path of the output platform file.
+<DT>[<DD>
 <DT><B>--verbose</B>
 
 <DD>
 By default <B>mbmakeplatform</B> outputs minimal information to the shell. This option
-causes the program to indicate it's progress as it runs. Goody.
+causes the program to indicate it's progress as it runs. 
+<DT><B>--help</B><DD>
+Lists the available command options.
+<DT><B>--input</B>=<I>plffile</I><DD>
+Specify an existing platform file to read and then modify with subsequent commands.
+<DT><B>--swath</B>=[]<I>datalist</I> or <I>swathfile</I>]<DD>
+Specify a swath data input (a datalist file or an individual data file) from which
+<B>mbmakeplatform</B> will attempt to extract a starting platform structure, including
+the list of sensors and the sensor positional and angular offsets. If the input path
+name follows the <B>MB-System</B> convention (e.g. *.mb59 for format 59) or is otherwise 
+recognized as associated with a known format, then the format need not be specified
+separately with <B>--swath-format</B>. Only the first available definition of the platform
+structure will be parsed, typically from the beginning of the first file referenced.
+This option only works for recent Kongsberg or Teledyne data formats (e.g. Kongsberg 
+formats 58 &amp; 59 and Teledyne formats 88 &amp; 89).
+<DT><B>--swath-format</B>=<I>value</I><DD>
+Specify the format of the swath file or datalist from which a starting platform structure
+should be extracted.
+<DT><B>--platform-type-surface-vessel</B><DD>
+Set the platform type to be a surface vessel.
+<DT><B>--platform-type-tow-body</B><DD>
+Set the platform type to be a towed body.
+<DT><B>--platform-type-rov</B><DD>
+Set the platform type to be an ROV (remotely operated vehicle).
+<DT><B>--platform-type-auv</B><DD>
+Set the platform type to be an AUV (autonomous underwater vehicle).
+<DT><B>--platform-type-aircraft</B><DD>
+Set the platform type to be an aircraft.
+<DT><B>--platform-type-satellite</B><DD>
+Set the platform type to be a satellite.
+<DT><B>--platform-name</B>=<I>string</I><DD>
+Set the platform name.
+<DT><B>--platform-organization</B>=<I>string</I><DD>
+Set the name of the platform operating organization.
+<DT><B>--platform-documentation-url</B>=<I>string</I><DD>
+Set the name of the platform documentation website url.
+<DT><B>--platform-start-time</B>=<I>yyyy/mm/dd/hh/mm/ss.ssssss</I><DD>
+Set the starting time for the time interval that this platform description is valid.
+<DT><B>--platform-end-time</B>=<I>yyyy/mm/dd/hh/mm/ss.ssssss</I><DD>
+Set the ending time for the time interval that this platform description is valid.
+<DT><B>--add-sensor-sonar-echosounder</B><DD>
+Initiate adding a new sensor of type echosounder (sonar). All commands will pertain to this sensor
+until the command <B>end-sensor</B> is given.
+<DT><B>--add-sensor-sonar-multiechosounder</B><DD>
+Initiate adding a new sensor of type multiechosounder (sonar). All commands will pertain to this sensor
+until the command <B>end-sensor</B> is given.
+<DT><B>--add-sensor-sonar-sidescan</B><DD>
+Initiate adding a new sensor of type sidescan (sonar). All commands will pertain to this sensor
+until the command <B>end-sensor</B> is given.
+<DT><B>--add-sensor-sonar-interferometry</B><DD>
+Initiate adding a new sensor of type interferometry sidescan (sonar). All commands will pertain to this sensor
+until the command <B>end-sensor</B> is given.
+<DT><B>--add-sensor-sonar-multibeam</B><DD>
+Initiate adding a new sensor of type multibeam (sonar). All commands will pertain to this sensor
+until the command <B>end-sensor</B> is given.
+<DT><B>--add-sensor-sonar-multibeam-twohead</B><DD>
+Initiate adding a new sensor of type two-head multibeam (sonar). All commands will pertain to this sensor
+until the command <B>end-sensor</B> is given.
+<DT><B>--add-sensor-sonar-subbottom</B><DD>
+Initiate adding a new sensor of type subbottom (sonar). All commands will pertain to this sensor
+until the command <B>end-sensor</B> is given.
+<DT><B>--add-sensor-camera-mono</B><DD>
+Initiate adding a new sensor of type single still camera. All commands will pertain to this sensor
+until the command <B>end-sensor</B> is given.
+<DT><B>--add-sensor-camera-stereo</B><DD>
+Initiate adding a new sensor of type stereo still camera rig. All commands will pertain to this sensor
+until the command <B>end-sensor</B> is given.
+<DT><B>--add-sensor-camera-video</B><DD>
+Initiate adding a new sensor of type video camera. All commands will pertain to this sensor
+until the command <B>end-sensor</B> is given.
+<DT><B>--add-sensor-lidar-scan</B><DD>
+Initiate adding a new sensor of type 2D scanning lidar. All commands will pertain to this sensor
+until the command <B>end-sensor</B> is given.
+<DT><B>--add-sensor-lidar-swath</B><DD>
+Initiate adding a new sensor of type swath lidar. All commands will pertain to this sensor
+until the command <B>end-sensor</B> is given.
+<DT><B>--add-sensor-position</B><DD>
+Initiate adding a new sensor of type position. All commands will pertain to this sensor
+until the command <B>end-sensor</B> is given.
+<DT><B>--add-sensor-compass</B><DD>
+Initiate adding a new sensor of type compass. All commands will pertain to this sensor
+until the command <B>end-sensor</B> is given.
+<DT><B>--add-sensor-vru</B><DD>
+Initiate adding a new sensor of type vertical reference unit (VRU). All commands will pertain to this sensor
+until the command <B>end-sensor</B> is given.
+<DT><B>--add-sensor-imu</B><DD>
+Initiate adding a new sensor of type inertial motion unit (IMU). All commands will pertain to this sensor
+until the command <B>end-sensor</B> is given.
+<DT><B>--add-sensor-ins</B><DD>
+Initiate adding a new sensor of type inertial navigation system (INS). All commands will pertain to this sensor
+until the command <B>end-sensor</B> is given.
+<DT><B>--add-sensor-ins-with-pressure</B><DD>
+Initiate adding a new sensor of type inertial navigation system (INS) with pressure. All commands will pertain to this sensor
+until the command <B>end-sensor</B> is given.
+<DT><B>--add-sensor-ctd</B><DD>
+Initiate adding a new sensor of type CTD. All commands will pertain to this sensor
+until the command <B>end-sensor</B> is given.
+<DT><B>--add-sensor-pressure</B><DD>
+Initiate adding a new sensor of type pressure. All commands will pertain to this sensor
+until the command <B>end-sensor</B> is given.
+<DT><B>--add-sensor-soundspeed</B><DD>
+Initiate adding a new sensor of type sound speed. All commands will pertain to this sensor
+until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor</B>=<I>sensorid</I><DD>
+Initiate modifying the existing sensor <I>sensorid</I> (where sensors ids count from 0). All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-bathymetry</B><DD>
+Initiate modifying the existing sensor that is identified as the source for bathymetry. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-bathymetry1</B><DD>
+Initiate modifying the existing sensor that is identified as the source for bathymetry1. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-bathymetry2</B><DD>
+Initiate modifying the existing sensor that is identified as the source for bathymetry2. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-bathymetry3</B><DD>
+Initiate modifying the existing sensor that is identified as the source for bathymetry3. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-backscatter</B><DD>
+Initiate modifying the existing sensor that is identified as the source for backscatter. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-backscatter1</B><DD>
+Initiate modifying the existing sensor that is identified as the source for backscatter1. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-backscatter2</B><DD>
+Initiate modifying the existing sensor that is identified as the source for backscatter2. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-backscatter3</B><DD>
+Initiate modifying the existing sensor that is identified as the source for backscatter3. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-subbottom</B><DD>
+Initiate modifying the existing sensor that is identified as the source for subbottom. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-subbottom1</B><DD>
+Initiate modifying the existing sensor that is identified as the source for subbottom1. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-subbottom2</B><DD>
+Initiate modifying the existing sensor that is identified as the source for subbottom2. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-subbottom3</B><DD>
+Initiate modifying the existing sensor that is identified as the source for subbottom3. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-position</B><DD>
+Initiate modifying the existing sensor that is identified as the source for position. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-position1</B><DD>
+Initiate modifying the existing sensor that is identified as the source for position1. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-position2</B><DD>
+Initiate modifying the existing sensor that is identified as the source for position2. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-position3</B><DD>
+Initiate modifying the existing sensor that is identified as the source for position3. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-depth</B><DD>
+Initiate modifying the existing sensor that is identified as the source for depth. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-depth1</B><DD>
+Initiate modifying the existing sensor that is identified as the source for depth1. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-depth2</B><DD>
+Initiate modifying the existing sensor that is identified as the source for depth2. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-depth3</B><DD>
+Initiate modifying the existing sensor that is identified as the source for depth3. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-heading</B><DD>
+Initiate modifying the existing sensor that is identified as the source for heading. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-heading1</B><DD>
+Initiate modifying the existing sensor that is identified as the source for heading1. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-heading2</B><DD>
+Initiate modifying the existing sensor that is identified as the source for heading2. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-heading3</B><DD>
+Initiate modifying the existing sensor that is identified as the source for heading3. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-rollpitch</B><DD>
+Initiate modifying the existing sensor that is identified as the source for rollpitch. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-rollpitch1</B><DD>
+Initiate modifying the existing sensor that is identified as the source for rollpitch1. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-rollpitch2</B><DD>
+Initiate modifying the existing sensor that is identified as the source for rollpitch2. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-rollpitch3</B><DD>
+Initiate modifying the existing sensor that is identified as the source for rollpitch3. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-heave</B><DD>
+Initiate modifying the existing sensor that is identified as the source for heave. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-heave1</B><DD>
+Initiate modifying the existing sensor that is identified as the source for heave1. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-heave2</B><DD>
+Initiate modifying the existing sensor that is identified as the source for heave2. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--modify-sensor-heave3</B><DD>
+Initiate modifying the existing sensor that is identified as the source for heave3. All
+commands will pertain to this sensor until the command <B>end-sensor</B> is given.
+<DT><B>--sensor-model</B>=<I>string</I><DD>
+Set sensor model string.
+<DT><B>--sensor-manufacturer</B>=<I>string</I><DD>
+Set sensor manufacturer string.
+<DT><B>--sensor-serialnumber</B>=<I>string</I><DD>
+Set sensor serial number string.
+<DT><B>--sensor-capability-position</B><DD>
+Add position to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-depth</B><DD>
+Add depth (typically from pressure) to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-altitude</B><DD>
+Add altitude to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-velocity</B><DD>
+Add velocity of motion to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-acceleration</B><DD>
+Add acceleration of motion to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-pressure</B><DD>
+Add pressure to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-rollpitch</B><DD>
+Add roll and pitch to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-heading</B><DD>
+Add heading to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-magneticfield</B><DD>
+Add magnetic field to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-temperature</B><DD>
+Add temperature to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-conductivity</B><DD>
+Add conductivity to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-salinity</B><DD>
+Add salinity to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-soundspeed</B><DD>
+Add sound speed to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-gravity</B><DD>
+Add gravity to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-topography-echosounder</B><DD>
+Add topography from echosounder to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-topography-interferometry</B><DD>
+Add topography from interferometric sidescan sonar to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-topography-sass</B><DD>
+Add topography from synthetic aperture sidescan (SASS) sonar to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-topography-multibeam</B><DD>
+Add topography from multibeam sonar to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-topography-photogrammetry</B><DD>
+Add topography from photogrammetry to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-topography-structurefrommotion</B><DD>
+Add topography from structure from motion to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-topography-lidar</B><DD>
+Add topography from lidar to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-topography-structuredlight</B><DD>
+Add topography from structured light to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-topography-laserscanner</B><DD>
+Add topography from laser scanner to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-backscatter-echosounder</B><DD>
+Add backscatter from echosounder to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-backscatter-sidescan</B><DD>
+Add backscatter from sidescan sonar to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-backscatter-interferometry</B><DD>
+Add backscatter from interferometric sidescan sonar to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-backscatter-sass</B><DD>
+Add backscatter from synthetic aperture sidescan (SASS) sonar to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-backscatter-multibeam</B><DD>
+Add backscatter from multibeam sonar to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-backscatter-lidar</B><DD>
+Add backscatter from lidar to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-backscatter-structuredlight</B><DD>
+Add backscatter from structured light to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-backscatter-laserscanner</B><DD>
+Add backscatter from laser scanner to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-photography</B><DD>
+Add single camera still photography to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-stereophotography</B><DD>
+Add stereo camera still photography to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-video</B><DD>
+Add video to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability-stereovideo</B><DD>
+Add stereo video to list of sensor's measurement capabilities.
+<DT><B>--sensor-capability1</B>=<I>value</I><DD>
+Set the first of two sensor capability 4 byte bitmasks directly. The usage of the bits
+in this mask are:
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_NONE <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00000000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>All bits = 0<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_POSITION <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00000001<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 0 = 1<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_DEPTH <TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00000002<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 1 = 2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_ALTITUDE <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00000004<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 2 = 4<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_VELOCITY <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00000008<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 3 = 8<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_ACCELERATION <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00000010<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 4 = 16<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_PRESSURE <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00000020<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 5 = 32<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_ROLLPITCH <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00000040<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 6 = 64<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_HEADING <TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00000080<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 7 = 128<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_HEAVE <TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00000100<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 8 = 256<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_UNUSED09 <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00000200<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 9 = 512<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_UNUSED10 <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00000400<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 10 = 1024<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_UNUSED11 <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00000800<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 11 = 2048<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_UNUSED12 <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00001000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 12 = 4096<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_TEMPERATURE <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00002000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 13 = 8192<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_CONDUCTIVITY <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00004000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 14 = 16384<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_SALINITY <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00008000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 15 = 32768<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_SOUNDSPEED <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00010000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 16 = 65536<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_UNUSED17 <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00020000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 17= 131072<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_UNUSED18 <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00040000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 18 = 262144<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_UNUSED19 <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00080000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 19 = 524288<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_GRAVITY <TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00100000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 20 = 1048576<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_UNUSED21 <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00200000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 21 = 2097152<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_UNUSED22 <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00400000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 22 = 4194304<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_UNUSED23 <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00800000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 23 = 8388608<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_MAGNETICFIELD <TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x01000000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 24 = 16777216<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_UNUSED25 <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x02000000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 25 = 33554432<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_UNUSED26 <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x04000000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 26 = 67108864<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_UNUSED27 <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x08000000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 27 = 134217728<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_UNUSED28 <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x10000000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 28 = 268435456<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_UNUSED29 <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x20000000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 29 = 536870912<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_UNUSED30 <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x40000000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 30 = 1073741824<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY1_UNUSED31 <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x80000000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 31 = 2147483648<BR>
+<P>
+<DT><B>--sensor-capability2</B>=<I>value</I><DD>
+Set the second of two sensor capability 4 byte bitmasks directly. The usage of the bits
+in this mask are:
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_NONE <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00000000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>All bits = 0<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_TOPOGRAPHY_ECHOSOUNDER <TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00000001<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 0 = 1<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_TOPOGRAPHY_INTERFEROMETRY <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00000002<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 1 = 2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_TOPOGRAPHY_SASS <TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00000004<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 2 = 4<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_TOPOGRAPHY_MULTIBEAM <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00000008<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 3 = 8<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_TOPOGRAPHY_PHOTOGRAMMETRY <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00000010<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 4 = 16<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_TOPOGRAPHY_STRUCTUREFROMMOTION <TT>&nbsp;&nbsp;&nbsp;</TT>0x00000020 <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 5 = 32<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_TOPOGRAPHY_LIDAR <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00000040<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 6 = 64<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_TOPOGRAPHY_STRUCTUREDLIGHT <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00000080<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 7 = 128<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_TOPOGRAPHY_LASERSCANNER <TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00000100<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 8 = 256<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_UNUSED09 <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00000200<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 9 = 512<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_UNUSED10 <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00000400<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 10 = 1024<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_UNUSED11 <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00000800<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 11 = 2048<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_BACKSCATTER_ECHOSOUNDER <TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00001000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 12 = 4096<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_BACKSCATTER_SIDESCAN <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00002000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 13 = 8192<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_BACKSCATTER_INTERFEROMETRY <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00004000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 14 = 16384<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_BACKSCATTER_SASS <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00008000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 15 = 32768<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_BACKSCATTER_MULTIBEAM <TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00010000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 16 = 65536<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_BACKSCATTER_LIDAR <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00020000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 17= 131072<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_BACKSCATTER_STRUCTUREDLIGHT <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00040000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 18 = 262144<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_BACKSCATTER_LASERSCANNER <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00080000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 19 = 524288<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_UNUSED20 <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00100000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 20 = 1048576<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_SUBBOTTOM_ECHOSOUNDER <TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00200000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 21 = 2097152<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_SUBBOTTOM_CHIRP <TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00400000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 22 = 4194304<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_UNUSED23 <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x00800000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 23 = 8388608<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_PHOTOGRAPHY <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x01000000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 24 = 16777216<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_STEREOPHOTOGRAPHY <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x02000000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 25 = 33554432<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_VIDEO <TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x04000000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 26 = 67108864<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_STEREOVIDEO <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x08000000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 27 = 134217728<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_UNUSED28 <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x10000000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 28 = 268435456<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_UNUSED29 <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x20000000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 29 = 536870912<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_UNUSED30 <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x40000000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 30 = 1073741824<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SENSOR_CAPABILITY2_UNUSED31 <TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0x80000000<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bit 31 = 2147483648<BR>
+<DT><B>--sensor-offsets</B>=<I>x/y/z/azimuth/roll/pitch</I><DD>
+Used to set the positional (x, y, and z) and angular (azimuth, roll, and pitch) offsets
+for the sensor currently being added. 
+To modify offsets of an existing sensor use <B>--modify-offsets</B>.
+Here x is positive to starboard,
+y is positive forward, and z is positive up. Roll is positive starboard up, pitch is 
+positive forward up, and azimuth is positive clockwise from forward. Generally one sensor
+has zero offsets and thus serves as the platform origin. For sensors with two elements
+(e.g. bistatic multibeam sonars with separate transmit and receive arrays, or stereo
+camera rigs with two cameras), two <B>--sensor_offsets</B> calls are made. In the case
+of a multibeam the first set of offsets is for the transmit array, and in the case of a
+stereo camera rig the first offsets are for the left camera.
+<DT><B>--sensor-offset-positions</B>=<I>x/y/z</I><DD>
+Used to set the positional (x, y, and z) offsets
+for the sensor currently being added. 
+To modify positional offsets of an existing sensor use <B>--modify-offset-positions</B>.
+Here x is positive to starboard,
+y is positive forward, and z is positive up. Generally one sensor
+has zero offsets and thus serves as the platform origin. This command is used for sensors
+that do not make measurements dependent on orientation, and so do not have angular
+offsets (e.g. sound speed, pressure, or CTD sensors).
+<DT><B>--sensor-offset-angles</B>=<I>azimuth/roll/pitch</I><DD>
+Used to set the angular (azimuth, roll, and pitch) offsets
+for the sensor currently being added. 
+To modify angular offsets of an existing sensor use <B>--modify-offset-angles</B>.
+Here roll is positive starboard up, pitch is 
+positive forward up, and azimuth is positive clockwise from forward. Generally one sensor
+has zero offsets and thus serves as the platform origin. This command is used for sensors
+that do not make measurements dependent on position, and so do not have positional
+offsets (e.g. vertical reference units (VRUs) that measure orientation only).
+<DT><B>--sensor-time-latency</B>=<I>value</I><DD>
+Sets a static time latency in seconds for the sensor currently being added.
+<DT><B>--sensor-time-latency-model</B>=<I>file</I><DD>
+Specifies a file containing a time latency model time series for the sensor currently 
+being added. The file is in the form of two white-space delimited 
+columns with the first column being times in epoch seconds (seconds since the start of
+1970) and the second being the time latency in seconds.
+<DT><B>--sensor-source-bathymetry</B><DD>
+Sets the sensor currently being either added or modified to be the source for bathymetry.
+<DT><B>--sensor-source-bathymetry1</B><DD>
+Sets the sensor currently being either added or modified to be the source for bathymetry1.
+<DT><B>--sensor-source-bathymetry2</B><DD>
+Sets the sensor currently being either added or modified to be the source for bathymetry2.
+<DT><B>--sensor-source-bathymetry3</B><DD>
+Sets the sensor currently being either added or modified to be the source for bathymetry3.
+<DT><B>--sensor-source-backscatter</B><DD>
+Sets the sensor currently being either added or modified to be the source for backscatter.
+<DT><B>--sensor-source-backscatter1</B><DD>
+Sets the sensor currently being either added or modified to be the source for backscatter1.
+<DT><B>--sensor-source-backscatter2</B><DD>
+Sets the sensor currently being either added or modified to be the source for backscatter2.
+<DT><B>--sensor-source-backscatter3</B><DD>
+Sets the sensor currently being either added or modified to be the source for backscatter3.
+<DT><B>--sensor-source-subbottom</B><DD>
+Sets the sensor currently being either added or modified to be the source for subbottom.
+<DT><B>--sensor-source-subbottom1</B><DD>
+Sets the sensor currently being either added or modified to be the source for subbottom1.
+<DT><B>--sensor-source-subbottom2</B><DD>
+Sets the sensor currently being either added or modified to be the source for subbottom2.
+<DT><B>--sensor-source-subbottom3</B><DD>
+Sets the sensor currently being either added or modified to be the source for subbottom3.
+<DT><B>--sensor-source-position</B><DD>
+Sets the sensor currently being either added or modified to be the source for position.
+<DT><B>--sensor-source-position1</B><DD>
+Sets the sensor currently being either added or modified to be the source for position1.
+<DT><B>--sensor-source-position2</B><DD>
+Sets the sensor currently being either added or modified to be the source for position2.
+<DT><B>--sensor-source-position3</B><DD>
+Sets the sensor currently being either added or modified to be the source for position3.
+<DT><B>--sensor-source-depth</B><DD>
+Sets the sensor currently being either added or modified to be the source for depth.
+<DT><B>--sensor-source-depth1</B><DD>
+Sets the sensor currently being either added or modified to be the source for depth1.
+<DT><B>--sensor-source-depth2</B><DD>
+Sets the sensor currently being either added or modified to be the source for depth2.
+<DT><B>--sensor-source-depth3</B><DD>
+Sets the sensor currently being either added or modified to be the source for depth3.
+<DT><B>--sensor-source-heading</B><DD>
+Sets the sensor currently being either added or modified to be the source for heading.
+<DT><B>--sensor-source-heading1</B><DD>
+Sets the sensor currently being either added or modified to be the source for heading1.
+<DT><B>--sensor-source-heading2</B><DD>
+Sets the sensor currently being either added or modified to be the source for heading2.
+<DT><B>--sensor-source-heading3</B><DD>
+Sets the sensor currently being either added or modified to be the source for heading3.
+<DT><B>--sensor-source-rollpitch</B><DD>
+Sets the sensor currently being either added or modified to be the source for rollpitch.
+<DT><B>--sensor-source-rollpitch1</B><DD>
+Sets the sensor currently being either added or modified to be the source for rollpitch1.
+<DT><B>--sensor-source-rollpitch2</B><DD>
+Sets the sensor currently being either added or modified to be the source for rollpitch2.
+<DT><B>--sensor-source-rollpitch3</B><DD>
+Sets the sensor currently being either added or modified to be the source for rollpitch3.
+<DT><B>--sensor-source-heave</B><DD>
+Sets the sensor currently being either added or modified to be the source for heave.
+<DT><B>--sensor-source-heave1</B><DD>
+Sets the sensor currently being either added or modified to be the source for heave1.
+<DT><B>--sensor-source-heave2</B><DD>
+Sets the sensor currently being either added or modified to be the source for heave2.
+<DT><B>--sensor-source-heave3</B><DD>
+Sets the sensor currently being either added or modified to be the source for heave3.
+<DT><B>--end-sensor</B><DD>
+Ends the commands for adding or modifying a sensor.
+<DT><B>--modify-offsets</B>=<I>ioff/x/y/z/azimuth/roll/pitch</I><DD>
+Used to set the positional (x, y, and z) and angular (azimuth, roll, and pitch) offsets
+for the sensor currently being modified. 
+To add offsets to a new sensor use <B>--sensor-offsets</B>.
+Here x is positive to starboard,
+y is positive forward, and z is positive up. Roll is positive starboard up, pitch is 
+positive forward up, and azimuth is positive clockwise from forward. Generally one sensor
+has zero offsets and thus serves as the platform origin. For sensors with two elements
+(e.g. bistatic multibeam sonars with separate transmit and receive arrays, or stereo
+camera rigs with two cameras), two <B>--sensor_offsets</B> calls are made. In the case
+of a multibeam the first set of offsets is for the transmit array, and in the case of a
+stereo camera rig the first offsets are for the left camera.
+<DT><B>--modify-offset-positions</B>=<I>ioff/x/y/z</I><DD>
+Used to set the positional (x, y, and z) offsets
+for the sensor currently being modified. 
+To add positional offsets to a new sensor use <B>--sensor-offset-positions</B>.
+Here x is positive to starboard,
+y is positive forward, and z is positive up. Generally one sensor
+has zero offsets and thus serves as the platform origin. This command is used for sensors
+that do not make measurements dependent on orientation, and so do not have angular
+offsets (e.g. sound speed, pressure, or CTD sensors).
+<DT><B>--modify-offset-angles</B>=<I>ioff/azimuth/roll/pitch</I><DD>
+Used to set the angular (azimuth, roll, and pitch) offsets
+for the sensor currently being modified. 
+To add angular offsets to a new sensor use <B>--sensor-offset-angles</B>.
+Here roll is positive starboard up, pitch is 
+positive forward up, and azimuth is positive clockwise from forward. Generally one sensor
+has zero offsets and thus serves as the platform origin. This command is used for sensors
+that do not make measurements dependent on position, and so do not have positional
+offsets (e.g. vertical reference units (VRUs) that measure orientation only).
+<DT><B>--modify-time-latency</B>=<I>value</I><DD>
+Sets a static time latency in seconds for the sensor currently being modified.
+<DT><B>--modify-time-latency-model</B>=<I>file<DD>
+Specifies a file containing a time latency model time series for the sensor currently 
+being modified. The file is in the form of two white-space delimited 
+columns with the first column being times in epoch seconds (seconds since the start of
+1970) and the second being the time latency in seconds.
+<DT></I><B>--set-source-bathymetry</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for bathymetry.
+<DT><B>--set-source-bathymetry1</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for bathymetry1.
+<DT><B>--set-source-bathymetry2</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for bathymetry2.
+<DT><B>--set-source-bathymetry3</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for bathymetry3.
+<DT><B>--set-source-backscatter</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for backscatter.
+<DT><B>--set-source-backscatter1</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for backscatter1.
+<DT><B>--set-source-backscatter2</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for backscatter2.
+<DT><B>--set-source-backscatter3</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for backscatter2.
+<DT><B>--set-source-subbottom</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for subbottom.
+<DT><B>--set-source-subbottom1</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for subbottom1.
+<DT><B>--set-source-subbottom2</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for subbottom2.
+<DT><B>--set-source-subbottom3</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for subbottom3.
+<DT><B>--set-source-camera</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for camera.
+<DT><B>--set-source-camera1</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for camera1.
+<DT><B>--set-source-camera2</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for camera2.
+<DT><B>--set-source-camera3</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for camera3.
+<DT><B>--set-source-position</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for position.
+<DT><B>--set-source-position1</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for position1.
+<DT><B>--set-source-position2</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for position2.
+<DT><B>--set-source-position3</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for position3.
+<DT><B>--set-source-depth</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for depth.
+<DT><B>--set-source-depth1</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for depth1.
+<DT><B>--set-source-depth2</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for depth2.
+<DT><B>--set-source-depth3</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for depth3.
+<DT><B>--set-source-heading</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for heading.
+<DT><B>--set-source-heading1</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for heading1.
+<DT><B>--set-source-heading2</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for heading2.
+<DT><B>--set-source-heading3</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for heading3.
+<DT><B>--set-source-rollpitch</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for rollpitch.
+<DT><B>--set-source-rollpitch1</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for rollpitch1.
+<DT><B>--set-source-rollpitch2</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for rollpitch2.
+<DT><B>--set-source-rollpitch3</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for rollpitch3.
+<DT><B>--set-source-heave</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for heave.
+<DT><B>--set-source-heave1</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for heave1.
+<DT><B>--set-source-heave2</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for heave2.
+<DT><B>--set-source-heave3</B>=<I>sensorid</I><DD>
+Set the specified sensor to be a source for heave3.
+<DT>]<DD>
 <P>
 </DL>
 <A NAME="lbAH">&nbsp;</A>
 <H2>EXAMPLES</H2>
 
-To be written.....
+<P>
+The Monterey Bay Aquarium Research Institute operates a Low Altitude Survey System (LASS)
+that is mounted on Remotely Operated Vehicles (ROVs) and used for 1-cm-scale surveys of
+the seafloor. The LASS combines the following sensors:
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Kearfott SeaDevil inertial navigation system (INS)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Paroscientific Digiquartz pressure sensor<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Teledyne Reson T50 400 kHz multibeam sonar<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>3D at Depth Wide Swath Subsea Lidar (WiSSL)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Stereo camera rig with two Allied Vision Prosilica GX1920 color cameras<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>VectorNav VN100 inertial measurement unit (IMU) and attitude heading reference system (AHRS)<BR>
+<BR>
+
+<P>
+<B>MB-System</B> processing of the various datasets collected by the LASS depend upon the
+platform model for the LASS, which is created by the following set of commands to 
+<B>mbmakeplatform</B>:
+<P>
+mbmakeplatform --output=20240829ROVVentana.plf \
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--platform-type-rov&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--platform-name=&quot;Ventana&quot;&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--platform-organization=&quot;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute&quot;&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--add-sensor-ins&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-model=&quot;SeaDeViL&quot;&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-manufacturer=&quot;Kearfott&quot;&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-serialnumber=&quot;2&quot;&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-capability-position&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-capability-heading&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-capability-rollpitch&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-offsets=0.0/0.0/0.0/0.0/0.0/0.0&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-time-latency=0.0&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-source-position&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-source-heading&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-source-rollpitch&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-source-heave&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--end-sensor&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--add-sensor-pressure&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-model=&quot;Digiquartz&quot;&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-manufacturer=&quot;Paroscientific&quot;&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-serialnumber=&quot;Unknown&quot;&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-capability-depth&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-offset-positions=-0.2164694/-0.076170/-0.069085&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-time-latency=0.0&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-source-depth&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--end-sensor&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--add-sensor-sonar-multibeam&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-model=&quot;T50&nbsp;400&nbsp;kHz&quot;&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-manufacturer=&quot;Reson&quot;&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-serialnumber=&quot;Unknown&quot;&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-capability-topography-multibeam&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-capability-backscatter-multibeam&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-offsets=-0.459100/0.246774/-0.180388/0.07/0.07/0.16&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-offsets=-0.459100/0.442174/-0.211386/0.07/0.07/0.16&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-source-bathymetry&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-source-bathymetry1&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-source-backscatter&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-source-backscatter1&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--end-sensor&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--add-sensor-lidar-swath&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-model=&quot;WiSSL&quot;&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-manufacturer=&quot;3DatDepth&quot;&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-serialnumber=&quot;1&quot;&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-capability-topography-lidar&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-capability-backscatter-lidar&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-offsets=-0.4653/0.0160/-0.0952/0.0/0.0/0.0&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-source-bathymetry2&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-source-backscatter2&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--end-sensor&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--add-sensor-camera-stereo&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-model=&quot;Prosilica&nbsp;GX1920&quot;&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-manufacturer=&quot;Allied&nbsp;Vision&quot;&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-serialnumber=&quot;Unknown&quot;&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-capability-stereophotography&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-offsets=-0.559430/-0.106901/-0.136561/0.0/0.0/0.0&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-offsets=-0.559430/-0.106901/-0.136561/0.0/0.0/0.0&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-source-bathymetry3&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-source-backscatter3&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--end-sensor&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--add-sensor-ins&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-model=&quot;VN-100&quot;&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-manufacturer=&quot;VectorNav&quot;&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-serialnumber=&quot;Unknown&quot;&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-capability-position&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-capability-heading&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-capability-rollpitch&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-offsets=--0.255900/0.231999/-0.004164/0.0/0.0/0.0&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-time-latency=0.0&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-source-position&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-source-heading&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-source-rollpitch&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-source-heave&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--end-sensor
+<P>
+Executing the above command produces a platform file named 20240829ROVVentana.plf, which
+has the following contents:
+<P>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>## MB-System Platform Definition File<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB-SYSTEM_VERSION        5.8.2beta13<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>FILE_VERSION             1.00<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ORIGIN                   Generated by user &lt;seafloor&gt; on cpu &lt;Morgan.local&gt; at &lt;Thu Aug 29 14:33:58 2024&gt;<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PLATFORM_TYPE            3  ## ROV<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PLATFORM_NAME            Ventana<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PLATFORM_ORGANIZATION    Monterey Bay Aquarium Research Institute<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>DOCUMENTATION_URL        <BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>START_TIME_D             0.000000  ## 0000/00/00 00:00:00.000000<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>END_TIME_D             0.000000  ## 0000/00/00 00:00:00.000000<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PLATFORM_NUM_SENSORS     6<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>## Defined data source sensors:<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SOURCE_BATHYMETRY        2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SOURCE_BATHYMETRY1       2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SOURCE_BATHYMETRY2       3<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SOURCE_BATHYMETRY3       4<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SOURCE_BACKSCATTER       2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SOURCE_BACKSCATTER1      2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SOURCE_BACKSCATTER2      3<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SOURCE_BACKSCATTER3      4<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SOURCE_POSITION          5<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SOURCE_DEPTH             1<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SOURCE_HEADING           5<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SOURCE_ROLLPITCH         5<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SOURCE_HEAVE             5<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>## Undefined data sources:<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_SUBBOTTOM<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_SUBBOTTOM1<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_SUBBOTTOM2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_SUBBOTTOM3<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_CAMERA<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_CAMERA1<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_CAMERA2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_CAMERA3<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_POSITION1<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_POSITION2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_POSITION3<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_DEPTH1<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_DEPTH2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_DEPTH3<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_HEADING1<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_HEADING2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_HEADING3<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_ROLLPITCH1<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_ROLLPITCH2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_ROLLPITCH3<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_HEAVE1<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_HEAVE2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_HEAVE3<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>## Sensor list:<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_TYPE                0  101  ## INS<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_MODEL                 0  SeaDeViL<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_MANUFACTURER          0  Kearfott<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_SERIALNUMBER          0  2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_CAPABILITY1           0         193  ## position rollpitch heading heading<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_CAPABILITY2           0           0  ##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_NUM_OFFSETS           0   1<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>OFFSET_POSITION              0       0    0.000000    0.000000    0.000000 ## Starboard, Forward, Up (meters)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>OFFSET_ATTITUDE              0       0    0.000000    0.000000    0.000000 ## Heading, Roll, Pitch (degrees)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_TIME_LATENCY_STATIC   0        0.000000  ## Seconds<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_TYPE                1  111  ## Pressure<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_MODEL                 1  Digiquartz<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_MANUFACTURER          1  Paroscientific<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_SERIALNUMBER          1  Unknown<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_CAPABILITY1           1           2  ## depth<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_CAPABILITY2           1           0  ##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_NUM_OFFSETS           1   1<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>OFFSET_POSITION              1       0   -0.216469   -0.076170   -0.069085 ## Starboard, Forward, Up (meters)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_TIME_LATENCY_STATIC   1        0.000000  ## Seconds<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_TYPE                2   30  ## Sonar multibeam<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_MODEL                 2  T50 400 kHz<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_MANUFACTURER          2  Reson<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_SERIALNUMBER          2  Unknown<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_CAPABILITY1           2           0  ##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_CAPABILITY2           2       65544  ## topography_multibeam backscatter_multibeam<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_NUM_OFFSETS           2   2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>OFFSET_POSITION              2       0   -0.459100    0.246774   -0.180388 ## Starboard, Forward, Up (meters)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>OFFSET_ATTITUDE              2       0    0.070000    0.070000    0.160000 ## Heading, Roll, Pitch (degrees)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>OFFSET_POSITION              2       1   -0.459100    0.442174   -0.211386 ## Starboard, Forward, Up (meters)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>OFFSET_ATTITUDE              2       1    0.070000    0.070000    0.160000 ## Heading, Roll, Pitch (degrees)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_TYPE                3   61  ## Lidar swath<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_MODEL                 3  WiSSL<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_MANUFACTURER          3  3DatDepth<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_SERIALNUMBER          3  1<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_CAPABILITY1           3           0  ##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_CAPABILITY2           3      131136  ## topography_lidar backscatter_lidar<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_NUM_OFFSETS           3   1<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>OFFSET_POSITION              3       0   -0.465300    0.016000   -0.095200 ## Starboard, Forward, Up (meters)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>OFFSET_ATTITUDE              3       0    0.000000    0.000000    0.000000 ## Heading, Roll, Pitch (degrees)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_TYPE                4   51  ## Camera stereo<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_MODEL                 4  Prosilica GX1920<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_MANUFACTURER          4  Allied Vision<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_SERIALNUMBER          4  Unknown<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_CAPABILITY1           4           0  ##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_CAPABILITY2           4    33554432  ## stereophotography<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_NUM_OFFSETS           4   2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>OFFSET_POSITION              4       0   -0.559430   -0.106901   -0.136561 ## Starboard, Forward, Up (meters)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>OFFSET_ATTITUDE              4       0    0.000000    0.000000    0.000000 ## Heading, Roll, Pitch (degrees)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>OFFSET_POSITION              4       1   -0.559430   -0.106901   -0.136561 ## Starboard, Forward, Up (meters)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>OFFSET_ATTITUDE              4       1    0.000000    0.000000    0.000000 ## Heading, Roll, Pitch (degrees)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_TYPE                5  101  ## INS<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_MODEL                 5  VN-100<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_MANUFACTURER          5  VectorNav<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_SERIALNUMBER          5  Unknown<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_CAPABILITY1           5         193  ## position rollpitch heading heading<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_CAPABILITY2           5           0  ##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_NUM_OFFSETS           5   1<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>OFFSET_POSITION              5       0    0.000000    0.000000    0.000000 ## Starboard, Forward, Up (meters)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>OFFSET_ATTITUDE              5       0    0.000000    0.000000    0.000000 ## Heading, Roll, Pitch (degrees)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_TIME_LATENCY_STATIC   5        0.000000  ## Seconds<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##<BR>
+<BR>
+
+<P>
+The Monterey Bay Aquarium Research Institute operates two Dorado class autonomous 
+underwater vehicles (AUVs) optimized for seafloor mapping in the deep ocean.
+These Mapping AUVs field the following sensors:
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Kearfott SeaDevil inertial navigation system (INS)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Paroscientific Digiquartz pressure sensor<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Teledyne Reson T50 400 kHz multibeam sonar<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Edgetech 110 kHz chirp sidescan sonar<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Edgetech 1-6 kHz chirp subbottom profiler<BR>
+<BR>
+
+<P>
+<B>MB-System</B> processing of the various datasets collected by the Mapping AUVs depend upon the
+platform models for these vehicles, which are created by the following set of commands to 
+<B>mbmakeplatform</B>:
+<P>
+mbmakeplatform --output=20240510m1_MAUV2.plf \
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--platform-type-auv&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--platform-name=&quot;MAUV2&nbsp;MBARI&nbsp;Dorado&nbsp;Class&nbsp;Mapping&nbsp;AUV&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--platform-organization=&quot;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--add-sensor-ins&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-model=&quot;SeaDeViL&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-manufacturer=&quot;Kearfott&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-serialnumber=&quot;2&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-capability-position&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-capability-heading&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-capability-rollpitch&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-offsets=0.0/0.0/0.0/0.0/0.0/0.0&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-time-latency=0.0&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-source-position&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-source-heading&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-source-rollpitch&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-source-heave&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--end-sensor&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--add-sensor-pressure&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-model=&quot;Digiquartz&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-manufacturer=&quot;Paroscientific&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-serialnumber=&quot;Unknown&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-capability-depth&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-offset-positions=0.0/-0.6/0.0&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-time-latency=0.0\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-source-depth&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--end-sensor&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--add-sensor-sonar-multibeam&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-model=&quot;7125&nbsp;400&nbsp;kHz&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-manufacturer=&quot;Reson&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-serialnumber=&quot;Unknown&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-capability-topography-multibeam&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-capability-backscatter-multibeam&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-offsets=0.0/0.353/-0.18/0.50/-0.16/+0.34&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-offsets=0.0/0.153/+0.00/0.50/-0.16/+0.34&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-source-bathymetry&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-source-bathymetry1&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-source-backscatter&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-source-backscatter1&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--end-sensor&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--add-sensor-sonar-sidescan&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-model=&quot;FSAU&nbsp;chirp&nbsp;110&nbsp;kHz&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-manufacturer=&quot;Edgetech&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-serialnumber=&quot;Unknown&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-capability-backscatter-sidescan&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-offsets=0.0/1.353/-0.10/0.0/0.0/0.0&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-source-backscatter2&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--end-sensor&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--add-sensor-sonar-subbottom&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-model=&quot;FSAU&nbsp;chirp&nbsp;1-6&nbsp;kHz&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-manufacturer=&quot;Edgetech&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-serialnumber=&quot;Unknown&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-capability-backscatter-sidescan&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-offsets=0.0/1.353/-0.10/0.0/0.0/0.0&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--sensor-source-backscatter2&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--end-sensor
+<P>
+<P>
+Executing the above command produces a platform file named 20240510m1_MAUV2.plf, which
+has the following contents:
+<P>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>## MB-System Platform Definition File<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB-SYSTEM_VERSION        5.8.2beta02<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>FILE_VERSION             1.00<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ORIGIN                   Generated by user &lt;caress&gt; on cpu &lt;auvrouter.rc.mbari.org&gt; at &lt;Sun May 12 20:48:01 2024&gt;<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PLATFORM_TYPE            4  ## AUV<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PLATFORM_NAME            MAUV2 MBARI Dorado Class Mapping AUV<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PLATFORM_ORGANIZATION    Monterey Bay Aquarium Research Institute<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>DOCUMENTATION_URL        <BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>START_TIME_D             0.000000  ## 0000/00/00 00:00:00.000000<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>END_TIME_D             0.000000  ## 0000/00/00 00:00:00.000000<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PLATFORM_NUM_SENSORS     5<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>## Defined data source sensors:<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SOURCE_BATHYMETRY        2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SOURCE_BATHYMETRY1       2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SOURCE_BACKSCATTER       2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SOURCE_BACKSCATTER1      2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SOURCE_BACKSCATTER2      4<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SOURCE_POSITION          0<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SOURCE_DEPTH             1<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SOURCE_HEADING           0<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SOURCE_ROLLPITCH         0<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SOURCE_HEAVE             0<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>## Undefined data sources:<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_BATHYMETRY2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_BATHYMETRY3<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_BACKSCATTER3<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_SUBBOTTOM<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_SUBBOTTOM1<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_SUBBOTTOM2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_SUBBOTTOM3<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_CAMERA<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_CAMERA1<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_CAMERA2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_CAMERA3<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_POSITION1<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_POSITION2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_POSITION3<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_DEPTH1<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_DEPTH2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_DEPTH3<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_HEADING1<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_HEADING2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_HEADING3<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_ROLLPITCH1<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_ROLLPITCH2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_ROLLPITCH3<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_HEAVE1<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_HEAVE2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  ## SOURCE_HEAVE3<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>## Sensor list:<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_TYPE                0  101  ## INS<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_MODEL                 0  SeaDeViL<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_MANUFACTURER          0  Kearfott<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_SERIALNUMBER          0  2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_CAPABILITY1           0         193  ## position rollpitch heading heading<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_CAPABILITY2           0           0  ##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_NUM_OFFSETS           0   1<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>OFFSET_POSITION              0       0    0.000000    0.000000    0.000000 ## Starboard, Forward, Up (meters)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>OFFSET_ATTITUDE              0       0    0.000000    0.000000    0.000000 ## Heading, Roll, Pitch (degrees)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_TIME_LATENCY_STATIC   0        0.000000  ## Seconds<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_TYPE                1  111  ## Pressure<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_MODEL                 1  Digiquartz<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_MANUFACTURER          1  Paroscientific<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_SERIALNUMBER          1  Unknown<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_CAPABILITY1           1           2  ## depth<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_CAPABILITY2           1           0  ##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_NUM_OFFSETS           1   1<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>OFFSET_POSITION              1       0    0.000000   -0.600000    0.000000 ## Starboard, Forward, Up (meters)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_TIME_LATENCY_STATIC   1        0.000000  ## Seconds<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_TYPE                2   30  ## Sonar multibeam<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_MODEL                 2  7125 400 kHz<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_MANUFACTURER          2  Reson<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_SERIALNUMBER          2  Unknown<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_CAPABILITY1           2           0  ##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_CAPABILITY2           2       65544  ## topography_multibeam backscatter_multibeam<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_NUM_OFFSETS           2   2<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>OFFSET_POSITION              2       0    0.000000    0.353000   -0.180000 ## Starboard, Forward, Up (meters)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>OFFSET_ATTITUDE              2       0    0.500000   -0.160000    0.340000 ## Heading, Roll, Pitch (degrees)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>OFFSET_POSITION              2       1    0.000000    0.153000    0.000000 ## Starboard, Forward, Up (meters)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>OFFSET_ATTITUDE              2       1    0.500000   -0.160000    0.340000 ## Heading, Roll, Pitch (degrees)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_TYPE                3   20  ## Sonar sidescan<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_MODEL                 3  FSAU chirp 110 kHz<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_MANUFACTURER          3  Edgetech<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_SERIALNUMBER          3  Unknown<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_CAPABILITY1           3           0  ##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_CAPABILITY2           3        8192  ## backscatter_sidescan<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_NUM_OFFSETS           3   1<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>OFFSET_POSITION              3       0    0.000000    1.353000   -0.100000 ## Starboard, Forward, Up (meters)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>OFFSET_ATTITUDE              3       0    0.000000    0.000000    0.000000 ## Heading, Roll, Pitch (degrees)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_TYPE                4   40  ## Sonar subbottom<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_MODEL                 4  FSAU chirp 1-6 kHz<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_MANUFACTURER          4  Edgetech<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_SERIALNUMBER          4  Unknown<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_CAPABILITY1           4           0  ##<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_CAPABILITY2           4        8192  ## backscatter_sidescan<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SENSOR_NUM_OFFSETS           4   1<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>OFFSET_POSITION              4       0    0.000000    1.353000   -0.100000 ## Starboard, Forward, Up (meters)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>OFFSET_ATTITUDE              4       0    0.000000    0.000000    0.000000 ## Heading, Roll, Pitch (degrees)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##<BR>
+<BR>
+
+<P>
 <P>
 <A NAME="lbAI">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
-<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbdatalist.html">mbdatalist</A></B>(1), <B><A HREF="mbprocess.html">mbprocess</A></B>(1)
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbpreprocess.html">mbpreprocess</A></B>(1), <B><A HREF="mbprocess.html">mbprocess</A></B>(1)
 <P>
 <A NAME="lbAJ">&nbsp;</A>
 <H2>BUGS</H2>
 
-Oh yeah.
+Platform files are complicated, yet inscrutable.
 <P>
 
 <HR>
@@ -586,7 +2418,7 @@ Oh yeah.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 11 June 2016</P></CENTER>
+Last Updated: 30 September 2024</P></CENTER>
 
 <HR>
 <center>

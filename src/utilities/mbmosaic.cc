@@ -2687,8 +2687,12 @@ int main(int argc, char **argv) {
 				}
 				if (verbose >= 2)
 					fprintf(outfp, "\n");
-				if (verbose > 0 || file_in_bounds)
+				if (verbose > 0 || file_in_bounds) {
+				  if (astatus == MB_ALTNAV_USE)
+					fprintf(outfp, "%d data points processed in %s using nav from %s\n", ndatafile, file, apath);
+				  else
 					fprintf(outfp, "%u data points processed in %s\n", ndatafile, file);
+				}
 
 				/* add to datalist if data actually contributed */
 				if (grid_mode != MBMOSAIC_AVERAGE && ndatafile > 0 && dfp != nullptr) {
@@ -3259,8 +3263,12 @@ int main(int argc, char **argv) {
 				}
 				if (verbose >= 2)
 					fprintf(outfp, "\n");
-				if (verbose > 0 || file_in_bounds)
+				if (verbose > 0 || file_in_bounds) {
+				  if (astatus == MB_ALTNAV_USE)
+					fprintf(outfp, "%d data points processed in %s using nav from %s\n", ndatafile, file, apath);
+				  else
 					fprintf(outfp, "%u data points processed in %s\n", ndatafile, file);
+				}
 
 				/* add to datalist if data actually contributed */
 				if (ndatafile > 0 && dfp != nullptr) {

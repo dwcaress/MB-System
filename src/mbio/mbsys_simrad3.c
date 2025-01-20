@@ -890,7 +890,7 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 
 	/* get data structure pointers */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
-	// struct mb_platform_struct *platforms = (struct mb_platform_struct *)platform_ptr;
+	struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       target_sensor:              %d\n", pars->target_sensor);
@@ -1053,32 +1053,29 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude, time_d,
 		                                 &heave, &jattitude, &interp_error);
 
-		/* insert navigation */
-		ping->png_longitude = 10000000 * navlon;
-		ping->png_latitude = 20000000 * navlat;
-
-		/* insert heading */
-		if (heading < 0.0)
-			heading += 360.0;
-		else if (heading > 360.0)
-			heading -= 360.0;
-		ping->png_heading = (int)rint(heading * 100);
-
-		/* insert roll pitch and heave */
-		ping->png_roll = (int)rint(roll / 0.01);
-		ping->png_pitch = (int)rint(pitch / 0.01);
-		ping->png_heave = (int)rint(heave / 0.01);
-
 		/*--------------------------------------------------------------*/
 		/* get transducer offsets */
 		/*--------------------------------------------------------------*/
-		/* transmit and receive array offsets */
+		/* transmit and receive array offsets embedded in file */
 		double tx_x, tx_y, tx_z;
 		double tx_h, tx_r, tx_p;
 		double rx_x, rx_y, rx_z;
 		double rx_h, rx_r, rx_p;
-
-		if (store->par_stc == 0) {
+		if (store->sonar == 30) {
+			tx_x = store->par_s1x;
+			tx_y = store->par_s1y;
+			tx_z = store->par_s1z;
+			tx_h = store->par_s1h;
+			tx_r = store->par_s1r;
+			tx_p = store->par_s1p;
+			rx_x = store->par_s1x;
+			rx_y = store->par_s1y;
+			rx_z = store->par_s1z;
+			rx_h = store->par_s1h;
+			rx_r = store->par_s1r;
+			rx_p = store->par_s1p;
+		}
+		else if (store->par_stc == 0) {
 			tx_x = store->par_s1x;
 			tx_y = store->par_s1y;
 			tx_z = store->par_s1z;
@@ -1190,6 +1187,57 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 			rx_r = store->par_s3r;
 			rx_p = store->par_s3p;
 		}
+		
+		/* transmit and receive array offsets from platform file */
+		double tx_x_p, tx_y_p, tx_z_p;
+		double tx_h_p, tx_r_p, tx_p_p;
+		double rx_x_p, rx_y_p, rx_z_p;
+		double rx_h_p, rx_r_p, rx_p_p;
+		int tx_sign_p = 1.0;
+		int rx_sign_p = 1.0;
+		if (platform != NULL) {
+			status = mb_platform_position_offset(verbose, (void *)platform, pars->target_sensor, 0, 
+													&(tx_x_p), &(tx_y_p), &(tx_z_p), error);
+			status = mb_platform_position_offset(verbose, (void *)platform, pars->target_sensor, 0, 
+													&(rx_x_p), &(rx_y_p), &(rx_z_p), error);
+			status = mb_platform_orientation_offset(verbose, (void *)platform, pars->target_sensor, 0,
+													&(tx_h_p), &(tx_r_p), &(tx_p_p), error);
+			status = mb_platform_orientation_offset(verbose, (void *)platform, pars->target_sensor, 1,
+													&(rx_h_p), &(rx_r_p), &(rx_p_p), error);
+	
+			// handle reverse mounting of transmit and receive arrays */
+			if (tx_h_p > 100.0 || tx_h_p < -100.0) {
+				tx_h_p -= 180.0;
+				if (tx_h_p < 0.0)
+				    tx_h_p += 360.0;
+				tx_sign_p = -1.0;
+			}
+			if (rx_h_p > 100.0 || rx_h_p < -100.0) {
+			    rx_h_p -= 180.0;
+			    if (rx_h_p < 0.0)
+				    rx_h_p += 360.0;
+			    rx_sign_p = -1.0;
+			}
+		}
+
+		/* insert navigation */
+		ping->png_longitude = 10000000 * navlon;
+		ping->png_latitude = 20000000 * navlat;
+
+		/* insert heading */
+		heading += tx_h_p;
+		if (heading < 0.0)
+			heading += 360.0;
+		else if (heading > 360.0)
+			heading -= 360.0;
+		ping->png_heading = (int)rint(heading * 100);
+
+		/* insert roll pitch and heave */
+		roll += rx_r_p;
+		pitch += rx_p_p;
+		ping->png_roll = (int)rint(roll / 0.01);
+		ping->png_pitch = (int)rint(pitch / 0.01);
+		ping->png_heave = (int)rint(heave / 0.01);
 
 		/* insert sensordepth */
 		if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY) {
@@ -1285,33 +1333,78 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 			    3) flip the sign of the beam steering angle from that array
 			        (reverse TX means flip sign of TX steer, reverse RX
 			        means flip sign of RX steer) */
-			if (tx_h <= 90.0 || tx_h >= 270.0) {
-				tx_align.roll = tx_r;
-				tx_align.pitch = tx_p;
-				tx_align.heading = tx_h;
-				tx_steer = (0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]]);
+			        
+			/* if no platform file use embedded array alignment to calculate beam takeoff
+			   angles and leave calculated bathymetry unchanged */
+			if (platform == NULL) {
+				if (tx_h <= 90.0 || tx_h >= 270.0) {
+					tx_align.roll = tx_r;
+					tx_align.pitch = tx_p;
+					tx_align.heading = tx_h;
+					tx_steer = (0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]]);
+				}
+				else {
+					tx_align.roll = -tx_r;
+					tx_align.pitch = -tx_p;
+					tx_align.heading = tx_h - 180.0;
+					tx_steer = -(0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]]);
+				}
+				if (rx_h <= 90.0 || rx_h >= 270.0) {
+					rx_align.roll = rx_r;
+					rx_align.pitch = rx_p;
+					rx_align.heading = rx_h;
+					rx_steer = (0.01 * (double)ping->png_raw_rxpointangle[i]);
+				}
+				else {
+					rx_align.roll = -rx_r;
+					rx_align.pitch = -rx_p;
+					rx_align.heading = rx_h - 180.0;
+					rx_steer = -(0.01 * (double)ping->png_raw_rxpointangle[i]);
+				}
 			}
+			
+			/* else use platform file alignment to calculate beam takeoff
+			   angles and also apply rotations to calculated bathymetry */
 			else {
-				tx_align.roll = -tx_r;
-				tx_align.pitch = -tx_p;
-				tx_align.heading = tx_h - 180.0;
-				tx_steer = -(0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]]);
-			}
-			tx_orientation.roll = transmit_roll;
-			tx_orientation.pitch = transmit_pitch;
-			tx_orientation.heading = transmit_heading;
-			if (rx_h <= 90.0 || rx_h >= 270.0) {
+				tx_align.roll = tx_r_p;
+				tx_align.pitch = tx_p_p;
+				tx_align.heading = tx_h_p;
+				tx_steer = tx_sign_p * 0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]];
 				rx_align.roll = rx_r;
 				rx_align.pitch = rx_p;
 				rx_align.heading = rx_h;
-				rx_steer = (0.01 * (double)ping->png_raw_rxpointangle[i]);
+				rx_steer = tx_sign_p * 0.01 * (double)ping->png_raw_rxpointangle[i];
+				
+				/* implied beam rotations */
+				double d_tx_r_p = tx_r_p - tx_r;
+				double d_tx_p_p = tx_p_p - tx_p;
+
+				/* get range and angles in
+					roll-pitch frame */
+				double alphar = 0.0;
+				double betar = 0.5 * M_PI;
+				double range = sqrt(ping->png_depth[i] * ping->png_depth[i]
+									+ ping->png_acrosstrack[i] * ping->png_acrosstrack[i]
+									+ ping->png_alongtrack[i] * ping->png_alongtrack[i]);
+				if (fabs(ping->png_range[i]) >= 0.001) {
+				  alphar = asin(MAX(-1.0, MIN(1.0, (ping->png_alongtrack[i] / range))));
+				  betar = acos(MAX(-1.0, MIN(1.0, (ping->png_acrosstrack[i] / range / cos(alphar)))));
+				}
+				if (ping->png_depth[i] < 0.0)
+				  betar = 2.0 * M_PI - betar;
+				/* apply roll pitch corrections */
+				betar += DTR * d_tx_r_p;
+				alphar += DTR * d_tx_p_p;
+	
+				/* recalculate bathymetry */
+				ping->png_depth[i] = range * cos(alphar) * sin(betar);
+				ping->png_alongtrack[i] = range * sin(alphar);
+				ping->png_acrosstrack[i] = range * cos(alphar) * cos(betar);
 			}
-			else {
-				rx_align.roll = -rx_r;
-				rx_align.pitch = -rx_p;
-				rx_align.heading = rx_h - 180.0;
-				rx_steer = -(0.01 * (double)ping->png_raw_rxpointangle[i]);
-			}
+			
+			tx_orientation.roll = transmit_roll;
+			tx_orientation.pitch = transmit_pitch;
+			tx_orientation.heading = transmit_heading;
 			rx_orientation.roll = receive_roll;
 			rx_orientation.pitch = receive_pitch;
 			rx_orientation.heading = receive_heading;

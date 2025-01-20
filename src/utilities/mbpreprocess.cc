@@ -3077,7 +3077,7 @@ int main(int argc, char **argv) {
             char *message;
             mb_error(verbose, error, &message);
             fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
-            fprintf(stderr, "\nMBIO Error returned from function <mb_put>:\n%s\n", message);
+            fprintf(stderr, "\nMBIO Error returned from function <mb_put_all>:\n%s\n", message);
             fprintf(stderr, "\nMultibeam Data Not Written To File <%s>\n", ofile);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
             exit(error);

@@ -41,10 +41,10 @@
 #include "trn_debug.hpp"
 #include "geo_cfg.hpp"
 #include "NavUtils.h"
+#include "GeoCon.hpp"
 
 // /////////////////
 // Macros
-
 
 #ifndef DTR
 #define DTR(x) ((x) * M_PI/180.)
@@ -311,8 +311,8 @@ public:
 
         std::list<trn::beam_tup> mBeamList = bi->beams_raw();
         std::list<trn::beam_tup>::iterator it;
-        int k=0;
-        for(it=mBeamList.begin(); it!=mBeamList.end(); k++)
+
+        for(it=mBeamList.begin(); it!=mBeamList.end(); )
         {
             trn::beam_tup bt = static_cast<trn::beam_tup> (*it);
             os <<  std::get<0>(bt) << "," << std::get<1>(bt);
@@ -407,8 +407,8 @@ public:
 
         std::list<trn::beam_tup> mBeamList = bi->beams_raw();
         std::list<trn::beam_tup>::iterator it;
-        int k=0;
-        for(it=mBeamList.begin(); it!=mBeamList.end(); k++)
+
+        for(it=mBeamList.begin(); it!=mBeamList.end(); )
         {
             trn::beam_tup bt = static_cast<trn::beam_tup> (*it);
             os << std::setw(wkey) << "[" << std::get<0>(bt) << "]";
@@ -1844,8 +1844,8 @@ public:
             ss << std::setprecision(4);
             std::list<trn::beam_tup>::iterator it;
             std::list<trn::beam_tup>beam_list = bi->beams_raw();
-            int k=0;
-            for(it=beam_list.begin(); it!=beam_list.end(); k++)
+
+            for(it=beam_list.begin(); it!=beam_list.end();)
             {
                 trn::beam_tup bt = static_cast<trn::beam_tup> (*it);
                 double range = std::get<1>(bt);
@@ -1946,13 +1946,13 @@ public:
     // returns new poseT; caller must release
     // no vi arg for backwards compatibility with older handlers
     // TODO: bring old handlers up to date with new mb1_to_pose
-    static poseT *mb1_to_pose(mb1_t *src, trn::att_info *ai, long int utmZone)
-    {
-        return mb1_to_pose(src, ai, NULL, utmZone);
+//    static poseT *mb1_to_pose(mb1_t *src, trn::att_info *ai, long int utmZone)
+//    {
+//        return mb1_to_pose(src, ai, NULL, utmZone);
+//
+//    }
 
-    }
-
-    static poseT *mb1_to_pose(mb1_t *src, trn::att_info *ai, trn::vel_info *vi, long int utmZone)
+    static poseT *mb1_to_pose(mb1_t *src, trn::att_info *ai, trn::vel_info *vi, GeoCon *geocon)
     {
         if(nullptr == src)
             return nullptr;
@@ -1963,9 +1963,9 @@ public:
 
             obj->time = src->ts;
 
-            NavUtils::geoToUtm( Math::degToRad(src->lat),
+            geocon->geo_to_mp(Math::degToRad(src->lat),
                                Math::degToRad(src->lon),
-                               utmZone, &(obj->x), &(obj->y));
+                               &(obj->x), &(obj->y));
 
             obj->z = src->depth;
             obj->phi = ai->roll();
@@ -2021,7 +2021,7 @@ public:
     }
 
     // returns new measT; caller must release
-    static measT *mb1_to_meas(mb1_t *src, trn::att_info *ai, int data_type, long int utmZone)
+    static measT *mb1_to_meas(mb1_t *src, trn::att_info *ai, int data_type, GeoCon *geocon)
     {
         if(nullptr == src)
             return nullptr;
@@ -2038,9 +2038,9 @@ public:
             obj->psi = src->hdg;
             obj->z = src->depth;
 
-            NavUtils::geoToUtm( Math::degToRad(src->lat),
+            geocon->geo_to_mp(Math::degToRad(src->lat),
                                Math::degToRad(src->lon),
-                               utmZone, &(obj->x), &(obj->y));
+                               &(obj->x), &(obj->y));
 
             for(int i = 0; i < obj->numMeas; i++){
                 // TODO: fill in measT from ping...

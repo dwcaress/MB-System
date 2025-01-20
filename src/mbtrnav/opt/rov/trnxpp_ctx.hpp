@@ -1212,8 +1212,6 @@ public:
         if(nullptr == sounding)
             return retval;
 
-        int err_count = 0;
-
         if(mMB1SvrList.size() <= 0){
             return 0;
         }
@@ -1224,7 +1222,6 @@ public:
             std::string key = std::get<0>(*it);
             void *vp = std::get<5>(*it);
             if(vp == nullptr){
-                err_count++;
                 continue;
             }
 

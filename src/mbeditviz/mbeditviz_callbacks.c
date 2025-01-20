@@ -970,6 +970,7 @@ void do_mbeditviz_viewgrid() {
   int mbv_site_view_mode;
   int mbv_route_view_mode;
   int mbv_nav_view_mode;
+  int mbv_navswathbounds_view_mode;
   int mbv_navdrape_view_mode;
   int mbv_vector_view_mode;
   int mbv_primary_colortable;
@@ -1037,6 +1038,7 @@ void do_mbeditviz_viewgrid() {
     mbv_site_view_mode = MBV_VIEW_OFF;
     mbv_route_view_mode = MBV_VIEW_OFF;
     mbv_nav_view_mode = MBV_VIEW_OFF;
+    mbv_navswathbounds_view_mode = MBV_VIEW_OFF;
     mbv_navdrape_view_mode = MBV_VIEW_OFF;
     mbv_vector_view_mode = MBV_VIEW_OFF;
     mbv_primary_colortable = MBV_COLORTABLE_HAXBY;
@@ -1078,8 +1080,9 @@ void do_mbeditviz_viewgrid() {
       mbev_status = mbview_setviewcontrols(
           mbev_verbose, mbev_instance, mbv_display_mode, mbv_mouse_mode, mbv_grid_mode, mbv_primary_histogram,
           mbv_primaryslope_histogram, mbv_secondary_histogram, mbv_primary_shade_mode, mbv_slope_shade_mode,
-          mbv_secondary_shade_mode, mbv_grid_contour_mode, mbv_site_view_mode, mbv_route_view_mode, mbv_nav_view_mode,
-          mbv_navdrape_view_mode, mbv_vector_view_mode, mbv_exageration, mbv_modelelevation3d, mbv_modelazimuth3d,
+          mbv_secondary_shade_mode, mbv_grid_contour_mode, mbv_site_view_mode, mbv_route_view_mode, 
+          mbv_nav_view_mode, mbv_navswathbounds_view_mode, mbv_navdrape_view_mode, mbv_vector_view_mode, 
+          mbv_exageration, mbv_modelelevation3d, mbv_modelazimuth3d,
           mbv_viewelevation3d, mbv_viewazimuth3d, mbv_illuminate_magnitude, mbv_illuminate_elevation,
           mbv_illuminate_azimuth, mbv_slope_magnitude, mbv_overlay_shade_magnitude, mbv_overlay_shade_center,
           mbv_overlay_shade_mode, mbv_contour_interval, MBV_PROJECTION_PROJECTED, mbev_grid.projection_id, &mbev_error);

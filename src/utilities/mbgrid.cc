@@ -1958,7 +1958,12 @@ int main(int argc, char **argv) {
         }
         if (verbose >= 2)
           fprintf(outfp, "\n");
-        fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+        if (verbose > 0 || file_in_bounds) {
+		  if (astatus == MB_ALTNAV_USE)
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f) using nav from %s\n", ndatafile, rfile, dmin, dmax, apath);
+		  else
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+        }
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
@@ -2945,9 +2950,13 @@ int main(int argc, char **argv) {
         }
         if (verbose >= 2)
           fprintf(outfp, "\n");
-        if (verbose > 0 || file_in_bounds)
-          fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
-
+        if (verbose > 0 || file_in_bounds) {
+		  if (astatus == MB_ALTNAV_USE)
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f) using nav from %s\n", ndatafile, rfile, dmin, dmax, apath);
+		  else
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+		}
+		
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
           if (pstatus == MB_PROCESSED_USE && astatus == MB_ALTNAV_USE)
@@ -3377,8 +3386,12 @@ int main(int argc, char **argv) {
         }
         if (verbose >= 2)
           fprintf(outfp, "\n");
-        if (verbose > 0 || file_in_bounds)
-          fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+        if (verbose > 0 || file_in_bounds) {
+		  if (astatus == MB_ALTNAV_USE)
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f) using nav from %s\n", ndatafile, rfile, dmin, dmax, apath);
+		  else
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+		}
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
@@ -3469,8 +3482,12 @@ int main(int argc, char **argv) {
         error = MB_ERROR_NO_ERROR;
         if (verbose >= 2)
           fprintf(outfp, "\n");
-        if (verbose > 0 || ndatafile > 0)
-          fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, file, dmin, dmax);
+        if (verbose > 0 || file_in_bounds) {
+		  if (astatus == MB_ALTNAV_USE)
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f) using nav from %s\n", ndatafile, rfile, dmin, dmax, apath);
+		  else
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+		}
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
@@ -3995,8 +4012,12 @@ int main(int argc, char **argv) {
         }
         if (verbose >= 2)
           fprintf(outfp, "\n");
-        if (verbose > 0 || file_in_bounds)
-          fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+        if (verbose > 0 || file_in_bounds) {
+		  if (astatus == MB_ALTNAV_USE)
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f) using nav from %s\n", ndatafile, rfile, dmin, dmax, apath);
+		  else
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+		}
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
@@ -4094,8 +4115,12 @@ int main(int argc, char **argv) {
         error = MB_ERROR_NO_ERROR;
         if (verbose >= 2)
           fprintf(outfp, "\n");
-        if (verbose > 0 || ndatafile > 0)
-          fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, file, dmin, dmax);
+        if (verbose > 0 || file_in_bounds) {
+		  if (astatus == MB_ALTNAV_USE)
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f) using nav from %s\n", ndatafile, rfile, dmin, dmax, apath);
+		  else
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+		}
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
@@ -4533,8 +4558,12 @@ int main(int argc, char **argv) {
         }
         if (verbose >= 2)
           fprintf(outfp, "\n");
-        if (verbose > 0 || file_in_bounds)
-          fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+        if (verbose > 0 || file_in_bounds) {
+		  if (astatus == MB_ALTNAV_USE)
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f) using nav from %s\n", ndatafile, rfile, dmin, dmax, apath);
+		  else
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+		}
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
@@ -4958,8 +4987,12 @@ int main(int argc, char **argv) {
         }
         if (verbose >= 2)
           fprintf(outfp, "\n");
-        if (verbose > 0 || file_in_bounds)
-          fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+        if (verbose > 0 || file_in_bounds) {
+		  if (astatus == MB_ALTNAV_USE)
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f) using nav from %s\n", ndatafile, rfile, dmin, dmax, apath);
+		  else
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+		}
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {

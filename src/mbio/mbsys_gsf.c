@@ -533,7 +533,7 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 			*nss = 0;
 			for (int i = 0; i < *nbath; i++) {
 				/* get pixel sample size */
-	      gsfTimeSeriesIntensity *snippet = &(mb_ping->brb_inten->time_series[i]);
+	      		gsfTimeSeriesIntensity *snippet = &(mb_ping->brb_inten->time_series[i]);
 				vertical = mb_ping->depth[i] - mb_ping->depth_corrector;
 				range = sqrt(vertical * vertical + bathacrosstrack[i] * bathacrosstrack[i]);
 				angle = 90.0 - fabs(mb_ping->beam_angle[i]);
@@ -810,16 +810,18 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 				mb_ping->mr_amplitude[i] = amp[i];
 			}
 
-    /* read multibeam sidescan into storage arrays */
-    int k = 0;
-    for (int i = 0; i < nbath; i++) {
-			gsfTimeSeriesIntensity *snippet = &(mb_ping->brb_inten->time_series[i]);
-			for (int j = 0; j < snippet->sample_count; j++) {
-        if (k < nss) {
-          snippet->samples[j] = ss[k];
-			    k++;
-        }
-      }
+    	/* read multibeam sidescan into storage arrays */
+    	if (nss > 0 && mb_ping->brb_inten != NULL) {
+			int k = 0;
+			for (int i = 0; i < nbath; i++) {
+				gsfTimeSeriesIntensity *snippet = &(mb_ping->brb_inten->time_series[i]);
+				for (int j = 0; j < snippet->sample_count; j++) {
+					if (k < nss) {
+						snippet->samples[j] = ss[k];
+						k++;
+					}
+				}
+			}
 		}
 
 		/* reset GSF scale factors if needed */

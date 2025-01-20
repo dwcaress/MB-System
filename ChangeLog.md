@@ -22,6 +22,11 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.2beta19    January 19, 2025
+- Version 5.8.2beta18    December 8, 2024
+- Version 5.8.2beta17    November 7, 2024
+- Version 5.8.2beta16    November 6, 2024
+- Version 5.8.2beta15    October 1, 2024
 - Version 5.8.2beta14    September 6, 2024
 - Version 5.8.2beta13    August 23, 2024
 - Version 5.8.2beta12    August 22, 2024
@@ -47,7 +52,83 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 ---
 
-#### 5.8.2beta14 (August 23, 2024)
+#### 5.8.2beta19 (January 19, 2025)
+
+Program mbgrdviz: Fixed bug in which routes might not be exported correctly when multiple
+routes are exported to a single route file.
+
+Program mbgrdviz: Fixed error messages indicating failed projection of some soundings.
+
+Program mbpreprocess: Fixed crash when preprocessing third generation Kongsberg 
+multibeam data (*.all files, formats 58 and 59) using a platform model defined in a
+platform file created by mbmakeplatform.
+
+Program mbgrid: Reduced the default verbosity so that the shell output only lists files
+with data actually used in the gridding.
+
+Format 121 (Generic Sensor Format (GSF)): Fixed crashes that occurred when processing GSF
+files derived from Teledyne Reson multibeam data.
+
+Format 89 (Teledyne Reson and Norbit (*.s7k)): Handles the lack of a FileHeader record in
+Norbit multibeam data recorded in the s7k format.
+
+#### 5.8.2beta18 (December 8, 2024)
+
+MBlist: Fixed a critical bug in which mblist would never output from processed files 
+specified through a datalist using the $PROCESSED tag.
+
+Format MBF_KEMKALL (261): Augmented the i/o module to read and write an undocumented kmall
+data record (#MSC) found in EM124 data collected by NERC. Without documentation the record
+cannot be parsed, but it is read and rewritten without modification.
+
+Format MBF_KEMKMALL (261): Fixed failure to differentiate between #SKM records from different
+navigation + heading + attitude systems. If a platform has two navation/attitude systems, then
+the first will map to MB_DATA_NAV1 type data, and the second to MB_DATA_NAV2. The default for
+mbpreprocess will be to interpolate from navigation, heading, and attitude data stored in 
+MB_DATA_NAV1 records, which for this format means #SKM datagrams with system id 0 (as opposed 
+to system id 1).
+
+Miscellaneous: Removed top level files "NEWS", "NOTES", and "INSTALL.md". These files existed
+to conform to GNU expectations for a package structure. We are no longer trying to match the
+GNU structure, and so have removed these unnecessary files.
+
+Most SeaBeam Classic formats (MBF_SBSIOMRG, MBF_SBSIOCEN, MBF_SBSIOLSI, MBF_SBURICEN, MBF_SBURIVAX): Added code to handle rare condition where the ping timestamp has a seconds value of 60. Now the code will add one to the minutes value, and set the seconds value to 0.
+
+#### 5.8.2beta17 (November 7, 2024)
+
+Libtrnav (src/mbtrnav/): Additional fixes by Kent Headley to enable building on Ubuntu 24.
+
+#### 5.8.2beta16 (November 6, 2024)
+
+Mbm_route2mission: Change so that no edgetech behaviors are output to the mission script
+if no sidescan or subbottom is enabled.
+
+Format MBF_MBPRONAV (165): code changed so that if a file has records in which the date
+fields (yyyy mm dd hh mm ss.ssssss) are all zero, then on reading the data will be set
+using the value in the time_d (epoch time in seconds) field.
+
+Mbauvloglist: Fixed bug that caused occasional crashes.
+
+Mbphotogrammetry: Now applies CLAHE equalization to images before calculating disparity map.
+
+Libtrnav (src/mbtrnav/): Many fixes by Kent Headley, including casting the code to use
+Proj for geodetic transformations when used as part of MB-System while still allowing
+use of the old GCTP library when used in other contexts lacking Proj.
+
+### 5.8.2beta15 (October 1, 2024)
+
+Mbmakeplatform: Fixed problems with handling sensor add and sensor modify modes.
+
+Mbgrdviz, mbeditviz, mbnavadjust: Changed the mbview display of swath bounds for selected
+navigation to be optional rather than always displayed.
+
+Formats 58 (MBF_EM710RAW) and 59 (MBF_EM710MBA): Fixed preprocessing support for the 
+Kongsberg M3 multibeam. Added capability to use an MB-System platform file in place of
+the sensor offsets embedded in the logged multibeam files.
+
+Mbphotogrammetry: Fixed use of range bounds in filtering the photogrammetric bathymetry.
+
+#### 5.8.2beta14 (September 6, 2024)
 
 Mbphotomosaic: Removed unnecessary --correction-file-color option (redundant with --correction-file)
 

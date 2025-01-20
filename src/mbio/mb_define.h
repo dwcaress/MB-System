@@ -37,8 +37,8 @@
 #include <stdint.h>
 
 /* Define version and date for this release */
-#define MB_VERSION "5.8.2beta14"
-#define MB_VERSION_DATE "6 September 2024"
+#define MB_VERSION "5.8.2beta19"
+#define MB_VERSION_DATE "19 January 2025"
 
 /* CMake supports current OS's and so there is only one form of RPC and XDR and no mb_config.h file */
 #ifdef CMAKE_BUILD_SYSTEM
@@ -516,6 +516,9 @@ int mb_platform_lever(int verbose, void *platform_ptr, int targetsensor, int tar
 int mb_platform_position(int verbose, void *platform_ptr, int targetsensor, int targetsensoroffset, double navlon, double navlat,
                          double sensordepth, double heading, double roll, double pitch, double *targetlon, double *targetlat,
                          double *targetz, int *error);
+int mb_platform_position_offset(int verbose, void *platform_ptr, int targetsensor, int targetsensoroffset,
+                                   double *target_x_offset, double *target_y_offset, double *target_z_offset,
+                                   int *error);
 int mb_platform_orientation(int verbose, void *platform_ptr, double heading, double roll, double pitch, double *platform_heading,
                             double *platform_roll, double *platform_pitch, int *error);
 int mb_platform_orientation_offset(int verbose, void *platform_ptr, int targetsensor, int targetsensoroffset,
