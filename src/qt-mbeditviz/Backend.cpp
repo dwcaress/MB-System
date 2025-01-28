@@ -106,15 +106,15 @@ int Backend::init(int argc, char **argv,
   verbose_ = 0;
 
   mode_output_ = MBEV_OUTPUT_MODE_EDIT;
-  grid_algorithm_ = MBEV_GRID_ALGORITH_FOOTPRINT;
+  grid_algorithm_ = Footprint;
   num_files_ = 0;
   num_files_alloc_ = 0;
-  num_files__loaded = 0;
+  num_files_loaded_ = 0;
 
   num_esf_open_ = 0;
 
   files_ = NULL;
-  grid_.status = grid__NONE;
+  grid_.status = MBEV_GRID_NONE;
   grid_.projection_id[0] = 0;
   for (int i = 0; i < 4; i++) {
     grid_.bounds[i] = 0.0;
@@ -134,8 +134,8 @@ int Backend::init(int argc, char **argv,
   grid_.val = NULL;
   grid_.sgm = NULL;
   for (int i = 0; i < 4; i++) {
-    grid__bounds[i] = 0.0;
-    grid__boundsutm[i] = 0.0;
+    grid_.bounds[i] = 0.0;
+    grid_.boundsutm[i] = 0.0;
   }
   grid_cellsize_ = 0.0;
   grid_n_columns_ = 0;
@@ -198,7 +198,7 @@ int Backend::init(int argc, char **argv,
       break;
     case 'G':
     case 'g':
-      grid_algorithm_ = grid_algorithm__SIMPLEMEAN;
+      grid_algorithm_ = SimpleMean;
       break;
     case 'I':
     case 'i':
@@ -380,10 +380,11 @@ int Backend::import_file(char *path, int format) {
   /* allocate mbpr_file_struct array if needed */
   status_ = MB_SUCCESS;
   if (num_files_alloc_ <= num_files_) {
-    void *nptr = realloc(files_, sizeof(File) * (num_files__alloc + MBEV_ALLOC_NUM));
+    void *nptr = realloc(files_, sizeof(File) * (num_files_alloc_ +
+						 MBEV_ALLOC_NUM));
     if (nptr != NULL) {
       files_ = (File *)nptr;
-      num_files__alloc += MBEV_ALLOC_NUM;
+      num_files_alloc_ += MBEV_ALLOC_NUM;
     } else {
       free(files_);
       files_ = NULL;
@@ -599,7 +600,7 @@ int Backend::load_file(int ifile, bool assertLock) {
       int iBeginTime[] = {1962, 2, 21, 10, 30, 0, 0};
       int iEndTime[] = {2062, 2, 21, 10, 30, 0, 0};
       double beginTime, endTime;
-      double lonLatBounds[] = -360., 360., -90., 90);
+      double lonLatBounds[] = {-360., 360., -90., 90};
 
     
     if ((status_ = mb_read_init(verbose_, swathfile, format, 1, 
@@ -1644,7 +1645,7 @@ int Backend::load_file(int ifile, bool assertLock) {
     /* set the load status */
     if (status_ == MB_SUCCESS) {
       file->load_status = true;
-      num_files__loaded++;
+      num_files_loaded_++;
     }
   }
 
@@ -2054,7 +2055,7 @@ int Backend::unload_file(int ifile, bool assertUnlock) {
 
     /* reset load status */
     file->load_status = false;
-    num_files__loaded--;
+    num_files_loaded_--;
 
     /* unlock the file */
     if (assertUnlock && useLockFiles_) {
@@ -2221,7 +2222,7 @@ int Backend::get_grid_bounds() {
   double reference_lat;
 
   /* find lon lat bounds of loaded files */
-  if (num_files__loaded > 0) {
+  if (num_files_loaded_ > 0) {
     bool first = true;
     // double depth_min;
     for (int ifile = 0; ifile < num_files_; ifile++) {
@@ -2256,7 +2257,7 @@ int Backend::get_grid_bounds() {
       }
     }
   }
-  if (num_files__loaded <= 0 || grid_bounds_[1] <= grid_bounds_[0] || grid_bounds_[3] <= grid_bounds_[2]) {
+  if (num_files_loaded_ <= 0 || grid_bounds_[1] <= grid_bounds_[0] || grid_bounds_[3] <= grid_bounds_[2]) {
     status_ = MB_FAILURE;
     error_ = MB_ERROR_BAD_PARAMETER;
   }
@@ -2311,7 +2312,7 @@ int Backend::get_grid_bounds() {
     grid_bounds_utm[0] = MIN(grid_bounds_utm[0], xx);
     grid_bounds_utm[1] = MAX(grid_bounds_utm[1], xx);
     grid_bounds_utm[2] = MIN(grid_bounds_utm[2], yy);
-    grid_bounds_utm[3] = MAX(mbev_grid.boundsutm[3], yy);
+    grid_bounds_utm[3] = MAX(grid_.boundsutm[3], yy);
     // fprintf(stderr,"Grid bounds: %f %f %f %f    %f %f %f %f\n",
     // grid_bounds_[0],grid_bounds_[1],grid_bounds_[2],grid_bounds_[3],
     // grid_bounds_utm[0],grid_bounds_utm[1],grid_bounds_utm[2],grid_bounds_utm[3]);
@@ -2380,18 +2381,18 @@ int Backend::setup_grid() {
   }
 
   /* find lon lat bounds of loaded files */
-  if (num_files__loaded > 0) {
+  if (num_files_loaded_ > 0) {
     /* get grid bounds */
-    mbev_grid.bounds[0] = grid_bounds_[0];
-    mbev_grid.bounds[1] = grid_bounds_[1];
-    mbev_grid.bounds[2] = grid_bounds_[2];
-    mbev_grid.bounds[3] = grid_bounds_[3];
+    grid_.bounds[0] = grid_bounds_[0];
+    grid_.bounds[1] = grid_bounds_[1];
+    grid_.bounds[2] = grid_bounds_[2];
+    grid_.bounds[3] = grid_bounds_[3];
 
     /* get grid spacing */
-    mbev_grid.dx = grid_cellsize_;
-    mbev_grid.dy = grid_cellsize_;
+    grid_.dx = grid_cellsize_;
+    grid_.dy = grid_cellsize_;
   }
-  if (num_files__loaded <= 0 || mbev_grid.bounds[1] <= mbev_grid.bounds[0] || mbev_grid.bounds[3] <= mbev_grid.bounds[2]) {
+  if (num_files_loaded_ <= 0 || grid_.bounds[1] <= grid_.bounds[0] || grid_.bounds[3] <= grid_.bounds[2]) {
     status_ = MB_FAILURE;
     error_ = MB_ERROR_BAD_PARAMETER;
   }
@@ -2403,18 +2404,18 @@ int Backend::setup_grid() {
   /* get projection */
   if (status_ == MB_SUCCESS) {
     /* get projection */
-    double reference_lon = 0.5 * (mbev_grid.bounds[0] + mbev_grid.bounds[1]);
-    const double reference_lat = 0.5 * (mbev_grid.bounds[2] + mbev_grid.bounds[3]);
+    double reference_lon = 0.5 * (grid_.bounds[0] + grid_.bounds[1]);
+    const double reference_lat = 0.5 * (grid_.bounds[2] + grid_.bounds[3]);
     if (reference_lon < 180.0)
       reference_lon += 360.0;
     if (reference_lon >= 180.0)
       reference_lon -= 360.0;
     int utm_zone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
     if (reference_lat >= 0.0)
-      snprintf(mbev_grid.projection_id, sizeof(mb_path), "UTM%2.2dN", utm_zone);
+      snprintf(grid_.projection_id, sizeof(mb_path), "UTM%2.2dN", utm_zone);
     else
-      snprintf(mbev_grid.projection_id, sizeof(mb_path), "UTM%2.2dS", utm_zone);
-    const int proj_status = mb_proj_init(verbose_, mbev_grid.projection_id, &(mbev_grid.pjptr), &error_);
+      snprintf(grid_.projection_id, sizeof(mb_path), "UTM%2.2dS", utm_zone);
+    const int proj_status = mb_proj_init(verbose_, grid_.projection_id, &(grid_.pjptr), &error_);
     if (proj_status != MB_SUCCESS) {
       status_ = MB_FAILURE;
       error_ = MB_ERROR_BAD_PARAMETER;
@@ -2428,60 +2429,60 @@ int Backend::setup_grid() {
     /* first point */
     double xx;
     double yy;
-    mb_proj_forward(verbose_, mbev_grid.pjptr, mbev_grid.bounds[0], mbev_grid.bounds[2], &xx, &yy, &error_);
-    mbev_grid.boundsutm[0] = xx;
-    mbev_grid.boundsutm[1] = xx;
-    mbev_grid.boundsutm[2] = yy;
-    mbev_grid.boundsutm[3] = yy;
+    mb_proj_forward(verbose_, grid_.pjptr, grid_.bounds[0], grid_.bounds[2], &xx, &yy, &error_);
+    grid_.boundsutm[0] = xx;
+    grid_.boundsutm[1] = xx;
+    grid_.boundsutm[2] = yy;
+    grid_.boundsutm[3] = yy;
 
     /* second point */
-    mb_proj_forward(verbose_, mbev_grid.pjptr, mbev_grid.bounds[1], mbev_grid.bounds[2], &xx, &yy, &error_);
-    mbev_grid.boundsutm[0] = MIN(mbev_grid.boundsutm[0], xx);
-    mbev_grid.boundsutm[1] = MAX(mbev_grid.boundsutm[1], xx);
-    mbev_grid.boundsutm[2] = MIN(mbev_grid.boundsutm[2], yy);
-    mbev_grid.boundsutm[3] = MAX(mbev_grid.boundsutm[3], yy);
+    mb_proj_forward(verbose_, grid_.pjptr, grid_.bounds[1], grid_.bounds[2], &xx, &yy, &error_);
+    grid_.boundsutm[0] = MIN(grid_.boundsutm[0], xx);
+    grid_.boundsutm[1] = MAX(grid_.boundsutm[1], xx);
+    grid_.boundsutm[2] = MIN(grid_.boundsutm[2], yy);
+    grid_.boundsutm[3] = MAX(grid_.boundsutm[3], yy);
 
     /* third point */
-    mb_proj_forward(verbose_, mbev_grid.pjptr, mbev_grid.bounds[0], mbev_grid.bounds[3], &xx, &yy, &error_);
-    mbev_grid.boundsutm[0] = MIN(mbev_grid.boundsutm[0], xx);
-    mbev_grid.boundsutm[1] = MAX(mbev_grid.boundsutm[1], xx);
-    mbev_grid.boundsutm[2] = MIN(mbev_grid.boundsutm[2], yy);
-    mbev_grid.boundsutm[3] = MAX(mbev_grid.boundsutm[3], yy);
+    mb_proj_forward(verbose_, grid_.pjptr, grid_.bounds[0], grid_.bounds[3], &xx, &yy, &error_);
+    grid_.boundsutm[0] = MIN(grid_.boundsutm[0], xx);
+    grid_.boundsutm[1] = MAX(grid_.boundsutm[1], xx);
+    grid_.boundsutm[2] = MIN(grid_.boundsutm[2], yy);
+    grid_.boundsutm[3] = MAX(grid_.boundsutm[3], yy);
 
     /* fourth point */
-    mb_proj_forward(verbose_, mbev_grid.pjptr, mbev_grid.bounds[1], mbev_grid.bounds[3], &xx, &yy, &error_);
-    mbev_grid.boundsutm[0] = MIN(mbev_grid.boundsutm[0], xx);
-    mbev_grid.boundsutm[1] = MAX(mbev_grid.boundsutm[1], xx);
-    mbev_grid.boundsutm[2] = MIN(mbev_grid.boundsutm[2], yy);
-    mbev_grid.boundsutm[3] = MAX(mbev_grid.boundsutm[3], yy);
+    mb_proj_forward(verbose_, grid_.pjptr, grid_.bounds[1], grid_.bounds[3], &xx, &yy, &error_);
+    grid_.boundsutm[0] = MIN(grid_.boundsutm[0], xx);
+    grid_.boundsutm[1] = MAX(grid_.boundsutm[1], xx);
+    grid_.boundsutm[2] = MIN(grid_.boundsutm[2], yy);
+    grid_.boundsutm[3] = MAX(grid_.boundsutm[3], yy);
 
     /* get grid dimensions */
-    mbev_grid.n_columns = (mbev_grid.boundsutm[1] - mbev_grid.boundsutm[0]) / mbev_grid.dx + 1;
-    mbev_grid.n_rows = (mbev_grid.boundsutm[3] - mbev_grid.boundsutm[2]) / mbev_grid.dy + 1;
-    mbev_grid.boundsutm[1] = mbev_grid.boundsutm[0] + (mbev_grid.n_columns - 1) * mbev_grid.dx;
-    mbev_grid.boundsutm[3] = mbev_grid.boundsutm[2] + (mbev_grid.n_rows - 1) * mbev_grid.dy;
+    grid_.n_columns = (grid_.boundsutm[1] - grid_.boundsutm[0]) / grid_.dx + 1;
+    grid_.n_rows = (grid_.boundsutm[3] - grid_.boundsutm[2]) / grid_.dy + 1;
+    grid_.boundsutm[1] = grid_.boundsutm[0] + (grid_.n_columns - 1) * grid_.dx;
+    grid_.boundsutm[3] = grid_.boundsutm[2] + (grid_.n_rows - 1) * grid_.dy;
     /*fprintf(stderr,"Grid bounds: %f %f %f %f    %f %f %f %f\n",
-    mbev_grid.bounds[0],mbev_grid.bounds[1],mbev_grid.bounds[2],mbev_grid.bounds[3],
-    mbev_grid.boundsutm[0],mbev_grid.boundsutm[1],mbev_grid.boundsutm[2],mbev_grid.boundsutm[3]);
+    grid_.bounds[0],grid_.bounds[1],grid_.bounds[2],grid_.bounds[3],
+    grid_.boundsutm[0],grid_.boundsutm[1],grid_.boundsutm[2],grid_.boundsutm[3]);
     fprintf(stderr,"cell size:%f %f dimensions: %d %d\n",
-    mbev_grid.dx,mbev_grid.dy,mbev_grid.n_columns,mbev_grid.n_rows);*/
+    grid_.dx,grid_.dy,grid_.n_columns,grid_.n_rows);*/
   }
 
   /* allocate memory for grid */
   if (status_ == MB_SUCCESS) {
-    if ((mbev_grid.sum = (float *)malloc(mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float))) == NULL)
+    if ((grid_.sum = (float *)malloc(grid_.n_columns * grid_.n_rows * sizeof(float))) == NULL)
       error_ = MB_ERROR_MEMORY_FAIL;
-    if ((mbev_grid.wgt = (float *)malloc(mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float))) == NULL)
+    if ((grid_.wgt = (float *)malloc(grid_.n_columns * grid_.n_rows * sizeof(float))) == NULL)
       error_ = MB_ERROR_MEMORY_FAIL;
-    if ((mbev_grid.val = (float *)malloc(mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float))) == NULL)
+    if ((grid_.val = (float *)malloc(grid_.n_columns * grid_.n_rows * sizeof(float))) == NULL)
       error_ = MB_ERROR_MEMORY_FAIL;
-    if ((mbev_grid.sgm = (float *)malloc(mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float))) == NULL)
+    if ((grid_.sgm = (float *)malloc(grid_.n_columns * grid_.n_rows * sizeof(float))) == NULL)
       error_ = MB_ERROR_MEMORY_FAIL;
     if (error_ == MB_ERROR_NO_ERROR) {
-      memset(mbev_grid.sum, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
-      memset(mbev_grid.wgt, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
-      memset(mbev_grid.val, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
-      memset(mbev_grid.sgm, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
+      memset(grid_.sum, 0, grid_.n_columns * grid_.n_rows * sizeof(float));
+      memset(grid_.wgt, 0, grid_.n_columns * grid_.n_rows * sizeof(float));
+      memset(grid_.val, 0, grid_.n_columns * grid_.n_rows * sizeof(float));
+      memset(grid_.sgm, 0, grid_.n_columns * grid_.n_rows * sizeof(float));
     }
     else
       status_ = MB_FAILURE;
@@ -2513,15 +2514,15 @@ int Backend::project_soundings() {
       File *file = &files_[ifile];
       if (file->load_status) {
         filecount++;
-        snprintf(message, sizeof(message), "Projecting file %d of %d...", filecount, num_files__loaded);
+        snprintf(message, sizeof(message), "Projecting file %d of %d...", filecount, num_files_loaded_);
         (*showMessage)(message);
         for (int iping = 0; iping < file->num_pings; iping++) {
           Ping *ping = &(file->pings[iping]);
-          mb_proj_forward(verbose_, mbev_grid.pjptr, ping->navlon, ping->navlat, &ping->navlonx, &ping->navlaty,
+          mb_proj_forward(verbose_, grid_.pjptr, ping->navlon, ping->navlat, &ping->navlonx, &ping->navlaty,
                           &error_);
           for (int ibeam = 0; ibeam < ping->beams_bath; ibeam++) {
             if (!mb_beam_check_flag_unusable(ping->beamflag[ibeam])) {
-              mb_proj_forward(verbose_, mbev_grid.pjptr, ping->bathlon[ibeam], ping->bathlat[ibeam],
+              mb_proj_forward(verbose_, grid_.pjptr, ping->bathlon[ibeam], ping->bathlat[ibeam],
                               &ping->bathx[ibeam], &ping->bathy[ibeam], &error_);
             }
           }
@@ -2557,19 +2558,19 @@ int Backend::make_grid() {
           grid_bounds_utm[2], grid_bounds_utm[3]);
   fprintf(stderr, "Cell size:%.3f\nGrid Dimensions: %d %d\n",
           grid_cellsize_, grid_n_columns_, grid_n_rows_);
-  if (grid_algorithm_ == grid_algorithm__SIMPLEMEAN)
+  if (grid_algorithm_ == SimpleMean)
     fprintf(stderr, "Algorithm: Simple Mean\n");
-  else if (grid_algorithm_ == grid_algorithm__FOOTPRINT)
+  else if (grid_algorithm_ == Footprint)
     fprintf(stderr, "Algorithm: Footprint\n");
-  else //if (grid_algorithm_ == grid_algorithm__SHOALBIAS)
+  else //if (grid_algorithm_ == ShoalBias)
     fprintf(stderr, "Algorithm: Shoal Bias\n");
   fprintf(stderr, "Interpolation: %d\n\n", grid_interpolation_);
 
   /* zero the grid arrays */
-  memset(mbev_grid.sum, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
-  memset(mbev_grid.wgt, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
-  /* memset(mbev_grid.val, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));*/
-  memset(mbev_grid.sgm, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
+  memset(grid_.sum, 0, grid_.n_columns * grid_.n_rows * sizeof(float));
+  memset(grid_.wgt, 0, grid_.n_columns * grid_.n_rows * sizeof(float));
+  /* memset(grid_.val, 0, grid_.n_columns * grid_.n_rows * sizeof(float));*/
+  memset(grid_.sgm, 0, grid_.n_columns * grid_.n_rows * sizeof(float));
 
   /* loop over loaded files */
   int filecount = 0;
@@ -2577,7 +2578,7 @@ int Backend::make_grid() {
     File *file = &files_[ifile];
     if (file->load_status) {
       filecount++;
-      snprintf(message, sizeof(message), "Gridding file %d of %d...", filecount, num_files__loaded);
+      snprintf(message, sizeof(message), "Gridding file %d of %d...", filecount, num_files_loaded_);
       (*showMessage)(message);
       for (int iping = 0; iping < file->num_pings; iping++) {
         Ping *ping = &(file->pings[iping]);
@@ -2589,35 +2590,35 @@ int Backend::make_grid() {
       }
     }
   }
-  mbev_grid.nodatavalue = MBEV_NODATA;
+  grid_.nodatavalue = MBEV_NODATA;
   bool first = true;
-  for (int i = 0; i < mbev_grid.n_columns; i++)
-    for (int j = 0; j < mbev_grid.n_rows; j++) {
-      const int k = i * mbev_grid.n_rows + j;
-      if (mbev_grid.wgt[k] > 0.0) {
-        mbev_grid.val[k] = mbev_grid.sum[k] / mbev_grid.wgt[k];
-        mbev_grid.sgm[k] = sqrt(fabs(mbev_grid.sgm[k] / mbev_grid.wgt[k] - mbev_grid.val[k] * mbev_grid.val[k]));
+  for (int i = 0; i < grid_.n_columns; i++)
+    for (int j = 0; j < grid_.n_rows; j++) {
+      const int k = i * grid_.n_rows + j;
+      if (grid_.wgt[k] > 0.0) {
+        grid_.val[k] = grid_.sum[k] / grid_.wgt[k];
+        grid_.sgm[k] = sqrt(fabs(grid_.sgm[k] / grid_.wgt[k] - grid_.val[k] * grid_.val[k]));
         if (first) {
-          mbev_grid.min = mbev_grid.val[k];
-          mbev_grid.max = mbev_grid.val[k];
-          mbev_grid.smin = mbev_grid.sgm[k];
-          mbev_grid.smax = mbev_grid.sgm[k];
+          grid_.min = grid_.val[k];
+          grid_.max = grid_.val[k];
+          grid_.smin = grid_.sgm[k];
+          grid_.smax = grid_.sgm[k];
           first = false;
         }
         else {
-          mbev_grid.min = MIN(mbev_grid.min, mbev_grid.val[k]);
-          mbev_grid.max = MAX(mbev_grid.max, mbev_grid.val[k]);
-          mbev_grid.smin = MIN(mbev_grid.smin, mbev_grid.sgm[k]);
-          mbev_grid.smax = MAX(mbev_grid.smax, mbev_grid.sgm[k]);
+          grid_.min = MIN(grid_.min, grid_.val[k]);
+          grid_.max = MAX(grid_.max, grid_.val[k]);
+          grid_.smin = MIN(grid_.smin, grid_.sgm[k]);
+          grid_.smax = MAX(grid_.smax, grid_.sgm[k]);
         }
       }
       else {
-        mbev_grid.val[k] = mbev_grid.nodatavalue;
-        mbev_grid.sgm[k] = mbev_grid.nodatavalue;
+        grid_.val[k] = grid_.nodatavalue;
+        grid_.sgm[k] = grid_.nodatavalue;
       }
     }
-  if (mbev_grid.status == MBEV_GRID_NONE)
-    mbev_grid.status = MBEV_GRID_NOTVIEWED;
+  if (grid_.status == MBEV_GRID_NONE)
+    grid_.status = MBEV_GRID_NOTVIEWED;
 
   if (verbose_ >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -2646,11 +2647,11 @@ int Backend::grid_beam(File *file, Ping *ping, int ibeam,
   }
 
   /* find location of beam center */
-  const int i = (ping->bathx[ibeam] - mbev_grid.boundsutm[0] + 0.5 * mbev_grid.dx) / mbev_grid.dx;
-  const int j = (ping->bathy[ibeam] - mbev_grid.boundsutm[2] + 0.5 * mbev_grid.dy) / mbev_grid.dy;
+  const int i = (ping->bathx[ibeam] - grid_.boundsutm[0] + 0.5 * grid_.dx) / grid_.dx;
+  const int j = (ping->bathy[ibeam] - grid_.boundsutm[2] + 0.5 * grid_.dy) / grid_.dy;
 
   /* proceed if beam in grid */
-  if (i >= 0 && i < mbev_grid.n_columns && j >= 0 && j < mbev_grid.n_rows) {
+  if (i >= 0 && i < grid_.n_columns && j >= 0 && j < grid_.n_rows) {
     double foot_dx, foot_dy, foot_dxn, foot_dyn;
     double foot_lateral, foot_range, foot_theta;
     double foot_dtheta, foot_dphi;
@@ -2659,9 +2660,9 @@ int Backend::grid_beam(File *file, Ping *ping, int ibeam,
     int ix1, ix2, iy1, iy2;
 
     /* shoal bias gridding mode */
-    if (grid_algorithm_ == grid_algorithm__SHOALBIAS) {
+    if (grid_algorithm_ == ShoalBias)
       /* get location in grid arrays */
-      const int kk = i * mbev_grid.n_rows + j;
+      const int kk = i * grid_.n_rows + j;
 
       if (isnan(ping->bathcorr[ibeam])) {
         fprintf(stderr, "\nFunction Backend::grid_beam(): Encountered NaN value in swath data from file: %s\n",
@@ -2674,37 +2675,37 @@ int Backend::grid_beam(File *file, Ping *ping, int ibeam,
       }
 
       /* add to weights and sums */
-      if (beam_ok && (-ping->bathcorr[ibeam]) >  mbev_grid.sum[kk]) {
-        mbev_grid.wgt[kk] = 1.0;
-        mbev_grid.sum[kk] = (-ping->bathcorr[ibeam]);
-        mbev_grid.sgm[kk] = ping->bathcorr[ibeam] * ping->bathcorr[ibeam];
+      if (beam_ok && (-ping->bathcorr[ibeam]) >  grid_.sum[kk]) {
+        grid_.wgt[kk] = 1.0;
+        grid_.sum[kk] = (-ping->bathcorr[ibeam]);
+        grid_.sgm[kk] = ping->bathcorr[ibeam] * ping->bathcorr[ibeam];
       }
 
       /* recalculate grid cell if desired */
       if (apply_now) {
         /* recalculate grid cell */
-        if (mbev_grid.wgt[kk] > 0.0) {
-          mbev_grid.val[kk] = mbev_grid.sum[kk] / mbev_grid.wgt[kk];
-          mbev_grid.sgm[kk] = sqrt(fabs(mbev_grid.sgm[kk] / mbev_grid.wgt[kk] - mbev_grid.val[kk] * mbev_grid.val[kk]));
-          mbev_grid.min = MIN(mbev_grid.min, mbev_grid.val[kk]);
-          mbev_grid.max = MAX(mbev_grid.max, mbev_grid.val[kk]);
-          mbev_grid.smin = MIN(mbev_grid.smin, mbev_grid.sgm[kk]);
-          mbev_grid.smax = MAX(mbev_grid.smax, mbev_grid.sgm[kk]);
+        if (grid_.wgt[kk] > 0.0) {
+          grid_.val[kk] = grid_.sum[kk] / grid_.wgt[kk];
+          grid_.sgm[kk] = sqrt(fabs(grid_.sgm[kk] / grid_.wgt[kk] - grid_.val[kk] * grid_.val[kk]));
+          grid_.min = MIN(grid_.min, grid_.val[kk]);
+          grid_.max = MAX(grid_.max, grid_.val[kk]);
+          grid_.smin = MIN(grid_.smin, grid_.sgm[kk]);
+          grid_.smax = MAX(grid_.smax, grid_.sgm[kk]);
         }
         else {
-          mbev_grid.val[kk] = mbev_grid.nodatavalue;
-          mbev_grid.sgm[kk] = mbev_grid.nodatavalue;
+          grid_.val[kk] = grid_.nodatavalue;
+          grid_.sgm[kk] = grid_.nodatavalue;
         }
 
         /* update grid in mbview display */
-        mbview_updateprimarygridcell(verbose_, 0, i, j, mbev_grid.val[kk], &error_);
+        mbview_updateprimarygridcell(verbose_, 0, i, j, grid_.val[kk], &error_);
       }
     }
 
     /* simple gridding mode */
-    else if (file->topo_type != MB_TOPOGRAPHY_TYPE_MULTIBEAM || grid_algorithm_ == grid_algorithm__SIMPLEMEAN) {
+    else if (file->topo_type != MB_TOPOGRAPHY_TYPE_MULTIBEAM || grid_algorithm_ == SimpleMean) {
       /* get location in grid arrays */
-      const int kk = i * mbev_grid.n_rows + j;
+      const int kk = i * grid_.n_rows + j;
 
       if (isnan(ping->bathcorr[ibeam])) {
         fprintf(stderr, "\nFunction Backend::grid_beam(): Encountered NaN value in swath data from file: %s\n",
@@ -2718,36 +2719,36 @@ int Backend::grid_beam(File *file, Ping *ping, int ibeam,
 
       /* add to weights and sums */
       if (beam_ok) {
-        mbev_grid.wgt[kk] += 1.0;
-        mbev_grid.sum[kk] += (-ping->bathcorr[ibeam]);
-        mbev_grid.sgm[kk] += ping->bathcorr[ibeam] * ping->bathcorr[ibeam];
+        grid_.wgt[kk] += 1.0;
+        grid_.sum[kk] += (-ping->bathcorr[ibeam]);
+        grid_.sgm[kk] += ping->bathcorr[ibeam] * ping->bathcorr[ibeam];
       }
       else {
-        mbev_grid.wgt[kk] -= 1.0;
-        mbev_grid.sum[kk] -= (-ping->bathcorr[ibeam]);
-        mbev_grid.sgm[kk] -= ping->bathcorr[ibeam] * ping->bathcorr[ibeam];
-        if (mbev_grid.wgt[kk] < MBEV_GRID_WEIGHT_TINY)
-          mbev_grid.wgt[kk] = 0.0;
+        grid_.wgt[kk] -= 1.0;
+        grid_.sum[kk] -= (-ping->bathcorr[ibeam]);
+        grid_.sgm[kk] -= ping->bathcorr[ibeam] * ping->bathcorr[ibeam];
+        if (grid_.wgt[kk] < MBEV_GRID_WEIGHT_TINY)
+          grid_.wgt[kk] = 0.0;
       }
 
       /* recalculate grid cell if desired */
       if (apply_now) {
         /* recalculate grid cell */
-        if (mbev_grid.wgt[kk] > 0.0) {
-          mbev_grid.val[kk] = mbev_grid.sum[kk] / mbev_grid.wgt[kk];
-          mbev_grid.sgm[kk] = sqrt(fabs(mbev_grid.sgm[kk] / mbev_grid.wgt[kk] - mbev_grid.val[kk] * mbev_grid.val[kk]));
-          mbev_grid.min = MIN(mbev_grid.min, mbev_grid.val[kk]);
-          mbev_grid.max = MAX(mbev_grid.max, mbev_grid.val[kk]);
-          mbev_grid.smin = MIN(mbev_grid.smin, mbev_grid.sgm[kk]);
-          mbev_grid.smax = MAX(mbev_grid.smax, mbev_grid.sgm[kk]);
+        if (grid_.wgt[kk] > 0.0) {
+          grid_.val[kk] = grid_.sum[kk] / grid_.wgt[kk];
+          grid_.sgm[kk] = sqrt(fabs(grid_.sgm[kk] / grid_.wgt[kk] - grid_.val[kk] * grid_.val[kk]));
+          grid_.min = MIN(grid_.min, grid_.val[kk]);
+          grid_.max = MAX(grid_.max, grid_.val[kk]);
+          grid_.smin = MIN(grid_.smin, grid_.sgm[kk]);
+          grid_.smax = MAX(grid_.smax, grid_.sgm[kk]);
         }
         else {
-          mbev_grid.val[kk] = mbev_grid.nodatavalue;
-          mbev_grid.sgm[kk] = mbev_grid.nodatavalue;
+          grid_.val[kk] = grid_.nodatavalue;
+          grid_.sgm[kk] = grid_.nodatavalue;
         }
 
         /* update grid in mbview display */
-        mbview_updateprimarygridcell(verbose_, 0, i, j, mbev_grid.val[kk], &error_);
+        mbview_updateprimarygridcell(verbose_, 0, i, j, grid_.val[kk], &error_);
       }
     }
 
@@ -2777,29 +2778,29 @@ int Backend::grid_beam(File *file, Ping *ping, int ibeam,
       foot_hlength = foot_range * tan(DTR * foot_dphi);
 
       /* get range of bins around footprint to examine */
-      foot_wix = fabs(foot_hwidth * cos(DTR * foot_theta) / mbev_grid.dx);
-      foot_wiy = fabs(foot_hwidth * sin(DTR * foot_theta) / mbev_grid.dx);
-      foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) / mbev_grid.dy);
-      foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) / mbev_grid.dy);
+      foot_wix = fabs(foot_hwidth * cos(DTR * foot_theta) / grid_.dx);
+      foot_wiy = fabs(foot_hwidth * sin(DTR * foot_theta) / grid_.dx);
+      foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) / grid_.dy);
+      foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) / grid_.dy);
       foot_dix = 2 * MAX(foot_wix, foot_lix);
       foot_diy = 2 * MAX(foot_wiy, foot_liy);
       ix1 = MAX(i - foot_dix, 0);
-      ix2 = MIN(i + foot_dix, mbev_grid.n_columns - 1);
+      ix2 = MIN(i + foot_dix, grid_.n_columns - 1);
       iy1 = MAX(j - foot_diy, 0);
-      iy2 = MIN(j + foot_diy, mbev_grid.n_rows - 1);
+      iy2 = MIN(j + foot_diy, grid_.n_rows - 1);
 
       /* loop over neighborhood of bins */
       for (int ii = ix1; ii <= ix2; ii++)
         for (int jj = iy1; jj <= iy2; jj++) {
           /* find distance of bin center from sounding center */
-          const double xx = (mbev_grid.boundsutm[0] + ii * mbev_grid.dx + 0.5 * mbev_grid.dx - ping->bathx[ibeam]);
-          const double yy = (mbev_grid.boundsutm[2] + jj * mbev_grid.dy + 0.5 * mbev_grid.dy - ping->bathy[ibeam]);
+          const double xx = (grid_.boundsutm[0] + ii * grid_.dx + 0.5 * grid_.dx - ping->bathx[ibeam]);
+          const double yy = (grid_.boundsutm[2] + jj * grid_.dy + 0.5 * grid_.dy - ping->bathy[ibeam]);
 
           /* get center and corners of bin in meters from sounding center */
           const double xx0 = xx;
           const double yy0 = yy;
-          const double bdx = 0.5 * mbev_grid.dx;
-          const double bdy = 0.5 * mbev_grid.dy;
+          const double bdx = 0.5 * grid_.dx;
+          const double bdy = 0.5 * grid_.dy;
           const double xx1 = xx0 - bdx;
           const double xx2 = xx0 + bdx;
           const double yy1 = yy0 - bdy;
@@ -2828,41 +2829,41 @@ int Backend::grid_beam(File *file, Ping *ping, int ibeam,
           /* if beam affects cell apply using weight */
           if (use_weight == MBEV_USE_YES) {
             /* get location in grid arrays */
-            const int kk = ii * mbev_grid.n_rows + jj;
+            const int kk = ii * grid_.n_rows + jj;
 
             /* add to weights and sums */
             if (beam_ok) {
-              mbev_grid.wgt[kk] += weight;
-              mbev_grid.sum[kk] += weight * (-ping->bathcorr[ibeam]);
-              mbev_grid.sgm[kk] += weight * ping->bathcorr[ibeam] * ping->bathcorr[ibeam];
+              grid_.wgt[kk] += weight;
+              grid_.sum[kk] += weight * (-ping->bathcorr[ibeam]);
+              grid_.sgm[kk] += weight * ping->bathcorr[ibeam] * ping->bathcorr[ibeam];
             }
             else {
-              mbev_grid.wgt[kk] -= weight;
-              mbev_grid.sum[kk] -= weight * (-ping->bathcorr[ibeam]);
-              mbev_grid.sgm[kk] -= weight * ping->bathcorr[ibeam] * ping->bathcorr[ibeam];
-              if (mbev_grid.wgt[kk] < MBEV_GRID_WEIGHT_TINY)
-                mbev_grid.wgt[kk] = 0.0;
+              grid_.wgt[kk] -= weight;
+              grid_.sum[kk] -= weight * (-ping->bathcorr[ibeam]);
+              grid_.sgm[kk] -= weight * ping->bathcorr[ibeam] * ping->bathcorr[ibeam];
+              if (grid_.wgt[kk] < MBEV_GRID_WEIGHT_TINY)
+                grid_.wgt[kk] = 0.0;
             }
 
             /* recalculate grid cell if desired */
             if (apply_now) {
               /* recalculate grid cell */
-              if (mbev_grid.wgt[kk] > 0.0) {
-                mbev_grid.val[kk] = mbev_grid.sum[kk] / mbev_grid.wgt[kk];
-                mbev_grid.sgm[kk] =
-                    sqrt(fabs(mbev_grid.sgm[kk] / mbev_grid.wgt[kk] - mbev_grid.val[kk] * mbev_grid.val[kk]));
-                mbev_grid.min = MIN(mbev_grid.min, mbev_grid.val[kk]);
-                mbev_grid.max = MAX(mbev_grid.max, mbev_grid.val[kk]);
-                mbev_grid.smin = MIN(mbev_grid.smin, mbev_grid.sgm[kk]);
-                mbev_grid.smax = MAX(mbev_grid.smax, mbev_grid.sgm[kk]);
+              if (grid_.wgt[kk] > 0.0) {
+                grid_.val[kk] = grid_.sum[kk] / grid_.wgt[kk];
+                grid_.sgm[kk] =
+                    sqrt(fabs(grid_.sgm[kk] / grid_.wgt[kk] - grid_.val[kk] * grid_.val[kk]));
+                grid_.min = MIN(grid_.min, grid_.val[kk]);
+                grid_.max = MAX(grid_.max, grid_.val[kk]);
+                grid_.smin = MIN(grid_.smin, grid_.sgm[kk]);
+                grid_.smax = MAX(grid_.smax, grid_.sgm[kk]);
               }
               else {
-                mbev_grid.val[kk] = mbev_grid.nodatavalue;
-                mbev_grid.sgm[kk] = mbev_grid.nodatavalue;
+                grid_.val[kk] = grid_.nodatavalue;
+                grid_.sgm[kk] = grid_.nodatavalue;
               }
 
               /* update grid in mbview display */
-              mbview_updateprimarygridcell(verbose_, 0, ii, jj, mbev_grid.val[kk], &error_);
+              mbview_updateprimarygridcell(verbose_, 0, ii, jj, grid_.val[kk], &error_);
             }
           }
         }
@@ -2892,7 +2893,7 @@ int Backend::make_grid_simple() {
   bool first;
 
   /* find lon lat bounds of loaded files */
-  if (num_files__loaded > 0) {
+  if (num_files_loaded_ > 0) {
     first = true;
     for (int ifile = 0; ifile < num_files_; ifile++) {
       File *file = &files_[ifile];
@@ -2903,10 +2904,10 @@ int Backend::make_grid_simple() {
         else
           info = &(file->raw_info);
         if (first) {
-          mbev_grid.bounds[0] = info->lon_min;
-          mbev_grid.bounds[1] = info->lon_max;
-          mbev_grid.bounds[2] = info->lat_min;
-          mbev_grid.bounds[3] = info->lat_max;
+          grid_.bounds[0] = info->lon_min;
+          grid_.bounds[1] = info->lon_max;
+          grid_.bounds[2] = info->lat_min;
+          grid_.bounds[3] = info->lat_max;
           depth_min = info->depth_min;
           depth_max = info->depth_max;
           altitude_min = info->altitude_min;
@@ -2914,30 +2915,30 @@ int Backend::make_grid_simple() {
           first = false;
           if (verbose_ > 0)
             fprintf(stderr, "Processed:%d Name:%s Bounds: %f %f %f %F   File Bounds: %f %f %f %f\n",
-                    file->processed_info_loaded, file->name, mbev_grid.bounds[0], mbev_grid.bounds[1],
-                    mbev_grid.bounds[2], mbev_grid.bounds[3], info->lon_min, info->lon_max, info->lat_min,
+                    file->processed_info_loaded, file->name, grid_.bounds[0], grid_.bounds[1],
+                    grid_.bounds[2], grid_.bounds[3], info->lon_min, info->lon_max, info->lat_min,
                     info->lat_max);
         }
         else {
-          mbev_grid.bounds[0] = MIN(mbev_grid.bounds[0], info->lon_min);
-          mbev_grid.bounds[1] = MAX(mbev_grid.bounds[1], info->lon_max);
-          mbev_grid.bounds[2] = MIN(mbev_grid.bounds[2], info->lat_min);
-          mbev_grid.bounds[3] = MAX(mbev_grid.bounds[3], info->lat_max);
+          grid_.bounds[0] = MIN(grid_.bounds[0], info->lon_min);
+          grid_.bounds[1] = MAX(grid_.bounds[1], info->lon_max);
+          grid_.bounds[2] = MIN(grid_.bounds[2], info->lat_min);
+          grid_.bounds[3] = MAX(grid_.bounds[3], info->lat_max);
           depth_min = MIN(depth_min, info->depth_min);
           depth_max = MIN(depth_max, info->depth_max);
           altitude_min = MIN(altitude_min, info->altitude_min);
           altitude_max = MIN(altitude_max, info->altitude_max);
           if (verbose_ > 0)
             fprintf(stderr, "Processed:%d Name:%s Bounds: %f %f %f %F   File Bounds: %f %f %f %f\n",
-                    file->processed_info_loaded, file->name, mbev_grid.bounds[0], mbev_grid.bounds[1],
-                    mbev_grid.bounds[2], mbev_grid.bounds[3], info->lon_min, info->lon_max, info->lat_min,
+                    file->processed_info_loaded, file->name, grid_.bounds[0], grid_.bounds[1],
+                    grid_.bounds[2], grid_.bounds[3], info->lon_min, info->lon_max, info->lat_min,
                     info->lat_max);
         }
       }
     }
   }
 
-  if (num_files__loaded <= 0 || mbev_grid.bounds[1] <= mbev_grid.bounds[0] || mbev_grid.bounds[3] <= mbev_grid.bounds[2]) {
+  if (num_files_loaded_ <= 0 || grid_.bounds[1] <= grid_.bounds[0] || grid_.bounds[3] <= grid_.bounds[2]) {
     status_ = MB_FAILURE;
     error_ = MB_ERROR_BAD_PARAMETER;
   }
@@ -2949,18 +2950,18 @@ int Backend::make_grid_simple() {
   /* get projection */
   if (status_ == MB_SUCCESS) {
     /* get projection */
-    double reference_lon = 0.5 * (mbev_grid.bounds[0] + mbev_grid.bounds[1]);
-    const double reference_lat = 0.5 * (mbev_grid.bounds[2] + mbev_grid.bounds[3]);
+    double reference_lon = 0.5 * (grid_.bounds[0] + grid_.bounds[1]);
+    const double reference_lat = 0.5 * (grid_.bounds[2] + grid_.bounds[3]);
     if (reference_lon < 180.0)
       reference_lon += 360.0;
     if (reference_lon >= 180.0)
       reference_lon -= 360.0;
     int utm_zone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
     if (reference_lat >= 0.0)
-      snprintf(mbev_grid.projection_id, sizeof(mb_path), "UTM%2.2dN", utm_zone);
+      snprintf(grid_.projection_id, sizeof(mb_path), "UTM%2.2dN", utm_zone);
     else
-      snprintf(mbev_grid.projection_id, sizeof(mb_path), "UTM%2.2dS", utm_zone);
-    const int proj_status = mb_proj_init(verbose_, mbev_grid.projection_id, &(mbev_grid.pjptr), &error_);
+      snprintf(grid_.projection_id, sizeof(mb_path), "UTM%2.2dS", utm_zone);
+    const int proj_status = mb_proj_init(verbose_, grid_.projection_id, &(grid_.pjptr), &error_);
     if (proj_status != MB_SUCCESS) {
       status_ = MB_FAILURE;
       error_ = MB_ERROR_BAD_PARAMETER;
@@ -2976,77 +2977,77 @@ int Backend::make_grid_simple() {
     /* get projected bounds */
 
     /* first point */
-    mb_proj_forward(verbose_, mbev_grid.pjptr, mbev_grid.bounds[0], mbev_grid.bounds[2], &xx, &yy, &error_);
-    mbev_grid.boundsutm[0] = xx;
-    mbev_grid.boundsutm[1] = xx;
-    mbev_grid.boundsutm[2] = yy;
-    mbev_grid.boundsutm[3] = yy;
+    mb_proj_forward(verbose_, grid_.pjptr, grid_.bounds[0], grid_.bounds[2], &xx, &yy, &error_);
+    grid_.boundsutm[0] = xx;
+    grid_.boundsutm[1] = xx;
+    grid_.boundsutm[2] = yy;
+    grid_.boundsutm[3] = yy;
 
     /* second point */
-    mb_proj_forward(verbose_, mbev_grid.pjptr, mbev_grid.bounds[1], mbev_grid.bounds[2], &xx, &yy, &error_);
-    mbev_grid.boundsutm[0] = MIN(mbev_grid.boundsutm[0], xx);
-    mbev_grid.boundsutm[1] = MAX(mbev_grid.boundsutm[1], xx);
-    mbev_grid.boundsutm[2] = MIN(mbev_grid.boundsutm[2], yy);
-    mbev_grid.boundsutm[3] = MAX(mbev_grid.boundsutm[3], yy);
+    mb_proj_forward(verbose_, grid_.pjptr, grid_.bounds[1], grid_.bounds[2], &xx, &yy, &error_);
+    grid_.boundsutm[0] = MIN(grid_.boundsutm[0], xx);
+    grid_.boundsutm[1] = MAX(grid_.boundsutm[1], xx);
+    grid_.boundsutm[2] = MIN(grid_.boundsutm[2], yy);
+    grid_.boundsutm[3] = MAX(grid_.boundsutm[3], yy);
 
     /* third point */
-    mb_proj_forward(verbose_, mbev_grid.pjptr, mbev_grid.bounds[0], mbev_grid.bounds[3], &xx, &yy, &error_);
-    mbev_grid.boundsutm[0] = MIN(mbev_grid.boundsutm[0], xx);
-    mbev_grid.boundsutm[1] = MAX(mbev_grid.boundsutm[1], xx);
-    mbev_grid.boundsutm[2] = MIN(mbev_grid.boundsutm[2], yy);
-    mbev_grid.boundsutm[3] = MAX(mbev_grid.boundsutm[3], yy);
+    mb_proj_forward(verbose_, grid_.pjptr, grid_.bounds[0], grid_.bounds[3], &xx, &yy, &error_);
+    grid_.boundsutm[0] = MIN(grid_.boundsutm[0], xx);
+    grid_.boundsutm[1] = MAX(grid_.boundsutm[1], xx);
+    grid_.boundsutm[2] = MIN(grid_.boundsutm[2], yy);
+    grid_.boundsutm[3] = MAX(grid_.boundsutm[3], yy);
 
     /* fourth point */
-    mb_proj_forward(verbose_, mbev_grid.pjptr, mbev_grid.bounds[1], mbev_grid.bounds[3], &xx, &yy, &error_);
-    mbev_grid.boundsutm[0] = MIN(mbev_grid.boundsutm[0], xx);
-    mbev_grid.boundsutm[1] = MAX(mbev_grid.boundsutm[1], xx);
-    mbev_grid.boundsutm[2] = MIN(mbev_grid.boundsutm[2], yy);
-    mbev_grid.boundsutm[3] = MAX(mbev_grid.boundsutm[3], yy);
+    mb_proj_forward(verbose_, grid_.pjptr, grid_.bounds[1], grid_.bounds[3], &xx, &yy, &error_);
+    grid_.boundsutm[0] = MIN(grid_.boundsutm[0], xx);
+    grid_.boundsutm[1] = MAX(grid_.boundsutm[1], xx);
+    grid_.boundsutm[2] = MIN(grid_.boundsutm[2], yy);
+    grid_.boundsutm[3] = MAX(grid_.boundsutm[3], yy);
 
     /* get grid spacing */
-    mbev_grid.dx = 0.14 * altitude_max;
-    mbev_grid.dy = 0.14 * altitude_max;
+    grid_.dx = 0.14 * altitude_max;
+    grid_.dy = 0.14 * altitude_max;
     if (altitude_max > 0.0) {
-      mbev_grid.dx = 0.02 * altitude_max;
-      mbev_grid.dy = 0.02 * altitude_max;
+      grid_.dx = 0.02 * altitude_max;
+      grid_.dy = 0.02 * altitude_max;
     }
     else if (depth_max > 0.0) {
-      mbev_grid.dx = 0.02 * depth_max;
-      mbev_grid.dy = 0.02 * depth_max;
+      grid_.dx = 0.02 * depth_max;
+      grid_.dy = 0.02 * depth_max;
     }
     else {
-      mbev_grid.dx = (mbev_grid.boundsutm[1] - mbev_grid.boundsutm[0]) / 250;
-      mbev_grid.dy = (mbev_grid.boundsutm[1] - mbev_grid.boundsutm[0]) / 250;
+      grid_.dx = (grid_.boundsutm[1] - grid_.boundsutm[0]) / 250;
+      grid_.dy = (grid_.boundsutm[1] - grid_.boundsutm[0]) / 250;
     }
 
     /* get grid dimensions */
-    mbev_grid.n_columns = (mbev_grid.boundsutm[1] - mbev_grid.boundsutm[0]) / mbev_grid.dx + 1;
-    mbev_grid.n_rows = (mbev_grid.boundsutm[3] - mbev_grid.boundsutm[2]) / mbev_grid.dy + 1;
-    mbev_grid.boundsutm[1] = mbev_grid.boundsutm[0] + (mbev_grid.n_columns - 1) * mbev_grid.dx;
-    mbev_grid.boundsutm[3] = mbev_grid.boundsutm[2] + (mbev_grid.n_rows - 1) * mbev_grid.dy;
+    grid_.n_columns = (grid_.boundsutm[1] - grid_.boundsutm[0]) / grid_.dx + 1;
+    grid_.n_rows = (grid_.boundsutm[3] - grid_.boundsutm[2]) / grid_.dy + 1;
+    grid_.boundsutm[1] = grid_.boundsutm[0] + (grid_.n_columns - 1) * grid_.dx;
+    grid_.boundsutm[3] = grid_.boundsutm[2] + (grid_.n_rows - 1) * grid_.dy;
     if (verbose_ > 0)
-      fprintf(stderr, "Grid bounds: %f %f %f %f    %f %f %f %f\n", mbev_grid.bounds[0], mbev_grid.bounds[1],
-              mbev_grid.bounds[2], mbev_grid.bounds[3], mbev_grid.boundsutm[0], mbev_grid.boundsutm[1],
-              mbev_grid.boundsutm[2], mbev_grid.boundsutm[3]);
+      fprintf(stderr, "Grid bounds: %f %f %f %f    %f %f %f %f\n", grid_.bounds[0], grid_.bounds[1],
+              grid_.bounds[2], grid_.bounds[3], grid_.boundsutm[0], grid_.boundsutm[1],
+              grid_.boundsutm[2], grid_.boundsutm[3]);
     if (verbose_ > 0)
-      fprintf(stderr, "cell size:%f %f dimensions: %d %d\n", mbev_grid.dx, mbev_grid.dy, mbev_grid.n_columns, mbev_grid.n_rows);
+      fprintf(stderr, "cell size:%f %f dimensions: %d %d\n", grid_.dx, grid_.dy, grid_.n_columns, grid_.n_rows);
   }
 
   /* allocate memory for grid */
   if (status_ == MB_SUCCESS) {
-    if ((mbev_grid.sum = (float *)malloc(mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float))) == NULL)
+    if ((grid_.sum = (float *)malloc(grid_.n_columns * grid_.n_rows * sizeof(float))) == NULL)
       error_ = MB_ERROR_MEMORY_FAIL;
-    if ((mbev_grid.wgt = (float *)malloc(mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float))) == NULL)
+    if ((grid_.wgt = (float *)malloc(grid_.n_columns * grid_.n_rows * sizeof(float))) == NULL)
       error_ = MB_ERROR_MEMORY_FAIL;
-    if ((mbev_grid.val = (float *)malloc(mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float))) == NULL)
+    if ((grid_.val = (float *)malloc(grid_.n_columns * grid_.n_rows * sizeof(float))) == NULL)
       error_ = MB_ERROR_MEMORY_FAIL;
-    if ((mbev_grid.sgm = (float *)malloc(mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float))) == NULL)
+    if ((grid_.sgm = (float *)malloc(grid_.n_columns * grid_.n_rows * sizeof(float))) == NULL)
       error_ = MB_ERROR_MEMORY_FAIL;
     if (error_ == MB_ERROR_NO_ERROR) {
-      memset(mbev_grid.sum, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
-      memset(mbev_grid.wgt, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
-      memset(mbev_grid.val, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
-      memset(mbev_grid.sgm, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
+      memset(grid_.sum, 0, grid_.n_columns * grid_.n_rows * sizeof(float));
+      memset(grid_.wgt, 0, grid_.n_columns * grid_.n_rows * sizeof(float));
+      memset(grid_.val, 0, grid_.n_columns * grid_.n_rows * sizeof(float));
+      memset(grid_.sgm, 0, grid_.n_columns * grid_.n_rows * sizeof(float));
     }
     else
       status_ = MB_FAILURE;
@@ -3060,55 +3061,55 @@ int Backend::make_grid_simple() {
       File *file = &files_[ifile];
       if (file->load_status) {
         filecount++;
-        snprintf(message, sizeof(message), "Gridding file %d of %d...", filecount, num_files__loaded);
+        snprintf(message, sizeof(message), "Gridding file %d of %d...", filecount, num_files_loaded_);
         (*showMessage)(message);
         for (iping = 0; iping < file->num_pings; iping++) {
           Ping *ping = &(file->pings[iping]);
           for (ibeam = 0; ibeam < ping->beams_bath; ibeam++) {
             if (!mb_beam_check_flag_unusable(ping->beamflag[ibeam])) {
-              mb_proj_forward(verbose_, mbev_grid.pjptr, ping->bathlon[ibeam], ping->bathlat[ibeam],
+              mb_proj_forward(verbose_, grid_.pjptr, ping->bathlon[ibeam], ping->bathlat[ibeam],
                               &ping->bathx[ibeam], &ping->bathy[ibeam], &error_);
             }
             if (mb_beam_ok(ping->beamflag[ibeam])) {
-              const int i = (ping->bathx[ibeam] - mbev_grid.boundsutm[0] + 0.5 * mbev_grid.dx) / mbev_grid.dx;
-              const int j = (ping->bathy[ibeam] - mbev_grid.boundsutm[2] + 0.5 * mbev_grid.dy) / mbev_grid.dy;
-              const int k = i * mbev_grid.n_rows + j;
-              mbev_grid.sum[k] += (-ping->bathcorr[ibeam]);
-              mbev_grid.wgt[k] += 1.0;
-              mbev_grid.sgm[k] += ping->bathcorr[ibeam] * ping->bathcorr[ibeam];
+              const int i = (ping->bathx[ibeam] - grid_.boundsutm[0] + 0.5 * grid_.dx) / grid_.dx;
+              const int j = (ping->bathy[ibeam] - grid_.boundsutm[2] + 0.5 * grid_.dy) / grid_.dy;
+              const int k = i * grid_.n_rows + j;
+              grid_.sum[k] += (-ping->bathcorr[ibeam]);
+              grid_.wgt[k] += 1.0;
+              grid_.sgm[k] += ping->bathcorr[ibeam] * ping->bathcorr[ibeam];
             }
           }
         }
       }
     }
-    mbev_grid.nodatavalue = MBEV_NODATA;
+    grid_.nodatavalue = MBEV_NODATA;
     first = true;
-    for (int i = 0; i < mbev_grid.n_columns; i++)
-      for (int j = 0; j < mbev_grid.n_rows; j++) {
-        const int k = i * mbev_grid.n_rows + j;
-        if (mbev_grid.wgt[k] > 0.0) {
-          mbev_grid.val[k] = mbev_grid.sum[k] / mbev_grid.wgt[k];
-          mbev_grid.sgm[k] = sqrt(fabs(mbev_grid.sgm[k] / mbev_grid.wgt[k] - mbev_grid.val[k] * mbev_grid.val[k]));
+    for (int i = 0; i < grid_.n_columns; i++)
+      for (int j = 0; j < grid_.n_rows; j++) {
+        const int k = i * grid_.n_rows + j;
+        if (grid_.wgt[k] > 0.0) {
+          grid_.val[k] = grid_.sum[k] / grid_.wgt[k];
+          grid_.sgm[k] = sqrt(fabs(grid_.sgm[k] / grid_.wgt[k] - grid_.val[k] * grid_.val[k]));
           if (first) {
-            mbev_grid.min = mbev_grid.val[k];
-            mbev_grid.max = mbev_grid.val[k];
-            mbev_grid.smin = mbev_grid.sgm[k];
-            mbev_grid.smax = mbev_grid.sgm[k];
+            grid_.min = grid_.val[k];
+            grid_.max = grid_.val[k];
+            grid_.smin = grid_.sgm[k];
+            grid_.smax = grid_.sgm[k];
             first = false;
           }
           else {
-            mbev_grid.min = MIN(mbev_grid.min, mbev_grid.val[k]);
-            mbev_grid.max = MAX(mbev_grid.max, mbev_grid.val[k]);
-            mbev_grid.smin = MIN(mbev_grid.smin, mbev_grid.sgm[k]);
-            mbev_grid.smax = MAX(mbev_grid.smax, mbev_grid.sgm[k]);
+            grid_.min = MIN(grid_.min, grid_.val[k]);
+            grid_.max = MAX(grid_.max, grid_.val[k]);
+            grid_.smin = MIN(grid_.smin, grid_.sgm[k]);
+            grid_.smax = MAX(grid_.smax, grid_.sgm[k]);
           }
         }
         else {
-          mbev_grid.val[k] = mbev_grid.nodatavalue;
-          mbev_grid.sgm[k] = mbev_grid.nodatavalue;
+          grid_.val[k] = grid_.nodatavalue;
+          grid_.sgm[k] = grid_.nodatavalue;
         }
       }
-    mbev_grid.status = MBEV_GRID_NOTVIEWED;
+    grid_.status = MBEV_GRID_NOTVIEWED;
   }
 
   if (verbose_ >= 2) {
@@ -3221,37 +3222,37 @@ int Backend::destroy_grid() {
   }
 
   /* deallocate memory and reset status */
-  if (mbev_grid.status != MBEV_GRID_NONE) {
+  if (grid_.status != MBEV_GRID_NONE) {
     /* deallocate arrays */
-    if (mbev_grid.sum != NULL)
-      free(mbev_grid.sum);
-    if (mbev_grid.wgt != NULL)
-      free(mbev_grid.wgt);
-    if (mbev_grid.val != NULL)
-      free(mbev_grid.val);
-    if (mbev_grid.sgm != NULL)
-      free(mbev_grid.sgm);
-    mbev_grid.sum = NULL;
-    mbev_grid.wgt = NULL;
-    mbev_grid.val = NULL;
-    mbev_grid.sgm = NULL;
+    if (grid_.sum != NULL)
+      free(grid_.sum);
+    if (grid_.wgt != NULL)
+      free(grid_.wgt);
+    if (grid_.val != NULL)
+      free(grid_.val);
+    if (grid_.sgm != NULL)
+      free(grid_.sgm);
+    grid_.sum = NULL;
+    grid_.wgt = NULL;
+    grid_.val = NULL;
+    grid_.sgm = NULL;
 
     /* release projection */
-    mb_proj_free(verbose_, &(mbev_grid.pjptr), &error_);
+    mb_proj_free(verbose_, &(grid_.pjptr), &error_);
 
     /* reset parameters */
-    memset(mbev_grid.projection_id, 0, MB_PATH_MAXLINE);
+    memset(grid_.projection_id, 0, MB_PATH_MAXLINE);
     for (int i = 0; i < 4; i++) {
-      mbev_grid.bounds[i] = 0.0;
-      mbev_grid.boundsutm[i] = 0.0;
+      grid_.bounds[i] = 0.0;
+      grid_.boundsutm[i] = 0.0;
     }
-    mbev_grid.dx = 0.0;
-    mbev_grid.dy = 0.0;
-    mbev_grid.n_columns = 0;
-    mbev_grid.n_rows = 0;
+    grid_.dx = 0.0;
+    grid_.dy = 0.0;
+    grid_.n_columns = 0;
+    grid_.n_rows = 0;
 
     /* reset status */
-    mbev_grid.status = MBEV_GRID_NONE;
+    grid_.status = MBEV_GRID_NONE;
   }
 
   if (verbose_ >= 2) {
@@ -3377,7 +3378,7 @@ int Backend::selectregion(size_t instance) {
                     ping->navlon, ping->navlat, mtodeglon, mtodeglat, beam_z,
                     beam_xtrack, beam_ltrack, sensordepth, rolldelta, pitchdelta,
                     heading, &(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
-                mb_proj_forward(verbose_, mbev_grid.pjptr, ping->bathlon[ibeam], ping->bathlat[ibeam],
+                mb_proj_forward(verbose_, grid_.pjptr, ping->bathlon[ibeam], ping->bathlat[ibeam],
                                 &ping->bathx[ibeam], &ping->bathy[ibeam], &error_);
 
                 /* get local position in selected region */
@@ -3549,7 +3550,7 @@ int Backend::selectarea(size_t instance) {
                     ping->navlon, ping->navlat, mtodeglon, mtodeglat, beam_z,
                     beam_xtrack, beam_ltrack, sensordepth, rolldelta, pitchdelta,
                     heading, &(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
-                mb_proj_forward(verbose_, mbev_grid.pjptr, ping->bathlon[ibeam], ping->bathlat[ibeam],
+                mb_proj_forward(verbose_, grid_.pjptr, ping->bathlon[ibeam], ping->bathlat[ibeam],
                                 &ping->bathx[ibeam], &ping->bathy[ibeam], &error_);
                 x = ping->bathx[ibeam] - selected_.xorigin;
                 y = ping->bathy[ibeam] - selected_.yorigin;
@@ -3709,7 +3710,7 @@ int Backend::selectnav(size_t instance) {
                   ping->navlon, ping->navlat, mtodeglon, mtodeglat, beam_z,
                   beam_xtrack, beam_ltrack, sensordepth, rolldelta, pitchdelta,
                   heading, &(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
-              mb_proj_forward(verbose_, mbev_grid.pjptr, ping->bathlon[ibeam], ping->bathlat[ibeam],
+              mb_proj_forward(verbose_, grid_.pjptr, ping->bathlon[ibeam], ping->bathlat[ibeam],
                               &ping->bathx[ibeam], &ping->bathy[ibeam], &error_);
 
               /* get local position in selected region */
@@ -4031,7 +4032,7 @@ void Backend::mb3dsoundings_bias(double rollbias, double pitchbias, double headi
     Backend::beam_position(ping->navlon, ping->navlat, mtodeglon, mtodeglat, beam_z,
                             beam_xtrack, beam_ltrack, sensordepth, rolldelta, pitchdelta,
                             heading, &(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
-    mb_proj_forward(verbose_, mbev_grid.pjptr, ping->bathlon[ibeam], ping->bathlat[ibeam], &ping->bathx[ibeam],
+    mb_proj_forward(verbose_, grid_.pjptr, ping->bathlon[ibeam], ping->bathlat[ibeam], &ping->bathx[ibeam],
                     &ping->bathy[ibeam], &error_);
     const double x = ping->bathx[ibeam] - selected_.xorigin;
     const double y = ping->bathy[ibeam] - selected_.yorigin;
@@ -4130,7 +4131,7 @@ void Backend::mb3dsoundings_biasapply(double rollbias, double pitchbias, double 
             Backend::beam_position(ping->navlon, ping->navlat, mtodeglon, mtodeglat,
                         beam_z, beam_xtrack, beam_ltrack, sensordepth, rolldelta, pitchdelta, heading,
                         &(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
-            mb_proj_forward(verbose_, mbev_grid.pjptr, ping->bathlon[ibeam], ping->bathlat[ibeam],
+            mb_proj_forward(verbose_, grid_.pjptr, ping->bathlon[ibeam], ping->bathlat[ibeam],
                     &ping->bathx[ibeam], &ping->bathy[ibeam], &error_);
           }
         }
@@ -4142,8 +4143,8 @@ void Backend::mb3dsoundings_biasapply(double rollbias, double pitchbias, double 
   Backend::make_grid();
 
   /* update the grid to mbview */
-  mbview_updateprimarygrid(verbose_, 0, mbev_grid.n_columns, mbev_grid.n_rows, mbev_grid.val, &error_);
-  mbview_updatesecondarygrid(verbose_, 0, mbev_grid.n_columns, mbev_grid.n_rows, mbev_grid.sgm, &error_);
+  mbview_updateprimarygrid(verbose_, 0, grid_.n_columns, grid_.n_rows, grid_.val, &error_);
+  mbview_updatesecondarygrid(verbose_, 0, grid_.n_columns, grid_.n_rows, grid_.sgm, &error_);
 
   /* turn message of */
   (*hideMessage)();
@@ -4476,8 +4477,8 @@ void Backend::mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best, 
   // const double snell_org = *snell_best;
 
   /* create grid of bins to calculate variance */
-  const double local_grid_dx = 2 * mbev_grid.dx;
-  const double local_grid_dy = 2 * mbev_grid.dy;
+  const double local_grid_dx = 2 * grid_.dx;
+  const double local_grid_dy = 2 * grid_.dy;
   const double local_grid_xmin = selected_.xmin - 0.25 * (selected_.xmax - selected_.xmin);
   double local_grid_xmax = selected_.xmax + 0.25 * (selected_.xmax - selected_.xmin);
   const double local_grid_ymin = selected_.ymin - 0.25 * (selected_.ymax - selected_.ymin);

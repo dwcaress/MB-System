@@ -28,8 +28,6 @@ extern "C" {
 #define MBEV_GRID_NONE 0
 #define MBEV_GRID_NOTVIEWED 1
 #define MBEV_GRID_VIEWED 2
-#define MBEV_GRID_ALGORITH_SIMPLE 0
-#define MBEV_GRID_ALGORITH_FOOTPRINT 1
 #define MBEV_GRID_WEIGHT_TINY 0.0000001
 #define MBEV_ALLOC_NUM 24
 #define MBEV_ALLOCK_NUM 1024
@@ -51,10 +49,11 @@ public:
 protected:
 
 typedef enum {
-     MBEV_GRID_ALGORITHM_SIMPLEMEAN = 0,
-     MBEV_GRID_ALGORITHM_FOOTPRINT = 1,
-     MBEV_GRID_ALGORITHM_SHOALBIAS = 2,
- } gridalgorithm_t;
+  SimpleMean,
+  Footprint,
+  ShoalBias
+  
+ } GridAlgorithm;
 
 typedef enum {
      MBEV_OUTPUT_MODE_EDIT = 0,
@@ -131,7 +130,7 @@ typedef enum {
     struct mb_esf_struct esf;
     int num_pings;
     int num_pings_alloc;
-    struct mbev_ping_struct *pings;
+    Ping *pings;
     double beamwidth_xtrack;
     double beamwidth_ltrack;
     int topo_type;
@@ -262,6 +261,7 @@ typedef enum {
   /* data parameters */
   int num_files_;
   int num_files_alloc_;
+  int num_files_loaded_;  
   int num_esf_open_;
   struct File *files_;
   Grid grid_;
@@ -271,7 +271,7 @@ typedef enum {
   double grid_bounds_[4];
   double grid_boundsutm_[4];
   double grid_cellsize_;
-  gridalgorithm_t grid_algorithm_;
+  GridAlgorithm grid_algorithm_;
   int grid_interpolation_;
   int grid_n_columns_;
   int grid_n_rows_;
@@ -288,7 +288,7 @@ typedef enum {
   int nSoundingThreshold_;
 
   /// selected sounding parameters
- Sounding selected_;
+ Soundings selected_;
 
   /// MBIO control parameters
   int format_;
