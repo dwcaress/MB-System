@@ -22,6 +22,7 @@
 #    See README.md file for copying and redistribution conditions.
 #------------------------------------------------------------------------------
 #
+#
 # To build MB-System from source using CMake do (example):
 #
 # mkdir build
@@ -167,9 +168,10 @@ if(buildQt)
   add_subdirectory(src/qt-mbedit)
   add_subdirectory(src/qt-mbedit-widgets)
   add_subdirectory(src/qt-mbnavedit)
-  add_subdirectory(src/qt-test)
-  add_subdirectory(src/qt-qqvtkRenderItem)
-  add_subdirectory(src/qt-qqvtkItem)
+  ### add_subdirectory(src/qt-test)
+  ### add_subdirectory(src/qt-qqvtkRenderItem)
+  ### add_subdirectory(src/qt-qqvtkItem)
+  ### add_subdirectory(src/qt-mbeditviz)
   
 endif()
 if(buildDeprecated)
