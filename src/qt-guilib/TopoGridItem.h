@@ -7,18 +7,20 @@
 #include <vtk/vtkPolyDataMapper.h>
 #include <vtk/vtkRenderWindow.h>
 #include <vtk/vtkElevationFilter.h>
-//// #include <vtk/vtkGradientFilter.h>
 #include <vtk/vtkLookupTable.h>
 #include <vtk/vtkTransform.h>
 #include <vtk/vtkTransformFilter.h>
 #include <vtk/vtkCubeAxesActor.h>
 #include <vtk/vtkNamedColors.h>
-
+#include <vtk/vtkGenericRenderWindowInteractor.h>
+#include <QVTKInteractor.h>
 #include "SlopeFilter.h"
 #include "TopoGridReader.h"
 #include "TopoColorMap.h"
+#include "TopoGridPickerInteractorStyle.h"
 
 namespace mb_system {
+
   /* **
      Manage VTK rendering of MB grid or swath file within a QtQuick item
   */
@@ -48,6 +50,9 @@ namespace mb_system {
       vtkNew<vtkActor> surfaceActor_;
       vtkNew<vtkPolyDataMapper> surfaceMapper_;
       vtkNew<vtkRenderer> renderer_;
+      /// vtkNew<vtkGenericRenderWindowInteractor> windowInteractor_;
+      vtkNew<QVTKInteractor> windowInteractor_;            
+      vtkNew<mb_system::TopoGridPickerInteractorStyle> interactorStyle_;      
 
       /// x,y,z axes
       vtkNew<vtkCubeAxesActor> axesActor_;
@@ -67,6 +72,10 @@ namespace mb_system {
     /// Constructor
     TopoGridItem();
 
+    /// Get pointer to grid reader
+    mb_system::TopoGridReader *getGridReader() {
+      return pipeline_->gridReader_;
+    }
   
     /// Initialize and connect VTK pipeline components, attach it to
     /// vtkRenderWindow, return latest pipeline object.
@@ -92,13 +101,21 @@ namespace mb_system {
     }
 
 
+    /// Get vertical exaggeration
+    Q_INVOKABLE float getVerticalExagg() {
+      return verticalExagg_;
+    }
+
+    
     /// Set type of surface to display
     Q_INVOKABLE void setDisplayedSurface(DisplayedSurface surfaceType) {
       qDebug() << "setDisplayedSurface to " << surfaceType;
       displayedSurface_ = surfaceType;
       reassemblePipeline();
     }
-    
+
+    /// Set picked point
+    void setPickedPoint(double *worldCoords);
 
     /// Set grid filename
     void setGridFilename(char *filename) {
@@ -141,6 +158,17 @@ namespace mb_system {
     /// Name of source grid file
     char *gridFilename_;
 
+
+    /// Latest picked coordinates
+    double pickedCoords_[3];
+
+    /// Indicates if point has been picked by user
+    bool pointPicked_;
+
+    /// Indicates whether to render on next update()
+    bool forceRender_;
+
+    
     /// Vertical exaggeration
     float verticalExagg_;
 
@@ -155,7 +183,8 @@ namespace mb_system {
     
     Pipeline *pipeline_;
     vtkRenderWindow *renderWindow_;
-    
+
+
   };
 }
 

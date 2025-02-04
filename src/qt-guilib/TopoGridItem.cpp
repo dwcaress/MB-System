@@ -20,6 +20,8 @@ TopoGridItem::TopoGridItem() {
   showAxes_ = false;
   scheme_ = TopoColorMap::Haxby;
   displayedSurface_ = DisplayedSurface::Elevation;
+  pointPicked_ = false;
+  forceRender_ = false;
 }
 
 
@@ -274,7 +276,7 @@ void TopoGridItem::assemblePipeline(TopoGridItem::Pipeline *pipeline) {
     pipeline->surfaceMapper_->SetInputConnection(pipeline->elevFilter_->
 						 GetOutputPort());
   }
-  
+
   // Make lookup table
   TopoColorMap::makeLUT(scheme_,
 			pipeline->elevLookupTable_);
@@ -315,6 +317,15 @@ void TopoGridItem::assemblePipeline(TopoGridItem::Pipeline *pipeline) {
     
   pipeline->surfaceActor_->SetScale(1., 1., verticalExagg_);  // NEW!
 
+  pipeline->interactorStyle_->initialize(this, pipeline->windowInteractor_);
+  pipeline->interactorStyle_->SetDefaultRenderer(pipeline->renderer_);
+  pipeline->interactorStyle_->polyData_ =
+    pipeline->gridReader_->GetOutput();
+  
+
+  pipeline->windowInteractor_->SetInteractorStyle(pipeline->interactorStyle_);
+  pipeline->windowInteractor_->SetRenderWindow(renderWindow_);
+  
   if (pipeline->firstRender_) {
     pipeline->renderer_->ResetCamera();
   }
@@ -425,4 +436,17 @@ void TopoGridItem::printPolyDataOutput(vtkDataSetAlgorithm *algorithm,
   }
   std::cerr << "---- printPolyDataOutput() done\n";
 }
+
+void TopoGridItem::setPickedPoint(double *worldCoords) {
+
+  pointPicked_ = true;
+
+  pickedCoords_[0] = worldCoords[0];
+  pickedCoords_[1] = worldCoords[1];
+  pickedCoords_[2] = worldCoords[2];
+
+  /// Force render on next update
+  forceRender_ = true;
+}
+
 
