@@ -25,10 +25,12 @@ protected:
 		  vtkInformationVector** inputVector,
                   vtkInformationVector* outputVector);
 
+  /// Slopes at each point
   vtkSmartPointer<vtkFloatArray> slopes_;
-  vtkSmartPointer<vtkPoints> points_;
-  vtkSmartPointer<vtkCellArray> polygons_;
-  
+
+  /// Slopes at each delauney triangle
+  vtkSmartPointer<vtkFloatArray> triSlopes_;  
+
   
 private:
   SlopeFilter(const mb_system::SlopeFilter&); // Not implemented.

@@ -10,6 +10,8 @@
 #include <vtkPointData.h>
 #include <vtkPolyData.h>
 #include <vtkCellData.h>
+#include <vtkIdList.h>
+#include <vtkCellArrayIterator.h>
 
 using namespace mb_system;
 
@@ -72,21 +74,78 @@ int SlopeFilter::RequestData(vtkInformation* vtkNotUsed(request),
     
     float slope = 0.;
     if (derivativeOK) {
-      // slope = 4000.;
       // TEST: Generate random value
       slope = (float )std::rand();
     }
     slopes_->SetValue(i, slope);
   }
 
+  triSlopes_ = vtkSmartPointer<vtkFloatArray>::New();
+  triSlopes_->SetName("TriSlopes");
+  triSlopes_->SetNumberOfComponents(1);
+  triSlopes_->SetNumberOfTuples(polys->GetNumberOfCells());
+
+  // Compute slope of each triangle
+  vtkIdList *cellPointList = vtkSmartPointer<vtkIdList>::New();
+
+  int nCells = polys->GetNumberOfCells();
+
+  int nCellsProcessed = 0;
+
+
+  for (int i = 0; i < nCells; i++ ) {
+    // NB: GetNextCell() is not thread-safe!
+    if (!polys->GetNextCell(cellPointList)) {
+      std::cerr << "Premature end of cells\n";
+      return 0;
+    }
+    // Expecting each polygon to be a triangle
+    if (cellPointList->GetNumberOfIds() != 3) {
+      std::cerr << "Got " << cellPointList->GetNumberOfIds() <<
+	" in cell; expecting 3 (triangle)\n";
+      return 0;
+    }
+    nCellsProcessed++;
+  }
+
+  /* ***
+  // Following thread-safe method encounters segfault
+  vtkCellArrayIterator *iter = vtk::TakeSmartPointer(polys->NewIterator());
+  for (iter->GoToFirstCell(); !iter->IsDoneWithTraversal();
+       iter->GoToNextCell()) {
+
+
+    /// iter->GetCurrentCell(cellPointList);
+    
+    // Expecting each polygon to be a triangle
+    if (cellPointList->GetNumberOfIds() != 3) {
+      std::cerr << "Got " << cellPointList->GetNumberOfIds() <<
+	" in cell; expecting 3 (triangle)\n";
+      return 0;
+    }
+
+    // Compute slope of plane defined by triangle
+
+    nCellsProcessed++;
+    std::cerr << "Processed " << nCellsProcessed << " cells so far\n";    
+  }
+  *** */
+  
+  std::cerr << "Processed " << nCellsProcessed << " cells\n";
+    
   // Copy input geometry and data to output
+  // e.g. in vtkElevationFilter::RequestData()
   output->CopyStructure(input);
   output->GetPointData()->PassData(input->GetPointData());
   output->GetCellData()->PassData(input->GetCellData());
   
-  // Add new scalars to output
+  // Associate slope scalars with points
   output->GetPointData()->AddArray(slopes_);
   output->GetPointData()->SetActiveScalars("Slopes");
+
+  // Associate triangle slope scalars with polygons
+  output->GetCellData()->AddArray(triSlopes_);
+  output->GetCellData()->SetActiveScalars("TriSlopes");
   
   return 1;
 }
