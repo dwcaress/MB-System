@@ -45,7 +45,8 @@ set(src
     QVtkItem.cpp
     GmtGridReader.cpp
     TopoGridData.cpp
-    TopoGridItem.cpp    
+    TopoGridItem.cpp
+    TopoGridPickerInteractorStyle.cpp
     GmtGridData.cpp
     MBQuickItem.cpp
     QVtkRenderer.cpp
@@ -76,10 +77,13 @@ if (APPLE)
 endif (APPLE)
 
 target_include_directories(MBGui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
-				 ${CMAKE_SOURCE_DIR}/src/mbaux)
+				 ${CMAKE_SOURCE_DIR}/src/mbaux
+				 ${CMAKE_SOURCE_DIR}/src/mbeditviz
+				 )
 target_link_libraries(
   MBGui
-  PRIVATE Qt6::Core Qt6::Quick mbio mbeditvizlib
+  PRIVATE Qt6::Core Qt6::Quick mbio
+  PUBLIC mbeditvizlib
   PUBLIC VTK::CommonColor
   	 VTK::CommonSystem
 	 VTK::pugixml
