@@ -31,7 +31,7 @@ QQuickVTKItem::vtkUserData TopoGridItem::initializeVTK(vtkRenderWindow *renderWi
   renderWindow_ = renderWindow;
   
   // Create pipeline elements
-  vtkNew<TopoGridItem::Pipeline> pipeline_;
+  pipeline_ = new TopoGridItem::Pipeline();
 
   renderWindow->AddRenderer(pipeline_->renderer_);
   
@@ -450,3 +450,6 @@ void TopoGridItem::setPickedPoint(double *worldCoords) {
 }
 
 
+TopoGridReader *TopoGridItem::getGridReader() {
+  return pipeline_->gridReader_;
+}
