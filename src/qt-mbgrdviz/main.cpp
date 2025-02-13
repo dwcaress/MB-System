@@ -7,12 +7,12 @@
 #include <vtk-9.3/vtkRenderer.h>
 #include <vtk-9.3/vtkConeSource.h>
 #include <vtk-9.3/vtkRenderWindow.h>
-#include "TopoGridItem.h"
+#include "TopoDataItem.h"
 #include "SharedConstants.h"
 
 using namespace mb_system;
 
-#define TopoGridItemName "topoGridItem"
+#define TopoDataItemName "topoDataItem"
 
 int main(int argc, char* argv[])
 {
@@ -29,8 +29,8 @@ int main(int argc, char* argv[])
  
   QQmlApplicationEngine engine;
 
-  // Register TopoGridItem type
-  qmlRegisterType<TopoGridItem>("VTK", 9, 3, "TopoGridItem");
+  // Register TopoDataItem type
+  qmlRegisterType<TopoDataItem>("VTK", 9, 3, "TopoDataItem");
 
   // Register SharedConstants type
   qmlRegisterType<SharedConstants>("SharedConstants", 1, 1, "SharedConstants");
@@ -39,15 +39,15 @@ int main(int argc, char* argv[])
  
   QObject* topLevel = engine.rootObjects().value(0);
 
-  // Find the TopoGridItem instantiatd by QML and load specified grid input
-  TopoGridItem *item = topLevel->findChild<TopoGridItem*>(TopoGridItemName);
+  // Find the TopoDataItem instantiatd by QML and load specified grid input
+  TopoDataItem *item = topLevel->findChild<TopoDataItem*>(TopoDataItemName);
   if (!item) {
-    qFatal() << "Couldn't find TopoGridItem " << TopoGridItemName
+    qFatal() << "Couldn't find TopoDataItem " << TopoDataItemName
 	     << " in QML";
     return 1;
   }
 
-  // Specifiy input file for TopoGridItem that was specified on command line
+  // Specifiy input file for TopoDataItem that was specified on command line
   // (could be nullptr); will be loaded and displayed when item is
   // initialized (if not nullptr)
   item->setGridFilename(gridFilename);
