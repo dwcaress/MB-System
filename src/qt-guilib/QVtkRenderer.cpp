@@ -228,7 +228,7 @@ void QVtkRenderer::synchronize(QQuickFramebufferObject *item) {
   
   if (gridFilenameChanged(item_->getGridFilename())) {
 
-    gridReader_ = vtkSmartPointer<TopoGridReader>::New();
+    gridReader_ = vtkSmartPointer<TopoDataReader>::New();
 
     qDebug() << "synchronize(): change busy state to true";
     item_->setAppBusy(true);
@@ -669,10 +669,10 @@ void QVtkRenderer::LoadFileWorker::run() {
   qDebug() << "after gridReader->SetFileName(): ErrorCode: " <<
     parent_.gridReader_->GetErrorCode();
   
-  TopoGridType gridType =
-    TopoGridReader::getGridType(parent_.gridFilename_);
+  TopoDataType gridType =
+    TopoDataReader::getDataType(parent_.gridFilename_);
 
-  parent_.gridReader_->setGridType(gridType);
+  parent_.gridReader_->setDataType(gridType);
 
   qDebug() << "before gridReader->Update(): ErrorCode: " <<
     parent_.gridReader_->GetErrorCode();

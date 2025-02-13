@@ -18,7 +18,7 @@
 #include <vtkTransformFilter.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkNamedColors.h>
-#include "TopoGridReader.h"
+#include "TopoDataReader.h"
 #include "DisplayProperties.h"
 #include "PickerInteractorStyle.h"
 #include "Route.h"
@@ -43,7 +43,7 @@ namespace mb_system {
 
      See https://www.qt.io/blog/2015/05/11/integrating-custom-opengl-rendering-with-qt-quick-via-qquickframebufferobject
 
-     QVtkRenderer contains TopoGridReader gridReader_, which reads data
+     QVtkRenderer contains TopoDataReader gridReader_, which reads data
      from a specified file which is added to the VTK pipeline.
   */
   class QVtkRenderer : public QObject,
@@ -92,7 +92,7 @@ namespace mb_system {
     }
     
     /// Get grid reader
-    TopoGridReader *getGridReader() {
+    TopoDataReader *getGridReader() {
       return gridReader_;
     }
 
@@ -151,7 +151,7 @@ namespace mb_system {
     QVtkItem *item_;
     
     /// Topo grid reader
-    vtkSmartPointer<TopoGridReader> gridReader_;
+    vtkSmartPointer<TopoDataReader> gridReader_;
 
     /// Elevation color filter
     vtkSmartPointer<vtkElevationFilter> elevColorizer_;
@@ -217,7 +217,7 @@ namespace mb_system {
     /// Routes to be overlaid on topography
     std::vector<Route> routes_;
 
-    /// Worker thread class to load grid file with TopoGridReader
+    /// Worker thread class to load grid file with TopoDataReader
     class LoadFileWorker : public QThread {
 
     public:

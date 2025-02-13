@@ -1,23 +1,23 @@
+#include <vtk/vtkRenderer.h>
+#include "TopoDataPickerInteractorStyle.h"
+#include "TopoDataItem.h"
+
+using namespace mb_system;
+
 #include <locale.h>
 #include <vtkPointPicker.h>
 #include <vtkSphereSource.h>
 #include <proj.h>
-#include "PickerInteractorStyle.h"
-#include "QVtkRenderer.h"
-#include "QVtkItem.h"
 
-#define VTK_CREATE(type, name) vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
-using namespace mb_system;
-
-PickerInteractorStyle::PickerInteractorStyle():
-  qVtkRenderer_(nullptr) {
+TopoDataPickerInteractorStyle::TopoDataPickerInteractorStyle():
+  item_(nullptr) {
   selectedMapper_ = vtkSmartPointer<vtkDataSetMapper>::New();
   selectedActor_ = vtkSmartPointer<vtkActor>::New();
 }
 
 
-void PickerInteractorStyle::OnLeftButtonDown() {
+void TopoDataPickerInteractorStyle::OnLeftButtonDown() {
   // Get starting mouse position
   /* *** Always returns 0! 
   this->Interactor->GetMousePosition(&startMousePos_[0],
@@ -32,7 +32,9 @@ void PickerInteractorStyle::OnLeftButtonDown() {
 }
 
 
-void PickerInteractorStyle::OnLeftButtonUp() {
+
+
+void TopoDataPickerInteractorStyle::OnLeftButtonUp() {
 
 
   int x = this->Interactor->GetEventPosition()[0];
@@ -90,8 +92,8 @@ void PickerInteractorStyle::OnLeftButtonUp() {
 
   // If dataset in geographic CRS, display picked point in geogaphic
   // CRS
-  const char *projString = qVtkRenderer_->getGridReader()->fileCRS();
-  bool geographicCRS = qVtkRenderer_->getGridReader()->geographicCRS();
+  const char *projString = item_->getGridReader()->fileCRS();
+  bool geographicCRS = item_->getGridReader()->geographicCRS();
   std::cout << "file CRS proj-string: " << projString << std::endl;
 
   int xyUnits;
@@ -110,7 +112,7 @@ void PickerInteractorStyle::OnLeftButtonUp() {
 
   printf("xyUnits: %c\n", xyUnits);
   printf("degree symbol: %c\n", 0370);
-  PJ *transform = qVtkRenderer_->getGridReader()->projFileToDisplay();
+  PJ *transform = item_->getGridReader()->projFileToDisplay();
 
   if (transform) {
     PJ_COORD utm = proj_coord(worldCoord[0], worldCoord[1], 0, 0);
@@ -125,8 +127,8 @@ void PickerInteractorStyle::OnLeftButtonUp() {
   
   // Correct elevation for vertical exaggeration
   worldCoord[2] /=
-    (qVtkRenderer_->getDisplayProperties()->verticalExagg() *
-     qVtkRenderer_->getGridReader()->zScaleLatLon());
+    (item_->getVerticalExagg() *
+     item_->getGridReader()->zScaleLatLon());
   
   char buf[256];
   if (pointId != -1) {
@@ -152,23 +154,23 @@ void PickerInteractorStyle::OnLeftButtonUp() {
 
   std::cerr << "buf: " << buf << std::endl;
   
-  // Store picked point coordinates in QVtkRenderer
-  qVtkRenderer_->setPickedPoint(worldCoord);
+  // Store picked point coordinates in TopoDataItem
+  item_->setPickedPoint(worldCoord);
 
   // Display picked point coordinates via QVtkIem
   QString coordMsg(buf);
-  qVtkRenderer_->getItem()->setPickedPoint(coordMsg);
+  qDebug() << "Display picked point here";
   
   // Forward event
   vtkInteractorStyleTrackballCamera::OnLeftButtonUp();
 
   // Re-render
-  qVtkRenderer_->getItem()->update();
+  item_->update();
 }
 
 
-void PickerInteractorStyle::testPoints(int x, int y,
-                                       vtkRenderer *renderer) {
+void TopoDataPickerInteractorStyle::testPoints(int x, int y,
+					       vtkRenderer *renderer) {
   vtkNew<vtkPointPicker> picker;
   
   for (int y1 = 0; y1 < 1000; y1++) {

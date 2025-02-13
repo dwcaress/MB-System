@@ -38,15 +38,16 @@ set(CMAKE_AUTOUIC ON)
 
 set(src
     TopoColorMap.cpp
-    TopoGridReader.cpp
+    SwathData.cpp
+    TopoDataReader.cpp
     Camera.cpp
     ColorMap.cpp
     DisplayProperties.cpp
     QVtkItem.cpp
     GmtGridReader.cpp
-    TopoGridData.cpp
-    TopoGridItem.cpp
-    TopoGridPickerInteractorStyle.cpp
+    TopoData.cpp
+    TopoDataItem.cpp
+    TopoDataPickerInteractorStyle.cpp
     GmtGridData.cpp
     MBQuickItem.cpp
     QVtkRenderer.cpp
@@ -54,7 +55,6 @@ set(src
     DataPointsOverlay.cpp
     Route.cpp
     Surface.cpp
-    SwathGridData.cpp
     MBGui.cpp
     SurfaceRenderer.cpp
     PickerInteractorStyle.cpp

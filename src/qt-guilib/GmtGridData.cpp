@@ -125,15 +125,15 @@ bool GmtGridData::setProjString() {
     if (endl) {
       char *projType = strndup(proj, endl-proj);
 
-      if (!strcmp(projType, TopoGridData::GeographicType_)) {
+      if (!strcmp(projType, TopoData::GeographicType_)) {
         sprintf(projString_, "EPSG:4326");
         return true;
       }
       else if (!strncmp(projType,
-                        TopoGridData::UtmType_,
-                        strlen(TopoGridData::UtmType_))) {
+                        TopoData::UtmType_,
+                        strlen(TopoData::UtmType_))) {
         sprintf(projString_, "+proj=utm +zone=%s +datum=WGS84",
-                projType + strlen(TopoGridData::UtmType_));
+                projType + strlen(TopoData::UtmType_));
         
         return true;
       }
