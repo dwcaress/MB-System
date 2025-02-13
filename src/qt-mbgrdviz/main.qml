@@ -58,7 +58,7 @@ Window {
          title: qsTr('Overlays')
 	 Action {
 	   text: qsTr('&Axes'); checkable: true;
-	   onTriggered: {topoGridItem.showAxes(checked)}
+	   onTriggered: {topoDataItem.showAxes(checked)}
 	 }
        }
 
@@ -68,12 +68,12 @@ Window {
 	 Action {
 	   text: qsTr('&Topography'); checkable: true;
 	   ActionGroup.group: exclusiveActions
-	   onTriggered: { topoGridItem.setDisplayedSurface(TopoGridItem.Elevation) }	   
+	   onTriggered: { topoDataItem.setDisplayedSurface(TopoDataItem.Elevation) }	   
 	 }
 	 Action {
 	   text: qsTr('&Slope'); checkable: true;
 	   ActionGroup.group: exclusiveActions
-	   onTriggered: { topoGridItem.setDisplayedSurface(TopoGridItem.Gradient) }
+	   onTriggered: { topoDataItem.setDisplayedSurface(TopoDataItem.Gradient) }
 	 }
        }
 
@@ -100,7 +100,7 @@ Window {
 
              qmlStr += 'onTriggered: { console.log(\'selected ' +
 	                               cmaps[i] + '\');' +
-				       'topoGridItem.setColormap(\'' +
+				       'topoDataItem.setColormap(\'' +
 				       cmaps[i] +
 				       '\')' +
 				       '}'
@@ -120,6 +120,13 @@ Window {
 	 }
 	 
        }
+
+       // Profile
+       Action {
+          text: qsTr('&Profile');
+	  onTriggered: { console.log('show profile') }
+	 }	 
+       
      }
   }
 
@@ -131,9 +138,9 @@ Window {
     text: qsTr('Push me!')
   }
   
-  TopoGridItem {
-    objectName: 'topoGridItem'
-    id: topoGridItem    
+  TopoDataItem {
+    objectName: 'topoDataItem'
+    id: topoDataItem    
     x: 200
     y: 200
     width: 600
@@ -150,7 +157,7 @@ Window {
         nameFilters: ['Swath files (*.grd *.mb[0-9][0-9])']
         onAccepted: {
             console.log('accepted ' + selectedFile);
-            topoGridItem.loadGridfile(selectedFile);
+            topoDataItem.loadGridfile(selectedFile);
         }
     }
 
