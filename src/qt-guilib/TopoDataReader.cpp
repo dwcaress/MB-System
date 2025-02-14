@@ -244,7 +244,7 @@ int TopoDataReader::RequestData(vtkInformation* request,
 
       if (!convertToUTM) {
         // Already in UTM
-        topoData_->data(row, col, &x, &y, &z);
+        topoData_->getXYZ(row, col, &x, &y, &z);
         // Don't insert NaN-valued data
         if (std::isnan(z) || z == TopoData::NoData) {
           gridMissingZValues = true;
@@ -259,7 +259,7 @@ int TopoDataReader::RequestData(vtkInformation* request,
         nValidPoints++;
       }
       else {
-        topoData_->data(row, col, &lon, &lat, &z);
+        topoData_->getXYZ(row, col, &lon, &lat, &z);
         if (std::isnan(z) || z == TopoData::NoData) {
           gridMissingZValues = true;
           // Don't insert nan values 
