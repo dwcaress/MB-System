@@ -88,7 +88,9 @@ namespace mb_system {
 
 
     /// Compute z-value along the straight line between start and end points
-    /// Return false on error, else return true */ 
+    /// profile consists of vector of 2-d arrays, each array specifies
+    /// distance from start and z-value.
+    /// Return false on error, else return true
     bool getElevProfile(int startRow, int startCol,
 			int endRow, int endCol,
 			int nPieces,
