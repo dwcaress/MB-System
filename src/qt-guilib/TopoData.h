@@ -1,6 +1,9 @@
 #ifndef TopoData_h
 #define TopoData_h
 
+#include <array>
+#include <vector>
+
 namespace mb_system {
 
   
@@ -41,8 +44,8 @@ namespace mb_system {
   
     /// Get x, y, z data at specified row and column.
     /// Returns false in case of error
-    virtual bool data(int row, int col, double *x, double *y,
-                      double *z) = 0;
+    virtual bool getXYZ(int row, int col, double *x, double *y,
+			double *z) = 0;
   
     /// Get min/max bounds on each axis
     void bounds(double *xMin, double *xMax,
@@ -83,6 +86,14 @@ namespace mb_system {
     /// Returns true on success, false on error
     virtual bool setProjString() = 0;
 
+
+    /// Compute z-value along the straight line between start and end points
+    /// Return false on error, else return true */ 
+    bool getElevProfile(int startRow, int startCol,
+			int endRow, int endCol,
+			int nPieces,
+			std::vector<std::array<double, 2>> *profile);
+    
   protected:
   
     /// Must be implemented by subclasses
