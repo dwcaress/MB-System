@@ -24,7 +24,6 @@ bool TopoData::getElevProfile(int startRow, int startCol,
 			      int nPieces,
 			      vector<array<double, 2>> *profile) {
 
-  // Compute horizontal length of line
   double startX, startY, startZ, endX, endY, endZ;
 
   if (!getXYZ(startRow, startCol, &startX, &startY, &startZ)) {
