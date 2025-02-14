@@ -40,6 +40,7 @@ bool TopoData::getElevProfile(int startRow, int startCol,
   double rowInterval = (endRow - startRow) / nPieces;
   double colInterval = (endCol - startCol) / nPieces;
 
+  array<double, 2> profilePoint;
   int n = 0;
   for (int col = startCol; col < endCol; col += colInterval) {
     for (int row = startRow; row < endRow; row += rowInterval) {
@@ -48,7 +49,7 @@ bool TopoData::getElevProfile(int startRow, int startCol,
 	std::cerr << "Invalid data at row " << row << ", col " << col << "\n";
 	continue;
       }
-      array<double, 2> profilePoint;
+
       // Compute horizontal distance from starting point
       double distance = sqrt(pow(x - startX, 2) + pow(y - startY, 2));
 
