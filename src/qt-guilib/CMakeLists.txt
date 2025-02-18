@@ -37,35 +37,35 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 set(src
-    TopoColorMap.cpp
-    SwathData.cpp
-    TopoDataReader.cpp
     Camera.cpp
+    ClickableLabel.cpp
     ColorMap.cpp
+    CPixmapDrawer.cpp
+    DataPointsOverlay.cpp
     DisplayProperties.cpp
-    QVtkItem.cpp
+    Emitter.cpp
+    GmtGridData.cpp
     GmtGridReader.cpp
+    GmtGridSurface.cpp
+    MBGui.cpp
+    MBQuickItem.cpp
+    PickerInteractorStyle.cpp
+    PixmapDrawer.cpp    
+    PixmapImage.cpp
+    QVtkItem.cpp
+    QVtkRenderer.cpp
+    Route.cpp
+    SharedConstants.cpp
+    SlopeFilter.cpp
+    Surface.cpp
+    SurfaceRenderer.cpp
+    SwathData.cpp
+    TopoColorMap.cpp
     TopoData.cpp
     TopoDataItem.cpp
     TopoDataPickerInteractorStyle.cpp
-    GmtGridData.cpp
-    MBQuickItem.cpp
-    QVtkRenderer.cpp
-    GmtGridSurface.cpp
-    DataPointsOverlay.cpp
-    Route.cpp
-    Surface.cpp
-    MBGui.cpp
-    SurfaceRenderer.cpp
-    PickerInteractorStyle.cpp
+    TopoDataReader.cpp
     Utilities.cpp
-    ClickableLabel.cpp
-    Emitter.cpp
-    PixmapDrawer.cpp    
-    CPixmapDrawer.cpp
-    PixmapImage.cpp
-    SharedConstants.cpp
-    SlopeFilter.cpp
     resources.qrc)
 
 add_library(MBGui ${src})
