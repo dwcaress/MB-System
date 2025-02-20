@@ -65,6 +65,7 @@ set(src
     TopoDataItem.cpp
     TopoDataPickerInteractorStyle.cpp
     TopoDataReader.cpp
+    TopoProfileItem.cpp    
     Utilities.cpp
     resources.qrc)
 
