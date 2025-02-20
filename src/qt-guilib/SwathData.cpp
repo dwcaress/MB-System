@@ -178,8 +178,8 @@ void SwathData::getParameters(int *nRows, int *nColumns,
 }
 
 
-bool SwathData::data(int row, int col,
-                         double *x, double *y, double *z) {
+bool SwathData::getXYZ(int row, int col,
+		       double *x, double *y, double *z) {
 
   *x = gridData_->boundsutm[2] + col * gridData_->dx; 
   *y = gridData_->boundsutm[0] + row * gridData_->dy;

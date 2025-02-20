@@ -39,11 +39,16 @@ bool TopoData::getElevProfile(int startRow, int startCol,
     return false;    
   }  
 
+  // Total horizontal length
+  double horizLength = sqrt(pow(endX - startX, 2) + pow(endY - startY, 2));
+  double horizIncr = horizLength / nPieces;
+  
   double rowInterval = (endRow - startRow) / nPieces;
   double colInterval = (endCol - startCol) / nPieces;
 
   array<double, 2> profilePoint;
   int n = 0;
+  double h = 0.;
   for (int col = startCol; col < endCol; col += colInterval) {
     for (int row = startRow; row < endRow; row += rowInterval) {
       double x, y, z;
@@ -55,7 +60,8 @@ bool TopoData::getElevProfile(int startRow, int startCol,
       // Compute horizontal distance from starting point
       double distance = sqrt(pow(x - startX, 2) + pow(y - startY, 2));
 
-      profilePoint[0] = distance;
+      profilePoint[0] = h;
+      h += horizIncr;
       profilePoint[1] = z;
       
       profile->push_back(profilePoint);

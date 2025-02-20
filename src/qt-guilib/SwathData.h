@@ -22,8 +22,8 @@ namespace mb_system {
     
     /// Get x, y, z data at specified grid row and column.
     /// Returns false in case of error
-    bool data(int row, int col, double *x, double *y,
-              double *z) override;
+    bool getXYZ(int row, int col, double *x, double *y,
+		double *z) override;
   
     /// Read data from swath file
     bool readDatafile(char *filename) override;

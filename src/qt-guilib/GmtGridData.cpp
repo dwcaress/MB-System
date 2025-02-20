@@ -95,8 +95,8 @@ GMT_GRID *GmtGridData::readGmtFile(const char *gridFile, void **api) {
 }
 
 
-bool GmtGridData::data(int row, int col,
-                       double *x, double *y, double *z) {
+bool GmtGridData::getXYZ(int row, int col,
+			 double *x, double *y, double *z) {
 
   *x = gmtGrid_->x[col];
   *y = gmtGrid_->y[row];
