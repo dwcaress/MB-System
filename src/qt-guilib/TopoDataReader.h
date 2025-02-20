@@ -13,7 +13,7 @@
 
 namespace mb_system {
 
-  /// Supported grid types
+  /// Supported data types
   enum TopoDataType {Unknown,
                      GMTGrid,
                      Swath };
@@ -37,13 +37,13 @@ namespace mb_system {
       return new TopoDataReader();
     }
   
-    /// Set grid file name
+    /// Set topo data file name
     void SetFileName(
-		     const char *fileName ///< [in] grid file name
+		     const char *fileName ///< [in] topo data file name
 		     ) override;
 
-    /// Return pointer to gridPoints
-    vtkPoints *gridPoints() { return gridPoints_; }
+    /// Return pointer to topoPoints
+    vtkPoints *topoDataPoints() { return topoDataPoints_; }
 
 
     /// Read TopoData from file
@@ -79,19 +79,19 @@ namespace mb_system {
     /// Return true if encapsulated TopoData is in geographic CRS
     bool geographicCRS();
     
-    /// Set grid type
+    /// Set data type
     void setDataType(TopoDataType dataType) {
       dataType_ = dataType;
     }
 
-    /// Return file grid type
+    /// Return file data type
     static TopoDataType getDataType(const char *filename);
 
-    /// Return CRS proj-string of stored grid data
+    /// Return CRS proj-string of stored topo data
     const char *fileCRS();
 
 
-    /// PROJ transform between stored and displayed grid data
+    /// PROJ transform between stored and displayed topo data
     PJ *projFileToDisplay() {
       return projTransform_;
     }
@@ -103,7 +103,7 @@ namespace mb_system {
     static void SelectionModifiedCallback(vtkObject* caller, unsigned long eid,
 					  void* clientdata, void* calldata);
 
-    /// Get offset from start of data grid.
+    /// Get offset from start of data 
     /// It's an error if row or col are out-of-range
     vtkIdType gridOffset(unsigned nRows, unsigned nCols,
                          unsigned row, unsigned col);
@@ -131,11 +131,11 @@ namespace mb_system {
     /// TopoData type to read
     TopoDataType dataType_;
 
-    /// Topometry grid data object
+    /// Topo data object
     TopoData *topoData_;
 
-    /// Grid points
-    vtkSmartPointer<vtkPoints> gridPoints_;
+    /// Topo points
+    vtkSmartPointer<vtkPoints> topoDataPoints_;
 
     /// Delaunay triangle vertices
     vtkSmartPointer<vtkCellArray> gridPolygons_;

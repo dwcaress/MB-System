@@ -78,8 +78,8 @@ TopoDataReader::TopoDataReader() :
   projContext_(nullptr), projTransform_(nullptr)
 {
   
-  gridPoints_ = vtkSmartPointer<vtkPoints>::New();
-  gridPoints_->SetDataTypeToDouble();
+  topoDataPoints_ = vtkSmartPointer<vtkPoints>::New();
+  topoDataPoints_->SetDataTypeToDouble();
   gridPolygons_ = vtkSmartPointer<vtkCellArray>::New();  
 
   this->SetNumberOfInputPorts(0);
@@ -220,14 +220,14 @@ int TopoDataReader::RequestData(vtkInformation* request,
   std::cerr << "nRows=" << nRows << ", nColumns=" << nColumns << std::endl;
   
   // Pre-allocate points memory
-  if (!gridPoints_->Allocate(nRows * nColumns)) {
+  if (!topoDataPoints_->Allocate(nRows * nColumns)) {
     std::cerr << "failed to allocate "
 	      <<  nRows * nColumns << " points"
 	      << std::endl;
   }
 
   // Reset/clear points
-  gridPoints_->Reset();
+  topoDataPoints_->Reset();
 
   unsigned row;
   unsigned col;
@@ -255,7 +255,7 @@ int TopoDataReader::RequestData(vtkInformation* request,
           }
         }
         
-        vtkIdType id = gridPoints_->InsertNextPoint(x, y, z);
+        vtkIdType id = topoDataPoints_->InsertNextPoint(x, y, z);
         nValidPoints++;
       }
       else {
@@ -272,7 +272,7 @@ int TopoDataReader::RequestData(vtkInformation* request,
                                      0, 0);
 
         PJ_COORD utm = proj_trans(projTransform_, PJ_FWD, lonLat);
-        vtkIdType id = gridPoints_->InsertNextPoint(utm.enu.e,
+        vtkIdType id = topoDataPoints_->InsertNextPoint(utm.enu.e,
                                                     utm.enu.n,
                                                     z);
       }
@@ -282,8 +282,8 @@ int TopoDataReader::RequestData(vtkInformation* request,
   
 
   double bounds[6];
-  gridPoints_->GetBounds(bounds);
-  std::cerr << "gridPoints_: xMin=" << bounds[0] << ", xMax=" << bounds[1] <<
+  topoDataPoints_->GetBounds(bounds);
+  std::cerr << "topoDataPoints_: xMin=" << bounds[0] << ", xMax=" << bounds[1] <<
     ", yMin=" << bounds[2] << ", yMax=" << bounds[3] <<
     ", zMin=" << bounds[4] << ", zMax=" << bounds[5] << std::endl;
   
@@ -323,11 +323,11 @@ int TopoDataReader::RequestData(vtkInformation* request,
 
   // Save to object's points and polygons (need to output both for
   // downstream processing)
-  polyOutput->SetPoints(gridPoints_);
+  polyOutput->SetPoints(topoDataPoints_);
   polyOutput->SetPolys(gridPolygons_);
 
   std::cerr << "TopoDataReader::RequestData() nPoints: "
-	    << gridPoints_->GetNumberOfPoints()
+	    << topoDataPoints_->GetNumberOfPoints()
     	    << std::endl;
 
   std::cerr << "TopoDataReader::RequestData() nCells: "
@@ -368,7 +368,7 @@ void TopoDataReader::gridBounds(double *xMin, double *xMax,
   topoData_->bounds(xMin, xMax, yMin, yMax, zMin, zMax);
   /* ***
   double bounds[6];
-  gridPoints_->GetBounds(bounds);
+  topoDataPoints_->GetBounds(bounds);
   *xMin = bounds[0];
   *xMax = bounds[1];
   *yMin = bounds[2];
@@ -511,7 +511,7 @@ bool TopoDataReader::triangleMissingZValues(vtkIdType *vertices) {
 
   double *point;
   for (int v = 0; v < 3; v++) {
-    point = gridPoints_->GetPoint(vertices[v]);
+    point = topoDataPoints_->GetPoint(vertices[v]);
     if (point[2] == TopoData::NoData) {
       // Missing at least one z-value
       return true;
