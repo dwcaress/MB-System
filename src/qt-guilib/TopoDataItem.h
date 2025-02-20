@@ -42,7 +42,7 @@ namespace mb_system {
       vtkTypeMacro(Pipeline, vtkObject);
 
       /// Topo grid reader
-      vtkNew<mb_system::TopoDataReader> gridReader_;
+      vtkNew<mb_system::TopoDataReader> topoReader_;
 
       vtkNew<vtkElevationFilter> elevFilter_;
       vtkNew<SlopeFilter> slopeFilter_;      

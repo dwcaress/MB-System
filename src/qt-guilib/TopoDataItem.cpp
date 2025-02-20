@@ -162,10 +162,10 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   }
   
   qDebug() << "set filename to " << gridFilename_;
-  pipeline->gridReader_->SetFileName(gridFilename_);
+  pipeline->topoReader_->SetFileName(gridFilename_);
 
   unsigned long errorCode;
-  if ((errorCode = pipeline->gridReader_->GetErrorCode()) != 0) {
+  if ((errorCode = pipeline->topoReader_->GetErrorCode()) != 0) {
     qWarning() << "grid reader error during SetFileName(): "
 	       << errorCode;
 
@@ -185,13 +185,13 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   TopoDataType gridType =
     TopoDataReader::getDataType(gridFilename_);
 
-  pipeline->gridReader_->setDataType(gridType);
+  pipeline->topoReader_->setDataType(gridType);
 
   // Update TopoDataReader
-  qDebug() << "call gridReader_->Update()";
-  pipeline->gridReader_->Update();
+  qDebug() << "call topoReader_->Update()";
+  pipeline->topoReader_->Update();
 
-  if ((errorCode = pipeline->gridReader_->GetErrorCode()) != 0) {
+  if ((errorCode = pipeline->topoReader_->GetErrorCode()) != 0) {
     qWarning() << "grid reader error during Update(): "
 	       << errorCode;
     
@@ -202,28 +202,28 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   }  
 
   /// DEBUG ////
-  vtkPolyData *polyData = pipeline->gridReader_->GetOutput();
+  vtkPolyData *polyData = pipeline->topoReader_->GetOutput();
   vtkPoints *points = polyData->GetPoints();
   vtkCellArray *cells = polyData->GetPolys();
   if (points) {
-    std::cerr << "gridReader output #points: " <<
+    std::cerr << "topoReader output #points: " <<
       points->GetNumberOfPoints() << "\n";
   }
   else {
-    std::cerr << "gridReader output has no points\n";
+    std::cerr << "topoReader output has no points\n";
   }
   if (cells) {
-    std::cerr << "gridReader output #cells: " << cells->GetNumberOfCells() <<
+    std::cerr << "topoReader output #cells: " << cells->GetNumberOfCells() <<
       "\n";
   }
   else {
-    std::cerr << "gridReader output has no cells\n";
+    std::cerr << "topoReader output has no cells\n";
   }  
   ////////////////////
   
   // Read grid bounds
   double gridBounds[6];
-  pipeline->gridReader_->gridBounds(&gridBounds[0], &gridBounds[1],
+  pipeline->topoReader_->gridBounds(&gridBounds[0], &gridBounds[1],
 				    &gridBounds[2], &gridBounds[3],
 				    &gridBounds[4], &gridBounds[5]);
   
@@ -233,7 +233,7 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   //////////////////////////////////////////
 
 
-  pipeline->elevFilter_->SetInputConnection(pipeline->gridReader_->
+  pipeline->elevFilter_->SetInputConnection(pipeline->topoReader_->
 					      GetOutputPort());
   
   pipeline->elevFilter_->SetLowPoint(0, 0, gridBounds[4]);
@@ -249,7 +249,7 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
 
 
   if (displayedSurface_ == TopoDataItem::DisplayedSurface::Gradient) {
-    qDebug() << "set slopeFilter input to gridReader output port:";
+    qDebug() << "set slopeFilter input to topoReader output port:";
     pipeline->slopeFilter_->SetInputConnection(pipeline->elevFilter_->
 					       GetOutputPort());
 
@@ -305,10 +305,10 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
 	      pipeline->colors_,
 	      pipeline->surfaceMapper_->GetBounds(),
 	      gridBounds,
-	      pipeline->gridReader_->xUnits(),
-	      pipeline->gridReader_->yUnits(),
-	      pipeline->gridReader_->zUnits(),
-	      pipeline->gridReader_->geographicCRS());
+	      pipeline->topoReader_->xUnits(),
+	      pipeline->topoReader_->yUnits(),
+	      pipeline->topoReader_->zUnits(),
+	      pipeline->topoReader_->geographicCRS());
 
 
     pipeline->axesActor_->SetCamera(pipeline->renderer_->GetActiveCamera());
@@ -322,7 +322,7 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   pipeline->interactorStyle_->initialize(this, pipeline->windowInteractor_);
   pipeline->interactorStyle_->SetDefaultRenderer(pipeline->renderer_);
   pipeline->interactorStyle_->polyData_ =
-    pipeline->gridReader_->GetOutput();
+    pipeline->topoReader_->GetOutput();
   
 
   pipeline->windowInteractor_->SetInteractorStyle(pipeline->interactorStyle_);
@@ -332,6 +332,10 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
     pipeline->renderer_->ResetCamera();
   }
   pipeline->firstRender_ = false;
+
+
+  /// TEST : get vertical profile across the map
+  
 }
 
 
@@ -453,5 +457,5 @@ void TopoDataItem::setPickedPoint(double *worldCoords) {
 
 
 TopoDataReader *TopoDataItem::getGridReader() {
-  return pipeline_->gridReader_;
+  return pipeline_->topoReader_;
 }
