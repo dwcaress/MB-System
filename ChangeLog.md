@@ -22,6 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.2beta20    February 22, 2025
 - Version 5.8.2beta19    January 19, 2025
 - Version 5.8.2beta18    December 8, 2024
 - Version 5.8.2beta17    November 7, 2024
@@ -51,6 +52,21 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.2beta20 (February 22, 2025)
+
+Program mbpreprocess: Added options --kluge-flipsign-roll and --kluge-flipsign-pitch 
+which flip the sign of roll or pitch values, respectively, before they are merged and
+applied to the swath bathymetry.
+
+Program mbauvloglist: Added support for new phins.log files for Dorado AUVs with a Phins
+INS installed.
+
+Program mbm_route2mission: Fixed the -Ggpsmode option so that the AUV mission script will
+actually make the AUV surface at survey line starts and/or ends when gpsmode > 0.
+
+Cmake build system: Augmented the places that Cmake will look for Motif headers and library
+with /opt/local/include/ and /opt/local/lib/ in the file build-utils/FindMotif.cmake)
 
 #### 5.8.2beta19 (January 19, 2025)
 

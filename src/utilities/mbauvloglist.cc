@@ -74,7 +74,8 @@ typedef enum {
     INDEX_CALC_DENSITY = -17,
     INDEX_CALC_KTIME = -18,
     INDEX_CALC_KSPEED = -19,
-    INDEX_TIME_INTERVAL = -20,
+    INDEX_CALC_PSPEED = -20,
+    INDEX_TIME_INTERVAL = -21,
 } index_t;
 
 typedef enum {
@@ -126,6 +127,7 @@ struct printfield {
 	int index;
 	bool formatset;
 	char format[MB_PATH_MAXLINE];
+	double scale;
 };
 
 constexpr char program_name[] = "MBauvloglist";
@@ -250,17 +252,19 @@ int main(int argc, char **argv) {
 	bool calc_density = false;
 	bool calc_ktime = false;
     bool calc_kspeed = false;
+    bool calc_pspeed = false;
 	bool recalculate_ctd = false;
 	int ctd_calibration_id = 0;
 	bool angles_in_degrees = false;
     bool calculate_time_interval  = false;
+    double scalevalue = 1.0;
 
 	{
 		bool errflg = false;
 		int c;
 		bool help = false;
 		char printformat[MB_PATH_MAXLINE] = "default";  // TODO(schwehr): Is this used correctly?
-		while ((c = getopt(argc, argv, "A:a:CcD:d:F:f:I:i:L:l:M:m:N:n:O:o:PpR:r:SsVvWwHh")) != -1)
+		while ((c = getopt(argc, argv, "A:a:CcD:d:F:f:I:i:L:l:M:m:N:n:O:o:PpR:r:SsVvWwX:x:Hh")) != -1)
 		{
 			switch (c) {
 			case 'H':
@@ -321,6 +325,8 @@ int main(int argc, char **argv) {
 					printfields[nprintfields].formatset = false;
 					strcpy(printfields[nprintfields].format, "");
 				}
+				printfields[nprintfields].scale = scalevalue;
+
 				if (strcmp(printfields[nprintfields].name, "calcPotentialTemperature") == 0)
 					calc_potentialtemp = true;
 				if (strcmp(printfields[nprintfields].name, "calcSoundspeed") == 0)
@@ -331,6 +337,8 @@ int main(int argc, char **argv) {
 					calc_ktime = true;
 				if (strcmp(printfields[nprintfields].name, "calcKSpeed") == 0)
 					calc_kspeed = true;
+				if (strcmp(printfields[nprintfields].name, "calcPSpeed") == 0)
+					calc_pspeed = true;
         		if (strcmp(printfields[nprintfields].name, "timeInterval") == 0)
           			calculate_time_interval = true;
 				printfields[nprintfields].index = -1;
@@ -349,6 +357,12 @@ int main(int argc, char **argv) {
 			case 'S':
 			case 's':
 				angles_in_degrees = true;
+				break;
+			case 'X':
+			case 'x':
+				double tmpd;
+				if (int nscan = sscanf(optarg, "%lf", &tmpd) == 1) 
+					scalevalue = tmpd;
 				break;
 			case '?':
 				errflg = true;
@@ -411,8 +425,8 @@ int main(int argc, char **argv) {
       fprintf(stderr, "dbg2       calculate_time_interval:  %d\n", calculate_time_interval);
 			fprintf(stderr, "dbg2       nprintfields:             %d\n", nprintfields);
 			for (int i = 0; i < nprintfields; i++)
-				fprintf(stderr, "dbg2         printfields[%d]:          %s %d %s\n", i, printfields[i].name, printfields[i].formatset,
-				        printfields[i].format);
+				fprintf(stderr, "dbg2         printfields[%d]:          %s %d %s %f\n", i, printfields[i].name, printfields[i].formatset,
+				        printfields[i].format, printfields[i].scale);
 		}
 
 		if (help) {
@@ -596,7 +610,8 @@ int main(int argc, char **argv) {
 	int nfields = 0;
 	int recordsize = 0;
 	bool ktime_available = false;
-  bool kvelocity_available = false;
+    bool kvelocity_available = false;
+    bool pvelocity_available = false;
 
 	/* auv log data */
 	struct field fields[NFIELDSMAX];
@@ -686,9 +701,13 @@ int main(int argc, char **argv) {
 				strcpy(fields[nfields].format, "%12.6f"); /* reset printing format from "%8.8e" */
       }
 
-      /* check if kearfott velocity vector is in this file */
+      /* check if Kearfott velocity vector is in this file */
       if (strcmp(fields[nfields].name, "mVbodyxK") == 0)
           kvelocity_available = true;
+
+      /* check if Phins velocity vector is in this file */
+      if (strcmp(fields[nfields].name, "phins_vnorth") == 0)
+          pvelocity_available = true;
 
       /* check if raw and processed ctd data are in this file */
       if (strcmp(fields[nfields].name, "cond_frequency") == 0)
@@ -761,6 +780,12 @@ int main(int argc, char **argv) {
     /* if calculating speed from Kearfott velocity vector check for available Kearfott data */
     if (calc_kspeed && !kvelocity_available) {
 		fprintf(stderr, "\nUnable to calculate speed from Kearfott data as requested, Kearfoot velocity data not in file <%s>\n", file);
+		exit(MB_ERROR_BAD_FORMAT);
+    }
+
+    /* if calculating speed from Phins velocity vector check for available Phins data */
+    if (calc_pspeed && !pvelocity_available) {
+		fprintf(stderr, "\nUnable to calculate speed from Phins data as requested, Phins velocity data not in file <%s>\n", file);
 		exit(MB_ERROR_BAD_FORMAT);
     }
 
@@ -888,6 +913,12 @@ int main(int argc, char **argv) {
 		}
 		else if (strcmp(printfields[i].name, "calcKSpeed") == 0) {
 			printfields[i].index = INDEX_CALC_KSPEED;
+			if (!printfields[i].formatset) {
+				strcpy(printfields[i].format, "%.3f");
+			}
+		}
+		else if (strcmp(printfields[i].name, "calcPSpeed") == 0) {
+			printfields[i].index = INDEX_CALC_PSPEED;
 			if (!printfields[i].formatset) {
 				strcpy(printfields[i].format, "%.3f");
 			}
@@ -1051,6 +1082,22 @@ int main(int argc, char **argv) {
           kspeed_calc = 3.6 * sqrt(mVbodyxK * mVbodyxK + mVbodyyK * mVbodyyK);
         }
 
+        /* calculate lateral speed in km/hr from x and y velocity components in Phins data */
+        double pspeed_calc = 0.0;
+        if (pvelocity_available && calc_pspeed) {
+          double mVbodyxP = 0.0;
+          double mVbodyyP = 0.0;
+          for (int ii = 0; ii < nfields; ii++) {
+      		if (strcmp(fields[ii].name, "phins_vnorth") == 0) {
+                mb_get_binary_double(true, &buffer[fields[ii].index], &mVbodyxP);
+      		}
+      		else if (strcmp(fields[ii].name, "phins_veast") == 0) {
+                mb_get_binary_double(true, &buffer[fields[ii].index], &mVbodyyP);
+      		}
+          }
+          pspeed_calc = 3.6 * sqrt(mVbodyxP * mVbodyxP + mVbodyyP * mVbodyyP);
+        }
+
 		/* loop over the printfields */
 		if (decimate > 1) {
 			if (decimate_count >= decimate) {
@@ -1063,6 +1110,7 @@ int main(int argc, char **argv) {
     	if (output_ok) {
   		  for (int i = 0; i < nprintfields; i++) {
   			const index_t index = static_cast<index_t>(printfields[i].index);
+  			double scale_output = printfields[i].scale;
   			// TODO(schwehr): Make this a switch.
   			if (index == INDEX_ZERO) {
   				double dvalue = 0.0;
@@ -1078,6 +1126,7 @@ int main(int argc, char **argv) {
   				                                           &jinterp, &error);
   				if (jinterp < 2 || jinterp > nav_num - 2)
   					dvalue = 0.0;
+  				dvalue *= scale_output;
   				if (output_mode == OUTPUT_MODE_BINARY)
   					fwrite(&dvalue, sizeof(double), 1, stdout);
   				else
@@ -1090,6 +1139,7 @@ int main(int argc, char **argv) {
   				                                           &jinterp, &error);
   				if (jinterp < 2 || jinterp > nav_num - 2)
   					dvalue = 0.0;
+  				dvalue *= scale_output;
   				if (output_mode == OUTPUT_MODE_BINARY)
   					fwrite(&dvalue, sizeof(double), 1, stdout);
   				else
@@ -1102,6 +1152,7 @@ int main(int argc, char **argv) {
   				                                          &jinterp, &error);
   				if (jinterp < 2 || jinterp > nav_num - 2)
   					dvalue = 0.0;
+  				dvalue *= scale_output;
   				if (output_mode == OUTPUT_MODE_BINARY)
   					fwrite(&dvalue, sizeof(double), 1, stdout);
   				else
@@ -1114,6 +1165,7 @@ int main(int argc, char **argv) {
   				                                         &jinterp, &error);
   				if (jinterp < 2 || jinterp > nav_num - 2)
   					dvalue = 0.0;
+  				dvalue *= scale_output;
   				if (output_mode == OUTPUT_MODE_BINARY)
   					fwrite(&dvalue, sizeof(double), 1, stdout);
   				else
@@ -1126,7 +1178,8 @@ int main(int argc, char **argv) {
   				    mb_linear_interp(verbose, nav_time_d - 1, nav_speed - 1, nav_num, time_d, &dvalue, &jinterp, &error);
   				if (jinterp < 2 || jinterp > nav_num - 2)
   					dvalue = 0.0;
-  				if (output_mode == OUTPUT_MODE_BINARY)
+   				dvalue *= scale_output;
+ 				if (output_mode == OUTPUT_MODE_BINARY)
   					fwrite(&dvalue, sizeof(double), 1, stdout);
   				else
   					fprintf(stdout, printfields[i].format, dvalue);
@@ -1138,6 +1191,7 @@ int main(int argc, char **argv) {
   				    mb_linear_interp(verbose, nav_time_d - 1, nav_sensordepth - 1, nav_num, time_d, &dvalue, &jinterp, &error);
   				if (jinterp < 2 || jinterp > nav_num - 2)
   					dvalue = 0.0;
+  				dvalue *= scale_output;
   				if (output_mode == OUTPUT_MODE_BINARY)
   					fwrite(&dvalue, sizeof(double), 1, stdout);
   				else
@@ -1150,6 +1204,7 @@ int main(int argc, char **argv) {
   				    mb_linear_interp(verbose, nav_time_d - 1, nav_roll - 1, nav_num, time_d, &dvalue, &jinterp, &error);
   				if (jinterp < 2 || jinterp > nav_num - 2)
   					dvalue = 0.0;
+  				dvalue *= scale_output;
   				if (output_mode == OUTPUT_MODE_BINARY)
   					fwrite(&dvalue, sizeof(double), 1, stdout);
   				else
@@ -1162,6 +1217,7 @@ int main(int argc, char **argv) {
   				    mb_linear_interp(verbose, nav_time_d - 1, nav_pitch - 1, nav_num, time_d, &dvalue, &jinterp, &error);
   				if (jinterp < 2 || jinterp > nav_num - 2)
   					dvalue = 0.0;
+  				dvalue *= scale_output;
   				if (output_mode == OUTPUT_MODE_BINARY)
   					fwrite(&dvalue, sizeof(double), 1, stdout);
   				else
@@ -1174,75 +1230,93 @@ int main(int argc, char **argv) {
   				    mb_linear_interp(verbose, nav_time_d - 1, nav_heave - 1, nav_num, time_d, &dvalue, &jinterp, &error);
   				if (jinterp < 2 || jinterp > nav_num - 2)
   					dvalue = 0.0;
-  				if (output_mode == OUTPUT_MODE_BINARY)
+   				dvalue *= scale_output;
+ 				if (output_mode == OUTPUT_MODE_BINARY)
   					fwrite(&dvalue, sizeof(double), 1, stdout);
   				else
   					fprintf(stdout, printfields[i].format, dvalue);
   			}
   			else if (index == INDEX_CALC_CONDUCTIVITY) {
+  				double dvalue = scale_output * conductivity_calc;
   				if (output_mode == OUTPUT_MODE_BINARY)
-  					fwrite(&conductivity_calc, sizeof(double), 1, stdout);
+  					fwrite(&dvalue, sizeof(double), 1, stdout);
   				else
-  					fprintf(stdout, printfields[i].format, conductivity_calc);
+  					fprintf(stdout, printfields[i].format, dvalue);
   			}
   			else if (index == INDEX_CALC_TEMPERATURE) {
+  				double dvalue = scale_output * temperature_calc;
   				if (output_mode == OUTPUT_MODE_BINARY)
-  					fwrite(&temperature_calc, sizeof(double), 1, stdout);
+  					fwrite(&dvalue, sizeof(double), 1, stdout);
   				else
-  					fprintf(stdout, printfields[i].format, temperature_calc);
+  					fprintf(stdout, printfields[i].format, dvalue);
   			}
   			else if (index == INDEX_CALC_PRESSURE) {
+  				double dvalue = scale_output * pressure_calc;
   				if (output_mode == OUTPUT_MODE_BINARY)
-  					fwrite(&pressure_calc, sizeof(double), 1, stdout);
+  					fwrite(&dvalue, sizeof(double), 1, stdout);
   				else
-  					fprintf(stdout, printfields[i].format, pressure_calc);
+  					fprintf(stdout, printfields[i].format, dvalue);
   			}
   			else if (index == INDEX_CALC_SALINITY) {
+  				double dvalue = scale_output * salinity_calc;
   				if (output_mode == OUTPUT_MODE_BINARY)
-  					fwrite(&salinity_calc, sizeof(double), 1, stdout);
+  					fwrite(&dvalue, sizeof(double), 1, stdout);
   				else
-  					fprintf(stdout, printfields[i].format, salinity_calc);
+  					fprintf(stdout, printfields[i].format, dvalue);
   			}
   			else if (index == INDEX_CALC_SOUNDSPEED) {
+  				double dvalue = scale_output * soundspeed_calc;
   				if (output_mode == OUTPUT_MODE_BINARY)
-  					fwrite(&soundspeed_calc, sizeof(double), 1, stdout);
+  					fwrite(&dvalue, sizeof(double), 1, stdout);
   				else
-  					fprintf(stdout, printfields[i].format, soundspeed_calc);
+  					fprintf(stdout, printfields[i].format, dvalue);
   			}
   			else if (index == INDEX_CALC_POTENTIALTEMP) {
+  				double dvalue = scale_output * potentialtemperature_calc;
   				if (output_mode == OUTPUT_MODE_BINARY)
-  					fwrite(&potentialtemperature_calc, sizeof(double), 1, stdout);
+  					fwrite(&dvalue, sizeof(double), 1, stdout);
   				else
-  					fprintf(stdout, printfields[i].format, potentialtemperature_calc);
+  					fprintf(stdout, printfields[i].format, dvalue);
   			}
   			else if (index == INDEX_CALC_DENSITY) {
+  				double dvalue = scale_output * density_calc;
   				if (output_mode == OUTPUT_MODE_BINARY)
-  					fwrite(&density_calc, sizeof(double), 1, stdout);
+  					fwrite(&dvalue, sizeof(double), 1, stdout);
   				else
-  					fprintf(stdout, printfields[i].format, density_calc);
+  					fprintf(stdout, printfields[i].format, dvalue);
   			}
   			else if (index == INDEX_CALC_KTIME) {
+  				double dvalue = scale_output * ktime_calc;
   				if (output_mode == OUTPUT_MODE_BINARY)
-  					fwrite(&ktime_calc, sizeof(double), 1, stdout);
+  					fwrite(&dvalue, sizeof(double), 1, stdout);
   				else
-  					fprintf(stdout, printfields[i].format, ktime_calc);
+  					fprintf(stdout, printfields[i].format, dvalue);
   			}
   			else if (index == INDEX_CALC_KSPEED) {
+  				double dvalue = scale_output * kspeed_calc;
   				if (output_mode == OUTPUT_MODE_BINARY)
-  					fwrite(&kspeed_calc, sizeof(double), 1, stdout);
+  					fwrite(&dvalue, sizeof(double), 1, stdout);
   				else
-  					fprintf(stdout, printfields[i].format, kspeed_calc);
+  					fprintf(stdout, printfields[i].format, dvalue);
+  			}
+  			else if (index == INDEX_CALC_PSPEED) {
+  				double dvalue = scale_output * pspeed_calc;
+  				if (output_mode == OUTPUT_MODE_BINARY)
+  					fwrite(&dvalue, sizeof(double), 1, stdout);
+  				else
+  					fprintf(stdout, printfields[i].format, dvalue);
   			}
   			else if (index == INDEX_TIME_INTERVAL) {
+  				double dvalue = scale_output * time_interval;
   				if (output_mode == OUTPUT_MODE_BINARY)
-  					fwrite(&time_interval, sizeof(double), 1, stdout);
+  					fwrite(&dvalue, sizeof(double), 1, stdout);
   				else
-  					fprintf(stdout, printfields[i].format, time_interval);
+  					fprintf(stdout, printfields[i].format, dvalue);
   			}
   			else if (fields[index].type == TYPE_DOUBLE) {
   				double dvalue = 0.0;
   				mb_get_binary_double(true, &buffer[fields[index].index], &dvalue);
-  				dvalue *= fields[index].scale;
+  				dvalue *= (fields[index].scale * scale_output);
   				if ((strcmp(fields[nfields].name, "mHeadK") == 0 || strcmp(fields[nfields].name, "mYawK") == 0) &&
   				    angles_in_degrees && dvalue < 0.0)
   					dvalue += 360.0;
@@ -1270,7 +1344,7 @@ int main(int argc, char **argv) {
   			else if (fields[index].type == TYPE_TIMETAG) {
   				double dvalue = 0.0;
   				mb_get_binary_double(true, &buffer[fields[index].index], &dvalue);
-  				time_d = dvalue;
+  				time_d = scale_output * dvalue;
   				if (strcmp(printfields[i].format, "time_i") == 0) {
   					mb_get_date(verbose, time_d, time_i);
   					if (output_mode == OUTPUT_MODE_BINARY) {
@@ -1279,8 +1353,8 @@ int main(int argc, char **argv) {
   					else if (output_mode == OUTPUT_MODE_CSV) {
   						fprintf(stdout, "%4.4d,%2.2d,%2.2d,%2.2d,%2.2d,%2.2d.%6.6d", time_i[0], time_i[1], time_i[2], time_i[3],
   						        time_i[4], time_i[5], time_i[6]);
-            }
-            else {
+            		}
+            		else {
   						fprintf(stdout, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d", time_i[0], time_i[1], time_i[2], time_i[3],
   						        time_i[4], time_i[5], time_i[6]);
   					}
@@ -1300,7 +1374,7 @@ int main(int argc, char **argv) {
   					else if (output_mode == OUTPUT_MODE_CSV) {
   						fprintf(stdout, "%4.4d,%3.3d,%2.2d,%2.2d,%2.2d.%6.6d", time_i[0], time_j[1], time_i[3], time_i[4],
   						        time_i[5], time_i[6]);
-            }
+            		}
   					else {
   						fprintf(stdout, "%4.4d %3.3d %2.2d %2.2d %2.2d.%6.6d", time_i[0], time_j[1], time_i[3], time_i[4],
   						        time_i[5], time_i[6]);
@@ -1317,7 +1391,8 @@ int main(int argc, char **argv) {
   				double dvalue = 0.0;
   				mb_get_binary_double(true, &buffer[fields[index].index], &dvalue);
   				dvalue *= fields[index].scale;
-  				if (strcmp(fields[index].name, "mYawCB") == 0 && angles_in_degrees && dvalue < 0.0)
+   				dvalue *= scale_output;
+ 				if (strcmp(fields[index].name, "mYawCB") == 0 && angles_in_degrees && dvalue < 0.0)
   					dvalue += 360.0;
   				if (output_mode == OUTPUT_MODE_BINARY)
   					fwrite(&dvalue, sizeof(double), 1, stdout);

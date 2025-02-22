@@ -1,6 +1,6 @@
-find_path(MOTIF_INCLUDE_DIR Xm/Xm.h /usr/openwin/include)
+find_path(MOTIF_INCLUDE_DIR Xm/Xm.h /usr/openwin/include /opt/local/include)
 
-find_library(MOTIF_LIBRARY Xm /usr/openwin/lib)
+find_library(MOTIF_LIBRARY Xm /usr/openwin/lib /opt/local/lib)
 
 mark_as_advanced(MOTIF_FOUND MOTIF_INCLUDE_DIR MOTIF_LIBRARY)
 

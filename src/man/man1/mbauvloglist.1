@@ -1,4 +1,4 @@
-.TH mbauvloglist 1 "17 June 2021" "MB-System 5.0" "MB-System 5.0"
+.TH mbauvloglist 1 "13 February 2025" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbauvloglist\fP \- Lists table data from an MBARI AUV mission log file.
 
@@ -7,7 +7,7 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmbauvloglist\fP \fB\-I\fP\fIfile\fP [\fB-C\fP \fB\-F\fP\fIprintformat\fP \fB\-L\fP\fIlonflip\fP
-\fB\-M\fP\fImode\fP \fB\-N\fP\fInavfile\fP \fB\-O\fP\fIlist\fP \fB\-P\fP \fB\-R\fP\fIid\fP \-S\fP \fB\-V \-H\fP ]
+\fB\-M\fP\fImode\fP \fB\-N\fP\fInavfile\fP \fB\-O\fP\fIlist\fP \fB\-P\fP \fB\-R\fP\fIid\fP \fB-S\fP \fB-X\fp\fIscale\fP \fB\-V \-H\fP ]
 
 .SH DESCRIPTION
 MBauvloglist reads an MBARI AUV mission log file and lists specified
@@ -291,6 +291,14 @@ Christian do Santos Ferreira
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
+.B \-C
+.br
+If merging with external navigation has been specified with the \fB-N\fP option,
+then the \fB-C\fP option causes input records with times before the beginning or
+after the end of the external navigation to not be output by \fBmbauvloglist\fP.
+The default behavior is to output all records, and for the values merged from the
+external navigation to be zero when outside the navigation time bounds.
+.TP
 .B \-F
 \fIprintformat\fP
 .br
@@ -423,13 +431,13 @@ CTD used on MBARI Mapping AUV 1 during 2016 and 2017.
 .br
 Scales angular values to be in degrees instead of radians.
 .TP
-.B \-C
+.B \-X
+\fIscale\fP
 .br
-If merging with external navigation has been specified with the \fB-N\fP option,
-then the \fB-C\fP option causes input records with times before the beginning or
-after the end of the external navigation to not be output by \fBmbauvloglist\fP.
-The default behavior is to output all records, and for the values merged from the
-external navigation to be zero when outside the navigation time bounds.
+Sets the output scaling factor multiplied by any following floating point values specified
+using the \fB-O\fP option. Initially this value is 1.0 so that by default no scaling occurs.
+If the \fB-X\fP option has been used, using it again with \fIscale\fP equal to 1.0 will 
+restore no scaling for any following \fB-O\fP invocations. Default: \fIscale\fP=1.0
 .TP
 .B \-V
 The \fB\-V\fP option causes the program to be verbose.

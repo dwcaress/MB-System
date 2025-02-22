@@ -54,10 +54,11 @@ add_library(
 
 set_target_properties(mbview PROPERTIES VERSION "0" SOVERSION "0")
 target_include_directories(mbview PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(mbview PRIVATE ${OpenGL_INCLUDE_DIRS} ${MOTIF_INCLUDE_DIRS} ${X11_INCLUDE_DIRS})
 target_link_libraries(mbview PRIVATE OpenGL::GL OpenGL::GLU mbio
-	             ${MOTIF_LIBRARIES}
-		     ${X11_LIBRARIES}
-		     ${X11_Xt_LIB})
+				${MOTIF_LIBRARIES}
+		     	${X11_LIBRARIES}
+		     	${X11_Xt_LIB})
 
 
 install(TARGETS mbview DESTINATION ${CMAKE_INSTALL_LIBDIR})
