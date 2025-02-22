@@ -1,4 +1,4 @@
-.TH mbpreprocess 1 "2 August 2024" "MB-System 5.0" "MB-System 5.0"
+.TH mbpreprocess 1 "28 January 2025" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbpreprocess\fP \- performs preprocessing of swath sonar data as part of setting
 up an MB-System processing structure for a dataset.
@@ -150,6 +150,10 @@ Version 5.0
 \fB--kluge-ignore-snippets\fP
 .br
 \fB--kluge-sonardepth-from-heave\fP
+.br
+\fB--kluge-flipsign-roll\fP
+.br
+\fB--kluge-flipsign-pitch\fP
 .br
 ]
 
@@ -879,6 +883,12 @@ This option pertains only to Reson 7125 200 kHz multibeam data collected on the 
 MBARI Mapping AUV from 2006 through 2009. Invoking this kluge triggers \fBmbpreprocess\fP
 to modify the beam quality factors to be consistent with the later (>2009) standard for
 the original bathymetry records in Reson s7k format data.
+.TP
+\fB--kluge-flipsign-roll\fP
+This option multiplies the roll values to merged by -1, flipping the sign.
+.TP
+\fB--kluge-flipsign-pitch\fP
+This option multiplies the pitch values to merged by -1, flipping the sign.
 
 .SH EXAMPLES
 To be written.....

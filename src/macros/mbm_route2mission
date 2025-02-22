@@ -205,6 +205,7 @@ $maxslope = sin($DTR * $maxclimbrate) / cos($DTR * $maxclimbrate);
 
 # Deal with command line arguments
 &MBGetopts('A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:j:L%l%M%mN%n%O:o:P:p:R:r:S:s:TtU:u:W:w:V*v*Zz');
+printf "-G options: $opt_G $opt_g\n";
 $altitudearg =		($opt_A || $opt_a);
 $behaviorarg =		($opt_B || $opt_b);
 $aborttime = 		($opt_C || $opt_c);
@@ -1212,6 +1213,22 @@ elsif ($verbose)
 		  	printf "    No Magnetometer Calibration\r\n";
       		}
 		}
+	if ($gpsmode == 0) 
+		{
+		printf "    GPSmode 0:                  AUV does not surface during mission\r\n";
+		}
+	elsif ($gpsmode == 1) 
+		{
+		printf "    GPSmode 1:                  AUV surfaces at start of lines\r\n";
+		}
+	elsif ($gpsmode == 2) 
+		{
+		printf "    GPSmode 2:                  AUV surfaces at end of lines\r\n";
+		}
+	elsif ($gpsmode == 3) 
+		{
+		printf "    GPSmode 3:                  AUV surfaces at start and end of lines\r\n";
+		}
 	if ($forwarddist)
 		{
 		printf "    Forward Looking Distance: $forwarddist (m)\r\n";
@@ -1385,6 +1402,22 @@ if (!$outputoff)
 		{
 		printf MFILE "#     Spiral descent depth:       $spiraldescentdepth m\r\n";
 		printf MFILE "#     Spiral descent altitude:    $spiraldescentaltitude m\r\n";
+		}
+	if ($gpsmode == 0) 
+		{
+		printf MFILE "#     GPSmode 0:                  AUV does not surface during mission\r\n";
+		}
+	elsif ($gpsmode == 1) 
+		{
+		printf MFILE "#     GPSmode 1:                  AUV surfaces at start of lines\r\n";
+		}
+	elsif ($gpsmode == 2) 
+		{
+		printf MFILE "#     GPSmode 2:                  AUV surfaces at end of lines\r\n";
+		}
+	elsif ($gpsmode == 3) 
+		{
+		printf MFILE "#     GPSmode 3:                  AUV surfaces at start and end of lines\r\n";
 		}
 	if ($forwarddist)
 		{
@@ -1692,7 +1725,7 @@ printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$nmissionpoints-1];
 			}
 
 		# do ascend, gps, descend at line starts and ends if specified
-# print "TEST for GPS ascent: $gpsmode $i $mstartstops[$i] \n";
+print "TEST for GPS ascent: $gpsmode $i $mstartstops[$i] \n";
 		if (($iwaypoint != $nwaypoints - 1)
             && ($iwaypoint != 0)
 			&& (   ($gpsmode == 1 && $mstartstops[$i] == 1)
@@ -1884,29 +1917,7 @@ print "Behavior: ascend\r\n";
 			print MFILE "# \r\n";
 			if ($mappingsonar)
 				{
-    			print MFILE "# Stop data logging on sonars and then turn off power to sonars\r\n";
-    			print MFILE "behavior battery \r\n";
-    			print MFILE "{ \r\n";
-				$behavior_id = $BEHAVIOR_battery + 0 * $behavior_count;
-				$behavior_count = $behavior_count + 1;
-				print MFILE "id     = $behavior_id; \r\n";
-    			print MFILE "	duration = 10; \r\n";
-    			print MFILE "	disableAuxLoads = 1; \r\n";
-    			print MFILE "} \r\n";
-				print MFILE "# ascend behavior for 30 seconds to give time for sonars to stop logging \r\n";
-				print MFILE "behavior ascend  \r\n";
-				print MFILE "{ \r\n";
-				$behavior_id = $BEHAVIOR_ascend + 0 * $behavior_count;
-				$behavior_count = $behavior_count + 1;
-				print MFILE "id     = $behavior_id; \r\n";
-				printf MFILE "duration  = 30; \r\n", $ascendtimes[$i];
-				print MFILE "horizontalMode   = rudder; \r\n";
-				print MFILE "horizontal       = ASCENDRUDDER; \r\n";
-				print MFILE "pitch            = ASCENDPITCH; \r\n";
-				print MFILE "speed            = ASCENTDESCENT_SPEED; \r\n";
-				print MFILE "endDepth         = ASCENDENDDEPTH; \r\n";
-				print MFILE "} \r\n";
-print "Behavior: ascend\r\n";
+    			print MFILE "# Stop data logging on sonars\r\n";
         		if ($subbottom || $sidescanlo || $sidescanhi)
           			{
   					print MFILE "behavior edgetech \r\n";
