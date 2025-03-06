@@ -126,9 +126,6 @@ typedef struct app_cfg_s{
     /// @var app_cfg_s::verbose
     /// @brief verbose output flag
     int verbose;
-    /// @var app_cfg_s::file
-    /// @brief S7K file path
-    char *file;
     /// @var app_cfg_s::host
     /// @brief hostname
     char *host;
@@ -150,6 +147,10 @@ typedef struct app_cfg_s{
     /// @var app_cfg_s::net_frame
     /// @brief input net_frame
     bool net_frames;
+    /// @var app_cfg_s::file_list
+    /// @brief data source file list
+    mlist_t *file_paths;
+
 }app_cfg_t;
 
 static void s_show_help();
@@ -190,6 +191,42 @@ static void s_show_help()
     printf("%s",usage_message);
 }
 // End function s_show_help
+
+/// @fn void app_cfg_t *app_cfg_new()
+/// @brief allocate new app_cfg_t instance
+/// @param[in] none
+/// @return new app_cfg_t on success, NULL otherwise
+static app_cfg_t *app_cfg_new()
+{
+    app_cfg_t *instance = (app_cfg_t *)malloc(sizeof(app_cfg_t));
+    if(instance != NULL) {
+        instance->verbose = 1;
+        instance->host = strdup(RESON_HOST_DFL);
+        instance->port = R7K_7KCENTER_PORT;
+        instance->cycles = 0;
+        instance->size = R7K_MAX_FRAME_BYTES;
+        instance->dev = R7KC_DEV_7125_400KHZ;
+        instance->mode = IMODE_SOCKET;
+        instance->net_frames = false;
+        instance->file_paths = NULL;
+    }
+    return instance;
+}
+
+/// @fn void app_cfg_destroy( *app_cfg_new()
+/// @brief release  app_cfg_t resources
+/// @param[in] pself pointer to app_cfg_t reference
+/// @return none
+static void app_cfg_destroy(app_cfg_t **pself)
+{
+    if(pself != NULL) {
+        app_cfg_t *self = *pself;
+        free(self->host);
+        mlist_destroy(&self->file_paths);
+        free(self);
+        *pself = NULL;
+    }
+}
 
 /// @fn void parse_args(int argc, char ** argv, app_cfg_t * cfg)
 /// @brief parse command line args, set application configuration.
@@ -243,7 +280,11 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
 
                 // file
                 else if (strcmp("file", options[option_index].name) == 0) {
-                    cfg->file = strdup(optarg);
+                    if(cfg->file_paths == NULL) {
+                        cfg->file_paths = mlist_new();
+                        mlist_autofree(cfg->file_paths, free);
+                    }
+                    mlist_add(cfg->file_paths, optarg);
                     cfg->mode = IMODE_FILE;
                 }
 
@@ -338,8 +379,33 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
             break;
     }
 
-    if(cfg->verbose != 0)
+    if(optind > 0) {
+
+        if(cfg->file_paths == NULL) {
+            cfg->file_paths = mlist_new();
+            mlist_autofree(cfg->file_paths, free);
+        }
+        cfg->mode = IMODE_FILE;
+        for (int i=optind; i<argc; i++) {
+            mlist_add(cfg->file_paths,strdup(argv[i]));
+        }
+    }
+    if(cfg->verbose != 0) {
         mxd_show();
+        fprintf(stderr,"verbose   [%d]\n",cfg->verbose);
+        fprintf(stderr,"host      [%s]\n",cfg->host);
+        fprintf(stderr,"port      [%d]\n",cfg->port);
+        fprintf(stderr,"nf        [%c]\n",(cfg->net_frames?'Y':'N'));
+        fprintf(stderr,"paths     [%p]\n",cfg->file_paths);
+        if(cfg->file_paths != NULL) {
+            fprintf(stderr,"files:\n");
+            char *path=(char *)mlist_first(cfg->file_paths);
+            while (NULL!=path) {
+                fprintf(stderr,"path      [%s]\n",path);
+                path = (char *)mlist_next(cfg->file_paths);
+            }
+        }
+    }
 
 //    mconf_init(NULL,NULL);
 //    mmd_channel_set(MOD_F7K,MM_ERR);
@@ -423,6 +489,8 @@ static int s_app_main (app_cfg_t *cfg)
         r7kr_reader_t *reader = NULL;
         mfile_file_t *ifile = NULL;
         r7kr_flags_t r7k_flags = R7KR_NET_STREAM;
+        char *s7k_path = (char *)mlist_first(cfg->file_paths);
+        mfile_file_t *s7k_file = mfile_file_new(s7k_path);
 
         if(cfg->mode == IMODE_SOCKET){
 
@@ -433,10 +501,10 @@ static int s_app_main (app_cfg_t *cfg)
         } else if(cfg->mode == IMODE_FILE) {
 
             // configure file reader
-            MX_LPRINT(FRAMES7K, 1, "opening file [%s]\n", cfg->file);
-            ifile = mfile_file_new(cfg->file);
-            reader = r7kr_freader_new(ifile, cfg->size, subs,  nsubs);
+            MX_LPRINT(FRAMES7K, 1, "processing file [%s]\n", s7k_path);
+            reader = r7kr_freader_new(s7k_file, cfg->size, subs,  nsubs);
             r7k_flags =  (cfg->net_frames ? R7KR_NF_STREAM : R7KR_DRF_STREAM);
+
         }
 
         // show reader config
@@ -453,8 +521,9 @@ static int s_app_main (app_cfg_t *cfg)
         }
 
         retval=0;
-        int read_retries=5;
+        int read_retries = 5;
         long int seq_number = 0;
+
 
         while ( (forever || (count<cfg->cycles)) && !g_stop_flag) {
             int istat=0;
@@ -511,10 +580,59 @@ static int s_app_main (app_cfg_t *cfg)
                     me_errno==ME_ERECV || (read_retries-- <= 0)) {
                     if(cfg->mode == IMODE_SOCKET){
                         MX_ERROR_MSG("socket closed - reconnecting in 5 sec\n");
+                        sleep(5);
                         r7kr_reader_connect(reader,true);
+                    } else if(cfg->mode == IMODE_FILE) {
+
+                        // read error, move on to next file
+                        // TODO: check/handle specific errors
+
+                        // close current file and reader
+                        MX_LPRINT(FRAMES7K, 2, "closing file [%s]\n", s7k_path);
+                        mfile_close(s7k_file);
+                        mfile_file_destroy(&s7k_file);
+
+                        MX_LMSG(FRAMES7K, 2, "closing reader\n");
+                        r7kr_reader_destroy(&reader);
+
+                        s7k_file = NULL;
+                        reader = NULL;
+
+                        // try the next path in the list
+                        s7k_path = (char *)mlist_next(cfg->file_paths);
+
+                        while(!g_stop_flag && s7k_path != NULL) {
+
+                            MX_LPRINT(FRAMES7K, 2, "processing file [%s]\n", s7k_path);
+                            // open next file
+                            s7k_file = mfile_file_new(s7k_path);
+
+                            reader = r7kr_freader_new(s7k_file, cfg->size, subs,  nsubs);
+
+                            if(reader != NULL) {
+                                MX_LPRINT(FRAMES7K, 2, "initialized reader using [%s]\n", s7k_path);
+                                break;
+                            }
+
+                            mfile_file_destroy(&s7k_file);
+                            s7k_file = NULL;
+                            reader = NULL;
+                            s7k_path = (char *)mlist_next(cfg->file_paths);
+                        }
+
+                        if(s7k_path == NULL) {
+                            // no more files, done
+                            MX_LMSG(FRAMES7K, 1, "no more files - quitting\n");
+                            break;
+                        }
+
+                        if(reader == NULL) {
+                            // reader error
+                            MX_LMSG(FRAMES7K, 1, "invalid reader - quitting\n");
+                            break;
+                        }
                     }
-                    sleep(5);
-                    read_retries=5;
+                    read_retries = 5;
                 }
             }
         }
@@ -548,20 +666,8 @@ int main(int argc, char **argv)
     saStruct.sa_flags = 0;
     saStruct.sa_handler = s_termination_handler;
     sigaction(SIGINT, &saStruct, NULL);
-    
-    app_cfg_t cfg_s = {
-        1,                      // verbose
-        NULL,                   // file
-        strdup(RESON_HOST_DFL), // host
-        R7K_7KCENTER_PORT,      // port
-        0,                      // cycles
-        R7K_MAX_FRAME_BYTES,    // size
-        R7KC_DEV_7125_400KHZ,   // dev
-        IMODE_SOCKET,           // mode
-        false                   // net_frame
-    };
 
-    app_cfg_t *cfg = &cfg_s;
+    app_cfg_t *cfg = app_cfg_new();
 
     // parse command line options
     parse_args(argc, argv, cfg);
@@ -569,8 +675,8 @@ int main(int argc, char **argv)
     // run app
     retval=s_app_main(cfg);
     
-    free(cfg->file);
-    free(cfg->host);
+    app_cfg_destroy(&cfg);
+
     return retval;
 }
 // End function main
