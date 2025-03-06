@@ -291,6 +291,8 @@ r7kr_reader_t *r7kr_freader_new(mfile_file_t *file, uint32_t capacity, uint32_t 
         if (NULL!=file) {
             if (mfile_open(self->fileif, MFILE_RONLY) <= 0) {
                 fprintf(stderr,"%s: ERR - could not open file [%s] [%d/%s]\n", __func__, self->fileif->path, errno, strerror(errno));
+                free(self);
+                return NULL;
             }
 
             fprintf(stderr,"%s - wrapping fd %d for file %s in socket\n",__func__, self->fileif->fd, self->fileif->path);
