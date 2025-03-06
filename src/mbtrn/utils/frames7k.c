@@ -62,6 +62,8 @@
 #include <getopt.h>
 #include "r7kc.h"
 #include "msocket.h"
+#include "mfile.h"
+#include "mlist.h"
 #include "mxdebug.h"
 #include "mxd_app.h"
 #include "r7k-reader.h"
@@ -113,6 +115,10 @@
 /////////////////////////
 // Declarations
 /////////////////////////
+typedef enum {
+    IMODE_SOCKET = 0,
+    IMODE_FILE
+}InputMode;
 
 /// @typedef struct app_cfg_s app_cfg_t
 /// @brief application configuration parameter structure
@@ -120,6 +126,9 @@ typedef struct app_cfg_s{
     /// @var app_cfg_s::verbose
     /// @brief verbose output flag
     int verbose;
+    /// @var app_cfg_s::file
+    /// @brief S7K file path
+    char *file;
     /// @var app_cfg_s::host
     /// @brief hostname
     char *host;
@@ -135,6 +144,12 @@ typedef struct app_cfg_s{
     /// @var app_cfg_s::id
     /// @brief reader id
     r7k_device_t dev;
+    /// @var app_cfg_s::input_mode
+    /// @brief input mode
+    InputMode mode;
+    /// @var app_cfg_s::net_frame
+    /// @brief input net_frame
+    bool net_frames;
 }app_cfg_t;
 
 static void s_show_help();
@@ -161,6 +176,8 @@ static void s_show_help()
     char usage_message[] = "\n frames7k [options]\n"
     " Options :\n"
     "  --verbose=<n>     : verbose output\n"
+    "  --file=<s>        : S7K file name\n"
+    "  --nf              : data includes net frames\n"
     "  --host=<s>[:port] : reson host name or IP address and port\n"
     "  --cycles=<n>      : number of cycles (dfl 0 - until CTRL-C)\n"
     "  --dev=<s>         : device [e.g. T50, 7125_400]; options:\n"
@@ -192,6 +209,8 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"verbose", required_argument, NULL, 0},
         {"help", no_argument, NULL, 0},
         {"version", no_argument, NULL, 0},
+        {"file", required_argument, NULL, 0},
+        {"nf", no_argument, NULL, 0},
         {"host", required_argument, NULL, 0},
         {"cycles", required_argument, NULL, 0},
         {"size", required_argument, NULL, 0},
@@ -217,6 +236,17 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                     help = true;
                 }
                 
+                // nf
+                else if (strcmp("nf", options[option_index].name) == 0) {
+                    cfg->net_frames = true;
+                }
+
+                // file
+                else if (strcmp("file", options[option_index].name) == 0) {
+                    cfg->file = strdup(optarg);
+                    cfg->mode = IMODE_FILE;
+                }
+
                 // host
                 else if (strcmp("host", options[option_index].name) == 0) {
                     char *ocopy = strdup(optarg);
@@ -227,6 +257,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                     if(port_tok != NULL)
                         sscanf(port_tok, "%d", &cfg->port);
                     free(ocopy);
+                    cfg->mode = IMODE_SOCKET;
                 }
                 // cycles
                 else if (strcmp("cycles", options[option_index].name) == 0) {
@@ -264,9 +295,9 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
 
     mxd_setModule(MXDEBUG, 0, true, NULL);
     mxd_setModule(MXERROR, 5, false, NULL);
-    mxd_setModule(FRAMES7K, 1, false, "trnc.error");
-    mxd_setModule(FRAMES7K_ERROR, 1, true, "trnc.error");
-    mxd_setModule(FRAMES7K_DEBUG, 1, true, "trnc.debug");
+    mxd_setModule(FRAMES7K, 1, false, "frames7k");
+    mxd_setModule(FRAMES7K_ERROR, 1, true, "frames7k.error");
+    mxd_setModule(FRAMES7K_DEBUG, 1, true, "frames7k.debug");
     mxd_setModule(MXMSOCK, 1, true, "msock");
     mxd_setModule(R7KC, 1, true, "r7kc");
     mxd_setModule(R7KC_DEBUG, 1, true, "r7kc.debug");
@@ -281,20 +312,20 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         case 1:
             mxd_setModule(MXDEBUG, 0, true, NULL);
             mxd_setModule(MXERROR, 5, false, NULL);
-            mxd_setModule(FRAMES7K, 1, false, "trnc.error");
+            mxd_setModule(FRAMES7K, 1, false, "frames7k");
             break;
         case 2:
             mxd_setModule(MXDEBUG, 5, true, NULL);
             mxd_setModule(MXERROR, 5, false, NULL);
-            mxd_setModule(FRAMES7K, 5, false, "trnc.error");
+            mxd_setModule(FRAMES7K, 5, false, "frames7k");
             break;
         case 3:
         case 4:
         case 5:
             mxd_setModule(MXDEBUG, 5, false, NULL);
             mxd_setModule(MXERROR, 5, false, NULL);
-            mxd_setModule(FRAMES7K_ERROR, 5, false, "trnc.error");
-            mxd_setModule(FRAMES7K_DEBUG, 5, false, "trnc.debug");
+            mxd_setModule(FRAMES7K_ERROR, 5, false, "frames7k.error");
+            mxd_setModule(FRAMES7K_DEBUG, 5, false, "frames7k.debug");
             mxd_setModule(MXMSOCK, 5, false, "msock");
             mxd_setModule(R7KC, 5, false, "r7kc");
             mxd_setModule(R7KC_DEBUG, 5, false, "r7kc.debug");
@@ -388,8 +419,25 @@ static int s_app_main (app_cfg_t *cfg)
         
         // initialize reader
         // create and open socket connection
-        MX_LPRINT(FRAMES7K, 1, "connecting host[%s:%d] dev[%d]\n", cfg->host, cfg->port, cfg->dev);
-        r7kr_reader_t *reader = r7kr_reader_new(cfg->dev, cfg->host, cfg->port, cfg->size, subs, nsubs);
+
+        r7kr_reader_t *reader = NULL;
+        mfile_file_t *ifile = NULL;
+        r7kr_flags_t r7k_flags = R7KR_NET_STREAM;
+
+        if(cfg->mode == IMODE_SOCKET){
+
+            // configure socket reader
+            MX_LPRINT(FRAMES7K, 1, "connecting host[%s:%d] dev[%d]\n", cfg->host, cfg->port, cfg->dev);
+            reader = r7kr_reader_new(cfg->dev, cfg->host, cfg->port, cfg->size, subs, nsubs);
+
+        } else if(cfg->mode == IMODE_FILE) {
+
+            // configure file reader
+            MX_LPRINT(FRAMES7K, 1, "opening file [%s]\n", cfg->file);
+            ifile = mfile_file_new(cfg->file);
+            reader = r7kr_freader_new(ifile, cfg->size, subs,  nsubs);
+            r7k_flags =  (cfg->net_frames ? R7KR_NF_STREAM : R7KR_DRF_STREAM);
+        }
 
         // show reader config
         if (cfg->verbose>1) {
@@ -398,24 +446,50 @@ static int s_app_main (app_cfg_t *cfg)
 
         uint32_t lost_bytes=0;
         // test r7kr_read_frame
-        byte frame_buf[MAX_FRAME_BYTES_7K]={0};
+        byte frame_buf[R7K_MAX_FRAME_BYTES]={0};
         
-        MX_LPRINT(FRAMES7K, 2, "reader connected [%s/%d] err(%s)\n", cfg->host, cfg->port,  me_strerror(me_errno));
+        if(cfg->mode == IMODE_SOCKET) {
+            MX_LPRINT(FRAMES7K, 2, "reader connected [%s/%d] err(%s)\n", cfg->host, cfg->port,  me_strerror(me_errno));
+        }
 
         retval=0;
         int read_retries=5;
+        long int seq_number = 0;
+
         while ( (forever || (count<cfg->cycles)) && !g_stop_flag) {
             int istat=0;
             count++;
             // clear frame buffer
-            memset(frame_buf,0,MAX_FRAME_BYTES_7K);
+            memset(frame_buf,0,R7K_MAX_FRAME_BYTES);
+
+            byte *pframe = frame_buf;
+            if(cfg->mode == IMODE_FILE) {
+                pframe = frame_buf + R7K_NF_BYTES;
+            }
+
             // read frame
-            if( (istat = r7kr_read_frame(reader, frame_buf, MAX_FRAME_BYTES_7K, R7KR_NET_STREAM, 0.0, R7KR_READ_TMOUT_MSEC,&lost_bytes )) > 0){
+            if( (istat = r7kr_read_frame(reader, pframe, R7K_MAX_FRAME_BYTES, r7k_flags, 0.0, R7KR_READ_TMOUT_MSEC,&lost_bytes )) > 0){
                 read_retries=5;
+
+                if(cfg->mode == IMODE_FILE) {
+                    memset((void *)frame_buf,0,R7K_NF_BYTES);
+                    r7k_nf_t *pnf = (r7k_nf_t *)frame_buf;
+                    r7k_drf_t *pdrf = (r7k_drf_t *)frame_buf + R7K_NF_BYTES;
+
+                    pnf->protocol_version = R7K_NF_PROTO_VER;
+                    pnf->tx_id       = r7k_txid();
+                    pnf->seq_number  = seq_number++;
+                    pnf->offset      = R7K_NF_BYTES;
+                    pnf->packet_size = R7K_NF_BYTES+pdrf->size;
+                    pnf->total_size  = pdrf->size;
+                    pnf->total_records  = 1;
+                    pframe = frame_buf + R7K_NF_BYTES;
+                }
+
 
                 MX_LPRINT(FRAMES7K, 1, "r7kr_read_frame cycle[%d/%d] ret[%d] lost[%"PRIu32"]\n", count, cfg->cycles, istat, lost_bytes);
                 // show contents
-                if (cfg->verbose>=1) {
+                if (cfg->verbose >= 1) {
                     r7k_nf_t *nf = (r7k_nf_t *)(frame_buf);
                     r7k_drf_t *drf = (r7k_drf_t *)(frame_buf+R7K_NF_BYTES);
                     MX_LMSG(FRAMES7K, 1, "NF:\n");
@@ -432,10 +506,14 @@ static int s_app_main (app_cfg_t *cfg)
             }else{
                 // read error
                 MX_ERROR("ERR - r7kr_read_frame - cycle[%d/%d] ret[%d] me_err[%d] lost[%d]\n", count+1, cfg->cycles, istat, (me_errno-ME_ERRORNO_BASE), lost_bytes);
-                if (me_errno==ME_ESOCK || me_errno==ME_EOF || me_errno==ME_ERECV || (read_retries-- <= 0)) {
-                    MX_ERROR_MSG("socket closed - reconnecting in 5 sec\n");
+
+                if (me_errno==ME_ESOCK || me_errno==ME_EOF ||
+                    me_errno==ME_ERECV || (read_retries-- <= 0)) {
+                    if(cfg->mode == IMODE_SOCKET){
+                        MX_ERROR_MSG("socket closed - reconnecting in 5 sec\n");
+                        r7kr_reader_connect(reader,true);
+                    }
                     sleep(5);
-                    r7kr_reader_connect(reader,true);
                     read_retries=5;
                 }
             }
@@ -471,7 +549,18 @@ int main(int argc, char **argv)
     saStruct.sa_handler = s_termination_handler;
     sigaction(SIGINT, &saStruct, NULL);
     
-    app_cfg_t cfg_s = {1, strdup(RESON_HOST_DFL), R7K_7KCENTER_PORT, 0, MAX_FRAME_BYTES_7K, R7KC_DEV_7125_400KHZ};
+    app_cfg_t cfg_s = {
+        1,                      // verbose
+        NULL,                   // file
+        strdup(RESON_HOST_DFL), // host
+        R7K_7KCENTER_PORT,      // port
+        0,                      // cycles
+        R7K_MAX_FRAME_BYTES,    // size
+        R7KC_DEV_7125_400KHZ,   // dev
+        IMODE_SOCKET,           // mode
+        false                   // net_frame
+    };
+
     app_cfg_t *cfg = &cfg_s;
 
     // parse command line options
@@ -480,6 +569,8 @@ int main(int argc, char **argv)
     // run app
     retval=s_app_main(cfg);
     
+    free(cfg->file);
+    free(cfg->host);
     return retval;
 }
 // End function main
