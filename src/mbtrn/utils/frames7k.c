@@ -150,6 +150,15 @@ typedef struct app_cfg_s{
     /// @var app_cfg_s::file_list
     /// @brief data source file list
     mlist_t *file_paths;
+    /// @var app_cfg_s::nsubs
+    /// @brief number of subscriptions
+    uint32_t nsubs;
+    /// @var app_cfg_s::subs
+    /// @brief  subscription list
+    uint32_t *subs;
+    /// @var app_cfg_s::filter
+    /// @brief filter using subcription list
+    bool filter;
 
 }app_cfg_t;
 
@@ -176,16 +185,18 @@ static void s_show_help()
     char help_message[] = "\n Stream reson data frames to console\n";
     char usage_message[] = "\n frames7k [options]\n"
     " Options :\n"
-    "  --verbose=<n>     : verbose output\n"
-    "  --file=<s>        : S7K file name\n"
-    "  --nf              : data includes net frames\n"
-    "  --host=<s>[:port] : reson host name or IP address and port\n"
-    "  --cycles=<n>      : number of cycles (dfl 0 - until CTRL-C)\n"
-    "  --dev=<s>         : device [e.g. T50, 7125_400]; options:\n"
-    "                       7125_400 : Reson 7125 400 kHz (default)"
-    "                       7125_200 : Reson 7125 200 kHz"
-    "                            T50 : Reson T50"
-    "  --size=<n>        : reader capacity (bytes)\n"
+    "  --verbose=<n>       : verbose output\n"
+    "  --file=<s>          : S7K file name\n"
+    "  --nf                : data includes net frames\n"
+    "  --host=<s>[:port]   : reson host name or IP address and port\n"
+    "  --cycles=<n>        : number of cycles (dfl 0 - until CTRL-C)\n"
+    "  --dev=<s>           : device [e.g. T50, 7125_400]; options:\n"
+    "                         7125_400 : Reson 7125 400 kHz (default)"
+    "                         7125_200 : Reson 7125 200 kHz"
+    "                              T50 : Reson T50"
+    "  --size=<n>          : reader capacity (bytes)\n"
+    "  --subs=[a|o,]<d...> : subscribed record types (socket input, or w/ --filter)\n"
+    "  --filter            : filter using subscription list for file input\n"
     "\n";
     printf("%s",help_message);
     printf("%s",usage_message);
@@ -209,6 +220,22 @@ static app_cfg_t *app_cfg_new()
         instance->mode = IMODE_SOCKET;
         instance->net_frames = false;
         instance->file_paths = NULL;
+        instance->nsubs = 11;
+        size_t len = instance->nsubs * sizeof(uint32_t);
+        instance->subs = (uint32_t *)malloc(len);
+        memset(instance->subs, 0, len);
+        instance->subs[0] = 1003;
+        instance->subs[1] = 1006;
+        instance->subs[2] = 1008;
+        instance->subs[3] = 1010;
+        instance->subs[4] = 1012;
+        instance->subs[5] = 1013;
+        instance->subs[6] = 1015;
+        instance->subs[7] = 1016;
+        instance->subs[8] = 7000;
+        instance->subs[9] = 7004;
+        instance->subs[10] = 7027;
+        instance->filter = false;
     }
     return instance;
 }
@@ -223,6 +250,7 @@ static void app_cfg_destroy(app_cfg_t **pself)
         app_cfg_t *self = *pself;
         free(self->host);
         mlist_destroy(&self->file_paths);
+        free(self->subs);
         free(self);
         *pself = NULL;
     }
@@ -252,6 +280,8 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"cycles", required_argument, NULL, 0},
         {"size", required_argument, NULL, 0},
         {"dev", required_argument, NULL, 0},
+        {"subs", required_argument, NULL, 0},
+        {"filter", no_argument, NULL, 0},
         {NULL, 0, NULL, 0}};
 
     /* process argument list */
@@ -315,6 +345,36 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                         cfg->dev = test;
                     }
                 }
+                // subs
+                else if (strcmp("subs", options[option_index].name) == 0) {
+                    char *ocopy = strdup(optarg);
+                    char *next_tok = strtok(ocopy,",");
+
+                    if(strcmp(next_tok,"o") == 0) {
+                        cfg->nsubs = 0;
+                        next_tok = strtok(NULL, ",");
+                    }
+
+                    while(next_tok != NULL) {
+                        uint32_t sub=0;
+                        if(sscanf(next_tok,"%u", &sub) == 1) {
+                            size_t len = (cfg->nsubs + 1) * sizeof(uint32_t);
+                            uint32_t *tmp = realloc(cfg->subs, len);
+                            cfg->subs = tmp;
+                            cfg->subs[cfg->nsubs] = sub;
+                            cfg->nsubs++;
+                        }
+                        next_tok = strtok(NULL, ",");
+                    }
+
+                    free(ocopy);
+                }
+
+                // filter
+                else if (strcmp("filter", options[option_index].name) == 0) {
+                    cfg->filter = true;
+                }
+
                 break;
             default:
                 help=true;
@@ -336,8 +396,8 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
 
     mxd_setModule(MXDEBUG, 0, true, NULL);
     mxd_setModule(MXERROR, 5, false, NULL);
-    mxd_setModule(FRAMES7K, 1, false, "frames7k");
-    mxd_setModule(FRAMES7K_ERROR, 1, true, "frames7k.error");
+    mxd_setModule(FRAMES7K, 1, true, "frames7k");
+    mxd_setModule(FRAMES7K_ERROR, 1, false, "frames7k.error");
     mxd_setModule(FRAMES7K_DEBUG, 1, true, "frames7k.debug");
     mxd_setModule(MXMSOCK, 1, true, "msock");
     mxd_setModule(R7KC, 1, true, "r7kc");
@@ -392,55 +452,32 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
     }
     if(cfg->verbose != 0) {
         mxd_show();
-        fprintf(stderr,"verbose   [%d]\n",cfg->verbose);
-        fprintf(stderr,"host      [%s]\n",cfg->host);
-        fprintf(stderr,"port      [%d]\n",cfg->port);
-        fprintf(stderr,"nf        [%c]\n",(cfg->net_frames?'Y':'N'));
-        fprintf(stderr,"paths     [%p]\n",cfg->file_paths);
+        fprintf(stderr,"verbose   [%d]\n", cfg->verbose);
+        fprintf(stderr,"host      [%s]\n", cfg->host);
+        fprintf(stderr,"port      [%d]\n", cfg->port);
+        fprintf(stderr,"cycles    [%d]\n", cfg->cycles);
+        fprintf(stderr,"size      [%u]\n", cfg->size);
+        fprintf(stderr,"dev       [%d]\n", cfg->dev);
+        fprintf(stderr,"mode      [%s]\n", (cfg->mode == IMODE_SOCKET ? "socket" : "file"));
+        fprintf(stderr,"nf        [%c]\n", (cfg->net_frames ? 'Y' : 'N'));
+        fprintf(stderr,"filter    [%c]\n", (cfg->filter ? 'Y' : 'N'));
+        fprintf(stderr,"nsubs     [%u]\n", cfg->nsubs);
+        if(cfg->nsubs > 0 && cfg->subs != NULL) {
+            fprintf(stderr,"subs      [%p]\n", cfg->subs);
+            for(int i=0; i< cfg->nsubs; i++) {
+                fprintf(stderr,"rec       [%u]\n", cfg->subs[i]);
+            }
+        }
+        fprintf(stderr,"paths     [%p]\n", cfg->file_paths);
         if(cfg->file_paths != NULL) {
             fprintf(stderr,"files:\n");
             char *path=(char *)mlist_first(cfg->file_paths);
             while (NULL!=path) {
-                fprintf(stderr,"path      [%s]\n",path);
+                fprintf(stderr,"path      [%s]\n", path);
                 path = (char *)mlist_next(cfg->file_paths);
             }
         }
     }
-
-//    mconf_init(NULL,NULL);
-//    mmd_channel_set(MOD_F7K,MM_ERR);
-//    mmd_channel_set(MOD_R7K,MM_ERR);
-//    mmd_channel_set(MOD_R7KR,MM_ERR);
-//    mmd_channel_set(MOD_MSOCK,MM_ERR);
-//
-//    switch (cfg->verbose) {
-//        case 0:
-//            mmd_channel_set(MOD_F7K,0);
-//            mmd_channel_set(MOD_R7K,0);
-//            mmd_channel_set(MOD_R7KR,0);
-//            mmd_channel_set(MOD_MSOCK,0);
-//            break;
-//        case 1:
-//            mmd_channel_en(MOD_F7K,S7K_V1);
-//            mmd_channel_en(MOD_F7K,MM_DEBUG);
-//            break;
-//        case 2:
-//            mmd_channel_en(MOD_F7K,S7K_V1);
-//            mmd_channel_en(MOD_F7K,S7K_V2);
-//            mmd_channel_en(MOD_F7K,MM_DEBUG);
-//            mmd_channel_en(MOD_R7KR,MM_DEBUG);
-//            break;
-//        default:
-//            if(cfg->verbose>2){
-//                mmd_channel_en(MOD_F7K,S7K_V1);
-//                mmd_channel_en(MOD_F7K,S7K_V2);
-//                mmd_channel_en(MOD_F7K,MM_DEBUG);
-//                mmd_channel_en(MOD_MSOCK,MM_DEBUG);
-//                mmd_channel_en(MOD_R7K,MM_DEBUG|R7K_V2);
-//                mmd_channel_en(MOD_R7KR,MM_DEBUG);
-//            }
-//            break;
-//    }
 }
 // End function parse_args
 
@@ -454,7 +491,7 @@ static void s_termination_handler (int signum)
         case SIGINT:
         case SIGHUP:
         case SIGTERM:
-            MX_LPRINT(FRAMES7K, 2, "received sig[%d]\n", signum);
+           // MX_LPRINT(FRAMES7K, 2, "received sig[%d]\n", signum);
             g_stop_flag=true;
             break;
         default:
@@ -473,14 +510,12 @@ static int s_app_main (app_cfg_t *cfg)
     int retval=-1;
     
     if (NULL!=cfg) {
-        uint32_t nsubs=11;
-        uint32_t subs[]={1003, 1006, 1008, 1010, 1012, 1013, 1015,
-            1016, 7000, 7004, 7027};
-        
+
         int count = 0;
         bool forever = false;
-        if(cfg->cycles<=0){
-            forever=true;
+
+        if(cfg->cycles <= 0){
+            forever = true;
         }
         
         // initialize reader
@@ -496,15 +531,14 @@ static int s_app_main (app_cfg_t *cfg)
 
             // configure socket reader
             MX_LPRINT(FRAMES7K, 1, "connecting host[%s:%d] dev[%d]\n", cfg->host, cfg->port, cfg->dev);
-            reader = r7kr_reader_new(cfg->dev, cfg->host, cfg->port, cfg->size, subs, nsubs);
+            reader = r7kr_reader_new(cfg->dev, cfg->host, cfg->port, cfg->size, cfg->subs, cfg->nsubs);
 
         } else if(cfg->mode == IMODE_FILE) {
 
             // configure file reader
             MX_LPRINT(FRAMES7K, 1, "processing file [%s]\n", s7k_path);
-            reader = r7kr_freader_new(s7k_file, cfg->size, subs,  nsubs);
+            reader = r7kr_freader_new(s7k_file, cfg->size, cfg->subs,  cfg->nsubs);
             r7k_flags =  (cfg->net_frames ? R7KR_NF_STREAM : R7KR_DRF_STREAM);
-
         }
 
         // show reader config
@@ -514,8 +548,10 @@ static int s_app_main (app_cfg_t *cfg)
 
         uint32_t lost_bytes=0;
         // test r7kr_read_frame
-        byte frame_buf[R7K_MAX_FRAME_BYTES]={0};
-        
+        // must malloc; large stack variables cause SIGABRT
+        byte *frame_buf = (byte *)malloc(R7K_MAX_FRAME_BYTES);
+        memset(frame_buf, 0, R7K_MAX_FRAME_BYTES);
+
         if(cfg->mode == IMODE_SOCKET) {
             MX_LPRINT(FRAMES7K, 2, "reader connected [%s/%d] err(%s)\n", cfg->host, cfg->port,  me_strerror(me_errno));
         }
@@ -524,12 +560,11 @@ static int s_app_main (app_cfg_t *cfg)
         int read_retries = 5;
         long int seq_number = 0;
 
-
-        while ( (forever || (count<cfg->cycles)) && !g_stop_flag) {
+        while ( (forever || (count < cfg->cycles)) && !g_stop_flag) {
             int istat=0;
             count++;
             // clear frame buffer
-            memset(frame_buf,0,R7K_MAX_FRAME_BYTES);
+            memset(frame_buf, 0, R7K_MAX_FRAME_BYTES);
 
             byte *pframe = frame_buf;
             if(cfg->mode == IMODE_FILE) {
@@ -537,44 +572,59 @@ static int s_app_main (app_cfg_t *cfg)
             }
 
             // read frame
-            if( (istat = r7kr_read_frame(reader, pframe, R7K_MAX_FRAME_BYTES, r7k_flags, 0.0, R7KR_READ_TMOUT_MSEC,&lost_bytes )) > 0){
+            if( (istat = r7kr_read_frame(reader, pframe, R7K_MAX_FRAME_BYTES, r7k_flags, 0.0, R7KR_READ_TMOUT_MSEC, &lost_bytes )) > 0){
                 read_retries=5;
+
+                r7k_nf_t *nf = (r7k_nf_t *)(frame_buf);
+                r7k_drf_t *drf = (r7k_drf_t *)(frame_buf+R7K_NF_BYTES);
 
                 if(cfg->mode == IMODE_FILE) {
                     memset((void *)frame_buf,0,R7K_NF_BYTES);
-                    r7k_nf_t *pnf = (r7k_nf_t *)frame_buf;
-                    r7k_drf_t *pdrf = (r7k_drf_t *)frame_buf + R7K_NF_BYTES;
 
-                    pnf->protocol_version = R7K_NF_PROTO_VER;
-                    pnf->tx_id       = r7k_txid();
-                    pnf->seq_number  = seq_number++;
-                    pnf->offset      = R7K_NF_BYTES;
-                    pnf->packet_size = R7K_NF_BYTES+pdrf->size;
-                    pnf->total_size  = pdrf->size;
-                    pnf->total_records  = 1;
+                    nf->protocol_version = R7K_NF_PROTO_VER;
+                    nf->tx_id       = r7k_txid();
+                    nf->seq_number  = seq_number++;
+                    nf->offset      = R7K_NF_BYTES;
+                    nf->packet_size = R7K_NF_BYTES + drf->size;
+                    nf->total_size  = drf->size;
+                    nf->total_records  = 1;
                     pframe = frame_buf + R7K_NF_BYTES;
                 }
 
 
                 MX_LPRINT(FRAMES7K, 1, "r7kr_read_frame cycle[%d/%d] ret[%d] lost[%"PRIu32"]\n", count, cfg->cycles, istat, lost_bytes);
+
+                // show all frames by default
+                // in socket mode, only subscribed types received
+                bool show_frame = true;
+
+                if(cfg->mode == IMODE_FILE) {
+                    // block if filter specified in file mode (using sub list)
+                    if(cfg->filter && !r7kr_reader_issub(reader, drf->record_type_id))
+                        show_frame = false;
+                }
+
                 // show contents
-                if (cfg->verbose >= 1) {
-                    r7k_nf_t *nf = (r7k_nf_t *)(frame_buf);
-                    r7k_drf_t *drf = (r7k_drf_t *)(frame_buf+R7K_NF_BYTES);
+                if (show_frame) {
+
                     MX_LMSG(FRAMES7K, 1, "NF:\n");
                     r7k_nf_show(nf,false,5);
+
                     MX_LMSG(FRAMES7K, 1, "DRF:\n");
                     r7k_drf_show(drf,false,5);
-                    if(cfg->verbose>3){
+
+                    if(cfg->verbose > 3) {
+                        // show raw data for verbose mode
                         MX_LMSG(FRAMES7K, 1, "data:\n");
                         if (istat>0 && cfg->verbose>1) {
-                            r7k_hex_show(frame_buf,istat,16,true,5);
+                            r7k_hex_show(frame_buf, istat, 16, true, 5);
                         }
                     }
+                    MX_LMSG(FRAMES7K, 1, "\n");
                 }
-            }else{
+            } else {
                 // read error
-                MX_ERROR("ERR - r7kr_read_frame - cycle[%d/%d] ret[%d] me_err[%d] lost[%d]\n", count+1, cfg->cycles, istat, (me_errno-ME_ERRORNO_BASE), lost_bytes);
+                MX_LPRINT(FRAMES7K, 2, "ERR - r7kr_read_frame - cycle[%d/%d] ret[%d] me_err[%d] lost[%d]\n", count+1, cfg->cycles, istat, (me_errno-ME_ERRORNO_BASE), lost_bytes);
 
                 if (me_errno==ME_ESOCK || me_errno==ME_EOF ||
                     me_errno==ME_ERECV || (read_retries-- <= 0)) {
@@ -607,22 +657,30 @@ static int s_app_main (app_cfg_t *cfg)
                             // open next file
                             s7k_file = mfile_file_new(s7k_path);
 
-                            reader = r7kr_freader_new(s7k_file, cfg->size, subs,  nsubs);
+                            reader = r7kr_freader_new(s7k_file, cfg->size, cfg->subs,  cfg->nsubs);
 
                             if(reader != NULL) {
-                                MX_LPRINT(FRAMES7K, 2, "initialized reader using [%s]\n", s7k_path);
+                                // reader and file OK, process the file
+                                MX_LPRINT(FRAMES7K, 2, "initialized reader using [%s] nsubs[%u]\n", s7k_path, cfg->nsubs);
+                                lost_bytes = 0;
                                 break;
                             }
 
-                            mfile_file_destroy(&s7k_file);
+                            // reader invalid (probably invalid file)
+                            // release file, reader
+                            if(s7k_file != NULL)
+                                mfile_file_destroy(&s7k_file);
                             s7k_file = NULL;
                             reader = NULL;
+
+                            // try next file in list
                             s7k_path = (char *)mlist_next(cfg->file_paths);
                         }
 
                         if(s7k_path == NULL) {
                             // no more files, done
                             MX_LMSG(FRAMES7K, 1, "no more files - quitting\n");
+                            retval = 0;
                             break;
                         }
 
@@ -642,7 +700,13 @@ static int s_app_main (app_cfg_t *cfg)
         }else{
             MX_LPRINT(FRAMES7K, 2, "cycles[%d/%d]\n", count, cfg->cycles);
         }
+
+        // release resources
+        mfile_file_destroy(&s7k_file);
+        r7kr_reader_destroy(&reader);
+        free(frame_buf);
     }// else invalid argument
+
     return retval;
 }
 // End function s_app_main
