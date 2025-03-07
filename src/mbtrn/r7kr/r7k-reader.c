@@ -295,7 +295,8 @@ r7kr_reader_t *r7kr_freader_new(mfile_file_t *file, uint32_t capacity, uint32_t 
                 return NULL;
             }
 
-            fprintf(stderr,"%s - wrapping fd %d for file %s in socket\n",__func__, self->fileif->fd, self->fileif->path);
+            MX_LPRINT(R7KR_DEBUG, 1, "%s - wrapping fd %d for file %s in socket\n",__func__, self->fileif->fd, self->fileif->path);
+
             // wrap file descriptor in socket
             // so it can be passed to read
             self->sockif = msock_wrap_fd(self->fileif->fd);
@@ -1504,7 +1505,6 @@ int64_t r7kr_read_frame(r7kr_reader_t *self, byte *dest,
                          double newer_than, uint32_t timeout_msec,
                              uint32_t *sync_bytes )
 {
-
     int64_t retval=-1;
 
     me_errno = ME_OK;
