@@ -1776,15 +1776,20 @@ int mb_platform_position_offset(int verbose, void *platform_ptr, int targetsenso
       /* get sensor structures */
       struct mb_sensor_struct *sensor_target = &platform->sensors[targetsensor];
       struct mb_sensor_struct *sensor_position = &platform->sensors[platform->source_position];
-      struct mb_sensor_struct *sensor_depth = &platform->sensors[platform->source_depth];
+      struct mb_sensor_struct *sensor_depth = NULL;
+      if (platform->source_depth >= 0)
+        sensor_depth = &platform->sensors[platform->source_depth];
+      else if (platform->source_heave >= 0)
+        sensor_depth = &platform->sensors[platform->source_heave];
 
       /* get position offset */
       *target_x_offset = sensor_target->offsets[targetsensoroffset].position_offset_x 
       						- sensor_position->offsets[targetsensoroffset].position_offset_x;
       *target_y_offset = sensor_target->offsets[targetsensoroffset].position_offset_y 
       						- sensor_position->offsets[targetsensoroffset].position_offset_y;
-      *target_z_offset = sensor_target->offsets[targetsensoroffset].position_offset_z 
-      						- sensor_depth->offsets[targetsensoroffset].position_offset_z;
+      *target_z_offset = sensor_target->offsets[targetsensoroffset].position_offset_z;
+      if (sensor_depth != NULL)
+      	*target_z_offset -= sensor_depth->offsets[targetsensoroffset].position_offset_z;
     }
   }
 

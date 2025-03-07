@@ -3693,7 +3693,7 @@ int mbsys_reson7k3_print_FileHeader(int verbose, s7k3_FileHeader *FileHeader, in
     fprintf(stderr, "%llx", (long long unsigned) FileHeader->session_identifier[i]);
   fprintf(stderr, "\n");
   fprintf(stderr, "%s     record_data_size:           %d\n", first, FileHeader->record_data_size);
-  fprintf(stderr, "%s     number_subsystems:          %d\n", first, FileHeader->number_devices);
+  fprintf(stderr, "%s     number_devices:             %d\n", first, FileHeader->number_devices);
   fprintf(stderr, "%s     recording_name:             %s\n", first, FileHeader->recording_name);
   fprintf(stderr, "%s     recording_version:          %s\n", first, FileHeader->recording_version);
   fprintf(stderr, "%s     user_defined_name:          %s\n", first, FileHeader->user_defined_name);

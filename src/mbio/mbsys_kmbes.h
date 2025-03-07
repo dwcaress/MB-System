@@ -440,7 +440,18 @@ struct mbsys_kmbes_skm_info {
                                          *      1 = data is available
                                          * The bit pattern is used to determine sensorStatus from status field in
                                          * #KMB samples. Only data available from sensor is check up against
-                                         * invalid/reduced performance in status, and summaries in sensorStatus. */
+                                         * invalid/reduced performance in status, and summaries in sensorStatus. 
+                                         *
+                                         *   bit
+                                         *   ---
+                                         *    0	Horizontal position and velocity
+										 *    1	Roll and pitch
+										 *    2	Heading
+										 *    3	Heave
+										 *    4	Acceleration
+										 *    5	Delayed heave
+										 *    6	Delayed heave 
+										 */
 };
 
 

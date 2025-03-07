@@ -2853,16 +2853,16 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr) {
           /* write the route end */
           fprintf(sfp, "> ## ENDROUTE\n");
         }
-
-        /* deallocate arrays */
-        if (npointalloc > 0) {
-          status = mbview_freeroutearrays(verbose, &routelon, &routelat, &routewaypoint, &routetopo, &routebearing,
-                                          &distlateral, &distovertopo, &slope, &error);
-        }
       }
 
       /* close the output file */
       fclose(sfp);
+
+	  /* deallocate arrays */
+	  if (npointalloc > 0) {
+		status = mbview_freeroutearrays(verbose, &routelon, &routelat, &routewaypoint, &routetopo, &routebearing,
+										&distlateral, &distovertopo, &slope, &error);
+	  }
     }
   }
 
@@ -3487,7 +3487,7 @@ int do_mbgrdviz_saverisiscriptnoheading(size_t instance, char *output_file_ptr) 
                     reference_lon, reference_lat, projection_id);
 
             /* initialize projection */
-            if (mb_proj_init(2, projection_id, &(pjptr), &error) != MB_SUCCESS) {
+            if (mb_proj_init(verbose, projection_id, &(pjptr), &error) != MB_SUCCESS) {
               char *error_message = NULL;
               mb_error(verbose, error, &error_message);
               fprintf(stderr, "\nMBIO Error initializing projection:\n%s\n", error_message);
@@ -3739,7 +3739,7 @@ int do_mbgrdviz_saverisi2scriptheading(size_t instance, char *output_file_ptr) {
                     reference_lon, reference_lat, projection_id);
 
             /* initialize projection */
-            if (mb_proj_init(2, projection_id, &(pjptr), &error) != MB_SUCCESS) {
+            if (mb_proj_init(verbose, projection_id, &(pjptr), &error) != MB_SUCCESS) {
               char *error_message = NULL;
               mb_error(verbose, error, &error_message);
               fprintf(stderr, "\nMBIO Error initializing projection:\n%s\n", error_message);
@@ -3975,7 +3975,7 @@ int do_mbgrdviz_saverisi2scriptnoheading(size_t instance, char *output_file_ptr)
                     reference_lon, reference_lat, projection_id);
 
             /* initialize projection */
-            if (mb_proj_init(2, projection_id, &(pjptr), &error) != MB_SUCCESS) {
+            if (mb_proj_init(verbose, projection_id, &(pjptr), &error) != MB_SUCCESS) {
               char *error_message = NULL;
               mb_error(verbose, error, &error_message);
               fprintf(stderr, "\nMBIO Error initializing projection:\n%s\n", error_message);

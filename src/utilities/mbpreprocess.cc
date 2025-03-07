@@ -146,7 +146,9 @@ constexpr char usage_message[] =
     "\t--kluge-auv-sentry-sensordepth\n"
     "\t--kluge-ignore-snippets\n"
     "\t--kluge-sensordepth-from-heave\n"
-    "\t--kluge-early-MBARI-Mapping-AUV\n";
+    "\t--kluge-early-MBARI-Mapping-AUV\n"
+    "\t--kluge-flipsign-roll\n"
+    "\t--kluge-flipsign-pitch\n";
 
 /*--------------------------------------------------------------------*/
 
@@ -189,6 +191,8 @@ int main(int argc, char **argv) {
   bool kluge_ignore_snippets = false;
   bool kluge_sensordepth_from_heave = false;
   bool kluge_early_mbari_mapping_auv = false;
+  bool kluge_flipsign_roll = false;
+  bool kluge_flipsign_pitch = false;
 
   mb_path sensordepth_file;
   memset(sensordepth_file, 0, sizeof(mb_path));
@@ -317,6 +321,8 @@ int main(int argc, char **argv) {
                                       {"kluge-ignore-snippets", no_argument, nullptr, 0},
                                       {"kluge-sensordepth-from-heave", no_argument, nullptr, 0},
                                       {"kluge-early-MBARI-Mapping-AUV", no_argument, nullptr, 0},
+                                      {"kluge-flipsign-roll", no_argument, nullptr, 0},
+                                      {"kluge-flipsign-pitch", no_argument, nullptr, 0},
                                       {nullptr, 0, nullptr, 0}};
 
     int option_index;
@@ -709,6 +715,16 @@ int main(int argc, char **argv) {
           preprocess_pars.n_kluge++;
           kluge_early_mbari_mapping_auv = true;
         }
+        else if (strcmp("kluge-flipsign-roll", options[option_index].name) == 0) {
+          preprocess_pars.kluge_id[preprocess_pars.n_kluge] = MB_PR_KLUGE_FLIPSIGNROLL;
+          preprocess_pars.n_kluge++;
+          kluge_flipsign_roll = true;
+        }
+        else if (strcmp("kluge-flipsign-pitch", options[option_index].name) == 0) {
+          preprocess_pars.kluge_id[preprocess_pars.n_kluge] = MB_PR_KLUGE_FLIPSIGNPITCH;
+          preprocess_pars.n_kluge++;
+          kluge_flipsign_pitch = true;
+        }
 
         break;
       case '?':
@@ -891,6 +907,8 @@ int main(int argc, char **argv) {
     fprintf(stderr, "dbg2       kluge_ignore_snippets:               %d\n", kluge_ignore_snippets);
     fprintf(stderr, "dbg2       kluge_sensordepth_from_heave         %d\n", kluge_sensordepth_from_heave);
     fprintf(stderr, "dbg2       kluge_early_mbari_mapping_auv        %d\n", kluge_early_mbari_mapping_auv);
+    fprintf(stderr, "dbg2       kluge_flipsign_roll                  %d\n", kluge_flipsign_roll);
+    fprintf(stderr, "dbg2       kluge_flipsign_pitch                 %d\n", kluge_flipsign_pitch);
     fprintf(stderr, "dbg2  Additional output:\n");
     fprintf(stderr, "dbg2       output_sensor_fnv:            %d\n", output_sensor_fnv);
     fprintf(stderr, "dbg2  Skip existing output files:\n");
@@ -1004,6 +1022,8 @@ int main(int argc, char **argv) {
     fprintf(stderr, "     kluge_ignore_snippets:               %d\n", kluge_ignore_snippets);
     fprintf(stderr, "     kluge_sensordepth_from_heave         %d\n", kluge_sensordepth_from_heave);
     fprintf(stderr, "     kluge_early_mbari_mapping_auv        %d\n", kluge_early_mbari_mapping_auv);
+    fprintf(stderr, "     kluge_flipsign_roll                  %d\n", kluge_flipsign_roll);
+    fprintf(stderr, "     kluge_flipsign_pitch                 %d\n", kluge_flipsign_pitch);
     fprintf(stderr, "Additional output:\n");
     fprintf(stderr, "     output_sensor_fnv:            %d\n", output_sensor_fnv);
     fprintf(stderr, "Skip existing output files:\n");
@@ -2331,6 +2351,38 @@ int main(int argc, char **argv) {
     fprintf(stderr, "-----------------------------------------------\n");
   }
 
+
+  /*-------------------------------------------------------------------*/
+
+  /* deal with flipping the sign of roll and/or pitch */
+  if ((kluge_flipsign_roll || kluge_flipsign_pitch) && n_attitude > 0 && n_attitude_alloc >= n_attitude) {
+    if (verbose > 0) {
+      fprintf(stderr, "\n-----------------------------------------------\n");
+      if (kluge_flipsign_roll)
+        fprintf(stderr, "Flipping sign of roll\n");
+      if (kluge_flipsign_pitch)
+        fprintf(stderr, "Flipping sign of pitch\n");
+    }
+
+	/* roll */
+	if (kluge_flipsign_roll && n_attitude > 0 && n_attitude_alloc >= n_attitude) {
+	  for (int i = 0;i<n_attitude;i++) {
+		attitude_roll[i] *= -1.0;
+	  }
+	}
+  
+	/* roll */
+	if (kluge_flipsign_pitch && n_attitude > 0 && n_attitude_alloc >= n_attitude) {
+	  for (int i = 0;i<n_attitude;i++) {
+		attitude_pitch[i] *= -1.0;
+	  }
+	}
+
+	if (verbose > 0) {
+	  fprintf(stderr, "-----------------------------------------------\n");
+	}
+  }
+
   /*-------------------------------------------------------------------*/
 
   /* Do second pass through the data reading everything,
@@ -3077,7 +3129,7 @@ int main(int argc, char **argv) {
             char *message;
             mb_error(verbose, error, &message);
             fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
-            fprintf(stderr, "\nMBIO Error returned from function <mb_put>:\n%s\n", message);
+            fprintf(stderr, "\nMBIO Error returned from function <mb_put_all>:\n%s\n", message);
             fprintf(stderr, "\nMultibeam Data Not Written To File <%s>\n", ofile);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
             exit(error);
