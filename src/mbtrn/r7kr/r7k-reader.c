@@ -1670,7 +1670,7 @@ int64_t r7kr_read_frame(r7kr_reader_t *self, byte *dest,
                     }
 
                 }else{
-                    MX_MMSG(R7KR_DEBUG, "Frame invalid [%d/%s] retval[%"PRId64"]\n", me_errno, me_strerror(me_errno), retval);
+                    MX_MPRINT(R7KR_DEBUG, "Frame invalid [%d/%s] retval[%"PRId64"]\n", me_errno, me_strerror(me_errno), retval);
                     MST_COUNTER_INC(self->stats->events[R7KR_EV_FRAME_INVALID]);
                 }
                 // quit and return
