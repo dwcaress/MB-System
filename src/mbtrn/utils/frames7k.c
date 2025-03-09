@@ -271,8 +271,6 @@ static void show_cfg(app_cfg_t *cfg, int indent)
     int wkey = 16;
     int wval = 16;
 
-    fprintf(stderr,"%*sDebug configuration:\n",indent,(indent>0?" ":""));
-    mxd_show();
     fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey, "App Config", wval, cfg);
     fprintf(stderr,"%*s%*s %*d\n",indent,(indent>0?" ":""),wkey,"verbose", wval, cfg->verbose);
     fprintf(stderr,"%*s%*s %*s\n",indent,(indent>0?" ":""),wkey,"host", wval, cfg->host);
@@ -288,6 +286,7 @@ static void show_cfg(app_cfg_t *cfg, int indent)
 
     if(cfg->nsubs > 0 && cfg->subs != NULL) {
         fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey, "Record Types", wval, cfg->subs);
+        fprintf(stderr,"%*s%*s %*d\n",indent,(indent>0?" ":""),wkey, "N", wval, cfg->nsubs);
 
         int cols = 4;
         int rows = cfg->nsubs/cols;
@@ -315,6 +314,7 @@ static void show_cfg(app_cfg_t *cfg, int indent)
 
     if(cfg->file_paths != NULL) {
         fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey, "Files", wval, cfg->file_paths);
+        fprintf(stderr,"%*s%*s %*zu\n",indent,(indent>0?" ":""),wkey, "N", wval, mlist_size(cfg->file_paths));
         char *path=(char *)mlist_first(cfg->file_paths);
         int i=0;
         while (NULL!=path) {
@@ -323,7 +323,9 @@ static void show_cfg(app_cfg_t *cfg, int indent)
         }
     }
     fprintf(stderr,"\n");
-
+    fprintf(stderr,"%*s%*s\n",indent,(indent>0?" ":""), wkey, "Debug Config");
+    mxd_show();
+    fprintf(stderr,"\n");
 }
 
 /// @fn void parse_args(int argc, char ** argv, app_cfg_t * cfg)
@@ -703,7 +705,7 @@ static int s_app_main (app_cfg_t *cfg)
 
                         while(!g_stop_flag && s7k_path != NULL) {
 
-                            MX_LPRINT(FRAMES7K, 2, "processing file [%s]\n", s7k_path);
+                            MX_LPRINT(FRAMES7K, 1, "processing file [%s]\n", s7k_path);
                             // open next file
                             s7k_file = mfile_file_new(s7k_path);
 
