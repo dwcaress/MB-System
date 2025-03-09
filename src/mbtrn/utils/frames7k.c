@@ -159,6 +159,9 @@ typedef struct app_cfg_s{
     /// @var app_cfg_s::filter
     /// @brief filter using subcription list
     bool filter;
+    /// @var app_cfg_s::show_data
+    /// @brief show frame data
+    bool show_data;
 
 }app_cfg_t;
 
@@ -185,7 +188,8 @@ static void s_show_help()
     char help_message[] = "\n Stream reson data frames to console\n";
     char usage_message[] = "\n frames7k [options]\n"
     " Options :\n"
-    "  --verbose=<n>       : verbose output\n"
+    "  --verbose=<n>       : verbose debug output\n"
+    "  --data              : show data\n"
     "  --file=<s>          : S7K file name\n"
     "  --nf                : data includes net frames\n"
     "  --host=<s>[:port]   : reson host name or IP address and port\n"
@@ -211,7 +215,7 @@ static app_cfg_t *app_cfg_new()
 {
     app_cfg_t *instance = (app_cfg_t *)malloc(sizeof(app_cfg_t));
     if(instance != NULL) {
-        instance->verbose = 1;
+        instance->verbose = 0;
         instance->host = strdup(RESON_HOST_DFL);
         instance->port = R7K_7KCENTER_PORT;
         instance->cycles = 0;
@@ -236,6 +240,7 @@ static app_cfg_t *app_cfg_new()
         instance->subs[9] = 7004;
         instance->subs[10] = 7027;
         instance->filter = false;
+        instance->show_data = false;
     }
     return instance;
 }
@@ -256,6 +261,71 @@ static void app_cfg_destroy(app_cfg_t **pself)
     }
 }
 
+/// @fn void show_cfg(app_cfg_t *cfg, int indent)
+/// @brief  show formatted configuration summary
+/// @param[in] cfg app_cfg_t instance
+/// @param[in] indent indent width (spaces)
+/// @return none
+static void show_cfg(app_cfg_t *cfg, int indent)
+{
+    int wkey = 16;
+    int wval = 16;
+
+    fprintf(stderr,"%*sDebug configuration:\n",indent,(indent>0?" ":""));
+    mxd_show();
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey, "App Config", wval, cfg);
+    fprintf(stderr,"%*s%*s %*d\n",indent,(indent>0?" ":""),wkey,"verbose", wval, cfg->verbose);
+    fprintf(stderr,"%*s%*s %*s\n",indent,(indent>0?" ":""),wkey,"host", wval, cfg->host);
+    fprintf(stderr,"%*s%*s %*d\n",indent,(indent>0?" ":""),wkey,"port", wval, cfg->port);
+    fprintf(stderr,"%*s%*s %*d\n",indent,(indent>0?" ":""),wkey,"cycles", wval, cfg->cycles);
+    fprintf(stderr,"%*s%*s %*u\n",indent,(indent>0?" ":""),wkey,"size", wval, cfg->size);
+    fprintf(stderr,"%*s%*s %*d\n",indent,(indent>0?" ":""),wkey,"dev", wval, cfg->dev);
+    fprintf(stderr,"%*s%*s %*s\n",indent,(indent>0?" ":""),wkey,"mode",wval, (cfg->mode == IMODE_SOCKET ? "socket" : "file"));
+    fprintf(stderr,"%*s%*s %*c\n",indent,(indent>0?" ":""),wkey,"data", wval, (cfg->show_data? 'Y' : 'N'));
+    fprintf(stderr,"%*s%*s %*c\n",indent,(indent>0?" ":""),wkey,"nf", wval, (cfg->net_frames ? 'Y' : 'N'));
+    fprintf(stderr,"%*s%*s %*c\n",indent,(indent>0?" ":""),wkey,"filter", wval, (cfg->filter ? 'Y' : 'N'));
+    fprintf(stderr,"%*s%*s %*u\n",indent,(indent>0?" ":""),wkey,"nsubs", wval, cfg->nsubs);
+
+    if(cfg->nsubs > 0 && cfg->subs != NULL) {
+        fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey, "Record Types", wval, cfg->subs);
+
+        int cols = 4;
+        int rows = cfg->nsubs/cols;
+        int rem = cfg->nsubs%cols;
+        int i=0;
+
+        for(i=0; i< cfg->nsubs; i++) {
+            if(i%cols==0) {
+                // indent row
+                fprintf(stderr,"%*s%*d:",indent,(indent>0?" ":""), wkey, i);
+            }
+            // print record type
+            fprintf(stderr," %u", cfg->subs[i]);
+
+            if(i>0 && (i+1)%cols==0) {
+                // add new line after column
+                fprintf(stderr,"\n");
+            }
+        }
+        if(i%cols != 0) {
+            // add newline after partial row
+            fprintf(stderr,"\n");
+        }
+    }
+
+    if(cfg->file_paths != NULL) {
+        fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey, "Files", wval, cfg->file_paths);
+        char *path=(char *)mlist_first(cfg->file_paths);
+        int i=0;
+        while (NULL!=path) {
+            fprintf(stderr,"%*s%*d: %*s\n",indent,(indent>0?" ":""), wkey, i++, wval, path);
+            path = (char *)mlist_next(cfg->file_paths);
+        }
+    }
+    fprintf(stderr,"\n");
+
+}
+
 /// @fn void parse_args(int argc, char ** argv, app_cfg_t * cfg)
 /// @brief parse command line args, set application configuration.
 /// @param[in] argc number of arguments
@@ -272,6 +342,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
     
     static struct option options[] = {
         {"verbose", required_argument, NULL, 0},
+        {"data", no_argument, NULL, 0},
         {"help", no_argument, NULL, 0},
         {"version", no_argument, NULL, 0},
         {"file", required_argument, NULL, 0},
@@ -302,7 +373,12 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 else if (strcmp("help", options[option_index].name) == 0) {
                     help = true;
                 }
-                
+
+                // data
+                if (strcmp("data", options[option_index].name) == 0) {
+                    cfg->show_data = true;
+                }
+
                 // nf
                 else if (strcmp("nf", options[option_index].name) == 0) {
                     cfg->net_frames = true;
@@ -450,33 +526,9 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
             mlist_add(cfg->file_paths,strdup(argv[i]));
         }
     }
+
     if(cfg->verbose != 0) {
-        mxd_show();
-        fprintf(stderr,"verbose   [%d]\n", cfg->verbose);
-        fprintf(stderr,"host      [%s]\n", cfg->host);
-        fprintf(stderr,"port      [%d]\n", cfg->port);
-        fprintf(stderr,"cycles    [%d]\n", cfg->cycles);
-        fprintf(stderr,"size      [%u]\n", cfg->size);
-        fprintf(stderr,"dev       [%d]\n", cfg->dev);
-        fprintf(stderr,"mode      [%s]\n", (cfg->mode == IMODE_SOCKET ? "socket" : "file"));
-        fprintf(stderr,"nf        [%c]\n", (cfg->net_frames ? 'Y' : 'N'));
-        fprintf(stderr,"filter    [%c]\n", (cfg->filter ? 'Y' : 'N'));
-        fprintf(stderr,"nsubs     [%u]\n", cfg->nsubs);
-        if(cfg->nsubs > 0 && cfg->subs != NULL) {
-            fprintf(stderr,"subs      [%p]\n", cfg->subs);
-            for(int i=0; i< cfg->nsubs; i++) {
-                fprintf(stderr,"rec       [%u]\n", cfg->subs[i]);
-            }
-        }
-        fprintf(stderr,"paths     [%p]\n", cfg->file_paths);
-        if(cfg->file_paths != NULL) {
-            fprintf(stderr,"files:\n");
-            char *path=(char *)mlist_first(cfg->file_paths);
-            while (NULL!=path) {
-                fprintf(stderr,"path      [%s]\n", path);
-                path = (char *)mlist_next(cfg->file_paths);
-            }
-        }
+        show_cfg(cfg, 5);
     }
 }
 // End function parse_args
@@ -592,7 +644,7 @@ static int s_app_main (app_cfg_t *cfg)
                 }
 
 
-                MX_LPRINT(FRAMES7K, 1, "r7kr_read_frame cycle[%d/%d] ret[%d] lost[%"PRIu32"]\n", count, cfg->cycles, istat, lost_bytes);
+                MX_LPRINT(FRAMES7K, 2, "r7kr_read_frame cycle[%d/%d] ret[%d] lost[%"PRIu32"]\n", count, cfg->cycles, istat, lost_bytes);
 
                 // show all frames by default
                 // in socket mode, only subscribed types received
@@ -607,20 +659,18 @@ static int s_app_main (app_cfg_t *cfg)
                 // show contents
                 if (show_frame) {
 
-                    MX_LMSG(FRAMES7K, 1, "NF:\n");
+                    MX_MSG("NF:\n");
                     r7k_nf_show(nf,false,5);
 
-                    MX_LMSG(FRAMES7K, 1, "DRF:\n");
+                    MX_MSG("DRF:\n");
                     r7k_drf_show(drf,false,5);
 
-                    if(cfg->verbose > 3) {
+                    if(cfg->show_data && istat > 0) {
                         // show raw data for verbose mode
-                        MX_LMSG(FRAMES7K, 1, "data:\n");
-                        if (istat>0 && cfg->verbose>1) {
-                            r7k_hex_show(frame_buf, istat, 16, true, 5);
-                        }
+                        MX_MSG("data:\n");
+                        r7k_hex_show(frame_buf, istat, 16, true, 5);
                     }
-                    MX_LMSG(FRAMES7K, 1, "\n");
+                    MX_MSG("\n");
                 }
             } else {
                 // read error
