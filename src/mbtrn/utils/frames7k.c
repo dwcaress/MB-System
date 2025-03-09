@@ -186,21 +186,42 @@ static bool g_stop_flag=false;
 static void s_show_help()
 {
     char help_message[] = "\n Stream reson data frames to console\n";
-    char usage_message[] = "\n frames7k [options]\n"
+    char usage_message[] = "\n frames7k [options] [file,...]\n"
     " Options :\n"
     "  --verbose=<n>       : verbose debug output\n"
-    "  --data              : show data\n"
-    "  --file=<s>          : S7K file name\n"
-    "  --nf                : data includes net frames\n"
     "  --host=<s>[:port]   : reson host name or IP address and port\n"
-    "  --cycles=<n>        : number of cycles (dfl 0 - until CTRL-C)\n"
-    "  --dev=<s>           : device [e.g. T50, 7125_400]; options:\n"
-    "                         7125_400 : Reson 7125 400 kHz (default)"
-    "                         7125_200 : Reson 7125 200 kHz"
-    "                              T50 : Reson T50"
-    "  --size=<n>          : reader capacity (bytes)\n"
-    "  --subs=[a|o,]<d...> : subscribed record types (socket input, or w/ --filter)\n"
+    "  --data              : show data payload (formatted hex)\n"
     "  --filter            : filter using subscription list for file input\n"
+    "  --subs=[o,]<d,...>  : append/overwrite record type list\n"
+    "                          For socket input, sets subscription (and output) list.\n"
+    "                          For file input, sets output list when --filter specified.\n"
+    "                          Use 'o' to overwrite default list (default: append).\n"
+    "                          Default record types:\n"
+    "                            1003 1006 1008 1010\n"
+    "                            1012 1013 1015 1016\n"
+    "                            7000 7004 7027\n"
+    "  --file=<s>          : S7K file name (or list after options)\n"
+    "  --net               : input includes net frames\n"
+    "  --cycles=<n>        : number of cycles (default 0: until CTRL-C or end of input)\n"
+    "  --dev=<s>           : device [e.g. T50, 7125_400]; options:\n"
+    "                          7125_400 : Reson 7125 400 kHz (default)\n"
+    "                          7125_200 : Reson 7125 200 kHz\n"
+    "                               T50 : Reson T50\n"
+    "  --size=<n>          : reader capacity (bytes)\n"
+    "\n"
+    " Examples\n"
+    "\n"
+    "   # Subscribe/read from socket, using default 7kCenter port, show message data\n"
+    "    frames7k --host=192.168.1.101 --data\n"
+    "\n"
+    "   # Show headers of S7K data files\n"
+    "    frames7k $(ls /path/to/data/*.s7k)\n"
+    "\n"
+    "   # Read from files, display headers from record types 7000,1008\n"
+    "    frames7k --subs=o,7000,1008 --filter $(ls /path/to/data/*.s7k)\n"
+    "\n"
+    "   # Read from socket (non-standard port), display headers from record types 7000,1008\n"
+    "    frames7k --subs=o,7000,1008 --filter --host:192.168.1.101:7001\n"
     "\n";
     printf("%s",help_message);
     printf("%s",usage_message);
@@ -280,7 +301,7 @@ static void show_cfg(app_cfg_t *cfg, int indent)
     fprintf(stderr,"%*s%*s %*d\n",indent,(indent>0?" ":""),wkey,"dev", wval, cfg->dev);
     fprintf(stderr,"%*s%*s %*s\n",indent,(indent>0?" ":""),wkey,"mode",wval, (cfg->mode == IMODE_SOCKET ? "socket" : "file"));
     fprintf(stderr,"%*s%*s %*c\n",indent,(indent>0?" ":""),wkey,"data", wval, (cfg->show_data? 'Y' : 'N'));
-    fprintf(stderr,"%*s%*s %*c\n",indent,(indent>0?" ":""),wkey,"nf", wval, (cfg->net_frames ? 'Y' : 'N'));
+    fprintf(stderr,"%*s%*s %*c\n",indent,(indent>0?" ":""),wkey,"net", wval, (cfg->net_frames ? 'Y' : 'N'));
     fprintf(stderr,"%*s%*s %*c\n",indent,(indent>0?" ":""),wkey,"filter", wval, (cfg->filter ? 'Y' : 'N'));
     fprintf(stderr,"%*s%*s %*u\n",indent,(indent>0?" ":""),wkey,"nsubs", wval, cfg->nsubs);
 
@@ -348,7 +369,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"help", no_argument, NULL, 0},
         {"version", no_argument, NULL, 0},
         {"file", required_argument, NULL, 0},
-        {"nf", no_argument, NULL, 0},
+        {"net", no_argument, NULL, 0},
         {"host", required_argument, NULL, 0},
         {"cycles", required_argument, NULL, 0},
         {"size", required_argument, NULL, 0},
@@ -381,8 +402,8 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                     cfg->show_data = true;
                 }
 
-                // nf
-                else if (strcmp("nf", options[option_index].name) == 0) {
+                // net
+                else if (strcmp("net", options[option_index].name) == 0) {
                     cfg->net_frames = true;
                 }
 
@@ -428,7 +449,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                     char *ocopy = strdup(optarg);
                     char *next_tok = strtok(ocopy,",");
 
-                    if(strcmp(next_tok,"o") == 0) {
+                    if(next_tok[0] == 'o' || next_tok[0] == 'O') {
                         cfg->nsubs = 0;
                         next_tok = strtok(NULL, ",");
                     }
