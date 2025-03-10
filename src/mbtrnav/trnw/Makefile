@@ -14,33 +14,21 @@ mb1rs_ver ?=0.0.0b1
 OPT_MB1RS_VER=-DMB1RS_VER=$(mb1rs_ver)
 OPT_MB1RS_BUILD=-DMB1RS_BUILD=$(build_date)
 
+LIBTRNAV_TOP = ..
+ifndef COMMON_DEFS
+include ${LIBTRNAV_TOP}/Makefile.common
+endif
+
+# build directories
+OUTPUT_DIR=${LIBTRNAV_TOP}/bin
+BUILD_DIR=${LIBTRNAV_TOP}/build
+QNX_DIR=${LIBTRNAV_TOP}/qnx-utils
+NEWMAT_DIR=${LIBTRNAV_TOP}/newmat
+TNAV_DIR=${LIBTRNAV_TOP}/terrain-nav
+
 # C standard e.g. -std=c99 -std=gnu99
 # may be needed for Cygwin (e.g. for loop declare/init)
 #STD= -std=c99
-
-# Platform-specific options
-ifeq ($(shell uname),Linux)
-	OS_CFLAGS=
-	OS_INC_PATH=
-	OS_LIB_PATH=
-endif
-
-ifeq ($(shell uname),Darwin)
-	OS_CFLAGS=
-	OS_INC_PATH=-I/opt/local/include
-	OS_LIB_PATH=-L/opt/local/lib
-endif
-
-ifeq ($(shell uname),Cygwin)
-	OS_CFLAGS=
-	OS_INC_PATH=-I/opt/local/include
-	OS_LIB_PATH=-L/opt/local/lib
-endif
-
-$(info "INFO +++ trnw - OPT_USE_PROJ ${OPT_USE_PROJ}")
-$(info "INFO +++ trnw - PROJ_LIB ${PROJ_LIB}")
-$(info "INFO +++ trnw - OPT_PROJ_INC ${OPT_PROJ_INC}")
-$(info "INFO +++ trnw - OPT_PROJ_LIB ${OPT_PROJ_LIB}")
 
 # for TRN clients or to force
 # netif default MMDEBUG config
@@ -69,13 +57,6 @@ else
 BUILD_OPTIONS = $(BUILD_RELEASE_OPTIONS)
 endif
 
-# build directories
-OUTPUT_DIR=../bin
-BUILD_DIR=../build
-QNX_DIR=../qnx-utils
-NEWMAT_DIR=../newmat
-TNAV_DIR=../terrain-nav
-
 # mframe is required to build TRN clients
 # MFRAME_INC_DIR: location of mframe headers
 # MFRAME_LIB_DIR: location of mframe library (libmframe.a)
@@ -102,12 +83,29 @@ CPP = g++ -std=c++11
 WARN_FLAGS=-Wall
 
 # Compiler flags
-CFLAGS = -g -O2 $(WARN_FLAGS) $(GPROF) $(BUILD_OPTIONS) $(OS_CFLAGS)
-INC_PATHS = -I. -I$(MFRAME_INC_DIR) -I$(TNAV_DIR) -I$(NEWMAT_DIR) -I$(QNX_DIR) $(OPT_PROJ_INC) $(OS_INC_PATH)
+CFLAGS = -g -O2 $(WARN_FLAGS) $(GPROF) $(BUILD_OPTIONS) $(OPT_OS_CFLAGS)
+INC_PATHS = -I. -I$(MFRAME_INC_DIR) -I$(TNAV_DIR) -I$(NEWMAT_DIR) -I$(QNX_DIR) $(OPT_PROJ_INC) $(OPT_OS_INC)
 
 # Linker flags
-LD_FLAGS = -g $(GPROF)
-LIB_PATHS = -L$(OUTPUT_DIR) -L$(MFRAME_LIB_DIR) $(OPT_PROJ_LIB) $(OS_LIB_PATH) -L/usr/local/lib
+LD_FLAGS = -g $(GPROF) $(OPT_OS_LDFLAGS)
+LIB_PATHS = -L$(OUTPUT_DIR) -L$(MFRAME_LIB_DIR) $(OPT_PROJ_LIB) -L/usr/local/lib  $(OPT_OS_LIB)
+
+ifdef buildDebug
+$(info "INFO +++ trnw - OPT_USE_PROJ ${OPT_USE_PROJ}")
+$(info "INFO +++ trnw - PROJ_LIB ${PROJ_LIB}")
+$(info "INFO +++ trnw - OPT_PROJ_INC ${OPT_PROJ_INC}")
+$(info "INFO +++ trnw - OPT_PROJ_LIB ${OPT_PROJ_LIB}")
+$(info "INFO +++ trnw - OS_PREFIX          ${OS_PREFIX}")
+$(info "INFO +++ trnw - OPT_OS_CFLAGS      ${OPT_OS_CFLAGS}")
+$(info "INFO +++ trnw - OPT_OS_LDFLAGS     ${OPT_OS_LDFLAGS}")
+$(info "INFO +++ trnw - OPT_OS_INC         ${OPT_OS_INC}")
+$(info "INFO +++ trnw - OPT_OS_LIB         ${OPT_OS_LIB}")
+$(info "INFO +++ trnw - OPT_OS_LIBS        ${OPT_OS_LIBS}")
+$(info "INFO +++       - CFLAGS             ${CFLAGS}")
+$(info "INFO +++       - INC_PATHS          ${INC_PATHS}")
+$(info "INFO +++       - LD_FLAGS           ${LD_FLAGS}")
+$(info "INFO +++       - LIB_PATHS          ${LIB_PATHS}")
+endif
 
 ########################################
 # Target Definitions
