@@ -49,7 +49,7 @@ Window {
                 Text {
                     id: element1
                     height: 17
-                    text: qsTr("X offset      ")
+                    text: qsTr("X offset  !!!    ")
                     wrapMode: Text.NoWrap
                     textFormat: Text.AutoText
                     padding: 0
@@ -67,7 +67,7 @@ Window {
 
                 Text {
                     id: element
-                    text: qsTr("Y offset")
+                    text: qsTr("Y offset ???")
                     font.pixelSize: 18
                 }
 
