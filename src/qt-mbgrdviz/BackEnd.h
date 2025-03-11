@@ -67,6 +67,7 @@ protected:
   ///  std::vector<const char *> colorMapNames_;
   /// QStringListModel colorMapsModel_;
   QStringList colorMapsList_;  
+
   
 private:
   /// Constant string member test
