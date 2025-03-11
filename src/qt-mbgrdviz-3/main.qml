@@ -183,7 +183,7 @@ ApplicationWindow {
                 }
             }
 
-            Action {text: qsTr("2D"); onTriggered: {
+            Action {text: qsTr("2D settings"); onTriggered: {
                     console.log("show 2d settings window");
                     settings2d.show()
                 }
