@@ -32,7 +32,6 @@
 # CMAKE_BUILD_TYPE can be: empty, Debug, Release, RelWithDebInfo or MinSizeRel
 #
 #------------------------------------------------------------------------------
-
 message("----------------------------------------------------------")
 message("MB-System")
 message("CMake Build System")
@@ -168,11 +167,6 @@ if(buildQt)
   add_subdirectory(src/qt-mbedit)
   add_subdirectory(src/qt-mbedit-widgets)
   add_subdirectory(src/qt-mbnavedit)
-  ### add_subdirectory(src/qt-test)
-  ### add_subdirectory(src/qt-qqvtkRenderItem)
-  ### add_subdirectory(src/qt-qqvtkItem)
-  ### add_subdirectory(src/qt-mbeditviz)
-  
 endif()
 if(buildDeprecated)
   add_subdirectory(src/deprecated)
