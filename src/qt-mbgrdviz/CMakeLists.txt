@@ -24,7 +24,7 @@
 
 find_package(
   Qt6
-  COMPONENTS  Gui OpenGL Quick
+  COMPONENTS  Gui OpenGL Quick Graphs
   REQUIRED)
 
 find_package(VTK 9.3 REQUIRED COMPONENTS GUISupportQtQuick)
@@ -36,6 +36,6 @@ set(CMAKE_AUTOUIC ON)
 add_executable(qt-mbgrdviz  main.cpp qml.qrc)
 
 target_link_libraries(qt-mbgrdviz PRIVATE MBGui
-                      Qt6::Core Qt6::Quick Qt6::Gui
+                      Qt6::Core Qt6::Quick Qt6::Gui Qt6::Graphs
                       Qt6::OpenGL VTK::GUISupportQtQuick)
 
