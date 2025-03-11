@@ -96,6 +96,12 @@ namespace mb_system {
       return projTransform_;
     }
 
+
+    /// Return pointer to TopoData
+    TopoData *topoData() {
+      return topoData_;
+    }
+    
     
  protected:
   
