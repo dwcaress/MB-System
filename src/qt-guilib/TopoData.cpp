@@ -39,33 +39,27 @@ bool TopoData::getElevProfile(int startRow, int startCol,
     return false;    
   }  
 
-  // Total horizontal length
-  double horizLength = sqrt(pow(endX - startX, 2) + pow(endY - startY, 2));
-  double horizIncr = horizLength / nPieces;
-  
-  double rowInterval = (endRow - startRow) / nPieces;
-  double colInterval = (endCol - startCol) / nPieces;
+  double m = (endRow - startRow) / (endCol - startCol);
+  double b = startRow - m * startCol;
 
   array<double, 2> profilePoint;
-  int n = 0;
-  double h = 0.;
-  for (int col = startCol; col < endCol; col += colInterval) {
-    for (int row = startRow; row < endRow; row += rowInterval) {
-      double x, y, z;
-      if (!getXYZ(row, col, &x, &y, &z)) {
-	std::cerr << "Invalid data at row " << row << ", col " << col << "\n";
-	continue;
-      }
-
-      // Compute horizontal distance from starting point
-      double distance = sqrt(pow(x - startX, 2) + pow(y - startY, 2));
-
-      profilePoint[0] = h;
-      h += horizIncr;
-      profilePoint[1] = z;
-      
-      profile->push_back(profilePoint);
+  float incr = (endCol - startCol) / nPieces;
+  int colIncr = incr + 0.5;
+  for (int col = startCol; col < endCol; col += colIncr) {
+    int row = m * col + b;
+    double x, y, z;
+    if (!getXYZ(row, col, &x, &y, &z)) {
+      std::cerr << "Invalid data at row " << row << ", col " << col << "\n";
+      continue;
     }
+
+    // Compute horizontal distance from starting point
+    double h = sqrt(pow(x - startX, 2) + pow(y - startY, 2));
+
+    profilePoint[0] = h;
+    profilePoint[1] = z;
+    profile->push_back(profilePoint);
   }
+
   return true;
 }
