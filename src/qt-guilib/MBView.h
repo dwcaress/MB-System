@@ -7,6 +7,12 @@ of the legacy mbview C library.
  */
 class MBView {
 
+ public:
+
+
+  struct World {
+  };
+ 
   // mbview_getdataptr()
   static int getDataPointer(int verbose, size_t instance,
 			    struct mbview_struct **datahandle, int *error);
@@ -36,7 +42,7 @@ class MBView {
   // mbview_updatesecondarygrid()
   static int updateSecondaryGrid(int verbose, size_t instance,
 				 int secondary_n_columns, int secondary_n_rows,
-				 float *secondary_data,  
+				 float *secondary_data);
 };
 
 }
