@@ -463,14 +463,14 @@ TopoDataReader *TopoDataItem::getGridReader() {
 }
 
 
-QList<QVector2D> TopoDataItem::getZProfile(int row1, int col1,
-					   int row2,  int col2,
-					   int nPieces) {
+QList<QVector2D> TopoDataItem::getElevProfile(int row1, int col1,
+					      int row2,  int col2,
+					      int nPieces) {
 
 
   auto *profile = new std::vector<std::array<double, 2>>;
 
-  qDebug() << "TopoDataItem::getZProfile() TEST TEST TEST row/col values";
+  qDebug() << "TopoDataItem::getElevProfile() TEST TEST TEST row/col values";
   row1 = col1 = 0;
 
   row2 = pipeline_->topoReader_->topoData()->nRows();
@@ -504,7 +504,7 @@ QList<QVector2D> TopoDataItem::getZProfile(int row1, int col1,
   }
 
   // print out list values
-  qDebug() << "getZProfile() output:";
+  qDebug() << "getElevProfile() output:";
   for (int i = 0; i < qProfile.size(); i++) {
     const QVector2D p = qProfile.at(i);
     qDebug() << "p.x(): " << p.x() << ", p.y(): " << p.y();
