@@ -14,6 +14,9 @@
 #include <vtk/vtkNamedColors.h>
 #include <vtk/vtkGenericRenderWindowInteractor.h>
 #include <QVTKInteractor.h>
+#include <QList>
+#include <QVector2D>
+#include <QVariant>
 #include "SlopeFilter.h"
 #include "TopoDataReader.h"
 #include "TopoColorMap.h"
@@ -111,6 +114,17 @@ namespace mb_system {
       displayedSurface_ = surfaceType;
       reassemblePipeline();
     }
+
+
+    /// Test
+    Q_INVOKABLE QList<QVector2D> runTest2(void);    
+
+    /// Return depth profile from encapsulated TopoData object, as a
+    /// QList of QVector2D objects, removing need to register additional
+    /// types with metadata system. QList has zero-length in case of error.
+    Q_INVOKABLE QList<QVector2D> getZProfile(int row1, int col1,
+					     int row2, int col2,
+					     int nPieces);
 
     /// Set picked point
     void setPickedPoint(double *worldCoords);

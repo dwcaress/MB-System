@@ -1,5 +1,7 @@
 #include <unistd.h>
 #include <climits>
+#include <array>
+#include <vector>
 #include <vtk/vtkProperty.h>
 #include <vtk/vtkTextProperty.h>
 #include <vtk/vtkErrorCode.h>
@@ -459,3 +461,108 @@ void TopoDataItem::setPickedPoint(double *worldCoords) {
 TopoDataReader *TopoDataItem::getGridReader() {
   return pipeline_->topoReader_;
 }
+
+
+QList<QVector2D> TopoDataItem::getZProfile(int row1, int col1,
+					   int row2,  int col2,
+					   int nPieces) {
+
+
+  auto *profile = new std::vector<std::array<double, 2>>;
+
+  qDebug() << "TopoDataItem::getZProfile() TEST TEST TEST row/col values";
+  row1 = col1 = 0;
+
+  row2 = pipeline_->topoReader_->topoData()->nRows();
+  col2 = pipeline_->topoReader_->topoData()->nColumns();
+  
+  bool ok = pipeline_->topoReader_->topoData()->getElevProfile(row1, col1,
+							       row2 - 1,
+							       col2 - 1,
+							       nPieces,
+							       profile);
+  QList<QVector2D> qProfile;
+  
+  if (!ok) {
+    // Return 0-length profile
+    return qProfile;
+  }
+
+  // Print profile
+  for (int i = 0; i < profile->size(); i++) {
+    std::array<double, 2> point = profile->at(i);
+    qDebug() << "distance: " << point[0] << ", z: " << point[1];
+  }
+
+  // Transfer std::vector profile data to QList of QVector2D objects
+  QVector2D qPoint;  
+  for (int i = 0; i < profile->size(); i++) {
+    std::array<double, 2> point = profile->at(i);
+    qPoint.setX((float )point[0]);
+    qPoint.setY((float )point[1]);
+    qProfile.append(qPoint);
+  }
+
+  // print out list values
+  qDebug() << "getZProfile() output:";
+  for (int i = 0; i < qProfile.size(); i++) {
+    const QVector2D p = qProfile.at(i);
+    qDebug() << "p.x(): " << p.x() << ", p.y(): " << p.y();
+  }
+
+  delete profile;
+  
+  return qProfile;
+}
+
+
+QList<QVector2D> TopoDataItem::runTest2(void) {
+  // Get elevation profile
+  int nRows = pipeline_->topoReader_->topoData()->nRows();
+  int nCols = pipeline_->topoReader_->topoData()->nColumns();
+
+  qDebug() << "nRows: " << nRows << ", nCols: " << nCols;
+
+  // Vector holds elevation profile
+  auto *profile = new std::vector<std::array<double, 2>>;
+
+  qDebug() << "runTest(): get elevation profile";
+  int nPieces = 10;
+  bool ok = pipeline_->topoReader_->topoData()->getElevProfile(0, 0,
+							       nRows-1,
+							       nCols-1,
+							       nPieces,
+							       profile);
+  QList<QVector2D> qProfile;
+  
+  if (!ok) {
+    return qProfile;
+  }
+
+  // Print profile
+  for (int i = 0; i < profile->size(); i++) {
+    std::array<double, 2> point = profile->at(i);
+    qDebug() << "distance: " << point[0] << ", z: " << point[1];
+  }
+
+  // Transfer std::vector profile data to QList of QVector2D objects
+  QVector2D qPoint;  
+  for (int i = 0; i < profile->size(); i++) {
+    std::array<double, 2> point = profile->at(i);
+    qPoint.setX((float )point[0]);
+    qPoint.setY((float )point[1]);
+    qProfile.append(qPoint);
+  }
+
+  // print out list values
+  qDebug() << "getZProfile() output:";
+  for (int i = 0; i < qProfile.size(); i++) {
+    const QVector2D p = qProfile.at(i);
+    qDebug() << "p.x(): " << p.x() << ", p.y(): " << p.y();
+  }
+
+  delete profile;
+  
+  return qProfile;
+}
+
