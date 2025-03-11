@@ -4,6 +4,8 @@ import QtQuick.Controls 2.9
 import QtQuick.Window 2.2
 import QtQuick.Layouts 1.14
 import QtQuick.Dialogs
+import QtGraphs 6.8   // "is not installed"
+import "ui-components"
 
 import VTK 9.3
 import SharedConstants 1.1
@@ -21,6 +23,12 @@ Window {
   // Short-hand reference to supported color maps
   property variant cmaps: constants.cmaps
 
+  // Store x-y value
+  property vector2d point
+
+  // Bathymetry profile
+  property list<vector2d> profile
+
   ActionGroup {
     id: colorActions
     exclusive: true
@@ -37,7 +45,7 @@ Window {
      Menu {
        title: qsTr('&File')
 
-       Action { text: qsTr('Open grid...') ;
+       Action { text: qsTr('Open grid or swath...') ;
                 onTriggered: {console.log('show file dialog')
                 gridfileDialog.open()}
        }
@@ -124,9 +132,36 @@ Window {
        // Profile
        Action {
           text: qsTr('&Profile');
-	  onTriggered: { console.log('show profile') }
+	  onTriggered: { console.log('show profile'); topoProfile.show() }
 	 }	 
        
+     }
+
+     Menu {
+       title: 'Mouse'
+	 Action {
+	   text: qsTr('&Pan and zoom'); checkable: true;
+	   ActionGroup.group: exclusiveActions
+	   onTriggered: { }	   
+	 }
+	 Action {
+	   text: qsTr('&Rotate model'); checkable: true;
+	   ActionGroup.group: exclusiveActions
+	   onTriggered: { }	   
+	 }
+
+	 Action {
+	   text: qsTr('&Rotate model'); checkable: true;
+	   ActionGroup.group: exclusiveActions
+	   onTriggered: { }	   
+	 }	 
+
+	 Action {
+	   text: qsTr('&Lighting'); checkable: true;
+	   ActionGroup.group: exclusiveActions
+	   onTriggered: { }	   
+	 }	 
+
      }
   }
 
@@ -136,6 +171,17 @@ Window {
   
   Button {
     text: qsTr('Push me!')
+    onPressed: {
+    var dummy = 0;
+    var myProfile = topoDataItem.getElevProfile(dummy, dummy, dummy, dummy, 20);
+    console.log('profile length: ', myProfile.length)
+
+    for (var i = 0; i < myProfile.length; i++) {
+      console.log('x: ', myProfile[i].x, ' y: ', myProfile[i].y);
+    }
+
+    }
+    /// onPressed: {topoDataItem.getZProfile(0, 0, 300, 300, 10, profile)}    
   }
   
   TopoDataItem {
@@ -171,4 +217,9 @@ Window {
         onAccepted: Qt.quit()
     }
 
+
+    TopoProfileWindow {
+      id: topoProfile
+      visible: false
+    }
 }
