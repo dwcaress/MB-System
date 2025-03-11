@@ -24,8 +24,9 @@
 
 find_package(
   Qt6
-  COMPONENTS Gui Quick
+  COMPONENTS Gui Quick Graphs
   REQUIRED)
+  
 find_package(GMT REQUIRED)
 find_package(VTK 9.3 REQUIRED)
 message("Found VTK_VERSION ${VTK_VERSION}")
@@ -83,7 +84,7 @@ target_include_directories(MBGui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 				 )
 target_link_libraries(
   MBGui
-  PRIVATE Qt6::Core Qt6::Quick mbio
+  PRIVATE Qt6::Core Qt6::Quick Qt6::Graphs mbio
   PUBLIC mbeditvizlib
   PUBLIC VTK::CommonColor
   	 VTK::CommonSystem
