@@ -4,7 +4,7 @@ import QtQuick.Controls 2.9
 import QtQuick.Window 2.2
 import QtQuick.Layouts 1.14
 import QtQuick.Dialogs
-import QtGraphs 6.8   // "is not installed"
+import QtGraphs 6.8   
 import "ui-components"
 
 import VTK 9.3
@@ -12,188 +12,224 @@ import SharedConstants 1.1
 
 
 Window {
-  width: 800
-  height: 800
+    width: 800
+    height: 800
 
-  // Declare instance of SharedConstants
-  SharedConstants {
-    id: constants
-  }
+    id: mainWindow
 
-  // Short-hand reference to supported color maps
-  property variant cmaps: constants.cmaps
+    // Declare instance of SharedConstants
+    SharedConstants {
+        id: constants
+    }
 
-  // Store x-y value
-  property vector2d point
+    // Short-hand reference to supported color maps
+    property variant cmaps: constants.cmaps
 
-  // Bathymetry profile
-  property list<vector2d> profile
+    /// TEST TEST TEST
+    property int mainTestInt: 77
+    property string mainTestString: 'hello sailor!'
 
-  ActionGroup {
-    id: colorActions
-    exclusive: true
-  }
+    // Bathymetry profile
+    property list<vector2d> myProfile
 
-  ActionGroup {
-      id: exclusiveActions
-      exclusive: true
-  }
+    onMyProfileChanged: {
+        console.log('Hey, myProfile changed to: ', myProfile)
+        mainWindow.profileSig(999, 'profileSig()')
+    }
+
+    Component.onCompleted: {
+    }
+
+    ActionGroup {
+        id: colorActions
+        exclusive: true
+    }
+
+    ActionGroup {
+        id: exclusiveActions
+        exclusive: true
+    }
     
-  MenuBar {
-     id: menuBar
-     
-     Menu {
-       title: qsTr('&File')
+    MenuBar {
+        id: menuBar
 
-       Action { text: qsTr('Open grid or swath...') ;
+        Menu {
+            title: qsTr('&File')
+
+            Action { text: qsTr('Open grid or swath...') ;
                 onTriggered: {console.log('show file dialog')
-                gridfileDialog.open()}
-       }
-       Action {
-         text: qsTr('Exit')
-	 onTriggered: quitDialog.open()
-       }
-     }
+                    gridfileDialog.open()}
+            }
+            Action {
+                text: qsTr('Exit')
+                onTriggered: quitDialog.open()
+            }
+        }
 
-     Menu {
-       title: 'View'
+        Menu {
+            title: 'View'
 
-       Action {
-         text: qsTr('Preferences')
-       }
+            Action {
+                text: qsTr('Preferences')
+            }
 
-       Menu {
-         title: qsTr('Overlays')
-	 Action {
-	   text: qsTr('&Axes'); checkable: true;
-	   onTriggered: {topoDataItem.showAxes(checked)}
-	 }
-       }
+            Menu {
+                title: qsTr('Overlays')
+                Action {
+                    text: qsTr('&Axes'); checkable: true;
+                    onTriggered: {topoDataItem.showAxes(checked)}
+                }
+            }
 
-       Menu {
-         title: qsTr('Displayed surface')
-	 
-	 Action {
-	   text: qsTr('&Topography'); checkable: true;
-	   ActionGroup.group: exclusiveActions
-	   onTriggered: { topoDataItem.setDisplayedSurface(TopoDataItem.Elevation) }	   
-	 }
-	 Action {
-	   text: qsTr('&Slope'); checkable: true;
-	   ActionGroup.group: exclusiveActions
-	   onTriggered: { topoDataItem.setDisplayedSurface(TopoDataItem.Gradient) }
-	 }
-       }
+            Menu {
+                title: qsTr('Displayed surface')
 
-       Menu {
-         title: qsTr('&Color map')
-	 id: colormapMenu
+                Action {
+                    text: qsTr('&Topography'); checkable: true;
+                    ActionGroup.group: exclusiveActions
+                    onTriggered: { topoDataItem.setDisplayedSurface(TopoDataItem.Elevation) }
+                }
+                Action {
+                    text: qsTr('&Slope'); checkable: true;
+                    ActionGroup.group: exclusiveActions
+                    onTriggered: { topoDataItem.setDisplayedSurface(TopoDataItem.Gradient) }
+                }
+            }
 
-         // Add actions when menu is complete
-	 Component.onCompleted: {
-           // Insert menu items here, with number of items and
-           // item names as specified in the cmaps[] array that was
-           // retrieved from C++
-           for (var i = 0; i < cmaps.length; i++)  {
-             console.log('colormap: ', cmaps[i]);
-             // Build QML string that specifies menu Action to insert
-             var qmlStr = 'import QtQuick.Controls 2.3; ' +
-                     'Action {id: myAction; checkable: true; ';
+            Menu {
+                title: qsTr('&Color map')
+                id: colormapMenu
 
-             // First item is checked
-             if (i == 0) { qmlStr += 'checked: true; '; }
+                // Add actions when menu is complete
+                Component.onCompleted: {
+                    // Insert menu items here, with number of items and
+                    // item names as specified in the cmaps[] array that was
+                    // retrieved from C++
+                    for (var i = 0; i < cmaps.length; i++)  {
+                        console.log('colormap: ', cmaps[i]);
+                        // Build QML string that specifies menu Action to insert
+                        var qmlStr = 'import QtQuick.Controls 2.3; ' +
+                                'Action {id: myAction; checkable: true; ';
 
-             qmlStr += 'ActionGroup.group: colorActions; ';
-             qmlStr += 'text: \'' + cmaps[i] + '\'; ';
+                        // First item is checked
+                        if (i == 0) { qmlStr += 'checked: true; '; }
 
-             qmlStr += 'onTriggered: { console.log(\'selected ' +
-	                               cmaps[i] + '\');' +
-				       'topoDataItem.setColormap(\'' +
-				       cmaps[i] +
-				       '\')' +
-				       '}'
-             qmlStr += '} '
+                        qmlStr += 'ActionGroup.group: colorActions; ';
+                        qmlStr += 'text: \'' + cmaps[i] + '\'; ';
 
-	     console.log('qmlStr: ', qmlStr)
-             // Create the menu Action
-             var obj =
-                 Qt.createQmlObject(qmlStr,
-                                    colormapMenu,
-                                   'dynamicAction');
+                        qmlStr += 'onTriggered: { console.log(\'selected ' +
+                                cmaps[i] + '\');' +
+                                'topoDataItem.setColormap(\'' +
+                                cmaps[i] +
+                                '\')' +
+                                '}'
+                        qmlStr += '} '
 
-              // Add created action to menu
-	      colormapMenu.addAction(obj)
-           }
+                        console.log('qmlStr: ', qmlStr)
+                        // Create the menu Action
+                        var obj =
+                                Qt.createQmlObject(qmlStr,
+                                                   colormapMenu,
+                                                   'dynamicAction');
 
-	 }
-	 
-       }
+                        // Add created action to menu
+                        colormapMenu.addAction(obj)
+                    }
 
-       // Profile
-       Action {
-          text: qsTr('&Profile');
-	  onTriggered: { console.log('show profile'); topoProfile.show() }
-	 }	 
-       
-     }
+                }
 
-     Menu {
-       title: 'Mouse'
-	 Action {
-	   text: qsTr('&Pan and zoom'); checkable: true;
-	   ActionGroup.group: exclusiveActions
-	   onTriggered: { }	   
-	 }
-	 Action {
-	   text: qsTr('&Rotate model'); checkable: true;
-	   ActionGroup.group: exclusiveActions
-	   onTriggered: { }	   
-	 }
+            }
 
-	 Action {
-	   text: qsTr('&Rotate model'); checkable: true;
-	   ActionGroup.group: exclusiveActions
-	   onTriggered: { }	   
-	 }	 
+            // Profile
+            Action {
+                text: qsTr('&Profile');
+                onTriggered: { console.log('show profile'); topoProfileWindow.show() }
+            }
 
-	 Action {
-	   text: qsTr('&Lighting'); checkable: true;
-	   ActionGroup.group: exclusiveActions
-	   onTriggered: { }	   
-	 }	 
+        }
 
-     }
-  }
+        Menu {
+            title: 'Mouse'
+            Action {
+                text: qsTr('&Pan and zoom'); checkable: true;
+                ActionGroup.group: exclusiveActions
+                onTriggered: { }
+            }
+            Action {
+                text: qsTr('&Rotate model'); checkable: true;
+                ActionGroup.group: exclusiveActions
+                onTriggered: { }
+            }
 
-  ColumnLayout {
+            Action {
+                text: qsTr('&Rotate model'); checkable: true;
+                ActionGroup.group: exclusiveActions
+                onTriggered: { }
+            }
 
-  anchors.top: menuBar.bottom
-  
-  Button {
-    text: qsTr('Push me!')
-    onPressed: {
-    var dummy = 0;
-    var myProfile = topoDataItem.getElevProfile(dummy, dummy, dummy, dummy, 20);
-    console.log('profile length: ', myProfile.length)
+            Action {
+                text: qsTr('&Lighting'); checkable: true;
+                ActionGroup.group: exclusiveActions
+                onTriggered: { }
+            }
 
-    for (var i = 0; i < myProfile.length; i++) {
-      console.log('x: ', myProfile[i].x, ' y: ', myProfile[i].y);
+        }
     }
 
+    ColumnLayout {
+
+        anchors.top: menuBar.bottom
+
+        Button {
+            text: qsTr('Push me!')
+            onPressed: {
+                var dummy = 0;
+                myProfile = topoDataItem.getElevProfile(dummy, dummy, dummy, dummy, 500);
+                console.log('profile length: ', myProfile.length);
+
+                var xmin = 10000;
+                var xmax = -xmin;
+                var ymin = 100000;
+                var ymax = -ymin;
+                for (var i = 0; i < myProfile.length; i++) {
+                    console.log('x: ', myProfile[i].x, ' y: ', myProfile[i].y);
+                    if (myProfile[i].x < xmin) { xmin = myProfile[i].x }
+                    if (myProfile[i].x > xmax) { xmax = myProfile[i].x }
+                    if (myProfile[i].y < ymin) { ymin = myProfile[i].y }
+                    if (myProfile[i].y > ymax) { ymax = myProfile[i].y }
+                }
+                console.log('xmin: ', xmin, '  xmax: ', xmax);
+                console.log('ymin: ', ymin, '  ymax: ', ymax);
+
+                console.log('*** topoTestInt: ', profileGraph.topoTestInt)
+
+                // Set graph axes ranges
+                profileGraph.xAxis.min = xmin
+                profileGraph.xAxis.max = xmax
+                profileGraph.yAxis.min = ymin
+                profileGraph.yAxis.max = ymax
+
+                profileGraph.xyData.clear()
+
+                // Populate graph line-series points
+                for (var i = 0; i < myProfile.length; i++) {
+                    profileGraph.xyData.append(myProfile[i].x, myProfile[i].y);
+                }
+
+            }
+        }
+
+        TopoDataItem {
+            objectName: 'topoDataItem'
+            id: topoDataItem
+            x: 200
+            y: 200
+            width: 600
+            height: 600
+            focus: true
+        }
+
     }
-    /// onPressed: {topoDataItem.getZProfile(0, 0, 300, 300, 10, profile)}    
-  }
-  
-  TopoDataItem {
-    objectName: 'topoDataItem'
-    id: topoDataItem    
-    x: 200
-    y: 200
-    width: 600
-    height: 600
-    focus: true
-  }
-  }
 
 
     FileDialog {
@@ -208,7 +244,7 @@ Window {
     }
 
 
-   MessageDialog {
+    MessageDialog {
         id: quitDialog
         title: "Quit?"
         text: "Quit application?"
@@ -217,9 +253,13 @@ Window {
         onAccepted: Qt.quit()
     }
 
-
-    TopoProfileWindow {
-      id: topoProfile
-      visible: false
+    Window {
+        id: topoProfileWindow
+        visible: false
+        TopoProfileGraph {
+            id: profileGraph
+        }
     }
+
 }
+
