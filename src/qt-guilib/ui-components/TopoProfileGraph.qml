@@ -1,0 +1,103 @@
+// TopoProfileGraph.qml
+import QtQuick 2.9
+import QtQuick.Window 2.3
+import QtQuick.Controls 2.3
+import QtQuick.Layouts 1.3
+import QtGraphs
+
+/// Displays 2d vertical 'slice' between specified endpoints
+/// width: 640
+  ///     height: 480
+/// title: qsTr("Topo Profile")
+
+GraphsView {
+    id: graphsView
+    /// TEST TEST TEST
+    property int topoTestInt: 999
+    property alias xAxis: graphsView.axisX
+    property alias yAxis: graphsView.axisY
+    property alias xyData: lineSeries
+
+    Component.onCompleted: {
+        console.log('*** mainTestInt: ', mainTestInt);
+        console.log('*** mainTestString ', mainTestString);
+    }
+
+    anchors.fill: parent
+    anchors.margins: 16
+    theme: GraphsTheme {
+        readonly property color c1: "#DBEB00"
+        readonly property color c2: "#373F26"
+        readonly property color c3: Qt.lighter(c2, 1.5)
+        colorScheme: GraphsTheme.ColorScheme.Dark
+        seriesColors: ["#2CDE85", "#DBEB00"]
+        grid.mainColor: c3
+        grid.subColor: c2
+        axisX.mainColor: c3
+        axisY.mainColor: c3
+        axisX.subColor: c2
+        axisY.subColor: c2
+        axisX.labelTextColor: c1
+        axisY.labelTextColor: c1
+    }
+    axisX: ValueAxis {
+        max: 5
+        labelDecimals: 1
+    }
+
+    axisY: ValueAxis {
+        max: 10
+        labelDecimals: 1
+    }
+
+    //! [linemarker]
+    component Marker: Rectangle {
+        width: 16
+        height: 16
+        color: "#ffffff"
+        radius: width * 0.5
+        border.width: 4
+        border.color: "#000000"
+    }
+
+    //! [linemarker]
+    LineSeries {
+        id: lineSeries
+        width: 4
+        pointDelegate: Marker {}
+        /* ***
+        XYPoint {
+            x: 0
+            y: 0
+        }
+        XYPoint {
+            x: 1
+            y: 2.1
+        }
+        XYPoint {
+            x: 2
+            y: 3.3
+        }
+        XYPoint {
+            x: 3
+            y: 2.1
+        }
+        XYPoint {
+            x: 4
+            y: 4.9
+        }
+        XYPoint {
+            x: 5
+            y: 3.0
+        }
+        *** */
+    }
+}
+
+
+
+/*##^## Designer {
+    D{i:3;anchors_height:400;anchors_width:400}D{i:11;anchors_height:100;anchors_width:100}
+}
+ ##^##*/
+
