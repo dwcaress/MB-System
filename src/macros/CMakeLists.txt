@@ -40,6 +40,7 @@ set(scripts
     mbm_multicopy
     mbm_multidatalist
     mbm_multiprocess
+    mbm_phins2fnv
     mbm_plot
     mbm_rollerror
     mbm_route2mission
