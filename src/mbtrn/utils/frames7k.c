@@ -413,7 +413,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                         cfg->file_paths = mlist_new();
                         mlist_autofree(cfg->file_paths, free);
                     }
-                    mlist_add(cfg->file_paths, optarg);
+                    mlist_add(cfg->file_paths, strdup(optarg));
                     cfg->mode = IMODE_FILE;
                 }
 
