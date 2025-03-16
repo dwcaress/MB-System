@@ -37,8 +37,8 @@
 #include <stdint.h>
 
 /* Define version and date for this release */
-#define MB_VERSION "5.8.2beta20"
-#define MB_VERSION_DATE "22 February 2025"
+#define MB_VERSION "5.8.2beta21"
+#define MB_VERSION_DATE "15 March 2025"
 
 /* CMake supports current OS's and so there is only one form of RPC and XDR and no mb_config.h file */
 #ifdef CMAKE_BUILD_SYSTEM
@@ -229,6 +229,10 @@ typedef enum {
 
 /* multiply this by radians to get degrees */
 #define RTD 57.2957795130823230000
+
+/* declare Golden Mean ratios */
+#define GOLDEN_MEAN_SMALL 0.38197
+#define GOLDEN_MEAN_LARGE 0.61803
 
 /* time conversions */
 #define MB_SECINYEAR 31536000.0
