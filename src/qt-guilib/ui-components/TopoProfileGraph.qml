@@ -5,17 +5,17 @@ import QtQuick.Controls 2.3
 import QtQuick.Layouts 1.3
 import QtGraphs
 
-/// Displays 2d vertical 'slice' between specified endpoints
-/// width: 640
-  ///     height: 480
-/// title: qsTr("Topo Profile")
-
+/** Displays 2d vertical 'slice' between specified endpoints */
 GraphsView {
     id: graphsView
     /// TEST TEST TEST
     property int topoTestInt: 999
+
+    /// type:ValueAxis profile x-axis
     property alias xAxis: graphsView.axisX
+    /// type:ValueAxis profile y-axis
     property alias yAxis: graphsView.axisY
+    /// type:LineSeries profile data
     property alias xyData: lineSeries
 
     Component.onCompleted: {
