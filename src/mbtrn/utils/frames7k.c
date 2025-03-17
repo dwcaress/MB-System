@@ -634,7 +634,6 @@ static int s_app_main (app_cfg_t *cfg)
         retval=0;
         int read_retries = 5;
         long int seq_number = 0;
-        bool auto_str = false;
 
         while ( (forever || (count < cfg->cycles)) && !g_stop_flag) {
             int istat=0;
@@ -654,7 +653,10 @@ static int s_app_main (app_cfg_t *cfg)
                 r7k_nf_t *nf = (r7k_nf_t *)(frame_buf);
                 r7k_drf_t *drf = (r7k_drf_t *)(frame_buf+R7K_NF_BYTES);
 
+                bool auto_str = false;
                 if(cfg->mode == IMODE_FILE && !cfg->net_frames) {
+                    // file does not contain netframes
+                    // auto-generate netframe info
                     memset((void *)frame_buf,0,R7K_NF_BYTES);
 
                     nf->protocol_version = R7K_NF_PROTO_VER;
@@ -665,10 +667,7 @@ static int s_app_main (app_cfg_t *cfg)
                     nf->total_size  = drf->size;
                     nf->total_records  = 1;
                     auto_str = true;
-                } else {
-                    auto_str = false;
                 }
-
 
                 MX_LPRINT(FRAMES7K, 2, "r7kr_read_frame cycle[%d/%d] ret[%d] lost[%"PRIu32"]\n", count, cfg->cycles, istat, lost_bytes);
 
