@@ -634,6 +634,7 @@ static int s_app_main (app_cfg_t *cfg)
         retval=0;
         int read_retries = 5;
         long int seq_number = 0;
+        bool auto_str = false;
 
         while ( (forever || (count < cfg->cycles)) && !g_stop_flag) {
             int istat=0;
@@ -663,6 +664,9 @@ static int s_app_main (app_cfg_t *cfg)
                     nf->packet_size = R7K_NF_BYTES + drf->size;
                     nf->total_size  = drf->size;
                     nf->total_records  = 1;
+                    auto_str = true;
+                } else {
+                    auto_str = false;
                 }
 
 
@@ -681,7 +685,7 @@ static int s_app_main (app_cfg_t *cfg)
                 // show contents
                 if (show_frame) {
 
-                    MX_MSG("NF:\n");
+                    MX_PRINT("NF%s:\n",(auto_str ? " [auto] " : ""));
                     r7k_nf_show(nf,false,5);
 
                     MX_MSG("DRF:\n");
