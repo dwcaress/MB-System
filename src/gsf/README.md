@@ -18,5 +18,5 @@ in the file [src/gsf/gsf_lib.pdf](gsf_lib.pdf).
 
 See:
 
-- https://www.leidos.com/products/ocean-marine
-- https://en.wikipedia.org/wiki/Generic_sensor_format
+- [https://www.leidos.com/products/ocean-marine](https://www.leidos.com/products/ocean-marine)
+- [https://en.wikipedia.org/wiki/Generic_sensor_format](https://en.wikipedia.org/wiki/Generic_sensor_format)
