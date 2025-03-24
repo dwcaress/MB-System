@@ -15,13 +15,8 @@ GraphsView {
     property alias xAxis: graphsView.axisX
     /// type:ValueAxis profile y-axis
     property alias yAxis: graphsView.axisY
-    /// type:LineSeries profile data
+    /// type:LineSeries profile x-y data
     property alias xyData: lineSeries
-
-    Component.onCompleted: {
-        console.log('*** mainTestInt: ', mainTestInt);
-        console.log('*** mainTestString ', mainTestString);
-    }
 
     anchors.fill: parent
     anchors.margins: 16
