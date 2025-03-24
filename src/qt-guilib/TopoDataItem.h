@@ -76,7 +76,7 @@ namespace mb_system {
     TopoDataItem();
 
     /// Get pointer to grid reader
-    mb_system::TopoDataReader *getGridReader();
+    mb_system::TopoDataReader *getDataReader();
     
     /// Initialize and connect VTK pipeline components, attach it to
     /// vtkRenderWindow, return latest pipeline object.
@@ -88,7 +88,7 @@ namespace mb_system {
 		       *renderWindow, vtkUserData userData) override;
 
     /// Load specified grid file
-    Q_INVOKABLE bool loadGridfile(QUrl file);
+    Q_INVOKABLE bool loadDatafile(QUrl file);
 
     /// Set color map
     Q_INVOKABLE bool setColormap(QString cmapName);    
@@ -130,15 +130,15 @@ namespace mb_system {
     void setPickedPoint(double *worldCoords);
 
     /// Set grid filename
-    void setGridFilename(char *filename) {
-      if (gridFilename_) {
-        free((void *)gridFilename_);
+    void setDataFilename(char *filename) {
+      if (dataFilename_) {
+        free((void *)dataFilename_);
       }
       if (filename) {
-	gridFilename_ = strdup(filename);
+	dataFilename_ = strdup(filename);
       }
       else {
-	gridFilename_ = strdup("");
+	dataFilename_ = strdup("");
       }
     }
 
@@ -167,8 +167,8 @@ namespace mb_system {
 			     const char *outputName);
 
     
-    /// Name of source grid file
-    char *gridFilename_;
+    /// Name of source data file
+    char *dataFilename_;
 
 
     /// Latest picked coordinates

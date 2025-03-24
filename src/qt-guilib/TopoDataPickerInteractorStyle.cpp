@@ -92,8 +92,8 @@ void TopoDataPickerInteractorStyle::OnLeftButtonUp() {
 
   // If dataset in geographic CRS, display picked point in geogaphic
   // CRS
-  const char *projString = item_->getGridReader()->fileCRS();
-  bool geographicCRS = item_->getGridReader()->geographicCRS();
+  const char *projString = item_->getDataReader()->fileCRS();
+  bool geographicCRS = item_->getDataReader()->geographicCRS();
   std::cout << "file CRS proj-string: " << projString << std::endl;
 
   int xyUnits;
@@ -112,7 +112,7 @@ void TopoDataPickerInteractorStyle::OnLeftButtonUp() {
 
   printf("xyUnits: %c\n", xyUnits);
   printf("degree symbol: %c\n", 0370);
-  PJ *transform = item_->getGridReader()->projFileToDisplay();
+  PJ *transform = item_->getDataReader()->projFileToDisplay();
 
   if (transform) {
     PJ_COORD utm = proj_coord(worldCoord[0], worldCoord[1], 0, 0);
@@ -128,7 +128,7 @@ void TopoDataPickerInteractorStyle::OnLeftButtonUp() {
   // Correct elevation for vertical exaggeration
   worldCoord[2] /=
     (item_->getVerticalExagg() *
-     item_->getGridReader()->zScaleLatLon());
+     item_->getDataReader()->zScaleLatLon());
   
   char buf[256];
   if (pointId != -1) {

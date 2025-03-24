@@ -17,7 +17,7 @@ vtkStandardNewMacro(TopoDataItem::Pipeline);
 
 
 TopoDataItem::TopoDataItem() {
-  gridFilename_ = strdup("");
+  dataFilename_ = strdup("");
   verticalExagg_ = 1.;
   showAxes_ = false;
   scheme_ = TopoColorMap::Haxby;
@@ -119,13 +119,13 @@ void TopoDataItem::setupAxes(vtkCubeAxesActor *axesActor,
 
 
 
-bool TopoDataItem::loadGridfile(QUrl fileUrl) {
+bool TopoDataItem::loadDatafile(QUrl fileUrl) {
 
   char *filename = strdup(fileUrl.toLocalFile().toLatin1().data());
   qDebug() << "loadGridfile " << filename;
 
   // Set name of grid file to access from pipeline
-  setGridFilename(filename);
+  setDataFilename(filename);
 
   pipeline_->firstRender_ = true;
   
@@ -158,20 +158,20 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   qDebug() << "assemblePipeline()";
   
   // Check that input file exists and is readable
-  if (access(gridFilename_, R_OK) == -1) {
-    qWarning() << "Can't access input file " << gridFilename_;
+  if (access(dataFilename_, R_OK) == -1) {
+    qWarning() << "Can't access input file " << dataFilename_;
     return;
   }
   
-  qDebug() << "set filename to " << gridFilename_;
-  pipeline->topoReader_->SetFileName(gridFilename_);
+  qDebug() << "set filename to " << dataFilename_;
+  pipeline->topoReader_->SetFileName(dataFilename_);
 
   unsigned long errorCode;
   if ((errorCode = pipeline->topoReader_->GetErrorCode()) != 0) {
     qWarning() << "grid reader error during SetFileName(): "
 	       << errorCode;
 
-    qWarning() << gridFilename_ << ": " <<
+    qWarning() << dataFilename_ << ": " <<
       vtkErrorCode::GetStringFromErrorCode(errorCode);
 
     return;
@@ -185,7 +185,7 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
 
   // Determine grid type
   TopoDataType gridType =
-    TopoDataReader::getDataType(gridFilename_);
+    TopoDataReader::getDataType(dataFilename_);
 
   pipeline->topoReader_->setDataType(gridType);
 
@@ -197,7 +197,7 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
     qWarning() << "grid reader error during Update(): "
 	       << errorCode;
     
-    qWarning() << gridFilename_ << ": " <<
+    qWarning() << dataFilename_ << ": " <<
       vtkErrorCode::GetStringFromErrorCode(errorCode);
     
     return;
@@ -458,7 +458,7 @@ void TopoDataItem::setPickedPoint(double *worldCoords) {
 }
 
 
-TopoDataReader *TopoDataItem::getGridReader() {
+TopoDataReader *TopoDataItem::getDataReader() {
   return pipeline_->topoReader_;
 }
 
