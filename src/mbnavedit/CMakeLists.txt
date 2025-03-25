@@ -29,10 +29,14 @@ find_package(Motif REQUIRED)
 
 add_library(mbnaveditLib mbnavedit_prog.c)
 target_include_directories(mbnaveditLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(mbnaveditLib PRIVATE mbaux mbxgr mbview
-                            ${MOTIF_LIBRARIES}
-                            ${X11_LIBRARIES}
-                            ${X11_Xt_LIB})
+
+
+##target_link_libraries(mbnaveditLib PRIVATE mbaux mbxgr mbview
+##                            ${MOTIF_LIBRARIES}
+##                            ${X11_LIBRARIES}
+##                            ${X11_Xt_LIB})
+
+target_link_libraries(mbnaveditLib PRIVATE mbaux)
 
 
 add_executable(mbnavedit mbnavedit.c mbnavedit_callbacks.c mbnavedit_creation.c
