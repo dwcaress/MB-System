@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
+#define MBNAVEDIT_DECLARE_GLOBALS
 #include "mbnavedit_prog.h"
 #include "mb_color.h"
 
