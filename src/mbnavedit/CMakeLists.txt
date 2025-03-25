@@ -34,11 +34,11 @@ target_link_libraries(mbnaveditLib PRIVATE mbaux)
 
 
 add_executable(mbnavedit mbnavedit.c mbnavedit_callbacks.c mbnavedit_creation.c
-                         mbnavedit_prog.c mbnavedit_util.c)
+                         mbnavedit_util.c)
 
 target_include_directories(mbnavedit PUBLIC ${CMAKE_SOURCE_DIR}/src/mbaux)
 
-target_link_libraries(mbnavedit PRIVATE mbaux mbxgr
+target_link_libraries(mbnavedit PRIVATE mbnaveditLib mbaux mbxgr
                             ${MOTIF_LIBRARIES}
 			    ${X11_LIBRARIES}
 			    ${X11_Xt_LIB})
