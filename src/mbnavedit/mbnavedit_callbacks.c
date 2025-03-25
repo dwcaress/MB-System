@@ -58,7 +58,6 @@
 #include <Xm/ToggleB.h>
 #include <Xm/Xm.h>
 
-#define MBNAVEDIT_DECLARE_GLOBALS
 #include "mb_define.h"
 #include "mb_io.h"
 #include "mb_process.h"
