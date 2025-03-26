@@ -25,7 +25,7 @@
 namespace mb_system {
 
   /* **
-     Manage VTK rendering of MB grid or swath file within a QtQuickVTKItem
+     Renders bathymetric data of MB grid or swath file, within a QtQuickVTKItem.
   */
   class TopoDataItem : public QQuickVTKItem {
     Q_OBJECT
@@ -53,7 +53,6 @@ namespace mb_system {
       vtkNew<vtkActor> surfaceActor_;
       vtkNew<vtkPolyDataMapper> surfaceMapper_;
       vtkNew<vtkRenderer> renderer_;
-      /// vtkNew<vtkGenericRenderWindowInteractor> windowInteractor_;
       vtkNew<QVTKInteractor> windowInteractor_;            
       vtkNew<mb_system::TopoDataPickerInteractorStyle> interactorStyle_;      
 
