@@ -653,7 +653,10 @@ static int s_app_main (app_cfg_t *cfg)
                 r7k_nf_t *nf = (r7k_nf_t *)(frame_buf);
                 r7k_drf_t *drf = (r7k_drf_t *)(frame_buf+R7K_NF_BYTES);
 
+                bool auto_str = false;
                 if(cfg->mode == IMODE_FILE && !cfg->net_frames) {
+                    // file does not contain netframes
+                    // auto-generate netframe info
                     memset((void *)frame_buf,0,R7K_NF_BYTES);
 
                     nf->protocol_version = R7K_NF_PROTO_VER;
@@ -663,8 +666,8 @@ static int s_app_main (app_cfg_t *cfg)
                     nf->packet_size = R7K_NF_BYTES + drf->size;
                     nf->total_size  = drf->size;
                     nf->total_records  = 1;
+                    auto_str = true;
                 }
-
 
                 MX_LPRINT(FRAMES7K, 2, "r7kr_read_frame cycle[%d/%d] ret[%d] lost[%"PRIu32"]\n", count, cfg->cycles, istat, lost_bytes);
 
@@ -681,7 +684,7 @@ static int s_app_main (app_cfg_t *cfg)
                 // show contents
                 if (show_frame) {
 
-                    MX_MSG("NF:\n");
+                    MX_PRINT("NF%s:\n",(auto_str ? " [auto] " : ""));
                     r7k_nf_show(nf,false,5);
 
                     MX_MSG("DRF:\n");
