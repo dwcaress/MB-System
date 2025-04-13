@@ -101,7 +101,7 @@ public:
     }OFlags;
 
    TrnLogConfig()
-    : mDebug(0), mVerbose(false), mHost("localhost"), mTrnCfg(), mPort(TRN_SERVER_PORT_DFL), mServer(false), mTrnInCsvEn(false), mTrnOutCsvEn(false), mTrnInCsvPath(), mTrnOutCsvPath(), mTrnSensor(TRN_SENSOR_MB), mOFlags(),  mBeams(0), mStep(false), mSwath(0.)
+    : mDebug(0), mVerbose(false), mHost("localhost"), mTrnCfg(), mPort(TRN_SERVER_PORT_DFL), mServer(false), mTrnInCsvEn(false), mTrnOutCsvEn(false), mTrnInCsvPath(), mTrnOutCsvPath(), mTrnSensor(0), mOFlags(),  mBeams(0), mStep(false), mSwath(0.)
     {
 
     }
@@ -397,7 +397,7 @@ public:
                     {
                         try{
 
-                            mTrn->measUpdate(mt, mConfig.trn_sensor());
+                            mTrn->measUpdate(mt, mt->dataType);
                             this->stats().mMeasUpdate++;
 
                             if(mTrn->lastMeasSuccessful()){
@@ -703,13 +703,18 @@ protected:
         ss += mmse.covariance[5] * mmse.covariance[5];
         os << sqrt(ss) << "\n";
 
-        os << "s[t, x, y, z]        ";
+        os << "s[t, x, y, z, m]     ";
         os << std::setprecision(3);
         os << mmse.time << ", ";
         os << std::setprecision(2);
         os << sqrt(mmse.covariance[0]) << ", ";
         os << sqrt(mmse.covariance[2]) << ", ";
-        os << sqrt(mmse.covariance[5]) << "\n";
+        os << sqrt(mmse.covariance[5]) << ", ";
+        double sdmag[3] = {sqrt(mmse.covariance[0]), sqrt(mmse.covariance[2]), sqrt(mmse.covariance[5])};
+        ss = sdmag[0] * sdmag[0];
+        ss += sdmag[1] * sdmag[1];
+        ss += sdmag[2] * sdmag[2];
+        os << sqrt(ss) << "\n";
 
         os << "POS[t, tm, x, y, z]  ";
         os << std::fixed << std::setprecision(3);
@@ -787,7 +792,7 @@ protected:
         os << std::setw(wkey) <<  "theta" << std::setw(wval) << mt.theta << "\n";
         os << std::setw(wkey) <<  "psi" << std::setw(wval) << mt.psi << "\n";
         os << std::setw(wkey) <<  "num_meas" << std::setw(wval) << mt.numMeas << "\n";
-        os << std::setw(wkey) <<  "beams" << std::setw(wval) << "[stat, range]" << "\n";
+        os << std::setw(wkey) <<  "beams" << std::setw(wval) << "[stat, range, across, along, down]" << "\n";
         os << std::setprecision(2) ;
         for(int i=0; i<mt.numMeas; i++){
             os << std::setw(wkey-4) <<  "[" << std::setw(3) << mt.beamNums[i] << "]";
@@ -1142,10 +1147,17 @@ protected:
                 int src_beams = measin->num_meas;
                 int dest_beams = ((mConfig.beams() > 0) ? mConfig.beams() : src_beams);
 
-                measT *dest = new measT(dest_beams, measin->data_type);
+                // generate measT using specified sensor type
+                // may be different from input type,
+                // e.g. run IDT as multibeam
+                // or use input type if unspecified
+                int sensor_type = (mConfig.trn_sensor() > 0 ? mConfig.trn_sensor() : measin->data_type);
+                measT *dest = new measT(dest_beams, sensor_type);
+
                 if(NULL != dest){
                     dest->time = measin->time;
-                    dest->dataType = measin->data_type;
+                    // data type set by CTOR
+                    // dest->dataType = measin->data_type;
                     dest->x = measin->x;
                     dest->y = measin->y;
                     dest->z = measin->z;
