@@ -136,7 +136,7 @@ declare -A QP_KEY_SIZE
 declare -A QP_KEY_MAX_COL
 declare -A QP_POINTTYPE
 declare -A QP_POINTSIZE
-declare -A QP_POINTCOLOT
+declare -A QP_POINTCOLOR
 declare -A QP_INC_POINTTYPE
 declare -A QP_INC_POINTCOLOR
 declare -A QP_LINETYPE

@@ -69,6 +69,7 @@ export QU_ORANGE="\'#d95319\'" # orange
 export QU_LTORANGE="\'#c97339\'" # light-orange
 export QU_YELLOW="\'#edb120\'" # yellow
 export QU_PURPLE="\'#7e2f8e\'" # purple
+export QU_MAGENTA="\'#ff00ff\'" # magenta
 export QU_GREEN="\'#77ac30\'"  # green
 export QU_LTBLUE="\'#4dbeee\'" # light-blue
 export QU_RED="\'#a2142f\'"    # red
