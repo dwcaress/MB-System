@@ -1509,8 +1509,8 @@ logname(NULL)
     particlename = STRDUPNULL(partfile);
 
     if (!(map && cfg && logdir && partfile)){
-        fprintf(stderr,"%s: WARNING - converted NULL parameters to empty string\n",
-                __func__);
+        fprintf(stderr,"%s: WARNING - converted NULL parameters to empty string map %p cfg %p logdir %p partfile %p\n",
+                __func__, map, cfg, logdir, partfile);
     }
 }
 
