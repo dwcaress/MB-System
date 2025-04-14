@@ -66,14 +66,14 @@ _GNU_SOURCE
 #TRN_NORAND
 WITH_TESTS
 WITH_MMDEBUG
-DWITH_MST_MSTATS
+WITH_MST_MSTATS
 MST_STATS_EN
 #WITH_ALT_DELTAT_VALIDATION
-#WITH_TNAVPF_CEP_CORRECTION
+#WITH_CEP_2022
 WITH_TRNLOG
 WITH_TRNLOG_EST_OUT
 )
-
+#
 #------------------------------------------------------------------------------
 #
 # build libgeolib (gctp)
@@ -338,6 +338,187 @@ target_link_libraries(trncli PRIVATE newmat geolib trnw qnx mb1 tnav NetCDF::Net
 #
 #------------------------------------------------------------------------------
 #
+# build trn-server (stand-alone TRN server app)
+
+# specify build target
+add_executable(trn-server
+       utils/trn_server.cpp
+)
+target_include_directories(trn-server PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnframe
+                                          ${LibPROJ_INCLUDE_DIRS}
+                                          ${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
+                                          ${CMAKE_SOURCE_DIR}/src/mbtrnav/newmat
+                                          ${CMAKE_SOURCE_DIR}/src/mbtrnav/qnx-utils)
+target_link_libraries(trn-server PRIVATE mbtrnframe tnav newmat qnx geolib LibPROJ::LibPROJ NetCDF::NetCDF)
+#
+#------------------------------------------------------------------------------
+#
+# build test-trn-log (octree summary)
+
+# specify build target
+add_executable(trnlog-test
+       utils/test_trn_log.cpp
+)
+target_include_directories(trnlog-test PRIVATE
+${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw ${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
+${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
+${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
+)
+target_link_libraries(trnlog-test PRIVATE tnav newmat qnx geolib LibPROJ::LibPROJ NetCDF::NetCDF)
+#
+#------------------------------------------------------------------------------
+#
+# build octree2patches
+
+# specify build target
+add_executable( octree2patches
+       utils/octree2Patches.cpp
+)
+target_include_directories(octree2patches PRIVATE
+${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw ${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
+${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
+${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
+)
+target_link_libraries(octree2patches PRIVATE tnav newmat qnx geolib LibPROJ::LibPROJ NetCDF::NetCDF)
+#
+#------------------------------------------------------------------------------
+#
+# build grd-octree-maker
+
+# specify build target
+add_executable( grd-octree-maker
+       utils/grdOctreeMaker.cpp
+)
+target_include_directories(grd-octree-maker PRIVATE
+${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw ${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
+${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
+${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
+)
+target_link_libraries(grd-octree-maker PRIVATE tnav newmat qnx geolib LibPROJ::LibPROJ NetCDF::NetCDF)
+#
+#------------------------------------------------------------------------------
+#
+# build csv-octree-maker
+
+# specify build target
+add_executable( csv-octree-maker
+       utils/csvOctreeMaker.cpp
+)
+target_include_directories(csv-octree-maker PRIVATE
+${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw ${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
+${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
+${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
+)
+target_link_libraries(csv-octree-maker PRIVATE tnav newmat qnx geolib LibPROJ::LibPROJ NetCDF::NetCDF)
+#
+#------------------------------------------------------------------------------
+#
+# build transoct
+
+# specify build target
+add_executable( transoct
+       utils/translateOctree.cpp
+)
+target_include_directories(transoct PRIVATE
+${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw ${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
+${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
+${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
+)
+target_link_libraries(transoct PRIVATE tnav newmat qnx geolib LibPROJ::LibPROJ NetCDF::NetCDF)
+#
+#------------------------------------------------------------------------------
+#
+# build tile-test
+
+# specify build target
+add_executable( tile-test
+       utils/tile_test.cpp
+)
+target_include_directories(tile-test PRIVATE
+${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw ${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
+${CMAKE_SOURCE_DIR}/src/mbtrnav/newmat
+${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
+${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
+)
+target_link_libraries(tile-test PRIVATE tnav newmat qnx geolib LibPROJ::LibPROJ NetCDF::NetCDF)
+#
+#------------------------------------------------------------------------------
+#
+# build otree (octree summary)
+
+# specify build target
+add_executable(otree
+       utils/OctreeTest.cpp
+)
+target_include_directories(otree PRIVATE
+${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw ${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
+${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
+${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
+)
+target_link_libraries(otree PRIVATE tnav newmat qnx geolib LibPROJ::LibPROJ NetCDF::NetCDF)
+#
+#------------------------------------------------------------------------------
+#
+# build readlog
+
+# specify build target
+add_executable(readlog
+       qnx-utils/readlog.cc
+)
+target_include_directories(readlog PRIVATE
+${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw ${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
+${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
+${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
+)
+target_link_libraries(readlog PRIVATE tnav newmat qnx geolib LibPROJ::LibPROJ NetCDF::NetCDF)
+#
+#------------------------------------------------------------------------------
+#
+# build writelog
+
+# specify build target
+add_executable(writelog
+       qnx-utils/writelog.cc
+)
+target_include_directories(writelog PRIVATE
+${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw ${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
+${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
+${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
+)
+target_link_libraries(writelog PRIVATE tnav newmat qnx geolib LibPROJ::LibPROJ NetCDF::NetCDF)
+#
+#------------------------------------------------------------------------------
+#
+# build log-to-matlab
+
+# specify build target
+add_executable(log-to-matlab
+       qnx-utils/logToMatlab.cc
+)
+target_include_directories(log-to-matlab PRIVATE
+${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw ${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
+${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
+${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
+)
+target_link_libraries(log-to-matlab PRIVATE tnav newmat qnx geolib LibPROJ::LibPROJ NetCDF::NetCDF)
+#
+#------------------------------------------------------------------------------
+#
+# build log-to-csv
+
+# specify build target
+add_executable(log-to-csv
+       qnx-utils/logToMatlab.cc
+)
+target_include_directories(log-to-csv PRIVATE
+${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw ${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
+${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
+${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
+)
+target_link_libraries(log-to-csv PRIVATE tnav newmat qnx geolib LibPROJ::LibPROJ NetCDF::NetCDF)
+#
+#------------------------------------------------------------------------------
+#
 # build trnucli-test (TRNU client app)
 
 # specify build target
@@ -364,7 +545,7 @@ target_link_libraries(trnusvr-test PRIVATE mbtrnframe netif tnav trnw newmat qnx
 
 
 ##################################
-# extra TRN clients
+## extra TRN clients
 
 #
 #------------------------------------------------------------------------------
@@ -487,7 +668,10 @@ target_link_libraries(geocon-test PRIVATE geocon qnx)
 target_include_directories(geocon-test PRIVATE ${CMAKE_SOURCE_DIR}
 ${LibPROJ_INCLUDE_DIRS} trnw qnx-utils)
 
-# build mb1log-player
+#
+#------------------------------------------------------------------------------
+#
+#  build mb1log-player
 
 # specify build target
 add_executable(mb1log-player
@@ -512,11 +696,67 @@ ${NetCDF_INCLUDE_DIRS}
 target_compile_options(mb1log-player PUBLIC
 "-std=c++11"
 )
+#
+#------------------------------------------------------------------------------
+#
+#  build trnlog-player
+
+# specify build target
+add_executable(trnlog-player
+utils/trnlog_player.cpp
+utils/TrnClient.cpp
+utils/TerrainNavClient.cpp
+)
+
+# specify dependency libs
+target_link_libraries(trnlog-player PRIVATE trnw trncli netif tnav qnx newmat geolib)
+
+# specify include paths
+target_include_directories(trnlog-player PUBLIC
+BEFORE
+${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/rov
+${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw
+${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
+${CMAKE_SOURCE_DIR}/src/mbtrnav/newmat
+${CMAKE_SOURCE_DIR}/src/mbtrnav/qnx-utils
+${NetCDF_INCLUDE_DIRS}
+)
+target_compile_options(trnlog-player PUBLIC
+"-std=c++11"
+)
+#
+#------------------------------------------------------------------------------
+#
+#  build csvlog-player
+
+# specify build target
+add_executable(csvlog-player
+utils/csvlog_player.cpp
+utils/TrnClient.cpp
+utils/TerrainNavClient.cpp
+)
+
+# specify dependency libs
+target_link_libraries(csvlog-player PRIVATE trnw trncli netif tnav qnx newmat geolib)
+
+# specify include paths
+target_include_directories(csvlog-player PUBLIC
+BEFORE
+${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/rov
+${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw
+${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
+${CMAKE_SOURCE_DIR}/src/mbtrnav/newmat
+${CMAKE_SOURCE_DIR}/src/mbtrnav/qnx-utils
+${NetCDF_INCLUDE_DIRS}
+)
+target_compile_options(csvlog-player PUBLIC
+"-std=c++11"
+)
 #------------------------------------------------------------------------------
 # install it all
 #
 install(TARGETS geolib geocon newmat tnav qnx trnw netif mb1 trnucli trnwcli DESTINATION ${CMAKE_INSTALL_LIBDIR})
-install(TARGETS trnucli-test trnusvr-test trncli-test mmcpub mmcsub mcpub mcsub trnif-test mb1rs mb1log-player geocon-test DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS trn-server trnlog-test octree2patches grd-octree-maker csv-octree-maker transoct tile-test otree readlog writelog log-to-matlab log-to-csv trnucli-test trnusvr-test trncli-test trnif-test mmcpub mmcsub mcpub mcsub mb1rs mb1log-player trnlog-player csvlog-player geocon-test DESTINATION ${CMAKE_INSTALL_BINDIR})
 #
 #------------------------------------------------------------------------------
 

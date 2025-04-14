@@ -65,6 +65,14 @@ lcm_wrap_types(
     lcm_types/trn_pose_t.lcm
     lcm_types/trnupub_t.lcm
     lcm_types/trn_mb1_t.lcm
+    lcm_types/stdlcm_header_t.lcm
+    lcm_types/geolcm_point_t.lcm
+    lcm_types/senlcm_multibeam_euclidean_t.lcm
+    lcm_types/stdlcm_msg_t.lcm
+    lcm_types/navlcm_position_t.lcm
+    lcm_types/senlcm_gps_fix_t.lcm
+    lcm_types/senlcm_rph_t.lcm
+    lcm_types/senlcm_rph_angrate_t.lcm
 )
 
 # C Static libs
@@ -98,6 +106,7 @@ if(JAVA_FOUND)
         SOURCES ${java_sources}
         )
 endif()
+
 #
 #------------------------------------------------------------------------------
 #
@@ -107,6 +116,7 @@ endif()
 add_library(udpms
        udpm_sub.c)
 #
+
 #------------------------------------------------------------------------------
 #
 # build trnxplug
@@ -122,6 +132,7 @@ add_library(trnxplug
     plug-oisled2.cpp
     plug-lassmb.cpp
     plug-xmb1.cpp
+    plug-mbminirov.cpp
 )
 
 target_include_directories(trnxplug PRIVATE
@@ -133,11 +144,12 @@ target_include_directories(trnxplug PRIVATE
     ${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/rov
     ${CMAKE_BINARY_DIR}/src/mbtrnav/opt/rov
     ${NetCDF_INCLUDE_DIRS}
+    ${LibPROJ_INCLUDE_DIR}
 )
 
 target_link_libraries(trnxplug PRIVATE
     newmat
-    geolib
+    geocon
     trnw
     qnx
     mb1
@@ -161,13 +173,15 @@ target_include_directories(trnxpp PRIVATE
     ${CMAKE_SOURCE_DIR}/src/mbtrnav/qnx-utils
     ${CMAKE_SOURCE_DIR}/src/mbtrnav/newmat
     ${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
+    ${CMAKE_BINARY_DIR}/src/mbtrnav/utils
     ${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw
     ${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/rov
     ${CMAKE_BINARY_DIR}/src/mbtrnav/opt/rov
     ${NetCDF_INCLUDE_DIRS}
+    ${LibPROJ_INCLUDE_DIR}
 )
 
-target_link_libraries(trnxpp PRIVATE lcm stdc++ mb1 trncli tnav newmat qnx m geolib udpms trnxplug NetCDF::NetCDF)
+target_link_libraries(trnxpp PRIVATE lcm stdc++ mb1 trncli tnav newmat qnx m geocon udpms trnxplug NetCDF::NetCDF)
 #
 #------------------------------------------------------------------------------
 #
@@ -186,6 +200,7 @@ target_link_libraries(trnxpp PRIVATE lcm stdc++ mb1 trncli tnav newmat qnx m geo
 #    ${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw
 #    ${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/rov
 #    ${NetCDF_INCLUDE_DIRS}
+#    ${LibPROJ_INCLUDE_DIRS}
 #)
 
 # may need rt (librt) in Linux
