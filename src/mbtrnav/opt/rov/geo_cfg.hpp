@@ -23,13 +23,27 @@
 #include <libgen.h>
 #include <map>
 
+#ifndef DTR
+#define DTR(x) ((x) * M_PI/180.)
+#endif
+#ifndef RTD
+#define RTD(x) ((x) * 180./M_PI)
+#endif
+
 #ifndef GEO_CFG_H
 #define GEO_CFG_H
+
+typedef enum{
+    GA_RADIANS=0,
+    GA_DEGREES
+}geo_angle_units_t;
 
 class beam_geometry
 {
 public:
-    beam_geometry(){}
+    beam_geometry()
+    : xmap()
+    {}
     ~beam_geometry(){}
 
     static char *trim(char *src)
@@ -54,7 +68,7 @@ public:
 
         if(NULL != map_spec){
             // parse extra parameters:
-            // - comma-separated key=value pairs
+            // - colon-separated key/value pairs: foo/3.14,bar/1.57...
             // - keys may contain [a-zA-Z0-9_-.]
             // - values are type double (parsed using %g)
             // - trims leading/trailing whitespace
@@ -86,6 +100,13 @@ public:
         }
     }
 
+    virtual std::string tostring(int wkey=15, int wval=18) = 0;
+    virtual double ro_u(int idx, geo_angle_units_t units = GA_RADIANS) = 0;
+    virtual double tr_m(int idx) = 0;
+    // extra parameters (key/value pairs)
+    // keys may contain [a-zA-Z0-9_-.]
+    std::map<std::string, double> xmap;
+
 private:
 };
 
@@ -95,7 +116,8 @@ public:
 
 
     dvlgeo()
-    :beam_count(0)
+    :beam_geometry()
+    , beam_count(0)
     , yaw_rf(NULL)
     , pitch_rf(NULL)
     , rot_radius_m(0.)
@@ -109,7 +131,8 @@ public:
     }
 
     dvlgeo(uint16_t nbeams, const char *bspec, double *rot, double *tran, double rrot=0.)
-    :beam_count(nbeams)
+    :beam_geometry()
+    , beam_count(nbeams)
     , yaw_rf(NULL)
     , pitch_rf(NULL)
     , rot_radius_m(rrot)
@@ -131,11 +154,11 @@ public:
         parse_bspec(bspec);
     }
     dvlgeo(uint16_t nbeams, const char *bspec, double *rot, double *tran, double rrot, std::map<std::string, double>& kvmap)
-    :beam_count(nbeams)
+    : beam_geometry()
+    , beam_count(nbeams)
     , yaw_rf(NULL)
     , pitch_rf(NULL)
     , rot_radius_m(rrot)
-    , xmap(kvmap)
     {
         for(int i=0; i<3; i++)
         {
@@ -152,8 +175,8 @@ public:
         memset(yaw_rf, 0, asz);
         memset(pitch_rf, 0, asz);
         parse_bspec(bspec);
+        xmap = kvmap;
     }
-
 
     ~dvlgeo()
     {
@@ -365,7 +388,7 @@ public:
         os << "\n";
     }
 
-    std::string tostring(int wkey=15, int wval=18)
+    virtual std::string tostring(int wkey=15, int wval=18) override
     {
         std::ostringstream ss;
         tostream(ss, wkey, wval);
@@ -375,6 +398,17 @@ public:
     void show(int wkey=15, int wval=18)
     {
         tostream(std::cerr, wkey, wval);
+    }
+
+    virtual double ro_u(int idx, geo_angle_units_t units = GA_RADIANS) override
+    {
+        double angle = (units == GA_RADIANS ? DTR(svr_deg[idx % 3]) : svr_deg[idx % 3]);
+        return angle;
+    }
+
+    virtual double tr_m(int idx) override
+    {
+        return svt_m[idx % 3];
     }
 
     // number of beams
@@ -390,9 +424,6 @@ public:
     double *pitch_rf;
     // DVL rotation radius (OI toolsled)
     double rot_radius_m;
-    // extra parameters (key/value pairs)
-    // keys may contain [a-zA-Z0-9_-.]
-    std::map<std::string, double> xmap;
 };
 
 class mbgeo : public beam_geometry
@@ -401,7 +432,9 @@ public:
     static const int MBG_PDEG=0;
 
     mbgeo()
-    :beam_count(0.),swath_deg(0.)
+    : beam_geometry()
+    , beam_count(0.),
+    swath_deg(0.)
     {
         size_t asz = 3 * sizeof(double);
         memset(svr_deg, 0, asz);
@@ -409,7 +442,8 @@ public:
     }
 
     mbgeo(uint16_t nbeams, double swath, double *rot, double *tran, double rrot=0.)
-    : beam_count(nbeams)
+    :  beam_geometry()
+    , beam_count(nbeams)
     , swath_deg(swath)
     , rot_radius_m(rrot)
     {
@@ -423,10 +457,10 @@ public:
     }
 
     mbgeo(uint16_t nbeams, double swath, double *rot, double *tran, double rrot,  const std::map<std::string, double> &kvmap)
-    : beam_count(nbeams)
+    :  beam_geometry()
+    , beam_count(nbeams)
     , swath_deg(swath)
     , rot_radius_m(rrot)
-    , xmap(kvmap)
     {
         for(int i=0; i<3; i++)
         {
@@ -435,6 +469,7 @@ public:
             if(tran != NULL)
                 svt_m[i] = tran[i];
         }
+        xmap = kvmap;
     }
 
     ~mbgeo(){}
@@ -516,7 +551,7 @@ public:
         os << "\n";
     }
 
-    std::string tostring(int wkey=15, int wval=18)
+    virtual std::string tostring(int wkey=15, int wval=18) override
     {
         std::ostringstream ss;
         tostream(ss, wkey, wval);
@@ -526,6 +561,17 @@ public:
     void show(int wkey=15, int wval=18)
     {
         tostream(std::cerr, wkey, wval);
+    }
+
+    virtual double ro_u(int idx, geo_angle_units_t units = GA_RADIANS) override
+    {
+        double angle = (units == GA_RADIANS ? DTR(svr_deg[idx % 3]) : svr_deg[idx % 3]);
+        return angle;
+    }
+
+    double tr_m(int idx) override
+    {
+        return svt_m[idx % 3];
     }
 
     // number of beams
@@ -539,9 +585,6 @@ public:
     double svt_m[3];
     // device rotation radius (OI toolsled)
     double rot_radius_m;
-    // extra parameters (key/value pairs)
-    // keys may contain [a-zA-Z0-9_-.]
-    std::map<std::string, double> xmap;
 
 };
 
@@ -549,37 +592,50 @@ class txgeo : public beam_geometry
 {
 public:
     txgeo()
-    : mRotLen(0)
+    :  beam_geometry()
+    , mRotLen(0)
     , rot_deg(nullptr)
     , mTranLen(0)
     , tran_m(nullptr)
-    , xmap()
     {
+    }
 
+    txgeo(int rlen, double *rot, int tlen, double *tran)
+    : beam_geometry()
+    {
+        if(rlen > 0) {
+            int ra_len = rlen * sizeof(double);
+            rot_deg = (double *)malloc(ra_len);
+
+            if(rot_deg != NULL){
+                memset(rot_deg, 0, ra_len);
+                memcpy(rot_deg, rot, ra_len);
+            } else {
+                fprintf(stderr, "%s:%d - ERR: could not allocate rot_deg\n", __func__, __LINE__);
+            }
+        } else {
+            mRotLen = 0;
+            rot_deg = nullptr;
+        }
+
+        if(tlen > 0) {
+            int ra_len = tlen * sizeof(double);
+            tran_m = (double *)malloc(ra_len);
+            if(tran_m != NULL){
+                memset(tran_m, 0, ra_len);
+                memcpy(tran_m, tran, ra_len);
+            } else {
+                fprintf(stderr, "%s:%d - ERR: could not allocate tran_m\n", __func__, __LINE__);
+            }
+        } else {
+            mTranLen = 0;
+            tran_m = nullptr;
+        }
     }
 
     txgeo(int rlen, double *rot, int tlen, double *tran, const std::map<std::string, double> &kvmap)
-    : mRotLen(rlen)
-    , mTranLen(tlen)
-    , xmap(kvmap)
+    : txgeo(rlen, rot, tlen, tran)
     {
-        int ra_len = rlen * sizeof(double);
-        rot_deg = (double *)malloc(ra_len);
-        if(rot_deg != NULL){
-            memset(rot_deg, 0, ra_len);
-            memcpy(rot_deg, rot, ra_len);
-        } else {
-            fprintf(stderr, "%s:%d - ERR: could not allocate rot_deg\n", __func__, __LINE__);
-        }
-
-        ra_len = tlen * sizeof(double);
-        tran_m = (double *)malloc(ra_len);
-        if(tran_m != NULL){
-            memset(tran_m, 0, ra_len);
-            memcpy(tran_m, tran, ra_len);
-        } else {
-            fprintf(stderr, "%s:%d - ERR: could not allocate tran_m\n", __func__, __LINE__);
-        }
     }
 
     ~txgeo()
@@ -735,7 +791,7 @@ public:
         os << "\n";
     }
 
-    std::string tostring(int wkey=15, int wval=18)
+    virtual std::string tostring(int wkey=15, int wval=18) override
     {
         std::ostringstream ss;
         tostream(ss, wkey, wval);
@@ -745,6 +801,17 @@ public:
     void show(int wkey=15, int wval=18)
     {
         tostream(std::cerr, wkey, wval);
+    }
+
+    virtual double ro_u(int idx, geo_angle_units_t units = GA_RADIANS) override
+    {
+        double angle = (units == GA_RADIANS ? DTR(rot_deg[idx % 3]) : rot_deg[idx % 3]);
+        return angle;
+    }
+
+    double tr_m(int idx) override
+    {
+        return tran_m[idx % 3];
     }
 
     // rot_deg array len (multiple of 3)
@@ -760,8 +827,5 @@ public:
     // +x: fwd +y: stbd, +z:down
     double *tran_m;
 
-    // extra parameters (key/value pairs)
-    // keys may contain [a-zA-Z0-9_-.]
-    std::map<std::string, double> xmap;
 };
 #endif
