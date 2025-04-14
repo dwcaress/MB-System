@@ -4681,15 +4681,15 @@ int main(int argc, char **argv) {
 
     /* close the files */
       if (mbtrn_cfg->input_mode == INPUT_MODE_SOCKET) {
-          fprintf(stderr, "socket input mode - continue (probably shouldn't be here)\n");
-          mlog_tprintf(mbtrnpp_mlog_id,"e,invalid code path - socket input mode\n");
+          fprintf(stderr, "socket input mode - ERR - main loop exited (possible read error)\n");
+          mlog_tprintf(mbtrnpp_mlog_id,"e,main loop exited - socket input mode\n");
           read_data = true;
 
           // empty the ring buffer
           ndata = 0;
       } else if (mbtrn_cfg->input_mode == INPUT_MODE_SERIAL) {
-          fprintf(stderr, "serial input mode - continue (probably shouldn't be here)\n");
-          mlog_tprintf(mbtrnpp_mlog_id,"e,invalid code path - serial input mode\n");
+          fprintf(stderr, "serial input mode - ERR - main loop exited (possible read error)\n");
+          mlog_tprintf(mbtrnpp_mlog_id,"e,main loop exited - serial input mode\n");
           read_data = true;
 
           // empty the ring buffer
