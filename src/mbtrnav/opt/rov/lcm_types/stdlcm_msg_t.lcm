@@ -1,0 +1,63 @@
+package stdlcm;
+
+/* Generic lcmtype for adding extra data to any sensor.
+ */
+
+struct bool_entry_t
+{
+    string key;
+    boolean value;
+}
+
+// integer 64-bit
+struct integer_entry_t
+{
+    string key;
+    int64_t value;
+}
+
+// double precision floating-point
+struct real_entry_t
+{
+    string key;
+    double value;
+}
+
+struct string_entry_t
+{
+    string key;
+    string value;
+}
+
+struct byte_array_entry_t
+{
+    string key;
+    int32_t len;
+    byte value[len];
+}
+
+struct msg_t
+{
+    // Standard header.
+    stdlcm.header_t header;
+
+    // bool type
+    int16_t n_bools;
+    bool_entry_t l_bool[n_bools];
+
+    // integer type
+    int16_t n_ints;
+    integer_entry_t l_int[n_ints];
+
+    // double type
+    int16_t n_reals;
+    real_entry_t l_real[n_reals];
+
+    // string type
+    int16_t n_strings;
+    string_entry_t l_string[n_strings];
+
+    // byte array type
+    int16_t n_bytes;
+    byte_array_entry_t l_bytes[n_bytes];
+}

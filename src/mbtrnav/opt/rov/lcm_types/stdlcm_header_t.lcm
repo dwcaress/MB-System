@@ -1,0 +1,17 @@
+package stdlcm;
+
+/* Standard metadata to stamp other lcmtypes given a timestamp, a sequence id
+ * and coordinate frame.
+ */
+
+struct header_t
+{
+    // Sequence number of published packet consecutively increasing.
+    int32_t sequence;
+
+    // Epoch time in microseconds.
+    int64_t timestamp;
+
+    // Frame this data is associated with.
+    string frame_id;
+}

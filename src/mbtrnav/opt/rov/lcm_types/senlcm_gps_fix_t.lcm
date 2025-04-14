@@ -1,0 +1,22 @@
+package senlcm;
+
+/* Standard message for GPS fixes.
+ */
+
+struct gps_fix_t
+{
+    // Standard header.
+    stdlcm.header_t header;
+
+    // Latitude.
+    // SI units = degrees.
+    double latitude;
+
+    // Longitude.
+    // SI units = degrees.
+    double longitud;
+
+    // Altitude.
+    // SI units = m.
+    double altitude;
+}

@@ -1,0 +1,12 @@
+package geolcm;
+
+/* Standard message to represent the position of a point in free space.
+ */
+
+struct point_t
+{
+    // Position coordinates X, Y, Z.
+    double x;
+    double y;
+    double z;
+}
