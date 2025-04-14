@@ -61,7 +61,7 @@ static void transform_oidvl(trn::bath_info **bi, trn::att_info **ai, beam_geomet
 
     // compute translation offset of NAV (on sled arm) due to arm rotation
     sled_rofs_t sled_ofs = {0}, *pofs = &sled_ofs;
-    TrnxPlugin::sled_nav_rot_offsets(ois_att, veh_att, ois_navgeo, pofs);
+    trnx_utils::sled_nav_rot_offsets(ois_att, veh_att, ois_navgeo, pofs);
 
     // set up rotations due to mounting and arm rotation
     double BROT_SF[3] = {ois_dvlgeo->ro_u(0), ois_dvlgeo->ro_u(1), ois_dvlgeo->ro_u(2)};
@@ -245,7 +245,7 @@ static void transform_rovdvl(trn::bath_info **bi, trn::att_info **ai, beam_geome
 
     // compute translation offset of NAV (on sled arm) due to arm rotation
     sled_rofs_t sled_ofs = {0}, *pofs = &sled_ofs;
-    TrnxPlugin::sled_nav_rot_offsets(ois_att, veh_att, ois_navgeo, pofs);
+    trnx_utils::sled_nav_rot_offsets(ois_att, veh_att, ois_navgeo, pofs);
 
     // sensor mounting angles (relative to vehicle, radians)
     // 3-2-1 euler angles, r/p/y  (phi/theta/psi)
@@ -509,7 +509,7 @@ int cb_proto_oisledx(void *pargs)
 
                 if(ctx->mUmap["USE_VBATH"] != 0) {
                     transform_rovdvl(bi, ai, bgeo, snd);
-                    TrnxPlugin::adjust_mb1_nav_rotating(ai, bgeo, ctx->geocon(), snd);
+                    trnx_utils::adjust_mb1_nav_rotating(ai, bgeo, ctx->geocon(), snd);
                 } else {
                     // tranform oisled DVL beams
                     transform_oidvl(bi, ai, bgeo, snd);

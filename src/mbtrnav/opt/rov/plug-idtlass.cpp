@@ -311,7 +311,7 @@ int cb_proto_idtlass(void *pargs)
                         }
 
                         // adjust nav for LASS arm position/rotation
-                        TrnxPlugin::adjust_mb1_nav_rotating(ai, bgeo, ctx->geocon(), snd);
+                        trnx_utils::adjust_mb1_nav_rotating(ai, bgeo, ctx->geocon(), snd);
 
                     } else {
                         fprintf(stderr,"%s:%d ERR - unsupported input_type[%d] beam transformation invalid\n", __func__, __LINE__, trn_type[0]);
