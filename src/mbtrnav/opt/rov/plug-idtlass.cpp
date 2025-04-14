@@ -35,6 +35,7 @@ int transform_idtlass(trn::bath_info **bi, trn::att_info **ai, beam_geometry **b
         return retval;
     }
 
+    // map indexed inputs to names
 
     // 0: VEH bath (IDT)
     trn::bath_info *veh_bath = bi[0];
@@ -51,18 +52,11 @@ int transform_idtlass(trn::bath_info **bi, trn::att_info **ai, beam_geometry **b
     beam_geometry *ois_navgeo = bgeo[1];
     beam_geometry *veh_navgeo = bgeo[2];
 
-//    // IDT geometry
-//    mbgeo *mb_geo[1] = {static_cast<mbgeo *>(bgeo[0])};
-//
-//    // 0: sled INS geometry
-//    // 1: veh nav geometry
-//    txgeo *tx_geo[2] = {static_cast<txgeo *>(bgeo[1]), static_cast<txgeo *>(bgeo[2])};
-
-
     if(veh_bath && static_cast<mbgeo *>(veh_bathgeo)->beam_count <= 0){
         fprintf(stderr, "%s - geometry warning : geo[0] beams <= 0 {%u}\n", __func__, static_cast<mbgeo *>(veh_bathgeo)->beam_count);
     }
 
+    // get bathy beam compoents (unscaled, sensor frame)
     Matrix mBcompSF = trnx_utils::mb_sframe_components(veh_bath, static_cast<mbgeo *>(veh_bathgeo), 1.0);
 
     // vehicle attitude (relative to NED, radians)
@@ -72,21 +66,14 @@ int transform_idtlass(trn::bath_info **bi, trn::att_info **ai, beam_geometry **b
     // vehicle attitude (pitch, roll, heading(=0))
     Matrix mATT = trnx_utils::affine321Rotation(vATT);
 
-    // vehicle attitude (relative to NED, radians)
-    // r/p/y  (phi/theta/psi)
-    // MB1 assumes vehicle frame, not world frame (i.e. exclude heading)
+    // bath sensor rotation (mounting orientation, sensor->veh frame)
     double vBATH_ROT[3] = {veh_bathgeo->ro_u(0), veh_bathgeo->ro_u(1), veh_bathgeo->ro_u(2)};
-    // vehicle attitude (pitch, roll, heading(=0))
+    // bath rotation matrix
     Matrix mBATH_ROT = trnx_utils::affine321Rotation(vBATH_ROT);
 
     // apply IDT sensor frame rotation, vehicle attitude transforms
     // to get (unscaled) beam components in vehicle frame, i.e. direction cosines
     Matrix mBcompVF = mATT.t() * mBATH_ROT.t() * mBcompSF;
-
-    // adjust sounding depth (Z+ down)
-    // should not be needed
-//    double zofs = tx_geo[0]->xmap["depthOfs"];
-//    r_snd->depth += zofs;
 
     if(trn_debug::get()->debug() >= TRNDL_PLUGIDTLASS){
 
@@ -95,20 +82,8 @@ int transform_idtlass(trn::bath_info **bi, trn::att_info **ai, beam_geometry **b
             TRN_NDPRINT(TRNDL_PLUGIDTLASS, "ois_navgeo:\n%s\n", ois_navgeo->tostring().c_str());
             TRN_NDPRINT(TRNDL_PLUGIDTLASS, "veh_navgeo:\n%s\n", veh_navgeo->tostring().c_str());
 
-//            TRN_NDPRINT(TRNDL_PLUGIDTLASS, "arm rotation (deg) Pv[%.3lf] Pa[%.3lf] angle[%.3lf]\n", Math::radToDeg(ai[0]->pitch()), Math::radToDeg(ai[1]->pitch()), Math::radToDeg(Wa));
-//            TRN_NDPRINT(TRNDL_PLUGIDTLASS, "Z ofs: (m) %.3lf\n", zofs);
-//
-//            TRN_NDPRINT(TRNDL_PLUGIDTLASS, "Xo, Yo, Zo, Wo [%.3lf, %.3lf, %.3lf, %.3lf (%.3lf)]\n", Xo, Yo, Zo, Wo, RTD(Wo));
-//            TRN_NDPRINT(TRNDL_PLUGIDTLASS, "Xr, Yr, Zr, Wr [%.3lf, %.3lf, %.3lf, %.3lf (%.3lf)]\n", Xr, Yr, Zr, Wr, RTD(Wr));
-//            TRN_NDPRINT(TRNDL_PLUGIDTLASS, "dX, dY, dZ[%.3lf, %.3lf, %.3lf]\n", dX, dY, dZ);
-//            TRN_NDPRINT(TRNDL_PLUGIDTLASS, "r[%.3lf]\n", r);
-//
-//            TRN_NDPRINT(TRNDL_PLUGIDTLASS, "ARM_ROT  [%.3lf, %.3lf, %.3lf] [%.3lf, %.3lf, %.3lf] deg\n", vARM_ROT[0], vARM_ROT[1], vARM_ROT[2], RTD(vARM_ROT[0]), RTD(vARM_ROT[1]), RTD(vARM_ROT[2]));
-//            TRN_NDPRINT(TRNDL_PLUGIDTLASS, "INS_ROT  [%.3lf, %.3lf, %.3lf] [%.3lf, %.3lf, %.3lf] deg\n", vINS_ROT[0], vINS_ROT[1], vINS_ROT[2], RTD(vINS_ROT[0]), RTD(vINS_ROT[1]), RTD(vINS_ROT[2]));
             TRN_NDPRINT(TRNDL_PLUGIDTLASS, "BATH_ROT  [%.3lf, %.3lf, %.3lf] [%.3lf, %.3lf, %.3lf] deg\n", vBATH_ROT[0], vBATH_ROT[1], vBATH_ROT[2], RTD(vBATH_ROT[0]), RTD(vBATH_ROT[1]), RTD(vBATH_ROT[2]));
-//            TRN_NDPRINT(TRNDL_PLUGIDTLASS, "IDT_TRANo [%.3lf, %.3lf, %.3lf]\n", mb_geo[0]->svt_m[0], mb_geo[0]->svt_m[1], mb_geo[0]->svt_m[2]);
-//            TRN_NDPRINT(TRNDL_PLUGIDTLASS, "IDT_TRAN [%.3lf, %.3lf, %.3lf]\n", vIDT_TRAN[0], vIDT_TRAN[1], vIDT_TRAN[2]);
-  
+
         const char *pinv = (ai[0]->flags().is_set(trn::AF_INVERT_PITCH)? "(p-)" :"(p+)");
             TRN_NDPRINT(TRNDL_PLUGIDTLASS, "VATT     [%.3lf, %.3lf, %.3lf] rad\n", vATT[0], vATT[1], vATT[2]);
             TRN_NDPRINT(TRNDL_PLUGIDTLASS, "VATT     [%.2lf, %.2lf, %.2lf] deg %s hdg(%.2lf)\n",
@@ -148,7 +123,6 @@ int transform_idtlass(trn::bath_info **bi, trn::att_info **ai, beam_geometry **b
             r_snd->beams[idx[0]].rhoy = mBeams(2, idx[1]);
             r_snd->beams[idx[0]].rhoz = mBeams(3, idx[1]);
 
-
             rho[0] = mBeams(1, idx[1]);
             rho[1] = mBeams(2, idx[1]);
             rho[2] = mBeams(3, idx[1]);
@@ -162,28 +136,6 @@ int transform_idtlass(trn::bath_info **bi, trn::att_info **ai, beam_geometry **b
         if(trn_debug::get()->debug() >= TRNDL_PLUGIDTLASS){
 
             double range = sqrt(rho[0] * rho[0] + rho[1] * rho[1] + rho[2] * rho[2]);
-
-           // double urange = sqrt(urho[0]*urho[0] + urho[1]*urho[1] + urho[2]*urho[2]);
-//            double urhoNorm = trnx_utils::vnorm(urho);
-//            double uaxr = (urhoNorm == 0. ? 0. : acos(urho[0] / urhoNorm));
-//            double uayr = (urhoNorm == 0. ? 0. : acos(urho[1] / urhoNorm));
-//            double uazr = (urhoNorm == 0. ? 0. : acos(urho[2] / urhoNorm));
-
-//            TRN_NDPRINT(TRNDL_PLUGIDTLASS_H, "%s: urho[%7.4lf, %7.4lf, %7.4lf] urange[%7.4lf]\n",
-//                        __func__, urho[0], urho[1], urho[2], urange);
-//
-//            TRN_NDPRINT(TRNDL_PLUGIDTLASS_H, "%s:  rho[%7.4lf, %7.4lf, %7.4lf] range [%7.4lf]\n",
-//                        __func__, rho[0], rho[1], rho[2], range);
-
-//            TRN_NDPRINT(TRNDL_PLUGIDTLASS_H, "%s: b[%3d] r[%7.2lf] R[%7.2lf]     rhox[%7.4lf] rhoy[%7.4lf] rhoz[%7.4lf]     ax[%6.3lf] ay[%6.3lf] az[%6.3lf] U\n",
-//                        __func__, b, urange, urhoNorm,
-//                        urho[0],
-//                        urho[1],
-//                        urho[2],
-//                        Math::radToDeg(uaxr),
-//                        Math::radToDeg(uayr),
-//                        Math::radToDeg(uazr)
-//                        );
 
             // calculated beam range (should match measured range)
             //double rho[3] = {r_snd->beams[idx[0]].rhox, r_snd->beams[idx[0]].rhoy, r_snd->beams[idx[0]].rhoz};
@@ -303,7 +255,6 @@ int cb_proto_idtlass(void *pargs)
             // generate MB1 sounding (raw beams)
             mb1_t *snd = trnx_utils::lcm_to_mb1(bi[0], ni[1], ai[0]);
 
-
             std::list<trn::beam_tup> beams = bi[0]->beams_raw();
             std::list<trn::beam_tup>::iterator it;
 
@@ -318,9 +269,6 @@ int cb_proto_idtlass(void *pargs)
                 if(di[0] != NULL) {
                     alt_depth = di[0]->pressure_to_depth_m(ni[1]->lat());
                     TRN_NDPRINT(3, "ni depth: %.3lf di pressure: %.3lf lat: %.3lf alt_depth: %.3lf\n", ni[1]->depth(), di[0]->pressure_dbar(), ni[1]->lat(), alt_depth );
-                    //                trn::depth_input *din = xpp->get_depth_input(*dkey[0]);
-                    //                TRN_NDPRINT(3, "presssure:\n");
-                    //                din->tostream(std::cerr);
                     snd->depth = alt_depth;
                 }
 
