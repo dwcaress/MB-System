@@ -38,6 +38,7 @@
 #include "mb1_provider_IF.hpp"
 #include "trn_msg_utils.hpp"
 #include "trnx_utils.hpp"
+#include "GeoCon.hpp"
 
 namespace trn
 {
@@ -95,6 +96,8 @@ public:
     , mMBEstCsvFile(nullptr)
     , mRawBathCsvFile(nullptr)
     , mUtmZone(10)
+    , mGeoCRS(std::string(""))
+    , mGeoCon(nullptr)
     , mDecMod(0)
     , mCBCount(0)
     , mCtxKey("undefined")
@@ -105,6 +108,10 @@ public:
     , mRawBathCsvPath()
     , mLcmFlags(0)
     {
+        // Use UTM by default (zone 10, Monterey Bay)
+        // To configure, pass either utm:<zone> or geocrs:<crs>
+        // The last one passed will be used
+        mGeoCon = new GeoCon(mUtmZone);
     }
 
     trnxpp_ctx(const trnxpp_ctx &other)
@@ -115,6 +122,8 @@ public:
     , mMBEstCsvFile(other.mMBEstCsvFile)
     , mRawBathCsvFile(other.mRawBathCsvFile)
     , mUtmZone(other.mUtmZone)
+    , mGeoCRS(other.mGeoCRS)
+    , mGeoCon(other.mGeoCon)
     , mDecMod(other.mDecMod)
     , mCBCount(other.mCBCount)
     , mCtxKey(other.mCtxKey)
@@ -200,6 +209,8 @@ public:
         os << std::setw(wkey) << "trnest_csv_file" << std::setw(wval) << mTrnEstCsvFile <<"\n";
         os << std::setw(wkey) << "rawBath_csv_file" << std::setw(wval) << mRawBathCsvFile <<"\n";
         os << std::setw(wkey) << "utm zone" << std::setw(wval) << mUtmZone <<"\n";
+        os << std::setw(wkey) << "geo_crs" << std::setw(wval) << mGeoCRS.c_str() <<"\n";
+        os << std::setw(wkey) << "geocon" << std::setw(wval) << (mGeoCon != nullptr ? mGeoCon->typestr() : "NULL" ) <<"\n";
         os << std::setw(wkey) << "cb_count" << std::setw(wval) << mCBCount <<"\n";
         os << std::setw(wkey) << "cb_mod" << std::setw(wval) << mDecMod <<"\n";
 
@@ -391,11 +402,32 @@ public:
     void set_utm_zone(long int utm)
     {
         mUtmZone = utm;
+        if(mGeoCon != nullptr)
+            delete(mGeoCon);
+        mGeoCon = new GeoCon(mUtmZone);
     }
 
     long int utm_zone()
     {
         return mUtmZone;
+    }
+
+    void set_geo_crs(std::string crs)
+    {
+        mGeoCRS = crs;
+        if(mGeoCon != nullptr)
+            delete(mGeoCon);
+        mGeoCon = new GeoCon(crs.c_str());
+    }
+
+    std::string geo_crs()
+    {
+        return mGeoCRS;
+    }
+
+    GeoCon *geocon()
+    {
+        return mGeoCon;
     }
 
     void add_callback_key(const std::string &key){
@@ -1854,6 +1886,8 @@ private:
     FILE *mMBEstCsvFile;
     FILE *mRawBathCsvFile;
     long int mUtmZone;
+    std::string mGeoCRS;
+    GeoCon *mGeoCon;
     int mDecMod;
     int mCBCount;
     std::string mCtxKey;
