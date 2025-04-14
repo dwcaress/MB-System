@@ -19,7 +19,7 @@ void transform_mblass(trn::bath_info **bi, trn::att_info **ai, mbgeo **geo, mb1_
 {
     // validate inputs
     if(NULL == geo || geo[1] == nullptr){
-        fprintf(stderr, "%s - geometry error : NULL input geo[%p] {%p, %p} \n", __func__, geo, (geo?geo[0]:nullptr), (geo?geo[1]:nullptr));
+        fprintf(stderr, "%s - geometry error : NULL input geo[%p] {0:%p, 1:%p} \n", __func__, geo, (geo?geo[0]:nullptr), (geo?geo[1]:nullptr));
         return;
     }
     if(geo[0] && geo[0]->beam_count <= 0){
@@ -117,6 +117,7 @@ void transform_mblass(trn::bath_info **bi, trn::att_info **ai, mbgeo **geo, mb1_
 
         // beam number (0-indexed)
         int b = std::get<0>(bt);
+
         double range = std::get<1>(bt);
         // beam components WF x,y,z
         // matrix row/col (1 indexed)
@@ -260,7 +261,7 @@ int cb_proto_mblass(void *pargs)
             if(nullptr != bp[1]) {
 
                 dvlgeo *geo[1] = {nullptr};
-                mbgeo *mgeo[1] = {nullptr};
+                mbgeo *mgeo[2] = {nullptr, nullptr};
                 beam_geometry *bgeo[2] = {nullptr, nullptr};
 
                 if(nullptr != bp[0]){
@@ -269,7 +270,8 @@ int cb_proto_mblass(void *pargs)
                 }
 
                 bgeo[1] = xpp->lookup_geo(*bkey[1], trn_type[1]);
-                mgeo[0] = static_cast<mbgeo *>(bgeo[1]);
+                mgeo[0] = static_cast<mbgeo *>(bgeo[0]);
+                mgeo[1] = static_cast<mbgeo *>(bgeo[1]);
 
                 // tranform oisled multibeam beams
                 transform_mblass(bi, ai, mgeo, snd);
