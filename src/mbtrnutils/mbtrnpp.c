@@ -3106,6 +3106,7 @@ static void s_sig_handler(int sig)
     {
         case SIGINT:
             // user interrupt (CTRL-C); set flag to end processing loop(s)
+            fprintf(stderr,"%s:%d - SIGINT received\n", __func__, __LINE__);
             g_interrupted = true;
             break;
         default:
@@ -4632,7 +4633,7 @@ int main(int argc, char **argv) {
 
                 MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBGETALL]);
 
-                fprintf(stderr, "EOF (input socket) - clear status/error\n");
+                fprintf(stderr, "%s:%d - EOF (input socket) - clear status/error\n", __func__, __LINE__);
                 status = MB_SUCCESS;
                 error = MB_ERROR_NO_ERROR;
 
@@ -4640,7 +4641,7 @@ int main(int argc, char **argv) {
 
                 MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBGETALL]);
 
-                fprintf(stderr, "EOF (input serial) - clear status/error\n");
+                fprintf(stderr, "%s:%d - EOF (input serial) - clear status/error\n", __func__, __LINE__);
                 status = MB_SUCCESS;
                 error = MB_ERROR_NO_ERROR;
 
@@ -4681,19 +4682,34 @@ int main(int argc, char **argv) {
 
     /* close the files */
       if (mbtrn_cfg->input_mode == INPUT_MODE_SOCKET) {
-          fprintf(stderr, "socket input mode - ERR - main loop exited (possible read error)\n");
-          mlog_tprintf(mbtrnpp_mlog_id,"e,main loop exited - socket input mode\n");
-          read_data = true;
+          if(g_interrupted) {
+              fprintf(stderr, "socket input mode - interrupt received\n");
+              mlog_tprintf(mbtrnpp_mlog_id,"e,interrupt received - socket input mode\n");
+          } else {
+              fprintf(stderr, "socket input mode - continue (probably shouldn't be here)\n");
+              mlog_tprintf(mbtrnpp_mlog_id,"e,invalid code path - socket input mode\n");
+              read_data = true;
+          }
 
           // empty the ring buffer
           ndata = 0;
+
+          // release mbio resources
+          status = mb_close(mbtrn_cfg->verbose, &imbio_ptr, &error);
       } else if (mbtrn_cfg->input_mode == INPUT_MODE_SERIAL) {
-          fprintf(stderr, "serial input mode - ERR - main loop exited (possible read error)\n");
-          mlog_tprintf(mbtrnpp_mlog_id,"e,main loop exited - serial input mode\n");
-          read_data = true;
+          if(g_interrupted) {
+              fprintf(stderr, "serial input mode - interrupt received\n");
+              mlog_tprintf(mbtrnpp_mlog_id,"e,interrupt received - socket input mode\n");
+          } else {
+              fprintf(stderr, "serial input mode - continue (probably shouldn't be here)\n");
+              mlog_tprintf(mbtrnpp_mlog_id,"e,invalid code path - socket input mode\n");
+              read_data = true;
+          }
 
           // empty the ring buffer
           ndata = 0;
+          // release mbio resources
+          status = mb_close(mbtrn_cfg->verbose, &imbio_ptr, &error);
       } else {
           status = mb_close(mbtrn_cfg->verbose, &imbio_ptr, &error);
 
@@ -4779,6 +4795,7 @@ int main(int argc, char **argv) {
 
     status = mbtrnpp_closelog(mbtrn_cfg->verbose, &logfp, &error);
   }
+  
 
   /* close output */
   if ( OUTPUT_FLAG_SET(OUTPUT_MB1_FILE_EN) ) {
@@ -4815,7 +4832,6 @@ int main(int argc, char **argv) {
   MEM_CHKINVALIDATE(mbtrn_cfg->trn_mission_id);
 
   /* check memory */
-  //if (mbtrn_cfg->verbose >= 4)
     status = mb_memory_list(mbtrn_cfg->verbose, &error);
 
   /* give the statistics */
@@ -6896,7 +6912,7 @@ int mbtrnpp_reson7kr_input_read(int verbose, void *mbio_ptr, size_t *size, char 
         // only reconnect if disconnected
         if ((NULL!=reader && reader->state==R7KR_INITIALIZED) || (me_errno==ME_ESOCK) || (me_errno==ME_EOF)  ) {
 
-            fprintf(stderr,"EOF (input socket) - clear status/error\n");
+            fprintf(stderr, "%s:%d - EOF (input serial) - clear status/error\n", __func__, __LINE__);
             status = MB_SUCCESS;
             *error = MB_ERROR_NO_ERROR;
 
@@ -9064,7 +9080,7 @@ int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buf
             } else {
                 // read error
                 read_err = true;
-                MX_LPRINT(MBTRNPP, 3, "mb1r_read_frame failed rbytes[%zu]\n",(size_t)rbytes);
+                MX_LPRINT(MBTRNPP, 3, "mb1r_read_frame failed rbytes[%"PRId64"]\n",rbytes);
             }
 
         } else {
@@ -9119,7 +9135,7 @@ int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buf
         // only reconnect if disconnected
         if ((NULL!=reader && reader->state==MB1R_INITIALIZED) || (me_errno==ME_ESOCK) || (me_errno==ME_EOF)  ) {
 
-            fprintf(stderr,"EOF (input socket) - clear status/error\n");
+            fprintf(stderr,"%s:%d - EOF (input socket) - clear status/error reader state %d me_error %d\n", __func__, __LINE__, reader->state, me_errno);
             status = MB_SUCCESS;
             *error = MB_ERROR_NO_ERROR;
 
@@ -9131,8 +9147,14 @@ int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buf
             mlog_tprintf(mbtrnpp_mlog_id,"mbtrnpp: input socket status[%s]\n",mb1r_strstate(reader->state));
             MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_DISN]);
 
-            // re-connect reader
+            if(g_interrupted) {
+                fprintf(stderr, "%s:%d - interrupted (SIGINT) returning MB_ERROR_EOF\n", __func__, __LINE__);
+                status   = MB_FAILURE;
+                *error   = MB_ERROR_EOF;
+                *size    = (size_t)0;
+            } else
             if (mb1r_reader_connect(reader,true)==0) {
+                // re-connect reader
                 read_frame = true;
                 read_err = false;
                 fprintf(stderr,"mbtrnpp: input socket re-connected status[%s]\n",mb1r_strstate(reader->state));
