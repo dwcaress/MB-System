@@ -227,9 +227,9 @@ public:
         // [ 4] utmN_m
         // [ 5] utmE_m
         // [ 6] depth_m
-        // [ 7] roll_rad
+        // [ 7] heading_rad
         // [ 8] pitch_rad
-        // [ 9] heading_rad
+        // [ 9] roll_rad
         // [  ] flag (0)
         // [  ] flag (0)
         // [  ] flag (0)
@@ -279,9 +279,15 @@ public:
         }
 
         os << (alt_depth >= 0 ? alt_depth: ni->depth()) << ",";
-        os << ai->pitch() << ",";
-        os << ai->roll() << ",";
-        os << ai->heading() << ",";
+        if (fmt == FMT_STANDARD) {
+            os << ai->pitch() << ",";
+            os << ai->roll() << ",";
+            os << ai->heading() << ",";
+        }else {
+            os << ai->heading() << ",";
+            os << ai->roll() << ",";
+            os << ai->pitch() << ",";
+        }
 
         os << std::setprecision(1);
         if (fmt == FMT_STANFORD) {
@@ -538,12 +544,17 @@ public:
         ss += mbest->est[2].cov[2] * mbest->est[2].cov[2];
         os << sqrt(ss) << "\n";
 
-        os << std::setw(5) << "s" << std::setw(21) << " [t, x, y, z] ";
+        os << std::setw(5) << "s" << std::setw(21) << " [t, x, y, z, m] ";
         os << std::setprecision(3);
         os << std::setw(13) << mbest->est[2].time << ", ";
         os << std::setw(7) << sqrt(mbest->est[2].cov[0]) << ", ";
         os << std::setw(7) << sqrt(mbest->est[2].cov[1]) << ", ";
-        os << std::setw(7) << sqrt(mbest->est[2].cov[2]) << "\n";
+        os << std::setw(7) << sqrt(mbest->est[2].cov[2]) << ", ";
+        double sdmag[3] = {sqrt(mbest->est[2].cov[0]), sqrt(mbest->est[2].cov[1]), sqrt(mbest->est[2].cov[2])};
+        ss = sdmag[0] * sdmag[0];
+        ss += sdmag[1] * sdmag[1];
+        ss += sdmag[2] * sdmag[2];
+        os << sqrt(ss) << "\n";
 
         os << std::setw(wkey) << "reinit_count:" << std::setw(wkey) << mbest->reinit_count << "\n";
         os << std::setw(wkey) << "reinit_tlast:" << std::setw(wkey) << mbest->reinit_tlast << "\n";
@@ -751,6 +762,34 @@ public:
         return mat;
     }
 
+    // 2D rotation of 3D point (about Z axis)
+    // i.e. get rotated coordinates
+    // expects
+    // rot_rad: rotation angle (rad)
+    // point_m[0]: point vector x (m)
+    // point_m[1]: point vector y (m)
+    // point_m[2]: point vector z (m)
+    static Matrix affine2DRotatePoint(double rot_rad, double *point_m)
+    {
+        Matrix pt(3,1);
+        pt(1,1) = point_m[0];
+        pt(2,1) = point_m[1];
+        pt(3,1) = point_m[2];
+
+        Matrix rot(3,3);
+        rot(1,1) = cos(rot_rad);
+        rot(1,2) = -sin(rot_rad);
+        rot(1,3) = 0.;
+        rot(2,1) = sin(rot_rad);
+        rot(2,2) = cos(rot_rad);
+        rot(2,3) = 0.;
+        rot(3,1) = 0.;
+        rot(3,2) = 0.;
+        rot(3,3) = 1.;
+
+        return rot * pt;
+    }
+
     static int test_affine()
     {
         // validate matrix geometry operations
@@ -955,7 +994,7 @@ public:
 
         TRN_NDPRINT(TRNDL_UTILS_MBSFCOMP, "%s: --- \n",__func__);
         TRN_NDPRINT(TRNDL_UTILS_MBSFCOMP, "sensor frame:\nalong: x (fwd +)\nacross: y (stb+)\ndown: z (down+)\n");
-        TRN_NDPRINT(TRNDL_UTILS_MBSFCOMP, "S[%.3lf] K[%.3lf] e[%.3lf]\n", S, K, e);
+        TRN_NDPRINT(TRNDL_UTILS_MBSFCOMP, "N[%d] S[%.3lf] K[%.3lf] e[%.3lf]\n", nbeams, S, K, e);
 
         for(it=beams.begin(); it!=beams.end(); it++)
         {
@@ -994,11 +1033,11 @@ public:
 
                 double rhoNorm = vnorm(rho);
 
-                const char *sep = (b == 60 ? "****" : "    ");
+                const char *sep = (b == nbeams/2 ? "****" : "    ");
                 TRN_NDPRINT(TRNDL_UTILS_MBSFCOMP_H, "%s - b[%3d] r[%7.2lf] R[%7.2lf] %s Rx[%7.2lf] Ry[%7.2lf] Rz[%7.2lf] %s yd[%7.2lf] pd[%7.2lf] %s cy[%7.2lf] sy[%7.2lf] cp[%7.2lf] sp[%7.2lf]\n",
                             __func__, b, range, rhoNorm,
                             sep, sf_comp(1,idx[1]), sf_comp(2,idx[1]), sf_comp(3,idx[1]),
-                            sep, yd, pd, cos(yr), sep, sin(yr), cos(pr), sin(pr));
+                           sep, yd, pd, sep, cos(yr),  sin(yr), cos(pr), sin(pr));
             }
 
             idx[0]++;
@@ -1061,7 +1100,7 @@ public:
                 TRN_NDPRINT(TRNDL_UTILS_DVLSFCOMP_H, "%s - b[%3d] r[%7.2lf] R[%7.2lf] %s Rx[%7.2lf] Ry[%7.2lf] Rz[%7.2lf] %s yd[%7.2lf] pd[%7.2lf] %s cy[%7.2lf] sy[%7.2lf] cp[%7.2lf] sp[%7.2lf]\n",
                             __func__, b, range, rhoNorm,
                             sep, sf_comp(1,idx[1]), sf_comp(2,idx[1]), sf_comp(3,idx[1]),
-                            sep, yd, pd, cos(yr), sep, sin(yr), cos(pr), sin(pr));
+                            sep, yd, pd, sep, cos(yr), sin(yr), cos(pr), sin(pr));
             }
 
             idx[0]++;
