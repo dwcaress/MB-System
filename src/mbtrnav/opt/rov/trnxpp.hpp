@@ -51,6 +51,12 @@
 #include "parosci_stat_input.hpp"
 #include "ctd_fastcat_input.hpp"
 #include "trn_mb1_input.hpp"
+#include "norbit_input.hpp"
+#include "vn100_input.hpp"
+#include "vn100s_input.hpp"
+#include "rph_input.hpp"
+#include "rph_angrate_input.hpp"
+#include "senlcm_gps_fix_input.hpp"
 
 namespace trn
 {
@@ -608,13 +614,43 @@ public:
             trn_lcm_input *obj = new trn::x_mb1_input("XMB1", 10);
             dynamic_cast<trn::mb1_input *>(obj)->set_mb1_input_type(BT_MULTIBEAM);
             return obj;
-        } else if(channel.compare("PAROSCI_STAT")==0)
+        } 
+        else if(channel.compare("PAROSCI_STAT")==0)
         {
             return new trn::parosci_stat_input("PAROSCI_STAT", 10);
-        }  else if(channel.compare("CTD_FASTCAT")==0)
+        }  
+        else if(channel.compare("CTD_FASTCAT")==0)
         {
             return new trn::ctd_fastcat_input("CTD_FASTCAT", 10);
-        } else {
+        }
+        else if(channel.compare("MULTIBEAM_EUCLIDEAN")==0)
+        {
+            trn_lcm_input *obj = new trn::norbit_input("MULTIBEAM_EUCLIDEAN", buf_depth);
+            dynamic_cast<trn::bath_input *>(obj)->set_bath_input_type(BT_MULTIBEAM);
+//            dynamic_cast<trn::bath_input *>(obj)->set_bath_input_type(BT_DELTAT);
+            return obj;
+        } 
+        else if(channel.compare("VN100")==0)
+        {
+            return new trn::vn100_input("VN100", buf_depth);
+        }
+        else if(channel.compare("VN100S")==0)
+        {
+            return new trn::vn100s_input("VN100S", buf_depth);
+        }
+        else if(channel.compare("MINIROV_VN100_ESTIMATED_STATE_GPS")==0)
+        {
+            return new trn::senlcm_gps_fix_input("MINIROV_VN100_ESTIMATED_STATE_GPS", buf_depth);
+        }
+        else if(channel.compare("MINIROV_VN100S_ESTIMATED_STATE_RPH")==0)
+        {
+            return new trn::rph_input("MINIROV_VN100S_ESTIMATED_STATE_RPH", buf_depth);
+        }
+        else if(channel.compare("VN100S_RPH_ANGRATE")==0)
+        {
+            return new trn::rph_angrate_input("VN100S_RPH_ANGRATE", buf_depth);
+        }
+        else {
             std::cerr << __func__ << ": ERR - Unsupported type [" << channel << "]\n";
         }
         return nullptr;
@@ -1133,9 +1169,9 @@ public:
         int retval = -1;
         if(NULL != map_spec){
             // parse extra parameters:
-            // - comma-separated key=value pairs
+            // - colon-separated key=value pairs dmap:foo/3.5:bar/18.97
             // - keys may contain [a-zA-Z0-9_-.]
-            // - values are type double (parsed using %g)
+            // - values are type unsigned long (parsed using &g)
             // - trims leading/trailing whitespace
             TRN_NDPRINT(5,  "%s:%d - parsing map_spec[%s]\n", __func__, __LINE__, map_spec);
             const char *kvdel="/";
@@ -1172,9 +1208,9 @@ public:
         int retval = -1;
         if(NULL != map_spec){
             // parse extra parameters:
-            // - comma-separated key=value pairs
+            // - colon-separated key=value pairs umap:foo/3:bar/18
             // - keys may contain [a-zA-Z0-9_-.]
-            // - values are type double (parsed using %g)
+            // - values are type unsigned long (parsed using PRIu64)
             // - trims leading/trailing whitespace
             TRN_NDPRINT(5,  "%s:%d - parsing map_spec[%s]\n", __func__, __LINE__, map_spec);
             const char *kvdel="/";
@@ -1211,9 +1247,9 @@ public:
         int retval = -1;
         if(NULL != map_spec){
             // parse extra parameters:
-            // - comma-separated key=value pairs
+            // - colon-separated key=value pairs imap:foo/3:bar/-18
             // - keys may contain [a-zA-Z0-9_-.]
-            // - values are type double (parsed using %g)
+            // - values are type long int (parsed using PRId64)
             // - trims leading/trailing whitespace
             TRN_NDPRINT(5,  "%s:%d - parsing map_spec[%s]\n", __func__, __LINE__, map_spec);
             const char *kvdel="/";
@@ -1560,6 +1596,22 @@ public:
                         TRN_NDPRINT(5,  "%s:%d - utm[%ld]\n", __func__, __LINE__, utm);
 
                         ctx->set_utm_zone(utm);
+                    }
+
+                }  else if(strstr(opt_s, "geocrs:") != NULL)  {
+
+                    // discard option "utm:"
+                    strtok(opt_s,":");
+                    char *key_s = strtok(NULL,":");
+                    char *val_key = trnxpp_cfg::trim(key_s);
+
+                    TRN_NDPRINT(5,  "%s:%d - val_key[%s]\n", __func__, __LINE__, val_key);
+
+                    if(val_key && strlen(val_key) > 0){
+
+                        TRN_NDPRINT(5,  "%s:%d - geocrs[s]\n", __func__, __LINE__, val_key);
+
+                        ctx->set_geo_crs(std::string(val_key));
                     }
 
                 } else  if(strstr(opt_s, "bi:") != NULL) {
