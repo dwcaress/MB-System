@@ -5,7 +5,7 @@
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
- *    Dale N. Chayes 
+ *    Dale N. Chayes
  *      Center for Coastal and Ocean Mapping
  *      University of New Hampshire
  *      Durham, New Hampshire, USA
@@ -13,7 +13,7 @@
  *      MARUM
  *      University of Bremen
  *      Bremen Germany
- *     
+ *
  *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
  *      Columbia University
@@ -21,29 +21,27 @@
  *
  *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
-/*
- *    The program MBgrd2gltf, including this source file, was created
- *    by a Capstone Project team at the California State University 
- *    Monterey Bay (CSUMB) including Kyle Dowling, Julian Fortin, 
- *    Jesse Benavides, Nicolas Porras Falconio. This team was mentored by:
- *    Mike McCann
- *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, California, USA
- *--------------------------------------------------------------------*/
+ /*
+  *    The program MBgrd2gltf, including this source file, was created
+  *    by a Capstone Project team at the California State University
+  *    Monterey Bay (CSUMB) including Kyle Dowling, Julian Fortin,
+  *    Jesse Benavides, Nicolas Porras Falconio. This team was mentored by:
+  *    Mike McCann
+  *      Monterey Bay Aquarium Research Institute
+  *      Moss Landing, California, USA
+  *--------------------------------------------------------------------*/
 
 #ifndef MATRIX_H
 #define MATRIX_H
 
-// standard library
+  // standard library
 #include <cstddef>
 #include <stdexcept>
 #include <string>
 
-namespace mbgrd2gltf
-{
+namespace mbgrd2gltf {
 	template <typename T>
-	class Matrix
-	{
+	class Matrix {
 	private: // members
 
 		size_t _size_x;
@@ -53,44 +51,40 @@ namespace mbgrd2gltf
 	public: // methods
 
 		Matrix() :
-		_size_x(0),
-		_size_y(0),
-		_data(nullptr)
-		{}
+			_size_x(0),
+			_size_y(0),
+			_data(nullptr) {
+		}
 
 		Matrix(size_t size_x, size_t size_y) :
-		_size_x(size_x),
-		_size_y(size_y),
-		_data(new T[size_x * size_y])
-		{}
+			_size_x(size_x),
+			_size_y(size_y),
+			_data(new T[size_x * size_y]) {
+		}
 
 		Matrix(Matrix&& other) :
-		_size_x(other._size_x),
-		_size_y(other._size_y),
-		_data(other._data)
-		{
+			_size_x(other._size_x),
+			_size_y(other._size_y),
+			_data(other._data) {
 			other._data = nullptr;
 		}
 
 		Matrix(const Matrix& other) :
-		_size_x(other.size_x()),
-		_size_y(other.size_y()),
-		_data(new T[other.count()])
-		{
+			_size_x(other.size_x()),
+			_size_y(other.size_y()),
+			_data(new T[other.count()]) {
 			size_t len = count();
-			const T *other_data = other.data();
+			const T* other_data = other.data();
 
 			for (size_t i = 0; i < len; ++i)
 				_data[i] = other_data[i];
 		}
 
-		~Matrix()
-		{
+		~Matrix() {
 			delete[] _data;
 		}
 
-		inline T& operator[](size_t i)
-		{
+		inline T& operator[](size_t i) {
 			if (i >= count())
 				throw std::out_of_range("attempted to access index "
 					+ std::to_string(i)
@@ -100,8 +94,7 @@ namespace mbgrd2gltf
 			return _data[i];
 		}
 
-		inline const T& operator[](size_t i) const
-		{
+		inline const T& operator[](size_t i) const {
 			if (i >= count())
 				throw std::out_of_range("attempted to access index "
 					+ std::to_string(i)
@@ -111,8 +104,7 @@ namespace mbgrd2gltf
 			return _data[i];
 		}
 
-		inline const T& at(size_t x, size_t y) const
-		{
+		inline const T& at(size_t x, size_t y) const {
 			if (x >= _size_x || y >= _size_y)
 				throw std::out_of_range("attempted to access element at ("
 					+ std::to_string(x)
@@ -127,8 +119,7 @@ namespace mbgrd2gltf
 			return _data[index(x, y)];
 		}
 
-		inline T& at(size_t x, size_t y)
-		{
+		inline T& at(size_t x, size_t y) {
 			if (x >= _size_x || y >= _size_y)
 				throw std::out_of_range("attempted to access element at ("
 					+ std::to_string(x)
@@ -143,8 +134,7 @@ namespace mbgrd2gltf
 			return _data[index(x, y)];
 		}
 
-		inline size_t index(size_t x, size_t y) const
-		{
+		inline size_t index(size_t x, size_t y) const {
 			return x + y * _size_x;
 		}
 
@@ -154,8 +144,7 @@ namespace mbgrd2gltf
 		inline const T* data() const { return _data; }
 		inline size_t count() const { return _size_x * _size_y; }
 
-		inline Matrix& operator=(Matrix&& other)
-		{
+		inline Matrix& operator=(Matrix&& other) {
 			_size_x = other._size_x;
 			_size_y = other._size_y;
 			_data = other._data;
@@ -165,8 +154,7 @@ namespace mbgrd2gltf
 			return *this;
 		}
 
-		inline Matrix& operator=(const Matrix& other)
-		{
+		inline Matrix& operator=(const Matrix& other) {
 			delete[] _data;
 
 			size_t len = other.count();
@@ -182,6 +170,17 @@ namespace mbgrd2gltf
 
 			return *this;
 		}
+		// iterator definitions
+		using iterator = T*;
+		using const_iterator = const T*;
+
+		iterator begin() { return _data; }
+		const_iterator begin() const { return _data; }
+		const_iterator cbegin() const { return _data; }
+
+		iterator end() { return _data + count(); }
+		const_iterator end() const { return _data + count(); }
+		const_iterator cend() const { return _data + count(); }
 	};
 }
 
