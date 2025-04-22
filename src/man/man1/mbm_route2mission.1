@@ -1,4 +1,4 @@
-.TH mbm_route2mission 1 "19 June 2023" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_route2mission 1 "21 April 2025" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_route2mission\fP \- Macro to convert an \fBmbgrdviz\fP route file into an
 MBARI AUV mission script.
@@ -11,7 +11,7 @@ Version 5.0\fP
 [\fB\-A\fP\fIaltmin/altabort[/altdesired[/altdesired2[/altdesired3]]]\fP
 \fB\-B\fP\fIbehavior\fP \fB\-C\fP\fImissiontime\fP
 \fB\-D\fP\fIdepthconstant[/depthconstant2]\fP \fB\-E\fP\fIstarttime\fP
-\fB\-F\fP\fIforwarddistance\fP \fB\-G\fP\fIgpsmode\fP
+\fB\-F\fP\fIforwarddistance\fP \fB\-G\fP\fIsurfacewaypoint\fP
 \fB\-J\fP\fIdepthprofilefile\fP \fB\-L\fP\fIapproachdepth\fP
 \fB\-M\fP\fI[sensorlist]\fP \fB\-N\fP[\fIspiraldescentaltitude\fP] \fB\-O\fP\fImissionfile\fP
 \fB\-P\fP\fI[startlon/startlat | startdistance]\fP
@@ -73,8 +73,10 @@ altitude and to set \fIaltdesired\fP to a value slightly smaller than \fIaltmin\
 This strategy allows the look-ahead feature to bring the vehicle safely over steep rises
 while otherwise maintaining a constant altitude.
 
-The \fB\-G\fP option allows the user to specify that the vehicle ascend to the surface
-and reset positioning with GPS at the beginning and/or end of survey lines.
+By default the AUV does not surface between the initial descent and the ascent at the end 
+of the mission.The \fB\-G\fP option allows the user to specify that the vehicle ascend to 
+the surface and reset positioning with GPS at a specified waypoint type, wherever that 
+waypoint type occurs during a mission. 
 
 The \fB\-N\fP option allows the user to specify that the vehicle first move to the
 initial survey waypoint, and then follow a spiral descent to the desired survey depth.
@@ -183,15 +185,27 @@ depth along the survey route, and then commands the vehicle to
 fly at least \fIaltmin\fP above that depth.
 .TP
 .B \-G
-\fIgpsmode\fP
+\fIsurfacewaypoint\fP
 .br
-Sets the frequency with which the AUV will surface between survey lines to
-get GPS fixes. By default, the vehicle only get GPS fixes at the surface at
-the beginning and end of the mission, and not surface during the mission.
-If \fIgpsmode\fP = 1, then the vehicle will ascend for gps fixes at
-the start of each survey line. If \fIgpsmode\fP = 2, then the vehicle will
-ascend for gps fixes at the end of each survey line. If \fIgpsmode\fP = 3,
-then the vehicle will ascend for gps fixes at the start and end of each survey line.
+By default the AUV does not surface between the descent at the start and the ascent at the
+end of the mission. This option specifies a waypoint type at which the AUV will pause
+survey data collection, ascend to the surface, obtain positioning through GPS, descend,
+resume data collection, and then resume running the survey mission. The waypoint types
+can be set while interactively editing a survey route using \fBmgrdviz\fP; 
+the options are:
+.br
+     1 = SIMPLE
+     2 = TRANSIT
+     3 = STARTLINE
+     4 = ENDLINE
+     5 = STARTLINE2
+     6 = ENDLINE2
+     7 = STARTLINE3
+     8 = ENDLINE3
+     9 = STARTLINE4
+     10 = ENDLINE4
+     11 = STARTLINE5
+     12 = ENDLINE5
 .TP
 .B \-H
 This "help" flag cause the program to print out a description
