@@ -5,7 +5,7 @@
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
- *    Dale N. Chayes 
+ *    Dale N. Chayes
  *      Center for Coastal and Ocean Mapping
  *      University of New Hampshire
  *      Durham, New Hampshire, USA
@@ -13,7 +13,7 @@
  *      MARUM
  *      University of Bremen
  *      Bremen Germany
- *     
+ *
  *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
  *      Columbia University
@@ -21,19 +21,19 @@
  *
  *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
-/*
- *    The program MBgrd2gltf, including this source file, was created
- *    by a Capstone Project team at the California State University 
- *    Monterey Bay (CSUMB) including Kyle Dowling, Julian Fortin, 
- *    Jesse Benavides, Nicolas Porras Falconio. This team was mentored by:
- *    Mike McCann
- *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, California, USA
- *--------------------------------------------------------------------*/
+ /*
+  *    The program MBgrd2gltf, including this source file, was created
+  *    by a Capstone Project team at the California State University
+  *    Monterey Bay (CSUMB) including Kyle Dowling, Julian Fortin,
+  *    Jesse Benavides, Nicolas Porras Falconio. This team was mentored by:
+  *    Mike McCann
+  *      Monterey Bay Aquarium Research Institute
+  *      Moss Landing, California, USA
+  *--------------------------------------------------------------------*/
 
 #include "geometry.h"
 
-// standard library
+  // standard library
 #include <cmath>
 #include <iostream>
 
@@ -41,25 +41,21 @@
 #define WGS_84_SEMI_MAJOR_AXIS 6378137.0
 #define WGS_84_INVERSE_FLATTENING 298.257223563
 
-namespace mbgrd2gltf
-{
+namespace mbgrd2gltf {
 	Geometry::Geometry(const Bathymetry& bathymetry, const Options& options) :
-	_vertices(get_vertices(bathymetry, options.exaggeration())),
-	_triangles(get_triangles(_vertices))
-	{}
+		_vertices(get_vertices(bathymetry, options.exaggeration())),
+		_triangles(get_triangles(_vertices)) {
+	}
 
-	double Geometry::to_radians(double degrees)
-	{
+	double Geometry::to_radians(double degrees) {
 		return degrees * (3.1415926535 / 180.0);
 	}
 
-	double Geometry::get_longitude(const Bathymetry& bathymetry, size_t x)
-	{
+	double Geometry::get_longitude(const Bathymetry& bathymetry, size_t x) {
 		return bathymetry.longitude_min() + bathymetry.longitude_spacing() * (double)x;
 	}
 
-	double Geometry::get_latitude(const Bathymetry& bathymetry, size_t y)
-	{
+	double Geometry::get_latitude(const Bathymetry& bathymetry, size_t y) {
 		//std::cerr << std::fixed;
 		//std::cerr << "bathymetry.latitude_min(): " << bathymetry.latitude_min() << '\n';
 		//std::cerr << "bathymetry.latitude_max(): " << bathymetry.latitude_max() << '\n';
@@ -67,8 +63,7 @@ namespace mbgrd2gltf
 		return bathymetry.latitude_max() - bathymetry.latitude_spacing() * (double)y;
 	}
 
-	Vertex Geometry::get_earth_centered_vertex(double longitude, double latitude, double altitude, uint32_t id)
-	{
+	Vertex Geometry::get_earth_centered_vertex(double longitude, double latitude, double altitude, uint32_t id) {
 		// Test with:
 		// longitude, latitude, altitude: -122.503094 37.058946 -1020
 		// x, y, z:                       -2737902.2652    -4297133.60787    3822000.89563
@@ -97,14 +92,14 @@ namespace mbgrd2gltf
 		// Mimic https://github.com/GenericMappingTools/gmt/blob/be890649579be45e94269632786d08890a26dfea/src/gmt_map.c#L9094-L9108
 		// and   https://github.com/x3dom/x3dom/blob/3ace18318cd192e424546569932abfe3e1e2346a/src/nodes/Geospatial/GeoCoordinate.js#L380-L443
 		double F = 1.0 / WGS_84_INVERSE_FLATTENING;
-		double e_squared = F * ( 2.0 - F );
+		double e_squared = F * (2.0 - F);
 
 		double sin_lon = sin(to_radians(longitude));
 		double cos_lon = cos(to_radians(longitude));
 		double sin_lat = sin(to_radians(latitude));
 		double cos_lat = cos(to_radians(latitude));
 
-		double N = WGS_84_SEMI_MAJOR_AXIS / sqrt (1.0 - e_squared * sin_lat * sin_lat);
+		double N = WGS_84_SEMI_MAJOR_AXIS / sqrt(1.0 - e_squared * sin_lat * sin_lat);
 		double tmp = (N + altitude) * cos_lat;
 		x = tmp * cos_lon;
 		y = tmp * sin_lon;
@@ -125,20 +120,16 @@ namespace mbgrd2gltf
 		return Vertex(x, y, z, id);
 	}
 
-	Matrix<Vertex> Geometry::get_vertices(const Bathymetry& bathymetry, double vertical_exaggeration)
-	{
+	Matrix<Vertex> Geometry::get_vertices(const Bathymetry& bathymetry, double vertical_exaggeration) {
 		Matrix<Vertex> out(bathymetry.size_x(), bathymetry.size_y());
 		const auto& altitudes = bathymetry.altitudes();
 		uint32_t vertex_id = 1;
 
-		for (size_t y = 0; y < altitudes.size_y(); ++y)
-		{
-			for (size_t x = 0; x < altitudes.size_x(); ++x)
-			{
+		for (size_t y = 0; y < altitudes.size_y(); ++y) {
+			for (size_t x = 0; x < altitudes.size_x(); ++x) {
 				float altitude = altitudes.at(x, y);
 
-				if (!std::isnan(altitude))
-				{
+				if (!std::isnan(altitude)) {
 					double longitude = get_longitude(bathymetry, x);
 					double latitude = get_latitude(bathymetry, y);
 					double adjusted_altitude = (double)altitude * vertical_exaggeration;
@@ -150,8 +141,7 @@ namespace mbgrd2gltf
 		return out;
 	}
 
-	std::vector<Triangle> Geometry::get_triangles(const Matrix<Vertex>& vertices)
-	{
+	std::vector<Triangle> Geometry::get_triangles(const Matrix<Vertex>& vertices) {
 		size_t end_y = vertices.size_y() - 1;
 		size_t end_x = vertices.size_x() - 1;
 		size_t max_triangle_count = 2 * end_x * end_y;
@@ -159,51 +149,48 @@ namespace mbgrd2gltf
 		std::vector<Triangle> out;
 
 		out.reserve(max_triangle_count);
-			
-		for (size_t y = 0; y < end_y; ++y)
-		{
-			for (size_t x = 0; x < end_x; ++x)
-			{
+
+		for (size_t y = 0; y < end_y; ++y) {
+			for (size_t x = 0; x < end_x; ++x) {
 				const auto& bottom_left = vertices.at(x, y);
 				const auto& bottom_right = vertices.at(x + 1, y);
 				const auto& top_left = vertices.at(x, y + 1);
 				const auto& top_right = vertices.at(x + 1, y + 1);
-				
-				if (bottom_left.is_valid() && top_right.is_valid())
-				{
+
+				if (bottom_left.is_valid() && top_right.is_valid()) {
 					if (top_left.is_valid())
-						out.emplace_back(Triangle {
+						out.emplace_back(Triangle{
 							bottom_left.index(),
 							top_left.index(),
 							top_right.index()
-						});
-					
+							});
+
 					if (bottom_right.is_valid())
-						out.emplace_back(Triangle {
+						out.emplace_back(Triangle{
 							bottom_left.index(),
 							top_right.index(),
 							bottom_right.index()
-						});
+							});
 				}
-				else if (bottom_right.is_valid() && top_left.is_valid())
-				{
+				else if (bottom_right.is_valid() && top_left.is_valid()) {
 					if (bottom_left.is_valid())
-						out.emplace_back(Triangle {
+						out.emplace_back(Triangle{
 							bottom_right.index(),
 							bottom_left.index(),
 							top_left.index()
-						});
-					
+							});
+
 					if (top_right.is_valid())
-						out.emplace_back(Triangle {
+						out.emplace_back(Triangle{
 							bottom_right.index(),
 							top_left.index(),
 							top_right.index()
-						});
+							});
 				}
 			}
 		}
 
 		return out;
 	}
+
 }
