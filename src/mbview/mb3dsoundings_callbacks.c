@@ -3567,11 +3567,11 @@ void do_mb3dsdg_action_optimizebiasvalues_r(Widget w, XtPointer client_data, XtP
                                                             &timelag, &snell);
 
     /* set the bias parameters stored for the gui */
-    mb3dsoundings.irollbias = (int)(100 * rollbias);
-    mb3dsoundings.ipitchbias = (int)(100 * pitchbias);
-    mb3dsoundings.iheadingbias = (int)(100 * headingbias);
-    mb3dsoundings.itimelag = (int)(100 * timelag);
-    mb3dsoundings.isnell = (int)(10000 * snell);
+    mb3dsoundings.irollbias = (int)round(100 * rollbias);
+    mb3dsoundings.ipitchbias = (int)round(100 * pitchbias);
+    mb3dsoundings.iheadingbias = (int)round(100 * headingbias);
+    mb3dsoundings.itimelag = (int)round(100 * timelag);
+    mb3dsoundings.isnell = (int)round(10000 * snell);
 
     /* update the gui */
     mb3dsoundings_updategui();
@@ -3613,11 +3613,11 @@ void do_mb3dsdg_action_optimizebiasvalues_p(Widget w, XtPointer client_data, XtP
                                                             &timelag, &snell);
 
     /* set the bias parameters stored for the gui */
-    mb3dsoundings.irollbias = (int)(100 * rollbias);
-    mb3dsoundings.ipitchbias = (int)(100 * pitchbias);
-    mb3dsoundings.iheadingbias = (int)(100 * headingbias);
-    mb3dsoundings.itimelag = (int)(100 * timelag);
-    mb3dsoundings.isnell = (int)(10000 * snell);
+    mb3dsoundings.irollbias = (int)round(100 * rollbias);
+    mb3dsoundings.ipitchbias = (int)round(100 * pitchbias);
+    mb3dsoundings.iheadingbias = (int)round(100 * headingbias);
+    mb3dsoundings.itimelag = (int)round(100 * timelag);
+    mb3dsoundings.isnell = (int)round(10000 * snell);
 
     /* update the gui */
     mb3dsoundings_updategui();
@@ -3654,11 +3654,11 @@ void do_mb3dsdg_action_optimizebiasvalues_h(Widget w, XtPointer client_data, XtP
                                                             &timelag, &snell);
 
     /* set the bias parameters stored for the gui */
-    mb3dsoundings.irollbias = (int)(100 * rollbias);
-    mb3dsoundings.ipitchbias = (int)(100 * pitchbias);
-    mb3dsoundings.iheadingbias = (int)(100 * headingbias);
-    mb3dsoundings.itimelag = (int)(100 * timelag);
-    mb3dsoundings.isnell = (int)(10000 * snell);
+    mb3dsoundings.irollbias = (int)round(100 * rollbias);
+    mb3dsoundings.ipitchbias = (int)round(100 * pitchbias);
+    mb3dsoundings.iheadingbias = (int)round(100 * headingbias);
+    mb3dsoundings.itimelag = (int)round(100 * timelag);
+    mb3dsoundings.isnell = (int)round(10000 * snell);
 
     /* update the gui */
     mb3dsoundings_updategui();
@@ -3700,11 +3700,11 @@ void do_mb3dsdg_action_optimizebiasvalues_rp(Widget w, XtPointer client_data, Xt
                                                             &headingbias, &timelag, &snell);
 
     /* set the bias parameters stored for the gui */
-    mb3dsoundings.irollbias = (int)(100 * rollbias);
-    mb3dsoundings.ipitchbias = (int)(100 * pitchbias);
-    mb3dsoundings.iheadingbias = (int)(100 * headingbias);
-    mb3dsoundings.itimelag = (int)(100 * timelag);
-    mb3dsoundings.isnell = (int)(10000 * snell);
+    mb3dsoundings.irollbias = (int)round(100 * rollbias);
+    mb3dsoundings.ipitchbias = (int)round(100 * pitchbias);
+    mb3dsoundings.iheadingbias = (int)round(100 * headingbias);
+    mb3dsoundings.itimelag = (int)round(100 * timelag);
+    mb3dsoundings.isnell = (int)round(10000 * snell);
 
     /* update the gui */
     mb3dsoundings_updategui();
@@ -3746,11 +3746,11 @@ void do_mb3dsdg_action_optimizebiasvalues_rph(Widget w, XtPointer client_data, X
                                                             &headingbias, &timelag, &snell);
 
     /* set the bias parameters stored for the gui */
-    mb3dsoundings.irollbias = (int)(100 * rollbias);
-    mb3dsoundings.ipitchbias = (int)(100 * pitchbias);
-    mb3dsoundings.iheadingbias = (int)(100 * headingbias);
-    mb3dsoundings.itimelag = (int)(100 * timelag);
-    mb3dsoundings.isnell = (int)(10000 * snell);
+    mb3dsoundings.irollbias = (int)round(100 * rollbias);
+    mb3dsoundings.ipitchbias = (int)round(100 * pitchbias);
+    mb3dsoundings.iheadingbias = (int)round(100 * headingbias);
+    mb3dsoundings.itimelag = (int)round(100 * timelag);
+    mb3dsoundings.isnell = (int)round(10000 * snell);
 
     /* update the gui */
     mb3dsoundings_updategui();
@@ -3785,11 +3785,11 @@ void do_mb3dsdg_action_optimizebiasvalues_t(Widget w, XtPointer client_data, XtP
                                                             &timelag, &snell);
 
     /* set the bias parameters stored for the gui */
-    mb3dsoundings.irollbias = (int)(100 * rollbias);
-    mb3dsoundings.ipitchbias = (int)(100 * pitchbias);
-    mb3dsoundings.iheadingbias = (int)(100 * headingbias);
-    mb3dsoundings.itimelag = (int)(100 * timelag);
-    mb3dsoundings.isnell = (int)(10000 * snell);
+    mb3dsoundings.irollbias = (int)round(100 * rollbias);
+    mb3dsoundings.ipitchbias = (int)round(100 * pitchbias);
+    mb3dsoundings.iheadingbias = (int)round(100 * headingbias);
+    mb3dsoundings.itimelag = (int)round(100 * timelag);
+    mb3dsoundings.isnell = (int)round(10000 * snell);
 
     /* update the gui */
     mb3dsoundings_updategui();
@@ -3826,11 +3826,11 @@ void do_mb3dsdg_action_optimizebiasvalues_s(Widget w, XtPointer client_data, XtP
                                                             &timelag, &snell);
 
     /* set the bias parameters stored for the gui */
-    mb3dsoundings.irollbias = (int)(100 * rollbias);
-    mb3dsoundings.ipitchbias = (int)(100 * pitchbias);
-    mb3dsoundings.iheadingbias = (int)(100 * headingbias);
-    mb3dsoundings.itimelag = (int)(100 * timelag);
-    mb3dsoundings.isnell = (int)(10000 * snell);
+    mb3dsoundings.irollbias = (int)round(100 * rollbias);
+    mb3dsoundings.ipitchbias = (int)round(100 * pitchbias);
+    mb3dsoundings.iheadingbias = (int)round(100 * headingbias);
+    mb3dsoundings.itimelag = (int)round(100 * timelag);
+    mb3dsoundings.isnell = (int)round(10000 * snell);
 
     /* update the gui */
     mb3dsoundings_updategui();

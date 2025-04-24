@@ -22,6 +22,9 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.2beta22    April 25, 2025
+- Version 5.8.2beta21    March 15, 2025
+- Version 5.8.2beta20    February 22, 2025
 - Version 5.8.2beta19    January 19, 2025
 - Version 5.8.2beta18    December 8, 2024
 - Version 5.8.2beta17    November 7, 2024
@@ -51,6 +54,45 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.2beta22 (April 25, 2025)
+
+Macro mbm_route2mission: Altered the \fB-G\fP option so that instead of causing the AUV 
+mission to include surfacing at survey line starting and/or ending waypoints, now \fB-G\fP
+causes AUV surfacing to occur at the specified waypoint type.
+
+Program mbimagelist: New utility program that parses \fBMB-System\fP imagelist structures
+and can also be used to generate metadata files used by other MB-System programs.
+
+#### 5.8.2beta21 (March 15, 2025)
+
+Program mbeditviz: Improved the algorithm used to solve for optimal roll bias, pitch bias, 
+heading bias, time lag, and Snell factor values using sets of soundings selected by area,
+region, and navigation. Previously these optimization problems were solved by a brute 
+force search for values minimizing the bathymetric variance in the selected soundings.
+Now the approach is a more sensible Golden Section Search (e.g. Press et al., Numerical 
+Recipies in C, 2nd ed., 1992). Also, the shell output when executing these optimizations
+is more useful - in particular, the order of the bias parameters now conforms to the order
+used by platform files and mbmakeplatform. In fact, this same order is now used for the 
+bias value sliders in the mbeditviz 3D sounding window.
+
+Library mbview: fix bug that prevented building mbview on Ubuntu because of a missing 
+include of time.h in src/mbview/mbiew_plot.c tied to X11 event debugging code.
+
+#### 5.8.2beta20 (February 22, 2025)
+
+Program mbpreprocess: Added options --kluge-flipsign-roll and --kluge-flipsign-pitch 
+which flip the sign of roll or pitch values, respectively, before they are merged and
+applied to the swath bathymetry.
+
+Program mbauvloglist: Added support for new phins.log files for Dorado AUVs with a Phins
+INS installed.
+
+Program mbm_route2mission: Fixed the -Ggpsmode option so that the AUV mission script will
+actually make the AUV surface at survey line starts and/or ends when gpsmode > 0.
+
+Cmake build system: Augmented the places that Cmake will look for Motif headers and library
+with /opt/local/include/ and /opt/local/lib/ in the file build-utils/FindMotif.cmake)
 
 #### 5.8.2beta19 (January 19, 2025)
 

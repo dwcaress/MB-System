@@ -44,6 +44,7 @@ message("Set install directory using -DCMAKE_INSTALL_PREFIX=directory (default i
 message("The default build mode is release (optimized for performance, not debuggable).")
 message("Enable debugging with -DCMAKE_BUILD_TYPE=Debug")
 message("Build shared/static libraries with -DBUILD_SHARED_LIBS=ON/OFF")
+message("Disable building graphical utilities with -DbuildGUIs=OFF")
 message("Disable building TRN software with -DbuildTRN=OFF")
 message("Disable building photomosaicing software with -DbuildOpenCV=OFF")
 message("Disable supporting GSF format data with -DbuildGSF=OFF")
@@ -79,9 +80,6 @@ if (CMAKE_C_BYTE_ORDER STREQUAL "LITTLE_ENDIAN")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DBYTESWAPPED")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBYTESWAPPED")
 endif()
-
-option(buildGSF "build GSF library" ON)
-option(buildGUIs "build graphical tools" ON)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)

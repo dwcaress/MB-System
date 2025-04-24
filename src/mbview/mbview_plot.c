@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "mb_status.h"
 #include "mb_define.h"
@@ -76,6 +77,7 @@
 
 // #define MBV_DEBUG_GLX 1
 // #define MBV_GET_GLX_ERRORS 1
+// #define MBV_DEBUG_TIMING
 
 /*------------------------------------------------------------------------------*/
 int mbview_reset_glx(size_t instance) {
@@ -189,6 +191,11 @@ int mbview_drawdata(size_t instance, int rez) {
 	else
 		stride = MAX((int)ceil(((double)nxrange) / ((double)data->lorez_dimension)),
 		             (int)ceil(((double)nyrange) / ((double)data->lorez_dimension)));
+
+#ifdef MBV_DEBUG_TIMING
+	fprintf(stderr, "%s:%d:%s: rez:%d  grid: %d %d  dim: %d %d  stride:%d\n", 
+			__FILE__, __LINE__, __FUNCTION__, rez, nxrange, nyrange, data->hirez_dimension, data->lorez_dimension, stride);
+#endif
 
 	/* enable depth test for 3D plots */
 	if (data->display_mode == MBV_DISPLAY_3D || data->display_projection_mode == MBV_PROJECTION_SPHEROID)
@@ -851,6 +858,11 @@ int mbview_plot(size_t instance, int rez) {
 	/* only plot if this view is still active */
 	if (view->glx_init) {
 
+#ifdef MBV_DEBUG_TIMING
+		struct timespec starttime;
+		clock_gettime(CLOCK_REALTIME, &starttime);
+#endif
+
 /* make correct window current for OpenGL */
 #ifdef MBV_DEBUG_GLX
 		fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, __func__, instance,
@@ -986,6 +998,13 @@ int mbview_plot(size_t instance, int rez) {
 			mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
 #endif
 		}
+
+#ifdef MBV_DEBUG_TIMING
+		struct timespec endtime;
+		clock_gettime(CLOCK_REALTIME, &endtime);
+		double runtime = (endtime.tv_sec - starttime.tv_sec) + 0.000000001 * (endtime.tv_nsec - starttime.tv_nsec) ;
+		fprintf(stderr, "%s:%d:%s instance:%zu %s runtime: %.9f\n", __FILE__, __LINE__, __FUNCTION__, instance, __FUNCTION__, runtime);
+#endif
 	}
 
 	const int status = MB_SUCCESS;

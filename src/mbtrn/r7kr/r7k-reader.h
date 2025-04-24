@@ -354,7 +354,6 @@ r7k_drf_t *r7kr_reader_enumerate(r7kr_reader_t *self);
 uint32_t r7kr_reader_frames(r7kr_reader_t *self);
 int64_t r7kr_reader_read(r7kr_reader_t *self, byte *dest, uint32_t len);
 
-
 // functions for peer comparisons
 // used in r7krnpreprocess
 

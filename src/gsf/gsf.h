@@ -178,8 +178,8 @@ extern          "C"
 
 /* Define this version of the GSF library (MAXIMUM 11 characters) */
 #define GSF_MAJOR_VERSION "03"
-#define GSF_MINOR_VERSION "10"
-#define GSF_VERSION      "GSF-v03.10"
+#define GSF_MINOR_VERSION "11"
+#define GSF_VERSION      "GSF-v03.11"
 
 /* Define largest ever expected record size */
 #define GSF_MAX_RECORD_SIZE    524288

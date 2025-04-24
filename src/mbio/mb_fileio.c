@@ -171,7 +171,20 @@ int mb_fileio_get(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
       }
   }
   else if (mb_io_ptr->mbsp != NULL) {
-    mb_io_ptr->mb_io_input_read(verbose, mbio_ptr, size, buffer, error);
+      // mb_io_input_read may return zero or more bytes (possibly fewer than requested)
+      // If zero bytes are returned, error is set (!= MBERROR_NO_ERROR) if an error occurred
+      // otherwise returns -1 on error
+      if ((read_len = mb_io_ptr->mb_io_input_read(verbose, mbio_ptr, size, buffer, error)) <= 0) {
+          if(NULL != error && *error != MB_ERROR_NO_ERROR) {
+              status = MB_FAILURE;
+              // leave error set
+              // *error = MB_ERROR_EOF;
+              *size = read_len;
+          }
+      }
+      else {
+          *error = MB_ERROR_NO_ERROR;
+      }
   }
   else {
       fprintf(stderr,"mb_io file and socket pointers both NULL\n");

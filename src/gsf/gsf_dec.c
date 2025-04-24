@@ -1437,7 +1437,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, const unsigned char *sptr,
                 }
                 else
                 {
-                    ret = DecodeSignedTwoByteArray(&ft->rec.mb_ping.beam_angle_forward, p, ping->number_beams, &ft->rec.mb_ping.scaleFactors, GSF_SWATH_BATHY_SUBRECORD_BEAM_ANGLE_FORWARD_ARRAY, handle);
+                    ret = DecodeTwoByteArray(&ft->rec.mb_ping.beam_angle_forward, p, ping->number_beams, &ft->rec.mb_ping.scaleFactors, GSF_SWATH_BATHY_SUBRECORD_BEAM_ANGLE_FORWARD_ARRAY, handle);
                 }
                 if (ret < 0)
                 {

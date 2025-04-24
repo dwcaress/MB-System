@@ -37,8 +37,8 @@
 #include <stdint.h>
 
 /* Define version and date for this release */
-#define MB_VERSION "5.8.2beta19"
-#define MB_VERSION_DATE "19 January 2025"
+#define MB_VERSION "5.8.2beta21"
+#define MB_VERSION_DATE "15 March 2025"
 
 /* CMake supports current OS's and so there is only one form of RPC and XDR and no mb_config.h file */
 #ifdef CMAKE_BUILD_SYSTEM
@@ -230,6 +230,10 @@ typedef enum {
 /* multiply this by radians to get degrees */
 #define RTD 57.2957795130823230000
 
+/* declare Golden Mean ratios */
+#define GOLDEN_MEAN_SMALL 0.38197
+#define GOLDEN_MEAN_LARGE 0.61803
+
 /* time conversions */
 #define MB_SECINYEAR 31536000.0
 #define MB_SECINDAY 86400.0
@@ -365,6 +369,7 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
 int mb_imagelist_recursion(int verbose, void *imagelist_ptr, bool print, int *recursion, int *error);
 int mb_imagelist_close(int verbose, void **imagelist_ptr, int *error);
 int mb_get_relative_path(int verbose, char *path, char *pwd, int *error);
+int mb_get_absolute_path(int verbose, char *path, char *pwd, int *error);
 int mb_get_shortest_path(int verbose, char *path, int *error);
 int mb_get_basename(int verbose, char *path, int *error);
 int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], bool *file_in_bounds, int *error);
