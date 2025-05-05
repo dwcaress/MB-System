@@ -2,11 +2,11 @@
 #include <climits>
 #include <array>
 #include <vector>
-#include <vtk/vtkProperty.h>
-#include <vtk/vtkTextProperty.h>
-#include <vtk/vtkErrorCode.h>
-#include <vtk/vtkCellData.h>
-#include <vtk/vtkPointData.h>
+#include <vtkProperty.h>
+#include <vtkTextProperty.h>
+#include <vtkErrorCode.h>
+#include <vtkCellData.h>
+#include <vtkPointData.h>
 #include "TopoDataItem.h"
 #include "TopoColorMap.h"
 
