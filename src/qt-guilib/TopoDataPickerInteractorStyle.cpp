@@ -1,4 +1,4 @@
-#include <vtk/vtkRenderer.h>
+#include <vtkRenderer.h>
 #include "TopoDataPickerInteractorStyle.h"
 #include "TopoDataItem.h"
 
