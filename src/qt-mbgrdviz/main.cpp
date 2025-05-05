@@ -3,12 +3,12 @@
 #include <QQmlApplicationEngine>
 #include <QQuickWindow>
 #include <QtGraphs/QAbstractAxis>    /// TEST
-#include <vtk-9.3/QQuickVTKItem.h>
-#include <vtk-9.3/vtkPolyDataMapper.h>
-#include <vtk-9.3/vtkActor.h>
-#include <vtk-9.3/vtkRenderer.h>
-#include <vtk-9.3/vtkConeSource.h>
-#include <vtk-9.3/vtkRenderWindow.h>
+#include <QQuickVTKItem.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkActor.h>
+#include <vtkRenderer.h>
+#include <vtkConeSource.h>
+#include <vtkRenderWindow.h>
 #include "TopoDataItem.h"
 #include "SharedConstants.h"
 #include "GuiNames.h"
