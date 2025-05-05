@@ -27,7 +27,7 @@ find_package(
   COMPONENTS  Gui OpenGL Quick
   REQUIRED)
 
-find_package(VTK 9.3 REQUIRED COMPONENTS GUISupportQtQuick)
+find_package(VTK 9.3 COMPONENTS GUISupportQtQuick)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
