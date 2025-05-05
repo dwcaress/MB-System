@@ -9,6 +9,7 @@ import "ui-components"
 
 import VTK 9.3
 import SharedConstants 1.1
+import GuiNames 1.1
 
 
 Window {
@@ -22,6 +23,10 @@ Window {
         id: constants
     }
 
+    GuiNames {
+      id: guiNames
+    }
+    
     // Short-hand reference to supported color maps
     property variant cmaps: constants.cmaps
 
@@ -37,7 +42,14 @@ Window {
         mainWindow.profileSig(999, 'profileSig()')
     }
 
+    property int myVal: GuiNames.Speed
+
     Component.onCompleted: {
+
+      console.log('GuiNames.Depth =  ', GuiNames.Depth)
+      console.log('GuiNames.Heading =  ', GuiNames.Heading)            
+      console.log('guiNames.objectName(Speed): ', guiNames.objectName(GuiNames.Speed))
+
     }
 
     ActionGroup {
@@ -58,7 +70,7 @@ Window {
 
             Action { text: qsTr('Open grid or swath...') ;
                 onTriggered: {console.log('show file dialog')
-                    gridfileDialog.open()}
+                    datafileDialog.open()}
             }
             Action {
                 text: qsTr('Exit')
@@ -149,7 +161,7 @@ Window {
         }
 
         Menu {
-            title: 'Mouse'
+            title: 'Mouse mode'
             Action {
                 text: qsTr('&Pan and zoom'); checkable: true;
                 ActionGroup.group: exclusiveActions
@@ -162,7 +174,7 @@ Window {
             }
 
             Action {
-                text: qsTr('&Rotate model'); checkable: true;
+                text: qsTr('&Rotate view'); checkable: true;
                 ActionGroup.group: exclusiveActions
                 onTriggered: { }
             }
@@ -171,6 +183,12 @@ Window {
                 text: qsTr('&Lighting'); checkable: true;
                 ActionGroup.group: exclusiveActions
                 onTriggered: { }
+            }
+
+            Action {
+                text: qsTr('&Ruler'); checkable: true;
+                ActionGroup.group: exclusiveActions
+                onTriggered: { topoProfileWindow.show() }
             }
 
         }
@@ -200,8 +218,6 @@ Window {
                 }
                 console.log('xmin: ', xmin, '  xmax: ', xmax);
                 console.log('ymin: ', ymin, '  ymax: ', ymax);
-
-                console.log('*** topoTestInt: ', profileGraph.topoTestInt)
 
                 // Set graph axes ranges
                 profileGraph.xAxis.min = xmin
@@ -233,13 +249,13 @@ Window {
 
 
     FileDialog {
-        id: gridfileDialog
+        id: datafileDialog
         title: qsTr('Open grid or swath file')
         // nameFilters: ['Swath files (*.grd *.mb[0-9]*)']
         nameFilters: ['Swath files (*.grd *.mb[0-9][0-9])']
         onAccepted: {
             console.log('accepted ' + selectedFile);
-            topoDataItem.loadGridfile(selectedFile);
+            topoDataItem.loadDatafile(selectedFile);
         }
     }
 
@@ -255,6 +271,8 @@ Window {
 
     Window {
         id: topoProfileWindow
+	width: 500
+	height: 500
         visible: false
         TopoProfileGraph {
             id: profileGraph
