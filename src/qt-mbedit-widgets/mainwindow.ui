@@ -600,7 +600,7 @@
   <customwidget>
    <class>ClickableLabel</class>
    <extends>QLabel</extends>
-   <header>/home/oreilly/MB-System/src/qt-mbedit-widgets/ClickableLabel.h</header>
+   <header>ClickableLabel.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
