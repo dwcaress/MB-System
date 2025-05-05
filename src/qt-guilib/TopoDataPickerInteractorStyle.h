@@ -1,10 +1,10 @@
 #ifndef TopoDataPickerInteractorStyle_H
 #define TopoDataPickerInteractorStyle_H
 #include <vtkInteractorStyleTrackballCamera.h>
-#include <vtk/vtkGenericRenderWindowInteractor.h>
-#include <vtk/vtkDataSetMapper.h>
-#include <vtk/vtkActor.h>
-#include <vtk/vtkPolyData.h>
+#include <vtkGenericRenderWindowInteractor.h>
+#include <vtkDataSetMapper.h>
+#include <vtkActor.h>
+#include <vtkPolyData.h>
 
 namespace mb_system {
 
