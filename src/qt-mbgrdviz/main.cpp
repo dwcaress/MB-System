@@ -1,3 +1,4 @@
+#include <sstream>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQuickWindow>
@@ -9,9 +10,8 @@
 #include <vtk-9.3/vtkConeSource.h>
 #include <vtk-9.3/vtkRenderWindow.h>
 #include "TopoDataItem.h"
-#include "TopoProfileItem.h"
 #include "SharedConstants.h"
-#include "PixmapImage.h"
+#include "GuiNames.h"
 
 using namespace std;
 using namespace mb_system;
@@ -20,12 +20,12 @@ using namespace mb_system;
 
 int main(int argc, char* argv[])
 {
-  char *gridFilename = nullptr;
+  char *topoDataFile = nullptr;
 
   bool error = false;
   for (int i = 1; i < argc; i++) {
     if (!strcmp(argv[i], "-I") && i <= argc-2) {
-      gridFilename = argv[++i];
+      topoDataFile = argv[++i];
     }
     else if (!strcmp(argv[i], "-testpoints") && i <= argc-2) {
       // Parse two points from next argument:
@@ -55,7 +55,6 @@ int main(int argc, char* argv[])
     exit(1);
   }
 
-
   // Sets the graphics API to OpenGLRhi and sets up the surface format for
   // intermixed VTK and QtQuick rendering. 
   QQuickVTKItem::setGraphicsApi();
@@ -67,16 +66,11 @@ int main(int argc, char* argv[])
   // Register TopoDataItem type
   qmlRegisterType<TopoDataItem>("VTK", 9, 3, "TopoDataItem");
 
-  // Register SharedConstants type
   qmlRegisterType<SharedConstants>("SharedConstants", 1, 1, "SharedConstants");
 
-  // Register TopoProfileItem type
-  qmlRegisterType<TopoProfileItem>("TopoProfileItem", 1, 0, "TopoProfileItem");
-  
-  // ui-components/TopoProfileWindow.qml instantiates PixmapImage, and C++
-  // will draw to that - so register PixmapImage class with QML
-  qmlRegisterType<mb_system::PixmapImage>("PixmapImage", 1, 0,
-					  "PixmapImage");      
+  // Register GuiNames type
+  qmlRegisterType<GuiNames>("GuiNames", 1, 1, "GuiNames");
+
   engine.load(QUrl("qrc:/main.qml"));
  
   QObject* topLevel = engine.rootObjects().value(0);
@@ -89,10 +83,10 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  // Specifiy input file for TopoDataItem that was specified on command line
+  // Specify input file for TopoDataItem that was specified on command line
   // (could be nullptr); will be loaded and displayed when item is
   // initialized (if not nullptr)
-  item->setGridFilename(gridFilename);
+  item->setDataFilename(topoDataFile);
   
   QQuickWindow* window = qobject_cast<QQuickWindow*>(topLevel);
   window->show();
