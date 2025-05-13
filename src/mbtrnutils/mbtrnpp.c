@@ -4282,6 +4282,7 @@ int main(int argc, char **argv) {
               }
             }
           }
+
           if(beam_start<0 || beam_end<0)
           mlog_tprintf(mbtrnpp_mlog_id,"e,ping array boundary violation beam_start/end[%d/%d] n_pings_read[%d]\n",beam_start,beam_end,n_pings_read);
 
@@ -4291,7 +4292,7 @@ int main(int argc, char **argv) {
 
           /* apply decimation - only consider outputting decimated soundings */
             if(mbtrn_cfg->n_output_soundings == 0) {
-                mlog_tprintf(mbtrnpp_mlog_id,"e,n_outputsoundings == 0 - invalid\n", beam_start, beam_end, n_pings_read);
+                mlog_tprintf(mbtrnpp_mlog_id,"e,n_outputsoundings == 0 - invalid start[%d] end[%d] n_pings[%d]\n", beam_start, beam_end, n_pings_read);
             }
           beam_decimation = ((beam_end - beam_start + 1) / mbtrn_cfg->n_output_soundings);
             if(beam_decimation <= 0) {
