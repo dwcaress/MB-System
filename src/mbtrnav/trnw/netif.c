@@ -560,12 +560,12 @@ int netif_pub(netif_t *self, char *output_buffer, size_t len, size_t *r_iobytes)
                     MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_CLI_PUBN]);
                     MST_COUNTER_ADD(self->profile->stats->status[NETIF_STA_CLI_PUB_BYTES],iobytes);
 
-                    MX_LPRINT(NETIF, 2,  "[SVCPUB.%s]:TX - ret[%5d] bytes id[%d/%s:%s] hbtime[%.2lf]\n", self->port_name, iobytes, idx, psub->chost, psub->service, psub->hbtime);
+                    MX_LPRINT(NETIF, 2,  "[SVCPUB.%s]:TX - ret[%5d] bytes id[%d/%s:%s] len[%zu] hbtime[%.2lf]\n", self->port_name, iobytes, idx, psub->chost, psub->service, len, psub->hbtime);
                     if(NULL != r_iobytes) {
                         *r_iobytes = iobytes;
                     }
                 }else{
-                    MX_LPRINT(NETIF, 4,  "\n[SVCPUB.%s]:ERR - sendto ret[%d] id[%d/%s:%s] [%d/%s]\n", self->port_name, iobytes, idx, psub->chost, psub->service, errno, strerror(errno));
+                    MX_LPRINT(NETIF, 4,  "\n[SVCPUB.%s]:ERR - sendto ret[%d] id[%d/%s:%s] len[%zu] [%d/%s]\n", self->port_name, iobytes, idx, psub->chost, psub->service, len, errno, strerror(errno));
                     //                mlog_tprintf(self->mlog_id,"[PUB.%s]:ERR - sendto ret[%d] id[%d/%s:%s] [%d/%s]\n",self->port_name,iobytes,idx,psub->chost, psub->service,errno,strerror(errno));
                     MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPUB_TX]);
                 }
