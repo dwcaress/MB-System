@@ -112,6 +112,10 @@ set(CMAKE_INSTALL_MANPAGES share/man)
 set(CMAKE_INSTALL_DOC share/doc)
 set(levitusDir "share/mbsystem")
 
+# Set minimum required VTK version
+set(MIN_VTK_VERSION "9.3")
+
+
 include(GNUInstallDirs)
 include(CTest)
 

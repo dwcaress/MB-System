@@ -28,7 +28,8 @@ find_package(
   REQUIRED)
   
 find_package(GMT REQUIRED)
-find_package(VTK 9.3)
+message("Fint minimum VTK_VERSION ${MIN_VTK_VERSION}")
+find_package(VTK ${MIN_VTK_VERSION})
 message("Found VTK_VERSION ${VTK_VERSION}")
 
 find_package(LibPROJ REQUIRED)

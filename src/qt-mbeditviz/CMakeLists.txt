@@ -27,7 +27,7 @@ find_package(
   COMPONENTS Gui Widgets Quick
   REQUIRED)
 
-find_package(VTK 9.3 COMPONENTS GUISupportQtQuick)
+find_package(VTK ${MIN_VTK_VERSION} COMPONENTS GUISupportQtQuick)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
