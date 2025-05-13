@@ -4700,10 +4700,10 @@ int main(int argc, char **argv) {
       } else if (mbtrn_cfg->input_mode == INPUT_MODE_SERIAL) {
           if(g_interrupted) {
               fprintf(stderr, "serial input mode - interrupt received\n");
-              mlog_tprintf(mbtrnpp_mlog_id,"e,interrupt received - socket input mode\n");
+              mlog_tprintf(mbtrnpp_mlog_id,"e,interrupt received - serial input mode\n");
           } else {
               fprintf(stderr, "serial input mode - continue (probably shouldn't be here)\n");
-              mlog_tprintf(mbtrnpp_mlog_id,"e,invalid code path - socket input mode\n");
+              mlog_tprintf(mbtrnpp_mlog_id,"e,invalid code path - serial input mode\n");
               read_data = true;
           }
 
