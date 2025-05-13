@@ -369,6 +369,7 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
 int mb_imagelist_recursion(int verbose, void *imagelist_ptr, bool print, int *recursion, int *error);
 int mb_imagelist_close(int verbose, void **imagelist_ptr, int *error);
 int mb_get_relative_path(int verbose, char *path, char *pwd, int *error);
+int mb_get_absolute_path(int verbose, char *path, char *pwd, int *error);
 int mb_get_shortest_path(int verbose, char *path, int *error);
 int mb_get_basename(int verbose, char *path, int *error);
 int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], bool *file_in_bounds, int *error);

@@ -4521,6 +4521,60 @@ int mb_get_relative_path(int verbose, char *path, char *ipwd, int *error) {
 
   return (status);
 }
+
+/*--------------------------------------------------------------------*/
+int mb_get_absolute_path(int verbose, char *path, char *ipwd, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:       %d\n", verbose);
+    fprintf(stderr, "dbg2       path:          %s\n", path);
+    fprintf(stderr, "dbg2       ipwd:          %s\n", ipwd);
+  }
+
+  /* get string lengths */
+  int pathlen = strlen(path);
+  int pwdlen = strlen(ipwd);
+
+#ifdef WIN32
+  /* The approximation here is to try to make a Windows path like a unix one and expect that
+     the same algorithm still applies. Off course, there probably many ways this can go wrong
+     because we trim the first 2 chars in strings like C:\blabla and don't put it back. But
+     test have shown that it was maybe not necessary.
+  */
+  cvt_to_nix_path(path);
+  cvt_to_nix_path(ipwd);
+#endif
+
+  int status = MB_SUCCESS;
+  char absolutepath[MB_PATH_MAXLINE] = {""};
+  char *bufptr = NULL;
+
+  /* if path starts with '/' then it is already an absolute path so do nothing 
+  	 otherwise concatenate pwd and path and then shorten the path if possible */
+  if (pathlen > 0 && path[0] != '/') {
+    strncpy(absolutepath, ipwd, MB_PATH_MAXLINE);
+    strncat(absolutepath, "/", MB_PATH_MAXLINE - strlen(ipwd));
+    strncat(absolutepath, path, MB_PATH_MAXLINE - strlen(ipwd) - 1);
+    strncpy(path, absolutepath, MB_PATH_MAXLINE);
+  }
+  mb_get_shortest_path(verbose, path, error);
+
+  /* no error even if no path or pwd */
+  status = MB_SUCCESS;
+  *error = MB_ERROR_NO_ERROR;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       path:          %s\n", path);
+    fprintf(stderr, "dbg2       error:         %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:      %d\n", status);
+  }
+
+  return (status);
+}
 /*--------------------------------------------------------------------*/
 int mb_get_shortest_path(int verbose, char *path, int *error) {
   if (verbose >= 2) {
