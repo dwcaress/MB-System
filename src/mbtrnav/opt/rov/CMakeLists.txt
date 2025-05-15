@@ -124,7 +124,6 @@ add_library(trnxplug
     plug-oisled2.cpp
     plug-lassmb.cpp
     plug-xmb1.cpp
-    ${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw/GeoCon.cpp
 )
 
 target_include_directories(trnxplug PRIVATE
@@ -142,6 +141,7 @@ target_include_directories(trnxplug PRIVATE
 target_link_libraries(trnxplug PRIVATE
     newmat
     geolib
+    geocon
     trnw
     qnx
     mb1
@@ -149,7 +149,6 @@ target_link_libraries(trnxplug PRIVATE
     udpms
     trncli
     NetCDF::NetCDF
-    LibPROJ::LibPROJ
     lcm
 )
 #
