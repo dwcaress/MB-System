@@ -3288,6 +3288,7 @@ int main(int argc, char **argv) {
 
   int i_ping_process;
   int beam_start, beam_end, beam_decimation;
+    double Kbd;
 //  int i, ii, j, jj;
 //  int jj0, jj1, dj;
 
@@ -4264,28 +4265,34 @@ int main(int argc, char **argv) {
           threshold_tangent = tan(DTR * 0.5 * mbtrn_cfg->swath_width);
           beam_start = ping[i_ping_process].beams_bath - 1;
           beam_end = 0;
-          for (int j = 0; j < ping[i_ping_process].beams_bath; j++) {
-            if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
-              if(ping[i_ping_process].bath[j] <= ping[i_ping_process].sensordepth) {
-                // invalidate tangent calculation because the denominator zero or negative
-                tangent = threshold_tangent + 1.0;
-              } else {
-                tangent = ping[i_ping_process].bathacrosstrack[j]
-                            / (ping[i_ping_process].bath[j] - ping[i_ping_process].sensordepth);
-              }
-              if (fabs(tangent) > threshold_tangent && mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
-                ping[i_ping_process].beamflag_filter[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
-                n_soundings_trimmed++;
-              }
-              else {
-                beam_start = MIN(beam_start, j);
-                beam_end = MAX(beam_end, j);
-              }
+
+            for (int j = 0; j < ping[i_ping_process].beams_bath; j++) {
+
+                if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
+
+                    if(ping[i_ping_process].bath[j] <= ping[i_ping_process].sensordepth) {
+                        // invalidate tangent calculation because the denominator zero or negative
+                        tangent = threshold_tangent + 1.0;
+                        fprintf(stderr,"invalid bath beam[%d]: b %.3lf sd %.3lf\n", j, ping[i_ping_process].bath[j], ping[i_ping_process].sensordepth);
+                    } else {
+                        tangent = ping[i_ping_process].bathacrosstrack[j]
+                        / (ping[i_ping_process].bath[j] - ping[i_ping_process].sensordepth);
+                    }
+
+                    if (fabs(tangent) > threshold_tangent && mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
+
+                        ping[i_ping_process].beamflag_filter[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+                        n_soundings_trimmed++;
+                    }
+                    else {
+                        beam_start = MIN(beam_start, j);
+                        beam_end = MAX(beam_end, j);
+                    }
+                }
             }
-          }
 
           if(beam_start<0 || beam_end<0)
-          mlog_tprintf(mbtrnpp_mlog_id,"e,ping array boundary violation beam_start/end[%d/%d] n_pings_read[%d]\n",beam_start,beam_end,n_pings_read);
+              mlog_tprintf(mbtrnpp_mlog_id,"e,ping array boundary violation beam_start/end[%d/%d] n_pings_read[%d]\n",beam_start,beam_end,n_pings_read);
 
           // test boundaries (zero min)
           beam_start = MAX(beam_start, 0);
@@ -4296,19 +4303,61 @@ int main(int argc, char **argv) {
                 mlog_tprintf(mbtrnpp_mlog_id,"e,n_outputsoundings == 0 - invalid start[%d] end[%d] n_pings[%d]\n", beam_start, beam_end, n_pings_read);
             }
           beam_decimation = ((beam_end - beam_start + 1) / mbtrn_cfg->n_output_soundings);
+
             if(beam_decimation <= 0) {
                 beam_decimation = 1;
                 static bool warned = false;
                 if(!warned)
-                mlog_tprintf(mbtrnpp_mlog_id,"e,beam_decimation <= 0 - invalid end[%d] start[%d] using decimation[%d]\n", beam_end, beam_start, beam_decimation);
-                warned = true;
+                mlog_tprintf(mbtrnpp_mlog_id,"e,beam_decimation <= 0 - invalid end[%d] start[%d] sounding %d using decimation[%d]\n", beam_end, beam_start, mbtrn_cfg->n_output_soundings, beam_decimation);
+               warned = true;
             }
+
+            // compute floating point decimation factor
+            double bs = fabs(beam_end - beam_start + 1.);
+            double bn = mbtrn_cfg->n_output_soundings;
+            // ensure 0 < K < 1
+            Kbd = bn > bs ? bs/bn : bn/bs;
+
+//            mlog_tprintf(mbtrnpp_mlog_id,"i,bs %4d be %4d (be-bs) %4d N %d BD %8.3lf\n", beam_start, beam_end, (beam_end-beam_start), mbtrn_cfg->n_output_soundings, Kbd);
+
           int dj = mbtrn_cfg->median_filter_n_across / 2;
           n_output = 0;
+
           for (int j = beam_start; j <= beam_end; j++) {
 
+              if(!mbtrn_cfg->median_filter_en) {
+                  // median filter disabled, decimation only
+
+                  // Decimate to arbitrary number of beams (output-soundings),
+                  // distributed evenly across swath width:
+                  // filtered beam number (rounded) rdbn = ROUND(beam_num * K)
+                  // where K is beam decimation factor, 0 < K < 1:
+                  //   bs = fabs(beam_end - beam_start + 1.);
+                  //   bn = mbtrn_cfg->n_output_soundings;
+                  //   K = bn > bs ? bs/bn : bn/bs;
+
+                  // calculate rdbn for current and previous beam
+                  // (don't violate beam array boundary)
+                  double fbn[2] = { (j == 0 ? 0 : (j-1) * Kbd), j * Kbd};
+                  double rfbn[2] = {round(fbn[0]), round(fbn[1])};
+
+                  // fprintf(stderr,"beam[%4d] bs %4d be %4d (%4d) N %d bd %8.3lf mm {%8.3lf, %8.3lf} rr {%8.3lf, %8.3lf} %c\n", j, beam_start, beam_end, (beam_end-beam_start), mbtrn_cfg->n_output_soundings, Kbd, fbn[0], fbn[1], rfbn[0], rfbn[1], (rfbn[0]!=rfbn[1]?'*':'-'));
+
+                  if(rfbn[0] == rfbn[1]) {
+                      // reject beam when
+                      //   round(beam[i] * K) == round(beam[i-1] * K)
+                      // i.e. filtered beam[i] duplicates beam[i-1]
+                      ping[i_ping_process].beamflag_filter[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+                      n_soundings_decimated++;
+                  } else {
+                      n_output++;
+                  }
+                  continue;
+              }
+
             if (beam_decimation > 0 && (j - beam_start) % beam_decimation == 0) {
-              if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
+
+                if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
                 /* apply median filtering to this sounding */
                 if (median_filter_n_total > 1) {
                   /* accumulate soundings for median filter */
