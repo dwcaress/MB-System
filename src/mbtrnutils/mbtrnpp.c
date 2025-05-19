@@ -3288,7 +3288,7 @@ int main(int argc, char **argv) {
 
   int i_ping_process;
   int beam_start, beam_end, beam_decimation;
-    double Kbd;
+    double Kd;
 //  int i, ii, j, jj;
 //  int jj0, jj1, dj;
 
@@ -4315,10 +4315,10 @@ int main(int argc, char **argv) {
             // compute floating point decimation factor
             double bs = fabs(beam_end - beam_start + 1.);
             double bn = mbtrn_cfg->n_output_soundings;
-            // ensure 0 < K < 1
-            Kbd = bn > bs ? bs/bn : bn/bs;
+            // ensure 0 < Kd < 1
+            Kd = bn > bs ? bs/bn : bn/bs;
 
-//            mlog_tprintf(mbtrnpp_mlog_id,"i,bs %4d be %4d (be-bs) %4d N %d BD %8.3lf\n", beam_start, beam_end, (beam_end-beam_start), mbtrn_cfg->n_output_soundings, Kbd);
+//            mlog_tprintf(mbtrnpp_mlog_id,"i,bs %4d be %4d (be-bs) %4d N %d BD %8.3lf\n", beam_start, beam_end, (beam_end-beam_start), mbtrn_cfg->n_output_soundings, Kd);
 
           int dj = mbtrn_cfg->median_filter_n_across / 2;
           n_output = 0;
@@ -4336,14 +4336,14 @@ int main(int argc, char **argv) {
                   //   bn = mbtrn_cfg->n_output_soundings;
                   //   K = bn > bs ? bs/bn : bn/bs;
 
-                  // calculate rdbn for current and previous beam
+                  // calculate scaled beam number (nr) for current and previous beam
                   // (don't violate beam array boundary)
-                  double fbn[2] = { (j == 0 ? 0 : (j-1) * Kbd), j * Kbd};
-                  double rfbn[2] = {round(fbn[0]), round(fbn[1])};
+                  double ns[2] = { (j == 0 ? 0 : (j-1) * Kd), j * Kd};
+                  double nr[2] = {round(ns[0]), round(ns[1])};
 
-                  // fprintf(stderr,"beam[%4d] bs %4d be %4d (%4d) N %d bd %8.3lf mm {%8.3lf, %8.3lf} rr {%8.3lf, %8.3lf} %c\n", j, beam_start, beam_end, (beam_end-beam_start), mbtrn_cfg->n_output_soundings, Kbd, fbn[0], fbn[1], rfbn[0], rfbn[1], (rfbn[0]!=rfbn[1]?'*':'-'));
+                  // fprintf(stderr,"beam[%4d] bs %4d be %4d (%4d) N %d bd %8.3lf mm {%8.3lf, %8.3lf} rr {%8.3lf, %8.3lf} %c\n", j, beam_start, beam_end, (beam_end-beam_start), mbtrn_cfg->n_output_soundings, Kd, ns[0], ns[1], nr[0], nr[1], (nr[0]!=nr[1]?'*':'-'));
 
-                  if(rfbn[0] == rfbn[1]) {
+                  if(nr[0] == nr[1]) {
                       // reject beam when
                       //   round(beam[i] * K) == round(beam[i-1] * K)
                       // i.e. filtered beam[i] duplicates beam[i-1]
