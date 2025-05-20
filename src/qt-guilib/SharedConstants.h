@@ -4,6 +4,17 @@
 #include <QStringList>
 #include <iostream>
 
+#define MousePanAndZoom "Pan and zoom"
+#define MouseRotateModel "Rotate model"
+#define MouseRotateView "Rotate view"
+#define MouseShading "Shading"
+#define MousePickArea "Pick area"
+#define MouseEditSites "Edit sites"
+#define MouseEditRoutes "Edit routes"
+#define MousePickNav "Pick nav"
+#define MousePickNavFile "Pick nav file"
+
+
 namespace mb_system {
 /// Constants shared between C++ and QML code
 class SharedConstants : public QObject

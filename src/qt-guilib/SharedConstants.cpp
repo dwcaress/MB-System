@@ -22,14 +22,14 @@ SharedConstants::SharedConstants() {
       colorMapsList_.append(colorMapNames[i]);
     }
 
-    mouseModes_ += "Pan and zoom";
-    mouseModes_ += "Rotate model";
-    mouseModes_ += "Rotate view";
-    mouseModes_ += "Shading";
-    mouseModes_ += "Pick area";
-    mouseModes_ += "Edit sites";
-    mouseModes_ += "Edit routes";
-    mouseModes_ += "Pick nav";
-    mouseModes_ += "Pick nav file";    
+    mouseModes_ += MousePanAndZoom;
+    mouseModes_ += MouseRotateModel;
+    mouseModes_ += MouseRotateView;
+    mouseModes_ += MouseShading;
+    mouseModes_ += MousePickArea;
+    mouseModes_ += MouseEditSites;
+    mouseModes_ += MouseEditRoutes;
+    mouseModes_ += MousePickNav;
+    mouseModes_ += MousePickNavFile;
       
 }
