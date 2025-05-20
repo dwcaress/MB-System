@@ -30,6 +30,9 @@ Window {
     // Short-hand reference to supported color maps
     property variant cmaps: constants.cmaps
 
+    // Short-hand reference to supported mouse modes
+    property variant mouseModes: constants.mouseModes
+
     /// TEST TEST TEST
     property int mainTestInt: 77
     property string mainTestString: 'hello sailor!'
@@ -50,11 +53,6 @@ Window {
       console.log('GuiNames.Heading =  ', GuiNames.Heading)            
       console.log('guiNames.objectName(Speed): ', guiNames.objectName(GuiNames.Speed))
 
-    }
-
-    ActionGroup {
-        id: colorActions
-        exclusive: true
     }
 
     ActionGroup {
@@ -108,90 +106,62 @@ Window {
                 }
             }
 
-            Menu {
-                title: qsTr('&Color map')
-                id: colormapMenu
 
-                // Add actions when menu is complete
-                Component.onCompleted: {
-                    // Insert menu items here, with number of items and
-                    // item names as specified in the cmaps[] array that was
-                    // retrieved from C++
-                    for (var i = 0; i < cmaps.length; i++)  {
-                        console.log('colormap: ', cmaps[i]);
-                        // Build QML string that specifies menu Action to insert
-                        var qmlStr = 'import QtQuick.Controls 2.3; ' +
-                                'Action {id: myAction; checkable: true; ';
+	Menu {
+	    title: 'Color map'
+	    id: colormapMenu
 
-                        // First item is checked
-                        if (i == 0) { qmlStr += 'checked: true; '; }
+            property string currentCmap
+	    
+            Repeater {
+	      model: cmaps
+	      visible: true
+	      MenuItem {
+	        text: modelData; checkable: true;
+		checked: colormapMenu.currentCmap == modelData
+                onTriggered: {
+		               colormapMenu.currentCmap = modelData
+		               console.log('selected ', modelData);
+		               topoDataItem.setColormap(modelData)
+		}		
+	      }
+	    }
+	  }
 
-                        qmlStr += 'ActionGroup.group: colorActions; ';
-                        qmlStr += 'text: \'' + cmaps[i] + '\'; ';
-
-                        qmlStr += 'onTriggered: { console.log(\'selected ' +
-                                cmaps[i] + '\');' +
-                                'topoDataItem.setColormap(\'' +
-                                cmaps[i] +
-                                '\')' +
-                                '}'
-                        qmlStr += '} '
-
-                        console.log('qmlStr: ', qmlStr)
-                        // Create the menu Action
-                        var obj =
-                                Qt.createQmlObject(qmlStr,
-                                                   colormapMenu,
-                                                   'dynamicAction');
-
-                        // Add created action to menu
-                        colormapMenu.addAction(obj)
-                    }
-
-                }
-
-            }
-
+  
             // Profile
             Action {
                 text: qsTr('&Profile');
-                onTriggered: { console.log('show profile'); topoProfileWindow.show() }
+                onTriggered: { console.log('show profile');
+		topoProfileWindow.show() }
             }
 
         }
 
-        Menu {
-            title: 'Mouse mode'
-            Action {
-                text: qsTr('&Pan and zoom'); checkable: true;
-                ActionGroup.group: exclusiveActions
-                onTriggered: { }
-            }
-            Action {
-                text: qsTr('&Rotate model'); checkable: true;
-                ActionGroup.group: exclusiveActions
-                onTriggered: { }
-            }
+	Menu {
+	    title: 'Mouse mode'
+	    id: mouseModeMenu
 
-            Action {
-                text: qsTr('&Rotate view'); checkable: true;
-                ActionGroup.group: exclusiveActions
-                onTriggered: { }
-            }
+            property string currentMode: ''
 
-            Action {
-                text: qsTr('&Lighting'); checkable: true;
-                ActionGroup.group: exclusiveActions
-                onTriggered: { }
-            }
+            Repeater {
+	      model: mouseModes
+	      visible: true
+	      
+	      MenuItem {
+	        text: modelData
+		checkable: true
+		checked: mouseModeMenu.currentMode === modelData
+		
+                onTriggered: {
+		               mouseModeMenu.currentMode = modelData
+		               console.log('selected ', modelData);
+		               topoDataItem.setMouseMode(modelData)
+	        }		
+	      }
+	    }
+	  }
 
-            Action {
-                text: qsTr('&Ruler'); checkable: true;
-                ActionGroup.group: exclusiveActions
-                onTriggered: { topoProfileWindow.show() }
-            }
-
-        }
     }
 
     ColumnLayout {
