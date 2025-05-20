@@ -49,13 +49,12 @@ set(src
     GmtGridData.cpp
     GmtGridReader.cpp
     GmtGridSurface.cpp
+    InteractorStyle.cpp
+    LightingInteractorStyle.cpp
     MBGui.cpp
     MBQuickItem.cpp
-    PickerInteractorStyle.cpp
     PixmapDrawer.cpp    
     PixmapImage.cpp
-    QVtkItem.cpp
-    QVtkRenderer.cpp
     Route.cpp
     SharedConstants.cpp
     SlopeFilter.cpp
@@ -65,7 +64,7 @@ set(src
     TopoColorMap.cpp
     TopoData.cpp
     TopoDataItem.cpp
-    TopoDataPickerInteractorStyle.cpp
+    PickInteractorStyle.cpp
     TopoDataReader.cpp
     TopoProfileItem.cpp    
     Utilities.cpp
