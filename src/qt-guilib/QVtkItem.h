@@ -10,6 +10,8 @@
 
 namespace mb_system {
   /**
+     DEPRECATED: superseded by TopoDataItem/QQuickVTKItem.
+
      QVtkRenderer and QVtkItem coordinate with one another to render VTK scenes 
      within a QVtkItem declared in QML. QVtkItem is registered in the QML
      system by a call to qmlRegisterType() within an application's main() 
