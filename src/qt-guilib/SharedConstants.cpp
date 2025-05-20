@@ -21,4 +21,15 @@ SharedConstants::SharedConstants() {
       // Append name to QStringList
       colorMapsList_.append(colorMapNames[i]);
     }
+
+    mouseModes_ += "Pan and zoom";
+    mouseModes_ += "Rotate model";
+    mouseModes_ += "Rotate view";
+    mouseModes_ += "Shading";
+    mouseModes_ += "Pick area";
+    mouseModes_ += "Edit sites";
+    mouseModes_ += "Edit routes";
+    mouseModes_ += "Pick nav";
+    mouseModes_ += "Pick nav file";    
+      
 }

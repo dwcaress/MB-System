@@ -2,6 +2,7 @@
 #define SHAREDCONSTANTS_H
 #include <QObject>
 #include <QStringList>
+#include <iostream>
 
 namespace mb_system {
 /// Constants shared between C++ and QML code
@@ -22,7 +23,6 @@ public:
 
   Q_ENUM(EditState)
 
-    
   /// Define read-only QString property called "testString"
   Q_PROPERTY(QString testString READ getTestString)
 
@@ -34,12 +34,16 @@ public:
 
   /// List of supported color maps
   Q_PROPERTY(QStringList cmaps MEMBER colorMapsList_)
+
+  /// List of supported mouse modes
+  Q_PROPERTY(QStringList mouseModes MEMBER mouseModes_)  
   
 protected:
       
   static const QString testString_;
 
   QStringList colorMapsList_;
+  QStringList mouseModes_;
   
   
 };
