@@ -33,7 +33,8 @@ namespace mb_system {
   /// Forward class declaration
   class QVtkRenderer;
 
-  /** Catch mouse events */
+  /** DEPRECATED.
+  Catch mouse events */
   class PickerInteractorStyle : public vtkInteractorStyleTrackballCamera {
 
   public:
