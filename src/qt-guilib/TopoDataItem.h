@@ -2,7 +2,7 @@
 #define TOPOGRIDITEM_H
 #include <QObject>
 #include <QQuickVTKItem.h>
-#include <vtkActor.h>
+#include <vtkActor.h>    // Does it require vtk/?
 #include <vtkRenderer.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkRenderWindow.h>
@@ -20,7 +20,8 @@
 #include "SlopeFilter.h"
 #include "TopoDataReader.h"
 #include "TopoColorMap.h"
-#include "TopoDataPickerInteractorStyle.h"
+#include "InteractorStyle.h"
+#include "PickInteractorStyle.h"
 
 namespace mb_system {
 
@@ -53,8 +54,12 @@ namespace mb_system {
       vtkNew<vtkActor> surfaceActor_;
       vtkNew<vtkPolyDataMapper> surfaceMapper_;
       vtkNew<vtkRenderer> renderer_;
-      vtkNew<QVTKInteractor> windowInteractor_;            
-      vtkNew<mb_system::TopoDataPickerInteractorStyle> interactorStyle_;      
+      vtkNew<QVTKInteractor> windowInteractor_;
+
+      /// Assign this pointer to appropriate interactor style,
+      /// depending on how 'mouse mode' is set
+      // /vtkNew<mb_system::TopoDataPickerInteractorStyle> interactorStyle_;
+      mb_system::InteractorStyle *interactorStyle_;            
 
       /// x,y,z axes
       vtkNew<vtkCubeAxesActor> axesActor_;
@@ -99,6 +104,9 @@ namespace mb_system {
     Q_INVOKABLE void setVerticalExagg(float verticalExagg) {
       verticalExagg_ = verticalExagg;
     }
+
+    /// Set mouse mode
+    Q_INVOKABLE bool setMouseMode(QString mouseMode);
 
 
     /// Get vertical exaggeration
@@ -195,7 +203,9 @@ namespace mb_system {
     Pipeline *pipeline_;
     vtkRenderWindow *renderWindow_;
 
-
+    /// Interactor styles (can be selected by user)
+    mb_system::PickInteractorStyle *pickInteractorStyle_;
+    
   };
 }
 

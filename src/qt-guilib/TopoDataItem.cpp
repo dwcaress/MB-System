@@ -2,11 +2,11 @@
 #include <climits>
 #include <array>
 #include <vector>
-#include <vtkProperty.h>
-#include <vtkTextProperty.h>
-#include <vtkErrorCode.h>
-#include <vtkCellData.h>
-#include <vtkPointData.h>
+#include <vtk/vtkProperty.h>
+#include <vtk/vtkTextProperty.h>
+#include <vtk/vtkErrorCode.h>
+#include <vtk/vtkCellData.h>
+#include <vtk/vtkPointData.h>
 #include "TopoDataItem.h"
 #include "TopoColorMap.h"
 
@@ -24,6 +24,10 @@ TopoDataItem::TopoDataItem() {
   displayedSurface_ = DisplayedSurface::Elevation;
   pointPicked_ = false;
   forceRender_ = false;
+
+
+  // Instantiate interactor styles
+  pickInteractorStyle_ = new PickInteractorStyle();
 }
 
 
@@ -36,6 +40,9 @@ QQuickVTKItem::vtkUserData TopoDataItem::initializeVTK(vtkRenderWindow *renderWi
   pipeline_ = new TopoDataItem::Pipeline();
 
   renderWindow->AddRenderer(pipeline_->renderer_);
+
+  // Set interactor style
+  pipeline_->interactorStyle_ = pickInteractorStyle_;
   
   // Assemble vtk pipeline
   assemblePipeline(pipeline_);
@@ -566,3 +573,9 @@ QList<QVector2D> TopoDataItem::runTest2(void) {
   return qProfile;
 }
 
+
+
+bool TopoDataItem::setMouseMode(QString mouseMode) {
+  qDebug() << "setMouseMode(): " << mouseMode;
+  return true;
+}
