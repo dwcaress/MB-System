@@ -139,7 +139,7 @@ Window {
         }
 
 	Menu {
-	    title: 'Mouse mode'
+	    title: 'Mouse'
 	    id: mouseModeMenu
 
             property string currentMode: ''
