@@ -9,6 +9,8 @@
 #include <vtk/vtkPointData.h>
 #include "TopoDataItem.h"
 #include "TopoColorMap.h"
+#include "SharedConstants.h"
+
 
 using namespace mb_system;
 
@@ -28,6 +30,7 @@ TopoDataItem::TopoDataItem() {
 
   // Instantiate interactor styles
   pickInteractorStyle_ = new PickInteractorStyle();
+  lightPositionInteractorStyle_ = new LightPositionInteractorStyle();
 }
 
 
@@ -46,6 +49,7 @@ QQuickVTKItem::vtkUserData TopoDataItem::initializeVTK(vtkRenderWindow *renderWi
   
   // Assemble vtk pipeline
   assemblePipeline(pipeline_);
+  setupLightSource();
 
   return pipeline_;
 }
@@ -307,6 +311,10 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
 
   pipeline->renderer_->SetBackground(pipeline->colors_->GetColor3d("White").
 				     GetData());
+
+  // Need set add the light again here
+  pipeline->renderer_->AddLight(pipeline->lightSource_);
+  pipeline->interactorStyle_->setLight(pipeline->lightSource_);
   
   if (showAxes_) {
     // Set up axes
@@ -577,5 +585,44 @@ QList<QVector2D> TopoDataItem::runTest2(void) {
 
 bool TopoDataItem::setMouseMode(QString mouseMode) {
   qDebug() << "setMouseMode(): " << mouseMode;
+
+  if (mouseMode == MousePanAndZoom) {
+    qDebug() << "setMouseMode(): set " << mouseMode << " picker";
+    pipeline_->interactorStyle_ = pickInteractorStyle_;    
+  }
+  else if (mouseMode == MouseShading) {
+    qDebug() << "setMouseMode(): set " << mouseMode << " picker";
+    lightPositionInteractorStyle_->setRenderer(pipeline_->renderer_);
+    pipeline_->interactorStyle_ = lightPositionInteractorStyle_;
+  }
+  else {
+    qDebug() << "setMouseMode(): " << mouseMode << " not yet implemented";
+    return false;
+  }
+
+  reassemblePipeline();
+  
   return true;
 }
+
+
+void TopoDataItem::setupLightSource() {
+  vtkLight *light = pipeline_->lightSource_;
+  light->SetColor(1.0, 1.0, 1.0);
+  
+  // Position light above the midde of the topo surface
+  double x = -0.03;
+  double y = 0.24;
+  double z = 0.10;
+  
+  light->SetPosition(x, y, z);
+  
+  light->SetFocalPoint(0.0, 0.0, 0.0);
+  light->SetIntensity(1.0);
+
+  pipeline_->renderer_->AddLight(light);
+
+  pipeline_->interactorStyle_->setLight(light);
+}
+
+

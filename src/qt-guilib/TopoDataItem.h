@@ -12,6 +12,7 @@
 #include <vtkTransformFilter.h>
 #include <vtkCubeAxesActor.h>
 #include <vtkNamedColors.h>
+#include <vtkLight.h>
 #include <vtkGenericRenderWindowInteractor.h>
 #include <QVTKInteractor.h>
 #include <QList>
@@ -22,6 +23,7 @@
 #include "TopoColorMap.h"
 #include "InteractorStyle.h"
 #include "PickInteractorStyle.h"
+#include "LightPositionInteractorStyle.h"
 
 namespace mb_system {
 
@@ -45,6 +47,9 @@ namespace mb_system {
       /// Enable run-time typing to Pipeline
       vtkTypeMacro(Pipeline, vtkObject);
 
+      /// Light source
+      vtkNew<vtkLight> lightSource_;
+      
       /// Topo grid reader
       vtkNew<mb_system::TopoDataReader> topoReader_;
 
@@ -133,6 +138,10 @@ namespace mb_system {
 					     int row2, int col2,
 					     int nPieces);
 
+    /// Set up the light source
+    Q_INVOKABLE void setupLightSource(void);
+
+    
     /// Set picked point
     void setPickedPoint(double *worldCoords);
 
@@ -205,6 +214,7 @@ namespace mb_system {
 
     /// Interactor styles (can be selected by user)
     mb_system::PickInteractorStyle *pickInteractorStyle_;
+    LightPositionInteractorStyle *lightPositionInteractorStyle_;
     
   };
 }
