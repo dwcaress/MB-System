@@ -954,6 +954,7 @@ static bool g_interrupted = false;
 #ifdef MST_STATS_EN
 #define MBTRNPP_UPDATE_STATS(p, l, f) (mbtrnpp_update_stats(p, l, f))
 #else
+#pragma message("!!! Compling without MST_STATS_EN (mbtrnpp-plot won't generate performance plots) !!!")
 #define MBTRNPP_UPDATE_STATS(p, l, f)
 #endif // MST_STATS_EN
 
@@ -3287,7 +3288,8 @@ int main(int argc, char **argv) {
   int (*mbtrnpp_input_close)(int verbose, void *mbio_ptr, int *error);
 
   int i_ping_process;
-  int beam_start, beam_end, beam_decimation;
+  int beam_start, beam_end;
+  double Kd;
 //  int i, ii, j, jj;
 //  int jj0, jj1, dj;
 
@@ -4179,6 +4181,7 @@ int main(int argc, char **argv) {
         num_kinds_read[kind]++;
         num_kinds_read_tot[kind]++;
       }
+
       if (status == MB_SUCCESS && kind == MB_DATA_DATA) {
         ping[idataread].count = ndata;
         ndata++;
@@ -4248,380 +4251,443 @@ int main(int argc, char **argv) {
         }
 
         /* only process and output if enough data have been read */
-        if (ndata == mbtrn_cfg->n_buffer_max) {
-          for (int i = 0; i < mbtrn_cfg->n_buffer_max; i++) {
-            if (ping[i].count == n_ping_process)
-              i_ping_process = i;
-          }
-
-          // fprintf(stderr, "\nProcess some data: ndata:%d counts: ", ndata);
-          // for (i = 0; i < mbtrn_cfg->n_buffer_max; i++) {
-          //    fprintf(stderr,"%d ", ping[i].count);
-          //}
-          // fprintf(stderr," : process %d\n", i_ping_process);
-
-          /* apply swath width */
-          threshold_tangent = tan(DTR * 0.5 * mbtrn_cfg->swath_width);
-          beam_start = ping[i_ping_process].beams_bath - 1;
-          beam_end = 0;
-          for (int j = 0; j < ping[i_ping_process].beams_bath; j++) {
-            if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
-              if(ping[i_ping_process].bath[j] <= ping[i_ping_process].sensordepth) {
-                // invalidate tangent calculation because the denominator zero or negative
-                tangent = threshold_tangent + 1.0;
-              } else {
-                tangent = ping[i_ping_process].bathacrosstrack[j]
-                            / (ping[i_ping_process].bath[j] - ping[i_ping_process].sensordepth);
+          if (ndata == mbtrn_cfg->n_buffer_max) {
+              for (int i = 0; i < mbtrn_cfg->n_buffer_max; i++) {
+                  if (ping[i].count == n_ping_process)
+                      i_ping_process = i;
               }
-              if (fabs(tangent) > threshold_tangent && mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
-                ping[i_ping_process].beamflag_filter[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
-                n_soundings_trimmed++;
-              }
-              else {
-                beam_start = MIN(beam_start, j);
-                beam_end = MAX(beam_end, j);
-              }
-            }
-          }
 
-          if(beam_start<0 || beam_end<0)
-          mlog_tprintf(mbtrnpp_mlog_id,"e,ping array boundary violation beam_start/end[%d/%d] n_pings_read[%d]\n",beam_start,beam_end,n_pings_read);
+              // fprintf(stderr, "\nProcess some data: ndata:%d counts: ", ndata);
+              // for (i = 0; i < mbtrn_cfg->n_buffer_max; i++) {
+              //    fprintf(stderr,"%d ", ping[i].count);
+              //}
+              // fprintf(stderr," : process %d\n", i_ping_process);
 
-          // test boundaries (zero min)
-          beam_start = MAX(beam_start, 0);
-          beam_end = MAX(beam_end, 0);
+              /* apply swath width */
+              threshold_tangent = tan(DTR * 0.5 * mbtrn_cfg->swath_width);
+              beam_start = ping[i_ping_process].beams_bath - 1;
+              beam_end = 0;
 
-          /* apply decimation - only consider outputting decimated soundings */
-            if(mbtrn_cfg->n_output_soundings == 0) {
-                mlog_tprintf(mbtrnpp_mlog_id,"e,n_outputsoundings == 0 - invalid start[%d] end[%d] n_pings[%d]\n", beam_start, beam_end, n_pings_read);
-            }
-          beam_decimation = ((beam_end - beam_start + 1) / mbtrn_cfg->n_output_soundings);
-            if(beam_decimation <= 0) {
-                beam_decimation = 1;
-                static bool warned = false;
-                if(!warned)
-                mlog_tprintf(mbtrnpp_mlog_id,"e,beam_decimation <= 0 - invalid end[%d] start[%d] using decimation[%d]\n", beam_end, beam_start, beam_decimation);
-                warned = true;
-            }
-          int dj = mbtrn_cfg->median_filter_n_across / 2;
-          n_output = 0;
-          for (int j = beam_start; j <= beam_end; j++) {
+              for (int j = 0; j < ping[i_ping_process].beams_bath; j++) {
 
-            if (beam_decimation > 0 && (j - beam_start) % beam_decimation == 0) {
-              if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
-                /* apply median filtering to this sounding */
-                if (median_filter_n_total > 1) {
-                  /* accumulate soundings for median filter */
-                  n_median_filter_soundings = 0;
-                  int jj0 = MAX(beam_start, j - dj);
-                  int jj1 = MIN(beam_end, j + dj);
-                  for (int ii = 0; ii < mbtrn_cfg->n_buffer_max; ii++) {
-                    for (int jj = jj0; jj <= jj1; jj++) {
-                      if (mb_beam_ok(ping[ii].beamflag[jj])) {
-                        median_filter_soundings[n_median_filter_soundings] = ping[ii].bath[jj];
-                        n_median_filter_soundings++;
+                  if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
+
+                      if(ping[i_ping_process].bath[j] <= ping[i_ping_process].sensordepth) {
+                          // invalidate tangent calculation because the denominator zero or negative
+                          tangent = threshold_tangent + 1.0;
+                          fprintf(stderr,"invalid bath beam[%d]: b %.3lf sd %.3lf\n", j, ping[i_ping_process].bath[j], ping[i_ping_process].sensordepth);
+                      } else {
+                          tangent = ping[i_ping_process].bathacrosstrack[j]
+                          / (ping[i_ping_process].bath[j] - ping[i_ping_process].sensordepth);
                       }
-                    }
+
+                      if (fabs(tangent) > threshold_tangent && mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
+
+                          ping[i_ping_process].beamflag_filter[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+                          n_soundings_trimmed++;
+                      }
+                      else {
+                          beam_start = MIN(beam_start, j);
+                          beam_end = MAX(beam_end, j);
+                      }
+                  }
+              }
+
+              if(beam_start < 0 || beam_end < 0)
+                  mlog_tprintf(mbtrnpp_mlog_id,"e,ping array boundary violation beam_start/end[%d/%d] beams_bath[%d]\n",beam_start, beam_end, ping[i_ping_process].beams_bath);
+
+              // test boundaries (zero min)
+              beam_start = MAX(beam_start, 0);
+              beam_end = MAX(beam_end, 0);
+
+              /* apply decimation - only consider outputting decimated soundings */
+
+              // compute floating point decimation factor
+              double bs = fabs(1. + (double)(beam_end - beam_start));
+              double bn = mbtrn_cfg->n_output_soundings;
+
+              if(bs == 0 && bn == 0) {
+                  static int16_t dec_err = 3;
+                  if(dec_err-- > 0)
+                      mlog_tprintf(mbtrnpp_mlog_id,"e,beam_decimation error bn == bs == 0 (output soundings == 0?)\n");
+              }
+
+              if( (beam_end < beam_start) || (bn <= 0) || (bn > bs)) {
+                  static int16_t dec_warn = 10;
+                  if(dec_warn-- > 0)
+                      mlog_tprintf(mbtrnpp_mlog_id,"w,beam_decimation invalid parameter beam_start/end %d/%d sp %.0lf bn %.0lf\n", beam_start, beam_end, bs, bn);
+              }
+
+              // ensure 0 < Kd < 1
+              Kd = bn > bs ? bs/bn : bn/bs;
+
+              // mlog_tprintf(mbtrnpp_mlog_id,"i,bs %4d be %4d (be-bs) %4d N %d BD %8.3lf\n", beam_start, beam_end, (beam_end-beam_start), mbtrn_cfg->n_output_soundings, Kd);
+
+              n_output = 0;
+              int dj = mbtrn_cfg->median_filter_n_across / 2;
+              int  n_soundings_decimated_o = n_soundings_decimated;
+              int  n_soundings_flagged_o = n_soundings_flagged;
+              int n_accepted = 0;
+              int n_beam_invalid = 0;
+
+              for (int j = beam_start; j <= beam_end; j++) {
+
+                  // Decimate to arbitrary number of beams (output-soundings),
+                  // distributed evenly across swath width:
+                  // filtered beam number (rounded) rdbn = ROUND(beam_num * K)
+                  // where K is beam decimation factor, 0 < K < 1:
+                  //   bs = fabs(beam_end - beam_start + 1.);
+                  //   bn = mbtrn_cfg->n_output_soundings;
+                  //   K = bn > bs ? bs/bn : bn/bs;
+
+                  // calculate scaled beam number (nr) for current and previous beam
+                  // (don't violate beam array boundary)
+                  double ns[2] = { (j == 0 ? 0 : (j-1) * Kd), j * Kd};
+                  double nr[2] = {round(ns[0]), round(ns[1])};
+
+                  if(!mbtrn_cfg->median_filter_en) {
+                      // median filter disabled, decimation only
+
+                      // fprintf(stderr,"beam[%4d] bs %4d be %4d (%4d) N %d bd %8.3lf mm {%8.3lf, %8.3lf} rr {%8.3lf, %8.3lf} %c\n", j, beam_start, beam_end, (beam_end-beam_start), mbtrn_cfg->n_output_soundings, Kd, ns[0], ns[1], nr[0], nr[1], (nr[0]!=nr[1]?'*':'-'));
+
+                      if(nr[0] == nr[1]) {
+                          // reject beam when
+                          //   round(beam[i] * K) == round(beam[i-1] * K)
+                          // i.e. filtered beam[i] duplicates beam[i-1]
+                          ping[i_ping_process].beamflag_filter[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+                          n_soundings_decimated++;
+                      } else {
+                          n_output++;
+                      }
+                      continue;
                   }
 
-                  /* run qsort */
-                  qsort((char *)median_filter_soundings, n_median_filter_soundings, sizeof(double),
-                        (void *)mb_double_compare);
-                  median = median_filter_soundings[n_median_filter_soundings / 2];
-                  // fprintf(stderr, "Beam %3d of %d:%d bath:%.3f n:%3d:%3d median:%.3f ", j, beam_start,
-                  // beam_end, ping[i_ping_process].bath[j], n_median_filter_soundings, median_filter_n_min,
-                  // median);
+                  // fprintf(stderr,"beam[%4d] nr[0],nr[1] %.3lf, %.3lf  nr[0] != nr[1] %c\n", j, nr[0], nr[1], (nr[0] != nr[1] ? 'Y': 'N'));
+                  if(nr[0] != nr[1]) {
 
-                  /* apply median filter - also flag soundings that don't have enough neighbors to filter */
-                  if (n_median_filter_soundings < median_filter_n_min ||
-                      fabs(ping[i_ping_process].bath[j] - median) > mbtrn_cfg->median_filter_threshold * median) {
-                    ping[i_ping_process].beamflag_filter[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
-                    n_soundings_flagged++;
+                      if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
+                          /* apply median filtering to this sounding */
+                          if (median_filter_n_total > 1) {
+                              /* accumulate soundings for median filter */
+                              n_median_filter_soundings = 0;
+                              int jj0 = MAX(beam_start, j - dj);
+                              int jj1 = MIN(beam_end, j + dj);
+                              for (int ii = 0; ii < mbtrn_cfg->n_buffer_max; ii++) {
+                                  for (int jj = jj0; jj <= jj1; jj++) {
+                                      if (mb_beam_ok(ping[ii].beamflag[jj])) {
+                                          median_filter_soundings[n_median_filter_soundings] = ping[ii].bath[jj];
+                                          n_median_filter_soundings++;
+                                      }
+                                  }
+                              }
 
-                    // fprintf(stderr, "**filtered**");
+                              /* run qsort */
+                              qsort((char *)median_filter_soundings, n_median_filter_soundings, sizeof(double),
+                                    (void *)mb_double_compare);
+                              median = median_filter_soundings[n_median_filter_soundings / 2];
+
+                              //                            fprintf(stderr, "Beam %3d of %d:%d bath:%.3f n:%3d:%3d median:%.3f ", j, beam_start,
+                              //                                    beam_end, ping[i_ping_process].bath[j],
+                              //                                    n_median_filter_soundings,
+                              //                                    median_filter_n_min,
+                              //                                    median);
+
+                              /* apply median filter - also flag soundings that don't have enough neighbors to filter */
+                              if (n_median_filter_soundings < median_filter_n_min ||
+                                  fabs(ping[i_ping_process].bath[j] - median) > mbtrn_cfg->median_filter_threshold * median) {
+                                  ping[i_ping_process].beamflag_filter[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+                                  n_soundings_flagged++;
+
+                                  // fprintf(stderr, "**filtered**");
+                              } else {
+                                  n_accepted++;
+                              }
+                              // fprintf(stderr, "\n");
+                          }
+                          if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
+                              if (n_output < mbtrn_cfg->n_output_soundings) {
+                                  n_output++;
+                              }
+                              else {
+                                  ping[i_ping_process].beamflag_filter[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+                                  n_soundings_decimated++;
+                              }
+                          }
+                      } else {
+                          n_beam_invalid++;
+                      }
                   }
-                  // fprintf(stderr, "\n");
-                }
-                if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
-                  if (n_output < mbtrn_cfg->n_output_soundings) {
-                    n_output++;
+                  else if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
+                      // beam OK, but decimated
+                      ping[i_ping_process].beamflag_filter[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+                      n_soundings_decimated++;
                   } else {
-                    ping[i_ping_process].beamflag_filter[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
-                    n_soundings_decimated++;
+                      // beam not OK, and decimated
+                      n_soundings_decimated++;
                   }
-                }
-                else {
-                  n_soundings_decimated++;
-                }
               }
-            }
-            else if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
-              ping[i_ping_process].beamflag_filter[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
-              n_soundings_decimated++;
-            }
-          }
 
-          /* write out results to stdout as text */
-          if ( OUTPUT_FLAG_SET(OUTPUT_MBSYS_STDOUT) ) {
-            fprintf(stderr, "Ping: %.9f %.7f %.7f %.3f %.3f %4d\n", ping[i_ping_process].time_d,
-                    ping[i_ping_process].navlat, ping[i_ping_process].navlon, ping[i_ping_process].sensordepth,
-                    (double)(DTR * ping[i_ping_process].heading), n_output);
-            for (int j = 0; j < ping[i_ping_process].beams_bath; j++) {
-              if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
-                fprintf(stderr, "%3.3d starboard:%.3f forward:%.3f down:%.3f\n", j,
-                        ping[i_ping_process].bathacrosstrack[j], ping[i_ping_process].bathalongtrack[j],
-                        ping[i_ping_process].bath[j] - ping[i_ping_process].sensordepth);
-                n_soundings_written++;
+              /* write out results to stdout as text */
+              if (OUTPUT_FLAG_SET(OUTPUT_MBSYS_STDOUT) ) {
+                  fprintf(stderr, "Ping: %.9f %.7f %.7f %.3f %.3f %4d\n", ping[i_ping_process].time_d,
+                          ping[i_ping_process].navlat, ping[i_ping_process].navlon, ping[i_ping_process].sensordepth,
+                          (double)(DTR * ping[i_ping_process].heading), n_output);
+                  for (int j = 0; j < ping[i_ping_process].beams_bath; j++) {
+                      if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
+                          fprintf(stderr, "%3.3d starboard:%.3f forward:%.3f down:%.3f\n", j,
+                                  ping[i_ping_process].bathacrosstrack[j], ping[i_ping_process].bathalongtrack[j],
+                                  ping[i_ping_process].bath[j] - ping[i_ping_process].sensordepth);
+                          n_soundings_written++;
+                      }
+                  }
+                  n_pings_written++;
               }
-            }
-            n_pings_written++;
-          }
 
-          /* pack the data into a TRN MB1 packet and either send it to TRN or write it to a file */
-        if (!OUTPUT_FLAGS_ZERO()) {
-            n_pings_written++;
+              /* pack the data into a TRN MB1 packet and either send it to TRN or write it to a file */
+              if (!OUTPUT_FLAGS_ZERO()) {
+                  n_pings_written++;
 
-            /* make sure buffer is large enough to hold the packet */
-            mb1_size = MBTRNPREPROCESS_MB1_HEADER_SIZE + n_output * MBTRNPREPROCESS_MB1_SOUNDING_SIZE +
-                       MBTRNPREPROCESS_MB1_CHECKSUM_SIZE;
-            if (n_output_buffer_alloc < mb1_size) {
-              if ((status = mb_reallocd(mbtrn_cfg->verbose, __FILE__, __LINE__, mb1_size, (void **)&output_buffer, &error)) ==
-                  MB_SUCCESS) {
-                n_output_buffer_alloc = mb1_size;
-              }
-              else {
-                mb_error(mbtrn_cfg->verbose, error, &message);
-                fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
-                fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-				mlog_tprintf(mbtrnpp_mlog_id,"e,MBIO error allocating data arrays [%s]\n");
-                s_mbtrnpp_exit(error);
-              }
-            }
+                  /* make sure buffer is large enough to hold the packet */
+                  mb1_size = MBTRNPREPROCESS_MB1_HEADER_SIZE + n_output * MBTRNPREPROCESS_MB1_SOUNDING_SIZE +
+                  MBTRNPREPROCESS_MB1_CHECKSUM_SIZE;
+                  if (n_output_buffer_alloc < mb1_size) {
+                      if ((status = mb_reallocd(mbtrn_cfg->verbose, __FILE__, __LINE__, mb1_size, (void **)&output_buffer, &error)) ==
+                          MB_SUCCESS) {
+                          n_output_buffer_alloc = mb1_size;
+                      }
+                      else {
+                          mb_error(mbtrn_cfg->verbose, error, &message);
+                          fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
+                          fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+                          mlog_tprintf(mbtrnpp_mlog_id,"e,MBIO error allocating data arrays [%s]\n");
+                          s_mbtrnpp_exit(error);
+                      }
+                  }
 
-            // get ping number
-            mb_pingnumber(mbtrn_cfg->verbose, imbio_ptr, &ping_number, &error);
+                  // get ping number
+                  mb_pingnumber(mbtrn_cfg->verbose, imbio_ptr, &ping_number, &error);
 
-            /* now pack the data into the packet buffer */
-            index = 0;
-            output_buffer[index] = 'M';
-            index++;
-            output_buffer[index] = 'B';
-            index++;
-            output_buffer[index] = '1';
-            index++;
-            output_buffer[index] = 0;
-            index++;
-            mb_put_binary_int(true, mb1_size, &output_buffer[index]);
-            index += 4;
+                  /* now pack the data into the packet buffer */
+                  index = 0;
+                  output_buffer[index] = 'M';
+                  index++;
+                  output_buffer[index] = 'B';
+                  index++;
+                  output_buffer[index] = '1';
+                  index++;
+                  output_buffer[index] = 0;
+                  index++;
+                  mb_put_binary_int(true, mb1_size, &output_buffer[index]);
+                  index += 4;
 
-            mb_put_binary_double(true, ping[i_ping_process].time_d, &output_buffer[index]);
-            index += 8;
-            mb_put_binary_double(true, ping[i_ping_process].navlat, &output_buffer[index]);
-            index += 8;
-            mb_put_binary_double(true, ping[i_ping_process].navlon, &output_buffer[index]);
-            index += 8;
-            mb_put_binary_double(true, ping[i_ping_process].sensordepth, &output_buffer[index]);
-            index += 8;
-            mb_put_binary_double(true, (double)(DTR * ping[i_ping_process].heading), &output_buffer[index]);
-            index += 8;
+                  mb_put_binary_double(true, ping[i_ping_process].time_d, &output_buffer[index]);
+                  index += 8;
+                  mb_put_binary_double(true, ping[i_ping_process].navlat, &output_buffer[index]);
+                  index += 8;
+                  mb_put_binary_double(true, ping[i_ping_process].navlon, &output_buffer[index]);
+                  index += 8;
+                  mb_put_binary_double(true, ping[i_ping_process].sensordepth, &output_buffer[index]);
+                  index += 8;
+                  mb_put_binary_double(true, (double)(DTR * ping[i_ping_process].heading), &output_buffer[index]);
+                  index += 8;
 
-            mb_put_binary_int(true, ping_number, &output_buffer[index]);
-            index += 4;
+                  mb_put_binary_int(true, ping_number, &output_buffer[index]);
+                  index += 4;
 
-            mb_put_binary_int(true, n_output, &output_buffer[index]);
-            index += 4;
+                  mb_put_binary_int(true, n_output, &output_buffer[index]);
+                  index += 4;
 
-            MX_LPRINT(MBTRNPP, 1,
-                     "\nts[%.3lf] beams[%03d] ping[%06u]\nlat[%.4lf] lon[%.4lf] hdg[%6.2lf] sd[%7.2lf]\nv[%+6.2lf] "
-                     "p/r/y[%.3lf / %.3lf / %.3lf]\n",
-                     ping[i_ping_process].time_d, n_output, ping_number, ping[i_ping_process].navlat,
-                     ping[i_ping_process].navlon, (double)(DTR * ping[i_ping_process].heading),
-                     ping[i_ping_process].sensordepth, ping[i_ping_process].speed, ping[i_ping_process].pitch,
-                     ping[i_ping_process].roll, ping[i_ping_process].heave);
+                  MX_LPRINT(MBTRNPP, 1,
+                            "\nts[%.3lf] beams[%03d] ping[%06u]\nlat[%.4lf] lon[%.4lf] hdg[%6.2lf] sd[%7.2lf]\nv[%+6.2lf] "
+                            "p/r/y[%.3lf / %.3lf / %.3lf]\n",
+                            ping[i_ping_process].time_d, n_output, ping_number, ping[i_ping_process].navlat,
+                            ping[i_ping_process].navlon, (double)(DTR * ping[i_ping_process].heading),
+                            ping[i_ping_process].sensordepth, ping[i_ping_process].speed, ping[i_ping_process].pitch,
+                            ping[i_ping_process].roll, ping[i_ping_process].heave);
 
-            for (int j = 0; j < ping[i_ping_process].beams_bath; j++) {
-              if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
+                  for (int j = 0; j < ping[i_ping_process].beams_bath; j++) {
+                      if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
 
-                mb_put_binary_int(true, j, &output_buffer[index]);
-                index += 4;
-                mb_put_binary_double(true, ping[i_ping_process].bathalongtrack[j], &output_buffer[index]);
-                index += 8;
-                mb_put_binary_double(true, ping[i_ping_process].bathacrosstrack[j], &output_buffer[index]);
-                index += 8;
-                //                                mb_put_binary_double(true, ping[i_ping_process].bath[j],
-                //                                &output_buffer[index]); index += 8;
-                // subtract sonar depth from vehicle bathy; changed 12jul18 cruises
-                mb_put_binary_double(true, (ping[i_ping_process].bath[j] - ping[i_ping_process].sensordepth),
-                                     &output_buffer[index]);
-                index += 8;
+                          mb_put_binary_int(true, j, &output_buffer[index]);
+                          index += 4;
+                          mb_put_binary_double(true, ping[i_ping_process].bathalongtrack[j], &output_buffer[index]);
+                          index += 8;
+                          mb_put_binary_double(true, ping[i_ping_process].bathacrosstrack[j], &output_buffer[index]);
+                          index += 8;
+                          //                                mb_put_binary_double(true, ping[i_ping_process].bath[j],
+                          //                                &output_buffer[index]); index += 8;
+                          // subtract sonar depth from vehicle bathy; changed 12jul18 cruises
+                          mb_put_binary_double(true, (ping[i_ping_process].bath[j] - ping[i_ping_process].sensordepth),
+                                               &output_buffer[index]);
+                          index += 8;
 
-                  MX_LPRINT(MBTRNPP, 2, "n[%03d] atrk/X[%+10.3lf] ctrk/Y[%+10.3lf] dpth/Z[%+10.3lf]\n", j,
-                         ping[i_ping_process].bathalongtrack[j], ping[i_ping_process].bathacrosstrack[j],
-                         (ping[i_ping_process].bath[j] - ping[i_ping_process].sensordepth));
-              }
-            }
+                          MX_LPRINT(MBTRNPP, 2, "n[%03d] atrk/X[%+10.3lf] ctrk/Y[%+10.3lf] dpth/Z[%+10.3lf]\n", j,
+                                    ping[i_ping_process].bathalongtrack[j], ping[i_ping_process].bathacrosstrack[j],
+                                    (ping[i_ping_process].bath[j] - ping[i_ping_process].sensordepth));
+                      }
+                  }
 
-            /* add the checksum */
-            checksum = 0;
-            unsigned char *cp = (unsigned char *)output_buffer;
-            for (int j = 0; j < index; j++) {
-              // checksum += (unsigned int) output_buffer[j];
-              checksum += (unsigned int)(*cp++);
-            }
+                  /* add the checksum */
+                  checksum = 0;
+                  unsigned char *cp = (unsigned char *)output_buffer;
+                  for (int j = 0; j < index; j++) {
+                      // checksum += (unsigned int) output_buffer[j];
+                      checksum += (unsigned int)(*cp++);
+                  }
 
-            mb_put_binary_int(true, checksum, &output_buffer[index]);
-            index += 4;
-            MX_LPRINT(MBTRNPP, 3, "mb1 record chk[%08X] idx[%zu] mb1sz[%zu]\n", checksum, index, mb1_size);
+                  mb_put_binary_int(true, checksum, &output_buffer[index]);
+                  index += 4;
+                  MX_LPRINT(MBTRNPP, 3, "mb1 record chk[%08X] idx[%zu] mb1sz[%zu]\n", checksum, index, mb1_size);
 
-            MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_PING_XT], mtime_dtime());
+                  MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_PING_XT], mtime_dtime());
 
-            /* output MB1, TRN data */
-            if ( !OUTPUT_FLAGS_ZERO() ) {
+                  /* output MB1, TRN data */
+                  if ( !OUTPUT_FLAGS_ZERO() ) {
 
-                // begin: move after TRN update for sim sync
-//                MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_PROC_MB1_XT], mtime_dtime());
-//
-//                // do MB1 processing/output
-//                mbtrnpp_process_mb1(output_buffer, mb1_size, trn_cfg);
-//
-//                MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_PROC_MB1_XT], mtime_dtime());
-                // end: move after TRN update for sim sync
+                      // begin: move after TRN update for sim sync
+                      //                MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_PROC_MB1_XT], mtime_dtime());
+                      //
+                      //                // do MB1 processing/output
+                      //                mbtrnpp_process_mb1(output_buffer, mb1_size, trn_cfg);
+                      //
+                      //                MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_PROC_MB1_XT], mtime_dtime());
+                      // end: move after TRN update for sim sync
 
 #ifdef WITH_MBTNAV
 
-                bool update_trn = true;
+                      bool update_trn = true;
 
-                // if gain thresholding applied and gain too low, do not process and set reinit flag
-                if (mbtrn_cfg->reinit_gain_enable && (transmit_gain < transmit_gain_threshold)) {
-                  update_trn = false;
-                  if (!reinit_flag) {
-                    fprintf(stderr, "--Reinit set due to transmit gain %f < threshold %f\n",
-                            transmit_gain, transmit_gain_threshold);
-                    mlog_tprintf(mbtrnpp_mlog_id,"i,set reinit due to transmit gain [%.2lf] lower than threshold [%.2lf]\n",
-                                  transmit_gain, transmit_gain_threshold);
-                    MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_GAIN_LO]);
-                    reinit_flag = true;
-                  }
-                }
-                // if ok pass filtered ping to TRN for processing
-                if (update_trn) {
+                      // if gain thresholding applied and gain too low, do not process and set reinit flag
+                      if (mbtrn_cfg->reinit_gain_enable && (transmit_gain < transmit_gain_threshold)) {
+                          update_trn = false;
+                          if (!reinit_flag) {
+                              fprintf(stderr, "--Reinit set due to transmit gain %f < threshold %f\n",
+                                      transmit_gain, transmit_gain_threshold);
+                              mlog_tprintf(mbtrnpp_mlog_id,"i,set reinit due to transmit gain [%.2lf] lower than threshold [%.2lf]\n",
+                                           transmit_gain, transmit_gain_threshold);
+                              MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_GAIN_LO]);
+                              reinit_flag = true;
+                          }
+                      }
+                      // if ok pass filtered ping to TRN for processing
+                      if (update_trn) {
 
-                  // if reinit_flag set then reinit the TRN filter
-                  if (reinit_flag) {
-                    reinitialized = true;
-                    // TRN reinit function options are:
-                    //
-                    //   (1) reinit w/ zero offset and default standard deviations
-                    //       which correspond to the particle filter distribution widths
-                    //   wtnav_reinit_filter(trn_instance, true);
-                    //
-                    //   (2) Reinit w/ offset set to last good offset estimate and
-                    //       default standard deviations
-                    //   wtnav_reinit_filter_offset(trn_instance, true, use_offset_n, use_offset_e, use_offset_z);
-                    //
-                    //   (3) Reinit w/ offset set to last good offset estimate and
-                    //       specified standard deviations (here set to default values)
-                    //   d_triplet_t xyz_sdev={0., 0., 0.};
-                    //   wtnav_get_init_stddev_xyz(trn_instance, &xyz_sdev);
-                    //   wtnav_reinit_filter_box(trn_instance, true, use_offset_n, use_offset_e, use_offset_z,
-                    //                                              xyz_sdev.x, xyz_sdev.y, xyz_sdev.z);
-                    //
-                    d_triplet_t xyz_sdev={0., 0., 0.};
-                    xyz_sdev.x = MIN((n_reinit_since_use + 1), 10) * mbtrn_cfg->reinit_search_xy;
-                    xyz_sdev.y = xyz_sdev.x;
-                    xyz_sdev.z = mbtrn_cfg->reinit_search_z;
-                    //wtnav_get_init_stddev_xyz(trn_instance, &xyz_sdev);
-                    fprintf(stderr, "--reinit time_d:%.6f centered on offset: %f %f %f  sd: %f %f %f\n",
-                                  ping[i_ping_process].time_d, use_offset_e, use_offset_n, use_offset_z,
-                                  xyz_sdev.x, xyz_sdev.y, xyz_sdev.z);
-                    wtnav_reinit_filter_box(trn_instance, true, use_offset_n, use_offset_e, use_offset_z,
-                                              xyz_sdev.x, xyz_sdev.y, xyz_sdev.z);
+                          // if reinit_flag set then reinit the TRN filter
+                          if (reinit_flag) {
+                              reinitialized = true;
+                              // TRN reinit function options are:
+                              //
+                              //   (1) reinit w/ zero offset and default standard deviations
+                              //       which correspond to the particle filter distribution widths
+                              //   wtnav_reinit_filter(trn_instance, true);
+                              //
+                              //   (2) Reinit w/ offset set to last good offset estimate and
+                              //       default standard deviations
+                              //   wtnav_reinit_filter_offset(trn_instance, true, use_offset_n, use_offset_e, use_offset_z);
+                              //
+                              //   (3) Reinit w/ offset set to last good offset estimate and
+                              //       specified standard deviations (here set to default values)
+                              //   d_triplet_t xyz_sdev={0., 0., 0.};
+                              //   wtnav_get_init_stddev_xyz(trn_instance, &xyz_sdev);
+                              //   wtnav_reinit_filter_box(trn_instance, true, use_offset_n, use_offset_e, use_offset_z,
+                              //                                              xyz_sdev.x, xyz_sdev.y, xyz_sdev.z);
+                              //
+                              d_triplet_t xyz_sdev={0., 0., 0.};
+                              xyz_sdev.x = MIN((n_reinit_since_use + 1), 10) * mbtrn_cfg->reinit_search_xy;
+                              xyz_sdev.y = xyz_sdev.x;
+                              xyz_sdev.z = mbtrn_cfg->reinit_search_z;
+                              //wtnav_get_init_stddev_xyz(trn_instance, &xyz_sdev);
+                              fprintf(stderr, "--reinit time_d:%.6f centered on offset: %f %f %f  sd: %f %f %f\n",
+                                      ping[i_ping_process].time_d, use_offset_e, use_offset_n, use_offset_z,
+                                      xyz_sdev.x, xyz_sdev.y, xyz_sdev.z);
+                              wtnav_reinit_filter_box(trn_instance, true, use_offset_n, use_offset_e, use_offset_z,
+                                                      xyz_sdev.x, xyz_sdev.y, xyz_sdev.z);
 
-                    mlog_tprintf(mbtrnpp_mlog_id, "i,trn filter reinit time_d:%.6f centered on offset: %f %f %f\n",
-                                  ping[i_ping_process].time_d, use_offset_e, use_offset_n, use_offset_z);
-                    MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_REINIT]);
-                    reinit_flag = false;
-                    n_reinit++;
-                    n_reinit_since_use++;
-                    reinit_time = ping[i_ping_process].time_d;
-                  }
+                              mlog_tprintf(mbtrnpp_mlog_id, "i,trn filter reinit time_d:%.6f centered on offset: %f %f %f\n",
+                                           ping[i_ping_process].time_d, use_offset_e, use_offset_n, use_offset_z);
+                              MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_REINIT]);
+                              reinit_flag = false;
+                              n_reinit++;
+                              n_reinit_since_use++;
+                              reinit_time = ping[i_ping_process].time_d;
+                          }
 
-                  MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_PROC_TRN_XT], mtime_dtime());
+                          MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_PROC_TRN_XT], mtime_dtime());
 
-                  // do TRN processing, output, and tests for reinitializing TRN
-                  mbtrnpp_trn_process_mb1(trn_instance, (mb1_t *)output_buffer, trn_cfg);
+                          // do TRN processing, output, and tests for reinitializing TRN
+                          mbtrnpp_trn_process_mb1(trn_instance, (mb1_t *)output_buffer, trn_cfg);
 
-                  MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_PROC_TRN_XT], mtime_dtime());
+                          MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_PROC_TRN_XT], mtime_dtime());
 
-                }
+                      }
 
-                else {
-                    int time_i[7];
-                    mb_get_date(0, ping[i_ping_process].time_d, time_i);
-                    fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
-                                    "| %11.6f %11.6f %8.3f | Ping not processed - low gain condition\n",
-                    time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], ping[i_ping_process].time_d,
-                    ping[i_ping_process].navlon, ping[i_ping_process].navlat, ping[i_ping_process].sensordepth);
-                    mbtrnpp_trnu_pubempty_osocket(ping[i_ping_process].time_d, ping[i_ping_process].navlat,
-                      ping[i_ping_process].navlon, ping[i_ping_process].sensordepth,trnusvr);
-                }
+                      else {
+                          int time_i[7];
+                          mb_get_date(0, ping[i_ping_process].time_d, time_i);
+                          fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
+                                  "| %11.6f %11.6f %8.3f | Ping not processed - low gain condition\n",
+                                  time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], ping[i_ping_process].time_d,
+                                  ping[i_ping_process].navlon, ping[i_ping_process].navlat, ping[i_ping_process].sensordepth);
+                          mbtrnpp_trnu_pubempty_osocket(ping[i_ping_process].time_d, ping[i_ping_process].navlat,
+                                                        ping[i_ping_process].navlon, ping[i_ping_process].sensordepth,trnusvr);
+                      }
 
 #endif // WITH_MBTNAV
 
-                // begin: move after TRN update for sim sync
-                MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_PROC_MB1_XT], mtime_dtime());
+                      // begin: move after TRN update for sim sync
+                      MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_PROC_MB1_XT], mtime_dtime());
 
-                // do MB1 processing/output
-                // after TRN processing/update to enable synchronization, e.g. with sim
-                // i.e. when MB1 record is published, TRN processing has completed
-                mbtrnpp_process_mb1(output_buffer, mb1_size, trn_cfg);
+                      // do MB1 processing/output
+                      // after TRN processing/update to enable synchronization, e.g. with sim
+                      // i.e. when MB1 record is published, TRN processing has completed
+                      mbtrnpp_process_mb1(output_buffer, mb1_size, trn_cfg);
 
-                MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_PROC_MB1_XT], mtime_dtime());
-                // end: move after TRN update for sim sync
+                      MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_PROC_MB1_XT], mtime_dtime());
+                      // end: move after TRN update for sim sync
 
 
-                MBTRNPP_UPDATE_STATS(app_stats, mbtrnpp_mlog_id, mbtrn_cfg->mbtrnpp_stat_flags);
+                      MBTRNPP_UPDATE_STATS(app_stats, mbtrnpp_mlog_id, mbtrn_cfg->mbtrnpp_stat_flags);
 
-            } // end MBTRNPREPROCESS_OUTPUT_TRN
+                  } // end MBTRNPREPROCESS_OUTPUT_TRN
 
-            /* write the packet to a file */
-            if ( OUTPUT_FLAG_SET(OUTPUT_MB1_FILE_EN) ) {
+                  /* write the packet to a file */
+                  if ( OUTPUT_FLAG_SET(OUTPUT_MB1_FILE_EN) ) {
 
-                if(NULL!=output_mb1_fp && NULL!=output_buffer){
-                    MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_FWRITE_XT], mtime_dtime());
+                      if(NULL!=output_mb1_fp && NULL!=output_buffer){
+                          MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_FWRITE_XT], mtime_dtime());
 
-                    size_t obytes=0;
-                    if( (obytes=fwrite(output_buffer, mb1_size, 1, output_mb1_fp))>0){
-                        MST_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_MB_FWRITE_BYTES],mb1_size);
-                    } else {
-                        MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBLOGWR]);
-                    }
+                          size_t obytes=0;
+                          if( (obytes=fwrite(output_buffer, mb1_size, 1, output_mb1_fp))>0){
+                              MST_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_MB_FWRITE_BYTES],mb1_size);
+                          } else {
+                              MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBLOGWR]);
+                          }
 
-                    MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_FWRITE_XT], mtime_dtime());
+                          MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_FWRITE_XT], mtime_dtime());
 
-                } else {
-                    fprintf(stderr,"%s:%d - ERR fwrite failed obuf[%p] fp[%p]\n",__FUNCTION__,__LINE__,output_buffer,output_mb1_fp);
-                }
-              // fprintf(stderr, "WRITE SIZE: %zu %zu %zu\n", mb1_size, index, index - mb1_size);
-            }
-          } // else !stdout
-        } // data read (ndata == mbtrn_cfg->n_buffer_max)
+                      } else {
+                          fprintf(stderr,"%s:%d - ERR fwrite failed obuf[%p] fp[%p]\n",__FUNCTION__,__LINE__,output_buffer,output_mb1_fp);
+                      }
+                      // fprintf(stderr, "WRITE SIZE: %zu %zu %zu\n", mb1_size, index, index - mb1_size);
+                  }
+              } // else !stdout
 
-        /* move data in buffer */
-        if (ndata >= mbtrn_cfg->n_buffer_max) {
-          ndata--;
-          for (int i = 0; i < mbtrn_cfg->n_buffer_max; i++) {
-            ping[i].count--;
-            if (ping[i].count < 0) {
-              idataread = i;
-            }
+          } // data read (ndata == mbtrn_cfg->n_buffer_max)
+
+          /* move data in buffer */
+          if (ndata >= mbtrn_cfg->n_buffer_max) {
+              ndata--;
+              for (int i = 0; i < mbtrn_cfg->n_buffer_max; i++) {
+                  ping[i].count--;
+                  if (ping[i].count < 0) {
+                      idataread = i;
+                  }
+              }
+          } else {
+              idataread++;
+              if (idataread >= mbtrn_cfg->n_buffer_max)
+                  idataread = 0;
           }
-        }
-        else {
-          idataread++;
-          if (idataread >= mbtrn_cfg->n_buffer_max)
-            idataread = 0;
-        }
       }
       else {
 
