@@ -65,6 +65,7 @@ set linetype cycle 8
 "
 # colors
 export QU_BLUE="\'#0072bd\'"   # blue
+export QU_MAGENTA="\'#ff00ff\'" # magenta
 export QU_ORANGE="\'#d95319\'" # orange
 export QU_LTORANGE="\'#c97339\'" # light-orange
 export QU_YELLOW="\'#edb120\'" # yellow
