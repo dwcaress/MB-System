@@ -5643,7 +5643,7 @@ int mbtrnpp_trn_pub_olog(trn_update_t *update,
                          update->mle_dat->z);
 
         if(NULL!=update->mse_dat)
-            mlog_tprintf(log_id,"trn_mse_dat,%lf,%.4lf,%.4lf,%.4lf,%.4lf,%.4lf,%.4lf,%.4lf\n",
+            mlog_tprintf(log_id,"trn_mse_dat,%lf,%.4lf,%.4lf,%.4lf,%.4lf,%.4lf,%.4lf,%.4lf,%hd\n",
                          update->mse_dat->time,
                          update->mse_dat->x,
                          update->mse_dat->y,
@@ -5651,7 +5651,8 @@ int mbtrnpp_trn_pub_olog(trn_update_t *update,
                          update->mse_dat->covariance[0],
                          update->mse_dat->covariance[2],
                          update->mse_dat->covariance[5],
-                         update->mse_dat->covariance[1]);
+                         update->mse_dat->covariance[1],
+                         update->is_converged);
 
         if(NULL!=update->mse_dat && NULL!=update->pt_dat && NULL!=update->mle_dat)
             mlog_tprintf(log_id,"trn_est,%lf,%.4lf,%.4lf,%.4lf,%.4lf,%.4lf,%.4lf,%.2lf,%.2lf,%.2lf\n",
