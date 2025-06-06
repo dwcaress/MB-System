@@ -4267,7 +4267,7 @@ int main(int argc, char **argv) {
               threshold_tangent = tan(DTR * 0.5 * mbtrn_cfg->swath_width);
               beam_start = ping[i_ping_process].beams_bath - 1;
               beam_end = 0;
-
+ 
               for (int j = 0; j < ping[i_ping_process].beams_bath; j++) {
 
                   if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
