@@ -287,8 +287,8 @@ QP_YTITLE["$QU_KEY"]="MLE Northing"
 #QP_Y2TITLE["$QU_KEY"]="Depth"
 #QP_Y2RANGE_MIN["$QU_KEY"]=6.5
 #QP_Y2RANGE_MAX["$QU_KEY"]=8.8
-QP_XSCALE["$QU_KEY"]=-1.0
-QP_YSCALE["$QU_KEY"]=-1.0
+#QP_XSCALE["$QU_KEY"]=-1.0
+#QP_YSCALE["$QU_KEY"]=-1.0
 QP_XOFS["$QU_KEY"]=${QU_EST_E_OFS}
 QP_YOFS["$QU_KEY"]=${QU_EST_W_OFS}
 QP_PLOT_STYLE["$QU_KEY"]="points" #lines
@@ -301,8 +301,13 @@ QP_USE_LINETYPES["$QU_KEY"]="N"
 QP_LINETYPE["$QU_KEY"]=1
 QP_INC_LINETYPE["$QU_KEY"]="Y"
 #QP_LINE_TYPES["$QU_KEY"]="${QU_LINE_TYPE_DFL}"
-QP_PLOT_SPECS["$QU_KEY"]="${QU_TRNU_PTDAT_CSV},${QU_GREEN},4,,1,5,x1y1,pt.xy"
-QP_PLOT_SPECS["$QU_KEY"]+="+${QU_TRNU_MLEDAT_CSV},${QU_ORANGE},4,,1,5,x1y2,mle.xy"
+QP_EXPR["$QU_KEY"]="Y"
+QP_SPECDEL["$QU_KEY"]="|"
+QP_PLOT_SPECS["$QU_KEY"]="${QU_TRNU_PTDAT_CSV},${QU_GREEN},4,,1,(\$5),x1y1,pt.xy"
+QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNU_MLEDAT_CSV},${QU_BLUE},4,,1,(\$5),x1y2,mle.xy"
+# Note: older trnu logs may not include the convergence columns
+QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNU_MLEDAT_CSV},${QU_ORANGE},4,,1,(\$7==1?\$5:1/0),x1y2,mle(cnv)"
+QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNU_MLEDAT_CSV},${QU_MAGENTA},4,,1,(\$8==1?\$5:1/0),x1y2,mle(val)"
 
 QU_KEY=${QU_KEYS[4]}
 QP_OFILE_NAME["$QU_KEY"]="${QU_MLEX_OIMG_NAME}"
@@ -474,9 +479,10 @@ QP_INC_LINETYPE["$QU_KEY"]="Y"
 QP_EXPR["$QU_KEY"]="Y"
 QP_SPECDEL["$QU_KEY"]="|"
 QP_PLOT_SPECS["$QU_KEY"]="${QU_TRNU_PTDAT_CSV},${QU_GREEN},4,,1,(\$5),x1y1,pt.xy"
-QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNU_MSEDAT_CSV},${QU_BLUE},4,,1,(\$5),x1y2,mse.xy"
-# Note: older trnu logs may not include the converged column (11)
-QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNU_MSEDAT_CSV},${QU_ORANGE},4,,1,(\$11==1?\$5:1/0),x1y2,mse.xy"
+QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNU_MSEDAT_CSV},${QU_BLUE},4,,1,(\$5),x1y2,mse"
+# Note: older trnu logs may not include the converge columns
+QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNU_MSEDAT_CSV},${QU_ORANGE},4,,1,(\$11==1?\$5:1/0),x1y2,mse(cnv)"
+QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNU_MSEDAT_CSV},${QU_MAGENTA},4,,1,(\$12==1?\$5:1/0),x1y2,mse(val)"
 
 QU_KEY=${QU_KEYS[8]}
 QP_OFILE_NAME["$QU_KEY"]="${QU_MSEX_OIMG_NAME}"
@@ -632,8 +638,8 @@ QP_YTITLE["$QU_KEY"]="PT Northing"
 #QP_Y2TITLE["$QU_KEY"]="Depth"
 #QP_Y2RANGE_MIN["$QU_KEY"]=6.5
 #QP_Y2RANGE_MAX["$QU_KEY"]=8.8
-QP_XSCALE["$QU_KEY"]=-1.0
-QP_YSCALE["$QU_KEY"]=-1.0
+#QP_XSCALE["$QU_KEY"]=-1.0
+#QP_YSCALE["$QU_KEY"]=-1.0
 QP_XOFS["$QU_KEY"]="${QU_EST_E_OFS}"
 QP_YOFS["$QU_KEY"]=${QU_EST_W_OFS}
 QP_PLOT_STYLE["$QU_KEY"]="points" #lines
