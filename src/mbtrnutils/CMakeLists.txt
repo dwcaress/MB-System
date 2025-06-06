@@ -40,6 +40,11 @@ find_package(NetCDF REQUIRED)
 find_package(LibPROJ REQUIRED)
 
 #------------------------------------------------------------------------------
+add_compile_definitions(
+WITH_MMDEBUG
+WITH_MST_MSTATS
+MST_STATS_EN
+)
 
 add_executable(mbtrnpp mbtrnpp.c)
 target_include_directories(mbtrnpp PRIVATE ${NetCDF_INCLUDE_DIRS} ${libPROJ_INCLUDE_DIRS}
