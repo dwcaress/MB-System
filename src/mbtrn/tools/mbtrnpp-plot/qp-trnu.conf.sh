@@ -301,13 +301,16 @@ QP_USE_LINETYPES["$QU_KEY"]="N"
 QP_LINETYPE["$QU_KEY"]=1
 QP_INC_LINETYPE["$QU_KEY"]="Y"
 #QP_LINE_TYPES["$QU_KEY"]="${QU_LINE_TYPE_DFL}"
+# Use these for trnu logs with convergence fields in trn_mse_dat trn_mle_dat
 QP_EXPR["$QU_KEY"]="Y"
 QP_SPECDEL["$QU_KEY"]="|"
 QP_PLOT_SPECS["$QU_KEY"]="${QU_TRNU_PTDAT_CSV},${QU_GREEN},4,,1,(\$5),x1y1,pt.xy"
 QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNU_MLEDAT_CSV},${QU_BLUE},4,,1,(\$5),x1y2,mle.xy"
-# Note: older trnu logs may not include the convergence columns
 QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNU_MLEDAT_CSV},${QU_ORANGE},4,,1,(\$7==1?\$5:1/0),x1y2,mle(cnv)"
 QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNU_MLEDAT_CSV},${QU_MAGENTA},4,,1,(\$8==1?\$5:1/0),x1y2,mle(val)"
+# Use these for trnu logs w/o convergence fields in trn_mse_dat trn_mle_dat
+#QP_PLOT_SPECS["$QU_KEY"]="${QU_TRNU_PTDAT_CSV},${QU_GREEN},4,,1,5,x1y1,pt.xy"
+#QP_PLOT_SPECS["$QU_KEY"]+="+${QU_TRNU_MLEDAT_CSV},${QU_BLUE},4,,1,5,x1y2,mle.xy"
 
 QU_KEY=${QU_KEYS[4]}
 QP_OFILE_NAME["$QU_KEY"]="${QU_MLEX_OIMG_NAME}"
@@ -476,13 +479,16 @@ QP_USE_LINETYPES["$QU_KEY"]="N"
 QP_LINETYPE["$QU_KEY"]=1
 QP_INC_LINETYPE["$QU_KEY"]="Y"
 #QP_LINE_TYPES["$QU_KEY"]="${QU_LINE_TYPE_DFL}"
+# Use these for trnu logs with convergence fields in trn_mse_dat trn_mle_dat
 QP_EXPR["$QU_KEY"]="Y"
 QP_SPECDEL["$QU_KEY"]="|"
 QP_PLOT_SPECS["$QU_KEY"]="${QU_TRNU_PTDAT_CSV},${QU_GREEN},4,,1,(\$5),x1y1,pt.xy"
 QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNU_MSEDAT_CSV},${QU_BLUE},4,,1,(\$5),x1y2,mse"
-# Note: older trnu logs may not include the converge columns
 QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNU_MSEDAT_CSV},${QU_ORANGE},4,,1,(\$11==1?\$5:1/0),x1y2,mse(cnv)"
 QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNU_MSEDAT_CSV},${QU_MAGENTA},4,,1,(\$12==1?\$5:1/0),x1y2,mse(val)"
+# Use these for trnu logs w/o convergence fields in trn_mse_dat trn_mle_dat
+#QP_PLOT_SPECS["$QU_KEY"]="${QU_TRNU_PTDAT_CSV},${QU_GREEN},4,,1,5,x1y1,pt.xy"
+#QP_PLOT_SPECS["$QU_KEY"]+="+${QU_TRNU_MSEDAT_CSV},${QU_BLUE},4,,1,5,x1y2,mse"
 
 QU_KEY=${QU_KEYS[8]}
 QP_OFILE_NAME["$QU_KEY"]="${QU_MSEX_OIMG_NAME}"
