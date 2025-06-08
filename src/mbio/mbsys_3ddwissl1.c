@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------
- *    The MB-system:  mbsys_3ddwissl.c  3.00  12/26/2017
+ *    The MB-system:  mbsys_3ddwissl1.c  3.00  12/26/2017
  *
  *    Copyright (c) 2017-2024 by
  *    David W. Caress (caress@mbari.org)
@@ -350,17 +350,15 @@
 #include "mb_io.h"
 #include "mb_process.h"
 #include "mb_status.h"
-#include "mbsys_3ddwissl.h"
-
-// #define MBF_3DDEPTHP_DEBUG 1
+#include "mbsys_3ddwissl1.h"
 
 /*-------------------------------------------------------------------- */
-int mbsys_3ddwissl_alloc
+int mbsys_3ddwissl1_alloc
 (
   int verbose,              /* in: verbosity level set on command line 0..N */
   void *mbio_ptr,              /* in: see mb_io.h:/^struct mb_io_struct/ */
   void **store_ptr,              /* in: see mbsys_3ddwissl.h:/^struct
-                           mbsys_3ddwissl_struct/ */
+                           mbsys_3ddwissl1_struct/ */
   int *error                /* out: see mb_status.h:/MB_ERROR/ */
 )
 {
@@ -382,13 +380,13 @@ int mbsys_3ddwissl_alloc
   int status = mb_mallocd(verbose,
     __FILE__,
     __LINE__,
-    sizeof(struct mbsys_3ddwissl_struct),
+    sizeof(struct mbsys_3ddwissl1_struct),
     (void **)store_ptr,
     error);
   /*mb_io_ptr->structure_size = 0; */
 
   /* get data structure pointer */
-  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)*store_ptr;
+  struct mbsys_3ddwissl1_struct *store = (struct mbsys_3ddwissl1_struct *)*store_ptr;
 
   /* initialize everything */
 
@@ -411,14 +409,14 @@ int mbsys_3ddwissl_alloc
 
   /* head A calibration */
   memset((void *)&store->calibration_v1s1_a, 0,
-    sizeof(struct mbsys_3ddwissl_calibration_v1s1_struct));
+    sizeof(struct mbsys_3ddwissl1_calibration_v1s1_struct));
   memset((void *)&store->calibration_v1s3_a, 0,
-    sizeof(struct mbsys_3ddwissl_calibration_v1s3_struct));
+    sizeof(struct mbsys_3ddwissl1_calibration_v1s3_struct));
 
   memset((void *)&store->calibration_v1s1_b, 0,
-    sizeof(struct mbsys_3ddwissl_calibration_v1s1_struct));
+    sizeof(struct mbsys_3ddwissl1_calibration_v1s1_struct));
   memset((void *)&store->calibration_v1s3_b, 0,
-    sizeof(struct mbsys_3ddwissl_calibration_v1s3_struct));
+    sizeof(struct mbsys_3ddwissl1_calibration_v1s3_struct));
 
   /* Scan Information */
   store->record_id = MB_DATA_NONE;    /* head A (0x3D53 or 0x3D73) or head B (0x3D54 or
@@ -475,14 +473,14 @@ int mbsys_3ddwissl_alloc
     }
 
   return status;
-}  /* mbsys_3ddwissl_alloc */
+}  /* mbsys_3ddwissl1_alloc */
 /*----------------------------------------------------------------------*/
-int mbsys_3ddwissl_deall
+int mbsys_3ddwissl1_deall
 (
   int verbose,              /* in: verbosity level set on command line 0..N */
   void *mbio_ptr,              /* in: see mb_io.h:/^struct mb_io_struct/ */
   void **store_ptr,              /* in: see mbsys_3ddwissl.h:/^struct
-                           mbsys_3ddwissl_struct/ */
+                           mbsys_3ddwissl1_struct/ */
   int *error                /* out: see mb_status.h:/error values/ */
 )
 {
@@ -499,7 +497,7 @@ int mbsys_3ddwissl_deall
     }
 
   /* get data structure pointer */
-  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)*store_ptr;
+  struct mbsys_3ddwissl1_struct *store = (struct mbsys_3ddwissl1_struct *)*store_ptr;
 
   int status = MB_SUCCESS;
 
@@ -523,22 +521,22 @@ int mbsys_3ddwissl_deall
     }
 
   return status;
-}  /* mbsys_3ddwissl_deall */
+}  /* mbsys_3ddwissl1_deall */
 /*----------------------------------------------------------------------*/
-int mbsys_3ddwissl_dimensions
+int mbsys_3ddwissl1_dimensions
 (
   int verbose,
   void *mbio_ptr,                      /* in: verbosity level set on command
                                  line 0..N */
   void *store_ptr,                /* in: see mbsys_3ddwissl.h:/^struct
-                             mbsys_3ddwissl_struct/ */
+                             mbsys_3ddwissl1_struct/ */
   int *kind,                    /* in: see mb_status.h:0+/MBIO data type/ */
   int *nbath,                    /* out: number of bathymetric samples
-                             0..MBSYS_SWPLS_MAX_BEAMS */
+                             0..MBSYS_3DDWISSL1_MAX_BEAMS */
   int *namp,                    /* out: number of amplitude samples
-                             0..MBSYS_SWPLS_MAX_BEAMS */
+                             0..MBSYS_3DDWISSL1_MAX_BEAMS */
   int *nss,                    /* out: number of sidescan samples
-                             0..MBSYS_SWPLS_MAX_BEAMS */
+                             0..MBSYS_3DDWISSL1_MAX_BEAMS */
   int *error                    /* out: see mb_status.h:/error values/ */
 )
 {
@@ -558,7 +556,7 @@ int mbsys_3ddwissl_dimensions
   // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
+  struct mbsys_3ddwissl1_struct *store = (struct mbsys_3ddwissl1_struct *)store_ptr;
 
   /* get data kind */
   *kind = store->kind;
@@ -593,9 +591,9 @@ int mbsys_3ddwissl_dimensions
     }
 
   return status;
-}  /* mbsys_3ddwissl_dimensions */
+}  /* mbsys_3ddwissl1_dimensions */
 /*--------------------------------------------------------------------*/
-int mbsys_3ddwissl_pingnumber
+int mbsys_3ddwissl1_pingnumber
 (
   int verbose,                    /* in: verbosity level set on command line 0..N */
   void *mbio_ptr,                 /* in: see mb_io.h:/^struct mb_io_struct/ */
@@ -617,7 +615,7 @@ int mbsys_3ddwissl_pingnumber
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)mb_io_ptr->store_data;
+  struct mbsys_3ddwissl1_struct *store = (struct mbsys_3ddwissl1_struct *)mb_io_ptr->store_data;
 
   /* extract ping number from structure */
   *pingnumber = store->scan_count;
@@ -635,13 +633,13 @@ int mbsys_3ddwissl_pingnumber
     }
 
   return status;
-}  /* mbsys_3ddwissl_pingnumber */
+}  /* mbsys_3ddwissl1_pingnumber */
 /*--------------------------------------------------------------------*/
-int mbsys_3ddwissl_preprocess
+int mbsys_3ddwissl1_preprocess
 (
   int verbose,                /* in: verbosity level set on command line 0..N */
   void *mbio_ptr,             /* in: see mb_io.h:/^struct mb_io_struct/ */
-  void *store_ptr,            /* in: see mbsys_3ddwissl.h:/^struct mbsys_3ddwissl_struct/ */
+  void *store_ptr,            /* in: see mbsys_3ddwissl.h:/^struct mbsys_3ddwissl1_struct/ */
   void *platform_ptr,
   void *preprocess_pars_ptr,
   int *error
@@ -671,7 +669,7 @@ int mbsys_3ddwissl_preprocess
   struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
 
   /* get data structure pointers */
-  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
+  struct mbsys_3ddwissl1_struct *store = (struct mbsys_3ddwissl1_struct *)store_ptr;
   //struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
 
   /* get kluges */
@@ -898,7 +896,7 @@ int mbsys_3ddwissl_preprocess
     for (int ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
       {
       /* get pulse */
-      struct mbsys_3ddwissl_pulse_struct *pulse = (struct mbsys_3ddwissl_pulse_struct *)&store->pulses[ipulse];
+      struct mbsys_3ddwissl1_pulse_struct *pulse = (struct mbsys_3ddwissl1_pulse_struct *)&store->pulses[ipulse];
 
       /* set time */
       pulse->time_d = store->time_d + (double)pulse->time_offset;
@@ -1040,12 +1038,12 @@ int mbsys_3ddwissl_preprocess
     if (pars->sounding_amplitude_filter)
       amplitude_threshold = pars->sounding_amplitude_threshold;
     else
-      amplitude_threshold = MBSYS_3DDWISSL_DEFAULT_AMPLITUDE_THRESHOLD;
+      amplitude_threshold = MBSYS_3DDWISSL1_DEFAULT_AMPLITUDE_THRESHOLD;
     double target_altitude;
     if (pars->sounding_altitude_filter)
       target_altitude = pars->sounding_target_altitude;
     else
-      target_altitude = MBSYS_3DDWISSL_DEFAULT_TARGET_ALTITUDE;
+      target_altitude = MBSYS_3DDWISSL1_DEFAULT_TARGET_ALTITUDE;
     if (pars->head1_offsets)
       {
       store->heada_offset_x_m = pars->head1_offsets_x;
@@ -1064,7 +1062,7 @@ int mbsys_3ddwissl_preprocess
       store->headb_offset_roll_deg = pars->head2_offsets_roll;
       store->headb_offset_pitch_deg = pars->head2_offsets_pitch;
       }
-    status = mbsys_3ddwissl_calculatebathymetry(verbose, mbio_ptr, store_ptr,
+    status = mbsys_3ddwissl1_calculatebathymetry(verbose, mbio_ptr, store_ptr,
                   amplitude_threshold, target_altitude, error);
   }
 
@@ -1078,9 +1076,9 @@ int mbsys_3ddwissl_preprocess
     }
 
   return status;
-} /* mbsys_3ddwissl_preprocess */
+} /* mbsys_3ddwissl1_preprocess */
 /*--------------------------------------------------------------------*/
-int mbsys_3ddwissl_sensorhead
+int mbsys_3ddwissl1_sensorhead
 (
   int verbose,
   void *mbio_ptr,
@@ -1106,16 +1104,16 @@ int mbsys_3ddwissl_sensorhead
   // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
+  struct mbsys_3ddwissl1_struct *store = (struct mbsys_3ddwissl1_struct *)store_ptr;
 
   /* if survey data extract which lidar head used for this scan */
   if (store->kind == MB_DATA_DATA)
     {
-    if (( store->record_id == MBSYS_3DDWISSL_RECORD_RAWHEADA) ||
-      ( store->record_id == MBSYS_3DDWISSL_RECORD_PROHEADA) )
+    if (( store->record_id == MBSYS_3DDWISSL1_RECORD_RAWHEADA) ||
+      ( store->record_id == MBSYS_3DDWISSL1_RECORD_PROHEADA) )
       *sensorhead = 1;
-    else if (( store->record_id == MBSYS_3DDWISSL_RECORD_RAWHEADB) ||
-      ( store->record_id == MBSYS_3DDWISSL_RECORD_PROHEADB) )
+    else if (( store->record_id == MBSYS_3DDWISSL1_RECORD_RAWHEADB) ||
+      ( store->record_id == MBSYS_3DDWISSL1_RECORD_PROHEADB) )
       *sensorhead = 0;
     }
   const int status = MB_SUCCESS;
@@ -1131,14 +1129,14 @@ int mbsys_3ddwissl_sensorhead
     }
 
   return status;
-} /* mbsys_3ddwissl_sensorhead */
+} /* mbsys_3ddwissl1_sensorhead */
 /*--------------------------------------------------------------------*/
-int mbsys_3ddwissl_extract
+int mbsys_3ddwissl1_extract
 (
   int verbose,              /* in: verbosity level set on command line 0..N */
   void *mbio_ptr,                  /* in: see mb_io.h:/^struct mb_io_struct/ */
   void *store_ptr,                /* in: see mbsys_3ddwissl.h:/^struct
-                             mbsys_3ddwissl_struct/ */
+                             mbsys_3ddwissl1_struct/ */
   int *kind,                /* out: MBIO data type; see mb_status.h:0+/MBIO data
                          type/ */
   int time_i[7],              /* out: MBIO time array; see mb_time.c:0+/mb_get_time/
@@ -1191,7 +1189,7 @@ int mbsys_3ddwissl_extract
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
+  struct mbsys_3ddwissl1_struct *store = (struct mbsys_3ddwissl1_struct *)store_ptr;
 
   /* get data kind */
   *kind = store->kind;
@@ -1229,10 +1227,10 @@ int mbsys_3ddwissl_extract
 
     /* get the bathymetry */
     for (int ipulse = 0; ipulse < store->pulses_per_scan; ipulse++) {
-      struct mbsys_3ddwissl_pulse_struct *pulse = &store->pulses[ipulse];
+      struct mbsys_3ddwissl1_pulse_struct *pulse = &store->pulses[ipulse];
       for (int isounding = 0; isounding < store->soundings_per_pulse; isounding++) {
         const int ibath = store->soundings_per_pulse * ipulse + isounding;
-        struct mbsys_3ddwissl_sounding_struct *sounding = &pulse->soundings[isounding];
+        struct mbsys_3ddwissl1_sounding_struct *sounding = &pulse->soundings[isounding];
         beamflag[ibath] = sounding->beamflag;
         bath[ibath] = sounding->depth + store->sensordepth;
         amp[ibath] = (double) sounding->amplitude;
@@ -1263,14 +1261,14 @@ int mbsys_3ddwissl_extract
     }
 
   return status;
-}  /* mbsys_3ddwissl_extract */
+}  /* mbsys_3ddwissl1_extract */
 /*--------------------------------------------------------------------*/
-int mbsys_3ddwissl_insert
+int mbsys_3ddwissl1_insert
 (
   int verbose,              /* in: verbosity level set on command line 0..N */
   void *mbio_ptr,                /* in: see mb_io.h:/^struct mb_io_struct/ */
   void *store_ptr,              /* in: see mbsys_3ddwissl.h:/^struct
-                           mbsys_3ddwissl_struct/ */
+                           mbsys_3ddwissl1_struct/ */
   int kind,                /* in: see mb_status.h:0+/MBIO data type/ */
   int time_i[7],              /* in: see mb_time.c:0+/mb_get_time/ */
   double time_d,              /* in: time in seconds since 1,1,1970) */
@@ -1324,14 +1322,14 @@ int mbsys_3ddwissl_insert
     }
 
   int status = MB_SUCCESS;
-  struct mbsys_3ddwissl_pulse_struct *pulse;
-  struct mbsys_3ddwissl_sounding_struct *sounding;
+  struct mbsys_3ddwissl1_pulse_struct *pulse;
+  struct mbsys_3ddwissl1_sounding_struct *sounding;
 
   /* get mbio descriptor */
   // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
+  struct mbsys_3ddwissl1_struct *store = (struct mbsys_3ddwissl1_struct *)store_ptr;
 
   /* get data kind */
   store->kind = kind;
@@ -1369,13 +1367,13 @@ int mbsys_3ddwissl_insert
       {
       status =
         mb_reallocd(verbose, __FILE__, __LINE__,
-        (size_t) (store->pulses_per_scan * sizeof(struct mbsys_3ddwissl_pulse_struct)),
+        (size_t) (store->pulses_per_scan * sizeof(struct mbsys_3ddwissl1_pulse_struct)),
         (void **) &(store->pulses), error);
       if (status == MB_SUCCESS)
         {
         memset((void *) &(store->pulses[store->num_pulses_alloc]), 0,
           (store->pulses_per_scan - store->num_pulses_alloc)*
-          sizeof(struct mbsys_3ddwissl_pulse_struct));
+          sizeof(struct mbsys_3ddwissl1_pulse_struct));
         store->num_pulses_alloc = store->pulses_per_scan;
         }
       }
@@ -1416,7 +1414,7 @@ int mbsys_3ddwissl_insert
     }
 
   if (verbose >= 4)
-    mbsys_3ddwissl_print_store(verbose, store, error);
+    mbsys_3ddwissl1_print_store(verbose, store, error);
   if (verbose >= 2)
     {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -1427,15 +1425,15 @@ int mbsys_3ddwissl_insert
     }
 
   return status;
-}  /* mbsys_3ddwissl_insert */
+}  /* mbsys_3ddwissl1_insert */
 /*--------------------------------------------------------------------*/
-int mbsys_3ddwissl_ttimes
+int mbsys_3ddwissl1_ttimes
 (
   int verbose,                  /* in: verbosity level set on command line 0..N
                              */
   void *mbio_ptr,                  /* in: see mb_io.h:/^struct mb_io_struct/ */
   void *store_ptr,                /* in: see mbsys_3ddwissl.h:/^struct
-                             mbsys_3ddwissl_struct/ */
+                             mbsys_3ddwissl1_struct/ */
   int *kind,                    /* out: MBIO data type; see mb_status.h:0+/MBIO
                              data type/ */
   int *nbeams,                  /* out: number of beams (samples) in this ping
@@ -1476,7 +1474,7 @@ int mbsys_3ddwissl_ttimes
   /* get mb_io_ptr */
   // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
+  struct mbsys_3ddwissl1_struct *store = (struct mbsys_3ddwissl1_struct *)store_ptr;
 
   /* get data kind */
   *kind = store->kind;
@@ -1535,14 +1533,14 @@ int mbsys_3ddwissl_ttimes
     }
 
   return status;
-}  /* mbsys_3ddwissl_ttimes */
+}  /* mbsys_3ddwissl1_ttimes */
 /*--------------------------------------------------------------------*/
-int mbsys_3ddwissl_detects
+int mbsys_3ddwissl1_detects
 (
   int verbose,              /* in: verbosity level set on command line 0..N */
   void *mbio_ptr,                  /* in: see mb_io.h:/^struct mb_io_struct/ */
   void *store_ptr,                /* in: see mbsys_3ddwissl.h:/^struct
-                             mbsys_3ddwissl_struct/ */
+                             mbsys_3ddwissl1_struct/ */
   int *kind,                /* out: MBIO data type; see mb_status.h:0+/MBIO data
                          type/ */
   int *nbeams,              /* out: number of beams (samples) in this ping */
@@ -1553,8 +1551,8 @@ int mbsys_3ddwissl_detects
 {
   assert(mbio_ptr != NULL);
   assert(store_ptr != NULL);
-  struct mbsys_3ddwissl_pulse_struct *pulse;
-  struct mbsys_3ddwissl_sounding_struct *sounding;
+  struct mbsys_3ddwissl1_pulse_struct *pulse;
+  struct mbsys_3ddwissl1_sounding_struct *sounding;
 
   if (verbose >= 2)
     {
@@ -1570,7 +1568,7 @@ int mbsys_3ddwissl_detects
   // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
+  struct mbsys_3ddwissl1_struct *store = (struct mbsys_3ddwissl1_struct *)store_ptr;
 
   /* get data kind */
   *kind = store->kind;
@@ -1640,14 +1638,14 @@ int mbsys_3ddwissl_detects
     }
 
   return status;
-}  /* mbsys_3ddwissl_detects */
+}  /* mbsys_3ddwissl1_detects */
 /*--------------------------------------------------------------------*/
-int mbsys_3ddwissl_pulses
+int mbsys_3ddwissl1_pulses
 (
   int verbose,              /* in: verbosity level set on command line 0..N */
   void *mbio_ptr,                /* in: see mb_io.h:/^struct mb_io_struct/ */
   void *store_ptr,              /* in: see mbsys_3ddwissl.h:/^struct
-                           mbsys_3ddwissl_struct/ */
+                           mbsys_3ddwissl1_struct/ */
   int *kind,                /* out: MBIO data type; see mb_status.h:0+/MBIO data
                          type/ */
   int *nbeams,              /* out: number of beams (samples) in this ping */
@@ -1673,7 +1671,7 @@ int mbsys_3ddwissl_pulses
   // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
+  struct mbsys_3ddwissl1_struct *store = (struct mbsys_3ddwissl1_struct *)store_ptr;
 
   /* get data kind */
   *kind = store->kind;
@@ -1731,14 +1729,14 @@ int mbsys_3ddwissl_pulses
     }
 
   return status;
-}  /* mbsys_3ddwissl_pulses */
+}  /* mbsys_3ddwissl1_pulses */
 /*--------------------------------------------------------------------*/
-int mbsys_3ddwissl_gains
+int mbsys_3ddwissl1_gains
 (
   int verbose,                /* in: verbosity level set on command line 0..N */
   void *mbio_ptr,                /* in: see mb_io.h:/^struct mb_io_struct/ */
   void *store_ptr,              /* in: see mbsys_3ddwissl.h:/^struct
-                           mbsys_3ddwissl_struct/ */
+                           mbsys_3ddwissl1_struct/ */
   int *kind,                  /* in: MBIO data type; see mb_status.h:0+/MBIO data
                            type/ */
   double *transmit_gain,                /* out: transmit gain (dB) */
@@ -1763,7 +1761,7 @@ int mbsys_3ddwissl_gains
   // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
+  struct mbsys_3ddwissl1_struct *store = (struct mbsys_3ddwissl1_struct *)store_ptr;
 
   /* get data kind */
   *kind = store->kind;
@@ -1821,21 +1819,21 @@ int mbsys_3ddwissl_gains
     }
 
   return status;
-}  /* mbsys_3ddwissl_gains */
+}  /* mbsys_3ddwissl1_gains */
 /*--------------------------------------------------------------------*/
-int mbsys_3ddwissl_extract_altitude
+int mbsys_3ddwissl1_extract_altitude
 (
   int verbose,        /* in: verbosity level set on command line 0..N */
   void *mbio_ptr,        /* in: see mb_io.h:/^struct mb_io_struct/ */
-  void *store_ptr,      /* in: see mbsys_3ddwissl.h:/^struct mbsys_3ddwissl_struct/ */
+  void *store_ptr,      /* in: see mbsys_3ddwissl.h:/^struct mbsys_3ddwissl1_struct/ */
   int *kind,          /* in: MBIO data type; see mb_status.h:0+/MBIO data type/ */
   double *transducer_depth,  /* out: transducer depth below water line (m) */
   double *altitude,      /* out: transducer altitude above seafloor (m) */
   int *error          /* out: see mb_status.h:/MB_ERROR/ */
 )
 {
-  struct mbsys_3ddwissl_pulse_struct *pulse;
-  struct mbsys_3ddwissl_sounding_struct *sounding;
+  struct mbsys_3ddwissl1_pulse_struct *pulse;
+  struct mbsys_3ddwissl1_sounding_struct *sounding;
 
   /* check for non-null data */
   assert(mbio_ptr != NULL);
@@ -1854,7 +1852,7 @@ int mbsys_3ddwissl_extract_altitude
   // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
+  struct mbsys_3ddwissl1_struct *store = (struct mbsys_3ddwissl1_struct *)store_ptr;
 
   /* get data kind */
   *kind = store->kind;
@@ -1920,14 +1918,14 @@ int mbsys_3ddwissl_extract_altitude
     }
 
   return status;
-}  /* mbsys_3ddwissl_extract_altitude */
+}  /* mbsys_3ddwissl1_extract_altitude */
 /*--------------------------------------------------------------------*/
-int mbsys_3ddwissl_extract_nnav
+int mbsys_3ddwissl1_extract_nnav
 (
   int verbose,                /* in: verbosity level set on command line 0..N */
   void *mbio_ptr,                    /* in: see mb_io.h:/^struct mb_io_struct/ */
   void *store_ptr,                  /* in: see mbsys_3ddwissl.h:/^struct
-                               mbsys_3ddwissl_struct/ */
+                               mbsys_3ddwissl1_struct/ */
   int nmax,                  /* in: maximum size available to n; e.g., n < nmax
                            */
   int *kind,                  /* out: MBIO data type; see mb_status.h:0+/MBIO data
@@ -1969,7 +1967,7 @@ int mbsys_3ddwissl_extract_nnav
   // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
+  struct mbsys_3ddwissl1_struct *store = (struct mbsys_3ddwissl1_struct *)store_ptr;
 
   /* get data kind */
   *kind = store->kind;
@@ -2046,16 +2044,16 @@ int mbsys_3ddwissl_extract_nnav
     }
 
   return status;
-}  /* mbsys_3ddwissl_extract_nnav */
+}  /* mbsys_3ddwissl1_extract_nnav */
 /*--------------------------------------------------------------------*/
-int mbsys_3ddwissl_extract_nav
+int mbsys_3ddwissl1_extract_nav
 (
   int verbose,
   void *mbio_ptr,                      /* in: verbosity level set on command
                                  line 0..N */
   void *store_ptr,                  /* in: see mb_io.h:/^struct mb_io_struct/ */
   int *kind,                      /* out: see mbsys_3ddwissl.h:/^struct
-                               mbsys_3ddwissl_struct/ */
+                               mbsys_3ddwissl1_struct/ */
   int time_i[7],                    /* out: time_i[7] values; see mb_time.c */
   double *time_d,                    /* out: time in seconds since 1,1,1970 */
   double *navlon,                    /* out: longitude (degrees) -180..+180.0 */
@@ -2085,7 +2083,7 @@ int mbsys_3ddwissl_extract_nav
   // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure */
-  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
+  struct mbsys_3ddwissl1_struct *store = (struct mbsys_3ddwissl1_struct *)store_ptr;
 
   /* extract data from structure */
   *kind = store->kind;
@@ -2153,9 +2151,9 @@ int mbsys_3ddwissl_extract_nav
     }
 
   return status;
-}  /* mbsys_3ddwissl_extract_nav */
+}  /* mbsys_3ddwissl1_extract_nav */
 /*----------------------------------------------------------------------*/
-int mbsys_3ddwissl_insert_nav
+int mbsys_3ddwissl1_insert_nav
 (
   int verbose,
   void *mbio_ptr,                      /* in: verbosity level set on command
@@ -2212,7 +2210,7 @@ int mbsys_3ddwissl_insert_nav
   // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
+  struct mbsys_3ddwissl1_struct *store = (struct mbsys_3ddwissl1_struct *)store_ptr;
 
   const int status = MB_SUCCESS;
 
@@ -2249,14 +2247,14 @@ int mbsys_3ddwissl_insert_nav
     }
 
   return status;
-}  /* mbsys_3ddwissl_insert_nav */
+}  /* mbsys_3ddwissl1_insert_nav */
 /*----------------------------------------------------------------------*/
-int mbsys_3ddwissl_extract_svp
+int mbsys_3ddwissl1_extract_svp
 (
   int verbose,                /* in: verbosity level set on command line 0..N */
   void *mbio_ptr,                /* in: see mb_io.h:mb_io_struct */
   void *store_ptr,                  /* in: see
-                               mbsys_3ddwissl.h:mbsys_3ddwissl_struct */
+                               mbsys_3ddwissl.h:mbsys_3ddwissl1_struct */
   int *kind,                  /* out: see mb_status.h:MBIO data type */
   int *nsvp,                  /* out: number of svp measurements */
   double *depth,                /* out: array[nsvp] depths (m) */
@@ -2280,7 +2278,7 @@ int mbsys_3ddwissl_extract_svp
   // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
+  struct mbsys_3ddwissl1_struct *store = (struct mbsys_3ddwissl1_struct *)store_ptr;
 
   /* get data kind */
   *kind = store->kind;
@@ -2322,13 +2320,13 @@ int mbsys_3ddwissl_extract_svp
     }
 
   return status;
-}  /* mbsys_3ddwissl_extract_svp */
+}  /* mbsys_3ddwissl1_extract_svp */
 /*----------------------------------------------------------------------*/
-int mbsys_3ddwissl_insert_svp
+int mbsys_3ddwissl1_insert_svp
 (
   int verbose,                /* in: verbosity level set on command line 0..N */
   void *mbio_ptr,                /* in: mbio.h:mb_io_struct */
-  void *store_ptr,                  /* in: mbsys_3ddwissl_struct */
+  void *store_ptr,                  /* in: mbsys_3ddwissl1_struct */
   int nsvp,                  /* in: number of svp records to insert */
   double *depth,                /* in: array[nsvp] depth records (m) */
   double *velocity,                  /* in: array[nsvp] sound velocity records
@@ -2361,7 +2359,7 @@ int mbsys_3ddwissl_insert_svp
   // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
+  struct mbsys_3ddwissl1_struct *store = (struct mbsys_3ddwissl1_struct *)store_ptr;
 
   int status = MB_SUCCESS;
 
@@ -2389,14 +2387,14 @@ int mbsys_3ddwissl_insert_svp
     }
 
   return status;
-}  /* mbsys_3ddwissl_insert_svp */
+}  /* mbsys_3ddwissl1_insert_svp */
 /*----------------------------------------------------------------------*/
-int mbsys_3ddwissl_copy
+int mbsys_3ddwissl1_copy
 (
   int verbose,            /* in: verbosity level set on command line */
   void *mbio_ptr,                /* in: see mb_io.h:mb_io_struct */
-  void *store_ptr,              /* in: see mbsys_3ddwissl.h:mbsys_3ddwissl_struct */
-  void *copy_ptr,                /* out: see mbsys_3ddwissl.h:mbsys_3ddwissl_struct
+  void *store_ptr,              /* in: see mbsys_3ddwissl.h:mbsys_3ddwissl1_struct */
+  void *copy_ptr,                /* out: see mbsys_3ddwissl.h:mbsys_3ddwissl1_struct
                            */
   int *error              /* out: see mb_status.h:MB_ERROR */
 )
@@ -2423,13 +2421,13 @@ int mbsys_3ddwissl_copy
   // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointers */
-  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
-  struct mbsys_3ddwissl_struct *copy = (struct mbsys_3ddwissl_struct *)copy_ptr;
+  struct mbsys_3ddwissl1_struct *store = (struct mbsys_3ddwissl1_struct *)store_ptr;
+  struct mbsys_3ddwissl1_struct *copy = (struct mbsys_3ddwissl1_struct *)copy_ptr;
 
   /* copy structure */
   const int num_pulses_alloc = copy->num_pulses_alloc;
-  struct mbsys_3ddwissl_pulse_struct *pulse_ptr = copy->pulses;
-  memcpy(copy_ptr, store_ptr, sizeof(struct mbsys_3ddwissl_struct));
+  struct mbsys_3ddwissl1_pulse_struct *pulse_ptr = copy->pulses;
+  memcpy(copy_ptr, store_ptr, sizeof(struct mbsys_3ddwissl1_struct));
   copy->num_pulses_alloc = num_pulses_alloc;
   copy->pulses = pulse_ptr;
 
@@ -2442,7 +2440,7 @@ int mbsys_3ddwissl_copy
       mb_reallocd(verbose,
       __FILE__,
       __LINE__,
-      copy->pulses_per_scan * sizeof(struct mbsys_3ddwissl_pulse_struct),
+      copy->pulses_per_scan * sizeof(struct mbsys_3ddwissl1_pulse_struct),
       (void **)&copy->pulses,
       error);
     if (status == MB_SUCCESS)
@@ -2451,7 +2449,7 @@ int mbsys_3ddwissl_copy
 
   /* copy pulses */
   memcpy((void *)copy->pulses, (void *)store->pulses,
-    copy->pulses_per_scan * sizeof(struct mbsys_3ddwissl_pulse_struct));
+    copy->pulses_per_scan * sizeof(struct mbsys_3ddwissl1_pulse_struct));
 
   if (verbose >= 2)
     {
@@ -2463,17 +2461,17 @@ int mbsys_3ddwissl_copy
     }
 
   return status;
-}  /* mbsys_3ddwissl_copy */
+}  /* mbsys_3ddwissl1_copy */
 /*----------------------------------------------------------------------*/
-int mbsys_3ddwissl_print_store
+int mbsys_3ddwissl1_print_store
 (
   int verbose,              /* in: verbosity level set on command line 0..N */
-  void *store_ptr,          /* in: see mbsys_3ddwissl.h:mbsys_3ddwissl_struct */
+  void *store_ptr,          /* in: see mbsys_3ddwissl.h:mbsys_3ddwissl1_struct */
   int *error                /* out: see mb_status.h:MB_ERROR */
 )
 {
-  struct mbsys_3ddwissl_pulse_struct *pulse;
-  struct mbsys_3ddwissl_sounding_struct *sounding;
+  struct mbsys_3ddwissl1_pulse_struct *pulse;
+  struct mbsys_3ddwissl1_sounding_struct *sounding;
 
   if (verbose >= 2)
     {
@@ -2491,7 +2489,7 @@ int mbsys_3ddwissl_print_store
   *error = MB_ERROR_NO_ERROR;
 
   /* get data structure pointers */
-  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
+  struct mbsys_3ddwissl1_struct *store = (struct mbsys_3ddwissl1_struct *)store_ptr;
 
   /* print 3DDWISSL store structure contents */
   static const char debug_str[] = "dbg2  ";
@@ -3596,13 +3594,13 @@ int mbsys_3ddwissl_print_store
     }
 
   return status;
-}  /* mbsys_3ddwissl_print_store */
+}  /* mbsys_3ddwissl1_print_store */
 /*--------------------------------------------------------------------*/
-int mbsys_3ddwissl_calculatebathymetry
+int mbsys_3ddwissl1_calculatebathymetry
 (
   int verbose,        /* in: verbosity level set on command line 0..N */
   void *mbio_ptr,     /* in: see mb_io.h:mb_io_struct */
-  void *store_ptr,    /* in: see mbsys_3ddwissl.h:mbsys_3ddwissl_struct */
+  void *store_ptr,    /* in: see mbsys_3ddwissl.h:mbsys_3ddwissl1_struct */
   double amplitude_threshold,   /* used to determine valid soundings */
   double target_altitude, /* used to prioritize picks close to a desired standoff */
   int *error              /* out: see mb_status.h:MB_ERROR */
@@ -3610,8 +3608,8 @@ int mbsys_3ddwissl_calculatebathymetry
 {
   (void)mbio_ptr;  // Unused arg
 
-  struct mbsys_3ddwissl_pulse_struct *pulse;
-  struct mbsys_3ddwissl_sounding_struct *sounding;
+  struct mbsys_3ddwissl1_pulse_struct *pulse;
+  struct mbsys_3ddwissl1_sounding_struct *sounding;
   double alpha, beta, theta, phi;
   double angle_az_sign, angle_el_sign;
   double mtodeglon, mtodeglat;
@@ -3643,7 +3641,7 @@ int mbsys_3ddwissl_calculatebathymetry
   *error = MB_ERROR_NO_ERROR;
 
   /* get data structure pointers */
-  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
+  struct mbsys_3ddwissl1_struct *store = (struct mbsys_3ddwissl1_struct *)store_ptr;
 
   /* recalculate bathymetry from LIDAR data */
   if (store->kind == MB_DATA_DATA)
@@ -3663,8 +3661,8 @@ int mbsys_3ddwissl_calculatebathymetry
     mb_coor_scale(verbose, store->navlat, &mtodeglon, &mtodeglat);
 
     /* set offsets according to which optical head these soundings come from */
-    if (( store->record_id == MBSYS_3DDWISSL_RECORD_RAWHEADA) ||
-      ( store->record_id == MBSYS_3DDWISSL_RECORD_PROHEADA) )
+    if (( store->record_id == MBSYS_3DDWISSL1_RECORD_RAWHEADA) ||
+      ( store->record_id == MBSYS_3DDWISSL1_RECORD_PROHEADA) )
       {
       /* optical head A */
       angle_az_sign = -1.0;
@@ -3692,7 +3690,7 @@ int mbsys_3ddwissl_calculatebathymetry
     /* figure out valid amplitude threshold */
     for (int ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
       {
-      pulse = (struct mbsys_3ddwissl_pulse_struct *)&store->pulses[ipulse];
+      pulse = (struct mbsys_3ddwissl1_pulse_struct *)&store->pulses[ipulse];
       short amplitude_max = 0;
       for (int isounding=0; isounding<store->soundings_per_pulse; isounding++)
         {
@@ -3706,7 +3704,7 @@ int mbsys_3ddwissl_calculatebathymetry
     /* loop over all pulses and soundings */
     for (int ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
       {
-      pulse = (struct mbsys_3ddwissl_pulse_struct *)&store->pulses[ipulse];
+      pulse = (struct mbsys_3ddwissl1_pulse_struct *)&store->pulses[ipulse];
       int isounding_largest = -1;
       short amplitude_largest = 0;
       for (int isounding=0; isounding<store->soundings_per_pulse; isounding++)
@@ -3802,9 +3800,9 @@ int mbsys_3ddwissl_calculatebathymetry
     }
 
   return status;
-}  /* mbsys_3ddwissl_calculatebathymetry */
+}  /* mbsys_3ddwissl1_calculatebathymetry */
 /*--------------------------------------------------------------------*/
-int mbsys_3ddwissl_wissl_indextable_compare1
+int mbsys_3ddwissl1_wissl_indextable_compare1
 (
   const void *a,
   const void *b
@@ -3834,7 +3832,7 @@ int mbsys_3ddwissl_wissl_indextable_compare1
   return result;
 }
 /*--------------------------------------------------------------------*/
-int mbsys_3ddwissl_wissl_indextable_compare2
+int mbsys_3ddwissl1_wissl_indextable_compare2
 (
   const void *a,
   const void *b
@@ -3854,7 +3852,7 @@ int mbsys_3ddwissl_wissl_indextable_compare2
   return result;
 }
 /*--------------------------------------------------------------------*/
-int mbsys_3ddwissl_indextablefix
+int mbsys_3ddwissl1_indextablefix
 (
   int verbose,
   void *mbio_ptr,
@@ -3887,7 +3885,7 @@ int mbsys_3ddwissl_indextablefix
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)mb_io_ptr->store_data;
+  struct mbsys_3ddwissl1_struct *store = (struct mbsys_3ddwissl1_struct *)mb_io_ptr->store_data;
 
   /* get index table structure pointer */
   struct mb_io_indextable_struct *indextable = (struct mb_io_indextable_struct *)indextable_ptr;
@@ -3897,7 +3895,7 @@ int mbsys_3ddwissl_indextablefix
   qsort((void *)indextable,
     num_indextable,
     sizeof(struct mb_io_indextable_struct),
-    (void *)mbsys_3ddwissl_wissl_indextable_compare1);
+    (void *)mbsys_3ddwissl1_wissl_indextable_compare1);
   for (i=0; i<num_indextable; i++)
     indextable[i].total_index_sorted = i;
 
@@ -3913,7 +3911,7 @@ int mbsys_3ddwissl_indextablefix
    */
 
   /* calculate the approximate expected time between scan timestamps */
-  dt_threshold = 2.30 * store->pulses_per_scan / MBSYS_3DDWISSL_LASERPULSERATE;
+  dt_threshold = 2.30 * store->pulses_per_scan / MBSYS_3DDWISSL1_LASERPULSERATE;
 
   /* find the index bounds of sorted data from the two WiSSL optical heads */
   head_a_start = num_indextable;
@@ -3922,14 +3920,14 @@ int mbsys_3ddwissl_indextablefix
   head_b_end = -1;
   for (int i = 0; i < num_indextable; i++)
     {
-    if (indextable[i].subsensor == MBSYS_3DDWISSL_HEADA)
+    if (indextable[i].subsensor == MBSYS_3DDWISSL1_HEADA)
       {
       if (i < head_a_start)
         head_a_start = i;
       if (i > head_a_end)
         head_a_end = i;
       }
-    else if (indextable[i].subsensor == MBSYS_3DDWISSL_HEADB)
+    else if (indextable[i].subsensor == MBSYS_3DDWISSL1_HEADB)
       {
       if (i < head_b_start)
         head_b_start = i;
@@ -4084,9 +4082,9 @@ int mbsys_3ddwissl_indextablefix
     }
 
   return status;
-}  /* mbsys_3ddwissl_fixwissltimestamps */
+}  /* mbsys_3ddwissl1_fixwissltimestamps */
 /*--------------------------------------------------------------------*/
-int mbsys_3ddwissl_indextableapply
+int mbsys_3ddwissl1_indextableapply
 (
   int verbose,
   void *mbio_ptr,
@@ -4139,13 +4137,13 @@ int mbsys_3ddwissl_indextableapply
   for (giindex = 0; giindex < num_indextable; giindex++)
     if (indextable[giindex].file_index == n_file)
       {
-      if (indextable[giindex].subsensor == MBSYS_3DDWISSL_HEADA)
+      if (indextable[giindex].subsensor == MBSYS_3DDWISSL1_HEADA)
         {
         if (giindex_a_begin < 0)
           giindex_a_begin = giindex;
         giindex_a_end = giindex;
         }
-      else if (indextable[giindex].subsensor == MBSYS_3DDWISSL_HEADB)
+      else if (indextable[giindex].subsensor == MBSYS_3DDWISSL1_HEADB)
         {
         if (giindex_b_begin < 0)
           giindex_b_begin = giindex;
@@ -4156,7 +4154,7 @@ int mbsys_3ddwissl_indextableapply
   /* replace timestamps with corrected values from the global index table */
   for (iindex = 0; iindex < mb_io_ptr->num_indextable; iindex++)
     {
-    if (mb_io_ptr->indextable[iindex].subsensor == MBSYS_3DDWISSL_HEADA)
+    if (mb_io_ptr->indextable[iindex].subsensor == MBSYS_3DDWISSL1_HEADA)
       {
       for (giindex = giindex_a_begin; giindex <= giindex_a_end; giindex++)
         if (mb_io_ptr->indextable[iindex].subsensor_index ==
@@ -4165,7 +4163,7 @@ int mbsys_3ddwissl_indextableapply
             indextable[giindex].time_d_corrected;
 
       }
-    else if (mb_io_ptr->indextable[iindex].subsensor == MBSYS_3DDWISSL_HEADB)
+    else if (mb_io_ptr->indextable[iindex].subsensor == MBSYS_3DDWISSL1_HEADB)
       {
       for (giindex = giindex_b_begin; giindex <= giindex_b_end; giindex++)
         if (mb_io_ptr->indextable[iindex].subsensor_index ==
@@ -4178,7 +4176,7 @@ int mbsys_3ddwissl_indextableapply
 
   /* resort the file's index table using the new timestamps */
   qsort((void *)mb_io_ptr->indextable, mb_io_ptr->num_indextable,
-    sizeof(struct mb_io_indextable_struct), (void *)mbsys_3ddwissl_wissl_indextable_compare2);
+    sizeof(struct mb_io_indextable_struct), (void *)mbsys_3ddwissl1_wissl_indextable_compare2);
   for (i=0; i<mb_io_ptr->num_indextable; i++)
     mb_io_ptr->indextable[i].total_index_sorted = i;
 
@@ -4192,5 +4190,5 @@ int mbsys_3ddwissl_indextableapply
     }
 
   return status;
-}  /* mbsys_3ddwissl_applywissltimestamps */
+}  /* mbsys_3ddwissl1_applywissltimestamps */
 /*--------------------------------------------------------------------*/
