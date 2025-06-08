@@ -74,14 +74,15 @@
 #define MB_SYS_BENTHOS 33
 #define MB_SYS_SWATHPLUS 34
 #define MB_SYS_3DATDEPTHLIDAR 35
-#define MB_SYS_3DDWISSL 36
-#define MB_SYS_WASSP 37
-#define MB_SYS_STEREOPAIR 38
-#define MB_SYS_KMBES 39
-#define MB_SYS_RESON7K3 40
+#define MB_SYS_3DDWISSL1 36
+#define MB_SYS_3DDWISSL2 37
+#define MB_SYS_WASSP 38
+#define MB_SYS_STEREOPAIR 39
+#define MB_SYS_KMBES 40
+#define MB_SYS_RESON7K3 41
 
 /* Number of supported MBIO data formats */
-#define MB_FORMATS 81
+#define MB_FORMATS 87
 
 /* Data formats supported by MBIO */
 
@@ -525,6 +526,12 @@ binary, single files, 3D at Depth. */
 variable beams, bathymetry, amplitude, \
 binary, single files, MBARI. */
 
+#define MBF_3DWISSL2 234
+/* 3D at Depth vendor format for 3D at Depth WiSSL2
+(Wide Swath Subsea Lidar, \
+variable beams, bathymetry, amplitude, \
+binary, single files, 3D at Depth. */
+
 #define MBF_WASSPENL 241
 /* WASSP Multibeam Vendor Format,  \
 WASSP multibeams, \
@@ -630,6 +637,7 @@ int mbr_register_swplssxp(int verbose, void *mbio_ptr, int *error);
 int mbr_register_3ddepthp(int verbose, void *mbio_ptr, int *error);
 int mbr_register_3dwisslr(int verbose, void *mbio_ptr, int *error);
 int mbr_register_3dwisslp(int verbose, void *mbio_ptr, int *error);
+int mbr_register_3dwissl2(int verbose, void *mbio_ptr, int *error);
 int mbr_register_wasspenl(int verbose, void *mbio_ptr, int *error);
 int mbr_register_photgram(int verbose, void *mbio_ptr, int *error);
 int mbr_register_kemkmall(int verbose, void *mbio_ptr, int *error);
@@ -1064,6 +1072,11 @@ int mbr_info_3dwisslr(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error);
 int mbr_info_3dwisslp(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
+                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
+                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
+                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
+                      double *beamwidth_ltrack, int *error);
+int mbr_info_3dwissl2(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
