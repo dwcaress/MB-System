@@ -7,7 +7,7 @@
 #define MousePanAndZoom "Pan and zoom"
 #define MouseRotateModel "Rotate model"
 #define MouseRotateView "Rotate view"
-#define MouseShading "Shading"
+#define MouseLighting "Lighting"
 #define MousePickArea "Pick area"
 #define MouseEditSites "Edit sites"
 #define MouseEditRoutes "Edit routes"
