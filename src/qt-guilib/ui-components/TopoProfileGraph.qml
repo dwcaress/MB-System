@@ -8,8 +8,6 @@ import QtGraphs
 /** Displays 2d vertical 'slice' between specified endpoints */
 GraphsView {
     id: graphsView
-    /// TEST TEST TEST
-    property int topoTestInt: 999
 
     /// type:ValueAxis profile x-axis
     property alias xAxis: graphsView.axisX
