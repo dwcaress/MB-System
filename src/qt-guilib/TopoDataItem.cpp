@@ -34,7 +34,8 @@ TopoDataItem::TopoDataItem() {
 }
 
 
-QQuickVTKItem::vtkUserData TopoDataItem::initializeVTK(vtkRenderWindow *renderWindow) {
+QQuickVTKItem::vtkUserData TopoDataItem::initializeVTK(vtkRenderWindow
+						       *renderWindow) {
   qDebug() << "initializeVTK()";
 
   renderWindow_ = renderWindow;
@@ -192,7 +193,10 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   pipeline->surfaceMapper_->RemoveAllInputConnections(0);
     
   // Clear actor list
-  pipeline->renderer_->RemoveAllViewProps();  
+  pipeline->renderer_->RemoveAllViewProps();
+
+  // Clear all lights
+  pipeline->renderer_->RemoveAllLights();    
 
   // Determine grid type
   TopoDataType gridType =
@@ -590,7 +594,7 @@ bool TopoDataItem::setMouseMode(QString mouseMode) {
     qDebug() << "setMouseMode(): set " << mouseMode << " picker";
     pipeline_->interactorStyle_ = pickInteractorStyle_;    
   }
-  else if (mouseMode == MouseShading) {
+  else if (mouseMode == MouseLighting) {
     qDebug() << "setMouseMode(): set " << mouseMode << " picker";
     lightPositionInteractorStyle_->setRenderer(pipeline_->renderer_);
     pipeline_->interactorStyle_ = lightPositionInteractorStyle_;
@@ -625,4 +629,29 @@ void TopoDataItem::setupLightSource() {
   pipeline_->interactorStyle_->setLight(light);
 }
 
+
+void TopoDataItem::setLight(float intensity, double x, double y, double z) {
+  pipeline_->lightSource_->SetIntensity(intensity);
+
+  
+  pipeline_->lightSource_->SetPosition(x, y, z);
+  
+  // Render scene
+  reassemblePipeline();
+}
+
+
+QVariantList TopoDataItem::getLightPosition() {
+
+  double position[3];
+  pipeline_->lightSource_->GetPosition(position);
+  QVariantList result;
+  
+  for (int i = 0; i < 3; i++) {
+    qDebug() << "getLightPosition(): " << i << ": " << position[i];
+    result.append(position[i]);
+  }
+
+  return result;
+}
 

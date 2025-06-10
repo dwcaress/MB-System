@@ -141,7 +141,12 @@ namespace mb_system {
     /// Set up the light source
     Q_INVOKABLE void setupLightSource(void);
 
-    
+    /// Set light source intensity and position
+    Q_INVOKABLE void setLight(float intensity, double x, double y, double z);
+
+    /// Get light source intensity and position
+    Q_INVOKABLE QVariantList getLightPosition(void);
+
     /// Set picked point
     void setPickedPoint(double *worldCoords);
 
