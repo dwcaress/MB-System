@@ -1,9 +1,9 @@
 // import related modules
 import QtQuick 2.9
-import QtQuick.Controls 2.9
+import QtQuick.Controls 
 import QtQuick.Window 2.2
 import QtQuick.Layouts 1.14
-import QtQuick.Dialogs
+import QtQuick.Dialogs 
 import QtGraphs 6.8   
 import "ui-components"
 
@@ -40,11 +40,6 @@ Window {
     // Bathymetry profile
     property list<vector2d> myProfile
 
-    onMyProfileChanged: {
-        console.log('Hey, myProfile changed to: ', myProfile)
-        mainWindow.profileSig(999, 'profileSig()')
-    }
-
     property int myVal: GuiNames.Speed
 
     Component.onCompleted: {
@@ -64,7 +59,7 @@ Window {
         id: menuBar
 
         Menu {
-            title: qsTr('&File')
+            title: qsTr('File')
 
             Action { text: qsTr('Open grid or swath...') ;
                 onTriggered: {console.log('show file dialog')
@@ -79,14 +74,24 @@ Window {
         Menu {
             title: 'View'
 
-            Action {
-                text: qsTr('Preferences')
-            }
+                Action {
+		  text: qsTr('2D preferences')
+		  onTriggered: {console.log('show 2D preferences');
+		  settings2d.show()}
+		}
+		
+                Action {
+		  text: qsTr('Lighting')
+		  onTriggered: {console.log('show 3D preferences');
+		  settings3dDialog.open();
+		  }
+		}
+
 
             Menu {
                 title: qsTr('Overlays')
                 Action {
-                    text: qsTr('&Axes'); checkable: true;
+                    text: qsTr('Axes'); checkable: true;
                     onTriggered: {topoDataItem.showAxes(checked)}
                 }
             }
@@ -95,12 +100,12 @@ Window {
                 title: qsTr('Displayed surface')
 
                 Action {
-                    text: qsTr('&Topography'); checkable: true;
+                    text: qsTr('Topography'); checkable: true;
                     ActionGroup.group: exclusiveActions
                     onTriggered: { topoDataItem.setDisplayedSurface(TopoDataItem.Elevation) }
                 }
                 Action {
-                    text: qsTr('&Slope'); checkable: true;
+                    text: qsTr('Slope'); checkable: true;
                     ActionGroup.group: exclusiveActions
                     onTriggered: { topoDataItem.setDisplayedSurface(TopoDataItem.Gradient) }
                 }
@@ -131,7 +136,7 @@ Window {
   
             // Profile
             Action {
-                text: qsTr('&Profile');
+                text: qsTr('Profile');
                 onTriggered: { console.log('show profile');
 		topoProfileWindow.show() }
             }
@@ -249,5 +254,100 @@ Window {
         }
     }
 
+    Settings2dWindow {
+        id: settings2d
+        visible: false
+    }
+
+
+
+
+    Dialog {
+        id: settings3dDialog
+	title: '3D view preferences'
+	modal: false
+	property list<double> intensity
+	
+        contentItem: Settings3D {
+	  id: settings3D
+	  intensity.onPressedChanged: {
+	                        console.log('intensity pressed/released')
+				if (!intensity.pressed) {
+				  console.log('RELEASED')
+				  updateLighting()
+				  }
+				}
+
+           lightX.onPressedChanged: {
+	                        console.log('intensity pressed/released')
+				if (!lightX.pressed) {
+				  console.log('RELEASED')
+				  updateLighting()
+				  }
+				}
+
+
+           lightY.onPressedChanged: {
+	                        console.log('intensity pressed/released')
+				if (!lightY.pressed) {
+				  console.log('RELEASED')
+				  updateLighting()
+				  }
+				}
+
+           lightZ.onPressedChanged: {
+	                        console.log('intensity pressed/released')
+				if (!lightZ.pressed) {
+				  console.log('RELEASED')
+				  updateLighting()
+				  }
+				}				
+        }
+	
+        // Button box at the bottom
+        footer: DialogButtonBox {
+            standardButtons: DialogButtonBox.Ok | DialogButtonBox.Cancel |
+	                     DialogButtonBox.Apply
+
+            onApplied: {
+	        console.log('set intensity to ', settings3D.intensity.value);
+	        topoDataItem.setLight(settings3D.intensity.value,
+		                      settings3D.lightX.value,
+				      settings3D.lightY.value,
+				      settings3D.lightZ.value)}
+			
+            onAccepted: {
+                console.log("OK clicked")
+                settings3dDialog.accept()
+            }
+            
+            onRejected: {
+                console.log("Cancel clicked")
+                settings3dDialog.reject()
+            }
+      }
+      onOpened: { console.log('settings3dDialog opened');
+                // Set values in settings gui to current values
+                var pos = topoDataItem.getLightPosition()
+		console.log('pos=', JSON.stringify(pos))
+		settings3D.lightX.value = pos[0]
+		settings3D.lightY.value = pos[1]
+		settings3D.lightZ.value = pos[2]
+      }
+	
+
+    }
+    
+    function updateLighting() {
+        console.log('updateLighting()')
+	console.log('settings3dDialog=', settings3dDialog)
+	console.log('settings3D=', settings3D)	
+
+	topoDataItem.setLight(settings3D.intensity.value,
+		              settings3D.lightX.value,
+		              settings3D.lightY.value,			      		                      settings3D.lightZ.value)
+    }
+    
 }
+
 
