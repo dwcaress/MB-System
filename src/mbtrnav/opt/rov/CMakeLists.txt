@@ -20,6 +20,8 @@ message("In src/mbtrnav/opt/rov")
 
 find_package(NetCDF REQUIRED)
 find_package(lcm REQUIRED)
+find_package(LibPROJ REQUIRED)
+
 include(${LCM_USE_FILE})
 message("-- LCM found! (please ignore any warnings about CMake version deprecation...)")
 
@@ -140,15 +142,17 @@ target_include_directories(trnxplug PRIVATE
     ${CMAKE_SOURCE_DIR}/src/mbtrnav/qnx-utils
     ${CMAKE_SOURCE_DIR}/src/mbtrnav/newmat
     ${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
+    ${CMAKE_BINARY_DIR}/src/mbtrnav/utils
     ${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw
     ${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/rov
     ${CMAKE_BINARY_DIR}/src/mbtrnav/opt/rov
     ${NetCDF_INCLUDE_DIRS}
-    ${LibPROJ_INCLUDE_DIR}
+    ${LibPROJ_INCLUDE_DIRS}
 )
 
 target_link_libraries(trnxplug PRIVATE
     newmat
+    geolib
     geocon
     trnw
     qnx
@@ -178,10 +182,10 @@ target_include_directories(trnxpp PRIVATE
     ${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/rov
     ${CMAKE_BINARY_DIR}/src/mbtrnav/opt/rov
     ${NetCDF_INCLUDE_DIRS}
-    ${LibPROJ_INCLUDE_DIR}
+    ${LibPROJ_INCLUDE_DIRS}
 )
 
-target_link_libraries(trnxpp PRIVATE lcm stdc++ mb1 trncli tnav newmat qnx m geocon udpms trnxplug NetCDF::NetCDF)
+target_link_libraries(trnxpp PRIVATE lcm stdc++ mb1 trncli tnav newmat qnx m geolib geocon udpms trnxplug NetCDF::NetCDF)
 #
 #------------------------------------------------------------------------------
 #
@@ -223,6 +227,7 @@ target_link_libraries(trnxpp PRIVATE lcm stdc++ mb1 trncli tnav newmat qnx m geo
 #    ${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw
 #    ${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/rov
 #    ${NetCDF_INCLUDE_DIRS}
+#    ${LibPROJ_INCLUDE_DIRS}
 #)
 
 # may need rt (librt) in Linux

@@ -56,6 +56,7 @@
 
 /* Macro definitions for the limits of the scale factor multipler */
 #define MIN_GSF_SF_MULT_VALUE  1
+//#define MAX_GSF_SF_MULT_VALUE  ULONG_MAX
 #define MAX_GSF_SF_MULT_VALUE  4294967295 // Changed to hard wired value from
                                           // ULONG_MAX for MB-System DW Caress 3 August 2019
                                           // This value is used for limiting scaling and

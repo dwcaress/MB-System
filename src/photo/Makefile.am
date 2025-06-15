@@ -19,4 +19,5 @@ mbphotomosaic_SOURCES = mbphotomosaic.cc
 mbgetphotocorrection_SOURCES = mbgetphotocorrection.cc
 mbphotogrammetry_SOURCES = mbphotogrammetry.cc
 mbimagecorrect_SOURCES = mbimagecorrect.cc
+mbimagelist_SOURCES = mbimagelist.cc
 mbtiff2png_SOURCES = mbtiff2png.cc

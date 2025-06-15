@@ -71,6 +71,7 @@ set(SRC
     mbr_3ddepthp.c
     mbr_3dwisslp.c
     mbr_3dwisslr.c
+    mbr_3dwissl2.c
     mbr_asciixyz.c
     mbr_bchrtunb.c
     mbr_bchrxunb.c
@@ -148,7 +149,8 @@ set(SRC
     mbr_xtfb1624.c
     mbr_xtfr8101.c
     mbsys_3datdepthlidar.c
-    mbsys_3ddwissl.c
+    mbsys_3ddwissl1.c
+    mbsys_3ddwissl2.c
     mbsys_atlas.c
     mbsys_benthos.c
     mbsys_dsl.c
@@ -217,7 +219,7 @@ if(buildGSF)
 endif()
 target_link_libraries(
   mbio
-  PRIVATE NetCDF::NetCDF mbbsio mbsapi LibPROJ::LibPROJ
+  PRIVATE NetCDF::NetCDF mbbitpack mbbsio mbsapi LibPROJ::LibPROJ
   PUBLIC TIRPC::TIRPC m)
 if (buildTRN)
   target_link_libraries(

@@ -25,7 +25,7 @@
 message("In src/photo")
 
 set(executables mbphotomosaic mbgetphotocorrection mbphotogrammetry
-                  mbimagecorrect mbtiff2png)
+                  mbimagecorrect mbtiff2png mbimagelist)
 set(scripts mbm_makeimagelist)
 
 find_package(OpenCV 4 REQUIRED COMPONENTS core highgui calib3d)

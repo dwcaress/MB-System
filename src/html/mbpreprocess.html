@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbpreprocess</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  2 August 2024 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  28 January 2025 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -242,6 +242,12 @@ Version 5.0
 <BR>
 
 <B>--kluge-sonardepth-from-heave</B>
+<BR>
+
+<B>--kluge-flipsign-roll</B>
+<BR>
+
+<B>--kluge-flipsign-pitch</B>
 <BR>
 
 ]
@@ -1115,6 +1121,10 @@ This option pertains only to Reson 7125 200 kHz multibeam data collected on the 
 MBARI Mapping AUV from 2006 through 2009. Invoking this kluge triggers <B>mbpreprocess</B>
 to modify the beam quality factors to be consistent with the later (&gt;2009) standard for
 the original bathymetry records in Reson s7k format data.
+<DT><B>--kluge-flipsign-roll</B><DD>
+This option multiplies the roll values to merged by -1, flipping the sign.
+<DT><B>--kluge-flipsign-pitch</B><DD>
+This option multiplies the pitch values to merged by -1, flipping the sign.
 <P>
 </DL>
 <A NAME="lbAH">&nbsp;</A>
@@ -1150,7 +1160,7 @@ Oh yeah.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 2 August 2024</P></CENTER>
+Last Updated: 28 January 2025</P></CENTER>
 
 <HR>
 <center>

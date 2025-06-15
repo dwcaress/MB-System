@@ -369,6 +369,7 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
 int mb_imagelist_recursion(int verbose, void *imagelist_ptr, bool print, int *recursion, int *error);
 int mb_imagelist_close(int verbose, void **imagelist_ptr, int *error);
 int mb_get_relative_path(int verbose, char *path, char *pwd, int *error);
+int mb_get_absolute_path(int verbose, char *path, char *pwd, int *error);
 int mb_get_shortest_path(int verbose, char *path, int *error);
 int mb_get_basename(int verbose, char *path, int *error);
 int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], bool *file_in_bounds, int *error);
@@ -730,11 +731,13 @@ int mb_linear_interp_longitude(int verbose, const double *xa, const double *ya, 
 int mb_linear_interp_latitude(int verbose, const double *xa, const double *ya, int n, double x, double *y, int *i, int *error);
 int mb_linear_interp_heading(int verbose, const double *xa, const double *ya, int n, double x, double *y, int *i, int *error);
 
+/* byte swap function prototypes */
 int mb_swap_check();
 int mb_swap_float(float *a);
 int mb_swap_double(double *a);
 int mb_swap_long(mb_s_long *a);
 
+/* beam angle calculation function prototypes */
 int mb_beaudoin(int verbose, mb_3D_orientation tx_align, mb_3D_orientation tx_orientation, double tx_steer,
                 mb_3D_orientation rx_align, mb_3D_orientation rx_orientation, double rx_steer, double reference_heading,
                 double *beamAzimuth, double *beamDepression, int *error);
@@ -747,6 +750,17 @@ int mb_rt(int verbose, void *modelptr, double source_depth, double source_angle,
           double surface_vel, double null_angle, int nplot_max,
           int *nplot, double *xplot, double *zplot, double *tplot,
           double *x, double *z, double *travel_time, int *ray_stat, int *error);
+          
+/* mb_bitpack C API function prototypes */
+void *mb_bitpack_new();
+void mb_bitpack_delete(void **mbbpptr);
+void mb_bitpack_clear(void *mbbpptr);
+void mb_bitpack_setbitsize(void *mbbpptr, unsigned int nbits);
+bool mb_bitpack_resize(void *mbbpptr, unsigned int arraySize, char **buffer, unsigned int* buffer_size);
+int mb_bitpack_getbytestoread(void *mbbpptr);
+int mb_bitpack_getbytestowrite(void *mbbpptr);
+bool mb_bitpack_readvalue(void *mbbpptr, unsigned int* value);
+bool mb_bitpack_writevalue(void *mbbpptr, unsigned int value); 
 
 #ifdef __cplusplus
 }  /* extern "C" */

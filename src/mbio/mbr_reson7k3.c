@@ -8953,18 +8953,18 @@ int mbr_reson7k3_rd_RemoteControlSonarSettings(int verbose, char *buffer, void *
   }
 
 /* print out the results */
-#ifdef MBR_RESON7K3_DEBUG
+//#ifdef MBR_RESON7K3_DEBUG
   fprintf(stderr,
           "R7KRECID_RemoteControlSonarSettings:  --7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping:%d size:%d "
           "index:%d\n",
           store->time_i[0], store->time_i[1], store->time_i[2], store->time_i[3], store->time_i[4], store->time_i[5],
           store->time_i[6], RemoteControlSonarSettings->ping_number, header->Size, index);
-#endif
-#ifdef MBR_RESON7K3_DEBUG2
-  if (verbose > 0)
-#else
-  if (verbose >= 2)
-#endif
+//#endif
+//#ifdef MBR_RESON7K3_DEBUG2
+//  if (verbose > 0)
+//#else
+//  if (verbose >= 2)
+//#endif
     mbsys_reson7k3_print_RemoteControlSonarSettings(verbose, RemoteControlSonarSettings, error);
 
   if (verbose >= 2) {

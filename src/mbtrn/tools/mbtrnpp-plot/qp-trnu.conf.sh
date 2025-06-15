@@ -28,7 +28,7 @@ QU_STITLE=${QU_STITLE:-"\n${QU_DATA_SET_ID}"}
 QU_EST_E_OFS="4.06167e6"
 QU_EST_W_OFS="594320."
 
-QU_MLE_PTITLE=${QU_PTITLE:-"TRN MLE estimated x,y"}
+QU_MLE_PTITLE=${QU_PTITLE:-"TRN MLE vs Nav estimated position"}
 QU_MLEX_PTITLE=${QU_PTITLE:-"mbtrnpp TRN MLE X"}
 QU_MLEY_PTITLE=${QU_PTITLE:-"mbtrnpp TRN MLE Y"}
 QU_MLEZ_PTITLE=${QU_PTITLE:-"mbtrnpp TRN MLE Z"}
@@ -37,7 +37,7 @@ export QU_MLEX_OIMG_NAME="mle-x"
 export QU_MLEY_OIMG_NAME="mle-y"
 export QU_MLEZ_OIMG_NAME="mle-z"
 
-QU_MSE_PTITLE=${QU_PTITLE:-"mbtrnpp TRN MMSE estimated x,y"}
+QU_MSE_PTITLE=${QU_PTITLE:-"mbtrnpp TRN MMSE vs Nav estimated position"}
 QU_MSEX_PTITLE=${QU_PTITLE:-"mbtrnpp TRN MMSE X"}
 QU_MSEY_PTITLE=${QU_PTITLE:-"mbtrnpp TRN MMSE Y"}
 QU_MSEZ_PTITLE=${QU_PTITLE:-"mbtrnpp TRN MMSE Z"}
@@ -287,8 +287,8 @@ QP_YTITLE["$QU_KEY"]="MLE Northing"
 #QP_Y2TITLE["$QU_KEY"]="Depth"
 #QP_Y2RANGE_MIN["$QU_KEY"]=6.5
 #QP_Y2RANGE_MAX["$QU_KEY"]=8.8
-QP_XSCALE["$QU_KEY"]=-1.0
-QP_YSCALE["$QU_KEY"]=-1.0
+#QP_XSCALE["$QU_KEY"]=-1.0
+#QP_YSCALE["$QU_KEY"]=-1.0
 QP_XOFS["$QU_KEY"]=${QU_EST_E_OFS}
 QP_YOFS["$QU_KEY"]=${QU_EST_W_OFS}
 QP_PLOT_STYLE["$QU_KEY"]="points" #lines
@@ -301,7 +301,16 @@ QP_USE_LINETYPES["$QU_KEY"]="N"
 QP_LINETYPE["$QU_KEY"]=1
 QP_INC_LINETYPE["$QU_KEY"]="Y"
 #QP_LINE_TYPES["$QU_KEY"]="${QU_LINE_TYPE_DFL}"
-QP_PLOT_SPECS["$QU_KEY"]="${QU_TRNU_MLEDAT_CSV},${QU_GREEN},4,,1,5,,mle.xy"
+# Use these for trnu logs with convergence fields in trn_mse_dat trn_mle_dat
+QP_EXPR["$QU_KEY"]="Y"
+QP_SPECDEL["$QU_KEY"]="|"
+QP_PLOT_SPECS["$QU_KEY"]="${QU_TRNU_PTDAT_CSV},${QU_GREEN},4,,1,(\$5),x1y1,pt.xy"
+QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNU_MLEDAT_CSV},${QU_BLUE},4,,1,(\$5),x1y2,mle.xy"
+QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNU_MLEDAT_CSV},${QU_ORANGE},4,,1,(\$7==1?\$5:1/0),x1y2,mle(cnv)"
+QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNU_MLEDAT_CSV},${QU_MAGENTA},4,,1,(\$8==1?\$5:1/0),x1y2,mle(val)"
+# Use these for trnu logs w/o convergence fields in trn_mse_dat trn_mle_dat
+#QP_PLOT_SPECS["$QU_KEY"]="${QU_TRNU_PTDAT_CSV},${QU_GREEN},4,,1,5,x1y1,pt.xy"
+#QP_PLOT_SPECS["$QU_KEY"]+="+${QU_TRNU_MLEDAT_CSV},${QU_BLUE},4,,1,5,x1y2,mle.xy"
 
 QU_KEY=${QU_KEYS[4]}
 QP_OFILE_NAME["$QU_KEY"]="${QU_MLEX_OIMG_NAME}"
@@ -470,7 +479,16 @@ QP_USE_LINETYPES["$QU_KEY"]="N"
 QP_LINETYPE["$QU_KEY"]=1
 QP_INC_LINETYPE["$QU_KEY"]="Y"
 #QP_LINE_TYPES["$QU_KEY"]="${QU_LINE_TYPE_DFL}"
-QP_PLOT_SPECS["$QU_KEY"]="${QU_TRNU_MSEDAT_CSV},${QU_GREEN},4,,1,5,,mse.xy"
+# Use these for trnu logs with convergence fields in trn_mse_dat trn_mle_dat
+QP_EXPR["$QU_KEY"]="Y"
+QP_SPECDEL["$QU_KEY"]="|"
+QP_PLOT_SPECS["$QU_KEY"]="${QU_TRNU_PTDAT_CSV},${QU_GREEN},4,,1,(\$5),x1y1,pt.xy"
+QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNU_MSEDAT_CSV},${QU_BLUE},4,,1,(\$5),x1y2,mse"
+QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNU_MSEDAT_CSV},${QU_ORANGE},4,,1,(\$11==1?\$5:1/0),x1y2,mse(cnv)"
+QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNU_MSEDAT_CSV},${QU_MAGENTA},4,,1,(\$12==1?\$5:1/0),x1y2,mse(val)"
+# Use these for trnu logs w/o convergence fields in trn_mse_dat trn_mle_dat
+#QP_PLOT_SPECS["$QU_KEY"]="${QU_TRNU_PTDAT_CSV},${QU_GREEN},4,,1,5,x1y1,pt.xy"
+#QP_PLOT_SPECS["$QU_KEY"]+="+${QU_TRNU_MSEDAT_CSV},${QU_BLUE},4,,1,5,x1y2,mse"
 
 QU_KEY=${QU_KEYS[8]}
 QP_OFILE_NAME["$QU_KEY"]="${QU_MSEX_OIMG_NAME}"
@@ -626,8 +644,8 @@ QP_YTITLE["$QU_KEY"]="PT Northing"
 #QP_Y2TITLE["$QU_KEY"]="Depth"
 #QP_Y2RANGE_MIN["$QU_KEY"]=6.5
 #QP_Y2RANGE_MAX["$QU_KEY"]=8.8
-QP_XSCALE["$QU_KEY"]=-1.0
-QP_YSCALE["$QU_KEY"]=-1.0
+#QP_XSCALE["$QU_KEY"]=-1.0
+#QP_YSCALE["$QU_KEY"]=-1.0
 QP_XOFS["$QU_KEY"]="${QU_EST_E_OFS}"
 QP_YOFS["$QU_KEY"]=${QU_EST_W_OFS}
 QP_PLOT_STYLE["$QU_KEY"]="points" #lines
@@ -857,7 +875,7 @@ QP_USE_LINETYPES["$QU_KEY"]="N"
 QP_LINETYPE["$QU_KEY"]=1
 QP_INC_LINETYPE["$QU_KEY"]="Y"
 #QP_LINE_TYPES["$QU_KEY"]="${QU_LINE_TYPE_DFL}"
-QP_PLOT_SPECS["$QU_KEY"]="${QU_TRNU_STATE_CSV},${QU_GREEN},14,,1,10,,cycle"
+QP_PLOT_SPECS["$QU_KEY"]="${QU_TRNU_STATE_CSV},${QU_GREEN},,16,1,10,x2y1,cycle"
 QP_PLOT_SPECS["$QU_KEY"]+="+${QU_TRNU_STATE_CSV},${QU_BLUE},14,,1,12,,ping"
 
 QU_KEY=${QU_KEYS[17]}

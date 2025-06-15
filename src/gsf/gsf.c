@@ -257,7 +257,7 @@ gsfStat (const char *filename, long long *sz)
 	rc = stat(filename, &stbuf);
 #else
 
-#if (defined __WINDOWS__) || (defined __MINGW32__) || (defined _WIN32)
+#if (defined __WINDOWS__) || (defined __MINGW32__)
     struct _stati64    stbuf;
     rc = _stati64(filename, &stbuf);
 #else
@@ -3611,6 +3611,7 @@ gsfCopyRecords (gsfRecords *target, const gsfRecords *source)
                     memcpy (target->mb_ping.brb_inten->time_series[i].samples, source->mb_ping.brb_inten->time_series[i].samples, sizeof(unsigned int) * source->mb_ping.brb_inten->time_series[i].sample_count);
                     target->mb_ping.brb_inten->time_series[i].sample_count = source->mb_ping.brb_inten->time_series[i].sample_count;
                     target->mb_ping.brb_inten->time_series[i].detect_sample = source->mb_ping.brb_inten->time_series[i].detect_sample;
+                    target->mb_ping.brb_inten->time_series[i].start_range_samples = source->mb_ping.brb_inten->time_series[i].start_range_samples;
                 }
             }
         }

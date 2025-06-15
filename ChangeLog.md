@@ -22,7 +22,8 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
-- Version 5.8.2beta20    March 15, 2025
+- Version 5.8.2beta22    April 25, 2025
+- Version 5.8.2beta21    March 15, 2025
 - Version 5.8.2beta20    February 22, 2025
 - Version 5.8.2beta19    January 19, 2025
 - Version 5.8.2beta18    December 8, 2024
@@ -53,6 +54,15 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.2beta22 (April 25, 2025)
+
+Macro mbm_route2mission: Altered the \fB-G\fP option so that instead of causing the AUV 
+mission to include surfacing at survey line starting and/or ending waypoints, now \fB-G\fP
+causes AUV surfacing to occur at the specified waypoint type.
+
+Program mbimagelist: New utility program that parses \fBMB-System\fP imagelist structures
+and can also be used to generate metadata files used by other MB-System programs.
 
 #### 5.8.2beta21 (March 15, 2025)
 
