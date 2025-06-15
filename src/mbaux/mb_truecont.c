@@ -786,7 +786,7 @@ int mb_triangulate(int verbose, struct swath *data, int *error) {
       rr_threshold = data->triangle_scale;
     } else {
       rr_threshold = MAX(0.01 * (xmax - xmin) / mtodeglon, 0.01 * (ymax - ymin) / mtodeglat);
-fprintf(stderr, "%s:%d:%s: rr_threshold: %f m\n", __FILE__, __LINE__, __FUNCTION__, rr_threshold);
+// fprintf(stderr, "%s:%d:%s: rr_threshold: %f m\n", __FILE__, __LINE__, __FUNCTION__, rr_threshold);
     }
     dlon = rr_threshold * mtodeglon;
     dlat = rr_threshold * mtodeglat;

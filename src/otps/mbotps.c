@@ -1085,7 +1085,7 @@ int main(int argc, char **argv) {
         }
         if (output_modtime > input_modtime && input_size > 0 && output_size > 0)
           proceed = false;
-        }
+      }
 
       /* skip the file */
       if (!proceed) {

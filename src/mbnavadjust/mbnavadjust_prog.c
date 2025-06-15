@@ -11102,7 +11102,7 @@ int mbnavadjust_updategrid() {
           /* write file header */
           char user[256], host[256], date[32];
           status = mb_user_host_date(mbna_verbose, user, host, date, &error);
-          gethostname(host, MBP_FILENAMESIZE);
+          gethostname(host, 256);
           snprintf(ostring, sizeof(ostring), "# Adjusted navigation generated using MBnavadjust\n");
           fprintf(afp, "%s", ostring);
           snprintf(ostring, sizeof(ostring), "# MB-System version:        %s\n", MB_VERSION);
