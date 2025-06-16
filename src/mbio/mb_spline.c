@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_spline.c	10/11/00
  *
- *    Copyright (c) 2000-2024 by
+ *    Copyright (c) 2000-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
