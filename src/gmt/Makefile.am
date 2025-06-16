@@ -7,13 +7,15 @@ if BUILD_MBTRN
 endif
 
 AM_CPPFLAGS =
-AM_CPPFLAGS += -I${top_srcdir}/src/mbio
-AM_CPPFLAGS += -I${top_srcdir}/src/mbaux
-AM_CPPFLAGS += ${libgmt_CPPFLAGS}
-AM_CPPFLAGS += ${libgdal_CPPFLAGS}
-AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
+AM_CPPFLAGS += -I${top_srcdir}/src/mbio 
+AM_CPPFLAGS += -I${top_srcdir}/src/mbaux 
+AM_CPPFLAGS += ${libgmt_CPPFLAGS} 
+AM_CPPFLAGS += ${libgdal_CPPFLAGS} 
+AM_CPPFLAGS += ${libnetcdf_CPPFLAGS} 
 
-AM_CFLAGS = ${libgmt_CFLAGS} ${libgdal_CFLAGS} ${libnetcdf_CFLAGS}
+AM_CFLAGS = ${libgmt_CFLAGS} 
+AM_CFLAGS += ${libgdal_CFLAGS} 
+AM_CFLAGS += ${libnetcdf_CFLAGS} 
 
 mbsystem_la_LDFLAGS = -module -avoid-version -shared
 mbsystem_la_SOURCES =

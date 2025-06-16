@@ -166,7 +166,7 @@ dnl Handle option to enable debugging
 AC_ARG_WITH(debug, [  --with-debug  Set compiler flags to allow full debugging], [AC_DEFINE(WITH_DEBUG,1,0) AC_SUBST(WITH_DEBUG,1) CFLAGS="-O0 -g" CXXFLAGS="-O0 -g"])
 
 dnl Check for programs
-AC_PROG_CC
+AC_PROG_CC([cc gcc])
 AM_PROG_CC_C_O
 AC_PROG_CXX
 AC_PROG_INSTALL
@@ -1506,6 +1506,7 @@ AC_CONFIG_FILES([\
     src/mbio/Makefile \
     src/surf/Makefile \
     src/bsio/Makefile \
+    src/mbbitpack/Makefile \
     src/mbaux/Makefile \
     src/utilities/Makefile \
     src/gmt/Makefile \
