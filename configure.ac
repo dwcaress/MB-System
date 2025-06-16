@@ -1,11 +1,7 @@
 dnl--------------------------------------------------------------------
 dnl    The MB-system:    configure.ac    12/7/2011
 dnl
-dnl    Copyright (c) 2011-2023 by
-dnl------------------------------------------------------------------------------
-dnl    The MB-system:  CMakeLists.txt   27 June 2023
-dnl
-dnl    Copyright (c) 2023-2024 by
+dnl    Copyright (c) 2011-2025 by
 dnl    David W. Caress (caress@mbari.org)
 dnl      Monterey Bay Aquarium Research Institute
 dnl      Moss Landing, California, USA
@@ -35,7 +31,7 @@ AS_ECHO([" "])
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO(["    The MB-system:    configure    12/7/2011"])
 AS_ECHO([" "])
-AS_ECHO(["    Copyright (c) 2011-2024 by"])
+AS_ECHO(["    Copyright (c) 2011-2025 by"])
 AS_ECHO(["    D. W. Caress (caress@lamont.ldgo.columbia.edu)"])
 AS_ECHO(["    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)"])
 AS_ECHO(["    Lamont-Doherty Earth Observatory"])
