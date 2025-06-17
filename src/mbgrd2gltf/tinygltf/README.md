@@ -2,30 +2,37 @@
 
 `TinyGLTF` is a header only C++11 glTF 2.0 https://github.com/KhronosGroup/glTF library.
 
-`TinyGLTF` uses Niels Lohmann's json library(https://github.com/nlohmann/json), so now it requires C++11 compiler.
-If you are looking for old, C++03 version, please use `devel-picojson` branch(but not maintained anymore).
+`TinyGLTF` uses Niels Lohmann's json library (https://github.com/nlohmann/json), so now it requires C++11 compiler.
+(Also, you can use RadpidJSON as an JSON backend)
+If you are looking for old, C++03 version, please use `devel-picojson` branch (but not maintained anymore).
 
 ## Status
 
+Currently TinyGLTF is stable and maintenance mode. No drastic changes and feature additions planned.
+
+ - v2.8.0 Add URICallbacks for custom URI handling in Buffer and Image. PR#397
+ - v2.7.0 Change WriteImageDataFunction user callback function signature. PR#393
+ - v2.6.0 Support serializing sparse accessor(Thanks to @fynv).
+ - v2.5.0 Add SetPreserveImageChannels() option to load image data as is.
  - v2.4.0 Experimental RapidJSON support. Experimental C++14 support(C++14 may give better performance)
  - v2.3.0 Modified Material representation according to glTF 2.0 schema(and introduced TextureInfo class)
  - v2.2.0 release(Support loading 16bit PNG. Sparse accessor support)
- - v2.1.0 release(Draco support)
+ - v2.1.0 release(Draco decoding support)
  - v2.0.0 release(22 Aug, 2018)!
 
 ### Branches
 
-* `sajson` : Use sajson to parse JSON. Parsing only but faster compile time(2x reduction compared to json.hpp and RapidJson)
+* `sajson` : Use sajson to parse JSON. Parsing only but faster compile time(2x reduction compared to json.hpp and RapidJson), but not well maintained.
 
 ## Builds
-
-[![Build Status](https://travis-ci.org/syoyo/tinygltf.svg?branch=devel)](https://travis-ci.org/syoyo/tinygltf)
 
 [![Build status](https://ci.appveyor.com/api/projects/status/warngenu9wjjhlm8?svg=true)](https://ci.appveyor.com/project/syoyo/tinygltf)
 
 ![C/C++ CI](https://github.com/syoyo/tinygltf/workflows/C/C++%20CI/badge.svg)
 
 ## Features
+
+Probably mostly feature-complete. Last missing feature is Draco encoding: https://github.com/syoyo/tinygltf/issues/207
 
 * Written in portable C++. C++-11 with STL dependency only.
   * [x] macOS + clang(LLVM)
@@ -79,6 +86,12 @@ In extension(`ExtensionMap`), JSON number value is parsed as int or float(number
 * [basic](examples/basic) : Basic glTF viewer with texturing support.
 * [build-gltf](examples/build-gltf) : Build simple glTF scene from a scratch.
 
+### WASI/WASM build
+
+Users who want to run TinyGLTF securely and safely(e.g. need to handle malcious glTF file to serve online glTF conver),
+I recommend to build TinyGLTF for WASM target.
+WASI build example is located in [wasm](wasm) .
+
 ## Projects using TinyGLTF
 
 * px_render Single header C++ Libraries for Thread Scheduling, Rendering, and so on... https://github.com/pplux/px
@@ -91,12 +104,15 @@ In extension(`ExtensionMap`), JSON number value is parsed as int or float(number
 * [GlslViewer](https://github.com/patriciogonzalezvivo/glslViewer) - live GLSL coding for MacOS and Linux
 * [Vulkan-Samples](https://github.com/KhronosGroup/Vulkan-Samples) - The Vulkan Samples is collection of resources to help you develop optimized Vulkan applications.
 * [TDME2](https://github.com/andreasdr/tdme2) - TDME2 - ThreeDeeMiniEngine2 is a lightweight 3D engine including tools suited for 3D game development using C++11
-* [SanityEngine](https://github.com/DethRaid/SanityEngine) - A C++/D3D12 renderer focused on the personal and proessional development of its developer
+* [SanityEngine](https://github.com/DethRaid/SanityEngine) - A C++/D3D12 renderer focused on the personal and professional development of its developer
+* [Open3D](http://www.open3d.org/) - A Modern Library for 3D Data Processing
+* [Supernova Engine](https://github.com/supernovaengine/supernova) - Game engine for 2D and 3D projects with Lua or C++ in data oriented design.
+* [Wicked Engine<img src="https://github.com/turanszkij/WickedEngine/blob/master/Content/logo_small.png" width="28px" align="center"/>](https://github.com/turanszkij/WickedEngine) - 3D engine with modern graphics
 * Your projects here! (Please send PR)
 
 ## TODOs
 
-* [ ] Write C++ code generator which emits C++ code from JSON schema for robust parsing.
+* [ ] Robust URI decoding/encoding. https://github.com/syoyo/tinygltf/issues/369
 * [ ] Mesh Compression/decompression(Open3DGC, etc)
   * [x] Load Draco compressed mesh
   * [ ] Save Draco compressed mesh
@@ -106,6 +122,10 @@ In extension(`ExtensionMap`), JSON number value is parsed as int or float(number
   * [ ] OpenEXR extension through TinyEXR.
 * [ ] 16bit PNG support in Serialization
 * [ ] Write example and tests for `animation` and `skin`
+
+### Optional
+
+* [ ] Write C++ code generator which emits C++ code from JSON schema for robust parsing?
 
 ## Licenses
 
@@ -173,8 +193,9 @@ if (!ret) {
 * `TINYGLTF_NO_INCLUDE_RAPIDJSON `: Disable including RapidJson's header files from within `tiny_gltf.h` because it has been already included before or you want to include it using custom path before including `tiny_gltf.h`.
 * `TINYGLTF_NO_INCLUDE_STB_IMAGE `: Disable including `stb_image.h` from within `tiny_gltf.h` because it has been already included before or you want to include it using custom path before including `tiny_gltf.h`.
 * `TINYGLTF_NO_INCLUDE_STB_IMAGE_WRITE `: Disable including `stb_image_write.h` from within `tiny_gltf.h` because it has been already included before or you want to include it using custom path before including `tiny_gltf.h`.
-* `TINYGLTF_USE_RAPIDJSON` : Use RapidJSON as a JSON parser/serializer. RapidJSON files are not included in TinyGLTF repo. Please set an include path to RapidJSON if you enable this featrure.
+* `TINYGLTF_USE_RAPIDJSON` : Use RapidJSON as a JSON parser/serializer. RapidJSON files are not included in TinyGLTF repo. Please set an include path to RapidJSON if you enable this feature.
 * `TINYGLTF_USE_CPP14` : Use C++14 feature(requires C++14 compiler). This may give better performance than C++11.
+
 
 ## CMake options
 
@@ -210,7 +231,7 @@ add_subdirectory(/path/to/tinygltf)
 
 #### Setup
 
-Python 2.6 or 2.7 required.
+Python required.
 Git clone https://github.com/KhronosGroup/glTF-Sample-Models to your local dir.
 
 #### Run parsing test
