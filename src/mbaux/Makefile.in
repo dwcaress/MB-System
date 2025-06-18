@@ -437,11 +437,11 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+lib_LTLIBRARIES = libmbaux.la ${XGRLIB}
+include_HEADERS = mb_aux.h ${XGRINC}
 @BUILD_MOTIF_TRUE@XGRLIB = libmbxgr.la
 @BUILD_MOTIF_TRUE@XGRINC = mb_xgraphics.h
 @BUILD_MBTRN_TRUE@MBTRNLIB = $(top_builddir)/src/mbtrn/libr7kr.la
-lib_LTLIBRARIES = libmbaux.la ${XGRLIB}
-include_HEADERS = mb_aux.h ${XGRINC}
 AM_CFLAGS = ${libgmt_CFLAGS} ${libgdal_CFLAGS} ${libnetcdf_CFLAGS}
 AM_CPPFLAGS = -I${top_srcdir}/src/mbio ${libgmt_CPPFLAGS} \
 	${libgdal_CPPFLAGS} ${libnetcdf_CPPFLAGS} ${libx11_CPPFLAGS}

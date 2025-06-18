@@ -158,11 +158,11 @@ am__define_uniq_tagged_files = \
   unique=`for i in $$list; do \
     if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
   done | $(am__uniquify_input)`
-DIST_SUBDIRS = gsf surf bsio mbtrnframe mbtrnav mbtrn mbio mbaux \
-	utilities mbtrnutils gmt otps mbgrd2gltf macros share man html \
-	mbedit mbnavedit mbvelocitytool mbview mbgrdviz mbeditviz \
-	mbnavadjust photo qt-mbgrdviz qt-mbgrdviz-2 qt-guilib \
-	qt-mbgrdviz-3 deprecated
+DIST_SUBDIRS = gsf surf bsio mbtrnframe mbtrnav mbtrn mbbitpack mbio \
+	mbaux utilities mbtrnutils gmt otps mbgrd2gltf macros share \
+	man html mbedit mbnavedit mbvelocitytool mbview mbgrdviz \
+	mbeditviz mbnavadjust photo qt-mbgrdviz qt-mbgrdviz-2 \
+	qt-guilib qt-mbgrdviz-3 deprecated
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
@@ -387,9 +387,9 @@ top_srcdir = @top_srcdir@
 @BUILD_QTTOOLS_TRUE@XBUILD_SUB_QTTOOLS = qt-mbgrdviz qt-mbgrdviz-2 qt-guilib qt-mbgrdviz-3
 @BUILD_DEPRECATED_TRUE@XBUILD_SUB_DEPRECATED = deprecated
 SUBDIRS = $(am__append_1) surf bsio $(XBUILD_SUB_MBTFRAME) \
-	$(XBUILD_SUB_MBTNAV) $(XBUILD_SUB_MBTRN) mbio mbaux utilities \
-	$(XBUILD_SUB_MBTRNBIN) gmt otps mbgrd2gltf macros share man \
-	html $(XBUILD_SUB_MOTIF) $(XBUILD_SUB_GL) \
+	$(XBUILD_SUB_MBTNAV) $(XBUILD_SUB_MBTRN) mbbitpack mbio mbaux \
+	utilities $(XBUILD_SUB_MBTRNBIN) gmt otps mbgrd2gltf macros \
+	share man html $(XBUILD_SUB_MOTIF) $(XBUILD_SUB_GL) \
 	$(XBUILD_SUB_OPENCVTOOLS) $(XBUILD_SUB_QTTOOLS) \
 	$(XBUILD_SUB_DEPRECATED)
 CLEANFILES = 

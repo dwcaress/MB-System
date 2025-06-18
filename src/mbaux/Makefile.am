@@ -1,3 +1,6 @@
+lib_LTLIBRARIES = libmbaux.la ${XGRLIB}
+include_HEADERS = mb_aux.h ${XGRINC}
+
 if BUILD_MOTIF
   XGRLIB = libmbxgr.la
   XGRINC = mb_xgraphics.h
@@ -5,9 +8,6 @@ endif
 if BUILD_MBTRN
   MBTRNLIB = $(top_builddir)/src/mbtrn/libr7kr.la
 endif
-
-lib_LTLIBRARIES = libmbaux.la ${XGRLIB}
-include_HEADERS = mb_aux.h ${XGRINC}
 
 AM_CFLAGS =
 AM_CFLAGS += ${libgmt_CFLAGS}

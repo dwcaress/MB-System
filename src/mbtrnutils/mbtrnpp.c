@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbtrnpp.c  2/19/2018
  *
- *    Copyright (c) 2018-2024 by
+ *    Copyright (c) 2018-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -5493,8 +5493,11 @@ int mbtrnpp_init_debug(int verbose) {
 
     // open mb1 data log
     if ( OUTPUT_FLAG_SET(OUTPUT_MB1_BIN) ) {
-        mb1_blog_path = (char *)malloc(512);
-        sprintf(mb1_blog_path, "%s//%s-%s%s", mbtrn_cfg->trn_log_dir, MB1_BLOG_NAME,
+    		size_t blog_path_len = strlen(mbtrn_cfg->trn_log_dir) + strlen(MB1_BLOG_NAME) 
+    														+ strlen(s_mbtrnpp_session_str(NULL,0,RF_NONE)) 
+    														+ strlen(MBTRNPP_LOG_EXT) + 4;
+        mb1_blog_path = (char *)malloc(blog_path_len);
+        sprintf(mb1_blog_path, "%s/%s-%s%s", mbtrn_cfg->trn_log_dir, MB1_BLOG_NAME,
                 s_mbtrnpp_session_str(NULL,0,RF_NONE), MBTRNPP_LOG_EXT);
         mb1_blog_id = mlog_get_instance(mb1_blog_path, &mb1_blog_conf, MB1_BLOG_NAME);
         fprintf(stderr,"MB1 binary log [%s]\n",mb1_blog_path);
@@ -5504,8 +5507,11 @@ int mbtrnpp_init_debug(int verbose) {
 
     // open trn message log
     if (OUTPUT_FLAG_SET(OUTPUT_MBTRNPP_MSG) ) {
-        mbtrnpp_mlog_path = (char *)malloc(512);
-        sprintf(mbtrnpp_mlog_path, "%s//%s-%s%s", mbtrn_cfg->trn_log_dir, MBTRNPP_MLOG_NAME, s_mbtrnpp_session_str(NULL,0,RF_NONE), MBTRNPP_LOG_EXT);
+    		size_t mlog_path_len = strlen(mbtrn_cfg->trn_log_dir) + strlen(MBTRNPP_MLOG_NAME) 
+    														+ strlen(s_mbtrnpp_session_str(NULL,0,RF_NONE)) 
+    														+ strlen(MBTRNPP_LOG_EXT) + 4;
+        mbtrnpp_mlog_path = (char *)malloc(mlog_path_len);
+        sprintf(mbtrnpp_mlog_path, "%s/%s-%s%s", mbtrn_cfg->trn_log_dir, MBTRNPP_MLOG_NAME, s_mbtrnpp_session_str(NULL,0,RF_NONE), MBTRNPP_LOG_EXT);
         mbtrnpp_mlog_id = mlog_get_instance(mbtrnpp_mlog_path, &mbtrnpp_mlog_conf, MBTRNPP_MLOG_NAME);
         fprintf(stderr,"mbtrnpp message log [%s]\n",mbtrnpp_mlog_path);
         mlog_show(mbtrnpp_mlog_id, true, 5);
@@ -5521,8 +5527,11 @@ int mbtrnpp_init_debug(int verbose) {
 
     // open trn message log
     if (OUTPUT_FLAG_SET(OUTPUT_TRNU_ASC) ) {
-        trnu_alog_path = (char *)malloc(512);
-        sprintf(trnu_alog_path, "%s//%s-%s%s", mbtrn_cfg->trn_log_dir, TRNU_ALOG_NAME, s_mbtrnpp_session_str(NULL,0,RF_NONE), MBTRNPP_LOG_EXT);
+    		size_t alog_path_len = strlen(mbtrn_cfg->trn_log_dir) + strlen(TRNU_ALOG_NAME) 
+    														+ strlen(s_mbtrnpp_session_str(NULL,0,RF_NONE)) 
+    														+ strlen(MBTRNPP_LOG_EXT) + 4;
+        trnu_alog_path = (char *)malloc(alog_path_len);
+        sprintf(trnu_alog_path, "%s/%s-%s%s", mbtrn_cfg->trn_log_dir, TRNU_ALOG_NAME, s_mbtrnpp_session_str(NULL,0,RF_NONE), MBTRNPP_LOG_EXT);
         trnu_alog_id = mlog_get_instance(trnu_alog_path, &trnu_alog_conf, TRNU_ALOG_NAME);
         fprintf(stderr,"trn update log [%s]\n",trnu_alog_path);
         mlog_show(trnu_alog_id, true, 5);
@@ -5533,8 +5542,11 @@ int mbtrnpp_init_debug(int verbose) {
     }
 
     if ( OUTPUT_FLAG_SET(OUTPUT_TRNU_BIN) ) {
-        trnu_blog_path = (char *)malloc(512);
-        sprintf(trnu_blog_path, "%s//%s-%s%s", mbtrn_cfg->trn_log_dir, TRNU_BLOG_NAME,
+    		size_t blog_path_len = strlen(mbtrn_cfg->trn_log_dir) + strlen(TRNU_BLOG_NAME) 
+    														+ strlen(s_mbtrnpp_session_str(NULL,0,RF_NONE)) 
+    														+ strlen(MBTRNPP_LOG_EXT) + 4;
+        trnu_blog_path = (char *)malloc(blog_path_len);
+        sprintf(trnu_blog_path, "%s/%s-%s%s", mbtrn_cfg->trn_log_dir, TRNU_BLOG_NAME,
                 s_mbtrnpp_session_str(NULL,0,RF_NONE), MBTRNPP_LOG_EXT);
         trnu_blog_id = mlog_get_instance(trnu_blog_path, &trnu_blog_conf, TRNU_BLOG_NAME);
         fprintf(stderr,"TRNU binary log [%s]\n",trnu_blog_path);
@@ -6754,8 +6766,11 @@ int mbtrnpp_reson7kr_input_open(int verbose, void *mbio_ptr, char *definition, i
     // configure reader data log
     if ( OUTPUT_FLAG_SET(OUTPUT_RESON_BIN) ) {
       // open mbr data log
-      reson_blog_path = (char *)malloc(512);
-      sprintf(reson_blog_path, "%s//%s-%s%s", mbtrn_cfg->trn_log_dir, RESON_BLOG_NAME, s_mbtrnpp_session_str(NULL,0,RF_NONE), MBTRNPP_LOG_EXT);
+    	size_t blog_path_len = strlen(mbtrn_cfg->trn_log_dir) + strlen(RESON_BLOG_NAME) 
+    														+ strlen(s_mbtrnpp_session_str(NULL,0,RF_NONE)) 
+    														+ strlen(MBTRNPP_LOG_EXT) + 4;
+      reson_blog_path = (char *)malloc(blog_path_len);
+      sprintf(reson_blog_path, "%s/%s-%s%s", mbtrn_cfg->trn_log_dir, RESON_BLOG_NAME, s_mbtrnpp_session_str(NULL,0,RF_NONE), MBTRNPP_LOG_EXT);
 
       reson_blog_id = mlog_get_instance(reson_blog_path, &reson_blog_conf, RESON_BLOG_NAME);
 
@@ -9030,8 +9045,11 @@ int mbtrnpp_mb1r_input_open(int verbose, void *mbio_ptr, char *definition, int *
         // configure reader data log
         if ( OUTPUT_FLAG_SET(OUTPUT_MB1R_BIN) ) {
             // open mbr data log
-            mb1r_blog_path = (char *)malloc(512);
-            sprintf(mb1r_blog_path, "%s//%s-%s%s", mbtrn_cfg->trn_log_dir, MB1R_BLOG_NAME, s_mbtrnpp_session_str(NULL,0,RF_NONE), MBTRNPP_LOG_EXT);
+    				size_t blog_path_len = strlen(mbtrn_cfg->trn_log_dir) + strlen(MB1R_BLOG_NAME) 
+    														+ strlen(s_mbtrnpp_session_str(NULL,0,RF_NONE)) 
+    														+ strlen(MBTRNPP_LOG_EXT) + 4;
+      			mb1r_blog_path = (char *)malloc(blog_path_len);
+            sprintf(mb1r_blog_path, "%s/%s-%s%s", mbtrn_cfg->trn_log_dir, MB1R_BLOG_NAME, s_mbtrnpp_session_str(NULL,0,RF_NONE), MBTRNPP_LOG_EXT);
 
             mb1r_blog_id = mlog_get_instance(mb1r_blog_path, &mb1r_blog_conf, MB1R_BLOG_NAME);
 

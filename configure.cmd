@@ -27,9 +27,11 @@
     autoreconf --force --install
 
 # Run the configure script - here the prerequisites have been installed with
-# MacPorts, and the OpenCV based photomosaicing and Terrain relative
-# Navigation are all enabled
+# MacPorts but the OpenCV based photomosaicing and Terrain relative
+# Navigation are disabled
 # Add --enable-deprecated to also build the deprecated programs
+# Add --enable-mbtrn --enable-mbtnav to also build the TRN tools
+# Add --enable-opencv to also build the OpenCV programs
     CFLAGS="-g -Wall -Wextra" CPPFLAGS="-g" ./configure \
       --prefix=/usr/local \
       --disable-static \
@@ -47,12 +49,14 @@
       --with-motif-include=/opt/local/include \
       --with-opengl-include=/opt/local/include \
       --with-opengl-lib=/opt/local/lib \
-      --enable-mbtrn \
-      --enable-mbtnav \
-      --enable-opencv \
-      --with-opencv-include=/opt/local/include/opencv4 \
-      --with-opencv-lib=/opt/local/lib/opencv4 \
       --with-otps-dir=/usr/local/src/otps
+
+# These options disabled because they do not work on all operating systems
+#      --enable-mbtrn \
+#      --enable-mbtnav \
+#      --enable-opencv \
+#      --with-opencv-include=/opt/local/include/opencv4 \
+#      --with-opencv-lib=/opt/local/lib/opencv4 \
 
     make
     make check
