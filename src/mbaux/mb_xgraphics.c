@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	xgraphics.c	8/3/94
  *
- *    Copyright (c) 1993-2024 by
+ *    Copyright (c) 1993-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA

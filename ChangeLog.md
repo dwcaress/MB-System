@@ -22,7 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
-- Version 5.8.2beta22    April 25, 2025
+- Version 5.8.2beta22    June 16, 2025
 - Version 5.8.2beta21    March 15, 2025
 - Version 5.8.2beta20    February 22, 2025
 - Version 5.8.2beta19    January 19, 2025
@@ -55,7 +55,19 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 ---
 
-#### 5.8.2beta22 (April 25, 2025)
+#### 5.8.2beta22 (June 16, 2025)
+
+Program mbtrnpp: Improved beam decimation and median filtering algorithms and some included
+performance analysis plotting tools. Also fixed string construction code that triggered 
+buffer overflow signals (falsely) when compiled with strict security rules, as is the 
+default for Ubuntu 24.
+
+Program mbgrdviz: Added capability to export routes in the form of Kongsberg Dynamic 
+Positioning system waypoints, allowing importation of the MB-System derived survey plans
+to the bridge control system on MBARI's R/V David Packard.
+
+Format MBF_3DWISSL2 (234): First work on i/o module for data from the 3D at Depth WiSSL2
+(2nd Generation Wide Swath Subsea Lidar) - this is not complete.
 
 Macro mbm_route2mission: Altered the \fB-G\fP option so that instead of causing the AUV 
 mission to include surfacing at survey line starting and/or ending waypoints, now \fB-G\fP

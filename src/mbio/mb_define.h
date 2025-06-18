@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mb_define.h  4/21/96
  *
- *    Copyright (c) 1996-2024 by
+ *    Copyright (c) 1996-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -37,8 +37,8 @@
 #include <stdint.h>
 
 /* Define version and date for this release */
-#define MB_VERSION "5.8.2beta21"
-#define MB_VERSION_DATE "15 March 2025"
+#define MB_VERSION "5.8.2beta22"
+#define MB_VERSION_DATE "16 June 2025"
 
 /* CMake supports current OS's and so there is only one form of RPC and XDR and no mb_config.h file */
 #ifdef CMAKE_BUILD_SYSTEM
