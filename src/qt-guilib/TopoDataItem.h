@@ -23,7 +23,7 @@
 #include "TopoColorMap.h"
 #include "InteractorStyle.h"
 #include "PickInteractorStyle.h"
-#include "LightPositionInteractorStyle.h"
+#include "LightingInteractorStyle.h"
 
 namespace mb_system {
 
@@ -219,7 +219,7 @@ namespace mb_system {
 
     /// Interactor styles (can be selected by user)
     mb_system::PickInteractorStyle *pickInteractorStyle_;
-    LightPositionInteractorStyle *lightPositionInteractorStyle_;
+    LightingInteractorStyle *lightingInteractorStyle_;
     
   };
 }

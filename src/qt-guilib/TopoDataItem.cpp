@@ -30,7 +30,7 @@ TopoDataItem::TopoDataItem() {
 
   // Instantiate interactor styles
   pickInteractorStyle_ = new PickInteractorStyle();
-  lightPositionInteractorStyle_ = new LightPositionInteractorStyle();
+  lightingInteractorStyle_ = new LightingInteractorStyle();
 }
 
 
@@ -596,8 +596,8 @@ bool TopoDataItem::setMouseMode(QString mouseMode) {
   }
   else if (mouseMode == MouseLighting) {
     qDebug() << "setMouseMode(): set " << mouseMode << " picker";
-    lightPositionInteractorStyle_->setRenderer(pipeline_->renderer_);
-    pipeline_->interactorStyle_ = lightPositionInteractorStyle_;
+    lightingInteractorStyle_->setRenderer(pipeline_->renderer_);
+    pipeline_->interactorStyle_ = lightingInteractorStyle_;
   }
   else {
     qDebug() << "setMouseMode(): " << mouseMode << " not yet implemented";
