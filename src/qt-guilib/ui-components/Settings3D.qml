@@ -29,7 +29,7 @@ Item {
                     value: 1
                 }
                 // Set displayed decimal places on slider label
-                Label { text: "val: " + Math.round(intensity.value *100)/100 }
+                Label { text: Math.round(intensity.value *100)/100 }
 
                 MenuSeparator { }
                 Label {
@@ -46,8 +46,7 @@ Item {
                     value: 1
                 }
                 // Set displayed decimal places on slider label
-                Label { text: "lightXval: " +
-		        Math.round(intensity.value *100)/100 }
+                Label { text: Math.round(lightX.value *100)/100 }
 
                 MenuSeparator { }
                 Label {
@@ -64,8 +63,7 @@ Item {
                     value: 1
                 }
                 // Set displayed decimal places on slider label
-                Label { text: "lightYval: " +
-		        Math.round(lightY.value *100)/100 }
+                Label { text: Math.round(lightY.value *100)/100 }
 			
                 MenuSeparator { }			
                 Label {
@@ -82,8 +80,7 @@ Item {
                     value: 1
                 }
                 // Set displayed decimal places on slider label
-                Label { text: "lightZval: " +
-		        Math.round(lightZ.value *100)/100 }
+                Label { text: Math.round(lightZ.value *100)/100 }
 
 
 
