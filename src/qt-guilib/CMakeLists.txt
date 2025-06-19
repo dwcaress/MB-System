@@ -51,7 +51,6 @@ set(src
     GmtGridSurface.cpp
     InteractorStyle.cpp
     LightingInteractorStyle.cpp
-    LightPositionInteractorStyle.cpp
     MBGui.cpp
     MBQuickItem.cpp
     PixmapDrawer.cpp    
