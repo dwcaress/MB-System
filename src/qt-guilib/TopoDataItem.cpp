@@ -655,3 +655,8 @@ QVariantList TopoDataItem::getLightPosition() {
   return result;
 }
 
+
+double TopoDataItem::getLightIntensity() {
+  return pipeline_->lightSource_->GetIntensity();
+}
+
