@@ -333,6 +333,7 @@ Window {
 		settings3D.lightX.value = pos[0]
 		settings3D.lightY.value = pos[1]
 		settings3D.lightZ.value = pos[2]
+		settings3D.intensity.value = topoDataItem.getLightIntensity()
       }
 	
 
