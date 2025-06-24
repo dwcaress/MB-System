@@ -24,8 +24,8 @@ Item {
                 Slider {
                     id: intensity
                     Layout.fillWidth: true
-                    from: 0
-                    to: 1
+                    from: 0.2
+                    to: 2
                     value: 1
                 }
                 // Set displayed decimal places on slider label
