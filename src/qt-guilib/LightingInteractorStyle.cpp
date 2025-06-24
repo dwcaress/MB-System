@@ -17,23 +17,23 @@
 vtkStandardNewMacro(LightingInteractorStyle);
 
 LightingInteractorStyle::LightingInteractorStyle() {
-  this->lightMoving_ = false;
-  this->intensityChanging_ = false;  
-  this->startMousePosition_[0] = 0;
-  this->startMousePosition_[1] = 0;
+  lightMoving_ = false;
+  intensityChanging_ = false;  
+  startMousePosition_[0] = 0;
+  startMousePosition_[1] = 0;
 }
 
 void LightingInteractorStyle::setRenderer(vtkRenderer* renderer) {
-  this->renderer_ = renderer;
+  renderer_ = renderer;
 }
 
 void LightingInteractorStyle::OnLeftButtonDown() {
   std::cerr << "LightingInteractorStyle::OnLeftButtonDown()\n";
-  if (this->Interactor->GetShiftKey()) {
+  if (Interactor->GetShiftKey()) {
     std::cerr << "start moving the light!\n";
-    this->lightMoving_ = true;
-    this->Interactor->GetEventPosition(this->startMousePosition_[0],
-				       this->startMousePosition_[1]);
+    lightMoving_ = true;
+    Interactor->GetEventPosition(startMousePosition_[0],
+				       startMousePosition_[1]);
   }
   else {
     std::cerr << "Do not move the light\n";
@@ -42,42 +42,48 @@ void LightingInteractorStyle::OnLeftButtonDown() {
 }
 
 void LightingInteractorStyle::OnLeftButtonUp() {
-  this->lightMoving_ = false;
+  lightMoving_ = false;
   vtkInteractorStyleTrackballCamera::OnLeftButtonUp();
 }
 
 
 void LightingInteractorStyle::OnRightButtonDown() {
   std::cerr << "LightingInteractorStyle::OnRightButtonDown()\n";
-  if (this->Interactor->GetShiftKey()) {
+  if (Interactor->GetShiftKey()) {
     std::cerr << "start changing intensity!\n";
-    this->intensityChanging_ = true;
-    this->Interactor->GetEventPosition(this->startMousePosition_[0],
-				       this->startMousePosition_[1]);
+    intensityChanging_ = true;
+    Interactor->GetEventPosition(startMousePosition_[0],
+				       startMousePosition_[1]);
   }
   else {
-    std::cerr << "Do not move the light\n";
+    std::cerr << "Do not change light intensity\n";
   }
   vtkInteractorStyleTrackballCamera::OnRightButtonDown();
 }
 
 void LightingInteractorStyle::OnRightButtonUp() {
-  this->intensityChanging_ = false;
+  intensityChanging_ = false;
   vtkInteractorStyleTrackballCamera::OnRightButtonUp();
 }
 
 void LightingInteractorStyle::OnMouseMove() {
-  if (this->lightMoving_ && this->Interactor->GetShiftKey())  {
-    // Get current mouse position
-    int position[2];
-    this->Interactor->GetEventPosition(position[0], position[1]);
+  // Get current mouse position
+  int position[2];
+  Interactor->GetEventPosition(position[0], position[1]);
             
-    // Calculate change from previous position
-    double dx = position[0] - this->startMousePosition_[0];
-    double dy = position[1] - this->startMousePosition_[1];
+  // Calculate change from previous position
+  double dx = position[0] - startMousePosition_[0];
+  double dy = position[1] - startMousePosition_[1];
+
+  // Scale movement based on renderer size
+  int* size = Interactor->GetRenderWindow()->GetSize();
+  dx = dx / size[0] * 5.0;
+  dy = dy / size[1] * 5.0;
+  
+  if (lightMoving_ && Interactor->GetShiftKey())  {
             
     // Get current camera parameters to relate mouse movement to 3D space
-    vtkCamera* camera = this->renderer_->GetActiveCamera();
+    vtkCamera* camera = renderer_->GetActiveCamera();
             
     // Get camera vectors
     double forward[3];
@@ -90,14 +96,10 @@ void LightingInteractorStyle::OnMouseMove() {
     vtkMath::Cross(forward, up, right);
     vtkMath::Normalize(right);
             
-    // Scale movement based on renderer size
-    int* size = this->Interactor->GetRenderWindow()->GetSize();
-    dx = dx / size[0] * 5.0;
-    dy = dy / size[1] * 5.0;
             
     // Get current light position
     double current_pos[3];
-    this->lightSource_->GetPosition(current_pos);
+    lightSource_->GetPosition(current_pos);
             
     // Calculate new position
     double new_pos[3] = {
@@ -111,20 +113,35 @@ void LightingInteractorStyle::OnMouseMove() {
       ", z= " << new_pos[2] << "\n";
       
     // Update light position
-    this->lightSource_->SetPosition(new_pos);
+    lightSource_->SetPosition(new_pos);
 
-    // Store new position as starting position for next move
-    this->startMousePosition_[0] = position[0];
-    this->startMousePosition_[1] = position[1];
-            
     // Trigger render to update scene with new lighting
-    this->Interactor->Render();
+    //// Interactor->Render();
+    Interactor->Render();    
+  }
+  else if (intensityChanging_ && Interactor->GetShiftKey())  {
+    double intensity = lightSource_->GetIntensity();
+    std::cerr << "change light intensity; now is " << intensity << "\n";
+    std::cerr << "intensity: " << intensity << ", dx: " << dx <<
+      ", dy: " << dy << "\n";
+    
+    // Calculate new intensity based on mouse dy
+    intensity += dy;
+    intensity = std::min(intensity, 2.0);
+    intensity = std::max(intensity, 0.2);
+    
+    // Update light intensity
+    lightSource_->SetIntensity(intensity);
+
+    Interactor->Render();    
   }
   else {
     // Pass the event to the parent class for standard camera manipulation
     vtkInteractorStyleTrackballCamera::OnMouseMove();
   }
-        
+  // Store new position as starting position for next move
+  startMousePosition_[0] = position[0];
+  startMousePosition_[1] = position[1];
 }
 
 
