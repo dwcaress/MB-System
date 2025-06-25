@@ -22,6 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.2beta23    June 25, 2025
 - Version 5.8.2beta22    June 16, 2025
 - Version 5.8.2beta21    March 15, 2025
 - Version 5.8.2beta20    February 22, 2025
@@ -54,6 +55,25 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.2beta23 (June 25, 2025)
+
+Program mbgrdviz: Fixed capability to export routes in the form of Kongsberg Dynamic 
+Positioning system waypoints, allowing importation of the MB-System derived survey plans
+to the bridge control system on MBARI's R/V David Packard.
+
+Format 89 (Teledyne Reson and Norbit (*.s7k)): Removed an errant debug message.
+
+Program mbnavadjust: Greatly improved picking data sections and global ties from the 
+model time series plots. Reorganized the List menu so that the choices switching the 
+data pick mode on the model plot and the map visualization are together. When the list
+shows data sections, global ties, or sorted global ties, then picking on the model plot
+or on navigation in the visualization will bring up the analysis window with a data section 
+and potentially a reference grid. Otherwise the picking and the analysis window will be
+of crossings and crossing ties. 
+
+Program mbpreprocess: Fixed generation of asynchronous navigation, attitude, heading and
+sensor depth files for use by mbeditviz.
 
 #### 5.8.2beta22 (June 16, 2025)
 

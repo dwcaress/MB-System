@@ -2743,7 +2743,7 @@ int main(int argc, char **argv) {
       n_rf_att1 = 0;
       n_rf_att2 = 0;
       n_rf_att3 = 0;
-	  n_rf_dup_timestamp = 0;
+	    n_rf_dup_timestamp = 0;
       n_wf_data = 0;
       n_wf_comment = 0;
       n_wf_nav = 0;
@@ -3023,13 +3023,9 @@ int main(int argc, char **argv) {
           preprocess_pars.n_soundspeed = n_soundspeed;
           preprocess_pars.soundspeed_time_d = soundspeed_time_d;
           preprocess_pars.soundspeed_soundspeed = soundspeed_soundspeed;
-//fprintf(stderr, "\n%s:%d:%s: n_sensordepth: %d %d\n", __FILE__, __LINE__, __FUNCTION__, 
-//preprocess_pars.n_sensordepth, n_sensordepth);
 
           /* attempt to execute a preprocess function for these data */
           status = mb_preprocess(verbose, imbio_ptr, istore_ptr, (void *)platform, (void *)&preprocess_pars, &error);
-//fprintf(stderr, "%s:%d:%s: n_sensordepth: %d %d\n\n", __FILE__, __LINE__, __FUNCTION__, 
-//preprocess_pars.n_sensordepth, n_sensordepth);
 
           /* If a predefined preprocess function does not exist for
            * this format then standard preprocessing will be done
@@ -3378,7 +3374,7 @@ int main(int argc, char **argv) {
       }
 
       /* close the input ("logged") swath file */
-      status &= mb_close(verbose, &imbio_ptr, &error);
+      status = mb_close(verbose, &imbio_ptr, &error);
       n_rt_files++;
 
       /* close the output ("raw") swath file */
@@ -3387,7 +3383,7 @@ int main(int argc, char **argv) {
 
       // close the output fbt file
       if (make_fbt)
-        status &= mb_close(verbose, &fmbio_ptr, &error);
+        status = mb_close(verbose, &fmbio_ptr, &error);
 
       //close the output fnv file
       if (make_fnv)

@@ -37,8 +37,8 @@
 #include <stdint.h>
 
 /* Define version and date for this release */
-#define MB_VERSION "5.8.2beta22"
-#define MB_VERSION_DATE "16 June 2025"
+#define MB_VERSION "5.8.2beta23"
+#define MB_VERSION_DATE "25 June 2025"
 
 /* CMake supports current OS's and so there is only one form of RPC and XDR and no mb_config.h file */
 #ifdef CMAKE_BUILD_SYSTEM
@@ -710,6 +710,8 @@ int mb_get_date(int verbose, double time_d, int time_i[7]);
 int mb_get_date_string(int verbose, double time_d, char *string);
 int mb_get_jtime(int verbose, int time_i[7], int time_j[5]);
 int mb_get_itime(int verbose, int time_j[5], int time_i[7]);
+char *mb_day_name(int verbose, int day);
+char *mb_month_name(int verbose, int month);
 int mb_fix_y2k(int verbose, int year_short, int *year_long);
 int mb_unfix_y2k(int verbose, int year_long, int *year_short);
 
