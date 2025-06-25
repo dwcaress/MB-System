@@ -2370,48 +2370,75 @@ void do_update_modelplot_status() {
 
     struct mbna_crossing *crossing;
 
-    /* set model view status label */
-    if (project.modelplot_style == MBNA_MODELPLOT_TIMESERIES) {
-      if (mbna_crossing_select == MBNA_SELECT_NONE) {
-        snprintf(string, sizeof(string), ":::t\"Mouse: <left> select  tie; <middle> select untied crossing; <right> drag zoom "
-          "extent\":t\"No Selection\"");
-      }
-      else {
-        crossing = &(project.crossings[mbna_crossing_select]);
-        sprintf(string,
-          ":::t\"Mouse: <left> select  tie; <middle> select untied crossing; <right> drag zoom "
-          "extent\":t\"Selected Crossing: %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d\"",
-          mbna_crossing_select, project.files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1,
-          project.files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2);
-      }
-    }
-    else if (project.modelplot_style == MBNA_MODELPLOT_PERTURBATION) {
-      if (mbna_crossing_select == MBNA_SELECT_NONE) {
-        snprintf(string, sizeof(string), ":::t\"Mouse: <left> select  tie; <middle> select untied crossing; <right> drag zoom "
-          "extent\":t\"No Selection\"");
-      }
-      else {
-        crossing = &(project.crossings[mbna_crossing_select]);
-        sprintf(string,
-          ":::t\"Mouse: <left> select  tie; <middle> select untied crossing; <right> drag zoom "
-          "extent\":t\"Selected Crossing: %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d\"",
-          mbna_crossing_select, project.files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1,
-          project.files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2);
-      }
+    /* set modelplot mode */
+    if (mbna_view_list == MBNA_VIEW_LIST_FILESECTIONS 
+      	|| mbna_view_list == MBNA_VIEW_LIST_GLOBALTIES
+        || mbna_view_list == MBNA_VIEW_LIST_GLOBALTIESSORTED) {
+      mbna_modelplot_mode = MBNA_MODELPLOT_MODE_SECTIONS;
     }
     else {
-      if (mbna_crossing_select == MBNA_SELECT_NONE) {
-        snprintf(string, sizeof(string), ":::t\"Mouse: <left> select  tie; <middle> select block to view; <right> drag zoom "
-          "extent\":t\"No Selection\"");
-      }
-      else {
-        crossing = &(project.crossings[mbna_crossing_select]);
-        sprintf(string,
-          ":::t\"Mouse: <left> select  tie; <middle> select block to view; <right> drag zoom extent\":t\"Selected "
-          "Crossing: %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d\"",
-          mbna_crossing_select, project.files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1,
-          project.files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2);
-      }
+    	mbna_modelplot_mode = MBNA_MODELPLOT_MODE_CROSSINGS;
+    }
+
+    /* set model view status label */
+    if (mbna_modelplot_mode == MBNA_MODELPLOT_MODE_CROSSINGS) {
+			if (project.modelplot_style == MBNA_MODELPLOT_TIMESERIES || project.modelplot_style == MBNA_MODELPLOT_PERTURBATION) {
+				if (mbna_crossing_select == MBNA_SELECT_NONE) {
+					snprintf(string, sizeof(string), ":::t\"Mouse: <left> select  tie; <middle> select untied crossing; <right> drag zoom "
+						"extent\":t\"No Selection\"");
+				}
+				else {
+					crossing = &(project.crossings[mbna_crossing_select]);
+					snprintf(string, sizeof(string),
+						":::t\"Mouse: <left> select  tie; <middle> select untied crossing; <right> drag zoom "
+						"extent\":t\"Selected Crossing: %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d\"",
+						mbna_crossing_select, project.files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1,
+						project.files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2);
+				}
+			}
+			else {
+				if (mbna_crossing_select == MBNA_SELECT_NONE) {
+					snprintf(string, sizeof(string), ":::t\"Mouse: <left> select  tie; <middle> select block to view; <right> drag zoom "
+						"extent\":t\"No Selection\"");
+				}
+				else {
+					crossing = &(project.crossings[mbna_crossing_select]);
+					snprintf(string, sizeof(string),
+						":::t\"Mouse: <left> select  tie; <middle> select block to view; <right> drag zoom extent\":t\"Selected "
+						"Crossing: %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d\"",
+						mbna_crossing_select, project.files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1,
+						project.files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2);
+				}
+			}
+    }
+    else /* if (mbna_modelplot_mode == MBNA_MODELPLOT_MODE_SECTIONS) */ {
+			if (project.modelplot_style == MBNA_MODELPLOT_TIMESERIES || project.modelplot_style == MBNA_MODELPLOT_PERTURBATION) {
+				if (mbna_section_select == MBNA_SELECT_NONE) {
+					snprintf(string, sizeof(string), ":::t\"Mouse: <left> select global tie; <middle> select untied section; <right> drag zoom "
+						"extent\":t\"No Selection\"");
+				}
+				else /* if (mbna_section_select != MBNA_SELECT_NONE) */ {
+					crossing = &(project.crossings[mbna_crossing_select]);
+					snprintf(string, sizeof(string),
+						":::t\"Mouse: <left> select global tie; <middle> select untied section <right> drag zoom "
+						"extent\":t\"Selected Section: %2.2d:%3.3d:%3.3d\"",
+						project.files[mbna_current_file].block, mbna_current_file, mbna_current_section);
+				}
+			}
+			else {
+				if (mbna_crossing_select == MBNA_SELECT_NONE) {
+					snprintf(string, sizeof(string), ":::t\"Mouse: <left> select  tie; <middle> select block to view; <right> drag zoom "
+						"extent\":t\"No Selection\"");
+				}
+				else {
+					crossing = &(project.crossings[mbna_crossing_select]);
+					snprintf(string, sizeof(string),
+						":::t\"Mouse: <left> select  tie; <middle> select block to view; <right> drag zoom extent\":t\"Selected "
+						"Crossing: %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d\"",
+						mbna_crossing_select, project.files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1,
+						project.files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2);
+				}
+			}
     }
 
     set_label_multiline_string(label_modelplot_status, string);
@@ -6362,9 +6389,7 @@ void do_pickroute_notify(size_t instance) {
 
   if (shareddata->route_selected != MBV_SELECT_NONE) {
     struct mbview_route_struct *route = &shareddata->routes[shareddata->route_selected];
-    if (mbna_view_list == MBNA_VIEW_LIST_FILESECTIONS
-        || mbna_view_list == MBNA_VIEW_LIST_GLOBALTIES
-        || mbna_view_list == MBNA_VIEW_LIST_GLOBALTIESSORTED) {
+    if (mbna_modelplot_mode == MBNA_MODELPLOT_MODE_SECTIONS) {
       int isurvey;
       int ifile;
       int isection;
@@ -6469,8 +6494,6 @@ void do_picknav_notify(size_t instance) {
       mbna_survey_select = project.files[mbna_file_select].block;
       mbna_file_id_2 = ifile1;
       mbna_section_2 = isection1;
-//fprintf(stderr, "%s:%d:%s: nav1->name:%s mbna_naverr_mode:%d mbna_current_file:%d mbna_current_section:%d\n",
-//__FILE__, __LINE__, __FUNCTION__, nav1->name, mbna_naverr_mode, mbna_current_file, mbna_current_section);
 
       /* bring up naverr window if required */
       if (mbna_current_section != MBV_SELECT_NONE && mbna_naverr_mode == MBNA_NAVERR_MODE_UNLOADED) {

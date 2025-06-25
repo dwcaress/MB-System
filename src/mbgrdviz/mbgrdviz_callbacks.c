@@ -5003,10 +5003,13 @@ int do_mbgrdviz_savekongsbergdp(size_t instance, char *output_file_ptr) {
 			//status = mb_user_host_date(verbose, user, host, date, &error);
 			//fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
 			time_t right_now = time(NULL);
+			struct tm *tm_ptr = gmtime(&right_now);
 			double time_d = (double) right_now;
 			int time_i[7];
 			mb_get_date(verbose, time_d, time_i);
-			fprintf(sfp, "CreateDate(UTC),%2.2d.%2.2d.%4.4d %2.2d:%2.2d:%2.2d\r\n", time_i[2], time_i[1], time_i[0], time_i[3], time_i[4], time_i[5]);
+			fprintf(sfp, "CreateDate (UTC),%s, %s %d, %d %2.2d:%2.2d:%2.2d\r\nVersion,4\r\n", 
+								mb_day_name(verbose, tm_ptr->tm_wday + 1), mb_month_name(verbose, 
+								time_i[1]), time_i[2], time_i[0], time_i[3], time_i[4], time_i[5]);
 
       /* loop over routes */
       for (iroute = 0; iroute < nroute; iroute++) {
@@ -5063,8 +5066,8 @@ int do_mbgrdviz_savekongsbergdp(size_t instance, char *output_file_ptr) {
             lonDeg = (int)(floor(fabs(routelon[j])));
             lonMin = (fabs(routelon[j]) - (double)lonDeg) * 60.0;
 
-            fprintf(sfp, "WP,%d,%c,%2.2d,%09.6f,%c,%3.3d,%09.6f,0,%07.3f,0.5000,350.00\r\n", 
-            				noutputwaypoints,latNS, latDeg, latMin, lonEW, lonDeg, lonMin, routebearing[j]);
+            fprintf(sfp, "WP,%d,%c,%2.2d,%09.6f,%c,%3.3d,%09.6f,0,  0.000,0.5000,350.00\r\n", 
+            				noutputwaypoints,latNS, latDeg, latMin, lonEW, lonDeg, lonMin);
           }
         }
 			  fprintf(sfp, "END\r\n");

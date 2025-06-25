@@ -44,7 +44,7 @@
 #include "mb_status.h"
 
 /* year-day conversion */
-const int yday[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
+const int mb_yearday[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
 
 /*--------------------------------------------------------------------*/
 /*   function mb_get_time returns the number of seconds from
@@ -94,7 +94,7 @@ int mb_get_time(int verbose, int time_i[7], double *time_d) {
 
   /* get time */
   else {
-    int yearday = yday[time_i[1] - 1];
+    int yearday = mb_yearday[time_i[1] - 1];
     if (((time_i[0] % 4 == 0 && time_i[0] % 100 != 0) || time_i[0] % 400 == 0) && (time_i[1] > 2))
       yearday++;
     const int leapday = (time_i[0] - 1969) / 4;
@@ -143,12 +143,12 @@ int mb_get_date(int verbose, double time_d, int time_i[7]) {
     yearday = daytotal - 365 * (time_i[0] - 1970) - leapday + 1;
   }
   leapday = 0;
-  if (((time_i[0] % 4 == 0 && time_i[0] % 100 != 0) || time_i[0] % 400 == 0) && yearday > yday[2])
+  if (((time_i[0] % 4 == 0 && time_i[0] % 100 != 0) || time_i[0] % 400 == 0) && yearday > mb_yearday[2])
     leapday = 1;
   for (int i = 0; i < 12; i++)
-    if (yearday > (yday[i] + leapday))
+    if (yearday > (mb_yearday[i] + leapday))
       time_i[1] = i + 1;
-  time_i[2] = yearday - yday[time_i[1] - 1] - leapday;
+  time_i[2] = yearday - mb_yearday[time_i[1] - 1] - leapday;
 
   /* assume success */
   const int status = MB_SUCCESS;
@@ -250,7 +250,7 @@ int mb_get_jtime(int verbose, int time_i[7], int time_j[5]) {
 
     /* get time with day of year */
     time_j[0] = time_i[0];
-    time_j[1] = yday[time_i[1] - 1] + time_i[2];
+    time_j[1] = mb_yearday[time_i[1] - 1] + time_i[2];
     if (((time_i[0] % 4 == 0 && time_i[0] % 100 != 0) || time_i[0] % 400 == 0) && (time_i[1] > 2))
       time_j[1]++;
     time_j[2] = time_i[3] * MB_IMININHOUR + time_i[4];
@@ -327,17 +327,17 @@ int mb_get_itime(int verbose, int time_j[5], int time_i[7]) {
     time_i[5] = time_j[3];
     time_i[6] = time_j[4];
     int leapday;
-    if (((time_j[0] % 4 == 0 && time_j[0] % 100 != 0) || time_j[0] % 400 == 0) && time_j[1] > yday[2])
+    if (((time_j[0] % 4 == 0 && time_j[0] % 100 != 0) || time_j[0] % 400 == 0) && time_j[1] > mb_yearday[2])
       leapday = 1;
     else
       leapday = 0;
     time_i[1] = 0;
     for (int i = 0; i < 12; i++)
-      if (time_j[1] > (yday[i] + leapday))
+      if (time_j[1] > (mb_yearday[i] + leapday))
         time_i[1] = i + 1;
-    if (leapday == 1 && time_j[1] == yday[2] + 1)
+    if (leapday == 1 && time_j[1] == mb_yearday[2] + 1)
       leapday = 0;
-    time_i[2] = time_j[1] - yday[time_i[1] - 1] - leapday;
+    time_i[2] = time_j[1] - mb_yearday[time_i[1] - 1] - leapday;
   }
 
   if (verbose >= 2) {
@@ -356,6 +356,49 @@ int mb_get_itime(int verbose, int time_j[5], int time_i[7]) {
 
   return (status);
 }
+
+/*--------------------------------------------------------------------*/
+/*   function mb_day_name returns the string for the name of a day
+ *       numbered from 1 (Sunday) through 7 (Saturday)
+ *       with all other day numbers returned as "Unknown"
+ */
+char *mb_day_name(int verbose, int day) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       day:        %d\n", day);
+  }
+  char* mb_dayname[] = {"Unknown", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+
+  /* return day name string */
+  int iday = day;
+  if (iday < 1 || iday > 7)
+  	iday = 0;
+  return(mb_dayname[iday]);
+}
+
+/*--------------------------------------------------------------------*/
+/*   function mb_month_name returns the string for the name of a month
+ *       numbered from 1 (January) through 12 (December)
+ *       with all other month numbers returned as "Unknown"
+ */
+char *mb_month_name(int verbose, int month) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       month:      %d\n", month);
+  }
+  char* mb_monthname[] = {"Unknown", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+
+  /* return month name string */
+  int imonth = month;
+  if (imonth < 1 || month > 12)
+  	imonth = 0;
+  return(mb_monthname[imonth]);
+}
+
 /*--------------------------------------------------------------------*/
 /*   function mb_fix_y2k translates a two digit year value
  *      into a four digit year value using the following rule:
