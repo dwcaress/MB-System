@@ -30,6 +30,11 @@ namespace mb_system {
     /// Constructor
     PickInteractorStyle();
 
+    /// Print name of interactor style
+    const char *printName() override {
+      return "PickInteractorStyle";
+    }
+    
     /// Pick cell
     virtual void OnLeftButtonDown() override;
 
