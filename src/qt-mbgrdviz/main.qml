@@ -9,7 +9,6 @@ import "ui-components"
 
 import VTK 9.3
 import SharedConstants 1.1
-import GuiNames 1.1
 
 
 Window {
@@ -18,37 +17,29 @@ Window {
 
     id: mainWindow
 
-    // Declare instance of SharedConstants
+    // Declare instance of SharedConstants, which will populate
+    // QStringList objects needed by QML
     SharedConstants {
         id: constants
     }
 
-    GuiNames {
-      id: guiNames
-    }
-    
     // Short-hand reference to supported color maps
     property variant cmaps: constants.cmaps
 
     // Short-hand reference to supported mouse modes
     property variant mouseModes: constants.mouseModes
 
-    /// TEST TEST TEST
-    property int mainTestInt: 77
-    property string mainTestString: 'hello sailor!'
-
     // Bathymetry profile
     property list<vector2d> myProfile
 
-    property int myVal: GuiNames.Speed
-
     Component.onCompleted: {
-
-      console.log('GuiNames.Depth =  ', GuiNames.Depth)
-      console.log('GuiNames.Heading =  ', GuiNames.Heading)            
-      console.log('guiNames.objectName(Speed): ', guiNames.objectName(GuiNames.Speed))
-
-    }
+      console.log('SharedConstants.EditState.ViewOnly  ',
+                  SharedConstants.EditState.ViewOnly)
+      console.log('SharedConstants.EditState.EditRoute  ',
+                  SharedConstants.EditState.EditRoute)     
+      console.log('SharedConstants.EditState.EditOverlay  ',
+                  SharedConstants.EditState.EditOverlay)
+      }
 
     ActionGroup {
         id: exclusiveActions
@@ -119,10 +110,10 @@ Window {
             property string currentCmap
 	    
             Repeater {
-	      model: cmaps
+	      model: cmaps  // List of colormap names
 	      visible: true
 	      MenuItem {
-	        text: modelData; checkable: true;
+	        text: modelData; checkable: true;  // colormap name
 		checked: colormapMenu.currentCmap == modelData
                 onTriggered: {
 		               colormapMenu.currentCmap = modelData
