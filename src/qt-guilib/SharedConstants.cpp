@@ -22,6 +22,7 @@ SharedConstants::SharedConstants() {
       colorMapsList_.append(colorMapNames[i]);
     }
 
+    // Build QStringList of mouse modes
     mouseModes_ += MousePanAndZoom;
     mouseModes_ += MouseRotateModel;
     mouseModes_ += MouseRotateView;
