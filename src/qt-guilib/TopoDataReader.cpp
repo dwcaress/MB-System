@@ -446,6 +446,7 @@ TopoData *TopoDataReader::readDatafile(char *filename) {
   TopoData *topoData = nullptr;
 
   SwathData *swathTest = nullptr;
+  setDataType(getDataType(filename));
   
   switch (dataType_) {
   case TopoDataType::GMTGrid:
@@ -458,7 +459,7 @@ TopoData *TopoDataReader::readDatafile(char *filename) {
     
   default:
     // Unknown data type
-    std::cerr << filename << ": uhandled topo data type: " << dataType_
+    std::cerr << filename << ": unhandled topo data type: " << dataType_
               << std::endl;    
     return nullptr;
   }
