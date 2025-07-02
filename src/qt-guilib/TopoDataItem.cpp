@@ -7,6 +7,7 @@
 #include <vtk/vtkErrorCode.h>
 #include <vtk/vtkCellData.h>
 #include <vtk/vtkPointData.h>
+#include <vtk/vtkLightCollection.h>
 #include "TopoDataItem.h"
 #include "TopoColorMap.h"
 #include "SharedConstants.h"
@@ -316,9 +317,16 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   pipeline->renderer_->SetBackground(pipeline->colors_->GetColor3d("White").
 				     GetData());
 
-  // Need set add the light again here
-  pipeline->renderer_->AddLight(pipeline->lightSource_);
+  // Need to add the light again here
+  std::cerr << "assemblePipeline(): GetLightIntensity=" <<
+    pipeline->lightSource_->GetIntensity() << "\n";
+
   pipeline->interactorStyle_->setLight(pipeline->lightSource_);
+  pipeline->renderer_->AddLight(pipeline->lightSource_);
+
+  vtkLightCollection *lights = pipeline->renderer_->GetLights();
+  std::cout << "there are " << lights->GetNumberOfItems()
+            << " lights.\n";
   
   if (showAxes_) {
     // Set up axes
@@ -535,63 +543,12 @@ QList<QVector2D> TopoDataItem::getElevProfile(int row1, int col1,
 }
 
 
-QList<QVector2D> TopoDataItem::runTest2(void) {
-  // Get elevation profile
-  int nRows = pipeline_->topoReader_->topoData()->nRows();
-  int nCols = pipeline_->topoReader_->topoData()->nColumns();
-
-  qDebug() << "nRows: " << nRows << ", nCols: " << nCols;
-
-  // Vector holds elevation profile
-  auto *profile = new std::vector<std::array<double, 2>>;
-
-  qDebug() << "runTest(): get elevation profile";
-  int nPieces = 10;
-  bool ok = pipeline_->topoReader_->topoData()->getElevProfile(0, 0,
-							       nRows-1,
-							       nCols-1,
-							       nPieces,
-							       profile);
-  QList<QVector2D> qProfile;
-  
-  if (!ok) {
-    return qProfile;
-  }
-
-  // Print profile
-  for (int i = 0; i < profile->size(); i++) {
-    std::array<double, 2> point = profile->at(i);
-    qDebug() << "distance: " << point[0] << ", z: " << point[1];
-  }
-
-  // Transfer std::vector profile data to QList of QVector2D objects
-  QVector2D qPoint;  
-  for (int i = 0; i < profile->size(); i++) {
-    std::array<double, 2> point = profile->at(i);
-    qPoint.setX((float )point[0]);
-    qPoint.setY((float )point[1]);
-    qProfile.append(qPoint);
-  }
-
-  // print out list values
-  qDebug() << "getZProfile() output:";
-  for (int i = 0; i < qProfile.size(); i++) {
-    const QVector2D p = qProfile.at(i);
-    qDebug() << "p.x(): " << p.x() << ", p.y(): " << p.y();
-  }
-
-  delete profile;
-  
-  return qProfile;
-}
-
-
-
 bool TopoDataItem::setMouseMode(QString mouseMode) {
   qDebug() << "setMouseMode(): " << mouseMode;
 
   if (mouseMode == MousePanAndZoom) {
     qDebug() << "setMouseMode(): set " << mouseMode << " picker";
+
     pipeline_->interactorStyle_ = pickInteractorStyle_;    
   }
   else if (mouseMode == MouseLighting) {
@@ -611,6 +568,9 @@ bool TopoDataItem::setMouseMode(QString mouseMode) {
 
 
 void TopoDataItem::setupLightSource() {
+
+  std::cerr << "setupLightSource()\n";
+  
   vtkLight *light = pipeline_->lightSource_;
   light->SetColor(1.0, 1.0, 1.0);
   
@@ -631,6 +591,9 @@ void TopoDataItem::setupLightSource() {
 
 
 void TopoDataItem::setLight(float intensity, double x, double y, double z) {
+
+  std::cerr << "setLight()\n";
+  
   pipeline_->lightSource_->SetIntensity(intensity);
 
   
