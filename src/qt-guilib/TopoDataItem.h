@@ -63,7 +63,6 @@ namespace mb_system {
 
       /// Assign this pointer to appropriate interactor style,
       /// depending on how 'mouse mode' is set
-      // /vtkNew<mb_system::TopoDataPickerInteractorStyle> interactorStyle_;
       mb_system::InteractorStyle *interactorStyle_;            
 
       /// x,y,z axes
@@ -126,10 +125,6 @@ namespace mb_system {
       displayedSurface_ = surfaceType;
       reassemblePipeline();
     }
-
-
-    /// Test
-    Q_INVOKABLE QList<QVector2D> runTest2(void);    
 
     /// Return elevation profile from encapsulated TopoData object, as a
     /// QList of QVector2D objects, removing need to register additional
@@ -204,7 +199,6 @@ namespace mb_system {
     /// Indicates whether to render on next update()
     bool forceRender_;
 
-    
     /// Vertical exaggeration
     float verticalExagg_;
 
@@ -216,12 +210,16 @@ namespace mb_system {
 
     /// Type of surface to display (elevation, gradient...)
     DisplayedSurface displayedSurface_;
-    
+
+    /// VTK pipeline
     Pipeline *pipeline_;
+    
     vtkRenderWindow *renderWindow_;
 
     /// Interactor styles (can be selected by user)
     mb_system::PickInteractorStyle *pickInteractorStyle_;
+
+    /// Change lighting with mouse
     LightingInteractorStyle *lightingInteractorStyle_;
     
   };
