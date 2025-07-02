@@ -26,6 +26,11 @@ public:
 
   LightingInteractorStyle();
 
+  /// Print name of interactor style
+  const char *printName() override {
+    return "LightingInteractorStyle";
+  }
+  
   void setRenderer(vtkRenderer* renderer);
 
   virtual void OnLeftButtonDown() override;
