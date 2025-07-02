@@ -11,7 +11,6 @@
 #include <vtkRenderWindow.h>
 #include "TopoDataItem.h"
 #include "SharedConstants.h"
-#include "GuiNames.h"
 
 using namespace std;
 using namespace mb_system;
@@ -67,10 +66,7 @@ int main(int argc, char* argv[])
   qmlRegisterType<TopoDataItem>("VTK", 9, 3, "TopoDataItem");
 
   qmlRegisterType<SharedConstants>("SharedConstants", 1, 1, "SharedConstants");
-
-  // Register GuiNames type
-  qmlRegisterType<GuiNames>("GuiNames", 1, 1, "GuiNames");
-
+  
   engine.load(QUrl("qrc:/main.qml"));
  
   QObject* topLevel = engine.rootObjects().value(0);
