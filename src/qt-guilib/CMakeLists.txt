@@ -44,6 +44,7 @@ set(src
     ColorMap.cpp
     CPixmapDrawer.cpp
     DataPointsOverlay.cpp
+    DataSelectInteractorStyle.cpp    
     DisplayProperties.cpp
     Emitter.cpp
     GmtGridData.cpp
