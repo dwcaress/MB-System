@@ -17,38 +17,40 @@
 #include <vtkCamera.h>
 #include "InteractorStyle.h"
 
-/** Custom interactor style for light position control */
-class LightingInteractorStyle : public mb_system::InteractorStyle
-{
-public:
+namespace mb_system {
+  /** Custom interactor style for light position control */
+  class LightingInteractorStyle : public mb_system::InteractorStyle
+  {
+  public:
     static LightingInteractorStyle* New();
     vtkTypeMacro(LightingInteractorStyle, vtkInteractorStyleTrackballCamera);
 
-  LightingInteractorStyle();
+    LightingInteractorStyle();
 
-  /// Print name of interactor style
-  const char *printName() override {
-    return "LightingInteractorStyle";
-  }
+    /// Print name of interactor style
+    const char *printName() override {
+      return "LightingInteractorStyle";
+    }
   
-  void setRenderer(vtkRenderer* renderer);
+    void setRenderer(vtkRenderer* renderer);
 
-  virtual void OnLeftButtonDown() override;
+    virtual void OnLeftButtonDown() override;
 
-  virtual void OnLeftButtonUp() override;
+    virtual void OnLeftButtonUp() override;
 
-  virtual void OnRightButtonDown() override;
+    virtual void OnRightButtonDown() override;
 
-  virtual void OnRightButtonUp() override;
+    virtual void OnRightButtonUp() override;
   
-  virtual void OnMouseMove() override;
+    virtual void OnMouseMove() override;
 
-private:
+  private:
 
-  vtkRenderer* renderer_;
-  bool lightMoving_;
-  bool intensityChanging_;  
-  int startMousePosition_[2];
-};
+    vtkRenderer* renderer_;
+    bool lightMoving_;
+    bool intensityChanging_;  
+    int startMousePosition_[2];
+  };
+}    // namespace
 
 #endif

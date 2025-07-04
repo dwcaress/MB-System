@@ -14,6 +14,8 @@
 #include <vtkTextProperty.h>
 #include "LightingInteractorStyle.h"
 
+using namespace mb_system;
+
 vtkStandardNewMacro(LightingInteractorStyle);
 
 LightingInteractorStyle::LightingInteractorStyle() {
