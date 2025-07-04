@@ -8,6 +8,7 @@
 #define MouseRotateModel "Rotate model"
 #define MouseRotateView "Rotate view"
 #define MouseLighting "Lighting"
+#define MouseDataSelect "Data select"
 #define MousePickArea "Pick area"
 #define MouseEditSites "Edit sites"
 #define MouseEditRoutes "Edit routes"

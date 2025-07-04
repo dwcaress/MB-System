@@ -27,6 +27,7 @@ SharedConstants::SharedConstants() {
     mouseModes_ += MouseRotateModel;
     mouseModes_ += MouseRotateView;
     mouseModes_ += MouseLighting;
+    mouseModes_ += MouseDataSelect;
     mouseModes_ += MousePickArea;
     mouseModes_ += MouseEditSites;
     mouseModes_ += MouseEditRoutes;
