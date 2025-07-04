@@ -144,7 +144,7 @@ namespace mb_system {
     vtkSmartPointer<vtkPoints> topoDataPoints_;
 
     /// Delaunay triangle vertices
-    vtkSmartPointer<vtkCellArray> gridPolygons_;
+    vtkSmartPointer<vtkCellArray> topoDataPolygons_;
 
     char *xUnits_;
     char *yUnits_;

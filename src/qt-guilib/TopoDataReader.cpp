@@ -80,7 +80,7 @@ TopoDataReader::TopoDataReader() :
   
   topoDataPoints_ = vtkSmartPointer<vtkPoints>::New();
   topoDataPoints_->SetDataTypeToDouble();
-  gridPolygons_ = vtkSmartPointer<vtkCellArray>::New();  
+  topoDataPolygons_ = vtkSmartPointer<vtkCellArray>::New();  
 
   this->SetNumberOfInputPorts(0);
 
@@ -288,7 +288,7 @@ int TopoDataReader::RequestData(vtkInformation* request,
     ", zMin=" << bounds[4] << ", zMax=" << bounds[5] << std::endl;
   
   // Set Delaunay triangle vertices
-  if (!gridPolygons_->Allocate(nRows * nColumns * 2)) {
+  if (!topoDataPolygons_->Allocate(nRows * nColumns * 2)) {
     std::cerr << "failed to allocat "
 	      <<  nRows * nColumns *2 << " polygons"
 	      << std::endl;
@@ -304,9 +304,9 @@ int TopoDataReader::RequestData(vtkInformation* request,
       triangleVertexId[1] = gridOffset(nRows, nColumns, row, col+1);
       triangleVertexId[2] = gridOffset(nRows, nColumns, row+1, col+1);
       // If any of this triangle's vertices refer to point with no z-data,
-      // then do not insert triangle into gridPolygons
+      // then do not insert triangle into topoDataPolygons
       if (!gridMissingZValues || !triangleMissingZValues(triangleVertexId)) {
-        gridPolygons_->InsertNextCell(3, triangleVertexId);
+        topoDataPolygons_->InsertNextCell(3, triangleVertexId);
       }
 
       // Second triangle
@@ -314,9 +314,9 @@ int TopoDataReader::RequestData(vtkInformation* request,
       triangleVertexId[1] = gridOffset(nRows, nColumns, row+1, col+1);
       triangleVertexId[2] = gridOffset(nRows, nColumns, row+1, col);
       // If any of this triangle's vertices refer to point with no z-data,
-      // then do not insert triangle into gridPolygons
+      // then do not insert triangle into topoDataPolygons
       if (!gridMissingZValues || !triangleMissingZValues(triangleVertexId)) {
-        gridPolygons_->InsertNextCell(3, triangleVertexId);
+        topoDataPolygons_->InsertNextCell(3, triangleVertexId);
       }      
     }
   }
@@ -324,14 +324,14 @@ int TopoDataReader::RequestData(vtkInformation* request,
   // Save to object's points and polygons (need to output both for
   // downstream processing)
   polyOutput->SetPoints(topoDataPoints_);
-  polyOutput->SetPolys(gridPolygons_);
+  polyOutput->SetPolys(topoDataPolygons_);
 
   std::cerr << "TopoDataReader::RequestData() nPoints: "
 	    << topoDataPoints_->GetNumberOfPoints()
     	    << std::endl;
 
   std::cerr << "TopoDataReader::RequestData() nCells: "
-	    << gridPolygons_->GetNumberOfCells()
+	    << topoDataPolygons_->GetNumberOfCells()
     	    << std::endl;
   
   std::cerr << "TopoDataReader::RequestData() - done" << std::endl;
