@@ -5,15 +5,15 @@
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
- *    Dale N. Chayes 
+ *    Dale N. Chayes
  *      Center for Coastal and Ocean Mapping
  *      University of New Hampshire
  *      Durham, New Hampshire, USA
  *    Christian dos Santos Ferreira
  *      MARUM
  *      University of Bremen
- *      Bremen Germany
- *     
+ *      Bremen, Germany
+ *
  *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
  *      Columbia University
@@ -21,20 +21,20 @@
  *
  *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
-/*
- *    The program MBgrd2gltf, including this source file, was created
- *    by a Capstone Project team at the California State University 
- *    Monterey Bay (CSUMB) including Kyle Dowling, Julian Fortin, 
- *    Jesse Benavides, Nicolas Porras Falconio. This team was mentored by:
- *    Mike McCann
- *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, California, USA
- *--------------------------------------------------------------------*/
+ /*
+  *    The program MBgrd2gltf, including this source file, was created
+  *    by a Capstone Project team at the California State University
+  *    Monterey Bay (CSUMB) including Kyle Dowling, Julian Fortin,
+  *    Jesse Benavides, Nicolas Porras Falconio. This team was mentored by:
+  *    Mike McCann
+  *      Monterey Bay Aquarium Research Institute
+  *      Moss Landing, California, USA
+  *--------------------------------------------------------------------*/
 
 #ifndef BATHYMETRY_H
 #define BATHYMETRY_H
 
-// local includes
+  // local includes
 #include "matrix.h"
 #include "options.h"
 
@@ -42,60 +42,51 @@
 #include <string>
 #include <unordered_map>
 
-namespace mbgrd2gltf
-{
-	class Bathymetry
-	{
+namespace mbgrd2gltf {
+	class Bathymetry {
 	public: // types
-
-		class NetCdfError : public std::exception
-		{
+		class NetCdfError : public std::exception {
 		private:
-
 			int _error_code;
 			std::string _msg;
 
 		public:
-
 			NetCdfError(int error_code, std::string&& msg) :
-			_error_code(error_code),
-			_msg("NetCDF error " + std::to_string(error_code) + ": " + msg)
-			{}
+				_error_code(error_code), _msg("NetCDF error " + std::to_string(error_code) + ": " + msg) {
+			}
 
 			int error_code() const { return _error_code; }
-			const char *what() const noexcept
-			{
-				return _msg.c_str();
-			}
+			const char* what() const noexcept { return _msg.c_str(); }
 		};
 
 	private: // members
-
 		Matrix<float> _z;
 		double _x_range[2];
 		double _y_range[2];
 		double _z_range[2];
 		double _spacing[2];
-		size_t _side;		
+		size_t _side;
 		size_t _xysize;
-		unsigned _dimension[2];		
+		size_t _x;
+		size_t _y;
+		size_t _start[2];
+		unsigned int _dimension[2];
+		size_t _length[2];
 
 	private: // methods
-
-		static int get_netcdf_id(const char *filepath);
-		static int get_variable_id(int netcdf_id, const char *name);
-		static int get_dimension_id(int netcdf_id, const char *name);
-		static size_t get_attribute_length(int netcdf_id, const char *name);
-		static void get_attribute_text(int netcdf_id, const char *name, char *out);
-		static size_t get_dimension_length(int netcdf_id, const char *name);
-		static void get_variable_double_array(int netcdf_id, const char *name, double *out, size_t length);
-		static void get_variable_float_array(int netcdf_id, const char *name, float *out, size_t length);
-		static void get_variable_uint_array(int netcdf_id, const char *name, unsigned *out, size_t length);
-
+		static int get_netcdf_id(const char* filepath);
+		static int get_variable_id(int netcdf_id, const char* name);
+		static int get_dimension_id(int netcdf_id, const char* name);
+		static size_t get_attribute_length(int netcdf_id, const char* name);
+		static void get_attribute_text(int netcdf_id, const char* name, char* out);
+		static void get_variable_attribute_double(int netcdf_id, const char* var_name, const char* att_name, double* out);
+		static size_t get_dimension_length(int netcdf_id, const char* name);
+		static void get_variable_double_array(int netcdf_id, const char* name, double* out, size_t length);
+		static void get_variable_float_array(int netcdf_id, const char* name, float* out, size_t* start, size_t* length);
+		static void get_variable_uint_array(int netcdf_id, const char* name, unsigned int* out, size_t* start, size_t* length);
 		void compress(const Options& options);
 
 	public: // methods
-
 		Bathymetry(const Options& options);
 		Bathymetry(Bathymetry&&) = default;
 		Bathymetry(const Bathymetry&) = default;
@@ -109,8 +100,8 @@ namespace mbgrd2gltf
 		inline double altitude_max() const { return _z_range[1]; }
 		inline double longitude_spacing() const { return _spacing[0]; }
 		inline double latitude_spacing() const { return _spacing[1]; }
-		inline unsigned size_x() const { return _dimension[0]; }
-		inline unsigned size_y() const { return _dimension[1]; }
+		inline size_t size_x() const { return _dimension[0]; }
+		inline size_t size_y() const { return _dimension[1]; }
 		inline size_t side_count() const { return _side; }
 		inline size_t altitudes_length() const { return _xysize; }
 
