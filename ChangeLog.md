@@ -22,6 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.2beta24    July 19, 2025
 - Version 5.8.2beta23    June 25, 2025
 - Version 5.8.2beta22    June 16, 2025
 - Version 5.8.2beta21    March 15, 2025
@@ -55,6 +56,21 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.2beta24 (July 19, 2025)
+
+Program mbgrdviz: Added capability to export an MB-System route file in a file format that
+can be loaded into a Kongsberg dynamic positioning (DP) system, enabling using the DP to
+run the survey lines described by the route file.
+
+Program mbgrdviz: Added capability to export an MB-System route file in a file format that
+can be loaded into the Kongsberg multibeam control software called SIS (Seafloor information
+System). The route can be imported in two forms: one where each segment between major
+waypoints translates to a separate line in SIS, and another that generates a multisegment
+line in SIS.
+
+Program mbpreprocess: Altered the --skip-existing options so that previously preprocessed
+files are entirely skipped.
 
 #### 5.8.2beta23 (June 25, 2025)
 
