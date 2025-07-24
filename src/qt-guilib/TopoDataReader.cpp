@@ -344,6 +344,12 @@ void TopoDataReader::SetFileName(const char *fileName) {
   fprintf(stderr, "In TopoDataReader::SetFileName()\n");
 
   vtkAbstractPolyDataReader::SetFileName(fileName);
+
+  // Fatal error if specified file is not accessible
+  if (access(fileName, R_OK) == -1) {
+    std::cerr << "Can't access input file " << fileName << "\n";
+    exit(1);
+  }  
   if (fileName_) {
     fprintf(stderr, "TopoDataReader::SetFileName: free fileName_\n");
     free((void *)fileName_);
