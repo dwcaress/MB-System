@@ -44,7 +44,6 @@
 #define GOOD 1
 #define BAD 0
 
-namespace {
 // Define interaction style
 class HighlightInteractorStyle : public vtkInteractorStyleRubberBandPick
 {
@@ -159,11 +158,10 @@ public:
       else {
 	std::cout << "Couldn't get original point Ids\n";
       }
-
     }
   }
 
-  void SetPolyData(vtkSmartPointer<vtkPolyData> polyData)
+  void setPolyData(vtkSmartPointer<vtkPolyData> polyData)
   {
     polyData_ = polyData;
   }
@@ -174,156 +172,139 @@ private:
   vtkSmartPointer<vtkDataSetMapper> selectedMapper_;  
 };
   
-  vtkStandardNewMacro(HighlightInteractorStyle);
+vtkStandardNewMacro(HighlightInteractorStyle);
 
-  vtkSmartPointer<vtkPolyData> ReadPolyData(const char* fileName);
-} // namespace
+vtkSmartPointer<vtkPolyData> readPolyData(const char* fileName);
+
+
+class PointCloudEditor {
+
+public:
+
+  PointCloudEditor(vtkPolyData *polyData) {
+
+    polyData_ = polyData;
+    
+    // Build color lookup table
+    lut_->SetNumberOfTableValues(2);
+    lut_->SetRange(0, 1);
+    lut_->SetTableValue(0, 1.0, 0.0, 0.0, 1.0);
+    lut_->SetTableValue(1, 0.0, 1.0, 0.0, 1.0);  
+    lut_->Build();
+
+    // Associate id's with original polyData
+    idFilter_->SetInputData(polyData_);
+
+    // Specify name by which to retrieve id's
+    idFilter_->SetCellIdsArrayName(ORIGINAL_IDS);
+    idFilter_->SetPointIdsArrayName(ORIGINAL_IDS);
+
+    idFilter_->Update();    
+    surfaceFilter_->SetInputConnection(idFilter_->GetOutputPort());
+    surfaceFilter_->Update();
+    polyData_ = surfaceFilter_->GetOutput();
+    
+    quality_->SetName(DATA_QUALITY_NAME);
+    quality_->SetNumberOfTuples(polyData_->GetNumberOfPoints());
+
+    // First assume all points are good
+    for (int i = 0; i < polyData_->GetNumberOfPoints(); i++) {
+      quality_->SetValue(i, GOOD);
+    }
+
+    // Associate quality array with original poly data
+    polyData_->GetPointData()->AddArray(quality_);
+    
+  }
+
+  /// Visualize the point cloud
+  void visualize(void) {
+
+    mapper_->SetInputData(polyData_);
+    mapper_->ScalarVisibilityOff();
+
+    // Configure mapper to use LUT stuff
+    mapper_->SetLookupTable(lut_);
+    mapper_->SetScalarModeToUsePointData();
+    mapper_->SetColorModeToMapScalars();
+    mapper_->SetScalarRange(0, 1);
+    actor_->SetMapper(mapper_);
+    actor_->GetProperty()->SetPointSize(5);
+
+    /* ***
+    actor_->GetProperty()->
+      SetDiffuseColor(colors_->GetColor3d("Peacock").GetData());
+      *** */
+    
+    renderer_->UseHiddenLineRemovalOn();
+
+    renderWindow_->AddRenderer(renderer_);
+    renderWindow_->SetSize(640, 480);
+    renderWindow_->SetWindowName("HighlightSelection");
+
+    renderWindowInteractor_->SetPicker(areaPicker_);
+    renderWindowInteractor_->SetRenderWindow(renderWindow_);
+
+    renderer_->AddActor(actor_);
+    renderer_->SetBackground(colors_->GetColor3d("Tan").GetData());
+
+    renderWindow_->Render();
+
+    style_->setPolyData(polyData_);
+    renderWindowInteractor_->SetInteractorStyle(style_);
+
+    renderWindowInteractor_->Start();
+  }
+
+  
+protected:
+  vtkNew<vtkAreaPicker> areaPicker_;
+  vtkNew<vtkRenderWindow> renderWindow_;
+  vtkNew<vtkDataSetSurfaceFilter> surfaceFilter_;
+  vtkNew<vtkLookupTable> lut_;
+  vtkNew<vtkIdFilter> idFilter_;  
+  vtkNew<vtkNamedColors> colors_;
+  vtkNew<vtkPolyDataMapper> mapper_;
+  vtkNew<vtkActor> actor_;  
+  vtkNew<vtkRenderer> renderer_;
+  vtkNew<vtkRenderWindowInteractor> renderWindowInteractor_;
+
+  vtkNew<HighlightInteractorStyle> style_;
+
+  vtkSmartPointer<vtkPolyData> polyData_;
+  
+  // Add data quality array to input vtkPolyData
+  vtkSmartPointer<vtkIntArray> quality_ =
+    vtkSmartPointer<vtkIntArray>::New();
+
+};
+
 
 int main(int argc, char* argv[])
 {
-  // Get polyData from specified source
-  auto polyData = ReadPolyData(argc > 1 ? argv[1] : "");
-
-  vtkNew<vtkNamedColors> colors;
-
-  vtkNew<vtkIdFilter> idFilter;
-
-  // Associate id's with original polyData
-  idFilter->SetInputData(polyData);
-
-  // Specify name by which to retrieve id's
-  idFilter->SetCellIdsArrayName(ORIGINAL_IDS);
-  idFilter->SetPointIdsArrayName(ORIGINAL_IDS);
-
-
-  idFilter->Update();
-
-  // This is needed to convert the ouput of vtkIdFilter (vtkDataSet) back to
-  // vtkPolyData.
-  vtkNew<vtkDataSetSurfaceFilter> surfaceFilter;
-  surfaceFilter->SetInputConnection(idFilter->GetOutputPort());
-  surfaceFilter->Update();
-
-  vtkPolyData* input = surfaceFilter->GetOutput();
-
-  // Set lookup table
-  vtkNew<vtkLookupTable> lut;
-  lut->SetNumberOfTableValues(2);
-  lut->SetRange(0, 1);
-  lut->SetTableValue(0, 1.0, 0.0, 0.0, 1.0);
-  lut->SetTableValue(1, 0.0, 1.0, 0.0, 1.0);  
-  lut->Build();
-  
-  // Create a mapper and actor.
-  vtkNew<vtkPolyDataMapper> mapper;
-  mapper->SetInputData(polyData);
-  mapper->ScalarVisibilityOff();
-
-  // Configure mapper to use LUT stuff
-  mapper->SetLookupTable(lut);
-  mapper->SetScalarModeToUsePointData();
-  mapper->SetColorModeToMapScalars();
-  mapper->SetScalarRange(0, 1);
-  
-  vtkNew<vtkActor> actor;
-  actor->SetMapper(mapper);
-  actor->GetProperty()->SetPointSize(5);
-
-
-  actor->GetProperty()->SetDiffuseColor(
-      colors->GetColor3d("Peacock").GetData());
-
-  // Visualize
-  vtkNew<vtkRenderer> renderer;
-  renderer->UseHiddenLineRemovalOn();
-
-  vtkNew<vtkRenderWindow> renderWindow;
-  renderWindow->AddRenderer(renderer);
-  renderWindow->SetSize(640, 480);
-  renderWindow->SetWindowName("HighlightSelection");
-
-  vtkNew<vtkAreaPicker> areaPicker;
-  vtkNew<vtkRenderWindowInteractor> renderWindowInteractor;
-  renderWindowInteractor->SetPicker(areaPicker);
-  renderWindowInteractor->SetRenderWindow(renderWindow);
-
-  renderer->AddActor(actor);
-  renderer->SetBackground(colors->GetColor3d("Tan").GetData());
-
-  renderWindow->Render();
-
-  // Add data quality array to input vtkPolyData
-  vtkSmartPointer<vtkIntArray> quality =
-    vtkSmartPointer<vtkIntArray>::New();
-
-  quality->SetName(DATA_QUALITY_NAME);
-  quality->SetNumberOfTuples(input->GetNumberOfPoints());
-
-  // First assume all points are good
-  for (int i = 0; i < input->GetNumberOfPoints(); i++) {
-    quality->SetValue(i, GOOD);
+  if (argc < 2) {
+    std::cerr << "usage: " << argv[0] << " <swath-or-gridFile>\n";
+    return 1;
   }
+  
+  // Get polyData from specified source
+  auto polyData = readPolyData(argv[1]);
 
-  // Associate quality array with original poly data
-  input->GetPointData()->AddArray(quality);
+  auto editor = new PointCloudEditor(polyData);
+  editor->visualize();
 
-  vtkNew<HighlightInteractorStyle> style;
-  style->SetPolyData(input);
-  renderWindowInteractor->SetInteractorStyle(style);
 
-  renderWindowInteractor->Start();
-
-  return EXIT_SUCCESS;
+  return 0;
 }
-namespace {
-vtkSmartPointer<vtkPolyData> ReadPolyData(const char* fileName)
+
+
+vtkSmartPointer<vtkPolyData> readPolyData(const char* fileName)
 {
   vtkSmartPointer<vtkPolyData> polyData;
   std::string extension =
       vtksys::SystemTools::GetFilenameLastExtension(std::string(fileName));
-  if (extension == ".ply")
-  {
-    vtkNew<vtkPLYReader> reader;
-    reader->SetFileName(fileName);
-    reader->Update();
-    polyData = reader->GetOutput();
-  }
-  else if (extension == ".vtp")
-  {
-    vtkNew<vtkXMLPolyDataReader> reader;
-    reader->SetFileName(fileName);
-    reader->Update();
-    polyData = reader->GetOutput();
-  }
-  else if (extension == ".obj")
-  {
-    vtkNew<vtkOBJReader> reader;
-    reader->SetFileName(fileName);
-    reader->Update();
-    polyData = reader->GetOutput();
-  }
-  else if (extension == ".stl")
-  {
-    vtkNew<vtkSTLReader> reader;
-    reader->SetFileName(fileName);
-    reader->Update();
-    polyData = reader->GetOutput();
-  }
-  else if (extension == ".vtk")
-  {
-    vtkNew<vtkPolyDataReader> reader;
-    reader->SetFileName(fileName);
-    reader->Update();
-    polyData = reader->GetOutput();
-  }
-  else if (extension == ".g")
-  {
-    vtkNew<vtkBYUReader> reader;
-    reader->SetGeometryFileName(fileName);
-    reader->Update();
-    polyData = reader->GetOutput();
-  }
-  else if (extension == ".grd" || extension == ".mb88") {
+
+  if (extension == ".grd" || extension == ".mb88") {
     std::cout << "read mb-system grid\n";
     vtkSmartPointer<mb_system::TopoDataReader> reader =
       vtkSmartPointer<mb_system::TopoDataReader>::New();
@@ -333,7 +314,7 @@ vtkSmartPointer<vtkPolyData> ReadPolyData(const char* fileName)
   }
   else
   {
-    std::cout << "input file: " << fileName << "\n";
+    std::cout << "unknown input file format: " << fileName << "\n";
     std::cout << "read sphere source\n";
     vtkNew<vtkSphereSource> source;
     source->SetPhiResolution(21);
@@ -343,4 +324,4 @@ vtkSmartPointer<vtkPolyData> ReadPolyData(const char* fileName)
   }
   return polyData;
 }
-} // namespace
+
