@@ -30,6 +30,10 @@
 #include <vtkXMLPolyDataReader.h>
 #include <vtksys/SystemTools.hxx>
 #include <vtkActor2D.h>
+#include <vtkSliderRepresentation2D.h>
+#include <vtkSliderWidget.h>
+#include <vtkCallbackCommand.h>
+#include <vtkTextProperty.h>
 
 #include "Utilities.h"
 #include "TopoDataReader.h"
@@ -46,6 +50,22 @@
 
 
 class PointCloudEditor;
+
+class vtkSliderCallback : public vtkCallbackCommand
+{
+public:
+  static vtkSliderCallback* New() {
+    return new vtkSliderCallback;
+  }
+  virtual void Execute(vtkObject* caller, unsigned long, void*) {
+    vtkSliderWidget* sliderWidget = reinterpret_cast<vtkSliderWidget*>(caller);
+    double value = 
+      static_cast<vtkSliderRepresentation*>(sliderWidget->GetRepresentation())->GetValue();
+    std::cerr << "vtkSliderCallback: value = " << value << "\n";
+  }
+
+  vtkSliderCallback() { }
+};
 
 // Define interaction style
 class PointsSelectInteractorStyle : public vtkInteractorStyleRubberBandPick {
@@ -101,6 +121,10 @@ public:
     return polyData_;
   }
 
+  /// Get interactor
+  vtkRenderWindowInteractor *interactor() {
+    return renderWindowInteractor_;
+  }
   
   /// Visualize the point cloud
   void visualize(void) {
@@ -119,11 +143,6 @@ public:
     actor_->SetMapper(mapper_);
     actor_->GetProperty()->SetPointSize(5);
 
-    /* ***
-       actor_->GetProperty()->
-       SetDiffuseColor(colors_->GetColor3d("Peacock").GetData());
-       *** */
-    
     renderer_->UseHiddenLineRemovalOn();
 
     renderWindow_->AddRenderer(renderer_);
@@ -138,7 +157,57 @@ public:
 
     renderWindow_->Render();
 
-    /// style_->setPolyData(polyData_);
+    // GUI elements go here
+    vtkNew<vtkSliderRepresentation2D> sliderRep;
+
+    sliderRep->SetMinimumValue(1.0);
+    sliderRep->SetMaximumValue(20.0);
+    sliderRep->SetValue(1.0);
+    sliderRep->SetTitleText("vertical exaggeration");
+
+    // Set color properties:
+    //   // Set color properties:
+    // Change the color of the knob that slides
+    sliderRep->GetSliderProperty()->SetColor(
+					     colors_->GetColor3d("Green").GetData());
+    // Change the color of the text indicating what the slider controls
+    sliderRep->GetTitleProperty()->SetColor(
+					    colors_->GetColor3d("AliceBlue").GetData());
+    // Change the color of the text displaying the value
+    sliderRep->GetLabelProperty()->SetColor(
+					    colors_->GetColor3d("AliceBlue").GetData());
+    // Change the color of the knob when the mouse is held on it
+    sliderRep->GetSelectedProperty()->SetColor(
+					       colors_->GetColor3d("DeepPink").GetData());
+    // Change the color of the bar
+    sliderRep->GetTubeProperty()->SetColor(
+					   colors_->GetColor3d("MistyRose").GetData());
+    // Change the color of the ends of the bar
+    sliderRep->GetCapProperty()->SetColor(colors_->GetColor3d("Yellow").GetData());
+    sliderRep->SetSliderLength(0.05);
+    sliderRep->SetSliderWidth(0.025);
+    sliderRep->SetEndCapLength(0.02);
+
+    // Display pixel values (640 X 480)
+    // sliderRep->GetPoint1Coordinate()->SetCoordinateSystemToDisplay();
+    // sliderRep->GetPoint1Coordinate()->SetValue(128, 48);
+    // sliderRep->GetPoint2Coordinate()->SetCoordinateSystemToDisplay();
+    // sliderRep->GetPoint2Coordinate()->SetValue(512, 48);
+    // Or use this - better because it scales to the window size:
+    sliderRep->GetPoint1Coordinate()->SetCoordinateSystemToNormalizedDisplay();
+    sliderRep->GetPoint1Coordinate()->SetValue(0.2, 0.1);
+    sliderRep->GetPoint2Coordinate()->SetCoordinateSystemToNormalizedDisplay();
+    sliderRep->GetPoint2Coordinate()->SetValue(0.8, 0.1);
+
+    vtkNew<vtkSliderWidget> sliderWidget;
+    sliderWidget->SetInteractor(renderWindowInteractor_);
+    sliderWidget->SetRepresentation(sliderRep);
+    sliderWidget->SetAnimationModeToAnimate();
+    sliderWidget->EnabledOn();
+
+    vtkNew<vtkSliderCallback> callback;
+    sliderWidget->AddObserver(vtkCommand::InteractionEvent, callback);
+
     renderWindowInteractor_->SetInteractorStyle(style_);
 
     renderWindowInteractor_->Start();
@@ -335,6 +404,11 @@ int main(int argc, char* argv[])
     std::cerr << "Couldn't process " << argv[1] << "\n";
     return 1;
   }
+
+  
+
+
+
 
   editor->visualize();
 
