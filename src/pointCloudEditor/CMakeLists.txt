@@ -43,7 +43,8 @@ find_package(VTK ${MIN_VTK_VERSION} COMPONENTS
   RenderingOpenGL2
 )
 
-add_executable(ptcloudEditor pointCloudEditor.cpp)
+add_executable(pointCloudEditor PointCloudEditor.cpp ZScaleCallback.cpp
+               PointsSelectInteractorStyle.cpp)
 
-target_link_libraries(ptcloudEditor PRIVATE MBGui ${VTK_LIBRARIES})
+target_link_libraries(pointCloudEditor PRIVATE MBGui ${VTK_LIBRARIES})
 
