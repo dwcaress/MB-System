@@ -51,21 +51,6 @@
 
 class PointCloudEditor;
 
-class vtkSliderCallback : public vtkCallbackCommand
-{
-public:
-  static vtkSliderCallback* New() {
-    return new vtkSliderCallback;
-  }
-  virtual void Execute(vtkObject* caller, unsigned long, void*) {
-    vtkSliderWidget* sliderWidget = reinterpret_cast<vtkSliderWidget*>(caller);
-    double value = 
-      static_cast<vtkSliderRepresentation*>(sliderWidget->GetRepresentation())->GetValue();
-    std::cerr << "vtkSliderCallback: value = " << value << "\n";
-  }
-
-  vtkSliderCallback() { }
-};
 
 // Define interaction style
 class PointsSelectInteractorStyle : public vtkInteractorStyleRubberBandPick {
@@ -73,8 +58,7 @@ public:
   static PointsSelectInteractorStyle* New();
   vtkTypeMacro(PointsSelectInteractorStyle, vtkInteractorStyleRubberBandPick);
 
-  PointsSelectInteractorStyle() : vtkInteractorStyleRubberBandPick()
-  {
+  PointsSelectInteractorStyle() : vtkInteractorStyleRubberBandPick()  {
     selectedMapper_ = vtkSmartPointer<vtkDataSetMapper>::New();
     selectedActor_ = vtkSmartPointer<vtkActor>::New();
     selectedActor_->SetMapper(selectedMapper_);
@@ -106,6 +90,8 @@ public:
 
   PointCloudEditor(void) {
 
+    verticalExagg_ = 1.;
+    
     // Build color lookup table
     lut_->SetNumberOfTableValues(2);
     lut_->SetRange(0, 1);
@@ -116,6 +102,37 @@ public:
     style_->setEditor(this);
   }
 
+  class SliderCallback : public vtkCallbackCommand {
+  public:
+    static SliderCallback* New() {
+      return new SliderCallback;
+    }
+  
+    virtual void Execute(vtkObject* caller, unsigned long, void *) {
+      vtkSliderWidget* sliderWidget = reinterpret_cast<vtkSliderWidget*>(caller);
+
+      double value = 
+	static_cast<vtkSliderRepresentation*>(sliderWidget->GetRepresentation())->GetValue();
+		 
+      std::cerr << "SliderCallback: value = " << value << "\n";
+      editor_->setVerticalExagg(value);
+    }
+
+    SliderCallback() {
+    }
+
+    void setEditor(PointCloudEditor *editor) { editor_ = editor; }
+
+  protected:
+  
+    PointCloudEditor *editor_;
+  };
+
+
+  void setVerticalExagg(double exagg) {
+    verticalExagg_ = exagg;
+  }
+  
   /// Get point cloud vtkPolyData
   vtkPolyData *polyData() {
     return polyData_;
@@ -130,7 +147,6 @@ public:
   void visualize(void) {
 
     mapper_->SetInputData(polyData_);
-    // mapper_->ScalarVisibilityOff();
 
     // Configure mapper to use LUT stuff
     mapper_->SetLookupTable(lut_);
@@ -141,6 +157,7 @@ public:
     mapper_->SetColorModeToMapScalars();
     mapper_->SetScalarRange(0, 1);
     actor_->SetMapper(mapper_);
+
     actor_->GetProperty()->SetPointSize(5);
 
     renderer_->UseHiddenLineRemovalOn();
@@ -157,62 +174,72 @@ public:
 
     renderWindow_->Render();
 
-    // GUI elements go here
-    vtkNew<vtkSliderRepresentation2D> sliderRep;
+    // Build GUI elements
+    buildGui();
+    
+    verticalExagg_ = 
+      static_cast<vtkSliderRepresentation*>
+      (sliderWidget_->GetRepresentation())->GetValue();
 
-    sliderRep->SetMinimumValue(1.0);
-    sliderRep->SetMaximumValue(20.0);
-    sliderRep->SetValue(1.0);
-    sliderRep->SetTitleText("vertical exaggeration");
-
-    // Set color properties:
-    //   // Set color properties:
-    // Change the color of the knob that slides
-    sliderRep->GetSliderProperty()->SetColor(
-					     colors_->GetColor3d("Green").GetData());
-    // Change the color of the text indicating what the slider controls
-    sliderRep->GetTitleProperty()->SetColor(
-					    colors_->GetColor3d("AliceBlue").GetData());
-    // Change the color of the text displaying the value
-    sliderRep->GetLabelProperty()->SetColor(
-					    colors_->GetColor3d("AliceBlue").GetData());
-    // Change the color of the knob when the mouse is held on it
-    sliderRep->GetSelectedProperty()->SetColor(
-					       colors_->GetColor3d("DeepPink").GetData());
-    // Change the color of the bar
-    sliderRep->GetTubeProperty()->SetColor(
-					   colors_->GetColor3d("MistyRose").GetData());
-    // Change the color of the ends of the bar
-    sliderRep->GetCapProperty()->SetColor(colors_->GetColor3d("Yellow").GetData());
-    sliderRep->SetSliderLength(0.05);
-    sliderRep->SetSliderWidth(0.025);
-    sliderRep->SetEndCapLength(0.02);
-
-    // Display pixel values (640 X 480)
-    // sliderRep->GetPoint1Coordinate()->SetCoordinateSystemToDisplay();
-    // sliderRep->GetPoint1Coordinate()->SetValue(128, 48);
-    // sliderRep->GetPoint2Coordinate()->SetCoordinateSystemToDisplay();
-    // sliderRep->GetPoint2Coordinate()->SetValue(512, 48);
-    // Or use this - better because it scales to the window size:
-    sliderRep->GetPoint1Coordinate()->SetCoordinateSystemToNormalizedDisplay();
-    sliderRep->GetPoint1Coordinate()->SetValue(0.2, 0.1);
-    sliderRep->GetPoint2Coordinate()->SetCoordinateSystemToNormalizedDisplay();
-    sliderRep->GetPoint2Coordinate()->SetValue(0.8, 0.1);
-
-    vtkNew<vtkSliderWidget> sliderWidget;
-    sliderWidget->SetInteractor(renderWindowInteractor_);
-    sliderWidget->SetRepresentation(sliderRep);
-    sliderWidget->SetAnimationModeToAnimate();
-    sliderWidget->EnabledOn();
-
-    vtkNew<vtkSliderCallback> callback;
-    sliderWidget->AddObserver(vtkCommand::InteractionEvent, callback);
-
+    // Set vertical exaggeration
+    std::cerr << "Set vertical exaggeration to " << verticalExagg_ << "\n";
+    actor_->SetScale(1.0, 1.0, verticalExagg_);
+    std::cerr << "Done setting vertical exaggeration\n";
+    
     renderWindowInteractor_->SetInteractorStyle(style_);
 
     renderWindowInteractor_->Start();
+
   }
-  
+
+  /// Instantiate GUI elements; note that GUI elements should be class members so
+  /// they aren't garbage-collected outside of this functions' scope.
+  void buildGui() {
+    std::cerr << "**** buildGui()\n";
+
+    sliderRep_->SetMinimumValue(1.0);
+    sliderRep_->SetMaximumValue(20.0);
+    sliderRep_->SetValue(verticalExagg_);
+    sliderRep_->SetTitleText("vertical exaggeration");
+
+    // Change the color of the knob that slides
+    sliderRep_->GetSliderProperty()->SetColor(
+					     colors_->GetColor3d("Green").GetData());
+    // Change the color of the text indicating what the slider controls
+    sliderRep_->GetTitleProperty()->SetColor(
+					    colors_->GetColor3d("AliceBlue").GetData());
+    // Change the color of the text displaying the value
+    sliderRep_->GetLabelProperty()->SetColor(
+					    colors_->GetColor3d("AliceBlue").GetData());
+    // Change the color of the knob when the mouse is held on it
+    sliderRep_->GetSelectedProperty()->SetColor(
+					       colors_->GetColor3d("DeepPink").GetData());
+    // Change the color of the bar
+    sliderRep_->GetTubeProperty()->SetColor(
+					   colors_->GetColor3d("MistyRose").GetData());
+    // Change the color of the ends of the bar
+    sliderRep_->GetCapProperty()->SetColor(colors_->GetColor3d("Yellow").GetData());
+
+    sliderRep_->SetSliderLength(0.05);
+    sliderRep_->SetSliderWidth(0.025);
+    sliderRep_->SetEndCapLength(0.02);
+
+    sliderRep_->GetPoint1Coordinate()->SetCoordinateSystemToNormalizedDisplay();
+    sliderRep_->GetPoint1Coordinate()->SetValue(0.2, 0.1);
+    sliderRep_->GetPoint2Coordinate()->SetCoordinateSystemToNormalizedDisplay();
+    sliderRep_->GetPoint2Coordinate()->SetValue(0.8, 0.1);
+
+    /// vtkNew<vtkSliderWidget> sliderWidget;
+    sliderWidget_->SetInteractor(renderWindowInteractor_);
+    sliderWidget_->SetRepresentation(sliderRep_);
+    sliderWidget_->SetAnimationModeToAnimate();
+    sliderWidget_->EnabledOn();
+
+    vtkNew<SliderCallback> callback;
+    callback->setEditor(this);
+    sliderWidget_->AddObserver(vtkCommand::EndInteractionEvent, callback);
+  }
+
   
   bool readPolyData(const char* fileName) {
     
@@ -280,9 +307,14 @@ protected:
 
   vtkSmartPointer<vtkPolyData> polyData_;
   
+  vtkNew<vtkSliderRepresentation2D> sliderRep_;
+  vtkNew<vtkSliderWidget> sliderWidget_;
+  
   // data quality array for input vtkPolyData
   vtkSmartPointer<vtkIntArray> quality_ =
     vtkSmartPointer<vtkIntArray>::New();
+
+  double verticalExagg_;
 };
 
 
