@@ -44,6 +44,7 @@
 #include "PointsSelectInteractorStyle.h"
 #include "Utilities.h"
 #include "TopoDataReader.h"
+#include "RadioButtonGroup.h"
 
 #define VTKISRBP_ORIENT 0
 #define VTKISRBP_SELECT 1
@@ -55,6 +56,15 @@
 #define GOOD 1
 #define BAD 0
 
+// Edit modes
+typedef enum {
+  EraseMode,
+  RestoreMode
+
+} EditMode;
+
+
+class EditModeGroup;
 
 class PointCloudEditor {
 
@@ -78,7 +88,7 @@ public:
   /// Instantiate GUI elements; note that GUI elements should be class
   /// members so they aren't garbage-collected outside of this
   /// functions' scope.
-  void buildGui();
+  void buildWidgets();
 
   /// Read point cloud data from specified file
   bool readPolyData(const char* fileName);
@@ -89,11 +99,25 @@ public:
     verticalExagg_ = value;
   }
 
+  /// Create a color image
+  static vtkNew<vtkImageData> createColorImage(std::string const& color);
+
+  // Set edit mode
+  void setEditMode(EditMode mode) {
+    editMode_ = mode;
+  }
+
+  // Get edit mode
+  EditMode getEditMode() {
+    return editMode_;
+  }
+
+  
 protected:
   vtkNew<vtkAreaPicker> areaPicker_;
   vtkNew<vtkRenderWindow> renderWindow_;
   vtkNew<vtkDataSetSurfaceFilter> surfaceFilter_;
-  vtkNew<vtkLookupTable> lut_;
+  vtkNew<vtkLookupTable> qualityLUT_;
   vtkNew<vtkIdFilter> idFilter_;  
   vtkNew<vtkNamedColors> colors_;
   vtkNew<vtkPolyDataMapper> mapper_;
@@ -108,13 +132,43 @@ protected:
   
   vtkNew<vtkSliderRepresentation2D> sliderRep_;
   vtkNew<vtkSliderWidget> sliderWidget_;
+  vtkNew<EditModeGroup> editModeGroup_;
   
   // data quality array for input vtkPolyData
   vtkSmartPointer<vtkIntArray> quality_ =
     vtkSmartPointer<vtkIntArray>::New();
 
+  EditMode editMode_;
   double verticalExagg_;
+
+  bool firstRender_;
+  
 };
+
+
+class EditModeGroup : public mb_system::RadioButtonGroup {
+public:
+  static EditModeGroup* New() { return new EditModeGroup; }  
+
+  void setEditor(PointCloudEditor *editor) {
+    editor_ = editor;
+  }
+  
+  bool processAction(int selectedIndex) override {
+    if (selectedIndex == 0) {
+      editor_->setEditMode(EraseMode);
+    }
+    else {
+      editor_->setEditMode(RestoreMode);
+    }
+  }
+  
+  protected:
+    PointCloudEditor *editor_;
+};
+
+  
+
 
 
 
