@@ -14,16 +14,21 @@
 #include <vtkNamedColors.h>
 #include <vtkLight.h>
 #include <vtkGenericRenderWindowInteractor.h>
+#include <vtkInteractorStyle.h>
+#include <vtkInteractorStyleRubberBandPick.h>
 #include <QVTKInteractor.h>
+#include <vtkInteractorStyleTerrain.h>
+#include <vtkAreaPicker.h>
 #include <QList>
 #include <QVector2D>
 #include <QVariant>
 #include "SlopeFilter.h"
 #include "TopoDataReader.h"
 #include "TopoColorMap.h"
-#include "InteractorStyle.h"
 #include "PickInteractorStyle.h"
 #include "LightingInteractorStyle.h"
+#include "DataSelectInteractorStyle.h"
+#include "MyRubberBandStyle.h"
 
 namespace mb_system {
 
@@ -60,10 +65,12 @@ namespace mb_system {
       vtkNew<vtkPolyDataMapper> surfaceMapper_;
       vtkNew<vtkRenderer> renderer_;
       vtkNew<QVTKInteractor> windowInteractor_;
+      /// vtkNew<vtkRenderWindowInteractor> windowInteractor_;      
+      vtkNew<vtkAreaPicker> areaPicker_;
 
       /// Assign this pointer to appropriate interactor style,
       /// depending on how 'mouse mode' is set
-      mb_system::InteractorStyle *interactorStyle_;            
+      vtkInteractorStyle *interactorStyle_;            
 
       /// x,y,z axes
       vtkNew<vtkCubeAxesActor> axesActor_;
@@ -75,7 +82,8 @@ namespace mb_system {
     /// Type of surface to display; elevation, gradient...
     enum class DisplayedSurface : int {
       Elevation,
-      Gradient
+      Gradient,
+      DataQuality
     };
 
     Q_ENUM(DisplayedSurface)
@@ -118,7 +126,6 @@ namespace mb_system {
       return verticalExagg_;
     }
 
-    
     /// Set type of surface to display
     Q_INVOKABLE void setDisplayedSurface(DisplayedSurface surfaceType) {
       qDebug() << "setDisplayedSurface to " << surfaceType;
@@ -145,6 +152,11 @@ namespace mb_system {
     /// Get light source intensity
     Q_INVOKABLE double getLightIntensity(void);    
 
+    /// Print mouse help message
+    Q_INVOKABLE QString printMouseHelp() {
+      return "Mouse help goes here";
+    }
+    
     /// Set picked point
     void setPickedPoint(double *worldCoords);
 
@@ -162,11 +174,20 @@ namespace mb_system {
     }
 
 
+    /// Get pipeline
+    Pipeline *getPipeline() {
+      return pipeline_;
+    }
+
+
+    /// Queue vtk style render updates to the render thread
+    void queueVtkStyleRender(MyRubberBandStyle *style);
+    
   
   protected:
 
     /// Assemble pipeline elements
-    void assemblePipeline(Pipeline *pipeline);
+    virtual void assemblePipeline(Pipeline *pipeline);
 
     /// Pass pipeline reassembly lambda code to dispatch_async() 
     /// for execution in render thread
@@ -221,6 +242,11 @@ namespace mb_system {
 
     /// Change lighting with mouse
     LightingInteractorStyle *lightingInteractorStyle_;
+
+    /// Select topo/bathymetry data with mouse
+    DataSelectInteractorStyle *dataSelectInteractorStyle_;    
+
+    vtkNew<MyRubberBandStyle> testStyle_;
     
   };
 }

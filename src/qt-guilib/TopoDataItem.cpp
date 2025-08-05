@@ -2,6 +2,7 @@
 #include <climits>
 #include <array>
 #include <vector>
+#include <thread>
 #include <vtk/vtkProperty.h>
 #include <vtk/vtkTextProperty.h>
 #include <vtk/vtkErrorCode.h>
@@ -28,10 +29,14 @@ TopoDataItem::TopoDataItem() {
   pointPicked_ = false;
   forceRender_ = false;
 
+  
 
   // Instantiate interactor styles
-  pickInteractorStyle_ = new PickInteractorStyle();
-  lightingInteractorStyle_ = new LightingInteractorStyle();
+  pickInteractorStyle_ = new PickInteractorStyle(this);
+  lightingInteractorStyle_ = new LightingInteractorStyle(this);
+  dataSelectInteractorStyle_ = new DataSelectInteractorStyle(this);
+
+  testStyle_->setTopoDataItem(this);
 }
 
 
@@ -142,9 +147,6 @@ bool TopoDataItem::loadDatafile(QUrl fileUrl) {
 
   pipeline_->firstRender_ = true;
   
-  // Set function to run in QT render thread
-  /// dispatch_async(&(this->reassemblePipeline));  // HOW???
-
   reassemblePipeline();
   
   return true;
@@ -152,6 +154,8 @@ bool TopoDataItem::loadDatafile(QUrl fileUrl) {
 
 
 void TopoDataItem::reassemblePipeline() {
+  std::cerr << "reassemblePipeline() thread: " <<
+    std::this_thread::get_id() << "\n";  
   // Dispatch lambda function to run in QT render thread 
   dispatch_async([this](vtkRenderWindow *renderWindow, vtkUserData userData) {
     auto *pipeline = TopoDataItem::Pipeline::SafeDownCast(userData);
@@ -168,7 +172,8 @@ void TopoDataItem::reassemblePipeline() {
 
 void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
 
-  qDebug() << "assemblePipeline()";
+  std::cerr << "assemblePipeline() thread: " <<
+    std::this_thread::get_id() << "\n";
   
   // Check that input file exists and is readable
   if (access(dataFilename_, R_OK) == -1) {
@@ -219,26 +224,6 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
     return;
   }  
 
-  /// DEBUG ////
-  vtkPolyData *polyData = pipeline->topoReader_->GetOutput();
-  vtkPoints *points = polyData->GetPoints();
-  vtkCellArray *cells = polyData->GetPolys();
-  if (points) {
-    std::cerr << "topoReader output #points: " <<
-      points->GetNumberOfPoints() << "\n";
-  }
-  else {
-    std::cerr << "topoReader output has no points\n";
-  }
-  if (cells) {
-    std::cerr << "topoReader output #cells: " << cells->GetNumberOfCells() <<
-      "\n";
-  }
-  else {
-    std::cerr << "topoReader output has no cells\n";
-  }  
-  ////////////////////
-  
   // Read grid bounds
   double gridBounds[6];
   pipeline->topoReader_->gridBounds(&gridBounds[0], &gridBounds[1],
@@ -321,7 +306,7 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   std::cerr << "assemblePipeline(): GetLightIntensity=" <<
     pipeline->lightSource_->GetIntensity() << "\n";
 
-  pipeline->interactorStyle_->setLight(pipeline->lightSource_);
+  /// pipeline->interactorStyle_->setLight(pipeline->lightSource_);
   pipeline->renderer_->AddLight(pipeline->lightSource_);
 
   vtkLightCollection *lights = pipeline->renderer_->GetLights();
@@ -347,13 +332,9 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   }
     
   pipeline->surfaceActor_->SetScale(1., 1., verticalExagg_);  // NEW!
-
-  pipeline->interactorStyle_->initialize(this, pipeline->windowInteractor_);
   pipeline->interactorStyle_->SetDefaultRenderer(pipeline->renderer_);
-  pipeline->interactorStyle_->polyData_ =
-    pipeline->topoReader_->GetOutput();
-  
 
+  pipeline->windowInteractor_->SetPicker(pipeline->areaPicker_);
   pipeline->windowInteractor_->SetInteractorStyle(pipeline->interactorStyle_);
   pipeline->windowInteractor_->SetRenderWindow(renderWindow_);
   
@@ -362,9 +343,6 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   }
   pipeline->firstRender_ = false;
 
-
-  /// TEST : get vertical profile across the map
-  
 }
 
 
@@ -553,8 +531,17 @@ bool TopoDataItem::setMouseMode(QString mouseMode) {
   }
   else if (mouseMode == MouseLighting) {
     qDebug() << "setMouseMode(): set " << mouseMode << " picker";
-    lightingInteractorStyle_->setRenderer(pipeline_->renderer_);
     pipeline_->interactorStyle_ = lightingInteractorStyle_;
+  }
+  else if (mouseMode == MouseDataSelect) {
+    qDebug() << "setMouseMode(): set " << mouseMode << " picker";
+    /// pipeline_->interactorStyle_ = dataSelectInteractorStyle_;
+    qDebug() << "setMouseMode():: TEST TEST set rubberBand style";
+    pipeline_->interactorStyle_ = dataSelectInteractorStyle_;
+  }
+  else if (mouseMode == MouseTest) {
+    qDebug() << "setMouseMode():: TEST!!";
+    pipeline_->interactorStyle_ = testStyle_;
   }
   else {
     qDebug() << "setMouseMode(): " << mouseMode << " not yet implemented";
@@ -585,8 +572,6 @@ void TopoDataItem::setupLightSource() {
   light->SetIntensity(1.0);
 
   pipeline_->renderer_->AddLight(light);
-
-  pipeline_->interactorStyle_->setLight(light);
 }
 
 
@@ -623,3 +608,13 @@ double TopoDataItem::getLightIntensity() {
   return pipeline_->lightSource_->GetIntensity();
 }
 
+
+void TopoDataItem::queueVtkStyleRender(MyRubberBandStyle *style) {
+  // Dispatch lambda function to redraw rubber band in Qt render thread
+  dispatch_async([style](vtkRenderWindow *renderWindow,
+		  vtkSmartPointer<vtkObject> userData) {
+    style->RedrawRubberBand();
+  });
+  
+  
+}
