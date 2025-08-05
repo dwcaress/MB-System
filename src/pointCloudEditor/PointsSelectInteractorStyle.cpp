@@ -10,6 +10,23 @@
 
 vtkStandardNewMacro(PointsSelectInteractorStyle);
 
+void PointsSelectInteractorStyle::OnChar() {
+  int startingMode = CurrentMode;
+  vtkInteractorStyleRubberBandPick::OnChar();
+  if (startingMode == VTKISRBP_SELECT &&
+      CurrentMode != VTKISRBP_SELECT) {
+    // Just left select mode
+    std::cerr << "Just left select mode\n";
+    // Remove selected area actor
+    GetInteractor()
+      ->GetRenderWindow()
+      ->GetRenderers()
+      ->GetFirstRenderer()
+      ->RemoveActor(selectedActor_);
+    editor_->visualize();
+  }
+}
+
 void PointsSelectInteractorStyle::OnLeftButtonUp() {
   // Forward events
   vtkInteractorStyleRubberBandPick::OnLeftButtonUp();
@@ -40,10 +57,10 @@ void PointsSelectInteractorStyle::OnLeftButtonUp() {
     selectedMapper_->SetInputData(extractedData);
     selectedMapper_->ScalarVisibilityOff();
 
-    selectedActor_->GetProperty()->SetColor(
-					    colors->GetColor3d("Red").GetData());
+    selectedActor_->
+      GetProperty()->SetColor(colors->GetColor3d("Black").GetData());
       
-    selectedActor_->GetProperty()->SetPointSize(5);
+    selectedActor_->GetProperty()->SetPointSize(1);
     // selectedActor_->GetProperty()->SetRepresentationToWireframe();
     // selectedActor_->GetProperty()->SetRepresentationToSurface();
     selectedActor_->GetProperty()->SetRepresentationToPoints();
@@ -97,10 +114,16 @@ void PointsSelectInteractorStyle::OnLeftButtonUp() {
 	std::cerr << "x: " << xyz[0] << ", y: " << xyz[1] <<
 	  ", z: " << xyz[2] << "\n";
 
-	// Set selected point data quality to BAD
+	// Set selected point data quality
 	if (quality) {
-	  std::cerr << "set value to BAD\n";
-	  quality->SetValue(pointId, BAD);
+	  if (editor_->getEditMode() == EraseMode) {
+	    std::cerr << "set value to BAD\n";
+	    quality->SetValue(pointId, BAD);
+	  }
+	  else {
+	    std::cerr << "set value to GOOD\n";	    
+	    quality->SetValue(pointId, GOOD);	    
+	  }
 	}
 
       }
@@ -108,10 +131,10 @@ void PointsSelectInteractorStyle::OnLeftButtonUp() {
     else {
       std::cerr << "Couldn't get original point Ids\n";
     }
+    std::cerr << "Visualize data\n";
+    editor_->visualize();
   }
 
-  std::cerr << "Visualize data\n";
-  editor_->visualize();
 }
 
 

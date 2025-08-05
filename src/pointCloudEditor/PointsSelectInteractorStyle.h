@@ -21,6 +21,9 @@ public:
 
   virtual void OnLeftButtonUp() override;
 
+  /// Character typed
+  void OnChar() override;
+
   void setEditor(PointCloudEditor *editor) {
     editor_ = editor;
   }
