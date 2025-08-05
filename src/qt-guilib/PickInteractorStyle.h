@@ -5,7 +5,7 @@
 #include <vtkDataSetMapper.h>
 #include <vtkActor.h>
 #include <vtkPolyData.h>
-#include "InteractorStyle.h"
+#include "InteractorStyleIF.h"
 
 namespace mb_system {
 
@@ -14,25 +14,30 @@ namespace mb_system {
   
   /** Catch mouse events */
   class PickInteractorStyle :
-    public mb_system::InteractorStyle {
+    public vtkInteractorStyleTrackballCamera,
+    public mb_system::InteractorStyleIF {
 
   public:
 
     vtkTypeMacro(PickInteractorStyle,
 		 vtkInteractorStyleTrackballCamera);
 
+    /* ***
     /// Get a new PickerInteractorStyle object
     /// For use with vtkSmartPointer
     static PickInteractorStyle *New() {
       return new PickInteractorStyle();
     }
+    *** */
 
     /// Constructor
-    PickInteractorStyle();
+    PickInteractorStyle(mb_system::TopoDataItem *item) {
+      item_ = item;
+    }
 
-    /// Print name of interactor style
-    const char *printName() override {
-      return "PickInteractorStyle";
+    /// Print help message describing mouse actions
+    virtual const char *printHelp() {
+      return "PickInteractorStyle help message goes here";
     }
     
     /// Pick cell
@@ -48,6 +53,9 @@ namespace mb_system {
     int startMousePos_[2];
 
     void testPoints(int x, int y, vtkRenderer *renderer);
+
+    mb_system::TopoDataItem *item_;
+    
   };
     
 }

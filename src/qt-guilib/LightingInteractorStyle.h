@@ -11,29 +11,33 @@
 #include <vtkProperty.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
-#include <vtkRenderer.h>
 #include <vtkTextActor.h>
 #include <vtkTextProperty.h>
 #include <vtkCamera.h>
-#include "InteractorStyle.h"
+#include "InteractorStyleIF.h"
 
 namespace mb_system {
+
+  /// Forward declaration
+  class TopoDataItem;
+  
   /** Custom interactor style for light position control */
-  class LightingInteractorStyle : public mb_system::InteractorStyle
-  {
+  class LightingInteractorStyle :
+    public vtkInteractorStyleTrackballCamera,
+    public mb_system::InteractorStyleIF {
+
   public:
-    static LightingInteractorStyle* New();
+
+    /// RTTI support
     vtkTypeMacro(LightingInteractorStyle, vtkInteractorStyleTrackballCamera);
 
-    LightingInteractorStyle();
+    LightingInteractorStyle(TopoDataItem *item);
 
-    /// Print name of interactor style
-    const char *printName() override {
-      return "LightingInteractorStyle";
+    /// Print help message
+    const char *printHelp() override {
+      return "shift-L-drag: change light position  shift-R-drag: change light intensity";
     }
   
-    void setRenderer(vtkRenderer* renderer);
-
     virtual void OnLeftButtonDown() override;
 
     virtual void OnLeftButtonUp() override;
@@ -46,7 +50,8 @@ namespace mb_system {
 
   private:
 
-    vtkRenderer* renderer_;
+    mb_system::TopoDataItem *topoDataItem_;
+    
     bool lightMoving_;
     bool intensityChanging_;  
     int startMousePosition_[2];

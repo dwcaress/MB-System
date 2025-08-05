@@ -13,20 +13,18 @@
 #include <vtkTextActor.h>
 #include <vtkTextProperty.h>
 #include "LightingInteractorStyle.h"
+#include "TopoDataItem.h"
 
 using namespace mb_system;
 
-vtkStandardNewMacro(LightingInteractorStyle);
+// vtkStandardNewMacro(LightingInteractorStyle);
 
-LightingInteractorStyle::LightingInteractorStyle() {
+LightingInteractorStyle::LightingInteractorStyle(TopoDataItem *item) {
+  topoDataItem_ = item;
   lightMoving_ = false;
   intensityChanging_ = false;  
   startMousePosition_[0] = 0;
   startMousePosition_[1] = 0;
-}
-
-void LightingInteractorStyle::setRenderer(vtkRenderer* renderer) {
-  renderer_ = renderer;
 }
 
 void LightingInteractorStyle::OnLeftButtonDown() {
@@ -85,7 +83,7 @@ void LightingInteractorStyle::OnMouseMove() {
   if (lightMoving_ && Interactor->GetShiftKey())  {
             
     // Get current camera parameters to relate mouse movement to 3D space
-    vtkCamera* camera = renderer_->GetActiveCamera();
+    vtkCamera* camera = topoDataItem_->getPipeline()->renderer_->GetActiveCamera();
             
     // Get camera vectors
     double forward[3];
@@ -101,7 +99,7 @@ void LightingInteractorStyle::OnMouseMove() {
             
     // Get current light position
     double current_pos[3];
-    lightSource_->GetPosition(current_pos);
+    topoDataItem_->getPipeline()->lightSource_->GetPosition(current_pos);
             
     // Calculate new position
     double new_pos[3] = {
@@ -115,14 +113,14 @@ void LightingInteractorStyle::OnMouseMove() {
       ", z= " << new_pos[2] << "\n";
       
     // Update light position
-    lightSource_->SetPosition(new_pos);
+    topoDataItem_->getPipeline()->lightSource_->SetPosition(new_pos);
 
     // Trigger render to update scene with new lighting
     //// Interactor->Render();
     Interactor->Render();    
   }
   else if (intensityChanging_ && Interactor->GetShiftKey())  {
-    double intensity = lightSource_->GetIntensity();
+    double intensity = topoDataItem_->getPipeline()->lightSource_->GetIntensity();
     std::cerr << "change light intensity; now is " << intensity << "\n";
     std::cerr << "intensity: " << intensity << ", dx: " << dx <<
       ", dy: " << dy << "\n";
@@ -133,7 +131,7 @@ void LightingInteractorStyle::OnMouseMove() {
     intensity = std::max(intensity, 0.2);
     
     // Update light intensity
-    lightSource_->SetIntensity(intensity);
+    topoDataItem_->getPipeline()->lightSource_->SetIntensity(intensity);
 
     Interactor->Render();    
   }

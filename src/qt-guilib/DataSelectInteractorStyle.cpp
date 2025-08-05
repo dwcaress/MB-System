@@ -18,23 +18,73 @@
 #include <vtkVersion.h>
 #include <vtkPointData.h>
 #include <vtkIdTypeArray.h>
+#include <QQuickVTKItem.h>
 #include "DataSelectInteractorStyle.h"
+#include "TopoDataItem.h"
 
 #define VTKISRBP_ORIENT 0
 #define VTKISRBP_SELECT 1
 #define ORIGINAL_POINT_IDS "vtkOriginalPointIds"
 
 using namespace mb_system;
+//// vtkStandardNewMacro(DataSelectInteractorStyle);
 
-DataSelectInteractorStyle::DataSelectInteractorStyle() {
-  selectedMapper_ = vtkSmartPointer<vtkDataSetMapper>::New();
-  selectedActor_ = vtkSmartPointer<vtkActor>::New();
-  selectedActor_->SetMapper(selectedMapper_);
+DataSelectInteractorStyle::DataSelectInteractorStyle(TopoDataItem *item) {
+  topoDataItem_ = item;
+}
+
+
+void DataSelectInteractorStyle::OnMouseMove()
+{
+  std::cout << "DataSelectInteractorStyle::OnMouseMove()\n";
+  
+  if (CurrentMode != VTKISRBP_SELECT)
+  {
+    // if not in rubber band mode,  let the parent class handle it
+    Superclass::OnMouseMove();
+    return;
+  }
+
+  if (!Interactor || !Moving)
+  {
+    return;
+  }
+
+  EndPosition[0] = Interactor->GetEventPosition()[0];
+  EndPosition[1] = Interactor->GetEventPosition()[1];
+  const int* size = Interactor->GetRenderWindow()->GetSize();
+  if (EndPosition[0] > (size[0] - 1))
+  {
+    EndPosition[0] = size[0] - 1;
+  }
+  if (EndPosition[0] < 0)
+  {
+    EndPosition[0] = 0;
+  }
+  if (EndPosition[1] > (size[1] - 1))
+  {
+    this->EndPosition[1] = size[1] - 1;
+  }
+  if (this->EndPosition[1] < 0)
+  {
+    this->EndPosition[1] = 0;
+  }
+
+
+  std::cerr << "skip RedrawRubberBand()\n";
+  /* ***
+  std::cerr << "DataSelectInteractorStyle dispatch RedrawRubberBand()\n";
+  // Dispatch lambda function to redraw rubber band in Qt render thread
+  topoDataItem_->dispatch_async([this](vtkRenderWindow *renderWindow,
+				       vtkSmartPointer<vtkObject> userData) {
+    this->RedrawRubberBand();
+  });
+  *** */
 }
 
 void DataSelectInteractorStyle::OnLeftButtonUp() {
   // Forward events
-  vtkInteractorStyleRubberBandPick::OnLeftButtonUp();
+  vtkInteractorStyleRubberBandPick::OnLeftButtonUp();    
 
   if (CurrentMode == VTKISRBP_SELECT)
     {
@@ -44,21 +94,24 @@ void DataSelectInteractorStyle::OnLeftButtonUp() {
 	static_cast<vtkAreaPicker*>(GetInteractor()->GetPicker())
 	->GetFrustum();
 
+      vtkPolyData *polyData =
+	topoDataItem_->getPipeline()->topoReader_->GetOutput();
+      
       vtkNew<vtkExtractPolyDataGeometry> extractor;
-      extractor->SetInputData(polyData_);
+      extractor->SetInputData(polyData);
       
       // Add array containing original data point IDs
       vtkSmartPointer<vtkIdTypeArray> originalPointIds =
 	vtkSmartPointer<vtkIdTypeArray>::New();
 
       originalPointIds->SetName(ORIGINAL_POINT_IDS);
-      originalPointIds->SetNumberOfTuples(polyData_->GetNumberOfPoints());
-      for (int i = 0; i < polyData_->GetNumberOfPoints(); i++) {
+      originalPointIds->SetNumberOfTuples(polyData->GetNumberOfPoints());
+      for (int i = 0; i < polyData->GetNumberOfPoints(); i++) {
 	originalPointIds->SetValue(i, i);
       }
 
-      // Associate point ID array with original poly data
-      polyData_->GetPointData()->SetScalars(originalPointIds);
+      // Fill point ID array with original poly data
+      polyData->GetPointData()->SetScalars(originalPointIds);
       
       // Extract cells that lie within the user-specified frustrum
       extractor->SetImplicitFunction(frustum);
@@ -74,28 +127,44 @@ void DataSelectInteractorStyle::OnLeftButtonUp() {
 
       // Set mapper input to extracted cells
       // (Color is not controlled by scalar)
-      selectedMapper_->SetInputData(extractedData);
-      selectedMapper_->ScalarVisibilityOff();
+      topoDataItem_->getPipeline()->surfaceMapper_->SetInputData(extractedData);
+      // selectedMapper_->SetInputData(extractedData);
+      topoDataItem_->getPipeline()->surfaceMapper_->ScalarVisibilityOff();
+      // selectedMapper_->ScalarVisibilityOff();
 
-      selectedActor_->GetProperty()->SetColor(
-					      colors->GetColor3d("Tomato").GetData());
+      std::cerr << "DataSelectInteractor: commented out code!!!!!\n";
+      topoDataItem_->getPipeline()->
+	surfaceActor_->GetProperty()->
+	SetColor(colors->GetColor3d("Tomator").GetData());
       
-      selectedActor_->GetProperty()->SetPointSize(5);
-      // selectedActor_->GetProperty()->SetRepresentationToWireframe();
-      selectedActor_->GetProperty()->SetRepresentationToSurface();
+      /// selectedActor_->GetProperty()->SetColor(
+      ///	      colors->GetColor3d("Tomato").GetData());
 
+      topoDataItem_->getPipeline()->
+	surfaceActor_->GetProperty()->SetPointSize(5);
+      
+      ///      selectedActor_->GetProperty()->SetPointSize(5);
+
+      topoDataItem_->getPipeline()->
+	surfaceActor_->GetProperty()->SetRepresentationToSurface();
+      /// selectedActor_->GetProperty()->SetRepresentationToSurface();
+
+      
       GetInteractor()
 	->GetRenderWindow()
 	->GetRenderers()
 	->GetFirstRenderer()
-	->AddActor(selectedActor_);
-      
+	->AddActor(topoDataItem_->getPipeline()->
+		   surfaceActor_);
+
       GetInteractor()->GetRenderWindow()->Render();
 
       // Highlight the selected area
       HighlightProp(nullptr);
 
       // Get the points
+      std::cerr << "GET THE POINTS\n";
+      
       vtkPoints *points = extractedData->GetPoints();
       std::cout << "Got " << points->GetNumberOfPoints() << " points\n";
       for (int i = 0; i < points->GetNumberOfPoints(); i++) {
@@ -123,12 +192,4 @@ void DataSelectInteractorStyle::OnLeftButtonUp() {
 
     }
 }
-
-
-void DataSelectInteractorStyle::setPolyData(vtkPolyData* polyData) {
-  polyData_ = polyData;
-}
-
-  
-
 

@@ -20,29 +20,44 @@
 #include <vtkVersion.h>
 #include <vtkPointData.h>
 #include <vtkIdTypeArray.h>
-#include "InteractorStyle.h"
+#include "InteractorStyleIF.h"
 
 namespace mb_system {
 
-  class DataSelectInteractorStyle : public vtkInteractorStyleRubberBandPick {
+  class TopoDataItem;
+  
+  class DataSelectInteractorStyle :
+    public vtkInteractorStyleRubberBandPick,
+    public mb_system::InteractorStyleIF {
+
   public:
-    static DataSelectInteractorStyle* New();
+    /// static DataSelectInteractorStyle* New();
     vtkTypeMacro(DataSelectInteractorStyle, vtkInteractorStyleRubberBandPick);
 
-    DataSelectInteractorStyle();
+    DataSelectInteractorStyle(TopoDataItem *item);
 
+    const char *printHelp() override {
+      return "r: toggle data select mode    R-drag: select data";
+    }
+    
     void OnLeftButtonUp(void) override;
+    void OnMouseMove() override;
 
-    void setPolyData(vtkPolyData *polyData);
+    
+  protected:
+    void RedrawRubberBand()
+    {
+        // Do nothing - this prevents the OpenGL state conflicts
+        // The selection will still work, just without visual feedback
+    }
 
+    
   private:
-    vtkSmartPointer<vtkPolyData> polyData_;
-    vtkSmartPointer<vtkActor> selectedActor_;
-    vtkSmartPointer<vtkDataSetMapper> selectedMapper_;  
+
+    TopoDataItem *topoDataItem_;
+    
   };
   
-  vtkStandardNewMacro(DataSelectInteractorStyle);
-
   vtkSmartPointer<vtkPolyData> ReadPolyData(const char* fileName);
 } // namespace
 

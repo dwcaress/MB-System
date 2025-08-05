@@ -10,9 +10,11 @@ using namespace mb_system;
 #include <proj.h>
 
 
+/* ***
 PickInteractorStyle::PickInteractorStyle() {
   std::cerr << "PickInteractorStyle()\n";
 }
+*** */
 
 
 void PickInteractorStyle::OnLeftButtonDown() {
