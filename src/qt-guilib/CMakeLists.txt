@@ -39,6 +39,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 set(src
+    PickInteractorStyle.cpp
     Camera.cpp
     ClickableLabel.cpp
     ColorMap.cpp
@@ -50,12 +51,14 @@ set(src
     GmtGridData.cpp
     GmtGridReader.cpp
     GmtGridSurface.cpp
-    InteractorStyle.cpp
     LightingInteractorStyle.cpp
     MBGui.cpp
     MBQuickItem.cpp
+    MyRubberBandStyle.cpp
+    PickInteractorStyle.cpp
     PixmapDrawer.cpp    
     PixmapImage.cpp
+    RadioButtonGroup.cpp
     Route.cpp
     SharedConstants.cpp
     SlopeFilter.cpp
@@ -65,7 +68,6 @@ set(src
     TopoColorMap.cpp
     TopoData.cpp
     TopoDataItem.cpp
-    PickInteractorStyle.cpp
     TopoDataReader.cpp
     TopoProfileItem.cpp    
     Utilities.cpp
