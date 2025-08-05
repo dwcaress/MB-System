@@ -2,13 +2,15 @@ import QtQuick 2.9
 import QtQuick.Window 2.3
 import QtQuick.Controls 2.3
 import QtQuick.Layouts 1.3
+import QtQuick.Dialogs
 /* ***
 BackEnd singleton is registered in root context by main.cpp
 See https://qml.guide/singletons/
 *** */
 
-Window {
+Dialog {
     id: settings3dWindow
+    standardButtons: StandardButton.Ok | StandardButton.Cancel
     visible: true
     width: 640
     height: 480
@@ -78,7 +80,37 @@ Window {
                 }
             }
         }
+	
+        GroupBox {
+            id: lightGroupBox
+            width: 200
+            height: 200
+            title: qsTr("Light:")
+            Grid {
+                width: 400
+                height: 400
+                rows: 3
+                columns: 2
 
+                Label {
+                    text: qsTr("Intensity")
+                    fontSizeMode: Text.Fit
+                    font.pixelSize: 18                    
+                }
+                
+                Slider {
+                    id: intensity
+                    Layout.fillWidth: true
+                    from: 0
+                    to: 1
+                    value: 1
+                    // onValueChanged: mainWindow.qmlSignal("verticalExagg " +
+                    //       value)
+                }
+                // Set displayed decimal places on slider label
+                Label { text: "val: " + Math.round(intensity.value *100)/100 }     }           	    
+	}
+	
         GroupBox {
             id: groupBox1
             width: 200
@@ -145,14 +177,6 @@ Window {
                 rows: 1
                 columns: 2
 
-                /* ***
-                Text {
-                    id: element4
-                    text: qsTr("Vertical exagg")
-                    fontSizeMode: Text.Fit
-                    font.pixelSize: 18
-                }
-                *** */
                 Label {
                     text: qsTr("Vertical exagg")
                     fontSizeMode: Text.Fit
@@ -165,8 +189,8 @@ Window {
                     from: 1
                     to: 10
                     value: 1
-                    onValueChanged: mainWindow.qmlSignal("verticalExagg " +
-                           value)
+                    // onValueChanged: mainWindow.qmlSignal("verticalExagg " +
+                       //    value)
                 }
                 // Set displayed decimal places on slider label
                 Label { text: "val: " + Math.round(zScale.value *100)/100 }                
@@ -210,6 +234,7 @@ Window {
             }
         }
 
+        /* ****
         Frame {
             id: frame2
             width: 200
@@ -237,92 +262,9 @@ Window {
                 }
             }
         }
+	*** */
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
