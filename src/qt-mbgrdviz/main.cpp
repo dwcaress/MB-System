@@ -1,4 +1,5 @@
 #include <sstream>
+#include <thread>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQuickWindow>
@@ -19,6 +20,9 @@ using namespace mb_system;
 
 int main(int argc, char* argv[])
 {
+  std::cerr << "main() thread: " <<
+    std::this_thread::get_id() << "\n";
+  
   char *topoDataFile = nullptr;
 
   bool error = false;
