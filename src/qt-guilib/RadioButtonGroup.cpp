@@ -24,13 +24,12 @@ void RadioButtonGroup::Execute(vtkObject* caller, unsigned long event,
       vtkButtonRepresentation::SafeDownCast(pressedButton->
 					    GetRepresentation());      
 
-    std::cerr << "pressedButton state = " << buttonRep->GetState()
-	      << "\n";      
+    std::cerr << "button " << pressedButton << "state = "
+	      << buttonRep->GetState() << "\n";      
 
-    buttonRep->SetState(1);
-      
 
     // Turn "on" the pressed button
+    std::cerr << "set button " << pressedButtonIndex << " state to 1\n";    
     buttonRep->SetState(1);
 
     // Turn "off" all other buttons in the group
@@ -39,19 +38,20 @@ void RadioButtonGroup::Execute(vtkObject* caller, unsigned long event,
 	vtkButtonRepresentation* buttonRep = 
 	  vtkButtonRepresentation::SafeDownCast(buttons_[i]->
 						GetRepresentation());
+	std::cerr << "set button " << i << " state to 0\n";
 	buttonRep->SetState(0);	    
       }
 
     }        
-    // --- Add your radio button specific actions here ---
-    // For example, you might print a message:
-    std::cout << "Radio Button " << pressedButtonIndex <<
-      " selected." << std::endl;
       
     // Force a render to update the button appearances
     if (interactor_) {
       interactor_->GetRenderWindow()->Render();
     }
+
+    /// Execute application-specific action 
+    processAction(pressedButtonIndex);
+    
   }
 }
 
@@ -77,7 +77,9 @@ int main(int, char*[]) {
   // You would typically load image files for your desired radio button appearance.
   imageOn->SetDimensions(10, 10, 1);
   imageOn->AllocateScalars(VTK_UNSIGNED_CHAR, 3);
-  unsigned char* pixelsOn = static_cast<unsigned char*>(imageOn->GetScalarPointer());
+  unsigned char* pixelsOn =
+    static_cast<unsigned char*>(imageOn->GetScalarPointer());
+
   for (int i = 0; i < 10 * 10 * 3; i += 3) {
     pixelsOn[i] = 0;     // Red
     pixelsOn[i + 1] = 0; // Green
@@ -141,6 +143,7 @@ int main(int, char*[]) {
     vtkButtonRepresentation* buttonRep = 
       vtkButtonRepresentation::SafeDownCast(radioButtons[0]->
 					    GetRepresentation());
+    std::cerr << "set button 0 state to 1\n";
     buttonRep->SetState(1);
   }
 
