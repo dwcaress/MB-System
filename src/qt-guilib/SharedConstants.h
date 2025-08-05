@@ -8,13 +8,13 @@
 #define MouseRotateModel "Rotate model"
 #define MouseRotateView "Rotate view"
 #define MouseLighting "Lighting"
-#define MouseDataSelect "Data select"
+#define MouseDataSelect "Select data"
 #define MousePickArea "Pick area"
 #define MouseEditSites "Edit sites"
 #define MouseEditRoutes "Edit routes"
 #define MousePickNav "Pick nav"
 #define MousePickNavFile "Pick nav file"
-
+#define MouseTest "TESTING"
 
 namespace mb_system {
 /// Constants shared between C++ and QML code

@@ -33,5 +33,6 @@ SharedConstants::SharedConstants() {
     mouseModes_ += MouseEditRoutes;
     mouseModes_ += MousePickNav;
     mouseModes_ += MousePickNavFile;
+    mouseModes_ += MouseTest;    
       
 }
