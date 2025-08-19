@@ -22,6 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- **Version 5.8.2          August 19, 2025**
 - Version 5.8.2beta24    July 19, 2025
 - Version 5.8.2beta23    June 25, 2025
 - Version 5.8.2beta22    June 16, 2025
@@ -56,6 +57,17 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.2 (August 19, 2025)
+
+**Version 5.8.2** is now the current release of MB-System. 
+
+The source code distribution can be downloaded from the MB-System Github repository at:  
+[https://github.com/dwcaress/MB-System/archive/refs/tags/5.8.2.tar.gz]()
+
+The changes and bug fixes of 5.8.2 relative to the prior stable release (5.8.1) are
+listed in the ChangeLog.md file entries for the preliminary releases 5.8.2beta01 through
+5.8.2beta24.
 
 #### 5.8.2beta24 (July 19, 2025)
 
