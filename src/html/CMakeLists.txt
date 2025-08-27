@@ -5,7 +5,7 @@
 #    David W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, California, USA
-#    Dale N. Chayes 
+#    Dale N. Chayes
 #      Center for Coastal and Ocean Mapping
 #      University of New Hampshire
 #      Durham, New Hampshire, USA
@@ -13,7 +13,7 @@
 #      MARUM
 #      University of Bremen
 #      Bremen Germany
-#      
+#
 #    MB-System was created by Caress and Chayes in 1992 at the
 #      Lamont-Doherty Earth Observatory
 #      Columbia University
@@ -59,6 +59,7 @@ set(HTML
     mbformat.html
     mbgetesf.html
     mbgpstide.html
+	mbgrd2gltf.html
     mbgrd2obj.html
     mbgrdtiff.html
     mbgrdviz.html
@@ -152,6 +153,7 @@ set(PDF
     mbformat.pdf
     mbgetesf.pdf
     mbgpstide.pdf
+	mbgrd2gltf.pdf
     mbgrd2obj.pdf
     mbgrdtiff.pdf
     mbgrdviz.pdf
