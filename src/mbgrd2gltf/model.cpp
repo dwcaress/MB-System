@@ -242,7 +242,7 @@ namespace mbgrd2gltf {
 
 			// Initialize the attribute with the correct type and number of components
 			// The attribute is of type POSITION and has 3 components (x, y, z)
-			pos_att.Init(draco::GeometryAttribute::POSITION, nullptr, 3, draco::DT_FLOAT32, false, sizeof(float) * 3, 0);
+			pos_att.Init(draco::GeometryAttribute::POSITION, nullptr, 3, draco::DT_FLOAT32, false, static_cast<int64_t>(12), static_cast<int64_t>(0));
 
 			// Add the attribute to the mesh
 			const uint32_t pos_att_id = pc.AddAttribute(pos_att, true, num_vertices);

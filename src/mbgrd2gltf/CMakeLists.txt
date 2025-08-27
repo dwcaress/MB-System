@@ -27,7 +27,8 @@ message("In src/mbgrd2gltf")
 find_package(NetCDF REQUIRED)
 
 # Attempt to find an installed version of Draco
-find_package(Draco)
+# Commented out to force use of local Draco source files for compatibility
+# find_package(Draco)
 
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -35,6 +36,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Set the draco directory
 set(DRACO_DIR "${CMAKE_CURRENT_SOURCE_DIR}/draco")
+
+# Initialize INCLUDE_DIRS
+set(INCLUDE_DIRS "")
 
 # Set the sources for the executable
 set(SOURCES bathymetry.cpp compression.cpp geometry.cpp main.cpp model.cpp options.cpp)
@@ -57,8 +61,10 @@ if(NOT TARGET Draco::Draco)
 		list(FILTER DRACO_SOURCES EXCLUDE REGEX ".*/.*test.*")
 
 		# Set the include directories and sources conditionally.
-		set(INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/draco)
+		set(INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/draco)
 		set(SOURCES ${SOURCES} ${DRACO_SOURCES})
+		# No external libraries needed since we're compiling the source
+		set(DRACO_LIBRARIES "")
 	else()
 		message("Using installed Draco, but Draco target not found, checking for libraries...")
 		find_library(DRACO_LIBRARY NAMES draco PATHS /usr/local/lib)
@@ -80,9 +86,11 @@ endif()
 add_executable(mbgrd2gltf ${SOURCES})
 
 # Set and link the include directories
-set(INCLUDE_DIRS ${INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/src/mbgrd2gltf ${CMAKE_SOURCE_DIR}/src/mbgrd2gltf/tinygltf)
 target_include_directories(mbgrd2gltf
 	PRIVATE ${NetCDF_INCLUDE_DIRS}
+	PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+	PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tinygltf
+	PRIVATE ${DRACO_DIR}
 	PRIVATE ${INCLUDE_DIRS}
 )
 
