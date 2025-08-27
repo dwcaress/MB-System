@@ -22,6 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.3beta01    August 27, 2025**
 - **Version 5.8.2          August 19, 2025**
 - Version 5.8.2beta24    July 19, 2025
 - Version 5.8.2beta23    June 25, 2025
@@ -57,6 +58,10 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.3beta01 (August 27, 2025)
+
+Program mbgrd2gltf: Fixed compile problem that occurs when the draco library is installed.
 
 #### 5.8.2 (August 19, 2025)
 
