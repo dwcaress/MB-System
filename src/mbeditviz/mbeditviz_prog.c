@@ -3709,34 +3709,34 @@ int mbeditviz_selectnav(size_t instance) {
             double mtodeglat;
             mb_coor_scale(mbev_verbose, ping->navlat, &mtodeglon, &mtodeglat);
             for (int ibeam = 0; ibeam < ping->beams_bath; ibeam++) {
-            if (mb_beam_check_flag_usable2(ping->beamflag[ibeam])
-              || (mbviewdata->state21 && mb_beam_check_flag_multipick(ping->beamflag[ibeam]))) {
-              /* allocate memory if needed */
-              if (mbev_selected.num_soundings >= mbev_selected.num_soundings_alloc) {
-                mbev_selected.num_soundings_alloc += MBEV_ALLOCK_NUM;
-                mbev_selected.soundings =
-                    realloc(mbev_selected.soundings,
-                            mbev_selected.num_soundings_alloc * sizeof(struct mb3dsoundings_sounding_struct));
-              }
-
-              /* same beam ids */
-              mbev_selected.soundings[mbev_selected.num_soundings].ifile = ifile;
-              mbev_selected.soundings[mbev_selected.num_soundings].iping = iping;
-              mbev_selected.soundings[mbev_selected.num_soundings].ibeam = ibeam;
-              mbev_selected.soundings[mbev_selected.num_soundings].beamflag = ping->beamflag[ibeam];
-              mbev_selected.soundings[mbev_selected.num_soundings].beamflagorg = ping->beamflagorg[ibeam];
-              mbev_selected.soundings[mbev_selected.num_soundings].beamcolor = ping->beamcolor[ibeam];
-
-              /* get sounding relative to sonar */
-              double beam_xtrack = ping->bathacrosstrack[ibeam];
-              double beam_ltrack = ping->bathalongtrack[ibeam];
-              double beam_z = ping->bath[ibeam] - ping->sensordepth;
-
-              /* if beamforming sound speed correction to be applied */
-              if (mbev_snell != 1.0) {
-                mbeditviz_snell_correction(mbev_snell, (ping->roll + rolldelta),
-                               &beam_xtrack, &beam_ltrack, &beam_z);
-              }
+							if (mb_beam_check_flag_usable2(ping->beamflag[ibeam])
+								|| (mbviewdata->state21 && mb_beam_check_flag_multipick(ping->beamflag[ibeam]))) {
+								/* allocate memory if needed */
+								if (mbev_selected.num_soundings >= mbev_selected.num_soundings_alloc) {
+									mbev_selected.num_soundings_alloc += MBEV_ALLOCK_NUM;
+									mbev_selected.soundings =
+											realloc(mbev_selected.soundings,
+															mbev_selected.num_soundings_alloc * sizeof(struct mb3dsoundings_sounding_struct));
+								}
+	
+								/* same beam ids */
+								mbev_selected.soundings[mbev_selected.num_soundings].ifile = ifile;
+								mbev_selected.soundings[mbev_selected.num_soundings].iping = iping;
+								mbev_selected.soundings[mbev_selected.num_soundings].ibeam = ibeam;
+								mbev_selected.soundings[mbev_selected.num_soundings].beamflag = ping->beamflag[ibeam];
+								mbev_selected.soundings[mbev_selected.num_soundings].beamflagorg = ping->beamflagorg[ibeam];
+								mbev_selected.soundings[mbev_selected.num_soundings].beamcolor = ping->beamcolor[ibeam];
+	
+								/* get sounding relative to sonar */
+								double beam_xtrack = ping->bathacrosstrack[ibeam];
+								double beam_ltrack = ping->bathalongtrack[ibeam];
+								double beam_z = ping->bath[ibeam] - ping->sensordepth;
+	
+								/* if beamforming sound speed correction to be applied */
+								if (mbev_snell != 1.0) {
+									mbeditviz_snell_correction(mbev_snell, (ping->roll + rolldelta),
+																 &beam_xtrack, &beam_ltrack, &beam_z);
+								}
 
               /* apply rotations and recalculate position */
               mbeditviz_beam_position(
@@ -3799,8 +3799,8 @@ int mbeditviz_selectnav(size_t instance) {
     const double dx = xmax - xmin;
     const double dy = ymax - ymin;
     const double dz = zmax - zmin;
-    const double xorigin = 0.5 * (xmin + xmax);
-    const double yorigin = 0.5 * (ymin + ymax);
+    mbev_selected.xorigin = 0.5 * (xmin + xmax);
+    mbev_selected.yorigin = 0.5 * (ymin + ymax);
     mbev_selected.zorigin = 0.5 * (zmin + zmax);
     mbev_selected.scale = 2.0 / sqrt(dy * dy + dx * dx);
     mbev_selected.zscale = mbev_selected.scale;
@@ -3811,8 +3811,8 @@ int mbeditviz_selectnav(size_t instance) {
     mbev_selected.zmin = -0.5 * dz;
     mbev_selected.zmax = 0.5 * dz;
     for (int i = 0; i < mbev_selected.num_soundings; i++) {
-      mbev_selected.soundings[i].x = mbev_selected.soundings[i].x - xorigin;
-      mbev_selected.soundings[i].y = mbev_selected.soundings[i].y - yorigin;
+      mbev_selected.soundings[i].x = mbev_selected.soundings[i].x - mbev_selected.xorigin;
+      mbev_selected.soundings[i].y = mbev_selected.soundings[i].y - mbev_selected.yorigin;
     }
     if (mbev_verbose > 0)
       fprintf(stderr, "mbeditviz_selectnav: num_soundings:%d\n", mbev_selected.num_soundings);
@@ -5215,20 +5215,20 @@ if (mode == MB3DSDG_OPTIMIZEBIASVALUES_R)
           rollbias_b = rollbias_c;
           variance_b = variance_c;
           rollbias_c = rollbias_b + drollbias;
- 		  mbeditviz_mb3dsoundings_getbiasvariance(
+ 		  	mbeditviz_mb3dsoundings_getbiasvariance(
 				local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 				local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias_c,
 				pitchbias, headingbias, timelag, snell, &variance_num, &variance_c);
 		  rollbias = rollbias_c;
 		  variance = variance_c;
 		  if (variance_num > 0 && (variance_c < variance_best)) {
-			*rollbias_best = rollbias_c;
-			variance_best = variance_c;
-			marker = marker2;
+				*rollbias_best = rollbias_c;
+				variance_best = variance_c;
+				marker = marker2;
 		  }
 		  else
-			marker = marker1;
-        }
+				marker = marker1;
+      }
 		fprintf(stderr, "ROLLBIAS:    | %6.3f  N:%d StDev:%6.3f %s | R: < %6.3f %6.3f %6.3f > | StDev: < %6.3f  %6.3f %6.3f > |\n", 
 				rollbias, variance_num, sqrt(variance), marker, 
 				rollbias_a, rollbias_b, rollbias_c, 

@@ -228,8 +228,8 @@ int mbnavadjust_init_globals() {
   mbna_color_foreground = BLACK;
   mbna_color_background = WHITE;
   project.use_mode = MBNA_USE_MODE_PRIMARY;
-  project.section_length = 0.14;
-  project.section_soundings = 100000;
+  project.section_length = 0.20;
+  project.section_soundings = 400000;
   project.decimation = 1;
   project.precision = SIGMA_MINIMUM;
   project.smoothing = MBNA_SMOOTHING_DEFAULT;
