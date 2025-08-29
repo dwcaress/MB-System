@@ -22,6 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.3beta02    August 29, 2025**
 - Version 5.8.3beta01    August 27, 2025**
 - **Version 5.8.2          August 19, 2025**
 - Version 5.8.2beta24    July 19, 2025
@@ -58,6 +59,13 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.3beta02 (August 29, 2025)
+
+Program mbeditviz: Fixed bias parameter optimization when soundings are selected by
+navigation.
+
+Program mbnavadjust: changed default section sizes to 0.2 km (200 m) and 400,000 soundings.
 
 #### 5.8.3beta01 (August 27, 2025)
 
