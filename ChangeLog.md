@@ -22,6 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.3beta03    August 31, 2025**
 - Version 5.8.3beta02    August 29, 2025**
 - Version 5.8.3beta01    August 27, 2025**
 - **Version 5.8.2          August 19, 2025**
@@ -59,6 +60,15 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.3beta03 (August 31, 2025)
+
+Program mbotps: Added long option commands, and altered the manual page to document use
+of long options. Fixed the --skip-existing {-M} command so that mbotps actually skips
+files that already have tide correction defined.
+
+Program mbnavadjust: Now displays the reference grid used for global ties in data section
+and global tie listings.
 
 #### 5.8.3beta02 (August 29, 2025)
 

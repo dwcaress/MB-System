@@ -67,6 +67,7 @@
  */
 
 #include <assert.h>
+#include <getopt.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -95,10 +96,25 @@ static char help_message[] =
     "MBotps predicts tides using methods and data derived from the "
     "OSU Tidal Prediction Software (OTPS) distributions.";
 static char usage_message[] =
-    "mbotps [-Atideformat -Byear/month/day/hour/minute/second -Ctidestationformat\n"
-    "\t-Dinterval -Eyear/month/day/hour/minute/second -Fformat\n"
-    "\t-Idatalist -Lopts_path -Ntidestationfile -Ooutput -Potps_location\n"
-    "\t-Rlon/lat -S -Tmodel -Utidestationlon/tidestationlat -V]";
+    "mbotps\n\t[\n"
+    "\t--input=datalist {-Idatalist}\n"
+    "\t--format=format_id {-Fformat_id}\n"
+    "\t--use-mbprocess {-M}\n"
+    "\t--skip-existing {-S}\n"
+    "\t--tide-output=file {-Ooutput}\n"
+    "\t--tide-position=lon/lat {-Rlon/lat}\n"
+    "\t--tide-format=format_id {-Atideformat}\n"
+    "\t--interval=interval {-Dinterval}\n"
+    "\t--start-time=year/month/day/hour/minute/second {-Byear/month/day/hour/minute/second}\n"
+    "\t--end-time=year/month/day/hour/minute/second {-Eyear/month/day/hour/minute/second}\n"
+    "\t--tide-station-file=file {-Ntidestationfile}\n"
+    "\t--tide-station-position=lon/lat {-Ulon/lat}\n"
+    "\t--tide-station-format=format_id {-Ctidestationformat}\n"
+    "\t--otps-model=model_name {-Tmodel}\n"
+    "\t--otps-path=path {-Ppath}\n"
+    "\t--help {-H}\n"
+    "\t--verbose {-V}\n"
+    "\t]\n";
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
@@ -154,99 +170,191 @@ int main(int argc, char **argv) {
   bool skip_existing = false;
   double tidestation_lon = 0.0;
   double tidestation_lat = 0.0;
-
-  /* process argument list */
   bool help = false;
-  {
-    bool errflg = false;
-    int c;
-    while ((c =
-            getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:I:i:MmN:n:O:o:P:p:R:r:SST:t:U:u:VvHh")) != -1)
-      switch (c) {
-        case 'H':
-        case 'h':
-          help = true;
-          break;
-        case 'V':
-        case 'v':
-          verbose++;
-          break;
-        case 'A':
-        case 'a':
-          sscanf(optarg, "%d", &tideformat);
-          if (tideformat != 2)
-            tideformat = 1;
-          break;
-        case 'B':
-        case 'b':
+
+	{
+		int option_index;
+		const struct option options[] = {
+			{"verbose", no_argument, NULL, 0},
+	                {"input", required_argument, NULL, 0},
+	                {"format", required_argument, NULL, 0},
+	                {"skip-existing", no_argument, NULL, 0},
+	                {"use-mbprocess", no_argument, NULL, 0},
+	                {"tide-output", required_argument, NULL, 0},
+	                {"tide-position", required_argument, NULL, 0},
+	                {"tide-format", required_argument, NULL, 0},
+	                {"interval", required_argument, NULL, 0},
+	                {"start-time", required_argument, NULL, 0},
+	                {"end-time", required_argument, NULL, 0},
+	                {"tide-station-file", required_argument, NULL, 0},
+	                {"tide-station-position", required_argument, NULL, 0},
+	                {"tide-station-format", required_argument, NULL, 0},
+	                {"otps-model", required_argument, NULL, 0},
+	                {"otps-path", required_argument, NULL, 0},
+	                {"help", no_argument, NULL, 0},
+	                {"verbose", no_argument, NULL, 0},
+	                {NULL, 0, NULL, 0}};
+
+		bool errflg = false;
+		int c;
+		while ((c = getopt_long(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:I:i:MmN:n:O:o:P:p:R:r:SST:t:U:u:VvHh", options, &option_index)) != -1)
+		{
+			switch (c) {
+			/* long options */
+			case 0:
+				if (strcmp("input", options[option_index].name) == 0) {
+          sscanf(optarg, "%s", read_file);
+          mbotps_mode = mbotps_mode | MBOTPS_MODE_NAVIGATION;
+				}
+				else if (strcmp("format", options[option_index].name) == 0) {
+          sscanf(optarg, "%d", &format);
+				}
+				else if (strcmp("skip-existing", options[option_index].name) == 0) {
+          skip_existing = true;
+				}
+				else if (strcmp("use-mbprocess", options[option_index].name) == 0) {
+          mbprocess_update = true;
+				}
+				else if (strcmp("tide-output", options[option_index].name) == 0) {
+          sscanf(optarg, "%s", tide_file);
+				}
+				else if (strcmp("tide-position", options[option_index].name) == 0) {
+				  sscanf(optarg, "%lf/%lf", &tidelon, &tidelat);
+				}
+				else if (strcmp("tide-format", options[option_index].name) == 0) {
+          sscanf(optarg, "%d", &tidestation_format);
+          if (tidestation_format < 1 || tidestation_format > 4)
+            tidestation_format = 2;
+				}
+				else if (strcmp("interval", options[option_index].name) == 0) {
+          sscanf(optarg, "%lf", &interval);
+				}
+				else if (strcmp("start-time", options[option_index].name) == 0) {
           sscanf(optarg, "%d/%d/%d/%d/%d/%d",
                  &btime_i[0], &btime_i[1], &btime_i[2],
                  &btime_i[3], &btime_i[4], &btime_i[5]);
           btime_i[6] = 0;
-          break;
-        case 'C':
-        case 'c':
-          sscanf(optarg, "%d", &tidestation_format);
-          if (tidestation_format < 1 || tidestation_format > 4)
-            tidestation_format = 2;
-          break;
-        case 'D':
-        case 'd':
-          sscanf(optarg, "%lf", &interval);
-          break;
-        case 'E':
-        case 'e':
+				}
+				else if (strcmp("end-time", options[option_index].name) == 0) {
           sscanf(optarg, "%d/%d/%d/%d/%d/%d",
                  &etime_i[0], &etime_i[1], &etime_i[2],
                  &etime_i[3], &etime_i[4], &etime_i[5]);
           etime_i[6] = 0;
-          break;
-        case 'F':
-        case 'f':
-          sscanf(optarg, "%d", &format);
-      	  break;
-        case 'I':
-        case 'i':
-          sscanf(optarg, "%s", read_file);
-          mbotps_mode = mbotps_mode | MBOTPS_MODE_NAVIGATION;
-          break;
-        case 'M':
-        case 'm':
-          mbprocess_update = true;
-          break;
-        case 'N':
-        case 'n':
+				}
+				else if (strcmp("tide-station-file", options[option_index].name) == 0) {
           sscanf(optarg, "%s", tidestation_file);
           mbotps_mode = mbotps_mode | MBOTPS_MODE_TIDESTATION;
-          break;
-        case 'O':
-        case 'o':
-          sscanf(optarg, "%s", tide_file);
-          break;
-        case 'P':
-        case 'p':
-          sscanf(optarg, "%s", otps_location_use);
-          break;
-        case 'R':
-        case 'r':
-          sscanf(optarg, "%lf/%lf", &tidelon, &tidelat);
-          break;
-        case 'S':
-        case 's':
-          skip_existing = true;
-          break;
-        case 'T':
-        case 't':
+				}
+				else if (strcmp("tide-station-position", options[option_index].name) == 0) {
+				  sscanf(optarg, "%lf/%lf", &tidestation_lon, &tidestation_lat);
+				}
+				else if (strcmp("tide-station-format", options[option_index].name) == 0) {
+          sscanf(optarg, "%d", &tidestation_format);
+          if (tidestation_format < 1 || tidestation_format > 4)
+            tidestation_format = 2;
+				}
+				else if (strcmp("otps-model", options[option_index].name) == 0) {
           sscanf(optarg, "%s", otps_model);
           otps_model_set = true;
-          break;
-        case 'U':
-        case 'u':
-          sscanf(optarg, "%lf/%lf", &tidestation_lon, &tidestation_lat);
-          break;
-        case '?':
-          errflg = true;
-      }
+				}
+				else if (strcmp("otps-path", options[option_index].name) == 0) {
+          sscanf(optarg, "%s", otps_location_use);
+				}
+				else if (strcmp("help", options[option_index].name) == 0) {
+					help = true;
+				}
+				else if (strcmp("verbose", options[option_index].name) == 0) {
+					verbose++;
+				}
+
+				break;
+
+			/* short options (deprecated) */
+			case 'A':
+			case 'a':
+				sscanf(optarg, "%d", &tideformat);
+				if (tideformat != 2)
+					tideformat = 1;
+				break;
+			case 'B':
+			case 'b':
+				sscanf(optarg, "%d/%d/%d/%d/%d/%d",
+							 &btime_i[0], &btime_i[1], &btime_i[2],
+							 &btime_i[3], &btime_i[4], &btime_i[5]);
+				btime_i[6] = 0;
+				break;
+			case 'C':
+			case 'c':
+				sscanf(optarg, "%d", &tidestation_format);
+				if (tidestation_format < 1 || tidestation_format > 4)
+					tidestation_format = 2;
+				break;
+			case 'D':
+			case 'd':
+				sscanf(optarg, "%lf", &interval);
+				break;
+			case 'E':
+			case 'e':
+				sscanf(optarg, "%d/%d/%d/%d/%d/%d",
+							 &etime_i[0], &etime_i[1], &etime_i[2],
+							 &etime_i[3], &etime_i[4], &etime_i[5]);
+				etime_i[6] = 0;
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", read_file);
+				mbotps_mode = mbotps_mode | MBOTPS_MODE_NAVIGATION;
+				break;
+			case 'M':
+			case 'm':
+				mbprocess_update = true;
+				break;
+			case 'N':
+			case 'n':
+				sscanf(optarg, "%s", tidestation_file);
+				mbotps_mode = mbotps_mode | MBOTPS_MODE_TIDESTATION;
+				break;
+			case 'O':
+			case 'o':
+				sscanf(optarg, "%s", tide_file);
+				break;
+			case 'P':
+			case 'p':
+				sscanf(optarg, "%s", otps_location_use);
+				break;
+			case 'R':
+			case 'r':
+				sscanf(optarg, "%lf/%lf", &tidelon, &tidelat);
+				break;
+			case 'S':
+			case 's':
+				skip_existing = true;
+				break;
+			case 'T':
+			case 't':
+				sscanf(optarg, "%s", otps_model);
+				otps_model_set = true;
+				break;
+			case 'U':
+			case 'u':
+				sscanf(optarg, "%lf/%lf", &tidestation_lon, &tidestation_lat);
+				break;
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case '?':
+				errflg = true;
+			}
+		}
 
     if (errflg) {
       fprintf(stderr, "usage: %s\n", usage_message);
@@ -1075,7 +1183,7 @@ int main(int argc, char **argv) {
           input_modtime = 0;
           input_size = 0;
         }
-        const int fstat2 = stat(tide_file, &file_status);
+        const int fstat2 = stat(tides_file, &file_status);
         if (fstat2 == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
           output_modtime = file_status.st_mtime;
           output_size = file_status.st_size;
