@@ -254,9 +254,6 @@ void mb_trackpingnumber(int verbose, struct swath *data, int *error) {
 		else if (pingnumber_tick) {
 			const double x1 = x - 0.25 * data->pingnumber_tick_len * dx;
 			const double y1 = y - 0.25 * data->pingnumber_tick_len * dy;
-			/* TODO(schwehr): Why were x2 and y2 assigned but not used? */
-			/* const double x2 = x + 0.25 * data->pingnumber_tick_len * dx; */
-			/* const double y2 = y + 0.25 * data->pingnumber_tick_len * dy; */
 			data->contour_plot(x1, y1, IMOVE);
 			data->contour_plot(x, y, IDRAW);
 		}
@@ -279,8 +276,8 @@ void mb_trackpingnumber(int verbose, struct swath *data, int *error) {
 /*--------------------------------------------------------------------------*/
 /* 	function mb_trackname plots the filename on the shiptrack.
      - contributed by Gordon Keith, CSIRO, December 2004 */
-// TODO(schwehr): perpendicular -> bool
-void mb_trackname(int verbose, int perpendicular, struct swath *data, char *file, int *error) {
+
+void mb_trackname(int verbose, bool perpendicular, struct swath *data, char *file, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBBA function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");

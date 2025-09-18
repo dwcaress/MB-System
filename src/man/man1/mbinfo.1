@@ -1,4 +1,4 @@
-.TH mbinfo 1 "24 August 2023" "MB-System 5.0" "MB-System 5.0"
+.TH mbinfo 1 "10 September 2025" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbinfo\fP \- Output some basic statistics of swath sonar data files.
 
@@ -6,15 +6,54 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbinfo\fP [\fB\-B\fIyr/mo/da/hr/mn/sc\fP \fB\-C \-E\fIyr/mo/da/hr/mn/sc\fP
-\fB\-F\fIformat\fP \fB\-G\fP \fB\-I\fIfilename\fP \fB\-L\fIlonflip\fP
-\fB\-M\fIlondim/latdim[/lonmin/lonmax/latmin/latmax]\fP
-\fB\-N\fP \fB\-O\fP \fB\-P\fIping\fP \fB\-Q\fP
-\fB\-R\fIwest/east/south/north\fP \fB\-S\fIspeed\fP \fB\-W\fP
-\fB\-X\fIoutputformat\fP \fB\-V \-H\fP]
+\fBmbinfo\fP 
+.br
+[
+.br
+\fB\-\-begin-time\fP=\fIyr/mo/da/hr/mn/sc\fP {\fB\-B\fP\fIyr/mo/da/hr/mn/sc\fP}
+.br
+\fB\-\-bounds\fP=\fIwest/east/south/north\fP {\fB\-R\fP\fIwest/east/south/north\fP}
+.br
+\fB\-\-comments\fP {\fB\-C\fP}
+.br
+\fB\-\-debug-record-types
+.br
+\fB\-\-debug-record-contents\fP=\fIidentifier\fP
+.br
+\fB\-\-end-time\fP=\fIyr/mo/da/hr/mn/sc\fP {\fB\-E\fP\fIyr/mo/da/hr/mn/sc\fP}
+.br
+\fB\-\-format\fP=\fIformat_id {-F\fP\fIformat_id\fP}
+.br
+\fB\-\-good-nav\fP {\fB\-G\fP}
+.br
+\fB\-\-help\fP {\fB\-H\fP}
+.br
+\fB\-\-input\fP=\fI[file | datalist]\fP {\fB\-I\fP\fIfile\fP}
+.br
+\fB\-\-longitude-domain\fP=\fIlonflip\fP {\fB\-L\fP\fIlonflip\fP}
+.br
+\fB\-\-mask-dimensions\fP=\fIlondim/latdim[/west/east/south/north]\fP  {\fB\-M\fP\fIlondim/latdim[/west/east/south/north]\fP}
+.br
+\fB\-\-notices\fP {\fB\-N\fP}
+.br
+\fB\-\-output-file\fP {\fB\-O\fP}
+.br
+\fB\-\-output-format\fP=\fIformat_id {\fB\-X\fP\fIformat_id\fP}
+.br
+\fB\-\-ping-variances\fP=\fInumber\fP {\fB\-P\fP\fIpings\fP}
+.br
+\fB\-\-quick\fP {\fB\-Q\fP}
+.br
+\fB\-\-speed-minimum\fP=\fIspeed\fP {\fB\-S\fP\fIspeed\fP}
+.br
+\fB\-\-time-gap\fP=\fItimegap\fP {\fB\-T\fP\fItimegap\fP}
+.br
+\fB\-\-use-feet\fP {\fB\-W\fP}
+.br
+\fB\-\-verbose\fP {\fB\-V\fP}
 
 .SH DESCRIPTION
-\fBMBinfo\fP is a utility for reading a swath sonar data file
+Program \fBmbinfo\fP is a utility for reading a swath sonar data file
 or files and outputting some basic statistics.  The table generated
 shows the filename, the data format id, a brief description of
 the format, any metadata that have been inserted into the data,
@@ -44,15 +83,15 @@ of ".inf" files allows this information to be determined without
 having to read through each swath file. To create an ".inf" file, simply direct the
 output of \fBmbinfo\fP to a file named by adding the
 suffix ".inf" to the input swath
-data filename. This can also be accomplished using the \fB\-O\fP
-option of \fBmbinfo\fP, or the \fB\-N\fP and \fB\-O\fP options of
+data filename. This can also be accomplished using the \fB\-\-output\-file\fP
+option of \fBmbinfo\fP, or the \fB\-\-make\-ancilliary\fP and \fB\-\-update\-ancillary\fP options of
 \fBmbdatalist\fP.
 
 Data archives use metadata harvesting tools that often work better with
 information structured for machine parsing rather than for easy
 reading by humans. To output a variant of "*.inf" files in the JSON
-format (with "_inf.json" suffixes), use the \fB\-X\fP\fI1\fP option.
-Similarly, specifying the \fB\-X\fP\fI2\fP option will result in XML
+format (with "_inf.json" suffixes), use the \fB\-\-output\-format\fP\fI1\fP option.
+Similarly, specifying the \fB\-\-output\-format\fP\fI2\fP option will result in XML
 output in files with "_xml.inf" suffixes.
 
 The program \fBmbprocess\fP can insert metadata recognized
@@ -66,7 +105,7 @@ and/or windowed in time and space.  Comments in the data
 stream may also be printed out.
 The results are dumped to stdout.
 
-If pings are averaged (\fIpings\fP > 2),
+If pings are averaged (\fB\-\-ping-variances\fP=\fInumber\fP with \fInumber\fP > 2),
 \fBmbinfo\fP estimates the variance for each of the bathymetry beams
 and sidescan pixels
 by reading a set number of pings and then finding the
@@ -77,8 +116,8 @@ The program output can also be extended to include a coarse
 mask representing where data lies within the file's bounding
 box. This mask is shown as a table of 0's and 1's, where
 the 1's indicate bins with data. The dimensions of the mask
-are specified with the \fB\-M\fP\fIlondim/latdim\fP option.
-For instance, if the user specifies \fB\-M\fP\fI10/10\fP, then
+are specified with the \fB\-\-mask-dimensions\fP=\fIlondim/latdim\fP option.
+For instance, if the user specifies \fB\-\-mask-dimensions\fP=\fI10/10\fP, then
 \fBmbinfo\fP will read through the data once to establish the
 usual statistics, including the data bounding box. Then, the
 program will initialize a 10 X 10 grid with the minimum and
@@ -88,7 +127,7 @@ pixel falls will be set to 1. After the second reading pass,
 the data location mask will be output at the end of the
 \fBmbinfo\fP output. If the data bounding box is already known, then
 it can be added to the \fB-M\fP command (e.g.
-\fB\-M\fP\fIlondim/latdim[/lonmin/lonmax/latmin/latmax]\fP). In this
+\fB\-\-mask-dimensions\fP=\fIlondim/latdim/west/east/south/north\fP). In this
 case, the data will only be read once.
 
 .SH MB-SYSTEM AUTHORSHIP
@@ -110,8 +149,7 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
-.B \-B
-\fIyr/mo/da/hr/mn/sc\fP
+.B \-\-begin-time=\fIyr/mo/da/hr/mn/sc\fP \fB\-B\fP\fIyr/mo/da/hr/mn/sc\fP
 .br
 This option sets the starting time for data allowed in the input data.
 The \fB\-E\fP option sets the ending time for data. If the
@@ -123,16 +161,19 @@ and starting time will be ignored. This scheme allows time
 windowing both inside and outside a specified interval.
 Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 .TP
-.B \-C
+.B \-\-comments {\fB\-C\fP}
 Normally, \fBmbinfo\fP ignores comments encountered in the
 data file.  If the \fB\-C\fP flag is given, all of the comments will be
 printed out.
 .TP
-.B \-E
-\fIyr/mo/da/hr/mn/sc\fP
+.B \-\-debug-record-types
+.TP
+.B \-\-debug-record-contents\fP=\fIidentifier\fP
+.TP
+.B \-\-end-time=\fIyr/mo/da/hr/mn/sc\fP {\fB\-E\fP\fIyr/mo/da/hr/mn/sc\fP}
 .br
 This option sets the ending time for data allowed in the input data.
-The \fB\-B\fP option sets the starting time for data. If the
+The \fB\-\-begin-time\fP option sets the starting time for data. If the
 starting time is before the ending time, then any data
 with a time stamp before the starting time or after the
 ending time is ignored. If instead the starting time is

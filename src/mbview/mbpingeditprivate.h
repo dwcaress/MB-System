@@ -26,8 +26,6 @@
  * Date:	November 11,  2007
  */
 
-// TODO(schwehr): Fold into mbpingedit_callbacks.c
-
 #ifndef MBVIEW_MBPINGEDITPRIVATE_H_
 #define MBVIEW_MBPINGEDITPRIVATE_H_
 

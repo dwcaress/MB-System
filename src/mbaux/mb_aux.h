@@ -205,7 +205,7 @@ int mb_contour_deall(int verbose, struct swath *data, int *error);
 int mb_contour(int verbose, struct swath *data, int *error);
 void mb_track(int verbose, struct swath *data, int *error);
 void mb_trackpingnumber(int verbose, struct swath *data, int *error);
-void mb_trackname(int verbose, int perpendicular, struct swath *data, char *file, int *error);
+void mb_trackname(int verbose, bool perpendicular, struct swath *data, char *file, int *error);
 
 /* pslibface function prototypes */
 int mb_plot_init(int verbose, int argc, char **argv, double *bounds_use, double *scale, double *inch2lon, int *error);

@@ -22,6 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.3beta04    September 18, 2025**
 - Version 5.8.3beta03    August 31, 2025**
 - Version 5.8.3beta02    August 29, 2025**
 - Version 5.8.3beta01    August 27, 2025**
@@ -60,6 +61,35 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.3beta04 (September 18, 2025)
+
+Many source files: Addressed code style issues raised previously by Kurt Schwehr, 
+particularly using bool type for logical variables
+
+Program mbinfo: Recast mbinfo to use long options as well as short options. Added a new
+capability to list records comprising a data file and the contents of selected records 
+using the --debug-record-types and --debug-record-contents options, which is so far
+implemented for formats 58, 59, and 89.
+
+Program mbpreprocess: Added several new "kluge" options:
+	--kluge-set-beamwidths
+	--kluge-set-beamwidth-acrosstrack
+	--kluge-set-beamwidth-alongtrack
+	--kluge-ignore-duplicate-pings
+	--kluge-xducer-depth-from-heave
+	--kluge-xducer-depth-from-sensordepth
+	--kluge-xducer-depth-from-heave-and-sensordepth
+
+Macro mbm_route2mission: Fixed end of mission battery behavior to use mode 2 so that the
+AUV sonars are only shut off if the batteries are mostly exhausted.
+
+Formats 58 and 59 (MBF_EM710RAW and MBF_EM710MBA): Recast handling of transducer depth
+modes so as to work correctly for more data sets, and added mbpreprocess kluge options
+to handle the less common combinations of data record types and sonar settings.
+
+Program mbphotomosaic: Augmented handling of camera types to include monocular cameras
+and single camera calibration models.
 
 #### 5.8.3beta03 (August 31, 2025)
 

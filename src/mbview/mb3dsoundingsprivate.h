@@ -26,8 +26,6 @@
  * Date:	May 25,  2007
  */
 
-// TODO(schwehr): Fold into mb3dsoundings_callbacks.c?
-
 #ifndef MBVIEW_MB3DSOUNDINGSPRIVATE_H_
 #define MBVIEW_MB3DSOUNDINGSPRIVATE_H_
 

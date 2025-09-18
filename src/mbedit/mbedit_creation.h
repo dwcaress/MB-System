@@ -31,6 +31,8 @@
 #define EXTERNAL extern
 #endif
 
+EXTERNAL void RegisterBxConverters(XtAppContext);
+EXTERNAL Widget Createwindow_mbedit(Widget parent);
 EXTERNAL Widget window_mbedit;
 EXTERNAL Widget setting_output_filelist;
 EXTERNAL Widget setting_output_toggle_edit_filelist;

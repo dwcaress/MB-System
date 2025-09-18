@@ -587,17 +587,9 @@ void do_load_specific_file(int i_file) {
 			fstat = stat(save_file, &file_status);
 		}
 
-		const int save_mode = false;
-		/* if esf file exists deal with it */
+		/* if esf file exists bring up dialog asking if esf should be used */
 		if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-			/* if save_mode set load data using esf */
-			if (save_mode)
-				do_load(true);  // TODO(schwehr): Can never happen
-
-			/* else bring up dialog asking
-			if esf should be used */
-			else
-				do_checkuseprevious();
+			do_checkuseprevious();
 		}
 
 		/* else just try to load the data without an esf */

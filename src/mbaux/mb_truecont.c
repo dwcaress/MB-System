@@ -30,6 +30,7 @@
  * Date:  April, 1994
  */
 
+#include <float.h>
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -1519,9 +1520,8 @@ int mb_ocontour(int verbose, struct swath *data, int *error) {
   }
 
   /* get min max of bathymetry */
-  // TODO(schwehr): Better to set min to DBL_MAX and max to -DBL_MAX?
-  double bath_min = 0.0;  // -Wmaybe-uninitialized
-  double bath_max = 0.0;  // -Wmaybe-uninitialized
+  double bath_min = DBL_MAX;
+  double bath_max = -DBL_MAX;
   bool extreme_start = false;
   for (int i = 0; i < data->npings; i++) {
     struct ping *ping = &data->pings[i];

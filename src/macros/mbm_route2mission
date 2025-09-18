@@ -1572,14 +1572,14 @@ if (!$outputoff)
     	}
 	if ($mappingsonar)
 		{
-		print MFILE "# Stop data logging on sonars and then turn off power to sonars\r\n";
+		print MFILE "# Stop data logging on sonars and then turn off power to sonars if batteries are low\r\n";
 		print MFILE "behavior battery \r\n";
 		print MFILE "{ \r\n";
 		$behavior_id = $BEHAVIOR_battery + 0 * $behavior_count;
 		$behavior_count = $behavior_count + 1;
 		print MFILE "id     = $behavior_id; \r\n";
 		print MFILE "	duration = 10; \r\n";
-		print MFILE "	disableAuxLoads = 1; \r\n";
+		print MFILE "	disableAuxLoads = 2; \r\n";
 		print MFILE "} \r\n";
 		print MFILE "# ascend behavior for 30 seconds to give time for sonars to stop logging \r\n";
 		print MFILE "behavior ascend  \r\n";
