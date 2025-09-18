@@ -4560,31 +4560,24 @@ void mbeditviz_mb3dsoundings_optimizebiasvaluesold(int mode, double *rollbias_be
   /* set flag to set best total variance on first calculation */
   bool first = true;
 
-  // TODO(schwehr): Localize variables.
-  mb_path message_string = "";
-  double variance_total;
-  double variance_total_best = 0.0;
-  int variance_num = 0;
-  double rollbias;
-  double pitchbias;
-  double headingbias;
-  double timelag;
-  double snell;
-  double rollbias_start, rollbias_end, drollbias;
-  double pitchbias_start, pitchbias_end, dpitchbias;
-  double headingbias_start, headingbias_end, dheadingbias;
-  // double timelag_start;
-  // double timelag_end;
-  // double dtimelag;
-  // double snell_start, snell_end;
-  // double dsnell;
-  // int niterate;
-  char *marker1 = "       ";
-  char *marker2 = " ******";
-  char *marker = NULL;
-
   /* Roll bias */
   if (mode & MB3DSDG_OPTIMIZEBIASVALUES_R) {
+		mb_path message_string = "";
+		double variance_total;
+		double variance_total_best = 0.0;
+		int variance_num = 0;
+		double rollbias;
+		double pitchbias;
+		double headingbias;
+		double timelag;
+		double snell;
+		double rollbias_start, rollbias_end, drollbias;
+		double pitchbias_start, pitchbias_end, dpitchbias;
+		double headingbias_start, headingbias_end, dheadingbias;
+		char *marker1 = "       ";
+		char *marker2 = " ******";
+		char *marker = NULL;
+
     /* start with coarse roll bias */
     int niterate = 11;
     rollbias_start = *rollbias_best - 5.0;
@@ -4651,6 +4644,22 @@ void mbeditviz_mb3dsoundings_optimizebiasvaluesold(int mode, double *rollbias_be
 
   /* Pitch bias */
   if (mode & MB3DSDG_OPTIMIZEBIASVALUES_P) {
+		mb_path message_string = "";
+		double variance_total;
+		double variance_total_best = 0.0;
+		int variance_num = 0;
+		double rollbias;
+		double pitchbias;
+		double headingbias;
+		double timelag;
+		double snell;
+		double rollbias_start, rollbias_end, drollbias;
+		double pitchbias_start, pitchbias_end, dpitchbias;
+		double headingbias_start, headingbias_end, dheadingbias;
+		char *marker1 = "       ";
+		char *marker2 = " ******";
+		char *marker = NULL;
+
     /* start with coarse pitch bias */
     rollbias = *rollbias_best;
     int niterate = 11;
@@ -4716,6 +4725,22 @@ void mbeditviz_mb3dsoundings_optimizebiasvaluesold(int mode, double *rollbias_be
 
   /* Heading bias */
   if (mode & MB3DSDG_OPTIMIZEBIASVALUES_H) {
+		mb_path message_string = "";
+		double variance_total;
+		double variance_total_best = 0.0;
+		int variance_num = 0;
+		double rollbias;
+		double pitchbias;
+		double headingbias;
+		double timelag;
+		double snell;
+		double rollbias_start, rollbias_end, drollbias;
+		double pitchbias_start, pitchbias_end, dpitchbias;
+		double headingbias_start, headingbias_end, dheadingbias;
+		char *marker1 = "       ";
+		char *marker2 = " ******";
+		char *marker = NULL;
+
     /* start with coarse heading bias */
     rollbias = *rollbias_best;
     pitchbias = *pitchbias_best;
@@ -4781,6 +4806,22 @@ void mbeditviz_mb3dsoundings_optimizebiasvaluesold(int mode, double *rollbias_be
 
   /* Redo roll bias if doing a combination of bias parameters */
   if (mode & MB3DSDG_OPTIMIZEBIASVALUES_R && mode != MB3DSDG_OPTIMIZEBIASVALUES_R) {
+		mb_path message_string = "";
+		double variance_total;
+		double variance_total_best = 0.0;
+		int variance_num = 0;
+		double rollbias;
+		double pitchbias;
+		double headingbias;
+		double timelag;
+		double snell;
+		double rollbias_start, rollbias_end, drollbias;
+		double pitchbias_start, pitchbias_end, dpitchbias;
+		double headingbias_start, headingbias_end, dheadingbias;
+		char *marker1 = "       ";
+		char *marker2 = " ******";
+		char *marker = NULL;
+
     /* now do fine roll bias */
     int niterate = 19;
     rollbias_start = *rollbias_best - 0.9;
@@ -4815,6 +4856,22 @@ void mbeditviz_mb3dsoundings_optimizebiasvaluesold(int mode, double *rollbias_be
 
   /* Redo pitch bias if doing a combination of bias parameters */
   if (mode & MB3DSDG_OPTIMIZEBIASVALUES_P && mode != MB3DSDG_OPTIMIZEBIASVALUES_P) {
+		mb_path message_string = "";
+		double variance_total;
+		double variance_total_best = 0.0;
+		int variance_num = 0;
+		double rollbias;
+		double pitchbias;
+		double headingbias;
+		double timelag;
+		double snell;
+		double rollbias_start, rollbias_end, drollbias;
+		double pitchbias_start, pitchbias_end, dpitchbias;
+		double headingbias_start, headingbias_end, dheadingbias;
+		char *marker1 = "       ";
+		char *marker2 = " ******";
+		char *marker = NULL;
+
     /* now do fine pitch bias */
     rollbias = *rollbias_best;
     int niterate = 19;
@@ -4849,6 +4906,22 @@ void mbeditviz_mb3dsoundings_optimizebiasvaluesold(int mode, double *rollbias_be
 
   /* Redo heading bias if doing a combination of bias parameters */
   if (mode & MB3DSDG_OPTIMIZEBIASVALUES_H && mode != MB3DSDG_OPTIMIZEBIASVALUES_H) {
+		mb_path message_string = "";
+		double variance_total;
+		double variance_total_best = 0.0;
+		int variance_num = 0;
+		double rollbias;
+		double pitchbias;
+		double headingbias;
+		double timelag;
+		double snell;
+		double rollbias_start, rollbias_end, drollbias;
+		double pitchbias_start, pitchbias_end, dpitchbias;
+		double headingbias_start, headingbias_end, dheadingbias;
+		char *marker1 = "       ";
+		char *marker2 = " ******";
+		char *marker = NULL;
+
     /* now do fine heading bias */
     rollbias = *rollbias_best;
     pitchbias = *pitchbias_best;
@@ -4883,6 +4956,22 @@ void mbeditviz_mb3dsoundings_optimizebiasvaluesold(int mode, double *rollbias_be
 
   /* Time lag */
   if (mode & MB3DSDG_OPTIMIZEBIASVALUES_T) {
+		mb_path message_string = "";
+		double variance_total;
+		double variance_total_best = 0.0;
+		int variance_num = 0;
+		double rollbias;
+		double pitchbias;
+		double headingbias;
+		double timelag;
+		double snell;
+		double rollbias_start, rollbias_end, drollbias;
+		double pitchbias_start, pitchbias_end, dpitchbias;
+		double headingbias_start, headingbias_end, dheadingbias;
+		char *marker1 = "       ";
+		char *marker2 = " ******";
+		char *marker = NULL;
+
     /* start with coarse time lag */
     rollbias = *rollbias_best;
     pitchbias = *pitchbias_best;
@@ -4950,6 +5039,22 @@ void mbeditviz_mb3dsoundings_optimizebiasvaluesold(int mode, double *rollbias_be
 
   /* Snell */
   if (mode & MB3DSDG_OPTIMIZEBIASVALUES_S) {
+		mb_path message_string = "";
+		double variance_total;
+		double variance_total_best = 0.0;
+		int variance_num = 0;
+		double rollbias;
+		double pitchbias;
+		double headingbias;
+		double timelag;
+		double snell;
+		double rollbias_start, rollbias_end, drollbias;
+		double pitchbias_start, pitchbias_end, dpitchbias;
+		double headingbias_start, headingbias_end, dheadingbias;
+		char *marker1 = "       ";
+		char *marker2 = " ******";
+		char *marker = NULL;
+
     /* start with coarse snell */
     rollbias = *rollbias_best;
     pitchbias = *pitchbias_best;

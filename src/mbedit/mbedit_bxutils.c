@@ -963,7 +963,6 @@ WidgetList BxWidgetIdsFromNames(Widget ref, char *cbName, char *stringList) {
 	 */
 	start = strtok(start, ",");
 
-	// TODO(schwehr): Localize
 	WidgetList wgtIds = NULL;
 	int wgtCount = 0;
 

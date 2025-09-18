@@ -1894,9 +1894,9 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 	double distance;
 	double altitude;
 	double sensordepth;
-	int variable_beams;
-	int traveltime;  // TODO(schwehr): bool
-	int beam_flagging;
+	bool variable_beams;
+	bool traveltime;
+	bool beam_flagging;
 	mb_path command;
 	mb_path string;
 	char svp_file[2048];

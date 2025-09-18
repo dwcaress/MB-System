@@ -1479,7 +1479,7 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 				}
 
 				/* deal with nav in form: yr mon day hour min sec time_d lon lat heading speed sensordepth roll pitch heave */
-				else if (merge_nav_format == MB_PR_NAV_FORMAT_FBT) {
+				else if (merge_nav_format == MB_PR_NAV_FORMAT_FNV) {
 					nget = sscanf(buffer, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", &time_i[0], &time_i[1],
 					              &time_i[2], &time_i[3], &time_i[4], &sec, &n_time_d[nrecord], &n_lon[nrecord], &n_lat[nrecord],
 					              &heading, &n_speed[nrecord], &sensordepth, &roll, &pitch, &heave);

@@ -44,11 +44,6 @@
 #include <Xm/DrawingA.h>
 #include "Mb3dsdg.h"
 
-/**
- * Common constant and pixmap declarations.
- */
-#include "mb3dsoundings_creation.h"
-
 void RegisterBxConverters(XtAppContext);
 XtPointer BX_CONVERT(Widget, char *, char *, int, Boolean *);
 

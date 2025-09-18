@@ -61,8 +61,8 @@
 
 /*--------------------------------------------------------------------*/
 int mbr_info_reson7k3(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
-                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
-                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
+                      char *system_name, char *format_description, int *numfile, int *filetype, bool *variable_beams,
+                      bool *traveltime, bool *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
   if (verbose >= 2) {
@@ -3863,6 +3863,14 @@ int mbr_reson7k3_rd_BeamGeometry(int verbose, char *buffer, void *store_ptr, int
   for (unsigned int i = 0; i < BeamGeometry->number_beams; i++) {
     mb_get_binary_float(true, &buffer[index], &(BeamGeometry->beamwidth_acrosstrack[i]));
     index += 4;
+  }
+  
+  /* Hydrosweep sonar data may include an addition array of per-beam Tx delay values */
+  if (header->DeviceId >= 14000 && header->DeviceId < 14050) {
+		for (unsigned int i = 0; i < BeamGeometry->number_beams; i++) {
+			mb_get_binary_float(true, &buffer[index], &(BeamGeometry->tx_delay[i]));
+			index += 4;
+		}
   }
 
   /* set kind */
@@ -10159,6 +10167,770 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
     }
 #endif
 
+    if (status == MB_SUCCESS && !done && !*save_flag 
+    		&& (mb_io_ptr->enable_debug_record_type_listing 
+    				|| mb_io_ptr->num_debug_record_identifiers > 0)) {
+      fprintf(stderr, "Reading record id: %4.4X  %4.4d | %4.4X  %4.4d | %4.4hX  %4.4d |", *recordid, *recordid, *deviceid,
+              *deviceid, *enumerator, *enumerator);
+      bool print = false;
+    	switch (*recordid) {
+    	
+        case R7KRECID_None:
+        	fprintf(stderr, " R7KRECID_None %d\n", *recordid);
+          break;
+        case R7KRECID_ReferencePoint:
+        	fprintf(stderr, " R7KRECID_ReferencePoint %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "1000", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_ReferencePoint(verbose, &store->ReferencePoint, error);
+          break;
+        case R7KRECID_UncalibratedSensorOffset:
+        	fprintf(stderr, " R7KRECID_UncalibratedSensorOffset %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "1001", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_UncalibratedSensorOffset(verbose, &store->UncalibratedSensorOffset, error);
+          break;
+        case R7KRECID_CalibratedSensorOffset:
+        	fprintf(stderr, " R7KRECID_CalibratedSensorOffset %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "1002", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_CalibratedSensorOffset(verbose, &store->CalibratedSensorOffset, error);
+          break;
+        case R7KRECID_Position:
+        	fprintf(stderr, " R7KRECID_Position %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "1003", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_Position(verbose, &store->Position, error);
+          break;
+        case R7KRECID_CustomAttitude:
+        	fprintf(stderr, " R7KRECID_CustomAttitude %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "1004", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_CustomAttitude(verbose, &store->CustomAttitude, error);
+          break;
+        case R7KRECID_Tide:
+        	fprintf(stderr, " R7KRECID_Tide %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "1005", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_Tide(verbose, &store->Tide, error);
+          break;
+        case R7KRECID_Altitude:
+        	fprintf(stderr, " R7KRECID_Altitude %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "1006", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_Altitude(verbose, &store->Altitude, error);
+          break;
+        case R7KRECID_MotionOverGround:
+        	fprintf(stderr, " R7KRECID_MotionOverGround %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "1007", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_MotionOverGround(verbose, &store->MotionOverGround, error);
+          break;
+        case R7KRECID_Depth:
+        	fprintf(stderr, " R7KRECID_Depth %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "1008", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_Depth(verbose, &store->Depth, error);
+          break;
+        case R7KRECID_SoundVelocityProfile:
+        	fprintf(stderr, " R7KRECID_SoundVelocityProfile %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "1009", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_SoundVelocityProfile(verbose, &store->SoundVelocityProfile, error);
+          break;
+        case R7KRECID_CTD:
+        	fprintf(stderr, " R7KRECID_CTD %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "1010", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_CTD(verbose, &store->CTD, error);
+          break;
+        case R7KRECID_Geodesy:
+        	fprintf(stderr, " R7KRECID_Geodesy %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "1011", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_Geodesy(verbose, &store->Geodesy, error);
+          break;
+        case R7KRECID_RollPitchHeave:
+        	fprintf(stderr, " R7KRECID_RollPitchHeave %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "1012", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_RollPitchHeave(verbose, &store->RollPitchHeave, error);
+          break;
+        case R7KRECID_Heading:
+        	fprintf(stderr, " R7KRECID_Heading %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "1013", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_Heading(verbose, &store->Heading, error);
+          break;
+        case R7KRECID_SurveyLine:
+        	fprintf(stderr, " R7KRECID_SurveyLine %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "1014", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_SurveyLine(verbose, &store->SurveyLine, error);
+          break;
+        case R7KRECID_Navigation:
+        	fprintf(stderr, " R7KRECID_Navigation %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "1015", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_Navigation(verbose, &store->Navigation, error);
+          break;
+        case R7KRECID_Attitude:
+        	fprintf(stderr, " R7KRECID_Attitude %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "1016", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_Attitude(verbose, &store->Attitude, error);
+          break;
+        case R7KRECID_PanTilt:
+        	fprintf(stderr, " R7KRECID_PanTilt %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "1017", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_PanTilt(verbose, &store->PanTilt, error);
+          break;
+        case R7KRECID_SonarInstallationIDs:
+        	fprintf(stderr, " R7KRECID_SonarInstallationIDs %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "1020", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_SonarInstallationIDs(verbose, &store->SonarInstallationIDs, error);
+          break;
+        case R7KRECID_Mystery:
+        	fprintf(stderr, " R7KRECID_Mystery %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "1022", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_Mystery(verbose, &store->Mystery, error);
+          break;
+        case R7KRECID_SonarPipeEnvironment:
+        	fprintf(stderr, " R7KRECID_SonarPipeEnvironment %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "2004", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_SonarPipeEnvironment(verbose, &store->SonarPipeEnvironment, error);
+          break;
+        case R7KRECID_ContactOutput:
+        	fprintf(stderr, " R7KRECID_ContactOutput %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "3001", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_ContactOutput(verbose, &store->ContactOutput, error);
+          break;
+        case R7KRECID_ProcessedSideScan:
+        	fprintf(stderr, " R7KRECID_ProcessedSideScan %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "3199", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_ProcessedSideScan(verbose, &store->ProcessedSideScan, error);
+          break;
+        case R7KRECID_SonarSettings:
+        	fprintf(stderr, " R7KRECID_SonarSettings %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7000", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_SonarSettings(verbose, &store->SonarSettings, error);
+          break;
+        case R7KRECID_Configuration:
+        	fprintf(stderr, " R7KRECID_Configuration %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7001", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_Configuration(verbose, &store->Configuration, error);
+          break;
+        case R7KRECID_MatchFilter:
+        	fprintf(stderr, " R7KRECID_MatchFilter %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7002", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_MatchFilter(verbose, &store->MatchFilter, error);
+          break;
+        case R7KRECID_FirmwareHardwareConfiguration:
+        	fprintf(stderr, " R7KRECID_FirmwareHardwareConfiguration %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7003", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_FirmwareHardwareConfiguration(verbose, &store->FirmwareHardwareConfiguration, error);
+          break;
+        case R7KRECID_BeamGeometry:
+        	fprintf(stderr, " R7KRECID_BeamGeometry %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7004", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_BeamGeometry(verbose, &store->BeamGeometry, error);
+          break;
+        case R7KRECID_Bathymetry:
+        	fprintf(stderr, " R7KRECID_Bathymetry %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7006", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_Bathymetry(verbose, &store->Bathymetry, error);
+          break;
+        case R7KRECID_SideScan:
+        	fprintf(stderr, " R7KRECID_SideScan %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7007", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_SideScan(verbose, &store->SideScan, error);
+          break;
+        case R7KRECID_WaterColumn:
+        	fprintf(stderr, " R7KRECID_WaterColumn %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7008", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_WaterColumn(verbose, &store->WaterColumn, error);
+          break;
+        case R7KRECID_VerticalDepth:
+        	fprintf(stderr, " R7KRECID_VerticalDepth %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7009", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_VerticalDepth(verbose, &store->VerticalDepth, error);
+          break;
+        case R7KRECID_TVG:
+        	fprintf(stderr, " R7KRECID_TVG %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7010", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_TVG(verbose, &store->TVG, error);
+          break;
+        case R7KRECID_Image:
+        	fprintf(stderr, " R7KRECID_Image %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7011", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_Image(verbose, &store->Image, error);
+          break;
+        case R7KRECID_PingMotion:
+        	fprintf(stderr, " R7KRECID_PingMotion %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7012", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_PingMotion(verbose, &store->PingMotion, error);
+          break;
+        case R7KRECID_AdaptiveGate:
+        	fprintf(stderr, " R7KRECID_AdaptiveGate %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7014", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_AdaptiveGate(verbose, &store->AdaptiveGate, error);
+          break;
+        case R7KRECID_DetectionDataSetup:
+        	fprintf(stderr, " R7KRECID_DetectionDataSetup %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7017", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_DetectionDataSetup(verbose, &store->DetectionDataSetup, error);
+          break;
+        case R7KRECID_Beamformed:
+        	fprintf(stderr, " R7KRECID_Beamformed %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7018", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_Beamformed(verbose, &store->Beamformed, error);
+          break;
+        case R7KRECID_VernierProcessingDataRaw:
+        	fprintf(stderr, " R7KRECID_VernierProcessingDataRaw %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7019", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_VernierProcessingDataRaw(verbose, &store->VernierProcessingDataRaw, error);
+          break;
+        case R7KRECID_BITE:
+        	fprintf(stderr, " R7KRECID_BITE %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7021", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_BITE(verbose, &store->BITE, error);
+          break;
+        case R7KRECID_SonarSourceVersion:
+        	fprintf(stderr, " R7KRECID_SonarSourceVersion %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7022", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_SonarSourceVersion(verbose, &store->SonarSourceVersion, error);
+          break;
+        case R7KRECID_WetEndVersion8k:
+        	fprintf(stderr, " R7KRECID_WetEndVersion8k %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7023", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_WetEndVersion8k(verbose, &store->WetEndVersion8k, error);
+          break;
+        case R7KRECID_RawDetection:
+        	fprintf(stderr, " R7KRECID_RawDetection %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7027", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_RawDetection(verbose, &store->RawDetection, error);
+          break;
+        case R7KRECID_Snippet:
+        	fprintf(stderr, " R7KRECID_Snippet %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7028", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_Snippet(verbose, &store->Snippet, error);
+          break;
+        case R7KRECID_VernierProcessingDataFiltered:
+        	fprintf(stderr, " R7KRECID_VernierProcessingDataFiltered %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7029", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_VernierProcessingDataFiltered(verbose, &store->VernierProcessingDataFiltered, error);
+          break;
+        case R7KRECID_InstallationParameters:
+        	fprintf(stderr, " R7KRECID_InstallationParameters %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7030", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_InstallationParameters(verbose, &store->InstallationParameters, error);
+          break;
+        case R7KRECID_BITESummary:
+        	fprintf(stderr, " R7KRECID_BITESummary %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7031", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_BITESummary(verbose, &store->BITESummary, error);
+          break;
+        case R7KRECID_CompressedBeamformedMagnitude:
+        	fprintf(stderr, " R7KRECID_CompressedBeamformedMagnitude %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7041", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_CompressedBeamformedMagnitude(verbose, &store->CompressedBeamformedMagnitude, error);
+          break;
+        case R7KRECID_CompressedWaterColumn:
+        	fprintf(stderr, " R7KRECID_CompressedWaterColumn %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7042", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_CompressedWaterColumn(verbose, &store->CompressedWaterColumn, error);
+          break;
+        case R7KRECID_SegmentedRawDetection:
+        	fprintf(stderr, " R7KRECID_SegmentedRawDetection %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7047", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_SegmentedRawDetection(verbose, &store->SegmentedRawDetection, error);
+          break;
+        case R7KRECID_CalibratedBeam:
+        	fprintf(stderr, " R7KRECID_CalibratedBeam %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7048", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_CalibratedBeam(verbose, &store->CalibratedBeam, error);
+          break;
+        case R7KRECID_SystemEvents:
+        	fprintf(stderr, " R7KRECID_SystemEvents %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7050", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_SystemEvents(verbose, &store->SystemEvents, error);
+          break;
+        case R7KRECID_SystemEventMessage:
+        	fprintf(stderr, " R7KRECID_SystemEventMessage %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7051", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_SystemEventMessage(verbose, &store->SystemEventMessage, error);
+          break;
+        case R7KRECID_RDRRecordingStatus:
+        	fprintf(stderr, " R7KRECID_RDRRecordingStatus %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7052", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_RDRRecordingStatus(verbose, &store->RDRRecordingStatus, error);
+          break;
+        case R7KRECID_Subscriptions:
+        	fprintf(stderr, " R7KRECID_Subscriptions %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7053", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_Subscriptions(verbose, &store->Subscriptions, error);
+          break;
+        case R7KRECID_RDRStorageRecording:
+        	fprintf(stderr, " R7KRECID_RDRStorageRecording %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7054", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_RDRStorageRecording(verbose, &store->RDRStorageRecording, error);
+          break;
+        case R7KRECID_CalibrationStatus:
+        	fprintf(stderr, " R7KRECID_CalibrationStatus %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7055", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_CalibrationStatus(verbose, &store->CalibrationStatus, error);
+          break;
+        case R7KRECID_CalibratedSideScan:
+        	fprintf(stderr, " R7KRECID_CalibratedSideScan %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7057", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_CalibratedSideScan(verbose, &store->CalibratedSideScan, error);
+          break;
+        case R7KRECID_SnippetBackscatteringStrength:
+        	fprintf(stderr, " R7KRECID_SnippetBackscatteringStrength %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7058", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_SnippetBackscatteringStrength(verbose, &store->SnippetBackscatteringStrength, error);
+          break;
+        case R7KRECID_MB2Status:
+        	fprintf(stderr, " R7KRECID_MB2Status %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7059", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_MB2Status(verbose, &store->MB2Status, error);
+          break;
+        case R7KRECID_FileHeader:
+        	fprintf(stderr, " R7KRECID_FileHeader %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7200", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_FileHeader(verbose, &store->FileHeader, error);
+          break;
+        case R7KRECID_FileCatalog:
+        	fprintf(stderr, " R7KRECID_FileCatalog %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7300", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_FileCatalog(verbose, &store->FileCatalog_read, error);
+          break;
+        case R7KRECID_TimeMessage:
+        	fprintf(stderr, " R7KRECID_TimeMessage %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7400", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_TimeMessage(verbose, &store->TimeMessage, error);
+          break;
+        case R7KRECID_RemoteControl:
+        	fprintf(stderr, " R7KRECID_RemoteControl %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7500", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_RemoteControl(verbose, &store->RemoteControl, error);
+          break;
+        case R7KRECID_RemoteControlAcknowledge:
+        	fprintf(stderr, " R7KRECID_RemoteControlAcknowledge %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7501", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_RemoteControlAcknowledge(verbose, &store->RemoteControlAcknowledge, error);
+          break;
+        case R7KRECID_RemoteControlNotAcknowledge:
+        	fprintf(stderr, " R7KRECID_RemoteControlNotAcknowledge %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7502", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_RemoteControlNotAcknowledge(verbose, &store->RemoteControlNotAcknowledge, error);
+          break;
+        case R7KRECID_RemoteControlSonarSettings:
+        	fprintf(stderr, " R7KRECID_RemoteControlSonarSettings %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7503", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_RemoteControlSonarSettings(verbose, &store->RemoteControlSonarSettings, error);
+          break;
+        case R7KRECID_CommonSystemSettings:
+        	fprintf(stderr, " R7KRECID_CommonSystemSettings %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7504", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_CommonSystemSettings(verbose, &store->CommonSystemSettings, error);
+          break;
+        case R7KRECID_SVFiltering:
+        	fprintf(stderr, " R7KRECID_SVFiltering %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7510", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_SVFiltering(verbose, &store->SVFiltering, error);
+          break;
+        case R7KRECID_SystemLockStatus:
+        	fprintf(stderr, " R7KRECID_SystemLockStatus %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7511", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_SystemLockStatus(verbose, &store->SystemLockStatus, error);
+          break;
+        case R7KRECID_SoundVelocity:
+        	fprintf(stderr, " R7KRECID_SoundVelocity %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7610", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_SoundVelocity(verbose, &store->SoundVelocity, error);
+          break;
+        case R7KRECID_AbsorptionLoss:
+        	fprintf(stderr, " R7KRECID_AbsorptionLoss %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7611", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_AbsorptionLoss(verbose, &store->AbsorptionLoss, error);
+          break;
+        case R7KRECID_SpreadingLoss:
+        	fprintf(stderr, " R7KRECID_SpreadingLoss %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7612", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_SpreadingLoss(verbose, &store->SpreadingLoss, error);
+          break;
+        case R7KRECID_ProfileAverageSalinity:
+        	fprintf(stderr, " R7KRECID_ProfileAverageSalinity %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7613", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_ProfileAverageSalinity(verbose, &store->ProfileAverageSalinity, error);
+          break;
+        case R7KRECID_ProfileAverageTemperature:
+        	fprintf(stderr, " R7KRECID_ProfileAverageTemperature %d\n", *recordid);
+        	for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+        		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "7614", sizeof(mb_name)) == 0) {
+        			print = true;
+        		}
+        	}
+        	if (print)
+        		mbsys_reson7k3_print_ProfileAverageTemperature(verbose, &store->ProfileAverageTemperature, error);
+          break;
+      }
+    }
+
     /* set done if read failure */
     if (status == MB_FAILURE) {
 #ifdef MBR_RESON7K3_DEBUG2
@@ -14378,6 +15150,11 @@ int mbr_reson7k3_wr_BeamGeometry(int verbose, int *bufferalloc, char **bufferptr
   *size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
   *size += R7KHDRSIZE_BeamGeometry;
   *size += BeamGeometry->number_beams * 16;
+ 
+	/* Hydrosweep sonar data may include an addition array of per-beam Tx delay values */
+	if (header->DeviceId >= 14000 && header->DeviceId < 14050)  {
+	  *size += BeamGeometry->number_beams * 4;
+	}
 
   /* allocate memory to write rest of record if necessary */
   if (*bufferalloc < *size) {
@@ -14423,6 +15200,14 @@ int mbr_reson7k3_wr_BeamGeometry(int verbose, int *bufferalloc, char **bufferptr
       mb_put_binary_float(true, BeamGeometry->beamwidth_acrosstrack[i], &buffer[index]);
       index += 4;
     }
+ 
+		/* Hydrosweep sonar data may include an addition array of per-beam Tx delay values */
+		if (header->DeviceId >= 14000 && header->DeviceId < 14050) {
+			for (unsigned int i = 0; i < BeamGeometry->number_beams; i++) {
+      	mb_put_binary_float(true, BeamGeometry->tx_delay[i], &buffer[index]);
+				index += 4;
+			}
+		}
 
     /* reset the header size value */
     mb_put_binary_int(true, ((unsigned int)(index + 4)), &buffer[8]);
@@ -20533,7 +21318,7 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
       memset(store->FileHeader.recording_version, 0 , sizeof(store->FileHeader.recording_version));
       memset(store->FileHeader.user_defined_name, 0 , sizeof(store->FileHeader.user_defined_name));
       memset(store->FileHeader.notes, 0 , sizeof(store->FileHeader.notes));
-      store->FileHeader.optionaldata = 1;
+      store->FileHeader.optionaldata = true;
       store->FileHeader.file_catalog_size = 0;
       store->FileHeader.file_catalog_offset = 0;
     }

@@ -118,8 +118,6 @@
  *
  *--------------------------------------------------------------------*/
 
-/* TODO(schwehr): Remove gotos */
-
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -277,7 +275,7 @@ int mb_zgrid(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float 
 	float x, y, delzm;
 	float dzmax, dzrms;
 	int im, jm;
-	float dzrms8 = 0.0f;  // TODO(schwehr): -Wmaybe-uninitialized
+	float dzrms8 = 0.0f;
 	float z00;
 	float dz;
 	float ze;

@@ -476,10 +476,9 @@ struct mb_io_struct {
   int numfile;             /* the number of parallel files required for i/o */
   int filetype;            /* type of files used (normal, single normal, xdr, or gsf) */
   mb_filemode_enum filemode;            /* file mode (read or write) */
-  // TODO(schwehr): Bool
-  int variable_beams;      /* if true then number of beams variable */
-  int traveltime;          /* if true then traveltime and angle data supported */
-  int beam_flagging;       /* if true then beam flagging supported */
+  bool variable_beams;      /* if true then number of beams variable */
+  bool traveltime;          /* if true then traveltime and angle data supported */
+  bool beam_flagging;       /* if true then beam flagging supported */
   int platform_source;     /* data record type containing sensor offsets */
   int nav_source;          /* data record type containing the primary navigation */
   int sensordepth_source;  /* data record type containing the primary sensordepth */
@@ -515,11 +514,11 @@ struct mb_io_struct {
   long file_bytes;             /* number of bytes read from file */
   char *file_iobuffer;         /* file i/o buffer for fread() and fwrite() calls */
   FILE *mbfp2;                 /* file descriptor #2 */
-  char file2[MB_PATH_MAXLINE]; /* file name #2 */
+  mb_path file2; /* file name #2 */
   long file2_pos;              /* file position #2 at start of last record read */
   long file2_bytes;            /* number of bytes read from file */
   FILE *mbfp3;                 /* file descriptor #3 */
-  char file3[MB_PATH_MAXLINE]; /* file name #3 */
+  mb_path file3; /* file name #3 */
   long file3_pos;              /* file position #3 at start of last record read */
   long file3_bytes;            /* number of bytes read from file */
   int ncid;                    /* netCDF datastream ID */
@@ -619,8 +618,8 @@ struct mb_io_struct {
   double *new_ss_alongtrack;
 
   /* variables for projections to and from projected coordinates */
-  int projection_initialized;  // TODO(schwehr): bool
-  char projection_id[MB_NAME_LENGTH];
+  bool projection_initialized;
+  mb_name projection_id;
   void *pjptr;
 
   /* variables for interpolating/extrapolating navigation
@@ -666,6 +665,17 @@ struct mb_io_struct {
 
   /* variables for accumulating MBIO notices */
   int notice_list[MB_NOTICE_MAX];
+  
+  /* flags controlling debug per-record record type and content info printing 
+     during reading
+     - the record identifier strings are format dependent, excepting
+       that "all" or "ALL" will cause the contents of all record 
+       types to be dumped 
+     - this capability is initialized by mb_set_debug_records() following mb_read_init()
+     - this capability is only used by program mbinfo */
+  bool enable_debug_record_type_listing;
+  int num_debug_record_identifiers;
+  mb_name debug_record_identifiers[MB_NUM_DEBUG_RECORD_MAX];
 
   /* variable for registering and maintaining application i/o arrays */
   int bath_arrays_reallocated;

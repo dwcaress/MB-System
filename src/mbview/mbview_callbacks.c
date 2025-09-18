@@ -93,7 +93,7 @@
 //#define MBV_DEBUG_GLX 1
 //#define MBV_GET_GLX_ERRORS 1
 
-#include "creation-c.h"
+extern MB3DViewData mbview_mbgrdviz;
 
 Widget BxFindTopShell(Widget);
 WidgetList BxWidgetIdsFromNames(Widget, char *, char *);

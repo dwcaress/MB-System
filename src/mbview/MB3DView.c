@@ -83,10 +83,8 @@
 #include <Xm/ScrolledW.h>
 #include "MB3DView.h"
 
-/**
- * Common constant and pixmap declarations.
- */
-#include "creation-c.h"
+#include "MB3DView.h"
+extern MB3DViewData mbview_mbgrdviz;
 
 /**
  * Convenience functions from utilities file.

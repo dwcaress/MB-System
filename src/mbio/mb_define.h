@@ -37,8 +37,8 @@
 #include <stdint.h>
 
 /* Define version and date for this release */
-#define MB_VERSION "5.8.3beta03"
-#define MB_VERSION_DATE "31 August 2025"
+#define MB_VERSION "5.8.3beta04"
+#define MB_VERSION_DATE "18 September 2025"
 
 /* CMake supports current OS's and so there is only one form of RPC and XDR and no mb_config.h file */
 #ifdef CMAKE_BUILD_SYSTEM
@@ -183,6 +183,10 @@ typedef char mb_command[MB_COMMAND_LENGTH];
 
 /* maximum number of asynchronous nav samples per record */
 #define MB_NAV_MAX 256
+
+/* maximum number of record types that can specified to have contents dumped during
+   reading for debugging */
+#define MB_NUM_DEBUG_RECORD_MAX 10
 
 /* file mode (read or write) */
 typedef enum {
@@ -329,14 +333,14 @@ int mb_fileiobuffer(int verbose, int *fileiobuffer);
 int mb_format_register(int verbose, int *format, void *mbio_ptr, int *error);
 int mb_format_info(int verbose, int *format, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max,
                    char *format_name, char *system_name, char *format_description, int *numfile, int *filetype,
-                   int *variable_beams, int *traveltime, int *beam_flagging, int *platform_source, int *nav_source,
+                   bool *variable_beams, bool *traveltime, bool *beam_flagging, int *platform_source, int *nav_source,
                    int *sensordepth_source, int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                    double *beamwidth_ltrack, int *error);
 int mb_format(int verbose, int *format, int *error);
 int mb_format_system(int verbose, int *format, int *system, int *error);
 int mb_format_description(int verbose, int *format, char *description, int *error);
 int mb_format_dimensions(int verbose, int *format, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, int *error);
-int mb_format_flags(int verbose, int *format, int *variable_beams, int *traveltime, int *beam_flagging, int *error);
+int mb_format_flags(int verbose, int *format, bool *variable_beams, bool *traveltime, bool *beam_flagging, int *error);
 int mb_format_source(int verbose, int *format, int *platform_source, int *nav_source, int *sensordepth_source, int *heading_source,
                      int *attitude_source, int *svp_source, int *error);
 int mb_format_beamwidth(int verbose, int *format, double *beamwidth_xtrack, double *beamwidth_ltrack, int *error);
@@ -402,6 +406,11 @@ int mb_input_init(int verbose, char *socket_definition, int format, int pings,
                   int (*input_read)(int verbose, void *mbio_ptr, size_t *size, char *buffer, int *error),
                   int (*input_close)(int verbose, void *mbio_ptr, int *error),
                   int *error);
+int mb_set_debug_records(int verbose, void *mbio_ptr, 
+									bool enable_debug_record_type_listing, 
+									int num_debug_record_identifiers, 
+									mb_name *debug_record_identifiers,
+									int *error);
 int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *beams_bath, int *beams_amp, int *pixels_ss,
                   int *error);
 int mb_close(int verbose, void **mbio_ptr, int *error);

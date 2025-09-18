@@ -35,14 +35,8 @@
 #include <Xm/RepType.h>
 #include <Xm/Xm.h>
 
-// TODO(schwehr): Make medit headers follow UWYU to not be after X11/Xm.
 #include "mbedit.h"
 #include "mbedit_creation.h"
-
-// TODO(schwehr): These should be in headers.
-extern void RegisterBxConverters(XtAppContext);
-extern Pixmap XPM_PIXMAP(Widget, char **);
-Widget Createwindow_mbedit(Widget parent);
 
 #define BX_APP_CLASS "mbedit"
 
