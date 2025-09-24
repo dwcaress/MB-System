@@ -435,7 +435,7 @@ target_include_directories(mb1rs PRIVATE ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}
 #------------------------------------------------------------------------------
 # install it all
 #
-install(TARGETS geolib newmat tnav qnx trnw netif mb1 trnucli trnwcli DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS geolib newmat tnav qnx trnw netif mb1 trncli trnucli trnwcli DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(TARGETS trnucli-test trnusvr-test trncli-test mmcpub mmcsub mcpub mcsub trnif-test mb1rs DESTINATION ${CMAKE_INSTALL_BINDIR})
 #
 #------------------------------------------------------------------------------
