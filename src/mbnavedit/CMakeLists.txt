@@ -44,5 +44,5 @@ target_link_libraries(mbnavedit PRIVATE mbnaveditLib mbaux mbxgr
 			    ${X11_Xt_LIB})
 
 
-
+install(TARGETS mbnaveditLib DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(TARGETS mbnavedit DESTINATION ${CMAKE_INSTALL_BINDIR})
