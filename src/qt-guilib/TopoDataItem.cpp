@@ -3,12 +3,10 @@
 #include <array>
 #include <vector>
 #include <thread>
-#include <vtk/vtkProperty.h>
-#include <vtk/vtkTextProperty.h>
-#include <vtk/vtkErrorCode.h>
-#include <vtk/vtkCellData.h>
-#include <vtk/vtkPointData.h>
-#include <vtk/vtkLightCollection.h>
+#include <vtkErrorCode.h>
+#include <vtkCellData.h>
+#include <vtkPointData.h>
+#include <vtkLightCollection.h>
 #include "TopoDataItem.h"
 #include "TopoColorMap.h"
 #include "SharedConstants.h"
