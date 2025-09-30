@@ -3,7 +3,7 @@
 // #include "vtkOpenGLRenderWindow.h"  // VTK's OpenGL includes
 /// #include "vtkOpenGLState.h"         // VTK's state management
 #include "MyRubberBandStyle.h"
-#include <vtkglew/include/GL/glew.h>
+/// #include <vtkglew/include/GL/glew.h>
 #include <GL/gl.h>
 #include <GL/glext.h>
 #include "vtkOpenGLRenderWindow.h"
