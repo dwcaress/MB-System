@@ -49,6 +49,6 @@ bool TopoProfileItem::draw(vector<array<double, 2>> *profile) {
       yMax = point[1];
     }
   }
-  
+  return true;
 }
 
