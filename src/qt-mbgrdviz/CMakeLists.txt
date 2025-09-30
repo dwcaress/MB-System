@@ -39,3 +39,4 @@ target_link_libraries(qt-mbgrdviz PRIVATE MBGui
                       Qt6::Core Qt6::Quick Qt6::Gui Qt6::Graphs
                       Qt6::OpenGL VTK::GUISupportQtQuick)
 
+install(TARGETS qt-mbgrdviz DESTINATION ${CMAKE_INSTALL_BINDIR})
