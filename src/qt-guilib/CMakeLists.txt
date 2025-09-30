@@ -134,4 +134,4 @@ target_link_libraries(
          GMT::GMT
 	 LibPROJ::LibPROJ)
 
-install(TARGETS MBGui DESTINATION cmake-example/lib)
+install(TARGETS MBGui DESTINATION ${CMAKE_INSTALL_LIBDIR})
