@@ -22,10 +22,11 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
-- Version 5.8.3beta04    September 18, 2025**
-- Version 5.8.3beta03    August 31, 2025**
-- Version 5.8.3beta02    August 29, 2025**
-- Version 5.8.3beta01    August 27, 2025**
+- Version 5.8.3beta05    September 30, 2025
+- Version 5.8.3beta04    September 18, 2025
+- Version 5.8.3beta03    August 31, 2025
+- Version 5.8.3beta02    August 29, 2025
+- Version 5.8.3beta01    August 27, 2025
 - **Version 5.8.2          August 19, 2025**
 - Version 5.8.2beta24    July 19, 2025
 - Version 5.8.2beta23    June 25, 2025
@@ -61,6 +62,33 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.3beta05 (September 30, 2025)
+
+GMT grid i/o functions (src/mbaux/mb_readwritegrd.c): Added compiler directives insuring
+that the GMT header file gmt_dev.h does not implicitly include a glib header file not 
+needed by MB-System.
+
+GMT module mbcontour: Added compiler directives insuring
+that the GMT header file gmt_dev.h does not implicitly include a glib header file not 
+needed by MB-System.
+
+GMT module mbgrd2obj: Added compiler directives insuring
+that the GMT header file gmt_dev.h does not implicitly include a glib header file not 
+needed by MB-System.
+
+GMT module mbgrdtiff: Added compiler directives insuring
+that the GMT header file gmt_dev.h does not implicitly include a glib header file not 
+needed by MB-System.
+
+GMT module mbswath: Added compiler directives insuring
+that the GMT header file gmt_dev.h does not implicitly include a glib header file not 
+needed by MB-System.
+
+Programs mbedit, mbeditviz, mbgrdviz, mbnavadjust, mbnavedit, mbvelocitytool: Removed code
+ensuring that a message display dialog is displayed when created or updated by processing
+all outstanding X11 events, as this causes mbeditviz to get lost in an infinite event
+processing loop on Ubuntu 24 installations.
 
 #### 5.8.3beta04 (September 18, 2025)
 

@@ -250,6 +250,11 @@
 #ifdef PACKAGE_VERSION
 #undef PACKAGE_VERSION
 #endif
+
+/* include GMT header file gmt_dev.h without including glib headers not needed by MB-System */
+#ifdef HAVE_GLIB_GTHREAD
+#undefine HAVE_GLIB_GTHREAD
+#endif
 #include "gmt_dev.h"
 
 /* TIFF 6.0 and geoTIFF tag array */

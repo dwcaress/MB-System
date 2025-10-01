@@ -565,12 +565,12 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
         mb_path lock_user = "";
         mb_path lock_cpu = "";
         char lock_date[25] = "";
-         mb_pr_lockinfo(mbev_verbose, file->path, &locked, &lock_purpose, lock_program, lock_user, lock_cpu,
+        mb_pr_lockinfo(mbev_verbose, file->path, &locked, &lock_purpose, lock_program, lock_user, lock_cpu,
                                      lock_date, &mbev_error);
 
         snprintf(error1, sizeof(error1), "Unable to open input file:");
-        snprintf(error2, sizeof(error1), "File locked by <%s> running <%s>", lock_user, lock_program);
-        snprintf(error3, sizeof(error1), "on cpu <%s> at <%s>", lock_cpu, lock_date);
+        snprintf(error2, sizeof(error2), "File locked by <%s> running <%s>", lock_user, lock_program);
+        snprintf(error3, sizeof(error3), "on cpu <%s> at <%s>", lock_cpu, lock_date);
         fprintf(stderr, "\nUnable to open input file:\n");
         fprintf(stderr, "  %s\n", file->path);
         fprintf(stderr, "File locked by <%s> running <%s>\n", lock_user, lock_program);
@@ -580,12 +580,12 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
       /* else if unable to create lock file there is a permissions problem */
       else if (mbev_error == MB_ERROR_OPEN_FAIL) {
         snprintf(error1, sizeof(error1), "Unable to create lock file");
-        snprintf(error2, sizeof(error1), "for intended input file:");
-        snprintf(error3, sizeof(error1), "-Likely permissions issue");
+        snprintf(error2, sizeof(error2), "for intended input file:");
+        snprintf(error3, sizeof(error3), "- Likely permissions issue");
         fprintf(stderr, "Unable to create lock file\n");
         fprintf(stderr, "for intended input file:\n");
         fprintf(stderr, "  %s\n", file->path);
-        fprintf(stderr, "-Likely permissions issue\n");
+        fprintf(stderr, "- Likely permissions issue\n");
       }
 
       /* put up error dialog */
@@ -593,7 +593,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
     }
   }
 
-  /* load the file if it needs loading and has been locked */
+  /* load the file if it needs loading and has now been locked */
   if (mbev_status == MB_SUCCESS && ifile >= 0 && ifile < mbev_num_files && !mbev_files[ifile].load_status &&
       mbev_files[ifile].raw_info.nrecords > 0) {
     file = &(mbev_files[ifile]);
@@ -4572,8 +4572,6 @@ void mbeditviz_mb3dsoundings_optimizebiasvaluesold(int mode, double *rollbias_be
 		double timelag;
 		double snell;
 		double rollbias_start, rollbias_end, drollbias;
-		double pitchbias_start, pitchbias_end, dpitchbias;
-		double headingbias_start, headingbias_end, dheadingbias;
 		char *marker1 = "       ";
 		char *marker2 = " ******";
 		char *marker = NULL;
@@ -4653,9 +4651,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvaluesold(int mode, double *rollbias_be
 		double headingbias;
 		double timelag;
 		double snell;
-		double rollbias_start, rollbias_end, drollbias;
 		double pitchbias_start, pitchbias_end, dpitchbias;
-		double headingbias_start, headingbias_end, dheadingbias;
 		char *marker1 = "       ";
 		char *marker2 = " ******";
 		char *marker = NULL;
@@ -4734,8 +4730,6 @@ void mbeditviz_mb3dsoundings_optimizebiasvaluesold(int mode, double *rollbias_be
 		double headingbias;
 		double timelag;
 		double snell;
-		double rollbias_start, rollbias_end, drollbias;
-		double pitchbias_start, pitchbias_end, dpitchbias;
 		double headingbias_start, headingbias_end, dheadingbias;
 		char *marker1 = "       ";
 		char *marker2 = " ******";
@@ -4816,8 +4810,6 @@ void mbeditviz_mb3dsoundings_optimizebiasvaluesold(int mode, double *rollbias_be
 		double timelag;
 		double snell;
 		double rollbias_start, rollbias_end, drollbias;
-		double pitchbias_start, pitchbias_end, dpitchbias;
-		double headingbias_start, headingbias_end, dheadingbias;
 		char *marker1 = "       ";
 		char *marker2 = " ******";
 		char *marker = NULL;
@@ -4865,9 +4857,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvaluesold(int mode, double *rollbias_be
 		double headingbias;
 		double timelag;
 		double snell;
-		double rollbias_start, rollbias_end, drollbias;
 		double pitchbias_start, pitchbias_end, dpitchbias;
-		double headingbias_start, headingbias_end, dheadingbias;
 		char *marker1 = "       ";
 		char *marker2 = " ******";
 		char *marker = NULL;
@@ -4915,8 +4905,6 @@ void mbeditviz_mb3dsoundings_optimizebiasvaluesold(int mode, double *rollbias_be
 		double headingbias;
 		double timelag;
 		double snell;
-		double rollbias_start, rollbias_end, drollbias;
-		double pitchbias_start, pitchbias_end, dpitchbias;
 		double headingbias_start, headingbias_end, dheadingbias;
 		char *marker1 = "       ";
 		char *marker2 = " ******";
@@ -4965,9 +4953,6 @@ void mbeditviz_mb3dsoundings_optimizebiasvaluesold(int mode, double *rollbias_be
 		double headingbias;
 		double timelag;
 		double snell;
-		double rollbias_start, rollbias_end, drollbias;
-		double pitchbias_start, pitchbias_end, dpitchbias;
-		double headingbias_start, headingbias_end, dheadingbias;
 		char *marker1 = "       ";
 		char *marker2 = " ******";
 		char *marker = NULL;
@@ -5048,9 +5033,6 @@ void mbeditviz_mb3dsoundings_optimizebiasvaluesold(int mode, double *rollbias_be
 		double headingbias;
 		double timelag;
 		double snell;
-		double rollbias_start, rollbias_end, drollbias;
-		double pitchbias_start, pitchbias_end, dpitchbias;
-		double headingbias_start, headingbias_end, dheadingbias;
 		char *marker1 = "       ";
 		char *marker2 = " ******";
 		char *marker = NULL;
