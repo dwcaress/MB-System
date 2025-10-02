@@ -22,6 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.3beta06    October 1, 2025
 - Version 5.8.3beta05    September 30, 2025
 - Version 5.8.3beta04    September 18, 2025
 - Version 5.8.3beta03    August 31, 2025
@@ -62,6 +63,12 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.3beta06 (October 1, 2025)
+
+GMT grid i/o functions (src/mbaux/mb_readwritegrd.c): Fixed compiler directives insuring
+that the GMT header file gmt_dev.h does not implicitly include a glib header file not 
+needed by MB-System.
 
 #### 5.8.3beta05 (September 30, 2025)
 
