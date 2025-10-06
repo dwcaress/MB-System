@@ -1,9 +1,10 @@
-Portfiles for macports install of MB-System
-To use these Portfiles, you must have macports installed locally.
+This directory contains Portfiles that install MB-System with macports.
+The Portfile to install MB-System is science/mb-system/Portfile.
 
-You can run these Portfiles 'locally', i.e. even if the Portfiles are
-not published to the official MacPorts port tree; in the following example,
-replace the hypothetical user julesverne with your username.
+You must have macports installed locally to use a Portfile.
+
+You can this local Portfile, even if the Portfile isn't yet
+published to the official MacPorts port tree; do the following:
 
 1. Open sources.conf in a text editor with 'sudo'.
 For example, to open it into TextEdit:
