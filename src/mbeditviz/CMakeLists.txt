@@ -43,4 +43,6 @@ target_link_libraries(mbeditviz PRIVATE mbaux mbxgr mbview
 			    ${X11_LIBRARIES}
 			    ${X11_Xt_LIB})
 
+install(TARGETS mbeditvizlib DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
 install(TARGETS mbeditviz DESTINATION ${CMAKE_INSTALL_BINDIR})
