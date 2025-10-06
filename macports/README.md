@@ -1,0 +1,33 @@
+Portfiles for macports install of MB-System
+To use these Portfiles, you must have macports installed locally.
+
+You can run these Portfiles 'locally', i.e. even if the Portfiles are
+not published to the official MacPorts port tree; in the following example,
+replace the hypothetical user julesverne with your username.
+
+1. Open sources.conf in a text editor with 'sudo'.
+For example, to open it into TextEdit:
+
+% sudo open -e /opt/local/etc/macports/sources.conf
+
+2. Insert a URL pointing to your local repository location before the rsync
+URL as shown:
+```
+file:///*MBSystemHome*/macports
+rsync://rsync.macports.org/macports/release/tarballs/ports.tar [default]
+```
+(Note the file URL should appear before the rsync URL)
+
+3. Add these Portfiles to the port index:
+```
+% cd *MBSystemHome*/macports
+% sudo portindex
+``
+Now you can reference and install these local port files as with any other
+macports port command. E.g. to install MB-System, including the vtk/qt-based
+GUI applications with macports:
+
+```
+% cd *MBSystemHome*/macports
+% sudo port install mb-system +buildQt
+```
