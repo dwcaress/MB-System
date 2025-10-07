@@ -27,6 +27,8 @@ find_package(
   COMPONENTS Gui Widgets Quick
   REQUIRED)
 
+find_package(VTK ${MIN_VTK_VERSION} COMPONENTS GUISupportQtQuick)
+
 if(CMAKE_SYSTEM_NAME STREQUAL Linux)
   message("Find TIRPC")
   find_package(TIRPC REQUIRED)
@@ -52,8 +54,9 @@ target_include_directories(qt-mbedit-widgets PUBLIC ${CMAKE_SOURCE_DIR}/src/mbio
                                      ${CMAKE_SOURCE_DIR}/src/qt-guilib/u
                                      ${CMAKE_SOURCE_DIR}/src/mbedit)
 
-target_link_libraries(qt-mbedit-widgets PRIVATE MBGui Qt6::Core Qt6::Widgets Qt6::Quick
-                               	           mbeditLib mbio
-					   PUBLIC TIRPC::TIRPC)
+target_link_libraries(qt-mbedit-widgets PRIVATE MBGui Qt6::Core Qt6::Widgets
+                      Qt6::Quick VTK::GUISupportQtQuick
+		      mbeditLib mbio
+		      PUBLIC TIRPC::TIRPC)
 
 install(TARGETS qt-mbedit-widgets DESTINATION ${CMAKE_INSTALL_BINDIR})
