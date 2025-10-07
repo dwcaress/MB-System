@@ -44,5 +44,5 @@ target_link_libraries(mbedit PRIVATE mbaux mbxgr
 			    ${X11_Xt_LIB})
 
 
-
+install(TARGETS mbeditLib DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(TARGETS mbedit DESTINATION ${CMAKE_INSTALL_BINDIR})
