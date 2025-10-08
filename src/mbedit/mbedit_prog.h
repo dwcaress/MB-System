@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_prog.h	3/27/2024
  *
- *    Copyright (c) 2009-2024 by
+ *    Copyright (c) 2009-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
