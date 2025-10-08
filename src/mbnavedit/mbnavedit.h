@@ -97,7 +97,7 @@ MBNAVEDIT_EXTERNAL double offset_lat;
 MBNAVEDIT_EXTERNAL double offset_lon_applied;
 MBNAVEDIT_EXTERNAL double offset_lat_applied;
 
-/* mbnavedit plot size parameters */
+// mbnavedit plot size parameters 
 MBNAVEDIT_EXTERNAL int plot_width;
 MBNAVEDIT_EXTERNAL int plot_height;
 MBNAVEDIT_EXTERNAL int number_plots;
