@@ -30,10 +30,17 @@
  *
  * Author:	D. W. Caress
  * Date:	October 14, 2009
+ * 
  */
+
 
 #ifndef MBEDIT_PROG_H
 #define MBEDIT_PROG_H
+/**
+mbedit_prog.h and mbedit_prog.c are window-system-agnostic backend 
+business-logic, and can be utilized by various front-end GUIs based on 
+X11/Motif, Qt/QVTK, etc.
+*/
 
 #include "mb_color.h"
 
@@ -96,7 +103,7 @@ typedef enum {
   
 } MouseGrabMode;
 
-/// This source code is windowing-system-agnostic, but 
+/// This function is windowing-system-agnostic, but 
 /// accepts function pointers that interact with specific windowing system
 int mbedit_init(int argc, char **argv,
 		/// #input files specified on command line
