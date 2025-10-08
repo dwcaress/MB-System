@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mblist.c  2/1/93
  *
- *    Copyright (c) 1993-2024 by
+ *    Copyright (c) 1993-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -1153,6 +1153,7 @@ int main(int argc, char **argv) {
   const bool read_datalist = format < 0;
   bool read_data;
   void *datalist;
+  char file[MB_PATH_MAXLINE] = "";
   char path[MB_PATH_MAXLINE] = "";
   char ppath[MB_PATH_MAXLINE] = "";
   char apath[MB_PATH_MAXLINE] = "";
@@ -1171,9 +1172,13 @@ int main(int argc, char **argv) {
     }
     read_data = mb_datalist_read3(verbose, datalist, &pstatus, path, ppath, 
                                   &astatus, apath, dpath, &format, &file_weight, &error) == MB_SUCCESS;
+	if (pstatus == MB_PROCESSED_USE)
+	  strcpy(file, ppath);
+	else
+	  strcpy(file, path);
   } else {
     // else copy single filename to be read
-    strcpy(path, read_file);
+    strcpy(file, read_file);
     read_data = true;
     astatus = 0;
   }
@@ -3094,14 +3099,17 @@ int main(int argc, char **argv) {
   while (read_data) {
 
     /* initialize reading the swath file */
-    if (mb_read_init_altnav(verbose, path, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, astatus, apath, &mbio_ptr,
+    if (mb_read_init_altnav(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, astatus, apath, &mbio_ptr,
                                &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error) != MB_SUCCESS) {
       char *message;
       mb_error(verbose, error, &message);
-      fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
-      fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", path);
+      fprintf(stderr, "\nMBIO Error returned from function <mb_read_init_altnav>:\n%s\n", message);
+      fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
       exit(error);
+    }
+    if (verbose > 0) {
+      fprintf(stderr, "  mblist opened: %s\n", file);
     }
 
     /* figure out whether bath, amp, or ss will be used */
@@ -3263,7 +3271,7 @@ int main(int argc, char **argv) {
       if (segment_mode == MBLIST_SEGMENT_MODE_TAG)
         fprintf(output[0], "%s\n", segment_tag);
       else if (segment_mode == MBLIST_SEGMENT_MODE_SWATHFILE)
-        fprintf(output[0], "# %s\n", path);
+        fprintf(output[0], "# %s\n", file);
       else if (segment_mode == MBLIST_SEGMENT_MODE_DATALIST)
         fprintf(output[0], "# %s\n", dpath);
     }
@@ -3406,7 +3414,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "dbg2       status:         %d\n", status);
       }
 
-      if (verbose >= 1 && kind == MB_DATA_COMMENT) {
+      if (verbose >= 2 && kind == MB_DATA_COMMENT) {
         if (icomment == 0) {
           fprintf(stderr, "\nComments:\n");
           icomment++;
@@ -3551,28 +3559,37 @@ int main(int argc, char **argv) {
         time_d_old = time_d;
       }
 
+if (error == MB_ERROR_NO_ERROR)
       /* now loop over beams */
       if (error == MB_ERROR_NO_ERROR && (nread - 1) % decimate == 0)
         for (int j = beam_start; j <= beam_end; j++) {
           /* check beam status */
           beam_status = MB_SUCCESS;
-          if (check_bath && check_values == MBLIST_CHECK_ON && !mb_beam_ok(beamflag[j]))
+          if (check_bath && check_values == MBLIST_CHECK_ON && !mb_beam_ok(beamflag[j])) {
             beam_status = MB_FAILURE;
-          else if (check_bath && check_values == MBLIST_CHECK_ON_NULL && beamflag[j] == MB_FLAG_NULL)
+          }
+          else if (check_bath && check_values == MBLIST_CHECK_ON_NULL && beamflag[j] == MB_FLAG_NULL) {
             beam_status = MB_FAILURE;
-          if (check_amp && check_values == MBLIST_CHECK_ON && !mb_beam_ok(beamflag[j]))
+          }
+          if (check_amp && check_values == MBLIST_CHECK_ON && !mb_beam_ok(beamflag[j])) {
             beam_status = MB_FAILURE;
-          else if (check_amp && check_values == MBLIST_CHECK_ON_NULL && beamflag[j] == MB_FLAG_NULL)
+          }
+          else if (check_amp && check_values == MBLIST_CHECK_ON_NULL && beamflag[j] == MB_FLAG_NULL) {
             beam_status = MB_FAILURE;
-          if (check_ss && j != beam_vertical)
+          }
+          if (check_ss && j != beam_vertical) {
             beam_status = MB_FAILURE;
-          else if (check_ss && j == beam_vertical)
+          }
+          else if (check_ss && j == beam_vertical) {
             if (ss[pixel_vertical] <= MB_SIDESCAN_NULL)
               beam_status = MB_FAILURE;
-          if (use_time_interval && first)
+          }
+          if (use_time_interval && first) {
             beam_status = MB_FAILURE;
-          if (check_nav && (navlon == 0.0 || navlat == 0.0))
+          }
+          if (check_nav && (navlon == 0.0 || navlat == 0.0)) {
             beam_status = MB_FAILURE;
+          }
 
           /* print out good beams */
           if (beam_status == MB_SUCCESS) {
@@ -4533,14 +4550,14 @@ int main(int argc, char **argv) {
                 case 'F': /* filename */
                   if (netcdf)
                     fprintf(output[i], "\"");
-                  fprintf(output[i], "%s", path);
+                  fprintf(output[i], "%s", file);
 
                   if (netcdf)
                     fprintf(output[i], "\"");
 
                   if (!ascii)
-                    for (k = strlen(path); k < MB_PATH_MAXLINE; k++)
-                      fwrite(&path[strlen(path)], sizeof(char), 1, outfile);
+                    for (k = strlen(file); k < MB_PATH_MAXLINE; k++)
+                      fwrite(&file[strlen(file)], sizeof(char), 1, outfile);
 
                   raw_next_value = false;
                   break;
@@ -5457,13 +5474,13 @@ int main(int argc, char **argv) {
                 case 'F': /* filename */
                   if (netcdf)
                     fprintf(output[i], "\"");
-                  fprintf(output[i], "%s", path);
+                  fprintf(output[i], "%s", file);
                   if (netcdf)
                     fprintf(output[i], "\"");
 
                   if (!ascii)
-                    for (k = strlen(path); k < MB_PATH_MAXLINE; k++)
-                      fwrite(&path[strlen(path)], sizeof(char), 1, outfile);
+                    for (k = strlen(file); k < MB_PATH_MAXLINE; k++)
+                      fwrite(&file[strlen(file)], sizeof(char), 1, outfile);
 
                   raw_next_value = false;
                   break;
@@ -5654,6 +5671,12 @@ int main(int argc, char **argv) {
     if (read_datalist) {
       read_data = mb_datalist_read3(verbose, datalist, &pstatus, path, ppath, 
                                     &astatus, apath, dpath, &format, &file_weight, &error) == MB_SUCCESS;
+      if (read_data) {
+        if (pstatus == MB_PROCESSED_USE)
+          strcpy(file, ppath);
+        else
+          strcpy(file, path);
+        }
     } else {
       read_data = false;
     }

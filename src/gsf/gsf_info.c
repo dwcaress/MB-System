@@ -189,6 +189,7 @@ gsfFileSupportsRecalculateXYZ(int handle, int *status)
                         case GSF_SWATH_BATHY_SUBRECORD_EM710_SPECIFIC:
                         case GSF_SWATH_BATHY_SUBRECORD_EM302_SPECIFIC:
                         case GSF_SWATH_BATHY_SUBRECORD_EM122_SPECIFIC:
+                        case GSF_SWATH_BATHY_SUBRECORD_ME70BO_SPECIFIC:
                             if (rec.mb_ping.sector_number)
                             {
                                 ping_rec++;
@@ -349,6 +350,7 @@ gsfFileSupportsRecalculateTPU(int handle, int *status)
                         case GSF_SWATH_BATHY_SUBRECORD_EM710_SPECIFIC:
                         case GSF_SWATH_BATHY_SUBRECORD_EM302_SPECIFIC:
                         case GSF_SWATH_BATHY_SUBRECORD_EM122_SPECIFIC:
+                        case GSF_SWATH_BATHY_SUBRECORD_ME70BO_SPECIFIC:
                             if ((rec.mb_ping.sector_number) && (rec.mb_ping.sensor_data.gsfEM4Specific.sector[0].signal_length > 0))
                             {
                                 ping_rec++;

@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_cheb.c			3/23/00
  *
- *    Copyright (c) 2000-2024 by
+ *    Copyright (c) 2000-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -358,7 +358,7 @@ void lspeig(const double *a, const int *ia, const int *nia, int nnz, int nc,
 	double errsmp;
 
 	if (ncyc == 0) {
-		i = 0;  /* TODO(schwehr): Bug? */
+		i = 0;
 		for (int j = 0; j < nia[i]; j++) {
 			const int k = nnz * i + j;
 			x[ia[k]] = a[k];
@@ -1023,7 +1023,6 @@ void mblsqr_lsqr(int m, int n, void (*aprod)(int mode, int m, int n, double x[],
 		mbcblas_dcopy(n, v, 1, w, 1);
 	}
 
-	// TODO(schwehr): Localize
 	int nconv;
 	double bnorm = 0.0;
 	double rnorm = 0.0;

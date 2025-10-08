@@ -62,8 +62,7 @@ void DataLogReader::readHeader()
     mnem = type = format = lname = units = NULL;
 
     // Read a line
-    fgets(buffer, sizeof(buffer), fileStream());
-
+    if(fgets(buffer, sizeof(buffer), fileStream()) == NULL){;}
 
     if (buffer[strlen(buffer)-1] == '\n') 
       // Strip off trailing newlien

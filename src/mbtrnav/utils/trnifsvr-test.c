@@ -323,9 +323,12 @@ static int s_app_main(app_cfg_t *cfg)
 
         trn_config_t *trn_cfg = trncfg_new(NULL,
                                            -1,
+                                           false,
+                                           0,
+                                           NULL,
                                            10L,
-                                           TRN_MAP_BO,
                                            TRN_SENSOR_MB,
+                                           TRN_MAP_BO,
                                            TRN_FILT_PARTICLE,
                                            TRN_FILT_HIGH,
                                            TRN_FILT_REINIT_EN,

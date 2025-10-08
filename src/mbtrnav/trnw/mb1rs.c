@@ -157,7 +157,7 @@ int64_t s_file_frame_fn(mb1rs_ctx_t *ctx, byte *r_buf, uint32_t len)
             uint32_t readlen = 1;
             uint32_t record_bytes=0;
             int64_t read_bytes=0;
-            uint32_t sync_bytes=0;
+//            uint32_t sync_bytes=0;
             mb1_t *dest = mb1_new(MB1_MAX_BEAMS);
 
             // sync to start of record
@@ -170,9 +170,10 @@ int64_t s_file_frame_fn(mb1rs_ctx_t *ctx, byte *r_buf, uint32_t len)
                     bp++;
                     readlen=MB1_HEADER_BYTES-1;
                     break;
-                }else{
-                    sync_bytes++;
                 }
+//                else{
+//                    sync_bytes++;
+//                }
             }
 
             // if start of sync found, read header (fixed-length sounding bytes)

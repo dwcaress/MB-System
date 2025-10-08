@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
  *
- *    Copyright (c) 1993-2024 by
+ *    Copyright (c) 1993-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -626,26 +626,26 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 
 	/* check for projection specification file */
 	mb_path prjfile;
-  assert(strlen(file) < MB_PATH_MAXLINE - 4);
+	assert(strlen(file) < MB_PATH_MAXLINE - 4);
 	sprintf(prjfile, "%s.prj", file);
 	struct stat file_status;
 	const int fstat = stat(prjfile, &file_status);
 	if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR && file_status.st_size > 0) {
-  	FILE *pfp = fopen(prjfile, "r");
-  	if (pfp != NULL) {
-  		char projection_id[MB_NAME_LENGTH] = {0};;
-  		if (fscanf(pfp, "%31s", projection_id) == 1) {
-  		  const int proj_status = mb_proj_init(verbose, projection_id, &(mb_io_ptr->pjptr), error);
-  		  if (proj_status == MB_SUCCESS) {
-  			  mb_io_ptr->projection_initialized = true;
-  			  strcpy(mb_io_ptr->projection_id, projection_id);
-        }
-  		}
-  		fclose(pfp);
-      if (mb_io_ptr->projection_initialized == false) {
-      	fprintf(stderr, "Projection file %s exists but unable to initialize projection using contained id: %s\n\n", prjfile, projection_id);
-      }
-    }
+	  FILE *pfp = fopen(prjfile, "r");
+	  if (pfp != NULL) {
+		  char projection_id[MB_NAME_LENGTH] = {0};;
+		  if (fscanf(pfp, "%31s", projection_id) == 1) {
+			const int proj_status = mb_proj_init(verbose, projection_id, &(mb_io_ptr->pjptr), error);
+			if (proj_status == MB_SUCCESS) {
+				mb_io_ptr->projection_initialized = true;
+				strcpy(mb_io_ptr->projection_id, projection_id);
+			}
+		  }
+		  fclose(pfp);
+		if (mb_io_ptr->projection_initialized == false) {
+		  fprintf(stderr, "Projection file %s exists but unable to initialize projection using contained id: %s\n\n", prjfile, projection_id);
+		}
+	  }
 	}
 
 	/* set error and status (if you got here you succeeded */
@@ -1311,6 +1311,45 @@ int mb_input_init(int verbose, char *socket_definition, int format,
 		fprintf(stderr, "dbg2       beams_bath: %d\n", *beams_bath);
 		fprintf(stderr, "dbg2       beams_amp:  %d\n", *beams_amp);
 		fprintf(stderr, "dbg2       pixels_ss:  %d\n", *pixels_ss);
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mb_set_debug_records(int verbose, void *mbio_ptr, 
+		bool enable_debug_record_type_listing, 
+		int num_debug_record_identifiers, 
+		mb_name *debug_record_identifiers,
+    int *error) {
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       enable_debug_record_type_listing:  %d\n", enable_debug_record_type_listing);
+		fprintf(stderr, "dbg2       num_debug_record_identifiers:      %d\n", num_debug_record_identifiers);
+		for (int i = 0; i < num_debug_record_identifiers; i++) {
+		  fprintf(stderr, "dbg2       debug_record_identifiers[%2d]:    %s\n", i, debug_record_identifiers[i]);
+		}
+	}
+	
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  mb_io_ptr->enable_debug_record_type_listing = enable_debug_record_type_listing;
+  mb_io_ptr->num_debug_record_identifiers = MIN(num_debug_record_identifiers, MB_NUM_DEBUG_RECORD_MAX);
+  for (int i = 0; i < mb_io_ptr->num_debug_record_identifiers; i++) {
+  	strncpy(mb_io_ptr->debug_record_identifiers[i], debug_record_identifiers[i], sizeof(mb_name));
+  }
+
+	/* set error and status (if you got here you succeeded */
+	*error = MB_ERROR_NO_ERROR;
+	int status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);

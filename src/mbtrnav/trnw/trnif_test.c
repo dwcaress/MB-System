@@ -482,6 +482,9 @@ static int s_app_main(app_cfg_t *cfg)
 
         trn_config_t *trn_cfg = trncfg_new(cfg->host,
                                            cfg->port,
+                                           false,
+                                           0,
+                                           NULL,
                                            10L,
                                            TRN_SENSOR_MB,
                                            TRN_MAP_BO,

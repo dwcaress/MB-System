@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbrphsbias.c	9/29/2013
  *
- *    Copyright (c) 2013-2024 by
+ *    Copyright (c) 2013-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -348,9 +348,9 @@ int main(int argc, char **argv) {
 	void *store_ptr = nullptr;
 	int kind;
 	char swathfileread[MB_PATH_MAXLINE];
-	int variable_beams;
-	int traveltime;
-	int beam_flagging;
+	bool variable_beams;
+	bool traveltime;
+	bool beam_flagging;
 	double btime_d;
 	double etime_d;
 

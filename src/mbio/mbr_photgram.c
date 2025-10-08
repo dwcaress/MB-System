@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_photgram.c	1/27/2014
  *
- *    Copyright (c) 2014-2024 by
+ *    Copyright (c) 2014-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -78,8 +78,8 @@
  *              Heading                             4F      Decimal degrees
  *              Roll                                4F      Decimal degrees
  *              Pitch                               4F      Decimal degrees
- *              Speed                               4F      Decimal degrees
- *              Altitude                            4F      Decimal degrees
+ *              Speed                               4F      Meters per second
+ *              Altitude                            4F      Meters
  *              N (Number of soundings)             4U
  *              ------------------------------------------------------------
  *              Repeat N times:
@@ -107,8 +107,8 @@
  *              Heading                             4F      Decimal degrees
  *              Roll                                4F      Decimal degrees
  *              Pitch                               4F      Decimal degrees
- *              Speed                               4F      Decimal degrees
- *              Altitude                            4F      Decimal degrees
+ *              Speed                               4F      Meters per second
+ *              Altitude                            4F      Meters
  *              End identifier                      4U      (0x454E4421 = "END!" = 1162757153)
  *              Check sum of data record between    2U
  *              and including the data record and
@@ -141,8 +141,8 @@
 
 /*--------------------------------------------------------------------*/
 int mbr_info_photgram(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
-                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
-                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
+                      char *system_name, char *format_description, int *numfile, int *filetype, bool *variable_beams,
+                      bool *traveltime, bool *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
 	int status = MB_SUCCESS;

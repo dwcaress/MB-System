@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_surface.c	5/2/94
  *
- *    Copyright (c) 1994-2024 by
+ *    Copyright (c) 1994-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -1096,10 +1096,10 @@ void load_constraints(char *low, char *high) {
 		*/
 
 		for (int j = 0, ij = 0; j < n_rows; j++) {
-			const double yy = n_rows - j - 1;  // TODO(schwehr): Why is yy a double?
+			int iyy = n_rows - j - 1;
 			for (int i = 0; i < n_columns; i++, ij++) {
 				/*if (GMT_is_fnan ((double)lower[ij])) continue;*/
-				lower[ij] -= (plane_c0 + plane_c1 * i + plane_c2 * yy);
+				lower[ij] -= (plane_c0 + plane_c1 * i + plane_c2 * iyy);
 				lower[ij] *= r_z_scale;
 			}
 		}
@@ -1133,10 +1133,10 @@ void load_constraints(char *low, char *high) {
 		        }
 		*/
 		for (int j = 0, ij = 0; j < n_rows; j++) {
-			const double yy = n_rows - j - 1;  // TODO(schwehr): Why is yy a double?
+			int iyy = n_rows - j - 1;
 			for (int i = 0; i < n_columns; i++, ij++) {
 				/*if (GMT_is_fnan ((double)upper[ij])) continue;*/
-				upper[ij] -= (plane_c0 + plane_c1 * i + plane_c2 * yy);
+				upper[ij] -= (plane_c0 + plane_c1 * i + plane_c2 * iyy);
 				upper[ij] *= r_z_scale;
 			}
 		}

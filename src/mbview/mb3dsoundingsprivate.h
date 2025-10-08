@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb3dsoundingsprivate.h	5/25/2007
  *
- *    Copyright (c) 2007-2024 by
+ *    Copyright (c) 2007-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -25,8 +25,6 @@
  * Author:	D. W. Caress
  * Date:	May 25,  2007
  */
-
-// TODO(schwehr): Fold into mb3dsoundings_callbacks.c?
 
 #ifndef MBVIEW_MB3DSOUNDINGSPRIVATE_H_
 #define MBVIEW_MB3DSOUNDINGSPRIVATE_H_

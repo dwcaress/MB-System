@@ -4173,6 +4173,22 @@ object mB3DView_mbview_toggleButton_nav : XmToggleButton widget {
 !(BX)    };
 };
 
+object mB3DView_mbview_toggleButton_navswathbounds : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Navigation Swath Bounds");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNvalueChangedCallback = procedure do_mbview_navswathbounds();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object mB3DView_mbview_toggleButton_navdrape : XmToggleButton widget {
     arguments {
         arguments Style_use;

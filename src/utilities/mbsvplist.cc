@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbsvplist.c  1/3/2001
  *
- *    Copyright (c) 2001-2024 by
+ *    Copyright (c) 2001-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -699,7 +699,7 @@ int main(int argc, char **argv) {
 
             /* if desired, set first svp output to be used for recalculating
                 bathymetry */
-            if (svp_setprocess && svp_save_count == 1) {
+            if (svp_setprocess && svp_save_count >= 1) {
               status = mb_pr_update_svp(verbose, file, true, svp_file, MBP_ANGLES_OK, true, &error);
             }
           }

@@ -4,6 +4,7 @@
 #include "trnxpp.hpp"
 #include "trn_debug.hpp"
 #include "trnx_utils.hpp"
+#include "GeoCon.h"
 
 #ifndef TRNX_PLUGIN_H
 #define TRNX_PLUGIN_H

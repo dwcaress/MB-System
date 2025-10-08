@@ -1,7 +1,7 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	MB3DNavList.c	10/28/2003
  *
- *    Copyright (c) 2003-2024 by
+ *    Copyright (c) 2003-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -45,8 +45,8 @@
 #include <Xm/List.h>
 #include "MB3DNavList.h"
 
-//  Common constant and pixmap declarations.
-#include "creation-c.h"
+#include "MB3DView.h"
+extern MB3DViewData mbview_mbgrdviz;
 
 void RegisterBxConverters(XtAppContext);
 XtPointer BX_CONVERT(Widget, char *, char *, int, Boolean *);

@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sburivax.c	2/2/93
  *
- *    Copyright (c) 1993-2024 by
+ *    Copyright (c) 1993-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -53,8 +53,8 @@
 
 /*--------------------------------------------------------------------*/
 int mbr_info_sburivax(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
-                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
-                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
+                      char *system_name, char *format_description, int *numfile, int *filetype, bool *variable_beams,
+                      bool *traveltime, bool *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
 	if (verbose >= 2) {
@@ -292,6 +292,10 @@ int mbr_rt_sburivax(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* time stamp */
 		store->year = data->year;
 		store->day = data->day;
+		if (data->sec == 60) {
+		  data->min++;
+		  data->sec = 0;
+		}
 		store->min = data->min;
 		store->sec = data->sec;
 

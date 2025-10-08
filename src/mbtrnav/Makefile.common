@@ -1,0 +1,255 @@
+########################################
+# libtrnav Shared Build Environment
+# version and build configuration
+#
+# This file is included by libtrnav
+# Makefiles to configure shared environment
+# and build options.
+# these symbols are exported:
+#
+#  OPT_PROJ_INC        libproj include path
+#  OPT_PROJ_LIB        libproj library path
+#  OPT_USE_PROJ        use libproj (default gctp)
+#  PROJ_LIB            libproj linker option
+#  OPT_TRN_NORAND      TRN random number seed
+#  OPT_WITH_TRNLOG     TRN binary log
+#  OPT_TRNLOG_EST_OUT  Log TRN estimates
+#  OPT_WITH_TNAVPF_CEP_CORRECTION
+#                      TRN CEP correction (deprecated)
+#  MACPORTS_PREFIX     MacPorts package directory
+#  HOMEBREW_PREFIX     Homebrew package directory
+#  OS_PREFIX           platform-specific prefix (for dependencies)
+#  OPT_OS_LDFLAGS      platform-specific LDFLAGS
+#  OPT_OS_CFLAGS       platform-specific CFLAGS
+#  OPT_OS_INC          platform-specific include paths
+#  OPT_OS_LIB          platform-specific library paths
+#  OPT_OS_LIBS         platform-specific libraries
+#  COMMON_DEFS=1       status flag
+#
+# Build options defaults defined in this file:
+#
+#  buildUseProj     Coordinate transform library 0: gctp    1 : libproj []
+#  buildTrnNoRand   TRN random seed              0: enable  1 : disable []
+#  buildTrnLog      TRN binary log               0: disable 1 : enable  [1]
+#  buildTrnLogEst   TRN log estimates            0: disable 1 : enable  [1]
+#  MACPORTS_PREFIX  MacPorts package path        [/opt/local]
+#  HOMEBREW_PREFIX  Homebrew package path        [/opt/homebrew]
+#  PROJ_INC_DIR     libproj include path         [/opt/local/lib/proj9/include]
+#  PROJ_LIB_DIR     libproj library path         [/opt/local/lib/proj9/lib]
+#  DIST_VER         distribition version         []
+#  DIST_DATE        distribution date            [20241126T1631]
+########################################
+
+########################################
+# Installation
+
+# set PREFIX from environment or command line
+ifeq (${PREFIX},)
+    # set default if not passed on command line
+    PREFIX := /usr/local
+else
+    # use environment value if not passed on command line
+    PREFIX := ${PREFIX}
+endif
+
+# set DESTDIR from environment or command line
+ifeq (${DESTDIR},)
+    # set default if not passed on command line
+    DESTDIR :=
+else
+    # use environment value if not passed on command line
+    DESTDIR := ${DESTDIR}
+endif
+
+# use buildUseProj option to set environment
+# related to libproj
+# (used by sub-makefiles)
+ifdef buildUseProj
+    ifeq ($(buildUseProj),0)
+        OPT_USE_PROJ =
+        PROJ_LIB =
+    else
+        OPT_USE_PROJ = -DTRN_USE_PROJ
+        PROJ_LIB = -lproj
+    endif
+else
+    OPT_USE_PROJ =
+    PROJ_LIB =
+endif
+
+# use buildTrnNoRand option to set
+# the OPT_TRN_NORAND
+# (used by sub-makefiles)
+ifdef buildTrnNoRand
+    ifeq ($(buildTrnNoRand),0)
+        OPT_TRN_NORAND =
+    else
+        OPT_TRN_NORAND = -DTRN_NORAND
+    endif
+else
+    OPT_TRN_NORAND =
+endif
+
+# use RAND_FLAG option to set
+# the OPT_TRN_NORAND
+# alias for buildTrnNoRand for backwards compatibility
+# (used by sub-makefiles)
+ifdef RAND_FLAG
+    ifeq ($(RAND_FLAG),0)
+        OPT_TRN_NORAND =
+    else
+        OPT_TRN_NORAND = -DTRN_NORAND
+    endif
+else
+    OPT_TRN_NORAND =
+endif
+
+# use buildTrnLog option to set
+# the OPT_WITH_TRNLOG
+# (used by sub-makefiles)
+ifdef buildTrnLog
+    ifeq ($(buildTrnLog),0)
+        OPT_WITH_TRNLOG =
+    else
+        OPT_WITH_TRNLOG = -DWITH_TRNLOG
+    endif
+else
+    buildTrnLog=1
+    OPT_WITH_TRNLOG = -DWITH_TRNLOG
+endif
+
+# use buildTrnLogEst option to set
+# the OPT_TRNLOG_EST_OUT
+# (used by sub-makefiles)
+ifdef buildTrnLogEst
+    ifeq ($(buildTrnLogEst),0)
+            OPT_TRNLOG_EST_OUT =
+    else
+            OPT_TRNLOG_EST_OUT = -DWITH_TRNLOG_EST_OUT
+    endif
+else
+    buildTrnLogEst=1
+    OPT_TRNLOG_EST_OUT = -DWITH_TRNLOG_EST_OUT
+endif
+
+# This option is no longer valid
+# use buildTrnCEPCorr option to set
+# the OPT_WITH_TNAVPF_CEP_CORRECTION
+# (used by sub-makefiles)
+#ifdef buildTrnCEPCorr
+#    ifeq ($(buildTrnCEPCorr),0)
+#            OPT_WITH_TNAVPF_CEP_CORRECTION =
+#    else
+#            OPT_WITH_TNAVPF_CEP_CORRECTION = -DWITH_TNAVPF_CEP_CORRECTION
+#    endif
+#else
+#        OPT_WITH_TNAVPF_CEP_CORRECTION =
+#endif
+
+# set libproj path defaults
+# may override on make command line
+ifeq ($(shell uname),Linux)
+    ifndef PROJ_INC_DIR
+        PROJ_INC_DIR=/usr/include
+    endif
+
+    ifndef PROJ_LIB_DIR
+        PROJ_LIB_DIR=/usr/lib/x86_64-linux-gnu
+    endif
+    OPT_OS_CFLAGS =
+    OPT_OS_LDFLAGS =
+    OPT_OS_INC = -I/usr/include
+    OPT_OS_LIB = -L/usr/lib -L/usr/lib/x86_64-linux-gnu
+    OPT_OS_LIBS = -lrt
+endif
+
+ifeq ($(shell uname),Darwin)
+    # set MACPORTS_PREFIX from environment or command line
+    ifeq (${MACPORTS_PREFIX},)
+        # set default if not passed on command line
+        MACPORTS_PREFIX = /opt/local
+    endif
+
+    # set HOMEBREW_PREFIX from environment or command line
+    ifeq (${HOMEBREW_PREFIX},)
+        # set default if not passed on command line
+        HOMEBREW_PREFIX = /opt/homebrew
+    endif
+
+    OS_PREFIX = ${MACPORTS_PREFIX}
+    OPT_OS_CFLAGS = -I${OS_PREFIX}/include
+    OPT_OS_LDFLAGS = -L${OS_PREFIX}/lib
+
+    ifndef PROJ_INC_DIR
+        PROJ_INC_DIR=${OS_PREFIX}/lib/proj9/include
+    endif
+
+    ifndef PROJ_LIB_DIR
+        PROJ_LIB_DIR=${OS_PREFIX}/lib/proj9/lib
+    endif
+
+    OPT_OS_CFLAGS =
+    OPT_OS_LDFLAGS =
+    OPT_OS_INC = -I${MACPORTS_PREFIX}/include -I${PROJ_INC_DIR}
+    OPT_OS_LIB = -L${MACPORTS_PREFIX}/lib -L${PROJ_LIB_DIR}
+    OPT_OS_LIBS =
+endif
+
+ifeq ($(shell uname),Cygwin)
+    ifndef PROJ_INC_DIR
+        PROJ_INC_DIR=/usr/include
+    endif
+
+    ifndef PROJ_LIB_DIR
+        PROJ_LIB_DIR=/usr/local/lib
+    endif
+
+    OPT_OS_CFLAGS =
+    OPT_OS_LDFLAGS =
+    OPT_OS_INC = -I/usr/include
+    OPT_OS_LIB = -L/usr/local/lib
+    OPT_OS_LIBS = -lrt
+endif
+
+# Export environment used by sub-Makefiles
+export OPT_PROJ_INC = -I${PROJ_INC_DIR}
+export OPT_PROJ_LIB = -L${PROJ_LIB_DIR}
+export OPT_USE_PROJ
+export PROJ_LIB
+export OPT_TRN_NORAND
+export OPT_WITH_TRNLOG
+export OPT_TRNLOG_EST_OUT
+export OPT_WITH_TNAVPF_CEP_CORRECTION
+export MACPORTS_PREFIX
+export HOMEBREW_PREFIX
+export OS_PREFIX
+export OPT_OS_LDFLAGS
+export OPT_OS_CFLAGS
+export OPT_OS_INC
+export OPT_OS_LIB
+export OPT_OS_LIBS
+export COMMON_DEFS=1
+
+ifdef buildDebug
+$(info "INFO +++ common - buildUseProj       ${buildUseProj}")
+$(info "INFO +++ common - buildTrnNoRand     ${buildTrnNoRand}")
+$(info "INFO +++ common - buildTrnLog        ${buildTrnLog}")
+$(info "INFO +++ common - buildTrnLogEst     ${buildTrnLogEst}")
+$(info "INFO +++ common - buildTrnCEPCorr    ${buildTrnCEPCorr}")
+$(info "INFO +++ common - OPT_USE_PROJ       ${OPT_USE_PROJ}")
+$(info "INFO +++ common - PROJ_LIB           ${PROJ_LIB}")
+$(info "INFO +++ common - OPT_PROJ_INC       ${OPT_PROJ_INC}")
+$(info "INFO +++ common - OPT_PROJ_LIB       ${OPT_PROJ_LIB}")
+$(info "INFO +++ common - OPT_TRN_NORAND     ${OPT_TRN_NORAND}")
+$(info "INFO +++ common - OPT_WITH_TRNLOG    ${OPT_WITH_TRNLOG}")
+$(info "INFO +++ common - OPT_TRNLOG_EST_OUT ${OPT_TRNLOG_EST_OUT}")
+$(info "INFO +++ common - OPT_WITH_TNAVPF_CEP_CORRECTION ${OPT_WITH_TNAVPF_CEP_CORRECTION}")
+$(info "INFO +++ common - MACPORTS_PREFIX    ${MACPORTS_PREFIX}")
+$(info "INFO +++ common - HOMEBREW_PREFIX    ${HOMEBREW_PREFIX}")
+$(info "INFO +++ common - OS_PREFIX          ${OS_PREFIX}")
+$(info "INFO +++ common - OPT_OS_CFLAGS      ${OPT_OS_CFLAGS}")
+$(info "INFO +++ common - OPT_OS_LDFLAGS     ${OPT_OS_LDFLAGS}")
+$(info "INFO +++ common - OPT_OS_INC         ${OPT_OS_INC}")
+$(info "INFO +++ common - OPT_OS_LIB         ${OPT_OS_LIB}")
+$(info "INFO +++ common - OPT_OS_LIBS        ${OPT_OS_LIBS}")
+endif

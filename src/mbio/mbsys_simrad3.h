@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad3.h	2/22/2008
  *
- *    Copyright (c) 2008-2024 by
+ *    Copyright (c) 2008-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -393,6 +393,56 @@
 #define EM3_INVALID_U_INT 0xFFFFFFFF
 #define EM3_INVALID_INT 0x7FFFFFFF
 
+/* M3 datagram types */
+#pragma pack(push,1)
+struct mbsys_simrad3_header {
+    /* Definition of general datagram header */
+    unsigned int numBytesDgm;       /* Datagram length in bytes.
+                                     * The length field at the start (4 bytes) and end of the datagram (4 bytes)
+                                     * are included in the length count. */
+    mb_u_char dgmSTX;               /* start ID e.g. 0x02 */
+    mb_u_char dgmType;              /* datagram type definition, e.g.
+                                     Installation (I or i) or r (Remote information): Start = 049h Stop = 069h Remote info = 070h Runtime (R): 052h
+                                     Raw range and beam angle 78 (N): 04eh
+                                     XYZ88 (X): 058h, or 88d Clock (C): 043h
+                                     Attitude (A): 041h
+                                     Position (P): 050h
+                                     Surface sound speed (G): 047h
+                                     */
+    unsigned short emModeNum;       /* EM model number For M3, use 30. For M3 dual head, use 30D */
+    unsigned int date;              /* Date (in binary format) = year*10000+Month*100+day (example: April 26, 2016 = 20160426) */
+    unsigned int timeMs;            /* Time since midnight in milliseconds  */
+    unsigned short counter;            /* Sequential counter associated with each datagram. In M3, it
+                                      is the ping sequential counter associated with data. Only
+                                      exception is the counter in the installation datagram, where
+                                      the counter starts from 0 and increases by 1 whenever a new
+                                      installation datagram is received.  */
+    unsigned short sysSerialNum;       /* System serial number. Set it to the lower two bytes of the first M3 head sonar info.*/
+    unsigned short secHeadSerialNum;   /* Secondary system serial number and only used by Installation parameter. Set it to the lower two bytes of the second M3 sonar info. Currently it is always 0. */
+};
+
+struct mbsys_simrad3_footer {
+    mb_u_char dgmETX;        /*End identifier, always 03h*/
+    unsigned short checksum; /*Sum of bytes between STX and ETX*/
+};
+#pragma pack(pop)
+
+// Enumerate EM datagram types
+typedef enum {
+    /* unknown datagram */
+    ALL_UNKNOWN = 0,
+    ALL_INSTALLATION_U = 'I',
+    ALL_INSTALLATION_L = 'i',
+    ALL_REMOTE = 'r',
+    ALL_RUNTIME = 'R',
+    ALL_RAW_RANGE_BEAM_ANGLE = 'N',
+    ALL_XYZ88 = 'X',
+    ALL_CLOCK = 'C',
+    ALL_ATTITUDE = 'A',
+    ALL_POSITION = 'P',
+    ALL_SURFACE_SOUND_SPEED = 'G'
+} mbsys_simrad3_emdgm_type;
+
 /* internal data structure for survey data */
 struct mbsys_simrad3_ping_struct {
 	int read_status; /* read status for this structure:
@@ -441,13 +491,13 @@ struct mbsys_simrad3_ping_struct {
 	int png_spare;         /* spare */
 	float png_depth[MBSYS_SIMRAD3_MAXBEAMS];
 	/* depths relative to sonar (m)
-The beam data are given re the transmit
-transducer or sonar head depth and the
-horizontal location (x,y) of the active
-positioning systems reference point.
-Heave, roll, pitch, sound speed at the
-transducer depth and ray bending through
-the water column have been applied. */
+		The beam data are given re the transmit
+		transducer or sonar head depth and the
+		horizontal location (x,y) of the active
+		positioning systems reference point.
+		Heave, roll, pitch, sound speed at the
+		transducer depth and ray bending through
+		the water column have been applied. */
 	float png_acrosstrack[MBSYS_SIMRAD3_MAXBEAMS];
 	/* acrosstrack distances (m) */
 	float png_alongtrack[MBSYS_SIMRAD3_MAXBEAMS];
@@ -516,8 +566,7 @@ the water column have been applied. */
 	   as measured by heave  */
 
 	/* raw travel time and angle data version 4 */
-	// TODO(schwehr): bool.
-	int png_raw_read;       /* flag indicating actual reading of raw beam record */
+	bool png_raw_read;       /* flag indicating actual reading of raw beam record */
 	int png_raw_date;       /* date = year*10000 + month*100 + day
 	                    Feb 26, 1995 = 19950226 */
 	int png_raw_msec;       /* time since midnight in msec
@@ -614,8 +663,7 @@ the water column have been applied. */
 	    defined by Xavier Lurton. Others have not yet been defined */
 
 	/* sidescan */
-	// TODO(schwehr): bool.
-	int png_ss_read;          /* flag indicating actual reading of sidescan record */
+	bool png_ss_read;         /* flag indicating actual reading of sidescan record */
 	int png_ss_date;          /* date = year*10000 + month*100 + day
 	                      Feb 26, 1995 = 19950226 */
 	int png_ss_msec;          /* time since midnight in msec
@@ -1039,7 +1087,11 @@ struct mbsys_simrad3_struct {
 	                 *       1        ----           Head           ----          ----
 	                 *       2        ----          Head 1         Head 2         ----
 	                 *       3        ----            TX            RX 1          RX 2
-	                 *       4        TX 1           TX 2           RX 1          RX 2     */
+	                 *       4        TX 1           TX 2           RX 1          RX 2     
+	                 *
+	                 * NOTE: if the sonar is an M3 (sonar == 30) then par_stc == 0 even 
+	                 *       the sonar is a single head and should be par_stc = 1 
+	                 */
 	double par_s0z; /* Transducer 0 vertical location (m) */
 	double par_s0x; /* Transducer 0 along location (m) */
 	double par_s0y; /* Transducer 0 athwart location (m) */

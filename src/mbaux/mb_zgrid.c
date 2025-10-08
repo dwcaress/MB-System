@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_zgrid.c	    4/25/95
  *
- *    Copyright (c) 1993-2024 by
+ *    Copyright (c) 1993-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -117,8 +117,6 @@
  * 2 October 2012
  *
  *--------------------------------------------------------------------*/
-
-/* TODO(schwehr): Remove gotos */
 
 #include <math.h>
 #include <stdio.h>
@@ -277,7 +275,7 @@ int mb_zgrid(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float 
 	float x, y, delzm;
 	float dzmax, dzrms;
 	int im, jm;
-	float dzrms8 = 0.0f;  // TODO(schwehr): -Wmaybe-uninitialized
+	float dzrms8 = 0.0f;
 	float z00;
 	float dz;
 	float ze;

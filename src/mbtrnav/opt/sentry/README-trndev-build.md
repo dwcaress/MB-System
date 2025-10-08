@@ -52,14 +52,47 @@ sudo ./trndev-build-cmake.sh -i [-d <path> -p <path>]
 ```
 Description: build/install trndev using cmake
 
-usage: trndev-build-cmake.sh [options]
-Options:
--d <s> : set DESTDIR for install/uninstall []
--p <s> : set PREFIX for install/uninstall [/usr/local]
--i     : install
--u     : uninstall
--h     : help message
--v     : verbose output
+ usage: trndev-build-cmake.sh [options]
+ Options:
+  -d <s> : set DESTDIR for install/uninstall []
+  -p <s> : set PREFIX for install/uninstall [/usr/local]
+  -i     : install
+  -u     : uninstall
+  -m <s> : libmframe cmake options
+  -t <s> : libtrnav cmake options
+  -h     : help message
+  -v     : verbose output
+
+Use Notes:
+ This script is typically run twice:
+   build (optionally using -t, -m)
+   then
+   install (using -i, optionally -p, -d)
+   or
+   uninstall (using -u)
+
+   When uninstalling, use the same -p, -d options
+   used to install
+
+Examples:
+
+ # build
+   trndev-build-cmake.sh
+
+ # build using cmake TRN options
+   trndev-build-cmake.sh -t "-DbuildUseProj=ON"
+
+ # install to default directory /usr/local
+   sudo trndev-build-cmake.sh -i
+
+ # uninstall from default directory /usr/local
+   sudo trndev-build-cmake.sh -u
+
+ # install to staging directory w/ default PREFIX (as non-root)
+   trndev-build-cmake.sh -id $PWD/stage
+
+ # uninstall from staging directory w/ custom PREFIX (as non-root)
+   trndev-build-cmake.sh -ud $PWD/stage -p /foo/bar
 ```
 
 ### trndev-build-gnu.sh

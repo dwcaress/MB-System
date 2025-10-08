@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbpronav.c	5/20/99
  *
- *    Copyright (c) 1999-2024 by
+ *    Copyright (c) 1999-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -48,8 +48,8 @@
 
 /*--------------------------------------------------------------------*/
 int mbr_info_mbpronav(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
-                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
-                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
+                      char *system_name, char *format_description, int *numfile, int *filetype, bool *variable_beams,
+                      bool *traveltime, bool *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
 	if (verbose >= 2) {
@@ -288,7 +288,12 @@ int mbr_mbpronav_rd_data(int verbose, void *mbio_ptr, int *error) {
 		data->time_i[5] = (int)sec;
 		data->time_i[6] = 1000000.0 * (sec - data->time_i[5]);
 		if (nread >= 9) {
-			mb_get_time(verbose, data->time_i, &data->time_d);
+			if (data->time_i[0] > 1962 && data->time_i[0] < 2062)
+				mb_get_time(verbose, data->time_i, &data->time_d);
+			else {
+				data->time_d = d1;
+				mb_get_date(verbose, data->time_d, data->time_i);
+				}
 			data->longitude = d2;
 			data->latitude = d3;
 			data->heading = 0.0;

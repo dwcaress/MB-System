@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_delaun.c	4/19/94
  *
- *    Copyright (c) 1994-2024 by
+ *    Copyright (c) 1994-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -307,7 +307,7 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 			circumcenter and circumcircle of the enclosing
 			equilateral triangle */
 			else {
-				fprintf(stderr, "\nmb_delaun Warning. Zero denominator\n");
+				fprintf(stderr, "\nmb_delaun Warning: three linear points cannot be a triangle\n");
 				fprintf(stderr, "%d %f %f\n", i1, p1[i1], p2[i1]);
 				fprintf(stderr, "%d %f %f\n", i2, p1[i2], p2[i2]);
 				fprintf(stderr, "%d %f %f\n", nuc, p1[nuc], p2[nuc]);
@@ -329,8 +329,8 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 	/* set number of triangles */
 	*ntri = isp;
 
-	/* remove triangles using added points and triangles made
-	    up of three flagged edge points */
+	/* remove triangles using added points, triangles made
+	    up of three flagged edge points, and degenerate triangles */
 	for (int i = *ntri - 1; i > -1; i--) {
 		if (iv1[i] >= npts || iv2[i] >= npts || iv3[i] >= npts) {
 			for (int j = i; j < isp - 1; j++) {
@@ -341,6 +341,16 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 			isp--;
 		}
 		else if (ed[iv1[i]] != 0 && ed[iv2[i]] != 0 && ed[iv3[i]] != 0) {
+			for (int j = i; j < isp - 1; j++) {
+				iv1[j] = iv1[j + 1];
+				iv2[j] = iv2[j + 1];
+				iv3[j] = iv3[j + 1];
+			}
+			isp--;
+		}
+		if (iv1[i] == iv2[i] || iv2[i] == iv3[i] || iv3[i] == iv1[i]) {
+fprintf(stderr, "%s:%d:%s: Removing degenerate triangle: %d %d %d\n", 
+__FILE__, __LINE__, __FUNCTION__, iv1[i], iv2[i], iv3[i]);
 			for (int j = i; j < isp - 1; j++) {
 				iv1[j] = iv1[j + 1];
 				iv2[j] = iv2[j + 1];

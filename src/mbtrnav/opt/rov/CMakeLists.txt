@@ -20,6 +20,8 @@ message("In src/mbtrnav/opt/rov")
 
 find_package(NetCDF REQUIRED)
 find_package(lcm REQUIRED)
+find_package(LibPROJ REQUIRED)
+
 include(${LCM_USE_FILE})
 message("-- LCM found! (please ignore any warnings about CMake version deprecation...)")
 
@@ -133,11 +135,13 @@ target_include_directories(trnxplug PRIVATE
     ${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/rov
     ${CMAKE_BINARY_DIR}/src/mbtrnav/opt/rov
     ${NetCDF_INCLUDE_DIRS}
+    ${LibPROJ_INCLUDE_DIRS}
 )
 
 target_link_libraries(trnxplug PRIVATE
     newmat
     geolib
+    geocon
     trnw
     qnx
     mb1
@@ -165,6 +169,7 @@ target_include_directories(trnxpp PRIVATE
     ${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/rov
     ${CMAKE_BINARY_DIR}/src/mbtrnav/opt/rov
     ${NetCDF_INCLUDE_DIRS}
+    ${LibPROJ_INCLUDE_DIRS}
 )
 
 target_link_libraries(trnxpp PRIVATE lcm stdc++ mb1 trncli tnav newmat qnx m geolib udpms trnxplug NetCDF::NetCDF)

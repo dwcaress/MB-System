@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mb_readwritegrd.c  12/10/2007
  *
- *    Copyright (c) 2007-2024 by
+ *    Copyright (c) 2007-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -36,6 +36,10 @@
 #include <time.h>
 #include <unistd.h>
 
+/* include GMT header file gmt_dev.h without including glib headers not needed by MB-System */
+#ifdef HAVE_GLIB_GTHREAD
+#undef HAVE_GLIB_GTHREAD
+#endif
 #include "gmt_dev.h"
 
 #ifndef CMAKE_BUILD_SYSTEM
@@ -136,6 +140,8 @@ int mb_check_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char
         int nscan;
         int utmzone;
         char NorS;
+        double lon_origin;
+        double lat_origin;
         if ((nscan = sscanf(&(header->remark[2]), "Projection: UTM%d%c", &utmzone, &NorS)) == 2) {
           if (NorS == 'N') {
             epsgid = 32600 + utmzone;
@@ -151,6 +157,12 @@ int mb_check_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char
           *grid_projection_mode = MB_PROJECTION_PROJECTED;
           sprintf(grid_projection_id, "EPSG:%d", epsgid);
         }
+        else if ((nscan = sscanf(&(header->remark[2]), "Projection: LTM%lf/%lf", &lon_origin, &lat_origin)) == 2) {
+          modeltype = ModelTypeProjected;
+          sprintf(projectionname, "LTM%.9f/%.9f", lon_origin, lat_origin);
+          *grid_projection_mode = MB_PROJECTION_PROJECTED;
+      	  sprintf(grid_projection_id, "+proj=tmerc +lon_0=%.9f +lat_0=%.9f +ellps=WGS84", lon_origin, lat_origin);
+		}
         else if ((nscan = sscanf(&(header->remark[2]), "Projection: EPSG:%d", &epsgid)) == 1) {
           sprintf(projectionname, "EPSG:%d", epsgid);
           modeltype = ModelTypeProjected;
@@ -354,6 +366,8 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
         int nscan;
         int utmzone;
         char NorS;
+        double lon_origin;
+        double lat_origin;
         if ((nscan = sscanf(&(header->remark[2]), "Projection: UTM%d%c", &utmzone, &NorS)) == 2) {
           if (NorS == 'N') {
             epsgid = 32600 + utmzone;
@@ -369,6 +383,12 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
           *grid_projection_mode = MB_PROJECTION_PROJECTED;
           sprintf(grid_projection_id, "EPSG:%d", epsgid);
         }
+        else if ((nscan = sscanf(&(header->remark[2]), "Projection: LTM%lf/%lf", &lon_origin, &lat_origin)) == 2) {
+          modeltype = ModelTypeProjected;
+          sprintf(projectionname, "LTM%.9f/%.9f", lon_origin, lat_origin);
+          *grid_projection_mode = MB_PROJECTION_PROJECTED;
+      	  sprintf(grid_projection_id, "+proj=tmerc +lon_0=%.9f +lat_0=%.9f +ellps=WGS84", lon_origin, lat_origin);
+		}
         else if ((nscan = sscanf(&(header->remark[2]), "Projection: EPSG:%d", &epsgid)) == 1) {
           sprintf(projectionname, "EPSG:%d", epsgid);
           modeltype = ModelTypeProjected;

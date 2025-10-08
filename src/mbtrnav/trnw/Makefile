@@ -14,28 +14,21 @@ mb1rs_ver ?=0.0.0b1
 OPT_MB1RS_VER=-DMB1RS_VER=$(mb1rs_ver)
 OPT_MB1RS_BUILD=-DMB1RS_BUILD=$(build_date)
 
+LIBTRNAV_TOP = ..
+ifndef COMMON_DEFS
+include ${LIBTRNAV_TOP}/Makefile.common
+endif
+
+# build directories
+OUTPUT_DIR=${LIBTRNAV_TOP}/bin
+BUILD_DIR=${LIBTRNAV_TOP}/build
+QNX_DIR=${LIBTRNAV_TOP}/qnx-utils
+NEWMAT_DIR=${LIBTRNAV_TOP}/newmat
+TNAV_DIR=${LIBTRNAV_TOP}/terrain-nav
+
 # C standard e.g. -std=c99 -std=gnu99
 # may be needed for Cygwin (e.g. for loop declare/init)
 #STD= -std=c99
-
-# Platform-specific options
-ifeq ($(shell uname),Linux)
-OS_CFLAGS=
-OS_INC_PATH=
-OS_LIB_PATH=
-endif
-
-ifeq ($(shell uname),Darwin)
-OS_CFLAGS=
-OS_INC_PATH=-I/opt/local/include
-OS_LIB_PATH=-L/opt/local/lib
-endif
-
-ifeq ($(shell uname),Cygwin)
-OS_CFLAGS=
-OS_INC_PATH=-I/opt/local/include
-OS_LIB_PATH=-L/opt/local/lib
-endif
 
 # for TRN clients or to force
 # netif default MMDEBUG config
@@ -51,7 +44,7 @@ $(info "INFO +++ using NETIF_MMDEBUG")
 endif
 
 # Build options
-BUILD_RELEASE_OPTIONS = $(STD) -D_GNU_SOURCE  $(OPT_TRN_VER) $(OPT_TRN_BUILD) $(OPT_NETIF_MMDEBUG) $(OPT_MB1RS_VER) $(OPT_MB1RS_BUILD)
+BUILD_RELEASE_OPTIONS = $(STD) -D_GNU_SOURCE  $(OPT_TRN_VER) $(OPT_TRN_BUILD) $(OPT_NETIF_MMDEBUG) $(OPT_MB1RS_VER) $(OPT_MB1RS_BUILD) $(OPT_USE_PROJ)
 BUILD_DEBUG_OPTIONS = $(BUILD_RELEASE_OPTIONS) -DWITH_PDEBUG
 
 BUILD_OPTIONS = $(BUILD_RELEASE_OPTIONS)
@@ -63,13 +56,6 @@ BUILD_OPTIONS = $(BUILD_DEBUG_OPTIONS)
 else
 BUILD_OPTIONS = $(BUILD_RELEASE_OPTIONS)
 endif
-
-# build directories
-OUTPUT_DIR=../bin
-BUILD_DIR=../build
-QNX_DIR=../qnx-utils
-NEWMAT_DIR=../newmat
-TNAV_DIR=../terrain-nav
 
 # mframe is required to build TRN clients
 # MFRAME_INC_DIR: location of mframe headers
@@ -89,7 +75,7 @@ MFRAME_LIB=# $(MFRAME_LIB_DIR)/libmframe.a
 
 # Compilation Options
 CXX = gcc
-CPP = g++
+CPP = g++ -std=c++11
 # compile and link with -pg for profiling support
 # then do gprof <application> gmon.out for profile output to console
 #GPROF= -pg
@@ -97,21 +83,44 @@ CPP = g++
 WARN_FLAGS=-Wall
 
 # Compiler flags
-CFLAGS = -g -O2 $(WARN_FLAGS) $(GPROF) $(BUILD_OPTIONS) $(OS_CFLAGS)
-INC_PATHS = -I. -I$(MFRAME_INC_DIR) -I$(TNAV_DIR) -I$(NEWMAT_DIR) -I$(QNX_DIR) $(OS_INC_PATH)
+CFLAGS = -g -O2 $(WARN_FLAGS) $(GPROF) $(BUILD_OPTIONS) $(OPT_OS_CFLAGS)
+INC_PATHS = -I. -I$(MFRAME_INC_DIR) -I$(TNAV_DIR) -I$(NEWMAT_DIR) -I$(QNX_DIR) $(OPT_PROJ_INC) $(OPT_OS_INC)
 
 # Linker flags
-LD_FLAGS = -g $(GPROF)
-LIB_PATHS = -L$(OUTPUT_DIR) -L$(MFRAME_LIB_DIR) $(OS_LIB_PATH) -L/usr/local/lib
+LD_FLAGS = -g $(GPROF) $(OPT_OS_LDFLAGS)
+LIB_PATHS = -L$(OUTPUT_DIR) -L$(MFRAME_LIB_DIR) $(OPT_PROJ_LIB) -L/usr/local/lib  $(OPT_OS_LIB)
+
+ifdef buildDebug
+$(info "INFO +++ trnw - OPT_USE_PROJ ${OPT_USE_PROJ}")
+$(info "INFO +++ trnw - PROJ_LIB ${PROJ_LIB}")
+$(info "INFO +++ trnw - OPT_PROJ_INC ${OPT_PROJ_INC}")
+$(info "INFO +++ trnw - OPT_PROJ_LIB ${OPT_PROJ_LIB}")
+$(info "INFO +++ trnw - OS_PREFIX          ${OS_PREFIX}")
+$(info "INFO +++ trnw - OPT_OS_CFLAGS      ${OPT_OS_CFLAGS}")
+$(info "INFO +++ trnw - OPT_OS_LDFLAGS     ${OPT_OS_LDFLAGS}")
+$(info "INFO +++ trnw - OPT_OS_INC         ${OPT_OS_INC}")
+$(info "INFO +++ trnw - OPT_OS_LIB         ${OPT_OS_LIB}")
+$(info "INFO +++ trnw - OPT_OS_LIBS        ${OPT_OS_LIBS}")
+$(info "INFO +++       - CFLAGS             ${CFLAGS}")
+$(info "INFO +++       - INC_PATHS          ${INC_PATHS}")
+$(info "INFO +++       - LD_FLAGS           ${LD_FLAGS}")
+$(info "INFO +++       - LIB_PATHS          ${LIB_PATHS}")
+endif
 
 ########################################
 # Target Definitions
+
+# libgeocon: Geoconversion wrapper for NavUtils/GCTP, PROJ
+LIBGEOCON=libgeocon.a
+LIBGEOCON_SRC = GeoCon.cpp
+LIBGEOCON_OBJ=$(LIBGEOCON_SRC:%.cpp=$(BUILD_DIR)/%.o)
+LIBGEOCON_LIBS = -lqnx -lgeolib  $(PROJ_LIB)
 
 # libtrnw: TRN C wrappers
 LIBTRNW=libtrnw.a
 LIBTRNW_SRC=trnw.cpp
 LIBTRNW_OBJ=$(LIBTRNW_SRC:%.cpp=$(BUILD_DIR)/%.o)
-LIBTRNW_LIBS = -ltrn -lqnx -lnewmat -lpthread
+LIBTRNW_LIBS = -ltrn -lqnx -lgeolib -lnewmat $(PROJ_LIB) -lpthread
 
 LIBMB1=libmb1.a
 LIBMB1_SRC = mb1_msg.c
@@ -145,13 +154,13 @@ $(BUILD_DIR)/matrixArrayCalcs.o
 LIBTRNCLI=libtrncli.a
 LIBTRNCLI_SRC=trn_cli.c
 LIBTRNCLI_OBJ=$(LIBTRNCLI_SRC:%.c=$(BUILD_DIR)/%.o)
-LIBTRNCLI_LIBS = -lmframe -lpthread -lm
+LIBTRNCLI_LIBS = -lgeocon -lqnx -lgeolib -lmframe -lpthread -lm
 
 # trncli-test: trn_cli unit test
 TRNCLI_TEST=trncli-test
 TRNCLI_TEST_SRC=trncli_test.c mb1_msg.c
 TRNCLI_TEST_OBJ=$(TRNCLI_TEST_SRC:%.c=$(BUILD_DIR)/%.o)
-TRNCLI_TEST_LIBS = -lmframe -ltrnw -lpthread -lm -lqnx -lnewmat -ltrn -ltrncli -lnetcdf -lgeolib -lstdc++
+TRNCLI_TEST_LIBS = -lmframe -ltrnw  -ltrn -ltrncli -lgeocon -lqnx -lgeolib  -lnewmat -lnetcdf  $(PROJ_LIB) -lpthread -lm  -lstdc++
 
 # libtrnucli: TRNU client lib
 LIBTRNUCLI=libtrnucli.a
@@ -169,13 +178,13 @@ LIBNETIF_LIBS =
 TRNUCLI_TEST=trnucli-test
 TRNUCLI_TEST_SRC=trnucli_test.c 
 TRNUCLI_TEST_OBJ=$(TRNUCLI_TEST_SRC:%.c=$(BUILD_DIR)/%.o)
-TRNUCLI_TEST_LIBS = -lnetif -ltrnucli -lmframe -lpthread -lm -lqnx -lnewmat -ltrn -ltrncli -lnetcdf -lgeolib -lstdc++
+TRNUCLI_TEST_LIBS = -lnetif -ltrnucli -lmframe -lpthread -lm -lqnx -lnewmat -ltrn -ltrncli -lnetcdf -lgeolib $(PROJ_LIB) -lstdc++
 
 # trnusvr-test: trnu_cli test server
 TRNUSVR_TEST=trnusvr-test
 TRNUSVR_TEST_SRC=trnusvr_test.c netif.c trnif_msg.c trnif_proto.c
 TRNUSVR_TEST_OBJ=$(TRNUSVR_TEST_SRC:%.c=$(BUILD_DIR)/%.o)
-TRNUSVR_TEST_LIBS = -lmframe -ltrnw -lpthread -lm -lqnx -lnewmat -ltrn -ltrncli -lnetcdf -lgeolib -lstdc++
+TRNUSVR_TEST_LIBS = -lmframe -ltrnw -lpthread -lm -lqnx -lnewmat -ltrn -ltrncli -lnetcdf -lgeolib $(PROJ_LIB) -lstdc++
 
 # mcpub: multicast test publisher
 MCPUB=mcpub
@@ -204,12 +213,17 @@ MMCSUB_LIBS = $(MFRAME_LIB) -lmframe -lm -lstdc++
 TRNIF_TEST=trnif-test
 TRNIF_TEST_SRC=trnif_test.c trnif_proto.c trnif_msg.c
 TRNIF_TEST_OBJ = $(TRNIF_TEST_SRC:%.c=$(BUILD_DIR)/%.o)
-TRNIF_TEST_LIBS = -lnetif -lmframe -ltrnw -lpthread -lm -lqnx -lnewmat -ltrn -lnetcdf -lgeolib -lstdc++
+TRNIF_TEST_LIBS = -lnetif -lmframe -ltrnw -lpthread -lm  -lnewmat -ltrn -lnetcdf -lgeocon -lqnx -lgeolib  $(PROJ_LIB) -lstdc++
 
 MB1RS=mb1rs
 MB1RS_SRC=mb1_msg.c mb1rs.c mb1rs-app.c
 MB1RS_OBJ=$(MB1RS_SRC:%.c=$(BUILD_DIR)/%.o)
 MB1RS_LIBS = $(MFRAME_LIB) -lmframe -lm -lpthread -lstdc++
+
+GEOCON_TEST=geocon-test
+GEOCON_TEST_SRC=geocon_test.cpp
+GEOCON_TEST_OBJ=$(GEOCON_TEST_SRC:%.cpp=$(BUILD_DIR)/%.o)
+GEOCON_TEST_LIBS = -lgeocon -lqnx -lgeolib $(PROJ_LIB) -lstdc++
 
 # TRN clients
 TRNC_SRC+= $(LIBTRNCLI_SRC) \
@@ -227,6 +241,7 @@ $(MB1RS_SRC)
 
 TRNC_TARGETS+=  $(OUTPUT_DIR)/$(LIBTRNCLI) \
 $(OUTPUT_DIR)/$(LIBTRNUCLI) \
+$(OUTPUT_DIR)/$(LIBGEOCON) \
 $(OUTPUT_DIR)/$(TRNCLI_TEST) \
 $(OUTPUT_DIR)/$(TRNUCLI_TEST)\
 $(OUTPUT_DIR)/$(TRNUSVR_TEST) \
@@ -246,10 +261,10 @@ TRNW_OBJECTS = $(TRNW_SOURCES:%.cpp=$(BUILD_DIR)/%.o)
 TRNC_DEPENDS = $(TRNC_SOURCES:%.c=$(BUILD_DIR)/%.d)
 TRNW_DEPENDS = $(TRNW_SOURCES:%.cpp=$(BUILD_DIR)/%.d)
 CLEAN_OBJECTS = $(TRNC_OBJECTS) $(TRNW_OBJECTS) $(MCSUB_OBJ) $(MMCSUB_OBJ) $(LIBNETIF_OBJ) \
-$(LIBMB1_OBJ)
-CLEAN_DEPENDS = $(TRNC_DEPENDS) $(TRNW_DEPENDS) 
+$(LIBMB1_OBJ) $(GEOCON_TEST_OBJ) $(LIBGEOCON_OBJ)
+CLEAN_DEPENDS = $(TRNC_DEPENDS) $(TRNW_DEPENDS)
 BINARIES =  $(OUTPUT_DIR)/$(LIBTRNW) $(OUTPUT_DIR)/$(TRNC_TARGETS) $(OUTPUT_DIR)/$(LIBNETIF) \
-$(OUTPUT_DIR)/$(LIBMB1)
+$(OUTPUT_DIR)/$(LIBMB1) $(OUTPUT_DIR)/$(GEOCON_TEST)
 
 CLEANUP = gmon.out
 # dSYMs : XCode debug symbol file folders
@@ -258,8 +273,8 @@ CLEANUP = gmon.out
 
 ########################################
 # Rules: build targets
-all: $(OUTPUT_DIR)/$(LIBTRNW) $(OUTPUT_DIR)/$(LIBMB1)
-	
+all: $(OUTPUT_DIR)/$(LIBTRNW) $(OUTPUT_DIR)/$(LIBMB1) $(OUTPUT_DIR)/$(LIBGEOCON) $(OUTPUT_DIR)/$(GEOCON_TEST)
+
 
 trnc: $(OUTPUT_DIR)/$(LIBTRNW) $(OUTPUT_DIR)/$(LIBNETIF) $(TRNC_TARGETS)
 	@echo building $@...
@@ -283,6 +298,12 @@ $(OUTPUT_DIR)/$(LIBTRNW): $(LIBTRNW_OBJ)
 $(OUTPUT_DIR)/$(LIBTRNCLI): $(LIBTRNCLI_OBJ)
 	@echo building $@...
 	ar rcs $@ $(LIBTRNCLI_OBJ) $(BUILD_DIR)/*.o
+
+# build GeoConverter library
+#	--record-libdeps="$(LIB_PATHS) $(LIBGEOCON_LIBS)"
+$(OUTPUT_DIR)/$(LIBGEOCON): $(LIBGEOCON_OBJ)
+	@echo building $@...
+	ar rcs $@ $(LIBGEOCON_OBJ)
 
 # build trncli-test utility
 $(OUTPUT_DIR)/$(TRNCLI_TEST): $(TRNCLI_TEST_OBJ) $(LIBTRNW_OBJ) $(LIBTRNCLI_OBJ)
@@ -335,11 +356,19 @@ $(OUTPUT_DIR)/$(MMCSUB): $(MMCSUB_OBJ)
 $(OUTPUT_DIR)/$(TRNIF_TEST): $(TRNIF_TEST_OBJ)
 	@echo building $@...
 	$(CXX) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(TRNIF_TEST_LIBS)
+	@echo
 
 # build mb1rs MB1 server
 $(OUTPUT_DIR)/$(MB1RS): $(MB1RS_OBJ)
 	@echo building $@...
 	$(CXX) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(MB1RS_LIBS)
+	@echo
+
+# build geocon-test utility
+$(OUTPUT_DIR)/$(GEOCON_TEST): $(GEOCON_TEST_OBJ)
+	@echo building $@...
+	$(CPP) $(INC_PATHS) $(LIB_PATHS)  $^ -o $@ $(LD_FLAGS) $(GEOCON_TEST_LIBS)
+	@echo
 
 # include the dependencies
 ifeq ($(MAKECMDGOALS),trnc)

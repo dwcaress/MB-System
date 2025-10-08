@@ -151,10 +151,10 @@ EncodeCompressedUnsignedShortArray (unsigned char *sptr, const unsigned short *a
         return (-1);
     }
 
-    n = num_beams;
+    n = (size_t) num_beams;
 
     /* Allocate a temporary output array. */
-    out = (gsfuLong *) malloc (n * sizeof (gsfuLong));
+    out = (gsfuLong *) calloc (n, sizeof (gsfuLong));
     if (!out)
     {
         gsfError = GSF_MEMORY_ALLOCATION_FAILED;
@@ -250,8 +250,12 @@ DecodeCompressedUnsignedShortArray (unsigned short **array, const unsigned char 
     int version;
     int order;
 
-
-    if (num_beams <= 0)
+    if (compressed_size - 1 <= 0)
+    {
+    	gsfError = GSF_COMPRESSION_FAILED;
+    	return (-1);
+    }
+    else if (num_beams <= 0)
     {
         gsfError = GSF_INVALID_NUM_BEAMS;
         return (-1);
@@ -274,13 +278,15 @@ DecodeCompressedUnsignedShortArray (unsigned short **array, const unsigned char 
        systems have a dynamic number of beams depending on depth. */
     if (num_beams > arraySize[handle - 1][subrecordID - 1])
     {
-        *array = (unsigned short *) realloc ((void *) *array, num_beams * sizeof (unsigned short));
-
-        if (*array == (unsigned short *) NULL)
+        unsigned short * ustemp = (unsigned short *) realloc ((void *) *array, num_beams * sizeof (unsigned short));
+        if (ustemp == (unsigned short *) NULL)
         {
+            free(*array);
+            *array = (unsigned short *)NULL;
             gsfError = GSF_MEMORY_ALLOCATION_FAILED;
             return (-1);
         }
+        *array = ustemp;
         memset (*array, 0, num_beams * sizeof (unsigned short));
 
         arraySize[handle - 1][subrecordID - 1] = num_beams;
@@ -301,7 +307,7 @@ DecodeCompressedUnsignedShortArray (unsigned short **array, const unsigned char 
     m = (compressed_size - 1) / sizeof (gsfuLong);
 
     /* Allocate a temporary input array. */
-    in = (gsfuLong *) malloc (m * sizeof (gsfuLong));
+    in = (gsfuLong *) calloc (m, sizeof (gsfuLong));
     if (!in)
     {
         gsfError = GSF_MEMORY_ALLOCATION_FAILED;
@@ -315,7 +321,7 @@ DecodeCompressedUnsignedShortArray (unsigned short **array, const unsigned char 
         p += 4;
     }
 
-    out = (gsfsLong *) malloc (num_beams * sizeof (gsfsLong));
+    out = (gsfsLong *) calloc (num_beams, sizeof (gsfsLong));
     if (!out)
     {
         free (in);
@@ -337,7 +343,7 @@ DecodeCompressedUnsignedShortArray (unsigned short **array, const unsigned char 
 
     for (i = 0; i < n; i++)
     {
-        (*array)[i] = out[i];
+        (*array)[i] = (unsigned short) out[i];
     }
 
     free (out);
@@ -397,10 +403,10 @@ EncodeCompressedArray (unsigned char *sptr, const double *array, int num_beams,
         return (-1);
     }
 
-    n = num_beams;
+    n = (size_t) num_beams;
 
     /* Allocate a temporary output array. */
-    out = (gsfuLong *) malloc (n * sizeof (gsfuLong));
+    out = (gsfuLong *) calloc (n, sizeof (gsfuLong));
     if (!out)
     {
         gsfError = GSF_MEMORY_ALLOCATION_FAILED;
@@ -520,13 +526,16 @@ DecodeCompressedArray (double **array, const unsigned char *sptr, int num_beams,
        systems have a dynamic number of beams depending on depth. */
     if (num_beams > arraySize[handle - 1][subrecordID - 1])
     {
-        *array = (double *) realloc ((void *) *array, num_beams * sizeof (double));
+        double * dtemp = (double *) realloc ((void *) *array, num_beams * sizeof (double));
 
-        if (*array == (double *) NULL)
+        if (dtemp == (double *) NULL)
         {
+            free(*array);
+            *array = (double *)NULL;
             gsfError = GSF_MEMORY_ALLOCATION_FAILED;
             return (-1);
         }
+        *array = dtemp;
         memset (*array, 0, num_beams * sizeof (double));
 
         arraySize[handle - 1][subrecordID - 1] = num_beams;
@@ -547,7 +556,7 @@ DecodeCompressedArray (double **array, const unsigned char *sptr, int num_beams,
     m = (compressed_size - 1) / sizeof (gsfuLong);
 
     /* Allocate a temporary input array. */
-    gsfuLong *in = (gsfuLong *) malloc (m * sizeof (gsfuLong));
+    gsfuLong *in = (gsfuLong *) calloc (m, sizeof (gsfuLong));
     if (!in)
     {
         gsfError = GSF_MEMORY_ALLOCATION_FAILED;
@@ -1187,7 +1196,7 @@ SignEncode (gsfuLong *out, const gsfsLong *in, const size_t n)
         }
         else
         {
-            x = in[i];
+            x = (gsfuLong) in[i];
             out[i] = 2 * x;
         }
     }

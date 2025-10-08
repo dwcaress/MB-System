@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbnavadjust_io.h  4/18/2014
 
- *    Copyright (c) 2014-2024 by
+ *    Copyright (c) 2014-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -135,6 +135,8 @@
 #define MBNA_GOODOVERLAP_THRESHOLD 25
 #define MBNA_BETTEROVERLAP_THRESHOLD 50
 
+#define MBNA_MODELPLOT_MODE_SECTIONS 0
+#define MBNA_MODELPLOT_MODE_CROSSINGS 1
 #define MBNA_MODELPLOT_TIMESERIES 0
 #define MBNA_MODELPLOT_PERTURBATION 1
 #define MBNA_MODELPLOT_TIEOFFSETS 2
@@ -513,8 +515,8 @@ int mbnavadjust_reference_unload(int verbose, void **swath, int *error);
 int mbnavadjust_refgrid_unload(int verbose, struct mbna_project *project, int *error);
 int mbnavadjust_import_data(int verbose, struct mbna_project *project, char *path, int format, int *error);
 int mbnavadjust_import_file(int verbose, struct mbna_project *project, char *path, int format, bool firstfile, int *error);
-int mbnavadjust_coverage_mask(int verbose, struct mbna_project *project,
-                                int ifile, int isection, int *error);
+int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,int ifile, int *error);
+int mbnavadjust_coverage_mask(int verbose, struct mbna_project *project, int ifile, int isection, int *error);
 int mbnavadjust_import_reference(int verbose, struct mbna_project *project, char *path, int *error);
 int mbnavadjust_findcrossings(int verbose, struct mbna_project *project, int *error);
 int mbnavadjust_findcrossingsfile(int verbose, struct mbna_project *project, int ifile, int *error);

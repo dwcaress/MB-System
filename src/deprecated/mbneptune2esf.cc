@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbneptune2esf.c	2004/11/11
  *
- *    Copyright (c) 2004-2024 by
+ *    Copyright (c) 2004-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -595,8 +595,8 @@ int main(int argc, char **argv) {
 	}
 
 	/* MBIO read control parameters */
-	int variable_beams;
-	int traveltime;
+	bool variable_beams;
+	bool traveltime;
 	double btime_d;
 	double etime_d;
 	double distance;
@@ -664,7 +664,7 @@ int main(int argc, char **argv) {
 		if (usable_rule) {
 
 			/* check format and get format flags */
-			int beam_flagging;  // TODO(schwehr): mb_format_flags should take a bool.
+			bool beam_flagging;
 			if ((status = mb_format_flags(verbose, &format, &variable_beams, &traveltime, &beam_flagging, &error)) !=
 			    MB_SUCCESS) {
 				char *message = nullptr;

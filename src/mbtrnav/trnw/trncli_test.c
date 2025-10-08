@@ -291,6 +291,9 @@ static void s_show_help()
     " --cfg         : TRN devices config file\n"
     " --par         : TRN particle file\n"
     " --logdir      : TRN log directory suffix (TRN-<logdir>.nnn)\n"
+    " --use_proj    : Use proj instead of GCTP\n"
+    " --projection  : projection\n"
+    " --trn-crs     : Proj CRS\n"
     " --trn-ftype   : TRN filter type:\n"
     "                  0: TRN_FILT_NONE\n"
     "                  1: TRN_FILT_POINTMASS\n"
@@ -389,6 +392,9 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"cfg", required_argument, NULL, 0},
         {"par", required_argument, NULL, 0},
         {"logdir", required_argument, NULL, 0},
+        {"use-proj", required_argument, NULL, 0},
+        {"projection", required_argument, NULL, 0},
+        {"trn-crs", required_argument, NULL, 0},
         {"trn-ftype", required_argument, NULL, 0},
         {"trn-mtype", required_argument, NULL, 0},
         {"trn-utm", required_argument, NULL, 0},
@@ -519,6 +525,41 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
                         free(cfg->trn_cfg->log_dir);
                     }
                     cfg->trn_cfg->log_dir=strdup(optarg);
+                }
+                // use-proj
+                else if (strcmp("use-proj", options[option_index].name) == 0) {
+                    
+                    cfg->trn_cfg->use_proj=true;
+
+                    sscanf(optarg,"%c",&cmnem);
+                    switch (cmnem) {
+                        case 'y':
+                        case 'Y':
+                        case '1':
+                            cfg->trn_cfg->use_proj=true;
+                            break;
+
+                        case 'n':
+                        case 'N':
+                        case '0':
+                            cfg->trn_cfg->use_proj=false;
+                            break;
+                        default:
+                            fprintf(stderr, "ERR - invalid use-proj[%c]\n", cmnem);
+                            break;
+                    }
+
+                }
+                // trn-crs
+                else if (strcmp("trn-crs", options[option_index].name) == 0) {
+                    if(NULL!=cfg->trn_cfg->trn_crs){
+                        free(cfg->trn_cfg->trn_crs);
+                    }
+                    cfg->trn_cfg->trn_crs=strdup(optarg);
+                }
+                // trn-crs
+                else if (strcmp("projection", options[option_index].name) == 0) {
+                    sscanf(optarg, "%d", &cfg->trn_cfg->projection);
                 }
                 // ftype
                 else if (strcmp("trn-ftype", options[option_index].name) == 0) {
@@ -699,6 +740,9 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
     s_dbg_printf(stderr, cfg->verbose, "mode      [%c]\n", (char)cfg->mode);
     s_dbg_printf(stderr, cfg->verbose, "host      [%s]\n", cfg->trn_cfg->trn_host);
     s_dbg_printf(stderr, cfg->verbose, "port      [%d]\n", cfg->trn_cfg->trn_port);
+    s_dbg_printf(stderr, cfg->verbose, "use-proj  [%d]\n", (cfg->trn_cfg->use_proj?"Y":"N"));
+    s_dbg_printf(stderr, cfg->verbose, "projection [%d]\n",cfg->trn_cfg->projection);
+    s_dbg_printf(stderr, cfg->verbose, "crs       [%s]\n", cfg->trn_cfg->trn_crs);
     s_dbg_printf(stderr, cfg->verbose, "map       [%s]\n", cfg->trn_cfg->map_file);
     s_dbg_printf(stderr, cfg->verbose, "cfg       [%s]\n", cfg->trn_cfg->cfg_file);
     s_dbg_printf(stderr, cfg->verbose, "particles [%s]\n", cfg->trn_cfg->particles_file);
@@ -1174,7 +1218,17 @@ static int s_trncli_show_trn_update(trncli_t *tcli, mb1_t *mb1, app_cfg_t *cfg)
             }
 
         } else {
-            wposet_mb1_to_pose(&pt, mb1, cfg->utm);
+            // TODO: implement configuation support for libproj (--proj-crs, --use-proj)
+            wgeocon_t *geocon = NULL;
+            if(cfg->trn_cfg->use_proj) {
+                // TODO: set source CRS
+                geocon = wgeocon_new_proj(cfg->trn_cfg->trn_crs);
+                wgeocon_init(geocon, 0, NULL);
+            } else {
+                geocon = wgeocon_new_gctp(cfg->utm);
+            }
+            wposet_mb1_to_pose(&pt, mb1, geocon);
+            wgeocon_delete(geocon);
         }
 
         test = trncli_get_bias_estimates(tcli, pt, &pt_dat, &mle_dat, &mse_dat);

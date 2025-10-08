@@ -2,7 +2,7 @@
 #--------------------------------------------------------------------
 #    The MB-system:  mbm_grdplot.perl  8/6/95
 #
-#    Copyright (c) 1993-2024 by
+#    Copyright (c) 1993-2025 by
 #    David W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, California, USA
@@ -234,6 +234,11 @@ $ncpt = 11;
   @cptbr9 = (255, 210, 170, 145, 120, 120, 104,  67,  33,   0,   0);
   @cptbg9 = (255, 200, 160, 145, 130, 100, 107, 123, 140, 160, 230);
   @cptbb9 = (100,  75,  50,  45,  40,  30,  24,   7,   0,   0,   0);
+
+# color palette 10 - Seismic (blue to white to red)
+  @cptbr10 = (  0,  51, 102, 153, 204, 255, 255, 255, 255, 255, 255);
+  @cptbg10 = (  0,  51, 102, 153, 204, 255, 204, 153, 102,  51,   0);
+  @cptbb10 = (255, 255, 255, 255, 255, 255, 204, 153, 102,  51,   0);
 
 # Determine the GMT version
 $gmt_version = `gmt --version`;
@@ -826,7 +831,7 @@ if ($color_control)
     ($color_style, $color_palette, $ncolors)
       = $color_control =~  /(\S+)\/(\S+)\/(\S+)/;
     if ($color_palette < 1
-      || $color_palette > 9)
+      || $color_palette > 10)
       {
       $color_palette = 1;
       }
@@ -840,7 +845,7 @@ if ($color_control)
     ($color_style, $color_palette) = $color_control
       =~  /(\S+)\/(\S+)/;
     if ($color_palette < 1
-      || $color_palette > 9)
+      || $color_palette > 10)
       {
       $color_palette = 1;
       }
@@ -1116,7 +1121,7 @@ if (!$bounds || !$zbounds || $zmode == 1)
         /\S+\s+v_min:\s+(\S+)\s+v_max:\s+(\S+)\s+name:\s+(.+)/;
       }
     }
-  if ($color_mode != 6 && $zmin_f >= $zmax_f)
+  if ($color_mode != 6 && $color_mode != 7 && $zmin_f >= $zmax_f)
     {
     if ($zbounds)
       {
@@ -1151,7 +1156,7 @@ if (!$bounds || !$zbounds || $zmode == 1)
 
   # check that there are data
   if ($xmin_f >= $xmax_f || $ymin_f >= $ymax_f
-    || ($color_mode != 6 && $zmin_f >= $zmax_f && !$zbounds))
+    || ($color_mode != 6 && $color_mode != 7 && $zmin_f >= $zmax_f && !$zbounds))
     {
     print "\a";
     print "$xmin_f $xmax_f $ymin_f $ymax_f $zmin_f $zmax_f\n";
@@ -1217,7 +1222,7 @@ if (!$zbounds)
 
 # check that there are data
 if ((!$use_corner_points && ($xmin >= $xmax || $ymin >= $ymax))
-  || ($color_mode != 6 && $zmin >= $zmax))
+  || ($color_mode != 6 && $color_mode != 7 && $zmin >= $zmax))
   {
   print "\a";
   die "Improper data limits: x: $xmin $xmax  y: $ymin $ymax  z: $zmin $zmax\n$program_name aborted.\n"
@@ -1716,7 +1721,7 @@ elsif ($color_mode)
 if ($color_mode)
   {
   # deal with single colormap (not sealevel)
-  if ($color_palette < 8)
+  if ($color_palette < 8 || $color_palette == 10)
     {
     # set selected color palette
     eval "\@cptbr = \@cptbr$color_palette;";

@@ -91,8 +91,8 @@ public:
         ss << beam_count() << ",";
 
         std::list<trn::beam_tup>::iterator it;
-        int k=0;
-        for(it=mBeamList.begin(); it!=mBeamList.end(); k++)
+
+        for(it=mBeamList.begin(); it!=mBeamList.end(); )
         {
             trn::beam_tup bt = static_cast<trn::beam_tup> (*it);
             ss <<  std::get<0>(bt) << ":" << std::get<1>(bt);
@@ -118,8 +118,8 @@ public:
         ss << beam_count() << ",";
 
         std::list<trn::beam_tup>::iterator it;
-        int k=0;
-        for(it=mBeamList.begin(); it!=mBeamList.end(); k++)
+
+        for(it=mBeamList.begin(); it!=mBeamList.end(); )
         {
             trn::beam_tup bt = static_cast<trn::beam_tup> (*it);
             ss <<  std::get<0>(bt) << "," << std::get<1>(bt);

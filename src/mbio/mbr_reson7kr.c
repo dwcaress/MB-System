@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbr_reson7kr.c  4/4/2004
  *
- *    Copyright (c) 2004-2024 by
+ *    Copyright (c) 2004-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -57,8 +57,8 @@
 
 /*--------------------------------------------------------------------*/
 int mbr_info_reson7kr(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
-                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
-                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
+                      char *system_name, char *format_description, int *numfile, int *filetype, bool *variable_beams,
+                      bool *traveltime, bool *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
   if (verbose >= 2) {
@@ -8029,7 +8029,8 @@ Have a nice day...\n");
           *last_ping = *new_ping;
           store->read_volatilesettings = false;
           store->read_matchfilter = false;
-          store->read_beamgeometry = false;
+          // Do not reset BeamGeometry as it does not come for every ping when data are logged by PDS
+          // store->read_BeamGeometry = false;
           store->read_bathymetry = false;
           store->read_remotecontrolsettings = false;
           store->read_backscatter = false;
@@ -16673,7 +16674,8 @@ int mbr_reson7kr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
         store->read_matchfilter = false;
         //store->read_volatilesettings;
         store->read_matchfilter = false;
-        //store->read_beamgeometry;
+        // Do not reset BeamGeometry as it does not come for every ping when data are logged by PDS
+        // store->read_BeamGeometry = false;
         store->read_remotecontrolsettings = false;
         store->read_bathymetry = false;
         store->read_backscatter = false;

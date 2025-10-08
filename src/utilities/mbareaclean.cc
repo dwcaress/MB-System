@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbareaclean.c	2/27/2003
  *
- *    Copyright (c) 2003-2024 by
+ *    Copyright (c) 2003-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -653,9 +653,9 @@ int main(int argc, char **argv) {
 	while (read_data) {
 
 		/* check format and get format flags */
-		int variable_beams;
-		int traveltime;
-		int beam_flagging;
+		bool variable_beams;
+		bool traveltime;
+		bool beam_flagging;
 		if ((status = mb_format_flags(verbose, &format, &variable_beams, &traveltime, &beam_flagging, &error)) != MB_SUCCESS) {
 			char *message = nullptr;
 			mb_error(verbose, error, &message);

@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em710raw.c	2/26/2008
  *
- *    Copyright (c) 2008-2024 by
+ *    Copyright (c) 2008-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -79,8 +79,8 @@ extern int isnanf(float x);
 
 /*--------------------------------------------------------------------*/
 int mbr_info_em710raw(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
-                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
-                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
+                      char *system_name, char *format_description, int *numfile, int *filetype, bool *variable_beams,
+                      bool *traveltime, bool *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
 	if (verbose >= 2) {
@@ -97,7 +97,7 @@ int mbr_info_em710raw(int verbose, int *system, int *beams_bath_max, int *beams_
 	strncpy(format_name, "EM710RAW", MB_NAME_LENGTH);
 	strncpy(system_name, "SIMRAD3", MB_NAME_LENGTH);
 	strncpy(format_description,
-	        "Format name:          MBF_EM710RAW\nInformal Description: Kongsberg current multibeam vendor format\nAttributes:    "
+	        "Format name:          MBF_EM710RAW\nInformal Description: Kongsberg 3rd generation multibeam vendor format\nAttributes:    "
 	        "       Kongsberg EM122, EM302, EM710,\n                      bathymetry, amplitude, and sidescan,\n                 "
 	        "     up to 400 beams, variable pixels, binary, Kongsberg.\n",
 	        MB_DESCRIPTION_LENGTH);
@@ -500,8 +500,23 @@ int mbr_em710raw_rd_puid(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 		        line[EM3_PU_ID_SIZE - 5], line[EM3_PU_ID_SIZE - 5]);
 #endif
 	}
+	
+	/* print debug info if set in mbinfo */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+  if (status == MB_SUCCESS  
+    		&& (mb_io_ptr->enable_debug_record_type_listing 
+    				|| mb_io_ptr->num_debug_record_identifiers > 0)) {
+    fprintf(stderr, "Reading PU Id record 0 0x%x %d\n", store->type, store->type);
+  }
+	bool print = false;
+	for (int i = 0; !print && i < mb_io_ptr->num_debug_record_identifiers; i++) {
+		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "all", sizeof(mb_name)) == 0
+				|| strncmp(mb_io_ptr->debug_record_identifiers[i], "0", sizeof(mb_name)) == 0) {
+			print = true;
+		}
+	}
 
-	if (verbose >= 5) {
+	if (verbose >= 5 || print) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:                %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:               %d\n", store->sonar);
@@ -651,7 +666,22 @@ int mbr_em710raw_rd_status(int verbose, void *mbio_ptr, int swap, struct mbsys_s
 #endif
 	}
 
-	if (verbose >= 5) {
+	/* print debug info if set in mbinfo */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+  if (status == MB_SUCCESS  
+    		&& (mb_io_ptr->enable_debug_record_type_listing 
+    				|| mb_io_ptr->num_debug_record_identifiers > 0)) {
+    fprintf(stderr, "Reading PU Status record 1 0x%x %d\n", store->type, store->type);
+  }
+	bool print = false;
+	for (int i = 0; !print && i < mb_io_ptr->num_debug_record_identifiers; i++) {
+		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "all", sizeof(mb_name)) == 0
+				|| strncmp(mb_io_ptr->debug_record_identifiers[i], "1", sizeof(mb_name)) == 0) {
+			print = true;
+		}
+	}
+
+	if (verbose >= 5 || print) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:                %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:               %d\n", store->sonar);
@@ -728,6 +758,12 @@ int mbr_em710raw_rd_start(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 		fprintf(stderr, "dbg2       type:       %d\n", type);
 		fprintf(stderr, "dbg2       sonar:      %d\n", sonar);
 	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get xducer_depth_mode flag */
+	int *xducer_depth_mode = (int *)&mb_io_ptr->save5;
 
 	/* set goodend false until a good end is found */
 	*goodend = false;
@@ -1099,6 +1135,29 @@ int mbr_em710raw_rd_start(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 		}
 	}
 
+	/* if specified from mbpreprocess then reset xducer depth mode */
+	if (*xducer_depth_mode == MBSYS_SIMRAD3_ZMODE_USE_HEAVE_ONLY) {
+		store->par_dsh[0] = 'N';
+		store->par_dsh[1] = 'I';
+	}
+	else if (*xducer_depth_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY) {
+		store->par_dsh[0] = 'I';
+		store->par_dsh[1] = 'N';
+	}
+	/* this is an MB-System only value set using mbpreprocess */
+	else if (*xducer_depth_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_AND_HEAVE) {
+		store->par_dsh[0] = 'N';
+		store->par_dsh[1] = 'N';
+	}
+	
+	/* if xducer_depth_mode not set and par_dsh not set then assume use of heave */
+	if ((store->par_dsh[0] != 'I' &&  store->par_dsh[0] != 'N') 
+			|| (store->par_dsh[0] != 'I' &&  store->par_dsh[0] != 'N')) {
+		store->par_dsh[0] = 'N';
+		store->par_dsh[1] = 'I';
+		*xducer_depth_mode = MBSYS_SIMRAD3_ZMODE_USE_HEAVE_ONLY;
+	}
+
 	/* now set the data kind */
 	if (status == MB_SUCCESS) {
 		if (store->type == EM3_START && store->par_date == 0)
@@ -1147,7 +1206,25 @@ file will return error */
 #endif
 	}
 
-	if (verbose >= 5) {
+	/* print debug info if set in mbinfo */
+  if (status == MB_SUCCESS  
+    		&& (mb_io_ptr->enable_debug_record_type_listing 
+    				|| mb_io_ptr->num_debug_record_identifiers > 0)) {
+    fprintf(stderr, "Reading Installation Parameters record I 0x%x %d\n", store->type, store->type);
+  }
+	bool print = false;
+	for (int i = 0; !print && i < mb_io_ptr->num_debug_record_identifiers; i++) {
+		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "all", sizeof(mb_name)) == 0
+				|| strncmp(mb_io_ptr->debug_record_identifiers[i], "I", sizeof(mb_name)) == 0 && store->type == EM3_START) {
+			print = true;
+		}
+		else if (strncmp(mb_io_ptr->debug_record_identifiers[i], "all", sizeof(mb_name)) == 0
+				|| strncmp(mb_io_ptr->debug_record_identifiers[i], "i", sizeof(mb_name)) == 0 && store->type == EM3_STOP) {
+			print = true;
+		}
+	}
+
+	if (verbose >= 5 || print) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
@@ -1385,7 +1462,22 @@ int mbr_em710raw_rd_run_parameter(int verbose, void *mbio_ptr, int swap, struct 
 #endif
 	}
 
-	if (verbose >= 5) {
+	/* print debug info if set in mbinfo */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+  if (status == MB_SUCCESS  
+    		&& (mb_io_ptr->enable_debug_record_type_listing 
+    				|| mb_io_ptr->num_debug_record_identifiers > 0)) {
+    fprintf(stderr, "Reading Runtime Parameters record R 0x%x %d\n", store->type, store->type);
+  }
+	bool print = false;
+	for (int i = 0; !print && i < mb_io_ptr->num_debug_record_identifiers; i++) {
+		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "all", sizeof(mb_name)) == 0
+				|| strncmp(mb_io_ptr->debug_record_identifiers[i], "R", sizeof(mb_name)) == 0) {
+			print = true;
+		}
+	}
+
+	if (verbose >= 5 || print) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
@@ -1478,7 +1570,22 @@ int mbr_em710raw_rd_clock(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 #endif
 	}
 
-	if (verbose >= 5) {
+	/* print debug info if set in mbinfo */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+  if (status == MB_SUCCESS  
+    		&& (mb_io_ptr->enable_debug_record_type_listing 
+    				|| mb_io_ptr->num_debug_record_identifiers > 0)) {
+    fprintf(stderr, "Reading Clock record C 0x%x %d\n", store->type, store->type);
+  }
+	bool print = false;
+	for (int i = 0; !print && i < mb_io_ptr->num_debug_record_identifiers; i++) {
+		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "all", sizeof(mb_name)) == 0
+				|| strncmp(mb_io_ptr->debug_record_identifiers[i], "C", sizeof(mb_name)) == 0) {
+			print = true;
+		}
+	}
+
+	if (verbose >= 5 || print) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
@@ -1555,7 +1662,22 @@ int mbr_em710raw_rd_tide(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 #endif
 	}
 
-	if (verbose >= 5) {
+	/* print debug info if set in mbinfo */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+  if (status == MB_SUCCESS  
+    		&& (mb_io_ptr->enable_debug_record_type_listing 
+    				|| mb_io_ptr->num_debug_record_identifiers > 0)) {
+    fprintf(stderr, "Reading Tide record T 0x%x %d\n", store->type, store->type);
+  }
+	bool print = false;
+	for (int i = 0; !print && i < mb_io_ptr->num_debug_record_identifiers; i++) {
+		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "all", sizeof(mb_name)) == 0
+				|| strncmp(mb_io_ptr->debug_record_identifiers[i], "T", sizeof(mb_name)) == 0) {
+			print = true;
+		}
+	}
+
+	if (verbose >= 5 || print) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
@@ -1630,7 +1752,22 @@ int mbr_em710raw_rd_height(int verbose, void *mbio_ptr, int swap, struct mbsys_s
 #endif
 	}
 
-	if (verbose >= 5) {
+	/* print debug info if set in mbinfo */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+  if (status == MB_SUCCESS  
+    		&& (mb_io_ptr->enable_debug_record_type_listing 
+    				|| mb_io_ptr->num_debug_record_identifiers > 0)) {
+    fprintf(stderr, "Reading Height record h 0x%x %d\n", store->type, store->type);
+  }
+	bool print = false;
+	for (int i = 0; !print && i < mb_io_ptr->num_debug_record_identifiers; i++) {
+		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "all", sizeof(mb_name)) == 0
+				|| strncmp(mb_io_ptr->debug_record_identifiers[i], "h", sizeof(mb_name)) == 0) {
+			print = true;
+		}
+	}
+
+	if (verbose >= 5 || print) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
@@ -1740,7 +1877,22 @@ int mbr_em710raw_rd_heading(int verbose, void *mbio_ptr, int swap, struct mbsys_
 #endif
 	}
 
-	if (verbose >= 5) {
+	/* print debug info if set in mbinfo */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+  if (status == MB_SUCCESS  
+    		&& (mb_io_ptr->enable_debug_record_type_listing 
+    				|| mb_io_ptr->num_debug_record_identifiers > 0)) {
+    fprintf(stderr, "Reading Heading record H 0x%x %d\n", store->type, store->type);
+  }
+	bool print = false;
+	for (int i = 0; !print && i < mb_io_ptr->num_debug_record_identifiers; i++) {
+		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "all", sizeof(mb_name)) == 0
+				|| strncmp(mb_io_ptr->debug_record_identifiers[i], "H", sizeof(mb_name)) == 0) {
+			print = true;
+		}
+	}
+
+	if (verbose >= 5 || print) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
@@ -1851,7 +2003,22 @@ int mbr_em710raw_rd_ssv(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 #endif
 	}
 
-	if (verbose >= 5) {
+	/* print debug info if set in mbinfo */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+  if (status == MB_SUCCESS  
+    		&& (mb_io_ptr->enable_debug_record_type_listing 
+    				|| mb_io_ptr->num_debug_record_identifiers > 0)) {
+    fprintf(stderr, "Reading SSV record G 0x%x %d\n", store->type, store->type);
+  }
+	bool print = false;
+	for (int i = 0; !print && i < mb_io_ptr->num_debug_record_identifiers; i++) {
+		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "all", sizeof(mb_name)) == 0
+				|| strncmp(mb_io_ptr->debug_record_identifiers[i], "G", sizeof(mb_name)) == 0) {
+			print = true;
+		}
+	}
+
+	if (verbose >= 5 || print) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
@@ -1961,7 +2128,22 @@ int mbr_em710raw_rd_tilt(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 #endif
 	}
 
-	if (verbose >= 5) {
+	/* print debug info if set in mbinfo */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+  if (status == MB_SUCCESS  
+    		&& (mb_io_ptr->enable_debug_record_type_listing 
+    				|| mb_io_ptr->num_debug_record_identifiers > 0)) {
+    fprintf(stderr, "Reading Tilt record J 0x%x %d\n", store->type, store->type);
+  }
+	bool print = false;
+	for (int i = 0; !print && i < mb_io_ptr->num_debug_record_identifiers; i++) {
+		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "all", sizeof(mb_name)) == 0
+				|| strncmp(mb_io_ptr->debug_record_identifiers[i], "J", sizeof(mb_name)) == 0) {
+			print = true;
+		}
+	}
+
+	if (verbose >= 5 || print) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
@@ -2105,7 +2287,21 @@ int mbr_em710raw_rd_extraparameters(int verbose, void *mbio_ptr, int swap, struc
 #endif
 	}
 
-	if (verbose >= 5) {
+	/* print debug info if set in mbinfo */
+  if (status == MB_SUCCESS  
+    		&& (mb_io_ptr->enable_debug_record_type_listing 
+    				|| mb_io_ptr->num_debug_record_identifiers > 0)) {
+    fprintf(stderr, "Reading Extra Parameters record 3 0x%x %d\n", store->type, store->type);
+  }
+	bool print = false;
+	for (int i = 0; !print && i < mb_io_ptr->num_debug_record_identifiers; i++) {
+		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "all", sizeof(mb_name)) == 0
+				|| strncmp(mb_io_ptr->debug_record_identifiers[i], "3", sizeof(mb_name)) == 0) {
+			print = true;
+		}
+	}
+
+	if (verbose >= 5 || print) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
@@ -2243,7 +2439,22 @@ int mbr_em710raw_rd_attitude(int verbose, void *mbio_ptr, int swap, struct mbsys
 			store->kind = MB_DATA_ATTITUDE1;
 	}
 
-	if (verbose >= 5) {
+	/* print debug info if set in mbinfo */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+  if (status == MB_SUCCESS  
+    		&& (mb_io_ptr->enable_debug_record_type_listing 
+    				|| mb_io_ptr->num_debug_record_identifiers > 0)) {
+    fprintf(stderr, "Reading Attitude record A 0x%x %d\n", store->type, store->type);
+  }
+	bool print = false;
+	for (int i = 0; !print && i < mb_io_ptr->num_debug_record_identifiers; i++) {
+		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "all", sizeof(mb_name)) == 0
+				|| strncmp(mb_io_ptr->debug_record_identifiers[i], "A", sizeof(mb_name)) == 0) {
+			print = true;
+		}
+	}
+
+	if (verbose >= 5 || print) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       kind:            %d\n", store->kind);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
@@ -2392,7 +2603,22 @@ int mbr_em710raw_rd_netattitude(int verbose, void *mbio_ptr, int swap, struct mb
 #endif
 	}
 
-	if (verbose >= 5) {
+	/* print debug info if set in mbinfo */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+  if (status == MB_SUCCESS  
+    		&& (mb_io_ptr->enable_debug_record_type_listing 
+    				|| mb_io_ptr->num_debug_record_identifiers > 0)) {
+    fprintf(stderr, "Reading Network Attitude record n 0x%x %d\n", store->type, store->type);
+  }
+	bool print = false;
+	for (int i = 0; !print && i < mb_io_ptr->num_debug_record_identifiers; i++) {
+		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "all", sizeof(mb_name)) == 0
+				|| strncmp(mb_io_ptr->debug_record_identifiers[i], "n", sizeof(mb_name)) == 0) {
+			print = true;
+		}
+	}
+
+	if (verbose >= 5 || print) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       kind:                 %d\n", store->kind);
 		fprintf(stderr, "dbg5       type:                 %d\n", store->type);
@@ -2555,7 +2781,22 @@ int mbr_em710raw_rd_pos(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 		}
 	}
 
-	if (verbose >= 5) {
+	/* print debug info if set in mbinfo */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+  if (status == MB_SUCCESS  
+    		&& (mb_io_ptr->enable_debug_record_type_listing 
+    				|| mb_io_ptr->num_debug_record_identifiers > 0)) {
+    fprintf(stderr, "Reading Position record P 0x%x %d\n", store->type, store->type);
+  }
+	bool print = false;
+	for (int i = 0; !print && i < mb_io_ptr->num_debug_record_identifiers; i++) {
+		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "all", sizeof(mb_name)) == 0
+				|| strncmp(mb_io_ptr->debug_record_identifiers[i], "P", sizeof(mb_name)) == 0) {
+			print = true;
+		}
+	}
+
+	if (verbose >= 5 || print) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
@@ -2669,7 +2910,22 @@ int mbr_em710raw_rd_svp(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 #endif
 	}
 
-	if (verbose >= 5) {
+	/* print debug info if set in mbinfo */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+  if (status == MB_SUCCESS  
+    		&& (mb_io_ptr->enable_debug_record_type_listing 
+    				|| mb_io_ptr->num_debug_record_identifiers > 0)) {
+    fprintf(stderr, "Reading Sound Speed Profile record V 0x%x %d\n", store->type, store->type);
+  }
+	bool print = false;
+	for (int i = 0; !print && i < mb_io_ptr->num_debug_record_identifiers; i++) {
+		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "all", sizeof(mb_name)) == 0
+				|| strncmp(mb_io_ptr->debug_record_identifiers[i], "V", sizeof(mb_name)) == 0) {
+			print = true;
+		}
+	}
+
+	if (verbose >= 5 || print) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
@@ -2780,7 +3036,22 @@ int mbr_em710raw_rd_svp2(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 #endif
 	}
 
-	if (verbose >= 5) {
+	/* print debug info if set in mbinfo */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+  if (status == MB_SUCCESS  
+    		&& (mb_io_ptr->enable_debug_record_type_listing 
+    				|| mb_io_ptr->num_debug_record_identifiers > 0)) {
+    fprintf(stderr, "Reading Sound Speed Profile record U 0x%x %d\n", store->type, store->type);
+  }
+	bool print = false;
+	for (int i = 0; !print && i < mb_io_ptr->num_debug_record_identifiers; i++) {
+		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "all", sizeof(mb_name)) == 0
+				|| strncmp(mb_io_ptr->debug_record_identifiers[i], "U", sizeof(mb_name)) == 0) {
+			print = true;
+		}
+	}
+
+	if (verbose >= 5 || print) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
@@ -2971,7 +3242,22 @@ int mbr_em710raw_rd_bath2(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 #endif
 	}
 
-	if (verbose >= 5) {
+	/* print debug info if set in mbinfo */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+  if (status == MB_SUCCESS  
+    		&& (mb_io_ptr->enable_debug_record_type_listing 
+    				|| mb_io_ptr->num_debug_record_identifiers > 0)) {
+    fprintf(stderr, "Reading XYZ 88 record X 0x%x %d\n", store->type, store->type);
+  }
+	bool print = false;
+	for (int i = 0; !print && i < mb_io_ptr->num_debug_record_identifiers; i++) {
+		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "all", sizeof(mb_name)) == 0
+				|| strncmp(mb_io_ptr->debug_record_identifiers[i], "X", sizeof(mb_name)) == 0) {
+			print = true;
+		}
+	}
+
+	if (verbose >= 5 || print) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:                  %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:                 %d\n", store->sonar);
@@ -3191,7 +3477,22 @@ int mbr_em710raw_rd_rawbeam4(int verbose, void *mbio_ptr, int swap, struct mbsys
 		}
 	}
 
-	if (verbose >= 5) {
+	/* print debug info if set in mbinfo */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+  if (status == MB_SUCCESS  
+    		&& (mb_io_ptr->enable_debug_record_type_listing 
+    				|| mb_io_ptr->num_debug_record_identifiers > 0)) {
+    fprintf(stderr, "Reading Raw Range and Angle record N 0x%x %d\n", store->type, store->type);
+  }
+	bool print = false;
+	for (int i = 0; !print && i < mb_io_ptr->num_debug_record_identifiers; i++) {
+		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "all", sizeof(mb_name)) == 0
+				|| strncmp(mb_io_ptr->debug_record_identifiers[i], "N", sizeof(mb_name)) == 0) {
+			print = true;
+		}
+	}
+
+	if (verbose >= 5 || print) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
@@ -3363,7 +3664,22 @@ int mbr_em710raw_rd_quality(int verbose, void *mbio_ptr, int swap, struct mbsys_
 #endif
 	}
 
-	if (verbose >= 5) {
+	/* print debug info if set in mbinfo */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+  if (status == MB_SUCCESS  
+    		&& (mb_io_ptr->enable_debug_record_type_listing 
+    				|| mb_io_ptr->num_debug_record_identifiers > 0)) {
+    fprintf(stderr, "Reading Quality record O 0x%x %d\n", store->type, store->type);
+  }
+	bool print = false;
+	for (int i = 0; !print && i < mb_io_ptr->num_debug_record_identifiers; i++) {
+		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "all", sizeof(mb_name)) == 0
+				|| strncmp(mb_io_ptr->debug_record_identifiers[i], "O", sizeof(mb_name)) == 0) {
+			print = true;
+		}
+	}
+
+	if (verbose >= 5 || print) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:                  %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:                 %d\n", store->sonar);
@@ -3596,7 +3912,22 @@ int mbr_em710raw_rd_ss2(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 #endif
 	}
 
-	if (verbose >= 5) {
+	/* print debug info if set in mbinfo */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+  if (status == MB_SUCCESS  
+    		&& (mb_io_ptr->enable_debug_record_type_listing 
+    				|| mb_io_ptr->num_debug_record_identifiers > 0)) {
+    fprintf(stderr, "Reading Seabed Image record Y 0x%x %d\n", store->type, store->type);
+  }
+	bool print = false;
+	for (int i = 0; !print && i < mb_io_ptr->num_debug_record_identifiers; i++) {
+		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "all", sizeof(mb_name)) == 0
+				|| strncmp(mb_io_ptr->debug_record_identifiers[i], "Y", sizeof(mb_name)) == 0) {
+			print = true;
+		}
+	}
+
+	if (verbose >= 5 || print) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:               %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:              %d\n", store->sonar);
@@ -3700,7 +4031,22 @@ int mbr_em710raw_makenull_ss2(int verbose, void *mbio_ptr, struct mbsys_simrad3_
     memset(ping->png_ss, 0, MBSYS_SIMRAD3_MAXPIXELS * sizeof(short));
     memset(ping->png_ssalongtrack, 0, MBSYS_SIMRAD3_MAXPIXELS * sizeof(short));
 
-  	if (verbose >= 5) {
+	/* print debug info if set in mbinfo */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+  if (status == MB_SUCCESS  
+    		&& (mb_io_ptr->enable_debug_record_type_listing 
+    				|| mb_io_ptr->num_debug_record_identifiers > 0)) {
+    fprintf(stderr, "Made numm Seabed Image record Y 0x%x %d\n", store->type, store->type);
+  }
+	bool print = false;
+	for (int i = 0; !print && i < mb_io_ptr->num_debug_record_identifiers; i++) {
+		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "all", sizeof(mb_name)) == 0
+				|| strncmp(mb_io_ptr->debug_record_identifiers[i], "Y", sizeof(mb_name)) == 0) {
+			print = true;
+		}
+	}
+
+	if (verbose >= 5 || print) {
   		fprintf(stderr, "\ndbg5  Values modified in MBIO function <%s>\n", __func__);
   		fprintf(stderr, "dbg5       type:               %d\n", store->type);
   		fprintf(stderr, "dbg5       sonar:              %d\n", store->sonar);
@@ -3907,7 +4253,22 @@ int mbr_em710raw_rd_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 #endif
 	}
 
-	if (verbose >= 5) {
+	/* print debug info if set in mbinfo */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+  if (status == MB_SUCCESS  
+    		&& (mb_io_ptr->enable_debug_record_type_listing 
+    				|| mb_io_ptr->num_debug_record_identifiers > 0)) {
+    fprintf(stderr, "Reading Water Column record k 0x%x %d\n", store->type, store->type);
+  }
+	bool print = false;
+	for (int i = 0; !print && i < mb_io_ptr->num_debug_record_identifiers; i++) {
+		if (strncmp(mb_io_ptr->debug_record_identifiers[i], "all", sizeof(mb_name)) == 0
+				|| strncmp(mb_io_ptr->debug_record_identifiers[i], "k", sizeof(mb_name)) == 0) {
+			print = true;
+		}
+	}
+
+	if (verbose >= 5 || print) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
@@ -3970,6 +4331,7 @@ int mbr_em710raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int *label_save_flag;
 	char *record_size_char;
   bool *ignore_snippets;
+  int *xducer_depth_mode;
 	short type;
 	short sonar;
 	int *version;
@@ -4009,7 +4371,7 @@ int mbr_em710raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	num_sonars = (int *)&mb_io_ptr->save10;
 	record_size_char = (char *)&record_size;
   ignore_snippets = (bool *)&mb_io_ptr->save4;
-//  *ignore_snippets = true;
+	xducer_depth_mode = (int *)&mb_io_ptr->save5;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
@@ -4529,7 +4891,17 @@ store->pings[store->ping_index].png_ss_count);
 			done = true;
 
 		/* if necessary read over unread but expected bytes */
-		bytes_read = ftell(mbfp) - mb_io_ptr->file_bytes - 4;
+        if(mbfp != NULL){
+            // reading from file
+            bytes_read = ftell(mbfp) - mb_io_ptr->file_bytes - 4;
+        }
+//        else if(mbsp != NULL) {
+//            // reading from socket
+//            bytes_read = 0;
+//        } else {
+//            // error: neither file nor socket set
+//        }
+
 		if (!*label_save_flag && !good_end_bytes && bytes_read < record_size) {
 #ifdef MBR_EM710RAW_DEBUG
 			fprintf(stderr, "skip over %d unread bytes of supported datagram type %x\n", record_size - bytes_read, type);
@@ -4541,8 +4913,8 @@ store->pings[store->ping_index].png_ss_count);
 		}
 
 #ifdef MBR_EM710RAW_DEBUG
-		fprintf(stderr, "record_size:%d bytes read:%ld file_pos old:%ld new:%ld\n", record_size,
-		        ftell(mbfp) - mb_io_ptr->file_bytes, mb_io_ptr->file_bytes, ftell(mbfp));
+        if(mbfp != NULL)
+            fprintf(stderr, "record_size:%d bytes read:%ld file_pos old:%ld new:%ld\n", record_size, ftell(mbfp) - mb_io_ptr->file_bytes, mb_io_ptr->file_bytes, ftell(mbfp));
 		fprintf(stderr, "done:%d status:%d error:%d\n", done, status, *error);
 		fprintf(stderr, "end of mbr_em710raw_rd_data loop:\n\n");
 #endif
@@ -4552,10 +4924,15 @@ store->pings[store->ping_index].png_ss_count);
 #endif
 
 		/* get file position */
-		if (*label_save_flag)
-			mb_io_ptr->file_bytes = ftell(mbfp) - 2;
-		else
-			mb_io_ptr->file_bytes = ftell(mbfp);
+        if (*label_save_flag) {
+            if(mbfp != NULL) {
+                mb_io_ptr->file_bytes = ftell(mbfp) - 2;
+            }
+        } else {
+            if(mbfp != NULL){
+                mb_io_ptr->file_bytes = ftell(mbfp);
+            }
+        }
 	}
 
 	if (verbose >= 2) {
@@ -4572,7 +4949,6 @@ store->pings[store->ping_index].png_ss_count);
 int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int time_i[7];
 	double ntime_d, ptime_d, atime_d, btime_d;
-	double bath_time_d, ss_time_d;
 	double rawspeed, pheading;
 	double plon, plat, pspeed, roll, pitch, heave;
 	double att_time_d[MBSYS_SIMRAD3_MAXATTITUDE];
@@ -4732,7 +5108,12 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 	}
 
-	/* save sonar depth value if survey data */
+	/* save sonar depth value from height datagrams - note that this will only be used
+			by the preprocess routine if the installation parameters indicate that
+			a depth sensor is being used instead of or in addition to heave. This is indicated by 
+			store-par_dsh = "NI" to use heave from the active motion sensor 
+			and store->par_dsh = "IN" to use the
+			sensor depth contained in the height datagram */
 	if (status == MB_SUCCESS && store->kind == MB_DATA_HEIGHT) {
 		time_i[0] = store->hgt_date / 10000;
 		time_i[1] = (store->hgt_date % 10000) / 100;
@@ -4774,36 +5155,36 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	   match for survey data - we can have bath without
 	   sidescan but not sidescan without bath */
 	else if (status == MB_SUCCESS && store->kind == MB_DATA_DATA) {
-		/* get times of bath and sidescan records */
-		time_i[0] = ping->png_date / 10000;
-		time_i[1] = (ping->png_date % 10000) / 100;
-		time_i[2] = ping->png_date % 100;
-		time_i[3] = ping->png_msec / 3600000;
-		time_i[4] = (ping->png_msec % 3600000) / 60000;
-		time_i[5] = (ping->png_msec % 60000) / 1000;
-		time_i[6] = (ping->png_msec % 1000) * 1000;
-		mb_get_time(verbose, time_i, &bath_time_d);
-		time_i[0] = ping->png_ss_date / 10000;
-		time_i[1] = (ping->png_ss_date % 10000) / 100;
-		time_i[2] = ping->png_ss_date % 100;
-		time_i[3] = ping->png_ss_msec / 3600000;
-		time_i[4] = (ping->png_ss_msec % 3600000) / 60000;
-		time_i[5] = (ping->png_ss_msec % 60000) / 1000;
-		time_i[6] = (ping->png_ss_msec % 1000) * 1000;
-		mb_get_time(verbose, time_i, &ss_time_d);
+		
+		/* make sure bathymetry, raw beam and snippet records have the same timestamp */
+		if (ping->png_count == ping->png_raw_count && (ping->png_date != ping->png_raw_date || ping->png_msec != ping->png_raw_msec)) {
+			ping->png_raw_date = ping->png_date;
+			ping->png_raw_msec = ping->png_msec;
+		}
+		if (ping->png_count == ping->png_ss_count && (ping->png_date != ping->png_ss_date || ping->png_msec != ping->png_ss_msec)) {
+			ping->png_ss_date = ping->png_date;
+			ping->png_ss_msec = ping->png_msec;
+		}
 
-		/* check for time match - if bath newer than
-		   sidescan then zero sidescan,  if sidescan
-		   newer than bath then set error,  if ok then
-		   check that beam ids are the same */
+		/* check for ping count match - if not
+		   then zero sidescan,  if ok then
+		   check that beam numbers are the same */
 		if (ping->png_ss_date == 0 || ping->png_nbeams_ss == 0) {
 			status = mbsys_simrad3_zero_ss(verbose, store_ptr, error);
 		}
-		else if (fabs(bath_time_d - ss_time_d) > 0.002) {
-			if (verbose > 0)
-				fprintf(stderr, "%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan zeroed, bathtime:%f != sstime:%f\n",
-				        __func__, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], bath_time_d,
-				        ss_time_d);
+		else if (ping->png_count != ping->png_ss_count) {
+			if (verbose > 0) {
+				time_i[0] = ping->png_date / 10000;
+				time_i[1] = (ping->png_date % 10000) / 100;
+				time_i[2] = ping->png_date % 100;
+				time_i[3] = ping->png_msec / 3600000;
+				time_i[4] = (ping->png_msec % 3600000) / 60000;
+				time_i[5] = (ping->png_msec % 60000) / 1000;
+				time_i[6] = (ping->png_msec % 1000) * 1000;
+				fprintf(stderr, "%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan zeroed, png_count:%d != png_ss_count:%d\n",
+				        __func__, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], 
+						ping->png_count, ping->png_ss_count);
+			}
 			status = mbsys_simrad3_zero_ss(verbose, store_ptr, error);
 		}
 		else {

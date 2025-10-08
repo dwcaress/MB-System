@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbextractsegy</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  10 March 2024 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -255,28 +255,33 @@ be the input swath filename with &quot;.segy&quot; appended.
 <I>sampleformat</I>
 <BR>
 
-Sets the sample format desired for use in the output SEGY file. Options include:
+Sets the sample format desired for use in the output SEGY data, which in turn
+determines how many SEGY files are output. Each SEGY file will contain one
+trace per ping (or shot); outputting multiple traces per ping creates
+multiple SEGY files. The options for <I>sampleformat</I> include:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SEGY_SAMPLEFORMAT_NONE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SEGY_SAMPLEFORMAT_TRACE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SEGY_SAMPLEFORMAT_ENVELOPE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SEGY_SAMPLEFORMAT_ANALYTIC&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4<BR>
 <BR>
 
-MB_SEGY_SAMPLEFORMAT_TRACE implies that the seismic trace is in the original,
-most raw form with both positive and negative values.
-MB_SEGY_SAMPLEFORMAT_ANALYTIC implies that the trace has been
-been transformed from the original time series to an analytic signal containing
-both real and imaginary parts. Both the real and imaginary signals
-are stored in the SEGY file. MB_SEGY_SAMPLEFORMAT_ENVELOPE implies that the
-analytic signal has been reduced back to a single real, positive-only envelope
-signal by taking the magnitude of the real and imaginary parts at every sample.
-It is important to note that this option only sets the desired sample format, and
-the program may find it necessary to store the data in an alternate form. For
-instance, if the user specifies MB_SEGY_SAMPLEFORMAT_TRACE or
-MB_SEGY_SAMPLEFORMAT_ANALYTIC but the swath file only contains envelope data,
-the data will be written in the envelope form. The default value of
-MB_SEGY_SAMPLEFORMAT_NONE allows the program to choose the most appropriate
-sample format.
+The input seismic traces may be in three forms. The most basic form is a single
+acoustic or seismic signal time series with positive and negative values.
+An analytic signal is complex with the real and imaginary parts represented by
+two traces with positive and negative values. An envelope signal is calculated 
+as the magnitude of an analytic signal and so forms a single positive-only trace.
+The <I>sampleformat</I> sets the form of the output trace stored in one or more
+output SEGY files. If the output sample format differs from the input, then
+<B>mbextractsegy</B> must make the implied transformation. The default value of
+MB_SEGY_SAMPLEFORMAT_NONE to output data in the existing form. In the case of an
+output MB_SEGY_SAMPLEFORMAT_TRACE, a single trace is output. If the input is an
+analytic time series, then the output will be a single trace comprised of the
+real part of the signal. In the case of MB_SEGY_SAMPLEFORMAT_ENVELOPE, if the
+input is an analytic time series, then the single trace output will be an
+envelope function calculated from the analytic time series. In the case of
+MB_SEGY_SAMPLEFORMAT_ANALYTIC, then there will be three traces (and three
+SEGY files) output, the real part of the analytic data, the imaginary part
+of the analytic data, and the envelope function calculated from the analytic data.
 <DT><B>-U</B>
 
 <DD>
@@ -441,7 +446,7 @@ reflection data..
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 3 June 2013</P></CENTER>
+Last Updated: 10 March 2024</P></CENTER>
 
 <HR>
 <center>

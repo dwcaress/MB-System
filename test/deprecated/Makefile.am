@@ -5,9 +5,6 @@ TESTS =
 # if HAVE_PYTHON
 check_SCRIPTS =
 
-TESTS += mb7k2jstar_test.py
-check_SCRIPTS += mb7k2jstar_test.py
-
 TESTS += mb7k2ss_test.py
 check_SCRIPTS += mb7k2ss_test.py
 

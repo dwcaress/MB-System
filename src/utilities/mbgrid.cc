@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbgrid.cc  5/2/94
  *
- *    Copyright (c) 1993-2024 by
+ *    Copyright (c) 1993-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -758,9 +758,8 @@ int main(int argc, char **argv) {
       fprintf(outfp, "dbg2       shift_y:              %f\n", shift_y);
       fprintf(outfp, "dbg2       bathy_in_feet:        %d\n", bathy_in_feet);
       fprintf(outfp, "dbg2       projection_pars:      %s\n", projection_pars);
-      fprintf(outfp, "dbg2       proj flag 1:          %d\n", projection_pars_f);
+      fprintf(outfp, "dbg2       projection_pars_f:    %d\n", projection_pars_f);
       fprintf(outfp, "dbg2       projection_id:        %s\n", projection_id);
-      // fprintf(outfp, "dbg2       utm_zone:             %d\n", utm_zone);
       fprintf(outfp, "dbg2       minormax_weighted_mean_threshold: %f\n", minormax_weighted_mean_threshold);
 
     }
@@ -965,6 +964,7 @@ int main(int argc, char **argv) {
 
   /* deal with projected gridding */
   if (projection_pars_f) {
+  
     /* check for UTM with undefined zone */
     if (strcmp(projection_pars, "UTM") == 0 || strcmp(projection_pars, "U") == 0 || strcmp(projection_pars, "utm") == 0 ||
         strcmp(projection_pars, "u") == 0) {
@@ -979,6 +979,20 @@ int main(int argc, char **argv) {
         snprintf(projection_id, sizeof(projection_id), "UTM%2.2dN", utm_zone);
       else
         snprintf(projection_id, sizeof(projection_id), "UTM%2.2dS", utm_zone);
+    }
+    else if (strncmp(projection_pars, "LTM", 3) == 0 || strncmp(projection_pars, "ltm", 3) == 0 
+    			|| strcmp(projection_pars, "L") == 0 || strcmp(projection_pars, "l") == 0) {
+	  double reference_lon;
+	  double reference_lat;
+      if (sscanf(projection_pars, "LTM%lf/%lf", &reference_lon, &reference_lat) == 2
+      		|| sscanf(projection_pars, "ltm%lf/%lf", &reference_lon, &reference_lat) == 2) {
+        strncpy(projection_id, projection_pars, sizeof(projection_id));
+      }
+      else {
+		reference_lon = 0.5 * (gbnd[0] + gbnd[1]);
+		reference_lat = 0.5 * (gbnd[2] + gbnd[3]);
+		snprintf(projection_id, sizeof(projection_id), "LTM%.5f/%.5f", reference_lon, reference_lat);
+      }
     }
     else
       strcpy(projection_id, projection_pars);
@@ -1944,10 +1958,12 @@ int main(int argc, char **argv) {
         }
         if (verbose >= 2)
           fprintf(outfp, "\n");
-        if (verbose > 0)
-          fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
-        else if (file_in_bounds)
-          fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
+        if (verbose > 0 || file_in_bounds) {
+		  if (astatus == MB_ALTNAV_USE)
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f) using nav from %s\n", ndatafile, rfile, dmin, dmax, apath);
+		  else
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+        }
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
@@ -1963,8 +1979,7 @@ int main(int argc, char **argv) {
     }
     if (datalist != nullptr)
       mb_datalist_close(verbose, &datalist, &error);
-    if (verbose > 0)
-      fprintf(outfp, "\n%d total data points processed\n", ndata);
+    fprintf(outfp, "\n%d total data points processed\n", ndata);
 
     /* close datalist if necessary */
     if (dfp != nullptr) {
@@ -2218,7 +2233,7 @@ int main(int argc, char **argv) {
             status = mb_read(verbose, mbio_ptr, &kind, &rpings, time_i, &time_d, &navlon, &navlat, &speed, &heading,
                              &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath,
                              amp, bathlon, bathlat, ss, sslon, sslat, comment, &error);
-
+                             
             /* time gaps are not a problem here */
             if (error == MB_ERROR_TIME_GAP) {
               error = MB_ERROR_NO_ERROR;
@@ -2238,14 +2253,14 @@ int main(int argc, char **argv) {
             if ((datatype == MBGRID_DATA_BATHYMETRY || datatype == MBGRID_DATA_TOPOGRAPHY) &&
                 error == MB_ERROR_NO_ERROR) {
 
-                            /* if needed try again to get topography type */
-                            if (topo_type == MB_TOPOGRAPHY_TYPE_UNKNOWN) {
-                                status = mb_sonartype(verbose, mbio_ptr, mb_io_ptr->store_data, &topo_type, &error);
-                                if (topo_type == MB_TOPOGRAPHY_TYPE_UNKNOWN
-                                    && mb_io_ptr->beamwidth_xtrack > 0.0 && mb_io_ptr->beamwidth_ltrack > 0.0) {
-                                    topo_type = MB_TOPOGRAPHY_TYPE_MULTIBEAM;
-                                }
-                            }
+							/* if needed try again to get topography type */
+							if (topo_type == MB_TOPOGRAPHY_TYPE_UNKNOWN) {
+									status = mb_sonartype(verbose, mbio_ptr, mb_io_ptr->store_data, &topo_type, &error);
+									if (topo_type == MB_TOPOGRAPHY_TYPE_UNKNOWN
+											&& mb_io_ptr->beamwidth_xtrack > 0.0 && mb_io_ptr->beamwidth_ltrack > 0.0) {
+											topo_type = MB_TOPOGRAPHY_TYPE_MULTIBEAM;
+									}
+							}
 
               /* reproject beam positions if necessary */
               if (use_projection) {
@@ -2515,16 +2530,13 @@ int main(int argc, char **argv) {
         }
         if (verbose >= 2)
           fprintf(outfp, "\n");
-        if (verbose > 0)
+        if (verbose > 0 || file_in_bounds)
           fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
-        else if (file_in_bounds)
-          fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
       } /* end if (format > 0) */
     }
     if (datalist != nullptr)
       mb_datalist_close(verbose, &datalist, &error);
-    if (verbose > 0)
-      fprintf(outfp, "\n%d total data points processed\n", ndata);
+    fprintf(outfp, "\n%d total data points processed\n", ndata);
 
     /* now loop over all points in the output grid */
     if (verbose >= 1)
@@ -2938,11 +2950,13 @@ int main(int argc, char **argv) {
         }
         if (verbose >= 2)
           fprintf(outfp, "\n");
-        if (verbose > 0)
-          fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
-        else if (file_in_bounds)
-          fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
-
+        if (verbose > 0 || file_in_bounds) {
+		  if (astatus == MB_ALTNAV_USE)
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f) using nav from %s\n", ndatafile, rfile, dmin, dmax, apath);
+		  else
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+		}
+		
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
           if (pstatus == MB_PROCESSED_USE && astatus == MB_ALTNAV_USE)
@@ -2957,8 +2971,7 @@ int main(int argc, char **argv) {
     }
     if (datalist != nullptr)
       mb_datalist_close(verbose, &datalist, &error);
-    if (verbose > 0)
-      fprintf(outfp, "\n%d total data points processed\n", ndata);
+    fprintf(outfp, "\n%d total data points processed\n", ndata);
 
     /* close datalist if necessary */
     if (dfp != nullptr) {
@@ -3373,10 +3386,12 @@ int main(int argc, char **argv) {
         }
         if (verbose >= 2)
           fprintf(outfp, "\n");
-        if (verbose > 0)
-          fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
-        else if (file_in_bounds)
-          fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
+        if (verbose > 0 || file_in_bounds) {
+		  if (astatus == MB_ALTNAV_USE)
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f) using nav from %s\n", ndatafile, rfile, dmin, dmax, apath);
+		  else
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+		}
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
@@ -3467,10 +3482,12 @@ int main(int argc, char **argv) {
         error = MB_ERROR_NO_ERROR;
         if (verbose >= 2)
           fprintf(outfp, "\n");
-        if (verbose > 0)
-          fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, file, dmin, dmax);
-        else if (ndatafile > 0)
-          fprintf(outfp, "%d data points processed in %s\n", ndatafile, file);
+        if (verbose > 0 || file_in_bounds) {
+		  if (astatus == MB_ALTNAV_USE)
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f) using nav from %s\n", ndatafile, rfile, dmin, dmax, apath);
+		  else
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+		}
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
@@ -3486,8 +3503,7 @@ int main(int argc, char **argv) {
     }
     if (datalist != nullptr)
       mb_datalist_close(verbose, &datalist, &error);
-    if (verbose > 0)
-      fprintf(outfp, "\n%d total data points processed\n", ndata);
+    fprintf(outfp, "\n%d total data points processed\n", ndata);
 
     /* close datalist if necessary */
     if (dfp != nullptr) {
@@ -3996,10 +4012,12 @@ int main(int argc, char **argv) {
         }
         if (verbose >= 2)
           fprintf(outfp, "\n");
-        if (verbose > 0)
-          fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
-        else if (file_in_bounds)
-          fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
+        if (verbose > 0 || file_in_bounds) {
+		  if (astatus == MB_ALTNAV_USE)
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f) using nav from %s\n", ndatafile, rfile, dmin, dmax, apath);
+		  else
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+		}
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
@@ -4097,10 +4115,12 @@ int main(int argc, char **argv) {
         error = MB_ERROR_NO_ERROR;
         if (verbose >= 2)
           fprintf(outfp, "\n");
-        if (verbose > 0)
-          fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, file, dmin, dmax);
-        else if (ndatafile > 0)
-          fprintf(outfp, "%d data points processed in %s\n", ndatafile, file);
+        if (verbose > 0 || file_in_bounds) {
+		  if (astatus == MB_ALTNAV_USE)
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f) using nav from %s\n", ndatafile, rfile, dmin, dmax, apath);
+		  else
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+		}
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
@@ -4116,8 +4136,7 @@ int main(int argc, char **argv) {
     }
     if (datalist != nullptr)
       mb_datalist_close(verbose, &datalist, &error);
-    if (verbose > 0)
-      fprintf(outfp, "\n%d total data points processed\n", ndata);
+    fprintf(outfp, "\n%d total data points processed\n", ndata);
 
     /* close datalist if necessary */
     if (dfp != nullptr) {
@@ -4539,10 +4558,12 @@ int main(int argc, char **argv) {
         }
         if (verbose >= 2)
           fprintf(outfp, "\n");
-        if (verbose > 0)
-          fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
-        else if (file_in_bounds)
-          fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
+        if (verbose > 0 || file_in_bounds) {
+		  if (astatus == MB_ALTNAV_USE)
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f) using nav from %s\n", ndatafile, rfile, dmin, dmax, apath);
+		  else
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+		}
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
@@ -4559,8 +4580,7 @@ int main(int argc, char **argv) {
     }
     if (datalist != nullptr)
       mb_datalist_close(verbose, &datalist, &error);
-    if (verbose > 0)
-      fprintf(outfp, "\n%d total data points processed\n", ndata);
+    fprintf(outfp, "\n%d total data points processed\n", ndata);
 
     /* close datalist if necessary */
     if (dfp != nullptr) {
@@ -4967,10 +4987,12 @@ int main(int argc, char **argv) {
         }
         if (verbose >= 2)
           fprintf(outfp, "\n");
-        if (verbose > 0)
-          fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
-        else if (file_in_bounds)
-          fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
+        if (verbose > 0 || file_in_bounds) {
+		  if (astatus == MB_ALTNAV_USE)
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f) using nav from %s\n", ndatafile, rfile, dmin, dmax, apath);
+		  else
+			fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+		}
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
@@ -4987,8 +5009,7 @@ int main(int argc, char **argv) {
     }
     if (datalist != nullptr)
       mb_datalist_close(verbose, &datalist, &error);
-    if (verbose > 0)
-      fprintf(outfp, "\n%d total data points processed\n", ndata);
+    fprintf(outfp, "\n%d total data points processed\n", ndata);
 
     /* close datalist if necessary */
     if (dfp != nullptr) {

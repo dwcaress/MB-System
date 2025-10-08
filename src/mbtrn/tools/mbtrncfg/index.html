@@ -133,6 +133,31 @@
                         <td class="entry"><input type="text" size="8" name="median-filter" value="">
                             </td>
                     </tr>
+                    <tr>
+                        <td class="param" onmouseover="showhelp('platform-file')"><a>platform-file</a></td>
+                        <td class="entry"><input type="text" size="8" name="platform-file" value="">
+                            </td>
+                    </tr>
+                    <tr>
+                        <td class="param" onmouseover="showhelp('tide-model')"><a>tide-model</a></td>
+                        <td class="entry"><input type="text" size="8" name="tide-model" value="">
+                            </td>
+                    </tr>
+                    <tr>
+                        <td class="param" onmouseover="showhelp('statsec')"><a>statsec</a></td>
+                        <td class="entry"><input type="text" size="8" name="statsec" value="">
+                            </td>
+                    </tr>
+                    <tr>
+                        <td class="param" onmouseover="showhelp('statflags')"><a>statflags</a></td>
+                        <td class="entry"><input type="text" size="64" name="statflags" value="">
+                            </td>
+                    </tr>
+                   <tr>
+                        <td class="param" onmouseover="showhelp('delay')"><a>delay</a></td>
+                        <td class="entry"><input type="text" size="8" name="delay" value="">
+                            </td>
+                    </tr>
                     <tr><td><div style="height:5px;"></div></td></tr>
                     <tr>
                         <td class="param" onmouseover="showhelp('trn-en')"><a>trn-en</a></td>
@@ -151,11 +176,29 @@
                         <td class="entry"><input type="text" size="8" name="trn-sensor" value="">
                             </td>
                     </tr>
-                  <tr>
-                      <td class="param" onmouseover="showhelp('trn-utm')"><a>trn-utm</a></td>
-                      <td class="entry"><input type="text" size="8" name="trn-utm" value="">
-                          </td>
-                  </tr>
+                    <tr><td><div style="height:5px;"></div></td></tr>
+                    <tr>
+                        <td class="param" onmouseover="showhelp('use-proj')"><a>use-proj</a></td>
+                        <td class="entry">
+                            Y<input type="radio" size="48" name="use-proj" value="en" checked>
+                                N<input type="radio" size="48" name="use-proj" value="dis">
+                                    </td>
+                    </tr>
+                    <tr>
+                        <td class="param" onmouseover="showhelp('projection')"><a>projection</a></td>
+                        <td class="entry"><input type="text" size="8" name="projection" value="">
+                            </td>
+                    </tr>
+                    <tr>
+                        <td class="param" onmouseover="showhelp('trn-crs')"><a>trn-crs</a></td>
+                        <td class="entry"><input type="text" size="8" name="trn-crs" value="">
+                            </td>
+                    </tr>
+                    <tr>
+                        <td class="param" onmouseover="showhelp('trn-utm')"><a>trn-utm</a></td>
+                        <td class="entry"><input type="text" size="8" name="trn-utm" value="">
+                            </td>
+                    </tr>
                   <tr>
                       <td class="param" onmouseover="showhelp('trn-map')"><a>trn-map</a></td>
                       <td class="entry"><input type="text" size="64" name="trn-map" value="">
@@ -230,7 +273,7 @@
                   <tr>
                       <td class="param" onmouseover="showhelp('reinit-gain')"><a>reinit-gain</a></td>
                       <td class="entry">
-                          Y<input type="radio" size="48" name="reinit-gain" value="di" checked>
+                          Y<input type="radio" size="48" name="reinit-gain" value="en" checked>
                               N<input type="radio" size="48" name="reinit-gain" value="dis">
                                   </td>
                   </tr>
@@ -264,11 +307,6 @@
                       <td class="entry"><input type="text" size="8" name="convergence-repeat-min" value="">
                           </td>
                   </tr>
-                  <tr>
-                      <td class="param" onmouseover="showhelp('tide-model')"><a>tide-model</a></td>
-                      <td class="entry"><input type="text" size="8" name="tide-model" value="">
-                          </td>
-                  </tr>
                   <tr><td><div style="height:5px;"></div></td></tr>
                   <tr>
                       <td class="param" onmouseover="showhelp('trn-out')"><a>trn-out</a></td>
@@ -293,21 +331,6 @@
                   <tr>
                       <td class="param" onmouseover="showhelp('mbhbt')"><a>mbhbt</a></td>
                       <td class="entry"><input type="text" size="8" name="mbhbt" value="">
-                          </td>
-                  </tr>
-                  <tr>
-                      <td class="param" onmouseover="showhelp('statsec')"><a>statsec</a></td>
-                      <td class="entry"><input type="text" size="8" name="statsec" value="">
-                          </td>
-                  </tr>
-                  <tr>
-                      <td class="param" onmouseover="showhelp('statflags')"><a>statflags</a></td>
-                      <td class="entry"><input type="text" size="64" name="statflags" value="">
-                          </td>
-                  </tr>
-                 <tr>
-                      <td class="param" onmouseover="showhelp('delay')"><a>delay</a></td>
-                      <td class="entry"><input type="text" size="8" name="delay" value="">
                           </td>
                   </tr>
               </table>

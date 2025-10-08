@@ -624,8 +624,6 @@ Matrix TNavPointMassFilter::generateCorrelationSurf(bool& containsNaN) {
 	//normalization constants used to sum the likelihood scores
 	double alpha = 0;
 	double beta = 0;
-	int numAlpha = 0;
-	int numBeta = 0;
 
 	if(saveDirectory != NULL) {
 		//save corrData values to file for debugging
@@ -727,7 +725,6 @@ Matrix TNavPointMassFilter::generateCorrelationSurf(bool& containsNaN) {
 				//probability to the uniform distribution
 				Like(i, j) = 1.0 / (Like.Nrows() * Like.Ncols());
 				beta += Like(i, j);
-				numBeta++;
 			} else {
 				//normalization constant for gaussian distribution with
 				//dimension N = numBeamsCorrelated
@@ -753,7 +750,6 @@ Matrix TNavPointMassFilter::generateCorrelationSurf(bool& containsNaN) {
 				
 				alpha += Like(i, j);
 				GaussianProb(i, j) = 1;
-				numAlpha++;
 			}
 		}
 	}

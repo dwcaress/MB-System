@@ -1765,6 +1765,14 @@ motionUpdateParticle(particleT& particle, const poseT& diffPose, double* velocit
 
 
 #ifdef WITH_TNAVPF_CEP_CORRECTION
+        // k headley per Rock 2024-11-20
+        // This correction not recommended (use original)
+        // It does not result in an effective drift rate as set by the driftRate parameter.
+        // We now know that original motivation (ROV TRN, w/ variable time steps) occurred
+        // because process noise was effectively zero at zero velocity, which this doesn't address.
+        // We are lumping all process noise into that single (non-gaussian) parameter, which we
+        // dial until it makes sence; using the original expression is more sensible and intuitive.
+        //
         // k headley per Rock 2022-12-05
         // removes sqrt (error)
         // divides by sqrt of time since last sample (b/c it is discrete time)
@@ -1772,6 +1780,9 @@ motionUpdateParticle(particleT& particle, const poseT& diffPose, double* velocit
         // introduce disproportionate amounts of noise, giving unreliable results.
         double driftStddev = MOTION_NOISE_MULTIPLIER * (cep / sqrt(-2 * (log(1 - 0.5))))/sqrt(diffPose.time);
 #else
+        // k headley per Rock 2024-11-20
+        // recommended to use this
+        // k headley per Rock 2022-12-05
         // original, thought to be incorrect
         //TODO:  check conversion from CEP to Stddev, I don't feel like there should be a sqrt outside the CEP
         double driftStddev = MOTION_NOISE_MULTIPLIER * sqrt(cep / sqrt(-2 * (log(1 - 0.5))));

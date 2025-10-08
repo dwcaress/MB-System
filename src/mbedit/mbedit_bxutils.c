@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_bxutils.c	1993
  *
- *    Copyright (c) 1993-2024 by
+ *    Copyright (c) 1993-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -963,7 +963,6 @@ WidgetList BxWidgetIdsFromNames(Widget ref, char *cbName, char *stringList) {
 	 */
 	start = strtok(start, ",");
 
-	// TODO(schwehr): Localize
 	WidgetList wgtIds = NULL;
 	int wgtCount = 0;
 

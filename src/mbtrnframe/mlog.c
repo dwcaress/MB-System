@@ -565,23 +565,38 @@ static int s_log_set_seg(mlog_t *self, int16_t segno)
         
         memset(new_name,0,len);
         bp = new_name;
-        size_t rem = len;
+        size_t bytes_rem = len;
 //        fprintf(stderr,"path[%s] name[%s] ext[%s] len[%d]\n",self->path,self->name,self->ext,len);
-
+        int bw = 0;
         // format new file path string
         if (NULL!=self->path) {
-            int bw = snprintf(bp, len, "%s",self->path);
+            bw = snprintf(bp, bytes_rem, "%s",self->path);
+            bytes_rem -= (bw > 0 ? bw : 0);
+            if(bw < 0 || bytes_rem < 0) {
+                fprintf(stderr,"%s:%d ERR\n", __func__, __LINE__);
+                return retval;
+            }
             bp = new_name + strlen(new_name);
-            rem -= (bw > 0 ? bw : 0);
         }
-        int bw = snprintf(bp, len, "%s", self->name);
+
+        bw = snprintf(bp, bytes_rem, "%s", self->name);
+        bytes_rem -= (bw > 0 ? bw : 0);
+        if(bw < 0 || bytes_rem < 0) {
+            fprintf(stderr,"%s:%d ERR\n", __func__, __LINE__);
+            return retval;
+        }
         bp = new_name + strlen(new_name);
-        rem -= (bw > 0 ? bw : 0);
-        bw = snprintf(bp, rem+1, ML_SEG_FMT, segno);
+
+        bw = snprintf(bp, bytes_rem, ML_SEG_FMT, segno);
+        bytes_rem -= (bw > 0 ? bw : 0);
+        if(bw < 0 || bytes_rem < 0) {
+            fprintf(stderr,"%s:%d ERR\n", __func__, __LINE__);
+            return retval;
+        }
+
         bp = new_name+strlen(new_name);
-        rem -= (bw > 0 ? bw : 0);
         if (NULL!=self->ext) {
-            snprintf(bp, rem+1, "%c%s",ML_SYS_EXT_DEL,self->ext);
+            snprintf(bp, bytes_rem, "%c%s", ML_SYS_EXT_DEL, self->ext);
             bp = new_name+strlen(new_name);
         }
 //        fprintf(stderr,"new_name[%s] len[%d]\n",new_name,strlen(new_name));
@@ -709,24 +724,54 @@ static void s_init_log(mlog_t *self)
 static char *s_seg_path(const char *file_path, mlog_t *self, uint16_t segno)
 {
     char *retval=NULL;
-    if (NULL!=self && NULL!=file_path && segno<=ML_MAX_SEG) {
-size_t len =0;
+
+    if (NULL!=self && NULL!=file_path && segno <= ML_MAX_SEG) {
+
+        // parse out file path components: path, name, (optional)extension
         s_parse_path(file_path,self);
-        len =strlen(file_path)+8;
-        retval = (char *)malloc(len*sizeof(char));
-        if (NULL!=retval) {
-        char *op = NULL;
+
+        // length is full file path, plus space
+        // for 4-digit segment number (0 - 9999)
+        // plus a few bytes margin
+        size_t len = strlen(file_path) + 8;
+
+        retval = (char *)malloc(len * sizeof(char));
+
+        if (self->name !=NULL && NULL!=retval) {
             memset(retval,0,len);
-            size_t rem = len;
-            op = retval;
-            int bw = snprintf(op, len, "%s%s",(self->path==NULL?"":self->path),self->name);
-            op=retval+strlen(retval);
-            rem -= (bw > 0 ? bw : 0);
-            bw = snprintf(op, rem+1, ML_SEG_FMT,(short int)segno);
-            op=retval+strlen(retval);
-            rem -= (bw > 0 ? bw : 0);
-            snprintf(op, rem+1, "%s%s",(self->ext==NULL?"":"."),(self->ext==NULL?"":self->ext));
+            size_t bytes_rem = len;
+            char *op = retval;
+            char *path_str = (self->path == NULL ? "" : self->path);
+
+            // add name and file path
+            int bw = snprintf(op, bytes_rem, "%s%s", path_str, self->name);
+            bytes_rem -= bw;
+
+            if(bw <= 0 || bytes_rem <= 0){
+                fprintf(stderr, "%s:%d ERR\n", __func__, __LINE__);
+                return NULL;
+            }
+            op = retval + strlen(retval);
+
+            // insert segment number (w/ rollover)
+            uint16_t seg = (segno > ML_MAX_SEG) ? 0 : segno;
+            bw = snprintf(op, bytes_rem, ML_SEG_FMT, (short unsigned int)seg);
+            bytes_rem -= bw;
+
+            if(bw <= 0 || bytes_rem <= 0){
+                fprintf(stderr, "%s:%d ERR\n", __func__, __LINE__);
+                return NULL;
+            }
+            op = retval + strlen(retval);
+
+            if(self->ext != NULL && strlen(self->ext) > 0) {
+                snprintf(op, bytes_rem, "%c%s", ML_SYS_EXT_DEL, self->ext);
+            }
+        } else {
+            fprintf(stderr, "%s:%d ERR\n", __func__, __LINE__);
         }
+    } else {
+        fprintf(stderr, "%s:%d ERR\n", __func__, __LINE__);
     }
     return retval;
 }
@@ -2535,12 +2580,19 @@ int mlog_test(int argc, char **argv)
     mlog_putc(SYSLOG_ID,'\n');
     mlog_write(SYSLOG_ID,(byte *)wdata,strlen(wdata));
 
-    fprintf(stderr,"segno /x/y/z12345.log    [%04d]\n",s_path_segno("/x/y/z12345.log","/x/y/z1",ML_SEG_FMT));
-    fprintf(stderr,"segno z_19999.log/z_1    [%04d]\n",s_path_segno("z_19999.log","z_1",ML_SEG_FMT));
-    fprintf(stderr,"segno z_1999999.log/z_19 [%04d]\n",s_path_segno("z_1999999.log","z_19",ML_SEG_FMT));
-    fprintf(stderr,"segno z_1999999/z_16     [%04d]\n",s_path_segno("z_1999999","z_16",ML_SEG_FMT));
-    fprintf(stderr,"segno z_1999999/z_       [%04d]\n",s_path_segno("z_1999999","z_",ML_SEG_FMT));
-    
+    int16_t ts = s_path_segno("/x/y/z12345.log","/x/y/z1",ML_SEG_FMT);
+    fprintf(stderr,"segno /x/y/z12345.log [/x/y/z1] [%04d] (%s)\n", ts, (ts >= 0 ? "OK" : "ERR"));
+    ts = s_path_segno("/x/y/z12345.log","z1",ML_SEG_FMT);
+    fprintf(stderr,"segno /x/y/z12345.log [z1]      [%04d] (%s)\n", ts, (ts >= 0 ? "OK" : "ERR"));
+    ts = s_path_segno("z_19999.log","z_1",ML_SEG_FMT);
+    fprintf(stderr,"segno z_19999.log     [z_1]     [%04d] (%s)\n", ts, (ts >= 0 ? "OK" : "ERR"));
+    ts = s_path_segno("z_1999999.log","z_19",ML_SEG_FMT);
+    fprintf(stderr,"segno z_1999999.log   [z_19]    [%04d] (%s)\n", ts, (ts >= 0 ? "OK" : "ERR"));
+    ts = s_path_segno("z_1999999","z_16",ML_SEG_FMT);
+    fprintf(stderr,"segno z_1999999       [z_16]    [%04d] (%s)\n", ts, (ts >= 0 ? "OK" : "ERR"));
+    ts = s_path_segno("z_1999999","z_",ML_SEG_FMT);
+    fprintf(stderr,"segno z_1999999       [z_]      [%04d] (%s)\n", ts, (ts >= 0 ? "OK" : "ERR"));
+
     fprintf(stderr,"looking for max seg in dir [%s] using name[%s]\n", syslog_orig->path, syslog_orig->name);
     s_get_log_info(&linfo,syslog_orig->path,syslog_orig->name, ML_SEG_FMT,syslog_orig->file);
     fprintf(stderr,"max_seg [%04hu]\n",linfo.seg_max);

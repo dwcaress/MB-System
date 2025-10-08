@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
  *
- *    Copyright (c) 2004-2024 by
+ *    Copyright (c) 2004-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -173,7 +173,8 @@ struct mb_segytraceheader_struct {
 	float dummy1;             /* bytes 204-207 */
 	float dummy2;             /* bytes 208-211 */
 	float dummy3;             /* bytes 212-215 */
-	float dummy4;             /* bytes 216-219 */
+	float sensordepthtime;    /* bytes 216-219, sensor depth expressed in TWTT equivalent using soundspeed,
+												- this amounts to trace start delay time relative to sea surface */
 	float soundspeed;         /* bytes 220-223, water sound speed in m/sec (MB-System only) */
 	float distance;           /* bytes 224-227, distance from previous shot along track in meters (MB-System only) */
 	float roll;               /* bytes 228-231, roll in degrees (MB-System only) */

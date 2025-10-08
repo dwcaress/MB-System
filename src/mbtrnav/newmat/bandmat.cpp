@@ -124,8 +124,8 @@ void BandMatrix::ReSizeForAdd(const GeneralMatrix& A, const GeneralMatrix& B)
    REPORT
    Tracer tr("BandMatrix::ReSizeForAdd");
    MatrixBandWidth A_BW = A.BandWidth(); MatrixBandWidth B_BW = B.BandWidth();
-   if ((A_BW.Lower() < 0) | (A_BW.Upper() < 0) | (B_BW.Lower() < 0)
-      | (A_BW.Upper() < 0))
+   if ((A_BW.Lower() < 0) || (A_BW.Upper() < 0) || (B_BW.Lower() < 0)
+      || (A_BW.Upper() < 0))
          Throw(ProgramException("Can't ReSize to BandMatrix" ));
    // already know A and B are square
    ReSize(A.Nrows(), my_max(A_BW.Lower(), B_BW.Lower()),
@@ -137,8 +137,8 @@ void BandMatrix::ReSizeForSP(const GeneralMatrix& A, const GeneralMatrix& B)
    REPORT
    Tracer tr("BandMatrix::ReSizeForSP");
    MatrixBandWidth A_BW = A.BandWidth(); MatrixBandWidth B_BW = B.BandWidth();
-   if ((A_BW.Lower() < 0) | (A_BW.Upper() < 0) | (B_BW.Lower() < 0)
-      | (A_BW.Upper() < 0))
+   if ((A_BW.Lower() < 0) || (A_BW.Upper() < 0) || (B_BW.Lower() < 0)
+      || (A_BW.Upper() < 0))
          Throw(ProgramException("Can't ReSize to BandMatrix" ));
    // already know A and B are square
    ReSize(A.Nrows(), my_min(A_BW.Lower(), B_BW.Lower()),
@@ -486,7 +486,7 @@ void SymmetricBandMatrix::ReSizeForAdd(const GeneralMatrix& A,
    REPORT
    Tracer tr("SymmetricBandMatrix::ReSizeForAdd");
    MatrixBandWidth A_BW = A.BandWidth(); MatrixBandWidth B_BW = B.BandWidth();
-   if ((A_BW.Lower() < 0) | (B_BW.Lower() < 0))
+   if ((A_BW.Lower() < 0) || (B_BW.Lower() < 0))
          Throw(ProgramException("Can't ReSize to SymmetricBandMatrix" ));
    // already know A and B are square
    ReSize(A.Nrows(), my_max(A_BW.Lower(), B_BW.Lower()));
@@ -498,7 +498,7 @@ void SymmetricBandMatrix::ReSizeForSP(const GeneralMatrix& A,
    REPORT
    Tracer tr("SymmetricBandMatrix::ReSizeForSP");
    MatrixBandWidth A_BW = A.BandWidth(); MatrixBandWidth B_BW = B.BandWidth();
-   if ((A_BW.Lower() < 0) | (B_BW.Lower() < 0))
+   if ((A_BW.Lower() < 0) || (B_BW.Lower() < 0))
          Throw(ProgramException("Can't ReSize to SymmetricBandMatrix" ));
    // already know A and B are square
    ReSize(A.Nrows(), my_min(A_BW.Lower(), B_BW.Lower()));

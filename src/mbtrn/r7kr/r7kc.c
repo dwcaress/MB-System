@@ -535,12 +535,12 @@ void r7k_hex_show(byte *data, uint32_t len, uint16_t cols, bool show_offsets, ui
         int rem = len%cols;
 
         byte *p=data;
-        fprintf(stderr,"%*s:\n",indent,__func__);
+        //fprintf(stderr,"%*s:\n",indent,__func__);
         for (int i=0; i<rows; i++) {
             if (show_offsets) {
-                fprintf(stderr,"%*s%04ld [",indent,(indent>0?" ":""),(long int)(p-data));
+                fprintf(stderr,"%*s%04ld ",indent,(indent>0?" ":""),(long int)(p-data));
             }else{
-                fprintf(stderr,"%*s[",indent,(indent>0?" ":""));
+                fprintf(stderr,"%*s",indent,(indent>0?" ":""));
             }
             for (int j=0; j<cols; j++) {
                 if (p>=data && p<(data+len)) {
@@ -551,18 +551,18 @@ void r7k_hex_show(byte *data, uint32_t len, uint16_t cols, bool show_offsets, ui
                     fprintf(stderr,"   ");
                 }
             }
-            fprintf(stderr," ]\n");
+            fprintf(stderr," \n");
         }
         if (rem>0) {
             if (show_offsets) {
-                fprintf(stderr,"%*s%04ld [",indent,(indent>0?" ":""),(long int)(p-data));
+                fprintf(stderr,"%*s%04ld ",indent,(indent>0?" ":""),(long int)(p-data));
             }else{
-                fprintf(stderr,"%*s[",indent,(indent>0?" ":""));
+                fprintf(stderr,"%*s",indent,(indent>0?" ":""));
             }
             for (int j=0; j<rem; j++) {
                 fprintf(stderr," %02x",*p++);
             }
-            fprintf(stderr,"%*s ]\n",3*(cols-rem)," ");
+            fprintf(stderr,"%*s \n",3*(cols-rem)," ");
         }
 
     }

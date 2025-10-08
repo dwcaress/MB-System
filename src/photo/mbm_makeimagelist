@@ -1,8 +1,34 @@
 #!/usr/bin/env python3
-####
-# Simple Script to create imagelist.mb-2
+#------------------------------------------------------------------------------
+#     The MB-system:	mbm_makeimagelist	10/10/2001
+# 
+#     Copyright (c) 2018-2025 by
+#     David W. Caress (caress@mbari.org)
+#       Monterey Bay Aquarium Research Institute
+#       Moss Landing, California, USA
+#     Dale N. Chayes 
+#       Center for Coastal and Ocean Mapping
+#       University of New Hampshire
+#       Durham, New Hampshire, USA
+#     Christian dos Santos Ferreira
+#       MARUM
+#       University of Bremen
+#       Bremen Germany
+#      
+#     MB-System was created by Caress and Chayes in 1992 at the
+#       Lamont-Doherty Earth Observatory
+#       Columbia University
+#       Palisades, NY 10964
+# 
+#     See README.md file for copying and redistribution conditions.
+#------------------------------------------------------------------------------
 #
-# 09/22/18  GT   Created
+#  mbm_makeimagelist generates MB-System imagelist files within MBARI 
+#  Low Altitude Survey System (LASS) stereo seafloor photography data directories
+# 
+#  Author:	Giancarlo Troni
+#  Date:	September 22, 2018
+#------------------------------------------------------------------------------
 
 import sys, getopt, os, re
 import glob, csv
@@ -10,8 +36,8 @@ from datetime import datetime
 from collections import namedtuple
 from PIL import Image
 
-shortOpts = "hbd:f:o:g:x"
-longOpts = ["help", "check-bayer", "imdir=", "imformat=", "outfile=", "gpsfile=", "nogpsfile"]
+shortOpts = "hbd:f:o:g:xy"
+longOpts = ["help", "check-bayer", "imdir=", "imformat=", "outfile=", "gpsfile=", "nogpsfile", "nogains"]
 
 def usage():
   pname, sname = os.path.split(sys.argv[0])
@@ -24,6 +50,7 @@ def usage():
   -o --outfile=outfname      Output data to [ofname] [default 'imagelist']
   -g --gpsfile=gpsfname      GPS time data from [gpsfname] [default './../logfile_gpstime_cam_sync.csv']
   -x --nogpsfile             Avoid using GPS tigger times (just image time matching)
+  -x --nogains               Avoid using camera gain and exposure embedded in images
   """ )
   sys.exit()
 
@@ -179,6 +206,7 @@ def main (args, opts={}):
   outFname = "imagelist"
   gpsFname = "/../logfile_gpstime_cam_sync.csv"
   fGPStimes = True
+  fGains = True
   checkBayer = False
   for o, a in opts:
     if o in ("-h", "--help"):
@@ -195,6 +223,8 @@ def main (args, opts={}):
       gpsFname = a
     elif o in ("-x", "--nogpsfile"):
       fGPStimes = False
+    elif o in ("-y", "--nogains"):
+      fGains = False
     else:
       assert False, "unhandled option: "+o+" "+a
 
@@ -221,23 +251,32 @@ def main (args, opts={}):
   for f in image_list_left :
     if checkBayer:
       f = f.replace("color", "bayer", 1)
-    img = Image.open(f)
-    tagdata = img.tag.tagdata
-    img.close()
-    gain_exposure_str = tagdata[270].decode('UTF-8','ignore')
-    (gain_str, exposure_str) = re.findall(r"[-+]?\d*\.?\d+|[-+]?\d+", gain_exposure_str);
-    gain_list_left.append(float(gain_str))
-    exposure_list_left.append(float(exposure_str))
+    if fGains:
+      img = Image.open(f)
+      tagdata = img.tag.tagdata
+      img.close()
+      gain_exposure_str = tagdata[270].decode('UTF-8','ignore')
+      #print(gain_exposure_str)
+      (gain_str, exposure_str) = re.findall(r"[-+]?\d*\.?\d+|[-+]?\d+", gain_exposure_str);
+      gain_list_left.append(float(gain_str))
+      exposure_list_left.append(float(exposure_str))
+    else:
+      gain_list_left.append(0.0)
+      exposure_list_left.append(0.0)
   for f in image_list_right :
     if checkBayer:
       f = f.replace("color", "bayer", 1)
-    img = Image.open(f)
-    tagdata = img.tag.tagdata
-    img.close()
-    gain_exposure_str = tagdata[270].decode('UTF-8','ignore')
-    (gain_str, exposure_str) = re.findall(r"[-+]?\d*\.?\d+|[-+]?\d+", gain_exposure_str);
-    gain_list_right.append(float(gain_str))
-    exposure_list_right.append(float(exposure_str))
+    if fGains:
+      img = Image.open(f)
+      tagdata = img.tag.tagdata
+      img.close()
+      gain_exposure_str = tagdata[270].decode('UTF-8','ignore')
+      (gain_str, exposure_str) = re.findall(r"[-+]?\d*\.?\d+|[-+]?\d+", gain_exposure_str);
+      gain_list_right.append(float(gain_str))
+      exposure_list_right.append(float(exposure_str))
+    else:
+      gain_list_right.append(0.0)
+      exposure_list_right.append(0.0)
 
   #  Use GPS Triggers?
   if fGPStimes:

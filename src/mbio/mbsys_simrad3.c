@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad3.c	3.00	2/22/2008
  *
- *    Copyright (c) 2008-2024 by
+ *    Copyright (c) 2008-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -625,7 +625,7 @@ int mbsys_simrad3_zero_ss(int verbose, void *store_ptr, int *error) {
 		struct mbsys_simrad3_ping_struct *ping =
 			(struct mbsys_simrad3_ping_struct *)&(store->pings[ping_num]);
 
-		ping->png_ss_read = 0;          /* flag indicating actual reading of sidescan record */
+		ping->png_ss_read = false;          /* flag indicating actual reading of sidescan record */
 		ping->png_ss_date = 0;          /* date = year*10000 + month*100 + day
 		                        Feb 26, 1995 = 19950226 */
 		ping->png_ss_msec = 0;          /* time since midnight in msec
@@ -876,7 +876,7 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		fprintf(stderr, "dbg2       preprocess_pars_ptr:        %p\n", (void *)preprocess_pars_ptr);
 	}
 
-  *error = MB_ERROR_NO_ERROR;
+  	*error = MB_ERROR_NO_ERROR;
 
 	/* check for non-null data */
 	assert(mbio_ptr != NULL);
@@ -885,12 +885,12 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 	/* get mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-  /* get preprocessing parameters */
-  struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
+  	/* get preprocessing parameters */
+  	struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
 
 	/* get data structure pointers */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
-	// struct mb_platform_struct *platforms = (struct mb_platform_struct *)platform_ptr;
+	struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       target_sensor:              %d\n", pars->target_sensor);
@@ -922,22 +922,43 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 
 	int status = MB_SUCCESS;
 
-  /* if called with store_ptr == NULL then called after mb_read_init() but before
-      any data are read - for some formats this allows kluge options to set special
-      reading conditions/behaviors */
-  if (store_ptr == NULL) {
-		for (int i = 0; i < pars->n_kluge; i++)
+	/* if called with store_ptr == NULL then called after mb_read_init() but before
+	  any data are read - for some formats this allows kluge options to set special
+	  reading conditions/behaviors */
+	if (store_ptr == NULL) {
+		for (int i = 0; i < pars->n_kluge; i++){
 			if (pars->kluge_id[i] == MB_PR_KLUGE_IGNORESNIPPETS) {
-        bool *ignore_snippets = (bool *)&mb_io_ptr->save4;
-        *ignore_snippets = true;
-      }
-  }
+	    		bool *ignore_snippets = (bool *)&mb_io_ptr->save4;
+	    		*ignore_snippets = true;
+	  	}
+			if (pars->kluge_id[i] == MB_PR_KLUGE_AUVSENTRYSENSORDEPTH) {
+	    		bool *xducer_depth_mode = (bool *)&mb_io_ptr->save5;
+	    		*xducer_depth_mode = MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY;
+	  	}
+			if (pars->kluge_id[i] == MB_PR_KLUGE_SENSORDEPTHFROMHEAVE) {
+	    		bool *xducer_depth_mode = (bool *)&mb_io_ptr->save5;
+	    		*xducer_depth_mode = MBSYS_SIMRAD3_ZMODE_USE_HEAVE_ONLY;
+	  	}
+			if (pars->kluge_id[i] == MB_PR_KLUGE_XDUCER_DEPTH_FROM_HEAVE) {
+	    		bool *xducer_depth_mode = (bool *)&mb_io_ptr->save5;
+	    		*xducer_depth_mode = MBSYS_SIMRAD3_ZMODE_USE_HEAVE_ONLY;
+	  	}
+			if (pars->kluge_id[i] == MB_PR_KLUGE_XDUCER_DEPTH_FROM_SENSORDEPTH) {
+	    		bool *xducer_depth_mode = (bool *)&mb_io_ptr->save5;
+	    		*xducer_depth_mode = MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY;
+	  	}
+			if (pars->kluge_id[i] == MB_PR_KLUGE_XDUCER_DEPTH_FROM_HEAVEANDSENSORDEPTH) {
+	    		bool *xducer_depth_mode = (bool *)&mb_io_ptr->save5;
+	    		*xducer_depth_mode = MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_AND_HEAVE;
+	  	}
+	  }
+	}
 
 	/* deal with a survey record */
 	else if (store->kind == MB_DATA_DATA) {
 
-  	/* get data structure pointers */
-    struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
+  		/* get data structure pointers */
+    	struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 
 		/* depth sensor offsets - used in place of heave for underwater platforms */
 		int depthsensor_mode = MBSYS_SIMRAD3_ZMODE_UNKNOWN;
@@ -947,9 +968,11 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		    NI => Use heave
 		    IN => Depth sensor */
 		/*--------------------------------------------------------------*/
-		if (store->par_dsh[0] == 'I')
+		if (store->par_dsh[0] == 'N' && store->par_dsh[1] == 'I')
+			depthsensor_mode = MBSYS_SIMRAD3_ZMODE_USE_HEAVE_ONLY;
+		else if (store->par_dsh[0] == 'I' && store->par_dsh[1] == 'N')
 			depthsensor_mode = MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY;
-		else if (store->par_dsh[0] == 'N')
+		else if (store->par_dsh[0] == 'N' && store->par_dsh[1] == 'N')
 			depthsensor_mode = MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_AND_HEAVE;
 		else
 			depthsensor_mode = MBSYS_SIMRAD3_ZMODE_USE_HEAVE_ONLY;
@@ -968,11 +991,21 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 			ping->png_msec = 3600000 * time_i[3] + 60000 * time_i[4] + 1000 * time_i[5] + 0.001 * time_i[6];
 			store->date = ping->png_date;
 			store->msec = ping->png_msec;
-			fprintf(stderr,
-			        "Timestamp changed in function %s: "
+			if (ping->png_raw_date > 0) {
+				ping->png_raw_date = ping->png_date;
+				ping->png_raw_msec = ping->png_msec;
+			}
+			if (ping->png_ss_date > 0) {
+				ping->png_ss_date = ping->png_date;
+				ping->png_ss_msec = ping->png_msec;
+			}
+			if (verbose >= 2) {
+				fprintf(stderr,
+			        "dbg2       Timestamp changed in function %s: "
 			        "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d "
 			        "| ping_number:%d\n",
 			        __func__, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], ping->png_count);
+			}
 		}
 
 		/*--------------------------------------------------------------*/
@@ -1038,11 +1071,179 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude, time_d,
 		                                 &heave, &jattitude, &interp_error);
 
+		/*--------------------------------------------------------------*/
+		/* get transducer offsets */
+		/*--------------------------------------------------------------*/
+		/* transmit and receive array offsets embedded in file */
+		double tx_x, tx_y, tx_z;
+		double tx_h, tx_r, tx_p;
+		double rx_x, rx_y, rx_z;
+		double rx_h, rx_r, rx_p;
+		if (store->sonar == 30) {
+			tx_x = store->par_s1x;
+			tx_y = store->par_s1y;
+			tx_z = store->par_s1z;
+			tx_h = store->par_s1h;
+			tx_r = store->par_s1r;
+			tx_p = store->par_s1p;
+			rx_x = store->par_s1x;
+			rx_y = store->par_s1y;
+			rx_z = store->par_s1z;
+			rx_h = store->par_s1h;
+			rx_r = store->par_s1r;
+			rx_p = store->par_s1p;
+		}
+		else if (store->par_stc == 0) {
+			tx_x = store->par_s1x;
+			tx_y = store->par_s1y;
+			tx_z = store->par_s1z;
+			tx_h = store->par_s1h;
+			tx_r = store->par_s1r;
+			tx_p = store->par_s1p;
+			rx_x = store->par_s2x;
+			rx_y = store->par_s2y;
+			rx_z = store->par_s2z;
+			rx_h = store->par_s2h;
+			rx_r = store->par_s2r;
+			rx_p = store->par_s2p;
+		}
+		else if (store->par_stc == 1) {
+			tx_x = store->par_s1x;
+			tx_y = store->par_s1y;
+			tx_z = store->par_s1z;
+			tx_h = store->par_s1h;
+			tx_r = store->par_s1r;
+			tx_p = store->par_s1p;
+			rx_x = store->par_s1x;
+			rx_y = store->par_s1y;
+			rx_z = store->par_s1z;
+			rx_h = store->par_s1h;
+			rx_r = store->par_s1r;
+			rx_p = store->par_s1p;
+		}
+		else if (store->par_stc == 2 && ping->png_serial == store->par_serial_1) {
+			tx_x = store->par_s1x;
+			tx_y = store->par_s1y;
+			tx_z = store->par_s1z;
+			tx_h = store->par_s1h;
+			tx_r = store->par_s1r;
+			tx_p = store->par_s1p;
+			rx_x = store->par_s1x;
+			rx_y = store->par_s1y;
+			rx_z = store->par_s1z;
+			rx_h = store->par_s1h;
+			rx_r = store->par_s1r;
+			rx_p = store->par_s1p;
+		}
+		else if (store->par_stc == 2 && ping->png_serial == store->par_serial_2) {
+			tx_x = store->par_s2x;
+			tx_y = store->par_s2y;
+			tx_z = store->par_s2z;
+			tx_h = store->par_s2h;
+			tx_r = store->par_s2r;
+			tx_p = store->par_s2p;
+			rx_x = store->par_s2x;
+			rx_y = store->par_s2y;
+			rx_z = store->par_s2z;
+			rx_h = store->par_s2h;
+			rx_r = store->par_s2r;
+			rx_p = store->par_s2p;
+		}
+		else if (store->par_stc == 3 && ping->png_serial == store->par_serial_1) {
+			tx_x = store->par_s1x;
+			tx_y = store->par_s1y;
+			tx_z = store->par_s1z;
+			tx_h = store->par_s1h;
+			tx_r = store->par_s1r;
+			tx_p = store->par_s1p;
+			rx_x = store->par_s2x;
+			rx_y = store->par_s2y;
+			rx_z = store->par_s2z;
+			rx_h = store->par_s2h;
+			rx_r = store->par_s2r;
+			rx_p = store->par_s2p;
+		}
+		else if (store->par_stc == 3 && ping->png_serial == store->par_serial_2) {
+			tx_x = store->par_s1x;
+			tx_y = store->par_s1y;
+			tx_z = store->par_s1z;
+			tx_h = store->par_s1h;
+			tx_r = store->par_s1r;
+			tx_p = store->par_s1p;
+			rx_x = store->par_s3x;
+			rx_y = store->par_s3y;
+			rx_z = store->par_s3z;
+			rx_h = store->par_s3h;
+			rx_r = store->par_s3r;
+			rx_p = store->par_s3p;
+		}
+		else if (store->par_stc == 4 && ping->png_serial == store->par_serial_1) {
+			tx_x = store->par_s0x;
+			tx_y = store->par_s0y;
+			tx_z = store->par_s0z;
+			tx_h = store->par_s0h;
+			tx_r = store->par_s0r;
+			tx_p = store->par_s0p;
+			rx_x = store->par_s2x;
+			rx_y = store->par_s2y;
+			rx_z = store->par_s2z;
+			rx_h = store->par_s2h;
+			rx_r = store->par_s2r;
+			rx_p = store->par_s2p;
+		}
+		else if (store->par_stc == 4 && ping->png_serial == store->par_serial_2) {
+			tx_x = store->par_s1x;
+			tx_y = store->par_s1y;
+			tx_z = store->par_s1z;
+			tx_h = store->par_s1h;
+			tx_r = store->par_s1r;
+			tx_p = store->par_s1p;
+			rx_x = store->par_s3x;
+			rx_y = store->par_s3y;
+			rx_z = store->par_s3z;
+			rx_h = store->par_s3h;
+			rx_r = store->par_s3r;
+			rx_p = store->par_s3p;
+		}
+		
+		/* transmit and receive array offsets from platform file */
+		double tx_x_p, tx_y_p, tx_z_p;
+		double tx_h_p, tx_r_p, tx_p_p;
+		double rx_x_p, rx_y_p, rx_z_p;
+		double rx_h_p, rx_r_p, rx_p_p;
+		int tx_sign_p = 1.0;
+		int rx_sign_p = 1.0;
+		if (platform != NULL) {
+			status = mb_platform_position_offset(verbose, (void *)platform, pars->target_sensor, 0, 
+													&(tx_x_p), &(tx_y_p), &(tx_z_p), error);
+			status = mb_platform_position_offset(verbose, (void *)platform, pars->target_sensor, 0, 
+													&(rx_x_p), &(rx_y_p), &(rx_z_p), error);
+			status = mb_platform_orientation_offset(verbose, (void *)platform, pars->target_sensor, 0,
+													&(tx_h_p), &(tx_r_p), &(tx_p_p), error);
+			status = mb_platform_orientation_offset(verbose, (void *)platform, pars->target_sensor, 1,
+													&(rx_h_p), &(rx_r_p), &(rx_p_p), error);
+	
+			// handle reverse mounting of transmit and receive arrays */
+			if (tx_h_p > 100.0 || tx_h_p < -100.0) {
+				tx_h_p -= 180.0;
+				if (tx_h_p < 0.0)
+				    tx_h_p += 360.0;
+				tx_sign_p = -1.0;
+			}
+			if (rx_h_p > 100.0 || rx_h_p < -100.0) {
+			    rx_h_p -= 180.0;
+			    if (rx_h_p < 0.0)
+				    rx_h_p += 360.0;
+			    rx_sign_p = -1.0;
+			}
+		}
+
 		/* insert navigation */
 		ping->png_longitude = 10000000 * navlon;
 		ping->png_latitude = 20000000 * navlat;
 
 		/* insert heading */
+		heading += tx_h_p;
 		if (heading < 0.0)
 			heading += 360.0;
 		else if (heading > 360.0)
@@ -1050,138 +1251,22 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		ping->png_heading = (int)rint(heading * 100);
 
 		/* insert roll pitch and heave */
+		roll += rx_r_p;
+		pitch += rx_p_p;
 		ping->png_roll = (int)rint(roll / 0.01);
 		ping->png_pitch = (int)rint(pitch / 0.01);
 		ping->png_heave = (int)rint(heave / 0.01);
 
-		/*--------------------------------------------------------------*/
-		/* get transducer offsets */
-		/*--------------------------------------------------------------*/
-		/* transmit and receive array offsets */
-		// double tx_x, tx_y, tx_z;
-		double tx_h, tx_r, tx_p;
-		// double rx_x, rx_y, rx_z;
-		double rx_h, rx_r, rx_p;
-
-		if (store->par_stc == 0) {
-			// tx_x = store->par_s1x;
-			// tx_y = store->par_s1y;
-			// tx_z = store->par_s1z;
-			tx_h = store->par_s1h;
-			tx_r = store->par_s1r;
-			tx_p = store->par_s1p;
-			// rx_x = store->par_s2x;
-			// rx_y = store->par_s2y;
-			// rx_z = store->par_s2z;
-			rx_h = store->par_s2h;
-			rx_r = store->par_s2r;
-			rx_p = store->par_s2p;
+		/* insert sensordepth */
+		if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_HEAVE_ONLY) {
+			ping->png_xducer_depth = 0.5 * (tx_z + rx_z) - store->par_wlz + heave;
 		}
-		else if (store->par_stc == 1) {
-			// tx_x = store->par_s1x;
-			// tx_y = store->par_s1y;
-			// tx_z = store->par_s1z;
-			tx_h = store->par_s1h;
-			tx_r = store->par_s1r;
-			tx_p = store->par_s1p;
-			// rx_x = store->par_s1x;
-			// rx_y = store->par_s1y;
-			// rx_z = store->par_s1z;
-			rx_h = store->par_s1h;
-			rx_r = store->par_s1r;
-			rx_p = store->par_s1p;
+		else if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY) {
+			ping->png_xducer_depth = sensordepth;
+		} 
+		else if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_AND_HEAVE) {
+			ping->png_xducer_depth = sensordepth + 0.5 * (tx_z + rx_z) - store->par_wlz + heave;
 		}
-		else if (store->par_stc == 2 && ping->png_serial == store->par_serial_1) {
-			// tx_x = store->par_s1x;
-			// tx_y = store->par_s1y;
-			// tx_z = store->par_s1z;
-			tx_h = store->par_s1h;
-			tx_r = store->par_s1r;
-			tx_p = store->par_s1p;
-			// rx_x = store->par_s1x;
-			// rx_y = store->par_s1y;
-			// rx_z = store->par_s1z;
-			rx_h = store->par_s1h;
-			rx_r = store->par_s1r;
-			rx_p = store->par_s1p;
-		}
-		else if (store->par_stc == 2 && ping->png_serial == store->par_serial_2) {
-			// tx_x = store->par_s2x;
-			// tx_y = store->par_s2y;
-			// tx_z = store->par_s2z;
-			tx_h = store->par_s2h;
-			tx_r = store->par_s2r;
-			tx_p = store->par_s2p;
-			// rx_x = store->par_s2x;
-			// rx_y = store->par_s2y;
-			// rx_z = store->par_s2z;
-			rx_h = store->par_s2h;
-			rx_r = store->par_s2r;
-			rx_p = store->par_s2p;
-		}
-		else if (store->par_stc == 3 && ping->png_serial == store->par_serial_1) {
-			// tx_x = store->par_s1x;
-			// tx_y = store->par_s1y;
-			// tx_z = store->par_s1z;
-			tx_h = store->par_s1h;
-			tx_r = store->par_s1r;
-			tx_p = store->par_s1p;
-			// rx_x = store->par_s2x;
-			// rx_y = store->par_s2y;
-			// rx_z = store->par_s2z;
-			rx_h = store->par_s2h;
-			rx_r = store->par_s2r;
-			rx_p = store->par_s2p;
-		}
-		else if (store->par_stc == 3 && ping->png_serial == store->par_serial_2) {
-			// tx_x = store->par_s1x;
-			// tx_y = store->par_s1y;
-			// tx_z = store->par_s1z;
-			tx_h = store->par_s1h;
-			tx_r = store->par_s1r;
-			tx_p = store->par_s1p;
-			// rx_x = store->par_s3x;
-			// rx_y = store->par_s3y;
-			// rx_z = store->par_s3z;
-			rx_h = store->par_s3h;
-			rx_r = store->par_s3r;
-			rx_p = store->par_s3p;
-		}
-		else if (store->par_stc == 4 && ping->png_serial == store->par_serial_1) {
-			// tx_x = store->par_s0x;
-			// tx_y = store->par_s0y;
-			// tx_z = store->par_s0z;
-			tx_h = store->par_s0h;
-			tx_r = store->par_s0r;
-			tx_p = store->par_s0p;
-			// rx_x = store->par_s2x;
-			// rx_y = store->par_s2y;
-			// rx_z = store->par_s2z;
-			rx_h = store->par_s2h;
-			rx_r = store->par_s2r;
-			rx_p = store->par_s2p;
-		}
-		else if (store->par_stc == 4 && ping->png_serial == store->par_serial_2) {
-			// tx_x = store->par_s1x;
-			// tx_y = store->par_s1y;
-			// tx_z = store->par_s1z;
-			tx_h = store->par_s1h;
-			tx_r = store->par_s1r;
-			tx_p = store->par_s1p;
-			// rx_x = store->par_s3x;
-			// rx_y = store->par_s3y;
-			// rx_z = store->par_s3z;
-			rx_h = store->par_s3h;
-			rx_r = store->par_s3r;
-			rx_p = store->par_s3p;
-		}
-
-		/* insert sensordepth if requested */
-		// if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY) {
-			// ping->png_xducer_depth = sensordepth;
-		// } else {
-			// ping->png_xducer_depth = 0.5 * (tx_z + rx_z) - store->par_wlz + heave;
-		// }
 
 		double transmit_heading, transmit_heave, transmit_roll, transmit_pitch;
 		double receive_heading, receive_heave, receive_roll, receive_pitch;
@@ -1234,12 +1319,22 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 				                                 receive_time_d, &receive_heave, &jattitude, error);
 
 			/* use sensordepth instead of heave for submerged platforms */
-			if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY) {
+			if (depthsensor_mode != MBSYS_SIMRAD3_ZMODE_USE_HEAVE_ONLY) {
+				double transmit_sensordepth, receive_sensordepth;
 				mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
-				                                 pars->n_sensordepth, transmit_time_d, &transmit_heave, &jsensordepth, error);
+				                                 pars->n_sensordepth, transmit_time_d, &transmit_sensordepth, &jsensordepth, error);
 				mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
-				                                 pars->n_sensordepth, receive_time_d, &receive_heave, &jsensordepth, error);
-				heave = transmit_heave;
+				                                 pars->n_sensordepth, receive_time_d, &receive_sensordepth, &jsensordepth, error);
+				if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY) {
+					transmit_heave = transmit_sensordepth;
+					receive_heave = receive_sensordepth;
+					heave = transmit_heave;
+				}
+				else {
+					transmit_heave += transmit_sensordepth;
+					receive_heave += receive_sensordepth;
+					heave = transmit_heave;
+				}
 			}
 
 			/* get ssv and range */
@@ -1266,33 +1361,78 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 			    3) flip the sign of the beam steering angle from that array
 			        (reverse TX means flip sign of TX steer, reverse RX
 			        means flip sign of RX steer) */
-			if (tx_h <= 90.0 || tx_h >= 270.0) {
-				tx_align.roll = tx_r;
-				tx_align.pitch = tx_p;
-				tx_align.heading = tx_h;
-				tx_steer = (0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]]);
+			        
+			/* if no platform file use embedded array alignment to calculate beam takeoff
+			   angles and leave calculated bathymetry unchanged */
+			if (platform == NULL) {
+				if (tx_h <= 90.0 || tx_h >= 270.0) {
+					tx_align.roll = tx_r;
+					tx_align.pitch = tx_p;
+					tx_align.heading = tx_h;
+					tx_steer = (0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]]);
+				}
+				else {
+					tx_align.roll = -tx_r;
+					tx_align.pitch = -tx_p;
+					tx_align.heading = tx_h - 180.0;
+					tx_steer = -(0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]]);
+				}
+				if (rx_h <= 90.0 || rx_h >= 270.0) {
+					rx_align.roll = rx_r;
+					rx_align.pitch = rx_p;
+					rx_align.heading = rx_h;
+					rx_steer = (0.01 * (double)ping->png_raw_rxpointangle[i]);
+				}
+				else {
+					rx_align.roll = -rx_r;
+					rx_align.pitch = -rx_p;
+					rx_align.heading = rx_h - 180.0;
+					rx_steer = -(0.01 * (double)ping->png_raw_rxpointangle[i]);
+				}
 			}
+			
+			/* else use platform file alignment to calculate beam takeoff
+			   angles and also apply rotations to calculated bathymetry */
 			else {
-				tx_align.roll = -tx_r;
-				tx_align.pitch = -tx_p;
-				tx_align.heading = tx_h - 180.0;
-				tx_steer = -(0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]]);
-			}
-			tx_orientation.roll = transmit_roll;
-			tx_orientation.pitch = transmit_pitch;
-			tx_orientation.heading = transmit_heading;
-			if (rx_h <= 90.0 || rx_h >= 270.0) {
+				tx_align.roll = tx_r_p;
+				tx_align.pitch = tx_p_p;
+				tx_align.heading = tx_h_p;
+				tx_steer = tx_sign_p * 0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]];
 				rx_align.roll = rx_r;
 				rx_align.pitch = rx_p;
 				rx_align.heading = rx_h;
-				rx_steer = (0.01 * (double)ping->png_raw_rxpointangle[i]);
+				rx_steer = tx_sign_p * 0.01 * (double)ping->png_raw_rxpointangle[i];
+				
+				/* implied beam rotations */
+				double d_tx_r_p = tx_r_p - tx_r;
+				double d_tx_p_p = tx_p_p - tx_p;
+
+				/* get range and angles in
+					roll-pitch frame */
+				double alphar = 0.0;
+				double betar = 0.5 * M_PI;
+				double range = sqrt(ping->png_depth[i] * ping->png_depth[i]
+									+ ping->png_acrosstrack[i] * ping->png_acrosstrack[i]
+									+ ping->png_alongtrack[i] * ping->png_alongtrack[i]);
+				if (fabs(ping->png_range[i]) >= 0.001) {
+				  alphar = asin(MAX(-1.0, MIN(1.0, (ping->png_alongtrack[i] / range))));
+				  betar = acos(MAX(-1.0, MIN(1.0, (ping->png_acrosstrack[i] / range / cos(alphar)))));
+				}
+				if (ping->png_depth[i] < 0.0)
+				  betar = 2.0 * M_PI - betar;
+				/* apply roll pitch corrections */
+				betar += DTR * d_tx_r_p;
+				alphar += DTR * d_tx_p_p;
+	
+				/* recalculate bathymetry */
+				ping->png_depth[i] = range * cos(alphar) * sin(betar);
+				ping->png_alongtrack[i] = range * sin(alphar);
+				ping->png_acrosstrack[i] = range * cos(alphar) * cos(betar);
 			}
-			else {
-				rx_align.roll = -rx_r;
-				rx_align.pitch = -rx_p;
-				rx_align.heading = rx_h - 180.0;
-				rx_steer = -(0.01 * (double)ping->png_raw_rxpointangle[i]);
-			}
+			
+			tx_orientation.roll = transmit_roll;
+			tx_orientation.pitch = transmit_pitch;
+			tx_orientation.heading = transmit_heading;
 			rx_orientation.roll = receive_roll;
 			rx_orientation.pitch = receive_pitch;
 			rx_orientation.heading = receive_heading;
@@ -1323,7 +1463,6 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 				}
 				else if ((detection_mask & 15) == 3) {
 					ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
-					;
 				}
 				else if ((detection_mask & 15) == 4) {
 					ping->png_beamflag[i] = MB_FLAG_NULL;
@@ -1338,8 +1477,8 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 
 			/* check for NaN value */
 			if (isnan(ping->png_depth[i])
-          || isnan(ping->png_acrosstrack[i])
-          || isnan(ping->png_alongtrack[i])) {
+          		|| isnan(ping->png_acrosstrack[i])
+          		|| isnan(ping->png_alongtrack[i])) {
 				ping->png_beamflag[i] = MB_FLAG_NULL;
 			}
 		}
@@ -1349,10 +1488,10 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		swath_width = (double *)&mb_io_ptr->saved2;
 		ping->png_pixel_size = 0;
 		ping->png_pixels_ss = 0;
-    if (ping->png_ss_read)
-		  status = mbsys_simrad3_makess(verbose, mbio_ptr, store_ptr, false, pixel_size, false, swath_width, 1, error);
-    else
-      status = mbsys_simrad3_zero_ss(verbose, store_ptr, error);
+    	if (ping->png_ss_read)
+		  	status = mbsys_simrad3_makess(verbose, mbio_ptr, store_ptr, false, pixel_size, false, swath_width, 1, error);
+    	else
+      		status = mbsys_simrad3_zero_ss(verbose, store_ptr, error);
 	}
 
 	if (verbose >= 2) {
@@ -1860,12 +1999,11 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 
 		/* add depth sensor if needed */
-		if (platform->source_depth1 < 0 && store->par_dsh[0] == 'I' && store->par_dsh[1] == 'N') {
-			// TODO(schwehr): Bug?
-			// capability1 = MB_SENSOR_CAPABILITY1_DEPTH;
-			// capability2 = MB_SENSOR_CAPABILITY2_NONE;
-			capability1 = 0;
-			capability2 = 0;
+		if (platform->source_depth1 < 0 
+				&& (store->par_dsh[0] == 'I' && store->par_dsh[1] == 'N' 
+						|| store->par_dsh[0] == 'N' && store->par_dsh[1] == 'N')) {
+			capability1 = MB_SENSOR_CAPABILITY1_DEPTH;
+			capability2 = MB_SENSOR_CAPABILITY2_NONE;
 			const int num_offsets = 1;
 			const int num_time_latency = 0;
 			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_PRESSURE, NULL, NULL, NULL, capability1,
@@ -2016,6 +2154,8 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 			platform->source_rollpitch = platform->source_rollpitch1;
 		if (store->par_dsh[0] == 'I' && store->par_dsh[1] == 'N')
 			platform->source_depth = platform->source_depth1;
+		if (store->par_dsh[0] == 'N' && store->par_dsh[1] == 'N')
+			platform->source_depth = platform->source_depth1;
 		if (store->par_ahe == 2 || store->par_ahe == 8)
 			platform->source_heave = platform->source_rollpitch1;
 		else if (store->par_ahe == 3 || store->par_ahe == 9)
@@ -2150,19 +2290,24 @@ int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		}
 		*nbath = ping->png_nbeams;
 		*namp = *nbath;
-		*nss = MBSYS_SIMRAD3_MAXPIXELS;
-		const double pixel_size = ping->png_pixel_size;
-		for (int i = 0; i < MBSYS_SIMRAD3_MAXPIXELS; i++) {
-			if (ping->png_ss[i] == EM3_INVALID_SS || (ping->png_ss[i] == EM3_INVALID_AMP && ping->png_ssalongtrack[i] == 0)) {
-				ss[i] = MB_SIDESCAN_NULL;
-				ssacrosstrack[i] = pixel_size * (i - MBSYS_SIMRAD3_MAXPIXELS / 2);
-				ssalongtrack[i] = 0.0;
+		if (ping->png_pixels_ss > 0) {
+			*nss = MBSYS_SIMRAD3_MAXPIXELS;
+			const double pixel_size = ping->png_pixel_size;
+			for (int i = 0; i < MBSYS_SIMRAD3_MAXPIXELS; i++) {
+				if (ping->png_ss[i] == EM3_INVALID_SS || (ping->png_ss[i] == EM3_INVALID_AMP && ping->png_ssalongtrack[i] == 0)) {
+					ss[i] = MB_SIDESCAN_NULL;
+					ssacrosstrack[i] = pixel_size * (i - MBSYS_SIMRAD3_MAXPIXELS / 2);
+					ssalongtrack[i] = 0.0;
+				}
+				else {
+					ss[i] = 0.01 * ping->png_ss[i];
+					ssacrosstrack[i] = pixel_size * (i - MBSYS_SIMRAD3_MAXPIXELS / 2);
+					ssalongtrack[i] = 0.01 * ping->png_ssalongtrack[i];
+				}
 			}
-			else {
-				ss[i] = 0.01 * ping->png_ss[i];
-				ssacrosstrack[i] = pixel_size * (i - MBSYS_SIMRAD3_MAXPIXELS / 2);
-				ssalongtrack[i] = 0.01 * ping->png_ssalongtrack[i];
-			}
+		}
+		else {
+			*nss = 0;
 		}
 
 		if (verbose >= 4) {
@@ -3816,121 +3961,117 @@ int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA) {
-		double ss[MBSYS_SIMRAD3_MAXPIXELS];
-		int ss_cnt[MBSYS_SIMRAD3_MAXPIXELS];
-		double ssacrosstrack[MBSYS_SIMRAD3_MAXPIXELS];
-		double ssalongtrack[MBSYS_SIMRAD3_MAXPIXELS];
 
 		/* get survey data structure */
 		struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
-
-		/* zero the sidescan */
-		for (int i = 0; i < MBSYS_SIMRAD3_MAXPIXELS; i++) {
-			ss[i] = 0.0;
-			ssacrosstrack[i] = 0.0;
-			ssalongtrack[i] = 0.0;
-			ss_cnt[i] = 0;
+	
+		/* zero the generated sidescan in the structure */
+		ping->png_pixels_ss = 0;
+		for (int i=0; i < MBSYS_SIMRAD3_MAXPIXELS; i++) {
+			ping->png_ss[i] = EM3_INVALID_SS;
+			ping->png_ssalongtrack[i] = 0.0;
 		}
+		
 
-		/* set scaling parameters */
-		const double depthoffset = ping->png_xducer_depth;
-		const double reflscale = 0.1;
-
-		/* get raw pixel size */
-		const double ss_spacing = 750.0 / ping->png_sample_rate;
-
-		/* get beam angle size */
-		double beamwidth;
-		if (store->sonar == MBSYS_SIMRAD3_EM1000) {
-			beamwidth = 2.5;
-		}
-		else if (ping->png_tx > 0) {
-			beamwidth = 0.1 * ping->png_tx;
-		}
-		else if (store->run_tran_beam > 0) {
-			beamwidth = 0.1 * store->run_tran_beam;
-		} else {
-			assert(false);
-		}
-
-		/* get median depth */
-		int nbathsort = 0;
-		double bathsort[MBSYS_SIMRAD3_MAXBEAMS];
-		for (int i = 0; i < ping->png_nbeams; i++) {
-			if (mb_beam_ok(ping->png_beamflag[i])) {
-				bathsort[nbathsort] = ping->png_depth[i] + depthoffset;
-				nbathsort++;
-			}
-		}
-
-		/* get sidescan pixel size */
-		if (!swath_width_set) {
-			if (store->run_swath_angle > 0)
-				*swath_width = (double)store->run_swath_angle;
-			else
-				*swath_width = 2.5 + MAX(90.0 - ping->png_depression[0], 90.0 - ping->png_depression[ping->png_nbeams - 1]);
-		}
-
-		if (!pixel_size_set && nbathsort > 0) {
-			double pixel_size_calc;
-			qsort((char *)bathsort, nbathsort, sizeof(double), (void *)mb_double_compare);
-			pixel_size_calc = 2 * tan(DTR * (*swath_width)) * bathsort[nbathsort / 2] / MBSYS_SIMRAD3_MAXPIXELS;
-			if (store->run_max_swath > 0) {
-				const double pixel_size_max_swath = 2 * ((double)store->run_max_swath) / ((double)MBSYS_SIMRAD3_MAXPIXELS);
-				if (pixel_size_max_swath < pixel_size_calc)
-					pixel_size_calc = pixel_size_max_swath;
-			}
-			pixel_size_calc = MAX(pixel_size_calc, bathsort[nbathsort / 2] * sin(DTR * 0.1));
-			if ((*pixel_size) <= 0.0)
-				(*pixel_size) = pixel_size_calc;
-			else if (0.95 * (*pixel_size) > pixel_size_calc)
-				(*pixel_size) = 0.95 * (*pixel_size);
-			else if (1.05 * (*pixel_size) < pixel_size_calc)
-				(*pixel_size) = 1.05 * (*pixel_size);
-			else
-				(*pixel_size) = pixel_size_calc;
-		}
-
-		/* get pixel interpolation */
-		const int pixel_int_use = pixel_int + 1;
-
-		/* check that sidescan can be used */
-		/* get times of bath and sidescan records */
-		int time_i[7];
-		time_i[0] = ping->png_date / 10000;
-		time_i[1] = (ping->png_date % 10000) / 100;
-		time_i[2] = ping->png_date % 100;
-		time_i[3] = ping->png_msec / 3600000;
-		time_i[4] = (ping->png_msec % 3600000) / 60000;
-		time_i[5] = (ping->png_msec % 60000) / 1000;
-		time_i[6] = (ping->png_msec % 1000) * 1000;
-		double bath_time_d;
-		mb_get_time(verbose, time_i, &bath_time_d);
-		time_i[0] = ping->png_ss_date / 10000;
-		time_i[1] = (ping->png_ss_date % 10000) / 100;
-		time_i[2] = ping->png_ss_date % 100;
-		time_i[3] = ping->png_ss_msec / 3600000;
-		time_i[4] = (ping->png_ss_msec % 3600000) / 60000;
-		time_i[5] = (ping->png_ss_msec % 60000) / 1000;
-		time_i[6] = (ping->png_ss_msec % 1000) * 1000;
-		double ss_time_d;
-		mb_get_time(verbose, time_i, &ss_time_d);
-
+		/* check if snippets are available */
 		bool ss_ok = true;
-		if (ping->png_nbeams < ping->png_nbeams_ss || ping->png_nbeams > ping->png_nbeams_ss + 1) {
+		if (ping->png_nbeams == 0 || (ping->png_nbeams < ping->png_nbeams_ss || ping->png_nbeams > ping->png_nbeams_ss + 1)) {
 			ss_ok = false;
-			if (verbose > 0)
+			if (verbose > 0 && ping->png_nbeams > 0 && ping->png_nbeams_ss > 0) {
+				int time_i[7];
+				time_i[0] = ping->png_ss_date / 10000;
+				time_i[1] = (ping->png_ss_date % 10000) / 100;
+				time_i[2] = ping->png_ss_date % 100;
+				time_i[3] = ping->png_ss_msec / 3600000;
+				time_i[4] = (ping->png_ss_msec % 3600000) / 60000;
+				time_i[5] = (ping->png_ss_msec % 60000) / 1000;
+				time_i[6] = (ping->png_ss_msec % 1000) * 1000;
 				fprintf(stderr,
-				        "%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan ignored: num bath beams != num ss beams: %d %d\n",
-				        __func__, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
-				        ping->png_nbeams, ping->png_nbeams_ss);
+			        "%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan ignored: num bath beams != num ss beams: %d %d\n",
+			        __func__, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
+			        ping->png_nbeams, ping->png_nbeams_ss);
+			}
 		}
 
-
-
-		/* loop over raw sidescan, putting each raw pixel into
-		    the binning arrays */
+		/* process if snippets are available */
 		if (ss_ok) {
+
+			/* zero the sidescan */
+			double ss[MBSYS_SIMRAD3_MAXPIXELS];
+			int ss_cnt[MBSYS_SIMRAD3_MAXPIXELS];
+			double ssacrosstrack[MBSYS_SIMRAD3_MAXPIXELS];
+			double ssalongtrack[MBSYS_SIMRAD3_MAXPIXELS];
+			for (int i = 0; i < MBSYS_SIMRAD3_MAXPIXELS; i++) {
+				ss[i] = 0.0;
+				ssacrosstrack[i] = 0.0;
+				ssalongtrack[i] = 0.0;
+				ss_cnt[i] = 0;
+			}
+
+			/* set scaling parameters */
+			const double depthoffset = ping->png_xducer_depth;
+			const double reflscale = 0.1;
+
+			/* get raw pixel size */
+			const double ss_spacing = 750.0 / ping->png_sample_rate;
+
+			/* get beam angle size */
+			double beamwidth;
+			if (ping->png_tx > 0) {
+				beamwidth = 0.1 * ping->png_tx;
+			}
+			else if (store->run_tran_beam > 0) {
+				beamwidth = 0.1 * store->run_tran_beam;
+			} else if (store->sonar == MBSYS_SIMRAD3_M3) {
+				beamwidth = 3.0;
+			}
+			else if (store->sonar == MBSYS_SIMRAD3_EM1000) {
+				beamwidth = 2.5;
+			}
+
+			/* get median depth */
+			int nbathsort = 0;
+			double bathsort[MBSYS_SIMRAD3_MAXBEAMS];
+			for (int i = 0; i < ping->png_nbeams; i++) {
+				if (mb_beam_ok(ping->png_beamflag[i])) {
+					bathsort[nbathsort] = ping->png_depth[i] + depthoffset;
+					nbathsort++;
+				}
+			}
+
+			/* get sidescan pixel size */
+			if (!swath_width_set) {
+				if (store->run_swath_angle > 0)
+					*swath_width = (double)store->run_swath_angle;
+				else
+					*swath_width = 2.5 + MAX(90.0 - ping->png_depression[0], 90.0 - ping->png_depression[ping->png_nbeams - 1]);
+			}
+
+			if (!pixel_size_set && nbathsort > 0) {
+				double pixel_size_calc;
+				qsort((char *)bathsort, nbathsort, sizeof(double), (void *)mb_double_compare);
+				pixel_size_calc = 2 * tan(DTR * (*swath_width)) * bathsort[nbathsort / 2] / MBSYS_SIMRAD3_MAXPIXELS;
+				if (store->run_max_swath > 0) {
+					const double pixel_size_max_swath = 2 * ((double)store->run_max_swath) / ((double)MBSYS_SIMRAD3_MAXPIXELS);
+					if (pixel_size_max_swath < pixel_size_calc)
+						pixel_size_calc = pixel_size_max_swath;
+				}
+				pixel_size_calc = MAX(pixel_size_calc, bathsort[nbathsort / 2] * sin(DTR * 0.1));
+				if ((*pixel_size) <= 0.0)
+					(*pixel_size) = pixel_size_calc;
+				else if (0.95 * (*pixel_size) > pixel_size_calc)
+					(*pixel_size) = 0.95 * (*pixel_size);
+				else if (1.05 * (*pixel_size) < pixel_size_calc)
+					(*pixel_size) = 1.05 * (*pixel_size);
+				else
+					(*pixel_size) = pixel_size_calc;
+			}
+
+			/* get pixel interpolation */
+			const int pixel_int_use = pixel_int + 1;
+
+			/* loop over raw sidescan, putting each raw pixel into
+		    	the binning arrays */
 			for (int i = 0; i < ping->png_nbeams_ss; i++) {
 				short *beam_ss = &ping->png_ssraw[ping->png_start_sample[i]];
 				if (mb_beam_ok(ping->png_beamflag[i])) {
@@ -3959,76 +4100,76 @@ int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 					}
 				}
 			}
-		}
 
-		/* average the sidescan */
-		int first = MBSYS_SIMRAD3_MAXPIXELS;
-		int last = -1;
-		for (int k = 0; k < MBSYS_SIMRAD3_MAXPIXELS; k++) {
-			if (ss_cnt[k] > 0) {
-				ss[k] /= ss_cnt[k];
-				ssalongtrack[k] /= ss_cnt[k];
-				ssacrosstrack[k] = (k - MBSYS_SIMRAD3_MAXPIXELS / 2) * (*pixel_size);
-				first = MIN(first, k);
-				last = k;
-			}
-			else
-				ss[k] = MB_SIDESCAN_NULL;
-		}
-
-		/* interpolate the sidescan */
-		int k1 = first;
-		int k2 = first;
-		for (int k = first + 1; k < last; k++) {
-			if (ss_cnt[k] <= 0) {
-				if (k2 <= k) {
-					k2 = k + 1;
-					while (k2 < last && ss_cnt[k2] <= 0)
-						k2++;
-				}
-				if (k2 - k1 <= pixel_int_use) {
-					ss[k] = ss[k1] + (ss[k2] - ss[k1]) * ((double)(k - k1)) / ((double)(k2 - k1));
+			/* average the sidescan */
+			int first = MBSYS_SIMRAD3_MAXPIXELS;
+			int last = -1;
+			for (int k = 0; k < MBSYS_SIMRAD3_MAXPIXELS; k++) {
+				if (ss_cnt[k] > 0) {
+					ss[k] /= ss_cnt[k];
+					ssalongtrack[k] /= ss_cnt[k];
 					ssacrosstrack[k] = (k - MBSYS_SIMRAD3_MAXPIXELS / 2) * (*pixel_size);
-					ssalongtrack[k] =
-					    ssalongtrack[k1] + (ssalongtrack[k2] - ssalongtrack[k1]) * ((double)(k - k1)) / ((double)(k2 - k1));
+					first = MIN(first, k);
+					last = k;
+				}
+				else
+					ss[k] = MB_SIDESCAN_NULL;
+			}
+
+			/* interpolate the sidescan */
+			int k1 = first;
+			int k2 = first;
+			for (int k = first + 1; k < last; k++) {
+				if (ss_cnt[k] <= 0) {
+					if (k2 <= k) {
+						k2 = k + 1;
+						while (k2 < last && ss_cnt[k2] <= 0)
+							k2++;
+					}
+					if (k2 - k1 <= pixel_int_use) {
+						ss[k] = ss[k1] + (ss[k2] - ss[k1]) * ((double)(k - k1)) / ((double)(k2 - k1));
+						ssacrosstrack[k] = (k - MBSYS_SIMRAD3_MAXPIXELS / 2) * (*pixel_size);
+						ssalongtrack[k] =
+						    ssalongtrack[k1] + (ssalongtrack[k2] - ssalongtrack[k1]) * ((double)(k - k1)) / ((double)(k2 - k1));
+					}
+				}
+				else {
+					k1 = k;
 				}
 			}
-			else {
-				k1 = k;
-			}
-		}
 
-		/* insert the new sidescan into store */
-		ping->png_pixel_size = *pixel_size;
-		if (last > first)
-			ping->png_pixels_ss = MBSYS_SIMRAD3_MAXPIXELS;
-		else
-			ping->png_pixels_ss = 0;
-		for (int i = 0; i < MBSYS_SIMRAD3_MAXPIXELS; i++) {
-			if (ss[i] > MB_SIDESCAN_NULL) {
-				ping->png_ss[i] = (short)(100 * ss[i]);
-				ping->png_ssalongtrack[i] = (short)(100 * ssalongtrack[i]);
+			/* insert the new sidescan into store */
+			ping->png_pixel_size = *pixel_size;
+			if (last > first)
+				ping->png_pixels_ss = MBSYS_SIMRAD3_MAXPIXELS;
+			else
+				ping->png_pixels_ss = 0;
+			for (int i = 0; i < MBSYS_SIMRAD3_MAXPIXELS; i++) {
+				if (ss[i] > MB_SIDESCAN_NULL) {
+					ping->png_ss[i] = (short)(100 * ss[i]);
+					ping->png_ssalongtrack[i] = (short)(100 * ssalongtrack[i]);
+				}
+				else {
+					ping->png_ss[i] = EM3_INVALID_SS;
+					ping->png_ssalongtrack[i] = 0;
+				}
 			}
-			else {
-				ping->png_ss[i] = EM3_INVALID_SS;
-				ping->png_ssalongtrack[i] = 0;
-			}
-		}
 
-		if (verbose >= 2) {
-			fprintf(stderr, "\ndbg2  Sidescan regenerated in <%s>\n", __func__);
-			fprintf(stderr, "dbg2       png_nbeams_ss: %d\n", ping->png_nbeams_ss);
-			for (int i = 0; i < ping->png_nbeams_ss; i++)
-				fprintf(stderr, "dbg2       beam:%d  flag:%3d  bath:%f  amp:%d  acrosstrack:%f  alongtrack:%f\n", i,
-				        ping->png_beamflag[i], ping->png_depth[i], ping->png_amp[i], ping->png_acrosstrack[i],
-				        ping->png_alongtrack[i]);
-			fprintf(stderr, "dbg2       pixels_ss:  %d\n", MBSYS_SIMRAD3_MAXPIXELS);
-			for (int i = 0; i < MBSYS_SIMRAD3_MAXPIXELS; i++)
-				fprintf(stderr, "dbg2       pixel:%4d  cnt:%3d  ss:%10f  xtrack:%10f  ltrack:%10f\n", i, ss_cnt[i], ss[i],
-				        ssacrosstrack[i], ssalongtrack[i]);
-			fprintf(stderr, "dbg2       pixels_ss:  %d\n", ping->png_pixels_ss);
-			for (int i = 0; i < MBSYS_SIMRAD3_MAXPIXELS; i++)
-				fprintf(stderr, "dbg2       pixel:%4d  ss:%8d  ltrack:%8d\n", i, ping->png_ss[i], ping->png_ssalongtrack[i]);
+			if (verbose >= 2) {
+				fprintf(stderr, "\ndbg2  Sidescan regenerated in <%s>\n", __func__);
+				fprintf(stderr, "dbg2       png_nbeams_ss: %d\n", ping->png_nbeams_ss);
+				for (int i = 0; i < ping->png_nbeams_ss; i++)
+					fprintf(stderr, "dbg2       beam:%d  flag:%3d  bath:%f  amp:%d  acrosstrack:%f  alongtrack:%f\n", i,
+					        ping->png_beamflag[i], ping->png_depth[i], ping->png_amp[i], ping->png_acrosstrack[i],
+					        ping->png_alongtrack[i]);
+				fprintf(stderr, "dbg2       pixels_ss:  %d\n", MBSYS_SIMRAD3_MAXPIXELS);
+				for (int i = 0; i < MBSYS_SIMRAD3_MAXPIXELS; i++)
+					fprintf(stderr, "dbg2       pixel:%4d  cnt:%3d  ss:%10f  xtrack:%10f  ltrack:%10f\n", i, ss_cnt[i], ss[i],
+					        ssacrosstrack[i], ssalongtrack[i]);
+				fprintf(stderr, "dbg2       pixels_ss:  %d\n", ping->png_pixels_ss);
+				for (int i = 0; i < MBSYS_SIMRAD3_MAXPIXELS; i++)
+					fprintf(stderr, "dbg2       pixel:%4d  ss:%8d  ltrack:%8d\n", i, ping->png_ss[i], ping->png_ssalongtrack[i]);
+			}
 		}
 	}
 

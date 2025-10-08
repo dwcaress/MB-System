@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
-#    The MB-system:  CMakeLists.txt   27 June 2023
+#    The MB-system:  CMakeLists.txt   16 June 2025
 #
-#    Copyright (c) 2023-2024 by
+#    Copyright (c) 2023-2025 by
 #    David W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, California, USA
@@ -44,6 +44,7 @@ message("Set install directory using -DCMAKE_INSTALL_PREFIX=directory (default i
 message("The default build mode is release (optimized for performance, not debuggable).")
 message("Enable debugging with -DCMAKE_BUILD_TYPE=Debug")
 message("Build shared/static libraries with -DBUILD_SHARED_LIBS=ON/OFF")
+message("Disable building graphical utilities with -DbuildGUIs=OFF")
 message("Disable building TRN software with -DbuildTRN=OFF")
 message("Disable building photomosaicing software with -DbuildOpenCV=OFF")
 message("Disable supporting GSF format data with -DbuildGSF=OFF")
@@ -80,9 +81,6 @@ if (CMAKE_C_BYTE_ORDER STREQUAL "LITTLE_ENDIAN")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBYTESWAPPED")
 endif()
 
-option(buildGSF "build GSF library" ON)
-option(buildGUIs "build graphical tools" ON)
-
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 endif()
@@ -98,6 +96,7 @@ option(buildGUIs "build graphical tools" ON)
 option(buildOpenCV "build OpenCV tools" ON)
 option(buildTRN "build MBTRN tools" ON)
 option(buildTRNLCM "build MBTRN LCM tools" OFF)
+option(buildTrnNoRand "build with TRN_NORAND (random seed disabled)" OFF)
 option(buildPCL "build point-cloud-library" OFF)
 option(buildQt "build Qt tools" OFF)
 option(buildTests "build unit tests exercised by make test" ON)
@@ -131,6 +130,7 @@ if(buildGSF)
   add_subdirectory(src/gsf)
 endif()
 add_subdirectory(src/mbaux)
+add_subdirectory(src/mbbitpack)
 add_subdirectory(src/mbio)
 add_subdirectory(src/bsio)
 add_subdirectory(src/surf)
@@ -156,6 +156,8 @@ if(buildOpenCV)
   add_subdirectory(src/photo)
 endif()
 if(buildTRN)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DTRN_USE_PROJ")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DTRN_USE_PROJ")
   add_subdirectory(src/mbtrnframe)
   add_subdirectory(src/mbtrn)
   add_subdirectory(src/mbtrnav)
@@ -211,6 +213,7 @@ message("CMAKE_C_FLAGS: ${CMAKE_C_FLAGS}")
 message("CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 message("CMAKE_INSTALL_RPATH: ${CMAKE_INSTALL_RPATH}")
 message("CMAKE_MACOSX_RPATH: ${CMAKE_MACOSX_RPATH}")
+message(OTPS directory: ${otpsDir})
 
 # For debugging: print all set variables
 message("----------------------------------------------------------")

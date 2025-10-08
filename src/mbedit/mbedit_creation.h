@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_creation.h	1993
  *
- *    Copyright (c) 1993-2024 by
+ *    Copyright (c) 1993-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -31,6 +31,8 @@
 #define EXTERNAL extern
 #endif
 
+EXTERNAL void RegisterBxConverters(XtAppContext);
+EXTERNAL Widget Createwindow_mbedit(Widget parent);
 EXTERNAL Widget window_mbedit;
 EXTERNAL Widget setting_output_filelist;
 EXTERNAL Widget setting_output_toggle_edit_filelist;

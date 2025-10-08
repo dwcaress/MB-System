@@ -1,11 +1,7 @@
 dnl--------------------------------------------------------------------
 dnl    The MB-system:    configure.ac    12/7/2011
 dnl
-dnl    Copyright (c) 2011-2023 by
-dnl------------------------------------------------------------------------------
-dnl    The MB-system:  CMakeLists.txt   27 June 2023
-dnl
-dnl    Copyright (c) 2023-2024 by
+dnl    Copyright (c) 2011-2025 by
 dnl    David W. Caress (caress@mbari.org)
 dnl      Monterey Bay Aquarium Research Institute
 dnl      Moss Landing, California, USA
@@ -29,13 +25,13 @@ dnl-----------------------------------------------------------------------------
 dnl--------------------------------------------------------------------
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.9],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.8.2],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AS_ECHO([" "])
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO(["    The MB-system:    configure    12/7/2011"])
 AS_ECHO([" "])
-AS_ECHO(["    Copyright (c) 2011-2023 by"])
+AS_ECHO(["    Copyright (c) 2011-2025 by"])
 AS_ECHO(["    D. W. Caress (caress@lamont.ldgo.columbia.edu)"])
 AS_ECHO(["    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)"])
 AS_ECHO(["    Lamont-Doherty Earth Observatory"])
@@ -143,7 +139,7 @@ AS_ECHO(["----------------------------------------------------------------------
 AS_ECHO([" "])
 
 dnl Require automake 2.71 or later
-AC_PREREQ([2.71])
+AC_PREREQ([2.72])
 
 dnl Disable warnings about unrecognized options
 AC_DISABLE_OPTION_CHECKING
@@ -166,7 +162,7 @@ dnl Handle option to enable debugging
 AC_ARG_WITH(debug, [  --with-debug  Set compiler flags to allow full debugging], [AC_DEFINE(WITH_DEBUG,1,0) AC_SUBST(WITH_DEBUG,1) CFLAGS="-O0 -g" CXXFLAGS="-O0 -g"])
 
 dnl Check for programs
-AC_PROG_CC
+AC_PROG_CC([cc gcc])
 AM_PROG_CC_C_O
 AC_PROG_CXX
 AC_PROG_INSTALL
@@ -358,7 +354,7 @@ dnl--------------------------------------------------------------------
 
 dnl Use OTPS (OSU Tidal Prediction Software) location if specified with --with-otps-dir, use default otherwise
 AS_ECHO(["Use OTPS (OSU Tidal Prediction Software) location if specified with --with-otps-dir, use default otherwise"])
-OTPS_DIR="/usr/local/src/otps"
+OTPS_DIR="/usr/local/src/OTPS"
 AC_ARG_WITH(otps_dir, [ --with-otps-dir=DIR    Location of OSU Tidal Prediction Software], [OTPS_DIR=${withval}])
 AC_SUBST(OTPS_DIR)
 
@@ -1506,6 +1502,7 @@ AC_CONFIG_FILES([\
     src/mbio/Makefile \
     src/surf/Makefile \
     src/bsio/Makefile \
+    src/mbbitpack/Makefile \
     src/mbaux/Makefile \
     src/utilities/Makefile \
     src/gmt/Makefile \

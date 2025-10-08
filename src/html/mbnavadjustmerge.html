@@ -155,6 +155,12 @@ Version 5.0
 --insert-discontinuity=file:section
 <BR>
 
+--remove-discontinuity=file:section
+<BR>
+
+--merge-surveys=survey1:survey2
+<BR>
+
 --reimport-file=file
 <BR>
 
@@ -538,6 +544,33 @@ merged projects.
 <DD>
 This option inserts a navigation discontinuity immediately after the specified
 file and section.
+<DT><B>--remove-discontinuity=file:section</B>
+
+<DD>
+This option removes a navigation discontinuity immediately after the specified
+file and section (if the discontinuity exists).
+<DT><B>--merge-surveys=survey1:survey2</B>
+
+<DD>
+This option merges two surveys.
+<DT><B>--reimport-file=file</B>
+
+<DD>
+This option reimports the specified swath file into the project from the current processed 
+version of that file. The file is broken into the same sections as previously, regardless 
+of any changes to the settings for the maximum section length or the maximum number of soundings 
+in a section. The original navigation and attitude data are also preserved, but the 
+bathymetry is changed to reflect the current processed values. This means that updates
+to the bathymetry editing can be brought into the mbnavadjust project.
+<DT><B>--reimport-all-files</B>
+
+<DD>
+This option reimports all of the swath files into the project from the current processed 
+versions of those files. Each file is broken into the same sections as previously, regardless 
+of any changes to the settings for the maximum section length or the maximum number of soundings 
+in a section. The original navigation and attitude data are also preserved, but the 
+bathymetry is changed to reflect the current processed values. This means that updates
+to the bathymetry editing can be brought into the mbnavadjust project.
 <DT><B>--import-tie-list=filename</B>
 
 <DD>

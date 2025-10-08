@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hysweep.h	12/23/2011
  *
- *    Copyright (c) 2011-2024 by
+ *    Copyright (c) 2011-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -293,8 +293,7 @@ struct mbsys_hysweep_device_struct {
 	                   0040 - tide
 	                   0200 - MRU (heave, pitch, and roll compensation) */
 	int DV2_towfish;           /* 1 if device is mountedc on a tow fish */
-	// TODO(schwehr): Make DV2_enabled be a bool.
-	int DV2_enabled;           /* 1 if device is enabled */
+	bool DV2_enabled;           /* 1 if device is enabled */
 
 	/* OF2: Hysweep device offsets  */
 	int num_offsets; /* number of offsets identified for this device */

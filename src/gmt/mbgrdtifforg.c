@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrdtiff.c	5/30/93
  *
- *    Copyright (c) 1999-2024 by
+ *    Copyright (c) 1999-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -339,7 +339,12 @@ int tiff_offset[] = {
 #undef PACKAGE_VERSION
 #endif
 
+/* include GMT header file gmt_dev.h without including glib headers not needed by MB-System */
+#ifdef HAVE_GLIB_GTHREAD
+#undef HAVE_GLIB_GTHREAD
+#endif
 #include "gmt_dev.h"
+
 /*  Compatibility with old lower-function/macro names use prior to GMT 5.3.0 */
 #if GMT_MAJOR_VERSION == 5 && GMT_MINOR_VERSION < 3
 #define gmt_M_180_range GMT_180_RANGE

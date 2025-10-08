@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbpreprocess</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  5 November 2022 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  28 January 2025 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -211,6 +211,9 @@ Version 5.0
 <B>--kluge-time-jumps</B>=<I>SECONDS</I>
 <BR>
 
+<B>--kluge-fix-7k-timestamps</B>=<I>TARGETOFFSET</I>
+<BR>
+
 <B>--kluge-ancilliary-time-jumps</B>=<I>SECONDS</I>
 <BR>
 
@@ -239,6 +242,12 @@ Version 5.0
 <BR>
 
 <B>--kluge-sonardepth-from-heave</B>
+<BR>
+
+<B>--kluge-flipsign-roll</B>
+<BR>
+
+<B>--kluge-flipsign-pitch</B>
 <BR>
 
 ]
@@ -1056,6 +1065,17 @@ to the origin for a dual head lidar system. The only relevant formats are for
 <DT><B>--kluge-time-jumps=</B><I>SECONDS</I>
 
 <DD>
+<DT><B>--kluge-fix-7k-timestamps=</B><I>TARGETOFFSET</I>
+
+<DD>
+This option was created to fix some Teledyne Reson T50 multibeam data (format 89) collected
+in 2024 with an MBARI Mapping AUV. The sonar ping timestamps jumped considerably (by as
+much as a day!!) while the ancillary nav, sensor depth, and attitude records maintained
+accurate timing. In good data the ping records will occur in the datastream with a fairly
+stable delay from the most recent ancillary records (0.7 seconds in this case). This
+option forces the pings records to have timestamps that have the target offset from the
+most recent ancillary records whenever the recorded offset magnitude is more than four 
+times the target offset.
 <DT><B>--kluge-ancilliary-time-jumps=</B><I>SECONDS</I>
 
 <DD>
@@ -1094,6 +1114,17 @@ This option causes heave values to be moved to the sonardepth (sometimes sensord
 field, leaving the heave value as zero, for each survey ping. This is currently
 only relevant to the preprocessing of Imagenex DeltaT multibeam data in the vendor
 83P format (191). The output of preprocessing format 191 data are format 192 files.
+<DT><B>--kluge-early-mbari-mapping-auv</B>
+
+<DD>
+This option pertains only to Reson 7125 200 kHz multibeam data collected on the first
+MBARI Mapping AUV from 2006 through 2009. Invoking this kluge triggers <B>mbpreprocess</B>
+to modify the beam quality factors to be consistent with the later (&gt;2009) standard for
+the original bathymetry records in Reson s7k format data.
+<DT><B>--kluge-flipsign-roll</B><DD>
+This option multiplies the roll values to merged by -1, flipping the sign.
+<DT><B>--kluge-flipsign-pitch</B><DD>
+This option multiplies the pitch values to merged by -1, flipping the sign.
 <P>
 </DL>
 <A NAME="lbAH">&nbsp;</A>
@@ -1129,7 +1160,7 @@ Oh yeah.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 5 November 2022</P></CENTER>
+Last Updated: 28 January 2025</P></CENTER>
 
 <HR>
 <center>

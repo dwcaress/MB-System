@@ -1,7 +1,7 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	Mb3dsdg.c	10/28/2003
  *
- *    Copyright (c) 2003-2024 by
+ *    Copyright (c) 2003-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -43,11 +43,6 @@
 #include <Xm/Separator.h>
 #include <Xm/DrawingA.h>
 #include "Mb3dsdg.h"
-
-/**
- * Common constant and pixmap declarations.
- */
-#include "mb3dsoundings_creation.h"
 
 void RegisterBxConverters(XtAppContext);
 XtPointer BX_CONVERT(Widget, char *, char *, int, Boolean *);
@@ -304,7 +299,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Roll Bias (degrees)", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Heading Bias (degrees)", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNtitleString, tmp0);
 		if (argok)
 			ac++;
@@ -321,6 +316,48 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 		XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
 		ac++;
 		XtSetArg(args[ac], XmNx, 100);
+		ac++;
+		XtSetArg(args[ac], XmNy, 70);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 150);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 63);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(class_in->Mb3dsdg, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->scale_headingbias = XmCreateScale(class_in->Mb3dsdg, (char *)"scale_headingbias", args, ac);
+		XtManageChild(class_in->scale_headingbias);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->scale_headingbias, XmNvalueChangedCallback, do_mb3dsdg_headingbias, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Roll Bias (degrees)", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNtitleString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNminimum, -100);
+		ac++;
+		XtSetArg(args[ac], XmNdecimalPoints, 2);
+		ac++;
+		XtSetArg(args[ac], XmNshowArrows, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNscaleMultiple, 1);
+		ac++;
+		XtSetArg(args[ac], XmNshowValue, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+		ac++;
+		XtSetArg(args[ac], XmNx, 250);
 		ac++;
 		XtSetArg(args[ac], XmNy, 70);
 		ac++;
@@ -362,7 +399,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 		ac++;
 		XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
 		ac++;
-		XtSetArg(args[ac], XmNx, 250);
+		XtSetArg(args[ac], XmNx, 400);
 		ac++;
 		XtSetArg(args[ac], XmNy, 70);
 		ac++;
@@ -385,48 +422,6 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 	}
 
 	XtAddCallback(class_in->scale_pitchbias, XmNvalueChangedCallback, do_mb3dsdg_pitchbias, (XtPointer)0);
-
-	ac = 0;
-	{
-		XmString tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Heading Bias (degrees)", XmRXmString, 0, &argok);
-		XtSetArg(args[ac], XmNtitleString, tmp0);
-		if (argok)
-			ac++;
-		XtSetArg(args[ac], XmNminimum, -100);
-		ac++;
-		XtSetArg(args[ac], XmNdecimalPoints, 2);
-		ac++;
-		XtSetArg(args[ac], XmNshowArrows, TRUE);
-		ac++;
-		XtSetArg(args[ac], XmNscaleMultiple, 1);
-		ac++;
-		XtSetArg(args[ac], XmNshowValue, TRUE);
-		ac++;
-		XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
-		ac++;
-		XtSetArg(args[ac], XmNx, 400);
-		ac++;
-		XtSetArg(args[ac], XmNy, 70);
-		ac++;
-		XtSetArg(args[ac], XmNwidth, 150);
-		ac++;
-		XtSetArg(args[ac], XmNheight, 63);
-		ac++;
-		XtSetArg(
-		    args[ac], XmNfontList,
-		    BX_CONVERT(class_in->Mb3dsdg, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
-		if (argok)
-			ac++;
-		class_in->scale_headingbias = XmCreateScale(class_in->Mb3dsdg, (char *)"scale_headingbias", args, ac);
-		XtManageChild(class_in->scale_headingbias);
-
-		/**
-		 * Free any memory allocated for resources.
-		 */
-		XmStringFree((XmString)tmp0);
-	}
-
-	XtAddCallback(class_in->scale_headingbias, XmNvalueChangedCallback, do_mb3dsdg_headingbias, (XtPointer)0);
 
 	ac = 0;
 	{
@@ -1845,7 +1840,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 	ac++;
 	XtSetArg(args[ac], XmNtopOffset, 70);
 	ac++;
-	XtSetValues(class_in->scale_rollbias, args, ac);
+	XtSetValues(class_in->scale_headingbias, args, ac);
 
 	ac = 0;
 	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_NONE);
@@ -1856,7 +1851,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 	ac++;
 	XtSetArg(args[ac], XmNtopOffset, 70);
 	ac++;
-	XtSetValues(class_in->scale_pitchbias, args, ac);
+	XtSetValues(class_in->scale_rollbias, args, ac);
 
 	ac = 0;
 	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_NONE);
@@ -1867,7 +1862,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 	ac++;
 	XtSetArg(args[ac], XmNtopOffset, 70);
 	ac++;
-	XtSetValues(class_in->scale_headingbias, args, ac);
+	XtSetValues(class_in->scale_pitchbias, args, ac);
 
 	ac = 0;
 	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_NONE);

@@ -35,6 +35,7 @@
 #.   udpc
 #.   mbtnav_cli
 #.   stream7k
+#.   frames7k
 #.   emu7k
 #.   r7kr-test
 #.   trnc
@@ -45,6 +46,13 @@
 #.   mb1-cli
 #
 message("In src/mbtrn")
+
+if(CMAKE_SYSTEM_NAME STREQUAL Linux)
+  find_package(TIRPC REQUIRED)
+else()
+  add_library(TIRPC::TIRPC INTERFACE IMPORTED)
+endif()
+
 add_compile_definitions(
 HAVE_CONFIG_H
 _GNU_SOURCE
@@ -102,10 +110,18 @@ target_link_libraries(mbtnav_cli PRIVATE mbtrnframe m pthread)
 #------------------------------------------------------------------------------
 #
 add_executable(stream7k utils/stream7k.c)
-target_include_directories(stream7k PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnframe 
-							${CMAKE_SOURCE_DIR}/src/mbtrn/r7kr
-							${CMAKE_SOURCE_DIR}/src/mbtrnutils)
+target_include_directories(stream7k PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnframe
+                            ${CMAKE_SOURCE_DIR}/src/mbtrn/r7kr
+                            ${CMAKE_SOURCE_DIR}/src/mbtrnutils)
 target_link_libraries(stream7k PRIVATE mbtrnframe r7kr)
+#
+#------------------------------------------------------------------------------
+#
+add_executable(frames7k utils/frames7k.c)
+target_include_directories(frames7k PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnframe
+                            ${CMAKE_SOURCE_DIR}/src/mbtrn/r7kr
+                            ${CMAKE_SOURCE_DIR}/src/mbtrnutils)
+target_link_libraries(frames7k PRIVATE mbtrnframe r7kr)
 #
 #------------------------------------------------------------------------------
 #
@@ -165,13 +181,31 @@ target_link_libraries(mb1r_test PRIVATE mb1r m pthread)
 #
 add_executable(mb1-cli mb1r/mb1cli-app.c)
 target_include_directories(mb1-cli PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnframe
-							${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw)
+                            ${LibPROJ_INCLUDE_DIRS}
+                            ${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw)
 target_link_libraries(mb1-cli PRIVATE mbtrnframe mb1r mb1 m pthread)
+#
+#------------------------------------------------------------------------------
+#
+add_executable(emallpub utils/emallpub.c)
+target_include_directories(emallpub PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnframe
+                            ${CMAKE_SOURCE_DIR}/src/mbio
+							${CMAKE_SOURCE_DIR}/src/mbtrnutils)
+target_link_libraries(emallpub PRIVATE TIRPC::TIRPC mbtrnframe m pthread)
+#
+#------------------------------------------------------------------------------
+#
+add_executable(emserpub utils/emserpub.c)
+target_include_directories(emserpub PRIVATE ${CMAKE_SOURCE_DIR}/src/mbtrnframe
+                            ${CMAKE_SOURCE_DIR}/src/mbio
+							${CMAKE_SOURCE_DIR}/src/mbtrnutils)
+target_link_libraries(emserpub PRIVATE TIRPC::TIRPC mbtrnframe m pthread)
 #
 #------------------------------------------------------------------------------
 #
 install(TARGETS r7kr mb1r DESTINATION ${CMAKE_INSTALL_LIBDIR})
 #
-install(TARGETS udps udpc mbtnav_cli stream7k emu7k r7kr_test trnc tbinx mb1conv mb12csv mb1r_test mb1-cli DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS udps udpc mbtnav_cli stream7k frames7k emu7k r7kr_test trnc tbinx mb1conv mb12csv mb1r_test mb1-cli emallpub emserpub DESTINATION ${CMAKE_INSTALL_BINDIR})
 #
 #------------------------------------------------------------------------------
+#

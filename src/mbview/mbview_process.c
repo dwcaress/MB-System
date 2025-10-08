@@ -1,7 +1,7 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_process.c	9/25/2003
  *
- *    Copyright (c) 2003-2024 by
+ *    Copyright (c) 2003-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -1450,8 +1450,11 @@ __FILE__, __LINE__, __FUNCTION__, xlon, ylat);
 	*xdisplay = view->scale * (xx - view->xorigin);
 	*ydisplay = view->scale * (yy - view->yorigin);
 	*zdisplay = view->scale * (zz - view->zorigin);
-	/* fprintf(stderr,"   scale:%f   scaled: %f %f %f\n",
-	view->scale, *xdisplay, *ydisplay, *zdisplay); */
+	if (isnan(*xdisplay)) {
+		fprintf(stderr, "NaN alert!!\n");
+		//fprintf(stderr,"pos: %f %f %f   raw: %f %f %f  topo:%f   scale:%f   scaled: %f %f %f\n",
+		//xlon, ylat, zdata, xx, yy, zz, effective_topography, view->scale, *xdisplay, *ydisplay, *zdisplay);
+	}
 
 	const int status = MB_SUCCESS;
 

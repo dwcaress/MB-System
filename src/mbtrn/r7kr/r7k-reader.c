@@ -289,11 +289,14 @@ r7kr_reader_t *r7kr_freader_new(mfile_file_t *file, uint32_t capacity, uint32_t 
         self->sockif = NULL;
         self->fileif = file;
         if (NULL!=file) {
-            if (mfile_open(self->fileif, MFILE_RONLY)<=0) {
-                fprintf(stderr,"ERR - could not open file [%s] [%d/%s]\n",self->fileif->path,errno,strerror(errno));
+            if (mfile_open(self->fileif, MFILE_RONLY) <= 0) {
+                fprintf(stderr,"%s: ERR - could not open file [%s] [%d/%s]\n", __func__, self->fileif->path, errno, strerror(errno));
+                free(self);
+                return NULL;
             }
 
-            fprintf(stderr,"wrapping fd %d for file %s in socket\n",self->fileif->fd,self->fileif->path);
+            MX_LPRINT(R7KR_DEBUG, 1, "%s - wrapping fd %d for file %s in socket\n",__func__, self->fileif->fd, self->fileif->path);
+
             // wrap file descriptor in socket
             // so it can be passed to read
             self->sockif = msock_wrap_fd(self->fileif->fd);
@@ -1057,7 +1060,7 @@ int64_t r7kr_read_drf(r7kr_reader_t *self, byte *dest, uint32_t len,
                 // inputs: pbuf, read_len
 //                MX_MPRINT(R7KR_DEBUG, "R7KR_ACTION_READ rlen[%"PRIu32"]\n", read_len);
                 read_bytes=0;
-                while (read_bytes<read_len) {
+                while (read_bytes < read_len) {
                     if ( (read_bytes=msock_read_tmout(r7kr_reader_sockif(self), pbuf, read_len, timeout_msec)) == read_len) {
 //                        MX_MPRINT(R7KR_DEBUG, "read OK [%"PRId64"]\n",read_bytes);
 
@@ -1502,7 +1505,6 @@ int64_t r7kr_read_frame(r7kr_reader_t *self, byte *dest,
                          double newer_than, uint32_t timeout_msec,
                              uint32_t *sync_bytes )
 {
-
     int64_t retval=-1;
 
     me_errno = ME_OK;
@@ -1668,7 +1670,7 @@ int64_t r7kr_read_frame(r7kr_reader_t *self, byte *dest,
                     }
 
                 }else{
-                    MX_MMSG(R7KR_DEBUG, "Frame invalid [%d/%s] retval[%"PRId64"]\n", me_errno, me_strerror(me_errno), retval);
+                    MX_MPRINT(R7KR_DEBUG, "Frame invalid [%d/%s] retval[%"PRId64"]\n", me_errno, me_strerror(me_errno), retval);
                     MST_COUNTER_INC(self->stats->events[R7KR_EV_FRAME_INVALID]);
                 }
                 // quit and return
@@ -1678,7 +1680,7 @@ int64_t r7kr_read_frame(r7kr_reader_t *self, byte *dest,
 
     }else{
         //        PEPRINT((stderr,"invalid argument\n"));
-        MX_ERROR_MSG("invalid argument\n");
+        MX_ERROR_MSG("invalid argument: self: %p dest: %p flags: %X sockif: %p fd: %d\n", self, dest, flags, sockif, (sockif != NULL ? sockif->fd : -1));
     }
     MX_LPRINT(R7KR, 2, "r7kr_read_frame returning [%"PRId64"]\n", retval);
     return retval;

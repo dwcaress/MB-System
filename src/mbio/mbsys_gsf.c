@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_gsf.c	3.00	8/20/94
  *
- *    Copyright (c) 1994-2024 by
+ *    Copyright (c) 1994-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -510,10 +510,30 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 			         mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM3002D_SPECIFIC) {
 				ss_spacing = 750.0 / ((double)mb_ping->sensor_data.gsfEM3Specific.sample_rate);
 			}
+			else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_GEOSWATH_PLUS_SPECIFIC) {
+				ss_spacing = 750.0 / ((double)mb_ping->sensor_data.gsfGeoSwathPlusSpecific.sample_rate);
+			}
+			else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_DELTA_T_SPECIFIC) {
+				double sample_rate = 0.002;
+				if (mb_ping->sensor_data.gsfDeltaTSpecific.sample_rate_flag)
+					sample_rate = 0.0002;
+				ss_spacing = 750.0 / sample_rate;
+			}
+			else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2020_SPECIFIC ||
+			         mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2022_SPECIFIC ||
+			         mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2024_SPECIFIC) {
+				ss_spacing = 750.0 / ((double)mb_ping->sensor_data.gsfR2SonicSpecific.rx_sample_rate);
+			}
+			else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_RESON_TSERIES_SPECIFIC) {
+				ss_spacing = 750.0 / ((double)mb_ping->sensor_data.gsfResonTSeriesSpecific.sample_rate);
+			}
+			else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_KMALL_SPECIFIC) {
+				ss_spacing = 750.0 / ((double)mb_ping->sensor_data.gsfKMALLSpecific.seabedImageSampleRate);
+			}
 			*nss = 0;
 			for (int i = 0; i < *nbath; i++) {
 				/* get pixel sample size */
-	      gsfTimeSeriesIntensity *snippet = &(mb_ping->brb_inten->time_series[i]);
+	      		gsfTimeSeriesIntensity *snippet = &(mb_ping->brb_inten->time_series[i]);
 				vertical = mb_ping->depth[i] - mb_ping->depth_corrector;
 				range = sqrt(vertical * vertical + bathacrosstrack[i] * bathacrosstrack[i]);
 				angle = 90.0 - fabs(mb_ping->beam_angle[i]);
@@ -790,16 +810,18 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 				mb_ping->mr_amplitude[i] = amp[i];
 			}
 
-    /* read multibeam sidescan into storage arrays */
-    int k = 0;
-    for (int i = 0; i < nbath; i++) {
-			gsfTimeSeriesIntensity *snippet = &(mb_ping->brb_inten->time_series[i]);
-			for (int j = 0; j < snippet->sample_count; j++) {
-        if (k < nss) {
-          snippet->samples[j] = ss[k];
-			    k++;
-        }
-      }
+    	/* read multibeam sidescan into storage arrays */
+    	if (nss > 0 && mb_ping->brb_inten != NULL) {
+			int k = 0;
+			for (int i = 0; i < nbath; i++) {
+				gsfTimeSeriesIntensity *snippet = &(mb_ping->brb_inten->time_series[i]);
+				for (int j = 0; j < snippet->sample_count; j++) {
+					if (k < nss) {
+						snippet->samples[j] = ss[k];
+						k++;
+					}
+				}
+			}
 		}
 
 		/* reset GSF scale factors if needed */

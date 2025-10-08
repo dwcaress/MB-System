@@ -1,7 +1,7 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	MB3DView.h	10/28/2003
  *
- *    Copyright (c) 2003-2024 by
+ *    Copyright (c) 2003-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -63,6 +63,7 @@ typedef struct _MB3DViewData {
 	Widget mbview_toggleButton_site;
 	Widget mbview_toggleButton_route;
 	Widget mbview_toggleButton_nav;
+	Widget mbview_toggleButton_navswathbounds;
 	Widget mbview_toggleButton_navdrape;
 	Widget mbview_toggleButton_vector;
 	Widget mbview_separator8;

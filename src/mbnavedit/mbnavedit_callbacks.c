@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
  *
- *    Copyright (c) 1995-2024 by
+ *    Copyright (c) 1995-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -2629,31 +2629,8 @@ int do_mbnavedit_workfunction(XtPointer client_data) {
 int do_message_on(char *message) {
 	set_label_string(label_message, message);
 	XtManageChild(bulletinBoard_message);
-
-	/* force the label to be visible */
-	Widget diashell;
-	for (diashell = label_message; !XtIsShell(diashell); diashell = XtParent(diashell))
-		;
-	Widget topshell;
-	for (topshell = diashell; !XtIsTopLevelShell(topshell); topshell = XtParent(topshell))
-		;
-	if (XtIsRealized(diashell) && XtIsRealized(topshell)) {
-		Window diawindow = XtWindow(diashell);
-		Window topwindow = XtWindow(topshell);
-
-		/* wait for the dialog to be mapped */
-		XWindowAttributes xwa;
-		XEvent event;
-		while (XGetWindowAttributes(display, diawindow, &xwa) && xwa.map_state != IsViewable) {
-			if (XGetWindowAttributes(display, topwindow, &xwa) && xwa.map_state != IsViewable)
-				break;
-
-			XtAppNextEvent(app_context, &event);
-			XtDispatchEvent(&event);
-		}
-	}
-
-	XmUpdateDisplay(topshell);
+	XSync(XtDisplay(bulletinBoard_message), 0);
+	XmUpdateDisplay(bulletinBoard_message);
 
 	return (MB_SUCCESS);
 }
@@ -2663,7 +2640,7 @@ int do_message_on(char *message) {
 int do_message_off() {
 	XtUnmanageChild(bulletinBoard_message);
 	XSync(XtDisplay(bulletinBoard_message), 0);
-	XmUpdateDisplay(drawingArea);
+	XmUpdateDisplay(bulletinBoard_message);
 
 	return (MB_SUCCESS);
 }

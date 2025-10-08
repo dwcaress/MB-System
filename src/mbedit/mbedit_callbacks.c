@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
  *
- *    Copyright (c) 1993-2024 by
+ *    Copyright (c) 1993-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -612,18 +612,10 @@ void do_load_specific_file(int i_file) {
       fstat = stat(save_file, &file_status);
     }
 
-    const int save_mode = false;
-    /* if esf file exists deal with it */
-    if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-      /* if save_mode set load data using esf */
-      if (save_mode)
-	do_load(true);  // TODO(schwehr): Can never happen
-
-			/* else bring up dialog asking
-			   if esf should be used */
-      else
-	do_checkuseprevious();
-    }
+		/* if esf file exists bring up dialog asking if esf should be used */
+		if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+			do_checkuseprevious();
+		}
 
     /* else just try to load the data without an esf */
     else {
@@ -2748,35 +2740,11 @@ int do_mbedit_settimer() {
 /*--------------------------------------------------------------------*/
 
 int do_message_on(char *message) {
+
   set_label_string(label_message, message);
   XtManageChild(bulletinBoard_message);
-
-  /* force the label to be visible */
-  Widget diashell;
-  for (diashell = label_message; !XtIsShell(diashell); diashell = XtParent(diashell))
-    ;
-
-  Widget topshell;
-  for (topshell = diashell; !XtIsTopLevelShell(topshell); topshell = XtParent(topshell))
-    ;
-
-  if (XtIsRealized(diashell) && XtIsRealized(topshell)) {
-    Window diawindow = XtWindow(diashell);
-    Window topwindow = XtWindow(topshell);
-
-    XEvent event;
-    XWindowAttributes xwa;
-    /* wait for the dialog to be mapped */
-    while (XGetWindowAttributes(display, diawindow, &xwa) && xwa.map_state != IsViewable) {
-      if (XGetWindowAttributes(display, topwindow, &xwa) && xwa.map_state != IsViewable)
-	break;
-
-      XtAppNextEvent(app_context, &event);
-      XtDispatchEvent(&event);
-    }
-  }
-
-  XmUpdateDisplay(topshell);
+  XSync(XtDisplay(bulletinBoard_message), 0);
+  XmUpdateDisplay(bulletinBoard_message);
 
   return (1);
 }
@@ -2787,6 +2755,7 @@ int do_message_off() {
   XtUnmanageChild(bulletinBoard_message);
   XSync(XtDisplay(bulletinBoard_message), 0);
   XmUpdateDisplay(window_mbedit);
+
 
   return (1);
 }

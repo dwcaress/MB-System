@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbsys_ldeoih.c  2/26/93
  *
- *    Copyright (c) 1993-2024 by
+ *    Copyright (c) 1993-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -651,7 +651,7 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
           notdistfirst = true;
           depthmax = fabs(bath[i] - store->sensordepth);
           distmax = fabs(bathacrosstrack[i]);
-          distmax = fabs(bathalongtrack[i]);
+          distmax = MAX(distmax, fabs(bathalongtrack[i]));
         }
       }
     }

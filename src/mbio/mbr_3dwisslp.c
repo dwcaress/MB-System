@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbr_3dwisslp.c  2/11/93
  *
- *    Copyright (c) 1993-2024 by
+ *    Copyright (c) 1993-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -43,7 +43,7 @@
 #include "mb_format.h"
 #include "mb_io.h"
 #include "mb_status.h"
-#include "mbsys_3ddwissl.h"
+#include "mbsys_3ddwissl1.h"
 
 /*#define MBF_3DWISSLP_DEBUG 1 */
 
@@ -60,9 +60,9 @@ int mbr_info_3dwisslp
   char *format_description,
   int *numfile,
   int *filetype,
-  int *variable_beams,
-  int *traveltime,
-  int *beam_flagging,
+  bool *variable_beams,
+  bool *traveltime,
+  bool *beam_flagging,
   int *platform_source,
   int *nav_source,
   int *sensordepth_source,
@@ -83,12 +83,12 @@ int mbr_info_3dwisslp
 
   /* set format info parameters */
   *error = MB_ERROR_NO_ERROR;
-  *system = MB_SYS_3DDWISSL;
+  *system = MB_SYS_3DDWISSL1;
   *beams_bath_max = 0;
   *beams_amp_max = 0;
   *pixels_ss_max = 0;
   strncpy(format_name, "3DWISSLP", MB_NAME_LENGTH);
-  strncpy(system_name, "3DWISSLP", MB_NAME_LENGTH);
+  strncpy(system_name, "3DWISSL1", MB_NAME_LENGTH);
   strncpy(format_description,
     "Format name:          MBF_3DWISSLP\nInformal Description: 3D at Depth " "Wide Swath Subsea Lidar (WiSSL) processing format\n" "           Attributes: 3D at Depth lidar, variable pulses, bathymetry and amplitude, \n" "                      binary, MBARI.\n",
     MB_DESCRIPTION_LENGTH);
@@ -162,7 +162,7 @@ int mbr_alm_3dwisslp
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* allocate memory for data structure */
-  const int status = mbsys_3ddwissl_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
+  const int status = mbsys_3ddwissl1_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
   /* get pointer to mbio descriptor */
   mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
@@ -219,7 +219,7 @@ int mbr_dem_3dwisslp
     }
 
   /* deallocate memory  */
-  status = mbsys_3ddwissl_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
+  status = mbsys_3ddwissl1_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
   if (verbose >= 2)
     {
@@ -256,7 +256,7 @@ int mbr_3dwisslp_rd_data
 
   /* get pointer to mbio descriptor */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
+  struct mbsys_3ddwissl1_struct *store = (struct mbsys_3ddwissl1_struct *)store_ptr;
 
   /* get saved values */
   int *file_header_readwritten = (int *)&mb_io_ptr->save1;
@@ -276,7 +276,7 @@ int mbr_3dwisslp_rd_data
     /* calculate size of file header and allocate read buffer */
     /* - the size of V1S1 and V1S3 parameter records is the same at 450 bytes */
     read_len =
-      (size_t)(MBSYS_3DDWISSL_V1S1_PARAMETER_SIZE+ 2 * MBSYS_3DDWISSL_V1S1_CALIBRATION_SIZE);
+      (size_t)(MBSYS_3DDWISSL1_V1S1_PARAMETER_SIZE+ 2 * MBSYS_3DDWISSL1_V1S1_CALIBRATION_SIZE);
     if (mb_io_ptr->data_structure_size < read_len)
       {
       status =
@@ -292,7 +292,7 @@ int mbr_3dwisslp_rd_data
 
     /* read file header and check the first two bytes */
     char *buffer = mb_io_ptr->raw_data;
-    read_len = (size_t)MBSYS_3DDWISSL_V1S1_PARAMETER_SIZE;
+    read_len = (size_t)MBSYS_3DDWISSL1_V1S1_PARAMETER_SIZE;
     if (status == MB_SUCCESS)
       status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
     if (status == MB_SUCCESS)
@@ -303,7 +303,7 @@ int mbr_3dwisslp_rd_data
 
       /* if ok and parameter_id is for the fileheader and the magic number is correct
        * then parse the rest of the file header */
-      if (( store->parameter_id == MBSYS_3DDWISSL_RECORD_FILEHEADER) &&
+      if (( store->parameter_id == MBSYS_3DDWISSL1_RECORD_FILEHEADER) &&
         ( store->magic_number == MBF_3DWISSLP_MAGICNUMBER) )
         {
         /* set read flag */
@@ -330,30 +330,30 @@ int mbr_3dwisslp_rd_data
         /* calculate size of a processed scan record and allocate read buffer and pulses
            array */
         if (( store->file_version == 1) && ( store->sub_version == 1) )
-          store->size_pulse_record_raw= MBSYS_3DDWISSL_V1S1_RAW_SCAN_HEADER_SIZE+
+          store->size_pulse_record_raw= MBSYS_3DDWISSL1_V1S1_RAW_SCAN_HEADER_SIZE+
             store->pulses_per_scan*
-            (MBSYS_3DDWISSL_V1S1_RAW_PULSE_HEADER_SIZE+ store->soundings_per_pulse *
-            MBSYS_3DDWISSL_V1S1_RAW_SOUNDING_SIZE);
+            (MBSYS_3DDWISSL1_V1S1_RAW_PULSE_HEADER_SIZE+ store->soundings_per_pulse *
+            MBSYS_3DDWISSL1_V1S1_RAW_SOUNDING_SIZE);
         else if (( store->file_version == 1) && ( store->sub_version == 2) )
-          store->size_pulse_record_raw= MBSYS_3DDWISSL_V1S2_RAW_SCAN_HEADER_SIZE+
+          store->size_pulse_record_raw= MBSYS_3DDWISSL1_V1S2_RAW_SCAN_HEADER_SIZE+
             store->pulses_per_scan*
-            (MBSYS_3DDWISSL_V1S2_RAW_PULSE_HEADER_SIZE+ store->soundings_per_pulse *
-            MBSYS_3DDWISSL_V1S2_RAW_SOUNDING_SIZE);
+            (MBSYS_3DDWISSL1_V1S2_RAW_PULSE_HEADER_SIZE+ store->soundings_per_pulse *
+            MBSYS_3DDWISSL1_V1S2_RAW_SOUNDING_SIZE);
         else/*if (store->file_version == 1 && store->sub_version == 3)*/
-          store->size_pulse_record_raw= MBSYS_3DDWISSL_V1S3_RAW_SCAN_HEADER_SIZE+
+          store->size_pulse_record_raw= MBSYS_3DDWISSL1_V1S3_RAW_SCAN_HEADER_SIZE+
             store->pulses_per_scan*
-            (MBSYS_3DDWISSL_V1S3_RAW_PULSE_HEADER_SIZE+ store->soundings_per_pulse *
-            MBSYS_3DDWISSL_V1S3_RAW_SOUNDING_SIZE);
+            (MBSYS_3DDWISSL1_V1S3_RAW_PULSE_HEADER_SIZE+ store->soundings_per_pulse *
+            MBSYS_3DDWISSL1_V1S3_RAW_SOUNDING_SIZE);
         if (( store->file_version == 1) && ( store->sub_version == 1) )
-          store->size_pulse_record_processed= MBSYS_3DDWISSL_V1S1_PRO_SCAN_HEADER_SIZE+
+          store->size_pulse_record_processed= MBSYS_3DDWISSL1_V1S1_PRO_SCAN_HEADER_SIZE+
             store->pulses_per_scan*
-            (MBSYS_3DDWISSL_V1S1_PRO_PULSE_HEADER_SIZE+ store->soundings_per_pulse *
-            MBSYS_3DDWISSL_V1S1_PRO_SOUNDING_SIZE);
+            (MBSYS_3DDWISSL1_V1S1_PRO_PULSE_HEADER_SIZE+ store->soundings_per_pulse *
+            MBSYS_3DDWISSL1_V1S1_PRO_SOUNDING_SIZE);
         else/*if (store->file_version == 1 && store->sub_version == 3)*/
-          store->size_pulse_record_processed= MBSYS_3DDWISSL_V1S3_PRO_SCAN_HEADER_SIZE+
+          store->size_pulse_record_processed= MBSYS_3DDWISSL1_V1S3_PRO_SCAN_HEADER_SIZE+
             store->pulses_per_scan*
-            (MBSYS_3DDWISSL_V1S3_PRO_PULSE_HEADER_SIZE+ store->soundings_per_pulse *
-            MBSYS_3DDWISSL_V1S3_PRO_SOUNDING_SIZE);
+            (MBSYS_3DDWISSL1_V1S3_PRO_PULSE_HEADER_SIZE+ store->soundings_per_pulse *
+            MBSYS_3DDWISSL1_V1S3_PRO_SOUNDING_SIZE);
         if (mb_io_ptr->data_structure_size < store->size_pulse_record_processed)
           {
           status = mb_reallocd(verbose,
@@ -370,7 +370,7 @@ int mbr_3dwisslp_rd_data
           }
         if (store->num_pulses_alloc < store->pulses_per_scan)
           {
-          read_len = store->pulses_per_scan * sizeof(struct mbsys_3ddwissl_pulse_struct);
+          read_len = store->pulses_per_scan * sizeof(struct mbsys_3ddwissl1_pulse_struct);
           status =
             mb_reallocd(verbose,
             __FILE__,
@@ -398,18 +398,18 @@ int mbr_3dwisslp_rd_data
 #endif
 
         /* set the WiSSL two optical head geometry using predefined values */
-        store->heada_offset_x_m = MBSYS_3DDWISSL_HEADA_OFFSET_X_M;
-        store->heada_offset_y_m = MBSYS_3DDWISSL_HEADA_OFFSET_Y_M;
-        store->heada_offset_z_m = MBSYS_3DDWISSL_HEADA_OFFSET_Z_M;
-        store->heada_offset_heading_deg = MBSYS_3DDWISSL_HEADA_OFFSET_HEADING_DEG;
-        store->heada_offset_roll_deg = MBSYS_3DDWISSL_HEADA_OFFSET_ROLL_DEG;
-        store->heada_offset_pitch_deg = MBSYS_3DDWISSL_HEADA_OFFSET_PITCH_DEG;
-        store->headb_offset_x_m = MBSYS_3DDWISSL_HEADB_OFFSET_X_M;
-        store->headb_offset_y_m = MBSYS_3DDWISSL_HEADB_OFFSET_Y_M;
-        store->headb_offset_z_m = MBSYS_3DDWISSL_HEADB_OFFSET_Z_M;
-        store->headb_offset_heading_deg = MBSYS_3DDWISSL_HEADB_OFFSET_HEADING_DEG;
-        store->headb_offset_roll_deg = MBSYS_3DDWISSL_HEADB_OFFSET_ROLL_DEG;
-        store->headb_offset_pitch_deg = MBSYS_3DDWISSL_HEADB_OFFSET_PITCH_DEG;
+        store->heada_offset_x_m = MBSYS_3DDWISSL1_HEADA_OFFSET_X_M;
+        store->heada_offset_y_m = MBSYS_3DDWISSL1_HEADA_OFFSET_Y_M;
+        store->heada_offset_z_m = MBSYS_3DDWISSL1_HEADA_OFFSET_Z_M;
+        store->heada_offset_heading_deg = MBSYS_3DDWISSL1_HEADA_OFFSET_HEADING_DEG;
+        store->heada_offset_roll_deg = MBSYS_3DDWISSL1_HEADA_OFFSET_ROLL_DEG;
+        store->heada_offset_pitch_deg = MBSYS_3DDWISSL1_HEADA_OFFSET_PITCH_DEG;
+        store->headb_offset_x_m = MBSYS_3DDWISSL1_HEADB_OFFSET_X_M;
+        store->headb_offset_y_m = MBSYS_3DDWISSL1_HEADB_OFFSET_Y_M;
+        store->headb_offset_z_m = MBSYS_3DDWISSL1_HEADB_OFFSET_Z_M;
+        store->headb_offset_heading_deg = MBSYS_3DDWISSL1_HEADB_OFFSET_HEADING_DEG;
+        store->headb_offset_roll_deg = MBSYS_3DDWISSL1_HEADB_OFFSET_ROLL_DEG;
+        store->headb_offset_pitch_deg = MBSYS_3DDWISSL1_HEADB_OFFSET_PITCH_DEG;
         }
       }
 
@@ -419,14 +419,14 @@ int mbr_3dwisslp_rd_data
     if (( status == MB_SUCCESS) && ( store->file_version == 1) && ( store->sub_version == 1) )
       {
       /* get calibration information for head a */
-      read_len = (size_t)(2 * MBSYS_3DDWISSL_V1S1_CALIBRATION_SIZE);
+      read_len = (size_t)(2 * MBSYS_3DDWISSL1_V1S1_CALIBRATION_SIZE);
       status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
       if (status == MB_SUCCESS)
         {
         index = 0;
 
         /* get calibration information for head a */
-        struct mbsys_3ddwissl_calibration_v1s1_struct *calibration_v1s1 =
+        struct mbsys_3ddwissl1_calibration_v1s1_struct *calibration_v1s1 =
           &store->calibration_v1s1_a;
         memcpy(calibration_v1s1->cfg_path, &buffer[index], 64); index +=64;
         mb_get_binary_int(true, (void *)&buffer[index],
@@ -654,14 +654,14 @@ int mbr_3dwisslp_rd_data
       (( store->sub_version == 2) || ( store->sub_version == 3) ) )
       {
       /* get calibration information for head a */
-      read_len = (size_t)(2 * MBSYS_3DDWISSL_V1S3_CALIBRATION_SIZE);
+      read_len = (size_t)(2 * MBSYS_3DDWISSL1_V1S3_CALIBRATION_SIZE);
       status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
       if (status == MB_SUCCESS)
         {
         index = 0;
 
         /* get calibration information for head a */
-        struct mbsys_3ddwissl_calibration_v1s3_struct *calibration_v1s3=
+        struct mbsys_3ddwissl1_calibration_v1s3_struct *calibration_v1s3=
           &store->calibration_v1s3_a;
         memcpy(calibration_v1s3->cfg_path, &buffer[index], 64); index +=64;
         mb_get_binary_int(true, (void *)&buffer[index],
@@ -960,27 +960,27 @@ int mbr_3dwisslp_rd_data
       if (( store->file_version == 1) && ( store->sub_version == 1) )
         fprintf(stderr,
           "SCAN_HEADER_SIZE:%d pulses_per_scan:%d PULSE_HEADER_SIZE:%d soundings_per_pulse:%d SOUNDING_SIZE:%d\n",
-          MBSYS_3DDWISSL_V1S1_RAW_SCAN_HEADER_SIZE,
+          MBSYS_3DDWISSL1_V1S1_RAW_SCAN_HEADER_SIZE,
           store->pulses_per_scan,
-          MBSYS_3DDWISSL_V1S1_RAW_PULSE_HEADER_SIZE,
+          MBSYS_3DDWISSL1_V1S1_RAW_PULSE_HEADER_SIZE,
           store->soundings_per_pulse,
-          MBSYS_3DDWISSL_V1S1_RAW_SOUNDING_SIZE);
+          MBSYS_3DDWISSL1_V1S1_RAW_SOUNDING_SIZE);
       else if (( store->file_version == 1) && ( store->sub_version == 2) )
         fprintf(stderr,
           "SCAN_HEADER_SIZE:%d pulses_per_scan:%d PULSE_HEADER_SIZE:%d soundings_per_pulse:%d SOUNDING_SIZE:%d\n",
-          MBSYS_3DDWISSL_V1S2_RAW_SCAN_HEADER_SIZE,
+          MBSYS_3DDWISSL1_V1S2_RAW_SCAN_HEADER_SIZE,
           store->pulses_per_scan,
-          MBSYS_3DDWISSL_V1S2_RAW_PULSE_HEADER_SIZE,
+          MBSYS_3DDWISSL1_V1S2_RAW_PULSE_HEADER_SIZE,
           store->soundings_per_pulse,
-          MBSYS_3DDWISSL_V1S2_RAW_SOUNDING_SIZE);
+          MBSYS_3DDWISSL1_V1S2_RAW_SOUNDING_SIZE);
       else/* if (store->file_version == 1 && store->sub_version == 3) */
         fprintf(stderr,
           "SCAN_HEADER_SIZE:%d pulses_per_scan:%d PULSE_HEADER_SIZE:%d soundings_per_pulse:%d SOUNDING_SIZE:%d\n",
-          MBSYS_3DDWISSL_V1S3_RAW_SCAN_HEADER_SIZE,
+          MBSYS_3DDWISSL1_V1S3_RAW_SCAN_HEADER_SIZE,
           store->pulses_per_scan,
-          MBSYS_3DDWISSL_V1S3_RAW_PULSE_HEADER_SIZE,
+          MBSYS_3DDWISSL1_V1S3_RAW_PULSE_HEADER_SIZE,
           store->soundings_per_pulse,
-          MBSYS_3DDWISSL_V1S3_RAW_SOUNDING_SIZE);
+          MBSYS_3DDWISSL1_V1S3_RAW_SOUNDING_SIZE);
 #endif
       }
     else
@@ -1013,9 +1013,9 @@ int mbr_3dwisslp_rd_data
       if (status == MB_SUCCESS)
         {
         memcpy(&store->record_id, buffer, sizeof(short));
-        if (( store->record_id == MBSYS_3DDWISSL_RECORD_PROHEADA) ||
-          ( store->record_id == MBSYS_3DDWISSL_RECORD_PROHEADB) ||
-          ( store->record_id == MBSYS_3DDWISSL_RECORD_COMMENT) )
+        if (( store->record_id == MBSYS_3DDWISSL1_RECORD_PROHEADA) ||
+          ( store->record_id == MBSYS_3DDWISSL1_RECORD_PROHEADB) ||
+          ( store->record_id == MBSYS_3DDWISSL1_RECORD_COMMENT) )
           {
           valid_id = true;
           }
@@ -1063,21 +1063,21 @@ int mbr_3dwisslp_rd_data
       *error);
 #endif
 
-    /* read MBSYS_3DDWISSL_RECORD_PROHEADA or MBSYS_3DDWISSL_RECORD_PROHEADB record */
+    /* read MBSYS_3DDWISSL1_RECORD_PROHEADA or MBSYS_3DDWISSL1_RECORD_PROHEADB record */
     if (( status == MB_SUCCESS) &&
-      (( store->record_id == MBSYS_3DDWISSL_RECORD_PROHEADA) ||
-      ( store->record_id == MBSYS_3DDWISSL_RECORD_PROHEADB) ))
+      (( store->record_id == MBSYS_3DDWISSL1_RECORD_PROHEADA) ||
+      ( store->record_id == MBSYS_3DDWISSL1_RECORD_PROHEADB) ))
       {
 #ifdef MBF_3DWISSLP_DEBUG
-      if (store->record_id == MBSYS_3DDWISSL_RECORD_PROHEADA)
+      if (store->record_id == MBSYS_3DDWISSL1_RECORD_PROHEADA)
         fprintf(stderr,
-          "%s:%s():%d Reading MBSYS_3DDWISSL_RECORD_PROHEADA\n",
+          "%s:%s():%d Reading MBSYS_3DDWISSL1_RECORD_PROHEADA\n",
           __FILE__,
           __FUNCTION__,
           __LINE__);
       else
         fprintf(stderr,
-          "%s:%s():%d Reading MBSYS_3DDWISSL_RECORD_PROHEADB\n",
+          "%s:%s():%d Reading MBSYS_3DDWISSL1_RECORD_PROHEADB\n",
           __FILE__,
           __FUNCTION__,
           __LINE__);
@@ -1173,10 +1173,10 @@ int mbr_3dwisslp_rd_data
 
         /* initialize all of the pulses with zero values excepting for null beamflags */
         memset(store->pulses, 0,
-          (size_t)(store->pulses_per_scan * sizeof(struct mbsys_3ddwissl_pulse_struct)));
+          (size_t)(store->pulses_per_scan * sizeof(struct mbsys_3ddwissl1_pulse_struct)));
         for (int ipulse=0; ipulse<store->pulses_per_scan; ipulse++)
           {
-          struct mbsys_3ddwissl_pulse_struct *pulse = &store->pulses[ipulse];
+          struct mbsys_3ddwissl1_pulse_struct *pulse = &store->pulses[ipulse];
           for (int isounding = 0; isounding < store->soundings_per_pulse; isounding++)
             pulse->soundings[isounding].beamflag = MB_FLAG_NULL;
           }
@@ -1188,7 +1188,7 @@ int mbr_3dwisslp_rd_data
           unsigned short ushort_val = 0;
           mb_get_binary_short(true, (void *)&buffer[index], &ushort_val); index += 2;
           int ipulse = (int) ushort_val;
-          struct mbsys_3ddwissl_pulse_struct *pulse = &store->pulses[ipulse];
+          struct mbsys_3ddwissl1_pulse_struct *pulse = &store->pulses[ipulse];
           mb_get_binary_float(true, (void *)&buffer[index], &(pulse->angle_az));
           index += 4;
           mb_get_binary_float(true, (void *)&buffer[index], &(pulse->angle_el));
@@ -1225,7 +1225,7 @@ int mbr_3dwisslp_rd_data
           mb_get_binary_short(true, (void *)&buffer[index], &ushort_val); index += 2;
           int ipulse = (int) ushort_val;
           int isounding = (int) buffer[index]; index += 1;
-          struct mbsys_3ddwissl_pulse_struct *pulse = &store->pulses[ipulse];
+          struct mbsys_3ddwissl1_pulse_struct *pulse = &store->pulses[ipulse];
           pulse->validsounding_count += 1;
           mb_get_binary_float(true, (void *)&buffer[index],
             &(pulse->soundings[isounding].range)); index += 4;
@@ -1254,11 +1254,11 @@ int mbr_3dwisslp_rd_data
       }
 
     /* read comment record */
-    else if (( status == MB_SUCCESS) && ( store->record_id == MBSYS_3DDWISSL_RECORD_COMMENT) )
+    else if (( status == MB_SUCCESS) && ( store->record_id == MBSYS_3DDWISSL1_RECORD_COMMENT) )
       {
 #ifdef MBF_3DWISSLP_DEBUG
       fprintf(stderr,
-        "%s:%s():%d Reading MBSYS_3DDWISSL_RECORD_COMMENT\n",
+        "%s:%s():%d Reading MBSYS_3DDWISSL1_RECORD_COMMENT\n",
         __FILE__,
         __FUNCTION__,
         __LINE__);
@@ -1292,7 +1292,7 @@ int mbr_3dwisslp_rd_data
 
   /* print out status info */
   if (( verbose >= 3) && ( status == MB_SUCCESS) )
-    mbsys_3ddwissl_print_store(verbose, store_ptr, error);
+    mbsys_3ddwissl1_print_store(verbose, store_ptr, error);
 
   if (verbose >= 2)
     {
@@ -1329,7 +1329,7 @@ int mbr_rt_3dwisslp
 
   /* get pointers to mbio descriptor and data structure */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
+  struct mbsys_3ddwissl1_struct *store = (struct mbsys_3ddwissl1_struct *)store_ptr;
 
   /* read next data from file */
   const int status = mbr_3dwisslp_rd_data(verbose, mbio_ptr, store_ptr, error);
@@ -1337,16 +1337,16 @@ int mbr_rt_3dwisslp
   /* if needed calculate bathymetry */
   if (( status == MB_SUCCESS) && ( store->kind == MB_DATA_DATA) &&
       (!store->bathymetry_calculated))
-    mbsys_3ddwissl_calculatebathymetry(verbose,
+    mbsys_3ddwissl1_calculatebathymetry(verbose,
       mbio_ptr,
       store_ptr,
-      MBSYS_3DDWISSL_DEFAULT_AMPLITUDE_THRESHOLD,
-      MBSYS_3DDWISSL_DEFAULT_TARGET_ALTITUDE,
+      MBSYS_3DDWISSL1_DEFAULT_AMPLITUDE_THRESHOLD,
+      MBSYS_3DDWISSL1_DEFAULT_TARGET_ALTITUDE,
       error);
 
   /* print out status info */
   if (verbose > 1)
-    mbsys_3ddwissl_print_store(verbose, store_ptr, error);
+    mbsys_3ddwissl1_print_store(verbose, store_ptr, error);
 
   /* set error and kind in mb_io_ptr */
   mb_io_ptr->new_error = *error;
@@ -1387,7 +1387,7 @@ int mbr_3dwisslp_wr_data
 
   /* get pointer to mbio descriptor */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
+  struct mbsys_3ddwissl1_struct *store = (struct mbsys_3ddwissl1_struct *)store_ptr;
 
   /* get saved values */
   int *file_header_readwritten = (int *)&mb_io_ptr->save1;
@@ -1427,16 +1427,16 @@ int mbr_3dwisslp_wr_data
     /* calculate maximum size of output lidar record and allocate write buffer to handle that */
     if (store->sub_version == 1)
       write_len =
-        (size_t)MAX((MBSYS_3DDWISSL_V1S1_PRO_SCAN_HEADER_SIZE+ store->pulses_per_scan*
-        (MBSYS_3DDWISSL_V1S1_PRO_PULSE_HEADER_SIZE+ store->soundings_per_pulse*
-        MBSYS_3DDWISSL_V1S1_PRO_SOUNDING_SIZE)),
-        (MBSYS_3DDWISSL_V1S1_PARAMETER_SIZE+ 2 * MBSYS_3DDWISSL_V1S1_CALIBRATION_SIZE));
+        (size_t)MAX((MBSYS_3DDWISSL1_V1S1_PRO_SCAN_HEADER_SIZE+ store->pulses_per_scan*
+        (MBSYS_3DDWISSL1_V1S1_PRO_PULSE_HEADER_SIZE+ store->soundings_per_pulse*
+        MBSYS_3DDWISSL1_V1S1_PRO_SOUNDING_SIZE)),
+        (MBSYS_3DDWISSL1_V1S1_PARAMETER_SIZE+ 2 * MBSYS_3DDWISSL1_V1S1_CALIBRATION_SIZE));
     else/* if (store->sub_version >= 2) */
       write_len =
-        (size_t)MAX((MBSYS_3DDWISSL_V1S3_PRO_SCAN_HEADER_SIZE+ store->pulses_per_scan*
-        (MBSYS_3DDWISSL_V1S3_PRO_PULSE_HEADER_SIZE+ store->soundings_per_pulse*
-        MBSYS_3DDWISSL_V1S3_PRO_SOUNDING_SIZE)),
-        (MBSYS_3DDWISSL_V1S3_PARAMETER_SIZE+ 2 * MBSYS_3DDWISSL_V1S3_CALIBRATION_SIZE));
+        (size_t)MAX((MBSYS_3DDWISSL1_V1S3_PRO_SCAN_HEADER_SIZE+ store->pulses_per_scan*
+        (MBSYS_3DDWISSL1_V1S3_PRO_PULSE_HEADER_SIZE+ store->soundings_per_pulse*
+        MBSYS_3DDWISSL1_V1S3_PRO_SOUNDING_SIZE)),
+        (MBSYS_3DDWISSL1_V1S3_PARAMETER_SIZE+ 2 * MBSYS_3DDWISSL1_V1S3_CALIBRATION_SIZE));
     if (mb_io_ptr->data_structure_size < write_len)
       {
       status =
@@ -1454,13 +1454,13 @@ int mbr_3dwisslp_wr_data
     if (( status == MB_SUCCESS) && ( store->file_version == 1) && ( store->sub_version == 1) )
       {
       write_len =
-        (size_t)(MBSYS_3DDWISSL_V1S1_PARAMETER_SIZE+ 2 *
-        MBSYS_3DDWISSL_V1S1_CALIBRATION_SIZE);
+        (size_t)(MBSYS_3DDWISSL1_V1S1_PARAMETER_SIZE+ 2 *
+        MBSYS_3DDWISSL1_V1S1_CALIBRATION_SIZE);
       index = 0;
       buffer = mb_io_ptr->raw_data;
 
       /* start of parameter record (and file ) */
-      store->parameter_id = MBSYS_3DDWISSL_RECORD_FILEHEADER;
+      store->parameter_id = MBSYS_3DDWISSL1_RECORD_FILEHEADER;
       store->magic_number = MBF_3DWISSLP_MAGICNUMBER;
       mb_put_binary_short(true, store->parameter_id, (void **)&buffer[index]); index += 2;
       mb_put_binary_short(true, store->magic_number, (void **)&buffer[index]); index += 2;
@@ -1498,7 +1498,7 @@ int mbr_3dwisslp_wr_data
 #endif
 
       /* put calibration information for head a */
-      struct mbsys_3ddwissl_calibration_v1s1_struct *calibration_v1s1;
+      struct mbsys_3ddwissl1_calibration_v1s1_struct *calibration_v1s1;
       calibration_v1s1 = &store->calibration_v1s1_a;
       memcpy((void **)&buffer[index], calibration_v1s1->cfg_path, 64); index +=64;
       mb_put_binary_int(true, calibration_v1s1->laser_head_no, (void **)&buffer[index]);
@@ -1766,14 +1766,14 @@ int mbr_3dwisslp_wr_data
       ( store->sub_version >= 2) )
       {
       write_len =
-        (size_t)(MBSYS_3DDWISSL_V1S1_PARAMETER_SIZE+ 2 *
-        MBSYS_3DDWISSL_V1S3_CALIBRATION_SIZE);
+        (size_t)(MBSYS_3DDWISSL1_V1S1_PARAMETER_SIZE+ 2 *
+        MBSYS_3DDWISSL1_V1S3_CALIBRATION_SIZE);
       index = 0;
       buffer = mb_io_ptr->raw_data;
       unsigned short sub_version = 3;
 
       /* start of parameter record (and file ) */
-      store->parameter_id = MBSYS_3DDWISSL_RECORD_FILEHEADER;
+      store->parameter_id = MBSYS_3DDWISSL1_RECORD_FILEHEADER;
       store->magic_number = MBF_3DWISSLP_MAGICNUMBER;
       mb_put_binary_short(true, store->parameter_id, (void **)&buffer[index]); index += 2;
       mb_put_binary_short(true, store->magic_number, (void **)&buffer[index]); index += 2;
@@ -1811,7 +1811,7 @@ int mbr_3dwisslp_wr_data
 #endif
 
       /* get calibration information for head a */
-      struct mbsys_3ddwissl_calibration_v1s3_struct *calibration_v1s3;
+      struct mbsys_3ddwissl1_calibration_v1s3_struct *calibration_v1s3;
       calibration_v1s3 = &store->calibration_v1s3_a;
       memcpy((void **)&buffer[index], calibration_v1s3->cfg_path, 64); index += 64;
       mb_put_binary_int(true, calibration_v1s3->laser_head_no, (void **)&buffer[index]);
@@ -2124,7 +2124,7 @@ int mbr_3dwisslp_wr_data
             allocate write buffer to handle the larger of the two */
     write_len =
       MAX(
-      (size_t)(MBSYS_3DDWISSL_V1S1_PARAMETER_SIZE+ 2 * MBSYS_3DDWISSL_V1S1_CALIBRATION_SIZE),
+      (size_t)(MBSYS_3DDWISSL1_V1S1_PARAMETER_SIZE+ 2 * MBSYS_3DDWISSL1_V1S1_CALIBRATION_SIZE),
       MB_COMMENT_MAXLINE + 4);
     if (mb_io_ptr->data_structure_size < write_len)
       {
@@ -2144,8 +2144,8 @@ int mbr_3dwisslp_wr_data
       {
       /* calculate size of parameter record to be written here */
       write_len =
-        (size_t)(MBSYS_3DDWISSL_V1S1_PARAMETER_SIZE+ 2 *
-        MBSYS_3DDWISSL_V1S1_CALIBRATION_SIZE);
+        (size_t)(MBSYS_3DDWISSL1_V1S1_PARAMETER_SIZE+ 2 *
+        MBSYS_3DDWISSL1_V1S1_CALIBRATION_SIZE);
 
       /* write file header which is also the parameter record */
       index = 0;
@@ -2177,7 +2177,7 @@ int mbr_3dwisslp_wr_data
     index = 0;
     buffer = mb_io_ptr->raw_data;
 
-    store->record_id = MBSYS_3DDWISSL_RECORD_COMMENT;
+    store->record_id = MBSYS_3DDWISSL1_RECORD_COMMENT;
     store->comment_len = MIN(strlen(store->comment), MB_COMMENT_MAXLINE-1);
     mb_put_binary_short(true, store->record_id, &buffer[index]);
     index += 2;
@@ -2207,7 +2207,7 @@ int mbr_3dwisslp_wr_data
     store->validsounding_count = 0;
     for (unsigned int ipulse = 0; ipulse < store->pulse_count; ipulse++)
       {
-      struct mbsys_3ddwissl_pulse_struct *pulse = &store->pulses[ipulse];
+      struct mbsys_3ddwissl1_pulse_struct *pulse = &store->pulses[ipulse];
       pulse->validsounding_count = 0;
       for (int isounding = 0; isounding < store->soundings_per_pulse; isounding++)
         if (pulse->soundings[isounding].beamflag != MB_FLAG_NULL)
@@ -2222,14 +2222,14 @@ int mbr_3dwisslp_wr_data
     /* calculate size of output lidar record and allocate write buffer to handle that */
     if (( store->file_version == 1) && ( store->sub_version == 1) )
       write_len =
-        (size_t)(MBSYS_3DDWISSL_V1S1_PRO_SCAN_HEADER_SIZE+ store->validpulse_count*
-        MBSYS_3DDWISSL_V1S1_PRO_PULSE_HEADER_SIZE+ store->validsounding_count*
-        MBSYS_3DDWISSL_V1S1_PRO_SOUNDING_SIZE);
+        (size_t)(MBSYS_3DDWISSL1_V1S1_PRO_SCAN_HEADER_SIZE+ store->validpulse_count*
+        MBSYS_3DDWISSL1_V1S1_PRO_PULSE_HEADER_SIZE+ store->validsounding_count*
+        MBSYS_3DDWISSL1_V1S1_PRO_SOUNDING_SIZE);
     else/* if (store->file_version == 1 && store->sub_version >= 2) */
       write_len =
-        (size_t)(MBSYS_3DDWISSL_V1S3_PRO_SCAN_HEADER_SIZE+ store->validpulse_count*
-        MBSYS_3DDWISSL_V1S3_PRO_PULSE_HEADER_SIZE+ store->validsounding_count*
-        MBSYS_3DDWISSL_V1S3_PRO_SOUNDING_SIZE);
+        (size_t)(MBSYS_3DDWISSL1_V1S3_PRO_SCAN_HEADER_SIZE+ store->validpulse_count*
+        MBSYS_3DDWISSL1_V1S3_PRO_PULSE_HEADER_SIZE+ store->validsounding_count*
+        MBSYS_3DDWISSL1_V1S3_PRO_SOUNDING_SIZE);
     store->scan_size = write_len;
 #ifdef MBF_3DWISSLP_DEBUG
     fprintf(stderr,
@@ -2246,10 +2246,10 @@ int mbr_3dwisslp_wr_data
     index = 0;
     buffer = mb_io_ptr->raw_data;
 
-    if (store->record_id == MBSYS_3DDWISSL_RECORD_RAWHEADA)
-      store->record_id = MBSYS_3DDWISSL_RECORD_PROHEADA;
-    if (store->record_id == MBSYS_3DDWISSL_RECORD_RAWHEADB)
-      store->record_id = MBSYS_3DDWISSL_RECORD_PROHEADB;
+    if (store->record_id == MBSYS_3DDWISSL1_RECORD_RAWHEADA)
+      store->record_id = MBSYS_3DDWISSL1_RECORD_PROHEADA;
+    if (store->record_id == MBSYS_3DDWISSL1_RECORD_RAWHEADB)
+      store->record_id = MBSYS_3DDWISSL1_RECORD_PROHEADB;
     mb_put_binary_short(true, store->record_id, &buffer[index]); index += 2;
     mb_put_binary_int(true, store->scan_size, &buffer[index]); index += 4;
     mb_put_binary_short(true, store->year, &buffer[index]); index += 2;
@@ -2287,7 +2287,7 @@ int mbr_3dwisslp_wr_data
     /* write only the valid (non-null) scan pulses */
     for (int ipulse=0; ipulse<store->pulses_per_scan; ipulse++)
       {
-      struct mbsys_3ddwissl_pulse_struct *pulse = &store->pulses[ipulse];
+      struct mbsys_3ddwissl1_pulse_struct *pulse = &store->pulses[ipulse];
       if (pulse->validsounding_count > 0)
         {
         mb_put_binary_short(true, (unsigned short)ipulse, &buffer[index]); index += 2;
@@ -2316,7 +2316,7 @@ int mbr_3dwisslp_wr_data
     /* write only the valid (non-null) soundings */
     for (int ipulse=0; ipulse<store->pulses_per_scan; ipulse++)
       {
-      struct mbsys_3ddwissl_pulse_struct *pulse = &store->pulses[ipulse];
+      struct mbsys_3ddwissl1_pulse_struct *pulse = &store->pulses[ipulse];
       if (pulse->validsounding_count > 0)
         {
         for (int isounding=0; isounding<store->soundings_per_pulse; isounding++)
@@ -2460,24 +2460,24 @@ int mbr_register_3dwisslp
   /* set format and system specific function pointers */
   mb_io_ptr->mb_io_format_alloc = &mbr_alm_3dwisslp;
   mb_io_ptr->mb_io_format_free = &mbr_dem_3dwisslp;
-  mb_io_ptr->mb_io_store_alloc = &mbsys_3ddwissl_alloc;
-  mb_io_ptr->mb_io_store_free = &mbsys_3ddwissl_deall;
+  mb_io_ptr->mb_io_store_alloc = &mbsys_3ddwissl1_alloc;
+  mb_io_ptr->mb_io_store_free = &mbsys_3ddwissl1_deall;
   mb_io_ptr->mb_io_read_ping = &mbr_rt_3dwisslp;
   mb_io_ptr->mb_io_write_ping = &mbr_wt_3dwisslp;
-  mb_io_ptr->mb_io_dimensions = &mbsys_3ddwissl_dimensions;
-  mb_io_ptr->mb_io_preprocess = &mbsys_3ddwissl_preprocess;
-  mb_io_ptr->mb_io_sensorhead = &mbsys_3ddwissl_sensorhead;
-  mb_io_ptr->mb_io_extract = &mbsys_3ddwissl_extract;
-  mb_io_ptr->mb_io_insert = &mbsys_3ddwissl_insert;
-  mb_io_ptr->mb_io_extract_nav = &mbsys_3ddwissl_extract_nav;
-  mb_io_ptr->mb_io_insert_nav = &mbsys_3ddwissl_insert_nav;
-  mb_io_ptr->mb_io_extract_altitude = &mbsys_3ddwissl_extract_altitude;
+  mb_io_ptr->mb_io_dimensions = &mbsys_3ddwissl1_dimensions;
+  mb_io_ptr->mb_io_preprocess = &mbsys_3ddwissl1_preprocess;
+  mb_io_ptr->mb_io_sensorhead = &mbsys_3ddwissl1_sensorhead;
+  mb_io_ptr->mb_io_extract = &mbsys_3ddwissl1_extract;
+  mb_io_ptr->mb_io_insert = &mbsys_3ddwissl1_insert;
+  mb_io_ptr->mb_io_extract_nav = &mbsys_3ddwissl1_extract_nav;
+  mb_io_ptr->mb_io_insert_nav = &mbsys_3ddwissl1_insert_nav;
+  mb_io_ptr->mb_io_extract_altitude = &mbsys_3ddwissl1_extract_altitude;
   mb_io_ptr->mb_io_insert_altitude = NULL;
-  mb_io_ptr->mb_io_extract_svp = &mbsys_3ddwissl_extract_svp;
-  mb_io_ptr->mb_io_insert_svp = &mbsys_3ddwissl_insert_svp;
-  mb_io_ptr->mb_io_ttimes = &mbsys_3ddwissl_ttimes;
-  mb_io_ptr->mb_io_detects = &mbsys_3ddwissl_detects;
-  mb_io_ptr->mb_io_copyrecord = &mbsys_3ddwissl_copy;
+  mb_io_ptr->mb_io_extract_svp = &mbsys_3ddwissl1_extract_svp;
+  mb_io_ptr->mb_io_insert_svp = &mbsys_3ddwissl1_insert_svp;
+  mb_io_ptr->mb_io_ttimes = &mbsys_3ddwissl1_ttimes;
+  mb_io_ptr->mb_io_detects = &mbsys_3ddwissl1_detects;
+  mb_io_ptr->mb_io_copyrecord = &mbsys_3ddwissl1_copy;
   mb_io_ptr->mb_io_extract_rawss = NULL;
   mb_io_ptr->mb_io_insert_rawss = NULL;
 

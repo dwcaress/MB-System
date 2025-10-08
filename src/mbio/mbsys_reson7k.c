@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbsys_reson7k.c  3.00  3/23/2004
  *
- *    Copyright (c) 2004-2024 by
+ *    Copyright (c) 2004-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -122,6 +122,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)*store_ptr;
 
   /* initialize everything */
+  memset(*store_ptr, 0, sizeof(struct mbsys_reson7k_struct));
 
   /* Type of data record */
   store->kind = MB_DATA_NONE;
@@ -1350,9 +1351,7 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
     calibratedsnippettimeseries->detect_sample = 0;
     calibratedsnippettimeseries->end_sample = 0;
     calibratedsnippettimeseries->nalloc = 0;
-    // TODO(schwehr): This was a bug, yes?
-    // if (v2snippettimeseries->amplitude != NULL)
-    if (calibratedsnippettimeseries->amplitude != NULL)
+		if (calibratedsnippettimeseries->amplitude != NULL)
       status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(calibratedsnippettimeseries->amplitude), error);
   }
 
@@ -2663,7 +2662,7 @@ int mbsys_reson7k_print_processedsidescan(int verbose, s7kr_processedsidescan *p
   fprintf(stderr, "%s     ss_source:                  %u\n", first, processedsidescan->ss_source);
   fprintf(stderr, "%s     number_pixels:              %u\n", first, processedsidescan->number_pixels);
   fprintf(stderr, "%s     pixelwidth:                 %f\n", first, processedsidescan->pixelwidth);
-  fprintf(stderr, "%s     sensordepth:                 %f\n", first, processedsidescan->sensordepth);
+  fprintf(stderr, "%s     sensordepth:                %f\n", first, processedsidescan->sensordepth);
   fprintf(stderr, "%s     altitude:                   %f\n", first, processedsidescan->altitude);
   for (unsigned int i = 0; i < processedsidescan->number_pixels; i++)
     fprintf(stderr, "%s     pixel[%d]:  sidescan:%f alongtrack:%f\n", first, i, processedsidescan->sidescan[i],
@@ -4534,6 +4533,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
   bool kluge_soundspeedsnell = false;
   bool kluge_zeroattitudecorrection = false;
   bool kluge_zeroalongtrackangles = false;
+  bool kluge_early_mbari_mapping_auv = false;
 
   /* kluge parameters */
   double kluge_beampatternsnellfactor = 1.0;
@@ -4554,6 +4554,9 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
     }
     else if (pars->kluge_id[i] == MB_PR_KLUGE_ZEROALONGTRACKANGLES) {
       kluge_zeroalongtrackangles = true;
+    }
+    else if (pars->kluge_id[i] == MB_PR_KLUGE_EARLYMBARIMAPPINGAUV) {
+      kluge_early_mbari_mapping_auv = true;
     }
   }
 
@@ -4603,6 +4606,9 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
       }
       else if (pars->kluge_id[i] == MB_PR_KLUGE_ZEROALONGTRACKANGLES) {
         fprintf(stderr, "dbg2       kluge_zeroalongtrackangles:    %d\n", kluge_zeroalongtrackangles);
+      }
+      else if (pars->kluge_id[i] == MB_PR_KLUGE_EARLYMBARIMAPPINGAUV) {
+        fprintf(stderr, "dbg2       kluge_early_mbari_mapping_auv: %d\n", kluge_early_mbari_mapping_auv);
       }
     }
   }
@@ -4787,6 +4793,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
       /* fix version 4 quality flags */
       if (bathymetry->header.Version < 5) {
+// fprintf(stderr, "%s:%d:%s: fix version 4 quality flags: %d  year: %d  bluefinnav: %d\n", __FILE__, __LINE__, __FUNCTION__, bathymetry->header.Version, header->s7kTime.Year, store->nrec_bluefinnav);
         for (unsigned int i = 0; i < bathymetry->number_beams; i++) {
           if ((bathymetry->quality[i]) < 16) {
             if (bathymetry->range[i] > 0.007) {
@@ -4804,6 +4811,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
       /* fix early version 5 quality flags */
       else if (bathymetry->header.Version == 5 && header->s7kTime.Year < 2006) {
+// fprintf(stderr, "%s:%d:%s: fix early version 5 quality flags: %d  year: %d  bluefinnav: %d\n", __FILE__, __LINE__, __FUNCTION__, bathymetry->header.Version, header->s7kTime.Year, store->nrec_bluefinnav);
         for (unsigned int i = 0; i < bathymetry->number_beams; i++) {
           /* phase picks */
           if ((bathymetry->quality[i]) == 8) {
@@ -4816,8 +4824,10 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
       }
 
       /* fix early MBARI version 5 quality flags */
-      else if (bathymetry->header.Version == 5 && store->nrec_bluefinnav > 0 && header->s7kTime.Year < 2008) {
+      else if (bathymetry->header.Version == 5 && (kluge_early_mbari_mapping_auv || store->nrec_bluefinnav > 0) && header->s7kTime.Year < 2008) {
+// fprintf(stderr, "%s:%d:%s: fix early MBARI version 5 quality flags: %d  year: %d  bluefinnav: %d\n", __FILE__, __LINE__, __FUNCTION__, bathymetry->header.Version, header->s7kTime.Year, store->nrec_bluefinnav);
         for (unsigned int i = 0; i < bathymetry->number_beams; i++) {
+// fprintf(stderr, "    %d   %d "MB_PRINTF_BINARY_PATTERN_INT8" 0x%.8X", i, bathymetry->quality[i], MB_PRINTF_BYTE_TO_BINARY_INT8(bathymetry->quality[i]), bathymetry->quality[i]);
           /* phase picks */
           if ((bathymetry->quality[i]) == 4) {
             bathymetry->quality[i] = 32 + 15;
@@ -4825,11 +4835,13 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
           else if ((bathymetry->quality[i]) == 2) {
             bathymetry->quality[i] = 16 + 15;
           }
+// fprintf(stderr, "     %d "MB_PRINTF_BINARY_PATTERN_INT8" 0x%.8X\n", bathymetry->quality[i], MB_PRINTF_BYTE_TO_BINARY_INT8(bathymetry->quality[i]), bathymetry->quality[i]);
         }
       }
 
       /* fix upgraded MBARI version 5 quality flags */
-      else if (bathymetry->header.Version >= 5 && store->nrec_bluefinnav > 0 && header->s7kTime.Year <= 2010) {
+      else if (bathymetry->header.Version >= 5 && (kluge_early_mbari_mapping_auv || store->nrec_bluefinnav > 0) && header->s7kTime.Year <= 2010) {
+// fprintf(stderr, "%s:%d:%s: fix upgraded MBARI version 5 quality flags: %d  year: %d  bluefinnav: %d\n", __FILE__, __LINE__, __FUNCTION__, bathymetry->header.Version, header->s7kTime.Year, store->nrec_bluefinnav);
         for (unsigned int i = 0; i < bathymetry->number_beams; i++) {
           bathymetry->quality[i] = bathymetry->quality[i] & 15;
 
@@ -4850,6 +4862,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
       /* fix upgraded version 5 quality flags */
       else if (bathymetry->header.Version >= 5) {
+// fprintf(stderr, "%s:%d:%s: fix upgraded version 5 quality flags: %d  year: %d  bluefinnav: %d\n", __FILE__, __LINE__, __FUNCTION__, bathymetry->header.Version, header->s7kTime.Year, store->nrec_bluefinnav);
         for (unsigned int i = 0; i < bathymetry->number_beams; i++) {
           bathymetry->quality[i] = bathymetry->quality[i] & 15;
 
@@ -4877,6 +4890,11 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
           }
         }
       }
+
+      /* not fixing quality flags */
+      else if (bathymetry->header.Version >= 5) {
+// fprintf(stderr, "%s:%d:%s: not fixing quality flags: %d  year: %d  bluefinnav: %d\n", __FILE__, __LINE__, __FUNCTION__, bathymetry->header.Version, header->s7kTime.Year, store->nrec_bluefinnav);
+	  }
 
       /* if requested ignore water column data
        * (will not be included in any output file) */
@@ -5981,7 +5999,7 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
       else if (bathymetry->quality[i] & 128) {
         beamflag[i] = MB_FLAG_FLAG + MB_FLAG_MANUAL;
       }
-      else if (bathymetry->quality[i] & 240) {
+      else if (bathymetry->quality[i] & 48) {
         beamflag[i] = MB_FLAG_NONE;
       }
       else if ((bathymetry->quality[i] & 3) == 3) {
@@ -5998,27 +6016,7 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
       }
 #ifdef MSYS_RESON7KR_DEBUG
       fprintf(stderr, "EXTRACT: beam:%d quality:%d q&240:%d ", i, bathymetry->quality[i], bathymetry->quality[i] & 240);
-      if (bathymetry->quality[i] & 1)
-        fprintf(stderr, "1");
-      else
-        fprintf(stderr, "0");
-      if (bathymetry->quality[i] & 2)
-        fprintf(stderr, "1");
-      else
-        fprintf(stderr, "0");
-      if (bathymetry->quality[i] & 4)
-        fprintf(stderr, "1");
-      else
-        fprintf(stderr, "0");
-      if (bathymetry->quality[i] & 8)
-        fprintf(stderr, "1");
-      else
-        fprintf(stderr, "0");
-      if (bathymetry->quality[i] & 16)
-        fprintf(stderr, "1");
-      else
-        fprintf(stderr, "0");
-      if (bathymetry->quality[i] & 32)
+      if (bathymetry->quality[i] & 128)
         fprintf(stderr, "1");
       else
         fprintf(stderr, "0");
@@ -6026,7 +6024,27 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
         fprintf(stderr, "1");
       else
         fprintf(stderr, "0");
-      if (bathymetry->quality[i] & 128)
+      if (bathymetry->quality[i] & 32)
+        fprintf(stderr, "1");
+      else
+        fprintf(stderr, "0");
+      if (bathymetry->quality[i] & 16)
+        fprintf(stderr, "1");
+      else
+        fprintf(stderr, "0");
+      if (bathymetry->quality[i] & 8)
+        fprintf(stderr, "1");
+      else
+        fprintf(stderr, "0");
+      if (bathymetry->quality[i] & 4)
+        fprintf(stderr, "1");
+      else
+        fprintf(stderr, "0");
+      if (bathymetry->quality[i] & 2)
+        fprintf(stderr, "1");
+      else
+        fprintf(stderr, "0");
+      if (bathymetry->quality[i] & 1)
         fprintf(stderr, "1");
       else
         fprintf(stderr, "0");
@@ -7220,9 +7238,7 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 
     /* get draft  */
     if (mb_io_ptr->nsensordepth > 0) {
-      // TODO(schwehr): Was something else intended in the if?
-      // if (mb_io_ptr->nsensordepth > 0)
-        mb_depint_interp(verbose, mbio_ptr, store->time_d, draft, error);
+      mb_depint_interp(verbose, mbio_ptr, store->time_d, draft, error);
       *heave = 0.0;
     }
     else if (bathymetry->optionaldata) {
@@ -7671,7 +7687,7 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
 
     for (int iatt=0; iatt < attitude->n; iatt++) {
       /* get time */
-      time_d[iatt] = store->time_d + attitude->delta_time[iatt];
+      time_d[iatt] = store->time_d + 0.001 * attitude->delta_time[iatt];
       mb_get_date(verbose, time_d[iatt], &(time_i[7 * iatt]));
 
       /* get interpolated nav heading and speed  */
@@ -8327,7 +8343,7 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
     mb_segytraceheader_ptr->dummy1 = 0.0;
     mb_segytraceheader_ptr->dummy2 = 0.0;
     mb_segytraceheader_ptr->dummy3 = 0.0;
-    mb_segytraceheader_ptr->dummy4 = 0.0;
+    mb_segytraceheader_ptr->sensordepthtime = 2.0 * sensordepth / watersoundspeed;
     mb_segytraceheader_ptr->soundspeed = watersoundspeed;
     mb_segytraceheader_ptr->distance = 0.0;
     mb_segytraceheader_ptr->roll = (float)roll;
@@ -8416,7 +8432,7 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
       fprintf(stderr, "dbg2       dummy1:            %f\n", mb_segytraceheader_ptr->dummy1);
       fprintf(stderr, "dbg2       dummy2:            %f\n", mb_segytraceheader_ptr->dummy2);
       fprintf(stderr, "dbg2       dummy3:            %f\n", mb_segytraceheader_ptr->dummy3);
-      fprintf(stderr, "dbg2       dummy4:            %f\n", mb_segytraceheader_ptr->dummy4);
+      fprintf(stderr, "dbg2       sensordepthtime:   %f\n", mb_segytraceheader_ptr->sensordepthtime);
       fprintf(stderr, "dbg2       soundspeed:        %f\n", mb_segytraceheader_ptr->soundspeed);
       fprintf(stderr, "dbg2       distance:          %f\n", mb_segytraceheader_ptr->distance);
       fprintf(stderr, "dbg2       roll:              %f\n", mb_segytraceheader_ptr->roll);
@@ -8608,7 +8624,7 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int
     fprintf(stderr, "dbg2       dummy1:            %f\n", mb_segytraceheader_ptr->dummy1);
     fprintf(stderr, "dbg2       dummy2:            %f\n", mb_segytraceheader_ptr->dummy2);
     fprintf(stderr, "dbg2       dummy3:            %f\n", mb_segytraceheader_ptr->dummy3);
-    fprintf(stderr, "dbg2       dummy4:            %f\n", mb_segytraceheader_ptr->dummy4);
+    fprintf(stderr, "dbg2       sensordepthtime:   %f\n", mb_segytraceheader_ptr->sensordepthtime);
     fprintf(stderr, "dbg2       soundspeed:        %f\n", mb_segytraceheader_ptr->soundspeed);
     fprintf(stderr, "dbg2       distance:          %f\n", mb_segytraceheader_ptr->distance);
     fprintf(stderr, "dbg2       roll:              %f\n", mb_segytraceheader_ptr->roll);
@@ -8839,7 +8855,7 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int 
     fprintf(stderr, "dbg2       dummy1:            %f\n", mb_segytraceheader_ptr->dummy1);
     fprintf(stderr, "dbg2       dummy2:            %f\n", mb_segytraceheader_ptr->dummy2);
     fprintf(stderr, "dbg2       dummy3:            %f\n", mb_segytraceheader_ptr->dummy3);
-    fprintf(stderr, "dbg2       dummy4:            %f\n", mb_segytraceheader_ptr->dummy4);
+    fprintf(stderr, "dbg2       sensordepthtime:   %f\n", mb_segytraceheader_ptr->sensordepthtime);
     fprintf(stderr, "dbg2       soundspeed:        %f\n", mb_segytraceheader_ptr->soundspeed);
     fprintf(stderr, "dbg2       distance:          %f\n", mb_segytraceheader_ptr->distance);
     fprintf(stderr, "dbg2       roll:              %f\n", mb_segytraceheader_ptr->roll);

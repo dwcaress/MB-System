@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mb_format.c  2/18/94
  *
- *    Copyright (c) 1993-2024 by
+ *    Copyright (c) 1993-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -359,9 +359,12 @@ int mb_format_register(int verbose, int *format, void *mbio_ptr, int *error) {
   }
   else if (*format == MBF_3DWISSLR) {
     status = mbr_register_3dwisslr(verbose, mbio_ptr, error);
-    }
-    else if (*format == MBF_3DWISSLP) {
+  }
+  else if (*format == MBF_3DWISSLP) {
     status = mbr_register_3dwisslp(verbose, mbio_ptr, error);
+  }
+  else if (*format == MBF_3DWISSL2) {
+    status = mbr_register_3dwissl2(verbose, mbio_ptr, error);
   }
   else if (*format == MBF_WASSPENL) {
     status = mbr_register_wasspenl(verbose, mbio_ptr, error);
@@ -434,7 +437,7 @@ int mb_format_register(int verbose, int *format, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mb_format_info(int verbose, int *format, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max,
                    char *format_name, char *system_name, char *format_description, int *numfile, int *filetype,
-                   int *variable_beams, int *traveltime, int *beam_flagging, int *platform_source, int *nav_source,
+                   bool *variable_beams, bool *traveltime, bool *beam_flagging, int *platform_source, int *nav_source,
                    int *sensordepth_source, int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                    double *beamwidth_ltrack, int *error) {
   if (verbose >= 2) {
@@ -965,6 +968,12 @@ int mb_format_info(int verbose, int *format, int *system, int *beams_bath_max, i
                                platform_source, nav_source, sensordepth_source, heading_source, attitude_source, svp_source,
                                beamwidth_xtrack, beamwidth_ltrack, error);
   }
+  else if (*format == MBF_3DWISSL2) {
+    status = mbr_info_3dwissl2(verbose, system, beams_bath_max, beams_amp_max, pixels_ss_max, format_name, system_name,
+                               format_description, numfile, filetype, variable_beams, traveltime, beam_flagging,
+                               platform_source, nav_source, sensordepth_source, heading_source, attitude_source, svp_source,
+                               beamwidth_xtrack, beamwidth_ltrack, error);
+  }
   else if (*format == MBF_WASSPENL) {
     status = mbr_info_wasspenl(verbose, system, beams_bath_max, beams_amp_max, pixels_ss_max, format_name, system_name,
                                format_description, numfile, filetype, variable_beams, traveltime, beam_flagging,
@@ -1130,9 +1139,9 @@ int mb_format(int verbose, int *format, int *error) {
   char format_description[MB_DESCRIPTION_LENGTH];
   int numfile;             /* the number of parallel files required for i/o */
   int filetype;            /* type of files used (normal, xdr, or gsf) */
-  int variable_beams;      /* if true then number of beams variable */
-  int traveltime;          /* if true then traveltime and angle data supported */
-  int beam_flagging;       /* if true then beam flagging supported */
+  bool variable_beams;      /* if true then number of beams variable */
+  bool traveltime;          /* if true then traveltime and angle data supported */
+  bool beam_flagging;       /* if true then beam flagging supported */
   int platform_source;     /* data record type containing sensor offsets */
   int nav_source;          /* data record types containing the primary navigation */
   int sensordepth_source;  /* data record types containing the primary sensordepth */
@@ -1178,9 +1187,9 @@ int mb_format_system(int verbose, int *format, int *system, int *error) {
   char format_description[MB_DESCRIPTION_LENGTH];
   int numfile;             /* the number of parallel files required for i/o */
   int filetype;            /* type of files used (normal, xdr, or gsf) */
-  int variable_beams;      /* if true then number of beams variable */
-  int traveltime;          /* if true then traveltime and angle data supported */
-  int beam_flagging;       /* if true then beam flagging supported */
+  bool variable_beams;      /* if true then number of beams variable */
+  bool traveltime;          /* if true then traveltime and angle data supported */
+  bool beam_flagging;       /* if true then beam flagging supported */
   int platform_source;     /* data record type containing sensor offsets */
   int nav_source;          /* data record types containing the primary navigation */
   int sensordepth_source;  /* data record types containing the primary sensordepth */
@@ -1227,9 +1236,9 @@ int mb_format_dimensions(int verbose, int *format, int *beams_bath_max, int *bea
   char format_description[MB_DESCRIPTION_LENGTH];
   int numfile;             /* the number of parallel files required for i/o */
   int filetype;            /* type of files used (normal, xdr, or gsf) */
-  int variable_beams;      /* if true then number of beams variable */
-  int traveltime;          /* if true then traveltime and angle data supported */
-  int beam_flagging;       /* if true then beam flagging supported */
+  bool variable_beams;      /* if true then number of beams variable */
+  bool traveltime;          /* if true then traveltime and angle data supported */
+  bool beam_flagging;       /* if true then beam flagging supported */
   int platform_source;     /* data record type containing sensor offsets */
   int nav_source;          /* data record types containing the primary navigation */
   int sensordepth_source;  /* data record types containing the primary sensordepth */
@@ -1283,9 +1292,9 @@ int mb_format_description(int verbose, int *format, char *description, int *erro
   char system_name[MB_NAME_LENGTH];
   int numfile;             /* the number of parallel files required for i/o */
   int filetype;            /* type of files used (normal, xdr, or gsf) */
-  int variable_beams;      /* if true then number of beams variable */
-  int traveltime;          /* if true then traveltime and angle data supported */
-  int beam_flagging;       /* if true then beam flagging supported */
+  bool variable_beams;      /* if true then number of beams variable */
+  bool traveltime;          /* if true then traveltime and angle data supported */
+  bool beam_flagging;       /* if true then beam flagging supported */
   int platform_source;     /* data record type containing sensor offsets */
   int nav_source;          /* data record types containing the primary navigation */
   int sensordepth_source;  /* data record types containing the primary sensordepth */
@@ -1314,7 +1323,7 @@ int mb_format_description(int verbose, int *format, char *description, int *erro
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_format_flags(int verbose, int *format, int *variable_beams, int *traveltime, int *beam_flagging, int *error) {
+int mb_format_flags(int verbose, int *format, bool *variable_beams, bool *traveltime, bool *beam_flagging, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1388,9 +1397,9 @@ int mb_format_source(int verbose, int *format, int *platform_source, int *nav_so
   char format_description[MB_DESCRIPTION_LENGTH];
   int numfile;             /* the number of parallel files required for i/o */
   int filetype;            /* type of files used (normal, xdr, or gsf) */
-  int variable_beams;      /* if true then number of beams variable */
-  int traveltime;          /* if true then traveltime and angle data supported */
-  int beam_flagging;       /* if true then beam flagging supported */
+  bool variable_beams;      /* if true then number of beams variable */
+  bool traveltime;          /* if true then traveltime and angle data supported */
+  bool beam_flagging;       /* if true then beam flagging supported */
   double beamwidth_xtrack; /* nominal acrosstrack beamwidth */
   double beamwidth_ltrack; /* nominal alongtrack beamwidth */
 
@@ -1445,9 +1454,9 @@ int mb_format_beamwidth(int verbose, int *format, double *beamwidth_xtrack, doub
   char format_description[MB_DESCRIPTION_LENGTH];
   int numfile;            /* the number of parallel files required for i/o */
   int filetype;           /* type of files used (normal, xdr, or gsf) */
-  int variable_beams;     /* if true then number of beams variable */
-  int traveltime;         /* if true then traveltime and angle data supported */
-  int beam_flagging;      /* if true then beam flagging supported */
+  bool variable_beams;     /* if true then number of beams variable */
+  bool traveltime;         /* if true then traveltime and angle data supported */
+  bool beam_flagging;      /* if true then beam flagging supported */
   int platform_source;    /* data record type containing sensor offsets */
   int nav_source;         /* data record types containing the primary navigation */
   int sensordepth_source; /* data record types containing the primary sensordepth */
@@ -2169,7 +2178,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
       i = strlen(filename) - 4;
     else
       i = 0;
-    if ((suffix = strstr(&filename[i], ".seg")) != NULL || (suffix = strstr(&filename[i], ".SEG")) != NULL)
+    if ((suffix = strstr(&filename[i], ".seg")) != NULL || (suffix = strstr(&filename[i], ".SEG")) != NULL 
+        || (suffix = strstr(&filename[i], ".sgy")) != NULL || (suffix = strstr(&filename[i], ".SGY")) != NULL)
       suffix_len = 4;
     else
       suffix_len = 0;
@@ -2896,6 +2906,25 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
             }
             found = true;
         }
+  }
+
+  /* look for a 3DatDepth *.sriat file format convention */
+  if (!found) {
+    int i;
+    if (strlen(filename) >= 7)
+      i = strlen(filename) - 6;
+    else
+      i = 0;
+    if ((suffix = strstr(&filename[i], ".sriat")) != NULL)
+      suffix_len = 6;
+    else if ((suffix = strstr(&filename[i], ".SRIAT")) != NULL)
+      suffix_len = 6;
+    else
+      suffix_len = 0;
+    if (suffix_len == 6) {
+      *format = MBF_3DWISSL2;
+	  found = true;
+	}
   }
 
   /* look for a WASSP *.000 file format convention */
@@ -4508,6 +4537,60 @@ int mb_get_relative_path(int verbose, char *path, char *ipwd, int *error) {
     status = MB_SUCCESS;
     *error = MB_ERROR_NO_ERROR;
   }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       path:          %s\n", path);
+    fprintf(stderr, "dbg2       error:         %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:      %d\n", status);
+  }
+
+  return (status);
+}
+
+/*--------------------------------------------------------------------*/
+int mb_get_absolute_path(int verbose, char *path, char *ipwd, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:       %d\n", verbose);
+    fprintf(stderr, "dbg2       path:          %s\n", path);
+    fprintf(stderr, "dbg2       ipwd:          %s\n", ipwd);
+  }
+
+  /* get string lengths */
+  int pathlen = strlen(path);
+  int pwdlen = strlen(ipwd);
+
+#ifdef WIN32
+  /* The approximation here is to try to make a Windows path like a unix one and expect that
+     the same algorithm still applies. Off course, there probably many ways this can go wrong
+     because we trim the first 2 chars in strings like C:\blabla and don't put it back. But
+     test have shown that it was maybe not necessary.
+  */
+  cvt_to_nix_path(path);
+  cvt_to_nix_path(ipwd);
+#endif
+
+  int status = MB_SUCCESS;
+  char absolutepath[MB_PATH_MAXLINE] = {""};
+  char *bufptr = NULL;
+
+  /* if path starts with '/' then it is already an absolute path so do nothing 
+  	 otherwise concatenate pwd and path and then shorten the path if possible */
+  if (pathlen > 0 && path[0] != '/') {
+    strncpy(absolutepath, ipwd, MB_PATH_MAXLINE);
+    strncat(absolutepath, "/", MB_PATH_MAXLINE - strlen(ipwd));
+    strncat(absolutepath, path, MB_PATH_MAXLINE - strlen(ipwd) - 1);
+    strncpy(path, absolutepath, MB_PATH_MAXLINE);
+  }
+  mb_get_shortest_path(verbose, path, error);
+
+  /* no error even if no path or pwd */
+  status = MB_SUCCESS;
+  *error = MB_ERROR_NO_ERROR;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);

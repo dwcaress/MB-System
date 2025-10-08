@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbclean.c  2/26/93
  *
- *    Copyright (c) 1993-2024 by
+ *    Copyright (c) 1993-2025 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, California, USA
@@ -608,8 +608,8 @@ int main(int argc, char **argv) {
   /* MBIO read control parameters */
   char swathfileread[MB_PATH_MAXLINE];
   int formatread;
-  int variable_beams;
-  int traveltime;
+  bool variable_beams;
+  bool traveltime;
   double distance;
   double altitude;
   double sensordepth;
@@ -676,7 +676,7 @@ int main(int argc, char **argv) {
   int sensorhead = 0;
   int sensorhead_error = MB_ERROR_NO_ERROR;
 
-  int beam_flagging;  // TODO(schwehr): make mb_format_flags take a bool.
+  bool beam_flagging;
 
   /* loop over all files to be read */
   while (read_data) {
