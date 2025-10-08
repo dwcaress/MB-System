@@ -1,0 +1,115 @@
+# -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
+
+PortSystem          1.0
+PortGroup           github 1.0
+PortGroup           cmake 1.1
+
+github.setup        dwcaress MB-System feature-newgui
+version             2024.09.29
+revision            0
+categories          science
+platforms           darwin
+license             GPL-3+
+maintainers         nomaintainer
+description         MB-System seafloor mapping software (feature-newgui branch)
+long_description    MB-System is an open source software package for the processing \
+                    and display of bathymetry and backscatter imagery data derived \
+                    from multibeam, interferometry, and sidescan sonars. This port \
+                    installs the feature-newgui development branch.
+
+homepage            https://www.mbari.org/products/research-software/mb-system/
+
+fetch.type          git
+
+depends_build       port:pkgconfig
+
+depends_lib         port:gdal \
+                    port:gmt6 \
+                    port:netcdf \
+                    port:fftw-3 \
+                    port:proj9 \
+                    port:openmotif \
+                    port:xorg-libX11 \
+                    port:xorg-libXt
+
+# VTK configuration for buildQt variant
+set vtk_version     9.5.2
+set vtk_short       9.5
+set vtk_file        VTK-${vtk_version}.tar.gz
+
+# Qt variant for new GUI
+variant buildQt description {Build with Qt GUI support} {
+    PortGroup       qt6 1.0
+    
+    depends_lib-append \
+                    port:qt6 \
+                    port:glew
+    
+    depends_build-append \
+                    port:cmake
+}
+    
+    # Download VTK separately
+    post-fetch {
+        if {![file exists ${distpath}/${vtk_file}]} {
+            ui_msg "Downloading VTK ${vtk_version}..."
+            system "cd ${distpath} && curl -L -O https://vtk.org/files/release/${vtk_short}/${vtk_file}"
+        }
+    }
+    
+    post-extract {
+        ui_msg "Extracting VTK ${vtk_version}..."
+        system "cd ${workpath} && tar xzf ${distpath}/${vtk_file}"
+    }
+    
+    pre-configure {
+        ui_msg "Building VTK ${vtk_version} with Qt modules..."
+        
+        file mkdir ${workpath}/vtk-build
+        
+        system "cd ${workpath}/vtk-build && \
+            ${prefix}/bin/cmake ${workpath}/VTK-${vtk_version} \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=${workpath}/vtk-install \
+            -DBUILD_SHARED_LIBS=ON \
+            -DVTK_GROUP_ENABLE_Qt=YES \
+            -DVTK_MODULE_ENABLE_VTK_GUISupportQt=YES \
+            -DVTK_MODULE_ENABLE_VTK_GUISupportQtQuick=YES \
+            -DVTK_MODULE_ENABLE_VTK_RenderingQt=YES \
+            -DVTK_MODULE_ENABLE_VTK_ViewsQt=YES \
+            -DQt5_DIR=${prefix}/lib/cmake/Qt5 \
+            && ${prefix}/bin/cmake --build . --parallel ${build.jobs} \
+            && ${prefix}/bin/cmake --install ."
+    }
+    
+configure.args-append \
+                    -DCMAKE_INSTALL_PREFIX=${prefix} \
+                    -DBUILD_TESTING=OFF
+
+if {[variant_isset buildQt]} {
+    configure.args-append \
+                    -DbuildQt=ON \
+                    -DVTK_DIR=${workpath}/vtk-install/lib/cmake/vtk-${vtk_short} \
+                    -DQt6_DIR=${prefix}/libexec/qt6/lib/cmake/Qt6
+} else {
+    configure.args-append \
+                    -DbuildQt=OFF
+}
+
+post-destroot {
+    # Copy VTK libraries to destroot when buildQt variant is used
+    if {[variant_isset buildQt]} {
+        ui_msg "Installing VTK libraries to destroot..."
+        system "cp -R ${workpath}/vtk-install/* ${destroot}${prefix}/"
+    }
+    
+    xinstall -d ${destroot}${prefix}/share/doc/${name}
+    xinstall -m 644 ${worksrcpath}/README.md ${destroot}${prefix}/share/doc/${name}
+}
+
+notes "
+MB-System has been installed from the feature-newgui development branch.
+This is an experimental version and may not be stable.
+
+Documentation: https://www.mbari.org/products/research-software/mb-system/
+"
