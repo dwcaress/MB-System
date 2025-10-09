@@ -65,4 +65,18 @@ EXTERNAL Widget pushButton_viewselected;
 EXTERNAL Widget pushButton_viewall;
 EXTERNAL Widget list_filelist;
 
+/// Prototypes for auto-generated GUI functions
+void BxUnmanageCB(Widget w, XtPointer client, XtPointer call);
+void BxManageCB(Widget w, XtPointer client, XtPointer call);
+void BxPopupCB(Widget w, XtPointer client, XtPointer call);
+XtPointer BX_CONVERT(Widget w, char *from_string, char *to_type, int to_size, Boolean *success);
+void BxExitCB(Widget w, XtPointer client, XtPointer call);
+void BxSetValuesCB(Widget w, XtPointer client, XtPointer call);
+void RegisterBxConverters(XtAppContext);
+XtPointer BX_DOUBLE(double);
+XtPointer BX_SINGLE(float);
+void BX_MENU_POST(Widget, XtPointer, XEvent *, Boolean *);
+Pixmap XPM_PIXMAP(Widget, char **);
+void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
+
 #endif  // MBEDITVIZ_MBEDITVIZ_CREATION_H_
