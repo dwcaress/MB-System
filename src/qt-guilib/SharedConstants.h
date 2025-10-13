@@ -45,10 +45,18 @@ public:
   }
 
   /// List of supported color maps
-  Q_PROPERTY(QStringList cmaps MEMBER colorMapsList_)
+  Q_PROPERTY(QStringList cmaps MEMBER colorMapsList_ NOTIFY cmapsChanged)
 
   /// List of supported mouse modes
-  Q_PROPERTY(QStringList mouseModes MEMBER mouseModes_)  
+  Q_PROPERTY(QStringList mouseModes MEMBER mouseModes_
+	     NOTIFY mouseModesChanged)  
+
+signals:
+  // Emit this if cmaps changes
+  void cmapsChanged();
+
+  // Emit this if mouseModes changes
+  void mouseModesChanged();  
   
 protected:
       
