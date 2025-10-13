@@ -255,8 +255,9 @@ Window {
 
     Dialog {
         id: settings3dDialog
-	title: '3D view preferences'
+	title: 'Lighting preferences'
 	modal: false
+	width: 300
 	property list<double> intensity
 	
         contentItem: Settings3D {
