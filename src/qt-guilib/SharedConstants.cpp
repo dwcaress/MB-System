@@ -8,31 +8,37 @@ const QString SharedConstants::testString_ = QString("Hello sailor!");
 
 SharedConstants::SharedConstants() {
   
-    // Get colormap names to be displayed by QML GUI
+    // Load supported colormap names (defined in TopoColorMap class)
+    // into vector
     std::vector<const char *> colorMapNames;
-
-    // Load colormap names into vector
     TopoColorMap::schemeNames(&colorMapNames);
 
     std::cout << "ColorMaps:\n";
-    // Copy colormap names to QStringList
+    // Copy colormap names to QStringList (for retrieval by QML)
     for (int i = 0; i < colorMapNames.size(); i++) {
       std::cout << colorMapNames[i] << "\n";
       // Append name to QStringList
       colorMapsList_.append(colorMapNames[i]);
     }
 
-    // Build QStringList of mouse modes
-    mouseModes_ += MousePanAndZoom;
-    mouseModes_ += MouseRotateModel;
-    mouseModes_ += MouseRotateView;
-    mouseModes_ += MouseLighting;
-    mouseModes_ += MouseDataSelect;
-    mouseModes_ += MousePickArea;
-    mouseModes_ += MouseEditSites;
-    mouseModes_ += MouseEditRoutes;
-    mouseModes_ += MousePickNav;
-    mouseModes_ += MousePickNavFile;
-    mouseModes_ += MouseTest;    
+    // Assemble data model of supported mouse modes
+    mouseModes_ += 
+      new MouseMode(MousePanAndZoom, "L-drag: rotate, " \
+		    "M-drag: pan, R-drag: zoom, " \
+		    "wheel: zoom");
       
+    mouseModes_ += new MouseMode(MouseLighting,
+				 "shift-L-drag: change light pos, "  \
+				 "shift-R-drag: change intensity "   \
+				 "(+ basic pan and zoom)");
+    mouseModes_ += new MouseMode(MouseDataSelect,
+				 "'r': toggle select mode,  "	\
+				 "R-drag: select data "		\
+				 "(+ basic pan and zoom)");
+
+    mouseModes_ += new MouseMode(MouseEditSites, "Tooltip goes here");
+    mouseModes_ += new MouseMode(MouseEditRoutes, "Tooltip goes here");
+    mouseModes_ += new MouseMode(MousePickNav, "Tooltip goes here");
+    mouseModes_ += new MouseMode(MousePickNavFile, "Tooltip goes here");    
+    mouseModes_ += new MouseMode(MouseTest, "TESTING");
 }

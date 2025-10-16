@@ -4,7 +4,7 @@
 #include <QStringList>
 #include <iostream>
 
-#define MousePanAndZoom "Pan and zoom"
+#define MousePanAndZoom "Basic pan and zoom"
 #define MouseRotateModel "Rotate model"
 #define MouseRotateView "Rotate view"
 #define MouseLighting "Lighting"
@@ -17,7 +17,34 @@
 #define MouseTest "TESTING"
 
 namespace mb_system {
-/// Constants shared between C++ and QML code
+
+  /// Data model for 'mouse mode', accessed from QML
+  /// including mode name and brief ToolTip.
+  /// Class is defined outside of SharedConstants, as
+  /// nested QObject definitions are not supported.
+  class MouseMode : public QObject {
+    Q_OBJECT
+
+  public:
+    // Make sure the assignment operator is public
+    MouseMode& operator=(const MouseMode& other);
+
+    MouseMode(QString name, QString toolTip) {
+      name_ = name;
+      toolTip_ = toolTip;
+    }
+    
+    Q_PROPERTY(QString name READ getName)
+    Q_PROPERTY(QString toolTip READ getToolTip)
+
+    QString getName() const { return name_; }
+    QString getToolTip() const { return toolTip_; }
+
+    QString name_;
+    QString toolTip_;
+  };
+
+/// Constants defined here in C++ and accessible through QML.
 class SharedConstants : public QObject
 {
     Q_OBJECT
@@ -48,8 +75,8 @@ public:
   Q_PROPERTY(QStringList cmaps MEMBER colorMapsList_ NOTIFY cmapsChanged)
 
   /// List of supported mouse modes
-  Q_PROPERTY(QStringList mouseModes MEMBER mouseModes_
-	     NOTIFY mouseModesChanged)  
+  Q_PROPERTY(QList<MouseMode *> mouseModes MEMBER mouseModes_
+	     NOTIFY mouseModesChanged)
 
 signals:
   // Emit this if cmaps changes
@@ -63,9 +90,7 @@ protected:
   static const QString testString_;
 
   QStringList colorMapsList_;
-  QStringList mouseModes_;
-  
-  
+  QList<MouseMode *> mouseModes_;
 };
 
 }
