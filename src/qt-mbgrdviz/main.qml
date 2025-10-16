@@ -23,9 +23,6 @@ Window {
         id: constants
     }
 
-    // Short-hand reference to supported color maps
-    property variant cmaps: constants.cmaps
-
     // Bathymetry profile
     property list<vector2d> myProfile
 
@@ -108,7 +105,7 @@ Window {
             property string currentCmap
 	    
             Repeater {
-	      model: cmaps  // List of colormap names
+	      model: constants.cmaps  // List of colormap names
 	      visible: true
 	      MenuItem {
 	        text: modelData; checkable: true;  // colormap name
