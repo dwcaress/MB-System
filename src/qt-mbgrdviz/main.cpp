@@ -20,6 +20,18 @@ using namespace mb_system;
 
 int main(int argc, char* argv[])
 {
+
+#if defined(Q_OS_MACOS)
+  // Do not use native MacOS menu stuff, as this app's QML file
+  // assigns tooltips to menu items
+  
+  // For older Qt versions, this may be required.
+    QGuiApplication::setAttribute(Qt::AA_DontUseNativeMenuBar);
+    // This is the modern and more precise attribute for disabling
+    // native menu windows.
+    QGuiApplication::setAttribute(Qt::AA_DontUseNativeMenuWindows);
+#endif
+
   std::cerr << "main() thread: " <<
     std::this_thread::get_id() << "\n";
   
