@@ -26,9 +26,6 @@ Window {
     // Short-hand reference to supported color maps
     property variant cmaps: constants.cmaps
 
-    // Short-hand reference to supported mouse modes
-    property variant mouseModes: constants.mouseModes
-
     // Bathymetry profile
     property list<vector2d> myProfile
 
@@ -70,13 +67,14 @@ Window {
 		  onTriggered: {console.log('show 2D preferences');
 		  settings2d.show()}
 		}
-		
+
                 Action {
-		  text: qsTr('Lighting')
-		  onTriggered: {console.log('show 3D preferences');
-		  settings3dDialog.open();
-		  }
-		}
+	          text: qsTr('Lighting')
+	          onTriggered: {console.log('show 3D preferences');
+	            settings3dDialog.open();
+	          }
+	        }
+
 
 
             Menu {
@@ -141,18 +139,21 @@ Window {
             property string currentMode: ''
 
             Repeater {
-	      model: mouseModes
+	      model: constants.mouseModes
 	      visible: true
 	      
 	      MenuItem {
-	        text: modelData
+	        text: modelData.name
 		checkable: true
-		checked: mouseModeMenu.currentMode === modelData
+		checked: mouseModeMenu.currentMode === modelData.name
+
+                ToolTip.visible: hovered
+		ToolTip.text: modelData.toolTip
 		
                 onTriggered: {
-		               mouseModeMenu.currentMode = modelData
-		               console.log('selected ', modelData);
-		               topoDataItem.setMouseMode(modelData)
+		               mouseModeMenu.currentMode = modelData.name,
+		               console.log('selected ', modelData.name);
+		               topoDataItem.setMouseMode(modelData.name)
 	        }		
 	      }
 	    }
