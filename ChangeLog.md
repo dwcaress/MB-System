@@ -79,6 +79,9 @@ navigation and attitude data with multibeam data, all collected on a submerged A
 which the platform depth is defined by a pressure sensor rather than the heave output
 by the INS.
 
+Programs mbgrdviz, mbeditviz, mbnavadjust: Fixed the mouse button description for Rotate 
+View mode so that the right button is properly labeled as zoom rather than exaggeration.
+
 #### 5.8.3beta06 (October 1, 2025)
 
 GMT integration: Fixed compiler directives insuring

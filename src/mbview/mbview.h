@@ -567,7 +567,7 @@ struct mbview_struct {
 	int secondary_shade_mode;
 
 	/* view controls */
-	double exageration;
+	double exaggeration;
 	double modelelevation3d;
 	double modelazimuth3d;
 	double viewelevation3d;
@@ -587,7 +587,7 @@ struct mbview_struct {
 	double contour_interval;
 
 	/* profile controls */
-	double profile_exageration;
+	double profile_exaggeration;
 	int profile_widthfactor;
 	double profile_slopethreshold;
 
@@ -755,7 +755,7 @@ int mbview_setwindowparms(int verbose, size_t instance, int (*mbview_dismiss_not
 int mbview_setviewcontrols(int verbose, size_t instance, int display_mode, int mouse_mode, int grid_mode, int primary_histogram,
                            int primaryslope_histogram, int secondary_histogram, int primary_shade_mode, int slope_shade_mode,
                            int secondary_shade_mode, int grid_contour_mode, int site_view_mode, int route_view_mode,
-                           int nav_view_mode, int navswathbounds_view_mode, int navdrape_view_mode, int vector_view_mode, double exageration,
+                           int nav_view_mode, int navswathbounds_view_mode, int navdrape_view_mode, int vector_view_mode, double exaggeration,
                            double modelelevation3d, double modelazimuth3d, double viewelevation3d, double viewazimuth3d,
                            double illuminate_magnitude, double illuminate_elevation, double illuminate_azimuth,
                            double slope_magnitude, double overlay_shade_magnitude, double overlay_shade_center,

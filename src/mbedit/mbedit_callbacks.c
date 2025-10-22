@@ -137,7 +137,7 @@ int nbuffer;
 int ngood;
 int icurrent;
 int mnplot;
-int mexager;
+int mexagger;
 int mplot_width;
 int mx_interval;
 int my_interval;
@@ -562,7 +562,7 @@ void do_filelist_remove(Widget w, XtPointer client_data, XtPointer call_data) {
 	do_setup_data();
 
 	/* replot the data */
-	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+	status = mbedit_action_plot(mplot_width, mexagger, mx_interval, my_interval,
 								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
 	                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 	if (status == 0)
@@ -605,7 +605,7 @@ int do_setup_data() {
 	/* get some default values from mbedit */
 	status = mbedit_get_defaults(&plot_size_max, &mplot_size, &mshow_beammode,
 								 &mshow_flaggedsoundings, &mshow_flaggedprofiles, &mshow_time, &buffer_size_max,
-	                             &buffer_size, &hold_size, &mformat, &mplot_width, &mexager, &mx_interval, &my_interval, ttime_i,
+	                             &buffer_size, &hold_size, &mformat, &mplot_width, &mexagger, &mx_interval, &my_interval, ttime_i,
 	                             &mode_output);
 
 	/* set about version label */
@@ -636,8 +636,8 @@ int do_setup_data() {
 	/* set values of plot width slider */
 	XtVaSetValues(slider_scale_x, XmNminimum, 1, XmNvalue, mplot_width, NULL);
 
-	/* set values of vertical exageration slider */
-	XtVaSetValues(slider_scale_y, XmNdecimalPoints, 2, XmNvalue, mexager, NULL);
+	/* set values of vertical exaggeration slider */
+	XtVaSetValues(slider_scale_y, XmNdecimalPoints, 2, XmNvalue, mexagger, NULL);
 
 	/* set values of x interval slider */
 	XtVaSetValues(slider_x_interval, XmNvalue, mx_interval, NULL);
@@ -950,7 +950,7 @@ void do_file_selection_cancel(Widget w, XtPointer client_data, XtPointer call_da
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* replot the data */
-	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+	status = mbedit_action_plot(mplot_width, mexagger, mx_interval, my_interval,
 								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
 	                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 }
@@ -965,7 +965,7 @@ void do_expose(Widget w, XtPointer client_data, XtPointer call_data) {
 
 	/* replot the data */
 	if (expose_plot_ok)
-		status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+		status = mbedit_action_plot(mplot_width, mexagger, mx_interval, my_interval,
 									mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
 		                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 }
@@ -1078,14 +1078,14 @@ void do_scale_y(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)client_data;
 	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
 
-	mexager = acs->value;
+	mexagger = acs->value;
 
 	/* if slider set to minimum value, half the value range;
 	    if slider set to maximum value,  double the range */
 	int maxx;
 	XtVaGetValues(slider_scale_y, XmNmaximum, &maxx, NULL);
-	if (mexager == 1 || mexager == maxx) {
-		if (mexager == 1)
+	if (mexagger == 1 || mexagger == maxx) {
+		if (mexagger == 1)
 			maxx = maxx / 2;
 		else
 			maxx = 2 * maxx;
@@ -1098,7 +1098,7 @@ void do_scale_y(Widget w, XtPointer client_data, XtPointer call_data) {
 	}
 
 	/* replot the data */
-	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+	status = mbedit_action_plot(mplot_width, mexagger, mx_interval, my_interval,
 								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
 	                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 	if (status == 0)
@@ -1158,7 +1158,7 @@ void do_scale_x(Widget w, XtPointer client_data, XtPointer call_data) {
 	}
 
 	/* replot the data */
-	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+	status = mbedit_action_plot(mplot_width, mexagger, mx_interval, my_interval,
 								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
 	                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 	if (status == 0)
@@ -1278,7 +1278,7 @@ void do_x_interval(Widget w, XtPointer client_data, XtPointer call_data) {
 	}
 
 	/* replot the data */
-	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+	status = mbedit_action_plot(mplot_width, mexagger, mx_interval, my_interval,
 								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
 	                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 	if (status == 0)
@@ -1312,7 +1312,7 @@ void do_y_interval(Widget w, XtPointer client_data, XtPointer call_data) {
 	}
 
 	/* replot the data */
-	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+	status = mbedit_action_plot(mplot_width, mexagger, mx_interval, my_interval,
 				    mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
 	                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 	if (status == 0)
@@ -1329,7 +1329,7 @@ void do_load(int save_mode) {
 	if (currentfile >= 0) {
 		/* process input file name */
 		status = mbedit_action_open(filepaths[currentfile], fileformats[currentfile], currentfile, numfiles, save_mode,
-		                            mode_output, mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+		                            mode_output, mplot_width, mexagger, mx_interval, my_interval, mplot_size, mshow_beammode,
 		                            mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time,
 									&buffer_size, &buffer_size_max, &hold_size, &ndumped, &nloaded,
 		                            &nbuffer, &ngood, &icurrent, &mnplot);
@@ -1341,7 +1341,7 @@ void do_load(int save_mode) {
 
 	/* display data from chosen file */
 	if (status == MB_SUCCESS) {
-		status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+		status = mbedit_action_plot(mplot_width, mexagger, mx_interval, my_interval,
 								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
 		                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 		if (status == 0)
@@ -1480,7 +1480,7 @@ void do_end(Widget w, XtPointer client_data, XtPointer call_data) {
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	fprintf(stderr, "do_end\n");
 
-	status = mbedit_action_step(nbuffer - icurrent - 1, mplot_width, mexager, mx_interval, my_interval, mplot_size,
+	status = mbedit_action_step(nbuffer - icurrent - 1, mplot_width, mexagger, mx_interval, my_interval, mplot_size,
 	                            mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 	if (status == 0)
 		XBell(theDisplay, 100);
@@ -1495,13 +1495,13 @@ void do_forward(Widget w, XtPointer client_data, XtPointer call_data) {
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (key_g_down == 0) {
-		status = mbedit_action_step(step, mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+		status = mbedit_action_step(step, mplot_width, mexagger, mx_interval, my_interval, mplot_size, mshow_beammode,
 		                            mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 		if (status == 0)
 			XBell(theDisplay, 100);
 	}
 	else {
-		status = mbedit_action_step(nbuffer - icurrent - 1, mplot_width, mexager, mx_interval, my_interval, mplot_size,
+		status = mbedit_action_step(nbuffer - icurrent - 1, mplot_width, mexagger, mx_interval, my_interval, mplot_size,
 		                            mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 		if (status == 0)
 			XBell(theDisplay, 100);
@@ -1517,13 +1517,13 @@ void do_reverse(Widget w, XtPointer client_data, XtPointer call_data) {
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (key_g_down == 0) {
-		status = mbedit_action_step(-step, mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+		status = mbedit_action_step(-step, mplot_width, mexagger, mx_interval, my_interval, mplot_size, mshow_beammode,
 		                            mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 		if (status == 0)
 			XBell(theDisplay, 100);
 	}
 	else {
-		status = mbedit_action_step(-icurrent, mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+		status = mbedit_action_step(-icurrent, mplot_width, mexagger, mx_interval, my_interval, mplot_size, mshow_beammode,
 		                            mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 		if (status == 0)
 			XBell(theDisplay, 100);
@@ -1539,7 +1539,7 @@ void do_start(Widget w, XtPointer client_data, XtPointer call_data) {
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	fprintf(stderr, "do_start\n");
 
-	status = mbedit_action_step(-icurrent, mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+	status = mbedit_action_step(-icurrent, mplot_width, mexagger, mx_interval, my_interval, mplot_size, mshow_beammode,
 	                            mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 	if (status == 0)
 		XBell(theDisplay, 100);
@@ -1570,7 +1570,7 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 	/* check for data file loaded at startup */
 	if (startup_file) {
 		startup_file = 0;
-		status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+		status = mbedit_action_plot(mplot_width, mexagger, mx_interval, my_interval,
 								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
 		                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 		if (status == 0)
@@ -1590,7 +1590,7 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 	if (acs->reason == XmCR_INPUT) {
 		/* deal with expose events by replotting the mbedit view */
 		if (event->xany.type == Expose || event->xany.type == GraphicsExpose)
-			status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+			status = mbedit_action_plot(mplot_width, mexagger, mx_interval, my_interval,
 								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
 			                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 
@@ -1605,14 +1605,14 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 			case 'F':
 			case 'f':
 				if (key_g_down == 0) {
-					status = mbedit_action_step(step, mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+					status = mbedit_action_step(step, mplot_width, mexagger, mx_interval, my_interval, mplot_size, mshow_beammode,
 					                            mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 					if (status == 0)
 						XBell(theDisplay, 100);
 				}
 				else {
 					status =
-					    mbedit_action_step(nbuffer - icurrent - 1, mplot_width, mexager, mx_interval, my_interval, mplot_size,
+					    mbedit_action_step(nbuffer - icurrent - 1, mplot_width, mexagger, mx_interval, my_interval, mplot_size,
 					                       mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 					if (status == 0)
 						XBell(theDisplay, 100);
@@ -1621,13 +1621,13 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 			case 'V':
 			case 'v':
 				if (key_g_down == 0) {
-					status = mbedit_action_step(-step, mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+					status = mbedit_action_step(-step, mplot_width, mexagger, mx_interval, my_interval, mplot_size, mshow_beammode,
 					                            mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 					if (status == 0)
 						XBell(theDisplay, 100);
 				}
 				else {
-					status = mbedit_action_step(-icurrent, mplot_width, mexager, mx_interval, my_interval, mplot_size,
+					status = mbedit_action_step(-icurrent, mplot_width, mexagger, mx_interval, my_interval, mplot_size,
 					                            mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 					if (status == 0)
 						XBell(theDisplay, 100);
@@ -1641,7 +1641,7 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 			case 'm':
 			case 'Z':
 			case 'z':
-				status = mbedit_action_bad_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+				status = mbedit_action_bad_ping(mplot_width, mexagger, mx_interval, my_interval, mplot_size, mshow_beammode,
 				                                mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 				key_z_down = 1;
 				key_s_down = 0;
@@ -1652,7 +1652,7 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 			case 'k':
 			case 'S':
 			case 's':
-				status = mbedit_action_good_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+				status = mbedit_action_good_ping(mplot_width, mexagger, mx_interval, my_interval, mplot_size, mshow_beammode,
 				                                 mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 				key_z_down = 0;
 				key_s_down = 1;
@@ -1664,10 +1664,10 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 			case 'A':
 			case 'a':
 				if (!mode_reverse_keys)
-					status = mbedit_action_left_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+					status = mbedit_action_left_ping(mplot_width, mexagger, mx_interval, my_interval, mplot_size, mshow_beammode,
 					                                 mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 				else
-					status = mbedit_action_right_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+					status = mbedit_action_right_ping(mplot_width, mexagger, mx_interval, my_interval, mplot_size, mshow_beammode,
 					                                  mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 				key_z_down = 0;
 				key_s_down = 0;
@@ -1679,10 +1679,10 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 			case 'D':
 			case 'd':
 				if (!mode_reverse_keys)
-					status = mbedit_action_right_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+					status = mbedit_action_right_ping(mplot_width, mexagger, mx_interval, my_interval, mplot_size, mshow_beammode,
 					                                  mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 				else
-					status = mbedit_action_left_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+					status = mbedit_action_left_ping(mplot_width, mexagger, mx_interval, my_interval, mplot_size, mshow_beammode,
 					                                 mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 				key_z_down = 0;
 				key_s_down = 0;
@@ -1693,18 +1693,18 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 			case ',':
 			case 'X':
 			case 'x':
-				status = mbedit_action_flag_view(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+				status = mbedit_action_flag_view(mplot_width, mexagger, mx_interval, my_interval, mplot_size, mshow_beammode,
 				                                 mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 				break;
 			case '>':
 			case '.':
 			case 'C':
 			case 'c':
-				status = mbedit_action_unflag_view(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+				status = mbedit_action_unflag_view(mplot_width, mexagger, mx_interval, my_interval, mplot_size, mshow_beammode,
 				                                   mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 				break;
 			case '!':
-				status = mbedit_action_zero_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+				status = mbedit_action_zero_ping(mplot_width, mexagger, mx_interval, my_interval, mplot_size, mshow_beammode,
 				                                 mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 				break;
 			case 'U':
@@ -1825,7 +1825,7 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 				XmToggleButtonSetState(toggleButton_view_acrosstrack, false, FALSE);
 
 				/* replot the data */
-				status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+				status = mbedit_action_plot(mplot_width, mexagger, mx_interval, my_interval, mplot_size, mshow_beammode,
 				                            mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 			} break;
 			case '3':
@@ -1838,7 +1838,7 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 				XmToggleButtonSetState(toggleButton_view_acrosstrack, false, FALSE);
 
 				/* replot the data */
-				status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+				status = mbedit_action_plot(mplot_width, mexagger, mx_interval, my_interval, mplot_size, mshow_beammode,
 				                            mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 			} break;
 			case '4':
@@ -1851,7 +1851,7 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 				XmToggleButtonSetState(toggleButton_view_acrosstrack, true, FALSE);
 
 				/* replot the data */
-				status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+				status = mbedit_action_plot(mplot_width, mexagger, mx_interval, my_interval, mplot_size, mshow_beammode,
 				                            mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 			} break;
 			default:
@@ -1912,23 +1912,23 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 				while (doit) {
 
 					if (mode_pick == MODE_TOGGLE)
-						status = mbedit_action_mouse_toggle(x_loc, y_loc, mplot_width, mexager, mx_interval, my_interval,
+						status = mbedit_action_mouse_toggle(x_loc, y_loc, mplot_width, mexagger, mx_interval, my_interval,
 						                                    mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer,
 						                                    &ngood, &icurrent, &mnplot);
 					else if (mode_pick == MODE_PICK)
-						status = mbedit_action_mouse_pick(x_loc, y_loc, mplot_width, mexager, mx_interval, my_interval,
+						status = mbedit_action_mouse_pick(x_loc, y_loc, mplot_width, mexagger, mx_interval, my_interval,
 						                                  mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood,
 						                                  &icurrent, &mnplot);
 					else if (mode_pick == MODE_ERASE)
-						status = mbedit_action_mouse_erase(x_loc, y_loc, mplot_width, mexager, mx_interval, my_interval,
+						status = mbedit_action_mouse_erase(x_loc, y_loc, mplot_width, mexagger, mx_interval, my_interval,
 						                                   mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer,
 						                                   &ngood, &icurrent, &mnplot);
 					else if (mode_pick == MODE_RESTORE)
-						status = mbedit_action_mouse_restore(x_loc, y_loc, mplot_width, mexager, mx_interval, my_interval,
+						status = mbedit_action_mouse_restore(x_loc, y_loc, mplot_width, mexagger, mx_interval, my_interval,
 						                                     mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer,
 						                                     &ngood, &icurrent, &mnplot);
 					else if (mode_pick == MODE_GRAB) {
-						status = mbedit_action_mouse_grab(grab_mode, x_loc, y_loc, mplot_width, mexager, mx_interval, my_interval,
+						status = mbedit_action_mouse_grab(grab_mode, x_loc, y_loc, mplot_width, mexagger, mx_interval, my_interval,
 						                                  mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood,
 						                                  &icurrent, &mnplot);
 						if (status == MB_SUCCESS)
@@ -1937,38 +1937,38 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 							grab_mode = GRAB_START;
 					}
 					else if (mode_pick == MODE_INFO)
-						status = mbedit_action_mouse_info(x_loc, y_loc, mplot_width, mexager, mx_interval, my_interval,
+						status = mbedit_action_mouse_info(x_loc, y_loc, mplot_width, mexagger, mx_interval, my_interval,
 						                                  mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood,
 						                                  &icurrent, &mnplot);
 					if (status == 0)
 						XBell(theDisplay, 100);
 					else if (key_z_down) {
 						status =
-						    mbedit_action_bad_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+						    mbedit_action_bad_ping(mplot_width, mexagger, mx_interval, my_interval, mplot_size, mshow_beammode,
 						                           mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 					}
 					else if (key_s_down) {
 						status =
-						    mbedit_action_good_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
+						    mbedit_action_good_ping(mplot_width, mexagger, mx_interval, my_interval, mplot_size, mshow_beammode,
 						                            mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 					}
 					else if (key_a_down) {
 						if (!mode_reverse_keys)
-							status = mbedit_action_left_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size,
+							status = mbedit_action_left_ping(mplot_width, mexagger, mx_interval, my_interval, mplot_size,
 							                                 mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood,
 							                                 &icurrent, &mnplot);
 						else
-							status = mbedit_action_right_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size,
+							status = mbedit_action_right_ping(mplot_width, mexagger, mx_interval, my_interval, mplot_size,
 							                                  mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood,
 							                                  &icurrent, &mnplot);
 					}
 					else if (key_d_down) {
 						if (!mode_reverse_keys)
-							status = mbedit_action_right_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size,
+							status = mbedit_action_right_ping(mplot_width, mexagger, mx_interval, my_interval, mplot_size,
 							                                  mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood,
 							                                  &icurrent, &mnplot);
 						else
-							status = mbedit_action_left_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size,
+							status = mbedit_action_left_ping(mplot_width, mexagger, mx_interval, my_interval, mplot_size,
 							                                 mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood,
 							                                 &icurrent, &mnplot);
 					}
@@ -1996,7 +1996,7 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 
 					/* if grab on but mouse released, end grab */
 					if (grab_mode == GRAB_MOVE && doit == 0) {
-						status = mbedit_action_mouse_grab(GRAB_END, x_loc, y_loc, mplot_width, mexager, mx_interval, my_interval,
+						status = mbedit_action_mouse_grab(GRAB_END, x_loc, y_loc, mplot_width, mexagger, mx_interval, my_interval,
 						                                  mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood,
 						                                  &icurrent, &mnplot);
 						grab_mode = GRAB_START;
@@ -2012,14 +2012,14 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 				while (doit) {
 					if (doit == 1 || difftime(time(NULL), start_time_t) > 2.0) {
 						if (key_g_down == 0) {
-							status = mbedit_action_step(-step, mplot_width, mexager, mx_interval, my_interval, mplot_size,
+							status = mbedit_action_step(-step, mplot_width, mexagger, mx_interval, my_interval, mplot_size,
 							                            mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent,
 							                            &mnplot);
 							if (status == 0)
 								XBell(theDisplay, 100);
 						}
 						else {
-							status = mbedit_action_step(-icurrent, mplot_width, mexager, mx_interval, my_interval, mplot_size,
+							status = mbedit_action_step(-icurrent, mplot_width, mexagger, mx_interval, my_interval, mplot_size,
 							                            mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent,
 							                            &mnplot);
 							if (status == 0)
@@ -2045,14 +2045,14 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 				while (doit) {
 					if (doit == 1 || difftime(time(NULL), start_time_t) > 2.0) {
 						if (key_g_down == 0) {
-							status = mbedit_action_step(step, mplot_width, mexager, mx_interval, my_interval, mplot_size,
+							status = mbedit_action_step(step, mplot_width, mexagger, mx_interval, my_interval, mplot_size,
 							                            mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent,
 							                            &mnplot);
 							if (status == 0)
 								XBell(theDisplay, 100);
 						}
 						else {
-							status = mbedit_action_step(nbuffer - icurrent - 1, mplot_width, mexager, mx_interval, my_interval,
+							status = mbedit_action_step(nbuffer - icurrent - 1, mplot_width, mexagger, mx_interval, my_interval,
 							                            mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood,
 							                            &icurrent, &mnplot);
 							if (status == 0)
@@ -2082,7 +2082,7 @@ void do_flag_view(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)call_data;
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	status = mbedit_action_flag_view(mplot_width, mexager, mx_interval, my_interval,
+	status = mbedit_action_flag_view(mplot_width, mexagger, mx_interval, my_interval,
 								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
 	                                 mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 }
@@ -2095,7 +2095,7 @@ void do_unflag_view(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)call_data;
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	status = mbedit_action_unflag_view(mplot_width, mexager, mx_interval, my_interval,
+	status = mbedit_action_unflag_view(mplot_width, mexagger, mx_interval, my_interval,
 								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
 	                                   mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 }
@@ -2108,7 +2108,7 @@ void do_unflag_all(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)call_data;
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	status = mbedit_action_unflag_all(mplot_width, mexager, mx_interval, my_interval,
+	status = mbedit_action_unflag_all(mplot_width, mexagger, mx_interval, my_interval,
 								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
 	                                  mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 }
@@ -2127,7 +2127,7 @@ void do_next_buffer(Widget w, XtPointer client_data, XtPointer call_data) {
 	expose_plot_ok = false;
 
 	/* get next buffer */
-	status = mbedit_action_next_buffer(hold_size, buffer_size, mplot_width, mexager, mx_interval, my_interval, mplot_size,
+	status = mbedit_action_next_buffer(hold_size, buffer_size, mplot_width, mexagger, mx_interval, my_interval, mplot_size,
 	                                   mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &ndumped, &nloaded, &nbuffer, &ngood, &icurrent,
 	                                   &mnplot, &quit);
 	if (status == 0)
@@ -2155,7 +2155,7 @@ void do_show_flaggedsoundings(Widget w, XtPointer client_data, XtPointer call_da
 	mshow_flaggedsoundings = XmToggleButtonGetState(toggleButton_show_flaggedsoundings_on);
 
 	/* replot the data */
-	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+	status = mbedit_action_plot(mplot_width, mexagger, mx_interval, my_interval,
 								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
 	                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 }
@@ -2171,7 +2171,7 @@ void do_show_flaggedprofiles(Widget w, XtPointer client_data, XtPointer call_dat
 	mshow_flaggedprofiles = XmToggleButtonGetState(toggleButton_show_flaggedprofiles_on);
 
 	/* replot the data */
-	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+	status = mbedit_action_plot(mplot_width, mexagger, mx_interval, my_interval,
 								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
 	                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 }
@@ -2205,7 +2205,7 @@ void do_view_mode(Widget w, XtPointer client_data, XtPointer call_data) {
 	status = mbedit_set_viewmode(mview_mode);
 
 	/* replot the data */
-	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+	status = mbedit_action_plot(mplot_width, mexagger, mx_interval, my_interval,
 								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
 	                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 }
@@ -2269,7 +2269,7 @@ void do_show_time(Widget w, XtPointer client_data, XtPointer call_data) {
 	status = mbedit_set_scaling(mb_borders, mshow_time);
 
 	/* replot the data */
-	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+	status = mbedit_action_plot(mplot_width, mexagger, mx_interval, my_interval,
 								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
 	                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 }
@@ -2310,7 +2310,7 @@ void do_show_flags(Widget w, XtPointer client_data, XtPointer call_data) {
 	XmToggleButtonSetState(toggleButton_show_pulsetypes, FALSE, FALSE);
 
 	/* replot the data */
-	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+	status = mbedit_action_plot(mplot_width, mexagger, mx_interval, my_interval,
 								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
 	                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 }
@@ -2329,7 +2329,7 @@ void do_show_detects(Widget w, XtPointer client_data, XtPointer call_data) {
 	XmToggleButtonSetState(toggleButton_show_pulsetypes, FALSE, FALSE);
 
 	/* replot the data */
-	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+	status = mbedit_action_plot(mplot_width, mexagger, mx_interval, my_interval,
 								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
 	                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 }
@@ -2348,7 +2348,7 @@ void do_show_pulsetypes(Widget w, XtPointer client_data, XtPointer call_data) {
 	XmToggleButtonSetState(toggleButton_show_pulsetypes, TRUE, FALSE);
 
 	/* replot the data */
-	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+	status = mbedit_action_plot(mplot_width, mexagger, mx_interval, my_interval,
 								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
 	                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 }
@@ -2456,7 +2456,7 @@ void do_number_pings(Widget w, XtPointer client_data, XtPointer call_data) {
 	XtVaSetValues(slider_number_step, XmNvalue, step, NULL);
 
 	/* replot the data */
-	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
+	status = mbedit_action_plot(mplot_width, mexagger, mx_interval, my_interval,
 								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
 	                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 	if (status == 0)
@@ -2535,7 +2535,7 @@ void do_goto_apply(Widget w, XtPointer client_data, XtPointer call_data) {
 	expose_plot_ok = false;
 
 	status =
-	    mbedit_action_goto(ttime_i, hold_size, buffer_size, mplot_width, mexager, mx_interval, my_interval, mplot_size,
+	    mbedit_action_goto(ttime_i, hold_size, buffer_size, mplot_width, mexagger, mx_interval, my_interval, mplot_size,
 	                       mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &ndumped, &nloaded, &nbuffer, &ngood, &icurrent, &mnplot);
 	if (status == 0)
 		XBell(theDisplay, 100);
@@ -2586,7 +2586,7 @@ void do_set_filters(Widget w, XtPointer client_data, XtPointer call_data) {
 	                            f_wrongside_threshold, f_cutbeam, f_cutbeam_begin, f_cutbeam_end, f_cutdistance,
 	                            f_cutdistance_begin, f_cutdistance_end, f_cutangle, f_cutangle_begin, f_cutangle_end);
 
-	status = mbedit_action_filter_all(mplot_width, mexager, mx_interval, my_interval,
+	status = mbedit_action_filter_all(mplot_width, mexagger, mx_interval, my_interval,
 								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
 	                                  mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 }
