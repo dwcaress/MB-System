@@ -6255,7 +6255,7 @@ void set_mbview_mouse_mode(size_t instance, int mode) {
 	else if (data->mouse_mode == MBV_MOUSE_SHADE)
 		sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Pick\":t\"M: Light Source\":t\"R: Shade Magnitude\"");
 	else if (data->mouse_mode == MBV_MOUSE_VIEWPOINT)
-		sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Pick\":t\"M: View Rotate\":t\"R: Exageration\"");
+		sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Pick\":t\"M: View Rotate\":t\"R: Zoom\"");
 	else if (data->mouse_mode == MBV_MOUSE_AREA)
 		sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Drag Region\":t\"M: Drag Area\":t\"R: Area Width\"");
 	else if (data->mouse_mode == MBV_MOUSE_SITE)
