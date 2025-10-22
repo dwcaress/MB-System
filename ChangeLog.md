@@ -22,6 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.3beta07   October 22, 2025
 - Version 5.8.3beta06    October 1, 2025
 - Version 5.8.3beta05    September 30, 2025
 - Version 5.8.3beta04    September 18, 2025
@@ -64,9 +65,23 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 ---
 
+#### 5.8.3beta07 (October 22, 2025)
+
+Program mbeditviz: Fixed display of swath width when navigation is selected in the survey
+view.
+
+Format 234 (MBF_3DWISSL2): Supports data from new 3D at Depth 2nd Generation Wide swath
+Subsea Lidar (WiSSL2).
+
+Program mbpreprocess: Added option attitude-zero-heave to zero heave values in attitude
+data to be merged with survey data. The immediate use is for integration of Exail Phins C7
+navigation and attitude data with multibeam data, all collected on a submerged AUV for
+which the platform depth is defined by a pressure sensor rather than the heave output
+by the INS.
+
 #### 5.8.3beta06 (October 1, 2025)
 
-GMT grid i/o functions (src/mbaux/mb_readwritegrd.c): Fixed compiler directives insuring
+GMT integration: Fixed compiler directives insuring
 that the GMT header file gmt_dev.h does not implicitly include a glib header file not 
 needed by MB-System.
 

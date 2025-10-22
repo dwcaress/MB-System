@@ -50,15 +50,21 @@
 #include "mb_define.h"
 
 /* defines */
-#define SRIAT_HEADER_VERSION CRIAAT_FILE_VERSION 5
+#define SRIAT_SYNC_WORD 0xC0DEFACE // unswapped byte order: CE FA DE C0
+#define SRIAT_HEADER_VERSION CRIAAT_FILE_VERSION 6
 #define SRIAT_RECORD_ID_RANGE 	    1
 #define SRIAT_RECORD_ID_THERMAL     2
 #define SRIAT_RECORD_ID_MBARI       3
 #define SRIAT_RECORD_ID_FILEHEADER  4
 #define SRIAT_RECORD_ID_TAIL        5
 #define SRIAT_RECORD_ID_PIA         6
-#define SRIAT_RECORD_SIZE_FILEHEADER  177
-#define SRIAT_RECORD_SIZE_RANGE_HEADER  63
+#define SRIAT_RECORD_ID_COMMENT     7
+
+#define SRIAT_RECORD_SIZE_FILEHEADER  187
+#define SRIAT_RECORD_SIZE_RANGE_HEADER  72
+#define SRIAT_RECORD_SIZE_MBARI_HEADER  160
+#define SRIAT_RECORD_SIZE_MBARI_SOUNDING  60
+#define SRIAT_RECORD_SIZE_COMMENT_HEADER 12
 
 enum
 {
@@ -71,100 +77,102 @@ enum
    PACKET_ID_PIA = 6,     // Packet informational area - end of file of where data is at.
 };
 
-/*--------------------------------------------------------------------------------------*/
-/* file header record: 177 bytes */
-/*--------------------------------------------------------------------------------------*/
-typedef struct
-{
+#define MBSYS_3DDWISSL2_DEFAULT_AMPLITUDE_THRESHOLD 	1.5
+#define MBSYS_3DDWISSL2_DEFAULT_TARGET_ALTITUDE        3.0
 
-   unsigned char     PacketID;            // The packet type / ID = PACKET_ID_HEADER
-   unsigned char     Version;             // packet version number
-   unsigned short    SizeBytes;           // define size of header in bytes.
+/*--------------------------------------------------------------------------------------*/
+/* file header record: 187 bytes */
+/*--------------------------------------------------------------------------------------*/
+struct mbsys_3ddwissl2_sriat_fileheader_struct
+{
+   unsigned int SyncWord;
+   mb_u_char PacketID;            // The packet type / ID = PACKET_ID_HEADER
+   mb_u_char Version;             // packet version number
+   unsigned int SizeBytes;           // define size of header in bytes.
    // --- above is common header format ---
 
-   unsigned int      ScanSizeBytes;       // define size of Data (does not include header) - Fill in at end.
+   unsigned int ScanSizeBytes;       // define size of Data AND this header - Fill in at end.
 
    /////////////////////////////////////////////////////////////////////////////
    // --- Time Stamp - use TimeSpec: (Sec and nSec from Epic)-------------------
    // This file covers from time start to time end. 
-   int               TimeStart_Sec ;       // Rollover in 2038 if this is signed.
-   int               TimeStart_nSec;       //   signed allows math to add or subtract right.
+   int TimeStart_Sec ;       // Rollover in 2038 if this is signed.
+   int TimeStart_nSec;       //   signed allows math to add or subtract right.
     
-   int               TimeEnd_Sec ;         // Rollover in 2038 if this is signed.
-   int               TimeEnd_nSec;         //   signed allows math to add or subtract right.
+   int TimeEnd_Sec ;         // Rollover in 2038 if this is signed.
+   int TimeEnd_nSec;         //   signed allows math to add or subtract right.
    // --- Time Stamp End -------------------------------------------------------
    /////////////////////////////////////////////////////////////////////////////
 
-   unsigned char     SL_GEN   ;             // SL Generation The "#" {SL"2", SL"3", SL"4", SL"5", SL"6"} or {MBARI, PIPE, SL4, SL5, SL6}
-   unsigned char     SL_Letter;             // SL#L-xxxx The L = "N"uclear, "D"eep, "P"ipeline, "M"bari part.
-   unsigned char     SL_X     ;             // SL XXX number of the name SL4(N)-XXX
-   unsigned char     nPtsToAverage;         // default 1, only EP will set to a different value.
+   mb_u_char SL_GEN   ;           // SL Generation The "#" {SL"2", SL"3", SL"4", SL"5", SL"6"}, the number not letter
+   mb_u_char SL_Letter;           // SL#L-xxxx The L = "N"uclear, "D"eep, "P"ipeline, "M"bari part.
+   mb_u_char SL_X     ;           // SL XXX number of the name SL4(N)-XXX
+   mb_u_char nPtsToAverage;       // default 1, only EP will set to a different value.
+      
+   char cJobName[24]; // Job folder
+   char cScanPos[24]; // Position Folder.
+   char cfileTag[24]; // file name.
+   unsigned short nScanNum;     // pulled from fileTag or auto counts each scan (UDP).
 
-   char              cJobName[24];          // Job folder
-   char              cScanPos[24];          // Position Folder.
-   char              cfileTag[24];          // file name.
+   int AzCmdStart            ;// Full resolution raw counts. Start taking data here.
+   int AzCmdEnd              ;// Full resolution raw counts. Stop  taking data here.
 
-   unsigned short    nScanNum;              // pulled from fileTag or auto counts each scan (UDP).
+	 unsigned int rawbit1;
+   unsigned int      nPtsPerScanLine   : 14;// 10 - 10,000 <= nPtsPerLine (actual number of Laser shots in angle per row).
+   unsigned int      nScanLinesPerScan : 12;// 10 - 3800 (4095 bit limit)
+   unsigned int      Spare1            : 6;
 
-   unsigned int      rawbit1;
-   unsigned int      nPtsPerScanLine;       // bitfield : 14; // 10 - 10,000 <= nPtsPerLine (actual number of Range points in scan).
-   unsigned int      AzCmdStart;            // bitfield : 18; // Full resolution raw counts. Start taking data here.
+	 unsigned int rawbit2;
+   unsigned int      nPtsPerLine       : 14;// 10 - 10,000 define a full line of points (full 360 rotation count)
+   unsigned int      Mode              :  3;// scan mode { RA, FA, AZ, EL, EP } 
+   unsigned int      nTPtsPerScanLine  : 14;// 10 - 10,000 <= nPtsPerLine (actual number of Thermal points in scan).
+   unsigned int      bHaveThermal      :  1;// 1 = Have Thermal Data, 0 = no Thermal Data or Packets.
 
-   unsigned int      rawbit2;
-   unsigned int      AzCmdEnd;              // bitfield : 18; // Full resolution raw counts. Stop  taking data here.
-   unsigned int      nScanLinesPerScan;     // bitfield : 12; // 10 - 3800 (4095 bit limit)
-   unsigned int      Spare1;                // bitfield : 2;
-
-   unsigned int      rawbit3;
-   unsigned int      nPtsPerLine;           // bitfield : 14; // 10 - 10,000 define a full line of points (full rotation count)
-   unsigned int      Mode;                  // bitfield :  3; // scan mode { RA, FA, AZ, EL, EP } 
-   unsigned int      nTPtsPerScanLine;      // bitfield : 14; // 10 - 10,000 <= nPtsPerLine (actual number of Thermal points in scan).
-   unsigned int      Spare2;                // bitfield : 1;
-
-   unsigned int      ShotCnt;               // Max is 14,500,000 (24 bits), don't include averages. Number in SCAN, windowed down by Az Start/Stop angles.
-   //unsigned short    Conductivity_uS_cm;  // Range 0-65535 uSiemens per cm (note uS/Cm * 1/10,000 = S/m)
-   unsigned short    WaterSalinity_psu ;    // Range 0-42 PSU. psu = #*42/65535;  Calculated from CTD.
-   unsigned short    WaterPressure_dbar;    // Range 0-6000 (13 bits) 1 dbar = 1 meter.
+   unsigned int ShotCnt;           // Max is 14,500,000 (24 bits), don't include averages. Number in SCAN, windowed down by Az Start/Stop angles.
+   //unsigned short Conductivity_uS_cm;// Range 0-65535 uSiemens per cm (note uS/Cm * 1/10,000 = S/m)
+   unsigned short WaterSalinity_psu ;  // Range 0-42 PSU. psu = #*42/65535;  Calculated from CTD.
+   unsigned short WaterPressure_dbar;  // Range 0-6000 (13 bits) 1 dbar = 1 meter.
    
-   unsigned int      rawbit4;
-   unsigned int      WaterTemperature_C;    // bitfield : 13; // Range -2 to 35. Cal is C = #*37/8191 - 2;
-   unsigned int      PRF_Hz;                // bitfield : 19; // current laser shot rate. 500,000 max, 19 bits. 
+	 unsigned int rawbit3;
+   unsigned int WaterTemperature_C : 13;// Range -2 to 35. Cal is C = #*37/8191 - 2;
+   unsigned int PRF_Hz             : 19;// current laser shot rate. 500,000 max, 19 bits. 
 
-   unsigned char     DigitizerTemperature_C; // C = #*100/255;
+   mb_u_char DigitizerTemperature_C; // C = #*100/255;
    
-   //unsigned int      Motor_Hz    ;      // current motor spin rate - pts/line and prf can calculate.
+   //unsigned int Motor_Hz    ;      // current motor spin rate - pts/line and prf can calculate.
 
-   float             RScale_m_per_cnt;      // Need exact range per count for accuracy.
+   float RScale_m_per_cnt; // Need exact range per count for accuracy.
 
-   unsigned short    ThBinStart_cnt;        // Bin Count start, AzCmdStart for thermal. Az angle/TempAzCnt = bin
-   unsigned short    ThBinEnd_cnts ;        // Bin Count end,   AzCmdEnd   for thermal.
+   short ThBinStart_cnt; // Bin Count start, AzCmdStart for thermal. Az angle/TempAzCnt = bin
+   short ThBinEnd_cnts ; // Bin Count end,   AzCmdEnd   for thermal.
 
    // Temperature Profile definition ----------------------
-   unsigned char     TempAzCnt ; // number of shots to average in Az   for a Temperature Bin. 1-255. Default 10.
-   unsigned char     TempRowCnt; // number of shots to average in Rows for a Temperature Bin. 1-255. Default 10.  
+   mb_u_char TempAzCnt ; // number of shots to average in Az   for a Temperature Bin. 1-255. Default 10.
+   mb_u_char TempRowCnt; // number of shots to average in Rows for a Temperature Bin. 1-255. Default 10.  
    // Is range average fixed or some sort of profile? Note: Only reports <128 bins and <AvAz*AvEl count.
    //        [0] = 0    //  0 averages of 1  in range Skip? Did not implement just single sample.
    //        [1] = 8    //  8 averages of 2  in range for the fist 8*2   = 16  (must be divisable by 16)
    //        [2] = 12   // 12 averages of 4  in range for the next 12*4  = 48  (must be divisable by 16)
    //        [3] = 28   // 28 averages of 8  in range for the next 28*8  = 224 (must be divisable by 16)
    //        [4] = 52   // 51 averages of 16 in range for the next 52*16 = 832 (by definition is divisable by 16)
-   unsigned int      rawbit5;
-   unsigned int      TempRCnt_av2;   // bitfield : 8; // number of shots to average in Range for a Temperature Range Bin. 1-128 
-   unsigned int      TempRCnt_av4;   // bitfield : 8; // number of shots to average in Range for a Temperature Range Bin. 1-128
-   unsigned int      TempRCnt_av8;   // bitfield : 8; // number of shots to average in Range for a Temperature Range Bin. 1-128
-   unsigned int      TempRCnt_av16;  // bitfield : 8; // number of shots to average in Range for a Temperature Range Bin. 1-128
+	 unsigned int rawbit4;
+   unsigned int TempRCnt_av2  : 8;  // number of shots to average in Range for a Temperature Range Bin. 1-128 
+   unsigned int TempRCnt_av4  : 8;  // number of shots to average in Range for a Temperature Range Bin. 1-128
+   unsigned int TempRCnt_av8  : 8;  // number of shots to average in Range for a Temperature Range Bin. 1-128
+   unsigned int TempRCnt_av16  : 8;  // number of shots to average in Range for a Temperature Range Bin. 1-128
    // end Temperature Profile definition ----------------
 
-   unsigned short     ScannerShift_mDeg;  // 1 = 0.001 degrees.
+   unsigned short ScannerShift_mDeg;  // 1 = 0.001 degrees.
 
    // Used when converting file from Range to XYZ.
-   float       Shift_m[3];           // Additional shift to apply
+   float Shift_m[3];           // Additional shift to apply
    // Rotation with respect to sensitive point. order is {X, Y, then Z}.
-   float       Rotate_deg[3];        // Additional rotation to apply  
-   unsigned char       EC_Version[4];        // Capture Software version info.
-   unsigned char       InstaCloud_Version[4];// [0]= MSB, [3]=LSB, Example: 7.1.1.255
-   short       ElDeg_cnts;           // cal is 90 degees /0xFFFF, 0 is perpendicular to output cap
-} mbsys_3ddwissl2_sriat_fileheader_struct; 
+   float Rotate_deg[3];        // Additional rotation to apply  
+   mb_u_char EC_Version[4];        // Capture Software version info.
+   mb_u_char InstaCloud_Version[4];// [0]= MSB, [3]=LSB, Example: 7.1.1.255
+   short ElDeg_cnts;           // cal is 90 degees /0xFFFF, 0 is perpendicular to output cap
+
+}; 
 
 /*--------------------------------------------------------------------------------------* 
  * Range record
@@ -177,7 +185,8 @@ typedef struct
 // AZ[num shots] - only 1 per shot
 // R [num shots * Points_per_LOS]  - always 2 points/shot
 // I [num shots * Points_per_LOS]  - always 2 points/shot
-// Class[num shots * Points_per_LOS]- always 2 points/shot ... Classification { 0=Unclass, Ignore, LowRange, HiRange, LowIndex, HiIndex, Clutter }
+// Class[num shots * Points_per_LOS]- always 2 points/shot ... 
+//   Classification { 0=Unclass, Ignore, LowRange, HiRange, LowIndex, HiIndex, Clutter }
 //
 // ------ only MBARI has this second part ----
 // R0     [num shots] - Red 0 signal             
@@ -205,298 +214,242 @@ enum {
    // Values 10 - 15 available.
 };
 
-/* SRIAT range record structure */
-typedef struct
+// ---------------------------------------------------------------------
+
+/* SRIAT range record structure 
+		- This represents the structure of the raw SRIAT range record 
+		- the MBARI WiSSL2 SRIAT i/o module can read the raw SRIAT range record but store it
+			into an extended structure that will be written out as an MBARI range record
+		- Format 234 files written by MB-System will therefore always consist of the extended
+			MBARI range records, represented in the mbarirange structure defined below. */
+struct mbsys_3ddwissl2_sriatrange_struct
 { 
-  unsigned char   PacketID;           // The packet type / ID = PACKET_ID_RANGE
-  unsigned char   Version;
-  unsigned short  SizeBytes;           // define size of header in bytes.
-  // ---
-  unsigned int    DataSizeBytes;       // The Variable Range data size AND this header (total size Range Packet)
-  
-  ///////////////////////////////////
-  int             TimeStart_Sec;       // Rollover in 2038 if this is signed.
-  int             TimeStart_nSec;      //   signed allows math to add or subtract right.
-  //unsigned int DeltaTimeStamp_S    : 12; // 4095 (real max is probably 180 seconds)
-  //unsigned int DeltaTimeStamp_uS   : 20; // 1,000,000
-  ///////////////////////////////////
+   unsigned int SyncWord;
+   mb_u_char PacketID;            // The packet type / ID = PACKET_ID_RANGE
+   mb_u_char Version  ;
+   unsigned int SizeBytes;           // The Variable Range data size AND this header (total size Range Packet)
+   // ---
+   unsigned short HdrSizeBytes;        // define size of header in bytes.
+   
+   ////// Timestamp - absolute ///////
+   unsigned int TimeStart_Sec ;       // Rollover in 2038 if this is signed.
+   unsigned int TimeStart_nSec;       //   signed allows math to add or subtract right.
+   ///////////////////////////////////
 
-  unsigned short  NumPtsRow;          // (14 bits - max is 16,383) Number of shots per rotation of motor.
-  unsigned short  NumPtsPkt;          // (14 bits - max is 16,383) Number of shots in this packet <= NumPtsRow.
-  unsigned int    LineLaserPower;     // Fraction of max power output - both gain setting and attenuator, 20 bits full res 
-  
-  unsigned int    rawbit1;
-  unsigned int    PRF_Hz;             // bitfield : 19; // current laser shot rate. Used with timestamp for point spacing. Max 500,000.
-  unsigned int    Spare1;             // bitfield : 7; // ballence
-  unsigned int    Points_per_LOS;     // bitfield : 2; // 0=good data only, 1=1 (always 1), 2=2 (always 2 entries)
-  unsigned int    ScannerType;        // bitfield : 4; // {MBARI, PIPE, SL4, SL5, SL6} - TBD.  
+   unsigned short NumPtsRow          ; // (14 bits - max is 16,383) Number of shots per rotation of motor.
+   unsigned short NumPtsPkt          ; // (14 bits - max is 16,383) Number of shots in this packet <= NumPtsRow.
+   unsigned int LineLaserPower     ; // Fraction of max power output - both gain setting and attinuator, 20 bits full res 
+   
+   unsigned int rawbit1;
+   unsigned int PRF_Hz         : 19; // current laser shot rate. Used with timestamp for point spacing. Max 500,000.
+   unsigned int Spare1         :  7; // balance
+   unsigned int Points_per_LOS :  2; // 0=good data only, 1=1 (always 1), 2=2 (always 2 entries)
+   unsigned int ScannerType    :  4; // {MBARI, PIPE, SL4, SL5, SL6} - TBD.  
 
-  short           lineAccelX;         // 16 bits - signed acceleration, full res
-  short           lineAccelY;         // 16 bits - signed acceleration, full res
-  short           lineAccelZ;         // 16 bits - signed acceleration, full res  
-  unsigned short  lineIndex;          // U16.15 Water index
-  
-  unsigned short  RowNumber;          // 0-3800 (12 bits), data is for this row.
-  // ---------------------------------------------------------------------
-  // keep Max R / Max I?
-  unsigned int    rawbit2;
-  unsigned int	   R_Max;              // bitfield : 20;     // represented in raw counts,    20.14 m 
-  unsigned int    I_Max;              // bitfield : 12;     // represented in raw counts,    12 bits
-  // Send AutoR / AutoI? -> needed for LAS CCI
-  unsigned int    rawbit3;
-  unsigned int    R_Auto;             // bitfield : 20;     // represented in raw counts,    20.14 m 
-  unsigned int    I_Auto;             // bitfield : 12;     // represented in raw counts,    12 bits
-  // Strongest mode? - all returns (AGC - scan info)
-  unsigned int    rawbit4;
-  unsigned int    R_Mode;             // bitfield : 20;     // represented in raw counts,    20.14 m 
-  unsigned int    I_Mode;             // bitfield : 12;     // represented in raw counts,    12 bits
-  // Info about the scan line distribution for Laser Power, AGC:
-  unsigned char   I_Good;             // Percent in good range: 30% to 90% of full scale.
-  unsigned char   I_Low;              // Percent in low  range: <30%  of full scale.
-  unsigned char   I_High;             // Percent in high range: >90%  of full scale.
-  // Monitor laser output amplitude for thermal control of SHG TEC.
-  unsigned short  SHGAmplitudeAv;     // 12 bit average for line.
-  // ---------------------------------------------------------------------
+   short lineAccelX         ; // 16 bits - signed acceleration, full res
+   short lineAccelY         ; // 16 bits - signed acceleration, full res
+   short lineAccelZ         ; // 16 bits - signed acceleration, full res  
+   unsigned short lineIndex          ; // U16.15 Water index
+   
+   unsigned short RowNumber          ; // 0-3800 (12 bits), data is for this row.
+   // ---------------------------------------------------------------------
+   // Monitor laser output amplitude for thermal control of SHG TEC.
+   unsigned short      SHGAmplitudeAv; // 12 bit average for line.
+   // keep Max R / Max I?
+   unsigned int rawbit2;
+   unsigned int		R_Max : 20;     // represented in raw counts,    20.14 m 
+   unsigned int		I_Max : 12;     // represented in raw counts,    12 bits
+   // Send AutoR / AutoI? -> needed for LAS CCI
+   unsigned int rawbit3;
+   unsigned int		R_Auto: 20;     // represented in raw counts,    20.14 m 
+   unsigned int		I_Auto: 12;     // represented in raw counts,    12 bits
+   // Strongest mode? - all returns (AGC - scan info)
+   unsigned int rawbit4;
+   unsigned int		R_Mode: 20;     // represented in raw counts,    20.14 m 
+   unsigned int		I_Mode: 12;     // represented in raw counts,    12 bits
+   // Info about the scan line distribution for Laser Power, AGC:
+   mb_u_char       I_Good    ;     // Percent in good range: 30% to 90% of full scale.
+   mb_u_char       I_Low     ;     // Percent in low  range: <30%  of full scale.
+   mb_u_char       I_High    ;     // Percent in high range: >90%  of full scale.
+   mb_u_char       Spare3    ;     // header sized for 32 bit alignment.
+   // ---------------------------------------------------------------------
 
-  unsigned int    rawbit5;
-  unsigned int    R_offset;           // bitfield : 20; // represented in raw counts,    20 bits
-  unsigned int    I_offset;           // bitfield : 12; // represented in raw counts,    12 bits
+   unsigned int rawbit5;
+   unsigned int		R_offset  : 20; // represented in raw counts,    20 bits
+   unsigned int		I_offset  : 12; // represented in raw counts,    12 bits
 
-  unsigned int    rawbit6;
-  unsigned int    AZ_offset;          // bitfield : 18; // represented in raw counts,    18 bits                        
-  unsigned int    R_nbits;            // bitfield : 5; // number of bits each 0-20
-  unsigned int    I_nbits;            // bitfield : 4; // number of bits each 0-12
-  unsigned int    AZ_nbits;           // bitfield : 5; // number of bits each 0-18
+	 int            AZ_offset     ; // represented in raw counts,    s18 bits
+
+   unsigned int rawbit6;
+   unsigned int      R_nbits   :  5; // number of bits each 0-20
+   unsigned int      I_nbits   :  4; // number of bits each 0-12
+   unsigned int      AZ_nbits  :  5; // number of bits each 0-18
+   unsigned int      Spare2    :  18;
   // ---------------------------------------------------------------------
    
-  //unsigned char* PointData[variable];
+  //mb_u_char* PointData[variable];
   //U*: AZ[NumPtsPkt] - only 1 per shot (but only if always setting 2 per shot)
   //U*: R [NumPtsPkt * Points_per_LOS]  - always 2 points/shot
   //U*: I [NumPtsPkt * Points_per_LOS]  - always 2 points/shot
-  //U4: Class[NumPtsPkt * Points_per_LOS]- always 2 points/shot ... Classification { 0=Unclass, Ignore, LowRange, HiRange, LowIndex, HiIndex, Clutter }
+  //U4: Class[NumPtsPkt * Points_per_LOS]- always 2 points/shot ... 
+  //		Classification { 0=Unclass, Ignore, LowRange, HiRange, LowIndex, HiIndex, Clutter }
   size_t sriat_num_samples_alloc;
   unsigned int *sriat_Az;            // U18 cal = 360 deg / 0x3FFFF
   unsigned int *sriat_Range1;         // U20 at .1 mm per count.
   unsigned int *sriat_Range2;         // U20 at .1 mm per count.
   unsigned short *sriat_Intensity1;   // U12 raw value
   unsigned short *sriat_Intensity2;   // U12 raw value
-  unsigned char *sriat_ClassR1;       // U4 Range class
-  unsigned char *sriat_ClassR2;       // U4 Range class
-
-   
-} mbsys_3ddwissl2_sriatrange_struct; // row info, one for each row
-
-/* MBARI range record structure */
-typedef struct
-{ 
-  unsigned char   PacketID;           // The packet type / ID = PACKET_ID_RANGE
-  unsigned char   Version;
-  unsigned short  SizeBytes;           // define size of header in bytes.
-  // ---
-  unsigned int    DataSizeBytes;       // The Variable Range data size AND this header (total size Range Packet)
+  mb_u_char *sriat_ClassR1;       // U4 Range class
+  mb_u_char *sriat_ClassR2;       // U4 Range class
   
-  ///////////////////////////////////
-  int             TimeStart_Sec;       // Rollover in 2038 if this is signed.
-  int             TimeStart_nSec;      //   signed allows math to add or subtract right.
-  //unsigned int DeltaTimeStamp_S    : 12; // 4095 (real max is probably 180 seconds)
-  //unsigned int DeltaTimeStamp_uS   : 20; // 1,000,000
-  ///////////////////////////////////
+}; // row info, one for each row
 
-  unsigned short  NumPtsRow;          // (14 bits - max is 16,383) Number of shots per rotation of motor.
-  unsigned short  NumPtsPkt;          // (14 bits - max is 16,383) Number of shots in this packet <= NumPtsRow.
-  unsigned int    LineLaserPower;     // Fraction of max power output - both gain setting and attenuator, 20 bits full res 
-   
-} mbsys_3ddwissl2_mbarirange_struct; 
+// ---------------------------------------------------------------------
 
-/* 3DatDepth LIDAR data structure */
+struct mbsys_3ddwissl2_sounding_struct
+  {
+  unsigned short int pulse_id;		/* pulse number in the original reported scan */
+  unsigned short int sounding_id;					/* 0 or 1 */
+  float time_offset;							/* time offset relative to start of scan (seconds) */
+
+  /* lidar reference point navigation relative to the start of the scan */
+  float acrosstrack_offset;  	/* m */
+  float alongtrack_offset;  		/* m */
+  float sensordepth_offset;  	/* m */
+  float heading_offset;    			/* deg */
+  float roll_offset;      			/* deg */
+  float pitch_offset;      			/* deg */
+
+  /* raw information */
+  float range;      /* meters from glass front */
+  float angle_az;  /* Acrosstrack angle, zero = vertical down, positive to starboard (deg) */
+  float angle_el;  /* Alongtrack angle, zero = vertical down, positive forward, (deg) */
+  short intensity;    /* peak of signal - to 1023 */
+  mb_u_char class;  /* diagnostic value - unknown meaning, >= V1.2 only */
+
+  /* processed information incorporating pulse offsets and head offsets */
+  mb_u_char beamflag;  	/* MB-System beam flag */
+  float acrosstrack;  	/* acrosstrack distance relative lidar reference point (meters) */
+  float alongtrack;    	/* alongtrack distance relative to lidar reference point (meters) */
+  float depth;      		/* depth relative to lidar reference point (meters) */
+  };
+
+/* MBARI range record structure  
+		- This represents the structure of the extended MBARI range record 
+		- The MBARI WiSSL2 SRIAT i/o module can read the raw SRIAT range record structured
+			as defined above, but stores it into an extended structure that will be written out 
+			as an MBARI range record.
+		- Format 234 files written by MB-System will therefore always consist of the extended
+			MBARI range records, represented in the mbarirange structure defined here. */
+struct mbsys_3ddwissl2_mbarirange_struct
+{ 
+   unsigned int SyncWord;
+   mb_u_char PacketID;            // The packet type / ID = PACKET_ID_RANGE
+   mb_u_char Version  ;
+   unsigned int SizeBytes;           // The Variable Range data size AND this header (total size Range Packet)
+   // ---------------------------------------------------------------------
+   unsigned short HdrSizeBytes;        // define size of header in bytes.
+   unsigned int TimeStart_Sec;       // Rollover in 2038 if this is signed.
+   unsigned int TimeStart_nSec;       //   signed allows math to add or subtract right.
+   unsigned short NumPtsRow; // (14 bits - max is 16,383) Number of shots per rotation of motor.
+   unsigned short NumPtsPkt; // (14 bits - max is 16,383) Number of shots in this packet <= NumPtsRow.
+   unsigned int LineLaserPower; // Fraction of max power output - both gain setting and attinuator, 20 bits full res 
+   unsigned int PRF_Hz; // current laser shot rate. Used with timestamp for point spacing. Max 500,000.
+   unsigned short Points_per_LOS; // 0=good data only, 1=1 (always 1), 2=2 (always 2 entries)
+   unsigned short ScannerType; // {MBARI, PIPE, SL4, SL5, SL6} - TBD.  
+   short lineAccelX; // 16 bits - signed acceleration, full res
+   short lineAccelY; // 16 bits - signed acceleration, full res
+   short lineAccelZ; // 16 bits - signed acceleration, full res  
+   unsigned short lineIndex; // U16.15 Water index
+   unsigned short RowNumber; // 0-3800 (12 bits), data is for this row.
+   // ---------------------------------------------------------------------
+   // Monitor laser output amplitude for thermal control of SHG TEC.
+   unsigned short      SHGAmplitudeAv; // 12 bit average for line.
+
+   // keep Max R / Max I?
+   unsigned int		R_Max;     // represented in raw counts,    20.14 m 
+   unsigned int		I_Max;     // represented in raw counts,    12 bits
+
+   // Send AutoR / AutoI? -> needed for LAS CCI
+   unsigned int		R_Auto;     // represented in raw counts,    20.14 m 
+   unsigned int		I_Auto;     // represented in raw counts,    12 bits
+
+   // Strongest mode? - all returns (AGC - scan info)
+   unsigned int		R_Mode;     // represented in raw counts,    20.14 m 
+   unsigned int		I_Mode;     // represented in raw counts,    12 bits
+
+   // Info about the scan line distribution for Laser Power, AGC:
+   mb_u_char       I_Good;     // Percent in good range: 30% to 90% of full scale.
+   mb_u_char       I_Low;      // Percent in low  range: <30%  of full scale.
+   mb_u_char       I_High;     // Percent in high range: >90%  of full scale.
+   mb_u_char       I_Spare;    // header sized for 32 bit alignment.
+   // ---------------------------------------------------------------------
+
+   unsigned int		R_offset; // represented in raw counts,    20 bits
+   unsigned int		I_offset; // represented in raw counts,    12 bits
+	 int            AZ_offset; // represented in raw counts,    s18 bits
+  // ---------------------------------------------------------------------
+
+  /* merged navigation and attitude per each scan */
+  double time_d;                /* epoch time of the first pulse in this scan */
+  double navlon;                /* lidar reference point position longitude (degrees) */
+  double navlat;                /* lidar reference point  position latitude (degrees) */
+  double sensordepth;   				/* lidar reference point  position depth below sea surface (meters), includes any tide correction */
+  double speed;                	/* lidar speed (m/s) */
+  double heading;               /* lidar heading (degrees) */
+  double roll;                  /* lidar roll (degrees) */
+  double pitch;                	/* lidar pitch (degrees) */
+  unsigned int num_soundings; 	/* number of soundings stored in this record 
+  																	- originally the scan included results from a subset
+  																	  of pulses over a limited angle range, with two 
+  																	  soundings per each pulse. Some picks are null and
+  																	  others are valid. 
+  																	- the output file with processed bathymetry may contain
+  																	  all of the original soundings (null and valid), or
+  																	  a subset of the soundings.
+  																  - The most common subsets will be:
+  																  		- all valid soundings
+  																  		- all first soundings 
+  																  		- all valid first soundings */
+  unsigned int num_soundings_alloc; /* number of soundings allocated to be stored in this record */
+
+  /* soundings */
+  struct mbsys_3ddwissl2_sounding_struct *soundings;
+     
+}; 
+
+/* MBARI comment record */
+struct mbsys_3ddwissl2_comment_struct
+{ 
+   unsigned int SyncWord;
+   mb_u_char PacketID;                // The packet type / ID = PACKET_ID_RANGE
+   mb_u_char Version;
+   unsigned int SizeBytes;            // Total size comment record
+   unsigned short comment_len;        // comment length in bytes, including one or more 
+   																		//   end-of-string null bytes, 
+   																		//   e.g. comment_len = strlen(comment->comment) + 1;
+   char comment[MB_COMMENT_MAXLINE];  // comment string 
+     
+}; 
+// ---------------------------------------------------------------------
+
+/* Data structure for 3DatDepth WiSSL2 Lidar data */
 struct mbsys_3ddwissl2_struct
   {
   /* Type of data record */
   int kind;  /* MB-System record ID */
   
   /* File header */
-  mbsys_3ddwissl2_sriat_fileheader_struct fileheader;
-  
-  /* SRIAT form lidar scan */
-  mbsys_3ddwissl2_sriatrange_struct sriatrange;
+  struct mbsys_3ddwissl2_sriat_fileheader_struct fileheader;
   
   /* MBARI processing lidar scan */
-  mbsys_3ddwissl2_mbarirange_struct mbarirange;
+  bool bathymetry_calculated;
+  struct mbsys_3ddwissl2_mbarirange_struct mbarirange;
 
   /* comment */
-  unsigned short comment_len;          /* comment length in bytes */
-  char comment[MB_COMMENT_MAXLINE];  /* comment string */
+  struct mbsys_3ddwissl2_comment_struct comment;
   };
-
-
-
-
-typedef struct
-{  
-   unsigned char       Packet_ID;           // The packet type / ID = PACKET_ID_THERMAL
-   unsigned char			Version  ;
-   unsigned short      SizeBytes;           // define size of header in bytes.
-   // ---
-   unsigned int      DataSizeBytes;       // The Variable Thermal data size AND this header (total size Thermal Packet)
-   // Timestamp - absolute or relitive?
-   int      TimeStart_Sec ;       // Rollover in 2038 if this is signed.
-   int      TimeStart_nSec;       //   signed allows math to add or subtract right.
-   //unsigned int DeltaTimeStamp_S    : 12; // 4095 (real max is probably 180 seconds)
-   //unsigned int DeltaTimeStamp_uS   : 20; // 1,000,000
-   ///////////////////////////////////
-
-   unsigned short NumPtsRow        ; // (14 bits - max is 16,383) Number of shots per rotation of motor.
-   unsigned short NumPtsPkt        ; // (14 bits - max is 16,383) Number of shots in this packet <= NumPtsRow.
-
-   unsigned short ScannerType    :4; // {MBARI, PIPE, SL4, SL5, SL6} - also sets what is in header.
-   unsigned short RBinEnd        :8; // Last range bin in line (255 max)
-   unsigned short Spare1         :2; // Ballence
-   unsigned short Points_per_LOS :2; // 0=good data only, 1=1 (always 1), 2=2 (always 2 entries)
-
-   // In header - will not change for each line.
-   //unsigned char  TempAzCnt        ; // number of shots to average in Az   for a Temperature Bin. 1-255. Default 10.
-   //unsigned char  TempRowCnt       ; // number of shots to average in Rows for a Temperature Bin. 1-255. Default 10.
-
-   unsigned int AzBinStart   : 13; // limit to 8191           = # columns / TempAzCnt 
-   unsigned int ElBin        : 11; // limit to 2047 (11 bits) = # Rows    / TempElCnt
-   unsigned int RBinStart    :  8; // First range bin in line (255 max), a line is TempAzCnt ranges at a time.
-
-   unsigned int R0_offset    : 20; // represented in raw counts,    20 bits
-   unsigned int SNR_offset   : 12; // represented in raw counts,    12 bits
-
-   unsigned int Ratio_offset     ; // represented in raw counts,    32 bits
-           
-   unsigned int R0_nbits     :  6; // number of bits each 0-32
-   unsigned int SNR_nbits    :  6; // number of bits each 0-32
-   unsigned int Ratio_nbits  :  6; // number of bits each 0-32
-   unsigned int AzBinStop    : 13; // limit to 8191           = # columns / TempAzCnt
-   unsigned int Spare2       : 1; // ballence
-} mbsys_3ddwissl2_StructLineThermalPacket; // row info, one for each row
-//unsigned char* PointData[variable];
-//U*: R0     [NumPtsPkt] - Red 0 signal             
-//U*: Ratio  [NumPtsPkt] - Red 1/ Red 0 signal      
-//U*: SNR    [NumPtsPkt] - Red 0/1 SNR measure 
-//U4: Class  [NumPtsPkt] - Classification { 0=Unclass, Ignore, LowSNR, Clutter, HiSNR, Good, Glow }
-
-typedef struct {
-   unsigned int AzCmdStart_deg_cnt; // in 360./0x3FFFF per count - default resolution
-   unsigned int AzCmdEnd_deg_cnt  ; // in 360./0x3FFFF per count - default resolution
-   unsigned int RangeMin_m_cnt    ; // in default resolution U20.14, need to change with m_iRScale_Bits for direct compare.
-   unsigned int RangeMax_m_cnt    ; // in default resolution U20.14, need to change with m_iRScale_Bits for direct compare.
-   unsigned short ThBinStart_cnts   ; // Thermal az bin start (include) deg to cnts is 5000/360.0 = 1/m_fAzBin_deg_per_cnt
-   unsigned short ThBinEnd_cnts     ; // Thermal az bin end   (include)
-   unsigned int IntensityMin      ;
-   unsigned int IntensityMax      ;
-   unsigned int SNRMin            ; // Thermal SNR U12.0
-   unsigned int SNRMax            ;
-   unsigned int R0Min             ; // Thermal Ro  U20
-   unsigned int R0Max             ;
-   unsigned int RatioMin          ; // Thermal Ratio U32.31
-   unsigned int RatioMax          ;
-   bool   SendGoodOnly      ; // Only Class good - includes Az window.
-   bool   SendAzWindow      ; // All points in the Az range acceptance window, good or bad.
-} mbsys_3ddwissl2_SriatProcessingCFG;
-
-typedef struct {
-   unsigned int  Az_cnts;       // U18 cal = 360 deg / 0x3FFFF ... but only used for window selection.
-   unsigned int  Red0_cnts ;    // U20 Sum red0
-   unsigned int  Ratio_cnts;    // U32.31 Red0/Red1
-   unsigned short  SNR_cnts  ;    // U12 goodness measure
-   unsigned int  Time_uS;       // uSeconds from start of scan (Center Time ~200 ms each if 10x10 at 50 Hz)
-   unsigned char   ClassT    ; // Thermal class
-   unsigned short  AzBin;
-   unsigned short  ElBin;
-   unsigned char   RBin;
-} mbsys_3ddwissl2_TempDataPoint;
-
-typedef struct {
-   unsigned int  Az_cnts;        // U18 cal = 360 deg / 0x3FFFF
-   unsigned int  Range_cnts;     // U20 at .1 mm per count.
-   unsigned short  Intensity_cnts; // U12 raw value
-   unsigned int  Time_uS;        // uSeconds from start of scan.
-   unsigned char   ClassR;         // Range   class
-} mbsys_3ddwissl2_RangeDataPoint; // will have 2x number of ranges for every 1 temperature.
-
-
-
-
-
-
-
-// unpacked range data
-struct RiaatArray
-{
-
-   unsigned int   m_iSize   ; // current size of populated data.
-   unsigned int   m_iMaxSize; // Maximum size of populated data, array size.
-
-   unsigned int*  m_piAz_Deg   ; // Az Angle (spin axis measurement) ... Speed + Index replace?
-   int*     m_piRange_m  ; // Range to data point ... from glass?
-   unsigned short*  m_piIntensity; // Signal intensity
-   unsigned int*  m_pnTime_uS  ; // time from start of scan in uS
-   unsigned char*   m_iClass     ; // classification of data point.   
-
-   // Calculated variables and parameters 
-   float m_fExpectedDeltaTime_uS; // calculated based on PRF and line count, used to stuff.
-   float m_fExpectedDeltaAz_deg ; // calculated based on PRF and line count, used to stuff.
-   float m_fScannerShift_deg    ; // = shift count * m_fExpectedDeltaAz_deg
-   bool  m_bSimpleAngle         ; // range is from Start to End if true (does not pass through zero).
-   // running tally
-   int   m_iPtsGoodR            ; // the number of good points (by classification).
-   // Limits
-   unsigned int m_iRmin_cnt ; // 20 bits
-   unsigned int m_iRmax_cnt ; // 20 bits
-   unsigned short m_iImin_cnt ; // 12 bits
-   unsigned short m_iImax_cnt ; // 12 bits
-   unsigned int m_iAzmin_cnt; // 18 bits
-   unsigned int m_iAzmax_cnt; // 18 bits
-};
-
-// unpacked thermal data
-struct ThermArray
-{
-
-   unsigned int   m_iSize   ; // current size of populated data.
-   unsigned int   m_iMaxSize; // Maximum size of populated data, array size.
-   //float    m_fLaserPrf; // calculate timestamp from / fill array if missing data.
-
-   unsigned int*  m_piRatio;  // Red 2 / Red 1 U32.31
-   unsigned int*  m_piR0   ;  // Red 1
-   unsigned short*  m_piSNR  ;  // Red 1 Intensity.
-   unsigned int*  m_pnTime_uS; // time from start of scan in uS - probably will not need. Array position implies.
-   unsigned char*   m_iClass ;  // classification of data point.
-
-   //float* GetThermalProfile(unsigned short az_bin, unsigned short el_bin);
-   //float* GetRangeProfile_m(unsigned short az_bin, unsigned short el_bin);
-   
-   //// Set the AZ bin range and El bin value when adding points
-   unsigned short   m_iAzBinLast; // pt zero baised Az Bin
-   unsigned short   m_iElBinLast; // pt zero baised EL bin
-   unsigned short   m_iRBinLast ; // pt zero baised R bin
-   
-   // Used to determine if the Az bin is in the Az capture window.
-   float    m_AzBinAngle_deg;// calculate what a bin size is in deg (PreHeader fills out).
-
-   // Limits
-   unsigned short m_iSNRmin_cnt  ; // 12 bits
-   unsigned short m_iSNRmax_cnt  ; // 12 bits
-   unsigned int m_iR0min_cnt   ; // 20 bits
-   unsigned int m_iR0max_cnt   ; // 20 bits
-   unsigned int m_iRatioMin_cnt; // 32 bits
-   unsigned int m_iRatioMax_cnt; // 32 bits
-   unsigned short  m_iAzBinMin; // 13 bits The min AZ    bin for thermal 
-   unsigned short  m_iElBinMin; // 11 bits The min EL    bin for thermal
-   unsigned char   m_iRBinMin ; //  8 bits The min Range bin for thermal
-   unsigned short  m_iAzBinMax; // 13 bits The max AZ    bin for thermal
-   unsigned short  m_iElBinMax; // 11 bits The max EL    bin for thermal
-   unsigned char   m_iRBinMax ; //  8 bits The max Range bin for thermal
-
-   // Parameters
-   int      m_iPtsGoodT;
-   bool     m_bSimpleAngle; // range is from Start to End if true (does not pass through zero).
-   unsigned char    m_TempAzCnt ; // number of shots to average in Az   for a Temperature Bin. 1-255. Default 10.
-   unsigned char    m_TempRowCnt; // number of shots to average in Rows for a Temperature Bin. 1-255. Default 10. 
-};
+// ---------------------------------------------------------------------
 
 /* System specific function prototypes */
 int mbsys_3ddwissl2_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error);
@@ -678,19 +631,6 @@ int mbsys_3ddwissl2_calculatebathymetry(int verbose,
   void *store_ptr,
   double amplitude_threshold,
   double target_altitude,
-  int *error);
-
-/* functions called by mbpreprocess to fix first generation WiSSL timestamp errors */
-int mbsys_3ddwissl2_indextablefix(int verbose,
-  void *mbio_ptr,
-  int num_indextable,
-  void *indextable_ptr,
-  int *error);
-int mbsys_3ddwissl2_indextableapply(int verbose,
-  void *mbio_ptr,
-  int num_indextable,
-  void *indextable_ptr,
-  int n_file,
   int *error);
 
 #endif  /* MBSYS_3DDWISSL2_H_ */

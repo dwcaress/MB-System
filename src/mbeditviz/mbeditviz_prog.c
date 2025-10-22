@@ -955,29 +955,10 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
           }
 
           else {
-            /* find centermost beam */
-            icenter = -1;
-            iport = -1;
-            istbd = -1;
-            centerdistance = 0.0;
-            portdistance = 0.0;
-            stbddistance = 0.0;
-            for (ibeam = 0; ibeam < beams_bath; ibeam++) {
-              if (!mb_beam_check_flag_unusable(beamflag[ibeam])) {
-                if (icenter == -1 || fabs(bathacrosstrack[ibeam]) < centerdistance) {
-                  icenter = ibeam;
-                  centerdistance = bathacrosstrack[ibeam];
-                }
-                if (iport == -1 || bathacrosstrack[ibeam] < portdistance) {
-                  iport = ibeam;
-                  portdistance = bathacrosstrack[ibeam];
-                }
-                if (istbd == -1 || bathacrosstrack[ibeam] > stbddistance) {
-                  istbd = ibeam;
-                  stbddistance = bathacrosstrack[ibeam];
-                }
-              }
-            }
+          	mbev_status = mb_swathbounds(mbev_verbose, false, ping->beams_bath, 0, 
+          																ping->beamflag, ping->bathacrosstrack,
+          																NULL, NULL, &iport, &icenter, &istbd, 
+          																NULL, NULL, NULL, &mbev_error);
 
             mb_coor_scale(mbev_verbose, ping->navlat, &mtodeglon, &mtodeglat);
             if (icenter >= 0) {
