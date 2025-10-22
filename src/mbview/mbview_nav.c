@@ -1861,7 +1861,7 @@ int mbview_navpicksize(size_t instance) {
 			if (!found)
 				shared.shareddata.navpick.xpoints[i].zdata = shared.shareddata.navpick.endpoints[1].zdata;
 			shared.shareddata.navpick.xpoints[i].zdisplay[instance] =
-			    view->scale * (data->exageration * shared.shareddata.navpick.xpoints[i].zdata - view->zorigin);
+			    view->scale * (data->exaggeration * shared.shareddata.navpick.xpoints[i].zdata - view->zorigin);
 			mbview_projectll2display(instance, shared.shareddata.navpick.xpoints[i].xlon,
 			                         shared.shareddata.navpick.xpoints[i].ylat, shared.shareddata.navpick.xpoints[i].zdata,
 			                         &shared.shareddata.navpick.xpoints[i].xdisplay[instance],

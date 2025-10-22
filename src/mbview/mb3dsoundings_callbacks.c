@@ -395,8 +395,8 @@ int mb3dsoundings_updatestatus() {
 
   /* else set standard status label */
   else {
-    sprintf(value_text, "Azi:%.2f | Elev: %.2f | Exager:%.2f | Tot:%d Good:%d Flagged:%d", mb3dsoundings.azimuth,
-            mb3dsoundings.elevation, mb3dsoundings.exageration, soundingdata->num_soundings,
+    sprintf(value_text, "Azi:%.2f | Elev: %.2f | exagger:%.2f | Tot:%d Good:%d Flagged:%d", mb3dsoundings.azimuth,
+            mb3dsoundings.elevation, mb3dsoundings.exaggeration, soundingdata->num_soundings,
             soundingdata->num_soundings_unflagged, soundingdata->num_soundings_flagged);
     XtManageChild(mb3dsoundings.mb3dsdg.scale_rollbias);
     XtManageChild(mb3dsoundings.mb3dsdg.scale_pitchbias);
@@ -435,22 +435,22 @@ int mb3dsoundings_updatelabelmousemode() {
   }
   else /* if (mb3dsoundings.mouse_mode == MBS_MOUSE_ROTATE) */ {
     if (mb3dsoundings.edit_mode == MBS_EDIT_TOGGLE) {
-      sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Toggle)\":t\"M: Rotate Soundings\"\"R: Exageration\"");
+      sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Toggle)\":t\"M: Rotate Soundings\"\"R: exaggeration\"");
     }
     else if (mb3dsoundings.edit_mode == MBS_EDIT_PICK) {
-      sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Pick)\":t\"M: Rotate Soundings\"\"R: Exageration\"");
+      sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Pick)\":t\"M: Rotate Soundings\"\"R: exaggeration\"");
     }
     else if (mb3dsoundings.edit_mode == MBS_EDIT_ERASE) {
-      sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Erase)\":t\"M: Rotate Soundings\"\"R: Exageration\"");
+      sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Erase)\":t\"M: Rotate Soundings\"\"R: exaggeration\"");
     }
     else if (mb3dsoundings.edit_mode == MBS_EDIT_RESTORE) {
-      sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Restore)\":t\"M: Rotate Soundings\"\"R: Exageration\"");
+      sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Restore)\":t\"M: Rotate Soundings\"\"R: exaggeration\"");
     }
     else if (mb3dsoundings.edit_mode == MBS_EDIT_GRAB) {
-      sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Grab)\":t\"M: Rotate Soundings\"\"R: Exageration\"");
+      sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Grab)\":t\"M: Rotate Soundings\"\"R: exaggeration\"");
     }
     else if (mb3dsoundings.edit_mode == MBS_EDIT_INFO) {
-      sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Info)\":t\"M: Rotate Soundings\"\"R: Exageration\"");
+      sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Info)\":t\"M: Rotate Soundings\"\"R: exaggeration\"");
     }
   }
   set_mbview_label_multiline_string(mb3dsoundings.mb3dsdg.label_mousemode, value_text);
@@ -742,7 +742,7 @@ int mb3dsoundings_reset() {
   /* drawing variables */
   mb3dsoundings.elevation = 0.0;
   mb3dsoundings.azimuth = 0.0;
-  mb3dsoundings.exageration = 1.0;
+  mb3dsoundings.exaggeration = 1.0;
   mb3dsoundings.gl_width = 0;
   mb3dsoundings.gl_height = 0;
   ;
@@ -1356,7 +1356,7 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
           XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), XtWindow(mb3dsoundings.mb3dsdg.drawingArea),
                         mb3dsoundings.FleurBlackCursor);
 
-          mb3dsoundings.exageration_save = mb3dsoundings.exageration;
+          mb3dsoundings.exaggeration_save = mb3dsoundings.exaggeration;
         }
 
         /* pan zoom mode */
@@ -1465,8 +1465,8 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
           XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), XtWindow(mb3dsoundings.mb3dsdg.drawingArea),
                         mb3dsoundings.FleurRedCursor);
 
-          /* change vertical exageration of 3D map */
-          mb3dsoundings.exageration = mb3dsoundings.exageration_save *
+          /* change vertical exaggeration of 3D map */
+          mb3dsoundings.exaggeration = mb3dsoundings.exaggeration_save *
                                       exp(((double)(mb3dsoundings.button_move_y - mb3dsoundings.button_down_y)) /
                                           ((double)mb3dsoundings.gl_height));
 
@@ -1748,7 +1748,7 @@ int mb3dsoundings_scale(int verbose, int *error) {
       (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
     sounding->glx = soundingdata->scale * sounding->x;
     sounding->gly = soundingdata->scale * sounding->y;
-    sounding->glz = mb3dsoundings.exageration * soundingdata->zscale * (sounding->z - soundingdata->zorigin);
+    sounding->glz = mb3dsoundings.exaggeration * soundingdata->zscale * (sounding->z - soundingdata->zorigin);
   }
 
   return (mbs_status);
@@ -1768,7 +1768,7 @@ int mb3dsoundings_scalez(int verbose, int *error) {
   for (int i = 0; i < soundingdata->num_soundings; i++) {
     struct mb3dsoundings_sounding_struct *sounding =
       (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
-    sounding->glz = mb3dsoundings.exageration * soundingdata->zscale * (sounding->z - soundingdata->zorigin);
+    sounding->glz = mb3dsoundings.exaggeration * soundingdata->zscale * (sounding->z - soundingdata->zorigin);
   }
 
   return (mbs_status);
@@ -2422,7 +2422,7 @@ int mb3dsoundings_setzscale(int verbose, int *error) {
   soundingdata->zmin = -0.5 * (zmax - zmin);
   soundingdata->zmax = 0.5 * (zmax - zmin);
   for (int i = 0; i < soundingdata->num_soundings; i++) {
-    soundingdata->soundings[i].glz = mb3dsoundings.exageration * soundingdata->zscale
+    soundingdata->soundings[i].glz = mb3dsoundings.exaggeration * soundingdata->zscale
                                       * (soundingdata->soundings[i].z - soundingdata->zorigin);
   }
 
@@ -2499,8 +2499,8 @@ soundingdata->num_soundings); */
     glxmax = soundingdata->scale * soundingdata->xmax;
     glymin = soundingdata->scale * soundingdata->ymin;
     glymax = soundingdata->scale * soundingdata->ymax;
-    float glzmin = mb3dsoundings.exageration * soundingdata->zscale * soundingdata->zmin;
-    float glzmax = mb3dsoundings.exageration * soundingdata->zscale * soundingdata->zmax;
+    float glzmin = mb3dsoundings.exaggeration * soundingdata->zscale * soundingdata->zmin;
+    float glzmax = mb3dsoundings.exaggeration * soundingdata->zscale * soundingdata->zmax;
     glLineWidth(1.0);
     glColor3f(0.0, 0.0, 0.0);
     glEnable(GL_LINE_STIPPLE);
@@ -3199,7 +3199,7 @@ void do_mb3dsdg_resetview(Widget w, XtPointer client_data, XtPointer call_data) 
   /* reset view orientation */
   mb3dsoundings.elevation = 0.0;
   mb3dsoundings.azimuth = 0.0;
-  mb3dsoundings.exageration = 1.0;
+  mb3dsoundings.exaggeration = 1.0;
 
   /* rescale */
   mb3dsoundings_scalez(mbs_verbose, &mbs_error);

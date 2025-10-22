@@ -16279,7 +16279,7 @@ int mbnavadjust_open_visualization(int which_grid) {
   double mbv_slope_colortable_max;
   int mbv_secondary_colortable;
   int mbv_secondary_colortable_mode;
-  double mbv_exageration;
+  double mbv_exaggeration;
   double mbv_modelelevation3d;
   double mbv_modelazimuth3d;
   double mbv_viewelevation3d;
@@ -16424,7 +16424,7 @@ int mbnavadjust_open_visualization(int which_grid) {
       mbv_secondary_colortable_mode = MBV_COLORTABLE_NORMAL;
       // double mbv_secondary_colortable_min = 0.0;
       // double mbv_secondary_colortable_max = 0.0;
-      mbv_exageration = 1.0;
+      mbv_exaggeration = 1.0;
       mbv_modelelevation3d = 90.0;
       mbv_modelazimuth3d = 0.0;
       mbv_viewelevation3d = 90.0;
@@ -16497,7 +16497,7 @@ int mbnavadjust_open_visualization(int which_grid) {
           mbv_primaryslope_histogram, mbv_secondary_histogram, mbv_primary_shade_mode, mbv_slope_shade_mode,
           mbv_secondary_shade_mode, mbv_grid_contour_mode, mbv_site_view_mode, mbv_route_view_mode, 
           mbv_nav_view_mode, mbv_navswathbounds_view_mode, mbv_navdrape_view_mode, mbv_vector_view_mode, 
-          mbv_exageration, mbv_modelelevation3d, mbv_modelazimuth3d,
+          mbv_exaggeration, mbv_modelelevation3d, mbv_modelazimuth3d,
           mbv_viewelevation3d, mbv_viewazimuth3d, mbv_illuminate_magnitude, mbv_illuminate_elevation,
           mbv_illuminate_azimuth, mbv_slope_magnitude, mbv_overlay_shade_magnitude, mbv_overlay_shade_center,
           mbv_overlay_shade_mode, mbv_contour_interval, mbv_display_projection_mode, mbv_display_projection_id, &error);

@@ -380,7 +380,7 @@ int mbview_reset(size_t instance) {
 		data->secondary_colortable_max = 0.0;
 		data->secondary_shade_mode = MBV_SHADE_VIEW_NONE;
 
-		data->exageration = 1.0;
+		data->exaggeration = 1.0;
 		data->modelelevation3d = 90.0;
 		data->modelazimuth3d = 0.0;
 		data->viewelevation3d = 90.0;
@@ -403,7 +403,7 @@ int mbview_reset(size_t instance) {
 		data->contour_interval = 100.0;
 
 		/* profile controls */
-		data->profile_exageration = 1.0;
+		data->profile_exaggeration = 1.0;
 		data->profile_widthfactor = 1;
 		data->profile_slopethreshold = 2.00;
 
@@ -664,7 +664,7 @@ int mbview_reset(size_t instance) {
 		view->viewoffset3d_z_save = 0.0;
 		view->areaaspect = 0.5;
 		view->areaaspect_save = 0.5;
-		view->exageration_save = 0.0;
+		view->exaggeration_save = 0.0;
 		view->modelelevation3d_save = 0.0;
 		view->modelazimuth3d_save = 0.0;
 		view->viewelevation3d_save = 0.0;
@@ -792,7 +792,7 @@ int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datah
 		fprintf(stderr, "dbg2       secondary_shade_mode:      %d\n", data->secondary_shade_mode);
 
 		/* view controls */
-		fprintf(stderr, "dbg2       exageration:               %f\n", data->exageration);
+		fprintf(stderr, "dbg2       exaggeration:               %f\n", data->exaggeration);
 		fprintf(stderr, "dbg2       modelelevation3d:          %f\n", data->modelelevation3d);
 		fprintf(stderr, "dbg2       modelazimuth3d:            %f\n", data->modelazimuth3d);
 		fprintf(stderr, "dbg2       viewelevation3d:           %f\n", data->viewelevation3d);
@@ -808,7 +808,7 @@ int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datah
 		fprintf(stderr, "dbg2       contour_interval:           %f\n", data->slope_magnitude);
 
 		/* profile controls */
-		fprintf(stderr, "dbg2       profile_exageration:        %f\n", data->profile_exageration);
+		fprintf(stderr, "dbg2       profile_exaggeration:        %f\n", data->profile_exaggeration);
 		fprintf(stderr, "dbg2       profile_widthfactor:        %d\n", data->profile_widthfactor);
 		fprintf(stderr, "dbg2       profile_slopethreshold:     %f\n", data->profile_slopethreshold);
 
@@ -1307,7 +1307,7 @@ int mbview_setwindowparms(int verbose, size_t instance, int (*mbview_dismiss_not
 int mbview_setviewcontrols(int verbose, size_t instance, int display_mode, int mouse_mode, int grid_mode, int primary_histogram,
                            int primaryslope_histogram, int secondary_histogram, int primary_shade_mode, int slope_shade_mode,
                            int secondary_shade_mode, int grid_contour_mode, int site_view_mode, int route_view_mode,
-                           int nav_view_mode, int navswathbounds_view_mode, int navdrape_view_mode, int vector_view_mode, double exageration,
+                           int nav_view_mode, int navswathbounds_view_mode, int navdrape_view_mode, int vector_view_mode, double exaggeration,
                            double modelelevation3d, double modelazimuth3d, double viewelevation3d, double viewazimuth3d,
                            double illuminate_magnitude, double illuminate_elevation, double illuminate_azimuth,
                            double slope_magnitude, double overlay_shade_magnitude, double overlay_shade_center,
@@ -1336,7 +1336,7 @@ int mbview_setviewcontrols(int verbose, size_t instance, int display_mode, int m
 		fprintf(stderr, "dbg2       nav_view_mode:             %d\n", nav_view_mode);
 		fprintf(stderr, "dbg2       navswathbounds_view_mode:  %d\n", navswathbounds_view_mode);
 		fprintf(stderr, "dbg2       vector_view_mode:          %d\n", vector_view_mode);
-		fprintf(stderr, "dbg2       exageration:               %f\n", exageration);
+		fprintf(stderr, "dbg2       exaggeration:               %f\n", exaggeration);
 		fprintf(stderr, "dbg2       modelelevation3d:          %f\n", modelelevation3d);
 		fprintf(stderr, "dbg2       modelazimuth3d:            %f\n", modelazimuth3d);
 		fprintf(stderr, "dbg2       viewelevation3d:           %f\n", viewelevation3d);
@@ -1373,7 +1373,7 @@ int mbview_setviewcontrols(int verbose, size_t instance, int display_mode, int m
 	data->navswathbounds_view_mode = navswathbounds_view_mode;
 	data->navdrape_view_mode = navdrape_view_mode;
 	data->vector_view_mode = vector_view_mode;
-	data->exageration = exageration;
+	data->exaggeration = exaggeration;
 	data->modelelevation3d = modelelevation3d;
 	data->modelazimuth3d = modelazimuth3d;
 	data->viewelevation3d = viewelevation3d;
@@ -1458,7 +1458,7 @@ int mbview_open(int verbose, size_t instance, int *error) {
 		fprintf(stderr, "dbg2       secondary_shade_mode:      %d\n", data->secondary_shade_mode);
 
 		/* view controls */
-		fprintf(stderr, "dbg2       exageration:               %f\n", data->exageration);
+		fprintf(stderr, "dbg2       exaggeration:               %f\n", data->exaggeration);
 		fprintf(stderr, "dbg2       modelelevation3d:          %f\n", data->modelelevation3d);
 		fprintf(stderr, "dbg2       modelazimuth3d:            %f\n", data->modelazimuth3d);
 		fprintf(stderr, "dbg2       viewelevation3d:           %f\n", data->viewelevation3d);
@@ -1474,7 +1474,7 @@ int mbview_open(int verbose, size_t instance, int *error) {
 		fprintf(stderr, "dbg2       contour_interval:           %f\n", data->slope_magnitude);
 
 		/* profile controls */
-		fprintf(stderr, "dbg2       profile_exageration:        %f\n", data->profile_exageration);
+		fprintf(stderr, "dbg2       profile_exaggeration:        %f\n", data->profile_exaggeration);
 		fprintf(stderr, "dbg2       profile_widthfactor:        %d\n", data->profile_widthfactor);
 		fprintf(stderr, "dbg2       profile_slopethreshold:     %f\n", data->profile_slopethreshold);
 
@@ -1980,8 +1980,8 @@ int mbview_open(int verbose, size_t instance, int *error) {
 		XtSetValues(view->mb3dview.mbview_label_model, args, ac);
 		XtSetValues(view->mb3dview.mbview_separator9, args, ac);
 		XtSetValues(view->mb3dview.mbview_pushButton_view_3d_apply, args, ac);
-		XtSetValues(view->mb3dview.mbview_label_exager, args, ac);
-		XtSetValues(view->mb3dview.mbview_textField_exageration, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_exagger, args, ac);
+		XtSetValues(view->mb3dview.mbview_textField_exaggeration, args, ac);
 		XtSetValues(view->mb3dview.mbview_pushButton_view_3d_dismiss, args, ac);
 		XtSetValues(view->mb3dview.mbview_dialogShell_2dparms, args, ac);
 		XtSetValues(view->mb3dview.mbview_bulletinBoard_2dparms, args, ac);
@@ -2013,7 +2013,7 @@ int mbview_open(int verbose, size_t instance, int *error) {
 		XtSetValues(view->mb3dview.mbview_scrolledWindow_profile, args, ac);
 		XtSetValues(view->mb3dview.mbview_drawingArea_profile, args, ac);
 		XtSetValues(view->mb3dview.mbview_profile_label_info, args, ac);
-		XtSetValues(view->mb3dview.mbview_scale_profile_exager, args, ac);
+		XtSetValues(view->mb3dview.mbview_scale_profile_exagger, args, ac);
 		XtSetValues(view->mb3dview.mbview_profile_pushButton_dismiss, args, ac);
 		XtSetValues(view->glwmda, args, ac);
 		/* set the initialization flag */
@@ -2202,7 +2202,7 @@ int mbview_update_sensitivity(int verbose, size_t instance, int *error) {
 	XtSetValues(view->mb3dview.mbview_textField_model_elevation, args, ac);
 	XtSetValues(view->mb3dview.mbview_textField_model_3dzoom, args, ac);
 	XtSetValues(view->mb3dview.mbview_label_model_3dzoom, args, ac);
-	XtSetValues(view->mb3dview.mbview_textField_exageration, args, ac);
+	XtSetValues(view->mb3dview.mbview_textField_exaggeration, args, ac);
 	XtSetValues(view->mb3dview.mbview_textField_view_azimuth, args, ac);
 	XtSetValues(view->mb3dview.mbview_textField_view_elevation, args, ac);
 	XtSetValues(view->mb3dview.mbview_textField_view_3doffsetx, args, ac);
@@ -3704,7 +3704,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					/* set cursor for exaggerate */
 					XDefineCursor(view->dpy, view->xid, view->FleurBlackCursor);
 
-					view->exageration_save = data->exageration;
+					view->exaggeration_save = data->exaggeration;
 				}
 
 				/* handle shading */
@@ -4145,16 +4145,16 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					/* set cursor for exaggerate */
 					XDefineCursor(view->dpy, view->xid, view->FleurRedCursor);
 
-					/* change vertical exageration of 3D map */
-					data->exageration = view->exageration_save *
+					/* change vertical exaggeration of 3D map */
+					data->exaggeration = view->exaggeration_save *
 					                    exp(((double)(view->button_down_y - view->button_move_y)) / ((double)data->height));
 					if (data->display_projection_mode != MBV_PROJECTION_SPHEROID) {
-						view->zorigin = data->exageration * 0.5 * (data->primary_min + data->primary_max);
+						view->zorigin = data->exaggeration * 0.5 * (data->primary_min + data->primary_max);
 					}
-					if (XtIsManaged(view->mb3dview.mbview_textField_exageration)) {
+					if (XtIsManaged(view->mb3dview.mbview_textField_exaggeration)) {
             mb_path value_text;
-						sprintf(value_text, "%g", data->exageration);
-						XmTextFieldSetString(view->mb3dview.mbview_textField_exageration, value_text);
+						sprintf(value_text, "%g", data->exaggeration);
+						XmTextFieldSetString(view->mb3dview.mbview_textField_exaggeration, value_text);
 					}
 
 					/* reset flags */
@@ -6251,7 +6251,7 @@ void set_mbview_mouse_mode(size_t instance, int mode) {
 	if (data->mouse_mode == MBV_MOUSE_MOVE)
     sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Pick\":t\"M: Pan\":t\"R: Zoom\"");
 	else if (data->mouse_mode == MBV_MOUSE_ROTATE)
-		sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Pick\":t\"M: Rotate\":t\"R:Exageration\"");
+		sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Pick\":t\"M: Rotate\":t\"R:exaggeration\"");
 	else if (data->mouse_mode == MBV_MOUSE_SHADE)
 		sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Pick\":t\"M: Light Source\":t\"R: Shade Magnitude\"");
 	else if (data->mouse_mode == MBV_MOUSE_VIEWPOINT)
@@ -6891,8 +6891,8 @@ int do_mbview_3dparmstext(size_t instance) {
 	XmTextFieldSetString(view->mb3dview.mbview_textField_view_azimuth, value_text);
 	sprintf(value_text, "%g", data->viewelevation3d);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_view_elevation, value_text);
-	sprintf(value_text, "%g", data->exageration);
-	XmTextFieldSetString(view->mb3dview.mbview_textField_exageration, value_text);
+	sprintf(value_text, "%g", data->exaggeration);
+	XmTextFieldSetString(view->mb3dview.mbview_textField_exaggeration, value_text);
 	sprintf(value_text, "%g", view->offset3d_x);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_view_3doffsetx, value_text);
 	sprintf(value_text, "%g", view->offset3d_y);
@@ -7000,12 +7000,12 @@ void do_mbview_3dparmsapply(Widget w, XtPointer client_data, XtPointer call_data
 		change = true;
 	}
 
-	get_mbview_text_string(view->mb3dview.mbview_textField_exageration, value_text);
+	get_mbview_text_string(view->mb3dview.mbview_textField_exaggeration, value_text);
 	sscanf(value_text, "%lf", &dvalue);
-	if (dvalue != data->exageration) {
-		data->exageration = dvalue;
+	if (dvalue != data->exaggeration) {
+		data->exaggeration = dvalue;
 		if (data->display_projection_mode != MBV_PROJECTION_SPHEROID) {
-			view->zorigin = data->exageration * 0.5 * (data->primary_min + data->primary_max);
+			view->zorigin = data->exaggeration * 0.5 * (data->primary_min + data->primary_max);
 		}
 		change = true;
 
@@ -7936,7 +7936,7 @@ void do_mbview_reset_view(Widget w, XtPointer client_data, XtPointer call_data) 
 	view->offset3d_y = 0.0;
 	view->offset3d_z = 0.0;
 	view->viewoffset3d_z = 0.0;
-	data->exageration = 1.0;
+	data->exaggeration = 1.0;
 	data->modelelevation3d = 90.0;
 	data->modelazimuth3d = 0.0;
 	data->viewelevation3d = 90.0;
@@ -8125,7 +8125,7 @@ void do_mbview_profile_resize(Widget w, XtPointer client_data, XEvent *event, Bo
 }
 /*------------------------------------------------------------------------------*/
 
-void do_mbview_profile_exager(Widget w, XtPointer client_data, XtPointer call_data) {
+void do_mbview_profile_exagger(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)client_data;  // Unused parameter
 
 	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
@@ -8138,13 +8138,13 @@ void do_mbview_profile_exager(Widget w, XtPointer client_data, XtPointer call_da
 	XtGetValues(w, args, ac);
 
 	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_profile_exager: instance:%zu\n", instance);
+		fprintf(stderr, "do_mbview_profile_exagger: instance:%zu\n", instance);
 
 	struct mbview_world_struct *view = &(mbviews[instance]);
 	struct mbview_struct *data = &(view->data);
 
-	const int profile_exager = acs->value;
-	data->profile_exageration = 0.1 * profile_exager;
+	const int profile_exagger = acs->value;
+	data->profile_exaggeration = 0.1 * profile_exagger;
 
 	/* reinitialize the opengl widget */
 	mbview_reset_prglx(instance);
