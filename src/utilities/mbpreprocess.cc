@@ -106,6 +106,7 @@ constexpr char usage_message[] =
     "\t--attitude-file-format=format_id\n"
     "\t--attitude-async=record_kind\n"
     "\t--attitude-sensor=sensor_id\n\n"
+    "\t--attitude-zero-heave\n\n"
     "\t--soundspeed-file=file\n"
     "\t--soundspeed-file-format=format_id\n"
     "\t--soundspeed-async=record_kind\n"
@@ -251,6 +252,7 @@ int main(int argc, char **argv) {
   int attitude_file_format = 0;
   int attitude_async = MB_DATA_DATA;
   int attitude_sensor = -1;
+  bool zero_heave = false;
   merge_t soundspeed_mode = MBPREPROCESS_MERGE_OFF;
   int soundspeed_file_format = 0;
   int soundspeed_async = MB_DATA_DATA;
@@ -292,6 +294,7 @@ int main(int argc, char **argv) {
                                       {"attitude-file-format", required_argument, nullptr, 0},
                                       {"attitude-async", required_argument, nullptr, 0},
                                       {"attitude-sensor", required_argument, nullptr, 0},
+                                      {"attitude-zero-heave", no_argument, nullptr, 0},
                                       {"soundspeed-file", required_argument, nullptr, 0},
                                       {"soundspeed-file-format", required_argument, nullptr, 0},
                                       {"soundspeed-async", required_argument, nullptr, 0},
@@ -492,6 +495,9 @@ int main(int argc, char **argv) {
         else if (strcmp("attitude-sensor", options[option_index].name) == 0) {
           /* n = */ sscanf(optarg, "%d", &attitude_sensor);
           preprocess_pars.recalculate_bathymetry = true;
+        }
+        else if (strcmp("attitude-zero-heave", options[option_index].name) == 0) {
+          zero_heave = true;
         }
         /*-------------------------------------------------------
          * Define source of soundspeed - could be an external file
@@ -929,6 +935,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "dbg2       attitude_file_format:         %d\n", attitude_file_format);
     fprintf(stderr, "dbg2       attitude_async:               %d\n", attitude_async);
     fprintf(stderr, "dbg2       attitude_sensor:              %d\n", attitude_sensor);
+    fprintf(stderr, "dbg2       attitude_zero_heave:          %d\n", zero_heave);
     fprintf(stderr, "dbg2  Source of soundspeed data:\n");
     fprintf(stderr, "dbg2       soundspeed_mode:              %d\n", soundspeed_mode);
     fprintf(stderr, "dbg2       soundspeed_file:              %s\n", soundspeed_file);
@@ -1050,6 +1057,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "     attitude_file_format:         %d\n", attitude_file_format);
     fprintf(stderr, "     attitude_async:               %d\n", attitude_async);
     fprintf(stderr, "     attitude_sensor:              %d\n", attitude_sensor);
+    fprintf(stderr, "     attitude_zero_heave:          %d\n", zero_heave);
     fprintf(stderr, "Source of soundspeed data:\n");
     fprintf(stderr, "     soundspeed_mode:              %d\n", soundspeed_mode);
     fprintf(stderr, "     soundspeed_file:              %s\n", soundspeed_file);
@@ -2094,6 +2102,13 @@ int main(int argc, char **argv) {
       attitude_roll[i], attitude_pitch[i], attitude_heave[i]);
   }
 #endif
+
+	/* zero heave values if requested */
+	if (zero_heave) {
+		for (int i=0;i<n_attitude;i++) {
+			attitude_heave[i] = 0.0;
+		}
+	}
 
   /* deal with correcting MBARI Mapping AUV pressure depth time jumps */
   if (kluge_timejumps_mbaripressure) {

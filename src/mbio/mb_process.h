@@ -807,15 +807,15 @@ struct mb_preprocess_struct {
   double *soundspeed_time_d;
   double *soundspeed_soundspeed;
 
-  int no_change_survey;
+  bool no_change_survey;
   int multibeam_sidescan_source;
-  int modify_soundspeed;
-  int recalculate_bathymetry;
-  int sounding_amplitude_filter;
+  bool modify_soundspeed;
+  bool recalculate_bathymetry;
+  bool sounding_amplitude_filter;
   double sounding_amplitude_threshold;
-  int sounding_altitude_filter;
+  bool sounding_altitude_filter;
   double sounding_target_altitude;
-  int ignore_water_column;
+  bool ignore_water_column;
   int head1_offsets;
   double head1_offsets_x;
   double head1_offsets_y;

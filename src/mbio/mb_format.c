@@ -2922,9 +2922,13 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
     else
       suffix_len = 0;
     if (suffix_len == 6) {
+			if (fileroot != NULL) {
+					strncpy(fileroot, filename, strlen(filename) - suffix_len);
+					fileroot[strlen(filename) - suffix_len] = '\0';
+			}
       *format = MBF_3DWISSL2;
-	  found = true;
-	}
+	  	found = true;
+		}
   }
 
   /* look for a WASSP *.000 file format convention */
