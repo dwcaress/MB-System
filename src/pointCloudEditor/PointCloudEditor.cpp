@@ -111,13 +111,14 @@ void PointCloudEditor::visualize(void) {
   renderer_->AddActor(actor_);
   renderer_->SetBackground(colors_->GetColor3d("Tan").GetData());
 
-  renderWindow_->Render();
-
   if (firstRender_) {
     // Build GUI elements
     buildWidgets();
     firstRender_ = false;
   }
+
+  renderWindow_->Render();
+
 
   /// actor_->SetScale(1.0, 1.0, verticalExagg_);
 
@@ -241,6 +242,8 @@ void PointCloudEditor::buildWidgets() {
     radioButtons.push_back(buttonWidget);
   }
 
+  std::cerr << "end buildWidgets()***\n";
+  
 }
 
   
