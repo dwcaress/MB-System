@@ -87,7 +87,8 @@ protected:
   vtkNew<vtkRenderer> overlayRenderer_;
   vtkNew<vtkActor2D> rubberBandActor_;
   vtkNew<vtkPolyDataMapper2D> rubberBandMapper_;
-  vtkNew<vtkPolyData> rubberBandPolyData_;  
+  vtkNew<vtkPolyData> rubberBandPolyData_;
+  vtkNew<vtkCoordinate> transformCoordinate_;
   bool overlayInitialized_ = false;
 
   void InitializeOverlay();

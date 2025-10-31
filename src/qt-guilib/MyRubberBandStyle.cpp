@@ -360,7 +360,7 @@ void MyRubberBandStyle::RedrawRubberBand() {
 
 #endif
 
-
+/* ***
 void MyRubberBandStyle::RedrawRubberBand() 
 {
     if (!overlayInitialized_) {
@@ -414,6 +414,54 @@ void MyRubberBandStyle::RedrawRubberBand()
     }
     
     // Render
+    this->Interactor->GetRenderWindow()->Render();
+}
+*** */
+
+/* ***** Claude.ai ******* */
+void MyRubberBandStyle::RedrawRubberBand() 
+{
+    if (!overlayInitialized_) {
+        std::cerr << "overlay not yet initialized\n";
+        InitializeOverlay();
+        if (!overlayInitialized_) {
+            std::cerr << "FAILED to initialize overlay\n";	  
+            return;
+        }
+    }
+    
+    // Get window size
+    const int* size = this->Interactor->GetRenderWindow()->GetSize();
+    
+    // Clamp coordinates to window bounds
+    double x1 = std::max(0, std::min(this->StartPosition[0], size[0] - 1));
+    double y1 = std::max(0, std::min(this->StartPosition[1], size[1] - 1));
+    double x2 = std::max(0, std::min(this->EndPosition[0], size[0] - 1));
+    double y2 = std::max(0, std::min(this->EndPosition[1], size[1] - 1));
+
+    std::cerr << "x1: " << x1 << ", y1: " << y1 <<
+              ", x2: " << x2 << ", y2: " << y2 << "\n";
+    
+    // Create new geometry
+    vtkNew<vtkPoints> points;
+    vtkNew<vtkCellArray> lines;
+    
+    // Use DISPLAY coordinates directly (pixel coordinates)
+    points->InsertNextPoint(x1, y1, 0);
+    points->InsertNextPoint(x2, y1, 0);
+    points->InsertNextPoint(x2, y2, 0);
+    points->InsertNextPoint(x1, y2, 0);
+    
+    // Create closed rectangle (5 points to close the loop)
+    vtkIdType rect[5] = {0, 1, 2, 3, 0};
+    lines->InsertNextCell(5, rect);
+    
+    // Update polydata
+    rubberBandPolyData_->SetPoints(points);
+    rubberBandPolyData_->SetLines(lines);
+    rubberBandPolyData_->Modified();
+    
+    // Render the window
     this->Interactor->GetRenderWindow()->Render();
 }
 
@@ -516,6 +564,8 @@ void MyRubberBandStyle::PrintSelf(ostream& os, vtkIndent indent)
   this->Superclass::PrintSelf(os, indent);
 }
 
+
+/* ***
 void MyRubberBandStyle::InitializeOverlay() {
   if (!this->Interactor || overlayInitialized_) {
     return;
@@ -535,7 +585,43 @@ void MyRubberBandStyle::InitializeOverlay() {
         
   overlayInitialized_ = true;
 }
+*** */
 
+/* ***** Claude.ai ******* */
+void MyRubberBandStyle::InitializeOverlay() {
+    if (!this->Interactor || overlayInitialized_) {
+        return;
+    }
+    
+    vtkRenderWindow* renWin = this->Interactor->GetRenderWindow();
+    
+    // Set up overlay renderer
+    renWin->AddRenderer(overlayRenderer_);
+    overlayRenderer_->SetLayer(1); // Overlay layer
+    overlayRenderer_->InteractiveOff();
+    renWin->SetNumberOfLayers(2);
+    
+    // Match the viewport of the main renderer
+    overlayRenderer_->SetViewport(0.0, 0.0, 1.0, 1.0);
+    
+    // Initialize polydata
+    rubberBandPolyData_->Initialize();
+    rubberBandMapper_->SetInputData(rubberBandPolyData_);
+    
+    // CRITICAL: Set the coordinate system to DISPLAY
+    transformCoordinate_->SetCoordinateSystemToDisplay();
+    rubberBandMapper_->SetTransformCoordinate(transformCoordinate_);
+    
+    // Configure the actor
+    rubberBandActor_->SetMapper(rubberBandMapper_);
+    rubberBandActor_->GetProperty()->SetColor(1.0, 0.0, 0.0); // Red
+    rubberBandActor_->GetProperty()->SetLineWidth(2.0);
+    rubberBandActor_->GetProperty()->SetOpacity(1.0);
+    
+    overlayRenderer_->AddActor2D(rubberBandActor_);
+    
+    overlayInitialized_ = true;
+}
 
 void MyRubberBandStyle::SetInteractor(vtkRenderWindowInteractor* interactor) {
   this->Superclass::SetInteractor(interactor);
