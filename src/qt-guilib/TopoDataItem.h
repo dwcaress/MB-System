@@ -15,6 +15,7 @@
 #include <vtkLight.h>
 #include <vtkGenericRenderWindowInteractor.h>
 #include <vtkInteractorStyle.h>
+#include <vtkInteractorStyleDrawPolygon.h>
 #include <vtkInteractorStyleRubberBandPick.h>
 #include <QVTKInteractor.h>
 #include <vtkInteractorStyleTerrain.h>
@@ -244,7 +245,8 @@ namespace mb_system {
     LightingInteractorStyle *lightingInteractorStyle_;
 
     /// Select topo/bathymetry data with mouse
-    DataSelectInteractorStyle *dataSelectInteractorStyle_;    
+    /// DataSelectInteractorStyle *dataSelectInteractorStyle_;
+    vtkNew<MyRubberBandStyle> dataSelectInteractorStyle_;
 
     vtkNew<MyRubberBandStyle> testStyle_;
     

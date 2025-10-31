@@ -32,7 +32,8 @@ TopoDataItem::TopoDataItem() {
   // Instantiate interactor styles
   pickInteractorStyle_ = new PickInteractorStyle(this);
   lightingInteractorStyle_ = new LightingInteractorStyle(this);
-  dataSelectInteractorStyle_ = new DataSelectInteractorStyle(this);
+
+  dataSelectInteractorStyle_->setTopoDataItem(this);
 
   testStyle_->setTopoDataItem(this);
 }
