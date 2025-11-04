@@ -36,7 +36,7 @@ namespace mb_system {
     }
 
     /// Print help message describing mouse actions
-    virtual const char *printHelp() {
+    virtual const char *printHelp() override {
       return "PickInteractorStyle help message goes here";
     }
     
