@@ -121,7 +121,7 @@ int TopoDataReader::RequestData(vtkInformation* request,
     return 0;
   }
   
-  // Read grid file
+  // Read data file
   std::cerr << "TopoDataReader::RequestData() - readGridfile()" << std::endl;
   topoData_ = readDatafile(fileName_);
   
