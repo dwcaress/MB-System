@@ -58,6 +58,7 @@ set(src
     PickInteractorStyle.cpp
     PixmapDrawer.cpp    
     PixmapImage.cpp
+    PointsSelectInteractorStyle.cpp
     RadioButtonGroup.cpp
     Route.cpp
     SharedConstants.cpp
