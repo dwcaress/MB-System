@@ -33,9 +33,9 @@ TopoDataItem::TopoDataItem() {
   pickInteractorStyle_ = new PickInteractorStyle(this);
   lightingInteractorStyle_ = new LightingInteractorStyle(this);
 
-  dataSelectInteractorStyle_->setTopoDataItem(this);
+  pointsSelectInteractorStyle_->setTopoDataItem(this);
 
-  testStyle_->setTopoDataItem(this);
+  testStyle_->setQQuickVTKItem(this);
 }
 
 
@@ -524,19 +524,16 @@ bool TopoDataItem::setMouseMode(QString mouseMode) {
   qDebug() << "setMouseMode(): " << mouseMode;
 
   if (mouseMode == MousePanAndZoom) {
-    qDebug() << "setMouseMode(): set " << mouseMode << " picker";
-
+    qDebug() << "setMouseMode(): set pickInteractorStyle_";
     pipeline_->interactorStyle_ = pickInteractorStyle_;    
   }
   else if (mouseMode == MouseLighting) {
-    qDebug() << "setMouseMode(): set " << mouseMode << " picker";
+    qDebug() << "setMouseMode(): set lightingInteractorStyle_";
     pipeline_->interactorStyle_ = lightingInteractorStyle_;
   }
   else if (mouseMode == MouseDataSelect) {
-    qDebug() << "setMouseMode(): set " << mouseMode << " picker";
-    /// pipeline_->interactorStyle_ = dataSelectInteractorStyle_;
-    qDebug() << "setMouseMode():: TEST TEST set rubberBand style";
-    pipeline_->interactorStyle_ = dataSelectInteractorStyle_;
+    qDebug() << "setMouseMode(): set pointsSelectInteractorStyle_";
+    pipeline_->interactorStyle_ = pointsSelectInteractorStyle_;
   }
   else if (mouseMode == MouseTest) {
     qDebug() << "setMouseMode():: TEST!!";

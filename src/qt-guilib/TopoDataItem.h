@@ -28,7 +28,8 @@
 #include "TopoColorMap.h"
 #include "PickInteractorStyle.h"
 #include "LightingInteractorStyle.h"
-#include "DataSelectInteractorStyle.h"
+/// #include "DataSelectInteractorStyle.h"
+#include "PointsSelectInteractorStyle.h"
 #include "MyRubberBandStyle.h"
 
 namespace mb_system {
@@ -245,8 +246,7 @@ namespace mb_system {
     LightingInteractorStyle *lightingInteractorStyle_;
 
     /// Select topo/bathymetry data with mouse
-    /// DataSelectInteractorStyle *dataSelectInteractorStyle_;
-    vtkNew<MyRubberBandStyle> dataSelectInteractorStyle_;
+    vtkNew<PointsSelectInteractorStyle> pointsSelectInteractorStyle_;
 
     vtkNew<MyRubberBandStyle> testStyle_;
     
