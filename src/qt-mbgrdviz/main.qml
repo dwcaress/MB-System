@@ -252,11 +252,13 @@ Window {
         TopoProfileGraph {
             id: profileGraph
         }
+	onClosing: topoDataItem.forceActiveFocus();
     }
 
     Settings2dWindow {
         id: settings2d
         visible: false
+	onClosing: topoDataItem.forceActiveFocus();
     }
 
 
