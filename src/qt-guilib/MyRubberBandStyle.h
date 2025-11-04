@@ -28,14 +28,30 @@
 #include "vtkProperty2D.h"
 #include "vtkPolyDataMapper2D.h"
 #include "vtkPolyData.h"
+#include <QQuickVTKItem.h>
+
+#define ORIENT_MODE 0
+#define SELECT_MODE 1
 
 VTK_ABI_NAMESPACE_BEGIN
 class vtkUnsignedCharArray;
 
+
 namespace mb_system {
   
-class TopoDataItem;
 
+  /* **
+     Code based on vtkInteractorStyleRubberBandPick, with modifications to work properly with
+     QQuickVTKItem.
+     
+     Like TrackBallCamera, but this can pick props underneath a rubber band selection rectangle.
+
+     This interactor style allows the user to draw a rectangle in the render window by hitting 'r'
+     and then using the left mouse button. When the mouse button is released, the attached picker operates
+     on the pixel in the center of the selection rectangle. If the picker happens to be a vtkAreaPicker it will
+     operate on the entire selection rectangle. When the 'p' key is hit the above pick operation occurs on a
+     1x1 rectangle. In other respects it behaves the same as its parent class.
+   */
 class VTKINTERACTIONSTYLE_EXPORT MyRubberBandStyle
   : public vtkInteractorStyleTrackballCamera
 {
@@ -56,9 +72,9 @@ public:
   void OnChar() override;
   ///@}
 
-  /// Set TopoDataItem
-  void setTopoDataItem(TopoDataItem *item) {
-    topoDataItem_ = item;
+  /// Set QQuickVTKItem
+  void setQQuickVTKItem(QQuickVTKItem *item) {
+    qquickVTKItem_ = item;
   }
 
   /// Public, so it can be queued by QQuickVtkItem::async_update()
@@ -82,7 +98,7 @@ protected:
 
   int CurrentMode;
 
-  TopoDataItem *topoDataItem_;
+  QQuickVTKItem *qquickVTKItem_;
 
   vtkNew<vtkRenderer> overlayRenderer_;
   vtkNew<vtkActor2D> rubberBandActor_;

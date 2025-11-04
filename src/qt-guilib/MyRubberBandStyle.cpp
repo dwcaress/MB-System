@@ -11,7 +11,7 @@
 #include "vtkRenderWindowInteractor.h"
 #include "vtkRenderer.h"
 #include "vtkUnsignedCharArray.h"
-#include "TopoDataItem.h"
+/// #include "TopoDataItem.h"
 
 #include <thread>
 
@@ -20,14 +20,10 @@ using namespace mb_system;
 VTK_ABI_NAMESPACE_BEGIN
 vtkStandardNewMacro(MyRubberBandStyle);
 
-#define VTKISRBP_ORIENT 0
-#define VTKISRBP_SELECT 1
-
-
 //------------------------------------------------------------------------------
 MyRubberBandStyle::MyRubberBandStyle()
 {
-  this->CurrentMode = VTKISRBP_ORIENT;
+  this->CurrentMode = ORIENT_MODE;
   this->StartPosition[0] = this->StartPosition[1] = 0;
   this->EndPosition[0] = this->EndPosition[1] = 0;
   this->Moving = 0;
@@ -43,24 +39,27 @@ MyRubberBandStyle::~MyRubberBandStyle()
 //------------------------------------------------------------------------------
 void MyRubberBandStyle::StartSelect()
 {
-  this->CurrentMode = VTKISRBP_SELECT;
+  this->CurrentMode = SELECT_MODE;
 }
 
 //------------------------------------------------------------------------------
 void MyRubberBandStyle::OnChar()
 {
+  std::cerr << "OnChar(): CurrentMode=" << CurrentMode << "\n";
   switch (this->Interactor->GetKeyCode())
   {
     case 'r':
     case 'R':
       // r toggles the rubber band selection mode for mouse button 1
-      if (this->CurrentMode == VTKISRBP_ORIENT)
+      if (this->CurrentMode == ORIENT_MODE)
       {
-        this->CurrentMode = VTKISRBP_SELECT;
+        this->CurrentMode = SELECT_MODE;
+	std::cerr << "OnChar(): in ORIENT_MODE, toggle to SELECT_MODE\n";
       }
       else
       {
-        this->CurrentMode = VTKISRBP_ORIENT;
+        this->CurrentMode = ORIENT_MODE;
+	std::cerr << "OnChar(): in SELECT_MODE, toggle to ORIENT_MODE\n";
       }
       break;
     case 'p':
@@ -78,13 +77,14 @@ void MyRubberBandStyle::OnChar()
     }
     default:
       this->Superclass::OnChar();
+      std::cerr << "OnChar(): default\n";
   }
 }
 
 //------------------------------------------------------------------------------
 void MyRubberBandStyle::OnLeftButtonDown()
 {
-  if (this->CurrentMode != VTKISRBP_SELECT)
+  if (this->CurrentMode != SELECT_MODE)
   {
     // if not in rubber band mode, let the parent class handle it
     this->Superclass::OnLeftButtonDown();
@@ -122,10 +122,7 @@ void MyRubberBandStyle::OnLeftButtonDown()
 //------------------------------------------------------------------------------
 void MyRubberBandStyle::OnMouseMove()
 {
-  std::cerr << "MyRubberBandStyle::OnMouseMove() thread: " <<
-    std::this_thread::get_id() << "\n";
-  
-  if (this->CurrentMode != VTKISRBP_SELECT)
+  if (this->CurrentMode != SELECT_MODE)
   {
     // if not in rubber band mode,  let the parent class handle it
     this->Superclass::OnMouseMove();
@@ -158,10 +155,16 @@ void MyRubberBandStyle::OnMouseMove()
   }
 
   // Queue VtkStyle render updates via TopoDataItem
-  if (topoDataItem_) {
+  if (qquickVTKItem_) {
     std::cerr << "Call RedrawRubberBand() in Qt render thread\n";
-    // Queue VtkStyle render updates via TopoDataItem
-    topoDataItem_->queueVtkStyleRender(this);
+    // Queue VtkStyle render updates via QQuickVTKItem
+    //// qquickVTKItem_->queueVtkStyleRender(this);
+    // Dispatch lambda function to redraw rubber band in Qt render thread
+    qquickVTKItem_->dispatch_async([this](vtkRenderWindow *renderWindow,
+					  vtkSmartPointer<vtkObject> userData) {
+    this->RedrawRubberBand();
+  });
+    
   }
   else {
     this->RedrawRubberBand();
@@ -173,7 +176,7 @@ void MyRubberBandStyle::OnMouseMove()
 //------------------------------------------------------------------------------
 void MyRubberBandStyle::OnLeftButtonUp()
 {
-  if (this->CurrentMode != VTKISRBP_SELECT)
+  if (this->CurrentMode != SELECT_MODE)
   {
     // if not in rubber band mode,  let the parent class handle it
     this->Superclass::OnLeftButtonUp();
@@ -192,7 +195,7 @@ void MyRubberBandStyle::OnLeftButtonUp()
     this->Pick();
   }
   this->Moving = 0;
-  // this->CurrentMode = VTKISRBP_ORIENT;
+  // this->CurrentMode = ORIENT_MODE;
 }
 
 
