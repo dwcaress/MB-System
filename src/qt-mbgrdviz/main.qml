@@ -136,7 +136,7 @@ Window {
             property string currentMode: ''
 
             Repeater {
-	      model: constants.mouseModes
+	      model: constants.mouseModes // mouse mode names, tooltips
 	      visible: true
 	      
 	      MenuItem {
@@ -220,7 +220,16 @@ Window {
         onAccepted: {
             console.log('accepted ' + selectedFile);
             topoDataItem.loadDatafile(selectedFile);
+	    // Known issue: must return focus to topoDataItem	    
+            topoDataItem.forceActiveFocus();	    
         }
+        onRejected: {
+	    // Known issue: must return focus to topoDataItem			      	
+            topoDataItem.forceActiveFocus();
+	}
+
+
+
     }
 
 
@@ -231,6 +240,8 @@ Window {
         buttons: MessageDialog.Yes | MessageDialog.No
         Component.onCompleted: visible = false
         onAccepted: Qt.quit()
+	// Known issue: must return focus to topoDataItem      	
+        onRejected: topoDataItem.forceActiveFocus();
     }
 
     Window {
@@ -304,16 +315,23 @@ Window {
 	        topoDataItem.setLight(settings3D.intensity.value,
 		                      settings3D.lightX.value,
 				      settings3D.lightY.value,
-				      settings3D.lightZ.value)}
+				      settings3D.lightZ.value);
+		// Known issue: must return focus to topoDataItem
+                topoDataItem.forceActiveFocus();
+             }
 			
             onAccepted: {
                 console.log("OK clicked")
                 settings3dDialog.accept()
+		// Known issue: must return focus to topoDataItemr		
+                topoDataItem.forceActiveFocus();		
             }
             
             onRejected: {
                 console.log("Cancel clicked")
                 settings3dDialog.reject()
+		// Known issue: must return focus to topoDataItem
+                topoDataItem.forceActiveFocus();		
             }
       }
       onOpened: { console.log('settings3dDialog opened');
