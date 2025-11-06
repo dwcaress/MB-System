@@ -7,6 +7,7 @@
 #include <vtkCellData.h>
 #include <vtkPointData.h>
 #include <vtkLightCollection.h>
+#include <vtkIdTypeArray.h>
 #include "TopoDataItem.h"
 #include "TopoColorMap.h"
 #include "SharedConstants.h"
@@ -223,6 +224,15 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
     return;
   }  
 
+  // Associate cell and point id's with original polyData
+  pipeline->idFilter_->SetInputData(pipeline->topoReader_->GetOutput());
+
+  // Specify name by which to retrieve original id's
+  pipeline->idFilter_->SetCellIdsArrayName(ORIGINAL_IDS);
+  pipeline->idFilter_->SetPointIdsArrayName(ORIGINAL_IDS);
+  pipeline->idFilter_->Update();
+
+
   // Read grid bounds
   double gridBounds[6];
   pipeline->topoReader_->gridBounds(&gridBounds[0], &gridBounds[1],
@@ -235,7 +245,9 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   //////////////////////////////////////////
 
 
-  pipeline->elevFilter_->SetInputConnection(pipeline->topoReader_->
+  //pipeline->elevFilter_->SetInputConnection(pipeline->topoReader_->/
+  //					      GetOutputPort());
+  pipeline->elevFilter_->SetInputConnection(pipeline->idFilter_->
 					      GetOutputPort());
   
   pipeline->elevFilter_->SetLowPoint(0, 0, gridBounds[4]);
@@ -249,7 +261,33 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   /// DEBUG ///
   printPolyDataOutput(pipeline->elevFilter_, "elevFilter");
 
+  pipeline->polyData_ =
+    vtkPolyData::SafeDownCast(pipeline->elevFilter_->GetOutput());
 
+  pipeline->quality_->SetName(DATA_QUALITY_NAME);
+  pipeline->quality_->SetNumberOfTuples(pipeline->polyData_->
+					GetNumberOfPoints());
+    
+  // First assume all points are good
+  for (int i = 0; i < pipeline->polyData_->GetNumberOfPoints(); i++) {
+    pipeline->quality_->SetValue(i, GOOD_DATA);
+  }
+
+  // Associate quality array with original poly data
+  pipeline->polyData_->GetPointData()->AddArray(pipeline->quality_);
+  
+  /// TEST TEST TEST
+  // Try to get subsetted original point IDs
+  vtkIdTypeArray *ids =
+    vtkIdTypeArray::SafeDownCast(pipeline->polyData_->GetPointData()->
+				 GetArray(ORIGINAL_IDS));
+  if (ids) {
+    qDebug() << "assemblePipeline(): FOUND id array";
+  }
+  else {
+    qDebug() << "assemblePipeline(): COULD NOT FIND id array";    
+  }
+  
   if (displayedSurface_ == TopoDataItem::DisplayedSurface::Gradient) {
     qDebug() << "set slopeFilter input to topoReader output port:";
     pipeline->slopeFilter_->SetInputConnection(pipeline->elevFilter_->
@@ -613,4 +651,8 @@ void TopoDataItem::queueVtkStyleRender(MyRubberBandStyle *style) {
   });
   
   
+}
+
+vtkPolyData *TopoDataItem::getPolyData() {
+  return pipeline_->polyData_;
 }

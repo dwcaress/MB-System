@@ -5,6 +5,7 @@
 #include <vtkActor.h>    // Does it require vtk/?
 #include <vtkRenderer.h>
 #include <vtkPolyDataMapper.h>
+#include <vtkPolyData.h>
 #include <vtkRenderWindow.h>
 #include <vtkElevationFilter.h>
 #include <vtkLookupTable.h>
@@ -20,6 +21,7 @@
 #include <QVTKInteractor.h>
 #include <vtkInteractorStyleTerrain.h>
 #include <vtkAreaPicker.h>
+#include <vtkIdFilter.h>
 #include <QList>
 #include <QVector2D>
 #include <QVariant>
@@ -28,9 +30,16 @@
 #include "TopoColorMap.h"
 #include "PickInteractorStyle.h"
 #include "LightingInteractorStyle.h"
-/// #include "DataSelectInteractorStyle.h"
 #include "PointsSelectInteractorStyle.h"
 #include "MyRubberBandStyle.h"
+
+
+#define DATA_QUALITY_NAME "dataQuality"
+#define ORIGINAL_IDS "originalIDs"
+#define BAD_DATA 0
+#define GOOD_DATA 1
+
+
 
 namespace mb_system {
 
@@ -61,7 +70,8 @@ namespace mb_system {
       vtkNew<mb_system::TopoDataReader> topoReader_;
 
       vtkNew<vtkElevationFilter> elevFilter_;
-      vtkNew<SlopeFilter> slopeFilter_;      
+      vtkNew<SlopeFilter> slopeFilter_;
+      vtkNew<vtkIdFilter> idFilter_;
       vtkNew<vtkLookupTable> elevLookupTable_;
       vtkNew<vtkActor> surfaceActor_;
       vtkNew<vtkPolyDataMapper> surfaceMapper_;
@@ -69,11 +79,16 @@ namespace mb_system {
       vtkNew<QVTKInteractor> windowInteractor_;
       /// vtkNew<vtkRenderWindowInteractor> windowInteractor_;      
       vtkNew<vtkAreaPicker> areaPicker_;
+      // data quality array for input vtkPolyData
+      vtkNew<vtkIntArray> quality_;
 
       /// Assign this pointer to appropriate interactor style,
       /// depending on how 'mouse mode' is set
       vtkInteractorStyle *interactorStyle_;            
 
+      /// Source polydata
+      vtkPolyData *polyData_;
+      
       /// x,y,z axes
       vtkNew<vtkCubeAxesActor> axesActor_;
       vtkNew<vtkNamedColors>colors_;
@@ -175,12 +190,14 @@ namespace mb_system {
       }
     }
 
-
     /// Get pipeline
     Pipeline *getPipeline() {
       return pipeline_;
     }
 
+
+    /// Get source polydata
+    vtkPolyData *getPolyData();
 
     /// Queue vtk style render updates to the render thread
     void queueVtkStyleRender(MyRubberBandStyle *style);
