@@ -11,7 +11,6 @@
 #include "vtkRenderWindowInteractor.h"
 #include "vtkRenderer.h"
 #include "vtkUnsignedCharArray.h"
-/// #include "TopoDataItem.h"
 
 #include <thread>
 
@@ -77,7 +76,6 @@ void MyRubberBandStyle::OnChar()
     }
     default:
       this->Superclass::OnChar();
-      std::cerr << "OnChar(): default\n";
   }
 }
 
@@ -154,11 +152,10 @@ void MyRubberBandStyle::OnMouseMove()
     this->EndPosition[1] = 0;
   }
 
-  // Queue VtkStyle render updates via TopoDataItem
+  // Queue VtkStyle render rubber band box updates via associated QQuickVTKItem
   if (qquickVTKItem_) {
-    std::cerr << "Call RedrawRubberBand() in Qt render thread\n";
+    // std::cerr << "Call RedrawRubberBand() in Qt render thread\n";
     // Queue VtkStyle render updates via QQuickVTKItem
-    //// qquickVTKItem_->queueVtkStyleRender(this);
     // Dispatch lambda function to redraw rubber band in Qt render thread
     qquickVTKItem_->dispatch_async([this](vtkRenderWindow *renderWindow,
 					  vtkSmartPointer<vtkObject> userData) {
@@ -169,8 +166,6 @@ void MyRubberBandStyle::OnMouseMove()
   else {
     this->RedrawRubberBand();
   }
-
-  std::cerr << "Leave MyRubberBandStyle::OnMouseMove()\n";  
 }
 
 //------------------------------------------------------------------------------
@@ -199,229 +194,7 @@ void MyRubberBandStyle::OnLeftButtonUp()
 }
 
 
-#ifdef OLD_REDRAW
-//------------------------------------------------------------------------------
-void MyRubberBandStyle::RedrawRubberBand()
-{
-  std::cerr << "MyRubberBandStyle::RedrawRubberBand() thread: " <<
-    std::this_thread::get_id() << "\n";
-  
-  // update the rubber band on the screen
-  const int* size = this->Interactor->GetRenderWindow()->GetSize();
-
-  vtkUnsignedCharArray* tmpPixelArray = vtkUnsignedCharArray::New();
-  tmpPixelArray->DeepCopy(this->PixelArray);
-  unsigned char* pixels = tmpPixelArray->GetPointer(0);
-
-  int min[2], max[2];
-
-  min[0] =
-    this->StartPosition[0] <= this->EndPosition[0] ? this->StartPosition[0] : this->EndPosition[0];
-  if (min[0] < 0)
-  {
-    min[0] = 0;
-  }
-  if (min[0] >= size[0])
-  {
-    min[0] = size[0] - 1;
-  }
-
-  min[1] =
-    this->StartPosition[1] <= this->EndPosition[1] ? this->StartPosition[1] : this->EndPosition[1];
-  if (min[1] < 0)
-  {
-    min[1] = 0;
-  }
-  if (min[1] >= size[1])
-  {
-    min[1] = size[1] - 1;
-  }
-
-  max[0] =
-    this->EndPosition[0] > this->StartPosition[0] ? this->EndPosition[0] : this->StartPosition[0];
-  if (max[0] < 0)
-  {
-    max[0] = 0;
-  }
-  if (max[0] >= size[0])
-  {
-    max[0] = size[0] - 1;
-  }
-
-  max[1] =
-    this->EndPosition[1] > this->StartPosition[1] ? this->EndPosition[1] : this->StartPosition[1];
-  if (max[1] < 0)
-  {
-    max[1] = 0;
-  }
-  if (max[1] >= size[1])
-  {
-    max[1] = size[1] - 1;
-  }
-
-  int i;
-  for (i = min[0]; i <= max[0]; i++)
-  {
-    pixels[4 * (min[1] * size[0] + i)] = 255 ^ pixels[4 * (min[1] * size[0] + i)];
-    pixels[4 * (min[1] * size[0] + i) + 1] = 255 ^ pixels[4 * (min[1] * size[0] + i) + 1];
-    pixels[4 * (min[1] * size[0] + i) + 2] = 255 ^ pixels[4 * (min[1] * size[0] + i) + 2];
-    pixels[4 * (max[1] * size[0] + i)] = 255 ^ pixels[4 * (max[1] * size[0] + i)];
-    pixels[4 * (max[1] * size[0] + i) + 1] = 255 ^ pixels[4 * (max[1] * size[0] + i) + 1];
-    pixels[4 * (max[1] * size[0] + i) + 2] = 255 ^ pixels[4 * (max[1] * size[0] + i) + 2];
-  }
-  for (i = min[1] + 1; i < max[1]; i++)
-  {
-    pixels[4 * (i * size[0] + min[0])] = 255 ^ pixels[4 * (i * size[0] + min[0])];
-    pixels[4 * (i * size[0] + min[0]) + 1] = 255 ^ pixels[4 * (i * size[0] + min[0]) + 1];
-    pixels[4 * (i * size[0] + min[0]) + 2] = 255 ^ pixels[4 * (i * size[0] + min[0]) + 2];
-    pixels[4 * (i * size[0] + max[0])] = 255 ^ pixels[4 * (i * size[0] + max[0])];
-    pixels[4 * (i * size[0] + max[0]) + 1] = 255 ^ pixels[4 * (i * size[0] + max[0]) + 1];
-    pixels[4 * (i * size[0] + max[0]) + 2] = 255 ^ pixels[4 * (i * size[0] + max[0]) + 2];
-  }
-
-  /* **** Recommended by Claude.ai *** */
-  vtkOpenGLRenderWindow* renWin = 
-    vtkOpenGLRenderWindow::SafeDownCast(this->Interactor->GetRenderWindow());
-
-  vtkOpenGLState* ostate;
-  if (renWin) {
-    std::cerr << "got renWin\n";
-    ostate = renWin->GetState();
-        
-    // Push current state
-    ostate->Push();
-  }
-  /* ******************************* */
-  std::cerr << "RedrawRubberBand(): set rgb pixel data\n";
-
-  this->Interactor->
-    GetRenderWindow()->SetRGBACharPixelData(
-					    0, 0, size[0] - 1, size[1] - 1,
-					    pixels, 0);
-
-  
-  /* **** Recommended by Claude.ai *** */
-  if (renWin) {
-    // Pop back to previous state
-    ostate->Pop();
-  }
-  /* ******************************* */  
-  
-  std::cerr << "RedrawRubberBand(): get render window frame\n";
-  this->Interactor->GetRenderWindow()->Frame();
-  
-  std::cerr << "RedrawRubberBand(): delete tmpPixelArray\n";
-  tmpPixelArray->Delete();
-  std::cerr << "RedrawRubberBand(): tmpPixelArray DELETED\n";  
-
-  std::cerr << "Leave MyRubberBandStyle::RedrawRubberBand()\n";  
-}
-#endif
-
-#ifdef OLD_REDRAW
-void MyRubberBandStyle::RedrawRubberBand() {
-  if (!overlayInitialized_) return;
-        
-  // Create rectangle geometry
-  vtkNew<vtkPoints> points;
-  vtkNew<vtkCellArray> lines;
-        
-  const int* size = this->Interactor->GetRenderWindow()->GetSize();
-        
-  // Convert to normalized coordinates
-  double x1 = (double)this->StartPosition[0] / size[0];
-  double y1 = (double)this->StartPosition[1] / size[1];
-  double x2 = (double)this->EndPosition[0] / size[0];
-  double y2 = (double)this->EndPosition[1] / size[1];
-
-  std::cerr << "RedrawRubberBand(): x1=" << x1 << "y1=" << y1 << "\n";
-  std::cerr << "RedrawRubberBand(): x2=" << x2 << "y2=" << y2 << "\n";
-  
-  // Create rectangle points
-  points->InsertNextPoint(x1, y1, 0);
-  points->InsertNextPoint(x2, y1, 0);
-  points->InsertNextPoint(x2, y2, 0);
-  points->InsertNextPoint(x1, y2, 0);
-        
-  // Create rectangle lines
-  vtkIdType rect[5] = {0, 1, 2, 3, 0};
-  lines->InsertNextCell(5, rect);
-        
-  // Update polydata
-  vtkPolyData* polyData = rubberBandMapper_->GetInput();
-  polyData->SetPoints(points);
-  polyData->SetLines(lines);
-  polyData->Modified();
-        
-  // Set color to red
-  rubberBandActor_->GetProperty()->SetColor(1.0, 0.0, 0.0);
-  rubberBandActor_->GetProperty()->SetLineWidth(2.0);
-        
-  // Render only the overlay
-  overlayRenderer_->GetRenderWindow()->Render();
-}
-
-#endif
-
-/* ***
-void MyRubberBandStyle::RedrawRubberBand() 
-{
-    if (!overlayInitialized_) {
-      std::cerr << "overlay not yet initialized\n";
-        InitializeOverlay();
-        if (!overlayInitialized_) {
-	  std::cerr << "FAILED to initialize overlay\n";	  
-	  return;
-	}
-    }
-    
-    // Clear previous geometry
-    rubberBandPolyData_->Reset();
-    
-    // Get window size for coordinate validation
-    const int* size = this->Interactor->GetRenderWindow()->GetSize();
-    
-    // Clamp coordinates to window bounds
-    double x1 = std::max(0, std::min(this->StartPosition[0], size[0] - 1));
-    double y1 = std::max(0, std::min(this->StartPosition[1], size[1] - 1));
-    double x2 = std::max(0, std::min(this->EndPosition[0], size[0] - 1));
-    double y2 = std::max(0, std::min(this->EndPosition[1], size[1] - 1));
-
-    std::cerr << "x1: " << x1 << ", y1: " << y1 <<
-      ", x2: " << x2 << ", y2: " << y2 << "\n";
-    
-    // Only draw if we have a valid rectangle
-    if (abs(x2 - x1) > 1 && abs(y2 - y1) > 1)
-    {
-        vtkNew<vtkPoints> points;
-        vtkNew<vtkCellArray> lines;
-        
-        // Create 4 corners of rectangle
-        points->InsertNextPoint(x1, y1, 0);
-        points->InsertNextPoint(x2, y1, 0);
-        points->InsertNextPoint(x2, y2, 0);
-        points->InsertNextPoint(x1, y2, 0);
-        
-        // Create 4 lines for rectangle edges
-        vtkIdType line1[2] = {0, 1}; lines->InsertNextCell(2, line1);
-        vtkIdType line2[2] = {1, 2}; lines->InsertNextCell(2, line2);
-        vtkIdType line3[2] = {2, 3}; lines->InsertNextCell(2, line3);
-        vtkIdType line4[2] = {3, 0}; lines->InsertNextCell(2, line4);
-        
-        rubberBandPolyData_->SetPoints(points);
-        rubberBandPolyData_->SetLines(lines);
-        rubberBandPolyData_->Modified();
-    }
-    else {
-      std::cerr << "INVALID RECTANGLE\n";
-    }
-    
-    // Render
-    this->Interactor->GetRenderWindow()->Render();
-}
-*** */
-
-/* ***** Claude.ai ******* */
+/* ***** Claude.ai implementation ******* */
 void MyRubberBandStyle::RedrawRubberBand() 
 {
     if (!overlayInitialized_) {
@@ -442,8 +215,8 @@ void MyRubberBandStyle::RedrawRubberBand()
     double x2 = std::max(0, std::min(this->EndPosition[0], size[0] - 1));
     double y2 = std::max(0, std::min(this->EndPosition[1], size[1] - 1));
 
-    std::cerr << "x1: " << x1 << ", y1: " << y1 <<
-              ", x2: " << x2 << ", y2: " << y2 << "\n";
+    /// std::cerr << "x1: " << x1 << ", y1: " << y1 <<
+    ///      ", x2: " << x2 << ", y2: " << y2 << "\n";
     
     // Create new geometry
     vtkNew<vtkPoints> points;
