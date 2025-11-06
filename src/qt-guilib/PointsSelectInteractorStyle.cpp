@@ -11,11 +11,6 @@
 #define VTKISRBP_ORIENT 0
 #define VTKISRBP_SELECT 1
 
-#define DATA_QUALITY_NAME "dataQuality"
-#define ORIGINAL_IDS "originalIDs"
-#define BAD 0
-#define GOOD 1
-
 using namespace mb_system;
 
 vtkStandardNewMacro(PointsSelectInteractorStyle);
@@ -23,6 +18,18 @@ vtkStandardNewMacro(PointsSelectInteractorStyle);
 void PointsSelectInteractorStyle::OnLeftButtonUp() {
   // Forward events
   MyRubberBandStyle::OnLeftButtonUp();
+
+  /// TEST TEST TEST
+  vtkIdTypeArray *ids =
+    vtkIdTypeArray::SafeDownCast(topoDataItem_->getPolyData()->GetPointData()->
+				   GetArray(ORIGINAL_IDS));
+  if (ids) {
+    qDebug() << "OnLeftButtonUp(): FOUND original IDs in topoDataItem polydata";
+  }
+  else {
+    qDebug() << "OnLeftButtonUp(): COULD NOT FIND original IDs in topoDataItem polydata";    
+  }
+				 
   if (CurrentMode == SELECT_MODE) {
     vtkNew<vtkNamedColors> colors;
 
@@ -31,7 +38,7 @@ void PointsSelectInteractorStyle::OnLeftButtonUp() {
       ->GetFrustum();
 
     vtkNew<vtkExtractPolyDataGeometry> extractor;
-    extractor->SetInputData(topoDataItem_->getPipeline()->topoReader_->GetOutput());
+    extractor->SetInputData(topoDataItem_->getPolyData());
 
     // Extract cells that lie within the user-specified frustrum
     extractor->SetImplicitFunction(frustum);
@@ -74,8 +81,8 @@ void PointsSelectInteractorStyle::OnLeftButtonUp() {
     std::cerr << "Got " << points->GetNumberOfPoints() << " points\n";
     for (int i = 0; i < points->GetNumberOfPoints(); i++) {
       double *point = points->GetPoint(i);
-      std::cerr << "pt " << i << ": "
-		<< point[0] << ", " << point[1] << ", " << point[2] << "\n";
+      /// std::cerr << "pt " << i << ": "
+      ///	<< point[0] << ", " << point[1] << ", " << point[2] << "\n";
     }
 
 
@@ -88,11 +95,10 @@ void PointsSelectInteractorStyle::OnLeftButtonUp() {
       std::cerr << "Got original point IDs\n";
 
       vtkPoints *points =
-	topoDataItem_->getPipeline()->topoReader_->GetOutput()->GetPoints();
+	topoDataItem_->getPolyData()->GetPoints();
       
       vtkIntArray* quality =
-	vtkIntArray::SafeDownCast(topoDataItem_->getPipeline()->topoReader_->
-				  GetOutput()->GetPointData()->
+	vtkIntArray::SafeDownCast(topoDataItem_->getPolyData()->GetPointData()->
 				  GetArray(DATA_QUALITY_NAME));
       if (!quality) {
 	std::cerr << "Couldn't find " << DATA_QUALITY_NAME << "!!\n";
@@ -103,22 +109,22 @@ void PointsSelectInteractorStyle::OnLeftButtonUp() {
 	
       for (int i = 0; i < extractedData->GetNumberOfPoints(); i++) {
 	vtkIdType pointId = filteredPointIds->GetValue(i);
-	std::cerr << "subset point " << i << " -> original point " <<
-	  pointId << "\n";
+	// std::cerr << "subset point " << i << " -> original point " <<
+	// pointId << "\n";
 	double xyz[3];
 	points->GetPoint(pointId, xyz);
-	std::cerr << "x: " << xyz[0] << ", y: " << xyz[1] <<
-	  ", z: " << xyz[2] << "\n";
+	/// std::cerr << "x: " << xyz[0] << ", y: " << xyz[1] <<
+	/// ", z: " << xyz[2] << "\n";
 
 	// Set selected point data quality
 	if (quality) {
 	  if (editMode_ == EraseMode) {
-	    std::cerr << "set value to BAD\n";
-	    quality->SetValue(pointId, BAD);
+	    /// std::cerr << "set value to BAD\n";
+	    quality->SetValue(pointId, BAD_DATA);
 	  }
 	  else {
-	    std::cerr << "set value to GOOD\n";	    
-	    quality->SetValue(pointId, GOOD);	    
+	    /// std::cerr << "set value to GOOD\n";	    
+	    quality->SetValue(pointId, GOOD_DATA);	    
 	  }
 	}
 
