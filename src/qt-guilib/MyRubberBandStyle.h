@@ -108,7 +108,9 @@ protected:
   bool overlayInitialized_ = false;
 
   void InitializeOverlay();
-  
+
+  /// Clear overlay contents (selection rectangle)
+  void ClearOverlay();
   
 private:
   MyRubberBandStyle(const MyRubberBandStyle&) = delete;

@@ -54,11 +54,13 @@ void MyRubberBandStyle::OnChar()
       {
         this->CurrentMode = SELECT_MODE;
 	std::cerr << "OnChar(): in ORIENT_MODE, toggle to SELECT_MODE\n";
+	overlayInitialized_ = false;
       }
       else
       {
         this->CurrentMode = ORIENT_MODE;
 	std::cerr << "OnChar(): in SELECT_MODE, toggle to ORIENT_MODE\n";
+	ClearOverlay();
       }
       break;
     case 'p':
@@ -183,6 +185,7 @@ void MyRubberBandStyle::OnLeftButtonUp()
     return;
   }
 
+
   // otherwise record the rubber band end coordinate and then fire off a pick
   if ((this->StartPosition[0] != this->EndPosition[0]) ||
     (this->StartPosition[1] != this->EndPosition[1]))
@@ -191,6 +194,9 @@ void MyRubberBandStyle::OnLeftButtonUp()
   }
   this->Moving = 0;
   // this->CurrentMode = ORIENT_MODE;
+
+  overlayInitialized_ = false;
+  InitializeOverlay();
 }
 
 
@@ -341,28 +347,6 @@ void MyRubberBandStyle::PrintSelf(ostream& os, vtkIndent indent)
 }
 
 
-/* ***
-void MyRubberBandStyle::InitializeOverlay() {
-  if (!this->Interactor || overlayInitialized_) {
-    return;
-  }
-        
-  // Set up overlay renderer
-  this->Interactor->GetRenderWindow()->AddRenderer(overlayRenderer_);
-  overlayRenderer_->SetLayer(1); // Overlay layer
-  overlayRenderer_->InteractiveOff();
-  this->Interactor->GetRenderWindow()->SetNumberOfLayers(2);
-        
-  // Create rubber band actor
-  vtkNew<vtkPolyData> polyData;
-  rubberBandMapper_->SetInputData(polyData);
-  rubberBandActor_->SetMapper(rubberBandMapper_);
-  overlayRenderer_->AddActor(rubberBandActor_);
-        
-  overlayInitialized_ = true;
-}
-*** */
-
 /* ***** Claude.ai ******* */
 void MyRubberBandStyle::InitializeOverlay() {
     if (!this->Interactor || overlayInitialized_) {
@@ -398,6 +382,12 @@ void MyRubberBandStyle::InitializeOverlay() {
     
     overlayInitialized_ = true;
 }
+
+void MyRubberBandStyle::ClearOverlay() {
+  overlayRenderer_->RemoveAllViewProps();
+  this->Interactor->GetRenderWindow()->Render();
+}
+
 
 void MyRubberBandStyle::SetInteractor(vtkRenderWindowInteractor* interactor) {
   this->Superclass::SetInteractor(interactor);
