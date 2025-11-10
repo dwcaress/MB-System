@@ -201,9 +201,19 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   // Clear actor list
   pipeline->renderer_->RemoveAllViewProps();
 
-  // Clear all lights
-  pipeline->renderer_->RemoveAllLights();    
+  vtkLightCollection *lights = pipeline->renderer_->GetLights();
+  std::cout << "before clearing lights there are " <<
+    lights->GetNumberOfItems()
+            << " lights.\n";
 
+  // Clear all lights
+  pipeline->renderer_->RemoveAllLights();
+  
+  lights = pipeline->renderer_->GetLights();
+  std::cout << "after clearing lights there are " <<
+    lights->GetNumberOfItems()
+            << " lights.\n";
+  
   // Determine grid type
   TopoDataType gridType =
     TopoDataReader::getDataType(dataFilename_);
@@ -346,9 +356,10 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   /// pipeline->interactorStyle_->setLight(pipeline->lightSource_);
   pipeline->renderer_->AddLight(pipeline->lightSource_);
 
-  vtkLightCollection *lights = pipeline->renderer_->GetLights();
-  std::cout << "there are " << lights->GetNumberOfItems()
-            << " lights.\n";
+  lights = pipeline->renderer_->GetLights();
+  std::cout << "after AddLight() there are  " <<
+    lights->GetNumberOfItems()
+            << " lights.\n\n";
   
   if (showAxes_) {
     // Set up axes
