@@ -353,7 +353,6 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   std::cerr << "assemblePipeline(): GetLightIntensity=" <<
     pipeline->lightSource_->GetIntensity() << "\n";
 
-  /// pipeline->interactorStyle_->setLight(pipeline->lightSource_);
   pipeline->renderer_->AddLight(pipeline->lightSource_);
 
   lights = pipeline->renderer_->GetLights();
@@ -609,14 +608,12 @@ void TopoDataItem::setupLightSource() {
   // Position light above the midde of the topo surface
   double x = -0.03;
   double y = 0.24;
-  double z = 0.10;
+  double z = 0.50;
   
   light->SetPosition(x, y, z);
   
   light->SetFocalPoint(0.0, 0.0, 0.0);
   light->SetIntensity(1.0);
-
-  pipeline_->renderer_->AddLight(light);
 }
 
 
