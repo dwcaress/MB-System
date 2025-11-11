@@ -1,3 +1,5 @@
+#define QT_NO_DEBUG_OUTPUT
+
 #include <unistd.h>
 #include <climits>
 #include <array>
@@ -154,8 +156,6 @@ bool TopoDataItem::loadDatafile(QUrl fileUrl) {
 
 
 void TopoDataItem::reassemblePipeline() {
-  std::cerr << "reassemblePipeline() thread: " <<
-    std::this_thread::get_id() << "\n";  
   // Dispatch lambda function to run in QT render thread 
   dispatch_async([this](vtkRenderWindow *renderWindow, vtkUserData userData) {
     auto *pipeline = TopoDataItem::Pipeline::SafeDownCast(userData);
@@ -172,9 +172,6 @@ void TopoDataItem::reassemblePipeline() {
 
 void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
 
-  std::cerr << "assemblePipeline() thread: " <<
-    std::this_thread::get_id() << "\n";
-  
   // Check that input file exists and is readable
   if (access(dataFilename_, R_OK) == -1) {
     qWarning() << "Can't access input file " << dataFilename_;
@@ -202,17 +199,11 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   pipeline->renderer_->RemoveAllViewProps();
 
   vtkLightCollection *lights = pipeline->renderer_->GetLights();
-  std::cout << "before clearing lights there are " <<
-    lights->GetNumberOfItems()
-            << " lights.\n";
 
   // Clear all lights
   pipeline->renderer_->RemoveAllLights();
   
   lights = pipeline->renderer_->GetLights();
-  std::cout << "after clearing lights there are " <<
-    lights->GetNumberOfItems()
-            << " lights.\n";
   
   // Determine grid type
   TopoDataType gridType =
@@ -313,10 +304,10 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
     pipeline->surfaceMapper_->SetArrayAccessMode(VTK_GET_ARRAY_BY_NAME);
     pipeline->surfaceMapper_->SelectColorArray("Slopes");
     
-    std::cerr << "now mapper->GetArrayName(): " <<
-      pipeline->surfaceMapper_->GetArrayName() << "\n";
+    qDebug() << "now mapper->GetArrayName(): " <<
+      pipeline->surfaceMapper_->GetArrayName();
 
-    std::cerr << "surfaceMapper: ";
+    qDebug() << "surfaceMapper: ";
     pipeline->surfaceMapper_->Print(std::cerr);
     
     // Bogus min/max gradient values
@@ -324,7 +315,7 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
     maxVal = RAND_MAX;  // TEST TEST TEST
   }
   else {
-    std::cerr << "connect surfaceMapper to elevFilter output port\n";
+    qDebug() << "connect surfaceMapper to elevFilter output port\n";
     pipeline->surfaceMapper_->SetInputConnection(pipeline->elevFilter_->
 						 GetOutputPort());
   }
@@ -350,15 +341,12 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
 				     GetData());
 
   // Need to add the light again here
-  std::cerr << "assemblePipeline(): GetLightIntensity=" <<
-    pipeline->lightSource_->GetIntensity() << "\n";
+  qDebug() << "assemblePipeline(): GetLightIntensity=" <<
+    pipeline->lightSource_->GetIntensity();
 
   pipeline->renderer_->AddLight(pipeline->lightSource_);
 
   lights = pipeline->renderer_->GetLights();
-  std::cout << "after AddLight() there are  " <<
-    lights->GetNumberOfItems()
-            << " lights.\n\n";
   
   if (showAxes_) {
     // Set up axes
@@ -424,7 +412,7 @@ void TopoDataItem::showAxes(bool plotAxes) {
 void TopoDataItem::printPolyDataOutput(vtkDataSetAlgorithm *algorithm,
 				 const char *outputName) {
 
-  std::cerr << "---- printPolyDataOutput() for " << outputName << "\n";
+  qDebug() << "---- printPolyDataOutput() for " << outputName;
     
   algorithm->Update();
 
@@ -436,31 +424,31 @@ void TopoDataItem::printPolyDataOutput(vtkDataSetAlgorithm *algorithm,
 
   double bounds[6];
   if (points) {
-    std::cerr << "#points in " << outputName << " output: " <<
-      points->GetNumberOfPoints() << "\n";
+    qDebug() << "#points in " << outputName << " output: " <<
+      points->GetNumberOfPoints();
 
     // Compute x, y, z bounds
-    std::cerr << "Compute " << outputName << " bounds...";
+    qDebug() << "Compute " << outputName << " bounds...";
     points->ComputeBounds();
-    std::cerr << "Done\n";
+    qDebug() << "Done";
 
     points->GetBounds(bounds);
-    std::cerr << outputName << " bounds: " <<
+    qDebug() << outputName << " bounds: " <<
       " xmin=" << bounds[0] << " xmax=" << bounds[1] <<
       " ymin=" << bounds[2] << " ymax=" << bounds[3] <<
-      " zmin=" << bounds[4] << " zmax=" << bounds[5] << "\n";
+      " zmin=" << bounds[4] << " zmax=" << bounds[5];
       
   }
   else {
-    std::cerr << "no points in " << outputName << " output\n";    
+    qDebug() << "no points in " << outputName << " output";    
   }
   
   if (cells) {
-    std::cerr << "#cells in " << outputName << " output: " <<
-      cells->GetNumberOfCells() << "\n";
+    qDebug() << "#cells in " << outputName << " output: " <<
+      cells->GetNumberOfCells();
   }
   else {
-    std::cerr << "no cells in " << outputName << " output\n";
+    qDebug() << "no cells in " << outputName << " output";
   }
 
   vtkDataArray *dataArray = nullptr;
@@ -468,33 +456,33 @@ void TopoDataItem::printPolyDataOutput(vtkDataSetAlgorithm *algorithm,
   vtkPointData *pointData = dataSet->GetPointData();
   
   if (pointData) {
-    std::cerr << outputName << " pointData:\n";
+    qDebug() << outputName << " pointData:";
     pointData->Print(std::cerr);
     dataArray = pointData->GetScalars();
     if (dataArray) {
       dataArray->Print(std::cerr);
     }
     else {
-      std::cerr << outputName << " has no point data scalars\n";
+      qDebug() << outputName << " has no point data scalars";
     }
   }
   else {
-    std::cerr << outputName << " has no pointData\n";
+    qDebug() << outputName << " has no pointData";
   }
   
   vtkCellData* cellData = dataSet->GetCellData();
   if (cellData) {
-    std::cerr << outputName << " cellData:\n";
+    qDebug() << outputName << " cellData:";
     cellData->Print(std::cerr);
     dataArray = cellData->GetScalars();
     if (dataArray) {
       dataArray->Print(std::cerr);
     }
     else {
-      std::cerr << outputName << " has no cell data scalars\n";
+      qDebug() << outputName << " has no cell data scalars";
     }
   }
-  std::cerr << "---- printPolyDataOutput() done\n";
+  qDebug() << "---- printPolyDataOutput() done";
 }
 
 void TopoDataItem::setPickedPoint(double *worldCoords) {
@@ -600,7 +588,7 @@ bool TopoDataItem::setMouseMode(QString mouseMode) {
 
 void TopoDataItem::setupLightSource() {
 
-  std::cerr << "setupLightSource()\n";
+  qDebug() << "setupLightSource()";
   
   vtkLight *light = pipeline_->lightSource_;
   light->SetColor(1.0, 1.0, 1.0);
@@ -619,7 +607,7 @@ void TopoDataItem::setupLightSource() {
 
 void TopoDataItem::setLight(float intensity, double x, double y, double z) {
 
-  std::cerr << "setLight()\n";
+  qDebug() << "setLight()";
   
   pipeline_->lightSource_->SetIntensity(intensity);
 

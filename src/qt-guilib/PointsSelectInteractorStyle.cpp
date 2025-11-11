@@ -1,3 +1,5 @@
+#define QT_NO_DEBUG_OUTPUT
+
 #include <vtkNamedColors.h>
 #include <vtkAreaPicker.h>
 #include <vtkExtractPolyDataGeometry.h>
@@ -48,9 +50,9 @@ void PointsSelectInteractorStyle::OnLeftButtonUp() {
 
     vtkPolyData *extractedData = extractor->GetOutput();
       
-    std::cerr << "Extracted "
+    qDebug() << "Extracted "
 	      << extractedData->GetNumberOfCells()
-	      << " cells." << std::endl;
+	     << " cells.";
 
     // Set mapper input to extracted cells
     // (Color is not controlled by scalar)
@@ -78,11 +80,9 @@ void PointsSelectInteractorStyle::OnLeftButtonUp() {
 
     // Get the points
     vtkPoints *points = extractedData->GetPoints();
-    std::cerr << "Got " << points->GetNumberOfPoints() << " points\n";
+    qDebug() << "Got " << points->GetNumberOfPoints() << " points";
     for (int i = 0; i < points->GetNumberOfPoints(); i++) {
       double *point = points->GetPoint(i);
-      /// std::cerr << "pt " << i << ": "
-      ///	<< point[0] << ", " << point[1] << ", " << point[2] << "\n";
     }
 
 
@@ -92,7 +92,7 @@ void PointsSelectInteractorStyle::OnLeftButtonUp() {
 				   GetArray(ORIGINAL_IDS));
 
     if (filteredPointIds) {
-      std::cerr << "Got original point IDs\n";
+      qDebug() << "Got original point IDs";
 
       vtkPoints *points =
 	topoDataItem_->getPolyData()->GetPoints();
@@ -101,29 +101,24 @@ void PointsSelectInteractorStyle::OnLeftButtonUp() {
 	vtkIntArray::SafeDownCast(topoDataItem_->getPolyData()->GetPointData()->
 				  GetArray(DATA_QUALITY_NAME));
       if (!quality) {
-	std::cerr << "Couldn't find " << DATA_QUALITY_NAME << "!!\n";
-      }
-      else {
-	std::cerr << "FOUND " << DATA_QUALITY_NAME << "!!\n";	  
+	qWarning() << "Couldn't find " << DATA_QUALITY_NAME << "!!";
       }
 	
       for (int i = 0; i < extractedData->GetNumberOfPoints(); i++) {
 	vtkIdType pointId = filteredPointIds->GetValue(i);
-	// std::cerr << "subset point " << i << " -> original point " <<
-	// pointId << "\n";
 	double xyz[3];
 	points->GetPoint(pointId, xyz);
-	/// std::cerr << "x: " << xyz[0] << ", y: " << xyz[1] <<
-	/// ", z: " << xyz[2] << "\n";
+	qDebug() << "x: " << xyz[0] << ", y: " << xyz[1] <<
+	  ", z: " << xyz[2];
 
 	// Set selected point data quality
 	if (quality) {
 	  if (editMode_ == EraseMode) {
-	    /// std::cerr << "set value to BAD\n";
+	    qDebug() << "set value to BAD";
 	    quality->SetValue(pointId, BAD_DATA);
 	  }
 	  else {
-	    /// std::cerr << "set value to GOOD\n";	    
+	    qDebug() << "set value to GOOD";
 	    quality->SetValue(pointId, GOOD_DATA);	    
 	  }
 	}
@@ -131,9 +126,9 @@ void PointsSelectInteractorStyle::OnLeftButtonUp() {
       }
     }
     else {
-      std::cerr << "Couldn't get original point Ids\n";
+      qDebug() << "Couldn't get original point Ids";
     }
-    std::cerr << "redraw data\n";
+    qDebug() << "redraw data";
     topoDataItem_->update();
   }
 

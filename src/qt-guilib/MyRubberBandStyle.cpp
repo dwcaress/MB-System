@@ -1,5 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
 /// SPDX-License-Identifier: BSD-3-Clause
+#define QT_NO_DEBUG_OUTPUT
+
 #include "MyRubberBandStyle.h"
 #include "vtkOpenGLRenderWindow.h"
 #include "vtkOpenGLState.h"
@@ -44,7 +46,7 @@ void MyRubberBandStyle::StartSelect()
 //------------------------------------------------------------------------------
 void MyRubberBandStyle::OnChar()
 {
-  std::cerr << "OnChar(): CurrentMode=" << CurrentMode << "\n";
+  qDebug() << "OnChar(): CurrentMode=" << CurrentMode;
   switch (this->Interactor->GetKeyCode())
   {
     case 'r':
@@ -53,13 +55,13 @@ void MyRubberBandStyle::OnChar()
       if (this->CurrentMode == ORIENT_MODE)
       {
         this->CurrentMode = SELECT_MODE;
-	std::cerr << "OnChar(): in ORIENT_MODE, toggle to SELECT_MODE\n";
+	qDebug() << "OnChar(): in ORIENT_MODE, toggle to SELECT_MODE";
 	overlayInitialized_ = false;
       }
       else
       {
         this->CurrentMode = ORIENT_MODE;
-	std::cerr << "OnChar(): in SELECT_MODE, toggle to ORIENT_MODE\n";
+	qDebug() << "OnChar(): in SELECT_MODE, toggle to ORIENT_MODE";
 	ClearOverlay();
       }
       break;
@@ -91,8 +93,6 @@ void MyRubberBandStyle::OnLeftButtonDown()
     return;
   }
 
-  std::cerr << "MyRubberBandStyle::onLeftButtonDown()\n";
-  
   if (!this->Interactor)
   {
     return;
@@ -156,7 +156,6 @@ void MyRubberBandStyle::OnMouseMove()
 
   // Queue VtkStyle render rubber band box updates via associated QQuickVTKItem
   if (qquickVTKItem_) {
-    // std::cerr << "Call RedrawRubberBand() in Qt render thread\n";
     // Queue VtkStyle render updates via QQuickVTKItem
     // Dispatch lambda function to redraw rubber band in Qt render thread
     qquickVTKItem_->dispatch_async([this](vtkRenderWindow *renderWindow,
@@ -204,12 +203,12 @@ void MyRubberBandStyle::OnLeftButtonUp()
 void MyRubberBandStyle::RedrawRubberBand() 
 {
     if (!overlayInitialized_) {
-        std::cerr << "overlay not yet initialized\n";
-        InitializeOverlay();
-        if (!overlayInitialized_) {
-            std::cerr << "FAILED to initialize overlay\n";	  
-            return;
-        }
+      qDebug() << "overlay not yet initialized\n";
+      InitializeOverlay();
+      if (!overlayInitialized_) {
+	qWarning() << "FAILED to initialize overlay";	  
+	return;
+      }
     }
     
     // Get window size
@@ -221,9 +220,6 @@ void MyRubberBandStyle::RedrawRubberBand()
     double x2 = std::max(0, std::min(this->EndPosition[0], size[0] - 1));
     double y2 = std::max(0, std::min(this->EndPosition[1], size[1] - 1));
 
-    /// std::cerr << "x1: " << x1 << ", y1: " << y1 <<
-    ///      ", x2: " << x2 << ", y2: " << y2 << "\n";
-    
     // Create new geometry
     vtkNew<vtkPoints> points;
     vtkNew<vtkCellArray> lines;
