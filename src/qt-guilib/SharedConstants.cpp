@@ -23,18 +23,18 @@ SharedConstants::SharedConstants() {
 
     // Assemble data model of supported mouse modes
     mouseModes_ += 
-      new MouseMode(MousePanAndZoom, "L-drag: rotate, " \
+      new MouseMode(MousePanAndZoom, "L-drag: tilt, " \
 		    "M-drag: pan, R-drag: zoom, " \
 		    "wheel: zoom");
       
     mouseModes_ += new MouseMode(MouseLighting,
 				 "shift-L-drag: change light pos, "  \
 				 "shift-R-drag: change intensity "   \
-				 "(+ basic pan and zoom)");
+				 "(+ basic pan,tilt,zoom)");
     mouseModes_ += new MouseMode(MouseDataSelect,
 				 "'r': toggle select mode,  "	\
 				 "R-drag: select data "		\
-				 "(+ basic pan and zoom)");
+				 "(+ basic pan,tilt,zoom)");
 
     mouseModes_ += new MouseMode(MouseEditSites, "Tooltip goes here");
     mouseModes_ += new MouseMode(MouseEditRoutes, "Tooltip goes here");

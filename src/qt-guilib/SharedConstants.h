@@ -4,7 +4,7 @@
 #include <QStringList>
 #include <iostream>
 
-#define MousePanAndZoom "Basic pan and zoom"
+#define MousePanAndZoom "Basic pan, tilt, zoom"
 #define MouseRotateModel "Rotate model"
 #define MouseRotateView "Rotate view"
 #define MouseLighting "Lighting"
