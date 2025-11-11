@@ -1,3 +1,4 @@
+#define QT_NO_DEBUG_OUTPUT
 #include <vtkActor.h>
 #include <vtkCubeSource.h>
 #include <vtkInteractorStyleTrackballCamera.h>
@@ -28,15 +29,14 @@ LightingInteractorStyle::LightingInteractorStyle(TopoDataItem *item) {
 }
 
 void LightingInteractorStyle::OnLeftButtonDown() {
-  std::cerr << "LightingInteractorStyle::OnLeftButtonDown()\n";
   if (Interactor->GetShiftKey()) {
-    std::cerr << "start moving the light!\n";
+    qDebug() << "start moving the light";
     lightMoving_ = true;
     Interactor->GetEventPosition(startMousePosition_[0],
 				       startMousePosition_[1]);
   }
   else {
-    std::cerr << "Do not move the light\n";
+    qDebug() << "Do not move the light";
   }
   vtkInteractorStyleTrackballCamera::OnLeftButtonDown();
 }
@@ -48,15 +48,12 @@ void LightingInteractorStyle::OnLeftButtonUp() {
 
 
 void LightingInteractorStyle::OnRightButtonDown() {
-  std::cerr << "LightingInteractorStyle::OnRightButtonDown()\n";
   if (Interactor->GetShiftKey()) {
-    std::cerr << "start changing intensity!\n";
     intensityChanging_ = true;
     Interactor->GetEventPosition(startMousePosition_[0],
 				       startMousePosition_[1]);
   }
   else {
-    std::cerr << "Do not change light intensity\n";
   }
   vtkInteractorStyleTrackballCamera::OnRightButtonDown();
 }
@@ -108,9 +105,9 @@ void LightingInteractorStyle::OnMouseMove() {
       current_pos[2] + dx * right[2] - dy * up[2]
     };
 
-    std::cerr << "set light position:  x= " << new_pos[0] <<
+    qDebug() << "set light position:  x= " << new_pos[0] <<
       ", y=: " << new_pos[1] <<
-      ", z= " << new_pos[2] << "\n";
+      ", z= " << new_pos[2];
       
     // Update light position
     topoDataItem_->getPipeline()->lightSource_->SetPosition(new_pos);
@@ -121,9 +118,9 @@ void LightingInteractorStyle::OnMouseMove() {
   }
   else if (intensityChanging_ && Interactor->GetShiftKey())  {
     double intensity = topoDataItem_->getPipeline()->lightSource_->GetIntensity();
-    std::cerr << "change light intensity; now is " << intensity << "\n";
-    std::cerr << "intensity: " << intensity << ", dx: " << dx <<
-      ", dy: " << dy << "\n";
+    qDebug() << "change light intensity; now is " << intensity;
+    qDebug() << "intensity: " << intensity << ", dx: " << dx <<
+      ", dy: " << dy;
     
     // Calculate new intensity based on mouse dy
     intensity += dy;
