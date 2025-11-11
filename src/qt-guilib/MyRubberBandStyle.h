@@ -6,6 +6,7 @@
  * rectangle.
  *
  *
+ *
  * This interactor style allows the user to draw a rectangle in the render
  * window by hitting 'r' and then using the left mouse button.
  * When the mouse button is released, the attached picker operates on the pixel
@@ -13,7 +14,16 @@
  * vtkAreaPicker it will operate on the entire selection rectangle.
  * When the 'p' key is hit the above pick operation occurs on a 1x1 rectangle.
  * In other respects it behaves the same as its parent class.
- *
+  *
+ * This class is based on vtkInteractorStyleRubberBandPicker, with changes
+ * suggested by humans and Claude.ai to fix bugs arising from use with
+ * QQuickVTKItem. In particular VTK 'drawing' operations of lines and boxes
+ * must be deferred to the the Qt render thread, via
+ * QQuickVTKItem::dispatch_async(); therefore this class includes a
+ * reference to the associated QQuickVTKItem object.
+ * Note that this implementation calculates geometry based on the screen
+ * coordinate system rather than world coordinate system.
+
  * @sa
  * vtkAreaPicker
  */
