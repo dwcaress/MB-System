@@ -214,30 +214,35 @@ void MyRubberBandStyle::RedrawRubberBand()
     // Get window size
     const int* size = this->Interactor->GetRenderWindow()->GetSize();
     
-    // Clamp coordinates to window bounds
+    // Clamp coordinates to window bounds; ensures that rubber band rectangle
+    // stays within window boundaries (0 to size-1), i.e. prevent rubber band
+    /// rectangle from extending beyond visible area.
     double x1 = std::max(0, std::min(this->StartPosition[0], size[0] - 1));
     double y1 = std::max(0, std::min(this->StartPosition[1], size[1] - 1));
     double x2 = std::max(0, std::min(this->EndPosition[0], size[0] - 1));
     double y2 = std::max(0, std::min(this->EndPosition[1], size[1] - 1));
 
-    // Create new geometry
+    // Create rectangle geometry
     vtkNew<vtkPoints> points;
     vtkNew<vtkCellArray> lines;
     
     // Use DISPLAY coordinates directly (pixel coordinates)
-    points->InsertNextPoint(x1, y1, 0);
-    points->InsertNextPoint(x2, y1, 0);
-    points->InsertNextPoint(x2, y2, 0);
-    points->InsertNextPoint(x1, y2, 0);
+    points->InsertNextPoint(x1, y1, 0);  // bottom left
+    points->InsertNextPoint(x2, y1, 0);  // bottom right
+    points->InsertNextPoint(x2, y2, 0);  // top right 
+    points->InsertNextPoint(x1, y2, 0);  // top left
     
-    // Create closed rectangle (5 points to close the loop)
+    // Create closed rectanglular path polyline
+    // (5 points to close the loop); 
     vtkIdType rect[5] = {0, 1, 2, 3, 0};
     lines->InsertNextCell(5, rect);
     
-    // Update polydata
+    // Update rubber band polydata geometry
     rubberBandPolyData_->SetPoints(points);
     rubberBandPolyData_->SetLines(lines);
-    rubberBandPolyData_->Modified();
+    // Mark polydata as modified so it will be redrawn when window is 
+    // next rendered.
+    rubberBandPolyData_->Modified();      
     
     // Render the window
     this->Interactor->GetRenderWindow()->Render();
