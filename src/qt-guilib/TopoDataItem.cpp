@@ -29,7 +29,6 @@ TopoDataItem::TopoDataItem() {
   displayedSurface_ = DisplayedSurface::Elevation;
   pointPicked_ = false;
   forceRender_ = false;
-
   
 
   // Instantiate interactor styles
@@ -37,8 +36,10 @@ TopoDataItem::TopoDataItem() {
   lightingInteractorStyle_ = new LightingInteractorStyle(this);
 
   pointsSelectInteractorStyle_->setTopoDataItem(this);
-
+  pointsSelectInteractorStyle_->setDrawingMode(MyRubberBandStyle::DrawingMode::Rectangle);
+  
   testStyle_->setQQuickVTKItem(this);
+  testStyle_->setDrawingMode(MyRubberBandStyle::DrawingMode::Line);
 }
 
 
