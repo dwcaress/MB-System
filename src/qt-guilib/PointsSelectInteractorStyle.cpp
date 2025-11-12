@@ -21,6 +21,11 @@ void PointsSelectInteractorStyle::OnLeftButtonUp() {
   // Forward events
   MyRubberBandStyle::OnLeftButtonUp();
 
+  if (!topoDataItem_) {
+    qWarning() << "topoDataItem_ has not been set!";
+    return;
+  }
+  
   /// TEST TEST TEST
   vtkIdTypeArray *ids =
     vtkIdTypeArray::SafeDownCast(topoDataItem_->getPolyData()->GetPointData()->
@@ -131,7 +136,6 @@ void PointsSelectInteractorStyle::OnLeftButtonUp() {
     qDebug() << "redraw data";
     topoDataItem_->update();
   }
-
 }
 
 
