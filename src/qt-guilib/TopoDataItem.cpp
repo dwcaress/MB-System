@@ -639,16 +639,6 @@ double TopoDataItem::getLightIntensity() {
 }
 
 
-void TopoDataItem::queueVtkStyleRender(MyRubberBandStyle *style) {
-  // Dispatch lambda function to redraw rubber band in Qt render thread
-  dispatch_async([style](vtkRenderWindow *renderWindow,
-		  vtkSmartPointer<vtkObject> userData) {
-    style->RedrawRubberBand();
-  });
-  
-  
-}
-
 vtkPolyData *TopoDataItem::getPolyData() {
   return pipeline_->polyData_;
 }

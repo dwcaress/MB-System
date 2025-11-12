@@ -199,9 +199,6 @@ namespace mb_system {
     /// Get source polydata
     vtkPolyData *getPolyData();
 
-    /// Queue vtk style render updates to the render thread
-    void queueVtkStyleRender(MyRubberBandStyle *style);
-    
   
   protected:
 
