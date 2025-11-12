@@ -164,6 +164,7 @@ void MyRubberBandStyle::OnMouseMove()
     
   }
   else {
+    qWarning() << "qquickVtkItem_ has not been set!";
     redrawRubberBand();
   }
 }
