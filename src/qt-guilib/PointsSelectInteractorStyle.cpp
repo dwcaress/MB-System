@@ -32,7 +32,7 @@ void PointsSelectInteractorStyle::OnLeftButtonUp() {
     qDebug() << "OnLeftButtonUp(): COULD NOT FIND original IDs in topoDataItem polydata";    
   }
 				 
-  if (CurrentMode == SELECT_MODE) {
+  if (drawingMode_ == DrawingMode::Rectangle) {
     vtkNew<vtkNamedColors> colors;
 
     vtkPlanes* frustum =

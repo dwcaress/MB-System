@@ -24,134 +24,133 @@ vtkStandardNewMacro(MyRubberBandStyle);
 //------------------------------------------------------------------------------
 MyRubberBandStyle::MyRubberBandStyle()
 {
-  this->CurrentMode = ORIENT_MODE;
-  this->StartPosition[0] = this->StartPosition[1] = 0;
-  this->EndPosition[0] = this->EndPosition[1] = 0;
-  this->Moving = 0;
-  this->PixelArray = vtkUnsignedCharArray::New();
+  drawingMode_ = DrawingMode::Rectangle;
+  startPosition_[0] = startPosition_[1] = 0;
+  endPosition_[0] = endPosition_[1] = 0;
+  moving_ = 0;
+  pixelArray_ = vtkUnsignedCharArray::New();
+  drawEnabled_ = false;
 }
 
 //------------------------------------------------------------------------------
 MyRubberBandStyle::~MyRubberBandStyle()
 {
-  this->PixelArray->Delete();
+  pixelArray_->Delete();
 }
 
 //------------------------------------------------------------------------------
-void MyRubberBandStyle::StartSelect()
+void MyRubberBandStyle::startSelect()
 {
-  this->CurrentMode = SELECT_MODE;
+  qDebug() << "MyRubberBandStyle::StartSelect()";
+  ///  drawingMode_ = DrawingMode::DrawRectangle; // ????
 }
 
 //------------------------------------------------------------------------------
 void MyRubberBandStyle::OnChar()
 {
-  qDebug() << "OnChar(): CurrentMode=" << CurrentMode;
-  switch (this->Interactor->GetKeyCode())
+  qDebug() << "OnChar(): drawingMode_=" << drawingMode_;
+  switch (Interactor->GetKeyCode())
   {
     case 'r':
     case 'R':
-      // r toggles the rubber band selection mode for mouse button 1
-      if (this->CurrentMode == ORIENT_MODE)
-      {
-        this->CurrentMode = SELECT_MODE;
-	qDebug() << "OnChar(): in ORIENT_MODE, toggle to SELECT_MODE";
+      // r toggles the drawing rubber band
+      drawEnabled_ = !drawEnabled_;
+      if (drawEnabled_) {
+	qDebug() << "OnChar(): drawEnabled now true, reinitialize overlay";
 	overlayInitialized_ = false;
       }
       else
       {
-        this->CurrentMode = ORIENT_MODE;
-	qDebug() << "OnChar(): in SELECT_MODE, toggle to ORIENT_MODE";
+	qDebug() << "OnChar(): drawenabled now false, clear overlay";
 	ClearOverlay();
       }
       break;
     case 'p':
     case 'P':
     {
-      vtkRenderWindowInteractor* rwi = this->Interactor;
+      vtkRenderWindowInteractor* rwi = Interactor;
       int* eventPos = rwi->GetEventPosition();
-      this->FindPokedRenderer(eventPos[0], eventPos[1]);
-      this->StartPosition[0] = eventPos[0];
-      this->StartPosition[1] = eventPos[1];
-      this->EndPosition[0] = eventPos[0];
-      this->EndPosition[1] = eventPos[1];
-      this->Pick();
+      FindPokedRenderer(eventPos[0], eventPos[1]);
+      startPosition_[0] = eventPos[0];
+      startPosition_[1] = eventPos[1];
+      endPosition_[0] = eventPos[0];
+      endPosition_[1] = eventPos[1];
+      Pick();
       break;
     }
     default:
-      this->Superclass::OnChar();
+      Superclass::OnChar();
   }
 }
 
 //------------------------------------------------------------------------------
 void MyRubberBandStyle::OnLeftButtonDown()
 {
-  if (this->CurrentMode != SELECT_MODE)
+  if (!drawEnabled_)
   {
     // if not in rubber band mode, let the parent class handle it
-    this->Superclass::OnLeftButtonDown();
+    Superclass::OnLeftButtonDown();
     return;
   }
 
-  if (!this->Interactor)
+  if (!Interactor)
   {
     return;
   }
 
   // otherwise record the rubber band starting coordinate
 
-  this->Moving = 1;
+  moving_ = 1;
 
-  vtkRenderWindow* renWin = this->Interactor->GetRenderWindow();
+  vtkRenderWindow* renWin = Interactor->GetRenderWindow();
 
-  this->StartPosition[0] = this->Interactor->GetEventPosition()[0];
-  this->StartPosition[1] = this->Interactor->GetEventPosition()[1];
-  this->EndPosition[0] = this->StartPosition[0];
-  this->EndPosition[1] = this->StartPosition[1];
+  startPosition_[0] = Interactor->GetEventPosition()[0];
+  startPosition_[1] = Interactor->GetEventPosition()[1];
+  endPosition_[0] = startPosition_[0];
+  endPosition_[1] = startPosition_[1];
 
-  this->PixelArray->Initialize();
-  this->PixelArray->SetNumberOfComponents(4);
+  pixelArray_->Initialize();
+  pixelArray_->SetNumberOfComponents(4);
   const int* size = renWin->GetSize();
-  this->PixelArray->SetNumberOfTuples(size[0] * size[1]);
+  pixelArray_->SetNumberOfTuples(size[0] * size[1]);
 
-  renWin->GetRGBACharPixelData(0, 0, size[0] - 1, size[1] - 1, 1, this->PixelArray);
+  renWin->GetRGBACharPixelData(0, 0, size[0] - 1, size[1] - 1, 1, pixelArray_);
 
-  this->FindPokedRenderer(this->StartPosition[0], this->StartPosition[1]);
+  FindPokedRenderer(startPosition_[0], startPosition_[1]);
 }
 
 //------------------------------------------------------------------------------
 void MyRubberBandStyle::OnMouseMove()
 {
-  if (this->CurrentMode != SELECT_MODE)
-  {
+  if (!drawEnabled_)  {
     // if not in rubber band mode,  let the parent class handle it
-    this->Superclass::OnMouseMove();
+    Superclass::OnMouseMove();
     return;
   }
 
-  if (!this->Interactor || !this->Moving)
+  if (!Interactor || !moving_)
   {
     return;
   }
 
-  this->EndPosition[0] = this->Interactor->GetEventPosition()[0];
-  this->EndPosition[1] = this->Interactor->GetEventPosition()[1];
-  const int* size = this->Interactor->GetRenderWindow()->GetSize();
-  if (this->EndPosition[0] > (size[0] - 1))
+  endPosition_[0] = Interactor->GetEventPosition()[0];
+  endPosition_[1] = Interactor->GetEventPosition()[1];
+  const int* size = Interactor->GetRenderWindow()->GetSize();
+  if (endPosition_[0] > (size[0] - 1))
   {
-    this->EndPosition[0] = size[0] - 1;
+    endPosition_[0] = size[0] - 1;
   }
-  if (this->EndPosition[0] < 0)
+  if (endPosition_[0] < 0)
   {
-    this->EndPosition[0] = 0;
+    endPosition_[0] = 0;
   }
-  if (this->EndPosition[1] > (size[1] - 1))
+  if (endPosition_[1] > (size[1] - 1))
   {
-    this->EndPosition[1] = size[1] - 1;
+    endPosition_[1] = size[1] - 1;
   }
-  if (this->EndPosition[1] < 0)
+  if (endPosition_[1] < 0)
   {
-    this->EndPosition[1] = 0;
+    endPosition_[1] = 0;
   }
 
   // Queue VtkStyle render rubber band box updates via associated QQuickVTKItem
@@ -160,39 +159,37 @@ void MyRubberBandStyle::OnMouseMove()
     // Dispatch lambda function to redraw rubber band in Qt render thread
     qquickVTKItem_->dispatch_async([this](vtkRenderWindow *renderWindow,
 					  vtkSmartPointer<vtkObject> userData) {
-    this->RedrawRubberBand();
+    redrawRubberBand();
   });
     
   }
   else {
-    this->RedrawRubberBand();
+    redrawRubberBand();
   }
 }
 
 //------------------------------------------------------------------------------
 void MyRubberBandStyle::OnLeftButtonUp()
 {
-  if (this->CurrentMode != SELECT_MODE)
-  {
+  if (!drawEnabled_) {
     // if not in rubber band mode,  let the parent class handle it
-    this->Superclass::OnLeftButtonUp();
+    Superclass::OnLeftButtonUp();
     return;
   }
 
-  if (!this->Interactor || !this->Moving)
+  if (!Interactor || !moving_)
   {
     return;
   }
 
 
   // otherwise record the rubber band end coordinate and then fire off a pick
-  if ((this->StartPosition[0] != this->EndPosition[0]) ||
-    (this->StartPosition[1] != this->EndPosition[1]))
+  if ((startPosition_[0] != endPosition_[0]) ||
+    (startPosition_[1] != endPosition_[1]))
   {
-    this->Pick();
+    Pick();
   }
-  this->Moving = 0;
-  // this->CurrentMode = ORIENT_MODE;
+  moving_ = 0;
 
   overlayInitialized_ = false;
   InitializeOverlay();
@@ -200,8 +197,11 @@ void MyRubberBandStyle::OnLeftButtonUp()
 
 
 /* ***** Claude.ai implementation ******* */
-void MyRubberBandStyle::RedrawRubberBand() 
+void MyRubberBandStyle::redrawRubberBand() 
 {
+  if (!drawEnabled_) {
+    return;
+  }
     if (!overlayInitialized_) {
       qDebug() << "overlay not yet initialized\n";
       InitializeOverlay();
@@ -212,30 +212,46 @@ void MyRubberBandStyle::RedrawRubberBand()
     }
     
     // Get window size
-    const int* size = this->Interactor->GetRenderWindow()->GetSize();
+    const int* size = Interactor->GetRenderWindow()->GetSize();
     
     // Clamp coordinates to window bounds; ensures that rubber band rectangle
     // stays within window boundaries (0 to size-1), i.e. prevent rubber band
     /// rectangle from extending beyond visible area.
-    double x1 = std::max(0, std::min(this->StartPosition[0], size[0] - 1));
-    double y1 = std::max(0, std::min(this->StartPosition[1], size[1] - 1));
-    double x2 = std::max(0, std::min(this->EndPosition[0], size[0] - 1));
-    double y2 = std::max(0, std::min(this->EndPosition[1], size[1] - 1));
+    double x1 = std::max(0, std::min(startPosition_[0], size[0] - 1));
+    double y1 = std::max(0, std::min(startPosition_[1], size[1] - 1));
+    double x2 = std::max(0, std::min(endPosition_[0], size[0] - 1));
+    double y2 = std::max(0, std::min(endPosition_[1], size[1] - 1));
 
-    // Create rectangle geometry
+    // Create rectangle/line geometry
     vtkNew<vtkPoints> points;
     vtkNew<vtkCellArray> lines;
     
-    // Use DISPLAY coordinates directly (pixel coordinates)
-    points->InsertNextPoint(x1, y1, 0);  // bottom left
-    points->InsertNextPoint(x2, y1, 0);  // bottom right
-    points->InsertNextPoint(x2, y2, 0);  // top right 
-    points->InsertNextPoint(x1, y2, 0);  // top left
+    if (drawingMode_ == DrawingMode::Rectangle) {
+      // Use DISPLAY coordinates directly (pixel coordinates)
+      points->InsertNextPoint(x1, y1, 0);  // bottom left
+      points->InsertNextPoint(x2, y1, 0);  // bottom right
+      points->InsertNextPoint(x2, y2, 0);  // top right 
+      points->InsertNextPoint(x1, y2, 0);  // top left
+
+      // Create closed rectanglular path polyline
+      // (5 points to close the loop); 
+      vtkIdType rect[] = {0, 1, 2, 3, 0};
+      lines->InsertNextCell(5, rect);
+    }
+    else if (drawingMode_ == DrawingMode::Line) {
+      // Draw line from bottom left to upper right
+      // Create two points for the line
+      points->InsertNextPoint(x1, y1, 0);  // Start point
+      points->InsertNextPoint(x2, y2, 0);  // End point
     
-    // Create closed rectanglular path polyline
-    // (5 points to close the loop); 
-    vtkIdType rect[5] = {0, 1, 2, 3, 0};
-    lines->InsertNextCell(5, rect);
+      // Create a line connecting the two points
+      vtkIdType line[] = {0, 1};
+      lines->InsertNextCell(2, line);
+    }
+    else {
+      qWarning() << "redrawRubberBand(): unknowing drawing mode";
+      return;
+    }
     
     // Update rubber band polydata geometry
     rubberBandPolyData_->SetPoints(points);
@@ -245,7 +261,7 @@ void MyRubberBandStyle::RedrawRubberBand()
     rubberBandPolyData_->Modified();      
     
     // Render the window
-    this->Interactor->GetRenderWindow()->Render();
+    Interactor->GetRenderWindow()->Render();
 }
 
 //------------------------------------------------------------------------------
@@ -253,10 +269,10 @@ void MyRubberBandStyle::Pick()
 {
   // find rubber band lower left, upper right and center
   double rbcenter[3];
-  const int* size = this->Interactor->GetRenderWindow()->GetSize();
+  const int* size = Interactor->GetRenderWindow()->GetSize();
   int min[2], max[2];
   min[0] =
-    this->StartPosition[0] <= this->EndPosition[0] ? this->StartPosition[0] : this->EndPosition[0];
+    startPosition_[0] <= endPosition_[0] ? startPosition_[0] : endPosition_[0];
   if (min[0] < 0)
   {
     min[0] = 0;
@@ -267,7 +283,7 @@ void MyRubberBandStyle::Pick()
   }
 
   min[1] =
-    this->StartPosition[1] <= this->EndPosition[1] ? this->StartPosition[1] : this->EndPosition[1];
+    startPosition_[1] <= endPosition_[1] ? startPosition_[1] : endPosition_[1];
   if (min[1] < 0)
   {
     min[1] = 0;
@@ -278,7 +294,7 @@ void MyRubberBandStyle::Pick()
   }
 
   max[0] =
-    this->EndPosition[0] > this->StartPosition[0] ? this->EndPosition[0] : this->StartPosition[0];
+    endPosition_[0] > startPosition_[0] ? endPosition_[0] : startPosition_[0];
   if (max[0] < 0)
   {
     max[0] = 0;
@@ -289,7 +305,7 @@ void MyRubberBandStyle::Pick()
   }
 
   max[1] =
-    this->EndPosition[1] > this->StartPosition[1] ? this->EndPosition[1] : this->StartPosition[1];
+    endPosition_[1] > startPosition_[1] ? endPosition_[1] : startPosition_[1];
   if (max[1] < 0)
   {
     max[1] = 0;
@@ -303,10 +319,10 @@ void MyRubberBandStyle::Pick()
   rbcenter[1] = (min[1] + max[1]) / 2.0;
   rbcenter[2] = 0;
 
-  if (this->State == VTKIS_NONE)
+  if (State == VTKIS_NONE)
   {
     // tell the RenderWindowInteractor's picker to make it happen
-    vtkRenderWindowInteractor* rwi = this->Interactor;
+    vtkRenderWindowInteractor* rwi = Interactor;
 
     vtkAssemblyPath* path = nullptr;
     rwi->StartPickCallback();
@@ -316,45 +332,45 @@ void MyRubberBandStyle::Pick()
       vtkAreaPicker* areaPicker = vtkAreaPicker::SafeDownCast(picker);
       if (areaPicker != nullptr)
       {
-        areaPicker->AreaPick(min[0], min[1], max[0], max[1], this->CurrentRenderer);
+        areaPicker->AreaPick(min[0], min[1], max[0], max[1], CurrentRenderer);
       }
       else
       {
-        picker->Pick(rbcenter[0], rbcenter[1], 0.0, this->CurrentRenderer);
+        picker->Pick(rbcenter[0], rbcenter[1], 0.0, CurrentRenderer);
       }
       path = picker->GetPath();
     }
     if (path == nullptr)
     {
-      this->HighlightProp(nullptr);
-      this->PropPicked = 0;
+      HighlightProp(nullptr);
+      PropPicked = 0;
     }
     else
     {
       // highlight the one prop that the picker saved in the path
-      // this->HighlightProp(path->GetFirstNode()->GetViewProp());
-      this->PropPicked = 1;
+      // HighlightProp(path->GetFirstNode()->GetViewProp());
+      PropPicked = 1;
     }
     rwi->EndPickCallback();
   }
 
-  this->Interactor->Render();
+  Interactor->Render();
 }
 
 //------------------------------------------------------------------------------
 void MyRubberBandStyle::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os, indent);
+  Superclass::PrintSelf(os, indent);
 }
 
 
 /* ***** Claude.ai ******* */
 void MyRubberBandStyle::InitializeOverlay() {
-    if (!this->Interactor || overlayInitialized_) {
+    if (!Interactor || overlayInitialized_) {
         return;
     }
     
-    vtkRenderWindow* renWin = this->Interactor->GetRenderWindow();
+    vtkRenderWindow* renWin = Interactor->GetRenderWindow();
     
     // Set up overlay renderer
     renWin->AddRenderer(overlayRenderer_);
@@ -386,12 +402,12 @@ void MyRubberBandStyle::InitializeOverlay() {
 
 void MyRubberBandStyle::ClearOverlay() {
   overlayRenderer_->RemoveAllViewProps();
-  this->Interactor->GetRenderWindow()->Render();
+  Interactor->GetRenderWindow()->Render();
 }
 
 
 void MyRubberBandStyle::SetInteractor(vtkRenderWindowInteractor* interactor) {
-  this->Superclass::SetInteractor(interactor);
+  Superclass::SetInteractor(interactor);
   InitializeOverlay();
 }
 

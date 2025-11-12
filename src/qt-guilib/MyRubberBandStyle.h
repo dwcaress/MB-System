@@ -40,8 +40,10 @@
 #include "vtkPolyData.h"
 #include <QQuickVTKItem.h>
 
+/* ***
 #define ORIENT_MODE 0
 #define SELECT_MODE 1
+*** */
 
 VTK_ABI_NAMESPACE_BEGIN
 class vtkUnsignedCharArray;
@@ -66,11 +68,23 @@ class VTKINTERACTIONSTYLE_EXPORT MyRubberBandStyle
   : public vtkInteractorStyleTrackballCamera
 {
 public:
+
+  enum class DrawingMode {
+    Rectangle, Line
+  };
+
+  /// Return draw-enabled state
+  bool drawEnabled() { return drawEnabled_; }
+
+  /// Set draw-enabled state
+  void setDrawEnable(bool enabled) { drawEnabled_ = enabled; }
+
+  
   static MyRubberBandStyle* New();
   vtkTypeMacro(MyRubberBandStyle, vtkInteractorStyleTrackballCamera);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  void StartSelect();
+  void startSelect();
 
   ///@{
   /**
@@ -87,11 +101,15 @@ public:
     qquickVTKItem_ = item;
   }
 
+  /// Redraw mouse-traced shape
   /// Public, so it can be queued by QQuickVtkItem::async_update()
-  void RedrawRubberBand();
+  void redrawRubberBand();
 
   void SetInteractor(vtkRenderWindowInteractor* interactor) override;
 
+  void setDrawingMode(DrawingMode mode) {
+    drawingMode_ = mode;
+  }
   
 protected:
   MyRubberBandStyle();
@@ -99,14 +117,17 @@ protected:
 
   virtual void Pick();
 
-  int StartPosition[2];
-  int EndPosition[2];
+  bool drawEnabled_;
+  
+  int startPosition_[2];
+  int endPosition_[2];
 
-  int Moving;
+  int moving_;
 
-  vtkUnsignedCharArray* PixelArray;
+  vtkUnsignedCharArray* pixelArray_;
 
-  int CurrentMode;
+  /// Current drawing mode
+  DrawingMode drawingMode_;
 
   QQuickVTKItem *qquickVTKItem_;
 
