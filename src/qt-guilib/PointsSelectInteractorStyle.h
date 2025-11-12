@@ -27,6 +27,7 @@ class TopoDataItem;
       selectedMapper_ = vtkSmartPointer<vtkDataSetMapper>::New();
       selectedActor_ = vtkSmartPointer<vtkActor>::New();
       selectedActor_->SetMapper(selectedMapper_);
+      topoDataItem_ = nullptr;
     }
 
     virtual void OnLeftButtonUp() override;
