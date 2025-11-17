@@ -116,7 +116,8 @@ char usage_message[] = "mbphotogrammetry \n"
                         "\t--algorithm-speckle-window-size=value\n"
                         "\t--algorithm-speckle-range=value\n"
                         "\t--algorithm-disp-12-max-diff=value\n"
-                        "\t--algorithm-texture-threshold=value\n";
+                        "\t--algorithm-texture-threshold=value\n"
+                        "\t--good-fraction-threshold=value\n";
 
 /*--------------------------------------------------------------------*/
 
@@ -125,7 +126,8 @@ struct mbpg_process_struct {
     // input stereo pair and camera pose
     unsigned int thread;
     int pair_count;
-    double pair_quality;
+    double quality;
+    bool rectified;
     mb_path imageLeftFile;
     double image_left_time_d;
     double image_left_gain;
@@ -675,7 +677,7 @@ void process_stereopair(int verbose, struct mbpg_process_struct *process,
 
         /* initialize cameras, calibration, and stereo algorithm */
         if (!control->photogrammetryInitialized) {
-            if (!control->calibrationInitialized) {
+            if (!control->calibrationInitialized && !process->rectified) {
                 fprintf(stderr,"\nNo stereo camera calibration has been loaded - aborting...\n");
                 fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
                 exit(1);
@@ -732,14 +734,16 @@ void process_stereopair(int verbose, struct mbpg_process_struct *process,
             fprintf(stderr, "%s:%d:%s: algorithm set\n", __FILE__, __LINE__, __func__);
 
             /* set up rectification */
-            calibrationMatrixValues(control->cameraMatrix[0], control->imageSize[0],
-                        control->SensorWidthMm, control->SensorHeightMm,
-                        control->fovx[0], control->fovy[0], control->focalLength[0],
-                        control->principalPoint[0], control->aspectRatio[0]);
-            calibrationMatrixValues(control->cameraMatrix[1], control->imageSize[1],
-                        control->SensorWidthMm, control->SensorHeightMm,
-                        control->fovx[1], control->fovy[1], control->focalLength[1],
-                        control->principalPoint[1], control->aspectRatio[1]);
+            if (!process->rectified) {
+								calibrationMatrixValues(control->cameraMatrix[0], control->imageSize[0],
+														control->SensorWidthMm, control->SensorHeightMm,
+														control->fovx[0], control->fovy[0], control->focalLength[0],
+														control->principalPoint[0], control->aspectRatio[0]);
+								calibrationMatrixValues(control->cameraMatrix[1], control->imageSize[1],
+														control->SensorWidthMm, control->SensorHeightMm,
+														control->fovx[1], control->fovy[1], control->focalLength[1],
+														control->principalPoint[1], control->aspectRatio[1]);
+            }
             if (verbose > 0) {
                 fprintf(stderr,"\nLeft Camera Characteristics:\n");
                 fprintf(stderr,"  Image width (pixels):         %d\n", control->imageSize[0].width);
@@ -782,11 +786,13 @@ void process_stereopair(int verbose, struct mbpg_process_struct *process,
                 fprintf(stderr,"  downsample:                   %d\n\n", control->downsample);
             }
 
-            stereoRectify( control->cameraMatrix[0], control->distCoeffs[0], control->cameraMatrix[1], control->distCoeffs[1], 
-                            control->imageSize[0], control->R, control->T, control->R1, control->R2, control->P1, control->P2, control->Q, 
-                            CALIB_ZERO_DISPARITY, -1, control->imageSize[0], &control->roi1, &control->roi2 );
-            initUndistortRectifyMap(control->cameraMatrix[0], control->distCoeffs[0], control->R1, control->P1, control->imageSize[0], CV_16SC2, control->map11, control->map12);
-            initUndistortRectifyMap(control->cameraMatrix[1], control->distCoeffs[1], control->R2, control->P2, control->imageSize[1], CV_16SC2, control->map21, control->map22);
+						if (!process->rectified) {
+								stereoRectify( control->cameraMatrix[0], control->distCoeffs[0], control->cameraMatrix[1], control->distCoeffs[1], 
+																control->imageSize[0], control->R, control->T, control->R1, control->R2, control->P1, control->P2, control->Q, 
+																CALIB_ZERO_DISPARITY, -1, control->imageSize[0], &control->roi1, &control->roi2 );
+								initUndistortRectifyMap(control->cameraMatrix[0], control->distCoeffs[0], control->R1, control->P1, control->imageSize[0], CV_16SC2, control->map11, control->map12);
+								initUndistortRectifyMap(control->cameraMatrix[1], control->distCoeffs[1], control->R2, control->P2, control->imageSize[1], CV_16SC2, control->map21, control->map22);
+						}
 
             /* print out calibration values */
             if (verbose > 0) {
@@ -808,8 +814,14 @@ void process_stereopair(int verbose, struct mbpg_process_struct *process,
         /* apply stereo calibration to rectify the images */
         Mat img1r, img2r, img1g, img2g, img1gc, img2gc;
         Mat disp, dispf, disp8;
-        remap(img1, img1r, control->map11, control->map12, INTER_LINEAR);
-        remap(img2, img2r, control->map21, control->map22, INTER_LINEAR);
+				if (!process->rectified) {
+						img1r = img1.clone();
+						img2r = img2.clone();
+				}
+				else {
+        		remap(img1, img1r, control->map11, control->map12, INTER_LINEAR);
+        		remap(img2, img2r, control->map21, control->map22, INTER_LINEAR);
+				}
 
         /* Downsample if specified */
         if (control->downsample > 1) {
@@ -1193,6 +1205,7 @@ int main(int argc, char** argv)
      *         --algorithm-speckle-range=value
      *         --algorithm-disp-12-max-diff=value
      *         --algorithm-texture-threshold=value
+     *         --good-fraction-threshold=value
      */
     static struct option options[] =
         {
@@ -1675,6 +1688,7 @@ int main(int argc, char** argv)
     int npairs_output = 0;
     int npairs_output_tot = 0;
     int imageStatus = MB_IMAGESTATUS_NONE;
+    bool rectified = false;
     mb_path dpath;
     unsigned int numThreadsSet = 0;
     mb_path imageLeftFile;
@@ -1696,7 +1710,7 @@ int main(int argc, char** argv)
     while (!done) {
 
         /* get next entry from the recursive imagelist structure */
-        status = mb_imagelist_read(verbose, imagelist_ptr, &imageStatus,
+        status = mb_imagelist_read(verbose, imagelist_ptr, &imageStatus, &rectified, 
                                 imageLeftFile, imageRightFile, dpath,
                                 &image_left_time_d, &image_right_time_d,
                                 &image_left_gain, &image_right_gain,
@@ -1841,13 +1855,13 @@ int main(int argc, char** argv)
             }
 
             /* check imageQuality value against threshold */
-            double pair_quality = 1.0;
+            double quality = 1.0;
             if (use_this_pair && imagequality_initialized) {
                 if (nquality > 1) {
                     intstat = mb_linear_interp(verbose, qtime-1, qquality-1, nquality,
-                                                image_left_time_d, &pair_quality, &iqtime, &error);
+                                                image_left_time_d, &quality, &iqtime, &error);
                 }
-                if (pair_quality < imageQualityThreshold) {
+                if (quality < imageQualityThreshold) {
                     use_this_pair = false;
                 }
             }
@@ -1922,6 +1936,8 @@ int main(int argc, char** argv)
                 struct mbpg_process_struct *process = &processData[numThreadsSet];
                 process->thread = numThreadsSet;
                 process->pair_count = npairs_process;
+                process->quality = quality;
+                process->rectified = rectified;
                 strncpy(process->imageLeftFile, imageLeftFile, sizeof(mb_path));
                 process->image_left_time_d = image_left_time_d;
                 process->image_left_gain = image_left_gain;
@@ -1931,7 +1947,6 @@ int main(int argc, char** argv)
                 process->image_right_gain = image_right_gain;
                 process->image_right_exposure = image_right_exposure;
                 process->speed = speed;
-                process->pair_quality = pair_quality;
 
                 /* calculate target sensor position - this is a stereo pair and we
                   want to navigate the center or average of the two cameras */
@@ -2028,7 +2043,7 @@ int main(int argc, char** argv)
                         process->image_left_navlon, process->image_left_navlat, process->image_left_sensordepth, 
                         process->image_left_heading, process->image_left_roll, process->image_left_pitch,
                         process->image_left_amplitude, process->image_right_amplitude,
-                        process->pair_quality);
+                        process->quality);
                 mb_write_ping(verbose, mbio_ptr, (void *)&process->store, &error);
                 npairs_output++;
                 npairs_output_tot++;

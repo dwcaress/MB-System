@@ -858,7 +858,8 @@ struct mb_imagelist_struct {
   int open;
   int recursion;
   int leftrightstereo;
-  int printed;
+  bool rectified;
+  bool printed;
   char path[MB_PATH_MAXLINE];
   FILE *fp;
   struct mb_imagelist_struct *imagelist;

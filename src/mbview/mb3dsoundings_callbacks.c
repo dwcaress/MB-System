@@ -2616,8 +2616,8 @@ soundingdata->num_soundings); */
       struct mb3dsoundings_sounding_struct *sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
       struct mb3dsoundings_sounding_struct *sounding2 = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i + 1]);
 
-      /* plot segment only if soundings are from the same ping */
-      if (sounding2->ifile == sounding->ifile && sounding->iping == sounding2->iping) {
+      /* plot segment only if soundings are from the same ping and profile */
+      if (sounding2->ifile == sounding->ifile && sounding->iping == sounding2->iping && sounding->iprofile == sounding2->iprofile) {
         /* plot in black if both soundings are good */
         if (mb_beam_ok(sounding->beamflag) && mb_beam_ok(sounding2->beamflag)) {
           glColor3f(0.0, 0.0, 0.0);
