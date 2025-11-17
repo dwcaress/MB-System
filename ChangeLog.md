@@ -22,7 +22,8 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
-- Version 5.8.3beta07   October 22, 2025
+- Version 5.8.3beta08    November 16, 2025
+- Version 5.8.3beta07    October 22, 2025
 - Version 5.8.3beta06    October 1, 2025
 - Version 5.8.3beta05    September 30, 2025
 - Version 5.8.3beta04    September 18, 2025
@@ -64,6 +65,19 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.3beta08 (November 16, 2025)
+
+Programs mbedit and mbeditviz: Now display dual swath Kongsberg multibeam data in the
+kmall format (id 261) with two separate acrosstrack profiles. As before the two profiles
+are associated with a single ping cycle and set of datagrams.
+
+Format MBF_3DWISSL2 (id 234): Updates to handle the evolving representation for the
+3D at Depth 2nd generation Wide Swath Subsea Lidar (WiSSL2)
+
+Programs mbphotomosaic, mbgetphotocorrection, and mbphotogrammetry: Augmented to handle
+seafloor photographs that have already been rectified (corrected for distortion). This
+capability has not been fully tested at this point.
 
 #### 5.8.3beta07 (October 22, 2025)
 

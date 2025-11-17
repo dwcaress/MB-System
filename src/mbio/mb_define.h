@@ -37,8 +37,8 @@
 #include <stdint.h>
 
 /* Define version and date for this release */
-#define MB_VERSION "5.8.3beta07"
-#define MB_VERSION_DATE "22 October 2025"
+#define MB_VERSION "5.8.3beta08"
+#define MB_VERSION_DATE "16 November 2025"
 
 /* CMake supports current OS's and so there is only one form of RPC and XDR and no mb_config.h file */
 #ifdef CMAKE_BUILD_SYSTEM
@@ -365,7 +365,7 @@ int mb_datalist_readorg(int verbose, void *datalist_ptr, char *path, int *format
 int mb_datalist_recursion(int verbose, void *datalist_ptr, bool print, int *recursion, int *error);
 int mb_datalist_close(int verbose, void **datalist_ptr, int *error);
 int mb_imagelist_open(int verbose, void **imagelist_ptr, char *path, int *error);
-int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
+int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus, bool *rectified, 
                       char *path0, char *path1, char *dpath,
                       double *time_d0, double *time_d1,
                       double *gain0, double *gain1,

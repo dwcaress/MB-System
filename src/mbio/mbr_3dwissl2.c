@@ -46,7 +46,7 @@
 #include "mb_status.h"
 #include "mbsys_3ddwissl2.h"
 
-// #define MBF_3DWISSLP_DEBUG 1 
+//#define MBF_3DWISSLP_DEBUG 1 
 
 /*--------------------------------------------------------------------*/
 int mbr_info_3dwissl2
@@ -615,15 +615,18 @@ int mbr_3dwissl2_rd_data
 			int Spare2 = rawbits >> 14;
 
 //fprintf(stderr, "%s:%d:%s: index:%d\n", __FILE__, __LINE__, __FUNCTION__, index);
-			
+
+			/* scanline timestamp */
+			double time_d = mbarirange->TimeStart_Sec + 1.0e-9 * mbarirange->TimeStart_nSec;
+
 			/* fix scanline timestamp */
-	  	struct mbsys_3ddwissl2_sriat_fileheader_struct *fileheader = &store->fileheader;
-			double start_time_d = fileheader->TimeStart_Sec + 1.0e-9 * fileheader->TimeStart_nSec;
-			double end_time_d = fileheader->TimeEnd_Sec + 1.0e-9 * fileheader->TimeEnd_nSec;
-			double dtime = (end_time_d - start_time_d) / (fileheader->nScanLinesPerScan - 1);
-			double time_d = start_time_d + dtime * mbarirange->RowNumber;
-   		mbarirange->TimeStart_Sec = (int) floor(time_d);
-   		mbarirange->TimeStart_nSec = (int)(1.0e9 * (time_d - mbarirange->TimeStart_Sec));
+	  	//struct mbsys_3ddwissl2_sriat_fileheader_struct *fileheader = &store->fileheader;
+			//double start_time_d = fileheader->TimeStart_Sec + 1.0e-9 * fileheader->TimeStart_nSec;
+			//double end_time_d = fileheader->TimeEnd_Sec + 1.0e-9 * fileheader->TimeEnd_nSec;
+			//double dtime = (end_time_d - start_time_d) / (fileheader->nScanLinesPerScan - 1);
+			//time_d = start_time_d + dtime * mbarirange->RowNumber;
+   		//mbarirange->TimeStart_Sec = (int) floor(time_d);
+   		//mbarirange->TimeStart_nSec = (int)(1.0e9 * (time_d - mbarirange->TimeStart_Sec));
 
 #ifndef MBF_3DWISSLP_DEBUG
 			if (verbose >= 5) 
@@ -638,7 +641,6 @@ int mbr_3dwissl2_rd_data
 				fprintf(stderr, "dbg5       mbarirange->HdrSizeBytes:                %u\n", mbarirange->HdrSizeBytes);
 				fprintf(stderr, "dbg5       mbarirange->TimeStart_Sec:               %d\n", mbarirange->TimeStart_Sec);
 				fprintf(stderr, "dbg5       mbarirange->TimeStart_nSec:              %d\n", mbarirange->TimeStart_nSec);
-				time_d = mbarirange->TimeStart_Sec + 1.0e-9 * mbarirange->TimeStart_nSec;
 				int time_i[7];
 				mb_get_date(verbose, time_d, time_i);
 				fprintf(stderr, "dbg5       timestamp:                               %.6f %4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d\n", time_d, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6]);
@@ -673,7 +675,12 @@ int mbr_3dwissl2_rd_data
 				fprintf(stderr, "dbg5       AZ_nbits:                    						 %u\n", AZ_nbits);
 				fprintf(stderr, "dbg5       Spare2:                      						 %u\n", Spare2);
 				}
-				
+int time_i[7];
+mb_get_date(verbose, time_d, time_i);
+fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d   %4.4d:%4.4d:%4.4d",
+time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
+mbarirange->RowNumber,mbarirange->NumPtsRow,mbarirange->NumPtsPkt);
+
 			/* Initialize the processed data section */
 			mbarirange->time_d = time_d;
 			mbarirange->navlon = 0.0;
@@ -716,6 +723,7 @@ int mbr_3dwissl2_rd_data
 			status = mb_bitpack_resize(bitpackedarrayptr, mbarirange->NumPtsPkt, &bpbuffer, &bpbuffer_size);
 			memcpy(bpbuffer, &buffer[index], bpbuffer_size);
 			long long *lptr = (long long *) bpbuffer;
+	  	struct mbsys_3ddwissl2_sriat_fileheader_struct *fileheader = &store->fileheader;
 			double angle_el = fileheader->ElDeg_cnts * 90.0 / 65535.0;
 			int num_soundings = 0;
 			for (int ipulse = 0; ipulse < mbarirange->NumPtsPkt; ipulse++) 
@@ -728,6 +736,12 @@ int mbr_3dwissl2_rd_data
 				mbarirange->soundings[num_soundings].time_offset = ((double)ipulse) / ((double)mbarirange->PRF_Hz);
 				mbarirange->soundings[num_soundings].angle_az = (mbarirange->AZ_offset + (int) i_az) * 360.0 / 262143.0;
 				mbarirange->soundings[num_soundings].angle_el = angle_el;
+if (ipulse == 0)
+fprintf(stderr, "%10d %8.3f ", i_az, mbarirange->soundings[num_soundings].angle_az);
+else if (ipulse == 1)
+fprintf(stderr, "%10d %8.3f ", i_az, mbarirange->soundings[num_soundings].angle_az);
+else if (ipulse == mbarirange->NumPtsPkt - 1)
+fprintf(stderr, "%10d %8.3f\n", i_az, mbarirange->soundings[num_soundings].angle_az);
 				num_soundings++;
 				
 				//mbarirange->soundings[num_soundings].pulse_id = ipulse;
@@ -1006,6 +1020,12 @@ int mbr_3dwissl2_rd_data
     	}
 
 			store->kind = MB_DATA_DATA;
+			done = true;
+		}
+		
+	else
+		{
+			store->kind = MB_DATA_NONE;
 			done = true;
 		}
 

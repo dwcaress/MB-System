@@ -695,6 +695,7 @@ struct mbview_struct {
 struct mb3dsoundings_sounding_struct {
 	int ifile;
 	int iping;
+	int iprofile;
 	int ibeam;
 	int beamcolor;
 	char beamflag;

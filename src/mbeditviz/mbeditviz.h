@@ -100,6 +100,8 @@ struct mbev_ping_struct {
 	int time_i[7];
 	double time_d;
 	int multiplicity;
+	bool dualprofile;
+	int dualprofilebeam;
 	double navlon;
 	double navlat;
 	double navlonx;

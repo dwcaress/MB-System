@@ -120,6 +120,8 @@ struct mbedit_ping_struct {
 	int time_i[7];
 	double time_d;
 	int multiplicity;
+	bool dualprofile;
+	int dualprofilebeam;
 	double time_interval;
 	double navlon;
 	double navlat;
@@ -131,8 +133,6 @@ struct mbedit_ping_struct {
 	double pitch;
 	double heave;
 	double distance;
-	bool dualprofile;
-	int dualprofilebeam;
 	int beams_bath;
 	char *beamflag;
 	char *beamflagorg;
@@ -3940,11 +3940,15 @@ int mbedit_load_data(int buffer_size, int *nloaded, int *nbuffer, int *ngood, in
 		                    &ping[nbuff].sensordepth, &ping[nbuff].beams_bath, &namp, &nss, beamflag, bath, amp, bathacrosstrack,
 		                    bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
 		if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
+		
+			/* get navigation */
 			if (nbuff > 0)
 				ping[nbuff].time_interval = ping[nbuff].time_d - ping[nbuff - 1].time_d;
 			status = mb_extract_nav(verbose, imbio_ptr, store_ptr, &kind, ping[nbuff].time_i, &ping[nbuff].time_d,
 			                        &ping[nbuff].navlon, &ping[nbuff].navlat, &speed_nav, &ping[nbuff].heading, &draft,
 			                        &ping[nbuff].roll, &ping[nbuff].pitch, &ping[nbuff].heave, &error);
+
+			/* check for ping multiplicity */
 			const int sensorhead_status = mb_sensorhead(verbose, imbio_ptr, store_ptr, &sensorhead, &sensorhead_error);
 			if (sensorhead_status == MB_SUCCESS) {
 				ping[nbuff].multiplicity = sensorhead;
@@ -3960,6 +3964,8 @@ int mbedit_load_data(int buffer_size, int *nloaded, int *nbuffer, int *ngood, in
 			else
 				ping[nbuff].distance = ping[nbuff - 1].distance + ping[nbuff].speed * ping[nbuff].time_interval / 3.6;
 			nbeams = ping[nbuff].beams_bath;
+			
+			/* get detect status */
 			detect_status = mb_detects(verbose, imbio_ptr, store_ptr, &kind, &nbeams, detect, &detect_error);
 			if (detect_status != MB_SUCCESS) {
 				status = MB_SUCCESS;
@@ -4042,6 +4048,62 @@ int mbedit_load_data(int buffer_size, int *nloaded, int *nbuffer, int *ngood, in
 				ping[nbuff].pulses[i] = pulses[i];
 				ping[nbuff].bath_x[i] = 0;
 				ping[nbuff].bath_y[i] = 0;
+			}
+			
+			/* check if this is a dual profile (e.g. Kongsberg dual swath) */
+			double xtrack_min = 0.0;
+			double xtrack_max = 0.0;
+			double xtrack_absmax = 0.0;
+			bool first = true;
+			for (int i = 0; i < ping[nbuff].beams_bath; i++) {
+				if (mb_beam_ok(ping[nbuff].beamflag[i])) {
+					if (first) {
+						xtrack_min = ping[nbuff].bathacrosstrack[i];
+						xtrack_max = ping[nbuff].bathacrosstrack[i];
+						first = false;
+					}
+					else {
+						xtrack_min = MIN(xtrack_min, ping[nbuff].bathacrosstrack[i]);
+						xtrack_max = MAX(xtrack_max, ping[nbuff].bathacrosstrack[i]);
+					}
+				}
+			}
+			if (first) {
+				for (int i = 0; i < ping[nbuff].beams_bath; i++) {
+					if (!mb_beam_ok(ping[nbuff].beamflag[i]) 
+							&& !mb_beam_check_flag_unusable2(ping[nbuff].beamflag[i])) {
+						if (first) {
+							xtrack_min = ping[nbuff].bathacrosstrack[i];
+							xtrack_max = ping[nbuff].bathacrosstrack[i];
+							first = false;
+						}
+						else {
+							xtrack_min = MIN(xtrack_min, ping[nbuff].bathacrosstrack[i]);
+							xtrack_max = MAX(xtrack_max, ping[nbuff].bathacrosstrack[i]);
+						}
+					}
+				}
+			}
+			xtrack_absmax = MAX(fabs(xtrack_min), fabs(xtrack_max));
+			ping[nbuff].dualprofile = false;
+			ping[nbuff].dualprofilebeam = 0;
+			first = true;
+			double xtrack_old = 0.0;
+			for (int i = 0; i < ping[nbuff].beams_bath; i++) {
+				if (!mb_beam_check_flag_unusable2(ping[nbuff].beamflag[i])) {
+					if (first) {
+						xtrack_old = ping[nbuff].bathacrosstrack[i];
+						first = false;
+					}
+					else {
+						double xtrack_diff = ping[nbuff].bathacrosstrack[i] - xtrack_old;
+						if (xtrack_diff < 0.0 && fabs(xtrack_diff) > 0.5 * xtrack_absmax) {
+							ping[nbuff].dualprofile = true;
+							ping[nbuff].dualprofilebeam = i;
+						}
+						xtrack_old = ping[nbuff].bathacrosstrack[i];
+					}
+				}
 			}
 		}
 		if (status == MB_SUCCESS) {
@@ -4207,7 +4269,7 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
 	show_time = sh_time,
 
 	/* figure out which pings to plot */
-	    plot_size = plt_size;
+	plot_size = plt_size;
 	if (current_id + plot_size > nbuff)
 		nplot = nbuff - current_id;
 	else
@@ -4265,30 +4327,6 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
 		bathmedian = bathlist[nbathlist / 2];
 	}
 	
-	/* check for dual profile condition */
-	for (int i = current_id; i < current_id + nplot; i++) {
-		ping[i].dualprofile = false;
-		ping[i].dualprofilebeam = 0;
-		bool first = true;
-		double xtrack_old = 0.0;
-		for (int j = 0; j < ping[i].beams_bath; j++) {
-			if (!mb_beam_check_flag_unusable2(ping[i].beamflag[j])) {
-				if (first) {
-					xtrack_old = ping[i].bathacrosstrack[j];
-					first = false;
-				}
-				else {
-					double xtrack_diff = ping[i].bathacrosstrack[j] - xtrack_old;
-					if (xtrack_diff < 0.0 && fabs(xtrack_diff) > 0.5 * xtrack_absmax) {
-						ping[i].dualprofile = true;
-						ping[i].dualprofilebeam = j;
-					}
-					xtrack_old = ping[i].bathacrosstrack[j];
-				}
-			}
-		}
-	}
-
 	/* reset xtrack_absmax if required */
 	if (autoscale && xtrack_absmax < 0.5) {
 		xtrack_absmax = 1000.0;
@@ -4379,6 +4417,19 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
 	int sascent;
 	int sdescent;
 	int sxstart;
+
+	if (ping[current_id].dualprofile) {
+		sprintf(string, "Dual Swath per Ping");
+		xg_justify(mbedit_xgid, string, &swidth, &sascent, &sdescent);
+		xg_drawstring(mbedit_xgid, xcen - swidth / 2, ymin - margin / 2 - sdescent + 5, string, pixel_values[BLACK],
+									XG_SOLIDLINE);
+	}
+	else {
+		sprintf(string, "Single Swath per Ping");
+		xg_justify(mbedit_xgid, string, &swidth, &sascent, &sdescent);
+		xg_drawstring(mbedit_xgid, xcen - swidth / 2, ymin - margin / 2 - sdescent + 5, string, pixel_values[BLACK],
+									XG_SOLIDLINE);
+	}
 
 	if (sh_mode == MBEDIT_SHOW_FLAG) {
 		sprintf(string, "Sounding Colors by Flagging:  Unflagged  Manual  Filter  Sonar");
@@ -4609,7 +4660,17 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
 		ping[i].label_y = y;
 		for (int j = 0; j < ping[i].beams_bath; j++) {
 			if (!mb_beam_check_flag_unusable2(ping[i].beamflag[j])) {
-				if (view_mode == MBEDIT_VIEW_WATERFALL) {
+				if (view_mode == MBEDIT_VIEW_WATERFALL && ping[i].dualprofile) {
+					ping[i].bath_x[j] = (int)(xcen + dxscale * ping[i].bathacrosstrack[j]);
+					ping[i].bath_y[j] = (int)(y + dyscale * ((double)ping[i].bath[j] - bathmedian));
+					if (j < ping[i].dualprofilebeam) {
+						ping[i].bath_y[j] -= (int)(dy/4);
+					}
+					else {
+						ping[i].bath_y[j] += (int)(dy/4);
+					}
+				}
+				else if (view_mode == MBEDIT_VIEW_WATERFALL) {
 					ping[i].bath_x[j] = (int)(xcen + dxscale * ping[i].bathacrosstrack[j]);
 					ping[i].bath_y[j] = (int)(y + dyscale * ((double)ping[i].bath[j] - bathmedian));
 				}
