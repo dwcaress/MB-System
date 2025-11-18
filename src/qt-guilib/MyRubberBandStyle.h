@@ -14,18 +14,15 @@
  * vtkAreaPicker it will operate on the entire selection rectangle.
  * When the 'p' key is hit the above pick operation occurs on a 1x1 rectangle.
  * In other respects it behaves the same as its parent class.
-  *
+ *
  * This class is based on vtkInteractorStyleRubberBandPicker, with changes
- * suggested by humans and Claude.ai to fix bugs arising from use with
+ * suggested by humans and Claude.ai to fix bugs arising from use with 
  * QQuickVTKItem. In particular VTK 'drawing' operations of lines and boxes
  * must be deferred to the the Qt render thread, via
  * QQuickVTKItem::dispatch_async(); therefore this class includes a
  * reference to the associated QQuickVTKItem object.
- * Note that this implementation calculates geometry based on the screen
- * coordinate system rather than world coordinate system.
-
- * @sa
- * vtkAreaPicker
+ * Note that shapes (box, line) defined by the mouse are defined and drawn into the
+ * 'overlay' (i.e. layer-1 of the associated vtkRenderWindow), in display coordinates
  */
 
 #ifndef MyRubberBandStyle_h
@@ -78,7 +75,9 @@ public:
 
   /// Set draw-enabled state
   void setDrawEnable(bool enabled) { drawEnabled_ = enabled; }
-
+  void setDrawingMode(DrawingMode mode) {
+    drawingMode_ = mode;
+  }
   
   static MyRubberBandStyle* New();
   vtkTypeMacro(MyRubberBandStyle, vtkInteractorStyleTrackballCamera);
@@ -107,9 +106,6 @@ public:
 
   void SetInteractor(vtkRenderWindowInteractor* interactor) override;
 
-  void setDrawingMode(DrawingMode mode) {
-    drawingMode_ = mode;
-  }
   
 protected:
   MyRubberBandStyle();
