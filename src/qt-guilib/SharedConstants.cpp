@@ -28,8 +28,8 @@ SharedConstants::SharedConstants() {
 		    "wheel: zoom");
       
     mouseModes_ += new MouseMode(MouseLighting,
-				 "shift-L-drag: change light pos, "  \
-				 "shift-R-drag: change intensity "   \
+				 "alt-L-drag: change light pos, "  \
+				 "alt-R-drag: change intensity "   \
 				 "(+ basic pan,tilt,zoom)");
     mouseModes_ += new MouseMode(MouseDataSelect,
 				 "'r': toggle select mode,  "	\
