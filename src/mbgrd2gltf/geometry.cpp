@@ -192,5 +192,70 @@ namespace mbgrd2gltf {
 
 		return out;
 	}
+	
+	//This function when called will grab the geometry in chunks instead of all in one
+	std::vector<Geometry::Tile> Geometry::get_triangles_tiled(const Matrix<Vertex>& vertices, size_t tileSize) {
+		std::vector<Geometry::Tile> tiles;
 
+		// Number of cells. Triangles are generated over cells.
+		const size_t cellsY = (vertices.size_y() > 0) ? vertices.size_y() - 1 : 0;
+		const size_t cellsX = (vertices.size_x() > 0) ? vertices.size_x() - 1 : 0;
+		if (cellsX == 0 || cellsY == 0) return tiles;
+
+		for (size_t ty = 0; ty < cellsY; ty += tileSize) {
+			for (size_t tx = 0; tx < cellsX; tx += tileSize) {
+				const size_t endY = std::min(ty + tileSize, cellsY);
+				const size_t endX = std::min(tx + tileSize, cellsX);
+
+				Geometry::Tile tile;
+				tile.x0 = tx; tile.y0 = ty; tile.x1 = endX; tile.y1 = endY;
+				tile.triangles.reserve(2ull * (endX - tx) * (endY - ty));
+
+				for (size_t y = ty; y < endY; ++y) {
+					for (size_t x = tx; x < endX; ++x) {
+						const auto& bottom_left = vertices.at(x, y);
+						const auto& bottom_right = vertices.at(x + 1, y);
+						const auto& top_left = vertices.at(x, y + 1);
+						const auto& top_right = vertices.at(x + 1, y + 1);
+
+						if (bottom_left.is_valid() && top_right.is_valid()) {
+							if (top_left.is_valid())
+								tile.triangles.emplace_back(Triangle{
+									bottom_left.index(),
+									top_left.index(),
+									top_right.index()
+								});
+
+							if (bottom_right.is_valid())
+								tile.triangles.emplace_back(Triangle{
+									bottom_left.index(),
+									top_right.index(),
+									bottom_right.index()
+								});
+						}
+						else if (bottom_right.is_valid() && top_left.is_valid()) {
+							if (bottom_left.is_valid())
+								tile.triangles.emplace_back(Triangle{
+									bottom_right.index(),
+									bottom_left.index(),
+									top_left.index()
+								});
+
+							if (top_right.is_valid())
+								tile.triangles.emplace_back(Triangle{
+									bottom_right.index(),
+									top_left.index(),
+									top_right.index()
+								});
+						}
+					}
+				}
+
+				if (!tile.triangles.empty())
+					tiles.push_back(std::move(tile));
+			}
+		}
+
+		return tiles;
+	}
 }
