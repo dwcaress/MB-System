@@ -7,6 +7,7 @@
 #include <vtkRendererCollection.h>
 #include <vtkPlanes.h>
 #include <vtkPointData.h>
+#include <vtkPointPicker.h>
 #include "PointsSelectInteractorStyle.h"
 #include "TopoDataItem.h"
 
@@ -22,9 +23,49 @@ void PointsSelectInteractorStyle::OnLeftButtonUp() {
   MyRubberBandStyle::OnLeftButtonUp();
 
   if (!topoDataItem_) {
-    qWarning() << "topoDataItem_ has not been set!";
+    qWarning() << "PointsSelectInteractorStyle::topoDataItem_ has not been set!";
     return;
   }
+
+  if (drawEnabled() && drawingMode_ == DrawingMode::Line) {
+    // Finished drawing a line - emit signal
+    
+    vtkNew<vtkPointPicker> picker;
+    vtkRenderer *renderer = GetDefaultRenderer();    
+    double *startLineWorld, *endLineWorld;
+    // Get world coordinates of line start
+    if (picker->Pick(startPosition_[0], startPosition_[1], 0,
+		     renderer)) {
+      startLineWorld = picker->GetPickPosition();
+      qDebug() << "startPosition world x=" <<
+	startLineWorld[0] <<
+	", y=" << startLineWorld[1] << ", z=" << startLineWorld[2];
+    }
+    else {
+      qWarning() << "Could not pick startPosition";
+    }
+
+    // Get world coordinates of line end
+    if (picker->Pick(endPosition_[0], endPosition_[1], 0,
+		     renderer)) {
+      endLineWorld = picker->GetPickPosition();
+      qDebug() << "endPosition world x=" << endLineWorld[0] <<
+	", y=" << endLineWorld[1] << ", z=" << endLineWorld[2];
+    }
+    else {
+      qWarning() << "Could not pick endPosition";
+    }
+    
+    qDebug() << "emit lineDefined signal";
+    QList<double> start;
+    QList<double> end;
+    for (int i = 0; i < 3; i++) {
+      start.append(startLineWorld[i]);
+      end.append(endLineWorld[i]);
+    }
+    emit topoDataItem_->lineDefined(start, end);
+  }
+
   
   /// TEST TEST TEST
   vtkIdTypeArray *ids =
