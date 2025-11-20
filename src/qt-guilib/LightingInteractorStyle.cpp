@@ -1,4 +1,4 @@
-#define QT_NO_DEBUG_OUTPUT
+/// #define QT_NO_DEBUG_OUTPUT
 #include <vtkActor.h>
 #include <vtkCubeSource.h>
 #include <vtkInteractorStyleTrackballCamera.h>
@@ -29,7 +29,10 @@ LightingInteractorStyle::LightingInteractorStyle(TopoDataItem *item) {
 }
 
 void LightingInteractorStyle::OnLeftButtonDown() {
-  if (Interactor->GetShiftKey()) {
+  qDebug() << "onLeftButtonDown() GetAltKey()=" <<
+    Interactor->GetAltKey();
+  
+  if (Interactor->GetAltKey()) {
     qDebug() << "start moving the light";
     lightMoving_ = true;
     Interactor->GetEventPosition(startMousePosition_[0],
@@ -48,7 +51,7 @@ void LightingInteractorStyle::OnLeftButtonUp() {
 
 
 void LightingInteractorStyle::OnRightButtonDown() {
-  if (Interactor->GetShiftKey()) {
+  if (Interactor->GetAltKey()) {
     intensityChanging_ = true;
     Interactor->GetEventPosition(startMousePosition_[0],
 				       startMousePosition_[1]);
@@ -77,7 +80,7 @@ void LightingInteractorStyle::OnMouseMove() {
   dx = dx / size[0] * 5.0;
   dy = dy / size[1] * 5.0;
   
-  if (lightMoving_ && Interactor->GetShiftKey())  {
+  if (lightMoving_ && Interactor->GetAltKey())  {
             
     // Get current camera parameters to relate mouse movement to 3D space
     vtkCamera* camera = topoDataItem_->getPipeline()->renderer_->GetActiveCamera();
@@ -116,7 +119,7 @@ void LightingInteractorStyle::OnMouseMove() {
     //// Interactor->Render();
     Interactor->Render();    
   }
-  else if (intensityChanging_ && Interactor->GetShiftKey())  {
+  else if (intensityChanging_ && Interactor->GetAltKey())  {
     double intensity = topoDataItem_->getPipeline()->lightSource_->GetIntensity();
     qDebug() << "change light intensity; now is " << intensity;
     qDebug() << "intensity: " << intensity << ", dx: " << dx <<
