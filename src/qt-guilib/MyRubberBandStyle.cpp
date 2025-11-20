@@ -13,6 +13,7 @@
 #include "vtkRenderWindowInteractor.h"
 #include "vtkRenderer.h"
 #include "vtkUnsignedCharArray.h"
+#include "vtkPointPicker.h"
 
 #include <thread>
 
@@ -45,42 +46,68 @@ void MyRubberBandStyle::startSelect()
   ///  drawingMode_ = DrawingMode::DrawRectangle; // ????
 }
 
+/* ***
+void MyRubberBandStyle::OnKeyPress() {
+  qDebug() << "MyRubberBandStyle::OnKeyPress()";
+  Superclass::OnKeyPress();
+  qDebug() << "OnKeyPress(): GetKeyCode(): " <<
+    Interactor->GetKeyCode();
+}
+*** */
+/* ***
 //-----------------------------------------------------------------
-void MyRubberBandStyle::OnChar()
+void MyRubberBandStyle::OnKeyPress()
 {
-  qDebug() << "OnChar(): drawingMode_=" << (int )drawingMode_;
-  switch (Interactor->GetKeyCode())
-    {
-    case 'r':
-    case 'R':
-      // r toggles the drawing rubber band
-      drawEnabled_ = !drawEnabled_;
-      if (drawEnabled_) {
-	qDebug() << "OnChar(): drawEnabled now true, reinitialize overlay";
-	overlayInitialized_ = false;
+  qDebug() << "OnKeyPress(): drawingMode_=" << (int )drawingMode_;
+
+  if (Interactor->GetAltKey()) {
+    drawEnabled_ = true;
+  }
+  else {
+    drawEnabled_ = false;
+  }
+  Superclass::OnKeyPress();
+}
+*** */
+void MyRubberBandStyle::OnChar() {
+  qDebug() << "OnChar(): drawingMode_=" << (int )drawingMode_;  
+  switch (int code = Interactor->GetKeyCode()) {
+  case 'r':
+  case 'l':
+    // r toggles the drawing rubber band
+    drawEnabled_ = !drawEnabled_;
+    if (drawEnabled_) {
+      qDebug() << "OnKeyPress(): drawEnabled now true, reinitialize overlay";
+      overlayInitialized_ = false;
+      if (code == 'r') {
+	drawingMode_ = DrawingMode::Rectangle;
       }
-      else
-	{
-	  qDebug() << "OnChar(): drawenabled now false, clear overlay";
-	  ClearOverlay();
-	}
-      break;
-    case 'p':
-    case 'P':
-      {
-	vtkRenderWindowInteractor* rwi = Interactor;
-	int* eventPos = rwi->GetEventPosition();
-	FindPokedRenderer(eventPos[0], eventPos[1]);
-	startPosition_[0] = eventPos[0];
-	startPosition_[1] = eventPos[1];
-	endPosition_[0] = eventPos[0];
-	endPosition_[1] = eventPos[1];
-	Pick();
-	break;
+      else {
+	drawingMode_ = DrawingMode::Line;
       }
-    default:
-      Superclass::OnChar();
     }
+    else {
+      qDebug() << "OnChar(): drawenabled now false, clear overlay";
+      ClearOverlay();
+    }
+    break;
+
+
+  case 'p':
+  case 'P': {
+    vtkRenderWindowInteractor* rwi = Interactor;
+    int* eventPos = rwi->GetEventPosition();
+    FindPokedRenderer(eventPos[0], eventPos[1]);
+    startPosition_[0] = eventPos[0];
+    startPosition_[1] = eventPos[1];
+    endPosition_[0] = eventPos[0];
+    endPosition_[1] = eventPos[1];
+    Pick();
+    break;
+  }
+  default:
+    Superclass::OnKeyPress();
+  }
 }
 
 //-----------------------------------------------------------------
@@ -185,16 +212,15 @@ void MyRubberBandStyle::OnLeftButtonUp()
     return;
   }
 
-  if (!Interactor || !moving_)
-    {
-      return;
-    }
-
+  if (!Interactor || !moving_) {
+    return;
+  }
 
   // otherwise record the rubber band end coordinate and then fire
   // off a pick
   if ((startPosition_[0] != endPosition_[0]) ||
       (startPosition_[1] != endPosition_[1])) {
+
     Pick();
   }
   moving_ = 0;
@@ -279,6 +305,9 @@ void MyRubberBandStyle::redrawRubberBand()
 //--------------------------------------------------------------
 void MyRubberBandStyle::Pick() {
   // find rubber band lower left, upper right and center
+
+  qDebug() << "MyRubberBandStyle::Pick()";
+  
   double rbcenter[3];
   const int* size = Interactor->GetRenderWindow()->GetSize();
   int min[2], max[2];

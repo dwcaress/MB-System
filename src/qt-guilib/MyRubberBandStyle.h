@@ -11,6 +11,7 @@
 #include "vtkProperty2D.h"
 #include "vtkPolyDataMapper2D.h"
 #include "vtkPolyData.h"
+#include <QObject.h>
 #include <QQuickVTKItem.h>
 
 /* ***
@@ -48,8 +49,11 @@ namespace mb_system {
 
   */
 class VTKINTERACTIONSTYLE_EXPORT MyRubberBandStyle
-  : public vtkInteractorStyleTrackballCamera
-{
+  : public QObject, public vtkInteractorStyleTrackballCamera {
+
+  Q_OBJECT
+
+    
 public:
 
   enum class DrawingMode {
@@ -79,6 +83,7 @@ public:
   void OnLeftButtonDown() override;
   void OnLeftButtonUp() override;
   void OnChar() override;
+  /// void OnKeyPress() override;  
   ///@}
 
   /// Set QQuickVTKItem
