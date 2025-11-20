@@ -122,9 +122,11 @@ Window {
   
             // Profile
             Action {
-                text: qsTr('Profile');
+                text: qsTr('Elev profile');
                 onTriggered: { console.log('show profile');
-		topoProfileWindow.show() }
+		topoProfileWindow.show();
+                topoDataItem.forceActiveFocus();
+	      }
             }
 
         }
@@ -358,7 +360,18 @@ Window {
 		              settings3D.lightX.value,
 		              settings3D.lightY.value,			      		                      settings3D.lightZ.value)
     }
-    
+
+    Connections {
+      ignoreUnknownSignals: true
+      target: topoDataItem
+      onLineDefined: {
+        console.log("Line defined!")
+	console.log("start:", start)
+	console.log("end:", end)
+	myProfile = topoDataItem.getElevationProfile(500);
+      }
+    }
+
 }
 
 
