@@ -4,7 +4,8 @@
 
 namespace mb_system {
   /**
-     GmtGridData encapsulates data read from a GMT grid file.
+     GmtGridData encapsulates GMT_GRID data read from a GMT grid file.
+     The data is read by MB-System legacy C functions and GMT functions.
   */
   class GmtGridData : public TopoData {
 

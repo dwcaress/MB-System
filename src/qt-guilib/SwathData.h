@@ -7,8 +7,9 @@ struct mbev_grid_struct;
 
 namespace mb_system {
   /**
-     SwathData encapsulates data read from a swath file in any format supported
-     by MB-System.
+     SwathData encapsulates mbev_grid_struct data read from a swath file
+     in any format supported by MB-System. The data is read from the file
+     using MB-System legacy C functions.
   */
   class SwathData : public TopoData {
 
