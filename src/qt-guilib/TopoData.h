@@ -6,11 +6,19 @@
 
 namespace mb_system {
 
-  
-  
   /**
-     TopoData abstract base class defines interface to 3D data 
-     such as GMT grid data or swath data. 
+     The TopoData abstract base class defines a uniform interface to 3D data 
+     including GMT grid data or MB-System swath data in any
+     MB-System-supported sonar format. The interface represents the 3D data
+     as a rectangular grid, with an x,y,z world coordinate associated with
+     each row,column pair. 
+     Subclasses encapsulate the data as various structures such as
+     mbev_grid_struct or GMT_GRID, and provide appropriate
+     implementations of TopoData abstract interface methods to access the data.
+     This approach simplifies data access by visualization components, and
+     makes extensive reuse of MB-System legacy C functions
+     and GMT functions.
+
   */
   class TopoData {
 
@@ -29,10 +37,10 @@ namespace mb_system {
     /// "No data" value
     static const double NoData;
 
-    /// Read grid data from file
+    /// Read 3D topo data from file
     virtual bool readDatafile(char *filename) = 0;
   
-    /// Number of grid rows
+    /// Number of data rows
     virtual int nRows() {
       return nRows_;
     }
@@ -108,7 +116,7 @@ namespace mb_system {
                                double *zMin, double *zMax,
                                char **xUnits, char **yUnits, char **zUnits) = 0;
 
-    /// Grid rows and columns
+    /// Number of grid rows and columns
     int nRows_, nColumns_;
     
     /// Grid data bounds
