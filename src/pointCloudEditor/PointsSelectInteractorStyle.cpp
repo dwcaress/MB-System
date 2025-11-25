@@ -1,7 +1,11 @@
 #include <vtkNamedColors.h>
+#include <vtkPointPicker.h>
 #include <vtkAreaPicker.h>
 #include <vtkExtractPolyDataGeometry.h>
 #include <vtkRenderWindowInteractor.h>
+#include <vtkPlane.h>
+#include <vtkCutter.h>
+#include <vtkSphereSource.h>
 #include "PointsSelectInteractorStyle.h"
 #include "PointCloudEditor.h"
 
@@ -31,6 +35,12 @@ void PointsSelectInteractorStyle::OnLeftButtonUp() {
   // Forward events
   vtkInteractorStyleRubberBandPick::OnLeftButtonUp();
   if (CurrentMode == VTKISRBP_SELECT) {
+
+    if (selectMode_ == SelectionMode::ElevSlice) {
+      computeElevationProfile();
+      return;
+    }
+    
     vtkNew<vtkNamedColors> colors;
 
     vtkPlanes* frustum =
@@ -138,3 +148,108 @@ void PointsSelectInteractorStyle::OnLeftButtonUp() {
 }
 
 
+
+void PointsSelectInteractorStyle::computeElevationProfile() {
+  vtkRenderer *renderer = editor_->getRenderer();
+
+  // Find world coordinates of start and end points
+  vtkNew<vtkPointPicker> picker;
+  double p1[3], p2[3];
+
+  std::cerr << "StartPosition[0]= " << StartPosition[0] <<
+    ", StartPosition[1]= " << StartPosition[1] << "\n";
+
+  std::cerr << "EndPosition[0]= " << EndPosition[0] <<
+    ", EndPosition[1]= " << EndPosition[1] << "\n";  
+  
+  double *p;
+  if (picker->Pick(static_cast<double>(StartPosition[0]),
+		   static_cast<double>(StartPosition[1]), 0, renderer)) {
+    p = picker->GetPickPosition();
+    std::copy(p, p+3, p1);
+    std::cerr << "start world x=" << p[0] <<", y=" << p[1] <<
+      ", z=" << p[2] << "\n";
+  }
+  else {
+    std::cerr << "Could not pick StartPosition\n";
+    return;
+  }
+      
+  if (picker->Pick(static_cast<double>(EndPosition[0]),
+		   static_cast<double>(EndPosition[1]), 0, renderer)) {
+    p = picker->GetPickPosition();	
+    std::copy(p, p+3, p2);
+    std::cerr << "end world x=" << p[0] <<", y=" << p[1] <<
+      ", z=" << p[2] << "\n";    
+  }
+  else {
+    std::cerr << "Could not pick EndPosition\n";
+    return;
+  }
+
+  // Put a little sphhere ("pin") at start and end points
+  vtkNew<vtkSphereSource> startPin;
+  vtkNew<vtkSphereSource> endPin;
+
+  startPin->SetCenter(p1[0], p1[1], p1[2]);
+  startPin->SetRadius(50.);
+  startPin->SetPhiResolution(50);
+  startPin->SetThetaResolution(50);
+  vtkNew<vtkPolyDataMapper> startPinMapper;
+  startPinMapper->SetInputConnection(startPin->GetOutputPort());
+  vtkNew<vtkActor> startPinActor;
+  startPinActor->SetMapper(startPinMapper);
+  startPinActor->GetProperty()->SetColor(1., 0., 0.);
+  startPinActor->GetProperty()->SetLineWidth(3.);
+  editor_->addActor(startPinActor);
+
+  endPin->SetCenter(p2[0], p2[1], p2[2]);
+  endPin->SetRadius(50.);
+  endPin->SetPhiResolution(50);
+  endPin->SetThetaResolution(50);
+  vtkNew<vtkPolyDataMapper> endPinMapper;
+  endPinMapper->SetInputConnection(endPin->GetOutputPort());
+  vtkNew<vtkActor> endPinActor;
+  endPinActor->SetMapper(endPinMapper);
+  endPinActor->GetProperty()->SetColor(1., 0., 0.);
+  endPinActor->GetProperty()->SetLineWidth(3.);
+  editor_->addActor(endPinActor);  
+  
+  // Compute normal to elevation profile plane; elevation profile plane is vertical,
+  // so normal to plane is horizontal
+  double normal[3];
+  normal[0] = -(p2[1] - p1[1]);
+  normal[1] = p2[0] - p1[0];
+  normal[2] = 0.0;     // normal to z-axis is horizontal
+
+  vtkMath::Normalize(normal);
+
+  // Create the elevation profile plane
+  vtkNew<vtkPlane> plane;
+  plane->SetOrigin(p2);
+  plane->SetNormal(normal);
+
+  // Create the cutter filter
+  vtkNew<vtkCutter> cutter;
+  cutter->SetInputData(editor_->polyData());
+  cutter->SetCutFunction(plane);
+  cutter->Update();
+
+  // Elevation profile mapper
+  vtkNew<vtkPolyDataMapper> profileMapper;
+  profileMapper->SetInputConnection(cutter->GetOutputPort());
+
+  // Elevation profile actor
+  vtkNew<vtkActor> profileActor;
+  profileActor->SetMapper(profileMapper);
+  profileActor->GetProperty()->SetColor(1., 0., 0.);
+  profileActor->GetProperty()->SetLineWidth(3.);
+
+  // Redraw point cloud, including elevation profile
+  editor_->addActor(profileActor);
+
+  editor_->setSurfaceOpacity(0.3);
+  
+  editor_->visualize();
+
+}

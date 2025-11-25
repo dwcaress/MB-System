@@ -17,8 +17,17 @@ public:
     selectedMapper_ = vtkSmartPointer<vtkDataSetMapper>::New();
     selectedActor_ = vtkSmartPointer<vtkActor>::New();
     selectedActor_->SetMapper(selectedMapper_);
+    setSelectMode(SelectionMode::ElevSlice);
   }
 
+  enum class SelectionMode {
+    Points, ElevSlice
+  };
+
+  void setSelectMode(SelectionMode mode) {
+    selectMode_ = mode;
+  }
+  
   virtual void OnLeftButtonUp() override;
 
   /// Character typed
@@ -28,8 +37,11 @@ public:
     editor_ = editor;
   }
 
-private:
+protected:
+  void computeElevationProfile();
   
+  SelectionMode selectMode_ = SelectionMode::Points;
+
   PointCloudEditor *editor_;
   vtkSmartPointer<vtkActor> selectedActor_;
   vtkSmartPointer<vtkDataSetMapper> selectedMapper_;
