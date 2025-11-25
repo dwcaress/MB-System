@@ -77,6 +77,7 @@ variant buildQt description {Build with Qt GUI support} {
             -DVTK_MODULE_ENABLE_VTK_GUISupportQtQuick=YES \
             -DVTK_MODULE_ENABLE_VTK_RenderingQt=YES \
             -DVTK_MODULE_ENABLE_VTK_ViewsQt=YES \
+            -DVTK_MODULE_ENABLE_VTK_Charts=YES \
             -DQt5_DIR=${prefix}/lib/cmake/Qt5 \
             && ${prefix}/bin/cmake --build . --parallel ${build.jobs} \
             && ${prefix}/bin/cmake --install ."
