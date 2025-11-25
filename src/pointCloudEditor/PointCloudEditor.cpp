@@ -67,6 +67,9 @@ PointCloudEditor::PointCloudEditor(void) {
 
   style_->setEditor(this);
   editModeGroup_->setEditor(this);
+
+  addedActors_.clear();
+  
 }
 
 
@@ -109,6 +112,12 @@ void PointCloudEditor::visualize(void) {
   renderWindowInteractor_->SetRenderWindow(renderWindow_);
 
   renderer_->AddActor(actor_);
+
+  // Add extra actors
+  for (vtkActor *actor: addedActors_) {
+    renderer_->AddActor(actor);
+  }
+  
   renderer_->SetBackground(colors_->GetColor3d("Tan").GetData());
 
   if (firstRender_) {

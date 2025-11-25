@@ -112,6 +112,34 @@ public:
     return editMode_;
   }
 
+  vtkRenderer *getRenderer() {
+    return renderer_;
+  }
+
+
+  /// Set surace opacity
+  bool setSurfaceOpacity(float opacity) {
+    if (opacity < 0. || opacity > 1.0) {
+      std::cerr << opacity << ": invalid opacity\n";
+      return false;
+    }
+    actor_->GetProperty()->SetOpacity(opacity);
+    return true;
+  }
+
+  
+  void setProfileActor(vtkActor *actor) {
+    profileActor_ = actor;
+  }
+
+  void setPinActor(vtkActor *actor) {
+    pinActor_ = actor;
+  }  
+
+  /// Add an actor
+  void addActor(vtkActor *actor) {
+    addedActors_.push_back(actor);
+  }
   
 protected:
   vtkNew<vtkAreaPicker> areaPicker_;
@@ -121,7 +149,17 @@ protected:
   vtkNew<vtkIdFilter> idFilter_;  
   vtkNew<vtkNamedColors> colors_;
   vtkNew<vtkPolyDataMapper> mapper_;
-  vtkNew<vtkActor> actor_;  
+  vtkNew<vtkActor> actor_;
+
+  /// Additional actors
+  std::vector<vtkActor *> addedActors_;
+  
+  // User may define elevation profile
+  vtkActor *profileActor_;
+
+  // User may define start/end pin
+  vtkActor *pinActor_;  
+  
   vtkNew<vtkRenderer> renderer_;
   vtkNew<vtkRenderWindowInteractor> renderWindowInteractor_;
   vtkNew<vtkTransform> scaleTransform_;
