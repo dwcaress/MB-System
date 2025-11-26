@@ -286,17 +286,22 @@ void PointsSelectInteractorStyle::computeElevationProfile() {
     double point[3];
     points->GetPoint(i, point);
 
-    double vec[3];
-    // Compute coordinates relative to starting point
-    vec[0] = point[0] - startPoint[0];
-    vec[1] = point[1] - startPoint[1];
-    vec[2] = point[2] - startPoint[2];
+    if ((point[0] >= startPoint[0] && point[0] <= endPoint[0]) ||
+	(point[0] >= endPoint[0] && point[0] <= startPoint[0])) {
+      // This point lies on line between startPoint and endPoint;
+      // add it to profileData
+      double vec[3];
+      // Compute coordinates relative to starting point
+      vec[0] = point[0] - startPoint[0];
+      vec[1] = point[1] - startPoint[1];
+      vec[2] = point[2] - startPoint[2];
 
-    // Compute this point's distance along profile = dot product with
-    // direction vector
-    double distAlongProfile = vtkMath::Dot(vec, direction);
-    double elevation = point[2];
-    profileData.push_back({distAlongProfile, elevation});
+      // Compute this point's distance along profile = dot product with
+      // direction vector
+      double distAlongProfile = vtkMath::Dot(vec, direction);
+      double elevation = point[2];
+      profileData.push_back({distAlongProfile, elevation});
+    }
   }
 
   // Sort by distance along profile
