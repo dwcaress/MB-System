@@ -1,3 +1,8 @@
+#include <vtkAutoInit.h>
+VTK_MODULE_INIT(vtkRenderingContextOpenGL2)
+VTK_MODULE_INIT(vtkRenderingOpenGL2)  // Usually also needed
+VTK_MODULE_INIT(vtkInteractionStyle)  // If you use interaction
+
 #include <vtkActor.h>
 #include <vtkAreaPicker.h>
 #include <vtkDataSetMapper.h>
