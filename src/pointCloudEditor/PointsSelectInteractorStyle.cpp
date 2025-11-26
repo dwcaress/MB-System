@@ -349,7 +349,11 @@ void PointsSelectInteractorStyle::computeElevationProfile() {
 
   chart->SetShowLegend(false);
   chart->GetAxis(vtkAxis::BOTTOM)->SetTitle("Distance");
+  chart->GetAxis(vtkAxis::BOTTOM)->GetTitleProperties()->SetFontSize(20);
+  chart->GetAxis(vtkAxis::BOTTOM)->GetLabelProperties()->SetFontSize(20);
   chart->GetAxis(vtkAxis::LEFT)->SetTitle("Elevation (m)");
+  chart->GetAxis(vtkAxis::LEFT)->GetTitleProperties()->SetFontSize(20);
+  chart->GetAxis(vtkAxis::LEFT)->GetLabelProperties()->SetFontSize(20);  
 
   // Assemble pipeline and start event loop
   editor_->visualize();
