@@ -23,6 +23,7 @@
 #------------------------------------------------------------------------------
 set(MIN_VTK_VERSION "9.3")
 find_package(VTK ${MIN_VTK_VERSION} COMPONENTS
+  ChartsCore
   CommonColor
   CommonCore
   CommonDataModel
@@ -36,15 +37,18 @@ find_package(VTK ${MIN_VTK_VERSION} COMPONENTS
   IOPLY
   IOXML
   InteractionStyle
+  RenderingContext2D
   RenderingContextOpenGL2
   RenderingCore
   RenderingFreeType
   RenderingGL2PSOpenGL2
   RenderingOpenGL2
+  ViewsContext2D
 )
 
 add_executable(pointCloudEditor PointCloudEditor.cpp ZScaleCallback.cpp
                PointsSelectInteractorStyle.cpp)
 
-target_link_libraries(pointCloudEditor PRIVATE MBGui ${VTK_LIBRARIES})
+target_link_libraries(pointCloudEditor PRIVATE MBGui ${VTK_LIBRARIES}
+                         VTK::RenderingContext2D VTK::ViewsContext2D)
 
