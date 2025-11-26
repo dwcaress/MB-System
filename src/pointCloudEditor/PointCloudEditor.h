@@ -70,7 +70,7 @@ class PointCloudEditor {
 
 public:
 
-  PointCloudEditor(void);
+  PointCloudEditor(bool elevProfile);
 
   /// Get point cloud vtkPolyData
   vtkPolyData *polyData() {
@@ -131,13 +131,14 @@ public:
     return true;
   }
 
-  
   /// Add an actor
   void addActor(vtkActor *actor) {
     addedActors_.push_back(actor);
   }
   
 protected:
+  bool displayElevProfile_;
+  
   vtkNew<vtkAreaPicker> areaPicker_;
   vtkNew<vtkRenderWindow> renderWindow_;
   vtkNew<vtkDataSetSurfaceFilter> surfaceFilter_;

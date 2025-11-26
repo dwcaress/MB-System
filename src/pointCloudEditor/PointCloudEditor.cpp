@@ -56,7 +56,7 @@ VTK_MODULE_INIT(vtkInteractionStyle)  // If you use interaction
 #define BAD 0
 
 
-PointCloudEditor::PointCloudEditor(void) {
+PointCloudEditor::PointCloudEditor(bool elevProfile) {
 
   verticalExagg_ = 1.;
 
@@ -70,7 +70,18 @@ PointCloudEditor::PointCloudEditor(void) {
   qualityLUT_->SetTableValue(GOOD, 0.0, 1.0, 0.0, 1.0);  
   qualityLUT_->Build();
 
+  displayElevProfile_ = elevProfile;
+  
   style_->setEditor(this);
+  if (displayElevProfile_) {
+    style_->setSelectMode(PointsSelectInteractorStyle::
+			  SelectionMode::ElevSlice);
+  }
+  else {
+    style_->setSelectMode(PointsSelectInteractorStyle::
+			  SelectionMode::Points);
+  }
+  
   editModeGroup_->setEditor(this);
 
   addedActors_.clear();
@@ -108,7 +119,11 @@ void PointCloudEditor::visualize(void) {
 
   renderer3D_->UseHiddenLineRemovalOn();
 
-  renderer3D_->SetViewport(0., 0., 0.5, 1.0);
+  if (displayElevProfile_) {
+    // Add viewport for elevation profile 2D graph
+    renderer3D_->SetViewport(0., 0., 0.5, 1.0);
+  }
+  
   renderWindow_->AddRenderer(renderer3D_);
   renderWindow_->SetSize(1000, 1000);  
   renderWindow_->SetWindowName("HighlightSelection");
@@ -347,14 +362,32 @@ vtkNew<vtkImageData> PointCloudEditor::createColorImage(std::string
 
 int main(int argc, char* argv[])
 {
+  bool error = false;
   if (argc < 2) {
-    std::cerr << "usage: " << argv[0] << " <swath-or-gridFile>\n";
-    return 1;
+    error = true;
   }
 
-  PointCloudEditor *editor = new PointCloudEditor();
+  bool elevProfile = false;
+  // Look for options
+  for (int i = 1; i < argc-1; i++) {
+    if (!strcmp(argv[i], "-elev")) {
+      elevProfile = true;
+    }
+    else {
+      std::cerr << argv[i] << ": unknown option\n";
+      error = true;
+    }
+  }
 
-  if (!editor->readPolyData(argv[1])) {
+  if (error) {
+    std::cerr << "usage: " << argv[0] << " [-elev]  <swath-or-gridFile>\n";
+    return 1;
+  }
+  
+  PointCloudEditor *editor = new PointCloudEditor(elevProfile);
+
+  // Last argument specifies the input file
+  if (!editor->readPolyData(argv[argc-1])) {
     std::cerr << "Couldn't process " << argv[1] << "\n";
     return 1;
   }
