@@ -6,6 +6,15 @@
 #include <vtkPlane.h>
 #include <vtkCutter.h>
 #include <vtkSphereSource.h>
+#include <vtkChartXY.h>
+#include <vtkContextView.h>
+#include <vtkContextScene.h>
+#include <vtkContextActor.h>
+#include <vtkTable.h>
+#include <vtkFloatArray.h>
+#include <vtkPlot.h>
+#include <vtkAxis.h>
+
 #include "PointsSelectInteractorStyle.h"
 #include "PointCloudEditor.h"
 
@@ -154,7 +163,7 @@ void PointsSelectInteractorStyle::computeElevationProfile() {
 
   // Find world coordinates of start and end points
   vtkNew<vtkPointPicker> picker;
-  double p1[3], p2[3];
+  double startPoint[3], endPoint[3];
 
   std::cerr << "StartPosition[0]= " << StartPosition[0] <<
     ", StartPosition[1]= " << StartPosition[1] << "\n";
@@ -166,7 +175,7 @@ void PointsSelectInteractorStyle::computeElevationProfile() {
   if (picker->Pick(static_cast<double>(StartPosition[0]),
 		   static_cast<double>(StartPosition[1]), 0, renderer)) {
     p = picker->GetPickPosition();
-    std::copy(p, p+3, p1);
+    std::copy(p, p+3, startPoint);
     std::cerr << "start world x=" << p[0] <<", y=" << p[1] <<
       ", z=" << p[2] << "\n";
   }
@@ -178,7 +187,7 @@ void PointsSelectInteractorStyle::computeElevationProfile() {
   if (picker->Pick(static_cast<double>(EndPosition[0]),
 		   static_cast<double>(EndPosition[1]), 0, renderer)) {
     p = picker->GetPickPosition();	
-    std::copy(p, p+3, p2);
+    std::copy(p, p+3, endPoint);
     std::cerr << "end world x=" << p[0] <<", y=" << p[1] <<
       ", z=" << p[2] << "\n";    
   }
@@ -191,7 +200,7 @@ void PointsSelectInteractorStyle::computeElevationProfile() {
   vtkNew<vtkSphereSource> startPin;
   vtkNew<vtkSphereSource> endPin;
 
-  startPin->SetCenter(p1[0], p1[1], p1[2]);
+  startPin->SetCenter(startPoint[0], startPoint[1], startPoint[2]);
   startPin->SetRadius(50.);
   startPin->SetPhiResolution(50);
   startPin->SetThetaResolution(50);
@@ -203,7 +212,7 @@ void PointsSelectInteractorStyle::computeElevationProfile() {
   startPinActor->GetProperty()->SetLineWidth(3.);
   editor_->addActor(startPinActor);
 
-  endPin->SetCenter(p2[0], p2[1], p2[2]);
+  endPin->SetCenter(endPoint[0], endPoint[1], endPoint[2]);
   endPin->SetRadius(50.);
   endPin->SetPhiResolution(50);
   endPin->SetThetaResolution(50);
@@ -218,15 +227,15 @@ void PointsSelectInteractorStyle::computeElevationProfile() {
   // Compute normal to elevation profile plane; elevation profile plane is vertical,
   // so normal to plane is horizontal
   double normal[3];
-  normal[0] = -(p2[1] - p1[1]);
-  normal[1] = p2[0] - p1[0];
+  normal[0] = -(endPoint[1] - startPoint[1]);
+  normal[1] = endPoint[0] - startPoint[0];
   normal[2] = 0.0;     // normal to z-axis is horizontal
 
   vtkMath::Normalize(normal);
 
   // Create the elevation profile plane
   vtkNew<vtkPlane> plane;
-  plane->SetOrigin(p2);
+  plane->SetOrigin(endPoint);
   plane->SetNormal(normal);
 
   // Create the cutter filter
@@ -235,6 +244,7 @@ void PointsSelectInteractorStyle::computeElevationProfile() {
   cutter->SetCutFunction(plane);
   cutter->Update();
 
+  // Display profile on main 3D surface 
   // Elevation profile mapper
   vtkNew<vtkPolyDataMapper> profileMapper;
   profileMapper->SetInputConnection(cutter->GetOutputPort());
@@ -249,7 +259,95 @@ void PointsSelectInteractorStyle::computeElevationProfile() {
   editor_->addActor(profileActor);
 
   editor_->setSurfaceOpacity(0.3);
+
+  std::cerr << "Now extract and graph profile data\n";
   
+  // Extract elev profile data for display in 2D graph
+  vtkPolyData *profilePolyData = cutter->GetOutput();
+  vtkPoints *points = profilePolyData->GetPoints();
+  if (!points || points->GetNumberOfPoints() == 0) {
+    std::cerr << "No elevation profile intersection found!\n";
+    return;
+  }
+
+  // Get profile direction vector
+  double direction[3];
+  direction[0] = endPoint[0] - startPoint[0];
+  direction[1] = endPoint[1] - startPoint[1];
+  direction[2] = endPoint[2] - startPoint[2];
+  vtkMath::Normalize(direction);
+
+  // Fill profileData with sorted (x,y) data for plotting
+  // x: distance along profile
+  // y: elevation
+  std::vector<std::pair<double, double>> profileData;
+  
+  for (vtkIdType i = 0; i < points->GetNumberOfPoints(); i++) {
+    double point[3];
+    points->GetPoint(i, point);
+
+    double vec[3];
+    // Compute coordinates relative to starting point
+    vec[0] = point[0] - startPoint[0];
+    vec[1] = point[1] - startPoint[1];
+    vec[2] = point[2] - startPoint[2];
+
+    // Compute this point's distance along profile = dot product with
+    // direction vector
+    double distAlongProfile = vtkMath::Dot(vec, direction);
+    double elevation = point[2];
+    profileData.push_back({distAlongProfile, elevation});
+  }
+
+  // Sort by distance along profile
+  std::sort(profileData.begin(), profileData.end());
+
+  // Now ready to plot profileData; 
+  // x: distance along profile
+  // y: elevation
+
+  // Create table for chart
+  vtkNew<vtkTable> table;
+
+  vtkNew<vtkFloatArray> xArray;
+  xArray->SetName("Distance");
+  table->AddColumn(xArray);
+
+  vtkNew<vtkFloatArray> yArray;
+  yArray->SetName("Elevation (m)");
+  table->AddColumn(yArray);
+
+  table->SetNumberOfRows(profileData.size());
+  for (size_t i = 0; i < profileData.size(); i++) {
+    table->SetValue(i, 0, profileData[i].first);   // distance
+    table->SetValue(i, 1, profileData[i].second);  // elevation
+  }
+
+  vtkNew<vtkRenderer> renderer2D;
+  renderer2D->SetViewport(0.5, 0.0, 1.0, 1.0);
+  renderer2D->SetBackground(1., 1., 1.);
+  editor_->getRenderWindow()->AddRenderer(renderer2D);
+
+  vtkNew<vtkChartXY> chart;
+  vtkNew<vtkContextScene> scene;
+  vtkNew<vtkContextActor> actor;
+  
+  scene->AddItem(chart);
+  actor->SetScene(scene);
+  renderer2D->AddActor(actor);
+  
+  // Add profile data to the chart
+  vtkPlot* line = chart->AddPlot(vtkChart::LINE);
+  line->SetInputData(table, 0, 1);
+  line->SetColor(0, 0, 255, 255); // blue
+  line->SetWidth(2.0);
+
+  chart->SetShowLegend(false);
+  chart->GetAxis(vtkAxis::BOTTOM)->SetTitle("Distance");
+  chart->GetAxis(vtkAxis::LEFT)->SetTitle("Elevation (m)");
+
+  // Assemble pipeline and start event loop
   editor_->visualize();
+
 
 }

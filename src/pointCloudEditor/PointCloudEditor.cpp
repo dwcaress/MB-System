@@ -106,24 +106,24 @@ void PointCloudEditor::visualize(void) {
   actor_->SetMapper(mapper_);
   actor_->SetScale(1., 1., zScale);
 
-  renderer_->UseHiddenLineRemovalOn();
+  renderer3D_->UseHiddenLineRemovalOn();
 
-  renderWindow_->AddRenderer(renderer_);
-  ///renderWindow_->SetSize(640, 480);
+  renderer3D_->SetViewport(0., 0., 0.5, 1.0);
+  renderWindow_->AddRenderer(renderer3D_);
   renderWindow_->SetSize(1000, 1000);  
   renderWindow_->SetWindowName("HighlightSelection");
 
   renderWindowInteractor_->SetPicker(areaPicker_);
   renderWindowInteractor_->SetRenderWindow(renderWindow_);
 
-  renderer_->AddActor(actor_);
+  renderer3D_->AddActor(actor_);
 
   // Add extra actors
   for (vtkActor *actor: addedActors_) {
-    renderer_->AddActor(actor);
+    renderer3D_->AddActor(actor);
   }
   
-  renderer_->SetBackground(colors_->GetColor3d("Tan").GetData());
+  renderer3D_->SetBackground(colors_->GetColor3d("Tan").GetData());
 
   if (firstRender_) {
     // Build GUI elements
@@ -141,7 +141,7 @@ void PointCloudEditor::visualize(void) {
   renderWindowInteractor_->Start();
 
   // Apply scale transform to camera too
-  vtkCamera *camera = renderer_->GetActiveCamera();
+  vtkCamera *camera = renderer3D_->GetActiveCamera();
   camera->SetModelTransformMatrix(scaleTransform_->GetMatrix());
 }
 
@@ -244,7 +244,7 @@ void PointCloudEditor::buildWidgets() {
     bounds[1] = bounds[0] + 50.0;
     buttonRepresentation->PlaceWidget(bounds.data());
     textActor->SetDisplayPosition(bounds[0]+12, bounds[2]+20);
-    renderer_->AddActor2D(textActor);
+    renderer3D_->AddActor2D(textActor);
     
     vtkNew<vtkButtonWidget> buttonWidget;
     buttonWidget->SetInteractor(renderWindowInteractor_);

@@ -113,10 +113,14 @@ public:
   }
 
   vtkRenderer *getRenderer() {
-    return renderer_;
+    return renderer3D_;
   }
 
 
+  vtkRenderWindow *getRenderWindow() {
+    return renderWindow_;
+  }
+  
   /// Set surace opacity
   bool setSurfaceOpacity(float opacity) {
     if (opacity < 0. || opacity > 1.0) {
@@ -128,14 +132,6 @@ public:
   }
 
   
-  void setProfileActor(vtkActor *actor) {
-    profileActor_ = actor;
-  }
-
-  void setPinActor(vtkActor *actor) {
-    pinActor_ = actor;
-  }  
-
   /// Add an actor
   void addActor(vtkActor *actor) {
     addedActors_.push_back(actor);
@@ -160,7 +156,7 @@ protected:
   // User may define start/end pin
   vtkActor *pinActor_;  
   
-  vtkNew<vtkRenderer> renderer_;
+  vtkNew<vtkRenderer> renderer3D_;
   vtkNew<vtkRenderWindowInteractor> renderWindowInteractor_;
   vtkNew<vtkTransform> scaleTransform_;
   vtkNew<vtkTransformFilter> scaleTransformFilter_;
