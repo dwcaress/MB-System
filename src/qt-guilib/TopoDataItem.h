@@ -34,7 +34,7 @@
 #include "MyRubberBandStyle.h"
 #include "Point.h"
 #include "PickerInteractorStyle.h"
-#include "CameraRestrictStyle.h"
+#include "RestrictCameraStyle.h"
 #include "DrawInteractorStyle.h"
 
 #define DATA_QUALITY_NAME "dataQuality"

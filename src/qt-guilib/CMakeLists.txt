@@ -40,7 +40,6 @@ set(CMAKE_AUTOUIC ON)
 
 set(src
     Camera.cpp
-    CameraRestrictStyle.cpp
     ClickableLabel.cpp
     ColorMap.cpp
     CPixmapDrawer.cpp
@@ -61,6 +60,7 @@ set(src
     PixmapImage.cpp
     PointsSelectInteractorStyle.cpp
     RadioButtonGroup.cpp
+    RestrictCameraStyle.cpp
     Route.cpp
     SharedConstants.cpp
     SlopeFilter.cpp
