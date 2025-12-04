@@ -208,6 +208,10 @@ namespace mb_system {
       pipeline_->addedActors_.push_back(actor);
     }
 
+    void clearAddedActors() {
+      pipeline_->addedActors_.clear();
+    }
+
     /// Get source polydata
     vtkPolyData *getPolyData();
 
