@@ -329,7 +329,6 @@ void PointsSelectInteractorStyle::computeElevationProfile() {
   }
 
   vtkNew<vtkRenderer> renderer2D;
-  // renderer2D->SetViewport(0.5, 0.0, 1.0, 1.0);
   renderer2D->SetViewport(0., 0., 1.0, 0.25);  
   renderer2D->SetBackground(1., 1., 1.);
   editor_->getRenderWindow()->AddRenderer(renderer2D);
@@ -361,3 +360,5 @@ void PointsSelectInteractorStyle::computeElevationProfile() {
 
 
 }
+
+
