@@ -37,9 +37,10 @@ TopoDataItem::TopoDataItem() {
 
   pointsSelectInteractorStyle_->setTopoDataItem(this);
   pointsSelectInteractorStyle_->setDrawingMode(MyRubberBandStyle::DrawingMode::Rectangle);
-  
-  testStyle_->setQQuickVTKItem(this);
-  testStyle_->setDrawingMode(MyRubberBandStyle::DrawingMode::Line);
+
+  // testStyle_->SetMinimumZ(-1000.);
+  testStyle_->setTopoDataItem(this);
+  testStyle_->setDrawingMode(DrawInteractorStyle::DrawingMode::Line);
 }
 
 
@@ -94,8 +95,10 @@ void TopoDataItem::setupAxes(vtkCubeAxesActor *axesActor,
   vtkColor3d axisColor = namedColors->GetColor3d("Black");
   
   axesActor->GetTitleTextProperty(0)->SetColor(axisColor.GetData());
-  axesActor->GetTitleTextProperty(0)->SetFontSize(48);
+  axesActor->GetTitleTextProperty(0)->SetFontSize(100);
   axesActor->GetLabelTextProperty(0)->SetColor(axisColor.GetData());
+
+  axesActor->GetLabelTextProperty(0)->SetFontSize(30);
 
   axesActor->GetTitleTextProperty(1)->SetColor(axisColor.GetData());
   axesActor->GetLabelTextProperty(1)->SetColor(axisColor.GetData());
@@ -133,6 +136,8 @@ void TopoDataItem::setupAxes(vtkCubeAxesActor *axesActor,
     axesActor->SetYLabelFormat("%.0f");    
   }
 
+  axesActor->SetScreenSize(15.0);
+  
   // Calling this sometimes results in no z-labels at all
   // axesActor->SetZLabelFormat("%.0f");
   
@@ -338,6 +343,12 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   // Add actor to renderer
   pipeline->renderer_->AddActor(pipeline->surfaceActor_);
 
+  // Add any additional actors
+  // Add extra actors
+  for (vtkActor *actor: pipeline->addedActors_) {
+    pipeline->renderer_->AddActor(actor);
+  }
+  
   pipeline->renderer_->SetBackground(pipeline->colors_->GetColor3d("White").
 				     GetData());
 
@@ -351,6 +362,8 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   
   if (showAxes_) {
     // Set up axes
+    pipeline->axesActor_->SetCamera(pipeline->renderer_->GetActiveCamera());
+    pipeline->axesActor_->SetScale(1., 1., verticalExagg_);
     setupAxes(pipeline->axesActor_,
 	      pipeline->colors_,
 	      pipeline->surfaceMapper_->GetBounds(),
@@ -361,10 +374,8 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
 	      pipeline->topoReader_->geographicCRS());
 
 
-    pipeline->axesActor_->SetCamera(pipeline->renderer_->GetActiveCamera());
 
     pipeline->renderer_->AddActor(pipeline->axesActor_);    
-    pipeline->axesActor_->SetScale(1., 1., verticalExagg_);
   }
     
   pipeline->surfaceActor_->SetScale(1., 1., verticalExagg_);  // NEW!
