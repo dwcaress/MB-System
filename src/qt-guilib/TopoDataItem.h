@@ -32,7 +32,10 @@
 #include "LightingInteractorStyle.h"
 #include "PointsSelectInteractorStyle.h"
 #include "MyRubberBandStyle.h"
-
+#include "Point.h"
+#include "PickerInteractorStyle.h"
+#include "CameraRestrictStyle.h"
+#include "DrawInteractorStyle.h"
 
 #define DATA_QUALITY_NAME "dataQuality"
 #define ORIGINAL_IDS "originalIDs"
@@ -92,7 +95,10 @@ namespace mb_system {
       /// x,y,z axes
       vtkNew<vtkCubeAxesActor> axesActor_;
       vtkNew<vtkNamedColors>colors_;
-    
+
+      /// Additional actors 
+      std::vector<vtkActor *> addedActors_;
+      
       bool firstRender_ = true;
     };
 
@@ -196,10 +202,24 @@ namespace mb_system {
     }
 
 
+    /// Add an actor to be rendered
+    void addActor(vtkActor *actor) {
+      actor->Modified();
+      pipeline_->addedActors_.push_back(actor);
+    }
+
     /// Get source polydata
     vtkPolyData *getPolyData();
 
+    /// User-defined path of 3D points in world coordinates
+    std::vector<mb_system::Point3D> userPath_;
 
+    /// Trigger re-render
+    void render() {
+      assemblePipeline(pipeline_);
+    }
+
+    
   signals:
     
     /// Emit when user defines a line with mouse
@@ -269,7 +289,9 @@ namespace mb_system {
     /// Select topo/bathymetry data with mouse
     vtkNew<PointsSelectInteractorStyle> pointsSelectInteractorStyle_;
 
-    vtkNew<MyRubberBandStyle> testStyle_;
+    DrawInteractorStyle *whatTheHell;
+    
+    vtkNew<DrawInteractorStyle> testStyle_;
     
   };
 }
