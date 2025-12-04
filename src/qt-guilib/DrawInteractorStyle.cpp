@@ -162,6 +162,8 @@ void DrawInteractorStyle::SetInteractor(vtkRenderWindowInteractor
 void DrawInteractorStyle::computeElevationProfile(double *startPoint,
 						  double *endPoint) {
 
+  topoDataItem_->clearAddedActors();
+  
   // Put a little sphhere ("pin") at start and end points
   vtkNew<vtkSphereSource> startPin;
   vtkNew<vtkSphereSource> endPin;
