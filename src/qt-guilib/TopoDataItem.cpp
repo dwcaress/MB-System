@@ -343,6 +343,10 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   // Add actor to renderer
   pipeline->renderer_->AddActor(pipeline->surfaceActor_);
 
+  //// DEBUG - count actors
+  vtkActorCollection* actors = pipeline->renderer_->GetActors();
+  std::cerr << "TOTAL actors: " << actors->GetNumberOfItems() << "\n";
+
   // Add any additional actors
   // Add extra actors
   for (vtkActor *actor: pipeline->addedActors_) {
