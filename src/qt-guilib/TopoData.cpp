@@ -63,3 +63,14 @@ bool TopoData::getElevProfile(int startRow, int startCol,
 
   return true;
 }
+
+
+/* ***
+bool TopoData::getElevProfile(double startX, double startY,
+			      double endX, double endY,
+			      int nPieces,
+			      vector<array<double, 2>> *profile) {
+
+  return true;
+}
+*** */
