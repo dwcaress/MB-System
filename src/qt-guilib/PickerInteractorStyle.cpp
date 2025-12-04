@@ -12,6 +12,7 @@ using namespace mb_system;
 
 PickerInteractorStyle::PickerInteractorStyle():
   qVtkRenderer_(nullptr) {
+  qDebug() << "PickerInteractorStyle ctr";
   selectedMapper_ = vtkSmartPointer<vtkDataSetMapper>::New();
   selectedActor_ = vtkSmartPointer<vtkActor>::New();
 }
@@ -23,7 +24,8 @@ void PickerInteractorStyle::OnLeftButtonDown() {
   this->Interactor->GetMousePosition(&startMousePos_[0],
 				     &startMousePos_[1]);
 				     *** */
-  
+
+  qDebug() << "PickerInteractorStyle::OnLeftButtonDown()";
   startMousePos_[0] = this->Interactor->GetEventPosition()[0];
   startMousePos_[1] = this->Interactor->GetEventPosition()[1];
   
