@@ -39,14 +39,15 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 set(src
-    PickInteractorStyle.cpp
     Camera.cpp
+    CameraRestrictStyle.cpp
     ClickableLabel.cpp
     ColorMap.cpp
     CPixmapDrawer.cpp
     DataPointsOverlay.cpp
     DataSelectInteractorStyle.cpp    
     DisplayProperties.cpp
+    DrawInteractorStyle.cpp
     Emitter.cpp
     GmtGridData.cpp
     GmtGridReader.cpp
