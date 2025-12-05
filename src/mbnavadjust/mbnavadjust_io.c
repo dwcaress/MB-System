@@ -1291,6 +1291,16 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
               fprintf(stderr, "read failed on old format crossing: %s\n", buffer);
             }
           }
+          
+          /* fix case where crossing status and num_ties disagree */
+          if (crossing->status == MBNA_CROSSING_STATUS_SET && crossing->num_ties == 0) {
+          	crossing->status = MBNA_CROSSING_STATUS_NONE;
+          }
+          else if (crossing->num_ties > 0) {
+          	crossing->status = MBNA_CROSSING_STATUS_SET;
+          }
+          
+          /* count crossings true and analyzed */
           if (status == MB_SUCCESS && crossing->status != MBNA_CROSSING_STATUS_NONE)
             project->num_crossings_analyzed++;
           if (status == MB_SUCCESS && crossing->truecrossing) {

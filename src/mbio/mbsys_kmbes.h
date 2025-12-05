@@ -36,10 +36,13 @@
  * Notes on the mbsys_kmbes data structure and associated format:
  *   1. This MBIO format supports the generic interface message output
  *      by the Kongsberg EM datagram format.
+ *
  *   2. Reference: Kongsberg EM datagram format Reg. no. 410224 rev F, November 2018
  *                 Kongsberg EM datagram format Reg. nr. 410224 rev J, 15-09-2023
+ *
  *   3. The Kongsberg EM datagram stream consists of several different data
  *      records that can vary among models and installations
+ *
  *   4. The Kongsberg EM datagram format supports the following multibeam models 
  *      September 2016:
  *        EM 710,   40-100 kHz
@@ -56,9 +59,12 @@
  *      unsigned short echoSounderID;   // Echo sounder identity.
  *      unsigned int time_sec;          // Time in second.
  *      unsigned int time_nanosec;      // Nano seconds remainder.
+ *
  *   5. Each datagram ends with:
  *      unsigned int numBytesDgm;       // Datagram length in bytes.
+ *
  *   6. All data are in little-endian form.
+ *
  *   7. The data record names include:
  *      // I - datagrams (Installation and Runtime)
  *      IIP, // Installation parameters and sensor setup.
@@ -98,6 +104,33 @@
  *           // - this means that MB-System beamflags are embedded in the MRZ datagram soundings
  *      XMC, // Comment datagram (MB-System only)
  *      XMS, // MB-System multibeam pseudosidescan derived from multibeam backscatter (MB-System only)
+ *
+ *   8. The data records are mapped to MB-System data kind values as follows:
+ *      SPO ==> kind = MB_DATA_NAV = 12
+ *      SPE ==> kind = MB_DATA_NAVIGATION_ERROR = 26
+ *      SPD ==> kind = MB_DATA_DATUM = 75
+ *      SKM ==> kind = MB_DATA_NAV1 = 29 if (skm->infoPart.sensorSystem == 0)
+ *      SKM ==> kind = MB_DATA_NAV2 = 30  if (skm->infoPart.sensorSystem == 1)
+ *      SVP ==> kind = MB_DATA_VELOCITY_PROFILE = 6
+ *      SVT ==> kind = MB_DATA_SSV = 19
+ *      SCL ==> kind = MB_DATA_CLOCK = 14
+ *      SDE ==> kind = MB_DATA_SENSORDEPTH = 59
+ *      SHI ==> kind = MB_DATA_HEIGHT = 16
+ *      SHA ==> kind = MB_DATA_HEADING = 17
+ *      MRZ ==> kind = MB_DATA_DATA = 1
+ *      MWC ==> kind = MB_DATA_WATER_COLUMN = 46
+ *      MSC ==> kind = MB_DATA_DATA = 1
+ *      CPO ==> kind = MB_DATA_NAV3 = 31
+ *      CHE ==> kind = MB_DATA_HEAVE = 64
+ *      IIP ==> kind = MB_DATA_INSTALLATION = 45
+ *      IOP ==> kind = MB_DATA_RUN_PARAMETER = 13
+ *      IBR ==> kind = MB_DATA_BIST1 = 66
+ *      IBS ==> kind = MB_DATA_BIST2 = 67
+ *      FCF ==> kind = MB_DATA_BSCALIBRATIONFILE = 69
+ *      XMB ==> kind = MB_DATA_MBSYSTEM = 68
+ *      XMC ==> kind = MB_DATA_COMMENT = 2
+ *      XMT ==> kind = MB_DATA_DATA = 1
+ *      XMS ==> kind = MB_DATA_DATA = 1
  */
 
 #ifndef MBSYS_KMBES_H_

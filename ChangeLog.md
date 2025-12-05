@@ -22,6 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.3beta09    December 4, 2025
 - Version 5.8.3beta08    November 16, 2025
 - Version 5.8.3beta07    October 22, 2025
 - Version 5.8.3beta06    October 1, 2025
@@ -65,6 +66,10 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.3beta09 (December 4, 2025)
+
+Program mbnavadjustmerge: Fixed options --unset-tie, --unset-ties-file, --unset-ties-survey, --unset-ties-by-survey, --unset-ties-block, --unset-ties-all.
 
 #### 5.8.3beta08 (November 16, 2025)
 
