@@ -3342,6 +3342,7 @@ int main(int argc, char **argv) {
 
       /* unset the ties associated with this crossing */
       if (found_crossing && crossing->num_ties > 0) {
+        crossing->status = MBNA_CROSSING_STATUS_NONE;
         crossing->num_ties = 0;
 
         fprintf(stderr, "Unset tie:   %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", current_crossing, file1->block,
@@ -3361,6 +3362,7 @@ int main(int argc, char **argv) {
           file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
           fprintf(stderr, "Unset tie(s) of crossing:   %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", current_crossing, file1->block,
                   crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2, crossing->section_2);
+          crossing->status = MBNA_CROSSING_STATUS_NONE;
           crossing->num_ties = 0;
         }
       }
@@ -3378,6 +3380,7 @@ int main(int argc, char **argv) {
           file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
           fprintf(stderr, "Unset tie(s) of crossing:   %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", current_crossing, file1->block,
                   crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2, crossing->section_2);
+          crossing->status = MBNA_CROSSING_STATUS_NONE;
           crossing->num_ties = 0;
         }
       }
@@ -3395,6 +3398,7 @@ int main(int argc, char **argv) {
           file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
           fprintf(stderr, "Unset tie(s) of crossing:   %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", current_crossing, file1->block,
                   crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2, crossing->section_2);
+          crossing->status = MBNA_CROSSING_STATUS_NONE;
           crossing->num_ties = 0;
         }
       }
@@ -3406,14 +3410,15 @@ int main(int argc, char **argv) {
       for (int icrossing = 0; icrossing < project_output.num_crossings; icrossing++) {
         crossing = (struct mbna_crossing *)&project_output.crossings[icrossing];
         if (crossing->num_ties > 0
-            && ((project_output.files[crossing->file_id_1].block == mods[imod].survey1 ||
+            && ((project_output.files[crossing->file_id_1].block == mods[imod].survey1 &&
                   project_output.files[crossing->file_id_2].block == mods[imod].survey2)
-              || (project_output.files[crossing->file_id_1].block == mods[imod].survey1 ||
-                  project_output.files[crossing->file_id_2].block == mods[imod].survey2))) {
+              || (project_output.files[crossing->file_id_1].block == mods[imod].survey2 &&
+                  project_output.files[crossing->file_id_2].block == mods[imod].survey1))) {
           file1 = (struct mbna_file *)&project_output.files[crossing->file_id_1];
           file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
           fprintf(stderr, "Unset tie(s) of crossing:   %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", current_crossing, file1->block,
                   crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2, crossing->section_2);
+          crossing->status = MBNA_CROSSING_STATUS_NONE;
           crossing->num_ties = 0;
         }
       }
@@ -3431,9 +3436,10 @@ int main(int argc, char **argv) {
           file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
           fprintf(stderr, "Unset tie(s) of crossing:   %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", current_crossing, file1->block,
                   crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2, crossing->section_2);
-	  	  num_crossings_unset ++;
-	  	  num_ties_unset += crossing->num_ties;
-          crossing->num_ties = 0;
+	  	  	num_crossings_unset ++;
+	  	  	num_ties_unset += crossing->num_ties;
+          crossing->status = MBNA_CROSSING_STATUS_NONE;
+        	crossing->num_ties = 0;
         }
       }
       fprintf(stderr, "  %d crossings unset\n", num_crossings_unset);
