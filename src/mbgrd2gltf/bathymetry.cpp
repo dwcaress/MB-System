@@ -38,106 +38,115 @@
 #include <iostream>
 
 namespace mbgrd2gltf {
-	// we have 3 main conventions to deal with: GMT, COARDS, CF
-	//gmt: x,y,z with x_range, y_range, z_range variables
-	//coards: lon, lat, z
-	//cf: longitude, latitude, elevation
-	Bathymetry::Bathymetry(const Options& options) {
-		int netcdf_id = get_netcdf_id(options.input_filepath().c_str());
+// we have 3 main conventions to deal with: GMT, COARDS, CF
+//gmt: x,y,z with x_range, y_range, z_range variables
+//coards: lon, lat, z
+//cf: longitude, latitude, elevation
+Bathymetry::Bathymetry(const Options& options) {
+  int netcdf_id = get_netcdf_id(options.input_filepath().c_str());
 
-    // --- Detect convention type ---
-    enum class GridConvention { GMT, COARDS, CF, UNKNOWN };
-    GridConvention convention = GridConvention::UNKNOWN;
+  // --- Detect convention type ---
+  enum class GridConvention { GMT, COARDS, CF, UNKNOWN };
+  GridConvention convention = GridConvention::UNKNOWN;
 
-    int varid;
-    if (nc_inq_varid(netcdf_id, "x_range", &varid) == NC_NOERR &&
-        nc_inq_varid(netcdf_id, "y_range", &varid) == NC_NOERR)
-        convention = GridConvention::GMT;
-    else if (nc_inq_varid(netcdf_id, "lon", &varid) == NC_NOERR &&
-             nc_inq_varid(netcdf_id, "lat", &varid) == NC_NOERR)
-        convention = GridConvention::COARDS;
-    else if (nc_inq_varid(netcdf_id, "longitude", &varid) == NC_NOERR &&
-             nc_inq_varid(netcdf_id, "latitude", &varid) == NC_NOERR)
-        convention = GridConvention::CF;
-    else
-        convention = GridConvention::UNKNOWN;
+  int varid;
+  if (nc_inq_varid(netcdf_id, "x_range", &varid) == NC_NOERR &&
+      nc_inq_varid(netcdf_id, "y_range", &varid) == NC_NOERR)
+    convention = GridConvention::GMT;
+  else if (nc_inq_varid(netcdf_id, "lon", &varid) == NC_NOERR &&
+           nc_inq_varid(netcdf_id, "lat", &varid) == NC_NOERR)
+    convention = GridConvention::COARDS;
+  else if (nc_inq_varid(netcdf_id, "longitude", &varid) == NC_NOERR &&
+           nc_inq_varid(netcdf_id, "latitude", &varid) == NC_NOERR)
+    convention = GridConvention::CF;
+  else
+    convention = GridConvention::UNKNOWN;
 
-    // --- Assign variable names based on convention ---
-    std::string x_name, y_name, z_name;
-    std::string x_range_name, y_range_name, z_range_name;
+  // --- Assign variable names based on convention ---
+  std::string x_name, y_name, z_name;
+  std::string x_range_name, y_range_name, z_range_name;
 
-    switch (convention) {
-        case GridConvention::GMT:
-            x_name = "x"; y_name = "y"; z_name = "z";
-            x_range_name = "x_range"; y_range_name = "y_range"; z_range_name = "z_range";
-            break;
-        case GridConvention::COARDS:
-            x_name = "lon"; y_name = "lat"; z_name = "z";
-            break;
-        case GridConvention::CF:
-            x_name = "longitude"; y_name = "latitude"; z_name = "elevation";
-            break;
-        default:
-            x_name = "x"; y_name = "y"; z_name = "z";
-    }
+  switch (convention) {
+  case GridConvention::GMT:
+    x_name = "x";
+    y_name = "y";
+    z_name = "z";
+    x_range_name = "x_range";
+    y_range_name = "y_range";
+    z_range_name = "z_range";
+    break;
+  case GridConvention::COARDS:
+    x_name = "lon";
+    y_name = "lat";
+    z_name = "z";
+    break;
+  case GridConvention::CF:
+    x_name = "longitude";
+    y_name = "latitude";
+    z_name = "elevation";
+    break;
+  default:
+    x_name = "x";
+    y_name = "y";
+    z_name = "z";
+  }
 
-    // --- Dimensions ---
-    if (nc_inq_dimid(netcdf_id, x_name.c_str(), nullptr) == NC_NOERR)
-        _x = get_dimension_length(netcdf_id, x_name.c_str());
-    else if (nc_inq_dimid(netcdf_id, "lon", nullptr) == NC_NOERR)
-        _x = get_dimension_length(netcdf_id, "lon");
+  // --- Dimensions ---
+  if (nc_inq_dimid(netcdf_id, x_name.c_str(), nullptr) == NC_NOERR)
+    _x = get_dimension_length(netcdf_id, x_name.c_str());
+  else if (nc_inq_dimid(netcdf_id, "lon", nullptr) == NC_NOERR)
+    _x = get_dimension_length(netcdf_id, "lon");
 
-    if (nc_inq_dimid(netcdf_id, y_name.c_str(), nullptr) == NC_NOERR)
-        _y = get_dimension_length(netcdf_id, y_name.c_str());
-    else if (nc_inq_dimid(netcdf_id, "lat", nullptr) == NC_NOERR)
-        _y = get_dimension_length(netcdf_id, "lat");
+  if (nc_inq_dimid(netcdf_id, y_name.c_str(), nullptr) == NC_NOERR)
+    _y = get_dimension_length(netcdf_id, y_name.c_str());
+  else if (nc_inq_dimid(netcdf_id, "lat", nullptr) == NC_NOERR)
+    _y = get_dimension_length(netcdf_id, "lat");
 
-    _side = 2;
-    _xysize = _x * _y;
+  _side = 2;
+  _xysize = _x * _y;
 
-    // --- Range metadata ---
-    if (nc_inq_varid(netcdf_id, x_range_name.c_str(), &varid) == NC_NOERR) {
-        get_variable_double_array(netcdf_id, x_range_name.c_str(), _x_range, _side);
-        get_variable_double_array(netcdf_id, y_range_name.c_str(), _y_range, _side);
-        get_variable_double_array(netcdf_id, z_range_name.c_str(), _z_range, _side);
-    } else {
-        // fallback to attributes
-        get_variable_attribute_double(netcdf_id, x_name.c_str(), "actual_range", _x_range);
-        get_variable_attribute_double(netcdf_id, y_name.c_str(), "actual_range", _y_range);
-        get_variable_attribute_double(netcdf_id, z_name.c_str(), "actual_range", _z_range);
-        std::swap(_y_range[0], _y_range[1]);
-    }
+  // --- Range metadata ---
+  if (nc_inq_varid(netcdf_id, x_range_name.c_str(), &varid) == NC_NOERR) {
+    get_variable_double_array(netcdf_id, x_range_name.c_str(), _x_range, _side);
+    get_variable_double_array(netcdf_id, y_range_name.c_str(), _y_range, _side);
+    get_variable_double_array(netcdf_id, z_range_name.c_str(), _z_range, _side);
+  } else {
+    // fallback to attributes
+    get_variable_attribute_double(netcdf_id, x_name.c_str(), "actual_range", _x_range);
+    get_variable_attribute_double(netcdf_id, y_name.c_str(), "actual_range", _y_range);
+    get_variable_attribute_double(netcdf_id, z_name.c_str(), "actual_range", _z_range);
+    std::swap(_y_range[0], _y_range[1]);
+  }
 
-    // --- Spacing ---
-    if (nc_inq_varid(netcdf_id, "spacing", &varid) == NC_NOERR)
-        get_variable_double_array(netcdf_id, "spacing", _spacing, _side);
-    else {
-        _spacing[0] = (_x_range[1] - _x_range[0]) / _x;
-        _spacing[1] = (_y_range[1] - _y_range[0]) / _y;
-    }
+  // --- Spacing ---
+  if (nc_inq_varid(netcdf_id, "spacing", &varid) == NC_NOERR)
+    get_variable_double_array(netcdf_id, "spacing", _spacing, _side);
+  else {
+    _spacing[0] = (_x_range[1] - _x_range[0]) / _x;
+    _spacing[1] = (_y_range[1] - _y_range[0]) / _y;
+  }
 
-    // --- Dimensions array ---
-    _dimension[0] = _x;
-    _dimension[1] = _y;
+  // --- Dimensions array ---
+  _dimension[0] = _x;
+  _dimension[1] = _y;
 
-    // --- Grid data ---
-    size_t start[2] = {0, 0};
-    size_t length[2] = {_y, _x};
-    _z = Matrix<float>(_x, _y);
+  // --- Grid data ---
+  size_t start[2] = {0, 0};
+  size_t length[2] = {_y, _x};
+  _z = Matrix<float>(_x, _y);
 
-    if (nc_inq_varid(netcdf_id, z_name.c_str(), &varid) == NC_NOERR)
-        get_variable_float_array(netcdf_id, z_name.c_str(), _z.data(), start, length);
-    else
-        throw NetCdfError(NC_EBADID, "no recognized z variable in file");
+  if (nc_inq_varid(netcdf_id, z_name.c_str(), &varid) == NC_NOERR)
+    get_variable_float_array(netcdf_id, z_name.c_str(), _z.data(), start, length);
+  else
+    throw NetCdfError(NC_EBADID, "no recognized z variable in file");
 
-    // --- Cleanup ---
-    int return_value = nc_close(netcdf_id);
-    if (return_value != NC_NOERR)
-        throw NetCdfError(return_value, "failed to close netCDF file");
+  // --- Cleanup ---
+  int return_value = nc_close(netcdf_id);
+  if (return_value != NC_NOERR)
+    throw NetCdfError(return_value, "failed to close netCDF file");
 
-    compress(options);
-
-	}
+  compress(options);
+}
 
 int Bathymetry::get_netcdf_id(const char* filepath) {
   int netcdf_id;
