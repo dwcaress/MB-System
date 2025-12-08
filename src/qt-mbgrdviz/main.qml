@@ -167,37 +167,7 @@ Window {
         Button {
             text: qsTr('Push me!')
             onPressed: {
-                var dummy = 0;
-                myProfile = topoDataItem.getElevProfile(dummy, dummy, dummy, dummy, 500);
-                console.log('profile length: ', myProfile.length);
-
-                var xmin = 10000;
-                var xmax = -xmin;
-                var ymin = 100000;
-                var ymax = -ymin;
-                for (var i = 0; i < myProfile.length; i++) {
-                    console.log('x: ', myProfile[i].x, ' y: ', myProfile[i].y);
-                    if (myProfile[i].x < xmin) { xmin = myProfile[i].x }
-                    if (myProfile[i].x > xmax) { xmax = myProfile[i].x }
-                    if (myProfile[i].y < ymin) { ymin = myProfile[i].y }
-                    if (myProfile[i].y > ymax) { ymax = myProfile[i].y }
-                }
-                console.log('xmin: ', xmin, '  xmax: ', xmax);
-                console.log('ymin: ', ymin, '  ymax: ', ymax);
-
-                // Set graph axes ranges
-                profileGraph.xAxis.min = xmin
-                profileGraph.xAxis.max = xmax
-                profileGraph.yAxis.min = ymin
-                profileGraph.yAxis.max = ymax
-
-                profileGraph.xyData.clear()
-
-                // Populate graph line-series points
-                for (var i = 0; i < myProfile.length; i++) {
-                    profileGraph.xyData.append(myProfile[i].x, myProfile[i].y);
-                }
-
+	      console.log('Pressed buttonn')
             }
         }
 
@@ -361,17 +331,44 @@ Window {
 		              settings3D.lightY.value,			      		                      settings3D.lightZ.value)
     }
 
-    Connections {
-      ignoreUnknownSignals: true
-      target: topoDataItem
-      onLineDefined: {
-        console.log("Line defined!")
-	console.log("start:", start)
-	console.log("end:", end)
-	myProfile = topoDataItem.getElevationProfile(500);
+  Connections {
+    ignoreUnknownSignals: true
+    
+    target: topoDataItem
+    onLineDefined: function (profileData) {
+      console.log("Line defined!")
+      var xmin = 100000;
+      var xmax = -xmin;
+      var ymin = 100000;
+      var ymax = -ymin;
+      for (var i = 0; i < profileData.length; i++) {
+        console.log('x: ', profileData[i].x, ' y: ', profileData[i].y);
+        if (profileData[i].x < xmin) { xmin = profileData[i].x }
+        if (profileData[i].x > xmax) { xmax = profileData[i].x }
+        if (profileData[i].y < ymin) { ymin = profileData[i].y }
+        if (profileData[i].y > ymax) { ymax = profileData[i].y }
       }
-    }
+      console.log('xmin: ', xmin, '  xmax: ', xmax);
+      console.log('ymin: ', ymin, '  ymax: ', ymax);
 
+      // Set graph axes ranges
+      profileGraph.xAxis.min = xmin
+      profileGraph.xAxis.max = xmax
+      profileGraph.yAxis.min = ymin
+      profileGraph.yAxis.max = ymax
+
+      profileGraph.xyData.clear()
+
+      // Populate graph line-series points
+      for (var i = 0; i < profileData.length; i++) {
+        profileGraph.xyData.append(profileData[i].x, profileData[i].y);
+       }
+       topoProfileWindow.show();
+       topoDataItem.forceActiveFocus();
+     }
+  }
 }
+
+
 
 
