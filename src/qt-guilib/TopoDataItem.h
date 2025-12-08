@@ -225,10 +225,8 @@ namespace mb_system {
 
     
   signals:
-    
     /// Emit when user defines a line with mouse
-    void lineDefined(QList<double> start,
-		     QList<double> end);
+    void lineDefined(QList<QVector2D> elevProfile);
   
   
   protected:
