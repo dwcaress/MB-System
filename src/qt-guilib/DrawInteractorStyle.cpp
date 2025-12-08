@@ -229,7 +229,8 @@ void DrawInteractorStyle::computeElevationProfile(double *startPoint,
 
   /* ***
   editor_->setSurfaceOpacity(0.3);
-
+  ** */
+  
   std::cerr << "Now extract and graph profile data\n";
   
   // Extract elev profile data for display in 2D graph
@@ -281,6 +282,7 @@ void DrawInteractorStyle::computeElevationProfile(double *startPoint,
   // x: distance along profile
   // y: elevation
 
+  /* ***
   // Create table for chart
   vtkNew<vtkTable> table;
 
@@ -330,7 +332,21 @@ void DrawInteractorStyle::computeElevationProfile(double *startPoint,
   *** */
 
   qDebug() << "render() again";
-  
   topoDataItem_->render();
+
+  // Transfer profile X-Y data to QList<QVector2D, and include as signal
+  // payload
+  QList<QVector2D> qProfile;
+  QVector2D qPoint;
+  for (int i = 0; i < profileData.size(); i++) {
+    std::pair<double, double> point = profileData.at(i);
+    qPoint.setX((float )point.first);
+    qPoint.setY((float )point.second);
+    qProfile.append(qPoint);
+  }
+
+  qDebug() << "emit TopoDataItem::lineDefined()";
+  // Emit signal with profile X-Y payload
+  emit topoDataItem_->lineDefined(qProfile);
   
 }
