@@ -63,7 +63,7 @@ void PointsSelectInteractorStyle::OnLeftButtonUp() {
       start.append(startLineWorld[i]);
       end.append(endLineWorld[i]);
     }
-    emit topoDataItem_->lineDefined(start, end);
+    /// emit topoDataItem_->lineDefined(start, end);
   }
 
   
