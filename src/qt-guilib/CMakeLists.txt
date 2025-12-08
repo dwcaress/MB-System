@@ -48,6 +48,7 @@ set(src
     DisplayProperties.cpp
     DrawInteractorStyle.cpp
     Emitter.cpp
+    FixedScreensizeCallback.cpp
     GmtGridData.cpp
     GmtGridReader.cpp
     GmtGridSurface.cpp
