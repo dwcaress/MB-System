@@ -10,6 +10,8 @@ void FixedScreensizeCallback::Execute(vtkObject* caller, unsigned long, void*) {
   // The actor we want to scale is stored in this->Actor
   // NOT the caller (which is the renderer)
   if (!actor_ || !renderer_ || !pixelSize_) {
+    qDebug() << "actor_=" << actor_ << ", renderer_=" << renderer_ <<
+      "pixelSize_=" << pixelSize_;
     qWarning() << "actor, renderer and/or pixelSize not specified";
     return;
   }
