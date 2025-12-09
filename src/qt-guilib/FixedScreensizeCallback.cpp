@@ -1,7 +1,6 @@
 #include <vtkCamera.h>
 #include <vtkRenderWindow.h>
-#include <qtLogging>
-#include <qDebug>
+#include <QDebug>
 #include "FixedScreensizeCallback.h"
 
 using namespace mb_system;
@@ -16,12 +15,16 @@ void FixedScreensizeCallback::Execute(vtkObject* caller, unsigned long, void*) {
     return;
   }
 
+  qDebug() << "get active camera";
   vtkCamera* camera = renderer_->GetActiveCamera();
-        
+
+  qDebug() << "get actor position"; 
   // Get THIS specific actor's position
   double* pos = actor_->GetPosition();
   double* camPos = camera->GetPosition();
 
+  qDebug() << "actor pos: " << pos << "cam pos: " << camPos;
+  
   // Calculate distance from camera to THIS actor
   double dx = pos[0] - camPos[0];
   double dy = pos[1] - camPos[1];
