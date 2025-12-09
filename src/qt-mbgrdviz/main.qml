@@ -342,7 +342,7 @@ Window {
       var ymin = 100000;
       var ymax = -ymin;
       for (var i = 0; i < profileData.length; i++) {
-        console.log('x: ', profileData[i].x, ' y: ', profileData[i].y);
+        // console.log('x: ', profileData[i].x, ' y: ', profileData[i].y);
         if (profileData[i].x < xmin) { xmin = profileData[i].x }
         if (profileData[i].x > xmax) { xmax = profileData[i].x }
         if (profileData[i].y < ymin) { ymin = profileData[i].y }
