@@ -144,6 +144,9 @@ void TopoDataItem::setupAxes(vtkCubeAxesActor *axesActor,
 }
 
 
+void TopoDataItem::initializePipeline() {
+  clearAddedActors();
+}
 
 bool TopoDataItem::loadDatafile(QUrl fileUrl) {
 
@@ -154,6 +157,8 @@ bool TopoDataItem::loadDatafile(QUrl fileUrl) {
   setDataFilename(filename);
 
   pipeline_->firstRender_ = true;
+
+  initializePipeline();
   
   reassemblePipeline();
   

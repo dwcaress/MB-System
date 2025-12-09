@@ -235,6 +235,9 @@ namespace mb_system {
   
   protected:
 
+    /// Initialize pipeline structure 
+    void initializePipeline(void);
+    
     /// Assemble pipeline elements
     virtual void assemblePipeline(Pipeline *pipeline);
 
