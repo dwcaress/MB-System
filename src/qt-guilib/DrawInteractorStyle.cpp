@@ -191,14 +191,17 @@ void DrawInteractorStyle::computeElevationProfile(double *startPoint,
   endPinActor->SetMapper(endPinMapper);
   endPinActor->GetProperty()->SetColor(1., 0., 0.);
   endPinActor->GetProperty()->SetLineWidth(3.);
-  topoDataItem_->addActor(endPinActor);  
+  topoDataItem_->addActor(endPinActor);
+
+
   vtkSmartPointer<FixedScreensizeCallback> callback =
     vtkSmartPointer<FixedScreensizeCallback>::New();
 
   callback->setActor(endPinActor);
   callback->setActorPixelSize(10);
   callback->setRenderer(topoDataItem_->getRenderer());
-  (topoDataItem_->getRenderer())->AddObserver(vtkCommand::StartEvent, callback);
+  (topoDataItem_->getRenderer())->GetActiveCamera()->
+    AddObserver(vtkCommand::StartEvent, callback);
   
   // Compute normal to elevation profile plane; elevation profile plane is vertical,
   // so normal to plane is horizontal
