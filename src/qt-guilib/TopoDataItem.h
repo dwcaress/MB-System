@@ -170,7 +170,7 @@ namespace mb_system {
     Q_INVOKABLE void setLight(float intensity, double x, double y, double z);
 
     /// Get light source position
-    Q_INVOKABLE QVariantList getLightPosition(void);
+   Q_INVOKABLE QVariantList getLightPosition(void);
 
     /// Get light source intensity
     Q_INVOKABLE double getLightIntensity(void);    
@@ -201,6 +201,10 @@ namespace mb_system {
       return pipeline_;
     }
 
+    /// Get surface renderer from pipeline
+    vtkRenderer *getRenderer() {
+      return pipeline_->renderer_;
+    }
 
     /// Add an actor to be rendered
     void addActor(vtkActor *actor) {
