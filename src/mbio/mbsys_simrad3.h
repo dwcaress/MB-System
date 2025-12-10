@@ -566,8 +566,7 @@ struct mbsys_simrad3_ping_struct {
 	   as measured by heave  */
 
 	/* raw travel time and angle data version 4 */
-	// TODO(schwehr): bool.
-	int png_raw_read;       /* flag indicating actual reading of raw beam record */
+	bool png_raw_read;       /* flag indicating actual reading of raw beam record */
 	int png_raw_date;       /* date = year*10000 + month*100 + day
 	                    Feb 26, 1995 = 19950226 */
 	int png_raw_msec;       /* time since midnight in msec
@@ -664,8 +663,7 @@ struct mbsys_simrad3_ping_struct {
 	    defined by Xavier Lurton. Others have not yet been defined */
 
 	/* sidescan */
-	// TODO(schwehr): bool.
-	int png_ss_read;          /* flag indicating actual reading of sidescan record */
+	bool png_ss_read;         /* flag indicating actual reading of sidescan record */
 	int png_ss_date;          /* date = year*10000 + month*100 + day
 	                      Feb 26, 1995 = 19950226 */
 	int png_ss_msec;          /* time since midnight in msec

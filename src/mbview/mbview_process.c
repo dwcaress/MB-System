@@ -136,7 +136,7 @@ int mbview_projectdata(size_t instance) {
 		/* get origin */
 		view->xorigin = 0.5 * (view->xmin + view->xmax);
 		view->yorigin = 0.5 * (view->ymin + view->ymax);
-		view->zorigin = data->exageration * 0.5 * (data->primary_min + data->primary_max);
+		view->zorigin = data->exaggeration * 0.5 * (data->primary_min + data->primary_max);
 
 		/* set projection for getting lon lat */
 		proj_status = mb_proj_init(mbv_verbose, data->primary_grid_projection_id, &(view->primary_pjptr), &error);
@@ -216,7 +216,7 @@ __FILE__, __LINE__, __FUNCTION__, xlonmin, xlonmax, ylatmin, ylatmax);
 			/* get origin */
 			view->xorigin = 0.5 * (view->xmin + view->xmax);
 			view->yorigin = 0.5 * (view->ymin + view->ymax);
-			view->zorigin = data->exageration * 0.5 * (data->primary_min + data->primary_max);
+			view->zorigin = data->exaggeration * 0.5 * (data->primary_min + data->primary_max);
 		}
 		else if (data->display_projection_mode == MBV_PROJECTION_GEOGRAPHIC) {
 			/* set up geographic pseduo-projection */
@@ -231,7 +231,7 @@ __FILE__, __LINE__, __FUNCTION__, xlonmin, xlonmax, ylatmin, ylatmax);
 			/* get origin */
 			view->xorigin = 0.5 * (view->xmin + view->xmax);
 			view->yorigin = 0.5 * (view->ymin + view->ymax);
-			view->zorigin = data->exageration * 0.5 * (data->primary_min + data->primary_max);
+			view->zorigin = data->exaggeration * 0.5 * (data->primary_min + data->primary_max);
 		}
 		else if (data->display_projection_mode == MBV_PROJECTION_SPHEROID) {
 			/* get bounds */
@@ -692,7 +692,7 @@ int mbview_zscalegridpoint(size_t instance, int k) {
 	    data->display_projection_mode == MBV_PROJECTION_ALREADYPROJECTED ||
 	    data->display_projection_mode == MBV_PROJECTION_GEOGRAPHIC) {
 		/* scale z value alone */
-		data->primary_z[k] = (float)(view->scale * (data->exageration * data->primary_data[k] - view->zorigin));
+		data->primary_z[k] = (float)(view->scale * (data->exaggeration * data->primary_data[k] - view->zorigin));
 	}
 	else if (data->display_projection_mode == MBV_PROJECTION_SPHEROID) {
 		/* must reproject everything in this case */
@@ -745,7 +745,7 @@ int mbview_zscalepoint(size_t instance, int globalview, double offset_factor, st
 	/* scale z value */
 	if (data->display_projection_mode != MBV_PROJECTION_SPHEROID) {
 		/* scale z value alone */
-		point->zdisplay = view->scale * (data->exageration * point->zdata - view->zorigin) + offset_factor;
+		point->zdisplay = view->scale * (data->exaggeration * point->zdata - view->zorigin) + offset_factor;
 	}
 	else {
 		/* reproject positions into display coordinates */
@@ -793,7 +793,7 @@ int mbview_zscalepointw(size_t instance, int globalview, double offset_factor, s
 	/* scale z value */
 	if (data->display_projection_mode != MBV_PROJECTION_SPHEROID) {
 		/* scale z value alone */
-		pointw->zdisplay[instance] = view->scale * (data->exageration * pointw->zdata - view->zorigin) + offset_factor;
+		pointw->zdisplay[instance] = view->scale * (data->exaggeration * pointw->zdata - view->zorigin) + offset_factor;
 	}
 	else {
 		/* reproject positions into display coordinates */
@@ -1112,7 +1112,7 @@ int mbview_projectforward(size_t instance, bool needlonlat, double xgrid, double
 	if (data->primary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED) {
 		xx = xgrid;
 		yy = ygrid;
-		zz = data->exageration * zdata;
+		zz = data->exaggeration * zdata;
 		*xdisplay = view->scale * (xx - view->xorigin);
 		*ydisplay = view->scale * (yy - view->yorigin);
 		*zdisplay = view->scale * (zz - view->zorigin);
@@ -1422,19 +1422,19 @@ fprintf(stderr, "%s:%d:%s: Warning: calling mb_proj_forward with invalid latitud
 __FILE__, __LINE__, __FUNCTION__, xlon, ylat);
 }
 		mb_proj_forward(mbv_verbose, view->display_pjptr, xlon, ylat, &xx, &yy, &error);
-		zz = data->exageration * zdata;
+		zz = data->exaggeration * zdata;
 		/* fprintf(stderr,"pos: %f %f %f   raw: %f %f %f ",
 		xlon, ylat, zdata, xx, yy, zz); */
 	}
 	else if (data->display_projection_mode == MBV_PROJECTION_GEOGRAPHIC) {
 		xx = xlon / view->mtodeglon;
 		yy = ylat / view->mtodeglat;
-		zz = data->exageration * zdata;
+		zz = data->exaggeration * zdata;
 	}
 	else /*if (data->display_projection_mode == MBV_PROJECTION_SPHEROID) */
 	{
 		mbview_sphere_forward(instance, xlon, ylat, &xx, &yy, &zz);
-		effective_topography = data->exageration * (zdata - 0.5 * (data->primary_min + data->primary_max)) +
+		effective_topography = data->exaggeration * (zdata - 0.5 * (data->primary_min + data->primary_max)) +
 		                       0.5 * (data->primary_min + data->primary_max);
 		/* fprintf(stderr,"pos: %f %f %f   raw: %f %f %f  topo:%f ",
 		xlon, ylat, zdata, xx, yy, zz, effective_topography); */
@@ -1550,7 +1550,7 @@ int mbview_projectdistance(size_t instance, double xlon1, double ylat1, double z
 	struct mbview_world_struct *view = &(mbviews[instance]);
 	struct mbview_struct *data = &(view->data);
 
-	/* get positions in display projection without scaling or exageration */
+	/* get positions in display projection without scaling or exaggeration */
 	if (data->display_projection_mode == MBV_PROJECTION_PROJECTED ||
 	    data->display_projection_mode == MBV_PROJECTION_ALREADYPROJECTED) {
 		/* point 1 */

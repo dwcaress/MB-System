@@ -102,7 +102,7 @@ procedure do_mbview_overlay_none();
 procedure do_mbview_overlay_secondary();
 procedure do_mbview_overlay_slope();
 procedure do_mbview_profile_dismiss();
-procedure do_mbview_profile_exager();
+procedure do_mbview_profile_exagger();
 procedure do_mbview_profile_slope();
 procedure do_mbview_profile_width();
 procedure do_mbview_projection_popdown();
@@ -927,12 +927,12 @@ object mB3DView_mbview_profile_pushButton_dismiss : XmPushButton widget {
 !(BX)    };
 };
 
-object mB3DView_mbview_scale_profile_exager : XmScale widget {
+object mB3DView_mbview_scale_profile_exagger : XmScale widget {
     arguments {
         arguments Style_use;
         XmNdecimalPoints = 1;
         XmNvalue = 10;
-        XmNtitleString = compound_string("Vertical Exageration");
+        XmNtitleString = compound_string("Vertical exaggeration");
         XmNshowArrows = TRUE;
         XmNshowValue = TRUE;
         XmNorientation = XmHORIZONTAL;
@@ -948,8 +948,8 @@ object mB3DView_mbview_scale_profile_exager : XmScale widget {
     };
     callbacks {
         callbacks Style_useReasons;
-        XmNvalueChangedCallback = procedure do_mbview_profile_exager();
-        XmNdragCallback = procedure do_mbview_profile_exager();
+        XmNvalueChangedCallback = procedure do_mbview_profile_exagger();
+        XmNdragCallback = procedure do_mbview_profile_exagger();
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
@@ -1114,7 +1114,7 @@ object mB3DView_mbview_form_profile : XmFormDialog widget {
          managed XmScale mB3DView_mbview_scale_profile_slope;
          managed XmScrolledWindow mB3DView_mbview_scrolledWindow_profile;
          managed XmLabel mB3DView_mbview_profile_label_info;
-         managed XmScale mB3DView_mbview_scale_profile_exager;
+         managed XmScale mB3DView_mbview_scale_profile_exagger;
          managed XmPushButton mB3DView_mbview_profile_pushButton_dismiss;
     };
     callbacks {
@@ -1580,7 +1580,7 @@ object mB3DView_mbview_pushButton_view_3d_dismiss : XmPushButton widget {
 !(BX)    };
 };
 
-object mB3DView_mbview_textField_exageration : XmTextField widget {
+object mB3DView_mbview_textField_exaggeration : XmTextField widget {
     arguments {
         arguments Style_use;
         XmNx = 160;
@@ -1598,11 +1598,11 @@ object mB3DView_mbview_textField_exageration : XmTextField widget {
 !(BX)    };
 };
 
-object mB3DView_mbview_label_exager : XmLabel widget {
+object mB3DView_mbview_label_exagger : XmLabel widget {
     arguments {
         arguments Style_use;
         XmNalignment = XmALIGNMENT_END;
-        XmNlabelString = compound_string("Vertical Exageration:");
+        XmNlabelString = compound_string("Vertical exaggeration:");
         XmNx = 10;
         XmNy = 290;
         XmNwidth = 150;
@@ -2090,8 +2090,8 @@ object mB3DView_mbview_bulletinBoard_3dparms : XmBulletinBoardDialog widget {
          managed XmLabel mB3DView_mbview_label_model;
          managed XmSeparator mB3DView_mbview_separator9;
          managed XmPushButton mB3DView_mbview_pushButton_view_3d_apply;
-         managed XmLabel mB3DView_mbview_label_exager;
-         managed XmTextField mB3DView_mbview_textField_exageration;
+         managed XmLabel mB3DView_mbview_label_exagger;
+         managed XmTextField mB3DView_mbview_textField_exaggeration;
          managed XmPushButton mB3DView_mbview_pushButton_view_3d_dismiss;
     };
     callbacks {

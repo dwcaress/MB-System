@@ -22,6 +22,18 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.3beta09    December 4, 2025
+- Version 5.8.3beta08    November 16, 2025
+- Version 5.8.3beta07    October 22, 2025
+- Version 5.8.3beta06    October 1, 2025
+- Version 5.8.3beta05    September 30, 2025
+- Version 5.8.3beta04    September 18, 2025
+- Version 5.8.3beta03    August 31, 2025
+- Version 5.8.3beta02    August 29, 2025
+- Version 5.8.3beta01    August 27, 2025
+- **Version 5.8.2          August 19, 2025**
+- Version 5.8.2beta24    July 19, 2025
+- Version 5.8.2beta23    June 25, 2025
 - Version 5.8.2beta22    June 16, 2025
 - Version 5.8.2beta21    March 15, 2025
 - Version 5.8.2beta20    February 22, 2025
@@ -54,6 +66,167 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.3beta09 (December 4, 2025)
+
+Program mbnavadjustmerge: Fixed options --unset-tie, --unset-ties-file, --unset-ties-survey, --unset-ties-by-survey, --unset-ties-block, --unset-ties-all.
+
+#### 5.8.3beta08 (November 16, 2025)
+
+Programs mbedit and mbeditviz: Now display dual swath Kongsberg multibeam data in the
+kmall format (id 261) with two separate acrosstrack profiles. As before the two profiles
+are associated with a single ping cycle and set of datagrams.
+
+Format MBF_3DWISSL2 (id 234): Updates to handle the evolving representation for the
+3D at Depth 2nd generation Wide Swath Subsea Lidar (WiSSL2)
+
+Programs mbphotomosaic, mbgetphotocorrection, and mbphotogrammetry: Augmented to handle
+seafloor photographs that have already been rectified (corrected for distortion). This
+capability has not been fully tested at this point.
+
+#### 5.8.3beta07 (October 22, 2025)
+
+Program mbeditviz: Fixed display of swath width when navigation is selected in the survey
+view.
+
+Format 234 (MBF_3DWISSL2): Supports data from new 3D at Depth 2nd Generation Wide swath
+Subsea Lidar (WiSSL2).
+
+Program mbpreprocess: Added option attitude-zero-heave to zero heave values in attitude
+data to be merged with survey data. The immediate use is for integration of Exail Phins C7
+navigation and attitude data with multibeam data, all collected on a submerged AUV for
+which the platform depth is defined by a pressure sensor rather than the heave output
+by the INS.
+
+Programs mbgrdviz, mbeditviz, mbnavadjust: Fixed the mouse button description for Rotate 
+View mode so that the right button is properly labeled as zoom rather than exaggeration.
+
+#### 5.8.3beta06 (October 1, 2025)
+
+GMT integration: Fixed compiler directives insuring
+that the GMT header file gmt_dev.h does not implicitly include a glib header file not 
+needed by MB-System.
+
+#### 5.8.3beta05 (September 30, 2025)
+
+GMT grid i/o functions (src/mbaux/mb_readwritegrd.c): Added compiler directives insuring
+that the GMT header file gmt_dev.h does not implicitly include a glib header file not 
+needed by MB-System.
+
+GMT module mbcontour: Added compiler directives insuring
+that the GMT header file gmt_dev.h does not implicitly include a glib header file not 
+needed by MB-System.
+
+GMT module mbgrd2obj: Added compiler directives insuring
+that the GMT header file gmt_dev.h does not implicitly include a glib header file not 
+needed by MB-System.
+
+GMT module mbgrdtiff: Added compiler directives insuring
+that the GMT header file gmt_dev.h does not implicitly include a glib header file not 
+needed by MB-System.
+
+GMT module mbswath: Added compiler directives insuring
+that the GMT header file gmt_dev.h does not implicitly include a glib header file not 
+needed by MB-System.
+
+Programs mbedit, mbeditviz, mbgrdviz, mbnavadjust, mbnavedit, mbvelocitytool: Removed code
+ensuring that a message display dialog is displayed when created or updated by processing
+all outstanding X11 events, as this causes mbeditviz to get lost in an infinite event
+processing loop on Ubuntu 24 installations.
+
+#### 5.8.3beta04 (September 18, 2025)
+
+Many source files: Addressed code style issues raised previously by Kurt Schwehr, 
+particularly using bool type for logical variables
+
+Program mbinfo: Recast mbinfo to use long options as well as short options. Added a new
+capability to list records comprising a data file and the contents of selected records 
+using the --debug-record-types and --debug-record-contents options, which is so far
+implemented for formats 58, 59, and 89.
+
+Program mbpreprocess: Added several new "kluge" options:
+	--kluge-set-beamwidths
+	--kluge-set-beamwidth-acrosstrack
+	--kluge-set-beamwidth-alongtrack
+	--kluge-ignore-duplicate-pings
+	--kluge-xducer-depth-from-heave
+	--kluge-xducer-depth-from-sensordepth
+	--kluge-xducer-depth-from-heave-and-sensordepth
+
+Macro mbm_route2mission: Fixed end of mission battery behavior to use mode 2 so that the
+AUV sonars are only shut off if the batteries are mostly exhausted.
+
+Formats 58 and 59 (MBF_EM710RAW and MBF_EM710MBA): Recast handling of transducer depth
+modes so as to work correctly for more data sets, and added mbpreprocess kluge options
+to handle the less common combinations of data record types and sonar settings.
+
+Program mbphotomosaic: Augmented handling of camera types to include monocular cameras
+and single camera calibration models.
+
+#### 5.8.3beta03 (August 31, 2025)
+
+Program mbotps: Added long option commands, and altered the manual page to document use
+of long options. Fixed the --skip-existing {-M} command so that mbotps actually skips
+files that already have tide correction defined.
+
+Program mbnavadjust: Now displays the reference grid used for global ties in data section
+and global tie listings.
+
+#### 5.8.3beta02 (August 29, 2025)
+
+Program mbeditviz: Fixed bias parameter optimization when soundings are selected by
+navigation.
+
+Program mbnavadjust: changed default section sizes to 0.2 km (200 m) and 400,000 soundings.
+
+#### 5.8.3beta01 (August 27, 2025)
+
+Program mbgrd2gltf: Fixed compile problem that occurs when the draco library is installed.
+
+#### 5.8.2 (August 19, 2025)
+
+**Version 5.8.2** is now the current release of MB-System. 
+
+The source code distribution can be downloaded from the MB-System Github repository at:  
+[https://github.com/dwcaress/MB-System/archive/refs/tags/5.8.2.tar.gz]()
+
+The changes and bug fixes of 5.8.2 relative to the prior stable release (5.8.1) are
+listed in the ChangeLog.md file entries for the preliminary releases 5.8.2beta01 through
+5.8.2beta24.
+
+#### 5.8.2beta24 (July 19, 2025)
+
+Program mbgrdviz: Added capability to export an MB-System route file in a file format that
+can be loaded into a Kongsberg dynamic positioning (DP) system, enabling using the DP to
+run the survey lines described by the route file.
+
+Program mbgrdviz: Added capability to export an MB-System route file in a file format that
+can be loaded into the Kongsberg multibeam control software called SIS (Seafloor information
+System). The route can be imported in two forms: one where each segment between major
+waypoints translates to a separate line in SIS, and another that generates a multisegment
+line in SIS.
+
+Program mbpreprocess: Altered the --skip-existing options so that previously preprocessed
+files are entirely skipped.
+
+#### 5.8.2beta23 (June 25, 2025)
+
+Program mbgrdviz: Fixed capability to export routes in the form of Kongsberg Dynamic 
+Positioning system waypoints, allowing importation of the MB-System derived survey plans
+to the bridge control system on MBARI's R/V David Packard.
+
+Format 89 (Teledyne Reson and Norbit (*.s7k)): Removed an errant debug message.
+
+Program mbnavadjust: Greatly improved picking data sections and global ties from the 
+model time series plots. Reorganized the List menu so that the choices switching the 
+data pick mode on the model plot and the map visualization are together. When the list
+shows data sections, global ties, or sorted global ties, then picking on the model plot
+or on navigation in the visualization will bring up the analysis window with a data section 
+and potentially a reference grid. Otherwise the picking and the analysis window will be
+of crossings and crossing ties. 
+
+Program mbpreprocess: Fixed generation of asynchronous navigation, attitude, heading and
+sensor depth files for use by mbeditviz.
 
 #### 5.8.2beta22 (June 16, 2025)
 

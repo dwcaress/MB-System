@@ -26,8 +26,6 @@
  * Date:	November 11,  2007
  */
 
-// TODO(schwehr): Fold into mbpingedit_callbacks.c
-
 #ifndef MBVIEW_MBPINGEDITPRIVATE_H_
 #define MBVIEW_MBPINGEDITPRIVATE_H_
 
@@ -140,10 +138,10 @@ struct mbpingedit_world_struct {
 	/* drawing variables */
 	float elevation;
 	float azimuth;
-	float exageration;
+	float exaggeration;
 	float elevation_save;
 	float azimuth_save;
-	float exageration_save;
+	float exaggeration_save;
 	Dimension gl_xo;
 	Dimension gl_yo;
 	Dimension gl_width;

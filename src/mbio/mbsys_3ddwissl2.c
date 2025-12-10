@@ -435,6 +435,13 @@ int mbsys_3ddwissl2_deall
   struct mbsys_3ddwissl2_struct *store = (struct mbsys_3ddwissl2_struct *)*store_ptr;
 
   int status = MB_SUCCESS;
+  
+	struct mbsys_3ddwissl2_mbarirange_struct *mbarirange = &store->mbarirange;
+	if (mbarirange->soundings != NULL && mbarirange->num_soundings_alloc > 0) 
+		{
+		status = mb_freed(verbose, __FILE__, __LINE__, (void **)(&mbarirange->soundings), error);
+		mbarirange->num_soundings_alloc = 0;
+		}
 
   /* deallocate memory for data structure */
   status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
@@ -490,6 +497,18 @@ int mbsys_3ddwissl2_dimensions
   *kind = store->kind;
 
   /* extract beam and pixel numbers from structure */
+  if (*kind == MB_DATA_DATA)
+    {
+    *nbath = store->mbarirange.num_soundings;
+    *namp = *nbath;
+    *nss = 0;
+    }
+  else
+    {
+    *nbath = 0;
+    *namp = 0;
+    *nss = 0;
+    }
 
   const int status = MB_SUCCESS;
 
@@ -534,6 +553,14 @@ int mbsys_3ddwissl2_pingnumber
   struct mbsys_3ddwissl2_struct *store = (struct mbsys_3ddwissl2_struct *)mb_io_ptr->store_data;
 
   /* extract ping number from structure */
+  if (store->kind == MB_DATA_DATA)
+    {
+    *pingnumber = store->mbarirange.RowNumber;
+    }
+  else
+    {
+    *pingnumber = 0;
+    }
 
   const int status = MB_SUCCESS;
 
@@ -643,8 +670,282 @@ int mbsys_3ddwissl2_preprocess
   }
 
 	/* deal with a survey record */
-	if (store->kind == MB_DATA_DATA) {
+	else if (store->kind == MB_DATA_DATA) {
+	
+	  struct mbsys_3ddwissl2_mbarirange_struct *mbarirange = &store->mbarirange;
 
+    /* change timestamp if indicated */
+    if (pars->timestamp_changed)
+      {
+      mbarirange->time_d = pars->time_d;
+      mbarirange->TimeStart_Sec = (int) floor(pars->time_d);
+   		mbarirange->TimeStart_nSec = (int)(1.0e9 * (pars->time_d - mbarirange->TimeStart_Sec));
+      }
+
+    /* interpolate navigation and attitude */
+
+    /* get nav sensordepth heading attitude values for scan timestamp
+       - this will generally conform to the first pulse of the scan */
+    // int interp_status = MB_SUCCESS;
+    int interp_error = MB_ERROR_NO_ERROR;
+		int jnav = 0;
+		int jsensordepth = 0;
+		int jheading = 0;
+		int jattitude = 0;
+    if (pars->n_nav > 0)
+      {
+      /* interp_status = */ mb_linear_interp_longitude(verbose,
+        pars->nav_time_d - 1,
+        pars->nav_lon - 1,
+        pars->n_nav,
+        mbarirange->time_d,
+        &mbarirange->navlon,
+        &jnav,
+        &interp_error);
+      /* interp_status = */ mb_linear_interp_latitude(verbose,
+        pars->nav_time_d - 1,
+        pars->nav_lat - 1,
+        pars->n_nav,
+        mbarirange->time_d,
+        &mbarirange->navlat,
+        &jnav,
+        &interp_error);
+      /* interp_status = */ mb_linear_interp(verbose,
+        pars->nav_time_d - 1,
+        pars->nav_speed - 1,
+        pars->n_nav,
+        mbarirange->time_d,
+        &mbarirange->speed,
+        &jnav,
+        &interp_error);
+      }
+    if (pars->n_sensordepth > 0)
+    	{
+      /* interp_status = */ mb_linear_interp(verbose,
+        pars->sensordepth_time_d - 1,
+        pars->sensordepth_sensordepth - 1,
+        pars->n_sensordepth,
+        mbarirange->time_d,
+        &mbarirange->sensordepth,
+        &jsensordepth,
+        &interp_error);
+    	}
+    if (pars->n_heading > 0)
+      {
+      /* interp_status = */ mb_linear_interp_heading(verbose,
+        pars->heading_time_d - 1,
+        pars->heading_heading - 1,
+        pars->n_heading,
+        mbarirange->time_d,
+        &mbarirange->heading,
+        &jheading,
+        &interp_error);
+      }
+    if (pars->n_attitude > 0)
+      {
+      /* interp_status = */ mb_linear_interp(verbose,
+        pars->attitude_time_d - 1,
+        pars->attitude_roll - 1,
+        pars->n_attitude,
+        mbarirange->time_d,
+        &mbarirange->roll,
+        &jattitude,
+        &interp_error);
+      /* interp_status = */ mb_linear_interp(verbose,
+        pars->attitude_time_d - 1,
+        pars->attitude_pitch - 1,
+        pars->n_attitude,
+        mbarirange->time_d,
+        &mbarirange->pitch,
+        &jattitude,
+        &interp_error);
+      }
+
+    /* do lever arm correction */
+    if (platform_ptr != NULL)
+      {
+
+      /* calculate sonar position */
+      status = mb_platform_position(verbose,
+        platform_ptr,
+        pars->target_sensor,
+        0,
+        mbarirange->navlon,
+        mbarirange->navlat,
+        mbarirange->sensordepth,
+        mbarirange->heading,
+        mbarirange->roll,
+        mbarirange->pitch,
+        &mbarirange->navlon,
+        &mbarirange->navlat,
+        &mbarirange->sensordepth,
+        error);
+
+      /* calculate sonar attitude */
+      status = mb_platform_orientation_target(verbose,
+        platform_ptr,
+        pars->target_sensor,
+        0,
+        mbarirange->heading,
+        mbarirange->roll,
+        mbarirange->pitch,
+        &mbarirange->heading,
+        &mbarirange->roll,
+        &mbarirange->pitch,
+        error);
+      }
+
+    /* get scaling */
+    double mtodeglon, mtodeglat;
+    mb_coor_scale(verbose, mbarirange->navlat, &mtodeglon, &mtodeglat);
+    double headingx = sin(mbarirange->heading * DTR);
+    double headingy = cos(mbarirange->heading * DTR);
+
+    /* loop over all soundings */
+    for (int isounding = 0; isounding < mbarirange->num_soundings; isounding++)
+      {
+			struct mbsys_3ddwissl2_sounding_struct *sounding = &(mbarirange->soundings[isounding]);
+
+			/* get nav sensordepth heading attitude offset values relative to start of scan for each sounding */
+			// int interp_status = MB_SUCCESS;
+			int interp_error = MB_ERROR_NO_ERROR;
+      double time_d = mbarirange->time_d + (double)sounding->time_offset;
+      double navlon = mbarirange->navlon;
+      double navlat = mbarirange->navlat;
+      double speed = mbarirange->speed;
+      double sensordepth = mbarirange->sensordepth;
+      double heading = mbarirange->heading;
+      double roll = mbarirange->roll;
+      double pitch = mbarirange->pitch;
+			if (pars->n_nav > 0)
+				{
+				/* interp_status = */ mb_linear_interp_longitude(verbose,
+					pars->nav_time_d - 1,
+					pars->nav_lon - 1,
+					pars->n_nav,
+					time_d,
+					&navlon,
+					&jnav,
+					&interp_error);
+				/* interp_status = */ mb_linear_interp_latitude(verbose,
+					pars->nav_time_d - 1,
+					pars->nav_lat - 1,
+					pars->n_nav,
+					time_d,
+					&navlat,
+					&jnav,
+					&interp_error);
+				/* interp_status = */ mb_linear_interp(verbose,
+					pars->nav_time_d - 1,
+					pars->nav_speed - 1,
+					pars->n_nav,
+					time_d,
+					&speed,
+					&jnav,
+					&interp_error);
+				}
+			if (pars->n_sensordepth > 0)
+				{
+				/* interp_status = */ mb_linear_interp(verbose,
+					pars->sensordepth_time_d - 1,
+					pars->sensordepth_sensordepth - 1,
+					pars->n_sensordepth,
+					time_d,
+					&sensordepth,
+					&jsensordepth,
+					&interp_error);
+				}
+			if (pars->n_heading > 0)
+				{
+				/* interp_status = */ mb_linear_interp_heading(verbose,
+					pars->heading_time_d - 1,
+					pars->heading_heading - 1,
+					pars->n_heading,
+					time_d,
+					&heading,
+					&jheading,
+					&interp_error);
+				}
+			if (pars->n_attitude > 0)
+				{
+				/* interp_status = */ mb_linear_interp(verbose,
+					pars->attitude_time_d - 1,
+					pars->attitude_roll - 1,
+					pars->n_attitude,
+					time_d,
+					&roll,
+					&jattitude,
+					&interp_error);
+				/* interp_status = */ mb_linear_interp(verbose,
+					pars->attitude_time_d - 1,
+					pars->attitude_pitch - 1,
+					pars->n_attitude,
+					time_d,
+					&pitch,
+					&jattitude,
+					&interp_error);
+				}
+
+      /* do lever arm correction */
+      if (platform_ptr != NULL)
+        {
+        /* calculate sensor position position */
+        status = mb_platform_position(verbose,
+          platform_ptr,
+          pars->target_sensor,
+          0,
+          navlon,
+          navlat,
+          sensordepth,
+          heading,
+          roll,
+          pitch,
+          &navlon,
+          &navlat,
+          &sensordepth,
+          error);
+        double dlonm = (navlon - mbarirange->navlon) / mtodeglon;
+        double dlatm = (navlat - mbarirange->navlat) / mtodeglat;
+        sounding->acrosstrack_offset = dlonm * headingx + dlatm * headingy;
+        sounding->alongtrack_offset = dlonm * headingy - dlatm * headingx;
+        sounding->sensordepth_offset = (float)(sensordepth - mbarirange->sensordepth);
+
+        /* calculate sensor attitude */
+        status = mb_platform_orientation_target(verbose,
+          platform_ptr,
+          pars->target_sensor,
+          0,
+          heading,
+          roll,
+          pitch,
+          &heading,
+          &roll,
+          &pitch,
+          error);
+        sounding->heading_offset = (float)(heading - mbarirange->heading);
+        sounding->roll_offset = (float)(roll - mbarirange->roll);
+        sounding->pitch_offset = (float)(pitch - mbarirange->pitch);
+        }
+
+        /* if requested apply kluge scaling of rx beam angles */
+        if (kluge_beampatternsnell) {
+          sounding->angle_az = RTD * asin(MAX(-1.0, MIN(1.0, kluge_beampatternsnellfactor * sin(DTR * sounding->angle_az))));
+        }
+			}
+			
+    /* calculate the bathymetry using the newly inserted values */
+    double amplitude_threshold;
+    if (pars->sounding_amplitude_filter)
+      amplitude_threshold = pars->sounding_amplitude_threshold;
+    else
+      amplitude_threshold = MBSYS_3DDWISSL2_DEFAULT_AMPLITUDE_THRESHOLD;
+    double target_altitude;
+    if (pars->sounding_altitude_filter)
+      target_altitude = pars->sounding_target_altitude;
+    else
+      target_altitude = MBSYS_3DDWISSL2_DEFAULT_TARGET_ALTITUDE;
+    status = mbsys_3ddwissl2_calculatebathymetry(verbose, mbio_ptr, store_ptr,
+                  amplitude_threshold, target_altitude, error);
   }
 
   if (verbose >= 2)
@@ -687,11 +988,8 @@ int mbsys_3ddwissl2_sensorhead
   /* get data structure pointer */
   struct mbsys_3ddwissl2_struct *store = (struct mbsys_3ddwissl2_struct *)store_ptr;
 
-  /* if survey data extract which lidar head used for this scan */
-  if (store->kind == MB_DATA_DATA)
-    {
-    *sensorhead = 0;
-    }
+  /* only one lidar head for the WiSSL2 */
+  *sensorhead = 0;
   const int status = MB_SUCCESS;
 
   if (verbose >= 2)
@@ -772,11 +1070,22 @@ int mbsys_3ddwissl2_extract
   /* extract data from store and copy into mb-system slots */
   if (*kind == MB_DATA_DATA)
     {
+	  struct mbsys_3ddwissl2_mbarirange_struct *mbarirange = &store->mbarirange;
+	  
     /* get the timestamp */
+		*time_d = mbarirange->time_d;
+		mb_get_date(verbose, *time_d, time_i);
 
     /* get the navigation */
+    *navlon = mbarirange->navlon;
+    *navlat = mbarirange->navlat;
+    *speed = mbarirange->speed;
+    *heading = mbarirange->heading;
 
     /* get the number of soundings */
+    *nbath = mbarirange->num_soundings;
+    *namp = *nbath;
+    *nss = 0;
 
     /* we are poking into the mb_io_ptr to change the beamwidth here
         350 microradians for the LIDAR laser */
@@ -784,6 +1093,15 @@ int mbsys_3ddwissl2_extract
     mb_io_ptr->beamwidth_ltrack = 0.02;
 
     /* get the bathymetry */
+    for (int isounding = 0; isounding < mbarirange->num_soundings; isounding++) 
+    	{
+			struct mbsys_3ddwissl2_sounding_struct *sounding = &(mbarirange->soundings[isounding]);
+			beamflag[isounding] = sounding->beamflag;
+			bath[isounding] = sounding->depth + mbarirange->sensordepth + sounding->sensordepth_offset;
+			amp[isounding] = (double) sounding->intensity;
+			bathacrosstrack[isounding] = sounding->acrosstrack + sounding->acrosstrack_offset;
+			bathalongtrack[isounding] = sounding->alongtrack + sounding->alongtrack_offset;
+    	}
 
     /* always successful */
     *error = MB_ERROR_NO_ERROR;
@@ -792,8 +1110,8 @@ int mbsys_3ddwissl2_extract
 
   else if (*kind == MB_DATA_COMMENT)
     {
-    memset((void *)comment, 0, MB_COMMENT_MAXLINE);
-		strncpy(comment, store->comment, MB_COMMENT_MAXLINE - 1);
+    memset((void *)store->comment.comment, 0, MB_COMMENT_MAXLINE);
+		strncpy(store->comment.comment, comment, MB_COMMENT_MAXLINE - 1);
     }
 
   if (verbose >= 2)
@@ -880,23 +1198,62 @@ int mbsys_3ddwissl2_insert
   /* insert data in structure */
   if (store->kind == MB_DATA_DATA)
     {
+	  struct mbsys_3ddwissl2_mbarirange_struct *mbarirange = &store->mbarirange;
+
     /* set the timestamp */
+		mbarirange->time_d = time_d;
+    mbarirange->TimeStart_Sec = (int) floor(time_d);
+   	mbarirange->TimeStart_nSec = (int)(1.0e9 * (time_d - mbarirange->TimeStart_Sec));
 
     /* set the navigation */
+    mbarirange->navlon = navlon;
+    mbarirange->navlat = navlat;
+    mbarirange->speed = speed;
+    mbarirange->heading = heading;
 
     /* check for allocation of space */
+		if (status == MB_SUCCESS && mbarirange->num_soundings_alloc < nbath)
+			{
+			size_t alloc_size = nbath * sizeof(struct mbsys_3ddwissl2_sounding_struct);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, 
+								alloc_size, (void **)(&mbarirange->soundings), error);
+			if (status == MB_SUCCESS)
+				{
+				memset(mbarirange->soundings, 0, alloc_size);
+				mbarirange->num_soundings_alloc = mbarirange->num_soundings;
+				}
+			else
+				{
+				store->kind = MB_DATA_NONE;
+				int freestatus = mb_freed(verbose, __FILE__, __LINE__, 
+								(void **)(&mbarirange->soundings), error);
+				}
+			}
 
     /* set the bathymetry */
-
+    if (status == MB_SUCCESS) 
+    	{
+    	mbarirange->num_soundings = nbath;
+			for (int isounding = 0; isounding < mbarirange->num_soundings; isounding++) 
+				{
+				struct mbsys_3ddwissl2_sounding_struct *sounding = &(mbarirange->soundings[isounding]);
+        sounding->beamflag = beamflag[isounding];
+        sounding->depth = bath[isounding] - mbarirange->sensordepth - sounding->sensordepth_offset;
+        sounding->intensity = (int) amp[isounding];
+        sounding->acrosstrack = bathacrosstrack[isounding] - sounding->acrosstrack_offset;
+        sounding->alongtrack = bathalongtrack[isounding] - sounding->alongtrack_offset;
+				}
+			}
+				
     /* insert the sidescan pixel data */
     }
 
   /* deal with comments */
   else if (store->kind == MB_DATA_COMMENT)
     {
-    store->comment_len = MIN(strlen(comment), MB_COMMENT_MAXLINE-1);
-    memset((void *)store->comment, 0, MB_COMMENT_MAXLINE);
-    strncpy(store->comment, comment, MB_COMMENT_MAXLINE - 1);
+    store->comment.comment_len = MIN(strlen(comment) + 1, MB_COMMENT_MAXLINE);
+    memset((void *)store->comment.comment, 0, MB_COMMENT_MAXLINE);
+    strncpy(store->comment.comment, comment, MB_COMMENT_MAXLINE - 1);
     }
 
   /* deal with other records types  */
@@ -978,7 +1335,7 @@ int mbsys_3ddwissl2_ttimes
   if (*kind == MB_DATA_DATA)
     {
     /* get the number of soundings */
-    *nbeams = 0;
+    *nbeams = store->mbarirange.num_soundings;
 
     /* get travel times, angles */
     for (int i = 0; i < *nbeams; i++)
@@ -1032,10 +1389,8 @@ int mbsys_3ddwissl2_detects
 (
   int verbose,              /* in: verbosity level set on command line 0..N */
   void *mbio_ptr,                  /* in: see mb_io.h:/^struct mb_io_struct/ */
-  void *store_ptr,                /* in: see mbsys_3ddwissl.h:/^struct
-                             mbsys_3ddwissl2_struct/ */
-  int *kind,                /* out: MBIO data type; see mb_status.h:0+/MBIO data
-                         type/ */
+  void *store_ptr,                /* in: see mbsys_3ddwissl.h:/^struct mbsys_3ddwissl2_struct/ */
+  int *kind,                /* out: MBIO data type; see mb_status.h:0+/MBIO data type/ */
   int *nbeams,              /* out: number of beams (samples) in this ping */
   int *detects,                /* out: array[nbeams] detection flag;
                             see mb_status.h:/Bottom detect flags/ */
@@ -1069,7 +1424,22 @@ int mbsys_3ddwissl2_detects
   /* extract data from structure */
   if (*kind == MB_DATA_DATA)
     {
+	  struct mbsys_3ddwissl2_mbarirange_struct *mbarirange = &store->mbarirange;
+
     /* get the number of soundings */
+    *nbeams = mbarirange->num_soundings;
+
+    /* WiSSL2 detects */
+		for (int isounding = 0; isounding < mbarirange->num_soundings; isounding++) 
+			{
+			// Bits 8-11 are used for multi-detect sounding priority, with highest == 0
+			// A sounding flagged as secondary has a priority of 1, else the priority is 0
+			struct mbsys_3ddwissl2_sounding_struct *sounding = &(mbarirange->soundings[isounding]);
+			if (mb_beam_check_flag_multipick(sounding->beamflag))
+				detects[isounding] = MB_DETECT_LIDAR | 0x100;
+			else
+				detects[isounding] = MB_DETECT_LIDAR;
+			}			
 
     /* always successful */
     *error = MB_ERROR_NO_ERROR;
@@ -1111,6 +1481,99 @@ int mbsys_3ddwissl2_detects
 
   return status;
 }  /* mbsys_3ddwissl2_detects */
+/*--------------------------------------------------------------------*/
+int mbsys_3ddwissl2_pulses
+(
+  int verbose,              /* in: verbosity level set on command line 0..N */
+  void *mbio_ptr,                /* in: see mb_io.h:/^struct mb_io_struct/ */
+  void *store_ptr,              /* in: see mbsys_3ddwissl.h:/^struct
+                           mbsys_3ddwissl2_struct/ */
+  int *kind,                /* out: MBIO data type; see mb_status.h:0+/MBIO data
+                         type/ */
+  int *nbeams,              /* out: number of beams (samples) in this ping */
+  int *pulses,              /* out: array[nbeams] pulse type; see
+                         mb_status.h:/Source pulse/ */
+  int *error                /* out: see mb_status.h:/MB_ERROR/ */
+)
+{
+  assert(mbio_ptr != NULL);
+  assert(store_ptr != NULL);
+
+  if (verbose >= 2)
+    {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:  %p\n", store_ptr);
+    fprintf(stderr, "dbg2       pulses:     %p\n", pulses);
+    }
+
+  /* get mbio descriptor */
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+  /* get data structure pointer */
+  struct mbsys_3ddwissl2_struct *store = (struct mbsys_3ddwissl2_struct *)store_ptr;
+
+  /* get data kind */
+  *kind = store->kind;
+
+  int status = MB_SUCCESS;
+
+  /* extract data from structure */
+  if (*kind == MB_DATA_DATA)
+    {
+	  struct mbsys_3ddwissl2_mbarirange_struct *mbarirange = &store->mbarirange;
+
+    /* get the number of soundings */
+    *nbeams = mbarirange->num_soundings;
+
+    /* get pulse type */
+    for (int isounding = 0; isounding < mbarirange->num_soundings; isounding++)
+      pulses[isounding] = MB_PULSE_LIDAR;
+
+    /* set status */
+    *error = MB_ERROR_NO_ERROR;
+    status = MB_SUCCESS;
+    }
+
+  /* deal with comments */
+  else if (*kind == MB_DATA_COMMENT)
+    {
+    /* set status */
+    *error = MB_ERROR_COMMENT;
+    status = MB_FAILURE;
+    }
+
+  /* deal with other record type */
+  else
+    {
+    /* set status */
+    *error = MB_ERROR_OTHER;
+    status = MB_FAILURE;
+    }
+
+  if (verbose >= 2)
+    {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       kind:       %d\n", *kind);
+    }
+  if ((verbose >= 2) && (*error == MB_ERROR_NO_ERROR))
+    {
+    fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
+    for (int i = 0; i < *nbeams; i++)
+      fprintf(stderr, "dbg2       beam %d: pulses:%d\n", i, pulses[i]);
+    }
+  if (verbose >= 2)
+    {
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+    }
+
+  return status;
+}  /* mbsys_3ddwissl2_pulses */
 /*--------------------------------------------------------------------*/
 int mbsys_3ddwissl2_gains
 (
@@ -1155,8 +1618,10 @@ int mbsys_3ddwissl2_gains
     *error = MB_ERROR_NO_ERROR;
     status = MB_SUCCESS;
 
-    /* get transmit_gain (dB) */
-    *transmit_gain = 0.0;
+	  struct mbsys_3ddwissl2_mbarirange_struct *mbarirange = &store->mbarirange;
+
+    /* get laser power */
+    *transmit_gain = (double)mbarirange->LineLaserPower;
 
     /* get pulse_length */
     *pulse_length = 0.0;
@@ -1243,11 +1708,27 @@ int mbsys_3ddwissl2_extract_altitude
   /* extract data from structure */
   if (*kind == MB_DATA_DATA)
     {
+	  	struct mbsys_3ddwissl2_mbarirange_struct *mbarirange = &store->mbarirange;
+
     /* get sonar depth */
-    *transducer_depth = 0.0;
+    *transducer_depth = mbarirange->sensordepth;
 
     /* loop over all soundings looking for most nadir */
-
+    double rmin = 9999999.9;
+		for (int isounding=0; isounding < mbarirange->num_soundings; isounding++) 
+			{
+			struct mbsys_3ddwissl2_sounding_struct *sounding = &(mbarirange->soundings[isounding]);
+			if (mb_beam_ok(sounding->beamflag))
+				{
+				double r = sqrt(sounding->acrosstrack * sounding->acrosstrack);
+				if (r < rmin)
+					{
+					rmin = r;
+					*altitude = sounding->depth;
+    			*transducer_depth = mbarirange->sensordepth + sounding->sensordepth_offset;
+					}
+				}
+			}
     *error = MB_ERROR_NO_ERROR;
     status = MB_SUCCESS;
     }
@@ -1338,29 +1819,33 @@ int mbsys_3ddwissl2_extract_nnav
   /* extract data from ping structure */
   if (*kind == MB_DATA_DATA)
     {
+	  struct mbsys_3ddwissl2_mbarirange_struct *mbarirange = &store->mbarirange;
+
     /* just one navigation value */
     *n = 1;
-
-    /* get time */
+	  
+    /* get the timestamp */
+		*time_d = mbarirange->time_d;
 
     /* get navigation and heading */
-    navlon[0] = 0.0;
-    navlat[0] = 0.0;
-    speed[0] = 0.0;
-    heading[0] = 0.0;
+    navlon[0] = mbarirange->navlon;
+    navlat[0] = mbarirange->navlat;
+    speed[0] = mbarirange->speed;
+    heading[0] = mbarirange->heading;
 
     /* get draft */
-    draft[0] = 0.0;
+    draft[0] = mbarirange->sensordepth;
 
     /* get roll pitch and heave. In SXP heave is included in height. */
-    roll[0] = 0.0;
-    pitch[0] = 0.0;
+    roll[0] = mbarirange->roll;
+    pitch[0] = mbarirange->pitch;
     heave[0] = 0.0;
 
     /* done translating values */
     *error = MB_ERROR_NO_ERROR;
     status = MB_SUCCESS;
     }
+    
   /* deal with comment */
   else if (*kind == MB_DATA_COMMENT)
     {
@@ -1452,6 +1937,28 @@ int mbsys_3ddwissl2_extract_nav
   /* extract data from ping structure */
   if (*kind == MB_DATA_DATA)
     {
+	  struct mbsys_3ddwissl2_mbarirange_struct *mbarirange = &store->mbarirange;
+	  
+    /* get the timestamp */
+		*time_d = mbarirange->time_d;
+
+    /* get navigation and heading */
+    *navlon = mbarirange->navlon;
+    *navlat = mbarirange->navlat;
+    *speed = mbarirange->speed;
+    *heading = mbarirange->heading;
+
+    /* get draft */
+    *draft = mbarirange->sensordepth;
+
+    /* get roll pitch and heave. In SXP heave is included in height. */
+    *roll = mbarirange->roll;
+    *pitch = mbarirange->pitch;
+    *heave = 0.0;
+
+    /* done translating values */
+    *error = MB_ERROR_NO_ERROR;
+    status = MB_SUCCESS;
     }
 
   /* deal with comment */
@@ -1565,6 +2072,24 @@ int mbsys_3ddwissl2_insert_nav
 
   /* insert data in data structure */
   if (store->kind == MB_DATA_DATA) {
+	  struct mbsys_3ddwissl2_mbarirange_struct *mbarirange = &store->mbarirange;
+	  
+    /* get the timestamp */
+		mbarirange->time_d = time_d;
+
+    /* get navigation and heading */
+    mbarirange->navlon = navlon;
+    mbarirange->navlat = navlat;
+    mbarirange->speed = speed;
+    mbarirange->heading = heading;
+
+    /* get draft */
+    mbarirange->sensordepth = draft;
+
+    /* get roll pitch and heave. In SXP heave is included in height. */
+    mbarirange->roll = roll;
+    mbarirange->pitch = pitch;
+    // heave;
 
     /* done translating values */
     *error = MB_ERROR_NO_ERROR;
@@ -1759,12 +2284,32 @@ int mbsys_3ddwissl2_copy
   struct mbsys_3ddwissl2_struct *copy = (struct mbsys_3ddwissl2_struct *)copy_ptr;
 
   /* copy structure */
+  const int num_soundings_alloc = copy->mbarirange.num_soundings_alloc;
+  struct mbsys_3ddwissl2_sounding_struct *soundings = copy->mbarirange.soundings;
+  memcpy(copy_ptr, store_ptr, sizeof(struct mbsys_3ddwissl2_struct));
+  copy->mbarirange.num_soundings_alloc = num_soundings_alloc;
+  copy->mbarirange.soundings = soundings;
 
   int status = MB_SUCCESS;
 
-  /* allocate memory for data structure */
+  /* allocate memory for soundings if needed */
+  if ((copy->mbarirange.num_soundings > copy->mbarirange.num_soundings_alloc) 
+  			|| ( copy->mbarirange.soundings == NULL) )
+    {
+    status =
+      mb_reallocd(verbose, __FILE__, __LINE__,
+      copy->mbarirange.num_soundings * sizeof(struct mbsys_3ddwissl2_sounding_struct),
+      (void **)&copy->mbarirange.soundings, error);
+    if (status == MB_SUCCESS)
+      copy->mbarirange.num_soundings_alloc = copy->mbarirange.num_soundings;
+    }
 
   /* copy pulses */
+  if (status == MB_SUCCESS) 
+  	{
+  	memcpy((void *)copy->mbarirange.soundings, (void *)store->mbarirange.soundings,
+    				copy->mbarirange.num_soundings * sizeof(struct mbsys_3ddwissl2_sounding_struct));
+    }
 
   if (verbose >= 2)
     {
@@ -1822,13 +2367,83 @@ int mbsys_3ddwissl2_print_store
   fprintf(stderr, "%s struct mbsys_3ddwissls contents:\n", first);
   fprintf(stderr, "%s     kind:                          %d\n", first, store->kind);
 
-  if (store->kind == MB_DATA_DATA)
+  if (store->kind == MB_DATA_PARAMETER)
     {
+	  struct mbsys_3ddwissl2_sriat_fileheader_struct *fileheader = &store->fileheader;
+		fprintf(stderr, "\n%s  File header record\n", first);
+		fprintf(stderr, "%s     fileheader->SyncWord:                    %u\n", first, fileheader->SyncWord);
+		fprintf(stderr, "%s     fileheader->PacketID:                    %u\n", first, fileheader->PacketID);
+		fprintf(stderr, "%s     fileheader->Version:                     %u\n", first, fileheader->Version);
+		fprintf(stderr, "%s     fileheader->SizeBytes:                   %u\n", first, fileheader->SizeBytes);
+		fprintf(stderr, "%s     fileheader->ScanSizeBytes:               %u\n", first, fileheader->ScanSizeBytes);
+		fprintf(stderr, "%s     fileheader->TimeStart_Sec:               %d\n", first, fileheader->TimeStart_Sec);
+		fprintf(stderr, "%s     fileheader->TimeStart_nSec:              %d\n", first, fileheader->TimeStart_nSec);
+		fprintf(stderr, "%s     fileheader->TimeEnd_Sec:                 %d\n", first, fileheader->TimeEnd_Sec);
+		fprintf(stderr, "%s     fileheader->TimeEnd_nSec:                %d\n", first, fileheader->TimeEnd_nSec);
+		fprintf(stderr, "%s     fileheader->SL_GEN:                      %u\n", first, fileheader->SL_GEN);
+		fprintf(stderr, "%s     fileheader->SL_Letter:                   %u\n", first, fileheader->SL_Letter);
+		fprintf(stderr, "%s     fileheader->SL_X:                        %u\n", first, fileheader->SL_X);
+		fprintf(stderr, "%s     fileheader->nPtsToAverage:               %u\n", first, fileheader->nPtsToAverage);
+		fprintf(stderr, "%s     fileheader->cJobName:                    %s\n", first, fileheader->cJobName);
+		fprintf(stderr, "%s     fileheader->cScanPos:                    %s\n", first, fileheader->cScanPos);
+		fprintf(stderr, "%s     fileheader->cfileTag:                    %s\n", first, fileheader->cfileTag);
+		fprintf(stderr, "%s     fileheader->nScanNum:                    %u\n", first, fileheader->nScanNum);
+		fprintf(stderr, "%s     fileheader->AzCmdStart:                  %u\n", first, fileheader->AzCmdStart);
+		fprintf(stderr, "%s     fileheader->AzCmdEnd:                    %u\n", first, fileheader->AzCmdEnd);
+		fprintf(stderr, "%s     fileheader->nScanNum:                    %u\n", first, fileheader->nScanNum);
+		fprintf(stderr, "%s     fileheader->rawbit1:                     %u\n", first, fileheader->rawbit1);
+		fprintf(stderr, "%s     -fileheader->nPtsPerScanLine:             %u\n", first, fileheader->nPtsPerScanLine);
+		fprintf(stderr, "%s     -fileheader->nScanLinesPerScan:           %u\n", first, fileheader->nScanLinesPerScan);
+		fprintf(stderr, "%s     -fileheader->Spare1:                      %u\n", first, fileheader->Spare1);
+		fprintf(stderr, "%s     fileheader->rawbit2:                     %u\n", first, fileheader->rawbit2);
+		fprintf(stderr, "%s     -fileheader->nPtsPerLine:                 %u\n", first, fileheader->nPtsPerLine);
+		fprintf(stderr, "%s     -fileheader->Mode:                        %u\n", first, fileheader->Mode);
+		fprintf(stderr, "%s     -fileheader->nTPtsPerScanLine:            %u\n", first, fileheader->nTPtsPerScanLine);
+		fprintf(stderr, "%s     -fileheader->bHaveThermal:                %u\n", first, fileheader->bHaveThermal);
+		fprintf(stderr, "%s     fileheader->ShotCnt:                     %u\n", first, fileheader->ShotCnt);
+		fprintf(stderr, "%s     fileheader->WaterSalinity_psu:           %u  %.3f\n", first, fileheader->WaterSalinity_psu, fileheader->WaterSalinity_psu * 42.0 / 65535.0 - 2.0);
+		fprintf(stderr, "%s     fileheader->WaterPressure_dbar:          %u\n", first, fileheader->WaterPressure_dbar);
+		fprintf(stderr, "%s     fileheader->rawbit3:                     %u\n", first, fileheader->rawbit3);
+		fprintf(stderr, "%s     -fileheader->WaterTemperature_C:          %u  %.3f\n", first, fileheader->WaterTemperature_C, fileheader->WaterTemperature_C * 37.0 / 8191.0 - 2.0);
+		fprintf(stderr, "%s     -fileheader->PRF_Hz:                      %u\n", first, fileheader->PRF_Hz);
+		fprintf(stderr, "%s     fileheader->DigitizerTemperature_C:      %u  %.3f\n", first, fileheader->DigitizerTemperature_C, fileheader->DigitizerTemperature_C * 100.0 / 255.0);
+		fprintf(stderr, "%s     fileheader->RScale_m_per_cnt:            %f\n", first, fileheader->RScale_m_per_cnt);
+		fprintf(stderr, "%s     fileheader->ThBinStart_cnt:              %u\n", first, fileheader->ThBinStart_cnt);
+		fprintf(stderr, "%s     fileheader->ThBinEnd_cnts:               %u\n", first, fileheader->ThBinEnd_cnts);
+		fprintf(stderr, "%s     fileheader->TempAzCnt:                   %u\n", first, fileheader->TempAzCnt);
+		fprintf(stderr, "%s     fileheader->TempRowCnt:                  %u\n", first, fileheader->TempRowCnt);
+		fprintf(stderr, "%s     fileheader->rawbit4:                     %u\n", first, fileheader->rawbit4);
+		fprintf(stderr, "%s     -fileheader->TempRCnt_av2:                %u\n", first, fileheader->TempRCnt_av2);
+		fprintf(stderr, "%s     -fileheader->TempRCnt_av4:                %u\n", first, fileheader->TempRCnt_av4);
+		fprintf(stderr, "%s     -fileheader->TempRCnt_av8:                %u\n", first, fileheader->TempRCnt_av8);
+		fprintf(stderr, "%s     -fileheader->TempRCnt_av16:               %u\n", first, fileheader->TempRCnt_av16);
+		fprintf(stderr, "%s     fileheader->ScannerShift_mDeg:           %u\n", first, fileheader->ScannerShift_mDeg);
+		fprintf(stderr, "%s     fileheader->Shift_m[0]:                  %f\n", first, fileheader->Shift_m[0]);
+		fprintf(stderr, "%s     fileheader->Shift_m[1]:                  %f\n", first, fileheader->Shift_m[1]);
+		fprintf(stderr, "%s     fileheader->Shift_m[2]:                  %f\n", first, fileheader->Shift_m[2]);
+		fprintf(stderr, "%s     fileheader->Rotate_deg[0]:               %f\n", first, fileheader->Rotate_deg[0]);
+		fprintf(stderr, "%s     fileheader->Rotate_deg[1]:               %f\n", first, fileheader->Rotate_deg[1]);
+		fprintf(stderr, "%s     fileheader->Rotate_deg[2]:               %f\n", first, fileheader->Rotate_deg[2]);
+		fprintf(stderr, "%s     fileheader->EC_Version:                  %d.%d.%d.%d\n", 
+						first, fileheader->EC_Version[0], fileheader->EC_Version[1], 
+						fileheader->EC_Version[2], fileheader->EC_Version[3]);
+		fprintf(stderr, "%s     fileheader->InstaCloud_Version:          %d.%d.%d.%d\n", 
+						first, fileheader->InstaCloud_Version[0], fileheader->InstaCloud_Version[1], 
+						fileheader->InstaCloud_Version[2], fileheader->InstaCloud_Version[3]);
+		fprintf(stderr, "%s     fileheader->ElDeg_cnts:                  %d  %.3f\n", first, fileheader->ElDeg_cnts, fileheader->ElDeg_cnts * 90.0 / 65535.0);
     }
   else if (store->kind == MB_DATA_COMMENT)
     {
-    fprintf(stderr, "%s     comment_len:                   %d\n", first, store->comment_len);
-    fprintf(stderr, "%s     comment:                       %s\n", first, store->comment);
+	  struct mbsys_3ddwissl2_comment_struct *comment = &store->comment;
+		fprintf(stderr, "%s     comment->SyncWord:                       %u\n", first, comment->SyncWord);
+		fprintf(stderr, "%s     comment->PacketID:                       %u\n", first, comment->PacketID);
+		fprintf(stderr, "%s     comment->Version:                        %u\n", first, comment->Version);
+		fprintf(stderr, "%s     comment->SizeBytes:                      %u\n", first, comment->SizeBytes);
+		fprintf(stderr, "%s     comment->comment_len:                    %u\n", first, comment->comment_len);
+		fprintf(stderr, "%s     comment->comment:                        %s\n", first, comment->comment);
+    }
+  else if (store->kind == MB_DATA_DATA)
+    {
     }
 
   if (verbose >= 2)
@@ -1842,4 +2457,132 @@ int mbsys_3ddwissl2_print_store
 
   return status;
 }  /* mbsys_3ddwissl2_print_store */
+/*--------------------------------------------------------------------*/
+int mbsys_3ddwissl2_calculatebathymetry
+(
+  int verbose,        /* in: verbosity level set on command line 0..N */
+  void *mbio_ptr,     /* in: see mb_io.h:mb_io_struct */
+  void *store_ptr,    /* in: see mbsys_3ddwissl.h:mbsys_3ddwissl2_struct */
+  double amplitude_threshold,   /* used to determine valid soundings */
+  double target_altitude, /* used to prioritize picks close to a desired standoff */
+  int *error              /* out: see mb_status.h:MB_ERROR */
+)
+{
+  (void)mbio_ptr;  // Unused arg
+
+  if (verbose >= 2)
+    {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:               %d\n", verbose);
+    fprintf(stderr, "dbg2         mbio_ptr:            %p\n", mbio_ptr);
+    fprintf(stderr, "dbg2         store:               %p\n", store_ptr);
+    fprintf(stderr, "dbg2         amplitude_threshold: %f\n", amplitude_threshold);
+    fprintf(stderr, "dbg2         target_altitude:     %f\n", target_altitude);
+    }
+
+  assert(store_ptr != NULL);
+
+  /* always successful */
+  int status = MB_SUCCESS;
+  *error = MB_ERROR_NO_ERROR;
+
+  /* get data structure pointers */
+  struct mbsys_3ddwissl2_struct *store = (struct mbsys_3ddwissl2_struct *)store_ptr;
+
+  /* recalculate bathymetry from LIDAR data */
+  if (store->kind == MB_DATA_DATA)
+    {
+    struct mbsys_3ddwissl2_mbarirange_struct *mbarirange = &store->mbarirange;
+  	
+    /* get scaling */
+  	double mtodeglon, mtodeglat;
+    mb_coor_scale(verbose, mbarirange->navlat, &mtodeglon, &mtodeglat);
+
+    /* loop over all soundings */
+    for (int isounding = 0; isounding < mbarirange->num_soundings; isounding++)
+      {
+  		struct mbsys_3ddwissl2_sounding_struct *sounding = &mbarirange->soundings[isounding];
+  		
+  		if (sounding->range > 0.0) 
+  			{
+
+				/* apply pitch and roll */  // TODO fix rotation w/ Giancarlo's functions
+				double alpha = sounding->angle_el + mbarirange->pitch + sounding->pitch_offset;
+				double beta = 90.0 - sounding->angle_az + mbarirange->roll + sounding->roll_offset;
+	
+				/* translate to takeoff coordinates */
+				double theta, phi;
+				mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
+				phi += sounding->heading_offset;    // TODO fix rotation w/ Giancarlo's functions
+	
+				/* get lateral and vertical components of range */
+				double xx = sounding->range * sin(DTR * theta);
+				sounding->depth = sounding->range * cos(DTR * theta)
+													+ sounding->sensordepth_offset;
+				sounding->acrosstrack = xx * cos(DTR * phi) + sounding->acrosstrack_offset;
+				sounding->alongtrack = xx * sin(DTR * phi) + sounding->alongtrack_offset;
+
+				/* calculate amplitude range factor */
+				double altitude_factor = 1.0;
+				if (target_altitude > 0.0)
+					{
+					double target_range = target_altitude /
+													cos(DTR * (sounding->angle_az - mbarirange->roll - sounding->roll_offset));
+					double scaled_range_diff = (sounding->range - target_range) / target_range;
+					altitude_factor = exp(-4.0 * scaled_range_diff * scaled_range_diff);
+					}
+				double flagging_factor = altitude_factor * sounding->intensity * sounding->range * sounding->range / 1000.0;
+				
+				/* get beamflag */
+        //if (sounding->intensity * amplitude_factor >= amplitude_threshold)
+        if (sounding->sounding_id == 0 && flagging_factor > amplitude_threshold)
+					{
+          sounding->beamflag = MB_FLAG_NONE;
+					}
+				else 
+					{
+					sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_SONAR;
+					}
+//fprintf(stderr, " sounding->intensity:%d amplitude_threshold:%f *:%f  beamflag:%d\n",
+//sounding->intensity, amplitude_threshold, sounding->intensity*amplitude_factor, sounding->beamflag);
+  			}
+  		else
+  			{
+				sounding->depth = 0.0;
+				sounding->acrosstrack = 0.0;
+				sounding->alongtrack = 0.0;
+				sounding->beamflag = MB_FLAG_NULL;
+  			}
+  		}
+
+		if (verbose >= 5) 
+			{
+			for (int isounding=0; isounding < mbarirange->num_soundings; isounding++) 
+				{
+				struct mbsys_3ddwissl2_sounding_struct *sounding = &(mbarirange->soundings[isounding]);
+				fprintf(stderr, "dbg5       sdg:%5.5d:%4.4d:%d | %8.6f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f | %7.4f %8.3f %8.3f %4u %3u | %8.4f %8.4f %8.4f %u\n", 
+					isounding, sounding->pulse_id, sounding->sounding_id, sounding->time_offset,
+					sounding->acrosstrack_offset, sounding->alongtrack_offset, sounding->sensordepth_offset,
+					sounding->heading_offset, sounding->roll_offset, sounding->pitch_offset,
+					sounding->range, sounding->angle_az, sounding->angle_el, sounding->intensity, sounding->class,
+					sounding->acrosstrack, sounding->alongtrack, sounding->depth, sounding->beamflag);
+				}
+			}
+
+    /* set flag indicating that bathymetry has been calculated */
+    store->bathymetry_calculated = true;
+    }
+
+  if (verbose >= 2)
+    {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+    }
+
+  return status;
+}  /* mbsys_3ddwissl2_calculatebathymetry */
 /*--------------------------------------------------------------------*/

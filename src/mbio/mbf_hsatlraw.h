@@ -77,6 +77,7 @@
 #ifndef MBF_HSATLRAW_H_
 #define MBF_HSATLRAW_H_
 
+#include <stdbool.h>
 #include <stdio.h>
 
 /* maximum number of depth-velocity pairs */
@@ -197,8 +198,8 @@ extern "C" {
 
 int mbr_register_hsatlraw(int verbose, void *mbio_ptr, int *error);
 int mbr_info_hsatlraw(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
-                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
-                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
+                      char *system_name, char *format_description, int *numfile, int *filetype, bool *variable_beams,
+                      bool *traveltime, bool *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error);
 int mbr_alm_hsatlraw(int verbose, void *mbio_ptr, int *error);

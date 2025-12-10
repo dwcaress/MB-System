@@ -309,6 +309,9 @@ Widget CreatemainWindow(Widget parent) {
 	Widget cascadeButton_about;
 	Widget pulldownMenu_about;
 	Widget pushButton_about;
+	Widget separator18;
+	Widget separator19;
+	Widget separator20;
 
 	/**
 	 * Register the converters for the widgets.
@@ -714,6 +717,110 @@ Widget CreatemainWindow(Widget parent) {
 	XtAddCallback(pushButton_showreferencegrids, XmNactivateCallback, do_list_showreferencegrids, (XtPointer)0);
 
 	ac = 0;
+	separator18 = XmCreateSeparator(pulldownMenu_list, (char *)"separator18", args, ac);
+	XtManageChild(separator18);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_list, (char *)"Show Data File Sections", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_list, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showsections = XmCreatePushButton(pulldownMenu_list, (char *)"pushButton_showsections", args, ac);
+		XtManageChild(pushButton_showsections);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showsections, XmNactivateCallback, do_list_showsections, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_list, (char *)"Show Global Ties", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_list, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showglobalties = XmCreatePushButton(pulldownMenu_list, (char *)"pushButton_showglobalties", args, ac);
+		XtManageChild(pushButton_showglobalties);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showglobalties, XmNactivateCallback, do_list_showglobalties, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_list, (char *)"Show Global Ties Sorted", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_list, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showglobaltiessorted = XmCreatePushButton(pulldownMenu_list, (char *)"pushButton_showglobaltiessorted", args, ac);
+		XtManageChild(pushButton_showglobaltiessorted);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showglobaltiessorted, XmNactivateCallback, do_list_showglobaltiessorted, (XtPointer)0);
+
+	ac = 0;
+	separator19 = XmCreateSeparator(pulldownMenu_list, (char *)"separator19", args, ac);
+	XtManageChild(separator19);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_list, (char *)"Show Data Files", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_list, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showdata = XmCreatePushButton(pulldownMenu_list, (char *)"pushButton_showdata", args, ac);
+		XtManageChild(pushButton_showdata);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showdata, XmNactivateCallback, do_list_showdata, (XtPointer)0);
+
+	ac = 0;
 	{
 		XmString tmp0;
 
@@ -762,52 +869,8 @@ Widget CreatemainWindow(Widget parent) {
 	XtAddCallback(pushButton_showblocks, XmNactivateCallback, do_list_showblocks, (XtPointer)0);
 
 	ac = 0;
-	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(pulldownMenu_list, (char *)"Show Data Files", XmRXmString, 0, &argok);
-		XtSetArg(args[ac], XmNlabelString, tmp0);
-		if (argok)
-			ac++;
-		XtSetArg(
-		    args[ac], XmNfontList,
-		    BX_CONVERT(pulldownMenu_list, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
-		if (argok)
-			ac++;
-		pushButton_showdata = XmCreatePushButton(pulldownMenu_list, (char *)"pushButton_showdata", args, ac);
-		XtManageChild(pushButton_showdata);
-
-		/**
-		 * Free any memory allocated for resources.
-		 */
-		XmStringFree((XmString)tmp0);
-	}
-
-	XtAddCallback(pushButton_showdata, XmNactivateCallback, do_list_showdata, (XtPointer)0);
-
-	ac = 0;
-	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(pulldownMenu_list, (char *)"Show Data File Sections", XmRXmString, 0, &argok);
-		XtSetArg(args[ac], XmNlabelString, tmp0);
-		if (argok)
-			ac++;
-		XtSetArg(
-		    args[ac], XmNfontList,
-		    BX_CONVERT(pulldownMenu_list, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
-		if (argok)
-			ac++;
-		pushButton_showsections = XmCreatePushButton(pulldownMenu_list, (char *)"pushButton_showsections", args, ac);
-		XtManageChild(pushButton_showsections);
-
-		/**
-		 * Free any memory allocated for resources.
-		 */
-		XmStringFree((XmString)tmp0);
-	}
-
-	XtAddCallback(pushButton_showsections, XmNactivateCallback, do_list_showsections, (XtPointer)0);
+	separator20 = XmCreateSeparator(pulldownMenu_list, (char *)"separator20", args, ac);
+	XtManageChild(separator20);
 
 	ac = 0;
 	{
@@ -1026,54 +1089,6 @@ Widget CreatemainWindow(Widget parent) {
 	}
 
 	XtAddCallback(pushButton_showcrossingtiessortedworst, XmNactivateCallback, do_list_showcrossingtiessortedworst, (XtPointer)0);
-
-	ac = 0;
-	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(pulldownMenu_list, (char *)"Show Global Ties", XmRXmString, 0, &argok);
-		XtSetArg(args[ac], XmNlabelString, tmp0);
-		if (argok)
-			ac++;
-		XtSetArg(
-		    args[ac], XmNfontList,
-		    BX_CONVERT(pulldownMenu_list, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
-		if (argok)
-			ac++;
-		pushButton_showglobalties = XmCreatePushButton(pulldownMenu_list, (char *)"pushButton_showglobalties", args, ac);
-		XtManageChild(pushButton_showglobalties);
-
-		/**
-		 * Free any memory allocated for resources.
-		 */
-		XmStringFree((XmString)tmp0);
-	}
-
-	XtAddCallback(pushButton_showglobalties, XmNactivateCallback, do_list_showglobalties, (XtPointer)0);
-
-	ac = 0;
-	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(pulldownMenu_list, (char *)"Show Global Ties Sorted", XmRXmString, 0, &argok);
-		XtSetArg(args[ac], XmNlabelString, tmp0);
-		if (argok)
-			ac++;
-		XtSetArg(
-		    args[ac], XmNfontList,
-		    BX_CONVERT(pulldownMenu_list, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
-		if (argok)
-			ac++;
-		pushButton_showglobaltiessorted = XmCreatePushButton(pulldownMenu_list, (char *)"pushButton_showglobaltiessorted", args, ac);
-		XtManageChild(pushButton_showglobaltiessorted);
-
-		/**
-		 * Free any memory allocated for resources.
-		 */
-		XmStringFree((XmString)tmp0);
-	}
-
-	XtAddCallback(pushButton_showglobaltiessorted, XmNactivateCallback, do_list_showglobaltiessorted, (XtPointer)0);
 
 	ac = 0;
 	XtSetArg(args[ac], XmNsubMenuId, pulldownMenu_list);

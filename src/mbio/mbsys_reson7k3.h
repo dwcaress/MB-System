@@ -437,7 +437,7 @@ typedef struct s7k3_header_struct {
   u32 OptionalDataOffset;     // Data offset - Offset in bytes to optional data field from
                               // start of record. Zero implies no optional data.
   u32 OptionalDataIdentifier; // User defined.
-  s7k3_time s7kTime;           // 7KTIME u8*10 UTC - Time tag indicating when data was
+  s7k3_time s7kTime;          // 7KTIME u8*10 UTC - Time tag indicating when data was
                               // produced.
   u16 RecordVersion;          // Currently 1
   u32 RecordType;             // Record type - Identifier for record type of embedded data.
@@ -1123,7 +1123,7 @@ typedef struct s7k3_BeamGeometry_struct {
   f32 angle_acrosstrack[MBSYS_RESON7K_MAX_BEAMS];     // Receiver beam Y direction angle (radians)
   f32 beamwidth_alongtrack[MBSYS_RESON7K_MAX_BEAMS];  // Receiver beamwidth X (radians)
   f32 beamwidth_acrosstrack[MBSYS_RESON7K_MAX_BEAMS]; // Receiver beamwidth Y (radians)
-  f32 tx_delay;                                       // Tx delay for the beam in fractional samples,
+  f32 tx_delay[MBSYS_RESON7K_MAX_BEAMS];                                       // Tx delay for the beam in fractional samples,
                                                       // zero when not applicable.
                                                       // Up to now Tx Delay is only supported for the
                                                       // Hydrosweep sonars.
@@ -1178,11 +1178,8 @@ typedef struct s7k3_Bathymetry_struct {
                                           //       for each beam (minimum depth gate)
   f32 max_depth_gate[MBSYS_RESON7K_MAX_SOUNDINGS];  // Maximum two-way travel time to filter point
                                           //       for each beam (maximum depth gate)
-  // TODO(schwehr): Can optionaldata be a bool?
-  u32 optionaldata;                             // Flag indicating if bathymetry calculated and
+  bool optionaldata;                      // Flag indicating if bathymetry calculated and
                                           //       values below filled in
-                                                  //  0 = No
-                                                  //  1 = Yes
                                           //       This is an internal MB-System flag, not
                                           //       a value in the data format
   f32 frequency;                            // Ping frequency in Hz
@@ -1234,9 +1231,7 @@ typedef struct s7k3_SideScan_struct {
                         //  range 0 meters (total bytes per side
   c8 *stbd_data;         // Magnitude/Phase series Starboard side. First sample represents
                         //  range 0 meters (total bytes per side
-  u32 optionaldata;      // Flag indicating if values below filled in
-                        //     0 = No
-                        //     1 = Yes
+  bool optionaldata;    // Flag indicating if values below filled in
                         //     This is an internal MB-System flag, not a value in
                         //     the data format
   f32 frequency;         // Ping frequency in Hz
@@ -1744,10 +1739,8 @@ typedef struct s7k3_RawDetection_struct {
                         //     zero if roll stabilization is ON.
   u32 reserved[15];         // Reserved
   s7k3_rawdetectiondata rawdetectiondata[MBSYS_RESON7K_MAX_SOUNDINGS];
-  u32 optionaldata;                             // Flag indicating if bathymetry calculated and
+  bool optionaldata;                      // Flag indicating if bathymetry calculated and
                                           //       values below filled in
-                                                  //  0 = No
-                                                  //  1 = Yes
                                           //       This is an internal MB-System flag, not
                                           //       a value in the data format
   f32 frequency;                            // Ping frequency in Hz
@@ -1807,7 +1800,7 @@ typedef struct s7k3_Snippet_struct {
   u32 reserved[6];    // Reserved for future use
   s7k3_snippetdata snippetdata[MBSYS_RESON7K_MAX_BEAMS];
   // Snippet time series for each beam
-  u32 optionaldata;    // Optional data
+  bool optionaldata;   // Optional data
   f32 frequency;       // Ping frequency in Hz
   f64 latitude;        // Latitude of vessel reference point in Radians -pi/2 to pi/2,
                         //south negative
@@ -2124,10 +2117,8 @@ typedef struct s7k3_SegmentedRawDetection_struct {
                         //    data recoding in fractional samples.
   s7k3_segmentedrawdetectiontxdata segmentedrawdetectiontxdata[MBSYS_RESON7K_MAX_SEGMENTS];
   s7k3_segmentedrawdetectionrxdata segmentedrawdetectionrxdata[MBSYS_RESON7K_MAX_SOUNDINGS];
-  u32 optionaldata;                             // Flag indicating if bathymetry calculated and
+  bool optionaldata;                      // Flag indicating if bathymetry calculated and
                                           //       values below filled in
-                                                  //  0 = No
-                                                  //  1 = Yes
                                           //       This is an internal MB-System flag, not
                                           //       a value in the data format
   f32 frequency;                            // Ping frequency in Hz
@@ -2327,9 +2318,7 @@ typedef struct s7k3_CalibrationStatus_struct {
                         //    11 - Failed - ceramics bad
                         //    12 - Failed - magnitude tolerance
                         //    13 - Failed - phase tolerance
-  u32 optionaldata;        // Flag indicating if optional data are filled in
-                        //    0 = No
-                        //    1 = Yes
+  bool optionaldata;    // Flag indicating if optional data are filled in
                         //    This is an internal MB-System flag,
                         //    not a value in the data format
   u8 system_calibration;   // Bitfield indicating which system(s) are being calibrated
@@ -2381,7 +2370,7 @@ typedef struct s7k3_CalibratedSideScan_struct {
   u8 *stbd_data;        // Starboard magnitude series. First sample represents zero range
   u16 *port_beam;       // Indicates the beam number corresponding value was taken from
   u16 *stbd_beam;       // Indicates the beam number corresponding value was taken from
-  u32 optionaldata;     // Optional data
+  bool optionaldata;    // Optional data
   f32 frequency;        // Ping frequency in Hz
   f64 latitude;         // Latitude of vessel reference point in Radians -pi/2 to pi/2,
                         //south negative
@@ -2447,7 +2436,7 @@ typedef struct s7k3_SnippetBackscatteringStrength_struct {
   s7k3_snippetbackscatteringstrengthdata
                        snippetbackscatteringstrengthdata[MBSYS_RESON7K_MAX_BEAMS];
   // Snippet time series for each beam
-  u32 optionaldata;    // Optional data
+  bool optionaldata;   // Optional data
   f32 frequency;       // Ping frequency in Hz
   f64 latitude;        // Latitude of vessel reference point in Radians -pi/2 to pi/2,
                         //south negative
@@ -2625,7 +2614,7 @@ typedef struct s7k3_FileHeader_struct {
   c8 user_defined_name[64];  // User defined name - null terminated string
   c8 notes[128];             // Notes - null terminated string
   s7k3_subsystem subsystem[MBSYS_RESON7K_MAX_DEVICE];
-  u32 optionaldata;          // Optional data
+  bool optionaldata;         // Optional data
   u32 file_catalog_size;     // File catalog record size in bytes
   u64 file_catalog_offset;   // File catalog record offset in bytes from the file beginning
 } s7k3_FileHeader;
@@ -2667,7 +2656,7 @@ typedef struct s7k3_TimeMessage_struct {
   u16 port_id;        // Port number identifier for pulse
   u32 reserved;       // Reserved
   u64 reserved2;      // Reserved
-  u32 optionaldata;   // Optional data
+  bool optionaldata;  // Optional data
   f64 utctime;        // Time since midnight in HHMMSS.SS format
   f64 external_time;  // UTC Time in milliseconds since 1 Jan 1970
   f64 t0;             // T Null Time in milliseconds since 1 Jan 1970
@@ -3110,7 +3099,7 @@ typedef struct s7k3_SystemLockStatus_struct {
 typedef struct s7k3_SoundVelocity_struct {
   s7k3_header header;
   f32 soundvelocity; // Water sound speed (m/s)
-  u32 optionaldata;  // Flag indicating if optional data are filled in
+  bool optionaldata; // Flag indicating if optional data are filled in
                     //  // 0 = No
                     //  // 1 = Yes
                     //  This is an internal MB-System flag, not a value in the data format

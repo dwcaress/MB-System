@@ -1351,9 +1351,7 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
     calibratedsnippettimeseries->detect_sample = 0;
     calibratedsnippettimeseries->end_sample = 0;
     calibratedsnippettimeseries->nalloc = 0;
-    // TODO(schwehr): This was a bug, yes?
-    // if (v2snippettimeseries->amplitude != NULL)
-    if (calibratedsnippettimeseries->amplitude != NULL)
+		if (calibratedsnippettimeseries->amplitude != NULL)
       status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(calibratedsnippettimeseries->amplitude), error);
   }
 
@@ -7240,9 +7238,7 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 
     /* get draft  */
     if (mb_io_ptr->nsensordepth > 0) {
-      // TODO(schwehr): Was something else intended in the if?
-      // if (mb_io_ptr->nsensordepth > 0)
-        mb_depint_interp(verbose, mbio_ptr, store->time_d, draft, error);
+      mb_depint_interp(verbose, mbio_ptr, store->time_d, draft, error);
       *heave = 0.0;
     }
     else if (bathymetry->optionaldata) {

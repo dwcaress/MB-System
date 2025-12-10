@@ -94,7 +94,7 @@ constexpr char help_message[] =
 constexpr char usage_message[] =
     "mbbackangle -Ifile "
     "[-Akind -Bmode[/beamwidth/depression] -Fformat -Ggridmode/angle/min/max/n_columns/n_rows "
-    "-Nnangles/angle_max -Ppings -Q -Rrefangle -Ttopogridfile -Zaltitude -V -H]";
+    "-Nnangles/angle_max -Ppings -Q -Rrefangle -S -Ttopogridfile -Zaltitude -V -H]";
 
 /*--------------------------------------------------------------------*/
 int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, int nangles, double angle_max, double dangle,
@@ -318,6 +318,7 @@ int main(int argc, char **argv) {
 	memset(&grid, 0, sizeof(struct mbba_grid_struct));
 	bool corr_topogrid = false;
 	double altitude_default = 0.0;
+	bool skip_existing = false;
 
 	int error = MB_ERROR_NO_ERROR;
   char user[256], host[256], date[32];
@@ -328,7 +329,7 @@ int main(int argc, char **argv) {
 		int c;
 		bool help = false;
 
-		while ((c = getopt(argc, argv, "A:a:B:b:CcDdF:f:G:g:HhI:i:N:n:P:p:QqR:r:T:t:VvZ:z:")) != -1)
+		while ((c = getopt(argc, argv, "A:a:B:b:CcDdF:f:G:g:HhI:i:N:n:P:p:QqR:r:SsT:t:VvZ:z:")) != -1)
 		{
 			switch (c) {
 			case 'A':
@@ -428,6 +429,10 @@ int main(int argc, char **argv) {
 			case 'R':
 			case 'r':
 				sscanf(optarg, "%lf", &ref_angle);
+				break;
+			case 'S':
+			case 's':
+				corr_slope = true;
 				break;
 			case 'T':
 			case 't':
@@ -592,63 +597,64 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Control Parameters:\n");
-		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
-		fprintf(stderr, "dbg2       format:       %d\n", format);
-		fprintf(stderr, "dbg2       pings:        %d\n", pings);
-		fprintf(stderr, "dbg2       lonflip:      %d\n", lonflip);
-		fprintf(stderr, "dbg2       bounds[0]:    %f\n", bounds[0]);
-		fprintf(stderr, "dbg2       bounds[1]:    %f\n", bounds[1]);
-		fprintf(stderr, "dbg2       bounds[2]:    %f\n", bounds[2]);
-		fprintf(stderr, "dbg2       bounds[3]:    %f\n", bounds[3]);
-		fprintf(stderr, "dbg2       btime_i[0]:   %d\n", btime_i[0]);
-		fprintf(stderr, "dbg2       btime_i[1]:   %d\n", btime_i[1]);
-		fprintf(stderr, "dbg2       btime_i[2]:   %d\n", btime_i[2]);
-		fprintf(stderr, "dbg2       btime_i[3]:   %d\n", btime_i[3]);
-		fprintf(stderr, "dbg2       btime_i[4]:   %d\n", btime_i[4]);
-		fprintf(stderr, "dbg2       btime_i[5]:   %d\n", btime_i[5]);
-		fprintf(stderr, "dbg2       btime_i[6]:   %d\n", btime_i[6]);
-		fprintf(stderr, "dbg2       etime_i[0]:   %d\n", etime_i[0]);
-		fprintf(stderr, "dbg2       etime_i[1]:   %d\n", etime_i[1]);
-		fprintf(stderr, "dbg2       etime_i[2]:   %d\n", etime_i[2]);
-		fprintf(stderr, "dbg2       etime_i[3]:   %d\n", etime_i[3]);
-		fprintf(stderr, "dbg2       etime_i[4]:   %d\n", etime_i[4]);
-		fprintf(stderr, "dbg2       etime_i[5]:   %d\n", etime_i[5]);
-		fprintf(stderr, "dbg2       etime_i[6]:   %d\n", etime_i[6]);
-		fprintf(stderr, "dbg2       speedmin:     %f\n", speedmin);
-		fprintf(stderr, "dbg2       timegap:      %f\n", timegap);
-		fprintf(stderr, "dbg2       read_file:    %s\n", read_file);
-		fprintf(stderr, "dbg2       dump:         %d\n", dump);
-		fprintf(stderr, "dbg2       symmetry:     %d\n", symmetry);
-		fprintf(stderr, "dbg2       amplitude_on: %d\n", amplitude_on);
-		fprintf(stderr, "dbg2       sidescan_on:  %d\n", sidescan_on);
-		fprintf(stderr, "dbg2       corr_slope:   %d\n", corr_slope);
-		fprintf(stderr, "dbg2       corr_topogrid:%d\n", corr_topogrid);
-		fprintf(stderr, "dbg2       grid.file:    %s\n", grid.file);
-		fprintf(stderr, "dbg2       nangles:      %d\n", nangles);
-		fprintf(stderr, "dbg2       angle_max:    %f\n", angle_max);
-		fprintf(stderr, "dbg2       ref_angle:    %f\n", ref_angle);
-		fprintf(stderr, "dbg2       beammode:     %d\n", beammode);
-		fprintf(stderr, "dbg2       ssbeamwidth:  %f\n", ssbeamwidth);
-		fprintf(stderr, "dbg2       ssdepression: %f\n", ssdepression);
-		fprintf(stderr, "dbg2       pings_avg:    %d\n", pings_avg);
-		fprintf(stderr, "dbg2       angle_max:    %f\n", angle_max);
-		fprintf(stderr, "dbg2       altitude:     %f\n", altitude_default);
-		fprintf(stderr, "dbg2       gridamp:      %d\n", gridamp);
-		fprintf(stderr, "dbg2       gridampangle: %f\n", gridampangle);
-		fprintf(stderr, "dbg2       gridampmin:   %f\n", gridampmin);
-		fprintf(stderr, "dbg2       gridampmax:   %f\n", gridampmax);
-		fprintf(stderr, "dbg2       gridampn_columns:    %d\n", gridampn_columns);
+		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
+		fprintf(stderr, "dbg2       format:           %d\n", format);
+		fprintf(stderr, "dbg2       pings:            %d\n", pings);
+		fprintf(stderr, "dbg2       lonflip:          %d\n", lonflip);
+		fprintf(stderr, "dbg2       bounds[0]:        %f\n", bounds[0]);
+		fprintf(stderr, "dbg2       bounds[1]:        %f\n", bounds[1]);
+		fprintf(stderr, "dbg2       bounds[2]:        %f\n", bounds[2]);
+		fprintf(stderr, "dbg2       bounds[3]:        %f\n", bounds[3]);
+		fprintf(stderr, "dbg2       btime_i[0]:       %d\n", btime_i[0]);
+		fprintf(stderr, "dbg2       btime_i[1]:       %d\n", btime_i[1]);
+		fprintf(stderr, "dbg2       btime_i[2]:       %d\n", btime_i[2]);
+		fprintf(stderr, "dbg2       btime_i[3]:       %d\n", btime_i[3]);
+		fprintf(stderr, "dbg2       btime_i[4]:       %d\n", btime_i[4]);
+		fprintf(stderr, "dbg2       btime_i[5]:       %d\n", btime_i[5]);
+		fprintf(stderr, "dbg2       btime_i[6]:       %d\n", btime_i[6]);
+		fprintf(stderr, "dbg2       etime_i[0]:       %d\n", etime_i[0]);
+		fprintf(stderr, "dbg2       etime_i[1]:       %d\n", etime_i[1]);
+		fprintf(stderr, "dbg2       etime_i[2]:       %d\n", etime_i[2]);
+		fprintf(stderr, "dbg2       etime_i[3]:       %d\n", etime_i[3]);
+		fprintf(stderr, "dbg2       etime_i[4]:       %d\n", etime_i[4]);
+		fprintf(stderr, "dbg2       etime_i[5]:       %d\n", etime_i[5]);
+		fprintf(stderr, "dbg2       etime_i[6]:       %d\n", etime_i[6]);
+		fprintf(stderr, "dbg2       speedmin:         %f\n", speedmin);
+		fprintf(stderr, "dbg2       timegap:          %f\n", timegap);
+		fprintf(stderr, "dbg2       read_file:        %s\n", read_file);
+		fprintf(stderr, "dbg2       dump:             %d\n", dump);
+		fprintf(stderr, "dbg2       symmetry:         %d\n", symmetry);
+		fprintf(stderr, "dbg2       amplitude_on:     %d\n", amplitude_on);
+		fprintf(stderr, "dbg2       sidescan_on:      %d\n", sidescan_on);
+		fprintf(stderr, "dbg2       corr_slope:       %d\n", corr_slope);
+		fprintf(stderr, "dbg2       corr_topogrid:    %d\n", corr_topogrid);
+		fprintf(stderr, "dbg2       grid.file:        %s\n", grid.file);
+		fprintf(stderr, "dbg2       nangles:          %d\n", nangles);
+		fprintf(stderr, "dbg2       angle_max:        %f\n", angle_max);
+		fprintf(stderr, "dbg2       ref_angle:        %f\n", ref_angle);
+		fprintf(stderr, "dbg2       beammode:         %d\n", beammode);
+		fprintf(stderr, "dbg2       ssbeamwidth:      %f\n", ssbeamwidth);
+		fprintf(stderr, "dbg2       ssdepression:     %f\n", ssdepression);
+		fprintf(stderr, "dbg2       pings_avg:        %d\n", pings_avg);
+		fprintf(stderr, "dbg2       angle_max:        %f\n", angle_max);
+		fprintf(stderr, "dbg2       altitude:         %f\n", altitude_default);
+		fprintf(stderr, "dbg2       gridamp:          %d\n", gridamp);
+		fprintf(stderr, "dbg2       gridampangle:     %f\n", gridampangle);
+		fprintf(stderr, "dbg2       gridampmin:       %f\n", gridampmin);
+		fprintf(stderr, "dbg2       gridampmax:       %f\n", gridampmax);
+		fprintf(stderr, "dbg2       gridampn_columns: %d\n", gridampn_columns);
 		fprintf(stderr, "dbg2       gridampn_rows:    %d\n", gridampn_rows);
-		fprintf(stderr, "dbg2       gridampdx:    %f\n", gridampdx);
-		fprintf(stderr, "dbg2       gridampdy:    %f\n", gridampdy);
-		fprintf(stderr, "dbg2       gridss:       %d\n", gridss);
-		fprintf(stderr, "dbg2       gridssangle:  %f\n", gridssangle);
-		fprintf(stderr, "dbg2       gridssmin:    %f\n", gridssmin);
-		fprintf(stderr, "dbg2       gridssmax:    %f\n", gridssmax);
-		fprintf(stderr, "dbg2       gridssn_columns:     %d\n", gridssn_columns);
+		fprintf(stderr, "dbg2       gridampdx:        %f\n", gridampdx);
+		fprintf(stderr, "dbg2       gridampdy:        %f\n", gridampdy);
+		fprintf(stderr, "dbg2       gridss:           %d\n", gridss);
+		fprintf(stderr, "dbg2       gridssangle:      %f\n", gridssangle);
+		fprintf(stderr, "dbg2       gridssmin:        %f\n", gridssmin);
+		fprintf(stderr, "dbg2       gridssmax:        %f\n", gridssmax);
+		fprintf(stderr, "dbg2       gridssn_columns:  %d\n", gridssn_columns);
 		fprintf(stderr, "dbg2       gridssn_rows:     %d\n", gridssn_rows);
-		fprintf(stderr, "dbg2       gridssdx:     %f\n", gridssdx);
-		fprintf(stderr, "dbg2       gridssdy:     %f\n", gridssdy);
+		fprintf(stderr, "dbg2       gridssdx:         %f\n", gridssdx);
+		fprintf(stderr, "dbg2       gridssdy:         %f\n", gridssdy);
+		fprintf(stderr, "dbg2       skip_existing:    %d\n", skip_existing);
 	}
 
 	/* allocate memory for angle arrays */
@@ -869,9 +875,9 @@ int main(int argc, char **argv) {
 			mb_path cformat_description;
 			int cnumfile = 0;
 			int cfiletype = 0;
-			int cvariable_beams = 0;
-			int ctraveltime = 0;
-			int cbeam_flagging = 0;
+			bool cvariable_beams = 0;
+			bool ctraveltime = 0;
+			bool cbeam_flagging = 0;
 			int cplatform_source = 0;
 			int cnav_source = 0;
 			int csensordepth_source = 0;
@@ -894,8 +900,62 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "Skipping swath file: %s because format %d does not include sidescan data\n", swathfile, format);
 			}
 		}
+		
+    if (ok_to_process && skip_existing) {
+  		struct stat file_status;
+  		int input_size, input_modtime, output_size, output_modtime;
+      if (stat(swathfile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+        input_modtime = file_status.st_mtime;
+        input_size = file_status.st_size;
+      }
+      else {
+        input_modtime = 0;
+        input_size = 0;
+      }
+      bool output_uptodate = true;
+      if (amplitude_on) {
+				strcpy(amptablefile, swathfile);
+				strcat(amptablefile, ".aga");
+				if (stat(amptablefile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+					output_modtime = file_status.st_mtime;
+					output_size = file_status.st_size;
+				}
+				else {
+					output_modtime = 0;
+					output_size = 0;
+				}
+				if (output_modtime < input_modtime || output_size <= 0) {
+					output_uptodate = false;
+				}
+			}
+      if (sidescan_on) {
+				strcpy(sstablefile, swathfile);
+				strcat(sstablefile, ".aga");
+				if (stat(sstablefile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+					output_modtime = file_status.st_mtime;
+					output_size = file_status.st_size;
+				}
+				else {
+					output_modtime = 0;
+					output_size = 0;
+				}
+				if (output_modtime < input_modtime || output_size <= 0) {
+					output_uptodate = false;
+				}
+			}
+			if (output_uptodate)
+				ok_to_process = false;
+    }
 
-		if (ok_to_process) {
+		if (!ok_to_process) {
+
+			/* output information */
+			if (verbose > 0) {
+				fprintf(stderr, "\nnskipping swath file:  %s %d\n", swathfile, format);
+			}
+		}
+
+		else /* if (ok_to_process) */ {
 
 			/* output information */
 			if (verbose > 0) {

@@ -625,7 +625,7 @@ int mbsys_simrad3_zero_ss(int verbose, void *store_ptr, int *error) {
 		struct mbsys_simrad3_ping_struct *ping =
 			(struct mbsys_simrad3_ping_struct *)&(store->pings[ping_num]);
 
-		ping->png_ss_read = 0;          /* flag indicating actual reading of sidescan record */
+		ping->png_ss_read = false;          /* flag indicating actual reading of sidescan record */
 		ping->png_ss_date = 0;          /* date = year*10000 + month*100 + day
 		                        Feb 26, 1995 = 19950226 */
 		ping->png_ss_msec = 0;          /* time since midnight in msec
@@ -930,12 +930,28 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 			if (pars->kluge_id[i] == MB_PR_KLUGE_IGNORESNIPPETS) {
 	    		bool *ignore_snippets = (bool *)&mb_io_ptr->save4;
 	    		*ignore_snippets = true;
-	  		}
-			if (pars->kluge_id[i] == MB_PR_KLUGE_AUVSENTRYSENSORDEPTH) {
-	    		bool *sensordepth_only = (bool *)&mb_io_ptr->save5;
-	    		*sensordepth_only = true;
-	  		}
 	  	}
+			if (pars->kluge_id[i] == MB_PR_KLUGE_AUVSENTRYSENSORDEPTH) {
+	    		bool *xducer_depth_mode = (bool *)&mb_io_ptr->save5;
+	    		*xducer_depth_mode = MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY;
+	  	}
+			if (pars->kluge_id[i] == MB_PR_KLUGE_SENSORDEPTHFROMHEAVE) {
+	    		bool *xducer_depth_mode = (bool *)&mb_io_ptr->save5;
+	    		*xducer_depth_mode = MBSYS_SIMRAD3_ZMODE_USE_HEAVE_ONLY;
+	  	}
+			if (pars->kluge_id[i] == MB_PR_KLUGE_XDUCER_DEPTH_FROM_HEAVE) {
+	    		bool *xducer_depth_mode = (bool *)&mb_io_ptr->save5;
+	    		*xducer_depth_mode = MBSYS_SIMRAD3_ZMODE_USE_HEAVE_ONLY;
+	  	}
+			if (pars->kluge_id[i] == MB_PR_KLUGE_XDUCER_DEPTH_FROM_SENSORDEPTH) {
+	    		bool *xducer_depth_mode = (bool *)&mb_io_ptr->save5;
+	    		*xducer_depth_mode = MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY;
+	  	}
+			if (pars->kluge_id[i] == MB_PR_KLUGE_XDUCER_DEPTH_FROM_HEAVEANDSENSORDEPTH) {
+	    		bool *xducer_depth_mode = (bool *)&mb_io_ptr->save5;
+	    		*xducer_depth_mode = MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_AND_HEAVE;
+	  	}
+	  }
 	}
 
 	/* deal with a survey record */
@@ -952,9 +968,11 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		    NI => Use heave
 		    IN => Depth sensor */
 		/*--------------------------------------------------------------*/
-		if (store->par_dsh[0] == 'I')
+		if (store->par_dsh[0] == 'N' && store->par_dsh[1] == 'I')
+			depthsensor_mode = MBSYS_SIMRAD3_ZMODE_USE_HEAVE_ONLY;
+		else if (store->par_dsh[0] == 'I' && store->par_dsh[1] == 'N')
 			depthsensor_mode = MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY;
-		else if (store->par_dsh[0] == 'N')
+		else if (store->par_dsh[0] == 'N' && store->par_dsh[1] == 'N')
 			depthsensor_mode = MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_AND_HEAVE;
 		else
 			depthsensor_mode = MBSYS_SIMRAD3_ZMODE_USE_HEAVE_ONLY;
@@ -1240,14 +1258,14 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		ping->png_heave = (int)rint(heave / 0.01);
 
 		/* insert sensordepth */
-		if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY) {
+		if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_HEAVE_ONLY) {
+			ping->png_xducer_depth = 0.5 * (tx_z + rx_z) - store->par_wlz + heave;
+		}
+		else if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY) {
 			ping->png_xducer_depth = sensordepth;
 		} 
 		else if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_AND_HEAVE) {
-			ping->png_xducer_depth = sensordepth + heave;
-		}
-		else if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_HEAVE_ONLY) {
-			ping->png_xducer_depth = 0.5 * (tx_z + rx_z) - store->par_wlz + heave;
+			ping->png_xducer_depth = sensordepth + 0.5 * (tx_z + rx_z) - store->par_wlz + heave;
 		}
 
 		double transmit_heading, transmit_heave, transmit_roll, transmit_pitch;
@@ -1301,12 +1319,22 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 				                                 receive_time_d, &receive_heave, &jattitude, error);
 
 			/* use sensordepth instead of heave for submerged platforms */
-			if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY) {
+			if (depthsensor_mode != MBSYS_SIMRAD3_ZMODE_USE_HEAVE_ONLY) {
+				double transmit_sensordepth, receive_sensordepth;
 				mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
-				                                 pars->n_sensordepth, transmit_time_d, &transmit_heave, &jsensordepth, error);
+				                                 pars->n_sensordepth, transmit_time_d, &transmit_sensordepth, &jsensordepth, error);
 				mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
-				                                 pars->n_sensordepth, receive_time_d, &receive_heave, &jsensordepth, error);
-				heave = transmit_heave;
+				                                 pars->n_sensordepth, receive_time_d, &receive_sensordepth, &jsensordepth, error);
+				if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY) {
+					transmit_heave = transmit_sensordepth;
+					receive_heave = receive_sensordepth;
+					heave = transmit_heave;
+				}
+				else {
+					transmit_heave += transmit_sensordepth;
+					receive_heave += receive_sensordepth;
+					heave = transmit_heave;
+				}
 			}
 
 			/* get ssv and range */
@@ -1971,12 +1999,11 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 
 		/* add depth sensor if needed */
-		if (platform->source_depth1 < 0 && store->par_dsh[0] == 'I' && store->par_dsh[1] == 'N') {
-			// TODO(schwehr): Bug?
-			// capability1 = MB_SENSOR_CAPABILITY1_DEPTH;
-			// capability2 = MB_SENSOR_CAPABILITY2_NONE;
-			capability1 = 0;
-			capability2 = 0;
+		if (platform->source_depth1 < 0 
+				&& (store->par_dsh[0] == 'I' && store->par_dsh[1] == 'N' 
+						|| store->par_dsh[0] == 'N' && store->par_dsh[1] == 'N')) {
+			capability1 = MB_SENSOR_CAPABILITY1_DEPTH;
+			capability2 = MB_SENSOR_CAPABILITY2_NONE;
 			const int num_offsets = 1;
 			const int num_time_latency = 0;
 			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_PRESSURE, NULL, NULL, NULL, capability1,
@@ -2126,6 +2153,8 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 		else
 			platform->source_rollpitch = platform->source_rollpitch1;
 		if (store->par_dsh[0] == 'I' && store->par_dsh[1] == 'N')
+			platform->source_depth = platform->source_depth1;
+		if (store->par_dsh[0] == 'N' && store->par_dsh[1] == 'N')
 			platform->source_depth = platform->source_depth1;
 		if (store->par_ahe == 2 || store->par_ahe == 8)
 			platform->source_heave = platform->source_rollpitch1;

@@ -44,7 +44,10 @@
 #define THIS_MODULE_PURPOSE "Plot swath bathymetry, amplitude, or backscatter"
 #define THIS_MODULE_KEYS ""
 
-/* GMT5 header file */
+/* include GMT header file gmt_dev.h without including glib headers not needed by MB-System */
+#ifdef HAVE_GLIB_GTHREAD
+#undef HAVE_GLIB_GTHREAD
+#endif
 #include "gmt_dev.h"
 
 /*  Compatibility with old lower-function/macro names use prior to GMT 5.3.0 */
@@ -769,7 +772,7 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 	double dlat1, dlat2;
 	double x, y;
 	double ddlonx, ddlaty;
-	static double dddepth = 0.0; // TODO(schwehr): Why static?
+	double dddepth = 0.0;
 	bool setprint;
 
 	/* loop over the inner beams and get

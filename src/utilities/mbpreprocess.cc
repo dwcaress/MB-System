@@ -106,6 +106,7 @@ constexpr char usage_message[] =
     "\t--attitude-file-format=format_id\n"
     "\t--attitude-async=record_kind\n"
     "\t--attitude-sensor=sensor_id\n\n"
+    "\t--attitude-zero-heave\n\n"
     "\t--soundspeed-file=file\n"
     "\t--soundspeed-file-format=format_id\n"
     "\t--soundspeed-async=record_kind\n"
@@ -148,8 +149,15 @@ constexpr char usage_message[] =
     "\t--kluge-sensordepth-from-heave\n"
     "\t--kluge-early-MBARI-Mapping-AUV\n"
     "\t--kluge-flipsign-roll\n"
-    "\t--kluge-flipsign-pitch\n";
-
+    "\t--kluge-flipsign-pitch\n"
+    "\t--kluge-set-beamwidths=beamwidth-acrosstrack/beamwidth-alongtrack\n"
+    "\t--kluge-set-beamwidth-acrosstrack=beamwidth-acrosstrack\n"
+    "\t--kluge-set-beamwidth-alongtrack=beamwidth-alongtrack\n"
+    "\t--kluge-ignore-duplicate-pings\n"
+    "\t--kluge-xducer-depth-from-heave\n"
+    "\t--kluge-xducer-depth-from-sensordepth\n"
+    "\t--kluge-xducer-depth-from-heave-and-sensordepth\n";
+    
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
@@ -193,6 +201,12 @@ int main(int argc, char **argv) {
   bool kluge_early_mbari_mapping_auv = false;
   bool kluge_flipsign_roll = false;
   bool kluge_flipsign_pitch = false;
+  bool kluge_setbeamwidthacrosstrack = false;
+  bool kluge_setbeamwidthalongtrack = false;
+  bool kluge_ignore_duplicate_pings = false;
+  bool kluge_xducer_depth_from_heave = false;
+  bool kluge_xducer_depth_from_sensordepth = false;
+  bool kluge_xducer_depth_from_heaveandsensordepth = false;
 
   mb_path sensordepth_file;
   memset(sensordepth_file, 0, sizeof(mb_path));
@@ -238,6 +252,7 @@ int main(int argc, char **argv) {
   int attitude_file_format = 0;
   int attitude_async = MB_DATA_DATA;
   int attitude_sensor = -1;
+  bool zero_heave = false;
   merge_t soundspeed_mode = MBPREPROCESS_MERGE_OFF;
   int soundspeed_file_format = 0;
   int soundspeed_async = MB_DATA_DATA;
@@ -279,6 +294,7 @@ int main(int argc, char **argv) {
                                       {"attitude-file-format", required_argument, nullptr, 0},
                                       {"attitude-async", required_argument, nullptr, 0},
                                       {"attitude-sensor", required_argument, nullptr, 0},
+                                      {"attitude-zero-heave", no_argument, nullptr, 0},
                                       {"soundspeed-file", required_argument, nullptr, 0},
                                       {"soundspeed-file-format", required_argument, nullptr, 0},
                                       {"soundspeed-async", required_argument, nullptr, 0},
@@ -323,6 +339,13 @@ int main(int argc, char **argv) {
                                       {"kluge-early-MBARI-Mapping-AUV", no_argument, nullptr, 0},
                                       {"kluge-flipsign-roll", no_argument, nullptr, 0},
                                       {"kluge-flipsign-pitch", no_argument, nullptr, 0},
+                                      {"kluge-set-beamwidths", required_argument, nullptr, 0},
+                                      {"kluge-set-beamwidth-acrosstrack", required_argument, nullptr, 0},
+                                      {"kluge-set-beamwidth-alongtrack", required_argument, nullptr, 0},
+                                      {"kluge-ignore-duplicate-pings", no_argument, nullptr, 0},
+                                      {"kluge-xducer-depth-from-heave", no_argument, nullptr, 0},
+                                      {"kluge-xducer-depth-from-sensordepth", no_argument, nullptr, 0},
+                                      {"kluge-xducer-depth-from-heave-and-sensordepth", no_argument, nullptr, 0},
                                       {nullptr, 0, nullptr, 0}};
 
     int option_index;
@@ -472,6 +495,9 @@ int main(int argc, char **argv) {
         else if (strcmp("attitude-sensor", options[option_index].name) == 0) {
           /* n = */ sscanf(optarg, "%d", &attitude_sensor);
           preprocess_pars.recalculate_bathymetry = true;
+        }
+        else if (strcmp("attitude-zero-heave", options[option_index].name) == 0) {
+          zero_heave = true;
         }
         /*-------------------------------------------------------
          * Define source of soundspeed - could be an external file
@@ -725,6 +751,64 @@ int main(int argc, char **argv) {
           preprocess_pars.n_kluge++;
           kluge_flipsign_pitch = true;
         }
+        else if (strcmp("kluge-set-beamwidths", options[option_index].name) == 0) {
+        	double kluge_beamwidth_acrosstrack, kluge_beamwidth_alongtrack;
+          const int n = sscanf(optarg, "%lf/%lf", &kluge_beamwidth_acrosstrack, &kluge_beamwidth_alongtrack);
+          if (n == 2) {
+            preprocess_pars.kluge_id[preprocess_pars.n_kluge] = MB_PR_KLUGE_SETBEAMWIDTHACROSSTRACK;
+            double *dptr = (double *)&preprocess_pars.kluge_pars[preprocess_pars.n_kluge * MB_PR_KLUGE_PAR_SIZE];
+            *dptr = kluge_beamwidth_acrosstrack;
+            preprocess_pars.n_kluge++;
+            kluge_setbeamwidthacrosstrack = true;
+            preprocess_pars.kluge_id[preprocess_pars.n_kluge] = MB_PR_KLUGE_SETBEAMWIDTHALONGTRACK;
+            dptr = (double *)&preprocess_pars.kluge_pars[preprocess_pars.n_kluge * MB_PR_KLUGE_PAR_SIZE];
+            *dptr = kluge_beamwidth_alongtrack;
+            preprocess_pars.n_kluge++;
+            kluge_setbeamwidthalongtrack = true;
+          }
+        }
+        else if (strcmp("kluge-set-beamwidth-acrosstrack", options[option_index].name) == 0) {
+        	double kluge_beamwidth_acrosstrack;
+          const int n = sscanf(optarg, "%lf", &kluge_beamwidth_acrosstrack);
+          if (n == 1) {
+            preprocess_pars.kluge_id[preprocess_pars.n_kluge] = MB_PR_KLUGE_SETBEAMWIDTHACROSSTRACK;
+            double *dptr = (double *)&preprocess_pars.kluge_pars[preprocess_pars.n_kluge * MB_PR_KLUGE_PAR_SIZE];
+            *dptr = kluge_beamwidth_acrosstrack;
+            preprocess_pars.n_kluge++;
+            kluge_setbeamwidthacrosstrack = true;
+          }
+        }
+        else if (strcmp("kluge-set-beamwidth-alongtrack", options[option_index].name) == 0) {
+        	double kluge_beamwidth_alongtrack;
+          const int n = sscanf(optarg, "%lf", &kluge_beamwidth_alongtrack);
+          if (n == 1) {
+            preprocess_pars.kluge_id[preprocess_pars.n_kluge] = MB_PR_KLUGE_SETBEAMWIDTHALONGTRACK;
+            double *dptr = (double *)&preprocess_pars.kluge_pars[preprocess_pars.n_kluge * MB_PR_KLUGE_PAR_SIZE];
+            *dptr = kluge_beamwidth_alongtrack;
+            preprocess_pars.n_kluge++;
+            kluge_setbeamwidthalongtrack = true;
+          }
+        }
+        else if (strcmp("kluge-ignore-duplicate-pings", options[option_index].name) == 0) {
+          preprocess_pars.kluge_id[preprocess_pars.n_kluge] = MB_PR_KLUGE_IGNOREDUPLICATEPINGS;
+          preprocess_pars.n_kluge++;
+        	kluge_ignore_duplicate_pings = true;
+        }
+        else if (strcmp("kluge-xducer-depth-from-heave", options[option_index].name) == 0) {
+          preprocess_pars.kluge_id[preprocess_pars.n_kluge] = MB_PR_KLUGE_XDUCER_DEPTH_FROM_HEAVE;
+          preprocess_pars.n_kluge++;
+        	kluge_xducer_depth_from_heave = true;
+        }
+        else if (strcmp("kluge-xducer-depth-from-sensordepth", options[option_index].name) == 0) {
+          preprocess_pars.kluge_id[preprocess_pars.n_kluge] = MB_PR_KLUGE_XDUCER_DEPTH_FROM_SENSORDEPTH;
+          preprocess_pars.n_kluge++;
+        	kluge_xducer_depth_from_sensordepth = true;
+        }
+        else if (strcmp("kluge-xducer-depth-from-heave-and-sensordepth", options[option_index].name) == 0) {
+          preprocess_pars.kluge_id[preprocess_pars.n_kluge] = MB_PR_KLUGE_XDUCER_DEPTH_FROM_HEAVEANDSENSORDEPTH;
+          preprocess_pars.n_kluge++;
+        	kluge_xducer_depth_from_heaveandsensordepth = true;
+        }
 
         break;
       case '?':
@@ -851,6 +935,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "dbg2       attitude_file_format:         %d\n", attitude_file_format);
     fprintf(stderr, "dbg2       attitude_async:               %d\n", attitude_async);
     fprintf(stderr, "dbg2       attitude_sensor:              %d\n", attitude_sensor);
+    fprintf(stderr, "dbg2       attitude_zero_heave:          %d\n", zero_heave);
     fprintf(stderr, "dbg2  Source of soundspeed data:\n");
     fprintf(stderr, "dbg2       soundspeed_mode:              %d\n", soundspeed_mode);
     fprintf(stderr, "dbg2       soundspeed_file:              %s\n", soundspeed_file);
@@ -909,6 +994,12 @@ int main(int argc, char **argv) {
     fprintf(stderr, "dbg2       kluge_early_mbari_mapping_auv        %d\n", kluge_early_mbari_mapping_auv);
     fprintf(stderr, "dbg2       kluge_flipsign_roll                  %d\n", kluge_flipsign_roll);
     fprintf(stderr, "dbg2       kluge_flipsign_pitch                 %d\n", kluge_flipsign_pitch);
+    fprintf(stderr, "dbg2       kluge_setbeamwidthacrosstrack        %d\n", kluge_setbeamwidthacrosstrack);
+    fprintf(stderr, "dbg2       kluge_setbeamwidthalongtrack         %d\n", kluge_setbeamwidthalongtrack);
+    fprintf(stderr, "dbg2       kluge_ignore_duplicate_pings         %d\n", kluge_ignore_duplicate_pings);
+    fprintf(stderr, "dbg2       kluge_xducer_depth_from_heave        %d\n", kluge_xducer_depth_from_heave);
+    fprintf(stderr, "dbg2       kluge_xducer_depth_from_sensordepth  %d\n", kluge_xducer_depth_from_sensordepth);
+    fprintf(stderr, "dbg2       kluge_xducer_depth_from_heaveandsensordepth  %d\n", kluge_xducer_depth_from_heaveandsensordepth);
     fprintf(stderr, "dbg2  Additional output:\n");
     fprintf(stderr, "dbg2       output_sensor_fnv:            %d\n", output_sensor_fnv);
     fprintf(stderr, "dbg2  Skip existing output files:\n");
@@ -966,6 +1057,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "     attitude_file_format:         %d\n", attitude_file_format);
     fprintf(stderr, "     attitude_async:               %d\n", attitude_async);
     fprintf(stderr, "     attitude_sensor:              %d\n", attitude_sensor);
+    fprintf(stderr, "     attitude_zero_heave:          %d\n", zero_heave);
     fprintf(stderr, "Source of soundspeed data:\n");
     fprintf(stderr, "     soundspeed_mode:              %d\n", soundspeed_mode);
     fprintf(stderr, "     soundspeed_file:              %s\n", soundspeed_file);
@@ -1024,6 +1116,12 @@ int main(int argc, char **argv) {
     fprintf(stderr, "     kluge_early_mbari_mapping_auv        %d\n", kluge_early_mbari_mapping_auv);
     fprintf(stderr, "     kluge_flipsign_roll                  %d\n", kluge_flipsign_roll);
     fprintf(stderr, "     kluge_flipsign_pitch                 %d\n", kluge_flipsign_pitch);
+    fprintf(stderr, "     kluge_setbeamwidthacrosstrack        %d\n", kluge_setbeamwidthacrosstrack);
+    fprintf(stderr, "     kluge_setbeamwidthalongtrack         %d\n", kluge_setbeamwidthalongtrack);
+    fprintf(stderr, "     kluge_ignore_duplicate_pings         %d\n", kluge_ignore_duplicate_pings);
+    fprintf(stderr, "     kluge_xducer_depth_from_heave        %d\n", kluge_xducer_depth_from_heave);
+    fprintf(stderr, "     kluge_xducer_depth_from_sensordepth  %d\n", kluge_xducer_depth_from_sensordepth);
+    fprintf(stderr, "     kluge_xducer_depth_from_heaveandsensordepth  %d\n", kluge_xducer_depth_from_heaveandsensordepth);
     fprintf(stderr, "Additional output:\n");
     fprintf(stderr, "     output_sensor_fnv:            %d\n", output_sensor_fnv);
     fprintf(stderr, "Skip existing output files:\n");
@@ -1411,441 +1509,518 @@ int main(int argc, char **argv) {
 
   /* loop over all files to be read */
   while (read_data) {
-    /* if origin of the ancillary data has not been specified, figure out
-       defaults based on the first file's format */
-    if (nav_mode == MBPREPROCESS_MERGE_OFF) {
-      if (iformat == MBF_EMOLDRAW || iformat == MBF_EM300RAW || iformat == MBF_EM710RAW) {
-        nav_mode = MBPREPROCESS_MERGE_ASYNC;
-        nav_async = MB_DATA_NAV;
-      }
-      else if (iformat == MBF_KEMKMALL) {
-        nav_mode = MBPREPROCESS_MERGE_ASYNC;
-        nav_async = MB_DATA_NAV1;
-      }
-      else if (iformat == MBF_RESON7KR) {
-        nav_mode = MBPREPROCESS_MERGE_ASYNC;
-        nav_async = MB_DATA_NAV1;
-      }
-      else if (iformat == MBF_RESON7K3) {
-        nav_mode = MBPREPROCESS_MERGE_ASYNC;
-        nav_async = MB_DATA_NAV;
-      }
+
+    /* get output format - in some cases this may be a
+     * different, generally extended format
+     * more suitable for processing than the original */
+    if (iformat == MBF_EMOLDRAW || iformat == MBF_EM12IFRM || iformat == MBF_EM12DARW || iformat == MBF_EM300RAW ||
+        iformat == MBF_EM300MBA)
+      oformat = MBF_EM300MBA;
+    else if (iformat == MBF_EM710RAW || iformat == MBF_EM710MBA)
+      oformat = MBF_EM710MBA;
+    else if (iformat == MBF_IMAGE83P)
+      oformat = MBF_IMAGEMBA;
+    else if (iformat == MBF_3DWISSLR)
+      oformat = MBF_3DWISSLP;
+    else if (iformat == MBF_OICGEODA)
+      oformat = MBF_OICMBARI;
+    else if (iformat == MBF_SB2100RW)
+      oformat = MBF_SB2100B2;
+    else
+      oformat = iformat;
+
+    /* figure out the output file name */
+    status = mb_get_format(verbose, ifile, fileroot, &testformat, &error);
+    snprintf(ofile, sizeof(ofile), "%s.mb%d", fileroot, oformat);
+    if (strcmp(ifile, ofile) == 0)
+      snprintf(ofile, sizeof(ofile), "%sr.mb%d", fileroot, oformat);
+
+    /* if a different output directory was set by user, reset file path */
+    if (output_directory_set) {
+      char buffer[MB_PATH_MAXLINE] = "";
+      strcpy(buffer, output_directory);
+      if (buffer[strlen(output_directory) - 1] != '/')
+        strcat(buffer, "/");
+      char *filenameptr;
+      if (strrchr(ofile, '/') != nullptr)
+        filenameptr = strrchr(ofile, '/') + 1;
+      else
+        filenameptr = ofile;
+      strcat(buffer, filenameptr);
+      strcpy(ofile, buffer);
     }
-    if (sensordepth_mode == MBPREPROCESS_MERGE_OFF) {
-      if (iformat == MBF_EMOLDRAW || iformat == MBF_EM300RAW || iformat == MBF_EM710RAW) {
-        sensordepth_mode = MBPREPROCESS_MERGE_ASYNC;
-        sensordepth_async = MB_DATA_HEIGHT;
+
+    /* Figure out if the file should be preprocessed - don't if it looks like
+      the file was previously preprocessed and looks up to date  AND the
+      appropriate request has been made */
+    bool proceed = true;
+    if (skip_existing) {
+      if (stat(ifile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+        input_modtime = file_status.st_mtime;
+        input_size = file_status.st_size;
       }
-      else if (iformat == MBF_KEMKMALL) {
-        sensordepth_mode = MBPREPROCESS_MERGE_ASYNC;
-        sensordepth_async = MB_DATA_SENSORDEPTH;
+      else {
+        input_modtime = 0;
+        input_size = 0;
       }
-      else if (iformat == MBF_RESON7KR) {
-        sensordepth_mode = MBPREPROCESS_MERGE_ASYNC;
-        sensordepth_async = MB_DATA_SENSORDEPTH;
+      if (stat(ofile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+        output_modtime = file_status.st_mtime;
+        output_size = file_status.st_size;
       }
-      else if (iformat == MBF_RESON7K3) {
-        sensordepth_mode = MBPREPROCESS_MERGE_ASYNC;
-        sensordepth_async = MB_DATA_NAV;
+      else {
+        output_modtime = 0;
+        output_size = 0;
       }
-    }
-    if (heading_mode == MBPREPROCESS_MERGE_OFF) {
-      if (iformat == MBF_EMOLDRAW || iformat == MBF_EM300RAW || iformat == MBF_EM710RAW) {
-        heading_mode = MBPREPROCESS_MERGE_ASYNC;
-        heading_async = MB_DATA_NAV;
-      }
-      else if (iformat == MBF_KEMKMALL) {
-        heading_mode = MBPREPROCESS_MERGE_ASYNC;
-        heading_async = MB_DATA_NAV1;
-      }
-      else if (iformat == MBF_RESON7KR) {
-        heading_mode = MBPREPROCESS_MERGE_ASYNC;
-        heading_async = MB_DATA_HEADING;
-      }
-      else if (iformat == MBF_RESON7K3) {
-        heading_mode = MBPREPROCESS_MERGE_ASYNC;
-        heading_async = MB_DATA_NAV;
-      }
-    }
-    if (attitude_mode == MBPREPROCESS_MERGE_OFF) {
-      if (iformat == MBF_EMOLDRAW || iformat == MBF_EM300RAW || iformat == MBF_EM710RAW) {
-        attitude_mode = MBPREPROCESS_MERGE_ASYNC;
-        attitude_async = MB_DATA_ATTITUDE;
-      }
-      else if (iformat == MBF_KEMKMALL) {
-        attitude_mode = MBPREPROCESS_MERGE_ASYNC;
-        attitude_async = MB_DATA_NAV1;
-      }
-      else if (iformat == MBF_RESON7KR) {
-        attitude_mode = MBPREPROCESS_MERGE_ASYNC;
-        attitude_async = MB_DATA_ATTITUDE;
-      }
-      else if (iformat == MBF_RESON7K3) {
-        attitude_mode = MBPREPROCESS_MERGE_ASYNC;
-        attitude_async = MB_DATA_ATTITUDE;
+      if (output_modtime > input_modtime && output_size > input_size) {
+        proceed = false;
       }
     }
 
-    if (verbose > 0)
-      fprintf(stderr, "\nPass 1: Opening file %s %d\n", ifile, iformat);
-
-    /* initialize reading the swath file */
-    if (mb_read_init(verbose, ifile, iformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
-                               &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error) != MB_SUCCESS) {
-      char *message;
-      mb_error(verbose, error, &message);
-      fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
-      fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
-      fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", ifile);
-      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(error);
+    /* skip redo if requested and relevant */
+    if (!proceed) {
+      if (verbose > 0)
+        fprintf(stderr, "\nPass 1: Skipping input file:  %s %d\n", ifile, iformat);
     }
 
-    /* call preprocess function with pars settings before reading any data
-        - for some formats this can set special read behavior
-        - passing store_ptr == NULL indicates this is the pre-reading call
-        - if a preprocess function does not exist for this format then
-          standard preprocessing will be done - reset the error */
-    if (mb_preprocess(verbose, imbio_ptr, NULL, NULL, (void *)&preprocess_pars, &error) == MB_FAILURE) {
-      status = MB_SUCCESS;
-      error = MB_ERROR_NO_ERROR;
-    }
-
-    beamflag = nullptr;
-    bath = nullptr;
-    amp = nullptr;
-    bathacrosstrack = nullptr;
-    bathalongtrack = nullptr;
-    ss = nullptr;
-    ssacrosstrack = nullptr;
-    ssalongtrack = nullptr;
-    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, &error);
-
-    /* if error initializing memory then quit */
-    if (error != MB_ERROR_NO_ERROR) {
-      char *message;
-      mb_error(verbose, error, &message);
-      fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
-      fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
-      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(error);
-    }
-
-    /* zero file count records */
-    int n_rf_data = 0;
-    int n_rf_comment = 0;
-    int n_rf_nav = 0;
-    int n_rf_nav1 = 0;
-    int n_rf_nav2 = 0;
-    int n_rf_nav3 = 0;
-    int n_rf_att = 0;
-    int n_rf_att1 = 0;
-    int n_rf_att2 = 0;
-    int n_rf_att3 = 0;
-
-    /* read data */
-    while (error <= MB_ERROR_NO_ERROR) {
-      /* reset error */
-      error = MB_ERROR_NO_ERROR;
-
-      /* read next data record */
-      status = mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
-                          &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
-                          bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
-
-      /* some nonfatal errors do not matter */
-      if (error < MB_ERROR_NO_ERROR && error > MB_ERROR_UNINTELLIGIBLE) {
-        error = MB_ERROR_NO_ERROR;
-        status = MB_SUCCESS;
-      }
-
-      if (verbose >= 2) {
-        fprintf(stderr, "\ndbg2  Data record read in program <%s>\n", program_name);
-        fprintf(stderr, "dbg2       kind:           %d\n", kind);
-        fprintf(stderr, "dbg2       error:          %d\n", error);
-        fprintf(stderr, "dbg2       status:         %d\n", status);
-      }
-
-      /* count records */
-      if (kind == MB_DATA_DATA) {
-        n_rf_data++;
-        n_rt_data++;
-      }
-      else if (kind == MB_DATA_COMMENT) {
-        n_rf_comment++;
-        n_rt_comment++;
-      }
-      else if (kind == MB_DATA_NAV) {
-        n_rf_nav++;
-        n_rt_nav++;
-      }
-      else if (kind == MB_DATA_NAV1) {
-        n_rf_nav1++;
-        n_rt_nav1++;
-      }
-      else if (kind == MB_DATA_NAV2) {
-        n_rf_nav2++;
-        n_rt_nav2++;
-      }
-      else if (kind == MB_DATA_NAV3) {
-        n_rf_nav3++;
-        n_rt_nav3++;
-      }
-      else if (kind == MB_DATA_ATTITUDE) {
-        n_rf_att++;
-        n_rt_att++;
-      }
-      else if (kind == MB_DATA_ATTITUDE1) {
-        n_rf_att1++;
-        n_rt_att1++;
-      }
-      else if (kind == MB_DATA_ATTITUDE2) {
-        n_rf_att2++;
-        n_rt_att2++;
-      }
-      else if (kind == MB_DATA_ATTITUDE3) {
-        n_rf_att3++;
-        n_rt_att3++;
-      }
-
-      /* look for nav if not externally defined */
-      if (status == MB_SUCCESS && nav_mode == MBPREPROCESS_MERGE_ASYNC && kind == nav_async) {
-        /* extract nav data */
-        int extract_status = mb_extract_nnav(verbose, imbio_ptr, istore_ptr, nanavmax, &kind, &nanav, atime_i, atime_d, alon, alat,
-                                 aspeed, aheading, asensordepth, aroll, apitch, aheave, &error);
-
-        /* allocate memory if needed */
-        if (extract_status == MB_SUCCESS && nanav > 0 && n_nav + nanav >= n_nav_alloc) {
-          error = MB_ERROR_NO_ERROR;
-          n_nav_alloc += std::max(MBPREPROCESS_ALLOC_CHUNK, nanav);
-          status = mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_time_d, &error);
-          status &= mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_navlon, &error);
-          status &= mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_navlat, &error);
-          status &= mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_speed, &error);
-          if (error != MB_ERROR_NO_ERROR) {
-            char *message;
-            mb_error(verbose, error, &message);
-            fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
-            fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
-            fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-            exit(error);
-          }
-        }
-
-        /* copy the nav data */
-        if (extract_status == MB_SUCCESS && nanav > 0) {
-          for (int i = 0; i < nanav; i++) {
-            if (atime_d[i] > 0.0 && alon[i] != 0.0 && alat[i] != 0.0) {
-              nav_time_d[n_nav] = atime_d[i];
-              nav_navlon[n_nav] = alon[i];
-              nav_navlat[n_nav] = alat[i];
-              nav_speed[n_nav] = aspeed[i];
-              n_nav++;
-            }
-          }
-        }
-      }
-
-      /* look for sensordepth if not externally defined */
-      if (status == MB_SUCCESS && sensordepth_mode == MBPREPROCESS_MERGE_ASYNC && kind == sensordepth_async) {
-        /* extract sensordepth data */
-        int extract_status = status = mb_extract_nnav(verbose, imbio_ptr, istore_ptr, nanavmax, &kind, &nanav, atime_i, atime_d, alon, alat,
-                                 aspeed, aheading, asensordepth, aroll, apitch, aheave, &error);
-
-        /* allocate memory if needed */
-        if (extract_status == MB_SUCCESS && nanav > 0 && n_sensordepth + nanav >= n_sensordepth_alloc) {
-          error = MB_ERROR_NO_ERROR;
-          n_sensordepth_alloc += std::max(MBPREPROCESS_ALLOC_CHUNK, nanav);
-          status = mb_reallocd(verbose, __FILE__, __LINE__, n_sensordepth_alloc * sizeof(double),
-                               (void **)&sensordepth_time_d, &error);
-          status &= mb_reallocd(verbose, __FILE__, __LINE__, n_sensordepth_alloc * sizeof(double),
-                               (void **)&sensordepth_sensordepth, &error);
-          if (error != MB_ERROR_NO_ERROR) {
-            char *message;
-            mb_error(verbose, error, &message);
-            fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
-            fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
-            fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-            exit(error);
-          }
-        }
-
-        /* copy the sensordepth data */
-        if (extract_status == MB_SUCCESS && nanav > 0) {
-          for (int i = 0; i < nanav; i++) {
-            sensordepth_time_d[n_sensordepth] = atime_d[i];
-            sensordepth_sensordepth[n_sensordepth] = asensordepth[i];
-            n_sensordepth++;
-          }
-        }
-      }
-
-      /* look for heading if not externally defined */
-      if (status == MB_SUCCESS && heading_mode == MBPREPROCESS_MERGE_ASYNC && kind == heading_async) {
-        /* extract heading data */
-        int extract_status = mb_extract_nnav(verbose, imbio_ptr, istore_ptr, nanavmax, &kind, &nanav, atime_i, atime_d, alon, alat,
-                                 aspeed, aheading, asensordepth, aroll, apitch, aheave, &error);
-
-        /* allocate memory if needed */
-        if (extract_status == MB_SUCCESS && nanav > 0 && n_heading + nanav >= n_heading_alloc) {
-          error = MB_ERROR_NO_ERROR;
-          n_heading_alloc += std::max(MBPREPROCESS_ALLOC_CHUNK, nanav);
-          status = mb_reallocd(verbose, __FILE__, __LINE__, n_heading_alloc * sizeof(double), (void **)&heading_time_d,
-                               &error);
-          status &= mb_reallocd(verbose, __FILE__, __LINE__, n_heading_alloc * sizeof(double), (void **)&heading_heading,
-                               &error);
-          if (error != MB_ERROR_NO_ERROR) {
-            char *message;
-            mb_error(verbose, error, &message);
-            fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
-            fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
-            fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-            exit(error);
-          }
-        }
-
-        /* copy the heading data */
-        if (extract_status == MB_SUCCESS && nanav > 0) {
-          for (int i = 0; i < nanav; i++) {
-            heading_time_d[n_heading] = atime_d[i];
-            heading_heading[n_heading] = aheading[i];
-            n_heading++;
-          }
-        }
-      }
-
-      /* look for altitude if not externally defined */
-      if (status == MB_SUCCESS && altitude_mode == MBPREPROCESS_MERGE_ASYNC && kind == altitude_async) {
-        /* extract altitude data */
-        int extract_status = mb_extract_altitude(verbose, imbio_ptr, istore_ptr, &kind, &sensordepth, &altitude, &error);
-
-        /* allocate memory if needed */
-        if (extract_status == MB_SUCCESS && n_altitude + 1 >= n_altitude_alloc) {
-          error = MB_ERROR_NO_ERROR;
-          n_altitude_alloc += MBPREPROCESS_ALLOC_CHUNK;
-          status = mb_reallocd(verbose, __FILE__, __LINE__, n_altitude_alloc * sizeof(double),
-                               (void **)&altitude_time_d, &error);
-          status &= mb_reallocd(verbose, __FILE__, __LINE__, n_altitude_alloc * sizeof(double),
-                               (void **)&altitude_altitude, &error);
-          if (error != MB_ERROR_NO_ERROR) {
-            char *message;
-            mb_error(verbose, error, &message);
-            fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
-            fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
-            fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-            exit(error);
-          }
-        }
-
-        /* copy the altitude data */
-        if (extract_status == MB_SUCCESS) {
-          altitude_time_d[n_altitude] = time_d;
-          altitude_altitude[n_altitude] = altitude;
-          n_altitude++;
-        }
-      }
-
-      /* look for attitude if not externally defined */
-      if (status == MB_SUCCESS && attitude_mode == MBPREPROCESS_MERGE_ASYNC && kind == attitude_async) {
-        /* extract attitude data */
-        int extract_status = mb_extract_nnav(verbose, imbio_ptr, istore_ptr, nanavmax, &kind, &nanav, atime_i, atime_d, alon, alat,
-                                 aspeed, aheading, asensordepth, aroll, apitch, aheave, &error);
-
-        /* allocate memory if needed */
-        if (extract_status == MB_SUCCESS && nanav > 0 && n_attitude + nanav >= n_attitude_alloc) {
-          error = MB_ERROR_NO_ERROR;
-          n_attitude_alloc += std::max(MBPREPROCESS_ALLOC_CHUNK, nanav);
-          status = mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double),
-                               (void **)&attitude_time_d, &error);
-          status &= mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double), (void **)&attitude_roll,
-                               &error);
-          status &= mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double), (void **)&attitude_pitch,
-                               &error);
-          status &= mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double), (void **)&attitude_heave,
-                               &error);
-          if (error != MB_ERROR_NO_ERROR) {
-            char *message;
-            mb_error(verbose, error, &message);
-            fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
-            fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
-            fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-            exit(error);
-          }
-        }
-
-        /* copy the attitude data */
-        if (extract_status == MB_SUCCESS && nanav > 0) {
-          for (int i = 0; i < nanav; i++) {
-            attitude_time_d[n_attitude] = atime_d[i];
-            attitude_roll[n_attitude] = aroll[i];
-            attitude_pitch[n_attitude] = apitch[i];
-            attitude_heave[n_attitude] = aheave[i];
-            n_attitude++;
-          }
-        }
-      }
-    }
-
-    /* copy data record index if used for this format */
-    status &= mb_indextable(verbose, imbio_ptr, &i_num_indextable, (void **)&i_indextable, &error);
-    if (i_num_indextable > 0) {
-      if (num_indextable_alloc <= num_indextable + i_num_indextable) {
-        /* allocate space */
-        num_indextable_alloc += i_num_indextable;
-        status &= mb_reallocd(verbose, __FILE__, __LINE__,
-                            num_indextable_alloc * sizeof(struct mb_io_indextable_struct),
-                            (void **)(&indextable), &error);
-        if (error != MB_ERROR_NO_ERROR) {
-          char *message;
-          mb_error(verbose, error, &message);
-          fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
-          fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
-          fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-          exit(error);
-        }
-      }
-
-      /* copy the index */
-      memcpy(&indextable[num_indextable], i_indextable,
-                 i_num_indextable * sizeof(struct mb_io_indextable_struct));
-      for (int i = num_indextable; i < num_indextable + i_num_indextable; i++) {
-        indextable[i].file_index = n_rt_files;
-      }
-      num_indextable += i_num_indextable;
-    }
-
-    /* output data counts */
-    if (verbose > 0) {
-      fprintf(stderr, "Pass 1: Records read from input file %d: %s\n", n_rt_files, ifile);
-      fprintf(stderr, "     %d survey records\n", n_rf_data);
-      fprintf(stderr, "     %d comment records\n", n_rf_comment);
-      fprintf(stderr, "     %d nav records\n", n_rf_nav);
-      fprintf(stderr, "     %d nav1 records\n", n_rf_nav1);
-      fprintf(stderr, "     %d nav2 records\n", n_rf_nav2);
-      fprintf(stderr, "     %d nav3 records\n", n_rf_nav3);
-      fprintf(stderr, "     %d att records\n", n_rf_att);
-      fprintf(stderr, "     %d att1 records\n", n_rf_att1);
-      fprintf(stderr, "     %d att2 records\n", n_rf_att2);
-      fprintf(stderr, "     %d att3 records\n", n_rf_att3);
-    }
-
-    /* close the swath file */
-    status &= mb_close(verbose, &imbio_ptr, &error);
-        n_rt_files++;
+    /* read ancillary data from the input file */
+		else {
+	
+			/* if origin of the ancillary data has not been specified, figure out
+				 defaults based on the first file's format */
+			if (nav_mode == MBPREPROCESS_MERGE_OFF) {
+				if (iformat == MBF_EMOLDRAW || iformat == MBF_EM300RAW || iformat == MBF_EM710RAW) {
+					nav_mode = MBPREPROCESS_MERGE_ASYNC;
+					nav_async = MB_DATA_NAV;
+				}
+				else if (iformat == MBF_KEMKMALL) {
+					nav_mode = MBPREPROCESS_MERGE_ASYNC;
+					nav_async = MB_DATA_NAV1;
+				}
+				else if (iformat == MBF_RESON7KR) {
+					nav_mode = MBPREPROCESS_MERGE_ASYNC;
+					nav_async = MB_DATA_NAV1;
+				}
+				else if (iformat == MBF_RESON7K3) {
+					nav_mode = MBPREPROCESS_MERGE_ASYNC;
+					nav_async = MB_DATA_NAV;
+				}
+			}
+			if (sensordepth_mode == MBPREPROCESS_MERGE_OFF) {
+				if (iformat == MBF_EMOLDRAW || iformat == MBF_EM300RAW || iformat == MBF_EM710RAW) {
+					sensordepth_mode = MBPREPROCESS_MERGE_ASYNC;
+					sensordepth_async = MB_DATA_HEIGHT;
+				}
+				else if (iformat == MBF_KEMKMALL) {
+					sensordepth_mode = MBPREPROCESS_MERGE_ASYNC;
+					sensordepth_async = MB_DATA_SENSORDEPTH;
+				}
+				else if (iformat == MBF_RESON7KR) {
+					sensordepth_mode = MBPREPROCESS_MERGE_ASYNC;
+					sensordepth_async = MB_DATA_SENSORDEPTH;
+				}
+				else if (iformat == MBF_RESON7K3) {
+					sensordepth_mode = MBPREPROCESS_MERGE_ASYNC;
+					sensordepth_async = MB_DATA_NAV;
+				}
+			}
+			if (heading_mode == MBPREPROCESS_MERGE_OFF) {
+				if (iformat == MBF_EMOLDRAW || iformat == MBF_EM300RAW || iformat == MBF_EM710RAW) {
+					heading_mode = MBPREPROCESS_MERGE_ASYNC;
+					heading_async = MB_DATA_NAV;
+				}
+				else if (iformat == MBF_KEMKMALL) {
+					heading_mode = MBPREPROCESS_MERGE_ASYNC;
+					heading_async = MB_DATA_NAV1;
+				}
+				else if (iformat == MBF_RESON7KR) {
+					heading_mode = MBPREPROCESS_MERGE_ASYNC;
+					heading_async = MB_DATA_HEADING;
+				}
+				else if (iformat == MBF_RESON7K3) {
+					heading_mode = MBPREPROCESS_MERGE_ASYNC;
+					heading_async = MB_DATA_NAV;
+				}
+			}
+			if (attitude_mode == MBPREPROCESS_MERGE_OFF) {
+				if (iformat == MBF_EMOLDRAW || iformat == MBF_EM300RAW || iformat == MBF_EM710RAW) {
+					attitude_mode = MBPREPROCESS_MERGE_ASYNC;
+					attitude_async = MB_DATA_ATTITUDE;
+				}
+				else if (iformat == MBF_KEMKMALL) {
+					attitude_mode = MBPREPROCESS_MERGE_ASYNC;
+					attitude_async = MB_DATA_NAV1;
+				}
+				else if (iformat == MBF_RESON7KR) {
+					attitude_mode = MBPREPROCESS_MERGE_ASYNC;
+					attitude_async = MB_DATA_ATTITUDE;
+				}
+				else if (iformat == MBF_RESON7K3) {
+					attitude_mode = MBPREPROCESS_MERGE_ASYNC;
+					attitude_async = MB_DATA_ATTITUDE;
+				}
+			}
+	
+			if (verbose > 0)
+				fprintf(stderr, "\nPass 1: Opening file %s %d\n", ifile, iformat);
+	
+			/* initialize reading the swath file */
+			if (mb_read_init(verbose, ifile, iformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
+																 &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error) != MB_SUCCESS) {
+				char *message;
+				mb_error(verbose, error, &message);
+				fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
+				fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
+				fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", ifile);
+				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+				exit(error);
+			}
+	
+			/* call preprocess function with pars settings before reading any data
+					- for some formats this can set special read behavior
+					- passing store_ptr == NULL indicates this is the pre-reading call
+					- if a preprocess function does not exist for this format then
+						standard preprocessing will be done - reset the error */
+			if (mb_preprocess(verbose, imbio_ptr, NULL, NULL, (void *)&preprocess_pars, &error) == MB_FAILURE) {
+				status = MB_SUCCESS;
+				error = MB_ERROR_NO_ERROR;
+			}
+	
+			beamflag = nullptr;
+			bath = nullptr;
+			amp = nullptr;
+			bathacrosstrack = nullptr;
+			bathalongtrack = nullptr;
+			ss = nullptr;
+			ssacrosstrack = nullptr;
+			ssalongtrack = nullptr;
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, &error);
+	
+			/* if error initializing memory then quit */
+			if (error != MB_ERROR_NO_ERROR) {
+				char *message;
+				mb_error(verbose, error, &message);
+				fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
+				fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
+				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+				exit(error);
+			}
+	
+			/* zero file count records */
+			int n_rf_data = 0;
+			int n_rf_comment = 0;
+			int n_rf_nav = 0;
+			int n_rf_nav1 = 0;
+			int n_rf_nav2 = 0;
+			int n_rf_nav3 = 0;
+			int n_rf_att = 0;
+			int n_rf_att1 = 0;
+			int n_rf_att2 = 0;
+			int n_rf_att3 = 0;
+	
+			/* read data */
+			while (error <= MB_ERROR_NO_ERROR) {
+				/* reset error */
+				error = MB_ERROR_NO_ERROR;
+	
+				/* read next data record */
+				status = mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
+														&distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
+														bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
+	
+				/* some nonfatal errors do not matter */
+				if (error < MB_ERROR_NO_ERROR && error > MB_ERROR_UNINTELLIGIBLE) {
+					error = MB_ERROR_NO_ERROR;
+					status = MB_SUCCESS;
+				}
+	
+				if (verbose >= 2) {
+					fprintf(stderr, "\ndbg2  Data record read in program <%s>\n", program_name);
+					fprintf(stderr, "dbg2       kind:           %d\n", kind);
+					fprintf(stderr, "dbg2       error:          %d\n", error);
+					fprintf(stderr, "dbg2       status:         %d\n", status);
+				}
+	
+				/* count records */
+				if (kind == MB_DATA_DATA) {
+					n_rf_data++;
+					n_rt_data++;
+				}
+				else if (kind == MB_DATA_COMMENT) {
+					n_rf_comment++;
+					n_rt_comment++;
+				}
+				else if (kind == MB_DATA_NAV) {
+					n_rf_nav++;
+					n_rt_nav++;
+				}
+				else if (kind == MB_DATA_NAV1) {
+					n_rf_nav1++;
+					n_rt_nav1++;
+				}
+				else if (kind == MB_DATA_NAV2) {
+					n_rf_nav2++;
+					n_rt_nav2++;
+				}
+				else if (kind == MB_DATA_NAV3) {
+					n_rf_nav3++;
+					n_rt_nav3++;
+				}
+				else if (kind == MB_DATA_ATTITUDE) {
+					n_rf_att++;
+					n_rt_att++;
+				}
+				else if (kind == MB_DATA_ATTITUDE1) {
+					n_rf_att1++;
+					n_rt_att1++;
+				}
+				else if (kind == MB_DATA_ATTITUDE2) {
+					n_rf_att2++;
+					n_rt_att2++;
+				}
+				else if (kind == MB_DATA_ATTITUDE3) {
+					n_rf_att3++;
+					n_rt_att3++;
+				}
+	
+				/* look for nav if not externally defined */
+				if (status == MB_SUCCESS && nav_mode == MBPREPROCESS_MERGE_ASYNC && kind == nav_async) {
+					/* extract nav data */
+					int extract_status = mb_extract_nnav(verbose, imbio_ptr, istore_ptr, nanavmax, &kind, &nanav, atime_i, atime_d, alon, alat,
+																	 aspeed, aheading, asensordepth, aroll, apitch, aheave, &error);
+	
+					/* allocate memory if needed */
+					if (extract_status == MB_SUCCESS && nanav > 0 && n_nav + nanav >= n_nav_alloc) {
+						error = MB_ERROR_NO_ERROR;
+						n_nav_alloc += std::max(MBPREPROCESS_ALLOC_CHUNK, nanav);
+						status = mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_time_d, &error);
+						status &= mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_navlon, &error);
+						status &= mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_navlat, &error);
+						status &= mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_speed, &error);
+						if (error != MB_ERROR_NO_ERROR) {
+							char *message;
+							mb_error(verbose, error, &message);
+							fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
+							fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
+							fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+							exit(error);
+						}
+					}
+	
+					/* copy the nav data */
+					if (extract_status == MB_SUCCESS && nanav > 0) {
+						for (int i = 0; i < nanav; i++) {
+							if (atime_d[i] > 0.0 && alon[i] != 0.0 && alat[i] != 0.0) {
+								nav_time_d[n_nav] = atime_d[i];
+								nav_navlon[n_nav] = alon[i];
+								nav_navlat[n_nav] = alat[i];
+								nav_speed[n_nav] = aspeed[i];
+								n_nav++;
+							}
+						}
+					}
+				}
+	
+				/* look for sensordepth if not externally defined */
+				if (status == MB_SUCCESS && sensordepth_mode == MBPREPROCESS_MERGE_ASYNC && kind == sensordepth_async) {
+					/* extract sensordepth data */
+					int extract_status = status = mb_extract_nnav(verbose, imbio_ptr, istore_ptr, nanavmax, &kind, &nanav, atime_i, atime_d, alon, alat,
+																	 aspeed, aheading, asensordepth, aroll, apitch, aheave, &error);
+	
+					/* allocate memory if needed */
+					if (extract_status == MB_SUCCESS && nanav > 0 && n_sensordepth + nanav >= n_sensordepth_alloc) {
+						error = MB_ERROR_NO_ERROR;
+						n_sensordepth_alloc += std::max(MBPREPROCESS_ALLOC_CHUNK, nanav);
+						status = mb_reallocd(verbose, __FILE__, __LINE__, n_sensordepth_alloc * sizeof(double),
+																 (void **)&sensordepth_time_d, &error);
+						status &= mb_reallocd(verbose, __FILE__, __LINE__, n_sensordepth_alloc * sizeof(double),
+																 (void **)&sensordepth_sensordepth, &error);
+						if (error != MB_ERROR_NO_ERROR) {
+							char *message;
+							mb_error(verbose, error, &message);
+							fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
+							fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
+							fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+							exit(error);
+						}
+					}
+	
+					/* copy the sensordepth data */
+					if (extract_status == MB_SUCCESS && nanav > 0) {
+						for (int i = 0; i < nanav; i++) {
+							sensordepth_time_d[n_sensordepth] = atime_d[i];
+							sensordepth_sensordepth[n_sensordepth] = asensordepth[i];
+							n_sensordepth++;
+						}
+					}
+				}
+	
+				/* look for heading if not externally defined */
+				if (status == MB_SUCCESS && heading_mode == MBPREPROCESS_MERGE_ASYNC && kind == heading_async) {
+					/* extract heading data */
+					int extract_status = mb_extract_nnav(verbose, imbio_ptr, istore_ptr, nanavmax, &kind, &nanav, atime_i, atime_d, alon, alat,
+																	 aspeed, aheading, asensordepth, aroll, apitch, aheave, &error);
+	
+					/* allocate memory if needed */
+					if (extract_status == MB_SUCCESS && nanav > 0 && n_heading + nanav >= n_heading_alloc) {
+						error = MB_ERROR_NO_ERROR;
+						n_heading_alloc += std::max(MBPREPROCESS_ALLOC_CHUNK, nanav);
+						status = mb_reallocd(verbose, __FILE__, __LINE__, n_heading_alloc * sizeof(double), (void **)&heading_time_d,
+																 &error);
+						status &= mb_reallocd(verbose, __FILE__, __LINE__, n_heading_alloc * sizeof(double), (void **)&heading_heading,
+																 &error);
+						if (error != MB_ERROR_NO_ERROR) {
+							char *message;
+							mb_error(verbose, error, &message);
+							fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
+							fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
+							fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+							exit(error);
+						}
+					}
+	
+					/* copy the heading data */
+					if (extract_status == MB_SUCCESS && nanav > 0) {
+						for (int i = 0; i < nanav; i++) {
+							heading_time_d[n_heading] = atime_d[i];
+							heading_heading[n_heading] = aheading[i];
+							n_heading++;
+						}
+					}
+				}
+	
+				/* look for altitude if not externally defined */
+				if (status == MB_SUCCESS && altitude_mode == MBPREPROCESS_MERGE_ASYNC && kind == altitude_async) {
+					/* extract altitude data */
+					int extract_status = mb_extract_altitude(verbose, imbio_ptr, istore_ptr, &kind, &sensordepth, &altitude, &error);
+	
+					/* allocate memory if needed */
+					if (extract_status == MB_SUCCESS && n_altitude + 1 >= n_altitude_alloc) {
+						error = MB_ERROR_NO_ERROR;
+						n_altitude_alloc += MBPREPROCESS_ALLOC_CHUNK;
+						status = mb_reallocd(verbose, __FILE__, __LINE__, n_altitude_alloc * sizeof(double),
+																 (void **)&altitude_time_d, &error);
+						status &= mb_reallocd(verbose, __FILE__, __LINE__, n_altitude_alloc * sizeof(double),
+																 (void **)&altitude_altitude, &error);
+						if (error != MB_ERROR_NO_ERROR) {
+							char *message;
+							mb_error(verbose, error, &message);
+							fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
+							fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
+							fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+							exit(error);
+						}
+					}
+	
+					/* copy the altitude data */
+					if (extract_status == MB_SUCCESS) {
+						altitude_time_d[n_altitude] = time_d;
+						altitude_altitude[n_altitude] = altitude;
+						n_altitude++;
+					}
+				}
+	
+				/* look for attitude if not externally defined */
+				if (status == MB_SUCCESS && attitude_mode == MBPREPROCESS_MERGE_ASYNC && kind == attitude_async) {
+					/* extract attitude data */
+					int extract_status = mb_extract_nnav(verbose, imbio_ptr, istore_ptr, nanavmax, &kind, &nanav, atime_i, atime_d, alon, alat,
+																	 aspeed, aheading, asensordepth, aroll, apitch, aheave, &error);
+	
+					/* allocate memory if needed */
+					if (extract_status == MB_SUCCESS && nanav > 0 && n_attitude + nanav >= n_attitude_alloc) {
+						error = MB_ERROR_NO_ERROR;
+						n_attitude_alloc += std::max(MBPREPROCESS_ALLOC_CHUNK, nanav);
+						status = mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double),
+																 (void **)&attitude_time_d, &error);
+						status &= mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double), (void **)&attitude_roll,
+																 &error);
+						status &= mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double), (void **)&attitude_pitch,
+																 &error);
+						status &= mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double), (void **)&attitude_heave,
+																 &error);
+						if (error != MB_ERROR_NO_ERROR) {
+							char *message;
+							mb_error(verbose, error, &message);
+							fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
+							fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
+							fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+							exit(error);
+						}
+					}
+	
+					/* copy the attitude data */
+					if (extract_status == MB_SUCCESS && nanav > 0) {
+						for (int i = 0; i < nanav; i++) {
+							attitude_time_d[n_attitude] = atime_d[i];
+							attitude_roll[n_attitude] = aroll[i];
+							attitude_pitch[n_attitude] = apitch[i];
+							attitude_heave[n_attitude] = aheave[i];
+							n_attitude++;
+						}
+					}
+				}
+			}
+	
+			/* copy data record index if used for this format */
+			status &= mb_indextable(verbose, imbio_ptr, &i_num_indextable, (void **)&i_indextable, &error);
+			if (i_num_indextable > 0) {
+				if (num_indextable_alloc <= num_indextable + i_num_indextable) {
+					/* allocate space */
+					num_indextable_alloc += i_num_indextable;
+					status &= mb_reallocd(verbose, __FILE__, __LINE__,
+															num_indextable_alloc * sizeof(struct mb_io_indextable_struct),
+															(void **)(&indextable), &error);
+					if (error != MB_ERROR_NO_ERROR) {
+						char *message;
+						mb_error(verbose, error, &message);
+						fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
+						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
+						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+						exit(error);
+					}
+				}
+	
+				/* copy the index */
+				memcpy(&indextable[num_indextable], i_indextable,
+									 i_num_indextable * sizeof(struct mb_io_indextable_struct));
+				for (int i = num_indextable; i < num_indextable + i_num_indextable; i++) {
+					indextable[i].file_index = n_rt_files;
+				}
+				num_indextable += i_num_indextable;
+			}
+	
+			/* output data counts */
+			if (verbose > 0) {
+				fprintf(stderr, "Pass 1: Records read from input file %d: %s\n", n_rt_files, ifile);
+				fprintf(stderr, "     %d survey records\n", n_rf_data);
+				fprintf(stderr, "     %d comment records\n", n_rf_comment);
+				fprintf(stderr, "     %d nav records\n", n_rf_nav);
+				fprintf(stderr, "     %d nav1 records\n", n_rf_nav1);
+				fprintf(stderr, "     %d nav2 records\n", n_rf_nav2);
+				fprintf(stderr, "     %d nav3 records\n", n_rf_nav3);
+				fprintf(stderr, "     %d att records\n", n_rf_att);
+				fprintf(stderr, "     %d att1 records\n", n_rf_att1);
+				fprintf(stderr, "     %d att2 records\n", n_rf_att2);
+				fprintf(stderr, "     %d att3 records\n", n_rf_att3);
+			}
+	
+			/* close the swath file */
+			status &= mb_close(verbose, &imbio_ptr, &error);
+					n_rt_files++;
+		}
 
     /* figure out whether and what to read next */
     if (read_datalist) {
@@ -1927,6 +2102,13 @@ int main(int argc, char **argv) {
       attitude_roll[i], attitude_pitch[i], attitude_heave[i]);
   }
 #endif
+
+	/* zero heave values if requested */
+	if (zero_heave) {
+		for (int i=0;i<n_attitude;i++) {
+			attitude_heave[i] = 0.0;
+		}
+	}
 
   /* deal with correcting MBARI Mapping AUV pressure depth time jumps */
   if (kluge_timejumps_mbaripressure) {
@@ -2743,7 +2925,7 @@ int main(int argc, char **argv) {
       n_rf_att1 = 0;
       n_rf_att2 = 0;
       n_rf_att3 = 0;
-	  n_rf_dup_timestamp = 0;
+	    n_rf_dup_timestamp = 0;
       n_wf_data = 0;
       n_wf_comment = 0;
       n_wf_nav = 0;
@@ -2762,6 +2944,7 @@ int main(int argc, char **argv) {
 
       double last_survey_time_d[MB_SUBSENSOR_NUM_MAX];
       memset(last_survey_time_d, 0, MB_SUBSENSOR_NUM_MAX * sizeof(double));
+      double time_prior_d = 0.0;
 
       /* ------------------------------- */
       /* write comments to output file   */
@@ -2772,6 +2955,7 @@ int main(int argc, char **argv) {
         /* reset error */
         status = MB_SUCCESS;
         error = MB_ERROR_NO_ERROR;
+        bool output_ok = true;
 
         /* read next data record */
         status = mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon_org, &navlat_org, &speed_org,
@@ -2844,6 +3028,8 @@ int main(int argc, char **argv) {
           (kind == MB_DATA_DATA || kind == MB_DATA_SUBBOTTOM_MCS || kind == MB_DATA_SUBBOTTOM_CNTRBEAM ||
            kind == MB_DATA_SUBBOTTOM_SUBBOTTOM || kind == MB_DATA_SIDESCAN2 || kind == MB_DATA_SIDESCAN3 ||
            kind == MB_DATA_WATER_COLUMN)) {
+           
+					bool output_ok = true;
 
           /* call mb_extract_nav to get attitude */
           status = mb_extract_nav(verbose, imbio_ptr, istore_ptr, &kind, time_i, &time_d, &navlon_org, &navlat_org,
@@ -2992,10 +3178,10 @@ int main(int argc, char **argv) {
           pitch = pitch_org;
           heave = heave_org;
 		  
-		  /* reset time_i */
-		  if (timestamp_changed) {
-			  mb_get_date(verbose, time_d, time_i);
-		  }
+					/* reset time_i */
+					if (timestamp_changed) {
+						mb_get_date(verbose, time_d, time_i);
+					}
 
           /* set up preprocess structure */
           preprocess_pars.target_sensor = target_sensor;
@@ -3023,13 +3209,9 @@ int main(int argc, char **argv) {
           preprocess_pars.n_soundspeed = n_soundspeed;
           preprocess_pars.soundspeed_time_d = soundspeed_time_d;
           preprocess_pars.soundspeed_soundspeed = soundspeed_soundspeed;
-//fprintf(stderr, "\n%s:%d:%s: n_sensordepth: %d %d\n", __FILE__, __LINE__, __FUNCTION__, 
-//preprocess_pars.n_sensordepth, n_sensordepth);
 
           /* attempt to execute a preprocess function for these data */
           status = mb_preprocess(verbose, imbio_ptr, istore_ptr, (void *)platform, (void *)&preprocess_pars, &error);
-//fprintf(stderr, "%s:%d:%s: n_sensordepth: %d %d\n\n", __FILE__, __LINE__, __FUNCTION__, 
-//preprocess_pars.n_sensordepth, n_sensordepth);
 
           /* If a predefined preprocess function does not exist for
            * this format then standard preprocessing will be done
@@ -3119,9 +3301,18 @@ int main(int argc, char **argv) {
             }
           }
         }
+        
+        if (kluge_ignore_duplicate_pings && kind == MB_DATA_DATA) {
+        	if (fabs(time_d - time_prior_d) < MB_ESF_MAXTIMEDIFF) {
+        		output_ok = false;
+        		fprintf(stderr, "Kluge ignore duplicate pings - duplicate ping skipped - Timestamps: %.6f %.6f\n", time_d, time_prior_d);
+        	}
+        }
+        if (kind == MB_DATA_DATA)
+        	time_prior_d = time_d;
 
         /* write some data */
-        if (error == MB_ERROR_NO_ERROR) {
+        if (error == MB_ERROR_NO_ERROR && output_ok) {
           status = mb_put_all(verbose, ombio_ptr, istore_ptr, false, kind, time_i, time_d, navlon, navlat, speed, heading,
                     obeams_bath, obeams_amp, opixels_ss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss,
                     ssacrosstrack, ssalongtrack, comment, &error);
@@ -3378,7 +3569,7 @@ int main(int argc, char **argv) {
       }
 
       /* close the input ("logged") swath file */
-      status &= mb_close(verbose, &imbio_ptr, &error);
+      status = mb_close(verbose, &imbio_ptr, &error);
       n_rt_files++;
 
       /* close the output ("raw") swath file */
@@ -3387,7 +3578,7 @@ int main(int argc, char **argv) {
 
       // close the output fbt file
       if (make_fbt)
-        status &= mb_close(verbose, &fmbio_ptr, &error);
+        status = mb_close(verbose, &fmbio_ptr, &error);
 
       //close the output fnv file
       if (make_fnv)

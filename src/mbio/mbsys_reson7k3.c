@@ -3167,7 +3167,7 @@ int mbsys_reson7k3_print_SegmentedRawDetection(int verbose, s7k3_SegmentedRawDet
               segmentedrawdetectionrxdata->sn_ratio);
   }
   fprintf(stderr, "\n%s     optionaldata:                %u\n", first, SegmentedRawDetection->optionaldata);
-  if (SegmentedRawDetection->optionaldata != false) {
+  if (SegmentedRawDetection->optionaldata) {
     fprintf(stderr, "%s     frequency:                   %f\n", first, SegmentedRawDetection->frequency);
     fprintf(stderr, "%s     latitude:                    %f\n", first, SegmentedRawDetection->latitude);
     fprintf(stderr, "%s     longitude:                   %f\n", first, SegmentedRawDetection->longitude);
@@ -4915,6 +4915,10 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
   double kluge_soundspeedsnellfactor = 1.0;
   bool kluge_zeroAttitudecorrection = false;
   bool kluge_zeroalongtrackangles = false;
+  bool kluge_setbeamwidthacrosstrack = false;
+  double kluge_beamwidth_acrosstrack = 0.0;
+  bool kluge_setbeamwidthalongtrack = false;
+  double kluge_beamwidth_alongtrack = 0.0;
 
   /* get kluges */
   for (int i = 0; i < pars->n_kluge; i++) {
@@ -4935,6 +4939,14 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
     }
     else if (pars->kluge_id[i] == MB_PR_KLUGE_ZEROALONGTRACKANGLES) {
       kluge_zeroalongtrackangles = true;
+    }
+    else if (pars->kluge_id[i] == MB_PR_KLUGE_SETBEAMWIDTHACROSSTRACK) {
+      kluge_setbeamwidthacrosstrack = true;
+      kluge_beamwidth_acrosstrack = *((double *)&pars->kluge_pars[i * MB_PR_KLUGE_PAR_SIZE]);
+    }
+    else if (pars->kluge_id[i] == MB_PR_KLUGE_SETBEAMWIDTHALONGTRACK) {
+      kluge_setbeamwidthalongtrack = true;
+      kluge_beamwidth_alongtrack = *((double *)&pars->kluge_pars[i * MB_PR_KLUGE_PAR_SIZE]);
     }
   }
 
@@ -4989,17 +5001,16 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
       else if (pars->kluge_id[i] == MB_PR_KLUGE_ZEROALONGTRACKANGLES) {
         fprintf(stderr, "dbg2       kluge_zeroalongtrackangles:         %d\n", kluge_zeroalongtrackangles);
       }
+      else if (pars->kluge_id[i] == MB_PR_KLUGE_SETBEAMWIDTHACROSSTRACK) {
+        fprintf(stderr, "dbg2       kluge_beamwidth_acrosstrack:        %f\n", kluge_beamwidth_acrosstrack);
+      }
+      else if (pars->kluge_id[i] == MB_PR_KLUGE_SETBEAMWIDTHALONGTRACK) {
+        fprintf(stderr, "dbg2       kluge_beamwidth_alongtrack:         %f\n", kluge_beamwidth_alongtrack);
+      }
     }
   }
 
   int status = MB_SUCCESS;
-
-  s7k3_header *header = NULL;
-  s7k3_SonarSettings *SonarSettings = NULL;
-  s7k3_segmentedrawdetectionrxdata *segmentedrawdetectionrxdata = NULL;
-  s7k3_bathydata *bathydata = NULL;
-  s7k3_rawdetectiondata *rawdetectiondata = NULL;
-  s7k3_VerticalDepth *VerticalDepth = NULL;
 
   /* variables for beam angle calculation */
   mb_3D_orientation tx_align;
@@ -5054,12 +5065,14 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
 
   /* deal with a survey record */
   else if (store->kind == MB_DATA_DATA) {
+  
+    s7k3_header *header = NULL;
     s7k3_Navigation *Navigation = &(store->Navigation);
-    SonarSettings = &(store->SonarSettings);
+    s7k3_SonarSettings *SonarSettings = &(store->SonarSettings);
     s7k3_MatchFilter *MatchFilter = &(store->MatchFilter);
     s7k3_BeamGeometry *BeamGeometry = &(store->BeamGeometry);
     s7k3_SideScan *SideScan = &(store->SideScan);
-    VerticalDepth = &(store->VerticalDepth);
+    s7k3_VerticalDepth *VerticalDepth = &(store->VerticalDepth);
     s7k3_TVG *TVG = &(store->TVG);
     s7k3_Image *Image = &(store->Image);
     s7k3_PingMotion *PingMotion = &(store->PingMotion);
@@ -5397,6 +5410,23 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
       store->read_CompressedBeamformedMagnitude = false;
       store->read_CompressedWaterColumn = false;
     }
+    
+    /* if requested reset beam width values in the SonarSettings and BeamGeometry records	
+    		and in the mb_io structure */
+    if (kluge_setbeamwidthacrosstrack || kluge_setbeamwidthalongtrack) {
+    	if (kluge_setbeamwidthacrosstrack) {
+    		mb_io_ptr->beamwidth_ltrack = kluge_beamwidth_acrosstrack;
+    		if (BeamGeometry->number_beams > 0 && BeamGeometry->number_beams <= MBSYS_RESON7K_MAX_BEAMS) {
+					for (int i = 0; i < BeamGeometry->number_beams; i++) {
+						BeamGeometry->beamwidth_acrosstrack[i] = DTR * kluge_beamwidth_acrosstrack;
+					}
+    		}
+    	}
+    	if (kluge_setbeamwidthalongtrack) {
+    		mb_io_ptr->beamwidth_xtrack = kluge_beamwidth_alongtrack;
+    		SonarSettings->beamwidth_vertical = DTR * kluge_beamwidth_alongtrack;
+    	}
+    }
 
     /*--------------------------------------------------------------*/
     /* change timestamp if indicated */
@@ -5462,11 +5492,6 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
     /*--------------------------------------------------------------*/
     /* interpolate ancillary values  */
     /*--------------------------------------------------------------*/
-	bool dprint = false;
-	if (store->time_i[2]== 12 && store->time_i[3]==16 && store->time_i[4]==0 && store->time_i[5]==17)
-		dprint = true;
-	if (store->time_i[2]== 12 && store->time_i[3]==16 && store->time_i[4]==3 && store->time_i[5]==45)
-		dprint = true;
 
     int interp_status = mb_linear_interp_longitude(verbose, pars->nav_time_d - 1, pars->nav_lon - 1, pars->n_nav, time_d,
                                                &navlon, &jnav, &interp_error);
@@ -5617,6 +5642,8 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
 
       /* initialize all of the beams */
       if (store->read_RawDetection) {
+  			s7k3_rawdetectiondata *rawdetectiondata = NULL;
+  			s7k3_bathydata *bathydata = NULL;
         for (unsigned int i = 0; i < RawDetection->number_beams; i++) {
           rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
           bathydata = &(RawDetection->bathydata[i]);
@@ -5629,6 +5656,8 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
           bathydata->azimuth_angle = 0.0;
         }
       } else if (store->read_SegmentedRawDetection) {
+  			s7k3_segmentedrawdetectionrxdata *segmentedrawdetectionrxdata = NULL;
+  			s7k3_bathydata *bathydata = NULL;
         for (unsigned int i = 0; i < SegmentedRawDetection->n_rx; i++) {
           segmentedrawdetectionrxdata = &(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
           bathydata = &(SegmentedRawDetection->bathydata[i]);
@@ -5704,6 +5733,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
          * RawDetection record
          */
         if (store->read_RawDetection) {
+  				s7k3_rawdetectiondata *rawdetectiondata = NULL;
           for (unsigned int i = 0; i < RawDetection->number_beams; i++) {
             rawdetectiondata = &RawDetection->rawdetectiondata[i];
             rawdetectiondata->rx_angle
@@ -5712,6 +5742,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
           }
         }
         else if (store->read_SegmentedRawDetection) {
+  				s7k3_segmentedrawdetectionrxdata *segmentedrawdetectionrxdata = NULL;
           for (unsigned int i = 0; i < SegmentedRawDetection->n_rx; i++) {
             segmentedrawdetectionrxdata = &(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
             segmentedrawdetectionrxdata->rx_angle_cross
@@ -5749,6 +5780,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
          * RawDetection record
          */
         if (store->read_RawDetection) {
+  				s7k3_rawdetectiondata *rawdetectiondata = NULL;
           for (unsigned int i = 0; i < RawDetection->number_beams; i++) {
             rawdetectiondata = &RawDetection->rawdetectiondata[i];
             rawdetectiondata->rx_angle =
@@ -5757,6 +5789,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
           }
         }
         else if (store->read_SegmentedRawDetection) {
+  				s7k3_segmentedrawdetectionrxdata *segmentedrawdetectionrxdata = NULL;
           for (unsigned int i = 0; i < SegmentedRawDetection->n_rx; i++) {
             segmentedrawdetectionrxdata = &(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
             segmentedrawdetectionrxdata->rx_angle_cross =
@@ -5800,8 +5833,8 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
       /* calculate bathymetry from RawDetection record */
       if (store->read_RawDetection) {
         for (unsigned int i = 0; i < RawDetection->number_beams; i++) {
-          rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
-          bathydata = &(RawDetection->bathydata[i]);
+          s7k3_rawdetectiondata *rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
+          s7k3_bathydata *bathydata = &(RawDetection->bathydata[i]);
 
           /* get range */
           ttime = rawdetectiondata->detection_point / RawDetection->sampling_rate;
@@ -5883,14 +5916,6 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
           bathydata->depth = zz + sensordepth - heave;
           bathydata->pointing_angle = DTR * theta;
           bathydata->azimuth_angle = DTR * beamAzimuth;
-if (dprint && i == RawDetection->number_beams/2) {
-fprintf(stderr, "\nPing time: %d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d\n", 
-store->time_i[0], store->time_i[1], store->time_i[2], store->time_i[3], store->time_i[4], store->time_i[5], store->time_i[6]);
-fprintf(stderr, "Heading:%f Roll:%f Pitch:%f Heave:%f Sensordepth:%f\n",
-heading, roll, pitch, heave, sensordepth);
-fprintf(stderr, "Bathy calc: rx_sign:%d tx_sign:%d beamAzimuth:%f beamDepression:%f rr:%f zz:%f xt:%f lt:%f  depth:%f\n",
-rx_sign, tx_sign, beamAzimuth, beamDepression, rr, zz, bathydata->acrosstrack, bathydata->alongtrack, bathydata->depth);
-}
         }
 
         /* set flag */
@@ -5902,10 +5927,10 @@ rx_sign, tx_sign, beamAzimuth, beamDepression, rr, zz, bathydata->acrosstrack, b
       /* calculate bathymetry from SegmentedRawDetection record */
       else if (store->read_SegmentedRawDetection) {
         for (unsigned int i = 0; i < SegmentedRawDetection->n_rx; i++) {
-          segmentedrawdetectionrxdata = &(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
+          s7k3_segmentedrawdetectionrxdata *segmentedrawdetectionrxdata = &(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
           s7k3_segmentedrawdetectiontxdata *segmentedrawdetectiontxdata =
               &(SegmentedRawDetection->segmentedrawdetectiontxdata[segmentedrawdetectionrxdata->used_segment-1]);
-          bathydata = &(SegmentedRawDetection->bathydata[i]);
+          s7k3_bathydata *bathydata = &(SegmentedRawDetection->bathydata[i]);
 
           /* get range */
           ttime = segmentedrawdetectionrxdata->detection_point / segmentedrawdetectiontxdata->sampling_rate;
@@ -6323,11 +6348,16 @@ int mbsys_reson7k3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
       }
 
       /* set beamwidths in mb_io structure */
-      mb_io_ptr->beamwidth_xtrack = MIN(mb_io_ptr->beamwidth_xtrack, 2.0);
-      mb_io_ptr->beamwidth_ltrack = MIN(mb_io_ptr->beamwidth_ltrack, 2.0);
       mb_io_ptr->beamwidth_xtrack = RTD * BeamGeometry->beamwidth_acrosstrack[BeamGeometry->number_beams / 2];
       //mb_io_ptr->beamwidth_ltrack = RTD * BeamGeometry->beamwidth_alongtrack[BeamGeometry->number_beams / 2];
       mb_io_ptr->beamwidth_ltrack = RTD * SonarSettings->beamwidth_vertical;
+            
+      if (mb_io_ptr->beamwidth_xtrack <= 0.0)
+      	mb_io_ptr->beamwidth_xtrack = 2.0;
+      if (mb_io_ptr->beamwidth_ltrack <= 0.0)
+      	mb_io_ptr->beamwidth_ltrack = 2.0;
+      mb_io_ptr->beamwidth_xtrack = MIN(mb_io_ptr->beamwidth_xtrack, 2.0);
+      mb_io_ptr->beamwidth_ltrack = MIN(mb_io_ptr->beamwidth_ltrack, 2.0);
 
       /* read distance and depth values into storage arrays */
       /* the number of soundings reported is the number of actual detections -
@@ -6392,11 +6422,16 @@ int mbsys_reson7k3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
       }
 
       /* set beamwidths in mb_io structure */
-      mb_io_ptr->beamwidth_xtrack = MIN(mb_io_ptr->beamwidth_xtrack, 2.0);
-      mb_io_ptr->beamwidth_ltrack = MIN(mb_io_ptr->beamwidth_ltrack, 2.0);
       mb_io_ptr->beamwidth_xtrack = RTD * BeamGeometry->beamwidth_acrosstrack[BeamGeometry->number_beams / 2];
       //mb_io_ptr->beamwidth_ltrack = RTD * BeamGeometry->beamwidth_alongtrack[BeamGeometry->number_beams / 2];
       mb_io_ptr->beamwidth_ltrack = RTD * SonarSettings->beamwidth_vertical;
+      
+      if (mb_io_ptr->beamwidth_xtrack <= 0.0)
+      	mb_io_ptr->beamwidth_xtrack = 2.0;
+      if (mb_io_ptr->beamwidth_ltrack <= 0.0)
+      	mb_io_ptr->beamwidth_ltrack = 2.0;
+      mb_io_ptr->beamwidth_xtrack = MIN(mb_io_ptr->beamwidth_xtrack, 2.0);
+      mb_io_ptr->beamwidth_ltrack = MIN(mb_io_ptr->beamwidth_ltrack, 2.0);
 
       /* read distance and depth values into storage arrays */
       /* the number of soundings reported is the number of actual detections -

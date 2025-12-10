@@ -2120,24 +2120,24 @@ struct mbsys_reson7k_struct {
 
 	/* ping record id's */
 	int current_ping_number;
-	int read_volatilesettings;  // TODO(schwehr): bool
-	int read_matchfilter;  // TODO(schwehr): bool
-	int read_beamgeometry;  // TODO(schwehr): bool
-	int read_remotecontrolsettings;  // TODO(schwehr): bool
-	int read_bathymetry;  // TODO(schwehr): bool
-	int read_backscatter;  // TODO(schwehr): bool
-	int read_beam;  // TODO(schwehr): bool
-	int read_verticaldepth;  // TODO(schwehr): bool
-	int read_tvg;
-	int read_image;
-	int read_v2pingmotion;
-	int read_v2detectionsetup;
-	int read_v2beamformed;
-	int read_v2detection;
-	int read_v2rawdetection;
-	int read_v2snippet;
-	int read_calibratedsnippet;
-	int read_processedsidescan;
+	bool read_volatilesettings;
+	bool read_matchfilter;
+	bool read_beamgeometry;
+	bool read_remotecontrolsettings;
+	bool read_bathymetry;
+	bool read_backscatter;
+	bool read_beam;
+	bool read_verticaldepth;
+	bool read_tvg;
+	bool read_image;
+	bool read_v2pingmotion;
+	bool read_v2detectionsetup;
+	bool read_v2beamformed;
+	bool read_v2detection;
+	bool read_v2rawdetection;
+	bool read_v2snippet;
+	bool read_calibratedsnippet;
+	bool read_processedsidescan;
 
 	/* MB-System time stamp */
 	double time_d;

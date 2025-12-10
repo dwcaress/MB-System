@@ -348,9 +348,9 @@ int main(int argc, char **argv) {
 	void *store_ptr = nullptr;
 	int kind;
 	char swathfileread[MB_PATH_MAXLINE];
-	int variable_beams;
-	int traveltime;
-	int beam_flagging;
+	bool variable_beams;
+	bool traveltime;
+	bool beam_flagging;
 	double btime_d;
 	double etime_d;
 

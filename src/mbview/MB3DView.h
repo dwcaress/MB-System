@@ -215,8 +215,8 @@ typedef struct _MB3DViewData {
 	Widget mbview_label_model;
 	Widget mbview_separator9;
 	Widget mbview_pushButton_view_3d_apply;
-	Widget mbview_label_exager;
-	Widget mbview_textField_exageration;
+	Widget mbview_label_exagger;
+	Widget mbview_textField_exaggeration;
 	Widget mbview_pushButton_view_3d_dismiss;
 	Widget mbview_dialogShell_2dparms;
 	Widget mbview_bulletinBoard_2dparms;
@@ -250,7 +250,7 @@ typedef struct _MB3DViewData {
 	Widget mbview_scrolledWindow_profile;
 	Widget mbview_drawingArea_profile;
 	Widget mbview_profile_label_info;
-	Widget mbview_scale_profile_exager;
+	Widget mbview_scale_profile_exagger;
 	Widget mbview_profile_pushButton_dismiss;
 } MB3DViewData;
 
