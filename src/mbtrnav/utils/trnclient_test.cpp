@@ -58,6 +58,8 @@ typedef struct trn_worker_s
     outfmt_t ofmt;
     ofstream *pfile;
     char *map;
+    char *veh;
+    char *trncfg;
     char *host;
     long port;
     char *logdir;
@@ -251,7 +253,7 @@ int main(int argc, char** argv)
     int c=0;
     double delay_sec=0.0;
 
-    while ( (c = getopt(argc, argv, "a:f:hl:m:o:p:st:v:")) != EOF )
+    while ( (c = getopt(argc, argv, "a:f:hl:M:V:C:o:p:st:v:")) != EOF )
     {
         if (c == 'l'){
             if(NULL!=worker->logdir)
@@ -263,10 +265,20 @@ int main(int argc, char** argv)
             free(worker->host);
             worker->host = strdup(optarg);     // TRN host overrides host in config file
         }
-        else if (c == 'm'){
+        else if (c == 'M'){
             if(NULL!=worker->map)
             free(worker->map);
             worker->map = strdup(optarg);     // TRN map overrides map in config file
+        }
+        else if (c == 'V'){
+            if(NULL!=worker->veh)
+            free(worker->veh);
+            worker->veh = strdup(optarg);     // TRN map overrides map in config file
+        }
+        else if (c == 'C'){
+            if(NULL!=worker->trncfg)
+            free(worker->trncfg);
+            worker->trncfg = strdup(optarg);     // TRN map overrides map in config file
         }
         else if (c == 'p'){
             worker->port = atol(optarg);       // TRN port overrides port in config file
@@ -307,6 +319,9 @@ int main(int argc, char** argv)
             fprintf(stderr,"  -o c   : output fmt (a|c)\n");
             fprintf(stderr,"  -v n   : verbose output level\n");
             fprintf(stderr,"  -t n   : period sec\n");
+            fprintf(stderr,"  -M s   : map file name\n");
+            fprintf(stderr,"  -V s   : vehicle file name\n");
+            fprintf(stderr,"  -C s   : TRN config file (e.g. terrainAid.cfg)\n");
             fprintf(stderr,"  -h     : help message\n");
             fprintf(stderr,"\n");
             exit(0);
@@ -322,11 +337,22 @@ int main(int argc, char** argv)
     tl_mconfig(TL_TNAV_PARTICLE_FILTER, TL_SERR, TL_NC);
     tl_mconfig(TL_TNAV_FILTER, TL_SERR, TL_NC);
 
-    // Create and initialize the Replay object
+    // Create and initialize the TrnClient object
     //
+
     worker->trncli = new TrnClient(worker->host, worker->port);
     worker->trncli->setVerbose(worker->verbose);
 
+    worker->trncli->loadCfgAttributes(worker->trncfg);
+
+    if(worker->map != NULL){
+        TrnAttr::chkSetString(&worker->trncli->_trn_attr->mapName, worker->map);
+    }
+    if(worker->veh != NULL){
+        TrnAttr::chkSetString(&worker->trncli->_trn_attr->vehicleCfgName, worker->veh);
+    }
+    worker->trncli->show();
+    fprintf(stderr,"\n%s\n",worker->trncli->_trn_attr->tostring().c_str());
     // Open connection to the TRN server. The server
     // initialization will fail unless the correct
     // map and vehicle configuration files are present
