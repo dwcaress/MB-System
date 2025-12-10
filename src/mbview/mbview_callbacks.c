@@ -8231,31 +8231,8 @@ int do_mbview_message_on(char *message, size_t instance) {
 
 	set_mbview_label_string(view->mb3dview.mbview_label_message, message);
 	XtManageChild(view->mb3dview.mbview_bulletinBoard_message);
-
-	/* force the label to be visible */
-	Widget diashell;
-	for (diashell = view->mb3dview.mbview_label_message; !XtIsShell(diashell); diashell = XtParent(diashell))
-		;
-	Widget topshell;
-	for (topshell = diashell; !XtIsTopLevelShell(topshell); topshell = XtParent(topshell))
-		;
-	if (XtIsRealized(diashell) && XtIsRealized(topshell)) {
-		Window diawindow = XtWindow(diashell);
-		Window topwindow = XtWindow(topshell);
-		XEvent event;
-		XWindowAttributes xwa;
-
-		/* wait for the dialog to be mapped */
-		while (XGetWindowAttributes(view->dpy, diawindow, &xwa) && xwa.map_state != IsViewable) {
-			if (XGetWindowAttributes(view->dpy, topwindow, &xwa) && xwa.map_state != IsViewable)
-				break;
-
-			XtAppNextEvent(app_context, &event);
-			XtDispatchEvent(&event);
-		}
-	}
-
-	XmUpdateDisplay(topshell);
+	XSync(XtDisplay(view->mb3dview.mbview_bulletinBoard_message), 0);
+	XmUpdateDisplay(view->mainWindow);
 
 	return (1);
 }

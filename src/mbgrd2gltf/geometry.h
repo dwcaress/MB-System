@@ -33,7 +33,7 @@
 #ifndef GEOMETRY_H
 #define GEOMETRY_H
 
- // local includes
+// local includes
 #include "vertex.h"
 #include "triangle.h"
 #include "matrix.h"

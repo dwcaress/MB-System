@@ -21,7 +21,7 @@
  *
  *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
- /*
+/*
   *    The program MBgrd2gltf, including this source file, was created
   *    by a Capstone Project team at the California State University
   *    Monterey Bay (CSUMB) including Kyle Dowling, Julian Fortin,
@@ -34,46 +34,42 @@
 #ifndef POINT_H
 #define POINT_H
 
-  // standard library
+// standard library
 #include <cstdint>
 
 namespace mbgrd2gltf {
-	class Vertex {
-	private: // members
+class Vertex {
+private: // members
+  float _x;
+  float _y;
+  float _z;
+  uint32_t _id;
 
-		float _x;
-		float _y;
-		float _z;
-		uint32_t _id;
+public: // methods
+  Vertex()
+      : _x(0)
+      , _y(0)
+      , _z(0)
+      , _id(0) {}
 
-	public: // methods
+  Vertex(float x, float y, float z, uint32_t id)
+      : _x(x)
+      , _y(y)
+      , _z(z)
+      , _id(id) {}
 
-		Vertex() :
-			_x(0),
-			_y(0),
-			_z(0),
-			_id(0) {
-		}
+  Vertex(Vertex&&) = default;
+  Vertex(const Vertex&) = default;
 
-		Vertex(float x, float y, float z, uint32_t id) :
-			_x(x),
-			_y(y),
-			_z(z),
-			_id(id) {
-		}
+  inline float x() const { return _x; }
+  inline float y() const { return _y; }
+  inline float z() const { return _z; }
+  inline uint32_t index() const { return _id - 1; }
+  inline bool is_valid() const { return _id > 0; }
 
-		Vertex(Vertex&&) = default;
-		Vertex(const Vertex&) = default;
-
-		inline float x() const { return _x; }
-		inline float y() const { return _y; }
-		inline float z() const { return _z; }
-		inline uint32_t index() const { return _id - 1; }
-		inline bool is_valid() const { return _id > 0; }
-
-		Vertex& operator=(Vertex&&) = default;
-		Vertex& operator=(const Vertex&) = default;
-	};
-}
+  Vertex& operator=(Vertex&&) = default;
+  Vertex& operator=(const Vertex&) = default;
+};
+} // namespace mbgrd2gltf
 
 #endif
