@@ -525,7 +525,7 @@ AddPoint(const Vector& point) {
 		}
 		break;
 		default: {
-			std::cout << "\nData Type Octrees require the AddData Method\nNo points added\n\n";
+			std::cerr << "\nData Type Octrees require the AddData Method\nNo points added\n\n";
 		}
 	}
 	return false;
@@ -549,7 +549,7 @@ AddPoints(const Vector points[], const unsigned int numPoints) {
 		break;
 
 		default: {
-			std::cout << "\nData Type Octrees require the AddData Method\nNo points added\n\n";
+			std::cerr << "\nData Type Octrees require the AddData Method\nNo points added\n\n";
 		}
 	}
 	return index;
@@ -567,7 +567,7 @@ AddData(const Vector& point, const ValueType data) {
 		OctreeRoot->AddData(*this, point, data, 0);
 		return true;
 	} else {
-		std::cout << "\nAddData does not apply to OctreeNode Types other than Data\nNo points added\n\n";
+		std::cerr << "\nAddData does not apply to OctreeNode Types other than Data\nNo points added\n\n";
 	}
 	return false;
 }
@@ -587,7 +587,7 @@ AddData(const Vector points[], const ValueType data[], unsigned int numDatas) {
 		}
 		return index;
 	} else {
-		std::cout << "\nAddData does not apply to OctreeNode Types other than Data\nNo points added\n\n";
+		std::cerr << "\nAddData does not apply to OctreeNode Types other than Data\nNo points added\n\n";
 		return 0;
 	}
 }
@@ -677,7 +677,7 @@ SaveToFile(const char* filename) const {
 	std::FILE* saveFile;
 	saveFile = std::fopen(filename , "wb");
 	if(saveFile == NULL) {
-		std::cout << "Unable to open: " << filename << std::endl;
+		std::cerr << "Unable to open: " << filename << std::endl;
 		return false;
 	}
 
@@ -729,7 +729,7 @@ LoadFromFile(const char* filename) {
 	std::FILE* loadFile;
 	loadFile = std::fopen(filename , "rb");
 	if(loadFile == NULL) {
-		std::cout << "LoadFromFile - Unable to open: " << filename << std::endl;
+		std::cerr << "LoadFromFile - Unable to open: " << filename << std::endl;
 		return false;
 	}
 
@@ -773,9 +773,9 @@ LoadFromFile(const char* filename) {
 	int numLeafNodes = 0;
 
 	bool returnValue = OctreeRoot->LoadFromFile(loadFile, numBranchNodes, numLeafNodes);
-    std::cout << "\nOctree file <" << filename << "> loaded\n";
-	std::cout << "Num Branch Nodes: " << numBranchNodes << "\tNum Leaf Nodes: " << numLeafNodes << "\n";
-	std::cout << "Total Node Size: " << ((numBranchNodes + numLeafNodes) * sizeof(OctreeNode) +
+    std::cerr << "\nOctree file <" << filename << "> loaded\n";
+	std::cerr << "Num Branch Nodes: " << numBranchNodes << "\tNum Leaf Nodes: " << numLeafNodes << "\n";
+	std::cerr << "Total Node Size: " << ((numBranchNodes + numLeafNodes) * sizeof(OctreeNode) +
 					     numBranchNodes * 8 * sizeof(OctreeNode*) )/ 1048576 << " MB \n";
 
 	if(std::ferror(loadFile)) {
@@ -791,33 +791,33 @@ template <class ValueType>
 void
 Octree<ValueType>::
 Print(OTreeStats *ts) const {
-    std::cout << "LowerBounds:\t";
+    std::cerr << "LowerBounds:\t";
     LowerBounds.Print();
-    std::cout << "UpperBounds:\t";
+    std::cerr << "UpperBounds:\t";
     UpperBounds.Print();
-    std::cout << "MaxDepth:\t" << MaxDepth << std::endl;
-    std::cout << "Size:\t\t";
+    std::cerr << "MaxDepth:\t" << MaxDepth << std::endl;
+    std::cerr << "Size:\t\t";
     Size.Print();
-    std::cout << "TrueResolution:\t";
+    std::cerr << "TrueResolution:\t";
     TrueResolution.Print();
-    std::cout << "OctreeType:\t" << OctreeNodeType << std::endl;
-    std::cout << "valueType sz:\t" << sizeof(ValueType) << std::endl;
+    std::cerr << "OctreeType:\t" << OctreeNodeType << std::endl;
+    std::cerr << "valueType sz:\t" << sizeof(ValueType) << std::endl;
 
     //big octrees have LOTS to print
     OctreeRoot->Print(0,ts);
-    std::cout << std::endl;
+    std::cerr << std::endl;
     int wkey=12;
     int wval=30;
     if(NULL!=ts){
-    std::cout << std::setfill(' ');
-    std::cout << std::setw(wkey) << "depth :" << std::setw(wval) << ts->depth <<  std::endl;
-    std::cout << std::setw(wkey) << "branches :" << std::setw(wval) << ts->branches << std::endl;
-    std::cout << std::setw(wkey) << "leaves :" << std::setw(wval) << ts->leaves << std::endl;
-    std::cout << std::setw(wkey) << "nodes :" << std::setw(wval) << ts->nodes << std::endl;
-    std::cout << std::setw(wkey) << "disk size :" << std::setw(wval) << DiskSize(ts) << std::endl;
-    std::cout << std::setw(wkey) << "RAM size :" << std::setw(wval) << MemSize(ts) << std::endl;
+    std::cerr << std::setfill(' ');
+    std::cerr << std::setw(wkey) << "depth :" << std::setw(wval) << ts->depth <<  std::endl;
+    std::cerr << std::setw(wkey) << "branches :" << std::setw(wval) << ts->branches << std::endl;
+    std::cerr << std::setw(wkey) << "leaves :" << std::setw(wval) << ts->leaves << std::endl;
+    std::cerr << std::setw(wkey) << "nodes :" << std::setw(wval) << ts->nodes << std::endl;
+    std::cerr << std::setw(wkey) << "disk size :" << std::setw(wval) << DiskSize(ts) << std::endl;
+    std::cerr << std::setw(wkey) << "RAM size :" << std::setw(wval) << MemSize(ts) << std::endl;
     }
-    std::cout << std::endl;
+    std::cerr << std::endl;
 }
 
 template <class ValueType>
