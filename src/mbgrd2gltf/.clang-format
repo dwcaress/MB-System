@@ -1,0 +1,31 @@
+# Conservative formatter for mbgrd2gltf only
+BasedOnStyle: LLVM
+IndentWidth: 2
+TabWidth: 2
+UseTab: Never
+ColumnLimit: 100
+
+# Avoid risky include re-sort
+SortIncludes: false
+IncludeBlocks: Preserve
+
+# Keep comments/blocks stable
+ReflowComments: false
+AlignTrailingComments: true
+
+# Keep pointer/reference alignment calm
+PointerAlignment: Left
+ReferenceAlignment: Pointer
+
+# Keep constructor init lists tidy
+BreakConstructorInitializers: BeforeComma
+
+# Don’t aggressively reorder or wrap macros
+MacroBlockBegin: ''
+MacroBlockEnd: ''
+
+# Leave case labels indented normally
+IndentCaseLabels: false
+
+# Keep namespace closing comments if they exist
+FixNamespaceComments: true

@@ -21,7 +21,7 @@
  *
  *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
- /*
+/*
   *    The program MBgrd2gltf, including this source file, was created
   *    by a Capstone Project team at the California State University
   *    Monterey Bay (CSUMB) including Kyle Dowling, Julian Fortin,
@@ -43,39 +43,33 @@
 using namespace mbgrd2gltf;
 
 int main(int argc, char* argv[]) {
-	try {
-		Options options((unsigned)argc, (const char**)argv);
-		if (options.is_help()) {
-			std::cout << "Help requested, exiting..." << std::endl;
-			return 0;
-		}
-		Bathymetry bathymetry(options);
-		Geometry geometry(bathymetry, options);
-		model::write_gltf(geometry, options);
-	}
-	catch (const std::invalid_argument& e) {
-		std::cerr << "Invalid argument error: " << e.what() << std::endl;
-		return 1;
-	}
-	catch (const std::out_of_range& e) {
-		std::cerr << "Out of range error: " << e.what() << std::endl;
-		return 1;
-	}
-	catch (const std::bad_alloc& e) {
-		std::cerr << "Memory allocation error: " << e.what() << std::endl;
-		return 1;
-	}
-	catch (const std::runtime_error& e) {
-		std::cerr << "Runtime error: " << e.what() << std::endl;
-		return 1;
-	}
-	catch (const std::exception& e) {
-		std::cerr << "General error: " << e.what() << std::endl;
-		return 1;
-	}
-	catch (...) {
-		std::cerr << "Unknown error occurred." << std::endl;
-		return 1;
-	}
-	return 0;
+  try {
+    Options options((unsigned)argc, (const char**)argv);
+    if (options.is_help()) {
+      std::cout << "Help requested, exiting..." << std::endl;
+      return 0;
+    }
+    Bathymetry bathymetry(options);
+    Geometry geometry(bathymetry, options);
+    model::write_gltf(geometry, options);
+  } catch (const std::invalid_argument& e) {
+    std::cerr << "Invalid argument error: " << e.what() << std::endl;
+    return 1;
+  } catch (const std::out_of_range& e) {
+    std::cerr << "Out of range error: " << e.what() << std::endl;
+    return 1;
+  } catch (const std::bad_alloc& e) {
+    std::cerr << "Memory allocation error: " << e.what() << std::endl;
+    return 1;
+  } catch (const std::runtime_error& e) {
+    std::cerr << "Runtime error: " << e.what() << std::endl;
+    return 1;
+  } catch (const std::exception& e) {
+    std::cerr << "General error: " << e.what() << std::endl;
+    return 1;
+  } catch (...) {
+    std::cerr << "Unknown error occurred." << std::endl;
+    return 1;
+  }
+  return 0;
 }
