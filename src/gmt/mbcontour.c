@@ -44,7 +44,10 @@
 
 //#include <stdbool.h>
 
-/* GMT header file */
+/* include GMT header file gmt_dev.h without including glib headers not needed by MB-System */
+#ifdef HAVE_GLIB_GTHREAD
+#undef HAVE_GLIB_GTHREAD
+#endif
 #include "gmt_dev.h"
 
 /*  Compatibility with old lower-function/macro names use prior to GMT 5.3.0 */
@@ -1179,20 +1182,6 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 		read_data = true;
 	}
 
-	// TODO(schwehr): Localize variables
-
-	struct swath *swath_plot = NULL;
-	struct ping *pingcur = NULL;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathlon = NULL;
-	double *bathlat = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *sslon = NULL;
-	double *sslat = NULL;
-	unsigned int pingnumber;
-
 	/* loop over files in file list */
 	if (verbose == 1)
 		fprintf(stderr, "\n");
@@ -1219,6 +1208,17 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 				mb_get_fnv(verbose, file, &format, &error);
 			}
 
+			struct swath *swath_plot = NULL;
+			struct ping *pingcur = NULL;
+			char *beamflag = NULL;
+			double *bath = NULL;
+			double *bathlon = NULL;
+			double *bathlat = NULL;
+			double *amp = NULL;
+			double *ss = NULL;
+			double *sslon = NULL;
+			double *sslat = NULL;
+			unsigned int pingnumber;
 			double btime_d;
 			double etime_d;
 			int beams_bath;

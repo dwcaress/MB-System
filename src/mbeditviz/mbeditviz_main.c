@@ -40,22 +40,8 @@
 #include <Xm/MwmUtil.h>
 
 #include "mbview.h"
-
 #include "mbeditviz.h"
-
 #include "mbeditviz_creation.h"
-
-// TODO(schwehr): These should be coming from a header.
-extern void RegisterBxConverters(XtAppContext);
-extern XtPointer BX_CONVERT(Widget, char *, char *, int, Boolean *);
-extern XtPointer BX_DOUBLE(double);
-extern XtPointer BX_SINGLE(float);
-extern void BX_MENU_POST(Widget, XtPointer, XEvent *, Boolean *);
-extern Pixmap XPM_PIXMAP(Widget, char **);
-extern void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
-
-extern void do_mbeditviz_quit(Widget, XtPointer, XtPointer);
-extern void BxExitCB(Widget, XtPointer, XtPointer);
 
 /* Avoid conflict due to BOOL redefinitions (Xm vs Win headers) */
 #ifdef WIN32
@@ -148,6 +134,9 @@ int main(int argc, char **argv) {
 	mb3dsoundings_startup(mbev_verbose, parent, app, &mbev_error);
 	mb3dsoundings_set_dismiss_notify(mbev_verbose, mbeditviz_mb3dsoundings_dismiss, &mbev_error);
 	mb3dsoundings_set_edit_notify(mbev_verbose, mbeditviz_mb3dsoundings_edit, &mbev_error);
+
+	/* initialize app value and wait until view realized */
+	do_wait_until_viewed();
 
 	mbeditviz_init(argcsave, argv,
                        "MBeditviz",

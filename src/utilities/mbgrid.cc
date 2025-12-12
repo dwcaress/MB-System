@@ -2233,7 +2233,7 @@ int main(int argc, char **argv) {
             status = mb_read(verbose, mbio_ptr, &kind, &rpings, time_i, &time_d, &navlon, &navlat, &speed, &heading,
                              &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath,
                              amp, bathlon, bathlat, ss, sslon, sslat, comment, &error);
-
+                             
             /* time gaps are not a problem here */
             if (error == MB_ERROR_TIME_GAP) {
               error = MB_ERROR_NO_ERROR;
@@ -2253,14 +2253,14 @@ int main(int argc, char **argv) {
             if ((datatype == MBGRID_DATA_BATHYMETRY || datatype == MBGRID_DATA_TOPOGRAPHY) &&
                 error == MB_ERROR_NO_ERROR) {
 
-                            /* if needed try again to get topography type */
-                            if (topo_type == MB_TOPOGRAPHY_TYPE_UNKNOWN) {
-                                status = mb_sonartype(verbose, mbio_ptr, mb_io_ptr->store_data, &topo_type, &error);
-                                if (topo_type == MB_TOPOGRAPHY_TYPE_UNKNOWN
-                                    && mb_io_ptr->beamwidth_xtrack > 0.0 && mb_io_ptr->beamwidth_ltrack > 0.0) {
-                                    topo_type = MB_TOPOGRAPHY_TYPE_MULTIBEAM;
-                                }
-                            }
+							/* if needed try again to get topography type */
+							if (topo_type == MB_TOPOGRAPHY_TYPE_UNKNOWN) {
+									status = mb_sonartype(verbose, mbio_ptr, mb_io_ptr->store_data, &topo_type, &error);
+									if (topo_type == MB_TOPOGRAPHY_TYPE_UNKNOWN
+											&& mb_io_ptr->beamwidth_xtrack > 0.0 && mb_io_ptr->beamwidth_ltrack > 0.0) {
+											topo_type = MB_TOPOGRAPHY_TYPE_MULTIBEAM;
+									}
+							}
 
               /* reproject beam positions if necessary */
               if (use_projection) {

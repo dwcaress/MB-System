@@ -117,6 +117,7 @@ struct mbpm_process_struct {
     int image_count;
     int image_camera;
     double image_quality;
+    bool image_rectified;
     double image_gain;
     double image_exposure;
     double time_d;
@@ -593,7 +594,12 @@ void process_image(int verbose, struct mbpm_process_struct *process,
         double intensityCorrection;
 
         /* undistort the image */
-        undistort(imageProcess, imageUndistort, control->cameraMatrix[process->image_camera], control->distCoeffs[process->image_camera], noArray());
+        if (!process->image_rectified) {
+        		undistort(imageProcess, imageUndistort, control->cameraMatrix[process->image_camera], control->distCoeffs[process->image_camera], noArray());
+        }
+        else {
+        		imageUndistort = imageProcess.clone();
+        }
         imageProcess.release();
 
         /* get field of view, offsets, and principal point to use */
@@ -1516,12 +1522,13 @@ int main(int argc, char** argv)
     npairs = 0;
     nimages = 0;
     int imageStatus = MB_IMAGESTATUS_NONE;
+    bool rectified = false;
     double image_quality = 0.0;
     mb_path dpath;
     unsigned int numThreadsSet = 0;
     fprintf(stderr,"About to read ImageListFile: %s\n", ImageListFile);
 
-    while ((status = mb_imagelist_read(verbose, imagelist_ptr, &imageStatus,
+    while ((status = mb_imagelist_read(verbose, imagelist_ptr, &imageStatus, &rectified, 
                                 imageLeftFile, imageRightFile, dpath,
                                 &left_time_d, &right_time_d,
                                 &left_gain, &right_gain,
@@ -2093,7 +2100,7 @@ int main(int argc, char** argv)
                     initialize the use of the camera model. We assume that all
                     images derive from the same camera rig and have the same
                     dimensions. */
-                if (!undistort_initialized) {
+                if (!undistort_initialized || !rectified) {
                     undistort_initialized = true;
                     Mat imageFirst = imread(imageFile);
                     if (!imageFirst.empty()) {
@@ -2161,6 +2168,7 @@ int main(int argc, char** argv)
                 processPars[numThreadsSet].image_count = nimages - currentimages + iimage;
                 processPars[numThreadsSet].image_camera = image_camera;
                 processPars[numThreadsSet].image_quality = image_quality;
+                processPars[numThreadsSet].image_rectified = rectified;
                 processPars[numThreadsSet].image_gain = image_gain;
                 processPars[numThreadsSet].image_exposure = image_exposure;
                 processPars[numThreadsSet].time_d = time_d;

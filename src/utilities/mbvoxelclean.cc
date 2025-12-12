@@ -398,8 +398,8 @@ int main(int argc, char **argv) {
 
   int kind = MB_DATA_NONE;
   char swathfileread[MB_PATH_MAXLINE];
-  int variable_beams;
-  int traveltime;
+  bool variable_beams;
+  bool traveltime;
   double btime_d;
   double etime_d;
 
@@ -466,7 +466,7 @@ int main(int argc, char **argv) {
   /* loop over all files to be read */
   while (read_data) {
     bool oktoprocess = true;
-    int beam_flagging;  // TODO(schwehr): Make mb_format_flags take a bool
+    bool beam_flagging; 
 
     /* check format and get format flags */
     if ((status = mb_format_flags(verbose, &format, &variable_beams, &traveltime, &beam_flagging, &error)) != MB_SUCCESS) {

@@ -507,9 +507,9 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
   double swath_width;
 
   /* processing variables */
-  int variable_beams = false;
-  int traveltime = false;
-  int beam_flagging = false;
+  bool variable_beams = false;
+  bool traveltime = false;
+  bool beam_flagging = false;
   char mbp_pfile[MBP_FILENAMESIZE];
   FILE *tfp;
   int nnav = 0;
@@ -687,7 +687,7 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
     }
   }
 
-  /* check for format with travel time data */  // TODO(schwehr): Make mb_format_flags take bools.
+  /* check for format with travel time data */ 
   *status = mb_format_flags(verbose, &process->mbp_format, &variable_beams, &traveltime, &beam_flagging, error);
   if (process->mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE && !traveltime) {
     fprintf(stderr, "\nWarning:\n\tFormat %d does not include travel time data.\n", process->mbp_format);

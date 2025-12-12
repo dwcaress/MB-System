@@ -156,9 +156,9 @@ MBNAVADJUST_EXTERNAL struct mbna_contour_vector mbna_contour1;
 MBNAVADJUST_EXTERNAL struct mbna_contour_vector mbna_contour2;
 
 /* model plot parameters */
+MBNAVADJUST_EXTERNAL int mbna_modelplot_mode;
 MBNAVADJUST_EXTERNAL int mbna_modelplot_width;
 MBNAVADJUST_EXTERNAL int mbna_modelplot_height;
-MBNAVADJUST_EXTERNAL int mbna_modelplot;
 MBNAVADJUST_EXTERNAL int mbna_modelplot_count;
 MBNAVADJUST_EXTERNAL int mbna_modelplot_start;
 MBNAVADJUST_EXTERNAL int mbna_modelplot_end;
@@ -273,11 +273,17 @@ int mbnavadjust_modelplot_plot_timeseries(void);
 int mbnavadjust_modelplot_plot_perturbation(void);
 int mbnavadjust_modelplot_plot_tieoffsets(void);
 int mbnavadjust_modelplot_pick(int x, int y);
-int mbnavadjust_modelplot_pick_timeseries(int x, int y);
-int mbnavadjust_modelplot_pick_perturbation(int x, int y);
+int mbnavadjust_modelplot_pick_timeseries_crossingties(int x, int y);
+int mbnavadjust_modelplot_pick_timeseries_globalties(int x, int y);
+int mbnavadjust_modelplot_pick_perturbation_crossingties(int x, int y);
+int mbnavadjust_modelplot_pick_perturbation_globalties(int x, int y);
 int mbnavadjust_modelplot_pick_tieoffsets(int x, int y);
-int mbnavadjust_modelplot_pick_globaltieoffsets(int x, int y);
 int mbnavadjust_modelplot_middlepick(int x, int y);
+int mbnavadjust_modelplot_middlepick_timeseries_crossingties(int x, int y);
+int mbnavadjust_modelplot_middlepick_timeseries_globalties(int x, int y);
+int mbnavadjust_modelplot_middlepick_perturbation_crossingties(int x, int y);
+int mbnavadjust_modelplot_middlepick_perturbation_globalties(int x, int y);
+int mbnavadjust_modelplot_middlepick_tieoffsets(int x, int y);
 int mbnavadjust_modelplot_setzoom(void);
 int mbnavadjust_modelplot_clearblock(void);
 

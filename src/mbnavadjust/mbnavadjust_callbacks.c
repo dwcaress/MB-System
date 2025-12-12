@@ -1054,10 +1054,18 @@ void do_update_status() {
                 tiestatus = tiestatus_xy_f;
               else if (section->globaltie.status == MBNA_TIE_Z_FIXED)
                 tiestatus = tiestatus_z_f;
+							int refgrid_id = project.refgrid_select;
+							mb_path refgrid_name = " | No reference grid";
+							if (section->globaltie.refgrid_id >= 0 && project.refgrid_select < 0) {
+								refgrid_id = section->globaltie.refgrid_id;
+							}
+							if (refgrid_id >= 0) {
+								strncpy(refgrid_name, project.refgrid_names[refgrid_id], sizeof(refgrid_name));
+							}
               if (section->globaltie.inversion_status == MBNA_INVERSION_CURRENT)
                 snprintf(string, sizeof(string), 
                   "%c %2.2d:%4.4d:%2.2d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d"
-                  " | %2.2d %s %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f",
+                  " | %2.2d %s %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f | %s",
                   status_char, file->block, file->id, j,
                   btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4], btime_i[5], btime_i[6],
                   etime_i[0], etime_i[1], etime_i[2], etime_i[3], etime_i[4], etime_i[5], etime_i[6],
@@ -1065,11 +1073,12 @@ void do_update_status() {
                   section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
                   section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3,
                   section->globaltie.dx_m, section->globaltie.dy_m, section->globaltie.dz_m,
-                  section->globaltie.sigma_m, section->globaltie.rsigma_m);
+                  section->globaltie.sigma_m, section->globaltie.rsigma_m,
+                  refgrid_name);
               else if (section->globaltie.inversion_status == MBNA_INVERSION_OLD)
                 snprintf(string, sizeof(string), 
                   "%c %2.2d:%4.4d:%2.2d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d"
-                  " | %2.2d %s %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f ***",
+                  " | %2.2d %s %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f *** | %s",
                   status_char, file->block, file->id, j,
                   btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4], btime_i[5], btime_i[6],
                   etime_i[0], etime_i[1], etime_i[2], etime_i[3], etime_i[4], etime_i[5], etime_i[6],
@@ -1077,7 +1086,8 @@ void do_update_status() {
                   section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
                   section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3,
                   section->globaltie.dx_m, section->globaltie.dy_m, section->globaltie.dz_m,
-                  section->globaltie.sigma_m, section->globaltie.rsigma_m);
+                  section->globaltie.sigma_m, section->globaltie.rsigma_m,
+                  refgrid_name);
               else
                 snprintf(string, sizeof(string), 
                   "%c %2.2d:%4.4d:%2.2d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d"
@@ -1088,6 +1098,7 @@ void do_update_status() {
                   section->globaltie.snav, tiestatus,
                   section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
                   section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3);
+ 
             }
             xstr[num_sections] = XmStringCreateLocalized(string);
             if (mbna_verbose > 0)
@@ -1792,28 +1803,36 @@ void do_update_status() {
               tiestatus = tiestatus_xy_f;
             else if (section->globaltie.status == MBNA_TIE_Z_FIXED)
               tiestatus = tiestatus_z_f;
+						int refgrid_id = project.refgrid_select;
+						mb_path refgrid_name = " | No reference grid";
+						if (section->globaltie.refgrid_id >= 0 && project.refgrid_select < 0) {
+							refgrid_id = section->globaltie.refgrid_id;
+						}
+						if (refgrid_id >= 0) {
+							strncpy(refgrid_name, project.refgrid_names[refgrid_id], sizeof(refgrid_name));
+						}
             if (section->globaltie.inversion_status == MBNA_INVERSION_CURRENT)
               sprintf(string,
-                "%2.2d:%4.4d:%3.3d:%2.2d %s %2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f",
+                "%2.2d:%4.4d:%3.3d:%2.2d %s %2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f | %s",
                 project.files[i].block, i, j, section->globaltie.snav, tiestatus, section->globaltie.refgrid_id, 
                 section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
                 section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3,
                 section->globaltie.dx_m, section->globaltie.dy_m, section->globaltie.dz_m,
-                section->globaltie.sigma_m, section->globaltie.rsigma_m);
+                section->globaltie.sigma_m, section->globaltie.rsigma_m, refgrid_name);
             else if (section->globaltie.inversion_status == MBNA_INVERSION_OLD)
               sprintf(string,
-                "%2.2d:%4.4d:%3.3d:%2.2d %s %2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f ***",
+                "%2.2d:%4.4d:%3.3d:%2.2d %s %2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f *** | %s",
                 project.files[i].block, i, j, section->globaltie.snav, tiestatus, section->globaltie.refgrid_id,
                 section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
                 section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3,
                 section->globaltie.dx_m, section->globaltie.dy_m, section->globaltie.dz_m,
-                section->globaltie.sigma_m, section->globaltie.rsigma_m);
+                section->globaltie.sigma_m, section->globaltie.rsigma_m, refgrid_name);
             else
               sprintf(string,
-                "%2.2d:%4.4d:%3.3d:%2.2d %s %2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f",
+                "%2.2d:%4.4d:%3.3d:%2.2d %s %2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %s",
                 project.files[i].block, i, j, section->globaltie.snav, tiestatus, section->globaltie.refgrid_id,
                 section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
-                section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3);
+                section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3, refgrid_name);
             xstr[num_globalties] = XmStringCreateLocalized(string);
             if (mbna_verbose > 0)
               fprintf(stderr, "%s\n", string);
@@ -1922,34 +1941,42 @@ void do_update_status() {
           tiestatus = tiestatus_xy_f;
         else if (section->globaltie.status == MBNA_TIE_Z_FIXED)
           tiestatus = tiestatus_z_f;
+				int refgrid_id = project.refgrid_select;
+				mb_path refgrid_name = " | No reference grid";
+				if (section->globaltie.refgrid_id >= 0 && project.refgrid_select < 0) {
+					refgrid_id = section->globaltie.refgrid_id;
+				}
+				if (refgrid_id >= 0) {
+					strncpy(refgrid_name, project.refgrid_names[refgrid_id], sizeof(refgrid_name));
+				}
         if (section->globaltie.inversion_status == MBNA_INVERSION_CURRENT)
           sprintf(string,
-            "%2.2d:%4.4d:%3.3d:%2.2d %s %2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f",
+            "%2.2d:%4.4d:%3.3d:%2.2d %s %2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f | %s",
             project.files[section->file_id].block,
             section->file_id, section->section_id,
             section->globaltie.snav, tiestatus, section->globaltie.refgrid_id,
             section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
             section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3,
             section->globaltie.dx_m, section->globaltie.dy_m, section->globaltie.dz_m,
-            section->globaltie.sigma_m, section->globaltie.rsigma_m);
+            section->globaltie.sigma_m, section->globaltie.rsigma_m, refgrid_name);
         else if (section->globaltie.inversion_status == MBNA_INVERSION_OLD)
           sprintf(string,
-            "%2.2d:%4.4d:%3.3d:%2.2d %s %2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f ***",
+            "%2.2d:%4.4d:%3.3d:%2.2d %s %2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f *** | %s",
             project.files[section->file_id].block,
             section->file_id, section->section_id,
             section->globaltie.snav, tiestatus, section->globaltie.refgrid_id,
             section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
             section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3,
             section->globaltie.dx_m, section->globaltie.dy_m, section->globaltie.dz_m,
-            section->globaltie.sigma_m, section->globaltie.rsigma_m);
+            section->globaltie.sigma_m, section->globaltie.rsigma_m, refgrid_name);
         else
           sprintf(string,
-            "%2.2d:%4.4d:%3.3d:%2.2d %s %2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f",
+            "%2.2d:%4.4d:%3.3d:%2.2d %s %2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %s",
             project.files[section->file_id].block,
             section->file_id, section->section_id,
             section->globaltie.snav, tiestatus, section->globaltie.refgrid_id,
             section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
-            section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3);
+            section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3, refgrid_name);
         xstr[kk] = XmStringCreateLocalized(string);
         if (mbna_verbose > 0)
           fprintf(stderr, "%s\n", string);
@@ -2370,48 +2397,75 @@ void do_update_modelplot_status() {
 
     struct mbna_crossing *crossing;
 
-    /* set model view status label */
-    if (project.modelplot_style == MBNA_MODELPLOT_TIMESERIES) {
-      if (mbna_crossing_select == MBNA_SELECT_NONE) {
-        snprintf(string, sizeof(string), ":::t\"Mouse: <left> select  tie; <middle> select untied crossing; <right> drag zoom "
-          "extent\":t\"No Selection\"");
-      }
-      else {
-        crossing = &(project.crossings[mbna_crossing_select]);
-        sprintf(string,
-          ":::t\"Mouse: <left> select  tie; <middle> select untied crossing; <right> drag zoom "
-          "extent\":t\"Selected Crossing: %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d\"",
-          mbna_crossing_select, project.files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1,
-          project.files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2);
-      }
-    }
-    else if (project.modelplot_style == MBNA_MODELPLOT_PERTURBATION) {
-      if (mbna_crossing_select == MBNA_SELECT_NONE) {
-        snprintf(string, sizeof(string), ":::t\"Mouse: <left> select  tie; <middle> select untied crossing; <right> drag zoom "
-          "extent\":t\"No Selection\"");
-      }
-      else {
-        crossing = &(project.crossings[mbna_crossing_select]);
-        sprintf(string,
-          ":::t\"Mouse: <left> select  tie; <middle> select untied crossing; <right> drag zoom "
-          "extent\":t\"Selected Crossing: %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d\"",
-          mbna_crossing_select, project.files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1,
-          project.files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2);
-      }
+    /* set modelplot mode */
+    if (mbna_view_list == MBNA_VIEW_LIST_FILESECTIONS 
+      	|| mbna_view_list == MBNA_VIEW_LIST_GLOBALTIES
+        || mbna_view_list == MBNA_VIEW_LIST_GLOBALTIESSORTED) {
+      mbna_modelplot_mode = MBNA_MODELPLOT_MODE_SECTIONS;
     }
     else {
-      if (mbna_crossing_select == MBNA_SELECT_NONE) {
-        snprintf(string, sizeof(string), ":::t\"Mouse: <left> select  tie; <middle> select block to view; <right> drag zoom "
-          "extent\":t\"No Selection\"");
-      }
-      else {
-        crossing = &(project.crossings[mbna_crossing_select]);
-        sprintf(string,
-          ":::t\"Mouse: <left> select  tie; <middle> select block to view; <right> drag zoom extent\":t\"Selected "
-          "Crossing: %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d\"",
-          mbna_crossing_select, project.files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1,
-          project.files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2);
-      }
+    	mbna_modelplot_mode = MBNA_MODELPLOT_MODE_CROSSINGS;
+    }
+
+    /* set model view status label */
+    if (mbna_modelplot_mode == MBNA_MODELPLOT_MODE_CROSSINGS) {
+			if (project.modelplot_style == MBNA_MODELPLOT_TIMESERIES || project.modelplot_style == MBNA_MODELPLOT_PERTURBATION) {
+				if (mbna_crossing_select == MBNA_SELECT_NONE) {
+					snprintf(string, sizeof(string), ":::t\"Mouse: <left> select  tie; <middle> select untied crossing; <right> drag zoom "
+						"extent\":t\"No Selection\"");
+				}
+				else {
+					crossing = &(project.crossings[mbna_crossing_select]);
+					snprintf(string, sizeof(string),
+						":::t\"Mouse: <left> select  tie; <middle> select untied crossing; <right> drag zoom "
+						"extent\":t\"Selected Crossing: %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d\"",
+						mbna_crossing_select, project.files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1,
+						project.files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2);
+				}
+			}
+			else {
+				if (mbna_crossing_select == MBNA_SELECT_NONE) {
+					snprintf(string, sizeof(string), ":::t\"Mouse: <left> select  tie; <middle> select block to view; <right> drag zoom "
+						"extent\":t\"No Selection\"");
+				}
+				else {
+					crossing = &(project.crossings[mbna_crossing_select]);
+					snprintf(string, sizeof(string),
+						":::t\"Mouse: <left> select  tie; <middle> select block to view; <right> drag zoom extent\":t\"Selected "
+						"Crossing: %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d\"",
+						mbna_crossing_select, project.files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1,
+						project.files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2);
+				}
+			}
+    }
+    else /* if (mbna_modelplot_mode == MBNA_MODELPLOT_MODE_SECTIONS) */ {
+			if (project.modelplot_style == MBNA_MODELPLOT_TIMESERIES || project.modelplot_style == MBNA_MODELPLOT_PERTURBATION) {
+				if (mbna_section_select == MBNA_SELECT_NONE) {
+					snprintf(string, sizeof(string), ":::t\"Mouse: <left> select global tie; <middle> select untied section; <right> drag zoom "
+						"extent\":t\"No Selection\"");
+				}
+				else /* if (mbna_section_select != MBNA_SELECT_NONE) */ {
+					crossing = &(project.crossings[mbna_crossing_select]);
+					snprintf(string, sizeof(string),
+						":::t\"Mouse: <left> select global tie; <middle> select untied section <right> drag zoom "
+						"extent\":t\"Selected Section: %2.2d:%3.3d:%3.3d\"",
+						project.files[mbna_current_file].block, mbna_current_file, mbna_current_section);
+				}
+			}
+			else {
+				if (mbna_crossing_select == MBNA_SELECT_NONE) {
+					snprintf(string, sizeof(string), ":::t\"Mouse: <left> select  tie; <middle> select block to view; <right> drag zoom "
+						"extent\":t\"No Selection\"");
+				}
+				else {
+					crossing = &(project.crossings[mbna_crossing_select]);
+					snprintf(string, sizeof(string),
+						":::t\"Mouse: <left> select  tie; <middle> select block to view; <right> drag zoom extent\":t\"Selected "
+						"Crossing: %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d\"",
+						mbna_crossing_select, project.files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1,
+						project.files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2);
+				}
+			}
     }
 
     set_label_multiline_string(label_modelplot_status, string);
@@ -2721,34 +2775,46 @@ void do_naverr_update() {
     struct mbna_file *file = &project.files[mbna_current_file];
     struct mbna_section *section = &file->sections[mbna_current_section];
     struct mbna_globaltie *globaltie = &section->globaltie;
+    int refgrid_id = project.refgrid_select;
+    mb_path refgrid_name = "none";
+    if (globaltie->refgrid_id >= 0 && project.refgrid_select < 0) {
+      refgrid_id = globaltie->refgrid_id;
+    }
+    if (refgrid_id >= 0) {
+    	strncpy(refgrid_name, project.refgrid_names[refgrid_id], sizeof(refgrid_name));
+    }
 
     if (section->status == MBNA_CROSSING_STATUS_NONE) {
       snprintf(string, sizeof(string), ":::t\"Section: %2.2d:%3.3d:%3.3d\"\
 :t\"Global Tie Status: Unset \"\
+:t\"Ref Grid: %s \"\
 :t\"Plot Widths (m): Contour: %.2f Misfit: %.2f Z: %.2f\"\
 :t\"Zoom Factor: %.2f \"\
 :t\"Relative Offsets:   None None None\"",
-        project.files[mbna_current_file].block, mbna_current_file, mbna_current_section, plot_width,
-        misfit_width, project.zoffsetwidth, zoom_factor);
+        project.files[mbna_current_file].block, mbna_current_file, mbna_current_section, 
+        refgrid_name, plot_width, misfit_width, project.zoffsetwidth, zoom_factor);
     }
     else if (section->status == MBNA_CROSSING_STATUS_SKIP) {
       snprintf(string, sizeof(string), ":::t\"Section: %2.2d:%3.3d:%3.3d\"\
 :t\"Global Tie Status: Unset (skipped) \"\
+:t\"Ref Grid: %s \"\
 :t\"Plot Widths (m): Contour: %.2f Misfit: %.2f Z: %.2f\"\
 :t\"Zoom Factor: %.2f \"\
 :t\"Relative Offsets:   None None None\"",
-        project.files[mbna_current_file].block, mbna_current_file, mbna_current_section, plot_width,
-        misfit_width, project.zoffsetwidth, zoom_factor);
+        project.files[mbna_current_file].block, mbna_current_file, mbna_current_section, 
+        refgrid_name, plot_width, misfit_width, project.zoffsetwidth, zoom_factor);
     }
     else {
       snprintf(string, sizeof(string), ":::t\"Section: %2.2d:%3.3d:%3.3d\"\
 :t\"Global Tie Status: Set \"\
+:t\"Ref Grid: %s \"\
 :t\"Nav Point: %4d\"\
 :t\"Plot Widths (m): Contour: %.2f Misfit: %.2f Z: %.2f\"\
 :t\"Zoom Factor: %.2f \"\
 :t\"Relative Offsets (m):   %.3f %.3f %.3f\"\
 :t\"Sigma (m):   %.3f %.3f %.3f\"",
         project.files[mbna_current_file].block, mbna_current_file, mbna_current_section,
+        refgrid_name, 
         globaltie->snav, plot_width, misfit_width, project.zoffsetwidth, zoom_factor,
         globaltie->offset_x_m, globaltie->offset_y_m, globaltie->offset_z_m,
         globaltie->sigmar1, globaltie->sigmar2, globaltie->sigmar3);
@@ -6362,9 +6428,7 @@ void do_pickroute_notify(size_t instance) {
 
   if (shareddata->route_selected != MBV_SELECT_NONE) {
     struct mbview_route_struct *route = &shareddata->routes[shareddata->route_selected];
-    if (mbna_view_list == MBNA_VIEW_LIST_FILESECTIONS
-        || mbna_view_list == MBNA_VIEW_LIST_GLOBALTIES
-        || mbna_view_list == MBNA_VIEW_LIST_GLOBALTIESSORTED) {
+    if (mbna_modelplot_mode == MBNA_MODELPLOT_MODE_SECTIONS) {
       int isurvey;
       int ifile;
       int isection;
@@ -6469,8 +6533,6 @@ void do_picknav_notify(size_t instance) {
       mbna_survey_select = project.files[mbna_file_select].block;
       mbna_file_id_2 = ifile1;
       mbna_section_2 = isection1;
-//fprintf(stderr, "%s:%d:%s: nav1->name:%s mbna_naverr_mode:%d mbna_current_file:%d mbna_current_section:%d\n",
-//__FILE__, __LINE__, __FUNCTION__, nav1->name, mbna_naverr_mode, mbna_current_file, mbna_current_section);
 
       /* bring up naverr window if required */
       if (mbna_current_section != MBV_SELECT_NONE && mbna_naverr_mode == MBNA_NAVERR_MODE_UNLOADED) {
@@ -6653,34 +6715,8 @@ int do_message_on(char *message) {
 
   set_label_string(label_message, message);
   XtManageChild(bulletinBoard_message);
-
-  /* force the label to be visible */
-  Widget diashell;
-  for (diashell = label_message; !XtIsShell(diashell); diashell = XtParent(diashell))
-    ;
-
-  Widget topshell;
-  for (topshell = diashell; !XtIsTopLevelShell(topshell); topshell = XtParent(topshell))
-    ;
-
-  if (XtIsRealized(diashell) && XtIsRealized(topshell)) {
-    Window diawindow = XtWindow(diashell);
-    Window topwindow = XtWindow(topshell);
-
-    XWindowAttributes xwa;
-    XEvent event;
-
-    /* wait for the dialog to be mapped */
-    while (XGetWindowAttributes(XtDisplay(bulletinBoard_message), diawindow, &xwa) && xwa.map_state != IsViewable) {
-      if (XGetWindowAttributes(XtDisplay(bulletinBoard_message), topwindow, &xwa) && xwa.map_state != IsViewable)
-        break;
-
-      XtAppNextEvent(app_context, &event);
-      XtDispatchEvent(&event);
-    }
-  }
-
-  XmUpdateDisplay(topshell);
+  XSync(XtDisplay(bulletinBoard_message), 0);
+  XmUpdateDisplay(bulletinBoard_message);
 
   return (MB_SUCCESS);
 }

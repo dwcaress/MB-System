@@ -48,7 +48,11 @@ constexpr char help_message[] =
     "mbdatalist parses recursive datalist files and outputs the\n"
     "complete list of data files and formats. The results are dumped to stdout.";
 constexpr char usage_message[] =
-    "mbdatalist [-C -D -Fformat -Ifile -N -O -P -Q -Rw/e/s/n -S -U -Y -Z -V -H]";
+    "mbdatalist\n\t[\n\t--verbose {-V}\n\t--help {-H}\n\t--copy {-C}\n\t--report {-D}\n"
+    "\t--format=format_id {-Fformat_id}\n\t--input=file {-Ifile}\n\t--make-ancillary {-N}\n"
+    "\t--update-ancillary {-O}\n\t--processed {-P}\n\t--problem {-Q}\n"
+    "\t--bounds=w/e/s/n {-Rw/e/s/n}\n\t--status\n"
+    "\t--raw {-U}\n\t--unlock {-Y}\n\t--datalistp {-Z}\n";
 
 /*--------------------------------------------------------------------*/
 
@@ -81,7 +85,6 @@ int main(int argc, char **argv) {
 
 	{
 		int option_index;
-
 		const struct option options[] = {
 			{"verbose", no_argument, nullptr, 0},
 	                {"help", no_argument, nullptr, 0},

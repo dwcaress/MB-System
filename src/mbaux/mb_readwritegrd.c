@@ -36,6 +36,10 @@
 #include <time.h>
 #include <unistd.h>
 
+/* include GMT header file gmt_dev.h without including glib headers not needed by MB-System */
+#ifdef HAVE_GLIB_GTHREAD
+#undef HAVE_GLIB_GTHREAD
+#endif
 #include "gmt_dev.h"
 
 #ifndef CMAKE_BUILD_SYSTEM

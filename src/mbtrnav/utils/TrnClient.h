@@ -28,6 +28,7 @@
 #include <sys/time.h>
 #include "TerrainNavClient.h"
 #include "structDefs.h"
+#include "TrnAttr.h"
 
 
 #define TRNCLI_PORT_DFL 27027
@@ -36,40 +37,40 @@
 #undef WITH_DEGTORAD_FN
 
 class DataLogReader;
-struct TRN_attr;
+//struct TRN_attr;
 struct poseT;
 struct measT;
 class TerrainNav;
 
 
-struct TRN_attr
-{
-    char *_mapFileName;
-    long  _map_type;
-    long  _filter_type;
-    char *_particlesName;
-    char *_vehicleCfgName;
-    char *_dvlCfgName;
-    char *_resonCfgName;
-    char *_terrainNavServer;
-    char *_lrauvDvlFilename;
-    long  _terrainNavPort;
-    bool _forceLowGradeFilter;
-    bool _allowFilterReinits;
-    long _useModifiedWeighting;
-    long _samplePeriod;
-    double _maxNorthingCov;
-    double _maxEastingCov;
-    double _maxNorthingError;
-    double _maxEastingError;
-    double _phiBias;
-    bool _useIDTData;
-    bool _useDvlSide;
-    bool _useMbTrnData;
-    bool _skipInit;
-    TRN_attr();
-    ~TRN_attr();
-};
+//struct TRN_attr
+//{
+//    char *_mapFileName;
+//    long  _map_type;
+//    long  _filter_type;
+//    char *_particlesName;
+//    char *_vehicleCfgName;
+//    char *_dvlCfgName;
+//    char *_resonCfgName;
+//    char *_terrainNavServer;
+//    char *_lrauvDvlFilename;
+//    long  _terrainNavPort;
+//    bool _forceLowGradeFilter;
+//    bool _allowFilterReinits;
+//    long _useModifiedWeighting;
+//    long _samplePeriod;
+//    double _maxNorthingCov;
+//    double _maxEastingCov;
+//    double _maxNorthingError;
+//    double _maxEastingError;
+//    double _phiBias;
+//    bool _useIDTData;
+//    bool _useDvlSide;
+//    bool _useMbTrnData;
+//    bool _skipInit;
+//    TRN_attr();
+//    ~TRN_attr();
+//};
 
 
 class TrnClient : public TerrainNavClient {
@@ -82,16 +83,17 @@ public:
     int initSocket();
     int connectSocket();
     int loadCfgAttributes(const char *cfg_file);
-    int getNextKeyValue(FILE *cfg, char key[], char value[]);
+//    int getNextKeyValue(FILE *cfg, char key[], char value[]);
     int setVerbose(int val);
     void show(int indent=0, int wkey=15, int wval=18);
     TerrainNav* connectTRN();
     void setQuitRef(bool *pvar);
     bool isQuitSet();
+    TrnAttr *_trn_attr;
 
 protected:
     char *_cfg_file;
-    TRN_attr *_trn_attr;
+//    TRN_attr *_trn_attr;
     int verbose;
     bool *_quit_ref;
     

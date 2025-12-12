@@ -565,12 +565,12 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
         mb_path lock_user = "";
         mb_path lock_cpu = "";
         char lock_date[25] = "";
-         mb_pr_lockinfo(mbev_verbose, file->path, &locked, &lock_purpose, lock_program, lock_user, lock_cpu,
+        mb_pr_lockinfo(mbev_verbose, file->path, &locked, &lock_purpose, lock_program, lock_user, lock_cpu,
                                      lock_date, &mbev_error);
 
         snprintf(error1, sizeof(error1), "Unable to open input file:");
-        snprintf(error2, sizeof(error1), "File locked by <%s> running <%s>", lock_user, lock_program);
-        snprintf(error3, sizeof(error1), "on cpu <%s> at <%s>", lock_cpu, lock_date);
+        snprintf(error2, sizeof(error2), "File locked by <%s> running <%s>", lock_user, lock_program);
+        snprintf(error3, sizeof(error3), "on cpu <%s> at <%s>", lock_cpu, lock_date);
         fprintf(stderr, "\nUnable to open input file:\n");
         fprintf(stderr, "  %s\n", file->path);
         fprintf(stderr, "File locked by <%s> running <%s>\n", lock_user, lock_program);
@@ -580,12 +580,12 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
       /* else if unable to create lock file there is a permissions problem */
       else if (mbev_error == MB_ERROR_OPEN_FAIL) {
         snprintf(error1, sizeof(error1), "Unable to create lock file");
-        snprintf(error2, sizeof(error1), "for intended input file:");
-        snprintf(error3, sizeof(error1), "-Likely permissions issue");
+        snprintf(error2, sizeof(error2), "for intended input file:");
+        snprintf(error3, sizeof(error3), "- Likely permissions issue");
         fprintf(stderr, "Unable to create lock file\n");
         fprintf(stderr, "for intended input file:\n");
         fprintf(stderr, "  %s\n", file->path);
-        fprintf(stderr, "-Likely permissions issue\n");
+        fprintf(stderr, "- Likely permissions issue\n");
       }
 
       /* put up error dialog */
@@ -593,7 +593,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
     }
   }
 
-  /* load the file if it needs loading and has been locked */
+  /* load the file if it needs loading and has now been locked */
   if (mbev_status == MB_SUCCESS && ifile >= 0 && ifile < mbev_num_files && !mbev_files[ifile].load_status &&
       mbev_files[ifile].raw_info.nrecords > 0) {
     file = &(mbev_files[ifile]);
@@ -929,6 +929,61 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
                                       &(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
             }
           }
+
+        	/* check for dual profile (e.g. dual swath mode on Kongsberg multibeams) */
+					ping->dualprofile = false;
+					ping->dualprofilebeam = 0;
+					double xtrack_min = 0.0;
+					double xtrack_max = 0.0;
+					double xtrack_absmax = 0.0;
+					bool first = true;
+					for (int j = 0; j < ping->beams_bath; j++) {
+						if (mb_beam_ok(ping->beamflag[j])) {
+							if (first) {
+								xtrack_min = ping->bathacrosstrack[j];
+								xtrack_max = ping->bathacrosstrack[j];
+								first = false;
+							}
+							else {
+								xtrack_min = MIN(xtrack_min, ping->bathacrosstrack[j]);
+								xtrack_max = MAX(xtrack_max, ping->bathacrosstrack[j]);
+							}
+						}
+					}
+					if (first) {
+						for (int j = 0; j < ping->beams_bath; j++) {
+							if (!mb_beam_check_flag_unusable2(ping->beamflag[j])) {
+								if (first) {
+									xtrack_min = ping->bathacrosstrack[j];
+									xtrack_max = ping->bathacrosstrack[j];
+									first = false;
+								}
+								else {
+									xtrack_min = MIN(xtrack_min, ping->bathacrosstrack[j]);
+									xtrack_max = MAX(xtrack_max, ping->bathacrosstrack[j]);
+								}
+							}
+						}
+					}
+					first = true;
+					double xtrack_old = 0.0;
+					xtrack_absmax = MAX(fabs(xtrack_min), fabs(xtrack_max));
+					for (int j = 0; j < ping->beams_bath; j++) {
+						if (!mb_beam_check_flag_unusable2(ping->beamflag[j])) {
+							if (first) {
+								xtrack_old = ping->bathacrosstrack[j];
+								first = false;
+							}
+							else {
+								double xtrack_diff = ping->bathacrosstrack[j] - xtrack_old;
+								if (xtrack_diff < 0.0 && fabs(xtrack_diff) > 0.5 * xtrack_absmax) {
+									ping->dualprofile = true;
+									ping->dualprofilebeam = j;
+								}
+								xtrack_old = ping->bathacrosstrack[j];
+							}
+						}
+					}
         }
 
         /* extract some more values */
@@ -955,29 +1010,10 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
           }
 
           else {
-            /* find centermost beam */
-            icenter = -1;
-            iport = -1;
-            istbd = -1;
-            centerdistance = 0.0;
-            portdistance = 0.0;
-            stbddistance = 0.0;
-            for (ibeam = 0; ibeam < beams_bath; ibeam++) {
-              if (!mb_beam_check_flag_unusable(beamflag[ibeam])) {
-                if (icenter == -1 || fabs(bathacrosstrack[ibeam]) < centerdistance) {
-                  icenter = ibeam;
-                  centerdistance = bathacrosstrack[ibeam];
-                }
-                if (iport == -1 || bathacrosstrack[ibeam] < portdistance) {
-                  iport = ibeam;
-                  portdistance = bathacrosstrack[ibeam];
-                }
-                if (istbd == -1 || bathacrosstrack[ibeam] > stbddistance) {
-                  istbd = ibeam;
-                  stbddistance = bathacrosstrack[ibeam];
-                }
-              }
-            }
+          	mbev_status = mb_swathbounds(mbev_verbose, false, ping->beams_bath, 0, 
+          																ping->beamflag, ping->bathacrosstrack,
+          																NULL, NULL, &iport, &icenter, &istbd, 
+          																NULL, NULL, NULL, &mbev_error);
 
             mb_coor_scale(mbev_verbose, ping->navlat, &mtodeglon, &mtodeglat);
             if (icenter >= 0) {
@@ -3391,6 +3427,11 @@ int mbeditviz_selectregion(size_t instance) {
                 mbev_selected.soundings[mbev_selected.num_soundings].ifile = ifile;
                 mbev_selected.soundings[mbev_selected.num_soundings].iping = iping;
                 mbev_selected.soundings[mbev_selected.num_soundings].ibeam = ibeam;
+                if (ping->dualprofile && ibeam >= ping->dualprofilebeam) {
+                	mbev_selected.soundings[mbev_selected.num_soundings].iprofile = 1;
+                } else {
+                	mbev_selected.soundings[mbev_selected.num_soundings].iprofile = 0;
+                }
                 mbev_selected.soundings[mbev_selected.num_soundings].beamflag = ping->beamflag[ibeam];
                 mbev_selected.soundings[mbev_selected.num_soundings].beamflagorg = ping->beamflagorg[ibeam];
                 mbev_selected.soundings[mbev_selected.num_soundings].beamcolor = ping->beamcolor[ibeam];
@@ -3563,6 +3604,11 @@ int mbeditviz_selectarea(size_t instance) {
                 mbev_selected.soundings[mbev_selected.num_soundings].ifile = ifile;
                 mbev_selected.soundings[mbev_selected.num_soundings].iping = iping;
                 mbev_selected.soundings[mbev_selected.num_soundings].ibeam = ibeam;
+                if (ping->dualprofile && ibeam >= ping->dualprofilebeam) {
+                	mbev_selected.soundings[mbev_selected.num_soundings].iprofile = 1;
+                } else {
+                	mbev_selected.soundings[mbev_selected.num_soundings].iprofile = 0;
+                }
                 mbev_selected.soundings[mbev_selected.num_soundings].beamflag = ping->beamflag[ibeam];
                 mbev_selected.soundings[mbev_selected.num_soundings].beamflagorg = ping->beamflagorg[ibeam];
                 mbev_selected.soundings[mbev_selected.num_soundings].beamcolor = ping->beamcolor[ibeam];
@@ -3709,34 +3755,39 @@ int mbeditviz_selectnav(size_t instance) {
             double mtodeglat;
             mb_coor_scale(mbev_verbose, ping->navlat, &mtodeglon, &mtodeglat);
             for (int ibeam = 0; ibeam < ping->beams_bath; ibeam++) {
-            if (mb_beam_check_flag_usable2(ping->beamflag[ibeam])
-              || (mbviewdata->state21 && mb_beam_check_flag_multipick(ping->beamflag[ibeam]))) {
-              /* allocate memory if needed */
-              if (mbev_selected.num_soundings >= mbev_selected.num_soundings_alloc) {
-                mbev_selected.num_soundings_alloc += MBEV_ALLOCK_NUM;
-                mbev_selected.soundings =
-                    realloc(mbev_selected.soundings,
-                            mbev_selected.num_soundings_alloc * sizeof(struct mb3dsoundings_sounding_struct));
-              }
-
-              /* same beam ids */
-              mbev_selected.soundings[mbev_selected.num_soundings].ifile = ifile;
-              mbev_selected.soundings[mbev_selected.num_soundings].iping = iping;
-              mbev_selected.soundings[mbev_selected.num_soundings].ibeam = ibeam;
-              mbev_selected.soundings[mbev_selected.num_soundings].beamflag = ping->beamflag[ibeam];
-              mbev_selected.soundings[mbev_selected.num_soundings].beamflagorg = ping->beamflagorg[ibeam];
-              mbev_selected.soundings[mbev_selected.num_soundings].beamcolor = ping->beamcolor[ibeam];
-
-              /* get sounding relative to sonar */
-              double beam_xtrack = ping->bathacrosstrack[ibeam];
-              double beam_ltrack = ping->bathalongtrack[ibeam];
-              double beam_z = ping->bath[ibeam] - ping->sensordepth;
-
-              /* if beamforming sound speed correction to be applied */
-              if (mbev_snell != 1.0) {
-                mbeditviz_snell_correction(mbev_snell, (ping->roll + rolldelta),
-                               &beam_xtrack, &beam_ltrack, &beam_z);
-              }
+							if (mb_beam_check_flag_usable2(ping->beamflag[ibeam])
+								|| (mbviewdata->state21 && mb_beam_check_flag_multipick(ping->beamflag[ibeam]))) {
+								/* allocate memory if needed */
+								if (mbev_selected.num_soundings >= mbev_selected.num_soundings_alloc) {
+									mbev_selected.num_soundings_alloc += MBEV_ALLOCK_NUM;
+									mbev_selected.soundings =
+											realloc(mbev_selected.soundings,
+															mbev_selected.num_soundings_alloc * sizeof(struct mb3dsoundings_sounding_struct));
+								}
+	
+								/* same beam ids */
+								mbev_selected.soundings[mbev_selected.num_soundings].ifile = ifile;
+								mbev_selected.soundings[mbev_selected.num_soundings].iping = iping;
+								mbev_selected.soundings[mbev_selected.num_soundings].ibeam = ibeam;
+                if (ping->dualprofile && ibeam >= ping->dualprofilebeam) {
+                	mbev_selected.soundings[mbev_selected.num_soundings].iprofile = 1;
+                } else {
+                	mbev_selected.soundings[mbev_selected.num_soundings].iprofile = 0;
+                }
+								mbev_selected.soundings[mbev_selected.num_soundings].beamflag = ping->beamflag[ibeam];
+								mbev_selected.soundings[mbev_selected.num_soundings].beamflagorg = ping->beamflagorg[ibeam];
+								mbev_selected.soundings[mbev_selected.num_soundings].beamcolor = ping->beamcolor[ibeam];
+	
+								/* get sounding relative to sonar */
+								double beam_xtrack = ping->bathacrosstrack[ibeam];
+								double beam_ltrack = ping->bathalongtrack[ibeam];
+								double beam_z = ping->bath[ibeam] - ping->sensordepth;
+	
+								/* if beamforming sound speed correction to be applied */
+								if (mbev_snell != 1.0) {
+									mbeditviz_snell_correction(mbev_snell, (ping->roll + rolldelta),
+																 &beam_xtrack, &beam_ltrack, &beam_z);
+								}
 
               /* apply rotations and recalculate position */
               mbeditviz_beam_position(
@@ -3799,8 +3850,8 @@ int mbeditviz_selectnav(size_t instance) {
     const double dx = xmax - xmin;
     const double dy = ymax - ymin;
     const double dz = zmax - zmin;
-    const double xorigin = 0.5 * (xmin + xmax);
-    const double yorigin = 0.5 * (ymin + ymax);
+    mbev_selected.xorigin = 0.5 * (xmin + xmax);
+    mbev_selected.yorigin = 0.5 * (ymin + ymax);
     mbev_selected.zorigin = 0.5 * (zmin + zmax);
     mbev_selected.scale = 2.0 / sqrt(dy * dy + dx * dx);
     mbev_selected.zscale = mbev_selected.scale;
@@ -3811,8 +3862,8 @@ int mbeditviz_selectnav(size_t instance) {
     mbev_selected.zmin = -0.5 * dz;
     mbev_selected.zmax = 0.5 * dz;
     for (int i = 0; i < mbev_selected.num_soundings; i++) {
-      mbev_selected.soundings[i].x = mbev_selected.soundings[i].x - xorigin;
-      mbev_selected.soundings[i].y = mbev_selected.soundings[i].y - yorigin;
+      mbev_selected.soundings[i].x = mbev_selected.soundings[i].x - mbev_selected.xorigin;
+      mbev_selected.soundings[i].y = mbev_selected.soundings[i].y - mbev_selected.yorigin;
     }
     if (mbev_verbose > 0)
       fprintf(stderr, "mbeditviz_selectnav: num_soundings:%d\n", mbev_selected.num_soundings);
@@ -4560,31 +4611,22 @@ void mbeditviz_mb3dsoundings_optimizebiasvaluesold(int mode, double *rollbias_be
   /* set flag to set best total variance on first calculation */
   bool first = true;
 
-  // TODO(schwehr): Localize variables.
-  mb_path message_string = "";
-  double variance_total;
-  double variance_total_best = 0.0;
-  int variance_num = 0;
-  double rollbias;
-  double pitchbias;
-  double headingbias;
-  double timelag;
-  double snell;
-  double rollbias_start, rollbias_end, drollbias;
-  double pitchbias_start, pitchbias_end, dpitchbias;
-  double headingbias_start, headingbias_end, dheadingbias;
-  // double timelag_start;
-  // double timelag_end;
-  // double dtimelag;
-  // double snell_start, snell_end;
-  // double dsnell;
-  // int niterate;
-  char *marker1 = "       ";
-  char *marker2 = " ******";
-  char *marker = NULL;
-
   /* Roll bias */
   if (mode & MB3DSDG_OPTIMIZEBIASVALUES_R) {
+		mb_path message_string = "";
+		double variance_total;
+		double variance_total_best = 0.0;
+		int variance_num = 0;
+		double rollbias;
+		double pitchbias;
+		double headingbias;
+		double timelag;
+		double snell;
+		double rollbias_start, rollbias_end, drollbias;
+		char *marker1 = "       ";
+		char *marker2 = " ******";
+		char *marker = NULL;
+
     /* start with coarse roll bias */
     int niterate = 11;
     rollbias_start = *rollbias_best - 5.0;
@@ -4651,6 +4693,20 @@ void mbeditviz_mb3dsoundings_optimizebiasvaluesold(int mode, double *rollbias_be
 
   /* Pitch bias */
   if (mode & MB3DSDG_OPTIMIZEBIASVALUES_P) {
+		mb_path message_string = "";
+		double variance_total;
+		double variance_total_best = 0.0;
+		int variance_num = 0;
+		double rollbias;
+		double pitchbias;
+		double headingbias;
+		double timelag;
+		double snell;
+		double pitchbias_start, pitchbias_end, dpitchbias;
+		char *marker1 = "       ";
+		char *marker2 = " ******";
+		char *marker = NULL;
+
     /* start with coarse pitch bias */
     rollbias = *rollbias_best;
     int niterate = 11;
@@ -4716,6 +4772,20 @@ void mbeditviz_mb3dsoundings_optimizebiasvaluesold(int mode, double *rollbias_be
 
   /* Heading bias */
   if (mode & MB3DSDG_OPTIMIZEBIASVALUES_H) {
+		mb_path message_string = "";
+		double variance_total;
+		double variance_total_best = 0.0;
+		int variance_num = 0;
+		double rollbias;
+		double pitchbias;
+		double headingbias;
+		double timelag;
+		double snell;
+		double headingbias_start, headingbias_end, dheadingbias;
+		char *marker1 = "       ";
+		char *marker2 = " ******";
+		char *marker = NULL;
+
     /* start with coarse heading bias */
     rollbias = *rollbias_best;
     pitchbias = *pitchbias_best;
@@ -4781,6 +4851,20 @@ void mbeditviz_mb3dsoundings_optimizebiasvaluesold(int mode, double *rollbias_be
 
   /* Redo roll bias if doing a combination of bias parameters */
   if (mode & MB3DSDG_OPTIMIZEBIASVALUES_R && mode != MB3DSDG_OPTIMIZEBIASVALUES_R) {
+		mb_path message_string = "";
+		double variance_total;
+		double variance_total_best = 0.0;
+		int variance_num = 0;
+		double rollbias;
+		double pitchbias;
+		double headingbias;
+		double timelag;
+		double snell;
+		double rollbias_start, rollbias_end, drollbias;
+		char *marker1 = "       ";
+		char *marker2 = " ******";
+		char *marker = NULL;
+
     /* now do fine roll bias */
     int niterate = 19;
     rollbias_start = *rollbias_best - 0.9;
@@ -4815,6 +4899,20 @@ void mbeditviz_mb3dsoundings_optimizebiasvaluesold(int mode, double *rollbias_be
 
   /* Redo pitch bias if doing a combination of bias parameters */
   if (mode & MB3DSDG_OPTIMIZEBIASVALUES_P && mode != MB3DSDG_OPTIMIZEBIASVALUES_P) {
+		mb_path message_string = "";
+		double variance_total;
+		double variance_total_best = 0.0;
+		int variance_num = 0;
+		double rollbias;
+		double pitchbias;
+		double headingbias;
+		double timelag;
+		double snell;
+		double pitchbias_start, pitchbias_end, dpitchbias;
+		char *marker1 = "       ";
+		char *marker2 = " ******";
+		char *marker = NULL;
+
     /* now do fine pitch bias */
     rollbias = *rollbias_best;
     int niterate = 19;
@@ -4849,6 +4947,20 @@ void mbeditviz_mb3dsoundings_optimizebiasvaluesold(int mode, double *rollbias_be
 
   /* Redo heading bias if doing a combination of bias parameters */
   if (mode & MB3DSDG_OPTIMIZEBIASVALUES_H && mode != MB3DSDG_OPTIMIZEBIASVALUES_H) {
+		mb_path message_string = "";
+		double variance_total;
+		double variance_total_best = 0.0;
+		int variance_num = 0;
+		double rollbias;
+		double pitchbias;
+		double headingbias;
+		double timelag;
+		double snell;
+		double headingbias_start, headingbias_end, dheadingbias;
+		char *marker1 = "       ";
+		char *marker2 = " ******";
+		char *marker = NULL;
+
     /* now do fine heading bias */
     rollbias = *rollbias_best;
     pitchbias = *pitchbias_best;
@@ -4883,6 +4995,19 @@ void mbeditviz_mb3dsoundings_optimizebiasvaluesold(int mode, double *rollbias_be
 
   /* Time lag */
   if (mode & MB3DSDG_OPTIMIZEBIASVALUES_T) {
+		mb_path message_string = "";
+		double variance_total;
+		double variance_total_best = 0.0;
+		int variance_num = 0;
+		double rollbias;
+		double pitchbias;
+		double headingbias;
+		double timelag;
+		double snell;
+		char *marker1 = "       ";
+		char *marker2 = " ******";
+		char *marker = NULL;
+
     /* start with coarse time lag */
     rollbias = *rollbias_best;
     pitchbias = *pitchbias_best;
@@ -4950,6 +5075,19 @@ void mbeditviz_mb3dsoundings_optimizebiasvaluesold(int mode, double *rollbias_be
 
   /* Snell */
   if (mode & MB3DSDG_OPTIMIZEBIASVALUES_S) {
+		mb_path message_string = "";
+		double variance_total;
+		double variance_total_best = 0.0;
+		int variance_num = 0;
+		double rollbias;
+		double pitchbias;
+		double headingbias;
+		double timelag;
+		double snell;
+		char *marker1 = "       ";
+		char *marker2 = " ******";
+		char *marker = NULL;
+
     /* start with coarse snell */
     rollbias = *rollbias_best;
     pitchbias = *pitchbias_best;
@@ -5215,20 +5353,20 @@ if (mode == MB3DSDG_OPTIMIZEBIASVALUES_R)
           rollbias_b = rollbias_c;
           variance_b = variance_c;
           rollbias_c = rollbias_b + drollbias;
- 		  mbeditviz_mb3dsoundings_getbiasvariance(
+ 		  	mbeditviz_mb3dsoundings_getbiasvariance(
 				local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 				local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias_c,
 				pitchbias, headingbias, timelag, snell, &variance_num, &variance_c);
 		  rollbias = rollbias_c;
 		  variance = variance_c;
 		  if (variance_num > 0 && (variance_c < variance_best)) {
-			*rollbias_best = rollbias_c;
-			variance_best = variance_c;
-			marker = marker2;
+				*rollbias_best = rollbias_c;
+				variance_best = variance_c;
+				marker = marker2;
 		  }
 		  else
-			marker = marker1;
-        }
+				marker = marker1;
+      }
 		fprintf(stderr, "ROLLBIAS:    | %6.3f  N:%d StDev:%6.3f %s | R: < %6.3f %6.3f %6.3f > | StDev: < %6.3f  %6.3f %6.3f > |\n", 
 				rollbias, variance_num, sqrt(variance), marker, 
 				rollbias_a, rollbias_b, rollbias_c, 

@@ -323,6 +323,7 @@ target_link_libraries(trnucli PRIVATE mbtrnframe netif)
 add_library(trncli
        utils/TerrainNavClient.cpp
        utils/TrnClient.cpp
+       utils/TrnAttr.cpp
 )
 
 target_include_directories(trncli PRIVATE
@@ -667,11 +668,10 @@ trnw/geocon_test.cpp
 target_link_libraries(geocon-test PRIVATE geocon qnx)
 target_include_directories(geocon-test PRIVATE ${CMAKE_SOURCE_DIR}
 ${LibPROJ_INCLUDE_DIRS} trnw qnx-utils)
-
 #
 #------------------------------------------------------------------------------
 #
-#  build mb1log-player
+# build mb1log-player
 
 # specify build target
 add_executable(mb1log-player
@@ -699,13 +699,14 @@ target_compile_options(mb1log-player PUBLIC
 #
 #------------------------------------------------------------------------------
 #
-#  build trnlog-player
+# build trnlog-player
 
 # specify build target
 add_executable(trnlog-player
 utils/trnlog_player.cpp
 utils/TrnClient.cpp
 utils/TerrainNavClient.cpp
+utils/TrnAttr.cpp
 )
 
 # specify dependency libs
@@ -715,25 +716,29 @@ target_link_libraries(trnlog-player PRIVATE trnw trncli netif tnav qnx newmat ge
 target_include_directories(trnlog-player PUBLIC
 BEFORE
 ${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/rov
+${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
 ${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw
 ${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
 ${CMAKE_SOURCE_DIR}/src/mbtrnav/newmat
 ${CMAKE_SOURCE_DIR}/src/mbtrnav/qnx-utils
+${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/rov
 ${NetCDF_INCLUDE_DIRS}
 )
+
 target_compile_options(trnlog-player PUBLIC
 "-std=c++11"
 )
 #
 #------------------------------------------------------------------------------
 #
-#  build csvlog-player
+# build csvlog-player
 
 # specify build target
 add_executable(csvlog-player
 utils/csvlog_player.cpp
 utils/TrnClient.cpp
 utils/TerrainNavClient.cpp
+utils/TrnAttr.cpp
 )
 
 # specify dependency libs
@@ -743,20 +748,136 @@ target_link_libraries(csvlog-player PRIVATE trnw trncli netif tnav qnx newmat ge
 target_include_directories(csvlog-player PUBLIC
 BEFORE
 ${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/rov
+${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
+${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw
+${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
+${CMAKE_SOURCE_DIR}/src/mbtrnav/newmat
+${CMAKE_SOURCE_DIR}/src/mbtrnav/qnx-utils
+${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/rov
+${NetCDF_INCLUDE_DIRS}
+)
+
+target_compile_options(csvlog-player PUBLIC
+"-std=c++11"
+)
+#
+#------------------------------------------------------------------------------
+#
+# build replay
+
+# specify build target
+add_executable(replay
+opt/dorado/Replay.cpp
+opt/dorado/trn_replay.cpp
+#/opt/dorado/replay_app.cpp
+utils/TerrainNavClient.cpp
+)
+
+# specify dependency libs
+target_link_libraries(replay PRIVATE
+trnw
+trncli
+netif
+tnav
+qnx
+newmat
+geolib
+NetCDF::NetCDF
+)
+
+target_include_directories(replay PUBLIC
+BEFORE
+${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/dorado
+${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
 ${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw
 ${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
 ${CMAKE_SOURCE_DIR}/src/mbtrnav/newmat
 ${CMAKE_SOURCE_DIR}/src/mbtrnav/qnx-utils
 ${NetCDF_INCLUDE_DIRS}
 )
-target_compile_options(csvlog-player PUBLIC
+
+target_compile_options(replay PUBLIC
 "-std=c++11"
 )
+#
+#------------------------------------------------------------------------------
+#
+# build test-trnattr
+
+# specify build target
+add_executable(test-trnattr
+utils/test_trnattr.cpp
+utils/TrnAttr.cpp
+)
+
+# specify dependency libs
+target_link_libraries(test-trnattr PRIVATE
+trnw
+trncli
+netif
+tnav
+qnx
+newmat
+geolib
+NetCDF::NetCDF
+)
+
+# specify include paths
+target_include_directories(test-trnattr PUBLIC
+BEFORE
+${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/dorado
+${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
+${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw
+${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
+${CMAKE_SOURCE_DIR}/src/mbtrnav/newmat
+${CMAKE_SOURCE_DIR}/src/mbtrnav/qnx-utils
+${NetCDF_INCLUDE_DIRS}
+)
+
+target_compile_options(test-trnattr PUBLIC
+"-std=c++11"
+)
+#
+#------------------------------------------------------------------------------
+#
+# build trn-player
+
+# specify build target
+add_executable(trn-player
+opt/examples/trn-player/TrnPlayer.hpp
+opt/examples/trn-player/TrnPlayer.cpp
+opt/examples/trn-player/TrnPlayerCtx.hpp
+opt/examples/trn-player/trn-player.cpp
+terrain-nav/TerrainNav.cpp
+)
+
+# specify dependency libs
+target_link_libraries(trn-player PRIVATE
+tnav
+qnx
+newmat
+NetCDF::NetCDF
+)
+
+# specify include paths
+target_include_directories(trn-player PUBLIC
+BEFORE
+${CMAKE_SOURCE_DIR}/src/mbtrnav/utils
+${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
+${CMAKE_SOURCE_DIR}/src/mbtrnav/newmat
+${CMAKE_SOURCE_DIR}/src/mbtrnav/qnx-utils
+${NetCDF_INCLUDE_DIRS}
+)
+
+target_compile_options(trn-player PUBLIC
+"-std=c++11"
+)
+
 #------------------------------------------------------------------------------
 # install it all
 #
 install(TARGETS geolib geocon newmat tnav qnx trnw netif mb1 trnucli trnwcli DESTINATION ${CMAKE_INSTALL_LIBDIR})
-install(TARGETS trn-server trnlog-test octree2patches grd-octree-maker csv-octree-maker transoct tile-test otree readlog writelog log-to-matlab log-to-csv trnucli-test trnusvr-test trncli-test trnif-test mmcpub mmcsub mcpub mcsub mb1rs mb1log-player trnlog-player csvlog-player geocon-test DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS trn-server trnlog-test octree2patches grd-octree-maker csv-octree-maker transoct tile-test otree readlog writelog log-to-matlab log-to-csv trnucli-test trnusvr-test trncli-test trnif-test mmcpub mmcsub mcpub mcsub mb1rs mb1log-player trnlog-player csvlog-player geocon-test trnlog-player csvlog-player replay test-trnattr trn-player DESTINATION ${CMAKE_INSTALL_BINDIR})
 #
 #------------------------------------------------------------------------------
 

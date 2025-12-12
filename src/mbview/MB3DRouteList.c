@@ -45,8 +45,8 @@
 #include <Xm/List.h>
 #include "MB3DRouteList.h"
 
-// Common constant and pixmap declarations.
-#include "creation-c.h"
+#include "MB3DView.h"
+extern MB3DViewData mbview_mbgrdviz;
 
 // Convenience functions from utilities file.
 void RegisterBxConverters(XtAppContext);
