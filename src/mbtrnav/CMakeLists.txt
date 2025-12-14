@@ -838,8 +838,7 @@ add_executable(trncli-test
 )
 
 # specify include paths and libraries
-# mbtrnframe trnwcli newmat geolib trnw qnx mb1 tnav geocon LibPROJ::LibPROJ NetCDF::NetCDF m
-target_link_libraries(trncli-test PRIVATE mbtrnframe trnwcli qnx newmat geocon)
+target_link_libraries(trncli-test PRIVATE mbtrnframe trnwcli qnx newmat geocon m)
 
 target_include_directories(trncli-test PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
