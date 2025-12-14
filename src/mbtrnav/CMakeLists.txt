@@ -307,7 +307,7 @@ target_compile_options(geocon PRIVATE
 #
 #------------------------------------------------------------------------------
 #
-# build trnwc (TRN C wrapper)
+# build trnwc (TRN IF, messages)
 add_library(trnwc STATIC
     ${TRNW_SRC_DIR}/mb1_msg.c
     ${TRNW_SRC_DIR}/trnif_msg.c
@@ -822,7 +822,7 @@ add_executable(trnclient-test
 )
 
 # specify include paths and libraries
-target_link_libraries(trnclient-test PRIVATE tnav newmat qnx  NetCDF::NetCDF)
+target_link_libraries(trnclient-test PRIVATE tnav newmat qnx NetCDF::NetCDF)
 
 target_include_directories(trnclient-test PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
@@ -838,7 +838,8 @@ add_executable(trncli-test
 )
 
 # specify include paths and libraries
-target_link_libraries(trncli-test PRIVATE mbtrnframe trnwcli newmat geolib trnw qnx mb1 tnav geocon LibPROJ::LibPROJ NetCDF::NetCDF m)
+# mbtrnframe trnwcli newmat geolib trnw qnx mb1 tnav geocon LibPROJ::LibPROJ NetCDF::NetCDF m
+target_link_libraries(trncli-test PRIVATE mbtrnframe trnwcli qnx newmat geocon)
 
 target_include_directories(trncli-test PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
