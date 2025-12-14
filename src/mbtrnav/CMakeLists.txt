@@ -107,75 +107,75 @@ list(PREPEND LIBTRNAV_INCLUDES
 # build libgeolib (gctp)
 
 add_library(geolib 
-       ${GCTP_SRC_DIR}/gctp.c
-       ${GCTP_SRC_DIR}/alberfor.c
-       ${GCTP_SRC_DIR}/alberinv.c
-       ${GCTP_SRC_DIR}/alconfor.c
-       ${GCTP_SRC_DIR}/alconinv.c
-       ${GCTP_SRC_DIR}/azimfor.c
-       ${GCTP_SRC_DIR}/aziminv.c
-       ${GCTP_SRC_DIR}/eqconfor.c
-       ${GCTP_SRC_DIR}/eqconinv.c
-       ${GCTP_SRC_DIR}/equifor.c
-       ${GCTP_SRC_DIR}/equiinv.c
-       ${GCTP_SRC_DIR}/gnomfor.c
-       ${GCTP_SRC_DIR}/gnominv.c
-       ${GCTP_SRC_DIR}/goodfor.c
-       ${GCTP_SRC_DIR}/goodinv.c
-       ${GCTP_SRC_DIR}/gvnspfor.c
-       ${GCTP_SRC_DIR}/gvnspinv.c
-       ${GCTP_SRC_DIR}/hamfor.c
-       ${GCTP_SRC_DIR}/haminv.c
-       ${GCTP_SRC_DIR}/imolwfor.c
-       ${GCTP_SRC_DIR}/imolwinv.c
-       ${GCTP_SRC_DIR}/lamazfor.c
-       ${GCTP_SRC_DIR}/lamazinv.c
-       ${GCTP_SRC_DIR}/merfor.c
-       ${GCTP_SRC_DIR}/merinv.c
-       ${GCTP_SRC_DIR}/millfor.c
-       ${GCTP_SRC_DIR}/millinv.c
-       ${GCTP_SRC_DIR}/molwfor.c
-       ${GCTP_SRC_DIR}/molwinv.c
-       ${GCTP_SRC_DIR}/obleqfor.c
-       ${GCTP_SRC_DIR}/obleqinv.c
-       ${GCTP_SRC_DIR}/omerfor.c
-       ${GCTP_SRC_DIR}/omerinv.c
-       ${GCTP_SRC_DIR}/orthfor.c
-       ${GCTP_SRC_DIR}/orthinv.c
-       ${GCTP_SRC_DIR}/polyfor.c
-       ${GCTP_SRC_DIR}/polyinv.c
-       ${GCTP_SRC_DIR}/psfor.c
-       ${GCTP_SRC_DIR}/psinv.c
-       ${GCTP_SRC_DIR}/robfor.c
-       ${GCTP_SRC_DIR}/robinv.c
-       ${GCTP_SRC_DIR}/sinfor.c
-       ${GCTP_SRC_DIR}/sininv.c
-       ${GCTP_SRC_DIR}/somfor.c
-       ${GCTP_SRC_DIR}/sominv.c
-       ${GCTP_SRC_DIR}/sterfor.c
-       ${GCTP_SRC_DIR}/sterinv.c
-       ${GCTP_SRC_DIR}/stplnfor.c
-       ${GCTP_SRC_DIR}/stplninv.c
-       ${GCTP_SRC_DIR}/tmfor.c
-       ${GCTP_SRC_DIR}/tminv.c
-       ${GCTP_SRC_DIR}/utmfor.c
-       ${GCTP_SRC_DIR}/utminv.c
-       ${GCTP_SRC_DIR}/vandgfor.c
-       ${GCTP_SRC_DIR}/vandginv.c
-       ${GCTP_SRC_DIR}/wivfor.c
-       ${GCTP_SRC_DIR}/wivinv.c
-       ${GCTP_SRC_DIR}/wviifor.c
-       ${GCTP_SRC_DIR}/wviiinv.c
-       ${GCTP_SRC_DIR}/for_init.c
-       ${GCTP_SRC_DIR}/inv_init.c
-       ${GCTP_SRC_DIR}/cproj.c
-       ${GCTP_SRC_DIR}/report.c
-       ${GCTP_SRC_DIR}/lamccfor.c
-       ${GCTP_SRC_DIR}/lamccinv.c
-       ${GCTP_SRC_DIR}/paksz.c
-       ${GCTP_SRC_DIR}/untfz.c
-       ${GCTP_SRC_DIR}/sphdz.c
-       ${GCTP_SRC_DIR}/br_gctp.c
+   ${GCTP_SRC_DIR}/gctp.c
+   ${GCTP_SRC_DIR}/alberfor.c
+   ${GCTP_SRC_DIR}/alberinv.c
+   ${GCTP_SRC_DIR}/alconfor.c
+   ${GCTP_SRC_DIR}/alconinv.c
+   ${GCTP_SRC_DIR}/azimfor.c
+   ${GCTP_SRC_DIR}/aziminv.c
+   ${GCTP_SRC_DIR}/eqconfor.c
+   ${GCTP_SRC_DIR}/eqconinv.c
+   ${GCTP_SRC_DIR}/equifor.c
+   ${GCTP_SRC_DIR}/equiinv.c
+   ${GCTP_SRC_DIR}/gnomfor.c
+   ${GCTP_SRC_DIR}/gnominv.c
+   ${GCTP_SRC_DIR}/goodfor.c
+   ${GCTP_SRC_DIR}/goodinv.c
+   ${GCTP_SRC_DIR}/gvnspfor.c
+   ${GCTP_SRC_DIR}/gvnspinv.c
+   ${GCTP_SRC_DIR}/hamfor.c
+   ${GCTP_SRC_DIR}/haminv.c
+   ${GCTP_SRC_DIR}/imolwfor.c
+   ${GCTP_SRC_DIR}/imolwinv.c
+   ${GCTP_SRC_DIR}/lamazfor.c
+   ${GCTP_SRC_DIR}/lamazinv.c
+   ${GCTP_SRC_DIR}/merfor.c
+   ${GCTP_SRC_DIR}/merinv.c
+   ${GCTP_SRC_DIR}/millfor.c
+   ${GCTP_SRC_DIR}/millinv.c
+   ${GCTP_SRC_DIR}/molwfor.c
+   ${GCTP_SRC_DIR}/molwinv.c
+   ${GCTP_SRC_DIR}/obleqfor.c
+   ${GCTP_SRC_DIR}/obleqinv.c
+   ${GCTP_SRC_DIR}/omerfor.c
+   ${GCTP_SRC_DIR}/omerinv.c
+   ${GCTP_SRC_DIR}/orthfor.c
+   ${GCTP_SRC_DIR}/orthinv.c
+   ${GCTP_SRC_DIR}/polyfor.c
+   ${GCTP_SRC_DIR}/polyinv.c
+   ${GCTP_SRC_DIR}/psfor.c
+   ${GCTP_SRC_DIR}/psinv.c
+   ${GCTP_SRC_DIR}/robfor.c
+   ${GCTP_SRC_DIR}/robinv.c
+   ${GCTP_SRC_DIR}/sinfor.c
+   ${GCTP_SRC_DIR}/sininv.c
+   ${GCTP_SRC_DIR}/somfor.c
+   ${GCTP_SRC_DIR}/sominv.c
+   ${GCTP_SRC_DIR}/sterfor.c
+   ${GCTP_SRC_DIR}/sterinv.c
+   ${GCTP_SRC_DIR}/stplnfor.c
+   ${GCTP_SRC_DIR}/stplninv.c
+   ${GCTP_SRC_DIR}/tmfor.c
+   ${GCTP_SRC_DIR}/tminv.c
+   ${GCTP_SRC_DIR}/utmfor.c
+   ${GCTP_SRC_DIR}/utminv.c
+   ${GCTP_SRC_DIR}/vandgfor.c
+   ${GCTP_SRC_DIR}/vandginv.c
+   ${GCTP_SRC_DIR}/wivfor.c
+   ${GCTP_SRC_DIR}/wivinv.c
+   ${GCTP_SRC_DIR}/wviifor.c
+   ${GCTP_SRC_DIR}/wviiinv.c
+   ${GCTP_SRC_DIR}/for_init.c
+   ${GCTP_SRC_DIR}/inv_init.c
+   ${GCTP_SRC_DIR}/cproj.c
+   ${GCTP_SRC_DIR}/report.c
+   ${GCTP_SRC_DIR}/lamccfor.c
+   ${GCTP_SRC_DIR}/lamccinv.c
+   ${GCTP_SRC_DIR}/paksz.c
+   ${GCTP_SRC_DIR}/untfz.c
+   ${GCTP_SRC_DIR}/sphdz.c
+   ${GCTP_SRC_DIR}/br_gctp.c
 )
 
 target_compile_options(geolib PRIVATE
@@ -189,28 +189,28 @@ target_compile_options(geolib PRIVATE
 # build libnewmat (matrix math)
 
 add_library(newmat 
-       ${NEWMAT_SRC_DIR}/newmat1.cpp
-       ${NEWMAT_SRC_DIR}/newmat2.cpp
-       ${NEWMAT_SRC_DIR}/newmat3.cpp
-       ${NEWMAT_SRC_DIR}/newmat4.cpp
-       ${NEWMAT_SRC_DIR}/newmat5.cpp
-       ${NEWMAT_SRC_DIR}/newmat6.cpp
-       ${NEWMAT_SRC_DIR}/newmat7.cpp
-       ${NEWMAT_SRC_DIR}/newmat8.cpp
-       ${NEWMAT_SRC_DIR}/newmatex.cpp
-       ${NEWMAT_SRC_DIR}/bandmat.cpp
-       ${NEWMAT_SRC_DIR}/submat.cpp
-       ${NEWMAT_SRC_DIR}/myexcept.cpp
-       ${NEWMAT_SRC_DIR}/cholesky.cpp
-       ${NEWMAT_SRC_DIR}/evalue.cpp
-       ${NEWMAT_SRC_DIR}/fft.cpp
-       ${NEWMAT_SRC_DIR}/hholder.cpp
-       ${NEWMAT_SRC_DIR}/jacobi.cpp
-       ${NEWMAT_SRC_DIR}/newfft.cpp
-       ${NEWMAT_SRC_DIR}/sort.cpp
-       ${NEWMAT_SRC_DIR}/svd.cpp
-       ${NEWMAT_SRC_DIR}/newmatrm.cpp
-       ${NEWMAT_SRC_DIR}/newmat9.cpp
+   ${NEWMAT_SRC_DIR}/newmat1.cpp
+   ${NEWMAT_SRC_DIR}/newmat2.cpp
+   ${NEWMAT_SRC_DIR}/newmat3.cpp
+   ${NEWMAT_SRC_DIR}/newmat4.cpp
+   ${NEWMAT_SRC_DIR}/newmat5.cpp
+   ${NEWMAT_SRC_DIR}/newmat6.cpp
+   ${NEWMAT_SRC_DIR}/newmat7.cpp
+   ${NEWMAT_SRC_DIR}/newmat8.cpp
+   ${NEWMAT_SRC_DIR}/newmatex.cpp
+   ${NEWMAT_SRC_DIR}/bandmat.cpp
+   ${NEWMAT_SRC_DIR}/submat.cpp
+   ${NEWMAT_SRC_DIR}/myexcept.cpp
+   ${NEWMAT_SRC_DIR}/cholesky.cpp
+   ${NEWMAT_SRC_DIR}/evalue.cpp
+   ${NEWMAT_SRC_DIR}/fft.cpp
+   ${NEWMAT_SRC_DIR}/hholder.cpp
+   ${NEWMAT_SRC_DIR}/jacobi.cpp
+   ${NEWMAT_SRC_DIR}/newfft.cpp
+   ${NEWMAT_SRC_DIR}/sort.cpp
+   ${NEWMAT_SRC_DIR}/svd.cpp
+   ${NEWMAT_SRC_DIR}/newmatrm.cpp
+   ${NEWMAT_SRC_DIR}/newmat9.cpp
 )
 #
 #------------------------------------------------------------------------------
@@ -218,27 +218,27 @@ add_library(newmat
 # build libqnx (utils)
 
 add_library(qnx 
-       ${QNX_SRC_DIR}/AsciiFile.cc
-       ${QNX_SRC_DIR}/AngleData.cc
-       ${QNX_SRC_DIR}/CharData.cc
-       ${QNX_SRC_DIR}/BinaryFile.cc
-       ${QNX_SRC_DIR}/DataLog.cc
-       ${QNX_SRC_DIR}/DataLogReader.cc
-       ${QNX_SRC_DIR}/DataLogWriter.cc
-       ${QNX_SRC_DIR}/FileData.cc
-       ${QNX_SRC_DIR}/StringConverter.cc
-       ${QNX_SRC_DIR}/StringData.cc
-       ${QNX_SRC_DIR}/TimeP.cc
-       ${QNX_SRC_DIR}/TimeTag.cc
-       ${QNX_SRC_DIR}/ShortData.cc
-       ${QNX_SRC_DIR}/Math.cc
-       ${QNX_SRC_DIR}/NavUtils.cc
-       ${QNX_SRC_DIR}/IntegerData.cc
-       ${QNX_SRC_DIR}/FloatData.cc
-       ${QNX_SRC_DIR}/DoubleData.cc
-       ${QNX_SRC_DIR}/DataField.cc
-       ${QNX_SRC_DIR}/DataFieldFactory.cc
-       ${QNX_SRC_DIR}/LogFile.cc
+   ${QNX_SRC_DIR}/AsciiFile.cc
+   ${QNX_SRC_DIR}/AngleData.cc
+   ${QNX_SRC_DIR}/CharData.cc
+   ${QNX_SRC_DIR}/BinaryFile.cc
+   ${QNX_SRC_DIR}/DataLog.cc
+   ${QNX_SRC_DIR}/DataLogReader.cc
+   ${QNX_SRC_DIR}/DataLogWriter.cc
+   ${QNX_SRC_DIR}/FileData.cc
+   ${QNX_SRC_DIR}/StringConverter.cc
+   ${QNX_SRC_DIR}/StringData.cc
+   ${QNX_SRC_DIR}/TimeP.cc
+   ${QNX_SRC_DIR}/TimeTag.cc
+   ${QNX_SRC_DIR}/ShortData.cc
+   ${QNX_SRC_DIR}/Math.cc
+   ${QNX_SRC_DIR}/NavUtils.cc
+   ${QNX_SRC_DIR}/IntegerData.cc
+   ${QNX_SRC_DIR}/FloatData.cc
+   ${QNX_SRC_DIR}/DoubleData.cc
+   ${QNX_SRC_DIR}/DataField.cc
+   ${QNX_SRC_DIR}/DataFieldFactory.cc
+   ${QNX_SRC_DIR}/LogFile.cc
 )
 
 # specify include paths and libraries
@@ -250,27 +250,27 @@ target_link_libraries(qnx PRIVATE geolib)
 
 # specify library
 add_library(tnav 
-       ${TNAV_SRC_DIR}/TerrainNav.cpp
-       ${TNAV_SRC_DIR}/TNavConfig.cpp
-       ${TNAV_SRC_DIR}/TNavFilter.cpp
-       ${TNAV_SRC_DIR}/TNavPointMassFilter.cpp
-       ${TNAV_SRC_DIR}/TNavParticleFilter.cpp
-       ${TNAV_SRC_DIR}/TNavBankFilter.cpp
-       ${TNAV_SRC_DIR}/TNavPFLog.cpp
-       ${TNAV_SRC_DIR}/TerrainMapOctree.cpp
-       ${TNAV_SRC_DIR}/PositionLog.cpp
-       ${TNAV_SRC_DIR}/TerrainNavLog.cpp
-       ${TNAV_SRC_DIR}/mapio.cpp
-       ${TNAV_SRC_DIR}/structDefs.cpp
-       ${TNAV_SRC_DIR}/TrnLog.cpp
-       ${TNAV_SRC_DIR}/trn_log.cpp
-       ${TNAV_SRC_DIR}/myOutput.cpp
-       ${TNAV_SRC_DIR}/matrixArrayCalcs.cpp
-       ${TNAV_SRC_DIR}/TerrainMapDEM.cpp
-       ${TNAV_SRC_DIR}/OctreeSupport.cpp
-       ${TNAV_SRC_DIR}/Octree.cpp
-       ${TNAV_SRC_DIR}/OctreeNode.cpp
-       ${TNAV_SRC_DIR}/TRNUtils.cpp
+   ${TNAV_SRC_DIR}/TerrainNav.cpp
+   ${TNAV_SRC_DIR}/TNavConfig.cpp
+   ${TNAV_SRC_DIR}/TNavFilter.cpp
+   ${TNAV_SRC_DIR}/TNavPointMassFilter.cpp
+   ${TNAV_SRC_DIR}/TNavParticleFilter.cpp
+   ${TNAV_SRC_DIR}/TNavBankFilter.cpp
+   ${TNAV_SRC_DIR}/TNavPFLog.cpp
+   ${TNAV_SRC_DIR}/TerrainMapOctree.cpp
+   ${TNAV_SRC_DIR}/PositionLog.cpp
+   ${TNAV_SRC_DIR}/TerrainNavLog.cpp
+   ${TNAV_SRC_DIR}/mapio.cpp
+   ${TNAV_SRC_DIR}/structDefs.cpp
+   ${TNAV_SRC_DIR}/TrnLog.cpp
+   ${TNAV_SRC_DIR}/trn_log.cpp
+   ${TNAV_SRC_DIR}/myOutput.cpp
+   ${TNAV_SRC_DIR}/matrixArrayCalcs.cpp
+   ${TNAV_SRC_DIR}/TerrainMapDEM.cpp
+   ${TNAV_SRC_DIR}/OctreeSupport.cpp
+   ${TNAV_SRC_DIR}/Octree.cpp
+   ${TNAV_SRC_DIR}/OctreeNode.cpp
+   ${TNAV_SRC_DIR}/TRNUtils.cpp
 )
 
 # specify include paths and libraries
@@ -316,15 +316,16 @@ target_include_directories(trnwc PRIVATE
 
 # specify library
 add_library(trnw 
-   ${TRNW_SRC_DIR}/trnw.cpp
-   ${TRNW_SRC_DIR}/mb1_msg.c
-   ${TRNW_SRC_DIR}/trnif_msg.c
+    ${TRNW_SRC_DIR}/trnw.cpp
+    ${TRNW_SRC_DIR}/mb1_msg.c
+    ${TRNW_SRC_DIR}/trnif_msg.c
 )
 
 # specify include paths and libraries
 target_link_libraries(trnw PRIVATE tnav newmat qnx geocon LibPROJ::LibPROJ NetCDF::NetCDF)
 
-target_include_directories(trnw PRIVATE ${CMAKE_SOURCE_DIR}/src/mbio
+target_include_directories(trnw PRIVATE
+    ${CMAKE_SOURCE_DIR}/src/mbio
     ${LIBTRNAV_INCLUDES}
 )
 #
@@ -432,7 +433,6 @@ add_executable(mmcpub
 target_link_libraries(mmcpub PRIVATE mbtrnframe)
 
 target_include_directories(mmcpub PRIVATE
-    ${CMAKE_SOURCE_DIR}
     ${LIBTRNAV_INCLUDES}
 )
 #
@@ -448,7 +448,6 @@ add_executable(mmcsub
 target_link_libraries(mmcsub PRIVATE mbtrnframe)
 
 target_include_directories(mmcsub PRIVATE
-    ${CMAKE_SOURCE_DIR}
     ${LIBTRNAV_INCLUDES}
 )
 #
@@ -462,7 +461,6 @@ add_executable(mcpub
 
 # specify include paths and libraries
 target_include_directories(mcpub PRIVATE
-    ${CMAKE_SOURCE_DIR}
     ${LIBTRNAV_INCLUDES}
 )
 #
@@ -477,7 +475,6 @@ add_executable(mcsub
 
 # specify include paths and libraries
 target_include_directories(mcsub PRIVATE
-    ${CMAKE_SOURCE_DIR}
     ${LIBTRNAV_INCLUDES}
 )
 #
@@ -495,7 +492,6 @@ add_executable(mb1rs
 target_link_libraries(mb1rs PRIVATE mbtrnframe m)
 
 target_include_directories(mb1rs PRIVATE
-    ${CMAKE_SOURCE_DIR}
     ${LIBTRNAV_INCLUDES}
 )
 #
@@ -836,7 +832,6 @@ add_executable(trncli-test
 target_link_libraries(trncli-test PRIVATE mbtrnframe trnwcli newmat geolib trnw qnx mb1 tnav geocon LibPROJ::LibPROJ NetCDF::NetCDF m)
 
 target_include_directories(trncli-test PRIVATE
-    ${CMAKE_SOURCE_DIR}
     ${LIBTRNAV_INCLUDES}
 )
 #
@@ -855,7 +850,6 @@ add_executable(trnif-test
 target_link_libraries(trnif-test PRIVATE mbtrnframe netif newmat geolib trnw qnx mb1 tnav NetCDF::NetCDF)
 
 target_include_directories(trnif-test PRIVATE
-    ${CMAKE_SOURCE_DIR}
     ${LIBTRNAV_INCLUDES}
 )
 #
@@ -903,7 +897,6 @@ add_executable(geocon-test
 target_link_libraries(geocon-test PRIVATE geocon qnx)
 
 target_include_directories(geocon-test PRIVATE
-    ${CMAKE_SOURCE_DIR}
     ${LIBTRNAV_INCLUDES}
 )
 #
