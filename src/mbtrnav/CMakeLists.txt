@@ -86,6 +86,22 @@ set(DORADO_SRC_DIR ${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/dorado)
 set(OPTROV_SRC_DIR ${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/rov)
 set(TRNPLAYER_SRC_DIR ${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/examples/trn-player)
 
+#################################
+# define include paths
+# mframe, libtrnav, netcdf
+list(PREPEND LIBTRNAV_INCLUDES
+"${LibPROJ_INCLUDE_DIR}"
+"${Libmframe_INCLUDE_DIRS}"
+"${CMAKE_SOURCE_DIR}/src/mbtrnframe"
+"${GCTP_INCL_DIR}"
+"${NEWMAT_SRC_DIR}"
+"${QNX_SRC_DIR}"
+"${TNAV_SRC_DIR}"
+"${TRNW_SRC_DIR}"
+"${UTILS_SRC_DIR}"
+"${NetCDF_INCLUDE_DIRS}"
+)
+
 #------------------------------------------------------------------------------
 #
 # build libgeolib (gctp)
@@ -261,9 +277,7 @@ add_library(tnav
 target_link_libraries(tnav PRIVATE newmat qnx NetCDF::NetCDF)
 
 target_include_directories(tnav PRIVATE
-    ${NEWMAT_SRC_DIR}
-    ${QNX_SRC_DIR}
-    ${NetCDF_INCLUDE_DIRS}
+    ${LIBTRNAV_INCLUDES}
 )
 #
 #------------------------------------------------------------------------------
@@ -279,9 +293,8 @@ add_library(geocon
 target_link_libraries(geocon PRIVATE newmat qnx LibPROJ::LibPROJ )
 
 target_include_directories(geocon PRIVATE
-    ${NEWMAT_SRC_DIR}
-    ${QNX_SRC_DIR}
-    ${LibPROJ_INCLUDE_DIRS})
+    ${LIBTRNAV_INCLUDES}
+)
 #
 #------------------------------------------------------------------------------
 #
@@ -294,12 +307,7 @@ add_library(trnwc STATIC
 # specify include paths and libraries
 target_include_directories(trnwc PRIVATE
     ${CMAKE_SOURCE_DIR}/src/mbio
-    ${LibPROJ_INCLUDE_DIRS}
-    ${TRNW_SRC_DIR}
-    ${TNAV_SRC_DIR}
-    ${NEWMAT_SRC_DIR}
-    ${QNX_SRC_DIR}
-    ${NetCDF_INCLUDE_DIRS}
+    ${LIBTRNAV_INCLUDES}
 )
 #
 #------------------------------------------------------------------------------
@@ -317,11 +325,7 @@ add_library(trnw
 target_link_libraries(trnw PRIVATE tnav newmat qnx geocon LibPROJ::LibPROJ NetCDF::NetCDF)
 
 target_include_directories(trnw PRIVATE ${CMAKE_SOURCE_DIR}/src/mbio
-  ${LibPROJ_INCLUDE_DIRS}
-  ${TNAV_SRC_DIR}
-  ${NEWMAT_SRC_DIR}
-  ${QNX_SRC_DIR}
-  ${NetCDF_INCLUDE_DIRS}
+    ${LIBTRNAV_INCLUDES}
 )
 #
 #------------------------------------------------------------------------------
@@ -338,10 +342,8 @@ add_library(netif
 target_link_libraries(netif PRIVATE mbtrnframe tnav trnw)
 
 target_include_directories(netif PRIVATE
-    ${CMAKE_SOURCE_DIR}/src/mbtrnframe
-    ${LibPROJ_INCLUDE_DIRS}
-    ${TNAV_SRC_DIR}
     ${CMAKE_SOURCE_DIR}/src/mbtrnutils
+    ${LIBTRNAV_INCLUDES}
 )
 #
 #------------------------------------------------------------------------------
@@ -363,12 +365,11 @@ add_library(trnucli
 )
 
 # specify include paths and libraries
-target_include_directories(trnucli PRIVATE
-    ${CMAKE_SOURCE_DIR}/src/mbtrnframe
-    ${LibPROJ_INCLUDE_DIRS}
-    ${TNAV_SRC_DIR})
-
 target_link_libraries(trnucli PRIVATE mbtrnframe netif)
+
+target_include_directories(trnucli PRIVATE
+    ${LIBTRNAV_INCLUDES}
+)
 #
 #------------------------------------------------------------------------------
 #
@@ -385,12 +386,7 @@ add_library(trncli
 target_link_libraries(trncli PRIVATE newmat geolib trnw qnx mb1 tnav NetCDF::NetCDF)
 
 target_include_directories(trncli PRIVATE
-${CMAKE_SOURCE_DIR}/src/mbtrnframe
-    ${LibPROJ_INCLUDE_DIRS}
-    ${TNAV_SRC_DIR}
-    ${NEWMAT_SRC_DIR}
-    ${QNX_SRC_DIR}
-    ${NetCDF_INCLUDE_DIRS}
+    ${LIBTRNAV_INCLUDES}
 )
 #
 #------------------------------------------------------------------------------
@@ -405,12 +401,7 @@ add_library(trnwcli STATIC
 target_link_libraries(trnwcli PRIVATE newmat geolib trnw qnx mb1 tnav NetCDF::NetCDF)
 
 target_include_directories(trnwcli PRIVATE
-    ${LibPROJ_INCLUDE_DIRS}
-    ${CMAKE_SOURCE_DIR}/src/mbtrnframe
-    ${TNAV_SRC_DIR}
-    ${NEWMAT_SRC_DIR}
-    ${QNX_SRC_DIR}
-    ${NetCDF_INCLUDE_DIRS}
+    ${LIBTRNAV_INCLUDES}
 )
 #
 #------------------------------------------------------------------------------
@@ -426,12 +417,7 @@ add_executable(trn-server
 target_link_libraries(trn-server PRIVATE tnav newmat qnx geolib)
 
 target_include_directories(trn-server PRIVATE BEFORE
-    ${TNAV_SRC_DIR}
-    ${NEWMAT_SRC_DIR}
-    ${QNX_SRC_DIR}
-    ${TRNW_SRC_DIR}
-    ${UTILS_SRC_DIR}
-    ${NetCDF_INCLUDE_DIRS}
+    ${LIBTRNAV_INCLUDES}
 )
 #
 #------------------------------------------------------------------------------
@@ -447,9 +433,7 @@ target_link_libraries(mmcpub PRIVATE mbtrnframe)
 
 target_include_directories(mmcpub PRIVATE
     ${CMAKE_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/src/mbtrnframe
-    ${TRNW_SRC_DIR}
-    ${TNAV_SRC_DIR}
+    ${LIBTRNAV_INCLUDES}
 )
 #
 #------------------------------------------------------------------------------
@@ -465,9 +449,7 @@ target_link_libraries(mmcsub PRIVATE mbtrnframe)
 
 target_include_directories(mmcsub PRIVATE
     ${CMAKE_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/src/mbtrnframe
-    ${TRNW_SRC_DIR}
-    ${TNAV_SRC_DIR}
+    ${LIBTRNAV_INCLUDES}
 )
 #
 #------------------------------------------------------------------------------
@@ -481,8 +463,7 @@ add_executable(mcpub
 # specify include paths and libraries
 target_include_directories(mcpub PRIVATE
     ${CMAKE_SOURCE_DIR}
-    ${TRNW_SRC_DIR}
-    ${TNAV_SRC_DIR}
+    ${LIBTRNAV_INCLUDES}
 )
 #
 #------------------------------------------------------------------------------
@@ -497,8 +478,7 @@ add_executable(mcsub
 # specify include paths and libraries
 target_include_directories(mcsub PRIVATE
     ${CMAKE_SOURCE_DIR}
-    ${TRNW_SRC_DIR}
-    ${TNAV_SRC_DIR}
+    ${LIBTRNAV_INCLUDES}
 )
 #
 #------------------------------------------------------------------------------
@@ -516,9 +496,7 @@ target_link_libraries(mb1rs PRIVATE mbtrnframe m)
 
 target_include_directories(mb1rs PRIVATE
     ${CMAKE_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/src/mbtrnframe
-    ${TRNW_SRC_DIR}
-    ${TNAV_SRC_DIR}
+    ${LIBTRNAV_INCLUDES}
 )
 #
 #------------------------------------------------------------------------------
@@ -538,11 +516,7 @@ add_executable(trn-player
 target_link_libraries(trn-player PRIVATE tnav qnx newmat NetCDF::NetCDF)
 
 target_include_directories(trn-player PRIVATE BEFORE
-    ${UTILS_SRC_DIR}
-    ${TNAV_SRC_DIR}
-    ${NEWMAT_SRC_DIR}
-    ${QNX_SRC_DIR}
-    ${NetCDF_INCLUDE_DIRS}
+    ${LIBTRNAV_INCLUDES}
 )
 
 target_compile_options(trn-player PRIVATE
@@ -564,13 +538,8 @@ ${UTILS_SRC_DIR}/TerrainNavClient.cpp
 target_link_libraries(replay PRIVATE trnw trncli netif tnav qnx newmat geolib NetCDF::NetCDF)
 
 target_include_directories(replay PRIVATE BEFORE
+    ${LIBTRNAV_INCLUDES}
     ${DORADO_SRC_DIR}
-    ${UTILS_SRC_DIR}
-    ${TRNW_SRC_DIR}
-    ${TNAV_SRC_DIR}
-    ${NEWMAT_SRC_DIR}
-    ${QNX_SRC_DIR}
-    ${NetCDF_INCLUDE_DIRS}
 )
 
 target_compile_options(replay PRIVATE
@@ -592,12 +561,8 @@ add_executable(mb1log-player
 target_link_libraries(mb1log-player PRIVATE trnw trncli netif tnav qnx newmat geolib)
 
 target_include_directories(mb1log-player PRIVATE BEFORE
+    ${LIBTRNAV_INCLUDES}
     ${OPTROV_SRC_DIR}
-    ${TRNW_SRC_DIR}
-    ${TNAV_SRC_DIR}
-    ${NEWMAT_SRC_DIR}
-    ${QNX_SRC_DIR}
-    ${NetCDF_INCLUDE_DIRS}
 )
 
 target_compile_options(mb1log-player PRIVATE
@@ -617,25 +582,11 @@ add_executable(trnlog-player
 )
 
 # specify include paths and libraries
-target_link_libraries(trnlog-player PRIVATE
-    trnw
-    trncli
-    netif
-    tnav
-    qnx
-    newmat
-    geolib
-    NetCDF::NetCDF
-)
+target_link_libraries(trnlog-player PRIVATE trnw trncli netif tnav qnx newmat geolib NetCDF::NetCDF)
 
 target_include_directories(trnlog-player PRIVATE BEFORE
-    ${UTILS_SRC_DIR}
-    ${TRNW_SRC_DIR}
-    ${TNAV_SRC_DIR}
-    ${NEWMAT_SRC_DIR}
-    ${QNX_SRC_DIR}
+    ${LIBTRNAV_INCLUDES}
     ${OPTROV_SRC_DIR}
-    ${NetCDF_INCLUDE_DIRS}
 )
 
 target_compile_options(trnlog-player PRIVATE
@@ -658,13 +609,8 @@ add_executable(csvlog-player
 target_link_libraries(csvlog-player PRIVATE trnw trncli netif tnav qnx newmat geolib NetCDF::NetCDF)
 
 target_include_directories(csvlog-player PRIVATE BEFORE
-    ${UTILS_SRC_DIR}
-    ${TRNW_SRC_DIR}
-    ${TNAV_SRC_DIR}
-    ${NEWMAT_SRC_DIR}
-    ${QNX_SRC_DIR}
+    ${LIBTRNAV_INCLUDES}
     ${OPTROV_SRC_DIR}
-    ${NetCDF_INCLUDE_DIRS}
 )
 
 target_compile_options(csvlog-player PRIVATE
@@ -684,7 +630,7 @@ add_executable(readlog
 target_link_libraries(readlog PRIVATE qnx)
 
 target_include_directories(readlog PRIVATE BEFORE
-    ${TRNW_SRC_DIR}
+    ${LIBTRNAV_INCLUDES}
 )
 #
 #------------------------------------------------------------------------------
@@ -700,7 +646,7 @@ add_executable(writelog
 target_link_libraries(writelog PRIVATE qnx)
 
 target_include_directories(writelog PRIVATE BEFORE
-    ${TRNW_SRC_DIR}
+    ${LIBTRNAV_INCLUDES}
 )
 #
 #------------------------------------------------------------------------------
@@ -716,7 +662,7 @@ add_executable(log-to-matlab
 target_link_libraries(log-to-matlab PRIVATE qnx)
 
 target_include_directories(log-to-matlab PRIVATE BEFORE
-    ${TRNW_SRC_DIR}
+    ${LIBTRNAV_INCLUDES}
 )
 #
 #------------------------------------------------------------------------------
@@ -732,7 +678,7 @@ add_executable(log-to-csv
 target_link_libraries(log-to-csv  PRIVATE qnx)
 
 target_include_directories(log-to-csv PRIVATE BEFORE
-    ${TRNW_SRC_DIR}
+    ${LIBTRNAV_INCLUDES}
 )
 #------------------------------------------------------------------------------
 #
@@ -747,8 +693,7 @@ add_executable(otree
 target_link_libraries(otree PRIVATE tnav newmat qnx)
 
 target_include_directories(otree PRIVATE BEFORE
-    ${TRNW_SRC_DIR}
-    ${TNAV_SRC_DIR}
+    ${LIBTRNAV_INCLUDES}
 )
 #------------------------------------------------------------------------------
 #
@@ -763,8 +708,7 @@ add_executable(bodump
 target_link_libraries(bodump PRIVATE tnav newmat qnx)
 
 target_include_directories(bodump PRIVATE BEFORE
-    ${TRNW_SRC_DIR}
-    ${TNAV_SRC_DIR}
+    ${LIBTRNAV_INCLUDES}
 )
 #------------------------------------------------------------------------------
 #
@@ -779,9 +723,7 @@ add_executable(octree2patches
 target_link_libraries(octree2patches PRIVATE tnav newmat qnx)
 
 target_include_directories(octree2patches PRIVATE BEFORE
-    ${TRNW_SRC_DIR}
-    ${TNAV_SRC_DIR}
-    ${NetCDF_INCLUDE_DIRS}
+    ${LIBTRNAV_INCLUDES}
 )
 #------------------------------------------------------------------------------
 #
@@ -796,9 +738,7 @@ add_executable(grd-octree-maker
 target_link_libraries(grd-octree-maker PRIVATE tnav newmat qnx NetCDF::NetCDF)
 
 target_include_directories(grd-octree-maker PRIVATE BEFORE
-    ${TRNW_SRC_DIR}
-    ${TNAV_SRC_DIR}
-    ${NetCDF_INCLUDE_DIRS}
+    ${LIBTRNAV_INCLUDES}
 )
 #------------------------------------------------------------------------------
 #
@@ -814,9 +754,7 @@ target_link_libraries(csv-octree-maker PRIVATE tnav newmat qnx NetCDF::NetCDF
 )
 
 target_include_directories(csv-octree-maker PRIVATE BEFORE
-    ${TRNW_SRC_DIR}
-    ${TNAV_SRC_DIR}
-    ${NetCDF_INCLUDE_DIRS}
+    ${LIBTRNAV_INCLUDES}
 )
 #------------------------------------------------------------------------------
 #
@@ -831,9 +769,7 @@ add_executable(transoct
 target_link_libraries(transoct PRIVATE tnav newmat qnx)
 
 target_include_directories(transoct PRIVATE BEFORE
-    ${TRNW_SRC_DIR}
-    ${TNAV_SRC_DIR}
-    ${NetCDF_INCLUDE_DIRS}
+    ${LIBTRNAV_INCLUDES}
 )
 #
 #------------------------------------------------------------------------------
@@ -849,9 +785,7 @@ add_executable(trnucli-test
 target_link_libraries(trnucli-test PRIVATE mbtrnframe trnucli netif tnav trnw newmat qnx geolib LibPROJ::LibPROJ NetCDF::NetCDF)
 
 target_include_directories(trnucli-test PRIVATE
-    ${CMAKE_SOURCE_DIR}/src/mbtrnframe
-    ${LibPROJ_INCLUDE_DIRS}
-    ${TNAV_SRC_DIR}
+    ${LIBTRNAV_INCLUDES}
 )
 #
 #------------------------------------------------------------------------------
@@ -867,9 +801,7 @@ add_executable(trnusvr-test
 target_link_libraries(trnusvr-test PRIVATE mbtrnframe netif tnav trnw newmat qnx geolib NetCDF::NetCDF)
 
 target_include_directories(trnusvr-test PRIVATE
-    ${CMAKE_SOURCE_DIR}/src/mbtrnframe
-    ${LibPROJ_INCLUDE_DIRS}
-    ${TNAV_SRC_DIR}
+    ${LIBTRNAV_INCLUDES}
 )
 #
 #------------------------------------------------------------------------------
@@ -888,12 +820,7 @@ add_executable(trnclient-test
 target_link_libraries(trnclient-test PRIVATE tnav newmat qnx  NetCDF::NetCDF)
 
 target_include_directories(trnclient-test PRIVATE BEFORE
-    ${TRNW_SRC_DIR}
-    ${TNAV_SRC_DIR}
-    ${NEWMAT_SRC_DIR}
-    ${QNX_SRC_DIR}
-    ${UTILS_SRC_DIR}
-    ${NetCDF_INCLUDE_DIRS}
+    ${LIBTRNAV_INCLUDES}
 )
 #
 #------------------------------------------------------------------------------
@@ -910,8 +837,7 @@ target_link_libraries(trncli-test PRIVATE mbtrnframe trnwcli newmat geolib trnw 
 
 target_include_directories(trncli-test PRIVATE
     ${CMAKE_SOURCE_DIR}
-    ${LibPROJ_INCLUDE_DIRS}
-    ${CMAKE_SOURCE_DIR}/src/mbtrnframe trnw terrain-nav
+    ${LIBTRNAV_INCLUDES}
 )
 #
 #------------------------------------------------------------------------------
@@ -930,10 +856,7 @@ target_link_libraries(trnif-test PRIVATE mbtrnframe netif newmat geolib trnw qnx
 
 target_include_directories(trnif-test PRIVATE
     ${CMAKE_SOURCE_DIR}
-    ${LibPROJ_INCLUDE_DIRS}
-    ${TRNW_SRC_DIR}
-    ${TNAV_SRC_DIR}
-    ${CMAKE_SOURCE_DIR}/src/mbtrnframe
+    ${LIBTRNAV_INCLUDES}
 )
 #
 #------------------------------------------------------------------------------
@@ -949,9 +872,7 @@ add_executable(trnlog-test
 target_link_libraries(trnlog-test PRIVATE tnav newmat qnx geolib NetCDF::NetCDF)
 
 target_include_directories(trnlog-test PRIVATE
-    ${TRNW_SRC_DIR}
-    ${UTILS_SRC_DIR}
-    ${TNAV_SRC_DIR}
+    ${LIBTRNAV_INCLUDES}
 )
 #
 #------------------------------------------------------------------------------
@@ -967,10 +888,7 @@ add_executable(tile-test
 target_link_libraries(tile-test PRIVATE tnav newmat qnx)
 
 target_include_directories(tile-test PRIVATE BEFORE
-    ${TNAV_SRC_DIR}
-    ${NEWMAT_SRC_DIR}
-    ${TRNW_SRC_DIR}
-    ${NetCDF_INCLUDE_DIRS}
+    ${LIBTRNAV_INCLUDES}
 )
 #
 #------------------------------------------------------------------------------
@@ -986,8 +904,7 @@ target_link_libraries(geocon-test PRIVATE geocon qnx)
 
 target_include_directories(geocon-test PRIVATE
     ${CMAKE_SOURCE_DIR}
-    ${LibPROJ_INCLUDE_DIRS}
-    trnw qnx-utils
+    ${LIBTRNAV_INCLUDES}
 )
 #
 #------------------------------------------------------------------------------
@@ -1004,13 +921,8 @@ add_executable(test-trnattr
 target_link_libraries(test-trnattr PRIVATE trnw trncli netif tnav qnx newmat geolib NetCDF::NetCDF)
 
 target_include_directories(test-trnattr PRIVATE BEFORE
+    ${LIBTRNAV_INCLUDES}
     ${DORADO_SRC_DIR}
-    ${UTILS_SRC_DIR}
-    ${TRNW_SRC_DIR}
-    ${TNAV_SRC_DIR}
-    ${NEWMAT_SRC_DIR}
-    ${QNX_SRC_DIR}
-    ${NetCDF_INCLUDE_DIRS}
 )
 
 target_compile_options(test-trnattr PRIVATE
@@ -1030,11 +942,7 @@ add_executable(test-trn-log
 target_link_libraries(test-trn-log PRIVATE tnav newmat qnx)
 
 target_include_directories(test-trn-log PRIVATE BEFORE
-    ${UTILS_SRC_DIR}
-    ${TRNW_SRC_DIR}
-    ${TNAV_SRC_DIR}
-    ${NEWMAT_SRC_DIR}
-    ${QNX_SRC_DIR}
+    ${LIBTRNAV_INCLUDES}
 )
 #
 #------------------------------------------------------------------------------
