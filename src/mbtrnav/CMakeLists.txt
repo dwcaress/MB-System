@@ -266,7 +266,6 @@ add_library(tnav
    ${TNAV_SRC_DIR}/TerrainNavLog.cpp
    ${TNAV_SRC_DIR}/mapio.cpp
    ${TNAV_SRC_DIR}/structDefs.cpp
-   ${TNAV_SRC_DIR}/TrnLog.cpp
    ${TNAV_SRC_DIR}/trn_log.cpp
    ${TNAV_SRC_DIR}/myOutput.cpp
    ${TNAV_SRC_DIR}/matrixArrayCalcs.cpp
@@ -275,6 +274,7 @@ add_library(tnav
    ${TNAV_SRC_DIR}/Octree.cpp
    ${TNAV_SRC_DIR}/OctreeNode.cpp
    ${TNAV_SRC_DIR}/TRNUtils.cpp
+   ${TNAV_SRC_DIR}/TrnLog.cpp
 )
 
 # specify include paths and libraries
@@ -294,7 +294,7 @@ add_library(geocon
 )
 
 # specify include paths and libraries
-target_link_libraries(geocon PRIVATE newmat qnx LibPROJ::LibPROJ )
+target_link_libraries(geocon PRIVATE qnx LibPROJ::LibPROJ )
 
 target_include_directories(geocon PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
@@ -331,7 +331,7 @@ add_library(trnw
 )
 
 # specify include paths and libraries
-target_link_libraries(trnw PRIVATE tnav newmat qnx geocon LibPROJ::LibPROJ NetCDF::NetCDF)
+target_link_libraries(trnw PRIVATE tnav qnx newmat geocon m pthread)
 
 target_include_directories(trnw PRIVATE BEFORE
     ${CMAKE_SOURCE_DIR}/src/mbio
