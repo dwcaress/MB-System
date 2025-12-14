@@ -181,6 +181,10 @@ add_library(geolib
 target_compile_options(geolib PRIVATE
 "-Wno-deprecated-non-prototype"
 "-Wno-unused-result"
+"-Wno-unused-variable"
+"-Wno-unused-but-set-variable"
+"-Wno-uninitialized"
+"-Wno-sometimes-uninitialized"
 )
 
 #
@@ -276,7 +280,7 @@ add_library(tnav
 # specify include paths and libraries
 target_link_libraries(tnav PRIVATE newmat qnx NetCDF::NetCDF)
 
-target_include_directories(tnav PRIVATE
+target_include_directories(tnav PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
 )
 #
@@ -292,9 +296,14 @@ add_library(geocon
 # specify include paths and libraries
 target_link_libraries(geocon PRIVATE newmat qnx LibPROJ::LibPROJ )
 
-target_include_directories(geocon PRIVATE
+target_include_directories(geocon PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
 )
+
+target_compile_options(geocon PRIVATE
+"-std=c++11"
+)
+
 #
 #------------------------------------------------------------------------------
 #
@@ -305,7 +314,7 @@ add_library(trnwc STATIC
 )
 
 # specify include paths and libraries
-target_include_directories(trnwc PRIVATE
+target_include_directories(trnwc PRIVATE BEFORE
     ${CMAKE_SOURCE_DIR}/src/mbio
     ${LIBTRNAV_INCLUDES}
 )
@@ -324,7 +333,7 @@ add_library(trnw
 # specify include paths and libraries
 target_link_libraries(trnw PRIVATE tnav newmat qnx geocon LibPROJ::LibPROJ NetCDF::NetCDF)
 
-target_include_directories(trnw PRIVATE
+target_include_directories(trnw PRIVATE BEFORE
     ${CMAKE_SOURCE_DIR}/src/mbio
     ${LIBTRNAV_INCLUDES}
 )
@@ -342,7 +351,7 @@ add_library(netif
 # specify include paths and libraries
 target_link_libraries(netif PRIVATE mbtrnframe tnav trnw)
 
-target_include_directories(netif PRIVATE
+target_include_directories(netif PRIVATE BEFORE
     ${CMAKE_SOURCE_DIR}/src/mbtrnutils
     ${LIBTRNAV_INCLUDES}
 )
@@ -368,7 +377,7 @@ add_library(trnucli
 # specify include paths and libraries
 target_link_libraries(trnucli PRIVATE mbtrnframe netif)
 
-target_include_directories(trnucli PRIVATE
+target_include_directories(trnucli PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
 )
 #
@@ -386,7 +395,7 @@ add_library(trncli
 # specify include paths and libraries
 target_link_libraries(trncli PRIVATE newmat geolib trnw qnx mb1 tnav NetCDF::NetCDF)
 
-target_include_directories(trncli PRIVATE
+target_include_directories(trncli PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
 )
 #
@@ -401,7 +410,7 @@ add_library(trnwcli STATIC
 # specify include paths and libraries
 target_link_libraries(trnwcli PRIVATE newmat geolib trnw qnx mb1 tnav NetCDF::NetCDF)
 
-target_include_directories(trnwcli PRIVATE
+target_include_directories(trnwcli PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
 )
 #
@@ -432,7 +441,7 @@ add_executable(mmcpub
 # specify include paths and libraries
 target_link_libraries(mmcpub PRIVATE mbtrnframe)
 
-target_include_directories(mmcpub PRIVATE
+target_include_directories(mmcpub PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
 )
 #
@@ -447,7 +456,7 @@ add_executable(mmcsub
 # specify include paths and libraries
 target_link_libraries(mmcsub PRIVATE mbtrnframe)
 
-target_include_directories(mmcsub PRIVATE
+target_include_directories(mmcsub PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
 )
 #
@@ -460,7 +469,7 @@ add_executable(mcpub
 )
 
 # specify include paths and libraries
-target_include_directories(mcpub PRIVATE
+target_include_directories(mcpub PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
 )
 #
@@ -474,7 +483,7 @@ add_executable(mcsub
 )
 
 # specify include paths and libraries
-target_include_directories(mcsub PRIVATE
+target_include_directories(mcsub PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
 )
 #
@@ -491,7 +500,7 @@ add_executable(mb1rs
 # specify include paths and libraries
 target_link_libraries(mb1rs PRIVATE mbtrnframe m)
 
-target_include_directories(mb1rs PRIVATE
+target_include_directories(mb1rs PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
 )
 #
@@ -525,9 +534,9 @@ target_compile_options(trn-player PRIVATE
 
 # specify build target
 add_executable(replay
-${DORADO_SRC_DIR}/Replay.cpp
-${DORADO_SRC_DIR}/trn_replay.cpp
-${UTILS_SRC_DIR}/TerrainNavClient.cpp
+    ${DORADO_SRC_DIR}/Replay.cpp
+    ${DORADO_SRC_DIR}/trn_replay.cpp
+    ${UTILS_SRC_DIR}/TerrainNavClient.cpp
 )
 
 # specify include paths and libraries
@@ -780,7 +789,7 @@ add_executable(trnucli-test
 # specify include paths and libraries
 target_link_libraries(trnucli-test PRIVATE mbtrnframe trnucli netif tnav trnw newmat qnx geolib LibPROJ::LibPROJ NetCDF::NetCDF)
 
-target_include_directories(trnucli-test PRIVATE
+target_include_directories(trnucli-test PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
 )
 #
@@ -796,7 +805,7 @@ add_executable(trnusvr-test
 # specify include paths and libraries
 target_link_libraries(trnusvr-test PRIVATE mbtrnframe netif tnav trnw newmat qnx geolib NetCDF::NetCDF)
 
-target_include_directories(trnusvr-test PRIVATE
+target_include_directories(trnusvr-test PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
 )
 #
@@ -831,7 +840,7 @@ add_executable(trncli-test
 # specify include paths and libraries
 target_link_libraries(trncli-test PRIVATE mbtrnframe trnwcli newmat geolib trnw qnx mb1 tnav geocon LibPROJ::LibPROJ NetCDF::NetCDF m)
 
-target_include_directories(trncli-test PRIVATE
+target_include_directories(trncli-test PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
 )
 #
@@ -849,7 +858,7 @@ add_executable(trnif-test
 # specify include paths and libraries
 target_link_libraries(trnif-test PRIVATE mbtrnframe netif newmat geolib trnw qnx mb1 tnav NetCDF::NetCDF)
 
-target_include_directories(trnif-test PRIVATE
+target_include_directories(trnif-test PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
 )
 #
@@ -865,7 +874,7 @@ add_executable(trnlog-test
 # specify include paths and libraries
 target_link_libraries(trnlog-test PRIVATE tnav newmat qnx geolib NetCDF::NetCDF)
 
-target_include_directories(trnlog-test PRIVATE
+target_include_directories(trnlog-test PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
 )
 #
@@ -896,9 +905,14 @@ add_executable(geocon-test
 # specify include paths and libraries
 target_link_libraries(geocon-test PRIVATE geocon qnx)
 
-target_include_directories(geocon-test PRIVATE
+target_include_directories(geocon-test PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
 )
+
+target_compile_options(geocon-test PRIVATE
+"-std=c++11"
+)
+
 #
 #------------------------------------------------------------------------------
 #
