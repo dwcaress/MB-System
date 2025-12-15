@@ -85,15 +85,17 @@ set(UTILS_SRC_DIR  ${CMAKE_SOURCE_DIR}/src/mbtrnav/utils)
 set(DORADO_SRC_DIR ${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/dorado)
 set(OPTROV_SRC_DIR ${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/rov)
 set(TRNPLAYER_SRC_DIR ${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/examples/trn-player)
+set(MFRAME_SRC_DIR ${CMAKE_SOURCE_DIR}/src/mbtrnframe)
 
 #################################
 # define include paths
-# mframe, libtrnav, netcdf
+# mframe, libtrnav, netcdf, proj
+# use proj (default) or gctp, not both
 list(PREPEND LIBTRNAV_INCLUDES
-"${LibPROJ_INCLUDE_DIR}"
 "${Libmframe_INCLUDE_DIRS}"
-"${CMAKE_SOURCE_DIR}/src/mbtrnframe"
-"${GCTP_INCL_DIR}"
+"${LibPROJ_INCLUDE_DIR}"
+#"${GCTP_SRC_DIR}"
+"${MFRAME_SRC_DIR}"
 "${NEWMAT_SRC_DIR}"
 "${QNX_SRC_DIR}"
 "${TNAV_SRC_DIR}"
@@ -101,6 +103,21 @@ list(PREPEND LIBTRNAV_INCLUDES
 "${UTILS_SRC_DIR}"
 "${NetCDF_INCLUDE_DIRS}"
 )
+
+message("mbtrnav ----------------------------------------------------")
+message("buildUseProj           ${buildUseProj}")
+message("Libmframe_INCLUDE_DIRS ${Libmframe_INCLUDE_DIRS}")
+message("LibPROJ_INCLUDE_DIR    ${LibPROJ_INCLUDE_DIR}")
+message("MFRAME_SRC_DIR         ${MFRAME_SRC_DIR}")
+message("GCTP_SRC_DIR           ${GCTP_SRC_DIR}")
+message("NEWMAT_SRC_DIR         ${NEWMAT_SRC_DIR}")
+message("QNX_SRC_DIR            ${QNX_SRC_DIR}")
+message("TNAV_SRC_DIR           ${TNAV_SRC_DIR}")
+message("TRNW_SRC_DIR           ${TRNW_SRC_DIR}")
+message("UTILS_SRC_DIR          ${UTILS_SRC_DIR}")
+message("NetCDF_INCLUDE_DIRS    ${NetCDF_INCLUDE_DIRS}")
+message("LIBTRNAV_INCLUDES      ${LIBTRNAV_INCLUDES}")
+message("----------------------------------------------------------")
 
 #------------------------------------------------------------------------------
 #
