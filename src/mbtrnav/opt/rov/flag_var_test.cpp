@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cassert>
 #include <iomanip>
+#include <cstdint>
 #include "flag_utils.hpp"
 
 using namespace std;
