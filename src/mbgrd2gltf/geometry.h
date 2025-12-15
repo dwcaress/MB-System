@@ -44,36 +44,37 @@
 #include <vector>
 
 namespace mbgrd2gltf {
-    class Geometry {
+class Geometry {
 
-    public:
-        // One triangle vector per tile; use this to emit multiple glTF primitives.
-        struct Tile {
-            size_t x0, y0, x1, y1; // inclusive start (x0,y0), exclusive end (x1,y1) in cell space
-            std::vector<Triangle> triangles;
-        };
-        static std::vector<Tile> get_triangles_tiled(const Matrix<Vertex>& vertices, size_t tileSize);
+public:
+  // One triangle vector per tile; use this to emit multiple glTF primitives.
+  struct Tile {
+    size_t x0, y0, x1, y1; // inclusive start (x0,y0), exclusive end (x1,y1) in cell space
+    std::vector<Triangle> triangles;
+  };
+  static std::vector<Tile> get_triangles_tiled(const Matrix<Vertex>& vertices, size_t tileSize);
 
-    private: // members
-        Matrix<Vertex> _vertices;
-        // Flattened triangles (for backward compatibility)
-        std::vector<Triangle> _triangles;
-        std::vector<Tile> _tiles;
+private: // members
+  Matrix<Vertex> _vertices;
+  // Flattened triangles (for backward compatibility)
+  std::vector<Triangle> _triangles;
+  std::vector<Tile> _tiles;
 
-    private: // methods
-        static double to_radians(double degrees);
-        static double get_longitude(const Bathymetry& bathymetry, size_t x);
-        static double get_latitude(const Bathymetry& bathymetry, size_t y);
-        static Vertex get_earth_centered_vertex(double longitude, double latitude, double altitude, uint32_t id);
-        static Matrix<Vertex> get_vertices(const Bathymetry& bathymetry, double vertical_exaggeration);
-        static std::vector<Triangle> get_triangles(const Matrix<Vertex>& vertices);
+private: // methods
+  static double to_radians(double degrees);
+  static double get_longitude(const Bathymetry& bathymetry, size_t x);
+  static double get_latitude(const Bathymetry& bathymetry, size_t y);
+  static Vertex get_earth_centered_vertex(double longitude, double latitude, double altitude,
+                                          uint32_t id);
+  static Matrix<Vertex> get_vertices(const Bathymetry& bathymetry, double vertical_exaggeration);
+  static std::vector<Triangle> get_triangles(const Matrix<Vertex>& vertices);
 
-    public: // methods
-        Geometry(const Bathymetry& bathymetry, const Options& options);
-        const Matrix<Vertex>& vertices() const { return _vertices; }
-        const std::vector<Triangle>& triangles() const { return _triangles; }
-        const std::vector<Tile>& tiles() const { return _tiles; }
-    };
-}
+public: // methods
+  Geometry(const Bathymetry& bathymetry, const Options& options);
+  const Matrix<Vertex>& vertices() const { return _vertices; }
+  const std::vector<Triangle>& triangles() const { return _triangles; }
+  const std::vector<Tile>& tiles() const { return _tiles; }
+};
+} // namespace mbgrd2gltf
 
 #endif
