@@ -980,13 +980,18 @@ target_compile_options(test-trnattr PRIVATE
 "-std=c++11"
 )
 
+# update this list when targets are moved
+# in/out of buildTRNOptional block
 list(APPEND TRN_OPTIONAL
 readlog writelog log-to-matlab log-to-csv
 otree bodump octree2patches grd-octree-maker csv-octree-maker transoct
 test-trnif test-trnlog test-tile test-geocon test-trnattr
 )
-message("TRN_OPTIONAL ${TRN_OPTIONAL}")
 endif() # buildTRNOptional
+
+if(buildVerbose)
+message(" TRN_OPTIONAL                ${TRN_OPTIONAL}")
+endif()
 
 #
 #------------------------------------------------------------------------------
