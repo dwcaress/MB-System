@@ -32,6 +32,7 @@
 #include <sstream>
 #include <fstream>
 #include <iomanip>
+#include <limits>
 
 // parser debug output macros
 #define CTX_DPRINT(fmt,...) if(TrnPlayerCtx::gdebug(false) > 1)fprintf(stderr, fmt, __VA_ARGS__)
