@@ -42,9 +42,9 @@
 # Applications/Tests:
 #   trn-server mmcpub mmcsub mcpub mcsub mb1rs
 #   trn-player replay mb1log-player trnlog-player csvlog-player
+#   trnu-cli trnu-svr trn-client trn-cli
 #   readlog writelog log-to-matlab log-to-csv
 #   otree bodump octree2patches grd-octree-maker csv-octree-maker transoct
-#   trnu-cli trnu-svr trn-client trn-cli
 #   test-trnif test-trnlog test-tile test-geocon test-trnattr
 #
 message("In src/mbtrnav")
@@ -652,6 +652,73 @@ target_compile_options(csvlog-player PRIVATE
 #
 #------------------------------------------------------------------------------
 #
+# build trnu-cli (TRNU client app)
+
+# specify build target
+add_executable(trnu-cli
+    ${TRNW_SRC_DIR}/trnu-cli.c
+)
+
+# specify include paths and libraries
+target_link_libraries(trnu-cli PRIVATE mbtrnframe trnucli netif tnav trnw newmat qnx geolib LibPROJ::LibPROJ NetCDF::NetCDF)
+
+target_include_directories(trnu-cli PRIVATE BEFORE
+    ${LIBTRNAV_INCLUDES}
+)
+#
+#------------------------------------------------------------------------------
+#
+# build trnu-svr (stand-alone TRN server (no TRN instance))
+
+# specify build target
+add_executable(trnu-svr
+    ${TRNW_SRC_DIR}/trnu-svr.c
+)
+
+# specify include paths and libraries
+target_link_libraries(trnu-svr PRIVATE mbtrnframe netif tnav trnw newmat qnx geolib NetCDF::NetCDF)
+
+target_include_directories(trnu-svr PRIVATE BEFORE
+    ${LIBTRNAV_INCLUDES}
+)
+#
+#------------------------------------------------------------------------------
+#
+# build trn-client
+
+# specify build target
+add_executable(trn-client
+    ${UTILS_SRC_DIR}/trn-client.cpp
+    ${UTILS_SRC_DIR}/TrnClient.cpp
+    ${UTILS_SRC_DIR}/TerrainNavClient.cpp
+    ${UTILS_SRC_DIR}/TrnAttr.cpp
+)
+
+# specify include paths and libraries
+target_link_libraries(trn-client PRIVATE tnav newmat qnx NetCDF::NetCDF)
+
+target_include_directories(trn-client PRIVATE BEFORE
+    ${LIBTRNAV_INCLUDES}
+)
+#
+#------------------------------------------------------------------------------
+#
+#  build trn-cli
+
+add_executable(trn-cli
+    ${TRNW_SRC_DIR}/trn-cli.c
+    ${TRNW_SRC_DIR}/mb1_msg.c
+)
+
+# specify include paths and libraries
+target_link_libraries(trn-cli PRIVATE mbtrnframe trnw trnwcli qnx newmat geocon m)
+
+target_include_directories(trn-cli PRIVATE BEFORE
+    ${LIBTRNAV_INCLUDES}
+)
+#
+#------------------------------------------------------------------------------
+#
 # build readlog
 
 # specify build target
@@ -807,73 +874,6 @@ target_include_directories(transoct PRIVATE BEFORE
 #
 #------------------------------------------------------------------------------
 #
-# build trnu-cli (TRNU client app)
-
-# specify build target
-add_executable(trnu-cli
-    ${TRNW_SRC_DIR}/trnu-cli.c
-)
-
-# specify include paths and libraries
-target_link_libraries(trnu-cli PRIVATE mbtrnframe trnucli netif tnav trnw newmat qnx geolib LibPROJ::LibPROJ NetCDF::NetCDF)
-
-target_include_directories(trnu-cli PRIVATE BEFORE
-    ${LIBTRNAV_INCLUDES}
-)
-#
-#------------------------------------------------------------------------------
-#
-# build trnu-svr (stand-alone TRN server (no TRN instance))
-
-# specify build target
-add_executable(trnu-svr
-    ${TRNW_SRC_DIR}/trnu-svr.c
-)
-
-# specify include paths and libraries
-target_link_libraries(trnu-svr PRIVATE mbtrnframe netif tnav trnw newmat qnx geolib NetCDF::NetCDF)
-
-target_include_directories(trnu-svr PRIVATE BEFORE
-    ${LIBTRNAV_INCLUDES}
-)
-#
-#------------------------------------------------------------------------------
-#
-# build trn-client
-
-# specify build target
-add_executable(trn-client
-    ${UTILS_SRC_DIR}/trn-client.cpp
-    ${UTILS_SRC_DIR}/TrnClient.cpp
-    ${UTILS_SRC_DIR}/TerrainNavClient.cpp
-    ${UTILS_SRC_DIR}/TrnAttr.cpp
-)
-
-# specify include paths and libraries
-target_link_libraries(trn-client PRIVATE tnav newmat qnx NetCDF::NetCDF)
-
-target_include_directories(trn-client PRIVATE BEFORE
-    ${LIBTRNAV_INCLUDES}
-)
-#
-#------------------------------------------------------------------------------
-#
-#  build trn-cli
-
-add_executable(trn-cli
-    ${TRNW_SRC_DIR}/trn-cli.c
-    ${TRNW_SRC_DIR}/mb1_msg.c
-)
-
-# specify include paths and libraries
-target_link_libraries(trn-cli PRIVATE mbtrnframe trnw trnwcli qnx newmat geocon m)
-
-target_include_directories(trn-cli PRIVATE BEFORE
-    ${LIBTRNAV_INCLUDES}
-)
-#
-#------------------------------------------------------------------------------
-#
 #  build test-trnif
 
 # specify build target
@@ -975,9 +975,9 @@ ${CMAKE_INSTALL_LIBDIR}
 install(TARGETS
 trn-server mmcpub mmcsub mcpub mcsub mb1rs
 trn-player replay mb1log-player trnlog-player csvlog-player
+trnu-cli trnu-svr trn-client trn-cli
 readlog writelog log-to-matlab log-to-csv
 otree bodump octree2patches grd-octree-maker csv-octree-maker transoct
-trnu-cli trnu-svr trn-client trn-cli
 test-trnif test-trnlog test-tile test-geocon test-trnattr
 DESTINATION
 ${CMAKE_INSTALL_BINDIR}
