@@ -50,6 +50,9 @@
 message("In src/mbtrnav")
 #
 #------------------------------------------------------------------------------
+# set build option defaults
+option(buildVerbose "build with verbose output" ON)
+
 if(buildTrnNoRand)
     # add TRN_NORAND to disable TRN random seed.
     add_compile_definitions(TRN_NORAND)
