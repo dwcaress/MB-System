@@ -51,7 +51,12 @@ message("In src/mbtrnav")
 #
 #------------------------------------------------------------------------------
 # set build option defaults
+if(NOT DEFINED buildVerbose)
 option(buildVerbose "build with verbose output" ON)
+endif()
+if(NOT DEFINED buildTRNOptional)
+option(buildTRNOptional "build targets in buildTRNOptional" OFF)
+endif()
 
 if(buildTrnNoRand)
     # add TRN_NORAND to disable TRN random seed.
@@ -114,6 +119,7 @@ if(buildVerbose)
 get_directory_property( DirDefs DIRECTORY ${CMAKE_SOURCE_DIR}/src/mbtrnav COMPILE_DEFINITIONS )
 message("mbtrnav ----------------------------------------------------")
 message(" buildVerbose                ${buildVerbose}")
+message(" buildTRNOptional            ${buildTRNOptional}")
 message(" buildUseProj                ${buildUseProj}")
 message(" buildTRNLCM                 ${buildTRNLCM}")
 message(" buildTrnNoRand              ${buildTrnNoRand}")
@@ -719,6 +725,12 @@ target_link_libraries(trn-cli PRIVATE mbtrnframe trnw trnwcli qnx newmat geocon 
 target_include_directories(trn-cli PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
 )
+
+
+# Targets may be moved in/out of buildTRNOptional block
+# and/or enabled/disabled using buildTRNOptional=ON
+# (must also comment/uncomment in install targets)
+if(buildTRNOptional)
 #
 #------------------------------------------------------------------------------
 #
@@ -966,6 +978,15 @@ target_include_directories(test-trnattr PRIVATE BEFORE
 target_compile_options(test-trnattr PRIVATE
 "-std=c++11"
 )
+
+list(APPEND TRN_OPTIONAL
+readlog writelog log-to-matlab log-to-csv
+otree bodump octree2patches grd-octree-maker csv-octree-maker transoct
+test-trnif test-trnlog test-tile test-geocon test-trnattr
+)
+message("TRN_OPTIONAL ${TRN_OPTIONAL}")
+endif() # buildTRNOptional
+
 #
 #------------------------------------------------------------------------------
 # install it all
@@ -979,9 +1000,8 @@ install(TARGETS
 trn-server mmcpub mmcsub mcpub mcsub mb1rs
 trn-player replay mb1log-player trnlog-player csvlog-player
 trnu-cli trnu-svr trn-client trn-cli
-readlog writelog log-to-matlab log-to-csv
-otree bodump octree2patches grd-octree-maker csv-octree-maker transoct
-test-trnif test-trnlog test-tile test-geocon test-trnattr
+${TRN_OPTIONAL}
+
 DESTINATION
 ${CMAKE_INSTALL_BINDIR}
 )
