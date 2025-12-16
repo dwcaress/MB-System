@@ -106,39 +106,42 @@ list(PREPEND LIBTRNAV_INCLUDES
 
 #################################
 # emit some build info
+if(buildVerbose)
 get_directory_property( DirDefs DIRECTORY ${CMAKE_SOURCE_DIR}/src/mbtrnav COMPILE_DEFINITIONS )
 message("mbtrnav ----------------------------------------------------")
-message(" buildUseProj            ${buildUseProj}")
-message(" buildTRNLCM             ${buildTRNLCM}")
-message(" buildTrnNoRand          ${buildTrnNoRand}")
-message(" COMPILE_DEFINITIONS     ${DirDefs}")
-message(" Libmframe_FOUND         ${Libmframe_FOUND}")
-message(" Libmframe_INCLUDE_DIRS  ${Libmframe_INCLUDE_DIRS}")
-message(" Libmframe_LIBRARIES     ${Libmframe_LIBRARIES}")
-message(" mbtrnframe_FOUND        ${mbtrnframe_FOUND}")
-message(" mbtrnframe_INCLUDE_DIRS ${mbtrnframe_INCLUDE_DIRS}")
-message(" mbtrnframe_LIBRARIES    ${mbtrnframe_LIBRARIES}")
-message(" LibPROJ_FOUND           ${LibPROJ_FOUND}")
-message(" LibPROJ_LIBRARIES       ${LibPROJ_LIBRARIES}")
-message(" LibPROJ_INCLUDE_DIRS    ${LibPROJ_INCLUDE_DIRS}")
-message(" LibPROJ_INCLUDE_DIR     ${LibPROJ_INCLUDE_DIR}")
-message(" NetCDF_FOUND            ${NetCDF_FOUND}")
-message(" NetCDF_INCLUDE_DIRS     ${NetCDF_INCLUUDE_DIRS}")
-message(" NetCDF_LIBRARIES        ${NetCDF_LIBRARIES}")
-message(" NetCDF_LIBRARY          ${NetCDF_LIBRARY}")
-message(" NetCDF_VERSION          ${NetCDF_VERSION}")
-message(" netCDF_INSTALL_PREFIX   ${netCDF_INSTALL_PREFIX}")
-message(" netCDF_INCLUDE_DIR      ${netCDF_INCLUDE_DIR}")
-message(" netCDF_LIB_DIR          ${netCDF_LIB_DIR}")
-message(" GCTP_SRC_DIR            ${GCTP_SRC_DIR}")
-message(" NEWMAT_SRC_DIR          ${NEWMAT_SRC_DIR}")
-message(" QNX_SRC_DIR             ${QNX_SRC_DIR}")
-message(" TNAV_SRC_DIR            ${TNAV_SRC_DIR}")
-message(" TRNW_SRC_DIR            ${TRNW_SRC_DIR}")
-message(" UTILS_SRC_DIR           ${UTILS_SRC_DIR}")
-message(" NetCDF_INCLUDE_DIRS     ${NetCDF_INCLUDE_DIRS}")
-message(" LIBTRNAV_INCLUDES       ${LIBTRNAV_INCLUDES}")
+message(" buildVerbose                ${buildVerbose}")
+message(" buildUseProj                ${buildUseProj}")
+message(" buildTRNLCM                 ${buildTRNLCM}")
+message(" buildTrnNoRand              ${buildTrnNoRand}")
+message(" COMPILE_DEFINITIONS         ${DirDefs}")
+message(" Libmframe_FOUND             ${Libmframe_FOUND}")
+message(" Libmframe_INCLUDE_DIRS      ${Libmframe_INCLUDE_DIRS}")
+message(" Libmframe_LIBRARIES         ${Libmframe_LIBRARIES}")
+message(" mbtrnframe_FOUND            ${mbtrnframe_FOUND}")
+message(" mbtrnframe_INCLUDE_DIRS     ${mbtrnframe_INCLUDE_DIRS}")
+message(" mbtrnframe_LIBRARIES        ${mbtrnframe_LIBRARIES}")
+message(" LibPROJ_FOUND               ${LibPROJ_FOUND}")
+message(" LibPROJ_LIBRARIES           ${LibPROJ_LIBRARIES}")
+message(" LibPROJ_INCLUDE_DIRS        ${LibPROJ_INCLUDE_DIRS}")
+message(" LibPROJ_INCLUDE_DIR         ${LibPROJ_INCLUDE_DIR}")
+message(" NetCDF_FOUND                ${NetCDF_FOUND}")
+message(" NetCDF_INCLUDE_DIRS         ${NetCDF_INCLUUDE_DIRS}")
+message(" NetCDF_LIBRARIES            ${NetCDF_LIBRARIES}")
+message(" NetCDF_LIBRARY              ${NetCDF_LIBRARY}")
+message(" NetCDF_VERSION              ${NetCDF_VERSION}")
+message(" netCDF_INSTALL_PREFIX       ${netCDF_INSTALL_PREFIX}")
+message(" netCDF_INCLUDE_DIR          ${netCDF_INCLUDE_DIR}")
+message(" netCDF_LIB_DIR              ${netCDF_LIB_DIR}")
+message(" GCTP_SRC_DIR                ${GCTP_SRC_DIR}")
+message(" NEWMAT_SRC_DIR              ${NEWMAT_SRC_DIR}")
+message(" QNX_SRC_DIR                 ${QNX_SRC_DIR}")
+message(" TNAV_SRC_DIR                ${TNAV_SRC_DIR}")
+message(" TRNW_SRC_DIR                ${TRNW_SRC_DIR}")
+message(" UTILS_SRC_DIR               ${UTILS_SRC_DIR}")
+message(" NetCDF_INCLUDE_DIRS         ${NetCDF_INCLUDE_DIRS}")
+message(" LIBTRNAV_INCLUDES           ${LIBTRNAV_INCLUDES}")
 message("----------------------------------------------------------")
+endif()
 
 #------------------------------------------------------------------------------
 #
@@ -345,24 +348,10 @@ target_compile_options(geocon PRIVATE
 #
 #------------------------------------------------------------------------------
 #
-# build trnwc (TRN IF, messages)
-add_library(trnwc STATIC
-    ${TRNW_SRC_DIR}/mb1_msg.c
-    ${TRNW_SRC_DIR}/trnif_msg.c
-)
-
-# specify include paths and libraries
-target_include_directories(trnwc PRIVATE BEFORE
-    ${CMAKE_SOURCE_DIR}/src/mbio
-    ${LIBTRNAV_INCLUDES}
-)
-#
-#------------------------------------------------------------------------------
-#
-# build trnw (TRN C wrapper)
+# build trnw (TRN C wrapper backend)
 
 # specify library
-add_library(trnw 
+add_library(trnw
     ${TRNW_SRC_DIR}/trnw.cpp
     ${TRNW_SRC_DIR}/mb1_msg.c
     ${TRNW_SRC_DIR}/trnif_msg.c
@@ -441,12 +430,12 @@ target_include_directories(trncli PRIVATE BEFORE
 #
 #  build libtrnwcli
 
-add_library(trnwcli STATIC
+add_library(trnwcli
     ${TRNW_SRC_DIR}/trn_cli.c
 )
 
 # specify include paths and libraries
-target_link_libraries(trnwcli PRIVATE newmat geolib trnw qnx mb1 tnav NetCDF::NetCDF)
+target_link_libraries(trnwcli PRIVATE mbtrnframe newmat geolib trnw qnx mb1 tnav NetCDF::NetCDF)
 
 target_include_directories(trnwcli PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
@@ -876,7 +865,7 @@ add_executable(trncli-test
 )
 
 # specify include paths and libraries
-target_link_libraries(trncli-test PRIVATE mbtrnframe trnwcli qnx newmat geocon m)
+target_link_libraries(trncli-test PRIVATE mbtrnframe trnw trnwcli qnx newmat geocon m)
 
 target_include_directories(trncli-test PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
@@ -993,7 +982,7 @@ target_include_directories(test-trn-log PRIVATE BEFORE
 #------------------------------------------------------------------------------
 # install it all
 #
-install(TARGETS geolib newmat qnx tnav geocon trnwc trnw netif mb1 trnucli trncli trnwcli
+install(TARGETS geolib newmat qnx tnav geocon trnw netif mb1 trnucli trncli trnwcli
 DESTINATION
 ${CMAKE_INSTALL_LIBDIR}
 )
