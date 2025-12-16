@@ -727,9 +727,10 @@ target_include_directories(trn-cli PRIVATE BEFORE
 )
 
 
-# Targets may be moved in/out of buildTRNOptional block
-# and/or enabled/disabled using buildTRNOptional=ON
-# (must also comment/uncomment in install targets)
+# Build optional targets wnen buildTRNOptional=ON
+# Must update TRN_OPTIONAL list at end of block if
+# targets may be moved in/out of buildTRNOptional block
+
 if(buildTRNOptional)
 #
 #------------------------------------------------------------------------------
