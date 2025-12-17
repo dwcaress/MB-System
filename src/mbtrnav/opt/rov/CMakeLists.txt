@@ -15,7 +15,8 @@
 # The application(s) are:
 #   trnxpp
 #
-message("In src/mbtrnav/opt/rov")
+message(" In src/mbtrnav/opt/rov")
+message(" (please ignore CMake version deprecation warnings...)")
 #
 #------------------------------------------------------------------------------
 #
@@ -29,7 +30,7 @@ find_package(LibPROJ REQUIRED)
 find_package(lcm REQUIRED)
 if(lcm_FOUND)
 include(${LCM_USE_FILE})
-message(" LCM found (please ignore any warnings about CMake version deprecation...)")
+message(" LCM found")
 else()
 message(" LCM NOT found")
 endif()
@@ -39,7 +40,9 @@ find_package(Java)
 if(JAVA_FOUND)
     include(UseJava)
     set(java_args JAVA_SOURCES java_sources)
-    message("-- Java found!")
+    message(" Java found")
+else()
+    message(" Java NOT found")
 endif()
 
 add_compile_definitions(
