@@ -80,6 +80,7 @@
 
 #include "lrconav_app.h"
 #include "EgoRobot.h"
+#include "TrnLcmDecoder.h"
 
 /***********************************************************************
  * Macros
@@ -200,7 +201,7 @@ int main(int argc, char **argv)
     newdir += "/lrconav_syslog";
     file_output_open(newdir.c_str());
 
-    zf_log_set_output_level(ZF_LOG_VERBOSE);
+    zf_log_set_output_level(ZF_LOG_INFO);
 
     // Initialize LCM context (create, subscribe, etc)
     if (!init_lcm()) {
@@ -226,6 +227,19 @@ class CoNavLcmHandler
 public:
     CoNavLcmHandler() {}
     ~CoNavLcmHandler() {}
+
+    // When a local TRN message is received grab the data and pass it to the ego robot
+    void handleTrn(const lcm::ReceiveBuffer *rbuf,
+                   const std::string &chan,
+                   const LrauvLcmMessage *msg) {
+        TrnLcmDecoder::trndata lcmdata;
+        memset(&lcmdata, 0, sizeof(lcmdata));
+
+        LrauvLcmMessage myMsg = *msg;
+        if (0 == _trn_decoder.decode(lcmdata, myMsg)) {
+            _ego->trn_update(lcmdata);
+        }
+    }
 
     // When a Ahrs message is received copy data into vehicle state object
     void handleAhrs(const lcm::ReceiveBuffer *rbuf,
@@ -411,6 +425,8 @@ public:
         measure_update(mrInput);
     }
 
+protected:
+    TrnLcmDecoder _trn_decoder;
 };
 
 // Initialize the LCM context: subscribe to channels, set up channel handlers
@@ -429,6 +445,7 @@ bool init_lcm()
     _lcm->subscribe(DVL_CHANNEL,   &CoNavLcmHandler::handleDvl,   _lcmHandler);
     _lcm->subscribe(DEPTH_CHANNEL, &CoNavLcmHandler::handleDepth, _lcmHandler);
     _lcm->subscribe(MR_DAT_CHANNEL, &CoNavLcmHandler::handleCoNav, _lcmHandler);
+    _lcm->subscribe(TRN_CHANNEL, &CoNavLcmHandler::handleTrn, _lcmHandler);
 
     // Set up the conav channel writer
     if (!init_conav_writer()) {
@@ -481,21 +498,27 @@ int handle_lcm()
     return nm;
 }
 
-// Update vehicle position
+// Update vehicle position. Return number of filters used by the ego vehicle
+// to arrive at the current estimate.
 int process_update(CoNav::ERNavInput& nav)
 {
     // Call _ego->process_update() when it is "time" for another position update
     if (!motion_period_elapsed()) {
-        return -1;
+        return 0;
     }
 
     // Update EgoRobot with latest motion dataset and publish updated state
-    _ego->process_update(nav);
+    int nfilters = _ego->process_update(nav);
     _timing.lastMotionUpdate = _timing.egoClock;
     ZF_LOGD("motion update time = %.3f", _timing.lastMotionUpdate);
-    publish_state();
 
-    return 0;
+    // Only publish state if a filter was used
+    if (nfilters > 0)
+        publish_state();
+    else
+        ZF_LOGD("no filters exist to apply");
+
+    return nfilters;
 }
 
 // Update Cooperative Nav
