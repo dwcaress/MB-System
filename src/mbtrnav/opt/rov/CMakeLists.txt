@@ -267,7 +267,7 @@ Devel
 )
 
 install(TARGETS
-trnxpp trnlcm-test
+trnxpp
 ${TRN_OPTIONAL}
 
 DESTINATION
