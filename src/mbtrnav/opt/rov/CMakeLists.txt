@@ -56,9 +56,9 @@ set(TRNW_SRC_DIR   ${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw)
 set(UTILS_SRC_DIR  ${CMAKE_SOURCE_DIR}/src/mbtrnav/utils)
 set(DORADO_SRC_DIR ${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/dorado)
 set(ROV_SRC_DIR    ${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/rov)
+set(ROV_BIN_DIR    ${CMAKE_BINARY_DIR}/src/mbtrnav/opt/rov
 
 # add libproj [as needed]
-
 if(LibPROJ_LIBRARY)
 list(APPEND TRN_COMMON_LIBS "${LibPROJ_LIBRARY}")
 list(PREPEND LIBTRNAV_INCLUDES "${LibPROJ_INCLUDE_DIR}")
@@ -80,6 +80,7 @@ list(PREPEND LIBTRNAV_INCLUDES
 "${TRNW_SRC_DIR}"
 "${UTILS_SRC_DIR}"
 "${ROV_SRC_DIR}"
+"${ROV_BIN_DIR}"
 "${NetCDF_INCLUDE_DIRS}"
 )
 
