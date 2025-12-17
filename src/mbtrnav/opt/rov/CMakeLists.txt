@@ -56,7 +56,7 @@ set(TRNW_SRC_DIR   ${CMAKE_SOURCE_DIR}/src/mbtrnav/trnw)
 set(UTILS_SRC_DIR  ${CMAKE_SOURCE_DIR}/src/mbtrnav/utils)
 set(DORADO_SRC_DIR ${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/dorado)
 set(ROV_SRC_DIR    ${CMAKE_SOURCE_DIR}/src/mbtrnav/opt/rov)
-set(ROV_BIN_DIR    ${CMAKE_BINARY_DIR}/src/mbtrnav/opt/rov
+set(ROV_BIN_DIR    ${CMAKE_BINARY_DIR}/src/mbtrnav/opt/rov)
 
 # add libproj [as needed]
 if(LibPROJ_LIBRARY)
