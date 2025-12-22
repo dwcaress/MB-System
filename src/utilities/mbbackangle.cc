@@ -432,7 +432,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'S':
 			case 's':
-				corr_slope = true;
+				skip_existing = true;
 				break;
 			case 'T':
 			case 't':
@@ -951,7 +951,7 @@ int main(int argc, char **argv) {
 
 			/* output information */
 			if (verbose > 0) {
-				fprintf(stderr, "\nnskipping swath file:  %s %d\n", swathfile, format);
+				fprintf(stderr, "\nskipping swath file:  %s %d\n", swathfile, format);
 			}
 		}
 
