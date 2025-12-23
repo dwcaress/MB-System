@@ -7,6 +7,7 @@
 #include "vtkProperty2D.h"
 #include "vtkPolyDataMapper2D.h"
 #include "vtkPolyData.h"
+#include "vtkHandleWidget.h"
 #include <QObject>
 #include <QQuickVTKItem.h>
 #include "Point.h"
@@ -101,10 +102,16 @@ namespace mb_system {
     vtkNew<vtkPolyDataMapper2D> rubberBandMapper_;
     vtkNew<vtkPolyData> rubberBandPolyData_;
     vtkNew<vtkCoordinate> transformCoordinate_;
+    vtkNew<vtkActor> profileActor_;
     bool overlayInitialized_ = false;
 
     /// Last mousebutton-down event position
     int downEventPos_[2];
+
+    // Store line/polygon vertices handle widgets
+    std::vector<vtkSmartPointer<vtkHandleWidget>> handleWidgets_;
+
+
     
   private:
     DrawInteractorStyle(const DrawInteractorStyle&) = delete;

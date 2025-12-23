@@ -16,7 +16,6 @@
 #include "vtkPointPicker.h"
 #include <vtkPlane.h>
 #include <vtkCutter.h>
-#include <vtkSphereSource.h>
 #include <vtkChartXY.h>
 #include <vtkContextView.h>
 #include <vtkContextScene.h>
@@ -30,6 +29,7 @@
 #include <vtkPointGaussianMapper.h>
 #include <vtkPointHandleRepresentation3D.h>
 #include <vtkHandleWidget.h>
+#include <vtkFixedSizeHandleRepresentation3D.h>
 #include "TopoDataItem.h"
 #include "FixedScreensizeCallback.h"
 
@@ -167,90 +167,41 @@ void DrawInteractorStyle::computeElevationProfile(double *startPoint,
 						  double *endPoint) {
 
   topoDataItem_->clearAddedActors();
+  handleWidgets_.clear();
   
-  // Put a little sphhere ("pin") at start and end points
-  vtkNew<vtkSphereSource> startPin;
-  vtkNew<vtkSphereSource> endPin;
-
-  startPin->SetCenter(startPoint[0], startPoint[1], startPoint[2]);
-  startPin->SetRadius(50.);
-  startPin->SetPhiResolution(50);
-  startPin->SetThetaResolution(50);
-  vtkNew<vtkPolyDataMapper> startPinMapper;
-  startPinMapper->SetInputConnection(startPin->GetOutputPort());
-  vtkNew<vtkActor> startPinActor;
-  startPinActor->SetMapper(startPinMapper);
-  startPinActor->GetProperty()->SetColor(1., 0., 0.);
-  startPinActor->GetProperty()->SetLineWidth(3.);
-  topoDataItem_->addActor(startPinActor);
-
-  /* ***
-  // Create point at sphere position
-  vtkSmartPointer<vtkPoints> pts = vtkSmartPointer<vtkPoints>::New();
-  pts->InsertNextPoint(endPoint[0], endPoint[1], endPoint[2]);  // Your sphere position
-
-  vtkSmartPointer<vtkPolyData> polydata = vtkSmartPointer<vtkPolyData>::New();
-  polydata->SetPoints(pts);
-
-  vtkSmartPointer<vtkPointGaussianMapper> mapper = 
-    vtkSmartPointer<vtkPointGaussianMapper>::New();
-  mapper->SetInputData(polydata);
-  mapper->SetScaleFactor(5.);  // Adjust this value for size
-
-  vtkNew<vtkActor> endPinActor;
-  endPinActor->SetMapper(mapper);
+  // Put a little marker at start and end points
+  vtkNew<vtkHandleWidget> startWidget;
+  handleWidgets_.push_back(startWidget);
   
-  endPinActor->GetProperty()->SetColor(1., 0., 0.);
-  endPinActor->GetProperty()->SetLineWidth(3.);
-  topoDataItem_->addActor(endPinActor);  
-  *** */
-  /* ***
-  endPin->SetCenter(endPoint[0], endPoint[1], endPoint[2]);
-  endPin->SetRadius(50.);
-  endPin->SetPhiResolution(50);
-  endPin->SetThetaResolution(50);
-  vtkNew<vtkPolyDataMapper> endPinMapper;
-  endPinMapper->SetInputConnection(endPin->GetOutputPort());
-  vtkNew<vtkActor> endPinActor;
-  endPinActor->SetMapper(endPinMapper);
-  endPinActor->GetProperty()->SetColor(1., 0., 0.);
-  endPinActor->GetProperty()->SetLineWidth(3.);
-  topoDataItem_->addActor(endPinActor);
+  startWidget->SetInteractor(Interactor);
 
+  vtkNew<vtkFixedSizeHandleRepresentation3D> startPin;
+  startPin->SetWorldPosition(startPoint);
+  startPin->SetHandleSizeInPixels(30);
+  startPin->GetProperty()->SetColor(1., 0., 0.);  
 
-  vtkSmartPointer<FixedScreensizeCallback> callback =
-    vtkSmartPointer<FixedScreensizeCallback>::New();
-
-  endPinActor->SetScale(1., 1., 1.);
-  callback->setActor(endPinActor);
-  callback->setActorPixelSize(10);
-  callback->setRenderer(topoDataItem_->getRenderer());
-
-  /// (topoDataItem_->getRenderer())->GetActiveCamera()->
-  /// AddObserver(vtkCommand::ModifiedEvent, callback);
-  // Attach to multiple events for comprehensive coverage
-vtkCamera* camera = topoDataItem_->getRenderer()->GetActiveCamera();
-vtkRenderWindowInteractor* interactor = 
-    topoDataItem_->getRenderer()->GetRenderWindow()->GetInteractor();
-
-camera->AddObserver(vtkCommand::ModifiedEvent, callback);
-if (interactor) {
-    interactor->AddObserver(vtkCommand::InteractionEvent, callback);
- }
- **** */
-
-    vtkSmartPointer<vtkPointHandleRepresentation3D> handleRep =
-      vtkSmartPointer<vtkPointHandleRepresentation3D>::New();
-
-    handleRep->SetWorldPosition(endPoint); // Initial position of the handle
-
-    // Create the handle widget
-    vtkSmartPointer<vtkHandleWidget> handleWidget = vtkSmartPointer<vtkHandleWidget>::New();
-    handleWidget->SetInteractor(Interactor);
-    handleWidget->SetRepresentation(handleRep);
-    handleWidget->On();
-
+  startWidget->SetRepresentation(startPin);
+  startWidget->EnabledOn();
   
+  vtkNew<vtkHandleWidget> endWidget;
+  handleWidgets_.push_back(endWidget);
+  
+  endWidget->SetInteractor(Interactor);
+  vtkNew<vtkFixedSizeHandleRepresentation3D> endPin;
+  endPin->SetWorldPosition(endPoint);
+  endPin->SetHandleSizeInPixels(30);  
+  endPin->GetProperty()->SetColor(1., 0., 0.);
+  
+  endWidget->SetRepresentation(endPin);
+  endWidget->EnabledOn();
+
+  bool earlyReturn = false;
+  if (earlyReturn) {
+    qDebug() << "Early return for testing, after rendering widgets";
+    Interactor->GetRenderWindow()->Render();
+    return;
+  }
+
   // Compute normal to elevation profile plane; elevation profile plane is vertical,
   // so normal to plane is horizontal
   double normal[3];
@@ -277,19 +228,19 @@ if (interactor) {
   profileMapper->SetInputConnection(cutter->GetOutputPort());
 
   // Elevation profile actor
-  vtkNew<vtkActor> profileActor;
-  profileActor->SetMapper(profileMapper);
-  profileActor->GetProperty()->SetColor(1., 0., 0.);
-  profileActor->GetProperty()->SetLineWidth(3.);
+  profileActor_->SetMapper(profileMapper);
+  profileActor_->GetProperty()->SetColor(1., 0., 0.);
+  profileActor_->GetProperty()->SetLineWidth(3.);
 
 
-  // Redraw point cloud, including elevation profile
-  topoDataItem_->addActor(profileActor);
+  // Add profileActor_ to topoData pipeline 
+  topoDataItem_->addActor(profileActor_);
 
-  /* ***
-  editor_->setSurfaceOpacity(0.3);
-  ** */
+  // Add profileActor_ to topoDataItem renderer
+  topoDataItem_->getRenderer()->AddActor(profileActor_);
   
+  // editor_->setSurfaceOpacity(0.3);
+
   std::cerr << "Now extract and graph profile data\n";
   
   // Extract elev profile data for display in 2D graph
@@ -337,10 +288,10 @@ if (interactor) {
   // Sort by distance along profile
   std::sort(profileData.begin(), profileData.end());
 
-  // Now ready to plot profileData; 
+  // Now ready to plot profileData with vtk graph
   // x: distance along profile
   // y: elevation
-
+  
   /* ***
   // Create table for chart
   vtkNew<vtkTable> table;
@@ -391,7 +342,8 @@ if (interactor) {
   *** */
 
   qDebug() << "render() again";
-  topoDataItem_->render();
+  // topoDataItem_->render();
+  Interactor->GetRenderWindow()->Render();
 
   // Transfer profile X-Y data to QList<QVector2D, and include as signal
   // payload
