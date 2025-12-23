@@ -27,6 +27,9 @@
 #include <vtkAxis.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
+#include <vtkPointGaussianMapper.h>
+#include <vtkPointHandleRepresentation3D.h>
+#include <vtkHandleWidget.h>
 #include "TopoDataItem.h"
 #include "FixedScreensizeCallback.h"
 
@@ -181,6 +184,27 @@ void DrawInteractorStyle::computeElevationProfile(double *startPoint,
   startPinActor->GetProperty()->SetLineWidth(3.);
   topoDataItem_->addActor(startPinActor);
 
+  /* ***
+  // Create point at sphere position
+  vtkSmartPointer<vtkPoints> pts = vtkSmartPointer<vtkPoints>::New();
+  pts->InsertNextPoint(endPoint[0], endPoint[1], endPoint[2]);  // Your sphere position
+
+  vtkSmartPointer<vtkPolyData> polydata = vtkSmartPointer<vtkPolyData>::New();
+  polydata->SetPoints(pts);
+
+  vtkSmartPointer<vtkPointGaussianMapper> mapper = 
+    vtkSmartPointer<vtkPointGaussianMapper>::New();
+  mapper->SetInputData(polydata);
+  mapper->SetScaleFactor(5.);  // Adjust this value for size
+
+  vtkNew<vtkActor> endPinActor;
+  endPinActor->SetMapper(mapper);
+  
+  endPinActor->GetProperty()->SetColor(1., 0., 0.);
+  endPinActor->GetProperty()->SetLineWidth(3.);
+  topoDataItem_->addActor(endPinActor);  
+  *** */
+  /* ***
   endPin->SetCenter(endPoint[0], endPoint[1], endPoint[2]);
   endPin->SetRadius(50.);
   endPin->SetPhiResolution(50);
@@ -197,11 +221,35 @@ void DrawInteractorStyle::computeElevationProfile(double *startPoint,
   vtkSmartPointer<FixedScreensizeCallback> callback =
     vtkSmartPointer<FixedScreensizeCallback>::New();
 
+  endPinActor->SetScale(1., 1., 1.);
   callback->setActor(endPinActor);
   callback->setActorPixelSize(10);
   callback->setRenderer(topoDataItem_->getRenderer());
-  (topoDataItem_->getRenderer())->GetActiveCamera()->
-    AddObserver(vtkCommand::StartEvent, callback);
+
+  /// (topoDataItem_->getRenderer())->GetActiveCamera()->
+  /// AddObserver(vtkCommand::ModifiedEvent, callback);
+  // Attach to multiple events for comprehensive coverage
+vtkCamera* camera = topoDataItem_->getRenderer()->GetActiveCamera();
+vtkRenderWindowInteractor* interactor = 
+    topoDataItem_->getRenderer()->GetRenderWindow()->GetInteractor();
+
+camera->AddObserver(vtkCommand::ModifiedEvent, callback);
+if (interactor) {
+    interactor->AddObserver(vtkCommand::InteractionEvent, callback);
+ }
+ **** */
+
+    vtkSmartPointer<vtkPointHandleRepresentation3D> handleRep =
+      vtkSmartPointer<vtkPointHandleRepresentation3D>::New();
+
+    handleRep->SetWorldPosition(endPoint); // Initial position of the handle
+
+    // Create the handle widget
+    vtkSmartPointer<vtkHandleWidget> handleWidget = vtkSmartPointer<vtkHandleWidget>::New();
+    handleWidget->SetInteractor(Interactor);
+    handleWidget->SetRepresentation(handleRep);
+    handleWidget->On();
+
   
   // Compute normal to elevation profile plane; elevation profile plane is vertical,
   // so normal to plane is horizontal
