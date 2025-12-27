@@ -22,6 +22,8 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.3beta11    December 27, 2025
+- Version 5.8.3beta10    December 22, 2025
 - Version 5.8.3beta09    December 4, 2025
 - Version 5.8.3beta08    November 16, 2025
 - Version 5.8.3beta07    October 22, 2025
@@ -67,9 +69,25 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 ---
 
+#### 5.8.3beta11 (December 27, 2025)
+
+Formats 56 (MBF_EM300RAW) and 57 (MBF_EM300MBA): Fixed erroneous calculation of a large
+sensordepth value by mbprocess when the draft of a surface vessel has not been defined.
+
+#### 5.8.3beta10 (December 22, 2025)
+
+Program mbbackangle: A skipping existing feature implemented in beta04 had a small error 
+in the source code that made it not work as intended. This release contains a bug fix to 
+correct that behavior.
+
 #### 5.8.3beta09 (December 4, 2025)
 
-Program mbnavadjustmerge: Fixed options --unset-tie, --unset-ties-file, --unset-ties-survey, --unset-ties-by-survey, --unset-ties-block, --unset-ties-all.
+Program mbnavadjustmerge: Fixed options --unset-tie, --unset-ties-file, --unset-ties-survey, 
+--unset-ties-by-survey, --unset-ties-block, --unset-ties-all.
+
+Program mbbackangle: A skipping existing feature implemented in beta04 had a small error 
+in the source code that made it not work as intended. This release contains a bug fix to 
+correct that behavior.
 
 #### 5.8.3beta08 (November 16, 2025)
 
