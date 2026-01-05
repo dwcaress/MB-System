@@ -35,6 +35,7 @@
 #include <exception>
 #include <typeinfo>
 #include <stdexcept>
+#include "logger.h"
 #include "options.h"
 #include "bathymetry.h"
 #include "geometry.h"
@@ -49,6 +50,14 @@ int main(int argc, char* argv[]) {
       std::cout << "Help requested, exiting..." << std::endl;
       return 0;
     }
+    
+    // Configure logger based on verbose flag
+    if (options.is_verbose()) {
+      Logger::set_level(LogLevel::DEBUG);
+    } else {
+      Logger::set_level(LogLevel::INFO);
+    }
+    
     Bathymetry bathymetry(options);
     Geometry geometry(bathymetry, options);
     model::write_gltf(geometry, options);

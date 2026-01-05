@@ -33,9 +33,9 @@
 
 #include "bathymetry.h"
 #include "compression.h"
+#include "logger.h"
 #include <cmath>
 #include <netcdf.h>
-#include <iostream>
 
 namespace mbgrd2gltf {
 // we have 3 main conventions to deal with: GMT, COARDS, CF
@@ -132,38 +132,46 @@ Bathymetry::Bathymetry(const Options& options) {
     size_t start[1] = {0};
     size_t length[1] = {_side};
     get_variable_uint_array(netcdf_id, "dimension", _dimension, start, length);
-    std::cerr << "Read dimension variable: [" << _dimension[0] << ", " << _dimension[1] << "]" << std::endl;
+    if (options.is_verbose())
+      LOG_DEBUG("Read dimension variable: [", _dimension[0], ",", _dimension[1], "]");
     // Recalculate xysize to match the dimension variable
     _xysize = _dimension[0] * _dimension[1];
   } else {
     _dimension[0] = _x;
     _dimension[1] = _y;
-    std::cerr << "Using dimension lengths: [" << _dimension[0] << ", " << _dimension[1] << "]" << std::endl;
+    if (options.is_verbose())
+      LOG_DEBUG("Using dimension lengths: [", _dimension[0], ",", _dimension[1], "]");
   }
 
-  std::cerr << "Matrix allocation: " << _dimension[0] << " x " << _dimension[1] 
-            << " = " << _xysize << " elements (" 
-            << (_xysize * sizeof(float) / 1024.0 / 1024.0) << " MB)" << std::endl;
+  if (options.is_verbose()) {
+    LOG_DEBUG("Matrix allocation:", _dimension[0], "x", _dimension[1], "=", _xysize, "elements (",
+              _xysize * sizeof(float) / 1024.0 / 1024.0, "MB)");
+  }
 
   // --- Grid data ---
   // Strategy 1: Try reading as 1D array (works for some GMT grids)
   try {
     size_t zero = 0;
-    std::cerr << "Attempting 1D read: " << _xysize << " elements" << std::endl;
+    if (options.is_verbose())
+      LOG_DEBUG("Attempting 1D read:", _xysize, "elements");
     _z = Matrix<float>(_dimension[0], _dimension[1]);
     get_variable_float_array(netcdf_id, z_name.c_str(), _z.data(), &zero, &_xysize);
-    std::cerr << "1D read successful" << std::endl;
+    if (options.is_verbose())
+      LOG_DEBUG("1D read successful");
   } catch (const std::exception& e) {
     // Strategy 2: Fallback to 2D array read (more common for COARDS/CF grids)
-    std::cerr << "1D read failed: " << e.what() << std::endl;
-    std::cerr << "Attempting 2D read: [" << _y << " x " << _x << "]" << std::endl;
+    if (options.is_verbose()) {
+      LOG_DEBUG("1D read failed:", e.what());
+      LOG_DEBUG("Attempting 2D read: [", _y, "x", _x, "]");
+    }
     size_t start[2] = {0, 0};
     size_t length[2] = {_y, _x};
     // For 2D reads, always use the actual dimension lengths, not the dimension variable
     _z = Matrix<float>(_x, _y);
     if (nc_inq_varid(netcdf_id, z_name.c_str(), &varid) == NC_NOERR) {
       get_variable_float_array(netcdf_id, z_name.c_str(), _z.data(), start, length);
-      std::cerr << "2D read successful" << std::endl;
+      if (options.is_verbose())
+        LOG_DEBUG("2D read successful");
       // Update dimension array to reflect actual matrix size
       _dimension[0] = _x;
       _dimension[1] = _y;
@@ -270,7 +278,7 @@ void Bathymetry::get_variable_uint_array(int netcdf_id, const char* name, unsign
 void Bathymetry::compress(const Options& options) {
   Options localOptions = options;
   if (!options.is_stride_set() && (_z.size_x() * _z.size_y() > 9000000)) {
-    std::cout << "Auto setting stride to 1." << std::endl;
+    LOG_INFO("Auto setting stride to 1.");
     localOptions.set_stride_ratio(1.0);
   }
   if (!options.is_stride_set() && !options.is_max_size_set() &&
