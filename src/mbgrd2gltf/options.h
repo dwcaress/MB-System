@@ -51,6 +51,7 @@ private: // members
   double _exaggeration = 1.0;
   bool _is_binary_output = false;
   bool _is_help = false;
+  bool _is_verbose = false;
   bool _is_stride_set = false;
   bool _is_max_size_set = false;
   bool _is_exaggeration_set = false;
@@ -66,6 +67,7 @@ private: // methods
   void arg_stride(const char** args, unsigned size, unsigned& i);
   void arg_max_size(const char** args, unsigned size, unsigned& i);
   void arg_exaggeration(const char** args, unsigned size, unsigned& i);
+  void arg_verbose(const char** args, unsigned size, unsigned& i);
   void arg_draco_compression(const char** args, unsigned size, unsigned& i);
   void arg_draco_quantization(const char** args, unsigned size, unsigned& i);
 
@@ -79,6 +81,7 @@ public: // members
   double exaggeration() const { return _exaggeration; }
   bool is_binary_output() const { return _is_binary_output; }
   bool is_help() const { return _is_help; }
+  bool is_verbose() const { return _is_verbose; }
   bool is_stride_set() const { return _is_stride_set; }
   bool is_max_size_set() const { return _is_max_size_set; }
   bool is_exaggeration_set() const { return _is_exaggeration_set; }

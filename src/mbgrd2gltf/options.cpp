@@ -50,7 +50,8 @@ const char* const usage_str =
     "\n                              [(-m | --max-size) <max size>]"
     "\n                              [(-s | --stride) <stride ratio>]"
     "\n                              [(-d | --draco) <draco compression>]"
-    "\n                              [(-qp | -qn | -qt | -qc) <quantization>]";
+    "\n                              [(-qp | -qn | -qt | -qc) <quantization>]"
+    "\n                              [-v | --verbose]";
 
 const char* const help_str =
     "\nvariables:"
@@ -86,6 +87,9 @@ const char* const help_str =
     "\n                              but lower visual quality. The default quantization"
     "\n                              value is 16 for position, 7 for normal, 10 for texcoord,"
     "\n                              and 8 for color."
+    "\n"
+    "\n    -v, --verbose             Enable verbose output showing NetCDF reading details"
+    "\n                              and memory allocation information."
     "\n";
 
 const char* const try_help_str = "try 'mbgrd2gltf [-h | --help]' for more information";
@@ -113,6 +117,8 @@ const std::unordered_map<std::string, Options::ArgCallback> Options::arg_callbac
     {"--max-size", &Options::arg_max_size},
     {"-o", &Options::arg_output},
     {"--output", &Options::arg_output},
+    {"-v", &Options::arg_verbose},
+    {"--verbose", &Options::arg_verbose},
     {"-d", &Options::arg_draco_compression},
     {"--draco", &Options::arg_draco_compression},
     {"-qp", &Options::arg_draco_quantization},
@@ -161,6 +167,13 @@ void Options::arg_binary(const char**, unsigned, unsigned&) {
     throw std::invalid_argument("binary output may not be specified more than once");
 
   _is_binary_output = true;
+}
+
+void Options::arg_verbose(const char**, unsigned, unsigned&) {
+  if (_is_verbose)
+    throw std::invalid_argument("verbose may not be specified more than once");
+
+  _is_verbose = true;
 }
 
 void Options::arg_stride(const char** args, unsigned size, unsigned& i) {
