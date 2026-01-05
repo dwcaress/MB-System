@@ -17,6 +17,7 @@
 #include <list>
 #include <string>
 #include <map>
+#include <mutex>
 
 #include <unistd.h>
 
@@ -47,6 +48,27 @@ class trnxpp;
 
 // message callback type
 typedef int (* msg_callback)(void *);
+
+class TrnHostX {
+public:
+
+    TrnHostX()
+    : trnc_host(NULL)
+    , udpms_host(NULL)
+    , mb1s_host(NULL)
+    { }
+
+    ~TrnHostX()
+    {
+        // delegate deletion to owners
+    }
+
+    TrnClient *trnc_host;
+    udpm_sub_t *udpms_host;
+    mb1_server *mb1s_host;
+
+};
+
 // channel, input ptr
 using lcm_input = std::tuple<const std::string, trn_lcm_input*>;
 // channel, timeout_sec, callback func, pargs, sem_count
@@ -54,7 +76,9 @@ using sem_reg = std::tuple<const std::string, int, msg_callback, void *, int>;
 // channel, publisher
 using lcm_pub = std::tuple<const std::string, pcf::lcm_publisher *>;
 // key, typestr, host, port, ttl, instance ptr, cfg path
-using trn_host = std::tuple<std::string, std::string, std::string, int, int, void *, std::string>;
+// instance ptr is void to support different types
+//using trn_host = std::tuple<std::string, std::string, std::string, int, int, void *, std::string>;
+using trn_host = std::tuple<std::string, std::string, std::string, int, int, TrnHostX, std::string>;
 
 // channel, type, geo_ptr
 using beam_geo = std::tuple<const std::string, int, beam_geometry *>;
@@ -138,26 +162,38 @@ public:
 
     ~trnxpp_ctx()
     {
-        std::list<trn_host>::iterator it;
+        std::list<trn::trn_host>::iterator it;
         for(it = mMB1SvrList.begin(); it != mMB1SvrList.end(); it++){
-            void *vp_inst = std::get<5>(*it);
-            trn::mb1_server *pinst = static_cast<trn::mb1_server *>(vp_inst);
-            if(pinst != nullptr)
+            trn::trn_host thost = *it;
+//            void *vp_inst = std::get<5>(thost);
+//            trn::mb1_server *pinst = static_cast<trn::mb1_server *>(vp_inst);
+  
+            TrnHostX uhost = std::get<5>(thost);
+            trn::mb1_server *pinst = uhost.mb1s_host;
+if(pinst != nullptr)
             {
                 delete pinst;
             }
         }
         for(it = mUdpmSubList.begin(); it != mUdpmSubList.end(); it++){
-            void *vp_inst = std::get<5>(*it);
-            udpm_sub_t *pinst = static_cast<udpm_sub_t *>(vp_inst);
-            if(pinst != nullptr)
+            trn::trn_host thost = *it;
+//            void *vp_inst = std::get<5>(thost);
+//            udpm_sub_t *pinst = static_cast<udpm_sub_t *>(vp_inst);
+            TrnHostX uhost = std::get<5>(thost);
+            udpm_sub_t *pinst = uhost.udpms_host;
+          if(pinst != nullptr)
             {
                 delete pinst;
             }
         }
+
         for(it = mTrnCliList.begin(); it != mTrnCliList.end(); it++){
-            void *vp_inst = std::get<5>(*it);
-            TrnClient *pinst = static_cast<TrnClient *>(vp_inst);
+            trn::trn_host thost = *it;
+//            void *vp_inst = std::get<5>(thost);
+//            TrnClient *pinst = static_cast<TrnClient *>(vp_inst);
+            TrnHostX uhost = std::get<5>(thost);
+            TrnClient *pinst = uhost.trnc_host;
+
             if(pinst != nullptr)
             {
                 delete pinst;
@@ -191,6 +227,7 @@ public:
 
     void tostream(std::ostream &os, int wkey=15, int wval=18)
     {
+        //std::lock_guard<std::mutex> guard(mTrnCliMutex);
         int wx = wval;
         int alen = 0;
 
@@ -232,21 +269,24 @@ public:
 
         os << std::endl;
         os << std::setw(wkey) << "MB1Servers" << std::setw(wval) << mMB1SvrList.size() <<"\n";
-        std::list<trn_host>::iterator hit;
+        std::list<trn::trn_host>::iterator hit;
         int i=0;
         for(i=0, hit = mMB1SvrList.begin(); hit != mMB1SvrList.end(); hit++){
+            trn::trn_host thost = *hit;
             ostringstream ss;
-            std::string key = std::get<0>(*hit);
-            std::string type = std::get<1>(*hit);
-            std::string host = std::get<2>(*hit);
-            int port = std::get<3>(*hit);
-            int ttl = std::get<4>(*hit);
-            void *inst = std::get<5>(*hit);
-            std::string cfg_path = std::get<6>(*hit);
+            std::string key = std::get<0>(thost);
+            std::string type = std::get<1>(thost);
+            std::string host = std::get<2>(thost);
+            int port = std::get<3>(thost);
+            int ttl = std::get<4>(thost);
+//             void *inst = std::get<5>(thost);
+            TrnHostX inst = std::get<5>(thost);
+
+            std::string cfg_path = std::get<6>(thost);
             ss << key.c_str() << ", ";
             ss << type.c_str() << ", ";
             ss << host.c_str() << ":" << port << ":" << ttl << ", ";
-            ss << std::hex << inst << ", " << std::dec;
+            ss << std::hex << (void *)&inst << ", " << std::dec;
             ss << cfg_path.c_str() << std::endl;
 
             alen = strlen(ss.str().c_str());
@@ -256,18 +296,20 @@ public:
 
         os << std::setw(wkey) << "UDPm Subs" << std::setw(wval) << mUdpmSubList.size() <<"\n";
         for(i=0, hit = mUdpmSubList.begin(); hit != mUdpmSubList.end(); hit++){
+            trn::trn_host thost = *hit;
             ostringstream ss;
-            std::string key = std::get<0>(*hit);
-            std::string type = std::get<1>(*hit);
-            std::string host = std::get<2>(*hit);
-            int port = std::get<3>(*hit);
-            int ttl = std::get<4>(*hit);
-            void *inst = std::get<5>(*hit);
-            std::string cfg_path = std::get<6>(*hit);
+            std::string key = std::get<0>(thost);
+            std::string type = std::get<1>(thost);
+            std::string host = std::get<2>(thost);
+            int port = std::get<3>(thost);
+            int ttl = std::get<4>(thost);
+//             void *inst = std::get<5>(thost);
+            TrnHostX inst = std::get<5>(thost);
+            std::string cfg_path = std::get<6>(thost);
             ss << key.c_str() << ", ";
             ss << type.c_str() << ", ";
             ss << host.c_str() << ":" << port << ":" << ttl << ", ";
-            ss << std::hex << inst << ", " << std::dec;
+            ss << std::hex << &inst << ", " << std::dec;
             ss << cfg_path.c_str() << std::endl;
 
             alen = strlen(ss.str().c_str());
@@ -276,19 +318,22 @@ public:
         }
 
         os << std::setw(wkey) << "TrnClients" << std::setw(wval) << mTrnCliList.size() << std::endl;
+
         for(i=0, hit = mTrnCliList.begin(); hit != mTrnCliList.end(); hit++){
+            trn::trn_host thost = *hit;
             ostringstream ss;
-            std::string key = std::get<0>(*hit);
-            std::string type = std::get<1>(*hit);
-            std::string host = std::get<2>(*hit);
-            int port = std::get<3>(*hit);
-            int ttl = std::get<4>(*hit);
-            void *inst = std::get<5>(*hit);
+            std::string key = std::get<0>(thost);
+            std::string type = std::get<1>(thost);
+            std::string host = std::get<2>(thost);
+            int port = std::get<3>(thost);
+            int ttl = std::get<4>(thost);
+//             void *inst = std::get<5>(thost);
+            TrnHostX inst = std::get<5>(thost);
             std::string cfg_path = std::get<6>(*hit);
             ss << key.c_str() << ", ";
             ss << type.c_str() << ", ";
             ss << host.c_str() << ":" << port << ":" << ttl << ", ";
-            ss << std::hex << inst << ", " << std::dec;
+            ss << std::hex << &inst << ", " << std::dec;
             ss << cfg_path.c_str() << std::endl;
 
             alen = strlen(ss.str().c_str());
@@ -563,9 +608,10 @@ public:
             std::list<lcm_pub>::iterator it;
 
             for(it=pubs.begin(); it!=pubs.end() ; it++) {
-                const std::string key = std::get<0>(*it);
+                lcm_pub pub = (*it);
+                const std::string key = std::get<0>(pub);
                 if(key.compare(channel)==0){
-                    pcf::lcm_publisher *x = std::get<1>(*it);
+                    pcf::lcm_publisher *x = std::get<1>(pub);
                     return x;
                 }
             }
@@ -1004,8 +1050,8 @@ public:
 
     trn::trn_host *lookup_udpm_host(std::string key)
     {
-        trn_host *retval = nullptr;
-        std::list<trn_host>::iterator it;
+        trn::trn_host *retval = nullptr;
+        std::list<trn::trn_host>::iterator it;
         for(it = mUdpmSubList.begin(); it != mUdpmSubList.end(); it++){
             std::string list_key = std::get<0>(*it);
             if(list_key.compare(key) == 0){
@@ -1019,12 +1065,14 @@ public:
     udpm_sub_t *lookup_udpm_sub(std::string key)
     {
         udpm_sub_t *retval = nullptr;
-        std::list<trn_host>::iterator it;
+        std::list<trn::trn_host>::iterator it;
         for(it = mUdpmSubList.begin(); it != mUdpmSubList.end(); it++){
             std::string list_key = std::get<0>(*it);
-            void *inst = std::get<5>(*it);
+//            void *inst = std::get<5>(*it);
+            TrnHostX uhost = std::get<5>(*it);
             if(list_key.compare(key) == 0){
-                retval = static_cast<udpm_sub_t *>(inst);
+//                retval = static_cast<udpm_sub_t *>(inst);
+                retval = uhost.udpms_host;
                 break;
             }
         }
@@ -1114,17 +1162,19 @@ public:
     {
         int retval = -1;
 
-        trn_host *udpm_host = lookup_udpm_host(key);
+        trn::trn_host *udpm_host = lookup_udpm_host(key);
 
         if(udpm_host == nullptr)
             return retval;
 
-        void *vp = std::get<5>(*udpm_host);
+//        void *vp = std::get<5>(*udpm_host);
+        TrnHostX uhost = std::get<5>(*udpm_host);
         std::string group = std::get<2>(*udpm_host);
         int port = std::get<3>(*udpm_host);
         int ttl = std::get<4>(*udpm_host);
 
-        udpm_sub_t *udpmsub = static_cast<udpm_sub_t *>(vp);
+//        udpm_sub_t *udpmsub = static_cast<udpm_sub_t *>(vp);
+        udpm_sub_t *udpmsub = uhost.udpms_host;
 
         if(udpmsub == nullptr){
             // create if not set
@@ -1134,7 +1184,9 @@ public:
         if(udpmsub == nullptr)
             return retval;
 
-        std::get<5>(*udpm_host) = (void *)udpmsub;
+//        std::get<5>(*udpm_host) = static_cast<void *>(udpmsub);
+        uhost.udpms_host = udpmsub;
+        std::get<5>(*udpm_host) = uhost;
 
         int debug = (NULL != cfg ? cfg->debug() : 0);
         udpms_set_debug(debug);
@@ -1156,8 +1208,8 @@ public:
 
     trn::trn_host *lookup_mb1svr_host(std::string key)
     {
-        trn_host *retval = nullptr;
-        std::list<trn_host>::iterator it;
+        trn::trn_host *retval = nullptr;
+        std::list<trn::trn_host>::iterator it;
         for(it = mMB1SvrList.begin(); it != mMB1SvrList.end(); it++){
             std::string list_key = std::get<0>(*it);
             if(list_key.compare(key) == 0){
@@ -1186,11 +1238,14 @@ public:
     int set_mb1svr_inst(std::string key, trn::mb1_server *inst)
     {
         int retval = -1;
-        std::list<trn_host>::iterator it;
+        std::list<trn::trn_host>::iterator it;
         for(it = mMB1SvrList.begin(); it != mMB1SvrList.end(); it++){
             std::string list_key = std::get<0>(*it);
             if(list_key.compare(key) == 0){
-                std::get<5>(*it) = (void *)inst;
+//                std::get<5>(*it) = static_cast<void *>(inst);
+                TrnHostX uhost = std::get<5>(*it);
+                uhost.mb1s_host = inst;
+                std::get<5>(*it) = uhost;
                 retval = 0;
                 break;
             }
@@ -1202,13 +1257,15 @@ public:
     {
         int retval = -1;
 
-        trn_host *mb1_host = lookup_mb1svr_host(key);
+        trn::trn_host *mb1_host = lookup_mb1svr_host(key);
 
         if(mb1_host == nullptr)
             return retval;
 
-        void *vp = std::get<5>(*mb1_host);
-        trn::mb1_server *mb1svr = static_cast<trn::mb1_server *>(vp);
+//        void *vp = std::get<5>(*mb1_host);
+        TrnHostX uhost = std::get<5>(*mb1_host);
+//        trn::mb1_server *mb1svr = static_cast<trn::mb1_server *>(vp);
+        trn::mb1_server *mb1svr = uhost.mb1s_host;
 
         if(nullptr != mb1svr) {
             delete mb1svr;
@@ -1218,6 +1275,13 @@ public:
         std::string host = std::get<2>(*mb1_host);
         int port = std::get<3>(*mb1_host);
         mb1svr = new trn::mb1_server((char *)host.c_str(), port);
+
+        if(mb1svr == nullptr)
+            return retval;
+
+        uhost.mb1s_host = mb1svr;
+        std::get<5>(*mb1_host) = uhost;
+
         set_mb1svr_inst(key, mb1svr);
 
         int debug = (NULL != cfg ? cfg->debug() : 0);
@@ -1249,16 +1313,23 @@ public:
         }
 
         // publish to MB1 servers
-        std::list<trn_host>::iterator it;
+        std::list<trn::trn_host>::iterator it;
         for(it = mMB1SvrList.begin(); it != mMB1SvrList.end(); it++){
-            std::string key = std::get<0>(*it);
-            void *vp = std::get<5>(*it);
+            trn::trn_host thost = (*it);
+            std::string key = std::get<0>(thost);
+
+//            void *vp = std::get<5>(thost);
+            TrnHostX uhost = std::get<5>(thost);
+            void *vp = uhost.mb1s_host;
+
             if(vp == nullptr){
                 continue;
             }
 
             TRN_NDPRINT(5, "%s:%d - pub MB1SVR key[%s] vp[%p]\n", __func__, __LINE__, key.c_str(), vp);
-            trn::mb1_server* mb1svr = static_cast<trn::mb1_server *>(vp);
+//            trn::mb1_server* mb1svr = static_cast<trn::mb1_server *>(vp);
+            trn::mb1_server* mb1svr = uhost.mb1s_host;
+
             mb1svr->publish((byte *)sounding, sounding->size);
             cfg->stats().mb_pub_n++;
         }
@@ -1284,9 +1355,12 @@ public:
             if(pub != nullptr){
 
                 for(it = mUdpmSubList.begin(); it != mUdpmSubList.end(); it++){
+                    trn::trn_host thost = (*it);
+                    std::string key = std::get<0>(thost);
 
-                    std::string key = std::get<0>(*it);
-                    void *vp = std::get<5>(*it);
+//                    void *vp = std::get<5>(thost);
+                    TrnHostX uhost = std::get<5>(thost);
+                    void *vp = uhost.udpms_host;
 
                     if(vp == nullptr){
                         continue;
@@ -1336,9 +1410,10 @@ public:
 
     trn::trn_host *lookup_trncli_host(std::string key)
     {
-        trn_host *retval = nullptr;
-        std::list<trn_host>::iterator it;
-        for(it = mTrnCliList.begin(); it != mTrnCliList.end(); it++){
+        trn::trn_host *retval = nullptr;
+        std::list<trn::trn_host>::iterator it;
+        int i=0;
+        for(it = mTrnCliList.begin(); it != mTrnCliList.end(); it++, i++){
             std::string list_key = std::get<0>(*it);
             if(list_key.compare(key) == 0){
                 retval = &(*it);
@@ -1350,9 +1425,11 @@ public:
 
     int add_trn_host(std::string key, trn::trn_host *host)
     {
+        //std::lock_guard<std::mutex> guard(mTrnCliMutex);
         int retval = -1;
 
         trn::trn_host *list_host = lookup_trncli_host(key);
+        fprintf(stderr, "%s:%d - ************************ key %s host %p list_host %p\n", __func__, __LINE__, key.c_str(), host, list_host);
 
         if(list_host == nullptr){
             // copy host
@@ -1368,16 +1445,23 @@ public:
         int retval = -1;
         int rem = retries;
 
-        trn_host *trnc_host = lookup_trncli_host(key);
+        trn::trn_host *trnc_host = lookup_trncli_host(key);
 
         if(trnc_host == nullptr)
             return retval;
+//
+//        void *vp = std::get<5>(*trnc_host);
+//        TrnClient *trncli = static_cast<TrnClient *>(vp);
 
-        void *vp = std::get<5>(*trnc_host);
-        TrnClient *trncli = static_cast<TrnClient *>(vp);
+        TrnHostX uhost = std::get<5>(*trnc_host);
+        void *vp = uhost.trnc_host;
+        TrnClient *trncli = uhost.trnc_host;
 
         if(trncli != nullptr){
+            TrnAttr &att_ref = trncli->getTrnAttr();
+            TrnAttr *patt = &att_ref;
             do{
+                fprintf(stderr, "%s:%d trncli[%p] trn_attr[%p] rem[%d] del[%d]\n", __func__, __LINE__, trncli, patt, rem, delay_sec);
                 TerrainNav *tnav = trncli->connectTRN();
                 if(tnav!=NULL && trncli->is_connected()){
                     retval=0;
@@ -1399,46 +1483,86 @@ public:
         if(NULL == cfg)
             return retval;
 
-        trn_host *trnc_host = lookup_trncli_host(key);
+        trn::trn_host *trnc_host = lookup_trncli_host(key);
 
-        if(trnc_host == nullptr)
+        if(trnc_host == nullptr) {
+            fprintf(stderr, "%s:%d trncli_host[%s] not found\n", __func__, __LINE__, key.c_str());
             return retval;
-
-        void *vp = std::get<5>(*trnc_host);
-        TrnClient *trncli = static_cast<TrnClient *>(vp);
-
-        if(nullptr != trncli) {
-
-            if(!force_reconnect && trncli->is_connected()){
-                return 0;
-            }
-
-            delete trncli;
-            trncli = nullptr;
         }
 
+//        void *vp = std::get<5>(*trnc_host);
+//        TrnClient *trncli = static_cast<TrnClient *>(vp);
+        TrnHostX uhost = std::get<5>(*trnc_host);
+        void *vp = uhost.trnc_host;
+        TrnClient *trncli = uhost.trnc_host;
+
+        if(NULL != trncli) {
+
+            if(!force_reconnect && trncli->is_connected()){
+                fprintf(stderr, "%s:%d trncli[%p] already connected\n", __func__, __LINE__, trncli);
+               return 0;
+            }
+
+            fprintf(stderr, "%s:%d !!!!!!!!!!! DELETING trncli[%p] !!!!!!!!!!!!\n", __func__, __LINE__, trncli);
+            delete trncli;
+            trncli = NULL;
+//            std::get<5>(*trnc_host) = NULL;
+            uhost.trnc_host = NULL;
+            std::get<5>(*trnc_host) = uhost;
+        }
+
+        fprintf(stderr, "%s:%d constructing trncli[%p]\n", __func__, __LINE__, trncli);
         trncli = new TrnClient("localhost",TRNCLI_PORT_DFL);
+        fprintf(stderr, "%s:%d new trncli[%p]\n", __func__, __LINE__, trncli);
 
-        std::get<5>(*trnc_host) = trncli;
 
-        trncli->loadCfgAttributes(std::get<6>(*trnc_host).c_str());
+        fprintf(stderr, "%s:%d - TRNCLI addr:\n", __func__, __LINE__);
+        trncli->show_addr();
+//        fprintf(stderr, "%s:%d - TRNCLI trn_attr addr:\n%s\n", __func__, __LINE__, trncli->getTrnAttr()->atostring().c_str());
+//        fprintf(stderr, "%s:%d -  terrainNavServer [%s]\n", __func__, __LINE__, trncli->getTrnAttr()->terrainNavServer);
+
+        std::string cfg_path_str = std::get<6>(*trnc_host);
+        trncli->loadCfgAttributes(cfg_path_str.c_str());
+
+//        std::get<5>(*trnc_host) = trncli;
+        uhost.trnc_host = trncli;
+        std::get<5>(*trnc_host) = uhost;
+
+        fprintf(stderr, "%s:%d - TRNCLI addr:\n", __func__, __LINE__);
+        trncli->show_addr();
+//        fprintf(stderr, "%s:%d - TRNCLI trn_attr addr:\n%s\n", __func__, __LINE__, trncli->getTrnAttr()->atostring().c_str());
+//        fprintf(stderr, "%s:%d -  terrainNavServer [%s]\n", __func__, __LINE__, trncli->getTrnAttr()->terrainNavServer);
+
+        TrnAttr &att_ref = trncli->getTrnAttr();
+        TrnAttr *patt = &att_ref;
+
+        fprintf(stderr, "%s:%d cfg_path_str [%s] key[%s] host.cli[%p] trncli[%p] trn_attr[%p]  ---------------------------\n", __func__, __LINE__, cfg_path_str.c_str(), key.c_str(), std::get<5>(*trnc_host).trnc_host, trncli, patt);
 
 //        int tcc = trncli_connect(key, 10, 3, user_int);
         int tcc = trncli_connect(key, 1, 0, user_int);
 
         if(trncli->is_connected()){
             LU_PEVENT(cfg->mlog(), "trn client connected");
-            TRN_NDPRINT(1, "trn client connected\n");
+            TRN_NDPRINT(1, "%s:%d trn client connected\n", __func__, __LINE__);
             cfg->stats().trn_cli_con++;
             retval = 0;
         } else {
             LU_PERROR(cfg->mlog(), "trn client connect failed [%d]", tcc);
-            TRN_NDPRINT(1, "trn client failed [%d]\n", tcc);
+            TRN_NDPRINT(1, "%s:%d trn client failed [%d]\n", __func__, __LINE__, tcc);
         }
 
-        if(cfg->debug()>0){
+        if(cfg->debug()>0 && trncli != NULL){
             trncli->show();
         }
+
+        if(trncli != NULL) {
+            fprintf(stderr, "%s:%d - TRNCLI addr:\n", __func__, __LINE__);
+            trncli->show_addr();
+        }
+//        fprintf(stderr, "%s:%d - TRNCLI trn_attr addr:\n%s\n", __func__, __LINE__, trncli->getTrnAttr()->atostring().c_str());
+//        fprintf(stderr, "%s:%d -  terrainNavServer [%s]\n", __func__, __LINE__, trncli->getTrnAttr()->terrainNavServer);
+
+        fprintf(stderr, "%s:%d -  //////////// START_TRNCLI EXITING ////////////\n", __func__, __LINE__);
 
         return retval;
     }
@@ -1453,8 +1577,9 @@ public:
         TRN_NDPRINT(1, "%s:%d - starting mb1pubs [%d]\n",__func__, __LINE__, mMB1SvrList.size());
 
         for(it = mMB1SvrList.begin(); it != mMB1SvrList.end(); it++){
+            trn::trn_host thost = *it;
 
-            std::string key = std::get<0>(*it);
+            std::string key = std::get<0>(thost);
 
             TRN_NDPRINT(1, "%s:%d - starting mb1pub [%s]\n",__func__, __LINE__, key.c_str());
 
@@ -1467,7 +1592,8 @@ public:
 
         for(it = mUdpmSubList.begin(); it != mUdpmSubList.end(); it++){
 
-            std::string key = std::get<0>(*it);
+            trn::trn_host thost = *it;
+            std::string key = std::get<0>(thost);
 
             TRN_NDPRINT(1, "%s:%d - starting udpm sub [%s]\n",__func__, __LINE__, key.c_str());
 
@@ -1480,7 +1606,8 @@ public:
 
         for(it = mTrnCliList.begin(); it != mTrnCliList.end(); it++){
 
-            std::string key = std::get<0>(*it);
+            trn::trn_host thost = *it;
+            std::string key = std::get<0>(thost);
 
             TRN_NDPRINT(1, "%s:%d - starting trncli [%s]\n",__func__, __LINE__, key.c_str());
 
@@ -1494,21 +1621,34 @@ public:
         return retval;
     }
 
-    void tcli_start_worker_fn(TrnClient *trncli, std::promise<bool> con_promise)
+    static void tcli_start_worker_fn(TrnClient *trncli, std::promise<bool> *con_promise)
     {
+        try{
+            TrnAttr &att_ref = trncli->getTrnAttr();
+            TrnAttr *patt = &att_ref;
 
-        TerrainNav *tnav = trncli->connectTRN();
-        bool iscon = false;
-        if(tnav != nullptr)
-            iscon = trncli->is_connected();
-        fprintf(stderr, "%s:%d setting promise: tnav[%p] iscon[%c]\n",__func__, __LINE__, tnav, (iscon?'Y':'N'));
-        con_promise.set_value(iscon);
+            fprintf(stderr, "%s:%d starting trncli:  trncli[%p] trn_attr[%p] trncli_sz[%zu]\n",__func__, __LINE__, trncli, patt, sizeof(*trncli));
+
+            TerrainNav *tnav = trncli->connectTRN();
+
+            bool iscon = false;
+
+            if(tnav != nullptr)
+                iscon = trncli->is_connected();
+
+            fprintf(stderr, "%s:%d setting promise: tnav[%p] trncli[%p] trn_attr[%p]  iscon[%c]\n",__func__, __LINE__, tnav, trncli, patt, (iscon?'Y':'N'));
+
+            con_promise->set_value(iscon);
+        } catch(Exception e) {
+            fprintf(stderr, "%s:%d - Exception during connectTRN\n", __func__, __LINE__);
+        }
     }
 
     // check connection, re-connect as needed (in separate thread)
     // return true if connected;
-    bool trncli_check_connection(int i, TrnClient *trnc, trnxpp_cfg *cfg)
+    bool trncli_check_connection(int idx, TrnClient *trnc, trnxpp_cfg *cfg)
     {
+        //std::lock_guard<std::mutex> guard(mTrnCliMutex);
         bool retval = false;
 
         static std::vector<bool> connection_pending;
@@ -1517,94 +1657,118 @@ public:
         static std::vector<std::future<bool>> con_futures;
         static std::vector<std::promise<bool> *> con_promises;
 
-        if(workers.size() == 0){
-            for(int i=0; i<mTrnCliList.size(); i++){
-                connection_pending.push_back(false);
-                is_connected.push_back(false);
-                workers.push_back(nullptr);
-                con_promises.push_back(nullptr);
-            }
+// original: should probably check mTrnCliList size, rather than one-time
+//        if(workers.size() == 0){
+//            for(int i=0; i<mTrnCliList.size(); i++){
+//                connection_pending.push_back(false);
+//                is_connected.push_back(false);
+//                workers.push_back(nullptr);
+//                con_promises.push_back(nullptr);
+//            }
+//            con_futures.resize(mTrnCliList.size());
+//        }
+        // TODO: should (re-)initialize any new values
+        if(workers.size() < mTrnCliList.size()){
+            size_t old_size = workers.size();
+            size_t new_size = mTrnCliList.size();
+            connection_pending.resize(mTrnCliList.size());
+            is_connected.resize(mTrnCliList.size());
+            workers.resize(mTrnCliList.size());
+            con_promises.resize(mTrnCliList.size());
             con_futures.resize(mTrnCliList.size());
+
+            for( size_t i=old_size; i < new_size; i++) {
+                connection_pending.at(i) = false;
+                is_connected.at(i) = false;
+                workers.at(i) = nullptr;
+                con_promises.at(i) = nullptr;
+            }
         }
 
+
         // return if already connected
-        if(trnc->is_connected() && !connection_pending.at(i))
+        if(trnc->is_connected() && !connection_pending.at(idx))
             return true;
 
+        fprintf(stderr, "%s:%d - idx[%d] workers.size[%zu] mTrnCliList.size[%zu]\n", __func__, __LINE__, idx, workers.size(), mTrnCliList.size());
 
-        if(!connection_pending.at(i)){
+        if(!connection_pending.at(idx)){
+            TrnAttr &att_ref = trnc->getTrnAttr();
+            TrnAttr *patt = &att_ref;
 
-            LU_PEVENT(cfg->mlog(), "ERR TrnClient is DISCONNECTED [%p]\n", __func__, __LINE__, trnc);
-            fprintf(stderr, "%s:%d - ERR TrnClient[%d]  is DISCONNECTED [%p]\n", __func__, __LINE__, i, trnc);
+            LU_PEVENT(cfg->mlog(), "ERR TrnClient[%d] is DISCONNECTED trnc[%p] trn_attr[%p]\n", __func__, __LINE__, idx, trnc, (void *)patt);
+            fprintf(stderr, "%s:%d - ERR TrnClient[%d]  is DISCONNECTED trnc[%p] trn_attr[%p]\n", __func__, __LINE__, idx, trnc, (void *)patt);
 
             // update disconnect stats
             if(cfg->stats().trn_cli_dis <= cfg->stats().trn_cli_con)
                 cfg->stats().trn_cli_dis++;
 
             // start a worker thread for client reconnect
-            std::cerr << "starting worker thread [" << i << "]\n";
+            std::cerr << __func__ << ":" << __LINE__ << " starting worker thread [" << idx << "]\n";
 
             // clean up resources from previous cycle
-            if(con_promises.at(i) != nullptr){
-                delete con_promises.at(i);
-                con_promises.at(i) = nullptr;
+            if(con_promises.at(idx) != nullptr){
+                delete con_promises.at(idx);
+                con_promises.at(idx) = nullptr;
             }
-            if(workers.at(i) != nullptr){
-                delete workers.at(i);
-                workers.at(i) = nullptr;
+            if(workers.at(idx) != nullptr){
+                delete workers.at(idx);
+                workers.at(idx) = nullptr;
             }
 
             // generate new shared context
             std::promise<bool> *con_promise = new std::promise<bool>;
-            con_promises.at(i) = con_promise;
-            con_futures.at(i) = con_promise->get_future();
-            connection_pending.at(i) = true;
+            con_promises.at(idx) = con_promise;
+            con_futures.at(idx) = con_promise->get_future();
+            connection_pending.at(idx) = true;
 
-            // start worker thread
-            std::thread *worker = new std::thread(&trnxpp_ctx::tcli_start_worker_fn, this, trnc,  std::move(*con_promise));
+            // start worker thread, add to list
+//            std::thread *worker = new std::thread(&trnxpp_ctx::tcli_start_worker_fn, this, trnc,  std::move(*con_promise));
+//            std::thread *worker = new std::thread(&trnxpp_ctx::tcli_start_worker_fn,  trnc,  std::move(*con_promise));
+            std::thread *worker = new std::thread(&trnxpp_ctx::tcli_start_worker_fn,  trnc,  con_promise);
 
-            workers.at(i) = worker;
+            workers.at(idx) = worker;
 
             // update connection state
-            is_connected.at(i) = false;
+            is_connected.at(idx) = false;
         } else {
 
             // check worker state
-            std::cerr << "worker thread [" << i << "] pending\n";
-            std::cerr << "con_future[" << i << "] valid[" << con_futures.at(i).valid() << "]\n";
+            std::cerr << __func__ << ":" << __LINE__ <<  " - worker thread [" << idx << "] pending\n";
+            std::cerr << __func__ << ":" << __LINE__ <<  " - con_future[" << idx << "] valid[" << con_futures.at(idx).valid() << "]\n";
 
             bool ready = false;
-            std::future_status con_status = con_futures.at(i).wait_for(std::chrono::milliseconds(100));
+            std::future_status con_status = con_futures.at(idx).wait_for(std::chrono::milliseconds(100));
             switch (con_status) {
                 case std::future_status::deferred:
-                    std::cerr << "con_status[" << i << "] DEFERRED\n";
+                    std::cerr << __func__ << ":" << __LINE__ <<  " - con_status[" << idx << "] DEFERRED\n";
                     break;
                 case std::future_status::timeout:
-                    std::cerr << "con_status[" << i << "] TIMEOUT\n";
+                    std::cerr << __func__ << ":" << __LINE__ <<  " - con_status[" << idx << "] TIMEOUT\n";
                     break;
                 case std::future_status::ready:
-                    std::cerr << "con_status[" << i << "] READY!\n";
+                    std::cerr << __func__ << ":" << __LINE__ <<  " - con_status[" << idx << "] READY!\n";
                     ready = true;
                     break;
                 default:
-                    std::cerr << "con_status[" << i << "] UNKNOWN!\n";
+                    std::cerr << __func__ << ":" << __LINE__ <<  " - con_status[" << idx << "] UNKNOWN!\n";
                     break;
             }
 
-            std::cerr << "worker thread [" << i << " con_status[" << (int)con_status << "] ready[" << (ready?'Y':'N') << "]\n";
+            std::cerr << __func__ << ":" << __LINE__ <<  " - worker thread [" << idx << "] con_status[" << (int)con_status << "] ready[" << (ready?'Y':'N') << "]\n";
 
             if(ready){
 
                 // thread finished, update state
-                is_connected.at(i) = con_futures.at(i).get();
-                connection_pending.at(i) = false;
+                is_connected.at(idx) = con_futures.at(idx).get();
+                connection_pending.at(idx) = false;
 
-                retval = is_connected.at(i);
+                retval = is_connected.at(idx);
 
-                std::cerr << "joining worker [" << i << " is_connected[" << (is_connected.at(i)?'Y':'N') << "]\n";
-                workers.at(i)->join();
+                std::cerr << __func__ << ":" << __LINE__ <<  " - joining worker [" << idx << "] is_connected[" << (is_connected.at(idx)?'Y':'N') << "]\n";
+                workers.at(idx)->join();
 
-                if(is_connected.at(i)){
+                if(is_connected.at(idx)){
 
                     // update connect stats
                     cfg->stats().trn_cli_con++;
@@ -1618,18 +1782,20 @@ public:
                 }
 
                 // clean up thread resources
-                if(workers.at(i) != nullptr){
-                    delete workers.at(i);
-                    workers.at(i) = nullptr;
+                if(workers.at(idx) != nullptr){
+                    delete workers.at(idx);
+                    workers.at(idx) = nullptr;
                 }
 
-                if(con_promises.at(i) != nullptr){
-                    delete con_promises.at(i);
-                    con_promises.at(i) = nullptr;
+                if(con_promises.at(idx) != nullptr){
+                    delete con_promises.at(idx);
+                    con_promises.at(idx) = nullptr;
                 }
+                connection_pending.at(idx) = false;
+
 
             } else {
-                std::cerr << "worker thread [" << i << "] not ready, continuing\n";
+                std::cerr << __func__ << ":" << __LINE__ <<  " - worker thread [" << idx << "] not ready, continuing\n";
             }
         }
         return retval;
@@ -1640,57 +1806,222 @@ public:
         return mTrnCliList.size();
     }
 
+    void dump_trnhosts()
+    {
+        fprintf(stderr,"%s:%d - ctx[%p] mTrnCliList[%p]\n",__func__, __LINE__,this,&mTrnCliList);
+      //std::lock_guard<std::mutex> guard(mTrnCliMutex);
+        // publish to MB1 servers
+        std::list<trn::trn_host>::iterator it;
+
+        int i=0;
+        for(it = mTrnCliList.begin(); it != mTrnCliList.end(); it++, i++){
+           
+            trn::trn_host thost = (*it);
+            std::string key = std::get<0>(thost);
+
+//            void *vp = std::get<5>(thost);
+//            TrnClient *trncli = static_cast<TrnClient *>(vp);
+
+            TrnHostX uhost = std::get<5>(thost);
+            void *vp = uhost.trnc_host;
+            TrnClient *trncli = uhost.trnc_host;
+            TrnAttr &att_ref = trncli->getTrnAttr();
+            TrnAttr *patt = &att_ref;
+
+            if(trncli != NULL) {
+
+                fprintf(stderr, "%s:%d - TRNCLI[%d] key[%s] vp[%p] trncli[%p] trn_attr[%p]:\n", __func__, __LINE__, i, key.c_str(), vp, trncli, patt);
+                fprintf(stderr, "%s:%d - TRNCLI[%d] SZ trncli[%zu] trn_attr[%zu]:\n", __func__, __LINE__, i, sizeof(*trncli), sizeof(*patt));
+
+                fprintf(stderr, "%s:%d - TRNCLI show_addr:\n", __func__, __LINE__);
+                trncli->show_addr();
+
+                std::string att_str = att_ref.atostring();
+                fprintf(stderr, "%s:%d - TRNCLI trn_attr addr:\n%s\n", __func__, __LINE__, att_str.c_str());
+
+                att_str = att_ref.tostring();
+                fprintf(stderr, "%s:%d - TRNCLI trn_attr members:\n%s\n", __func__, __LINE__, att_str.c_str());
+
+
+                if(NULL != patt) {
+                    fprintf(stderr, "%s:%d -  terrainNavServer [%s]\n", __func__, __LINE__, patt->terrainNavServer);
+                }else {
+                    fprintf(stderr, "%s:%d ///////// !!! TRN_ATTR is NULL !!! ////////////\n", __func__, __LINE__);
+                }
+            } else {
+                fprintf(stderr, "%s:%d - TRNCLI is NULL\n", __func__, __LINE__);
+            }
+        }
+    }
+
     int pub_trn(double nav_time, poseT *pt, measT *mt, int trn_type, std::list<lcm_pub> &pubs,  trnxpp_cfg *cfg)
     {
+        //std::lock_guard<std::mutex> guard(mTrnCliMutex);
         int retval = -1;
 
         if(mTrnCliList.size() <= 0){
             return 0;
         }
 
+        fprintf(stderr,"%s:%d - ctx[%p] mTrnCliList[%p]\n",__func__, __LINE__,this,&mTrnCliList);
         // publish to MB1 servers
-        std::list<trn_host>::iterator it;
-
         int i=0;
-        for(it = mTrnCliList.begin(); it != mTrnCliList.end(); it++, i++){
+        std::list<trn::trn_host>::iterator it;
 
-            std::string key = std::get<0>(*it);
-            void *vp = std::get<5>(*it);
+        for(it = mTrnCliList.begin(); it != mTrnCliList.end(); it++, i++) {
 
-            TRN_NDPRINT(5, "%s:%d - pub TRNCLI key[%s] vp[%p]\n", __func__, __LINE__, key.c_str(), vp);
+            trn::trn_host thost = (*it);
+            std::string key = std::get<0>(thost);
 
-            TrnClient *trncli = static_cast<TrnClient *>(vp);
+//            void *vp = std::get<5>(thost);
+//            TrnClient *trncli = static_cast<TrnClient *>(vp);
 
-            if(trncli == nullptr){
+            TrnHostX uhost = std::get<5>(thost);
+            void *vp = uhost.trnc_host;
+            TrnClient *trncli = uhost.trnc_host;
+            TrnAttr &att_ref = trncli->getTrnAttr();
+            TrnAttr *patt = &att_ref;
+
+            TRN_NDPRINT(5, "%s:%d - TRNCLI[%d] key[%s] vp[%p] trncli[%p] ctx[%p]:\n", __func__, __LINE__, i, key.c_str(), vp, trncli, this);
+
+            fprintf(stderr, "%s:%d - TRNCLI[%d] key[%s] vp[%p] trncli[%p] trn_attr[%p]:\n", __func__, __LINE__, i, key.c_str(), vp, trncli, patt);
+
+//--------------------------------------------
+            // KLH : TrnClient already kooked here...
+            // dump_trnhosts() works fine....
+            fprintf(stderr, "%s:%d -------- dump_trnhosts --------\n", __func__, __LINE__);
+            dump_trnhosts();
+
+            // in this context, however, the reference (or pointer) are corrupted (shifted 8 bytes)
+            fprintf(stderr, "%s:%d -------- TrnAttr::tostream --------\n", __func__, __LINE__);
+            // att_ref.tostream(cerr);
+            // patt->tostream(cerr);
+
+            // TrnAttr reference obtained from trncli->getAttr()
+            // is invalid (shifted 8 bytes)
+
+            // In debugger...:
+            // (lldb) print &(trncli->getTrnAttr())  // valid
+            // (TrnAttr *) 0x0000000108011258
+            // (lldb) print &trncli->_trn_attr       // valid
+            // (TrnAttr *) 0x0000000108011258
+
+            // (lldb) print &att_ref
+            // (TrnAttr *) 0x0000000108011260        // invalid
+            // (lldb) print patt
+            // (TrnAttr *) 0x0000000108011260        // invalid
+            // (lldb) print trncli->getTrnAttr()
+            // (TrnAttr) {
+            //   mapName = 0x000060000078c020 "PortTiles"
+            //   particlesName = 0x000060000078c040 "particles.cfg"
+            //   vehicleCfgName = 0x000060000058c000 "ventana_specs.cfg"
+            //   dvlCfgName = 0x000060000058c020 "rdiDVL_specs.cfg"
+            //   resonCfgName = 0x0000000000000000
+            //   lrauvDvlName = 0x0000000000000000
+            //   terrainNavServer = 0x000060000078c030 "192.168.1.101"
+            //   terrainNavPort = 29000
+            //   mapType = 2
+            //   filterType = 2
+            //   allowFilterReinits = true
+            //   useMbTrnData = false
+            //   useIDTData = false
+            //   useDvlSide = false
+            //   skipInit = false
+            //   useModifiedWeighting = 4
+            //   maxNorthingCov = 49
+            //   maxNorthingError = 50
+            //   maxEastingCov = 49
+            //   maxEastingError = 50
+            //   samplePeriod = 3000
+            //   forceLowGradeFilter = false
+            //   phiBias = 0
+            //   _cfg_file = 0x0000600000b8c090 "/Volumes/MDATA/test/config/terrainAid.cfg"
+            // }
+
+            // (lldb) print att_ref
+            // (TrnAttr &) 0x0000000108011260: {
+            //   mapName = 0x000060000078c040 "particles.cfg"
+            //   particlesName = 0x000060000058c000 "ventana_specs.cfg"
+            //   vehicleCfgName = 0x000060000058c020 "rdiDVL_specs.cfg"
+            //   dvlCfgName = 0x0000000000000000
+            //   resonCfgName = 0x0000000000000000
+            //   lrauvDvlName = 0x000060000078c030 "192.168.1.101"
+            //   terrainNavServer = 0x0000000000007148 ""
+            //   terrainNavPort = 2
+            //   mapType = 2
+            //   filterType = 1
+            //   allowFilterReinits = true
+            //   useMbTrnData = false
+            //   useIDTData = false
+            //   useDvlSide = false
+            //   skipInit = false
+            //   useModifiedWeighting = 4632092954238910464
+            //   maxNorthingCov = 50
+            //   maxNorthingError = 49
+            //   maxEastingCov = 50
+            //   maxEastingError = 1.4821969375237396E-320
+            //   samplePeriod = 0
+            //   forceLowGradeFilter = false
+            //   phiBias = 5.2150174540869847E-310
+            //   _cfg_file = 0x0000000000000000
+            //  }
+
+//            fprintf(stderr, "%s:%d -------- sizeof(void*) [%zu] sizeof(TrnClient*) [%zu] --------\n", __func__, __LINE__, sizeof(void*), sizeof(TrnClient*));
+            fprintf(stderr, "%s:%d -------- sizeof(TrnClient) [%zu] sizeof(TrnAttr) [%zu] --------\n", __func__, __LINE__, sizeof(TrnClient), sizeof(TrnAttr));
+//--------------------------------------------
+
+            if(trncli == NULL){
 
                 fprintf(stderr, "%s:%d - ERR TrnClient is NULL\n", __func__, __LINE__);
 
                 // initialize TrnClient (sets TrnClient host in mTrnCliList)
                 start_trncli(key, cfg, false, cfg->ginterrupt());
 
-                // update variable from TrnClientList reference
-                vp = std::get<5>(*it);
 
-                if(nullptr == vp){
+                // TODO: is it valid to re-read thost, or do we need to reiterate?
+                // update variable from TrnClientList reference
+//                vp = std::get<5>(thost);
+                uhost = std::get<5>(thost);
+                vp = uhost.trnc_host;
+
+                if(NULL == vp){
                     LU_PEVENT(cfg->mlog(), "ERR start_trncli failed\n", __func__, __LINE__);
                     fprintf(stderr, "%s:%d - ERR start_trncli failed\n", __func__, __LINE__);
                     continue;
                 }
 
                 // update local reference
-                trncli = static_cast<TrnClient *>(vp);
+//                trncli = static_cast<TrnClient *>(vp);
+                trncli = uhost.trnc_host;
+
+                if(trncli != NULL) {
+                    fprintf(stderr, "%s:%d - TRNCLI addr [%p]:\n", __func__, __LINE__, trncli);
+                    trncli->show_addr();
+                }
+//                fprintf(stderr, "%s:%d - TRNCLI trn_attr addr:\n%s\n", __func__, __LINE__, trncli->getTrnAttr()->atostring().c_str());
+//                fprintf(stderr, "%s:%d -  terrainNavServer [%s]\n", __func__, __LINE__, trncli->getTrnAttr()->terrainNavServer);
 
                 // update stats
                 cfg->stats().trn_cli_con++;
 
-                LU_PEVENT(cfg->mlog(), "TrnClient started [%p]\n", __func__, __LINE__, trncli);
-                fprintf(stderr, "%s:%d - TrnClient started [%p]\n", __func__, __LINE__, trncli);
+                LU_PEVENT(cfg->mlog(), "TrnClient started [%p]\n", __func__, __LINE__, (void *)trncli);
+                fprintf(stderr, "%s:%d - TrnClient started [%p]\n", __func__, __LINE__, (void *)trncli);
             }
+
+//            fprintf(stderr, "%s:%d - checking connection....getTrnAttr[%p]\n", __func__, __LINE__, (void *)trncli->getTrnAttr());
+
+//            trncli->show_addr();
+//             trncli->getTrnAttr()->tostream(std::cerr);
+//            fprintf(stderr, "%s:%d - TRNCLI addr:\n", __func__, __LINE__);
+//            trncli->show_addr();
+//            fprintf(stderr, "%s:%d - TRNCLI trn_attr addr:\n%s\n", __func__, __LINE__, trncli->getTrnAttr()->atostring().c_str());
+//            fprintf(stderr, "%s:%d -  terrainNavServer [%s]\n", __func__, __LINE__, trncli->getTrnAttr()->terrainNavServer);
 
             // check connection, restart as needed (in separate thread)
             bool is_connected = trncli_check_connection( i, trncli, cfg);
 
             if(!is_connected){
+                fprintf(stderr, "%s:%d - TrnClient not connected; connecting/continuing\n", __func__, __LINE__);
                 continue;
             }
 
@@ -1909,6 +2240,8 @@ private:
     std::list<trn::trn_host> mMB1SvrList;
     std::list<trn::trn_host> mUdpmSubList;
     std::list<trn::trn_host> mTrnCliList;
+
+    std::mutex mTrnCliMutex; // Global mutex object
 
 };
 }

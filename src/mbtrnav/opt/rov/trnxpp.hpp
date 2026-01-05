@@ -800,7 +800,7 @@ public:
         return retval;
     }
 
-    trn_host *lookup_trn_host(const std::string &key)
+    trn::trn_host *lookup_trn_host(const std::string &key)
     {
         std::list<trn_host>::iterator it;
         for(it = mTrnHostList.begin(); it != mTrnHostList.end(); it++)
@@ -815,6 +815,15 @@ public:
         return nullptr;
     }
 
+    void dump_trnhosts()
+    {
+        for(int i=0; i<mCtx.size(); i++) {
+
+            trnxpp_ctx *ctx = mCtx.at(i);
+            ctx->dump_trnhosts();
+        }
+    }
+
     int start_trn(trnxpp_cfg *cfg, bool *user_int)
     {
         int retval = -1;
@@ -824,6 +833,7 @@ public:
 
             trnxpp_ctx *ctx = mCtx.at(i);
             if(nullptr != ctx) {
+                fprintf(stderr, "%s:%d - starting CTX[%d] TRN\n", __func__, __LINE__, i);
                 if(ctx->start_trn(cfg, user_int) != 0){
                     errors++;
                 }
@@ -842,6 +852,8 @@ public:
                 if(ctx->init_rawbath_csv_file(cfg) != 0){
                     errors++;
                 }
+                fprintf(stderr, "%s:%d - AFTER starting CTX[%d]\n", __func__, __LINE__, i);
+                ctx->dump_trnhosts();
             }
         }
         retval = errors;
@@ -954,7 +966,11 @@ public:
             if(!parse_err) {
 
                 TRN_NDPRINT(5, "%s:%d adding TRN key[%s] host[%s, %s:%d:%d] cfg[%s]\n", __func__, __LINE__, key, type, (host==NULL?"-":host), port, ttl, cfg);
-                mTrnHostList.emplace_back(key, type, (host==NULL?"-":host), port, ttl, (void *)NULL, (cfg==NULL?"-":cfg));
+                
+                TrnHostX uhost;
+//                mTrnHostList.emplace_back(key, type, (host==NULL?"-":host), port, ttl, (void *)NULL, (cfg==NULL?"-":cfg));
+                mTrnHostList.emplace_back(key, type, (host==NULL?"-":host), port, ttl, uhost, (cfg==NULL?"-":cfg));
+
                 retval = 0;
             }
 
@@ -1750,19 +1766,25 @@ public:
                     if(strlen(val_key) > 0) {
                         TRN_NDPRINT(5,  "%s:%d - opt[%s] val_key[%s]\n", __func__, __LINE__, opt_s, val_key);
 
-                        trn::trn_host *thost = nullptr;
-                        if((thost = lookup_trn_host(val_key)) != nullptr){
+                        trn::trn_host *thost = lookup_trn_host(val_key);
+                        TRN_NDPRINT(5,  "%s:%d - thost[%p]\n", __func__, __LINE__, thost);
+
+                        if(thost != nullptr){
                             std::string trn_type = std::get<1>(*thost);
-                            if(trn_type.compare("trncli") == 0){
+                            fprintf(stderr,  "%s:%d - trn_type[%s]\n", __func__, __LINE__, trn_type.c_str());
+                            
+                            if(trn_type.compare("trncli") == 0) {
                                 ctx->add_trn_host(val_key, thost);
-                            } else if(trn_type.compare("mb1pub") == 0){
+                            } else if(trn_type.compare("mb1pub") == 0) {
                                 ctx->add_mb1svr_host(val_key, thost);
-                            }  else if(trn_type.compare("udpms") == 0){
+                            } else if(trn_type.compare("udpms") == 0) {
                                 ctx->add_udpm_host(val_key, thost);
                             } else {
-                                TRN_NDPRINT(5,  "%s:%d - invalid trn type [%s]\n", __func__, __LINE__, trn_type.c_str());
+                                TRN_NDPRINT(5,  "%s:%d - invalid trnhost type [%s]\n", __func__, __LINE__, trn_type.c_str());
                                 flags |= ERR;
                             }
+                        } else {
+                            fprintf(stderr,  "%s:%d - lookup_trn_host[%s] returned NULL\n", __func__, __LINE__, val_key);
                         }
 
                         flags &= ~TRN;
@@ -1984,6 +2006,7 @@ private:
     std::vector<trnxpp_ctx *> mCtx;
     std::list<callback_kv> mCallbackList;
     callback_res_t mCallbackRes;
+
 };
 
 }

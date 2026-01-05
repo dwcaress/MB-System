@@ -22,6 +22,8 @@
 #include "TerrainNavClient.h"
 #include "TRNUtils.h"
 
+#define TRN_CHUNK_SIZE  512
+
 /******************************************************************************
  TRANSITION MATRIX
  State 0: Well localized
@@ -306,7 +308,6 @@ char TerrainNavClient::get_msg()
 
 }
 
-#define TRN_CHUNK_SIZE  512
 
 // throws a TRNConnection exception if TRN has hung up
 size_t TerrainNavClient::send_msg(commsT& msg)

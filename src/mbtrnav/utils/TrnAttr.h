@@ -23,6 +23,8 @@
 // Buffer sizes
 #define TA_LINEBUF_BYTES 512
 #define TA_PATH_BYTES 1024
+#define TA_KEY_BYTES 512
+#define TA_VALUE_BYTES 1024
 
 // config parameter key definitions
 #define TA_MAPNAME_KEY "mapFileName"
@@ -48,13 +50,40 @@
 #define TA_USEDVLSIDE_KEY "useDVLSide"
 #define TA_USEMBTRNDATA_KEY "useMbTrnData"
 #define TA_USEMBTRNSVR_KEY "useMbTrnServer"
+#define TA_SKIPINIT_KEY "skipInit"
 
 class TrnAttr
 {
 public:
+    // config parameter key definitions
+//    const char * TA_MAPNAME_KEY="mapFileName";
+//    const char * TA_PARNAME_KEY= "particlesName";
+//    const char * TA_VEHNAME_KEY= "vehicleCfgName";
+//    const char * TA_DVLNAME_KEY= "dvlCfgName";
+//    const char * TA_RESONNAME_KEY= "resonCfgName";
+//    const char * TA_TRNSVR_KEY= "terrainNavServer";
+//    const char * TA_LRAUVDVL_KEY= "lrauvDvlFilename";
+//    const char * TA_MAPTYPE_KEY= "map_type";
+//    const char * TA_FILTERTYPE_KEY= "filterType";
+//    const char * TA_TRNPORT_KEY= "terrainNavPort";
+//    const char * TA_FORCELGF_KEY= "forceLowGradeFilter";
+//    const char * TA_ALLOWREINIT_KEY= "allowFilterReinits";
+//    const char * TA_USEMODWT_KEY= "useModifiedWeighting";
+//    const char * TA_SAMPLEPER_KEY= "samplePeriod";
+//    const char * TA_MAXNCOV_KEY= "maxNorthingCov";
+//    const char * TA_MAXNERR_KEY= "maxNorthingError";
+//    const char * TA_MAXECOV_KEY= "maxEastingCov";
+//    const char * TA_MAXEERR_KEY= "maxEastingError";
+//    const char * TA_ROLLOFS_KEY= "RollOffset";
+//    const char * TA_USEIDTDATA_KEY= "useIDTData";
+//    const char * TA_USEDVLSIDE_KEY= "useDVLSide";
+//    const char * TA_USEMBTRNDATA_KEY= "useMbTrnData";
+//    const char * TA_USEMBTRNSVR_KEY= "useMbTrnServer";
+//    const char * TA_SKIPINIT_KEY= "skipInit";
 
     TrnAttr();
     TrnAttr(const char *cfg_path);
+    TrnAttr(const TrnAttr& other);
     ~TrnAttr();
 
     // set the configuration file
@@ -68,6 +97,12 @@ public:
 
     // format as std:string
     std::string tostring(int wkey=20, int wval=28);
+
+    // formatted output stream
+    void atostream(std::ostream &os, int wkey=20, int wval=28);
+
+    // format as std:string
+    std::string atostring(int wkey=20, int wval=28);
 
     // Check value, free if non-NULL, then set to strdup(src)
     // Only use this on strings that have been malloc'd
@@ -97,6 +132,49 @@ public:
     long samplePeriod;
     bool forceLowGradeFilter;
     double phiBias;
+    TrnAttr& operator=(const TrnAttr& other) {
+        // 1. Check for self-assignment (e.g., obj = obj)
+        if (this != &other) {
+            // 2. Deallocate old resources
+    //        TrnAttr::chkSetString(&_cfg_file, NULL);
+    //        TrnAttr::chkSetString(&mapName, NULL);
+    //        TrnAttr::chkSetString(&particlesName, NULL);
+    //        TrnAttr::chkSetString(&vehicleCfgName, NULL);
+    //        TrnAttr::chkSetString(&dvlCfgName, NULL);
+    //        TrnAttr::chkSetString(&resonCfgName, NULL);
+    //        TrnAttr::chkSetString(&lrauvDvlName, NULL);
+    //        TrnAttr::chkSetString(&terrainNavServer, NULL);
+
+            // 3. Allocate new resources and copy the data
+            TrnAttr::chkSetString(&_cfg_file, other._cfg_file);
+            TrnAttr::chkSetString(&mapName, other.mapName);
+            TrnAttr::chkSetString(&particlesName, other.particlesName);
+            TrnAttr::chkSetString(&vehicleCfgName, other.vehicleCfgName);
+            TrnAttr::chkSetString(&dvlCfgName, other.dvlCfgName);
+            TrnAttr::chkSetString(&resonCfgName, other.resonCfgName);
+            TrnAttr::chkSetString(&lrauvDvlName, other.lrauvDvlName);
+            TrnAttr::chkSetString(&terrainNavServer, other.terrainNavServer);
+            terrainNavPort = other.terrainNavPort;
+            mapType = other.mapType;
+            filterType = other.filterType;
+            allowFilterReinits = other.allowFilterReinits;
+            useMbTrnData = other.useMbTrnData;
+            useIDTData = other.useIDTData;
+            useDvlSide = other.useDvlSide;
+            skipInit = other.skipInit;
+            useModifiedWeighting = other.useModifiedWeighting;
+            maxNorthingCov = other.maxNorthingCov;
+            maxNorthingError = other.maxNorthingError;
+            maxEastingCov = other.maxEastingCov;
+            maxEastingError = other.maxEastingError;
+            samplePeriod = other.samplePeriod;
+            forceLowGradeFilter = other.forceLowGradeFilter;
+            phiBias = other.phiBias;
+        }
+
+        // 4. Return a reference to the current object
+        return *this;
+    }
 
 protected:
     // config file parser
@@ -109,4 +187,4 @@ private:
     char *_cfg_file;
 };
 
-#endif
+#endif // include guard

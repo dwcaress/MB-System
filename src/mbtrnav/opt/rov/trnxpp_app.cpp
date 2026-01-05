@@ -381,6 +381,7 @@ void app_main(trnxpp_cfg &cfg)
 
     // connect all TRN IO
     xpp.start_trn(&cfg, &g_interrupt);
+
     xpp.start_lcm_pubs();
 
     xpp.show();

@@ -208,14 +208,21 @@ add_executable(trnxpp
     trnxpp_app.cpp
     ${UTILS_SRC_DIR}/TrnClient.cpp
     ${UTILS_SRC_DIR}/TerrainNavClient.cpp
+    ${UTILS_SRC_DIR}/TrnAttr.cpp
 )
 
 # specify include paths and libraries
-target_link_libraries(trnxpp PRIVATE lcm mb1 trncli tnav newmat qnx m geolib geocon udpms trnxplug NetCDF::NetCDF)
+target_link_libraries(trnxpp PRIVATE lcm stdc++ mb1 trncli tnav newmat qnx m geolib geocon udpms trnxplug NetCDF::NetCDF)
 
 target_include_directories(trnxpp PRIVATE
     ${LIBTRNAV_INCLUDES}
 )
+#target_compile_options(trnxpp PRIVATE
+#-fsanitize=address
+#)
+#target_link_options(trnxpp PRIVATE
+#-fsanitize=address
+#)
 #
 #------------------------------------------------------------------------------
 # Build optional targets wnen buildTRNOptional=ON

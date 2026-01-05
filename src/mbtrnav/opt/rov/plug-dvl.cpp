@@ -168,6 +168,7 @@ int cb_proto_dvl(void *pargs)
         }
 
         TRN_NDPRINT(TRNDL_PLUGOIDVL, "%s:%d processing ctx[%s]\n", __func__, __LINE__, ctx->ctx_key().c_str());
+        
 
         std::string *bkey[1] = {ctx->bath_input_chan(0)};
         std::string *nkey = ctx->nav_input_chan(0);
@@ -176,7 +177,7 @@ int cb_proto_dvl(void *pargs)
 
         if(bkey[0] == nullptr || nkey == nullptr || akey[0] == nullptr || vkey == nullptr)
         {
-            TRN_NDPRINT(TRNDL_PLUGOIDVL, "%s:%d WARN - NULL input key\n", __func__, __LINE__);
+            TRN_NDPRINT(TRNDL_PLUGOIDVL, "%s:%d WARN - NULL input key %p/%p/%p/%p\n", __func__, __LINE__, bkey[0], nkey, akey[0], vkey);
             continue;
         }
 
@@ -187,7 +188,7 @@ int cb_proto_dvl(void *pargs)
 
         if(bi == nullptr || ni == nullptr || ai == nullptr || vi == nullptr)
         {
-            fprintf(stderr,"%s:%d WARN - NULL info instance\n", __func__, __LINE__);
+            fprintf(stderr,"%s:%d WARN - NULL info instance %p/%p/%p/%p\n", __func__, __LINE__, bi, ni, ai, vi);
         }
 
 
@@ -209,14 +210,19 @@ int cb_proto_dvl(void *pargs)
         // check modulus
         if(ctx->decmod() <= 0 || (ctx->cbcount() % ctx->decmod()) == 0){
 
-
             // construct poseT/measT TRN inputs
             GeoCon gcon(ctx->utm_zone());
             poseT *pt = trnx_utils::mb1_to_pose(snd, ai, NULL, &gcon);
             measT *mt = trnx_utils::mb1_to_meas(snd, ai, trn_type, &gcon);
 
+            fprintf(stderr, "%s:%d processing ctx[%s/%p] ***********\n", __func__, __LINE__, ctx->ctx_key().c_str(), ctx);
+
             // publish update TRN, publish estimate to TRN, LCM
+            fprintf(stderr, "%s:%d ///////// calling PUB_TRN ////////////\n", __func__, __LINE__);
             ctx->pub_trn(nav_time, pt, mt, trn_type, xpp->pub_list(), cfg);
+
+            // does it make sense to publish to MB1?
+            // ctx->pub_mb1(snd, xpp->pub_list(), cfg);
 
             if(pt != nullptr)
                 delete pt;

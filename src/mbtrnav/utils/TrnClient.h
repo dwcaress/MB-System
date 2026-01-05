@@ -79,24 +79,27 @@ public:
     
     TrnClient(const char *host=NULL, int port=0);
     TrnClient(const char *svr_log_dir=NULL, const char *host=NULL, int port=0);
+    TrnClient(const TrnClient& other);
     ~TrnClient();
+    static void chkSetString(char **dest, const char *src);
+    int loadCfgAttributes(const char *cfg_file);
+    int setVerbose(int val);
     int initSocket();
     int connectSocket();
-    int loadCfgAttributes(const char *cfg_file);
-//    int getNextKeyValue(FILE *cfg, char key[], char value[]);
-    int setVerbose(int val);
-    void show(int indent=0, int wkey=15, int wval=18);
     TerrainNav* connectTRN();
+    void show(int indent=0, int wkey=15, int wval=18);
+    void show_addr(int indent=0, int wkey=15, int wval=18);
     void setQuitRef(bool *pvar);
     bool isQuitSet();
-    TrnAttr *_trn_attr;
+//    int getNextKeyValue(FILE *cfg, char key[], char value[]);
+    TrnAttr &getTrnAttr();
+
 
 protected:
-    char *_cfg_file;
-//    TRN_attr *_trn_attr;
     int verbose;
     bool *_quit_ref;
-    
+    char *_cfg_file;
+    TrnAttr _trn_attr;
 };
 
-#endif
+#endif // include guard

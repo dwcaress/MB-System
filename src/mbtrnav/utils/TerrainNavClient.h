@@ -298,6 +298,14 @@ class TerrainNavClient : public TerrainNav
     bool is_connected();
 
  protected:
+    void init_comms();
+    void init_server();
+    /////////////////////////////////////////////////////////////////////
+    // Communication functions
+    size_t  send_msg(commsT& msg); // Pack and send the message
+    char get_msg();       // Returns the type of message as defined in
+                          // structDefs.h, message placed in _server_msg
+    bool requestAndConfirm(commsT& msg, char expected_ret_type);
 
   //////////////////////////////////////////////////////////////////////
   // Other important state variables
@@ -315,15 +323,7 @@ class TerrainNavClient : public TerrainNav
   struct commsT _server_msg;
   char _comms_buf[TRN_MSG_SIZE];
 
-  void init_comms();
-  void init_server();
 
-  /////////////////////////////////////////////////////////////////////
-  // Communication functions
-  size_t  send_msg(commsT& msg); // Pack and send the message
-  char get_msg();       // Returns the type of message as defined in
-                        // structDefs.h, message placed in _server_msg
-  bool requestAndConfirm(commsT& msg, char expected_ret_type);
 
 };
 
