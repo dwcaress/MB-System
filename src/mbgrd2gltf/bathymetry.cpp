@@ -127,18 +127,51 @@ Bathymetry::Bathymetry(const Options& options) {
   }
 
   // --- Dimensions array ---
-  _dimension[0] = _x;
-  _dimension[1] = _y;
+  // Some NetCDF files have a "dimension" variable that may differ from dimension lengths
+  if (nc_inq_varid(netcdf_id, "dimension", &varid) == NC_NOERR) {
+    size_t start[1] = {0};
+    size_t length[1] = {_side};
+    get_variable_uint_array(netcdf_id, "dimension", _dimension, start, length);
+    std::cerr << "Read dimension variable: [" << _dimension[0] << ", " << _dimension[1] << "]" << std::endl;
+    // Recalculate xysize to match the dimension variable
+    _xysize = _dimension[0] * _dimension[1];
+  } else {
+    _dimension[0] = _x;
+    _dimension[1] = _y;
+    std::cerr << "Using dimension lengths: [" << _dimension[0] << ", " << _dimension[1] << "]" << std::endl;
+  }
+
+  std::cerr << "Matrix allocation: " << _dimension[0] << " x " << _dimension[1] 
+            << " = " << _xysize << " elements (" 
+            << (_xysize * sizeof(float) / 1024.0 / 1024.0) << " MB)" << std::endl;
 
   // --- Grid data ---
-  size_t start[2] = {0, 0};
-  size_t length[2] = {_y, _x};
-  _z = Matrix<float>(_x, _y);
-
-  if (nc_inq_varid(netcdf_id, z_name.c_str(), &varid) == NC_NOERR)
-    get_variable_float_array(netcdf_id, z_name.c_str(), _z.data(), start, length);
-  else
-    throw NetCdfError(NC_EBADID, "no recognized z variable in file");
+  // Strategy 1: Try reading as 1D array (works for some GMT grids)
+  try {
+    size_t zero = 0;
+    std::cerr << "Attempting 1D read: " << _xysize << " elements" << std::endl;
+    _z = Matrix<float>(_dimension[0], _dimension[1]);
+    get_variable_float_array(netcdf_id, z_name.c_str(), _z.data(), &zero, &_xysize);
+    std::cerr << "1D read successful" << std::endl;
+  } catch (const std::exception& e) {
+    // Strategy 2: Fallback to 2D array read (more common for COARDS/CF grids)
+    std::cerr << "1D read failed: " << e.what() << std::endl;
+    std::cerr << "Attempting 2D read: [" << _y << " x " << _x << "]" << std::endl;
+    size_t start[2] = {0, 0};
+    size_t length[2] = {_y, _x};
+    // For 2D reads, always use the actual dimension lengths, not the dimension variable
+    _z = Matrix<float>(_x, _y);
+    if (nc_inq_varid(netcdf_id, z_name.c_str(), &varid) == NC_NOERR) {
+      get_variable_float_array(netcdf_id, z_name.c_str(), _z.data(), start, length);
+      std::cerr << "2D read successful" << std::endl;
+      // Update dimension array to reflect actual matrix size
+      _dimension[0] = _x;
+      _dimension[1] = _y;
+      _xysize = _x * _y;
+    } else {
+      throw NetCdfError(NC_EBADID, "no recognized z variable in file");
+    }
+  }
 
   // --- Cleanup ---
   int return_value = nc_close(netcdf_id);
