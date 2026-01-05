@@ -186,6 +186,8 @@ Bathymetry::Bathymetry(const Options& options) {
   if (return_value != NC_NOERR)
     throw NetCdfError(return_value, "failed to close netCDF file");
 
+  LOG_INFO("Loaded bathymetry grid:", _dimension[0], "x", _dimension[1], "=", _xysize, "points");
+
   compress(options);
 }
 
@@ -292,6 +294,7 @@ void Bathymetry::compress(const Options& options) {
   // Allow negative values for when one or more grid axes are reversed
   _spacing[0] = (_x_range[1] - _x_range[0]) / static_cast<double>(_dimension[0] - 1);
   _spacing[1] = (_y_range[1] - _y_range[0]) / static_cast<double>(_dimension[1] - 1);
+  LOG_INFO("Compressed grid to", _dimension[0], "x", _dimension[1], "=", _xysize, "points");
 }
 
 std::string Bathymetry::to_string() const {

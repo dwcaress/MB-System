@@ -32,6 +32,7 @@
   *--------------------------------------------------------------------*/
 
 #include "geometry.h"
+#include "logger.h"
 
 // standard library
 #include <cmath>
@@ -44,7 +45,13 @@
 namespace mbgrd2gltf {
 Geometry::Geometry(const Bathymetry& bathymetry, const Options& options)
     : _vertices(get_vertices(bathymetry, options.exaggeration()))
-    , _triangles(get_triangles(_vertices)) {}
+    , _triangles(get_triangles(_vertices)) {
+  size_t valid_vertices = 0;
+  for (const auto& v : _vertices) {
+    if (v.is_valid()) valid_vertices++;
+  }
+  LOG_INFO("Created", valid_vertices, "vertices and", _triangles.size(), "triangles");
+}
 
 double Geometry::to_radians(double degrees) { return degrees * (3.1415926535 / 180.0); }
 

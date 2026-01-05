@@ -35,6 +35,8 @@
 #include <exception>
 #include <typeinfo>
 #include <stdexcept>
+#include <unistd.h>
+#include <limits.h>
 #include "logger.h"
 #include "options.h"
 #include "bathymetry.h"
@@ -58,8 +60,30 @@ int main(int argc, char* argv[]) {
       Logger::set_level(LogLevel::INFO);
     }
     
+    LOG_INFO("Starting mbgrd2gltf processing for", options.input_filepath());
+    
     Bathymetry bathymetry(options);
+    LOG_INFO("Generating 3D geometry from bathymetry data");
     Geometry geometry(bathymetry, options);
+    
+    std::string output_file = options.output_filepath() + (options.is_binary_output() ? ".glb" : ".gltf");
+    
+    // Get absolute path
+    char abs_path[PATH_MAX];
+    std::string abs_output_file = output_file;
+    if (realpath(output_file.c_str(), abs_path) != nullptr) {
+      abs_output_file = abs_path;
+    } else {
+      // If file doesn't exist yet, construct absolute path manually
+      char cwd[PATH_MAX];
+      if (getcwd(cwd, sizeof(cwd)) != nullptr) {
+        if (output_file[0] != '/') {
+          abs_output_file = std::string(cwd) + "/" + output_file;
+        }
+      }
+    }
+    
+    LOG_INFO("Writing GLTF output file:", abs_output_file);
     model::write_gltf(geometry, options);
   } catch (const std::invalid_argument& e) {
     std::cerr << "Invalid argument error: " << e.what() << std::endl;

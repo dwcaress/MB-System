@@ -32,6 +32,7 @@
   *--------------------------------------------------------------------*/
 
 #include "model.h"
+#include "logger.h"
 
 // external libraries
 #define TINYGLTF_IMPLEMENTATION
@@ -39,6 +40,9 @@
 #define TINYGLTF_NO_STB_IMAGE_WRITE
 #include "tinygltf/tiny_gltf.h"
 #include "draco/compression/encode.h"
+
+// standard library
+#include <sys/stat.h>
 
 namespace mbgrd2gltf {
 namespace model {
@@ -304,6 +308,12 @@ bool dracoCompressed(tinygltf::Model& model, const Geometry& geometry, const Opt
       !options.draco_quantization_valid())
     return false;
 
+  // Log Draco compression with quantization settings
+  LOG_INFO("Applying Draco compression with quantization: position=", options.draco_quantization(0),
+           "normal=", options.draco_quantization(1), 
+           "texcoord=", options.draco_quantization(2),
+           "color=", options.draco_quantization(3));
+
   // Encode the geometry using Draco && add the compressed data to the model buffer.
   tinygltf::Buffer buffer;
   std::vector<unsigned char> compressed_data;
@@ -412,6 +422,17 @@ void write_gltf(const Geometry& geometry, const Options& options) {
   if (!gltf.WriteGltfSceneToFile(&model, output_filepath, options.is_binary_output(), true, true,
                                  options.is_binary_output())) {
     std::cerr << "Failed to write GLTF file." << std::endl;
+  } else {
+    // Get file size
+    struct stat st;
+    double file_size_mb = 0.0;
+    if (stat(output_filepath.c_str(), &st) == 0) {
+      file_size_mb = st.st_size / (1024.0 * 1024.0);
+    }
+    char size_str[32];
+    snprintf(size_str, sizeof(size_str), "%.3f", file_size_mb);
+    LOG_INFO("Successfully wrote", options.is_binary_output() ? "GLB" : "GLTF", 
+             "file to", output_filepath, "(" + std::string(size_str) + " MB)");
   }
 }
 
