@@ -1,0 +1,14 @@
+{
+    // Recommended extensions for MB-System development
+    "recommendations": [
+        // C/C++ language support - IntelliSense, code navigation, formatting
+        "ms-vscode.cpptools",
+        
+        // Debugger for macOS - stable LLDB integration without lldb-mi issues
+        "vadimcn.vscode-lldb",
+        
+        // CMake language support and tools
+        "twxs.cmake",
+        "ms-vscode.cmake-tools"
+    ]
+}
