@@ -46,6 +46,32 @@
 
 namespace mbgrd2gltf {
 namespace model {
+
+// Validate glTF file using TinyGLTF's built-in validation
+static void validate_gltf_file(const std::string& filepath, bool is_binary) {
+  LOG_INFO("Validating output file...");
+  tinygltf::TinyGLTF loader;
+  tinygltf::Model validation_model;
+  std::string err, warn;
+  bool ret;
+  
+  if (is_binary) {
+    ret = loader.LoadBinaryFromFile(&validation_model, &err, &warn, filepath);
+  } else {
+    ret = loader.LoadASCIIFromFile(&validation_model, &err, &warn, filepath);
+  }
+  
+  if (!warn.empty()) {
+    LOG_WARN("glTF validation warnings:", warn);
+  }
+  if (!err.empty()) {
+    LOG_ERROR("glTF validation errors:", err);
+  }
+  if (ret && warn.empty() && err.empty()) {
+    LOG_INFO("Validation passed - no errors or warnings");
+  }
+}
+
 //New Addition: Generation in tiles
 std::vector<double> get_vertex_mins(const std::vector<float>& vertex_buffer);
 std::vector<double> get_vertex_maxes(const std::vector<float>& vertex_buffer);
@@ -643,6 +669,8 @@ void write_gltf(const Geometry& geometry, const Options& options) {
         if (!gltf.WriteGltfSceneToFile(&model, output_filepath, options.is_binary_output(), true,
                                        true, options.is_binary_output())) {
           std::cerr << "Failed to write GLTF file." << std::endl;
+        } else {
+          validate_gltf_file(output_filepath, options.is_binary_output());
         }
         return; // done (tiled Draco)
       }
@@ -672,6 +700,8 @@ void write_gltf(const Geometry& geometry, const Options& options) {
         if (!gltf.WriteGltfSceneToFile(&model, output_filepath, options.is_binary_output(), true,
                                        true, options.is_binary_output())) {
           std::cerr << "Failed to write GLTF file." << std::endl;
+        } else {
+          validate_gltf_file(output_filepath, options.is_binary_output());
         }
         return; // done (single-primitive Draco)
       }
@@ -715,6 +745,8 @@ void write_gltf(const Geometry& geometry, const Options& options) {
     if (!gltf.WriteGltfSceneToFile(&model, output_filepath, options.is_binary_output(), true, true,
                                    options.is_binary_output())) {
       std::cerr << "Failed to write GLTF file." << std::endl;
+    } else {
+      validate_gltf_file(output_filepath, options.is_binary_output());
     }
     return;
   }
@@ -843,6 +875,8 @@ void write_gltf(const Geometry& geometry, const Options& options) {
   if (!gltf.WriteGltfSceneToFile(&model, output_filepath, options.is_binary_output(), true, true,
                                  options.is_binary_output())) {
     std::cerr << "Failed to write GLTF file." << std::endl;
+  } else {
+    validate_gltf_file(output_filepath, options.is_binary_output());
   }
 }
 
