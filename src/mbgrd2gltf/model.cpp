@@ -77,10 +77,10 @@ struct TileBuild {
 };
 
 // Remap global vertex IDs in 'tris' to local 0..k-1 and build a tile-local vertex buffer.
-// NOTE: Your Vertex IDs start at 1, and get_vertex_buffer() packs in that same order,
-// so the offset into the master vertex float array is (id - 1) * 3.
+// Uses the id_to_offset map to correctly locate vertices in the master buffer.
 static TileBuild build_tile_buffers(const std::vector<float>& masterVerts,
-                                    const std::vector<Triangle>& tris) {
+                                    const std::vector<Triangle>& tris,
+                                    const std::unordered_map<uint32_t, size_t>& id_to_offset) {
   TileBuild tb;
   if (tris.empty())
     return tb;
@@ -96,9 +96,18 @@ static TileBuild build_tile_buffers(const std::vector<float>& masterVerts,
     uint32_t lidx = static_cast<uint32_t>(tb.verts.size() / 3);
     remap[gidx] = lidx;
 
-    // map global id -> position in masterVerts
-    // (ids are 1-based; subtract 1)
-    const size_t off = (static_cast<size_t>(gidx) - 1u) * 3u;
+    // Look up the actual buffer offset for this vertex ID
+    auto offset_it = id_to_offset.find(gidx);
+    if (offset_it == id_to_offset.end()) {
+      // This should not happen if triangles are correctly formed
+      LOG_ERROR("Vertex ID", gidx, "not found in buffer map");
+      tb.verts.push_back(0.0f);
+      tb.verts.push_back(0.0f);
+      tb.verts.push_back(0.0f);
+      return lidx;
+    }
+    
+    const size_t off = offset_it->second;
     tb.verts.push_back(masterVerts[off + 0]);
     tb.verts.push_back(masterVerts[off + 1]);
     tb.verts.push_back(masterVerts[off + 2]);
@@ -148,15 +157,22 @@ static TileBuild build_tile_buffers(const std::vector<float>& masterVerts,
 
 /*
 		 * Create a buffer of vertex positions from a matrix of vertices.
+		 * Also creates a mapping from vertex ID to buffer position offset.
 		 * @param vertices : The matrix of vertices.
+		 * @param id_to_offset : Output map from vertex ID to buffer offset (in floats, divide by 3 for vertex index)
 		 * @return std::vector<float> : The buffer of vertex positions.
 		 */
-std::vector<float> get_vertex_buffer(const Matrix<Vertex>& vertices) {
+std::vector<float> get_vertex_buffer(const Matrix<Vertex>& vertices, 
+                                     std::unordered_map<uint32_t, size_t>* id_to_offset = nullptr) {
   std::vector<float> out;
   out.reserve(vertices.count() * 3); // Reserve space for 3 floats per vertex
 
   for (const auto& vertex : vertices) {
     if (vertex.is_valid()) {
+      if (id_to_offset) {
+        // Map vertex ID to its position in the buffer (offset in floats)
+        (*id_to_offset)[vertex.index()] = out.size();
+      }
       out.push_back(vertex.x());
       out.push_back(vertex.y());
       out.push_back(vertex.z());
@@ -483,7 +499,9 @@ bool dracoCompressed(tinygltf::Model& model, const Geometry& geometry, const Opt
 		* @param options : The options to use for writing the file
 		*/
 void write_gltf(const Geometry& geometry, const Options& options) {
-  const std::vector<float> master_vertex_buffer = get_vertex_buffer(geometry.vertices());
+  // Create vertex buffer and ID-to-offset mapping
+  std::unordered_map<uint32_t, size_t> id_to_offset;
+  const std::vector<float> master_vertex_buffer = get_vertex_buffer(geometry.vertices(), &id_to_offset);
   const size_t kTileSizeDefault = 256;
 
   std::vector<Geometry::Tile> tiles = geometry.tiles();
@@ -499,7 +517,7 @@ void write_gltf(const Geometry& geometry, const Options& options) {
       std::vector<TileBuild> built;
       built.reserve(tiles.size());
       for (const auto& tile : tiles) {
-        built.emplace_back(build_tile_buffers(master_vertex_buffer, tile.triangles));
+        built.emplace_back(build_tile_buffers(master_vertex_buffer, tile.triangles, id_to_offset));
       }
 
       // Single combined buffer holding all Draco payloads (one BufferView per tile)
@@ -692,7 +710,7 @@ void write_gltf(const Geometry& geometry, const Options& options) {
   std::vector<TileBuild> built;
   built.reserve(tiles.size());
   for (const auto& tile : tiles) {
-    built.emplace_back(build_tile_buffers(master_vertex_buffer, tile.triangles));
+    built.emplace_back(build_tile_buffers(master_vertex_buffer, tile.triangles, id_to_offset));
   }
 
   // One combined binary buffer for all tiles, with 4-byte alignment
