@@ -68,6 +68,18 @@ private:
   }
 
 public:
+  // Utility function to format integers with comma separators
+  template <typename T>
+  static std::string format_with_commas(T value) {
+    std::string str = std::to_string(value);
+    int pos = str.length() - 3;
+    while (pos > 0) {
+      str.insert(pos, ",");
+      pos -= 3;
+    }
+    return str;
+  }
+
   static void set_level(LogLevel level) { current_level = level; }
 
   static bool should_log(LogLevel level) { return level <= current_level; }

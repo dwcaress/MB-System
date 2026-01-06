@@ -47,23 +47,6 @@
 
 namespace mbgrd2gltf {
 
-// Helper function to format numbers with commas
-std::string format_number(size_t value) {
-  std::string num_str = std::to_string(value);
-  std::string result;
-  int count = 0;
-
-  for (int i = num_str.length() - 1; i >= 0; --i) {
-    if (count > 0 && count % 3 == 0) {
-      result = ',' + result;
-    }
-    result = num_str[i] + result;
-    count++;
-  }
-
-  return result;
-}
-
 Geometry::Geometry(const Bathymetry& bathymetry, const Options& options)
     : _vertices(get_vertices(bathymetry, options.exaggeration()))
     , _triangles(get_triangles(_vertices)) {
@@ -72,8 +55,8 @@ Geometry::Geometry(const Bathymetry& bathymetry, const Options& options)
     if (v.is_valid())
       valid_vertices++;
   }
-  LOG_INFO("Created", format_number(valid_vertices), "vertices and",
-           format_number(_triangles.size()), "triangles");
+  LOG_INFO("Created", Logger::format_with_commas(valid_vertices), "vertices and",
+           Logger::format_with_commas(_triangles.size()), "triangles");
 }
 
 double Geometry::to_radians(double degrees) { return degrees * (3.1415926535 / 180.0); }

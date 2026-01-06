@@ -61,6 +61,14 @@ int main(int argc, char* argv[]) {
       Logger::set_level(LogLevel::INFO);
     }
 
+    // Log the command line
+    std::string command_line;
+    for (int i = 0; i < argc; ++i) {
+      if (i > 0) command_line += " ";
+      command_line += argv[i];
+    }
+    LOG_INFO("Command:", command_line);
+
     // Get input file size
     struct stat input_st;
     double input_size_mb = 0.0;
@@ -72,11 +80,12 @@ int main(int argc, char* argv[]) {
 
     LOG_INFO("Starting mbgrd2gltf processing for", options.input_filepath(),
              "(" + std::string(input_size_str) + " MB)");
-    LOG_INFO("Binary output:", options.is_binary_output() ? "enabled" : "disabled",
-             ", Draco compression:", options.is_draco_compressed() ? "enabled" : "disabled");
+    LOG_INFO("Binary output:", options.is_binary_output() ? "enabled," : "disabled,",
+             "Draco compression:", options.is_draco_compressed() ? "enabled" : "disabled");
 
     Bathymetry bathymetry(options);
     LOG_INFO("Generating 3D geometry from 2D bathymetric grid data");
+    LOG_INFO("Vertical exaggeration:", options.exaggeration());
     Geometry geometry(bathymetry, options);
 
     std::string output_file =
@@ -98,6 +107,18 @@ int main(int argc, char* argv[]) {
     }
 
     model::write_gltf(geometry, options);
+    
+    // Get output file size
+    struct stat output_st;
+    double output_size_mb = 0.0;
+    if (stat(output_file.c_str(), &output_st) == 0) {
+      output_size_mb = output_st.st_size / (1024.0 * 1024.0);
+    }
+    char output_size_str[32];
+    snprintf(output_size_str, sizeof(output_size_str), "%.3f", output_size_mb);
+    
+    LOG_INFO("Successfully wrote glTF file to", abs_output_file, 
+             "(" + std::string(output_size_str) + " MB)");
   } catch (const std::invalid_argument& e) {
     std::cerr << "Invalid argument error: " << e.what() << std::endl;
     return 1;
