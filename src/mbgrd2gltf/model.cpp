@@ -513,11 +513,17 @@ void write_gltf(const Geometry& geometry, const Options& options) {
   // ---- If Draco was requested, try TILED DRACO first ----
   if (options.is_draco_compressed()) {
     if (!tiles.empty()) {
+      LOG_INFO("Building", Logger::format_with_commas(tiles.size()), "tiles for Draco compression");
       // Build per-tile buffers (localize indices & compute mins/maxes)
       std::vector<TileBuild> built;
       built.reserve(tiles.size());
+      size_t tile_count = 0;
       for (const auto& tile : tiles) {
         built.emplace_back(build_tile_buffers(master_vertex_buffer, tile.triangles, id_to_offset));
+        tile_count++;
+        if (tile_count % 100 == 0 || tile_count == tiles.size()) {
+          LOG_INFO("  Built tile", tile_count, "of", tiles.size());
+        }
       }
 
       // Single combined buffer holding all Draco payloads (one BufferView per tile)
@@ -535,6 +541,8 @@ void write_gltf(const Geometry& geometry, const Options& options) {
 
       tinygltf::Mesh mesh;
       bool encode_ok = true;
+      size_t encoded_count = 0;
+      LOG_INFO("Encoding", Logger::format_with_commas(built.size()), "tiles with Draco compression");
 
       for (auto& tb : built) {
         std::vector<uint32_t> idx;
@@ -596,6 +604,11 @@ void write_gltf(const Geometry& geometry, const Options& options) {
 
         prim.extensions["KHR_draco_mesh_compression"] = tinygltf::Value(dracoExt);
         mesh.primitives.push_back(std::move(prim));
+        
+        encoded_count++;
+        if (encoded_count % 100 == 0 || encoded_count == built.size()) {
+          LOG_INFO("  Encoded tile", encoded_count, "of", built.size());
+        }
       }
 
       if (encode_ok) {
@@ -707,10 +720,16 @@ void write_gltf(const Geometry& geometry, const Options& options) {
   }
 
   // Build per-tile buffers (remap global IDs to local)
+  LOG_INFO("Building", Logger::format_with_commas(tiles.size()), "tiles for uncompressed output");
   std::vector<TileBuild> built;
   built.reserve(tiles.size());
+  size_t tile_count = 0;
   for (const auto& tile : tiles) {
     built.emplace_back(build_tile_buffers(master_vertex_buffer, tile.triangles, id_to_offset));
+    tile_count++;
+    if (tile_count % 100 == 0 || tile_count == tiles.size()) {
+      LOG_INFO("  Built tile", tile_count, "of", tiles.size());
+    }
   }
 
   // One combined binary buffer for all tiles, with 4-byte alignment
@@ -757,6 +776,8 @@ void write_gltf(const Geometry& geometry, const Options& options) {
   tinygltf::Mesh mesh;
 
   // Pack: [indices][verts] per tile → repeat
+  LOG_INFO("Packing", Logger::format_with_commas(built.size()), "tiles into buffer");
+  size_t packed_count = 0;
   for (auto& tb : built) {
     // indices
     size_t start = align4(bin.size());
@@ -788,6 +809,11 @@ void write_gltf(const Geometry& geometry, const Options& options) {
     prim.attributes["POSITION"] = tb.accVerts;
     prim.material = 0;
     mesh.primitives.push_back(std::move(prim));
+    
+    packed_count++;
+    if (packed_count % 100 == 0 || packed_count == built.size()) {
+      LOG_INFO("  Packed tile", packed_count, "of", built.size());
+    }
   }
 
   // Single buffer that backs all bufferViews
