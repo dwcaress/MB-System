@@ -44,9 +44,20 @@
 
 namespace mbgrd2gltf {
 class Geometry {
+
+public:
+  // One triangle vector per tile; use this to emit multiple glTF primitives.
+  struct Tile {
+    size_t x0, y0, x1, y1; // inclusive start (x0,y0), exclusive end (x1,y1) in cell space
+    std::vector<Triangle> triangles;
+  };
+  static std::vector<Tile> get_triangles_tiled(const Matrix<Vertex>& vertices, size_t tileSize);
+
 private: // members
   Matrix<Vertex> _vertices;
+  // Flattened triangles (for backward compatibility)
   std::vector<Triangle> _triangles;
+  std::vector<Tile> _tiles;
 
 private: // methods
   static double to_radians(double degrees);
@@ -61,6 +72,7 @@ public: // methods
   Geometry(const Bathymetry& bathymetry, const Options& options);
   const Matrix<Vertex>& vertices() const { return _vertices; }
   const std::vector<Triangle>& triangles() const { return _triangles; }
+  const std::vector<Tile>& tiles() const { return _tiles; }
 };
 } // namespace mbgrd2gltf
 
