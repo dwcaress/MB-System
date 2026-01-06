@@ -17,5 +17,5 @@
 #include "logger.h"
 
 namespace mbgrd2gltf {
-  LogLevel Logger::current_level = LogLevel::OFF;
+LogLevel Logger::current_level = LogLevel::OFF;
 }

@@ -310,8 +310,7 @@ bool dracoCompressed(tinygltf::Model& model, const Geometry& geometry, const Opt
 
   // Log Draco compression with quantization settings
   LOG_INFO("Applying Draco compression with quantization: position=", options.draco_quantization(0),
-           "normal=", options.draco_quantization(1), 
-           "texcoord=", options.draco_quantization(2),
+           "normal=", options.draco_quantization(1), "texcoord=", options.draco_quantization(2),
            "color=", options.draco_quantization(3));
 
   // Encode the geometry using Draco && add the compressed data to the model buffer.
@@ -431,8 +430,8 @@ void write_gltf(const Geometry& geometry, const Options& options) {
     }
     char size_str[32];
     snprintf(size_str, sizeof(size_str), "%.3f", file_size_mb);
-    LOG_INFO("Successfully wrote", options.is_binary_output() ? "GLB" : "GLTF", 
-             "file to", output_filepath, "(" + std::string(size_str) + " MB)");
+    LOG_INFO("Successfully wrote", options.is_binary_output() ? "GLB" : "GLTF", "file to",
+             output_filepath, "(" + std::string(size_str) + " MB)");
   }
 }
 

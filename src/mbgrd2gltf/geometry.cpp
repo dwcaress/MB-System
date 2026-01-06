@@ -52,7 +52,7 @@ std::string format_number(size_t value) {
   std::string num_str = std::to_string(value);
   std::string result;
   int count = 0;
-  
+
   for (int i = num_str.length() - 1; i >= 0; --i) {
     if (count > 0 && count % 3 == 0) {
       result = ',' + result;
@@ -60,7 +60,7 @@ std::string format_number(size_t value) {
     result = num_str[i] + result;
     count++;
   }
-  
+
   return result;
 }
 
@@ -69,9 +69,10 @@ Geometry::Geometry(const Bathymetry& bathymetry, const Options& options)
     , _triangles(get_triangles(_vertices)) {
   size_t valid_vertices = 0;
   for (const auto& v : _vertices) {
-    if (v.is_valid()) valid_vertices++;
+    if (v.is_valid())
+      valid_vertices++;
   }
-  LOG_INFO("Created", format_number(valid_vertices), "vertices and", 
+  LOG_INFO("Created", format_number(valid_vertices), "vertices and",
            format_number(_triangles.size()), "triangles");
 }
 

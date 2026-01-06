@@ -26,13 +26,7 @@
 
 namespace mbgrd2gltf {
 
-enum class LogLevel {
-  OFF,
-  ERROR,
-  WARN,
-  INFO,
-  DEBUG
-};
+enum class LogLevel { OFF, ERROR, WARN, INFO, DEBUG };
 
 class Logger {
 private:
@@ -40,26 +34,30 @@ private:
 
   static const char* level_to_string(LogLevel level) {
     switch (level) {
-      case LogLevel::DEBUG: return "DEBUG";
-      case LogLevel::INFO: return "INFO";
-      case LogLevel::WARN: return "WARN";
-      case LogLevel::ERROR: return "ERROR";
-      default: return "OFF";
+    case LogLevel::DEBUG:
+      return "DEBUG";
+    case LogLevel::INFO:
+      return "INFO";
+    case LogLevel::WARN:
+      return "WARN";
+    case LogLevel::ERROR:
+      return "ERROR";
+    default:
+      return "OFF";
     }
   }
 
   static std::string get_timestamp() {
     auto now = std::chrono::system_clock::now();
     auto time = std::chrono::system_clock::to_time_t(now);
-    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-                  now.time_since_epoch()) % 1000;
-    
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
+
     std::tm tm_buf;
     localtime_r(&time, &tm_buf);
-    
+
     std::ostringstream oss;
-    oss << std::put_time(&tm_buf, "%Y-%m-%d %H:%M:%S")
-        << '.' << std::setfill('0') << std::setw(3) << ms.count();
+    oss << std::put_time(&tm_buf, "%Y-%m-%d %H:%M:%S") << '.' << std::setfill('0') << std::setw(3)
+        << ms.count();
     return oss.str();
   }
 
@@ -70,45 +68,39 @@ private:
   }
 
 public:
-  static void set_level(LogLevel level) {
-    current_level = level;
-  }
+  static void set_level(LogLevel level) { current_level = level; }
 
-  static bool should_log(LogLevel level) {
-    return level <= current_level;
-  }
+  static bool should_log(LogLevel level) { return level <= current_level; }
 
-  template<typename... Args>
+  template <typename... Args>
   static void log(LogLevel level, const char* file, const char* func, int line, Args&&... args) {
-    if (!should_log(level)) return;
+    if (!should_log(level))
+      return;
 
     std::ostringstream msg;
     build_message(msg, std::forward<Args>(args)...);
 
     std::ostream& out = (level == LogLevel::INFO) ? std::cout : std::cerr;
-    out << level_to_string(level) << " "
-        << get_timestamp() << " "
-        << extract_filename(file) << " "
-        << func << "():" << line << " "
-        << msg.str() << std::endl;
+    out << level_to_string(level) << " " << get_timestamp() << " " << extract_filename(file) << " "
+        << func << "():" << line << " " << msg.str() << std::endl;
   }
 
-  template<typename... Args>
+  template <typename... Args>
   static void debug(const char* file, const char* func, int line, Args&&... args) {
     log(LogLevel::DEBUG, file, func, line, std::forward<Args>(args)...);
   }
 
-  template<typename... Args>
+  template <typename... Args>
   static void info(const char* file, const char* func, int line, Args&&... args) {
     log(LogLevel::INFO, file, func, line, std::forward<Args>(args)...);
   }
 
-  template<typename... Args>
+  template <typename... Args>
   static void warn(const char* file, const char* func, int line, Args&&... args) {
     log(LogLevel::WARN, file, func, line, std::forward<Args>(args)...);
   }
 
-  template<typename... Args>
+  template <typename... Args>
   static void error(const char* file, const char* func, int line, Args&&... args) {
     log(LogLevel::ERROR, file, func, line, std::forward<Args>(args)...);
   }
@@ -116,7 +108,7 @@ public:
 private:
   static void build_message(std::ostringstream&) {}
 
-  template<typename T, typename... Args>
+  template <typename T, typename... Args>
   static void build_message(std::ostringstream& oss, T&& first, Args&&... rest) {
     oss << first;
     if constexpr (sizeof...(rest) > 0) {

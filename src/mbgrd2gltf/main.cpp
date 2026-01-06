@@ -53,14 +53,14 @@ int main(int argc, char* argv[]) {
       std::cout << "Help requested, exiting..." << std::endl;
       return 0;
     }
-    
+
     // Configure logger based on verbose flag
     if (options.is_verbose()) {
       Logger::set_level(LogLevel::DEBUG);
     } else {
       Logger::set_level(LogLevel::INFO);
     }
-    
+
     // Get input file size
     struct stat input_st;
     double input_size_mb = 0.0;
@@ -69,18 +69,19 @@ int main(int argc, char* argv[]) {
     }
     char input_size_str[32];
     snprintf(input_size_str, sizeof(input_size_str), "%.3f", input_size_mb);
-    
-    LOG_INFO("Starting mbgrd2gltf processing for", options.input_filepath(), 
+
+    LOG_INFO("Starting mbgrd2gltf processing for", options.input_filepath(),
              "(" + std::string(input_size_str) + " MB)");
     LOG_INFO("Binary output:", options.is_binary_output() ? "enabled" : "disabled",
              ", Draco compression:", options.is_draco_compressed() ? "enabled" : "disabled");
-    
+
     Bathymetry bathymetry(options);
     LOG_INFO("Generating 3D geometry from 2D bathymetric grid data");
     Geometry geometry(bathymetry, options);
-    
-    std::string output_file = options.output_filepath() + (options.is_binary_output() ? ".glb" : ".gltf");
-    
+
+    std::string output_file =
+        options.output_filepath() + (options.is_binary_output() ? ".glb" : ".gltf");
+
     // Get absolute path
     char abs_path[PATH_MAX];
     std::string abs_output_file = output_file;
@@ -95,7 +96,7 @@ int main(int argc, char* argv[]) {
         }
       }
     }
-    
+
     model::write_gltf(geometry, options);
   } catch (const std::invalid_argument& e) {
     std::cerr << "Invalid argument error: " << e.what() << std::endl;
