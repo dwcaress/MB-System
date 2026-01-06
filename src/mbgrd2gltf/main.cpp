@@ -37,6 +37,7 @@
 #include <stdexcept>
 #include <unistd.h>
 #include <limits.h>
+#include <sys/stat.h>
 #include "logger.h"
 #include "options.h"
 #include "bathymetry.h"
@@ -60,10 +61,22 @@ int main(int argc, char* argv[]) {
       Logger::set_level(LogLevel::INFO);
     }
     
-    LOG_INFO("Starting mbgrd2gltf processing for", options.input_filepath());
+    // Get input file size
+    struct stat input_st;
+    double input_size_mb = 0.0;
+    if (stat(options.input_filepath().c_str(), &input_st) == 0) {
+      input_size_mb = input_st.st_size / (1024.0 * 1024.0);
+    }
+    char input_size_str[32];
+    snprintf(input_size_str, sizeof(input_size_str), "%.3f", input_size_mb);
+    
+    LOG_INFO("Starting mbgrd2gltf processing for", options.input_filepath(), 
+             "(" + std::string(input_size_str) + " MB)");
+    LOG_INFO("Binary output:", options.is_binary_output() ? "enabled" : "disabled",
+             ", Draco compression:", options.is_draco_compressed() ? "enabled" : "disabled");
     
     Bathymetry bathymetry(options);
-    LOG_INFO("Generating 3D geometry from bathymetry data");
+    LOG_INFO("Generating 3D geometry from 2D bathymetric grid data");
     Geometry geometry(bathymetry, options);
     
     std::string output_file = options.output_filepath() + (options.is_binary_output() ? ".glb" : ".gltf");
@@ -83,7 +96,6 @@ int main(int argc, char* argv[]) {
       }
     }
     
-    LOG_INFO("Writing GLTF output file:", abs_output_file);
     model::write_gltf(geometry, options);
   } catch (const std::invalid_argument& e) {
     std::cerr << "Invalid argument error: " << e.what() << std::endl;

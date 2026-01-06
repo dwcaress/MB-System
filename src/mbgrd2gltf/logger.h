@@ -90,7 +90,6 @@ public:
         << get_timestamp() << " "
         << extract_filename(file) << " "
         << func << "():" << line << " "
-        << "[" << getpid() << "] "
         << msg.str() << std::endl;
   }
 

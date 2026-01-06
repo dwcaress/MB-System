@@ -262,6 +262,7 @@ void Bathymetry::get_variable_float_array(int netcdf_id, const char* name, float
   int variable_id = get_variable_id(netcdf_id, name);
   int return_value = nc_get_vara_float(netcdf_id, variable_id, start, length, out);
   if (return_value != NC_NOERR) {
+    // This catch can be normal if strategy 1 (1D read) fails and we fallback to strategy 2 (2D read)
     throw NetCdfError(return_value,
                       "failed to get float array data for variable '" + std::string(name) + "'");
   }
