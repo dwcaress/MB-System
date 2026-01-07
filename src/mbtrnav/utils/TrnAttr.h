@@ -19,6 +19,7 @@
 #include <ostream>
 #include <sstream>
 #include <cstring>
+#include <cstdint>
 
 // Buffer sizes
 #define TA_LINEBUF_BYTES 512

@@ -1231,7 +1231,8 @@ public:
             TRN_NDPRINT(5,  "%s:%d - parsing map_spec[%s]\n", __func__, __LINE__, map_spec);
             const char *kvdel="/";
             char *acpy = strdup(map_spec);
-            char *next_pair = strtok_r(acpy, ":", &acpy);
+            char *psav = NULL;
+            char *next_pair = strtok_r(acpy, ":", &psav);
             TRN_NDPRINT(5,  "%s:%d - next_pair[%s]\n", __func__, __LINE__, next_pair);
             while (next_pair != NULL) {
                 char *kcpy = strdup(next_pair);
@@ -1249,7 +1250,7 @@ public:
                     }
                 }
                 free(kcpy);
-                next_pair = strtok_r(acpy, ":", &acpy);
+                next_pair = strtok_r(NULL, ":", &psav);
                 TRN_NDPRINT(5,  "%s:%d - next_pair[%s]\n", __func__, __LINE__, next_pair);
             }
             free(acpy);
