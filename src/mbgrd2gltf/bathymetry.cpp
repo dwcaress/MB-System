@@ -219,23 +219,6 @@ int Bathymetry::get_dimension_id(int netcdf_id, const char* name) {
   return dimension_id;
 }
 
-size_t Bathymetry::get_attribute_length(int netcdf_id, const char* name) {
-  size_t length;
-  int return_value = nc_inq_attlen(netcdf_id, NC_GLOBAL, name, &length);
-  if (return_value != NC_NOERR) {
-    throw NetCdfError(return_value,
-                      "failed to get length for attribute '" + std::string(name) + "'");
-  }
-  return length;
-}
-
-void Bathymetry::get_attribute_text(int netcdf_id, const char* name, char* out) {
-  int return_value = nc_get_att_text(netcdf_id, NC_GLOBAL, name, out);
-  if (return_value != NC_NOERR) {
-    throw NetCdfError(return_value, "failed to get text for attribute '" + std::string(name) + "'");
-  }
-}
-
 size_t Bathymetry::get_dimension_length(int netcdf_id, const char* name) {
   size_t out;
   int dimension_id = get_dimension_id(netcdf_id, name);
@@ -298,25 +281,6 @@ void Bathymetry::compress(const Options& options) {
   _spacing[1] = (_y_range[1] - _y_range[0]) / static_cast<double>(_dimension[1] - 1);
   LOG_INFO("Compressed grid to", _dimension[0], "x", _dimension[1], "=", 
            Logger::format_with_commas(_xysize), "points");
-}
-
-std::string Bathymetry::to_string() const {
-  std::string out;
-  out.reserve(256);
-
-  out += '{';
-  out += "\nDimensions:\n";
-  out += "\n    Side:      " + std::to_string(_side);
-  out += "\n    XYSize:    " + std::to_string(_xysize);
-  out += "\n\nVariables:\n";
-  out += "\n    Dimension: " + std::to_string(_dimension[0]) + ", " + std::to_string(_dimension[1]);
-  out += "\n    X Range:   " + std::to_string(_x_range[0]) + ", " + std::to_string(_x_range[1]);
-  out += "\n    Y Range:   " + std::to_string(_y_range[0]) + ", " + std::to_string(_y_range[1]);
-  out += "\n    Z Range:   " + std::to_string(_z_range[0]) + ", " + std::to_string(_z_range[1]);
-  out += "\n    Spacing:   " + std::to_string(_spacing[0]) + ", " + std::to_string(_spacing[1]);
-  out += "\n}";
-
-  return out;
 }
 
 void Bathymetry::get_variable_attribute_double(int netcdf_id, const char* var_name,

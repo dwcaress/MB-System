@@ -77,8 +77,6 @@ private: // methods
   static int get_netcdf_id(const char* filepath);
   static int get_variable_id(int netcdf_id, const char* name);
   static int get_dimension_id(int netcdf_id, const char* name);
-  static size_t get_attribute_length(int netcdf_id, const char* name);
-  static void get_attribute_text(int netcdf_id, const char* name, char* out);
   static void get_variable_attribute_double(int netcdf_id, const char* var_name,
                                             const char* att_name, double* out);
   static size_t get_dimension_length(int netcdf_id, const char* name);
@@ -100,16 +98,10 @@ public: // methods
   inline double longitude_max() const { return _x_range[1]; }
   inline double latitude_min() const { return _y_range[0]; }
   inline double latitude_max() const { return _y_range[1]; }
-  inline double altitude_min() const { return _z_range[0]; }
-  inline double altitude_max() const { return _z_range[1]; }
   inline double longitude_spacing() const { return _spacing[0]; }
   inline double latitude_spacing() const { return _spacing[1]; }
   inline size_t size_x() const { return _dimension[0]; }
   inline size_t size_y() const { return _dimension[1]; }
-  inline size_t side_count() const { return _side; }
-  inline size_t altitudes_length() const { return _xysize; }
-
-  std::string to_string() const;
 };
 } // namespace mbgrd2gltf
 

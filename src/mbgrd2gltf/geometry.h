@@ -55,8 +55,6 @@ public:
 
 private: // members
   Matrix<Vertex> _vertices;
-  // Flattened triangles (for backward compatibility)
-  std::vector<Triangle> _triangles;
   std::vector<Tile> _tiles;
 
 private: // methods
@@ -66,12 +64,10 @@ private: // methods
   static Vertex get_earth_centered_vertex(double longitude, double latitude, double altitude,
                                           uint32_t id);
   static Matrix<Vertex> get_vertices(const Bathymetry& bathymetry, double vertical_exaggeration);
-  static std::vector<Triangle> get_triangles(const Matrix<Vertex>& vertices);
 
 public: // methods
   Geometry(const Bathymetry& bathymetry, const Options& options);
   const Matrix<Vertex>& vertices() const { return _vertices; }
-  const std::vector<Triangle>& triangles() const { return _triangles; }
   const std::vector<Tile>& tiles() const { return _tiles; }
 };
 } // namespace mbgrd2gltf
