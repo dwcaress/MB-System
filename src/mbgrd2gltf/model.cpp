@@ -209,77 +209,6 @@ std::vector<float> get_vertex_buffer(const Matrix<Vertex>& vertices,
 }
 
 /*
-		 * Create a buffer of indices from a vector of triangles.
-		 * @param triangles : The vector of triangles.
-		 * @return std::vector<uint32_t> : The buffer of indices.
-		 */
-std::vector<uint32_t> get_index_buffer(const std::vector<Triangle>& triangles) {
-  std::vector<uint32_t> out(triangles.size() * 3); // Reserve space for 3 indices per triangle
-
-  size_t index = 0;
-  for (const Triangle& triangle : triangles) {
-    out[index++] = triangle.a();
-    out[index++] = triangle.b();
-    out[index++] = triangle.c();
-  }
-
-  return out;
-}
-
-/*
-		 * Combine vertex and index buffers into a single GLTF buffer.
-		 * @param vertex_buffer : The buffer of vertex positions.
-		 * @param index_buffer : The buffer of indices.
-		 * @return tinygltf::Buffer : The combined GLTF buffer.
-		 */
-tinygltf::Buffer get_buffer(const std::vector<float>& vertex_buffer,
-                            const std::vector<uint32_t>& index_buffer) {
-  tinygltf::Buffer out;
-  size_t buffer_size =
-      index_buffer.size() * sizeof(uint32_t) + vertex_buffer.size() * sizeof(float);
-  out.data.resize(buffer_size);
-
-  uint32_t* indices_ptr = reinterpret_cast<uint32_t*>(out.data.data());
-  std::copy(index_buffer.begin(), index_buffer.end(), indices_ptr);
-
-  float* vertices_ptr =
-      reinterpret_cast<float*>(out.data.data() + index_buffer.size() * sizeof(uint32_t));
-  std::copy(vertex_buffer.begin(), vertex_buffer.end(), vertices_ptr);
-
-  return out;
-}
-
-/*
-		 * Create a buffer view for the vertex buffer in GLTF.
-		 * @param vertex_buffer : The buffer of vertex positions.
-		 * @param index_buffer : The buffer of indices.
-		 * @return tinygltf::BufferView : The buffer view for the vertex buffer.
-		 */
-tinygltf::BufferView get_vertex_buffer_view(const std::vector<float>& vertex_buffer,
-                                            const std::vector<uint32_t>& index_buffer) {
-  tinygltf::BufferView out;
-  out.buffer = 0;
-  out.byteOffset = index_buffer.size() * sizeof(uint32_t);
-  out.byteLength = vertex_buffer.size() * sizeof(float);
-  out.target = TINYGLTF_TARGET_ARRAY_BUFFER;
-  return out;
-}
-
-/*
-		 * Create a buffer view for the index buffer in GLTF.
-		 * @param index_buffer : The buffer of indices.
-		 * @return tinygltf::BufferView : The buffer view for the index buffer.
-		 */
-tinygltf::BufferView get_index_buffer_view(const std::vector<uint32_t>& index_buffer) {
-  tinygltf::BufferView out;
-  out.buffer = 0;
-  out.byteOffset = 0;
-  out.byteLength = index_buffer.size() * sizeof(uint32_t);
-  out.target = TINYGLTF_TARGET_ELEMENT_ARRAY_BUFFER;
-  return out;
-}
-
-/*
 		 * Get the minimum values for each coordinate (x, y, z) in the vertex buffer.
 		 * @param vertex_buffer : The buffer of vertex positions.
 		 * @return std::vector<double> : The minimum values for x, y, and z.
@@ -315,55 +244,6 @@ std::vector<double> get_vertex_maxes(const std::vector<float>& vertex_buffer) {
   }
 
   return {x_max, y_max, z_max};
-}
-
-/*
-		 * Create a GLTF accessor for the vertex buffer.
-		 * @param vertex_buffer : The buffer of vertex positions.
-		 * @return tinygltf::Accessor : The accessor for the vertex buffer.
-		 */
-tinygltf::Accessor get_vertex_accessor(const std::vector<float>& vertex_buffer) {
-  tinygltf::Accessor out;
-  out.bufferView = 1;
-  out.byteOffset = 0;
-  out.componentType = TINYGLTF_COMPONENT_TYPE_FLOAT;
-  out.count = vertex_buffer.size() / 3;
-  out.type = TINYGLTF_TYPE_VEC3;
-  out.maxValues = get_vertex_maxes(vertex_buffer);
-  out.minValues = get_vertex_mins(vertex_buffer);
-  return out;
-}
-
-/*
-		 * Create a GLTF accessor for the index buffer.
-		 * @param index_buffer : The buffer of indices.
-		 * @param vertex_count : The number of vertices.
-		 * @return tinygltf::Accessor : The accessor for the index buffer.
-		 */
-tinygltf::Accessor get_index_accessor(const std::vector<uint32_t>& index_buffer,
-                                      size_t vertex_count) {
-  tinygltf::Accessor out;
-  out.bufferView = 0;
-  out.byteOffset = 0;
-  out.componentType = TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT;
-  out.count = index_buffer.size();
-  out.type = TINYGLTF_TYPE_SCALAR;
-  out.maxValues = {(double)(vertex_count - 1)};
-  out.minValues = {0.0};
-  return out;
-}
-
-/*
-		 * Create a GLTF primitive for the mesh.
-		 * @return tinygltf::Primitive : The primitive for the mesh.
-		 */
-tinygltf::Primitive get_primitive() {
-  tinygltf::Primitive out;
-  out.indices = 0;
-  out.attributes["POSITION"] = 1;
-  out.material = 0;
-  out.mode = TINYGLTF_MODE_TRIANGLES;
-  return out;
 }
 
 /*
@@ -677,80 +557,10 @@ void write_gltf(const Geometry& geometry, const Options& options) {
 
       // If any tile failed to encode, fall through to uncompressed tiling.
       std::cerr << "Draco tile encode failed; writing uncompressed tiles instead.\n";
-    } else {
-      // No tiles somehow; keep your original single-primitive Draco path
-      const std::vector<uint32_t> index_buffer = get_index_buffer(geometry.triangles());
-      const std::string output_filepath =
-          options.output_filepath() + (options.is_binary_output() ? ".glb" : ".gltf");
-      tinygltf::Model model;
-      if (dracoCompressed(model, geometry, options, master_vertex_buffer, index_buffer)) {
-        tinygltf::Material mat;
-        mat.doubleSided = true;
-        model.materials.push_back(mat);
-        tinygltf::Scene scene;
-        tinygltf::Node node;
-        node.mesh = static_cast<int>(model.meshes.size()) - 1;
-        model.nodes.push_back(node);
-        scene.nodes.push_back(static_cast<int>(model.nodes.size()) - 1);
-        model.scenes.push_back(scene);
-        model.defaultScene = 0;
-        model.asset.version = "2.0";
-        model.asset.generator = "tinygltf";
-        tinygltf::TinyGLTF gltf;
-        if (!gltf.WriteGltfSceneToFile(&model, output_filepath, options.is_binary_output(), true,
-                                       true, options.is_binary_output())) {
-          std::cerr << "Failed to write GLTF file." << std::endl;
-        } else {
-          validate_gltf_file(output_filepath, options.is_binary_output());
-        }
-        return; // done (single-primitive Draco)
-      }
-      // If even that fails, fall through to uncompressed tiling below.
     }
   }
 
   // ---- Tiled, UNCOMPRESSED path (fixes typed-array overflow) ----
-  if (tiles.empty()) {
-    // Safety fallback to old single-primitive uncompressed path
-    const std::vector<uint32_t> index_buffer = get_index_buffer(geometry.triangles());
-    const std::string output_filepath =
-        options.output_filepath() + (options.is_binary_output() ? ".glb" : ".gltf");
-    tinygltf::Model model;
-
-    tinygltf::Buffer buffer = get_buffer(master_vertex_buffer, index_buffer);
-    model.buffers.push_back(std::move(buffer));
-    model.bufferViews.push_back(get_index_buffer_view(index_buffer));
-    model.bufferViews.push_back(get_vertex_buffer_view(master_vertex_buffer, index_buffer));
-    model.accessors.push_back(get_index_accessor(index_buffer, master_vertex_buffer.size() / 3));
-    model.accessors.push_back(get_vertex_accessor(master_vertex_buffer));
-
-    tinygltf::Mesh mesh;
-    mesh.primitives.push_back(get_primitive());
-    model.meshes.push_back(std::move(mesh));
-
-    tinygltf::Material mat;
-    mat.doubleSided = true;
-    model.materials.push_back(mat);
-    tinygltf::Scene scene;
-    tinygltf::Node node;
-    node.mesh = static_cast<int>(model.meshes.size()) - 1;
-    model.nodes.push_back(node);
-    scene.nodes.push_back(static_cast<int>(model.nodes.size()) - 1);
-    model.scenes.push_back(scene);
-    model.defaultScene = 0;
-    model.asset.version = "2.0";
-    model.asset.generator = "tinygltf";
-
-    tinygltf::TinyGLTF gltf;
-    if (!gltf.WriteGltfSceneToFile(&model, output_filepath, options.is_binary_output(), true, true,
-                                   options.is_binary_output())) {
-      std::cerr << "Failed to write GLTF file." << std::endl;
-    } else {
-      validate_gltf_file(output_filepath, options.is_binary_output());
-    }
-    return;
-  }
-
   // Build per-tile buffers (remap global IDs to local)
   LOG_INFO("Building", Logger::format_with_commas(tiles.size()), "tiles for uncompressed output");
   std::vector<TileBuild> built;

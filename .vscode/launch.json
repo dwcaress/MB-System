@@ -21,25 +21,25 @@
             "program": "${workspaceFolder}/build/src/mbgrd2gltf/mbgrd2gltf",
             "args": [
                 // Simple test to show help message
-                //"--help"
+                //"-H"
                 // Initial example for Monterey Bay terrain used by STOQS
-                //"${workspaceFolder}/build/Monterey25.grd", "-o", "${workspaceFolder}/build", "-e", "10.0", "-v"
+                //"-I", "${workspaceFolder}/build/Monterey25.grd", "-O", "${workspaceFolder}/build", "-E", "10.0", "-V"
                 // Monterey Bay binary with Draco compression
-                //"${workspaceFolder}/build/Monterey25.grd", "-o", "${workspaceFolder}/build", "-e", "10.0", "-v", "-d", "-b"
+                //"-I", "${workspaceFolder}/build/Monterey25.grd", "-O", "${workspaceFolder}/build", "-E", "10.0", "-V", "-D", "-B"
                 // Monterey Bay without verbose output
-                //"${workspaceFolder}/build/Monterey25.grd", "-o", "${workspaceFolder}/build", "-e", "10.0", "-d", "-b"
+                //"-I", "${workspaceFolder}/build/Monterey25.grd", "-O", "${workspaceFolder}/build", "-E", "10.0", "-D", "-B"
                 // Lake Erie example
-                //"${workspaceFolder}/build/erie_lld.grd", "-o", "${workspaceFolder}/build", "-e", "10.0", "-d", "-b"
+                //"-I", "${workspaceFolder}/build/erie_lld.grd", "-O", "${workspaceFolder}/build", "-E", "10.0", "-D", "-B"
                 // Lake Michigan example
-                //"${workspaceFolder}/build/michigan_lld.grd", "-o", "${workspaceFolder}/build", "-e", "10.0", "-d", "-b"
+                //"-I", "${workspaceFolder}/build/michigan_lld.grd", "-O", "${workspaceFolder}/build", "-E", "10.0", "-D", "-B"
                 // Lake Michigan example
-                //"${workspaceFolder}/build/michigan_lld.grd", "-o", "${workspaceFolder}/build", "-e", "10.0", "-d", "-b"
+                //"-I", "${workspaceFolder}/build/michigan_lld.grd", "-O", "${workspaceFolder}/build", "-E", "10.0", "-D", "-B"
                 // Globe example - fails to load due into gltf.report
-                //"${workspaceFolder}/build/Globe_1m_bath.grd", "-o", "${workspaceFolder}/build", "-e", "10.0", "-d", "-b"
+                //"-I", "${workspaceFolder}/build/Globe_1m_bath.grd", "-O", "${workspaceFolder}/build", "-E", "10.0", "-D", "-B"
                 // Terrain for BEDs during CCE 2015, no vertical exaggeration - fails to load into gltf.report
-                //"${workspaceFolder}/build/MontereyCanyonBeds_1m+5m.grd", "-o", "${workspaceFolder}/build", "-e", "1.0", "-d", "-b"
+                //"-I", "${workspaceFolder}/build/MontereyCanyonBeds_1m+5m.grd", "-O", "${workspaceFolder}/build", "-E", "1.0", "-D", "-B"
                 // San Pedro Basin example
-                "${workspaceFolder}/build/SanPedroBasin50.grd", "-o", "${workspaceFolder}/build", "-e", "10.0", "-d", "-b"
+                "-I", "${workspaceFolder}/build/SanPedroBasin50.grd", "-O", "${workspaceFolder}/build", "-E", "10.0", "-D", "-B"
             ],
             "stopOnEntry": false,
             "cwd": "${workspaceFolder}",

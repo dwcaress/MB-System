@@ -1,7 +1,18 @@
 # Source Directory: src/mbgrd2gltf/
 
 This directory contains the source files for the program mbgrd2gltf, a 2D/3D grd to gltf conversion program.
-This program was contributed to MB-System as part of the CSUMB Capstone in Spring 2023. Additional refinements and additions added as part of CSUMB Capstone in Fall 2025.
+The original gltf-generator program was created for STOQS by a CSUMB Capstone team in Fall 2021. This program was contributed to MB-System as part of the CSUMB Capstone in Spring 2023. Additional refinements and additions added as part of CSUMB Capstone in Spring 2024 (draco compression) and Fall 2025 (code refinement).
+
+# Team Fall 2020
+
+* Edward Montoya
+* Sean Towne
+
+# Team Fall 2021
+
+* Isaac Hirzel
+* Oliver Stringer
+* Zachary Abbett
 
 # Team Spring 2023
 
@@ -9,6 +20,13 @@ This program was contributed to MB-System as part of the CSUMB Capstone in Sprin
 * Kyle Dowling
 * Jesse Benavides
 * Julian Fortin
+
+# Team Spring 2024
+
+* Ivan Martinez
+* Steven Patrick
+* Varad Poddar
+* Aret Tinoco
 
 # Team Fall 2025
 
@@ -23,12 +41,23 @@ This program was contributed to MB-System as part of the CSUMB Capstone in Sprin
 * TinyGLTF
 	* This is in the project files as a single-header library. No futher action is needed for this dependency.
 
-# Previous Work
+# GitHub Issues Addressed
 
-* mbgrd2gltf (originally gltf-generator) was made to replace the current 3d geometry generation pipeline used in STOQS. 
-* This project was done for CSUMB capstone in fall 2021 to solve the following issue: https://github.com/stoqs/stoqs/issues/1093
-* https://github.com/stoqs/stoqs/blob/master/stoqs/contrib/gltf-generator/README.md
-* Refinements were completed for CSUMB Capstone in fall 2025 for the following issue: https://github.com/dwcaress/MB-System/issues/1521
+## Fall 2020 Team
+
+* [STOQS Issue #1093](https://github.com/stoqs/stoqs/issues/1093) - Initial exploration of automating the 3D geometry generation pipeline
+
+## Fall 2021 Team
+* [STOQS Issue #1093](https://github.com/stoqs/stoqs/issues/1093) - Initial gltf-generator implementation to replace 3D geometry generation pipeline
+
+## Spring 2023 Team  
+* [MB-System Issue #1257](https://github.com/dwcaress/MB-System/issues/1257) - Initial MB-System integration
+
+## Spring 2024 Team
+* [MB-System Issue #1456](https://github.com/dwcaress/MB-System/issues/1456) - Draco mesh compression support
+
+## Fall 2025 Team
+* [MB-System Issue #1521](https://github.com/dwcaress/MB-System/issues/1521) - General mbgrd2gltf C++ code refinement
 
 # Code Formatting
 
