@@ -36,13 +36,9 @@
 
 // standard library
 #include <string>
-#include <unordered_map>
 
 namespace mbgrd2gltf {
 class Options {
-public: // types
-  typedef void (Options::*ArgCallback)(const char** args, unsigned size, unsigned& i);
-
 private: // members
   std::string _input_filepath;
   std::string _output_filepath;
@@ -54,16 +50,6 @@ private: // members
   bool _is_output_folder_set = false;
   bool _is_draco_compressed = false;
   int _draco_quantization[4] = {16, 7, 10, 8}; // [POSITION, NORMAL, TEXCOORD, COLOR]
-
-  static const std::unordered_map<std::string, ArgCallback> arg_callbacks;
-
-private: // methods
-  void arg_binary(const char** args, unsigned size, unsigned& i);
-  void arg_output(const char** args, unsigned size, unsigned& i);
-  void arg_exaggeration(const char** args, unsigned size, unsigned& i);
-  void arg_verbose(const char** args, unsigned size, unsigned& i);
-  void arg_draco_compression(const char** args, unsigned size, unsigned& i);
-  void arg_draco_quantization(const char** args, unsigned size, unsigned& i);
 
 public: // members
   Options(unsigned argc, const char** argv);

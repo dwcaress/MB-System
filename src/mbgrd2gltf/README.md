@@ -1,7 +1,13 @@
 # Source Directory: src/mbgrd2gltf/
 
 This directory contains the source files for the program mbgrd2gltf, a 2D/3D grd to gltf conversion program.
-This program was contributed to MB-System as part of the CSUMB Capstone in Spring 2023. Additional refinements and additions added as part of CSUMB Capstone in Fall 2025.
+The original gltf-generator program was created for STOQS by a CSUMB Capstone team in Fall 2021. This program was contributed to MB-System as part of the CSUMB Capstone in Spring 2023. Additional refinements and additions added as part of CSUMB Capstone in Spring 2024 (draco compression) and Fall 2025 (code refinement).
+
+# Team Fall 2021
+
+* Isaac Hirzel
+* Oliver Stringer
+* Zachary Abbett
 
 # Team Spring 2023
 
@@ -9,6 +15,13 @@ This program was contributed to MB-System as part of the CSUMB Capstone in Sprin
 * Kyle Dowling
 * Jesse Benavides
 * Julian Fortin
+
+# Team Spring 2024
+
+* Ivan Martinez
+* Steven Patrick
+* Varad Poddar
+* Aret Tinoco
 
 # Team Fall 2025
 
