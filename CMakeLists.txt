@@ -58,6 +58,9 @@ message("----------------------------------------------------------")
 # Define minimum CMake version required
 cmake_minimum_required(VERSION 3.16)
 
+# Export compile commands for IDE tools
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Define project
 project(MB-System 
         DESCRIPTION "Open Source software for the processing and display of seafloor mapping data"
