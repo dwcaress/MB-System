@@ -46,14 +46,10 @@ public: // types
 private: // members
   std::string _input_filepath;
   std::string _output_filepath;
-  double _stride_ratio = 1.0;
-  size_t _max_size = 0;
   double _exaggeration = 1.0;
   bool _is_binary_output = false;
   bool _is_help = false;
   bool _is_verbose = false;
-  bool _is_stride_set = false;
-  bool _is_max_size_set = false;
   bool _is_exaggeration_set = false;
   bool _is_output_folder_set = false;
   bool _is_draco_compressed = false;
@@ -64,8 +60,6 @@ private: // members
 private: // methods
   void arg_binary(const char** args, unsigned size, unsigned& i);
   void arg_output(const char** args, unsigned size, unsigned& i);
-  void arg_stride(const char** args, unsigned size, unsigned& i);
-  void arg_max_size(const char** args, unsigned size, unsigned& i);
   void arg_exaggeration(const char** args, unsigned size, unsigned& i);
   void arg_verbose(const char** args, unsigned size, unsigned& i);
   void arg_draco_compression(const char** args, unsigned size, unsigned& i);
@@ -76,22 +70,14 @@ public: // members
 
   const std::string& input_filepath() const { return _input_filepath; }
   const std::string& output_filepath() const { return _output_filepath; }
-  double stride_ratio() const { return _stride_ratio; }
-  size_t max_size() const { return _max_size; }
   double exaggeration() const { return _exaggeration; }
   bool is_binary_output() const { return _is_binary_output; }
   bool is_help() const { return _is_help; }
   bool is_verbose() const { return _is_verbose; }
-  bool is_stride_set() const { return _is_stride_set; }
-  bool is_max_size_set() const { return _is_max_size_set; }
   bool is_exaggeration_set() const { return _is_exaggeration_set; }
   bool is_output_folder_set() const { return _is_output_folder_set; }
   bool is_draco_compressed() const { return _is_draco_compressed; }
   int draco_quantization(int i) const { return _draco_quantization[i]; }
-  void set_stride_ratio(double ratio) {
-    _stride_ratio = ratio;
-    _is_stride_set = true;
-  }
   bool draco_quantization_valid() const;
 };
 } // namespace mbgrd2gltf

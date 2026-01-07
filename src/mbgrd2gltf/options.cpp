@@ -47,8 +47,6 @@
 const char* const usage_str =
     "usage: mbgrd2gltf <filepath> [-b | --binary] [(-o | --output) <output folder>]"
     "\n                              [(-e | --exaggeration) <vertical exaggeration>]"
-    "\n                              [(-m | --max-size) <max size>]"
-    "\n                              [(-s | --stride) <stride ratio>]"
     "\n                              [(-d | --draco) <draco compression>]"
     "\n                              [(-qp | -qn | -qt | -qc) <quantization>]"
     "\n                              [-v | --verbose]";
@@ -63,17 +61,6 @@ const char* const help_str =
     "\n"
     "\n    <vertical exaggeration>   decimal number representing the coefficient by"
     "\n                              which the vertex altitudes will be multiplied"
-    "\n"
-    "\n    <max size>                decimal number representing the max size of the"
-    "\n                              output buffer data in MB (the actual size may vary"
-    "\n                              depending on a number of factors including whether"
-    "\n                              the output is in binary form or not)"
-    "\n"
-    "\n    <stride ratio>       	 decimal number representing the the amount"
-    "\n                              of stride('Skip') to apply to the buffer data of the"
-    "\n                              output as a ratio of normal to"
-    "\n                              running. As you stride, you skip over portions of data."
-    "\n                              The bigger the stride, the more points are skipped."
     "\n"
     "\n    <draco>                   reduces the file size of the output by using the"
     "\n                              Draco compression algorithm applied to the buffer data"
@@ -111,10 +98,6 @@ const std::unordered_map<std::string, Options::ArgCallback> Options::arg_callbac
     {"--binary", &Options::arg_binary},
     {"-e", &Options::arg_exaggeration},
     {"--exaggeration", &Options::arg_exaggeration},
-    {"-s", &Options::arg_stride},
-    {"--stride", &Options::arg_stride},
-    {"-m", &Options::arg_max_size},
-    {"--max-size", &Options::arg_max_size},
     {"-o", &Options::arg_output},
     {"--output", &Options::arg_output},
     {"-v", &Options::arg_verbose},
@@ -174,38 +157,6 @@ void Options::arg_verbose(const char**, unsigned, unsigned&) {
     throw std::invalid_argument("verbose may not be specified more than once");
 
   _is_verbose = true;
-}
-
-void Options::arg_stride(const char** args, unsigned size, unsigned& i) {
-  if (_is_stride_set)
-    throw std::invalid_argument("stride ratio may not be set more than once");
-
-  if (_is_max_size_set > 0)
-    throw std::invalid_argument("stride ratio may not be set when max size is set");
-
-  double value = get_value_double(args, size, i, "stride ratio");
-
-  if (value < 1.0)
-    throw std::invalid_argument("expected stride ratio >= 1 but got: " + std::to_string(value));
-
-  _stride_ratio = value;
-  _is_stride_set = true;
-}
-
-void Options::arg_max_size(const char** args, unsigned size, unsigned& i) {
-  if (_is_max_size_set)
-    throw std::invalid_argument("max size may not be specified more than once");
-
-  if (_is_stride_set)
-    throw std::invalid_argument("max size may not be set when compression ratio is set");
-
-  double value = get_value_double(args, size, i, "max size");
-  if (value < 0.0001)
-    throw std::invalid_argument("expected max size > 0.001 but got: " + std::to_string(value) +
-                                "MB");
-
-  _max_size = (size_t)(value * 1000000.0);
-  _is_max_size_set = true;
 }
 
 void Options::arg_draco_compression(const char**, unsigned, unsigned&) {

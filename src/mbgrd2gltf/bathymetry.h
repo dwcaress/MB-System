@@ -86,7 +86,6 @@ private: // methods
                                        size_t* length);
   static void get_variable_uint_array(int netcdf_id, const char* name, unsigned int* out,
                                       size_t* start, size_t* length);
-  void compress(const Options& options);
 
 public: // methods
   Bathymetry(const Options& options);
