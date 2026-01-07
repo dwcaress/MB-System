@@ -10,18 +10,15 @@ mbgrd2gltf \- convert bathymetric grid data to GLTF format with optional setting
 .I <output filepath>]
 [\fB\-e\fR | \-\-exaggeration
 .I <vertical exaggeration>]
-[\fB\-m\fR | \-\-max-size
-.I <max size>]
-[\fB\-s\fR | \-\-stride
-.I <stride ratio>]
 [\fB\-d\fR | \-\-draco]
 [\fB\-qp\fR | \fB\-qn\fR | \fB\-qt\fR | \fB\-qc\fR
 .I <quantization numbers>]
+[\fB\-v\fR | \-\-verbose]
 [\fB\-h\fR | \-\-help]
 
 .SH DESCRIPTION
 .B mbgrd2gltf
-is a tool designed to convert grid data files (GRD) to Graphics Library Transmission Format (GLTF) files. It can generate output in: a binary to create a more compact GLTF file, exaggerate vertex altitude to enhance topographic features, and cap the max-size of the GLTF so the output files don't exceed size constraints. Furthermore, optional Draco compression can reduce the outputed GLTF file size even more while maintaining good visual quality. With Draco, one can specify the quantization level, which affects the compression level of mesh vertices.
+is a tool designed to convert grid data files (GRD) to Graphics Library Transmission Format (GLTF) files. It can generate output in binary format to create a more compact GLTF file and exaggerate vertex altitude to enhance topographic features. The tool uses tiling to efficiently handle large datasets. Optional Draco compression can reduce the output GLTF file size significantly while maintaining good visual quality. With Draco, one can specify the quantization level, which affects the compression level of mesh vertices.
 
 .SH MB-SYSTEM AUTHORSHIP
 David W. Caress - Monterey Bay Aquarium Research Institute
@@ -48,15 +45,6 @@ Specify the path to the folder where the output GLTF file will be written.
 Specify the vertical exaggeration factor as a decimal number, which multiplies the vertex altitudes. This can enhance the visibility of topographic features.
 
 .TP
-.B \-m, \-\-max-size :
-Specify the maximum size of the output buffer data in megabytes. This is useful for ensuring that the output files do not exceed certain size constraints. Actual size may vary based on compression settings.
-
-.TP
-.B \-s, \-\-stride :
-Specify the decimal number representing the the amount of stride('Skip') to apply to the buffer data of the output as a ratio of normal to running. As you stride, you skip over portions of data.
-The bigger the stride, the more points are skipped.
-
-.TP
 .B \-d, \-\-draco :
 Enable Draco compression to reduce the file size by encoding meshes and point clouds.
 
@@ -64,6 +52,10 @@ Enable Draco compression to reduce the file size by encoding meshes and point cl
 .B \-qp | -qn | -qt | -qc :
 Specify the quantization level for Draco compression. Positional quantization (-qp) value affects the compression level of mesh vertices. Lower values increase compression but reduce precision, potentially affecting the visual quality of the terrain. Other quantization values are available
 for experimentation. They include -qn: Normal, -qt: TexCoord, -qc: Color. The default quantization value is 16 for position, 7 for normal, 10 for texcoord, 8 for color.
+
+.TP
+.B \-v, \-\-verbose :
+Enable verbose output showing NetCDF reading details and memory allocation information.
 
 .TP
 .B \-h, \-\-help :
@@ -84,13 +76,11 @@ Convert a GRD file to GLB(Binary GLTF) with specified output folder and Draco co
 .fi
 .RE
 
-Converting a large GRD file to GLB(Binary GLTF) with specified output folder and Draco compression at a quantization level of 20 with a vertical exaggeration of 20. [ All options in short-hand notiation. ]
+Convert a large GRD file to GLB with Draco compression, vertical exaggeration, and verbose output (all options in short-hand notation):
 .RS
 .nf
-.B mbgrd2gltf input.grd -o /path/to/output -d -b -qp 20 -e 20
+.B mbgrd2gltf input.grd -o /path/to/output -d -b -qp 20 -e 20 -v
 .fi
-.nf
-Auto setting stride to 1. [ Program generated output. ]
 .RE
 
 .SH "SEE ALSO"
