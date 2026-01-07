@@ -735,11 +735,6 @@ int mbview_destroy_prglx(size_t instance);
 int mbview_plotprofile(size_t instance);
 int mbview_profile_text(size_t instance);
 
-void BxUnmanageCB(Widget w, XtPointer client, XtPointer call);
-void BxManageCB(Widget w, XtPointer client, XtPointer call);
-void BxPopupCB(Widget w, XtPointer client, XtPointer call);
 XtPointer BX_CONVERT(Widget w, char *from_string, char *to_type, int to_size, Boolean *success);
-void BxExitCB(Widget w, XtPointer client, XtPointer call);
-void BxSetValuesCB(Widget w, XtPointer client, XtPointer call);
 
 #endif  // MBVIEW_MBVIEWPRIVATE_H_

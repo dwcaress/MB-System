@@ -1,6 +1,16 @@
-find_path(MOTIF_INCLUDE_DIR Xm/Xm.h /usr/openwin/include /opt/local/include)
 
-find_library(MOTIF_LIBRARY Xm /usr/openwin/lib /opt/local/lib)
+if (APPLE)
+	if(MACOS_USE_MACPORTS)
+		find_path(MOTIF_INCLUDE_DIR Xm/Xm.h /opt/local/include)
+		find_library(MOTIF_LIBRARY Xm /opt/local/lib)
+	else() # assume Homebrew
+		find_path(MOTIF_INCLUDE_DIR Xm/Xm.h /opt/homebrew/include)
+		find_library(MOTIF_LIBRARY Xm /opt/homebrew/lib)
+	endif()
+else()
+	find_path(MOTIF_INCLUDE_DIR Xm/Xm.h)
+	find_library(MOTIF_LIBRARY Xm)
+endif()
 
 mark_as_advanced(MOTIF_FOUND MOTIF_INCLUDE_DIR MOTIF_LIBRARY)
 
