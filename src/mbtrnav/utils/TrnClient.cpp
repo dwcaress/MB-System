@@ -178,10 +178,11 @@ int TrnClient::loadCfgAttributes(const char *cfg_file)
     char cfg_buf[512];
     char *cfg_path=NULL;
 
-    if(NULL!=cfg_file){
+    if(NULL != cfg_file){
         // set _cfg_file member and use that
         TrnAttr::chkSetString(&_cfg_file, cfg_file);
         cfg_path = _cfg_file;
+        fprintf(stderr, "%s:%d cfg_file [%s]\n", __func__, __LINE__, cfg_file);
     }else{
         // use default path ($TRN_CONFIGDIR/terrainAid.cfg or ./terrainAid.cfg)
         const char *cfg_dir = getenv("TRN_DATAFILES");
@@ -190,7 +191,7 @@ int TrnClient::loadCfgAttributes(const char *cfg_file)
         cfg_path = _cfg_file;
     }
 
-    fprintf(stderr, "%s:%d cfg_file [%s] _cfg_file [%s]\n", __func__, __LINE__, cfg_file, _cfg_file);
+    fprintf(stderr, "%s:%d _cfg_file [%s]\n", __func__, __LINE__, _cfg_file);
     
     _trn_attr.setCfgFile(_cfg_file);
 

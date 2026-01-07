@@ -90,12 +90,12 @@ public:
     ~trnx_utils()
     {}
 
-    static void trnest_tostream(std::ostream &os, double &ts, poseT &pt, poseT &mle, poseT &mmse, int wkey, int wval)
+    static void trnest_tostream(std::ostream &os, double &tstamp, poseT &pt, poseT &mle, poseT &mmse, int wkey, int wval)
     {
         os << "--- TRN Estimate OK---" << "\n";
         os << std::setw(5) << "MLE" << std::setw(21) << " [t, tm, x, y, z] ";
         os << std::fixed << std::setprecision(3);
-        os << std::setw(13) << ts << ", ";
+        os << std::setw(13) << tstamp << ", ";
         os << std::setw(13) << mle.time << ", ";
         os << std::setw(7) << mle.x << ", ";
         os << std::setw(7) << mle.y << ", ";
@@ -103,7 +103,7 @@ public:
 
         os << std::setw(5) << "MMSE" << std::setw(21) << " [t, tm, x, y, z] ";
         os << std::fixed << std::setprecision(3);
-        os << std::setw(13) << ts << ", ";
+        os << std::setw(13) << tstamp << ", ";
         os << std::setw(13) << mmse.time << ", ";
         os << std::setw(7) << mmse.x << ", ";
         os << std::setw(7) << mmse.y << ", ";
@@ -111,7 +111,7 @@ public:
 
         os << std::setw(5) << "POS" << std::setw(21) << " [t, tm, x, y, z] ";
         os << std::fixed << std::setprecision(3);
-        os << std::setw(13) << ts << ", ";
+        os << std::setw(13) << tstamp << ", ";
         os << std::setw(13) << mmse.time << ", ";
         os << std::setw(7) << pt.x << ", ";
         os << std::setw(7) << pt.y << ", ";
@@ -119,7 +119,7 @@ public:
 
         os << std::setw(5) << "OFS" << std::setw(21) << " [t, tm, x, y, z] ";
         os << std::fixed << std::setprecision(3);
-        os << std::setw(13) << ts << ", ";
+        os << std::setw(13) << tstamp << ", ";
         os << std::setw(13) << mmse.time << ", ";
         os << std::setw(7) << mmse.x - pt.x << ", ";
         os << std::setw(7) << mmse.y - pt.y << ", ";
@@ -206,16 +206,16 @@ public:
         return os.str();
     }
 
-    static std::string  trnest_tostring(double &time, poseT &pt, poseT &mle, poseT &mmse, int wkey=15, int wval=18)
+    static std::string  trnest_tostring(double &tstamp, poseT &pt, poseT &mle, poseT &mmse, int wkey=15, int wval=18)
     {
         std::ostringstream ss;
-        trnest_tostream(ss, time, pt, mle, mmse, wkey, wval);
+        trnest_tostream(ss, tstamp, pt, mle, mmse, wkey, wval);
         return ss.str();
     }
 
-    static void trnest_show(double &time, poseT &pt, poseT &mle, poseT &mmse, int wkey=15, int wval=18)
+    static void trnest_show(double &tstamp, poseT &pt, poseT &mle, poseT &mmse, int wkey=15, int wval=18)
     {
-        trnest_tostream(std::cerr, time, pt, mle, mmse, wkey, wval);
+        trnest_tostream(std::cerr, tstamp, pt, mle, mmse, wkey, wval);
     }
 
     static std::string  rawbath_tocsv(trn::bath_info *bi, trn::nav_info *ni, trn::att_info *ai, trn::vel_info *vi, long int utm, int format=0, double alt_depth=-1.)

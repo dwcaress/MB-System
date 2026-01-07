@@ -270,7 +270,7 @@ static void s_copy_config(trnxpp_cfg &cfg, trn::trnxpp &xpp)
     ostringstream ss;
     std::list<trn::trn_cfg_map>::iterator cit;
     for(cit = cfgList.begin(); cit != cfgList.end(); cit++){
-        ostringstream ss;
+
         if(std::get<1>(*cit).size() > 0){
             ss << "cp " << std::get<1>(*cit).c_str() << " " << cfg.logdir().c_str();
             ss << "/terrainAid-";

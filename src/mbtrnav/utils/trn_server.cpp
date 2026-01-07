@@ -986,15 +986,15 @@ int main(int argc, char** argv) {
 
 			// Get a msg from the client
 			//
-			int len;
-			if((len = get_msg()) < TRN_MSG_SIZE) {
+			int mlen;
+			if((mlen = get_msg()) < TRN_MSG_SIZE) {
 				continue;
 			}
 
 			// Determine message type and respond
 			//
 			_ct.clean();
-			len = _ct.unserialize(_sock_buf, TRN_MSG_SIZE);
+			mlen = _ct.unserialize(_sock_buf, TRN_MSG_SIZE);
 
 #if TRN_DEBUG
  		  if (_ct.msg_type == TRN_MEAS)

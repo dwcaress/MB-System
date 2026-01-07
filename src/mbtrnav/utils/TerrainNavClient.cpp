@@ -68,7 +68,11 @@ _sockport(-1)
 // Just establish a connection to a server that does not need initialization.
 // Used to connect to the Trn server in mbtrnpp
 TerrainNavClient::TerrainNavClient(char *server_ip, int port)
-:TerrainNav(), _connected(false), _mbtrn_server_type(true), _server_ip(NULL),
+:TerrainNav(), 
+_logdir(NULL),
+_connected(false),
+_mbtrn_server_type(true),
+_server_ip(NULL),
 _sockfd(-1), _sockport(port)
 {
   _server_ip = (NULL!=server_ip ? strdup(server_ip) : NULL);

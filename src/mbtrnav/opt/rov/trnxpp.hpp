@@ -138,8 +138,8 @@ public:
         }
         os << std::dec << std::setfill(' ');
         os << std::setw(wkey) << "Geo"  << std::setw(wval) << mGeoList.size() << "\n";
-        std::list<beam_geo>::iterator it;
         if(mGeoList.size() > 0){
+            std::list<beam_geo>::iterator it;
             int i = 0;
             for(it = mGeoList.begin(); it != mGeoList.end(); it++){
 
@@ -396,7 +396,7 @@ public:
             int r_stat = 0;
             if(cb != nullptr && parg != nullptr){
 
-                int stat = test_sem( channel, to_msec, cb, r_stat, parg, clear_pending);
+                stat = test_sem( channel, to_msec, cb, r_stat, parg, clear_pending);
 
                 r_called += (stat == 0 ? 1 : 0);
                 r_error += (r_stat != 0 ? 1 : 0);

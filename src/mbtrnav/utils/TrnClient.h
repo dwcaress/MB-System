@@ -77,10 +77,10 @@ class TrnClient : public TerrainNavClient {
     
 public:
     
-    TrnClient(const char *host=NULL, int port=0);
-    TrnClient(const char *svr_log_dir=NULL, const char *host=NULL, int port=0);
+    explicit TrnClient(const char *host=NULL, int port=0);
+    explicit TrnClient(const char *svr_log_dir=NULL, const char *host=NULL, int port=0);
     TrnClient(const TrnClient& other);
-    ~TrnClient();
+    virtual ~TrnClient() override;
     static void chkSetString(char **dest, const char *src);
     int loadCfgAttributes(const char *cfg_file);
     int setVerbose(int val);

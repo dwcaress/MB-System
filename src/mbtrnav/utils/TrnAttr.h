@@ -82,8 +82,8 @@ public:
 //    const char * TA_SKIPINIT_KEY= "skipInit";
 
     TrnAttr();
-    TrnAttr(const char *cfg_path);
-    TrnAttr(const TrnAttr& other);
+    explicit TrnAttr(const char *cfg_path);
+    explicit TrnAttr(const TrnAttr& other);
     ~TrnAttr();
 
     // set the configuration file
@@ -178,7 +178,7 @@ public:
 
 protected:
     // config file parser
-    static int getNextKeyValue(FILE *cfg, char key[], char value[]);
+    static int getNextKeyValue(FILE *cfg, char key[], uint16_t klen, char value[], uint16_t vlen);
     // set to default values
     void reset();
 

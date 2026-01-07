@@ -1811,9 +1811,9 @@ if(pinst != nullptr)
         fprintf(stderr,"%s:%d - ctx[%p] mTrnCliList[%p]\n",__func__, __LINE__,this,&mTrnCliList);
       //std::lock_guard<std::mutex> guard(mTrnCliMutex);
         // publish to MB1 servers
+        int i=0;
         std::list<trn::trn_host>::iterator it;
 
-        int i=0;
         for(it = mTrnCliList.begin(); it != mTrnCliList.end(); it++, i++){
            
             trn::trn_host thost = (*it);
@@ -1887,24 +1887,54 @@ if(pinst != nullptr)
             fprintf(stderr, "%s:%d - TRNCLI[%d] key[%s] vp[%p] trncli[%p] trn_attr[%p]:\n", __func__, __LINE__, i, key.c_str(), vp, trncli, patt);
 
 //--------------------------------------------
-            // KLH : TrnClient already kooked here...
-            // dump_trnhosts() works fine....
+            // KLH : TrnClient reference is involved in crash
+            // TrnClient/TrnAttr references in dump_trnhosts()  work as expected....
+            // NOTE: uses exact same steps here to obtain references and access members
             fprintf(stderr, "%s:%d -------- dump_trnhosts --------\n", __func__, __LINE__);
             dump_trnhosts();
 
-            // in this context, however, the reference (or pointer) are corrupted (shifted 8 bytes)
-            fprintf(stderr, "%s:%d -------- TrnAttr::tostream --------\n", __func__, __LINE__);
-            // att_ref.tostream(cerr);
-            // patt->tostream(cerr);
+            // in this (pub_trn) context, the reference is invalid
+            // appearing to be 8 bytes larger, but still using same offsets for data members
 
-            // TrnAttr reference obtained from trncli->getAttr()
-            // is invalid (shifted 8 bytes)
+            fprintf(stderr, "%s:%d -------- TrnAttr::tostream --------\n", __func__, __LINE__);
+//            att_ref.tostream(cerr);
+            //patt->tostream(cerr);
+
+            // alternatively, try it exactly like dump_trnhosts...
+//            fprintf(stderr, "%s:%d - TRNCLI show_addr:\n", __func__, __LINE__);
+//            trncli->show_addr();
+//
+//            fprintf(stderr, "%s:%d -------- TrnAttr::tostream --------\n", __func__, __LINE__);
+//            std::string att_str = att_ref.atostring();
+//            fprintf(stderr, "%s:%d - TRNCLI trn_attr addr:\n%s\n", __func__, __LINE__, att_str.c_str());
+//
+//            att_str = att_ref.tostring();
+//            fprintf(stderr, "%s:%d - TRNCLI trn_attr members:\n%s\n", __func__, __LINE__, att_str.c_str());
+//
+//            if(NULL != patt) {
+//                fprintf(stderr, "%s:%d -  terrainNavServer [%s]\n", __func__, __LINE__, patt->terrainNavServer);
+//            }else {
+//                fprintf(stderr, "%s:%d ///////// !!! TRN_ATTR is NULL !!! ////////////\n", __func__, __LINE__);
+//            }
+
+            // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            // TrnAttr reference obtained from trncli->getAttr() is invalid
+            // (apparently shifted 8 bytes, and size increased by 8 bytes)
+            // this seems like a vtable pointer is not being correctly accounted for
+            // but why in this context and not others (dump_trnhosts)
+            // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
             // In debugger...:
+            // trncli->getTrnAttr() (dereferenced directly)
             // (lldb) print &(trncli->getTrnAttr())  // valid
             // (TrnAttr *) 0x0000000108011258
             // (lldb) print &trncli->_trn_attr       // valid
             // (TrnAttr *) 0x0000000108011258
+
+            // but the reference assigned using getTrnAttr() is invalid!!!
+            // TrnAttr &att_ref = trncli->getTrnAttr();
+            // TrnAttr *patt = &att_ref;
+            // TrnAttr *patt = &(trncli->getTrnAttr());
 
             // (lldb) print &att_ref
             // (TrnAttr *) 0x0000000108011260        // invalid
@@ -1965,6 +1995,20 @@ if(pinst != nullptr)
             //   phiBias = 5.2150174540869847E-310
             //   _cfg_file = 0x0000000000000000
             //  }
+
+            // Other observations:
+            // TrnClient accesses in dump_trnhosts() OK in any context (references are valid)
+            // dump_trnhosts uses the same steps as pub_trn to obtain TrnClient/TrnAttr.
+            //
+            // Issue occurs in Release build (but in different context).
+            //
+            // TrnClient reference is corrupt whether it connects to TrnServer or not
+            // (but the app runs if it can connect to the server and the TrnClient/TrnAttr ref isn't used here)
+            //
+            // cppcheck?
+            // check for duplicate definitions?
+
+
 
 //            fprintf(stderr, "%s:%d -------- sizeof(void*) [%zu] sizeof(TrnClient*) [%zu] --------\n", __func__, __LINE__, sizeof(void*), sizeof(TrnClient*));
             fprintf(stderr, "%s:%d -------- sizeof(TrnClient) [%zu] sizeof(TrnAttr) [%zu] --------\n", __func__, __LINE__, sizeof(TrnClient), sizeof(TrnAttr));

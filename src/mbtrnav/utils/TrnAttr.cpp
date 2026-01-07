@@ -187,7 +187,7 @@ void TrnAttr::setCfgFile(const char *cfg_path)
 {
     TrnAttr::chkSetString(&_cfg_file, NULL);
 
-    if(cfg_path != NULL || strlen(cfg_path) > 0){
+    if(cfg_path != NULL){
         int slen = strlen(cfg_path) + 1;
         _cfg_file = (char *)malloc(slen);
         snprintf(_cfg_file, slen, "%s", cfg_path);
@@ -247,7 +247,7 @@ int TrnAttr::parseConfig()
     // If the key matches a known config item, extract and save the value.
     char key[TA_KEY_BYTES], value[TA_VALUE_BYTES];
 
-    while (getNextKeyValue(cfg, key, value)) {
+    while (getNextKeyValue(cfg, key, TA_KEY_BYTES, value, TA_VALUE_BYTES)) {
         fprintf(stderr, "%s:%d key[%s] value[%s]\n",__func__, __LINE__, key, value);
         if (!strcmp(TA_MAPNAME_KEY, key)) {
             chkSetString(&mapName, value);
@@ -312,7 +312,7 @@ int TrnAttr::parseConfig()
 // Return the next key and value pair in the cfg file.
 // Function returns 0 if no key/value pair was found,
 // otherwise 1.
-int TrnAttr::getNextKeyValue(FILE *cfg, char key[], char value[])
+int TrnAttr::getNextKeyValue(FILE *cfg, char key[], uint16_t klen, char value[], uint16_t vlen)
 {
     // Continue reading from cfg skipping comment lines
     //
@@ -327,7 +327,12 @@ int TrnAttr::getNextKeyValue(FILE *cfg, char key[], char value[])
             // If a non-comment line was read from the config file,
             // extract the key and value
             char *loc;
-            sscanf(line, "%s = %s", key, value);
+            char sfmt[64]={0};
+            // generate format string with with width limits to
+            // prevent buffer overflows (e.g. "%100s = %100s"
+            snprintf(sfmt, 64, "%%%ds = %%%ds", (klen-1), (vlen-1));
+//            sscanf(line, "%"(klen-1)"s = %"(vlen-1)"s", klen-1, key, vlen-1, value);
+            sscanf(line, sfmt, key, value);
             if ( (loc = strchr(value, ';')) ) *loc = '\0';  // Remove ';' from the value
             return 1;
         }
