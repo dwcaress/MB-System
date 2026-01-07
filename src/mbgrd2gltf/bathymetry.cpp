@@ -186,6 +186,9 @@ Bathymetry::Bathymetry(const Options& options) {
   if (return_value != NC_NOERR)
     throw NetCdfError(return_value, "failed to close netCDF file");
 
+  LOG_INFO("Loaded bathymetry grid:", _dimension[0], "x", _dimension[1], "=", 
+           Logger::format_with_commas(_xysize), "points");
+
   compress(options);
 }
 
@@ -260,6 +263,7 @@ void Bathymetry::get_variable_float_array(int netcdf_id, const char* name, float
   int variable_id = get_variable_id(netcdf_id, name);
   int return_value = nc_get_vara_float(netcdf_id, variable_id, start, length, out);
   if (return_value != NC_NOERR) {
+    // This catch can be normal if strategy 1 (1D read) fails and we fallback to strategy 2 (2D read)
     throw NetCdfError(return_value,
                       "failed to get float array data for variable '" + std::string(name) + "'");
   }
@@ -292,6 +296,8 @@ void Bathymetry::compress(const Options& options) {
   // Allow negative values for when one or more grid axes are reversed
   _spacing[0] = (_x_range[1] - _x_range[0]) / static_cast<double>(_dimension[0] - 1);
   _spacing[1] = (_y_range[1] - _y_range[0]) / static_cast<double>(_dimension[1] - 1);
+  LOG_INFO("Compressed grid to", _dimension[0], "x", _dimension[1], "=", 
+           Logger::format_with_commas(_xysize), "points");
 }
 
 std::string Bathymetry::to_string() const {
