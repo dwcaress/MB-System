@@ -48,6 +48,15 @@ endif()
 add_compile_definitions(
 HAVE_CONFIG_H
 _GNU_SOURCE
+#TRN_NORAND
+WITH_TESTS
+WITH_MMDEBUG
+WITH_MST_MSTATS
+MST_STATS_EN
+#WITH_ALT_DELTAT_VALIDATION
+#WITH_CEP_2022
+WITH_TRNLOG
+WITH_TRNLOG_EST_OUT
 )
 
 # define source directories
@@ -198,6 +207,32 @@ target_include_directories(trnxplug PRIVATE
     ${LIBTRNAV_INCLUDES}
 )
 
+#------------------------------------------------------------------------------
+#
+# build lcmtrnplug
+
+# specify library
+add_library(lcmtrnplug
+    plug-common.cpp
+    PlugDVL.cpp
+    PlugXMB1.cpp
+    PlugIDTLASS.cpp
+    PlugLASSMB.cpp
+    PlugMBMiniROV.cpp
+    PlugIDT.cpp
+    PlugOISled.cpp
+    PlugOISled2.cpp
+    PlugOISledX.cpp
+    LcmTrnPP.cpp
+    LcmTrnCtx.cpp
+)
+
+# specify include paths and libraries
+target_link_libraries(lcmtrnplug PRIVATE newmat geolib geocon trnw qnx mb1 tnav udpms trncli NetCDF::NetCDF lcm)
+
+target_include_directories(lcmtrnplug PRIVATE
+    ${LIBTRNAV_INCLUDES}
+)
 #
 #------------------------------------------------------------------------------
 #
@@ -206,9 +241,6 @@ target_include_directories(trnxplug PRIVATE
 # specify build target
 add_executable(trnxpp
     trnxpp_app.cpp
-    ${UTILS_SRC_DIR}/TrnClient.cpp
-    ${UTILS_SRC_DIR}/TerrainNavClient.cpp
-    ${UTILS_SRC_DIR}/TrnAttr.cpp
 )
 
 # specify include paths and libraries
@@ -217,12 +249,25 @@ target_link_libraries(trnxpp PRIVATE lcm stdc++ mb1 trncli tnav newmat qnx m geo
 target_include_directories(trnxpp PRIVATE
     ${LIBTRNAV_INCLUDES}
 )
-#target_compile_options(trnxpp PRIVATE
-#-fsanitize=address
-#)
-#target_link_options(trnxpp PRIVATE
-#-fsanitize=address
-#)
+#
+#------------------------------------------------------------------------------
+#
+# build lcmtrnpp (LCM TRN pre-processor)
+
+# specify build target
+add_executable(lcmtrnpp
+    LcmTrnApp.cpp
+    LcmTrnPP.cpp
+    LcmTrnCtx.cpp
+)
+
+# specify include paths and libraries
+# (stdc++ may be needed for linux)
+target_link_libraries(lcmtrnpp PRIVATE lcm mb1 trncli tnav newmat qnx m geolib geocon udpms lcmtrnplug NetCDF::NetCDF)
+
+target_include_directories(lcmtrnpp PRIVATE
+    ${LIBTRNAV_INCLUDES}
+)
 #
 #------------------------------------------------------------------------------
 # Build optional targets wnen buildTRNOptional=ON
@@ -280,7 +325,7 @@ endif()
 #
 #------------------------------------------------------------------------------
 # install it all
-install(TARGETS trnlcm trnlcm-cpp udpms trnxplug
+install(TARGETS trnlcm trnlcm-cpp udpms trnxplug lcmtrnplug
 
 DESTINATION
 ${CMAKE_INSTALL_LIBDIR}
@@ -289,7 +334,7 @@ Devel
 )
 
 install(TARGETS
-trnxpp
+trnxpp lcmtrnpp
 ${TRN_OPTIONAL}
 
 DESTINATION
