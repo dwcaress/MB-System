@@ -355,7 +355,7 @@ int TrnClient::loadCfgAttributes(const char *cfg_file, const char *usr_log_path)
         fprintf(stderr, "%s: trnsvr : %s\n", __func__, _trn_attr.terrainNavServer);
 
     }catch (Exception e){
-        printf("\n%s:%dException parsing \n", __func__, __LINE__);
+        printf("\n%s:%d Exception parsing \n", __func__, __LINE__);
     }
 
     fprintf(stderr, "%s: server : %s:%d\n", __func__, _server_ip, _sockport);
@@ -560,7 +560,7 @@ void TrnClient::show(int indent, int wkey, int wval)
     fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"server_addr",wval,&_server_addr);
     fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"server_msg",wval,&_server_msg);
     fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"comms_buf",wval,&_comms_buf);
-    
+
     fprintf(stderr,"%*s%*s %*c\n",indent,(indent>0?" ":""),wkey,"verbose",wval,(verbose?'Y':'N'));
     fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"quit_ref",wval,_quit_ref);
     fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"cfg_file",wval,_cfg_file);

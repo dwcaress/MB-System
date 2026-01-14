@@ -248,7 +248,6 @@ int TrnAttr::parseConfig()
     char key[TA_KEY_BYTES], value[TA_VALUE_BYTES];
 
     while (getNextKeyValue(cfg, key, TA_KEY_BYTES, value, TA_VALUE_BYTES)) {
-        fprintf(stderr, "%s:%d key[%s] value[%s]\n",__func__, __LINE__, key, value);
         if (!strcmp(TA_MAPNAME_KEY, key)) {
             chkSetString(&mapName, value);
         } else if (!strcmp(TA_PARNAME_KEY, key)) {

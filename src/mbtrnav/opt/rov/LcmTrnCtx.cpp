@@ -1357,7 +1357,6 @@ int LcmTrnCtx::add_trn_host(std::string key, trn_host *host)
     int retval = -1;
 
     trn_host *list_host = lookup_trncli_host(key);
-    fprintf(stderr, "%s:%d - ************************ key %s host %p list_host %p\n", __func__, __LINE__, key.c_str(), host, list_host);
 
     if(list_host == nullptr){
         // copy host
@@ -1436,7 +1435,7 @@ int LcmTrnCtx::start_trncli(const std::string &key, trnxpp_cfg *cfg, bool force_
         std::get<5>(*trnc_host) = uhost;
     }
 
-    fprintf(stderr, "%s:%d constructing trncli[%p]\n", __func__, __LINE__, trncli);
+//    fprintf(stderr, "%s:%d constructing trncli[%p]\n", __func__, __LINE__, trncli);
     trncli = new TrnClient("localhost",TRNCLI_PORT_DFL);
     TrnAttr &att = trncli->getTrnAttr();
 
@@ -1453,7 +1452,7 @@ int LcmTrnCtx::start_trncli(const std::string &key, trnxpp_cfg *cfg, bool force_
     TrnAttr &att_ref = trncli->getTrnAttr();
     TrnAttr *patt = &att_ref;
 
-    fprintf(stderr, "%s:%d cfg_path_str [%s] key[%s] host.cli[%p] trncli[%p] trn_attr[%p]  ---------------------------\n", __func__, __LINE__, cfg_path_str.c_str(), key.c_str(), std::get<5>(*trnc_host).trnc_host, trncli, patt);
+//    fprintf(stderr, "%s:%d cfg_path_str [%s] key[%s] host.cli[%p] trncli[%p] trn_attr[%p]  ---------------------------\n", __func__, __LINE__, cfg_path_str.c_str(), key.c_str(), std::get<5>(*trnc_host).trnc_host, trncli, patt);
 
 
 //        int tcc = trncli_connect(key, 10, 3, user_int);
@@ -1472,8 +1471,6 @@ int LcmTrnCtx::start_trncli(const std::string &key, trnxpp_cfg *cfg, bool force_
     if(cfg->debug()>0 && trncli != NULL){
         trncli->show();
     }
-
-    fprintf(stderr, "%s:%d -  //////////// START_TRNCLI EXITING ////////////\n", __func__, __LINE__);
 
     return retval;
 }
@@ -1770,7 +1767,7 @@ int LcmTrnCtx::pub_trn(double nav_time, poseT *pt, measT *mt, int trn_type, std:
         return 0;
     }
 
-    fprintf(stderr,"%s:%d - ctx[%p] mTrnCliList[%p]\n",__func__, __LINE__,this,&mTrnCliList);
+//    fprintf(stderr,"%s:%d - ctx[%p] mTrnCliList[%p]\n",__func__, __LINE__,this,&mTrnCliList);
     // publish to MB1 servers
     int i=0;
     std::list<trn_host>::iterator it;
@@ -1819,7 +1816,7 @@ int LcmTrnCtx::pub_trn(double nav_time, poseT *pt, measT *mt, int trn_type, std:
         bool is_connected = trncli_check_connection( i, trncli, cfg);
 
         if(!is_connected){
-            fprintf(stderr, "%s:%d - TrnClient not connected; connecting/continuing\n", __func__, __LINE__);
+            TRN_NDPRINT(5, "%s:%d - TrnClient not connected; connecting/continuing\n", __func__, __LINE__);
             continue;
         }
 

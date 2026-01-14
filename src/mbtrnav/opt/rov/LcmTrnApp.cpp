@@ -284,10 +284,11 @@ static void s_copy_config(trnxpp_cfg &cfg, LcmTrnPP &xpp)
             {
                 fprintf(stderr,"%s:%d - ERR config copy failed [%s] [%d/%s]\n",__func__, __LINE__,
                         ss.str().c_str(), errno, strerror(errno));
-            } else {
-                fprintf(stderr,"%s:%d - config copy OK [%s] [%d/%s]\n",__func__, __LINE__,
-                        ss.str().c_str(), errno, strerror(errno));
-            }
+            } 
+//            else {
+//                fprintf(stderr,"%s:%d - config copy OK [%s] [%d/%s]\n",__func__, __LINE__,
+//                        ss.str().c_str(), errno, strerror(errno));
+//            }
         }
     }
 
@@ -300,10 +301,11 @@ static void s_copy_config(trnxpp_cfg &cfg, LcmTrnPP &xpp)
     {
         fprintf(stderr,"%s:%d - ERR config copy failed [%s] [%d/%s]\n",__func__, __LINE__,
                 ss.str().c_str(), errno, strerror(errno));
-    } else {
-        fprintf(stderr,"%s:%d - config copy OK [%s] [%d/%s]\n",__func__, __LINE__,
-                ss.str().c_str(), errno, strerror(errno));
-    }
+    } 
+//    else {
+//        fprintf(stderr,"%s:%d - config copy OK [%s] [%d/%s]\n",__func__, __LINE__,
+//                ss.str().c_str(), errno, strerror(errno));
+//    }
 }
 
 #ifdef WITH_TEST_STREAMS

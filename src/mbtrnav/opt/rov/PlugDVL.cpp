@@ -216,12 +216,9 @@ int cb_proto_dvl(void *pargs)
             poseT *pt = trnx_utils::mb1_to_pose(snd, ai, NULL, &gcon);
             measT *mt = trnx_utils::mb1_to_meas(snd, ai, trn_type, &gcon);
 
-            fprintf(stderr, "%s:%d processing ctx[%s/%p] ***********\n", __func__, __LINE__, ctx->ctx_key().c_str(), ctx);
+//            fprintf(stderr, "%s:%d processing ctx[%s/%p] ***********\n", __func__, __LINE__, ctx->ctx_key().c_str(), ctx);
 
             // publish update TRN, publish estimate to TRN, LCM
-            fprintf(stderr, "%s:%d ///////// calling PUB_TRN ////////////\n", __func__, __LINE__);
-//            ctx->dump_trnhosts();
-//            ctx->dump_cheese();
             ctx->pub_trn(nav_time, pt, mt, trn_type, xpp->pub_list(), cfg);
 
             // does it make sense to publish to MB1?

@@ -804,15 +804,6 @@ trn_host *LcmTrnPP::lookup_trn_host(const std::string &key)
     return nullptr;
 }
 
-//    void dump_trnhosts()
-//    {
-//        for(int i=0; i<mCtx.size(); i++) {
-//
-//            LcmTrnCtx *ctx = mCtx.at(i);
-//            ctx->dump_trnhosts();
-//        }
-//    }
-
 int LcmTrnPP::start_trn(trnxpp_cfg *cfg, bool *user_int)
 {
     int retval = -1;
@@ -841,10 +832,6 @@ int LcmTrnPP::start_trn(trnxpp_cfg *cfg, bool *user_int)
             if(ctx->init_rawbath_csv_file(cfg) != 0){
                 errors++;
             }
-            fprintf(stderr, "%s:%d - AFTER starting CTX[%d]\n", __func__, __LINE__, i);
-            // WTF: if this call is removed, LcmTrnCtx::dump_trnhosts breaks in later calls
-            ctx->dump_trnhosts();
-//            ctx->dump_cheese();
         }
     }
     retval = errors;
@@ -1763,7 +1750,6 @@ int LcmTrnPP::parse_ctx(const char *str)
 
                     if(thost != nullptr){
                         std::string trn_type = std::get<1>(*thost);
-                        fprintf(stderr,  "%s:%d - trn_type[%s]\n", __func__, __LINE__, trn_type.c_str());
 
                         if(trn_type.compare("trncli") == 0) {
                             ctx->add_trn_host(val_key, thost);
