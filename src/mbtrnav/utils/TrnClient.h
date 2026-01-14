@@ -72,17 +72,18 @@ class TerrainNav;
 //    ~TRN_attr();
 //};
 
-
 class TrnClient : public TerrainNavClient {
     
 public:
     
-    explicit TrnClient(const char *host=NULL, int port=0);
-    explicit TrnClient(const char *svr_log_dir=NULL, const char *host=NULL, int port=0);
+    TrnClient();
+    explicit TrnClient(const char *host, int port=0);
+    explicit TrnClient(const char *svr_log_dir, const char *host=NULL, int port=0);
     TrnClient(const TrnClient& other);
     virtual ~TrnClient() override;
     static void chkSetString(char **dest, const char *src);
-    int loadCfgAttributes(const char *cfg_file);
+    char *updateSessionDir();
+    int loadCfgAttributes(const char *cfg_file, const char *usr_log_path = NULL);
     int setVerbose(int val);
     int initSocket();
     int connectSocket();
@@ -91,9 +92,8 @@ public:
     void show_addr(int indent=0, int wkey=15, int wval=18);
     void setQuitRef(bool *pvar);
     bool isQuitSet();
-//    int getNextKeyValue(FILE *cfg, char key[], char value[]);
     TrnAttr &getTrnAttr();
-
+    char *attGetServer();
 
 protected:
     int verbose;
