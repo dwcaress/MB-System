@@ -61,6 +61,7 @@ class TerrainNavClient : public TerrainNav
 		   const int &filterType,
 		   const int &mapType);
 
+    TerrainNavClient(const TerrainNavClient &other);
 
 #if 0
   /* Constructor: TerrainNavClient(mapName)
@@ -310,7 +311,6 @@ class TerrainNavClient : public TerrainNav
   //////////////////////////////////////////////////////////////////////
   // Other important state variables
   char *_logdir;          // name of the log directory on the MVC
-
   //////////////////////////////////////////////////////////////////////
   // Initialize connection to server and send state
   bool _connected;
@@ -319,11 +319,8 @@ class TerrainNavClient : public TerrainNav
   int _sockfd;
   int _sockport;
   struct sockaddr_in _server_addr;
-
   struct commsT _server_msg;
   char _comms_buf[TRN_MSG_SIZE];
-
-
 
 };
 
