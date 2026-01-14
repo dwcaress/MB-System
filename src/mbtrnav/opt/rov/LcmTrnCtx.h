@@ -348,9 +348,6 @@ private:
     std::list<trn_host> mMB1SvrList;
     std::list<trn_host> mUdpmSubList;
     std::list<trn_host> mTrnCliList;
-
-    std::mutex mTrnCliMutex; // Global mutex object
-
 };
 //}
 #endif

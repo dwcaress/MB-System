@@ -157,7 +157,6 @@ LcmTrnCtx::~LcmTrnCtx()
 
 void LcmTrnCtx::tostream(std::ostream &os, int wkey, int wval)
 {
-    //std::lock_guard<std::mutex> guard(mTrnCliMutex);
     int wx = wval;
     int alen = 0;
 
@@ -1355,7 +1354,6 @@ trn_host *LcmTrnCtx::lookup_trncli_host(std::string key)
 
 int LcmTrnCtx::add_trn_host(std::string key, trn_host *host)
 {
-    //std::lock_guard<std::mutex> guard(mTrnCliMutex);
     int retval = -1;
 
     trn_host *list_host = lookup_trncli_host(key);
@@ -1420,8 +1418,6 @@ int LcmTrnCtx::start_trncli(const std::string &key, trnxpp_cfg *cfg, bool force_
         return retval;
     }
 
-    //        void *vp = std::get<5>(*trnc_host);
-    //        TrnClient *trncli = static_cast<TrnClient *>(vp);
     TrnHostX uhost = std::get<5>(*trnc_host);
     void *vp = uhost.trnc_host;
     TrnClient *trncli = uhost.trnc_host;
@@ -1436,7 +1432,6 @@ int LcmTrnCtx::start_trncli(const std::string &key, trnxpp_cfg *cfg, bool force_
         fprintf(stderr, "%s:%d !!!!!!!!!!! DELETING trncli[%p] !!!!!!!!!!!!\n", __func__, __LINE__, trncli);
         delete trncli;
         trncli = NULL;
-        //            std::get<5>(*trnc_host) = NULL;
         uhost.trnc_host = NULL;
         std::get<5>(*trnc_host) = uhost;
     }
@@ -1445,29 +1440,15 @@ int LcmTrnCtx::start_trncli(const std::string &key, trnxpp_cfg *cfg, bool force_
     trncli = new TrnClient("localhost",TRNCLI_PORT_DFL);
     TrnAttr &att = trncli->getTrnAttr();
 
+    // TODO: WIP is TrnClient initialization correct?
     std::string cfg_path_str = std::get<6>(*trnc_host);
     // set up log directory (using app config --logdir)
     trncli->initLogDirectory(cfg->logdir().c_str(), NULL, 0, true);
     // load TRN configuration and configure TrnClient
     trncli->loadCfgAttributes(cfg_path_str.c_str(), cfg->logdir().c_str());
 
-
-    fprintf(stderr, "%s:%d new trncli[%p]\n", __func__, __LINE__, trncli);
-
-//    fprintf(stderr, "%s:%d - TRNCLI addr:\n", __func__, __LINE__);
-//    trncli->show_addr();
-    //        fprintf(stderr, "%s:%d - TRNCLI trn_attr addr:\n%s\n", __func__, __LINE__, trncli->getTrnAttr()->atostring().c_str());
-    //        fprintf(stderr, "%s:%d -  terrainNavServer [%s]\n", __func__, __LINE__, trncli->getTrnAttr()->terrainNavServer);
-
-
-    //        std::get<5>(*trnc_host) = trncli;
     uhost.trnc_host = trncli;
     std::get<5>(*trnc_host) = uhost;
-
-//    fprintf(stderr, "%s:%d - TRNCLI addr:\n", __func__, __LINE__);
-//    trncli->show_addr();
-    //        fprintf(stderr, "%s:%d - TRNCLI trn_attr addr:\n%s\n", __func__, __LINE__, trncli->getTrnAttr()->atostring().c_str());
-    //        fprintf(stderr, "%s:%d -  terrainNavServer [%s]\n", __func__, __LINE__, trncli->getTrnAttr()->terrainNavServer);
 
     TrnAttr &att_ref = trncli->getTrnAttr();
     TrnAttr *patt = &att_ref;
@@ -1475,7 +1456,7 @@ int LcmTrnCtx::start_trncli(const std::string &key, trnxpp_cfg *cfg, bool force_
     fprintf(stderr, "%s:%d cfg_path_str [%s] key[%s] host.cli[%p] trncli[%p] trn_attr[%p]  ---------------------------\n", __func__, __LINE__, cfg_path_str.c_str(), key.c_str(), std::get<5>(*trnc_host).trnc_host, trncli, patt);
 
 
-    //        int tcc = trncli_connect(key, 10, 3, user_int);
+//        int tcc = trncli_connect(key, 10, 3, user_int);
     int tcc = trncli_connect(key, 1, 0, user_int);
 
     if(trncli->is_connected()){
@@ -1491,13 +1472,6 @@ int LcmTrnCtx::start_trncli(const std::string &key, trnxpp_cfg *cfg, bool force_
     if(cfg->debug()>0 && trncli != NULL){
         trncli->show();
     }
-
-//    if(trncli != NULL) {
-//        fprintf(stderr, "%s:%d - TRNCLI addr:\n", __func__, __LINE__);
-//        trncli->show_addr();
-//    }
-    //        fprintf(stderr, "%s:%d - TRNCLI trn_attr addr:\n%s\n", __func__, __LINE__, trncli->getTrnAttr()->atostring().c_str());
-    //        fprintf(stderr, "%s:%d -  terrainNavServer [%s]\n", __func__, __LINE__, trncli->getTrnAttr()->terrainNavServer);
 
     fprintf(stderr, "%s:%d -  //////////// START_TRNCLI EXITING ////////////\n", __func__, __LINE__);
 
@@ -1585,7 +1559,6 @@ void LcmTrnCtx::tcli_start_worker_fn(TrnClient *trncli, std::promise<bool> *con_
 // return true if connected;
 bool LcmTrnCtx::trncli_check_connection(int idx, TrnClient *trnc, trnxpp_cfg *cfg)
 {
-    //std::lock_guard<std::mutex> guard(mTrnCliMutex);
     bool retval = false;
 
     static std::vector<bool> connection_pending;
@@ -1660,8 +1633,8 @@ bool LcmTrnCtx::trncli_check_connection(int idx, TrnClient *trnc, trnxpp_cfg *cf
         connection_pending.at(idx) = true;
 
         // start worker thread, add to list
-        //            std::thread *worker = new std::thread(&LcmTrnCtx::tcli_start_worker_fn, this, trnc,  std::move(*con_promise));
-        //            std::thread *worker = new std::thread(&LcmTrnCtx::tcli_start_worker_fn,  trnc,  std::move(*con_promise));
+//            std::thread *worker = new std::thread(&LcmTrnCtx::tcli_start_worker_fn, this, trnc,  std::move(*con_promise));
+//            std::thread *worker = new std::thread(&LcmTrnCtx::tcli_start_worker_fn,  trnc,  std::move(*con_promise));
         std::thread *worker = new std::thread(&LcmTrnCtx::tcli_start_worker_fn,  trnc,  con_promise);
 
         workers.at(idx) = worker;
@@ -1746,7 +1719,7 @@ int LcmTrnCtx::trncli_count()
 void LcmTrnCtx::dump_trnhosts()
 {
     fprintf(stderr,"%s:%d - ctx[%p] mTrnCliList[%p]\n",__func__, __LINE__,this,&mTrnCliList);
-    //std::lock_guard<std::mutex> guard(mTrnCliMutex);
+
     // publish to MB1 servers
     int i=0;
     std::list<trn_host>::iterator it;
@@ -1755,9 +1728,6 @@ void LcmTrnCtx::dump_trnhosts()
 
         trn_host thost = (*it);
         std::string key = std::get<0>(thost);
-
-        //            void *vp = std::get<5>(thost);
-        //            TrnClient *trncli = static_cast<TrnClient *>(vp);
 
         TrnHostX uhost = std::get<5>(thost);
         void *vp = uhost.trnc_host;
@@ -1770,82 +1740,30 @@ void LcmTrnCtx::dump_trnhosts()
             fprintf(stderr, "%s:%d - TRNCLI[%d] key[%s] vp[%p] trncli[%p] trn_attr[%p]:\n", __func__, __LINE__, i, key.c_str(), vp, trncli, patt);
             fprintf(stderr, "%s:%d - TRNCLI[%d] SZ trncli[%zu] trn_attr[%zu]:\n", __func__, __LINE__, i, sizeof(*trncli), sizeof(*patt));
 
-            fprintf(stderr, "%s:%d - TRNCLI show_addr:\n", __func__, __LINE__);
+            fprintf(stderr, "%s:%d - TRNCLI[%d] show_addr:\n", __func__, __LINE__,i);
             trncli->show_addr();
 
             std::string att_str = att_ref.atostring();
-            fprintf(stderr, "%s:%d - TRNCLI trn_attr addr:\n%s\n", __func__, __LINE__, att_str.c_str());
+            fprintf(stderr, "%s:%d - TRNCLI[%d] trn_attr addr:\n%s\n", __func__, __LINE__, i, att_str.c_str());
 
             att_str = att_ref.tostring();
-            fprintf(stderr, "%s:%d - TRNCLI trn_attr members:\n%s\n", __func__, __LINE__, att_str.c_str());
+            fprintf(stderr, "%s:%d - TRNCLI[%d] trn_attr members:\n%s\n", __func__, __LINE__, i, att_str.c_str());
 
 
             if(NULL != patt) {
-                fprintf(stderr, "%s:%d -  terrainNavServer [%s]\n", __func__, __LINE__, patt->terrainNavServer);
+                fprintf(stderr, "%s:%d - TRNCLI[%d] terrainNavServer [%s]\n", __func__, __LINE__, i, patt->terrainNavServer);
             }else {
-                fprintf(stderr, "%s:%d ///////// !!! TRN_ATTR is NULL !!! ////////////\n", __func__, __LINE__);
+                fprintf(stderr, "%s:%d - TRNCLI[%d]  !!! TRN_ATTR is NULL !!!\n", __func__, __LINE__, i);
             }
         } else {
-            fprintf(stderr, "%s:%d - TRNCLI is NULL\n", __func__, __LINE__);
+            fprintf(stderr, "%s:%d - TRNCLI[%d]  is NULL\n", __func__, __LINE__, i);
         }
     }
     return;
 }
-
-
-void LcmTrnCtx::dump_cheese()
-{
-    fprintf(stderr,"%s:%d - ctx[%p] mTrnCliList[%p]\n",__func__, __LINE__,this,&mTrnCliList);
-    //std::lock_guard<std::mutex> guard(mTrnCliMutex);
-    // publish to MB1 servers
-    int i=0;
-    std::list<trn_host>::iterator it;
-
-    for(it = mTrnCliList.begin(); it != mTrnCliList.end(); it++, i++){
-
-        trn_host thost = (*it);
-        std::string key = std::get<0>(thost);
-
-        //            void *vp = std::get<5>(thost);
-        //            TrnClient *trncli = static_cast<TrnClient *>(vp);
-
-        TrnHostX uhost = std::get<5>(thost);
-        void *vp = uhost.trnc_host;
-        TrnClient *trncli = uhost.trnc_host;
-        TrnAttr &att_ref = trncli->getTrnAttr();
-        TrnAttr *patt = &att_ref;
-
-        if(trncli != NULL) {
-
-            fprintf(stderr, "%s:%d - TRNCLI[%d] key[%s] vp[%p] trncli[%p] trn_attr[%p]:\n", __func__, __LINE__, i, key.c_str(), vp, trncli, patt);
-            fprintf(stderr, "%s:%d - TRNCLI[%d] SZ trncli[%zu] trn_attr[%zu]:\n", __func__, __LINE__, i, sizeof(*trncli), sizeof(*patt));
-
-            fprintf(stderr, "%s:%d - TRNCLI show_addr:\n", __func__, __LINE__);
-            trncli->show_addr();
-
-            std::string att_str = att_ref.atostring();
-            fprintf(stderr, "%s:%d - TRNCLI trn_attr addr:\n%s\n", __func__, __LINE__, att_str.c_str());
-
-            att_str = att_ref.tostring();
-            fprintf(stderr, "%s:%d - TRNCLI trn_attr members:\n%s\n", __func__, __LINE__, att_str.c_str());
-
-
-            if(NULL != patt) {
-                fprintf(stderr, "%s:%d -  terrainNavServer [%s]\n", __func__, __LINE__, patt->terrainNavServer);
-            }else {
-                fprintf(stderr, "%s:%d ///////// !!! TRN_ATTR is NULL !!! ////////////\n", __func__, __LINE__);
-            }
-        } else {
-            fprintf(stderr, "%s:%d - TRNCLI is NULL\n", __func__, __LINE__);
-        }
-    }
-    return;
-}
-
 
 int LcmTrnCtx::pub_trn(double nav_time, poseT *pt, measT *mt, int trn_type, std::list<lcm_pub> &pubs,  trnxpp_cfg *cfg)
 {
-    //std::lock_guard<std::mutex> guard(mTrnCliMutex);
     int retval = -1;
 
     if(mTrnCliList.size() <= 0){
@@ -1862,9 +1780,6 @@ int LcmTrnCtx::pub_trn(double nav_time, poseT *pt, measT *mt, int trn_type, std:
         trn_host thost = (*it);
         std::string key = std::get<0>(thost);
 
-        //            void *vp = std::get<5>(thost);
-        //            TrnClient *trncli = static_cast<TrnClient *>(vp);
-
         TrnHostX uhost = std::get<5>(thost);
         void *vp = uhost.trnc_host;
         TrnClient *trncli = uhost.trnc_host;
@@ -1872,20 +1787,6 @@ int LcmTrnCtx::pub_trn(double nav_time, poseT *pt, measT *mt, int trn_type, std:
         TrnAttr *patt = &att_ref;
 
         TRN_NDPRINT(5, "%s:%d - TRNCLI[%d] key[%s] vp[%p] trncli[%p] ctx[%p]:\n", __func__, __LINE__, i, key.c_str(), vp, trncli, this);
-
-        fprintf(stderr, "%s:%d - TRNCLI[%d] key[%s] vp[%p] trncli[%p] trn_attr[%p]:\n", __func__, __LINE__, i, key.c_str(), vp, trncli, patt);
-
-        //--------------------------------------------
-        // KLH : TrnClient reference is involved in crash
-        // TrnClient/TrnAttr references in dump_trnhosts()  work as expected....
-        // NOTE: uses exact same steps here to obtain references and access members
-//        fprintf(stderr, "%s:%d -------- dump_trnhosts --------\n", __func__, __LINE__);
-//        dump_trnhosts();
-////        dump_cheese();
-
-        //            fprintf(stderr, "%s:%d -------- sizeof(void*) [%zu] sizeof(TrnClient*) [%zu] --------\n", __func__, __LINE__, sizeof(void*), sizeof(TrnClient*));
-        fprintf(stderr, "%s:%d -------- sizeof(TrnClient) [%zu] sizeof(TrnAttr) [%zu] --------\n", __func__, __LINE__, sizeof(TrnClient), sizeof(TrnAttr));
-        //--------------------------------------------
 
         if(trncli == NULL){
 
@@ -1897,42 +1798,22 @@ int LcmTrnCtx::pub_trn(double nav_time, poseT *pt, measT *mt, int trn_type, std:
 
             // TODO: is it valid to re-read thost, or do we need to reiterate?
             // update variable from TrnClientList reference
-            //                vp = std::get<5>(thost);
             uhost = std::get<5>(thost);
             vp = uhost.trnc_host;
 
             if(NULL == vp){
                 LU_PEVENT(cfg->mlog(), "ERR start_trncli failed\n", __func__, __LINE__);
-                fprintf(stderr, "%s:%d - ERR start_trncli failed\n", __func__, __LINE__);
                 continue;
             }
 
             // update local reference
-            //                trncli = static_cast<TrnClient *>(vp);
             trncli = uhost.trnc_host;
-
-//            if(trncli != NULL) {
-//                fprintf(stderr, "%s:%d - TRNCLI addr [%p]:\n", __func__, __LINE__, trncli);
-//                trncli->show_addr();
-//            }
-            //                fprintf(stderr, "%s:%d - TRNCLI trn_attr addr:\n%s\n", __func__, __LINE__, trncli->getTrnAttr()->atostring().c_str());
-            //                fprintf(stderr, "%s:%d -  terrainNavServer [%s]\n", __func__, __LINE__, trncli->getTrnAttr()->terrainNavServer);
 
             // update stats
             cfg->stats().trn_cli_con++;
 
             LU_PEVENT(cfg->mlog(), "TrnClient started [%p]\n", __func__, __LINE__, (void *)trncli);
-            fprintf(stderr, "%s:%d - TrnClient started [%p]\n", __func__, __LINE__, (void *)trncli);
         }
-
-        //            fprintf(stderr, "%s:%d - checking connection....getTrnAttr[%p]\n", __func__, __LINE__, (void *)trncli->getTrnAttr());
-
-        //            trncli->show_addr();
-        //             trncli->getTrnAttr()->tostream(std::cerr);
-        //            fprintf(stderr, "%s:%d - TRNCLI addr:\n", __func__, __LINE__);
-        //            trncli->show_addr();
-        //            fprintf(stderr, "%s:%d - TRNCLI trn_attr addr:\n%s\n", __func__, __LINE__, trncli->getTrnAttr()->atostring().c_str());
-        //            fprintf(stderr, "%s:%d -  terrainNavServer [%s]\n", __func__, __LINE__, trncli->getTrnAttr()->terrainNavServer);
 
         // check connection, restart as needed (in separate thread)
         bool is_connected = trncli_check_connection( i, trncli, cfg);
