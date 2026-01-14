@@ -1535,7 +1535,7 @@ void LcmTrnCtx::tcli_start_worker_fn(TrnClient *trncli, std::promise<bool> *con_
         TrnAttr &att_ref = trncli->getTrnAttr();
         TrnAttr *patt = &att_ref;
 
-        fprintf(stderr, "%s:%d starting trncli:  trncli[%p] trn_attr[%p] trncli_sz[%zu]\n",__func__, __LINE__, trncli, patt, sizeof(*trncli));
+        TRN_NDPRINT(5, "%s:%d starting trncli:  trncli[%p] trn_attr[%p] trncli_sz[%zu]\n",__func__, __LINE__, trncli, patt, sizeof(*trncli));
 
         TerrainNav *tnav = trncli->connectTRN();
 
@@ -1544,7 +1544,7 @@ void LcmTrnCtx::tcli_start_worker_fn(TrnClient *trncli, std::promise<bool> *con_
         if(tnav != nullptr)
             iscon = trncli->is_connected();
 
-        fprintf(stderr, "%s:%d setting promise: tnav[%p] trncli[%p] trn_attr[%p]  iscon[%c]\n",__func__, __LINE__, tnav, trncli, patt, (iscon?'Y':'N'));
+        TRN_NDPRINT(5, "%s:%d setting promise: tnav[%p] trncli[%p] trn_attr[%p]  iscon[%c]\n",__func__, __LINE__, tnav, trncli, patt, (iscon?'Y':'N'));
 
         con_promise->set_value(iscon);
     } catch(Exception e) {
@@ -1597,14 +1597,11 @@ bool LcmTrnCtx::trncli_check_connection(int idx, TrnClient *trnc, trnxpp_cfg *cf
     if(trnc->is_connected() && !connection_pending.at(idx))
         return true;
 
-    fprintf(stderr, "%s:%d - idx[%d] workers.size[%zu] mTrnCliList.size[%zu]\n", __func__, __LINE__, idx, workers.size(), mTrnCliList.size());
-
     if(!connection_pending.at(idx)){
         TrnAttr &att_ref = trnc->getTrnAttr();
         TrnAttr *patt = &att_ref;
 
         LU_PEVENT(cfg->mlog(), "ERR TrnClient[%d] is DISCONNECTED trnc[%p] trn_attr[%p]\n", __func__, __LINE__, idx, trnc, (void *)patt);
-        fprintf(stderr, "%s:%d - ERR TrnClient[%d]  is DISCONNECTED trnc[%p] trn_attr[%p]\n", __func__, __LINE__, idx, trnc, (void *)patt);
 
         // update disconnect stats
         if(cfg->stats().trn_cli_dis <= cfg->stats().trn_cli_con)
@@ -1640,29 +1637,37 @@ bool LcmTrnCtx::trncli_check_connection(int idx, TrnClient *trnc, trnxpp_cfg *cf
         is_connected.at(idx) = false;
     } else {
 
-        // check worker state
-        std::cerr << __func__ << ":" << __LINE__ <<  " - worker thread [" << idx << "] pending\n";
-        std::cerr << __func__ << ":" << __LINE__ <<  " - con_future[" << idx << "] valid[" << con_futures.at(idx).valid() << "]\n";
-
         bool ready = false;
         std::future_status con_status = con_futures.at(idx).wait_for(std::chrono::milliseconds(100));
+
+        if(cfg->verbose()){
+            // check worker state
+            std::cerr << __func__ << ":" << __LINE__ <<  " - worker thread [" << idx << "] pending\n";
+            std::cerr << __func__ << ":" << __LINE__ <<  " - con_future[" << idx << "] valid[" << con_futures.at(idx).valid() << "]\n";
+        }
+
         switch (con_status) {
             case std::future_status::deferred:
-                std::cerr << __func__ << ":" << __LINE__ <<  " - con_status[" << idx << "] DEFERRED\n";
+                if(cfg->verbose())
+                    std::cerr << __func__ << ":" << __LINE__ <<  " - con_status[" << idx << "] DEFERRED\n";
                 break;
             case std::future_status::timeout:
+                if(cfg->verbose())
                 std::cerr << __func__ << ":" << __LINE__ <<  " - con_status[" << idx << "] TIMEOUT\n";
                 break;
             case std::future_status::ready:
+                if(cfg->verbose())
                 std::cerr << __func__ << ":" << __LINE__ <<  " - con_status[" << idx << "] READY!\n";
                 ready = true;
                 break;
             default:
+                if(cfg->verbose())
                 std::cerr << __func__ << ":" << __LINE__ <<  " - con_status[" << idx << "] UNKNOWN!\n";
                 break;
         }
 
-        std::cerr << __func__ << ":" << __LINE__ <<  " - worker thread [" << idx << "] con_status[" << (int)con_status << "] ready[" << (ready?'Y':'N') << "]\n";
+        if(cfg->verbose())
+            std::cerr << __func__ << ":" << __LINE__ <<  " - worker thread [" << idx << "] con_status[" << (int)con_status << "] ready[" << (ready?'Y':'N') << "]\n";
 
         if(ready){
 
@@ -1672,7 +1677,10 @@ bool LcmTrnCtx::trncli_check_connection(int idx, TrnClient *trnc, trnxpp_cfg *cf
 
             retval = is_connected.at(idx);
 
-            std::cerr << __func__ << ":" << __LINE__ <<  " - joining worker [" << idx << "] is_connected[" << (is_connected.at(idx)?'Y':'N') << "]\n";
+            if(cfg->verbose()) {
+                std::cerr << __func__ << ":" << __LINE__ <<  " - joining worker [" << idx << "] is_connected[" << (is_connected.at(idx)?'Y':'N') << "]\n";
+            }
+
             workers.at(idx)->join();
 
             if(is_connected.at(idx)){
@@ -1681,11 +1689,9 @@ bool LcmTrnCtx::trncli_check_connection(int idx, TrnClient *trnc, trnxpp_cfg *cf
                 cfg->stats().trn_cli_con++;
 
                 LU_PEVENT(cfg->mlog(), "INFO TrnClient is RECONNECTED [%p]\n", __func__, __LINE__, trnc);
-                fprintf(stderr, "%s:%d - INFO TrnClient is RECONNECTED [%p]\n", __func__, __LINE__, trnc);
 
             } else{
                 LU_PEVENT(cfg->mlog(), "ERR TrnClient reconnect failed [%p]\n", __func__, __LINE__, trnc);
-                fprintf(stderr, "%s:%d - ERR TrnClient reconnect failed [%p]\n", __func__, __LINE__, trnc);
             }
 
             // clean up thread resources
