@@ -14,6 +14,7 @@
 #include <libgen.h>
 #include <cmath>
 #include <math.h>
+#include <cstdio>
 
 #include "TerrainNav.h"
 #include "TerrainNavLog.h"
@@ -56,7 +57,7 @@ lastMeasSuccessTime(0.),
 lastInitAttemptTime(0.),
 lastBottomLockTime(0.),
 allowFilterReinits(true),
-useModifiedWeighting(0),
+useModifiedWeighting(TRN_WT_NONE),
 numReinits(0),
 saveDirectory(NULL),
 vehicleSpecFile(NULL),
@@ -71,54 +72,24 @@ _trnLog(NULL)
 ,_trnBinLog(NULL)
 #endif
 {
+    fprintf(stderr, "%s:%d - <<<<< DFL CTOR >>>>>\n", __func__, __LINE__);
     for(int i=0;i<3;i++)lastValidVel[i]=0.;
     for(int i=0;i<4;i++)noValidRange[i]=false;
     for(int i=0;i<4;i++)lastValidRange[i]=0.;
     for(int i=0;i<4;i++)lastValidRangeTime[i]=0.;
-   _initVars.setXYZ(X_STDDEV_INIT,Y_STDDEV_INIT,Z_STDDEV_INIT);
-    // NOTE: should NOT call initVariables
+
+    _initVars.setXYZ(X_STDDEV_INIT,Y_STDDEV_INIT,Z_STDDEV_INIT);
+    // NOTE: should NOT call initVariables, which should be called
+    // after configuration is complete
 }
 
 TerrainNav::TerrainNav(char* mapName)
-: tNavFilter(NULL),
-numWaitingMeas(0),
-lastMeasSuccess(false),
-lastVelBotLock(false),
-lastMeasValid(false),
-lastMeasSuccessTime(0.),
-lastInitAttemptTime(0.),
-lastBottomLockTime(0.),
-allowFilterReinits(true),
-useModifiedWeighting(0),
-numReinits(0),
-saveDirectory(NULL),
-vehicleSpecFile(NULL),
-particlesFile(NULL),
-mapFile(NULL),
-filterType(1),
-mapType(1),
-terrainMap(NULL),
-_initialized(false),
-_trnLog(NULL)
-#ifdef WITH_TRNLOG
-,_trnBinLog(NULL)
-#endif
+: TerrainNav()
 {
-    for(int i=0;i<3;i++)lastValidVel[i]=0.;
-    for(int i=0;i<4;i++)noValidRange[i]=false;
-    for(int i=0;i<4;i++)lastValidRange[i]=0.;
-    for(int i=0;i<4;i++)lastValidRangeTime[i]=0.;
+    fprintf(stderr, "%s:%d - <<<<< INIT(1) CTOR >>>>>\n", __func__, __LINE__);
+
 	//initialize pointers
 	this->mapFile = STRDUPNULL(mapName);
-	this->vehicleSpecFile = (char*)"mappingAUV_specs.cfg";
-	this->particlesFile = NULL;
-	this->saveDirectory = NULL;
-	this->tNavFilter = NULL;
-	this->terrainMap = NULL;
-	this->filterType = 1;
-	//this->octreeMap = NULL;
-	this->mapType = 1;  // defaults to DEM
-	this->allowFilterReinits = true;
 
 	if(this->mapType == 1) {
 		terrainMap = new TerrainMapDEM(this->mapFile);
@@ -132,18 +103,12 @@ _trnLog(NULL)
 }
 
 TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs)
+: TerrainNav()
 {
+    fprintf(stderr, "%s:%d - <<<<< INIT(2) CTOR >>>>>\n", __func__, __LINE__);
 	//initialize pointers
 	this->mapFile = STRDUPNULL(mapName);
 	this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
-	this->particlesFile = NULL;
-	this->saveDirectory = NULL;
-	this->tNavFilter = NULL;
-	this->terrainMap = NULL;
-	this->filterType = 1;
-	//this->octreeMap = NULL;
-	this->mapType = 1;
-	this->allowFilterReinits = true;
 
 	if(this->mapType == 1) {
 		this->terrainMap = new TerrainMapDEM(this->mapFile);
@@ -157,18 +122,13 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs)
 
 TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 					   const int& filterType)
+: TerrainNav()
 {
+    fprintf(stderr, "%s:%d - <<<<< INIT(3) CTOR >>>>>\n", __func__, __LINE__);
 	//initialize pointers
 	this->mapFile = STRDUPNULL(mapName);
 	this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
-	this->particlesFile = NULL;
-	this->saveDirectory = NULL;
-	this->tNavFilter = NULL;
-	this->terrainMap = NULL;
 	this->filterType = filterType;
-	//this->octreeMap = NULL;
-	this->mapType = 1;
-	this->allowFilterReinits = true;
 
 	if(this->mapType == 1) {
 		this->terrainMap = new TerrainMapDEM(this->mapFile);
@@ -182,18 +142,13 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 
 TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 					   const int& filterType, char* directory)
+: TerrainNav()
 {
+    fprintf(stderr, "%s:%d - <<<<< INIT(4.1) CTOR >>>>>\n", __func__, __LINE__);
 	//initialize pointers
 	this->mapFile = STRDUPNULL(mapName);
 	this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
 	this->saveDirectory = STRDUPNULL(directory);
-	this->particlesFile = NULL;
-	this->tNavFilter = NULL;
-	this->terrainMap = NULL;
-	this->filterType = filterType;
-	//this->octreeMap = NULL;
-	this->mapType = 1;
-	this->allowFilterReinits = true;
 
 	if(this->mapType == 1) {
 		this->terrainMap = new TerrainMapDEM(this->mapFile);
@@ -207,17 +162,15 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 
 TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 					   const int& filterType, const int& mapType)
+: TerrainNav()
 {
+    fprintf(stderr, "%s:%d - <<<<< INIT(4.2) CTOR >>>>>\n", __func__, __LINE__);
 	//initialize pointers
 	this->mapFile = STRDUPNULL(mapName);
 	this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
-	this->saveDirectory = NULL;
-	this->particlesFile = NULL;
-	this->tNavFilter = NULL;
 	this->filterType = filterType;
 	//this->octreeMap = NULL;
 	this->mapType = mapType;
-	this->allowFilterReinits = true;
 
 	if(this->mapType == 1) {
 		this->terrainMap = new TerrainMapDEM(this->mapFile);
@@ -231,18 +184,16 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 
 TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 					   const int& filterType, const int& mapType, char* directory)
+: TerrainNav()
 {
+    fprintf(stderr, "%s:%d - <<<<< INIT(5) CTOR >>>>>\n", __func__, __LINE__);
 	//initialize pointers
 	this->mapFile = STRDUPNULL(mapName);
 	this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
 	this->saveDirectory = STRDUPNULL(directory);
-	this->particlesFile = NULL;
-	this->tNavFilter = NULL;
-	this->terrainMap = NULL;
 	this->filterType = filterType;
 	//this->octreeMap = NULL;
 	this->mapType = mapType;
-	this->allowFilterReinits = true;
 
 	if(this->mapType == 1) {
 		this->terrainMap = new TerrainMapDEM(this->mapFile);
@@ -258,15 +209,13 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs, char* particles,
 							  const int& filterType, const int& mapType, char* directory)
 {
 
+    fprintf(stderr, "%s:%d - <<<<< INIT(6) CTOR >>>>>\n", __func__, __LINE__);
 	//initialize pointers
 	this->mapFile = STRDUPNULL(mapName);
 	this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
 	this->saveDirectory = STRDUPNULL(directory);
 	this->particlesFile = STRDUPNULL(particles);
-	this->tNavFilter = NULL;
-	this->terrainMap = NULL;
 	this->filterType = filterType;
-	//this->octreeMap = NULL;
 	this->mapType = mapType;
 	this->allowFilterReinits = true;
 
@@ -281,6 +230,41 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs, char* particles,
 	//initialize terrainNav private variables
 	initVariables();
 	logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::Constructor finished.\n");
+}
+
+TerrainNav::TerrainNav(const TerrainNav &other)
+:TerrainNav()
+{
+    fprintf(stderr, "%s:%d - <<<<< COPY CTOR >>>>>\n", __func__, __LINE__);
+    for(int i=0;i<3;i++)lastValidVel[i] = other.lastValidVel[i];
+    for(int i=0;i<4;i++)noValidRange[i] = other.noValidRange[i];
+    for(int i=0;i<4;i++)lastValidRange[i] = other.lastValidRange[i];
+    for(int i=0;i<4;i++)lastValidRangeTime[i] = other.lastValidRangeTime[i];
+    //initialize pointers
+    this->mapFile = STRDUPNULL(other.mapFile);
+    this->vehicleSpecFile = STRDUPNULL(other.vehicleSpecFile);
+    this->particlesFile = STRDUPNULL(other.particlesFile);
+    this->saveDirectory = STRDUPNULL(other.saveDirectory);
+    this->tNavFilter = NULL;
+    this->mapType = other.mapType;  // defaults to DEM
+    if(this->mapType == 1) {
+        this->terrainMap = new TerrainMapDEM(this->mapFile);
+    } else {
+        this->terrainMap = new TerrainMapOctree(this->mapFile);
+    }
+    this->filterType = other.filterType;
+    //this->octreeMap = NULL;
+    this->allowFilterReinits = other.allowFilterReinits;
+
+    if(this->mapType == 1) {
+        terrainMap = new TerrainMapDEM(this->mapFile);
+    } else {
+        terrainMap = new TerrainMapOctree(this->mapFile);
+    }
+    _initVars.setXYZ(X_STDDEV_INIT,Y_STDDEV_INIT,Z_STDDEV_INIT);
+    //initialize terrainNav private variables
+    initVariables();
+
 }
 
 TerrainNav::~TerrainNav() {
@@ -783,8 +767,12 @@ void TerrainNav::initVariables() {
 	copyToLogDir();
 
 	//create log objects
+    if(_trnLog != NULL)
+        delete _trnLog;
     _trnLog = new TerrainNavLog(DataLog::BinaryFormat);
 #ifdef WITH_TRNLOG
+    if(_trnBinLog != NULL)
+        delete _trnBinLog;
     _trnBinLog = new TrnLog(DataLog::BinaryFormat);
 #endif
     char *log_copy =STRDUPNULL(_trnLog->fileName());
@@ -813,15 +801,17 @@ void TerrainNav::initVariables() {
 	int i;
 	lastMeasSuccess = false;
 	numWaitingMeas = 0;
-	lastValidVel[0] = 0.0;
-	lastValidVel[1] = 0.0;
-	lastValidVel[2] = 0.0;
 	lastVelBotLock = false;
 	lastMeasValid = false;
 	lastMeasSuccessTime = -1.0;
 	lastInitAttemptTime = -1.0;
 	lastBottomLockTime = -1.0;
-	for(i = 0; i < 4; i++) {
+
+    for(i = 0; i < 3; i++) {
+        lastValidVel[i] = 0.0;
+    }
+
+    for(i = 0; i < 4; i++) {
 		lastValidRange[i] = 0;
 		lastValidRangeTime[i] = 0;
 		noValidRange[i] = true;
@@ -1472,32 +1462,47 @@ bool TerrainNav::checkFilterHealth() {
 
 }
 
-char *TerrainNav::getSessionDir(char *dir_prefix, char *dest, size_t len, bool create)
+char *TerrainNav::getSessionDir(const char *dir_prefix, char *dest, size_t len, bool create)
 {
     char *retval=NULL;
-    char sessiondir[512]={0};
     struct stat sb;
     // note: 0 is unused (foo-TRN, foo-TRN.01...)
-    int dir_count=1;
+    unsigned int dir_count=1;
+
+    const char *db_prefix = (dir_prefix != NULL ? dir_prefix : LOGDIR_DFL);
+    size_t db_len = strlen(db_prefix) + 1;
+
+    char dir_base[db_len];
+    memset(dir_base, 0, db_len);
+
+    snprintf(dir_base, db_len, "%s", db_prefix);
+
 
     char dot[]=".";
     char* logPath = getenv("TRN_LOGFILES");
-    char dir_base[128] = {0};
-    snprintf(dir_base, 128, "%s",dir_prefix!=NULL ? dir_prefix : LOGDIR_DFL);
-    if(NULL==logPath){
-        logPath=dot;
+
+    if(NULL == logPath){
+        logPath = dot;
     }
 
     // iterate until directory not found
     // Note that sequence skips index zero:
     //  <dir_base>-TRN, <dir_base>-TRN.01...
+    const char *del = db_prefix != NULL ? "-" : "";
 
-    snprintf(sessiondir, 512, "%s/%s-TRN", logPath, dir_base);
-//    fprintf(stderr, "%s - trying session directory [%s]\n",__func__, sessiondir);
+    fprintf(stderr,"%s:%d - dir_prefix[%s] db_prefix[%s] dir_base[%s] logPath[%s] del[%s]\n",__func__,  __LINE__,dir_prefix, db_prefix, dir_base, logPath, del);
+
+    size_t sd_len = strlen(logPath) + strlen(dir_base) + strlen(del) + strlen("/TRN.dddd");
+    char sessiondir[sd_len];
+    memset(sessiondir, 0, sd_len);
+
+
+    snprintf(sessiondir, sd_len, "%s/%s%sTRN", logPath, dir_base, del);
+    fprintf(stderr,"%s:%d - logPath[%s] dir_base[%s] sessiondir[%s]\n",__func__,  __LINE__, logPath, dir_base, sessiondir);
 
     while(stat(sessiondir, &sb)==0 && S_ISDIR(sb.st_mode)){
-        snprintf(sessiondir, 512, "%s/%s-TRN.%02d", logPath, dir_base, dir_count++);
-//        fprintf(stderr,"%s - trying session directory [%s]\n",__func__, sessiondir);
+        snprintf(sessiondir, sd_len, "%s/%s%sTRN.%02u", logPath, dir_base, del, dir_count++);
+        fprintf(stderr,"%s:%d - logPath[%s] dir_base[%s] sessiondir[%s]\n",__func__, __LINE__, logPath, dir_base, sessiondir);
     }
 
     // session dir points to next avail (non-existing)
@@ -1507,16 +1512,18 @@ char *TerrainNav::getSessionDir(char *dir_prefix, char *dest, size_t len, bool c
     }else{
         // return last tried (even if it doesn't exist)
         if(dir_count>1){
-            snprintf(sessiondir, 512, "%s/%s-TRN.%02d", logPath, dir_base, --dir_count);
+            snprintf(sessiondir, sd_len, "%s/%s%sTRN.%02u", logPath, del, dir_base, --dir_count);
         }
     }
     // check dest size and copy
-    if(NULL!=dest && len>(strlen(sessiondir)+1)){
-        snprintf(dest, strlen(sessiondir)+2, "%s/",sessiondir);
+    if(NULL != dest && len > (strlen(sessiondir)+1)){
+        snprintf(dest, len, "%s/",sessiondir);
         retval=dest;
+    } else {
+        fprintf(stderr, "%s:%d - ERR dest [%p] NULL or size too small (%zu/%zu)\n", __func__, __LINE__, dest, len, (strlen(sessiondir)+1));
     }
 
-    logs(TL_OMASK(TL_TERRAIN_NAV, (TL_LOG|TL_SERR)), "session directory is %s\n", retval);
+    logs(TL_OMASK(TL_TERRAIN_NAV, (TL_LOG|TL_SERR)), "%s:%d session directory is %s\n", __func__, __LINE__, retval);
 
     return retval;
 }
@@ -1556,8 +1563,8 @@ void TerrainNav::copyToLogDir()
         // update saveDirectory (used to store filter files)
         free(this->saveDirectory);
         this->saveDirectory = STRDUPNULL(dir_spec);
-        logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "TRN log directory is %s\n", this->saveDirectory);
-        
+        logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "%s:%d TRN log directory is %s\n", __func__, __LINE__, this->saveDirectory);
+
         // Create a latest link that points to the log directory
         //
         snprintf(dir_spec, 512, "%s/%s", trnLogDir, LatestLogDirName);
@@ -1625,4 +1632,275 @@ void TerrainNav::copyToLogDir()
                  copybuf, strerror(errno));
     }
     delete v;
+}
+
+// create log directory, optional create and/or return in buffer r_dest
+// if path is NULL, use TRN_LOGDIR
+// if TRN_LOGDIR is NULL, use "." (PWD)
+char *TerrainNav::initLogDirectory(const char *path, char **r_dest, size_t r_len, bool create)
+{
+    char *retval = NULL;
+    const char *dot = ".";
+    // working path
+    const char *wpath = dot;
+
+    if(path == NULL) {
+        char *trn_logdir = getenv("TRN_LOGFILES");
+        if(trn_logdir != NULL) {
+            wpath = trn_logdir;
+        }
+        // else wpath = dot
+    } else {
+        wpath = path;
+    }
+
+    // make mutable copy of path
+    char *path_cpy = strdup(wpath);
+
+    // remove trailing separator if any
+    char *path_end = path_cpy + strlen(path_cpy) - 1;
+    if( *path_end == '/') {
+        *path_end = '\0';
+    }
+
+    if(create) {
+        mkdir(path_cpy, 0777);
+    }
+
+    if(r_dest != NULL) {
+        if(*r_dest != NULL && r_len > strlen(path_cpy)) {
+            snprintf(*r_dest, r_len, "%s", path_cpy);
+            retval = *r_dest;
+        }
+    }
+
+    free(path_cpy);
+    return retval;
+}
+
+// generate session directory (holds TRN logs) in path/prefix-TRN.dd
+// path       : directory to contain session directory
+// prefix     : session directory prefix
+// r_dest     : return session directory path in r_dest if *r_dest != NULL
+// r_len      : size of *r_dest
+// do_create  : create directory
+// do_symlink : generate symlink in path
+char *TerrainNav::initSessionDirectory(const char *path, const char *prefix, char **r_dest, size_t r_len, bool do_create, bool do_symlink)
+{
+    char *retval = NULL;
+
+    if(path == NULL)
+        return retval;
+
+    // make mutable copy of path
+    char *path_cpy = strdup(path);
+
+    // remove trailing separator if any
+    char *path_end = path_cpy + strlen(path_cpy) - 1;
+    if( *path_end == '/') {
+        *path_end = '\0';
+    }
+
+    // make path buffer
+    const char *del = prefix != NULL ? "-" : "";
+    const char *wprefix = prefix != NULL ? prefix : "";
+
+    size_t sp_len = strlen(path_cpy) + strlen(wprefix) + strlen(del) + strlen("/TRN.dddd") + 1;
+    char session_path[sp_len];
+    memset(session_path, 0, sp_len);
+
+    // write base path (path/prefix-TRN)
+    snprintf(session_path, sp_len, "%s/%s%sTRN", path_cpy, wprefix, del);
+
+    fprintf(stderr,"%s:%d - path[%s] wprefix[%s] session_path[%s]\n",__func__,  __LINE__, path, wprefix, session_path);
+
+    unsigned int scount = 1;
+    struct stat sb;
+
+    // check for last existing session directory (prefix-TRN.NN)
+    while(stat(session_path, &sb)==0 && S_ISDIR(sb.st_mode)){
+        snprintf(session_path, sp_len, "%s/%s%sTRN.%02u", path_cpy, wprefix, del, scount++);
+        fprintf(stderr,"%s:%d - path[%s] wprefix[%s] session_path[%s]\n",__func__,  __LINE__, path, wprefix, session_path);
+    }
+
+    if(do_create){
+        // create the diretory
+        mkdir(session_path, 0777);
+    } else {
+        // return last tried (even if it doesn't exist)
+        if(scount>1){
+            snprintf(session_path, sp_len, "%s/%s%sTRN.%02u", path_cpy, wprefix, del, --scount);
+        }
+    }
+
+    // update saveDirectory
+    if(saveDirectory != NULL)
+        free(saveDirectory);
+    saveDirectory = strdup(session_path);
+
+    if (do_symlink){
+        size_t sp_len = strlen(session_path) + strlen(LatestLogDirName) + 2;
+
+        char sim_path[sp_len];
+        memset(sim_path, 0, sp_len);
+
+        // remove existing symlink
+        snprintf(sim_path, sp_len, "%s/%s", path_cpy, LatestLogDirName);
+        remove(sim_path);
+
+        // write new symlink
+        if (0 != symlink(session_path, sim_path))
+        {
+            logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "symlink %s to %s failed:%s\n",
+                 session_path, sim_path, strerror(errno));
+        }
+        else
+        {
+            logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "symlink %s to %s OK\n",
+                 session_path, sim_path);
+        }
+    }
+
+    if(r_dest != NULL) {
+        if(*r_dest != NULL && r_len > strlen(session_path)) {
+            snprintf(*r_dest, r_len, "%s", session_path);
+            retval = *r_dest;
+        }
+    }
+
+    free(path_cpy);
+    return retval;
+}
+
+/* Function: copyLogs() - copies configuration files to specified directory
+*  for future reference. Does not modify saveDirectory.
+*  A destination directory must be specified, otherwise nothing is copied.
+*  Destination should NOT include a trailing separator.
+*/
+void TerrainNav::copyLogs(const char *dest)
+{
+
+    // Copy only if there is a place for the files to land
+    //
+    if(dest == NULL)
+        return;
+
+    // make mutable copy of dest
+    char *dest_cpy = strdup(dest);
+    // remove trailing separator if any
+    char *dest_end = dest_cpy + strlen(dest_cpy) - 1;
+    if( *dest_end == '/') {
+        *dest_end = '\0';
+    }
+
+    // copy log files
+    char copybuf[CFG_FILE_BUF_BYTES];
+
+    if (NULL != this->vehicleSpecFile)
+    {
+        snprintf(copybuf, CFG_FILE_BUF_BYTES, "cp %s %s/.", this->vehicleSpecFile,
+                dest_cpy);
+        if (0 != system(copybuf))
+            logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "command \'%s\' failed:%s\n",
+                 copybuf, strerror(errno));
+    }
+
+    if (NULL != this->particlesFile)
+    {
+        snprintf(copybuf, CFG_FILE_BUF_BYTES, "cp %s %s/.", this->particlesFile,
+                 dest_cpy);
+        if (0 != system(copybuf))
+            logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "command \'%s\' failed:%s\n",
+                 copybuf, strerror(errno));
+    }
+
+    // Create a vehicleT object just to get the sensor spec files to copy
+    //
+    vehicleT *v = new vehicleT(vehicleSpecFile);
+    for (int i = 0; i < v->numSensors; i++)
+    {
+        snprintf(copybuf, CFG_FILE_BUF_BYTES, "cp %s %s/.", v->sensors[i].filename,
+                 dest_cpy);
+        if (0 != system(copybuf))
+            logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "command \'%s\' failed:%s\n",
+                 copybuf, strerror(errno));
+    }
+    delete v;
+    free(dest_cpy);
+}
+
+void TerrainNav::initSessionLogs() {
+    //create log objects
+    if(_trnLog != NULL)
+        delete _trnLog;
+    _trnLog = new TerrainNavLog(DataLog::BinaryFormat);
+#ifdef WITH_TRNLOG
+    if(_trnBinLog != NULL)
+        delete _trnBinLog;
+    _trnBinLog = new TrnLog(DataLog::BinaryFormat);
+#endif
+    char *log_copy =STRDUPNULL(_trnLog->fileName());
+    tl_new_logfile(dirname(log_copy));
+    free(log_copy);
+
+    // Initialize TNavConfig
+    TNavConfig::instance()->setMapFile(this->mapFile);
+    TNavConfig::instance()->setVehicleSpecsFile(this->vehicleSpecFile);
+    TNavConfig::instance()->setParticlesFile(this->particlesFile);
+    TNavConfig::instance()->setLogDir(this->saveDirectory);
+
+//    free(saveDirectory);
+//    this->saveDirectory = NULL;
+}
+
+void TerrainNav::initSessionVars() {
+    _initialized = false;
+    bool mapOk = true;
+
+    //initialize default variance for window size
+    double windowVar[N_COVAR] =
+            {_initVars.x() * _initVars.x(),
+             0.0, _initVars.y() * _initVars.y(),
+             0.0, 0.0, _initVars.z() * _initVars.z(),
+             0.0, 0.0, 0.0, PHI_STDDEV_INIT * PHI_STDDEV_INIT,
+             0.0, 0.0, 0.0, 0.0, THETA_STDDEV_INIT * THETA_STDDEV_INIT,
+             0.0, 0.0, 0.0, 0.0, 0.0, PSI_STDDEV_INIT * PSI_STDDEV_INIT,
+             0.0, 0.0, 0.0, 0.0, 0.0, 0.0, GYRO_BIAS_STDDEV_INIT * GYRO_BIAS_STDDEV_INIT,
+             0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, GYRO_BIAS_STDDEV_INIT * GYRO_BIAS_STDDEV_INIT,
+             0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, PSI_BERG_STDDEV_INIT * PSI_BERG_STDDEV_INIT
+                           };
+    // Shut off measWeights.txt debug.  It is too large.
+
+    //logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::TNavFilter initialized with Z variance %.2f\n", windowVar[5]);
+
+    //create filter object
+    createFilter(this->filterType, windowVar);
+
+    //old state machine version: filterState = 1;
+    //filterState = 2;//1;
+
+    int i;
+    lastMeasSuccess = false;
+    numWaitingMeas = 0;
+    lastVelBotLock = false;
+    lastMeasValid = false;
+    lastMeasSuccessTime = -1.0;
+    lastInitAttemptTime = -1.0;
+    lastBottomLockTime = -1.0;
+
+    for(i = 0; i < 3; i++) {
+        lastValidVel[i] = 0.0;
+    }
+
+    for(i = 0; i < 4; i++) {
+        lastValidRange[i] = 0;
+        lastValidRangeTime[i] = 0;
+        noValidRange[i] = true;
+    }
+    numReinits = 0;
+    useModifiedWeighting = TRN_WT_NONE;
+
+    _initialized = mapOk;
+    logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::initVariables finished.\n");
+
 }
