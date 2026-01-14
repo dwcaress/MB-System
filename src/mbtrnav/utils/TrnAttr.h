@@ -56,31 +56,6 @@
 class TrnAttr
 {
 public:
-    // config parameter key definitions
-//    const char * TA_MAPNAME_KEY="mapFileName";
-//    const char * TA_PARNAME_KEY= "particlesName";
-//    const char * TA_VEHNAME_KEY= "vehicleCfgName";
-//    const char * TA_DVLNAME_KEY= "dvlCfgName";
-//    const char * TA_RESONNAME_KEY= "resonCfgName";
-//    const char * TA_TRNSVR_KEY= "terrainNavServer";
-//    const char * TA_LRAUVDVL_KEY= "lrauvDvlFilename";
-//    const char * TA_MAPTYPE_KEY= "map_type";
-//    const char * TA_FILTERTYPE_KEY= "filterType";
-//    const char * TA_TRNPORT_KEY= "terrainNavPort";
-//    const char * TA_FORCELGF_KEY= "forceLowGradeFilter";
-//    const char * TA_ALLOWREINIT_KEY= "allowFilterReinits";
-//    const char * TA_USEMODWT_KEY= "useModifiedWeighting";
-//    const char * TA_SAMPLEPER_KEY= "samplePeriod";
-//    const char * TA_MAXNCOV_KEY= "maxNorthingCov";
-//    const char * TA_MAXNERR_KEY= "maxNorthingError";
-//    const char * TA_MAXECOV_KEY= "maxEastingCov";
-//    const char * TA_MAXEERR_KEY= "maxEastingError";
-//    const char * TA_ROLLOFS_KEY= "RollOffset";
-//    const char * TA_USEIDTDATA_KEY= "useIDTData";
-//    const char * TA_USEDVLSIDE_KEY= "useDVLSide";
-//    const char * TA_USEMBTRNDATA_KEY= "useMbTrnData";
-//    const char * TA_USEMBTRNSVR_KEY= "useMbTrnServer";
-//    const char * TA_SKIPINIT_KEY= "skipInit";
 
     TrnAttr();
     explicit TrnAttr(const char *cfg_path);
@@ -137,14 +112,6 @@ public:
         // 1. Check for self-assignment (e.g., obj = obj)
         if (this != &other) {
             // 2. Deallocate old resources
-    //        TrnAttr::chkSetString(&_cfg_file, NULL);
-    //        TrnAttr::chkSetString(&mapName, NULL);
-    //        TrnAttr::chkSetString(&particlesName, NULL);
-    //        TrnAttr::chkSetString(&vehicleCfgName, NULL);
-    //        TrnAttr::chkSetString(&dvlCfgName, NULL);
-    //        TrnAttr::chkSetString(&resonCfgName, NULL);
-    //        TrnAttr::chkSetString(&lrauvDvlName, NULL);
-    //        TrnAttr::chkSetString(&terrainNavServer, NULL);
 
             // 3. Allocate new resources and copy the data
             TrnAttr::chkSetString(&_cfg_file, other._cfg_file);

@@ -167,8 +167,7 @@ public:
             trn::trn_host thost = *it;
             TrnHostX uhost = std::get<5>(thost);
             trn::mb1_server *pinst = uhost.mb1s_host;
-if(pinst != nullptr)
-            {
+            if(pinst != nullptr) {
                 delete pinst;
             }
         }
@@ -176,8 +175,7 @@ if(pinst != nullptr)
             trn::trn_host thost = *it;
             TrnHostX uhost = std::get<5>(thost);
             udpm_sub_t *pinst = uhost.udpms_host;
-          if(pinst != nullptr)
-            {
+            if(pinst != nullptr) {
                 delete pinst;
             }
         }
@@ -186,9 +184,7 @@ if(pinst != nullptr)
             trn::trn_host thost = *it;
             TrnHostX uhost = std::get<5>(thost);
             TrnClient *pinst = uhost.trnc_host;
-
-            if(pinst != nullptr)
-            {
+            if(pinst != nullptr) {
                 delete pinst;
             }
         }

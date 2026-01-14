@@ -35,11 +35,11 @@
 #include "DataField.h"
 #include "TRNUtils.h"
 
-#define MAPNAME_BUF_BYTES 1024 //512
-#define CFGNAME_BUF_BYTES 1024 //512
-#define VEHICLENAME_BUF_BYTES 1024 //512
-#define PARTICLENAME_BUF_BYTES 1024 //512
-#define SESSIONDIR_BUF_BYTES 1024 //512
+#define MAPNAME_BUF_BYTES 1024
+#define CFGNAME_BUF_BYTES 1024
+#define VEHICLENAME_BUF_BYTES 1024
+#define PARTICLENAME_BUF_BYTES 1024
+#define SESSIONDIR_BUF_BYTES 1024
 #define LOGDIR_BUF_BYTES 64
 
 // Common to QNX and NIX versions
@@ -116,7 +116,7 @@ TrnClient::TrnClient(const char *svr_log_dir, const char *host, int port)
         // svr_log_dir (specified by application)
         // CWD if neither set
         const char *ld_env =getenv("TRN_LOGDIR");
-        
+
         if(NULL != svr_log_dir){
             ld_env = svr_log_dir;
         }
@@ -234,7 +234,7 @@ int TrnClient::loadCfgAttributes(const char *cfg_file, const char *usr_log_path)
     }
 
     fprintf(stderr, "%s:%d _cfg_file [%s] cfg_path[%s]\n", __func__, __LINE__, _cfg_file, cfg_path);
-    
+
     _trn_attr.setCfgFile(_cfg_file);
 
     _trn_attr.parseConfig();
@@ -315,7 +315,7 @@ int TrnClient::loadCfgAttributes(const char *cfg_file, const char *usr_log_path)
         }else{
             chkSetString(&this->particlesFile, NULL);
         }
-        
+
         chkSetString(&this->_server_ip, _trn_attr.terrainNavServer);
 
         if(_trn_attr.terrainNavPort > 0){

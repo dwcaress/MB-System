@@ -168,7 +168,6 @@ int cb_proto_dvl(void *pargs)
         }
 
         TRN_NDPRINT(TRNDL_PLUGOIDVL, "%s:%d processing ctx[%s]\n", __func__, __LINE__, ctx->ctx_key().c_str());
-        
 
         std::string *bkey[1] = {ctx->bath_input_chan(0)};
         std::string *nkey = ctx->nav_input_chan(0);

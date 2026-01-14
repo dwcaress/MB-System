@@ -233,7 +233,7 @@ int init() {
 	if(cfgPath == NULL) {
 		cfgPath = dotSlash;
 	}
-// TODO KLH: check / implement method to get session dir...
+// TODO : check / implement method to get session dir...
         snprintf(mapname, MAPNAME_BUF_BYTES, "%s/%s", mapPath, _ct.mapname);
         snprintf(cfgname, CFGNAME_BUF_BYTES, "%s/%s", cfgPath, _ct.cfgname);
         snprintf(particlename, PARTICLENAME_BUF_BYTES, "%s/%s", cfgPath, _ct.particlename);
@@ -337,7 +337,7 @@ int init() {
 
     try
     {
-//    TODO KLH: make particles file optional (select different CTOR if not specified)
+//    TODO : make particles file optional (select different CTOR if not specified)
         _tercom = new TerrainNav(mapname, cfgname, particlename, filterType, mapType, _ct.logname);
 
       // Acknowledge initialization if successful

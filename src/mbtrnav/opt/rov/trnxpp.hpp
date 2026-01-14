@@ -966,9 +966,8 @@ public:
             if(!parse_err) {
 
                 TRN_NDPRINT(5, "%s:%d adding TRN key[%s] host[%s, %s:%d:%d] cfg[%s]\n", __func__, __LINE__, key, type, (host==NULL?"-":host), port, ttl, cfg);
-                
+
                 TrnHostX uhost;
-//                mTrnHostList.emplace_back(key, type, (host==NULL?"-":host), port, ttl, (void *)NULL, (cfg==NULL?"-":cfg));
                 mTrnHostList.emplace_back(key, type, (host==NULL?"-":host), port, ttl, uhost, (cfg==NULL?"-":cfg));
 
                 retval = 0;
@@ -1773,7 +1772,7 @@ public:
                         if(thost != nullptr){
                             std::string trn_type = std::get<1>(*thost);
                             fprintf(stderr,  "%s:%d - trn_type[%s]\n", __func__, __LINE__, trn_type.c_str());
-                            
+
                             if(trn_type.compare("trncli") == 0) {
                                 ctx->add_trn_host(val_key, thost);
                             } else if(trn_type.compare("mb1pub") == 0) {
