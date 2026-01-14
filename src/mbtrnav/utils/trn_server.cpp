@@ -210,7 +210,7 @@ int init() {
 	//
 	if(_tercom) {
 		delete _tercom;
-		_tercom = 0;
+		_tercom = NULL;
 	}
 
 	// Construct a TerrainNav object using the info from the client
@@ -233,7 +233,7 @@ int init() {
 	if(cfgPath == NULL) {
 		cfgPath = dotSlash;
 	}
-
+// TODO KLH: check / implement method to get session dir...
         snprintf(mapname, MAPNAME_BUF_BYTES, "%s/%s", mapPath, _ct.mapname);
         snprintf(cfgname, CFGNAME_BUF_BYTES, "%s/%s", cfgPath, _ct.cfgname);
         snprintf(particlename, PARTICLENAME_BUF_BYTES, "%s/%s", cfgPath, _ct.particlename);
@@ -337,8 +337,8 @@ int init() {
 
     try
     {
-       _tercom = new TerrainNav(mapname, cfgname, particlename, filterType, mapType,
-        _ct.logname);
+//    TODO KLH: make particles file optional (select different CTOR if not specified)
+        _tercom = new TerrainNav(mapname, cfgname, particlename, filterType, mapType, _ct.logname);
 
       // Acknowledge initialization if successful
       //
@@ -912,7 +912,7 @@ int main(int argc, char** argv) {
           tl_mconfig(TL_TERRAIN_MAP, TL_SERR, TL_NC);
     //    tl_mconfig(TL_TERRAIN_MAP_DEM, TL_SERR, TL_NC);
 
-	_tercom = 0;
+	_tercom = NULL;
 	int len = 0;
     int err=0;
 
