@@ -51,7 +51,7 @@ TerrainNavClient::TerrainNavClient()
 , _sockfd(-1)
 , _sockport(-1)
 {
-    fprintf(stderr, "%s:%d - <<<<< DFL CTOR >>>>>\n", __func__, __LINE__);
+//    fprintf(stderr, "%s:%d - <<<<< DFL CTOR >>>>>\n", __func__, __LINE__);
     memset(_comms_buf,0,TRN_MSG_SIZE);
     _initialized = false;
 }
@@ -62,7 +62,7 @@ TerrainNavClient::TerrainNavClient(char *server_ip, int port)
 : TerrainNav()
 , _sockport(port)
 {
-    fprintf(stderr, "%s:%d - <<<<< INIT(2) CTOR >>>>>\n", __func__, __LINE__);
+//    fprintf(stderr, "%s:%d - <<<<< INIT(2) CTOR >>>>>\n", __func__, __LINE__);
   _server_ip = (NULL!=server_ip ? strdup(server_ip) : NULL);
     memset(_comms_buf,0,TRN_MSG_SIZE);
   init_comms();
@@ -76,7 +76,7 @@ TerrainNavClient::TerrainNavClient(char *server_ip, int port,
 : TerrainNav()
 , _sockport(port)
 {
-    fprintf(stderr, "%s:%d - <<<<< INIT(8) CTOR >>>>>\n", __func__, __LINE__);
+//    fprintf(stderr, "%s:%d - <<<<< INIT(8) CTOR >>>>>\n", __func__, __LINE__);
     // initialize member variables from the argument list
     // do not load maps, do not call initVariables() as those are uneeded
     this->mapFile = STRDUPNULL(mapName);
@@ -116,7 +116,7 @@ TerrainNavClient::TerrainNavClient(char *server_ip, int port,
 TerrainNavClient::TerrainNavClient(const TerrainNavClient &other)
 : TerrainNav(other)
 {
-    fprintf(stderr, "%s:%d - <<<<< COPY CTOR >>>>>\n", __func__, __LINE__);
+//    fprintf(stderr, "%s:%d - <<<<< COPY CTOR >>>>>\n", __func__, __LINE__);
     _logdir = STRDUPNULL(other._logdir);
     _connected = other._connected;
     _mbtrn_server_type = other._mbtrn_server_type;

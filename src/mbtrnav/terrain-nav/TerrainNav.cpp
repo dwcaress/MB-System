@@ -72,7 +72,7 @@ _trnLog(NULL)
 ,_trnBinLog(NULL)
 #endif
 {
-    fprintf(stderr, "%s:%d - <<<<< DFL CTOR >>>>>\n", __func__, __LINE__);
+//    fprintf(stderr, "%s:%d - <<<<< DFL CTOR >>>>>\n", __func__, __LINE__);
     for(int i=0;i<3;i++)lastValidVel[i]=0.;
     for(int i=0;i<4;i++)noValidRange[i]=false;
     for(int i=0;i<4;i++)lastValidRange[i]=0.;
@@ -86,7 +86,7 @@ _trnLog(NULL)
 TerrainNav::TerrainNav(char* mapName)
 : TerrainNav()
 {
-    fprintf(stderr, "%s:%d - <<<<< INIT(1) CTOR >>>>>\n", __func__, __LINE__);
+//    fprintf(stderr, "%s:%d - <<<<< INIT(1) CTOR >>>>>\n", __func__, __LINE__);
 
 	//initialize pointers
 	this->mapFile = STRDUPNULL(mapName);
@@ -105,7 +105,7 @@ TerrainNav::TerrainNav(char* mapName)
 TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs)
 : TerrainNav()
 {
-    fprintf(stderr, "%s:%d - <<<<< INIT(2) CTOR >>>>>\n", __func__, __LINE__);
+//    fprintf(stderr, "%s:%d - <<<<< INIT(2) CTOR >>>>>\n", __func__, __LINE__);
 	//initialize pointers
 	this->mapFile = STRDUPNULL(mapName);
 	this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
@@ -124,7 +124,7 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 					   const int& filterType)
 : TerrainNav()
 {
-    fprintf(stderr, "%s:%d - <<<<< INIT(3) CTOR >>>>>\n", __func__, __LINE__);
+//    fprintf(stderr, "%s:%d - <<<<< INIT(3) CTOR >>>>>\n", __func__, __LINE__);
 	//initialize pointers
 	this->mapFile = STRDUPNULL(mapName);
 	this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
@@ -144,7 +144,7 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 					   const int& filterType, char* directory)
 : TerrainNav()
 {
-    fprintf(stderr, "%s:%d - <<<<< INIT(4.1) CTOR >>>>>\n", __func__, __LINE__);
+//    fprintf(stderr, "%s:%d - <<<<< INIT(4.1) CTOR >>>>>\n", __func__, __LINE__);
 	//initialize pointers
 	this->mapFile = STRDUPNULL(mapName);
 	this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
@@ -164,7 +164,7 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 					   const int& filterType, const int& mapType)
 : TerrainNav()
 {
-    fprintf(stderr, "%s:%d - <<<<< INIT(4.2) CTOR >>>>>\n", __func__, __LINE__);
+//    fprintf(stderr, "%s:%d - <<<<< INIT(4.2) CTOR >>>>>\n", __func__, __LINE__);
 	//initialize pointers
 	this->mapFile = STRDUPNULL(mapName);
 	this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
@@ -186,7 +186,7 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 					   const int& filterType, const int& mapType, char* directory)
 : TerrainNav()
 {
-    fprintf(stderr, "%s:%d - <<<<< INIT(5) CTOR >>>>>\n", __func__, __LINE__);
+//    fprintf(stderr, "%s:%d - <<<<< INIT(5) CTOR >>>>>\n", __func__, __LINE__);
 	//initialize pointers
 	this->mapFile = STRDUPNULL(mapName);
 	this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
@@ -209,7 +209,7 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs, char* particles,
 							  const int& filterType, const int& mapType, char* directory)
 {
 
-    fprintf(stderr, "%s:%d - <<<<< INIT(6) CTOR >>>>>\n", __func__, __LINE__);
+//    fprintf(stderr, "%s:%d - <<<<< INIT(6) CTOR >>>>>\n", __func__, __LINE__);
 	//initialize pointers
 	this->mapFile = STRDUPNULL(mapName);
 	this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
@@ -235,7 +235,7 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs, char* particles,
 TerrainNav::TerrainNav(const TerrainNav &other)
 :TerrainNav()
 {
-    fprintf(stderr, "%s:%d - <<<<< COPY CTOR >>>>>\n", __func__, __LINE__);
+//    fprintf(stderr, "%s:%d - <<<<< COPY CTOR >>>>>\n", __func__, __LINE__);
     for(int i=0;i<3;i++)lastValidVel[i] = other.lastValidVel[i];
     for(int i=0;i<4;i++)noValidRange[i] = other.noValidRange[i];
     for(int i=0;i<4;i++)lastValidRange[i] = other.lastValidRange[i];

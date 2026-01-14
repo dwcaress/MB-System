@@ -43,7 +43,7 @@ TrnAttr::TrnAttr()
 ,phiBias(0)
 ,_cfg_file(NULL)
 {
-    fprintf(stderr,"%s:%d - TrnAttr CTOR >>>>>>>>>>>>>>>>>>\n", __func__, __LINE__);
+//    fprintf(stderr,"%s:%d - <<<<< DFL CTOR >>>>>\n", __func__, __LINE__);
 }
 
 TrnAttr::TrnAttr(const char *cfg_path)
@@ -72,7 +72,7 @@ TrnAttr::TrnAttr(const char *cfg_path)
 ,phiBias(0)
 ,_cfg_file(NULL)
 {
-    fprintf(stderr,"%s:%d - TrnAttr CTOR >>>>>>>>>>>>>>>>>>\n", __func__, __LINE__);
+    //    fprintf(stderr,"%s:%d - <<<<< INIT CTOR >>>>>\n", __func__, __LINE__);
     if(cfg_path == NULL || strlen(cfg_path) == 0){
         _cfg_file = NULL;
     }else{
@@ -108,7 +108,7 @@ TrnAttr::TrnAttr(const TrnAttr& other)
 ,phiBias(0)
 ,_cfg_file(NULL)
 {
-    fprintf(stderr,"%s:%d - TrnAttr COPY CTOR >>>>>>>>>>>>>>>>>>\n", __func__, __LINE__);
+    //    fprintf(stderr,"%s:%d - <<<<< COPY CTOR >>>>>\n", __func__, __LINE__);
     TrnAttr::chkSetString(&_cfg_file, other._cfg_file);
     TrnAttr::chkSetString(&mapName, other.mapName);
     TrnAttr::chkSetString(&particlesName, other.particlesName);
@@ -137,7 +137,7 @@ TrnAttr::TrnAttr(const TrnAttr& other)
 
 TrnAttr::~TrnAttr()
 {
-    fprintf(stderr,"%s:%d - TrnAttr DTOR <<<<<<<<<<<<<<<<<<<<<<\n", __func__, __LINE__);
+    //    fprintf(stderr,"%s:%d - <<<<< DTOR >>>>>\n", __func__, __LINE__);
 
     if(_cfg_file != NULL)
         free(_cfg_file);
