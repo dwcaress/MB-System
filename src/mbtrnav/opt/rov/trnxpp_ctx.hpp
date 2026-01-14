@@ -165,9 +165,6 @@ public:
         std::list<trn::trn_host>::iterator it;
         for(it = mMB1SvrList.begin(); it != mMB1SvrList.end(); it++){
             trn::trn_host thost = *it;
-//            void *vp_inst = std::get<5>(thost);
-//            trn::mb1_server *pinst = static_cast<trn::mb1_server *>(vp_inst);
-  
             TrnHostX uhost = std::get<5>(thost);
             trn::mb1_server *pinst = uhost.mb1s_host;
 if(pinst != nullptr)
@@ -177,8 +174,6 @@ if(pinst != nullptr)
         }
         for(it = mUdpmSubList.begin(); it != mUdpmSubList.end(); it++){
             trn::trn_host thost = *it;
-//            void *vp_inst = std::get<5>(thost);
-//            udpm_sub_t *pinst = static_cast<udpm_sub_t *>(vp_inst);
             TrnHostX uhost = std::get<5>(thost);
             udpm_sub_t *pinst = uhost.udpms_host;
           if(pinst != nullptr)
@@ -189,8 +184,6 @@ if(pinst != nullptr)
 
         for(it = mTrnCliList.begin(); it != mTrnCliList.end(); it++){
             trn::trn_host thost = *it;
-//            void *vp_inst = std::get<5>(thost);
-//            TrnClient *pinst = static_cast<TrnClient *>(vp_inst);
             TrnHostX uhost = std::get<5>(thost);
             TrnClient *pinst = uhost.trnc_host;
 
@@ -278,7 +271,6 @@ if(pinst != nullptr)
             std::string host = std::get<2>(thost);
             int port = std::get<3>(thost);
             int ttl = std::get<4>(thost);
-//             void *inst = std::get<5>(thost);
             TrnHostX inst = std::get<5>(thost);
 
             std::string cfg_path = std::get<6>(thost);
@@ -302,7 +294,6 @@ if(pinst != nullptr)
             std::string host = std::get<2>(thost);
             int port = std::get<3>(thost);
             int ttl = std::get<4>(thost);
-//             void *inst = std::get<5>(thost);
             TrnHostX inst = std::get<5>(thost);
             std::string cfg_path = std::get<6>(thost);
             ss << key.c_str() << ", ";
@@ -326,7 +317,6 @@ if(pinst != nullptr)
             std::string host = std::get<2>(thost);
             int port = std::get<3>(thost);
             int ttl = std::get<4>(thost);
-//             void *inst = std::get<5>(thost);
             TrnHostX inst = std::get<5>(thost);
             std::string cfg_path = std::get<6>(*hit);
             ss << key.c_str() << ", ";
@@ -1067,10 +1057,8 @@ if(pinst != nullptr)
         std::list<trn::trn_host>::iterator it;
         for(it = mUdpmSubList.begin(); it != mUdpmSubList.end(); it++){
             std::string list_key = std::get<0>(*it);
-//            void *inst = std::get<5>(*it);
             TrnHostX uhost = std::get<5>(*it);
             if(list_key.compare(key) == 0){
-//                retval = static_cast<udpm_sub_t *>(inst);
                 retval = uhost.udpms_host;
                 break;
             }
@@ -1166,13 +1154,11 @@ if(pinst != nullptr)
         if(udpm_host == nullptr)
             return retval;
 
-//        void *vp = std::get<5>(*udpm_host);
         TrnHostX uhost = std::get<5>(*udpm_host);
         std::string group = std::get<2>(*udpm_host);
         int port = std::get<3>(*udpm_host);
         int ttl = std::get<4>(*udpm_host);
 
-//        udpm_sub_t *udpmsub = static_cast<udpm_sub_t *>(vp);
         udpm_sub_t *udpmsub = uhost.udpms_host;
 
         if(udpmsub == nullptr){
@@ -1183,7 +1169,6 @@ if(pinst != nullptr)
         if(udpmsub == nullptr)
             return retval;
 
-//        std::get<5>(*udpm_host) = static_cast<void *>(udpmsub);
         uhost.udpms_host = udpmsub;
         std::get<5>(*udpm_host) = uhost;
 
@@ -1241,7 +1226,6 @@ if(pinst != nullptr)
         for(it = mMB1SvrList.begin(); it != mMB1SvrList.end(); it++){
             std::string list_key = std::get<0>(*it);
             if(list_key.compare(key) == 0){
-//                std::get<5>(*it) = static_cast<void *>(inst);
                 TrnHostX uhost = std::get<5>(*it);
                 uhost.mb1s_host = inst;
                 std::get<5>(*it) = uhost;
@@ -1261,9 +1245,7 @@ if(pinst != nullptr)
         if(mb1_host == nullptr)
             return retval;
 
-//        void *vp = std::get<5>(*mb1_host);
         TrnHostX uhost = std::get<5>(*mb1_host);
-//        trn::mb1_server *mb1svr = static_cast<trn::mb1_server *>(vp);
         trn::mb1_server *mb1svr = uhost.mb1s_host;
 
         if(nullptr != mb1svr) {
@@ -1317,7 +1299,6 @@ if(pinst != nullptr)
             trn::trn_host thost = (*it);
             std::string key = std::get<0>(thost);
 
-//            void *vp = std::get<5>(thost);
             TrnHostX uhost = std::get<5>(thost);
             void *vp = uhost.mb1s_host;
 
@@ -1326,7 +1307,6 @@ if(pinst != nullptr)
             }
 
             TRN_NDPRINT(5, "%s:%d - pub MB1SVR key[%s] vp[%p]\n", __func__, __LINE__, key.c_str(), vp);
-//            trn::mb1_server* mb1svr = static_cast<trn::mb1_server *>(vp);
             trn::mb1_server* mb1svr = uhost.mb1s_host;
 
             mb1svr->publish((byte *)sounding, sounding->size);
@@ -1357,7 +1337,6 @@ if(pinst != nullptr)
                     trn::trn_host thost = (*it);
                     std::string key = std::get<0>(thost);
 
-//                    void *vp = std::get<5>(thost);
                     TrnHostX uhost = std::get<5>(thost);
                     void *vp = uhost.udpms_host;
 
@@ -1447,9 +1426,6 @@ if(pinst != nullptr)
 
         if(trnc_host == nullptr)
             return retval;
-//
-//        void *vp = std::get<5>(*trnc_host);
-//        TrnClient *trncli = static_cast<TrnClient *>(vp);
 
         TrnHostX uhost = std::get<5>(*trnc_host);
         void *vp = uhost.trnc_host;
