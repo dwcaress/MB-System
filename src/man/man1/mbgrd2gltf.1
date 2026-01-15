@@ -1,27 +1,26 @@
-.TH MBGRD2GLTF 1 "17 April, 2024" "MB-System version 5.8" "MB-System User Commands"
+.TH MBGRD2GLTF 1 "7 January, 2026" "MB-System version 5.8" "MB-System User Commands"
 .SH NAME
 mbgrd2gltf \- convert bathymetric grid data to GLTF format with optional settings, including Draco compression.
 
 .SH SYNOPSIS
 .B mbgrd2gltf
-.I <filepath>
-[\fB\-b\fR | \-\-binary]
-[\fB\-o\fR | \-\-output
-.I <output filepath>]
-[\fB\-e\fR | \-\-exaggeration
-.I <vertical exaggeration>]
-[\fB\-m\fR | \-\-max-size
-.I <max size>]
-[\fB\-s\fR | \-\-stride
-.I <stride ratio>]
-[\fB\-d\fR | \-\-draco]
-[\fB\-qp\fR | \fB\-qn\fR | \fB\-qt\fR | \fB\-qc\fR
-.I <quantization numbers>]
-[\fB\-h\fR | \-\-help]
+\fB\-I\fP\fIgrdfile\fP
+[\fB\-B\fP]
+[\fB\-O\fP\fIoutputfolder\fP]
+[\fB\-E\fP\fIexaggeration\fP]
+[\fB\-D\fP]
+[\fB\-Qp\fP\fIvalue\fP]
+[\fB\-Qn\fP\fIvalue\fP]
+[\fB\-Qt\fP\fIvalue\fP]
+[\fB\-Qc\fP\fIvalue\fP]
+[\fB\-V\fP]
+[\fB\-H\fP]
 
 .SH DESCRIPTION
 .B mbgrd2gltf
-is a tool designed to convert grid data files (GRD) to Graphics Library Transmission Format (GLTF) files. It can generate output in: a binary to create a more compact GLTF file, exaggerate vertex altitude to enhance topographic features, and cap the max-size of the GLTF so the output files don't exceed size constraints. Furthermore, optional Draco compression can reduce the outputed GLTF file size even more while maintaining good visual quality. With Draco, one can specify the quantization level, which affects the compression level of mesh vertices.
+is a tool designed to convert grid data files (GRD) to Graphics Library Transmission Format (GLTF) files. It can generate output in binary format to create a more compact GLTF file and exaggerate vertex altitude to enhance topographic features. The tool uses tiling to efficiently handle large datasets. Optional Draco compression can reduce the output GLTF file size significantly while maintaining good visual quality. With Draco, one can specify the quantization level, which affects the compression level of mesh vertices.
+.PP
+The output mesh vertices are positioned in an Earth-Centered, Earth-Fixed (ECEF) Cartesian coordinate system with units in meters. ECEF is a 3D right-handed coordinate system with its origin at Earth's center of mass, the Z-axis pointing toward the North Pole, the X-axis intersecting the equator at the prime meridian, and the Y-axis completing the right-handed system at 90 degrees east longitude.
 
 .SH MB-SYSTEM AUTHORSHIP
 David W. Caress - Monterey Bay Aquarium Research Institute
@@ -30,67 +29,119 @@ Dale N. Chayes - Center for Coastal and Ocean Mapping, University of New Hampshi
 .br
 Christian dos Santos Ferreira - MARUM, University of Bremen
 
+.SH MBGRD2GLTF AUTHORSHIP
+The
+.B mbgrd2gltf
+program was contributed to MB-System by California State University Monterey Bay (CSUMB) Capstone teams. The original gltf-generator program was created for STOQS starting in Fall 2020:
+.PP
+Fall 2020 Team (STOQS gltf-generator):
+.br
+Edward Montoya, Sean Towne
+.PP
+Fall 2021 Team (STOQS gltf-generator):
+.br
+Isaac Hirzel, Oliver Stringer, Zachary Abbett
+.PP
+Spring 2023 Team (MB-System integration):
+.br
+Nicolas Porras Falconio, Kyle Dowling, Jesse Benavides, Julian Fortin
+.PP
+Spring 2024 Team (Draco compression):
+.br
+Ivan Martinez, Steven Patrick, Varad Poddar, Aret Tinoco
+.PP
+Fall 2025 Team (mbgrd2gltf C++ code refinements):
+.br
+Miguel Gonzales, Eric Rios, Jonathan Ramirez-Fausto, Tanmay Zende
+.PP
+Mentor: Mike McCann - Monterey Bay Aquarium Research Institute
+
 .SH OPTIONS
 .TP
-.B <filepath> :
-Specify the path to the input GMT GRD file.
+.B \-I
+\fIgrdfile\fP
+.br
+Input GMT GRD format bathymetry grid file. This option is required.
 
 .TP
-.B \-b, \-\-binary :
-Generate the output in binary GLTF format. Binary GLTF is more compact and typically loads faster in applications.
+.B \-B
+Generate the output in binary GLTF (GLB) format. Binary GLTF is more compact and typically loads faster in applications than text-based GLTF. Default: text-based GLTF output.
 
 .TP
-.B \-o, \-\-output :
-Specify the path to the folder where the output GLTF file will be written.
+.B \-O
+\fIoutputfolder\fP
+.br
+Specify the path to the folder where the output GLTF file will be written. Default: same directory as input file.
 
 .TP
-.B \-e, \-\-exaggeration :
-Specify the vertical exaggeration factor as a decimal number, which multiplies the vertex altitudes. This can enhance the visibility of topographic features.
+.B \-E
+\fIexaggeration\fP
+.br
+Specify the vertical exaggeration factor as a decimal number, which multiplies the vertex altitudes. This can enhance the visibility of topographic features. Default: 1.0 (no exaggeration).
 
 .TP
-.B \-m, \-\-max-size :
-Specify the maximum size of the output buffer data in megabytes. This is useful for ensuring that the output files do not exceed certain size constraints. Actual size may vary based on compression settings.
+.B \-D
+Enable Draco mesh compression to reduce the file size by encoding meshes and point clouds. This can significantly reduce file sizes while maintaining visual quality.
 
 .TP
-.B \-s, \-\-stride :
-Specify the decimal number representing the the amount of stride('Skip') to apply to the buffer data of the output as a ratio of normal to running. As you stride, you skip over portions of data.
-The bigger the stride, the more points are skipped.
+.B \-Qp
+\fIvalue\fP
+.br
+Draco position quantization bits (2-30). Affects the compression level of mesh vertex positions. Lower values increase compression but reduce precision, potentially affecting the visual quality of the terrain. Requires \fB\-D\fP option. Default: 16.
 
 .TP
-.B \-d, \-\-draco :
-Enable Draco compression to reduce the file size by encoding meshes and point clouds.
+.B \-Qn
+\fIvalue\fP
+.br
+Draco normal quantization bits (2-30). Affects the compression of surface normal vectors. Requires \fB\-D\fP option. Default: 7.
 
 .TP
-.B \-qp | -qn | -qt | -qc :
-Specify the quantization level for Draco compression. Positional quantization (-qp) value affects the compression level of mesh vertices. Lower values increase compression but reduce precision, potentially affecting the visual quality of the terrain. Other quantization values are available
-for experimentation. They include -qn: Normal, -qt: TexCoord, -qc: Color. The default quantization value is 16 for position, 7 for normal, 10 for texcoord, 8 for color.
+.B \-Qt
+\fIvalue\fP
+.br
+Draco texture coordinate quantization bits (2-30). Affects the compression of texture coordinates. Requires \fB\-D\fP option. Default: 10.
 
 .TP
-.B \-h, \-\-help :
-Display help message and exit. Provides more information on command usage and options.
+.B \-Qc
+\fIvalue\fP
+.br
+Draco color quantization bits (2-30). Affects the compression of vertex colors. Requires \fB\-D\fP option. Default: 8.
+
+.TP
+.B \-V
+Enable verbose output showing NetCDF reading details and memory allocation information.
+
+.TP
+.B \-H
+Display help message and exit.
 
 .SH EXAMPLES
 Convert a GMT GRD file to a GLTF file with default settings:
 .RS
 .nf
-.B mbgrd2gltf input.grd
+.B mbgrd2gltf \-I input.grd
 .fi
 .RE
 
-Convert a GRD file to GLB(Binary GLTF) with specified output folder and Draco compression at a quantization level of 20:
+Convert a GRD file to GLB (Binary GLTF) with specified output folder and Draco compression at a quantization level of 20:
 .RS
 .nf
-.B mbgrd2gltf input.grd --binary --output /path/to/output --draco -qp 20
+.B mbgrd2gltf \-I input.grd \-B \-O /path/to/output \-D \-Qp 20
 .fi
 .RE
 
-Converting a large GRD file to GLB(Binary GLTF) with specified output folder and Draco compression at a quantization level of 20 with a vertical exaggeration of 20. [ All options in short-hand notiation. ]
+Convert a large GRD file to GLB with Draco compression, vertical exaggeration of 20x, and verbose output:
 .RS
 .nf
-.B mbgrd2gltf input.grd -o /path/to/output -d -b -qp 20 -e 20
+.B mbgrd2gltf \-I input.grd \-O /path/to/output \-D \-B \-Qp 20 \-E 20 \-V
 .fi
+.RE
+
+Convert bathymetry with 10x vertical exaggeration:
+.RS
 .nf
-Auto setting stride to 1. [ Program generated output. ]
+.B mbgrd2gltf \-I bathymetry.grd \-E 10.0 \-B
+.fi
 .RE
 
 .SH "SEE ALSO"
