@@ -21,6 +21,7 @@
 #endif
 #include "TerrainNavClient.h"
 #include "TRNUtils.h"
+#define TRN_CHUNK_SIZE  512
 
 /******************************************************************************
  TRANSITION MATRIX
@@ -42,23 +43,15 @@
 //static int transitionMatrix[5][3] = {{2,0,1},{1,1,1},{1,2,2},{2,2,2},{2,2,2}};
 
 TerrainNavClient::TerrainNavClient()
-  :TerrainNav(),
-_logdir(NULL),
-_connected(false),
-_mbtrn_server_type(true),
-_server_ip(NULL),
-_sockfd(-1),
-_sockport(-1)
+: TerrainNav()
+, _logdir(NULL)
+, _connected(false)
+, _mbtrn_server_type(true)
+, _server_ip(NULL)
+, _sockfd(-1)
+, _sockport(-1)
 {
-    this->mapFile = NULL;
-    this->vehicleSpecFile = NULL;
-    this->saveDirectory = NULL;
-    this->particlesFile = NULL;
-    this->tNavFilter = NULL;
-    this->terrainMap = NULL;
-    this->filterType = 1;
-    this->mapType = 1;
-    this->allowFilterReinits = true;
+//    fprintf(stderr, "%s:%d - <<<<< DFL CTOR >>>>>\n", __func__, __LINE__);
     memset(_comms_buf,0,TRN_MSG_SIZE);
     _initialized = false;
 }
@@ -66,9 +59,10 @@ _sockport(-1)
 // Just establish a connection to a server that does not need initialization.
 // Used to connect to the Trn server in mbtrnpp
 TerrainNavClient::TerrainNavClient(char *server_ip, int port)
-:TerrainNav(), _connected(false), _mbtrn_server_type(true), _server_ip(NULL),
-_sockfd(-1), _sockport(port)
+: TerrainNav()
+, _sockport(port)
 {
+//    fprintf(stderr, "%s:%d - <<<<< INIT(2) CTOR >>>>>\n", __func__, __LINE__);
   _server_ip = (NULL!=server_ip ? strdup(server_ip) : NULL);
     memset(_comms_buf,0,TRN_MSG_SIZE);
   init_comms();
@@ -79,19 +73,22 @@ _sockfd(-1), _sockport(port)
 TerrainNavClient::TerrainNavClient(char *server_ip, int port,
            char *mapName, char *vehicleSpecs, char *particlefile, char *logdir,
            const int &filterType, const int &mapType)
-: TerrainNav(), _connected(false), _mbtrn_server_type(true), _sockfd(-1), _sockport(port)
+: TerrainNav()
+, _sockport(port)
 {
-  // initialize member variables from the argument list
-  // do not load maps, do not call initVariables() as those are uneeded
-  this->mapFile = STRDUPNULL(mapName);
-  this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
-  this->saveDirectory = STRDUPNULL(logdir);
-  this->particlesFile = STRDUPNULL(particlefile);
-  this->tNavFilter = NULL;
-  this->terrainMap = NULL;
-  this->filterType = filterType;
-  this->mapType = mapType;
-  this->allowFilterReinits = true;
+//    fprintf(stderr, "%s:%d - <<<<< INIT(8) CTOR >>>>>\n", __func__, __LINE__);
+    // initialize member variables from the argument list
+    // do not load maps, do not call initVariables() as those are uneeded
+    this->mapFile = STRDUPNULL(mapName);
+    this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
+    this->saveDirectory = STRDUPNULL(logdir);
+    this->particlesFile = STRDUPNULL(particlefile);
+    this->tNavFilter = NULL;
+    this->terrainMap = NULL;
+    this->filterType = filterType;
+    this->mapType = mapType;
+    this->allowFilterReinits = true;
+
     memset(_comms_buf,0,TRN_MSG_SIZE);
 
     if(this->mapType == 1) {
@@ -100,19 +97,53 @@ TerrainNavClient::TerrainNavClient(char *server_ip, int port,
         terrainMap = new TerrainMapOctree(this->mapFile);
     }
 
-  // Initialize TNavConfig
-  TNavConfig::instance()->setMapFile(this->mapFile);
-  TNavConfig::instance()->setVehicleSpecsFile(this->vehicleSpecFile);
-  TNavConfig::instance()->setParticlesFile(this->particlesFile);
-  TNavConfig::instance()->setLogDir(this->saveDirectory);
-  _server_ip = STRDUPNULL(server_ip);
-  _logdir    = (NULL!=logdir ? strdup(logdir) : NULL);
-  _initialized = false;
+    // Initialize TNavConfig
+    TNavConfig::instance()->setMapFile(this->mapFile);
+    TNavConfig::instance()->setVehicleSpecsFile(this->vehicleSpecFile);
+    TNavConfig::instance()->setParticlesFile(this->particlesFile);
+    TNavConfig::instance()->setLogDir(this->saveDirectory);
+    _server_ip = STRDUPNULL(server_ip);
+    _logdir    = STRDUPNULL(logdir);
+    _initialized = false;
 
-  init_comms();
-  init_server();
-  logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),
-    "TerrainNavClient::Constructor finished.\n");
+    init_comms();
+    init_server();
+    _initialized = true;
+    logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),
+         "TerrainNavClient::Constructor finished.\n");
+}
+
+TerrainNavClient::TerrainNavClient(const TerrainNavClient &other)
+: TerrainNav(other)
+{
+//    fprintf(stderr, "%s:%d - <<<<< COPY CTOR >>>>>\n", __func__, __LINE__);
+    _logdir = STRDUPNULL(other._logdir);
+    _connected = other._connected;
+    _mbtrn_server_type = other._mbtrn_server_type;
+    _server_ip = STRDUPNULL(other._logdir);
+    _sockfd = other._sockfd;
+    _sockport = other._sockport;
+
+    this->mapFile = STRDUPNULL(other.mapFile);
+    this->vehicleSpecFile= STRDUPNULL(other.vehicleSpecFile);
+    this->saveDirectory = STRDUPNULL(other.saveDirectory);
+    this->particlesFile = STRDUPNULL(other.particlesFile);
+//    this->tNavFilter = NULL;
+    if(this->mapType == 1) {
+        this->terrainMap = new TerrainMapDEM(this->mapFile);
+    } else {
+        this->terrainMap = new TerrainMapOctree(this->mapFile);
+    }
+    this->filterType = other.filterType;
+    this->mapType = other.mapType;
+    this->allowFilterReinits = other.allowFilterReinits;
+    memcpy(_comms_buf,other._comms_buf,TRN_MSG_SIZE);
+    _initialized = other._initialized;
+
+//    init_comms();
+//    init_server();
+//    _initialized = false;
+
 }
 
 TerrainNavClient::~TerrainNavClient()
@@ -306,7 +337,6 @@ char TerrainNavClient::get_msg()
 
 }
 
-#define TRN_CHUNK_SIZE  512
 
 // throws a TRNConnection exception if TRN has hung up
 size_t TerrainNavClient::send_msg(commsT& msg)

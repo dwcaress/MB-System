@@ -35,108 +35,211 @@
 #include "DataField.h"
 #include "TRNUtils.h"
 
-#define MAPNAME_BUF_BYTES 512
-#define CFGNAME_BUF_BYTES 512
-#define VEHICLENAME_BUF_BYTES 512
-#define PARTICLENAME_BUF_BYTES 512
-#define SESSIONDIR_BUF_BYTES 512
+#define MAPNAME_BUF_BYTES 1024
+#define CFGNAME_BUF_BYTES 1024
+#define VEHICLENAME_BUF_BYTES 1024
+#define PARTICLENAME_BUF_BYTES 1024
+#define SESSIONDIR_BUF_BYTES 1024
+#define LOGDIR_BUF_BYTES 64
 
 // Common to QNX and NIX versions
 // 
-TrnClient::TrnClient(const char *host, int port)
-: TerrainNavClient(),
-    _cfg_file(NULL),
-   verbose(0)
+TrnClient::TrnClient()
+: TerrainNavClient()
+, verbose(0)
+, _quit_ref(NULL)
+, _cfg_file(NULL)
 {
+//    fprintf(stderr,"%s:%d - <<<<< DFL CTOR >>>>>>\n", __func__, __LINE__);
     try{
-        _trn_attr = new TrnAttr();
-        char *ld =getenv("TRN_LOGDIR");
-        _logdir    = (NULL!=ld ? STRDUPNULL(ld): STRDUPNULL(LOGDIR_DFL));
-
-    }catch (Exception e){
-        printf("\n];\n");
-    }
-
-    if (NULL!=host){
-        free(_server_ip);
-        _server_ip = strdup(host);
-        _sockport = port;
-        free(_trn_attr->terrainNavServer);
-        _trn_attr->terrainNavServer = strdup(host);
-        _trn_attr->terrainNavPort = port;
-    }
-
-    fprintf(stderr, "\nServer      : %s :%ld\n",_trn_attr->terrainNavServer, _trn_attr->terrainNavPort);
-    fprintf(stderr,"Vehicle Cfg : %s\n\n", _trn_attr->vehicleCfgName);
-    _initialized = false;
-    
-}
-
-TrnClient::TrnClient(const char *svr_log_dir, const char *host, int port)
-: TerrainNavClient(),
-_cfg_file(NULL),
-verbose(0)
-{
-    try {
-        _trn_attr = new TrnAttr();
-
         // set TRN server log dir to
         // $TRN_LOGDIR (default if set)
         // svr_log_dir (specified by application)
         // CWD if neither set
-        const char *ld =getenv("TRN_LOGDIR");
-        if(NULL!=svr_log_dir){
-            ld=svr_log_dir;
-        }
-        _logdir    = (NULL!=ld ? STRDUPNULL(ld):STRDUPNULL(LOGDIR_DFL));
+        char *ld_env = getenv("TRN_LOGDIR");
+        _logdir = (NULL != ld_env ? STRDUPNULL(ld_env) : STRDUPNULL(LOGDIR_DFL));
 
     }catch (Exception e){
-        printf("\n];\n");
+        fprintf(stderr, "\n%s Exception - could not initialize TrnAttr\n", __func__);
     }
 
-    if (NULL!=host){
-        free(_server_ip);
+//    fprintf(stderr, "\n%s:%d - this %p trn_attr[%p]\n",__func__, __LINE__, this, &_trn_attr);
+    _initialized = false;
+
+}
+TrnClient::TrnClient(const char *host, int port)
+: TerrainNavClient()
+, verbose(0)
+, _quit_ref(NULL)
+, _cfg_file(NULL)
+{
+//    fprintf(stderr,"%s:%d - <<<<< INIT CTOR (host/port) >>>>>\n", __func__, __LINE__);
+    try{
+        // set TRN server log dir to
+        // $TRN_LOGDIR (default if set)
+        // svr_log_dir (specified by application)
+        // CWD if neither set
+        char *ld_env = getenv("TRN_LOGDIR");
+        _logdir = (NULL != ld_env ? STRDUPNULL(ld_env) : STRDUPNULL(LOGDIR_DFL));
+
+    }catch (Exception e){
+        fprintf(stderr, "\n%s Exception - could not initialize TrnAttr\n", __func__);
+    }
+
+    if (NULL != host){
+        if(_server_ip != NULL)
+            free(_server_ip);
         _server_ip = strdup(host);
         _sockport = port;
-        free(_trn_attr->terrainNavServer);
-        _trn_attr->terrainNavServer = strdup(host);
-        _trn_attr->terrainNavPort = port;
+        _trn_attr.terrainNavServer = strdup(host);
+        _trn_attr.terrainNavPort = port;
     }
-
-    fprintf(stderr, "\nServer      : %s :%ld\n",_trn_attr->terrainNavServer, _trn_attr->terrainNavPort);
-    fprintf(stderr,"Vehicle Cfg : %s\n\n", _trn_attr->vehicleCfgName);
 
     _initialized = false;
 
+//    fprintf(stderr, "\n%s:%d - this %p trn_attr[%p]\n",__func__, __LINE__, this, &_trn_attr);
+//    fprintf(stderr, "%s - Server      : %s :%ld\n", __func__, _trn_attr.terrainNavServer, _trn_attr.terrainNavPort);
+//    fprintf(stderr,"%s - Vehicle Cfg : %s\n", __func__, _trn_attr.vehicleCfgName);
+//    fprintf(stderr,"%s -_logdir : %s\n\n", __func__, _logdir);
+}
+
+TrnClient::TrnClient(const char *svr_log_dir, const char *host, int port)
+: TerrainNavClient()
+, verbose(0)
+, _quit_ref(NULL)
+, _cfg_file(NULL)
+{
+//    fprintf(stderr,"%s:%d - <<<<< INIT CTOR (logdir, host, port) >>>>>\n", __func__, __LINE__);
+    try {
+        // set TRN server log dir to
+        // $TRN_LOGDIR (default if set)
+        // svr_log_dir (specified by application)
+        // CWD if neither set
+        const char *ld_env =getenv("TRN_LOGDIR");
+
+        if(NULL != svr_log_dir){
+            ld_env = svr_log_dir;
+        }
+
+        _logdir = (NULL != ld_env ? STRDUPNULL(ld_env):STRDUPNULL(LOGDIR_DFL));
+
+    }catch (Exception e){
+        fprintf(stderr, "\n%s:%d Exception - could not initialize _logdir\n", __func__, __LINE__);
+    }
+
+    if (NULL!=host){
+        if(_server_ip != NULL)
+            free(_server_ip);
+        _server_ip = strdup(host);
+        _sockport = port;
+        _trn_attr.terrainNavServer = strdup(host);
+        _trn_attr.terrainNavPort = port;
+    }
+
+    _initialized = false;
+
+//    fprintf(stderr, "\n%s:%d - this %p trn_attr[%p]\n",__func__, __LINE__, this, &_trn_attr);
+//    fprintf(stderr, "%s - Server      : %s :%ld\n", __func__, _trn_attr.terrainNavServer, _trn_attr.terrainNavPort);
+//    fprintf(stderr,"%s - Vehicle Cfg : %s\n", __func__, _trn_attr.vehicleCfgName);
+//    fprintf(stderr,"%s -_logdir : %s\n\n", __func__, _logdir);
+}
+
+TrnClient::TrnClient(const TrnClient& other)
+: TerrainNavClient(other)
+{
+//    fprintf(stderr,"%s:%d - <<<<< COPY CTOR >>>>>\n", __func__, __LINE__);
+    this->verbose = other.verbose;
+    this->_quit_ref = other._quit_ref;
+    this->_cfg_file = STRDUPNULL(other._cfg_file);
+    this->_trn_attr = other._trn_attr;
+
+    this->_connected = other._connected;
+    this->_mbtrn_server_type = other._mbtrn_server_type;
+    this->_server_ip = STRDUPNULL(other._server_ip);
+    this->_sockfd = other._sockfd;
+    this->_logdir = STRDUPNULL(other._logdir);
+    this->_sockfd = other._sockfd;
+    this->_sockport = other._sockport;
+    std::memcpy(&_server_addr, &other._server_addr, sizeof(struct sockaddr_in));
+    this->_server_msg = other._server_msg;
+    std::memcpy(this->_comms_buf, other._comms_buf, TRN_MSG_SIZE);
+
+//    fprintf(stderr, "\n%s:%d - this %p trn_attr[%p]\n",__func__, __LINE__, this, &_trn_attr);
+//    fprintf(stderr, "%s - Server      : %s :%ld\n", __func__, _trn_attr.terrainNavServer, _trn_attr.terrainNavPort);
+//    fprintf(stderr,"%s - Vehicle Cfg : %s\n", __func__, _trn_attr.vehicleCfgName);
+//    fprintf(stderr,"%s -_logdir : %s\n\n", __func__, _logdir);
 }
 
 TrnClient::~TrnClient()
 {
+//    fprintf(stderr,"%s:%d - <<<<< DTOR >>>>>\n", __func__, __LINE__);
     free(_cfg_file);
-    delete _trn_attr;
     // base class closes _sockfd and free's _server_ip and _logdir
 }
 
-int TrnClient::loadCfgAttributes(const char *cfg_file)
+void TrnClient::chkSetString(char **dest, const char *src)
 {
-    char cfg_buf[512];
-    char *cfg_path=NULL;
+    if(dest==NULL)
+        return;
 
-    if(NULL!=cfg_file){
+    // free destination if allocated
+    if(*dest != NULL)
+        free(*dest);
+
+    // set destination with copy of source
+    if(src == NULL)
+        *dest = NULL;
+    else
+        *dest = strdup(src);
+}
+
+char *TrnClient::updateSessionDir()
+{
+
+//    if(_logdir == NULL || strcasecmp(_logdir,"session") == 0){
+        if(_logdir != NULL) {
+            free(_logdir);
+        }
+//    }
+    _logdir = (char *)malloc(LOGDIR_BUF_BYTES);
+    time_t tt_now=time(NULL);
+    struct tm *tm_now = gmtime(&tt_now);
+    strftime(_logdir,LOGDIR_BUF_BYTES,"%Y-%j",tm_now);
+
+    return _logdir;
+}
+
+int TrnClient::loadCfgAttributes(const char *cfg_file, const char *usr_log_path)
+{
+    char *cfg_path = NULL;
+
+    if(NULL != cfg_file){
         // set _cfg_file member and use that
         TrnAttr::chkSetString(&_cfg_file, cfg_file);
         cfg_path = _cfg_file;
+        fprintf(stderr, "%s:%d cfg_file [%s]\n", __func__, __LINE__, cfg_file);
     }else{
         // use default path ($TRN_CONFIGDIR/terrainAid.cfg or ./terrainAid.cfg)
         const char *cfg_dir = getenv("TRN_DATAFILES");
-        snprintf(cfg_buf, 512, "%s/terrainAid.cfg", (NULL!=cfg_dir ? cfg_dir : "."));
+        if(cfg_dir == NULL)
+            cfg_dir = ".";
+
+        size_t cb_len = strlen(cfg_dir) + strlen("/terrainAid.cfg") + 1;
+        char cfg_buf[cb_len];
+        memset(cfg_buf, 0, cb_len);
+
+        snprintf(cfg_buf, cb_len, "%s/terrainAid.cfg", cfg_dir);
         TrnAttr::chkSetString(&_cfg_file, cfg_buf);
         cfg_path = _cfg_file;
     }
 
-    _trn_attr->setCfgFile(_cfg_file);
+    fprintf(stderr, "%s:%d _cfg_file [%s] cfg_path[%s]\n", __func__, __LINE__, _cfg_file, cfg_path);
 
-    _trn_attr->parseConfig();
+    _trn_attr.setCfgFile(_cfg_file);
+
+    _trn_attr.parseConfig();
+
+    fprintf(stderr, "%s:%d trn_attr[%p]:\n%s\n", __func__, __LINE__, &_trn_attr,  _trn_attr.tostring().c_str());
 
     try {
 
@@ -144,10 +247,11 @@ int TrnClient::loadCfgAttributes(const char *cfg_file)
         char vehiclename[VEHICLENAME_BUF_BYTES]={0};
         char particlename[PARTICLENAME_BUF_BYTES]={0};
         char sessiondir[SESSIONDIR_BUF_BYTES]={0};
+        char *psession = sessiondir;
 
-        char* mapPath = getenv("TRN_MAPFILES");
-        char* cfgPath = getenv("TRN_DATAFILES");
-        char* logPath = getenv("TRN_LOGFILES");
+        const char* mapPath = getenv("TRN_MAPFILES");
+        const char* cfgPath = getenv("TRN_DATAFILES");
+        const char* logPath = getenv("TRN_LOGFILES");
 
         char cwd[] = ".";
         if(mapPath == NULL) {
@@ -156,7 +260,9 @@ int TrnClient::loadCfgAttributes(const char *cfg_file)
         if(cfgPath == NULL) {
             cfgPath = cwd;
         }
-        if(logPath == NULL) {
+        if(usr_log_path != NULL) {
+            logPath = usr_log_path;
+        } else if (logPath == NULL) {
             logPath = cwd;
         }
 
@@ -174,45 +280,55 @@ int TrnClient::loadCfgAttributes(const char *cfg_file)
         // For TRNClient, saveDirectory must be set to the log directory
         // (which may not exist yet), which is passed via init message to trn_server
         // and used to create the directory.
-        if(_logdir==NULL || strcasecmp(_logdir,"session")==0){
-            free(_logdir);
-            _logdir = (char *)malloc(32);
+        fprintf(stderr,"%s:%d - _logdir[%s]\n",__func__,  __LINE__, _logdir);
+        if(_logdir == NULL || strcasecmp(_logdir,"session") == 0){
+            if(_logdir != NULL)
+                free(_logdir);
+            _logdir = (char *)malloc(LOGDIR_BUF_BYTES);
             time_t tt_now=time(NULL);
             struct tm *tm_now = gmtime(&tt_now);
-            strftime(_logdir,32,"%Y-%j",tm_now);
+            strftime(_logdir,LOGDIR_BUF_BYTES,"%Y-%j",tm_now);
         }
-        getSessionDir(_logdir, sessiondir,512,false);
+        fprintf(stderr,"%s:%d - _logdir[%s]\n",__func__,  __LINE__, _logdir);
 
+        // initialize session directory info to pass to TRN server,
+        // but don't create the directory or symlink (TRN server does)
+        initSessionDirectory(logPath, _logdir, &psession, SESSIONDIR_BUF_BYTES, false, false);
 
-        if(_trn_attr->mapName != NULL){
-            snprintf(mapname, MAPNAME_BUF_BYTES, "%s/%s", mapPath, _trn_attr->mapName);
-            free(mapFile);
-            this->mapFile = STRDUPNULL(mapname);
+        if(_trn_attr.mapName != NULL){
+            snprintf(mapname, MAPNAME_BUF_BYTES, "%s/%s", mapPath, _trn_attr.mapName);
+            chkSetString(&this->mapFile, mapname);
         }else{
-            this->mapFile = NULL;
+            chkSetString(&this->mapFile, NULL);
         }
 
-        if(_trn_attr->vehicleCfgName != NULL){
-            snprintf(vehiclename, VEHICLENAME_BUF_BYTES, "%s/%s", cfgPath, _trn_attr->vehicleCfgName);
-            free(vehicleSpecFile);
-            this->vehicleSpecFile = STRDUPNULL(vehiclename);
+        if(_trn_attr.vehicleCfgName != NULL){
+            snprintf(vehiclename, VEHICLENAME_BUF_BYTES, "%s/%s", cfgPath, _trn_attr.vehicleCfgName);
+            chkSetString(&this->vehicleSpecFile, vehiclename);
         }else{
-            this->vehicleSpecFile = NULL;
+            chkSetString(&this->vehicleSpecFile, NULL);
         }
 
-        if(_trn_attr->particlesName!=NULL){
-            snprintf(particlename, PARTICLENAME_BUF_BYTES, "%s/%s", cfgPath, _trn_attr->particlesName);
-            free(particlesFile);
-            this->particlesFile = STRDUPNULL(particlename);
+        if(_trn_attr.particlesName!=NULL){
+            snprintf(particlename, PARTICLENAME_BUF_BYTES, "%s/%s", cfgPath, _trn_attr.particlesName);
+            chkSetString(&this->particlesFile, particlename);
         }else{
-            this->particlesFile = NULL;
+            chkSetString(&this->particlesFile, NULL);
         }
 
-        free(saveDirectory);
+        chkSetString(&this->_server_ip, _trn_attr.terrainNavServer);
+
+        if(_trn_attr.terrainNavPort > 0){
+            _sockport = _trn_attr.terrainNavPort;
+        }
+
+        // saveDirectory passed to TRN server; TRN session log directory path
+        if(saveDirectory != NULL)
+            free(saveDirectory);
         this->saveDirectory = STRDUPNULL(sessiondir);
 
-        this->mapType = _trn_attr->mapType;
-        this->filterType = _trn_attr->filterType;
+        this->mapType = _trn_attr.mapType;
+        this->filterType = _trn_attr.filterType;
 
 
 #ifdef TRNCLIENT_CREATE_MAP
@@ -236,14 +352,14 @@ int TrnClient::loadCfgAttributes(const char *cfg_file)
         fprintf(stderr, "%s: par    : %s\n", __func__, particlename);
         fprintf(stderr, "%s: cfg    : %s\n", __func__, cfg_path);
         fprintf(stderr, "%s: save   : %s\n", __func__, saveDirectory);
-        fprintf(stderr, "%s: trnsvr : %s\n", __func__, _trn_attr->terrainNavServer);
+        fprintf(stderr, "%s: trnsvr : %s\n", __func__, _trn_attr.terrainNavServer);
 
     }catch (Exception e){
-        printf("\n];\n");
+        printf("\n%s:%d Exception parsing \n", __func__, __LINE__);
     }
 
     fprintf(stderr, "%s: server : %s:%d\n", __func__, _server_ip, _sockport);
-    fprintf(stderr, "%s: vehcfg : %s\n", __func__, _trn_attr->vehicleCfgName);
+    fprintf(stderr, "%s: vehcfg : %s\n", __func__, _trn_attr.vehicleCfgName);
 
     return 0;
 }
@@ -340,15 +456,15 @@ int TrnClient::connectSocket()
 
             if(connect(_sockfd, (struct sockaddr *)&_server_addr, sizeof(struct sockaddr_in)) == 0)
             {
-                fprintf(stderr, "%s : connect OK [%s:%d]\n", __FUNCTION__, _server_ip, _sockport);
+                fprintf(stderr, "%s : connect OK [%s:%d]\n", __func__, _server_ip, _sockport);
                 _connected = true;
                 retval = 0;
             } else {
-                fprintf(stderr, "%s : connect ERR fd[%d] [%s:%d] [%d/%s]\n", __FUNCTION__, _sockfd, _server_ip, _sockport, errno,strerror(errno));
+                fprintf(stderr, "%s : connect ERR fd[%d] [%s:%d] [%d/%s]\n", __func__, _sockfd, _server_ip, _sockport, errno,strerror(errno));
                 perror("TrnClient::connectSocket");
             }
         } else {
-            fprintf(stderr,"%s: ERR - NULL _server_ip\n",__FUNCTION__);
+            fprintf(stderr,"%s: ERR - NULL _server_ip\n",__func__);
         }
     return retval;
 }
@@ -358,13 +474,11 @@ int TrnClient::connectSocket()
 TerrainNav* TrnClient::connectTRN()
 {
     TerrainNav *_tercom = NULL;
-    
-    fprintf(stderr, "TrnClient - Using TerrainNav [%s:%ld]\n",
-            _trn_attr->terrainNavServer, _trn_attr->terrainNavPort);
-    
+    TrnAttr *patt = &_trn_attr;
+
     try
     {
-        if(connectSocket()==0){
+        if(connectSocket() == 0){
             _tercom = static_cast<TerrainNav *>(this);
         }
 
@@ -378,7 +492,7 @@ TerrainNav* TrnClient::connectTRN()
         // On linux and cygwin, we can use a native TerrainNav object instead
         // of relying on a trn_server. Call useTRNServer() to decide.
         //
-//        printf("Connecting to %s...\n", _trn_attr->terrainNavServer);
+//        printf("Connecting to %s...\n", _trn_attr.terrainNavServer);
 //        _tercom = static_cast<TerrainNav *>(this);
     }
     catch (Exception e)
@@ -386,41 +500,50 @@ TerrainNav* TrnClient::connectTRN()
         fprintf(stderr, "TrnClient - Failed TRN connection. Check TRN error messages...\n");
     }
     
-    if (NULL!=_tercom && _tercom->is_connected() && !_trn_attr->skipInit){
+    if (NULL!=_tercom && _tercom->is_connected() && !this->_trn_attr.skipInit){
         init_server();
 
-        setModifiedWeighting(_trn_attr->useModifiedWeighting);
+        setModifiedWeighting(this->_trn_attr.useModifiedWeighting);
         // filterReinits
-        setFilterReinit(_trn_attr->allowFilterReinits);
-        if(_trn_attr->forceLowGradeFilter)
+        setFilterReinit(_trn_attr.allowFilterReinits);
+        if(this->_trn_attr.forceLowGradeFilter)
             useLowGradeFilter();
         else
             useHighGradeFilter();
 
         // server initialization creates log directory
         // copy config file to directory (if TRN on same host)
-        char copybuf[512] = {0};
+        // TODO: if server drops connection, it creates a new session
+        // directory, but this copies config file to it's
+        // current session (overwriting it).
+        // Maybe this isn't the place/time to do this...
         char *cfg_path = TNavConfig::instance()->getConfigPath();
 
-        if (this->saveDirectory && NULL != cfg_path)
+
+        if (NULL != this->saveDirectory && NULL != cfg_path)
         {
+            size_t cb_size = strlen(cfg_path) + strlen(this->saveDirectory) + strlen("cp  /.") + 1;
+            char copybuf[cb_size];
+            memset(copybuf, 0, cb_size);
+
             snprintf(copybuf, 512, "cp %s %s/.", cfg_path,
                     this->saveDirectory);
-            if (0 != system(copybuf))
-                fprintf(stderr, "%s: ERR - config copy [%s] failed [%d/%s]\n",
-                        __func__, copybuf, errno, strerror(errno));
-            else
-                fprintf(stderr, "%s: copied config [%s] to [%s]\n",
-                        __func__, cfg_path, saveDirectory);
+            if (0 != system(copybuf)) {
+                fprintf(stderr, "%s:%d: ERR - config copy [%s] failed [%d/%s]\n",
+                        __func__, __LINE__, copybuf, errno, strerror(errno));
+            } else {
+                fprintf(stderr, "%s:%d: copied config [%s] to [%s]\n",
+                        __func__, __LINE__, cfg_path, saveDirectory);
+            }
         }
         free(cfg_path);
 
         // If we reach here then we've connected
         //
-        fprintf(stderr, "TrnClient - connected to server if no error messages...\n");
+        fprintf(stderr, "%s:%d TrnClient - connected to server if no error messages...\n", __func__, __LINE__);
 
     } else{
-        fprintf(stderr, "TrnClient - Not initialized. skipInit(%c) See trn_server error messages...\n", _trn_attr->skipInit ? 'Y' : 'N');
+        fprintf(stderr, "%s:%d TrnClient - Not initialized. skipInit(%c) See trn_server error messages...\n", __func__, __LINE__, this->_trn_attr.skipInit ? 'Y' : 'N');
     }
     
     return _tercom;
@@ -428,14 +551,58 @@ TerrainNav* TrnClient::connectTRN()
 
 void TrnClient::show(int indent, int wkey, int wval)
 {
-    fprintf(stderr,"%*s%*s %*s\n",indent,(indent>0?" ":""),wkey,"host",wval,_server_ip);
-    fprintf(stderr,"%*s%*s %*d\n",indent,(indent>0?" ":""),wkey,"port",wval,_sockport);
-    fprintf(stderr,"%*s%*s %*d\n",indent,(indent>0?" ":""),wkey,"fd",wval,_sockfd);
-    fprintf(stderr,"%*s%*s %*c\n",indent,(indent>0?" ":""),wkey,"connected",wval,_connected?'Y':'N');
-    fprintf(stderr,"%*s%*s %*s\n",indent,(indent>0?" ":""),wkey,"trncfg",wval,_cfg_file);
     fprintf(stderr,"%*s%*s %*s\n",indent,(indent>0?" ":""),wkey,"logdir",wval,_logdir);
-    fprintf(stderr,"%*s%*s %*c\n",indent,(indent>0?" ":""),wkey,"trn svr type",wval,_mbtrn_server_type?'1':'0');
+    fprintf(stderr,"%*s%*s %*c\n",indent,(indent>0?" ":""),wkey,"connected",wval,(_connected?'Y':'N'));
+    fprintf(stderr,"%*s%*s %*d\n",indent,(indent>0?" ":""),wkey,"trn_server_type",wval,_mbtrn_server_type);
+    fprintf(stderr,"%*s%*s %*s\n",indent,(indent>0?" ":""),wkey,"server_ip",wval,_server_ip);
+    fprintf(stderr,"%*s%*s %*d\n",indent,(indent>0?" ":""),wkey,"sockport",wval,_sockport);
+    fprintf(stderr,"%*s%*s %*d\n",indent,(indent>0?" ":""),wkey,"sockfd",wval,_sockfd);
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"server_addr",wval,&_server_addr);
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"server_msg",wval,&_server_msg);
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"comms_buf",wval,&_comms_buf);
 
+    fprintf(stderr,"%*s%*s %*c\n",indent,(indent>0?" ":""),wkey,"verbose",wval,(verbose?'Y':'N'));
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"quit_ref",wval,_quit_ref);
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"cfg_file",wval,_cfg_file);
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"trn_attr",wval,(void *)&_trn_attr);
+}
+
+void TrnClient::show_addr(int indent, int wkey, int wval)
+{
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"this",wval,(void *)this);
+    fprintf(stderr,"%*s ----- TerrainNav -----\n",indent,(indent>0?" ":""));
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"saveDirectory",wval,(void *)saveDirectory);
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"vehicleSpecFile",wval,(void *)vehicleSpecFile);
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"particlesFile",wval,(void *)particlesFile);
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"mapFile",wval,(void *)mapFile);
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"filterType",wval,(void *)&filterType);
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"mapType",wval,(void *)&mapType);
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"terrainMap",wval,(void *)terrainMap);
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"_initialized",wval,(void *)&_initialized);
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"_trnLog",wval,(void *)_trnLog);
+#ifdef WITH_TRNLOG
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"_trnBinLog",wval,(void *)_trnBinLog);
+#endif
+
+    fprintf(stderr,"%*s ----- TerrainNavClient -----\n",indent,(indent>0?" ":""));
+
+
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"logdir",wval,(void *)_logdir);
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"connected",wval,(void *)&_connected);
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"trn_server_type",wval,(void *)&_mbtrn_server_type);
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"server_ip",wval,(void *)_server_ip);
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"sockfd",wval,(void *)&_sockfd);
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"sockport",wval,(void *)&_sockport);
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"server_addr",wval,(void *)&_server_addr);
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"server_msg",wval,(void *)&_server_msg);
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"comms_buf",wval,(void *)_comms_buf);
+
+    fprintf(stderr,"%*s ----- TrnClient -----\n",indent,(indent>0?" ":""));
+
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"verbose",wval,(void *)&verbose);
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"quit_ref",wval,(void *)&_quit_ref);
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"cfg_file",wval,(void *)_cfg_file);
+    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"trn_attr",wval, (void *)&_trn_attr);
 }
 
 void TrnClient::setQuitRef(bool *pvar)
@@ -448,4 +615,14 @@ bool TrnClient::isQuitSet()
     if(NULL != _quit_ref)
         return *_quit_ref;
     return false;
+}
+
+TrnAttr &TrnClient::getTrnAttr()
+{
+    return _trn_attr;
+}
+
+char *TrnClient::attGetServer()
+{
+    return _trn_attr.terrainNavServer;
 }

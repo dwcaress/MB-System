@@ -22,6 +22,7 @@
 #include <memory.h>
 #include <libgen.h>
 #include <map>
+#include <cstdint>
 
 #ifndef DTR
 #define DTR(x) ((x) * M_PI/180.)

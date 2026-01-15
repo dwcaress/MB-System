@@ -61,6 +61,7 @@ class TerrainNavClient : public TerrainNav
 		   const int &filterType,
 		   const int &mapType);
 
+    TerrainNavClient(const TerrainNavClient &other);
 
 #if 0
   /* Constructor: TerrainNavClient(mapName)
@@ -114,7 +115,7 @@ class TerrainNavClient : public TerrainNav
    * -------------------------------------------------------------------------*/
   /*! Frees all storage associated with the TerrainNav object.
    */
-  virtual ~TerrainNavClient();
+  virtual ~TerrainNavClient() override;
 
 
   /* Function: estimatePose
@@ -128,8 +129,8 @@ class TerrainNavClient : public TerrainNav
    * 1: Maximum Likelihood Estimate
    * 2: Minimum Mean Square Error Estimate.
    */
-  virtual void estimatePose(poseT* estimate, const int &type);
-		
+  virtual void estimatePose(poseT* estimate, const int &type) override;
+
   /* Function: measUpdate
    * Usage: tercom->measUpdate(currMeas, type);
    * -------------------------------------------------------------------------*/
@@ -143,7 +144,7 @@ class TerrainNavClient : public TerrainNav
    * 4: Homer Relative Measurement
 
    */
-  virtual void measUpdate(measT* incomingMeas, const int &type);
+  virtual void measUpdate(measT* incomingMeas, const int &type) override;
 
    
   /* Function: motionUpdate
@@ -153,7 +154,7 @@ class TerrainNavClient : public TerrainNav
    * to the TNavFilter object.  The function takes in a pointer to a poseT 
    * containing the current inertial measurement information. 
    */
-  virtual void motionUpdate(poseT* incomingNav);
+  virtual void motionUpdate(poseT* incomingNav) override;
 
   /* Function: outstandingMeas
    * Usage: tercom->outstandingMeas;
@@ -162,7 +163,7 @@ class TerrainNavClient : public TerrainNav
    * not yet incorporated into the PDF and waiting for more recent inertial
    * measurement data. 
    */
-  virtual bool outstandingMeas();
+  virtual bool outstandingMeas() override;
 
   /* Function: lastMeasSuccessful
    * Usage: tercom->lastMeasSuccessful();
@@ -170,7 +171,7 @@ class TerrainNavClient : public TerrainNav
   /*! Returns a boolean indicating if the last sonar measurement 
    * was successfully incorporated into the filter or not.
    */
-  virtual bool lastMeasSuccessful();
+  virtual bool lastMeasSuccessful() override;
 
 
   /* Function: setInterpMeasAttitude()
@@ -180,7 +181,7 @@ class TerrainNavClient : public TerrainNav
    * information should be determined from interpolated inertial poses.
    * Default = 0;
    */
-  virtual void setInterpMeasAttitude(bool set);
+  virtual void setInterpMeasAttitude(bool set) override;
 
 
   /* Function: setMapInterpMethod()
@@ -194,7 +195,7 @@ class TerrainNavClient : public TerrainNav
    * 3: spline
    * Default = 0;
    */
-  virtual void setMapInterpMethod(const int &type);
+  virtual void setMapInterpMethod(const int &type) override;
 
 
   /* Function: setVehicleDriftRate()
@@ -204,7 +205,7 @@ class TerrainNavClient : public TerrainNav
    * determined by the vehicle specification sheet.  The driftRate parameter
    * is given in units of % drift in meters/sec.
    */
-  virtual void setVehicleDriftRate(const double &driftRate);
+  virtual void setVehicleDriftRate(const double &driftRate) override;
 
 
   /* Function: isConverged()
@@ -213,7 +214,7 @@ class TerrainNavClient : public TerrainNav
   /*! Returns a boolean indicating if the terrain navigation filter has 
    * converged to an estimate.
    */
-  virtual bool isConverged();
+  virtual bool isConverged() override;
 
 
    /* Function: useLowGradeFilter()
@@ -222,8 +223,8 @@ class TerrainNavClient : public TerrainNav
   /*! Force filter settings for low grade system:
    * 7DOF system with ALLOW_ATTITUDE_SEARCH=1, DEAD_RECKON=1, SEARCH_GYRO=1
    */
-  virtual void useLowGradeFilter();
-  
+  virtual void useLowGradeFilter() override;
+
 
   /* Function: useHighGradeFilter()
    * Usage: tercom->useHighGradeFilter()
@@ -231,7 +232,7 @@ class TerrainNavClient : public TerrainNav
   /*! Force filter settings for low grade system:
    * 7DOF system with ALLOW_ATTITUDE_SEARCH=0, DEAD_RECKON=0, SEARCH_GYRO=0
    */
-  virtual void useHighGradeFilter();
+  virtual void useHighGradeFilter() override;
 
 
   /* Function: setFilterReinit(allow)
@@ -239,14 +240,14 @@ class TerrainNavClient : public TerrainNav
    * -------------------------------------------------------------------------*/
   /*! Overwrite boolean allowFilterReinits with input argument, allow.
    */
-  virtual void setFilterReinit(const bool allow);
+  virtual void setFilterReinit(const bool allow) override;
 
 	/* Function: setModifiedWeighting(use)
    * Usage: tercom->tNavFilter->setModifiedWeighting(use)
    * -------------------------------------------------------------------------*/
   /*! Overwrite boolean useModifiedWeighting with input argument, use.
    */
-  virtual void setModifiedWeighting(const int use);
+  virtual void setModifiedWeighting(const int use) override;
 
 
   /* Function: getFilterState()
@@ -254,7 +255,7 @@ class TerrainNavClient : public TerrainNav
    * ------------------------------------------------------------------------*/
   /*! Returns the integer filterState describing the current filter state.
    */
-  virtual int getFilterState();
+  virtual int getFilterState() override;
 
 
    /* Function: getNumReinits()
@@ -262,14 +263,14 @@ class TerrainNavClient : public TerrainNav
    * ------------------------------------------------------------------------*/
   /*! Returns the integer numReinits describing the number of reinitializations.
    */
-  virtual int getNumReinits();
+  virtual int getNumReinits() override;
 
    /* Function: reinitFilter(bool lowInfoTransition)
    * Usage: filterType = tercom->reinitFilter(true);
    * ------------------------------------------------------------------------*/
   /*! Reinitializes the TRN filter.
    */
-  virtual void reinitFilter(const bool lowInfoTransition);
+  virtual void reinitFilter(const bool lowInfoTransition) override;
 
     /* Function: reinitFilterBox(bool lowInfoTransition,
      *                           double offset_x, double offset_y, double offset_z,
@@ -280,29 +281,36 @@ class TerrainNavClient : public TerrainNav
      */
     virtual void reinitFilterBox(const bool lowInfoTransition,
                                  double offset_x, double offset_y, double offset_z,
-                                 double sdev_x, double sdev_y, double sdev_z);
+                                 double sdev_x, double sdev_y, double sdev_z) override;
 
     virtual void reinitFilterOffset(const bool lowInfoTransition,
-                                 double offset_x, double offset_y, double offset_z);
+                                 double offset_x, double offset_y, double offset_z) override;
 
-    virtual void setEstNavOffset(double offset_x, double offset_y, double offset_z);
+    virtual void setEstNavOffset(double offset_x, double offset_y, double offset_z) override;
 
-    virtual d_triplet_t *getEstNavOffset(d_triplet_t *dest);
+    virtual d_triplet_t *getEstNavOffset(d_triplet_t *dest) override;
 
-    virtual void setInitStdDevXYZ(double sdev_x, double sdev_y, double sdev_z);
+    virtual void setInitStdDevXYZ(double sdev_x, double sdev_y, double sdev_z) override;
 
-    virtual d_triplet_t *getInitStdDevXYZ(d_triplet_t *dest);
+    virtual d_triplet_t *getInitStdDevXYZ(d_triplet_t *dest) override;
 
-    virtual void setInitVars(InitVars *init_vars);
+    virtual void setInitVars(InitVars *init_vars) override;
 
-    bool is_connected();
+    virtual bool is_connected() override;
 
  protected:
+    void init_comms();
+    void init_server();
+    /////////////////////////////////////////////////////////////////////
+    // Communication functions
+    size_t  send_msg(commsT& msg); // Pack and send the message
+    char get_msg();       // Returns the type of message as defined in
+                          // structDefs.h, message placed in _server_msg
+    bool requestAndConfirm(commsT& msg, char expected_ret_type);
 
   //////////////////////////////////////////////////////////////////////
   // Other important state variables
   char *_logdir;          // name of the log directory on the MVC
-
   //////////////////////////////////////////////////////////////////////
   // Initialize connection to server and send state
   bool _connected;
@@ -311,19 +319,8 @@ class TerrainNavClient : public TerrainNav
   int _sockfd;
   int _sockport;
   struct sockaddr_in _server_addr;
-
   struct commsT _server_msg;
   char _comms_buf[TRN_MSG_SIZE];
-
-  void init_comms();
-  void init_server();
-
-  /////////////////////////////////////////////////////////////////////
-  // Communication functions
-  size_t  send_msg(commsT& msg); // Pack and send the message
-  char get_msg();       // Returns the type of message as defined in
-                        // structDefs.h, message placed in _server_msg
-  bool requestAndConfirm(commsT& msg, char expected_ret_type);
 
 };
 

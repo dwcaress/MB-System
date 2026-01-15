@@ -31,7 +31,8 @@
 #include "lcm_pcf/signal_t.hpp"
 #include "trn_lcm_input.hpp"
 #include "raw_signal_input.hpp"
-#include "trnxpp.hpp"
+#include "LcmTrnCtx.h"
+#include "LcmTrnPP.h"
 #include "mb1_server.hpp"
 #include "NavUtils.h"
 #include "trn_msg_utils.hpp"
@@ -43,7 +44,7 @@
 #include "log_utils.hpp"
 #include "trnxpp_cfg.hpp"
 #include "trnx_utils.hpp"
-#include "trnx_plugin.hpp"
+#include "LcmTrnPlugin.hpp"
 
 // /////////////////
 // Macros
@@ -96,6 +97,8 @@
 #define RTD(x) ((x) * 180./M_PI)
 #endif
 
+//using namespace trn;
+
 // /////////////////
 // Types
 
@@ -110,15 +113,15 @@ static bool g_interrupt=false;
 static void s_termination_handler (int signum);
 static void s_init_logging(trnxpp_cfg &cfg, int argc, char **argv);
 static void s_update_cycle_stats(trnxpp_cfg &cfg);
-static void s_copy_config(trnxpp_cfg &cfg, trn::trnxpp &xpp);
+static void s_copy_config(trnxpp_cfg &cfg, LcmTrnPP &xpp);
 #ifdef WITH_TEST_STREAMS
 static mb1_t *s_get_test_sounding(mb1_t *dest, int beams);
 #endif
-//int update_mb1(trn::trnxpp *xpp);
-//int update_trncli(trn::trnxpp *xpp);
+//int update_mb1(LcmTrnPP *xpp);
+//int update_trncli(LcmTrnPP *xpp);
 
 #ifdef WITH_TEST_STREAMS
-void handle_test_streams(pcf::lcm_publisher &signalPub, pcf::lcm_publisher &stringPub, trn::trnxpp &xpp, trn::mb1_server *mb1svr, trnxpp_cfg &cfg);
+void handle_test_streams(pcf::lcm_publisher &signalPub, pcf::lcm_publisher &stringPub, LcmTrnPP &xpp, trn::mb1_server *mb1svr, trnxpp_cfg &cfg);
 #endif
 void app_main(trnxpp_cfg &cfg);
 
@@ -247,14 +250,14 @@ static void s_update_cycle_stats(trnxpp_cfg &cfg)
     }
 }
 
-static void s_copy_config(trnxpp_cfg &cfg, trn::trnxpp &xpp)
+static void s_copy_config(trnxpp_cfg &cfg, LcmTrnPP &xpp)
 {
     // copy terrainAid.cfg
     // make list of trn config files
     // tuple contains ctx_key, terrain_nav_cfg_path
-    std::list<trn::trn_cfg_map> cfgList;
+    std::list<trn_cfg_map> cfgList;
 
-    std::list<trn::trn_host>::iterator it;
+    std::list<trn_host>::iterator it;
 
     for(it = xpp.trn_host_list_begin(); it != xpp.trn_host_list_end(); it++){
 
@@ -268,7 +271,7 @@ static void s_copy_config(trnxpp_cfg &cfg, trn::trnxpp &xpp)
 
     // copy them to new name differentiated using context key
     ostringstream ss;
-    std::list<trn::trn_cfg_map>::iterator cit;
+    std::list<trn_cfg_map>::iterator cit;
     for(cit = cfgList.begin(); cit != cfgList.end(); cit++){
 
         if(std::get<1>(*cit).size() > 0){
@@ -281,7 +284,11 @@ static void s_copy_config(trnxpp_cfg &cfg, trn::trnxpp &xpp)
             {
                 fprintf(stderr,"%s:%d - ERR config copy failed [%s] [%d/%s]\n",__func__, __LINE__,
                         ss.str().c_str(), errno, strerror(errno));
-            }
+            } 
+//            else {
+//                fprintf(stderr,"%s:%d - config copy OK [%s] [%d/%s]\n",__func__, __LINE__,
+//                        ss.str().c_str(), errno, strerror(errno));
+//            }
         }
     }
 
@@ -294,7 +301,11 @@ static void s_copy_config(trnxpp_cfg &cfg, trn::trnxpp &xpp)
     {
         fprintf(stderr,"%s:%d - ERR config copy failed [%s] [%d/%s]\n",__func__, __LINE__,
                 ss.str().c_str(), errno, strerror(errno));
-    }
+    } 
+//    else {
+//        fprintf(stderr,"%s:%d - config copy OK [%s] [%d/%s]\n",__func__, __LINE__,
+//                ss.str().c_str(), errno, strerror(errno));
+//    }
 }
 
 #ifdef WITH_TEST_STREAMS
@@ -328,7 +339,7 @@ static mb1_t *s_get_test_sounding(mb1_t *dest, int beams)
 #endif
 
 #ifdef WITH_TEST_STREAMS
-void handle_test_streams(pcf::lcm_publisher &signalPub, pcf::lcm_publisher &stringPub, trn::trnxpp &xpp, trn::mb1_server *mb1svr, trnxpp_cfg &cfg)
+void handle_test_streams(pcf::lcm_publisher &signalPub, pcf::lcm_publisher &stringPub, LcmTrnPP &xpp, trn::mb1_server *mb1svr, trnxpp_cfg &cfg)
 {
     lcm_pcf::signal_t signalMsg;
     lcm_pcf::string_t stringMsg;
@@ -370,11 +381,11 @@ void app_main(trnxpp_cfg &cfg)
     LU_PEVENT(cfg.mlog(), "lcm initialized");
 
     // get a trnxpp instance
-    trn::trnxpp xpp(lcm);
+    LcmTrnPP xpp(lcm);
 
     xpp.set_callback_res(&cfg);
 
-    TrnxPlugin::register_callbacks(xpp);
+    LcmTrnPlugin::register_callbacks(xpp);
 
     xpp.parse_config(&cfg);
     s_copy_config(cfg, xpp);

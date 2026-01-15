@@ -1,5 +1,6 @@
-#include "trnx_plugin.hpp"
+#include "LcmTrnPlugin.hpp"
 
+//using namespace trn;
 // g++ -c -g -O2 -std=c++11 -I. -I../../utils -I../../qnx-utils -I../../terrain-nav -I../../newmat -I../../trnw -I/usr/local/include -I/opt/local/include -fPIC plug-dvl.cpp
 
 // g++ -shared -o libdvl.so plug-dvl.o -L../../bin -L/usr/local/lib -L/opt/local/lib -L. -lnewmat -lgeolib -ltrnw -lqnx -lmb1 -ltrn -ludpms -ltrncli -lnetcdf -llcm
@@ -149,17 +150,17 @@ int cb_proto_dvl(void *pargs)
 
     TRN_NDPRINT(3, "%s:%d >>> Callback triggered <<<\n", __func__, __LINE__);
 
-    trn::trnxpp::callback_res_t *cb_res = static_cast<trn::trnxpp::callback_res_t *>(pargs);
-    trn::trnxpp *xpp = cb_res->xpp;
+    callback_res_t *cb_res = static_cast<callback_res_t *>(pargs);
+    LcmTrnPP *xpp = cb_res->xpp;
     trnxpp_cfg *cfg = cb_res->cfg;
 
     cfg->stats().trn_cb_n++;
 
     // iterate over contexts
-    std::vector<trn::trnxpp_ctx *>::iterator it;
+    std::vector<LcmTrnCtx *>::iterator it;
     for(it = xpp->ctx_list_begin(); it != xpp->ctx_list_end(); it++)
     {
-        trn::trnxpp_ctx *ctx = (*it);
+        LcmTrnCtx *ctx = (*it);
         // if context defined for this callback
         if(ctx == nullptr || !ctx->has_callback("cb_proto_dvl"))
         {
@@ -168,6 +169,7 @@ int cb_proto_dvl(void *pargs)
         }
 
         TRN_NDPRINT(TRNDL_PLUGOIDVL, "%s:%d processing ctx[%s]\n", __func__, __LINE__, ctx->ctx_key().c_str());
+        
 
         std::string *bkey[1] = {ctx->bath_input_chan(0)};
         std::string *nkey = ctx->nav_input_chan(0);
@@ -214,10 +216,9 @@ int cb_proto_dvl(void *pargs)
             poseT *pt = trnx_utils::mb1_to_pose(snd, ai, NULL, &gcon);
             measT *mt = trnx_utils::mb1_to_meas(snd, ai, trn_type, &gcon);
 
-            fprintf(stderr, "%s:%d processing ctx[%s/%p] ***********\n", __func__, __LINE__, ctx->ctx_key().c_str(), ctx);
+//            fprintf(stderr, "%s:%d processing ctx[%s/%p] ***********\n", __func__, __LINE__, ctx->ctx_key().c_str(), ctx);
 
             // publish update TRN, publish estimate to TRN, LCM
-            fprintf(stderr, "%s:%d ///////// calling PUB_TRN ////////////\n", __func__, __LINE__);
             ctx->pub_trn(nav_time, pt, mt, trn_type, xpp->pub_list(), cfg);
 
             // does it make sense to publish to MB1?

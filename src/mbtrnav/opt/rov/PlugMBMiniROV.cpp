@@ -1,4 +1,4 @@
-#include "trnx_plugin.hpp"
+#include "LcmTrnPlugin.hpp"
 
 // g++ -c -g -O2 -std=c++11 -I. -I../../utils -I../../qnx-utils -I../../terrain-nav -I../../newmat -I../../trnw -I/usr/local/include -I/opt/local/include -fPIC plug-mbminirov.cpp
 
@@ -209,17 +209,17 @@ int cb_proto_mbminirov(void *pargs)
 
     TRN_NDPRINT(TRNDL_PLUGMBMINIROV_H, "%s:%d >>> Callback triggered <<<\n", __func__, __LINE__);
 
-    trn::trnxpp::callback_res_t *cb_res = static_cast<trn::trnxpp::callback_res_t *>(pargs);
-    trn::trnxpp *xpp = cb_res->xpp;
+    callback_res_t *cb_res = static_cast<callback_res_t *>(pargs);
+    LcmTrnPP *xpp = cb_res->xpp;
     trnxpp_cfg *cfg = cb_res->cfg;
 
     cfg->stats().trn_cb_n++;
 
     // iterate over contexts
-    std::vector<trn::trnxpp_ctx *>::iterator it;
+    std::vector<LcmTrnCtx *>::iterator it;
     for(it = xpp->ctx_list_begin(); it != xpp->ctx_list_end(); it++)
     {
-        trn::trnxpp_ctx *ctx = (*it);
+        LcmTrnCtx *ctx = (*it);
         // if context defined for this callback
         if(ctx == nullptr || !ctx->has_callback("cb_proto_mbminirov"))
         {

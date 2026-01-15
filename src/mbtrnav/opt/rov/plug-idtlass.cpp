@@ -292,7 +292,7 @@ int cb_proto_idtlass(void *pargs)
                             (ni[1] != NULL ? ni[1]->time_usec()/1.e6 : 0.),
                             (ai[0] != NULL ? ai[0]->time_usec()/1.e6 : 0.),
                             (ai[1] != NULL ? ai[1]->time_usec()/1.e6 : 0.),
-                            (di[0] != NULL ? di[1]->time_usec()/1.e6 : 0.)
+                            (di[0] != NULL ? di[0]->time_usec()/1.e6 : 0.)
                         };
 
                         TRN_NDPRINT(3, "time skew (rel to bathy)\n");

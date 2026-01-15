@@ -344,15 +344,16 @@ int main(int argc, char** argv)
     worker->trncli->setVerbose(worker->verbose);
 
     worker->trncli->loadCfgAttributes(worker->trncfg);
-
+    TrnAttr &att_ref = worker->trncli->getTrnAttr();
+    TrnAttr *trn_attr = &att_ref;
     if(worker->map != NULL){
-        TrnAttr::chkSetString(&worker->trncli->_trn_attr->mapName, worker->map);
+        TrnAttr::chkSetString(&trn_attr->mapName, worker->map);
     }
     if(worker->veh != NULL){
-        TrnAttr::chkSetString(&worker->trncli->_trn_attr->vehicleCfgName, worker->veh);
+        TrnAttr::chkSetString(&trn_attr->vehicleCfgName, worker->veh);
     }
     worker->trncli->show();
-    fprintf(stderr,"\n%s\n",worker->trncli->_trn_attr->tostring().c_str());
+    fprintf(stderr,"\n%s\n",trn_attr->tostring().c_str());
     // Open connection to the TRN server. The server
     // initialization will fail unless the correct
     // map and vehicle configuration files are present
