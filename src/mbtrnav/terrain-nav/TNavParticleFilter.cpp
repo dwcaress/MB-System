@@ -17,12 +17,19 @@
 #define _STR(x) #x
 #define STR(x) _STR(x)
 
-#ifdef WITH_TNAVPF_CEP_CORRECTION
-#pragma message( __FILE__":" STR(__LINE__) " - feature WITH_TNAVPF_CEP_CORRECTION enabled (see FEATURE_OPTIONS in Makefile)" )
-#endif
 
 #define MAX_CROSS_BEAM_COMPARISONS  5
 #define USE_CROSS_BEAM_COMPARISON   0
+
+#ifndef PF_NOISE_STDEV_MIN
+// Process noise uncertainty floor
+// at each timestep, motion update advances and adds
+// gaussian noise.
+// Need to add some minimum noise when vehicle stationary
+// Otherwise, TRN won't update correctly
+// The value varies with map resolution
+#define PF_NOISE_STDEV_MIN 0.25 //0.083
+#endif
 
 //Alternative to cross beam comparison; only one of the two should be on at any given time
 #define USE_SUBCLOUD_COMPARISON 0
@@ -1763,10 +1770,10 @@ motionUpdateParticle(particleT& particle, const poseT& diffPose, double* velocit
 		//measurement
         double cep = (this->vehicle->driftRate / 100.0) * (sqrt(diffPose.x * diffPose.x + diffPose.y * diffPose.y));
 
-
-#ifdef WITH_TNAVPF_CEP_CORRECTION
+#ifdef WITH_CEP_2022
+#pragma message( __FILE__":" STR(__LINE__) " - WARN: feature WITH_CEP_2022 enabled (see build options)" )
         // k headley per Rock 2024-11-20
-        // This correction not recommended (use original)
+        // !!!  This correction not recommended !!!
         // It does not result in an effective drift rate as set by the driftRate parameter.
         // We now know that original motivation (ROV TRN, w/ variable time steps) occurred
         // because process noise was effectively zero at zero velocity, which this doesn't address.
@@ -1779,14 +1786,31 @@ motionUpdateParticle(particleT& particle, const poseT& diffPose, double* velocit
         // Without these, it is expected that changes to sample interval will
         // introduce disproportionate amounts of noise, giving unreliable results.
         double driftStddev = MOTION_NOISE_MULTIPLIER * (cep / sqrt(-2 * (log(1 - 0.5))))/sqrt(diffPose.time);
-#else
+#elif defined WITH_CEP_2020
+#pragma message( __FILE__":" STR(__LINE__) " - WARN: feature WITH_CEP_2020 enabled (see build options)")
+        // !!! ORIGINAL, CONSIDERED INCORRECT !!!
         // k headley per Rock 2024-11-20
         // recommended to use this
         // k headley per Rock 2022-12-05
-        // original, thought to be incorrect
         //TODO:  check conversion from CEP to Stddev, I don't feel like there should be a sqrt outside the CEP
         double driftStddev = MOTION_NOISE_MULTIPLIER * sqrt(cep / sqrt(-2 * (log(1 - 0.5))));
+# else
+#pragma message( __FILE__":" STR(__LINE__) " - INFO: using CEP_2025 for driftStddev" )
+        // !!! This version is currently considered to be correct !!!
+        // k headley per Rock 2025-03-19
+        // re sqrt(diffPose.time) term : Debbie M had it right.
+        // digital vs continuous sim: in digial must scale stddev by time
+        // can't scale in a way that works both over single and multiple time steps
+        double driftStddev = MOTION_NOISE_MULTIPLIER * (cep / sqrt(-2 * log(1 - 0.5)));
 #endif
+
+        // k headley per Rock 2025-03-19
+        // TRN doesn't work w/ zero motion
+        // want floor of stddev, MAX(const, driftStddev)
+        // const depends on resolution of map; must not be zero, sqrt(q)/12 as first cut (quantization error)? 
+        // q is map resolution
+        // driftStddev is a misnomer: really process noise uncertainty
+        driftStddev = ( (driftStddev < PF_NOISE_STDEV_MIN) ? PF_NOISE_STDEV_MIN : driftStddev);
 
 		//logs(TL_OMASK(TL_TNAV_PARTICLE_FILTER, TL_LOG),"MOTION UPDATE: CEP = %f\n",this->vehicle->driftRate/100.0); //TODO: Remove this (when no longer needed)
 		vehicleDisp[0] = diffPose.x + randn_zeroMean(driftStddev);
