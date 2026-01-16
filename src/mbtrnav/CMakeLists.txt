@@ -79,6 +79,7 @@ WITH_MST_MSTATS
 MST_STATS_EN
 #WITH_ALT_DELTAT_VALIDATION
 #WITH_CEP_2022
+#WITH_TRNU # enables trnum message decode in udpms_test
 WITH_TRNLOG
 WITH_TRNLOG_EST_OUT
 )
@@ -677,7 +678,7 @@ target_include_directories(trnu-cli PRIVATE BEFORE
 #
 #------------------------------------------------------------------------------
 #
-# build trnu-svr (stand-alone TRN server (no TRN instance))
+# build trnu-svr
 
 # specify build target
 add_executable(trnu-svr

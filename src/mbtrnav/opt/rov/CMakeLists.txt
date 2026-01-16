@@ -55,6 +55,7 @@ WITH_MST_MSTATS
 MST_STATS_EN
 #WITH_ALT_DELTAT_VALIDATION
 #WITH_CEP_2022
+#WITH_TRNU # enables trnum message decode in udpms_test
 WITH_TRNLOG
 WITH_TRNLOG_EST_OUT
 )
@@ -179,7 +180,7 @@ endif()
 add_library(udpms
        udpm_sub.c)
 
-add_compile_options(-std=c++11)
+#add_compile_options(-std=c++11)
 #
 
 #------------------------------------------------------------------------------
@@ -205,6 +206,10 @@ target_link_libraries(trnxplug PRIVATE newmat geolib geocon trnw qnx mb1 tnav ud
 
 target_include_directories(trnxplug PRIVATE
     ${LIBTRNAV_INCLUDES}
+)
+
+target_compile_options(trnxplug PRIVATE
+-std=c++11
 )
 
 #------------------------------------------------------------------------------
@@ -233,6 +238,10 @@ target_link_libraries(lcmtrnplug PRIVATE newmat geolib geocon trnw qnx mb1 tnav 
 target_include_directories(lcmtrnplug PRIVATE
     ${LIBTRNAV_INCLUDES}
 )
+
+target_compile_options(lcmtrnplug PRIVATE
+-std=c++11
+)
 #
 #------------------------------------------------------------------------------
 #
@@ -248,6 +257,9 @@ target_link_libraries(trnxpp PRIVATE lcm stdc++ mb1 trncli tnav newmat qnx m geo
 
 target_include_directories(trnxpp PRIVATE
     ${LIBTRNAV_INCLUDES}
+)
+target_compile_options(trnxpp PRIVATE
+-std=c++11
 )
 #
 #------------------------------------------------------------------------------
@@ -267,6 +279,9 @@ target_link_libraries(lcmtrnpp PRIVATE lcm mb1 trncli tnav newmat qnx m geolib g
 
 target_include_directories(lcmtrnpp PRIVATE
     ${LIBTRNAV_INCLUDES}
+)
+target_compile_options(lcmtrnpp PRIVATE
+-std=c++11
 )
 #
 #------------------------------------------------------------------------------
@@ -292,8 +307,11 @@ target_include_directories(trnlcm-test PRIVATE
     ${LIBTRNAV_INCLUDES}
     /usr/local/include
 )
+target_compile_options(trnlcm-test PRIVATE
+-std=c++11
+)
 
-add_compile_options(-std=c++11)
+#add_compile_options(-std=c++11)
 #
 #------------------------------------------------------------------------------
 #
@@ -311,10 +329,30 @@ add_executable(fv-test
 target_include_directories(fv-test PRIVATE
     ${LIBTRNAV_INCLUDES}
 )
+target_compile_options(fv-test PRIVATE
+-std=c++11
+)
+#
+#------------------------------------------------------------------------------
+#
+# build udpms-test
+
+# specify build target
+add_executable(udpms-test
+    udpms_test.c
+)
+
+# specify include paths and libraries
+# may need rt (librt) in Linux
+target_link_libraries(udpms-test PRIVATE udpms)
+
+target_include_directories(udpms-test PRIVATE
+    ${LIBTRNAV_INCLUDES}
+)
 
 # update this list when targets are moved
 # in/out of buildTRNOptional block
-list(APPEND TRN_OPTIONAL trnlcm-test fv-test)
+list(APPEND TRN_OPTIONAL trnlcm-test fv-test udpms-test)
 
 endif() # buildTRNOptional
 
