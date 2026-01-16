@@ -65,6 +65,7 @@
 #include <lcm/lcm-cpp.hpp>
 #include <sys/time.h>
 #include <unistd.h>
+#include <cmath>
 
 #include "gitversion.h"
 #include "LcmTrn.h"
@@ -96,11 +97,16 @@
 #define TRN_MLE_EST     1
 #define TRN_MMSE_EST    2
 #define NUM_EXPECTED_DVL_ITEMS 16
+// lat/lon values must be timestamped within this
+// margin for them to be considered coincident
+#define LATLON_COINCIDENT 0.5  // seconds
+
 // clang-format on
 
 static const int tl_both = TL_OMASK(TL_TRN_SERVER, TL_BOTH);
 static const int tl_log  = TL_OMASK(TL_TRN_SERVER, TL_LOG);
 
+static const char *STR_LCM_LCMURL     = "lcm.url";
 static const char *STR_LCM_TIMEOUT    = "lcm.timeout_sec";
 static const char *STR_LCM_INITIAL_TO = "lcm.initial_timeout_msec";
 static const char *STR_LCM_MAX_TO     = "lcm.max_timeout_msec";
@@ -109,6 +115,7 @@ static const char *STR_LCM_CMDNAME    = "lcm.cmd_channel";
 static const char *STR_LCM_AHRSNAME   = "lcm.ahrs_channel";
 static const char *STR_LCM_MEASNAME   = "lcm.dvl_channel";
 static const char *STR_LCM_NAVNAME    = "lcm.nav_channel";
+static const char *STR_TRN_TRACKDR    = "trn.track_dead_reckoning";
 static const char *STR_TRN_ZONE       = "trn.utm_zone";
 static const char *STR_TRN_PERIOD     = "trn.period_sec";
 static const char *STR_TRN_COHERENCE  = "trn.temporal_coherence_sec";
@@ -139,22 +146,23 @@ LcmTrn::LcmTrn(const char *configfilepath)
       _lastAHRSTimestamp(-1.0), _lastDvlTimestamp(-1.0),
       _lastNavTimestamp(-1.0), _lastDepthTimestamp(-1.0),
       _lastCmdTimestamp(-1.0), _lastUpdateTimestamp(-1.0), _good(false),
-      _trn_decoder(NULL)
+      _gotLat(false), _gotLon(false), _latTime(-1.0), _lonTime(-1.0),
+      _trnOffetsApplied(False), _trn_decoder(NULL)
 {
     logs(tl_both, "LcmTrn::LcmTrn() version %s built %s %s - config file %s\n",
-        __GIT_VERSION__, __DATE__, __TIME__, configfilepath);
+         __GIT_VERSION__, __DATE__, __TIME__, configfilepath);
 
     // Setup default config
     //
-    _trnc.utm_zone    = LCMTRN_DEFAULT_ZONE;
-    _trnc.period      = LCMTRN_DEFAULT_PERIOD;
-    _trnc.coherence   = LCMTRN_DEFAULT_COHERENCE;
-    _trnc.maptype     = TRN_MAP_OCTREE;
-    _trnc.filtertype  = LCMTRN_DEFAULT_FILTER;
-    _trnc.lowgrade    = LCMTRN_DEFAULT_LOWGRADE;
+    _trnc.utm_zone = LCMTRN_DEFAULT_ZONE;
+    _trnc.period = LCMTRN_DEFAULT_PERIOD;
+    _trnc.coherence = LCMTRN_DEFAULT_COHERENCE;
+    _trnc.maptype = TRN_MAP_OCTREE;
+    _trnc.filtertype = LCMTRN_DEFAULT_FILTER;
+    _trnc.lowgrade = LCMTRN_DEFAULT_LOWGRADE;
     _trnc.allowreinit = LCMTRN_DEFAULT_ALLOW;
-    _trnc.weighting   = LCMTRN_DEFAULT_WEIGHTING;
-    _trnc.instrument  = LCMTRN_DEFAULT_INSTRUMENT;
+    _trnc.weighting = LCMTRN_DEFAULT_WEIGHTING;
+    _trnc.instrument = LCMTRN_DEFAULT_INSTRUMENT;
 
     // Required config settings
     //
@@ -255,6 +263,7 @@ void LcmTrn::run()
 // determine if a TRN update should be performed.
 bool LcmTrn::updateTrn()
 {
+    logs(tl_both, "LcmTrn::updateTrn() - updating TRN...");
     // Return here unless the timing required for a trn update has been met
     if (!time2Update()) {
         return false;
@@ -272,16 +281,31 @@ bool LcmTrn::updateTrn()
              _thisPose.time, _thisMeas.time);
     }
 
-    logs(tl_both,
-         "LcmTrn::updateTrn() >>>> pose time %.2f, meas time %.2f <<<<\n",
-         _thisPose.time, _thisMeas.time);
+    if (fabs(_thisPose.time - _thisMeas.time) > 1000000.0) {
+        _thisMeas.time = _thisPose.time;
+        logs(tl_both,
+            "LcmTrn::updateTrn() >>>> pose time %.2f, meas time %.2f <<<<\n",
+            _thisPose.time, _thisMeas.time);
+    }
 
-    // Execute motion and measure updates
-    if (_thisPose.time <= _thisMeas.time) {
-        _lastUpdateTimestamp =  _thisMeas.time;
+    // usePose object will be used for motionUpdate call
+    poseT usePose = _thisPose;
+    // When configured, perform our own DR calculations and inject the DR2
+    // tracking northing and easting values into the usePose object
+    if (_trnc.trackdr) {
+        trackDR2();
+        usePose.x = _dr2.x;
+        usePose.y = _dr2.y;
+    }
+
+    // Execute motion and measure updates using dead reckoned position
+    // if configured
+    if (usePose.time <= _thisMeas.time) {
+        _lastUpdateTimestamp = _thisMeas.time;
         logs(tl_both, "LcmTrn::updateTrn() motionUpdate first last update time: %.2f", _lastUpdateTimestamp);
-        _tnav->motionUpdate(&_thisPose);
-        if (_thisPose.dvlValid) { // Update meas only if valid
+        _tnav->motionUpdate(&usePose);
+        if (usePose.dvlValid) {
+            // Update meas only if valid
             _tnav->measUpdate(&_thisMeas, _thisMeas.dataType);
         } else {
             logs(tl_both, "LcmTrn::updateTrn() measUpdate skipped due to invalid DVL");
@@ -294,44 +318,84 @@ bool LcmTrn::updateTrn()
         } else {
             logs(tl_both, "LcmTrn::updateTrn() measUpdate skipped due to invalid DVL");
         }
-        _tnav->motionUpdate(&_thisPose);
+        _tnav->motionUpdate(&usePose);
     }
 
-    // Keep this data around for the next round and reset timestamps
-    _lastMeas      = _thisMeas;
-    _lastPose      = _thisPose;
+    // Keep this data around for the next round
+    _lastMeas = _thisMeas;
+    _lastPose = _thisPose;
+
+    // Reset timestamps of the working pose and meas objects
     _thisPose.time = _thisMeas.time = 0.;
 
     // Request the estimates and TRN state
     _tnav->estimatePose(&_mle, TRN_MLE_EST);
     _tnav->estimatePose(&_mmse, TRN_MMSE_EST);
     _filterstate = _tnav->getFilterState();
-    _numreinits  = _tnav->getNumReinits();
+    _numreinits = _tnav->getNumReinits();
 
     return true;
 }
 
+// Update DR2 here - DR2 is the estimated position of the vehicle if
+// no TRN updates were ever applied
+void LcmTrn::trackDR2() {
+    // Allow some data to be gathered at startup
+    if (_dr2.time < 1.0 || _thisPose.time < 1.0 || _lastPose.time < 1.0) {
+        logs(tl_both, "LcmTrn::trackDR2() Initializing DR2");
+        _dr2.x = _thisPose.x;
+        _dr2.y = _thisPose.y;
+    } else {
+        // Increment DR2 with the difference in the last two DR positions
+        logs(tl_both, "LcmTrn::trackDR2() Always update DR2 without TRN offsets");
+        logs(tl_both, "LcmTrn::trackDR2() dr2.x: %.3f += (%.3f - %.3f)",
+             _dr2.x, _thisPose.x, _lastPose.x);
+        logs(tl_both, "LcmTrn::trackDR2() dr2.y %.3f += (%.3f - %.3f)",
+             _dr2.y, _thisPose.y, _lastPose.y);
+        _dr2.x += (_thisPose.x - _lastPose.x);
+        _dr2.y += (_thisPose.y - _lastPose.y);
+        // If offsets are being applied, adjust DR2 accordingly
+        if (_trnOffetsApplied) {
+            logs(tl_both, "LcmTrn::trackDR2() Converged: Adjusting DR2 TRN with offsets");
+            logs(tl_both, "LcmTrn::trackDR2() dr2.x: %.3f -= %.3f",
+                 _dr2.x, _trndata.mmse_offset_x);
+            logs(tl_both, "LcmTrn::trackDR2() dr2.y: %.3f -= %.3f",
+                 _dr2.y, _trndata.mmse_offset_y);
+            _dr2.x -= _trndata.mmse_offset_x;
+            _dr2.y -= _trndata.mmse_offset_y;
+        }
+    }
+    _dr2.time = _thisPose.time;
+    logs(tl_both, "LcmTrn::trackDR2() DR2 time: %.2f, x: %.3f, y: %.3f",
+         _dr2.time, _dr2.x, _dr2.y);
+
+    return;
+}
 int LcmTrn::getLcmTimeout(unsigned int initial_msec, unsigned int max_msec)
 {
     // We're tracking number of messages and the time it took to handle them
     int _nLcmMessages = 0;
-    int _nLcmMillis   = 0;
 
     // See if there are messages to handle
     int n = _lcm->handleTimeout(initial_msec);
 
-    // Get the start time
-    struct timeval now {0, 0};
-    gettimeofday(&now, nullptr);
-    time_t startTimeMs = (now.tv_sec * 1000) + (now.tv_usec / 1000);
-    time_t nowTimeMs   = startTimeMs;
+    // If there are no messages in the initial amount of time, we're done
+    // We're also done if there is no extra time configured
+    if (max_msec == 0 || n == 0) {
+        return n;
+    }
 
-    // Handle messages if there are any and up to the maximum
-    // for (int i = 0; i < (_eliConfig._lcmMaxMsgs-1) && n > 0; i++) {
+    // Get the start time
+    struct timeval now{0, 0};
+    gettimeofday(&now, nullptr);
+    time_t nowTimeMs = (now.tv_sec * 1000) + (now.tv_usec / 1000);
+    time_t maxTimeMs = nowTimeMs + max_msec;
+
+    // Handle messages if there are any and up to the maximum time
     int i = 0;
-    for (i = 1; (nowTimeMs - startTimeMs) < max_msec && n > 0; i++) {
+    for (i = 1; nowTimeMs < maxTimeMs; i++) {
         _nLcmMessages += n;
-        n = _lcm->handleTimeout(initial_msec);
+        n = _lcm->handleTimeout(maxTimeMs - nowTimeMs);
 
         gettimeofday(&now, nullptr);
         nowTimeMs = (now.tv_sec * 1000) + (now.tv_usec / 1000);
@@ -340,11 +404,10 @@ int LcmTrn::getLcmTimeout(unsigned int initial_msec, unsigned int max_msec)
     // Get the finish time
     // gettimeofday(&now, nullptr);
     // time_t endTimeMs = (now.tv_sec * 1000) + (now.tv_usec / 1000);
-    _nLcmMillis = (nowTimeMs - startTimeMs);
 
     if (_nLcmMessages > 0) {
         logs(tl_both, "%d msgs in %ld ms and %d handle calls", _nLcmMessages,
-             _nLcmMillis, i);
+             initial_msec + max_msec, i);
     }
 
     return _nLcmMessages;
@@ -364,9 +427,9 @@ int LcmTrn::handleMessages()
     double startsec = (spec.tv_sec * 1.0) + (spec.tv_usec / 1000000.);
     double acc = 0.;
     double thensec = startsec;
-    int nmsgs      = 0; // # messages handled in one call to handleTimeout
-    int totalmsgs  = 0; // # messages handled in all handleTimeout calls
-    int handled    = 0; // how many handleTimeout calls were made
+    int nmsgs = 0;     // # messages handled in one call to handleTimeout
+    int totalmsgs = 0; // # messages handled in all handleTimeout calls
+    int handled = 0;   // how many handleTimeout calls were made
 
     // when timeout_sec time has elapsed, return the
     // total number of messages handled.
@@ -415,6 +478,7 @@ void LcmTrn::cycle()
     // if (0 == handleMessages()) return;
     if (0 ==
         getLcmTimeout(_lcmc.initial_timeout_msec, _lcmc.max_timeout_msec)) {
+        //logs(tl_both, "LcmTrn::cycle() - no messages handled");
         return;
     }
 
@@ -423,6 +487,7 @@ void LcmTrn::cycle()
     if (__DBL_EPSILON__ >= _lastUpdateTimestamp) {
         _lastUpdateTimestamp = fmax(_thisPose.time, _thisMeas.time);
     }
+    logs(tl_both, "LcmTrn::cycle() - lastUpdateTimestamp %.2f", _lastUpdateTimestamp);
 
     // If we have fresh data, publish the latest TRN state to
     // the TRN channel. updateTrn() performs motion and measure updates
@@ -430,6 +495,14 @@ void LcmTrn::cycle()
     // out here as the updated TRN state.
     if (updateTrn()) {
         publishEstimatesDecoder();
+        // Is the frontseat going to use this updated position?
+        // TODO: have frontseat provide the use-it-or-lose-it flag
+        // This flag affects DR1 and DR2 updates.
+        // Until an indication can be read from the front seat, we'll use the
+        // same logic as to calculate it here.
+        // TRN offsets are applied when sqrt(COVAR_X^2 + COVAR_Y^2) < limit
+        _trnOffetsApplied = (_trndata.covar_x + _trndata.covar_y) > 0.0
+           && sqrt(pow(_trndata.covar_x, 2) + pow(_trndata.covar_y, 2)) < 20.0;
     }
 }
 
@@ -440,52 +513,59 @@ void LcmTrn::publishEstimatesDecoder()
     // Place most updated values into a trndata object and publish
     // using _trn_decoder.
     logs(tl_both, "publishEstimatesDecoder() - at %.2f sec", _lastUpdateTimestamp);
-    TrnLcmDecoder::trndata data;
-    data.reinits = _numreinits;
-    data.filterstate = _filterstate;
-    data.updatetime = _lastUpdateTimestamp;
-    data.mle_x = _mle.x;
-    data.mle_y = _mle.y;
-    data.mle_z = _mle.z;
-    data.mle_offset_x = _lastPose.x - _mle.x;
-    data.mle_offset_y = _lastPose.y - _mle.y;
-    data.mle_offset_z = _lastPose.z - _mle.z;
-    data.mmse_x = _mmse.x;
-    data.mmse_y = _mmse.y;
-    data.mmse_z = _mmse.z;
-    data.mmse_offset_x = _lastPose.x - _mmse.x;
-    data.mmse_offset_y = _lastPose.y - _mmse.y;
-    data.mmse_offset_z = _lastPose.z - _mmse.z;
-    data.covar_x = _mmse.covariance[COVAR_X];
-    data.covar_y = _mmse.covariance[COVAR_Y];
-    data.covar_z = _mmse.covariance[COVAR_Z];
-    data.covar_psi = _mmse.covariance[COVAR_PSI];
-    // Provide lat/lon of the last position estimate
+    _trndata.reinits = _numreinits;
+    _trndata.filterstate = _filterstate;
+    _trndata.updatetime = _lastUpdateTimestamp;
+    _trndata.mle_x = _mle.x;
+    _trndata.mle_y = _mle.y;
+    _trndata.mle_z = _mle.z;
+    // Offsets = previous saved TRN position minus the
+    // latest TRN estimated correction to that position
+    _trndata.mle_offset_x = _mle.x - _lastPose.x;
+    _trndata.mle_offset_y = _mle.y - _lastPose.y;
+    _trndata.mle_offset_z = _mle.z - _lastPose.z;
+    _trndata.mmse_x = _mmse.x;
+    _trndata.mmse_y = _mmse.y;
+    _trndata.mmse_z = _mmse.z;
+    _trndata.mmse_offset_x = _mmse.x - _lastPose.x;
+    _trndata.mmse_offset_y = _mmse.y - _lastPose.y;
+    _trndata.mmse_offset_z = _mmse.z - _lastPose.z;
+    _trndata.covar_x = _mmse.covariance[COVAR_X];
+    _trndata.covar_y = _mmse.covariance[COVAR_Y];
+    _trndata.covar_z = _mmse.covariance[COVAR_Z];
+    _trndata.covar_psi = _mmse.covariance[COVAR_PSI];
+    // Provide frontseat with an estimated vehicle lat/lon
+    // based on the offsets above applied to the most recent
+    // nav position (i.e., _thisPose).
     double lat_rads = 0, lon_rads = 0;
-    NavUtils::utmToGeo(data.mmse_x, data.mmse_y, _lastUtmZone, &lat_rads, &lon_rads);
-    data.mmse_lat = Math::radToDeg(lat_rads);
-    data.mmse_lon = Math::radToDeg(lon_rads);
+    double corrected_nav_x = _thisPose.x + _trndata.mmse_offset_x;
+    double corrected_nav_y = _thisPose.y + _trndata.mmse_offset_y;
+    logs(tl_both, "publishEstimatesDecoder() - offset_x %.8f offset_y %.8f",
+         _trndata.mmse_offset_x, _trndata.mmse_offset_y);
+    NavUtils::utmToGeo(corrected_nav_x, corrected_nav_y, _lastUtmZone,
+                       &lat_rads, &lon_rads);
+    _trndata.mmse_lat = Math::radToDeg(lat_rads);
+    _trndata.mmse_lon = Math::radToDeg(lon_rads);
 
     // ship it
     if (_trn_decoder) {
-        _trn_decoder->dump(data, std::cerr);
-        if (!_trn_decoder->publish(*_lcm, _lcmc.trn, data)) {
+        _trn_decoder->dump(_trndata, std::cerr);
+        if (!_trn_decoder->publish(*_lcm, _lcmc.trn, _trndata)) {
             logs(tl_both, "LcmTrn::publishEstimatesDecoder() - failed to publish message");
         }
 
         logs(tl_both, "LcmTrn::publishEstimatesDecoder() - reinits:%d filterstate:%d",
-            _numreinits, _filterstate);
+             _numreinits, _filterstate);
         logs(tl_both, "LcmTrn::publishEstimatesDecoder() - MLE  : %.2f %.2f %.2f", _mle.x,
-            _mle.y, _mle.z);
-        logs(tl_both, "LcmTrn::publishEstimatesDecoder() - MMSE : %.2f %.2f %.2f", _mmse.x,
-            _mmse.y, _mmse.z);
+             _mle.y, _mle.z);
+        logs(tl_both, "LcmTrn::publishEstimatesDecoder() - MMSE : %.2f %.2f %.2f lat/lon: %.2f %.2f",
+             _mmse.x, _mmse.y, _mmse.z, _trndata.mmse_lat, _trndata.mmse_lon);
         logs(tl_both, "LcmTrn::publishEstimatesDecoder() - COVAR: %.2f %.2f %.2f %.2f",
-            _mmse.covariance[COVAR_X], _mmse.covariance[COVAR_Y],
-            _mmse.covariance[COVAR_Z], _mmse.covariance[COVAR_PSI]);
+             _mmse.covariance[COVAR_X], _mmse.covariance[COVAR_Y],
+             _mmse.covariance[COVAR_Z], _mmse.covariance[COVAR_PSI]);
     } else {
         logs(tl_both, "LcmTrn::publishEstimatesDecoder() - no LCM decoder");
     }
-
 }
 
 // This is used in a motionUpdate. Read and populate the poseT object fields.
@@ -502,7 +582,8 @@ void LcmTrn::handleAhrs(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
     // AHRS data, not the position data from the DVL.
     _lastAHRSTimestamp = _thisPose.time = (double)msg->epochMillisec / 1000;
 
-    // Get heading, pitch, and roll from AHRS message
+    // Get heading, pitch, and roll from AHRS message.
+    // Do not assume all message items are present.
     const DoubleArray *da = NULL;
     if ((da = _msg_reader.getDoubleArray(_lcmc.heading))) {
         _thisPose.psi = da->data[SCALAR];
@@ -543,32 +624,57 @@ void LcmTrn::handleNav(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
     //     logs(tl_both, "item %d: %s", i, names[i]);
     // }
 
-    _lastNavTimestamp = _thisPose.time = (double)msg->epochMillisec / 1000;
+    double timestamp = (double)msg->epochMillisec / 1000;
 
-    // Get lat, lon, and depth from nav message, assume units are degrees.
-    // Convert to radians and/or UTM if necessary using NavUtils.
+    // Get lat/lon (degrees) and depth (m) from nav message.
+    // Convert to radians and UTM for TRN.
+    // Cannot assume lat and lon will be present in a single message.
+    // This requires we check that latest lat and lon values arrive
+    // within a reasonable timeframe (LATLON_COINCIDENT).
     float lat_rads = 0, lon_rads = 0;
+    double lat = 0, lon = 0;
     const DoubleArray *da = NULL;
-
     if ((da = _msg_reader.getDoubleArray(_lcmc.lat))) {
-        lat_rads = Math::degToRad(da->data[SCALAR]);
-    } else {
-        logs(tl_both, "handleNav() - %s item not found in nav msg", _lcmc.lat);
+        lat = da->data[SCALAR];
+        lat_rads = Math::degToRad(lat);
+        _gotLat = true;
+        _latTime = timestamp;
     }
 
     if ((da = _msg_reader.getDoubleArray(_lcmc.lon))) {
-        lon_rads = Math::degToRad(da->data[SCALAR]);
-    } else {
-        logs(tl_both, "handleNav() - %s item not found in nav msg", _lcmc.lon);
+        lon = da->data[SCALAR];
+        lon_rads = Math::degToRad(lon);
+        _gotLon = true;
+        _lonTime = timestamp;
     }
 
-    // Convert to UTM for use in TNav
-    _lastUtmZone = NavUtils::geoToUtmZone(lat_rads, lon_rads);
-    NavUtils::geoToUtm(lat_rads, lon_rads, _lastUtmZone, &_thisPose.x, &_thisPose.y);
-    logs(tl_both,
-         "handleNav() - %s msg: %.2f epoch sec; seqNo:%lld; %.2f north; %.2f "
-         "east\n",
-         _lcmc.nav, _thisPose.time, msg->seqNo, _thisPose.x, _thisPose.y);
+    if ((da = _msg_reader.getDoubleArray(_lcmc.veh_depth))) {
+        _thisPose.z = (da->data[SCALAR]);
+        _lastDepthTimestamp = timestamp;
+    }
+
+    // Convert lat/lon for use in TNav after two fresh values are received.
+    // The values must be timestamped within LATLON_COINCIDENT seconds
+    if (_gotLat && _gotLon) {
+        if (fabs(_latTime - _lonTime) <= LATLON_COINCIDENT) {
+            _lastUtmZone = NavUtils::geoToUtmZone(lat_rads, lon_rads);
+            NavUtils::geoToUtm(lat_rads, lon_rads, _lastUtmZone, &_thisPose.x, &_thisPose.y);
+            _lastNavTimestamp = _thisPose.time = timestamp;
+            logs(tl_both,
+                 "handleNav() - %s msg: %.2f epoch sec; seqNo:%lld; %.2f north; %.2f "
+                 "east; %.2f lat; %.2f lon; %.2f depth; utmZone: %d\n",
+                 _lcmc.nav, _thisPose.time, msg->seqNo, _thisPose.x, _thisPose.y,
+                 lat, lon, _thisPose.z, _lastUtmZone);
+        } else {
+            logs(tl_both,
+                 "handleNav() - %s msg: %.2f epoch sec; lat/lon rejected: "
+                 "%.2f lat; %.2f lon; timestamped %.2f sec too far apart\n",
+                 _lcmc.nav, timestamp, lat, lon,
+                 (fabs(_latTime - _lonTime) - LATLON_COINCIDENT));
+        }
+        _gotLat = _gotLon = false;
+        _latTime = _lonTime = -1.0;
+    }
 
     return;
 }
@@ -580,21 +686,20 @@ void LcmTrn::handleDvl(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
                        const LrauvLcmMessage *msg)
 {
     _msg_reader.setMsg(msg);
-    std::vector<const char *> names = _msg_reader.listNames();
-    if (names.size() < NUM_EXPECTED_DVL_ITEMS) {
-        cerr << "handleDVL() - rejecting for insufficient number of items: " << names.size() << endl;
-        return;
-    }
 
+    // Do not assume all message items are present.
     // The timestamp recorded in the measT object is that associated with the
     // DVL beam data.
     _lastDvlTimestamp = _thisMeas.time = (double)msg->epochMillisec / 1000;
+
+    logs(tl_both, "handleDVL() - DVL msg epochMillisec: %.2f\n",
+         _thisMeas.time);
 
     if (_lastMeas.time < 1.) {
         _lastMeas.time = _thisMeas.time;
     }
 
-    _thisMeas.numMeas  = 4;
+    _thisMeas.numMeas = 0;
     _thisPose.dvlValid = _thisPose.bottomLock = _thisPose.gpsValid = false;
     _thisMeas.ranges[0] = _thisMeas.ranges[1] = _thisMeas.ranges[2]
                         = _thisMeas.ranges[3] = 0.;
@@ -632,7 +737,8 @@ void LcmTrn::handleDvl(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
     const char *keys[] = {_lcmc.beam1, _lcmc.beam2, _lcmc.beam3, _lcmc.beam4};
     for (int b = 0; b < N_DVL_BEAMS; b++) {
         if ((fa = _msg_reader.getFloatArray(keys[b]))) {
-            _thisMeas.ranges[b]     = fa->data[SCALAR];
+            _thisMeas.numMeas += 1;
+            _thisMeas.ranges[b] = fa->data[SCALAR];
             _thisMeas.measStatus[b] = true;
         } else {
             _thisMeas.ranges[b]     = 0;
@@ -642,8 +748,8 @@ void LcmTrn::handleDvl(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
         }
     }
 
-    logs(tl_both, "handleDvl() - %s msg: %.2f epoch sec; seqNo:%lld\n",
-         _lcmc.dvl, _thisMeas.time, msg->seqNo);
+    logs(tl_both, "handleDvl() - %s msg: %.2f sec; seqNo:%lld; #beams:%d\n",
+         _lcmc.dvl, _thisMeas.time, msg->seqNo, _thisMeas.numMeas);
     logs(tl_both,
          "handleDvl() - %s msg: ranges %d, %.2f , %.2f , %.2f , %.2f\n",
          _lcmc.dvl, _thisPose.dvlValid, _thisMeas.ranges[0],
@@ -661,24 +767,23 @@ void LcmTrn::handleDepth(const lcm::ReceiveBuffer *rbuf,
 {
     _msg_reader.setMsg(msg);
 
-    long long seq = msg->seqNo;
-    _lastDepthTimestamp = (double)msg->epochMillisec / 1000;
-
+    // Do not assume all message items are present.
     // Get depth data from message
     const FloatArray *fa = NULL;
     if ((fa = _msg_reader.getFloatArray(_lcmc.veh_depth))) {
         _thisPose.z = fa->data[0];
+        _lastDepthTimestamp = (double)msg->epochMillisec / 1000;
     } else {
-        _thisPose.z = 0;
         logs(tl_both, "handleDepth() - %s item not found in dvl msg",
              _lcmc.veh_depth);
     }
 
-    _thisPose.gpsValid = (_thisPose.z < 0.6);
+    // For TRN purposes assume GPS is valid at shallow depths
+    _thisPose.gpsValid = (_thisPose.z < 1.0);
 
     logs(tl_both,
          "handleDepth()- %s msg: %.2f epoch sec; seqNo:%lld; depth %.2f\n",
-         _lcmc.depth, _lastDepthTimestamp, seq, _thisPose.z);
+         _lcmc.depth, _lastDepthTimestamp, msg->seqNo, _thisPose.z);
 
     return;
 }
@@ -711,11 +816,12 @@ void LcmTrn::handleCmd(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
 //
 void LcmTrn::initLcm()
 {
-    logs(tl_log, "LcmTrn::initLcm() - configuration file %s\n", _configfile);
+    logs(tl_both, "LcmTrn::initLcm() - configuration file %s, url = %s\n",
+         _configfile, _lcmc.url);
 
     cleanLcm();
 
-    _lcm = new lcm::LCM();
+    _lcm = new lcm::LCM(_lcmc.url);
     if (_lcm->good()) {
         _lcm->subscribe(_lcmc.ahrs, &LcmTrn::handleAhrs, this);
         _lcm->subscribe(_lcmc.nav, &LcmTrn::handleNav, this);
@@ -734,7 +840,7 @@ void LcmTrn::initLcm()
 void LcmTrn::initTrn()
 {
     logs(tl_log, "LcmTrn::initTrn() version %s - configuration file %s\n",
-        __GIT_VERSION__, _configfile);
+         __GIT_VERSION__, _configfile);
 
     cleanTrn();
 
@@ -800,7 +906,7 @@ int64_t LcmTrn::getTimeMillisec()
 
     gettimeofday(&spec, NULL);
 
-    double _ms         = (spec.tv_sec * 1000.) + (spec.tv_usec / 1000.);
+    double _ms = (spec.tv_sec * 1000.) + (spec.tv_usec / 1000.);
     int64_t current_ms = _ms;
 
     return current_ms;
@@ -891,7 +997,8 @@ bool LcmTrn::verifyTrnConfig()
         _trnc.filtertype != TRN_FILTER_PF) {
         logs(tl_both,
              "LcmTrn::verifyTrnConfig() - Unrecognized filter type %d specified "
-             "in %s.\n", _trnc.filtertype, _configfile);
+             "in %s.\n",
+             _trnc.filtertype, _configfile);
         isgood = false;
     }
 
@@ -918,6 +1025,11 @@ void LcmTrn::loadConfig()
     _cfg->readFile(_configfile);
 
     // Load the TRN options next. Use defaults if not present.
+    if (!_cfg->lookupValue(STR_TRN_TRACKDR, _trnc.trackdr)) {
+        _trnc.trackdr = LCMTRN_DEFAULT_TRACKDR;
+    }
+    logs(tl_both, "TrackDR =  %d", _trnc.trackdr);
+
     if (!_cfg->lookupValue(STR_TRN_ZONE, _trnc.utm_zone)) {
         _trnc.utm_zone = LCMTRN_DEFAULT_ZONE;
     }
@@ -965,6 +1077,9 @@ void LcmTrn::loadConfig()
     }
 
     // Load the required LCM stuff next. Flag error unless all are present
+    if (!_cfg->lookupValue(STR_LCM_LCMURL, _lcmc.url)) {
+        _lcmc.url = LCMTRN_DEFAULT_LCMURL;
+    }
     if (!_cfg->lookupValue(STR_LCM_TIMEOUT, _lcmc.timeout)) {
         _lcmc.timeout = LCMTRN_DEFAULT_PERIOD;
     }
@@ -1090,6 +1205,7 @@ bool LcmTrn::time2Update()
 
     // Need new version of poseT before updates
     if (_thisPose.time < 0.1) {
+        logs(tl_both, "Waiting for fresh pose: %.2f", _thisPose.time);
         return false;
     }
 
@@ -1104,7 +1220,7 @@ bool LcmTrn::time2Update()
 
     // Has the trn period expired yet?
     // If the TRN period has passed since the last TRN update, then yes.
-    double now  = fmax(_thisPose.time, _thisMeas.time);
+    double now = fmax(_thisPose.time, _thisMeas.time);
     bool period = ((_lastUpdateTimestamp + _trnc.period) <= now);
     logs(tl_both, "waiting for %.2f, time is %.2f\n",
          (_lastUpdateTimestamp + _trnc.period), now);
