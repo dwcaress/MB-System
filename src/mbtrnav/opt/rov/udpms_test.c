@@ -234,7 +234,9 @@ static int s_trnu_str(trnu_pub_t *update, char *dest, int len, int indent)
 
 void s_show_help()
 {
-    char help_message[] = "\n Test udpm_sub\n";
+    char help_message[] = "\n udpm_sub (UDP multicast) listener component test\n\n"
+    " Shows UDPm messages in hex format, e.g. from\n"
+    " trnum_svr netif, mcpub/mmcpub, or LCM\n";
 
     char use_message[] = "\n use : udpms-test [options]\n"
     " options:\n"
@@ -308,18 +310,26 @@ int main(int argc, char **argv)
             int64_t test = udpms_listen(sub, iobuf, read_len, 3000, 0);
             uint32_t *sync = (uint32_t *)iobuf;
 
-            if(test == read_len && (*sync == (uint32_t)TRNU_PUB_SYNC)){
-                s_show_hex(iobuf, 512);
+            if(test == read_len ) {
+                if (*sync == (uint32_t)TRNU_PUB_SYNC) {
+                    s_show_hex(iobuf, 512);
 #ifdef WITH_TRNU
-                trnu_pub_t *trnu = (trnu_pub_t *)iobuf;
-                char sbuf[4096]={0};
-                s_trnu_str(trnu, sbuf, 4096, 3);
-                fprintf(stderr,"\ntrnu:\n%s\n", sbuf);
+                    trnu_pub_t *trnu = (trnu_pub_t *)iobuf;
+                    char sbuf[4096]={0};
+                    s_trnu_str(trnu, sbuf, 4096, 3);
+                    fprintf(stderr,"\ntrnu:\n%s\n", sbuf);
 #endif
+                }
+            } else if (test > 0) {
+                fprintf(stderr, "message len=%lld :\n", test);
+                double a = (double)test/16.;
+                double r = round(a);
+                int olen = (int)r*16;
+                s_show_hex(iobuf, (olen>512 ? 512 : olen));
             }
-//            else {
-//                fprintf(stderr,"test %lld sync %04X TRN_PUB_SYNC %04X\n", test, *sync, (uint32_t)TRNU_PUB_SYNC);
-//            }
+            //            else {
+            //                fprintf(stderr,"test %lld sync %04X TRN_PUB_SYNC %04X\n", test, *sync, (uint32_t)TRNU_PUB_SYNC);
+            //            }
         }
     }
 
