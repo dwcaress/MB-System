@@ -145,8 +145,8 @@ int g_signal=0;
 /// @return none
 static void s_show_help()
 {
-    char help_message[] = "\ntrnif server unit test\n";
-    char usage_message[] = "\ntrnusvr-test [options]\n"
+    char help_message[] = "\ntrn UDP test server\n";
+    char usage_message[] = "\ntrnu-svr [options]\n"
     " --verbose=n    : verbose output, n>0\n"
     " --help         : output help message\n"
     " --version      : output version info\n"
