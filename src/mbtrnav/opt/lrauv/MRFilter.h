@@ -83,12 +83,6 @@
  * Code
  ***********************************************************************/
 
-// TRN info from the TRN instance on this vehicle (est nav, particles, etc)
-struct TrnData
-{
-    // TBD
-};
-
 // MRFilter class
 // Most of the computaions calculating ego vehicle estimates
 // occur in the multi-robot filters

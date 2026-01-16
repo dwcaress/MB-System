@@ -79,6 +79,7 @@
 #define DVL_CHANNEL            "RDI_Pathfinder"
 #define DEPTH_CHANNEL          "Depth_Keller"
 #define DEPTH_DEPTH            "depth"
+#define TRN_CHANNEL            ".TRN"
 #define CONAV_CHANNEL          "CoNav_Est"
 #define MR_DAT_CHANNEL         "Multi_Robot_DAT"
 #define MR_VEHID_NAME          "VehId"
