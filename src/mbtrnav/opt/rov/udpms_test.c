@@ -26,10 +26,8 @@
 #include <fcntl.h>
 #include "udpm_sub.h"
 
-#ifdef WITH_TRNU
 #include <math.h>
 #include "trn_msg.h"
-#endif
 
 // /////////////////
 // Macros
