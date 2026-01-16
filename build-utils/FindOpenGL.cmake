@@ -185,9 +185,11 @@ GLVND.  For non-GLVND Linux and other systems these are left undefined.
 macOS-Specific
 ^^^^^^^^^^^^^^
 
-On OSX FindOpenGL defaults to using the framework version of OpenGL. People
-will have to change the cache values of OPENGL_glu_LIBRARY and
-OPENGL_gl_LIBRARY to use OpenGL with X11 on OSX.
+On OSX FindOpenGL defaults to using the framework version of OpenGL (or nothing after 
+Apple deprecated OpenGL support), which does not  include the GLX extensions needed to 
+use OpenGL with X11 as required by MB-System. Instead reset the values
+of OPENGL_gl_LIBRARY, OPENGL_glu_LIBRARY, and OPENGL_INCLUDE_DIR to point at libraries
+and headers installed either by MacPorts or Homebrew.
 #]=======================================================================]
 
 set(_OpenGL_REQUIRED_VARS OPENGL_gl_LIBRARY)
@@ -214,20 +216,69 @@ if (WIN32)
     OPENGL_gl_LIBRARY
     OPENGL_glu_LIBRARY
     )
+
 elseif (APPLE)
   # The OpenGL.framework provides both GL and GLU, but does not include GLX functionality
   # Instead of using find_library() set the OpenGL include directory and libraries directly
-  # to those included in the XQuartz package
+  # to those installed either by MacPorts or Homebrew.
   #
   # Original calls not used now:
     # find_library(OPENGL_gl_LIBRARY OpenGL DOC "OpenGL library for OS X")
     # find_library(OPENGL_glu_LIBRARY OpenGL DOC "GLU library for OS X (usually same as OpenGL library)")
     # find_path(OPENGL_INCLUDE_DIR OpenGL/gl.h DOC "Include for OpenGL on OS X")
   #
-  # Set OpenGL include directory and libraries directly
-  set(OPENGL_gl_LIBRARY /opt/local/lib/libGL.dylib)
-  set(OPENGL_glu_LIBRARY /opt/local/lib/libGLU.dylib)
-  set(OPENGL_INCLUDE_DIR /opt/local/include)
+
+	# If MacOs version is Sequoia or earlier prefer MacPorts
+	if(${MACOS_VERSION} VERSION_LESS "16")
+
+		# Set OpenGL include directory and libraries directly when installed via MacPorts
+		if(MACOS_USE_MACPORTS)
+			# message("FindOpenGL: MacOS: MacPorts detected")
+			set(OPENGL_gl_LIBRARY /opt/local/lib/libGL.dylib)
+			set(OPENGL_glu_LIBRARY /opt/local/lib/libGLU.dylib)
+			set(OPENGL_INCLUDE_DIR /opt/local/include)
+	
+		# Set OpenGL include directory and libraries directly when installed via Homebrew
+		elseif(MACOS_USE_HOMEBREW)
+			# message("FindOpenGL: MacOS: Homebrew detected")
+			set(OPENGL_gl_LIBRARY /opt/homebrew/lib/libGL.dylib)
+			set(OPENGL_glu_LIBRARY /opt/homebrew/lib/libGLU.dylib)
+			set(OPENGL_INCLUDE_DIR /opt/homebrew/include)
+	
+		# Else try the default, but it probably will not work
+		else()
+			# message("FindOpenGL: MacOS: Neither MacPorts nor Homebrew installed, trying the default method...")
+			find_library(OPENGL_gl_LIBRARY OpenGL DOC "OpenGL library for OS X")
+			find_library(OPENGL_glu_LIBRARY OpenGL DOC "GLU library for OS X (usually same as OpenGL library)")
+			find_path(OPENGL_INCLUDE_DIR OpenGL/gl.h DOC "Include for OpenGL on OS X")
+		endif()
+
+	# If MacOs version is Tahoe or later prefer Homebrew
+	else()
+	
+		# Set OpenGL include directory and libraries directly when installed via Homebrew
+		if(MACOS_USE_HOMEBREW)
+			# message("FindOpenGL: MacOS: Homebrew detected")
+			set(OPENGL_gl_LIBRARY /opt/homebrew/lib/libGL.dylib)
+			set(OPENGL_glu_LIBRARY /opt/homebrew/lib/libGLU.dylib)
+			set(OPENGL_INCLUDE_DIR /opt/homebrew/include)
+
+		# Set OpenGL include directory and libraries directly when installed via MacPorts
+		elseif(MACOS_USE_MACPORTS)
+			# message("FindOpenGL: MacOS: MacPorts detected")
+			set(OPENGL_gl_LIBRARY /opt/local/lib/libGL.dylib)
+			set(OPENGL_glu_LIBRARY /opt/local/lib/libGLU.dylib)
+			set(OPENGL_INCLUDE_DIR /opt/local/include)
+	
+		# Else try the default, but it probably will not work
+		else()
+			# message("FindOpenGL: MacOS: Neither MacPorts nor Homebrew installed, trying the default method...")
+			find_library(OPENGL_gl_LIBRARY OpenGL DOC "OpenGL library for OS X")
+			find_library(OPENGL_glu_LIBRARY OpenGL DOC "GLU library for OS X (usually same as OpenGL library)")
+			find_path(OPENGL_INCLUDE_DIR OpenGL/gl.h DOC "Include for OpenGL on OS X")
+		endif()
+
+	endif()
 
   list(APPEND _OpenGL_REQUIRED_VARS OPENGL_INCLUDE_DIR)
   list(APPEND _OpenGL_CACHE_VARS
@@ -235,6 +286,7 @@ elseif (APPLE)
     OPENGL_gl_LIBRARY
     OPENGL_glu_LIBRARY
     )
+    
 else()
   if (CMAKE_ANDROID_NDK)
     set(_OPENGL_INCLUDE_PATH ${CMAKE_ANDROID_NDK}/sysroot/usr/include)
@@ -771,7 +823,9 @@ unset(_OpenGL_CACHE_VARS)
 
 if (OPENGL_FOUND)
   message("-- OpenGL found!")
+  # message("   OPENGL_INCLUDE_DIR: ${OPENGL_INCLUDE_DIR}")
+  # message("   OPENGL_gl_LIBRARY:  ${OPENGL_gl_LIBRARY}")
+  # message("   OPENGL_glu_LIBRARY: ${OPENGL_glu_LIBRARY}")
 else()
   message("-- OpenGL NOT found...")
 endif()
-
