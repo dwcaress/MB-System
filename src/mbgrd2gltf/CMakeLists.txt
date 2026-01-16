@@ -41,7 +41,7 @@ set(DRACO_DIR "${CMAKE_CURRENT_SOURCE_DIR}/draco")
 set(INCLUDE_DIRS "")
 
 # Set the sources for the executable
-set(SOURCES bathymetry.cpp compression.cpp geometry.cpp main.cpp model.cpp options.cpp)
+set(SOURCES bathymetry.cpp geometry.cpp logger.cpp main.cpp model.cpp options.cpp)
 
 # Manually set the include directories for Draco and other components
 include_directories(

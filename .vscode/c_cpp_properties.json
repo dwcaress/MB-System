@@ -1,0 +1,28 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/src/mbgrd2gltf",
+                "${workspaceFolder}/src/mbgrd2gltf/draco",
+                "${workspaceFolder}/src/mbgrd2gltf/tinygltf",
+                "${workspaceFolder}/src/mbio",
+                "${workspaceFolder}/src/mbaux",
+                "/opt/local/include",
+                "/opt/local/lib/proj9/include",
+                "/opt/local/lib/gmt6/include"
+            ],
+            "defines": [],
+            "macFrameworkPath": [
+                "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks"
+            ],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "macos-clang-arm64",
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json"
+        }
+    ],
+    "version": 4
+}
