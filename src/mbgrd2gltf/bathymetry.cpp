@@ -32,7 +32,6 @@
   *--------------------------------------------------------------------*/
 
 #include "bathymetry.h"
-#include "compression.h"
 #include "logger.h"
 #include <cmath>
 #include <netcdf.h>
@@ -188,8 +187,6 @@ Bathymetry::Bathymetry(const Options& options) {
 
   LOG_INFO("Loaded bathymetry grid:", _dimension[0], "x", _dimension[1], "=", 
            Logger::format_with_commas(_xysize), "points");
-
-  compress(options);
 }
 
 int Bathymetry::get_netcdf_id(const char* filepath) {
@@ -217,23 +214,6 @@ int Bathymetry::get_dimension_id(int netcdf_id, const char* name) {
     throw NetCdfError(return_value, "failed to get ID for dimension '" + std::string(name) + "'");
   }
   return dimension_id;
-}
-
-size_t Bathymetry::get_attribute_length(int netcdf_id, const char* name) {
-  size_t length;
-  int return_value = nc_inq_attlen(netcdf_id, NC_GLOBAL, name, &length);
-  if (return_value != NC_NOERR) {
-    throw NetCdfError(return_value,
-                      "failed to get length for attribute '" + std::string(name) + "'");
-  }
-  return length;
-}
-
-void Bathymetry::get_attribute_text(int netcdf_id, const char* name, char* out) {
-  int return_value = nc_get_att_text(netcdf_id, NC_GLOBAL, name, out);
-  if (return_value != NC_NOERR) {
-    throw NetCdfError(return_value, "failed to get text for attribute '" + std::string(name) + "'");
-  }
 }
 
 size_t Bathymetry::get_dimension_length(int netcdf_id, const char* name) {
@@ -277,46 +257,6 @@ void Bathymetry::get_variable_uint_array(int netcdf_id, const char* name, unsign
     throw NetCdfError(return_value,
                       "failed to get uint array data for variable '" + std::string(name) + "'");
   }
-}
-
-void Bathymetry::compress(const Options& options) {
-  Options localOptions = options;
-  if (!options.is_stride_set() && (_z.size_x() * _z.size_y() > 9000000)) {
-    LOG_INFO("Auto setting stride to 1.");
-    localOptions.set_stride_ratio(1.0);
-  }
-  if (!options.is_stride_set() && !options.is_max_size_set() &&
-      (_z.size_x() * _z.size_y() < 9000000))
-    return;
-  Matrix<float> compressed_z = compression::compress(_z, localOptions);
-  _z = compressed_z;
-  _xysize = _z.count();
-  _dimension[0] = _z.size_x();
-  _dimension[1] = _z.size_y();
-  // Allow negative values for when one or more grid axes are reversed
-  _spacing[0] = (_x_range[1] - _x_range[0]) / static_cast<double>(_dimension[0] - 1);
-  _spacing[1] = (_y_range[1] - _y_range[0]) / static_cast<double>(_dimension[1] - 1);
-  LOG_INFO("Compressed grid to", _dimension[0], "x", _dimension[1], "=", 
-           Logger::format_with_commas(_xysize), "points");
-}
-
-std::string Bathymetry::to_string() const {
-  std::string out;
-  out.reserve(256);
-
-  out += '{';
-  out += "\nDimensions:\n";
-  out += "\n    Side:      " + std::to_string(_side);
-  out += "\n    XYSize:    " + std::to_string(_xysize);
-  out += "\n\nVariables:\n";
-  out += "\n    Dimension: " + std::to_string(_dimension[0]) + ", " + std::to_string(_dimension[1]);
-  out += "\n    X Range:   " + std::to_string(_x_range[0]) + ", " + std::to_string(_x_range[1]);
-  out += "\n    Y Range:   " + std::to_string(_y_range[0]) + ", " + std::to_string(_y_range[1]);
-  out += "\n    Z Range:   " + std::to_string(_z_range[0]) + ", " + std::to_string(_z_range[1]);
-  out += "\n    Spacing:   " + std::to_string(_spacing[0]) + ", " + std::to_string(_spacing[1]);
-  out += "\n}";
-
-  return out;
 }
 
 void Bathymetry::get_variable_attribute_double(int netcdf_id, const char* var_name,
