@@ -6,22 +6,9 @@
 #ifndef LCM_TRN_CTX_H  // include guard
 #define LCM_TRN_CTX_H
 
-//#include <stdlib.h>
-//#include <stdio.h>
-//#include <stdarg.h>
-//#include <iostream>
-//#include <tuple>
 #include <thread>
 #include <future>
-//#include <chrono>
-//#include <list>
-//#include <string>
-//#include <map>
-//#include <mutex>
-//
-//#include <unistd.h>
-//
-//#include "pcf_utils.hpp"
+
 #include "lcm_interface.hpp"
 #include "lcm_publisher.hpp"
 #include "trn_lcm_input.hpp"
