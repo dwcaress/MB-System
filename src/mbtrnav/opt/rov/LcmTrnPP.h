@@ -41,6 +41,8 @@
 #include "rph_angrate_input.hpp"
 #include "senlcm_gps_fix_input.hpp"
 
+#define TRNHOSTLIST_STR_NONE "-"
+
 class LcmTrnPP;
 
 typedef struct callback_res_s
