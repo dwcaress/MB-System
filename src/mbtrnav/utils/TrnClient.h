@@ -35,11 +35,24 @@
 #define VNORM_DIM 3
 #undef WITH_VNORM_FN
 #undef WITH_DEGTORAD_FN
+#define SESSION_PREFIX_BUF_BYTES 64
 
 class DataLogReader;
 struct poseT;
 struct measT;
 class TerrainNav;
+
+typedef enum {
+    SID_YYYYJJJ = 0,
+    SID_YYYYJJJHHMM,
+    SID_ISO8601,
+    SID_LCMTRN
+}SIDFormat;
+
+typedef enum {
+    SID_GMT = 0,
+    SID_LOC,
+}SIDTime;
 
 class TrnClient : public TerrainNavClient {
     
@@ -47,14 +60,13 @@ public:
     
     TrnClient();
     explicit TrnClient(const char *host, int port=0);
-    explicit TrnClient(const char *svr_log_dir, const char *host=NULL, int port=0);
     TrnClient(const TrnClient& other);
     virtual ~TrnClient() override;
     static void chkSetString(char **dest, const char *src);
-    char *updateSessionDir();
-    int loadCfgAttributes(const char *cfg_file, const char *usr_log_path = NULL);
+    int loadCfgAttributes(const char *cfg_file);
     int setVerbose(int val);
     int initSocket();
+    void initServer();
     int connectSocket();
     TerrainNav* connectTRN();
     void show(int indent=0, int wkey=15, int wval=18);
@@ -63,11 +75,15 @@ public:
     bool isQuitSet();
     TrnAttr &getTrnAttr();
     char *attGetServer();
+    void setSessionID(const std::string &session_str);
+    char *sessionPrefix(char **r_dest, size_t len, SIDTime sid_time=SID_GMT, SIDFormat sid_fmt=SID_YYYYJJJ);
 
 protected:
     int verbose;
     bool *_quit_ref;
     char *_cfg_file;
+    char *_sessionPrefix;
+    std::string _sessionID;
     TrnAttr _trn_attr;
 };
 
