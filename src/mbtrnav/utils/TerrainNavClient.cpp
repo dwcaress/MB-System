@@ -44,7 +44,6 @@
 
 TerrainNavClient::TerrainNavClient()
 : TerrainNav()
-, _logdir(NULL)
 , _connected(false)
 , _mbtrn_server_type(true)
 , _server_ip(NULL)
@@ -63,9 +62,10 @@ TerrainNavClient::TerrainNavClient(char *server_ip, int port)
 , _sockport(port)
 {
 //    fprintf(stderr, "%s:%d - <<<<< INIT(2) CTOR >>>>>\n", __func__, __LINE__);
-  _server_ip = (NULL!=server_ip ? strdup(server_ip) : NULL);
+    _server_ip = STRDUPNULL(server_ip);
     memset(_comms_buf,0,TRN_MSG_SIZE);
-  init_comms();
+    init_comms();
+    // does not call init_server - why? need other config files?
   _initialized = true;
 }
 
@@ -103,7 +103,6 @@ TerrainNavClient::TerrainNavClient(char *server_ip, int port,
     TNavConfig::instance()->setParticlesFile(this->particlesFile);
     TNavConfig::instance()->setLogDir(this->saveDirectory);
     _server_ip = STRDUPNULL(server_ip);
-    _logdir    = STRDUPNULL(logdir);
     _initialized = false;
 
     init_comms();
@@ -117,15 +116,14 @@ TerrainNavClient::TerrainNavClient(const TerrainNavClient &other)
 : TerrainNav(other)
 {
 //    fprintf(stderr, "%s:%d - <<<<< COPY CTOR >>>>>\n", __func__, __LINE__);
-    _logdir = STRDUPNULL(other._logdir);
     _connected = other._connected;
     _mbtrn_server_type = other._mbtrn_server_type;
-    _server_ip = STRDUPNULL(other._logdir);
+    _server_ip = STRDUPNULL(other._server_ip);
     _sockfd = other._sockfd;
     _sockport = other._sockport;
 
     this->mapFile = STRDUPNULL(other.mapFile);
-    this->vehicleSpecFile= STRDUPNULL(other.vehicleSpecFile);
+    this->vehicleSpecFile = STRDUPNULL(other.vehicleSpecFile);
     this->saveDirectory = STRDUPNULL(other.saveDirectory);
     this->particlesFile = STRDUPNULL(other.particlesFile);
 //    this->tNavFilter = NULL;
@@ -140,6 +138,7 @@ TerrainNavClient::TerrainNavClient(const TerrainNavClient &other)
     memcpy(_comms_buf,other._comms_buf,TRN_MSG_SIZE);
     _initialized = other._initialized;
 
+    // TODO: what init should this CTOR do, if any?
 //    init_comms();
 //    init_server();
 //    _initialized = false;
@@ -150,7 +149,6 @@ TerrainNavClient::~TerrainNavClient()
 {
     close(_sockfd);
     free(_server_ip);
-    free(_logdir);
 }
 
 //////////////////////////////////////////////////////////////////////

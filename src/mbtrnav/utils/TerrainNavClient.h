@@ -310,7 +310,6 @@ class TerrainNavClient : public TerrainNav
 
   //////////////////////////////////////////////////////////////////////
   // Other important state variables
-  char *_logdir;          // name of the log directory on the MVC
   //////////////////////////////////////////////////////////////////////
   // Initialize connection to server and send state
   bool _connected;
