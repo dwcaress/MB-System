@@ -270,14 +270,15 @@ static void s_copy_config(trnxpp_cfg &cfg, LcmTrnPP &xpp)
     }
 
     // copy them to new name differentiated using context key
-    ostringstream ss;
     std::list<trn_cfg_map>::iterator cit;
     for(cit = cfgList.begin(); cit != cfgList.end(); cit++){
-
-        if(std::get<1>(*cit).size() > 0){
-            ss << "cp " << std::get<1>(*cit).c_str() << " " << cfg.logdir().c_str();
+        ostringstream ss;
+        std::string key_str = std::get<0>(*cit);
+        std::string cfg_str = std::get<1>(*cit);
+        if(cfg_str.size() > 0 && cfg_str.compare(TRNHOSTLIST_STR_NONE) != 0 ){
+            ss << "cp " << cfg_str.c_str() << " " << cfg.logdir().c_str();
             ss << "/terrainAid-";
-            ss << std::get<0>(*cit).c_str() << "-";
+            ss << key_str.c_str() << "-";
             ss << cfg.session_string().c_str();
             ss << ".cfg";
             if(system(ss.str().c_str()) != 0)
@@ -292,6 +293,7 @@ static void s_copy_config(trnxpp_cfg &cfg, LcmTrnPP &xpp)
         }
     }
 
+    ostringstream ss;
     ss.str(std::string());
     ss << "cp " << cfg.trnxpp_cfg_path() << " " << cfg.logdir().c_str();
     ss << "/trnxpp-";
