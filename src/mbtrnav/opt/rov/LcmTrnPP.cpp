@@ -947,7 +947,9 @@ int LcmTrnPP::parse_trn(const char *str)
 
             TrnHostX uhost;
             //                mTrnHostList.emplace_back(key, type, (host==NULL?"-":host), port, ttl, (void *)NULL, (cfg==NULL?"-":cfg));
-            mTrnHostList.emplace_back(key, type, (host==NULL?"-":host), port, ttl, uhost, (cfg==NULL?"-":cfg));
+            mTrnHostList.emplace_back(key, type,
+                                      (host == NULL ? TRNHOSTLIST_STR_NONE : host), port, ttl, uhost,
+                                      (cfg == NULL ? TRNHOSTLIST_STR_NONE : cfg));
 
             retval = 0;
         }
