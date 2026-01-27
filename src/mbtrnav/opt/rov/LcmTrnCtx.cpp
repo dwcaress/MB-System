@@ -613,7 +613,7 @@ int LcmTrnCtx::write_trnest_csv(double &stime, poseT &pt, poseT &mle, poseT &mms
 
         fprintf(mTrnEstCsvFile, "%s\n", ss.c_str());
 
-        //            TRN_NDPRINT(6, "%s\n", ss.c_str());
+        TRN_NDPRINT(6, "%s:%d trnest CSV: %s\n", __func__, __LINE__, ss.c_str());
 
         retval = ss.length();
     } else {
@@ -895,7 +895,7 @@ size_t LcmTrnCtx::write_mb1_bin(mb1_t *snd)
             fprintf(stderr, "%s:%d - MB1 write failed [%d/%s]\n", __func__, __LINE__, errno, strerror(errno));
         }
         else {
-            fprintf(stderr, "%s:%d - MB1 wrote [%lu] size[%u]\n", __func__, __LINE__, (unsigned long)retval, snd->size);
+            TRN_NDPRINT(3, "%s:%d - MB1 wrote [%lu] size[%u]\n", __func__, __LINE__, (unsigned long)retval, snd->size);
         }
     }
     return retval;
@@ -1427,7 +1427,7 @@ int LcmTrnCtx::start_trncli(const std::string &key, trnxpp_cfg *cfg, bool force_
             return 0;
         }
 
-        fprintf(stderr, "%s:%d !!!!!!!!!!! DELETING trncli[%p] !!!!!!!!!!!!\n", __func__, __LINE__, trncli);
+        fprintf(stderr, "%s:%d !!! DELETING trncli[%p] !!!\n", __func__, __LINE__, trncli);
         delete trncli;
         trncli = NULL;
         uhost.trnc_host = NULL;
@@ -1435,15 +1435,14 @@ int LcmTrnCtx::start_trncli(const std::string &key, trnxpp_cfg *cfg, bool force_
     }
 
 //    fprintf(stderr, "%s:%d constructing trncli[%p]\n", __func__, __LINE__, trncli);
-    trncli = new TrnClient("localhost",TRNCLI_PORT_DFL);
+    trncli = new TrnClient("localhost", TRNCLI_PORT_DFL);
+    trncli->setSessionID(cfg->session_string().c_str());
     TrnAttr &att = trncli->getTrnAttr();
 
     // TODO: WIP is TrnClient initialization correct?
     std::string cfg_path_str = std::get<6>(*trnc_host);
-    // set up log directory (using app config --logdir)
-    trncli->initLogDirectory(cfg->logdir().c_str(), NULL, 0, true);
     // load TRN configuration and configure TrnClient
-    trncli->loadCfgAttributes(cfg_path_str.c_str(), cfg->logdir().c_str());
+    trncli->loadCfgAttributes(cfg_path_str.c_str());
 
     uhost.trnc_host = trncli;
     std::get<5>(*trnc_host) = uhost;
