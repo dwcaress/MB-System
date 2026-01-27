@@ -133,7 +133,6 @@ void transform_dvl(trn::bath_info *bi, trn::att_info *ai, dvlgeo *geo, mb1_t *r_
         }
     }
     TRN_NDPRINT(TRNDL_PLUGOIDVL, "%s: --- \n\n",__func__);
-
     return;
 }
 
@@ -170,7 +169,6 @@ int cb_proto_dvl(void *pargs)
 
         TRN_NDPRINT(TRNDL_PLUGOIDVL, "%s:%d processing ctx[%s]\n", __func__, __LINE__, ctx->ctx_key().c_str());
         
-
         std::string *bkey[1] = {ctx->bath_input_chan(0)};
         std::string *nkey = ctx->nav_input_chan(0);
         std::string *akey[1] = {ctx->att_input_chan(0)};
@@ -192,7 +190,6 @@ int cb_proto_dvl(void *pargs)
             fprintf(stderr,"%s:%d WARN - NULL info instance %p/%p/%p/%p\n", __func__, __LINE__, bi, ni, ai, vi);
         }
 
-
         // if no errors, bs/bp pointers have been validated
 
         double nav_time = ni->time_usec()/1e6;
@@ -203,10 +200,16 @@ int cb_proto_dvl(void *pargs)
 
         dvlgeo *geo = static_cast<dvlgeo *>(bgeo);
         trn::bath_input *bp[1] = {xpp->get_bath_input(*bkey[0])};
-        int trn_type = bp[0]->bath_input_type();
+        // use trn_type TRN_SENSOR_MB
+        // since processing MB1, i.e. along/across/down
+        // int trn_type = bp[0]->bath_input_type();
+        int trn_type = TRN_SENSOR_MB;
 
-        // compute beam components in vehicle frame
+        // compute beam components in vehicle frame (format DVL as MB1)
         transform_dvl(bi, ai, geo, snd);
+
+        // set MB1 checksum
+        mb1_set_checksum(snd);
 
         // check modulus
         if(ctx->decmod() <= 0 || (ctx->cbcount() % ctx->decmod()) == 0){
@@ -221,8 +224,11 @@ int cb_proto_dvl(void *pargs)
             // publish update TRN, publish estimate to TRN, LCM
             ctx->pub_trn(nav_time, pt, mt, trn_type, xpp->pub_list(), cfg);
 
-            // does it make sense to publish to MB1?
-            // ctx->pub_mb1(snd, xpp->pub_list(), cfg);
+            // publish to mb1 server
+            // - must specify an mb1pub trn output in ctx config
+            // - can subscribe to MB1 stream using (MB-System) mb1-cli
+            // - not compatible with mbtrnpp, since it assumes multibeam
+            ctx->pub_mb1(snd, xpp->pub_list(), cfg);
 
             if(pt != nullptr)
                 delete pt;
@@ -235,10 +241,13 @@ int cb_proto_dvl(void *pargs)
         ctx->inc_cbcount();
 
 
-        // write to CSV
+        // write to CSV e.g. xpp-mb-*.mb1
         if(ctx->write_mb1_csv(snd, bi, ai, vi) > 0){
             cfg->stats().trn_csv_n++;
         }
+        // write xpp-mb-*.mb1
+        ctx->write_mb1_bin(snd);
+
         if(snd != nullptr)
             mb1_destroy(&snd);
 
