@@ -345,11 +345,11 @@ public:
 
                         if(NULL != data && len!=0)
                         {
-                            send(i, (const char*)data, len, 0);
+                            ssize_t wbytes = send(i, (const char*)data, len, 0);
                             if(_debug>=4){
                                 // data is expected to be an MB1 record(mb1_t)
                                 mb1_t *snd = (mb1_t *)data;
-                                MB1SVR_NDBG(5, stderr,"%s: sending frame fd[%d] p[%p] len[%lu]\n", __func__, i,  data, len);
+                                MB1SVR_NDBG(5, stderr,"%s: sending frame fd[%d] p[%p] len[%lu] wbytes[%lu]\n", __func__, i,  data, len, wbytes);
                                 mb1_show(snd, (_debug>=5?true:false), true);
                                 if(_debug>=5)
                                     mb1_hex_show((byte *)snd,snd->size,16,true,5);
