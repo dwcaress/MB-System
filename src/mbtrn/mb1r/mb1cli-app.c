@@ -70,6 +70,8 @@
 #include "mb1_msg.h"
 #include "mframe.h"
 #include "merror.h"
+#include "mxdebug.h"
+#include "mxd_app.h"
 
 /////////////////////////
 // Macros
@@ -130,7 +132,7 @@ typedef struct app_cfg_s{
 
 
 static void s_show_help();
-static int s_app_cfg_show(app_cfg_t *self,bool verbose, int indent);
+static int s_app_cfg_show(app_cfg_t *self, bool verbose, int indent);
 
 /////////////////////////
 // Imports
@@ -217,7 +219,7 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
             case 0:
                 // verbose
                 if (strcmp("verbose", options[option_index].name) == 0) {
-                    sscanf(optarg,"%d",&cfg->verbose);
+                    sscanf(optarg, "%d", &cfg->verbose);
                 }
                 // help
                 else if (strcmp("help", options[option_index].name) == 0) {
@@ -230,8 +232,8 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 // host
                 else if (strcmp("host", options[option_index].name) == 0) {
                     scpy = strdup(optarg);
-                    shost = strtok(scpy,":");
-                    sport = strtok(NULL,":");
+                    shost = strtok(scpy, ":");
+                    sport = strtok(NULL, ":");
                     if(NULL!=scpy){
                         free(cfg->host);
                         cfg->host = strdup(shost);
@@ -243,11 +245,11 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 }
                 // cycles
                 else if (strcmp("cycles", options[option_index].name) == 0) {
-                    sscanf(optarg,"%d",&cfg->cycles);
+                    sscanf(optarg, "%d", &cfg->cycles);
                 }
                 // retries
                 else if (strcmp("retries", options[option_index].name) == 0) {
-                    sscanf(optarg,"%d",&cfg->retries);
+                    sscanf(optarg, "%d", &cfg->retries);
                 }
                 // ofmt
                 else if (strcmp("ofmt", options[option_index].name) == 0) {
@@ -280,7 +282,7 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
                         scpy++;
                     }
                     if( (ival&MB1C_OF_ALL) !=0)
-                        cfg->oformat=ival;
+                        cfg->oformat = ival;
                 }
                 break;
             default:
@@ -289,7 +291,7 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
         }
         if (version) {
             //            mbtrn_show_app_version(TCPC_NAME,TCPC_BUILD);
-            fprintf(stderr,"%s build %s\n",MB1CLI_NAME,MB1CLI_BUILD);
+            fprintf(stderr, "%s build %s\n", MB1CLI_NAME,MB1CLI_BUILD);
             exit(0);
         }
         if (help) {
@@ -300,7 +302,7 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
     }// while
 
     // use this host if unset
-    if(NULL==cfg->host){
+    if(NULL == cfg->host){
         // if unset, use local IP
         char host[HOSTNAME_BUF_LEN]={0};
         if(gethostname(host, HOSTNAME_BUF_LEN)==0 && strlen(host)>0){
@@ -308,21 +310,26 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
 
             if( (host_entry = gethostbyname(host))!=NULL){
                 //Convert into IP string
-                char *s =inet_ntoa(*((struct in_addr*) host_entry->h_addr_list[0]));
+                char *s = inet_ntoa(*((struct in_addr*) host_entry->h_addr_list[0]));
                 cfg->host = strdup(s);
             } //find host information
         }
 
-        if(NULL==cfg->host){
-            cfg->host=strdup("localhost");
+        if(NULL == cfg->host){
+            cfg->host = strdup("localhost");
         }
     }
 
     if(cfg->verbose){
-        fprintf(stderr," Configuration:\n");
-        s_app_cfg_show(cfg,true,5);
-        fprintf(stderr,"\n");
+        fprintf(stderr, " Configuration:\n");
+        s_app_cfg_show(cfg, true, 5);
+        fprintf(stderr, "\n");
     }
+
+    mxd_setModule(MB1R, 1, false, "MB1R");
+    mxd_setModule(MB1R_ERROR, 1, false, "MB1R_ERR");
+    if(cfg->verbose > 0)
+        mxd_setModule(MB1R_DEBUG, 1, false, "MB1R_DEBUG");
 
 }
 
@@ -336,12 +343,12 @@ static void s_termination_handler (int signum)
         case SIGINT:
         case SIGHUP:
         case SIGTERM:
-            fprintf(stderr,"INFO - sig received[%d]\n",signum);
-            g_interrupt=true;
-            g_signal=signum;
+            fprintf(stderr, "INFO - sig received[%d]\n", signum);
+            g_interrupt = true;
+            g_signal = signum;
             break;
         default:
-            fprintf(stderr,"ERR - s_termination_handler: sig not handled[%d]\n",signum);
+            fprintf(stderr, "ERR - s_termination_handler: sig not handled[%d]\n", signum);
             break;
     }
 }
@@ -351,25 +358,25 @@ static app_cfg_t *app_cfg_new()
     app_cfg_t *instance = (app_cfg_t *)malloc(sizeof(app_cfg_t));
 
     if(NULL!=instance){
-        memset(instance,0,sizeof(app_cfg_t));
-        instance->verbose=MB1CLI_VERBOSE_DFL;
-        instance->host=NULL;
-        instance->port=MB1_IP_PORT_DFL;
-        instance->oformat=MB1CLI_OFORMAT_DFL;
-        instance->retries=MB1CLI_RETRIES_DFL;
-        instance->cycles=MB1CLI_CYCLES_DFL;
+        memset(instance, 0, sizeof(app_cfg_t));
+        instance->verbose = MB1CLI_VERBOSE_DFL;
+        instance->host = NULL;
+        instance->port = MB1_IP_PORT_DFL;
+        instance->oformat = MB1CLI_OFORMAT_DFL;
+        instance->retries = MB1CLI_RETRIES_DFL;
+        instance->cycles = MB1CLI_CYCLES_DFL;
     }
     return instance;
 }
 
 static void app_cfg_destroy(app_cfg_t **pself)
 {
-    if(NULL!=pself){
+    if(NULL != pself){
         app_cfg_t *self = (app_cfg_t *)(*pself);
-        if(NULL!=self){
+        if(NULL != self){
             free(self->host);
             free(self);
-            *pself=NULL;
+            *pself = NULL;
         }
     }
     return;
@@ -377,15 +384,15 @@ static void app_cfg_destroy(app_cfg_t **pself)
 
 static int s_app_cfg_show(app_cfg_t *self,bool verbose, int indent)
 {
-    int retval=0;
-    int wkey=15;
-    int wval=14;
-    fprintf(stderr,"%*s%*s  %*s\n",indent,(indent>0?" ":""),wkey,"verbose",wval,(self->verbose?"Y":"N"));
-    fprintf(stderr,"%*s%*s  %*s\n",indent,(indent>0?" ":""),wkey,"host",wval,self->host);
-    fprintf(stderr,"%*s%*s  %*d\n",indent,(indent>0?" ":""),wkey,"port",wval,self->port);
-    fprintf(stderr,"%*s%*s  %*s%03X\n",indent,(indent>0?" ":""),wkey,"oformat",wval-3,"",self->oformat);
-    fprintf(stderr,"%*s%*s  %*d\n",indent,(indent>0?" ":""),wkey,"retries",wval,self->retries);
-    fprintf(stderr,"%*s%*s  %*d\n",indent,(indent>0?" ":""),wkey,"cycles",wval,self->cycles);
+    int retval = 0;
+    int wkey = 15;
+    int wval = 14;
+    fprintf(stderr, "%*s%*s  %*s\n", indent, (indent>0?" ":""), wkey, "verbose", wval, (self->verbose ? "Y" : "N"));
+    fprintf(stderr, "%*s%*s  %*s\n", indent, (indent>0?" ":""), wkey, "host", wval, self->host);
+    fprintf(stderr, "%*s%*s  %*d\n", indent, (indent>0?" ":""), wkey, "port", wval, self->port);
+    fprintf(stderr, "%*s%*s  %*s%03X\n", indent, (indent>0?" ":""), wkey, "oformat", wval-3, "", self->oformat);
+    fprintf(stderr, "%*s%*s  %*d\n", indent, (indent>0?" ":""), wkey, "retries", wval, self->retries);
+    fprintf(stderr, "%*s%*s  %*d\n", indent, (indent>0?" ":""), wkey, "cycles", wval, self->cycles);
 
     return retval;
 }
@@ -397,7 +404,7 @@ static int s_app_cfg_show(app_cfg_t *self,bool verbose, int indent)
 /// @return 0 on success, -1 otherwise
 int main(int argc, char **argv)
 {
-    int retval=-1;
+    int retval = -1;
 
     struct sigaction saStruct;
     sigemptyset(&saStruct.sa_mask);
@@ -409,9 +416,9 @@ int main(int argc, char **argv)
     parse_args(argc, argv, cfg);
 
 
-    int errors=0;
+    int errors = 0;
 
-    if(cfg->verbose>0){
+    if(cfg->verbose > 0){
         s_app_cfg_show(cfg, true, 5);
     }
 
@@ -420,77 +427,82 @@ int main(int argc, char **argv)
     mb1r_reader_t *reader = mb1r_reader_new(cfg->host, cfg->port, MB1_MAX_SOUNDING_BYTES);
 
     // show reader config
-    if(cfg->verbose>1)
-    mb1r_reader_show(reader,true, 5);
+    if(cfg->verbose > 1)
+    mb1r_reader_show(reader, true, 5);
 
-    uint32_t lost_bytes=0;
+    uint32_t lost_bytes = 0;
     // test mb1r_read_frame
-    byte frame_buf[MB1_MAX_SOUNDING_BYTES]={0};
-    int frames_read=0;
+    byte frame_buf[MB1_MAX_SOUNDING_BYTES] = {0};
+    int frames_read = 0;
 
-    if(cfg->verbose>1)
-        fprintf(stderr,"connecting reader [%s/%d]\n",cfg->host,cfg->port);
+    if(cfg->verbose > 1)
+        fprintf(stderr, "connecting reader [%s/%d]\n", cfg->host, cfg->port);
 
-    int retries=cfg->retries>0 ? cfg->retries>0 : 1;
-    int cycles=cfg->cycles>0 ? cfg->cycles : 1;
+    int retries = (cfg->retries > 0 ? cfg->retries : 1);
+    int cycles = (cfg->cycles > 0 ? cfg->cycles : 1);
     while ( !g_interrupt ) {
          // clear frame buffer
-        memset(frame_buf,0,MB1_MAX_SOUNDING_BYTES);
-        int istat=0;
+        memset(frame_buf, 0 ,MB1_MAX_SOUNDING_BYTES);
+        int istat = 0;
 
-        if(cfg->verbose>1)
-            fprintf(stderr,"reading MB1 frame ret[%d]\n",retries);
+        if(cfg->verbose > 1)
+            fprintf(stderr, "%s:%d - reading MB1 frame ret[%d]\n", __func__, __LINE__, retries);
 
         // read frame
         if( (istat = mb1r_read_frame(reader, frame_buf, MB1_MAX_SOUNDING_BYTES, MB1R_NOFLAGS, 0.0, MB1R_READ_TMOUT_MSEC, &lost_bytes )) > 0){
 
             frames_read++;
-            if(cfg->cycles>0)cycles--;
+            if(cfg->cycles > 0)cycles--;
 
-            if(cfg->verbose>0)
-                fprintf(stderr,"mb1r_read_frame cycle[%d/%d] lost[%u] ret[%d]\n", frames_read,
-                        cfg->cycles,lost_bytes,istat);
+            if(cfg->verbose > 0)
+                fprintf(stderr, "%s:%d - mb1r_read_frame cycle[%d/%d] lost[%u] ret[%d]\n", __func__, __LINE__ , frames_read,
+                        cfg->cycles, lost_bytes, istat);
             // show contents
             mb1_t *psnd = (mb1_t *)(frame_buf);
             if( cfg->oformat == MB1C_OF_ALL){
-                mb1_show(psnd,true,5);
-                mb1_hex_show(frame_buf,istat,16,true,10);
-                fprintf(stderr,"\n");
+                mb1_show(psnd, true, 5);
+                mb1_hex_show(frame_buf, istat, 16, true, 10);
+                fprintf(stderr, "\n");
             }else{
                 if((cfg->oformat & MB1C_OF_HEADER) != 0) {
-                    mb1_show(psnd,((cfg->oformat & MB1C_OF_BEAMS)!=0),5);
+                    mb1_show(psnd,((cfg->oformat & MB1C_OF_BEAMS) != 0), 5);
                 }
                 if((cfg->oformat & MB1C_OF_HEX) != 0) {
-                    mb1_hex_show(frame_buf,istat,16,true,10);
+                    mb1_hex_show(frame_buf, istat, 16, true, 10);
                 }
-                fprintf(stderr,"\n");
+                fprintf(stderr, "\n");
             }
         }else{
-            if(cfg->retries>0)retries--;
+
+            if(cfg->retries > 0)
+                retries--;
+
             errors++;
             // read error
-            fprintf(stderr,"ERR - mb1r_read_frame - cycle[%d/%d] ret[%d] lost[%u] err[%d/%s]\n",frames_read+1,cfg->cycles,istat,lost_bytes,errno,strerror(errno));
-            if (errno==ECONNREFUSED || me_errno==ME_ESOCK || me_errno==ME_EOF || me_errno==ME_ERECV) {
 
-                fprintf(stderr,"socket closed - reconnecting in 5 sec\n");
+            fprintf(stderr, "%s:%d ERR (mb1r_read_frame) cycle[%d/%d] ret[%d] lost[%u] err[%d/%s]\n", __func__, __LINE__ , frames_read+1, cfg->cycles, istat, lost_bytes, errno, strerror(errno));
+
+            if (errno == ECONNREFUSED || me_errno == ME_ESOCK || me_errno == ME_EOF || me_errno == ME_ERECV) {
+
+                fprintf(stderr, "socket closed - reconnecting in 5 sec\n");
                 sleep(5);
-                mb1r_reader_connect(reader,true);
+                mb1r_reader_connect(reader, true);
             }
         }
-        if(cycles<1 || retries<1)
+        if((cycles < 1) || (retries < 1))
             break;
 
     }
 
-    if(cfg->verbose>0)
-        fprintf(stderr,"releasing reader\n");
+    if(cfg->verbose > 0)
+        fprintf(stderr, "releasing reader\n");
     mb1r_reader_destroy(&reader);
 
-    if(frames_read==cfg->cycles)
-        retval=0;
+    if(frames_read == cfg->cycles)
+        retval = 0;
 
-    if(cfg->verbose>0)
-        fprintf(stderr,"frames[%d/%d]  retries[%d] lost[%u] errors[%d]\n",
+    if(cfg->verbose > 0)
+        fprintf(stderr, "frames[%d/%d]  retries[%d] lost[%u] errors[%d]\n",
             frames_read, cfg->cycles, cfg->retries-retries, lost_bytes, errors);
 
     app_cfg_destroy(&cfg);
