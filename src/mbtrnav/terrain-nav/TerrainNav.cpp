@@ -60,6 +60,7 @@ allowFilterReinits(true),
 useModifiedWeighting(TRN_WT_NONE),
 numReinits(0),
 saveDirectory(NULL),
+currentSessionDirectory(NULL),
 vehicleSpecFile(NULL),
 particlesFile(NULL),
 mapFile(NULL),
@@ -208,12 +209,11 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs, char* particles,
 							  const int& filterType, const int& mapType, char* directory)
 {
-
 //    fprintf(stderr, "%s:%d - <<<<< INIT(6) CTOR >>>>>\n", __func__, __LINE__);
 	//initialize pointers
 	this->mapFile = STRDUPNULL(mapName);
 	this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
-	this->saveDirectory = STRDUPNULL(directory);
+    this->saveDirectory = STRDUPNULL(directory);
 	this->particlesFile = STRDUPNULL(particles);
 	this->filterType = filterType;
 	this->mapType = mapType;
@@ -245,6 +245,7 @@ TerrainNav::TerrainNav(const TerrainNav &other)
     this->vehicleSpecFile = STRDUPNULL(other.vehicleSpecFile);
     this->particlesFile = STRDUPNULL(other.particlesFile);
     this->saveDirectory = STRDUPNULL(other.saveDirectory);
+    this->currentSessionDirectory = STRDUPNULL(other.currentSessionDirectory);
     this->tNavFilter = NULL;
     this->mapType = other.mapType;  // defaults to DEM
     if(this->mapType == 1) {
@@ -283,10 +284,12 @@ TerrainNav::~TerrainNav() {
 
 	if(this->vehicleSpecFile != NULL)free(this->vehicleSpecFile);
 	this->vehicleSpecFile=NULL;
-	if(this->saveDirectory !=NULL)free(this->saveDirectory);
-	this->saveDirectory=NULL;
-	if(this->particlesFile !=NULL)free(this->particlesFile);
-	this->particlesFile=NULL;
+    if(this->saveDirectory !=NULL)free(this->saveDirectory);
+    this->saveDirectory=NULL;
+    if(this->currentSessionDirectory !=NULL)free(this->currentSessionDirectory);
+    this->currentSessionDirectory=NULL;
+    if(this->particlesFile !=NULL)free(this->particlesFile);
+    this->particlesFile=NULL;
 
     if(_trnLog !=NULL) delete _trnLog;
 #ifdef WITH_TRNLOG
@@ -385,9 +388,12 @@ void TerrainNav::measUpdate(measT* incomingMeas, const int& type) {
 	currMeas.dataType = type;
 
   // Record measurement
-    if (_trnLog) _trnLog->logMeas(&currMeas);
+    if (_trnLog) 
+        _trnLog->logMeas(&currMeas);
+
 #ifdef WITH_TRNLOG
-    if (NULL != _trnBinLog) _trnBinLog->logMeas(&currMeas, TrnLog::MEAS_IN);
+    if (NULL != _trnBinLog) 
+        _trnBinLog->logMeas(&currMeas, TrnLog::MEAS_IN);
 #endif
 	//check validity of range data
 	checkRangeValidity(currMeas);
@@ -786,6 +792,8 @@ void TerrainNav::initVariables() {
 	TNavConfig::instance()->setLogDir(this->saveDirectory);
 
 	// Shut off measWeights.txt debug.  It is too large.
+
+    // invalidate saveDirectory (future calls to copyToLogDir will be ignored)
     free(saveDirectory);
 	this->saveDirectory = NULL;
 
@@ -1028,20 +1036,25 @@ void TerrainNav::checkRangeValidity(measT& currMeas) {
 	logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"measT    z:%.3f\n", currMeas.z);
 	logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"measT  hdg:%.3f\n", currMeas.psi);
 	for(int i = 0; i < currMeas.numMeas; i++)
-        {
-          if (currMeas.dataType == TRN_SENSOR_MB)
-	  logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TRNBeam,%d,%.3f,%d,%.3f,%.3f,%.3f\n",
-            i, currMeas.time, currMeas.beamNums[i], currMeas.alongTrack[i],
-            currMeas.crossTrack[i], currMeas.altitudes[i]);
-          else if (currMeas.dataType == TRN_SENSOR_DELTAT)
-                logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"IDTBeam,%d,%.3f,%d,%.3f,%.3f,%.3f\n",
-                     i, currMeas.time, currMeas.beamNums[i], currMeas.alongTrack[i],
-                     currMeas.crossTrack[i], currMeas.altitudes[i]);
-          else if (currMeas.dataType == TRN_SENSOR_DVL)
-	  logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"DVLBeam,%.3f,%.3f\n",
-            i, currMeas.time, currMeas.ranges[i]);
+    {
+        if (currMeas.dataType == TRN_SENSOR_MB) {
 
+            logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TRNBeam,%d,%.3f,%d,%.3f,%.3f,%.3f\n",
+                 i, currMeas.time, currMeas.beamNums[i], currMeas.alongTrack[i],
+                 currMeas.crossTrack[i], currMeas.altitudes[i]);
+
+        } else if (currMeas.dataType == TRN_SENSOR_DELTAT) {
+
+            logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"IDTBeam,%d,%.3f,%d,%.3f,%.3f,%.3f\n",
+                 i, currMeas.time, currMeas.beamNums[i], currMeas.alongTrack[i],
+                 currMeas.crossTrack[i], currMeas.altitudes[i]);
+
+        } else if (currMeas.dataType == TRN_SENSOR_DVL) {
+
+            logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"DVLBeam,%.3f,%.3f\n",
+                 i, currMeas.time, currMeas.ranges[i]);
         }
+    }
 #endif
 	//this range check is only valid for DVL and IDT measurements
 	if(currMeas.dataType == TRN_SENSOR_DVL) {
@@ -1563,6 +1576,14 @@ void TerrainNav::copyToLogDir()
         // update saveDirectory (used to store filter files)
         free(this->saveDirectory);
         this->saveDirectory = STRDUPNULL(dir_spec);
+        // save copy of session directory path so that client can recall it.
+        // (saveDirectory will be invalidated in initVars)
+        if(saveDirectory != NULL) {
+            if(currentSessionDirectory != NULL)
+                free(currentSessionDirectory);
+            currentSessionDirectory = strdup(saveDirectory);
+        }
+
         logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "%s:%d TRN log directory is %s\n", __func__, __LINE__, this->saveDirectory);
 
         // Create a latest link that points to the log directory
@@ -1678,6 +1699,13 @@ char *TerrainNav::initLogDirectory(const char *path, char **r_dest, size_t r_len
     return retval;
 }
 
+#ifdef TNAV_INIT_HELPERS
+// returns copy of session dir (caller must free)
+char *TerrainNav::sessionPath()
+{
+    return (NULL != currentSessionDirectory ? strdup(currentSessionDirectory) : NULL);
+}
+
 // generate session directory (holds TRN logs) in path/prefix-TRN.dd
 // path       : directory to contain session directory
 // prefix     : session directory prefix
@@ -1772,11 +1800,16 @@ char *TerrainNav::initSessionDirectory(const char *path, const char *prefix, cha
     return retval;
 }
 
-/* Function: copyLogs() - copies configuration files to specified directory
-*  for future reference. Does not modify saveDirectory.
-*  A destination directory must be specified, otherwise nothing is copied.
-*  Destination should NOT include a trailing separator.
-*/
+// Function: copyLogs() - copies configuration files
+// to specified directory (typically TRN session directory)
+//   vehicleSpecFile
+//   particlesFile
+//   sensorSpec(s)
+//  for future reference.
+//  Does NOT modify saveDirectory or create any directories/symlinks.
+//  A destination directory must be specified, otherwise nothing is copied.
+//  Destination should NOT include a trailing separator.
+
 void TerrainNav::copyLogs(const char *dest)
 {
 
@@ -1794,10 +1827,11 @@ void TerrainNav::copyLogs(const char *dest)
     }
 
     // copy log files
-    char copybuf[CFG_FILE_BUF_BYTES];
+    char copybuf[CFG_FILE_BUF_BYTES] = {0};
 
     if (NULL != this->vehicleSpecFile)
     {
+        memset(copybuf, 0, CFG_FILE_BUF_BYTES);
         snprintf(copybuf, CFG_FILE_BUF_BYTES, "cp %s %s/.", this->vehicleSpecFile,
                 dest_cpy);
         if (0 != system(copybuf))
@@ -1807,6 +1841,7 @@ void TerrainNav::copyLogs(const char *dest)
 
     if (NULL != this->particlesFile)
     {
+        memset(copybuf, 0, CFG_FILE_BUF_BYTES);
         snprintf(copybuf, CFG_FILE_BUF_BYTES, "cp %s %s/.", this->particlesFile,
                  dest_cpy);
         if (0 != system(copybuf))
@@ -1819,6 +1854,7 @@ void TerrainNav::copyLogs(const char *dest)
     vehicleT *v = new vehicleT(vehicleSpecFile);
     for (int i = 0; i < v->numSensors; i++)
     {
+        memset(copybuf, 0, CFG_FILE_BUF_BYTES);
         snprintf(copybuf, CFG_FILE_BUF_BYTES, "cp %s %s/.", v->sensors[i].filename,
                  dest_cpy);
         if (0 != system(copybuf))
@@ -1904,3 +1940,4 @@ void TerrainNav::initSessionVars() {
     logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::initVariables finished.\n");
 
 }
+#endif
