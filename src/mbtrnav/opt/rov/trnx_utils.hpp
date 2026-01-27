@@ -2411,7 +2411,6 @@ public:
                 //                obj->covariance[i] = 0.0;
                 //                obj->alphas[i]     = 0.0;
             }
-
         }
         return obj;
     }
