@@ -112,7 +112,6 @@
 
 #define LOGDIR_DFL "session"
 #define CFG_FILE_BUF_BYTES 512
-
 class PositionLog;
 class TerrainNavLog;
 class TrnLog;
@@ -543,12 +542,14 @@ public:
 
     char *initLogDirectory(const char *path, char **r_dest, size_t r_len, bool create);
 
+#ifdef TNAV_INIT_HELPERS
+    char *sessionPath();
     char *initSessionDirectory(const char *path, const char *prefix, char **r_dest, size_t r_len, bool do_create, bool do_symlink);
-
     void copyLogs(const char *dest);
     void initSessionLogs();
 
     void initSessionVars();
+#endif
 
 protected:
 
@@ -727,6 +728,7 @@ protected:
 
     //file paths for map file, vehicle specs file, and save directory
     char* saveDirectory;
+    char* currentSessionDirectory;
     char* vehicleSpecFile;
     char* particlesFile;
     char* mapFile;
