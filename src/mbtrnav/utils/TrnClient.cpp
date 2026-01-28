@@ -96,7 +96,7 @@ TrnClient::TrnClient(const char *host, int port)
 {
 //    fprintf(stderr,"%s:%d - <<<<< INIT CTOR (host/port) >>>>>\n", __func__, __LINE__);
 
-    if (NULL != host){
+    if (NULL != host) {
         if(_server_ip != NULL)
             free(_server_ip);
         _server_ip = strdup(host);
@@ -139,7 +139,7 @@ TrnClient::~TrnClient()
 
 void TrnClient::chkSetString(char **dest, const char *src)
 {
-    if(dest==NULL)
+    if(dest == NULL)
         return;
 
     // free destination if allocated
@@ -179,11 +179,11 @@ int TrnClient::loadCfgAttributes(const char *cfg_file)
 {
     // set configuation file to load from
     // set TrnClient and TrnAttr _cfg_file members
-    if(NULL != cfg_file){
+    if(NULL != cfg_file) {
         // set _cfg_file member and use that
         TrnAttr::chkSetString(&this->_cfg_file, cfg_file);
-    }else{
-        // use default path ($TRN_CONFIGDIR/terrainAid.cfg or ./terrainAid.cfg)
+    } else {
+        // use default path ($TRN_DATAFILES/terrainAid.cfg or ./terrainAid.cfg)
         const char *cfg_dir = getenv("TRN_DATAFILES");
         if(cfg_dir == NULL)
             cfg_dir = ".";
@@ -200,18 +200,18 @@ int TrnClient::loadCfgAttributes(const char *cfg_file)
 
     _trn_attr.setCfgFile(_cfg_file);
 
-    // parse TRN attributes config file
-    _trn_attr.parseConfig();
-
-    fprintf(stderr, "%s:%d trn_attr[%p]:\n%s\n", __func__, __LINE__, &_trn_attr,  _trn_attr.tostring().c_str());
-
     try {
+        // parse TRN attributes config file
+        _trn_attr.parseConfig();
+
+        fprintf(stderr, "%s:%d trn_attr[%p]:\n%s\n", __func__, __LINE__, &_trn_attr,  _trn_attr.tostring().c_str());
+
 
         // get session (mission) directory prefix
 
         fprintf(stderr,"%s:%d - _sessionPrefix[%s]\n",__func__,  __LINE__, _sessionPrefix);
 
-        if(_sessionPrefix == NULL || strcasecmp(_sessionPrefix,"session") == 0){
+        if(_sessionPrefix == NULL || strcasecmp(_sessionPrefix,"session") == 0) {
             if(_sessionPrefix != NULL)
                 free(_sessionPrefix);
 
@@ -223,7 +223,7 @@ int TrnClient::loadCfgAttributes(const char *cfg_file)
         fprintf(stderr,"%s:%d - _sessionPrefix[%s]\n",__func__,  __LINE__, _sessionPrefix);
 
         chkSetString(&this->_server_ip, _trn_attr.terrainNavServer);
-        if(_trn_attr.terrainNavPort > 0){
+        if(_trn_attr.terrainNavPort > 0) {
             _sockport = _trn_attr.terrainNavPort;
         }
 
@@ -238,166 +238,12 @@ int TrnClient::loadCfgAttributes(const char *cfg_file)
         fprintf(stderr, "%s: svraddr       : %s\n", __func__, _trn_attr.terrainNavServer);
         fprintf(stderr, "%s: svrport       : %ld\n", __func__, _trn_attr.terrainNavPort);
 
-    }catch (Exception e){
+    } catch (Exception e) {
         printf("\n%s:%d Exception parsing \n", __func__, __LINE__);
     }
 
     return 0;
 }
-
-//int TrnClient::loadCfgAttributes_orig(const char *cfg_file, const char *usr_log_path)
-//{
-//    char *cfg_path = NULL;
-//
-//    if(NULL != cfg_file){
-//        // set _cfg_file member and use that
-//        TrnAttr::chkSetString(&_cfg_file, cfg_file);
-//        cfg_path = _cfg_file;
-//        fprintf(stderr, "%s:%d cfg_file [%s]\n", __func__, __LINE__, cfg_file);
-//    }else{
-//        // use default path ($TRN_CONFIGDIR/terrainAid.cfg or ./terrainAid.cfg)
-//        const char *cfg_dir = getenv("TRN_DATAFILES");
-//        if(cfg_dir == NULL)
-//            cfg_dir = ".";
-//
-//        size_t cb_len = strlen(cfg_dir) + strlen("/terrainAid.cfg") + 1;
-//        char cfg_buf[cb_len];
-//        memset(cfg_buf, 0, cb_len);
-//
-//        snprintf(cfg_buf, cb_len, "%s/terrainAid.cfg", cfg_dir);
-//        TrnAttr::chkSetString(&_cfg_file, cfg_buf);
-//        cfg_path = _cfg_file;
-//    }
-//
-//    fprintf(stderr, "%s:%d _cfg_file [%s] cfg_path[%s]\n", __func__, __LINE__, _cfg_file, cfg_path);
-//
-//    _trn_attr.setCfgFile(_cfg_file);
-//
-//    _trn_attr.parseConfig();
-//
-//    fprintf(stderr, "%s:%d trn_attr[%p]:\n%s\n", __func__, __LINE__, &_trn_attr,  _trn_attr.tostring().c_str());
-//
-//    try {
-//
-//        char mapname[MAPNAME_BUF_BYTES]={0};
-//        char vehiclename[VEHICLENAME_BUF_BYTES]={0};
-//        char particlename[PARTICLENAME_BUF_BYTES]={0};
-//        char sessiondir[SESSIONDIR_BUF_BYTES]={0};
-//        char *psession = sessiondir;
-//
-//        const char* mapPath = getenv("TRN_MAPFILES");
-//        const char* cfgPath = getenv("TRN_DATAFILES");
-//        const char* logPath = getenv("TRN_LOGFILES");
-//
-//        char cwd[] = ".";
-//        if(mapPath == NULL) {
-//            mapPath = cwd;
-//        }
-//        if(cfgPath == NULL) {
-//            cfgPath = cwd;
-//        }
-//        if(usr_log_path != NULL) {
-//            logPath = usr_log_path;
-//        } else if (logPath == NULL) {
-//            logPath = cwd;
-//        }
-//
-//        // get directory name for session (mission)
-//        // NOTE:
-//        // The session directory will be created by the trn_server when it
-//        // recieves an init message. During init, trn_server creates a new
-//        // TerrainNav instance, which invokes TerrainNav::initVariables,
-//        // which calls TerrainNav::copyToLogDir.
-//        // copyToLogDir computes and creates the next mission name (which should match
-//        // getSessionDir)
-//        // ParticleFilter is created in initVariables (i.e. at TerrainNav construction),
-//        // and will attempt to save particle files to saveDirectory if it is non-NULL.
-//        //
-//        // For TRNClient, saveDirectory must be set to the log directory
-//        // (which may not exist yet), which is passed via init message to trn_server
-//        // and used to create the directory.
-//        fprintf(stderr,"%s:%d - _sessionPrefix[%s]\n",__func__,  __LINE__, _sessionPrefix);
-//
-//        if(_sessionPrefix == NULL || strcasecmp(_sessionPrefix,"session") == 0){
-//            if(_sessionPrefix != NULL)
-//                free(_sessionPrefix);
-//            _sessionPrefix = (char *)malloc(SESSION_PREFIX_BUF_BYTES);
-//            sessionDir(&_sessionPrefix, SESSION_PREFIX_BUF_BYTES);
-//        }
-//        fprintf(stderr,"%s:%d - _sessionPrefix[%s]\n",__func__,  __LINE__, _sessionPrefix);
-//
-//        // initialize session directory info to pass to TRN server,
-//        // but don't create the directory or symlink (TRN server does)
-//        initSessionDirectory(logPath, _sessionPrefix, &psession, SESSIONDIR_BUF_BYTES, false, false);
-//
-//        if(_trn_attr.mapName != NULL){
-//            snprintf(mapname, MAPNAME_BUF_BYTES, "%s/%s", mapPath, _trn_attr.mapName);
-//            chkSetString(&this->mapFile, mapname);
-//        }else{
-//            chkSetString(&this->mapFile, NULL);
-//        }
-//
-//        if(_trn_attr.vehicleCfgName != NULL){
-//            snprintf(vehiclename, VEHICLENAME_BUF_BYTES, "%s/%s", cfgPath, _trn_attr.vehicleCfgName);
-//            chkSetString(&this->vehicleSpecFile, vehiclename);
-//        }else{
-//            chkSetString(&this->vehicleSpecFile, NULL);
-//        }
-//
-//        if(_trn_attr.particlesName!=NULL){
-//            snprintf(particlename, PARTICLENAME_BUF_BYTES, "%s/%s", cfgPath, _trn_attr.particlesName);
-//            chkSetString(&this->particlesFile, particlename);
-//        }else{
-//            chkSetString(&this->particlesFile, NULL);
-//        }
-//
-//        chkSetString(&this->_server_ip, _trn_attr.terrainNavServer);
-//
-//        if(_trn_attr.terrainNavPort > 0){
-//            _sockport = _trn_attr.terrainNavPort;
-//        }
-//
-//        // saveDirectory passed to TRN server; TRN session log directory path
-//        if(saveDirectory != NULL)
-//            free(saveDirectory);
-//        this->saveDirectory = STRDUPNULL(sessiondir);
-//
-//        this->mapType = _trn_attr.mapType;
-//        this->filterType = _trn_attr.filterType;
-//
-//
-//#ifdef TRNCLIENT_CREATE_MAP
-//        if(this->mapType == 1) {
-//            terrainMap = new TerrainMapDEM(this->mapFile);
-//        } else {
-//            terrainMap = new TerrainMapOctree(this->mapFile);
-//        }
-//#endif
-//        // Initialize TNavConfig
-//        TNavConfig::instance()->setMapFile(this->mapFile);
-//        TNavConfig::instance()->setVehicleSpecsFile(this->vehicleSpecFile);
-//        TNavConfig::instance()->setParticlesFile(this->particlesFile);
-//        TNavConfig::instance()->setLogDir(_sessionPrefix);
-//        TNavConfig::instance()->setConfigPath(cfg_path);
-//
-//        fprintf(stderr, "%s: map    : %s\n", __func__, mapname);
-//        fprintf(stderr, "%s: logPath: %s\n", __func__, logPath);
-//        fprintf(stderr, "%s: sessionPrefix : %s\n", __func__, _sessionPrefix);
-//        fprintf(stderr, "%s: veh    : %s\n", __func__, vehiclename);
-//        fprintf(stderr, "%s: par    : %s\n", __func__, particlename);
-//        fprintf(stderr, "%s: cfg    : %s\n", __func__, cfg_path);
-//        fprintf(stderr, "%s: save   : %s\n", __func__, saveDirectory);
-//        fprintf(stderr, "%s: trnsvr : %s\n", __func__, _trn_attr.terrainNavServer);
-//
-//    }catch (Exception e){
-//        printf("\n%s:%d Exception parsing \n", __func__, __LINE__);
-//    }
-//
-//    fprintf(stderr, "%s: server : %s:%d\n", __func__, _server_ip, _sockport);
-//    fprintf(stderr, "%s: vehcfg : %s\n", __func__, _trn_attr.vehicleCfgName);
-//
-//    return 0;
-//}
 
 #ifdef WITH_VNORM_FN
 // Take the standard 2-norm. This one returns the answer, since it is a scalar.
@@ -466,11 +312,11 @@ int TrnClient::initSocket()
 {
     int retval = -1;
 
-    if(_sockfd > 0){
+    if(_sockfd > 0) {
         return 0;
     }
     // Setup socket to receive the deltaT packets
-    if ( (_sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) > 0 ){
+    if ( (_sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) > 0 ) {
         int wstat = 16;
 
         fprintf(stderr,"%*s %s fd[%d]\n",wstat,"create socket","OK", _sockfd);
@@ -490,7 +336,7 @@ int TrnClient::initSocket()
         struct timeval tv={0,0};
         tv.tv_sec = 150;
         tv.tv_usec = 0;
-        if(setsockopt(_sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(struct timeval)) == 0){
+        if(setsockopt(_sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(struct timeval)) == 0) {
             fprintf(stderr,"%*s %s fd[%d]\n",wstat,"setsockopt SO_RCVTIMEO","OK", _sockfd);
         }else {
             fprintf(stderr,"%*s %s fd[%d] [%d/%s]\n",wstat,"setsockopt SO_RCVTIMEO","ERR", _sockfd, errno, strerror(errno));
@@ -502,7 +348,6 @@ int TrnClient::initSocket()
         fprintf(stderr, "%s: socket create failed [%d] [%d/%s]\n", __func__, _sockfd, errno,strerror(errno));
     }
 
-
     return retval;
 }
 
@@ -510,32 +355,33 @@ int TrnClient::connectSocket()
 {
     int retval = -1;
 
-        ::close(_sockfd);
-        _connected=false;
-        _sockfd = -1;
-        initSocket();
+    ::close(_sockfd);
+    _connected=false;
+    _sockfd = -1;
+    initSocket();
 
-        memset((void*)&_server_addr, 0, sizeof(struct sockaddr_in));
+    memset((void*)&_server_addr, 0, sizeof(struct sockaddr_in));
 
-        // Set up client info
-        // Beam former sends data to us
-        if(NULL != _server_ip) {
-            _server_addr.sin_family      = AF_INET;
-            _server_addr.sin_addr.s_addr = inet_addr(_server_ip);
-            _server_addr.sin_port        = htons(_sockport);
+    // Set up client info
+    // Beam former sends data to us
+    if(NULL != _server_ip) {
+        _server_addr.sin_family      = AF_INET;
+        _server_addr.sin_addr.s_addr = inet_addr(_server_ip);
+        _server_addr.sin_port        = htons(_sockport);
 
-            if(connect(_sockfd, (struct sockaddr *)&_server_addr, sizeof(struct sockaddr_in)) == 0)
-            {
-                fprintf(stderr, "%s : connect OK [%s:%d]\n", __func__, _server_ip, _sockport);
-                _connected = true;
-                retval = 0;
-            } else {
-                fprintf(stderr, "%s : connect ERR fd[%d] [%s:%d] [%d/%s]\n", __func__, _sockfd, _server_ip, _sockport, errno,strerror(errno));
-                perror("TrnClient::connectSocket");
-            }
+        if(connect(_sockfd, (struct sockaddr *)&_server_addr, sizeof(struct sockaddr_in)) == 0)
+        {
+            fprintf(stderr, "%s : connect OK [%s:%d]\n", __func__, _server_ip, _sockport);
+            _connected = true;
+            retval = 0;
         } else {
-            fprintf(stderr,"%s: ERR - NULL _server_ip\n",__func__);
+            fprintf(stderr, "%s : connect ERR fd[%d] [%s:%d] [%d/%s]\n", __func__, _sockfd, _server_ip, _sockport, errno,strerror(errno));
+            perror("TrnClient::connectSocket");
         }
+    } else {
+        fprintf(stderr,"%s: ERR - NULL _server_ip\n",__func__);
+    }
+
     return retval;
 }
 
@@ -546,20 +392,17 @@ TerrainNav* TrnClient::connectTRN()
     TerrainNav *_tercom = NULL;
     TrnAttr *patt = &_trn_attr;
 
-    try
-    {
+    try {
         printf("Connecting to %s:%ld...\n", _trn_attr.terrainNavServer, _trn_attr.terrainNavPort);
 
-        if(connectSocket() == 0){
+        if(connectSocket() == 0) {
             _tercom = static_cast<TerrainNav *>(this);
         }
-    }
-    catch (Exception e)
-    {
+    } catch (Exception e) {
         fprintf(stderr, "TrnClient - Failed TRN connection. Check TRN error messages...\n");
     }
 
-    if (NULL!=_tercom && _tercom->is_connected() && !this->_trn_attr.skipInit){
+    if (NULL != _tercom && _tercom->is_connected() && !this->_trn_attr.skipInit) {
 
         TrnClient::initServer();
 
@@ -585,86 +428,6 @@ TerrainNav* TrnClient::connectTRN()
 
     return _tercom;
 }
-
-//TerrainNav* TrnClient::connectTRN_orig()
-//{
-//    TerrainNav *_tercom = NULL;
-//    TrnAttr *patt = &_trn_attr;
-//
-//    try
-//    {
-//        if(connectSocket() == 0){
-//            _tercom = static_cast<TerrainNav *>(this);
-//        }
-//
-////        if(_connected){
-////            ::close(_sockfd);
-////            _connected=false;
-////        }
-////
-////        init_comms();
-//
-//        // On linux and cygwin, we can use a native TerrainNav object instead
-//        // of relying on a trn_server. Call useTRNServer() to decide.
-//        //
-////        printf("Connecting to %s...\n", _trn_attr.terrainNavServer);
-////        _tercom = static_cast<TerrainNav *>(this);
-//    }
-//    catch (Exception e)
-//    {
-//        fprintf(stderr, "TrnClient - Failed TRN connection. Check TRN error messages...\n");
-//    }
-//
-//    if (NULL!=_tercom && _tercom->is_connected() && !this->_trn_attr.skipInit){
-//
-//        init_server();
-//
-//        // TODO: does client need to configure it's own attributes?
-////        setModifiedWeighting(this->_trn_attr.useModifiedWeighting);
-////        // filterReinits
-////        setFilterReinit(_trn_attr.allowFilterReinits);
-////        if(this->_trn_attr.forceLowGradeFilter)
-////            useLowGradeFilter();
-////        else
-////            useHighGradeFilter();
-//
-//        // server initialization creates log directory
-//        // copy config file to directory (if TRN on same host)
-//        // TODO: if server drops connection, it creates a new session
-//        // directory, but this copies config file to it's
-//        // current session (overwriting it).
-//        // Maybe this isn't the place/time to do this...
-//        char *cfg_path = TNavConfig::instance()->getConfigPath();
-//
-//
-//        if (NULL != this->saveDirectory && NULL != cfg_path)
-//        {
-//            size_t cb_size = strlen(cfg_path) + strlen(this->saveDirectory) + strlen("cp  /.") + 1;
-//            char copybuf[cb_size];
-//            memset(copybuf, 0, cb_size);
-//
-//            snprintf(copybuf, 512, "cp %s %s/.", cfg_path,
-//                    this->saveDirectory);
-//            if (0 != system(copybuf)) {
-//                fprintf(stderr, "%s:%d: ERR - config copy [%s] failed [%d/%s]\n",
-//                        __func__, __LINE__, copybuf, errno, strerror(errno));
-//            } else {
-//                fprintf(stderr, "%s:%d: copied config [%s] to [%s]\n",
-//                        __func__, __LINE__, cfg_path, saveDirectory);
-//            }
-//        }
-//        free(cfg_path);
-//
-//        // If we reach here then we've connected
-//        //
-//        fprintf(stderr, "%s:%d TrnClient - connected to server if no error messages...\n", __func__, __LINE__);
-//
-//    } else{
-//        fprintf(stderr, "%s:%d TrnClient - Not initialized. skipInit(%c) See trn_server error messages...\n", __func__, __LINE__, this->_trn_attr.skipInit ? 'Y' : 'N');
-//    }
-//
-//    return _tercom;
-//}
 
 void TrnClient::show(int indent, int wkey, int wval)
 {
