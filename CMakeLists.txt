@@ -91,10 +91,6 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/build-utils")
 option(BUILD_SHARED_LIBS "Build and link with shared libraries" ON)
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-if(APPLE)
-	set(CMAKE_MACOSX_RPATH ON)
-endif()
 
 option(buildGSF "build GSF library" ON)
 option(buildGUIs "build graphical tools" ON)
@@ -167,6 +163,14 @@ include(CTest)
 # uninstall target
 if(NOT TARGET uninstall)
   add_custom_target(uninstall COMMAND xargs rm -vf < install_manifest.txt)
+endif()
+
+# set RPATH
+if (NOT CMAKE_INSTALL_RPATH)
+	set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_FULL_LIBDIR}")
+endif()
+if(APPLE)
+	set(CMAKE_MACOSX_RPATH ON)
 endif()
 
 # Libraries
