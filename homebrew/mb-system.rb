@@ -1,11 +1,11 @@
 class MbSystem < Formula
   desc "Processing and display of swath sonar bathymetry and backscatter imagery data"
   homepage "https://www.mbari.org/technology/mb-system/"
-  url "https://github.com/dwcaress/MB-System/archive/refs/tags/MB-System-5.8.2.tar.gz"
-
-  sha256 "da102e4ffe0b4eb535717171c3ca315295c5dd03ec584b06aa2fd748fada22a8"
+  url "https://github.com/dwcaress/MB-System.git",
+      branch: "feature-newgui"
+  version "5.8.2-newgui"
   license "GPL-3.0-or-later"
-  head "https://github.com/dwcaress/MB-System.git", branch: "master"
+  head "https://github.com/dwcaress/MB-System.git", branch: "feature-newgui"
 
   depends_on "cmake" => :build
   depends_on "pkg-config" => :build
@@ -13,13 +13,13 @@ class MbSystem < Formula
   depends_on "fftw"
   depends_on "gdal"
   depends_on "gmt"
-  depends_on "libx11"
-  depends_on "libxt"
   depends_on "netcdf"
   depends_on "openmotif"
   depends_on "proj"
   depends_on "qt@6"
   depends_on "vtk"
+  depends_on "libx11"
+  depends_on "libxt"
 
   def install
     # Set up build directory
@@ -27,6 +27,7 @@ class MbSystem < Formula
       args = %W[
         -DCMAKE_INSTALL_PREFIX=#{prefix}
         -DCMAKE_BUILD_TYPE=Release
+        -DbuildQt=1
       ]
 
       # Configure Qt6 paths
@@ -74,10 +75,12 @@ class MbSystem < Formula
 
   def caveats
     <<~EOS
-      MB-System has been installed with XQuartz for X11 support.
+      MB-System has been installed.
 
       The graphical tools (MBedit, MBnavedit, MBvelocitytool, MBgrdviz,
-      MBeditviz) require X11, which has been installed via XQuartz.
+      MBeditviz) require X11. Please install XQuartz if you haven't already:
+
+        brew install --cask xquartz
 
       You may need to log out and back in for XQuartz to be fully configured.
 
