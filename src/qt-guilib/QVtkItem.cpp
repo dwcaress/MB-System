@@ -6,13 +6,18 @@ using namespace mb_system;
 
 QVtkItem::QVtkItem() :
   gridFilename_(nullptr),
-  appTaskBusy_(false)
+  appTaskBusy_(false),
+  editState_(EditState::ViewOnly),
+  testInt_(999)
 {
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
     qDebug() << "mirrorVertically: " << mirrorVertically();
     // Qt and OpenGL apparently have opposite y-axis direction
     setMirrorVertically(true);
 
+    wheelEvent_ = nullptr;
+    mouseButtonEvent_ = nullptr;
+    mouseMoveEvent_ = nullptr;
 }
 
 QQuickFramebufferObject::Renderer *QVtkItem::createRenderer() const {
@@ -28,45 +33,54 @@ void QVtkItem::setGridFilename(char *gridFilename) {
 }
 
 
+
 void QVtkItem::wheelEvent(QWheelEvent *event) {
     qDebug() << "QVtkItem::wheelEvent()";
 
-    wheelEvent_ = std::make_shared<QWheelEvent>(*event);
+    wheelEvent_ = event;
     wheelEvent_->ignore();
     event->accept();
 
     // Schedule re-render
+    qDebug() << "call update()";
     update();
+    qDebug() << "back from update()";    
 }
+
 
 void QVtkItem::mousePressEvent(QMouseEvent *event) {
   
     qDebug() << "\nQVtkItem::mousePressEvent!!!";
 
-    mouseButtonEvent_ = std::make_shared<QMouseEvent>(*event);
+    // mouseButtonEvent_ = std::make_shared<QMouseEvent>(*event);
+    mouseButtonEvent_ = event;
     mouseButtonEvent_->ignore();
     event->accept();
 
     // Schedule re-render
+    qDebug() << "call update()";    
     update();
+    qDebug() << "back from update()";        
 }
 
 void QVtkItem::mouseReleaseEvent(QMouseEvent *event) {
-    mouseButtonEvent_ = std::make_shared<QMouseEvent>(*event);
-    mouseButtonEvent_->ignore();
-    event->accept();
+  // mouseButtonEvent_ = std::make_shared<QMouseEvent>(*event);
+  mouseButtonEvent_ = event;
+  mouseButtonEvent_->ignore();
+  event->accept();
 
-    // Schedule re-render
-    update();
+  // Schedule re-render
+  update();
 }
 
 void QVtkItem::mouseMoveEvent(QMouseEvent *event) {
-    mouseMoveEvent_ = std::make_shared<QMouseEvent>(*event);
-    mouseMoveEvent_->ignore();
-    event->accept();
+  // mouseMoveEvent_ = std::make_shared<QMouseEvent>(*event);
+  mouseMoveEvent_ = event;
+  mouseMoveEvent_->ignore();
+  event->accept();
 
-    // Schedule re-render
-    update();
+  // Schedule re-render
+  update();
 }
 
 

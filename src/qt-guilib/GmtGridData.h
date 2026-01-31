@@ -1,19 +1,20 @@
-#include "TopoGridData.h"
+#include "TopoData.h"
 #include "gmt.h"
 
 
 namespace mb_system {
   /**
-     GmtGridData encapsulates data read from a GMT grid file.
+     GmtGridData encapsulates GMT_GRID data read from a GMT grid file.
+     The data is read by MB-System legacy C functions and GMT functions.
   */
-  class GmtGridData : public TopoGridData {
+  class GmtGridData : public TopoData {
 
   public:
 
     /// Get x, y, z data at specified row and column.
     /// Returns false in case of error
-    bool data(int row, int col, double *x, double *y,
-              double *z) override;
+    bool getXYZ(int row, int col, double *x, double *y,
+		double *z) override;
   
     /// Read data from GMT file
     bool readDatafile(char *filename) override;
@@ -26,8 +27,8 @@ namespace mb_system {
     
   protected:
 
-    /// Base class calls this to get class parameter variables
-    /// N.B.: xUnits, yUnits and zUnits memory should be unallocated
+    /// Base class calls this to get class parameter variables.
+    /// Note: xUnits, yUnits and zUnits memory should be unallocated
     /// before calling this function to prevent memory leak.
     void getParameters(int *nRows, int *nColumns,
                        double *xMin, double *xMax,

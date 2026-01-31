@@ -8,15 +8,17 @@
 #include <QOpenGLShaderProgram>
 
 #include "Surface.h"
+#include "MBQuickItem.h"
 
 class QOpenGLBuffer;
 class QOpenGLVertexArrayObject;
 
+
 namespace mb_system {
   
   /**
-     SurfaceRenderer invokes OpenGL api functions to initialize drawing and buffers,
-     set up shaders, load and paint 3D surface data.
+     SurfaceRenderer invokes OpenGL api functions to initialize drawing and 
+     buffers, set up shaders, load and paint 3D surface data.
      Based on D'Angelo's MeshRenderer at
      https://www.kdab.com/integrate-opengl-code-qt-quick-2-applications-part-2/
   */
@@ -33,7 +35,7 @@ namespace mb_system {
     };
 
     /// Create and fill buffers with surface data
-    void initialize(Surface *surface,
+    void initialize(MBQuickItem *item, Surface *surface,
 		    CoordinateMirroring cm = DoNotMirrorCoordinates);
 
     /// Draw the surface
@@ -42,9 +44,10 @@ namespace mb_system {
     /// Destroy/free buffers, reset shader program
     void invalidate();
 
-    /// Set view parameters - azimuth, elevation, distance, etc - in "local" coordinate frame
-    /// (e.g. UTM meters)
-    void setView(float azimuthDeg, float elevationDeg, float distance, float xOffset, float yOffset);
+    /// Set view parameters - azimuth, elevation, distance, etc - in "local"
+    /// coordinate frame (e.g. UTM meters)
+    void setView(float azimuthDeg, float elevationDeg, float distance,
+		 float xOffset, float yOffset);
 
     /// Return pointer to surface
     Surface *surface() {
@@ -53,6 +56,9 @@ namespace mb_system {
   
   protected:
 
+    /// Pointer to MBQuickItem
+    MBQuickItem *item_;
+    
     /// Surface to be rendered
     Surface *surface_;
 
@@ -106,7 +112,8 @@ namespace mb_system {
     }
 
     /// Helper function; set shader uniform variable 'name' to value.
-    /// Return false if no uniform variable with name exists in shader, else return true.
+    /// Return false if no uniform variable with name exists in shader, else
+    /// return true.
     template <typename valueType>
     inline bool setUniformValue(QScopedPointer<QOpenGLShaderProgram>&shader,
 				const char *name,

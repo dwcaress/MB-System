@@ -23,11 +23,14 @@
 #------------------------------------------------------------------------------
 
 find_package(
-  Qt5
-  COMPONENTS Gui Quick
+  Qt6
+  COMPONENTS Gui Quick Graphs
   REQUIRED)
+  
 find_package(GMT REQUIRED)
-find_package(VTK REQUIRED)
+message("Fint minimum VTK_VERSION ${MIN_VTK_VERSION}")
+find_package(VTK ${MIN_VTK_VERSION})
+message("Found VTK_VERSION ${VTK_VERSION}")
 
 find_package(LibPROJ REQUIRED)
 
@@ -36,25 +39,40 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 set(src
-    TopoColorMap.cpp
-    TopoGridReader.cpp
     Camera.cpp
-    MBQuickItem.cpp
+    ClickableLabel.cpp
     ColorMap.cpp
+    CPixmapDrawer.cpp
+    DataPointsOverlay.cpp
+    DataSelectInteractorStyle.cpp    
     DisplayProperties.cpp
-    MBQuickView.cpp
-    QVtkItem.cpp
-    GmtGridReader.cpp
-    TopoGridData.cpp
+    DrawInteractorStyle.cpp
+    Emitter.cpp
+    FixedScreensizeCallback.cpp
     GmtGridData.cpp
-    MBQuickItem.cpp
-    QVtkRenderer.cpp
+    GmtGridReader.cpp
     GmtGridSurface.cpp
-    Surface.cpp
-    SwathGridData.cpp
+    LightingInteractorStyle.cpp
     MBGui.cpp
+    MBQuickItem.cpp
+    MyRubberBandStyle.cpp
+    PickInteractorStyle.cpp
+    PixmapDrawer.cpp    
+    PixmapImage.cpp
+    PointsSelectInteractorStyle.cpp
+    RadioButtonGroup.cpp
+    RestrictCameraStyle.cpp
+    Route.cpp
+    SharedConstants.cpp
+    SlopeFilter.cpp
+    Surface.cpp
     SurfaceRenderer.cpp
-    PickerInteractorStyle.cpp
+    SwathData.cpp
+    TopoColorMap.cpp
+    TopoData.cpp
+    TopoDataItem.cpp
+    TopoDataReader.cpp
+    TopoProfileItem.cpp    
     Utilities.cpp
     resources.qrc)
 
@@ -66,53 +84,62 @@ if (APPLE)
                   "-undefined dynamic_lookup -flat_namespace")
 endif (APPLE)
 
-target_include_directories(MBGui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(MBGui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+				 ${CMAKE_SOURCE_DIR}/src/mbaux
+				 ${CMAKE_SOURCE_DIR}/src/mbeditviz
+				 )
 target_link_libraries(
   MBGui
-  PRIVATE Qt5::Core Qt5::Quick mbio mbeditvizlib
+  PRIVATE Qt6::Core Qt6::Quick Qt6::Graphs mbio
+  PUBLIC mbeditvizlib
   PUBLIC VTK::CommonColor
-  	 VTK::CommonSystem
-	 VTK::pugixml
-	 VTK::CommonComputationalGeometry
-         VTK::CommonExecutionModel
-	 VTK::DICOMParser
-	 VTK::FiltersExtraction
-	 VTK::FiltersGeometry
-	 VTK::FiltersHybrid
-	 VTK::FiltersHyperTree
-	 VTK::FiltersModeling
-	 VTK::FiltersSources
-	 VTK::FiltersStatistics
-	 VTK::FiltersTexture
-	 VTK::FiltersVerdict
-	 VTK::GUISupportQt
-	 VTK::ImagingColor
-	 VTK::ImagingGeneral
-	 VTK::ImagingHybrid
-	 VTK::ImagingSources
-	 VTK::IOImage
-         VTK::IOGeometry
-         VTK::IOXML
-         VTK::InteractionStyle
-	 VTK::ParallelDIY
-         VTK::RenderingAnnotation
-         VTK::RenderingCore
-         VTK::RenderingFreeType
-         VTK::RenderingOpenGL2
-         VTK::RenderingVolume	 
-         VTK::RenderingUI
-	 VTK::loguru
-	 VTK::fmt
-	 VTK::verdict
-	 VTK::doubleconversion
-	 VTK::expat
-	 VTK::lz4
-	 VTK::lzma
-	 VTK::metaio
-	 VTK::jpeg
-	 VTK::png
-	 VTK::tiff
-         GMT::GMT
-	 LibPROJ::LibPROJ)
+  VTK::CommonSystem
+  VTK::ChartsCore
+  VTK::pugixml
+  VTK::CommonComputationalGeometry
+  VTK::CommonExecutionModel
+  VTK::DICOMParser
+  VTK::FiltersExtraction
+  VTK::FiltersGeometry
+  VTK::FiltersHybrid
+  VTK::FiltersHyperTree
+  VTK::FiltersModeling
+  VTK::FiltersSources
+  VTK::FiltersStatistics
+ VTK::FiltersTexture
+ VTK::FiltersVerdict
+ VTK::GUISupportQt
+ VTK::GUISupportQtQuick	 
+ VTK::ImagingColor
+ VTK::ImagingGeneral
+ VTK::ImagingHybrid
+ VTK::ImagingSources
+ VTK::IOImage
+  VTK::IOGeometry
+  VTK::IOXML
+  VTK::InteractionStyle
+  VTK::ParallelDIY
+  VTK::RenderingAnnotation
+  VTK::RenderingContext2D
+  VTK::RenderingCore  
+  VTK::RenderingFreeType
+  VTK::RenderingOpenGL2
+  VTK::RenderingVolume	 
+  VTK::RenderingUI
+  VTK::ViewsContext2D
+  VTK::loguru
+   VTK::fmt
+   VTK::verdict
+   VTK::doubleconversion
+   VTK::expat
+   VTK::lz4
+   VTK::lzma
+   VTK::metaio
+   VTK::jpeg
+   VTK::png
+   VTK::tiff
+   VTK::netcdf
+   GMT::GMT
+    LibPROJ::LibPROJ)
 
-install(TARGETS MBGui DESTINATION cmake-example/lib)
+install(TARGETS MBGui DESTINATION ${CMAKE_INSTALL_LIBDIR})

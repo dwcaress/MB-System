@@ -1,6 +1,6 @@
 #ifndef QVTKRENDERER_H
 #define QVTKRENDERER_H
-
+#include <vector>
 #include <QObject>
 #include <QQuickFramebufferObject>
 #include <QOpenGLFunctions>
@@ -18,20 +18,24 @@
 #include <vtkTransformFilter.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkNamedColors.h>
-#include "TopoGridReader.h"
+#include "TopoDataReader.h"
 #include "DisplayProperties.h"
 #include "PickerInteractorStyle.h"
-
-#define SELECTED_POINT_FILE "selectedPoint.txt"
+#include "Route.h"
 
 namespace mb_system {
 
   class QVtkItem;
-  
+
   /**
+     DEPRECATED: superseded by TopoDataItem/QQuickVTKItem.
+
      QVtkRenderer and QVtkItem coordinate with one another to render VTK scenes 
-     within a QQuickItem specified in QML. The QML QVtkItem  instantiates a
-     C++ QVtkItem, and QVtkItem::createRenderer() creates a QVtkRenderer object.
+     within a QVtkItem declared in QML. QVtkItem is registered in the QML
+     system by a call to qmlRegisterType() within an application's main() 
+     function, and thus a QML declaration of QVtkItem instantiates a C++ 
+     QvtkItem, which in turn instantiates a QVtkRenderer 
+     (QVtkItem::createRenderer()).
      QVtkRenderer code runs in the app's renderer thread, and is responsible 
      for setting up the scene in the VTK pipeline, rendering the scene, and 
      modifying the scene based on user inputs such as mouse zoom, rotate, pan, 
@@ -40,6 +44,9 @@ namespace mb_system {
      when the main thread is blocked.
 
      See https://www.qt.io/blog/2015/05/11/integrating-custom-opengl-rendering-with-qt-quick-via-qquickframebufferobject
+
+     QVtkRenderer contains TopoDataReader gridReader_, which reads data
+     from a specified file which is added to the VTK pipeline.
   */
   class QVtkRenderer : public QObject,
                        public QQuickFramebufferObject::Renderer,
@@ -87,13 +94,19 @@ namespace mb_system {
     }
     
     /// Get grid reader
-    TopoGridReader *getGridReader() {
+    TopoDataReader *getGridReader() {
       return gridReader_;
     }
 
-    /// Set picked point coordinates
+    /// Get world cooordinates of latest picked point. Return false if no
+    /// point has been picked.
+    bool getPickedPoint(double *worldXYZ);
+    
+    /// Set picked point coordinates, string representation
     void setPickedPoint(double *worldXYZ);
 
+
+					 
   public slots:
 
     /// Called when worker thread finishes
@@ -105,11 +118,11 @@ namespace mb_system {
     /// Display properties copied from QVtkItem
     mb_system::DisplayProperties *displayProperties_;
     
-    /// Initilize VTK pipeline member objects, then assemble (connect) ; return
-    /// false on error.
+    /// Initilize VTK pipeline member objects, then assemble (connect) ;
+    /// return false on error.
     bool initializePipeline(const char *grdFilename);
 
-    /// Connect pipeline components
+    /// Connect pipeline components; return false on error
     bool assemblePipeline();
 
     /// Setup axes, using vtkCubeAxesActor2D
@@ -140,7 +153,7 @@ namespace mb_system {
     QVtkItem *item_;
     
     /// Topo grid reader
-    vtkSmartPointer<TopoGridReader> gridReader_;
+    vtkSmartPointer<TopoDataReader> gridReader_;
 
     /// Elevation color filter
     vtkSmartPointer<vtkElevationFilter> elevColorizer_;
@@ -169,6 +182,7 @@ namespace mb_system {
     /// VTK render window
     vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWindow_;
 
+
     /// VTK mouse/key interactor
     vtkSmartPointer<vtkGenericRenderWindowInteractor> windowInteractor_;
 
@@ -182,23 +196,30 @@ namespace mb_system {
     char *gridFilename_;
 
     /// Latest wheel event
-    std::shared_ptr<QWheelEvent> wheelEvent_;
+    QWheelEvent* wheelEvent_;
 
     /// Latest mouse button event
-    std::shared_ptr<QMouseEvent> mouseButtonEvent_;
+    QMouseEvent* mouseButtonEvent_;
 
     /// Latest mouse move event
-    std::shared_ptr<QMouseEvent> mouseMoveEvent_;
+    QMouseEvent* mouseMoveEvent_;
 
     /// Coordinates of latest selected point
-    vtkSmartPointer<vtkPolyData> pickedPoint_;
+    double pickedCoords_[3];
 
     /// Indicate whether pickedPoint_ has been selected
     bool pointPicked_;
 
-    bool newPointPicked_;
+    /// Force render on next call to update()
+    bool forceRender_;
+
+    /// true during first render of particular grid
+    bool firstRender_;
     
-    /// Worker thread to load grid file
+    /// Routes to be overlaid on topography
+    std::vector<Route> routes_;
+
+    /// Worker thread class to load grid file with TopoDataReader
     class LoadFileWorker : public QThread {
 
     public:

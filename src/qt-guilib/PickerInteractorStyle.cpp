@@ -1,5 +1,6 @@
 #include <locale.h>
 #include <vtkPointPicker.h>
+#include <vtkSphereSource.h>
 #include <proj.h>
 #include "PickerInteractorStyle.h"
 #include "QVtkRenderer.h"
@@ -11,24 +12,64 @@ using namespace mb_system;
 
 PickerInteractorStyle::PickerInteractorStyle():
   qVtkRenderer_(nullptr) {
+  qDebug() << "PickerInteractorStyle ctr";
   selectedMapper_ = vtkSmartPointer<vtkDataSetMapper>::New();
   selectedActor_ = vtkSmartPointer<vtkActor>::New();
 }
 
 
 void PickerInteractorStyle::OnLeftButtonDown() {
+  // Get starting mouse position
+  /* *** Always returns 0! 
+  this->Interactor->GetMousePosition(&startMousePos_[0],
+				     &startMousePos_[1]);
+				     *** */
+
+  qDebug() << "PickerInteractorStyle::OnLeftButtonDown()";
+  startMousePos_[0] = this->Interactor->GetEventPosition()[0];
+  startMousePos_[1] = this->Interactor->GetEventPosition()[1];
+  
+  // Forward event
+  vtkInteractorStyleTrackballCamera::OnLeftButtonDown();
+}
+
+
+void PickerInteractorStyle::OnLeftButtonUp() {
+
+
   int x = this->Interactor->GetEventPosition()[0];
   int y = this->Interactor->GetEventPosition()[1];
+  int z = this->Interactor->GetEventPosition()[2];
   
-  std::cout << "Pixel x,y: " << x
-            << " " << y << std::endl;
+  std::cout << "Pixel x,y,z: " << x
+            << " " << y << " " << z << std::endl;
 
+  std::cout << "startMouseX: " << startMousePos_[0] <<
+    "  startMouseY: " << startMousePos_[1] << "\n";
+  
+  if (x != startMousePos_[0] ||
+      y != startMousePos_[1]) {
+
+    // Mouse-drag, not a pixel pick; Forward event and return
+    std::cerr << "End of mouse drag event, not a pixel pick\n";
+    vtkInteractorStyleTrackballCamera::OnLeftButtonUp();
+    return;
+  }
+  
   vtkRenderer *renderer = GetDefaultRenderer();
   int *rendererSize = renderer->GetSize();
   
   std::cout << "rendererSize[1]: " << rendererSize[1] << " y: " << y <<
     std::endl;
 
+  // Put a sphere at picked location
+  vtkNew<vtkSphereSource> sphere;
+  sphere->SetRadius(50.);
+  sphere->SetCenter(x, y, z);
+  sphere->SetPhiResolution(100);
+  sphere->SetThetaResolution(100);
+    
+  
   // Convert from Qt coordinate system (origin at upper left) to
   // VTK coordinate system (origin at lower left)
   y = rendererSize[1] - y + 1;
@@ -92,7 +133,7 @@ void PickerInteractorStyle::OnLeftButtonDown() {
   char buf[256];
   if (pointId != -1) {
 
-    if (worldCoord[2] == TopoGridData::NoData) {
+    if (worldCoord[2] == TopoData::NoData) {
       sprintf(buf, "%.*f%c, %.*f%c, NoData %s",
               decp, worldCoord[0], xyUnits, decp, worldCoord[1],
               xyUnits, projString);
@@ -116,23 +157,15 @@ void PickerInteractorStyle::OnLeftButtonDown() {
   // Store picked point coordinates in QVtkRenderer
   qVtkRenderer_->setPickedPoint(worldCoord);
 
-  /* ***
-  /// TEST TEST TEST
-  FILE *fp = fopen(SELECTED_POINT_FILE, "w");
-  fprintf(fp, "%d, %d, %d\n", (int )worldCoord[0], (int )worldCoord[1], (int )worldCoord[2]);
-  fclose(fp);
-  *** */
-  
   // Display picked point coordinates via QVtkIem
   QString coordMsg(buf);
   qVtkRenderer_->getItem()->setPickedPoint(coordMsg);
   
-  
-  /// Print picker results for range of y values
-  //  testPoints(x, y, renderer);
-  
   // Forward event
-  vtkInteractorStyleTrackballCamera::OnLeftButtonDown();
+  vtkInteractorStyleTrackballCamera::OnLeftButtonUp();
+
+  // Re-render
+  qVtkRenderer_->getItem()->update();
 }
 
 

@@ -1,0 +1,143 @@
+#ifndef TopoData_h
+#define TopoData_h
+
+#include <array>
+#include <vector>
+
+namespace mb_system {
+
+  /**
+     The TopoData abstract base class defines a uniform interface to 3D data 
+     including GMT grid data or MB-System swath data in any
+     MB-System-supported sonar format. The interface represents the 3D data
+     as a rectangular grid, with an x,y,z world coordinate associated with
+     each row,column pair. 
+     Subclasses encapsulate the data as various structures such as
+     mbev_grid_struct or GMT_GRID, and provide appropriate
+     implementations of TopoData abstract interface methods to access the data.
+     This approach simplifies data access by visualization components, and
+     makes extensive reuse of MB-System legacy C functions
+     and GMT functions.
+
+  */
+  class TopoData {
+
+  public:
+
+    /* ***
+    /// Supported projections
+    enum MapProjection {Unknown,
+                        Geographic,
+                        UTM};
+                        *** */
+
+    /// Constructor
+    TopoData();
+    
+    /// "No data" value
+    static const double NoData;
+
+    /// Read 3D topo data from file
+    virtual bool readDatafile(char *filename) = 0;
+  
+    /// Number of data rows
+    virtual int nRows() {
+      return nRows_;
+    }
+
+    /// Number of grid columns
+    virtual int nColumns() {
+      return nColumns_;
+    }
+  
+    /// Get x, y, z data at specified row and column.
+    /// Returns false in case of error
+    virtual bool getXYZ(int row, int col, double *x, double *y,
+			double *z) = 0;
+  
+    /// Get min/max bounds on each axis
+    void bounds(double *xMin, double *xMax,
+                double *yMin, double *yMax,
+                double *zMin, double *zMax) {
+      *xMin = xMin_;
+      *xMax = xMax_;
+      *yMin = yMin_;
+      *yMax = yMax_;
+      *zMin = zMin_;
+      *zMax = zMax_;
+    }
+
+    /// Get units on axes
+    virtual void units(char **xUnits, char **yUnits, char **zUnits) {
+      *xUnits = xUnits_;
+      *yUnits = yUnits_;
+      *zUnits = zUnits_;
+    }
+
+    /// Set parameter member variables
+    virtual void setParameters() final {
+    
+      // Call subclass-implemented function to get member variable values
+      getParameters(&nRows_, &nColumns_,
+                    &xMin_, &xMax_, &yMin_, &yMax_, &zMin_, &zMax_,
+                    &xUnits_, &yUnits_, &zUnits_);
+    }
+
+    /// Return proj-string corresponding to data's CRS, suitable for
+    /// use with PROJ C/C++ API
+    const char *projString() {
+      return (const char *)projString_;
+    }
+    
+    /// Set projString_ member to a valid proj-string corresponding
+    /// to data's coordinate reference system.
+    /// Returns true on success, false on error
+    virtual bool setProjString() = 0;
+
+
+    /// Compute z-value along the straight line between start and end points
+    /// profile consists of vector of 2-d arrays, each array specifies
+    /// distance from start and z-value.
+    /// Return false on error, else return true
+    bool getElevProfile(int startRow, int startCol,
+			int endRow, int endCol,
+			int nPieces,
+			std::vector<std::array<double, 2>> *profile);
+    
+  protected:
+  
+    /// Must be implemented by subclasses
+    /// Base class calls this to set class parameter variables
+    /// Note: xUnits, yUnits and zUnits memory should be unallocated
+    /// before calling this funtion.
+    virtual void getParameters(int *nRows, int *nColumns,
+                               double *xMin, double *xMax,
+                               double *yMin, double *yMax,
+                               double *zMin, double *zMax,
+                               char **xUnits, char **yUnits, char **zUnits) = 0;
+
+    /// Number of grid rows and columns
+    int nRows_, nColumns_;
+    
+    /// Grid data bounds
+    double xMin_, xMax_, yMin_, yMax_, zMin_, zMax_;
+
+    /// Grid data units
+    char *xUnits_, *yUnits_, *zUnits_;
+
+    /// proj-string describing map's CRS
+    char projString_[100];
+
+
+    /// Projection types specified in mb-system .grd and swath files
+    static const char *GeographicType_;
+    static const char *UtmType_;
+    
+  private:
+
+
+  };
+
+};
+
+#endif
