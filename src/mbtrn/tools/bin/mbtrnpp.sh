@@ -39,7 +39,6 @@ unset MBTRNPP_ENV
 # using an environment file or options
 TRN_SOURCE_HOST=${TRN_SOURCE_HOST:-"localhost"}
 TRN_HOST=${TRN_HOST:-"localhost"}
-TRN_MBTRNDIR=${TRN_MBTRNDIR:-"/usr/local/bin"}
 TRN_MAPFILES=${TRN_MAPFILES:-"./maps"}
 TRN_DATAFILES=${TRN_DATAFILES:-"./config"}
 TRN_LOGFILES=${TRN_LOGFILES:-"./logs/mbtrnpp"}
@@ -64,7 +63,7 @@ init_vars(){
     let CYCLES="${CYCLES_DFL}"
 
     # application path
-	APP_CMD="${APP_CMD:-${TRN_MBTRNDIR}/mbtrnpp}"
+    APP_CMD=$(which mbtrnpp)
 
 #    # mbtrnpp config file
 #    OPT_CONFIG=""
@@ -250,7 +249,7 @@ printUsage(){
     echo
     echo " use: `basename $0` [options] [-- --option=value...]"
     echo " Options:"
-    echo "  -a cmd  : app command            [$APP_CMD]"
+    echo "  -a cmd  : mbtrnpp command path   [$APP_CMD]"
     echo "  -c n    : cycles (<=0 forever)   [$CYCLES]"
     echo "  -d path : enable console log, set directory"
     echo "  -e path : environment file"
@@ -259,7 +258,6 @@ printUsage(){
     echo "  -D path : TRN config directory    [$TRN_DATAFILES]"
     echo "  -L path : TRN log directory       [$TRN_LOGFILES]"
     echo "  -M path : TRN maps directory      [$TRN_MAPFILES]"
-    echo "  -m path : override mbtrnpp dir    [$TRN_MBTRNDIR]"
     echo "  -o addr : TRN host                [$TRN_HOST]"
     echo "             affects : [--trn-out, --mb-out]"
     echo "  -s addr : TRN source host         [$TRN_SOURCE_HOST]"
@@ -288,7 +286,6 @@ printUsage(){
     echo "  TRN_SOURCE_HOST - TRN source IP           [--input]"
     echo "  TRN_HOST        - TRN server IP           [--trn-out, --mb-out]"
     echo "  TRN_GROUP       - TRN multicast group     [--trn-out]"
-    echo "  TRN_MBTRNDIR    - mbtrnpp directory       [mbtrnpp path]"
     echo ""
 }
 
@@ -352,8 +349,6 @@ while getopts a:c:d:D:e:G:hL:M:m:o:s:tvw: Option
         M ) TRN_MAPFILES=$OPTARG
         ;;
         h) DO_HELP="Y"
-        ;;
-        m ) TRN_MBTRNDIR=$OPTARG
         ;;
         o ) TRN_HOST=$OPTARG
         ;;
