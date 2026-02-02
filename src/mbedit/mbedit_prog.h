@@ -42,7 +42,7 @@ business-logic, and can be utilized by various front-end GUIs based on
 X11/Motif, Qt/QVTK, etc.
 */
 
-#include "mb_color.h"
+#include "mb_define.h"
 
 /* plot modes */
 /// Ancillary data to be plotted 
