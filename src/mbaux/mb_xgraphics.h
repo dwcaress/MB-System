@@ -32,7 +32,7 @@
 #define MB_XGRAPHICS_H_
 
 #include <stdbool.h>
-#include "mb_color.h"
+#include "mb_define.h"
 
 /* xgraphics defines */
 #define XG_SOLIDLINE 0
