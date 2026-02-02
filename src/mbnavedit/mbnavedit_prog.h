@@ -2,7 +2,6 @@
 #define MBNAVEDIT_PROG_H
 
 #include "mb_define.h"
-#include "mb_color.h"
 
 /**
 All definitions and prototypes in this header are windows-system agnostic,

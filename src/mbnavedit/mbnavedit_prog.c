@@ -44,7 +44,6 @@
 #include <unistd.h>
 #define MBNAVEDIT_DECLARE_GLOBALS
 #include "mbnavedit_prog.h"
-#include "mb_color.h"
 
 /* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
 #if defined(_MSC_VER) && (_MSC_VER >= 1900)
