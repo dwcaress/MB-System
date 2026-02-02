@@ -1,5 +1,7 @@
 #ifndef MB_COLOR_H
 #define MB_COLOR_H
+
+/**** DEPRECATED. DEFINITIONS HAVE BEEN MOVED TO mbio/mb_define.h *** */
 /* **
 This header does not contain window-system specific references, 
 as it is included by both X11 and Qt applications.
