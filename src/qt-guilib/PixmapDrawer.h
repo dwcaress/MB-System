@@ -6,7 +6,7 @@
 #include <QPainter>
 #include <QPixmap>
 #include <QFontMetrics>
-#include "mb_color.h"
+#include "mb_define.h"
 
 namespace mb_system {
 
