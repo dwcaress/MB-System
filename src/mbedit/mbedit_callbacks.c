@@ -195,12 +195,6 @@ int key_s_down = 0;
 int key_a_down = 0;
 int key_d_down = 0;
 
-/* Set the colors used for this program here. */
-#define NCOLORS 7
-XColor colors[NCOLORS];
-unsigned int mpixel_values[NCOLORS];
-XColor db_color;
-
 /* Set these to the dimensions of your canvas drawing */
 /* area, minus 1, located in mbedit.uil.              */
 static int mb_borders[4] = {0, 1016, 0, 525};
@@ -360,35 +354,85 @@ void do_mbedit_init(int argc, char **argv) {
 	XSelectInput(theDisplay, can_xid, EV_MASK);
 
 	/* Load the colors that will be used in this program. */
-	status = XLookupColor(display, colormap, "white", &db_color, &colors[0]);
-	if ((status = XAllocColor(display, colormap, &colors[0])) == 0)
-		fprintf(stderr, "Failure to allocate color: white\n");
-	status = XLookupColor(display, colormap, "black", &db_color, &colors[1]);
-	if ((status = XAllocColor(display, colormap, &colors[1])) == 0)
-		fprintf(stderr, "Failure to allocate color: black\n");
-#ifdef USE_ORANGE
-	status = XLookupColor(display, colormap, "orange", &db_color, &colors[2]);
-	if ((status = XAllocColor(display, colormap, &colors[2])) == 0)
-		fprintf(stderr, "Failure to allocate color: orange\n");
-#else
-	status = XLookupColor(display, colormap, "red", &db_color, &colors[2]);
-	if ((status = XAllocColor(display, colormap, &colors[2])) == 0)
-		fprintf(stderr, "Failure to allocate color: red\n");
-#endif
-	status = XLookupColor(display, colormap, "green", &db_color, &colors[3]);
-	if ((status = XAllocColor(display, colormap, &colors[3])) == 0)
-		fprintf(stderr, "Failure to allocate color: green\n");
-	status = XLookupColor(display, colormap, "blue", &db_color, &colors[4]);
-	if ((status = XAllocColor(display, colormap, &colors[4])) == 0)
-		fprintf(stderr, "Failure to allocate color: blue\n");
-	status = XLookupColor(display, colormap, "coral", &db_color, &colors[5]);
-	if ((status = XAllocColor(display, colormap, &colors[5])) == 0)
-		fprintf(stderr, "Failure to allocate color: coral\n");
-	status = XLookupColor(display, colormap, "lightgrey", &db_color, &colors[6]);
-	if ((status = XAllocColor(display, colormap, &colors[6])) == 0)
-		fprintf(stderr, "Failure to allocate color: lightgrey\n");
-	for (int i = 0; i < NCOLORS; i++) {
-		mpixel_values[i] = colors[i].pixel;
+	unsigned int mpixel_values[MB_NDrawingColors];
+	XColor db_color, screen_color;
+	for (int icolor = 0; icolor < MB_NDrawingColors; icolor++) {
+		if (icolor == MB_COLOR_WHITE) {
+			status = XLookupColor(display, colormap, "white", &db_color, &screen_color);
+			if ((status = XAllocColor(display, colormap, &screen_color)) == 0)
+				fprintf(stderr, "Failure to allocate color: white\n");
+			mpixel_values[icolor] = screen_color.pixel;
+		}
+		else if (icolor == MB_COLOR_BLACK) {
+			status = XLookupColor(display, colormap, "black", &db_color, &screen_color);
+			mpixel_values[icolor] = screen_color.pixel;
+			if ((status = XAllocColor(display, colormap, &screen_color)) == 0)
+				fprintf(stderr, "Failure to allocate color: black\n");
+			mpixel_values[icolor] = screen_color.pixel;
+		}
+		else if (icolor == MB_COLOR_RED) {
+			status = XLookupColor(display, colormap, "red", &db_color, &screen_color);
+			mpixel_values[icolor] = screen_color.pixel;
+			if ((status = XAllocColor(display, colormap, &screen_color)) == 0)
+				fprintf(stderr, "Failure to allocate color: red\n");
+			mpixel_values[icolor] = screen_color.pixel;
+		}
+		else if (icolor == MB_COLOR_ORANGE) {
+			status = XLookupColor(display, colormap, "orange", &db_color, &screen_color);
+			mpixel_values[icolor] = screen_color.pixel;
+			if ((status = XAllocColor(display, colormap, &screen_color)) == 0)
+				fprintf(stderr, "Failure to allocate color: orange\n");
+			mpixel_values[icolor] = screen_color.pixel;
+		}
+		else if (icolor == MB_COLOR_YELLOW) {
+			status = XLookupColor(display, colormap, "yellow", &db_color, &screen_color);
+			mpixel_values[icolor] = screen_color.pixel;
+			if ((status = XAllocColor(display, colormap, &screen_color)) == 0)
+				fprintf(stderr, "Failure to allocate color: yellow\n");
+			mpixel_values[icolor] = screen_color.pixel;
+		}
+		else if (icolor == MB_COLOR_GREEN) {
+			status = XLookupColor(display, colormap, "green", &db_color, &screen_color);
+			mpixel_values[icolor] = screen_color.pixel;
+			if ((status = XAllocColor(display, colormap, &screen_color)) == 0)
+				fprintf(stderr, "Failure to allocate color: green\n");
+			mpixel_values[icolor] = screen_color.pixel;
+		}
+		else if (icolor == MB_COLOR_BLUEGREEN) {
+			status = XLookupColor(display, colormap, "bluegreen", &db_color, &screen_color);
+			mpixel_values[icolor] = screen_color.pixel;
+			if ((status = XAllocColor(display, colormap, &screen_color)) == 0)
+				fprintf(stderr, "Failure to allocate color: bluegreen\n");
+			mpixel_values[icolor] = screen_color.pixel;
+		}
+		else if (icolor == MB_COLOR_BLUE) {
+			status = XLookupColor(display, colormap, "blue", &db_color, &screen_color);
+			mpixel_values[icolor] = screen_color.pixel;
+			if ((status = XAllocColor(display, colormap, &screen_color)) == 0)
+				fprintf(stderr, "Failure to allocate color: blue\n");
+			mpixel_values[icolor] = screen_color.pixel;
+		}
+		else if (icolor == MB_COLOR_PURPLE) {
+			status = XLookupColor(display, colormap, "purple", &db_color, &screen_color);
+			mpixel_values[icolor] = screen_color.pixel;
+			if ((status = XAllocColor(display, colormap, &screen_color)) == 0)
+				fprintf(stderr, "Failure to allocate color: purple\n");
+			mpixel_values[icolor] = screen_color.pixel;
+		}
+		else if (icolor == MB_COLOR_CORAL) {
+			status = XLookupColor(display, colormap, "coral", &db_color, &screen_color);
+			mpixel_values[icolor] = screen_color.pixel;
+			if ((status = XAllocColor(display, colormap, &screen_color)) == 0)
+				fprintf(stderr, "Failure to allocate color: coral\n");
+			mpixel_values[icolor] = screen_color.pixel;
+		}
+		else if (icolor == MB_COLOR_LIGHTGREY) {
+			status = XLookupColor(display, colormap, "lightgrey", &db_color, &screen_color);
+			mpixel_values[icolor] = screen_color.pixel;
+			if ((status = XAllocColor(display, colormap, &screen_color)) == 0)
+				fprintf(stderr, "Failure to allocate color: lightgrey\n");
+			mpixel_values[icolor] = screen_color.pixel;
+		}
 	}
 
 	/* Setup initial cursor. This will be changed when changing "MODE". */
@@ -401,7 +445,7 @@ void do_mbedit_init(int argc, char **argv) {
 	/* initialize graphics */
 	xg_init(theDisplay, can_xid, mb_borders, xgfont, &can_xgid);
 
-	status = mbedit_set_graphics(can_xgid, NCOLORS, mpixel_values);
+	status = mbedit_set_graphics(can_xgid, MB_NDrawingColors, mpixel_values);
 	status = mbedit_set_scaling(mb_borders, mshow_time);
 
 	/* initialize mbedit proper */

@@ -107,12 +107,6 @@ void *zoff_xgid = NULL; /* XG graphics id */
 void *modp_xgid = NULL; /* XG graphics id */
 Cursor myCursor;
 
-/* Set the colors used for this program here. */
-#define NCOLORS 256
-XColor colors[NCOLORS];
-unsigned int mpixel_values[NCOLORS];
-XColor db_color;
-
 /* Set these to the dimensions of your canvas drawing */
 /* areas, minus 1, located in the uil file       */
 static int cont_borders[4] = {0, 600, 0, 600};
@@ -445,97 +439,160 @@ void do_mbnavadjust_init(int argc, char **argv) {
   display = XtDisplay(form_mbnavadjust);
   colormap = DefaultColormap(display, XDefaultScreen(display));
 
-  /* Load the colors that will be used in this program. */
-  status = XLookupColor(display, colormap, "white", &db_color, &colors[0]);
-  if ((status = XAllocColor(display, colormap, &colors[0])) == 0)
-    fprintf(stderr, "Failure to allocate color: white\n");
-  status = XLookupColor(display, colormap, "black", &db_color, &colors[1]);
-  if ((status = XAllocColor(display, colormap, &colors[1])) == 0)
-    fprintf(stderr, "Failure to allocate color: black\n");
-  status = XLookupColor(display, colormap, "red", &db_color, &colors[2]);
-  if ((status = XAllocColor(display, colormap, &colors[2])) == 0)
-    fprintf(stderr, "Failure to allocate color: red\n");
-  status = XLookupColor(display, colormap, "green", &db_color, &colors[3]);
-  if ((status = XAllocColor(display, colormap, &colors[3])) == 0)
-    fprintf(stderr, "Failure to allocate color: green\n");
-  status = XLookupColor(display, colormap, "blue", &db_color, &colors[4]);
-  if ((status = XAllocColor(display, colormap, &colors[4])) == 0)
-    fprintf(stderr, "Failure to allocate color: blue\n");
-  status = XLookupColor(display, colormap, "coral", &db_color, &colors[5]);
-  if ((status = XAllocColor(display, colormap, &colors[5])) == 0)
-    fprintf(stderr, "Failure to allocate color: coral\n");
-  status = XLookupColor(display, colormap, "yellow", &db_color, &colors[6]);
-  if ((status = XAllocColor(display, colormap, &colors[6])) == 0)
-    fprintf(stderr, "Failure to allocate color: yellow\n");
-  int j = 7;
+
+	/* Load the colors that will be used in this program. */
+	unsigned int mpixel_values[MB_NDrawingColors + 16 * 5 + 1];
+	XColor db_color, screen_color;
+	for (int icolor = 0; icolor < MB_NDrawingColors; icolor++) {
+		if (icolor == MB_COLOR_WHITE) {
+			status = XLookupColor(display, colormap, "white", &db_color, &screen_color);
+			if ((status = XAllocColor(display, colormap, &screen_color)) == 0)
+				fprintf(stderr, "Failure to allocate color: white\n");
+			mpixel_values[icolor] = screen_color.pixel;
+		}
+		else if (icolor == MB_COLOR_BLACK) {
+			status = XLookupColor(display, colormap, "black", &db_color, &screen_color);
+			mpixel_values[icolor] = screen_color.pixel;
+			if ((status = XAllocColor(display, colormap, &screen_color)) == 0)
+				fprintf(stderr, "Failure to allocate color: black\n");
+			mpixel_values[icolor] = screen_color.pixel;
+		}
+		else if (icolor == MB_COLOR_RED) {
+			status = XLookupColor(display, colormap, "red", &db_color, &screen_color);
+			mpixel_values[icolor] = screen_color.pixel;
+			if ((status = XAllocColor(display, colormap, &screen_color)) == 0)
+				fprintf(stderr, "Failure to allocate color: red\n");
+			mpixel_values[icolor] = screen_color.pixel;
+		}
+		else if (icolor == MB_COLOR_ORANGE) {
+			status = XLookupColor(display, colormap, "orange", &db_color, &screen_color);
+			mpixel_values[icolor] = screen_color.pixel;
+			if ((status = XAllocColor(display, colormap, &screen_color)) == 0)
+				fprintf(stderr, "Failure to allocate color: orange\n");
+			mpixel_values[icolor] = screen_color.pixel;
+		}
+		else if (icolor == MB_COLOR_YELLOW) {
+			status = XLookupColor(display, colormap, "yellow", &db_color, &screen_color);
+			mpixel_values[icolor] = screen_color.pixel;
+			if ((status = XAllocColor(display, colormap, &screen_color)) == 0)
+				fprintf(stderr, "Failure to allocate color: yellow\n");
+			mpixel_values[icolor] = screen_color.pixel;
+		}
+		else if (icolor == MB_COLOR_GREEN) {
+			status = XLookupColor(display, colormap, "green", &db_color, &screen_color);
+			mpixel_values[icolor] = screen_color.pixel;
+			if ((status = XAllocColor(display, colormap, &screen_color)) == 0)
+				fprintf(stderr, "Failure to allocate color: green\n");
+			mpixel_values[icolor] = screen_color.pixel;
+		}
+		else if (icolor == MB_COLOR_BLUEGREEN) {
+			status = XLookupColor(display, colormap, "bluegreen", &db_color, &screen_color);
+			mpixel_values[icolor] = screen_color.pixel;
+			if ((status = XAllocColor(display, colormap, &screen_color)) == 0)
+				fprintf(stderr, "Failure to allocate color: bluegreen\n");
+			mpixel_values[icolor] = screen_color.pixel;
+		}
+		else if (icolor == MB_COLOR_BLUE) {
+			status = XLookupColor(display, colormap, "blue", &db_color, &screen_color);
+			mpixel_values[icolor] = screen_color.pixel;
+			if ((status = XAllocColor(display, colormap, &screen_color)) == 0)
+				fprintf(stderr, "Failure to allocate color: blue\n");
+			mpixel_values[icolor] = screen_color.pixel;
+		}
+		else if (icolor == MB_COLOR_PURPLE) {
+			status = XLookupColor(display, colormap, "purple", &db_color, &screen_color);
+			mpixel_values[icolor] = screen_color.pixel;
+			if ((status = XAllocColor(display, colormap, &screen_color)) == 0)
+				fprintf(stderr, "Failure to allocate color: purple\n");
+			mpixel_values[icolor] = screen_color.pixel;
+		}
+		else if (icolor == MB_COLOR_CORAL) {
+			status = XLookupColor(display, colormap, "coral", &db_color, &screen_color);
+			mpixel_values[icolor] = screen_color.pixel;
+			if ((status = XAllocColor(display, colormap, &screen_color)) == 0)
+				fprintf(stderr, "Failure to allocate color: coral\n");
+			mpixel_values[icolor] = screen_color.pixel;
+		}
+		else if (icolor == MB_COLOR_LIGHTGREY) {
+			status = XLookupColor(display, colormap, "lightgrey", &db_color, &screen_color);
+			mpixel_values[icolor] = screen_color.pixel;
+			if ((status = XAllocColor(display, colormap, &screen_color)) == 0)
+				fprintf(stderr, "Failure to allocate color: lightgrey\n");
+			mpixel_values[icolor] = screen_color.pixel;
+		}
+	}
+  int j = MB_NDrawingColors;
   for (int i = 0; i < 16; i++) {
-    colors[j + i].red = 65535;
-    /* colors[j+i].green = i * 4096; */
-    colors[j + i].green = i * 2048;
-    colors[j + i].blue = 0;
-    status = XAllocColor(display, colormap, &colors[j + i]);
+    screen_color.red = 65535;
+    screen_color.green = i * 2048;
+    screen_color.blue = 0;
+    status = XAllocColor(display, colormap, &screen_color);
     if (status == 0) {
-      fprintf(stderr, "Failure to allocate color[%d]: %d %d %d\n", j + i, colors[j + i].red, colors[j + i].green,
-        colors[j + i].blue);
+      fprintf(stderr, "Failure to allocate color[%d]: %d %d %d\n", j + i, 
+      	screen_color.red, screen_color.green, screen_color.blue);
     }
+		mpixel_values[j + i] = screen_color.pixel;
   }
   j += 16;
   for (int i = 0; i < 16; i++) {
-    colors[j + i].red = 65535 - i * 4096;
-    /* colors[j+i].green = 65535; */
-    colors[j + i].green = 32767 + i * 2048;
-    colors[j + i].blue = 0;
-    status = XAllocColor(display, colormap, &colors[j + i]);
+    screen_color.red = 65535 - i * 4096;
+    screen_color.green = 32767 + i * 2048;
+    screen_color.blue = 0;
+    status = XAllocColor(display, colormap, &screen_color);
     if (status == 0) {
-      fprintf(stderr, "Failure to allocate color[%d]: %d %d %d\n", j + i, colors[j + i].red, colors[j + i].green,
-        colors[j + i].blue);
+      fprintf(stderr, "Failure to allocate color[%d]: %d %d %d\n", j + i, 
+      	screen_color.red, screen_color.green, screen_color.blue);
     }
+		mpixel_values[j + i] = screen_color.pixel;
   }
   j += 16;
   for (int i = 0; i < 16; i++) {
-    colors[j + i].red = 0;
-    colors[j + i].green = 65535;
-    colors[j + i].blue = i * 4096;
-    status = XAllocColor(display, colormap, &colors[j + i]);
+    screen_color.red = 0;
+    screen_color.green = 65535;
+    screen_color.blue = i * 4096;
+    status = XAllocColor(display, colormap, &screen_color);
     if (status == 0) {
-      fprintf(stderr, "Failure to allocate color[%d]: %d %d %d\n", j + i, colors[j + i].red, colors[j + i].green,
-        colors[j + i].blue);
+      fprintf(stderr, "Failure to allocate color[%d]: %d %d %d\n", j + i, 
+      	screen_color.red, screen_color.green, screen_color.blue);
     }
+		mpixel_values[j + i] = screen_color.pixel;
   }
   j += 16;
   for (int i = 0; i < 16; i++) {
-    colors[j + i].red = 0;
-    colors[j + i].green = 65535 - i * 4096;
-    colors[j + i].blue = 65535;
-    status = XAllocColor(display, colormap, &colors[j + i]);
+    screen_color.red = 0;
+    screen_color.green = 65535 - i * 4096;
+    screen_color.blue = 65535;
+    status = XAllocColor(display, colormap, &screen_color);
     if (status == 0) {
-      fprintf(stderr, "Failure to allocate color[%d]: %d %d %d\n", j + i, colors[j + i].red, colors[j + i].green,
-        colors[j + i].blue);
+      fprintf(stderr, "Failure to allocate color[%d]: %d %d %d\n", j + i, 
+      	screen_color.red, screen_color.green, screen_color.blue);
     }
+		mpixel_values[j + i] = screen_color.pixel;
   }
   j += 16;
   for (int i = 0; i < 16; i++) {
-    colors[j + i].red = i * 4096;
-    colors[j + i].green = 0;
-    colors[j + i].blue = 65535;
-    status = XAllocColor(display, colormap, &colors[j + i]);
+    screen_color.red = i * 4096;
+    screen_color.green = 0;
+    screen_color.blue = 65535;
+    status = XAllocColor(display, colormap, &screen_color);
     if (status == 0) {
-      fprintf(stderr, "Failure to allocate color[%d]: %d %d %d\n", j + i, colors[j + i].red, colors[j + i].green,
-        colors[j + i].blue);
+      fprintf(stderr, "Failure to allocate color[%d]: %d %d %d\n", j + i, 
+      	screen_color.red, screen_color.green, screen_color.blue);
     }
+		mpixel_values[j + i] = screen_color.pixel;
   }
   j += 16;
-  colors[j].red = 65535;
-  colors[j].green = 0;
-  colors[j].blue = 65535;
-  status = XAllocColor(display, colormap, &colors[j]);
-  if (status == 0) {
-    fprintf(stderr, "Failure to allocate color[%d]: %d %d %d\n", j, colors[j].red, colors[j].green, colors[j].blue);
-  }
-  for (int i = 0; i < NCOLORS; i++) {
-    mpixel_values[i] = colors[i].pixel;
-  }
-  status = mbnavadjust_set_colors(NCOLORS, (int *)mpixel_values);
+	screen_color.red = 65535;
+	screen_color.green = 0;
+	screen_color.blue = 65535;
+	status = XAllocColor(display, colormap, &screen_color);
+	if (status == 0) {
+		fprintf(stderr, "Failure to allocate color[%d]: %d %d %d\n", j, 
+			screen_color.red, screen_color.green, screen_color.blue);
+	}
+	mpixel_values[j] = screen_color.pixel;
+
+  status = mbnavadjust_set_colors(MB_NDrawingColors + 16 * 5 + 1, (int *)mpixel_values);
   status = mbnavadjust_set_borders(cont_borders, corr_borders, zoff_borders);
 
   /* set verbose */
@@ -2583,7 +2640,12 @@ void do_naverr_init(int mode) {
 
   /* Setup cursors. */
   myCursor = XCreateFontCursor(display, XC_target);
-  XRecolorCursor(display, myCursor, &colors[2], &colors[5]);
+	XColor db_color, screen_color_red, screen_color_coral;
+	status = XLookupColor(display, colormap, "red", &db_color, &screen_color_red);
+	status = XAllocColor(display, colormap, &screen_color_red);
+	status = XLookupColor(display, colormap, "red", &db_color, &screen_color_coral);
+	status = XAllocColor(display, colormap, &screen_color_coral);
+  XRecolorCursor(display, myCursor, &screen_color_red, &screen_color_coral);
   XDefineCursor(display, cont_xid, myCursor);
   XDefineCursor(display, corr_xid, myCursor);
 
@@ -2936,41 +2998,6 @@ void do_naverr_offsetlabel() {
   XtVaSetValues(pushButton_naverr_addtie, XmNsensitive, mbna_allow_add_tie, NULL);
 }
 
-/*--------------------------------------------------------------------*/
-
-void do_naverr_test_graphics() {
-  /* now test graphics */
-  int ox = 0;
-  int oy = 0;
-  int dx = (cont_borders[1] - cont_borders[0]) / 16;
-  int dy = (cont_borders[3] - cont_borders[2]) / 16;
-  double rx = cont_borders[1] - ox;
-  double ry = cont_borders[3] - oy;
-  double rr = sqrt(rx * rx + ry * ry);
-  for (int i = 0; i < 16; i++) {
-    for (int j = 0; j < 16; j++) {
-      const int k = 16 * j + i;
-      ox = i * dx;
-      oy = j * dy;
-      xg_fillrectangle(cont_xgid, ox, oy, dx, dy, mpixel_values[k], 0);
-      xg_fillrectangle(cont_xgid, ox + dx / 4, oy + dy / 4, dx / 2, dy / 2, k, 0);
-    }
-  }
-  ox = (corr_borders[1] - corr_borders[0]) / 2;
-  oy = (corr_borders[3] - corr_borders[2]) / 2;
-  rx = corr_borders[1] - ox;
-  ry = corr_borders[3] - oy;
-  rr = sqrt(rx * rx + ry * ry);
-  for (int i = corr_borders[0]; i < corr_borders[1]; i++) {
-    for (int j = corr_borders[2]; j < corr_borders[3]; j++) {
-      rx = i - ox;
-      ry = j - oy;
-      const double r = sqrt(rx * rx + ry * ry);
-      const int k = 6 + (int)(80 * r / rr);
-      xg_fillrectangle(corr_xgid, i, j, 1, 1, mpixel_values[k], 0);
-    }
-  }
-}
 /*--------------------------------------------------------------------*/
 
 void do_list_data_select(Widget w, XtPointer client_data, XtPointer call_data) {
@@ -5988,7 +6015,12 @@ void do_modelplot_show(Widget w, XtPointer client_data, XtPointer call_data) {
 
   /* Setup cursors. */
   myCursor = XCreateFontCursor(display, XC_target);
-  XRecolorCursor(display, myCursor, &colors[2], &colors[5]);
+	XColor db_color, screen_color_red, screen_color_coral;
+	status = XLookupColor(display, colormap, "red", &db_color, &screen_color_red);
+	status = XAllocColor(display, colormap, &screen_color_red);
+	status = XLookupColor(display, colormap, "red", &db_color, &screen_color_coral);
+	status = XAllocColor(display, colormap, &screen_color_coral);
+  XRecolorCursor(display, myCursor, &screen_color_red, &screen_color_coral);
   XDefineCursor(display, modp_xid, myCursor);
 
   /* initialize graphics */
@@ -6089,7 +6121,12 @@ void do_modelplot_resize(Widget w, XtPointer client_data, XEvent *event, Boolean
 
       /* Setup cursors. */
       myCursor = XCreateFontCursor(display, XC_target);
-      XRecolorCursor(display, myCursor, &colors[2], &colors[5]);
+			XColor db_color, screen_color_red, screen_color_coral;
+			status = XLookupColor(display, colormap, "red", &db_color, &screen_color_red);
+			status = XAllocColor(display, colormap, &screen_color_red);
+			status = XLookupColor(display, colormap, "red", &db_color, &screen_color_coral);
+			status = XAllocColor(display, colormap, &screen_color_coral);
+			XRecolorCursor(display, myCursor, &screen_color_red, &screen_color_coral);
       XDefineCursor(display, modp_xid, myCursor);
 
       /* initialize graphics */

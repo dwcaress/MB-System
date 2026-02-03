@@ -29,6 +29,7 @@
  * Date:  April 21, 1996
  */
 
+
 #ifndef MB_DEFINE_H_
 #define MB_DEFINE_H_
 
@@ -254,26 +255,6 @@ typedef enum {
 #define MB_SOUNDSPEEDALGORITHM_CHENMILLERO   1
 #define MB_SOUNDSPEEDALGORITHM_WILSON     2
 #define MB_SOUNDSPEEDALGORITHM_DELGROSSO   3
-
-// MB-System graphics color and linestyle definitions
-typedef enum {
-  MB_COLOR_WHITE = 0,
-  MB_COLOR_BLACK,
-  MB_COLOR_RED,
-  MB_COLOR_ORANGE,
-  MB_COLOR_YELLOW,
-  MB_COLOR_GREEN,
-  MB_COLOR_BLUEGREEN,
-  MB_COLOR_BLUE,
-  MB_COLOR_PURPLE,
-  MB_COLOR_CORAL,
-  MB_COLOR_LIGHTGREY,
-  MB_NDrawingColors
-} mb_color_t;
-typedef enum {
-  MB_SOLID_LINE = 0,
-  MB_DASH_LINE
-} mb_linestyle_t;
 
 /* min max round define */
 #ifndef MIN
@@ -796,8 +777,4 @@ bool mb_bitpack_writevalue(void *mbbpptr, unsigned int value);
 }  /* extern "C" */
 #endif
 
-#endif /* MB_DEFINE_H_ */
-
-
-
-
+#endif  /* MB_DEFINE_H_ */
