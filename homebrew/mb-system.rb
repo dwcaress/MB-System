@@ -30,6 +30,10 @@ class MbSystem < Formula
         -DbuildQt=1
       ]
 
+      # Note: XQuartz GLX/OpenGL is broken on modern macOS
+      # X11/Motif apps with OpenGL (mbgrdviz, mbeditviz) will not work
+      # Users should use Qt versions (qt-mbgrdviz, etc.) instead
+
       # Configure Qt6 paths
       args << "-DQt6_DIR=#{Formula["qt@6"].opt_lib}/cmake/Qt6"
 
@@ -77,17 +81,33 @@ class MbSystem < Formula
     <<~EOS
       MB-System has been installed.
 
-      The graphical tools (MBedit, MBnavedit, MBvelocitytool, MBgrdviz,
-      MBeditviz) require X11. Please install XQuartz if you haven't already:
+      IMPORTANT: On modern macOS, XQuartz's OpenGL/GLX support is broken.
+      X11/Motif apps with OpenGL (mbgrdviz, mbeditviz) will NOT work.
+
+      ** Use the Qt versions instead: **
+        - qt-mbgrdviz (instead of mbgrdviz)
+        - qt-mbnavedit (instead of mbnavedit)
+        - qt-mbeditviz (instead of mbeditviz)
+
+      Qt versions use native macOS graphics and work reliably.
+
+      For non-OpenGL X11 apps (MBedit, etc.), you need XQuartz:
 
         brew install --cask xquartz
 
-      You may need to log out and back in for XQuartz to be fully configured.
+      Then start XQuartz before running X11 apps:
 
-      For more information and documentation, visit:
+        open -a XQuartz
+
+      Add locale settings to your ~/.zshrc or ~/.bash_profile:
+
+        export LC_ALL=en_US.UTF-8
+        export LANG=en_US.UTF-8
+
+      For more information:
         https://www.mbari.org/technology/mb-system/
 
-      To get help or report issues, use the MB-System discussion lists:
+      Discussion lists:
         http://listserver.mbari.org/sympa/info/mbsystem
     EOS
   end
