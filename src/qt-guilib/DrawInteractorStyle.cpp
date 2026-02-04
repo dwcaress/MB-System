@@ -31,7 +31,6 @@
 #include <vtkHandleWidget.h>
 #include <vtkFixedSizeHandleRepresentation3D.h>
 #include "TopoDataItem.h"
-#include "FixedScreensizeCallback.h"
 
 using namespace mb_system;
 
