@@ -73,9 +73,17 @@ int main(int argc, char* argv[])
   // Sets the graphics API to OpenGLRhi and sets up the surface format for
   // intermixed VTK and QtQuick rendering. 
   QQuickVTKItem::setGraphicsApi();
+
+  /// DEBUG -
+  // Check the platform name
+  if (QGuiApplication::platformName() == QLatin1String("xcb")) {
+    std::cerr << "Qt 6 is running on X11 (xcb plugin) on macOS.\n";
+  } else {
+    std::cerr << "Qt 6 is not running on X11\n";
+  }
   
   QGuiApplication app(argc, argv);
- 
+
   QQmlApplicationEngine engine;
 
   // Register TopoDataItem type
