@@ -250,6 +250,27 @@ Version 5.0
 <B>--kluge-flipsign-pitch</B>
 <BR>
 
+<B>--kluge-set-beamwidths</B>=<I>BEAMWIDTH-ACROSSTRACK/BEAMWIDTH-ALONGTRACK</I>
+<BR>
+
+<B>--kluge-set-beamwidth-acrosstrack</B>=<I>BEAMWIDTH-ACROSSTRACK</I>
+<BR>
+
+<B>--kluge-set-beamwidth-alongtrack</B>=<I>BEAMWIDTH-ALONGTRACK</I>
+<BR>
+
+<B>--kluge-ignore-duplicate-pings</B>
+<BR>
+
+<B>--kluge-xducer-depth-from-heave</B>
+<BR>
+
+<B>--kluge-xducer-depth-from-sensordepth</B>
+<BR>
+
+<B>--kluge-xducer-depth-from-heave-and-sensordepth</B>
+<BR>
+
 ]
 <P>
 <A NAME="lbAE">&nbsp;</A>
@@ -1125,6 +1146,46 @@ the original bathymetry records in Reson s7k format data.
 This option multiplies the roll values to merged by -1, flipping the sign.
 <DT><B>--kluge-flipsign-pitch</B><DD>
 This option multiplies the pitch values to merged by -1, flipping the sign.
+<DT><B>--kluge-set-beamwidths=</B><I>BEAMWIDTH-ACROSSTRACK/BEAMWIDTH-ALONGTRACK</I>
+
+<DD>
+This option changes the beamwidths embedded in s7k multibeam data (format 89). The
+beamwidths are in degrees.
+<DT><B>--kluge-set-beamwidth-acrosstrack=</B><I>BEAMWIDTH-ACROSSTRACK</I>
+
+<DD>
+This option changes the acrosstrack beamwidths embedded in s7k multibeam data (format 89).
+The beamwidth value is in degrees.
+<DT><B>--kluge-set-beamwidth-alongtrack=</B><I>BEAMWIDTH-ALONGTRACK</I>
+
+<DD>
+This option changes the alongtrack beamwidths embedded in s7k multibeam data (format 89).
+The beamwidth value is in degrees.
+<DT><B>--kluge-ignore-duplicate-pings</B>
+
+<DD>
+This option causes <B>mbpreprocess</B> to skip outputting more than one instance of a ping
+with the same timestamp.
+<DT><B>--kluge-xducer-depth-from-heave</B>
+
+<DD>
+This option overrides settings in the installation parameters record in third generation 
+Kongsberg multibeam data (formats 58 and 59) so that the transducer depth derives from motion 
+sensor heave plus the draft from the installation offsets.
+<DT><B>--kluge-xducer-depth-from-sensordepth</B>
+
+<DD>
+This option overrides settings in the installation parameters record in third generation 
+Kongsberg multibeam data (formats 58 and 59) so that the transducer depth derives from 
+the sensor height recorded in height datagrams (usually from a pressure sensor for
+submerged platforms).
+<DT><B>--kluge-xducer-depth-from-heave-and-sensordepth</B>
+
+<DD>
+This option overrides settings in the installation parameters record in third generation 
+Kongsberg multibeam data (formats 58 and 59) so that the transducer depth derives from 
+a combination of the sensor height recorded in height datagrams, heave from a motion
+sensor and the draft from the installation offsets.
 <P>
 </DL>
 <A NAME="lbAH">&nbsp;</A>

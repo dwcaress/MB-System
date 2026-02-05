@@ -268,24 +268,25 @@ int main(int argc, char **argv) {
 
 	int error = MB_ERROR_NO_ERROR;
 	void *imagelist;
-    int imageStatus = MB_IMAGESTATUS_NONE;
-    mb_path imageLeftFile = "";
-    mb_path imageRightFile = "";
-    mb_path dpath = "";
+	int imageStatus = MB_IMAGESTATUS_NONE;
+	bool rectified = false;
+	mb_path imageLeftFile = "";
+	mb_path imageRightFile = "";
+	mb_path dpath = "";
 	mb_path pwd = "";
 	if (absolutepaths)
     	assert(getcwd(pwd, MB_PATH_MAXLINE) != NULL);
-    double left_time_d;
-    double right_time_d;
-    double left_gain;
-    double right_gain;
-    double left_exposure;
-    double right_exposure;
-    
-    int num_left_images = 0;
-    int num_right_images = 0;
-    int num_single_images = 0;
-    int num_total_images = 0;
+	double left_time_d;
+	double right_time_d;
+	double left_gain;
+	double right_gain;
+	double left_exposure;
+	double right_exposure;
+	
+	int num_left_images = 0;
+	int num_right_images = 0;
+	int num_single_images = 0;
+	int num_total_images = 0;
 
 	if (mb_imagelist_open(verbose, &imagelist, read_file, &error) != MB_SUCCESS) {
 		fprintf(stderr, "\nUnable to open imagelist file: %s\n", read_file);
@@ -293,7 +294,7 @@ int main(int argc, char **argv) {
 		exit(MB_ERROR_OPEN_FAIL);
 	}
 
-    while ((status = mb_imagelist_read(verbose, imagelist, &imageStatus,
+  while ((status = mb_imagelist_read(verbose, imagelist, &imageStatus, &rectified, 
                                 imageLeftFile, imageRightFile, dpath,
                                 &left_time_d, &right_time_d,
                                 &left_gain, &right_gain,

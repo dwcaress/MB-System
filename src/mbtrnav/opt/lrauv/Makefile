@@ -101,6 +101,11 @@ LRCONAV_APP_OBJ = $(LRCONAV_APP_SRC:%.cpp=$(BUILD_DIR)/%.o)
 LRCONAV_APP_PP = $(LRCONAV_APP_SRC:%.cpp=./%.cpp-pp) $(LRCONAV_APP_SRC:%.h=./%.h-pp)
 LRCONAV_APP_LIBS = -llcm -lzf_log -ltrn  -lnewmat -lqnx -lgeolib -lnetcdf -lm $(OPT_OS_LIBS)
 
+CSV_REPLAY_APP=csv_replay-app
+CSV_REPLAY_SRC=csv_replay.cpp
+CSV_REPLAY_OBJ = $(CSV_REPLAY_SRC:%.cpp=$(BUILD_DIR)/%.o)
+CSV_REPLAY_LIBS = -llcm -lzf_log -ltrn  -lnewmat -lqnx -lgeolib -lnetcdf -lm $(OS_LIBS)
+
 #CONAV_MSG_PP = $(CONAV_MSG_SRC:%.cpp=./%.cpp-pp) $(CONAV_MSG_SRC:%.h=./%.h-pp)
 
 CONAV_MSG_APP=mr_msg-app
@@ -121,8 +126,7 @@ SOURCES = $(LRTRN_APP_SRC) $(LRCONAV_APP_SRC) $(CONAV_MSG_SRC) $(DECODER_TEST_SR
 OBJECTS = $(SOURCES:%.cpp=$(BUILD_DIR)/%.o)
 DEPENDS = $(SOURCES:%.cpp=$(BUILD_DIR)/%.d)
 BINARIES = $(OUTPUT_DIR)/$(LRTRN_APP) $(OUTPUT_DIR)/$(LRCONAV_APP) $(OUTPUT_DIR)/$(CONAV_MSG_APP) \
-	$(OUTPUT_DIR)/$(DECODER_TEST_APP)
-
+	$(OUTPUT_DIR)/$(DECODER_TEST_APP) $(OUTPUT_DIR)/$(CSV_REPLAY_APP)
 
 CLEANUP = gmon.out
 # dSYMs : XCode debug symbol file folders
@@ -156,6 +160,12 @@ $(OUTPUT_DIR)/$(CONAV_MSG_APP): $(CONAV_MSG_OBJ)
 $(OUTPUT_DIR)/$(DECODER_TEST_APP): $(DECODER_TEST_OBJ)
 	@echo building $@...
 	$(CXX) $(CFLAGS) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(DECODER_TEST_LIBS)
+	@echo
+
+# build csv_replay program
+$(OUTPUT_DIR)/$(CSV_REPLAY_APP): $(CSV_REPLAY_OBJ)
+	@echo building $@...
+	$(CXX) $(CFLAGS) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(CSV_REPLAY_LIBS)
 	@echo
 
 lint: $(LRTRN_APP_SRC) $(LRCONAV_APP_SRC) $(CONAV_MSG_SRC)

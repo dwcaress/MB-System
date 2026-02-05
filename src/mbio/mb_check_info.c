@@ -33,6 +33,7 @@
  * Date:	September 3, 1996
  */
 
+#include <assert.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -901,94 +902,113 @@ int mb_swathbounds(int verbose, int checkgood, int nbath, int nss,
 				fprintf(stderr, "dbg3       %4d   %f    %f\n", i, ss[i], ssacrosstrack[i]);
 		}
 	}
+	
+	if (nbath > 0) {
+		assert(beamflag != NULL);
+		assert(bathacrosstrack != NULL);
+		assert(ibeamport != NULL);
+		assert(ibeamcntr != NULL);
+		assert(ibeamstbd != NULL);
+	}
+	if (nss > 0) {
+		assert(ss != NULL);
+		assert(ssacrosstrack != NULL);
+		assert(ipixelport != NULL);
+		assert(ipixelcntr != NULL);
+		assert(ipixelstbd != NULL);
+	}
 
 	/* get min max of non-null beams */
-	*ibeamport = nbath / 2;
-	*ibeamcntr = *ibeamport;
-	*ibeamstbd = *ibeamport;
-  if (nbath > 0 && beamflag != NULL && bathacrosstrack != NULL) {
-  	double xtrackmin = 0.0;
-  	double xtrackmax = 0.0;
-  	double distmin = 0.0;
-  	bool found = false;
-  	for (int i = 0; i < nbath; i++) {
-  		if ((checkgood && mb_beam_ok(beamflag[i])) || !mb_beam_check_flag_unusable(beamflag[i])) {
-  			if (!found) {
-  				*ibeamport = i;
-  				*ibeamcntr = i;
-  				*ibeamstbd = i;
-  				xtrackmin = bathacrosstrack[i];
-  				distmin = fabs(bathacrosstrack[i]);
-  				xtrackmax = bathacrosstrack[i];
-  				found = true;
-  			}
-  			else {
-  				if (fabs(bathacrosstrack[i]) < distmin) {
-  					*ibeamcntr = i;
-  					distmin = fabs(bathacrosstrack[i]);
-  				}
-  				if (bathacrosstrack[i] < xtrackmin) {
-  					*ibeamport = i;
-  					xtrackmin = bathacrosstrack[i];
-  				}
-  				else if (bathacrosstrack[i] > xtrackmax) {
-  					*ibeamstbd = i;
-  					xtrackmax = bathacrosstrack[i];
-  				}
-  			}
-  		}
-  	}
-  }
+	if (nbath > 0) {
+		*ibeamport = nbath / 2;
+		*ibeamcntr = *ibeamport;
+		*ibeamstbd = *ibeamport;
+		double xtrackmin = 0.0;
+		double xtrackmax = 0.0;
+		double distmin = 0.0;
+		bool found = false;
+		for (int i = 0; i < nbath; i++) {
+			if ((checkgood && mb_beam_ok(beamflag[i])) || !mb_beam_check_flag_unusable(beamflag[i])) {
+				if (!found) {
+					*ibeamport = i;
+					*ibeamcntr = i;
+					*ibeamstbd = i;
+					xtrackmin = bathacrosstrack[i];
+					distmin = fabs(bathacrosstrack[i]);
+					xtrackmax = bathacrosstrack[i];
+					found = true;
+				}
+				else {
+					if (fabs(bathacrosstrack[i]) < distmin) {
+						*ibeamcntr = i;
+						distmin = fabs(bathacrosstrack[i]);
+					}
+					if (bathacrosstrack[i] < xtrackmin) {
+						*ibeamport = i;
+						xtrackmin = bathacrosstrack[i];
+					}
+					else if (bathacrosstrack[i] > xtrackmax) {
+						*ibeamstbd = i;
+						xtrackmax = bathacrosstrack[i];
+					}
+				}
+			}
+		}
+	}
 
 	/* get min max of non-null pixels */
-	*ipixelport = nss / 2;
-	*ipixelcntr = *ipixelport;
-	*ipixelstbd = *ipixelport;
-  if (nss > 0 && ss != NULL && ssacrosstrack != NULL) {
-  	double xtrackmin = 0.0;
-  	double xtrackmax = 0.0;
-  	double distmin = 0.0;
-  	bool found = false;
-  	for (int i = 0; i < nss; i++) {
-  		if (ss[i] > 0.0) {
-  			if (!found) {
-  				*ipixelport = i;
-  				*ipixelcntr = i;
-  				*ipixelstbd = i;
-  				xtrackmin = ssacrosstrack[i];
-  				distmin = fabs(ssacrosstrack[i]);
-  				xtrackmax = ssacrosstrack[i];
-  				found = true;
-  			}
-  			else {
-  				if (fabs(ssacrosstrack[i]) < distmin) {
-  					*ipixelcntr = i;
-  					distmin = fabs(ssacrosstrack[i]);
-  				}
-  				if (ssacrosstrack[i] < xtrackmin) {
-  					*ipixelport = i;
-  					xtrackmin = ssacrosstrack[i];
-  				}
-  				else if (ssacrosstrack[i] > xtrackmax) {
-  					*ipixelstbd = i;
-  					xtrackmax = ssacrosstrack[i];
-  				}
-  			}
-  		}
-  	}
-  }
+	if (nss > 0) {
+		*ipixelport = nss / 2;
+		*ipixelcntr = *ipixelport;
+		*ipixelstbd = *ipixelport;
+		double xtrackmin = 0.0;
+		double xtrackmax = 0.0;
+		double distmin = 0.0;
+		bool found = false;
+		for (int i = 0; i < nss; i++) {
+			if (ss[i] > 0.0) {
+				if (!found) {
+					*ipixelport = i;
+					*ipixelcntr = i;
+					*ipixelstbd = i;
+					xtrackmin = ssacrosstrack[i];
+					distmin = fabs(ssacrosstrack[i]);
+					xtrackmax = ssacrosstrack[i];
+					found = true;
+				}
+				else {
+					if (fabs(ssacrosstrack[i]) < distmin) {
+						*ipixelcntr = i;
+						distmin = fabs(ssacrosstrack[i]);
+					}
+					if (ssacrosstrack[i] < xtrackmin) {
+						*ipixelport = i;
+						xtrackmin = ssacrosstrack[i];
+					}
+					else if (ssacrosstrack[i] > xtrackmax) {
+						*ipixelstbd = i;
+						xtrackmax = ssacrosstrack[i];
+					}
+				}
+			}
+		}
+	}
 
 	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       ibeamport:     %d\n", *ibeamport);
-		fprintf(stderr, "dbg2       ibeamport:     %d\n", *ibeamcntr);
-		fprintf(stderr, "dbg2       ibeamstbd:     %d\n", *ibeamstbd);
-		fprintf(stderr, "dbg2       ipixelport:    %d\n", *ipixelport);
-		fprintf(stderr, "dbg2       ipixelport:    %d\n", *ipixelcntr);
-		fprintf(stderr, "dbg2       ipixelstbd:    %d\n", *ipixelstbd);
+		if (nbath > 0) {
+			fprintf(stderr, "dbg2       ibeamport:     %d\n", *ibeamport);
+			fprintf(stderr, "dbg2       ibeamport:     %d\n", *ibeamcntr);
+			fprintf(stderr, "dbg2       ibeamstbd:     %d\n", *ibeamstbd);
+		}
+		if (nss > 0) {
+			fprintf(stderr, "dbg2       ipixelport:    %d\n", *ipixelport);
+			fprintf(stderr, "dbg2       ipixelport:    %d\n", *ipixelcntr);
+			fprintf(stderr, "dbg2       ipixelstbd:    %d\n", *ipixelstbd);
+		}
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:     %d\n", status);

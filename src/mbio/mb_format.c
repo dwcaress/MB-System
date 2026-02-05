@@ -2922,9 +2922,13 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
     else
       suffix_len = 0;
     if (suffix_len == 6) {
+			if (fileroot != NULL) {
+					strncpy(fileroot, filename, strlen(filename) - suffix_len);
+					fileroot[strlen(filename) - suffix_len] = '\0';
+			}
       *format = MBF_3DWISSL2;
-	  found = true;
-	}
+	  	found = true;
+		}
   }
 
   /* look for a WASSP *.000 file format convention */
@@ -3939,6 +3943,7 @@ int mb_imagelist_open(int verbose, void **imagelist_ptr, char *path, int *error)
     imagelist->open = false;
     imagelist->recursion = 0;
     imagelist->leftrightstereo = MB_IMAGESTATUS_NONE;
+    imagelist->rectified = false;
     imagelist->printed = false;
     strcpy(imagelist->path, "");
     imagelist->imagelist = NULL;
@@ -3962,6 +3967,7 @@ int mb_imagelist_open(int verbose, void **imagelist_ptr, char *path, int *error)
       fprintf(stderr, "dbg2       imagelist->open:             %d\n", imagelist->open);
       fprintf(stderr, "dbg2       imagelist->recursion:        %d\n", imagelist->recursion);
       fprintf(stderr, "dbg2       imagelist->leftrightstereo:  %d\n", imagelist->leftrightstereo);
+      fprintf(stderr, "dbg2       imagelist->rectified:        %d\n", imagelist->rectified);
       fprintf(stderr, "dbg2       imagelist->printed:          %d\n", imagelist->printed);
       fprintf(stderr, "dbg2       imagelist->path:             %s\n", imagelist->path);
       fprintf(stderr, "dbg2       imagelist->fp:               %p\n", (void *)imagelist->fp);
@@ -3976,7 +3982,8 @@ int mb_imagelist_open(int verbose, void **imagelist_ptr, char *path, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
+int mb_imagelist_read(int verbose, void *imagelist_ptr, 
+											int *imagestatus, bool *rectified, 
                       char *path0, char *path1, char *dpath,
                       double *time_d0, double *time_d1,
                       double *gain0, double *gain1,
@@ -3994,6 +4001,7 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
     fprintf(stderr, "dbg2       imagelist->open:             %d\n", imagelist->open);
     fprintf(stderr, "dbg2       imagelist->recursion:        %d\n", imagelist->recursion);
     fprintf(stderr, "dbg2       imagelist->leftrightstereo:  %d\n", imagelist->leftrightstereo);
+    fprintf(stderr, "dbg2       imagelist->rectified:        %d\n", imagelist->rectified);
     fprintf(stderr, "dbg2       imagelist->printed:          %d\n", imagelist->printed);
     fprintf(stderr, "dbg2       imagelist->path:             %s\n", imagelist->path);
     fprintf(stderr, "dbg2       imagelist->fp:               %p\n", (void *)imagelist->fp);
@@ -4017,6 +4025,7 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
         bool rdone = false;
         while (!rdone) {
           *imagestatus = MB_IMAGESTATUS_NONE;
+          *rectified = false;
           *time_d0 = 0.0;
           *time_d1 = 0.0;
           *gain0 = 0.0;
@@ -4055,6 +4064,17 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
               else if (strncmp(buffer, "$STEREO", 7) == 0
                   || strncmp(buffer, "#STEREO", 7) == 0) {
                   imagelist->leftrightstereo = MB_IMAGESTATUS_STEREO;
+              }
+              
+              /* Check for special tag $RECTIFIED 
+                  - Indicates that following images have already been
+                    corrected for camera intrinsics (distortion)
+                  - Sets imagelist->rectified to true
+                  - Mbphotomosaic and mbphotogrammetry will skip rectification
+                    of these images */
+              else if (strncmp(buffer, "$RECTIFIED", 10) == 0
+                  || strncmp(buffer, "#RECTIFIED", 10) == 0) {
+                  imagelist->rectified = true;
               }
 
               /* Check for special tags $PARAMETER or #PARAMETER 
@@ -4111,6 +4131,7 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
                       const int fstat = stat(path0, &file_status);
                       if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR && file_status.st_size > 0) {
                           *imagestatus = *imagestatus | MB_IMAGESTATUS_LEFT;
+                          *rectified = imagelist->rectified;
                       }
 
                       /* if imagelist entry cannot be opened and verbose output warning */
@@ -4137,6 +4158,7 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
                       const int fstat = stat(path1, &file_status);
                       if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR && file_status.st_size > 0) {
                           *imagestatus = *imagestatus | MB_IMAGESTATUS_RIGHT;
+                          *rectified = imagelist->rectified;
                       }
 
                       /* if imagelist entry cannot be opened and verbose output warning */
@@ -4188,6 +4210,7 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
                           else {
                               *imagestatus = MB_IMAGESTATUS_SINGLE;
                           }
+                          *rectified = imagelist->rectified;
                       }
                   }
               }
@@ -4214,6 +4237,7 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
                       const int fstat = stat(path0, &file_status);
                       if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR && file_status.st_size > 0) {
                           *imagestatus = MB_IMAGESTATUS_IMAGELIST;
+                          *rectified = imagelist->rectified;
                       }
                   }
               }
@@ -4233,6 +4257,7 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
                 imagelist2 = imagelist->imagelist;
                 imagelist2->recursion = imagelist->recursion + 1;
                 imagelist2->leftrightstereo = imagelist->leftrightstereo;
+                imagelist2->rectified = imagelist->rectified;
                 rdone = true;
               }
               else {
@@ -4249,8 +4274,10 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
         imagelist2 = (struct mb_imagelist_struct *)imagelist->imagelist;
         if (imagelist2->open) {
           /* recursively call mb_imagelist_read */
-          status = mb_imagelist_read(verbose, (void *)imagelist->imagelist, imagestatus,
-                                    path0, path1, dpath, time_d0, time_d1, gain0, gain1, exposure0, exposure1, error);
+          status = mb_imagelist_read(verbose, (void *)imagelist->imagelist, 
+          														imagestatus, rectified, 
+                                    	path0, path1, dpath, time_d0, time_d1, 
+                                    	gain0, gain1, exposure0, exposure1, error);
 
           /* if imagelist read fails close it */
           if (status == MB_FAILURE) {
@@ -4270,6 +4297,7 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
     fprintf(stderr, "dbg2       imagelist->open:             %d\n", imagelist->open);
     fprintf(stderr, "dbg2       imagelist->recursion:        %d\n", imagelist->recursion);
     fprintf(stderr, "dbg2       imagelist->leftrightstereo:  %d\n", imagelist->leftrightstereo);
+    fprintf(stderr, "dbg2       imagelist->rectified:        %d\n", imagelist->rectified);
     fprintf(stderr, "dbg2       imagelist->printed:          %d\n", imagelist->printed);
     fprintf(stderr, "dbg2       imagelist->path:             %s\n", imagelist->path);
     fprintf(stderr, "dbg2       imagelist->fp:               %p\n", (void *)imagelist->fp);

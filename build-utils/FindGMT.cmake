@@ -38,6 +38,7 @@ if(UNIX AND NOT GMT_FOUND)
           /opt/local # MacPorts
           /opt/local/lib/gmt6 
           /opt/local/lib/gmt5
+          /opt/homebrew # Homebrew
           /opt/csw # Blastwave
           /opt
           /usr/local)
@@ -90,6 +91,7 @@ find_path(
         /opt/local # MacPorts
         /opt/local/lib/gmt6 
         /opt/local/lib/gmt5
+        /opt/homebrew # Homebrew
         /opt/csw # Blastwave
         /opt
         /usr/local)
@@ -105,6 +107,7 @@ if (NOT GMT_LIBRARY)
           /opt/local # MacPorts
           /opt/local/lib/gmt6 
           /opt/local/lib/gmt5
+          /opt/homebrew # Homebrew
           /opt/csw # Blastwave
           /opt
           /usr/local)
@@ -120,6 +123,7 @@ find_library(
         /opt/local # MacPorts
         /opt/local/lib/gmt6 
         /opt/local/lib/gmt5
+        /opt/homebrew # Homebrew
         /opt/csw # Blastwave
         /opt
         /usr/local)

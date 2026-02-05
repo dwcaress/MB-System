@@ -262,7 +262,7 @@ struct mbview_world_struct {
 	float viewoffset3d_z_save;
 	float areaaspect;
 	float areaaspect_save;
-	double exageration_save;
+	double exaggeration_save;
 	double modelelevation3d_save;
 	double modelazimuth3d_save;
 	double viewelevation3d_save;
@@ -408,7 +408,7 @@ int mbview_setwindowparms(int verbose, size_t instance, int (*mbview_dismiss_not
 int mbview_setviewcontrols(int verbose, size_t instance, int display_mode, int mouse_mode, int grid_mode, int primary_histogram,
                            int primaryslope_histogram, int secondary_histogram, int primary_shade_mode, int slope_shade_mode,
                            int secondary_shade_mode, int grid_contour_mode, int site_view_mode, int route_view_mode,
-                           int nav_view_mode, int navswathbounds_view_mode, int navdrape_view_mode, int vector_view_mode, double exageration,
+                           int nav_view_mode, int navswathbounds_view_mode, int navdrape_view_mode, int vector_view_mode, double exaggeration,
                            double modelelevation3d, double modelazimuth3d, double viewelevation3d, double viewazimuth3d,
                            double illuminate_magnitude, double illuminate_elevation, double illuminate_azimuth,
                            double slope_magnitude, double overlay_shade_magnitude, double overlay_shade_center,
@@ -517,7 +517,7 @@ void do_mbview_clearpicks(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_profile_dismiss(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_view_profile(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_profile_resize(Widget w, XtPointer client_data, XEvent *event, Boolean *unused);
-void do_mbview_profile_exager(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbview_profile_exagger(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_profile_width(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_profile_slope(Widget w, XtPointer client_data, XtPointer call_data);
 int do_mbview_status(char *message, size_t instance);
@@ -735,11 +735,6 @@ int mbview_destroy_prglx(size_t instance);
 int mbview_plotprofile(size_t instance);
 int mbview_profile_text(size_t instance);
 
-void BxUnmanageCB(Widget w, XtPointer client, XtPointer call);
-void BxManageCB(Widget w, XtPointer client, XtPointer call);
-void BxPopupCB(Widget w, XtPointer client, XtPointer call);
 XtPointer BX_CONVERT(Widget w, char *from_string, char *to_type, int to_size, Boolean *success);
-void BxExitCB(Widget w, XtPointer client, XtPointer call);
-void BxSetValuesCB(Widget w, XtPointer client, XtPointer call);
 
 #endif  // MBVIEW_MBVIEWPRIVATE_H_

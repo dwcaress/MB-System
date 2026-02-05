@@ -7,6 +7,7 @@ find_path(LibPROJ_INCLUDE_DIR
         /opt/local
         /opt/local/lib/proj9 
         /opt/local/lib/proj8
+        /opt/homebrew
         /opt/csw
         /opt
         /usr/local)
@@ -21,6 +22,7 @@ find_library(LibPROJ_LIBRARY_RELEASE
         /opt/local
         /opt/local/lib/proj9 
         /opt/local/lib/proj8
+        /opt/homebrew
         /opt/csw
         /opt
         /usr/local)
@@ -36,6 +38,7 @@ find_library(LibPROJ_LIBRARY_DEBUG
         /opt/local/lib/proj9 
         /opt/local/lib/proj8
         /opt/csw # Blastwave
+        /opt/homebrew
         /opt
         /usr/local)
 mark_as_advanced(LibPROJ_LIBRARY_DEBUG)

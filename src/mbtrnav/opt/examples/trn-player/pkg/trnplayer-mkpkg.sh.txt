@@ -1,0 +1,93 @@
+#!/bin/bash
+
+CALL_DIR=$PWD
+SESSION=$(date +%Y%m%d_%H%M%S)
+WORK_DIR=$PWD/mktrnp-$$
+
+PKG_DIR=pkg
+STAGE_DIR=trnplayer
+MFRAME_BRANCH=master
+LIBTRNAV_BRANCH=master
+LIBTRNAV_DATA_BRANCH=main
+VERBOSE=Y
+KEEP_WORK=N
+
+vout() {
+    if [ $VERBOSE == "Y" ]; then
+        echo $1
+    fi
+}
+
+vout "mkdir $WORK_DIR"
+
+# make working directory
+mkdir $WORK_DIR
+cd $WORK_DIR
+
+vout "cloning mframe..."
+
+# clone, build install libtrnav
+git clone git@bitbucket.org:mbari/mframe.git
+
+vout "building mframe branch ${MFRAME_BRANCH}..."
+
+cd mframe
+git checkout ${MFRAME_BRANCH}
+mkdir build
+
+cd build
+cmake -DCMAKE_INSTALL_PREFIX=$PWD/$PKG_DIR ..
+cmake --build .
+cmake --install .
+
+vout "cloning libtrnav..."
+
+# clone, build install libtrnav
+git clone git@bitbucket.org:mbari/libtrnav.git
+
+vout "building libtrnav branch ${LIBTRNAV_BRANCH}..."
+
+cd libtrnav
+git checkout ${LIBTRNAV_BRANCH}
+mkdir build
+
+cd build
+cmake -DCMAKE_INSTALL_PREFIX=$PWD/$PKG_DIR -DCMAKE_PREFIX_PATH=$WORK_DIR/mframe/build/$PKG_DIR ..
+cmake --build .
+cmake --install .
+
+codesign --force --deep --sign - $PKG_DIR/bin/trn-player
+
+vout "making staging directory $STAGE_DIR..."
+
+mkdir -p $STAGE_DIR/bin
+mkdir -p $STAGE_DIR/share
+
+#  clone libtrnav-data into staging directory
+vout "cloning libtrnav-data branch $LIBTRNAV_DATA_BRANCH..."
+
+cd $STAGE_DIR
+git clone git@bitbucket.org:mbari/libtrnav-data.git
+cd libtrnav-data
+git checkout $LIBTRNAV_DATA_BRANCH
+
+cd ..
+
+cd ..
+
+vout "copying files to staging directory..."
+cp $PKG_DIR/bin/trn-player $STAGE_DIR/bin/.
+cp $PKG_DIR/share/README* $STAGE_DIR/share/.
+cp $PKG_DIR/share/README* $STAGE_DIR/.
+cp $STAGE_DIR/libtrnav-data/trn-player/trnplayer.cfg $STAGE_DIR/.
+
+vout "building tar.gz archive $CALL_DIR/trnplayer-$SESSION.tar.gz..."
+# tar package
+tar czvf $CALL_DIR/trnplayer-$SESSION.tar.gz --exclude "libtrnav-data/.git" $STAGE_DIR
+cd $CALL_DIR
+
+if [ $KEEP_WORK == "N" ]; then
+    vout "removing work directory $WORK_DIR"
+    rm -rf $WORK_DIR
+fi
+vout "done"

@@ -929,6 +929,61 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
                                       &(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
             }
           }
+
+        	/* check for dual profile (e.g. dual swath mode on Kongsberg multibeams) */
+					ping->dualprofile = false;
+					ping->dualprofilebeam = 0;
+					double xtrack_min = 0.0;
+					double xtrack_max = 0.0;
+					double xtrack_absmax = 0.0;
+					bool first = true;
+					for (int j = 0; j < ping->beams_bath; j++) {
+						if (mb_beam_ok(ping->beamflag[j])) {
+							if (first) {
+								xtrack_min = ping->bathacrosstrack[j];
+								xtrack_max = ping->bathacrosstrack[j];
+								first = false;
+							}
+							else {
+								xtrack_min = MIN(xtrack_min, ping->bathacrosstrack[j]);
+								xtrack_max = MAX(xtrack_max, ping->bathacrosstrack[j]);
+							}
+						}
+					}
+					if (first) {
+						for (int j = 0; j < ping->beams_bath; j++) {
+							if (!mb_beam_check_flag_unusable2(ping->beamflag[j])) {
+								if (first) {
+									xtrack_min = ping->bathacrosstrack[j];
+									xtrack_max = ping->bathacrosstrack[j];
+									first = false;
+								}
+								else {
+									xtrack_min = MIN(xtrack_min, ping->bathacrosstrack[j]);
+									xtrack_max = MAX(xtrack_max, ping->bathacrosstrack[j]);
+								}
+							}
+						}
+					}
+					first = true;
+					double xtrack_old = 0.0;
+					xtrack_absmax = MAX(fabs(xtrack_min), fabs(xtrack_max));
+					for (int j = 0; j < ping->beams_bath; j++) {
+						if (!mb_beam_check_flag_unusable2(ping->beamflag[j])) {
+							if (first) {
+								xtrack_old = ping->bathacrosstrack[j];
+								first = false;
+							}
+							else {
+								double xtrack_diff = ping->bathacrosstrack[j] - xtrack_old;
+								if (xtrack_diff < 0.0 && fabs(xtrack_diff) > 0.5 * xtrack_absmax) {
+									ping->dualprofile = true;
+									ping->dualprofilebeam = j;
+								}
+								xtrack_old = ping->bathacrosstrack[j];
+							}
+						}
+					}
         }
 
         /* extract some more values */
@@ -955,29 +1010,10 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
           }
 
           else {
-            /* find centermost beam */
-            icenter = -1;
-            iport = -1;
-            istbd = -1;
-            centerdistance = 0.0;
-            portdistance = 0.0;
-            stbddistance = 0.0;
-            for (ibeam = 0; ibeam < beams_bath; ibeam++) {
-              if (!mb_beam_check_flag_unusable(beamflag[ibeam])) {
-                if (icenter == -1 || fabs(bathacrosstrack[ibeam]) < centerdistance) {
-                  icenter = ibeam;
-                  centerdistance = bathacrosstrack[ibeam];
-                }
-                if (iport == -1 || bathacrosstrack[ibeam] < portdistance) {
-                  iport = ibeam;
-                  portdistance = bathacrosstrack[ibeam];
-                }
-                if (istbd == -1 || bathacrosstrack[ibeam] > stbddistance) {
-                  istbd = ibeam;
-                  stbddistance = bathacrosstrack[ibeam];
-                }
-              }
-            }
+          	mbev_status = mb_swathbounds(mbev_verbose, false, ping->beams_bath, 0, 
+          																ping->beamflag, ping->bathacrosstrack,
+          																NULL, NULL, &iport, &icenter, &istbd, 
+          																NULL, NULL, NULL, &mbev_error);
 
             mb_coor_scale(mbev_verbose, ping->navlat, &mtodeglon, &mtodeglat);
             if (icenter >= 0) {
@@ -3391,6 +3427,11 @@ int mbeditviz_selectregion(size_t instance) {
                 mbev_selected.soundings[mbev_selected.num_soundings].ifile = ifile;
                 mbev_selected.soundings[mbev_selected.num_soundings].iping = iping;
                 mbev_selected.soundings[mbev_selected.num_soundings].ibeam = ibeam;
+                if (ping->dualprofile && ibeam >= ping->dualprofilebeam) {
+                	mbev_selected.soundings[mbev_selected.num_soundings].iprofile = 1;
+                } else {
+                	mbev_selected.soundings[mbev_selected.num_soundings].iprofile = 0;
+                }
                 mbev_selected.soundings[mbev_selected.num_soundings].beamflag = ping->beamflag[ibeam];
                 mbev_selected.soundings[mbev_selected.num_soundings].beamflagorg = ping->beamflagorg[ibeam];
                 mbev_selected.soundings[mbev_selected.num_soundings].beamcolor = ping->beamcolor[ibeam];
@@ -3563,6 +3604,11 @@ int mbeditviz_selectarea(size_t instance) {
                 mbev_selected.soundings[mbev_selected.num_soundings].ifile = ifile;
                 mbev_selected.soundings[mbev_selected.num_soundings].iping = iping;
                 mbev_selected.soundings[mbev_selected.num_soundings].ibeam = ibeam;
+                if (ping->dualprofile && ibeam >= ping->dualprofilebeam) {
+                	mbev_selected.soundings[mbev_selected.num_soundings].iprofile = 1;
+                } else {
+                	mbev_selected.soundings[mbev_selected.num_soundings].iprofile = 0;
+                }
                 mbev_selected.soundings[mbev_selected.num_soundings].beamflag = ping->beamflag[ibeam];
                 mbev_selected.soundings[mbev_selected.num_soundings].beamflagorg = ping->beamflagorg[ibeam];
                 mbev_selected.soundings[mbev_selected.num_soundings].beamcolor = ping->beamcolor[ibeam];
@@ -3723,6 +3769,11 @@ int mbeditviz_selectnav(size_t instance) {
 								mbev_selected.soundings[mbev_selected.num_soundings].ifile = ifile;
 								mbev_selected.soundings[mbev_selected.num_soundings].iping = iping;
 								mbev_selected.soundings[mbev_selected.num_soundings].ibeam = ibeam;
+                if (ping->dualprofile && ibeam >= ping->dualprofilebeam) {
+                	mbev_selected.soundings[mbev_selected.num_soundings].iprofile = 1;
+                } else {
+                	mbev_selected.soundings[mbev_selected.num_soundings].iprofile = 0;
+                }
 								mbev_selected.soundings[mbev_selected.num_soundings].beamflag = ping->beamflag[ibeam];
 								mbev_selected.soundings[mbev_selected.num_soundings].beamflagorg = ping->beamflagorg[ibeam];
 								mbev_selected.soundings[mbev_selected.num_soundings].beamcolor = ping->beamcolor[ibeam];

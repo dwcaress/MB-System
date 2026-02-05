@@ -138,10 +138,10 @@ struct mbpingedit_world_struct {
 	/* drawing variables */
 	float elevation;
 	float azimuth;
-	float exageration;
+	float exaggeration;
 	float elevation_save;
 	float azimuth_save;
-	float exageration_save;
+	float exaggeration_save;
 	Dimension gl_xo;
 	Dimension gl_yo;
 	Dimension gl_width;

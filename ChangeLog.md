@@ -22,6 +22,12 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.3beta12    January 7, 2026
+- Version 5.8.3beta11    December 27, 2025
+- Version 5.8.3beta10    December 22, 2025
+- Version 5.8.3beta09    December 4, 2025
+- Version 5.8.3beta08    November 16, 2025
+- Version 5.8.3beta07    October 22, 2025
 - Version 5.8.3beta06    October 1, 2025
 - Version 5.8.3beta05    September 30, 2025
 - Version 5.8.3beta04    September 18, 2025
@@ -64,9 +70,86 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 ---
 
+#### 5.8.3beta12 (January 7, 2026)
+
+CMake build system: Extended to handle complications of MacOs Tahoe. Building the 
+graphical tools in MB-System on MacOs has been complicated for a number of years because 
+of the requirement for X11/Motif and also, for programs mbgrdviz, mbeditviz, and mbnavadjust,
+OpenGL and GLX. For MacOs versions Sequoia (15) and earlier, the only way to successfully
+build and run MB-System has been to install all of the prerequisite packages using the MacPorts
+package manager. For reasons that have never been understood, the MB-System graphical 
+programs failed to run correctly when built with prerequisites installed through the
+alternative package managers Homebrew and Fink. This situation changes with MacOs Tahoe
+because now the MB-System graphical programs fail when prerequisites are installed through
+MacPorts, but succeed when the prerequisites are installed through Homebrew. This update
+to the build system handles the differences between the two MacOs scenarios (before Tahoe
+vs Tahoe or later). The installation documentation on the MB-System website will be 
+updated to reflect the necessity of using Homebrew for installations on MacOs Tahoe.
+A significant issue with all X11 programs running on MacOs Tahoe so far is that when 
+windows are resized, the GUI elements are not refreshed properly, and parts of the GUI
+wind up overwritten in solid black. Hopefully this will be fixed in a new version of
+the X11 server XQuartz. In the meantime, minimizing the program window using the middle
+(yellow) button on the upper left of the window (or the command-M shortcut), and then
+restoring that window by clicking on it's icon in the dock will properly refresh the GUI
+graphics.
+
+Program mbgrd2gltf: Continued updates to this tool for translating gridded topography
+to Graphics Library Transmission Format (GLTF) files that can be visualized by GLTF 
+viewers.
+
+#### 5.8.3beta11 (December 27, 2025)
+
+Formats 56 (MBF_EM300RAW) and 57 (MBF_EM300MBA): Fixed erroneous calculation of a large
+sensordepth value by mbprocess when the draft of a surface vessel has not been defined.
+
+#### 5.8.3beta10 (December 22, 2025)
+
+Program mbbackangle: A skipping existing feature implemented in beta04 had a small error 
+in the source code that made it not work as intended. This release contains a bug fix to 
+correct that behavior.
+
+#### 5.8.3beta09 (December 4, 2025)
+
+Program mbnavadjustmerge: Fixed options --unset-tie, --unset-ties-file, --unset-ties-survey, 
+--unset-ties-by-survey, --unset-ties-block, --unset-ties-all.
+
+Program mbbackangle: A skipping existing feature implemented in beta04 had a small error 
+in the source code that made it not work as intended. This release contains a bug fix to 
+correct that behavior.
+
+#### 5.8.3beta08 (November 16, 2025)
+
+Programs mbedit and mbeditviz: Now display dual swath Kongsberg multibeam data in the
+kmall format (id 261) with two separate acrosstrack profiles. As before the two profiles
+are associated with a single ping cycle and set of datagrams.
+
+Format MBF_3DWISSL2 (id 234): Updates to handle the evolving representation for the
+3D at Depth 2nd generation Wide Swath Subsea Lidar (WiSSL2)
+
+Programs mbphotomosaic, mbgetphotocorrection, and mbphotogrammetry: Augmented to handle
+seafloor photographs that have already been rectified (corrected for distortion). This
+capability has not been fully tested at this point.
+
+#### 5.8.3beta07 (October 22, 2025)
+
+Program mbeditviz: Fixed display of swath width when navigation is selected in the survey
+view.
+
+Format 234 (MBF_3DWISSL2): Supports data from new 3D at Depth 2nd Generation Wide swath
+Subsea Lidar (WiSSL2).
+
+Program mbpreprocess: Added option attitude-zero-heave to zero heave values in attitude
+data to be merged with survey data. The immediate use is for integration of Exail Phins C7
+navigation and attitude data with multibeam data, all collected on a submerged AUV for
+which the platform depth is defined by a pressure sensor rather than the heave output
+by the INS.
+
+Programs mbgrdviz, mbeditviz, mbnavadjust: Fixed the mouse button description for Rotate 
+View mode so that the right button is properly labeled as zoom rather than exaggeration.
+
 #### 5.8.3beta06 (October 1, 2025)
 
-GMT grid i/o functions (src/mbaux/mb_readwritegrd.c): Fixed compiler directives insuring
+GMT integration: Fixed compiler directives insuring
 that the GMT header file gmt_dev.h does not implicitly include a glib header file not 
 needed by MB-System.
 

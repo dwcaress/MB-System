@@ -41,47 +41,6 @@
 #define PARTICLENAME_BUF_BYTES 512
 #define SESSIONDIR_BUF_BYTES 512
 
-
-TRN_attr::TRN_attr()
-{
-    // Initialize to default values
-    //
-    _mapFileName = NULL;
-    _map_type = 2;
-    _filter_type = 2;
-    _particlesName = NULL;
-    _vehicleCfgName = NULL;
-    _dvlCfgName = NULL;
-    _resonCfgName = NULL;
-    _terrainNavServer = NULL;
-    _lrauvDvlFilename = 0;
-    _terrainNavPort = 27027;
-    _forceLowGradeFilter = false;
-    _allowFilterReinits = false;
-    _useModifiedWeighting = TRN_WT_NORM;
-    _samplePeriod = 3000;
-    _maxNorthingCov = 0.;
-    _maxNorthingError = 0.;
-    _maxEastingCov = 0.;
-    _maxEastingError = 0.;
-    _phiBias = 0;
-    _useIDTData = false;
-    _useDvlSide = false;
-    _useMbTrnData = false;
-    _skipInit = false;
-}
-
-TRN_attr::~TRN_attr()
-{
-    free(_mapFileName);
-    free(_particlesName);
-    free(_vehicleCfgName);
-    free(_dvlCfgName);
-    free(_resonCfgName);
-    free(_terrainNavServer);
-    free(_lrauvDvlFilename);
-}
-
 // Common to QNX and NIX versions
 // 
 TrnClient::TrnClient(const char *host, int port)
@@ -90,7 +49,7 @@ TrnClient::TrnClient(const char *host, int port)
    verbose(0)
 {
     try{
-        _trn_attr = new TRN_attr;
+        _trn_attr = new TrnAttr();
         char *ld =getenv("TRN_LOGDIR");
         _logdir    = (NULL!=ld ? STRDUPNULL(ld): STRDUPNULL(LOGDIR_DFL));
 
@@ -102,13 +61,13 @@ TrnClient::TrnClient(const char *host, int port)
         free(_server_ip);
         _server_ip = strdup(host);
         _sockport = port;
-        free(_trn_attr->_terrainNavServer);
-        _trn_attr->_terrainNavServer = strdup(host);
-        _trn_attr->_terrainNavPort = port;
+        free(_trn_attr->terrainNavServer);
+        _trn_attr->terrainNavServer = strdup(host);
+        _trn_attr->terrainNavPort = port;
     }
 
-    fprintf(stderr, "\nServer      : %s :%ld\n",_trn_attr->_terrainNavServer, _trn_attr->_terrainNavPort);
-    fprintf(stderr,"Vehicle Cfg : %s\n\n", _trn_attr->_vehicleCfgName);
+    fprintf(stderr, "\nServer      : %s :%ld\n",_trn_attr->terrainNavServer, _trn_attr->terrainNavPort);
+    fprintf(stderr,"Vehicle Cfg : %s\n\n", _trn_attr->vehicleCfgName);
     _initialized = false;
     
 }
@@ -119,7 +78,7 @@ _cfg_file(NULL),
 verbose(0)
 {
     try {
-        _trn_attr = new TRN_attr;
+        _trn_attr = new TrnAttr();
 
         // set TRN server log dir to
         // $TRN_LOGDIR (default if set)
@@ -139,13 +98,13 @@ verbose(0)
         free(_server_ip);
         _server_ip = strdup(host);
         _sockport = port;
-        free(_trn_attr->_terrainNavServer);
-        _trn_attr->_terrainNavServer = strdup(host);
-        _trn_attr->_terrainNavPort = port;
+        free(_trn_attr->terrainNavServer);
+        _trn_attr->terrainNavServer = strdup(host);
+        _trn_attr->terrainNavPort = port;
     }
 
-    fprintf(stderr, "\nServer      : %s :%ld\n",_trn_attr->_terrainNavServer, _trn_attr->_terrainNavPort);
-    fprintf(stderr,"Vehicle Cfg : %s\n\n", _trn_attr->_vehicleCfgName);
+    fprintf(stderr, "\nServer      : %s :%ld\n",_trn_attr->terrainNavServer, _trn_attr->terrainNavPort);
+    fprintf(stderr,"Vehicle Cfg : %s\n\n", _trn_attr->vehicleCfgName);
 
     _initialized = false;
 
@@ -158,7 +117,6 @@ TrnClient::~TrnClient()
     // base class closes _sockfd and free's _server_ip and _logdir
 }
 
-
 int TrnClient::loadCfgAttributes(const char *cfg_file)
 {
     char cfg_buf[512];
@@ -166,90 +124,20 @@ int TrnClient::loadCfgAttributes(const char *cfg_file)
 
     if(NULL!=cfg_file){
         // set _cfg_file member and use that
-        free(_cfg_file);
-        _cfg_file=strdup(cfg_file);
+        TrnAttr::chkSetString(&_cfg_file, cfg_file);
         cfg_path = _cfg_file;
     }else{
         // use default path ($TRN_CONFIGDIR/terrainAid.cfg or ./terrainAid.cfg)
-        cfg_path=cfg_buf;
         const char *cfg_dir = getenv("TRN_DATAFILES");
         snprintf(cfg_buf, 512, "%s/terrainAid.cfg", (NULL!=cfg_dir ? cfg_dir : "."));
+        TrnAttr::chkSetString(&_cfg_file, cfg_buf);
+        cfg_path = _cfg_file;
     }
 
-    if (access(cfg_path, F_OK) < 0){
-        fprintf(stderr, "TrnClient - Could not find config file [%s]\n", cfg_path);
-        return 1;
-    }
+    _trn_attr->setCfgFile(_cfg_file);
 
-    fprintf(stderr, "TrnClient - opening config file %s\n", cfg_path);
-    FILE *cfg = fopen(cfg_path, "r");
-    if (!cfg)
-    {
-        fprintf(stderr, "TrnClient - Could not open %s\n", cfg_path);
-        return 1;
-    }
+    _trn_attr->parseConfig();
 
-
-    // Get   key = value   pairs from non-comment lines in the cfg.
-    // If the key matches a known config item, extract and save the value.
-    //
-    char key[100]={0}, value[512]={0};
-    while (getNextKeyValue(cfg, key, value))
-    {
-        if      (!strcmp("mapFileName",          key)){
-            free(_trn_attr->_mapFileName);
-            _trn_attr->_mapFileName = strdup(value);
-        }
-        else if (!strcmp("particlesName",        key)){
-            free(_trn_attr->_particlesName);
-            _trn_attr->_particlesName = strdup(value);
-        }
-        else if (!strcmp("vehicleCfgName",       key)){
-            free(_trn_attr->_vehicleCfgName);
-            _trn_attr->_vehicleCfgName = strdup(value);
-        }
-        else if (!strcmp("dvlCfgName",           key)){
-            free(_trn_attr->_dvlCfgName);
-            _trn_attr->_dvlCfgName = strdup(value);
-        }
-        else if (!strcmp("resonCfgName",         key)){
-            free(_trn_attr->_resonCfgName);
-            _trn_attr->_resonCfgName = strdup(value);
-        }
-        else if (!strcmp("terrainNavServer",     key)){
-            free(_trn_attr->_terrainNavServer);
-            _trn_attr->_terrainNavServer = strdup(value);
-            free(_server_ip);
-            _server_ip = STRDUPNULL(_trn_attr->_terrainNavServer);
-        }
-        else if (!strcmp("lrauvDvlFilename",     key)){
-            free(_trn_attr->_lrauvDvlFilename);
-            _trn_attr->_lrauvDvlFilename = strdup(value);
-        }
-        else if (!strcmp("map_type",             key))  _trn_attr->_map_type = atoi(value);
-        else if (!strcmp("filterType",           key))  _trn_attr->_filter_type = atoi(value);
-        else if (!strcmp("terrainNavPort",       key)){
-            _trn_attr->_terrainNavPort = atol(value);
-            _sockport = _trn_attr->_terrainNavPort;
-        }
-        else if (!strcmp("forceLowGradeFilter",  key))  _trn_attr->_forceLowGradeFilter = strcasecmp("false", value);
-        else if (!strcmp("allowFilterReinits",   key))  _trn_attr->_allowFilterReinits = strcasecmp("false", value);
-        else if (!strcmp("useModifiedWeighting", key))  _trn_attr->_useModifiedWeighting = atoi(value);
-        else if (!strcmp("samplePeriod",         key))  _trn_attr->_samplePeriod = atoi(value);
-        else if (!strcmp("maxNorthingCov",       key))  _trn_attr->_maxNorthingCov = atof(value);
-        else if (!strcmp("maxNorthingError",     key))  _trn_attr->_maxNorthingError = atof(value);
-        else if (!strcmp("maxEastingCov",        key))  _trn_attr->_maxEastingCov = atof(value);
-        else if (!strcmp("maxEastingError",      key))  _trn_attr->_maxEastingError = atof(value);
-        else if (!strcmp("RollOffset",           key))  _trn_attr->_phiBias = atof(value);
-        else if (!strcmp("useIDTData",           key))  _trn_attr->_useIDTData = strcasecmp("false", value);
-        else if (!strcmp("useDVLSide",           key))  _trn_attr->_useDvlSide = strcasecmp("false", value);
-        else if (!strcmp("useMbTrnData",         key))  _trn_attr->_useMbTrnData = strcasecmp("false", value);
-        else if (!strcmp("skipInit",         key))  _trn_attr->_skipInit = strcasecmp("false", value);
-        else
-            fprintf(stderr, "\n\tTrnClient: Unknown key in cfg: %s\n\n", key);
-    }
-
-    // configure this instance and TRNConfig
     try {
 
         char mapname[MAPNAME_BUF_BYTES]={0};
@@ -296,24 +184,24 @@ int TrnClient::loadCfgAttributes(const char *cfg_file)
         getSessionDir(_logdir, sessiondir,512,false);
 
 
-        if(_trn_attr->_mapFileName != NULL){
-            snprintf(mapname, MAPNAME_BUF_BYTES, "%s/%s", mapPath, _trn_attr->_mapFileName);
+        if(_trn_attr->mapName != NULL){
+            snprintf(mapname, MAPNAME_BUF_BYTES, "%s/%s", mapPath, _trn_attr->mapName);
             free(mapFile);
             this->mapFile = STRDUPNULL(mapname);
         }else{
             this->mapFile = NULL;
         }
 
-        if(_trn_attr->_vehicleCfgName != NULL){
-            snprintf(vehiclename, VEHICLENAME_BUF_BYTES, "%s/%s", cfgPath, _trn_attr->_vehicleCfgName);
+        if(_trn_attr->vehicleCfgName != NULL){
+            snprintf(vehiclename, VEHICLENAME_BUF_BYTES, "%s/%s", cfgPath, _trn_attr->vehicleCfgName);
             free(vehicleSpecFile);
             this->vehicleSpecFile = STRDUPNULL(vehiclename);
         }else{
             this->vehicleSpecFile = NULL;
         }
 
-        if(_trn_attr->_particlesName!=NULL){
-            snprintf(particlename, PARTICLENAME_BUF_BYTES, "%s/%s", cfgPath, _trn_attr->_particlesName);
+        if(_trn_attr->particlesName!=NULL){
+            snprintf(particlename, PARTICLENAME_BUF_BYTES, "%s/%s", cfgPath, _trn_attr->particlesName);
             free(particlesFile);
             this->particlesFile = STRDUPNULL(particlename);
         }else{
@@ -323,8 +211,8 @@ int TrnClient::loadCfgAttributes(const char *cfg_file)
         free(saveDirectory);
         this->saveDirectory = STRDUPNULL(sessiondir);
 
-        this->mapType = _trn_attr->_map_type;
-        this->filterType = _trn_attr->_filter_type;
+        this->mapType = _trn_attr->mapType;
+        this->filterType = _trn_attr->filterType;
 
 
 #ifdef TRNCLIENT_CREATE_MAP
@@ -348,14 +236,14 @@ int TrnClient::loadCfgAttributes(const char *cfg_file)
         fprintf(stderr, "%s: par    : %s\n", __func__, particlename);
         fprintf(stderr, "%s: cfg    : %s\n", __func__, cfg_path);
         fprintf(stderr, "%s: save   : %s\n", __func__, saveDirectory);
-        fprintf(stderr, "%s: trnsvr : %s\n", __func__, _trn_attr->_terrainNavServer);
+        fprintf(stderr, "%s: trnsvr : %s\n", __func__, _trn_attr->terrainNavServer);
 
     }catch (Exception e){
         printf("\n];\n");
     }
 
     fprintf(stderr, "%s: server : %s:%d\n", __func__, _server_ip, _sockport);
-    fprintf(stderr, "%s: vehcfg : %s\n", __func__, _trn_attr->_vehicleCfgName);
+    fprintf(stderr, "%s: vehcfg : %s\n", __func__, _trn_attr->vehicleCfgName);
 
     return 0;
 }
@@ -381,42 +269,6 @@ static double degToRad(double deg)
   return deg*RadsPerDeg;
 }
 #endif
-
-/****************************************************************************/
-
-
-// Return the next key and value pair in the cfg file.
-// Function returns 0 if no key/value pair was found,
-// otherwise 1.
-// 
-int TrnClient::getNextKeyValue(FILE *cfg, char key[], char value[])
-{
-  // Continue reading from cfg skipping comment lines
-  // 
-  char line[300]={0};
-  while (fgets(line, sizeof(line), cfg))
-  {
-    // Chop off leading whitespace, then look for '//'
-    // 
-    size_t i = 0;
-    while(line[i] == ' ' || line[i] == '\t' || line[i] == '\n' || line[i] == '\r'
-      || line[i] == '\f' || line[i] == '\v') i++;
-
-    if (strncmp("//", line+i, 2))
-    {
-      // If a non-comment line was read from the config file,
-      // extract the key and value
-      // 
-      char *loc; 
-      sscanf(line, "%s = %s", key, value);
-      if ( (loc = strchr(value, ';')) ) *loc = '\0';  // Remove ';' from the value
-      return 1;
-    }
-  }
-
-  return 0;
-
-}
 
 int TrnClient::setVerbose(int val)
 {
@@ -508,7 +360,7 @@ TerrainNav* TrnClient::connectTRN()
     TerrainNav *_tercom = NULL;
     
     fprintf(stderr, "TrnClient - Using TerrainNav [%s:%ld]\n",
-            _trn_attr->_terrainNavServer, _trn_attr->_terrainNavPort);
+            _trn_attr->terrainNavServer, _trn_attr->terrainNavPort);
     
     try
     {
@@ -526,7 +378,7 @@ TerrainNav* TrnClient::connectTRN()
         // On linux and cygwin, we can use a native TerrainNav object instead
         // of relying on a trn_server. Call useTRNServer() to decide.
         //
-//        printf("Connecting to %s...\n", _trn_attr->_terrainNavServer);
+//        printf("Connecting to %s...\n", _trn_attr->terrainNavServer);
 //        _tercom = static_cast<TerrainNav *>(this);
     }
     catch (Exception e)
@@ -534,13 +386,13 @@ TerrainNav* TrnClient::connectTRN()
         fprintf(stderr, "TrnClient - Failed TRN connection. Check TRN error messages...\n");
     }
     
-    if (NULL!=_tercom && _tercom->is_connected() && !_trn_attr->_skipInit){
+    if (NULL!=_tercom && _tercom->is_connected() && !_trn_attr->skipInit){
         init_server();
 
-        setModifiedWeighting(_trn_attr->_useModifiedWeighting);
+        setModifiedWeighting(_trn_attr->useModifiedWeighting);
         // filterReinits
-        setFilterReinit(_trn_attr->_allowFilterReinits);
-        if(_trn_attr->_forceLowGradeFilter)
+        setFilterReinit(_trn_attr->allowFilterReinits);
+        if(_trn_attr->forceLowGradeFilter)
             useLowGradeFilter();
         else
             useHighGradeFilter();
@@ -568,7 +420,7 @@ TerrainNav* TrnClient::connectTRN()
         fprintf(stderr, "TrnClient - connected to server if no error messages...\n");
 
     } else{
-        fprintf(stderr, "TrnClient - Not initialized. skipInit(%c) See trn_server error messages...\n", _trn_attr->_skipInit ? 'Y' : 'N');
+        fprintf(stderr, "TrnClient - Not initialized. skipInit(%c) See trn_server error messages...\n", _trn_attr->skipInit ? 'Y' : 'N');
     }
     
     return _tercom;

@@ -75,6 +75,7 @@
 
 #include "TNavConfig.h"
 #include "TerrainNav.h"
+#include "TrnLcmDecoder.h"
 #include "structDefs.h"
 #include "macros.h"
 
@@ -106,6 +107,8 @@ using namespace lrauv_lcm_tools;
 // Other definitions
 #define LCMTRN_CONFIG_ENV "TRN_DATAFILES"
 #define LCMTRN_DEFAULT_CONFIG "lcm-trn.cfg"
+#define LCMTRN_DEFAULT_LCMURL "udpm://239.255.76.67:7667?ttl=1"
+#define LCMTRN_DEFAULT_TRACKDR true
 #define LCMTRN_DEFAULT_ZONE 10        // default utm zone Monterey Bay
 #define LCMTRN_DEFAULT_PERIOD 5       // min seconds between TRN updates
 #define LCMTRN_DEFAULT_COHERENCE 0.25 // max seconds between AHRS and DVL
@@ -132,95 +135,119 @@ typedef struct lcmconfig_ {
     const char *nav, *lat, *lon;
     const char *depth, *veh_depth, *pressure;
     const char *trn, *cmd, *reinit, *estimate;
+    const char *url;
 } LcmConfig;
 
-typedef struct trnconfig_ {
-    int utm_zone;
-    float period, coherence;
-    const char *mapn, *cfgn, *partn, *logd;                 // TRN cfg filenames
-    int maptype, filtertype, weighting, instrument, nbeams; // TRN options
-    bool allowreinit, lowgrade;
-} TrnConfig;
+    typedef struct trnconfig_ {
+        bool trackdr;
+        int utm_zone;
+        float period, coherence;
+        const char *mapn, *cfgn, *partn, *logd;                 // TRN cfg filenames
+        int maptype, filtertype, weighting, instrument, nbeams; // TRN options
+        bool allowreinit, lowgrade;
+    } TrnConfig;
 
-class LcmTrn
-{
-  public:
-    LcmTrn(const char *configfilepath);
-
-    ~LcmTrn();
-
-    static char *constructFullName(const char *env_var, const char *base_name);
-
-    bool good() { return _good; }
-    void run();   // Run while good()
-    void cycle(); // Execute a single listen-update cycle and return
-
-    LcmConfig *getLcmConfig() { return &_lcmc; }
-    TrnConfig *getTrnConfig() { return &_trnc; }
-
-  protected:
-    void init();
-    void reinit(const char *configfilepath = NULL);
-    void loadConfig();
-
-    void initTrn();
-    bool verifyTrnConfig();
-
-    void cleanTrn();
-    void initLcm();
-    bool verifyLcmConfig();
-    void cleanLcm();
-    int handleMessages();
-    int getLcmTimeout(unsigned int initial_timeout, unsigned int max_timeout);
-    void publishEstimatesDecoder();
-
-    void handleAhrs(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
-                    const LrauvLcmMessage *msg);
-    void handleDvl(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
-                   const LrauvLcmMessage *msg);
-    void handleDepth(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
-                     const LrauvLcmMessage *msg);
-    void handleCmd(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
-                   const LrauvLcmMessage *msg);
-    void handleNav(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
-                   const LrauvLcmMessage *msg);
-
-    bool time2Update();
-    bool updateTrn();
-
-    int64_t getTimeMillisec();
-
-    // Config items
-    const char *_configfile;
-    Config *_cfg;
-
-    int _lcmtimeout;
-    LcmConfig _lcmc;
-    TrnConfig _trnc;
-
-    // Main players
-    lcm::LCM *_lcm;
-    TerrainNav *_tnav;
-
-    // Internal TRN data
-    poseT _thisPose, _lastPose, _mle, _mmse;
-    measT _thisMeas, _lastMeas;
-    int _filterstate, _numreinits;
-    int _lastUtmZone;
-    int64_t _seqNo;
-
-    double _lastAHRSTimestamp;
-    double _lastDvlTimestamp;
-    double _lastNavTimestamp;
-    double _lastDepthTimestamp;
-    double _lastCmdTimestamp;
-    double _lastUpdateTimestamp;
-
-    bool _good;
-
-    LcmMessageReader _msg_reader;
-    TrnLcmDecoder* _trn_decoder;
+// For tracking Dead Reckoning states DR1 and DR2
+// Added 12/18/2024
+class DRstate {
+public:
+    DRstate() { reset(); }
+    void reset() { time = x = y = 0.0; }
+    double time;    // LRAUV timestamp associated with latest update
+    double x, y; // Calculated N/E/D position from vehicle lat/lon
 };
+
+    class LcmTrn
+    {
+    public:
+        LcmTrn(const char *configfilepath);
+
+        ~LcmTrn();
+
+        static char *constructFullName(const char *env_var, const char *base_name);
+
+        bool good() { return _good; }
+        void run();   // Run while good()
+        void cycle(); // Execute a single listen-update cycle and return
+
+        LcmConfig *getLcmConfig() { return &_lcmc; }
+        TrnConfig *getTrnConfig() { return &_trnc; }
+
+    protected:
+        void init();
+        void reinit(const char *configfilepath = NULL);
+        void loadConfig();
+
+        void initTrn();
+        bool verifyTrnConfig();
+
+        void cleanTrn();
+        void initLcm();
+        bool verifyLcmConfig();
+        void cleanLcm();
+        int handleMessages();
+        int getLcmTimeout(unsigned int initial_timeout, unsigned int max_timeout);
+        void publishEstimatesDecoder();
+        void trackDR2();
+
+        void handleAhrs(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
+                        const LrauvLcmMessage *msg);
+        void handleDvl(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
+                       const LrauvLcmMessage *msg);
+        void handleDepth(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
+                         const LrauvLcmMessage *msg);
+        void handleCmd(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
+                       const LrauvLcmMessage *msg);
+        void handleNav(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
+                       const LrauvLcmMessage *msg);
+
+        bool time2Update();
+        bool updateTrn();
+
+        int64_t getTimeMillisec();
+
+        // Config items
+        const char *_configfile;
+        Config *_cfg;
+
+        int _lcmtimeout;
+        LcmConfig _lcmc;
+        TrnConfig _trnc;
+
+        // Main players
+        lcm::LCM *_lcm;
+        TerrainNav *_tnav;
+
+        // Internal TRN data
+        poseT _thisPose, _lastPose, _mle, _mmse;
+        measT _thisMeas{4, 1}, _lastMeas{4, 1};
+        int _filterstate, _numreinits;
+        int _lastUtmZone;
+        int64_t _seqNo;
+
+        double _lastAHRSTimestamp;
+        double _lastDvlTimestamp;
+        double _lastNavTimestamp;
+        double _lastDepthTimestamp;
+        double _lastCmdTimestamp;
+        double _lastUpdateTimestamp;
+
+        bool _good;
+        bool _gotLat, _gotLon;
+        double _latTime, _lonTime;
+
+        // Dead Reckoning states
+        // This is required for the TRN to work properly when the LRAUV is
+        // ingesting the estimated lat and lon from TRN.
+        // DR1 is the current N/E/D position from LRAUV including TRN offsets
+        // DR2 is the current N/E/D position estimated locally without TRN offsets
+        DRstate _dr1, _dr2;
+        bool _trnOffetsApplied;
+        TrnLcmDecoder::trndata _trndata;
+
+        LcmMessageReader _msg_reader;
+        TrnLcmDecoder *_trn_decoder;
+    };
 
 } // namespace lcmTrn
 

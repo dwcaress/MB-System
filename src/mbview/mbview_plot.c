@@ -82,7 +82,7 @@
 /*------------------------------------------------------------------------------*/
 int mbview_reset_glx(size_t instance) {
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -91,26 +91,26 @@ int mbview_reset_glx(size_t instance) {
 	struct mbview_world_struct *view = &(mbviews[instance]);
 	struct mbview_struct *data = &(view->data);
 #ifdef MBV_DEBUG_GLX
-		fprintf(stderr, "%s:%d:%s instance:%zu view->glx_init:%d\n", __FILE__, __LINE__, __func__, instance,
+		fprintf(stderr, "%s:%d:%s instance:%zu view->glx_init:%d\n", __FILE__, __LINE__, (char *) __FUNCTION__, instance,
 		        view->glx_init);
 #endif
 
 	/* delete old glx_context if it exists */
 	if (view->glx_init) {
 #ifdef MBV_DEBUG_GLX
-		fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, __func__, instance,
+		fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, (char *) __FUNCTION__, instance,
 		        view->dpy, XtWindow(view->glwmda), view->glx_context);
 #endif
 		//glXMakeCurrent(view->dpy, XtWindow(view->glwmda), view->glx_context);
 #ifdef MBV_DEBUG_GLX
-		fprintf(stderr, "%s:%d:%s instance:%zu glXDestroyContext(%p,%lu,%p)\n", __FILE__, __LINE__, __func__, instance,
+		fprintf(stderr, "%s:%d:%s instance:%zu glXDestroyContext(%p,%lu,%p)\n", __FILE__, __LINE__, (char *) __FUNCTION__, instance,
 		        view->dpy, XtWindow(view->glwmda), view->glx_context);
 #endif
 		glXDestroyContext(view->dpy, view->glx_context);
 		view->glx_init = false;
 
 #ifdef MBV_GET_GLX_ERRORS
-		mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
+		mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
 #endif
 	}
 
@@ -123,12 +123,12 @@ int mbview_reset_glx(size_t instance) {
 	ac++;
 	XtGetValues(view->glwmda, args, ac);
 #ifdef MBV_DEBUG_GLX
-	fprintf(stderr, "%s:%d:%s instance:%zu glXCreateContext(%p,%p)\n", __FILE__, __LINE__, __func__, instance, view->dpy,
+	fprintf(stderr, "%s:%d:%s instance:%zu glXCreateContext(%p,%p)\n", __FILE__, __LINE__, (char *) __FUNCTION__, instance, view->dpy,
 	        view->vi);
 #endif
 	view->glx_context = glXCreateContext(view->dpy, view->vi, NULL, GL_TRUE);
 #ifdef MBV_DEBUG_GLX
-	fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, __func__, instance, view->dpy,
+	fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, (char *) __FUNCTION__, instance, view->dpy,
 	        XtWindow(view->glwmda), view->glx_context);
 #endif
 	glXMakeCurrent(view->dpy, XtWindow(view->glwmda), view->glx_context);
@@ -141,13 +141,13 @@ int mbview_reset_glx(size_t instance) {
 	view->contourfullrez = false;
 
 #ifdef MBV_GET_GLX_ERRORS
-	mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
+	mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
 #endif
 
 	const int status = MB_SUCCESS;
 
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 		fprintf(stderr, "dbg2       view->dpy:             %p\n", view->dpy);
@@ -167,7 +167,7 @@ int mbview_reset_glx(size_t instance) {
 /*------------------------------------------------------------------------------*/
 int mbview_drawdata(size_t instance, int rez) {
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -194,14 +194,14 @@ int mbview_drawdata(size_t instance, int rez) {
 
 #ifdef MBV_DEBUG_TIMING
 	fprintf(stderr, "%s:%d:%s: rez:%d  grid: %d %d  dim: %d %d  stride:%d\n", 
-			__FILE__, __LINE__, __FUNCTION__, rez, nxrange, nyrange, data->hirez_dimension, data->lorez_dimension, stride);
+			__FILE__, __LINE__, (char *) __FUNCTION__, rez, nxrange, nyrange, data->hirez_dimension, data->lorez_dimension, stride);
 #endif
 
 	/* enable depth test for 3D plots */
 	if (data->display_mode == MBV_DISPLAY_3D || data->display_projection_mode == MBV_PROJECTION_SPHEROID)
 		glEnable(GL_DEPTH_TEST);
 #ifdef MBV_GET_GLX_ERRORS
-	mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
+	mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
 #endif
 
 	/* set color parameters */
@@ -287,7 +287,7 @@ int mbview_drawdata(size_t instance, int rez) {
 					if (on) {
 						glEnd();
 #ifdef MBV_GET_GLX_ERRORS
-						mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
+						mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
 #endif
 						on = false;
 					}
@@ -314,7 +314,7 @@ int mbview_drawdata(size_t instance, int rez) {
 					if (on) {
 						glEnd();
 #ifdef MBV_GET_GLX_ERRORS
-						mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
+						mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
 #endif
 						on = false;
 					}
@@ -324,7 +324,7 @@ int mbview_drawdata(size_t instance, int rez) {
 			if (on) {
 				glEnd();
 #ifdef MBV_GET_GLX_ERRORS
-				mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
+				mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
 #endif
 				on = false;
 				flip = false;
@@ -400,7 +400,7 @@ int mbview_drawdata(size_t instance, int rez) {
 					if (on) {
 						glEnd();
 #ifdef MBV_GET_GLX_ERRORS
-						mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
+						mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
 #endif
 						on = false;
 					}
@@ -438,7 +438,7 @@ int mbview_drawdata(size_t instance, int rez) {
 					if (on) {
 						glEnd();
 #ifdef MBV_GET_GLX_ERRORS
-						mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
+						mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
 #endif
 						on = false;
 					}
@@ -448,7 +448,7 @@ int mbview_drawdata(size_t instance, int rez) {
 			if (on) {
 				glEnd();
 #ifdef MBV_GET_GLX_ERRORS
-				mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
+				mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
 #endif
 				on = false;
 				flip = false;
@@ -465,7 +465,7 @@ int mbview_drawdata(size_t instance, int rez) {
 		}
 	}
 #ifdef MBV_GET_GLX_ERRORS
-	mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
+	mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
 #endif
 
 	/* draw the triangle outlines */
@@ -520,7 +520,7 @@ int mbview_drawdata(size_t instance, int rez) {
 	}
 
 #ifdef MBV_GET_GLX_ERRORS
-	mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
+	mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
 #endif
 
 	/* draw current pick */
@@ -556,7 +556,7 @@ int mbview_drawdata(size_t instance, int rez) {
 	const int status = MB_SUCCESS;
 
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
@@ -566,7 +566,7 @@ int mbview_drawdata(size_t instance, int rez) {
 /*------------------------------------------------------------------------------*/
 int mbview_plotlowall(size_t instance) {
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -582,7 +582,7 @@ int mbview_plotlowall(size_t instance) {
 	const int status = MB_SUCCESS;
 
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
@@ -592,7 +592,7 @@ int mbview_plotlowall(size_t instance) {
 /*------------------------------------------------------------------------------*/
 int mbview_plotlowhighall(size_t instance) {
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -606,7 +606,7 @@ int mbview_plotlowhighall(size_t instance) {
 	const int status = MB_SUCCESS;
 
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
@@ -617,7 +617,7 @@ int mbview_plotlowhighall(size_t instance) {
 /*------------------------------------------------------------------------------*/
 int mbview_plothighall(size_t instance) {
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -633,7 +633,7 @@ int mbview_plothighall(size_t instance) {
 	const int status = MB_SUCCESS;
 
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
@@ -644,7 +644,7 @@ int mbview_plothighall(size_t instance) {
 /*------------------------------------------------------------------------------*/
 int mbview_plotlow(size_t instance) {
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -683,7 +683,7 @@ int mbview_plotlow(size_t instance) {
 	}
 
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
@@ -694,7 +694,7 @@ int mbview_plotlow(size_t instance) {
 /*------------------------------------------------------------------------------*/
 int mbview_plotlowhigh(size_t instance) {
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -736,7 +736,7 @@ int mbview_plotlowhigh(size_t instance) {
 	}
 
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
@@ -746,7 +746,7 @@ int mbview_plotlowhigh(size_t instance) {
 /*------------------------------------------------------------------------------*/
 int mbview_plothigh(size_t instance) {
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -785,7 +785,7 @@ int mbview_plothigh(size_t instance) {
 	}
 
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
@@ -795,7 +795,7 @@ int mbview_plothigh(size_t instance) {
 /*------------------------------------------------------------------------------*/
 int mbview_plotfull(size_t instance) {
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -835,7 +835,7 @@ int mbview_plotfull(size_t instance) {
 	}
 
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
@@ -845,7 +845,7 @@ int mbview_plotfull(size_t instance) {
 /*------------------------------------------------------------------------------*/
 int mbview_plot(size_t instance, int rez) {
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -865,13 +865,13 @@ int mbview_plot(size_t instance, int rez) {
 
 /* make correct window current for OpenGL */
 #ifdef MBV_DEBUG_GLX
-		fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, __func__, instance,
+		fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, (char *) __FUNCTION__, instance,
 		        view->dpy, XtWindow(view->glwmda), view->glx_context);
 #endif
 		glXMakeCurrent(view->dpy, XtWindow(view->glwmda), view->glx_context);
 
 #ifdef MBV_GET_GLX_ERRORS
-		mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
+		mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
 #endif
 
 		/*fprintf(stderr,"\nmbview_plot: instance:%zu rez:%d recursion:%zu\n",instance,rez,view->plot_recursion);
@@ -979,23 +979,23 @@ int mbview_plot(size_t instance, int rez) {
 
 /* make correct window current for OpenGL (may have changed due to recursion) */
 #ifdef MBV_DEBUG_GLX
-			fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, __func__, instance,
+			fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, (char *) __FUNCTION__, instance,
 			        view->dpy, XtWindow(view->glwmda), view->glx_context);
 #endif
 			glXMakeCurrent(view->dpy, XtWindow(view->glwmda), view->glx_context);
 
 #ifdef MBV_GET_GLX_ERRORS
-			mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
+			mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
 #endif
 
 /* swap opengl buffers */
 #ifdef MBV_DEBUG_GLX
-			fprintf(stderr, "%s:%d:%s instance:%zu glXSwapBuffers(%p,%lu)\n", __FILE__, __LINE__, __func__, instance,
+			fprintf(stderr, "%s:%d:%s instance:%zu glXSwapBuffers(%p,%lu)\n", __FILE__, __LINE__, (char *) __FUNCTION__, instance,
 			        view->dpy, XtWindow(view->glwmda));
 #endif
 			glXSwapBuffers(view->dpy, XtWindow(view->glwmda));
 #ifdef MBV_GET_GLX_ERRORS
-			mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
+			mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
 #endif
 		}
 
@@ -1003,14 +1003,14 @@ int mbview_plot(size_t instance, int rez) {
 		struct timespec endtime;
 		clock_gettime(CLOCK_REALTIME, &endtime);
 		double runtime = (endtime.tv_sec - starttime.tv_sec) + 0.000000001 * (endtime.tv_nsec - starttime.tv_nsec) ;
-		fprintf(stderr, "%s:%d:%s instance:%zu %s runtime: %.9f\n", __FILE__, __LINE__, __FUNCTION__, instance, __FUNCTION__, runtime);
+		fprintf(stderr, "%s:%d:%s instance:%zu %s runtime: %.9f\n", __FILE__, __LINE__, (char *) __FUNCTION__, instance, (char *) __FUNCTION__, runtime);
 #endif
 	}
 
 	const int status = MB_SUCCESS;
 
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
@@ -1022,7 +1022,7 @@ int mbview_plot(size_t instance, int rez) {
 int mbview_findpoint(size_t instance, int xpixel, int ypixel, bool *found, double *xgrid, double *ygrid, double *xlon,
                      double *ylat, double *zdata, double *xdisplay, double *ydisplay, double *zdisplay) {
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -1046,7 +1046,7 @@ int mbview_findpoint(size_t instance, int xpixel, int ypixel, bool *found, doubl
 				xgrid, ygrid, xlon, ylat, zdata,
 				xdisplay, ydisplay, zdisplay);
 //fprintf(stderr, "\n%s:%d:%s: Called mbview_findpointrez: rez:%d ij: %d %d found:%d bounds: %d %d %d %d\n",
-//__FILE__, __LINE__, __FUNCTION__, rez, xpixel, ypixel, *found, ijbounds[0], ijbounds[1], ijbounds[2], ijbounds[3]);
+//__FILE__, __LINE__, (char *) __FUNCTION__, rez, xpixel, ypixel, *found, ijbounds[0], ijbounds[1], ijbounds[2], ijbounds[3]);
 		}
 		/*fprintf(stderr,"First findpointrez: rez:%d pixels:%d %d found:%d xlon:%f ylat:%f zdata:%f\n",
 		rez,xpixel,ypixel,found,xlon,ylat,zdata);*/
@@ -1075,7 +1075,7 @@ int mbview_findpoint(size_t instance, int xpixel, int ypixel, bool *found, doubl
 				xgrid, ygrid, xlon, ylat, zdata,
 				xdisplay, ydisplay, zdisplay);
 //fprintf(stderr, "%s:%d:%s: Called mbview_findpointrez: rez:%d ij: %d %d found:%d bounds: %d %d %d %d\n",
-//__FILE__, __LINE__, __FUNCTION__, rez, xpixel, ypixel, *found, ijbounds[0], ijbounds[1], ijbounds[2], ijbounds[3]);
+//__FILE__, __LINE__, (char *) __FUNCTION__, rez, xpixel, ypixel, *found, ijbounds[0], ijbounds[1], ijbounds[2], ijbounds[3]);
 		}
 		if (!(*found) && foundsave) {
 			// rez = MBV_REZ_LOW;
@@ -1090,10 +1090,10 @@ int mbview_findpoint(size_t instance, int xpixel, int ypixel, bool *found, doubl
 		}
 /*if (*found && (ijbounds[1] != ijbounds[0] || ijbounds[3] != ijbounds[2]))
 fprintf(stderr, "%s:%d:%s: Looping over mbview_findpointrez calls\n",
-__FILE__, __LINE__, __FUNCTION__);
+__FILE__, __LINE__, (char *) __FUNCTION__);
 else
 fprintf(stderr, "%s:%d:%s: Not looping over mbview_findpointrez calls\n",
-__FILE__, __LINE__, __FUNCTION__);*/
+__FILE__, __LINE__, (char *) __FUNCTION__);*/
 
 		/* repeat until found at highest resolution possible */
 		while (*found && (ijbounds[1] != ijbounds[0] || ijbounds[3] != ijbounds[2])) {
@@ -1117,7 +1117,7 @@ __FILE__, __LINE__, __FUNCTION__);*/
 			mbview_findpointrez(instance, rez, xpixel, ypixel, ijbounds, found, xgrid, ygrid, xlon, ylat, zdata, xdisplay,
 			                    ydisplay, zdisplay);
 //fprintf(stderr, "%s:%d:%s: Called mbview_findpointrez: rez:%d ij: %d %d found:%d bounds: %d %d %d %d\n",
-//__FILE__, __LINE__, __FUNCTION__, rez, xpixel, ypixel, *found, ijbounds[0], ijbounds[1], ijbounds[2], ijbounds[3]);
+//__FILE__, __LINE__, (char *) __FUNCTION__, rez, xpixel, ypixel, *found, ijbounds[0], ijbounds[1], ijbounds[2], ijbounds[3]);
 		}
 
 		/* if not found and 2D get position directly from pixels */
@@ -1149,7 +1149,7 @@ __FILE__, __LINE__, __FUNCTION__);*/
 	const int status = MB_SUCCESS;
 
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       found:           %d\n", *found);
 		fprintf(stderr, "dbg2       xgrid:           %f\n", *xgrid);
@@ -1168,7 +1168,7 @@ int mbview_findpointrez(size_t instance, int rez, int xpixel, int ypixel, int ij
                         double *ygrid, double *xlon, double *ylat, double *zdata, double *xdisplay, double *ydisplay,
                         double *zdisplay) {
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -1197,7 +1197,7 @@ int mbview_findpointrez(size_t instance, int rez, int xpixel, int ypixel, int ij
 	if (view->glx_init) {
 /* make correct window current for OpenGL */
 #ifdef MBV_DEBUG_GLX
-		fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, __func__, instance,
+		fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, (char *) __FUNCTION__, instance,
 		        view->dpy, XtWindow(view->glwmda), view->glx_context);
 #endif
 		glXMakeCurrent(view->dpy, XtWindow(view->glwmda), view->glx_context);
@@ -1207,7 +1207,7 @@ if (rez <= MBV_REZ_LOW)
 //instance,xpixel,ypixel,ijbounds[0],ijbounds[1],ijbounds[2],ijbounds[3]);
 
 #ifdef MBV_GET_GLX_ERRORS
-		mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
+		mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
 #endif
 
 		/* apply projection if needed */
@@ -1374,7 +1374,7 @@ iii, jjj, rgba[0], rgba[1], rgba[2], rgba[3]);
 
 /*if (rez <= MBV_REZ_LOW)
 fprintf(stderr, "%s:%d:%s: rgba: %f %f %f %f\n",
-__FILE__, __LINE__, __FUNCTION__, rgba[0], rgba[1], rgba[2], rgba[3]);*/
+__FILE__, __LINE__, (char *) __FUNCTION__, rgba[0], rgba[1], rgba[2], rgba[3]);*/
 		/* calculate pick location */
 		if (rgba[0] != 1.0 && rgba[1] != 1.0 && (rgba[2] > 0.2 && rgba[2] < 0.8)) {
 			*found = true;
@@ -1432,14 +1432,14 @@ fprintf(stderr," pickrez: grid: %f %f %f     lonlat: %f %f display: %f %f %f\n",
 		}
 
 #ifdef MBV_GET_GLX_ERRORS
-		mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
+		mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
 #endif
 	}
 
 	const int status = MB_SUCCESS;
 
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       ijbounds[0]:     %d\n", ijbounds[0]);
 		fprintf(stderr, "dbg2       ijbounds[1]:     %d\n", ijbounds[1]);
@@ -1460,7 +1460,7 @@ fprintf(stderr," pickrez: grid: %f %f %f     lonlat: %f %f display: %f %f %f\n",
 /*------------------------------------------------------------------------------*/
 int mbview_viewbounds(size_t instance) {
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -1473,13 +1473,13 @@ int mbview_viewbounds(size_t instance) {
 	if (view->glx_init) {
 /* make correct window current for OpenGL */
 #ifdef MBV_DEBUG_GLX
-		fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, __func__, instance,
+		fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, (char *) __FUNCTION__, instance,
 		        view->dpy, XtWindow(view->glwmda), view->glx_context);
 #endif
 		glXMakeCurrent(view->dpy, XtWindow(view->glwmda), view->glx_context);
 
 #ifdef MBV_GET_GLX_ERRORS
-		mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
+		mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
 #endif
 
 		/* apply projection if needed */
@@ -1758,14 +1758,14 @@ int mbview_viewbounds(size_t instance) {
 data->viewbounds[0], data->viewbounds[1], data->viewbounds[2], data->viewbounds[3]);*/
 
 #ifdef MBV_GET_GLX_ERRORS
-		mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
+		mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
 #endif
 	}
 
 	const int status = MB_SUCCESS;
 
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       viewbounds[0]:   %d\n", data->viewbounds[0]);
 		fprintf(stderr, "dbg2       viewbounds[1]:   %d\n", data->viewbounds[1]);
@@ -1779,7 +1779,7 @@ data->viewbounds[0], data->viewbounds[1], data->viewbounds[2], data->viewbounds[
 /*------------------------------------------------------------------------------*/
 int mbview_drapesegment(size_t instance, struct mbview_linesegment_struct *seg) {
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -1815,7 +1815,7 @@ int mbview_drapesegment(size_t instance, struct mbview_linesegment_struct *seg) 
 	}
 
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 		fprintf(stderr, "dbg2       seg->endpoints:\n");
@@ -1843,7 +1843,7 @@ int mbview_drapesegment(size_t instance, struct mbview_linesegment_struct *seg) 
 /*------------------------------------------------------------------------------*/
 int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *seg) {
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -1974,7 +1974,7 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 	}
 
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 		fprintf(stderr, "dbg2       seg->endpoints:\n");
@@ -2002,7 +2002,7 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 /*------------------------------------------------------------------------------*/
 int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *seg) {
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -2220,7 +2220,7 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 	}
 
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 		fprintf(stderr, "dbg2       seg->nls:        %d\n", seg->nls);
@@ -2239,7 +2239,7 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 /*------------------------------------------------------------------------------*/
 int mbview_drapesegmentw(size_t instance, struct mbview_linesegmentw_struct *seg) {
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -2271,7 +2271,7 @@ int mbview_drapesegmentw(size_t instance, struct mbview_linesegmentw_struct *seg
 	}
 
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 		fprintf(stderr, "dbg2       seg->endpoints:\n");
@@ -2300,7 +2300,7 @@ int mbview_drapesegmentw(size_t instance, struct mbview_linesegmentw_struct *seg
 /*------------------------------------------------------------------------------*/
 int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *seg) {
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -2427,7 +2427,7 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 	}
 
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 		fprintf(stderr, "dbg2       seg->endpoints:\n");
@@ -2456,7 +2456,7 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 /*------------------------------------------------------------------------------*/
 int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct *seg) {
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -2713,7 +2713,7 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 	}
 
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 		fprintf(stderr, "dbg2       seg->nls:        %d\n", seg->nls);
@@ -2733,7 +2733,7 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 /*------------------------------------------------------------------------------*/
 int mbview_glerrorcheck(size_t instance, char *sourcefile, int line, char *sourcefunction) {
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -2752,7 +2752,7 @@ int mbview_glerrorcheck(size_t instance, char *sourcefile, int line, char *sourc
 	const int status = MB_SUCCESS;
 
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", (char *) __FUNCTION__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 		fprintf(stderr, "dbg2       gl_error:        %d\n", gl_error);

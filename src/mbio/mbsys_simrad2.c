@@ -3753,7 +3753,7 @@ int mbsys_simrad2_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
 			*speed = 0.0;
 
 		/* get draft  */
-		*draft = 0.01 * ping->png_xducer_depth + 655.36 * ping->png_offset_multiplier;
+		*draft = 0.01 * ping->png_xducer_depth + 655.36 * ping->png_offset_multiplier - 0.01 * ping->png_heave;
 
 		/* get roll pitch and heave */
 		*roll = 0.01 * ping->png_roll;
@@ -4183,8 +4183,9 @@ int mbsys_simrad2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 		ping->png_speed = (int)rint(speed / 0.036);
 
 		/* get draft  */
-		ping->png_offset_multiplier = (int)floor(draft / 655.36);
-		ping->png_xducer_depth = 100 * (draft + heave - 655.36 * ping->png_offset_multiplier);
+		double depthoffset = draft + heave;
+		ping->png_offset_multiplier = (int)floor(depthoffset / 655.36);
+		ping->png_xducer_depth = 100 * (depthoffset - 655.36 * ping->png_offset_multiplier);
 
 		/* get roll pitch and heave */
 		ping->png_roll = (int)rint(roll / 0.01);

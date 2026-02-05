@@ -28,7 +28,7 @@ set(executables mbphotomosaic mbgetphotocorrection mbphotogrammetry
                   mbimagecorrect mbtiff2png mbimagelist)
 set(scripts mbm_makeimagelist)
 
-find_package(OpenCV 4 REQUIRED COMPONENTS core highgui calib3d)
+find_package(OpenCV 4 REQUIRED COMPONENTS core highgui calib3d imgproc)
 
 install(TARGETS ${executables} DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(PROGRAMS ${scripts} DESTINATION ${CMAKE_INSTALL_BINDIR})

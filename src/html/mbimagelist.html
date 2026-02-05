@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbimagelist</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  24 March 2025 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  31 March 2025 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -40,7 +40,7 @@ Version 5.0
 <B>--absolute</B>   {<B>-A</B>}
 <BR>
 
-<B>--copy</B>=<I>directory</I>   {<B>-C</B><I>file</I>}
+<B>--copy</B>=<I>directory</I>   {<B>-C</B><I>directory</I>}
 <BR>
 
 <B>--copyhere</B>
@@ -82,10 +82,17 @@ Version 5.0
 Imagelist files, or lists of seafloor photographic images,
 are used by a number of <B>MB-System</B> programs dealing with
 seafloor photography. These lists may contain references
-to other imagelists, making them recursive. See the <B>MB-System</B>
-manual page for details on the format and structure of imagelists.
-The program <B>mbimagelist</B> outputs each
-image filename encountered as it descends through the input imagelist tree. 
+to other imagelists, making them recursive. 
+By default, the program <B>mbimagelist</B> outputs each
+image filename encountered as it parses through the input imagelist tree. The output
+paths can be relative to the current working directory or absolute. 
+<P>
+Imagelist files can also contain processing parameters associated with the images, including 
+specifying a file containing the calibration parameters for the camera rig, specifying
+a file containing the trajectory (navigation and attitude) of the camera rig as images
+were collected, specifying a file with an image correction lookup table, and several other
+parameters. All of these parameters correspond to command line options for <B>mbphotomosaic</B> 
+that can also be specified.
 <P>
 This program
 can be used in shellscripts to read imagelists in the same fashion
@@ -93,110 +100,6 @@ as <B>MB-System</B> programs like <B>mbphotomosaic</B> and <B>mbphotocorrect</B>
 This program can also be used to check and debug complex recursive
 imagelist structures.
 <P>
-<P>
-<P>
-<P>
-<P>
-<P>
-The program <B>mbprocess</B> operates on &quot;raw&quot; swath data files,
-producing a &quot;processed&quot; swath data file (see the <B>mbprocess</B> man
-page for explanation).
-The <B>MB-System</B> algorithm for reading imagelists will,
-if a flag is set, replace a swath file name with the associated
-&quot;processed&quot; file name when that &quot;processed&quot; file exists. This
-flag may be set by embedding &quot;$PROCESSED&quot; as a line in a imagelist
-or it may be set first by the calling program. The flag may also
-be set to preclude reporting &quot;processed&quot; file names (embedding &quot;$RAW&quot;
-in a imagelist accomplishes this). When setting this flag within
-imagelists, the first encounter of a $PROCESSED or $RAW tag will
-prevail over later instances of either tag. The <B>--processed</B> and <B>--raw</B>
-options force <B>mbimagelist</B> to output processed file names
-when they exist (<B>--processed</B>) or to only output unprocessed
-(raw) file names (<B>--raw</B>).
-<P>
-Programs such as <B>mbgrid</B> try to check statistics or &quot;inf&quot;
-files to see if the corresponding data files include data within
-the specified geographic bounds. Other programs look for
-&quot;fast bathymetry&quot; or &quot;fast navigation&quot; (&quot;fbt&quot; or &quot;fnv&quot;) files
-in order to read the data more quickly. The <B>--make-ancilliary</B> option causes
-<B>mbimagelist</B> to create these three types of ancillary files
-for each swath data file. The <B>--update-ancilliary</B> option causes <B>mbimagelist</B>
-to create the &quot;inf&quot;, &quot;fbt&quot;, and &quot;fnv&quot; files only when they don't
-already exist or are out of date (older than the data file).
-<P>
-imagelists may also contain a third value, called the grid
-weight, which is used by <B>mbgrid</B> to priortize data.
-The larger the grid weight, the more importance <B>mbgrid</B>
-attaches to the related bathymetry data. Grid weights can
-be applied to imagelist entries which are themselves imagelist
-files, causing these weights to be associated with all of
-files referenced therein. However, the default behavior is
-for any grid weight in a particular imagelist entry to override
-values derived from higher levels in the recursive structure.
-This behavior can be reversed if a $NOLOCALWEIGHT tag is placed
-in the imagelist, or in a imagelist higher up in the structure.
-See the <B>MB-System</B> manual page for a more complete
-description.
-<P>
-The <B>--bounds</B><I>W/E/S/N</I> option causes the program to check each
-data file with an &quot;inf&quot; file for overlap with the desired bounds,
-and only report those files with data in the desired area (or no
-&quot;inf&quot; file to check). This behavior mimics that of <B>mbgrid</B>,
-allowing users to check what data files will contribute to gridding
-some particular area.
-<P>
-The <B>--problem</B> option causes the program to check each data file for
-the existence of any ancillary files (e.g. navigation files, edit
-save files, etc.) referenced in its mbprocess parameter file
-(if the parameter file exists). The program will list any problem
-found with the processing parameters, and will also list any
-data problem noted in the &quot;inf&quot; files. The possible data problems
-include:
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;No&nbsp;survey&nbsp;data&nbsp;found
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Zero&nbsp;longitude&nbsp;or&nbsp;latitude&nbsp;in&nbsp;survey&nbsp;data
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Instantaneous&nbsp;speed&nbsp;exceeds&nbsp;25&nbsp;km/hr
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Average&nbsp;speed&nbsp;exceeds&nbsp;25&nbsp;km/hr
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sounding&nbsp;depth&nbsp;exceeds&nbsp;11000&nbsp;m
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Unsupported&nbsp;Simrad&nbsp;datagram
-<P>
-The <B>--imagelistp</B> option causes the program to generate a imagelist file
-named &quot;imagelistp.mb-1&quot; and then exit. This imagelist has the following form:
-<BR>
-
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>$PROCESSED<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>imagelist.mb-1&nbsp;-1<BR>
-<BR>
-
-This file is a commonly used convenience because it allows users to easily
-reference the swath files listed (directly or recursively) through
-the imagelist &quot;imagelist.mb-1&quot; with the $PROCESSED flag on. So, in order to
-grid the processed bathymetry rather than the raw bathymetry, run <B>mbgrid</B>
-with &quot;imagelistp.mb-1&quot; as the input rather than &quot;imagelist.mb-1&quot;.
-<P>
-The <B>--status</B> option causes <B>mbimagelist</B> to report the status of the files
-it lists, including whether the file is up to date or needs reprocessing,
-and if the file is locked. <B>MBprocess</B> sets locks while operating on
-a swath file to prevent other instances of <B>mbprocess</B> from simultaneously
-operating on that same file. This allows one to run <B>mbprocess</B> multiple
-times simultaneously on a single imagelist, either on a single multiprocessor
-machine or on multiple computers mounting the same filesystem.
-The consists of creating a small text file
-named by appending &quot;.lck&quot; to the swath filename; while this file exists
-other programs will not modify the locked file. The locking program deletes
-the lock file when it is done. Orphaned lock files may be left if <B>mbprocess</B>
-crashes or is interrupted. These will prevent reprocessing by <B>mbprocess</B>,
-but can be both detected with the <B>--status</B> option and removed using the <B>--unlock</B> option.
-<P>
-The <B>--report</B> option causes <B>mbimagelist</B> to list the imagelist files rather
-than the swath files referenced through the imagelists. Each imagelist file path
-is preceded by its recursion level within the overall imagelist structure.
-<P>
-Finally, this program can be used to copy the swath files referenced in a
-imagelist structure to a single directory and to create a imagelist there
-(names &quot;imagelist.mb-1&quot;) that references those swath files. This is
-accomplished using the <B>--copy</B> option. The <B>--copy</B> copy function will
-not be done if the <B>--make-ancilliary</B>, <B>--update-ancilliary</B>, or <B>--problem</B> options are specified,
-but is compatible with the <B>--processed</B>, <B>--bounds</B>, and <B>--raw</B> options.
 <P>
 <A NAME="lbAF">&nbsp;</A>
 <H2>MB-SYSTEM AUTHORSHIP</H2>
@@ -228,19 +131,22 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>--copy</B>
+<DT><B>--copy=</B><I>directory</I>
 
 <DD>
 <BR>
 
-Causes the swath files referenced in the input imagelist structure to be
+Causes the image files referenced in the input imagelist structure to be
+copied to the specified directory and creates a imagelist
+(names &quot;imagelist.mb-1&quot;) in that same directory that references the copied image files.
+<DT><B>--copyhere</B>
+
+<DD>
+<BR>
+
+Causes the image files referenced in the input imagelist structure to be
 copied to the current directory and creates a imagelist
-(names &quot;imagelist.mb-1&quot;) that references the copied swath files.
-The copy function will not be done if the <I>--make-ancilliary</I>, <I>--update-ancilliary</I>, or <I>--problem</I> options are specified.
-If the <I>--processed</I>, <I>--bounds</I>, and <I>--raw</I> options are specified these
-functions will modify which swath files are copied. Any ancillary files
-(e.g. *inf metadata files) will also be copied, but processed data
-files derived from the target copied files will not be copied.
+(names &quot;imagelist.mb-1&quot;) that references the copied image files.
 <DT><B>--report</B>
 
 <DD>
@@ -591,7 +497,7 @@ files. Copying of processed files should also be an option.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 24 March 2025</P></CENTER>
+Last Updated: 31 March 2025</P></CENTER>
 
 <HR>
 <center>

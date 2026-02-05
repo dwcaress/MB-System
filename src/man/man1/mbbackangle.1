@@ -1,5 +1,5 @@
 2100
-.TH mbbackangle 1 "13 July 2023" "MB-System 5.0" "MB-System 5.0"
+.TH mbbackangle 1 "26 December 2025" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbbackangle\fP \- Generates tables of the average amplitude or
 sidescan values in swath sonar data as a function of
@@ -207,9 +207,9 @@ applying the amplitude and/or sidescan correction tables generated
 by \fBmbbackangle\fP. Default: \fIrefangle\fP = 30.0 degrees.
 .TP
 .B \-S
-This option causes \fBmbbackangle\fP to skip processing of input files that have 
-previously processed, as evidenced by the existence of amplitude and/or sidescan 
-correction table files younger than .
+This option causes \fBmbbackangle\fP to skip processing of input raw swath files that have 
+previously processed and are up to date, as evidenced by the existence of amplitude 
+and/or sidescan correction table files older than the raw files and beam edits.
 .TP
 .B \-T
 \fItopogridfile\fP

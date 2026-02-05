@@ -15,7 +15,7 @@ double zGrid::getZ(unsigned int xIndex, unsigned int yIndex) const{
 	}
 }
 void zGrid::Print(){
-	std::cout << "X: " << numXValues << "\tY: " << numYValues << "\tXfirst: " << xIndexFirst << std::endl;
+	std::cerr << "X: " << numXValues << "\tY: " << numYValues << "\tXfirst: " << xIndexFirst << std::endl;
 }
 
 
@@ -52,7 +52,7 @@ Vector& Vector::operator+=(const Vector& V) {
 }
 /***************************************************/
 void Vector::Print(void) const {
-	std::cout << "X: " << x << "\tY: " << y << "\tZ: " << z << std::endl;
+	std::cerr << "X: " << x << "\tY: " << y << "\tZ: " << z << std::endl;
 }
 /***************************************************/
 /***************************************************/
@@ -74,7 +74,7 @@ Vector operator/ (Vector U, double divideBy) {
 }
 /***************************************************/
 void Path::Print(void) const {
-	std::cout << "X: " << x << "\tY: " << y << "\tZ: " << z << std::endl;
+	std::cerr << "X: " << x << "\tY: " << y << "\tZ: " << z << std::endl;
 }
 
 
@@ -129,7 +129,7 @@ int Octree_PickMaxRatio(double& Xratio, const double Yratio, const double Zratio
 // local functions:
 void OctreeNode_PrintTabs(int num) {
 	for(int ii = 0; ii < num; ii++) {
-		std::cout << "  ";
+		std::cerr << "  ";
 	}
 }
 

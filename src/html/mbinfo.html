@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbinfo</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  24 August 2023 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  10 September 2025 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -27,17 +27,78 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbinfo</B> [<B>-B</B><I>yr/mo/da/hr/mn/sc</I> <B>-C -E</B><I>yr/mo/da/hr/mn/sc</I>
-<B>-F</B><I>format</I> <B>-G</B> <B>-I</B><I>filename</I> <B>-L</B><I>lonflip</I>
-<B>-M</B><I>londim/latdim[/lonmin/lonmax/latmin/latmax]</I>
-<B>-N</B> <B>-O</B> <B>-P</B><I>ping</I> <B>-Q</B>
-<B>-R</B><I>west/east/south/north</I> <B>-S</B><I>speed</I> <B>-W</B>
-<B>-X</B><I>outputformat</I> <B>-V -H</B>]
+<B>mbinfo</B> 
+<BR>
+
+[
+<BR>
+
+<B>--begin-time</B>=<I>yr/mo/da/hr/mn/sc</I> {<B>-B</B><I>yr/mo/da/hr/mn/sc</I>}
+<BR>
+
+<B>--bounds</B>=<I>west/east/south/north</I> {<B>-R</B><I>west/east/south/north</I>}
+<BR>
+
+<B>--comments</B> {<B>-C</B>}
+<BR>
+
+<B>--debug-record-types
+<BR>
+
+--debug-record-contents</B>=<I>identifier</I>
+<BR>
+
+<B>--end-time</B>=<I>yr/mo/da/hr/mn/sc</I> {<B>-E</B><I>yr/mo/da/hr/mn/sc</I>}
+<BR>
+
+<B>--format</B>=<I>format_id {-F</I><I>format_id</I>}
+<BR>
+
+<B>--good-nav</B> {<B>-G</B>}
+<BR>
+
+<B>--help</B> {<B>-H</B>}
+<BR>
+
+<B>--input</B>=<I>[file | datalist]</I> {<B>-I</B><I>file</I>}
+<BR>
+
+<B>--longitude-domain</B>=<I>lonflip</I> {<B>-L</B><I>lonflip</I>}
+<BR>
+
+<B>--mask-dimensions</B>=<I>londim/latdim[/west/east/south/north]</I>  {<B>-M</B><I>londim/latdim[/west/east/south/north]</I>}
+<BR>
+
+<B>--notices</B> {<B>-N</B>}
+<BR>
+
+<B>--output-file</B> {<B>-O</B>}
+<BR>
+
+<B>--output-format</B>=<I>format_id {</I><B>-X</B><I>format_id</I>}
+<BR>
+
+<B>--ping-variances</B>=<I>number</I> {<B>-P</B><I>pings</I>}
+<BR>
+
+<B>--quick</B> {<B>-Q</B>}
+<BR>
+
+<B>--speed-minimum</B>=<I>speed</I> {<B>-S</B><I>speed</I>}
+<BR>
+
+<B>--time-gap</B>=<I>timegap</I> {<B>-T</B><I>timegap</I>}
+<BR>
+
+<B>--use-feet</B> {<B>-W</B>}
+<BR>
+
+<B>--verbose</B> {<B>-V</B>}
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
-<B>MBinfo</B> is a utility for reading a swath sonar data file
+Program <B>mbinfo</B> is a utility for reading a swath sonar data file
 or files and outputting some basic statistics.  The table generated
 shows the filename, the data format id, a brief description of
 the format, any metadata that have been inserted into the data,
@@ -67,15 +128,15 @@ of &quot;.inf&quot; files allows this information to be determined without
 having to read through each swath file. To create an &quot;.inf&quot; file, simply direct the
 output of <B>mbinfo</B> to a file named by adding the
 suffix &quot;.inf&quot; to the input swath
-data filename. This can also be accomplished using the <B>-O</B>
-option of <B>mbinfo</B>, or the <B>-N</B> and <B>-O</B> options of
+data filename. This can also be accomplished using the <B>--output-file</B>
+option of <B>mbinfo</B>, or the <B>--make-ancilliary</B> and <B>--update-ancillary</B> options of
 <B>mbdatalist</B>.
 <P>
 Data archives use metadata harvesting tools that often work better with
 information structured for machine parsing rather than for easy
 reading by humans. To output a variant of &quot;*.inf&quot; files in the JSON
-format (with &quot;_inf.json&quot; suffixes), use the <B>-X</B><I>1</I> option.
-Similarly, specifying the <B>-X</B><I>2</I> option will result in XML
+format (with &quot;_inf.json&quot; suffixes), use the <B>--output-format</B><I>1</I> option.
+Similarly, specifying the <B>--output-format</B><I>2</I> option will result in XML
 output in files with &quot;_xml.inf&quot; suffixes.
 <P>
 The program <B>mbprocess</B> can insert metadata recognized
@@ -89,7 +150,7 @@ and/or windowed in time and space.  Comments in the data
 stream may also be printed out.
 The results are dumped to stdout.
 <P>
-If pings are averaged (<I>pings</I> &gt; 2),
+If pings are averaged (<B>--ping-variances</B>=<I>number</I> with <I>number</I> &gt; 2),
 <B>mbinfo</B> estimates the variance for each of the bathymetry beams
 and sidescan pixels
 by reading a set number of pings and then finding the
@@ -100,8 +161,8 @@ The program output can also be extended to include a coarse
 mask representing where data lies within the file's bounding
 box. This mask is shown as a table of 0's and 1's, where
 the 1's indicate bins with data. The dimensions of the mask
-are specified with the <B>-M</B><I>londim/latdim</I> option.
-For instance, if the user specifies <B>-M</B><I>10/10</I>, then
+are specified with the <B>--mask-dimensions</B>=<I>londim/latdim</I> option.
+For instance, if the user specifies <B>--mask-dimensions</B>=<I>10/10</I>, then
 <B>mbinfo</B> will read through the data once to establish the
 usual statistics, including the data bounding box. Then, the
 program will initialize a 10 X 10 grid with the minimum and
@@ -111,7 +172,7 @@ pixel falls will be set to 1. After the second reading pass,
 the data location mask will be output at the end of the
 <B>mbinfo</B> output. If the data bounding box is already known, then
 it can be added to the <B>-M</B> command (e.g.
-<B>-M</B><I>londim/latdim[/lonmin/lonmax/latmin/latmax]</I>). In this
+<B>--mask-dimensions</B>=<I>londim/latdim/west/east/south/north</I>). In this
 case, the data will only be read once.
 <P>
 <A NAME="lbAF">&nbsp;</A>
@@ -144,10 +205,9 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-B</B>
+<DT><B>--begin-time=</B><I>yr/mo/da/hr/mn/sc</I> <B>-B</B><I>yr/mo/da/hr/mn/sc</I>
 
 <DD>
-<I>yr/mo/da/hr/mn/sc</I>
 <BR>
 
 This option sets the starting time for data allowed in the input data.
@@ -159,20 +219,25 @@ after the ending time, then any data between the ending
 and starting time will be ignored. This scheme allows time
 windowing both inside and outside a specified interval.
 Default: <I>yr/mo/da/hr/mn/sc</I> = 1962/2/21/10/30/0.
-<DT><B>-C</B>
+<DT><B>--comments {-C</B>}
 
 <DD>
 Normally, <B>mbinfo</B> ignores comments encountered in the
 data file.  If the <B>-C</B> flag is given, all of the comments will be
 printed out.
-<DT><B>-E</B>
+<DT><B>--debug-record-types</B>
 
 <DD>
-<I>yr/mo/da/hr/mn/sc</I>
+<DT><B>--debug-record-contents</B>=<I>identifier</I>
+
+<DD>
+<DT><B>--end-time=</B><I>yr/mo/da/hr/mn/sc</I> {<B>-E</B><I>yr/mo/da/hr/mn/sc</I>}
+
+<DD>
 <BR>
 
 This option sets the ending time for data allowed in the input data.
-The <B>-B</B> option sets the starting time for data. If the
+The <B>--begin-time</B> option sets the starting time for data. If the
 starting time is before the ending time, then any data
 with a time stamp before the starting time or after the
 ending time is ignored. If instead the starting time is
@@ -580,7 +645,7 @@ No currently known bugs.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 24 August 2023</P></CENTER>
+Last Updated: 10 September 2025</P></CENTER>
 
 <HR>
 <center>
