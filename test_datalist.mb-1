@@ -1,0 +1,4 @@
+# Test datalist for mbmesh
+# Format: filename format weight
+test/utilities/testdata/mb88/TN136HS.309.snipped.mb88 88 1.0
+test/utilities/testdata/mb59/TN136HS.309.snipped.mb59 59 1.0
