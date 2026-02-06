@@ -1048,6 +1048,7 @@ $missiontime += ($mmissiondepths[$nmissionpoints - 1] / $ascendrate)
 		+ $gpsduration;
 #printf "MISSIONTIME: ascent time:%f  tottime:%f\n",
 #($mmissiondepths[$nmissionpoints - 1] / $ascendrate)+ $gpsduration, $missiontime;
+$missiontimehours = $missiontime / 3600.0;
 
 # if not specified calculate abort time using safety factor of $durationfactormission
 if (!$aborttime)
@@ -1082,9 +1083,8 @@ elsif ($verbose)
 		}
 	printf "    Mission File:             $missionfile\r\n";
 	printf "    Distance:                 %.0f (m)  %.3f (km)\r\n", $distancelastmpoint, 0.001 * $distancelastmpoint;
-	printf "    Estimated Time:           %d (s)  %.3f (hr)\r\n", $missiontime, $missiontime / 3600.0;
+	printf "    Estimated Time:           %d (s)  %.3f (hr)\r\n", $missiontime, $missiontimehours;
 	printf "    Distance:                 %.0f (m)  %.3f (km) \r\n", $distancelastmpoint, 0.001 * $distancelastmpoint;
-	printf "    Estimated Time:           %d (s)  %.3f (hr) \r\n", $missiontime, $missiontime / 3600.0;
 	printf "    Abort Time:               %d (s)  %.3f (hr) \r\n", $aborttime, $aborttime / 3600.0;
 	printf "    Max battery life:         %d (s)  %.3f (hr) \r\n", $batterylife, $batterylife / 3600.0;
 	printf "    Safety margin:            %d (s)  %.3f (hr) \r\n", $safetymargin, $safetymargin / 3600.0;
@@ -1554,11 +1554,11 @@ if (!$outputoff)
 	print MFILE "speed            = ASCENTDESCENT_SPEED; \r\n";
 	print MFILE "endDepth         = ASCENDENDDEPTH; \r\n";
 	print MFILE "} \r\n";
-    print "Behavior: ascend\r\n";
+  print "Behavior: ascend\r\n";
 	print MFILE "# \r\n";
-    if ($trnenable)
-    	{
-	    print MFILE "# trn behavior \r\n";
+  if ($trnenable)
+    {
+	  print MFILE "# trn behavior \r\n";
 		print MFILE "behavior trn \r\n";
 		print MFILE "{ \r\n";
 		$behavior_id = $BEHAVIOR_trn + 0 * $behavior_count;
@@ -1568,19 +1568,35 @@ if (!$outputoff)
 		print MFILE "enableOffsets  = False; \r\n";
 		print MFILE "} \r\n";
 		print MFILE "# \r\n";
-	    print "Behavior: trn\r\n";
-    	}
+	  print "Behavior: trn\r\n";
+    }
 	if ($mappingsonar)
 		{
-		print MFILE "# Stop data logging on sonars and then turn off power to sonars if batteries are low\r\n";
-		print MFILE "behavior battery \r\n";
-		print MFILE "{ \r\n";
-		$behavior_id = $BEHAVIOR_battery + 0 * $behavior_count;
-		$behavior_count = $behavior_count + 1;
-		print MFILE "id     = $behavior_id; \r\n";
-		print MFILE "	duration = 10; \r\n";
-		print MFILE "	disableAuxLoads = 2; \r\n";
-		print MFILE "} \r\n";
+		if ($missiontimehours > 15.0)
+			{
+			print MFILE "# Stop data logging on sonars and then turn off power to sonars if batteries are low\r\n";
+			print MFILE "behavior battery \r\n";
+			print MFILE "{ \r\n";
+			$behavior_id = $BEHAVIOR_battery + 0 * $behavior_count;
+			$behavior_count = $behavior_count + 1;
+			print MFILE "id     = $behavior_id; \r\n";
+			print MFILE "	duration = 10; \r\n";
+			print MFILE "	disableAuxLoads = 2; \r\n";
+			print MFILE "} \r\n";
+			}
+		else
+			{
+			print MFILE "# # Stop data logging on sonars and then turn off power to sonars if batteries are low\r\n";
+			print MFILE "# behavior battery \r\n";
+			print MFILE "# { \r\n";
+			$behavior_id = $BEHAVIOR_battery + 0 * $behavior_count;
+			$behavior_count = $behavior_count + 1;
+			print MFILE "# id     = $behavior_id; \r\n";
+			print MFILE "# 	duration = 10; \r\n";
+			print MFILE "# 	disableAuxLoads = 2; \r\n";
+			print MFILE "# } \r\n";
+			}
+		print MFILE "# \r\n";
 		print MFILE "# ascend behavior for 30 seconds to give time for sonars to stop logging \r\n";
 		print MFILE "behavior ascend  \r\n";
 		print MFILE "{ \r\n";
@@ -1724,12 +1740,15 @@ printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$nmissionpoints-1];
 			}
 
 		# do ascend, gps, descend at line starts and ends if specified
-print "TEST for GPS ascent: $surfacewaypoint $i $iwaypoint $mwaypoints[$i]\n";
+		if ($surfacewaypoint > 0)
+			{
+			print "TEST for GPS ascent: $surfacewaypoint $i $iwaypoint $mwaypoints[$i]\n";
+			}
 		if (($iwaypoint != $nwaypoints - 1)
             && ($iwaypoint > 0)
 			&& ($surfacewaypoint > 0 && $surfacewaypoint == $mwaypoints[$i]))
 			{
-print "GPS ASCENT!!\n";
+			print "GPS ASCENT!!\n";
 			print MFILE "# \r\n";
 			printf MFILE "# Ascend, gps, descend after reaching waypoint %d at end of line %d\r\n", $iwaypoint, $iwaypoint;
 			if ($mappingsonar)
@@ -2178,7 +2197,7 @@ print "Behavior: startsurvey\n";
 				print MFILE "id     = $behavior_id; \r\n";
 				printf MFILE "latitude     = %f; \r\n", $mlats[$i];
 				printf MFILE "longitude    = %f; \r\n", $mlons[$i];
-				printf MFILE "duration     = 120; \r\n";
+				printf MFILE "duration     = TIME_TO_FIRST_WAYPOINT; \r\n";
 				printf MFILE "depth        = %f; \r\n", $mmissiondepths[$i];
 				print MFILE "speed        = ASCENTDESCENT_SPEED; \r\n";
 				print MFILE "} \r\n";
@@ -2523,7 +2542,7 @@ print "waypoint [$i] $mwaypoints[$i] line:$iwaypoint Depth:$mmissiondepths[$i]\n
 				{
 				printf MFILE "# abortOnTimeout    = True; \r\n";
 				}
-print " Depths: ";
+print " Depths 1: ";
 			if ($i > 0)
 				{
 				printf MFILE "initialDepth       = %f; \r\n", $mmissiondepths[$i-1];
@@ -2634,7 +2653,7 @@ printf " Segment length: %.2f m ",$mlengths[$i];
 				{
 				printf MFILE "# abortOnTimeout    = True; \r\n";
 				}
-print " Depths: ";
+print " Depths 2: ";
 			if ($i > 0)
 				{
 				printf MFILE "initialDepth       = %f; \r\n", $mmissiondepths[$i-1];
@@ -3158,8 +3177,7 @@ print "Behavior: delta_t (start, reset, logMode = 0)\r\n";
 	for ($i = 0; $i < $nmissionpoints-1; $i++)
 		{
 		printf TFILE "%f %f\r\n", $mdistances[$i], -$mmissiondepths[$i];
-		if (($i != $nwaypoints - 1)
-            && ($i != 0)
+		if ($surfacewaypoint > 0 && ($i != $nwaypoints - 1) && ($i != 0)
 			&& ($surfacewaypoint == $mwaypoints[$i]))
 			{
 			printf TFILE "%f %f\r\n", $mdistances[$i], 0.0;
