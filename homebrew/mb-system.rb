@@ -8,18 +8,22 @@ class MbSystem < Formula
   head "https://github.com/dwcaress/MB-System.git", branch: "feature-newgui"
 
   depends_on "cmake" => :build
+  depends_on "googletest" => :build
   depends_on "pkg-config" => :build
 
   depends_on "fftw"
   depends_on "gdal"
   depends_on "gmt"
+  depends_on "libx11"
+  depends_on "libxt"
+  depends_on "mesa"
+  depends_on "mesa-glu"
   depends_on "netcdf"
+  depends_on "opencv"
   depends_on "openmotif"
   depends_on "proj"
   depends_on "qt@6"
   depends_on "vtk"
-  depends_on "libx11"
-  depends_on "libxt"
 
   def install
     # Set up build directory
@@ -30,15 +34,15 @@ class MbSystem < Formula
         -DbuildQt=1
       ]
 
-      # Note: XQuartz GLX/OpenGL is broken on modern macOS
+      # NOTE: XQuartz GLX/OpenGL is broken on modern macOS
       # X11/Motif apps with OpenGL (mbgrdviz, mbeditviz) will not work
       # Users should use Qt versions (qt-mbgrdviz, etc.) instead
 
       # Configure Qt6 paths
-      args << "-DQt6_DIR=#{Formula["qt@6"].opt_lib}/cmake/Qt6"
+      ENV["Qt6_DIR"] = "#{Formula["qt@6"].opt_lib}/cmake/Qt6"
 
-      # Configure VTK paths
-      args << "-DVTK_DIR=#{Formula["vtk"].opt_lib}/cmake/vtk"
+      # Configure VTK - let CMake find it via CMAKE_PREFIX_PATH
+      args << "-DVTK_DIR=#{Formula["vtk"].opt_lib}/cmake/vtk-9.3"
 
       # Enable VTK modules with Qt GUI support
       args << "-DVTK_QT_VERSION=6"
