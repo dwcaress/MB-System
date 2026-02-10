@@ -234,7 +234,7 @@ if(buildDeprecated)
 endif()
 
 if(buildTests)
-  add_subdirectory(third_party)
+  ### add_subdirectory(third_party)
   add_subdirectory(test/mbio)
   add_subdirectory(test/utilities)
   if(buildDeprecated)
