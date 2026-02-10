@@ -1,4 +1,4 @@
-##find_package(GTest REQUIRED)
+find_package(GTest REQUIRED)
 message("In test/mbio")
 
 set(tests mb_defaults_test mb_error_test mb_format_test mb_mem_test
