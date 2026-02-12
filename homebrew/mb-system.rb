@@ -32,6 +32,7 @@ class MbSystem < Formula
         -DCMAKE_INSTALL_PREFIX=#{prefix}
         -DCMAKE_BUILD_TYPE=Release
         -DbuildQt=1
+        -DbuildTests=1
       ]
 
       # NOTE: XQuartz GLX/OpenGL is broken on modern macOS
