@@ -56,6 +56,9 @@ public:
 private: // members
   Matrix<Vertex> _vertices;
   std::vector<Tile> _tiles;
+  double _geoorigin_x = 0.0;
+  double _geoorigin_y = 0.0;
+  double _geoorigin_z = 0.0;
 
 private: // methods
   static double to_radians(double degrees);
@@ -63,12 +66,16 @@ private: // methods
   static double get_latitude(const Bathymetry& bathymetry, size_t y);
   static Vertex get_earth_centered_vertex(double longitude, double latitude, double altitude,
                                           uint32_t id);
-  static Matrix<Vertex> get_vertices(const Bathymetry& bathymetry, double vertical_exaggeration);
+  static Matrix<Vertex> get_vertices(const Bathymetry& bathymetry, double vertical_exaggeration,
+                                     double geoorigin_x, double geoorigin_y, double geoorigin_z);
 
 public: // methods
   Geometry(const Bathymetry& bathymetry, const Options& options);
   const Matrix<Vertex>& vertices() const { return _vertices; }
   const std::vector<Tile>& tiles() const { return _tiles; }
+  double geoorigin_x() const { return _geoorigin_x; }
+  double geoorigin_y() const { return _geoorigin_y; }
+  double geoorigin_z() const { return _geoorigin_z; }
 };
 } // namespace mbgrd2gltf
 

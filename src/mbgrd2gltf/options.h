@@ -43,12 +43,16 @@ private: // members
   std::string _input_filepath;
   std::string _output_filepath;
   double _exaggeration = 1.0;
+  double _geoorigin_lon = 0.0;
+  double _geoorigin_lat = 0.0;
+  double _geoorigin_elev = 0.0;
   bool _is_binary_output = false;
   bool _is_help = false;
   bool _is_verbose = false;
   bool _is_exaggeration_set = false;
   bool _is_output_folder_set = false;
   bool _is_draco_compressed = false;
+  bool _is_geoorigin_set = false;
   int _draco_quantization[4] = {16, 7, 10, 8}; // [POSITION, NORMAL, TEXCOORD, COLOR]
 
 public: // members
@@ -57,12 +61,16 @@ public: // members
   const std::string& input_filepath() const { return _input_filepath; }
   const std::string& output_filepath() const { return _output_filepath; }
   double exaggeration() const { return _exaggeration; }
+  double geoorigin_lon() const { return _geoorigin_lon; }
+  double geoorigin_lat() const { return _geoorigin_lat; }
+  double geoorigin_elev() const { return _geoorigin_elev; }
   bool is_binary_output() const { return _is_binary_output; }
   bool is_help() const { return _is_help; }
   bool is_verbose() const { return _is_verbose; }
   bool is_exaggeration_set() const { return _is_exaggeration_set; }
   bool is_output_folder_set() const { return _is_output_folder_set; }
   bool is_draco_compressed() const { return _is_draco_compressed; }
+  bool is_geoorigin_set() const { return _is_geoorigin_set; }
   int draco_quantization(int i) const { return _draco_quantization[i]; }
   bool draco_quantization_valid() const;
 };

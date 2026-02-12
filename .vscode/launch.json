@@ -39,7 +39,9 @@
                 // Terrain for BEDs during CCE 2015, no vertical exaggeration - fails to load into gltf.report
                 //"-I", "${workspaceFolder}/build/MontereyCanyonBeds_1m+5m.grd", "-O", "${workspaceFolder}/build", "-E", "1.0", "-D", "-B"
                 // San Pedro Basin example
-                "-I", "${workspaceFolder}/build/SanPedroBasin50.grd", "-O", "${workspaceFolder}/build", "-E", "10.0", "-D", "-B"
+                //"-I", "${workspaceFolder}/build/SanPedroBasin50.grd", "-O", "${workspaceFolder}/build", "-E", "10.0", "-D", "-B", "-V",
+                // Test --geoorigin option with LASS multibeam data from Davidson Seamount - shows roundoff errors with ECEF coordinates
+                "-I", "${workspaceFolder}/build/sample_data/OceanImaging2018/20180925d1/multibeam/ZTopo.grd", "-O", "${workspaceFolder}/build/sample_data/OceanImaging2018/20180925d1/multibeam", "-D", "-B", "-G", "-122,36,0", "-V"
             ],
             "stopOnEntry": false,
             "cwd": "${workspaceFolder}",

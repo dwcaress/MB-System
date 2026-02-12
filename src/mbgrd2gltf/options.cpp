@@ -61,10 +61,11 @@ constexpr char help_message[] =
     "\n"
     "The output mesh vertices are positioned in an Earth-Centered, Earth-Fixed\n"
     "(ECEF) Cartesian coordinate system with units in meters. ECEF is a 3D\n"
-    "right-handed coordinate system with its origin at Earth's center of mass.";
+    "right-handed coordinate system with its origin at Earth's center of mass.\n"
+    "A GeoOrigin can be specified to improve rendering precision for localized areas.";
 constexpr char usage_message[] =
     "mbgrd2gltf -Igrdfile [-B -Ooutputfolder -Eexaggeration\n"
-    "\t-D -Qpvalue -Qnvalue -Qtvalue -Qcvalue -V -H]";
+    "\t-Glon,lat,elev -D -Qpvalue -Qnvalue -Qtvalue -Qcvalue -V -H]";
 
 namespace mbgrd2gltf {
 
@@ -114,6 +115,8 @@ void print_help() {
   std::cout << "  -B                 Output in binary glTF (GLB) format\n";
   std::cout << "  -O<outputfolder>   Output folder path [default: input file directory]\n";
   std::cout << "  -E<exaggeration>   Vertical exaggeration factor [default: 1.0]\n";
+  std::cout << "  -G<lon,lat,elev>   GeoOrigin for high-precision local coordinates\n";
+  std::cout << "                     [default: original ECEF coordinates, no offset]\n";
   std::cout << "  -D                 Enable Draco mesh compression\n";
   std::cout << "  -Qp<value>         Draco position quantization bits (2-30) [default: 16]\n";
   std::cout << "  -Qn<value>         Draco normal quantization bits (2-30) [default: 7]\n";
@@ -198,6 +201,28 @@ Options::Options(unsigned argc, const char* argv[]) {
       case 'D':
       case 'd':
         _is_draco_compressed = true;
+        break;
+
+      case 'G':
+      case 'g':
+        if (!value_ptr) {
+          throw std::invalid_argument("Option -G requires lon,lat,elev values");
+        }
+        {
+          // Parse comma-separated values: lon,lat,elev
+          std::string geoorigin_str(value_ptr);
+          size_t comma1 = geoorigin_str.find(',');
+          size_t comma2 = geoorigin_str.rfind(',');
+          
+          if (comma1 == std::string::npos || comma2 == std::string::npos || comma1 == comma2) {
+            throw std::invalid_argument("GeoOrigin format must be lon,lat,elev");
+          }
+          
+          _geoorigin_lon = std::atof(geoorigin_str.substr(0, comma1).c_str());
+          _geoorigin_lat = std::atof(geoorigin_str.substr(comma1 + 1, comma2 - comma1 - 1).c_str());
+          _geoorigin_elev = std::atof(geoorigin_str.substr(comma2 + 1).c_str());
+          _is_geoorigin_set = true;
+        }
         break;
 
       case 'Q':

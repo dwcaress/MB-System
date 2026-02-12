@@ -8,6 +8,7 @@ mbgrd2gltf \- convert bathymetric grid data to GLTF format with optional setting
 [\fB\-B\fP]
 [\fB\-O\fP\fIoutputfolder\fP]
 [\fB\-E\fP\fIexaggeration\fP]
+[\fB\-G\fP\fIlon,lat,elev\fP]
 [\fB\-D\fP]
 [\fB\-Qp\fP\fIvalue\fP]
 [\fB\-Qn\fP\fIvalue\fP]
@@ -80,6 +81,12 @@ Specify the path to the folder where the output GLTF file will be written. Defau
 Specify the vertical exaggeration factor as a decimal number, which multiplies the vertex altitudes. This can enhance the visibility of topographic features. Default: 1.0 (no exaggeration).
 
 .TP
+.B \-G
+\fIlon,lat,elev\fP
+.br
+Specify a GeoOrigin point for high-precision local coordinates. The format is comma-separated longitude, latitude, and elevation values (e.g., -122.0,36.8,-1000). All vertex coordinates will be expressed as offsets from this origin point in the ECEF coordinate system. This improves rendering precision for localized areas by reducing the magnitude of coordinate values, which helps overcome GPU single-precision floating point limitations. When not specified, vertices use original ECEF coordinates measured from Earth's center.
+
+.TP
 .B \-D
 Enable Draco mesh compression to reduce the file size by encoding meshes and point clouds. This can significantly reduce file sizes while maintaining visual quality.
 
@@ -141,6 +148,13 @@ Convert bathymetry with 10x vertical exaggeration:
 .RS
 .nf
 .B mbgrd2gltf \-I bathymetry.grd \-E 10.0 \-B
+.fi
+.RE
+
+Convert bathymetry with a GeoOrigin for improved precision in X3D Geospatial applications:
+.RS
+.nf
+.B mbgrd2gltf \-I monterey.grd \-G\-122.0,36.8,\-1000 \-B
 .fi
 .RE
 
