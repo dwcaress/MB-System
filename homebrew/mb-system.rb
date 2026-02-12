@@ -51,30 +51,6 @@ class MbSystem < Formula
       args << "-DVTK_MODULE_ENABLE_VTK_ViewsQt=YES"
       args << "-DVTK_MODULE_ENABLE_VTK_GUISupportQtQuick=YES"
 
-      # Configure GMT paths
-      args << "-DGMT_DIR=#{Formula["gmt"].opt_prefix}"
-
-      # Configure PROJ paths
-      args << "-DPROJ_DIR=#{Formula["proj"].opt_prefix}"
-
-      # Configure GDAL paths
-      args << "-DGDAL_DIR=#{Formula["gdal"].opt_prefix}"
-
-      # Configure NetCDF paths
-      args << "-DNETCDF_DIR=#{Formula["netcdf"].opt_prefix}"
-
-      # Configure FFTW paths
-      args << "-DFFTW_DIR=#{Formula["fftw"].opt_prefix}"
-
-      # Configure Motif paths
-      args << "-DMOTIF_DIR=#{Formula["openmotif"].opt_prefix}"
-
-      # Configure X11 paths
-      args << "-DX11_INCLUDE_DIR=#{Formula["libx11"].opt_include}"
-      args << "-DX11_LIBRARIES=#{Formula["libx11"].opt_lib}/libX11.dylib"
-      args << "-DXt_INCLUDE_DIR=#{Formula["libxt"].opt_include}"
-      args << "-DXt_LIBRARIES=#{Formula["libxt"].opt_lib}/libXt.dylib"
-
       system "cmake", "..", *args, *std_cmake_args
       system "make"
       system "make", "install"
