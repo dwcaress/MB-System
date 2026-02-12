@@ -20,11 +20,11 @@ if (NOT GTest_FOUND)
   )
   
   # 4. Download and make the targets available
-  message('call FetchContent_MakeAvailable(googletest)')
+  message("call FetchContent_MakeAvailable(googletest)")
   FetchContent_MakeAvailable(googletest)
 
 else()
-  message('Using system-installed googletest')
+  message("Using system-installed googletest")
 
 endif()
 
