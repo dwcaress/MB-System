@@ -1,5 +1,5 @@
 message("In test/mbio")
-# Use 'Find or Fetch' pattern to access googletest:
+# Use 'Find or Fetch' pattern to access googletest libraries.
 # googletest is accessible as source and compiled library through homebrew
 # (use find_package), but is available as source-only on ubuntu/debian
 # (use Fetch)
@@ -24,7 +24,7 @@ if (NOT GTest_FOUND)
   FetchContent_MakeAvailable(googletest)
 
 else()
-  message('Using system-insalled googletest'
+  message('Using system-insalled googletest')
 
 endif()
 
