@@ -8,7 +8,7 @@ mbgrd2gltf \- convert bathymetric grid data to GLTF format with optional setting
 [\fB\-B\fP]
 [\fB\-O\fP\fIoutputfolder\fP]
 [\fB\-E\fP\fIexaggeration\fP]
-[\fB\-G\fP\fIlon,lat,elev\fP]
+[\fB\-G\fP[\fIlon,lat,elev\fP]]
 [\fB\-D\fP]
 [\fB\-Qp\fP\fIvalue\fP]
 [\fB\-Qn\fP\fIvalue\fP]
@@ -82,9 +82,15 @@ Specify the vertical exaggeration factor as a decimal number, which multiplies t
 
 .TP
 .B \-G
-\fIlon,lat,elev\fP
+[\fIlon,lat,elev\fP]
 .br
-Specify a GeoOrigin point for high-precision local coordinates. The format is comma-separated longitude, latitude, and elevation values (e.g., -122.0,36.8,-1000). All vertex coordinates will be expressed as offsets from this origin point in the ECEF coordinate system. This improves rendering precision for localized areas by reducing the magnitude of coordinate values, which helps overcome GPU single-precision floating point limitations. When not specified, vertices use original ECEF coordinates measured from Earth's center.
+Specify a GeoOrigin point for high-precision local coordinates. All vertex coordinates will be expressed as offsets from this origin point in the ECEF coordinate system. This improves rendering precision for localized areas by reducing the magnitude of coordinate values, which helps overcome GPU single-precision floating point limitations.
+.br
+If \fB\-G\fP is specified with values (e.g., -G-122.0,36.8,-1000), those values are used as the GeoOrigin.
+.br
+If \fB\-G\fP is specified without values, the geographic center of the grid and mean altitude are automatically computed and used as the GeoOrigin.
+.br
+When \fB\-G\fP is not specified, vertices use original ECEF coordinates measured from Earth's center.
 
 .TP
 .B \-D

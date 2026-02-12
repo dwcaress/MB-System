@@ -65,7 +65,7 @@ constexpr char help_message[] =
     "A GeoOrigin can be specified to improve rendering precision for localized areas.";
 constexpr char usage_message[] =
     "mbgrd2gltf -Igrdfile [-B -Ooutputfolder -Eexaggeration\n"
-    "\t-Glon,lat,elev -D -Qpvalue -Qnvalue -Qtvalue -Qcvalue -V -H]";
+    "\t-G[lon,lat,elev] -D -Qpvalue -Qnvalue -Qtvalue -Qcvalue -V -H]";
 
 namespace mbgrd2gltf {
 
@@ -115,7 +115,9 @@ void print_help() {
   std::cout << "  -B                 Output in binary glTF (GLB) format\n";
   std::cout << "  -O<outputfolder>   Output folder path [default: input file directory]\n";
   std::cout << "  -E<exaggeration>   Vertical exaggeration factor [default: 1.0]\n";
-  std::cout << "  -G<lon,lat,elev>   GeoOrigin for high-precision local coordinates\n";
+  std::cout << "  -G[<lon,lat,elev>] GeoOrigin for high-precision local coordinates\n";
+  std::cout << "                     -G with values: use specified lon,lat,elev\n";
+  std::cout << "                     -G without values: use grid center and mean altitude\n";
   std::cout << "                     [default: original ECEF coordinates, no offset]\n";
   std::cout << "  -D                 Enable Draco mesh compression\n";
   std::cout << "  -Qp<value>         Draco position quantization bits (2-30) [default: 16]\n";
@@ -159,7 +161,7 @@ Options::Options(unsigned argc, const char* argv[]) {
       value_ptr = &arg[2];
     }
     // Check if value is in next argument (e.g., -I file.grd)
-    else if (i + 1 < argc && option != 'B' && option != 'D' && option != 'V' && option != 'H') {
+    else if (i + 1 < argc && option != 'B' && option != 'D' && option != 'V' && option != 'H' && option != 'G') {
       value_ptr = argv[++i];
     }
 
@@ -206,10 +208,10 @@ Options::Options(unsigned argc, const char* argv[]) {
       case 'G':
       case 'g':
         if (!value_ptr) {
-          throw std::invalid_argument("Option -G requires lon,lat,elev values");
-        }
-        {
-          // Parse comma-separated values: lon,lat,elev
+          // -G without arguments: use automatic GeoOrigin (grid center)
+          _is_geoorigin_auto = true;
+        } else {
+          // -G with arguments: parse lon,lat,elev
           std::string geoorigin_str(value_ptr);
           size_t comma1 = geoorigin_str.find(',');
           size_t comma2 = geoorigin_str.rfind(',');

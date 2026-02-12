@@ -53,6 +53,7 @@ private: // members
   bool _is_output_folder_set = false;
   bool _is_draco_compressed = false;
   bool _is_geoorigin_set = false;
+  bool _is_geoorigin_auto = false;
   int _draco_quantization[4] = {16, 7, 10, 8}; // [POSITION, NORMAL, TEXCOORD, COLOR]
 
 public: // members
@@ -71,6 +72,7 @@ public: // members
   bool is_output_folder_set() const { return _is_output_folder_set; }
   bool is_draco_compressed() const { return _is_draco_compressed; }
   bool is_geoorigin_set() const { return _is_geoorigin_set; }
+  bool is_geoorigin_auto() const { return _is_geoorigin_auto; }
   int draco_quantization(int i) const { return _draco_quantization[i]; }
   bool draco_quantization_valid() const;
 };

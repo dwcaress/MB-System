@@ -47,8 +47,37 @@
 namespace mbgrd2gltf {
 
 Geometry::Geometry(const Bathymetry& bathymetry, const Options& options) {
-  // Apply GeoOrigin offset only if explicitly set by user
-  if (options.is_geoorigin_set()) {
+  // Apply GeoOrigin offset
+  if (options.is_geoorigin_auto()) {
+    // Automatic GeoOrigin: use geographic center of grid
+    double geoorigin_lon = (bathymetry.longitude_min() + bathymetry.longitude_max()) / 2.0;
+    double geoorigin_lat = (bathymetry.latitude_min() + bathymetry.latitude_max()) / 2.0;
+    
+    // Compute mean altitude from valid altitude values
+    const auto& altitudes = bathymetry.altitudes();
+    double altitude_sum = 0.0;
+    size_t altitude_count = 0;
+    for (size_t y = 0; y < altitudes.size_y(); ++y) {
+      for (size_t x = 0; x < altitudes.size_x(); ++x) {
+        float altitude = altitudes.at(x, y);
+        if (!std::isnan(altitude)) {
+          altitude_sum += altitude;
+          altitude_count++;
+        }
+      }
+    }
+    double geoorigin_elev = (altitude_count > 0) ? (altitude_sum / altitude_count) : 0.0;
+    
+    LOG_INFO("Using automatic GeoOrigin (grid center):", geoorigin_lon, ",", geoorigin_lat, ",", geoorigin_elev);
+    
+    // Compute GeoOrigin ECEF offset
+    Vertex geoorigin_vertex = get_earth_centered_vertex(geoorigin_lon, geoorigin_lat, geoorigin_elev, 0);
+    _geoorigin_x = geoorigin_vertex.x();
+    _geoorigin_y = geoorigin_vertex.y();
+    _geoorigin_z = geoorigin_vertex.z();
+    
+    LOG_INFO("GeoOrigin ECEF offset:", _geoorigin_x, ",", _geoorigin_y, ",", _geoorigin_z);
+  } else if (options.is_geoorigin_set()) {
     double geoorigin_lon = options.geoorigin_lon();
     double geoorigin_lat = options.geoorigin_lat();
     double geoorigin_elev = options.geoorigin_elev();
