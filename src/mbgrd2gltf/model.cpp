@@ -787,6 +787,20 @@ void write_html(const Bathymetry& bathymetry, const Geometry& geometry, const Op
   html_file << "        font-weight: bold;\n";
   html_file << "      }\n";
   html_file << "      #toggle-log-btn:hover { background-color: rgba(85,85,85,0.9); }\n";
+  html_file << "      #model-title {\n";
+  html_file << "        position: absolute;\n";
+  html_file << "        top: 0px;\n";
+  html_file << "        left: 50%;\n";
+  html_file << "        transform: translateX(-50%);\n";
+  html_file << "        background-color: rgba(199,202,204,.7);\n";
+  html_file << "        padding: 4px 20px;\n";
+  html_file << "        margin: 2px;\n";
+  html_file << "        margin-top: 2px;\n";
+  html_file << "        z-index: 1000;\n";
+  html_file << "        font-size: 16px;\n";
+  html_file << "        font-weight: bold;\n";
+  html_file << "        white-space: nowrap;\n";
+  html_file << "      }\n";
   html_file << "    </style>\n";
   html_file << "  </head>\n";
   html_file << "  <body style='width:100%; height:100%; border:0; margin:0; padding:0;'>\n";
@@ -795,6 +809,7 @@ void write_html(const Bathymetry& bathymetry, const Geometry& geometry, const Op
   html_file << "        <a href='https://www.x3dom.org'>X3DOM</a> output created with\n";
   html_file << "        <a href='https://www.mbari.org/products/research-software/mb-system/'>MB-System</a> mbgrd2gltf.\n";
   html_file << "      </div>\n";
+  html_file << "      <div id='model-title'>" << model_filename << "</div>\n";
   html_file << "      <div id='Interaction_Toolbox' style='margin:2px; padding:4px; padding-right:150px; background-color:rgba(199,202,204,.7);position:absolute; z-index:1000; right:0px; top:0px;'>\n";
   html_file << "        <table>\n";
   html_file << "          <tr>\n";

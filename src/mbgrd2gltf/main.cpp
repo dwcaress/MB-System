@@ -143,7 +143,7 @@ int main(int argc, char* argv[]) {
       std::string timestamp = timestamp_stream.str();
       
       // Get captured log messages for provenance
-      const std::vector<std::string>& log_messages = Logger::get_();
+      const std::vector<std::string>& log_messages = Logger::get_captured_logs();
       
       model::write_html(bathymetry, geometry, options, command_line, timestamp, log_messages);
       
