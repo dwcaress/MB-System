@@ -64,6 +64,9 @@ int main(int argc, char* argv[]) {
       Logger::set_level(LogLevel::INFO);
     }
 
+    // Start capturing log messages for provenance in HTML output
+    Logger::start_capture();
+
     // Log the command line
     std::string command_line;
     for (int i = 0; i < argc; ++i) {
@@ -139,7 +142,10 @@ int main(int argc, char* argv[]) {
       timestamp_stream << std::put_time(gmt, "%Y-%m-%dT%H:%M:%SZ");
       std::string timestamp = timestamp_stream.str();
       
-      model::write_html(bathymetry, geometry, options, command_line, timestamp);
+      // Get captured log messages for provenance
+      const std::vector<std::string>& log_messages = Logger::get_();
+      
+      model::write_html(bathymetry, geometry, options, command_line, timestamp, log_messages);
       
       // Extract directory path for web server instructions
       std::string output_dir = options.output_filepath();

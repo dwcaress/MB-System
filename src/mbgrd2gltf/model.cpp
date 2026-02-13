@@ -699,9 +699,11 @@ void write_gltf(const Geometry& geometry, const Options& options) {
  * @param options : The options used (for provenance metadata)
  * @param command_line : The complete command line string
  * @param timestamp : ISO 8601 timestamp of processing
+ * @param log_messages : Captured log messages for provenance
  */
 void write_html(const Bathymetry& bathymetry, const Geometry& geometry, const Options& options,
-                const std::string& command_line, const std::string& timestamp) {
+                const std::string& command_line, const std::string& timestamp,
+                const std::vector<std::string>& log_messages) {
   
   // Determine the glTF/GLB filename (same as output root + extension)
   std::string model_filename = options.output_filepath();
@@ -734,7 +736,57 @@ void write_html(const Bathymetry& bathymetry, const Geometry& geometry, const Op
   html_file << "    <meta http-equiv='Content-Type' content='text/html;charset=utf-8'></meta>\n";
   html_file << "    <link rel='stylesheet' type='text/css' href='https://www.x3dom.org/x3dom/release/x3dom.css'></link>\n";
   html_file << "    <script type='text/javascript' src='https://www.x3dom.org/x3dom/release/x3dom-full.js'></script>\n";
-  html_file << "    <style>.x3dom-logContainer { bottom: 0px; position: absolute; }\n";
+  html_file << "    <style>\n";
+  html_file << "      .x3dom-logContainer { bottom: 0px; position: absolute; }\n";
+  html_file << "      #log-panel {\n";
+  html_file << "        position: fixed;\n";
+  html_file << "        bottom: 0;\n";
+  html_file << "        left: 0;\n";
+  html_file << "        right: 0;\n";
+  html_file << "        max-height: 30vh;\n";
+  html_file << "        background-color: rgba(240,240,240,0.95);\n";
+  html_file << "        border-top: 2px solid #666;\n";
+  html_file << "        display: none;\n";
+  html_file << "        flex-direction: column;\n";
+  html_file << "        z-index: 2000;\n";
+  html_file << "      }\n";
+  html_file << "      #log-panel.visible { display: flex; }\n";
+  html_file << "      #log-header {\n";
+  html_file << "        background-color: #666;\n";
+  html_file << "        color: white;\n";
+  html_file << "        padding: 8px 12px;\n";
+  html_file << "        font-weight: bold;\n";
+  html_file << "        display: flex;\n";
+  html_file << "        justify-content: space-between;\n";
+  html_file << "        align-items: center;\n";
+  html_file << "        cursor: pointer;\n";
+  html_file << "      }\n";
+  html_file << "      #log-content {\n";
+  html_file << "        flex: 1;\n";
+  html_file << "        overflow-y: auto;\n";
+  html_file << "        padding: 8px;\n";
+  html_file << "        font-family: 'Courier New', monospace;\n";
+  html_file << "        font-size: 12px;\n";
+  html_file << "      }\n";
+  html_file << "      .log-line {\n";
+  html_file << "        padding: 2px 0;\n";
+  html_file << "        white-space: pre-wrap;\n";
+  html_file << "        word-wrap: break-word;\n";
+  html_file << "      }\n";
+  html_file << "      #toggle-log-btn {\n";
+  html_file << "        position: fixed;\n";
+  html_file << "        bottom: 10px;\n";
+  html_file << "        left: 10px;\n";
+  html_file << "        background-color: rgba(102,102,102,0.9);\n";
+  html_file << "        color: white;\n";
+  html_file << "        border: none;\n";
+  html_file << "        padding: 10px 15px;\n";
+  html_file << "        border-radius: 4px;\n";
+  html_file << "        cursor: pointer;\n";
+  html_file << "        z-index: 1500;\n";
+  html_file << "        font-weight: bold;\n";
+  html_file << "      }\n";
+  html_file << "      #toggle-log-btn:hover { background-color: rgba(85,85,85,0.9); }\n";
   html_file << "    </style>\n";
   html_file << "  </head>\n";
   html_file << "  <body style='width:100%; height:100%; border:0; margin:0; padding:0;'>\n";
@@ -795,6 +847,55 @@ void write_html(const Bathymetry& bathymetry, const Geometry& geometry, const Op
   html_file << "        </transform>\n";
   html_file << "      </scene>\n";
   html_file << "    </x3d>\n";
+  html_file << "    \n";
+  html_file << "    <button id='toggle-log-btn' onclick='toggleLogPanel()'>Show Processing Log</button>\n";
+  html_file << "    \n";
+  html_file << "    <div id='log-panel'>\n";
+  html_file << "      <div id='log-header' onclick='toggleLogPanel()'>\n";
+  html_file << "        <span>Processing Log (" << log_messages.size() << " messages)</span>\n";
+  html_file << "        <span id='close-log'>✕</span>\n";
+  html_file << "      </div>\n";
+  html_file << "      <div id='log-content'>\n";
+  
+  // Output all captured log messages
+  for (const auto& log_msg : log_messages) {
+    // Escape HTML special characters
+    std::string escaped_msg = log_msg;
+    size_t pos = 0;
+    while ((pos = escaped_msg.find("&", pos)) != std::string::npos) {
+      escaped_msg.replace(pos, 1, "&amp;");
+      pos += 5;
+    }
+    pos = 0;
+    while ((pos = escaped_msg.find("<", pos)) != std::string::npos) {
+      escaped_msg.replace(pos, 1, "&lt;");
+      pos += 4;
+    }
+    pos = 0;
+    while ((pos = escaped_msg.find(">", pos)) != std::string::npos) {
+      escaped_msg.replace(pos, 1, "&gt;");
+      pos += 4;
+    }
+    
+    html_file << "        <div class='log-line'>" << escaped_msg << "</div>\n";
+  }
+  
+  html_file << "      </div>\n";
+  html_file << "    </div>\n";
+  html_file << "    \n";
+  html_file << "    <script>\n";
+  html_file << "      function toggleLogPanel() {\n";
+  html_file << "        var panel = document.getElementById('log-panel');\n";
+  html_file << "        var btn = document.getElementById('toggle-log-btn');\n";
+  html_file << "        if (panel.classList.contains('visible')) {\n";
+  html_file << "          panel.classList.remove('visible');\n";
+  html_file << "          btn.textContent = 'Show Processing Log';\n";
+  html_file << "        } else {\n";
+  html_file << "          panel.classList.add('visible');\n";
+  html_file << "          btn.textContent = 'Hide Processing Log';\n";
+  html_file << "        }\n";
+  html_file << "      }\n";
+  html_file << "    </script>\n";
   html_file << "  </body>\n";
   html_file << "</html>\n";
   
