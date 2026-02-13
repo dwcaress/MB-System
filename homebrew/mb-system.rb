@@ -55,22 +55,11 @@ class MbSystem < Formula
       system "cmake", "..", *args, *std_cmake_args
       system "make"
       system "make", "install"
-      
-      # 1. Install C++ Test Apps from test/mbio
-      # This assumes the build process outputs binaries into the
-      # build/test/mbio directory
-      cd "build/test/mbio" do
-        # Binaries usually don't have extensions; this grabs all executable
-        # files
-        bin.install Dir["*"].select { |f| File.executable?(f) && !File.directory?(f) }
-      end
-
-    # 2. Install Python Utilities from test/utilities
-      # These are typically in the source tree, not the build tree
-      cd buildpath
-      cd "test/utilities" do
-        bin.install Dir["*.py"]
-      end
+    end      
+    # Install Python Utilities from test/utilities
+    # These are typically in the source tree, not the build tree
+    cd buildpath/"test/utilities" do
+      bin.install Dir["*.py"]
     end
   end
 
