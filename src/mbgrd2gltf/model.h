@@ -37,10 +37,13 @@
 // local includes
 #include "geometry.h"
 #include "options.h"
+#include "bathymetry.h"
 
 namespace mbgrd2gltf {
 namespace model {
 void write_gltf(const Geometry& geometry, const Options& options);
+void write_html(const Bathymetry& bathymetry, const Geometry& geometry, const Options& options, 
+                const std::string& command_line, const std::string& timestamp);
 }
 } // namespace mbgrd2gltf
 
