@@ -4,24 +4,30 @@ mbgrd2gltf \- convert bathymetric grid data to GLTF format with optional setting
 
 .SH SYNOPSIS
 .B mbgrd2gltf
-\fB\-I\fP\fIgrdfile\fP
-[\fB\-B\fP]
-[\fB\-O\fP\fIoutputfolder\fP]
-[\fB\-E\fP\fIexaggeration\fP]
-[\fB\-G\fP[\fIlon,lat,elev\fP]]
-[\fB\-D\fP]
-[\fB\-Qp\fP\fIvalue\fP]
-[\fB\-Qn\fP\fIvalue\fP]
-[\fB\-Qt\fP\fIvalue\fP]
-[\fB\-Qc\fP\fIvalue\fP]
-[\fB\-V\fP]
-[\fB\-H\fP]
+\fB\-\-input\fP \fIFILE\fP
+[\fB\-\-binary\fP]
+[\fB\-\-output\fP \fIDIR\fP]
+[\fB\-\-exaggeration\fP \fINUM\fP]
+[\fB\-\-geoorigin\fP[\fB=\fP\fILON,LAT,ELEV\fP]]
+[\fB\-\-draco\fP]
+[\fB\-\-quantize-position\fP \fINUM\fP]
+[\fB\-\-quantize-normal\fP \fINUM\fP]
+[\fB\-\-quantize-texcoord\fP \fINUM\fP]
+[\fB\-\-quantize-color\fP \fINUM\fP]
+[\fB\-\-verbose\fP]
+[\fB\-\-help\fP]
+.PP
+.B Legacy single-dash syntax:
+.br
+\fBmbgrd2gltf \-I\fP\fIFILE\fP [\fB\-B\fP] [\fB\-O\fP\fIDIR\fP] [\fB\-E\fP\fINUM\fP] [\fB\-G\fP[\fILON,LAT,ELEV\fP]] [\fB\-D\fP] [\fB\-Qp\fP\fINUM\fP] [\fB\-Qn\fP\fINUM\fP] [\fB\-Qt\fP\fINUM\fP] [\fB\-Qc\fP\fINUM\fP] [\fB\-V\fP] [\fB\-H\fP]
 
 .SH DESCRIPTION
 .B mbgrd2gltf
 is a tool designed to convert grid data files (GRD) to Graphics Library Transmission Format (GLTF) files. It can generate output in binary format to create a more compact GLTF file and exaggerate vertex altitude to enhance topographic features. The tool uses tiling to efficiently handle large datasets. Optional Draco compression can reduce the output GLTF file size significantly while maintaining good visual quality. With Draco, one can specify the quantization level, which affects the compression level of mesh vertices.
 .PP
 The output mesh vertices are positioned in an Earth-Centered, Earth-Fixed (ECEF) Cartesian coordinate system with units in meters. ECEF is a 3D right-handed coordinate system with its origin at Earth's center of mass, the Z-axis pointing toward the North Pole, the X-axis intersecting the equator at the prime meridian, and the Y-axis completing the right-handed system at 90 degrees east longitude.
+.PP
+For improved rendering precision in localized areas, the \fB\-\-geoorigin\fP option allows vertices to be expressed as offsets from a local origin point rather than from Earth's center. ECEF coordinates typically have magnitudes on the order of millions of meters, which can cause precision loss when using GPU single-precision floating point arithmetic. By specifying a GeoOrigin near the area of interest, coordinate magnitudes are reduced to thousands of meters, significantly improving rendering quality. The GeoOrigin can be explicitly specified with longitude, latitude, and elevation values, or automatically computed from the grid's geographic center and mean altitude. When no GeoOrigin is specified, vertices use the full ECEF coordinates.
 
 .SH MB-SYSTEM AUTHORSHIP
 David W. Caress - Monterey Bay Aquarium Research Institute
@@ -59,108 +65,122 @@ Mentor: Mike McCann - Monterey Bay Aquarium Research Institute
 
 .SH OPTIONS
 .TP
-.B \-I
-\fIgrdfile\fP
+.B \-\-input, \-I
+\fIFILE\fP
 .br
 Input GMT GRD format bathymetry grid file. This option is required.
 
 .TP
-.B \-B
+.B \-\-binary, \-B
 Generate the output in binary GLTF (GLB) format. Binary GLTF is more compact and typically loads faster in applications than text-based GLTF. Default: text-based GLTF output.
 
 .TP
-.B \-O
-\fIoutputfolder\fP
+.B \-\-output, \-O
+\fIDIR\fP
 .br
 Specify the path to the folder where the output GLTF file will be written. Default: same directory as input file.
 
 .TP
-.B \-E
-\fIexaggeration\fP
+.B \-\-exaggeration, \-E
+\fINUM\fP
 .br
 Specify the vertical exaggeration factor as a decimal number, which multiplies the vertex altitudes. This can enhance the visibility of topographic features. Default: 1.0 (no exaggeration).
 
 .TP
-.B \-G
-[\fIlon,lat,elev\fP]
+.B \-\-geoorigin, \-G
+[\fB=\fP\fILON,LAT,ELEV\fP]
 .br
 Specify a GeoOrigin point for high-precision local coordinates. All vertex coordinates will be expressed as offsets from this origin point in the ECEF coordinate system. This improves rendering precision for localized areas by reducing the magnitude of coordinate values, which helps overcome GPU single-precision floating point limitations.
 .br
-If \fB\-G\fP is specified with values (e.g., -G-122.0,36.8,-1000), those values are used as the GeoOrigin.
+With values (e.g., --geoorigin=-122.0,36.8,-1000): use specified GeoOrigin.
 .br
-If \fB\-G\fP is specified without values, the geographic center of the grid and mean altitude are automatically computed and used as the GeoOrigin.
+Without values: automatically compute and use grid center and mean altitude.
 .br
-When \fB\-G\fP is not specified, vertices use original ECEF coordinates measured from Earth's center.
+Not specified: vertices use original ECEF coordinates from Earth's center (default).
 
 .TP
-.B \-D
+.B \-\-draco, \-D
 Enable Draco mesh compression to reduce the file size by encoding meshes and point clouds. This can significantly reduce file sizes while maintaining visual quality.
 
 .TP
-.B \-Qp
-\fIvalue\fP
+.B \-\-quantize-position
+\fINUM\fP (or \fB-Qp\fP\fINUM\fP)
 .br
-Draco position quantization bits (2-30). Affects the compression level of mesh vertex positions. Lower values increase compression but reduce precision, potentially affecting the visual quality of the terrain. Requires \fB\-D\fP option. Default: 16.
+Draco position quantization bits (2-30). Affects the compression level of mesh vertex positions. Lower values increase compression but reduce precision, potentially affecting the visual quality of the terrain. Requires \fB\-\-draco\fP option. Default: 16.
 
 .TP
-.B \-Qn
-\fIvalue\fP
+.B \-\-quantize-normal
+\fINUM\fP (or \fB-Qn\fP\fINUM\fP)
 .br
-Draco normal quantization bits (2-30). Affects the compression of surface normal vectors. Requires \fB\-D\fP option. Default: 7.
+Draco normal quantization bits (2-30). Affects the compression of surface normal vectors. Requires \fB\-\-draco\fP option. Default: 7.
 
 .TP
-.B \-Qt
-\fIvalue\fP
+.B \-\-quantize-texcoord
+\fINUM\fP (or \fB-Qt\fP\fINUM\fP)
 .br
-Draco texture coordinate quantization bits (2-30). Affects the compression of texture coordinates. Requires \fB\-D\fP option. Default: 10.
+Draco texture coordinate quantization bits (2-30). Affects the compression of texture coordinates. Requires \fB\-\-draco\fP option. Default: 10.
 
 .TP
-.B \-Qc
-\fIvalue\fP
+.B \-\-quantize-color
+\fINUM\fP (or \fB-Qc\fP\fINUM\fP)
 .br
-Draco color quantization bits (2-30). Affects the compression of vertex colors. Requires \fB\-D\fP option. Default: 8.
+Draco color quantization bits (2-30). Affects the compression of vertex colors. Requires \fB\-\-draco\fP option. Default: 8.
 
 .TP
-.B \-V
+.B \-\-verbose, \-V
 Enable verbose output showing NetCDF reading details and memory allocation information.
 
 .TP
-.B \-H
+.B \-\-help, \-H
 Display help message and exit.
 
 .SH EXAMPLES
 Convert a GMT GRD file to a GLTF file with default settings:
 .RS
 .nf
-.B mbgrd2gltf \-I input.grd
+.B mbgrd2gltf --input input.grd
 .fi
 .RE
 
-Convert a GRD file to GLB (Binary GLTF) with specified output folder and Draco compression at a quantization level of 20:
+Convert a GRD file to GLB (Binary GLTF) with specified output folder and Draco compression:
 .RS
 .nf
-.B mbgrd2gltf \-I input.grd \-B \-O /path/to/output \-D \-Qp 20
+.B mbgrd2gltf --input input.grd --binary --output /path/to/output --draco --quantize-position 20
 .fi
 .RE
 
-Convert a large GRD file to GLB with Draco compression, vertical exaggeration of 20x, and verbose output:
+Convert with vertical exaggeration, Draco compression, and verbose output:
 .RS
 .nf
-.B mbgrd2gltf \-I input.grd \-O /path/to/output \-D \-B \-Qp 20 \-E 20 \-V
+.B mbgrd2gltf --input input.grd --output /path/to/output --draco --binary --quantize-position 20 --exaggeration 20 --verbose
 .fi
 .RE
 
 Convert bathymetry with 10x vertical exaggeration:
 .RS
 .nf
-.B mbgrd2gltf \-I bathymetry.grd \-E 10.0 \-B
+.B mbgrd2gltf --input bathymetry.grd --exaggeration 10.0 --binary
 .fi
 .RE
 
-Convert bathymetry with a GeoOrigin for improved precision in X3D Geospatial applications:
+Convert bathymetry with a GeoOrigin for improved precision:
 .RS
 .nf
-.B mbgrd2gltf \-I monterey.grd \-G\-122.0,36.8,\-1000 \-B
+.B mbgrd2gltf --input monterey.grd --geoorigin=-122.0,36.8,-1000 --binary
+.fi
+.RE
+
+Convert using automatic GeoOrigin (grid center):
+.RS
+.nf
+.B mbgrd2gltf --input monterey.grd --geoorigin --binary
+.fi
+.RE
+
+Legacy syntax (still supported):
+.RS
+.nf
+.B mbgrd2gltf -I input.grd -B -O /path/to/output -D -Qp 20 -E 10 -V
 .fi
 .RE
 
