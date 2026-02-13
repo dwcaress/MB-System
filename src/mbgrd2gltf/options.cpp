@@ -61,10 +61,11 @@ constexpr char help_message[] =
     "\n"
     "The output mesh vertices are positioned in an Earth-Centered, Earth-Fixed\n"
     "(ECEF) Cartesian coordinate system with units in meters. ECEF is a 3D\n"
-    "right-handed coordinate system with its origin at Earth's center of mass.";
+    "right-handed coordinate system with its origin at Earth's center of mass.\n"
+    "A GeoOrigin can be specified to improve rendering precision for localized areas.";
 constexpr char usage_message[] =
-    "mbgrd2gltf -Igrdfile [-B -Ooutputfolder -Eexaggeration\n"
-    "\t-D -Qpvalue -Qnvalue -Qtvalue -Qcvalue -V -H]";
+    "mbgrd2gltf --input FILE [OPTIONS]\n"
+    "       mbgrd2gltf -I FILE [OPTIONS]  (legacy style)";
 
 namespace mbgrd2gltf {
 
@@ -110,17 +111,23 @@ void print_help() {
   std::cout << "\n" << program_name << "\n\n";
   std::cout << help_message << "\n\n";
   std::cout << "usage: " << usage_message << "\n\n";
-  std::cout << "  -I<grdfile>        Input GMT GRD format bathymetry grid file\n";
-  std::cout << "  -B                 Output in binary glTF (GLB) format\n";
-  std::cout << "  -O<outputfolder>   Output folder path [default: input file directory]\n";
-  std::cout << "  -E<exaggeration>   Vertical exaggeration factor [default: 1.0]\n";
-  std::cout << "  -D                 Enable Draco mesh compression\n";
-  std::cout << "  -Qp<value>         Draco position quantization bits (2-30) [default: 16]\n";
-  std::cout << "  -Qn<value>         Draco normal quantization bits (2-30) [default: 7]\n";
-  std::cout << "  -Qt<value>         Draco texcoord quantization bits (2-30) [default: 10]\n";
-  std::cout << "  -Qc<value>         Draco color quantization bits (2-30) [default: 8]\n";
-  std::cout << "  -V                 Enable verbose output\n";
-  std::cout << "  -H                 Print this help message\n\n";
+  std::cout << "Options:\n";
+  std::cout << "  --input, -I FILE              Input GMT GRD format bathymetry grid file (required)\n";
+  std::cout << "  --binary, -B                  Output in binary glTF (GLB) format\n";
+  std::cout << "  --output, -O ROOT             Output file root [default: input file basename]\n";
+  std::cout << "  --exaggeration, -E NUM        Vertical exaggeration factor [default: 1.0]\n";
+  std::cout << "  --geoorigin, -G [LON,LAT,EL]  GeoOrigin for high-precision local coordinates\n";
+  std::cout << "                                  With values: use specified lon,lat,elev\n";
+  std::cout << "                                  Without values: use grid center and mean altitude\n";
+  std::cout << "                                  Not specified: original ECEF coordinates (default)\n";
+  std::cout << "  --draco, -D                   Enable Draco mesh compression\n";
+  std::cout << "  --quantize-position NUM       Draco position quantization bits (2-30) [default: 16]\n";
+  std::cout << "  --quantize-normal NUM         Draco normal quantization bits (2-30) [default: 7]\n";
+  std::cout << "  --quantize-texcoord NUM       Draco texcoord quantization bits (2-30) [default: 10]\n";
+  std::cout << "  --quantize-color NUM          Draco color quantization bits (2-30) [default: 8]\n";
+  std::cout << "                      (-Qp, -Qn, -Qt, -Qc for legacy style)\n";
+  std::cout << "  --verbose, -V                 Enable verbose output\n";
+  std::cout << "  --help, -H                    Print this help message\n\n";
 }
 
 bool Options::draco_quantization_valid() const {
@@ -130,9 +137,19 @@ bool Options::draco_quantization_valid() const {
   return true;
 }
 
+// Helper to check if argument starts with prefix
+static bool starts_with(const char* str, const char* prefix) {
+  return std::strncmp(str, prefix, std::strlen(prefix)) == 0;
+}
+
+// Helper to extract value from --option=value format
+static const char* get_option_value(const char* arg) {
+  const char* eq = std::strchr(arg, '=');
+  return eq ? eq + 1 : nullptr;
+}
+
 Options::Options(unsigned argc, const char* argv[]) {
-  // Parse command line arguments using MB-System conventions
-  // Options support both -I<value> and -I <value> formats
+  // Parse command line arguments supporting both modern (--option) and legacy (-O) styles
   
   if (argc < 2) {
     print_help();
@@ -145,108 +162,227 @@ Options::Options(unsigned argc, const char* argv[]) {
     
     if (arg[0] != '-') {
       throw std::invalid_argument(std::string("Unexpected argument: ") + arg + 
-                                  "\nAll options must start with '-'");
+                                  "\nAll options must start with '-' or '--'");
     }
 
-    char option = arg[1];
-    const char* value_ptr = nullptr;
-    
-    // Check if value is attached to option (e.g., -Ifile.grd)
-    if (arg[2] != '\0') {
-      value_ptr = &arg[2];
-    }
-    // Check if value is in next argument (e.g., -I file.grd)
-    else if (i + 1 < argc && option != 'B' && option != 'D' && option != 'V' && option != 'H') {
-      value_ptr = argv[++i];
-    }
-
-    switch (option) {
-      case 'I':
-      case 'i':
-        if (!value_ptr) {
-          throw std::invalid_argument("Option -I requires a grdfile argument");
+    // Modern double-dash long options
+    if (arg[1] == '-') {
+      const char* option = arg + 2;
+      const char* value_ptr = get_option_value(arg);
+      
+      // Extract option name (before '=' if present)
+      std::string opt_name;
+      if (value_ptr) {
+        opt_name = std::string(option, value_ptr - option - 1);
+      } else {
+        opt_name = option;
+      }
+      
+      // Get value from next arg if not in --option=value format
+      if (!value_ptr && i + 1 < argc && argv[i + 1][0] != '-') {
+        // Don't consume next arg for flags
+        if (opt_name != "binary" && opt_name != "draco" && opt_name != "verbose" && opt_name != "help" && opt_name != "geoorigin") {
+          value_ptr = argv[++i];
         }
+      }
+      
+      if (opt_name == "input") {
+        if (!value_ptr) throw std::invalid_argument("--input requires a file argument");
         _input_filepath = value_ptr;
-        break;
-
-      case 'O':
-      case 'o':
-        if (!value_ptr) {
-          throw std::invalid_argument("Option -O requires an output folder argument");
-        }
+      }
+      else if (opt_name == "output") {
+        if (!value_ptr) throw std::invalid_argument("--output requires an output file root argument");
         _output_filepath = value_ptr;
         _is_output_folder_set = true;
-        break;
-
-      case 'E':
-      case 'e':
-        if (!value_ptr) {
-          throw std::invalid_argument("Option -E requires an exaggeration value");
-        }
+      }
+      else if (opt_name == "exaggeration") {
+        if (!value_ptr) throw std::invalid_argument("--exaggeration requires a numeric value");
         _exaggeration = std::atof(value_ptr);
-        if (_exaggeration <= 0.0) {
-          throw std::invalid_argument("Exaggeration must be > 0");
-        }
+        if (_exaggeration <= 0.0) throw std::invalid_argument("Exaggeration must be > 0");
         _is_exaggeration_set = true;
-        break;
-
-      case 'B':
-      case 'b':
+      }
+      else if (opt_name == "binary") {
         _is_binary_output = true;
-        break;
-
-      case 'D':
-      case 'd':
+      }
+      else if (opt_name == "draco") {
         _is_draco_compressed = true;
-        break;
-
-      case 'Q':
-      case 'q':
-        if (!_is_draco_compressed) {
-          throw std::invalid_argument("Quantization options require -D (Draco compression)");
-        }
+      }
+      else if (opt_name == "geoorigin") {
         if (!value_ptr) {
-          throw std::invalid_argument("Quantization option requires a value");
-        }
-        {
-          char quant_type = arg[2];
-          const char* quant_value = (arg[3] != '\0') ? &arg[3] : value_ptr;
-          int quant_int = std::atoi(quant_value);
-          
-          if (quant_int < 2 || quant_int > 30) {
-            throw std::invalid_argument("Quantization value must be between 2 and 30");
+          _is_geoorigin_auto = true;
+        } else {
+          std::string geoorigin_str(value_ptr);
+          size_t comma1 = geoorigin_str.find(',');
+          size_t comma2 = geoorigin_str.rfind(',');
+          if (comma1 == std::string::npos || comma2 == std::string::npos || comma1 == comma2) {
+            throw std::invalid_argument("GeoOrigin format must be lon,lat,elev");
           }
-          
-          switch (quant_type) {
-            case 'p': case 'P': _draco_quantization[0] = quant_int; break;
-            case 'n': case 'N': _draco_quantization[1] = quant_int; break;
-            case 't': case 'T': _draco_quantization[2] = quant_int; break;
-            case 'c': case 'C': _draco_quantization[3] = quant_int; break;
-            default:
-              throw std::invalid_argument(std::string("Unknown quantization type: -Q") + quant_type);
-          }
+          _geoorigin_lon = std::atof(geoorigin_str.substr(0, comma1).c_str());
+          _geoorigin_lat = std::atof(geoorigin_str.substr(comma1 + 1, comma2 - comma1 - 1).c_str());
+          _geoorigin_elev = std::atof(geoorigin_str.substr(comma2 + 1).c_str());
+          _is_geoorigin_set = true;
         }
-        break;
-
-      case 'V':
-      case 'v':
+      }
+      else if (opt_name == "quantize-position") {
+        if (!value_ptr) throw std::invalid_argument("--quantize-position requires a numeric value");
+        int val = std::atoi(value_ptr);
+        if (val < 2 || val > 30) throw std::invalid_argument("Quantization value must be between 2 and 30");
+        _draco_quantization[0] = val;
+      }
+      else if (opt_name == "quantize-normal") {
+        if (!value_ptr) throw std::invalid_argument("--quantize-normal requires a numeric value");
+        int val = std::atoi(value_ptr);
+        if (val < 2 || val > 30) throw std::invalid_argument("Quantization value must be between 2 and 30");
+        _draco_quantization[1] = val;
+      }
+      else if (opt_name == "quantize-texcoord") {
+        if (!value_ptr) throw std::invalid_argument("--quantize-texcoord requires a numeric value");
+        int val = std::atoi(value_ptr);
+        if (val < 2 || val > 30) throw std::invalid_argument("Quantization value must be between 2 and 30");
+        _draco_quantization[2] = val;
+      }
+      else if (opt_name == "quantize-color") {
+        if (!value_ptr) throw std::invalid_argument("--quantize-color requires a numeric value");
+        int val = std::atoi(value_ptr);
+        if (val < 2 || val > 30) throw std::invalid_argument("Quantization value must be between 2 and 30");
+        _draco_quantization[3] = val;
+      }
+      else if (opt_name == "verbose") {
         _is_verbose = true;
-        break;
-
-      case 'H':
-      case 'h':
+      }
+      else if (opt_name == "help") {
         print_help();
         _is_help = true;
         return;
+      }
+      else {
+        throw std::invalid_argument(std::string("Unknown option: --") + opt_name);
+      }
+    }
+    // Legacy single-dash short options
+    else {
+      char option = arg[1];
+      const char* value_ptr = nullptr;
+      
+      // Check if value is attached to option (e.g., -Ifile.grd)
+      if (arg[2] != '\0') {
+        value_ptr = &arg[2];
+      }
+      // Check if value is in next argument (e.g., -I file.grd)
+      else if (i + 1 < argc && option != 'B' && option != 'D' && option != 'V' && option != 'H' && option != 'G') {
+        value_ptr = argv[++i];
+      }
 
-      default:
-        throw std::invalid_argument(std::string("Unknown option: -") + option);
+      switch (option) {
+        case 'I':
+        case 'i':
+          if (!value_ptr) {
+            throw std::invalid_argument("Option -I requires a grdfile argument");
+          }
+          _input_filepath = value_ptr;
+          break;
+
+        case 'O':
+        case 'o':
+          if (!value_ptr) {
+            throw std::invalid_argument("Option -O requires an output file root argument");
+          }
+          _output_filepath = value_ptr;
+          _is_output_folder_set = true;
+          break;
+
+        case 'E':
+        case 'e':
+          if (!value_ptr) {
+            throw std::invalid_argument("Option -E requires an exaggeration value");
+          }
+          _exaggeration = std::atof(value_ptr);
+          if (_exaggeration <= 0.0) {
+            throw std::invalid_argument("Exaggeration must be > 0");
+          }
+          _is_exaggeration_set = true;
+          break;
+
+        case 'B':
+        case 'b':
+          _is_binary_output = true;
+          break;
+
+        case 'D':
+        case 'd':
+          _is_draco_compressed = true;
+          break;
+
+        case 'G':
+        case 'g':
+          if (!value_ptr) {
+            // -G without arguments: use automatic GeoOrigin (grid center)
+            _is_geoorigin_auto = true;
+          } else {
+            // -G with arguments: parse lon,lat,elev
+            std::string geoorigin_str(value_ptr);
+            size_t comma1 = geoorigin_str.find(',');
+            size_t comma2 = geoorigin_str.rfind(',');
+            
+            if (comma1 == std::string::npos || comma2 == std::string::npos || comma1 == comma2) {
+              throw std::invalid_argument("GeoOrigin format must be lon,lat,elev");
+            }
+            
+            _geoorigin_lon = std::atof(geoorigin_str.substr(0, comma1).c_str());
+            _geoorigin_lat = std::atof(geoorigin_str.substr(comma1 + 1, comma2 - comma1 - 1).c_str());
+            _geoorigin_elev = std::atof(geoorigin_str.substr(comma2 + 1).c_str());
+            _is_geoorigin_set = true;
+          }
+          break;
+
+        case 'Q':
+        case 'q':
+          if (!_is_draco_compressed) {
+            throw std::invalid_argument("Quantization options require -D (Draco compression)");
+          }
+          if (!value_ptr) {
+            throw std::invalid_argument("Quantization option requires a value");
+          }
+          {
+            char quant_type = arg[2];
+            const char* quant_value = (arg[3] != '\0') ? &arg[3] : value_ptr;
+            int quant_int = std::atoi(quant_value);
+            
+            if (quant_int < 2 || quant_int > 30) {
+              throw std::invalid_argument("Quantization value must be between 2 and 30");
+            }
+            
+            switch (quant_type) {
+              case 'p': case 'P': _draco_quantization[0] = quant_int; break;
+              case 'n': case 'N': _draco_quantization[1] = quant_int; break;
+              case 't': case 'T': _draco_quantization[2] = quant_int; break;
+              case 'c': case 'C': _draco_quantization[3] = quant_int; break;
+              default:
+                throw std::invalid_argument(std::string("Unknown quantization type: -Q") + quant_type);
+            }
+          }
+          break;
+
+        case 'V':
+        case 'v':
+          _is_verbose = true;
+          break;
+
+        case 'H':
+        case 'h':
+          print_help();
+          _is_help = true;
+          return;
+
+        default:
+          throw std::invalid_argument(std::string("Unknown option: -") + option);
+      }
     }
   }
 
   // Check required arguments
   if (_input_filepath.empty()) {
-    throw std::invalid_argument("Input grdfile is required (use -I<grdfile>)");
+    throw std::invalid_argument("Input grdfile is required (use --input FILE or -I FILE)");
   }
 
   // Set output path if not specified
@@ -263,15 +399,8 @@ Options::Options(unsigned argc, const char* argv[]) {
     }
     
     _output_filepath += path_info.file_basename;
-  } else {
-    // User specified output folder
-    auto path_info = get_path_info(_input_filepath.c_str());
-    
-    if (_output_filepath.back() != dir_delim)
-      _output_filepath += dir_delim;
-    
-    _output_filepath += path_info.file_basename;
   }
+  // If user specified output root, use it directly (no modification needed)
 }
 
 } // namespace mbgrd2gltf
