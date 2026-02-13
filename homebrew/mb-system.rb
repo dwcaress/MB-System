@@ -33,6 +33,9 @@ class MbSystem < Formula
         -DCMAKE_BUILD_TYPE=Release
         -DbuildQt=1
         -DbuildTests=1
+        -DGTEST_ROOT=#{Formula["googletest"].opt_prefix}
+        -DCMAKE_INSTALL_RPATH=#{opt_lib}
+        -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON
       ]
 
       # NOTE: XQuartz GLX/OpenGL is broken on modern macOS
@@ -55,7 +58,15 @@ class MbSystem < Formula
       system "cmake", "..", *args, *std_cmake_args
       system "make"
       system "make", "install"
-    end      
+
+      # Install C++ Test Apps from test/mbio
+      # We target the specific build subdirectory where the binaries live
+      cd "test/mbio" do
+        # To grab all compiled test binaries in this folder:
+        bin.install Dir["*"].select { |f| File.executable?(f) && !File.directory?(f) }
+      end
+    end
+    
     # Install Python Utilities from test/utilities
     # These are typically in the source tree, not the build tree
     ohai "Install python test scripts now"
