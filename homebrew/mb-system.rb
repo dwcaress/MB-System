@@ -58,6 +58,7 @@ class MbSystem < Formula
     end      
     # Install Python Utilities from test/utilities
     # These are typically in the source tree, not the build tree
+    ohai "Install python test scripts now"
     cd buildpath/"test/utilities" do
       bin.install Dir["*.py"]
     end
