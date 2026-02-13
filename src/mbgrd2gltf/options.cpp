@@ -114,7 +114,7 @@ void print_help() {
   std::cout << "Options:\n";
   std::cout << "  --input, -I FILE              Input GMT GRD format bathymetry grid file (required)\n";
   std::cout << "  --binary, -B                  Output in binary glTF (GLB) format\n";
-  std::cout << "  --output, -O DIR              Output folder path [default: input file directory]\n";
+  std::cout << "  --output, -O ROOT             Output file root [default: input file basename]\n";
   std::cout << "  --exaggeration, -E NUM        Vertical exaggeration factor [default: 1.0]\n";
   std::cout << "  --geoorigin, -G [LON,LAT,EL]  GeoOrigin for high-precision local coordinates\n";
   std::cout << "                                  With values: use specified lon,lat,elev\n";
@@ -191,7 +191,7 @@ Options::Options(unsigned argc, const char* argv[]) {
         _input_filepath = value_ptr;
       }
       else if (opt_name == "output") {
-        if (!value_ptr) throw std::invalid_argument("--output requires a directory argument");
+        if (!value_ptr) throw std::invalid_argument("--output requires an output file root argument");
         _output_filepath = value_ptr;
         _is_output_folder_set = true;
       }
@@ -285,7 +285,7 @@ Options::Options(unsigned argc, const char* argv[]) {
         case 'O':
         case 'o':
           if (!value_ptr) {
-            throw std::invalid_argument("Option -O requires an output folder argument");
+            throw std::invalid_argument("Option -O requires an output file root argument");
           }
           _output_filepath = value_ptr;
           _is_output_folder_set = true;
@@ -399,15 +399,8 @@ Options::Options(unsigned argc, const char* argv[]) {
     }
     
     _output_filepath += path_info.file_basename;
-  } else {
-    // User specified output folder
-    auto path_info = get_path_info(_input_filepath.c_str());
-    
-    if (_output_filepath.back() != dir_delim)
-      _output_filepath += dir_delim;
-    
-    _output_filepath += path_info.file_basename;
   }
+  // If user specified output root, use it directly (no modification needed)
 }
 
 } // namespace mbgrd2gltf

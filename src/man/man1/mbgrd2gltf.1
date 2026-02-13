@@ -6,7 +6,7 @@ mbgrd2gltf \- convert bathymetric grid data to GLTF format with optional setting
 .B mbgrd2gltf
 \fB\-\-input\fP \fIFILE\fP
 [\fB\-\-binary\fP]
-[\fB\-\-output\fP \fIDIR\fP]
+[\fB\-\-output\fP \fIROOT\fP]
 [\fB\-\-exaggeration\fP \fINUM\fP]
 [\fB\-\-geoorigin\fP[\fB=\fP\fILON,LAT,ELEV\fP]]
 [\fB\-\-draco\fP]
@@ -19,7 +19,7 @@ mbgrd2gltf \- convert bathymetric grid data to GLTF format with optional setting
 .PP
 .B Legacy single-dash syntax:
 .br
-\fBmbgrd2gltf \-I\fP\fIFILE\fP [\fB\-B\fP] [\fB\-O\fP\fIDIR\fP] [\fB\-E\fP\fINUM\fP] [\fB\-G\fP[\fILON,LAT,ELEV\fP]] [\fB\-D\fP] [\fB\-Qp\fP\fINUM\fP] [\fB\-Qn\fP\fINUM\fP] [\fB\-Qt\fP\fINUM\fP] [\fB\-Qc\fP\fINUM\fP] [\fB\-V\fP] [\fB\-H\fP]
+\fBmbgrd2gltf \-I\fP\fIFILE\fP [\fB\-B\fP] [\fB\-O\fP\fIROOT\fP] [\fB\-E\fP\fINUM\fP] [\fB\-G\fP[\fILON,LAT,ELEV\fP]] [\fB\-D\fP] [\fB\-Qp\fP\fINUM\fP] [\fB\-Qn\fP\fINUM\fP] [\fB\-Qt\fP\fINUM\fP] [\fB\-Qc\fP\fINUM\fP] [\fB\-V\fP] [\fB\-H\fP]
 
 .SH DESCRIPTION
 .B mbgrd2gltf
@@ -76,9 +76,9 @@ Generate the output in binary GLTF (GLB) format. Binary GLTF is more compact and
 
 .TP
 .B \-\-output, \-O
-\fIDIR\fP
+\fIROOT\fP
 .br
-Specify the path to the folder where the output GLTF file will be written. Default: same directory as input file.
+Specify the output file root. The appropriate file extension (.gltf or .glb) will be appended automatically. Default: input file basename in the same directory.
 
 .TP
 .B \-\-exaggeration, \-E
@@ -145,14 +145,14 @@ Convert a GMT GRD file to a GLTF file with default settings:
 Convert a GRD file to GLB (Binary GLTF) with specified output folder and Draco compression:
 .RS
 .nf
-.B mbgrd2gltf --input input.grd --binary --output /path/to/output --draco --quantize-position 20
+.B mbgrd2gltf --input input.grd --binary --output /path/to/output/mymodel --draco --quantize-position 20
 .fi
 .RE
 
 Convert with vertical exaggeration, Draco compression, and verbose output:
 .RS
 .nf
-.B mbgrd2gltf --input input.grd --output /path/to/output --draco --binary --quantize-position 20 --exaggeration 20 --verbose
+.B mbgrd2gltf --input input.grd --output /path/to/output/mymodel --draco --binary --quantize-position 20 --exaggeration 20 --verbose
 .fi
 .RE
 
@@ -180,7 +180,7 @@ Convert using automatic GeoOrigin (grid center):
 Legacy syntax (still supported):
 .RS
 .nf
-.B mbgrd2gltf -I input.grd -B -O /path/to/output -D -Qp 20 -E 10 -V
+.B mbgrd2gltf -I input.grd -B -O /path/to/output/mymodel -D -Qp 20 -E 10 -V
 .fi
 .RE
 
