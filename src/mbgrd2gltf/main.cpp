@@ -85,6 +85,13 @@ int main(int argc, char* argv[]) {
              "(" + std::string(input_size_str) + " MB)");
     LOG_INFO("Binary output:", options.is_binary_output() ? "enabled," : "disabled,",
              "Draco compression:", options.is_draco_compressed() ? "enabled" : "disabled");
+    
+    if (options.is_draco_compressed()) {
+      LOG_INFO("Draco quantization bits - Position:", options.draco_quantization(0),
+               "Normal:", options.draco_quantization(1),
+               "Texcoord:", options.draco_quantization(2),
+               "Color:", options.draco_quantization(3));
+    }
 
     Bathymetry bathymetry(options);
     LOG_INFO("Generating 3D geometry from 2D bathymetric grid data");

@@ -728,234 +728,74 @@ void write_html(const Bathymetry& bathymetry, const Geometry& geometry, const Op
   
   // Write HTML content
   html_file << "<!DOCTYPE html>\n";
-  html_file << "<html lang=\"en\">\n";
-  html_file << "<head>\n";
-  html_file << "  <meta charset=\"UTF-8\">\n";
-  html_file << "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n";
-  html_file << "  <title>MB-System mbgrd2gltf - " << model_filename << "</title>\n";
-  html_file << "  <script type=\"text/javascript\" src=\"https://www.x3dom.org/x3dom/release/x3dom-full.js\"></script>\n";
-  html_file << "  <link rel=\"stylesheet\" href=\"https://www.x3dom.org/download/x3dom.css\">\n";
-  html_file << "  <style>\n";
-  html_file << "    body {\n";
-  html_file << "      font-family: Arial, sans-serif;\n";
-  html_file << "      margin: 0;\n";
-  html_file << "      padding: 20px;\n";
-  html_file << "      background-color: #f5f5f5;\n";
-  html_file << "    }\n";
-  html_file << "    .container {\n";
-  html_file << "      max-width: 1400px;\n";
-  html_file << "      margin: 0 auto;\n";
-  html_file << "      background-color: white;\n";
-  html_file << "      padding: 20px;\n";
-  html_file << "      box-shadow: 0 2px 4px rgba(0,0,0,0.1);\n";
-  html_file << "    }\n";
-  html_file << "    h1 {\n";
-  html_file << "      color: #2c3e50;\n";
-  html_file << "      border-bottom: 2px solid #3498db;\n";
-  html_file << "      padding-bottom: 10px;\n";
-  html_file << "    }\n";
-  html_file << "    h2 {\n";
-  html_file << "      color: #34495e;\n";
-  html_file << "      margin-top: 30px;\n";
-  html_file << "    }\n";
-  html_file << "    #x3d-viewer {\n";
-  html_file << "      width: 100%;\n";
-  html_file << "      height: 600px;\n";
-  html_file << "      border: 1px solid #bdc3c7;\n";
-  html_file << "      margin: 20px 0;\n";
-  html_file << "    }\n";
-  html_file << "    .metadata {\n";
-  html_file << "      background-color: #ecf0f1;\n";
-  html_file << "      padding: 15px;\n";
-  html_file << "      border-radius: 5px;\n";
-  html_file << "      margin: 20px 0;\n";
-  html_file << "    }\n";
-  html_file << "    .metadata-item {\n";
-  html_file << "      margin: 8px 0;\n";
-  html_file << "    }\n";
-  html_file << "    .metadata-label {\n";
-  html_file << "      font-weight: bold;\n";
-  html_file << "      color: #2c3e50;\n";
-  html_file << "      display: inline-block;\n";
-  html_file << "      min-width: 200px;\n";
-  html_file << "    }\n";
-  html_file << "    .metadata-value {\n";
-  html_file << "      color: #34495e;\n";
-  html_file << "      font-family: 'Courier New', monospace;\n";
-  html_file << "    }\n";
-  html_file << "    .controls {\n";
-  html_file << "      background-color: #d5dbdb;\n";
-  html_file << "      padding: 10px;\n";
-  html_file << "      border-radius: 5px;\n";
-  html_file << "      margin-bottom: 10px;\n";
-  html_file << "      font-size: 14px;\n";
-  html_file << "    }\n";
-  html_file << "    code {\n";
-  html_file << "      background-color: #ecf0f1;\n";
-  html_file << "      padding: 2px 6px;\n";
-  html_file << "      border-radius: 3px;\n";
-  html_file << "      font-family: 'Courier New', monospace;\n";
-  html_file << "    }\n";
-  html_file << "    .btn {\n";
-  html_file << "      background-color: #3498db;\n";
-  html_file << "      color: white;\n";
-  html_file << "      border: none;\n";
-  html_file << "      padding: 10px 20px;\n";
-  html_file << "      border-radius: 4px;\n";
-  html_file << "      cursor: pointer;\n";
-  html_file << "      font-size: 14px;\n";
-  html_file << "      margin-right: 10px;\n";
-  html_file << "    }\n";
-  html_file << "    .btn:hover {\n";
-  html_file << "      background-color: #2980b9;\n";
-  html_file << "    }\n";
-  html_file << "  </style>\n";
-  html_file << "</head>\n";
-  html_file << "<body>\n";
-  html_file << "  <div class=\"container\">\n";
-  html_file << "    <h1>MB-System mbgrd2gltf 3D Bathymetry Viewer</h1>\n";
-  html_file << "    \n";
-  html_file << "    <h2>3D Model Viewer</h2>\n";
-  html_file << "    <div class=\"controls\">\n";
-  html_file << "      <strong>Navigation:</strong> Left-click and drag to rotate | "
-            << "Middle-click or right-click and drag to pan | Scroll to zoom | "
-            << "Double-click to reset view\n";
+  html_file << "<html style='width:100%; height:100%; border:0; margin:0; padding:0;'>\n";
+  html_file << "  <head>\n";
+  html_file << "    <meta http-equiv='X-UA-Compatible' content='chrome=1'></meta>\n";
+  html_file << "    <meta http-equiv='Content-Type' content='text/html;charset=utf-8'></meta>\n";
+  html_file << "    <link rel='stylesheet' type='text/css' href='https://www.x3dom.org/x3dom/release/x3dom.css'></link>\n";
+  html_file << "    <script type='text/javascript' src='https://www.x3dom.org/x3dom/release/x3dom-full.js'></script>\n";
+  html_file << "    <style>.x3dom-logContainer { bottom: 0px; position: absolute; }\n";
+  html_file << "    </style>\n";
+  html_file << "  </head>\n";
+  html_file << "  <body style='width:100%; height:100%; border:0; margin:0; padding:0;'>\n";
+  html_file << "    <div id='HUDs_Div'>\n";
+  html_file << "      <div id='X3DOM_MBSystem_Links' class='group' style='margin:2px; margin-top:26px; padding:4px; background-color:rgba(199,202,204,.7); position:absolute; float:center; z-index:1000;'>\n";
+  html_file << "        <a href='https://www.x3dom.org'>X3DOM</a> output created with\n";
+  html_file << "        <a href='https://www.mbari.org/products/research-software/mb-system/'>MB-System</a> mbgrd2gltf.\n";
+  html_file << "      </div>\n";
+  html_file << "      <div id='Interaction_Toolbox' style='margin:2px; padding:4px; padding-right:150px; background-color:rgba(199,202,204,.7);position:absolute; z-index:1000; right:0px; top:0px;'>\n";
+  html_file << "        <table>\n";
+  html_file << "          <tr>\n";
+  html_file << "            <td>Navigation Mode:\n";
+  html_file << "            </td>\n";
+  html_file << "            <td align='right'>\n";
+  html_file << "              <select style='float:right;' onchange='if (this.selectedIndex !== undefined) { var e = document.getElementById(&apos;x3dElement&apos;); if (this.options[this.selectedIndex].value === &apos;examine&apos;) { e.runtime.examine(); } else if (this.options[this.selectedIndex].value === &apos;lookat&apos;) { e.runtime.lookAt(); } else if (this.options[this.selectedIndex].value === &apos;walk&apos;) { e.runtime.walk(); } else if (this.options[this.selectedIndex].value === &apos;fly&apos;) { e.runtime.fly(); } else if (this.options[this.selectedIndex].value === &apos;helicopter&apos;) { e.runtime.helicopter(); } else if (this.options[this.selectedIndex].value === &apos;none&apos;) { e.runtime.noNav(); } }'>\n";
+  html_file << "                <option value='examine'>Examine\n";
+  html_file << "                </option>\n";
+  html_file << "                <option value='lookat'>LookAt\n";
+  html_file << "                </option>\n";
+  html_file << "                <option value='walk'>Walk\n";
+  html_file << "                </option>\n";
+  html_file << "                <option value='fly'>Fly\n";
+  html_file << "                </option>\n";
+  html_file << "                <option value='helicopter'>Helicopter\n";
+  html_file << "                </option>\n";
+  html_file << "                <option value='none'>None\n";
+  html_file << "                </option>\n";
+  html_file << "              </select>\n";
+  html_file << "            </td>\n";
+  html_file << "          </tr>\n";
+  html_file << "          <tr>\n";
+  html_file << "            <td>Debug Display:\n";
+  html_file << "            </td>\n";
+  html_file << "            <td align='right'>\n";
+  html_file << "              <input type='checkbox' onclick='if (this.checked) { document.getElementById(&apos;x3dElement&apos;).runtime.statistics(true); } else { document.getElementById(&apos;x3dElement&apos;).runtime.statistics(false); }'>\n";
+  html_file << "              </input> Stats\n";
+  html_file << "              <input type='checkbox' onclick='document.getElementById(&apos;x3dElement&apos;).runtime.debug();'>\n";
+  html_file << "              </input> Log\n";
+  html_file << "            </td>\n";
+  html_file << "          </tr>\n";
+  html_file << "          <tr>\n";
+  html_file << "            <td>\n";
+  html_file << "              <button onclick='document.getElementById(&apos;x3dElement&apos;).runtime.showAll();'> Show Everything\n";
+  html_file << "              </button>\n";
+  html_file << "            </td>\n";
+  html_file << "            <td>\n";
+  html_file << "              <button onclick='document.getElementById(&apos;x3dElement&apos;).runtime.resetView();'> Reset View\n";
+  html_file << "              </button>\n";
+  html_file << "            </td>\n";
+  html_file << "          </tr>\n";
+  html_file << "        </table>\n";
+  html_file << "      </div>\n";
   html_file << "    </div>\n";
-  html_file << "    <div style=\"margin-bottom: 10px;\">\n";
-  html_file << "      <button class=\"btn\" onclick=\"showEverything()\">Show Everything</button>\n";
-  html_file << "    </div>\n";
-  html_file << "    \n";
-  html_file << "    <x3d id=\"x3d-viewer\">\n";
-  html_file << "      <scene>\n";
-  html_file << "        <navigationInfo type='\"examine\" \"any\"' "
-            << "headlight='true'></navigationInfo>\n";
-  html_file << "        <background skyColor='0.1 0.1 0.15'></background>\n";
-  html_file << "        <inline url=\"" << model_filename << "\"></inline>\n";
+  html_file << "    <x3d id='x3dElement' showStat='false' showLog='false' style='width:100%; height:100%; border:0; margin:0; padding:0;'>\n";
+  html_file << "      <scene DEF='scene'>\n";
+  html_file << "        <transform>\n";
+  html_file << "          <Inline id='inline' url='" << model_filename << "' nameSpaceName='gltf' mapDEFToID='true'></Inline>\n";
+  html_file << "        </transform>\n";
   html_file << "      </scene>\n";
   html_file << "    </x3d>\n";
-  html_file << "    \n";
-  html_file << "    <h2>Processing Provenance</h2>\n";
-  html_file << "    <div class=\"metadata\">\n";
-  html_file << "      <div class=\"metadata-item\">\n";
-  html_file << "        <span class=\"metadata-label\">Processing Date:</span>\n";
-  html_file << "        <span class=\"metadata-value\">" << timestamp << "</span>\n";
-  html_file << "      </div>\n";
-  html_file << "      <div class=\"metadata-item\">\n";
-  html_file << "        <span class=\"metadata-label\">Command Line:</span>\n";
-  html_file << "        <span class=\"metadata-value\">" << command_line << "</span>\n";
-  html_file << "      </div>\n";
-  html_file << "      <div class=\"metadata-item\">\n";
-  html_file << "        <span class=\"metadata-label\">Input File:</span>\n";
-  html_file << "        <span class=\"metadata-value\">" << options.input_filepath() << "</span>\n";
-  html_file << "      </div>\n";
-  html_file << "      <div class=\"metadata-item\">\n";
-  html_file << "        <span class=\"metadata-label\">Output File:</span>\n";
-  html_file << "        <span class=\"metadata-value\">" << model_filename << "</span>\n";
-  html_file << "      </div>\n";
-  html_file << "      <div class=\"metadata-item\">\n";
-  html_file << "        <span class=\"metadata-label\">Output Format:</span>\n";
-  html_file << "        <span class=\"metadata-value\">" 
-            << (options.is_binary_output() ? "Binary glTF (GLB)" : "glTF") << "</span>\n";
-  html_file << "      </div>\n";
-  html_file << "    </div>\n";
-  html_file << "    \n";
-  html_file << "    <h2>Grid Parameters</h2>\n";
-  html_file << "    <div class=\"metadata\">\n";
-  html_file << "      <div class=\"metadata-item\">\n";
-  html_file << "        <span class=\"metadata-label\">Longitude Range:</span>\n";
-  html_file << "        <span class=\"metadata-value\">" 
-            << std::fixed << std::setprecision(6) << lon_min 
-            << " to " << lon_max << " degrees</span>\n";
-  html_file << "      </div>\n";
-  html_file << "      <div class=\"metadata-item\">\n";
-  html_file << "        <span class=\"metadata-label\">Latitude Range:</span>\n";
-  html_file << "        <span class=\"metadata-value\">" 
-            << std::fixed << std::setprecision(6) << lat_min 
-            << " to " << lat_max << " degrees</span>\n";
-  html_file << "      </div>\n";
-  html_file << "      <div class=\"metadata-item\">\n";
-  html_file << "        <span class=\"metadata-label\">Vertical Exaggeration:</span>\n";
-  html_file << "        <span class=\"metadata-value\">" << options.exaggeration() << "x</span>\n";
-  html_file << "      </div>\n";
-  
-  // GeoOrigin information
-  if (options.is_geoorigin_auto()) {
-    html_file << "      <div class=\"metadata-item\">\n";
-    html_file << "        <span class=\"metadata-label\">GeoOrigin Mode:</span>\n";
-    html_file << "        <span class=\"metadata-value\">Automatic (grid center and mean altitude)</span>\n";
-    html_file << "      </div>\n";
-  } else if (options.is_geoorigin_set()) {
-    html_file << "      <div class=\"metadata-item\">\n";
-    html_file << "        <span class=\"metadata-label\">GeoOrigin Mode:</span>\n";
-    html_file << "        <span class=\"metadata-value\">User-specified</span>\n";
-    html_file << "      </div>\n";
-    html_file << "      <div class=\"metadata-item\">\n";
-    html_file << "        <span class=\"metadata-label\">GeoOrigin Longitude:</span>\n";
-    html_file << "        <span class=\"metadata-value\">" 
-              << std::fixed << std::setprecision(6) << options.geoorigin_lon() << " degrees</span>\n";
-    html_file << "      </div>\n";
-    html_file << "      <div class=\"metadata-item\">\n";
-    html_file << "        <span class=\"metadata-label\">GeoOrigin Latitude:</span>\n";
-    html_file << "        <span class=\"metadata-value\">" 
-              << std::fixed << std::setprecision(6) << options.geoorigin_lat() << " degrees</span>\n";
-    html_file << "      </div>\n";
-    html_file << "      <div class=\"metadata-item\">\n";
-    html_file << "        <span class=\"metadata-label\">GeoOrigin Elevation:</span>\n";
-    html_file << "        <span class=\"metadata-value\">" 
-              << std::fixed << std::setprecision(2) << options.geoorigin_elev() << " meters</span>\n";
-    html_file << "      </div>\n";
-  } else {
-    html_file << "      <div class=\"metadata-item\">\n";
-    html_file << "        <span class=\"metadata-label\">Coordinate System:</span>\n";
-    html_file << "        <span class=\"metadata-value\">ECEF (Earth-Centered, Earth-Fixed)</span>\n";
-    html_file << "      </div>\n";
-  }
-  
-  // Draco compression information
-  if (options.is_draco_compressed()) {
-    html_file << "      <div class=\"metadata-item\">\n";
-    html_file << "        <span class=\"metadata-label\">Draco Compression:</span>\n";
-    html_file << "        <span class=\"metadata-value\">Enabled</span>\n";
-    html_file << "      </div>\n";
-    html_file << "      <div class=\"metadata-item\">\n";
-    html_file << "        <span class=\"metadata-label\">Quantization (P/N/T/C):</span>\n";
-    html_file << "        <span class=\"metadata-value\">" 
-              << options.draco_quantization(0) << "/" 
-              << options.draco_quantization(1) << "/" 
-              << options.draco_quantization(2) << "/" 
-              << options.draco_quantization(3) << " bits</span>\n";
-    html_file << "      </div>\n";
-  } else {
-    html_file << "      <div class=\"metadata-item\">\n";
-    html_file << "        <span class=\"metadata-label\">Draco Compression:</span>\n";
-    html_file << "        <span class=\"metadata-value\">Disabled</span>\n";
-    html_file << "      </div>\n";
-  }
-  
-  html_file << "    </div>\n";
-  html_file << "    \n";
-  html_file << "    <h2>About</h2>\n";
-  html_file << "    <div class=\"metadata\">\n";
-  html_file << "      <p>This 3D bathymetry model was generated using <strong>mbgrd2gltf</strong>, "
-            << "part of the <a href=\"https://www.mbari.org/products/research-software/mb-system/\" "
-            << "target=\"_blank\">MB-System</a> seafloor mapping software suite.</p>\n";
-  html_file << "      <p>The 3D viewer uses <a href=\"https://www.x3dom.org/\" target=\"_blank\">X3DOM</a>, "
-            << "which provides declarative 3D graphics in HTML5 browsers using WebGL.</p>\n";
-  html_file << "      <p>glTF (GL Transmission Format) is a royalty-free 3D file format "
-            << "optimized for real-time rendering. Learn more at "
-            << "  \n";
-  html_file << "  <script>\n";
-  html_file << "    function showEverything() {\n";
-  html_file << "      var x3dElement = document.getElementById('x3d-viewer');\n";
-  html_file << "      if (x3dElement && x3dElement.runtime) {\n";
-  html_file << "        x3dElement.runtime.showAll();\n";
-  html_file << "      }\n";
-  html_file << "    }\n";
-  html_file << "  </script>\n";
-  html_file << "<a href=\"https://www.khronos.org/gltf/\" target=\"_blank\">https://www.khronos.org/gltf/</a></p>\n";
-  html_file << "    </div>\n";
-  html_file << "  </div>\n";
-  html_file << "</body>\n";
+  html_file << "  </body>\n";
   html_file << "</html>\n";
   
   html_file.close();
