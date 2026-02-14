@@ -45,6 +45,8 @@
 #include <sys/stat.h>
 #include <fstream>
 #include <iomanip>
+#include <sstream>
+#include <cmath>
 
 namespace mbgrd2gltf {
 namespace model {
@@ -728,6 +730,57 @@ void write_html(const Bathymetry& bathymetry, const Geometry& geometry, const Op
   double lat_min = bathymetry.latitude_min();
   double lat_max = bathymetry.latitude_max();
   
+  // Calculate center point for GeoViewpoint
+  double center_lon = (lon_min + lon_max) / 2.0;
+  double center_lat = (lat_min + lat_max) / 2.0;
+  
+  // Calculate mean depth from bathymetry altitude data
+  const auto& altitudes = bathymetry.altitudes();
+  double altitude_sum = 0.0;
+  size_t altitude_count = 0;
+  for (size_t y = 0; y < altitudes.size_y(); ++y) {
+    for (size_t x = 0; x < altitudes.size_x(); ++x) {
+      float altitude = altitudes.at(x, y);
+      if (!std::isnan(altitude)) {
+        altitude_sum += altitude;
+        altitude_count++;
+      }
+    }
+  }
+  double mean_depth = (altitude_count > 0) ? (altitude_sum / altitude_count) : 0.0;
+  
+  // Get mean elevation for auto geoorigin 
+  double mean_elevation = 0.0;
+  if (options.is_geoorigin_auto()) {
+    mean_elevation = mean_depth;
+  }
+  
+  // Calculate viewing altitude based on grid extent
+  // Approximate degrees to meters at this latitude: 1 degree ≈ 111km
+  double lat_extent_deg = lat_max - lat_min;
+  double lon_extent_deg = lon_max - lon_min;
+  double cos_lat = std::cos(center_lat * M_PI / 180.0);
+  
+  // Convert to approximate meters
+  double lat_extent_m = lat_extent_deg * 111000.0;
+  double lon_extent_m = lon_extent_deg * 111000.0 * cos_lat;
+  double max_extent_m = std::max(lat_extent_m, lon_extent_m);
+  
+  // Calculate altitude based on field of view to fill the window
+  // fieldOfView = 0.785398 radians (45 degrees)
+  // distance = (extent / 2) / tan(fov / 2)
+  const double fov = 0.785398;  // 45 degrees in radians
+  double view_altitude = ((max_extent_m / 2.0) / std::tan(fov / 2.0));
+  
+  // Format GeoViewpoint position and orientation (X3D Geo order: lat, lon, elevation)
+  // Position elevation is absolute, so add mean_depth to the relative view_altitude
+  std::ostringstream geoposition_str, orientation_str;
+  geoposition_str << std::fixed << std::setprecision(6) 
+                  << center_lat << " " << center_lon << " " << std::setprecision(1) << (mean_depth + view_altitude);
+  
+  // Orientation: rotate -90 degrees around X axis to look straight down (north up)
+  orientation_str << "1 0 0 -1.5708";
+  
   // Write HTML content
   html_file << "<!DOCTYPE html>\n";
   html_file << "<html style='width:100%; height:100%; border:0; margin:0; padding:0;'>\n";
@@ -857,6 +910,34 @@ void write_html(const Bathymetry& bathymetry, const Geometry& geometry, const Op
   html_file << "    </div>\n";
   html_file << "    <x3d id='x3dElement' showStat='false' showLog='false' style='width:100%; height:100%; border:0; margin:0; padding:0;'>\n";
   html_file << "      <scene DEF='scene'>\n";
+  
+  // Add GeoOrigin if one is being used
+  if (options.is_geoorigin_auto() || options.is_geoorigin_set()) {
+    html_file << "        <GeoOrigin DEF='GRID_ORIGIN' geoSystem='\"GD\" \"WE\"' geoCoords='";
+    if (options.is_geoorigin_set()) {
+      html_file << std::fixed << std::setprecision(6)
+                << options.geoorigin_lat() << " " << options.geoorigin_lon() << " " 
+                << std::setprecision(2) << options.geoorigin_elev();
+    } else {
+      // Use grid center and mean elevation for auto mode
+      html_file << std::fixed << std::setprecision(6)
+                << center_lat << " " << center_lon << " " << std::setprecision(2) << mean_elevation;
+    }
+    html_file << "'></GeoOrigin>\n";
+  }
+  
+  html_file << "        <GeoViewpoint DEF='OVERVIEW' position='" << geoposition_str.str() 
+            << "' orientation='" << orientation_str.str() 
+            << "' fieldOfView='0.785398' centerOfRotation='" 
+            << std::fixed << std::setprecision(6) << center_lat << " " << center_lon << " " 
+            << std::setprecision(2) << mean_depth << "'";
+  
+  // Reference GeoOrigin if one exists
+  if (options.is_geoorigin_auto() || options.is_geoorigin_set()) {
+    html_file << " geoOrigin='GRID_ORIGIN'";
+  }
+  
+  html_file << " geoSystem='\"GD\" \"WE\"'></GeoViewpoint>\n";
   html_file << "        <transform>\n";
   html_file << "          <Inline id='inline' url='" << model_filename << "' nameSpaceName='gltf' mapDEFToID='true'></Inline>\n";
   html_file << "        </transform>\n";
