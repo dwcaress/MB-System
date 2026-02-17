@@ -445,7 +445,7 @@ bool MainWindow::plotTest() {
 
 void MainWindow::drawLine(void *dummy,
 			  int x1, int y1, int x2, int y2,
-			  DrawingColor color, int style) {
+			  MB_DrawingColor color, int style) {
 
   setPenColorAndStyle(color, style);
   
@@ -455,7 +455,7 @@ void MainWindow::drawLine(void *dummy,
 
 void MainWindow::drawRect(void *dummy,
 			  int x, int y, int width, int height,
-			  DrawingColor color, int style) {
+			  MB_DrawingColor color, int style) {
 
   setPenColorAndStyle(color, style);
 
@@ -464,7 +464,7 @@ void MainWindow::drawRect(void *dummy,
 
 
 void MainWindow::drawString(void *dummy, int x, int y, char *string,
-			    DrawingColor color, int style) {
+			    MB_DrawingColor color, int style) {
 
   QString textBuf;
   QTextStream(&textBuf) << string;
@@ -476,7 +476,7 @@ void MainWindow::drawString(void *dummy, int x, int y, char *string,
 
 void MainWindow::fillRect(void *dummy,
 			  int x, int y, int width, int height,
-			  DrawingColor color, int style) {
+			  MB_DrawingColor color, int style) {
 
   setPenColorAndStyle(color, style);
 
@@ -494,7 +494,7 @@ void MainWindow::justifyString(void *dummy, char *string,
   *descent = staticFontMetrics_->descent();
 }
 
-const char *MainWindow::colorName(DrawingColor color) {
+const char *MainWindow::colorName(MB_DrawingColor color) {
   switch (color) {
   case WHITE:
     return "white";
@@ -526,7 +526,7 @@ const char *MainWindow::colorName(DrawingColor color) {
 
 
 
-void MainWindow::setPenColorAndStyle(DrawingColor color, int style) {
+void MainWindow::setPenColorAndStyle(MB_DrawingColor color, int style) {
 
 
   if (style == XG_DASHLINE) {
