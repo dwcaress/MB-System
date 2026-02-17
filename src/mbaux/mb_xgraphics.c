@@ -318,7 +318,7 @@ bool allocateDrawingColors(Display *display, Colormap *colormap,
   static XColor *staticXColors;
 
   staticXColors =
-    (XColor *)malloc(sizeof(XColor) * NDrawingColors);
+    (XColor *)malloc(sizeof(XColor) * MB_NDrawingColors);
 
   if (staticXColors == NULL) {
     fprintf(stderr, "allocateDrawingColors(): malloc failed\n");
@@ -330,7 +330,7 @@ bool allocateDrawingColors(Display *display, Colormap *colormap,
   // DrawingColor elements.
   XColor exactColor;
   const char *colorName;
-  for (DrawingColor i = WHITE; i < NDrawingColors; i++) {
+  for (MB_DrawingColor i = WHITE; i < MB_NDrawingColors; i++) {
     switch (i) {
     case WHITE:
       colorName = "white";
@@ -387,7 +387,7 @@ bool allocateDrawingColors(Display *display, Colormap *colormap,
     }    
   }
   
-  *nColors = NDrawingColors;
+  *nColors = MB_NDrawingColors;
   *xColors = staticXColors;
   return true;
 }
