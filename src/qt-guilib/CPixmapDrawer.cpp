@@ -23,7 +23,7 @@ CPixmapDrawer::CPixmapDrawer(QPainter *painter) {
 
 void CPixmapDrawer::drawLine(void *dummy,
 			    int x1, int y1, int x2, int y2,
-			    DrawingColor color, int style) {
+			    MB_DrawingColor color, int style) {
 
   setPenColorAndStyle(color, style);
   
@@ -34,7 +34,7 @@ void CPixmapDrawer::drawLine(void *dummy,
 
 void CPixmapDrawer::drawRect(void *dummy,
 			  int x, int y, int width, int height,
-			  DrawingColor color, int style) {
+			  MB_DrawingColor color, int style) {
 
   setPenColorAndStyle(color, style);
 
@@ -43,7 +43,7 @@ void CPixmapDrawer::drawRect(void *dummy,
 
 
 void CPixmapDrawer::drawString(void *dummy, int x, int y, char *string,
-			    DrawingColor color, int style) {
+			    MB_DrawingColor color, int style) {
 
   QString textBuf;
   QTextStream(&textBuf) << string;
@@ -54,7 +54,7 @@ void CPixmapDrawer::drawString(void *dummy, int x, int y, char *string,
 
 void CPixmapDrawer::fillRect(void *dummy,
 			  int x, int y, int width, int height,
-			  DrawingColor color, int style) {
+			  MB_DrawingColor color, int style) {
 
   setPenColorAndStyle(color, style);
 
@@ -76,7 +76,7 @@ void CPixmapDrawer::justifyString(void *dummy, char *string,
 }
 
 
-void CPixmapDrawer::setPenColorAndStyle(DrawingColor color, int style) {
+void CPixmapDrawer::setPenColorAndStyle(MB_DrawingColor color, int style) {
 
   if (style == DASH_LINE) {
     painter_->setPen(Qt::DashLine);

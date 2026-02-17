@@ -16,7 +16,7 @@ PixmapDrawer::PixmapDrawer() {
 
 void PixmapDrawer::drawLine(QPainter *painter,
 			    int x1, int y1, int x2, int y2,
-			    DrawingColor color, int style) {
+			    MB_DrawingColor color, int style) {
 
   setPenColorAndStyle(painter, color, style);
   
@@ -27,7 +27,7 @@ void PixmapDrawer::drawLine(QPainter *painter,
 
 void PixmapDrawer::drawRectangle(QPainter *painter,
 			  int x, int y, int width, int height,
-			  DrawingColor color, int style) {
+			  MB_DrawingColor color, int style) {
 
   setPenColorAndStyle(painter, color, style);
 
@@ -36,7 +36,7 @@ void PixmapDrawer::drawRectangle(QPainter *painter,
 
 
 void PixmapDrawer::drawString(QPainter *painter, int x, int y, char *string,
-			    DrawingColor color, int style) {
+			    MB_DrawingColor color, int style) {
 
   QString textBuf;
   QTextStream(&textBuf) << string;
@@ -47,7 +47,7 @@ void PixmapDrawer::drawString(QPainter *painter, int x, int y, char *string,
 
 void PixmapDrawer::fillRectangle(QPainter *painter,
 			  int x, int y, int width, int height,
-			  DrawingColor color, int style) {
+			  MB_DrawingColor color, int style) {
 
   setPenColorAndStyle(painter, color, style);
 
@@ -68,7 +68,7 @@ void PixmapDrawer::justifyString(QPainter *painter, char *string,
   *descent = fontMetrics_->descent();
 }
 
-const char *PixmapDrawer::colorName(DrawingColor color) {
+const char *PixmapDrawer::colorName(MB_DrawingColor color) {
   switch (color) {
   case WHITE:
     return "white";
@@ -106,7 +106,7 @@ const char *PixmapDrawer::colorName(DrawingColor color) {
 
 
 
-void PixmapDrawer::setPenColorAndStyle(QPainter *painter, DrawingColor color,
+void PixmapDrawer::setPenColorAndStyle(QPainter *painter, MB_DrawingColor color,
 				       int style) {
 
   if (style == DASH_LINE) {

@@ -20,16 +20,16 @@ namespace mb_system {
     CPixmapDrawer(QPainter *painter);
     
     static void drawLine(void *dummy, int x1, int y1, int x2, int y2,
-		       DrawingColor color, int style);
+		       MB_DrawingColor color, int style);
   
     static void drawRect(void *dummy, int x, int y, int width, int height,
-		       DrawingColor color, int style);
+		       MB_DrawingColor color, int style);
   
     static void fillRect(void *dummy, int x, int y, int width, int height,
-			 DrawingColor color, int style);
+			 MB_DrawingColor color, int style);
 
     static void drawString(void *dummy, int x, int y, char *string,
-			   DrawingColor color, int style);
+			   MB_DrawingColor color, int style);
   
     static void justifyString(void *dummy, char *string, int *width,
 			      int *ascent, int *descent);
@@ -42,7 +42,7 @@ namespace mb_system {
   protected:
 
     /// Set QPainter pen color and style
-    static void setPenColorAndStyle(DrawingColor color, int style);
+    static void setPenColorAndStyle(MB_DrawingColor color, int style);
 
     
     static QPainter *painter_;

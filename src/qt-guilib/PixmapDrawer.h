@@ -19,29 +19,29 @@ namespace mb_system {
     PixmapDrawer();
     
     static void drawLine(QPainter *painter, int x1, int y1, int x2, int y2,
-			 DrawingColor color, int style);
+			 MB_DrawingColor color, int style);
   
     static void drawRectangle(QPainter *painter, int x, int y,
 			      int width, int height,
-			      DrawingColor color, int style);
+			      MB_DrawingColor color, int style);
   
     static void fillRectangle(QPainter *painter, int x, int y,
 			      int width, int height,
-			      DrawingColor color, int style);
+			      MB_DrawingColor color, int style);
 
     static void drawString(QPainter *painter, int x, int y, char *string,
-			   DrawingColor color, int style);
+			   MB_DrawingColor color, int style);
   
     static void justifyString(QPainter *painter, char *string, int *width,
 			      int *ascent, int *descent);
 
-    /// Return color name corresponding to specified DrawingColor
-    static const char *colorName(DrawingColor color);
+    /// Return color name corresponding to specified MB_DrawingColor
+    static const char *colorName(MB_DrawingColor color);
     
   protected:
 
     /// Set QPainter pen color and style
-    static void setPenColorAndStyle(QPainter *painter, DrawingColor color,
+    static void setPenColorAndStyle(QPainter *painter, MB_DrawingColor color,
 				    int style);
 
     
