@@ -798,9 +798,9 @@ typedef enum {
   CORAL,
   LIGHTGREY,
   
-  NDrawingColors
+  MB_NDrawingColors
 
-} DrawingColor;
+} MB_DrawingColor;
 
 
 typedef enum {
