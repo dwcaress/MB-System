@@ -17,6 +17,7 @@ if (NOT GTest_FOUND)
   FetchContent_Declare(
      googletest
      URL https://github.com/google/googletest/archive/refs/heads/main.zip
+     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
   )
   
   # 4. Download and make the targets available
@@ -25,7 +26,6 @@ if (NOT GTest_FOUND)
 
 else()
   message("Using system-installed googletest")
-
 endif()
 
 set(tests mb_defaults_test mb_error_test mb_format_test mb_mem_test
