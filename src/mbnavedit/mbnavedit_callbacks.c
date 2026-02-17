@@ -125,28 +125,28 @@ static char input_file[MB_PATH_MAXLINE];
 int selected = 0; /* indicates an input file is selected */
 /// Function passed to mbedit_prog which is windows-system-agnostic
 void drawLine(void *xgid, int x1, int y1, int x2, int y2,
-	      DrawingColor color, int style) {
+	      MB_DrawingColor color, int style) {
 
   xg_drawline(xgid, x1, y1, x2, y2, xColors[color].pixel, style);
 }
 
 /// Function passed to mbedit_prog which is WS-agnostic
 void drawRect(void *xgid, int x1, int y1, int width, int height,
-	      DrawingColor color, int style) {
+	      MB_DrawingColor color, int style) {
 
   xg_drawrectangle(xgid, x1, y1, width, height, xColors[color].pixel, style);
 }
 
 /// Function passed to mbedit_prog which is WS-agnostic
 void fillRect(void *xgid, int x1, int y1, int width, int height,
-	      DrawingColor color, int style) {
+	      MB_DrawingColor color, int style) {
 
   xg_fillrectangle(xgid, x1, y1, width, height, xColors[color].pixel, style);
 }
 
 /// Function passed to mbedit_prog which is WS-agnostic
 void drawString(void *xgid, int x1, int y1, char *string,
-		DrawingColor color, int style) {
+		MB_DrawingColor color, int style) {
 
   xg_drawstring(xgid, x1, y1, string, xColors[color].pixel, style);
 }
