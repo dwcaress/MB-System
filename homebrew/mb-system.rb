@@ -63,16 +63,17 @@ class MbSystem < Formula
       # We target the specific build subdirectory where the binaries live
       cd "test/mbio" do
         # To grab all compiled test binaries in this folder:
-        bin.install Dir["*"].select { |f| File.executable?(f) && !File.directory?(f) }
+        (libexec/"bin").install Dir["*"].select { |f| File.executable?(f) && !File.directory?(f) }
       end
     end
     
     # Install Python Utilities from test/utilities
     # These are typically in the source tree, not the build tree
     ohai "Install python test scripts now"
-    cd buildpath/"test/utilities" do
-      bin.install Dir["*.py"]
-    end
+    (libexec/"bin").install Dir["test/utilities/*.py"]
+    ### cd buildpath/"test/utilities" do
+    ###  bin.install Dir["*.py"]
+    ### end
   end
 
   def caveats
