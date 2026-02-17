@@ -103,21 +103,21 @@ int mbnavedit_init(int argc, char **argv, bool *startup_file,
 
 		   /// Function to draw a line on canvas
 		   void (*drawLine)(void *gPtr, int x1, int y1, int x2, int y2,
-				    DrawingColor color, int style),
+				    MB_DrawingColor color, int style),
 
 		   /// Function to draw a rectangle on canvas
 		   void (*drawRect)(void *gPtr, int x, int y,
 				    int width, int height,
-				    DrawingColor color, int style),
+				    MB_DrawingColor color, int style),
 
 		   /// Draw a filled rectangle on canvvas
 		   void (*fillRect)(void *gPtr, int x, int y,
 				    int width, int height,
-				    DrawingColor color, int style),
+				    MB_DrawingColor color, int style),
 
 		   /// Draw a string on canvas
 		   void (*drawString)(void *gPtr, int x, int y, char *string,
-				      DrawingColor color, int style),
+				      MB_DrawingColor color, int style),
 
 		   /// Get dimensions of specified string drawn with active font
 		   void (*justifyString)(void *gPtr, char *string, int *width,
