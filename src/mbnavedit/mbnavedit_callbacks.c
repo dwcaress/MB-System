@@ -58,6 +58,7 @@
 #include <Xm/ToggleB.h>
 #include <Xm/Xm.h>
 
+#define MBNAVEDIT_DECLARE_GLOBALS
 #include "mb_define.h"
 #include "mb_io.h"
 #include "mb_process.h"
@@ -65,7 +66,7 @@
 #include "mb_xgraphics.h"
 #include "mbnavedit.h"
 #include "mbnavedit_extrawidgets.h"
-#include "mbnavedit_prog.h"
+
 #include "mbnavedit_creation.h"
 
 
@@ -98,10 +99,11 @@ Cursor myCursor;
 XColor closest[2];
 XColor exact[2];
 
-// Pointer to array of drawing colors
-XColor *xColors;
-int nXColors;
-
+/* Set the colors used for this program here. */
+#define NCOLORS 9
+XColor colors[NCOLORS];
+unsigned int mpixel_values[NCOLORS];
+XColor db_color;
 
 /* Set these to the dimensions of your canvas drawing */
 /* area, minus 1, located in mbnavedit.uil.              */
@@ -111,7 +113,7 @@ int status;
 char string[MB_PATH_MAXLINE];
 
 /* file opening parameters */
-bool startup_file = false;
+int startup_file = 0;  // TODO(schweh): bool
 int numfiles = 0;
 int currentfile = -1;
 int currentfile_shown = -1;
@@ -123,41 +125,6 @@ int timer_function_set = false;
 
 static char input_file[MB_PATH_MAXLINE];
 int selected = 0; /* indicates an input file is selected */
-/// Function passed to mbedit_prog which is windows-system-agnostic
-void drawLine(void *xgid, int x1, int y1, int x2, int y2,
-	      MB_DrawingColor color, int style) {
-
-  xg_drawline(xgid, x1, y1, x2, y2, xColors[color].pixel, style);
-}
-
-/// Function passed to mbedit_prog which is WS-agnostic
-void drawRect(void *xgid, int x1, int y1, int width, int height,
-	      MB_DrawingColor color, int style) {
-
-  xg_drawrectangle(xgid, x1, y1, width, height, xColors[color].pixel, style);
-}
-
-/// Function passed to mbedit_prog which is WS-agnostic
-void fillRect(void *xgid, int x1, int y1, int width, int height,
-	      MB_DrawingColor color, int style) {
-
-  xg_fillrectangle(xgid, x1, y1, width, height, xColors[color].pixel, style);
-}
-
-/// Function passed to mbedit_prog which is WS-agnostic
-void drawString(void *xgid, int x1, int y1, char *string,
-		MB_DrawingColor color, int style) {
-
-  xg_drawstring(xgid, x1, y1, string, xColors[color].pixel, style);
-}
-
-/// Function passed to mbedit_prog which is WS-agnostic
-void justifyString(void *xgid, char *string, int *width,
-		   int *ascent, int *descent) {
-
-  xg_justify(xgid, string, width, ascent, descent);
-}
-
 
 /*--------------------------------------------------------------------*/
 /*      Function Name:	BxExitCB
@@ -474,15 +441,40 @@ void do_mbnavedit_init(int argc, char **argv) {
 	XSelectInput(display, can_xid, EV_MASK);
 
 	/* get resize events - add an event handler */
-	XtAddEventHandler(XtParent(bulletinBoard), StructureNotifyMask,
-			  False, (XtEventHandler)do_resize, (XtPointer)NULL);
+	XtAddEventHandler(XtParent(bulletinBoard), StructureNotifyMask, False, (XtEventHandler)do_resize, (XtPointer)NULL);
 
 	/* Load the colors that will be used in this program. */
-	if (!allocateDrawingColors(display, &colormap, &xColors, &nXColors)) {
-	  fprintf(stderr, "allocateDrawingColors() failed\n");
-	  exit(1);
+	status = XLookupColor(display, colormap, "white", &db_color, &colors[0]);
+	if ((status = XAllocColor(display, colormap, &colors[0])) == 0)
+		fprintf(stderr, "Failure to allocate color: white\n");
+	status = XLookupColor(display, colormap, "black", &db_color, &colors[1]);
+	if ((status = XAllocColor(display, colormap, &colors[1])) == 0)
+		fprintf(stderr, "Failure to allocate color: black\n");
+	status = XLookupColor(display, colormap, "red", &db_color, &colors[2]);
+	if ((status = XAllocColor(display, colormap, &colors[2])) == 0)
+		fprintf(stderr, "Failure to allocate color: red\n");
+	status = XLookupColor(display, colormap, "green", &db_color, &colors[3]);
+	if ((status = XAllocColor(display, colormap, &colors[3])) == 0)
+		fprintf(stderr, "Failure to allocate color: green\n");
+	status = XLookupColor(display, colormap, "blue", &db_color, &colors[4]);
+	if ((status = XAllocColor(display, colormap, &colors[4])) == 0)
+		fprintf(stderr, "Failure to allocate color: blue\n");
+	status = XLookupColor(display, colormap, "orange", &db_color, &colors[5]);
+	if ((status = XAllocColor(display, colormap, &colors[5])) == 0)
+		fprintf(stderr, "Failure to allocate color: orange\n");
+	status = XLookupColor(display, colormap, "purple", &db_color, &colors[6]);
+	if ((status = XAllocColor(display, colormap, &colors[6])) == 0)
+		fprintf(stderr, "Failure to allocate color: purple\n");
+	status = XLookupColor(display, colormap, "coral", &db_color, &colors[7]);
+	if ((status = XAllocColor(display, colormap, &colors[7])) == 0)
+		fprintf(stderr, "Failure to allocate color: coral\n");
+	status = XLookupColor(display, colormap, "lightgrey", &db_color, &colors[8]);
+	if ((status = XAllocColor(display, colormap, &colors[8])) == 0)
+		fprintf(stderr, "Failure to allocate color: lightgrey\n");
+	for (int i = 0; i < NCOLORS; i++) {
+		mpixel_values[i] = colors[i].pixel;
 	}
-	
+
 	/* Setup initial cursor. This will be changed when changing "MODE". */
 	myCursor = XCreateFontCursor(display, XC_target);
 	XAllocNamedColor(display, colormap, "red", &closest[0], &exact[0]);
@@ -497,23 +489,10 @@ void do_mbnavedit_init(int argc, char **argv) {
 	mb_borders[2] = 0;
 	mb_borders[3] = number_plots * plot_height;
 	xg_init(display, can_xid, mb_borders, xgfont, &can_xgid);
-	status = mbnavedit_set_graphics(can_xgid, nXColors);
+	status = mbnavedit_set_graphics(can_xgid, NCOLORS, mpixel_values);
 
 	/* initialize mbnavedit proper */
-	status = mbnavedit_init(argc, argv, &startup_file,
-				can_xgid,
-				&drawLine, 
-			        &drawRect,
-				&fillRect,
-				&drawString,
-				&justifyString,
-				&do_parse_datalist,
-				&do_error_dialog,
-				&do_message_on,
-				&do_message_off,
-				&do_filebutton_on,
-				&do_filebutton_off,
-				&do_set_controls);
+	status = mbnavedit_init(argc, argv, &startup_file);
 
 	do_set_controls();
 
@@ -607,7 +586,7 @@ void do_editlistselection(Widget w, XtPointer client_data, XtPointer call_data) 
 	if (position_count > 0 && currentfile != position_list[0] - 1) {
 		currentfile = position_list[0] - 1;
 
-		bool quit = false;
+		int quit;
 		status = mbnavedit_action_done(&quit);
 		if (status == 0)
 			XBell(display, 100);
@@ -647,8 +626,7 @@ void do_filelist_remove(Widget w, XtPointer client_data, XtPointer call_data) {
 	ac++;
 	XtGetValues(list_filelist, args, ac);
 
-	/* if the selected file is different than what's already loaded, 
-	   remove it from the list */
+	/* if the selected file is different than what's already loaded, remove it from the list */
 	if (position_count > 0 && currentfile != position_list[0] - 1) {
 		for (int i = position_list[0] - 1; i < numfiles - 1; i++) {
 			strcpy(filepaths[i], filepaths[i + 1]);
@@ -1049,7 +1027,7 @@ void do_nextbuffer(Widget w, XtPointer client_data, XtPointer call_data) {
 	expose_plot_ok = false;
 
 	/* get next buffer */
-	bool quit = false;
+	int quit;
 	const int status = mbnavedit_action_next_buffer(&quit);
 	if (status == 0)
 		mbnavedit_bell(100);
@@ -1070,7 +1048,7 @@ void do_done(Widget w, XtPointer client_data, XtPointer call_data) {
 	expose_plot_ok = false;
 
 	/* finish with the current file */
-	bool quit = false;
+	int quit;
 	const int status = mbnavedit_action_done(&quit);
 	if (status == 0)
 		mbnavedit_bell(100);
@@ -2181,7 +2159,7 @@ void do_fileselection_ok(Widget w, XtPointer client_data, XtPointer call_data) {
 	expose_plot_ok = false;
 
 	/* close out previously open file */
-	bool quit = false;
+	int quit;
 	status = mbnavedit_action_done(&quit);
 	if (status == 0)
 		XBell(display, 100);
