@@ -412,27 +412,27 @@ bool MainWindow::plotTest() {
 
   //// TEST TEST TEST
   fillRect(dummy_, 0, 0, canvas_->width(), canvas_->height(),
-	   WHITE, XG_SOLIDLINE);
+	   MB_WHITE, XG_SOLIDLINE);
 
   fillRect(dummy_, 100, 100,
 	   canvas_->width()-200, canvas_->height()-200,
-	   RED, XG_SOLIDLINE);  
+	   MB_RED, XG_SOLIDLINE);  
 
   drawLine(dummy_, 0, 0, canvas_->width(), canvas_->height(),
-	   BLACK, XG_SOLIDLINE);
+	   MB_BLACK, XG_SOLIDLINE);
 
   drawLine(dummy_, canvas_->width(), 0, 0, canvas_->height(),
-	   GREEN, XG_DASHLINE);  
+	   MB_GREEN, XG_DASHLINE);  
 
   drawString(dummy_, 100, 100, (char *)"hello sailor!",
-	     BLACK, XG_SOLIDLINE);
+	     MB_BLACK, XG_SOLIDLINE);
 
   drawString(dummy_, 300, 100, (char *)"BLUE!",
-	     BLUE, XG_SOLIDLINE);
+	     MB_BLUE, XG_SOLIDLINE);
 
 
   drawString(dummy_, 400, 100, (char *)"GREEN",
-	     GREEN, XG_SOLIDLINE);    
+	     MB_GREEN, XG_SOLIDLINE);    
 
   // Update GUI
   ui->swathCanvas->setPixmap(*canvas_);
@@ -496,25 +496,25 @@ void MainWindow::justifyString(void *dummy, char *string,
 
 const char *MainWindow::colorName(MB_DrawingColor color) {
   switch (color) {
-  case WHITE:
+  case MB_WHITE:
     return "white";
 
-  case BLACK:
+  case MB_BLACK:
     return "black";
 
-  case RED:
+  case MB_RED:
     return "red";
 
-  case GREEN:
+  case MB_GREEN:
     return "green";
     
-  case BLUE:
+  case MB_BLUE:
     return "blue";
 
-  case CORAL:
+  case MB_CORAL:
     return "coral";
 
-  case LIGHTGREY:
+  case MB_LIGHTGREY:
     return "lightGray";
 
   default:
