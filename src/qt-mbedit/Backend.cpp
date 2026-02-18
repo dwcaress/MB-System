@@ -324,30 +324,30 @@ bool Backend::plotTest() {
   //// TEST TEST TEST
   CPixmapDrawer::fillRect(dummy_, 0, 0, canvasPixmap_->width(),
 			  canvasPixmap_->height(),
-			  WHITE, SOLID_LINE);
+			  MB_WHITE, MB_SOLID_LINE);
 
   CPixmapDrawer::fillRect(dummy_, 100, 100,
 			  canvasPixmap_->width()-200,
 			  canvasPixmap_->height()-200,
-			  RED, SOLID_LINE);  
+			  MB_RED, MB_SOLID_LINE);  
 
   CPixmapDrawer::drawLine(dummy_, 0, 0, canvasPixmap_->width(),
 			  canvasPixmap_->height(),
-			  BLACK, SOLID_LINE);
+			  MB_BLACK, MB_SOLID_LINE);
 
   CPixmapDrawer::drawLine(dummy_, canvasPixmap_->width(), 0, 0,
 			  canvasPixmap_->height(),
-			  GREEN, DASH_LINE);  
+			  MB_GREEN, MB_DASH_LINE);  
 
   CPixmapDrawer::drawString(dummy_, 100, 100, (char *)"this is coral",
-			    CORAL, SOLID_LINE);
+			    MB_CORAL, MB_SOLID_LINE);
 
   CPixmapDrawer::drawString(dummy_, 300, 100, (char *)"BLUE!",
-			    BLUE, SOLID_LINE);
+			    MB_BLUE, MB_SOLID_LINE);
 
 
   CPixmapDrawer::drawString(dummy_, 400, 100, (char *)"PURPLE",
-			    PURPLE, SOLID_LINE);    
+			    MB_PURPLE, MB_SOLID_LINE);    
 
   // Update GUI
   qDebug() << "TBD: Update GUI";
