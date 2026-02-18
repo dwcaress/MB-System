@@ -70,31 +70,31 @@ void PixmapDrawer::justifyString(QPainter *painter, char *string,
 
 const char *PixmapDrawer::colorName(MB_DrawingColor color) {
   switch (color) {
-  case WHITE:
+  case MB_WHITE:
     return "white";
 
-  case BLACK:
+  case MB_BLACK:
     return "black";
 
-  case RED:
+  case MB_RED:
     return "red";
 
-  case GREEN:
+  case MB_GREEN:
     return "green";
     
-  case BLUE:
+  case MB_BLUE:
     return "blue";
 
-  case ORANGE:
+  case MB_ORANGE:
     return "orange";
 
-  case PURPLE:
+  case MB_PURPLE:
     return "purple";
     
-  case CORAL:
+  case MB_CORAL:
     return "coral";
 
-  case LIGHTGREY:
+  case MB_LIGHTGREY:
     return "lightGray";
 
   default:
@@ -109,7 +109,7 @@ const char *PixmapDrawer::colorName(MB_DrawingColor color) {
 void PixmapDrawer::setPenColorAndStyle(QPainter *painter, MB_DrawingColor color,
 				       int style) {
 
-  if (style == DASH_LINE) {
+  if (style == MB_DASH_LINE) {
     painter->setPen(Qt::DashLine);
   }
   else {

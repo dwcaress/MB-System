@@ -78,7 +78,7 @@ void CPixmapDrawer::justifyString(void *dummy, char *string,
 
 void CPixmapDrawer::setPenColorAndStyle(MB_DrawingColor color, int style) {
 
-  if (style == DASH_LINE) {
+  if (style == MB_DASH_LINE) {
     painter_->setPen(Qt::DashLine);
   }
   else {
