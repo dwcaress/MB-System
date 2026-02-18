@@ -46,8 +46,62 @@
 
 namespace mbgrd2gltf {
 
-Geometry::Geometry(const Bathymetry& bathymetry, const Options& options)
-    : _vertices(get_vertices(bathymetry, options.exaggeration())) {
+Geometry::Geometry(const Bathymetry& bathymetry, const Options& options) {
+  // Apply GeoOrigin offset
+  if (options.is_geoorigin_auto()) {
+    // Automatic GeoOrigin: use geographic center of grid
+    double geoorigin_lon = (bathymetry.longitude_min() + bathymetry.longitude_max()) / 2.0;
+    double geoorigin_lat = (bathymetry.latitude_min() + bathymetry.latitude_max()) / 2.0;
+    
+    // Compute mean altitude from valid altitude values
+    const auto& altitudes = bathymetry.altitudes();
+    double altitude_sum = 0.0;
+    size_t altitude_count = 0;
+    for (size_t y = 0; y < altitudes.size_y(); ++y) {
+      for (size_t x = 0; x < altitudes.size_x(); ++x) {
+        float altitude = altitudes.at(x, y);
+        if (!std::isnan(altitude)) {
+          altitude_sum += altitude;
+          altitude_count++;
+        }
+      }
+    }
+    double geoorigin_elev = (altitude_count > 0) ? (altitude_sum / altitude_count) : 0.0;
+    
+    LOG_INFO("Using automatic GeoOrigin (grid center):", geoorigin_lon, ",", geoorigin_lat, ",", geoorigin_elev);
+    
+    // Compute GeoOrigin ECEF offset
+    Vertex geoorigin_vertex = get_earth_centered_vertex(geoorigin_lon, geoorigin_lat, geoorigin_elev, 0);
+    _geoorigin_x = geoorigin_vertex.x();
+    _geoorigin_y = geoorigin_vertex.y();
+    _geoorigin_z = geoorigin_vertex.z();
+    
+    LOG_INFO("GeoOrigin ECEF offset:", _geoorigin_x, ",", _geoorigin_y, ",", _geoorigin_z);
+  } else if (options.is_geoorigin_set()) {
+    double geoorigin_lon = options.geoorigin_lon();
+    double geoorigin_lat = options.geoorigin_lat();
+    double geoorigin_elev = options.geoorigin_elev();
+    LOG_INFO("Using user-specified GeoOrigin:", geoorigin_lon, ",", geoorigin_lat, ",", geoorigin_elev);
+    
+    // Compute GeoOrigin ECEF offset
+    Vertex geoorigin_vertex = get_earth_centered_vertex(geoorigin_lon, geoorigin_lat, geoorigin_elev, 0);
+    _geoorigin_x = geoorigin_vertex.x();
+    _geoorigin_y = geoorigin_vertex.y();
+    _geoorigin_z = geoorigin_vertex.z();
+    
+    LOG_INFO("GeoOrigin ECEF offset:", _geoorigin_x, ",", _geoorigin_y, ",", _geoorigin_z);
+  } else {
+    // No GeoOrigin - use original ECEF coordinates (no offset)
+    _geoorigin_x = 0.0;
+    _geoorigin_y = 0.0;
+    _geoorigin_z = 0.0;
+    LOG_INFO("Using original ECEF coordinates (no GeoOrigin offset)");
+  }
+  
+  // Generate vertices with GeoOrigin offset applied (or no offset if not set)
+  _vertices = get_vertices(bathymetry, options.exaggeration(), 
+                           _geoorigin_x, _geoorigin_y, _geoorigin_z);
+  
   size_t valid_vertices = 0;
   for (const auto& v : _vertices) {
     if (v.is_valid())
@@ -88,10 +142,13 @@ Vertex Geometry::get_earth_centered_vertex(double longitude, double latitude, do
   return Vertex(x, y, z, id);
 }
 
-Matrix<Vertex> Geometry::get_vertices(const Bathymetry& bathymetry, double vertical_exaggeration) {
+Matrix<Vertex> Geometry::get_vertices(const Bathymetry& bathymetry, double vertical_exaggeration,
+                                       double geoorigin_x, double geoorigin_y, double geoorigin_z) {
   Matrix<Vertex> out(bathymetry.size_x(), bathymetry.size_y());
   const auto& altitudes = bathymetry.altitudes();
   uint32_t vertex_id = 1;
+  bool printed_first = false;
+  size_t valid_count = 0;
 
   for (size_t y = 0; y < altitudes.size_y(); ++y) {
     for (size_t x = 0; x < altitudes.size_x(); ++x) {
@@ -101,8 +158,41 @@ Matrix<Vertex> Geometry::get_vertices(const Bathymetry& bathymetry, double verti
         double longitude = get_longitude(bathymetry, x);
         double latitude = get_latitude(bathymetry, y);
         double adjusted_altitude = (double)altitude * vertical_exaggeration;
-        out.at(x, y) =
-            get_earth_centered_vertex(longitude, latitude, adjusted_altitude, vertex_id++);
+        Vertex vertex = get_earth_centered_vertex(longitude, latitude, adjusted_altitude, vertex_id++);
+        
+        // Print first few valid vertices for debugging
+        if (!printed_first) {
+          if (geoorigin_x != 0.0 || geoorigin_y != 0.0 || geoorigin_z != 0.0) {
+            LOG_INFO("First vertex [", x, ",", y, "] before offset: x=", vertex.x(), 
+                     "y=", vertex.y(), "z=", vertex.z(), 
+                     "lon=", longitude, "lat=", latitude, "alt=", altitude);
+          }
+        }
+        
+        // Apply GeoOrigin offset
+        out.at(x, y) = Vertex(vertex.x() - geoorigin_x, 
+                              vertex.y() - geoorigin_y, 
+                              vertex.z() - geoorigin_z, 
+                              vertex.index());
+        
+        if (!printed_first) {
+          if (geoorigin_x != 0.0 || geoorigin_y != 0.0 || geoorigin_z != 0.0) {
+            LOG_INFO("First vertex [", x, ",", y, "] after offset:  x=", out.at(x, y).x(), 
+                     "y=", out.at(x, y).y(), "z=", out.at(x, y).z());
+          }
+          printed_first = true;
+        }
+        
+        valid_count++;
+        // Print a sample from the middle
+        if (valid_count == 1000) {
+          if (geoorigin_x != 0.0 || geoorigin_y != 0.0 || geoorigin_z != 0.0) {
+            LOG_INFO("Sample vertex #1000 [", x, ",", y, "] before offset: x=", vertex.x(), 
+                     "y=", vertex.y(), "z=", vertex.z());
+            LOG_INFO("Sample vertex #1000 [", x, ",", y, "] after offset:  x=", out.at(x, y).x(), 
+                     "y=", out.at(x, y).y(), "z=", out.at(x, y).z());
+          }
+        }
       }
     }
   }
