@@ -330,41 +330,41 @@ bool allocateDrawingColors(Display *display, Colormap *colormap,
   // DrawingColor elements.
   XColor exactColor;
   const char *colorName;
-  for (MB_DrawingColor i = WHITE; i < MB_NDrawingColors; i++) {
+  for (MB_DrawingColor i = MB_WHITE; i < MB_NDrawingColors; i++) {
     switch (i) {
-    case WHITE:
+    case MB_WHITE:
       colorName = "white";
       break;
 
-    case BLACK:
+    case MB_BLACK:
       colorName = "black";
       break;
 
-    case RED:
+    case MB_RED:
       colorName = "red";
       break;
 
-    case GREEN:
+    case MB_GREEN:
       colorName = "green";
       break;
 
-    case BLUE:
+    case MB_BLUE:
       colorName = "blue";
       break;
 
-    case ORANGE:
+    case MB_ORANGE:
       colorName = "orange";
       break;
 
-    case PURPLE:
+    case MB_PURPLE:
       colorName = "purple";
       break;
 
-    case CORAL:
+    case MB_CORAL:
       colorName = "coral";
       break;
 
-    case LIGHTGREY:
+    case MB_LIGHTGREY:
       colorName = "lightgrey";
       break;
 
