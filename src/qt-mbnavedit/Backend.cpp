@@ -204,34 +204,34 @@ bool Backend::plotTest() {
   //// TEST TEST TEST
   PixmapDrawer::fillRectangle(painter_, 0, 0, canvasPixmap_->width(),
 			      canvasPixmap_->height(),
-			      WHITE, SOLID_LINE);
+			      MB_WHITE, MB_SOLID_LINE);
 
   PixmapDrawer::fillRectangle(painter_, 100, 100,
 			      canvasPixmap_->width()-200,
 			      canvasPixmap_->height()-200,
-			      RED, SOLID_LINE);
+			      MB_RED, MB_SOLID_LINE);
   // Draw a square
   PixmapDrawer::fillRectangle(painter_, 0, 0,
 			      200, 200,
-			      BLUE, SOLID_LINE);  
+			      MB_BLUE, MB_SOLID_LINE);  
 
   PixmapDrawer::drawLine(painter_, 0, 0, canvasPixmap_->width(),
 			 canvasPixmap_->height(),
-			 BLACK, SOLID_LINE);
+			 MB_BLACK, MB_SOLID_LINE);
 
   PixmapDrawer::drawLine(painter_, canvasPixmap_->width(), 0, 0,
 			 canvasPixmap_->height(),
-			 GREEN, DASH_LINE);
+			 MB_GREEN, MB_DASH_LINE);
 
   PixmapDrawer::drawString(painter_, 100, 100, (char *)"this is coral",
-			   CORAL, SOLID_LINE);
+			   MB_CORAL, MB_SOLID_LINE);
 
   PixmapDrawer::drawString(painter_, 300, 100, (char *)"BLUE!",
-			   BLUE, SOLID_LINE);
+			   MB_BLUE, MB_SOLID_LINE);
 
 
-  PixmapDrawer::drawString(painter_, 400, 100, (char *)"PURPLE",
-			   PURPLE, SOLID_LINE);
+  PixmapDrawer::drawString(painter_, 400, 100, (char *)"MB_PURPLE",
+			   MB_PURPLE, MB_SOLID_LINE);
 
   // Update GUI
   swathPixmapImage_->update();
@@ -1250,8 +1250,8 @@ int Backend::clear_screen(void) {
 
   /* clear screen */
   PixmapDrawer::fillRectangle(painter_, 0, 0, plotWidth_,
-			      NUMBER_PLOTS_MAX * plotHeight_, WHITE,
-			      SOLID_LINE);
+			      NUMBER_PLOTS_MAX * plotHeight_, MB_WHITE,
+			      MB_SOLID_LINE);
 
   const int status = MB_SUCCESS;
 
@@ -2276,8 +2276,8 @@ int Backend::action_set_interval(int xx, int yy, int which) {
 				 plot_[i].iymin,
 				 interval_bound1,
 				 plot_[i].iymax,
-				 WHITE,
-				 DASH_LINE);
+				 MB_WHITE,
+				 MB_DASH_LINE);
 	}
 
       if (xx < plot_[0].ixmin)
@@ -2297,7 +2297,7 @@ int Backend::action_set_interval(int xx, int yy, int which) {
 			       plot_[i].iymin,
 			       interval_bound1,
 			       plot_[i].iymax,
-			       RED, DASH_LINE);
+			       MB_RED, MB_DASH_LINE);
       }
     }
 
@@ -2311,8 +2311,8 @@ int Backend::action_set_interval(int xx, int yy, int which) {
 				 plot_[i].iymin,
 				 interval_bound2,
 				 plot_[i].iymax,
-				 WHITE,
-				 DASH_LINE);
+				 MB_WHITE,
+				 MB_DASH_LINE);
 	}
 
       if (xx < plot_[0].ixmin)
@@ -2330,7 +2330,7 @@ int Backend::action_set_interval(int xx, int yy, int which) {
 	PixmapDrawer::drawLine(painter_, interval_bound2,
 			       plot_[i].iymin,
 			       interval_bound2, plot_[i].iymax,
-			       RED, DASH_LINE);
+			       MB_RED, MB_DASH_LINE);
       }
     }
 
@@ -4442,7 +4442,7 @@ int Backend::plot_all(void) {
       PixmapDrawer::drawString(painter_, center_x - swidth / 2,
 			       plot_[iplot].iymax-5*sascent / 2,
 			       string,
-			       BLACK, SOLID_LINE);
+			       MB_BLACK, MB_SOLID_LINE);
 
       /* get bounds for position bar */
       int fpx = center_x - 2 * margin_x + (4 * margin_x * currentId_) / nBuff_;
@@ -4456,18 +4456,18 @@ int Backend::plot_all(void) {
       PixmapDrawer::drawRectangle(painter_,
 				  center_x-2*margin_x, fpy,
 				  4 * margin_x, fpdy,
-				  BLACK, SOLID_LINE);
+				  MB_BLACK, MB_SOLID_LINE);
 			
       PixmapDrawer::drawRectangle(painter_,
 				  center_x - 2 * margin_x - 1,
 				  fpy - 1, 4 * margin_x + 2, fpdy + 2,
-				  BLACK, SOLID_LINE);
+				  MB_BLACK, MB_SOLID_LINE);
 			
       PixmapDrawer::fillRectangle(painter_, fpx, fpy, fpdx, fpdy,
-				  LIGHTGREY, SOLID_LINE);
+				  MB_LIGHTGREY, MB_SOLID_LINE);
 			
       PixmapDrawer::drawRectangle(painter_, fpx, fpy, fpdx, fpdy,
-				  BLACK, SOLID_LINE);
+				  MB_BLACK, MB_SOLID_LINE);
 
       sprintf(string, "0 ");
       PixmapDrawer::justifyString(painter_, string, &swidth,
@@ -4476,15 +4476,15 @@ int Backend::plot_all(void) {
       PixmapDrawer::drawString(painter_,
 			       (int)(center_x - 2 * margin_x - swidth),
 			       fpy + sascent, string,
-			       BLACK,
-			       SOLID_LINE);
+			       MB_BLACK,
+			       MB_SOLID_LINE);
 
       sprintf(string, " %d", nBuff_);
       PixmapDrawer::drawString(painter_,
 			       (int)(center_x + 2 * margin_x),
 			       fpy + sascent, string,
-			       BLACK,
-			       SOLID_LINE);
+			       MB_BLACK,
+			       MB_SOLID_LINE);
 
       /* plot x label */
       PixmapDrawer::justifyString(painter_, plot_[iplot].xlabel, &swidth, &sascent, &sdescent);
@@ -4493,7 +4493,7 @@ int Backend::plot_all(void) {
 			       (int)(plot_[iplot].iymin+
 				     0.75*margin_y),
 			       plot_[iplot].xlabel,
-			       BLACK, SOLID_LINE);
+			       MB_BLACK, MB_SOLID_LINE);
 
       /* plot y labels */
       PixmapDrawer::justifyString(painter_, plot_[iplot].ylabel1, &swidth, &sascent, &sdescent);
@@ -4502,7 +4502,7 @@ int Backend::plot_all(void) {
 				     swidth / 2 - 0.75 * margin_x),
 			       (int)(center_y - sascent),
 			       plot_[iplot].ylabel1,
-			       BLACK, SOLID_LINE);
+			       MB_BLACK, MB_SOLID_LINE);
 			
       PixmapDrawer::justifyString(painter_, plot_[iplot].ylabel2, &swidth, &sascent, &sdescent);
       PixmapDrawer::drawString(painter_,
@@ -4510,7 +4510,7 @@ int Backend::plot_all(void) {
 				     swidth / 2 - 0.75 * margin_x),
 			       (int)(center_y + 2 * sascent),
 			       plot_[iplot].ylabel2,
-			       BLACK, SOLID_LINE);
+			       MB_BLACK, MB_SOLID_LINE);
 
       /* plot x axis time annotation */
       const double dx = (plotEndTime_ - plotStartTime_) / 5;
@@ -4524,8 +4524,8 @@ int Backend::plot_all(void) {
 	PixmapDrawer::drawLine(painter_, ix,
 			       plot_[iplot].iymin, ix,
 			       plot_[iplot].iymin + 5,
-			       BLACK,
-			       SOLID_LINE);
+			       MB_BLACK,
+			       MB_SOLID_LINE);
 
 	/* draw annotations */
 	mb_get_date(verbose_, x, xtime_i);
@@ -4537,7 +4537,7 @@ int Backend::plot_all(void) {
 				 (int)(ix - swidth / 2),
 				 (int)(plot_[iplot].iymin +
 				       5 + 1.75 * sascent), string,
-				 BLACK, SOLID_LINE);
+				 MB_BLACK, MB_SOLID_LINE);
       }
 
       /* plot y min max values */
@@ -4553,7 +4553,7 @@ int Backend::plot_all(void) {
 				     swidth - 0.03 * margin_x),
 			       (int)(plot_[iplot].iymin + 0.5 *
 				     sascent), string,
-			       BLACK, SOLID_LINE);
+			       MB_BLACK, MB_SOLID_LINE);
 			
       sprintf(string, yformat, plot_[iplot].ymax);
       PixmapDrawer::justifyString(painter_, string, &swidth,
@@ -4564,7 +4564,7 @@ int Backend::plot_all(void) {
 				     0.03 * margin_x),
 			       (int)(plot_[iplot].iymax +
 				     0.5 * sascent), string,
-			       BLACK, SOLID_LINE);
+			       MB_BLACK, MB_SOLID_LINE);
 
       /* plot zero values */
       if ((plot_[iplot].ymax > 0.0 && plot_[iplot].ymin < 0.0) ||
@@ -4580,14 +4580,14 @@ int Backend::plot_all(void) {
 				 (int)(plot_[iplot].ixmin -
 				       swidth - 0.03 * margin_x),
 				 (int)(iyzero + 0.5 * sascent),
-				 string, BLACK,
-				 SOLID_LINE);
+				 string, MB_BLACK,
+				 MB_SOLID_LINE);
 				
 	PixmapDrawer::drawLine(painter_,
 			       plot_[iplot].ixmin, iyzero,
 			       plot_[iplot].ixmax, iyzero,
-			       BLACK,
-			       DASH_LINE);
+			       MB_BLACK,
+			       MB_DASH_LINE);
       }
 
       /* plot bounding box */
@@ -4598,7 +4598,7 @@ int Backend::plot_all(void) {
 				  plot_[iplot].ixmin,
 				  plot_[iplot].iymin -
 				  plot_[iplot].iymax,
-				  BLACK, SOLID_LINE);
+				  MB_BLACK, MB_SOLID_LINE);
 			
       PixmapDrawer::drawRectangle(painter_,
 				  plot_[iplot].ixmin - 1,
@@ -4607,7 +4607,7 @@ int Backend::plot_all(void) {
 				  plot_[iplot].ixmin + 2,
 				  plot_[iplot].iymin -
 				  plot_[iplot].iymax + 2,
-				  BLACK, SOLID_LINE);
+				  MB_BLACK, MB_SOLID_LINE);
 
       /* now plot the data */
       if (plot_[iplot].type == PLOT_TINTERVAL)
@@ -4671,8 +4671,8 @@ int Backend::plot_tint(int iplot) {
       const int tint_x2 = ixmin + xscale * (ping_[i].file_time_d - xmin);
       const int tint_y2 = iymin + yscale * (ping_[i].tint_org - ymin);
       PixmapDrawer::drawLine(painter_, tint_x1, tint_y1,
-			     tint_x2, tint_y2, GREEN,
-			     SOLID_LINE);
+			     tint_x2, tint_y2, MB_GREEN,
+			     MB_SOLID_LINE);
 			
       tint_x1 = tint_x2;
       tint_y1 = tint_y2;
@@ -4686,16 +4686,16 @@ int Backend::plot_tint(int iplot) {
     if (ping_[i].tint_select)
       PixmapDrawer::drawRectangle(painter_, ping_[i].tint_x - 2,
 				  ping_[i].tint_y - 2, 4, 4,
-				  RED, SOLID_LINE);
+				  MB_RED, MB_SOLID_LINE);
 		
     else if (ping_[i].tint != ping_[i].tint_org)
       PixmapDrawer::drawRectangle(painter_, ping_[i].tint_x - 2,
 				  ping_[i].tint_y - 2, 4, 4,
-				  PURPLE, SOLID_LINE);
+				  MB_PURPLE, MB_SOLID_LINE);
     else
       PixmapDrawer::fillRectangle(painter_, ping_[i].tint_x - 2,
 				  ping_[i].tint_y - 2, 4, 4,
-				  BLACK, SOLID_LINE);
+				  MB_BLACK, MB_SOLID_LINE);
   }
 
   const int status = MB_SUCCESS;
@@ -4734,8 +4734,8 @@ int Backend::plot_lon(int iplot) {
       const int lon_x2 = ixmin + xscale * (ping_[i].file_time_d - xmin);
       const int lon_y2 = iymin + yscale * (ping_[i].lon_org - ymin);
       PixmapDrawer::drawLine(painter_, lon_x1, lon_y1,
-			     lon_x2, lon_y2, GREEN,
-			     SOLID_LINE);
+			     lon_x2, lon_y2, MB_GREEN,
+			     MB_SOLID_LINE);
       lon_x1 = lon_x2;
       lon_y1 = lon_y2;
     }
@@ -4749,8 +4749,8 @@ int Backend::plot_lon(int iplot) {
       const int lon_x2 = ixmin + xscale * (ping_[i].file_time_d - xmin);
       const int lon_y2 = iymin + yscale * (ping_[i].lon_dr - ymin);
       PixmapDrawer::drawLine(painter_, lon_x1, lon_y1,
-			     lon_x2, lon_y2, BLUE,
-			     SOLID_LINE);
+			     lon_x2, lon_y2, MB_BLUE,
+			     MB_SOLID_LINE);
       lon_x1 = lon_x2;
       lon_y1 = lon_y2;
     }
@@ -4764,7 +4764,7 @@ int Backend::plot_lon(int iplot) {
       PixmapDrawer::drawRectangle(painter_,
 				  ping_[i].lon_x - 2,
 				  ping_[i].lon_y - 2, 4, 4,
-				  ORANGE, SOLID_LINE);
+				  MB_ORANGE, MB_SOLID_LINE);
   }
 
   /* plot basic longitude data */
@@ -4774,18 +4774,18 @@ int Backend::plot_lon(int iplot) {
     if (ping_[i].lon_select)
       PixmapDrawer::drawRectangle(painter_, ping_[i].lon_x - 2,
 				  ping_[i].lon_y - 2, 4, 4,
-				  RED, SOLID_LINE);
+				  MB_RED, MB_SOLID_LINE);
     else if (ping_[i].lonlat_flag) {
       ;
     }
     else if (ping_[i].lon != ping_[i].lon_org)
       PixmapDrawer::drawRectangle(painter_, ping_[i].lon_x - 2,
 				  ping_[i].lon_y - 2, 4, 4,
-				  PURPLE, SOLID_LINE);
+				  MB_PURPLE, MB_SOLID_LINE);
     else
       PixmapDrawer::fillRectangle(painter_, ping_[i].lon_x - 2,
 				  ping_[i].lon_y - 2, 4, 4,
-				  BLACK, SOLID_LINE);
+				  MB_BLACK, MB_SOLID_LINE);
   }
 
   const int status = MB_SUCCESS;
@@ -4824,7 +4824,7 @@ int Backend::plot_lat(int iplot) {
       const int lat_x2 = ixmin + xscale * (ping_[i].file_time_d - xmin);
       const int lat_y2 = iymin + yscale * (ping_[i].lat_org - ymin);
       PixmapDrawer::drawLine(painter_, lat_x1, lat_y1, lat_x2,
-			     lat_y2, GREEN, SOLID_LINE);
+			     lat_y2, MB_GREEN, MB_SOLID_LINE);
       lat_x1 = lat_x2;
       lat_y1 = lat_y2;
     }
@@ -4838,8 +4838,8 @@ int Backend::plot_lat(int iplot) {
       const int lat_x2 = ixmin + xscale * (ping_[i].file_time_d - xmin);
       const int lat_y2 = iymin + yscale * (ping_[i].lat_dr - ymin);
       PixmapDrawer::drawLine(painter_, lat_x1, lat_y1,
-			     lat_x2, lat_y2, BLUE,
-			     SOLID_LINE);
+			     lat_x2, lat_y2, MB_BLUE,
+			     MB_SOLID_LINE);
       lat_x1 = lat_x2;
       lat_y1 = lat_y2;
     }
@@ -4852,7 +4852,7 @@ int Backend::plot_lat(int iplot) {
     if (ping_[i].lonlat_flag)
       PixmapDrawer::drawRectangle(painter_, ping_[i].lat_x - 2,
 				  ping_[i].lat_y - 2, 4, 4,
-				  ORANGE, SOLID_LINE);
+				  MB_ORANGE, MB_SOLID_LINE);
   }
 
   /* plot basic latitude data */
@@ -4862,18 +4862,18 @@ int Backend::plot_lat(int iplot) {
     if (ping_[i].lat_select)
       PixmapDrawer::drawRectangle(painter_, ping_[i].lat_x - 2,
 				  ping_[i].lat_y - 2, 4, 4,
-				  RED, SOLID_LINE);
+				  MB_RED, MB_SOLID_LINE);
     else if (ping_[i].lonlat_flag) {
       ;
     }
     else if (ping_[i].lat != ping_[i].lat_org)
       PixmapDrawer::drawRectangle(painter_, ping_[i].lat_x - 2,
 				  ping_[i].lat_y - 2, 4, 4,
-				  PURPLE, SOLID_LINE);
+				  MB_PURPLE, MB_SOLID_LINE);
     else
       PixmapDrawer::fillRectangle(painter_, ping_[i].lat_x - 2,
 				  ping_[i].lat_y - 2, 4, 4,
-				  BLACK, SOLID_LINE);
+				  MB_BLACK, MB_SOLID_LINE);
   }
 
   const int status = MB_SUCCESS;
@@ -4912,8 +4912,8 @@ int Backend::plot_speed(int iplot) {
       const int speed_x2 = ixmin + xscale * (ping_[i].file_time_d - xmin);
       const int speed_y2 = iymin + yscale * (ping_[i].speed_org - ymin);
       PixmapDrawer::drawLine(painter_, speed_x1, speed_y1,
-			     speed_x2, speed_y2, GREEN,
-			     SOLID_LINE);
+			     speed_x2, speed_y2, MB_GREEN,
+			     MB_SOLID_LINE);
       speed_x1 = speed_x2;
       speed_y1 = speed_y2;
     }
@@ -4927,7 +4927,7 @@ int Backend::plot_speed(int iplot) {
       const int speed_x2 = ixmin + xscale * (ping_[i].file_time_d - xmin);
       const int speed_y2 = iymin + yscale * (ping_[i].speed_made_good - ymin);
       PixmapDrawer::drawLine(painter_, speed_x1, speed_y1,
-			     speed_x2, speed_y2, BLUE, SOLID_LINE);
+			     speed_x2, speed_y2, MB_BLUE, MB_SOLID_LINE);
       speed_x1 = speed_x2;
       speed_y1 = speed_y2;
     }
@@ -4940,15 +4940,15 @@ int Backend::plot_speed(int iplot) {
     if (ping_[i].speed_select)
       PixmapDrawer::drawRectangle(painter_, ping_[i].speed_x - 2,
 				  ping_[i].speed_y - 2, 4, 4,
-				  RED, SOLID_LINE);
+				  MB_RED, MB_SOLID_LINE);
     else if (ping_[i].speed != ping_[i].speed_org)
       PixmapDrawer::drawRectangle(painter_, ping_[i].speed_x - 2,
 				  ping_[i].speed_y - 2, 4, 4,
-				  PURPLE, SOLID_LINE);
+				  MB_PURPLE, MB_SOLID_LINE);
     else
       PixmapDrawer::fillRectangle(painter_, ping_[i].speed_x - 2,
 				  ping_[i].speed_y - 2, 4, 4,
-				  BLACK, SOLID_LINE);
+				  MB_BLACK, MB_SOLID_LINE);
   }
 
   int status = MB_SUCCESS;
@@ -4988,7 +4988,7 @@ int Backend::plot_heading(int iplot) {
       const int heading_y2 = iymin + yscale * (ping_[i].heading_org - ymin);
       PixmapDrawer::drawLine(painter_, heading_x1, heading_y1,
 			     heading_x2, heading_y2,
-			     GREEN, SOLID_LINE);
+			     MB_GREEN, MB_SOLID_LINE);
       heading_x1 = heading_x2;
       heading_y1 = heading_y2;
     }
@@ -5003,7 +5003,7 @@ int Backend::plot_heading(int iplot) {
       const int heading_y2 = iymin + yscale * (ping_[i].course_made_good - ymin);
       PixmapDrawer::drawLine(painter_, heading_x1, heading_y1,
 			     heading_x2, heading_y2,
-			     BLUE, SOLID_LINE);
+			     MB_BLUE, MB_SOLID_LINE);
       heading_x1 = heading_x2;
       heading_y1 = heading_y2;
     }
@@ -5016,17 +5016,17 @@ int Backend::plot_heading(int iplot) {
     if (ping_[i].heading_select)
       PixmapDrawer::drawRectangle(painter_, ping_[i].heading_x - 2,
 				  ping_[i].heading_y - 2, 4, 4,
-				  RED, SOLID_LINE);
+				  MB_RED, MB_SOLID_LINE);
     else if (ping_[i].heading != ping_[i].heading_org)
       PixmapDrawer::drawRectangle(painter_, ping_[i].heading_x - 2,
 				  ping_[i].heading_y - 2, 4, 4,
-				  PURPLE,
-				  SOLID_LINE);
+				  MB_PURPLE,
+				  MB_SOLID_LINE);
     else
       PixmapDrawer::fillRectangle(painter_, ping_[i].heading_x - 2,
 				  ping_[i].heading_y - 2, 4, 4,
-				  BLACK,
-				  SOLID_LINE);
+				  MB_BLACK,
+				  MB_SOLID_LINE);
   }
 
   const int status = MB_SUCCESS;
@@ -5065,7 +5065,7 @@ int Backend::plot_draft(int iplot) {
       const int draft_x2 = ixmin + xscale * (ping_[i].file_time_d - xmin);
       const int draft_y2 = iymin + yscale * (ping_[i].draft_org - ymin);
       PixmapDrawer::drawLine(painter_, draft_x1, draft_y1, draft_x2, draft_y2,
-			     GREEN, SOLID_LINE);
+			     MB_GREEN, MB_SOLID_LINE);
       draft_x1 = draft_x2;
       draft_y1 = draft_y2;
     }
@@ -5077,15 +5077,15 @@ int Backend::plot_draft(int iplot) {
     ping_[i].draft_y = iymin + yscale * (ping_[i].draft - ymin);
     if (ping_[i].draft_select)
       PixmapDrawer::drawRectangle(painter_, ping_[i].draft_x - 2, ping_[i].draft_y - 2,
-				  4, 4, RED, SOLID_LINE);
+				  4, 4, MB_RED, MB_SOLID_LINE);
     else if (ping_[i].draft != ping_[i].draft_org)
       PixmapDrawer::drawRectangle(painter_, ping_[i].draft_x - 2,
 				  ping_[i].draft_y - 2,
-				  4, 4, PURPLE, SOLID_LINE);
+				  4, 4, MB_PURPLE, MB_SOLID_LINE);
     else
       PixmapDrawer::fillRectangle(painter_, ping_[i].draft_x - 2,
-				  ping_[i].draft_y - 2, 4, 4, BLACK,
-				  SOLID_LINE);
+				  ping_[i].draft_y - 2, 4, 4, MB_BLACK,
+				  MB_SOLID_LINE);
   }
 
   const int status = MB_SUCCESS;
@@ -5124,7 +5124,7 @@ int Backend::plot_roll(int iplot) {
       const int roll_x2 = ixmin + xscale * (ping_[i].file_time_d - xmin);
       const int roll_y2 = iymin + yscale * (ping_[i].roll - ymin);
       PixmapDrawer::drawLine(painter_, roll_x1, roll_y1, roll_x2, roll_y2,
-			     GREEN, SOLID_LINE);
+			     MB_GREEN, MB_SOLID_LINE);
       roll_x1 = roll_x2;
       roll_y1 = roll_y2;
     }
@@ -5166,7 +5166,7 @@ int Backend::plot_pitch(int iplot) {
       const int pitch_x2 = ixmin + xscale * (ping_[i].file_time_d - xmin);
       const int pitch_y2 = iymin + yscale * (ping_[i].pitch - ymin);
       PixmapDrawer::drawLine(painter_, pitch_x1, pitch_y1, pitch_x2, pitch_y2,
-			     GREEN, SOLID_LINE);
+			     MB_GREEN, MB_SOLID_LINE);
       pitch_x1 = pitch_x2;
       pitch_y1 = pitch_y2;
     }
@@ -5208,7 +5208,7 @@ int Backend::plot_heave(int iplot) {
       const int heave_x2 = ixmin + xscale * (ping_[i].file_time_d - xmin);
       const int heave_y2 = iymin + yscale * (ping_[i].heave - ymin);
       PixmapDrawer::drawLine(painter_, heave_x1, heave_y1, heave_x2, heave_y2,
-			     GREEN, SOLID_LINE);
+			     MB_GREEN, MB_SOLID_LINE);
       heave_x1 = heave_x2;
       heave_y1 = heave_y2;
     }
@@ -5237,25 +5237,25 @@ int Backend::plot_tint_value(int iplot, int iping) {
 
   /* unplot basic expected time data value */
   PixmapDrawer::drawRectangle(painter_, ping_[iping].tint_x - 2,
-			      ping_[iping].tint_y - 2, 4, 4, WHITE,
-			      SOLID_LINE);
+			      ping_[iping].tint_y - 2, 4, 4, MB_WHITE,
+			      MB_SOLID_LINE);
   PixmapDrawer::fillRectangle(painter_, ping_[iping].tint_x - 2,
-			      ping_[iping].tint_y - 2, 4, 4, WHITE,
-			      SOLID_LINE);
+			      ping_[iping].tint_y - 2, 4, 4, MB_WHITE,
+			      MB_SOLID_LINE);
 
   /* replot basic expected time data value */
   if (ping_[iping].tint_select)
     PixmapDrawer::drawRectangle(painter_, ping_[iping].tint_x - 2,
-				ping_[iping].tint_y - 2, 4, 4, RED,
-				SOLID_LINE);
+				ping_[iping].tint_y - 2, 4, 4, MB_RED,
+				MB_SOLID_LINE);
   else if (ping_[iping].tint != ping_[iping].tint_org)
     PixmapDrawer::drawRectangle(painter_, ping_[iping].tint_x - 2,
-				ping_[iping].tint_y - 2, 4, 4, PURPLE,
-				SOLID_LINE);
+				ping_[iping].tint_y - 2, 4, 4, MB_PURPLE,
+				MB_SOLID_LINE);
   else
     PixmapDrawer::fillRectangle(painter_, ping_[iping].tint_x - 2,
-				ping_[iping].tint_y - 2, 4, 4, BLACK,
-				SOLID_LINE);
+				ping_[iping].tint_y - 2, 4, 4, MB_BLACK,
+				MB_SOLID_LINE);
 
   const int status = MB_SUCCESS;
 
@@ -5280,29 +5280,29 @@ int Backend::plot_lon_value(int iplot, int iping) {
 
   /* unplot basic lon data value */
   PixmapDrawer::drawRectangle(painter_, ping_[iping].lon_x - 2,
-			      ping_[iping].lon_y - 2, 4, 4, WHITE,
-			      SOLID_LINE);
+			      ping_[iping].lon_y - 2, 4, 4, MB_WHITE,
+			      MB_SOLID_LINE);
   PixmapDrawer::fillRectangle(painter_, ping_[iping].lon_x - 2,
-			      ping_[iping].lon_y - 2, 4, 4, WHITE,
-			      SOLID_LINE);
+			      ping_[iping].lon_y - 2, 4, 4, MB_WHITE,
+			      MB_SOLID_LINE);
 
   /* replot basic lon data value */
   if (ping_[iping].lon_select)
     PixmapDrawer::drawRectangle(painter_, ping_[iping].lon_x - 2,
-				ping_[iping].lon_y - 2, 4, 4, RED,
-				SOLID_LINE);
+				ping_[iping].lon_y - 2, 4, 4, MB_RED,
+				MB_SOLID_LINE);
   else if (ping_[iping].lonlat_flag)
     PixmapDrawer::drawRectangle(painter_, ping_[iping].lon_x - 2,
-				ping_[iping].lon_y - 2, 4, 4, ORANGE,
-				SOLID_LINE);
+				ping_[iping].lon_y - 2, 4, 4, MB_ORANGE,
+				MB_SOLID_LINE);
   else if (ping_[iping].lon != ping_[iping].lon_org)
     PixmapDrawer::drawRectangle(painter_, ping_[iping].lon_x - 2,
-				ping_[iping].lon_y - 2, 4, 4, PURPLE,
-				SOLID_LINE);
+				ping_[iping].lon_y - 2, 4, 4, MB_PURPLE,
+				MB_SOLID_LINE);
   else
     PixmapDrawer::fillRectangle(painter_, ping_[iping].lon_x - 2,
-				ping_[iping].lon_y - 2, 4, 4, BLACK,
-				SOLID_LINE);
+				ping_[iping].lon_y - 2, 4, 4, MB_BLACK,
+				MB_SOLID_LINE);
 
   const int status = MB_SUCCESS;
 
@@ -5327,29 +5327,29 @@ int Backend::plot_lat_value(int iplot, int iping) {
 
   /* unplot basic lat data value */
   PixmapDrawer::drawRectangle(painter_, ping_[iping].lat_x - 2,
-			      ping_[iping].lat_y - 2, 4, 4, WHITE,
-			      SOLID_LINE);
+			      ping_[iping].lat_y - 2, 4, 4, MB_WHITE,
+			      MB_SOLID_LINE);
   PixmapDrawer::fillRectangle(painter_, ping_[iping].lat_x - 2,
-			      ping_[iping].lat_y - 2, 4, 4, WHITE,
-			      SOLID_LINE);
+			      ping_[iping].lat_y - 2, 4, 4, MB_WHITE,
+			      MB_SOLID_LINE);
 
   /* replot basic lat data value */
   if (ping_[iping].lat_select)
     PixmapDrawer::drawRectangle(painter_, ping_[iping].lat_x - 2,
-				ping_[iping].lat_y - 2, 4, 4, RED,
-				SOLID_LINE);
+				ping_[iping].lat_y - 2, 4, 4, MB_RED,
+				MB_SOLID_LINE);
   else if (ping_[iping].lonlat_flag)
     PixmapDrawer::drawRectangle(painter_, ping_[iping].lat_x - 2,
-				ping_[iping].lat_y - 2, 4, 4, ORANGE,
-				SOLID_LINE);
+				ping_[iping].lat_y - 2, 4, 4, MB_ORANGE,
+				MB_SOLID_LINE);
   else if (ping_[iping].lat != ping_[iping].lat_org)
     PixmapDrawer::drawRectangle(painter_, ping_[iping].lat_x - 2,
-				ping_[iping].lat_y - 2, 4, 4, PURPLE,
-				SOLID_LINE);
+				ping_[iping].lat_y - 2, 4, 4, MB_PURPLE,
+				MB_SOLID_LINE);
   else
     PixmapDrawer::fillRectangle(painter_, ping_[iping].lat_x - 2,
-				ping_[iping].lat_y - 2, 4, 4, BLACK,
-				SOLID_LINE);
+				ping_[iping].lat_y - 2, 4, 4, MB_BLACK,
+				MB_SOLID_LINE);
 
   const int status = MB_SUCCESS;
 
@@ -5374,25 +5374,25 @@ int Backend::plot_speed_value(int iplot, int iping) {
 
   /* unplot basic speed data value */
   PixmapDrawer::drawRectangle(painter_, ping_[iping].speed_x - 2,
-			      ping_[iping].speed_y - 2, 4, 4, WHITE,
-			      SOLID_LINE);
+			      ping_[iping].speed_y - 2, 4, 4, MB_WHITE,
+			      MB_SOLID_LINE);
   PixmapDrawer::fillRectangle(painter_, ping_[iping].speed_x - 2,
-			      ping_[iping].speed_y - 2, 4, 4, WHITE,
-			      SOLID_LINE);
+			      ping_[iping].speed_y - 2, 4, 4, MB_WHITE,
+			      MB_SOLID_LINE);
 
   /* replot basic speed data value */
   if (ping_[iping].speed_select)
     PixmapDrawer::drawRectangle(painter_, ping_[iping].speed_x - 2,
-				ping_[iping].speed_y - 2, 4, 4, RED,
-				SOLID_LINE);
+				ping_[iping].speed_y - 2, 4, 4, MB_RED,
+				MB_SOLID_LINE);
   else if (ping_[iping].speed != ping_[iping].speed_org)
     PixmapDrawer::drawRectangle(painter_, ping_[iping].speed_x - 2,
-				ping_[iping].speed_y - 2, 4, 4, PURPLE,
-				SOLID_LINE);
+				ping_[iping].speed_y - 2, 4, 4, MB_PURPLE,
+				MB_SOLID_LINE);
   else
     PixmapDrawer::fillRectangle(painter_, ping_[iping].speed_x - 2,
-				ping_[iping].speed_y - 2, 4, 4, BLACK,
-				SOLID_LINE);
+				ping_[iping].speed_y - 2, 4, 4, MB_BLACK,
+				MB_SOLID_LINE);
 
   const int status = MB_SUCCESS;
 
@@ -5417,25 +5417,25 @@ int Backend::plot_heading_value(int iplot, int iping) {
 
   /* unplot basic heading data value */
   PixmapDrawer::drawRectangle(painter_, ping_[iping].heading_x - 2,
-			      ping_[iping].heading_y - 2, 4, 4, WHITE,
-			      SOLID_LINE);
+			      ping_[iping].heading_y - 2, 4, 4, MB_WHITE,
+			      MB_SOLID_LINE);
   PixmapDrawer::fillRectangle(painter_, ping_[iping].heading_x - 2,
-			      ping_[iping].heading_y - 2, 4, 4, WHITE,
-			      SOLID_LINE);
+			      ping_[iping].heading_y - 2, 4, 4, MB_WHITE,
+			      MB_SOLID_LINE);
 
   /* replot basic heading data value */
   if (ping_[iping].heading_select)
     PixmapDrawer::drawRectangle(painter_, ping_[iping].heading_x - 2,
-				ping_[iping].heading_y - 2, 4, 4, RED,
-				SOLID_LINE);
+				ping_[iping].heading_y - 2, 4, 4, MB_RED,
+				MB_SOLID_LINE);
   else if (ping_[iping].heading != ping_[iping].heading_org)
     PixmapDrawer::drawRectangle(painter_, ping_[iping].heading_x - 2,
-				ping_[iping].heading_y - 2, 4, 4, PURPLE,
-				SOLID_LINE);
+				ping_[iping].heading_y - 2, 4, 4, MB_PURPLE,
+				MB_SOLID_LINE);
   else
     PixmapDrawer::fillRectangle(painter_, ping_[iping].heading_x - 2,
-				ping_[iping].heading_y - 2, 4, 4, BLACK,
-				SOLID_LINE);
+				ping_[iping].heading_y - 2, 4, 4, MB_BLACK,
+				MB_SOLID_LINE);
 
   const int status = MB_SUCCESS;
 
@@ -5460,25 +5460,25 @@ int Backend::plot_draft_value(int iplot, int iping) {
 
   /* unplot basic draft data value */
   PixmapDrawer::drawRectangle(painter_, ping_[iping].draft_x - 2,
-			      ping_[iping].draft_y - 2, 4, 4, WHITE,
-			      SOLID_LINE);
+			      ping_[iping].draft_y - 2, 4, 4, MB_WHITE,
+			      MB_SOLID_LINE);
   PixmapDrawer::fillRectangle(painter_, ping_[iping].draft_x - 2,
-			      ping_[iping].draft_y - 2, 4, 4, WHITE,
-			      SOLID_LINE);
+			      ping_[iping].draft_y - 2, 4, 4, MB_WHITE,
+			      MB_SOLID_LINE);
 
   /* replot basic draft data value */
   if (ping_[iping].draft_select)
     PixmapDrawer::drawRectangle(painter_, ping_[iping].draft_x - 2,
-				ping_[iping].draft_y - 2, 4, 4, RED,
-				SOLID_LINE);
+				ping_[iping].draft_y - 2, 4, 4, MB_RED,
+				MB_SOLID_LINE);
   else if (ping_[iping].draft != ping_[iping].draft_org)
     PixmapDrawer::drawRectangle(painter_, ping_[iping].draft_x - 2,
-				ping_[iping].draft_y - 2, 4, 4, PURPLE,
-				SOLID_LINE);
+				ping_[iping].draft_y - 2, 4, 4, MB_PURPLE,
+				MB_SOLID_LINE);
   else
     PixmapDrawer::fillRectangle(painter_, ping_[iping].draft_x - 2,
-				ping_[iping].draft_y - 2, 4, 4, BLACK,
-				SOLID_LINE);
+				ping_[iping].draft_y - 2, 4, 4, MB_BLACK,
+				MB_SOLID_LINE);
 
   const int status = MB_SUCCESS;
 
