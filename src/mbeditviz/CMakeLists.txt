@@ -27,8 +27,8 @@ message("In src/mbeditviz")
 find_package(X11 REQUIRED)
 find_package(Motif REQUIRED)
 
-add_library(mbeditvizlib mbeditviz_creation.c mbeditviz_prog.c
-                         mbeditviz_callbacks.c)
+add_library(mbeditvizlib mbeditviz_prog.c)
+			 
 target_include_directories(mbeditvizlib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(mbeditvizlib PRIVATE mbaux mbxgr mbview
   			    ${MOTIF_LIBRARIES}
