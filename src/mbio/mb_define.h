@@ -788,15 +788,15 @@ bool mb_bitpack_writevalue(void *mbbpptr, unsigned int value);
 
 /// Standard mb-system drawing colors
 typedef enum {
-  WHITE = 0,
-  BLACK,
-  RED,
-  GREEN,
-  BLUE,
-  ORANGE,
-  PURPLE,
-  CORAL,
-  LIGHTGREY,
+  MB_WHITE = 0,
+  MB_BLACK,
+  MB_RED,
+  MB_GREEN,
+  MB_BLUE,
+  MB_ORANGE,
+  MB_PURPLE,
+  MB_CORAL,
+  MB_LIGHTGREY,
   
   MB_NDrawingColors
 
@@ -804,8 +804,8 @@ typedef enum {
 
 
 typedef enum {
-  SOLID_LINE = 0,
-  DASH_LINE
+  MB_SOLID_LINE = 0,
+  MB_DASH_LINE
   
 } LineStyle;
 
