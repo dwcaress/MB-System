@@ -257,7 +257,6 @@ static int s_parse_path(const char *src, mlog_t *dest)
             // point to first path sep or start of path
             ps--;
         }
-        fprintf(stderr,"%s ******** local src[%10s] ps[%s]\n", __func__, src, ps);
 
         // find last path sep
         pathe  = strrchr(ps, ML_SYS_PATH_DEL);
@@ -329,7 +328,7 @@ static int s_parse_path(const char *src, mlog_t *dest)
         }
         
 //        fprintf(stderr,"%s ******** local src[%10s] ppath[%p] pname[%p] pext[%p]\n", __func__, src,ppath,pname,pext);
-        fprintf(stderr,"%s ********  dest src[%10s] path[%10s] name[%10s] ext[%10s]\n", __func__, src,dest->path,dest->name,dest->ext);
+//        fprintf(stderr,"%s ********  dest src[%10s] path[%10s] name[%10s] ext[%10s]\n", __func__, src,dest->path,dest->name,dest->ext);
         free(scopy);
     }
     return retval;
@@ -909,7 +908,7 @@ static mlog_t *s_mlog_new(const char *file_path, mlog_config_t *config)
             instance->stime = 0;
             
             tpath = s_seg_path(file_path,instance,0);
-            fprintf(stderr, "********** tpath (s_seg_path): %s\n", tpath);
+
             instance->file  = mfile_file_new(tpath);
             free(tpath);
             instance->cfg = mlog_config_new(NULL,NULL,ML_MONO,ML_SERR,ML_NOLIMIT,ML_NOLIMIT,ML_NOLIMIT);
