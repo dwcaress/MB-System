@@ -53,6 +53,37 @@
                 // Show full backtrace when stopped
                 "settings set target.process.thread.step-avoid-regexp \"\""
             ]
+        },
+        {
+            "name": "Debug mbgrid (OceanImaging2018)",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/src/utilities/mbgrid",
+            "args": [
+                // Input datalist (paths inside are relative, so cwd must be the multibeam dir)
+                "-I", "datalistp.mb-1",
+                // Output grid name (written to cwd)
+                "-O", "ZTopoDebug",
+                // Grid cell spacing: 0.1m (use 0.05 to match original ZTopo.grd resolution)
+                "-E", "0.1/meters",
+                // Gridding algorithm: Gaussian weighted mean
+                "-A", "1",
+                // Interpolate gaps up to 5 cells from data
+                "-C", "5",
+                // Verbose output
+                "-V",
+            ],
+            "stopOnEntry": false,
+            // Must run from the data directory because datalistp.mb-1 uses relative file paths
+            "cwd": "${workspaceFolder}/build/sample_data/OceanImaging2018/20180925d1/multibeam",
+            "preLaunchTask": "Build All",
+            "breakpointMode": "path",
+            "initCommands": [
+                // Break on C++ exceptions being thrown
+                "breakpoint set -E C++",
+                // Show full backtrace when stopped
+                "settings set target.process.thread.step-avoid-regexp \"\""
+            ]
         }
     ]
 }
