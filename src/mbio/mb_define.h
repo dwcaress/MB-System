@@ -807,7 +807,7 @@ typedef enum {
   MB_SOLID_LINE = 0,
   MB_DASH_LINE
   
-} LineStyle;
+} MB_LineStyle;
 
 #endif
 
