@@ -23,23 +23,23 @@
                 // Simple test to show help message
                 //"-H"
                 // Initial example for Monterey Bay terrain used by STOQS
-                //"-I", "${workspaceFolder}/build/Monterey25.grd", "-O", "${workspaceFolder}/build", "-E", "10.0", "-V"
+                //"-I", "${workspaceFolder}/build/Monterey25.grd", "-O", "Monterey25_10x", "-E", "10.0", "-V"
                 // Monterey Bay binary with Draco compression
-                //"-I", "${workspaceFolder}/build/Monterey25.grd", "-O", "${workspaceFolder}/build", "-E", "10.0", "-V", "-D", "-B"
+                //"-I", "${workspaceFolder}/build/Monterey25.grd", "-O", "Monterey25_10x_draco", "-E", "10.0", "-V", "-D", "-B"
                 // Monterey Bay without verbose output
-                //"-I", "${workspaceFolder}/build/Monterey25.grd", "-O", "${workspaceFolder}/build", "-E", "10.0", "-D", "-B"
+                //"-I", "${workspaceFolder}/build/Monterey25.grd", "-O", "Monterey25_10x", "-E", "10.0", "-D", "-B"
                 // Lake Erie example
-                //"-I", "${workspaceFolder}/build/erie_lld.grd", "-O", "${workspaceFolder}/build", "-E", "10.0", "-D", "-B"
+                //"-I", "${workspaceFolder}/build/erie_lld.grd", "-O", "Erie_lld_10x_draco", "-E", "10.0", "-D", "-B"
                 // Lake Michigan example
-                //"-I", "${workspaceFolder}/build/michigan_lld.grd", "-O", "${workspaceFolder}/build", "-E", "10.0", "-D", "-B"
+                //"-I", "${workspaceFolder}/build/michigan_lld.grd", "-O", "Michigan_lld_10x_draco", "-E", "10.0", "-D", "-B"
                 // Lake Michigan example
-                //"-I", "${workspaceFolder}/build/michigan_lld.grd", "-O", "${workspaceFolder}/build", "-E", "10.0", "-D", "-B"
+                //"-I", "${workspaceFolder}/build/michigan_lld.grd", "-O", "Michigan_lld_10x_draco", "-E", "10.0", "-D", "-B"
                 // Globe example - fails to load due into gltf.report
-                //"-I", "${workspaceFolder}/build/Globe_1m_bath.grd", "-O", "${workspaceFolder}/build", "-E", "10.0", "-D", "-B"
+                //"-I", "${workspaceFolder}/build/Globe_1m_bath.grd", "-O", "Globe_1m_bath_10x_draco", "-E", "10.0", "-D", "-B"
                 // Terrain for BEDs during CCE 2015, no vertical exaggeration - fails to load into gltf.report
-                //"-I", "${workspaceFolder}/build/MontereyCanyonBeds_1m+5m.grd", "-O", "${workspaceFolder}/build", "-E", "1.0", "-D", "-B"
+                //"-I", "${workspaceFolder}/build/MontereyCanyonBeds_1m+5m.grd", "-O", "MontereyCanyonBeds_1m+5m_1x_draco", "-E", "1.0", "-D", "-B"
                 // San Pedro Basin example
-                //"-I", "${workspaceFolder}/build/SanPedroBasin50.grd", "-O", "${workspaceFolder}/build", "-E", "10.0", "-D", "-B", "-V",
+                //"-I", "${workspaceFolder}/build/SanPedroBasin50.grd", "-O", "SanPedroBasin50_10x_draco", "-E", "10.0", "-D", "-B", "-V",
                 // Test --geoorigin option with LASS multibeam data from Davidson Seamount - shows roundoff errors with ECEF coordinates
                 "-I", "${workspaceFolder}/build/sample_data/OceanImaging2018/20180925d1/multibeam/ZTopo.grd", "-O", "ZTopoTest", "-D", "-B", "-G-122,36,0", "-V", "-W"
             ],
