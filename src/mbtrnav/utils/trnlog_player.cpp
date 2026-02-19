@@ -119,6 +119,7 @@ public:
     bool server(){return mServer;}
     bool trni_csv(){return mTrnInCsvEn;}
     bool trno_csv(){return mTrnOutCsvEn;}
+    bool verbose(){return mVerbose;}
     int trn_sensor(){return mTrnSensor;}
     std::string host(){return mHost;}
     std::string trn_cfg(){return mTrnCfg;}
@@ -426,6 +427,7 @@ public:
                                     trno_csv_tostream(std::cout, ts, *lastPT, mle, mmse);
                                 }
                             }else{
+                                if(mConfig.verbose())
                                 fprintf(stderr,"%s:%d - last meas unsuccessful\n",__func__, __LINE__);
                             }
 
