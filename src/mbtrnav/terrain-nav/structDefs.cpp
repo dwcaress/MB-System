@@ -1312,6 +1312,7 @@ void vehicleT::parseVehicleSpecs(char* fileName){
     fstream vehicleFile;
 
     try {
+
         char temp[TEMP_BUF_BYTES]={0};
         vehicleFile.open(fileName);
         if(vehicleFile.is_open()) {
@@ -1360,7 +1361,17 @@ void vehicleT::parseVehicleSpecs(char* fileName){
 
                 //extract file directory
                 strcpy(sensorFile, fileName);
-                char *sensorPath = strstr(sensorFile, name);
+
+                // find last occurence of name in sensorFile
+                // (may coincidentally occur in path, so can't simply strstr)
+                char *xp = sensorFile + strlen(sensorFile) - strlen(name);
+                while(xp > sensorFile) {
+                    if(strstr(xp, name) != NULL) {
+                        break;
+                    }
+                    xp--;
+                }
+                char *sensorPath = xp;
 
                 //determine sensor file name
                 snprintf(temp2, TEMP_BUF_BYTES, "%s%s", sensors[i].name, "_specs.cfg\0");
