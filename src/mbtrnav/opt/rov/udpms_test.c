@@ -319,7 +319,7 @@ int main(int argc, char **argv)
 #endif
                 }
             } else if (test > 0) {
-                fprintf(stderr, "message len=%lld :\n", test);
+                fprintf(stderr, "message len=%lld :\n", (long long)test);
                 double a = (double)test/16.;
                 double r = round(a);
                 int olen = (int)r*16;

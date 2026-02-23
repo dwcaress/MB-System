@@ -390,7 +390,7 @@ int TrnClient::connectSocket()
 TerrainNav* TrnClient::connectTRN()
 {
     TerrainNav *_tercom = NULL;
-    TrnAttr *patt = &_trn_attr;
+    //TrnAttr *patt = &_trn_attr;
 
     try {
         printf("Connecting to %s:%ld...\n", _trn_attr.terrainNavServer, _trn_attr.terrainNavPort);

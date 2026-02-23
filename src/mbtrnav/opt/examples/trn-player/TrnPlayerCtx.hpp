@@ -160,8 +160,8 @@ public:
         snprintf(pfofile, BUF_SZ, "filterDistrib.txt");
 
         // init ranges : 0: range MIN 1: range MAX
-        ping_range[0] = std::numeric_limits<int>::max();
-        ping_range[1] = std::numeric_limits<int>::min();
+        ping_range[0] = std::numeric_limits<unsigned int>::max();
+        ping_range[1] = std::numeric_limits<unsigned int>::min();
         time_range[0] = std::numeric_limits<double>::max();;
         time_range[1] = std::numeric_limits<double>::min();
     }
@@ -1151,49 +1151,49 @@ public:
         // parsing complete: set context variables
 
         // set map file path
-        snprintf(ctx->mpath, BUF_SZ, "%s/%s", ctx->mdir, ctx->mfile);
+        snprintf(ctx->mpath, LBUF_SZ, "%s/%s", ctx->mdir, ctx->mfile);
         // set vehicle specs path
-        snprintf(ctx->vpath, BUF_SZ, "%s/%s", ctx->cdir, ctx->vfile);
+        snprintf(ctx->vpath, LBUF_SZ, "%s/%s", ctx->cdir, ctx->vfile);
         // set log dir if unset
         if(strlen(ctx->odir) == 0)
             snprintf(ctx->odir, BUF_SZ, "%s", TRN_LOGDIR_DFL);
         // set particles file if configured
         if(strlen(ctx->pfile) > 0)
-            snprintf(ctx->ppath, BUF_SZ, "%s/%s", ctx->cdir, ctx->pfile);
+            snprintf(ctx->ppath, LBUF_SZ, "%s/%s", ctx->cdir, ctx->pfile);
 
         // set input data log
         if(ctx->input_format == IOFMT_TRNNAV) {
-            snprintf(ctx->dpath, BUF_SZ, "%s/%s", ctx->ddir, log_name(IOFMT_TRNNAV));
+            snprintf(ctx->dpath, LBUF_SZ, "%s/%s", ctx->ddir, log_name(IOFMT_TRNNAV));
         } else if(ctx->input_format == IOFMT_TRNAID) {
-            snprintf(ctx->dpath, BUF_SZ, "%s/%s", ctx->ddir, log_name(IOFMT_TRNAID));
+            snprintf(ctx->dpath, LBUF_SZ, "%s/%s", ctx->ddir, log_name(IOFMT_TRNAID));
             if(strlen(ctx->nfile) > 0) {
-                snprintf(ctx->npath, BUF_SZ, "%s/%s", ctx->ddir, ctx->nfile);
+                snprintf(ctx->npath, LBUF_SZ, "%s/%s", ctx->ddir, ctx->nfile);
             } else {
-                snprintf(ctx->npath, BUF_SZ, "%s/%s", ctx->ddir, log_name(IOFMT_NAV));
+                snprintf(ctx->npath, LBUF_SZ, "%s/%s", ctx->ddir, log_name(IOFMT_NAV));
             }
         }  else if(ctx->input_format == IOFMT_CSV_DVL) {
-            snprintf(ctx->dpath, BUF_SZ, "%s/%s", ctx->ddir, log_name(IOFMT_CSV_DVL));
+            snprintf(ctx->dpath, LBUF_SZ, "%s/%s", ctx->ddir, log_name(IOFMT_CSV_DVL));
         }   else if(ctx->input_format == IOFMT_CSV_IDT) {
-            snprintf(ctx->dpath, BUF_SZ, "%s/%s", ctx->ddir, log_name(IOFMT_CSV_IDT));
+            snprintf(ctx->dpath, LBUF_SZ, "%s/%s", ctx->ddir, log_name(IOFMT_CSV_IDT));
         }   else if(ctx->input_format == IOFMT_CSV_MB) {
-            snprintf(ctx->dpath, BUF_SZ, "%s/%s", ctx->ddir, log_name(IOFMT_CSV_MB));
+            snprintf(ctx->dpath, LBUF_SZ, "%s/%s", ctx->ddir, log_name(IOFMT_CSV_MB));
         } else {
-            snprintf(ctx->dpath, BUF_SZ, "%s/%s", ctx->ddir, log_name(IOFMT_MBTRN));
+            snprintf(ctx->dpath, LBUF_SZ, "%s/%s", ctx->ddir, log_name(IOFMT_MBTRN));
         }
 
         if((ctx->oflags & OUT_MEAS_FILE) && strlen(ctx->mofile) > 0) {
-            snprintf(ctx->mopath, BUF_SZ, "%s/%s", "latestTRN", ctx->mofile);
+            snprintf(ctx->mopath, LBUF_SZ, "%s/%s", "latestTRN", ctx->mofile);
         }
 
         if((ctx->oflags & OUT_EST_FILE) && strlen(ctx->eofile) > 0) {
-            snprintf(ctx->eopath, BUF_SZ, "%s/%s", "latestTRN", ctx->eofile);
+            snprintf(ctx->eopath, LBUF_SZ, "%s/%s", "latestTRN", ctx->eofile);
         }
 
         if(strlen(ctx->ifile) > 0) {
-            snprintf(ctx->dpath, BUF_SZ, "%s/%s", ctx->ddir, ctx->ifile);
+            snprintf(ctx->dpath, LBUF_SZ, "%s/%s", ctx->ddir, ctx->ifile);
         }
         if(ctx->pf_omode != PFO_NONE) {
-            snprintf(ctx->pfopath, BUF_SZ, "%s/%s", "latestTRN", ctx->pfofile);
+            snprintf(ctx->pfopath, LBUF_SZ, "%s/%s", "latestTRN", ctx->pfofile);
         }
 
         return 0;
@@ -1279,7 +1279,7 @@ public:
     bool last_meas;
 
     double time_range[2];
-    int ping_range[2];
+    unsigned int ping_range[2];
 
     // mounting geometry parameters
     // dr: euler angles phi,theta,psi (pitch,roll,yaw) (deg)
@@ -1345,22 +1345,22 @@ public:
     char vfile[BUF_SZ];
 
     // App config file path
-    char cpath[BUF_SZ];
+    char cpath[LBUF_SZ];
     // TRN input log file path
-    char dpath[BUF_SZ];
+    char dpath[LBUF_SZ];
     // TRN estimate output file path
-    char eopath[BUF_SZ];
+    char eopath[LBUF_SZ];
     // TRN output file path
-    char mopath[BUF_SZ];
+    char mopath[LBUF_SZ];
     // TRN map file path
-    char mpath[BUF_SZ];
+    char mpath[LBUF_SZ];
     // TRN nav file path
-    char npath[BUF_SZ];
+    char npath[LBUF_SZ];
     // TRN particles file output path
-    char pfopath[BUF_SZ];
-    // TRN particles file path
-    char ppath[BUF_SZ];
+    char pfopath[LBUF_SZ];
+    // TRN pping_rangarticles file path
+    char ppath[LBUF_SZ];
     // TRN vehicle spec file path
-    char vpath[BUF_SZ];
+    char vpath[LBUF_SZ];
 };
 #endif
