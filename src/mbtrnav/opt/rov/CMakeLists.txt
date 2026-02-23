@@ -275,8 +275,7 @@ add_executable(lcmtrnpp
 )
 
 # specify include paths and libraries
-# (stdc++ may be needed for linux)
-target_link_libraries(lcmtrnpp PRIVATE lcm mb1 trncli tnav newmat qnx m geolib geocon udpms lcmtrnplug NetCDF::NetCDF)
+target_link_libraries(lcmtrnpp PRIVATE lcm stdc++ mb1 trncli tnav newmat qnx m geolib geocon udpms lcmtrnplug NetCDF::NetCDF)
 
 target_include_directories(lcmtrnpp PRIVATE
     ${LIBTRNAV_INCLUDES}
