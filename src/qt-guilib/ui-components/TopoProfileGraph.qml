@@ -1,4 +1,4 @@
-// TopoProfileGraph.qml
+/// TopoProfileGraph.qml
 import QtQuick 2.9
 import QtQuick.Window 2.3
 import QtQuick.Controls 2.3
@@ -9,36 +9,29 @@ import QtGraphs
 GraphsView {
     id: graphsView
 
-    /// type:ValueAxis profile x-axis
     property alias xAxis: graphsView.axisX
-    /// type:ValueAxis profile y-axis
     property alias yAxis: graphsView.axisY
-    /// type:LineSeries profile x-y data
     property alias xyData: lineSeries
-
+    zoomStyle: GraphsView.ZoomStyle.Center
+    panStyle: GraphsView.PanStyle.Drag
     anchors.fill: parent
     anchors.margins: 16
+
     theme: GraphsTheme {
         readonly property color c1: "#DBEB00"
         readonly property color c2: "#373F26"
         readonly property color c3: Qt.lighter(c2, 1.5)
-        colorScheme: GraphsTheme.ColorScheme.Dark
+        colorScheme: GraphsTheme.ColorScheme.Automatic
         seriesColors: ["#2CDE85", "#DBEB00"]
-        grid.mainColor: c3
-        grid.subColor: c2
-        axisX.mainColor: c3
-        axisY.mainColor: c3
-        axisX.subColor: c2
-        axisY.subColor: c2
-        axisX.labelTextColor: c1
-        axisY.labelTextColor: c1
     }
     axisX: ValueAxis {
+        titleText: "Distance (km)"
         max: 5
         labelDecimals: 1
     }
 
     axisY: ValueAxis {
+        titleText: "Elevation (m)"
         max: 10
         labelDecimals: 1
     }
@@ -91,6 +84,7 @@ GraphsView {
 
 /*##^## Designer {
     D{i:3;anchors_height:400;anchors_width:400}D{i:11;anchors_height:100;anchors_width:100}
+}
 }
  ##^##*/
 
