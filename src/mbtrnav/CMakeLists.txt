@@ -360,7 +360,7 @@ target_include_directories(tnav PRIVATE BEFORE
 )
 
 target_compile_options(tnav PRIVATE
-"-std=c++11"
+-std=c++11
 )
 
 #
@@ -381,7 +381,7 @@ target_include_directories(geocon PRIVATE BEFORE
 )
 
 target_compile_options(geocon PRIVATE
-"-std=c++11"
+-std=c++11
 )
 
 #
@@ -465,7 +465,7 @@ target_include_directories(trncli PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
 )
 target_compile_options(trncli PRIVATE
-"-std=c++11"
+-std=c++11
 )
 
 #
@@ -595,7 +595,7 @@ target_include_directories(trn-player PRIVATE BEFORE
 )
 
 target_compile_options(trn-player PRIVATE
-"-std=c++11"
+-std=c++11
 )
 #
 #------------------------------------------------------------------------------
@@ -618,7 +618,7 @@ target_include_directories(replay PRIVATE BEFORE
 )
 
 target_compile_options(replay PRIVATE
-"-std=c++11"
+-std=c++11
 )
 #
 #------------------------------------------------------------------------------
@@ -641,7 +641,7 @@ target_include_directories(mb1log-player PRIVATE BEFORE
 )
 
 target_compile_options(mb1log-player PRIVATE
-"-std=c++11"
+-std=c++11
 )
 #
 #------------------------------------------------------------------------------
@@ -665,7 +665,7 @@ target_include_directories(trnlog-player PRIVATE BEFORE
 )
 
 target_compile_options(trnlog-player PRIVATE
-"-std=c++11"
+-std=c++11
 )
 #
 #------------------------------------------------------------------------------
@@ -689,7 +689,7 @@ target_include_directories(csvlog-player PRIVATE BEFORE
 )
 
 target_compile_options(csvlog-player PRIVATE
-"-std=c++11"
+-std=c++11
 )
 #
 #------------------------------------------------------------------------------
@@ -744,7 +744,7 @@ target_include_directories(trn-client PRIVATE BEFORE
 )
 
 target_compile_options(trn-client PRIVATE
-"-std=c++11"
+-std=c++11
 )
 
 #
@@ -992,7 +992,7 @@ target_include_directories(test-geocon PRIVATE BEFORE
 )
 
 target_compile_options(test-geocon PRIVATE
-"-std=c++11"
+-std=c++11
 )
 
 #
@@ -1015,7 +1015,7 @@ target_include_directories(test-trnattr PRIVATE BEFORE
 )
 
 target_compile_options(test-trnattr PRIVATE
-"-std=c++11"
+-std=c++11
 )
 
 # update this list when targets are moved
