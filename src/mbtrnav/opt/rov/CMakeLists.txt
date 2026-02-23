@@ -344,7 +344,7 @@ add_executable(udpms-test
 
 # specify include paths and libraries
 # may need rt (librt) in Linux
-target_link_libraries(udpms-test PRIVATE udpms)
+target_link_libraries(udpms-test PRIVATE udpms m)
 
 target_include_directories(udpms-test PRIVATE
     ${LIBTRNAV_INCLUDES}
