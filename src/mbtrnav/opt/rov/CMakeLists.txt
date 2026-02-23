@@ -242,6 +242,7 @@ target_include_directories(lcmtrnplug PRIVATE
 target_compile_options(lcmtrnplug PRIVATE
 -std=c++11
 )
+
 #
 #------------------------------------------------------------------------------
 #
@@ -305,7 +306,7 @@ target_link_libraries(trnlcm-test PRIVATE lcm pthread)
 
 target_include_directories(trnlcm-test PRIVATE
     ${LIBTRNAV_INCLUDES}
-    /usr/local/include
+#    /usr/local/include
 )
 target_compile_options(trnlcm-test PRIVATE
 -std=c++11
@@ -364,6 +365,12 @@ endif()
 #------------------------------------------------------------------------------
 # install it all
 install(TARGETS trnlcm trnlcm-cpp udpms trnxplug lcmtrnplug
+
+EXPORT ${PROJECT_NAME}Targets
+RUNTIME DESTINATION bin
+LIBRARY DESTINATION lib${LIB_SUFFIX}
+ARCHIVE DESTINATION lib${LIB_SUFFIX}
+INCLUDES DESTINATION include
 
 DESTINATION
 ${CMAKE_INSTALL_LIBDIR}

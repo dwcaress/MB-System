@@ -51,38 +51,53 @@ message("In src/mbtrnav")
 #
 #------------------------------------------------------------------------------
 # set build option defaults
-if(NOT DEFINED buildVerbose)
 option(buildVerbose "build with verbose output" ON)
-endif()
-if(NOT DEFINED buildTRNOptional)
 option(buildTRNOptional "build targets in buildTRNOptional" OFF)
-endif()
+option(buildTrnNoRand "build with TRN_NORAND (random seed disabled)" OFF)
+#option(buildTrnLog "build using WITH_TRNLOG (TRN binary logging)" ON)
+#option(buildTrnLogEst "build using WITH_TRNLOG_EST_OUT (TRN MMSE logging)" ON)
 
 if(buildTrnNoRand)
     # add TRN_NORAND to disable TRN random seed.
+    # compile using cmake .. -DbuildTrnNoRand=ON
     add_compile_definitions(TRN_NORAND)
     message("TRN_NORAND set : TRN random seed DISABLED")
 else()
     message("TRN_NORAND unset : TRN random seed ENABLED")
 endif()
 
-find_package(NetCDF REQUIRED)
-find_package(LibPROJ REQUIRED)
-
+# WITH_TRNLOG         : enable TRN binary log (-DbuildTrnLog=ON)
+# WITH_TRNLOG_EST_OUT : enable TRN binary log (-DbuildTrnLogEst=ON)
+# MIN_RANGE           : relax DVL beam range validation; default 5m (-DMIN_RANGE=n)
+# WITH_TRNU           : enable trnum message decode in udpms_test (-DWITH_TRNU=1)
+# WITH_ALT_DELTAT_VALIDATION :
+# WITH_CEP_2022       : enable 2022 TRN CEP correction (-DbuildTrnCEP2022=ON)
+# WITH_PDEBUG         : enable extra debug output, e.g. PTRACE, PDPRINT (-DWITH_PDEBUG=1)
+# NETIF_MMDEBUG       : use netif default MMDEBUG macros (-DNETIF_MMDEBUG=1)
+#                       instead of values defined in a custom mconfig.h
+#                       [may need for Cygwin build]
+#                       TODO: get external netif mmdebug channel defs
 add_compile_definitions(
 HAVE_CONFIG_H
 _GNU_SOURCE
-#TRN_NORAND
 WITH_TESTS
 WITH_MMDEBUG
 WITH_MST_MSTATS
 MST_STATS_EN
-#WITH_ALT_DELTAT_VALIDATION
-#WITH_CEP_2022
-#WITH_TRNU # enables trnum message decode in udpms_test
 WITH_TRNLOG
 WITH_TRNLOG_EST_OUT
+#MIN_RANGE=3
+#WITH_TRNU
+#WITH_ALT_DELTAT_VALIDATION
+#WITH_CEP_2022
+#WITH_PDEBUG
+#NETIF_MMDEBUG
+#WITH_NETIF_MMD_EXT
 )
+
+find_package(NetCDF REQUIRED)
+find_package(LibPROJ REQUIRED)
+
 
 #################################
 # define source directories
@@ -151,6 +166,14 @@ message(" TRNW_SRC_DIR                ${TRNW_SRC_DIR}")
 message(" UTILS_SRC_DIR               ${UTILS_SRC_DIR}")
 message(" NetCDF_INCLUDE_DIRS         ${NetCDF_INCLUDE_DIRS}")
 message(" LIBTRNAV_INCLUDES           ${LIBTRNAV_INCLUDES}")
+# Get the compile definitions property for the current directory
+get_directory_property(DIR_DEFS DIRECTORY ${CMAKE_SOURCE_DIR} COMPILE_DEFINITIONS)
+# Print the definitions
+message(" ---- COMPILE_DEFINITIONS ----")
+# Optional: Iterate and print each definition
+foreach(d ${DIR_DEFS})
+    message(STATUS " Found Define: ${d}")
+endforeach()
 message("----------------------------------------------------------")
 endif()
 
@@ -335,6 +358,11 @@ target_link_libraries(tnav PRIVATE newmat qnx NetCDF::NetCDF)
 target_include_directories(tnav PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
 )
+
+target_compile_options(tnav PRIVATE
+"-std=c++11"
+)
+
 #
 #------------------------------------------------------------------------------
 #
@@ -436,6 +464,10 @@ target_link_libraries(trncli PRIVATE newmat geolib trnw qnx mb1 tnav NetCDF::Net
 target_include_directories(trncli PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
 )
+target_compile_options(trncli PRIVATE
+"-std=c++11"
+)
+
 #
 #------------------------------------------------------------------------------
 #
@@ -710,6 +742,11 @@ target_link_libraries(trn-client PRIVATE tnav newmat qnx NetCDF::NetCDF)
 target_include_directories(trn-client PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
 )
+
+target_compile_options(trn-client PRIVATE
+"-std=c++11"
+)
+
 #
 #------------------------------------------------------------------------------
 #
