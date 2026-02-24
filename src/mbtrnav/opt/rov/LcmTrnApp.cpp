@@ -1,13 +1,7 @@
-
-/// @file trnxpp_app.cpp
-/// @authors k. headley
-/// @date 21mar2022
-
-/// Summary: app code for trnxpp (LCM TRN preprocessing for ROVs)
-
-// ///////////////////////
-// Copyright 2022  Monterey Bay Aquarium Research Institute
-// Distributed under MIT license. See LICENSE file for more information.
+////////////////////////////////////////////////////////////////////////////////
+/// Copyright 2022  Monterey Bay Aquarium Research Institute
+/// Distributed under MIT license. See license.txt for more information.
+////////////////////////////////////////////////////////////////////////////////
 
 // /////////////////
 // Includes

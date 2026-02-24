@@ -1,3 +1,8 @@
+////////////////////////////////////////////////////////////////////////////////
+/// Copyright 2022  Monterey Bay Aquarium Research Institute
+/// Distributed under MIT license. See license.txt for more information.
+////////////////////////////////////////////////////////////////////////////////
+
 #include "LcmTrnPlugin.hpp"
 
 // g++ -c -g -O2 -std=c++11 -I. -I../../utils -I../../qnx-utils -I../../terrain-nav -I../../newmat -I../../trnw -I/usr/local/include -I/opt/local/include -fPIC plug-mbminirov.cpp

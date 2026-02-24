@@ -1,3 +1,11 @@
+////////////////////////////////////////////////////////////////////////////////
+/// Copyright 2022  Monterey Bay Aquarium Research Institute
+/// Distributed under MIT license. See license.txt for more information.
+////////////////////////////////////////////////////////////////////////////////
+
+#ifndef LCM_TRN_PLUGIN_H
+#define LCM_TRN_PLUGIN_H
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <libgen.h>
@@ -6,9 +14,6 @@
 #include "trn_debug.hpp"
 #include "trnx_utils.hpp"
 #include "GeoCon.h"
-
-#ifndef LCM_TRN_PLUGIN_H
-#define LCM_TRN_PLUGIN_H
 
 extern "C" int cb_proto_oisledx(void *pargs);
 

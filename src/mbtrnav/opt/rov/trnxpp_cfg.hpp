@@ -1,13 +1,13 @@
+////////////////////////////////////////////////////////////////////////////////
+/// Copyright 2022  Monterey Bay Aquarium Research Institute
+/// Distributed under MIT license. See license.txt for more information.
+////////////////////////////////////////////////////////////////////////////////
 
 /// @file trnxpp_cfg.cpp
 /// @authors k. headley
 /// @date 08nov2022
 
 /// Summary: trnxpp application configuration code
-
-// ///////////////////////
-// Copyright 2022  Monterey Bay Aquarium Research Institute
-// Distributed under MIT license. See LICENSE file for more information.
 
 // /////////////////
 // Includes

@@ -1,7 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////////
-//// Copyright 2022  Monterey Bay Aquarium Research Institute                 //
-//// Distributed under MIT license. See license.txt for more information.     //
+/// Copyright 2022  Monterey Bay Aquarium Research Institute
+/// Distributed under MIT license. See license.txt for more information.
 ////////////////////////////////////////////////////////////////////////////////
+
 #ifndef LCM_TRN_PP_H  // include guard
 #define LCM_TRN_PP_H
 

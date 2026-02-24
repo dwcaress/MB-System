@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
-//// Copyright 2022  Monterey Bay Aquarium Research Institute                 //
-//// Distributed under MIT license. See license.txt for more information.     //
+/// Copyright 2022  Monterey Bay Aquarium Research Institute
+/// Distributed under MIT license. See license.txt for more information.
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <stdlib.h>
