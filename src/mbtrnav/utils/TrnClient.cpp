@@ -14,7 +14,7 @@
 
 // TrnClient extends TerrainNavClient (and TerrainNav).
 // It provides better control over initialization than TerrainNavClient,
-// which calls initializes communications, logs, etc. in most constructors.
+// which initializes communications, logs, etc. in most constructors.
 // In some contexts, this is not desirable, since configuration steps may
 // be required after instantiation. This behavior varies among its constructors.
 //
