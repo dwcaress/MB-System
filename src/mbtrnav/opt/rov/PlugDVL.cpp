@@ -205,10 +205,15 @@ int cb_proto_dvl(void *pargs)
 
         dvlgeo *geo = static_cast<dvlgeo *>(bgeo);
         trn::bath_input *bp[1] = {xpp->get_bath_input(*bkey[0])};
-        // use trn_type TRN_SENSOR_MB
-        // since processing MB1, i.e. along/across/down
-        // int trn_type = bp[0]->bath_input_type();
-        int trn_type = TRN_SENSOR_MB;
+        // get default TRN sensor type from bath input
+        int trn_type = bp[0]->bath_input_type();
+
+        // check for TRN type override using imap config 'TRNTYPE'
+        // NOTE: value set in sensor spec must match
+        int type_ovr = ctx->mImap["TRNTYPE"];
+        if(type_ovr > TRN_SENSOR_DVL && type_ovr <= TRN_SENSOR_DELTAT) {
+            trn_type = type_ovr;
+        }
 
         // compute beam components in vehicle frame (format DVL as MB1)
         transform_dvl(bi, ai, geo, snd);
