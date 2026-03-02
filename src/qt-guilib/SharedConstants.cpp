@@ -38,7 +38,7 @@ SharedConstants::SharedConstants() {
 
     mouseModes_ += new MouseMode(MouseEditSites, "Tooltip goes here");
     mouseModes_ += new MouseMode(MouseEditRoutes, "Tooltip goes here");
-    mouseModes_ += new MouseMode(MousePickNav, "Tooltip goes here");
-    mouseModes_ += new MouseMode(MousePickNavFile, "Tooltip goes here");    
-    mouseModes_ += new MouseMode(MouseTest, "TESTING");
+    mouseModes_ += new MouseMode(MousePickNavFile, "Tooltip goes here");        
+    mouseModes_ += new MouseMode(MouseElevProfile,
+				 "left-click select points for elevation profile");
 }

@@ -4,6 +4,8 @@
 #include <QStringList>
 #include <iostream>
 
+/// These mouse mode names are displayed as choices in QML, then
+/// selected mode name is passed to backend function when user selects.
 #define MousePanAndZoom "Basic pan, tilt, zoom"
 #define MouseRotateModel "Rotate model"
 #define MouseRotateView "Rotate view"
@@ -14,14 +16,17 @@
 #define MouseEditRoutes "Edit routes"
 #define MousePickNav "Pick nav"
 #define MousePickNavFile "Pick nav file"
+#define MouseElevProfile "Define elev profile"
 #define MouseTest "TESTING"
 
 namespace mb_system {
 
   /// Data model for 'mouse mode', accessed from QML
-  /// including mode name and brief ToolTip.
-  /// Class is defined outside of SharedConstants, as
+  /// including mode name and brief ToolTip. User can choose from
+  /// a set of available mouse modes (as menu items).
+  /// This class is defined outside of SharedConstants class, as
   /// nested QObject definitions are not supported.
+  /// Can be accessed from QML when registered as a QML type
   class MouseMode : public QObject {
     Q_OBJECT
 
@@ -44,54 +49,58 @@ namespace mb_system {
     QString toolTip_;
   };
 
-/// Constants defined here in C++ and accessible through QML.
-class SharedConstants : public QObject
-{
+  /// Constants are defined here in C++ and are accessible through QML when
+  /// when registered as a QML type
+  class SharedConstants : public QObject {
     Q_OBJECT
 
-public:
+  public:
 
-  SharedConstants();
+    SharedConstants();
   
-  enum class EditState : int {
-			      ViewOnly,
-			      EditRoute,
-			      EditPoints,
-			      EditOverlay
-  };
+    enum class EditState : int {
+      ViewOnly,
+      EditRoute,
+      EditPoints,
+      EditOverlay
+    };
 
-  Q_ENUM(EditState)
+    Q_ENUM(EditState)
 
-  /// Define read-only QString property called "testString"
-  Q_PROPERTY(QString testString READ getTestString)
+    /// Define read-only QString property called "testString"
+    Q_PROPERTY(QString testString READ getTestString)
 
-  /// Just return a dummy string for now...
-  QString getTestString() const {
+    /// Just return a dummy string for now...
+    QString getTestString() const {
       std::cerr << "**** getTestString()\n";
       return testString_;
-  }
+    }
 
-  /// List of supported color maps
-  Q_PROPERTY(QStringList cmaps MEMBER colorMapsList_ NOTIFY cmapsChanged)
+    /// List of supported color maps
+    Q_PROPERTY(QStringList cmaps MEMBER colorMapsList_ NOTIFY cmapsChanged)
 
-  /// List of supported mouse modes
-  Q_PROPERTY(QList<MouseMode *> mouseModes MEMBER mouseModes_
-	     NOTIFY mouseModesChanged)
+    /// List of supported mouse modes
+    Q_PROPERTY(QList<MouseMode *> mouseModes MEMBER mouseModes_
+	       NOTIFY mouseModesChanged)
 
-signals:
-  // Emit this if cmaps changes
-  void cmapsChanged();
+  signals:
+    // Emit this if cmaps changes
+    void cmapsChanged();
 
-  // Emit this if mouseModes changes
-  void mouseModesChanged();  
+    // Emit this if mouseModes changes
+    void mouseModesChanged();  
   
-protected:
+  protected:
       
-  static const QString testString_;
+    static const QString testString_;
 
-  QStringList colorMapsList_;
-  QList<MouseMode *> mouseModes_;
-};
+    /// Populated by SharedConstants constructor
+    QStringList colorMapsList_;
 
-}
+    /// Populated by SharedConstants constructor
+    QList<MouseMode *> mouseModes_;
+  };
+
+}   // namespace
+
 #endif
