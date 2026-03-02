@@ -26,6 +26,7 @@ GraphsView {
     }
     axisX: ValueAxis {
         titleText: "Distance (km)"
+	min: 0   /// TEST TEST
         max: 5
         labelDecimals: 1
     }
