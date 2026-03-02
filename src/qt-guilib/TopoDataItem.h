@@ -140,7 +140,8 @@ namespace mb_system {
       verticalExagg_ = verticalExagg;
     }
 
-    /// Set mouse mode
+    /// Set vtk render window's event-driven user interace corresponding to
+    /// specified mouse mode name
     Q_INVOKABLE bool setMouseMode(QString mouseMode);
 
 
@@ -290,7 +291,7 @@ namespace mb_system {
     vtkRenderWindow *renderWindow_;
 
     /// Interactor styles (can be selected by user)
-    mb_system::PickInteractorStyle *pickInteractorStyle_;
+    PickInteractorStyle *pickInteractorStyle_;
 
     /// Change lighting with mouse
     LightingInteractorStyle *lightingInteractorStyle_;
@@ -298,7 +299,7 @@ namespace mb_system {
     /// Select topo/bathymetry data with mouse
     vtkNew<PointsSelectInteractorStyle> pointsSelectInteractorStyle_;
 
-    DrawInteractorStyle *whatTheHell;
+    vtkNew<DrawInteractorStyle> drawInteractorStyle_;
     
     vtkNew<DrawInteractorStyle> testStyle_;
     

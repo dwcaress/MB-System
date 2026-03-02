@@ -38,7 +38,10 @@ TopoDataItem::TopoDataItem() {
   pointsSelectInteractorStyle_->setTopoDataItem(this);
   pointsSelectInteractorStyle_->setDrawingMode(MyRubberBandStyle::DrawingMode::Rectangle);
 
-  // testStyle_->SetMinimumZ(-1000.);
+  
+  drawInteractorStyle_->setTopoDataItem(this);
+  drawInteractorStyle_->setDrawingMode(DrawInteractorStyle::DrawingMode::Line);
+
   testStyle_->setTopoDataItem(this);
   testStyle_->setDrawingMode(DrawInteractorStyle::DrawingMode::Line);
 }
@@ -592,6 +595,11 @@ bool TopoDataItem::setMouseMode(QString mouseMode) {
     qDebug() << "setMouseMode(): set pointsSelectInteractorStyle_";
     pipeline_->interactorStyle_ = pointsSelectInteractorStyle_;
   }
+  else if (mouseMode == MouseElevProfile) {
+    qDebug() << "setMouseMode(): set mouseElevInteractorStyle_;";
+    pipeline_->interactorStyle_ = drawInteractorStyle_;
+  }
+  
   else if (mouseMode == MouseTest) {
     qDebug() << "setMouseMode():: TEST!!";
     pipeline_->interactorStyle_ = testStyle_;
