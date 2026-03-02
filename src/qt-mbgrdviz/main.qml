@@ -105,7 +105,9 @@ Window {
             property string currentCmap
 	    
             Repeater {
-	      model: constants.cmaps  // List of colormap names
+               // List of colormap names from SharedConstants
+	      model: constants.cmaps
+	      
 	      visible: true
 	      MenuItem {
 	        text: modelData; checkable: true;  // colormap name
@@ -138,7 +140,9 @@ Window {
             property string currentMode: ''
 
             Repeater {
-	      model: constants.mouseModes // mouse mode names, tooltips
+	      // mouse mode names, tooltips defined in SharedConstants.h
+	      model: constants.mouseModes
+	      
 	      visible: true
 	      
 	      MenuItem {
@@ -337,10 +341,11 @@ Window {
     target: topoDataItem
     onLineDefined: function (profileData) {
       console.log("Line defined!")
-      var xmin = 100000;
-      var xmax = -xmin;
-      var ymin = 100000;
-      var ymax = -ymin;
+      var xmin = Infinity
+      var xmax = -Infinity
+      var ymin = Infinity
+      var ymax = -Infinity
+      // Find min/max values of x and y
       for (var i = 0; i < profileData.length; i++) {
         // console.log('x: ', profileData[i].x, ' y: ', profileData[i].y);
         if (profileData[i].x < xmin) { xmin = profileData[i].x }
@@ -351,21 +356,22 @@ Window {
       console.log('xmin: ', xmin, '  xmax: ', xmax);
       console.log('ymin: ', ymin, '  ymax: ', ymax);
 
-      // Set graph axes ranges
-      profileGraph.xAxis.min = xmin
-      profileGraph.xAxis.max = xmax
-      profileGraph.yAxis.min = ymin
-      profileGraph.yAxis.max = ymax
-
       profileGraph.xyData.clear()
 
       // Populate graph line-series points
       for (var i = 0; i < profileData.length; i++) {
         profileGraph.xyData.append(profileData[i].x, profileData[i].y);
-       }
-       topoProfileWindow.show();
-       topoDataItem.forceActiveFocus();
-     }
+      }
+      topoProfileWindow.show();
+
+      // Set graph axes ranges
+      profileGraph.axisX.min = xmin
+      profileGraph.axisX.max = xmax
+      profileGraph.axisY.min = ymin
+      profileGraph.axisY.max = ymax
+
+      topoDataItem.forceActiveFocus();
+    }
   }
 }
 
