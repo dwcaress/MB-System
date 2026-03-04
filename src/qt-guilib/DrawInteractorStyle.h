@@ -9,6 +9,7 @@
 #include "vtkPolyData.h"
 #include "vtkHandleWidget.h"
 #include "vtkHandleRepresentation.h"
+#include "vtkCutter.h"
 #include <QObject>
 #include <QQuickVTKItem.h>
 #include "Point.h"
@@ -22,11 +23,6 @@ namespace mb_system {
   /* **
      Like TrackBallCamera, but user can define path/polygon/etc
      by clicking left mouse button.
-
-     Note that shapes (path, polygon, etc) defined by the mouse are
-     drawn into the 'overlay' renderer (i.e. layer-1 of the associated
-     vtkRenderWindow), in display coordinates.
-
   */
   class DrawInteractorStyle
     : public QObject, public vtkInteractorStyleTrackballCamera {
@@ -78,41 +74,34 @@ namespace mb_system {
     DrawInteractorStyle();
     ~DrawInteractorStyle() override;
 
-    void initializeOverlay();
-
-    /// Clear overlay contents (selection rectangle)
-    void clearOverlay();
-
-    /// Set interactor, initialize overlay
+    /// Set interactor
     void SetInteractor(vtkRenderWindowInteractor* interactor) override;
 
     /// Associated TopoDataItem
     TopoDataItem *topoDataItem_;
 
-    bool drawEnabled_;
-
     /// Current drawing mode
     DrawingMode drawingMode_;
-  
+
+    /// Points in path defined by user mouse
     std::vector<std::array<double, 3>> userPath_;
     
-    QQuickVTKItem *qquickVTKItem_;
-
-    vtkNew<vtkRenderer> overlayRenderer_;
-    vtkNew<vtkActor2D> rubberBandActor_;
-    vtkNew<vtkPolyDataMapper2D> rubberBandMapper_;
-    vtkNew<vtkPolyData> rubberBandPolyData_;
-    vtkNew<vtkCoordinate> transformCoordinate_;
+    /// vtk pipeline objects for rendered elevation profile 
     vtkNew<vtkActor> profileActor_;
-    bool overlayInitialized_ = false;
+    vtkNew<vtkPlane> profilePlane_;
+    vtkNew<vtkCutter> profileCutter_;
+    vtkNew<vtkPolyDataMapper> profileMapper_;
+    
 
     /// Last mousebutton-down event position
     int downEventPos_[2];
 
-    // Store line/polygon vertices handle widgets and 
-    // representation for map pins;
-    // Want the widgets to persist, so store them in this
-    // class member vector.
+    /// To simplify memory management, store HandleWidgets and
+    /// HandleRepresentations as vectors of SmartPointers (SmartPointer type
+    /// so that vector members are still valid when accessed by
+    /// VTK rendering functions.)
+    /// As class members, the individual vector elements
+    /// will not be deallocated until the vectors are cleared. 
     std::vector<vtkSmartPointer<vtkHandleWidget>> pinWidgets_;
     std::vector<vtkSmartPointer<vtkHandleRepresentation>> pinRepresentations_;
 

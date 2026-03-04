@@ -40,7 +40,6 @@ vtkStandardNewMacro(DrawInteractorStyle);
 DrawInteractorStyle::DrawInteractorStyle()
 {
   drawingMode_ = DrawingMode::Rectangle;
-  drawEnabled_ = true;
 }
 
 //-----------------------------------------------------------------
@@ -81,39 +80,37 @@ void DrawInteractorStyle::OnLeftButtonUp() {
     return;
   }
 
+  int pointIndex = userPath_.size() - 1;
 
   qDebug() << "userPath_.size() = " << userPath_.size();  
   if (userPath_.size() == 1) {
-    qDebug() << "Create starting widget pin";
+    qDebug() << "Clear existing widgets and profile line";
     
-    // First point of profile defined
+    // First point of profile defined; clear existing widgets
     topoDataItem_->clearAddedActors();
     pinWidgets_.clear();
     pinRepresentations_.clear();
-    
-    double startPoint[3];
-    std::copy(userPath_[0].begin(), userPath_[0].end(), startPoint);
-  
-    // Put a pin marker at start point
-    vtkNew<vtkHandleWidget> startWidget;
-    pinWidgets_.push_back(startWidget);
-  
-    startWidget->SetInteractor(Interactor);
-
-    vtkNew<vtkFixedSizeHandleRepresentation3D> startPin;
-    pinRepresentations_.push_back(startPin);
-    
-    startPin->SetWorldPosition(startPoint);
-    startPin->SetHandleSizeInPixels(30);
-    startPin->GetProperty()->SetColor(1., 0., 0.);  
-    startWidget->SetRepresentation(startPin);
-    startWidget->EnabledOn();
-    // Render the pin
-    Interactor->GetRenderWindow()->Render();
-    
-    return;
   }
+  
+  double point[3];
+  std::copy(userPath_[pointIndex].begin(), userPath_[pointIndex].end(), point);
+  
+  // Put a pin marker at selected point
+  vtkNew<vtkHandleWidget> pinWidget;
+  pinWidgets_.push_back(pinWidget);
+  
+  pinWidget->SetInteractor(Interactor);
 
+  vtkNew<vtkFixedSizeHandleRepresentation3D> pin;
+  pinRepresentations_.push_back(pin);
+    
+  pin->SetWorldPosition(point);
+  pin->SetHandleSizeInPixels(30);
+  pin->GetProperty()->SetColor(1., 0., 0.);  
+  pinWidget->SetRepresentation(pin);
+  pinWidget->EnabledOn();
+  // Render the pin
+  Interactor->GetRenderWindow()->Render();
   
   if (userPath_.size() != 2) {
     return;
@@ -126,15 +123,11 @@ void DrawInteractorStyle::OnLeftButtonUp() {
   double pt2[3];
   std::copy(userPath_[1].begin(), userPath_[1].end(), pt2);
   
-  qDebug() << "pt1: " << pt1[0] << ", " << pt1[1] << ", " << pt1[2] << "\n";
-
-  qDebug() << "pt2: " << pt2[0] << ", " << pt2[1] << ", " << pt2[2] << "\n";  
-
+  computeElevationProfile(pt1, pt2);
 
   // Clear out line points
   userPath_.clear();
 
-  computeElevationProfile(pt1, pt2);
   
 }
 
@@ -154,44 +147,9 @@ void DrawInteractorStyle::OnLeftButtonDown() {
 }
 
 
-void DrawInteractorStyle::initializeOverlay() {
-  if (!Interactor || overlayInitialized_) {
-    return;
-  }
-    
-  vtkRenderWindow* renWin = Interactor->GetRenderWindow();
-    
-  // Set up overlay renderer
-  renWin->AddRenderer(overlayRenderer_);
-  overlayRenderer_->SetLayer(1);           // Use overlay layer 1
-  overlayRenderer_->InteractiveOff();
-  renWin->SetNumberOfLayers(2);
-    
-  // Match the viewport of the main renderer
-  overlayRenderer_->SetViewport(0.0, 0.0, 1.0, 1.0);
-    
-  // Initialize polydata
-  rubberBandPolyData_->Initialize();
-  // Rubber band polydata is source for overlayed pipeline
-  rubberBandMapper_->SetInputData(rubberBandPolyData_);
-    
-  // CRITICAL: Set the overlayed actor coordinate system to DISPLAY
-  transformCoordinate_->SetCoordinateSystemToDisplay();
-  rubberBandMapper_->SetTransformCoordinate(transformCoordinate_);
-    
-  overlayInitialized_ = true;
-}
-
-void DrawInteractorStyle::clearOverlay() {
-  overlayRenderer_->RemoveAllViewProps();
-  Interactor->GetRenderWindow()->Render();
-}
-
-
 void DrawInteractorStyle::SetInteractor(vtkRenderWindowInteractor
 					*interactor) {
   Superclass::SetInteractor(interactor);
-  initializeOverlay();
 }
 
 
@@ -199,49 +157,8 @@ void DrawInteractorStyle::SetInteractor(vtkRenderWindowInteractor
 void DrawInteractorStyle::computeElevationProfile(double *startPoint,
 						  double *endPoint) {
 
-  /* ***
-  topoDataItem_->clearAddedActors();
-  pinWidgets_.clear();
-  pinRepresentations_.clear();
-  
-  // Put a little marker at start and end points
-  vtkNew<vtkHandleWidget> startWidget;
-  pinWidgets_.push_back(startWidget);
-  
-  startWidget->SetInteractor(Interactor);
-
-  vtkNew<vtkFixedSizeHandleRepresentation3D> startPin;
-  pinRepresentations_.push_back(startPin);  
-  startPin->SetWorldPosition(startPoint);
-  startPin->SetHandleSizeInPixels(30);
-  startPin->GetProperty()->SetColor(1., 0., 0.);  
-
-  startWidget->SetRepresentation(startPin);
-  startWidget->EnabledOn();
-  *** */
-  
-  vtkNew<vtkHandleWidget> endWidget;
-  pinWidgets_.push_back(endWidget);
-  
-  endWidget->SetInteractor(Interactor);
-  vtkNew<vtkFixedSizeHandleRepresentation3D> endPin;
-  pinRepresentations_.push_back(endPin);
-  endPin->SetWorldPosition(endPoint);
-  endPin->SetHandleSizeInPixels(30);  
-  endPin->GetProperty()->SetColor(1., 0., 0.);
-  
-  endWidget->SetRepresentation(endPin);
-  endWidget->EnabledOn();
-
-  bool earlyReturn = false;
-  if (earlyReturn) {
-    qDebug() << "Early return for testing, after rendering widgets";
-    Interactor->GetRenderWindow()->Render();
-    return;
-  }
-
-  // Compute normal to elevation profile plane; elevation profile plane is vertical,
-  // so normal to plane is horizontal
+  // Compute normal to elevation profile plane; elevation profile plane is
+  // vertical, so normal to plane is horizontal
   double normal[3];
   normal[0] = -(endPoint[1] - startPoint[1]);
   normal[1] = endPoint[0] - startPoint[0];
@@ -250,29 +167,22 @@ void DrawInteractorStyle::computeElevationProfile(double *startPoint,
   vtkMath::Normalize(normal);
 
   // Create the elevation profile plane
-  vtkNew<vtkPlane> plane;
-  plane->SetOrigin(endPoint);
-  plane->SetNormal(normal);
+  profilePlane_->SetOrigin(endPoint);
+  profilePlane_->SetNormal(normal);
 
-  // Create the cutter filter
-  vtkNew<vtkCutter> cutter;
-  cutter->SetInputData(topoDataItem_->getPolyData());
-  cutter->SetCutFunction(plane);
-  cutter->Update();
+  // Add cutter filter
+  profileCutter_->SetInputData(topoDataItem_->getPolyData());
+  profileCutter_->SetCutFunction(profilePlane_);
+  profileCutter_->Update();
 
   // Display profile on main 3D surface 
   // Elevation profile mapper
-  vtkNew<vtkPolyDataMapper> profileMapper;
-  profileMapper->SetInputConnection(cutter->GetOutputPort());
+  profileMapper_->SetInputConnection(profileCutter_->GetOutputPort());
 
   // Elevation profile actor
-  profileActor_->SetMapper(profileMapper);
+  profileActor_->SetMapper(profileMapper_);
   profileActor_->GetProperty()->SetColor(1., 0., 0.);
   profileActor_->GetProperty()->SetLineWidth(3.);
-
-
-  // Add profileActor_ to topoData pipeline 
-  topoDataItem_->addActor(profileActor_);
 
   // Add profileActor_ to topoDataItem renderer
   topoDataItem_->getRenderer()->AddActor(profileActor_);
@@ -282,7 +192,7 @@ void DrawInteractorStyle::computeElevationProfile(double *startPoint,
   std::cerr << "Now extract and graph profile data\n";
   
   // Extract elev profile data for display in 2D graph
-  vtkPolyData *profilePolyData = cutter->GetOutput();
+  vtkPolyData *profilePolyData = profileCutter_->GetOutput();
   vtkPoints *points = profilePolyData->GetPoints();
   if (!points || points->GetNumberOfPoints() == 0) {
     std::cerr << "No elevation profile intersection found!\n";
@@ -329,58 +239,8 @@ void DrawInteractorStyle::computeElevationProfile(double *startPoint,
   // Now ready to plot profileData with vtk graph
   // x: distance along profile
   // y: elevation
-  
-  /* ***
-  // Create table for chart
-  vtkNew<vtkTable> table;
-
-  vtkNew<vtkFloatArray> xArray;
-  xArray->SetName("Distance");
-  table->AddColumn(xArray);
-
-  vtkNew<vtkFloatArray> yArray;
-  yArray->SetName("Elevation (m)");
-  table->AddColumn(yArray);
-
-  table->SetNumberOfRows(profileData.size());
-  for (size_t i = 0; i < profileData.size(); i++) {
-    table->SetValue(i, 0, profileData[i].first);   // distance
-    table->SetValue(i, 1, profileData[i].second);  // elevation
-  }
-
-  vtkNew<vtkRenderer> renderer2D;
-  renderer2D->SetViewport(0., 0., 1.0, 0.25);  
-  renderer2D->SetBackground(1., 1., 1.);
-  editor_->getRenderWindow()->AddRenderer(renderer2D);
-
-  vtkNew<vtkChartXY> chart;
-  vtkNew<vtkContextScene> scene;
-  vtkNew<vtkContextActor> actor;
-  
-  scene->AddItem(chart);
-  actor->SetScene(scene);
-  renderer2D->AddActor(actor);
-  
-  // Add profile data to the chart
-  vtkPlot* line = chart->AddPlot(vtkChart::LINE);
-  line->SetInputData(table, 0, 1);
-  line->SetColor(0, 0, 255, 255); // blue
-  line->SetWidth(2.0);
-
-  chart->SetShowLegend(false);
-  chart->GetAxis(vtkAxis::BOTTOM)->SetTitle("Distance");
-  chart->GetAxis(vtkAxis::BOTTOM)->GetTitleProperties()->SetFontSize(20);
-  chart->GetAxis(vtkAxis::BOTTOM)->GetLabelProperties()->SetFontSize(20);
-  chart->GetAxis(vtkAxis::LEFT)->SetTitle("Elevation (m)");
-  chart->GetAxis(vtkAxis::LEFT)->GetTitleProperties()->SetFontSize(20);
-  chart->GetAxis(vtkAxis::LEFT)->GetLabelProperties()->SetFontSize(20);  
-
-  // Assemble pipeline and start event loop
-  editor_->visualize();
-  *** */
 
   qDebug() << "render() again";
-  // topoDataItem_->render();
   Interactor->GetRenderWindow()->Render();
 
   // Transfer profile X-Y data to QList<QVector2D, and include as signal
