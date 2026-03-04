@@ -38,7 +38,7 @@ TopoDataItem::TopoDataItem() {
   pointsSelectInteractorStyle_->setTopoDataItem(this);
   pointsSelectInteractorStyle_->setDrawingMode(MyRubberBandStyle::DrawingMode::Rectangle);
 
-  
+  // This interactor style needs this reference
   drawInteractorStyle_->setTopoDataItem(this);
   drawInteractorStyle_->setDrawingMode(DrawInteractorStyle::DrawingMode::Line);
 
@@ -583,25 +583,20 @@ QList<QVector2D> TopoDataItem::getElevProfile(int row1, int col1,
 bool TopoDataItem::setMouseMode(QString mouseMode) {
   qDebug() << "setMouseMode(): " << mouseMode;
 
+  qDebug() << "SetMouseMode() to " << mouseMode;
   if (mouseMode == MousePanAndZoom) {
-    qDebug() << "setMouseMode(): set pickInteractorStyle_";
     pipeline_->interactorStyle_ = pickInteractorStyle_;    
   }
   else if (mouseMode == MouseLighting) {
-    qDebug() << "setMouseMode(): set lightingInteractorStyle_";
     pipeline_->interactorStyle_ = lightingInteractorStyle_;
   }
   else if (mouseMode == MouseDataSelect) {
-    qDebug() << "setMouseMode(): set pointsSelectInteractorStyle_";
     pipeline_->interactorStyle_ = pointsSelectInteractorStyle_;
   }
   else if (mouseMode == MouseElevProfile) {
-    qDebug() << "setMouseMode(): set mouseElevInteractorStyle_;";
     pipeline_->interactorStyle_ = drawInteractorStyle_;
   }
-  
   else if (mouseMode == MouseTest) {
-    qDebug() << "setMouseMode():: TEST!!";
     pipeline_->interactorStyle_ = testStyle_;
   }
   else {
