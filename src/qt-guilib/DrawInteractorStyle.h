@@ -8,6 +8,7 @@
 #include "vtkPolyDataMapper2D.h"
 #include "vtkPolyData.h"
 #include "vtkHandleWidget.h"
+#include "vtkHandleRepresentation.h"
 #include <QObject>
 #include <QQuickVTKItem.h>
 #include "Point.h"
@@ -108,9 +109,12 @@ namespace mb_system {
     /// Last mousebutton-down event position
     int downEventPos_[2];
 
-    // Store line/polygon vertices handle widgets
-    std::vector<vtkSmartPointer<vtkHandleWidget>> handleWidgets_;
-
+    // Store line/polygon vertices handle widgets and 
+    // representation for map pins;
+    // Want the widgets to persist, so store them in this
+    // class member vector.
+    std::vector<vtkSmartPointer<vtkHandleWidget>> pinWidgets_;
+    std::vector<vtkSmartPointer<vtkHandleRepresentation>> pinRepresentations_;
 
     
   private:

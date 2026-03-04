@@ -81,6 +81,40 @@ void DrawInteractorStyle::OnLeftButtonUp() {
     return;
   }
 
+
+  qDebug() << "userPath_.size() = " << userPath_.size();  
+  if (userPath_.size() == 1) {
+    qDebug() << "Create starting widget pin";
+    
+    // First point of profile defined
+    topoDataItem_->clearAddedActors();
+    pinWidgets_.clear();
+    pinRepresentations_.clear();
+    
+    double startPoint[3];
+    std::copy(userPath_[0].begin(), userPath_[0].end(), startPoint);
+  
+    // Put a pin marker at start point
+    vtkNew<vtkHandleWidget> startWidget;
+    pinWidgets_.push_back(startWidget);
+  
+    startWidget->SetInteractor(Interactor);
+
+    vtkNew<vtkFixedSizeHandleRepresentation3D> startPin;
+    pinRepresentations_.push_back(startPin);
+    
+    startPin->SetWorldPosition(startPoint);
+    startPin->SetHandleSizeInPixels(30);
+    startPin->GetProperty()->SetColor(1., 0., 0.);  
+    startWidget->SetRepresentation(startPin);
+    startWidget->EnabledOn();
+    // Render the pin
+    Interactor->GetRenderWindow()->Render();
+    
+    return;
+  }
+
+  
   if (userPath_.size() != 2) {
     return;
   }
@@ -165,28 +199,33 @@ void DrawInteractorStyle::SetInteractor(vtkRenderWindowInteractor
 void DrawInteractorStyle::computeElevationProfile(double *startPoint,
 						  double *endPoint) {
 
+  /* ***
   topoDataItem_->clearAddedActors();
-  handleWidgets_.clear();
+  pinWidgets_.clear();
+  pinRepresentations_.clear();
   
   // Put a little marker at start and end points
   vtkNew<vtkHandleWidget> startWidget;
-  handleWidgets_.push_back(startWidget);
+  pinWidgets_.push_back(startWidget);
   
   startWidget->SetInteractor(Interactor);
 
   vtkNew<vtkFixedSizeHandleRepresentation3D> startPin;
+  pinRepresentations_.push_back(startPin);  
   startPin->SetWorldPosition(startPoint);
   startPin->SetHandleSizeInPixels(30);
   startPin->GetProperty()->SetColor(1., 0., 0.);  
 
   startWidget->SetRepresentation(startPin);
   startWidget->EnabledOn();
+  *** */
   
   vtkNew<vtkHandleWidget> endWidget;
-  handleWidgets_.push_back(endWidget);
+  pinWidgets_.push_back(endWidget);
   
   endWidget->SetInteractor(Interactor);
   vtkNew<vtkFixedSizeHandleRepresentation3D> endPin;
+  pinRepresentations_.push_back(endPin);
   endPin->SetWorldPosition(endPoint);
   endPin->SetHandleSizeInPixels(30);  
   endPin->GetProperty()->SetColor(1., 0., 0.);
