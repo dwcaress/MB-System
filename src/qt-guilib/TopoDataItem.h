@@ -220,9 +220,6 @@ namespace mb_system {
     /// Get source polydata
     vtkPolyData *getPolyData();
 
-    /// User-defined path of 3D points in world coordinates
-    std::vector<mb_system::Point3D> userPath_;
-
     /// Trigger re-render
     void render() {
       assemblePipeline(pipeline_);
