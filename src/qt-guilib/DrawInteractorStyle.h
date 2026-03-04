@@ -93,6 +93,8 @@ namespace mb_system {
     vtkNew<vtkPolyDataMapper> profileMapper_;
     
 
+    bool drawEnabled_;
+    
     /// Last mousebutton-down event position
     int downEventPos_[2];
 
