@@ -40,6 +40,7 @@ vtkStandardNewMacro(DrawInteractorStyle);
 DrawInteractorStyle::DrawInteractorStyle()
 {
   drawingMode_ = DrawingMode::Rectangle;
+  drawEnabled_ = true;
 }
 
 //-----------------------------------------------------------------
@@ -97,18 +98,20 @@ void DrawInteractorStyle::OnLeftButtonUp() {
   
   // Put a pin marker at selected point
   vtkNew<vtkHandleWidget> pinWidget;
-  pinWidgets_.push_back(pinWidget);
+  pinWidgets_.push_back(pinWidget);  // pinWidget should persist
   
   pinWidget->SetInteractor(Interactor);
 
   vtkNew<vtkFixedSizeHandleRepresentation3D> pin;
-  pinRepresentations_.push_back(pin);
+  pinRepresentations_.push_back(pin); // pin representation should persist
     
   pin->SetWorldPosition(point);
   pin->SetHandleSizeInPixels(30);
   pin->GetProperty()->SetColor(1., 0., 0.);  
   pinWidget->SetRepresentation(pin);
   pinWidget->EnabledOn();
+  pinWidget->ProcessEventsOff();
+  
   // Render the pin
   Interactor->GetRenderWindow()->Render();
   
