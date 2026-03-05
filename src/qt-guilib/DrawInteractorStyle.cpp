@@ -14,22 +14,21 @@
 #include "vtkRenderer.h"
 #include "vtkUnsignedCharArray.h"
 #include "vtkPointPicker.h"
-#include <vtkPlane.h>
-#include <vtkCutter.h>
-#include <vtkChartXY.h>
-#include <vtkContextView.h>
-#include <vtkContextScene.h>
-#include <vtkContextActor.h>
-#include <vtkTable.h>
-#include <vtkFloatArray.h>
-#include <vtkPlot.h>
-#include <vtkAxis.h>
-#include <vtkPolyDataMapper.h>
-#include <vtkProperty.h>
-#include <vtkPointGaussianMapper.h>
-#include <vtkPointHandleRepresentation3D.h>
-#include <vtkHandleWidget.h>
-#include <vtkFixedSizeHandleRepresentation3D.h>
+#include "vtkPlane.h"
+#include "vtkChartXY.h"
+#include "vtkContextView.h"
+#include "vtkContextScene.h"
+#include "vtkContextActor.h"
+#include "vtkTable.h"
+#include "vtkFloatArray.h"
+#include "vtkPlot.h"
+#include "vtkAxis.h"
+#include "vtkPolyDataMapper.h"
+#include "vtkProperty.h"
+#include "vtkPointGaussianMapper.h"
+#include "vtkPointHandleRepresentation3D.h"
+#include "vtkHandleWidget.h"
+#include "vtkFixedSizeHandleRepresentation3D.h"
 #include "TopoDataItem.h"
 
 using namespace mb_system;
@@ -157,20 +156,20 @@ void DrawInteractorStyle::SetInteractor(vtkRenderWindowInteractor
 
 
 
-void DrawInteractorStyle::computeElevationProfile(double *startPoint,
-						  double *endPoint) {
+void DrawInteractorStyle::computeElevationProfile(double *p1,
+						  double *p2) {
 
   // Compute normal to elevation profile plane; elevation profile plane is
   // vertical, so normal to plane is horizontal
   double normal[3];
-  normal[0] = -(endPoint[1] - startPoint[1]);
-  normal[1] = endPoint[0] - startPoint[0];
+  normal[0] = -(p2[1] - p1[1]);
+  normal[1] = p2[0] - p1[0];
   normal[2] = 0.0;     // normal to z-axis is horizontal
 
   vtkMath::Normalize(normal);
 
   // Create the elevation profile plane
-  profilePlane_->SetOrigin(endPoint);
+  profilePlane_->SetOrigin(p2);
   profilePlane_->SetNormal(normal);
 
   // Add cutter filter
@@ -178,9 +177,66 @@ void DrawInteractorStyle::computeElevationProfile(double *startPoint,
   profileCutter_->SetCutFunction(profilePlane_);
   profileCutter_->Update();
 
-  // Display profile on main 3D surface 
+
+  // Clip the infinite intersection line to the segment [p1, p2] ---
+
+  // Compute the axis direction along p1->p2
+  double dx = p2[0] - p1[0];
+  double dy = p2[1] - p1[1];
+  double len = std::sqrt(dx*dx + dy*dy);
+  double ux = dx / len;   // unit vector along p1->p2
+  double uy = dy / len;
+
+  // We need a bounding box that:
+  //   - spans p1..p2 along the horizontal axis
+  //   - is wide enough in the perpendicular horizontal direction to include
+  //     any numerical slop from the cutter (a thin slab)
+  //   - spans the full Z range of the surface
+  double slop = 1e-3;   // tiny perpendicular half-width; adjust if needed
+
+  // Perpendicular unit vector (rotated 90° in XY)
+  double px = -uy;
+  double py =  ux;
+
+  // Four XY corners of the slab
+  // Corner = p1 or p2  ±  slop * perp
+  double corners[4][2] = {
+    { p1[0] + slop*px,  p1[1] + slop*py },
+    { p1[0] - slop*px,  p1[1] - slop*py },
+    { p2[0] + slop*px,  p2[1] + slop*py },
+    { p2[0] - slop*px,  p2[1] - slop*py }
+  };
+
+  double xMin = corners[0][0], xMax = corners[0][0];
+  double yMin = corners[0][1], yMax = corners[0][1];
+  for (int i = 1; i < 4; ++i) {
+    xMin = std::min(xMin, corners[i][0]);
+    xMax = std::max(xMax, corners[i][0]);
+    yMin = std::min(yMin, corners[i][1]);
+    yMax = std::max(yMax, corners[i][1]);
+  }
+
+  // Z bounds: cover the full surface Z range (or use known terrain extents)
+  double bounds[6];
+  topoDataItem_->getPolyData()->GetBounds(bounds);
+  double zMin = bounds[4];
+  double zMax = bounds[5];
+
+  // Build the box implicit function
+  
+  profileBox_->SetBounds(xMin, xMax, yMin, yMax, zMin, zMax);
+
+  // Clip: keep only the part of the cut line INSIDE the box
+  // (InsideOut=0 keeps points where box implicit function < 0, i.e. inside)
+  profileClipper_->SetInputConnection(profileCutter_->GetOutputPort());
+  profileClipper_->SetClipFunction(profileBox_);
+  profileClipper_->InsideOutOn();   // keep the region inside the box
+  profileClipper_->Update();
+
+  
+  // Display profile on TopoDataItem 3D surface 
   // Elevation profile mapper
-  profileMapper_->SetInputConnection(profileCutter_->GetOutputPort());
+  profileMapper_->SetInputConnection(profileClipper_->GetOutputPort());
 
   // Elevation profile actor
   profileActor_->SetMapper(profileMapper_);
@@ -204,9 +260,9 @@ void DrawInteractorStyle::computeElevationProfile(double *startPoint,
 
   // Get profile direction vector
   double direction[3];
-  direction[0] = endPoint[0] - startPoint[0];
-  direction[1] = endPoint[1] - startPoint[1];
-  direction[2] = endPoint[2] - startPoint[2];
+  direction[0] = p2[0] - p1[0];
+  direction[1] = p2[1] - p1[1];
+  direction[2] = p2[2] - p1[2];
   vtkMath::Normalize(direction);
 
   // Fill profileData with sorted (x,y) data for plotting
@@ -218,15 +274,15 @@ void DrawInteractorStyle::computeElevationProfile(double *startPoint,
     double point[3];
     points->GetPoint(i, point);
 
-    if ((point[0] >= startPoint[0] && point[0] <= endPoint[0]) ||
-	(point[0] >= endPoint[0] && point[0] <= startPoint[0])) {
-      // This point lies on line between startPoint and endPoint;
+    if ((point[0] >= p1[0] && point[0] <= p2[0]) ||
+	(point[0] >= p2[0] && point[0] <= p1[0])) {
+      // This point lies on line between p1 and p2;
       // add it to profileData
       double vec[3];
       // Compute coordinates relative to starting point
-      vec[0] = point[0] - startPoint[0];
-      vec[1] = point[1] - startPoint[1];
-      vec[2] = point[2] - startPoint[2];
+      vec[0] = point[0] - p1[0];
+      vec[1] = point[1] - p1[1];
+      vec[2] = point[2] - p1[2];
 
       // Compute this point's distance along profile = dot product with
       // direction vector

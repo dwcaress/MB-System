@@ -10,6 +10,8 @@
 #include "vtkHandleWidget.h"
 #include "vtkHandleRepresentation.h"
 #include "vtkCutter.h"
+#include "vtkClipPolyData.h"
+#include "vtkBox.h"
 #include <QObject>
 #include <QQuickVTKItem.h>
 #include "Point.h"
@@ -69,7 +71,7 @@ namespace mb_system {
   
   protected:
 
-    void computeElevationProfile(double pt1[3], double pt2[3]);
+    void computeElevationProfile(double startPoint[3], double endPoint[3]);
     
     DrawInteractorStyle();
     ~DrawInteractorStyle() override;
@@ -91,7 +93,8 @@ namespace mb_system {
     vtkNew<vtkPlane> profilePlane_;
     vtkNew<vtkCutter> profileCutter_;
     vtkNew<vtkPolyDataMapper> profileMapper_;
-    
+    vtkNew<vtkClipPolyData> profileClipper_;
+    vtkNew<vtkBox> profileBox_;
 
     bool drawEnabled_;
     
