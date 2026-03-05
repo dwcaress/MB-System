@@ -12,6 +12,7 @@
 #include "vtkCutter.h"
 #include "vtkClipPolyData.h"
 #include "vtkBox.h"
+#include "vtkRenderWindowInteractor.h"
 #include <QObject>
 #include <QQuickVTKItem.h>
 #include "Point.h"
@@ -20,6 +21,18 @@ class vtkUnsignedCharArray;
 
 namespace mb_system {
 
+  /* **
+     Need this subclass to work around a vtkHandleWidget bug which
+     retults in null ptr error when 'shift' is pressed
+  ** */
+  class MyHandleWidget : public vtkHandleWidget {
+  public:
+    static MyHandleWidget* New();
+    vtkTypeMacro(MyHandleWidget, vtkHandleWidget);
+
+    void removeKeyObservers(vtkRenderWindowInteractor* interactor);
+  };
+  
   class TopoDataItem;
   
   /* **
@@ -107,7 +120,7 @@ namespace mb_system {
     /// VTK rendering functions.)
     /// As class members, the individual vector elements
     /// will not be deallocated until the vectors are cleared. 
-    std::vector<vtkSmartPointer<vtkHandleWidget>> pinWidgets_;
+    std::vector<vtkSmartPointer<MyHandleWidget>> pinWidgets_;
     std::vector<vtkSmartPointer<vtkHandleRepresentation>> pinRepresentations_;
 
     

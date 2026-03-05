@@ -29,12 +29,21 @@
 #include "vtkPointHandleRepresentation3D.h"
 #include "vtkHandleWidget.h"
 #include "vtkFixedSizeHandleRepresentation3D.h"
+#include "vtkCallbackCommand.h"
 #include "TopoDataItem.h"
 
 using namespace mb_system;
 
 vtkStandardNewMacro(DrawInteractorStyle);
+vtkStandardNewMacro(MyHandleWidget);
 
+
+
+void MyHandleWidget::removeKeyObservers(vtkRenderWindowInteractor* interactor) {
+  interactor->RemoveObserver(this->KeyEventCallbackCommand);
+}
+
+	
 //------------------------------------------------------------------------------
 DrawInteractorStyle::DrawInteractorStyle()
 {
@@ -96,21 +105,24 @@ void DrawInteractorStyle::OnLeftButtonUp() {
   std::copy(userPath_[pointIndex].begin(), userPath_[pointIndex].end(), point);
   
   // Put a pin marker at selected point
-  vtkNew<vtkHandleWidget> pinWidget;
-  pinWidgets_.push_back(pinWidget);  // pinWidget should persist
-  
-  pinWidget->SetInteractor(Interactor);
+  auto pinWidget = vtkSmartPointer<MyHandleWidget>::New();
+  auto pin = vtkSmartPointer<vtkFixedSizeHandleRepresentation3D>::New();
 
-  vtkNew<vtkFixedSizeHandleRepresentation3D> pin;
-  pinRepresentations_.push_back(pin); // pin representation should persist
-    
   pin->SetWorldPosition(point);
   pin->SetHandleSizeInPixels(30);
   pin->GetProperty()->SetColor(1., 0., 0.);  
+  pinWidget->SetInteractor(Interactor);
   pinWidget->SetRepresentation(pin);
+  
+  pinWidget->RemoveObservers(vtkCommand::CharEvent);
+  
   pinWidget->EnabledOn();
   pinWidget->ProcessEventsOff();
-  
+  pinWidget->removeKeyObservers(Interactor);
+
+  pinWidgets_.push_back(pinWidget);  // pinWidget should persist
+  pinRepresentations_.push_back(pin); // pin representation should persist
+
   // Render the pin
   Interactor->GetRenderWindow()->Render();
   
@@ -177,8 +189,7 @@ void DrawInteractorStyle::computeElevationProfile(double *p1,
   profileCutter_->SetCutFunction(profilePlane_);
   profileCutter_->Update();
 
-
-  // Clip the infinite intersection line to the segment [p1, p2] ---
+  // Clip the infinite intersection line outside the segment [p1, p2] ---
 
   // Compute the axis direction along p1->p2
   double dx = p2[0] - p1[0];
@@ -232,7 +243,6 @@ void DrawInteractorStyle::computeElevationProfile(double *p1,
   profileClipper_->SetClipFunction(profileBox_);
   profileClipper_->InsideOutOn();   // keep the region inside the box
   profileClipper_->Update();
-
   
   // Display profile on TopoDataItem 3D surface 
   // Elevation profile mapper
