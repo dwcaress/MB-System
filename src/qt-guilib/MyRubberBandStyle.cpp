@@ -74,7 +74,8 @@ void MyRubberBandStyle::OnChar() {
   switch (int code = Interactor->GetKeyCode()) {
   case 'r':
   case 'l':
-    // r toggles the drawing rubber band
+    // r or l toggles the drawing rubber band
+    emit helpText("MyRubberBandStyle: toggled drawing mode");
     drawEnabled_ = !drawEnabled_;
     if (drawEnabled_) {
       qDebug() << "OnKeyPress(): drawEnabled now true, reinitialize overlay";

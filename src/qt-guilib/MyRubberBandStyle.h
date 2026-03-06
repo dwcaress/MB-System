@@ -21,18 +21,22 @@ class vtkUnsignedCharArray;
 namespace mb_system {
 
   /* **
-     Code based on vtkInteractorStyleRubberBandPick, with modifications to work properly with
-     QQuickVTKItem.
+     Code based on vtkInteractorStyleRubberBandPick, with modifications to work
+     properly with QQuickVTKItem.
      
-     Like TrackBallCamera, but this can pick props underneath a rubber band selection rectangle.
+     Like TrackBallCamera, but this can pick props underneath a rubber band
+     selection rectangle.
      
-     This interactor style allows the user to draw a rectangle or line in the render window. The user
-     presses the 'r' key to toggle in and out of draw mode. When in draw mode, the user presses the left
-     mouse button and drags to define upper-left/lower-right rectangle corners or line start and end points.
-     When in DrawingMode::Rectangle and the left mouse button is released, the attached picker operates
-     on the pixel in the center of the selection rectangle. If the picker happens to be a vtkAreaPicker it will
-     operate on the entire selection rectangle. When the 'p' key is hit the above pick operation occurs on a
-     1x1 rectangle. In other respects it behaves the same as its parent class.
+     This interactor style allows the user to draw a rectangle or line in the render
+     window. The user presses the 'r' key to toggle in and out of draw mode. When
+     in draw mode, the user presses the left mouse button and drags to define
+     upper-left/lower-right rectangle corners or line start and end points.
+     When in DrawingMode::Rectangle and the left mouse button is released, the
+     attached picker operates on the pixel in the center of the selection rectangle.
+     If the picker happens to be a vtkAreaPicker it will
+     operate on the entire selection rectangle. When the 'p' key is hit the above
+     pick operation occurs on a 1x1 rectangle. In other respects it behaves the
+     same as its parent class.
      This class is based on vtkInteractorStyleRubberBandPicker code, with changes
      suggested by humans and Claude.ai to fix bugs arising from use with 
      QQuickVTKItem. In particular VTK 'drawing' operations of lines and boxes
@@ -40,7 +44,8 @@ namespace mb_system {
      QQuickVTKItem::dispatch_async(); therefore this class includes a
      reference to the associated QQuickVTKItem object.
      Note that shapes (box, line) defined by the mouse are defined and drawn into the
-     'overlay' (i.e. layer-1 of the associated vtkRenderWindow), in display coordinates.
+     'overlay' (i.e. layer-1 of the associated vtkRenderWindow), in display
+     coordinates.
 
   */
 class VTKINTERACTIONSTYLE_EXPORT MyRubberBandStyle
@@ -92,7 +97,12 @@ public:
 
   void SetInteractor(vtkRenderWindowInteractor* interactor) override;
 
-  
+
+ signals:
+  /// Emit when sending help text
+  void helpText(QString helpText);
+    
+
 protected:
   MyRubberBandStyle();
   ~MyRubberBandStyle() override;
