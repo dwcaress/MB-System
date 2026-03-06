@@ -139,7 +139,7 @@ void DrawInteractorStyle::OnLeftButtonUp() {
   
   computeElevationProfile(pt1, pt2);
 
-  // Clear out line points
+  // Clear user-defined profile points
   userPath_.clear();
 
   
