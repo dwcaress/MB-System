@@ -20,7 +20,7 @@
  * This preserves features like cliffs, overhangs, and caves that
  * are lost in traditional 2D gridding.
  *
- * Author:  [Your Team]
+ * Author:  CSUMB Capstone - Spring 2026
  * Date:    March 6, 2026
  */
 
@@ -311,8 +311,6 @@ static int read_datalist_file(int verbose) {
 
   /* TODO #1: Implement datalist reading loop
    *
-   * INSTRUCTIONS FOR YOUR TEAM:
-   *
    * Use mb_datalist_read3() in a while loop to iterate through
    * each file in the datalist. The function signature is:
    *
@@ -419,8 +417,6 @@ static int read_swath_file(int verbose, char *file, int format,
 
   /* TODO #2: Initialize MB-System I/O
    *
-   * INSTRUCTIONS FOR YOUR TEAM:
-   *
    * Use mb_read_init() to open the swath file. The function signature is:
    *
    * int mb_read_init(int verbose, char *file, int format,
@@ -485,8 +481,6 @@ static int read_swath_file(int verbose, char *file, int format,
 
   /* TODO #3: Allocate data arrays
    *
-   * INSTRUCTIONS FOR YOUR TEAM:
-   *
    * After mb_read_init() succeeds, allocate arrays to hold ping data.
    * Use mb_mallocd() for MB-System memory tracking.
    *
@@ -525,8 +519,6 @@ static int read_swath_file(int verbose, char *file, int format,
   fprintf(stderr, "\n");
 
   /* TODO #4: Read pings in loop
-   *
-   * INSTRUCTIONS FOR YOUR TEAM:
    *
    * Use mb_get() in a while loop to read ping-by-ping data.
    *
@@ -581,8 +573,6 @@ static int read_swath_file(int verbose, char *file, int format,
   fprintf(stderr, "\n");
 
   /* TODO #5: Cleanup and close file
-   *
-   * INSTRUCTIONS FOR YOUR TEAM:
    *
    * Free allocated arrays and close MB-System I/O.
    *
@@ -642,8 +632,6 @@ static int process_ping(int verbose, int beams_bath, char *beamflag,
                        double time_d) {
 
   /* TODO #6: Process each beam in the ping
-   *
-   * INSTRUCTIONS FOR YOUR TEAM:
    *
    * Loop through all beams and extract valid soundings.
    *
