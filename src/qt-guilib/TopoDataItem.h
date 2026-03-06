@@ -225,11 +225,21 @@ namespace mb_system {
       assemblePipeline(pipeline_);
     }
 
+    /// Set pointsSelectInteractorStyle_ as a property so that its emitted
+    /// signals can be received by QML
+    Q_PROPERTY(MyRubberBandStyle* dataSelector
+	       READ getPointsSelectInteractorStyle CONSTANT)
+
+    /// Get the pointsSelectorInteractorStyle
+    MyRubberBandStyle *getPointsSelectInteractorStyle() {
+      return pointsSelectInteractorStyle_;
+    }
+    
     
   signals:
     /// Emit when user defines a line with mouse
     void lineDefined(QList<QVector2D> elevProfile);
-  
+
   
   protected:
 
