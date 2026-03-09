@@ -11,9 +11,9 @@
 #include <iostream>
 #include <memory.h>
 #include <string.h>
-#ifdef TRN_USE_PROJ
-#include <proj.h>
-#endif
+/// #ifdef TRN_USE_PROJ
+/// #include <proj.h>
+/// #endif
 #include <NavUtils.h>
 #include <MathP.h>
 #include "GeoCon.h"
