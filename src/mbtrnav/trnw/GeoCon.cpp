@@ -10,6 +10,11 @@
 #include "GeoCon.h"
 #include "GeoCon.hpp"
 
+/// proj.h stupidly defines a double variable named 'B0' which is a macro defined
+/// in <sys/termios.h>, which can lead to compilation errors if proj.h is included
+/// by GeoCon.h - so include proj.h here.
+#include <proj.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
