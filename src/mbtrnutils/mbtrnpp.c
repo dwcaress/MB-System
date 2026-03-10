@@ -48,6 +48,7 @@
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <proj.h>
 #include <termios.h>
 #include <signal.h>
 
