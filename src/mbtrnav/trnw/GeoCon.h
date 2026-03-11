@@ -7,12 +7,6 @@
 
 #include <memory.h>
 #include <string.h>
-#ifdef TRN_USE_PROJ
-/// proj.h stupidly defines a double variable named 'B0' which is a macro defined
-/// in <sys/termios.h>, which can lead to compilation errors.
-// #undef B0
-// #include <proj.h>
-#endif
 
 #ifndef GEOCON_H
 #define GEOCON_H

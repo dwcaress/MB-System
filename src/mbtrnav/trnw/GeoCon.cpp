@@ -10,10 +10,14 @@
 #include "GeoCon.h"
 #include "GeoCon.hpp"
 
-/// proj.h stupidly defines a double variable named 'B0' which is a macro defined
+/// proj.h stupidly defines a double variable named 'B0' which is also a macro defined
 /// in <sys/termios.h>, which can lead to compilation errors if proj.h is included
 /// by GeoCon.h - so include proj.h here.
+#ifdef TRN_USE_PROJ
 #include <proj.h>
+#endif
+#include <NavUtils.h>
+
 
 #ifdef __cplusplus
 extern "C" {
