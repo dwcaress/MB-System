@@ -301,66 +301,50 @@ static int read_datalist_file(int verbose) {
     fprintf(stderr, "Datalist opened: %s\n", read_datalist);
   }
 
+  
   /* Variables for mb_datalist_read3() */
-  int pstatus = MB_PROCESSED_NONE;
-  char path[MB_PATH_MAXLINE] = "";
-  char ppath[MB_PATH_MAXLINE] = "";
-  char dpath[MB_PATH_MAXLINE] = "";
-  int format = 0;
-  double file_weight = 1.0;
+  int pstatus = MB_PROCESSED_NONE; // Indicates whether to use raw or processed file
+  int astatus = MB_ALTNAV_NONE; // Indicates whether alternative navigation is available
+  char path[MB_PATH_MAXLINE] = ""; // Raw file path
+  char ppath[MB_PATH_MAXLINE] = ""; // Processed file path (if available)
+  char apath[MB_PATH_MAXLINE] = ""; // Alternative navigation file path (if available)
+  char dpath[MB_PATH_MAXLINE] = ""; // Optional data file path (not used in this project)
+  int format = 0; // MB-System format code
+  double file_weight = 1.0; // Weight for this file (usually 1.0)
 
-  /* TODO #1: Implement datalist reading loop
-   *
-   * Use mb_datalist_read3() in a while loop to iterate through
-   * each file in the datalist. The function signature is:
-   *
-   * int mb_datalist_read3(int verbose, void *datalist,
-   *                       int *pstatus, char *path, char *ppath,
-   *                       int *astatus, char *apath, char *dpath,
-   *                       int *format, double *file_weight, int *error)
-   *
-   * PSEUDOCODE:
-   *
-   * while (mb_datalist_read3(verbose, datalist,
-   *                          &pstatus, path, ppath,
-   *                          nullptr, nullptr, dpath,
-   *                          &format, &file_weight, &error) == MB_SUCCESS) {
-   *
-   *   // Skip non-swath files (format <= 0)
-   *   if (format <= 0) continue;
-   *
-   *   // Skip comment lines
-   *   if (path[0] == '#') continue;
-   *
-   *   // Choose raw or processed file
-   *   char *file_to_read = (pstatus == MB_PROCESSED_USE) ? ppath : path;
-   *
-   *   // Count files
-   *   nfile++;
-   *
-   *   // Read this file
-   *   if (verbose > 0) {
-   *     fprintf(stderr, "\nProcessing file %d: %s\n", nfile, file_to_read);
-   *   }
-   *
-   *   status = read_swath_file(verbose, file_to_read, format, file_weight);
-   *
-   *   if (status != MB_SUCCESS) {
-   *     fprintf(stderr, "Warning: Failed to read file: %s\n", file_to_read);
-   *     // Continue with next file
-   *   }
-   * }
-   *
-   * REFERENCE: See mbgrid.cc lines 1800-1850 for example
-   */
+  int mb_datalist_read3(int verbose, void *datalist,
+                        int *pstatus, char *path, char *ppath,
+                        int *astatus, char *apath, char *dpath,
+                        int *format, double *file_weight, int *error);
 
-  // STUB: Your implementation here
-  fprintf(stderr, "\n");
-  fprintf(stderr, "TODO #1: Implement datalist reading loop\n");
-  fprintf(stderr, "  Location: mbmesh.cc line %d\n", __LINE__ - 15);
-  fprintf(stderr, "  Reference: mbgrid.cc lines 1800-1850\n");
-  fprintf(stderr, "  See detailed comments above for instructions\n");
-  fprintf(stderr, "\n");
+  while (mb_datalist_read3(verbose, datalist,
+                           &pstatus, path, ppath,
+                           &astatus, apath, dpath,
+                           &format, &file_weight, &error) == MB_SUCCESS) {
+    // Skip non-swath files (format <= 0)
+    if (format <= 0) continue;
+
+    // Skip comment lines
+    if (path[0] == '#') continue;
+
+    // Choose raw or processed file
+    char *file_to_read = (pstatus == MB_PROCESSED_USE) ? ppath : path;
+
+    // Count files
+    nfile++;
+
+    // Read this file
+    if (verbose > 0) {
+      fprintf(stderr, "\nProcessing file %d: %s\n", nfile, file_to_read);
+    }
+
+    status = read_swath_file(verbose, file_to_read, format, file_weight);
+
+    if (status != MB_SUCCESS) {
+      fprintf(stderr, "Warning: Failed to read file: %s\n", file_to_read);
+      // Continue with next file
+    }
+  }
 
   /* Close datalist */
   mb_datalist_close(verbose, &datalist, &error);
@@ -415,66 +399,33 @@ static int read_swath_file(int verbose, char *file, int format,
   double distance, altitude, sensordepth;
   int beams_bath, beams_amp, pixels_ss;
 
-  /* TODO #2: Initialize MB-System I/O
-   *
-   * Use mb_read_init() to open the swath file. The function signature is:
-   *
-   * int mb_read_init(int verbose, char *file, int format,
-   *                  int pings, int lonflip, double bounds[4],
-   *                  int btime_i[7], int etime_i[7],
-   *                  double speedmin, double timegap,
-   *                  void **mbio_ptr,
-   *                  double *btime_d, double *etime_d,
-   *                  int *beams_bath, int *beams_amp, int *pixels_ss,
-   *                  int *error)
-   *
-   * PSEUDOCODE:
-   *
-   * // Time limits (all zeros = no limits)
-   * int btime_i[7] = {0, 0, 0, 0, 0, 0, 0};
-   * int etime_i[7] = {0, 0, 0, 0, 0, 0, 0};
-   * double btime_d, etime_d;
-   *
-   * // Call mb_read_init
-   * int status = mb_read_init(
-   *   verbose,           // Verbosity level
-   *   file,              // File path
-   *   format,            // MB-System format code
-   *   1,                 // pings (1 = read all)
-   *   0,                 // lonflip (0 = no flipping)
-   *   bounds,            // Geographic bounds (global variable)
-   *   btime_i, etime_i,  // Time limits (none)
-   *   0.0,               // speedmin (no speed filter)
-   *   1.0,               // timegap (1 second tolerance)
-   *   &mbio_ptr,         // Output: I/O pointer
-   *   &btime_d, &etime_d,// Output: file time range
-   *   &beams_bath,       // Output: number of bathymetry beams
-   *   &beams_amp,        // Output: number of amplitude beams
-   *   &pixels_ss,        // Output: number of sidescan pixels
-   *   &error             // Output: error code
-   * );
-   *
-   * if (status != MB_SUCCESS) {
-   *   char *message = nullptr;
-   *   mb_error(verbose, error, &message);
-   *   fprintf(stderr, "  Error initializing file: %s\n", message);
-   *   return MB_FAILURE;
-   * }
-   *
-   * if (verbose > 0) {
-   *   fprintf(stderr, "  File opened: %d beams, %d pings expected\n",
-   *           beams_bath, 0);
-   * }
-   *
-   * REFERENCE: See mbgrid.cc lines 2630-2650 for example
-   */
+  // Initializing MB-System I/O and reading pings will be implemented in the next steps.
+  //REFERENCE: See mbgrid.cc lines 2630-2650 for example
 
-  // STUB: Your implementation here
-  fprintf(stderr, "\n");
-  fprintf(stderr, "TODO #2: Call mb_read_init()\n");
-  fprintf(stderr, "  Location: mbmesh.cc line %d\n", __LINE__ - 15);
-  fprintf(stderr, "  Reference: mbgrid.cc lines 2630-2650\n");
-  fprintf(stderr, "\n");
+  // Time limits: full range = no filtering,]
+  // full range of valid times referenced from mb_time.cc lines 72-77
+  int btime_i[7] = {1930, 1, 1, 0, 0, 0, 0};
+  int etime_i[7] = {3000, 1, 1, 0, 0, 0, 0};
+  double btime_d, etime_d;
+
+  int status = mb_read_init(verbose, file, format, 1, 0, bounds,
+                            btime_i, etime_i, 0.0, 1.0,
+                            &mbio_ptr, &btime_d, &etime_d,
+                            &beams_bath, &beams_amp, &pixels_ss,
+                            &error);
+
+  // if mb_read_init fails, print error message and return failure
+  if (status != MB_SUCCESS) {
+    char *message = nullptr;
+    mb_error(verbose, error, &message);
+    fprintf(stderr, "  Error initializing file: %s\n", message);
+    return MB_FAILURE;
+  }
+  // if mb_read_init succeeds, print number of beams and pixels
+  if (verbose > 0) {
+    fprintf(stderr, "  File opened: %d beams, %d amp, %d ss\n",
+            beams_bath, beams_amp, pixels_ss);
+  }
 
   // Return early for stub
   return MB_SUCCESS;
@@ -514,6 +465,15 @@ static int read_swath_file(int verbose, char *file, int format,
    */
 
   // STUB: Your implementation here
+
+  status = mb_mallocd(verbose, __FILE__, __LINE__,
+                      beams_bath * sizeof(char),
+                      (void **)&beamflag, &error);
+  if (status != MB_SUCCESS) {
+    fprintf(stderr, "Error allocating beamflag array\n");
+    return MB_FAILURE;
+  }
+
   fprintf(stderr, "TODO #3: Allocate arrays with mb_mallocd()\n");
   fprintf(stderr, "  Location: mbmesh.cc line %d\n", __LINE__ - 5);
   fprintf(stderr, "\n");
