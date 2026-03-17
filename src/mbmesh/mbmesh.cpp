@@ -47,6 +47,8 @@
 #include <getopt.h>
 #include <unistd.h>
 #include <vector>
+#include <algorithm>
+
 
 // MB-System includes
 extern "C" {
@@ -312,10 +314,10 @@ static int read_datalist_file(int verbose) {
   int format = 0; // MB-System format code
   double file_weight = 1.0; // Weight for this file (usually 1.0)
 
-  int mb_datalist_read3(int verbose, void *datalist,
-                        int *pstatus, char *path, char *ppath,
-                        int *astatus, char *apath, char *dpath,
-                        int *format, double *file_weight, int *error);
+  // int mb_datalist_read3(int verbose, void *datalist,
+  //                       int *pstatus, char *path, char *ppath,
+  //                       int *astatus, char *apath, char *dpath,
+  //                       int *format, double *file_weight, int *error);
 
   while (mb_datalist_read3(verbose, datalist,
                            &pstatus, path, ppath,
@@ -389,6 +391,8 @@ static int read_swath_file(int verbose, char *file, int format,
   double *sslon = nullptr;
   double *sslat = nullptr;
   char comment[MB_COMMENT_MAXLINE] = "";
+  int kind, time_i[7];
+  double time_d, navlon, navlat, speed, heading, distance, altitude, sensordepth;
 
   /* Ping data variables */
   int kind;
@@ -428,7 +432,7 @@ static int read_swath_file(int verbose, char *file, int format,
   }
 
   // Return early for stub
-  return MB_SUCCESS;
+  // return MB_SUCCESS;
 
   /* TODO #3: Allocate data arrays
    *
@@ -466,17 +470,50 @@ static int read_swath_file(int verbose, char *file, int format,
 
   // STUB: Your implementation here
 
-  status = mb_mallocd(verbose, __FILE__, __LINE__,
-                      beams_bath * sizeof(char),
-                      (void **)&beamflag, &error);
-  if (status != MB_SUCCESS) {
-    fprintf(stderr, "Error allocating beamflag array\n");
-    return MB_FAILURE;
-  }
 
-  fprintf(stderr, "TODO #3: Allocate arrays with mb_mallocd()\n");
-  fprintf(stderr, "  Location: mbmesh.cc line %d\n", __LINE__ - 5);
-  fprintf(stderr, "\n");
+  // status = mb_mallocd(verbose, __FILE__, __LINE__,
+  //                     beams_bath * sizeof(char),
+  //                     (void **)&beamflag, &error);
+  // if (status != MB_SUCCESS) {
+  //   fprintf(stderr, "Error allocating beamflag array\n");
+  //   return MB_FAILURE;
+  // }
+
+  // fprintf(stderr, "TODO #3: Allocate arrays with mb_mallocd()\n");
+  // fprintf(stderr, "  Location: mbmesh.cc line %d\n", __LINE__ - 5);
+  // fprintf(stderr, "\n");
+
+  /* TODO #3: Allocate + Register Arrays */
+  status = mb_mallocd(verbose, __FILE__, __LINE__, 
+                      beams_bath * sizeof(char), (void**)&beamflag, &error);
+  if (status == MB_SUCCESS)
+    mb_register_array(verbose, MB_MEM_TYPE_BATHY, sizeof(char), (void**)&beamflag, &error);
+  
+  status = mb_mallocd(verbose, __FILE__, __LINE__, 
+                      beams_bath * sizeof(double), (void**)&bath, &error);
+  if (status == MB_SUCCESS)
+    mb_register_array(verbose, MB_MEM_TYPE_BATHY, sizeof(double), (void**)&bath, &error);
+  
+  status = mb_mallocd(verbose, __FILE__, __LINE__, 
+                      beams_bath * sizeof(double), (void**)&bathlon, &error);
+  if (status == MB_SUCCESS)
+    mb_register_array(verbose, MB_MEM_TYPE_BATHY_POS, sizeof(double), (void**)&bathlon, &error);
+  
+  status = mb_mallocd(verbose, __FILE__, __LINE__, 
+                      beams_bath * sizeof(double), (void**)&bathlat, &error);
+  if (status == MB_SUCCESS)
+    mb_register_array(verbose, MB_MEM_TYPE_BATHY_POS, sizeof(double), (void**)&bathlat, &error);
+  
+  status = mb_mallocd(verbose, __FILE__, __LINE__, 
+                      beams_amp * sizeof(double), (void**)&amp, &error);
+  if (status == MB_SUCCESS)
+    mb_register_array(verbose, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void**)&amp, &error);
+
+  if (status != MB_SUCCESS) {
+    fprintf(stderr, "  Error allocating arrays\n");
+    goto cleanup; 
+  }
+  if (verbose > 1) fprintf(stderr, "  Arrays allocated OK\n");
 
   /* TODO #4: Read pings in loop
    *
