@@ -1,4 +1,4 @@
-#define QT_NO_DEBUG_OUTPUT
+/// #define QT_NO_DEBUG_OUTPUT
 
 #include <unistd.h>
 #include <climits>
@@ -49,7 +49,7 @@ TopoDataItem::TopoDataItem() {
 
 QQuickVTKItem::vtkUserData TopoDataItem::initializeVTK(vtkRenderWindow
 						       *renderWindow) {
-  qDebug() << "initializeVTK()";
+  std::cerr << "initializeVTK()\n";
 
   renderWindow_ = renderWindow;
   
@@ -170,6 +170,7 @@ bool TopoDataItem::loadDatafile(QUrl fileUrl) {
 
 
 void TopoDataItem::reassemblePipeline() {
+  qDebug() << "reassemblePipeline()";
   // Dispatch lambda function to run in QT render thread 
   dispatch_async([this](vtkRenderWindow *renderWindow, vtkUserData userData) {
     auto *pipeline = TopoDataItem::Pipeline::SafeDownCast(userData);
@@ -178,6 +179,7 @@ void TopoDataItem::reassemblePipeline() {
   });
 
   // Schedule update on the vtkRenderWindow
+  qDebug() << "scheduleRenderer()";
   scheduleRender();
 
   return;
@@ -186,6 +188,7 @@ void TopoDataItem::reassemblePipeline() {
 
 void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
 
+  qDebug() << "assemblePipeline()";
   // Check that input file exists and is readable
   if (access(dataFilename_, R_OK) == -1) {
     qWarning() << "Can't access input file " << dataFilename_;
