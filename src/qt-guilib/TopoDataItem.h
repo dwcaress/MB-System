@@ -69,7 +69,7 @@ namespace mb_system {
       /// Light source
       vtkNew<vtkLight> lightSource_;
       
-      /// Topo grid reader
+      /// Topo data reader
       vtkNew<mb_system::TopoDataReader> topoReader_;
 
       vtkNew<vtkElevationFilter> elevFilter_;
@@ -80,7 +80,6 @@ namespace mb_system {
       vtkNew<vtkPolyDataMapper> surfaceMapper_;
       vtkNew<vtkRenderer> renderer_;
       vtkNew<QVTKInteractor> windowInteractor_;
-      /// vtkNew<vtkRenderWindowInteractor> windowInteractor_;      
       vtkNew<vtkAreaPicker> areaPicker_;
       // data quality array for input vtkPolyData
       vtkNew<vtkIntArray> quality_;
