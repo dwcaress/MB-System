@@ -275,6 +275,7 @@ int TopoDataReader::RequestData(vtkInformation* request,
         vtkIdType id = topoDataPoints_->InsertNextPoint(utm.enu.e,
                                                     utm.enu.n,
                                                     z);
+	nValidPoints++;
       }
     }
   }
@@ -343,6 +344,8 @@ int TopoDataReader::RequestData(vtkInformation* request,
 void TopoDataReader::SetFileName(const char *fileName) {
   fprintf(stderr, "In TopoDataReader::SetFileName()\n");
 
+  SetErrorCode(0);
+  
   vtkAbstractPolyDataReader::SetFileName(fileName);
 
   // Fatal error if specified file is not accessible
@@ -368,8 +371,8 @@ void TopoDataReader::SelectionModifiedCallback(vtkObject*, unsigned long,
 
 
 void TopoDataReader::gridBounds(double *xMin, double *xMax,
-                                 double *yMin, double *yMax,
-                                 double *zMin, double *zMax) {
+				double *yMin, double *yMax,
+				double *zMin, double *zMax) {
 
   topoData_->bounds(xMin, xMax, yMin, yMax, zMin, zMax);
   /* ***
