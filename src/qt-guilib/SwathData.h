@@ -74,8 +74,8 @@ namespace mb_system {
                        char **xUnits, char **yUnits, char **zUnits) override;
 
 
-    /// Unlock specified swath file
-    void unlockSwath(char *swathFile);
+    /// Unlock specified swath file; return true on success, else return false
+    bool unlockSwath(char *swathFile);
 
     /// Swath data read from file, old mb-system struct
     struct mbev_grid_struct *gridData_;
