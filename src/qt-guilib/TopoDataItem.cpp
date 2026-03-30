@@ -10,6 +10,7 @@
 #include <vtkPointData.h>
 #include <vtkLightCollection.h>
 #include <vtkIdTypeArray.h>
+#include <QQuickWindow>
 #include "TopoDataItem.h"
 #include "TopoColorMap.h"
 #include "SharedConstants.h"
@@ -67,6 +68,7 @@ QQuickVTKItem::vtkUserData TopoDataItem::initializeVTK(vtkRenderWindow
 
   return pipeline_;
 }
+
 
 
 void TopoDataItem::destroyingVTK(vtkRenderWindow
@@ -164,7 +166,7 @@ bool TopoDataItem::loadDatafile(QUrl fileUrl) {
   initializePipeline();
   
   reassemblePipeline();
-  
+
   return true;
 }
 
@@ -174,11 +176,10 @@ void TopoDataItem::reassemblePipeline() {
   dispatch_async([this](vtkRenderWindow *renderWindow, vtkUserData userData) {
     auto *pipeline = TopoDataItem::Pipeline::SafeDownCast(userData);
     assemblePipeline(pipeline);
+    // Re-render VTK after pipeline assembly
+    renderWindow_->Render();
     return;
   });
-
-  // Schedule update on the vtkRenderWindow
-  scheduleRender();
 
   return;
 }
@@ -191,20 +192,11 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
     qWarning() << "Can't access input file " << dataFilename_;
     return;
   }
-  
+
   qDebug() << "set filename to " << dataFilename_;
   pipeline->topoReader_->SetFileName(dataFilename_);
 
   unsigned long errorCode;
-  if ((errorCode = pipeline->topoReader_->GetErrorCode()) != 0) {
-    qWarning() << "grid reader error during SetFileName(): "
-	       << errorCode;
-
-    qWarning() << dataFilename_ << ": " <<
-      vtkErrorCode::GetStringFromErrorCode(errorCode);
-
-    return;
-  }
 
   // Clear mapper connections
   pipeline->surfaceMapper_->RemoveAllInputConnections(0);
@@ -217,14 +209,17 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   // Clear all lights
   pipeline->renderer_->RemoveAllLights();
   
-  lights = pipeline->renderer_->GetLights();
-  
   // Determine grid type
-  TopoDataType gridType =
+  TopoDataType dataType =
     TopoDataReader::getDataType(dataFilename_);
 
-  pipeline->topoReader_->setDataType(gridType);
+  pipeline->topoReader_->setDataType(dataType);
 
+  
+  // Force reader to re-run
+  pipeline->topoReader_->Modified();
+  pipeline->topoReader_->UpdateInformation();
+  
   // Update TopoDataReader
   qDebug() << "call topoReader_->Update()";
   pipeline->topoReader_->Update();
@@ -235,9 +230,9 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
     
     qWarning() << dataFilename_ << ": " <<
       vtkErrorCode::GetStringFromErrorCode(errorCode);
-    
+
     return;
-  }  
+  }
 
   // Associate cell and point id's with original polyData
   pipeline->idFilter_->SetInputData(pipeline->topoReader_->GetOutput());
@@ -246,7 +241,6 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   pipeline->idFilter_->SetCellIdsArrayName(ORIGINAL_IDS);
   pipeline->idFilter_->SetPointIdsArrayName(ORIGINAL_IDS);
   pipeline->idFilter_->Update();
-
 
   // Read grid bounds
   double gridBounds[6];
@@ -274,7 +268,7 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   double maxVal = gridBounds[5];
   
   /// DEBUG ///
-  printPolyDataOutput(pipeline->elevFilter_, "elevFilter");
+  /// printPolyDataOutput(pipeline->elevFilter_, "elevFilter");
 
   pipeline->polyData_ =
     vtkPolyData::SafeDownCast(pipeline->elevFilter_->GetOutput());
@@ -310,7 +304,7 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
 
     qDebug() << "connected slopeFilter input to elevFilter output port";
     
-    printPolyDataOutput(pipeline->slopeFilter_, "slopeFilter");
+    /// printPolyDataOutput(pipeline->slopeFilter_, "slopeFilter");
     
     pipeline->surfaceMapper_->SetInputConnection(pipeline->slopeFilter_->
 						 GetOutputPort());
@@ -334,6 +328,8 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
 						 GetOutputPort());
   }
 
+  pipeline->surfaceMapper_->Modified();
+  
   // Make lookup table
   TopoColorMap::makeLUT(scheme_,
 			pipeline->elevLookupTable_);
@@ -364,14 +360,11 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   pipeline->renderer_->SetBackground(pipeline->colors_->GetColor3d("White").
 				     GetData());
 
-  // Need to add the light again here
   qDebug() << "assemblePipeline(): GetLightIntensity=" <<
     pipeline->lightSource_->GetIntensity();
 
   pipeline->renderer_->AddLight(pipeline->lightSource_);
 
-  lights = pipeline->renderer_->GetLights();
-  
   if (showAxes_) {
     // Set up axes
     pipeline->axesActor_->SetCamera(pipeline->renderer_->GetActiveCamera());
@@ -384,8 +377,6 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
 	      pipeline->topoReader_->yUnits(),
 	      pipeline->topoReader_->zUnits(),
 	      pipeline->topoReader_->geographicCRS());
-
-
 
     pipeline->renderer_->AddActor(pipeline->axesActor_);    
   }
