@@ -42,23 +42,6 @@ int main(int argc, char* argv[])
     if (!strcmp(argv[i], "-I") && i <= argc-2) {
       topoDataFile = argv[++i];
     }
-    else if (!strcmp(argv[i], "-testpoints") && i <= argc-2) {
-      // Parse two points from next argument:
-      // beginX,beginY,endX,endY
-      std::stringstream input(argv[++i]);
-      string token;
-      char delim = ',';
-      int nToken = 0;
-      while (getline(input, token, delim)) {
-	cout << token << " ";
-	nToken++;
-      }
-      cout << "\n";
-      if (nToken != 4) {
-	cerr << "Expecting 4 coords\n";
-      }
-      
-    }
     else {
       cerr << "Unknown option: " << argv[i] << "\n";
       error = true;
@@ -66,7 +49,7 @@ int main(int argc, char* argv[])
   }
 
   if (error) {
-    cerr << "usage: " << argv[0] << "[-I inputFle][-testpoints x1,y1,x2,y2]\n";
+    cerr << "usage: " << argv[0] << "[-I inputFle]\n";
     exit(1);
   }
 
