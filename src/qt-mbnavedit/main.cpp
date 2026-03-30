@@ -9,7 +9,6 @@
 #include <QButtonGroup>
 #include <QQmlContext>
 #include <QVariant>
-// #include <QQuickStyle>
 #include "GuiNames.h"
 #include "Backend.h"
 #include "PixmapImage.h"
@@ -54,6 +53,10 @@ int main(int argc, char *argv[]) {
     theBackend_ = &backend;
     
     QQmlApplicationEngine engine;
+
+    GuiNames guiNames;
+    QQmlContext *context = engine.rootContext();
+    context->setContextProperty("GuiNames", &guiNames);
     
     // Make backend object and methods accessible to QML
     engine.setInitialProperties({

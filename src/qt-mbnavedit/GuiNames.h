@@ -1,16 +1,8 @@
-#ifndef GUINAMES_
-#define GUINAMES_
+#ifndef GuiNames_
+#define GuiNames_
 
 #include <QObject>
 
-class GuiNames : public QObject {
-
-  Q_OBJECT
-
- public:
-  GuiNames();
-
-};
 
 /// Define names of C++-connected QML items, used when exchanging information
 /// between QML GUI and C++ code.
@@ -48,6 +40,87 @@ class GuiNames : public QObject {
 #define DESELECT_ALL_MODENAME "deselectAllMode"
 #define DEFINE_INTERVAL_MODENAME "defineIntervalMode"
 
+class GuiNames : public QObject {
 
+  Q_OBJECT
+
+ public:
+  GuiNames() {}
+  
+  Q_PROPERTY(QString swathPixmap READ swathPixmap CONSTANT)
+  QString swathPixmap() const {return QStringLiteral(SWATH_PIXMAP_NAME);}
+
+  Q_PROPERTY(QString timeIntPlot READ timeIntPlot CONSTANT)
+  QString timeIntPlot() const {return QStringLiteral(TIMEINT_PLOTNAME);}  
+
+  Q_PROPERTY(QString swathPixmapObj READ swathPixmapObj CONSTANT)
+  QString swathPixmapObj() const {return QStringLiteral(SWATH_PIXMAP_NAME);}
+
+  Q_PROPERTY(QString timeInt READ timeInt CONSTANT)
+  QString timeInt() const {return QStringLiteral(TIMEINT_PLOTNAME);}
+
+  Q_PROPERTY(QString timeIntOrig READ timeIntOrig CONSTANT)
+  QString timeIntOrig() const {return QStringLiteral(TIMEINT_ORIG_PLOTNAME);}
+
+  Q_PROPERTY(QString lat READ lat CONSTANT)
+  QString lat() const {return QStringLiteral(LAT_PLOTNAME);}
+
+  Q_PROPERTY(QString latOrig READ latOrig CONSTANT)
+  QString latOrig() const {return QStringLiteral(LAT_ORIG_PLOTNAME);}
+
+  Q_PROPERTY(QString lon READ lon CONSTANT)
+  QString lon() const {return QStringLiteral(LON_PLOTNAME);}
+
+  Q_PROPERTY(QString lonOrig READ lonOrig CONSTANT)
+  QString lonOrig() const {return QStringLiteral(LON_ORIG_PLOTNAME);}
+
+  Q_PROPERTY(QString speed READ speed CONSTANT)
+  QString speed() const {return QStringLiteral(SPEED_PLOTNAME);}
+
+  Q_PROPERTY(QString speedOrig READ speedOrig CONSTANT)
+  QString speedOrig() const {return QStringLiteral(SPEED_ORIG_PLOTNAME);}
+
+  Q_PROPERTY(QString speedMadeGood READ speedMadeGood CONSTANT)
+  QString speedMadeGood() const {return QStringLiteral(SPEED_MADEGOOD_PLOTNAME);}
+
+  Q_PROPERTY(QString heading READ heading CONSTANT)
+  QString heading() const {return QStringLiteral(HEADING_PLOTNAME);}
+
+  Q_PROPERTY(QString headingOrig READ headingOrig CONSTANT)
+  QString headingOrig() const {return QStringLiteral(HEADING_ORIG_PLOTNAME);}
+
+  Q_PROPERTY(QString headingMadeGood READ headingMadeGood CONSTANT)
+  QString headingMadeGood() const {return QStringLiteral(HEADING_MADEGOOD_PLOTNAME);}
+
+  Q_PROPERTY(QString sensorDepth READ sensorDepth CONSTANT)
+  QString sensorDepth() const {return QStringLiteral(SENSORDEPTH_PLOTNAME);}
+
+  Q_PROPERTY(QString sensorDepthOrig READ sensorDepthOrig CONSTANT)
+  QString sensorDepthOrig() const {return QStringLiteral(SENSORDEPTH_ORIG_PLOTNAME);}
+
+  Q_PROPERTY(QString attitude READ attitude CONSTANT)
+  QString attitude() const {return QStringLiteral(ATTITUDE_PLOTNAME);}
+
+  Q_PROPERTY(QString pickMode READ pickMode CONSTANT)
+  QString pickMode() const {return QStringLiteral(PICK_MODENAME);}
+
+  Q_PROPERTY(QString selectMode READ selectMode CONSTANT)
+  QString selectMode() const {return QStringLiteral(SELECT_MODENAME);}
+
+  Q_PROPERTY(QString deselectMode READ deselectMode CONSTANT)
+  QString deselectMode() const {return QStringLiteral(DESELECT_MODENAME);}
+
+  Q_PROPERTY(QString selectAllMode READ selectAllMode CONSTANT)
+  QString selectAllMode() const {return QStringLiteral(SELECT_ALL_MODENAME);}
+
+  Q_PROPERTY(QString deselectAllMode READ deselectAllMode CONSTANT)
+  QString deselectAllMode()
+    const {return QStringLiteral(DESELECT_ALL_MODENAME);}
+
+  Q_PROPERTY(QString defineIntervalMode READ defineIntervalMode CONSTANT)
+  QString defineIntervalMode()
+    const {return QStringLiteral(DEFINE_INTERVAL_MODENAME);}
+  
+};
 
 #endif

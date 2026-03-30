@@ -33,7 +33,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-add_executable(qt-mbnavedit Backend.cpp 
+add_executable(qt-mbnavedit Backend.cpp GuiNames.h
 	       main.cpp qml.qrc)
 
 target_include_directories(qt-mbnavedit PUBLIC ${CMAKE_SOURCE_DIR}/src/mbaux)
