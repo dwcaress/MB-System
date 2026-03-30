@@ -248,7 +248,7 @@ namespace mb_system {
     /// Assemble pipeline elements
     virtual void assemblePipeline(Pipeline *pipeline);
 
-    /// Reassemble the pipeline and re-render, in the render thread
+    /// Reassemble the pipeline and re-render, in the Qt render thread
     void reassemblePipeline(void);
 
     /// Set up axes
