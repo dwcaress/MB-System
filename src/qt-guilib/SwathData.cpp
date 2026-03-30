@@ -65,9 +65,12 @@ bool SwathData::readDatafile(char *swathFile) {
   // Verify that accompanying .inf file exists;
   // append extension .inf and check...
   std::cerr << "readDataFile() " << swathFile << "\n";
-  char *infFile = strdup(swathFile);
-  strcat(infFile, ".inf");
-  
+  char *infFile;
+  if (asprintf(&infFile, "%s.inf", swathFile) == -1) {
+    fprintf(stderr, "asprintf() failed in SwathData::readDatafile()\n");
+    return false;
+  }
+
   // Check that inf file exists
   std::cerr << "try to access infFile: " << infFile << "\n";
   if (access(infFile, F_OK) != 0) {
@@ -102,7 +105,10 @@ bool SwathData::readDatafile(char *swathFile) {
 
   // Need to unlock file when done reading
   std::cout << "Unlock swath file" << std::endl;
-  unlockSwath((char *)swathFile);
+  if (!unlockSwath((char *)swathFile)) {
+    std::cerr << "Couldn't unlock " << swathFile << "\n";
+    return false;
+  }
 
   // Point to swath data just loaded into global array
   mbev_file_struct* swathData = &mbev_files[0];
@@ -191,15 +197,22 @@ bool SwathData::getXYZ(int row, int col,
 }
 
 
-void SwathData::unlockSwath(char *swathfile) {
+bool SwathData::unlockSwath(char *swathfile) {
   bool usingLocks = true;
   std::cout << "unlockSwath(" << swathfile << ")" << std::endl;
   if (usingLocks) {
     int lockError = 0;
 
-    mb_pr_unlockswathfile(mbev_verbose, swathfile,
-                          MBP_LOCK_EDITBATHY, appName_, &lockError);
+    int status = mb_pr_unlockswathfile(mbev_verbose, swathfile,
+				       MBP_LOCK_EDITBATHY, appName_,
+				       &lockError);
+    if (status == MB_SUCCESS) {
+      return true;
     }
+    else {
+      return false;
+    }
+  }
 }
 
 
