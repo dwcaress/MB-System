@@ -11,6 +11,7 @@
 #include <vtkLightCollection.h>
 #include <vtkIdTypeArray.h>
 #include <QQuickWindow>
+#include <QMessageBox>
 #include "TopoDataItem.h"
 #include "TopoColorMap.h"
 #include "SharedConstants.h"
@@ -192,6 +193,9 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   // Check that input file exists and is readable
   if (access(dataFilename_, R_OK) == -1) {
     qWarning() << "Can't access input file " << dataFilename_;
+    QString msg = QString("Cannot access input file ") + dataFilename_;
+    emit errorOccurred(msg);
+    
     return;
   }
 
@@ -232,6 +236,11 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
     
     qWarning() << dataFilename_ << ": " <<
       vtkErrorCode::GetStringFromErrorCode(errorCode);
+    
+    QString msg = QString("Cannot access input file ") + dataFilename_ + \
+      "\n" + vtkErrorCode::GetStringFromErrorCode(errorCode);
+    
+    emit errorOccurred(msg);    
 
     return;
   }
