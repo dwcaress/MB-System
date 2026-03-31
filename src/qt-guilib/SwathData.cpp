@@ -198,7 +198,8 @@ bool SwathData::getXYZ(int row, int col,
 
 
 bool SwathData::unlockSwath(char *swathfile) {
-  bool usingLocks = true;
+  
+  bool usingLocks = false;
   std::cout << "unlockSwath(" << swathfile << ")" << std::endl;
   if (usingLocks) {
     int lockError = 0;
@@ -212,6 +213,10 @@ bool SwathData::unlockSwath(char *swathfile) {
     else {
       return false;
     }
+  }
+  else {
+    std::cerr << "TEST: Skipping file lock check\n";
+    return true;
   }
 }
 
