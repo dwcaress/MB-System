@@ -177,7 +177,7 @@ void TopoDataItem::reassemblePipeline() {
   dispatch_async([this](vtkRenderWindow *renderWindow, vtkUserData userData) {
     auto *pipeline = TopoDataItem::Pipeline::SafeDownCast(userData);
     assemblePipeline(pipeline);
-    // Re-render VTK after pipeline assembly
+    // Re-render VTK after pipeline assembly, in Qt render thread
     renderWindow_->Render();
     return;
   });
