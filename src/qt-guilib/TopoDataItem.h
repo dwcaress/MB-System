@@ -239,6 +239,9 @@ namespace mb_system {
     /// Emit when user defines a line with mouse
     void lineDefined(QList<QVector2D> elevProfile);
 
+    /// Emit when error occurs, QML will pop up message
+    void errorOccurred(QString message);
+    
   
   protected:
 
