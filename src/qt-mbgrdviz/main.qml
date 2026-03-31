@@ -208,7 +208,6 @@ Window {
 
     }
 
-
     MessageDialog {
         id: quitDialog
         title: "Quit?"
@@ -335,11 +334,18 @@ Window {
 		              settings3D.lightY.value,			      		                      settings3D.lightZ.value)
     }
 
+
+  MessageDialog {
+    id: errorDialog
+    title: 'ERROR'
+    buttons: MessageDialog.Ok
+  }
+    
   Connections {
     ignoreUnknownSignals: true
     
     target: topoDataItem
-    onLineDefined: function (profileData) {
+    function onLineDefined(profileData) {
       console.log("Line defined!")
       var xmin = Infinity
       var xmax = -Infinity
@@ -371,6 +377,13 @@ Window {
       profileGraph.axisY.max = ymax
 
       topoDataItem.forceActiveFocus();
+    }
+
+    function onErrorOccurred(message) {
+      console.log('Received error message from C++:', message)
+      errorDialog.close()  // If somehow partially open...
+      errorDialog.text = message
+      errorDialog.open()
     }
   }
 }
