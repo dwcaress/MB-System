@@ -373,6 +373,7 @@ static int read_datalist_file(int verbose) {
  */
 static int read_swath_file(int verbose, char *file, int format,
                           double file_weight) {
+  (void)file_weight;
   if (verbose > 0) {
     fprintf(stderr, "  Opening file (format %d)...\n", format);
   }
@@ -391,8 +392,8 @@ static int read_swath_file(int verbose, char *file, int format,
   double *sslon = nullptr;
   double *sslat = nullptr;
   char comment[MB_COMMENT_MAXLINE] = "";
-  int kind, time_i[7];
-  double time_d, navlon, navlat, speed, heading, distance, altitude, sensordepth;
+  //int kind, time_i[7];
+  //double time_d, navlon, navlat, speed, heading, distance, altitude, sensordepth;
 
   /* Ping data variables */
   int kind;
@@ -434,39 +435,116 @@ static int read_swath_file(int verbose, char *file, int format,
   // Return early for stub
   // return MB_SUCCESS;
 
-  /* TODO #3: Allocate data arrays
-   *
-   * After mb_read_init() succeeds, allocate arrays to hold ping data.
-   * Use mb_mallocd() for MB-System memory tracking.
-   *
-   * PSEUDOCODE:
-   *
-   * // Allocate beamflag array
-   * status = mb_mallocd(verbose, __FILE__, __LINE__,
-   *                     beams_bath * sizeof(char),
-   *                     (void **)&beamflag, &error);
-   * if (status != MB_SUCCESS) {
-   *   fprintf(stderr, "Error allocating beamflag array\n");
-   *   return MB_FAILURE;
-   * }
-   *
-   * // Allocate bath array
-   * status = mb_mallocd(verbose, __FILE__, __LINE__,
-   *                     beams_bath * sizeof(double),
-   *                     (void **)&bath, &error);
-   * if (status != MB_SUCCESS) {
-   *   fprintf(stderr, "Error allocating bath array\n");
-   *   mb_freed(verbose, __FILE__, __LINE__, (void **)&beamflag, &error);
-   *   return MB_FAILURE;
-   * }
-   *
-   * // Repeat for: bathlon, bathlat, amp
-   * // (amp uses beams_amp size)
-   *
-   * // Skip sidescan for Phase 1
-   *
-   * REFERENCE: See mbgrid.cc lines 2660-2680 for example
-   */
+   //TODO #3: Allocate data arrays
+   
+   // After mb_read_init() succeeds, allocate arrays to hold ping data.
+   // Use mb_mallocd() for MB-System memory tracking.
+   
+   
+    // Allocate beamflag array
+    status = mb_mallocd(verbose, __FILE__, __LINE__,
+                        beams_bath * sizeof(char),
+                        (void **)&beamflag, &error);
+    if (status != MB_SUCCESS) {
+      fprintf(stderr, "Error allocating beamflag array\n");
+      return MB_FAILURE;
+    }
+   
+    // Allocate bath array
+    status = mb_mallocd(verbose, __FILE__, __LINE__,
+                        beams_bath * sizeof(double),
+                        (void **)&bath, &error);
+    if (status != MB_SUCCESS) {
+      fprintf(stderr, "Error allocating bath array\n");
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&beamflag, &error);
+      return MB_FAILURE;
+    }
+
+    // Allocate bathlon array
+    status = mb_mallocd(verbose, __FILE__, __LINE__,
+                        beams_bath * sizeof(double),
+                        (void **)&bathlon, &error);
+    if (status != MB_SUCCESS) {
+      fprintf(stderr, "Error allocating bathlon array\n");
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&beamflag, &error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&bath, &error);
+      return MB_FAILURE;
+    }
+
+    // Allocate bathlat array
+    status = mb_mallocd(verbose, __FILE__, __LINE__,
+                        beams_bath * sizeof(double),
+                        (void **)&bathlat, &error);
+    if (status != MB_SUCCESS) {
+      fprintf(stderr, "Error allocating bathlat array\n");
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&beamflag, &error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&bath, &error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&bathlon, &error);
+      return MB_FAILURE;
+    }
+
+    // Allocate amp array
+    status = mb_mallocd(verbose, __FILE__, __LINE__,
+                        beams_amp * sizeof(double),
+                        (void **)&amp, &error);
+    if (status != MB_SUCCESS) {
+      fprintf(stderr, "Error allocating amp array\n");
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&beamflag, &error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&bath, &error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&bathlon, &error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&bathlat, &error);
+      return MB_FAILURE;
+    }
+
+    // mb_get() always writes sidescan arrays, so allocate them when present.
+    if (pixels_ss > 0) {
+      status = mb_mallocd(verbose, __FILE__, __LINE__,
+                          pixels_ss * sizeof(double),
+                          (void **)&ss, &error);
+      if (status != MB_SUCCESS) {
+        fprintf(stderr, "Error allocating ss array\n");
+        mb_freed(verbose, __FILE__, __LINE__, (void **)&amp, &error);
+        mb_freed(verbose, __FILE__, __LINE__, (void **)&bathlat, &error);
+        mb_freed(verbose, __FILE__, __LINE__, (void **)&bathlon, &error);
+        mb_freed(verbose, __FILE__, __LINE__, (void **)&bath, &error);
+        mb_freed(verbose, __FILE__, __LINE__, (void **)&beamflag, &error);
+        mb_close(verbose, &mbio_ptr, &error);
+        return MB_FAILURE;
+      }
+
+      status = mb_mallocd(verbose, __FILE__, __LINE__,
+                          pixels_ss * sizeof(double),
+                          (void **)&sslon, &error);
+      if (status != MB_SUCCESS) {
+        fprintf(stderr, "Error allocating sslon array\n");
+        mb_freed(verbose, __FILE__, __LINE__, (void **)&ss, &error);
+        mb_freed(verbose, __FILE__, __LINE__, (void **)&amp, &error);
+        mb_freed(verbose, __FILE__, __LINE__, (void **)&bathlat, &error);
+        mb_freed(verbose, __FILE__, __LINE__, (void **)&bathlon, &error);
+        mb_freed(verbose, __FILE__, __LINE__, (void **)&bath, &error);
+        mb_freed(verbose, __FILE__, __LINE__, (void **)&beamflag, &error);
+        mb_close(verbose, &mbio_ptr, &error);
+        return MB_FAILURE;
+      }
+
+      status = mb_mallocd(verbose, __FILE__, __LINE__,
+                          pixels_ss * sizeof(double),
+                          (void **)&sslat, &error);
+      if (status != MB_SUCCESS) {
+        fprintf(stderr, "Error allocating sslat array\n");
+        mb_freed(verbose, __FILE__, __LINE__, (void **)&sslon, &error);
+        mb_freed(verbose, __FILE__, __LINE__, (void **)&ss, &error);
+        mb_freed(verbose, __FILE__, __LINE__, (void **)&amp, &error);
+        mb_freed(verbose, __FILE__, __LINE__, (void **)&bathlat, &error);
+        mb_freed(verbose, __FILE__, __LINE__, (void **)&bathlon, &error);
+        mb_freed(verbose, __FILE__, __LINE__, (void **)&bath, &error);
+        mb_freed(verbose, __FILE__, __LINE__, (void **)&beamflag, &error);
+        mb_close(verbose, &mbio_ptr, &error);
+        return MB_FAILURE;
+      }
+    }
+
+    // REFERENCE: See mbgrid.cc lines 2660-2680 for example
 
   // STUB: Your implementation here
 
@@ -483,91 +561,78 @@ static int read_swath_file(int verbose, char *file, int format,
   // fprintf(stderr, "  Location: mbmesh.cc line %d\n", __LINE__ - 5);
   // fprintf(stderr, "\n");
 
-  /* TODO #3: Allocate + Register Arrays */
-  status = mb_mallocd(verbose, __FILE__, __LINE__, 
-                      beams_bath * sizeof(char), (void**)&beamflag, &error);
-  if (status == MB_SUCCESS)
-    mb_register_array(verbose, MB_MEM_TYPE_BATHY, sizeof(char), (void**)&beamflag, &error);
+  // /* TODO #3: Allocate + Register Arrays */
+  // status = mb_mallocd(verbose, __FILE__, __LINE__, 
+  //                     beams_bath * sizeof(char), (void**)&beamflag, &error);
+  // if (status == MB_SUCCESS)
+  //   mb_register_array(verbose, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void**)&beamflag, &error);
   
-  status = mb_mallocd(verbose, __FILE__, __LINE__, 
-                      beams_bath * sizeof(double), (void**)&bath, &error);
-  if (status == MB_SUCCESS)
-    mb_register_array(verbose, MB_MEM_TYPE_BATHY, sizeof(double), (void**)&bath, &error);
+  // status = mb_mallocd(verbose, __FILE__, __LINE__, 
+  //                     beams_bath * sizeof(double), (void**)&bath, &error);
+  // if (status == MB_SUCCESS)
+  //   mb_register_array(verbose, MB_MEM_TYPE_BATHY, sizeof(double), (void**)&bath, &error);
   
-  status = mb_mallocd(verbose, __FILE__, __LINE__, 
-                      beams_bath * sizeof(double), (void**)&bathlon, &error);
-  if (status == MB_SUCCESS)
-    mb_register_array(verbose, MB_MEM_TYPE_BATHY_POS, sizeof(double), (void**)&bathlon, &error);
+  // status = mb_mallocd(verbose, __FILE__, __LINE__, 
+  //                     beams_bath * sizeof(double), (void**)&bathlon, &error);
+  // if (status == MB_SUCCESS)
+  //   mb_register_array(verbose, MB_MEM_TYPE_BATHY_POS, sizeof(double), (void**)&bathlon, &error);
   
-  status = mb_mallocd(verbose, __FILE__, __LINE__, 
-                      beams_bath * sizeof(double), (void**)&bathlat, &error);
-  if (status == MB_SUCCESS)
-    mb_register_array(verbose, MB_MEM_TYPE_BATHY_POS, sizeof(double), (void**)&bathlat, &error);
+  // status = mb_mallocd(verbose, __FILE__, __LINE__, 
+  //                     beams_bath * sizeof(double), (void**)&bathlat, &error);
+  // if (status == MB_SUCCESS)
+  //   mb_register_array(verbose, MB_MEM_TYPE_BATHY_POS, sizeof(double), (void**)&bathlat, &error);
   
-  status = mb_mallocd(verbose, __FILE__, __LINE__, 
-                      beams_amp * sizeof(double), (void**)&amp, &error);
-  if (status == MB_SUCCESS)
-    mb_register_array(verbose, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void**)&amp, &error);
+  // status = mb_mallocd(verbose, __FILE__, __LINE__, 
+  //                     beams_amp * sizeof(double), (void**)&amp, &error);
+  // if (status == MB_SUCCESS)
+  //   mb_register_array(verbose, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void**)&amp, &error);
 
-  if (status != MB_SUCCESS) {
-    fprintf(stderr, "  Error allocating arrays\n");
-    goto cleanup; 
+  // if (status != MB_SUCCESS) {
+  //   fprintf(stderr, "  Error allocating arrays\n");
+  //   goto cleanup; 
+  // }
+  // if (verbose > 1) fprintf(stderr, "  Arrays allocated OK\n");
+
+/* TODO #4: Read pings in loop */
+  int pings = 0; // Local counter for this file
+  int ping_number;
+
+  while ((status = mb_read(
+      verbose, mbio_ptr, &kind, &ping_number,
+      time_i, &time_d,
+      &navlon, &navlat, &speed, &heading,
+      &distance, &altitude, &sensordepth,
+      &beams_bath, &beams_amp, &pixels_ss,
+      beamflag, bath, amp, bathlon, bathlat,
+      ss, sslon, sslat,
+      comment, &error)) <= MB_ERROR_NO_ERROR) {
+    
+    /* Check for end of file or hard error */
+    if (error > MB_ERROR_NO_ERROR) {
+      break;
+    }
+
+    /* Only process survey data */
+    if (kind == MB_DATA_DATA) {
+      /* Process this ping */
+      process_ping(verbose, beams_bath, beamflag,
+                  bath, bathlon, bathlat, time_d);
+
+      /* Update global counter */
+      npings++;
+      pings++;
+
+      /* Progress report */
+      if (verbose > 1 && pings % 100 == 0) {
+        fprintf(stderr, "    Processed %d pings...\r", pings);
+        fflush(stderr);
+      }
+    }
   }
-  if (verbose > 1) fprintf(stderr, "  Arrays allocated OK\n");
 
-  /* TODO #4: Read pings in loop
-   *
-   * Use mb_get() in a while loop to read ping-by-ping data.
-   *
-   * PSEUDOCODE:
-   *
-   * int pings = 0; // Local counter for this file
-   *
-   * while (true) {
-   *   status = mb_get(
-   *     verbose, mbio_ptr, &kind, &pings,
-   *     time_i, &time_d,
-   *     &navlon, &navlat, &speed, &heading,
-   *     &distance, &altitude, &sensordepth,
-   *     &beams_bath, &beams_amp, &pixels_ss,
-   *     beamflag, bath, amp, bathlon, bathlat,
-   *     ss, sslon, sslat,  // Pass nullptr for ss arrays if not allocated
-   *     comment, &error
-   *   );
-   *
-   *   // Check for end of file or error
-   *   if (error > MB_ERROR_NO_ERROR) {
-   *     break;
-   *   }
-   *
-   *   // Only process survey data
-   *   if (kind == MB_DATA_DATA) {
-   *     // Process this ping
-   *     process_ping(verbose, beams_bath, beamflag,
-   *                 bath, bathlon, bathlat, time_d);
-   *
-   *     // Update global counter
-   *     npings++;
-   *     pings++; // Local counter
-   *
-   *     // Progress report
-   *     if (verbose > 1 && pings % 100 == 0) {
-   *       fprintf(stderr, "    Processed %d pings...\r", pings);
-   *     }
-   *   }
-   * }
-   *
-   * if (verbose > 0) {
-   *   fprintf(stderr, "  File complete: %d pings processed\n", pings);
-   * }
-   *
-   * REFERENCE: See mbgrid.cc lines 2700-2750 for example
-   */
-
-  // STUB: Your implementation here
-  fprintf(stderr, "TODO #4: Implement mb_get() reading loop\n");
-  fprintf(stderr, "  Location: mbmesh.cc line %d\n", __LINE__ - 5);
-  fprintf(stderr, "\n");
+  if (verbose > 0) {
+    fprintf(stderr, "  File complete: %d pings processed\n", pings);
+  }
 
   /* TODO #5: Cleanup and close file
    *
@@ -596,10 +661,27 @@ static int read_swath_file(int verbose, char *file, int format,
    * REFERENCE: See mbgrid.cc lines 2780-2800 for example
    */
 
-  // STUB: Your implementation here
-  fprintf(stderr, "TODO #5: Free arrays and call mb_close()\n");
-  fprintf(stderr, "  Location: mbmesh.cc line %d\n", __LINE__ - 5);
-  fprintf(stderr, "\n");
+  if (sslat != nullptr)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&sslat, &error);
+  if (sslon != nullptr)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&sslon, &error);
+  if (ss != nullptr)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&ss, &error);
+  if (amp != nullptr)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&amp, &error);
+  if (bathlat != nullptr)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&bathlat, &error);
+  if (bathlon != nullptr)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&bathlon, &error);
+  if (bath != nullptr)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&bath, &error);
+  if (beamflag != nullptr)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&beamflag, &error);
+
+  status = mb_close(verbose, &mbio_ptr, &error);
+  if (status != MB_SUCCESS && verbose > 0) {
+    fprintf(stderr, "  Warning: Error closing file\n");
+  }
 
   nfile_read++;
   return MB_SUCCESS;
@@ -628,58 +710,48 @@ static int process_ping(int verbose, int beams_bath, char *beamflag,
                        double *bath, double *bathlon, double *bathlat,
                        double time_d) {
 
-  /* TODO #6: Process each beam in the ping
-   *
-   * Loop through all beams and extract valid soundings.
-   *
-   * PSEUDOCODE:
-   *
-   * for (int i = 0; i < beams_bath; i++) {
-   *   // Count total beams
-   *   nbeams_total++;
-   *
-   *   // Check beam quality
-   *   if (!mb_beam_ok(beamflag[i])) {
-   *     nbeams_flagged++;
-   *     continue;  // Skip bad beam
-   *   }
-   *
-   *   // Create sounding
-   *   Sounding s;
-   *   s.longitude = bathlon[i];
-   *   s.latitude = bathlat[i];
-   *   s.depth = bath[i];
-   *   s.beamflag = beamflag[i];
-   *   s.beam_number = i;
-   *   s.time_d = time_d;
-   *
-   *   // Filter by geographic bounds if specified
-   *   if (bounds_specified) {
-   *     if (s.longitude < bounds[0] || s.longitude > bounds[1] ||
-   *         s.latitude < bounds[2] || s.latitude > bounds[3]) {
-   *       continue;  // Outside bounds, skip
-   *     }
-   *   }
-   *
-   *   // Add to collection
-   *   all_soundings.push_back(s);
-   *   nbeams_good++;
-   * }
-   *
-   * REFERENCE: See mbgrid.cc lines 2900-2950 for example
-   */
+  // TODO #6: Process each beam in the ping
+   
+   // Loop through all beams and extract valid soundings.
+   
+    //PSEUDOCODE:
+   
+    for (int i = 0; i < beams_bath; i++) {
+      // Count total beams
+      nbeams_total++;
+   
+      // Check beam quality
+      if (!mb_beam_ok(beamflag[i])) {
+        nbeams_flagged++;
+        continue;  // Skip bad beam
+      }
+   
+      // Create sounding
+      Sounding s;
+      s.longitude = bathlon[i];
+      s.latitude = bathlat[i];
+      s.depth = bath[i];
+      s.beamflag = beamflag[i];
+      s.beam_number = i;
+      s.time_d = time_d;
+   
+      // Filter by geographic bounds if specified
+      if (bounds_specified) {
+        if (s.longitude < bounds[0] || s.longitude > bounds[1] ||
+            s.latitude < bounds[2] || s.latitude > bounds[3]) {
+          continue;  // Outside bounds, skip
+        }
+      }
+   
+      // Add to collection
+      all_soundings.push_back(s);
+      nbeams_good++;
+    }
+   
+   // REFERENCE: See mbgrid.cc lines 2900-2950 for example
+   
 
-  // STUB: Your implementation here
-  for (int i = 0; i < beams_bath; i++) {
-    nbeams_total++;
-    // TODO: Implement beam processing
-  }
-
-  if (verbose > 2 && nbeams_total % 10000 == 0) {
-    fprintf(stderr, "TODO #6: Implement beam processing\n");
-    fprintf(stderr, "  Location: mbmesh.cc line %d\n", __LINE__ - 10);
-    fprintf(stderr, "  Beams processed so far: %d\n", nbeams_total);
-  }
+  
 
   return MB_SUCCESS;
 }
