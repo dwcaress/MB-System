@@ -56,6 +56,7 @@ extern "C" {
 #include "mb_format.h"
 #include "mb_io.h"
 #include "mb_status.h"
+#include "mb_macros.h"
 }
 
 constexpr char program_name[] = "mbmesh";
@@ -101,7 +102,7 @@ static int verbose = 0;
 static char read_datalist[MB_PATH_MAXLINE] = "datalist.mb-1";
 static char output_dir[MB_PATH_MAXLINE] = "./tileset";
 static bool bounds_specified = false;
-static double bounds[4] = {-360.0, 360.0, -90.0, 90.0};  // west, east, south, north
+static double bounds[4] = {-180.0, 180.0, -90.0, 90.0};  // west, east, south, north
 
 // Statistics
 static int nfile = 0;               // Number of files in datalist
@@ -594,33 +595,7 @@ static int read_swath_file(int verbose, char *file, int format,
     fprintf(stderr, "  File complete: %d pings processed\n", pings);
   }
 
-  /* Cleanup and close file
-   *
-   * Free allocated arrays and close MB-System I/O.
-   *
-   * PSEUDOCODE:
-   *
-   * // Free arrays in reverse order of allocation
-   * if (amp != nullptr)
-   *   mb_freed(verbose, __FILE__, __LINE__, (void **)&amp, &error);
-   * if (bathlat != nullptr)
-   *   mb_freed(verbose, __FILE__, __LINE__, (void **)&bathlat, &error);
-   * if (bathlon != nullptr)
-   *   mb_freed(verbose, __FILE__, __LINE__, (void **)&bathlon, &error);
-   * if (bath != nullptr)
-   *   mb_freed(verbose, __FILE__, __LINE__, (void **)&bath, &error);
-   * if (beamflag != nullptr)
-   *   mb_freed(verbose, __FILE__, __LINE__, (void **)&beamflag, &error);
-   *
-   * // Close MB-System I/O
-   * status = mb_close(verbose, &mbio_ptr, &error);
-   * if (status != MB_SUCCESS) {
-   *   fprintf(stderr, "  Warning: Error closing file\n");
-   * }
-   *
-   * REFERENCE: See mbgrid.cc lines 2780-2800 for example
-   */
-
+  // Cleanup and close file
   if (sslat != nullptr)
     mb_freed(verbose, __FILE__, __LINE__, (void **)&sslat, &error);
   if (sslon != nullptr)
