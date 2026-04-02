@@ -54,7 +54,7 @@ namespace mb_system {
   
   public:
 
-    /// 'Persistent' VTK pipeline objects, used by QQuickItem infrastructure
+    /// 'Persistent' VTK visualization pipeline objects
     struct Pipeline : vtkObject {
 
       Pipeline() {firstRender_ = true;}
