@@ -56,7 +56,6 @@ extern "C" {
 #include "mb_format.h"
 #include "mb_io.h"
 #include "mb_status.h"
-#include "mb_macros.h"
 }
 
 constexpr char program_name[] = "mbmesh";
@@ -126,6 +125,7 @@ static int read_swath_file(int verbose, char *file, int format, double file_weig
 static int process_ping(int verbose, int beams_bath, char *beamflag,
                        double *bath, double *bathlon, double *bathlat,
                        double time_d);
+static int write_xyz_file(const char *filename);
 static void print_statistics();
 
 /*--------------------------------------------------------------------*/
@@ -185,7 +185,6 @@ int main(int argc, char **argv) {
   /* TODO Phase 5: Write OGC 3D Tiles output (tileset.json + .glb files) */
 
   fprintf(stderr, "\nReady for Phase 2 (spatial indexing)\n");
-  fprintf(stderr, "Ready for Phase 2 (spatial indexing)\n");
   fprintf(stderr, "\nProgram <%s> completed successfully\n", program_name);
   exit(MB_SUCCESS);
 }
@@ -390,17 +389,18 @@ static int read_swath_file(int verbose, char *file, int format,
 
   /* MB-System I/O variables */
   void *mbio_ptr = nullptr;
+  void *store_ptr = nullptr;
   int error = MB_ERROR_NO_ERROR;
 
   /* Data arrays (will be allocated after mb_read_init) */
   char *beamflag = nullptr;
   double *bath = nullptr;
-  double *bathlon = nullptr;
-  double *bathlat = nullptr;
+  double *bathacrosstrack = nullptr;
+  double *bathalongtrack = nullptr;
   double *amp = nullptr;
   double *ss = nullptr;
-  double *sslon = nullptr;
-  double *sslat = nullptr;
+  double *ssacrosstrack = nullptr;
+  double *ssalongtrack = nullptr;
   char comment[MB_COMMENT_MAXLINE] = "";
   //int kind, time_i[7];
   //double time_d, navlon, navlat, speed, heading, distance, altitude, sensordepth;
@@ -442,142 +442,99 @@ static int read_swath_file(int verbose, char *file, int format,
             beams_bath, beams_amp, pixels_ss);
   }
 
-  // Return early for stub
-  // return MB_SUCCESS;
+  // Register arrays with MB-System I/O system
+  // This is CRITICAL - arrays must be registered before mb_read/mb_get_all calls
+  status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char),
+                            (void **)&beamflag, &error);
+  if (status != MB_SUCCESS) {
+    fprintf(stderr, "Error registering beamflag array\n");
+    mb_close(verbose, &mbio_ptr, &error);
+    return MB_FAILURE;
+  }
 
-   //Allocate data arrays
-   
-   // After mb_read_init() succeeds, allocate arrays to hold ping data.
-   // Use mb_mallocd() for MB-System memory tracking.
-   
-   
-    // Allocate beamflag array
-    status = mb_mallocd(verbose, __FILE__, __LINE__,
-                        beams_bath * sizeof(char),
-                        (void **)&beamflag, &error);
-    if (status != MB_SUCCESS) {
-      fprintf(stderr, "Error allocating beamflag array\n");
-      return MB_FAILURE;
-    }
-   
-    // Allocate bath array
-    status = mb_mallocd(verbose, __FILE__, __LINE__,
-                        beams_bath * sizeof(double),
-                        (void **)&bath, &error);
-    if (status != MB_SUCCESS) {
-      fprintf(stderr, "Error allocating bath array\n");
-      mb_freed(verbose, __FILE__, __LINE__, (void **)&beamflag, &error);
-      return MB_FAILURE;
-    }
+  status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
+                            (void **)&bath, &error);
+  if (status != MB_SUCCESS) {
+    fprintf(stderr, "Error registering bath array\n");
+    mb_close(verbose, &mbio_ptr, &error);
+    return MB_FAILURE;
+  }
 
-    // Allocate bathlon array
-    status = mb_mallocd(verbose, __FILE__, __LINE__,
-                        beams_bath * sizeof(double),
-                        (void **)&bathlon, &error);
-    if (status != MB_SUCCESS) {
-      fprintf(stderr, "Error allocating bathlon array\n");
-      mb_freed(verbose, __FILE__, __LINE__, (void **)&beamflag, &error);
-      mb_freed(verbose, __FILE__, __LINE__, (void **)&bath, &error);
-      return MB_FAILURE;
-    }
+  status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
+                            (void **)&bathacrosstrack, &error);
+  if (status != MB_SUCCESS) {
+    fprintf(stderr, "Error registering bathacrosstrack array\n");
+    mb_close(verbose, &mbio_ptr, &error);
+    return MB_FAILURE;
+  }
 
-    // Allocate bathlat array
-    status = mb_mallocd(verbose, __FILE__, __LINE__,
-                        beams_bath * sizeof(double),
-                        (void **)&bathlat, &error);
-    if (status != MB_SUCCESS) {
-      fprintf(stderr, "Error allocating bathlat array\n");
-      mb_freed(verbose, __FILE__, __LINE__, (void **)&beamflag, &error);
-      mb_freed(verbose, __FILE__, __LINE__, (void **)&bath, &error);
-      mb_freed(verbose, __FILE__, __LINE__, (void **)&bathlon, &error);
-      return MB_FAILURE;
-    }
+  status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
+                            (void **)&bathalongtrack, &error);
+  if (status != MB_SUCCESS) {
+    fprintf(stderr, "Error registering bathalongtrack array\n");
+    mb_close(verbose, &mbio_ptr, &error);
+    return MB_FAILURE;
+  }
 
-    // Allocate amp array
-    status = mb_mallocd(verbose, __FILE__, __LINE__,
-                        beams_amp * sizeof(double),
-                        (void **)&amp, &error);
-    if (status != MB_SUCCESS) {
-      fprintf(stderr, "Error allocating amp array\n");
-      mb_freed(verbose, __FILE__, __LINE__, (void **)&beamflag, &error);
-      mb_freed(verbose, __FILE__, __LINE__, (void **)&bath, &error);
-      mb_freed(verbose, __FILE__, __LINE__, (void **)&bathlon, &error);
-      mb_freed(verbose, __FILE__, __LINE__, (void **)&bathlat, &error);
-      return MB_FAILURE;
-    }
+  status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double),
+                            (void **)&amp, &error);
+  if (status != MB_SUCCESS) {
+    fprintf(stderr, "Error registering amp array\n");
+    mb_close(verbose, &mbio_ptr, &error);
+    return MB_FAILURE;
+  }
 
-    // mb_get() always writes sidescan arrays, so allocate them when present.
-    if (pixels_ss > 0) {
-      status = mb_mallocd(verbose, __FILE__, __LINE__,
-                          pixels_ss * sizeof(double),
-                          (void **)&ss, &error);
-      if (status != MB_SUCCESS) {
-        fprintf(stderr, "Error allocating ss array\n");
-        mb_freed(verbose, __FILE__, __LINE__, (void **)&amp, &error);
-        mb_freed(verbose, __FILE__, __LINE__, (void **)&bathlat, &error);
-        mb_freed(verbose, __FILE__, __LINE__, (void **)&bathlon, &error);
-        mb_freed(verbose, __FILE__, __LINE__, (void **)&bath, &error);
-        mb_freed(verbose, __FILE__, __LINE__, (void **)&beamflag, &error);
-        mb_close(verbose, &mbio_ptr, &error);
-        return MB_FAILURE;
-      }
+  status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double),
+                            (void **)&ss, &error);
+  if (status != MB_SUCCESS) {
+    fprintf(stderr, "Error registering ss array\n");
+    mb_close(verbose, &mbio_ptr, &error);
+    return MB_FAILURE;
+  }
 
-      status = mb_mallocd(verbose, __FILE__, __LINE__,
-                          pixels_ss * sizeof(double),
-                          (void **)&sslon, &error);
-      if (status != MB_SUCCESS) {
-        fprintf(stderr, "Error allocating sslon array\n");
-        mb_freed(verbose, __FILE__, __LINE__, (void **)&ss, &error);
-        mb_freed(verbose, __FILE__, __LINE__, (void **)&amp, &error);
-        mb_freed(verbose, __FILE__, __LINE__, (void **)&bathlat, &error);
-        mb_freed(verbose, __FILE__, __LINE__, (void **)&bathlon, &error);
-        mb_freed(verbose, __FILE__, __LINE__, (void **)&bath, &error);
-        mb_freed(verbose, __FILE__, __LINE__, (void **)&beamflag, &error);
-        mb_close(verbose, &mbio_ptr, &error);
-        return MB_FAILURE;
-      }
+  status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double),
+                            (void **)&ssacrosstrack, &error);
+  if (status !=  MB_SUCCESS) {
+    fprintf(stderr, "Error registering ssacrosstrack array\n");
+    mb_close(verbose, &mbio_ptr, &error);
+    return MB_FAILURE;
+  }
 
-      status = mb_mallocd(verbose, __FILE__, __LINE__,
-                          pixels_ss * sizeof(double),
-                          (void **)&sslat, &error);
-      if (status != MB_SUCCESS) {
-        fprintf(stderr, "Error allocating sslat array\n");
-        mb_freed(verbose, __FILE__, __LINE__, (void **)&sslon, &error);
-        mb_freed(verbose, __FILE__, __LINE__, (void **)&ss, &error);
-        mb_freed(verbose, __FILE__, __LINE__, (void **)&amp, &error);
-        mb_freed(verbose, __FILE__, __LINE__, (void **)&bathlat, &error);
-        mb_freed(verbose, __FILE__, __LINE__, (void **)&bathlon, &error);
-        mb_freed(verbose, __FILE__, __LINE__, (void **)&bath, &error);
-        mb_freed(verbose, __FILE__, __LINE__, (void **)&beamflag, &error);
-        mb_close(verbose, &mbio_ptr, &error);
-        return MB_FAILURE;
-      }
-    }
+  status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double),
+                            (void **)&ssalongtrack, &error);
+  if (status != MB_SUCCESS) {
+    fprintf(stderr, "Error registering ssalongtrack array\n");
+    mb_close(verbose, &mbio_ptr, &error);
+    return MB_FAILURE;
+  }
+
+  // For now, don't pre-allocate arrays - let mb_get_all handle it
+  // Just initialize pointers to NULL
 
 /* Read pings in loop */
   int pings = 0; // Local counter for this file
-  int ping_number;
+  int total_records = 0;
+  int data_records = 0;
 
+  fprintf(stderr, "  [DEBUG] About to start mb_read loop, mbio_ptr=%p\n", (void*)mbio_ptr);
   while ((status = mb_read(
-      verbose, mbio_ptr, &kind, &ping_number,
+      verbose, mbio_ptr, &kind, &pings,
       time_i, &time_d,
       &navlon, &navlat, &speed, &heading,
       &distance, &altitude, &sensordepth,
       &beams_bath, &beams_amp, &pixels_ss,
-      beamflag, bath, amp, bathlon, bathlat,
-      ss, sslon, sslat,
-      comment, &error)) <= MB_ERROR_NO_ERROR) {
+      beamflag, bath, amp, bathacrosstrack, bathalongtrack,
+      ss, ssacrosstrack, ssalongtrack,
+      comment, &error)) == MB_SUCCESS) {
     
-    /* Check for end of file or hard error */
-    if (error > MB_ERROR_NO_ERROR) {
-      break;
-    }
-
+    total_records++;
+    
     /* Only process survey data */
     if (kind == MB_DATA_DATA) {
+      data_records++;
       /* Process this ping */
       process_ping(verbose, beams_bath, beamflag,
-                  bath, bathlon, bathlat, time_d);
+                  bath, bathacrosstrack, bathalongtrack, time_d);
 
       /* Update global counter */
       npings++;
@@ -591,27 +548,39 @@ static int read_swath_file(int verbose, char *file, int format,
     }
   }
 
+  fprintf(stderr, "  [DEBUG] mb_read loop exited: status=%d\n", status);
+
   if (verbose > 0) {
     fprintf(stderr, "  File complete: %d pings processed\n", pings);
   }
 
   // Cleanup and close file
-  if (sslat != nullptr)
-    mb_freed(verbose, __FILE__, __LINE__, (void **)&sslat, &error);
-  if (sslon != nullptr)
-    mb_freed(verbose, __FILE__, __LINE__, (void **)&sslon, &error);
+  if (ssalongtrack != nullptr)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&ssalongtrack, &error);
+  if (ssacrosstrack != nullptr)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&ssacrosstrack, &error);
   if (ss != nullptr)
     mb_freed(verbose, __FILE__, __LINE__, (void **)&ss, &error);
-  if (amp != nullptr)
-    mb_freed(verbose, __FILE__, __LINE__, (void **)&amp, &error);
-  if (bathlat != nullptr)
-    mb_freed(verbose, __FILE__, __LINE__, (void **)&bathlat, &error);
-  if (bathlon != nullptr)
-    mb_freed(verbose, __FILE__, __LINE__, (void **)&bathlon, &error);
+  if (bathalongtrack != nullptr)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&bathalongtrack, &error);
+  if (bathacrosstrack != nullptr)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&bathacrosstrack, &error);
   if (bath != nullptr)
     mb_freed(verbose, __FILE__, __LINE__, (void **)&bath, &error);
+  if (amp != nullptr)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&amp, &error);
   if (beamflag != nullptr)
     mb_freed(verbose, __FILE__, __LINE__, (void **)&beamflag, &error);
+
+  // Reset arrays to NULL for next file
+  ssalongtrack = nullptr;
+  ssacrosstrack = nullptr;
+  ss = nullptr;
+  bathalongtrack = nullptr;
+  bathacrosstrack = nullptr;
+  bath = nullptr;
+  amp = nullptr;
+  beamflag = nullptr;
 
   status = mb_close(verbose, &mbio_ptr, &error);
   if (status != MB_SUCCESS && verbose > 0) {
@@ -636,18 +605,19 @@ static int read_swath_file(int verbose, char *file, int format,
  * @param beams_bath Number of bathymetry beams in ping
  * @param beamflag Quality flag array [beams_bath]
  * @param bath Depth array [beams_bath] (meters)
- * @param bathlon Longitude array [beams_bath] (degrees)
- * @param bathlat Latitude array [beams_bath] (degrees)
+ * @param bathacrosstrack Across-track distance array [beams_bath] (meters)
+ * @param bathalongtrack Along-track distance array [beams_bath] (meters)
  * @param time_d Timestamp (Unix seconds)
  * @return MB_SUCCESS
  */
 static int process_ping(int verbose, int beams_bath, char *beamflag,
-                       double *bath, double *bathlon, double *bathlat,
+                       double *bath, double *bathacrosstrack, double *bathalongtrack,
                        double time_d) {
 
   // Process each beam in the ping
    
    // Loop through all beams and extract valid soundings.
+   // Calculate longitude and latitude from acrosstrack and alongtrack distances.
    
     //PSEUDOCODE:
    
@@ -663,8 +633,8 @@ static int process_ping(int verbose, int beams_bath, char *beamflag,
    
       // Create sounding
       Sounding s;
-      s.longitude = bathlon[i];
-      s.latitude = bathlat[i];
+      s.longitude = bathacrosstrack[i];
+      s.latitude = bathalongtrack[i];
       s.depth = bath[i];
       s.beamflag = beamflag[i];
       s.beam_number = i;
