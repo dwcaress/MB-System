@@ -88,8 +88,8 @@ struct Sounding {
   int beam_number;    // Beam index within ping
   double time_d;      // Unix timestamp (seconds since epoch)
 
-  // TODO Phase 2: Add ECEF coordinates (x, y, z)
-  // TODO Phase 2: Add amplitude, acrosstrack distance, etc.
+  // TODO Phase 4: Add ECEF coordinates for 3D Tiles (x, y, z)
+  // TODO Phase 3: Add amplitude, acrosstrack, alongtrack for mesh quality
 };
 
 /*--------------------------------------------------------------------*/
@@ -169,12 +169,21 @@ int main(int argc, char **argv) {
   fprintf(stderr, "\nSwath data reading complete\n");
   print_statistics();
 
-  /* TODO Phase 2: Build spatial index from all_soundings */
-  /* TODO Phase 3: Generate meshes */
-  /* TODO Phase 4: Write 3D Tiles output */
+  /* Write XYZ point cloud */
+  char xyz_file[MB_PATH_MAXLINE];
+  snprintf(xyz_file, sizeof(xyz_file), "%s/pointcloud.xyz", output_dir);
+  write_xyz_file(xyz_file);
 
   fprintf(stderr, "\n=== Phase 1 Complete ===\n");
   fprintf(stderr, "Soundings collected: %zu\n", all_soundings.size());
+  fprintf(stderr, "XYZ file written: %s\n", xyz_file);
+
+  /* TODO Phase 2: Build spatial index (octree/quadtree) from all_soundings */
+  /* TODO Phase 3: Generate triangle meshes from indexed soundings */
+  /* TODO Phase 4: Convert meshes to ECEF coordinates */
+  /* TODO Phase 5: Write OGC 3D Tiles output (tileset.json + .glb files) */
+
+  fprintf(stderr, "\nReady for Phase 2 (spatial indexing)\n");
   fprintf(stderr, "Ready for Phase 2 (spatial indexing)\n");
   fprintf(stderr, "\nProgram <%s> completed successfully\n", program_name);
   exit(MB_SUCCESS);
@@ -435,7 +444,7 @@ static int read_swath_file(int verbose, char *file, int format,
   // Return early for stub
   // return MB_SUCCESS;
 
-   //TODO #3: Allocate data arrays
+   //Allocate data arrays
    
    // After mb_read_init() succeeds, allocate arrays to hold ping data.
    // Use mb_mallocd() for MB-System memory tracking.
@@ -544,56 +553,7 @@ static int read_swath_file(int verbose, char *file, int format,
       }
     }
 
-    // REFERENCE: See mbgrid.cc lines 2660-2680 for example
-
-  // STUB: Your implementation here
-
-
-  // status = mb_mallocd(verbose, __FILE__, __LINE__,
-  //                     beams_bath * sizeof(char),
-  //                     (void **)&beamflag, &error);
-  // if (status != MB_SUCCESS) {
-  //   fprintf(stderr, "Error allocating beamflag array\n");
-  //   return MB_FAILURE;
-  // }
-
-  // fprintf(stderr, "TODO #3: Allocate arrays with mb_mallocd()\n");
-  // fprintf(stderr, "  Location: mbmesh.cc line %d\n", __LINE__ - 5);
-  // fprintf(stderr, "\n");
-
-  // /* TODO #3: Allocate + Register Arrays */
-  // status = mb_mallocd(verbose, __FILE__, __LINE__, 
-  //                     beams_bath * sizeof(char), (void**)&beamflag, &error);
-  // if (status == MB_SUCCESS)
-  //   mb_register_array(verbose, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void**)&beamflag, &error);
-  
-  // status = mb_mallocd(verbose, __FILE__, __LINE__, 
-  //                     beams_bath * sizeof(double), (void**)&bath, &error);
-  // if (status == MB_SUCCESS)
-  //   mb_register_array(verbose, MB_MEM_TYPE_BATHY, sizeof(double), (void**)&bath, &error);
-  
-  // status = mb_mallocd(verbose, __FILE__, __LINE__, 
-  //                     beams_bath * sizeof(double), (void**)&bathlon, &error);
-  // if (status == MB_SUCCESS)
-  //   mb_register_array(verbose, MB_MEM_TYPE_BATHY_POS, sizeof(double), (void**)&bathlon, &error);
-  
-  // status = mb_mallocd(verbose, __FILE__, __LINE__, 
-  //                     beams_bath * sizeof(double), (void**)&bathlat, &error);
-  // if (status == MB_SUCCESS)
-  //   mb_register_array(verbose, MB_MEM_TYPE_BATHY_POS, sizeof(double), (void**)&bathlat, &error);
-  
-  // status = mb_mallocd(verbose, __FILE__, __LINE__, 
-  //                     beams_amp * sizeof(double), (void**)&amp, &error);
-  // if (status == MB_SUCCESS)
-  //   mb_register_array(verbose, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void**)&amp, &error);
-
-  // if (status != MB_SUCCESS) {
-  //   fprintf(stderr, "  Error allocating arrays\n");
-  //   goto cleanup; 
-  // }
-  // if (verbose > 1) fprintf(stderr, "  Arrays allocated OK\n");
-
-/* TODO #4: Read pings in loop */
+/* Read pings in loop */
   int pings = 0; // Local counter for this file
   int ping_number;
 
@@ -634,7 +594,7 @@ static int read_swath_file(int verbose, char *file, int format,
     fprintf(stderr, "  File complete: %d pings processed\n", pings);
   }
 
-  /* TODO #5: Cleanup and close file
+  /* Cleanup and close file
    *
    * Free allocated arrays and close MB-System I/O.
    *
@@ -710,7 +670,7 @@ static int process_ping(int verbose, int beams_bath, char *beamflag,
                        double *bath, double *bathlon, double *bathlat,
                        double time_d) {
 
-  // TODO #6: Process each beam in the ping
+  // Process each beam in the ping
    
    // Loop through all beams and extract valid soundings.
    
@@ -753,6 +713,38 @@ static int process_ping(int verbose, int beams_bath, char *beamflag,
 
   
 
+  return MB_SUCCESS;
+}
+
+/*--------------------------------------------------------------------*/
+/* CREATE .XYZ FILE */
+/*--------------------------------------------------------------------*/
+
+/**
+ * @brief Write soundings to XYZ point cloud file
+ * @param filename Output file path
+ * @return MB_SUCCESS or error code
+ */
+static int write_xyz_file(const char *filename) {
+  FILE *fp = fopen(filename, "w");
+  if (!fp) {
+    fprintf(stderr, "Error: Cannot create XYZ file: %s\n", filename);
+    return MB_FAILURE;
+  }
+
+  fprintf(stderr, "\nWriting XYZ point cloud: %s\n", filename);
+  fprintf(stderr, "  Points: %zu\n", all_soundings.size());
+
+  // Write header (optional)
+  fprintf(fp, "# X(lon) Y(lat) Z(depth)\n");
+
+  // Write points
+  for (const auto &s : all_soundings) {
+    fprintf(fp, "%.8f %.8f %.3f\n", s.longitude, s.latitude, s.depth);
+  }
+
+  fclose(fp);
+  fprintf(stderr, "  XYZ file written successfully\n");
   return MB_SUCCESS;
 }
 
