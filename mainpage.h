@@ -9,8 +9,8 @@
  *
  * \subsection build_deps Build Dependencies
  * - C++ version 2017+ compiler, linker, standard libraries
- * - VTK version 8.2+
- * - QT version 5.14+
+ * - VTK version 9.3+
+ * - QT version 6.10+
  *
  */
 
