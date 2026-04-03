@@ -25,6 +25,11 @@ Window {
 
     // Interface to C++ Backend methods
     required property var backend
+    required property var guiNames
+    
+    Component.onCompleted: {
+      console.log('guiNames.interval: ', guiNames.interval)
+    }
     
     ActionGroup {
         id: ancillaryData
@@ -64,70 +69,71 @@ Window {
             Menu {
                 title: "Ancillary data"
 
-                Action {objectName: "none"; checkable: true; checked: true;
-                    text: qsTr("None");
+                Action {objectName: guiNames.none; checkable: true;
+		        checked: true;
+                        text: qsTr("None");
+                        ActionGroup.group: ancillaryData;
+                        onTriggered: backend.onAncillDataChanged(objectName)
+                }
+
+                Action {objectName: guiNames.time; checkable: true; text: qsTr("Time");
                     ActionGroup.group: ancillaryData;
                     onTriggered: backend.onAncillDataChanged(objectName)
                 }
 
-                Action {objectName: "time"; checkable: true; text: qsTr("Time");
-                    ActionGroup.group: ancillaryData;
-                    onTriggered: backend.onAncillDataChanged(objectName)
-                }
-
-                Action {objectName: "interval"; checkable: true;
+                Action {objectName: guiNames.interval; checkable: true;
                     text: qsTr("Interval");
                     ActionGroup.group: ancillaryData
                     onTriggered: backend.onAncillDataChanged(objectName)
                 }
 
-                Action {objectName: "latitude"; checkable: true;
+                Action {objectName: guiNames.latitude; checkable: true;
                     text: qsTr("Latitude");
                     ActionGroup.group: ancillaryData
                     onTriggered: backend.onAncillDataChanged(objectName)
                 }
 
-                Action {objectName: "longitude"; checkable: true;
+                Action {objectName: guiNames.longitude; checkable: true;
                     text: qsTr("Longitude");
                     ActionGroup.group: ancillaryData
                     onTriggered: backend.onAncillDataChanged(objectName)
                 }
-                Action {objectName: "heading"; checkable: true;
+                Action {objectName: guiNames.heading; checkable: true;
                     text: qsTr("Heading");
                     ActionGroup.group: ancillaryData
                     onTriggered: backend.onAncillDataChanged(objectName)
                 }
-                Action {objectName: "speed"; checkable: true;
+                Action {objectName: guiNames.speed; checkable: true;
                     text: qsTr("Speed");
                     ActionGroup.group: ancillaryData
                     onTriggered: backend.onAncillDataChanged(objectName)
                 }
-                Action {objectName: "depth"; checkable: true;
+                Action {objectName: guiNames.depth; checkable: true;
                     text: qsTr("Depth");
                     ActionGroup.group: ancillaryData
                     onTriggered: backend.onAncillDataChanged(objectName)
                 }
-                Action {objectName: "altitude"; checkable: true;
+                Action {objectName: guiNames.altitude; checkable: true;
                     text: qsTr("Altitude");
                     ActionGroup.group: ancillaryData
                     onTriggered: backend.onAncillDataChanged(objectName)
                 }
-                Action {objectName: "sensorDepth"; checkable: true;
+                Action {objectName: guiNames.sensorDepth; checkable: true;
                     text: qsTr("Sensor depth");
                     ActionGroup.group: ancillaryData
                     onTriggered: backend.onAncillDataChanged(objectName)
                 }
-                Action {objectName: "roll"; checkable: true;
+                Action {objectName: guiNames.roll; checkable: true;
                     text: qsTr("Roll");
                     ActionGroup.group: ancillaryData
                     onTriggered: backend.onAncillDataChanged(objectName)
                 }
-                Action {objectName: "pitch"; checkable: true;
+                Action {objectName: guiNames.pitch; checkable: true;
                     text: qsTr("Pitch");
                     ActionGroup.group: ancillaryData
                     onTriggered: backend.onAncillDataChanged(objectName)
                 }
-                Action {objectName: "heave"; checkable: true;
+                Action {objectName: guiNames.heave; checkable: true;
                     text: qsTr("Heave");
                     ActionGroup.group: ancillaryData
                     onTriggered: backend.onAncillDataChanged(objectName)
