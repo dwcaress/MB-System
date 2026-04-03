@@ -2,7 +2,17 @@
  *    The MB-system:  mbmesh.cc  3/6/2026
  *
  *    Copyright (c) 2026 by
- *    [Your Team/Institution]
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
  *
  *    MB-System was created by Caress and Chayes in 1992 at the
  *      Lamont-Doherty Earth Observatory
@@ -619,8 +629,6 @@ static int process_ping(int verbose, int beams_bath, char *beamflag,
    // Loop through all beams and extract valid soundings.
    // Calculate longitude and latitude from acrosstrack and alongtrack distances.
    
-    //PSEUDOCODE:
-   
     for (int i = 0; i < beams_bath; i++) {
       // Count total beams
       nbeams_total++;
@@ -653,11 +661,6 @@ static int process_ping(int verbose, int beams_bath, char *beamflag,
       nbeams_good++;
     }
    
-   // REFERENCE: See mbgrid.cc lines 2900-2950 for example
-   
-
-  
-
   return MB_SUCCESS;
 }
 
