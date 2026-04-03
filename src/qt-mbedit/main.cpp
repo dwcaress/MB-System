@@ -53,12 +53,15 @@ int main(int argc, char *argv[]) {
     backend_ = &backend;
     
     QQmlApplicationEngine engine;
+
+    GuiNames guiNames;
+
+    QVariantMap initialProps;
+    initialProps.insert("backend", QVariant::fromValue(&backend));
+    initialProps.insert("guiNames", QVariant::fromValue(&guiNames));
     
     // Make backend object and methods accessible to QML
-    engine.setInitialProperties({
-	{ "backend", QVariant::fromValue(&backend) }
-      });    
-
+    engine.setInitialProperties(initialProps);
 
     // Boilerplate...
     const QUrl url(QStringLiteral("qrc:/main.qml"));
