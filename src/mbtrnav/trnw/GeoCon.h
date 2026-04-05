@@ -7,9 +7,6 @@
 
 #include <memory.h>
 #include <string.h>
-#ifdef TRN_USE_PROJ
-#include <proj.h>
-#endif
 
 #ifndef GEOCON_H
 #define GEOCON_H
