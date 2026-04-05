@@ -336,7 +336,7 @@ void do_mbeditviz_fileselection_list(Widget w, XtPointer client_data, XtPointer 
   fprintf(stderr, "do_mbeditviz_fileselection_list\n");
 #endif
 
-  static char selection_text[128];
+  static char selection_text[MB_PATH_MAXLINE];
 
   /* get selected text */
   get_text_string(fileSelectionText, (String)selection_text);

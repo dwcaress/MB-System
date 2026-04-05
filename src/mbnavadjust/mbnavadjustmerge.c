@@ -1843,12 +1843,22 @@ int main(int argc, char **argv) {
         sprintf(dstfile, "%s/nvs_%4.4d_%4.4d.mb71", project_output.datadir, i, j);
         int copy_error = MB_ERROR_NO_ERROR;
         int copy_status = mb_copyfile(verbose, srcfile, dstfile, &error);
+        if (copy_status == MB_SUCCESS) {
+        	sprintf(srcfile, "%s/nvs_%4.4d_%4.4d.mb71.inf", project_inputbase.datadir, i, j);
+        	sprintf(dstfile, "%s/nvs_%4.4d_%4.4d.mb71.inf", project_output.datadir, i, j);
+        	copy_status = mb_copyfile(verbose, srcfile, dstfile, &error);
+        }
+        if (copy_status == MB_SUCCESS) {
+        	sprintf(srcfile, "%s/nvs_%4.4d_%4.4d.mb71.fnv", project_inputbase.datadir, i, j);
+        	sprintf(dstfile, "%s/nvs_%4.4d_%4.4d.mb71.fnv", project_output.datadir, i, j);
+        	copy_status = mb_copyfile(verbose, srcfile, dstfile, &error);
+        }
         if (copy_status != MB_SUCCESS) {
-		  fprintf(stderr, "Section file copy failure for input base project (which is also the intended output):\n\t%s\n",
-				  srcfile);
-		  fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		  error = MB_ERROR_BAD_USAGE;
-		  exit(error);
+		  		fprintf(stderr, "Section file copy failure for input base project (which is also the intended output):\n\t%s\n",
+				  	srcfile);
+		  		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+		  		error = MB_ERROR_BAD_USAGE;
+		  		exit(error);
         } else {
           num_sections_copied++;
         }
@@ -1859,7 +1869,7 @@ int main(int argc, char **argv) {
         sprintf(dstfile, "%s/nvs_%4.4d_%4.4d.mb71.tri", project_output.datadir, i, j);
         copy_status = mb_copyfile(verbose, srcfile, dstfile, &copy_error);
         if (copy_status == MB_SUCCESS) {
-		  num_tri_copied++;
+		  		num_tri_copied++;
         }
       }
     }

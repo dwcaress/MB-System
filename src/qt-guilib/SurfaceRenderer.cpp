@@ -28,7 +28,7 @@
 #include <QOpenGLTexture>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>
-
+#include <QQuickWindow>
 #include <QMatrix4x4>
 
 #include <QDebug>
@@ -86,9 +86,12 @@ SurfaceRenderer::~SurfaceRenderer()
 }
 
 
-void SurfaceRenderer::initialize(Surface *surface, CoordinateMirroring cm)
+void SurfaceRenderer::initialize(MBQuickItem *item, Surface *surface,
+				 CoordinateMirroring cm)
 {
   qDebug() << "SurfaceRenderer::initialize()";
+  item_ = item;
+  
   if (!surface) {
     qInfo() << "SurfaceRenderer::initialize(): surface not yet created";
     return;
@@ -261,9 +264,11 @@ void SurfaceRenderer::render()
     return;
   }
 
+  item_->window()->beginExternalCommands();
+    
   if (!initialized_) {
     qDebug() << "SurfaceRenderer::render(): call initialize()";
-    initialize(surface_);
+    initialize(item_, surface_);
   }
 
   QOpenGLFunctions *functions = QOpenGLContext::currentContext()->functions();
@@ -388,6 +393,7 @@ void SurfaceRenderer::render()
 
   shaderProgram_->release();
   glFlush();
+  item_->window()->endExternalCommands();
   return;
 }
 

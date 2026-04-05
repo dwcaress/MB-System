@@ -787,8 +787,8 @@ void write_html(const Bathymetry& bathymetry, const Geometry& geometry, const Op
   html_file << "  <head>\n";
   html_file << "    <meta http-equiv='X-UA-Compatible' content='chrome=1'></meta>\n";
   html_file << "    <meta http-equiv='Content-Type' content='text/html;charset=utf-8'></meta>\n";
-  html_file << "    <link type="text/css" href="https://www.x3dom.org/x3dom/dist/x3dom.css" rel="stylesheet">\n";
-  html_file << "    <script type="text/javascript" src="https://www.x3dom.org/x3dom/dist/x3dom-full.js"></script>\n";
+  html_file << "    <link type='text/css' href='https://www.x3dom.org/x3dom/dist/x3dom.css' rel='stylesheet'>\n";
+  html_file << "    <script type='text/javascript' src='https://www.x3dom.org/x3dom/dist/x3dom-full.js'></script>\n";
   html_file << "    <style>\n";
   html_file << "      .x3dom-logContainer { bottom: 0px; position: absolute; }\n";
   html_file << "      #log-panel {\n";
