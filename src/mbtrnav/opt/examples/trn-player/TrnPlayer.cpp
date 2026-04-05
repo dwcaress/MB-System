@@ -1276,22 +1276,40 @@ int TrnPlayer::getCSVRecord(poseT *pt, measT *mt)
 
 int TrnPlayer::reset_pt(poseT **pt, unsigned int len)
 {
-    for (int i = 0; i < len; i++) {
+    if(pt == NULL)
+    return -1;
+    for (unsigned int i = 0; i < len; i++) {
+        if(pt[i] == NULL)
+        continue;
         pt[i]->x = pt[i]->y = pt[i]->z = 0.;
-        pt[i]->phi = pt[i]->theta = pt[i]->phi = 0.;
-        pt[i]->vx = pt[i]->vy = pt[i]->vz = 0.;
-        pt[i]->wx = pt[i]->wy = pt[i]->wz = 0.;
-        memset(pt[i]->covariance, 0, N_COVAR);
+        pt[i]->phi = 0.;
+        pt[i]->theta = 0.;
+        pt[i]->phi = 0.;
+        pt[i]->vx = 0.;
+        pt[i]->vy = 0.;
+        pt[i]->vz = 0.;
+        pt[i]->wx = 0.;
+        pt[i]->wy = 0.;
+        pt[i]->wz = 0.;
+        memset(pt[i]->covariance, 0, N_COVAR*sizeof(double));
     }
     return 0;
 }
 
 int TrnPlayer::reset_mt(measT **mt, unsigned int len)
 {
-    for (int i = 0; i < len; i++) {
+    if(mt == NULL)
+    return -1;
+    for (unsigned int i = 0; i < len; i++) {
+        if(mt[i] == NULL)
+        continue;
         int sz = mt[i]->numMeas;
-        mt[i]->x = mt[i]->y = mt[i]->z = 0.;
-        mt[i]->phi = mt[i]->theta = mt[i]->phi = 0.;
+        mt[i]->x = 0.;
+        mt[i]->y = 0.;
+        mt[i]->z = 0.;
+        mt[i]->phi = 0.;
+        mt[i]->theta = 0.;
+        mt[i]->phi = 0.;
         memset(mt[i]->ranges, 0, sz * sizeof(double));
         memset(mt[i]->crossTrack, 0, sz * sizeof(double));
         memset(mt[i]->alongTrack, 0, sz * sizeof(double));
@@ -1369,9 +1387,13 @@ void TrnPlayer::init_io()
 void TrnPlayer::copy_config()
 {
     if(strlen(ctx->cpath) > 0) {
-        char syscmd[2048]={0};
-        snprintf(syscmd, 2048, "cp %s latestTRN/.", ctx->cpath);
-        system(syscmd);
+        size_t blen = LBUF_SZ+16; 
+        char syscmd[blen];
+        memset(syscmd, 0, blen);
+        snprintf(syscmd, blen, "cp %s latestTRN/.", ctx->cpath);
+        int rv = system(syscmd);
+        if(rv != 0)
+        fprintf(stderr, "%s:%d - WARN system call %s returned %d\n", __func__, __LINE__, syscmd, rv);
     }
 }
 
