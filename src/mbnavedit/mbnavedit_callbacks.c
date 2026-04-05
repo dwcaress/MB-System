@@ -732,7 +732,7 @@ void do_load_specific_file(int i_file) {
 void do_set_controls() {
 	/* set about version label */
 	char value_text[MB_PATH_MAXLINE];
-	sprintf(value_text, ":::t\"MB-System Release %s\":t\"%s\"", MB_VERSION, MB_VERSION_DATE);
+	snprintf(value_text, sizeof(value_text), ":::t\"MB-System Release %s\":t\"%s\"", MB_VERSION, MB_VERSION_DATE);
 	set_label_multiline_string(label_about_version, value_text);
 
 	/* set value of format text item */
@@ -913,9 +913,9 @@ void do_set_controls() {
 	XtVaSetValues(scale_meantimewindow, XmNvalue, mean_time_window, NULL);
 	XtVaSetValues(scale_driftlon, XmNvalue, drift_lon, NULL);
 	XtVaSetValues(scale_driftlat, XmNvalue, drift_lat, NULL);
-	sprintf(value_text, "%.2f", weight_speed);
+	snprintf(value_text, sizeof(value_text), "%.2f", weight_speed);
 	XmTextFieldSetString(textField_modeling_speed, value_text);
-	sprintf(value_text, "%.2f", weight_acceleration);
+	snprintf(value_text, sizeof(value_text), "%.2f", weight_acceleration);
 	XmTextFieldSetString(textField_modeling_acceleration, value_text);
 
 	/* enable or disable time interpolation */
@@ -931,9 +931,9 @@ void do_set_controls() {
 	}
 
 	/* set offset values */
-	sprintf(value_text, "%.5f", offset_lon);
+	snprintf(value_text, sizeof(value_text), "%.5f", offset_lon);
 	XmTextFieldSetString(textField_lon_offset, value_text);
-	sprintf(value_text, "%.5f", offset_lat);
+	snprintf(value_text, sizeof(value_text), "%.5f", offset_lat);
 	XmTextFieldSetString(textField_lat_offset, value_text);
 }
 /*--------------------------------------------------------------------*/
@@ -1043,7 +1043,7 @@ void do_build_filelist() {
 					nvestrptr = nvenostr;
 
 				/* build x string item */
-				sprintf(value_text, "%s %s %s %3d", lockstrptr, nvestrptr, filepaths[i], fileformats[i]);
+				snprintf(value_text, sizeof(value_text), "%s %s %s %3d", lockstrptr, nvestrptr, filepaths[i], fileformats[i]);
 				xstr[i] = XmStringCreateLocalized(value_text);
 			}
 			XmListAddItems(list_filelist, xstr, numfiles, 0);
@@ -1967,9 +1967,9 @@ void do_offset_apply(Widget w, XtPointer client_data, XtPointer call_data) {
 
 	/* reset widgets so user sees what got applied */
 	char value_text[MB_PATH_MAXLINE];
-	sprintf(value_text, "%.5f", offset_lon);
+	snprintf(value_text, sizeof(value_text), "%.5f", offset_lon);
 	XmTextFieldSetString(textField_lon_offset, value_text);
-	sprintf(value_text, "%.5f", offset_lat);
+	snprintf(value_text, sizeof(value_text), "%.5f", offset_lat);
 	XmTextFieldSetString(textField_lat_offset, value_text);
 
 	/* apply offsets */
@@ -2313,7 +2313,7 @@ void do_fileselection_list(Widget w, XtPointer client_data, XtPointer call_data)
 		if (mb_get_format(0, string, fileroot, &form, &format_error) == MB_SUCCESS) {
 			format = form;
 			char value_text[10];
-			sprintf(value_text, "%d", format);
+			snprintf(value_text, sizeof(value_text), "%d", format);
 			XmTextFieldSetString(textField_format, value_text);
 		}
 

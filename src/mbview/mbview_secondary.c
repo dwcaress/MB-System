@@ -312,9 +312,9 @@ int mbview_setsecondarycolortable(int verbose, size_t instance, int secondary_co
 
 	/* set secondary color control widgets if managed */
 	if (XtIsManaged(view->mb3dview.mbview_textField_overlaymin)) {
-		sprintf(value_text, "%g", data->secondary_colortable_min);
+		snprintf(value_text, sizeof(value_text), "%g", data->secondary_colortable_min);
 		XmTextFieldSetString(view->mb3dview.mbview_textField_overlaymin, value_text);
-		sprintf(value_text, "%g", data->secondary_colortable_max);
+		snprintf(value_text, sizeof(value_text), "%g", data->secondary_colortable_max);
 		XmTextFieldSetString(view->mb3dview.mbview_textField_overlaymax, value_text);
 		if (data->secondary_colortable_mode == MBV_COLORTABLE_NORMAL) {
 			XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_overlay_ctoh, TRUE, TRUE);
@@ -324,9 +324,9 @@ int mbview_setsecondarycolortable(int verbose, size_t instance, int secondary_co
 		}
 	}
 	if (XtIsManaged(view->mb3dview.mbview_textField_overlay_amp)) {
-		sprintf(value_text, "%g", data->overlay_shade_magnitude);
+		snprintf(value_text, sizeof(value_text), "%g", data->overlay_shade_magnitude);
 		XmTextFieldSetString(view->mb3dview.mbview_textField_overlay_amp, value_text);
-		sprintf(value_text, "%g", data->overlay_shade_center);
+		snprintf(value_text, sizeof(value_text), "%g", data->overlay_shade_center);
 		XmTextFieldSetString(view->mb3dview.mbview_textField_overlay_center, value_text);
 		if (data->overlay_shade_mode == MBV_COLORTABLE_NORMAL) {
 			XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_overlay_shade_ctoh, TRUE, TRUE);
@@ -379,7 +379,7 @@ int mbview_setsecondaryname(int verbose, size_t instance, char *name, int *error
 		XmStringFree((XmString)tmp0);
 
 		ac = 0;
-		sprintf(value_text, "Shading by %s", name);
+		snprintf(value_text, sizeof(value_text), "Shading by %s", name);
 		tmp0 = (XmString)BX_CONVERT(view->mb3dview.mbview_toggleButton_overlay_secondary, (char *)value_text, XmRXmString, 0,
 		                            &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);

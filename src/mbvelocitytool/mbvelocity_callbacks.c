@@ -100,7 +100,7 @@ XFontStruct *fontStruct;
 
 int status;
 
-static char message_str[2048];
+static char message_str[MB_DESCRIPTION_LENGTH];
 static mb_path input_file;
 int selected = 0; /* indicates an input file is selected */
 
@@ -525,11 +525,11 @@ void do_mbvelocity_init(int argc, char **argv) {
 	status = mbvt_set_graphics(can_xgid, borders, MB_NDrawingColors, mpixel_values);
 
 	/* initialize some labels */
-	strcpy(message_str, "No display SVPs loaded...");
+	strncpy(message_str, "No display SVPs loaded...", MB_DESCRIPTION_LENGTH);
 	set_label_string(label_status_display, message_str);
-	strcpy(message_str, "No editable SVP loaded...");
+	strncpy(message_str, "No editable SVP loaded...", MB_DESCRIPTION_LENGTH);
 	set_label_string(label_status_edit, message_str);
-	strcpy(message_str, "No swath sonar data loaded...");
+	strncpy(message_str, "No swath sonar data loaded...", MB_DESCRIPTION_LENGTH);
 	set_label_string(label_status_mb, message_str);
 
 	/* initialize mbvelocitytool proper */
@@ -550,15 +550,15 @@ void do_set_controls() {
 	                &format_gui);
 
 	/* set about version label */
-	sprintf(message_str, ":::t\"MB-System Release %s\":t\"%s\"", MB_VERSION, MB_VERSION_DATE);
+	snprintf(message_str, MB_DESCRIPTION_LENGTH, ":::t\"MB-System Release %s\":t\"%s\"", MB_VERSION, MB_VERSION_DATE);
 	set_label_multiline_string(label_about_version, message_str);
 
 	if (ndisplay_gui < 1)
 		strcpy(message_str, "No display SVPs loaded...");
 	else if (ndisplay_gui == 1)
-		sprintf(message_str, "Loaded %d display SVP", ndisplay_gui);
+		snprintf(message_str, MB_DESCRIPTION_LENGTH, "Loaded %d display SVP", ndisplay_gui);
 	else
-		sprintf(message_str, "Loaded %d display SVPs", ndisplay_gui);
+		snprintf(message_str, MB_DESCRIPTION_LENGTH, "Loaded %d display SVPs", ndisplay_gui);
 	set_label_string(label_status_display, message_str);
 
 	/* set pushbuttons */
@@ -600,7 +600,7 @@ void do_set_controls() {
 		XmToggleButtonSetState(toggleButton_mode_null, TRUE, TRUE);
 
 	/* set value of format text item */
-	sprintf(message_str, "%2.2d", format_gui);
+	snprintf(message_str, MB_DESCRIPTION_LENGTH, "%2.2d", format_gui);
 	XmTextFieldSetString(textField_mbformat, message_str);
 }
 
@@ -739,7 +739,7 @@ void do_fileselection_list(Widget w, XtPointer client_data, XtPointer call_data)
 		form = format_gui;
 		if ((status = mbvt_get_format(selection_text, &form)) == MB_SUCCESS) {
 			format_gui = form;
-			sprintf(message_str, "%d", format_gui);
+			snprintf(message_str, MB_DESCRIPTION_LENGTH, "%d", format_gui);
 			XmTextFieldSetString(textField_mbformat, message_str);
 		}
 	}
@@ -764,7 +764,7 @@ void do_open(Widget w, XtPointer client_data, XtPointer call_data) {
 	}
 	else {
 		selected = 1;
-		strncpy(input_file, input_file_ptr, 128);
+		strncpy(input_file, input_file_ptr, MB_PATH_MAXLINE);
 		XtFree(input_file_ptr);
 	}
 
@@ -776,7 +776,7 @@ void do_open(Widget w, XtPointer client_data, XtPointer call_data) {
 
 			/* reset status message */
 			if (status == 1) {
-				sprintf(message_str, "Loaded display SVP from: %s", input_file);
+				snprintf(message_str, MB_DESCRIPTION_LENGTH, "Loaded display SVP from: %s", input_file);
 				set_label_string(label_status_display, message_str);
 			}
 		}
@@ -787,7 +787,7 @@ void do_open(Widget w, XtPointer client_data, XtPointer call_data) {
 			/* reset status message */
 			if (status == 1) {
 				edit_gui = 1;
-				sprintf(message_str, "Loaded editable SVP from: %s", input_file);
+				snprintf(message_str, MB_DESCRIPTION_LENGTH, "Loaded editable SVP from: %s", input_file);
 				set_label_string(label_status_edit, message_str);
 			}
 		}
@@ -797,7 +797,7 @@ void do_open(Widget w, XtPointer client_data, XtPointer call_data) {
 
 			/* reset status message */
 			if (status == 1) {
-				sprintf(message_str, "Saved editable SVP to: %s", input_file);
+				snprintf(message_str, MB_DESCRIPTION_LENGTH, "Saved editable SVP to: %s", input_file);
 				set_label_string(label_status_edit, message_str);
 			}
 		}
@@ -814,11 +814,11 @@ void do_open(Widget w, XtPointer client_data, XtPointer call_data) {
 
 			/* reset status message */
 			if (status == 1) {
-				sprintf(message_str, "Read %d pings from swath file: %s", nload, input_file);
+				snprintf(message_str, MB_DESCRIPTION_LENGTH, "Read %d pings from swath file: %s", nload, input_file);
 				set_label_string(label_status_mb, message_str);
 			}
 			if (status == 1 && edit_gui != 1) {
-				sprintf(message_str, "Loaded default editable SVP");
+				snprintf(message_str, MB_DESCRIPTION_LENGTH, "Loaded default editable SVP");
 				set_label_string(label_status_edit, message_str);
 			}
 
@@ -857,11 +857,11 @@ void do_open_commandline(char *wfile, char *sfile, char *file, int format) {
 
 		/* reset status message */
 		if (status == 1) {
-			sprintf(message_str, "Read %d pings from swath file: %s", nload, input_file);
+			snprintf(message_str, MB_DESCRIPTION_LENGTH, "Read %d pings from swath file: %s", nload, input_file);
 			set_label_string(label_status_mb, message_str);
 		}
 		if (status == 1 && edit_gui != 1) {
-			sprintf(message_str, "Loaded default editable SVP");
+			snprintf(message_str, MB_DESCRIPTION_LENGTH, "Loaded default editable SVP");
 			set_label_string(label_status_edit, message_str);
 		}
 	}
@@ -872,7 +872,7 @@ void do_open_commandline(char *wfile, char *sfile, char *file, int format) {
 
 		/* reset status message */
 		if (status == 1) {
-			sprintf(message_str, "Loaded editable SVP from: %s", wfile);
+			snprintf(message_str, MB_DESCRIPTION_LENGTH, "Loaded editable SVP from: %s", wfile);
 			set_label_string(label_status_edit, message_str);
 		}
 	}
@@ -882,7 +882,7 @@ void do_open_commandline(char *wfile, char *sfile, char *file, int format) {
 
 		/* reset status message */
 		if (status == 1) {
-			sprintf(message_str, "Loaded display SVP from: %s", wfile);
+			snprintf(message_str, MB_DESCRIPTION_LENGTH, "Loaded display SVP from: %s", wfile);
 			set_label_string(label_status_display, message_str);
 		}
 	}
@@ -909,7 +909,7 @@ void do_new_profile(Widget w, XtPointer client_data, XtPointer call_data) {
 	/* get new edit velocity profile */
 	mbvt_new_edit_profile();
 
-	sprintf(message_str, "Loaded default editable SVP");
+	snprintf(message_str, MB_DESCRIPTION_LENGTH, "Loaded default editable SVP");
 	set_label_string(label_status_edit, message_str);
 
 	/* replot everything */
@@ -1049,8 +1049,8 @@ void do_save_swath_svp(Widget w, XtPointer client_data, XtPointer call_data) {
 
 		/* reset status message */
 		if (status == 1) {
-			strcpy(message_str, "Saved Editable Sound Velocity Profile: ");
-			strcat(message_str, input_file);
+			strncpy(message_str, "Saved Editable Sound Velocity Profile: ", MB_DESCRIPTION_LENGTH);
+			strncat(message_str, input_file, MB_DESCRIPTION_LENGTH);
 			set_label_string(label_status_edit, message_str);
 		}
 	}
@@ -1077,8 +1077,8 @@ void do_save_residuals(Widget w, XtPointer client_data, XtPointer call_data) {
 
 		/* reset status message */
 		if (status == 1) {
-			strcpy(message_str, "Saved Residuals as Beam Offsets: ");
-			strcat(message_str, input_file);
+			strncpy(message_str, "Saved Residuals as Beam Offsets: ", MB_DESCRIPTION_LENGTH);
+			strncat(message_str, input_file, MB_DESCRIPTION_LENGTH);
 			set_label_string(label_status_edit, message_str);
 		}
 	}

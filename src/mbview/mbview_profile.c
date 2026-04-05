@@ -720,12 +720,12 @@ int mbview_profile_text(size_t instance) {
 
 	/* update profile info */
 	if (data->profile.npoints > 0 && data->profile.source != MBV_PROFILE_NONE) {
-		sprintf(value_text, ":::t\"Profile Source: %s\":t\" Length: %.2f m\":t\" Vertical Range: \":t\" %.2f to %.2f m\"",
+		snprintf(value_text, sizeof(value_text), ":::t\"Profile Source: %s\":t\" Length: %.2f m\":t\" Vertical Range: \":t\" %.2f to %.2f m\"",
 		        data->profile.source_name, data->profile.points[data->profile.npoints - 1].distance, data->profile.zmin,
 		        data->profile.zmax);
 	}
 	else {
-		sprintf(value_text, ":::t\"Profile Source: None\":t\"No Profile\"");
+		snprintf(value_text, sizeof(value_text), ":::t\"Profile Source: None\":t\"No Profile\"");
 	}
 	set_mbview_label_multiline_string(view->mb3dview.mbview_profile_label_info, value_text);
 

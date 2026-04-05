@@ -654,7 +654,7 @@ int do_setup_data() {
 
 	/* set about version label */
 	char value_text[MB_PATH_MAXLINE];
-	sprintf(value_text, ":::t\"MB-System Release %s\":t\"%s\"", MB_VERSION, MB_VERSION_DATE);
+	snprintf(value_text, sizeof(value_text), ":::t\"MB-System Release %s\":t\"%s\"", MB_VERSION, MB_VERSION_DATE);
 	set_label_multiline_string(label_about_version, value_text);
 
 	/* set values of number of pings slider */
@@ -667,14 +667,14 @@ int do_setup_data() {
 	XtVaSetValues(slider_buffer_size, XmNminimum, 1, XmNmaximum, buffer_size_max, XmNvalue, buffer_size, NULL);
 
 	/* set values of buffer size label */
-	sprintf(value_text, "%d", buffer_size_max);
+	snprintf(value_text, sizeof(value_text), "%d", buffer_size_max);
 	set_label_string(slider_buffer_size_max_label, value_text);
 
 	/* set values of buffer hold size slider */
 	XtVaSetValues(slider_buffer_hold, XmNminimum, 1, XmNmaximum, buffer_size_max, XmNvalue, hold_size, NULL);
 
 	/* set values of buffer hold size label */
-	sprintf(value_text, "%d", buffer_size_max);
+	snprintf(value_text, sizeof(value_text), "%d", buffer_size_max);
 	set_label_string(slider_buffer_hold_max_label, value_text);
 
 	/* set values of plot width slider */
@@ -690,26 +690,26 @@ int do_setup_data() {
 	XtVaSetValues(slider_y_interval, XmNvalue, my_interval, NULL);
 
 	/* set starting values in go to time widgets */
-	sprintf(value_text, "%4.4d", ttime_i[0]);
+	snprintf(value_text, sizeof(value_text), "%4.4d", ttime_i[0]);
 	XmTextFieldSetString(textfield_year, value_text);
 
-	sprintf(value_text, "%2.2d", ttime_i[1]);
+	snprintf(value_text, sizeof(value_text), "%2.2d", ttime_i[1]);
 	XmTextFieldSetString(textfield_month, value_text);
 
-	sprintf(value_text, "%2.2d", ttime_i[2]);
+	snprintf(value_text, sizeof(value_text), "%2.2d", ttime_i[2]);
 	XmTextFieldSetString(textfield_day, value_text);
 
-	sprintf(value_text, "%2.2d", ttime_i[3]);
+	snprintf(value_text, sizeof(value_text), "%2.2d", ttime_i[3]);
 	XmTextFieldSetString(textfield_hour, value_text);
 
-	sprintf(value_text, "%2.2d", ttime_i[4]);
+	snprintf(value_text, sizeof(value_text), "%2.2d", ttime_i[4]);
 	XmTextFieldSetString(textfield_minute, value_text);
 
-	sprintf(value_text, "%2.2d", ttime_i[5]);
+	snprintf(value_text, sizeof(value_text), "%2.2d", ttime_i[5]);
 	XmTextFieldSetString(textfield_second, value_text);
 
 	/* set value of format text item */
-	sprintf(value_text, "%2.2d", mformat);
+	snprintf(value_text, sizeof(value_text), "%2.2d", mformat);
 	XmTextFieldSetString(textfield_format, value_text);
 
 	/* set the output mode */
@@ -924,7 +924,7 @@ void do_build_filelist() {
 
 				/* build x string item */
 				char value_text[MB_PATH_MAXLINE+10];
-				sprintf(value_text, "%s %s %s %3d", lockstrptr, esfstrptr, filepaths[i], fileformats[i]);
+				snprintf(value_text, sizeof(value_text), "%s %s %s %3d", lockstrptr, esfstrptr, filepaths[i], fileformats[i]);
 				xstr[i] = XmStringCreateLocalized(value_text);
 
 				/* print out list of files */
@@ -1168,7 +1168,7 @@ void do_fileselection_list(Widget w, XtPointer client_data, XtPointer call_data)
 		if ((status = mbedit_get_format(selection_text, &form)) == MB_SUCCESS) {
 			mformat = form;
 			char value_text[10];
-			sprintf(value_text, "%d", mformat);
+			snprintf(value_text, sizeof(value_text), "%d", mformat);
 			XmTextFieldSetString(textfield_format, value_text);
 		}
 	}

@@ -613,10 +613,10 @@ void do_mbnavadjust_init(int argc, char **argv) {
 /*--------------------------------------------------------------------*/
 
 void do_set_controls() {
-  char value_text[128];
+  char value_text[MB_PATH_MAXLINE];
 
   /* set about version label */
-  sprintf(value_text, ":::t\"MB-System Release %s\":t\"%s\"", MB_VERSION, MB_VERSION_DATE);
+  snprintf(value_text, sizeof(value_text), ":::t\"MB-System Release %s\":t\"%s\"", MB_VERSION, MB_VERSION_DATE);
   set_label_multiline_string(label_about_version, value_text);
 
   /* set value of format text item */
@@ -4456,8 +4456,8 @@ void do_biases_init(Widget w, XtPointer client_data, XtPointer call_data) {
   struct mbna_file *file2 = &(project.files[mbna_file_id_2]);
 
   /* set biases label */
-  char value_text[128];
-  sprintf(value_text, ":::t\"Section ID\'s (file:section):\":t\"  Section 1: %4.4d:%4.4d\"\"  Section 2: %4.4d:%4.4d\"",
+  char value_text[MB_PATH_MAXLINE];
+  snprintf(value_text, sizeof(value_text), ":::t\"Section ID\'s (file:section):\":t\"  Section 1: %4.4d:%4.4d\"\"  Section 2: %4.4d:%4.4d\"",
     mbna_file_id_1, mbna_section_1, mbna_file_id_2, mbna_section_2);
   set_label_multiline_string(label_biases_files, value_text);
 
@@ -6708,7 +6708,7 @@ void do_fileselection_list(Widget w, XtPointer client, XtPointer call) {
     status = mb_get_format(mbna_verbose, string, fileroot, &form, &error);
     if (status == MB_SUCCESS) {
       format = form;
-      char value_text[128];
+      char value_text[MB_PATH_MAXLINE];
       snprintf(value_text, sizeof(value_text), "%d", format);
       XmTextFieldSetString(textField_format, value_text);
     }
