@@ -863,7 +863,7 @@ static int s_sm_act_read_header(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
             // actions...
             if(pctx->action == MB1R_ACTION_READ){
                 pctx->read_bytes=0;
-                while (pctx->read_bytes<pctx->read_len) {
+                while (pctx->read_bytes < pctx->read_len) {
 
                     MX_MPRINT(MB1R_DEBUG, "reading [%"PRId64"/%"PRIu32"] rto_ms[%"PRIu32"]\n", pctx->read_bytes, pctx->read_len,  pctx->timeout_msec);
 
@@ -1032,7 +1032,7 @@ static int s_sm_act_read_data(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
             // actions...
             if(pctx->action == MB1R_ACTION_READ){
                 pctx->read_bytes=0;
-                while (pctx->read_bytes<pctx->read_len) {
+                while (pctx->read_bytes < pctx->read_len) {
                     if ( (pctx->read_bytes=msock_read_tmout(mb1r_reader_sockif(self), pctx->pbuf, pctx->read_len, pctx->timeout_msec)) == pctx->read_len) {
                         MX_MPRINT(MB1R_DEBUG, "read_data OK [%"PRId64"]\n", pctx->read_bytes);
 
@@ -1077,7 +1077,7 @@ static int s_sm_act_read_data(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
                 pctx->state = MB1R_STATE_DATA_INVALID;
                 pctx->cx=0;
 
-                if(pctx->cx==0 && mb1_validate_checksum(pctx->psnd)!=0 ){
+                if(pctx->cx==0 && mb1_validate_checksum(pctx->psnd) != 0 ){
                     MX_MPRINT(MB1R_DEBUG, "INFO - read_data checksum invalid [%08X/%08X]\n", MB1_GET_CHECKSUM(pctx->psnd), mb1_calc_checksum(pctx->psnd));
                     MST_COUNTER_INC(self->stats->events[MB1R_EV_ECHKSUM]);
                     pctx->cx++;
@@ -1631,7 +1631,7 @@ int mb1r_test(int argc, char **argv)
     int frames_read=0;
 
     if(cfg->verbose>1)
-        fprintf(stderr,"connecting reader [%s/%d]\n",cfg->host,cfg->port);
+        fprintf(stderr,"%s:%d - connecting reader [%s/%d]\n", __func__, __LINE__, cfg->host,cfg->port);
 
     int retries=cfg->retries;
     while ( (frames_read<cfg->cycles) && retries>0 ) {
@@ -1639,13 +1639,13 @@ int mb1r_test(int argc, char **argv)
         memset(frame_buf,0,MB1_MAX_SOUNDING_BYTES);
         // read frame
         int istat=0;
-        fprintf(stderr,"reading sounding ret[%d]\n",retries);
+        fprintf(stderr,"%s:%d - reading sounding retries[%d]\n", __func__, __LINE__, retries);
         if( (istat = mb1r_read_frame(reader, frame_buf, MB1_MAX_SOUNDING_BYTES, MB1R_NOFLAGS, 0.0, MB1R_READ_TMOUT_MSEC, &lost_bytes )) > 0){
 
             frames_read++;
 
             if(cfg->verbose>0)
-                fprintf(stderr,"mb1r_read_frame cycle[%d/%d] lost[%u] ret[%d]\n", frames_read,
+                fprintf(stderr,"%s:%d - mb1r_read_frame cycle[%d/%d] lost[%u] ret[%d]\n", __func__, __LINE__, frames_read,
                         cfg->cycles,lost_bytes,istat);
             // show contents
             if (cfg->verbose>=1) {
@@ -1655,14 +1655,14 @@ int mb1r_test(int argc, char **argv)
 
                 if(cfg->verbose>1){
                     MX_LMSG(MB1R, 1, "data:\n");
-                    mb1_hex_show(frame_buf,istat,16,true,5);
+                    mb1_hex_show(frame_buf, istat, 16, true, 5);
                 }
             }
         }else{
             retries--;
             errors++;
             // read error
-            fprintf(stderr,"ERR - mb1r_read_frame - cycle[%d/%d] ret[%d] lost[%u] err[%d/%s]\n",frames_read+1,cfg->cycles,istat,lost_bytes,errno,strerror(errno));
+            fprintf(stderr,"%s:%d - ERR: mb1r_read_frame - cycle[%d/%d] ret[%d] lost[%u] err[%d/%s]\n", __func__, __LINE__, frames_read+1, cfg->cycles, istat, lost_bytes, errno, strerror(errno));
             if (errno==ECONNREFUSED || me_errno==ME_ESOCK || me_errno==ME_EOF || me_errno==ME_ERECV) {
 
                 fprintf(stderr,"socket closed - reconnecting in 5 sec\n");

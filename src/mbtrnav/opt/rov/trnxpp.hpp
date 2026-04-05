@@ -51,6 +51,12 @@
 #include "parosci_stat_input.hpp"
 #include "ctd_fastcat_input.hpp"
 #include "trn_mb1_input.hpp"
+#include "norbit_input.hpp"
+#include "vn100_input.hpp"
+#include "vn100s_input.hpp"
+#include "rph_input.hpp"
+#include "rph_angrate_input.hpp"
+#include "senlcm_gps_fix_input.hpp"
 
 namespace trn
 {
@@ -132,8 +138,8 @@ public:
         }
         os << std::dec << std::setfill(' ');
         os << std::setw(wkey) << "Geo"  << std::setw(wval) << mGeoList.size() << "\n";
-        std::list<beam_geo>::iterator it;
         if(mGeoList.size() > 0){
+            std::list<beam_geo>::iterator it;
             int i = 0;
             for(it = mGeoList.begin(); it != mGeoList.end(); it++){
 
@@ -390,7 +396,7 @@ public:
             int r_stat = 0;
             if(cb != nullptr && parg != nullptr){
 
-                int stat = test_sem( channel, to_msec, cb, r_stat, parg, clear_pending);
+                stat = test_sem( channel, to_msec, cb, r_stat, parg, clear_pending);
 
                 r_called += (stat == 0 ? 1 : 0);
                 r_error += (r_stat != 0 ? 1 : 0);
@@ -608,13 +614,43 @@ public:
             trn_lcm_input *obj = new trn::x_mb1_input("XMB1", 10);
             dynamic_cast<trn::mb1_input *>(obj)->set_mb1_input_type(BT_MULTIBEAM);
             return obj;
-        } else if(channel.compare("PAROSCI_STAT")==0)
+        } 
+        else if(channel.compare("PAROSCI_STAT")==0)
         {
             return new trn::parosci_stat_input("PAROSCI_STAT", 10);
-        }  else if(channel.compare("CTD_FASTCAT")==0)
+        }  
+        else if(channel.compare("CTD_FASTCAT")==0)
         {
             return new trn::ctd_fastcat_input("CTD_FASTCAT", 10);
-        } else {
+        }
+        else if(channel.compare("MULTIBEAM_EUCLIDEAN")==0)
+        {
+            trn_lcm_input *obj = new trn::norbit_input("MULTIBEAM_EUCLIDEAN", buf_depth);
+            dynamic_cast<trn::bath_input *>(obj)->set_bath_input_type(BT_MULTIBEAM);
+//            dynamic_cast<trn::bath_input *>(obj)->set_bath_input_type(BT_DELTAT);
+            return obj;
+        } 
+        else if(channel.compare("VN100")==0)
+        {
+            return new trn::vn100_input("VN100", buf_depth);
+        }
+        else if(channel.compare("VN100S")==0)
+        {
+            return new trn::vn100s_input("VN100S", buf_depth);
+        }
+        else if(channel.compare("MINIROV_VN100_ESTIMATED_STATE_GPS")==0)
+        {
+            return new trn::senlcm_gps_fix_input("MINIROV_VN100_ESTIMATED_STATE_GPS", buf_depth);
+        }
+        else if(channel.compare("MINIROV_VN100S_ESTIMATED_STATE_RPH")==0)
+        {
+            return new trn::rph_input("MINIROV_VN100S_ESTIMATED_STATE_RPH", buf_depth);
+        }
+        else if(channel.compare("VN100S_RPH_ANGRATE")==0)
+        {
+            return new trn::rph_angrate_input("VN100S_RPH_ANGRATE", buf_depth);
+        }
+        else {
             std::cerr << __func__ << ": ERR - Unsupported type [" << channel << "]\n";
         }
         return nullptr;
@@ -764,7 +800,7 @@ public:
         return retval;
     }
 
-    trn_host *lookup_trn_host(const std::string &key)
+    trn::trn_host *lookup_trn_host(const std::string &key)
     {
         std::list<trn_host>::iterator it;
         for(it = mTrnHostList.begin(); it != mTrnHostList.end(); it++)
@@ -779,6 +815,15 @@ public:
         return nullptr;
     }
 
+    void dump_trnhosts()
+    {
+        for(int i=0; i<mCtx.size(); i++) {
+
+            trnxpp_ctx *ctx = mCtx.at(i);
+            ctx->dump_trnhosts();
+        }
+    }
+
     int start_trn(trnxpp_cfg *cfg, bool *user_int)
     {
         int retval = -1;
@@ -788,6 +833,7 @@ public:
 
             trnxpp_ctx *ctx = mCtx.at(i);
             if(nullptr != ctx) {
+                fprintf(stderr, "%s:%d - starting CTX[%d] TRN\n", __func__, __LINE__, i);
                 if(ctx->start_trn(cfg, user_int) != 0){
                     errors++;
                 }
@@ -806,6 +852,8 @@ public:
                 if(ctx->init_rawbath_csv_file(cfg) != 0){
                     errors++;
                 }
+                fprintf(stderr, "%s:%d - AFTER starting CTX[%d]\n", __func__, __LINE__, i);
+                ctx->dump_trnhosts();
             }
         }
         retval = errors;
@@ -918,7 +966,10 @@ public:
             if(!parse_err) {
 
                 TRN_NDPRINT(5, "%s:%d adding TRN key[%s] host[%s, %s:%d:%d] cfg[%s]\n", __func__, __LINE__, key, type, (host==NULL?"-":host), port, ttl, cfg);
-                mTrnHostList.emplace_back(key, type, (host==NULL?"-":host), port, ttl, (void *)NULL, (cfg==NULL?"-":cfg));
+
+                TrnHostX uhost;
+                mTrnHostList.emplace_back(key, type, (host==NULL?"-":host), port, ttl, uhost, (cfg==NULL?"-":cfg));
+
                 retval = 0;
             }
 
@@ -1133,9 +1184,9 @@ public:
         int retval = -1;
         if(NULL != map_spec){
             // parse extra parameters:
-            // - comma-separated key=value pairs
+            // - colon-separated key=value pairs dmap:foo/3.5:bar/18.97
             // - keys may contain [a-zA-Z0-9_-.]
-            // - values are type double (parsed using %g)
+            // - values are type unsigned long (parsed using &g)
             // - trims leading/trailing whitespace
             TRN_NDPRINT(5,  "%s:%d - parsing map_spec[%s]\n", __func__, __LINE__, map_spec);
             const char *kvdel="/";
@@ -1172,14 +1223,15 @@ public:
         int retval = -1;
         if(NULL != map_spec){
             // parse extra parameters:
-            // - comma-separated key=value pairs
+            // - colon-separated key=value pairs umap:foo/3:bar/18
             // - keys may contain [a-zA-Z0-9_-.]
-            // - values are type double (parsed using %g)
+            // - values are type unsigned long (parsed using PRIu64)
             // - trims leading/trailing whitespace
             TRN_NDPRINT(5,  "%s:%d - parsing map_spec[%s]\n", __func__, __LINE__, map_spec);
             const char *kvdel="/";
             char *acpy = strdup(map_spec);
-            char *next_pair = strtok_r(acpy, ":", &acpy);
+            char *psav = NULL;
+            char *next_pair = strtok_r(acpy, ":", &psav);
             TRN_NDPRINT(5,  "%s:%d - next_pair[%s]\n", __func__, __LINE__, next_pair);
             while (next_pair != NULL) {
                 char *kcpy = strdup(next_pair);
@@ -1197,7 +1249,7 @@ public:
                     }
                 }
                 free(kcpy);
-                next_pair = strtok_r(acpy, ":", &acpy);
+                next_pair = strtok_r(NULL, ":", &psav);
                 TRN_NDPRINT(5,  "%s:%d - next_pair[%s]\n", __func__, __LINE__, next_pair);
             }
             free(acpy);
@@ -1211,9 +1263,9 @@ public:
         int retval = -1;
         if(NULL != map_spec){
             // parse extra parameters:
-            // - comma-separated key=value pairs
+            // - colon-separated key=value pairs imap:foo/3:bar/-18
             // - keys may contain [a-zA-Z0-9_-.]
-            // - values are type double (parsed using %g)
+            // - values are type long int (parsed using PRId64)
             // - trims leading/trailing whitespace
             TRN_NDPRINT(5,  "%s:%d - parsing map_spec[%s]\n", __func__, __LINE__, map_spec);
             const char *kvdel="/";
@@ -1562,6 +1614,22 @@ public:
                         ctx->set_utm_zone(utm);
                     }
 
+                }  else if(strstr(opt_s, "geocrs:") != NULL)  {
+
+                    // discard option "utm:"
+                    strtok(opt_s,":");
+                    char *key_s = strtok(NULL,":");
+                    char *val_key = trnxpp_cfg::trim(key_s);
+
+                    TRN_NDPRINT(5,  "%s:%d - val_key[%s]\n", __func__, __LINE__, val_key);
+
+                    if(val_key && strlen(val_key) > 0){
+
+                        TRN_NDPRINT(5,  "%s:%d - geocrs[s]\n", __func__, __LINE__, val_key);
+
+                        ctx->set_geo_crs(std::string(val_key));
+                    }
+
                 } else  if(strstr(opt_s, "bi:") != NULL) {
 
                     if(parse_ctx_input(opt_s, "bi", &bath_idx, &bath_ch, &bath_cb, &bath_to) == 0){
@@ -1698,19 +1766,25 @@ public:
                     if(strlen(val_key) > 0) {
                         TRN_NDPRINT(5,  "%s:%d - opt[%s] val_key[%s]\n", __func__, __LINE__, opt_s, val_key);
 
-                        trn::trn_host *thost = nullptr;
-                        if((thost = lookup_trn_host(val_key)) != nullptr){
+                        trn::trn_host *thost = lookup_trn_host(val_key);
+                        TRN_NDPRINT(5,  "%s:%d - thost[%p]\n", __func__, __LINE__, thost);
+
+                        if(thost != nullptr){
                             std::string trn_type = std::get<1>(*thost);
-                            if(trn_type.compare("trncli") == 0){
+                            fprintf(stderr,  "%s:%d - trn_type[%s]\n", __func__, __LINE__, trn_type.c_str());
+
+                            if(trn_type.compare("trncli") == 0) {
                                 ctx->add_trn_host(val_key, thost);
-                            } else if(trn_type.compare("mb1pub") == 0){
+                            } else if(trn_type.compare("mb1pub") == 0) {
                                 ctx->add_mb1svr_host(val_key, thost);
-                            }  else if(trn_type.compare("udpms") == 0){
+                            } else if(trn_type.compare("udpms") == 0) {
                                 ctx->add_udpm_host(val_key, thost);
                             } else {
-                                TRN_NDPRINT(5,  "%s:%d - invalid trn type [%s]\n", __func__, __LINE__, trn_type.c_str());
+                                TRN_NDPRINT(5,  "%s:%d - invalid trnhost type [%s]\n", __func__, __LINE__, trn_type.c_str());
                                 flags |= ERR;
                             }
+                        } else {
+                            fprintf(stderr,  "%s:%d - lookup_trn_host[%s] returned NULL\n", __func__, __LINE__, val_key);
                         }
 
                         flags &= ~TRN;
@@ -1932,6 +2006,7 @@ private:
     std::vector<trnxpp_ctx *> mCtx;
     std::list<callback_kv> mCallbackList;
     callback_res_t mCallbackRes;
+
 };
 
 }

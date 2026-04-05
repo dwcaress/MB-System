@@ -23,29 +23,60 @@
                 // Simple test to show help message
                 //"-H"
                 // Initial example for Monterey Bay terrain used by STOQS
-                //"-I", "${workspaceFolder}/build/Monterey25.grd", "-O", "${workspaceFolder}/build", "-E", "10.0", "-V"
+                //"-I", "${workspaceFolder}/build/Monterey25.grd", "-O", "Monterey25_10x", "-E", "10.0", "-V"
                 // Monterey Bay binary with Draco compression
-                //"-I", "${workspaceFolder}/build/Monterey25.grd", "-O", "${workspaceFolder}/build", "-E", "10.0", "-V", "-D", "-B"
+                //"-I", "${workspaceFolder}/build/Monterey25.grd", "-O", "Monterey25_10x_draco", "-E", "10.0", "-V", "-D", "-B"
                 // Monterey Bay without verbose output
-                //"-I", "${workspaceFolder}/build/Monterey25.grd", "-O", "${workspaceFolder}/build", "-E", "10.0", "-D", "-B"
+                //"-I", "${workspaceFolder}/build/Monterey25.grd", "-O", "Monterey25_10x", "-E", "10.0", "-D", "-B"
                 // Lake Erie example
-                //"-I", "${workspaceFolder}/build/erie_lld.grd", "-O", "${workspaceFolder}/build", "-E", "10.0", "-D", "-B"
+                //"-I", "${workspaceFolder}/build/erie_lld.grd", "-O", "Erie_lld_10x_draco", "-E", "10.0", "-D", "-B"
                 // Lake Michigan example
-                //"-I", "${workspaceFolder}/build/michigan_lld.grd", "-O", "${workspaceFolder}/build", "-E", "10.0", "-D", "-B"
+                //"-I", "${workspaceFolder}/build/michigan_lld.grd", "-O", "Michigan_lld_10x_draco", "-E", "10.0", "-D", "-B"
                 // Lake Michigan example
-                //"-I", "${workspaceFolder}/build/michigan_lld.grd", "-O", "${workspaceFolder}/build", "-E", "10.0", "-D", "-B"
+                //"-I", "${workspaceFolder}/build/michigan_lld.grd", "-O", "Michigan_lld_10x_draco", "-E", "10.0", "-D", "-B"
                 // Globe example - fails to load due into gltf.report
-                //"-I", "${workspaceFolder}/build/Globe_1m_bath.grd", "-O", "${workspaceFolder}/build", "-E", "10.0", "-D", "-B"
+                //"-I", "${workspaceFolder}/build/Globe_1m_bath.grd", "-O", "Globe_1m_bath_10x_draco", "-E", "10.0", "-D", "-B"
                 // Terrain for BEDs during CCE 2015, no vertical exaggeration - fails to load into gltf.report
-                //"-I", "${workspaceFolder}/build/MontereyCanyonBeds_1m+5m.grd", "-O", "${workspaceFolder}/build", "-E", "1.0", "-D", "-B"
+                //"-I", "${workspaceFolder}/build/MontereyCanyonBeds_1m+5m.grd", "-O", "MontereyCanyonBeds_1m+5m_1x_draco", "-E", "1.0", "-D", "-B"
                 // San Pedro Basin example
-                //"-I", "${workspaceFolder}/build/SanPedroBasin50.grd", "-O", "${workspaceFolder}/build", "-E", "10.0", "-D", "-B", "-V",
+                //"-I", "${workspaceFolder}/build/SanPedroBasin50.grd", "-O", "SanPedroBasin50_10x_draco", "-E", "10.0", "-D", "-B", "-V",
                 // Test --geoorigin option with LASS multibeam data from Davidson Seamount - shows roundoff errors with ECEF coordinates
-                "-I", "${workspaceFolder}/build/sample_data/OceanImaging2018/20180925d1/multibeam/ZTopo.grd", "-O", "${workspaceFolder}/build/sample_data/OceanImaging2018/20180925d1/multibeam", "-D", "-B", "-G", "-122,36,0", "-V"
+                "-I", "${workspaceFolder}/build/sample_data/OceanImaging2018/20180925d1/multibeam/ZTopo.grd", "-O", "ZTopoTest", "-D", "-B", "-G-122,36,0", "-V", "-W"
             ],
             "stopOnEntry": false,
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "Build mbgrd2gltf",
+            "breakpointMode": "path",
+            "initCommands": [
+                // Break on C++ exceptions being thrown
+                "breakpoint set -E C++",
+                // Show full backtrace when stopped
+                "settings set target.process.thread.step-avoid-regexp \"\""
+            ]
+        },
+        {
+            "name": "Debug mbgrid (OceanImaging2018)",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/src/utilities/mbgrid",
+            "args": [
+                // Input datalist (paths inside are relative, so cwd must be the multibeam dir)
+                "-I", "datalistp.mb-1",
+                // Output grid name (written to cwd)
+                "-O", "ZTopoDebug",
+                // Grid cell spacing: 0.1m (use 0.05 to match original ZTopo.grd resolution)
+                "-E", "0.1/meters",
+                // Gridding algorithm: Gaussian weighted mean
+                "-A", "1",
+                // Interpolate gaps up to 5 cells from data
+                "-C", "5",
+                // Verbose output
+                "-V",
+            ],
+            "stopOnEntry": false,
+            // Must run from the data directory because datalistp.mb-1 uses relative file paths
+            "cwd": "${workspaceFolder}/build/sample_data/OceanImaging2018/20180925d1/multibeam",
+            "preLaunchTask": "Build All",
             "breakpointMode": "path",
             "initCommands": [
                 // Break on C++ exceptions being thrown

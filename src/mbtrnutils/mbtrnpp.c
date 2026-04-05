@@ -48,6 +48,7 @@
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <proj.h>
 #include <termios.h>
 #include <signal.h>
 
@@ -5511,7 +5512,9 @@ int mbtrnpp_init_debug(int verbose) {
     														+ strlen(s_mbtrnpp_session_str(NULL,0,RF_NONE)) 
     														+ strlen(MBTRNPP_LOG_EXT) + 4;
         mbtrnpp_mlog_path = (char *)malloc(mlog_path_len);
+
         sprintf(mbtrnpp_mlog_path, "%s/%s-%s%s", mbtrn_cfg->trn_log_dir, MBTRNPP_MLOG_NAME, s_mbtrnpp_session_str(NULL,0,RF_NONE), MBTRNPP_LOG_EXT);
+
         mbtrnpp_mlog_id = mlog_get_instance(mbtrnpp_mlog_path, &mbtrnpp_mlog_conf, MBTRNPP_MLOG_NAME);
         fprintf(stderr,"mbtrnpp message log [%s]\n",mbtrnpp_mlog_path);
         mlog_show(mbtrnpp_mlog_id, true, 5);

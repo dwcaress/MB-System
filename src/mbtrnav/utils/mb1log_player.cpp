@@ -1068,7 +1068,7 @@ protected:
             if(g_interrupt)
                 ferr = true;
 
-            bool dflags[3] = {true,true,true};
+//            bool dflags[3] = {true,true,true};
             if (header_valid && ferr == false ) {
 
                 if(mb1->nbeams > 0){
@@ -1097,16 +1097,16 @@ protected:
                     {
                         fprintf(stderr, "%s:%d ERR nbeams %d (ping %07d)\n", __func__, __LINE__, mb1->nbeams, mb1->ping_number);
                         data_valid = false;
-                        dflags[0] = false;
+                        //dflags[0] = false;
                     } else if(mb1->ts <= 0)
                     {
                         fprintf(stderr, "%s:%d ERR time %.3lf (ping %07d)\n", __func__, __LINE__, mb1->ts, mb1->ping_number);
                         data_valid = false;
-                        dflags[1] = false;
+                        //dflags[1] = false;
                     } else if ((mb1->lat > -1. && mb1->lat < 1.)  || (mb1->lon > -1. && mb1->lon < 1.) || (mb1->depth > -1. && mb1->depth < 1.)) {
                         fprintf(stderr, "%s:%d ERR lat,lon,depth [%.3lf, %.3lf, %.3lf] (ping %07d)\n", __func__, __LINE__, mb1->lat, mb1->lon, mb1->depth, mb1->ping_number);
                         data_valid = false;
-                        dflags[2] = false;
+                        //dflags[2] = false;
                     }else {
                         rec_valid=true;
                     }
@@ -1204,7 +1204,7 @@ protected:
                 mod = 1;
 
             int j = 0;
-            for(int i=0; i < snd->nbeams; i++)
+            for(unsigned int i=0; i < snd->nbeams; i++)
             {
                 bool use_beam = false;
 
