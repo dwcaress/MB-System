@@ -15,9 +15,11 @@
 #include "CPixmapDrawer.h"
 #include "Emitter.h"
 
+
 extern "C" {
 #include "mbedit_prog.h"
 }
+
 
 /** mbedit Backend application logic; QObject subclass, so it can exchange
 info with QML  */
