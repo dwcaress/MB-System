@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
     initialProps.insert("backend", QVariant::fromValue(&backend));
     initialProps.insert("guiNames", QVariant::fromValue(&guiNames));
     
-    // Make backend object and methods accessible to QML
+    // Make backend object and guiNames accessible to QML
     engine.setInitialProperties(initialProps);
 
     // Boilerplate...
