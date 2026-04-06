@@ -17,12 +17,7 @@ typedef void *  String;
 
 typedef bool Boolean;
 
-extern "C" {
-#include "mbeditviz.h"
-}
-
-
-// Other types used in mbeditviz
+// type used in mbeditviz
 typedef bool Boolean;
 
 extern "C" {
