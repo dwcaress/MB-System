@@ -56,6 +56,25 @@
 // /////////////////
 // Types
 
+typedef struct sled_rofs_s {
+    double Xo;
+    double Yo;
+    double Zo;
+    double Ro;
+    double Wo;
+    double Xr;
+    double Yr;
+    double Zr;
+    double dX;
+    double dY;
+    double dZ;
+    double Wa;
+    double Wr;
+    double Ax;
+    double Ay;
+    double Az;
+}sled_rofs_t;
+
 // /////////////////
 // Module variables
 
@@ -71,12 +90,12 @@ public:
     ~trnx_utils()
     {}
 
-    static void trnest_tostream(std::ostream &os, double &ts, poseT &pt, poseT &mle, poseT &mmse, int wkey, int wval)
+    static void trnest_tostream(std::ostream &os, double &tstamp, poseT &pt, poseT &mle, poseT &mmse, int wkey, int wval)
     {
         os << "--- TRN Estimate OK---" << "\n";
         os << std::setw(5) << "MLE" << std::setw(21) << " [t, tm, x, y, z] ";
         os << std::fixed << std::setprecision(3);
-        os << std::setw(13) << ts << ", ";
+        os << std::setw(13) << tstamp << ", ";
         os << std::setw(13) << mle.time << ", ";
         os << std::setw(7) << mle.x << ", ";
         os << std::setw(7) << mle.y << ", ";
@@ -84,7 +103,7 @@ public:
 
         os << std::setw(5) << "MMSE" << std::setw(21) << " [t, tm, x, y, z] ";
         os << std::fixed << std::setprecision(3);
-        os << std::setw(13) << ts << ", ";
+        os << std::setw(13) << tstamp << ", ";
         os << std::setw(13) << mmse.time << ", ";
         os << std::setw(7) << mmse.x << ", ";
         os << std::setw(7) << mmse.y << ", ";
@@ -92,7 +111,7 @@ public:
 
         os << std::setw(5) << "POS" << std::setw(21) << " [t, tm, x, y, z] ";
         os << std::fixed << std::setprecision(3);
-        os << std::setw(13) << ts << ", ";
+        os << std::setw(13) << tstamp << ", ";
         os << std::setw(13) << mmse.time << ", ";
         os << std::setw(7) << pt.x << ", ";
         os << std::setw(7) << pt.y << ", ";
@@ -100,7 +119,7 @@ public:
 
         os << std::setw(5) << "OFS" << std::setw(21) << " [t, tm, x, y, z] ";
         os << std::fixed << std::setprecision(3);
-        os << std::setw(13) << ts << ", ";
+        os << std::setw(13) << tstamp << ", ";
         os << std::setw(13) << mmse.time << ", ";
         os << std::setw(7) << mmse.x - pt.x << ", ";
         os << std::setw(7) << mmse.y - pt.y << ", ";
@@ -187,16 +206,16 @@ public:
         return os.str();
     }
 
-    static std::string  trnest_tostring(double &time, poseT &pt, poseT &mle, poseT &mmse, int wkey=15, int wval=18)
+    static std::string  trnest_tostring(double &tstamp, poseT &pt, poseT &mle, poseT &mmse, int wkey=15, int wval=18)
     {
         std::ostringstream ss;
-        trnest_tostream(ss, time, pt, mle, mmse, wkey, wval);
+        trnest_tostream(ss, tstamp, pt, mle, mmse, wkey, wval);
         return ss.str();
     }
 
-    static void trnest_show(double &time, poseT &pt, poseT &mle, poseT &mmse, int wkey=15, int wval=18)
+    static void trnest_show(double &tstamp, poseT &pt, poseT &mle, poseT &mmse, int wkey=15, int wval=18)
     {
-        trnest_tostream(std::cerr, time, pt, mle, mmse, wkey, wval);
+        trnest_tostream(std::cerr, tstamp, pt, mle, mmse, wkey, wval);
     }
 
     static std::string  rawbath_tocsv(trn::bath_info *bi, trn::nav_info *ni, trn::att_info *ai, trn::vel_info *vi, long int utm, int format=0, double alt_depth=-1.)
@@ -227,9 +246,9 @@ public:
         // [ 4] utmN_m
         // [ 5] utmE_m
         // [ 6] depth_m
-        // [ 7] roll_rad
+        // [ 7] heading_rad
         // [ 8] pitch_rad
-        // [ 9] heading_rad
+        // [ 9] roll_rad
         // [  ] flag (0)
         // [  ] flag (0)
         // [  ] flag (0)
@@ -279,9 +298,15 @@ public:
         }
 
         os << (alt_depth >= 0 ? alt_depth: ni->depth()) << ",";
-        os << ai->pitch() << ",";
-        os << ai->roll() << ",";
-        os << ai->heading() << ",";
+        if (fmt == FMT_STANDARD) {
+            os << ai->pitch() << ",";
+            os << ai->roll() << ",";
+            os << ai->heading() << ",";
+        }else {
+            os << ai->heading() << ",";
+            os << ai->roll() << ",";
+            os << ai->pitch() << ",";
+        }
 
         os << std::setprecision(1);
         if (fmt == FMT_STANFORD) {
@@ -538,12 +563,17 @@ public:
         ss += mbest->est[2].cov[2] * mbest->est[2].cov[2];
         os << sqrt(ss) << "\n";
 
-        os << std::setw(5) << "s" << std::setw(21) << " [t, x, y, z] ";
+        os << std::setw(5) << "s" << std::setw(21) << " [t, x, y, z, m] ";
         os << std::setprecision(3);
         os << std::setw(13) << mbest->est[2].time << ", ";
         os << std::setw(7) << sqrt(mbest->est[2].cov[0]) << ", ";
         os << std::setw(7) << sqrt(mbest->est[2].cov[1]) << ", ";
-        os << std::setw(7) << sqrt(mbest->est[2].cov[2]) << "\n";
+        os << std::setw(7) << sqrt(mbest->est[2].cov[2]) << ", ";
+        double sdmag[3] = {sqrt(mbest->est[2].cov[0]), sqrt(mbest->est[2].cov[1]), sqrt(mbest->est[2].cov[2])};
+        ss = sdmag[0] * sdmag[0];
+        ss += sdmag[1] * sdmag[1];
+        ss += sdmag[2] * sdmag[2];
+        os << sqrt(ss) << "\n";
 
         os << std::setw(wkey) << "reinit_count:" << std::setw(wkey) << mbest->reinit_count << "\n";
         os << std::setw(wkey) << "reinit_tlast:" << std::setw(wkey) << mbest->reinit_tlast << "\n";
@@ -751,6 +781,34 @@ public:
         return mat;
     }
 
+    // 2D rotation of 3D point (about Z axis)
+    // i.e. get rotated coordinates
+    // expects
+    // rot_rad: rotation angle (rad)
+    // point_m[0]: point vector x (m)
+    // point_m[1]: point vector y (m)
+    // point_m[2]: point vector z (m)
+    static Matrix affine2DRotatePoint(double rot_rad, double *point_m)
+    {
+        Matrix pt(3,1);
+        pt(1,1) = point_m[0];
+        pt(2,1) = point_m[1];
+        pt(3,1) = point_m[2];
+
+        Matrix rot(3,3);
+        rot(1,1) = cos(rot_rad);
+        rot(1,2) = -sin(rot_rad);
+        rot(1,3) = 0.;
+        rot(2,1) = sin(rot_rad);
+        rot(2,2) = cos(rot_rad);
+        rot(2,3) = 0.;
+        rot(3,1) = 0.;
+        rot(3,2) = 0.;
+        rot(3,3) = 1.;
+
+        return rot * pt;
+    }
+
     static int test_affine()
     {
         // validate matrix geometry operations
@@ -955,7 +1013,7 @@ public:
 
         TRN_NDPRINT(TRNDL_UTILS_MBSFCOMP, "%s: --- \n",__func__);
         TRN_NDPRINT(TRNDL_UTILS_MBSFCOMP, "sensor frame:\nalong: x (fwd +)\nacross: y (stb+)\ndown: z (down+)\n");
-        TRN_NDPRINT(TRNDL_UTILS_MBSFCOMP, "S[%.3lf] K[%.3lf] e[%.3lf]\n", S, K, e);
+        TRN_NDPRINT(TRNDL_UTILS_MBSFCOMP, "N[%d] S[%.3lf] K[%.3lf] e[%.3lf]\n", nbeams, S, K, e);
 
         for(it=beams.begin(); it!=beams.end(); it++)
         {
@@ -994,11 +1052,11 @@ public:
 
                 double rhoNorm = vnorm(rho);
 
-                const char *sep = (b == 60 ? "****" : "    ");
+                const char *sep = (b == nbeams/2 ? "****" : "    ");
                 TRN_NDPRINT(TRNDL_UTILS_MBSFCOMP_H, "%s - b[%3d] r[%7.2lf] R[%7.2lf] %s Rx[%7.2lf] Ry[%7.2lf] Rz[%7.2lf] %s yd[%7.2lf] pd[%7.2lf] %s cy[%7.2lf] sy[%7.2lf] cp[%7.2lf] sp[%7.2lf]\n",
                             __func__, b, range, rhoNorm,
                             sep, sf_comp(1,idx[1]), sf_comp(2,idx[1]), sf_comp(3,idx[1]),
-                            sep, yd, pd, cos(yr), sep, sin(yr), cos(pr), sin(pr));
+                           sep, yd, pd, sep, cos(yr),  sin(yr), cos(pr), sin(pr));
             }
 
             idx[0]++;
@@ -1061,7 +1119,7 @@ public:
                 TRN_NDPRINT(TRNDL_UTILS_DVLSFCOMP_H, "%s - b[%3d] r[%7.2lf] R[%7.2lf] %s Rx[%7.2lf] Ry[%7.2lf] Rz[%7.2lf] %s yd[%7.2lf] pd[%7.2lf] %s cy[%7.2lf] sy[%7.2lf] cp[%7.2lf] sp[%7.2lf]\n",
                             __func__, b, range, rhoNorm,
                             sep, sf_comp(1,idx[1]), sf_comp(2,idx[1]), sf_comp(3,idx[1]),
-                            sep, yd, pd, cos(yr), sep, sin(yr), cos(pr), sin(pr));
+                            sep, yd, pd, sep, cos(yr), sin(yr), cos(pr), sin(pr));
             }
 
             idx[0]++;
@@ -1363,6 +1421,303 @@ public:
 //
 //        return;
 //    }
+
+    // calculate change in sled nav position due to arm rotation
+    // when the arm is unrotated, the nav sensor is located at
+    // Xo, Zo from the axis of rotation (vehicle/sled frame, +X: FWD +Z: Down).
+    // It rotates from initial position, Xo,Zo to Xr, Zr (Y is unchanged).
+    // The distance it has moved, dX, dY (=0), dZ, is the difference between
+    // the rotated and unroated positions.
+    // The sled arm and vehicle have an attitude outputs.
+    // The actual arm angle (world) is the different betwween the arm pitch and vehicle pitch
+    // the arm angle wrt horizontal (world) is the un-rotated angle (Atan(Zo/Xo)) plus the arm rotation
+    // Inputs:
+    // sled_nav_geo: location wrt vehicle origin
+    //               expects xmap:NAx, NAy, NAz offset wrt center of nav rotation
+    //               undefined values are 0.
+    // veh_att: vehicle roll/pitch/heading
+    // sled_att: sled roll/pitch/heading
+    static void sled_nav_rot_offsets(trn::att_info *veh_att, trn::att_info *sled_att, beam_geometry *sled_nav_geo, sled_rofs_t *r_offset) {
+
+        // validate inputs
+        if(veh_att == nullptr || sled_att == nullptr || sled_nav_geo == nullptr || r_offset == nullptr) {
+            std::cerr << __func__ << ": NULL input: veh_att %p sled_att %p sled_nav_geo %p  r_offset %p" << veh_att << sled_att << sled_nav_geo << r_offset << std::endl;
+            return;
+        }
+
+        double Xo = sled_nav_geo->xmap["NAx"];
+        double Yo = sled_nav_geo->xmap["NAy"];
+        double Zo = sled_nav_geo->xmap["NAz"];
+
+        // nav center of rotation relative to vehicle origin
+        double Ax = sled_nav_geo->tr_m(0) + Xo;
+        double Ay = sled_nav_geo->tr_m(1);
+        double Az = sled_nav_geo->tr_m(2) - Zo;
+
+        // r: nav sensor rotation radius
+        double Ro = sqrt(Xo * Xo + Zo * Zo);
+        // Wo: nav sensor un-rotated angle wrt horizontal through rotation axis
+        double Wo = atan2(Zo, Xo);
+
+        // Wa: arm tilt offset: (arm_tilt - vehicle_pitch)
+        //    double Wa = ai[1]->pitch() - ai[0]->pitch();
+        // force to zero (no ARM present)
+        double Wa = 0;
+
+        if(sled_att != nullptr) {
+            Wa = sled_att->pitch() - veh_att->pitch();
+        }
+
+        // Wr: sled tilt angle wrt horizontal
+        double Wr = (Wo + Wa);
+        // Zr,Yr,Zr : nav sensor (rotated) location
+        double Xr = Ro * cos(Wr);
+        double Yr = Yo;
+        double Zr = Ro * sin(Wr);
+        // sensor::nav position offsets due to arm rotation
+        double dX = Xr - Xo;
+        double dY = Yr - Yo;
+        double dZ = Zo - Zr;
+
+        if(r_offset != nullptr) {
+            r_offset->Xo = Xo;
+            r_offset->Yo = Yo;
+            r_offset->Zo = Zo;
+            r_offset->Ro = Ro;
+
+            r_offset->Xr = Xr;
+            r_offset->Yr = Yr;
+            r_offset->Zr = Zr;
+
+            r_offset->dX = dX;
+            r_offset->dY = dY;
+            r_offset->dZ = dZ;
+
+            r_offset->Wo = Wo;
+            r_offset->Wa = Wa;
+            r_offset->Wr = Wr;
+
+            r_offset->Ax = Ax;
+            r_offset->Ay = Ay;
+            r_offset->Az = Az;
+        }
+    }
+
+    // adjust LASS MB1 sounding navigation (lat, lon, depth)
+    // for the offset between the nav (on OI sled rotating arm) and bath (on vehicle)
+    // ai[0]  : veh attitude
+    // ai[1]  : sled attitude
+    // geo[0] : veh bath geo (wrt vehicle origin)
+    // geo[1] : sled nav geo (wrt vehicle origin)
+    // geocon : coordinate converter
+    // r_snd  : sounding
+    static void adjust_mb1_nav_rotating(trn::att_info **ai, beam_geometry **geo, GeoCon *gcon, mb1_t *r_snd)
+    {
+        // validate inputs
+        if(ai == nullptr ||  geo == nullptr || gcon == nullptr || r_snd == nullptr) {
+            std::cerr << __func__ << ": NULL input: ai %p geo %p gcon %p r_snd %p" << ai << geo << gcon << r_snd << std::endl;
+            return;
+        }
+        if(ai[0] == nullptr || ai[1] == nullptr) {
+            std::cerr << __func__ << ": NULL attitude: ai[0] %p ai[1] %p" << ai[0] << ai[1] << std::endl;
+            return;
+        }
+        if(geo[0] == nullptr || geo[1] == nullptr) {
+            std::cerr << __func__ << ": NULL geo: geo[0] %p geo[1] %p" << geo[0] << geo[1] << std::endl;
+            return;
+        }
+
+        trn::att_info *veh_att = ai[0];
+        trn::att_info *sled_att = ai[1];
+        beam_geometry *veh_bath_geo = geo[0];
+        beam_geometry *sled_nav_geo = geo[1];
+
+        // get nav coordinate offsets due to arm rotation (wrt vehicle origin/CRP)
+        sled_rofs_t sled_ofs = {0}, *pofs = &sled_ofs;
+        trnx_utils::sled_nav_rot_offsets(veh_att, sled_att, sled_nav_geo, pofs);
+
+        // nav position, adjusted for arm rotation (relative to vehicle origin)
+        double Nx = sled_nav_geo->tr_m(0) + pofs->dX;
+        double Ny = sled_nav_geo->tr_m(1) + pofs->dY;
+        double Nz = sled_nav_geo->tr_m(2) + pofs->dZ;
+        // bath position (relative to vehicle origin)
+        double Bx = veh_bath_geo->tr_m(0);
+        double By = veh_bath_geo->tr_m(1);
+        double Bz = veh_bath_geo->tr_m(2);
+        // bath offset relative to nav, (vehicle unrotated)
+        double dE = Nx - Bx;
+        double dN = Ny - By;
+        double dZ = Nz - Bz;
+        // heading (negated for cartesian rotation about Z)
+        double H = -veh_att->heading();
+
+        // transform vehicle frame offsets Bx,By to world Se,Sn
+        double vNavLoc[3] = {Nx, Ny, Nz};
+        double vBathLoc[3] = {Bx, By, Bz};
+
+        // get rotated coordinates of nav, bath (world frame)
+        Matrix mBathLocWF = trnx_utils::affine2DRotatePoint(DTR(H), vBathLoc);
+        Matrix mNavLocWF = trnx_utils::affine2DRotatePoint(DTR(H), vNavLoc);
+
+        // rotated nav,bath coordinates (world frame)
+        double Nyr = mNavLocWF(1,1);
+        double Nxr = mNavLocWF(2,1);
+        double Nzr = mNavLocWF(3,1);
+        double Byr = mBathLocWF(1,1);
+        double Bxr = mBathLocWF(2,1);
+        double Bzr = mBathLocWF(3,1);
+
+        // offset between Bath, Nav (Northings, Eastings)
+        double dEr = Bxr - Nxr;
+        double dNr = Byr - Nyr;
+        double dZr = Bzr - Nzr + veh_bath_geo->xmap["depthOfs"];
+
+        double lat_orig = r_snd->lat;
+        double lon_orig = r_snd->lon;
+
+        double snd_north = 0.;
+        double snd_east = 0.;
+
+        // convert sounding lat/lon to mercator projection (cartesian)
+        gcon->geo_to_mp(DTR(r_snd->lat), DTR(r_snd->lon), &snd_north, &snd_east);
+        // add offset
+        snd_north += dNr;
+        snd_east += dEr;
+
+        double lat_rad = 0.;
+        double lon_rad = 0.;
+        // convert to lat/lon
+        gcon->mp_to_geo(snd_north, snd_east, &lat_rad, &lon_rad);
+
+        // update souding LAT/LON
+        r_snd->lat = RTD(lat_rad);
+        r_snd->lon = RTD(lon_rad);
+
+        // update sounding depth
+        r_snd->depth += dZr ;
+
+        std::cerr << "N: {" << Nx << ", " << Ny << ", " << Nz << "} mag: " << sqrt((Nx*Nx) + (Ny*Ny)) << std::endl;
+        std::cerr << "B: {" << Bx << ", " << By << ", " << Bz << "} mag: " << sqrt((Bx*Bx) + (By*By)) << std::endl;
+        std::cerr << "H: " << H << " (" << DTR(H) << ") " << std::endl;
+        std::cerr << "R: " << sqrt((Bx-Nx)*(Bx-Nx) + (By-Ny)*(By-Ny)) << std::endl;
+        std::cerr << "dE: " << dE << " dN:" << dN << " dZ:" << dZ << std::endl;
+
+        std::cerr << "pofs dX, dY, dZ: " << "{" << pofs->dX << ", " << pofs->dY << ", " << pofs->dZ << "}" << std::endl;
+
+        std::cerr << "Nxr, Nyr, Nzr: {" << Nxr << ", " << Nyr << ", " << Nzr << "}" << std::endl;
+        std::cerr << "Bxr, Byr, Bzr: {" << Bxr << ", " << Byr << ", " << Bzr << "}" << std::endl;
+
+        std::cerr << "Nr {" << Nxr << ", " << Nyr << ", " << Nzr << "} mag: " << sqrt((Nxr*Nxr) + (Nyr*Nyr)) << std::endl;
+        std::cerr << "Br {" << Bxr << ", " << Byr << ", " << Bzr << "} mag: " << sqrt((Bxr*Bxr) + (Byr*Byr)) << std::endl;
+        std::cerr << "Rr: " << sqrt((Bxr-Nxr)*(Bxr-Nxr) + (Byr-Nyr)*(Byr-Nyr)) << std::endl;
+        std::cerr << "depthOfs: " << veh_bath_geo->xmap["depthOfs"] << std::endl;
+        std::cerr << "dEr: " << dEr << " dNr: " << dNr << " dZr: " << dZr <<  std::endl;
+        std::cerr << "Lat/Lon before/after: " << "[" << std::fixed << std::setprecision(6) << lat_orig << ", " << lon_orig <<"] / [" << r_snd->lat << ", " << r_snd->lon << "]" <<  std::dec << std::setprecision(3) << std::endl;
+
+    }
+
+    // adjust MB1 sounding navigation (lat, lon, depth)
+    // for the offset between (non-rotating) nav and bath (on vehicle)
+    // ai[0]  : veh attitude
+    // ai[1]  : sled attitude
+    // geo[0] : veh bath geo (wrt vehicle origin)
+    // geo[1] : sled nav geo (wrt vehicle origin)
+    // geocon : coordinate converter
+    // r_snd  : sounding
+    static void adjust_mb1_nav_fixed(trn::att_info **ai, beam_geometry **geo, GeoCon *gcon, mb1_t *r_snd)
+    {
+        // validate inputs
+        if(ai == nullptr || geo == nullptr || gcon == nullptr || r_snd == nullptr) {
+            std::cerr << __func__ << ": NULL input: ai %p geo %p gcon %p r_snd %p" << ai << geo << gcon << r_snd << std::endl;
+            return;
+        }
+        if(ai[0] == nullptr || ai[1] == nullptr) {
+            std::cerr << __func__ << ": NULL attitude: ai[0] %p ai[1] %p" << ai[0] << ai[1] << std::endl;
+            return;
+        }
+        if(geo[0] == nullptr || geo[1] == nullptr) {
+            std::cerr << __func__ << ": NULL geo: geo[0] %p geo[1] %p" << geo[0] << geo[1] << std::endl;
+            return;
+        }
+
+        trn::att_info *veh_att = ai[0];
+        trn::att_info *sled_att = ai[1];
+        beam_geometry *veh_bath_geo = geo[0];
+        beam_geometry *sled_nav_geo = geo[1];
+
+        // nav position, adjusted for arm rotation (relative to vehicle origin)
+        double Nx = sled_nav_geo->tr_m(0);
+        double Ny = sled_nav_geo->tr_m(1);
+        double Nz = sled_nav_geo->tr_m(2);
+        // bath position (relative to vehicle origin)
+        double Bx = veh_bath_geo->tr_m(0);
+        double By = veh_bath_geo->tr_m(1);
+        double Bz = veh_bath_geo->tr_m(2);
+        // bath offset relative to nav, (vehicle unrotated)
+        double dE = Nx - Bx;
+        double dN = Ny - By;
+        double dZ = Nz - Bz;
+        // heading (negated for cartesian rotation about Z)
+        double H = -veh_att->heading();
+
+        // transform vehicle frame offsets Bx,By to world Se,Sn
+        double vNavLoc[3] = {Nx, Ny, Nz};
+        double vBathLoc[3] = {Bx, By, Bz};
+
+        // get rotated coordinates of nav, bath (world frame)
+        Matrix mBathLocWF = trnx_utils::affine2DRotatePoint(DTR(H), vBathLoc);
+        Matrix mNavLocWF = trnx_utils::affine2DRotatePoint(DTR(H), vNavLoc);
+
+        // rotated nav,bath coordinates (world frame)
+        double Nyr = mNavLocWF(1,1);
+        double Nxr = mNavLocWF(2,1);
+        double Nzr = mNavLocWF(3,1);
+        double Byr = mBathLocWF(1,1);
+        double Bxr = mBathLocWF(2,1);
+        double Bzr = mBathLocWF(3,1);
+
+        // offset between Bath, Nav (Northings, Eastings)
+        double dEr = Bxr - Nxr;
+        double dNr = Byr - Nyr;
+        double dZr = Bzr - Nzr + veh_bath_geo->xmap["depthOfs"];
+
+        double snd_north = 0.;
+        double snd_east = 0.;
+
+        // convert sounding lat/lon to mercator projection (cartesian)
+        gcon->geo_to_mp(DTR(r_snd->lat), DTR(r_snd->lon), &snd_north, &snd_east);
+        // add offset
+        snd_north += dNr;
+        snd_east += dEr;
+
+        double lat_rad = 0.;
+        double lon_rad = 0.;
+        // convert to lat/lon
+        gcon->mp_to_geo(snd_north, snd_east, &lat_rad, &lon_rad);
+
+        // update souding LAT/LON
+        r_snd->lat = RTD(lat_rad);
+        r_snd->lon = RTD(lon_rad);
+
+        // update sounding depth
+        r_snd->depth += dZr ;
+
+        std::cerr << "N: {" << Nx << ", " << Ny << ", " << Nz << "} mag: " << sqrt((Nx*Nx) + (Ny*Ny)) << std::endl;
+        std::cerr << "B: {" << Bx << ", " << By << ", " << Bz << "} mag: " << sqrt((Bx*Bx) + (By*By)) << std::endl;
+        std::cerr << "H: " << H << " (" << DTR(H) << ") " << std::endl;
+        std::cerr << "R: " << sqrt((Bx-Nx)*(Bx-Nx) + (By-Ny)*(By-Ny)) << std::endl;
+        std::cerr << "dE: " << dE << " dN:" << dN << " dZ:" << dZ << std::endl;
+
+        std::cerr << "Nxr, Nyr, Nzr: {" << Nxr << ", " << Nyr << ", " << Nzr << "}" << std::endl;
+        std::cerr << "Bxr, Byr, Bzr: {" << Bxr << ", " << Byr << ", " << Bzr << "}" << std::endl;
+
+        std::cerr << "Nr {" << Nxr << ", " << Nyr << ", " << Nzr << "} mag: " << sqrt((Nxr*Nxr) + (Nyr*Nyr)) << std::endl;
+        std::cerr << "Br {" << Bxr << ", " << Byr << ", " << Bzr << "} mag: " << sqrt((Bxr*Bxr) + (Byr*Byr)) << std::endl;
+        std::cerr << "Rr: " << sqrt((Bxr-Nxr)*(Bxr-Nxr) + (Byr-Nyr)*(Byr-Nyr)) << std::endl;
+        std::cerr << "depthOfs: " << veh_bath_geo->xmap["depthOfs"] << std::endl;
+        std::cerr << "dEr: " << dEr << " dNr: " << dNr << " dZr: " << dZr <<  std::endl;
+
+    }
 
     // returns allocated mb1_t; caller must release using mb1_destroy()
     static mb1_t *lcm_to_mb1(trn::bath_info *bi, trn::nav_info *ni, trn::att_info *ai)
@@ -2056,7 +2411,6 @@ public:
                 //                obj->covariance[i] = 0.0;
                 //                obj->alphas[i]     = 0.0;
             }
-
         }
         return obj;
     }

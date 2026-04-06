@@ -1,0 +1,19 @@
+package senlcm;
+
+/* Standard message to report attitude and angular rate from a inertial measurement
+ * unit (IMU).
+ */
+
+struct rph_angrate_t
+{
+    // Standard header.
+    stdlcm.header_t header;
+
+    // Attitude in roll, pitch, heading convention as a list of three values.
+    // SI units = rad.
+    double rph[3];
+
+    // Angular rates as a list of three values.
+    // SI units = rad/s.
+    double angRate[3];
+}

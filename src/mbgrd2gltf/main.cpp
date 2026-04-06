@@ -38,6 +38,9 @@
 #include <unistd.h>
 #include <limits.h>
 #include <sys/stat.h>
+#include <ctime>
+#include <iomanip>
+#include <sstream>
 #include "logger.h"
 #include "options.h"
 #include "bathymetry.h"
@@ -61,6 +64,9 @@ int main(int argc, char* argv[]) {
       Logger::set_level(LogLevel::INFO);
     }
 
+    // Start capturing log messages for provenance in HTML output
+    Logger::start_capture();
+
     // Log the command line
     std::string command_line;
     for (int i = 0; i < argc; ++i) {
@@ -82,6 +88,13 @@ int main(int argc, char* argv[]) {
              "(" + std::string(input_size_str) + " MB)");
     LOG_INFO("Binary output:", options.is_binary_output() ? "enabled," : "disabled,",
              "Draco compression:", options.is_draco_compressed() ? "enabled" : "disabled");
+    
+    if (options.is_draco_compressed()) {
+      LOG_INFO("Draco quantization bits - Position:", options.draco_quantization(0),
+               "Normal:", options.draco_quantization(1),
+               "Texcoord:", options.draco_quantization(2),
+               "Color:", options.draco_quantization(3));
+    }
 
     Bathymetry bathymetry(options);
     LOG_INFO("Generating 3D geometry from 2D bathymetric grid data");
@@ -119,6 +132,43 @@ int main(int argc, char* argv[]) {
     
     LOG_INFO("Successfully wrote glTF file to", abs_output_file, 
              "(" + std::string(output_size_str) + " MB)");
+    
+    // Generate HTML viewer if requested
+    if (options.is_html_output()) {
+      // Get current timestamp in ISO 8601 format
+      std::time_t now = std::time(nullptr);
+      std::tm* gmt = std::gmtime(&now);
+      std::ostringstream timestamp_stream;
+      timestamp_stream << std::put_time(gmt, "%Y-%m-%dT%H:%M:%SZ");
+      std::string timestamp = timestamp_stream.str();
+      
+      // Get captured log messages for provenance
+      const std::vector<std::string>& log_messages = Logger::get_captured_logs();
+      
+      model::write_html(bathymetry, geometry, options, command_line, timestamp, log_messages);
+      
+      // Extract directory path for web server instructions
+      std::string output_dir = options.output_filepath();
+      size_t last_slash = output_dir.find_last_of("/\\");
+      if (last_slash != std::string::npos) {
+        output_dir = output_dir.substr(0, last_slash);
+      } else {
+        output_dir = ".";
+      }
+      
+      // Get just the HTML filename
+      std::string html_filename = options.output_filepath();
+      if (last_slash != std::string::npos) {
+        html_filename = html_filename.substr(last_slash + 1);
+      }
+      html_filename += ".html";
+      
+      LOG_INFO("To view the HTML file (avoiding CORS issues):");
+      LOG_INFO("  Start a local web server in the output directory:");
+      LOG_INFO("    cd", output_dir);
+      LOG_INFO("    python3 -m http.server 8000");
+      LOG_INFO("  Then open: http://localhost:8000/" + html_filename);
+    }
   } catch (const std::invalid_argument& e) {
     std::cerr << "Invalid argument error: " << e.what() << std::endl;
     return 1;

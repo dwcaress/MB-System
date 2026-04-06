@@ -23,18 +23,20 @@
 #------------------------------------------------------------------------------
 
 find_package(
-  Qt5
-  COMPONENTS Gui Widgets Quick
+  Qt6
+  COMPONENTS  Gui OpenGL Quick Graphs
   REQUIRED)
-find_package(VTK REQUIRED)
+
+find_package(VTK ${MIN_VTK_VERSION} COMPONENTS GUISupportQtQuick)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-add_executable(qt-mbgrdviz BackEnd.cpp main.cpp qml.qrc)
+add_executable(qt-mbgrdviz  main.cpp GuiNames.h qml.qrc)
 
-target_link_libraries(qt-mbgrdviz PRIVATE MBGui Qt5::Core Qt5::Quick
-                                          mbeditvizlib)
+target_link_libraries(qt-mbgrdviz PRIVATE MBGui
+                      Qt6::Core Qt6::Quick Qt6::Gui Qt6::Graphs
+                      Qt6::OpenGL VTK::GUISupportQtQuick)
 
 install(TARGETS qt-mbgrdviz DESTINATION ${CMAKE_INSTALL_BINDIR})
