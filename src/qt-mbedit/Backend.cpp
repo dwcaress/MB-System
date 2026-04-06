@@ -22,7 +22,6 @@
 
 extern "C" {
 #include "mb_status.h"
-#include "mbedit_prog.h"
 }
 
 /* edit outbounds defines */
@@ -101,10 +100,10 @@ bool Backend::initialize(QObject *loadedRoot, int argc, char **argv) {
 
   // Find PixmapImage in QML object tree
   swathPixmapImage_ = 
-    ui_->findChild<mb_system::PixmapImage*>(SWATH_PIXMAP_NAME);
+    ui_->findChild<mb_system::PixmapImage*>(GuiNames::swathPixmapObjStr);
 
   if (!swathPixmapImage_) {
-    qCritical() << "Couldn't find " << SWATH_PIXMAP_NAME << " in QML";
+    qCritical() << "Couldn't find " << GuiNames::swathPixmapObjStr << " in QML";
     return false;
   }
 
@@ -159,43 +158,43 @@ void Backend::onMainWindowDestroyed() {
 void Backend::onAncillDataChanged(QString msg) {
   qDebug() << "*** onAncillDataChanged() msg: " << msg;
 
-  if (msg == NONE_ANCILLDATA) {
+  if (msg == GuiNames::noneStr) {
     plotAncillData_ = NO_ANCILL;
   }
-  else if (msg == TIME_ANCILLDATA) {
+  else if (msg == GuiNames::timeStr) {
     plotAncillData_ = TIME;
   }
-  else if (msg == INTERVAL_ANCILLDATA) {
+  else if (msg == GuiNames::intervalStr) {
     plotAncillData_ = INTERVAL;
   }
-  else if (msg == LATITUDE_ANCILLDATA) {
+  else if (msg == GuiNames::latitudeStr) {
     plotAncillData_ = LATITUDE;
   }
-  else if (msg == LONGITUDE_ANCILLDATA) {
+  else if (msg == GuiNames::longitudeStr) {
     plotAncillData_ = LONGITUDE;
   }
-  else if (msg == HEADING_ANCILLDATA) {
+  else if (msg == GuiNames::headingStr) {
     plotAncillData_ = HEADING;
   }
-  else if (msg == SPEED_ANCILLDATA) {
+  else if (msg == GuiNames::speedStr) {
     plotAncillData_ = SPEED;
   }
-  else if (msg == DEPTH_ANCILLDATA) {
+  else if (msg == GuiNames::depthStr) {
     plotAncillData_ = DEPTH;
   }
-  else if (msg == ALTITUDE_ANCILLDATA) {
+  else if (msg == GuiNames::altitudeStr) {
     plotAncillData_ = ALTITUDE;
   }
-  else if (msg == SENSORDEPTH_ANCILLDATA) {
+  else if (msg == GuiNames::sensorDepthStr) {
     plotAncillData_ = SENSORDEPTH;
   }
-  else if (msg == ROLL_ANCILLDATA) {
+  else if (msg == GuiNames::rollStr) {
     plotAncillData_ = ROLL;
   }
-  else if (msg == PITCH_ANCILLDATA) {
+  else if (msg == GuiNames::pitchStr) {
     plotAncillData_ = PITCH;
   }
-  else if (msg == HEAVE_ANCILLDATA) {
+  else if (msg == GuiNames::heaveStr) {
     plotAncillData_ = HEAVE;
   }
   else {
@@ -208,13 +207,13 @@ void Backend::onAncillDataChanged(QString msg) {
 
 void Backend::onSliceChanged(QString slice) {
   qDebug() << "onSliceChanged(): " << slice;
-  if (slice == ALONGTRACK_SLICE) {
+  if (slice == GuiNames::alongTrackStr) {
     sliceMode_ = ALONGTRACK;
   }
-  else if (slice == CROSSTRACK_SLICE) {
+  else if (slice == GuiNames::crossTrackStr) {
     sliceMode_ = ACROSSTRACK;
   }
-  else if (slice == WATERFALL_SLICE) {
+  else if (slice == GuiNames::waterfallStr) {
     sliceMode_ = WATERFALL;
   }
   else {
@@ -226,13 +225,13 @@ void Backend::onSliceChanged(QString slice) {
 
 
 void Backend::onColorCodeChanged(QString code) {
-  if (code == BOTTOM_DETECT_COLOR) {
+  if (code == GuiNames::bottomDetectStr) {
     soundColorCoding_ = DETECT;
   }
-  else if (code == PULSE_SOURCE_COLOR) {
+  else if (code == GuiNames::pulseSourceStr) {
     soundColorCoding_ = PULSE;
   }
-  else if (code == FLAG_STATE_COLOR) {
+  else if (code == GuiNames::flagStateStr) {
     soundColorCoding_ = FLAG;    
   }
   else {
@@ -397,22 +396,22 @@ void Backend::onPingStepChanged(double value) {
 void Backend::onEditModeChanged(QString mode) {
   qDebug() << "onEditModeChanged(): " << mode;
 
-  if (mode == TOGGLE_EDIT_MODE) {
+  if (mode == GuiNames::toggleEditStr) {
     editMode_ = TOGGLE;
   }
-  else if (mode == PICK_EDIT_MODE) {
+  else if (mode == GuiNames::pickEditStr) {
     editMode_ = PICK;
   }
-  else if (mode == ERASE_EDIT_MODE) {
+  else if (mode == GuiNames::eraseEditStr) {
     editMode_ = ERASE;
   }
-  else if (mode == RESTORE_EDIT_MODE) {
+  else if (mode == GuiNames::restoreEditStr) {
     editMode_ = RESTORE;
   }
-  else if (mode == GRAB_EDIT_MODE) {
+  else if (mode == GuiNames::grabEditStr) {
     editMode_ = GRAB;
   }
-  else if (mode == INFO_EDIT_MODE) {
+  else if (mode == GuiNames::infoEditStr) {
     editMode_ = INFO;
   }
   
