@@ -1,0 +1,6 @@
+<map id="mb_system::TopoGridItem" name="mb_system::TopoGridItem">
+<area shape="rect" id="node1" title=" " alt="" coords="5,185,199,212"/>
+<area shape="rect" id="node2" title=" " alt="" coords="18,89,143,115"/>
+<area shape="rect" id="node3" href="$structmb__system_1_1_topo_grid_item_1_1_pipeline.html" title="&#39;Persistent&#39; VTK pipeline objects, used by QQuickItem infrastructure" alt="" coords="168,81,361,123"/>
+<area shape="rect" id="node4" title=" " alt="" coords="222,5,307,32"/>
+</map>

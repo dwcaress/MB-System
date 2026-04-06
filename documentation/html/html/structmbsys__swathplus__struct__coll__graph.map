@@ -1,0 +1,20 @@
+<map id="mbsys_swathplus_struct" name="mbsys_swathplus_struct">
+<area shape="rect" id="node1" title=" " alt="" coords="571,393,753,420"/>
+<area shape="rect" id="node2" href="$structswpls__tide__struct.html" title=" " alt="" coords="271,11,405,37"/>
+<area shape="rect" id="node3" href="$structswpls__projection__struct.html" title=" " alt="" coords="251,61,425,88"/>
+<area shape="rect" id="node4" href="$structswpls__imu__offset__struct.html" title=" " alt="" coords="248,112,428,139"/>
+<area shape="rect" id="node5" href="$structswpls__attitude__struct.html" title=" " alt="" coords="257,163,419,189"/>
+<area shape="rect" id="node6" href="$structswpls__position__en__struct.html" title=" " alt="" coords="245,213,431,240"/>
+<area shape="rect" id="node7" href="$structswpls__sxiping__struct.html" title=" " alt="" coords="259,264,417,291"/>
+<area shape="rect" id="node8" href="$structswpls__file__header__struct.html" title=" " alt="" coords="247,315,429,341"/>
+<area shape="rect" id="node9" href="$structswpls__comment__struct.html" title=" " alt="" coords="252,365,424,392"/>
+<area shape="rect" id="node10" href="$structswpls__agds__struct.html" title=" " alt="" coords="267,416,409,443"/>
+<area shape="rect" id="node11" href="$structswpls__sxpping__struct.html" title=" " alt="" coords="257,467,419,493"/>
+<area shape="rect" id="node12" href="$structswpls__point__struct.html" title=" " alt="" coords="5,467,148,493"/>
+<area shape="rect" id="node13" href="$structswpls__wl__offset__struct.html" title=" " alt="" coords="253,517,423,544"/>
+<area shape="rect" id="node14" href="$structswpls__echosounder__struct.html" title=" " alt="" coords="241,568,435,595"/>
+<area shape="rect" id="node15" href="$structswpls__pos__offset__struct.html" title=" " alt="" coords="249,619,427,645"/>
+<area shape="rect" id="node16" href="$structswpls__txer__offset__struct.html" title=" " alt="" coords="247,669,429,696"/>
+<area shape="rect" id="node17" href="$structswpls__ssv__struct.html" title=" " alt="" coords="272,720,404,747"/>
+<area shape="rect" id="node18" href="$structswpls__position__ll__struct.html" title=" " alt="" coords="249,771,427,797"/>
+</map>

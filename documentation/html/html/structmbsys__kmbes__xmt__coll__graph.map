@@ -1,0 +1,8 @@
+<map id="mbsys_kmbes_xmt" name="mbsys_kmbes_xmt">
+<area shape="rect" id="node1" title=" " alt="" coords="360,107,509,133"/>
+<area shape="rect" id="node2" href="$structmbsys__kmbes__m__body.html" title=" " alt="" coords="26,5,201,32"/>
+<area shape="rect" id="node3" href="$structmbsys__kmbes__m__partition.html" title="Multibeam datagrams." alt="" coords="14,56,213,83"/>
+<area shape="rect" id="node4" href="$structmbsys__kmbes__header.html" title="General datagram header." alt="" coords="29,107,197,133"/>
+<area shape="rect" id="node5" href="$structmbsys__kmbes__xmt__ping__info.html" title="XMT, // MB&#45;System multibeam ping navigation, attitude, travel time, and pointing angle (MB&#45;System onl..." alt="" coords="5,157,221,184"/>
+<area shape="rect" id="node6" href="$structmbsys__kmbes__xmt__sounding.html" title=" " alt="" coords="6,208,221,235"/>
+</map>

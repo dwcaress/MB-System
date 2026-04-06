@@ -1,0 +1,5 @@
+<map id="s7kr_bathymetry_struct" name="s7kr_bathymetry_struct">
+<area shape="rect" id="node1" title=" " alt="" coords="5,184,183,211"/>
+<area shape="rect" id="node2" href="$structs7k__header__struct.html" title=" " alt="" coords="23,95,165,121"/>
+<area shape="rect" id="node3" href="$structs7k__time__struct.html" title=" " alt="" coords="31,5,157,32"/>
+</map>

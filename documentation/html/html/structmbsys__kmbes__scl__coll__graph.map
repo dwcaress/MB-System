@@ -1,0 +1,6 @@
+<map id="mbsys_kmbes_scl" name="mbsys_kmbes_scl">
+<area shape="rect" id="node1" title=" " alt="" coords="221,109,362,136"/>
+<area shape="rect" id="node2" href="$structmbsys__kmbes__scl__data__from__sensor.html" title="#SCL &#45; Sensor CLock datagram" alt="" coords="5,5,183,47"/>
+<area shape="rect" id="node3" href="$structmbsys__kmbes__header.html" title="General datagram header." alt="" coords="207,13,375,39"/>
+<area shape="rect" id="node4" href="$structmbsys__kmbes__s__common.html" title="Sensor datagrams." alt="" coords="399,13,594,39"/>
+</map>

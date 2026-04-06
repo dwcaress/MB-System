@@ -1,0 +1,15 @@
+<map id="mbsys_wassp_struct" name="mbsys_wassp_struct">
+<area shape="rect" id="node1" title=" " alt="" coords="593,339,751,366"/>
+<area shape="rect" id="node2" href="$structmbsys__wassp__genbathy__struct.html" title=" " alt="" coords="277,5,459,47"/>
+<area shape="rect" id="node3" href="$structmbsys__wassp__unknown1__struct.html" title=" " alt="" coords="275,71,461,112"/>
+<area shape="rect" id="node4" href="$structmbsys__wassp__gen__sens__struct.html" title=" " alt="" coords="277,136,459,177"/>
+<area shape="rect" id="node5" href="$structmbsys__wassp__rawsonar__struct.html" title=" " alt="" coords="278,201,458,243"/>
+<area shape="rect" id="node6" href="$structmbsys__wassp__sys__cfg1__struct.html" title=" " alt="" coords="279,267,457,308"/>
+<area shape="rect" id="node7" href="$structmbsys__wassp__sensprop__struct.html" title=" " alt="" coords="279,332,457,373"/>
+<area shape="rect" id="node8" href="$structmbsys__wassp__sensor__struct.html" title=" " alt="" coords="5,332,168,373"/>
+<area shape="rect" id="node9" href="$structmbsys__wassp__wcd__navi__struct.html" title=" " alt="" coords="277,397,459,439"/>
+<area shape="rect" id="node10" href="$structmbsys__wassp__sys__prop__struct.html" title=" " alt="" coords="279,463,457,504"/>
+<area shape="rect" id="node11" href="$structmbsys__wassp__corbathy__struct.html" title=" " alt="" coords="279,528,457,569"/>
+<area shape="rect" id="node12" href="$structmbsys__wassp__nvupdate__struct.html" title=" " alt="" coords="277,593,459,635"/>
+<area shape="rect" id="node13" href="$structmbsys__wassp__mcomment__struct.html" title=" " alt="" coords="271,659,465,700"/>
+</map>

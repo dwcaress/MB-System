@@ -1,0 +1,13 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" title=" " alt="" coords="63,183,138,209"/>
+<area shape="rect" id="node2" href="$class_back_end.html" title="BackEnd is an interface between QML and C++ objects and functions." alt="" coords="313,5,391,32"/>
+<area shape="rect" id="node3" href="$class_my_timer.html" title="MyTimer lists loaded child objects after specified number of seconds." alt="" coords="313,56,391,83"/>
+<area shape="rect" id="node4" href="$classmb__system_1_1_camera.html" title="Camera holds viewpoint properties relative to viewed surface." alt="" coords="273,107,431,133"/>
+<area shape="rect" id="node5" href="$classmb__system_1_1_emitter.html" title="Emitter emits various signals." alt="" coords="275,157,429,184"/>
+<area shape="rect" id="node6" href="$classmb__system_1_1_q_vtk_renderer.html" title="QVtkRenderer and QVtkItem coordinate with one another to render VTK scenes within a QVtkItem declared..." alt="" coords="253,360,451,387"/>
+<area shape="rect" id="node7" href="$classmb__system_1_1_shared_constants.html" title="Constants shared between C++ and QML code." alt="" coords="244,208,460,235"/>
+<area shape="rect" id="node8" href="$classmb__system_1_1_surface_renderer.html" title="SurfaceRenderer invokes OpenGL api functions to initialize drawing and buffers, set up shaders,..." alt="" coords="245,259,459,285"/>
+<area shape="rect" id="node9" href="$classshared_qml_cpp_1_1_const.html" title="Constants shared between C++ and QML code." alt="" coords="271,309,433,336"/>
+<area shape="rect" id="node10" title=" " alt="" coords="28,331,173,357"/>
+<area shape="rect" id="node11" title=" " alt="" coords="5,382,196,423"/>
+</map>

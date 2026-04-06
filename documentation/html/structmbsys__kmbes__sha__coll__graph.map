@@ -1,0 +1,7 @@
+<map id="mbsys_kmbes_sha" name="mbsys_kmbes_sha">
+<area shape="rect" id="node1" title=" " alt="" coords="331,93,477,120"/>
+<area shape="rect" id="node2" href="$structmbsys__kmbes__header.html" title="General datagram header." alt="" coords="21,5,189,32"/>
+<area shape="rect" id="node3" href="$structmbsys__kmbes__sha__data__from__sensor.html" title="#SHA &#45; Sensor HeAding" alt="" coords="13,57,196,98"/>
+<area shape="rect" id="node4" href="$structmbsys__kmbes__s__common.html" title="Sensor datagrams." alt="" coords="7,123,202,149"/>
+<area shape="rect" id="node5" href="$structmbsys__kmbes__s__data__info.html" title=" " alt="" coords="5,173,204,200"/>
+</map>

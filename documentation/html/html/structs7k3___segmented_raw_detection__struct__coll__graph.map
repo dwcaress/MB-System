@@ -1,0 +1,8 @@
+<map id="s7k3_SegmentedRawDetection_struct" name="s7k3_SegmentedRawDetection_struct">
+<area shape="rect" id="node1" title=" " alt="" coords="761,91,987,133"/>
+<area shape="rect" id="node2" href="$structs7k3__header__struct.html" title=" " alt="" coords="303,7,453,33"/>
+<area shape="rect" id="node3" href="$structs7k3__time__struct.html" title=" " alt="" coords="5,7,140,33"/>
+<area shape="rect" id="node4" href="$structs7k3__segmentedrawdetectionrxdata__struct.html" title=" " alt="" coords="248,58,508,99"/>
+<area shape="rect" id="node5" href="$structs7k3__segmentedrawdetectiontxdata__struct.html" title=" " alt="" coords="248,123,508,165"/>
+<area shape="rect" id="node6" href="$structs7k3__bathydata__struct.html" title=" " alt="" coords="293,189,463,216"/>
+</map>

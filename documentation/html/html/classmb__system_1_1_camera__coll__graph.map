@@ -1,0 +1,4 @@
+<map id="mb_system::Camera" name="mb_system::Camera">
+<area shape="rect" id="node1" title="Camera holds viewpoint properties relative to viewed surface." alt="" coords="5,80,163,107"/>
+<area shape="rect" id="node2" title=" " alt="" coords="47,5,121,32"/>
+</map>

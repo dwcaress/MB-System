@@ -1,0 +1,4 @@
+<map id="mb_system::QVtkRenderer::LoadFileWorker" name="mb_system::QVtkRenderer::LoadFileWorker">
+<area shape="rect" id="node1" title="Worker thread class to load grid file with TopoGridReader." alt="" coords="5,80,203,121"/>
+<area shape="rect" id="node2" title=" " alt="" coords="65,5,143,32"/>
+</map>

@@ -1,0 +1,4 @@
+<map id="mb_system::MBQuickView" name="mb_system::MBQuickView">
+<area shape="rect" id="node1" title="MBQuickView connects GUI thread with render thread by responding to signals emitted by QML renderer,..." alt="" coords="5,80,201,107"/>
+<area shape="rect" id="node2" title=" " alt="" coords="53,5,154,32"/>
+</map>

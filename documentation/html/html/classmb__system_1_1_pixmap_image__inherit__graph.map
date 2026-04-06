@@ -1,0 +1,4 @@
+<map id="mb_system::PixmapImage" name="mb_system::PixmapImage">
+<area shape="rect" id="node1" title="GUI element displays an image; can be instantiated by QML and added to the QML scene graph (inherits ..." alt="" coords="5,80,201,107"/>
+<area shape="rect" id="node2" title=" " alt="" coords="29,5,177,32"/>
+</map>

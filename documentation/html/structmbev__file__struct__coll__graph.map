@@ -1,0 +1,8 @@
+<map id="mbev_file_struct" name="mbev_file_struct">
+<area shape="rect" id="node1" title=" " alt="" coords="231,199,361,225"/>
+<area shape="rect" id="node2" href="$structmbev__ping__struct.html" title=" " alt="" coords="5,95,144,121"/>
+<area shape="rect" id="node3" href="$structmb__info__struct.html" title=" " alt="" coords="169,95,287,121"/>
+<area shape="rect" id="node4" href="$structmb__esf__struct.html" title=" " alt="" coords="312,95,427,121"/>
+<area shape="rect" id="node5" href="$structmb__edit__struct.html" title=" " alt="" coords="310,5,429,32"/>
+<area shape="rect" id="node6" href="$structmb__process__struct.html" title="structure holding mbprocess parameters" alt="" coords="451,95,595,121"/>
+</map>
