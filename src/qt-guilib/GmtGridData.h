@@ -1,3 +1,6 @@
+#ifndef GmtGridData_H
+#define GmtGridData_H
+
 #include "TopoData.h"
 #include "gmt.h"
 
@@ -5,7 +8,8 @@
 namespace mb_system {
   /**
      GmtGridData encapsulates GMT_GRID data read from a GMT grid file.
-     The data is read by MB-System legacy C functions and GMT functions.
+     The class uses MB-System legacy C functions and GMT functions to read the
+     data.
   */
   class GmtGridData : public TopoData {
 
@@ -49,3 +53,5 @@ namespace mb_system {
   };
 
 };
+
+#endif
