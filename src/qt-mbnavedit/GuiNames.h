@@ -14,11 +14,14 @@ class GuiNames : public QObject {
 
  public:
   GuiNames() {}
-  
+
+  /// Name of PixmapImage C++ object instantiated by QML, which holds
+  /// swath graphs; Backend C++ code draws into this object
   static inline const char *swathPixmapObjStr = "swathPixmapObj";
   Q_PROPERTY(QString swathPixmapObj READ swathPixmapObj CONSTANT)
   QString swathPixmapObj() const {return QString::fromLatin1(swathPixmapObjStr);}
 
+  /// GUI elements that specify which plots should be drawn.
   static inline const char *timeIntStr = "timeInt";
   Q_PROPERTY(QString timeInt READ timeInt CONSTANT)
   QString timeInt() const {return QString::fromLatin1(timeIntStr);}
@@ -79,10 +82,12 @@ class GuiNames : public QObject {
   Q_PROPERTY(QString attitude READ attitude CONSTANT)
   QString attitude() const {return QString::fromLatin1(attitudeStr);}
 
+  /// GUI elements that set edit modes
   static inline const char *pickModeStr = "pickMode";
   Q_PROPERTY(QString pickMode READ pickMode CONSTANT)
   QString pickMode() const {return QString::fromLatin1(pickModeStr);}
 
+  // Define editing mode 
   static inline const char *selectModeStr = "selectMode";
   Q_PROPERTY(QString selectMode READ selectMode CONSTANT)
   QString selectMode() const {return QString::fromLatin1(selectModeStr);}
