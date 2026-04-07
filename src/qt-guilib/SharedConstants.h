@@ -19,14 +19,18 @@
 #define MouseElevProfile "Define elev profile"
 #define MouseTest "TESTING"
 
+/***
+    These classes describe data that is accessed by C++
+    (especially TopoDataItem) as well as QML for individual QtQuck applications.
+ */
 namespace mb_system {
 
   /// Data model for 'mouse mode', accessed from QML
   /// including mode name and brief ToolTip. User can choose from
-  /// a set of available mouse modes (as menu items).
+  /// a set of available mouse modes (e.g. as menu items).
   /// This class is defined outside of SharedConstants class, as
   /// nested QObject definitions are not supported.
-  /// Can be accessed from QML when registered as a QML type
+  /// SharedConstants contains a QList<MouseMode>.
   class MouseMode : public QObject {
     Q_OBJECT
 
@@ -49,15 +53,17 @@ namespace mb_system {
     QString toolTip_;
   };
 
-  /// Constants are defined here in C++ and are accessible through QML when
-  /// when registered as a QML type
+  /// SharedConstants are defined here in C++ and are accessible through QML,
+  /// e.g. can be instantiated in QML when registered with
+  /// qmlReisterType<SharedConstants>() from main.cpp.
   class SharedConstants : public QObject {
     Q_OBJECT
 
   public:
 
     SharedConstants();
-  
+
+    /// (Not yet anywhere yet)
     enum class EditState : int {
       ViewOnly,
       EditRoute,
@@ -65,16 +71,6 @@ namespace mb_system {
       EditOverlay
     };
 
-    Q_ENUM(EditState)
-
-    /// Define read-only QString property called "testString"
-    Q_PROPERTY(QString testString READ getTestString)
-
-    /// Just return a dummy string for now...
-    QString getTestString() const {
-      std::cerr << "**** getTestString()\n";
-      return testString_;
-    }
 
     /// List of supported color maps
     Q_PROPERTY(QStringList cmaps MEMBER colorMapsList_ NOTIFY cmapsChanged)
@@ -84,16 +80,14 @@ namespace mb_system {
 	       NOTIFY mouseModesChanged)
 
   signals:
-    // Emit this if cmaps changes
+    // Emit this if cmaps changes (probably never)
     void cmapsChanged();
 
-    // Emit this if mouseModes changes
+    // Emit this if mouseModes changes (probably never)
     void mouseModesChanged();  
   
   protected:
       
-    static const QString testString_;
-
     /// Populated by SharedConstants constructor
     QStringList colorMapsList_;
 

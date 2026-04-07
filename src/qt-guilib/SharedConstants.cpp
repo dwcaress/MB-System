@@ -4,8 +4,6 @@
 
 using namespace mb_system;
 
-const QString SharedConstants::testString_ = QString("Hello sailor!");
-
 SharedConstants::SharedConstants() {
   
     // Load supported colormap names (defined in TopoColorMap class)
@@ -13,7 +11,7 @@ SharedConstants::SharedConstants() {
     std::vector<const char *> colorMapNames;
     TopoColorMap::schemeNames(&colorMapNames);
 
-    std::cout << "ColorMaps:\n";
+    std::cout << "SharedConstants() - ColorMaps:\n";
     // Copy colormap names to QStringList (for retrieval by QML)
     for (int i = 0; i < colorMapNames.size(); i++) {
       std::cout << colorMapNames[i] << "\n";
