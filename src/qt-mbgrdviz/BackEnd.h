@@ -29,20 +29,6 @@ public:
 
   explicit BackEnd(QQmlApplicationEngine *engine,
 		   QObject *parent = nullptr);
-
-  /// Create and register singleton
-  static bool registerSingleton(int argc, char **argv,
-                                QQmlApplicationEngine *engine);
-
-  /// Specify grid file to display
-  Q_INVOKABLE bool setGridFile(QUrl file);
-
-
-  Q_INVOKABLE QStringList getColorMaps() const {
-    std::cerr << "*** getColorMaps()\n";
-    return colorMapsList_;
-  }
-  
 					 
 public slots:
 
@@ -64,8 +50,6 @@ protected:
   /// Selected file name item
   QObject *selectedFileItem_;
 
-  ///  std::vector<const char *> colorMapNames_;
-  /// QStringListModel colorMapsModel_;
   QStringList colorMapsList_;  
 
   
