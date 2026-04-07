@@ -45,9 +45,8 @@
 
 
 namespace mb_system {
-
-  /* **
-     Renders bathymetric data of MB grid or swath file, within a QtQuickVTKItem.
+  /**
+     Renders bathymetric data of grid or swath file, within a QtQuickVTKItem.
   */
   class TopoDataItem : public QQuickVTKItem {
     Q_OBJECT
