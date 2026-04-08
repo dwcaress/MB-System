@@ -8,7 +8,7 @@ import QtGraphs 6.8
 import "ui-components"
 
 import VTK 9.3
-import SharedConstants 1.1
+import Mbgrdviz 1.0
 
 
 Window {
@@ -16,12 +16,6 @@ Window {
     height: 800
 
     id: mainWindow
-
-    // Declare instance of SharedConstants, which will populate
-    // QStringList objects needed by QML
-    SharedConstants {
-        id: constants
-    }
 
     // Bathymetry profile
     property list<vector2d> myProfile
@@ -106,7 +100,7 @@ Window {
 	    
             Repeater {
                // List of colormap names from SharedConstants
-	      model: constants.cmaps
+	      model: SharedConstants.cmaps
 	      
 	      visible: true
 	      MenuItem {
@@ -141,7 +135,7 @@ Window {
 
             Repeater {
 	      // mouse mode names, tooltips defined in SharedConstants.h
-	      model: constants.mouseModes
+	      model: SharedConstants.mouseModes
 	      
 	      visible: true
 	      
