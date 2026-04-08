@@ -43,14 +43,22 @@ namespace mb_system {
       toolTip_ = toolTip;
     }
     
-    Q_PROPERTY(QString name READ getName)
-    Q_PROPERTY(QString toolTip READ getToolTip)
+    Q_PROPERTY(QString name READ getName NOTIFY nameChanged)
+    Q_PROPERTY(QString toolTip READ getToolTip NOTIFY toolTipChanged)
 
     QString getName() const { return name_; }
     QString getToolTip() const { return toolTip_; }
 
     QString name_;
     QString toolTip_;
+
+  signals:
+    // Emit this if mode name changes (probably never)
+    void nameChanged();
+
+    // Emit this if toolTip changes (probably never)
+    void toolTipChanged();    
+    
   };
 
   /// SharedConstants are defined here in C++ and are accessible through QML,
@@ -71,6 +79,7 @@ namespace mb_system {
       EditOverlay
     };
 
+    Q_ENUM(EditState)
 
     /// List of supported color maps
     Q_PROPERTY(QStringList cmaps MEMBER colorMapsList_ NOTIFY cmapsChanged)
