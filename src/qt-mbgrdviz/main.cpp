@@ -72,7 +72,9 @@ int main(int argc, char* argv[])
   // Register TopoDataItem type
   qmlRegisterType<TopoDataItem>("VTK", 9, 3, "TopoDataItem");
 
-  qmlRegisterType<SharedConstants>("SharedConstants", 1, 1, "SharedConstants");
+  auto *sharedConstants = new SharedConstants();
+  qmlRegisterSingletonInstance("Mbgrdviz", 1, 0, "SharedConstants",
+			       sharedConstants);
   
   engine.load(QUrl("qrc:/main.qml"));
  
