@@ -4358,7 +4358,9 @@ int main(int argc, char **argv) {
                           ping[i_ping_process].beamflag_filter[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
                           n_soundings_decimated++;
                       } else {
-                          n_output++;
+                          if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
+                              n_output++;
+                          }
                       }
                       continue;
                   }
@@ -4494,7 +4496,6 @@ int main(int argc, char **argv) {
 
                   mb_put_binary_int(true, ping_number, &output_buffer[index]);
                   index += 4;
-
                   mb_put_binary_int(true, n_output, &output_buffer[index]);
                   index += 4;
 
