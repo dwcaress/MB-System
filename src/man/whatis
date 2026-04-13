@@ -64,7 +64,7 @@ mbneptune2esf(1)         - Tool to import beam flags from Simrad's Neptune syste
 mbotps(1)                - Predicts tides using the OSU Tidal Prediction Software (OTPS) distribution
 mbprocess(1)             - this program performs a variety of swath data processing functions in a single step (producing a single output swath data file), including merging navigation, recalculating bathymetry from travel time and angle data by raytracing through a layered water sound velocity model, applying changes to ship draft, roll bias and pitch bias, applying tides, and applying bathymetry edits from edit save files
 mbps(1)                  - Generates a PostScript perspective plot of a piece of swath sonar data
-mbrollbias(1)            - Assess roll bias of swath sonar sonar systems
+mbrollbias(1)            - Assess roll bias of swath sonar systems
 mbrolltimelag(1)         - Calculates cross correlation between the apparent bottom slope in swath bathymetry data and the roll time series used by the sonar in order to assess attitude time lag problems
 mbroutetime(1)           - Program to output a list of the times when a survey passes the waypoints of a planned survey route
 mbsegygrid(1)            - Generate time vs. trace number grids of seismic data from segy files
