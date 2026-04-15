@@ -20,8 +20,9 @@
 #define MouseTest "TESTING"
 
 /***
-    These classes describe data that is accessed by C++
-    (especially TopoDataItem) as well as QML for individual QtQuck applications.
+    These classes and properties describe constant data that are accessed
+    by C++ library (e.g. TopoDataItem) as well as by QML for individual
+    QtQuck applications.
  */
 namespace mb_system {
 
