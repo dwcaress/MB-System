@@ -538,16 +538,18 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
             break;
     }
 
-    if(optind > 0) {
-
+    if(optind > 0 && optind < argc) {
         if(cfg->file_paths == NULL) {
             cfg->file_paths = mlist_new();
             mlist_autofree(cfg->file_paths, free);
         }
-        cfg->mode = IMODE_FILE;
         for (int i=optind; i<argc; i++) {
             mlist_add(cfg->file_paths,strdup(argv[i]));
         }
+    }
+    if(cfg->file_paths != NULL && mlist_size(cfg->file_paths) > 0) {
+        fprintf(stderr,"files specified, using FILE mode\n", optind);
+        cfg->mode = IMODE_FILE;
     }
 
     if(cfg->verbose != 0) {
