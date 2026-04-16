@@ -25,11 +25,6 @@ Window {
 
     // Interface to C++ Backend methods
     required property var backend
-    required property var guiNames
-    
-    Component.onCompleted: {
-      console.log('guiNames.interval: ', guiNames.interval)
-    }
     
     ActionGroup {
         id: ancillaryData
@@ -69,110 +64,120 @@ Window {
             Menu {
                 title: "Ancillary data"
 
-                Action {objectName: guiNames.none; checkable: true;
+                Action {checkable: true;
 		        checked: true;
                         text: qsTr("None");
                         ActionGroup.group: ancillaryData;
-                        onTriggered: backend.onAncillDataChanged(objectName)
+                        onTriggered: backend.displayNoAncillData()
                 }
 
-                Action {objectName: guiNames.time; checkable: true; text: qsTr("Time");
+                Action {checkable: true; text: qsTr("Time");
                     ActionGroup.group: ancillaryData;
-                    onTriggered: backend.onAncillDataChanged(objectName)
+                    onTriggered: backend.displayTime()
                 }
 
-                Action {objectName: guiNames.interval; checkable: true;
+                Action {checkable: true;
                     text: qsTr("Interval");
                     ActionGroup.group: ancillaryData
-                    onTriggered: backend.onAncillDataChanged(objectName)
+                    onTriggered: backend.displayInterval()
                 }
 
-                Action {objectName: guiNames.latitude; checkable: true;
+                Action {checkable: true;
                     text: qsTr("Latitude");
                     ActionGroup.group: ancillaryData
-                    onTriggered: backend.onAncillDataChanged(objectName)
+                    onTriggered: backend.displayLatitude()
                 }
 
-                Action {objectName: guiNames.longitude; checkable: true;
+                Action {checkable: true;
                     text: qsTr("Longitude");
                     ActionGroup.group: ancillaryData
-                    onTriggered: backend.onAncillDataChanged(objectName)
+                    onTriggered: backend.displayLongitude()
                 }
-                Action {objectName: guiNames.heading; checkable: true;
+		
+                Action {checkable: true;
                     text: qsTr("Heading");
                     ActionGroup.group: ancillaryData
-                    onTriggered: backend.onAncillDataChanged(objectName)
+                    onTriggered: backend.displayHeading()
                 }
-                Action {objectName: guiNames.speed; checkable: true;
+		
+                Action {checkable: true;
                     text: qsTr("Speed");
                     ActionGroup.group: ancillaryData
-                    onTriggered: backend.onAncillDataChanged(objectName)
+                    onTriggered: backend.displaySpeed()
                 }
-                Action {objectName: guiNames.depth; checkable: true;
+		
+                Action {checkable: true;
                     text: qsTr("Depth");
                     ActionGroup.group: ancillaryData
-                    onTriggered: backend.onAncillDataChanged(objectName)
+                    onTriggered: backend.displayDepth()
                 }
-                Action {objectName: guiNames.altitude; checkable: true;
+                Action {checkable: true;
                     text: qsTr("Altitude");
                     ActionGroup.group: ancillaryData
-                    onTriggered: backend.onAncillDataChanged(objectName)
+                    onTriggered: backend.displayAltitude()
                 }
-                Action {objectName: guiNames.sensorDepth; checkable: true;
+                Action {checkable: true;
                     text: qsTr("Sensor depth");
                     ActionGroup.group: ancillaryData
-                    onTriggered: backend.onAncillDataChanged(objectName)
+                    onTriggered: backend.displaySensorDepth()
                 }
-                Action {objectName: guiNames.roll; checkable: true;
+                Action {checkable: true;
                     text: qsTr("Roll");
                     ActionGroup.group: ancillaryData
-                    onTriggered: backend.onAncillDataChanged(objectName)
+                    onTriggered: backend.displayRoll()
                 }
-                Action {objectName: guiNames.pitch; checkable: true;
+                Action {checkable: true;
                     text: qsTr("Pitch");
                     ActionGroup.group: ancillaryData
-                    onTriggered: backend.onAncillDataChanged(objectName)
+                    onTriggered: backend.displayPitch()
                 }
-                Action {objectName: guiNames.heave; checkable: true;
+                Action {checkable: true;
                     text: qsTr("Heave");
                     ActionGroup.group: ancillaryData
-                    onTriggered: backend.onAncillDataChanged(objectName)
+                    onTriggered: backend.displayPitch()
                 }
 
             }
             MenuSeparator {}
             Menu {
                 title: "Slice"
-                Action {objectName: "waterfall"; checkable: true; checked: true;
+                Action {checkable: true; checked: true;
                     text: qsTr("Waterfall"); ActionGroup.group: slice
-                    onTriggered: backend.onSliceChanged(objectName)
+                    onTriggered: backend.setWaterfallDisplay()
                 }
-                Action {objectName: "alongTrack"; checkable: true;
+                Action {checkable: true;
                     text: qsTr("Along-track"); ActionGroup.group: slice
-                    onTriggered: backend.onSliceChanged(objectName)
+                    onTriggered: backend.setAlongTrackDisplay()
                 }
-                Action {objectName: "crossTrack"; checkable: true;
+                Action {checkable: true;
                     text: qsTr("Cross-track"); ActionGroup.group: slice
-                    onTriggered: backend.onSliceChanged(objectName)
+                    onTriggered: backend.setAcrossTrackDisplay()
                 }
             }
             MenuSeparator {}
             Menu {
                 title: "Color-coding"
-                Action {objectName: 'bottomDetect';
+                Action {/// objectName: 'bottomDetect';
                     checkable: true; checked: true;
                     text: qsTr("Bottom-detect algorithm");
                     ActionGroup.group: colorCoding;
-                    onTriggered: backend.onColorCodeChanged(objectName)}
-                Action {objectName: 'pulseSource';
+                    /// onTriggered: backend.onColorCodeChanged(objectName)
+                    onTriggered: backend.setBottomDetectColorCode()
+		    }
+		    
+                Action {/// objectName: 'pulseSource';
                     checkable: true;
                     text: qsTr("Pulse source");
                     ActionGroup.group: colorCoding;
-                    onTriggered: backend.onColorCodeChanged(objectName)}
-                Action {objectName: 'flagState'; checkable: true;
+                    /// onTriggered: backend.onColorCodeChanged(objectName)
+                    onTriggered: backend.setPulseColorCode()
+		    }
+                Action {/// objectName: 'flagState'; checkable: true;
                     text: qsTr("Flag state");
                     ActionGroup.group: colorCoding;
-                    onTriggered: backend.onColorCodeChanged(objectName)}
+                    /// onTriggered: backend.onColorCodeChanged(objectName)
+                    onTriggered: backend.setFlagStateColorCode()
+		    }
             }
 
         }
@@ -305,48 +310,42 @@ Window {
 
 
             RadioButton {
-                objectName: "toggleEdit"
                 /// checked: true
                 text: qsTr("Toggle")
                 ButtonGroup.group: editModes
-                onToggled: { backend.onEditModeChanged(objectName); }
+                onToggled: { backend.setToggleMode(); }
             }
 
             RadioButton {
-                objectName: "pickEdit"
                 text: qsTr("Pick")
                 ButtonGroup.group: editModes
-                onToggled: { backend.onEditModeChanged(objectName); }
+                onToggled: { backend.setPickMode(); }
             }
 
             RadioButton {
-                objectName: "eraseEdit"
                 text: qsTr("Erase")
                 ButtonGroup.group: editModes
-                onToggled: { backend.onEditModeChanged(objectName); }
+                onToggled: { backend.setEraseMode(); }
             }
 
             RadioButton {
-                objectName: "restoreEdit"
                 text: qsTr("Restore")
                 ButtonGroup.group: editModes
-                onToggled: { backend.onEditModeChanged(objectName); }
+                onToggled: { backend.setRestoreMode(objectName); }
             }
 
             RadioButton {
-                objectName: "grabEdit"
                 text: qsTr("Grab")
                 ButtonGroup.group: editModes
-                onToggled: { backend.onEditModeChanged(objectName); }
+                onToggled: { backend.setGrabMode(objectName); }
             }
 
             RadioButton {
-                objectName: "infoEdit"
                 checked: true
-                Component.onCompleted: { backend.onEditModeChanged(objectName) }
+                Component.onCompleted: { backend.setInfoMode() }
                 text: qsTr("Info")
                 ButtonGroup.group: editModes
-                onToggled: { backend.onEditModeChanged(objectName); }
+                onToggled: { backend.setInfoMode(); }
             }
         }
 
@@ -374,7 +373,7 @@ Window {
 
                     PixmapImage {
                         id: swathPixmap
-                        objectName: "swathPixmapObj"
+                        objectName: backend.swathPixmapObj
                         anchors.fill: parent
                     }
 
