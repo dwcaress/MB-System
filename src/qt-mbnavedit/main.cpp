@@ -9,7 +9,6 @@
 #include <QButtonGroup>
 #include <QQmlContext>
 #include <QVariant>
-#include "GuiNames.h"
 #include "Backend.h"
 #include "PixmapImage.h"
 #include "Emitter.h"
@@ -54,13 +53,10 @@ int main(int argc, char *argv[]) {
     
     QQmlApplicationEngine engine;
 
-    GuiNames guiNames;
-    
     QVariantMap initialProps;
     initialProps.insert("backend", QVariant::fromValue(&backend));
-    initialProps.insert("guiNames", QVariant::fromValue(&guiNames));
     
-    // Make backend object and guiNames accssible to QML
+    // Make backend object accssible to QML
     engine.setInitialProperties(initialProps);
 
     // Boilerplate...

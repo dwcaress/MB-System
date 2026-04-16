@@ -24,16 +24,11 @@ Window {
     title: 'qt-mbnavedit'
     color: 'lightgray'
 
-    // GuiNames, also used by C++
-    required property var guiNames
-
     // Interface to C++ Backend methods
     required property var backend
     
 
     Component.onCompleted: {
-        console.log('HELLO WTF?????')
-        console.log('GuiNames.pickMode: ', guiNames.pickMode)
 
         // Synchronize GUI input control state with C++ backend
 
@@ -91,47 +86,47 @@ Window {
 
             RadioButton {
 
-                objectName: guiNames.pickMode
                 text: qsTr('Pick')
 
                 checked: true
                 ButtonGroup.group: editModes
-                onToggled: { backend.onEditModeChanged(objectName); resetInterval.enabled = false }
+                onToggled: { backend.setPickMode();
+		     resetInterval.enabled = false }
             }
 
             RadioButton {
-                objectName: guiNames.selectMode
                 text: qsTr('Select')
                 ButtonGroup.group: editModes
-                onToggled: { backend.onEditModeChanged(objectName); resetInterval.enabled = false }
+                onToggled: { backend.setSelectMode();
+		     resetInterval.enabled = false }
             }
 
             RadioButton {
-                objectName: guiNames.deselectMode
                 text: qsTr('De-select')
                 ButtonGroup.group: editModes
-                onToggled: { backend.onEditModeChanged(objectName); resetInterval.enabled = false }
+                onToggled: { backend.setDeselectMode();
+		   resetInterval.enabled = false }
             }
 
             RadioButton {
-                objectName: guiNames.selectAllMode
                 text: qsTr('Select all')
                 ButtonGroup.group: editModes
-                onToggled: { console.log('select all objectName: ', objectName); backend.onEditModeChanged(objectName); resetInterval.enabled = false }
+                onToggled: { backend.setSelectAllMode();
+		   resetInterval.enabled = false }
             }
 
             RadioButton {
-                objectName: guiNames.deselectAllMode
                 text: qsTr('De-select all')
                 ButtonGroup.group: editModes
-                onToggled: { backend.onEditModeChanged(objectName); resetInterval.enabled = false}
+                onToggled: { backend.setDeselectAllMode();
+		   resetInterval.enabled = false}
             }
 
             RadioButton {
-                objectName: guiNames.defineIntervalMode
                 text: qsTr('Define interval')
                 ButtonGroup.group: editModes
-                onToggled: { backend.onEditModeChanged(objectName); resetInterval.enabled = true}
+                onToggled: { backend.setDefineIntervalMode();
+		   resetInterval.enabled = true}
             }
 
             Button {
@@ -230,131 +225,116 @@ Window {
                 }
 
                 CheckBox {
-                    objectName: guiNames.timeInt
                     checked: true
                     text: qsTr('Time interval')
-                    onToggled: backend.setPlot(objectName, checked)
+                    onToggled: backend.setTimeIntPlot(checked)
                     ButtonGroup.group: plotButtons
                 }
 
                 CheckBox {
-                    objectName: guiNames.timeIntOrig
                     text: qsTr('Original data')
                     checked: true
                     leftPadding: indicator.width
-                    onToggled: backend.setPlot(objectName, checked)
+                    onToggled: backend.setTimeIntOrigPlot(checked)
                     ButtonGroup.group: plotButtons
 
                 }
 
                 CheckBox {
-                    objectName: guiNames.lon
                     checked: true
                     text: qsTr('Longitude')
-                    onToggled: backend.setPlot(objectName, checked)
+                    onToggled: backend.setLonPlot(checked)
                     ButtonGroup.group: plotButtons
 
                 }
 
                 CheckBox {
-                    objectName: guiNames.lonOrig
                     checked: true
                     text: qsTr('Original')
                     leftPadding: indicator.width
-                    onToggled: backend.setPlot(objectName, checked)
+                    onToggled: backend.setLonOrigPlot(checked)
                     ButtonGroup.group: plotButtons
                 }
 
                 CheckBox {
-                    objectName: guiNames.lat
                     checked: true
                     text: qsTr('Latitude')
-                    onToggled: backend.setPlot(objectName, checked)
+                    onToggled: backend.setLatPlot(checked)
                     ButtonGroup.group: plotButtons
                 }
 
                 CheckBox {
-                    objectName: guiNames.latOrig
                     checked: true
                     text: qsTr('Original')
                     leftPadding: indicator.width
-                    onToggled: backend.setPlot(objectName, checked)
+                    onToggled: backend.setLatOrigPlot(checked)
                     ButtonGroup.group: plotButtons
                 }
 
                 CheckBox {
-                    objectName: guiNames.speed
                     checked: true
                     text: qsTr('Speed')
-                    onToggled: backend.setPlot(objectName, checked)
+                    onToggled: backend.setSpeedPlot(checked)
                     ButtonGroup.group: plotButtons
                 }
 
                 CheckBox {
-                    objectName: guiNames.speedOrig
                     checked: true
                     text: qsTr('Original')
                     leftPadding: indicator.width
-                    onToggled: backend.setPlot(objectName, checked)
+                    onToggled: backend.setSpeedOrigPlot(checked)
                     ButtonGroup.group: plotButtons
                 }
 
                 CheckBox {
-                    objectName: guiNames.speedMadeGood
                     text: qsTr('Speed made good')
                     leftPadding: indicator.width
-                    onToggled: backend.setPlot(objectName, checked)
+                    onToggled: backend.setSpeedMadeGoodPlot(checked)
                     Component.onCompleted: { checked = true }
                     ButtonGroup.group: plotButtons
                 }
 
                 CheckBox {
-                    objectName: guiNames.heading
                     checked: true
                     text: qsTr('Heading')
-                    onToggled: backend.setPlot(objectName, checked)
+                    onToggled: backend.setHeadingPlot(checked)
                     ButtonGroup.group: plotButtons
                 }
 
                 CheckBox {
-                    objectName: guiNames.headingOrig
                     checked: true
                     text: qsTr('Original')
                     leftPadding: indicator.width
-                    onToggled: backend.setPlot(objectName, checked)
+                    onToggled: backend.setHeadingOrig(checked)
                     ButtonGroup.group: plotButtons
                 }
 
                 CheckBox {
-                    objectName: guiNames.headingMadeGood
                     text: qsTr('Course made good')
                     leftPadding: indicator.width
-                    onToggled: backend.setPlot(objectName, checked)
+                    onToggled: backend.setHeadingMadeGoodPlot(checked)
                     ButtonGroup.group: plotButtons
                 }
 
                 CheckBox {
-                    objectName: guiNames.sensorDepth
                     checked: true
                     text: qsTr('Sonar depth')
-                    onToggled: backend.setPlot(objectName, checked)
+                    onToggled: backend.setSonarDepthPlot(checked)
                     ButtonGroup.group: plotButtons
                 }
 
                 CheckBox {
-                    objectName: guiNames.sensorDepthOrig
                     checked: true
                     text: qsTr('Original')
                     leftPadding: indicator.width
-                    onToggled: backend.setPlot(objectName, checked)
+                    onToggled: backend.setSonarDepthOrigPlot(checked)
                     ButtonGroup.group: plotButtons
                 }
 
                 CheckBox {
-                    objectName: guiNames.attitude
                     checked: false
                     text: qsTr('Roll,pitch,heave')
-                    onToggled: backend.setPlot(objectName, checked)
+                    onToggled: backend.setAttitudePlot(checked)
                     ButtonGroup.group: plotButtons
                 }
             }
@@ -384,7 +364,7 @@ Window {
 
                         PixmapImage {
                             id: swathPixmap
-                            objectName: guiNames.swathPixmapObj
+                            objectName: backend.swathPixmapObj
                             width: rectangle.width
                             height: 30000
                             anchors.fill: parent

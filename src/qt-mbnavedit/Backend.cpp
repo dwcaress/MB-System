@@ -18,7 +18,6 @@
 #include <QFont>
 #include "PixmapDrawer.h"
 #include "Backend.h"
-#include "GuiNames.h"
 
 extern "C" {
 #include "mb_status.h"
@@ -116,13 +115,13 @@ bool Backend::initialize(QObject *loadedRoot, int argc, char **argv) {
   ui_ = loadedRoot;
 
   // Find PixmapImage in QML object tree
-  qDebug() << "Find PixmapImage " << GuiNames::swathPixmapObjStr;
+  qDebug() << "Find PixmapImage " << swathPixmapObjStr;
 
   swathPixmapImage_ =
-    ui_->findChild<mb_system::PixmapImage*>(GuiNames::swathPixmapObjStr);
+    ui_->findChild<mb_system::PixmapImage*>(swathPixmapObjStr);
 
   if (!swathPixmapImage_) {
-    qCritical() << "Couldn't find " << GuiNames::swathPixmapObjStr << " in QML";
+    qCritical() << "Couldn't find " << swathPixmapObjStr << " in QML";
     return false;
   }
 
@@ -240,78 +239,104 @@ bool Backend::plotTest() {
   return true;
 }
 
+void Backend::setTimeIntPlot(bool set) {
+  plotTint_ = set;
+  refreshPlots();
+}
 
-void Backend::setPlot(QString plotName, bool set) {
-  qDebug() << "setPlot(): " << plotName << " " << set;
-  if (plotName == GuiNames::timeIntStr) {
-    plotTint_ = set;
-  }
-  else if (plotName == GuiNames::timeIntOrigStr) {
-    plotTintOrig_ = set;
-  }  
-  else if (plotName == GuiNames::latStr) {
-    plotLat_ = set;
-  }
-  else if (plotName == GuiNames::latOrigStr) {
-    plotLatOrig_ = set;
-  }  
-  else if (plotName == GuiNames::lonStr) {
-    plotLon_ = set;
-  }
-  else if (plotName == GuiNames::lonOrigStr) {
-    plotLonOrig_ = set;
-  }  
-  else if (plotName == GuiNames::speedStr) {
-    plotSpeed_ = set;
-  }
-  else if (plotName == GuiNames::speedOrigStr) {
-    plotSpeedOrig_ = set;
-  }
-  else if (plotName == GuiNames::speedMadeGoodStr) {
-    plotSmg_ = set;
-  }    
-  else if (plotName == GuiNames::headingStr) {
-    plotHeading_ = set;
-  }
-  else if (plotName == GuiNames::headingOrigStr) {
-    plotHeadingOrig_ = set;
-  }
-  else if (plotName == GuiNames::headingMadeGoodStr) {
-    plotCmg_ = set;
-  }    
-  else if (plotName == GuiNames::sensorDepthStr) {
-    plotDraft_ = set;
-  }
-  else if (plotName == GuiNames::sensorDepthOrigStr) {
-    plotDraftOrig_ = set;
-  }  
-  else if (plotName == GuiNames::attitudeStr) {
+
+void Backend::setTimeIntOrigPlot(bool set) {
+  plotTintOrig_ = set;
+  refreshPlots();
+}
+
+void Backend::setLatPlot(bool set) {
+  plotLat_ = set;
+  refreshPlots();
+}
+
+
+void Backend::setLatOrigPlot(bool set) {
+  plotLatOrig_ = set;
+  refreshPlots();
+}
+
+
+void Backend::setLonPlot(bool set) {
+  plotLon_ = set;
+  refreshPlots();
+}
+
+void Backend::setLonOrigPlot(bool set) {
+  plotLonOrig_ = set;
+  refreshPlots();
+}
+
+
+void Backend::setSpeedPlot(bool set) {
+  plotSpeed_ = set;
+  refreshPlots();
+}
+
+
+void Backend::setSpeedOrigPlot(bool set) {
+  plotSpeedOrig_ = set;
+  refreshPlots();
+}
+
+
+void Backend::setSpeedMadeGoodPlot(bool set) {
+  plotSmg_ = set;
+  refreshPlots();
+}
+
+
+void Backend::setHeadingPlot(bool set) {
+  plotHeading_ = set;
+  refreshPlots();
+}
+
+
+void Backend::setHeadingOrigPlot(bool set) {
+  plotHeadingOrig_ = set;
+  refreshPlots();
+}
+
+
+void Backend::setHeadingMadeGoodPlot(bool set) {
+  plotCmg_ = set;
+  refreshPlots();
+}
+
+
+void Backend::setSensorDepthPlot(bool set) {
+  plotDraft_ = set;
+  refreshPlots();
+}
+
+
+void Backend::setSensorDepthOrigPlot(bool set) {
+  plotDraftOrig_ = set;
+  refreshPlots();
+}
+
+
+void Backend::setAttitudePlot(bool set) {
     plotRoll_ = set;
     plotPitch_ = set;
     plotHeave_ = set;
-  }
-  else {
-    qWarning() << "setPlot(): Unhandled plot " << plotName;
-  }
 
-  qDebug() << "\ntimeInt_: " << plotTint_ <<
-    ", plotLat_: " << plotLat_ << ", plotLon_: " << plotLon_ <<
-    ", plotSpeed_: " << plotSpeed_ << ", plotHeading_: " << plotHeading_ <<
-    ", plotDraft_: " << plotDraft_;
+    refreshPlots();
+}
 
-  qDebug() << "plotRoll_: " << plotRoll_ << ", plotPitch_: " << plotPitch_ <<
-    ", plotHeave: " << plotHeave_;
-  
+
+void Backend::refreshPlots() {
   plot_all();
 
-  qDebug() << "swathPixmapImage_->update()";
   if (uiLoaded_) {
     swathPixmapImage_->update();
   }
-
-  return;
 }
-
 
 
 /*--------------------------------------------------------------------*/
@@ -5584,35 +5609,30 @@ int Backend::showMessage(const char *message) {
   return 0;
 }
 
-
-void Backend::onEditModeChanged(QString mode) {
-  qDebug() << "onEditModeChanged(): " << mode;
-  if (mode == GuiNames::pickModeStr) {
-    editMode_ = Pick;
-  }
-  else if (mode == GuiNames::selectModeStr) {
-    editMode_ = Select;
-  }
-  else if (mode == GuiNames::deselectModeStr) {
-    editMode_ = Deselect;
-  }
-  else if (mode == GuiNames::selectAllModeStr) {
-    editMode_ = SelectAll;
-  }
-  else if (mode == GuiNames::deselectModeStr) {
-    editMode_ = DeselectAll;
-  }
-  else if (mode == GuiNames::defineIntervalModeStr) {
-    editMode_ = DefineInterval;
-  }
-  else {
-    qWarning() << "Unknown edit mode: " << mode;
-  }
-
-  return;
-	  
+void Backend::setPickMode() {
+  editMode_ = Pick;
 }
 
+void Backend::setSelectMode() {
+  editMode_ = Pick;
+}
+
+
+void Backend::setDeselectMode() {
+  editMode_ = Deselect;
+}
+
+void Backend::setSelectAllMode() {
+  editMode_ = SelectAll;
+}
+
+void Backend::setDeselectAllMode() {
+  editMode_ = DeselectAll;
+}
+
+void Backend::setDefineIntervalMode() {
+  editMode_ = DefineInterval;
+}
 
 
 void Backend::onLeftButtonClicked(int x, int y) {

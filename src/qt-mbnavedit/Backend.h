@@ -10,7 +10,6 @@
 #include <QFontMetrics>
 #include <QQmlApplicationEngine>
 #include <QMessageBox>
-#include "GuiNames.h"
 #include "PixmapImage.h"
 #include "CPixmapDrawer.h"
 #include "Emitter.h"
@@ -451,13 +450,47 @@ protected:
 
 						      
 public:
+  /// Name of PixmapImage C++ object instantiated by QML, which holds
+  /// swath graphs; Backend C++ code draws into this object
+  static inline const char *swathPixmapObjStr = "swathPixmapObj";
+  Q_PROPERTY(QString swathPixmapObj READ swathPixmapObj CONSTANT)
+  QString swathPixmapObj() const {return QString::fromLatin1(swathPixmapObjStr);}
+
+  
   // These methods can be invoked directly by QML code
+  Q_INVOKABLE void setTimeIntPlot(bool set);
 
-  Q_INVOKABLE void setPlot(QString plotName, bool set);
+  Q_INVOKABLE void setTimeIntOrigPlot(bool set);
 
+  Q_INVOKABLE void setLatPlot(bool set);
+  Q_INVOKABLE void setLatOrigPlot(bool set);
+
+  Q_INVOKABLE void setLonPlot(bool set);
+  Q_INVOKABLE void setLonOrigPlot(bool set);
+
+  Q_INVOKABLE void setSpeedPlot(bool set);
+  Q_INVOKABLE void setSpeedOrigPlot(bool set);
+  Q_INVOKABLE void setSpeedMadeGoodPlot(bool set);  
+
+  Q_INVOKABLE void setHeadingPlot(bool set);
+  Q_INVOKABLE void setHeadingOrigPlot(bool set);
+  Q_INVOKABLE void setHeadingMadeGoodPlot(bool set);  
+
+  Q_INVOKABLE void setSensorDepthPlot(bool set);
+  Q_INVOKABLE void setSensorDepthOrigPlot(bool set);
+
+  Q_INVOKABLE void setAttitudePlot(bool set);
+  
+  
   /// Called when edit mode changed
-  Q_INVOKABLE void onEditModeChanged(QString modeName);
-
+  void Q_INVOKABLE setPickMode(void);
+  void Q_INVOKABLE setSelectMode(void);
+  void Q_INVOKABLE setDeselectMode(void);
+  void Q_INVOKABLE setSelectAllMode(void);
+  void Q_INVOKABLE setDeselectAllMode(void);
+  void Q_INVOKABLE setDefineIntervalMode(void);
+  
+    
   Q_INVOKABLE void onLeftButtonClicked(int x, int y);
 
   Q_INVOKABLE void onRightButtonClicked(int x, int y);
@@ -492,7 +525,9 @@ public:
   /// Invoked when main window is destroyed
   Q_INVOKABLE void onMainWindowDestroyed(void);
 
-
+protected:
+  
+  void refreshPlots(void);
 };
 
 
