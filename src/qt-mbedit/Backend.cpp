@@ -18,7 +18,6 @@
 #include <QFont>
 #include "CPixmapDrawer.h"
 #include "Backend.h"
-#include "GuiNames.h"
 
 extern "C" {
 #include "mb_status.h"
@@ -100,10 +99,10 @@ bool Backend::initialize(QObject *loadedRoot, int argc, char **argv) {
 
   // Find PixmapImage in QML object tree
   swathPixmapImage_ = 
-    ui_->findChild<mb_system::PixmapImage*>(GuiNames::swathPixmapObjStr);
+    ui_->findChild<mb_system::PixmapImage*>(swathPixmapObjStr);
 
   if (!swathPixmapImage_) {
-    qCritical() << "Couldn't find " << GuiNames::swathPixmapObjStr << " in QML";
+    qCritical() << "Couldn't find " << swathPixmapObjStr << " in QML";
     return false;
   }
 
@@ -154,92 +153,105 @@ void Backend::onMainWindowDestroyed() {
 
 }
 
+void Backend::displayNoAncillData() {
+  plotAncillData_ = NO_ANCILL;
+  plotSwath();
+}
 
-void Backend::onAncillDataChanged(QString msg) {
-  qDebug() << "*** onAncillDataChanged() msg: " << msg;
+void Backend::displayTime() {
+  plotAncillData_ = TIME;
+  plotSwath();
+}
 
-  if (msg == GuiNames::noneStr) {
-    plotAncillData_ = NO_ANCILL;
-  }
-  else if (msg == GuiNames::timeStr) {
-    plotAncillData_ = TIME;
-  }
-  else if (msg == GuiNames::intervalStr) {
-    plotAncillData_ = INTERVAL;
-  }
-  else if (msg == GuiNames::latitudeStr) {
-    plotAncillData_ = LATITUDE;
-  }
-  else if (msg == GuiNames::longitudeStr) {
-    plotAncillData_ = LONGITUDE;
-  }
-  else if (msg == GuiNames::headingStr) {
-    plotAncillData_ = HEADING;
-  }
-  else if (msg == GuiNames::speedStr) {
-    plotAncillData_ = SPEED;
-  }
-  else if (msg == GuiNames::depthStr) {
-    plotAncillData_ = DEPTH;
-  }
-  else if (msg == GuiNames::altitudeStr) {
-    plotAncillData_ = ALTITUDE;
-  }
-  else if (msg == GuiNames::sensorDepthStr) {
-    plotAncillData_ = SENSORDEPTH;
-  }
-  else if (msg == GuiNames::rollStr) {
-    plotAncillData_ = ROLL;
-  }
-  else if (msg == GuiNames::pitchStr) {
-    plotAncillData_ = PITCH;
-  }
-  else if (msg == GuiNames::heaveStr) {
-    plotAncillData_ = HEAVE;
-  }
-  else {
-    qWarning() << "Unknown ancillary data selected: " << msg;
-  }
+void Backend::displayInterval() {
+  plotAncillData_ = INTERVAL;
+  plotSwath();
+}
 
+void Backend::displayLatitude() {
+  plotAncillData_ = LATITUDE;
+  plotSwath();
+}
+
+void Backend::displayLongitude() {
+  plotAncillData_ = LONGITUDE;
+  plotSwath();
+}
+
+void Backend::displayHeading() {
+  plotAncillData_ = HEADING;
+  plotSwath();
+}
+
+void Backend::displaySpeed() {
+  plotAncillData_ = SPEED;
+  plotSwath();
+}
+
+void Backend::displayDepth() {
+  plotAncillData_ = DEPTH;
+  plotSwath();
+}
+
+void Backend::displayAltitude() {
+  plotAncillData_ = ALTITUDE;
+  plotSwath();
+}
+
+void Backend::displaySensorDepth() {
+  plotAncillData_ = SENSORDEPTH;
+  plotSwath();
+}
+
+void Backend::displayRoll() {
+  plotAncillData_ = ROLL;
+  plotSwath();
+}
+
+void Backend::displayPitch() {
+  plotAncillData_ = PITCH;
+  plotSwath();
+}
+
+void Backend::displayHeave() {
+  plotAncillData_ = HEAVE;
   plotSwath();
 }
 
 
-void Backend::onSliceChanged(QString slice) {
-  qDebug() << "onSliceChanged(): " << slice;
-  if (slice == GuiNames::alongTrackStr) {
-    sliceMode_ = ALONGTRACK;
-  }
-  else if (slice == GuiNames::crossTrackStr) {
-    sliceMode_ = ACROSSTRACK;
-  }
-  else if (slice == GuiNames::waterfallStr) {
-    sliceMode_ = WATERFALL;
-  }
-  else {
-    qWarning() << "Unknown slice option: " << slice;
-  }
+void Backend::setAlongTrackDisplay() {
+  sliceMode_ = ALONGTRACK;
+  plotSwath();
+}
 
+void Backend::setAcrossTrackDisplay() {
+  sliceMode_ = ACROSSTRACK;
+  plotSwath();
+}
+
+void Backend::setWaterfallDisplay() {
+  sliceMode_ = WATERFALL;
   plotSwath();
 }
 
 
-void Backend::onColorCodeChanged(QString code) {
-  if (code == GuiNames::bottomDetectStr) {
-    soundColorCoding_ = DETECT;
-  }
-  else if (code == GuiNames::pulseSourceStr) {
-    soundColorCoding_ = PULSE;
-  }
-  else if (code == GuiNames::flagStateStr) {
-    soundColorCoding_ = FLAG;    
-  }
-  else {
-    qWarning() << "Unknown color code option: " << code;    
-  }
 
+
+void Backend::setPulseColorCode() {
+  soundColorCoding_ = PULSE;
   plotSwath();
 }
+
+void Backend::setBottomDetectColorCode() {
+  soundColorCoding_ = DETECT;
+  plotSwath();  
+}
+
+void Backend::setFlagStateColorCode() {
+  soundColorCoding_ = FLAG;
+  plotSwath();  
+}
+
 
 
 bool Backend::plotSwath(void) {
@@ -393,33 +405,29 @@ void Backend::onPingStepChanged(double value) {
 }
 
 
-void Backend::onEditModeChanged(QString mode) {
-  qDebug() << "onEditModeChanged(): " << mode;
-
-  if (mode == GuiNames::toggleEditStr) {
-    editMode_ = TOGGLE;
-  }
-  else if (mode == GuiNames::pickEditStr) {
-    editMode_ = PICK;
-  }
-  else if (mode == GuiNames::eraseEditStr) {
-    editMode_ = ERASE;
-  }
-  else if (mode == GuiNames::restoreEditStr) {
-    editMode_ = RESTORE;
-  }
-  else if (mode == GuiNames::grabEditStr) {
-    editMode_ = GRAB;
-  }
-  else if (mode == GuiNames::infoEditStr) {
-    editMode_ = INFO;
-  }
-  
-  else {
-    qWarning() << "Unknown edit mode: " << mode;
-  }
+void Backend::setToggleMode() {
+  editMode_ = TOGGLE;
 }
 
+void Backend::setPickMode() {
+  editMode_ = PICK;
+}
+
+void Backend::setEraseMode() {
+  editMode_ = ERASE;
+}
+
+void Backend::setRestoreMode() {
+  editMode_ = RESTORE;
+}
+
+void Backend::setGrabMode() {
+  editMode_ = GRAB;
+}
+
+void Backend::setInfoMode() {
+  editMode_ = INFO;
+}
 
 void Backend::onLeftMouseButtonClicked(double x, double y) {
   qDebug() << "onLeftMouseButtonClicked()";

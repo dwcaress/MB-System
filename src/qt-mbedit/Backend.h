@@ -10,7 +10,6 @@
 #include <QFontMetrics>
 #include <QQmlApplicationEngine>
 #include <QMessageBox>
-#include "GuiNames.h"
 #include "PixmapImage.h"
 #include "CPixmapDrawer.h"
 #include "Emitter.h"
@@ -87,7 +86,12 @@ public:
   /// Emit signals on behalf of static member functions
   static mb_system::Emitter staticEmitter_;
 
-  // IVOKABLE methods can be invoked directly by QML code
+  /// Name of PixmapImage instantiated by QML, which holds swath graphs
+  static inline const char *swathPixmapObjStr = "swathPixmapObj";
+  Q_PROPERTY(QString swathPixmapObj READ swathPixmapObj CONSTANT)
+  QString swathPixmapObj() const {return QString::fromLatin1(swathPixmapObjStr);}
+  
+  // Q_INVOKABLE methods can be invoked directly by QML code
   
   /// Open and process swath file
   Q_INVOKABLE bool processSwathFile(QUrl swathFile);
@@ -98,10 +102,42 @@ public:
   Q_INVOKABLE void onVerticalExaggChanged(double value);
   Q_INVOKABLE void onPingStepChanged(double value); 
 
-  Q_INVOKABLE void onEditModeChanged(QString msg);
-  Q_INVOKABLE void onAncillDataChanged(QString msg);
-  Q_INVOKABLE void onSliceChanged(QString msg);
-  Q_INVOKABLE void onColorCodeChanged(QString msg);
+  /////  Q_INVOKABLE void onEditModeChanged(QString msg);
+  Q_INVOKABLE void setToggleMode(void);
+  Q_INVOKABLE void setPickMode(void);
+  Q_INVOKABLE void setEraseMode(void);
+  Q_INVOKABLE void setRestoreMode(void);
+  Q_INVOKABLE void setGrabMode(void);
+  Q_INVOKABLE void setInfoMode(void);
+  
+  /// Display ancillary data specified by msg
+  ///  Q_INVOKABLE void onAncillDataChanged(QString msg);
+
+  Q_INVOKABLE void displayNoAncillData(void);
+  Q_INVOKABLE void displayTime(void);
+  Q_INVOKABLE void displayInterval(void);
+  Q_INVOKABLE void displayLatitude(void);      
+  Q_INVOKABLE void displayLongitude(void);      
+  Q_INVOKABLE void displayHeading(void);
+  Q_INVOKABLE void displaySpeed(void);
+  Q_INVOKABLE void displayDepth(void);
+  Q_INVOKABLE void displayAltitude(void);
+  Q_INVOKABLE void displaySensorDepth(void);
+  Q_INVOKABLE void displayRoll(void);
+  Q_INVOKABLE void displayPitch(void);
+  Q_INVOKABLE void displayHeave(void);
+  
+  /// Plot sounding data in format specified by msg
+  //// Q_INVOKABLE void onSliceChanged(QString msg);
+
+  Q_INVOKABLE void setAlongTrackDisplay(void);
+  Q_INVOKABLE void setAcrossTrackDisplay(void);
+  Q_INVOKABLE void setWaterfallDisplay(void);
+  
+  //  Q_INVOKABLE void onColorCodeChanged(QString msg);
+  Q_INVOKABLE void setPulseColorCode(void);
+  Q_INVOKABLE void setBottomDetectColorCode(void);
+  Q_INVOKABLE void setFlagStateColorCode(void);
 
   Q_INVOKABLE void onLeftMouseButtonClicked(double x, double y);
   Q_INVOKABLE void onRightMouseButtonClicked(double x, double y);
@@ -125,9 +161,6 @@ protected:
     *height = canvasPixmap_->height();
   }
   
-  /// GUI item names
-  GuiNames *guiNames_;
-
   /// scaling between device and world x-coordinate
   double xScale_ = 1;
 
