@@ -4962,7 +4962,7 @@ int mbedit_plot_info() {
 		xg_justify(mbedit_xgid, string, &swidth, &sascent, &sdescent);
 		xg_drawstring(mbedit_xgid, xcen - swidth / 2, ymin - margin / 2 - 2 * (sascent + sdescent) + 3, string, pixel_values[MB_COLOR_BLACK],
 		              XG_SOLIDLINE);
-    fprintf(stdout, "\nSelected soundng:\n%s\n", string);
+    fprintf(stdout, "\nSelected sounding:\n%s\n", string);
 
 		sprintf(string, "Lon:%.5f deg  Lat:%.5f deg  Hdg:%.1f deg  Spd:%.1f km/hr",
             info_navlon, info_navlat, info_heading, info_speed);
