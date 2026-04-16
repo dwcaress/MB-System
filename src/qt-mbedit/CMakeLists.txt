@@ -33,7 +33,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-add_executable(qt-mbedit Backend.cpp GuiNames.h
+add_executable(qt-mbedit Backend.cpp
 	       main.cpp qml.qrc)
 
 target_include_directories(qt-mbedit PUBLIC ${CMAKE_SOURCE_DIR}/src/mbaux)
