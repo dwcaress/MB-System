@@ -136,6 +136,7 @@ static int process_ping(int verbose, int beams_bath, char *beamflag,
                        double *bath, double *bathlon, double *bathlat,
                        double time_d);
 static int write_xyz_file(const char *filename);
+static int write_projected_xyz_file(const char *filename);
 static void print_statistics();
 
 /*--------------------------------------------------------------------*/
@@ -180,14 +181,20 @@ int main(int argc, char **argv) {
   fprintf(stderr, "\nSwath data reading complete\n");
   print_statistics();
 
-  /* Write XYZ point cloud */
+  /* Write XYZ point cloud (lon/lat) */
   char xyz_file[MB_PATH_MAXLINE];
   snprintf(xyz_file, sizeof(xyz_file), "%s/pointcloud.xyz", output_dir);
   write_xyz_file(xyz_file);
 
+  /* Write projected XYZ point cloud (local meters) */
+  char projected_file[MB_PATH_MAXLINE];
+  snprintf(projected_file, sizeof(projected_file), "%s/adjustedPointcloud.xyz", output_dir);
+  write_projected_xyz_file(projected_file);
+
   fprintf(stderr, "\n=== Phase 1 Complete ===\n");
   fprintf(stderr, "Soundings collected: %zu\n", all_soundings.size());
   fprintf(stderr, "XYZ file written: %s\n", xyz_file);
+  fprintf(stderr, "Adjusted XYZ file written: %s\n", projected_file);
 
   /* TODO Phase 2: Build spatial index (octree/quadtree) from all_soundings */
   /* TODO Phase 3: Generate triangle meshes from indexed soundings */
@@ -693,6 +700,72 @@ static int write_xyz_file(const char *filename) {
 
   fclose(fp);
   fprintf(stderr, "  XYZ file written successfully\n");
+  return MB_SUCCESS;
+}
+
+/*--------------------------------------------------------------------*/
+/* CREATE PROJECTED .XYZ FILE (LOCAL METERS) */
+/*--------------------------------------------------------------------*/
+
+/**
+ * @brief Write soundings to XYZ file in local projected coordinates (meters)
+ *
+ * Converts lon/lat to local meters relative to the data centroid and
+ * centers depth around the mean. This makes the file viewable in
+ * generic 3D point cloud viewers without axis scale mismatch.
+ *
+ * @param filename Output file path
+ * @return MB_SUCCESS or error code
+ */
+static int write_projected_xyz_file(const char *filename) {
+  if (all_soundings.empty()) {
+    fprintf(stderr, "Warning: No soundings to write projected XYZ file\n");
+    return MB_FAILURE;
+  }
+
+  FILE *fp = fopen(filename, "w");
+  if (!fp) {
+    fprintf(stderr, "Error: Cannot create projected XYZ file: %s\n", filename);
+    return MB_FAILURE;
+  }
+
+  /* Compute centroid */
+  double sum_lon = 0.0, sum_lat = 0.0, sum_depth = 0.0;
+  for (const auto &s : all_soundings) {
+    sum_lon += s.longitude;
+    sum_lat += s.latitude;
+    sum_depth += s.depth;
+  }
+  double ref_lon = sum_lon / all_soundings.size();
+  double ref_lat = sum_lat / all_soundings.size();
+  double ref_depth = sum_depth / all_soundings.size();
+
+  /* Meters per degree at the reference latitude */
+  constexpr double m_per_deg_lat = 111132.0;
+  double m_per_deg_lon = 111132.0 * cos(ref_lat * M_PI / 180.0);
+
+  fprintf(stderr, "\nWriting projected XYZ point cloud: %s\n", filename);
+  fprintf(stderr, "  Reference point: lon=%.6f lat=%.6f depth=%.1f\n",
+          ref_lon, ref_lat, ref_depth);
+  fprintf(stderr, "  Scale: 1 deg lon = %.1f m, 1 deg lat = %.1f m\n",
+          m_per_deg_lon, m_per_deg_lat);
+  fprintf(stderr, "  Points: %zu\n", all_soundings.size());
+
+  /* Write header */
+  fprintf(fp, "# X(m) Y(m) Z(m) - local projected coordinates\n");
+  fprintf(fp, "# Reference: lon=%.8f lat=%.8f depth=%.3f\n",
+          ref_lon, ref_lat, ref_depth);
+
+  /* Write projected points */
+  for (const auto &s : all_soundings) {
+    double x = (s.longitude - ref_lon) * m_per_deg_lon;
+    double y = (s.latitude - ref_lat) * m_per_deg_lat;
+    double z = s.depth - ref_depth;
+    fprintf(fp, "%.3f %.3f %.3f\n", x, y, z);
+  }
+
+  fclose(fp);
+  fprintf(stderr, "  Projected XYZ file written successfully\n");
   return MB_SUCCESS;
 }
 
