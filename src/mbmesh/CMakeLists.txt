@@ -10,13 +10,15 @@
 message("In src/mbmesh")
 
 # mbmesh executable
-add_executable(mbmesh mbmesh.cpp)
+add_executable(mbmesh mbmesh.cpp pointcloud_glb_writer.cpp)
 
 # Link to MB-System mbio library
 target_link_libraries(mbmesh PRIVATE mbio)
 
-# Include MB-System headers
-target_include_directories(mbmesh PRIVATE ${CMAKE_SOURCE_DIR}/src/mbio)
+# Include MB-System headers and the bundled tinygltf headers
+target_include_directories(mbmesh PRIVATE
+  ${CMAKE_SOURCE_DIR}/src/mbio
+  ${CMAKE_SOURCE_DIR}/src/mbgrd2gltf)
 
 # Install
 install(TARGETS mbmesh DESTINATION ${CMAKE_INSTALL_BINDIR})

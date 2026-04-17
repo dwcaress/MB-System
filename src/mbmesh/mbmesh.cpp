@@ -55,10 +55,14 @@
 #include <cstdlib>
 #include <cstring>
 #include <getopt.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <vector>
 #include <algorithm>
 
+
+// Point cloud GLB export
+#include "pointcloud_glb_writer.h"
 
 // MB-System includes
 extern "C" {
@@ -137,6 +141,7 @@ static int process_ping(int verbose, int beams_bath, char *beamflag,
                        double time_d);
 static int write_xyz_file(const char *filename);
 static int write_projected_xyz_file(const char *filename);
+static int ensure_directory_exists(const char *path);
 static void print_statistics();
 
 /*--------------------------------------------------------------------*/
@@ -181,6 +186,11 @@ int main(int argc, char **argv) {
   fprintf(stderr, "\nSwath data reading complete\n");
   print_statistics();
 
+  if (ensure_directory_exists(output_dir) != MB_SUCCESS) {
+    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+    exit(MB_FAILURE);
+  }
+
   /* Write XYZ point cloud (lon/lat) */
   char xyz_file[MB_PATH_MAXLINE];
   snprintf(xyz_file, sizeof(xyz_file), "%s/pointcloud.xyz", output_dir);
@@ -196,6 +206,15 @@ int main(int argc, char **argv) {
   fprintf(stderr, "XYZ file written: %s\n", xyz_file);
   fprintf(stderr, "Adjusted XYZ file written: %s\n", projected_file);
 
+  /* Write a GLB point cloud from the adjusted XYZ file without modifying it */
+  char glb_file[MB_PATH_MAXLINE];
+  snprintf(glb_file, sizeof(glb_file), "%s/adjustedPointcloud.glb", output_dir);
+  if (write_pointcloud_glb_file(projected_file, glb_file, verbose) == 0) {
+    fprintf(stderr, "GLB point cloud file written: %s\n", glb_file);
+  } else {
+    fprintf(stderr, "Failed to write GLB point cloud file: %s\n", glb_file);
+  }
+
   /* TODO Phase 2: Build spatial index (octree/quadtree) from all_soundings */
   /* TODO Phase 3: Generate triangle meshes from indexed soundings */
   /* TODO Phase 4: Convert meshes to ECEF coordinates */
@@ -204,6 +223,28 @@ int main(int argc, char **argv) {
   fprintf(stderr, "\nReady for Phase 2 (spatial indexing)\n");
   fprintf(stderr, "\nProgram <%s> completed successfully\n", program_name);
   exit(MB_SUCCESS);
+}
+
+static int ensure_directory_exists(const char *path) {
+  struct stat st;
+  if (stat(path, &st) == 0) {
+    if (S_ISDIR(st.st_mode)) {
+      return MB_SUCCESS;
+    }
+
+    fprintf(stderr, "Error: Output path exists but is not a directory: %s\n", path);
+    return MB_FAILURE;
+  }
+
+  if (mkdir(path, 0755) == 0) {
+    if (verbose > 0) {
+      fprintf(stderr, "Created output directory: %s\n", path);
+    }
+    return MB_SUCCESS;
+  }
+
+  fprintf(stderr, "Error: Cannot create output directory %s\n", path);
+  return MB_FAILURE;
 }
 
 /*--------------------------------------------------------------------*/
