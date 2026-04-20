@@ -1,4 +1,3 @@
-import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Window 2.15
 import QtQuick.Controls.Universal 2.3
@@ -9,11 +8,11 @@ import QtQuick.Window 2.14
 import PixmapImage 1.0
 
 /* ***
-Display and edit swath file navigation metadata
+   Display and edit swath file navigation metadata
 
-NOTE: objectName values in this file MUST match object names used by C++ backend
+   NOTE: objectName values in this file MUST match object names used by C++ backend
 
-*** */
+   *** */
 
 Window {
     id: appWindow
@@ -30,17 +29,10 @@ Window {
 
     Component.onCompleted: {
 
-        // Synchronize GUI input control state with C++ backend
-
-        // Synchronize edit mode with backend
-        backend.onEditModeChanged(editModes.checkedButton.objectName);
-
-        // Synchronize preferred plots with backend
-        for (var i = 0; i < plotButtons.buttons.length; ++i) {
-            console.log('plot button: ', plotButtons.buttons[i])
-            backend.setPlot(plotButtons.buttons[i].objectName,
-	                    plotButtons.buttons[i].checked)
-        }
+        // Synchronize GUI input control state with C++ backend?
+        // Difficult to do here because each GUI button/checkbox has a different associated
+        // backend function to invoke. So instead we put that synchronization in the definition
+        // section for each button/checkbox.
 
     }
 
@@ -88,45 +80,49 @@ Window {
 
                 text: qsTr('Pick')
 
-                checked: true
                 ButtonGroup.group: editModes
-                onToggled: { backend.setPickMode();
-		     resetInterval.enabled = false }
+                onCheckedChanged: { if (checked) backend.setPickMode();
+                    resetInterval.enabled = false }
             }
 
             RadioButton {
                 text: qsTr('Select')
+                checked: true
                 ButtonGroup.group: editModes
-                onToggled: { backend.setSelectMode();
-		     resetInterval.enabled = false }
+                onCheckedChanged: { if (checked) backend.setSelectMode();
+                    resetInterval.enabled = false }
+
+                Component.onCompleted: {
+                    if (checked) backend.setSelectMode();
+                    resetInterval.enabled = false }
             }
 
             RadioButton {
                 text: qsTr('De-select')
                 ButtonGroup.group: editModes
-                onToggled: { backend.setDeselectMode();
-		   resetInterval.enabled = false }
+                onCheckedChanged: { if (checked) backend.setDeselectMode();
+                    resetInterval.enabled = false }
             }
 
             RadioButton {
                 text: qsTr('Select all')
                 ButtonGroup.group: editModes
-                onToggled: { backend.setSelectAllMode();
-		   resetInterval.enabled = false }
+                onCheckedChanged: { if (checked) backend.setSelectAllMode();
+                    resetInterval.enabled = false }
             }
 
             RadioButton {
                 text: qsTr('De-select all')
                 ButtonGroup.group: editModes
-                onToggled: { backend.setDeselectAllMode();
-		   resetInterval.enabled = false}
+                onCheckedChanged: { if (checked) backend.setDeselectAllMode();
+                    resetInterval.enabled = false}
             }
 
             RadioButton {
                 text: qsTr('Define interval')
                 ButtonGroup.group: editModes
-                onToggled: { backend.setDefineIntervalMode();
-		   resetInterval.enabled = true}
+                onCheckedChanged: { if (checked) backend.setDefineIntervalMode();
+                    resetInterval.enabled = true}
             }
 
             Button {
@@ -426,12 +422,12 @@ Window {
 
                             onPositionChanged: (mouse) => {
                                                    /* ****
-                                               console.log('Mouse moved at ',
-                                                          mouse.x, ', ', mouse.y);
-                                                console.log('pressed: ', pressed);
-                                               console.log('button: ', mouse.button);
-                                               console.log('buttons: ', mouse.buttons);
-                                               **** */
+                                   console.log('Mouse moved at ',
+                                   mouse.x, ', ', mouse.y);
+                                   console.log('pressed: ', pressed);
+                                   console.log('button: ', mouse.button);
+                                   console.log('buttons: ', mouse.buttons);
+                                   **** */
                                                    if (mouse.buttons == Qt.LeftButton) {
                                                        backend.onMouseMoved(mouse.x, mouse.y)
                                                    }
@@ -454,7 +450,7 @@ Window {
             // icon: StandardIcon.Question
             text: 'Quit application?'
             buttons: MessageDialog.Yes |
-                             MessageDialog.No
+                     MessageDialog.No
             Component.onCompleted: visible = false
             onAccepted: Qt.quit(0)
             // onNoClicked: console.log('did not quit')
