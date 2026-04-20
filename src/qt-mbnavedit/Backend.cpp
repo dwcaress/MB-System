@@ -97,7 +97,7 @@ Backend::Backend(int argc, char **argv) {
   QFont myFont("Helvetica [Cronyx]", 9);
   painter_->setFont(myFont);
 
-  init_globals();
+  init_members();
 
   /// UI not yet loaded
   uiLoaded_ = false;
@@ -340,7 +340,7 @@ void Backend::refreshPlots() {
 
 
 /*--------------------------------------------------------------------*/
-int Backend::init_globals(void) {
+int Backend::init_members(void) {
   /* set default global control parameters */
   outputMode_ = OUTPUT_MODE_OUTPUT;
   runMBProcess_ = false;
@@ -5609,28 +5609,35 @@ int Backend::showMessage(const char *message) {
   return 0;
 }
 
+
 void Backend::setPickMode() {
+  qDebug() << "setPickMode()";
   editMode_ = Pick;
 }
 
 void Backend::setSelectMode() {
-  editMode_ = Pick;
+  qDebug() << "setSelectMode()";  
+  editMode_ = Select;
 }
 
 
 void Backend::setDeselectMode() {
+  qDebug() << "setDeselectMode()";  
   editMode_ = Deselect;
 }
 
 void Backend::setSelectAllMode() {
+  qDebug() << "setSelectAllMode()";
   editMode_ = SelectAll;
 }
 
 void Backend::setDeselectAllMode() {
+  qDebug() << "setDeselectAllMode()";  
   editMode_ = DeselectAll;
 }
 
 void Backend::setDefineIntervalMode() {
+  qDebug() << "setDefineIntervalMode()";    
   editMode_ = DefineInterval;
 }
 
