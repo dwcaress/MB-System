@@ -7,12 +7,12 @@ import QtQuick.Window 2.14
 import PixmapImage 1.0
 
 /* ***
-Display and edit swath file pings/beams
+   Display and edit swath file pings/beams
 
-NOTE: objectName values in this file MUST match names used in
-findChild() C++ calls.
+   NOTE: objectName values in this file MUST match names used in
+   findChild() C++ calls.
 
-*** */
+   *** */
 
 
 Window {
@@ -41,144 +41,159 @@ Window {
         exclusive: true
     }
 
+
     MenuBar {
         id: menuBar
 
         Menu {
             title: qsTr("File")
             Action { text: qsTr("Open swath") ;
-                onTriggered: { console.log("show file dialog")
-                    fileDialog.open()} }
+                     onTriggered: { console.log("show file dialog")
+				    fileDialog.open()} }
             Action { text: qsTr("Available swath files") ;
-                onTriggered: { console.log("available swath files") }}
+                     onTriggered: { console.log("available swath files") }}
             Action { text: qsTr("Exit") ;
-                onTriggered: { console.log("exit"); quitDialog.open()}}
+                     onTriggered: { console.log("exit"); quitDialog.open()}}
 
         }
 
         Menu {
             title: qsTr("&View")
-            Action { checkable: true; text: qsTr("&Show flagged soundings") }
-            Action { checkable: true; text: qsTr("&Show flagged profiles") }
+
+	    Action {checkable: true; text: qsTr("&Show flagged soundings") }
+	    Action {checkable: true; text: qsTr("&Show flagged profiles") }
+
             MenuSeparator {}
             Menu {
                 title: "Ancillary data"
 
                 Action {checkable: true;
-		        checked: true;
+		        checked: true
                         text: qsTr("None");
                         ActionGroup.group: ancillaryData;
-                        onTriggered: backend.displayNoAncillData()
-                }
+                        onToggled:  {
+			    checked && backend.displayNoAncillData() }
+			
+			Component.onCompleted: {
+			    checked && backend.displayNoAncillData()}		
+                       }
 
                 Action {checkable: true; text: qsTr("Time");
-                    ActionGroup.group: ancillaryData;
-                    onTriggered: backend.displayTime()
-                }
+			ActionGroup.group: ancillaryData;
+			onToggled:  {
+			    checked &&  backend.displayTime()}
+                       }
 
                 Action {checkable: true;
-                    text: qsTr("Interval");
-                    ActionGroup.group: ancillaryData
-                    onTriggered: backend.displayInterval()
-                }
+			text: qsTr("Interval");
+			ActionGroup.group: ancillaryData
+			onToggled:  {
+			    checked && backend.displayInterval()}
+                       }
 
                 Action {checkable: true;
-                    text: qsTr("Latitude");
-                    ActionGroup.group: ancillaryData
-                    onTriggered: backend.displayLatitude()
-                }
+			text: qsTr("Latitude");
+			ActionGroup.group: ancillaryData
+			onToggled:  {checked &&  backend.displayLatitude()}
+                       }
 
                 Action {checkable: true;
-                    text: qsTr("Longitude");
-                    ActionGroup.group: ancillaryData
-                    onTriggered: backend.displayLongitude()
-                }
+			text: qsTr("Longitude");
+			ActionGroup.group: ancillaryData
+			onToggled:  {checked &&  backend.displayLongitude()}
+                       }
 		
                 Action {checkable: true;
-                    text: qsTr("Heading");
-                    ActionGroup.group: ancillaryData
-                    onTriggered: backend.displayHeading()
-                }
+			text: qsTr("Heading");
+			ActionGroup.group: ancillaryData
+			onToggled:  {checked &&  backend.displayHeading()}
+                       }
 		
                 Action {checkable: true;
-                    text: qsTr("Speed");
-                    ActionGroup.group: ancillaryData
-                    onTriggered: backend.displaySpeed()
-                }
+			text: qsTr("Speed");
+			ActionGroup.group: ancillaryData
+			onToggled:  {checked &&  backend.displaySpeed()}
+                       }
 		
                 Action {checkable: true;
-                    text: qsTr("Depth");
-                    ActionGroup.group: ancillaryData
-                    onTriggered: backend.displayDepth()
-                }
+			text: qsTr("Depth");
+			ActionGroup.group: ancillaryData
+			onToggled:  {checked &&  backend.displayDepth()}
+                       }
                 Action {checkable: true;
-                    text: qsTr("Altitude");
-                    ActionGroup.group: ancillaryData
-                    onTriggered: backend.displayAltitude()
-                }
+			text: qsTr("Altitude");
+			ActionGroup.group: ancillaryData
+			onToggled:  {checked &&  backend.displayAltitude()}
+                       }
                 Action {checkable: true;
-                    text: qsTr("Sensor depth");
-                    ActionGroup.group: ancillaryData
-                    onTriggered: backend.displaySensorDepth()
-                }
+			text: qsTr("Sensor depth");
+			ActionGroup.group: ancillaryData
+			onToggled:  {checked &&  backend.displaySensorDepth()}
+                       }
                 Action {checkable: true;
-                    text: qsTr("Roll");
-                    ActionGroup.group: ancillaryData
-                    onTriggered: backend.displayRoll()
-                }
+			text: qsTr("Roll");
+			ActionGroup.group: ancillaryData
+			onToggled:  {checked &&  backend.displayRoll()}
+                       }
                 Action {checkable: true;
-                    text: qsTr("Pitch");
-                    ActionGroup.group: ancillaryData
-                    onTriggered: backend.displayPitch()
-                }
+			text: qsTr("Pitch");
+			ActionGroup.group: ancillaryData
+			onToggled:  {checked &&  backend.displayPitch()}
+                       }
                 Action {checkable: true;
-                    text: qsTr("Heave");
-                    ActionGroup.group: ancillaryData
-                    onTriggered: backend.displayPitch()
-                }
+			text: qsTr("Heave");
+			ActionGroup.group: ancillaryData
+			onToggled:  {checked &&  backend.displayPitch()}
+                       }
 
             }
             MenuSeparator {}
             Menu {
                 title: "Slice"
-                Action {checkable: true; checked: true;
-                    text: qsTr("Waterfall"); ActionGroup.group: slice
-                    onTriggered: backend.setWaterfallDisplay()
-                }
-                Action {checkable: true;
-                    text: qsTr("Along-track"); ActionGroup.group: slice
-                    onTriggered: backend.setAlongTrackDisplay()
-                }
-                Action {checkable: true;
-                    text: qsTr("Cross-track"); ActionGroup.group: slice
-                    onTriggered: backend.setAcrossTrackDisplay()
-                }
+                Action {checkable: true
+			checked: true
+			text: qsTr("Waterfall"); ActionGroup.group: slice
+			onToggled:  {checked &&  backend.setWaterfallDisplay()}
+			Component.onCompleted: {
+			    checked && backend.setWaterfallDisplay()}		
+                       }
+                Action {checkable: true
+			text: qsTr("Along-track"); ActionGroup.group: slice
+			onToggled:  { checked &&  backend.setAlongTrackDisplay()}
+                       }
+                Action {checkable: true
+			text: qsTr("Cross-track"); ActionGroup.group: slice
+			onToggled:  {
+			    checked &&  backend.setAcrossTrackDisplay()}
+                       }
             }
             MenuSeparator {}
             Menu {
                 title: "Color-coding"
-                Action {/// objectName: 'bottomDetect';
-                    checkable: true; checked: true;
-                    text: qsTr("Bottom-detect algorithm");
-                    ActionGroup.group: colorCoding;
-                    /// onTriggered: backend.onColorCodeChanged(objectName)
-                    onTriggered: backend.setBottomDetectColorCode()
-		    }
-		    
-                Action {/// objectName: 'pulseSource';
-                    checkable: true;
-                    text: qsTr("Pulse source");
-                    ActionGroup.group: colorCoding;
-                    /// onTriggered: backend.onColorCodeChanged(objectName)
-                    onTriggered: backend.setPulseColorCode()
-		    }
-                Action {/// objectName: 'flagState'; checkable: true;
-                    text: qsTr("Flag state");
-                    ActionGroup.group: colorCoding;
-                    /// onTriggered: backend.onColorCodeChanged(objectName)
-                    onTriggered: backend.setFlagStateColorCode()
-		    }
+                Action {checkable: true
+		    checked: true
+		    text: qsTr("Bottom-detect algorithm")
+		    ActionGroup.group: colorCoding
+		    onToggled: {
+			checked && backend.setBottomDetectColorCode()}
+			Component.onCompleted: {
+			    checked && backend.setBottomDetectColorCode()}	
+		}
+
+                Action {checkable: true
+		    text: qsTr("Pulse source")
+		    ActionGroup.group: colorCoding
+		    onToggled:  {checked &&  backend.setPulseColorCode()}
+		}
+
+                Action {checkable: true
+		    text: qsTr("Flag state")
+		    ActionGroup.group: colorCoding
+		    onToggled:  {checked &&  backend.setFlagStateColorCode()}
+		}
             }
+	    
+	    MenuSeparator {}
 
         }
         Menu {
@@ -193,11 +208,11 @@ Window {
         Menu {
             title: "Help"
             Action {text: qsTr("About"); onTriggered: {
-                    console.log("show version info");
-                    myMessageDialog.text = qsTr("PROTOTYPE");
-                    myMessageDialog.open()
-                }
+                console.log("show version info");
+                myMessageDialog.text = qsTr("PROTOTYPE");
+                myMessageDialog.open()
             }
+		   }
         }
     }
 
@@ -229,7 +244,7 @@ Window {
                     live: false  // only update value when button released
                     Component.onCompleted: { backend.onXtrackChanged(value) }
                     onValueChanged: { console.log('xTrackSlider moved');
-                        backend.onXtrackChanged(value) }
+				      backend.onXtrackChanged(value) }
                 }
 
                 Label {
@@ -254,7 +269,7 @@ Window {
                 live: false  // only update value when button released
                 Component.onCompleted: { backend.onPingsShownChanged(value) }
                 onValueChanged: { console.log('pingsShownSlider moved: ', value);
-                    backend.onPingsShownChanged(value) }
+				  backend.onPingsShownChanged(value) }
             }
         }
 
@@ -266,7 +281,7 @@ Window {
             Layout.preferredHeight: 20
 
             Label { text: "VERTICAL exaggeration " +
-                          (verticalExaggSlider.value * 100).toFixed(1)}
+                    (verticalExaggSlider.value * 100).toFixed(1)}
             Slider {
                 id: verticalExaggSlider
                 objectName: "verticalExaggSliderObj"
@@ -291,7 +306,7 @@ Window {
                 live: false
                 Component.onCompleted: { backend.onPingStepChanged(value) }
                 onValueChanged: { console.log('pingStepSlider moved');
-                    backend.onPingStepChanged(value) }
+				  backend.onPingStepChanged(value) }
             }
         }
 
@@ -299,8 +314,7 @@ Window {
 
         ButtonGroup {
             id: editModes
-            objectName: "editModesObj"
-        }
+	}
 
         Flow {
             id: buttonRow
@@ -308,54 +322,47 @@ Window {
             Layout.fillHeight: true
             height: 20
 
+	    RadioButton {
+		text: qsTr("Toggle")
+		checked: true
+		ButtonGroup.group: editModes
+		onToggled: {checked && backend.setToggleMode()}
+		Component.onCompleted: {checked && backend.setToggleMode()}		
+	    }
 
             RadioButton {
-                /// checked: true
-                text: qsTr("Toggle")
-                ButtonGroup.group: editModes
-                onToggled: { backend.setToggleMode(); }
+		text: qsTr("Pick")
+		ButtonGroup.group: editModes
+		onToggled: {checked && backend.setPickMode()}
             }
 
             RadioButton {
-                text: qsTr("Pick")
-                ButtonGroup.group: editModes
-                onToggled: { backend.setPickMode(); }
+		text: qsTr("Erase")
+		ButtonGroup.group: editModes
+		onToggled: {checked && backend.setEraseMode()}
             }
 
             RadioButton {
-                text: qsTr("Erase")
-                ButtonGroup.group: editModes
-                onToggled: { backend.setEraseMode(); }
+		text: qsTr("Restore")
+		ButtonGroup.group: editModes
+		onToggled: {checked && backend.setRestoreMode()}
             }
 
             RadioButton {
-                text: qsTr("Restore")
-                ButtonGroup.group: editModes
-                onToggled: { backend.setRestoreMode(objectName); }
+		text: qsTr("Grab")
+		ButtonGroup.group: editModes
+		onToggled: {checked && backend.setGrabMode()}
             }
 
             RadioButton {
-                text: qsTr("Grab")
-                ButtonGroup.group: editModes
-                onToggled: { backend.setGrabMode(objectName); }
+		text: qsTr("Info")
+		ButtonGroup.group: editModes
+		onCheckedChanged: {checked && backend.setInfoMode()}
             }
-
-            RadioButton {
-                checked: true
-                Component.onCompleted: { backend.setInfoMode() }
-                text: qsTr("Info")
-                ButtonGroup.group: editModes
-                onToggled: { backend.setInfoMode(); }
-            }
-        }
+	}
 
 
-        ScrollView {
-
-            //           implicitHeight: Window.window.height * 0.5
-            //           implicitWidth: Window.window.width
-            //          anchors.left: parent.left
-            //           anchors.top: buttonRow.bottom
+	ScrollView {
             Layout.fillWidth: true
             Layout.fillHeight: true
             contentHeight: 5000
@@ -363,7 +370,7 @@ Window {
 
 
             ColumnLayout {
-                Rectangle {
+		Rectangle {
                     // Layout.fillWidth: true
                     // Grab selection matches when w=600
                     id: swathRectangle
@@ -372,116 +379,116 @@ Window {
                     height: Window.window.height
 
                     PixmapImage {
-                        id: swathPixmap
-                        objectName: backend.swathPixmapObj
-                        anchors.fill: parent
+			id: swathPixmap
+			objectName: backend.swathPixmapObj
+			anchors.fill: parent
                     }
 
                     MouseArea {
-                        id: swathMouseArea
-                        objectName: 'swathMouseAreaObj'
-                        // Fit exactly on PixmapImage to ensure proper scaling
-                        // and mapping of mouse events
-                        anchors.fill: swathPixmap
-                        onWidthChanged: { backend.onPixmapImageResize(swathMouseArea.width, swathMouseArea.height) }
-                        onHeightChanged: { backend.onPixmapImageResize(swathMouseArea.width, swathMouseArea.height) }
+			id: swathMouseArea
+			objectName: 'swathMouseAreaObj'
+			// Fit exactly on PixmapImage to ensure proper scaling
+			// and mapping of mouse events
+			anchors.fill: swathPixmap
+			onWidthChanged: { backend.onPixmapImageResize(swathMouseArea.width, swathMouseArea.height) }
+			onHeightChanged: { backend.onPixmapImageResize(swathMouseArea.width, swathMouseArea.height) }
 
 
-                        preventStealing: true
-                        hoverEnabled: false
-                        acceptedButtons: Qt.LeftButton | Qt.RightButton
+			preventStealing: true
+			hoverEnabled: false
+			acceptedButtons: Qt.LeftButton | Qt.RightButton
 
-                        onClicked: (mouse)=> {
-                                       /// console.log("Mouse clicked at ",
-                                       //        mouse.x, ", ", mouse.y)
-                                       if (mouse.button == Qt.LeftButton) {
-                                           // console.log('left clicked');
-                                           backend.onLeftMouseButtonClicked(mouse.x,
-                                                                            mouse.y);
-                                       }
-                                       else {
-                                           // console.log("right clicked");
-                                           backend.onRightMouseButtonClicked(mouse.x,
-                                                                             mouse.y);
-                                       }
-                                   }
+			onClicked: (mouse)=> {
+                            /// console.log("Mouse clicked at ",
+                            //        mouse.x, ", ", mouse.y)
+                            if (mouse.button == Qt.LeftButton) {
+				// console.log('left clicked');
+				backend.onLeftMouseButtonClicked(mouse.x,
+								 mouse.y);
+                            }
+                            else {
+				// console.log("right clicked");
+				backend.onRightMouseButtonClicked(mouse.x,
+								  mouse.y);
+                            }
+			}
 
 
-                        onPressed: (mouse) => {
-                                       console.log("Mouse pressed at ",
-                                                   mouse.x, ", ", mouse.y);
-                                       console.log('button: ', mouse.button);
-                                       if (mouse.button == Qt.LeftButton) {
-                                           backend.onLeftMouseButtonDown(mouse.x, mouse.y)
-                                       }
-                                   }
+			onPressed: (mouse) => {
+                            console.log("Mouse pressed at ",
+					mouse.x, ", ", mouse.y);
+                            console.log('button: ', mouse.button);
+                            if (mouse.button == Qt.LeftButton) {
+				backend.onLeftMouseButtonDown(mouse.x, mouse.y)
+                            }
+			}
 
-                        onReleased: (mouse) => {
-                                        console.log("Mouse released at ",
-                                                    mouse.x, ", ", mouse.y)
-                                        if (mouse.button == Qt.LeftButton) {
-                                            backend.onLeftMouseButtonUp(mouse.x, mouse.y)
-                                        }
-                                    }
+			onReleased: (mouse) => {
+                            console.log("Mouse released at ",
+					mouse.x, ", ", mouse.y)
+                            if (mouse.button == Qt.LeftButton) {
+				backend.onLeftMouseButtonUp(mouse.x, mouse.y)
+                            }
+			}
 
-                        onPositionChanged: (mouse) => {
-                                               console.log("Mouse moved at ",
-                                                           mouse.x, ", ", mouse.y);
-                                               console.log('pressed: ', pressed);
-                                               console.log('button: ', mouse.button);
-                                               console.log('buttons: ', mouse.buttons);
-                                               if (mouse.buttons == Qt.LeftButton) {
-                                                   backend.onMouseMove(mouse.x, mouse.y)
-                                               }
-                                               else {
-                                                   console.log('do not call backend')
-                                               }
-                                           }
+			onPositionChanged: (mouse) => {
+                            console.log("Mouse moved at ",
+					mouse.x, ", ", mouse.y);
+                            console.log('pressed: ', pressed);
+                            console.log('button: ', mouse.button);
+                            console.log('buttons: ', mouse.buttons);
+                            if (mouse.buttons == Qt.LeftButton) {
+				backend.onMouseMove(mouse.x, mouse.y)
+                            }
+                            else {
+				console.log('do not call backend')
+                            }
+			}
 
 
                     }
 
-                }
+		}
             }
-        }
+	}
     }
 
 
     MessageDialog {
-        id: quitDialog
-        title: "Quit?"
-        text: "Quit application?"
-        buttons: MessageDialog.Yes |
-                         MessageDialog.No
-        Component.onCompleted: visible = false
-        onAccepted: Qt.quit(0)
+	id: quitDialog
+	title: "Quit?"
+	text: "Quit application?"
+	buttons: MessageDialog.Yes |
+            MessageDialog.No
+	Component.onCompleted: visible = false
+	onAccepted: Qt.quit(0)
 
     }
 
 
     FileDialog {
-        id: fileDialog
-        title: "Open swath file"
-        nameFilters: ["Swath files (*.mb[0-9][0-9])"]
-        onAccepted: {
+	id: fileDialog
+	title: "Open swath file"
+	nameFilters: ["Swath files (*.mb[0-9][0-9])"]
+	onAccepted: {
             console.log("accepted " + selectedFile);
             backend.processSwathFile(selectedFile);
-        }
+	}
     }
 
     MessageDialog {
-        id: infoDialog
-        title: "Info"
-        text: "Text goes here"
-        buttons: MessageDialog.Ok
-        Component.onCompleted: visible = false
+	id: infoDialog
+	title: "Info"
+	text: "Text goes here"
+	buttons: MessageDialog.Ok
+	Component.onCompleted: visible = false
     }
 
 
     function showInfoDialog(message) {
-        console.log('showInfoDialog()', message);
-        infoDialog.text = message;
-        infoDialog.open();
+	console.log('showInfoDialog()', message);
+	infoDialog.text = message;
+	infoDialog.open();
     }
 }
 
