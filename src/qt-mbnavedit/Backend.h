@@ -76,6 +76,78 @@ public:
   /// Emit signals
   mb_system::Emitter emitter_;
 
+  /// Name of PixmapImage C++ object instantiated by QML, which holds
+  /// swath graphs; Backend C++ code draws into this object
+  static inline const char *swathPixmapObjStr = "swathPixmapObj";
+  Q_PROPERTY(QString swathPixmapObj READ swathPixmapObj CONSTANT)
+  QString swathPixmapObj() const {return QString::fromLatin1(swathPixmapObjStr);}
+
+  // These methods can be invoked directly by QML code
+  Q_INVOKABLE void setTimeIntPlot(bool set);
+
+  Q_INVOKABLE void setTimeIntOrigPlot(bool set);
+
+  Q_INVOKABLE void setLatPlot(bool set);
+  Q_INVOKABLE void setLatOrigPlot(bool set);
+
+  Q_INVOKABLE void setLonPlot(bool set);
+  Q_INVOKABLE void setLonOrigPlot(bool set);
+
+  Q_INVOKABLE void setSpeedPlot(bool set);
+  Q_INVOKABLE void setSpeedOrigPlot(bool set);
+  Q_INVOKABLE void setSpeedMadeGoodPlot(bool set);  
+
+  Q_INVOKABLE void setHeadingPlot(bool set);
+  Q_INVOKABLE void setHeadingOrigPlot(bool set);
+  Q_INVOKABLE void setHeadingMadeGoodPlot(bool set);  
+
+  Q_INVOKABLE void setSensorDepthPlot(bool set);
+  Q_INVOKABLE void setSensorDepthOrigPlot(bool set);
+
+  Q_INVOKABLE void setAttitudePlot(bool set);
+  
+  
+  /// Called when edit mode changed
+  Q_INVOKABLE void setPickMode(void);
+  Q_INVOKABLE void setSelectMode(void);
+  Q_INVOKABLE void setDeselectMode(void);
+  Q_INVOKABLE void setSelectAllMode(void);
+  Q_INVOKABLE void setDeselectAllMode(void);
+  Q_INVOKABLE void setDefineIntervalMode(void);
+    
+  Q_INVOKABLE void onLeftButtonClicked(int x, int y);
+
+  Q_INVOKABLE void onRightButtonClicked(int x, int y);
+
+  Q_INVOKABLE void onMiddleButtonClicked(int x, int y);
+
+  Q_INVOKABLE void onMouseMoved(int x, int y);
+
+  /// Invoked by QML when resize occurs; sets xScale_ and yScale member values
+  Q_INVOKABLE void onPixmapImageResize(int width, int height);
+    
+  /// Reset time interval
+  Q_INVOKABLE void onResetInterval(void);
+
+  /// Move swath view to start
+  Q_INVOKABLE void onGoStart(void);
+
+  /// Move swath view forward
+  Q_INVOKABLE void onGoForward(void);
+
+  /// Move swath view back
+  Q_INVOKABLE void onGoBack(void);
+
+  /// Move swath view to end
+  Q_INVOKABLE void onGoEnd(void);
+
+  // Interpolate around selected points
+  Q_INVOKABLE void onInterpolate(void);
+
+  Q_INVOKABLE void onInterpolateRepeat();
+  
+  /// Invoked when main window is destroyed
+  Q_INVOKABLE void onMainWindowDestroyed(void);
 
 protected:
 
@@ -338,7 +410,7 @@ protected:
   
   int set_graphics(void *xgid, int ncol);
 
-  int init_globals(void);
+  int init_members(void);
   
   int clear_screen(void);
 
@@ -448,85 +520,6 @@ protected:
 
   int plot_draft_value(int iplot, int iping);
 
-						      
-public:
-  /// Name of PixmapImage C++ object instantiated by QML, which holds
-  /// swath graphs; Backend C++ code draws into this object
-  static inline const char *swathPixmapObjStr = "swathPixmapObj";
-  Q_PROPERTY(QString swathPixmapObj READ swathPixmapObj CONSTANT)
-  QString swathPixmapObj() const {return QString::fromLatin1(swathPixmapObjStr);}
-
-  
-  // These methods can be invoked directly by QML code
-  Q_INVOKABLE void setTimeIntPlot(bool set);
-
-  Q_INVOKABLE void setTimeIntOrigPlot(bool set);
-
-  Q_INVOKABLE void setLatPlot(bool set);
-  Q_INVOKABLE void setLatOrigPlot(bool set);
-
-  Q_INVOKABLE void setLonPlot(bool set);
-  Q_INVOKABLE void setLonOrigPlot(bool set);
-
-  Q_INVOKABLE void setSpeedPlot(bool set);
-  Q_INVOKABLE void setSpeedOrigPlot(bool set);
-  Q_INVOKABLE void setSpeedMadeGoodPlot(bool set);  
-
-  Q_INVOKABLE void setHeadingPlot(bool set);
-  Q_INVOKABLE void setHeadingOrigPlot(bool set);
-  Q_INVOKABLE void setHeadingMadeGoodPlot(bool set);  
-
-  Q_INVOKABLE void setSensorDepthPlot(bool set);
-  Q_INVOKABLE void setSensorDepthOrigPlot(bool set);
-
-  Q_INVOKABLE void setAttitudePlot(bool set);
-  
-  
-  /// Called when edit mode changed
-  void Q_INVOKABLE setPickMode(void);
-  void Q_INVOKABLE setSelectMode(void);
-  void Q_INVOKABLE setDeselectMode(void);
-  void Q_INVOKABLE setSelectAllMode(void);
-  void Q_INVOKABLE setDeselectAllMode(void);
-  void Q_INVOKABLE setDefineIntervalMode(void);
-  
-    
-  Q_INVOKABLE void onLeftButtonClicked(int x, int y);
-
-  Q_INVOKABLE void onRightButtonClicked(int x, int y);
-
-  Q_INVOKABLE void onMiddleButtonClicked(int x, int y);
-
-  Q_INVOKABLE void onMouseMoved(int x, int y);
-
-  /// Invoked by QML when resize occurs; sets xScale_ and yScale member values
-  Q_INVOKABLE void onPixmapImageResize(int width, int height);
-    
-  /// Reset time interval
-  Q_INVOKABLE void onResetInterval(void);
-
-  /// Move swath view to start
-  Q_INVOKABLE void onGoStart(void);
-
-  /// Move swath view forward
-  Q_INVOKABLE void onGoForward(void);
-
-  /// Move swath view back
-  Q_INVOKABLE void onGoBack(void);
-
-  /// Move swath view to end
-  Q_INVOKABLE void onGoEnd(void);
-
-  // Interpolate around selected points
-  Q_INVOKABLE void onInterpolate(void);
-
-  Q_INVOKABLE void onInterpolateRepeat();
-  
-  /// Invoked when main window is destroyed
-  Q_INVOKABLE void onMainWindowDestroyed(void);
-
-protected:
-  
   void refreshPlots(void);
 };
 
