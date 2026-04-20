@@ -220,16 +220,19 @@ void Backend::displayHeave() {
 
 
 void Backend::setAlongTrackDisplay() {
+  qDebug() << "setAlongTrackDisplay()";
   sliceMode_ = ALONGTRACK;
   plotSwath();
 }
 
 void Backend::setAcrossTrackDisplay() {
+  qDebug() << "setAcrossTrackDisplay()";
   sliceMode_ = ACROSSTRACK;
   plotSwath();
 }
 
 void Backend::setWaterfallDisplay() {
+  qDebug() << "setWaterfallDisplay()";
   sliceMode_ = WATERFALL;
   plotSwath();
 }
@@ -406,26 +409,32 @@ void Backend::onPingStepChanged(double value) {
 
 
 void Backend::setToggleMode() {
+  qDebug() << "setToggleMode()";  
   editMode_ = TOGGLE;
 }
 
 void Backend::setPickMode() {
+  qDebug() << "setPickMode()";
   editMode_ = PICK;
 }
 
 void Backend::setEraseMode() {
+  qDebug() << "setEraseMode()";
   editMode_ = ERASE;
 }
 
 void Backend::setRestoreMode() {
+  qDebug() << "setRestoreMode()";
   editMode_ = RESTORE;
 }
 
 void Backend::setGrabMode() {
+  qDebug() << "setGrabMode()";  
   editMode_ = GRAB;
 }
 
 void Backend::setInfoMode() {
+  qDebug() << "setInfoMode()";
   editMode_ = INFO;
 }
 
