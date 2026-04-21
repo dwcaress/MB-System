@@ -13,6 +13,7 @@
 #include "PixmapImage.h"
 #include "Emitter.h"
 
+using namespace qt_mbedit;
 
 // Pointer to backend, to be used by signal handler 
 Backend *backend_ = nullptr;

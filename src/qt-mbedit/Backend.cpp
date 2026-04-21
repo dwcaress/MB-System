@@ -28,9 +28,11 @@ extern "C" {
 #define MBEDIT_OUTBOUNDS_FLAGGED 1
 #define MBEDIT_OUTBOUNDS_UNFLAGGED 2
 
+using namespace mb_system;
+using namespace qt_mbedit;
+
 mb_system::Emitter Backend::staticEmitter_;
 
-using namespace mb_system;
 
 Backend::Backend(int argc, char **argv) {
 
