@@ -13,6 +13,8 @@
 #include "PixmapImage.h"
 #include "Emitter.h"
 
+using namespace qt_mbnavedit;
+
 // Reference for interrupt handler
 Backend *theBackend_ = nullptr;
 

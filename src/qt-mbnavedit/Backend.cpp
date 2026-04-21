@@ -30,6 +30,10 @@ extern "C" {
 #include "mb_status.h"
 }
 
+extern char *optarg;
+
+using namespace qt_mbnavedit;
+
 Backend::Ping Backend::ping_[MBNAVEDIT_BUFFER_SIZE] = {};
 
 /* Mode value defines */
@@ -450,8 +454,6 @@ int Backend::init(int argc, char **argv, bool *startup_file) {
 
   int fileflag = 0;
 
-  /* parsing variables */
-  extern char *optarg;
   int errflg = 0;
   int c;
   int help = 0;
