@@ -114,10 +114,10 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 INPUT = .
 INPUT +=                 mainpage.h
-INPUT +=                  ../src/qt-mbgrdviz
-INPUT +=                 ../src/qt-mbgrdviz-2
-INPUT +=                 ../src/qt-mbgrdviz-3
 INPUT +=                 ../src/qt-guilib
+INPUT +=                  ../src/qt-mbgrdviz
+INPUT +=                  ../src/qt-mbedit
+INPUT +=                  ../src/qt-mbnavedit
 INPUT +=                 ../src/mbio
 INPUT +=                 ../src/mbeditviz
 
