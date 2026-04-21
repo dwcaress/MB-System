@@ -30,8 +30,9 @@ Window {
     Component.onCompleted: {
 
         // Synchronize GUI input control state with C++ backend?
-        // Difficult to do here because each GUI button/checkbox has a different associated
-        // backend function to invoke. So instead we put that synchronization in the definition
+        // Difficult to do here because each GUI button/checkbox has a
+	// different associated backend function to invoke. So instead we
+	// put that synchronization in the definition
         // section for each button/checkbox.
 
     }
