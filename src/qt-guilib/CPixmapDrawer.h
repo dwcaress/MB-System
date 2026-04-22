@@ -9,16 +9,20 @@
 #include "mb_define.h"
 
 namespace mb_system {
-
-  ///
-  /// Pointers to static methods of this class can be passed to and invoked
-  /// by legacy MB-System C code
+  /**
+  Draws shapes and text into a QPainter.
+  Signatures of the static member functions are consistent with those expected
+  by the mbedit_prog C module, which can draw using either these Qt-based
+  functions (e.g. qt-mbedit application) or with X11-based C functions
+  defined in mb_xgraphics (legacy mbedit X11/Motif application).
+  The first argument of these static member functions is required
+  by the mbedit_prog prototypes, but is unused by this Qt implementation. */
   class CPixmapDrawer {
 
   public:
 
     CPixmapDrawer(QPainter *painter);
-    
+
     static void drawLine(void *dummy, int x1, int y1, int x2, int y2,
 		       MB_DrawingColor color, int style);
   
