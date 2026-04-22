@@ -11,7 +11,6 @@
 #include <QQmlApplicationEngine>
 #include <QMessageBox>
 #include "PixmapImage.h"
-#include "CPixmapDrawer.h"
 #include "Emitter.h"
 
 
@@ -19,9 +18,13 @@ extern "C" {
 #include "mbedit_prog.h"
 }
 
+// Unique namespace to avoid name collision with Backend class
 namespace qt_mbedit {
-  /** mbedit Backend application logic; QObject subclass, so it can exchange
-      info with QML  */
+
+  /** qt-mbedit Backend application logic; some of the class methods
+      invoke 'C' functions defined in mbedit_prog.h 
+      QObject subclass, so it can exchange
+      info with QML.  */
   class Backend : public QObject  {
 
     /// This macro needed to enable info exchange with QML
@@ -162,7 +165,7 @@ namespace qt_mbedit {
     /// UI root object
     QObject *ui_;
 
-    /// QML-declared PixmapImage
+    /// QML-declared PixmapImage; displayed graphical data
     mb_system::PixmapImage *swathPixmapImage_;
   
     /// Test drawing to canvas
