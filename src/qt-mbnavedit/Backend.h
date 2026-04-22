@@ -11,7 +11,6 @@
 #include <QQmlApplicationEngine>
 #include <QMessageBox>
 #include "PixmapImage.h"
-#include "CPixmapDrawer.h"
 #include "Emitter.h"
 
 extern "C" {
@@ -25,10 +24,17 @@ extern "C" {
 
 #define MBNAVEDIT_BUFFER_SIZE 1000000
 
+// Unique namespace to avoid name collision with Backend class
 namespace qt_mbnavedit {
   
-  /** mbnavedit backend application logic; QObject subclass, so it can exchange
-      info with QML  */
+  /** qt-mbnavedit Backend application logic; QObject subclass, so it can
+      exchange info with QML. Backend reads a specified swath file and
+      displays its data by drawing into a QPixmap with a QPainter
+      (via mb_system::PixmapDrawer). Backend expects that accompanying
+      QML declares a mb_system::PixmapImage with specific
+      name, and associates the QPixmap with it, so that data is painted by the
+      PixmapImage. 
+  */
   class Backend : public QObject  {
 
     /// This macro needed to enable info exchange with QML
@@ -153,6 +159,9 @@ namespace qt_mbnavedit {
 
   protected:
 
+    /// Passed as first argument to CPixmapDrawer functions, not used by them
+    void *dummy_;
+    
     /// Mutually-exclusive edit modes 
     enum EditMode {
       Pick,
