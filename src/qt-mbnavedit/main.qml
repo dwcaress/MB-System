@@ -381,10 +381,15 @@ Window {
                             acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
                             preventStealing: true
 
-                            // mouseArea and pixmapImage are aligned, so notify backend of mouseArea
-                            // size change, so backend maintains proper scaling/mouse-event mapping
-                            onWidthChanged: { console.log('mouseArea width = ', swathMouseArea.width);
-                                backend.onPixmapImageResize(swathMouseArea.width, swathMouseArea.height) }
+                            // mouseArea and pixmapImage are aligned, so
+			    // notify backend of mouseArea
+                            // size change, so backend can maintain proper
+			    // scaling/mouse-event mapping
+                            onWidthChanged: {
+				console.log('mouseArea width=',
+					    swathMouseArea.width);
+                                backend.onPixmapImageResize(swathMouseArea.width,
+							    swathMouseArea.height) }
                             onHeightChanged: { console.log('mouseArea height: ', swathMouseArea.height)
                                 backend.onPixmapImageResize(swathMouseArea.width, swathMouseArea.height)}
 
