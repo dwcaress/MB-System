@@ -119,7 +119,9 @@ INPUT +=                  ../src/qt-mbgrdviz
 INPUT +=                  ../src/qt-mbedit
 INPUT +=                  ../src/qt-mbnavedit
 INPUT +=                 ../src/mbio
+INPUT +=                 ../src/mbedit
 INPUT +=                 ../src/mbeditviz
+INPUT +=                 ../src/mbaux
 
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.c \
