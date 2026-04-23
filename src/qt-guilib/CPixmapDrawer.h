@@ -11,10 +11,12 @@
 namespace mb_system {
   /**
   Draws shapes and text into a QPainter.
-  Signatures of the static member functions are consistent with those expected
-  by the mbedit_prog C module, which can draw using either these Qt-based
+  Static member functions can of course be called by C code
+  and their signatures are consistent with those expected
+  by C functions defined in mbedit_prog.h module. Thus mbedit_prog can
+  draw using either these Qt-based
   functions (e.g. qt-mbedit application) or with X11-based C functions
-  defined in mb_xgraphics (legacy mbedit X11/Motif application).
+  defined in mb_xgraphics.h (legacy mbedit X11/Motif application).
   The first argument of these static member functions is required
   by the mbedit_prog prototypes, but is unused by this Qt implementation. */
   class CPixmapDrawer {
@@ -38,7 +40,8 @@ namespace mb_system {
     static void justifyString(void *dummy, char *string, int *width,
 			      int *ascent, int *descent);
 
-    /// Set QPainter static pointer member
+    /// Set QPainter* static member (the QPainter has an associated
+    /// QPixmap)
     static void setPainter(QPainter *painter) {
       painter_ = painter;
     }
@@ -48,8 +51,9 @@ namespace mb_system {
     /// Set QPainter pen color and style
     static void setPenColorAndStyle(MB_DrawingColor color, int style);
 
-    
+    /// Graphics are drawn through QPainter
     static QPainter *painter_;
+
     static QString textBuf_;
     static QFontMetrics *fontMetrics_;    
   };

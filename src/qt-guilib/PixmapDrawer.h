@@ -11,7 +11,7 @@
 namespace mb_system {
 
   ///
-  /// Primitive methods for drawing shapes into QPixmap
+  /// Methods to draw primitive graphics into a QPixmap
   class PixmapDrawer {
 
   public:
