@@ -80,7 +80,7 @@ constexpr char help_message[] =
     "Phase 1 implementation reads and validates swath data input.";
 
 constexpr char usage_message[] =
-    "mbmesh -Idatalist [-Rwest/east/south/north] [-Ooutdir]\n"
+  "mbmesh -Idatalist [-Rwest/east/south/north] [-Ooutdir] [-html]\n"
     "       [-V -H]";
 
 /*--------------------------------------------------------------------*/
@@ -116,6 +116,7 @@ static char read_datalist[MB_PATH_MAXLINE] = "datalist.mb-1";
 static char output_dir[MB_PATH_MAXLINE] = "./tileset";
 static bool bounds_specified = false;
 static double bounds[4] = {-180.0, 180.0, -90.0, 90.0};  // west, east, south, north
+static bool html_output = false;
 
 // Statistics
 static int nfile = 0;               // Number of files in datalist
@@ -141,6 +142,8 @@ static int process_ping(int verbose, int beams_bath, char *beamflag,
                        double time_d);
 static int write_xyz_file(const char *filename);
 static int write_projected_xyz_file(const char *filename);
+static int write_html_file(const char *filename, const char *glb_filename);
+static int launch_html_viewer_server(const char *directory, const char *html_filename);
 static int ensure_directory_exists(const char *path);
 static void print_statistics();
 
@@ -169,6 +172,7 @@ int main(int argc, char **argv) {
     } else {
       fprintf(stderr, "  Geographic bounds: [unbounded]\n");
     }
+    fprintf(stderr, "  HTML output: %s\n", html_output ? "enabled" : "disabled");
     fprintf(stderr, "  Verbose level: %d\n", verbose);
   }
 
@@ -213,6 +217,19 @@ int main(int argc, char **argv) {
     fprintf(stderr, "GLB point cloud file written: %s\n", glb_file);
   } else {
     fprintf(stderr, "Failed to write GLB point cloud file: %s\n", glb_file);
+  }
+
+  if (html_output) {
+    char html_file[MB_PATH_MAXLINE];
+    snprintf(html_file, sizeof(html_file), "%s/adjustedPointcloud.html", output_dir);
+    if (write_html_file(html_file, "adjustedPointcloud.glb") == MB_SUCCESS) {
+      fprintf(stderr, "HTML viewer file written: %s\n", html_file);
+      if (launch_html_viewer_server(output_dir, "adjustedPointcloud.html") != MB_SUCCESS) {
+        fprintf(stderr, "Warning: Failed to auto-launch Python web server/viewer.\n");
+      }
+    } else {
+      fprintf(stderr, "Failed to write HTML viewer file: %s\n", html_file);
+    }
   }
 
   /* TODO Phase 2: Build spatial index (octree/quadtree) from all_soundings */
@@ -261,13 +278,24 @@ static int parse_options(int argc, char **argv) {
       {"verbose", no_argument, nullptr, 0},
       {"help", no_argument, nullptr, 0},
       {"input", required_argument, nullptr, 0},
+      {"html", no_argument, nullptr, 0},
       {nullptr, 0, nullptr, 0}};
+
+  // Support legacy single-dash long form requested by users: -html
+  for (int i = 1; i < argc; i++) {
+    if (strcmp(argv[i], "-html") == 0) {
+      argv[i] = (char *)"--html";
+    }
+  }
 
   /* Process command line options */
   while ((c = getopt_long(argc, argv, "I:O:R:VvHh", long_options, &option_index)) != -1) {
     switch (c) {
     case 0:
       /* Handle long options */
+      if (strcmp(long_options[option_index].name, "html") == 0) {
+        html_output = true;
+      }
       break;
 
     case 'I':
@@ -329,6 +357,7 @@ static void print_help() {
   fprintf(stderr, "\nOptional:\n");
   fprintf(stderr, "  -O<outputdir>      Output directory [./tileset]\n");
   fprintf(stderr, "  -R<w/e/s/n>        Geographic bounds (degrees)\n");
+  fprintf(stderr, "  -html              Also write adjustedPointcloud.html viewer file\n");
   fprintf(stderr, "  -V                 Increase verbosity (can repeat: -V -V)\n");
   fprintf(stderr, "  -H                 Print this help message\n");
   fprintf(stderr, "\nPhase 1 Implementation:\n");
@@ -807,6 +836,78 @@ static int write_projected_xyz_file(const char *filename) {
 
   fclose(fp);
   fprintf(stderr, "  Projected XYZ file written successfully\n");
+  return MB_SUCCESS;
+}
+
+/*--------------------------------------------------------------------*/
+/* CREATE HTML VIEWER FILE */
+/*--------------------------------------------------------------------*/
+
+static int write_html_file(const char *filename, const char *glb_filename) {
+  FILE *fp = fopen(filename, "w");
+  if (!fp) {
+    fprintf(stderr, "Error: Cannot create HTML file: %s\n", filename);
+    return MB_FAILURE;
+  }
+
+  fprintf(fp, "<html>\n");
+  fprintf(fp, "    <head>\n");
+  fprintf(fp, "        <title>MB-System Adjusted Point Cloud Viewer</title>\n");
+  fprintf(fp, "        <script type='text/javascript' src='http://www.x3dom.org/download/x3dom.js'></script>\n");
+  fprintf(fp, "        <link rel='stylesheet' type='text/css' href='http://www.x3dom.org/download/x3dom.css'></link>\n");
+  fprintf(fp, "    </head>\n");
+  fprintf(fp, "    <body>\n");
+  fprintf(fp, "        <h1>MB-System Adjusted Point Cloud Viewer</h1>\n");
+  fprintf(fp, "        <p>\n");
+  fprintf(fp, "            Viewing adjustedPointcloud.glb exported by mbmesh from swath sonar data.\n");
+  fprintf(fp, "        </p>\n");
+  fprintf(fp, "        <x3d>\n");
+  fprintf(fp, "            <scene>\n");
+  fprintf(fp, "                <transform>\n");
+  fprintf(fp, "                    <inline url=\"%s\"></inline>\n", glb_filename);
+  fprintf(fp, "                </transform>\n");
+  fprintf(fp, "            </scene>\n");
+  fprintf(fp, "        </x3d>\n");
+  fprintf(fp, "    </body>\n");
+  fprintf(fp, "</html>\n");
+
+  fclose(fp);
+  return MB_SUCCESS;
+}
+
+/*--------------------------------------------------------------------*/
+/* LAUNCH HTML VIEWER */
+/*--------------------------------------------------------------------*/
+
+static int launch_html_viewer_server(const char *directory, const char *html_filename) {
+  if (directory == nullptr || html_filename == nullptr) {
+    return MB_FAILURE;
+  }
+
+  const int port = 8000;
+
+  char server_command[MB_PATH_MAXLINE * 2];
+  snprintf(server_command, sizeof(server_command),
+           "python3 -m http.server %d --bind 127.0.0.1 --directory \"%s\" >/tmp/mbmesh_http.log 2>&1 &",
+           port, directory);
+
+  int server_status = system(server_command);
+  if (server_status != 0) {
+    return MB_FAILURE;
+  }
+
+  char open_command[MB_PATH_MAXLINE * 2];
+  snprintf(open_command, sizeof(open_command),
+           "python3 -c \"import webbrowser; webbrowser.open('http://127.0.0.1:%d/%s')\"",
+           port, html_filename);
+
+  int open_status = system(open_command);
+  if (open_status != 0) {
+    return MB_FAILURE;
+  }
+
+  fprintf(stderr, "Started Python web server at http://127.0.0.1:%d/%s\n", port, html_filename);
+  fprintf(stderr, "Server logs: /tmp/mbmesh_http.log\n");
   return MB_SUCCESS;
 }
 
