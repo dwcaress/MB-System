@@ -244,7 +244,7 @@ static int write_ecef_xyz_file(const char *filename) {
     return MB_FAILURE;
   }
 
-  /* Compute centroid (same as projected) */
+  /* Compute centroid (GeoOrigin, same as projected) */
   double sum_lon = 0.0, sum_lat = 0.0, sum_depth = 0.0;
   for (const auto &s : all_soundings) {
     sum_lon += s.longitude;
@@ -255,6 +255,10 @@ static int write_ecef_xyz_file(const char *filename) {
   double ref_lat = sum_lat / all_soundings.size();
   double ref_depth = sum_depth / all_soundings.size();
 
+  // Compute GeoOrigin ECEF offset
+  double x0, y0, z0;
+  geodetic_to_ecef(ref_lon, ref_lat, -ref_depth, &x0, &y0, &z0);
+
   FILE *fp = fopen(filename, "w");
   if (!fp) {
     fprintf(stderr, "Error: Cannot create ECEF XYZ file: %s\n", filename);
@@ -262,25 +266,24 @@ static int write_ecef_xyz_file(const char *filename) {
   }
 
   // User-facing output, matching other point cloud writers
-  // [ADDED] Print file name and number of points for ECEF output
   fprintf(stderr, "\nWriting ECEF XYZ point cloud: %s\n", filename);
   fprintf(stderr, "  Points: %zu\n", all_soundings.size());
 
   /* Write header */
-  fprintf(fp, "# X(m) Y(m) Z(m) - ECEF coordinates (WGS84)\n");
-  fprintf(fp, "# Reference: lon=%.8f lat=%.8f depth=%.3f\n",
+  fprintf(fp, "# X(m) Y(m) Z(m) - ECEF coordinates (WGS84, GeoOrigin offset)\n");
+  fprintf(fp, "# Reference (GeoOrigin): lon=%.8f lat=%.8f depth=%.3f\n",
           ref_lon, ref_lat, ref_depth);
+  fprintf(fp, "# Offset: x0=%.3f y0=%.3f z0=%.3f\n", x0, y0, z0);
 
-  /* Write ECEF points */
+  /* Write ECEF points with GeoOrigin offset */
   for (const auto &s : all_soundings) {
     double x, y, z;
     // Note: depth is positive down, so height = -depth
     geodetic_to_ecef(s.longitude, s.latitude, -s.depth, &x, &y, &z);
-    fprintf(fp, "%.3f %.3f %.3f\n", x, y, z);
+    fprintf(fp, "%.3f %.3f %.3f\n", x - x0, y - y0, z - z0);
   }
 
   fclose(fp);
-  // [ADDED] Print success message and file location for ECEF output
   fprintf(stderr, "  ECEF XYZ file written successfully\n");
   fprintf(stderr, "  Location: %s\n", filename);
   return MB_SUCCESS;
