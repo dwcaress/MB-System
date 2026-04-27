@@ -35,14 +35,6 @@
 using namespace mb_system;
 
 vtkStandardNewMacro(DrawInteractorStyle);
-vtkStandardNewMacro(MyHandleWidget);
-
-
-
-void MyHandleWidget::removeKeyObservers(vtkRenderWindowInteractor* interactor) {
-  interactor->RemoveObserver(this->KeyEventCallbackCommand);
-}
-
 	
 //------------------------------------------------------------------------------
 DrawInteractorStyle::DrawInteractorStyle()
@@ -105,7 +97,6 @@ void DrawInteractorStyle::OnLeftButtonUp() {
     // Detach each widget from the Interactor before releasing memory
     for (auto &w : pinWidgets_) {
       w->EnabledOff();
-      w->removeKeyObservers(Interactor);
       w->SetInteractor(nullptr);
     }
     
@@ -120,7 +111,7 @@ void DrawInteractorStyle::OnLeftButtonUp() {
   std::copy(userPath_[pointIndex].begin(), userPath_[pointIndex].end(), point);
   
   // Put a pin marker at selected point
-  auto pinWidget = vtkSmartPointer<MyHandleWidget>::New();
+  auto pinWidget = vtkSmartPointer<vtkHandleWidget>::New();
   auto pin = vtkSmartPointer<vtkFixedSizeHandleRepresentation3D>::New();
 
   pin->SetWorldPosition(point);    // C-style double array input
