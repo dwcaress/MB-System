@@ -21,10 +21,11 @@ extern "C" {
 // Unique namespace to avoid name collision with Backend class
 namespace qt_mbedit {
 
-  /** qt-mbedit Backend application logic; some of the class methods
-      invoke 'C' functions defined in mbedit_prog.h 
-      QObject subclass, so it can exchange
-      info with QML.  */
+  /** qt-mbedit Backend for qt-mbedit application. Much of the business logic
+      is implemented by 'C' functions defined in mbedit_prog.h, which are
+      invoked by Backend class methods.
+      Backend is a QObject subclass and many of its methods are
+      Q_INVOKABLE so can be called by QML. */
   class Backend : public QObject  {
 
     /// This macro needed to enable info exchange with QML
