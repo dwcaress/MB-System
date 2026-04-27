@@ -23,7 +23,7 @@ namespace mb_system {
 
   /* **
      Need this subclass to work around a vtkHandleWidget bug which
-     retults in null ptr error when 'shift' is pressed
+     results in null ptr error when 'shift' is pressed
   ** */
   class MyHandleWidget : public vtkHandleWidget {
   public:
