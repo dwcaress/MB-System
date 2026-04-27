@@ -13,7 +13,9 @@
 namespace mb_system {
   
   /** Radio button group implemented with VTK vtkButtonWidget. 
-      Based on Google AI-generated code on 7/31/2025
+      Based on Google AI-generated code on 7/31/2025.
+      DEPRECATED: RadioButtons are typically implemented in QML for
+      most MB-System applications.
   */
   class RadioButtonGroup : public vtkCommand {
   public:
