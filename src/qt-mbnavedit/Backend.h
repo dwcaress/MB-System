@@ -27,8 +27,9 @@ extern "C" {
 // Unique namespace to avoid name collision with Backend class
 namespace qt_mbnavedit {
   
-  /** qt-mbnavedit Backend application logic; QObject subclass, so it can
-      exchange info with QML. Backend reads a specified swath file and
+  /** qt-mbnavedit Backend application logic; this is QObject subclass,
+      and many of its methods are declared Q_INVOKABLE so can be called
+      from QML. Backend reads a specified swath file and
       displays its data by drawing into a QPixmap with a QPainter
       (via mb_system::PixmapDrawer). Backend expects that accompanying
       QML declares a mb_system::PixmapImage with specific
