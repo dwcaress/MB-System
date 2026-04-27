@@ -72,9 +72,11 @@ void DrawInteractorStyle::OnLeftButtonUp() {
     return;
   }
 
+  // Left-mouse button clicked without moving;
   // Get world coordinates of this point
   vtkNew<vtkPointPicker> picker;
   if (picker->Pick(eventPos[0], eventPos[1], 0, GetDefaultRenderer())) {
+    // Successfully picked world coordinates
     double worldCoords[3];
     picker->GetPickPosition(worldCoords);
 
@@ -85,40 +87,48 @@ void DrawInteractorStyle::OnLeftButtonUp() {
     userPath_.push_back(point);
   }
   else {
-    qWarning() << "Unable to pick point";
+    qWarning() << "ERROR: Unable to pick point";
     return;
   }
 
+  // Which point in user-defined path?
   int pointIndex = userPath_.size() - 1;
 
   qDebug() << "userPath_.size() = " << userPath_.size();  
   if (userPath_.size() == 1) {
+    // Defining first point in path
     qDebug() << "Clear existing widgets and profile line";
     
     // First point of profile defined; clear existing widgets
     topoDataItem_->clearAddedActors();
+
+    // Detach each widget from the Interactor before releasing memory
+    for (auto &w : pinWidgets_) {
+      w->EnabledOff();
+      w->removeKeyObservers(Interactor);
+      w->SetInteractor(nullptr);
+    }
+    
     pinWidgets_.clear();
     pinRepresentations_.clear();
   }
-  
+
+  // Note: vtkHandleRepresentation takes world position as 'c-style' double
+  // array, so must copy vector of std::array<double, 3> to this double array
   double point[3];
+  // Copy coordinates of this point to double array
   std::copy(userPath_[pointIndex].begin(), userPath_[pointIndex].end(), point);
   
   // Put a pin marker at selected point
   auto pinWidget = vtkSmartPointer<MyHandleWidget>::New();
   auto pin = vtkSmartPointer<vtkFixedSizeHandleRepresentation3D>::New();
 
-  pin->SetWorldPosition(point);
+  pin->SetWorldPosition(point);    // C-style double array input
   pin->SetHandleSizeInPixels(30);
   pin->GetProperty()->SetColor(1., 0., 0.);  
   pinWidget->SetInteractor(Interactor);
   pinWidget->SetRepresentation(pin);
-  
-  pinWidget->RemoveObservers(vtkCommand::CharEvent);
-  
   pinWidget->EnabledOn();
-  pinWidget->ProcessEventsOff();
-  pinWidget->removeKeyObservers(Interactor);
 
   pinWidgets_.push_back(pinWidget);  // pinWidget should persist
   pinRepresentations_.push_back(pin); // pin representation should persist
