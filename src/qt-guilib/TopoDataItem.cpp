@@ -9,6 +9,8 @@
 #include <vtkCellData.h>
 #include <vtkPointData.h>
 #include <vtkLightCollection.h>
+#include <vtkArrayCalculator.h>
+#include <vtkPolyDataNormals.h>
 #include <vtkIdTypeArray.h>
 #include <QQuickWindow>
 #include <QMessageBox>
@@ -309,34 +311,91 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   }
   
   if (displayedSurface_ == TopoDataItem::DisplayedSurface::Gradient) {
-    qDebug() << "set slopeFilter input to topoReader output port:";
-    pipeline->slopeFilter_->SetInputConnection(pipeline->elevFilter_->
-					       GetOutputPort());
 
-    qDebug() << "connected slopeFilter input to elevFilter output port";
-    
-    /// printPolyDataOutput(pipeline->slopeFilter_, "slopeFilter");
-    
-    pipeline->surfaceMapper_->SetInputConnection(pipeline->slopeFilter_->
-						 GetOutputPort());
-    
+    // Compute surface normals
+    qDebug() << "compute surface normals";
+    pipeline->normalsFilter_->
+      SetInputConnection(pipeline->elevFilter_->GetOutputPort());
+
+    pipeline->normalsFilter_->ComputePointNormalsOn();
+    pipeline->normalsFilter_->ComputeCellNormalsOff();
+    pipeline->normalsFilter_->SplittingOff();  // Keep mesh connectivity intact
+    pipeline->normalsFilter_->Update();
+
+    // Extract slope angle (in degrees) from normal z-component
+    // normal.z = cos(slope_angle), so slope_angle = acos(normal.z)
+    // Flat surface -> normal.z = 1.0 -> slope = 0 degrees
+    // Vertical surface -> normal.z = 0.0 -> slope = 90 degrees
+    qDebug() << "extract slope angles in degrees";
+    vtkNew<vtkArrayCalculator> slopeCalc;
+    slopeCalc->SetInputConnection(pipeline->normalsFilter_->GetOutputPort());
+    slopeCalc->SetAttributeTypeToPointData();
+    slopeCalc->AddVectorArrayName("Normals");
+    qDebug() << "SetFunction()";
+    slopeCalc->SetFunction("acos(Normals[2]) * 57.2957795");
+    slopeCalc->SetResultArrayName("Slopes");
+    slopeCalc->Update();
+
+    // Connect mapper to slope calculator output
+    pipeline->surfaceMapper_->SetInputConnection(slopeCalc->GetOutputPort());
     pipeline->surfaceMapper_->SetArrayAccessMode(VTK_GET_ARRAY_BY_NAME);
     pipeline->surfaceMapper_->SelectColorArray("Slopes");
-    
-    qDebug() << "now mapper->GetArrayName(): " <<
-      pipeline->surfaceMapper_->GetArrayName();
+    pipeline->surfaceMapper_->SetScalarModeToUsePointFieldData();
 
-    qDebug() << "surfaceMapper: ";
-    pipeline->surfaceMapper_->Print(std::cerr);
+    vtkPolyData *slopeOutput =
+      vtkPolyData::SafeDownCast(slopeCalc->GetOutput());
+    if (!slopeOutput) {
+      qWarning() << "slopeOutput is null";
+    }
+
+    vtkPointData *pd = slopeOutput->GetPointData();
+    qDebug() << "Number of point data arrays: " << pd->GetNumberOfArrays();
+    for (int i = 0; i < pd->GetNumberOfArrays(); i++) {
+      qDebug() << "Array " << i << ": " << pd->GetArrayName(i);
+    }
+
+    vtkDataArray *slopesArray = pd->GetArray("Slopes");
+
+    if (!slopesArray) {
+      qWarning() << "Slopes array NOT FOUND in slopeCalc output";
+      return;
+    }
+
+    double slopeRange[2];
+    slopesArray->GetRange(slopeRange);
+
+    qDebug() << "Slopes array found, #tuples=" <<
+      slopesArray->GetNumberOfTuples()
+	     << " #components=" << slopesArray->GetNumberOfComponents()
+	     << " range=[" << slopeRange[0] << "," << slopeRange[1] << "]";
+
+    // Also check normals were actually computed
+    vtkPolyData *normalsOutput =
+      vtkPolyData::SafeDownCast(pipeline->normalsFilter_->GetOutput());
     
-    // Bogus min/max gradient values
-    minVal = 0.;
-    maxVal = RAND_MAX;  // TEST TEST TEST
+    vtkDataArray *normalsArray =
+      normalsOutput->GetPointData()->GetArray("Normals");
+
+    if (!normalsArray) {
+      qWarning() << "Normals array NOT FOUND - normalsFilter may have failed";
+    }
+    else {
+      qDebug() << "Normals array found, #tuples=" <<
+	normalsArray->GetNumberOfTuples();
+    }
+    minVal = slopeRange[0];
+    maxVal = slopeRange[1];
   }
   else {
     qDebug() << "connect surfaceMapper to elevFilter output port\n";
     pipeline->surfaceMapper_->SetInputConnection(pipeline->elevFilter_->
 						 GetOutputPort());
+
+    // Reset scalar mode do defaults for elevation coloring
+    pipeline->surfaceMapper_->SetScalarModeToDefault();
+    pipeline->surfaceMapper_->SetColorModeToMapScalars();
+    // clear named array selection    
+    pipeline->surfaceMapper_->SelectColorArray(""); 
   }
 
   pipeline->surfaceMapper_->Modified();

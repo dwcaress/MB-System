@@ -20,12 +20,12 @@
 #include <vtkInteractorStyleRubberBandPick.h>
 #include <QVTKInteractor.h>
 #include <vtkInteractorStyleTerrain.h>
+#include <vtkPolyDataNormals.h>
 #include <vtkAreaPicker.h>
 #include <vtkIdFilter.h>
 #include <QList>
 #include <QVector2D>
 #include <QVariant>
-#include "SlopeFilter.h"
 #include "TopoDataReader.h"
 #include "TopoColorMap.h"
 #include "PickInteractorStyle.h"
@@ -72,7 +72,7 @@ namespace mb_system {
       vtkNew<mb_system::TopoDataReader> topoReader_;
 
       vtkNew<vtkElevationFilter> elevFilter_;
-      vtkNew<SlopeFilter> slopeFilter_;
+      vtkNew<vtkPolyDataNormals> normalsFilter_;
       vtkNew<vtkIdFilter> idFilter_;
       vtkNew<vtkLookupTable> elevLookupTable_;
       vtkNew<vtkActor> surfaceActor_;
