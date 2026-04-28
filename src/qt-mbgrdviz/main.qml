@@ -76,16 +76,16 @@ Window {
             }
 
             Menu {
-                title: qsTr('Displayed surface')
+                title: qsTr('Surface colors')
 
                 Action {
-                    text: qsTr('Topography'); checkable: true;
+                    text: qsTr('Elevation'); checkable: true;
                     ActionGroup.group: exclusiveActions
                     onTriggered: {
 			topoDataItem.setDisplayedSurface(TopoDataItem.Elevation) }
                 }
                 Action {
-                    text: qsTr('Slope'); checkable: true;
+                    text: qsTr('Slope magnitude'); checkable: true;
                     ActionGroup.group: exclusiveActions
                     onTriggered: {
 			topoDataItem.setDisplayedSurface(TopoDataItem.Gradient)}
