@@ -76,22 +76,50 @@ Window {
             }
 
             Menu {
-                title: qsTr('Surface colors')
+                title: qsTr('Surface colored by:')
 
                 Action {
                     text: qsTr('Elevation'); checkable: true;
+		    checked: true
                     ActionGroup.group: exclusiveActions
                     onTriggered: {
-			topoDataItem.setDisplayedSurface(TopoDataItem.Elevation) }
+			topoDataItem.setColoredScalar(TopoDataItem.Elevation) }
                 }
                 Action {
-                    text: qsTr('Slope magnitude'); checkable: true;
+                    text: qsTr('Slope angle'); checkable: true;
                     ActionGroup.group: exclusiveActions
                     onTriggered: {
-			topoDataItem.setDisplayedSurface(TopoDataItem.Gradient)}
+			topoDataItem.setColoredScalar(TopoDataItem.Gradient)}
                 }
             }
 
+            Menu {
+                title: qsTr('Surface render:')
+
+                Action {
+                    text: qsTr('Polygons'); checkable: true;
+		    checked: true
+                    ActionGroup.group: exclusiveActions
+                    onTriggered: {
+			topoDataItem.setSurfaceRenderType(TopoDataItem.Polys)
+		    }
+                }
+                Action {
+                    text: qsTr('Point cloud'); checkable: true;
+                    ActionGroup.group: exclusiveActions
+                    onTriggered: {
+			topoDataItem.setSurfaceRenderType(TopoDataItem.PointCloud)
+                    }
+		}
+                Action {
+		    text: qsTr('Wireframe'); checkable: true;
+		    ActionGroup.group: exclusiveActions
+		    onTriggered: {
+			topoDataItem.setSurfaceRenderType(TopoDataItem.Wireframe)
+		    }		    
+		}
+	    }
+		
 
 	    Menu {
 		title: 'Color map'
@@ -115,17 +143,6 @@ Window {
 		    }
 		}
 	    }
-
-	    
-            // Profile
-            Action {
-                text: qsTr('Elev profile');
-                onTriggered: { console.log('show profile');
-			       topoProfileWindow.show();
-			       topoDataItem.forceActiveFocus();
-			     }
-            }
-
         }
 
 	Menu {
@@ -166,7 +183,7 @@ Window {
         Button {
             text: qsTr('Push me!')
             onPressed: {
-		console.log('Pressed buttonn')
+		console.log('Pressed test button')
             }
         }
 
