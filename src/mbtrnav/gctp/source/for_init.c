@@ -30,7 +30,7 @@ long outspheroid;	/* output spheroid				*/
 char *fn27;		/* NAD 1927 parameter file			*/
 char *fn83;		/* NAD 1983 parameter file			*/
 long *iflg;		/* status flag					*/
-long (*for_trans[])();	/* forward function pointer			*/
+long (*for_trans[])(double lon, double lat, double *x, double *y);	/* forward function pointer			*/
 {
 long zone;		/* zone number					*/
 double azimuth;		/* azimuth					*/
