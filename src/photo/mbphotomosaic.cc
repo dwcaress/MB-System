@@ -4237,7 +4237,11 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             nimages++;
           }
         } else if (imageStatus == MB_IMAGESTATUS_LEFT) {
-          if (use_camera_mode == MBPM_USE_LEFT) {
+          if (use_camera_mode == MBPM_USE_STEREO) {
+            image_camera = MBPM_CAMERA_LEFT;
+            currentimages = 1;
+            nimages++;
+          } else if (use_camera_mode == MBPM_USE_LEFT) {
             image_camera = MBPM_CAMERA_LEFT;
             currentimages = 1;
             nimages++;
@@ -4245,7 +4249,11 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             currentimages = 0;
           }
         } else if (imageStatus == MB_IMAGESTATUS_RIGHT) {
-          if (use_camera_mode == MBPM_USE_RIGHT) {
+          if (use_camera_mode == MBPM_USE_STEREO) {
+            image_camera = MBPM_CAMERA_RIGHT;
+            currentimages = 1;
+            nimages++;
+          } else if (use_camera_mode == MBPM_USE_RIGHT) {
             image_camera = MBPM_CAMERA_RIGHT;
             currentimages = 1;
             nimages++;
