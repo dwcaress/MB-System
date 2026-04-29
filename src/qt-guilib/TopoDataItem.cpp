@@ -30,7 +30,7 @@ TopoDataItem::TopoDataItem() {
   verticalExagg_ = 1.;
   showAxes_ = false;
   scheme_ = TopoColorMap::Haxby;
-  displayedSurface_ = DisplayedSurface::Elevation;
+  coloredScalar_ = ColoredScalar::Elevation;
   pointPicked_ = false;
   forceRender_ = false;
   
@@ -310,7 +310,7 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
     qDebug() << "assemblePipeline(): COULD NOT FIND id array";    
   }
   
-  if (displayedSurface_ == TopoDataItem::DisplayedSurface::Gradient) {
+  if (coloredScalar_ == TopoDataItem::ColoredScalar::Gradient) {
 
     // Compute surface normals
     qDebug() << "compute surface normals";
@@ -413,7 +413,23 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   
   // Assign surfaceMapper to actor
   pipeline->surfaceActor_->SetMapper(pipeline->surfaceMapper_);
-    
+
+  switch (surfaceRenderType_) {
+  case TopoDataItem::SurfaceRenderType::Polys:
+    pipeline->surfaceActor_->GetProperty()->SetRepresentationToSurface();
+    break;
+
+  case TopoDataItem::SurfaceRenderType::Wireframe:
+    pipeline->surfaceActor_->GetProperty()->SetRepresentationToWireframe();
+    break;
+
+  case TopoDataItem::SurfaceRenderType::PointCloud:
+    pipeline->surfaceActor_->GetProperty()->SetRepresentationToPoints();
+    break;     
+      
+      
+  }
+  
   // Add actor to renderer
   pipeline->renderer_->AddActor(pipeline->surfaceActor_);
 

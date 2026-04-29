@@ -100,14 +100,25 @@ namespace mb_system {
       bool firstRender_ = true;
     };
 
-    /// Type of surface to display; elevation, gradient...
-    enum class DisplayedSurface : int {
+    /// Color surface by this scalar value
+    enum class ColoredScalar : int {
       Elevation,
       Gradient,
       DataQuality
     };
 
-    Q_ENUM(DisplayedSurface)
+    Q_ENUM(ColoredScalar)
+
+
+    /// Render surface style
+    enum class SurfaceRenderType {
+      Polys,
+      Wireframe,
+      PointCloud
+    };
+
+    Q_ENUM(SurfaceRenderType)
+    
     
     /// Constructor
     TopoDataItem();
@@ -149,9 +160,14 @@ namespace mb_system {
     }
 
     /// Set type of surface to display
-    Q_INVOKABLE void setDisplayedSurface(DisplayedSurface surfaceType) {
-      qDebug() << "setDisplayedSurface to " << surfaceType;
-      displayedSurface_ = surfaceType;
+    Q_INVOKABLE void setColoredScalar(ColoredScalar coloredScalar) {
+      qDebug() << "setColoredScalar to " << coloredScalar;
+      coloredScalar_ = coloredScalar;
+      reassemblePipeline();
+    }
+
+    Q_INVOKABLE void setSurfaceRenderType(SurfaceRenderType renderType) {
+      surfaceRenderType_ = renderType;
       reassemblePipeline();
     }
 
@@ -290,8 +306,11 @@ namespace mb_system {
     mb_system::TopoColorMap::Scheme scheme_;
 
     /// Type of surface to display (elevation, gradient...)
-    DisplayedSurface displayedSurface_;
+    ColoredScalar coloredScalar_;
 
+    /// Type of surface rendering
+    SurfaceRenderType surfaceRenderType_;
+    
     /// VTK pipeline
     Pipeline *pipeline_;
     
