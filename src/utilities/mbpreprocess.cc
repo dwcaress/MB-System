@@ -156,8 +156,9 @@ constexpr char usage_message[] =
     "\t--kluge-ignore-duplicate-pings\n"
     "\t--kluge-xducer-depth-from-heave\n"
     "\t--kluge-xducer-depth-from-sensordepth\n"
-    "\t--kluge-xducer-depth-from-heave-and-sensordepth\n";
-    
+    "\t--kluge-xducer-depth-from-heave-and-sensordepth\n"
+    "\t--kluge-rangescale\n"
+    "\t--kluge-fix-wissl2-ranges\n";
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
@@ -207,6 +208,9 @@ int main(int argc, char **argv) {
   bool kluge_xducer_depth_from_heave = false;
   bool kluge_xducer_depth_from_sensordepth = false;
   bool kluge_xducer_depth_from_heaveandsensordepth = false;
+  bool kluge_rangescale = false;
+  double kluge_rangescale_factor = 1.0;
+  bool kluge_fix_wissl2_ranges = false;
 
   mb_path sensordepth_file;
   memset(sensordepth_file, 0, sizeof(mb_path));
@@ -346,6 +350,8 @@ int main(int argc, char **argv) {
                                       {"kluge-xducer-depth-from-heave", no_argument, nullptr, 0},
                                       {"kluge-xducer-depth-from-sensordepth", no_argument, nullptr, 0},
                                       {"kluge-xducer-depth-from-heave-and-sensordepth", no_argument, nullptr, 0},
+                                      {"kluge-rangescale", required_argument, nullptr, 0},
+                                      {"kluge-fix-wissl2-ranges", no_argument, nullptr, 0},
                                       {nullptr, 0, nullptr, 0}};
 
     int option_index;
@@ -809,6 +815,21 @@ int main(int argc, char **argv) {
           preprocess_pars.n_kluge++;
         	kluge_xducer_depth_from_heaveandsensordepth = true;
         }
+        else if (strcmp("kluge-rangescale", options[option_index].name) == 0) {
+          const int n = sscanf(optarg, "%lf", &	kluge_rangescale_factor);
+          if (n == 1) {
+            preprocess_pars.kluge_id[preprocess_pars.n_kluge] = MB_PR_KLUGE_RANGESCALE;
+            double *dptr = (double *)&preprocess_pars.kluge_pars[preprocess_pars.n_kluge * MB_PR_KLUGE_PAR_SIZE];
+            *dptr = kluge_rangescale_factor;
+            preprocess_pars.n_kluge++;
+            kluge_rangescale = true;
+          }
+        }
+        else if (strcmp("kluge-fix-wissl2-ranges", options[option_index].name) == 0) {
+          preprocess_pars.kluge_id[preprocess_pars.n_kluge] = MB_PR_KLUGE_FIXWISSL2RANGES;
+          preprocess_pars.n_kluge++;
+          kluge_fix_wissl2_ranges = true;
+        }
 
         break;
       case '?':
@@ -1000,6 +1021,9 @@ int main(int argc, char **argv) {
     fprintf(stderr, "dbg2       kluge_xducer_depth_from_heave        %d\n", kluge_xducer_depth_from_heave);
     fprintf(stderr, "dbg2       kluge_xducer_depth_from_sensordepth  %d\n", kluge_xducer_depth_from_sensordepth);
     fprintf(stderr, "dbg2       kluge_xducer_depth_from_heaveandsensordepth  %d\n", kluge_xducer_depth_from_heaveandsensordepth);
+    fprintf(stderr, "dbg2       kluge_rangescale                     %d\n", kluge_rangescale);
+    fprintf(stderr, "dbg2       kluge_rangescale_factor              %f\n", kluge_rangescale_factor);
+    fprintf(stderr, "dbg2       kluge_fix_wissl2_ranges              %d\n", kluge_fix_wissl2_ranges);
     fprintf(stderr, "dbg2  Additional output:\n");
     fprintf(stderr, "dbg2       output_sensor_fnv:            %d\n", output_sensor_fnv);
     fprintf(stderr, "dbg2  Skip existing output files:\n");
@@ -1122,6 +1146,9 @@ int main(int argc, char **argv) {
     fprintf(stderr, "     kluge_xducer_depth_from_heave        %d\n", kluge_xducer_depth_from_heave);
     fprintf(stderr, "     kluge_xducer_depth_from_sensordepth  %d\n", kluge_xducer_depth_from_sensordepth);
     fprintf(stderr, "     kluge_xducer_depth_from_heaveandsensordepth  %d\n", kluge_xducer_depth_from_heaveandsensordepth);
+    fprintf(stderr, "     kluge_rangescale                     %d\n", kluge_rangescale);
+    fprintf(stderr, "     kluge_rangescale_factor              %f\n", kluge_rangescale_factor);
+    fprintf(stderr, "     kluge_fix_wissl2_ranges              %d\n", kluge_fix_wissl2_ranges);
     fprintf(stderr, "Additional output:\n");
     fprintf(stderr, "     output_sensor_fnv:            %d\n", output_sensor_fnv);
     fprintf(stderr, "Skip existing output files:\n");

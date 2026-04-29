@@ -617,10 +617,20 @@ int mbsys_3ddwissl2_preprocess
   /* get kluges */
   bool kluge_beampatternsnell = false;
   double kluge_beampatternsnellfactor = 1.0;
+  bool kluge_scalerange = false;
+  double kluge_scalerangefactor = 1.0;
+  bool kluge_fixwissl2ranges = false;
   for (int i = 0; i < pars->n_kluge; i++) {
     if (pars->kluge_id[i] == MB_PR_KLUGE_BEAMTWEAK) {
       kluge_beampatternsnell = true;
       kluge_beampatternsnellfactor = *((double *)&pars->kluge_pars[i * MB_PR_KLUGE_PAR_SIZE]);
+    }
+    if (pars->kluge_id[i] == MB_PR_KLUGE_RANGESCALE) {
+      kluge_scalerange = true;
+      kluge_scalerangefactor = *((double *)&pars->kluge_pars[i * MB_PR_KLUGE_PAR_SIZE]);
+    }
+    if (pars->kluge_id[i] == MB_PR_KLUGE_FIXWISSL2RANGES) {
+      kluge_fixwissl2ranges = true;
     }
   }
 
@@ -654,6 +664,13 @@ int mbsys_3ddwissl2_preprocess
       if (pars->kluge_id[i] == MB_PR_KLUGE_BEAMTWEAK) {
         fprintf(stderr, "dbg2       kluge_beampatternsnell:        %d\n", kluge_beampatternsnell);
         fprintf(stderr, "dbg2       kluge_beampatternsnellfactor:  %f\n", kluge_beampatternsnellfactor);
+      }
+      if (pars->kluge_id[i] == MB_PR_KLUGE_RANGESCALE) {
+        fprintf(stderr, "dbg2       kluge_scalerange:              %d\n", kluge_scalerange);
+        fprintf(stderr, "dbg2       kluge_scalerangefactor:        %f\n", kluge_scalerangefactor);
+      }
+      if (pars->kluge_id[i] == MB_PR_KLUGE_FIXWISSL2RANGES) {
+        fprintf(stderr, "dbg2       kluge_fixwissl2ranges:          %d\n", kluge_fixwissl2ranges);
       }
     }
   }
@@ -930,6 +947,16 @@ int mbsys_3ddwissl2_preprocess
         /* if requested apply kluge scaling of rx beam angles */
         if (kluge_beampatternsnell) {
           sounding->angle_az = RTD * asin(MAX(-1.0, MIN(1.0, kluge_beampatternsnellfactor * sin(DTR * sounding->angle_az))));
+        }
+
+        /* if requested apply kluge scaling of range values */
+        if (kluge_scalerange) {
+          sounding->range = kluge_scalerangefactor * sounding->range;
+        }
+        if (kluge_fixwissl2ranges) {
+					double indexwater = mbarirange->lineIndex * 2.0 / 65535.0;
+					double rangeoffset = 24 *1e-9 * 299792458.0 / (2*indexwater);
+          sounding->range = sounding->range - rangeoffset;
         }
 			}
 			

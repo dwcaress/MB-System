@@ -822,7 +822,7 @@ int mbr_3dwissl2_rd_data
 				{
 				fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg5       mbarirange->NumPtsPkt:                   %d\n", mbarirange->NumPtsPkt);
-				fprintf(stderr, "dbg5       isounding  Angle Range Amp Class  Range Amp Class\n");
+				fprintf(stderr, "dbg5       isounding  Angle Range Amp Class\n");
 				for (int isounding=0; isounding < mbarirange->num_soundings; isounding++) 
 					{
 					fprintf(stderr, "dbg5       isounding:%5d   %7.3f   %7.4f %4u %3u\n", 
