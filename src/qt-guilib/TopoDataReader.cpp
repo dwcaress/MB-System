@@ -483,11 +483,12 @@ TopoData *TopoDataReader::readDatafile(char *filename) {
 
   // Set proj-string for grid's CRS
   if (topoData->setProjString()) {
-    std::cerr << "proj-string: " << topoData->projString() << std::endl;
+    std::cerr << "proj-string: " << topoData->projString() <<
+	      filename << "\n";
   }
   else {
     // Unhandled projection
-    std::cerr << "unhandled projection type in " << filename << std::endl;    
+    std::cerr << "unhandled projection type in " << filename << "\n";
     return nullptr;
   }
 
