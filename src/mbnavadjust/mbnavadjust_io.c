@@ -159,6 +159,7 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
       project->num_files_alloc = 0;
       project->files = NULL;
       project->num_surveys = 0;
+      project->num_blocks = 0;
       project->num_snavs = 0;
       project->num_pings = 0;
       project->num_beams = 0;
@@ -531,14 +532,27 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
           exit(0);
         }
 
-        if (version_id >= 306) {
+        if (version_id >= 316) {
           if (status == MB_SUCCESS &&
               ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-               (nscan = sscanf(buffer, "%s %d", label, &project->num_surveys)) != 2 || strcmp(label, "NUMBLOCKS") != 0))
+               (nscan = sscanf(buffer, "%s %d", label, &project->num_surveys)) != 2 || strcmp(label, "NUMSURVEYS") != 0))
             status = MB_FAILURE;
+          if (status == MB_SUCCESS &&
+              ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
+               (nscan = sscanf(buffer, "%s %d", label, &project->num_blocks)) != 2 || strcmp(label, "NUMBLOCKS") != 0))
+            status = MB_FAILURE;
+        }
+        else if (version_id >= 306) {
+          if (status == MB_SUCCESS &&
+              ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
+               (nscan = sscanf(buffer, "%s %d", label, &project->num_blocks)) != 2 || strcmp(label, "NUMBLOCKS") != 0))
+            status = MB_FAILURE;
+          if (status == MB_SUCCESS)
+            project->num_surveys = project->num_blocks;
         }
         else {
           project->num_surveys = 0;
+          project->num_blocks = 0;
         }
         if (status == MB_FAILURE) {
           fprintf(stderr, "Die at line:%d file:%s buffer:%s\n", __LINE__, __FILE__, buffer);
@@ -728,7 +742,21 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
           file->num_snavs = 0;
           file->num_pings = 0;
           file->num_beams = 0;
-          if (version_id >= 306) {
+          if (version_id >= 316) {
+            if (status == MB_SUCCESS &&
+                ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
+                 (nscan = sscanf(buffer, "FILE %d %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %d %d %s", &idummy,
+                     &(file->status), &(file->id), &(file->format), &(file->survey), &(file->block),
+                     &(file->block_offset_x), &(file->block_offset_y), &(file->block_offset_z),
+                     &(file->heading_bias_import), &(file->roll_bias_import), &(file->heading_bias),
+                     &(file->roll_bias), &(file->num_sections), &(file->output_id), file->file)) != 16))
+              status = MB_FAILURE;
+            if (status == MB_FAILURE) {
+              fprintf(stderr, "Die at line:%d file:%s\nnscan:%d\nbuffer:%s\n", __LINE__, __FILE__, nscan, buffer);
+              exit(0);
+            }
+          }
+          else if (version_id >= 306) {
             if (status == MB_SUCCESS &&
                 ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
                  (nscan = sscanf(buffer, "FILE %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %d %d %s", &idummy,
@@ -737,6 +765,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
                      &(file->heading_bias_import), &(file->roll_bias_import), &(file->heading_bias),
                      &(file->roll_bias), &(file->num_sections), &(file->output_id), file->file)) != 15))
               status = MB_FAILURE;
+            file->survey = file->block;
           }
           else {
             if (status == MB_SUCCESS &&
@@ -746,11 +775,16 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
                      &(file->roll_bias_import), &(file->heading_bias), &(file->roll_bias),
                      &(file->num_sections), &(file->output_id), file->file)) != 11))
               status = MB_FAILURE;
+            file->survey = 0;
             file->block = 0;
             file->block_offset_x = 0.0;
             file->block_offset_y = 0.0;
             file->block_offset_z = 0.0;
           }
+					if (status == MB_FAILURE) {
+						fprintf(stderr, "Die at line:%d file:%s\n", __LINE__, __FILE__);
+						exit(0);
+					}
 
           /* set file->path as absolute path
               - file->file may be a relative path */
@@ -777,6 +811,10 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
               file->num_sections_alloc = 0;
               status = MB_FAILURE;
               *error = MB_ERROR_MEMORY_FAIL;
+            }
+            if (status == MB_FAILURE) {
+              fprintf(stderr, "Die at line:%d file:%s\n", __LINE__, __FILE__);
+              exit(0);
             }
           }
           for (int isection = 0; isection < file->num_sections; isection++) {
@@ -1208,14 +1246,22 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
           status = mbnavadjust_fix_section_sensordepth(verbose, project, error);
         }
 
-        /* recount the number of blocks */
+        /* recount the number of surveys */
         project->num_surveys = 0;
         for (int ifile = 0; ifile < project->num_files; ifile++) {
           struct mbna_file *file = &project->files[ifile];
+          if (ifile == 0 || (ifile > 0 && file->survey != project->files[ifile-1].survey))
+          	project->num_surveys++;
+        }
+
+        /* recount the number of blocks */
+        project->num_blocks = 0;
+        for (int ifile = 0; ifile < project->num_files; ifile++) {
+          struct mbna_file *file = &project->files[ifile];
           if (ifile == 0 || !file->sections[0].continuity) {
-            project->num_surveys++;
+            project->num_blocks++;
           }
-          file->block = project->num_surveys - 1;
+          file->block = project->num_blocks - 1;
           file->block_offset_x = 0.0;
           file->block_offset_y = 0.0;
           file->block_offset_z = 0.0;
@@ -1728,6 +1774,8 @@ int mbnavadjust_close_project(int verbose, struct mbna_project *project, int *er
   memset(project->path, 0, sizeof(project->path));
   memset(project->datadir, 0, sizeof(project->datadir));
   memset(project->logfile, 0, sizeof(project->logfile));
+  project->num_surveys = 0;
+  project->num_blocks = 0;
   project->num_files = 0;
   project->num_snavs = 0;
   project->num_pings = 0;
@@ -1831,7 +1879,8 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
               project->refgrid_bounds[3][i]);
     }
     fprintf(hfp, "NUMFILES\t%d\n", project->num_files);
-    fprintf(hfp, "NUMBLOCKS\t%d\n", project->num_surveys);
+    fprintf(hfp, "NUMSURVEYS\t%d\n", project->num_surveys);
+    fprintf(hfp, "NUMBLOCKS\t%d\n", project->num_blocks);
     fprintf(hfp, "NUMCROSSINGS\t%d\n", project->num_crossings);
     fprintf(hfp, "SECTIONLENGTH\t%f\n", project->section_length);
     fprintf(hfp, "SECTIONSOUNDINGS\t%d\n", project->section_soundings);
@@ -1847,8 +1896,8 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
     for (i = 0; i < project->num_files; i++) {
       /* write out basic file info */
       file = &project->files[i];
-      fprintf(hfp, "FILE %4d %4d %4d %4d %4d %13.8f %13.8f %13.8f %4.1f %4.1f %4.1f %4.1f %4d %4d %s\n", i, file->status,
-        file->id, file->format, file->block, file->block_offset_x, file->block_offset_y, file->block_offset_z,
+      fprintf(hfp, "FILE %4d %4d %4d %4d %4d %4d %13.8f %13.8f %13.8f %4.1f %4.1f %4.1f %4.1f %4d %4d %s\n", i, file->status,
+        file->id, file->format, file->survey, file->block, file->block_offset_x, file->block_offset_y, file->block_offset_z,
         file->heading_bias_import, file->roll_bias_import, file->heading_bias, file->roll_bias, file->num_sections,
         file->output_id, file->file);
 
@@ -2566,8 +2615,8 @@ int mbnavadjust_remove_short_sections(int verbose, struct mbna_project *project,
           && section->num_beams < minimum_section_soundings 
           && section->continuity
           && sectionprior->num_snav + section->num_snav < MBNA_SNAV_NUM) {
-fprintf(stderr, "\n%s:%d:%s: Removing short section: %2.2d:%4.4d:%2.2d   %9.6f %6d\n",
-__FILE__, __LINE__, __FUNCTION__, file->block, ifile, isection, section->distance, section->num_beams);
+//fprintf(stderr, "\n%s:%d:%s: Removing short section: %2.2d:%4.4d:%2.2d   %9.6f %6d\n",
+//__FILE__, __LINE__, __FUNCTION__, file->block, ifile, isection, section->distance, section->num_beams);
 
         /* copy the short section onto the end of the prior section */
         sectionprior->num_pings += section->num_pings;
@@ -2696,6 +2745,7 @@ __FILE__, __LINE__, __FUNCTION__, file->block, ifile, isection, section->distanc
   /* Reset counts in the project, including deleting previously existing crossings, 
       crossing ties, and global ties */
   project->num_surveys = 0;
+  project->num_blocks = 0;
   project->num_snavs = 0;
   project->num_pings = 0;
   project->num_beams = 0;
@@ -2708,10 +2758,12 @@ __FILE__, __LINE__, __FUNCTION__, file->block, ifile, isection, section->distanc
   /* recount the number of surveys (blocks), pings, beams */
   for (int ifile = 0; ifile < project->num_files; ifile++) {
     struct mbna_file *file = &project->files[ifile];
+		if (ifile == 0 || (ifile > 0 && file->survey != project->files[ifile-1].survey))
+			project->num_surveys++;
     if (ifile == 0 || !file->sections[0].continuity) {
-      project->num_surveys++;
+      project->num_blocks++;
     }
-    file->block = project->num_surveys - 1;
+    file->block = project->num_blocks - 1;
     file->block_offset_x = 0.0;
     file->block_offset_y = 0.0;
     file->block_offset_z = 0.0;
@@ -3208,7 +3260,7 @@ int mbnavadjust_remove_file_by_id(int verbose, struct mbna_project *project,
     snprintf(newfile, sizeof(mb_path), "%s/datalist_%4.4d.mb-1", project->datadir, isurvey);
     if ((ofp = fopen(newfile, "w")) != NULL) {
       for (int jfile = 0; jfile < project->num_files; jfile++) {
-        if (project->files[jfile].block == isurvey) {
+        if (project->files[jfile].survey == isurvey) {
           file = &project->files[jfile];
           for (int jsection = 0; jsection < file->num_sections; jsection++) {
             fprintf(ofp, "nvs_%4.4d_%4.4d.mb71 71\n", jfile, jsection);
@@ -3233,7 +3285,7 @@ int mbnavadjust_remove_file_by_id(int verbose, struct mbna_project *project,
     for (int isurvey = 0; isurvey < project->num_surveys; isurvey++) {
       bool first_file = true;
       for (int jfile = 0; jfile < project->num_files; jfile++) {
-        if (project->files[jfile].block == isurvey) {
+        if (project->files[jfile].survey == isurvey) {
           for (int jsection=0; jsection < project->files[jfile].num_sections; jsection++) {
             if (first_file && jsection == 0) {
               first_file = false;
@@ -4679,13 +4731,14 @@ int mbnavadjust_section_contour(int verbose, struct mbna_project *project,
 }
 /*--------------------------------------------------------------------*/
 int mbnavadjust_import_data(int verbose, struct mbna_project *project,
-          char *path, int iformat, int *error) {
+          char *path, int iformat, bool import_single_survey, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       project:    %p\n", project);
-    fprintf(stderr, "dbg2       path:       %s\n", path);
-    fprintf(stderr, "dbg2       format:     %d\n", iformat);
+    fprintf(stderr, "dbg2       verbose:              %d\n", verbose);
+    fprintf(stderr, "dbg2       project:              %p\n", project);
+    fprintf(stderr, "dbg2       path:                 %s\n", path);
+    fprintf(stderr, "dbg2       iformat:              %d\n", iformat);
+    fprintf(stderr, "dbg2       import_single_survey: %d\n", import_single_survey);
   }
 
   int status = MB_SUCCESS;
@@ -4696,8 +4749,9 @@ int mbnavadjust_import_data(int verbose, struct mbna_project *project,
   double weight;
   int form;
   void *datalist;
-
+  
   /* loop until all files read */
+  int num_files_before = project->num_files;
   bool done = false;
   bool firstfile = true;
   while (!done) {
@@ -4726,17 +4780,29 @@ int mbnavadjust_import_data(int verbose, struct mbna_project *project,
   /* look for new crossings */
   status = mbnavadjust_findcrossings(verbose, project, error);
 
-  /* count the number of blocks */
-  project->num_surveys = 0;
-  for (int i = 0; i < project->num_files; i++) {
-    file = &project->files[i];
-    if (i == 0 || !file->sections[0].continuity) {
-      project->num_surveys++;
+  /* count or augment the number of surveys and blocks */
+  for (int ifile = num_files_before; ifile < project->num_files; ifile++) {
+    file = &project->files[ifile];
+    if (ifile == num_files_before || (!file->sections[0].continuity && !import_single_survey)) {
+    	file->survey = project->num_surveys;
+  		project->num_surveys++;
     }
-    file->block = project->num_surveys - 1;
-    file->block_offset_x = 0.0;
-    file->block_offset_y = 0.0;
-    file->block_offset_z = 0.0;
+    else {
+    	file->survey = project->num_surveys - 1;
+    }
+    if (ifile == num_files_before || !file->sections[0].continuity) {
+    	file->block = project->num_blocks;
+			file->block_offset_x = 0.0;
+			file->block_offset_y = 0.0;
+			file->block_offset_z = 0.0;
+    	project->num_blocks++;
+    }
+    else {
+    	file->block = project->num_blocks - 1;
+			file->block_offset_x = 0.0;
+			file->block_offset_y = 0.0;
+			file->block_offset_z = 0.0;
+    }
   }
 
   /* set project bounds and scaling */

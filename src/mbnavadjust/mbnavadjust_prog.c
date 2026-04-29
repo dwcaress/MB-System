@@ -257,9 +257,9 @@ int mbnavadjust_init_globals() {
   mbna_modelplot_pickfile = MBNA_SELECT_NONE;
   mbna_modelplot_picksection = MBNA_SELECT_NONE;
   mbna_modelplot_picksnav = MBNA_SELECT_NONE;
-  mbna_block_select = MBNA_SELECT_NONE;
-  mbna_block_select1 = MBNA_SELECT_NONE;
-  mbna_block_select2 = MBNA_SELECT_NONE;
+  mbna_survey_select = MBNA_SELECT_NONE;
+  mbna_survey_select1 = MBNA_SELECT_NONE;
+  mbna_survey_select2 = MBNA_SELECT_NONE;
   mbna_reset_crossings = false;
   mbna_bin_swathwidth = 160.0;
   mbna_bin_pseudobeamwidth = 1.0;
@@ -819,7 +819,7 @@ int mbnavadjust_poornav_file() {
     }
     else if ((mbna_view_list == MBNA_VIEW_LIST_FILES || mbna_view_list == MBNA_VIEW_LIST_FILESECTIONS)
         && mbna_file_select > MBNA_SELECT_NONE && mbna_file_select < project.num_files) {
-      block = project.files[mbna_file_select].block;
+      block = project.files[mbna_file_select].survey;
     }
 
     /* set all files in block of selected file to poor nav */
@@ -828,7 +828,7 @@ int mbnavadjust_poornav_file() {
       do_message_on(message);
 
       for (int i = 0; i < project.num_files; i++) {
-        if (project.files[i].block == block) {
+        if (project.files[i].survey == block) {
           if (project.files[i].status != MBNA_FILE_POORNAV) {
             project.inversion_status = MBNA_INVERSION_OLD;
             project.files[i].status = MBNA_FILE_POORNAV;
@@ -880,7 +880,7 @@ int mbnavadjust_goodnav_file() {
     }
     else if ((mbna_view_list == MBNA_VIEW_LIST_FILES || mbna_view_list == MBNA_VIEW_LIST_FILESECTIONS)
         && mbna_file_select > MBNA_SELECT_NONE && mbna_file_select < project.num_files) {
-      block = project.files[mbna_file_select].block;
+      block = project.files[mbna_file_select].survey;
     }
 
     /* set all files in block of selected file to good nav */
@@ -889,7 +889,7 @@ int mbnavadjust_goodnav_file() {
       do_message_on(message);
 
       for (int i = 0; i < project.num_files; i++) {
-        if (project.files[i].block == block) {
+        if (project.files[i].survey == block) {
           if (project.files[i].status != MBNA_FILE_GOODNAV) {
             project.inversion_status = MBNA_INVERSION_OLD;
             project.files[i].status = MBNA_FILE_GOODNAV;
@@ -942,7 +942,7 @@ int mbnavadjust_fixednav_file() {
     }
     else if ((mbna_view_list == MBNA_VIEW_LIST_FILES || mbna_view_list == MBNA_VIEW_LIST_FILESECTIONS)
         && mbna_file_select > MBNA_SELECT_NONE && mbna_file_select < project.num_files) {
-      block = project.files[mbna_file_select].block;
+      block = project.files[mbna_file_select].survey;
     }
 
     /* set all files in block of selected file to fixed nav */
@@ -951,7 +951,7 @@ int mbnavadjust_fixednav_file() {
       do_message_on(message);
 
       for (int i = 0; i < project.num_files; i++) {
-        if (project.files[i].block == block) {
+        if (project.files[i].survey == block) {
           if (project.files[i].status != MBNA_FILE_FIXEDNAV) {
             project.inversion_status = MBNA_INVERSION_OLD;
             project.files[i].status = MBNA_FILE_FIXEDNAV;
@@ -1004,7 +1004,7 @@ int mbnavadjust_fixedxynav_file() {
     }
     else if ((mbna_view_list == MBNA_VIEW_LIST_FILES || mbna_view_list == MBNA_VIEW_LIST_FILESECTIONS)
         && mbna_file_select > MBNA_SELECT_NONE && mbna_file_select < project.num_files) {
-      block = project.files[mbna_file_select].block;
+      block = project.files[mbna_file_select].survey;
     }
 
     /* set all files in block of selected file to fixed xy nav */
@@ -1013,7 +1013,7 @@ int mbnavadjust_fixedxynav_file() {
       do_message_on(message);
 
       for (int i = 0; i < project.num_files; i++) {
-        if (project.files[i].block == block) {
+        if (project.files[i].survey == block) {
           if (project.files[i].status != MBNA_FILE_FIXEDXYNAV) {
             project.inversion_status = MBNA_INVERSION_OLD;
             project.files[i].status = MBNA_FILE_FIXEDXYNAV;
@@ -1066,7 +1066,7 @@ int mbnavadjust_fixedznav_file() {
     }
     else if ((mbna_view_list == MBNA_VIEW_LIST_FILES || mbna_view_list == MBNA_VIEW_LIST_FILESECTIONS)
         && mbna_file_select > MBNA_SELECT_NONE && mbna_file_select < project.num_files) {
-      block = project.files[mbna_file_select].block;
+      block = project.files[mbna_file_select].survey;
     }
 
     /* set all files in block of selected file to fixed z nav */
@@ -1075,7 +1075,7 @@ int mbnavadjust_fixedznav_file() {
       do_message_on(message);
 
       for (int i = 0; i < project.num_files; i++) {
-        if (project.files[i].block == block) {
+        if (project.files[i].survey == block) {
           if (project.files[i].status != MBNA_FILE_FIXEDZNAV) {
             project.inversion_status = MBNA_INVERSION_OLD;
             project.files[i].status = MBNA_FILE_FIXEDZNAV;
@@ -1845,11 +1845,11 @@ int mbnavadjust_naverr_specific_crossing(int new_crossing, int new_tie) {
 
       /* reset survey file and section selections */
       if (mbna_view_mode == MBNA_VIEW_MODE_SURVEY || mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY) {
-        if (mbna_survey_select == project.files[crossing->file_id_1].block) {
+        if (mbna_survey_select == project.files[crossing->file_id_1].survey) {
           mbna_file_select = crossing->file_id_1;
           mbna_section_select = crossing->section_1;
         }
-        else if (mbna_survey_select == project.files[crossing->file_id_2].block) {
+        else if (mbna_survey_select == project.files[crossing->file_id_2].survey) {
           mbna_file_select = crossing->file_id_2;
           mbna_section_select = crossing->section_2;
         }
@@ -1860,29 +1860,29 @@ int mbnavadjust_naverr_specific_crossing(int new_crossing, int new_tie) {
       }
       else if (mbna_view_mode == MBNA_VIEW_MODE_FILE || mbna_view_mode == MBNA_VIEW_MODE_WITHFILE) {
         if (mbna_file_select == crossing->file_id_1) {
-          mbna_survey_select = project.files[crossing->file_id_1].block;
+          mbna_survey_select = project.files[crossing->file_id_1].survey;
           mbna_section_select = crossing->section_1;
         }
         else if (mbna_file_select == crossing->file_id_2) {
-          mbna_survey_select = project.files[crossing->file_id_2].block;
+          mbna_survey_select = project.files[crossing->file_id_2].survey;
           mbna_section_select = crossing->section_2;
         }
         else {
-          mbna_survey_select = project.files[crossing->file_id_1].block;
+          mbna_survey_select = project.files[crossing->file_id_1].survey;
           mbna_section_select = crossing->section_1;
         }
       }
       else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION) {
         if (mbna_file_select == crossing->file_id_1 && mbna_section_select == crossing->section_1) {
-          mbna_survey_select = project.files[crossing->file_id_1].block;
+          mbna_survey_select = project.files[crossing->file_id_1].survey;
           mbna_file_select = crossing->file_id_1;
         }
         else if (mbna_file_select == crossing->file_id_2 && mbna_section_select == crossing->section_2) {
-          mbna_survey_select = project.files[crossing->file_id_2].block;
+          mbna_survey_select = project.files[crossing->file_id_2].survey;
           mbna_file_select = crossing->file_id_2;
         }
         else {
-          mbna_survey_select = project.files[crossing->file_id_1].block;
+          mbna_survey_select = project.files[crossing->file_id_1].survey;
           mbna_file_select = crossing->file_id_1;
         }
       }
@@ -1976,7 +1976,7 @@ int mbnavadjust_naverr_specific_section(int new_file, int new_section) {
       /* reset survey file and section selections */
       mbna_section_select = mbna_current_section;
       mbna_file_select = mbna_current_file;
-      mbna_survey_select = project.files[mbna_current_file].block;
+      mbna_survey_select = project.files[mbna_current_file].survey;
     }
 
     /* load the section */
@@ -2063,7 +2063,7 @@ int mbnavadjust_naverr_next_crossing() {
       }
       else {
         mbna_file_select = crossing->file_id_1;
-        mbna_survey_select = project.files[crossing->file_id_1].block;
+        mbna_survey_select = project.files[crossing->file_id_1].survey;
         mbna_section_select = crossing->section_1;
       }
     }
@@ -2191,7 +2191,7 @@ int mbnavadjust_naverr_next_section() {
     /* reset survey file and section selections */
     mbna_section_select = mbna_current_section;
     mbna_file_select = mbna_current_file;
-    mbna_survey_select = project.files[mbna_current_file].block;
+    mbna_survey_select = project.files[mbna_current_file].survey;
   }
 
   int status = MB_SUCCESS;
@@ -2280,7 +2280,7 @@ int mbnavadjust_naverr_previous_crossing() {
         }
         else {
           mbna_file_select = crossing->file_id_1;
-          mbna_survey_select = project.files[crossing->file_id_1].block;
+          mbna_survey_select = project.files[crossing->file_id_1].survey;
           mbna_section_select = crossing->section_1;
         }
       }
@@ -2410,7 +2410,7 @@ int mbnavadjust_naverr_previous_section() {
     /* reset survey file and section selections */
     mbna_section_select = mbna_current_section;
     mbna_file_select = mbna_current_file;
-    mbna_survey_select = project.files[mbna_current_file].block;
+    mbna_survey_select = project.files[mbna_current_file].survey;
   }
 
   int status = MB_SUCCESS;
@@ -2502,7 +2502,7 @@ int mbnavadjust_naverr_nextunset_crossing() {
       }
       else {
         mbna_file_select = crossing->file_id_1;
-        mbna_survey_select = project.files[crossing->file_id_1].block;
+        mbna_survey_select = project.files[crossing->file_id_1].survey;
         mbna_section_select = crossing->section_1;
       }
     }
@@ -2632,7 +2632,7 @@ int mbnavadjust_naverr_nextunset_section() {
     /* reset survey file and section selections */
     mbna_section_select = mbna_current_section;
     mbna_file_select = mbna_current_file;
-    mbna_survey_select = project.files[mbna_current_file].block;
+    mbna_survey_select = project.files[mbna_current_file].survey;
   }
 
   int status = MB_SUCCESS;
@@ -2863,8 +2863,8 @@ int mbnavadjust_naverr_addtie() {
       /* add info text */
       snprintf(message, sizeof(message), "Add Tie Point %d of Crossing %d\n > Nav points: %2.2d:%4.4d:%2.2d:%2.2d %2.2d:%4.4d:%2.2d:%2.2d\n > Offsets: %f %f %f m\n",
               mbna_current_tie, mbna_current_crossing, 
-              project.files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1, tie->snav_1,
-              project.files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2, tie->snav_2, 
+              project.files[crossing->file_id_1].survey, crossing->file_id_1, crossing->section_1, tie->snav_1,
+              project.files[crossing->file_id_2].survey, crossing->file_id_2, crossing->section_2, tie->snav_2, 
               tie->offset_x_m, tie->offset_y_m, tie->offset_z_m);
       if (mbna_verbose == 0)
         fprintf(stderr, "%s", message);
@@ -4109,7 +4109,7 @@ int mbnavadjust_referenceplussection_load() {
       int numz = 0;
       for (int ifile = 0; ifile < project.num_files; ifile++) {
         struct mbna_file *file = &project.files[ifile];
-        if (file->block == project.files[mbna_file_id_2].block) {
+        if (file->block == project.files[mbna_file_id_2].survey) {
           for (int isection = 0; isection < file->num_sections; isection++) {
             struct mbna_section *section = &file->sections[isection];
             if (section->status == MBNA_CROSSING_STATUS_SET) {
@@ -4127,7 +4127,7 @@ int mbnavadjust_referenceplussection_load() {
     /* reset survey file and section selections */
     mbna_section_select = mbna_current_section;
     mbna_file_select = mbna_current_file;
-    mbna_survey_select = project.files[mbna_current_file].block;
+    mbna_survey_select = project.files[mbna_current_file].survey;
 
     /* load section first because it defines the bounds of the reference bathymetry */
     snprintf(message, sizeof(message), "Loading file %d section %d...", mbna_current_file, mbna_current_section);
@@ -4239,7 +4239,7 @@ int mbnavadjust_referenceplussection_load() {
   /* reset survey file and section selections */
   mbna_section_select = mbna_current_section;
   mbna_file_select = mbna_current_file;
-  mbna_survey_select = project.files[mbna_current_file].block;
+  mbna_survey_select = project.files[mbna_current_file].survey;
 
   if (mbna_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
@@ -6110,18 +6110,18 @@ int mbnavadjust_autopick(bool do_vertical) {
         if (mbna_view_list == MBNA_VIEW_LIST_CROSSINGS) {
           if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
               (mbna_view_mode == MBNA_VIEW_MODE_SURVEY &&
-               mbna_survey_select == project.files[crossing->file_id_1].block &&
-               mbna_survey_select == project.files[crossing->file_id_2].block) ||
+               mbna_survey_select == project.files[crossing->file_id_1].survey &&
+               mbna_survey_select == project.files[crossing->file_id_2].survey) ||
               (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == crossing->file_id_1 &&
                mbna_file_select == crossing->file_id_2) ||
               (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY &&
-               (mbna_survey_select == project.files[crossing->file_id_1].block ||
-                mbna_survey_select == project.files[crossing->file_id_2].block)) ||
+               (mbna_survey_select == project.files[crossing->file_id_1].survey ||
+                mbna_survey_select == project.files[crossing->file_id_2].survey)) ||
               (mbna_view_mode == MBNA_VIEW_MODE_BLOCK &&
-               ((mbna_block_select1 == project.files[crossing->file_id_1].block &&
-                 mbna_block_select2 == project.files[crossing->file_id_2].block) ||
-                (mbna_block_select2 == project.files[crossing->file_id_1].block &&
-                 mbna_block_select1 == project.files[crossing->file_id_2].block))) ||
+               ((mbna_survey_select1 == project.files[crossing->file_id_1].survey &&
+                 mbna_survey_select2 == project.files[crossing->file_id_2].survey) ||
+                (mbna_survey_select2 == project.files[crossing->file_id_1].survey &&
+                 mbna_survey_select1 == project.files[crossing->file_id_2].survey))) ||
               (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE &&
                (mbna_file_select == crossing->file_id_1 || mbna_file_select == crossing->file_id_2)) ||
               (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == crossing->file_id_1 &&
@@ -6134,18 +6134,18 @@ int mbnavadjust_autopick(bool do_vertical) {
           if (crossing->overlap >= MBNA_MEDIOCREOVERLAP_THRESHOLD) {
             if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_SURVEY &&
-                 mbna_survey_select == project.files[crossing->file_id_1].block &&
-                 mbna_survey_select == project.files[crossing->file_id_2].block) ||
+                 mbna_survey_select == project.files[crossing->file_id_1].survey &&
+                 mbna_survey_select == project.files[crossing->file_id_2].survey) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == crossing->file_id_1 &&
                  mbna_file_select == crossing->file_id_2) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY &&
-                 (mbna_survey_select == project.files[crossing->file_id_1].block ||
-                  mbna_survey_select == project.files[crossing->file_id_2].block)) ||
+                 (mbna_survey_select == project.files[crossing->file_id_1].survey ||
+                  mbna_survey_select == project.files[crossing->file_id_2].survey)) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_BLOCK &&
-                 ((mbna_block_select1 == project.files[crossing->file_id_1].block &&
-                   mbna_block_select2 == project.files[crossing->file_id_2].block) ||
-                  (mbna_block_select2 == project.files[crossing->file_id_1].block &&
-                   mbna_block_select1 == project.files[crossing->file_id_2].block))) ||
+                 ((mbna_survey_select1 == project.files[crossing->file_id_1].survey &&
+                   mbna_survey_select2 == project.files[crossing->file_id_2].survey) ||
+                  (mbna_survey_select2 == project.files[crossing->file_id_1].survey &&
+                   mbna_survey_select1 == project.files[crossing->file_id_2].survey))) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE &&
                  (mbna_file_select == crossing->file_id_1 || mbna_file_select == crossing->file_id_2)) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == crossing->file_id_1 &&
@@ -6159,18 +6159,18 @@ int mbnavadjust_autopick(bool do_vertical) {
           if (crossing->overlap >= MBNA_GOODOVERLAP_THRESHOLD) {
             if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_SURVEY &&
-                 mbna_survey_select == project.files[crossing->file_id_1].block &&
-                 mbna_survey_select == project.files[crossing->file_id_2].block) ||
+                 mbna_survey_select == project.files[crossing->file_id_1].survey &&
+                 mbna_survey_select == project.files[crossing->file_id_2].survey) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == crossing->file_id_1 &&
                  mbna_file_select == crossing->file_id_2) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY &&
-                 (mbna_survey_select == project.files[crossing->file_id_1].block ||
-                  mbna_survey_select == project.files[crossing->file_id_2].block)) ||
+                 (mbna_survey_select == project.files[crossing->file_id_1].survey ||
+                  mbna_survey_select == project.files[crossing->file_id_2].survey)) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_BLOCK &&
-                 ((mbna_block_select1 == project.files[crossing->file_id_1].block &&
-                   mbna_block_select2 == project.files[crossing->file_id_2].block) ||
-                  (mbna_block_select2 == project.files[crossing->file_id_1].block &&
-                   mbna_block_select1 == project.files[crossing->file_id_2].block))) ||
+                 ((mbna_survey_select1 == project.files[crossing->file_id_1].survey &&
+                   mbna_survey_select2 == project.files[crossing->file_id_2].survey) ||
+                  (mbna_survey_select2 == project.files[crossing->file_id_1].survey &&
+                   mbna_survey_select1 == project.files[crossing->file_id_2].survey))) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE &&
                  (mbna_file_select == crossing->file_id_1 || mbna_file_select == crossing->file_id_2)) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == crossing->file_id_1 &&
@@ -6184,18 +6184,18 @@ int mbnavadjust_autopick(bool do_vertical) {
           if (crossing->overlap >= MBNA_BETTEROVERLAP_THRESHOLD) {
             if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_SURVEY &&
-                 mbna_survey_select == project.files[crossing->file_id_1].block &&
-                 mbna_survey_select == project.files[crossing->file_id_2].block) ||
+                 mbna_survey_select == project.files[crossing->file_id_1].survey &&
+                 mbna_survey_select == project.files[crossing->file_id_2].survey) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == crossing->file_id_1 &&
                  mbna_file_select == crossing->file_id_2) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY &&
-                 (mbna_survey_select == project.files[crossing->file_id_1].block ||
-                  mbna_survey_select == project.files[crossing->file_id_2].block)) ||
+                 (mbna_survey_select == project.files[crossing->file_id_1].survey ||
+                  mbna_survey_select == project.files[crossing->file_id_2].survey)) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_BLOCK &&
-                 ((mbna_block_select1 == project.files[crossing->file_id_1].block &&
-                   mbna_block_select2 == project.files[crossing->file_id_2].block) ||
-                  (mbna_block_select2 == project.files[crossing->file_id_1].block &&
-                   mbna_block_select1 == project.files[crossing->file_id_2].block))) ||
+                 ((mbna_survey_select1 == project.files[crossing->file_id_1].survey &&
+                   mbna_survey_select2 == project.files[crossing->file_id_2].survey) ||
+                  (mbna_survey_select2 == project.files[crossing->file_id_1].survey &&
+                   mbna_survey_select1 == project.files[crossing->file_id_2].survey))) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE &&
                  (mbna_file_select == crossing->file_id_1 || mbna_file_select == crossing->file_id_2)) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == crossing->file_id_1 &&
@@ -6209,18 +6209,18 @@ int mbnavadjust_autopick(bool do_vertical) {
           if (crossing->truecrossing) {
             if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_SURVEY &&
-                 mbna_survey_select == project.files[crossing->file_id_1].block &&
-                 mbna_survey_select == project.files[crossing->file_id_2].block) ||
+                 mbna_survey_select == project.files[crossing->file_id_1].survey &&
+                 mbna_survey_select == project.files[crossing->file_id_2].survey) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == crossing->file_id_1 &&
                  mbna_file_select == crossing->file_id_2) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY &&
-                 (mbna_survey_select == project.files[crossing->file_id_1].block ||
-                  mbna_survey_select == project.files[crossing->file_id_2].block)) ||
+                 (mbna_survey_select == project.files[crossing->file_id_1].survey ||
+                  mbna_survey_select == project.files[crossing->file_id_2].survey)) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_BLOCK &&
-                 ((mbna_block_select1 == project.files[crossing->file_id_1].block &&
-                   mbna_block_select2 == project.files[crossing->file_id_2].block) ||
-                  (mbna_block_select2 == project.files[crossing->file_id_1].block &&
-                   mbna_block_select1 == project.files[crossing->file_id_2].block))) ||
+                 ((mbna_survey_select1 == project.files[crossing->file_id_1].survey &&
+                   mbna_survey_select2 == project.files[crossing->file_id_2].survey) ||
+                  (mbna_survey_select2 == project.files[crossing->file_id_1].survey &&
+                   mbna_survey_select1 == project.files[crossing->file_id_2].survey))) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE &&
                  (mbna_file_select == crossing->file_id_1 || mbna_file_select == crossing->file_id_2)) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == crossing->file_id_1 &&
@@ -6260,11 +6260,11 @@ int mbnavadjust_autopick(bool do_vertical) {
 
         /* reset survey file and section selections */
         if (mbna_view_mode == MBNA_VIEW_MODE_SURVEY || mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY) {
-          if (mbna_survey_select == project.files[crossing->file_id_1].block) {
+          if (mbna_survey_select == project.files[crossing->file_id_1].survey) {
             mbna_file_select = crossing->file_id_1;
             mbna_section_select = crossing->section_1;
           }
-          else if (mbna_survey_select == project.files[crossing->file_id_2].block) {
+          else if (mbna_survey_select == project.files[crossing->file_id_2].survey) {
             mbna_file_select = crossing->file_id_2;
             mbna_section_select = crossing->section_2;
           }
@@ -6275,44 +6275,44 @@ int mbnavadjust_autopick(bool do_vertical) {
         }
         else if (mbna_view_mode == MBNA_VIEW_MODE_FILE || mbna_view_mode == MBNA_VIEW_MODE_WITHFILE) {
           if (mbna_file_select == crossing->file_id_1) {
-            mbna_survey_select = project.files[crossing->file_id_1].block;
+            mbna_survey_select = project.files[crossing->file_id_1].survey;
             mbna_section_select = crossing->section_1;
           }
           else if (mbna_file_select == crossing->file_id_2) {
-            mbna_survey_select = project.files[crossing->file_id_2].block;
+            mbna_survey_select = project.files[crossing->file_id_2].survey;
             mbna_section_select = crossing->section_2;
           }
           else {
-            mbna_survey_select = project.files[crossing->file_id_1].block;
+            mbna_survey_select = project.files[crossing->file_id_1].survey;
             mbna_section_select = crossing->section_1;
           }
         }
         else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION) {
           if (mbna_file_select == crossing->file_id_1 && mbna_section_select == crossing->section_1) {
-            mbna_survey_select = project.files[crossing->file_id_1].block;
+            mbna_survey_select = project.files[crossing->file_id_1].survey;
             mbna_file_select = crossing->file_id_1;
           }
           else if (mbna_file_select == crossing->file_id_2 && mbna_section_select == crossing->section_2) {
-            mbna_survey_select = project.files[crossing->file_id_2].block;
+            mbna_survey_select = project.files[crossing->file_id_2].survey;
             mbna_file_select = crossing->file_id_2;
           }
           else {
-            mbna_survey_select = project.files[crossing->file_id_1].block;
+            mbna_survey_select = project.files[crossing->file_id_1].survey;
             mbna_file_select = crossing->file_id_1;
           }
         }
         else if (mbna_file_select == crossing->file_id_1) {
-          mbna_survey_select = project.files[crossing->file_id_1].block;
+          mbna_survey_select = project.files[crossing->file_id_1].survey;
           mbna_file_select = crossing->file_id_1;
           mbna_section_select = crossing->section_1;
         }
         else if (mbna_file_select == crossing->file_id_2) {
-          mbna_survey_select = project.files[crossing->file_id_2].block;
+          mbna_survey_select = project.files[crossing->file_id_2].survey;
           mbna_file_select = crossing->file_id_2;
           mbna_section_select = crossing->section_2;
         }
         else {
-          mbna_survey_select = project.files[crossing->file_id_1].block;
+          mbna_survey_select = project.files[crossing->file_id_1].survey;
           mbna_file_select = crossing->file_id_1;
           mbna_section_select = crossing->section_1;
         }
@@ -6619,8 +6619,8 @@ int mbnavadjust_autosetsvsvertical() {
             fprintf(stderr,
                     "PROBLEM WITH TIE: %4d %2d %2.2d:%3.3d:%3.3d:%2.2d %2.2d:%3.3d:%3.3d:%2.2d %8.2f %8.2f %8.2f | "
                     "%8.2f %8.2f %8.2f\n",
-                    icrossing, j, project.files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1,
-                    tie->snav_1, project.files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2,
+                    icrossing, j, project.files[crossing->file_id_1].survey, crossing->file_id_1, crossing->section_1,
+                    tie->snav_1, project.files[crossing->file_id_2].survey, crossing->file_id_2, crossing->section_2,
                     tie->snav_2, tie->offset_x_m, tie->offset_y_m, tie->offset_z_m, tie->sigmar1, tie->sigmar2,
                     tie->sigmar3);
           }
@@ -6799,14 +6799,14 @@ int mbnavadjust_autosetsvsvertical() {
             tie = (struct mbna_tie *)&crossing->ties[itie];
 
             /* if blocks differ get id for block vs block */
-            if (project.files[crossing->file_id_1].block != project.files[crossing->file_id_2].block) {
-              if (project.files[crossing->file_id_2].block > project.files[crossing->file_id_1].block) {
-                jbvb1 = project.files[crossing->file_id_1].block;
-                jbvb2 = project.files[crossing->file_id_2].block;
+            if (project.files[crossing->file_id_1].survey != project.files[crossing->file_id_2].survey) {
+              if (project.files[crossing->file_id_2].survey > project.files[crossing->file_id_1].survey) {
+                jbvb1 = project.files[crossing->file_id_1].survey;
+                jbvb2 = project.files[crossing->file_id_2].survey;
               }
               else {
-                jbvb1 = project.files[crossing->file_id_2].block;
-                jbvb2 = project.files[crossing->file_id_1].block;
+                jbvb1 = project.files[crossing->file_id_2].survey;
+                jbvb2 = project.files[crossing->file_id_1].survey;
               }
               jbvb = (jbvb2) * (jbvb2 + 1) / 2 + jbvb1;
 
@@ -7404,18 +7404,18 @@ int mbnavadjust_zerozoffsets() {
         if (mbna_view_list == MBNA_VIEW_LIST_CROSSINGS) {
           if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
               (mbna_view_mode == MBNA_VIEW_MODE_SURVEY &&
-               mbna_survey_select == project.files[crossing->file_id_1].block &&
-               mbna_survey_select == project.files[crossing->file_id_2].block) ||
+               mbna_survey_select == project.files[crossing->file_id_1].survey &&
+               mbna_survey_select == project.files[crossing->file_id_2].survey) ||
               (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == crossing->file_id_1 &&
                mbna_file_select == crossing->file_id_2) ||
               (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY &&
-               (mbna_survey_select == project.files[crossing->file_id_1].block ||
-                mbna_survey_select == project.files[crossing->file_id_2].block)) ||
+               (mbna_survey_select == project.files[crossing->file_id_1].survey ||
+                mbna_survey_select == project.files[crossing->file_id_2].survey)) ||
               (mbna_view_mode == MBNA_VIEW_MODE_BLOCK &&
-               ((mbna_block_select1 == project.files[crossing->file_id_1].block &&
-                 mbna_block_select2 == project.files[crossing->file_id_2].block) ||
-                (mbna_block_select2 == project.files[crossing->file_id_1].block &&
-                 mbna_block_select1 == project.files[crossing->file_id_2].block))) ||
+               ((mbna_survey_select1 == project.files[crossing->file_id_1].survey &&
+                 mbna_survey_select2 == project.files[crossing->file_id_2].survey) ||
+                (mbna_survey_select2 == project.files[crossing->file_id_1].survey &&
+                 mbna_survey_select1 == project.files[crossing->file_id_2].survey))) ||
               (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE &&
                (mbna_file_select == crossing->file_id_1 || mbna_file_select == crossing->file_id_2)) ||
               (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == crossing->file_id_1 &&
@@ -7429,18 +7429,18 @@ int mbnavadjust_zerozoffsets() {
           if (crossing->overlap >= MBNA_MEDIOCREOVERLAP_THRESHOLD) {
             if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_SURVEY &&
-                 mbna_survey_select == project.files[crossing->file_id_1].block &&
-                 mbna_survey_select == project.files[crossing->file_id_2].block) ||
+                 mbna_survey_select == project.files[crossing->file_id_1].survey &&
+                 mbna_survey_select == project.files[crossing->file_id_2].survey) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == crossing->file_id_1 &&
                  mbna_file_select == crossing->file_id_2) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY &&
-                 (mbna_survey_select == project.files[crossing->file_id_1].block ||
-                  mbna_survey_select == project.files[crossing->file_id_2].block)) ||
+                 (mbna_survey_select == project.files[crossing->file_id_1].survey ||
+                  mbna_survey_select == project.files[crossing->file_id_2].survey)) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_BLOCK &&
-                 ((mbna_block_select1 == project.files[crossing->file_id_1].block &&
-                   mbna_block_select2 == project.files[crossing->file_id_2].block) ||
-                  (mbna_block_select2 == project.files[crossing->file_id_1].block &&
-                   mbna_block_select1 == project.files[crossing->file_id_2].block))) ||
+                 ((mbna_survey_select1 == project.files[crossing->file_id_1].survey &&
+                   mbna_survey_select2 == project.files[crossing->file_id_2].survey) ||
+                  (mbna_survey_select2 == project.files[crossing->file_id_1].survey &&
+                   mbna_survey_select1 == project.files[crossing->file_id_2].survey))) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE &&
                  (mbna_file_select == crossing->file_id_1 || mbna_file_select == crossing->file_id_2)) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == crossing->file_id_1 &&
@@ -7455,18 +7455,18 @@ int mbnavadjust_zerozoffsets() {
           if (crossing->overlap >= MBNA_GOODOVERLAP_THRESHOLD) {
             if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_SURVEY &&
-                 mbna_survey_select == project.files[crossing->file_id_1].block &&
-                 mbna_survey_select == project.files[crossing->file_id_2].block) ||
+                 mbna_survey_select == project.files[crossing->file_id_1].survey &&
+                 mbna_survey_select == project.files[crossing->file_id_2].survey) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == crossing->file_id_1 &&
                  mbna_file_select == crossing->file_id_2) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY &&
-                 (mbna_survey_select == project.files[crossing->file_id_1].block ||
-                  mbna_survey_select == project.files[crossing->file_id_2].block)) ||
+                 (mbna_survey_select == project.files[crossing->file_id_1].survey ||
+                  mbna_survey_select == project.files[crossing->file_id_2].survey)) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_BLOCK &&
-                 ((mbna_block_select1 == project.files[crossing->file_id_1].block &&
-                   mbna_block_select2 == project.files[crossing->file_id_2].block) ||
-                  (mbna_block_select2 == project.files[crossing->file_id_1].block &&
-                   mbna_block_select1 == project.files[crossing->file_id_2].block))) ||
+                 ((mbna_survey_select1 == project.files[crossing->file_id_1].survey &&
+                   mbna_survey_select2 == project.files[crossing->file_id_2].survey) ||
+                  (mbna_survey_select2 == project.files[crossing->file_id_1].survey &&
+                   mbna_survey_select1 == project.files[crossing->file_id_2].survey))) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE &&
                  (mbna_file_select == crossing->file_id_1 || mbna_file_select == crossing->file_id_2)) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == crossing->file_id_1 &&
@@ -7481,18 +7481,18 @@ int mbnavadjust_zerozoffsets() {
           if (crossing->overlap >= MBNA_BETTEROVERLAP_THRESHOLD) {
             if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_SURVEY &&
-                 mbna_survey_select == project.files[crossing->file_id_1].block &&
-                 mbna_survey_select == project.files[crossing->file_id_2].block) ||
+                 mbna_survey_select == project.files[crossing->file_id_1].survey &&
+                 mbna_survey_select == project.files[crossing->file_id_2].survey) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == crossing->file_id_1 &&
                  mbna_file_select == crossing->file_id_2) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY &&
-                 (mbna_survey_select == project.files[crossing->file_id_1].block ||
-                  mbna_survey_select == project.files[crossing->file_id_2].block)) ||
+                 (mbna_survey_select == project.files[crossing->file_id_1].survey ||
+                  mbna_survey_select == project.files[crossing->file_id_2].survey)) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_BLOCK &&
-                 ((mbna_block_select1 == project.files[crossing->file_id_1].block &&
-                   mbna_block_select2 == project.files[crossing->file_id_2].block) ||
-                  (mbna_block_select2 == project.files[crossing->file_id_1].block &&
-                   mbna_block_select1 == project.files[crossing->file_id_2].block))) ||
+                 ((mbna_survey_select1 == project.files[crossing->file_id_1].survey &&
+                   mbna_survey_select2 == project.files[crossing->file_id_2].survey) ||
+                  (mbna_survey_select2 == project.files[crossing->file_id_1].survey &&
+                   mbna_survey_select1 == project.files[crossing->file_id_2].survey))) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE &&
                  (mbna_file_select == crossing->file_id_1 || mbna_file_select == crossing->file_id_2)) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == crossing->file_id_1 &&
@@ -7507,18 +7507,18 @@ int mbnavadjust_zerozoffsets() {
           if (crossing->truecrossing) {
             if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_SURVEY &&
-                 mbna_survey_select == project.files[crossing->file_id_1].block &&
-                 mbna_survey_select == project.files[crossing->file_id_2].block) ||
+                 mbna_survey_select == project.files[crossing->file_id_1].survey &&
+                 mbna_survey_select == project.files[crossing->file_id_2].survey) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == crossing->file_id_1 &&
                  mbna_file_select == crossing->file_id_2) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY &&
-                 (mbna_survey_select == project.files[crossing->file_id_1].block ||
-                  mbna_survey_select == project.files[crossing->file_id_2].block)) ||
+                 (mbna_survey_select == project.files[crossing->file_id_1].survey ||
+                  mbna_survey_select == project.files[crossing->file_id_2].survey)) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_BLOCK &&
-                 ((mbna_block_select1 == project.files[crossing->file_id_1].block &&
-                   mbna_block_select2 == project.files[crossing->file_id_2].block) ||
-                  (mbna_block_select2 == project.files[crossing->file_id_1].block &&
-                   mbna_block_select1 == project.files[crossing->file_id_2].block))) ||
+                 ((mbna_survey_select1 == project.files[crossing->file_id_1].survey &&
+                   mbna_survey_select2 == project.files[crossing->file_id_2].survey) ||
+                  (mbna_survey_select2 == project.files[crossing->file_id_1].survey &&
+                   mbna_survey_select1 == project.files[crossing->file_id_2].survey))) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE &&
                  (mbna_file_select == crossing->file_id_1 || mbna_file_select == crossing->file_id_2)) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == crossing->file_id_1 &&
@@ -7605,18 +7605,18 @@ int mbnavadjust_unsetskipped() {
         if (mbna_view_list == MBNA_VIEW_LIST_CROSSINGS) {
           if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
               (mbna_view_mode == MBNA_VIEW_MODE_SURVEY &&
-               mbna_survey_select == project.files[crossing->file_id_1].block &&
-               mbna_survey_select == project.files[crossing->file_id_2].block) ||
+               mbna_survey_select == project.files[crossing->file_id_1].survey &&
+               mbna_survey_select == project.files[crossing->file_id_2].survey) ||
               (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == crossing->file_id_1 &&
                mbna_file_select == crossing->file_id_2) ||
               (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY &&
-               (mbna_survey_select == project.files[crossing->file_id_1].block ||
-                mbna_survey_select == project.files[crossing->file_id_2].block)) ||
+               (mbna_survey_select == project.files[crossing->file_id_1].survey ||
+                mbna_survey_select == project.files[crossing->file_id_2].survey)) ||
               (mbna_view_mode == MBNA_VIEW_MODE_BLOCK &&
-               ((mbna_block_select1 == project.files[crossing->file_id_1].block &&
-                 mbna_block_select2 == project.files[crossing->file_id_2].block) ||
-                (mbna_block_select2 == project.files[crossing->file_id_1].block &&
-                 mbna_block_select1 == project.files[crossing->file_id_2].block))) ||
+               ((mbna_survey_select1 == project.files[crossing->file_id_1].survey &&
+                 mbna_survey_select2 == project.files[crossing->file_id_2].survey) ||
+                (mbna_survey_select2 == project.files[crossing->file_id_1].survey &&
+                 mbna_survey_select1 == project.files[crossing->file_id_2].survey))) ||
               (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE &&
                (mbna_file_select == crossing->file_id_1 || mbna_file_select == crossing->file_id_2)) ||
               (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == crossing->file_id_1 &&
@@ -7630,18 +7630,18 @@ int mbnavadjust_unsetskipped() {
           if (crossing->overlap >= MBNA_MEDIOCREOVERLAP_THRESHOLD) {
             if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_SURVEY &&
-                 mbna_survey_select == project.files[crossing->file_id_1].block &&
-                 mbna_survey_select == project.files[crossing->file_id_2].block) ||
+                 mbna_survey_select == project.files[crossing->file_id_1].survey &&
+                 mbna_survey_select == project.files[crossing->file_id_2].survey) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == crossing->file_id_1 &&
                  mbna_file_select == crossing->file_id_2) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY &&
-                 (mbna_survey_select == project.files[crossing->file_id_1].block ||
-                  mbna_survey_select == project.files[crossing->file_id_2].block)) ||
+                 (mbna_survey_select == project.files[crossing->file_id_1].survey ||
+                  mbna_survey_select == project.files[crossing->file_id_2].survey)) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_BLOCK &&
-                 ((mbna_block_select1 == project.files[crossing->file_id_1].block &&
-                   mbna_block_select2 == project.files[crossing->file_id_2].block) ||
-                  (mbna_block_select2 == project.files[crossing->file_id_1].block &&
-                   mbna_block_select1 == project.files[crossing->file_id_2].block))) ||
+                 ((mbna_survey_select1 == project.files[crossing->file_id_1].survey &&
+                   mbna_survey_select2 == project.files[crossing->file_id_2].survey) ||
+                  (mbna_survey_select2 == project.files[crossing->file_id_1].survey &&
+                   mbna_survey_select1 == project.files[crossing->file_id_2].survey))) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE &&
                  (mbna_file_select == crossing->file_id_1 || mbna_file_select == crossing->file_id_2)) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == crossing->file_id_1 &&
@@ -7656,18 +7656,18 @@ int mbnavadjust_unsetskipped() {
           if (crossing->overlap >= MBNA_GOODOVERLAP_THRESHOLD) {
             if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_SURVEY &&
-                 mbna_survey_select == project.files[crossing->file_id_1].block &&
-                 mbna_survey_select == project.files[crossing->file_id_2].block) ||
+                 mbna_survey_select == project.files[crossing->file_id_1].survey &&
+                 mbna_survey_select == project.files[crossing->file_id_2].survey) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == crossing->file_id_1 &&
                  mbna_file_select == crossing->file_id_2) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY &&
-                 (mbna_survey_select == project.files[crossing->file_id_1].block ||
-                  mbna_survey_select == project.files[crossing->file_id_2].block)) ||
+                 (mbna_survey_select == project.files[crossing->file_id_1].survey ||
+                  mbna_survey_select == project.files[crossing->file_id_2].survey)) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_BLOCK &&
-                 ((mbna_block_select1 == project.files[crossing->file_id_1].block &&
-                   mbna_block_select2 == project.files[crossing->file_id_2].block) ||
-                  (mbna_block_select2 == project.files[crossing->file_id_1].block &&
-                   mbna_block_select1 == project.files[crossing->file_id_2].block))) ||
+                 ((mbna_survey_select1 == project.files[crossing->file_id_1].survey &&
+                   mbna_survey_select2 == project.files[crossing->file_id_2].survey) ||
+                  (mbna_survey_select2 == project.files[crossing->file_id_1].survey &&
+                   mbna_survey_select1 == project.files[crossing->file_id_2].survey))) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE &&
                  (mbna_file_select == crossing->file_id_1 || mbna_file_select == crossing->file_id_2)) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == crossing->file_id_1 &&
@@ -7682,18 +7682,18 @@ int mbnavadjust_unsetskipped() {
           if (crossing->overlap >= MBNA_BETTEROVERLAP_THRESHOLD) {
             if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_SURVEY &&
-                 mbna_survey_select == project.files[crossing->file_id_1].block &&
-                 mbna_survey_select == project.files[crossing->file_id_2].block) ||
+                 mbna_survey_select == project.files[crossing->file_id_1].survey &&
+                 mbna_survey_select == project.files[crossing->file_id_2].survey) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == crossing->file_id_1 &&
                  mbna_file_select == crossing->file_id_2) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY &&
-                 (mbna_survey_select == project.files[crossing->file_id_1].block ||
-                  mbna_survey_select == project.files[crossing->file_id_2].block)) ||
+                 (mbna_survey_select == project.files[crossing->file_id_1].survey ||
+                  mbna_survey_select == project.files[crossing->file_id_2].survey)) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_BLOCK &&
-                 ((mbna_block_select1 == project.files[crossing->file_id_1].block &&
-                   mbna_block_select2 == project.files[crossing->file_id_2].block) ||
-                  (mbna_block_select2 == project.files[crossing->file_id_1].block &&
-                   mbna_block_select1 == project.files[crossing->file_id_2].block))) ||
+                 ((mbna_survey_select1 == project.files[crossing->file_id_1].survey &&
+                   mbna_survey_select2 == project.files[crossing->file_id_2].survey) ||
+                  (mbna_survey_select2 == project.files[crossing->file_id_1].survey &&
+                   mbna_survey_select1 == project.files[crossing->file_id_2].survey))) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE &&
                  (mbna_file_select == crossing->file_id_1 || mbna_file_select == crossing->file_id_2)) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == crossing->file_id_1 &&
@@ -7708,18 +7708,18 @@ int mbnavadjust_unsetskipped() {
           if (crossing->truecrossing) {
             if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_SURVEY &&
-                 mbna_survey_select == project.files[crossing->file_id_1].block &&
-                 mbna_survey_select == project.files[crossing->file_id_2].block) ||
+                 mbna_survey_select == project.files[crossing->file_id_1].survey &&
+                 mbna_survey_select == project.files[crossing->file_id_2].survey) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == crossing->file_id_1 &&
                  mbna_file_select == crossing->file_id_2) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY &&
-                 (mbna_survey_select == project.files[crossing->file_id_1].block ||
-                  mbna_survey_select == project.files[crossing->file_id_2].block)) ||
+                 (mbna_survey_select == project.files[crossing->file_id_1].survey ||
+                  mbna_survey_select == project.files[crossing->file_id_2].survey)) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_BLOCK &&
-                 ((mbna_block_select1 == project.files[crossing->file_id_1].block &&
-                   mbna_block_select2 == project.files[crossing->file_id_2].block) ||
-                  (mbna_block_select2 == project.files[crossing->file_id_1].block &&
-                   mbna_block_select1 == project.files[crossing->file_id_2].block))) ||
+                 ((mbna_survey_select1 == project.files[crossing->file_id_1].survey &&
+                   mbna_survey_select2 == project.files[crossing->file_id_2].survey) ||
+                  (mbna_survey_select2 == project.files[crossing->file_id_1].survey &&
+                   mbna_survey_select1 == project.files[crossing->file_id_2].survey))) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE &&
                  (mbna_file_select == crossing->file_id_1 || mbna_file_select == crossing->file_id_2)) ||
                 (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == crossing->file_id_1 &&
@@ -7904,8 +7904,8 @@ int mbnavadjust_invertnav() {
             fprintf(stderr,
                     "PROBLEM WITH CROSSING TIE: %4d %2d %2.2d:%3.3d:%3.3d:%2.2d %2.2d:%3.3d:%3.3d:%2.2d %8.2f %8.2f %8.2f | "
                     "%8.2f %8.2f %8.2f\n",
-                    icrossing, j, project.files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1,
-                    tie->snav_1, project.files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2,
+                    icrossing, j, project.files[crossing->file_id_1].survey, crossing->file_id_1, crossing->section_1,
+                    tie->snav_1, project.files[crossing->file_id_2].survey, crossing->file_id_2, crossing->section_2,
                     tie->snav_2, tie->offset_x_m, tie->offset_y_m, tie->offset_z_m, tie->sigmar1, tie->sigmar2,
                     tie->sigmar3);
           }
@@ -8232,7 +8232,7 @@ fprintf(stderr, "\nGlobal ties XY %d:\n", nglobaltiexy);
     for (int igtie = 0; igtie < nglobaltiexy; igtie++) {
       if (project.files[global_ties_xy_files[igtie]].sections[global_ties_xy_sections[igtie]].globaltie.status != MBNA_TIE_NONE) {
         fprintf(stderr, "%d %4.4d:%4.4d:%4.4d:%2.2d  %.6f  %.3f %.3f %.3f  Global Tie\n",
-                  igtie, project.files[global_ties_xy_files[igtie]].block,
+                  igtie, project.files[global_ties_xy_files[igtie]].survey,
                   global_ties_xy_files[igtie],
                   global_ties_xy_sections[igtie],
                   project.files[global_ties_xy_files[igtie]].sections[global_ties_xy_sections[igtie]].globaltie.snav,
@@ -8243,7 +8243,7 @@ fprintf(stderr, "\nGlobal ties XY %d:\n", nglobaltiexy);
       }
       else {
         fprintf(stderr, "%d %4.4d:%4.4d:%4.4d:%2.2d  %.6f  %.3f %.3f %.3f  Fixed Tie\n",
-                  igtie, project.files[global_ties_xy_files[igtie]].block,
+                  igtie, project.files[global_ties_xy_files[igtie]].survey,
                   global_ties_xy_files[igtie],
                   global_ties_xy_sections[igtie],
                   project.files[global_ties_xy_files[igtie]].sections[global_ties_xy_sections[igtie]].fixedtie.snav,
@@ -8258,7 +8258,7 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
     for (int igtie = 0; igtie < nglobaltiez; igtie++) {
       if (project.files[global_ties_z_files[igtie]].sections[global_ties_z_sections[igtie]].globaltie.status != MBNA_TIE_NONE) {
         fprintf(stderr, "%d %4.4d:%4.4d:%4.4d:%2.2d  %.6f  %.3f %.3f %.3f  Global Tie\n",
-                  igtie, project.files[global_ties_z_files[igtie]].block,
+                  igtie, project.files[global_ties_z_files[igtie]].survey,
                   global_ties_z_files[igtie],
                   global_ties_z_sections[igtie],
                   project.files[global_ties_z_files[igtie]].sections[global_ties_z_sections[igtie]].globaltie.snav,
@@ -8269,7 +8269,7 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
       }
       else {
         fprintf(stderr, "%d %4.4d:%4.4d:%4.4d:%2.2d  %.6f  %.3f %.3f %.3f  Fixed Tie\n",
-                  igtie, project.files[global_ties_z_files[igtie]].block,
+                  igtie, project.files[global_ties_z_files[igtie]].survey,
                   global_ties_z_files[igtie],
                   global_ties_z_sections[igtie],
                   project.files[global_ties_z_files[igtie]].sections[global_ties_z_sections[igtie]].fixedtie.snav,
@@ -8289,7 +8289,7 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
           || project.files[global_ties_xy_files[igtie]].status == MBNA_FILE_FIXEDXYNAV) {
         fprintf(stdout, "MBnavadjust warning: An xy global tie has been defined for a file with xy navigation fixed.\n");
         fprintf(stdout, "  File: %2.2d:%5.5d %s   Section: %d  Offset: %f m east  %f m north  %f m vertical\n",
-                project.files[global_ties_xy_sections[igtie]].block,
+                project.files[global_ties_xy_sections[igtie]].survey,
                 global_ties_xy_files[igtie],
                 project.files[global_ties_xy_sections[igtie]].file,
                 global_ties_xy_sections[igtie],
@@ -8300,7 +8300,7 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
       }
 
       /* deal with this global or fixed tie (global takes precedence if both exist) */
-      int iblock_gtie = project.files[global_ties_xy_files[igtie]].block;
+      int iblock_gtie = project.files[global_ties_xy_files[igtie]].survey;
       int ifile_gtie = global_ties_xy_files[igtie];
       int isection_gtie = global_ties_xy_sections[igtie];
       int isnav_gtie;
@@ -8344,13 +8344,13 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
         }
       }
       if (igtie < nglobaltiexy - 1) {
-        iblock_gtie1 = project.files[global_ties_xy_files[igtie+1]].block;
+        iblock_gtie1 = project.files[global_ties_xy_files[igtie+1]].survey;
         ifile_gtie1 = global_ties_xy_files[igtie+1];
       }
 
       /* if this is the first global tie in a survey/block then set all previous nav
           in this block to the same offsets */
-      if (igtie == 0 || project.files[global_ties_xy_files[igtie-1]].block != iblock_gtie) {
+      if (igtie == 0 || project.files[global_ties_xy_files[igtie-1]].survey != iblock_gtie) {
         /* loop over all files and sections up to this point - any in the same block
             will have the offsets set */
         for (int ifile = 0; ifile <= ifile_gtie; ifile++) {
@@ -8447,7 +8447,7 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
           || project.files[global_ties_z_files[igtie]].status == MBNA_FILE_FIXEDZNAV) {
         fprintf(stdout, "MBnavadjust warning: A z global tie has been defined for a file with z navigation fixed.\n");
         fprintf(stdout, "  File: %2.2d:%5.5d %s   Section: %d  Offset: %f m east  %f m north  %f m vertical\n",
-                project.files[global_ties_z_sections[igtie]].block,
+                project.files[global_ties_z_sections[igtie]].survey,
                 global_ties_z_files[igtie],
                 project.files[global_ties_z_sections[igtie]].file,
                 global_ties_z_sections[igtie],
@@ -8458,7 +8458,7 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
       }
 
       /* deal with this global or fixed tie (global takes precedence if both exist) */
-      int iblock_gtie = project.files[global_ties_xy_files[igtie]].block;
+      int iblock_gtie = project.files[global_ties_xy_files[igtie]].survey;
       int ifile_gtie = global_ties_xy_files[igtie];
       int isection_gtie = global_ties_xy_sections[igtie];
       int isnav_gtie = -1;
@@ -8496,13 +8496,13 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
         }
       }
       if (igtie < nglobaltiez - 1) {
-        iblock_gtie1 = project.files[global_ties_z_files[igtie+1]].block;
+        iblock_gtie1 = project.files[global_ties_z_files[igtie+1]].survey;
         ifile_gtie1 = global_ties_z_files[igtie+1];
       }
 
       /* if this is the first global tie in a survey/block then set all previous nav
           in this block to the same offsets */
-      if (igtie == 0 || project.files[global_ties_z_files[igtie-1]].block != iblock_gtie) {
+      if (igtie == 0 || project.files[global_ties_z_files[igtie-1]].survey != iblock_gtie) {
         /* loop over all files and sections up to this point - any in the same block
             will have the offsets set */
         for (int ifile = 0; ifile <= ifile_gtie; ifile++) {
@@ -8769,14 +8769,14 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
             tie = (struct mbna_tie *)&crossing->ties[itie];
 
             /* if blocks differ get id for block vs block */
-            if (project.files[crossing->file_id_1].block != project.files[crossing->file_id_2].block) {
-              if (project.files[crossing->file_id_2].block > project.files[crossing->file_id_1].block) {
-                jbvb1 = project.files[crossing->file_id_1].block;
-                jbvb2 = project.files[crossing->file_id_2].block;
+            if (project.files[crossing->file_id_1].survey != project.files[crossing->file_id_2].survey) {
+              if (project.files[crossing->file_id_2].survey > project.files[crossing->file_id_1].survey) {
+                jbvb1 = project.files[crossing->file_id_1].survey;
+                jbvb2 = project.files[crossing->file_id_2].survey;
               }
               else {
-                jbvb1 = project.files[crossing->file_id_2].block;
-                jbvb2 = project.files[crossing->file_id_1].block;
+                jbvb1 = project.files[crossing->file_id_2].survey;
+                jbvb2 = project.files[crossing->file_id_1].survey;
               }
               jbvb = (jbvb2) * (jbvb2 + 1) / 2 + jbvb1;
 
@@ -9891,8 +9891,8 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
         for (int icrossing = 0; icrossing < project.num_crossings; icrossing++) {
           crossing = &project.crossings[icrossing];
           if (crossing->status == MBNA_CROSSING_STATUS_SET
-            && project.files[crossing->file_id_1].block == isurvey
-            && project.files[crossing->file_id_2].block == isurvey) {
+            && project.files[crossing->file_id_1].survey == isurvey
+            && project.files[crossing->file_id_2].survey == isurvey) {
             for (int itie = 0; itie < crossing->num_ties; itie++) {
               ntie_surveyonly += 3;
             }
@@ -9934,8 +9934,8 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
 
           /* use only set crossings */
           if (crossing->status == MBNA_CROSSING_STATUS_SET
-              && (full_inversion || (project.files[crossing->file_id_1].block == isurvey
-                  && project.files[crossing->file_id_2].block == isurvey)))
+              && (full_inversion || (project.files[crossing->file_id_1].survey == isurvey
+                  && project.files[crossing->file_id_2].survey == isurvey)))
               for (int itie = 0; itie < crossing->num_ties; itie++) {
                   /* A: get tie */
                   tie = (struct mbna_tie *)&crossing->ties[itie];
@@ -10777,10 +10777,10 @@ offset_x, offset_y, offset_z); */
                         "%2.2d:%4.4d:%3.3d:%2.2d %4.4d %2.2d %2.2d %2.2d:%2.2d:%2.2d.%6.6d  %.6f "
                         "%14.9f %14.9f "
                         "%8.2f %8.2f %8.2f   %8.2f %8.2f %8.2f   %8.2f %8.2f %8.2f\n",
-                      project.files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1, tie->snav_1,
+                      project.files[crossing->file_id_1].survey, crossing->file_id_1, crossing->section_1, tie->snav_1,
                       snav_1_time_i[0], snav_1_time_i[1], snav_1_time_i[2], snav_1_time_i[3], snav_1_time_i[4], snav_1_time_i[5], snav_1_time_i[6],
                       snav_1_time_d,
-                      project.files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2, tie->snav_2,
+                      project.files[crossing->file_id_2].survey, crossing->file_id_2, crossing->section_2, tie->snav_2,
                       snav_2_time_i[0], snav_2_time_i[1], snav_2_time_i[2], snav_2_time_i[3], snav_2_time_i[4], snav_2_time_i[5], snav_2_time_i[6],
                       snav_2_time_d,
                       avg_tie_lon, avg_tie_lat,
@@ -10948,7 +10948,7 @@ int mbnavadjust_updategrid() {
       snprintf(apath, sizeof(apath), "%s/datalist_%4.4d.mb-1", project.datadir, isurvey);
       if ((afp = fopen(apath, "w")) != NULL) {
         for (int ifile = 0; ifile < project.num_files; ifile++) {
-          if (project.files[ifile].block == isurvey) {
+          if (project.files[ifile].survey == isurvey) {
             file = &project.files[ifile];
             for (int j = 0; j < file->num_sections; j++) {
               fprintf(afp, "nvs_%4.4d_%4.4d.mb71 71\n", file->id, j);
@@ -10973,7 +10973,7 @@ int mbnavadjust_updategrid() {
       for (int isurvey = 0; isurvey < project.num_surveys; isurvey++) {
         bool first_file = true;
         for (int ifile = 0; ifile < project.num_files; ifile++) {
-          if (project.files[ifile].block == isurvey) {
+          if (project.files[ifile].survey == isurvey) {
             for (int isection=0; isection < project.files[ifile].num_sections; isection++) {
               if (first_file && isection == 0) {
                 first_file = false;
@@ -13344,13 +13344,13 @@ int mbnavadjust_modelplot_clearblock() {
   if (project.open && project.modelplot && mbna_current_crossing != MBNA_SELECT_NONE) {
     /* delete all ties associated with the same pair of surveys as the currently selected crossing */
     crossing = &(project.crossings[mbna_current_crossing]);
-    block1 = project.files[crossing->file_id_1].block;
-    block2 = project.files[crossing->file_id_2].block;
+    block1 = project.files[crossing->file_id_1].survey;
+    block2 = project.files[crossing->file_id_2].survey;
     for (int i = 0; i < project.num_crossings; i++) {
       crossing = &(project.crossings[i]);
       if (crossing->num_ties > 0 &&
-          ((project.files[crossing->file_id_1].block == block1 && project.files[crossing->file_id_2].block == block2) ||
-           (project.files[crossing->file_id_1].block == block2 && project.files[crossing->file_id_2].block == block1))) {
+          ((project.files[crossing->file_id_1].survey == block1 && project.files[crossing->file_id_2].survey == block2) ||
+           (project.files[crossing->file_id_1].survey == block2 && project.files[crossing->file_id_2].survey == block1))) {
         for (int j = crossing->num_ties - 1; j >= 0; j--) {
           mbnavadjust_deletetie(i, j, MBNA_CROSSING_STATUS_NONE);
 
@@ -13471,7 +13471,7 @@ int mbnavadjust_modelplot_plot_timeseries() {
 
       /* check if this file will be plotted */
       else if (mbna_view_mode == MBNA_VIEW_MODE_BLOCK) {
-        if (file->block == mbna_block_select1 || file->block == mbna_block_select2) {
+        if (file->block == mbna_survey_select1 || file->block == mbna_survey_select2) {
           file->show_in_modelplot = true;
         }
       }
@@ -13506,8 +13506,8 @@ int mbnavadjust_modelplot_plot_timeseries() {
 
         /* if either file is part of the selected survey
             then set plot flags on for both files */
-        if (project.files[crossing->file_id_1].block == mbna_survey_select ||
-            project.files[crossing->file_id_2].block == mbna_survey_select) {
+        if (project.files[crossing->file_id_1].survey == mbna_survey_select ||
+            project.files[crossing->file_id_2].survey == mbna_survey_select) {
           project.files[crossing->file_id_1].show_in_modelplot = true;
           project.files[crossing->file_id_2].show_in_modelplot = true;
         }
@@ -13643,7 +13643,7 @@ int mbnavadjust_modelplot_plot_timeseries() {
       snprintf(label, sizeof(label), "Display Only Selected Survey - Selected Survey:%d", mbna_survey_select);
     }
     else if (mbna_view_mode == MBNA_VIEW_MODE_BLOCK) {
-      snprintf(label, sizeof(label), "Display Only Selected Survey-vs-Survey Block - Selected Block: %4.4d %2.2d vs %2.2d", mbna_block_select, mbna_block_select1, mbna_block_select2);
+      snprintf(label, sizeof(label), "Display Only Selected Survey-vs-Survey Block - Selected Block: %4.4d %2.2d vs %2.2d", mbna_survey_select, mbna_survey_select1, mbna_survey_select2);
     }
     else if (mbna_view_mode == MBNA_VIEW_MODE_FILE) {
       snprintf(label, sizeof(label), "Display Only Selected File - Selected Survey/File:%d/%d", mbna_survey_select, mbna_file_select);
@@ -14405,8 +14405,8 @@ int mbnavadjust_modelplot_plot_perturbation() {
 
         /* if either file is part of the selected survey
             then set plot flags on for both files */
-        if (project.files[crossing->file_id_1].block == mbna_survey_select ||
-            project.files[crossing->file_id_2].block == mbna_survey_select) {
+        if (project.files[crossing->file_id_1].survey == mbna_survey_select ||
+            project.files[crossing->file_id_2].survey == mbna_survey_select) {
           project.files[crossing->file_id_1].show_in_modelplot = true;
           project.files[crossing->file_id_2].show_in_modelplot = true;
         }
@@ -14546,7 +14546,7 @@ int mbnavadjust_modelplot_plot_perturbation() {
       snprintf(label, sizeof(label), "Display Only Selected Survey - Selected Survey:%d", mbna_survey_select);
     }
     else if (mbna_view_mode == MBNA_VIEW_MODE_BLOCK) {
-      snprintf(label, sizeof(label), "Display Only Selected Survey-vs-Survey Block - Selected Block: %4.4d %2.2d vs %2.2d", mbna_block_select, mbna_block_select1, mbna_block_select2);
+      snprintf(label, sizeof(label), "Display Only Selected Survey-vs-Survey Block - Selected Block: %4.4d %2.2d vs %2.2d", mbna_survey_select, mbna_survey_select1, mbna_survey_select2);
     }
     else if (mbna_view_mode == MBNA_VIEW_MODE_FILE) {
       snprintf(label, sizeof(label), "Display Only Selected File - Selected Survey/File:%d/%d", mbna_survey_select, mbna_file_select);
@@ -15327,7 +15327,7 @@ int mbnavadjust_modelplot_plot_tieoffsets() {
 
             /* check to see if this tie should be plotted */
             if (mbna_view_mode == MBNA_VIEW_MODE_BLOCK) {
-              if (file->block == mbna_block_select1 || file->block == mbna_block_select2) {
+              if (file->block == mbna_survey_select1 || file->block == mbna_survey_select2) {
                 section->globaltie.isurveyplotindex = 1;
                 mbna_num_ties_plot++;
               }
@@ -15679,13 +15679,13 @@ int mbnavadjust_modelplot_plot_tieoffsets() {
         crossing = &project.crossings[i];
         for (int j = 0; j < crossing->num_ties; j++) {
           tie = &crossing->ties[j];
-          tie->block_1 = project.files[crossing->file_id_1].block;
-          tie->block_2 = project.files[crossing->file_id_2].block;
+          tie->block_1 = project.files[crossing->file_id_1].survey;
+          tie->block_2 = project.files[crossing->file_id_2].survey;
           tie->isurveyplotindex = -1;
 
           /* check to see if this tie should be plotted */
           if (mbna_view_mode == MBNA_VIEW_MODE_BLOCK) {
-            if (tie->block_1 == mbna_block_select1 && tie->block_2 == mbna_block_select2) {
+            if (tie->block_1 == mbna_survey_select1 && tie->block_2 == mbna_survey_select2) {
               tie->isurveyplotindex = 1;
               mbna_num_ties_plot++;
             }
@@ -16895,7 +16895,7 @@ int mbnavadjust_visualization_selectcrossingfromroute(int icrossing, int itie) {
       }
       else {
         mbna_file_select = crossing->file_id_1;
-        mbna_survey_select = project.files[crossing->file_id_1].block;
+        mbna_survey_select = project.files[crossing->file_id_1].survey;
         mbna_section_select = crossing->section_1;
       }
     }
@@ -16908,8 +16908,8 @@ int mbnavadjust_visualization_selectcrossingfromroute(int icrossing, int itie) {
   if (mbna_current_crossing >= 0) {
     /* put up message */
     snprintf(message, sizeof(message), "Loading crossing %d  %2.2d:%4.4d:%2.2d %2.2d:%4.4d:%2.2d...", 
-    			mbna_current_crossing, project.files[mbna_file_id_1].block, mbna_file_id_1, mbna_section_1, 
-    			project.files[mbna_file_id_2].block, mbna_file_id_2, mbna_section_2);
+    			mbna_current_crossing, project.files[mbna_file_id_1].survey, mbna_file_id_1, mbna_section_1, 
+    			project.files[mbna_file_id_2].survey, mbna_file_id_2, mbna_section_2);
     do_message_on(message);
 
     mbnavadjust_crossing_load();
@@ -16993,7 +16993,7 @@ int mbnavadjust_visualization_selectcrossingfromnav(int ifile1, int isection1, i
       }
       else {
         mbna_file_select = crossing->file_id_1;
-        mbna_survey_select = project.files[crossing->file_id_1].block;
+        mbna_survey_select = project.files[crossing->file_id_1].survey;
         mbna_section_select = crossing->section_1;
       }
     }
