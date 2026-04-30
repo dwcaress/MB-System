@@ -149,7 +149,7 @@ struct mbev_file_struct {
 	char path[MB_PATH_MAXLINE];
 	int format;
 	int raw_info_loaded;
-	int processed_info_loaded;
+	bool processed_info_loaded;
 	struct mb_info_struct raw_info;
 	struct mb_info_struct processed_info;
 	struct mb_process_struct process;
