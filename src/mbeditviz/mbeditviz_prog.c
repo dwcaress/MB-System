@@ -442,6 +442,7 @@ int mbeditviz_import_file(char *path, int format) {
     struct mbev_file_struct *file = &(mbev_files[mbev_num_files]);
     file->load_status = false;
     file->load_status_shown = false;
+    file->processed_info_loaded = false;
     file->locked = false;
     file->esf_exists = false;
     strcpy(file->path, path);
@@ -487,6 +488,7 @@ int mbeditviz_import_file(char *path, int format) {
     /* load processed file info */
     if (mbev_status == MB_SUCCESS) {
       struct stat file_status;
+      // Look for existing process output file
       const int fstatus = stat(file->process.mbp_ofile, &file_status);
       if (fstatus == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
         mbev_status =
