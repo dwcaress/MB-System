@@ -202,7 +202,7 @@ Window {
 
     FileDialog {
         id: datafileDialog
-        title: qsTr('Open grid or swath file')
+        title: qsTr('Open GMT grid or swath file')
         // nameFilters: ['Swath files (*.grd *.mb[0-9]*)']
         nameFilters: ['Swath files (*.grd *.mb[0-9][0-9])']
         onAccepted: {
