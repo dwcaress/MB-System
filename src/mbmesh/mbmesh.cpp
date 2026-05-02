@@ -146,6 +146,8 @@ static int write_html_file(const char *filename, const char *glb_filename);
 static int launch_html_viewer_server(const char *directory, const char *html_filename);
 static int ensure_directory_exists(const char *path);
 static void print_statistics();
+static int write_ecef_xyz_file(const char *filename);
+static void geodetic_to_ecef(double lon_deg, double lat_deg, double height, double *x, double *y, double *z);
 
 /*--------------------------------------------------------------------*/
 /* MAIN FUNCTION */
@@ -205,6 +207,11 @@ int main(int argc, char **argv) {
   snprintf(projected_file, sizeof(projected_file), "%s/adjustedPointcloud.xyz", output_dir);
   write_projected_xyz_file(projected_file);
 
+  /* Write ECEF XYZ point cloud (WGS84) */
+  char ecef_file[MB_PATH_MAXLINE];
+  snprintf(ecef_file, sizeof(ecef_file), "%s/ecefPointcloud.xyz", output_dir);
+  write_ecef_xyz_file(ecef_file);
+
   fprintf(stderr, "\n=== Phase 1 Complete ===\n");
   fprintf(stderr, "Soundings collected: %zu\n", all_soundings.size());
   fprintf(stderr, "XYZ file written: %s\n", xyz_file);
@@ -262,6 +269,82 @@ static int ensure_directory_exists(const char *path) {
 
   fprintf(stderr, "Error: Cannot create output directory %s\n", path);
   return MB_FAILURE;
+}
+
+/*--------------------------------------------------------------------*/
+/* GEODETIC TO ECEF CONVERSION */
+/*--------------------------------------------------------------------*/
+static void geodetic_to_ecef(double lon_deg, double lat_deg, double height, double *x, double *y, double *z) {
+  // WGS84 ellipsoid constants
+  constexpr double a = 6378137.0;         // semi-major axis (meters)
+  constexpr double f = 1.0 / 298.257223563; // flattening
+  constexpr double e2 = f * (2 - f);      // eccentricity squared
+
+  double lon = lon_deg * M_PI / 180.0;
+  double lat = lat_deg * M_PI / 180.0;
+  double sin_lat = sin(lat);
+  double cos_lat = cos(lat);
+  double sin_lon = sin(lon);
+  double cos_lon = cos(lon);
+  double N = a / sqrt(1 - e2 * sin_lat * sin_lat);
+
+  *x = (N + height) * cos_lat * cos_lon;
+  *y = (N + height) * cos_lat * sin_lon;
+  *z = (N * (1 - e2) + height) * sin_lat;
+}
+
+/*--------------------------------------------------------------------*/
+/* CREATE ECEF .XYZ FILE (WGS84) */
+/*--------------------------------------------------------------------*/
+static int write_ecef_xyz_file(const char *filename) {
+  if (all_soundings.empty()) {
+    fprintf(stderr, "Warning: No soundings to write ECEF XYZ file\n");
+    return MB_FAILURE;
+  }
+
+  /* Compute centroid (GeoOrigin, same as projected) */
+  double sum_lon = 0.0, sum_lat = 0.0, sum_depth = 0.0;
+  for (const auto &s : all_soundings) {
+    sum_lon += s.longitude;
+    sum_lat += s.latitude;
+    sum_depth += s.depth;
+  }
+  double ref_lon = sum_lon / all_soundings.size();
+  double ref_lat = sum_lat / all_soundings.size();
+  double ref_depth = sum_depth / all_soundings.size();
+
+  // Compute GeoOrigin ECEF offset
+  double x0, y0, z0;
+  geodetic_to_ecef(ref_lon, ref_lat, -ref_depth, &x0, &y0, &z0);
+
+  FILE *fp = fopen(filename, "w");
+  if (!fp) {
+    fprintf(stderr, "Error: Cannot create ECEF XYZ file: %s\n", filename);
+    return MB_FAILURE;
+  }
+
+  // User-facing output, matching other point cloud writers
+  fprintf(stderr, "\nWriting ECEF XYZ point cloud: %s\n", filename);
+  fprintf(stderr, "  Points: %zu\n", all_soundings.size());
+
+  /* Write header */
+  fprintf(fp, "# X(m) Y(m) Z(m) - ECEF coordinates (WGS84, GeoOrigin offset)\n");
+  fprintf(fp, "# Reference (GeoOrigin): lon=%.8f lat=%.8f depth=%.3f\n",
+          ref_lon, ref_lat, ref_depth);
+  fprintf(fp, "# Offset: x0=%.3f y0=%.3f z0=%.3f\n", x0, y0, z0);
+
+  /* Write ECEF points with GeoOrigin offset */
+  for (const auto &s : all_soundings) {
+    double x, y, z;
+    // Note: depth is positive down, so height = -depth
+    geodetic_to_ecef(s.longitude, s.latitude, -s.depth, &x, &y, &z);
+    fprintf(fp, "%.3f %.3f %.3f\n", x - x0, y - y0, z - z0);
+  }
+
+  fclose(fp);
+  fprintf(stderr, "  ECEF XYZ file written successfully\n");
+  fprintf(stderr, "  Location: %s\n", filename);
+  return MB_SUCCESS;
 }
 
 /*--------------------------------------------------------------------*/
