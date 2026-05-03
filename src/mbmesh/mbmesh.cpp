@@ -197,11 +197,6 @@ int main(int argc, char **argv) {
     exit(MB_FAILURE);
   }
 
-  /* Write XYZ point cloud (lon/lat) */
-  char xyz_file[MB_PATH_MAXLINE];
-  snprintf(xyz_file, sizeof(xyz_file), "%s/pointcloud.xyz", output_dir);
-  write_xyz_file(xyz_file);
-
   /* Write projected XYZ point cloud (local meters) */
   char projected_file[MB_PATH_MAXLINE];
   snprintf(projected_file, sizeof(projected_file), "%s/adjustedPointcloud.xyz", output_dir);
@@ -214,7 +209,6 @@ int main(int argc, char **argv) {
 
   fprintf(stderr, "\n=== Phase 1 Complete ===\n");
   fprintf(stderr, "Soundings collected: %zu\n", all_soundings.size());
-  fprintf(stderr, "XYZ file written: %s\n", xyz_file);
   fprintf(stderr, "Adjusted XYZ file written: %s\n", projected_file);
 
   /* Write a GLB point cloud from the adjusted XYZ file without modifying it */
@@ -301,6 +295,11 @@ static int write_ecef_xyz_file(const char *filename) {
     fprintf(stderr, "Warning: No soundings to write ECEF XYZ file\n");
     return MB_FAILURE;
   }
+
+  /* TODO: FIXME - GeoOrigin offset loses precision detail. Consider:
+     1. Making GeoOrigin an optional command-line parameter (--geo-origin)
+     2. Writing global ECEF coordinates directly (no offset subtraction)
+     3. Or increasing output precision to compensate for subtraction artifacts */
 
   /* Compute centroid (GeoOrigin, same as projected) */
   double sum_lon = 0.0, sum_lat = 0.0, sum_depth = 0.0;
