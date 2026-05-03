@@ -110,7 +110,7 @@ int write_pointcloud_glb_file(const char *xyz_file, const char *glb_file, int ve
 
   tinygltf::Material material;
   material.doubleSided = true;
-  material.pbrMetallicRoughness.baseColorFactor = {1.0, 1.0, 1.0, 1.0};
+  material.pbrMetallicRoughness.baseColorFactor = {0.129, 0.267, 0.431, 1.0};  // #21446eff dark blue
   model.materials.push_back(std::move(material));
 
   tinygltf::Node node;

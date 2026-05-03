@@ -937,10 +937,6 @@ static int write_html_file(const char *filename, const char *glb_filename) {
   fprintf(fp, "        <title>MB-System Adjusted Point Cloud Viewer</title>\n");
   fprintf(fp, "        <script type='text/javascript' src='http://www.x3dom.org/download/x3dom.js'></script>\n");
   fprintf(fp, "        <link rel='stylesheet' type='text/css' href='http://www.x3dom.org/download/x3dom.css'></link>\n");
-  fprintf(fp, "        <style>\n");
-  fprintf(fp, "            body { background-color: black; color: white; }\n");
-  fprintf(fp, "            x3d { background-color: black; }\n");
-  fprintf(fp, "        </style>\n");
   fprintf(fp, "    </head>\n");
   fprintf(fp, "    <body>\n");
   fprintf(fp, "        <h1>MB-System Adjusted Point Cloud Viewer</h1>\n");
