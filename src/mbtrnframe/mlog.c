@@ -246,16 +246,21 @@ static int s_parse_path(const char *src, mlog_t *dest)
         char *pext = NULL;
 
         while ( (*ps=='\t' || *ps==' ') && ps<pend) {
+            // skip leading whitespace
             ps++;
         }
         while ( (*ps==ML_SYS_PATH_DEL) && ps<pend) {
+            // skip multiple leading path separators
             ps++;
         }
         if ( ps>scopy && ((*(ps-1))==ML_SYS_PATH_DEL) ) {
+            // point to first path sep or start of path
             ps--;
         }
-        
+
+        // find last path sep
         pathe  = strrchr(ps, ML_SYS_PATH_DEL);
+        // find last ext
         exte  = strrchr(ps, ML_SYS_EXT_DEL);
         ppath = NULL;
         pname = NULL;
@@ -264,6 +269,10 @@ static int s_parse_path(const char *src, mlog_t *dest)
         if (pathe!=NULL) {
             pname = pathe+1;
             ppath = ps;
+            while(*(pathe-1) == ML_SYS_PATH_DEL && (pathe-1) > scopy) {
+                // skip multiple separators (reverse to end of path)
+                pathe--;
+            }
             *pathe='\0';
         }else{
             // path delimiter not found
@@ -318,8 +327,8 @@ static int s_parse_path(const char *src, mlog_t *dest)
            dest->ext = strdup(pext);
         }
         
-        //fprintf(stderr,"src[%s] path[%p] name[%p] ext[%p]\n",src,ppath,pname,pext);
-//        fprintf(stderr,"src[%10s] path[%10s] name[%10s] ext[%10s]\n",src,dest->path,dest->name,dest->ext);
+//        fprintf(stderr,"%s ******** local src[%10s] ppath[%p] pname[%p] pext[%p]\n", __func__, src,ppath,pname,pext);
+//        fprintf(stderr,"%s ********  dest src[%10s] path[%10s] name[%10s] ext[%10s]\n", __func__, src,dest->path,dest->name,dest->ext);
         free(scopy);
     }
     return retval;
@@ -743,8 +752,14 @@ static char *s_seg_path(const char *file_path, mlog_t *self, uint16_t segno)
             char *op = retval;
             char *path_str = (self->path == NULL ? "" : self->path);
 
+            // check whether path contains trailing path separator
+            // add delimiter accordingly
+            size_t plen = strlen(path_str);
+            char del[2] = {0};
+            del[0] = (path_str[plen-1] == ML_SYS_PATH_DEL ? '\0' : ML_SYS_PATH_DEL);
+
             // add name and file path
-            int bw = snprintf(op, bytes_rem, "%s%s", path_str, self->name);
+            int bw = snprintf(op, bytes_rem, "%s%s%s", path_str, del, self->name);
             bytes_rem -= bw;
 
             if(bw <= 0 || bytes_rem <= 0){
@@ -890,12 +905,10 @@ static mlog_t *s_mlog_new(const char *file_path, mlog_config_t *config)
             instance->path = NULL;
             instance->name = NULL;
             instance->ext  = NULL;
-            s_parse_path(file_path,instance);
-
             instance->stime = 0;
             
-//            instance->file  = mfile_file_new(NULL);
             tpath = s_seg_path(file_path,instance,0);
+
             instance->file  = mfile_file_new(tpath);
             free(tpath);
             instance->cfg = mlog_config_new(NULL,NULL,ML_MONO,ML_SERR,ML_NOLIMIT,ML_NOLIMIT,ML_NOLIMIT);

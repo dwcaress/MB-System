@@ -1,0 +1,29 @@
+package senlcm;
+
+/* Standard message for multibeam sensors in Euclidean coordinates.
+ */
+
+struct multibeam_euclidean_t
+{
+    // Standard header.
+    stdlcm.header_t header;
+
+    // Number of beams as an integer.
+    int16_t n_beams;
+
+    // Beams flag.
+    int8_t flags[n_beams];
+
+    // Range for each beam as a list of n_beams elements.
+    geolcm.point_t range[n_beams];
+
+    // Intensity for each beam as a list of n_beams elements.
+    double intensity[n_beams];
+
+    // Constants declaring whether each beam is good or bad.
+
+    const int8_t DETECT_OK = 0x00;          // Beam is OK
+    const int8_t DETECT_BAD_SONAR = 0x01;   // Beam is flagged as bad by the sonar.
+    const int8_t DETECT_BAD_FILTER = 0x02; // Beam is flagged as bad by post-processing filter.
+    const int8_t DETECT_BAD_MANUAL = 0x04; // Beam is flagged as bad manually.
+}

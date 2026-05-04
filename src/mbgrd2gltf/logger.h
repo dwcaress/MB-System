@@ -23,6 +23,8 @@
 #include <iomanip>
 #include <ctime>
 #include <unistd.h>
+#include <vector>
+#include <string>
 
 namespace mbgrd2gltf {
 
@@ -31,6 +33,8 @@ enum class LogLevel { OFF, ERROR, WARN, INFO, DEBUG };
 class Logger {
 private:
   static LogLevel current_level;
+  static bool capture_enabled;
+  static std::vector<std::string> captured_logs;
 
   static const char* level_to_string(LogLevel level) {
     switch (level) {
@@ -84,6 +88,19 @@ public:
 
   static bool should_log(LogLevel level) { return level <= current_level; }
 
+  static void start_capture() {
+    capture_enabled = true;
+    captured_logs.clear();
+  }
+
+  static void stop_capture() {
+    capture_enabled = false;
+  }
+
+  static const std::vector<std::string>& get_captured_logs() {
+    return captured_logs;
+  }
+
   template <typename... Args>
   static void log(LogLevel level, const char* file, const char* func, int line, Args&&... args) {
     if (!should_log(level))
@@ -92,9 +109,20 @@ public:
     std::ostringstream msg;
     build_message(msg, std::forward<Args>(args)...);
 
+    std::ostringstream full_msg;
+    full_msg << level_to_string(level) << " " << get_timestamp() << " " << extract_filename(file) << " "
+        << func << "():" << line << " " << msg.str();
+
+    std::string log_str = full_msg.str();
+
+    // Output to console
     std::ostream& out = (level == LogLevel::INFO) ? std::cout : std::cerr;
-    out << level_to_string(level) << " " << get_timestamp() << " " << extract_filename(file) << " "
-        << func << "():" << line << " " << msg.str() << std::endl;
+    out << log_str << std::endl;
+
+    // Capture if enabled
+    if (capture_enabled) {
+      captured_logs.push_back(log_str);
+    }
   }
 
   template <typename... Args>

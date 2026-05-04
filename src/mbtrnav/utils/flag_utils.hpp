@@ -133,7 +133,7 @@ bool operator<=(flag_var<T> lhs, flag_var<T> rhs) { return (lhs.get() <= rhs.get
 template<typename T, typename U>
 flag_var<T> operator<<=(flag_var<T> &lhs, U rhs) { lhs.set((lhs.get() << rhs));return lhs;}
 template<typename T, typename U>
-flag_var<T> operator>>=(flag_var<T> &lhs, U rhs) { lhs.set(lhs >> rhs);return lhs;}
+flag_var<T> operator>>=(flag_var<T> &lhs, U rhs) { lhs.set((lhs.get() >> rhs));return lhs;}
 
 template<typename T, typename U>
 flag_var<T> &operator&=(flag_var<T> &lhs, U rhs) { lhs.set((lhs.get() & rhs)); return lhs;}

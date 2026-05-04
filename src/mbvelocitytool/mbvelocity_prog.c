@@ -1228,7 +1228,7 @@ int mbvt_plot() {
 	xg_setclip(mbvt_xgid, borders[0], borders[2], borders[1] - borders[0], borders[3] - borders[2]);
 
 	/* clear screen */
-	xg_fillrectangle(mbvt_xgid, borders[0], borders[2], borders[1] - borders[0], borders[3] - borders[2], pixel_values[WHITE],
+	xg_fillrectangle(mbvt_xgid, borders[0], borders[2], borders[1] - borders[0], borders[3] - borders[2], pixel_values[MB_COLOR_WHITE],
 	                 XG_SOLIDLINE);
 
 	/* set scaling */
@@ -1253,37 +1253,37 @@ int mbvt_plot() {
 	ny_int = (ymaximum - yminimum) / deltay + 1;
 
 	/* plot grid */
-	xg_drawline(mbvt_xgid, xmin, ymin, xmin, ymax, pixel_values[BLACK], XG_SOLIDLINE);
-	xg_drawline(mbvt_xgid, xmax, ymin, xmax, ymax, pixel_values[BLACK], XG_SOLIDLINE);
+	xg_drawline(mbvt_xgid, xmin, ymin, xmin, ymax, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
+	xg_drawline(mbvt_xgid, xmax, ymin, xmax, ymax, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 	for (i = 0; i < nx_int; i++) {
 		xx = xmin + i * x_int;
 		vx = xminimum + i * deltax;
-		xg_drawline(mbvt_xgid, xx, ymin, xx, ymax, pixel_values[BLACK], XG_DASHLINE);
+		xg_drawline(mbvt_xgid, xx, ymin, xx, ymax, pixel_values[MB_COLOR_BLACK], XG_DASHLINE);
 		sprintf(string, "%.1f", vx);
 		xg_justify(mbvt_xgid, string, &swidth, &sascent, &sdescent);
-		xg_drawstring(mbvt_xgid, xx - swidth / 2, ymax + sascent + 5, string, pixel_values[BLACK], XG_SOLIDLINE);
+		xg_drawstring(mbvt_xgid, xx - swidth / 2, ymax + sascent + 5, string, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 	}
-	xg_drawline(mbvt_xgid, xmin, ymin, xmax, ymin, pixel_values[BLACK], XG_SOLIDLINE);
-	xg_drawline(mbvt_xgid, xmin, ymax, xmax, ymax, pixel_values[BLACK], XG_SOLIDLINE);
+	xg_drawline(mbvt_xgid, xmin, ymin, xmax, ymin, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
+	xg_drawline(mbvt_xgid, xmin, ymax, xmax, ymax, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 	for (i = 0; i < ny_int; i++) {
 		yy = ymin + i * y_int;
 		vy = yminimum + i * deltay;
-		xg_drawline(mbvt_xgid, xmin, yy, xmax, yy, pixel_values[BLACK], XG_DASHLINE);
+		xg_drawline(mbvt_xgid, xmin, yy, xmax, yy, pixel_values[MB_COLOR_BLACK], XG_DASHLINE);
 		sprintf(string, "%.1f", vy);
 		xg_justify(mbvt_xgid, string, &swidth, &sascent, &sdescent);
-		xg_drawstring(mbvt_xgid, xmin - swidth - 5, yy + sascent / 2, string, pixel_values[BLACK], XG_SOLIDLINE);
+		xg_drawstring(mbvt_xgid, xmin - swidth - 5, yy + sascent / 2, string, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 	}
 	strcpy(string, "Water Sound Velocity Profiles");
 	xg_justify(mbvt_xgid, string, &swidth, &sascent, &sdescent);
-	xg_drawstring(mbvt_xgid, xcen - swidth / 2, ymin - 2 * sascent + 10, string, pixel_values[BLACK], XG_SOLIDLINE);
+	xg_drawstring(mbvt_xgid, xcen - swidth / 2, ymin - 2 * sascent + 10, string, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 	strcpy(string, "Water Sound Velocity (m/s)");
 	xg_justify(mbvt_xgid, string, &swidth, &sascent, &sdescent);
-	xg_drawstring(mbvt_xgid, xcen - swidth / 2, ymax + 2 * sascent + 10, string, pixel_values[BLACK], XG_SOLIDLINE);
+	xg_drawstring(mbvt_xgid, xcen - swidth / 2, ymax + 2 * sascent + 10, string, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 	strcpy(string, "Depth");
 	xg_justify(mbvt_xgid, string, &swidth, &sascent, &sdescent);
-	xg_drawstring(mbvt_xgid, xmin - 2 * swidth - 10, ycen - sascent, string, pixel_values[BLACK], XG_SOLIDLINE);
+	xg_drawstring(mbvt_xgid, xmin - 2 * swidth - 10, ycen - sascent, string, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 	strcpy(string, "(m)");
-	xg_drawstring(mbvt_xgid, xmin - 2 * swidth, ycen + sascent, string, pixel_values[BLACK], XG_SOLIDLINE);
+	xg_drawstring(mbvt_xgid, xmin - 2 * swidth, ycen + sascent, string, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 
 	/* turn clipping on */
 
@@ -1298,7 +1298,7 @@ int mbvt_plot() {
 			xx = MIN(xx, 32000);
 			yy = MIN(yy, 32000);
 			/*		xg_drawrectangle(mbvt_xgid, xx-2, yy-2, 4, 4,
-			            pixel_values[color],XG_SOLIDLINE);*/
+			            pixel_values[MB_COLOR_color],XG_SOLIDLINE);*/
 			if (j > 0)
 				xg_drawline(mbvt_xgid, xxo, yyo, xx, yy, pixel_values[color], XG_SOLIDLINE);
 			xxo = xx;
@@ -1313,9 +1313,9 @@ int mbvt_plot() {
 			yy = ymin + (profile_edit.depth[j] - yminimum) * yscale;
 			xx = MIN(xx, 32000);
 			yy = MIN(yy, 32000);
-			xg_fillrectangle(mbvt_xgid, xx - 2, yy - 2, 4, 4, pixel_values[BLACK], XG_SOLIDLINE);
+			xg_fillrectangle(mbvt_xgid, xx - 2, yy - 2, 4, 4, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 			if (j > 0) {
-				xg_drawline(mbvt_xgid, xxo, yyo, xx, yy, pixel_values[BLACK], XG_SOLIDLINE);
+				xg_drawline(mbvt_xgid, xxo, yyo, xx, yy, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 			}
 			xxo = xx;
 			yyo = yy;
@@ -1350,18 +1350,18 @@ int mbvt_plot() {
 	nyr_int = (yrmaximum - yrminimum) / deltayr / 2 + 1;
 
 	/* plot grid */
-	xg_drawline(mbvt_xgid, xrmin, yrmin, xrmin, yrmax, pixel_values[BLACK], XG_SOLIDLINE);
-	xg_drawline(mbvt_xgid, xrmax, yrmin, xrmax, yrmax, pixel_values[BLACK], XG_SOLIDLINE);
+	xg_drawline(mbvt_xgid, xrmin, yrmin, xrmin, yrmax, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
+	xg_drawline(mbvt_xgid, xrmax, yrmin, xrmax, yrmax, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 	for (i = 0; i < nxr_int; i++) {
 		xx = xrmin + i * xr_int;
 		vx = xrminimum + i * deltaxr;
-		xg_drawline(mbvt_xgid, xx, yrmin, xx, yrmax, pixel_values[BLACK], XG_DASHLINE);
+		xg_drawline(mbvt_xgid, xx, yrmin, xx, yrmax, pixel_values[MB_COLOR_BLACK], XG_DASHLINE);
 		sprintf(string, "%.0f", vx);
 		xg_justify(mbvt_xgid, string, &swidth, &sascent, &sdescent);
-		xg_drawstring(mbvt_xgid, xx - swidth / 2, yrmax + sascent + 5, string, pixel_values[BLACK], XG_SOLIDLINE);
+		xg_drawstring(mbvt_xgid, xx - swidth / 2, yrmax + sascent + 5, string, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 	}
-	xg_drawline(mbvt_xgid, xrmin, yrmin, xrmax, yrmin, pixel_values[BLACK], XG_SOLIDLINE);
-	xg_drawline(mbvt_xgid, xrmin, yrmax, xrmax, yrmax, pixel_values[BLACK], XG_SOLIDLINE);
+	xg_drawline(mbvt_xgid, xrmin, yrmin, xrmax, yrmin, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
+	xg_drawline(mbvt_xgid, xrmin, yrmax, xrmax, yrmax, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 	if (resrange > 100.0)
 		sprintf(format_str, "%s", "%.0f");
 	else if (resrange > 10.0)
@@ -1371,34 +1371,34 @@ int mbvt_plot() {
 	for (i = 0; i < nyr_int; i++) {
 		yy = yrcen + i * yr_int;
 		vy = i * deltayr;
-		xg_drawline(mbvt_xgid, xrmin, yy, xrmax, yy, pixel_values[BLACK], XG_DASHLINE);
+		xg_drawline(mbvt_xgid, xrmin, yy, xrmax, yy, pixel_values[MB_COLOR_BLACK], XG_DASHLINE);
 		sprintf(string, format_str, vy);
 		xg_justify(mbvt_xgid, string, &swidth, &sascent, &sdescent);
-		xg_drawstring(mbvt_xgid, xrmin - swidth - 5, yy + sascent / 2, string, pixel_values[BLACK], XG_SOLIDLINE);
+		xg_drawstring(mbvt_xgid, xrmin - swidth - 5, yy + sascent / 2, string, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 		yy = yrcen - i * yr_int;
 		vy = -i * deltayr;
-		xg_drawline(mbvt_xgid, xrmin, yy, xrmax, yy, pixel_values[BLACK], XG_DASHLINE);
+		xg_drawline(mbvt_xgid, xrmin, yy, xrmax, yy, pixel_values[MB_COLOR_BLACK], XG_DASHLINE);
 		sprintf(string, format_str, vy);
 		xg_justify(mbvt_xgid, string, &swidth, &sascent, &sdescent);
-		xg_drawstring(mbvt_xgid, xrmin - swidth - 5, yy + sascent / 2, string, pixel_values[BLACK], XG_SOLIDLINE);
+		xg_drawstring(mbvt_xgid, xrmin - swidth - 5, yy + sascent / 2, string, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 	}
 	if (nbuffer > 0) {
 		sprintf(string, "Depth Range:  minimum: %5.0f m   maximum: %5.0f m", bath_min, bath_max);
 		xg_justify(mbvt_xgid, string, &swidth, &sascent, &sdescent);
-		xg_drawstring(mbvt_xgid, borders[1] / 2 - swidth / 2, yrmin - 4 * sascent + 14, string, pixel_values[BLACK],
+		xg_drawstring(mbvt_xgid, borders[1] / 2 - swidth / 2, yrmin - 4 * sascent + 14, string, pixel_values[MB_COLOR_BLACK],
 		              XG_SOLIDLINE);
 	}
 	strcpy(string, "Swath Bathymetry Beam Residuals");
 	xg_justify(mbvt_xgid, string, &swidth, &sascent, &sdescent);
-	xg_drawstring(mbvt_xgid, xrcen - swidth / 2, yrmin - 2 * sascent + 10, string, pixel_values[BLACK], XG_SOLIDLINE);
+	xg_drawstring(mbvt_xgid, xrcen - swidth / 2, yrmin - 2 * sascent + 10, string, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 	strcpy(string, "Bathymetry Beam Number");
 	xg_justify(mbvt_xgid, string, &swidth, &sascent, &sdescent);
-	xg_drawstring(mbvt_xgid, xrcen - swidth / 2, yrmax + 2 * sascent + 10, string, pixel_values[BLACK], XG_SOLIDLINE);
+	xg_drawstring(mbvt_xgid, xrcen - swidth / 2, yrmax + 2 * sascent + 10, string, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 	strcpy(string, "Residual");
 	xg_justify(mbvt_xgid, string, &swidth, &sascent, &sdescent);
-	xg_drawstring(mbvt_xgid, xrmin - swidth - 30, yrcen - sascent, string, pixel_values[BLACK], XG_SOLIDLINE);
+	xg_drawstring(mbvt_xgid, xrmin - swidth - 30, yrcen - sascent, string, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 	strcpy(string, "(m)");
-	xg_drawstring(mbvt_xgid, xrmin - swidth - 10, yrcen + sascent, string, pixel_values[BLACK], XG_SOLIDLINE);
+	xg_drawstring(mbvt_xgid, xrmin - swidth - 10, yrcen + sascent, string, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 
 	/* turn clipping on for residual plot box */
 	xg_setclip(mbvt_xgid, xrmin, yrmin, (xrmax - xrmin), (yrmax - yrmin));
@@ -1413,10 +1413,10 @@ int mbvt_plot() {
 				yy = MIN(yy, 32000);
 				yyl = yrmin + (residual[i] - res_sd[i] - yrminimum) * yrscale;
 				yyu = yrmin + (residual[i] + res_sd[i] - yrminimum) * yrscale;
-				xg_fillrectangle(mbvt_xgid, xx - 2, yy - 2, 4, 4, pixel_values[BLACK], XG_SOLIDLINE);
-				xg_drawline(mbvt_xgid, xx, yyl, xx, yyu, pixel_values[BLACK], XG_SOLIDLINE);
+				xg_fillrectangle(mbvt_xgid, xx - 2, yy - 2, 4, 4, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
+				xg_drawline(mbvt_xgid, xx, yyl, xx, yyu, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 				if (i > 0 && nresidual[i - 1] > 0)
-					xg_drawline(mbvt_xgid, xxo, yyo, xx, yy, pixel_values[BLACK], XG_SOLIDLINE);
+					xg_drawline(mbvt_xgid, xxo, yyo, xx, yy, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 				xxo = xx;
 				yyo = yy;
 			}
@@ -1462,43 +1462,43 @@ int mbvt_plot() {
 	nyp_int = (ypmaximum - ypminimum) / deltayp + 1;
 
 	/* plot grid */
-	xg_drawline(mbvt_xgid, xpmin, ypmin, xpmin, ypmax, pixel_values[BLACK], XG_SOLIDLINE);
-	xg_drawline(mbvt_xgid, xpmax, ypmin, xpmax, ypmax, pixel_values[BLACK], XG_SOLIDLINE);
+	xg_drawline(mbvt_xgid, xpmin, ypmin, xpmin, ypmax, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
+	xg_drawline(mbvt_xgid, xpmax, ypmin, xpmax, ypmax, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 	for (i = 0; i < nxp_int; i++) {
 		xx = xpcen + i * xp_int;
 		vx = i * deltaxp;
-		xg_drawline(mbvt_xgid, xx, ypmin, xx, ypmax, pixel_values[BLACK], XG_DASHLINE);
+		xg_drawline(mbvt_xgid, xx, ypmin, xx, ypmax, pixel_values[MB_COLOR_BLACK], XG_DASHLINE);
 		sprintf(string, "%.1f", vx);
 		xg_justify(mbvt_xgid, string, &swidth, &sascent, &sdescent);
-		xg_drawstring(mbvt_xgid, xx - swidth / 2, ypmax + sascent + 5, string, pixel_values[BLACK], XG_SOLIDLINE);
+		xg_drawstring(mbvt_xgid, xx - swidth / 2, ypmax + sascent + 5, string, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 		xx = xpcen - i * xp_int;
 		vx = -i * deltaxp;
-		xg_drawline(mbvt_xgid, xx, ypmin, xx, ypmax, pixel_values[BLACK], XG_DASHLINE);
+		xg_drawline(mbvt_xgid, xx, ypmin, xx, ypmax, pixel_values[MB_COLOR_BLACK], XG_DASHLINE);
 		sprintf(string, "%.1f", vx);
 		xg_justify(mbvt_xgid, string, &swidth, &sascent, &sdescent);
-		xg_drawstring(mbvt_xgid, xx - swidth / 2, ypmax + sascent + 5, string, pixel_values[BLACK], XG_SOLIDLINE);
+		xg_drawstring(mbvt_xgid, xx - swidth / 2, ypmax + sascent + 5, string, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 	}
-	xg_drawline(mbvt_xgid, xpmin, ypmin, xpmax, ypmin, pixel_values[BLACK], XG_SOLIDLINE);
-	xg_drawline(mbvt_xgid, xpmin, ypmax, xpmax, ypmax, pixel_values[BLACK], XG_SOLIDLINE);
+	xg_drawline(mbvt_xgid, xpmin, ypmin, xpmax, ypmin, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
+	xg_drawline(mbvt_xgid, xpmin, ypmax, xpmax, ypmax, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 	for (i = 0; i < nyp_int; i++) {
 		yy = ypmin + i * yp_int;
 		vy = ypminimum + i * deltayp;
-		xg_drawline(mbvt_xgid, xpmin, yy, xpmax, yy, pixel_values[BLACK], XG_DASHLINE);
+		xg_drawline(mbvt_xgid, xpmin, yy, xpmax, yy, pixel_values[MB_COLOR_BLACK], XG_DASHLINE);
 		sprintf(string, "%.1f", vy);
 		xg_justify(mbvt_xgid, string, &swidth, &sascent, &sdescent);
-		xg_drawstring(mbvt_xgid, xpmin - swidth - 5, yy + sascent / 2, string, pixel_values[BLACK], XG_SOLIDLINE);
+		xg_drawstring(mbvt_xgid, xpmin - swidth - 5, yy + sascent / 2, string, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 	}
 	strcpy(string, "Raypaths");
 	xg_justify(mbvt_xgid, string, &swidth, &sascent, &sdescent);
-	xg_drawstring(mbvt_xgid, xpcen - swidth / 2, ypmin - 2 * sascent + 10, string, pixel_values[BLACK], XG_SOLIDLINE);
+	xg_drawstring(mbvt_xgid, xpcen - swidth / 2, ypmin - 2 * sascent + 10, string, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 	strcpy(string, "Acrosstrack Distance (m)");
 	xg_justify(mbvt_xgid, string, &swidth, &sascent, &sdescent);
-	xg_drawstring(mbvt_xgid, xpcen - swidth / 2, ypmax + 2 * sascent + 10, string, pixel_values[BLACK], XG_SOLIDLINE);
+	xg_drawstring(mbvt_xgid, xpcen - swidth / 2, ypmax + 2 * sascent + 10, string, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 	strcpy(string, "Depth");
 	xg_justify(mbvt_xgid, string, &swidth, &sascent, &sdescent);
-	xg_drawstring(mbvt_xgid, xpmin - 2 * swidth - 10, ypcen - sascent, string, pixel_values[BLACK], XG_SOLIDLINE);
+	xg_drawstring(mbvt_xgid, xpmin - 2 * swidth - 10, ypcen - sascent, string, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 	strcpy(string, "(m)");
-	xg_drawstring(mbvt_xgid, xpmin - 2 * swidth, ypcen + sascent, string, pixel_values[BLACK], XG_SOLIDLINE);
+	xg_drawstring(mbvt_xgid, xpmin - 2 * swidth, ypcen + sascent, string, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 
 	/* turn clipping on for raypath plot box */
 	xg_setclip(mbvt_xgid, xpmin, ypmin, (xpmax - xpmin), (ypmax - ypmin));
@@ -1514,11 +1514,11 @@ int mbvt_plot() {
 					yy = ypmin + (raypathy[i][j] - ypminimum) * ypscale;
 					xx = MIN(xx, 32000);
 					yy = MIN(yy, 32000);
-					xg_drawline(mbvt_xgid, xxo, yyo, xx, yy, pixel_values[BLACK], XG_SOLIDLINE);
+					xg_drawline(mbvt_xgid, xxo, yyo, xx, yy, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 					xxo = xx;
 					yyo = yy;
 				}
-				xg_fillrectangle(mbvt_xgid, xx - 2, yy - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
+				xg_fillrectangle(mbvt_xgid, xx - 2, yy - 2, 4, 4, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 			}
 		}
 
@@ -1660,13 +1660,13 @@ int mbvt_action_drag_node(int x, int y) {
 			y = ymin;
 
 		/* unplot the current ping */
-		xg_fillrectangle(mbvt_xgid, edit_x[active] - 2, edit_y[active] - 2, 4, 4, pixel_values[WHITE], XG_SOLIDLINE);
+		xg_fillrectangle(mbvt_xgid, edit_x[active] - 2, edit_y[active] - 2, 4, 4, pixel_values[MB_COLOR_WHITE], XG_SOLIDLINE);
 		if (active > 0) {
-			xg_drawline(mbvt_xgid, edit_x[active - 1], edit_y[active - 1], edit_x[active], edit_y[active], pixel_values[WHITE],
+			xg_drawline(mbvt_xgid, edit_x[active - 1], edit_y[active - 1], edit_x[active], edit_y[active], pixel_values[MB_COLOR_WHITE],
 			            XG_SOLIDLINE);
 		}
 		if (active < profile_edit.n - 1) {
-			xg_drawline(mbvt_xgid, edit_x[active], edit_y[active], edit_x[active + 1], edit_y[active + 1], pixel_values[WHITE],
+			xg_drawline(mbvt_xgid, edit_x[active], edit_y[active], edit_x[active + 1], edit_y[active + 1], pixel_values[MB_COLOR_WHITE],
 			            XG_SOLIDLINE);
 		}
 
@@ -1678,18 +1678,18 @@ int mbvt_action_drag_node(int x, int y) {
 
 		/* replot the current svp */
 		if (active > 0) {
-			xg_drawline(mbvt_xgid, edit_x[active - 1], edit_y[active - 1], edit_x[active], edit_y[active], pixel_values[BLACK],
+			xg_drawline(mbvt_xgid, edit_x[active - 1], edit_y[active - 1], edit_x[active], edit_y[active], pixel_values[MB_COLOR_BLACK],
 			            XG_SOLIDLINE);
 		}
 		if (active < profile_edit.n - 1) {
-			xg_drawline(mbvt_xgid, edit_x[active], edit_y[active], edit_x[active + 1], edit_y[active + 1], pixel_values[BLACK],
+			xg_drawline(mbvt_xgid, edit_x[active], edit_y[active], edit_x[active + 1], edit_y[active + 1], pixel_values[MB_COLOR_BLACK],
 			            XG_SOLIDLINE);
 		}
 		if (active > 0)
-			xg_fillrectangle(mbvt_xgid, edit_x[active - 1] - 2, edit_y[active - 1] - 2, 4, 4, pixel_values[BLACK], XG_SOLIDLINE);
-		xg_fillrectangle(mbvt_xgid, edit_x[active] - 2, edit_y[active] - 2, 4, 4, pixel_values[BLACK], XG_SOLIDLINE);
+			xg_fillrectangle(mbvt_xgid, edit_x[active - 1] - 2, edit_y[active - 1] - 2, 4, 4, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
+		xg_fillrectangle(mbvt_xgid, edit_x[active] - 2, edit_y[active] - 2, 4, 4, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 		if (active < profile_edit.n - 1)
-			xg_fillrectangle(mbvt_xgid, edit_x[active + 1] - 2, edit_y[active + 1] - 2, 4, 4, pixel_values[BLACK], XG_SOLIDLINE);
+			xg_fillrectangle(mbvt_xgid, edit_x[active + 1] - 2, edit_y[active + 1] - 2, 4, 4, pixel_values[MB_COLOR_BLACK], XG_SOLIDLINE);
 	}
 	else
 		status = MB_FAILURE;

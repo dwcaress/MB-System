@@ -48,6 +48,16 @@ endif()
 add_compile_definitions(
 HAVE_CONFIG_H
 _GNU_SOURCE
+#TRN_NORAND
+WITH_TESTS
+WITH_MMDEBUG
+WITH_MST_MSTATS
+MST_STATS_EN
+#WITH_ALT_DELTAT_VALIDATION
+#WITH_CEP_2022
+#WITH_TRNU # enables trnum message decode in udpms_test
+WITH_TRNLOG
+WITH_TRNLOG_EST_OUT
 )
 
 # define source directories
@@ -119,6 +129,14 @@ lcm_wrap_types(
     lcm_types/trn_pose_t.lcm
     lcm_types/trnupub_t.lcm
     lcm_types/trn_mb1_t.lcm
+    lcm_types/stdlcm_header_t.lcm
+    lcm_types/geolcm_point_t.lcm
+    lcm_types/senlcm_multibeam_euclidean_t.lcm
+    lcm_types/stdlcm_msg_t.lcm
+    lcm_types/navlcm_position_t.lcm
+    lcm_types/senlcm_gps_fix_t.lcm
+    lcm_types/senlcm_rph_t.lcm
+    lcm_types/senlcm_rph_angrate_t.lcm
 )
 
 # C Static libs
@@ -152,6 +170,7 @@ if(JAVA_FOUND)
         SOURCES ${java_sources}
         )
 endif()
+
 #
 #------------------------------------------------------------------------------
 #
@@ -161,8 +180,9 @@ endif()
 add_library(udpms
        udpm_sub.c)
 
-add_compile_options(-std=c++11)
+#add_compile_options(-std=c++11)
 #
+
 #------------------------------------------------------------------------------
 #
 # build trnxplug
@@ -178,6 +198,7 @@ add_library(trnxplug
     plug-oisled2.cpp
     plug-lassmb.cpp
     plug-xmb1.cpp
+    plug-mbminirov.cpp
 )
 
 # specify include paths and libraries
@@ -185,6 +206,41 @@ target_link_libraries(trnxplug PRIVATE newmat geolib geocon trnw qnx mb1 tnav ud
 
 target_include_directories(trnxplug PRIVATE
     ${LIBTRNAV_INCLUDES}
+)
+
+target_compile_options(trnxplug PRIVATE
+-std=c++11
+)
+
+#------------------------------------------------------------------------------
+#
+# build lcmtrnplug
+
+# specify library
+add_library(lcmtrnplug
+    plug-common.cpp
+    PlugDVL.cpp
+    PlugXMB1.cpp
+    PlugIDTLASS.cpp
+    PlugLASSMB.cpp
+    PlugMBMiniROV.cpp
+    PlugIDT.cpp
+    PlugOISled.cpp
+    PlugOISled2.cpp
+    PlugOISledX.cpp
+    LcmTrnPP.cpp
+    LcmTrnCtx.cpp
+)
+
+# specify include paths and libraries
+target_link_libraries(lcmtrnplug PRIVATE newmat geolib geocon trnw qnx mb1 tnav udpms trncli NetCDF::NetCDF lcm)
+
+target_include_directories(lcmtrnplug PRIVATE
+    ${LIBTRNAV_INCLUDES}
+)
+
+target_compile_options(lcmtrnplug PRIVATE
+-std=c++11
 )
 
 #
@@ -195,15 +251,37 @@ target_include_directories(trnxplug PRIVATE
 # specify build target
 add_executable(trnxpp
     trnxpp_app.cpp
-    ${CMAKE_SOURCE_DIR}/src/mbtrnav/utils/TrnClient.cpp
-    ${CMAKE_SOURCE_DIR}/src/mbtrnav/utils/TerrainNavClient.cpp
 )
 
 # specify include paths and libraries
-target_link_libraries(trnxpp PRIVATE lcm stdc++ mb1 trncli tnav newmat qnx m geolib udpms trnxplug NetCDF::NetCDF)
+target_link_libraries(trnxpp PRIVATE lcm stdc++ mb1 trncli tnav newmat qnx m geolib geocon udpms trnxplug NetCDF::NetCDF)
 
 target_include_directories(trnxpp PRIVATE
     ${LIBTRNAV_INCLUDES}
+)
+target_compile_options(trnxpp PRIVATE
+-std=c++11
+)
+#
+#------------------------------------------------------------------------------
+#
+# build lcmtrnpp (LCM TRN pre-processor)
+
+# specify build target
+add_executable(lcmtrnpp
+    LcmTrnApp.cpp
+    LcmTrnPP.cpp
+    LcmTrnCtx.cpp
+)
+
+# specify include paths and libraries
+target_link_libraries(lcmtrnpp PRIVATE lcm stdc++ mb1 trncli tnav newmat qnx m geolib geocon udpms lcmtrnplug NetCDF::NetCDF)
+
+target_include_directories(lcmtrnpp PRIVATE
+    ${LIBTRNAV_INCLUDES}
+)
+target_compile_options(lcmtrnpp PRIVATE
+-std=c++11
 )
 #
 #------------------------------------------------------------------------------
@@ -227,10 +305,13 @@ target_link_libraries(trnlcm-test PRIVATE lcm pthread)
 
 target_include_directories(trnlcm-test PRIVATE
     ${LIBTRNAV_INCLUDES}
-    /usr/local/include
+#    /usr/local/include
+)
+target_compile_options(trnlcm-test PRIVATE
+-std=c++11
 )
 
-add_compile_options(-std=c++11)
+#add_compile_options(-std=c++11)
 #
 #------------------------------------------------------------------------------
 #
@@ -243,15 +324,35 @@ add_executable(fv-test
 
 # specify include paths and libraries
 # may need rt (librt) in Linux
-target_link_libraries(fv-test PRIVATE stdc++)
+#target_link_libraries(fv-test PRIVATE stdc++)
 
 target_include_directories(fv-test PRIVATE
+    ${LIBTRNAV_INCLUDES}
+)
+target_compile_options(fv-test PRIVATE
+-std=c++11
+)
+#
+#------------------------------------------------------------------------------
+#
+# build udpms-test
+
+# specify build target
+add_executable(udpms-test
+    udpms_test.c
+)
+
+# specify include paths and libraries
+# may need rt (librt) in Linux
+target_link_libraries(udpms-test PRIVATE udpms m)
+
+target_include_directories(udpms-test PRIVATE
     ${LIBTRNAV_INCLUDES}
 )
 
 # update this list when targets are moved
 # in/out of buildTRNOptional block
-list(APPEND TRN_OPTIONAL trnlcm-test fv-test)
+list(APPEND TRN_OPTIONAL trnlcm-test fv-test udpms-test)
 
 endif() # buildTRNOptional
 
@@ -262,7 +363,13 @@ endif()
 #
 #------------------------------------------------------------------------------
 # install it all
-install(TARGETS trnlcm trnlcm-cpp udpms trnxplug
+install(TARGETS trnlcm trnlcm-cpp udpms trnxplug lcmtrnplug
+
+EXPORT ${PROJECT_NAME}Targets
+RUNTIME DESTINATION bin
+LIBRARY DESTINATION lib${LIB_SUFFIX}
+ARCHIVE DESTINATION lib${LIB_SUFFIX}
+INCLUDES DESTINATION include
 
 DESTINATION
 ${CMAKE_INSTALL_LIBDIR}
@@ -271,7 +378,7 @@ Devel
 )
 
 install(TARGETS
-trnxpp
+trnxpp lcmtrnpp
 ${TRN_OPTIONAL}
 
 DESTINATION

@@ -1475,15 +1475,15 @@ protected:
 
         if (dest->numMeas <= 0 || dest->numMeas > MB1_MAX_BEAMS) {
             fprintf(stderr, "%s:%d ERR numMeas %d\n", __func__, __LINE__, dest->numMeas);
-            free(dest);
+            delete(dest);
             return NULL;
         } else if (dest->time <= 0) {
             fprintf(stderr, "%s:%d ERR time %.3lf\n", __func__, __LINE__, dest->time);
-            free(dest);
+            delete(dest);
             return NULL;
         } else if ((dest->x > -1. && dest->x < 1.)  || (dest->y > -1. && dest->y < 1.) || (dest->z > -1. && dest->z < 1.)) {
             fprintf(stderr, "%s:%d ERR x,y,z [%.3lf, %.3lf, %.3lf]\n", __func__, __LINE__, dest->x, dest->y, dest->z);
-            free(dest);
+            delete(dest);
             return NULL;
         }
 

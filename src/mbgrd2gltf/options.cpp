@@ -126,6 +126,7 @@ void print_help() {
   std::cout << "  --quantize-texcoord NUM       Draco texcoord quantization bits (2-30) [default: 10]\n";
   std::cout << "  --quantize-color NUM          Draco color quantization bits (2-30) [default: 8]\n";
   std::cout << "                      (-Qp, -Qn, -Qt, -Qc for legacy style)\n";
+  std::cout << "  --html, -W                    Generate HTML viewer with inline glTF/GLB model\n";
   std::cout << "  --verbose, -V                 Enable verbose output\n";
   std::cout << "  --help, -H                    Print this help message\n\n";
 }
@@ -181,7 +182,7 @@ Options::Options(unsigned argc, const char* argv[]) {
       // Get value from next arg if not in --option=value format
       if (!value_ptr && i + 1 < argc && argv[i + 1][0] != '-') {
         // Don't consume next arg for flags
-        if (opt_name != "binary" && opt_name != "draco" && opt_name != "verbose" && opt_name != "help" && opt_name != "geoorigin") {
+        if (opt_name != "binary" && opt_name != "draco" && opt_name != "verbose" && opt_name != "help" && opt_name != "geoorigin" && opt_name != "html") {
           value_ptr = argv[++i];
         }
       }
@@ -250,6 +251,9 @@ Options::Options(unsigned argc, const char* argv[]) {
       else if (opt_name == "verbose") {
         _is_verbose = true;
       }
+      else if (opt_name == "html") {
+        _is_html_output = true;
+      }
       else if (opt_name == "help") {
         print_help();
         _is_help = true;
@@ -269,7 +273,7 @@ Options::Options(unsigned argc, const char* argv[]) {
         value_ptr = &arg[2];
       }
       // Check if value is in next argument (e.g., -I file.grd)
-      else if (i + 1 < argc && option != 'B' && option != 'D' && option != 'V' && option != 'H' && option != 'G') {
+      else if (i + 1 < argc && option != 'B' && option != 'D' && option != 'V' && option != 'H' && option != 'G' && option != 'W') {
         value_ptr = argv[++i];
       }
 
@@ -366,6 +370,11 @@ Options::Options(unsigned argc, const char* argv[]) {
         case 'V':
         case 'v':
           _is_verbose = true;
+          break;
+
+        case 'W':
+        case 'w':
+          _is_html_output = true;
           break;
 
         case 'H':
