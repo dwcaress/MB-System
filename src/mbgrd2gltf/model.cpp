@@ -43,6 +43,10 @@
 
 // standard library
 #include <sys/stat.h>
+#include <fstream>
+#include <iomanip>
+#include <sstream>
+#include <cmath>
 
 namespace mbgrd2gltf {
 namespace model {
@@ -688,6 +692,312 @@ void write_gltf(const Geometry& geometry, const Options& options) {
   } else {
     validate_gltf_file(output_filepath, options.is_binary_output());
   }
+}
+
+/*
+ * Write an HTML viewer page with inline glTF/GLB model using X3DOM
+ * @param bathymetry : The bathymetry data (for grid bounds)
+ * @param geometry : The geometry used (for provenance metadata)
+ * @param options : The options used (for provenance metadata)
+ * @param command_line : The complete command line string
+ * @param timestamp : ISO 8601 timestamp of processing
+ * @param log_messages : Captured log messages for provenance
+ */
+void write_html(const Bathymetry& bathymetry, const Geometry& geometry, const Options& options,
+                const std::string& command_line, const std::string& timestamp,
+                const std::vector<std::string>& log_messages) {
+  
+  // Determine the glTF/GLB filename (same as output root + extension)
+  std::string model_filename = options.output_filepath();
+  size_t last_slash = model_filename.find_last_of("/\\");
+  if (last_slash != std::string::npos) {
+    model_filename = model_filename.substr(last_slash + 1);
+  }
+  model_filename += (options.is_binary_output() ? ".glb" : ".gltf");
+  
+  // HTML output file path
+  std::string html_filepath = options.output_filepath() + ".html";
+  
+  // Open output file
+  std::ofstream html_file(html_filepath);
+  if (!html_file.is_open()) {
+    throw std::runtime_error("Failed to open HTML output file: " + html_filepath);
+  }
+  
+  // Get grid bounds from bathymetry
+  double lon_min = bathymetry.longitude_min();
+  double lon_max = bathymetry.longitude_max();
+  double lat_min = bathymetry.latitude_min();
+  double lat_max = bathymetry.latitude_max();
+  
+  // Calculate center point for GeoViewpoint
+  double center_lon = (lon_min + lon_max) / 2.0;
+  double center_lat = (lat_min + lat_max) / 2.0;
+  
+  // Calculate mean depth from bathymetry altitude data
+  const auto& altitudes = bathymetry.altitudes();
+  double altitude_sum = 0.0;
+  size_t altitude_count = 0;
+  for (size_t y = 0; y < altitudes.size_y(); ++y) {
+    for (size_t x = 0; x < altitudes.size_x(); ++x) {
+      float altitude = altitudes.at(x, y);
+      if (!std::isnan(altitude)) {
+        altitude_sum += altitude;
+        altitude_count++;
+      }
+    }
+  }
+  double mean_depth = (altitude_count > 0) ? (altitude_sum / altitude_count) : 0.0;
+  
+  // Get mean elevation for auto geoorigin 
+  double mean_elevation = 0.0;
+  if (options.is_geoorigin_auto()) {
+    mean_elevation = mean_depth;
+  }
+  
+  // Calculate viewing altitude based on grid extent
+  // Approximate degrees to meters at this latitude: 1 degree ≈ 111km
+  double lat_extent_deg = lat_max - lat_min;
+  double lon_extent_deg = lon_max - lon_min;
+  double cos_lat = std::cos(center_lat * M_PI / 180.0);
+  
+  // Convert to approximate meters
+  double lat_extent_m = lat_extent_deg * 111000.0;
+  double lon_extent_m = lon_extent_deg * 111000.0 * cos_lat;
+  double max_extent_m = std::max(lat_extent_m, lon_extent_m);
+  
+  // Calculate altitude based on field of view to fill the window
+  // fieldOfView = 0.785398 radians (45 degrees)
+  // distance = (extent / 2) / tan(fov / 2)
+  const double fov = 0.785398;  // 45 degrees in radians
+  double view_altitude = ((max_extent_m / 2.0) / std::tan(fov / 2.0));
+  
+  // Format GeoViewpoint position and orientation (X3D Geo order: lat, lon, elevation)
+  // Position elevation is absolute, so add mean_depth to the relative view_altitude
+  std::ostringstream geoposition_str, orientation_str;
+  geoposition_str << std::fixed << std::setprecision(6) 
+                  << center_lat << " " << center_lon << " " << std::setprecision(1) << (mean_depth + view_altitude);
+  
+  // Orientation: rotate -90 degrees around X axis to look straight down (north up)
+  orientation_str << "1 0 0 -1.5708";
+  
+  // Write HTML content
+  html_file << "<!DOCTYPE html>\n";
+  html_file << "<html style='width:100%; height:100%; border:0; margin:0; padding:0;'>\n";
+  html_file << "  <head>\n";
+  html_file << "    <meta http-equiv='X-UA-Compatible' content='chrome=1'></meta>\n";
+  html_file << "    <meta http-equiv='Content-Type' content='text/html;charset=utf-8'></meta>\n";
+  html_file << "    <link type='text/css' href='https://www.x3dom.org/x3dom/dist/x3dom.css' rel='stylesheet'>\n";
+  html_file << "    <script type='text/javascript' src='https://www.x3dom.org/x3dom/dist/x3dom-full.js'></script>\n";
+  html_file << "    <style>\n";
+  html_file << "      .x3dom-logContainer { bottom: 0px; position: absolute; }\n";
+  html_file << "      #log-panel {\n";
+  html_file << "        position: fixed;\n";
+  html_file << "        bottom: 0;\n";
+  html_file << "        left: 0;\n";
+  html_file << "        right: 0;\n";
+  html_file << "        max-height: 30vh;\n";
+  html_file << "        background-color: rgba(240,240,240,0.95);\n";
+  html_file << "        border-top: 2px solid #666;\n";
+  html_file << "        display: none;\n";
+  html_file << "        flex-direction: column;\n";
+  html_file << "        z-index: 2000;\n";
+  html_file << "      }\n";
+  html_file << "      #log-panel.visible { display: flex; }\n";
+  html_file << "      #log-header {\n";
+  html_file << "        background-color: #666;\n";
+  html_file << "        color: white;\n";
+  html_file << "        padding: 8px 12px;\n";
+  html_file << "        font-weight: bold;\n";
+  html_file << "        display: flex;\n";
+  html_file << "        justify-content: space-between;\n";
+  html_file << "        align-items: center;\n";
+  html_file << "        cursor: pointer;\n";
+  html_file << "      }\n";
+  html_file << "      #log-content {\n";
+  html_file << "        flex: 1;\n";
+  html_file << "        overflow-y: auto;\n";
+  html_file << "        padding: 8px;\n";
+  html_file << "        font-family: 'Courier New', monospace;\n";
+  html_file << "        font-size: 12px;\n";
+  html_file << "      }\n";
+  html_file << "      .log-line {\n";
+  html_file << "        padding: 2px 0;\n";
+  html_file << "        white-space: pre-wrap;\n";
+  html_file << "        word-wrap: break-word;\n";
+  html_file << "      }\n";
+  html_file << "      #toggle-log-btn {\n";
+  html_file << "        position: fixed;\n";
+  html_file << "        bottom: 10px;\n";
+  html_file << "        left: 10px;\n";
+  html_file << "        background-color: rgba(102,102,102,0.9);\n";
+  html_file << "        color: white;\n";
+  html_file << "        border: none;\n";
+  html_file << "        padding: 10px 15px;\n";
+  html_file << "        border-radius: 4px;\n";
+  html_file << "        cursor: pointer;\n";
+  html_file << "        z-index: 1500;\n";
+  html_file << "        font-weight: bold;\n";
+  html_file << "      }\n";
+  html_file << "      #toggle-log-btn:hover { background-color: rgba(85,85,85,0.9); }\n";
+  html_file << "      #model-title {\n";
+  html_file << "        position: absolute;\n";
+  html_file << "        top: 0px;\n";
+  html_file << "        left: 50%;\n";
+  html_file << "        transform: translateX(-50%);\n";
+  html_file << "        background-color: rgba(199,202,204,.7);\n";
+  html_file << "        padding: 4px 20px;\n";
+  html_file << "        margin: 2px;\n";
+  html_file << "        margin-top: 2px;\n";
+  html_file << "        z-index: 1000;\n";
+  html_file << "        font-size: 16px;\n";
+  html_file << "        font-weight: bold;\n";
+  html_file << "        white-space: nowrap;\n";
+  html_file << "      }\n";
+  html_file << "    </style>\n";
+  html_file << "  </head>\n";
+  html_file << "  <body style='width:100%; height:100%; border:0; margin:0; padding:0;'>\n";
+  html_file << "    <div id='HUDs_Div'>\n";
+  html_file << "      <div id='X3DOM_MBSystem_Links' class='group' style='margin:2px; margin-top:26px; padding:4px; background-color:rgba(199,202,204,.7); position:absolute; float:center; z-index:1000;'>\n";
+  html_file << "        <a href='https://www.x3dom.org'>X3DOM</a> output created with\n";
+  html_file << "        <a href='https://www.mbari.org/products/research-software/mb-system/'>MB-System</a> mbgrd2gltf.\n";
+  html_file << "      </div>\n";
+  html_file << "      <div id='model-title'>" << model_filename << "</div>\n";
+  html_file << "      <div id='Interaction_Toolbox' style='margin:2px; padding:4px; padding-right:150px; background-color:rgba(199,202,204,.7);position:absolute; z-index:1000; right:0px; top:0px;'>\n";
+  html_file << "        <table>\n";
+  html_file << "          <tr>\n";
+  html_file << "            <td>Navigation Mode:\n";
+  html_file << "            </td>\n";
+  html_file << "            <td align='right'>\n";
+  html_file << "              <select style='float:right;' onchange='if (this.selectedIndex !== undefined) { var e = document.getElementById(&apos;x3dElement&apos;); if (this.options[this.selectedIndex].value === &apos;examine&apos;) { e.runtime.examine(); } else if (this.options[this.selectedIndex].value === &apos;lookat&apos;) { e.runtime.lookAt(); } else if (this.options[this.selectedIndex].value === &apos;walk&apos;) { e.runtime.walk(); } else if (this.options[this.selectedIndex].value === &apos;fly&apos;) { e.runtime.fly(); } else if (this.options[this.selectedIndex].value === &apos;helicopter&apos;) { e.runtime.helicopter(); } else if (this.options[this.selectedIndex].value === &apos;none&apos;) { e.runtime.noNav(); } }'>\n";
+  html_file << "                <option value='examine'>Examine\n";
+  html_file << "                </option>\n";
+  html_file << "                <option value='lookat'>LookAt\n";
+  html_file << "                </option>\n";
+  html_file << "                <option value='walk'>Walk\n";
+  html_file << "                </option>\n";
+  html_file << "                <option value='fly'>Fly\n";
+  html_file << "                </option>\n";
+  html_file << "                <option value='helicopter'>Helicopter\n";
+  html_file << "                </option>\n";
+  html_file << "                <option value='none'>None\n";
+  html_file << "                </option>\n";
+  html_file << "              </select>\n";
+  html_file << "            </td>\n";
+  html_file << "          </tr>\n";
+  html_file << "          <tr>\n";
+  html_file << "            <td>Debug Display:\n";
+  html_file << "            </td>\n";
+  html_file << "            <td align='right'>\n";
+  html_file << "              <input type='checkbox' onclick='if (this.checked) { document.getElementById(&apos;x3dElement&apos;).runtime.statistics(true); } else { document.getElementById(&apos;x3dElement&apos;).runtime.statistics(false); }'>\n";
+  html_file << "              </input> Stats\n";
+  html_file << "              <input type='checkbox' onclick='document.getElementById(&apos;x3dElement&apos;).runtime.debug();'>\n";
+  html_file << "              </input> Log\n";
+  html_file << "            </td>\n";
+  html_file << "          </tr>\n";
+  html_file << "          <tr>\n";
+  html_file << "            <td>\n";
+  html_file << "              <button onclick='document.getElementById(&apos;x3dElement&apos;).runtime.showAll();'> Show Everything\n";
+  html_file << "              </button>\n";
+  html_file << "            </td>\n";
+  html_file << "            <td>\n";
+  html_file << "              <button onclick='document.getElementById(&apos;x3dElement&apos;).runtime.resetView();'> Reset View\n";
+  html_file << "              </button>\n";
+  html_file << "            </td>\n";
+  html_file << "          </tr>\n";
+  html_file << "        </table>\n";
+  html_file << "      </div>\n";
+  html_file << "    </div>\n";
+  html_file << "    <x3d id='x3dElement' showStat='false' showLog='false' style='width:100%; height:100%; border:0; margin:0; padding:0;'>\n";
+  html_file << "      <scene DEF='scene'>\n";
+  
+  // Add GeoOrigin if one is being used
+  if (options.is_geoorigin_auto() || options.is_geoorigin_set()) {
+    html_file << "        <GeoOrigin DEF='GRID_ORIGIN' geoSystem='\"GD\" \"WE\"' geoCoords='";
+    if (options.is_geoorigin_set()) {
+      html_file << std::fixed << std::setprecision(6)
+                << options.geoorigin_lat() << " " << options.geoorigin_lon() << " " 
+                << std::setprecision(2) << options.geoorigin_elev();
+    } else {
+      // Use grid center and mean elevation for auto mode
+      html_file << std::fixed << std::setprecision(6)
+                << center_lat << " " << center_lon << " " << std::setprecision(2) << mean_elevation;
+    }
+    html_file << "'></GeoOrigin>\n";
+  }
+  
+  html_file << "        <GeoViewpoint DEF='OVERVIEW' position='" << geoposition_str.str() 
+            << "' orientation='" << orientation_str.str() 
+            << "' fieldOfView='0.785398' centerOfRotation='" 
+            << std::fixed << std::setprecision(6) << center_lat << " " << center_lon << " " 
+            << std::setprecision(2) << mean_depth << "'";
+  
+  // Reference GeoOrigin if one exists
+  if (options.is_geoorigin_auto() || options.is_geoorigin_set()) {
+    html_file << " geoOrigin='GRID_ORIGIN'";
+  }
+  
+  html_file << " geoSystem='\"GD\" \"WE\"'></GeoViewpoint>\n";
+  html_file << "        <transform>\n";
+  html_file << "          <Inline id='inline' url='" << model_filename << "' nameSpaceName='gltf' mapDEFToID='true'></Inline>\n";
+  html_file << "        </transform>\n";
+  html_file << "      </scene>\n";
+  html_file << "    </x3d>\n";
+  html_file << "    \n";
+  html_file << "    <button id='toggle-log-btn' onclick='toggleLogPanel()'>Show Processing Log</button>\n";
+  html_file << "    \n";
+  html_file << "    <div id='log-panel'>\n";
+  html_file << "      <div id='log-header' onclick='toggleLogPanel()'>\n";
+  html_file << "        <span>Processing Log (" << log_messages.size() << " messages)</span>\n";
+  html_file << "        <span id='close-log'>✕</span>\n";
+  html_file << "      </div>\n";
+  html_file << "      <div id='log-content'>\n";
+  
+  // Output all captured log messages
+  for (const auto& log_msg : log_messages) {
+    // Escape HTML special characters
+    std::string escaped_msg = log_msg;
+    size_t pos = 0;
+    while ((pos = escaped_msg.find("&", pos)) != std::string::npos) {
+      escaped_msg.replace(pos, 1, "&amp;");
+      pos += 5;
+    }
+    pos = 0;
+    while ((pos = escaped_msg.find("<", pos)) != std::string::npos) {
+      escaped_msg.replace(pos, 1, "&lt;");
+      pos += 4;
+    }
+    pos = 0;
+    while ((pos = escaped_msg.find(">", pos)) != std::string::npos) {
+      escaped_msg.replace(pos, 1, "&gt;");
+      pos += 4;
+    }
+    
+    html_file << "        <div class='log-line'>" << escaped_msg << "</div>\n";
+  }
+  
+  html_file << "      </div>\n";
+  html_file << "    </div>\n";
+  html_file << "    \n";
+  html_file << "    <script>\n";
+  html_file << "      function toggleLogPanel() {\n";
+  html_file << "        var panel = document.getElementById('log-panel');\n";
+  html_file << "        var btn = document.getElementById('toggle-log-btn');\n";
+  html_file << "        if (panel.classList.contains('visible')) {\n";
+  html_file << "          panel.classList.remove('visible');\n";
+  html_file << "          btn.textContent = 'Show Processing Log';\n";
+  html_file << "        } else {\n";
+  html_file << "          panel.classList.add('visible');\n";
+  html_file << "          btn.textContent = 'Hide Processing Log';\n";
+  html_file << "        }\n";
+  html_file << "      }\n";
+  html_file << "    </script>\n";
+  html_file << "  </body>\n";
+  html_file << "</html>\n";
+  
+  html_file.close();
+  
+  LOG_INFO("Successfully wrote HTML viewer to", html_filepath);
 }
 
 } // namespace model

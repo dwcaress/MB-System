@@ -128,12 +128,15 @@ public:
                 const std::string key = std::get<0>(*it);
                 pcf::semaphore *x = std::get<1>(*it);
                 if(key.compare(channel)==0){
-                    mSemList.erase(it);
+//                    mSemList.erase(it);
                     delete x;
                     std::cerr << "deleted sem channel[" << channel.c_str() << "]\n";
                     retval = 0;
+                    break;
                 }
             }
+            if(it != mSemList.end())
+                mSemList.erase(it);
         }
         return retval;
     }

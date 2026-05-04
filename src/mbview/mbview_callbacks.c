@@ -2042,7 +2042,7 @@ int mbview_open(int verbose, size_t instance, int *error) {
 
 	/* set about version label */
   mb_path value_text;
-	sprintf(value_text, "::#TimesMedium14:t\"MB-System Release %s\"#TimesMedium14\"%s\"", MB_VERSION, MB_VERSION_DATE);
+	snprintf(value_text, sizeof(value_text), "::#TimesMedium14:t\"MB-System Release %s\"#TimesMedium14\"%s\"", MB_VERSION, MB_VERSION_DATE);
 	set_mbview_label_multiline_string(view->mb3dview.mbview_label_about_version, value_text);
 
 	/* set widgets */
@@ -2979,7 +2979,7 @@ void do_mbview_set_projection_label(size_t instance) {
 
 	/* set projection label */
   mb_path value_text;
-	sprintf(value_text, ":::t\"Primary Grid Projection:\"");
+	snprintf(value_text, sizeof(value_text), ":::t\"Primary Grid Projection:\"");
 	if (data->primary_grid_projection_mode == MBV_PROJECTION_GEOGRAPHIC) {
 		strcat(value_text, ":t\"  Geographic\"");
 	}
@@ -3919,9 +3919,9 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 						                                               (view->top - view->bottom) / data->height;
 						if (XtIsManaged(view->mb3dview.mbview_textField_view_2doffsetx)) {
               mb_path value_text;
-							sprintf(value_text, "%g", view->offset2d_x);
+							snprintf(value_text, sizeof(value_text), "%g", view->offset2d_x);
 							XmTextFieldSetString(view->mb3dview.mbview_textField_view_2doffsetx, value_text);
-							sprintf(value_text, "%g", view->offset2d_y);
+							snprintf(value_text, sizeof(value_text), "%g", view->offset2d_y);
 							XmTextFieldSetString(view->mb3dview.mbview_textField_view_2doffsety, value_text);
 						}
 					}
@@ -3933,9 +3933,9 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 						                                               MBV_OPENGL_WIDTH * MBV_OPENGL_WIDTH / data->height;
 						if (XtIsManaged(view->mb3dview.mbview_textField_view_3doffsetx)) {
               mb_path value_text;
-							sprintf(value_text, "%g", view->offset3d_x);
+							snprintf(value_text, sizeof(value_text), "%g", view->offset3d_x);
 							XmTextFieldSetString(view->mb3dview.mbview_textField_view_3doffsetx, value_text);
-							sprintf(value_text, "%g", view->offset3d_y);
+							snprintf(value_text, sizeof(value_text), "%g", view->offset3d_y);
 							XmTextFieldSetString(view->mb3dview.mbview_textField_view_3doffsety, value_text);
 						}
 					}
@@ -3960,9 +3960,9 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					    180.0 * ((double)(view->button_move_y - view->button_down_y)) / ((double)data->height);
 					if (XtIsManaged(view->mb3dview.mbview_textField_model_azimuth)) {
             mb_path value_text;
-						sprintf(value_text, "%g", data->modelazimuth3d);
+						snprintf(value_text, sizeof(value_text), "%g", data->modelazimuth3d);
 						XmTextFieldSetString(view->mb3dview.mbview_textField_model_azimuth, value_text);
-						sprintf(value_text, "%g", data->modelelevation3d);
+						snprintf(value_text, sizeof(value_text), "%g", data->modelelevation3d);
 						XmTextFieldSetString(view->mb3dview.mbview_textField_model_elevation, value_text);
 					}
 
@@ -3998,9 +3998,9 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 						    180.0 * ((double)(view->button_move_y - view->button_down_y)) / ((double)data->height);
 						if (XtIsManaged(view->mb3dview.mbview_textField_illum_azi)) {
               mb_path value_text;
-							sprintf(value_text, "%g", data->illuminate_azimuth);
+							snprintf(value_text, sizeof(value_text), "%g", data->illuminate_azimuth);
 							XmTextFieldSetString(view->mb3dview.mbview_textField_illum_azi, value_text);
-							sprintf(value_text, "%g", data->illuminate_elevation);
+							snprintf(value_text, sizeof(value_text), "%g", data->illuminate_elevation);
 							XmTextFieldSetString(view->mb3dview.mbview_textField_illum_elev, value_text);
 						}
 
@@ -4026,9 +4026,9 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					    180.0 * ((double)(view->button_move_y - view->button_down_y)) / ((double)data->height);
 					if (XtIsManaged(view->mb3dview.mbview_textField_view_azimuth)) {
             mb_path value_text;
-						sprintf(value_text, "%g", data->viewazimuth3d);
+						snprintf(value_text, sizeof(value_text), "%g", data->viewazimuth3d);
 						XmTextFieldSetString(view->mb3dview.mbview_textField_view_azimuth, value_text);
-						sprintf(value_text, "%g", data->viewelevation3d);
+						snprintf(value_text, sizeof(value_text), "%g", data->viewelevation3d);
 						XmTextFieldSetString(view->mb3dview.mbview_textField_view_elevation, value_text);
 					}
 
@@ -4117,7 +4117,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 						               exp(((double)(view->button_down_y - view->button_move_y)) / ((double)data->height));
 						if (XtIsManaged(view->mb3dview.mbview_textField_view_2dzoom)) {
               mb_path value_text;
-							sprintf(value_text, "%g", view->size2d);
+							snprintf(value_text, sizeof(value_text), "%g", view->size2d);
 							XmTextFieldSetString(view->mb3dview.mbview_textField_view_2dzoom, value_text);
 						}
 					}
@@ -4128,7 +4128,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 						                   2.0 * (((double)(view->button_down_y - view->button_move_y)) / ((double)data->height));
 						if (XtIsManaged(view->mb3dview.mbview_textField_model_3dzoom)) {
               mb_path value_text;
-							sprintf(value_text, "%g", view->offset3d_z);
+							snprintf(value_text, sizeof(value_text), "%g", view->offset3d_z);
 							XmTextFieldSetString(view->mb3dview.mbview_textField_model_3dzoom, value_text);
 						}
 					}
@@ -4153,7 +4153,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					}
 					if (XtIsManaged(view->mb3dview.mbview_textField_exaggeration)) {
             mb_path value_text;
-						sprintf(value_text, "%g", data->exaggeration);
+						snprintf(value_text, sizeof(value_text), "%g", data->exaggeration);
 						XmTextFieldSetString(view->mb3dview.mbview_textField_exaggeration, value_text);
 					}
 
@@ -4195,7 +4195,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 						    exp(((double)(view->button_down_y - view->button_move_y)) / ((double)data->height));
 						if (XtIsManaged(view->mb3dview.mbview_textField_illum_amp)) {
               mb_path value_text;
-							sprintf(value_text, "%g", data->illuminate_magnitude);
+							snprintf(value_text, sizeof(value_text), "%g", data->illuminate_magnitude);
 							XmTextFieldSetString(view->mb3dview.mbview_textField_illum_amp, value_text);
 						}
 
@@ -4218,7 +4218,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 						    exp(((double)(view->button_down_y - view->button_move_y)) / ((double)data->height));
 						if (XtIsManaged(view->mb3dview.mbview_textField_slope_amp)) {
               mb_path value_text;
-							sprintf(value_text, "%g", data->slope_magnitude);
+							snprintf(value_text, sizeof(value_text), "%g", data->slope_magnitude);
 							XmTextFieldSetString(view->mb3dview.mbview_textField_slope_amp, value_text);
 						}
 
@@ -4241,7 +4241,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 						    exp(((double)(view->button_down_y - view->button_move_y)) / ((double)data->height));
 						if (XtIsManaged(view->mb3dview.mbview_textField_overlay_amp)) {
               mb_path value_text;
-							sprintf(value_text, "%g", data->overlay_shade_magnitude);
+							snprintf(value_text, sizeof(value_text), "%g", data->overlay_shade_magnitude);
 							XmTextFieldSetString(view->mb3dview.mbview_textField_overlay_amp, value_text);
 						}
 
@@ -4265,7 +4265,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 						               exp(((double)(view->button_down_y - view->button_move_y)) / ((double)data->height));
 						if (XtIsManaged(view->mb3dview.mbview_textField_view_2dzoom)) {
               mb_path value_text;
-							sprintf(value_text, "%g", view->size2d);
+							snprintf(value_text, sizeof(value_text), "%g", view->size2d);
 							XmTextFieldSetString(view->mb3dview.mbview_textField_view_2dzoom, value_text);
 						}
 					}
@@ -4277,7 +4277,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 						    2.0 * (((double)(view->button_down_y - view->button_move_y)) / ((double)data->height));
 						if (XtIsManaged(view->mb3dview.mbview_textField_view_3dzoom)) {
 							mb_path value_text;
-							sprintf(value_text, "%g", view->viewoffset3d_z);
+							snprintf(value_text, sizeof(value_text), "%g", view->viewoffset3d_z);
 							XmTextFieldSetString(view->mb3dview.mbview_textField_view_3dzoom, value_text);
 						}
 					}
@@ -6249,23 +6249,23 @@ void set_mbview_mouse_mode(size_t instance, int mode) {
 	/* set label */
 	mb_path value_text;
 	if (data->mouse_mode == MBV_MOUSE_MOVE)
-    sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Pick\":t\"M: Pan\":t\"R: Zoom\"");
+    snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Pick\":t\"M: Pan\":t\"R: Zoom\"");
 	else if (data->mouse_mode == MBV_MOUSE_ROTATE)
-		sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Pick\":t\"M: Rotate\":t\"R:exaggeration\"");
+		snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Pick\":t\"M: Rotate\":t\"R:exaggeration\"");
 	else if (data->mouse_mode == MBV_MOUSE_SHADE)
-		sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Pick\":t\"M: Light Source\":t\"R: Shade Magnitude\"");
+		snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Pick\":t\"M: Light Source\":t\"R: Shade Magnitude\"");
 	else if (data->mouse_mode == MBV_MOUSE_VIEWPOINT)
-		sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Pick\":t\"M: View Rotate\":t\"R: Zoom\"");
+		snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Pick\":t\"M: View Rotate\":t\"R: Zoom\"");
 	else if (data->mouse_mode == MBV_MOUSE_AREA)
-		sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Drag Region\":t\"M: Drag Area\":t\"R: Area Width\"");
+		snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Drag Region\":t\"M: Drag Area\":t\"R: Area Width\"");
 	else if (data->mouse_mode == MBV_MOUSE_SITE)
-		sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Select Site\":t\"M: Add Site\":t\"R: Delete Site\"");
+		snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Select Site\":t\"M: Add Site\":t\"R: Delete Site\"");
 	else if (data->mouse_mode == MBV_MOUSE_ROUTE)
-		sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Select Route\":t\"M: Add Route\":t\"R: Delete Route\"");
+		snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Select Route\":t\"M: Add Route\":t\"R: Delete Route\"");
 	else if (data->mouse_mode == MBV_MOUSE_NAV)
-		sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Pick\":t\"M: Select Nav\":t\"R: Deselect Nav\"");
+		snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Pick\":t\"M: Select Nav\":t\"R: Deselect Nav\"");
 	else if (data->mouse_mode == MBV_MOUSE_NAVFILE)
-		sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Pick\":t\"M: Select Nav File\":t\"R: Deselect Nav File\"");
+		snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Pick\":t\"M: Select Nav File\":t\"R: Deselect Nav File\"");
 	set_mbview_label_multiline_string(view->mb3dview.mbview_label_mouse, value_text);
 }
 
@@ -6524,11 +6524,11 @@ void do_mbview_colorboundspopup(Widget w, XtPointer client_data, XtPointer call_
 	mb_path value_text;
 
 	/* set values of widgets */
-	sprintf(value_text, "%g", data->primary_colortable_min);
+	snprintf(value_text, sizeof(value_text), "%g", data->primary_colortable_min);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_datamin, value_text);
-	sprintf(value_text, "%g", data->primary_colortable_max);
+	snprintf(value_text, sizeof(value_text), "%g", data->primary_colortable_max);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_datamax, value_text);
-	sprintf(value_text, "%g", data->contour_interval);
+	snprintf(value_text, sizeof(value_text), "%g", data->contour_interval);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_contours, value_text);
 	if (data->primary_colortable_mode == MBV_COLORTABLE_NORMAL) {
 		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_data_ctoh, TRUE, TRUE);
@@ -6536,9 +6536,9 @@ void do_mbview_colorboundspopup(Widget w, XtPointer client_data, XtPointer call_
 	else {
 		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_data_htoc, TRUE, TRUE);
 	}
-	sprintf(value_text, "%g", data->slope_colortable_min);
+	snprintf(value_text, sizeof(value_text), "%g", data->slope_colortable_min);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_slopemin, value_text);
-	sprintf(value_text, "%g", data->slope_colortable_max);
+	snprintf(value_text, sizeof(value_text), "%g", data->slope_colortable_max);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_slopemax, value_text);
 	if (data->slope_colortable_mode == MBV_COLORTABLE_NORMAL) {
 		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_slope_ctoh, TRUE, TRUE);
@@ -6546,9 +6546,9 @@ void do_mbview_colorboundspopup(Widget w, XtPointer client_data, XtPointer call_
 	else {
 		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_slope_htoc, TRUE, TRUE);
 	}
-	sprintf(value_text, "%g", data->secondary_colortable_min);
+	snprintf(value_text, sizeof(value_text), "%g", data->secondary_colortable_min);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_overlaymin, value_text);
-	sprintf(value_text, "%g", data->secondary_colortable_max);
+	snprintf(value_text, sizeof(value_text), "%g", data->secondary_colortable_max);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_overlaymax, value_text);
 	if (data->secondary_colortable_mode == MBV_COLORTABLE_NORMAL) {
 		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_overlay_ctoh, TRUE, TRUE);
@@ -6726,17 +6726,17 @@ void do_mbview_shadeparmspopup(Widget w, XtPointer client_data, XtPointer call_d
 	mb_path value_text;
 
 	/* set values of widgets */
-	sprintf(value_text, "%g", data->illuminate_magnitude);
+	snprintf(value_text, sizeof(value_text), "%g", data->illuminate_magnitude);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_illum_amp, value_text);
-	sprintf(value_text, "%g", data->illuminate_azimuth);
+	snprintf(value_text, sizeof(value_text), "%g", data->illuminate_azimuth);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_illum_azi, value_text);
-	sprintf(value_text, "%g", data->illuminate_elevation);
+	snprintf(value_text, sizeof(value_text), "%g", data->illuminate_elevation);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_illum_elev, value_text);
-	sprintf(value_text, "%g", data->slope_magnitude);
+	snprintf(value_text, sizeof(value_text), "%g", data->slope_magnitude);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_slope_amp, value_text);
-	sprintf(value_text, "%g", data->overlay_shade_magnitude);
+	snprintf(value_text, sizeof(value_text), "%g", data->overlay_shade_magnitude);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_overlay_amp, value_text);
-	sprintf(value_text, "%g", data->overlay_shade_center);
+	snprintf(value_text, sizeof(value_text), "%g", data->overlay_shade_center);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_overlay_center, value_text);
 	if (data->overlay_shade_mode == MBV_COLORTABLE_NORMAL) {
 		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_overlay_shade_ctoh, TRUE, TRUE);
@@ -6883,23 +6883,23 @@ int do_mbview_3dparmstext(size_t instance) {
 	mb_path value_text;
 
 	/* set values of widgets */
-	sprintf(value_text, "%g", data->modelazimuth3d);
+	snprintf(value_text, sizeof(value_text), "%g", data->modelazimuth3d);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_model_azimuth, value_text);
-	sprintf(value_text, "%g", data->modelelevation3d);
+	snprintf(value_text, sizeof(value_text), "%g", data->modelelevation3d);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_model_elevation, value_text);
-	sprintf(value_text, "%g", data->viewazimuth3d);
+	snprintf(value_text, sizeof(value_text), "%g", data->viewazimuth3d);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_view_azimuth, value_text);
-	sprintf(value_text, "%g", data->viewelevation3d);
+	snprintf(value_text, sizeof(value_text), "%g", data->viewelevation3d);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_view_elevation, value_text);
-	sprintf(value_text, "%g", data->exaggeration);
+	snprintf(value_text, sizeof(value_text), "%g", data->exaggeration);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_exaggeration, value_text);
-	sprintf(value_text, "%g", view->offset3d_x);
+	snprintf(value_text, sizeof(value_text), "%g", view->offset3d_x);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_view_3doffsetx, value_text);
-	sprintf(value_text, "%g", view->offset3d_y);
+	snprintf(value_text, sizeof(value_text), "%g", view->offset3d_y);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_view_3doffsety, value_text);
-	sprintf(value_text, "%g", view->offset3d_z);
+	snprintf(value_text, sizeof(value_text), "%g", view->offset3d_z);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_model_3dzoom, value_text);
-	sprintf(value_text, "%g", view->viewoffset3d_z);
+	snprintf(value_text, sizeof(value_text), "%g", view->viewoffset3d_z);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_view_3dzoom, value_text);
 
 	return (0);
@@ -7079,11 +7079,11 @@ int do_mbview_2dparmstext(size_t instance) {
 	mb_path value_text;
 
 	/* set values of widgets */
-	sprintf(value_text, "%g", view->offset2d_x);
+	snprintf(value_text, sizeof(value_text), "%g", view->offset2d_x);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_view_2doffsetx, value_text);
-	sprintf(value_text, "%g", view->offset2d_y);
+	snprintf(value_text, sizeof(value_text), "%g", view->offset2d_y);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_view_2doffsety, value_text);
-	sprintf(value_text, "%g", view->size2d);
+	snprintf(value_text, sizeof(value_text), "%g", view->size2d);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_view_2dzoom, value_text);
 
 	return (0);

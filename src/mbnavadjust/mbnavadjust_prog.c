@@ -102,27 +102,6 @@ mb_path error1;
 mb_pathplus error2;
 mb_path error3;
 
-/* route color defines (colors different in MBgrdviz than in MBnavadjust) */
-#define ROUTE_COLOR_BLACK 0
-#define ROUTE_COLOR_WHITE 1
-#define ROUTE_COLOR_RED 2
-#define ROUTE_COLOR_YELLOW 3
-#define ROUTE_COLOR_GREEN 4
-#define ROUTE_COLOR_BLUEGREEN 5
-#define ROUTE_COLOR_BLUE 6
-#define ROUTE_COLOR_PURPLE 7
-
-/* color control values */
-#define WHITE 0
-#define BLACK 1
-#define RED 2
-#define GREEN 3
-#define BLUE 4
-#define CORAL 5
-#define YELLOW 6
-#define ORANGE 23
-#define PURPLE 255
-
 #define XG_SOLIDLINE 0
 #define XG_DASHLINE 1
 void *pcont_xgid;
@@ -225,8 +204,8 @@ int mbnavadjust_init_globals() {
   mbna_view_mode = MBNA_VIEW_MODE_ALL;
   mbna_invert_mode = MBNA_INVERT_ZISOLATED;
   mbna_save_frequency = 10;
-  mbna_color_foreground = BLACK;
-  mbna_color_background = WHITE;
+  mbna_color_foreground = MB_COLOR_BLACK;
+  mbna_color_background = MB_COLOR_WHITE;
   project.use_mode = MBNA_USE_MODE_PRIMARY;
   project.section_length = 0.20;
   project.section_soundings = 400000;
@@ -354,8 +333,8 @@ int mbnavadjust_init(int argc, char **argv) {
       break;
     case 'D':
     case 'd':
-      mbna_color_foreground = WHITE;
-      mbna_color_background = BLACK;
+      mbna_color_foreground = MB_COLOR_WHITE;
+      mbna_color_background = MB_COLOR_BLACK;
       break;
     case 'I':
     case 'i':
@@ -5469,16 +5448,16 @@ void mbnavadjust_naverr_plot(int plotmode) {
           snav_1 = mbna_snav_1;
           snav_2 = mbna_snav_2;
           if (mbna_allow_set_tie)
-            fill = pixel_values[RED];
+            fill = pixel_values[MB_COLOR_RED];
           else
-            fill = pixel_values[6];
+            fill = pixel_values[MB_COLOR_YELLOW];
         }
         else {
           boxoff = 3;
           wid = 7;
           snav_1 = tie->snav_1;
           snav_2 = tie->snav_2;
-          fill = pixel_values[6];
+          fill = pixel_values[MB_COLOR_YELLOW];
         }
         ix = (int)(mbna_plotx_scale * (section1->snav_lon[snav_1] - mbna_plot_lon_min));
         iy = (int)(cont_borders[3] - mbna_ploty_scale * (section1->snav_lat[snav_1] - mbna_plot_lat_min));
@@ -5540,14 +5519,14 @@ void mbnavadjust_naverr_plot(int plotmode) {
 
             /* histogram equalized coloring */
             if (gridm[l] <= misfit_intervals[0])
-              ipixel = 7;
+              ipixel = MB_NDrawingColors;
             else if (gridm[l] >= misfit_intervals[nmisfit_intervals - 1])
-              ipixel = 7 + nmisfit_intervals - 1;
+              ipixel = MB_NDrawingColors + nmisfit_intervals - 1;
             else {
               found = false;
               for (int kk = 0; kk < nmisfit_intervals && !found; kk++) {
                 if (gridm[l] > misfit_intervals[kk] && gridm[l] <= misfit_intervals[kk + 1]) {
-                  ipixel = 7 + kk;
+                  ipixel = MB_NDrawingColors + kk;
                   found = true;
                 }
               }
@@ -5569,7 +5548,7 @@ void mbnavadjust_naverr_plot(int plotmode) {
     /* draw working offset */
     ix = ixo + (int)(mbna_misfit_xscale * (mbna_offset_x - mbna_misfit_offset_x));
     iy = iyo - (int)(mbna_misfit_yscale * (mbna_offset_y - mbna_misfit_offset_y));
-    xg_fillrectangle(pcorr_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+    xg_fillrectangle(pcorr_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
     xg_drawrectangle(pcorr_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
 
     /* draw uncertainty estimate */
@@ -5607,8 +5586,8 @@ void mbnavadjust_naverr_plot(int plotmode) {
     if (project.inversion_status != MBNA_INVERSION_NONE) {
       ix = ixo + (int)(mbna_misfit_xscale * (mbna_invert_offset_x - mbna_misfit_offset_x));
       iy = iyo - (int)(mbna_misfit_yscale * (mbna_invert_offset_y - mbna_misfit_offset_y));
-      xg_drawline(pcorr_xgid, ix - 10, iy, ix + 10, iy, pixel_values[GREEN], XG_SOLIDLINE);
-      xg_drawline(pcorr_xgid, ix, iy + 10, ix, iy - 10, pixel_values[GREEN], XG_SOLIDLINE);
+      xg_drawline(pcorr_xgid, ix - 10, iy, ix + 10, iy, pixel_values[MB_COLOR_GREEN], XG_SOLIDLINE);
+      xg_drawline(pcorr_xgid, ix, iy + 10, ix, iy - 10, pixel_values[MB_COLOR_GREEN], XG_SOLIDLINE);
       xg_drawline(pcorr_xgid, ix - 10, iy, ix + 10, iy, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
       xg_drawline(pcorr_xgid, ix, iy + 10, ix, iy - 10, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
     }
@@ -5655,14 +5634,14 @@ void mbnavadjust_naverr_plot(int plotmode) {
         if (gridnm[l] > 0) {
           /* histogram equalized coloring */
           if (gridm[l] <= misfit_intervals[0])
-            ipixel = 7;
+            ipixel = MB_NDrawingColors;
           else if (gridm[l] >= misfit_intervals[nmisfit_intervals - 1])
-            ipixel = 7 + nmisfit_intervals - 1;
+            ipixel = MB_NDrawingColors + nmisfit_intervals - 1;
           else {
             found = false;
             for (int kk = 0; kk < nmisfit_intervals && !found; kk++) {
               if (gridm[l] > misfit_intervals[kk] && gridm[l] <= misfit_intervals[kk + 1]) {
-                ipixel = 7 + kk;
+                ipixel = MB_NDrawingColors + kk;
                 found = true;
               }
             }
@@ -5852,9 +5831,9 @@ void mbnavadjust_naverr_plot(int plotmode) {
       boxoff = 6;
       wid = 13;
       if (mbna_allow_set_tie)
-        fill = pixel_values[RED];
+        fill = pixel_values[MB_COLOR_RED];
       else
-        fill = pixel_values[6];
+        fill = pixel_values[MB_COLOR_YELLOW];
       ix = (int)(mbna_plotx_scale * (section2->snav_lon[mbna_snav_2] - mbna_plot_lon_min));
       iy = (int)(cont_borders[3] - mbna_ploty_scale * (section2->snav_lat[mbna_snav_2] - mbna_plot_lat_min));
       xg_fillrectangle(pcont_xgid, ix - boxoff, iy - boxoff, wid, wid, fill, XG_SOLIDLINE);
@@ -5916,14 +5895,14 @@ void mbnavadjust_naverr_plot(int plotmode) {
 
               /* histogram equalized coloring */
               if (gridm[l] <= misfit_intervals[0])
-                ipixel = 7;
+                ipixel = MB_NDrawingColors;
               else if (gridm[l] >= misfit_intervals[nmisfit_intervals - 1])
-                ipixel = 7 + nmisfit_intervals - 1;
+                ipixel = MB_NDrawingColors + nmisfit_intervals - 1;
               else {
                 found = false;
                 for (int kk = 0; kk < nmisfit_intervals && !found; kk++) {
                   if (gridm[l] > misfit_intervals[kk] && gridm[l] <= misfit_intervals[kk + 1]) {
-                    ipixel = 7 + kk;
+                    ipixel = MB_NDrawingColors + kk;
                     found = true;
                   }
                 }
@@ -5945,7 +5924,7 @@ void mbnavadjust_naverr_plot(int plotmode) {
       /* draw working offset */
       ix = ixo + (int)(mbna_misfit_xscale * (mbna_offset_x - mbna_misfit_offset_x));
       iy = iyo - (int)(mbna_misfit_yscale * (mbna_offset_y - mbna_misfit_offset_y));
-      xg_fillrectangle(pcorr_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+      xg_fillrectangle(pcorr_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
       xg_drawrectangle(pcorr_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
 
       /* draw uncertainty estimate */
@@ -5983,8 +5962,8 @@ void mbnavadjust_naverr_plot(int plotmode) {
       if (project.inversion_status != MBNA_INVERSION_NONE) {
         ix = ixo + (int)(mbna_misfit_xscale * (mbna_invert_offset_x - mbna_misfit_offset_x));
         iy = iyo - (int)(mbna_misfit_yscale * (mbna_invert_offset_y - mbna_misfit_offset_y));
-        xg_drawline(pcorr_xgid, ix - 10, iy, ix + 10, iy, pixel_values[GREEN], XG_SOLIDLINE);
-        xg_drawline(pcorr_xgid, ix, iy + 10, ix, iy - 10, pixel_values[GREEN], XG_SOLIDLINE);
+        xg_drawline(pcorr_xgid, ix - 10, iy, ix + 10, iy, pixel_values[MB_COLOR_GREEN], XG_SOLIDLINE);
+        xg_drawline(pcorr_xgid, ix, iy + 10, ix, iy - 10, pixel_values[MB_COLOR_GREEN], XG_SOLIDLINE);
         xg_drawline(pcorr_xgid, ix - 10, iy, ix + 10, iy, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
         xg_drawline(pcorr_xgid, ix, iy + 10, ix, iy - 10, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
       }
@@ -6031,14 +6010,14 @@ void mbnavadjust_naverr_plot(int plotmode) {
           if (gridnm[l] > 0) {
             /* histogram equalized coloring */
             if (gridm[l] <= misfit_intervals[0])
-              ipixel = 7;
+              ipixel = MB_NDrawingColors;
             else if (gridm[l] >= misfit_intervals[nmisfit_intervals - 1])
-              ipixel = 7 + nmisfit_intervals - 1;
+              ipixel = MB_NDrawingColors + nmisfit_intervals - 1;
             else {
               found = false;
               for (int kk = 0; kk < nmisfit_intervals && !found; kk++) {
                 if (gridm[l] > misfit_intervals[kk] && gridm[l] <= misfit_intervals[kk + 1]) {
-                  ipixel = 7 + kk;
+                  ipixel = MB_NDrawingColors + kk;
                   found = true;
                 }
               }
@@ -13822,12 +13801,12 @@ int mbnavadjust_modelplot_plot_timeseries() {
           ix = mbna_modelplot_xo + (int)(mbna_modelplot_xscale * (iping - mbna_modelplot_start));
           iy = mbna_modelplot_yo_lon -
                (int)(mbna_modelplot_yscale * section->snav_lon_offset[section->num_snav / 2] / project.mtodeglon);
-          xg_drawrectangle(pmodp_xgid, ix - 3, iy - 1, 3, 3, pixel_values[GREEN], XG_SOLIDLINE);
+          xg_drawrectangle(pmodp_xgid, ix - 3, iy - 1, 3, 3, pixel_values[MB_COLOR_GREEN], XG_SOLIDLINE);
           iy = mbna_modelplot_yo_lat -
                (int)(mbna_modelplot_yscale * section->snav_lat_offset[section->num_snav / 2] / project.mtodeglat);
-          xg_drawrectangle(pmodp_xgid, ix - 3, iy - 1, 3, 3, pixel_values[GREEN], XG_SOLIDLINE);
+          xg_drawrectangle(pmodp_xgid, ix - 3, iy - 1, 3, 3, pixel_values[MB_COLOR_GREEN], XG_SOLIDLINE);
           iy = mbna_modelplot_yo_z - (int)(mbna_modelplot_yzscale * section->snav_z_offset[section->num_snav / 2]);
-          xg_drawrectangle(pmodp_xgid, ix - 3, iy - 1, 3, 3, pixel_values[GREEN], XG_SOLIDLINE);
+          xg_drawrectangle(pmodp_xgid, ix - 3, iy - 1, 3, 3, pixel_values[MB_COLOR_GREEN], XG_SOLIDLINE);
         }
 
         file = &project.files[crossing->file_id_2];
@@ -13839,12 +13818,12 @@ int mbnavadjust_modelplot_plot_timeseries() {
           ix = mbna_modelplot_xo + (int)(mbna_modelplot_xscale * (iping - mbna_modelplot_start));
           iy = mbna_modelplot_yo_lon -
                (int)(mbna_modelplot_yscale * section->snav_lon_offset[section->num_snav / 2] / project.mtodeglon);
-          xg_drawrectangle(pmodp_xgid, ix - 3, iy - 1, 3, 3, pixel_values[GREEN], XG_SOLIDLINE);
+          xg_drawrectangle(pmodp_xgid, ix - 3, iy - 1, 3, 3, pixel_values[MB_COLOR_GREEN], XG_SOLIDLINE);
           iy = mbna_modelplot_yo_lat -
                (int)(mbna_modelplot_yscale * section->snav_lat_offset[section->num_snav / 2] / project.mtodeglat);
-          xg_drawrectangle(pmodp_xgid, ix - 3, iy - 1, 3, 3, pixel_values[GREEN], XG_SOLIDLINE);
+          xg_drawrectangle(pmodp_xgid, ix - 3, iy - 1, 3, 3, pixel_values[MB_COLOR_GREEN], XG_SOLIDLINE);
           iy = mbna_modelplot_yo_z - (int)(mbna_modelplot_yzscale * section->snav_z_offset[section->num_snav / 2]);
-          xg_drawrectangle(pmodp_xgid, ix - 3, iy - 1, 3, 3, pixel_values[GREEN], XG_SOLIDLINE);
+          xg_drawrectangle(pmodp_xgid, ix - 3, iy - 1, 3, 3, pixel_values[MB_COLOR_GREEN], XG_SOLIDLINE);
         }
       }
     }
@@ -13864,11 +13843,11 @@ int mbnavadjust_modelplot_plot_timeseries() {
                  (int)(mbna_modelplot_yscale * section->snav_lon_offset[isnav] / project.mtodeglon);
             if ((i > 0 || j > 0) && !section->continuity && isnav == 0)
               xg_drawline(pmodp_xgid, ix, mbna_modelplot_yo_lon - plot_height / 2, ix,
-                          mbna_modelplot_yo_lon + plot_height / 2, pixel_values[GREEN], XG_SOLIDLINE);
+                          mbna_modelplot_yo_lon + plot_height / 2, pixel_values[MB_COLOR_GREEN], XG_SOLIDLINE);
             else if (i > 0 || j > 0) {
               /* if (j == 0 && isnav == 0 && section->continuity)
                   xg_drawline(pmodp_xgid, ix, mbna_modelplot_yo_lon - plot_height / 2, ix, mbna_modelplot_yo_lon +
-                 plot_height / 2, pixel_values[CORAL], XG_DASHLINE); */
+                 plot_height / 2, pixel_values[MB_COLOR_CORAL], XG_DASHLINE); */
               xg_drawline(pmodp_xgid, ixo, iyo, ix, iy, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
             }
             ixo = ix;
@@ -13893,11 +13872,11 @@ int mbnavadjust_modelplot_plot_timeseries() {
                  (int)(mbna_modelplot_yscale * section->snav_lat_offset[isnav] / project.mtodeglat);
             if ((i > 0 || j > 0) && !section->continuity && isnav == 0)
               xg_drawline(pmodp_xgid, ix, mbna_modelplot_yo_lat - plot_height / 2, ix,
-                          mbna_modelplot_yo_lat + plot_height / 2, pixel_values[GREEN], XG_SOLIDLINE);
+                          mbna_modelplot_yo_lat + plot_height / 2, pixel_values[MB_COLOR_GREEN], XG_SOLIDLINE);
             else if (i > 0 || j > 0) {
               /* if (j == 0 && isnav == 0 && section->continuity)
                   xg_drawline(pmodp_xgid, ix, mbna_modelplot_yo_lat - plot_height / 2, ix, mbna_modelplot_yo_lat +
-                 plot_height / 2, pixel_values[CORAL], XG_DASHLINE); */
+                 plot_height / 2, pixel_values[MB_COLOR_CORAL], XG_DASHLINE); */
               xg_drawline(pmodp_xgid, ixo, iyo, ix, iy, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
             }
             ixo = ix;
@@ -13921,11 +13900,11 @@ int mbnavadjust_modelplot_plot_timeseries() {
             iy = mbna_modelplot_yo_z - (int)(mbna_modelplot_yzscale * section->snav_z_offset[isnav]);
             if ((i > 0 || j > 0) && !section->continuity && isnav == 0)
               xg_drawline(pmodp_xgid, ix, mbna_modelplot_yo_z - plot_height / 2, ix,
-                          mbna_modelplot_yo_z + plot_height / 2, pixel_values[GREEN], XG_SOLIDLINE);
+                          mbna_modelplot_yo_z + plot_height / 2, pixel_values[MB_COLOR_GREEN], XG_SOLIDLINE);
             else if (i > 0 || j > 0) {
               /* if (j == 0 && isnav == 0 && section->continuity)
                   xg_drawline(pmodp_xgid, ix, mbna_modelplot_yo_z - plot_height / 2, ix, mbna_modelplot_yo_z +
-                 plot_height / 2, pixel_values[CORAL], XG_DASHLINE); */
+                 plot_height / 2, pixel_values[MB_COLOR_CORAL], XG_DASHLINE); */
               xg_drawline(pmodp_xgid, ixo, iyo, ix, iy, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
             }
             ixo = ix;
@@ -13944,7 +13923,7 @@ int mbnavadjust_modelplot_plot_timeseries() {
         if (tie->inversion_status == MBNA_INVERSION_CURRENT)
           pixel = pixel_values[mbna_color_foreground];
         else
-          pixel = pixel_values[BLUE];
+          pixel = pixel_values[MB_COLOR_BLUE];
 
         file = &project.files[crossing->file_id_1];
         section = &file->sections[crossing->section_1];
@@ -14004,11 +13983,11 @@ int mbnavadjust_modelplot_plot_timeseries() {
 						int iyl, iyu; /* lower and upper standard deviation bounds */
 						int w = 5;
 						int hw = 2;
-						int color = ORANGE;
+						int color = MB_COLOR_ORANGE;
 						if (selected) {
 							w = 9;
 							hw = 4;
-							color = RED;
+							color = MB_COLOR_RED;
 						}
 						
 						if (section->globaltie.status != MBNA_TIE_Z) {
@@ -14061,7 +14040,7 @@ int mbnavadjust_modelplot_plot_timeseries() {
 						ix = mbna_modelplot_xo + (int)(mbna_modelplot_xscale * (iping - mbna_modelplot_start));
 						int w = 9;
 						int hw = 4;
-						int color = RED;
+						int color = MB_COLOR_RED;
 						
 						/* east-west offsets */
 						iy = mbna_modelplot_yo_lon - (int)(mbna_modelplot_yscale 
@@ -14099,14 +14078,14 @@ int mbnavadjust_modelplot_plot_timeseries() {
 					ix = mbna_modelplot_xo + (int)(mbna_modelplot_xscale * (iping - mbna_modelplot_start));
 					iy = mbna_modelplot_yo_lon -
 							 (int)(mbna_modelplot_yscale * section->snav_lon_offset[tie->snav_1] / project.mtodeglon);
-					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 					xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
 					iy = mbna_modelplot_yo_lat -
 							 (int)(mbna_modelplot_yscale * section->snav_lat_offset[tie->snav_1] / project.mtodeglat);
-					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 					xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
 					iy = mbna_modelplot_yo_z - (int)(mbna_modelplot_yzscale * section->snav_z_offset[tie->snav_1]);
-					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 					xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
 				}
 	
@@ -14119,14 +14098,14 @@ int mbnavadjust_modelplot_plot_timeseries() {
 					ix = mbna_modelplot_xo + (int)(mbna_modelplot_xscale * (iping - mbna_modelplot_start));
 					iy = mbna_modelplot_yo_lon -
 							 (int)(mbna_modelplot_yscale * section->snav_lon_offset[tie->snav_2] / project.mtodeglon);
-					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 					xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
 					iy = mbna_modelplot_yo_lat -
 							 (int)(mbna_modelplot_yscale * section->snav_lat_offset[tie->snav_2] / project.mtodeglat);
-					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 					xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
 					iy = mbna_modelplot_yo_z - (int)(mbna_modelplot_yzscale * section->snav_z_offset[tie->snav_2]);
-					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 					xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
 				}
 			}
@@ -14144,14 +14123,14 @@ int mbnavadjust_modelplot_plot_timeseries() {
 					ix = mbna_modelplot_xo + (int)(mbna_modelplot_xscale * (iping - mbna_modelplot_start));
 					iy = mbna_modelplot_yo_lon -
 							 (int)(mbna_modelplot_yscale * section->snav_lon_offset[section->num_snav / 2] / project.mtodeglon);
-					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 					xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
 					iy = mbna_modelplot_yo_lat -
 							 (int)(mbna_modelplot_yscale * section->snav_lat_offset[section->num_snav / 2] / project.mtodeglat);
-					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 					xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
 					iy = mbna_modelplot_yo_z - (int)(mbna_modelplot_yzscale * section->snav_z_offset[section->num_snav / 2]);
-					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 					xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
 				}
 	
@@ -14164,14 +14143,14 @@ int mbnavadjust_modelplot_plot_timeseries() {
 					ix = mbna_modelplot_xo + (int)(mbna_modelplot_xscale * (iping - mbna_modelplot_start));
 					iy = mbna_modelplot_yo_lon -
 							 (int)(mbna_modelplot_yscale * section->snav_lon_offset[section->num_snav / 2] / project.mtodeglon);
-					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 					xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
 					iy = mbna_modelplot_yo_lat -
 							 (int)(mbna_modelplot_yscale * section->snav_lat_offset[section->num_snav / 2] / project.mtodeglat);
-					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 					xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
 					iy = mbna_modelplot_yo_z - (int)(mbna_modelplot_yzscale * section->snav_z_offset[section->num_snav / 2]);
-					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 					xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
 				}
 			}
@@ -14199,16 +14178,16 @@ int mbnavadjust_modelplot_plot_timeseries() {
 									ix = mbna_modelplot_xo + (int)(mbna_modelplot_xscale * (iping - mbna_modelplot_start));
 									iy = mbna_modelplot_yo_lon -
 											 (int)(mbna_modelplot_yscale * section->snav_lon_offset[tie->snav_1] / project.mtodeglon);
-									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[RED], XG_SOLIDLINE);
+									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 									xg_drawrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[mbna_color_foreground],
 																	 XG_SOLIDLINE);
 									iy = mbna_modelplot_yo_lat -
 											 (int)(mbna_modelplot_yscale * section->snav_lat_offset[tie->snav_1] / project.mtodeglat);
-									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[RED], XG_SOLIDLINE);
+									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 									xg_drawrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[mbna_color_foreground],
 																	 XG_SOLIDLINE);
 									iy = mbna_modelplot_yo_z - (int)(mbna_modelplot_yzscale * section->snav_z_offset[tie->snav_1]);
-									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[RED], XG_SOLIDLINE);
+									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 									xg_drawrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[mbna_color_foreground],
 																	 XG_SOLIDLINE);
 								}
@@ -14223,16 +14202,16 @@ int mbnavadjust_modelplot_plot_timeseries() {
 									ix = mbna_modelplot_xo + (int)(mbna_modelplot_xscale * (iping - mbna_modelplot_start));
 									iy = mbna_modelplot_yo_lon -
 											 (int)(mbna_modelplot_yscale * section->snav_lon_offset[tie->snav_2] / project.mtodeglon);
-									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[6], XG_SOLIDLINE);
+									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[MB_COLOR_YELLOW], XG_SOLIDLINE);
 									xg_drawrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[mbna_color_foreground],
 																	 XG_SOLIDLINE);
 									iy = mbna_modelplot_yo_lat -
 											 (int)(mbna_modelplot_yscale * section->snav_lat_offset[tie->snav_2] / project.mtodeglat);
-									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[6], XG_SOLIDLINE);
+									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[MB_COLOR_YELLOW], XG_SOLIDLINE);
 									xg_drawrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[mbna_color_foreground],
 																	 XG_SOLIDLINE);
 									iy = mbna_modelplot_yo_z - (int)(mbna_modelplot_yzscale * section->snav_z_offset[tie->snav_2]);
-									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[6], XG_SOLIDLINE);
+									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[MB_COLOR_YELLOW], XG_SOLIDLINE);
 									xg_drawrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[mbna_color_foreground],
 																	 XG_SOLIDLINE);
 								}
@@ -14257,16 +14236,16 @@ int mbnavadjust_modelplot_plot_timeseries() {
 									ix = mbna_modelplot_xo + (int)(mbna_modelplot_xscale * (iping - mbna_modelplot_start));
 									iy = mbna_modelplot_yo_lon -
 											 (int)(mbna_modelplot_yscale * section->snav_lon_offset[tie->snav_2] / project.mtodeglon);
-									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[RED], XG_SOLIDLINE);
+									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 									xg_drawrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[mbna_color_foreground],
 																	 XG_SOLIDLINE);
 									iy = mbna_modelplot_yo_lat -
 											 (int)(mbna_modelplot_yscale * section->snav_lat_offset[tie->snav_2] / project.mtodeglat);
-									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[RED], XG_SOLIDLINE);
+									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 									xg_drawrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[mbna_color_foreground],
 																	 XG_SOLIDLINE);
 									iy = mbna_modelplot_yo_z - (int)(mbna_modelplot_yzscale * section->snav_z_offset[tie->snav_2]);
-									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[RED], XG_SOLIDLINE);
+									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 									xg_drawrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[mbna_color_foreground],
 																	 XG_SOLIDLINE);
 								}
@@ -14281,16 +14260,16 @@ int mbnavadjust_modelplot_plot_timeseries() {
 									ix = mbna_modelplot_xo + (int)(mbna_modelplot_xscale * (iping - mbna_modelplot_start));
 									iy = mbna_modelplot_yo_lon -
 											 (int)(mbna_modelplot_yscale * section->snav_lon_offset[tie->snav_1] / project.mtodeglon);
-									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[6], XG_SOLIDLINE);
+									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[MB_COLOR_YELLOW], XG_SOLIDLINE);
 									xg_drawrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[mbna_color_foreground],
 																	 XG_SOLIDLINE);
 									iy = mbna_modelplot_yo_lat -
 											 (int)(mbna_modelplot_yscale * section->snav_lat_offset[tie->snav_1] / project.mtodeglat);
-									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[6], XG_SOLIDLINE);
+									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[MB_COLOR_YELLOW], XG_SOLIDLINE);
 									xg_drawrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[mbna_color_foreground],
 																	 XG_SOLIDLINE);
 									iy = mbna_modelplot_yo_z - (int)(mbna_modelplot_yzscale * section->snav_z_offset[tie->snav_1]);
-									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[6], XG_SOLIDLINE);
+									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[MB_COLOR_YELLOW], XG_SOLIDLINE);
 									xg_drawrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[mbna_color_foreground],
 																	 XG_SOLIDLINE);
 								}
@@ -14726,14 +14705,14 @@ int mbnavadjust_modelplot_plot_perturbation() {
           iy = mbna_modelplot_yo_lon -
                (int)(mbna_modelplot_yscale *
                      (section->snav_lon_offset[section->num_snav / 2] / project.mtodeglon - file->block_offset_x));
-          xg_drawrectangle(pmodp_xgid, ix - 3, iy - 1, 3, 3, pixel_values[GREEN], XG_SOLIDLINE);
+          xg_drawrectangle(pmodp_xgid, ix - 3, iy - 1, 3, 3, pixel_values[MB_COLOR_GREEN], XG_SOLIDLINE);
           iy = mbna_modelplot_yo_lat -
                (int)(mbna_modelplot_yscale *
                      (section->snav_lat_offset[section->num_snav / 2] / project.mtodeglat - file->block_offset_y));
-          xg_drawrectangle(pmodp_xgid, ix - 3, iy - 1, 3, 3, pixel_values[GREEN], XG_SOLIDLINE);
+          xg_drawrectangle(pmodp_xgid, ix - 3, iy - 1, 3, 3, pixel_values[MB_COLOR_GREEN], XG_SOLIDLINE);
           iy = mbna_modelplot_yo_z -
                (int)(mbna_modelplot_yzscale * (section->snav_z_offset[section->num_snav / 2] - file->block_offset_z));
-          xg_drawrectangle(pmodp_xgid, ix - 3, iy - 1, 3, 3, pixel_values[GREEN], XG_SOLIDLINE);
+          xg_drawrectangle(pmodp_xgid, ix - 3, iy - 1, 3, 3, pixel_values[MB_COLOR_GREEN], XG_SOLIDLINE);
         }
 
         file = &project.files[crossing->file_id_2];
@@ -14746,14 +14725,14 @@ int mbnavadjust_modelplot_plot_perturbation() {
           iy = mbna_modelplot_yo_lon -
                (int)(mbna_modelplot_yscale *
                      (section->snav_lon_offset[section->num_snav / 2] / project.mtodeglon - file->block_offset_x));
-          xg_drawrectangle(pmodp_xgid, ix - 3, iy - 1, 3, 3, pixel_values[GREEN], XG_SOLIDLINE);
+          xg_drawrectangle(pmodp_xgid, ix - 3, iy - 1, 3, 3, pixel_values[MB_COLOR_GREEN], XG_SOLIDLINE);
           iy = mbna_modelplot_yo_lat -
                (int)(mbna_modelplot_yscale *
                      (section->snav_lat_offset[section->num_snav / 2] / project.mtodeglat - file->block_offset_y));
-          xg_drawrectangle(pmodp_xgid, ix - 3, iy - 1, 3, 3, pixel_values[GREEN], XG_SOLIDLINE);
+          xg_drawrectangle(pmodp_xgid, ix - 3, iy - 1, 3, 3, pixel_values[MB_COLOR_GREEN], XG_SOLIDLINE);
           iy = mbna_modelplot_yo_z -
                (int)(mbna_modelplot_yzscale * (section->snav_z_offset[section->num_snav / 2] - file->block_offset_z));
-          xg_drawrectangle(pmodp_xgid, ix - 3, iy - 1, 3, 3, pixel_values[GREEN], XG_SOLIDLINE);
+          xg_drawrectangle(pmodp_xgid, ix - 3, iy - 1, 3, 3, pixel_values[MB_COLOR_GREEN], XG_SOLIDLINE);
         }
       }
     }
@@ -14774,11 +14753,11 @@ int mbnavadjust_modelplot_plot_perturbation() {
                        (section->snav_lon_offset[isnav] / project.mtodeglon - file->block_offset_x));
             if ((i > 0 || j > 0) && !section->continuity && isnav == 0)
               xg_drawline(pmodp_xgid, ix, mbna_modelplot_yo_lon - plot_height / 2, ix,
-                          mbna_modelplot_yo_lon + plot_height / 2, pixel_values[GREEN], XG_SOLIDLINE);
+                          mbna_modelplot_yo_lon + plot_height / 2, pixel_values[MB_COLOR_GREEN], XG_SOLIDLINE);
             else if (i > 0 || j > 0) {
               /* if (j == 0 && isnav == 0 && section->continuity)
                   xg_drawline(pmodp_xgid, ix, mbna_modelplot_yo_lon - plot_height / 2, ix, mbna_modelplot_yo_lon +
-                 plot_height / 2, pixel_values[CORAL], XG_DASHLINE); */
+                 plot_height / 2, pixel_values[MB_COLOR_CORAL], XG_DASHLINE); */
               xg_drawline(pmodp_xgid, ixo, iyo, ix, iy, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
             }
             ixo = ix;
@@ -14804,11 +14783,11 @@ int mbnavadjust_modelplot_plot_perturbation() {
                        (section->snav_lat_offset[isnav] / project.mtodeglat - file->block_offset_y));
             if ((i > 0 || j > 0) && !section->continuity && isnav == 0)
               xg_drawline(pmodp_xgid, ix, mbna_modelplot_yo_lat - plot_height / 2, ix,
-                          mbna_modelplot_yo_lat + plot_height / 2, pixel_values[GREEN], XG_SOLIDLINE);
+                          mbna_modelplot_yo_lat + plot_height / 2, pixel_values[MB_COLOR_GREEN], XG_SOLIDLINE);
             else if (i > 0 || j > 0) {
               /* if (j == 0 && isnav == 0 && section->continuity)
                   xg_drawline(pmodp_xgid, ix, mbna_modelplot_yo_lat - plot_height / 2, ix, mbna_modelplot_yo_lat +
-                 plot_height / 2, pixel_values[CORAL], XG_DASHLINE); */
+                 plot_height / 2, pixel_values[MB_COLOR_CORAL], XG_DASHLINE); */
               xg_drawline(pmodp_xgid, ixo, iyo, ix, iy, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
             }
             ixo = ix;
@@ -14833,11 +14812,11 @@ int mbnavadjust_modelplot_plot_perturbation() {
                  (int)(mbna_modelplot_yzscale * (section->snav_z_offset[isnav] - file->block_offset_z));
             if ((i > 0 || j > 0) && !section->continuity && isnav == 0)
               xg_drawline(pmodp_xgid, ix, mbna_modelplot_yo_z - plot_height / 2, ix,
-                          mbna_modelplot_yo_z + plot_height / 2, pixel_values[GREEN], XG_SOLIDLINE);
+                          mbna_modelplot_yo_z + plot_height / 2, pixel_values[MB_COLOR_GREEN], XG_SOLIDLINE);
             else if (i > 0 || j > 0) {
               /* if (j == 0 && isnav == 0 && section->continuity)
                   xg_drawline(pmodp_xgid, ix, mbna_modelplot_yo_z - plot_height / 2, ix, mbna_modelplot_yo_z +
-                 plot_height / 2, pixel_values[CORAL], XG_DASHLINE); */
+                 plot_height / 2, pixel_values[MB_COLOR_CORAL], XG_DASHLINE); */
               xg_drawline(pmodp_xgid, ixo, iyo, ix, iy, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
             }
             ixo = ix;
@@ -14856,7 +14835,7 @@ int mbnavadjust_modelplot_plot_perturbation() {
         if (tie->inversion_status == MBNA_INVERSION_CURRENT)
           pixel = pixel_values[mbna_color_foreground];
         else
-          pixel = pixel_values[BLUE];
+          pixel = pixel_values[MB_COLOR_BLUE];
 
         file = &project.files[crossing->file_id_1];
         section = &file->sections[crossing->section_1];
@@ -14922,11 +14901,11 @@ int mbnavadjust_modelplot_plot_perturbation() {
 						int iyl, iyu; /* lower and upper standard deviation bounds */
 						int w = 5;
 						int hw = 2;
-						int color = ORANGE;
+						int color = MB_COLOR_ORANGE;
 						if (selected) {
 							w = 9;
 							hw = 4;
-							color = RED;
+							color = MB_COLOR_RED;
 						}
 	
 						if (section->globaltie.status != MBNA_TIE_Z) {
@@ -14976,7 +14955,7 @@ int mbnavadjust_modelplot_plot_perturbation() {
 						ix = mbna_modelplot_xo + (int)(mbna_modelplot_xscale * (iping - mbna_modelplot_start));
 						int w = 9;
 						int hw = 4;
-						int color = RED;
+						int color = MB_COLOR_RED;
 	
 						/* east-west offsets */
 						iy = mbna_modelplot_yo_lon - (int)(mbna_modelplot_yscale 
@@ -15016,16 +14995,16 @@ int mbnavadjust_modelplot_plot_perturbation() {
 					iy = mbna_modelplot_yo_lon -
 							 (int)(mbna_modelplot_yscale *
 										 (section->snav_lon_offset[tie->snav_1] / project.mtodeglon - file->block_offset_x));
-					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 					xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
 					iy = mbna_modelplot_yo_lat -
 							 (int)(mbna_modelplot_yscale *
 										 (section->snav_lat_offset[tie->snav_1] / project.mtodeglat - file->block_offset_y));
-					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 					xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
 					iy = mbna_modelplot_yo_z -
 							 (int)(mbna_modelplot_yzscale * (section->snav_z_offset[tie->snav_1] - file->block_offset_z));
-					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 					xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
 				}
 	
@@ -15039,16 +15018,16 @@ int mbnavadjust_modelplot_plot_perturbation() {
 					iy = mbna_modelplot_yo_lon -
 							 (int)(mbna_modelplot_yscale *
 										 (section->snav_lon_offset[tie->snav_2] / project.mtodeglon - file->block_offset_x));
-					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 					xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
 					iy = mbna_modelplot_yo_lat -
 							 (int)(mbna_modelplot_yscale *
 										 (section->snav_lat_offset[tie->snav_2] / project.mtodeglat - file->block_offset_y));
-					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 					xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
 					iy = mbna_modelplot_yo_z -
 							 (int)(mbna_modelplot_yzscale * (section->snav_z_offset[tie->snav_2] - file->block_offset_z));
-					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 					xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
 				}
 			}
@@ -15067,16 +15046,16 @@ int mbnavadjust_modelplot_plot_perturbation() {
 					iy = mbna_modelplot_yo_lon -
 							 (int)(mbna_modelplot_yscale *
 										 (section->snav_lon_offset[section->num_snav / 2] / project.mtodeglon - file->block_offset_x));
-					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 					xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
 					iy = mbna_modelplot_yo_lat -
 							 (int)(mbna_modelplot_yscale *
 										 (section->snav_lat_offset[section->num_snav / 2] / project.mtodeglat - file->block_offset_y));
-					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 					xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
 					iy = mbna_modelplot_yo_z -
 							 (int)(mbna_modelplot_yzscale * (section->snav_z_offset[section->num_snav / 2] - file->block_offset_z));
-					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 					xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
 				}
 	
@@ -15090,16 +15069,16 @@ int mbnavadjust_modelplot_plot_perturbation() {
 					iy = mbna_modelplot_yo_lon -
 							 (int)(mbna_modelplot_yscale *
 										 (section->snav_lon_offset[section->num_snav / 2] / project.mtodeglon - file->block_offset_x));
-					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 					xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
 					iy = mbna_modelplot_yo_lat -
 							 (int)(mbna_modelplot_yscale *
 										 (section->snav_lat_offset[section->num_snav / 2] / project.mtodeglat - file->block_offset_y));
-					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 					xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
 					iy = mbna_modelplot_yo_z -
 							 (int)(mbna_modelplot_yzscale * (section->snav_z_offset[section->num_snav / 2] - file->block_offset_z));
-					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+					xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 					xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground], XG_SOLIDLINE);
 				}
 			}
@@ -15128,18 +15107,18 @@ int mbnavadjust_modelplot_plot_perturbation() {
 									iy = mbna_modelplot_yo_lon -
 											 (int)(mbna_modelplot_yscale *
 														 (section->snav_lon_offset[tie->snav_1] / project.mtodeglon - file->block_offset_x));
-									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[RED], XG_SOLIDLINE);
+									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 									xg_drawrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[mbna_color_foreground],
 																	 XG_SOLIDLINE);
 									iy = mbna_modelplot_yo_lat -
 											 (int)(mbna_modelplot_yscale *
 														 (section->snav_lat_offset[tie->snav_1] / project.mtodeglat - file->block_offset_y));
-									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[RED], XG_SOLIDLINE);
+									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 									xg_drawrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[mbna_color_foreground],
 																	 XG_SOLIDLINE);
 									iy = mbna_modelplot_yo_z -
 											 (int)(mbna_modelplot_yzscale * (section->snav_z_offset[tie->snav_1] - file->block_offset_z));
-									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[RED], XG_SOLIDLINE);
+									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 									xg_drawrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[mbna_color_foreground],
 																	 XG_SOLIDLINE);
 								}
@@ -15155,18 +15134,18 @@ int mbnavadjust_modelplot_plot_perturbation() {
 									iy = mbna_modelplot_yo_lon -
 											 (int)(mbna_modelplot_yscale *
 														 (section->snav_lon_offset[tie->snav_2] / project.mtodeglon - file->block_offset_x));
-									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[6], XG_SOLIDLINE);
+									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[MB_COLOR_YELLOW], XG_SOLIDLINE);
 									xg_drawrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[mbna_color_foreground],
 																	 XG_SOLIDLINE);
 									iy = mbna_modelplot_yo_lat -
 											 (int)(mbna_modelplot_yscale *
 														 (section->snav_lat_offset[tie->snav_2] / project.mtodeglat - file->block_offset_y));
-									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[6], XG_SOLIDLINE);
+									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[MB_COLOR_YELLOW], XG_SOLIDLINE);
 									xg_drawrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[mbna_color_foreground],
 																	 XG_SOLIDLINE);
 									iy = mbna_modelplot_yo_z -
 											 (int)(mbna_modelplot_yzscale * (section->snav_z_offset[tie->snav_2] - file->block_offset_z));
-									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[6], XG_SOLIDLINE);
+									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[MB_COLOR_YELLOW], XG_SOLIDLINE);
 									xg_drawrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[mbna_color_foreground],
 																	 XG_SOLIDLINE);
 								}
@@ -15192,18 +15171,18 @@ int mbnavadjust_modelplot_plot_perturbation() {
 									iy = mbna_modelplot_yo_lon -
 											 (int)(mbna_modelplot_yscale *
 														 (section->snav_lon_offset[tie->snav_2] / project.mtodeglon - file->block_offset_x));
-									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[RED], XG_SOLIDLINE);
+									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 									xg_drawrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[mbna_color_foreground],
 																	 XG_SOLIDLINE);
 									iy = mbna_modelplot_yo_lat -
 											 (int)(mbna_modelplot_yscale *
 														 (section->snav_lat_offset[tie->snav_2] / project.mtodeglat - file->block_offset_y));
-									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[RED], XG_SOLIDLINE);
+									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 									xg_drawrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[mbna_color_foreground],
 																	 XG_SOLIDLINE);
 									iy = mbna_modelplot_yo_z -
 											 (int)(mbna_modelplot_yzscale * (section->snav_z_offset[tie->snav_2] - file->block_offset_z));
-									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[RED], XG_SOLIDLINE);
+									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
 									xg_drawrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[mbna_color_foreground],
 																	 XG_SOLIDLINE);
 								}
@@ -15219,18 +15198,18 @@ int mbnavadjust_modelplot_plot_perturbation() {
 									iy = mbna_modelplot_yo_lon -
 											 (int)(mbna_modelplot_yscale *
 														 (section->snav_lon_offset[tie->snav_1] / project.mtodeglon - file->block_offset_x));
-									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[6], XG_SOLIDLINE);
+									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[MB_COLOR_YELLOW], XG_SOLIDLINE);
 									xg_drawrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[mbna_color_foreground],
 																	 XG_SOLIDLINE);
 									iy = mbna_modelplot_yo_lat -
 											 (int)(mbna_modelplot_yscale *
 														 (section->snav_lat_offset[tie->snav_1] / project.mtodeglat - file->block_offset_y));
-									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[6], XG_SOLIDLINE);
+									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[MB_COLOR_YELLOW], XG_SOLIDLINE);
 									xg_drawrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[mbna_color_foreground],
 																	 XG_SOLIDLINE);
 									iy = mbna_modelplot_yo_z -
 											 (int)(mbna_modelplot_yzscale * (section->snav_z_offset[tie->snav_1] - file->block_offset_z));
-									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[6], XG_SOLIDLINE);
+									xg_fillrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[MB_COLOR_YELLOW], XG_SOLIDLINE);
 									xg_drawrectangle(pmodp_xgid, ix - 5, iy - 5, 11, 11, pixel_values[mbna_color_foreground],
 																	 XG_SOLIDLINE);
 								}
@@ -15623,14 +15602,14 @@ int mbnavadjust_modelplot_plot_tieoffsets() {
               if (section->globaltie.inversion_status == MBNA_INVERSION_CURRENT)
                 pixel = pixel_values[mbna_color_foreground];
               else
-                pixel = pixel_values[BLUE];
+                pixel = pixel_values[MB_COLOR_BLUE];
 
               ix = mbna_modelplot_xo +
                    (int)(mbna_modelplot_xscale * (section->globaltie.isurveyplotindex - mbna_modelplot_tiestart + 1));
 
               iy = mbna_modelplot_yo_lon - (int)(mbna_modelplot_yscale * (section->globaltie.offset_x_m - mbna_modelplot_yxmid));
               if (ifile == mbna_current_file && jsection == mbna_current_section) {
-                xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+                xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
                 xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground],
                                  XG_SOLIDLINE);
               }
@@ -15639,7 +15618,7 @@ int mbnavadjust_modelplot_plot_tieoffsets() {
 
               iy = mbna_modelplot_yo_lat - (int)(mbna_modelplot_yscale * (section->globaltie.offset_y_m - mbna_modelplot_yymid));
               if (ifile == mbna_current_file && jsection == mbna_current_section) {
-                xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+                xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
                 xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground],
                                  XG_SOLIDLINE);
               }
@@ -15648,7 +15627,7 @@ int mbnavadjust_modelplot_plot_tieoffsets() {
 
               iy = mbna_modelplot_yo_z - (int)(mbna_modelplot_yzscale * (section->globaltie.offset_z_m - mbna_modelplot_yzmid));
               if (ifile == mbna_current_file && jsection == mbna_current_section) {
-                xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+                xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
                 xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground],
                                  XG_SOLIDLINE);
               }
@@ -16062,14 +16041,14 @@ int mbnavadjust_modelplot_plot_tieoffsets() {
                 if (tie->inversion_status == MBNA_INVERSION_CURRENT)
                   pixel = pixel_values[mbna_color_foreground];
                 else
-                  pixel = pixel_values[BLUE];
+                  pixel = pixel_values[MB_COLOR_BLUE];
 
                 ix = mbna_modelplot_xo +
                      (int)(mbna_modelplot_xscale * (tie->isurveyplotindex - mbna_modelplot_tiestart + 0.5));
 
                 iy = mbna_modelplot_yo_lon - (int)(mbna_modelplot_yscale * (tie->offset_x_m - mbna_modelplot_yxmid));
                 if (i == mbna_current_crossing && j == mbna_current_tie) {
-                  xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+                  xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
                   xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground],
                                    XG_SOLIDLINE);
                 }
@@ -16078,7 +16057,7 @@ int mbnavadjust_modelplot_plot_tieoffsets() {
 
                 iy = mbna_modelplot_yo_lat - (int)(mbna_modelplot_yscale * (tie->offset_y_m - mbna_modelplot_yymid));
                 if (i == mbna_current_crossing && j == mbna_current_tie) {
-                  xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+                  xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
                   xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground],
                                    XG_SOLIDLINE);
                 }
@@ -16087,7 +16066,7 @@ int mbnavadjust_modelplot_plot_tieoffsets() {
 
                 iy = mbna_modelplot_yo_z - (int)(mbna_modelplot_yzscale * (tie->offset_z_m - mbna_modelplot_yzmid));
                 if (i == mbna_current_crossing && j == mbna_current_tie) {
-                  xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+                  xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
                   xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground],
                                    XG_SOLIDLINE);
                 }
@@ -16128,14 +16107,14 @@ int mbnavadjust_modelplot_plot_tieoffsets() {
                     if (tie->inversion_status == MBNA_INVERSION_CURRENT)
                       pixel = pixel_values[mbna_color_foreground];
                     else
-                      pixel = pixel_values[BLUE];
+                      pixel = pixel_values[MB_COLOR_BLUE];
 
                     ix = mbna_modelplot_xo +
                          (int)(mbna_modelplot_xscale * (tie->isurveyplotindex - mbna_modelplot_tiestart + 0.5));
 
                     iy = mbna_modelplot_yo_lon - (int)(mbna_modelplot_yscale * (tie->offset_x_m - mbna_modelplot_yxmid));
                     if (i == mbna_current_crossing && j == mbna_current_tie) {
-                      xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+                      xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
                       xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground],
                                        XG_SOLIDLINE);
                     }
@@ -16144,7 +16123,7 @@ int mbnavadjust_modelplot_plot_tieoffsets() {
 
                     iy = mbna_modelplot_yo_lat - (int)(mbna_modelplot_yscale * (tie->offset_y_m - mbna_modelplot_yymid));
                     if (i == mbna_current_crossing && j == mbna_current_tie) {
-                      xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+                      xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
                       xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground],
                                        XG_SOLIDLINE);
                     }
@@ -16153,7 +16132,7 @@ int mbnavadjust_modelplot_plot_tieoffsets() {
 
                     iy = mbna_modelplot_yo_z - (int)(mbna_modelplot_yzscale * (tie->offset_z_m - mbna_modelplot_yzmid));
                     if (i == mbna_current_crossing && j == mbna_current_tie) {
-                      xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+                      xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[MB_COLOR_RED], XG_SOLIDLINE);
                       xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground],
                                        XG_SOLIDLINE);
                     }
@@ -16175,11 +16154,11 @@ int mbnavadjust_modelplot_plot_tieoffsets() {
               /* plot line for boundary between plot blocks */
               ix = mbna_modelplot_xo + (int)(mbna_modelplot_xscale * (plot_index - mbna_modelplot_tiestart + 0.5));
               xg_drawline(pmodp_xgid, ix, mbna_modelplot_yo_lon - plot_height / 2, ix,
-                          mbna_modelplot_yo_lon + plot_height / 2, pixel_values[GREEN], XG_DASHLINE);
+                          mbna_modelplot_yo_lon + plot_height / 2, pixel_values[MB_COLOR_GREEN], XG_DASHLINE);
               xg_drawline(pmodp_xgid, ix, mbna_modelplot_yo_lat - plot_height / 2, ix,
-                          mbna_modelplot_yo_lat + plot_height / 2, pixel_values[GREEN], XG_DASHLINE);
+                          mbna_modelplot_yo_lat + plot_height / 2, pixel_values[MB_COLOR_GREEN], XG_DASHLINE);
               xg_drawline(pmodp_xgid, ix, mbna_modelplot_yo_z - plot_height / 2, ix, mbna_modelplot_yo_z + plot_height / 2,
-                          pixel_values[GREEN], XG_DASHLINE);
+                          pixel_values[MB_COLOR_GREEN], XG_DASHLINE);
             }
           }
         }

@@ -23,6 +23,7 @@ namespace mb_system {
   class MBQuickItem : public QQuickItem
   {
     Q_OBJECT
+
   
   public:
     explicit MBQuickItem();
@@ -39,8 +40,10 @@ namespace mb_system {
 
   public slots:
 
-    /// Called on QQuickWindow::beforeSynchronizing signal, while main thread is blocked.
-    /// Create, initialze and connect surface renderer to beforeRender signal if new surface
+    /// Called on QQuickWindow::beforeSynchronizing signal,
+    // while main thread is blocked.
+    /// Create, initialze and connect surface renderer to beforeRender
+    // signal if new surface
     /// has been created; copy camera parameter values to renderer.
     void synchronizeUnderlay();
   
@@ -76,9 +79,9 @@ namespace mb_system {
     /// Name of current GMT grid file
     const char *gridFilename_;
 
-    /// Indicates when new surface has been created; flag is checked in sync() method
-    /// before each main-renderer synchronization, and new renderer created when new surface has
-    /// been created.
+    /// Indicates when new surface has been created; flag is checked in sync()
+    /// method before each main-renderer synchronization, and new renderer
+    /// created when new surface has been created.
     bool newSurface_;
   
     /// Singleton instance
@@ -86,8 +89,8 @@ namespace mb_system {
 	
 
   protected slots:
-    /// Connect sync() method with beforeSynchronizing signal, cleanup() method with
-    /// sceneGraphInvalidated signal
+    /// Connect sync() method with beforeSynchronizing signal, cleanup()
+    /// method with sceneGraphInvalidated signal
     void handleWindowChanged(QQuickWindow *window);
 
     /// Invoke renderer's render() method

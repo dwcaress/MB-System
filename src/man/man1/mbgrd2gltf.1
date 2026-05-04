@@ -14,12 +14,13 @@ mbgrd2gltf \- convert bathymetric grid data to GLTF format with optional setting
 [\fB\-\-quantize-normal\fP \fINUM\fP]
 [\fB\-\-quantize-texcoord\fP \fINUM\fP]
 [\fB\-\-quantize-color\fP \fINUM\fP]
+[\fB\-\-html\fP]
 [\fB\-\-verbose\fP]
 [\fB\-\-help\fP]
 .PP
 .B Legacy single-dash syntax:
 .br
-\fBmbgrd2gltf \-I\fP\fIFILE\fP [\fB\-B\fP] [\fB\-O\fP\fIROOT\fP] [\fB\-E\fP\fINUM\fP] [\fB\-G\fP[\fILON,LAT,ELEV\fP]] [\fB\-D\fP] [\fB\-Qp\fP\fINUM\fP] [\fB\-Qn\fP\fINUM\fP] [\fB\-Qt\fP\fINUM\fP] [\fB\-Qc\fP\fINUM\fP] [\fB\-V\fP] [\fB\-H\fP]
+\fBmbgrd2gltf \-I\fP\fIFILE\fP [\fB\-B\fP] [\fB\-O\fP\fIROOT\fP] [\fB\-E\fP\fINUM\fP] [\fB\-G\fP[\fILON,LAT,ELEV\fP]] [\fB\-D\fP] [\fB\-Qp\fP\fINUM\fP] [\fB\-Qn\fP\fINUM\fP] [\fB\-Qt\fP\fINUM\fP] [\fB\-Qc\fP\fINUM\fP] [\fB\-W\fP] [\fB\-V\fP] [\fB\-H\fP]
 
 .SH DESCRIPTION
 .B mbgrd2gltf
@@ -127,6 +128,10 @@ Draco texture coordinate quantization bits (2-30). Affects the compression of te
 Draco color quantization bits (2-30). Affects the compression of vertex colors. Requires \fB\-\-draco\fP option. Default: 8.
 
 .TP
+.B \-\-html, \-W
+Generate an HTML viewer page with inline 3D visualization using X3DOM. The HTML file includes the glTF/GLB model with interactive navigation controls, processing provenance metadata (command line, timestamps, grid parameters, GeoOrigin settings, compression options), and links to MB-System and X3DOM documentation. The viewer requires serving the files via HTTP (e.g., python3 -m http.server) to avoid browser CORS restrictions when loading local files. Output file: <output_root>.html
+
+.TP
 .B \-\-verbose, \-V
 Enable verbose output showing NetCDF reading details and memory allocation information.
 
@@ -174,6 +179,13 @@ Convert using automatic GeoOrigin (grid center):
 .RS
 .nf
 .B mbgrd2gltf --input monterey.grd --geoorigin --binary
+.fi
+.RE
+
+Generate HTML viewer with 3D visualization:
+.RS
+.nf
+.B mbgrd2gltf --input bathymetry.grd --exaggeration 10 --html --binary
 .fi
 .RE
 

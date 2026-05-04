@@ -35,68 +35,74 @@
 #define VNORM_DIM 3
 #undef WITH_VNORM_FN
 #undef WITH_DEGTORAD_FN
+#define SESSION_PREFIX_BUF_BYTES 64
 
 class DataLogReader;
-//struct TRN_attr;
 struct poseT;
 struct measT;
 class TerrainNav;
 
+typedef enum {
+    SID_YYYYJJJ = 0,
+    SID_YYYYJJJHHMM,
+    SID_ISO8601,
+    SID_LCMTRN
+}SIDFormat;
 
-//struct TRN_attr
-//{
-//    char *_mapFileName;
-//    long  _map_type;
-//    long  _filter_type;
-//    char *_particlesName;
-//    char *_vehicleCfgName;
-//    char *_dvlCfgName;
-//    char *_resonCfgName;
-//    char *_terrainNavServer;
-//    char *_lrauvDvlFilename;
-//    long  _terrainNavPort;
-//    bool _forceLowGradeFilter;
-//    bool _allowFilterReinits;
-//    long _useModifiedWeighting;
-//    long _samplePeriod;
-//    double _maxNorthingCov;
-//    double _maxEastingCov;
-//    double _maxNorthingError;
-//    double _maxEastingError;
-//    double _phiBias;
-//    bool _useIDTData;
-//    bool _useDvlSide;
-//    bool _useMbTrnData;
-//    bool _skipInit;
-//    TRN_attr();
-//    ~TRN_attr();
-//};
-
+typedef enum {
+    SID_GMT = 0,
+    SID_LOC,
+}SIDTime;
 
 class TrnClient : public TerrainNavClient {
     
 public:
     
-    TrnClient(const char *host=NULL, int port=0);
-    TrnClient(const char *svr_log_dir=NULL, const char *host=NULL, int port=0);
-    ~TrnClient();
-    int initSocket();
-    int connectSocket();
+    TrnClient();
+
+    explicit TrnClient(const char *host, int port=0);
+
+    TrnClient(const TrnClient& other);
+
+    virtual ~TrnClient() override;
+
+    static void chkSetString(char **dest, const char *src);
+
     int loadCfgAttributes(const char *cfg_file);
-//    int getNextKeyValue(FILE *cfg, char key[], char value[]);
+
     int setVerbose(int val);
-    void show(int indent=0, int wkey=15, int wval=18);
+
+    int initSocket();
+
+    void initServer();
+
+    int connectSocket();
+
     TerrainNav* connectTRN();
+
+    void show(int indent=0, int wkey=15, int wval=18);
+
+    void show_addr(int indent=0, int wkey=15, int wval=18);
+
     void setQuitRef(bool *pvar);
+
     bool isQuitSet();
-    TrnAttr *_trn_attr;
+
+    TrnAttr &getTrnAttr();
+
+    char *attGetServer();
+
+    void setSessionID(const std::string &session_str);
+
+    char *sessionPrefix(char **r_dest, size_t len, SIDTime sid_time=SID_GMT, SIDFormat sid_fmt=SID_YYYYJJJ);
 
 protected:
-    char *_cfg_file;
-//    TRN_attr *_trn_attr;
     int verbose;
     bool *_quit_ref;
-    
+    char *_cfg_file;
+    char *_sessionPrefix;
+    std::string _sessionID;
+    TrnAttr _trn_attr;
 };
 
-#endif
+#endif // include guard

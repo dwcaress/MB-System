@@ -18,4 +18,6 @@
 
 namespace mbgrd2gltf {
 LogLevel Logger::current_level = LogLevel::OFF;
+bool Logger::capture_enabled = false;
+std::vector<std::string> Logger::captured_logs;
 }

@@ -1322,7 +1322,7 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
 
       /* deal with nav in L-DEO processed nav format */
       else if (process->mbp_nav_format == 5) {
-        strncpy(dummy, "", 128);
+        strncpy(dummy, "", sizeof(dummy));
         if (buffer[2] == '+') {
           time_j[0] = (int)strtol(strncpy(dummy, buffer, 2), NULL, 10);
           mb_fix_y2k(verbose, time_j[0], &time_j[0]);
@@ -1332,15 +1332,15 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
           time_j[0] = (int)strtol(strncpy(dummy, buffer, 4), NULL, 10);
           ioff = 5;
         }
-        strncpy(dummy, "", 128);
+        strncpy(dummy, "", sizeof(dummy));
         time_j[1] = (int)strtol(strncpy(dummy, buffer + ioff, 3), NULL, 10);
-        strncpy(dummy, "", 128);
+        strncpy(dummy, "", sizeof(dummy));
         ioff += 4;
         hr = (int)strtol(strncpy(dummy, buffer + ioff, 2), NULL, 10);
-        strncpy(dummy, "", 128);
+        strncpy(dummy, "", sizeof(dummy));
         ioff += 3;
         time_j[2] = (int)strtol(strncpy(dummy, buffer + ioff, 2), NULL, 10) + 60 * hr;
-        strncpy(dummy, "", 128);
+        strncpy(dummy, "", sizeof(dummy));
         ioff += 3;
         time_j[3] = (int)strtol(strncpy(dummy, buffer + ioff, 2), NULL, 10);
         time_j[4] = 0;
@@ -1352,18 +1352,18 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
         ioff += 7;
         NorS[0] = buffer[ioff];
         ioff += 1;
-        strncpy(dummy, "", 128);
+        strncpy(dummy, "", sizeof(dummy));
         mlat = atof(strncpy(dummy, buffer + ioff, 3));
-        strncpy(dummy, "", 128);
+        strncpy(dummy, "", sizeof(dummy));
         ioff += 3;
         llat = atof(strncpy(dummy, buffer + ioff, 8));
         strncpy(EorW, "", sizeof(EorW));
         ioff += 9;
         EorW[0] = buffer[ioff];
-        strncpy(dummy, "", 128);
+        strncpy(dummy, "", sizeof(dummy));
         ioff += 1;
         mlon = atof(strncpy(dummy, buffer + ioff, 4));
-        strncpy(dummy, "", 128);
+        strncpy(dummy, "", sizeof(dummy));
         ioff += 4;
         llon = atof(strncpy(dummy, buffer + ioff, 8));
         nlon[nnav] = mlon + llon / 60.;
@@ -1382,7 +1382,7 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
         if (strncmp(buffer, "$", 1) == 0) {
           if (strncmp(&buffer[3], "DAT", 3) == 0 && len > 15) {
             time_set = false;
-            strncpy(dummy, "", 128);
+            strncpy(dummy, "", sizeof(dummy));
             time_i[0] = (int)strtol(strncpy(dummy, buffer + 7, 4), NULL, 10);
             time_i[1] = (int)strtol(strncpy(dummy, buffer + 11, 2), NULL, 10);
             time_i[2] = (int)strtol(strncpy(dummy, buffer + 13, 2), NULL, 10);
@@ -1391,25 +1391,25 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
             time_set = false;
             /* find start of ",hhmmss.ss" */
             if ((bufftmp = strchr(buffer, ',')) != nullptr) {
-              strncpy(dummy, "", 128);
+              strncpy(dummy, "", sizeof(dummy));
               time_i[3] = (int)strtol(strncpy(dummy, bufftmp + 1, 2), NULL, 10);
-              strncpy(dummy, "", 128);
+              strncpy(dummy, "", sizeof(dummy));
               time_i[4] = (int)strtol(strncpy(dummy, bufftmp + 3, 2), NULL, 10);
-              strncpy(dummy, "", 128);
+              strncpy(dummy, "", sizeof(dummy));
               time_i[5] = (int)strtol(strncpy(dummy, bufftmp + 5, 2), NULL, 10);
               if (bufftmp[7] == '.') {
-                strncpy(dummy, "", 128);
+                strncpy(dummy, "", sizeof(dummy));
                 time_i[6] = 10000 * (int)strtol(strncpy(dummy, bufftmp + 8, 2), NULL, 10);
               }
               else
                 time_i[6] = 0;
               /* find start of ",dd,mm,yyyy" */
               if ((bufftmp = strchr(&bufftmp[1], ',')) != nullptr) {
-                strncpy(dummy, "", 128);
+                strncpy(dummy, "", sizeof(dummy));
                 time_i[2] = (int)strtol(strncpy(dummy, bufftmp + 1, 2), NULL, 10);
-                strncpy(dummy, "", 128);
+                strncpy(dummy, "", sizeof(dummy));
                 time_i[1] = (int)strtol(strncpy(dummy, bufftmp + 4, 2), NULL, 10);
-                strncpy(dummy, "", 128);
+                strncpy(dummy, "", sizeof(dummy));
                 time_i[0] = (int)strtol(strncpy(dummy, bufftmp + 7, 4), NULL, 10);
                 time_set = true;
               }
@@ -1423,9 +1423,9 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
             if ((bufftmp = strchr(buffer, ',')) != nullptr) {
               if (process->mbp_nav_format == 7)
                 bufftmp = strchr(&bufftmp[1], ',');
-              strncpy(dummy, "", 128);
+              strncpy(dummy, "", sizeof(dummy));
               degree = (int)strtol(strncpy(dummy, bufftmp + 1, 2), NULL, 10);
-              strncpy(dummy, "", 128);
+              strncpy(dummy, "", sizeof(dummy));
               dminute = atof(strncpy(dummy, bufftmp + 3, 5));
               strncpy(NorS, "", sizeof(NorS));
               bufftmp = strchr(&bufftmp[1], ',');
@@ -1434,9 +1434,9 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
               if (strncmp(NorS, "S", 1) == 0)
                 nlat[nnav] = -nlat[nnav];
               bufftmp = strchr(&bufftmp[1], ',');
-              strncpy(dummy, "", 128);
+              strncpy(dummy, "", sizeof(dummy));
               degree = (int)strtol(strncpy(dummy, bufftmp + 1, 3), NULL, 10);
-              strncpy(dummy, "", 128);
+              strncpy(dummy, "", sizeof(dummy));
               dminute = atof(strncpy(dummy, bufftmp + 4, 5));
               bufftmp = strchr(&bufftmp[1], ',');
               strncpy(EorW, "", sizeof(EorW));
@@ -1628,7 +1628,7 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
   /* if adjusted nav merging to be done get adjusted nav */
   if (process->mbp_navadj_mode >= MBP_NAVADJ_LL) {
     /* set max number of characters to be read at a time */
-    nchar = 128;
+    nchar = MBP_FILENAMESIZE;;
 
     /* count the data points in the adjusted nav file */
     nanav = 0;
@@ -1766,7 +1766,7 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
   /* if attitude merging to be done get attitude */
   if (process->mbp_attitude_mode == MBP_ATTITUDE_ON) {
     /* set max number of characters to be read at a time */
-    nchar = 128;
+    nchar = MBP_FILENAMESIZE;;
 
     /* count the data points in the attitude file */
     nattitude = 0;
@@ -1924,7 +1924,7 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
   /* if sensordepth merging to be done get sensordepth */
   if (process->mbp_sensordepth_mode == MBP_SENSORDEPTH_ON) {
     /* set max number of characters to be read at a time */
-    nchar = 128;
+    nchar = MBP_FILENAMESIZE;;
 
     /* count the data points in the sensordepth file */
     nsensordepth = 0;
@@ -2080,7 +2080,7 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
   /* if tide correction to be done get tide */
   if (process->mbp_tide_mode == MBP_TIDE_ON) {
     /* set max number of characters to be read at a time */
-    nchar = 128;
+    nchar = MBP_FILENAMESIZE;;
 
     /* count the data points in the tide file */
     ntide = 0;
@@ -2250,7 +2250,7 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
   /* Static file is beam number vs correction */
   if (process->mbp_static_mode == MBP_STATIC_BEAM_ON) {
     /* set max number of characters to be read at a time */
-    nchar = 128;
+    nchar = MBP_FILENAMESIZE;;
 
     /* count the data points in the static file */
     nstatic = 0;
@@ -2335,7 +2335,7 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
   /* Static file is grazing angle vs correction */
   if (process->mbp_static_mode == MBP_STATIC_ANGLE_ON) {
     /* set max number of characters to be read at a time */
-    nchar = 128;
+    nchar = MBP_FILENAMESIZE;;
 
     /* count the data points in the static file */
     nstatic = 0;

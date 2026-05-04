@@ -1,6 +1,11 @@
+////////////////////////////////////////////////////////////////////////////////
+/// Copyright 2022  Monterey Bay Aquarium Research Institute
+/// Distributed under MIT license. See license.txt for more information.
+////////////////////////////////////////////////////////////////////////////////
 #include <stdlib.h>
 #include <stdio.h>
 #include <libgen.h>
+#include <iomanip>
 #include "trnxpp.hpp"
 #include "trn_debug.hpp"
 #include "trnx_utils.hpp"
@@ -33,6 +38,10 @@ int cb_proto_xmb1(void *pargs);
 int transform_idtlass(trn::bath_info **bi, trn::att_info **ai, beam_geometry **geo, mb1_t *r_snd);
 int cb_proto_idtlass(void *pargs);
 
+int transform_mbminirov(trn::bath_info **bi, trn::att_info **ai, beam_geometry **geo, mb1_t *r_snd);
+int cb_proto_mbminirov(void *pargs);
+
+
 class TrnxPlugin
 {
 public:
@@ -46,9 +55,11 @@ public:
         xpp.register_callback("cb_proto_oisled", cb_proto_oisled);
         xpp.register_callback("cb_proto_oisled2", cb_proto_oisled2);
         xpp.register_callback("cb_proto_oisledx", cb_proto_oisledx);
-        xpp.register_callback("cb_proto_mblass", cb_proto_oisledx);
+//        xpp.register_callback("cb_proto_mblass", cb_proto_oisledx);
+        xpp.register_callback("cb_proto_mblass", cb_proto_mblass);
         xpp.register_callback("cb_proto_xmb1", cb_proto_xmb1);
         xpp.register_callback("cb_proto_idtlass", cb_proto_idtlass);
+        xpp.register_callback("cb_proto_mbminirov", cb_proto_mbminirov);
     }
 };
 

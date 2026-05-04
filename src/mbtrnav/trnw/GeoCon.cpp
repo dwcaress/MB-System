@@ -6,6 +6,9 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#ifdef TRN_USE_PROJ
+#include <proj.h>
+#endif
 
 #include "GeoCon.h"
 #include "GeoCon.hpp"
@@ -75,7 +78,8 @@ int GeoConIF::debug()
 #ifdef TRN_USE_PROJ
 
 GeoConProj::GeoConProj()
-: m_tcrs(nullptr)
+: m_scrs(nullptr)
+, m_tcrs(nullptr)
 , m_proj_xfm(nullptr)
 , m_auto_delete_xfm(true)
 {
@@ -84,7 +88,9 @@ GeoConProj::GeoConProj()
 }
 
 GeoConProj::GeoConProj(const char *tcrs)
-: m_proj_xfm(nullptr)
+: m_scrs(nullptr)
+, m_tcrs(nullptr)
+, m_proj_xfm(nullptr)
 , m_auto_delete_xfm(true)
 {
     m_scrs = strdup(GEOIF_SCRS_DFL);
@@ -93,8 +99,9 @@ GeoConProj::GeoConProj(const char *tcrs)
 }
 
 GeoConProj::GeoConProj(void *xfm, bool autodel)
-: m_proj_xfm(xfm)
-, m_tcrs(NULL)
+: m_scrs(nullptr)
+, m_tcrs(nullptr)
+, m_proj_xfm(nullptr)
 , m_auto_delete_xfm(autodel)
 {
     m_scrs = strdup(GEOIF_SCRS_DFL);

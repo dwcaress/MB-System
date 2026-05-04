@@ -348,22 +348,22 @@ int mb3dsoundings_updatemodetoggles() {
     XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_info, TRUE, FALSE);
   }
   if (mb3dsoundings.edit_mode == MBS_EDIT_TOGGLE) {
-    sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Toggle)\":t\"M: Pan\"\"R: Zoom\"");
+    snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Toggle)\":t\"M: Pan\"\"R: Zoom\"");
   }
   else if (mb3dsoundings.edit_mode == MBS_EDIT_PICK) {
-    sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Pick)\":t\"M: Pan\"\"R: Zoom\"");
+    snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Pick)\":t\"M: Pan\"\"R: Zoom\"");
   }
   else if (mb3dsoundings.edit_mode == MBS_EDIT_ERASE) {
-    sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Erase)\":t\"M: Pan\"\"R: Zoom\"");
+    snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Erase)\":t\"M: Pan\"\"R: Zoom\"");
   }
   else if (mb3dsoundings.edit_mode == MBS_EDIT_RESTORE) {
-    sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Restore)\":t\"M: Pan\"\"R: Zoom\"");
+    snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Restore)\":t\"M: Pan\"\"R: Zoom\"");
   }
   else if (mb3dsoundings.edit_mode == MBS_EDIT_GRAB) {
-    sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Grab)\":t\"M: Pan\"\"R: Zoom\"");
+    snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Grab)\":t\"M: Pan\"\"R: Zoom\"");
   }
   else if (mb3dsoundings.edit_mode == MBS_EDIT_INFO) {
-    sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Info)\":t\"M: Pan\"\"R: Zoom\"");
+    snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Info)\":t\"M: Pan\"\"R: Zoom\"");
   }
   set_mbview_label_multiline_string(mb3dsoundings.mb3dsdg.label_mousemode, value_text);
 
@@ -395,7 +395,7 @@ int mb3dsoundings_updatestatus() {
 
   /* else set standard status label */
   else {
-    sprintf(value_text, "Azi:%.2f | Elev: %.2f | exagger:%.2f | Tot:%d Good:%d Flagged:%d", mb3dsoundings.azimuth,
+    snprintf(value_text, sizeof(value_text), "Azi:%.2f | Elev: %.2f | exagger:%.2f | Tot:%d Good:%d Flagged:%d", mb3dsoundings.azimuth,
             mb3dsoundings.elevation, mb3dsoundings.exaggeration, soundingdata->num_soundings,
             soundingdata->num_soundings_unflagged, soundingdata->num_soundings_flagged);
     XtManageChild(mb3dsoundings.mb3dsdg.scale_rollbias);
@@ -415,42 +415,42 @@ int mb3dsoundings_updatelabelmousemode() {
   /* set mouse mode label */
   if (mb3dsoundings.mouse_mode == MBS_MOUSE_PANZOOM) {
     if (mb3dsoundings.edit_mode == MBS_EDIT_TOGGLE) {
-      sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Toggle)\":t\"M: Pan\"\"R: Zoom\"");
+      snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Toggle)\":t\"M: Pan\"\"R: Zoom\"");
     }
     else if (mb3dsoundings.edit_mode == MBS_EDIT_PICK) {
-      sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Pick)\":t\"M: Pan\"\"R: Zoom\"");
+      snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Pick)\":t\"M: Pan\"\"R: Zoom\"");
     }
     else if (mb3dsoundings.edit_mode == MBS_EDIT_ERASE) {
-      sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Erase)\":t\"M: Pan\"\"R: Zoom\"");
+      snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Erase)\":t\"M: Pan\"\"R: Zoom\"");
     }
     else if (mb3dsoundings.edit_mode == MBS_EDIT_RESTORE) {
-      sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Restore)\":t\"M: Pan\"\"R: Zoom\"");
+      snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Restore)\":t\"M: Pan\"\"R: Zoom\"");
     }
     else if (mb3dsoundings.edit_mode == MBS_EDIT_GRAB) {
-      sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Grab)\":t\"M: Pan\"\"R: Zoom\"");
+      snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Grab)\":t\"M: Pan\"\"R: Zoom\"");
     }
     else if (mb3dsoundings.edit_mode == MBS_EDIT_INFO) {
-      sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Info)\":t\"M: Pan\"\"R: Zoom\"");
+      snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Info)\":t\"M: Pan\"\"R: Zoom\"");
     }
   }
   else /* if (mb3dsoundings.mouse_mode == MBS_MOUSE_ROTATE) */ {
     if (mb3dsoundings.edit_mode == MBS_EDIT_TOGGLE) {
-      sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Toggle)\":t\"M: Rotate Soundings\"\"R: exaggeration\"");
+      snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Toggle)\":t\"M: Rotate Soundings\"\"R: exaggeration\"");
     }
     else if (mb3dsoundings.edit_mode == MBS_EDIT_PICK) {
-      sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Pick)\":t\"M: Rotate Soundings\"\"R: exaggeration\"");
+      snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Pick)\":t\"M: Rotate Soundings\"\"R: exaggeration\"");
     }
     else if (mb3dsoundings.edit_mode == MBS_EDIT_ERASE) {
-      sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Erase)\":t\"M: Rotate Soundings\"\"R: exaggeration\"");
+      snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Erase)\":t\"M: Rotate Soundings\"\"R: exaggeration\"");
     }
     else if (mb3dsoundings.edit_mode == MBS_EDIT_RESTORE) {
-      sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Restore)\":t\"M: Rotate Soundings\"\"R: exaggeration\"");
+      snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Restore)\":t\"M: Rotate Soundings\"\"R: exaggeration\"");
     }
     else if (mb3dsoundings.edit_mode == MBS_EDIT_GRAB) {
-      sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Grab)\":t\"M: Rotate Soundings\"\"R: exaggeration\"");
+      snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Grab)\":t\"M: Rotate Soundings\"\"R: exaggeration\"");
     }
     else if (mb3dsoundings.edit_mode == MBS_EDIT_INFO) {
-      sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Info)\":t\"M: Rotate Soundings\"\"R: exaggeration\"");
+      snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Info)\":t\"M: Rotate Soundings\"\"R: exaggeration\"");
     }
   }
   set_mbview_label_multiline_string(mb3dsoundings.mb3dsdg.label_mousemode, value_text);
