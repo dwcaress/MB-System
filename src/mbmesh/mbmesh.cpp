@@ -34,22 +34,6 @@
  * Date:    March 6, 2026
  */
 
-/*--------------------------------------------------------------------
- * PHASE 1 SCOPE:
- * This initial implementation focuses ONLY on:
- * 1. Reading datalist files
- * 2. Opening swath files with MB-System API
- * 3. Extracting bathymetry soundings
- * 4. Storing soundings in memory
- * 5. Printing statistics
- *
- * NOT INCLUDED YET:
- * - Spatial indexing (quadtree/octree)
- * - Mesh generation
- * - 3D Tiles output
- * - ECEF coordinate conversion
- *--------------------------------------------------------------------*/
-
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -74,10 +58,9 @@ extern "C" {
 
 constexpr char program_name[] = "mbmesh";
 constexpr char help_message[] =
-    "mbmesh generates 3D Tiles from swath sonar bathymetry data.\n"
-    "This tool reads swath data files and produces OGC 3D Tiles format\n"
-    "output suitable for web-based 3D visualization.\n\n"
-    "Phase 1 implementation reads and validates swath data input.";
+    "mbmesh generates 3D point clouds from swath sonar bathymetry data.\n"
+    "This tool reads swath data files and produces multiple output formats\n"
+    "suitable for 3D visualization and analysis of seafloor bathymetry.";
 
 constexpr char usage_message[] =
   "mbmesh -Idatalist [-Rwest/east/south/north] [-Ooutdir] [-html]\n"
@@ -91,8 +74,8 @@ constexpr char usage_message[] =
  * @brief A single sonar sounding (one beam return)
  *
  * This structure represents one bathymetry measurement from the
- * multibeam sonar. For Phase 1, we just store the basic information
- * needed to validate the data input pipeline.
+ * multibeam sonar, storing coordinates and metadata for later processing
+ * and visualization.
  */
 struct Sounding {
   double longitude;   // Degrees east
@@ -101,9 +84,6 @@ struct Sounding {
   char beamflag;      // MB-System beam quality flag
   int beam_number;    // Beam index within ping
   double time_d;      // Unix timestamp (seconds since epoch)
-
-  // TODO Phase 4: Add ECEF coordinates for 3D Tiles (x, y, z)
-  // TODO Phase 3: Add amplitude, acrosstrack, alongtrack for mesh quality
 };
 
 /*--------------------------------------------------------------------*/
@@ -126,7 +106,7 @@ static int nbeams_total = 0;        // Total beams encountered
 static int nbeams_good = 0;         // Valid beams
 static int nbeams_flagged = 0;      // Flagged/rejected beams
 
-// Storage for soundings (in-memory for Phase 1)
+// Storage for soundings (in-memory collection of all valid beams)
 static std::vector<Sounding> all_soundings;
 
 /*--------------------------------------------------------------------*/
@@ -179,7 +159,7 @@ int main(int argc, char **argv) {
   }
 
   /* Read swath data from datalist */
-  fprintf(stderr, "\n=== Phase 1: Reading Swath Data ===\n");
+  fprintf(stderr, "\n=== Reading Swath Data ===\n");
   int status = read_datalist_file(verbose);
 
   if (status != MB_SUCCESS) {
@@ -207,7 +187,7 @@ int main(int argc, char **argv) {
   snprintf(ecef_file, sizeof(ecef_file), "%s/ecefPointcloud.xyz", output_dir);
   write_ecef_xyz_file(ecef_file);
 
-  fprintf(stderr, "\n=== Phase 1 Complete ===\n");
+  fprintf(stderr, "\nProcessing complete\n");
   fprintf(stderr, "Soundings collected: %zu\n", all_soundings.size());
   fprintf(stderr, "Adjusted XYZ file written: %s\n", projected_file);
 
@@ -233,12 +213,6 @@ int main(int argc, char **argv) {
     }
   }
 
-  /* TODO Phase 2: Build spatial index (octree/quadtree) from all_soundings */
-  /* TODO Phase 3: Generate triangle meshes from indexed soundings */
-  /* TODO Phase 4: Convert meshes to ECEF coordinates */
-  /* TODO Phase 5: Write OGC 3D Tiles output (tileset.json + .glb files) */
-
-  fprintf(stderr, "\nReady for Phase 2 (spatial indexing)\n");
   fprintf(stderr, "\nProgram <%s> completed successfully\n", program_name);
   exit(MB_SUCCESS);
 }
@@ -442,9 +416,6 @@ static void print_help() {
   fprintf(stderr, "  -html              Also write adjustedPointcloud.html viewer file\n");
   fprintf(stderr, "  -V                 Increase verbosity (can repeat: -V -V)\n");
   fprintf(stderr, "  -H                 Print this help message\n");
-  fprintf(stderr, "\nPhase 1 Implementation:\n");
-  fprintf(stderr, "  This version reads swath data and validates input only.\n");
-  fprintf(stderr, "  Spatial indexing and 3D Tiles output coming in Phase 2.\n");
   fprintf(stderr, "\nExample:\n");
   fprintf(stderr, "  mbmesh -Idatalist.mb-1 -R-122.5/-121.8/36.5/37.2 -V\n\n");
 }
