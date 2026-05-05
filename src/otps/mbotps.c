@@ -1198,7 +1198,7 @@ int main(int argc, char **argv) {
       /* skip the file */
       if (!proceed) {
         /* some helpful output */
-        fprintf(stderr, "%s : skipped - tide model file is up to date\n", swath_file);
+        fprintf(stderr, "%s : skipped - tide model file is up to date\n", file);
       }
 
       /* add nav points to tidal model list */

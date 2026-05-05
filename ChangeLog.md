@@ -22,6 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.3beta13    April 29, 2026
 - Version 5.8.3beta12    January 7, 2026
 - Version 5.8.3beta11    December 27, 2025
 - Version 5.8.3beta10    December 22, 2025
@@ -69,6 +70,19 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.3beta13 (January 29, 2026)
+
+Library mbtrnav/gctp: Added modern function definitions to function pointer arrays.
+
+Program mbphotomosaic: Fix bug in which if one photo of a stereo pair is dropped, the other
+photo is not used.
+
+Program mbnavadjust: Changed so that surveys can be imported as a single piece even if there
+are time breaks between some of the files.
+
+Format MBF_3DWISSL2 (id 234): Add kluge to deal with WiSSL2 lidar bathymetry needing 
+additional correction.
 
 #### 5.8.3beta12 (January 7, 2026)
 

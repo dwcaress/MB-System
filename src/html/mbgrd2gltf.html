@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>MBGRD2GLTF</H1>
-Section:  MB-System User Commands  (1)<BR>Updated:  17 April, 2024 <BR><A HREF="#index">Index</A>
+Section:  MB-System User Commands  (1)<BR>Updated:  7 January, 2026 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -24,33 +24,39 @@ mbgrd2gltf - convert bathymetric grid data to GLTF format with optional settings
 
 <B>mbgrd2gltf</B>
 
-<I>&lt;filepath&gt;</I>
+<B>--input</B> <I>FILE</I>
+[<B>--binary</B>]
+[<B>--output</B> <I>ROOT</I>]
+[<B>--exaggeration</B> <I>NUM</I>]
+[<B>--geoorigin</B>[<B>=</B><I>LON,LAT,ELEV</I>]]
+[<B>--draco</B>]
+[<B>--quantize-position</B> <I>NUM</I>]
+[<B>--quantize-normal</B> <I>NUM</I>]
+[<B>--quantize-texcoord</B> <I>NUM</I>]
+[<B>--quantize-color</B> <I>NUM</I>]
+[<B>--html</B>]
+[<B>--verbose</B>]
+[<B>--help</B>]
+<P>
 
-[<B>-b</B> | --binary]
-[<B>-o</B> | --output
-<I>&lt;output filepath&gt;]</I>
+<B>Legacy single-dash syntax:</B>
 
-[<B>-e</B> | --exaggeration
-<I>&lt;vertical exaggeration&gt;]</I>
+<BR>
 
-[<B>-m</B> | --max-size
-<I>&lt;max size&gt;]</I>
-
-[<B>-s</B> | --stride
-<I>&lt;stride ratio&gt;]</I>
-
-[<B>-d</B> | --draco]
-[<B>-qp</B> | <B>-qn</B> | <B>-qt</B> | <B>-qc</B>
-<I>&lt;quantization numbers&gt;]</I>
-
-[<B>-h</B> | --help]
+<B>mbgrd2gltf -I</B><I>FILE</I> [<B>-B</B>] [<B>-O</B><I>ROOT</I>] [<B>-E</B><I>NUM</I>] [<B>-G</B>[<I>LON,LAT,ELEV</I>]] [<B>-D</B>] [<B>-Qp</B><I>NUM</I>] [<B>-Qn</B><I>NUM</I>] [<B>-Qt</B><I>NUM</I>] [<B>-Qc</B><I>NUM</I>] [<B>-W</B>] [<B>-V</B>] [<B>-H</B>]
 <P>
 <A NAME="lbAD">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
 <B>mbgrd2gltf</B>
 
-is a tool designed to convert grid data files (GRD) to Graphics Library Transmission Format (GLTF) files. It can generate output in: a binary to create a more compact GLTF file, exaggerate vertex altitude to enhance topographic features, and cap the max-size of the GLTF so the output files don't exceed size constraints. Furthermore, optional Draco compression can reduce the outputed GLTF file size even more while maintaining good visual quality. With Draco, one can specify the quantization level, which affects the compression level of mesh vertices.
+is a tool designed to convert grid data files (GRD) to Graphics Library Transmission Format (GLTF) files. It can generate output in binary format to create a more compact GLTF file and exaggerate vertex altitude to enhance topographic features. The tool uses tiling to efficiently handle large datasets. Optional Draco compression can reduce the output GLTF file size significantly while maintaining good visual quality. With Draco, one can specify the quantization level, which affects the compression level of mesh vertices.
+<P>
+
+The output mesh vertices are positioned in an Earth-Centered, Earth-Fixed (ECEF) Cartesian coordinate system with units in meters. ECEF is a 3D right-handed coordinate system with its origin at Earth's center of mass, the Z-axis pointing toward the North Pole, the X-axis intersecting the equator at the prime meridian, and the Y-axis completing the right-handed system at 90 degrees east longitude.
+<P>
+
+For improved rendering precision in localized areas, the <B>--geoorigin</B> option allows vertices to be expressed as offsets from a local origin point rather than from Earth's center. ECEF coordinates typically have magnitudes on the order of millions of meters, which can cause precision loss when using GPU single-precision floating point arithmetic. By specifying a GeoOrigin near the area of interest, coordinate magnitudes are reduced to thousands of meters, significantly improving rendering quality. The GeoOrigin can be explicitly specified with longitude, latitude, and elevation values, or automatically computed from the grid's geographic center and mean altitude. When no GeoOrigin is specified, vertices use the full ECEF coordinates.
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>MB-SYSTEM AUTHORSHIP</H2>
@@ -64,89 +70,225 @@ Dale N. Chayes - Center for Coastal and Ocean Mapping, University of New Hampshi
 Christian dos Santos Ferreira - MARUM, University of Bremen
 <P>
 <A NAME="lbAF">&nbsp;</A>
+<H2>MBGRD2GLTF AUTHORSHIP</H2>
+
+The
+<B>mbgrd2gltf</B>
+
+program was contributed to MB-System by California State University Monterey Bay (CSUMB) Capstone teams. The original gltf-generator program was created for STOQS starting in Fall 2020:
+<P>
+
+Fall 2020 Team (STOQS gltf-generator):
+<BR>
+
+Edward Montoya, Sean Towne
+<P>
+
+Fall 2021 Team (STOQS gltf-generator):
+<BR>
+
+Isaac Hirzel, Oliver Stringer, Zachary Abbett
+<P>
+
+Spring 2023 Team (MB-System integration):
+<BR>
+
+Nicolas Porras Falconio, Kyle Dowling, Jesse Benavides, Julian Fortin
+<P>
+
+Spring 2024 Team (Draco compression):
+<BR>
+
+Ivan Martinez, Steven Patrick, Varad Poddar, Aret Tinoco
+<P>
+
+Fall 2025 Team (mbgrd2gltf C++ code refinements):
+<BR>
+
+Miguel Gonzales, Eric Rios, Jonathan Ramirez-Fausto, Tanmay Zende
+<P>
+
+Mentor: Mike McCann - Monterey Bay Aquarium Research Institute
+<P>
+<A NAME="lbAG">&nbsp;</A>
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>&lt;filepath&gt; :</B>
+<DT><B>--input, -I</B>
 
 <DD>
-Specify the path to the input GMT GRD file.
+<I>FILE</I>
+<BR>
+
+Input GMT GRD format bathymetry grid file. This option is required.
 <P>
-<DT><B>-b, --binary :</B>
+<DT><B>--binary, -B</B>
 
 <DD>
-Generate the output in binary GLTF format. Binary GLTF is more compact and typically loads faster in applications.
+Generate the output in binary GLTF (GLB) format. Binary GLTF is more compact and typically loads faster in applications than text-based GLTF. Default: text-based GLTF output.
 <P>
-<DT><B>-o, --output :</B>
+<DT><B>--output, -O</B>
 
 <DD>
-Specify the path to the folder where the output GLTF file will be written.
+<I>ROOT</I>
+<BR>
+
+Specify the output file root. The appropriate file extension (.gltf or .glb) will be appended automatically. Default: input file basename in the same directory.
 <P>
-<DT><B>-e, --exaggeration :</B>
+<DT><B>--exaggeration, -E</B>
 
 <DD>
-Specify the vertical exaggeration factor as a decimal number, which multiplies the vertex altitudes. This can enhance the visibility of topographic features.
+<I>NUM</I>
+<BR>
+
+Specify the vertical exaggeration factor as a decimal number, which multiplies the vertex altitudes. This can enhance the visibility of topographic features. Default: 1.0 (no exaggeration).
 <P>
-<DT><B>-m, --max-size :</B>
+<DT><B>--geoorigin, -G</B>
 
 <DD>
-Specify the maximum size of the output buffer data in megabytes. This is useful for ensuring that the output files do not exceed certain size constraints. Actual size may vary based on compression settings.
+[<B>=</B><I>LON,LAT,ELEV</I>]
+<BR>
+
+Specify a GeoOrigin point for high-precision local coordinates. All vertex coordinates will be expressed as offsets from this origin point in the ECEF coordinate system. This improves rendering precision for localized areas by reducing the magnitude of coordinate values, which helps overcome GPU single-precision floating point limitations.
+<BR>
+
+With values (e.g., --geoorigin=-122.0,36.8,-1000): use specified GeoOrigin.
+<BR>
+
+Without values: automatically compute and use grid center and mean altitude.
+<BR>
+
+Not specified: vertices use original ECEF coordinates from Earth's center (default).
 <P>
-<DT><B>-s, --stride :</B>
+<DT><B>--draco, -D</B>
 
 <DD>
-Specify the decimal number representing the the amount of stride('Skip') to apply to the buffer data of the output as a ratio of normal to running. As you stride, you skip over portions of data.
-The bigger the stride, the more points are skipped.
+Enable Draco mesh compression to reduce the file size by encoding meshes and point clouds. This can significantly reduce file sizes while maintaining visual quality.
 <P>
-<DT><B>-d, --draco :</B>
+<DT><B>--quantize-position</B>
 
 <DD>
-Enable Draco compression to reduce the file size by encoding meshes and point clouds.
+<I>NUM</I> (or <B>-Qp</B><I>NUM</I>)
+<BR>
+
+Draco position quantization bits (2-30). Affects the compression level of mesh vertex positions. Lower values increase compression but reduce precision, potentially affecting the visual quality of the terrain. Requires <B>--draco</B> option. Default: 16.
 <P>
-<DT><B>-qp | -qn | -qt | -qc :</B>
+<DT><B>--quantize-normal</B>
 
 <DD>
-Specify the quantization level for Draco compression. Positional quantization (-qp) value affects the compression level of mesh vertices. Lower values increase compression but reduce precision, potentially affecting the visual quality of the terrain. Other quantization values are available
-for experimentation. They include -qn: Normal, -qt: TexCoord, -qc: Color. The default quantization value is 16 for position, 7 for normal, 10 for texcoord, 8 for color.
+<I>NUM</I> (or <B>-Qn</B><I>NUM</I>)
+<BR>
+
+Draco normal quantization bits (2-30). Affects the compression of surface normal vectors. Requires <B>--draco</B> option. Default: 7.
 <P>
-<DT><B>-h, --help :</B>
+<DT><B>--quantize-texcoord</B>
 
 <DD>
-Display help message and exit. Provides more information on command usage and options.
+<I>NUM</I> (or <B>-Qt</B><I>NUM</I>)
+<BR>
+
+Draco texture coordinate quantization bits (2-30). Affects the compression of texture coordinates. Requires <B>--draco</B> option. Default: 10.
+<P>
+<DT><B>--quantize-color</B>
+
+<DD>
+<I>NUM</I> (or <B>-Qc</B><I>NUM</I>)
+<BR>
+
+Draco color quantization bits (2-30). Affects the compression of vertex colors. Requires <B>--draco</B> option. Default: 8.
+<P>
+<DT><B>--html, -W</B>
+
+<DD>
+Generate an HTML viewer page with inline 3D visualization using X3DOM. The HTML file includes the glTF/GLB model with interactive navigation controls, processing provenance metadata (command line, timestamps, grid parameters, GeoOrigin settings, compression options), and links to MB-System and X3DOM documentation. The viewer requires serving the files via HTTP (e.g., python3 -m http.server) to avoid browser CORS restrictions when loading local files. Output file: &lt;output_root&gt;.html
+<P>
+<DT><B>--verbose, -V</B>
+
+<DD>
+Enable verbose output showing NetCDF reading details and memory allocation information.
+<P>
+<DT><B>--help, -H</B>
+
+<DD>
+Display help message and exit.
 <P>
 </DL>
-<A NAME="lbAG">&nbsp;</A>
+<A NAME="lbAH">&nbsp;</A>
 <H2>EXAMPLES</H2>
 
 Convert a GMT GRD file to a GLTF file with default settings:
 <DL COMPACT><DT><DD>
 <PRE>
-<B>mbgrd2gltf input.grd</B>
+<B>mbgrd2gltf --input input.grd</B>
 </PRE>
 
 </DL>
 
 <P>
-Convert a GRD file to GLB(Binary GLTF) with specified output folder and Draco compression at a quantization level of 20:
+Convert a GRD file to GLB (Binary GLTF) with specified output folder and Draco compression:
 <DL COMPACT><DT><DD>
 <PRE>
-<B>mbgrd2gltf input.grd --binary --output /path/to/output --draco -qp 20</B>
+<B>mbgrd2gltf --input input.grd --binary --output /path/to/output/mymodel --draco --quantize-position 20</B>
 </PRE>
 
 </DL>
 
 <P>
-Converting a large GRD file to GLB(Binary GLTF) with specified output folder and Draco compression at a quantization level of 20 with a vertical exaggeration of 20. [ All options in short-hand notiation. ]
+Convert with vertical exaggeration, Draco compression, and verbose output:
 <DL COMPACT><DT><DD>
 <PRE>
-<B>mbgrd2gltf input.grd -o /path/to/output -d -b -qp 20 -e 20</B>
+<B>mbgrd2gltf --input input.grd --output /path/to/output/mymodel --draco --binary --quantize-position 20 --exaggeration 20 --verbose</B>
 </PRE>
 
-<PRE>
-Auto setting stride to 1. [ Program generated output. ]
 </DL>
 
-</PRE><A NAME="lbAH">&nbsp;</A>
+<P>
+Convert bathymetry with 10x vertical exaggeration:
+<DL COMPACT><DT><DD>
+<PRE>
+<B>mbgrd2gltf --input bathymetry.grd --exaggeration 10.0 --binary</B>
+</PRE>
+
+</DL>
+
+<P>
+Convert bathymetry with a GeoOrigin for improved precision:
+<DL COMPACT><DT><DD>
+<PRE>
+<B>mbgrd2gltf --input monterey.grd --geoorigin=-122.0,36.8,-1000 --binary</B>
+</PRE>
+
+</DL>
+
+<P>
+Convert using automatic GeoOrigin (grid center):
+<DL COMPACT><DT><DD>
+<PRE>
+<B>mbgrd2gltf --input monterey.grd --geoorigin --binary</B>
+</PRE>
+
+</DL>
+
+<P>
+Generate HTML viewer with 3D visualization:
+<DL COMPACT><DT><DD>
+<PRE>
+<B>mbgrd2gltf --input bathymetry.grd --exaggeration 10 --html --binary</B>
+</PRE>
+
+</DL>
+
+<P>
+Legacy syntax (still supported):
+<DL COMPACT><DT><DD>
+<PRE>
+<B>mbgrd2gltf -I input.grd -B -O /path/to/output/mymodel -D -Qp 20 -E 10 -V</B>
+</PRE>
+
+</DL>
+
+<P>
+<A NAME="lbAI">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
 <B><A HREF="mbinfo.html">mbinfo</A>(1),</B>
@@ -156,7 +298,7 @@ Auto setting stride to 1. [ Program generated output. ]
 <B><A HREF="mblist.html">mblist</A>(1)</B>
 
 <P>
-<A NAME="lbAI">&nbsp;</A>
+<A NAME="lbAJ">&nbsp;</A>
 <H2>BUGS</H2>
 
 Please report any bugs on the MB-System GitHub Issue Tracker.
@@ -169,16 +311,17 @@ Please report any bugs on the MB-System GitHub Issue Tracker.
 <DT><A HREF="#lbAC">SYNOPSIS</A><DD>
 <DT><A HREF="#lbAD">DESCRIPTION</A><DD>
 <DT><A HREF="#lbAE">MB-SYSTEM AUTHORSHIP</A><DD>
-<DT><A HREF="#lbAF">OPTIONS</A><DD>
-<DT><A HREF="#lbAG">EXAMPLES</A><DD>
-<DT><A HREF="#lbAH">SEE ALSO</A><DD>
-<DT><A HREF="#lbAI">BUGS</A><DD>
+<DT><A HREF="#lbAF">MBGRD2GLTF AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
 </DL>
 <HR>
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 17 April, 2024</P></CENTER>
+Last Updated: 7 January, 2026</P></CENTER>
 
 <HR>
 <center>

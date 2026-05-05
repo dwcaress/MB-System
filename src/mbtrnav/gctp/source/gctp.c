@@ -57,8 +57,8 @@ static long outpj[MAXPROJ + 1];		/* output projection array	*/
 static long outdat[MAXPROJ + 1];	/* output dataum array		*/
 static long outzn[MAXPROJ + 1];		/* output zone array		*/
 static double pdout[MAXPROJ+1][COEFCT];	/* output projection parm array	*/
-static long (*for_trans[MAXPROJ + 1])();/* forward function pointer array*/
-static long (*inv_trans[MAXPROJ + 1])();/* inverse function pointer array*/
+static long (*for_trans[MAXPROJ + 1])(double lon, double lat, double *x, double *y);/* forward function pointer array*/
+static long (*inv_trans[MAXPROJ + 1])(double x, double y, double *lon, double *lat);/* inverse function pointer array*/
 
 			/* Table of unit codes as specified by state
 			   laws as of 2/1/92 for NAD 1983 State Plane

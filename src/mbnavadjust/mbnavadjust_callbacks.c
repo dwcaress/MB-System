@@ -118,8 +118,9 @@ static int modp_borders[4];
 #define FILE_MODE_NONE 0
 #define FILE_MODE_NEW 1
 #define FILE_MODE_OPEN 2
-#define FILE_MODE_IMPORT 3
-#define FILE_MODE_REFERENCE 4
+#define FILE_MODE_IMPORTDATA 3
+#define FILE_MODE_IMPORTSURVEY 4
+#define FILE_MODE_REFERENCE 5
 size_t file_mode = FILE_MODE_NONE;
 int format = 0;
 int selected = 0; /* indicates an input file is selected */
@@ -762,84 +763,59 @@ void do_update_status() {
     set_label_string(label_listdata, string);
     if (mbna_verbose > 0)
       fprintf(stderr, "%s\n", string);
-    if (project.num_files > 0) {
-      /* count the number of surveys */
-      int num_surveys = 0;
-      int num_files = 0;
-      for (int i = 0; i < project.num_files; i++) {
-        struct mbna_file *file = &(project.files[i]);
-        if (file->block == num_surveys) {
-          num_surveys++;
-          num_files = 1;
+    if (project.num_surveys > 0 && project.num_files > 0) {
+    	int num_surveys_listed = 0;
+      XmString *xstr = (XmString *)malloc(project.num_surveys * sizeof(XmString));
+    	for (int isurvey = 0; isurvey < project.num_surveys; isurvey++) {
+    		int num_files_survey = 0;
+    		int num_global_ties_survey = 0;
+				bool first = true;
+				double btime_d = 0.0;
+				double etime_d = 0.0;
+    		for (int ifile=0; ifile < project.num_files; ifile++) {
+					struct mbna_file *file = &(project.files[ifile]);
+	
+					if (file->survey == isurvey) {
+						if (first) {
+							btime_d = file->sections[0].btime_d;
+							first = false;
+							if (file->status == MBNA_FILE_POORNAV)
+								filestatus = filestatus_poor;
+							else if (file->status == MBNA_FILE_GOODNAV)
+								filestatus = filestatus_good;
+							else if (file->status == MBNA_FILE_FIXEDNAV)
+								filestatus = filestatus_fixed;
+							else if (file->status == MBNA_FILE_FIXEDXYNAV)
+								filestatus = filestatus_fixedxy;
+							else if (file->status == MBNA_FILE_FIXEDZNAV)
+								filestatus = filestatus_fixedz;
+							else
+								filestatus = filestatus_unknown;
+						}
+						etime_d = file->sections[file->num_sections-1].etime_d;
+						for (int isection=0; isection < file->num_sections; isection++) {
+							struct mbna_section *section = &file->sections[isection];
+							if (section->globaltie.status != MBNA_TIE_NONE) {
+								num_global_ties_survey++;
+							}
+						}
+					}
         }
-        else
-          num_files++;
+			int btime_i[7], etime_i[7];
+			mb_get_date(mbna_verbose, btime_d, btime_i);
+			mb_get_date(mbna_verbose, etime_d, etime_i);
+			mb_path string = "";
+			snprintf(string, sizeof(string), 
+				"%3d %3d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %s g-ties:%d",
+				isurvey, num_files_survey, btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4], btime_i[5],
+				btime_i[6], etime_i[0], etime_i[1], etime_i[2], etime_i[3], etime_i[4], etime_i[5], etime_i[6],
+				filestatus, num_global_ties_survey);
+			xstr[isurvey] = XmStringCreateLocalized(string);
+			if (mbna_verbose > 0)
+				fprintf(stderr, "%s\n", string);
       }
-      XmString *xstr = (XmString *)malloc(num_surveys * sizeof(XmString));
-
-      /* generate list */
-      num_surveys = 0;
-      num_files = 0;
-      int num_global_ties = 0;
-      for (int i = 0; i < project.num_files; i++) {
-        struct mbna_file *file = &(project.files[i]);
-
-        double btime_d = 0.0;
-        double etime_d = 0.0;
-        if (i == 0) {
-          btime_d = file->sections[0].btime_d;
-        }
-        if (file->block == num_surveys) {
-          /* find end time for this block */
-          num_files = 0;
-          num_global_ties = 0;
-          btime_d = file->sections[0].etime_d;
-          for (int ii = i; ii < project.num_files; ii++) {
-            struct mbna_file *file2 = &(project.files[ii]);
-            if (file2->block == file->block) {
-              etime_d = file2->sections[file2->num_sections - 1].etime_d;
-              num_files++;
-              for (int isection=0; isection < file2->num_sections; isection++) {
-                struct mbna_section *section = &file2->sections[isection];
-                if (section->globaltie.status != MBNA_TIE_NONE) {
-                  num_global_ties++;
-                }
-              }
-            }
-          }
-
-          /* make survey list item */
-          if (file->status == MBNA_FILE_POORNAV)
-            filestatus = filestatus_poor;
-          else if (file->status == MBNA_FILE_GOODNAV)
-            filestatus = filestatus_good;
-          else if (file->status == MBNA_FILE_FIXEDNAV)
-            filestatus = filestatus_fixed;
-          else if (file->status == MBNA_FILE_FIXEDXYNAV)
-            filestatus = filestatus_fixedxy;
-          else if (file->status == MBNA_FILE_FIXEDZNAV)
-            filestatus = filestatus_fixedz;
-          else
-            filestatus = filestatus_unknown;
-          int btime_i[7], etime_i[7];
-          mb_get_date(mbna_verbose, btime_d, btime_i);
-          mb_get_date(mbna_verbose, etime_d, etime_i);
-          mb_path string = "";
-          snprintf(string, sizeof(string), 
-            "%3d %3d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %s g-ties:%d",
-            num_surveys, num_files, btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4], btime_i[5],
-            btime_i[6], etime_i[0], etime_i[1], etime_i[2], etime_i[3], etime_i[4], etime_i[5], etime_i[6],
-            filestatus, num_global_ties);
-          xstr[num_surveys] = XmStringCreateLocalized(string);
-          if (mbna_verbose > 0)
-            fprintf(stderr, "%s\n", string);
-
-          /* increment counter */
-          num_surveys++;
-        }
-      }
-      XmListAddItems(list_data, xstr, num_surveys, 0);
-      for (int i = 0; i < num_surveys; i++) {
+      XmListAddItems(list_data, xstr, project.num_surveys, 0);
+      for (int i = 0; i < project.num_surveys; i++) {
         XmStringFree(xstr[i]);
       }
       free(xstr);
@@ -883,8 +859,8 @@ void do_update_status() {
       /* generate list */
       for (int k = 0; k < project.num_crossings; k++) {
         struct mbna_crossing *crossing = &project.crossings[k];
-        int iblock = project.files[crossing->file_id_1].block
-               + (project.files[crossing->file_id_2].block * (project.files[crossing->file_id_2].block + 1) / 2);
+        int iblock = project.files[crossing->file_id_1].survey
+               + (project.files[crossing->file_id_2].survey * (project.files[crossing->file_id_2].survey + 1) / 2);
         if (crossing->truecrossing)
           n_tcrossing[iblock]++;
         if (crossing->overlap >= 50)
@@ -904,17 +880,17 @@ void do_update_status() {
           && survey2[iblock] == mbna_survey_select)
             || (mbna_view_mode == MBNA_VIEW_MODE_BLOCK)
             || (mbna_view_mode == MBNA_VIEW_MODE_FILE
-          && survey1[iblock] == project.files[mbna_file_select].block
-          && survey2[iblock] == project.files[mbna_file_select].block)
+          && survey1[iblock] == project.files[mbna_file_select].survey
+          && survey2[iblock] == project.files[mbna_file_select].survey)
             || (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY
           && (survey1[iblock] == mbna_survey_select
               || survey2[iblock] == mbna_survey_select))
             || (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
-          && (survey1[iblock] == project.files[mbna_file_select].block
-              || survey2[iblock] == project.files[mbna_file_select].block))
+          && (survey1[iblock] == project.files[mbna_file_select].survey
+              || survey2[iblock] == project.files[mbna_file_select].survey))
             || (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
-          && (survey1[iblock] == project.files[mbna_file_select].block
-              || survey2[iblock] == project.files[mbna_file_select].block))) {
+          && (survey1[iblock] == project.files[mbna_file_select].survey
+              || survey2[iblock] == project.files[mbna_file_select].survey))) {
           snprintf(string, sizeof(string), "block %4.4d: Survey %2.2d vs Survey %2.2d : Crossings: %4d %4d %4d %4d : Ties: %4d",
             iblock, survey1[iblock], survey2[iblock],
             n_tcrossing[iblock], n_50crossing[iblock], n_25crossing[iblock],
@@ -922,16 +898,18 @@ void do_update_status() {
           xstr[nblocklist] = XmStringCreateLocalized(string);
           if (mbna_verbose > 0)
             fprintf(stderr, "%s\n", string);
-          if (iblock == mbna_block_select)
+          if (iblock == mbna_survey_select)
             iblocklist_select = nblocklist;
           nblocklist++;
         }
       }
-
+fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
       XmListAddItems(list_data, xstr, nblocklist, 0);
+fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
       for (int iblocklist = 0; iblocklist < nblocklist; iblocklist++) {
         XmStringFree(xstr[iblocklist]);
       }
+fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
       free(xstr);
       free(survey1);
       free(survey2);
@@ -940,11 +918,14 @@ void do_update_status() {
       free(n_25crossing);
       free(n_allcrossing);
       free(n_tie);
-      if (mbna_block_select != MBNA_SELECT_NONE && iblocklist_select != MBNA_SELECT_NONE) {
+fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
+      if (mbna_survey_select != MBNA_SELECT_NONE && iblocklist_select != MBNA_SELECT_NONE) {
         XmListSelectPos(list_data, iblocklist_select + 1, 0);
         XmListSetPos(list_data, MAX(iblocklist_select + 1 - 5, 1));
       }
+fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
     }
+fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
   }
   else if (mbna_view_list == MBNA_VIEW_LIST_FILES) {
     if (mbna_view_mode == MBNA_VIEW_MODE_ALL)
@@ -952,7 +933,7 @@ void do_update_status() {
     else if (mbna_view_mode == MBNA_VIEW_MODE_SURVEY)
       snprintf(string, sizeof(string), "Data Files of Survey %d:", mbna_survey_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_BLOCK)
-      snprintf(string, sizeof(string), "Data Files of Survey-vs-Survey Block %d:", mbna_block_select);
+      snprintf(string, sizeof(string), "Data Files of Survey-vs-Survey Block %d:", mbna_survey_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_FILE)
       snprintf(string, sizeof(string), "Data File %d:%d:", mbna_survey_select, mbna_file_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY)
@@ -972,9 +953,9 @@ void do_update_status() {
       for (int i = 0; i < project.num_files; i++) {
         struct mbna_file *file = &(project.files[i]);
         if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
-            (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
+            (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->survey) ||
             (mbna_view_mode == MBNA_VIEW_MODE_FILE) ||
-            (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->block) ||
+            (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->survey) ||
             (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE) || (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION))
           num_files++;
       }
@@ -986,9 +967,9 @@ void do_update_status() {
       for (int i = 0; i < project.num_files; i++) {
         struct mbna_file *file = &(project.files[i]);
         if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
-            (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
+            (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->survey) ||
             (mbna_view_mode == MBNA_VIEW_MODE_FILE) ||
-            (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->block) ||
+            (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->survey) ||
             (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE) || (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION)) {
           if (file->status == MBNA_FILE_POORNAV)
             filestatus = filestatus_poor;
@@ -1009,7 +990,8 @@ void do_update_status() {
               num_global_ties++;
             }
           }
-          snprintf(string, sizeof(string), "%4.4d:%2.2d %s %4d %4.1f %4.1f g-ties:%d  %s", file->id, file->block, filestatus, file->num_sections,
+          snprintf(string, sizeof(string), "%2.2d:%4.4d %s %4d %4.1f %4.1f g-ties:%d  %s", 
+          	file->survey, file->id, filestatus, file->num_sections,
             file->heading_bias, file->roll_bias, num_global_ties, file->file);
           xstr[num_files] = XmStringCreateLocalized(string);
           if (mbna_verbose > 0)
@@ -1036,7 +1018,7 @@ void do_update_status() {
     else if (mbna_view_mode == MBNA_VIEW_MODE_SURVEY)
       snprintf(string, sizeof(string), "Data File Sections of Survey %d:", mbna_survey_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_BLOCK)
-      snprintf(string, sizeof(string), "Data Files Sections of Survey-vs-Survey Block %d:", mbna_block_select);
+      snprintf(string, sizeof(string), "Data Files Sections of Survey-vs-Survey Block %d:", mbna_survey_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_FILE)
       snprintf(string, sizeof(string), "Data File Sections of File %d:%d:", mbna_survey_select, mbna_file_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY)
@@ -1057,9 +1039,9 @@ void do_update_status() {
         struct mbna_file *file = &(project.files[i]);
         for (int j = 0; j < file->num_sections; j++) {
           if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
-              (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
+              (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->survey) ||
               (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == i) ||
-              (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->block) ||
+              (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->survey) ||
               (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE && mbna_file_select == i) ||
               (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == i)) {
             num_sections++;
@@ -1076,9 +1058,9 @@ void do_update_status() {
         for (int j = 0; j < file->num_sections; j++) {
           struct mbna_section *section = &(file->sections[j]);
           if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
-              (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
+              (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->survey) ||
               (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == i) ||
-              (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->block) ||
+              (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->survey) ||
               (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE && mbna_file_select == i) ||
               (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == i)) {
             int btime_i[7], etime_i[7];
@@ -1095,7 +1077,7 @@ void do_update_status() {
               snprintf(string, sizeof(string), 
                 "%c %2.2d:%4.4d:%2.2d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %4.4d/%2.2d/%2.2d "
                 "%2.2d:%2.2d:%2.2d.%6.6d",
-                status_char, file->block, file->id, j, btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4], btime_i[5],
+                status_char, file->survey, file->id, j, btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4], btime_i[5],
                 btime_i[6], etime_i[0], etime_i[1], etime_i[2], etime_i[3], etime_i[4], etime_i[5], etime_i[6]);
             else {
               char *tiestatus = NULL;
@@ -1123,7 +1105,7 @@ void do_update_status() {
                 snprintf(string, sizeof(string), 
                   "%c %2.2d:%4.4d:%2.2d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d"
                   " | %2.2d %s %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f | %s",
-                  status_char, file->block, file->id, j,
+                  status_char, file->survey, file->id, j,
                   btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4], btime_i[5], btime_i[6],
                   etime_i[0], etime_i[1], etime_i[2], etime_i[3], etime_i[4], etime_i[5], etime_i[6],
                   section->globaltie.snav, tiestatus,
@@ -1136,7 +1118,7 @@ void do_update_status() {
                 snprintf(string, sizeof(string), 
                   "%c %2.2d:%4.4d:%2.2d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d"
                   " | %2.2d %s %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f *** | %s",
-                  status_char, file->block, file->id, j,
+                  status_char, file->survey, file->id, j,
                   btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4], btime_i[5], btime_i[6],
                   etime_i[0], etime_i[1], etime_i[2], etime_i[3], etime_i[4], etime_i[5], etime_i[6],
                   section->globaltie.snav, tiestatus,
@@ -1149,7 +1131,7 @@ void do_update_status() {
                 snprintf(string, sizeof(string), 
                   "%c %2.2d:%4.4d:%2.2d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d"
                   " | %2.2d %s %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f",
-                  status_char, file->block, file->id, j,
+                  status_char, file->survey, file->id, j,
                   btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4], btime_i[5], btime_i[6],
                   etime_i[0], etime_i[1], etime_i[2], etime_i[3], etime_i[4], etime_i[5], etime_i[6],
                   section->globaltie.snav, tiestatus,
@@ -1183,7 +1165,7 @@ void do_update_status() {
     else if (mbna_view_mode == MBNA_VIEW_MODE_SURVEY)
       snprintf(string, sizeof(string), "Crossings of Survey %d:", mbna_survey_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_BLOCK)
-      snprintf(string, sizeof(string), "Crossings of Survey-vs-Survey Block %d:", mbna_block_select);
+      snprintf(string, sizeof(string), "Crossings of Survey-vs-Survey Block %d:", mbna_survey_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_FILE)
       snprintf(string, sizeof(string), "Crossings of File %d:%d:", mbna_survey_select, mbna_file_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY)
@@ -1225,8 +1207,8 @@ void do_update_status() {
           else
             truecrossing = 'X';
           snprintf(string, sizeof(string), "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing, i,
-            project.files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1,
-            project.files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2, crossing->overlap,
+            project.files[crossing->file_id_1].survey, crossing->file_id_1, crossing->section_1,
+            project.files[crossing->file_id_2].survey, crossing->file_id_2, crossing->section_2, crossing->overlap,
             crossing->num_ties);
           xstr[num_crossings] = XmStringCreateLocalized(string);
           if (mbna_verbose > 0)
@@ -1253,7 +1235,7 @@ void do_update_status() {
     else if (mbna_view_mode == MBNA_VIEW_MODE_SURVEY)
       snprintf(string, sizeof(string), ">10%% Overlap Crossings of Survey %d:", mbna_survey_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_BLOCK)
-      snprintf(string, sizeof(string), ">10%% Overlap Crossings of Survey-vs-Survey Block %d:", mbna_block_select);
+      snprintf(string, sizeof(string), ">10%% Overlap Crossings of Survey-vs-Survey Block %d:", mbna_survey_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_FILE)
       snprintf(string, sizeof(string), ">10%% Overlap Crossings of File %d:%d:", mbna_survey_select, mbna_file_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY)
@@ -1296,8 +1278,8 @@ void do_update_status() {
           else
             truecrossing = 'X';
           snprintf(string, sizeof(string), "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing, i,
-            project.files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1,
-            project.files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2, crossing->overlap,
+            project.files[crossing->file_id_1].survey, crossing->file_id_1, crossing->section_1,
+            project.files[crossing->file_id_2].survey, crossing->file_id_2, crossing->section_2, crossing->overlap,
             crossing->num_ties);
           xstr[num_crossings] = XmStringCreateLocalized(string);
           if (mbna_verbose > 0)
@@ -1324,7 +1306,7 @@ void do_update_status() {
     else if (mbna_view_mode == MBNA_VIEW_MODE_SURVEY)
       snprintf(string, sizeof(string), ">25%% Overlap Crossings of Survey %d:", mbna_survey_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_BLOCK)
-      snprintf(string, sizeof(string), ">25%% Overlap Crossings of Survey-vs-Survey Block %d:", mbna_block_select);
+      snprintf(string, sizeof(string), ">25%% Overlap Crossings of Survey-vs-Survey Block %d:", mbna_survey_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_FILE)
       snprintf(string, sizeof(string), ">25%% Overlap Crossings of File %d:%d:", mbna_survey_select, mbna_file_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY)
@@ -1367,8 +1349,8 @@ void do_update_status() {
           else
             truecrossing = 'X';
           snprintf(string, sizeof(string), "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing, i,
-            project.files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1,
-            project.files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2, crossing->overlap,
+            project.files[crossing->file_id_1].survey, crossing->file_id_1, crossing->section_1,
+            project.files[crossing->file_id_2].survey, crossing->file_id_2, crossing->section_2, crossing->overlap,
             crossing->num_ties);
           xstr[num_crossings] = XmStringCreateLocalized(string);
           if (mbna_verbose > 0)
@@ -1395,7 +1377,7 @@ void do_update_status() {
     else if (mbna_view_mode == MBNA_VIEW_MODE_SURVEY)
       snprintf(string, sizeof(string), ">50%% Crossings of Survey %d:", mbna_survey_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_BLOCK)
-      snprintf(string, sizeof(string), ">50%% Overlap Crossings of Survey-vs-Survey Block %d:", mbna_block_select);
+      snprintf(string, sizeof(string), ">50%% Overlap Crossings of Survey-vs-Survey Block %d:", mbna_survey_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_FILE)
       snprintf(string, sizeof(string), ">50%% Crossings of File %d:%d:", mbna_survey_select, mbna_file_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY)
@@ -1438,8 +1420,8 @@ void do_update_status() {
           else
             truecrossing = 'X';
           snprintf(string, sizeof(string), "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing, i,
-            project.files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1,
-            project.files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2, crossing->overlap,
+            project.files[crossing->file_id_1].survey, crossing->file_id_1, crossing->section_1,
+            project.files[crossing->file_id_2].survey, crossing->file_id_2, crossing->section_2, crossing->overlap,
             crossing->num_ties);
           xstr[num_crossings] = XmStringCreateLocalized(string);
           if (mbna_verbose > 0)
@@ -1466,7 +1448,7 @@ void do_update_status() {
     else if (mbna_view_mode == MBNA_VIEW_MODE_SURVEY)
       snprintf(string, sizeof(string), "True Crossings of Survey %d:", mbna_survey_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_BLOCK)
-      snprintf(string, sizeof(string), "True Crossings of Survey-vs-Survey Block %d:", mbna_block_select);
+      snprintf(string, sizeof(string), "True Crossings of Survey-vs-Survey Block %d:", mbna_survey_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_FILE)
       snprintf(string, sizeof(string), "True Crossings of File %d:%d:", mbna_survey_select, mbna_file_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY)
@@ -1508,8 +1490,8 @@ void do_update_status() {
           else
             truecrossing = 'X';
           snprintf(string, sizeof(string), "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing, i,
-            project.files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1,
-            project.files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2, crossing->overlap,
+            project.files[crossing->file_id_1].survey, crossing->file_id_1, crossing->section_1,
+            project.files[crossing->file_id_2].survey, crossing->file_id_2, crossing->section_2, crossing->overlap,
             crossing->num_ties);
           xstr[num_crossings] = XmStringCreateLocalized(string);
           if (mbna_verbose > 0)
@@ -1536,7 +1518,7 @@ void do_update_status() {
     else if (mbna_view_mode == MBNA_VIEW_MODE_SURVEY)
       snprintf(string, sizeof(string), "Ties of Survey %d:  Xing Tie Stat Sur1:Fil1:Sec1:Nv1 Sur2:Fil2:Sec2:Nv2 Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_BLOCK)
-      snprintf(string, sizeof(string), "Ties of Survey-vs-Survey Block %d:  Xing Tie Stat Sur1:Fil1:Sec1:Nv1 Sur2:Fil2:Sec2:Nv2 Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_block_select);
+      snprintf(string, sizeof(string), "Ties of Survey-vs-Survey Block %d:  Xing Tie Stat Sur1:Fil1:Sec1:Nv1 Sur2:Fil2:Sec2:Nv2 Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_FILE)
       snprintf(string, sizeof(string), "Ties of File %d:%d:  Xing Tie Stat Sur1:Fil1:Sec1:Nv1 Sur2:Fil2:Sec2:Nv2 Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select, mbna_file_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY)
@@ -1593,8 +1575,8 @@ void do_update_status() {
               sprintf(string,
                 "%6d %2d %s %2.2d:%4.4d:%3.3d:%2.2d %2.2d:%4.4d:%3.3d:%2.2d "
                 "%8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f",
-                i, j, tiestatus, project.files[crossing->file_id_1].block, crossing->file_id_1,
-                crossing->section_1, tie->snav_1, project.files[crossing->file_id_2].block,
+                i, j, tiestatus, project.files[crossing->file_id_1].survey, crossing->file_id_1,
+                crossing->section_1, tie->snav_1, project.files[crossing->file_id_2].survey,
                 crossing->file_id_2, crossing->section_2, tie->snav_2,
                 tie->offset_x_m, tie->offset_y_m, tie->offset_z_m,
                 tie->sigmar1, tie->sigmar2, tie->sigmar3,
@@ -1604,8 +1586,8 @@ void do_update_status() {
               sprintf(string,
                 "%6d %2d %s %2.2d:%4.4d:%3.3d:%2.2d %2.2d:%4.4d:%3.3d:%2.2d "
                 "%8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f ***",
-                i, j, tiestatus, project.files[crossing->file_id_1].block, crossing->file_id_1,
-                crossing->section_1, tie->snav_1, project.files[crossing->file_id_2].block,
+                i, j, tiestatus, project.files[crossing->file_id_1].survey, crossing->file_id_1,
+                crossing->section_1, tie->snav_1, project.files[crossing->file_id_2].survey,
                 crossing->file_id_2, crossing->section_2, tie->snav_2,
                 tie->offset_x_m, tie->offset_y_m, tie->offset_z_m,
                 tie->sigmar1, tie->sigmar2, tie->sigmar3,
@@ -1615,8 +1597,8 @@ void do_update_status() {
               sprintf(string,
                 "%6d %2d %s %2.2d:%4.4d:%3.3d:%2.2d %2.2d:%4.4d:%3.3d:%2.2d "
                 "%8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f",
-                i, j, tiestatus, project.files[crossing->file_id_1].block, crossing->file_id_1,
-                crossing->section_1, tie->snav_1, project.files[crossing->file_id_2].block,
+                i, j, tiestatus, project.files[crossing->file_id_1].survey, crossing->file_id_1,
+                crossing->section_1, tie->snav_1, project.files[crossing->file_id_2].survey,
                 crossing->file_id_2, crossing->section_2, tie->snav_2,
                 tie->offset_x_m, tie->offset_y_m, tie->offset_z_m,
                 tie->sigmar1, tie->sigmar2, tie->sigmar3);
@@ -1651,7 +1633,7 @@ void do_update_status() {
     else if (mbna_view_mode == MBNA_VIEW_MODE_SURVEY)
       snprintf(string, sizeof(string), "Sorted Ties of Survey %d:  Xing Tie Stat Sur1:Fil1:Sec1:Nv1 Sur2:Fil2:Sec2:Nv2 Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_BLOCK)
-      snprintf(string, sizeof(string), "Sorted Ties of Survey-vs-Survey Block %d:  Xing Tie Stat Sur1:Fil1:Sec1:Nv1 Sur2:Fil2:Sec2:Nv2 Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_block_select);
+      snprintf(string, sizeof(string), "Sorted Ties of Survey-vs-Survey Block %d:  Xing Tie Stat Sur1:Fil1:Sec1:Nv1 Sur2:Fil2:Sec2:Nv2 Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_FILE)
       snprintf(string, sizeof(string), "Sorted Ties of File %d:%d:  Xing Tie Stat Sur1:Fil1:Sec1:Nv1 Sur2:Fil2:Sec2:Nv2 Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select, mbna_file_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY)
@@ -1740,8 +1722,8 @@ void do_update_status() {
             sprintf(string,
               "%6d %2d %s %2.2d:%4.4d:%3.3d:%2.2d %2.2d:%4.4d:%3.3d:%2.2d "
               "%8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f",
-              tie->icrossing, tie->itie, tiestatus, project.files[crossing->file_id_1].block, crossing->file_id_1,
-              crossing->section_1, tie->snav_1, project.files[crossing->file_id_2].block,
+              tie->icrossing, tie->itie, tiestatus, project.files[crossing->file_id_1].survey, crossing->file_id_1,
+              crossing->section_1, tie->snav_1, project.files[crossing->file_id_2].survey,
               crossing->file_id_2, crossing->section_2, tie->snav_2,
               tie->offset_x_m, tie->offset_y_m, tie->offset_z_m,
               tie->sigmar1, tie->sigmar2, tie->sigmar3,
@@ -1750,8 +1732,8 @@ void do_update_status() {
             sprintf(string,
               "%6d %2d %s %2.2d:%4.4d:%3.3d:%2.2d %2.2d:%4.4d:%3.3d:%2.2d "
               "%8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f ***",
-              tie->icrossing, tie->itie, tiestatus, project.files[crossing->file_id_1].block, crossing->file_id_1,
-              crossing->section_1, tie->snav_1, project.files[crossing->file_id_2].block,
+              tie->icrossing, tie->itie, tiestatus, project.files[crossing->file_id_1].survey, crossing->file_id_1,
+              crossing->section_1, tie->snav_1, project.files[crossing->file_id_2].survey,
               crossing->file_id_2, crossing->section_2, tie->snav_2,
               tie->offset_x_m, tie->offset_y_m, tie->offset_z_m,
               tie->sigmar1, tie->sigmar2, tie->sigmar3,
@@ -1760,8 +1742,8 @@ void do_update_status() {
             sprintf(string,
               "%6d %2d %s %2.2d:%4.4d:%3.3d:%2.2d %2.2d:%4.4d:%3.3d:%2.2d "
               "%8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f",
-              tie->icrossing, tie->itie, tiestatus, project.files[crossing->file_id_1].block, crossing->file_id_1,
-              crossing->section_1, tie->snav_1, project.files[crossing->file_id_2].block,
+              tie->icrossing, tie->itie, tiestatus, project.files[crossing->file_id_1].survey, crossing->file_id_1,
+              crossing->section_1, tie->snav_1, project.files[crossing->file_id_2].survey,
               crossing->file_id_2, crossing->section_2, tie->snav_2,
               tie->offset_x_m, tie->offset_y_m, tie->offset_z_m,
               tie->sigmar1, tie->sigmar2, tie->sigmar3);
@@ -1793,7 +1775,7 @@ void do_update_status() {
     else if (mbna_view_mode == MBNA_VIEW_MODE_SURVEY)
       snprintf(string, sizeof(string), "Global Ties of Survey %d:  Sur:File:Sec:Nv Stat RefGrid  Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_BLOCK)
-      snprintf(string, sizeof(string), "Global Ties of Survey-vs-Survey Block %d:  Sur:File:Sec:Nv Stat RefGrid  Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_block_select);
+      snprintf(string, sizeof(string), "Global Ties of Survey-vs-Survey Block %d:  Sur:File:Sec:Nv Stat RefGrid  Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_FILE)
       snprintf(string, sizeof(string), "Global Ties of File %d:%d:  Sur:File:Sec:Nv Stat RefGrid  Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select, mbna_file_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY)
@@ -1818,9 +1800,9 @@ void do_update_status() {
           struct mbna_section *section = &(file->sections[j]);
           if (section->status == MBNA_CROSSING_STATUS_SET &&
               ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
-               (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
+               (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->survey) ||
                (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == i) ||
-               (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->block) ||
+               (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->survey) ||
                (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE && mbna_file_select == i) ||
                (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == i && mbna_section_select == j))) {
             num_globalties++;
@@ -1842,9 +1824,9 @@ void do_update_status() {
           struct mbna_section *section = &(file->sections[j]);
           if (section->status == MBNA_CROSSING_STATUS_SET &&
               ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
-               (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
+               (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->survey) ||
                (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == i) ||
-               (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->block) ||
+               (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->survey) ||
                (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE && mbna_file_select == i) ||
                (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == i && mbna_section_select == j))) {
             char *tiestatus = NULL;
@@ -1871,7 +1853,7 @@ void do_update_status() {
             if (section->globaltie.inversion_status == MBNA_INVERSION_CURRENT)
               sprintf(string,
                 "%2.2d:%4.4d:%3.3d:%2.2d %s %2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f | %s",
-                project.files[i].block, i, j, section->globaltie.snav, tiestatus, section->globaltie.refgrid_id, 
+                project.files[i].survey, i, j, section->globaltie.snav, tiestatus, section->globaltie.refgrid_id, 
                 section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
                 section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3,
                 section->globaltie.dx_m, section->globaltie.dy_m, section->globaltie.dz_m,
@@ -1879,7 +1861,7 @@ void do_update_status() {
             else if (section->globaltie.inversion_status == MBNA_INVERSION_OLD)
               sprintf(string,
                 "%2.2d:%4.4d:%3.3d:%2.2d %s %2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f *** | %s",
-                project.files[i].block, i, j, section->globaltie.snav, tiestatus, section->globaltie.refgrid_id,
+                project.files[i].survey, i, j, section->globaltie.snav, tiestatus, section->globaltie.refgrid_id,
                 section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
                 section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3,
                 section->globaltie.dx_m, section->globaltie.dy_m, section->globaltie.dz_m,
@@ -1887,7 +1869,7 @@ void do_update_status() {
             else
               sprintf(string,
                 "%2.2d:%4.4d:%3.3d:%2.2d %s %2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %s",
-                project.files[i].block, i, j, section->globaltie.snav, tiestatus, section->globaltie.refgrid_id,
+                project.files[i].survey, i, j, section->globaltie.snav, tiestatus, section->globaltie.refgrid_id,
                 section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
                 section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3, refgrid_name);
             xstr[num_globalties] = XmStringCreateLocalized(string);
@@ -1917,7 +1899,7 @@ void do_update_status() {
     else if (mbna_view_mode == MBNA_VIEW_MODE_SURVEY)
       snprintf(string, sizeof(string), "Global Ties of Survey %d:  Sur:File:Sec:Nv Stat RefGrid  Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_BLOCK)
-      snprintf(string, sizeof(string), "Global Ties of Survey-vs-Survey Block %d:  Sur:File:Sec:Nv Stat RefGrid  Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_block_select);
+      snprintf(string, sizeof(string), "Global Ties of Survey-vs-Survey Block %d:  Sur:File:Sec:Nv Stat RefGrid  Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_FILE)
       snprintf(string, sizeof(string), "Global Ties of File %d:%d:  Sur:File:Sec:Nv Stat RefGrid  Offx Offy Offz | S1 S2 S3 | Ex Ey Ez | Se Sr", mbna_survey_select, mbna_file_select);
     else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY)
@@ -1941,9 +1923,9 @@ void do_update_status() {
           struct mbna_section *section = &(file->sections[j]);
           if (section->status == MBNA_CROSSING_STATUS_SET &&
               ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
-               (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
+               (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->survey) ||
                (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == i) ||
-               (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->block) ||
+               (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->survey) ||
                (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE && mbna_file_select == i) ||
                (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == i && mbna_section_select == j))) {
             num_globalties++;
@@ -1966,9 +1948,9 @@ void do_update_status() {
           struct mbna_section *section = &(file->sections[j]);
           if (section->status == MBNA_CROSSING_STATUS_SET &&
               ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
-               (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
+               (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->survey) ||
                (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == i) ||
-               (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->block) ||
+               (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->survey) ||
                (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE && mbna_file_select == i) ||
                (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == i && mbna_section_select == j))) {
             section_ptr_list[num_globalties] = section;
@@ -2009,7 +1991,7 @@ void do_update_status() {
         if (section->globaltie.inversion_status == MBNA_INVERSION_CURRENT)
           sprintf(string,
             "%2.2d:%4.4d:%3.3d:%2.2d %s %2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f | %s",
-            project.files[section->file_id].block,
+            project.files[section->file_id].survey,
             section->file_id, section->section_id,
             section->globaltie.snav, tiestatus, section->globaltie.refgrid_id,
             section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
@@ -2019,7 +2001,7 @@ void do_update_status() {
         else if (section->globaltie.inversion_status == MBNA_INVERSION_OLD)
           sprintf(string,
             "%2.2d:%4.4d:%3.3d:%2.2d %s %2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f *** | %s",
-            project.files[section->file_id].block,
+            project.files[section->file_id].survey,
             section->file_id, section->section_id,
             section->globaltie.snav, tiestatus, section->globaltie.refgrid_id,
             section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
@@ -2029,7 +2011,7 @@ void do_update_status() {
         else
           sprintf(string,
             "%2.2d:%4.4d:%3.3d:%2.2d %s %2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %s",
-            project.files[section->file_id].block,
+            project.files[section->file_id].survey,
             section->file_id, section->section_id,
             section->globaltie.snav, tiestatus, section->globaltie.refgrid_id,
             section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
@@ -2055,6 +2037,7 @@ void do_update_status() {
       XmListSetPos(list_data, MAX(iselect + 1 - 5, 1));
     }
   }
+fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
 
   XtVaSetValues(toggleButton_showallsurveys, XmNsensitive, True, NULL);
   XtVaSetValues(toggleButton_showselectedsurvey, XmNsensitive, True, NULL);
@@ -2476,8 +2459,8 @@ void do_update_modelplot_status() {
 					snprintf(string, sizeof(string),
 						":::t\"Mouse: <left> select  tie; <middle> select untied crossing; <right> drag zoom "
 						"extent\":t\"Selected Crossing: %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d\"",
-						mbna_crossing_select, project.files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1,
-						project.files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2);
+						mbna_crossing_select, project.files[crossing->file_id_1].survey, crossing->file_id_1, crossing->section_1,
+						project.files[crossing->file_id_2].survey, crossing->file_id_2, crossing->section_2);
 				}
 			}
 			else {
@@ -2490,8 +2473,8 @@ void do_update_modelplot_status() {
 					snprintf(string, sizeof(string),
 						":::t\"Mouse: <left> select  tie; <middle> select block to view; <right> drag zoom extent\":t\"Selected "
 						"Crossing: %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d\"",
-						mbna_crossing_select, project.files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1,
-						project.files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2);
+						mbna_crossing_select, project.files[crossing->file_id_1].survey, crossing->file_id_1, crossing->section_1,
+						project.files[crossing->file_id_2].survey, crossing->file_id_2, crossing->section_2);
 				}
 			}
     }
@@ -2506,7 +2489,7 @@ void do_update_modelplot_status() {
 					snprintf(string, sizeof(string),
 						":::t\"Mouse: <left> select global tie; <middle> select untied section <right> drag zoom "
 						"extent\":t\"Selected Section: %2.2d:%3.3d:%3.3d\"",
-						project.files[mbna_current_file].block, mbna_current_file, mbna_current_section);
+						project.files[mbna_current_file].survey, mbna_current_file, mbna_current_section);
 				}
 			}
 			else {
@@ -2519,8 +2502,8 @@ void do_update_modelplot_status() {
 					snprintf(string, sizeof(string),
 						":::t\"Mouse: <left> select  tie; <middle> select block to view; <right> drag zoom extent\":t\"Selected "
 						"Crossing: %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d\"",
-						mbna_crossing_select, project.files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1,
-						project.files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2);
+						mbna_crossing_select, project.files[crossing->file_id_1].survey, crossing->file_id_1, crossing->section_1,
+						project.files[crossing->file_id_2].survey, crossing->file_id_2, crossing->section_2);
 				}
 			}
     }
@@ -2722,8 +2705,8 @@ void do_naverr_update() {
 :t\"Plot Widths (m): Contour: %.2f Misfit: %.2f Z: %.2f\"\
 :t\"Zoom Factor: %.2f \"\
 :t\"Relative Offsets:   None None None\"", mbna_current_crossing, project.num_crossings,
-        project.files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1,
-        project.files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2, timediff, plot_width,
+        project.files[crossing->file_id_1].survey, crossing->file_id_1, crossing->section_1,
+        project.files[crossing->file_id_2].survey, crossing->file_id_2, crossing->section_2, timediff, plot_width,
         misfit_width, project.zoffsetwidth, zoom_factor);
     }
     else if (crossing->status == MBNA_CROSSING_STATUS_SET) {
@@ -2735,8 +2718,8 @@ void do_naverr_update() {
 :t\"Zoom Factor: %.2f \"\
 :t\"Relative Offsets (m):   %.3f %.3f %.3f\"\
 :t\"Sigma (m):   %.3f %.3f %.3f\"", mbna_current_crossing, project.num_crossings,
-        project.files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1,
-        project.files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2, timediff,
+        project.files[crossing->file_id_1].survey, crossing->file_id_1, crossing->section_1,
+        project.files[crossing->file_id_2].survey, crossing->file_id_2, crossing->section_2, timediff,
         mbna_current_tie, crossing->num_ties, tie->snav_1, tie->snav_2, plot_width, misfit_width,
         project.zoffsetwidth, zoom_factor, tie->offset_x_m, tie->offset_y_m, tie->offset_z_m, tie->sigmar1,
         tie->sigmar2, tie->sigmar3);
@@ -2749,8 +2732,8 @@ void do_naverr_update() {
 :t\"Plot Widths (m): Contour: %.2f Misfit: %.2f Z: %.2f\"\
 :t\"Zoom Factor: %.2f \"\
 :t\"Relative Offsets:   Skipped Skipped Skipped\"", mbna_current_crossing, project.num_crossings,
-        project.files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1,
-        project.files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2, timediff, plot_width,
+        project.files[crossing->file_id_1].survey, crossing->file_id_1, crossing->section_1,
+        project.files[crossing->file_id_2].survey, crossing->file_id_2, crossing->section_2, timediff, plot_width,
         misfit_width, project.zoffsetwidth, zoom_factor);
     }
     set_label_multiline_string(label_naverr_status, string);
@@ -2853,7 +2836,7 @@ void do_naverr_update() {
 :t\"Plot Widths (m): Contour: %.2f Misfit: %.2f Z: %.2f\"\
 :t\"Zoom Factor: %.2f \"\
 :t\"Relative Offsets:   None None None\"",
-        project.files[mbna_current_file].block, mbna_current_file, mbna_current_section, 
+        project.files[mbna_current_file].survey, mbna_current_file, mbna_current_section, 
         refgrid_name, plot_width, misfit_width, project.zoffsetwidth, zoom_factor);
     }
     else if (section->status == MBNA_CROSSING_STATUS_SKIP) {
@@ -2863,7 +2846,7 @@ void do_naverr_update() {
 :t\"Plot Widths (m): Contour: %.2f Misfit: %.2f Z: %.2f\"\
 :t\"Zoom Factor: %.2f \"\
 :t\"Relative Offsets:   None None None\"",
-        project.files[mbna_current_file].block, mbna_current_file, mbna_current_section, 
+        project.files[mbna_current_file].survey, mbna_current_file, mbna_current_section, 
         refgrid_name, plot_width, misfit_width, project.zoffsetwidth, zoom_factor);
     }
     else {
@@ -2875,7 +2858,7 @@ void do_naverr_update() {
 :t\"Zoom Factor: %.2f \"\
 :t\"Relative Offsets (m):   %.3f %.3f %.3f\"\
 :t\"Sigma (m):   %.3f %.3f %.3f\"",
-        project.files[mbna_current_file].block, mbna_current_file, mbna_current_section,
+        project.files[mbna_current_file].survey, mbna_current_file, mbna_current_section,
         refgrid_name, 
         globaltie->snav, plot_width, misfit_width, project.zoffsetwidth, zoom_factor,
         globaltie->offset_x_m, globaltie->offset_y_m, globaltie->offset_z_m,
@@ -3031,7 +3014,7 @@ fprintf(stderr,"mbna_referencegrid_select:%d of %d\n", project.refgrid_select, p
       /* get selected file from list */
       for (int i= 0; i < project.num_files; i++) {
         file = &(project.files[i]);
-        if (mbna_file_select == MBNA_SELECT_NONE && mbna_survey_select == file->block) {
+        if (mbna_file_select == MBNA_SELECT_NONE && mbna_survey_select == file->survey) {
           mbna_file_select = i;
           mbna_section_select = 0;
         }
@@ -3050,11 +3033,11 @@ fprintf(stderr,"mbna_referencegrid_select:%d of %d\n", project.refgrid_select, p
       const int nscan = sscanf(selected_item, "block %d: Survey %d vs Survey %d : Crossings: %d %d %d %d : Ties: %d",
              &iblock_select, &isurvey1, &isurvey2, &d1, &d2, &d3, &d4, &d5);
       if (nscan == 8) {
-        mbna_block_select = iblock_select;
-        mbna_block_select1 = isurvey1;
-        mbna_block_select2 = isurvey2;
+        mbna_survey_select = iblock_select;
+        mbna_survey_select1 = isurvey1;
+        mbna_survey_select2 = isurvey2;
       }
-      // fprintf(stderr,"mbna_block_select:%d:%d:%d\n",mbna_block_select,mbna_block_select1,mbna_block_select2);
+      // fprintf(stderr,"mbna_survey_select:%d:%d:%d\n",mbna_survey_select,mbna_survey_select1,mbna_survey_select2);
       project.modelplot_uptodate = false;
     }
     else if (mbna_view_list == MBNA_VIEW_LIST_FILES) {
@@ -3064,14 +3047,14 @@ fprintf(stderr,"mbna_referencegrid_select:%d of %d\n", project.refgrid_select, p
       for (int i= 0; i < project.num_files; i++) {
         file = &(project.files[i]);
         if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
-            (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
+            (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->survey) ||
             (mbna_view_mode == MBNA_VIEW_MODE_FILE) ||
-            (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->block) ||
+            (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->survey) ||
             (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE) || (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION)) {
           if (num_files == position_list[0] - 1) {
             mbna_section_select = 0;
             mbna_file_select = i;
-            mbna_survey_select = file->block;
+            mbna_survey_select = file->survey;
           }
           num_files++;
         }
@@ -3085,15 +3068,15 @@ fprintf(stderr,"mbna_referencegrid_select:%d of %d\n", project.refgrid_select, p
         file = &(project.files[i]);
         for (int j = 0; j < file->num_sections; j++) {
           if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
-              (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
+              (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->survey) ||
               (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == i) ||
-              (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->block) ||
+              (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->survey) ||
               (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE && mbna_file_select == i) ||
               (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == i)) {
             if (num_sections == position_list[0] - 1) {
               mbna_section_select = j;
               mbna_file_select = i;
-              mbna_survey_select = file->block;
+              mbna_survey_select = file->survey;
             }
             num_sections++;
           }
@@ -3387,19 +3370,19 @@ int do_check_crossing_listok(int icrossing) {
 
   /* check view mode modifiers */
   if (use_status) {
-    // fprintf(stderr,"icrossing:%d mbna_view_mode:%d mbna_survey_select:%d mbna_block_select:%d:%d:%d mbna_file_select:%d
+    // fprintf(stderr,"icrossing:%d mbna_view_mode:%d mbna_survey_select:%d mbna_survey_select:%d:%d:%d mbna_file_select:%d
     // mbna_section_select:%d",
-    // icrossing,mbna_view_mode,mbna_survey_select,mbna_block_select,mbna_block_select1,mbna_block_select2,
+    // icrossing,mbna_view_mode,mbna_survey_select,mbna_survey_select,mbna_survey_select1,mbna_survey_select2,
     // mbna_file_select,mbna_section_select);
     if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
-        (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == project.files[crossing->file_id_1].block &&
-         mbna_survey_select == project.files[crossing->file_id_2].block) ||
-        (mbna_view_mode == MBNA_VIEW_MODE_BLOCK && mbna_block_select1 == project.files[crossing->file_id_1].block &&
-         mbna_block_select2 == project.files[crossing->file_id_2].block) ||
+        (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == project.files[crossing->file_id_1].survey &&
+         mbna_survey_select == project.files[crossing->file_id_2].survey) ||
+        (mbna_view_mode == MBNA_VIEW_MODE_BLOCK && mbna_survey_select1 == project.files[crossing->file_id_1].survey &&
+         mbna_survey_select2 == project.files[crossing->file_id_2].survey) ||
         (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == crossing->file_id_1 &&
          mbna_file_select == crossing->file_id_2) ||
-        (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && (mbna_survey_select == project.files[crossing->file_id_1].block ||
-                     mbna_survey_select == project.files[crossing->file_id_2].block)) ||
+        (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && (mbna_survey_select == project.files[crossing->file_id_1].survey ||
+                     mbna_survey_select == project.files[crossing->file_id_2].survey)) ||
         (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE &&
          (mbna_file_select == crossing->file_id_1 || mbna_file_select == crossing->file_id_2)) ||
         (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == crossing->file_id_1 &&
@@ -3443,9 +3426,9 @@ int do_check_section_listok(int ifile, int isection) {
   /* check view mode modifiers */
   if (use_status) {
     if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
-        (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == project.files[ifile].block) ||
+        (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == project.files[ifile].survey) ||
         (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == ifile) ||
-        (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_file_select == project.files[ifile].block) ||
+        (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_file_select == project.files[ifile].survey) ||
         (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE && mbna_file_select == ifile) ||
         (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == ifile && mbna_section_select == isection) ) {
       use_status = true;
@@ -3469,11 +3452,11 @@ int do_check_globaltie_listok(int ifile, int isection) {
   bool use_status = false;
   if (section->status == MBNA_CROSSING_STATUS_SET) {
     if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
-        (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
+        (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->survey) ||
         (mbna_view_mode == MBNA_VIEW_MODE_BLOCK &&
-         (mbna_block_select1 == file->block || mbna_block_select2 == file->block)) ||
+         (mbna_survey_select1 == file->survey || mbna_survey_select2 == file->survey)) ||
         (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == ifile) ||
-        (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->block) ||
+        (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->survey) ||
         (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE && mbna_file_select == ifile) ||
         (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == ifile && mbna_section_select == isection) ||
         (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == ifile && mbna_section_select == isection)) {
@@ -3492,11 +3475,11 @@ int do_check_nav_active(int ifile, int isection) {
   /* check section nav for view mode */
   bool active = false;
   if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
-      (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
+      (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->survey) ||
       (mbna_view_mode == MBNA_VIEW_MODE_BLOCK &&
-       (mbna_block_select1 == file->block || mbna_block_select2 == file->block)) ||
+       (mbna_survey_select1 == file->survey || mbna_survey_select2 == file->survey)) ||
       (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == ifile) ||
-      (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->block) ||
+      (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->survey) ||
       (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE && mbna_file_select == ifile) ||
       (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == ifile && mbna_section_select == isection) ||
       (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == ifile && mbna_section_select == isection)) {
@@ -4301,10 +4284,10 @@ void do_naverr_minxymisfit(Widget w, XtPointer client_data, XtPointer call_data)
   mbna_offset_x = mbna_minmisfit_xh;
   mbna_offset_y = mbna_minmisfit_yh;
   mbna_offset_z = mbna_minmisfit_zh;
-fprintf(stderr,"do_naverr_minxymisfit mbna_minmisfit_xh:%f mbna_minmisfit_yh:%f mbna_minmisfit_zh:%f\n",
-mbna_minmisfit_xh, mbna_minmisfit_yh, mbna_minmisfit_zh);
-fprintf(stderr,"%s %d: mbna_offset_z:%f mbna_offset_z:%f mbna_offset_z:%f\n",
-__FILE__, __LINE__, mbna_offset_x, mbna_offset_y, mbna_offset_z);
+//fprintf(stderr,"do_naverr_minxymisfit mbna_minmisfit_xh:%f mbna_minmisfit_yh:%f mbna_minmisfit_zh:%f\n",
+//mbna_minmisfit_xh, mbna_minmisfit_yh, mbna_minmisfit_zh);
+//fprintf(stderr,"%s %d: mbna_offset_z:%f mbna_offset_z:%f mbna_offset_z:%f\n",
+//__FILE__, __LINE__, mbna_offset_x, mbna_offset_y, mbna_offset_z);
 
   /* replot contours */
   mbnavadjust_naverr_replot();
@@ -4972,7 +4955,10 @@ void do_fileselection_mode(Widget w, XtPointer client_data, XtPointer call_data)
   else if (file_mode == FILE_MODE_OPEN) {
     tmp0 = (XmString)BX_CONVERT(fileSelectionBox, "*.nvh", XmRXmString, 0, &argok);
   }
-  else if (file_mode == FILE_MODE_IMPORT) {
+  else if (file_mode == FILE_MODE_IMPORTDATA) {
+    tmp0 = (XmString)BX_CONVERT(fileSelectionBox, "*.mb-1", XmRXmString, 0, &argok);
+  }
+  else if (file_mode == FILE_MODE_IMPORTSURVEY) {
     tmp0 = (XmString)BX_CONVERT(fileSelectionBox, "*.mb-1", XmRXmString, 0, &argok);
   }
   else if (file_mode == FILE_MODE_REFERENCE) {
@@ -5018,13 +5004,19 @@ void do_fileselection_ok(Widget w, XtPointer client_data, XtPointer call_data) {
     do_message_off();
     do_update_status();
   }
-  else if (file_mode == FILE_MODE_IMPORT) {
+  else if (file_mode == FILE_MODE_IMPORTDATA || file_mode == FILE_MODE_IMPORTSURVEY) {
     char format_text[40];
     get_text_string(textField_format, format_text);
     sscanf(format_text, "%d", &format);
-    snprintf(message, sizeof(message), "Importing data from %s %d", ifile, format);
+    bool import_single_survey = false;
+    if (file_mode == FILE_MODE_IMPORTSURVEY) {
+    	import_single_survey = true;
+    	snprintf(message, sizeof(message), "Importing single survey from %s %d", ifile, format);
+    } else {
+    	snprintf(message, sizeof(message), "Importing data from %s %d", ifile, format);
+    }
     do_message_on(message);
-    status = mbnavadjust_import_data(mbna_verbose, &project, ifile, format, &error);
+    status = mbnavadjust_import_data(mbna_verbose, &project, ifile, format, import_single_survey, &error);
     do_message_off();
 
     /* update datalist files and topography grids */
@@ -6165,9 +6157,9 @@ void do_modelplot_fullsize(Widget w, XtPointer client_data, XtPointer call_data)
     mbna_modelplot_tiezoom = false;
     mbna_modelplot_tiestartzoom = 0;
     mbna_modelplot_tieendzoom = 0;
-    mbna_block_select = MBNA_SELECT_NONE;
-    mbna_block_select1 = MBNA_SELECT_NONE;
-    mbna_block_select2 = MBNA_SELECT_NONE;
+    mbna_survey_select = MBNA_SELECT_NONE;
+    mbna_survey_select1 = MBNA_SELECT_NONE;
+    mbna_survey_select2 = MBNA_SELECT_NONE;
   }
 
   project.modelplot_uptodate = false;
@@ -6474,7 +6466,7 @@ void do_pickroute_notify(size_t instance) {
       mbna_current_section = isection;
       mbna_file_select = ifile;
       mbna_section_select = isection;
-      mbna_survey_select = project.files[mbna_file_select].block;
+      mbna_survey_select = project.files[mbna_file_select].survey;
       mbna_file_id_2 = ifile;
       mbna_section_2 = isection;
 
@@ -6567,7 +6559,7 @@ void do_picknav_notify(size_t instance) {
       mbna_current_section = isection1;
       mbna_file_select = ifile1;
       mbna_section_select = isection1;
-      mbna_survey_select = project.files[mbna_file_select].block;
+      mbna_survey_select = project.files[mbna_file_select].survey;
       mbna_file_id_2 = ifile1;
       mbna_section_2 = isection1;
 

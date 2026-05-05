@@ -249,7 +249,7 @@ struct mbsys_3ddwissl2_sriatrange_struct
    short lineAccelX         ; // 16 bits - signed acceleration, full res
    short lineAccelY         ; // 16 bits - signed acceleration, full res
    short lineAccelZ         ; // 16 bits - signed acceleration, full res  
-   unsigned short lineIndex          ; // U16.15 Water index
+   unsigned short lineIndex          ; // U16.15 Water index // indexWater = lineIndex * 2 / 65535
    
    unsigned short RowNumber          ; // 0-3800 (12 bits), data is for this row.
    // ---------------------------------------------------------------------

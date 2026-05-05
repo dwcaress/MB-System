@@ -42,9 +42,9 @@
 #include "mb_status.h"
 #endif
 
-/* Current MBnavadjust project file verion is 3.13 */
+/* Current MBnavadjust project file verion is 3.16 */
 #define MBNA_FILE_VERSION_MAJOR 3
-#define MBNA_FILE_VERSION_MINOR 15
+#define MBNA_FILE_VERSION_MINOR 16
 
 /* mbnavadjust global defines */
 #define MBNA_USE_MODE_NONE 0
@@ -273,6 +273,7 @@ struct mbna_file {
   double roll_bias_import;
   double heading_bias;
   double roll_bias;
+  int survey;
   int block;
   double block_offset_x;
   double block_offset_y;
@@ -366,6 +367,7 @@ struct mbna_project {
   int num_files_alloc;
   struct mbna_file *files;
   int num_surveys;
+  int num_blocks;
   int num_snavs;
   int num_pings;
   int num_beams;
@@ -513,7 +515,7 @@ int mbnavadjust_reference_load(int verbose, struct mbna_project *project, int re
                                 struct mbna_section *section, void **swath, int *error);
 int mbnavadjust_reference_unload(int verbose, void **swath, int *error);
 int mbnavadjust_refgrid_unload(int verbose, struct mbna_project *project, int *error);
-int mbnavadjust_import_data(int verbose, struct mbna_project *project, char *path, int format, int *error);
+int mbnavadjust_import_data(int verbose, struct mbna_project *project, char *path, int format, bool import_single_survey, int *error);
 int mbnavadjust_import_file(int verbose, struct mbna_project *project, char *path, int format, bool firstfile, int *error);
 int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,int ifile, int *error);
 int mbnavadjust_coverage_mask(int verbose, struct mbna_project *project, int ifile, int isection, int *error);

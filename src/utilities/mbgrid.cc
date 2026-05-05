@@ -114,6 +114,13 @@ typedef enum {
     MBGRID_INTERP_ALL = 3,
 } grid_interp_t;
 
+/* shift mode */
+typedef enum {
+    MBGRID_SHIFT_NONE = 0,
+    MBGRID_SHIFT_BOUNDS = 1,
+    MBGRID_SHIFT_DATA = 2,
+} grid_shift_t;
+
 /* comparison threshold */;
 constexpr double MBGRID_TINY = 0.00000001;
 
@@ -456,9 +463,11 @@ int main(int argc, char **argv) {
   bool gbndset = false;
   double scale = 1.0;
   double extend = 0.0;
+  int shift_mode = MBGRID_SHIFT_NONE;
   double shift_x = 0.0;
   double shift_y = 0.0;
-  bool shift = false;
+  double shift_lon = 0.0;
+  double shift_lat = 0.0;
   bool first_in_stays = true;
   bool check_time = false;
   double timediff = 300.0;
@@ -683,10 +692,13 @@ int main(int argc, char **argv) {
         break;
       case 'Y':
       case 'y':
-        if (int n = sscanf(optarg, "%lf/%lf", &shift_x, &shift_y) == 2) {
-          shift = true;
+      	{
+					const int n = sscanf(optarg, "%lf/%lf/%d", &shift_x, &shift_y, &shift_mode);
+					if (n == 2) {
+						shift_mode = MBGRID_SHIFT_BOUNDS;
+					}
+					break;
         }
-        break;
       case '?':
         errflg = true;
       }
@@ -753,7 +765,7 @@ int main(int argc, char **argv) {
       fprintf(outfp, "dbg2       setborder:            %d\n", setborder);
       fprintf(outfp, "dbg2       border:               %f\n", border);
       fprintf(outfp, "dbg2       extend:               %f\n", extend);
-      fprintf(outfp, "dbg2       shift:                %d\n", shift);
+      fprintf(outfp, "dbg2       shift_mode:           %d\n", shift_mode);
       fprintf(outfp, "dbg2       shift_x:              %f\n", shift_x);
       fprintf(outfp, "dbg2       shift_y:              %f\n", shift_y);
       fprintf(outfp, "dbg2       bathy_in_feet:        %d\n", bathy_in_feet);
@@ -1099,9 +1111,13 @@ int main(int argc, char **argv) {
     }
 
     /* get local scaling of lon lat */
-    mb_coor_scale(verbose, 0.5 * (obnd[2] + obnd[3]), &mtodeglon, &mtodeglat);
+    mb_coor_scale(2, 0.5 * (obnd[2] + obnd[3]), &mtodeglon, &mtodeglat);
     deglontokm = 0.001 / mtodeglon;
     deglattokm = 0.001 / mtodeglat;
+    if (shift_mode != MBGRID_SHIFT_NONE) {
+    	shift_lon = shift_x * mtodeglon;
+    	shift_lat = shift_y * mtodeglat;
+    }
 
     /* calculate grid properties */
     if (set_spacing) {
@@ -1140,6 +1156,10 @@ int main(int argc, char **argv) {
     mb_coor_scale(verbose, 0.5 * (gbnd[2] + gbnd[3]), &mtodeglon, &mtodeglat);
     deglontokm = 0.001 / mtodeglon;
     deglattokm = 0.001 / mtodeglat;
+    if (shift_mode != MBGRID_SHIFT_NONE) {
+    	shift_lon = shift_x * mtodeglon;
+    	shift_lat = shift_y * mtodeglat;
+    }
 
     /* calculate grid properties */
     if (set_spacing && (units[0] == 'M' || units[0] == 'm')) {
@@ -1435,15 +1455,20 @@ int main(int argc, char **argv) {
         fprintf(outfp, "Specified Latitude interval:  %f %s\n", dy_set, units);
       }
     }
-    if (shift && use_projection) {
+    if (shift_mode == MBGRID_SHIFT_BOUNDS && use_projection) {
       fprintf(outfp, "Grid shift (applied to the bounds of output grids):\n");
       fprintf(outfp, "  East shift:   %9.4f m\n", shift_x);
       fprintf(outfp, "  North shift:  %9.4f m\n", shift_y);
     }
-    else if (shift) {
+    else if (shift_mode == MBGRID_SHIFT_BOUNDS) {
       fprintf(outfp, "Grid shift (applied to the bounds of output grids):\n");
-      fprintf(outfp, "  Longitude interval: %f degrees or %f m\n", shift_x * mtodeglon, shift_x);
-      fprintf(outfp, "  Latitude interval:  %f degrees or %f m\n", shift_y * mtodeglat, shift_y);
+      fprintf(outfp, "  Longitude interval: %g degrees or %f m\n", shift_lon, shift_x);
+      fprintf(outfp, "  Latitude interval:  %g degrees or %f m\n", shift_lat, shift_y);
+    }
+    else if (shift_mode == MBGRID_SHIFT_DATA) {
+      fprintf(outfp, "Data shift (applied to the position of input data):\n");
+      fprintf(outfp, "  Longitude interval: %g degrees or %f m\n", shift_lon, shift_x);
+      fprintf(outfp, "  Latitude interval:  %g degrees or %f m\n", shift_lat, shift_y);
     }
     fprintf(outfp, "Input data bounds:\n");
     fprintf(outfp, "  Longitude: %9.4f %9.4f\n", bounds[0], bounds[1]);
@@ -1912,6 +1937,18 @@ int main(int argc, char **argv) {
               fprintf(outfp, "dbg2       error:          %d\n", error);
               fprintf(outfp, "dbg2       status:         %d\n", status);
             }
+            
+            /* apply position shift if specified */
+            if (shift_mode == MBGRID_SHIFT_DATA) {
+            	navlon += shift_lon;
+            	navlat += shift_lat;
+              for (ib = 0; ib < beams_bath; ib++) {
+                if (mb_beam_ok(beamflag[ib])) {
+                  bathlon[ib] += shift_lon;
+                  bathlat[ib] += shift_lat;
+                }
+            	}
+            }
 
             if ((datatype == MBGRID_DATA_BATHYMETRY || datatype == MBGRID_DATA_TOPOGRAPHY) &&
                 error == MB_ERROR_NO_ERROR) {
@@ -2248,6 +2285,18 @@ int main(int argc, char **argv) {
               fprintf(outfp, "dbg2       pixels_ss:      %d\n", pixels_ss);
               fprintf(outfp, "dbg2       error:          %d\n", error);
               fprintf(outfp, "dbg2       status:         %d\n", status);
+            }
+            
+            /* apply position shift if specified */
+            if (shift_mode == MBGRID_SHIFT_DATA) {
+            	navlon += shift_lon;
+            	navlat += shift_lat;
+              for (ib = 0; ib < beams_bath; ib++) {
+                if (mb_beam_ok(beamflag[ib])) {
+                  bathlon[ib] += shift_lon;
+                  bathlat[ib] += shift_lat;
+                }
+            	}
             }
 
             if ((datatype == MBGRID_DATA_BATHYMETRY || datatype == MBGRID_DATA_TOPOGRAPHY) &&
@@ -2701,6 +2750,18 @@ int main(int argc, char **argv) {
               fprintf(outfp, "dbg2       error:          %d\n", error);
               fprintf(outfp, "dbg2       status:         %d\n", status);
             }
+            
+            /* apply position shift if specified */
+            if (shift_mode == MBGRID_SHIFT_DATA) {
+            	navlon += shift_lon;
+            	navlat += shift_lat;
+              for (ib = 0; ib < beams_bath; ib++) {
+                if (mb_beam_ok(beamflag[ib])) {
+                  bathlon[ib] += shift_lon;
+                  bathlat[ib] += shift_lat;
+                }
+            	}
+            }
 
             if ((datatype == MBGRID_DATA_BATHYMETRY || datatype == MBGRID_DATA_TOPOGRAPHY) &&
                 error == MB_ERROR_NO_ERROR) {
@@ -3144,6 +3205,24 @@ int main(int argc, char **argv) {
               fprintf(outfp, "dbg2       error:          %d\n", error);
               fprintf(outfp, "dbg2       status:         %d\n", status);
             }
+            
+            /* apply position shift if specified */
+            if (shift_mode == MBGRID_SHIFT_DATA) {
+            	navlon += shift_lon;
+            	navlat += shift_lat;
+              for (ib = 0; ib < beams_bath; ib++) {
+                if (mb_beam_ok(beamflag[ib])) {
+                  bathlon[ib] += shift_lon;
+                  bathlat[ib] += shift_lat;
+                }
+            	}
+							for (ib = 0; ib < pixels_ss; ib++) {
+								if (ss[ib] > MB_SIDESCAN_NULL) {
+                  sslon[ib] += shift_lon;
+                  sslat[ib] += shift_lat;
+                }
+              }
+            }
 
             if ((datatype == MBGRID_DATA_BATHYMETRY || datatype == MBGRID_DATA_TOPOGRAPHY) &&
                 error == MB_ERROR_NO_ERROR) {
@@ -3422,6 +3501,13 @@ int main(int argc, char **argv) {
         double dmin = 0.0;
         double dmax = 0.0;
         while (fscanf(rfp, "%lf %lf %lf", &tlon, &tlat, &tvalue) != EOF) {
+            
+					/* apply position shift if specified */
+					if (shift_mode == MBGRID_SHIFT_DATA) {
+						tlon += shift_lon;
+						tlat += shift_lat;
+					}
+
           /* reproject data positions if necessary */
           if (use_projection)
             mb_proj_forward(verbose, pjptr, tlon, tlat, &tlon, &tlat, &error);
@@ -3692,6 +3778,24 @@ int main(int argc, char **argv) {
               fprintf(outfp, "dbg2       pixels_ss:      %d\n", pixels_ss);
               fprintf(outfp, "dbg2       error:          %d\n", error);
               fprintf(outfp, "dbg2       status:         %d\n", status);
+            }
+            
+            /* apply position shift if specified */
+            if (shift_mode == MBGRID_SHIFT_DATA) {
+            	navlon += shift_lon;
+            	navlat += shift_lat;
+              for (ib = 0; ib < beams_bath; ib++) {
+                if (mb_beam_ok(beamflag[ib])) {
+                  bathlon[ib] += shift_lon;
+                  bathlat[ib] += shift_lat;
+                }
+            	}
+							for (ib = 0; ib < pixels_ss; ib++) {
+								if (ss[ib] > MB_SIDESCAN_NULL) {
+                  sslon[ib] += shift_lon;
+                  sslat[ib] += shift_lat;
+                }
+              }
             }
 
             if ((datatype == MBGRID_DATA_BATHYMETRY || datatype == MBGRID_DATA_TOPOGRAPHY) &&
@@ -4013,11 +4117,11 @@ int main(int argc, char **argv) {
         if (verbose >= 2)
           fprintf(outfp, "\n");
         if (verbose > 0 || file_in_bounds) {
-		  if (astatus == MB_ALTNAV_USE)
-			fprintf(outfp, "%d data points processed in %s (minmax: %f %f) using nav from %s\n", ndatafile, rfile, dmin, dmax, apath);
-		  else
-			fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
-		}
+		  		if (astatus == MB_ALTNAV_USE)
+						fprintf(outfp, "%d data points processed in %s (minmax: %f %f) using nav from %s\n", ndatafile, rfile, dmin, dmax, apath);
+					else
+						fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+				}
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
@@ -4047,6 +4151,13 @@ int main(int argc, char **argv) {
         double dmin = 0.0;
         double dmax = 0.0;
         while (fscanf(rfp, "%lf %lf %lf", &tlon, &tlat, &tvalue) != EOF) {
+            
+					/* apply position shift if specified */
+					if (shift_mode == MBGRID_SHIFT_DATA) {
+						tlon += shift_lon;
+						tlat += shift_lat;
+					}
+        
           /* reproject data positions if necessary */
           if (use_projection)
             mb_proj_forward(verbose, pjptr, tlon, tlat, &tlon, &tlat, &error);
@@ -4115,12 +4226,12 @@ int main(int argc, char **argv) {
         error = MB_ERROR_NO_ERROR;
         if (verbose >= 2)
           fprintf(outfp, "\n");
-        if (verbose > 0 || file_in_bounds) {
-		  if (astatus == MB_ALTNAV_USE)
-			fprintf(outfp, "%d data points processed in %s (minmax: %f %f) using nav from %s\n", ndatafile, rfile, dmin, dmax, apath);
-		  else
-			fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
-		}
+				if (verbose > 0 || file_in_bounds) {
+					if (astatus == MB_ALTNAV_USE)
+					fprintf(outfp, "%d data points processed in %s (minmax: %f %f) using nav from %s\n", ndatafile, rfile, dmin, dmax, apath);
+					else
+					fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+				}
 
         /* add to datalist if data actually contributed */
         if (ndatafile > 0 && dfp != nullptr) {
@@ -4317,6 +4428,24 @@ int main(int argc, char **argv) {
               fprintf(outfp, "dbg2       pixels_ss:      %d\n", pixels_ss);
               fprintf(outfp, "dbg2       error:          %d\n", error);
               fprintf(outfp, "dbg2       status:         %d\n", status);
+            }
+            
+            /* apply position shift if specified */
+            if (shift_mode == MBGRID_SHIFT_DATA) {
+            	navlon += shift_lon;
+            	navlat += shift_lat;
+              for (ib = 0; ib < beams_bath; ib++) {
+                if (mb_beam_ok(beamflag[ib])) {
+                  bathlon[ib] += shift_lon;
+                  bathlat[ib] += shift_lat;
+                }
+            	}
+							for (ib = 0; ib < pixels_ss; ib++) {
+								if (ss[ib] > MB_SIDESCAN_NULL) {
+                  sslon[ib] += shift_lon;
+                  sslat[ib] += shift_lat;
+                }
+              }
             }
 
             if ((datatype == MBGRID_DATA_BATHYMETRY || datatype == MBGRID_DATA_TOPOGRAPHY) &&
@@ -4709,6 +4838,24 @@ int main(int argc, char **argv) {
               fprintf(outfp, "dbg2       pixels_ss:      %d\n", pixels_ss);
               fprintf(outfp, "dbg2       error:          %d\n", error);
               fprintf(outfp, "dbg2       status:         %d\n", status);
+            }
+            
+            /* apply position shift if specified */
+            if (shift_mode == MBGRID_SHIFT_DATA) {
+            	navlon += shift_lon;
+            	navlat += shift_lat;
+              for (ib = 0; ib < beams_bath; ib++) {
+                if (mb_beam_ok(beamflag[ib])) {
+                  bathlon[ib] += shift_lon;
+                  bathlat[ib] += shift_lat;
+                }
+            	}
+							for (ib = 0; ib < pixels_ss; ib++) {
+								if (ss[ib] > MB_SIDESCAN_NULL) {
+                  sslon[ib] += shift_lon;
+                  sslat[ib] += shift_lat;
+                }
+              }
             }
 
             if ((datatype == MBGRID_DATA_BATHYMETRY || datatype == MBGRID_DATA_TOPOGRAPHY) &&
@@ -5591,13 +5738,13 @@ int main(int argc, char **argv) {
   fprintf(outfp, "Minimum sigma: %10.5f   Maximum sigma: %10.5f\n", smin, smax);
 
   /* Apply shift to the output grid bounds if specified */
-  if (shift && use_projection) {
+  if (shift_mode == MBGRID_SHIFT_BOUNDS && use_projection) {
     gbnd[0] += shift_x;
     gbnd[1] += shift_x;
     gbnd[2] += shift_y;
     gbnd[3] += shift_y;
   }
-  else if (shift) {
+  else if (shift_mode == MBGRID_SHIFT_BOUNDS) {
     gbnd[0] += shift_x * mtodeglon;
     gbnd[1] += shift_x * mtodeglon;
     gbnd[2] += shift_y * mtodeglat;
