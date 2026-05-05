@@ -467,7 +467,7 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
     pipeline->renderer_->AddActor(pipeline->axesActor_);    
   }
     
-  pipeline->surfaceActor_->SetScale(1., 1., verticalExagg_);  // NEW!
+  pipeline->surfaceActor_->SetScale(1., 1., verticalExagg_); 
   pipeline->interactorStyle_->SetDefaultRenderer(pipeline->renderer_);
 
   pipeline->windowInteractor_->SetPicker(pipeline->areaPicker_);
@@ -743,3 +743,11 @@ double TopoDataItem::getLightIntensity() {
 vtkPolyData *TopoDataItem::getPolyData() {
   return pipeline_->polyData_;
 }
+
+
+void TopoDataItem::resetCamera() {
+  qDebug() << "resetCamera()";
+  pipeline_->renderer_->ResetCamera();
+  reassemblePipeline();
+}
+

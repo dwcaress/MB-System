@@ -72,7 +72,10 @@ namespace mb_system {
       vtkNew<mb_system::TopoDataReader> topoReader_;
 
       vtkNew<vtkElevationFilter> elevFilter_;
+
+      /// Used to compute slope
       vtkNew<vtkPolyDataNormals> normalsFilter_;
+      
       vtkNew<vtkIdFilter> idFilter_;
       vtkNew<vtkLookupTable> elevLookupTable_;
       vtkNew<vtkActor> surfaceActor_;
@@ -194,6 +197,10 @@ namespace mb_system {
     Q_INVOKABLE QString printMouseHelp() {
       return "Mouse help goes here";
     }
+
+    /// Reset camera, all actors in bounding box
+    Q_INVOKABLE void resetCamera();
+
     
     /// Set picked point
     void setPickedPoint(double *worldCoords);
