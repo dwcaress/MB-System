@@ -16,7 +16,10 @@ typedef enum {
   
 class TopoDataItem;
 
-  // Define interaction style
+  /// User can select data points in rectangular 'rubber band' area, by
+  /// left-dragging mouse.
+  /// Subclass of MyRubberBandStyle for proper QtQuick integration of
+  /// rubber band rectangle-draw during mouse drag.
   class PointsSelectInteractorStyle : public MyRubberBandStyle {
   public:
     static PointsSelectInteractorStyle* New();

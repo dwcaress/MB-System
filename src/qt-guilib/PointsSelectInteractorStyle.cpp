@@ -1,4 +1,4 @@
-#define QT_NO_DEBUG_OUTPUT
+/// #define QT_NO_DEBUG_OUTPUT
 
 #include <vtkNamedColors.h>
 #include <vtkAreaPicker.h>
@@ -81,10 +81,20 @@ void PointsSelectInteractorStyle::OnLeftButtonUp() {
   if (drawingMode_ == DrawingMode::Rectangle) {
     vtkNew<vtkNamedColors> colors;
 
+    /*
+      Retrieve frustum representinf the space starting from the camera's
+      lens and extending through the rectangular area drawn by the user
+      into the 3D scene. The frustum is stored as a vtkPlanes object,
+      consisting of six planes defining the boundaries of that 3D box.
+     */
     vtkPlanes* frustum =
       static_cast<vtkAreaPicker*>(GetInteractor()->GetPicker())
       ->GetFrustum();
 
+    /*
+      Initialize vtkExtractPolyDataGeometry, a filter used to "clip"
+      or "crop" polygonal data, set input to topoDataItem_.
+     */
     vtkNew<vtkExtractPolyDataGeometry> extractor;
     extractor->SetInputData(topoDataItem_->getPolyData());
 
@@ -93,7 +103,6 @@ void PointsSelectInteractorStyle::OnLeftButtonUp() {
     extractor->ExtractInsideOn();  // T.O'R.
     // Extract the cells
     extractor->Update();
-
     vtkPolyData *extractedData = extractor->GetOutput();
       
     qDebug() << "Extracted "
@@ -101,18 +110,21 @@ void PointsSelectInteractorStyle::OnLeftButtonUp() {
 	     << " cells.";
 
     // Set mapper input to extracted cells
-    // (Color is not controlled by scalar)
     selectedMapper_->SetInputData(extractedData);
+    // Color is not controlled by scalar
     selectedMapper_->ScalarVisibilityOff();
 
+    selectedActor_->SetMapper(selectedMapper_);
+    
     selectedActor_->
-      GetProperty()->SetColor(colors->GetColor3d("Black").GetData());
+      GetProperty()->SetColor(colors->GetColor3d("Red").GetData());
       
     selectedActor_->GetProperty()->SetPointSize(1);
     // selectedActor_->GetProperty()->SetRepresentationToWireframe();
     // selectedActor_->GetProperty()->SetRepresentationToSurface();
     selectedActor_->GetProperty()->SetRepresentationToPoints();
 
+    // 
     GetInteractor()
       ->GetRenderWindow()
       ->GetRenderers()
