@@ -39,7 +39,7 @@ Window {
         Menu {
             title: qsTr('File')
 
-            Action { text: qsTr('Open grid or swath...') ;
+            Action { text: qsTr('Open GMT grid or swath...') ;
                      onTriggered: {console.log('show file dialog')
 				   datafileDialog.open()}
 		   }
@@ -142,6 +142,14 @@ Window {
 			}		
 		    }
 		}
+	    }
+	    
+            MenuItem {
+		text: qsTr('Reset camera')
+		checkable: false
+		onTriggered: {
+		    topoDataItem.resetCamera()
+		}		    
 	    }
         }
 
@@ -365,7 +373,6 @@ Window {
 	    var ymax = -Infinity
 	    // Find min/max values of x and y
 	    for (var i = 0; i < profileData.length; i++) {
-		// console.log('x: ', profileData[i].x, ' y: ', profileData[i].y);
 		if (profileData[i].x < xmin) { xmin = profileData[i].x }
 		if (profileData[i].x > xmax) { xmax = profileData[i].x }
 		if (profileData[i].y < ymin) { ymin = profileData[i].y }
