@@ -64,7 +64,7 @@ namespace mb_system {
     void OnLeftButtonUp() override;
 
 
-    /// Set QQuickVTKItem
+    /// Set associated TopoDataItem
     void setTopoDataItem(TopoDataItem *item) {
       topoDataItem_ = item;
     }
