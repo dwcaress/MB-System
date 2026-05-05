@@ -124,7 +124,7 @@ void DrawInteractorStyle::OnLeftButtonUp() {
   pinWidgets_.push_back(pinWidget);  // pinWidget should persist
   pinRepresentations_.push_back(pin); // pin representation should persist
 
-  // Render the pin
+  // Render the pins
   Interactor->GetRenderWindow()->Render();
   
   if (userPath_.size() != 2) {
@@ -191,7 +191,6 @@ void DrawInteractorStyle::computeElevationProfile(double *p1,
   profileCutter_->Update();
 
   // Clip the infinite intersection line outside the segment [p1, p2] ---
-
   // Compute the axis direction along p1->p2
   double dx = p2[0] - p1[0];
   double dy = p2[1] - p1[1];
