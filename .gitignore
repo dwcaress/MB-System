@@ -6,6 +6,7 @@
 /config.status
 autom4te.cache/*
 build/*
+build-test
 googletest/*
 src/**/*.o
 src/**/*.lo

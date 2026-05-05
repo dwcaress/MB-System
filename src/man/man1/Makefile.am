@@ -63,6 +63,7 @@ man_MANS =  \
 	mbm_plot.1 \
 	mbm_route2mission.1 \
 	mbm_stat.1 \
+	mbm_tmap.1 \
 	mbm_utm.1 \
 	mbm_xbt.1 \
 	mbm_xyplot.1 \
