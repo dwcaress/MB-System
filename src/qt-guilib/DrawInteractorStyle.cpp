@@ -92,8 +92,6 @@ void DrawInteractorStyle::OnLeftButtonUp() {
     qDebug() << "Clear existing widgets and profile line";
     
     // First point of profile defined; clear existing widgets
-    topoDataItem_->clearAddedActors();
-
     // Detach each widget from the Interactor before releasing memory
     for (auto &w : pinWidgets_) {
       w->EnabledOff();
