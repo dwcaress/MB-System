@@ -153,7 +153,7 @@ void TopoDataItem::setupAxes(vtkCubeAxesActor *axesActor,
 
 
 void TopoDataItem::initializePipeline() {
-  clearAddedActors();
+
 }
 
 bool TopoDataItem::loadDatafile(QUrl fileUrl) {
@@ -437,12 +437,6 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   vtkActorCollection* actors = pipeline->renderer_->GetActors();
   std::cerr << "TOTAL actors: " << actors->GetNumberOfItems() << "\n";
 
-  // Add any additional actors
-  // Add extra actors
-  for (vtkActor *actor: pipeline->addedActors_) {
-    pipeline->renderer_->AddActor(actor);
-  }
-  
   pipeline->renderer_->SetBackground(pipeline->colors_->GetColor3d("White").
 				     GetData());
 
@@ -750,4 +744,64 @@ void TopoDataItem::resetCamera() {
   pipeline_->renderer_->ResetCamera();
   reassemblePipeline();
 }
+
+
+void TopoDataItem::setPBR(double roughness, double metallic) {
+
+  qDebug() << "setPBR(): check pipeline_ pointer";
+  if (!pipeline_) {
+    qDebug() << "setPBR(): pipeline_ is null";
+    return;
+  }
+  
+  qDebug() << "setPBR(): check surfaceActor_ pointer";
+  if (!pipeline_->surfaceActor_) {
+    qDebug() << "setPBR(): surfaceActor_ is null";
+    return;
+  }
+  
+  qDebug() << "setPBR(): get property";
+  vtkProperty *prop = pipeline_->surfaceActor_->GetProperty();
+  qDebug() << "setPBR(): set interpolation to PBR";  
+  prop->SetInterpolationToPBR();
+  qDebug() << "setPBR(): set roughness to "<<  roughness;
+  prop->SetRoughness(roughness);
+  qDebug() << "setPBR(): set metallic to " << metallic;
+  prop->SetMetallic(metallic);
+}
+
+
+
+void TopoDataItem::setOrthographicView() {
+  // First reset the camera while in perspective (3D) view
+  pipeline_->renderer_->ResetCamera();
+
+  double bounds[6];
+  pipeline_->surfaceActor_->GetBounds(bounds);
+  // bounds: [xmin, xmax, ymin, ymax, zmin, zmax]
+  //   X = easting, Y = northing, Z = elevation
+  double cx = (bounds[0] + bounds[1]) / 2.0;  // center easting
+  double cy = (bounds[2] + bounds[3]) / 2.0;  // center northing
+  double cz = (bounds[4] + bounds[5]) / 2.0;  // center elevation
+
+  double cameraHeight = bounds[5] + 2000.0;    // well above max elevation
+  
+  // ParallelScale = half the Y (northing) extent —
+  // this is what fills the viewport vertically in a top-down ortho view
+  double parallelScale = (bounds[3] - bounds[2]) / 2.0;
+
+  auto camera = pipeline_->renderer_->GetActiveCamera();
+
+  camera->ParallelProjectionOn();
+  camera->SetPosition(cx, cy, cameraHeight);  // centered over surface actor
+  camera->SetFocalPoint(cx, cy, cz);          
+  camera->SetViewUp(0.0, 1.0, 0.0);           // Y = northing = screen up
+  camera->SetParallelScale(parallelScale);    // fill viewport on y-axis
+
+  // Clipping range must bracket everything between camera and terrainq floor
+  camera->SetClippingRange(1.0, cameraHeight - bounds[4] + 100.0);
+
+  renderWindow_->Render();
+}
+
 

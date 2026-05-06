@@ -97,9 +97,6 @@ namespace mb_system {
       vtkNew<vtkCubeAxesActor> axesActor_;
       vtkNew<vtkNamedColors>colors_;
 
-      /// Additional actors 
-      std::vector<vtkActor *> addedActors_;
-      
       bool firstRender_ = true;
     };
 
@@ -201,6 +198,11 @@ namespace mb_system {
     /// Reset camera, all actors in bounding box
     Q_INVOKABLE void resetCamera();
 
+    /// Set physically-based rendering parameters on surface actor
+    Q_INVOKABLE void setPBR(double roughness, double metallic);
+
+    /// Set camera for orthographic view
+    Q_INVOKABLE void setOrthographicView();
     
     /// Set picked point
     void setPickedPoint(double *worldCoords);
@@ -226,16 +228,6 @@ namespace mb_system {
     /// Get surface renderer from pipeline
     vtkRenderer *getRenderer() {
       return pipeline_->renderer_;
-    }
-
-    /// Add an actor to be rendered
-    void addActor(vtkActor *actor) {
-      actor->Modified();
-      pipeline_->addedActors_.push_back(actor);
-    }
-
-    void clearAddedActors() {
-      pipeline_->addedActors_.clear();
     }
 
     /// Get source polydata
