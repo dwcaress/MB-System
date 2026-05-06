@@ -20,12 +20,6 @@ Window {
     property list<vector2d> myProfile
 
     Component.onCompleted: {
-	console.log('SharedConstants.EditState.ViewOnly  ',
-                    SharedConstants.EditState.ViewOnly)
-	console.log('SharedConstants.EditState.EditRoute  ',
-                    SharedConstants.EditState.EditRoute)     
-	console.log('SharedConstants.EditState.EditOverlay  ',
-                    SharedConstants.EditState.EditOverlay)
     }
 
     ActionGroup {
@@ -148,7 +142,8 @@ Window {
 		text: qsTr('Reset camera')
 		checkable: false
 		onTriggered: {
-		    topoDataItem.resetCamera()
+		    /// topoDataItem.resetCamera()
+		    topoDataItem.setOrthographicView()		    
 		}		    
 	    }
         }
@@ -192,6 +187,9 @@ Window {
             text: qsTr('Push me!')
             onPressed: {
 		console.log('Pressed test button')
+		// TESTING
+		console.log('topoDataItem.setPBR()???')
+		topoDataItem.setPBR(0.5, 0.)
             }
         }
 
@@ -294,38 +292,6 @@ Window {
 		updateLighting()
 	    }				
         }
-
-	/* ***
-        // Button box at the bottom
-        footer: DialogButtonBox {
-            standardButtons: DialogButtonBox.Ok | DialogButtonBox.Cancel |
-	        DialogButtonBox.Apply
-
-            onApplied: {
-	        console.log('set intensity to ', settings3D.intensity.value);
-	        topoDataItem.setLight(settings3D.intensity.value,
-		                      settings3D.lightX.value,
-				      settings3D.lightY.value,
-				      settings3D.lightZ.value);
-		// Known issue: must return focus to topoDataItem
-                topoDataItem.forceActiveFocus();
-            }
-	    
-            onAccepted: {
-                console.log("OK clicked")
-                settings3dDialog.accept()
-		// Known issue: must return focus to topoDataItemr		
-                topoDataItem.forceActiveFocus();		
-            }
-            
-            onRejected: {
-                console.log("Cancel clicked")
-                settings3dDialog.reject()
-		// Known issue: must return focus to topoDataItem
-                topoDataItem.forceActiveFocus();		
-            }
-	    }
-	    *** */
 	
 	onVisibilityChanged: { console.log('settings3dDialog opened');
                     // Set values in settings gui to current values
