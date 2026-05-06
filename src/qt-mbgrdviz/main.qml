@@ -277,37 +277,21 @@ Window {
 	    id: settings3D
 	    anchors.fill: parent
 	    anchors.margins: 10
-	    intensity.onPressedChanged: {
-	        console.log('intensity pressed/released')
-		if (!intensity.pressed) {
-		    console.log('RELEASED')
-		    updateLighting()
-		}
+
+	    intensity.onMoved: {
+		updateLighting()
 	    }
 
-            lightX.onPressedChanged: {
-	        console.log('intensity pressed/released')
-		if (!lightX.pressed) {
-		    console.log('RELEASED')
-		    updateLighting()
-		}
+            lightX.onMoved: {
+		updateLighting()
 	    }
 
-
-            lightY.onPressedChanged: {
-	        console.log('intensity pressed/released')
-		if (!lightY.pressed) {
-		    console.log('RELEASED')
-		    updateLighting()
-		}
+            lightY.onMoved: {
+		updateLighting()
 	    }
 
-            lightZ.onPressedChanged: {
-	        console.log('intensity pressed/released')
-		if (!lightZ.pressed) {
-		    console.log('RELEASED')
-		    updateLighting()
-		}
+            lightZ.onMoved: {
+		updateLighting()
 	    }				
         }
 
