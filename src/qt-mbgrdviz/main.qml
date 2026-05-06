@@ -61,7 +61,7 @@ Window {
             Action {
 	        text: qsTr('Lighting')
 	        onTriggered: {console.log('show 3D preferences');
-			      settings3dDialog.open();
+			      settings3dDialog.show();
 			     }
 	    }
 
@@ -259,15 +259,24 @@ Window {
 
 
 
-    Dialog {
+    Window {
         id: settings3dDialog
 	title: 'Lighting preferences'
-	modal: false
-	width: 300
+	visible: false
 	property list<double> intensity
+
+	// Bind window size to content's preferred size
+	width: settings3D.implicitWidth
+	height: settings3D.implicitHeight
+
+	// Prevents the user from shrinking it smaller than the content
+	minimumWidth: settings3D.implicitWidth
+	minimumHeight: settings3D.implicitHeight
 	
-        contentItem: Settings3D {
+        Settings3D {
 	    id: settings3D
+	    anchors.fill: parent
+	    anchors.margins: 10
 	    intensity.onPressedChanged: {
 	        console.log('intensity pressed/released')
 		if (!intensity.pressed) {
@@ -301,7 +310,8 @@ Window {
 		}
 	    }				
         }
-	
+
+	/* ***
         // Button box at the bottom
         footer: DialogButtonBox {
             standardButtons: DialogButtonBox.Ok | DialogButtonBox.Cancel |
@@ -330,8 +340,10 @@ Window {
 		// Known issue: must return focus to topoDataItem
                 topoDataItem.forceActiveFocus();		
             }
-	}
-	onOpened: { console.log('settings3dDialog opened');
+	    }
+	    *** */
+	
+	onVisibilityChanged: { console.log('settings3dDialog opened');
                     // Set values in settings gui to current values
                     var pos = topoDataItem.getLightPosition()
 		    console.log('pos=', JSON.stringify(pos))
