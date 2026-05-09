@@ -72,11 +72,6 @@ Planned enhancements for future versions:
 - **CMakeLists.txt** - CMake build configuration
 - **Makefile.am** - Autotools build configuration
 
-### Data Examples
-
-- **tiles/** - Example tile data
-- **tiles_ex2/** - Additional example tile data
-
 ## Building
 
 ### CMake (Recommended)
