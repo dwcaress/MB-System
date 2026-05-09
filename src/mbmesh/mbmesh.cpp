@@ -300,12 +300,6 @@ static int write_ecef_xyz_file(const char *filename) {
   fprintf(stderr, "\nWriting ECEF XYZ point cloud: %s\n", filename);
   fprintf(stderr, "  Points: %zu\n", all_soundings.size());
 
-  /* Write header */
-  fprintf(fp, "# X(m) Y(m) Z(m) - ECEF coordinates (WGS84, GeoOrigin offset)\n");
-  fprintf(fp, "# Reference (GeoOrigin): lon=%.8f lat=%.8f depth=%.3f\n",
-          ref_lon, ref_lat, ref_depth);
-  fprintf(fp, "# Offset: x0=%.3f y0=%.3f z0=%.3f\n", x0, y0, z0);
-
   /* Write ECEF points with GeoOrigin offset */
   for (const auto &s : all_soundings) {
     double x, y, z;
@@ -813,9 +807,6 @@ static int write_xyz_file(const char *filename) {
   fprintf(stderr, "\nWriting XYZ point cloud: %s\n", filename);
   fprintf(stderr, "  Points: %zu\n", all_soundings.size());
 
-  // Write header (optional)
-  fprintf(fp, "# X(lon) Y(lat) Z(depth)\n");
-
   // Write points
   for (const auto &s : all_soundings) {
     fprintf(fp, "%.8f %.8f %.3f\n", s.longitude, s.latitude, s.depth);
@@ -873,11 +864,6 @@ static int write_projected_xyz_file(const char *filename) {
   fprintf(stderr, "  Scale: 1 deg lon = %.1f m, 1 deg lat = %.1f m\n",
           m_per_deg_lon, m_per_deg_lat);
   fprintf(stderr, "  Points: %zu\n", all_soundings.size());
-
-  /* Write header */
-  fprintf(fp, "# X(m) Y(m) Z(m) - local projected coordinates\n");
-  fprintf(fp, "# Reference: lon=%.8f lat=%.8f depth=%.3f\n",
-          ref_lon, ref_lat, ref_depth);
 
   /* Write projected points */
   for (const auto &s : all_soundings) {
