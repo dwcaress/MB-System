@@ -276,6 +276,11 @@ Window {
 	    anchors.fill: parent
 	    anchors.margins: 10
 
+	    lightsEnabled.onCheckedChanged: {
+		console.log('Lights checked: ', settings3D.checked)
+		updateLighting()
+	    }
+	    
 	    intensity.onMoved: {
 		updateLighting()
 	    }
@@ -311,7 +316,8 @@ Window {
 	console.log('settings3dDialog=', settings3dDialog)
 	console.log('settings3D=', settings3D)	
 
-	topoDataItem.setLight(settings3D.intensity.value,
+	topoDataItem.setLight(settings3D.lightsEnabled.checked,
+			      settings3D.intensity.value,
 		              settings3D.lightX.value,
 		              settings3D.lightY.value,			      		                      settings3D.lightZ.value)
     }
