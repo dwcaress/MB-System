@@ -12,15 +12,29 @@ Item {
     property alias lightX: lightX
     property alias lightY: lightY
     property alias lightZ: lightZ    
-
+    property alias lightsEnabled: lightsEnabled
+    
             ColumnLayout {
-
+                Label {
+                    text: qsTr('Lights enabled')
+                    fontSizeMode: Text.Fit
+                    font.pixelSize: 18
+                }
+		
+		CheckBox {
+		    id: lightsEnabled
+		    checked: true
+		}
+		
+                MenuSeparator { }
+		
                 Label {
                     text: qsTr("Intensity")
                     fontSizeMode: Text.Fit
                     font.pixelSize: 18                    
                 }
-                
+
+		
                 Slider {
                     id: intensity
                     Layout.fillWidth: true
