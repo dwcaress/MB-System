@@ -426,8 +426,13 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   case TopoDataItem::SurfaceRenderType::PointCloud:
     pipeline->surfaceActor_->GetProperty()->SetRepresentationToPoints();
     break;     
-      
-      
+  }
+
+  if (!lightsEnabled_) {
+    pipeline->surfaceActor_->GetProperty()->LightingOff();
+  }
+  else {
+    pipeline->surfaceActor_->GetProperty()->LightingOn();
   }
   
   // Add actor to renderer
@@ -700,14 +705,23 @@ void TopoDataItem::setupLightSource() {
 }
 
 
-void TopoDataItem::setLight(float intensity, double x, double y, double z) {
+void TopoDataItem::setLight(bool lightsEnabled,
+			    float intensity, double x, double y, double z) {
 
   qDebug() << "setLight()";
+
+  lightsEnabled_ = lightsEnabled;
   
   pipeline_->lightSource_->SetIntensity(intensity);
-
   
   pipeline_->lightSource_->SetPosition(x, y, z);
+
+  if (!lightsEnabled_) {
+    pipeline_->surfaceActor_->GetProperty()->LightingOff();
+  }
+  else {
+    pipeline_->surfaceActor_->GetProperty()->LightingOn();
+  }
   
   // Render scene
   reassemblePipeline();

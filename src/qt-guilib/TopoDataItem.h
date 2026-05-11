@@ -182,7 +182,8 @@ namespace mb_system {
     Q_INVOKABLE void setupLightSource(void);
 
     /// Set light source intensity and position
-    Q_INVOKABLE void setLight(float intensity, double x, double y, double z);
+    Q_INVOKABLE void setLight(bool lightsEnabled,
+			      float intensity, double x, double y, double z);
 
     /// Get light source position
    Q_INVOKABLE QVariantList getLightPosition(void);
@@ -292,6 +293,9 @@ namespace mb_system {
     /// Indicates if point has been picked by user
     bool pointPicked_;
 
+    /// Shade display with lights?
+    bool lightsEnabled_ = true;
+    
     /// Indicates whether to render on next update()
     bool forceRender_;
 
