@@ -374,6 +374,11 @@ void TopoDataReader::gridBounds(double *xMin, double *xMax,
 				double *yMin, double *yMax,
 				double *zMin, double *zMax) {
 
+  if (!topoData_) {
+    std::cerr << "TopoDataReader::gridBounds(): topo data not loaded yet\n";
+    return;
+  }
+  
   topoData_->bounds(xMin, xMax, yMin, yMax, zMin, zMax);
   /* ***
   double bounds[6];
@@ -434,11 +439,13 @@ float TopoDataReader::zScaleLatLon() {
 }
 
 
-
-
-
 bool TopoDataReader::geographicCRS() {
 
+  if (!topoData_) {
+    std::cerr << "TopoDataReader::geographicCRS(): topo data not loaded yet\n";
+    return false;
+  }
+  
   const char *projString = topoData_->projString();
   if (strstr(projString, "EPSG:4326")) {
     // Appears to be in geographic CRS (are there other geographic EPSGs?)
@@ -537,8 +544,8 @@ bool TopoDataReader::triangleMissingZValues(vtkIdType *vertices) {
 
 const char *TopoDataReader::fileCRS() {
   if (!topoData_) {
-    std::cerr << "No grid defined" << std::endl;
-    return nullptr;
+    std::cerr << "TopoDataReader::fileCRS(): topo data not loaded yet\n";
+    return "";
   }
 
   return topoData_->projString();
