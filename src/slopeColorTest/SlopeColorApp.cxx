@@ -45,6 +45,7 @@
 
 // Source (replace with your vtkPolyData reader in production)
 #include <vtkSphereSource.h>
+#include "TopoDataReader.h"
 
 // ── Interactor style ──────────────────────────────────────────────────────────
 #include <vtkInteractorStyleTrackballCamera.h>
@@ -178,11 +179,26 @@ static void DeleteCallbackData(void* userData)
 // ═════════════════════════════════════════════════════════════════════════════
 int main(int argc, char* argv[])
 {
-  vtkPolyDataAlgorithm *source = nullptr;
+  vtkSmartPointer<vtkPolyDataAlgorithm> source;
+  vtkSmartPointer<mb_system::TopoDataReader> reader =
+    vtkSmartPointer<mb_system::TopoDataReader>::New();
+
+  // Elevation extents (world-space Z range of the source)
+  double elevMin = -1.0;
+  double elevMax =  1.0;
+
   
   if (argc == 2) {
     // Data file is second arg
     char *dataFile = argv[1];
+    reader->SetFileName(dataFile);
+    unsigned long error;
+    if ((error = reader->GetErrorCode()) != 0) {
+      std::cerr << "Failed to read data file\n";
+      exit(1);
+    }
+
+    source = reader;
   }
   else if (argc == 1) {
     // ── 0. Synthetic terrain source ───────────────────────────────────────────
@@ -198,7 +214,7 @@ int main(int argc, char* argv[])
     sphere->SetPhiResolution(80);
     sphere->SetThetaResolution(80);
     sphere->SetRadius(1.0);
-    source = (vtkPolyDataAlgorithm *)sphere;
+    source = sphere;
   }
   else {
     std::cerr << "Invalid arguments\n";
@@ -207,11 +223,10 @@ int main(int argc, char* argv[])
   }
 
   source->Update();
-
-  // Elevation extents (world-space Z range of the source)
-  const double elevMin = -1.0;
-  const double elevMax =  1.0;
-
+  double bounds[6];
+  source->GetOutput()->GetBounds(bounds);
+  elevMin = bounds[4];
+  elevMax = bounds[5];
   
   // ── 1. Elevation filter ───────────────────────────────────────────────────
   auto elevationFilter = vtkSmartPointer<vtkElevationFilter>::New();

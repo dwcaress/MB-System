@@ -33,7 +33,9 @@ message(STATUS "Found VTK ${VTK_VERSION} at ${VTK_DIR}")
 # ── Executable ────────────────────────────────────────────────────────────────
 add_executable(SlopeColorApp SlopeColorApp.cxx)
 
-target_link_libraries(SlopeColorApp PRIVATE ${VTK_LIBRARIES})
+target_include_directories(SlopeColorApp PRIVATE ${CMAKE_SOURCE_DIR}/src/qt-guilib)
+
+target_link_libraries(SlopeColorApp PRIVATE MBGui ${VTK_LIBRARIES})
 
 # Required VTK boilerplate: auto-initialises factory overrides (OpenGL etc.)
 vtk_module_autoinit(
