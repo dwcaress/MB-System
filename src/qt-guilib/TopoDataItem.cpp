@@ -222,7 +222,6 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
     TopoDataReader::getDataType(dataFilename_);
 
   pipeline->topoReader_->setDataType(dataType);
-
   
   // Force reader to re-run
   pipeline->topoReader_->Modified();
