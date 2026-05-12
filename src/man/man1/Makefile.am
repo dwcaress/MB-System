@@ -34,6 +34,7 @@ man_MANS =  \
 	mbformat.1 \
 	mbgetesf.1 \
 	mbgpstide.1 \
+	mbmesh.1 \
 	mbgrd2obj.1 \
 	mbgrdtiff.1 \
 	mbgrdviz.1 \
