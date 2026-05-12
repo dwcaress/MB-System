@@ -1,15 +1,15 @@
 #ifndef GmtGridReader_h
 #define GmtGridReader_h
 
-#include "gmt.h"
+#include <gmt/gmt.h>
 
-#include "vtkAbstractPolyDataReader.h"
-#include "vtkPolyData.h"
-#include "vtkInformation.h"
- #include "vtkInformationVector.h"
-#include "vtkSmartPointer.h"
-#include "vtkPoints.h"
-#include "vtkCellArray.h"
+#include <vtkAbstractPolyDataReader.h>
+#include <vtkPolyData.h>
+#include <vtkInformation.h>
+#include <vtkInformationVector.h>
+#include <vtkSmartPointer.h>
+#include <vtkPoints.h>
+#include <vtkCellArray.h>
 
 namespace mb_system {
   /**

@@ -1,18 +1,18 @@
 #ifndef DrawInteractorStyle_h
 #define DrawInteractorStyle_h
-#include "vtkInteractionStyleModule.h" // For export macro
-#include "vtkInteractorStyleTrackballCamera.h"
-#include "vtkRenderer.h"
-#include "vtkActor2D.h"
-#include "vtkProperty2D.h"
-#include "vtkPolyDataMapper2D.h"
-#include "vtkPolyData.h"
-#include "vtkHandleWidget.h"
-#include "vtkHandleRepresentation.h"
-#include "vtkCutter.h"
-#include "vtkClipPolyData.h"
-#include "vtkBox.h"
-#include "vtkRenderWindowInteractor.h"
+#include <vtkInteractionStyleModule.h> // For export macro
+#include <vtkInteractorStyleTrackballCamera.h>
+#include <vtkRenderer.h>
+#include <vtkActor2D.h>
+#include <vtkProperty2D.h>
+#include <vtkPolyDataMapper2D.h>
+#include <vtkPolyData.h>
+#include <vtkHandleWidget.h>
+#include <vtkHandleRepresentation.h>
+#include <vtkCutter.h>
+#include <vtkClipPolyData.h>
+#include <vtkBox.h>
+#include <vtkRenderWindowInteractor.h>
 #include <QObject>
 #include <QQuickVTKItem.h>
 #include "Point.h"

@@ -1,13 +1,13 @@
 #ifndef TopoDataReader_h
 #define TopoDataReader_h
 
-#include "vtkAbstractPolyDataReader.h"
-#include "vtkInformation.h"
-#include "vtkInformationVector.h"
-#include "vtkSmartPointer.h"
-#include "vtkPoints.h"
-#include "vtkCellArray.h"
-#include "gmt.h"
+#include <vtkAbstractPolyDataReader.h>
+#include <vtkInformation.h>
+#include <vtkInformationVector.h>
+#include <vtkSmartPointer.h>
+#include <vtkPoints.h>
+#include <vtkCellArray.h>
+#include <gmt/gmt.h>
 #include <proj.h>
 #include "TopoData.h"
 
