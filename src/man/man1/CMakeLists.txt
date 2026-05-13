@@ -20,7 +20,6 @@ set(manpages
     mbformat.1
     mbgetesf.1
     mbgpstide.1
-	mbmesh.1
 	mbgrd2gltf.1
     mbgrd2obj.1
     mbgrdtiff.1
@@ -58,6 +57,7 @@ set(manpages
     mbm_xbt.1
     mbm_xyplot.1
     mbmakeplatform.1
+    mbmesh.1
     mbminirovnav.1
     mbmosaic.1
     mbnavadjust.1
