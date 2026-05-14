@@ -63,7 +63,7 @@ set(src
     RestrictCameraStyle.cpp
     Route.cpp
     SharedConstants.cpp
-    SlopeFilter.cpp
+    SlopeShader.cpp
     Surface.cpp
     SurfaceRenderer.cpp
     SwathData.cpp
