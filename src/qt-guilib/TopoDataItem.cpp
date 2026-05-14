@@ -263,25 +263,19 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   qDebug() << "xMin: " << gridBounds[0] << ", xMax: " << gridBounds[1] <<
     "yMin: " << gridBounds[2] << ", yMax: " << gridBounds[3] <<
     "zMin: " << gridBounds[4] << ", zMax: " << gridBounds[5];
-  //////////////////////////////////////////
 
-
-  //pipeline->elevFilter_->SetInputConnection(pipeline->topoReader_->/
-  //					      GetOutputPort());
   pipeline->elevFilter_->SetInputConnection(pipeline->idFilter_->
-					      GetOutputPort());
+					    GetOutputPort());
   
   pipeline->elevFilter_->SetLowPoint(0, 0, gridBounds[4]);
   pipeline->elevFilter_->SetHighPoint(0, 0, gridBounds[5]);
+
   // Preserve scalar values (keep minZ/maxZ range)
   pipeline->elevFilter_->SetScalarRange(gridBounds[4], gridBounds[5]);    
 
   double minVal = gridBounds[4];
   double maxVal = gridBounds[5];
   
-  /// DEBUG ///
-  /// printPolyDataOutput(pipeline->elevFilter_, "elevFilter");
-
   pipeline->polyData_ =
     vtkPolyData::SafeDownCast(pipeline->elevFilter_->GetOutput());
 
@@ -309,8 +303,12 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
     qDebug() << "assemblePipeline(): COULD NOT FIND id array";    
   }
   
-  if (coloredScalar_ == TopoDataItem::ColoredScalar::Gradient) {
+  // if (coloredScalar_ == TopoDataItem::ColoredScalar::Gradient) {
+  switch (coloredScalar_) {
 
+  case ColoredScalar::Gradient: {
+    
+    // Compute local slope angle and map to color lookup table
     // Compute surface normals
     qDebug() << "compute surface normals";
     pipeline->normalsFilter_->
@@ -345,15 +343,17 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
       vtkPolyData::SafeDownCast(slopeCalc->GetOutput());
     if (!slopeOutput) {
       qWarning() << "slopeOutput is null";
+      return;
     }
 
-    vtkPointData *pd = slopeOutput->GetPointData();
-    qDebug() << "Number of point data arrays: " << pd->GetNumberOfArrays();
-    for (int i = 0; i < pd->GetNumberOfArrays(); i++) {
-      qDebug() << "Array " << i << ": " << pd->GetArrayName(i);
+    vtkPointData *slopePts = slopeOutput->GetPointData();
+    qDebug() << "Number of point data arrays: "
+	     << slopePts->GetNumberOfArrays();
+    for (int i = 0; i < slopePts->GetNumberOfArrays(); i++) {
+      qDebug() << "Array " << i << ": " << slopePts->GetArrayName(i);
     }
 
-    vtkDataArray *slopesArray = pd->GetArray("Slopes");
+    vtkDataArray *slopesArray = slopePts->GetArray("Slopes");
 
     if (!slopesArray) {
       qWarning() << "Slopes array NOT FOUND in slopeCalc output";
@@ -377,6 +377,7 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
 
     if (!normalsArray) {
       qWarning() << "Normals array NOT FOUND - normalsFilter may have failed";
+      return;
     }
     else {
       qDebug() << "Normals array found, #tuples=" <<
@@ -384,8 +385,10 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
     }
     minVal = slopeRange[0];
     maxVal = slopeRange[1];
+    break;
   }
-  else {
+    
+  case ColoredScalar::Elevation: {
     qDebug() << "connect surfaceMapper to elevFilter output port\n";
     pipeline->surfaceMapper_->SetInputConnection(pipeline->elevFilter_->
 						 GetOutputPort());
@@ -395,10 +398,14 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
     pipeline->surfaceMapper_->SetColorModeToMapScalars();
     // clear named array selection    
     pipeline->surfaceMapper_->SelectColorArray(""); 
+    break;
+  }
+    
+  default:
+    qWarning() << "Unhandled coloredScalar_: " << coloredScalar_;
+    return;
   }
 
-  pipeline->surfaceMapper_->Modified();
-  
   // Make lookup table
   TopoColorMap::makeLUT(scheme_,
 			pipeline->elevLookupTable_);
@@ -508,82 +515,6 @@ void TopoDataItem::showAxes(bool plotAxes) {
 }
 
 
-void TopoDataItem::printPolyDataOutput(vtkDataSetAlgorithm *algorithm,
-				 const char *outputName) {
-
-  qDebug() << "---- printPolyDataOutput() for " << outputName;
-    
-  algorithm->Update();
-
-  algorithm->Print(std::cerr);
-
-  vtkPolyData *polyData = algorithm->GetPolyDataOutput();
-  vtkPoints *points = polyData->GetPoints();
-  vtkCellArray *cells = polyData->GetPolys();
-
-  double bounds[6];
-  if (points) {
-    qDebug() << "#points in " << outputName << " output: " <<
-      points->GetNumberOfPoints();
-
-    // Compute x, y, z bounds
-    qDebug() << "Compute " << outputName << " bounds...";
-    points->ComputeBounds();
-    qDebug() << "Done";
-
-    points->GetBounds(bounds);
-    qDebug() << outputName << " bounds: " <<
-      " xmin=" << bounds[0] << " xmax=" << bounds[1] <<
-      " ymin=" << bounds[2] << " ymax=" << bounds[3] <<
-      " zmin=" << bounds[4] << " zmax=" << bounds[5];
-      
-  }
-  else {
-    qDebug() << "no points in " << outputName << " output";    
-  }
-  
-  if (cells) {
-    qDebug() << "#cells in " << outputName << " output: " <<
-      cells->GetNumberOfCells();
-  }
-  else {
-    qDebug() << "no cells in " << outputName << " output";
-  }
-
-  vtkDataArray *dataArray = nullptr;
-  vtkDataSet* dataSet = algorithm->GetOutput();
-  vtkPointData *pointData = dataSet->GetPointData();
-  
-  if (pointData) {
-    qDebug() << outputName << " pointData:";
-    pointData->Print(std::cerr);
-    dataArray = pointData->GetScalars();
-    if (dataArray) {
-      dataArray->Print(std::cerr);
-    }
-    else {
-      qDebug() << outputName << " has no point data scalars";
-    }
-  }
-  else {
-    qDebug() << outputName << " has no pointData";
-  }
-  
-  vtkCellData* cellData = dataSet->GetCellData();
-  if (cellData) {
-    qDebug() << outputName << " cellData:";
-    cellData->Print(std::cerr);
-    dataArray = cellData->GetScalars();
-    if (dataArray) {
-      dataArray->Print(std::cerr);
-    }
-    else {
-      qDebug() << outputName << " has no cell data scalars";
-    }
-  }
-  qDebug() << "---- printPolyDataOutput() done";
-}
-
 void TopoDataItem::setPickedPoint(double *worldCoords) {
 
   pointPicked_ = true;
@@ -599,59 +530,6 @@ void TopoDataItem::setPickedPoint(double *worldCoords) {
 
 TopoDataReader *TopoDataItem::getDataReader() {
   return pipeline_->topoReader_;
-}
-
-
-QList<QVector2D> TopoDataItem::getElevProfile(int row1, int col1,
-					      int row2,  int col2,
-					      int nPieces) {
-
-
-  auto *profile = new std::vector<std::array<double, 2>>;
-
-  qDebug() << "TopoDataItem::getElevProfile() TEST TEST TEST row/col values";
-  row1 = col1 = 0;
-
-  row2 = pipeline_->topoReader_->topoData()->nRows();
-  col2 = pipeline_->topoReader_->topoData()->nColumns();
-  
-  bool ok = pipeline_->topoReader_->topoData()->getElevProfile(row1, col1,
-							       row2 - 1,
-							       col2 - 1,
-							       nPieces,
-							       profile);
-  QList<QVector2D> qProfile;
-  
-  if (!ok) {
-    // Return 0-length profile
-    return qProfile;
-  }
-
-  // Print profile
-  for (int i = 0; i < profile->size(); i++) {
-    std::array<double, 2> point = profile->at(i);
-    qDebug() << "distance: " << point[0] << ", z: " << point[1];
-  }
-
-  // Transfer std::vector profile data to QList of QVector2D objects
-  QVector2D qPoint;  
-  for (int i = 0; i < profile->size(); i++) {
-    std::array<double, 2> point = profile->at(i);
-    qPoint.setX((float )point[0]);
-    qPoint.setY((float )point[1]);
-    qProfile.append(qPoint);
-  }
-
-  // print out list values
-  qDebug() << "getElevProfile() output:";
-  for (int i = 0; i < qProfile.size(); i++) {
-    const QVector2D p = qProfile.at(i);
-    qDebug() << "p.x(): " << p.x() << ", p.y(): " << p.y();
-  }
-
-  delete profile;
-  
-  return qProfile;
 }
 
 

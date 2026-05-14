@@ -171,13 +171,6 @@ namespace mb_system {
       reassemblePipeline();
     }
 
-    /// Return elevation profile from encapsulated TopoData object, as a
-    /// QList of QVector2D objects, removing need to register additional
-    /// types with metadata system. QList has zero-length in case of error.
-    Q_INVOKABLE QList<QVector2D> getElevProfile(int row1, int col1,
-						int row2, int col2,
-						int nPieces);
-
     /// Set up the light source
     Q_INVOKABLE void setupLightSource(void);
 
@@ -278,11 +271,6 @@ namespace mb_system {
 		   const char *zUnits,
 		   bool geographicCRS);
 
-    /// Print polydata output of pipeline algorithm
-    void printPolyDataOutput(vtkDataSetAlgorithm *algorithm,
-			     const char *outputName);
-
-    
     /// Name of source data file
     char *dataFilename_;
 
