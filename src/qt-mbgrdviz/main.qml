@@ -67,10 +67,14 @@ Window {
                     text: qsTr('Axes'); checkable: true;
                     onTriggered: {topoDataItem.showAxes(checked)}
                 }
+                Action {
+                    text: qsTr('Contours'); checkable: true;
+                    onTriggered: {console.log('toggle countours')}
+                }		
             }
 
             Menu {
-                title: qsTr('Surface colored by:')
+                title: qsTr('Surface colored by')
 
                 Action {
                     text: qsTr('Elevation'); checkable: true;
@@ -80,15 +84,40 @@ Window {
 			topoDataItem.setColoredScalar(TopoDataItem.Elevation) }
                 }
                 Action {
-                    text: qsTr('Slope angle'); checkable: true;
+                    text: qsTr('Slope'); checkable: true;
                     ActionGroup.group: exclusiveActions
                     onTriggered: {
-			topoDataItem.setColoredScalar(TopoDataItem.Gradient)}
+			topoDataItem.setColoredScalar(TopoDataItem.Slope)}
                 }
             }
 
             Menu {
-                title: qsTr('Surface render:')
+                title: qsTr('Shadow source')
+
+                Action {
+                    text: qsTr('Illumination'); checkable: true;
+		    checked: true
+                    ActionGroup.group: exclusiveActions
+                    onTriggered: {
+			topoDataItem.setShadowSource(TopoDataItem.Illumination) }
+                }
+                Action {
+                    text: qsTr('Local slope'); checkable: true;
+                    ActionGroup.group: exclusiveActions
+                    onTriggered: {
+			topoDataItem.setShadowSource(TopoDataItem.Slope)}
+                }
+                Action {
+                    text: qsTr('No shadows'); checkable: true;
+                    ActionGroup.group: exclusiveActions
+                    onTriggered: {
+			topoDataItem.setShadowSource(TopoDataItem.None)
+                    }
+		}
+            }	    
+
+            Menu {
+                title: qsTr('Surface render')
 
                 Action {
                     text: qsTr('Polygons'); checkable: true;
@@ -198,8 +227,8 @@ Window {
             id: topoDataItem
             x: 200
             y: 200
-            width: 600
-            height: 600
+            width: 650
+            height: 650
             focus: true
         }
 
