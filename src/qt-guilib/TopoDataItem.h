@@ -103,7 +103,7 @@ namespace mb_system {
     /// Color surface by this scalar value
     enum class ColoredScalar : int {
       Elevation,
-      Gradient,
+      Slope,
       DataQuality
     };
 
@@ -118,7 +118,15 @@ namespace mb_system {
     };
 
     Q_ENUM(SurfaceRenderType)
-    
+
+    /// Render shadow method
+    enum class ShadowSource {
+      Illumination,
+      LocalSlope,
+      None
+    };
+
+    Q_ENUM(ShadowSource)
     
     /// Constructor
     TopoDataItem();
@@ -171,6 +179,19 @@ namespace mb_system {
       reassemblePipeline();
     }
 
+    Q_INVOKABLE void setShadowSource(ShadowSource source) {
+      shadowSource_ = source;
+      if (shadowSource_ == ShadowSource::None) {
+	qDebug() << "disable lights";
+	lightsEnabled_ = false;
+      }
+      else {
+	lightsEnabled_ = true;
+      }
+      
+      reassemblePipeline();
+    }
+    
     /// Set up the light source
     Q_INVOKABLE void setupLightSource(void);
 
@@ -271,6 +292,12 @@ namespace mb_system {
 		   const char *zUnits,
 		   bool geographicCRS);
 
+
+    /// Shade each vertex from local slope value, darkening vertex in
+    /// proportion to slope.
+    bool shadeFromSlope(TopoDataItem::Pipeline *pipeline,
+			double minZ, double maxZ);
+
     /// Name of source data file
     char *dataFilename_;
 
@@ -299,6 +326,9 @@ namespace mb_system {
     /// Type of surface to display (elevation, gradient...)
     ColoredScalar coloredScalar_;
 
+    /// Shadow source
+    ShadowSource shadowSource_ = ShadowSource::Illumination;
+    
     /// Type of surface rendering
     SurfaceRenderType surfaceRenderType_;
     
