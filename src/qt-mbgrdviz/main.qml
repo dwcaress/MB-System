@@ -92,7 +92,7 @@ Window {
             }
 
             Menu {
-                title: qsTr('Shadow source')
+                title: qsTr('Surface shadows')
 
                 Action {
                     text: qsTr('Illumination'); checkable: true;
