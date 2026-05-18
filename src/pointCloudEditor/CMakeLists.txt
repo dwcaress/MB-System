@@ -21,7 +21,6 @@
 #
 #    See README.md file for copying and redistribution conditions.
 #------------------------------------------------------------------------------
-set(MIN_VTK_VERSION "9.3")
 find_package(VTK ${MIN_VTK_VERSION} COMPONENTS
   ChartsCore
   CommonColor
