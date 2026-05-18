@@ -29,7 +29,7 @@ find_package(
   
 find_package(GMT REQUIRED)
 message("Fint minimum VTK_VERSION ${MIN_VTK_VERSION}")
-find_package(VTK ${MIN_VTK_VERSION})
+find_package(VTK ${MIN_VTK_VERSION} COMPONENTS GUISupportQtQuick)
 message("Found VTK_VERSION ${VTK_VERSION}")
 
 find_package(LibPROJ REQUIRED)
@@ -99,21 +99,22 @@ target_link_libraries(
   VTK::CommonExecutionModel
   VTK::DICOMParser
   VTK::FiltersExtraction
+  VTK::FiltersProgrammable
   VTK::FiltersGeometry
   VTK::FiltersHybrid
   VTK::FiltersHyperTree
   VTK::FiltersModeling
   VTK::FiltersSources
   VTK::FiltersStatistics
- VTK::FiltersTexture
- VTK::FiltersVerdict
- VTK::GUISupportQt
- VTK::GUISupportQtQuick	 
- VTK::ImagingColor
- VTK::ImagingGeneral
- VTK::ImagingHybrid
- VTK::ImagingSources
- VTK::IOImage
+  VTK::FiltersTexture
+  VTK::FiltersVerdict
+  VTK::GUISupportQt
+  VTK::GUISupportQtQuick	 
+  VTK::ImagingColor
+  VTK::ImagingGeneral
+  VTK::ImagingHybrid
+  VTK::ImagingSources
+  VTK::IOImage
   VTK::IOGeometry
   VTK::IOXML
   VTK::InteractionStyle
