@@ -420,15 +420,24 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
     pipeline->surfaceMapper_->SetScalarRange(minVal, maxVal);
 
     pipeline->surfaceMapper_->SetLookupTable(pipeline->elevLookupTable_);
+    lightsEnabled_ = true;
     break;
   }
 
   case ShadowSource::LocalSlope: {
+    lightsEnabled_ = false;    
     if (!shadeFromSlope(pipeline, minVal, maxVal)) {
       qWarning() << "shadeFromSource() failed";
-      break;
     }
+    break;
   }
+
+  case ShadowSource::None: {
+    lightsEnabled_ = false;
+    break;
+  }
+
+    
   default:
     qWarning() << "Unhandled shadowSource: " << shadowSource_;
     return;
@@ -716,25 +725,28 @@ void TopoDataItem::setOrthographicView() {
 bool TopoDataItem::shadeFromSlope(TopoDataItem::Pipeline *pipeline,
 				  double minZ, double maxZ) {
 
-  auto normalsFilter = vtkSmartPointer<vtkPolyDataNormals>::New();
-  normalsFilter->SetInputConnection(pipeline->topoReader_->GetOutputPort());
-  normalsFilter->ComputePointNormalsOn();
-  normalsFilter->ComputeCellNormalsOff();
+  pipeline->shadeNormalsFilter_->
+    SetInputConnection(pipeline->idFilter_->GetOutputPort());
+
+  pipeline->shadeNormalsFilter_->ComputePointNormalsOn();
+  pipeline->shadeNormalsFilter_->ComputeCellNormalsOff();
   //
   // CRITICAL: SplittingOff() prevents vertex duplication at sharp edges.
   // If splitting is on, the normals array has more tuples than the elevation
   // scalar array → index mismatch → wrong colors.
   //
-  normalsFilter->SplittingOff();
-  normalsFilter->ConsistencyOn();
-  normalsFilter->AutoOrientNormalsOn();
-  normalsFilter->Update();
+  pipeline->shadeNormalsFilter_->SplittingOff();
+  pipeline->shadeNormalsFilter_->ConsistencyOn();
+  pipeline->shadeNormalsFilter_->AutoOrientNormalsOn();
+  pipeline->shadeNormalsFilter_->Update();
 
   // Sanity check: both branches must have the same vertex count
   const vtkIdType nElev  = pipeline->elevFilter_->GetOutput()->
     GetNumberOfPoints();
 
-  const vtkIdType nNorm  = normalsFilter->GetOutput()->GetNumberOfPoints();
+  const vtkIdType nNorm  =
+    pipeline->shadeNormalsFilter_->GetOutput()->GetNumberOfPoints();
+
   if (nElev != nNorm) {
       std::cerr << "ERROR: point count mismatch – elevation=" << nElev
 		<< "  normals=" << nNorm << "\n"
@@ -745,23 +757,24 @@ bool TopoDataItem::shadeFromSlope(TopoDataItem::Pipeline *pipeline,
   
   qDebug() << "Vertex count: " << nElev;
 
-  auto slopeColorFilter = vtkSmartPointer<vtkProgrammableFilter>::New();
-  slopeColorFilter->SetInputConnection(pipeline->elevFilter_->GetOutputPort());
+  pipeline->slopeColorFilter_->SetInputConnection(pipeline->elevFilter_->GetOutputPort());
 
   auto callbackData = new SlopeShader::CallbackData {
-    slopeColorFilter.Get(),
-    normalsFilter.Get(),
+    pipeline->slopeColorFilter_.Get(),
+    pipeline->shadeNormalsFilter_.Get(),
     pipeline->elevLookupTable_,
     minZ, maxZ,
     1.5,
     0.15
   };
 
-  slopeColorFilter->SetExecuteMethod(SlopeShader::execute, callbackData);
-  slopeColorFilter->SetExecuteMethodArgDelete(SlopeShader::deleteCallbackData);
-  slopeColorFilter->Update();
+  pipeline->slopeColorFilter_->
+    SetExecuteMethod(SlopeShader::execute, callbackData);
+  pipeline->slopeColorFilter_->
+    SetExecuteMethodArgDelete(SlopeShader::deleteCallbackData);
+  pipeline->slopeColorFilter_->Update();
 
-  pipeline->surfaceMapper_->SetInputConnection(slopeColorFilter->
+  pipeline->surfaceMapper_->SetInputConnection(pipeline->slopeColorFilter_->
 						GetOutputPort());
   //
   // SetColorModeToDirectScalars():
@@ -773,6 +786,7 @@ bool TopoDataItem::shadeFromSlope(TopoDataItem::Pipeline *pipeline,
   // Do NOT call SetLookupTable / SetScalarRange on the mapper;
   // those only apply when the mapper does its own LUT mapping.
 
+  return true;
 }
 
 

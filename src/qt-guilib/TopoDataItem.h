@@ -11,6 +11,7 @@
 #include <vtkLookupTable.h>
 #include <vtkTransform.h>
 #include <vtkTransformFilter.h>
+#include <vtkProgrammableFilter.h>
 #include <vtkCubeAxesActor.h>
 #include <vtkNamedColors.h>
 #include <vtkLight.h>
@@ -75,6 +76,11 @@ namespace mb_system {
 
       /// Used to compute slope
       vtkNew<vtkPolyDataNormals> normalsFilter_;
+
+      /// Used to compute slope for shade adjustment
+      vtkNew<vtkPolyDataNormals> shadeNormalsFilter_;      
+
+      vtkNew<vtkProgrammableFilter> slopeColorFilter_;
       
       vtkNew<vtkIdFilter> idFilter_;
       vtkNew<vtkLookupTable> elevLookupTable_;
