@@ -32,17 +32,18 @@
 
 namespace mb_system {
   /**
-   * SlopeShader
+   * SlopeShader is used by a vtkProgrammableFilter to 
+   * color a terrain surface by elevation (via a lookup table),
+   * then darken each vertex in proportion to local surface slope.
    *
-   * Colors a terrain surface by elevation (via a lookup table),
-   * then darkens each vertex in proportion to local surface slope.
+   * Application code fills in CallbackData instance, then invokes 
+   * vtkProgrammableFilter::SetExecuteMethod(SlopeShader::execute, callbackData) 
    *
-   * E.g. 
-   * Pipeline:
-   *   vtkSphereSource (synthetic terrain)
+   * E.g. within the VTK pipeline:
+   *   topoDataReader
    *     ├─► vtkElevationFilter   → elevation scalar "Elevation"
    *     └─► vtkPolyDataNormals   → per-vertex normals
-   *           └─► vtkProgrammableFilter  (merges both branches → RGBA "Colors")
+   *           └─► vtkProgrammableFilter  (SlopeShader accessed here)
    *                 └─► vtkPolyDataMapper (SetColorModeToDirectScalars)
    *                       └─► vtkActor ► vtkRenderer ► vtkRenderWindow
    *
