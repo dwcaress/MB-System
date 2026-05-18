@@ -32,11 +32,12 @@
 
 namespace mb_system {
   /**
-   * SlopeColorApp.cxx
+   * SlopeShader
    *
-   * VTK 9 example: colors a terrain surface by elevation (via a lookup table),
+   * Colors a terrain surface by elevation (via a lookup table),
    * then darkens each vertex in proportion to local surface slope.
    *
+   * E.g. 
    * Pipeline:
    *   vtkSphereSource (synthetic terrain)
    *     ├─► vtkElevationFilter   → elevation scalar "Elevation"
@@ -45,8 +46,6 @@ namespace mb_system {
    *                 └─► vtkPolyDataMapper (SetColorModeToDirectScalars)
    *                       └─► vtkActor ► vtkRenderer ► vtkRenderWindow
    *
-   * Build:
-   *   See CMakeLists.txt in the same directory.
    */
   class SlopeShader {
 

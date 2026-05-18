@@ -8,10 +8,6 @@
 using namespace mb_system;
 
 
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  The programmable filter's execute callback
-// ─────────────────────────────────────────────────────────────────────────────
 void SlopeShader::execute(void* userData) {
   auto* d = static_cast<CallbackData*>(userData);
 
@@ -110,9 +106,7 @@ void SlopeShader::execute(void* userData) {
   outPD->GetPointData()->SetScalars(colors);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  Cleanup callback so VTK properly frees CallbackData
-// ─────────────────────────────────────────────────────────────────────────────
+
 void SlopeShader::deleteCallbackData(void* userData) {
   delete static_cast<CallbackData*>(userData);
 }
@@ -316,4 +310,4 @@ int main(int argc, char* argv[])
 
   return EXIT_SUCCESS;
 }
-#endif
+#endif   // main() test 
