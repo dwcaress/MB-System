@@ -83,7 +83,8 @@ void LightingInteractorStyle::OnMouseMove() {
   if (lightMoving_ && Interactor->GetAltKey())  {
             
     // Get current camera parameters to relate mouse movement to 3D space
-    vtkCamera* camera = topoDataItem_->getPipeline()->renderer_->GetActiveCamera();
+    vtkCamera* camera = topoDataItem_->getPipeline()->renderer_->
+      GetActiveCamera();
             
     // Get camera vectors
     double forward[3];
@@ -116,11 +117,12 @@ void LightingInteractorStyle::OnMouseMove() {
     topoDataItem_->getPipeline()->lightSource_->SetPosition(new_pos);
 
     // Trigger render to update scene with new lighting
-    //// Interactor->Render();
     Interactor->Render();    
   }
   else if (intensityChanging_ && Interactor->GetAltKey())  {
-    double intensity = topoDataItem_->getPipeline()->lightSource_->GetIntensity();
+    double intensity =
+      topoDataItem_->getPipeline()->lightSource_->GetIntensity();
+
     qDebug() << "change light intensity; now is " << intensity;
     qDebug() << "intensity: " << intensity << ", dx: " << dx <<
       ", dy: " << dy;
