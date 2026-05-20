@@ -28,7 +28,18 @@ find_package(
   REQUIRED)
   
 find_package(GMT REQUIRED)
-message("Fint minimum VTK_VERSION ${MIN_VTK_VERSION}")
+
+# If VTK 9.5 is from Homebrew it was built against external NetCDF and
+# its exported targets reference NetCDF::NetCDF. Make that target exist before
+# find_package(VTK) so VTK-targets.cmake doesn't error.
+find_package(netCDF CONFIG QUIET)
+if(netCDF_FOUND AND NOT TARGET NetCDF::NetCDF)
+  add_library(NetCDF::NetCDF INTERFACE IMPORTED)
+  target_link_libraries(NetCDF::NetCDF INTERFACE netCDF::netcdf)
+endif()
+
+
+message("Find minimum VTK_VERSION ${MIN_VTK_VERSION}")
 find_package(VTK ${MIN_VTK_VERSION} COMPONENTS GUISupportQtQuick)
 message("Found VTK_VERSION ${VTK_VERSION}")
 
