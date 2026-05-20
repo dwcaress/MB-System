@@ -105,8 +105,14 @@ Window {
                     text: qsTr('Local slope'); checkable: true;
                     ActionGroup.group: exclusiveActions
                     onTriggered: {
-			topoDataItem.setShadowSource(TopoDataItem.Slope)}
+			topoDataItem.setShadowSource(TopoDataItem.LocalSlope)}
                 }
+                Action {
+                    text: qsTr('Local slope (GPU)'); checkable: true;
+                    ActionGroup.group: exclusiveActions
+                    onTriggered: {
+			topoDataItem.setShadowSource(TopoDataItem.LocalSlopeGpu)}
+                }		
                 Action {
                     text: qsTr('No shadows'); checkable: true;
                     ActionGroup.group: exclusiveActions
