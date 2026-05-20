@@ -71,7 +71,9 @@ void DrawInteractorStyle::OnLeftButtonUp() {
     // Successfully picked world coordinates
     double worldCoords[3];
     picker->GetPickPosition(worldCoords);
-
+    qDebug() << "World coords: x=" << worldCoords[0] <<
+      ", y=" << worldCoords[1] << ", z=" << worldCoords[2];
+    
     std::array<double, 3> point;
     point[0] = worldCoords[0];
     point[1] = worldCoords[1];
