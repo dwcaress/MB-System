@@ -16,6 +16,10 @@
 #include <vtkShaderProperty.h>
 #include <QQuickWindow>
 #include <QMessageBox>
+#include <QtConcurrent>       // Run tasks in parallel via QtConcurrent::run
+#include <QFuture>            // Monitor the return state of the worker
+#include <QFutureWatcher>     // Connect thread completion signals to slots
+#include <QApplication>
 #include "TopoDataItem.h"
 #include "TopoColorMap.h"
 #include "SharedConstants.h"
@@ -663,21 +667,27 @@ void TopoDataItem::setLight(bool lightsEnabled,
 
   qDebug() << "setLight()";
 
-  lightsEnabled_ = lightsEnabled;
+  /// reassemblePipeline();
+  // From your QQuickVtkItem subclass on the main thread
+  this->dispatch_async([=](vtkRenderWindow* renderWindow,
+			   vtkUserData userData) {
+    // Modify your VTK pipeline here
+    // No need to call Render() manually; scheduleRender() handles it
+    lightsEnabled_ = lightsEnabled;
   
-  pipeline_->lightSource_->SetIntensity(intensity);
+    pipeline_->lightSource_->SetIntensity(intensity);
   
-  pipeline_->lightSource_->SetPosition(x, y, z);
+    pipeline_->lightSource_->SetPosition(x, y, z);
 
-  if (!lightsEnabled_) {
-    pipeline_->surfaceActor_->GetProperty()->LightingOff();
-  }
-  else {
-    pipeline_->surfaceActor_->GetProperty()->LightingOn();
-  }
+    if (!lightsEnabled_) {
+      pipeline_->surfaceActor_->GetProperty()->LightingOff();
+    }
+    else {
+      pipeline_->surfaceActor_->GetProperty()->LightingOn();
+    }
   
   // Render scene
-  reassemblePipeline();
+  });
 }
 
 
@@ -843,3 +853,26 @@ bool TopoDataItem::shadeFromSlope(TopoDataItem::Pipeline *pipeline,
 }
 
 
+void TopoDataItem::setColoredScalar(ColoredScalar coloredScalar) {
+  qDebug() << "setColoredScalar to " << coloredScalar;
+  coloredScalar_ = coloredScalar;
+
+  // 1. Set the busy cursor on the main GUI thread
+  QApplication::setOverrideCursor(Qt::WaitCursor);
+
+  // 2. Launch the worker thread using QtConcurrent
+  QFuture<void> future = QtConcurrent::run([=]() {
+    // Perform heavy background work here
+    reassemblePipeline();
+  });
+
+  // 3. Create a watcher to detect completion on the main thread
+  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
+  watcher->setFuture(future);
+
+  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
+    QApplication::restoreOverrideCursor(); // Revert back to the normal cursor
+    watcher->deleteLater();
+  });
+ 
+}

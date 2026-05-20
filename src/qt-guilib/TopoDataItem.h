@@ -175,11 +175,8 @@ namespace mb_system {
     }
 
     /// Set type of surface to display
-    Q_INVOKABLE void setColoredScalar(ColoredScalar coloredScalar) {
-      qDebug() << "setColoredScalar to " << coloredScalar;
-      coloredScalar_ = coloredScalar;
-      reassemblePipeline();
-    }
+    Q_INVOKABLE void setColoredScalar(ColoredScalar coloredScalar);
+
 
     Q_INVOKABLE void setSurfaceRenderType(SurfaceRenderType renderType) {
       surfaceRenderType_ = renderType;
