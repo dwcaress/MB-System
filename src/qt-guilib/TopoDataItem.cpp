@@ -516,8 +516,14 @@ void TopoDataItem::applyAxes(Pipeline *pipeline) {
   pipeline->renderer_->RemoveActor(pipeline->axesActor_);
 
   if (showAxes_ && dataLoaded_) {
+    // Pivot Z-scaling about the data's vertical centre so the axes box
+    // tracks the surface actor (which uses the same pivot in
+    // applyVerticalExagg) instead of swinging around world Z=0.
+    const double zCenter = 0.5 * (gridBounds_[4] + gridBounds_[5]);
+    pipeline->axesActor_->SetOrigin(0., 0., zCenter);
+    pipeline->axesActor_->SetScale (1., 1., verticalExagg_);
+
     pipeline->axesActor_->SetCamera(pipeline->renderer_->GetActiveCamera());
-    pipeline->axesActor_->SetScale(1., 1., verticalExagg_);
     setupAxes(pipeline->axesActor_,
               pipeline->colors_,
               pipeline->surfaceMapper_->GetBounds(),
@@ -535,10 +541,18 @@ void TopoDataItem::applyAxes(Pipeline *pipeline) {
 //  Stage 7 — vertical exaggeration
 // ═════════════════════════════════════════════════════════════════════════════
 void TopoDataItem::applyVerticalExagg(Pipeline *pipeline) {
-  pipeline->surfaceActor_->SetScale(1., 1., verticalExagg_);
-  // Contour lines sit on top of the surface — they need the same Z scale
-  // or they'll detach from the terrain when exaggeration changes.
-  pipeline->contourActor_->SetScale(1., 1., verticalExagg_);
+  // Pivot Z-scaling about the data's vertical centre so the surface
+  // grows/shrinks symmetrically around its midplane instead of swinging
+  // around world Z=0.
+  const double zCenter = 0.5 * (gridBounds_[4] + gridBounds_[5]);
+
+  pipeline->surfaceActor_->SetOrigin(0., 0., zCenter);
+  pipeline->surfaceActor_->SetScale (1., 1., verticalExagg_);
+
+  pipeline->contourActor_->SetOrigin(0., 0., zCenter);
+  pipeline->contourActor_->SetScale (1., 1., verticalExagg_);
+
+  pipeline->renderer_->ResetCameraClippingRange();
 }
 
 
