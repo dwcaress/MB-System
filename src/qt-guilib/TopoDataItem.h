@@ -2,7 +2,7 @@
 #define TOPOGRIDITEM_H
 #include <QObject>
 #include <QQuickVTKItem.h>
-#include <vtkActor.h>    // Does it require vtk/?
+#include <vtkActor.h>
 #include <vtkRenderer.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkPolyData.h>
@@ -12,6 +12,7 @@
 #include <vtkTransform.h>
 #include <vtkTransformFilter.h>
 #include <vtkProgrammableFilter.h>
+#include <vtkArrayCalculator.h>
 #include <vtkCubeAxesActor.h>
 #include <vtkNamedColors.h>
 #include <vtkLight.h>
@@ -37,6 +38,7 @@
 #include "PickerInteractorStyle.h"
 #include "RestrictCameraStyle.h"
 #include "DrawInteractorStyle.h"
+#include "SlopeShader.h"
 
 #define DATA_QUALITY_NAME "dataQuality"
 #define ORIGINAL_IDS "originalIDs"
@@ -48,40 +50,53 @@
 namespace mb_system {
   /**
      Renders bathymetric data of grid or swath file, within a QtQuickVTKItem.
+
+     The pipeline is built once on data load (loadDataPipeline) and from then on
+     individual settings — colored scalar, shadow source, colormap, render type,
+     axes visibility, vertical exaggeration — are applied through narrow apply*
+     methods that only touch the affected stage.  This avoids re-reading the
+     data file on every UI change.
   */
   class TopoDataItem : public QQuickVTKItem {
     Q_OBJECT
-  
+
   public:
 
     /// 'Persistent' VTK visualization pipeline objects
     struct Pipeline : vtkObject {
 
-      Pipeline() {firstRender_ = true;}
-      
-      /// Declare static New() method expected by VTK factory classes, that
-      /// returns a Pipeline instance
+      Pipeline() {
+	firstRender_ = true;
+
+	// One-time wiring
+	surfaceActor_->SetMapper(surfaceMapper_);
+      }
+
+      /// Declare static New() method expected by VTK factory classes
       static Pipeline* New();
-      
-      /// Enable run-time typing to Pipeline
+
       vtkTypeMacro(Pipeline, vtkObject);
 
       /// Light source
       vtkNew<vtkLight> lightSource_;
-      
+
       /// Topo data reader
       vtkNew<mb_system::TopoDataReader> topoReader_;
 
       vtkNew<vtkElevationFilter> elevFilter_;
 
-      /// Used to compute slope
+      /// Computes per-vertex normals for "Slope" colored-scalar mode
       vtkNew<vtkPolyDataNormals> normalsFilter_;
 
-      /// Used to compute slope for shade adjustment
-      vtkNew<vtkPolyDataNormals> shadeNormalsFilter_;      
+      /// Computes per-vertex normals for slope-darkening (CPU and GPU paths)
+      vtkNew<vtkPolyDataNormals> shadeNormalsFilter_;
 
+      /// Computes a "Slopes" point-data array from Normals (acos of Nz)
+      vtkNew<vtkArrayCalculator> slopeCalc_;
+
+      /// CPU slope-darkening (RGBA written per vertex)
       vtkNew<vtkProgrammableFilter> slopeColorFilter_;
-      
+
       vtkNew<vtkIdFilter> idFilter_;
       vtkNew<vtkLookupTable> elevLookupTable_;
       vtkNew<vtkActor> surfaceActor_;
@@ -89,16 +104,16 @@ namespace mb_system {
       vtkNew<vtkRenderer> renderer_;
       vtkNew<QVTKInteractor> windowInteractor_;
       vtkNew<vtkAreaPicker> areaPicker_;
-      // data quality array for input vtkPolyData
+      /// data quality array for input vtkPolyData
       vtkNew<vtkIntArray> quality_;
 
       /// Assign this pointer to appropriate interactor style,
       /// depending on how 'mouse mode' is set
-      vtkInteractorStyle *interactorStyle_;            
+      vtkInteractorStyle *interactorStyle_;
 
-      /// Source polydata
+      /// Source polydata (alias for elevFilter_->GetOutput())
       vtkPolyData *polyData_;
-      
+
       /// x,y,z axes
       vtkNew<vtkCubeAxesActor> axesActor_;
       vtkNew<vtkNamedColors>colors_;
@@ -112,7 +127,6 @@ namespace mb_system {
       Slope,
       DataQuality
     };
-
     Q_ENUM(ColoredScalar)
 
 
@@ -122,7 +136,6 @@ namespace mb_system {
       Wireframe,
       PointCloud
     };
-
     Q_ENUM(SurfaceRenderType)
 
     /// Render shadow method
@@ -132,82 +145,74 @@ namespace mb_system {
       LocalSlopeGpu,
       None
     };
-
     Q_ENUM(ShadowSource)
-    
+
     /// Constructor
     TopoDataItem();
 
     /// Get pointer to grid reader
     mb_system::TopoDataReader *getDataReader();
-    
+
     /// Initialize and connect VTK pipeline components, attach it to
     /// vtkRenderWindow, return latest pipeline object.
-    /// (Return type vtkUserData is defined in parent class)
     vtkUserData initializeVTK(vtkRenderWindow *renderWindow) override;
 
     /// Clean up and free resources as needed
-    void destroyingVTK(vtkRenderWindow
-		       *renderWindow, vtkUserData userData) override;
+    void destroyingVTK(vtkRenderWindow *renderWindow,
+		       vtkUserData userData) override;
 
-    /// Load specified grid file
+    /// Load specified grid file (triggers full pipeline rebuild)
     Q_INVOKABLE bool loadDatafile(QUrl file);
 
-    /// Set color map
-    Q_INVOKABLE bool setColormap(QString cmapName);    
+    /// Set color map (rebuilds LUT only)
+    Q_INVOKABLE bool setColormap(QString cmapName);
 
     /// Toggle axes plot
     Q_INVOKABLE void showAxes(bool plotAxes);
 
     /// Set vertical exaggeration
-    Q_INVOKABLE void setVerticalExagg(float verticalExagg) {
-      verticalExagg_ = verticalExagg;
-    }
+    Q_INVOKABLE void setVerticalExagg(float verticalExagg);
 
-    /// Set vtk render window's event-driven user interace corresponding to
-    /// specified mouse mode name
+    /// Set mouse mode (swaps interactor style only)
     Q_INVOKABLE bool setMouseMode(QString mouseMode);
-
 
     /// Get vertical exaggeration
     Q_INVOKABLE float getVerticalExagg() {
       return verticalExagg_;
     }
 
-    /// Set type of surface to display
+    /// Set type of colored scalar (Elevation / Slope / DataQuality)
     Q_INVOKABLE void setColoredScalar(ColoredScalar coloredScalar);
 
+    /// Set surface representation (Polys / Wireframe / PointCloud)
+    Q_INVOKABLE void setSurfaceRenderType(SurfaceRenderType renderType);
 
-    Q_INVOKABLE void setSurfaceRenderType(SurfaceRenderType renderType) {
-      surfaceRenderType_ = renderType;
-      reassemblePipeline();
-    }
+    /// Set shadow source (Illumination / LocalSlope / LocalSlopeGpu / None)
+    Q_INVOKABLE void setShadowSource(ShadowSource source);
 
-    Q_INVOKABLE void setShadowSource(ShadowSource source) {
-      shadowSource_ = source;
-      if (shadowSource_ == ShadowSource::None) {
-	qDebug() << "disable lights";
-	lightsEnabled_ = false;
-      }
-      else {
-	lightsEnabled_ = true;
-      }
-      
-      reassemblePipeline();
-    }
-    
+    /// Slope-darkening gamma (>1 → only steep areas darken).
+    /// Cheap: just updates a uniform in GPU mode, or marks the CPU
+    /// programmable filter dirty in CPU mode.  Does not rebuild.
+    Q_INVOKABLE void setSlopeGamma(double gamma);
+
+    /// Slope-darkening floor (0–1; prevents pure-black cliffs)
+    Q_INVOKABLE void setMinBrightness(double minBrightness);
+
+    Q_INVOKABLE double getSlopeGamma()    { return slopeGamma_; }
+    Q_INVOKABLE double getMinBrightness() { return minBrightness_; }
+
     /// Set up the light source
     Q_INVOKABLE void setupLightSource(void);
 
     /// Set light source intensity and position
-    Q_INVOKABLE void setLight(bool lightsEnabled,
-			      float intensity, double x, double y, double z);
+    Q_INVOKABLE void setLight(bool lightsEnabled, float intensity,
+                              double x, double y, double z);
 
     /// Get light source position
-   Q_INVOKABLE QVariantList getLightPosition(void);
+    Q_INVOKABLE QVariantList getLightPosition(void);
 
     /// Get light source intensity
-    Q_INVOKABLE double getLightIntensity(void);    
+    Q_INVOKABLE double getLightIntensity(void);
 
     /// Print mouse help message
     Q_INVOKABLE QString printMouseHelp() {
@@ -222,7 +227,7 @@ namespace mb_system {
 
     /// Set camera for orthographic view
     Q_INVOKABLE void setOrthographicView();
-    
+
     /// Set picked point
     void setPickedPoint(double *worldCoords);
 
@@ -252,59 +257,84 @@ namespace mb_system {
     /// Get source polydata
     vtkPolyData *getPolyData();
 
-    /// Trigger re-render
+    /// Trigger re-render (full rebuild via render thread)
     void render() {
-      assemblePipeline(pipeline_);
+      reassemblePipeline();
     }
 
     /// Set pointsSelectInteractorStyle_ as a property so that its emitted
     /// signals can be received by QML
     Q_PROPERTY(MyRubberBandStyle* dataSelector
-	       READ getPointsSelectInteractorStyle CONSTANT)
+               READ getPointsSelectInteractorStyle CONSTANT)
 
-    /// Get the pointsSelectorInteractorStyle
     MyRubberBandStyle *getPointsSelectInteractorStyle() {
       return pointsSelectInteractorStyle_;
     }
-    
-    
+
+
   signals:
     /// Emit when user defines a line with mouse
     void lineDefined(QList<QVector2D> elevProfile);
 
     /// Emit when error occurs, QML will pop up message
     void errorOccurred(QString message);
-    
-  
+
+
   protected:
 
-    /// Initialize pipeline structure 
+    /// Initialize pipeline structure (currently a stub; kept for compat)
     void initializePipeline(void);
-    
-    /// Assemble pipeline elements
+
+    /// Full pipeline rebuild — re-reads data file, calls every apply*.
+    /// Used on first init and on data file load.
     virtual void assemblePipeline(Pipeline *pipeline);
 
-    /// Reassemble the pipeline and re-render, in the Qt render thread
+    /// Dispatch a full rebuild to the Qt render thread, then render.
     void reassemblePipeline(void);
 
-    /// Set up axes
+    // ── Staged pipeline assembly ────────────────────────────────────────────
+    //
+    // Each apply* method only touches the parts of the pipeline that depend
+    // on its corresponding piece of state.  Setters above dispatch only the
+    // method(s) they need.
+    //
+    /// Stage 1: read data file, set up reader/idFilter/elevFilter,
+    /// cache bounds, build quality array.  Called once per file load.
+    /// Returns false if the file could not be read.
+    bool loadDataPipeline(Pipeline *pipeline);
+
+    /// Stage 2: select the "colored" scalar and the upstream port that
+    /// carries it.  Also calls applyShadowSource() since the shadow source
+    /// consumes that port.
+    void applyColoredScalar(Pipeline *pipeline);
+
+    /// Stage 3: configure mapper tail (LUT, ColorMode, ScalarRange),
+    /// install/remove the GPU shader replacements, set lighting on/off.
+    void applyShadowSource(Pipeline *pipeline);
+
+    /// Rebuild the lookup table from scheme_ (in place).
+    void applyColormap(Pipeline *pipeline);
+
+    /// Set actor representation (Polys/Wireframe/PointCloud).
+    void applyRenderType(Pipeline *pipeline);
+
+    /// Add/remove the cube-axes actor based on showAxes_.
+    void applyAxes(Pipeline *pipeline);
+
+    /// Apply vertical exaggeration scale to the surface actor.
+    void applyVerticalExagg(Pipeline *pipeline);
+
+    /// Set up axes (geometry/units configuration)
     void setupAxes(vtkCubeAxesActor *axesActor,
-		   vtkNamedColors *colors,
-		   double *surfaceBounds,
-		   double *gridBounds,
-		   const char *xUnits, const char *yUnits,
-		   const char *zUnits,
-		   bool geographicCRS);
-
-
-    /// Each vertex colored from elev-LUT, then vertex darkened in
-    /// proportion to slope.
-    bool shadeFromSlope(TopoDataItem::Pipeline *pipeline,
-			double minZ, double maxZ);
+                   vtkNamedColors *colors,
+                   double *surfaceBounds,
+                   double *gridBounds,
+                   const char *xUnits, const char *yUnits,
+                   const char *zUnits,
+                   bool geographicCRS);
 
     /// Name of source data file
     char *dataFilename_;
-
 
     /// Latest picked coordinates
     double pickedCoords_[3];
@@ -312,9 +342,9 @@ namespace mb_system {
     /// Indicates if point has been picked by user
     bool pointPicked_;
 
-    /// Shade display with lights?
+    /// Shade display with lights?  (derived from shadowSource_)
     bool lightsEnabled_ = true;
-    
+
     /// Indicates whether to render on next update()
     bool forceRender_;
 
@@ -327,37 +357,49 @@ namespace mb_system {
     /// Colormap scheme
     mb_system::TopoColorMap::Scheme scheme_;
 
-    /// Type of surface to display (elevation, gradient...)
+    /// Type of surface to display (Elevation, Slope, DataQuality)
     ColoredScalar coloredScalar_;
 
     /// Shadow source
     ShadowSource shadowSource_ = ShadowSource::Illumination;
-    
+
     /// Type of surface rendering
-    SurfaceRenderType surfaceRenderType_;
-    
+    SurfaceRenderType surfaceRenderType_ = SurfaceRenderType::Polys;
+
     /// VTK pipeline
     Pipeline *pipeline_;
-    
+
     vtkRenderWindow *renderWindow_;
 
-    /// Interactor styles (can be selected by user)
+    // ── Cached after loadDataPipeline ──────────────────────────────────────
+    double elevMin_      = 0.0;
+    double elevMax_      = 0.0;
+    double gridBounds_[6]= {0,0,0,0,0,0};
+    bool   dataLoaded_   = false;
+
+    // ── Slope-darkening parameters (sliders feed these) ────────────────────
+    double slopeGamma_    = 1.5;
+    double minBrightness_ = 0.15;
+
+    /// Persistent callback data for the CPU slope filter.  Owned by
+    /// pipeline_->slopeColorFilter_ via SetExecuteMethodArgDelete.
+    SlopeShader::CallbackData *slopeCallbackData_ = nullptr;
+
+    /// Upstream port carrying the active colored scalar.  Set by
+    /// applyColoredScalar, consumed by applyShadowSource.
+    vtkAlgorithmOutput *coloredOutputPort_ = nullptr;
+
+    /// Cached scalar range for the colored scalar
+    double coloredMin_ = 0.0;
+    double coloredMax_ = 0.0;
+
+    // ── Interactor styles ──────────────────────────────────────────────────
     PickInteractorStyle *pickInteractorStyle_;
-
-    /// Change lighting with mouse
     LightingInteractorStyle *lightingInteractorStyle_;
-
-    /// Select topo/bathymetry data with mouse
     vtkNew<PointsSelectInteractorStyle> pointsSelectInteractorStyle_;
-
     vtkNew<DrawInteractorStyle> drawInteractorStyle_;
-    
     vtkNew<DrawInteractorStyle> testStyle_;
-    
   };
 }
 
 #endif
-
-
-
