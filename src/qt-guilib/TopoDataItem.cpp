@@ -13,6 +13,7 @@
 #include <vtkPolyDataNormals.h>
 #include <vtkIdTypeArray.h>
 #include <vtkProgrammableFilter.h>
+#include <vtkShaderProperty.h>
 #include <QQuickWindow>
 #include <QMessageBox>
 #include "TopoDataItem.h"
@@ -421,6 +422,7 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
 
     pipeline->surfaceMapper_->SetLookupTable(pipeline->elevLookupTable_);
     lightsEnabled_ = true;
+    
     break;
   }
 
@@ -429,20 +431,68 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
     if (!shadeFromSlope(pipeline, minVal, maxVal)) {
       qWarning() << "shadeFromSource() failed";
     }
+      break;
+  }
+
+  case ShadowSource::LocalSlopeGpu: {
+    qDebug() << "ShadowSource::LocalSlopeGpu";
+    lightsEnabled_ = false;
+
+    // Run normals in series so the polydata reaching the mapper carries
+    // BOTH the elevation scalar and per-vertex normals.
+    pipeline->shadeNormalsFilter_->
+      SetInputConnection(pipeline->elevFilter_->GetOutputPort());
+
+    pipeline->shadeNormalsFilter_->ComputePointNormalsOn();
+    pipeline->shadeNormalsFilter_->ComputeCellNormalsOff();
+    pipeline->shadeNormalsFilter_->SplittingOff();
+    pipeline->shadeNormalsFilter_->ConsistencyOn();
+    pipeline->shadeNormalsFilter_->AutoOrientNormalsOn();
+    pipeline->shadeNormalsFilter_->Update();
+
+    // Re-route the mapper through the normals filter so normalMC reaches
+    // the vertex shader.
+    pipeline->surfaceMapper_->SetInputConnection(
+        pipeline->shadeNormalsFilter_->GetOutputPort());
+
+    // Mapper does ordinary LUT-based scalar coloring; the GLSL replacement
+    // multiplies the resulting ambientColor/diffuseColor by slope brightness.
+    pipeline->surfaceMapper_->ScalarVisibilityOn();
+    pipeline->surfaceMapper_->SetLookupTable(pipeline->elevLookupTable_);
+    pipeline->surfaceMapper_->SetScalarRange(minVal, maxVal);
+    pipeline->surfaceMapper_->SetColorModeToMapScalars();
+    pipeline->surfaceMapper_->SetScalarModeToUsePointData();
+
+    double slopeGamma = 0.3;
+    double minBrightness = 0.15;
+
+    SlopeShader::installGpuShader(pipeline->surfaceActor_,
+				  slopeGamma,
+				  minBrightness);
     break;
   }
+    
 
   case ShadowSource::None: {
     lightsEnabled_ = false;
     break;
   }
 
-    
   default:
     qWarning() << "Unhandled shadowSource: " << shadowSource_;
     return;
   }  
 
+  if (shadowSource_ != ShadowSource::LocalSlopeGpu) {
+    // Reset GPU shader stuff
+    pipeline->surfaceActor_->GetShaderProperty()->
+      ClearAllVertexShaderReplacements();
+    
+    pipeline->surfaceActor_->GetShaderProperty()->
+      ClearAllFragmentShaderReplacements();    
+  }
+
+  
   // Assign surfaceMapper to actor
   pipeline->surfaceActor_->SetMapper(pipeline->surfaceMapper_);
 
@@ -757,21 +807,24 @@ bool TopoDataItem::shadeFromSlope(TopoDataItem::Pipeline *pipeline,
   
   qDebug() << "Vertex count: " << nElev;
 
-  pipeline->slopeColorFilter_->SetInputConnection(pipeline->elevFilter_->GetOutputPort());
+  pipeline->slopeColorFilter_->
+    SetInputConnection(pipeline->elevFilter_->GetOutputPort());
 
   auto callbackData = new SlopeShader::CallbackData {
     pipeline->slopeColorFilter_.Get(),
     pipeline->shadeNormalsFilter_.Get(),
     pipeline->elevLookupTable_,
     minZ, maxZ,
-    1.5,
+    0.3,
     0.15
   };
 
   pipeline->slopeColorFilter_->
     SetExecuteMethod(SlopeShader::execute, callbackData);
+  
   pipeline->slopeColorFilter_->
     SetExecuteMethodArgDelete(SlopeShader::deleteCallbackData);
+
   pipeline->slopeColorFilter_->Update();
 
   pipeline->surfaceMapper_->SetInputConnection(pipeline->slopeColorFilter_->

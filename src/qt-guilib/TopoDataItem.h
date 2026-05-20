@@ -129,6 +129,7 @@ namespace mb_system {
     enum class ShadowSource {
       Illumination,
       LocalSlope,
+      LocalSlopeGpu,
       None
     };
 
@@ -299,7 +300,7 @@ namespace mb_system {
 		   bool geographicCRS);
 
 
-    /// Shade each vertex from local slope value, darkening vertex in
+    /// Each vertex colored from elev-LUT, then vertex darkened in
     /// proportion to slope.
     bool shadeFromSlope(TopoDataItem::Pipeline *pipeline,
 			double minZ, double maxZ);
