@@ -69,7 +69,7 @@ Window {
                 }
                 Action {
                     text: qsTr('Contours'); checkable: true;
-                    onTriggered: {console.log('toggle countours')}
+                    onTriggered: {topoDataItem.setContours(checked)}
                 }		
             }
 

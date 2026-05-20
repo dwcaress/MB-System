@@ -23,6 +23,7 @@
 #include <QVTKInteractor.h>
 #include <vtkInteractorStyleTerrain.h>
 #include <vtkPolyDataNormals.h>
+#include <vtkContourFilter.h>
 #include <vtkAreaPicker.h>
 #include <vtkIdFilter.h>
 #include <QList>
@@ -66,10 +67,23 @@ namespace mb_system {
     struct Pipeline : vtkObject {
 
       Pipeline() {
-	firstRender_ = true;
+        firstRender_ = true;
+        // One-time wiring: the actor uses our mapper.  Done here (not in
+        // assemblePipeline) so that mode-change setters that bypass the
+        // full rebuild don't have to remember to call SetMapper.
+        surfaceActor_->SetMapper(surfaceMapper_);
 
-	// One-time wiring
-	surfaceActor_->SetMapper(surfaceMapper_);
+        // Contour actor: solid-color lines, no lighting, lifted slightly
+        // toward camera to avoid z-fighting with the surface underneath.
+        contourActor_->SetMapper(contourMapper_);
+        contourMapper_->SetInputConnection(contourFilter_->GetOutputPort());
+        contourMapper_->ScalarVisibilityOff();
+        contourMapper_->SetResolveCoincidentTopologyToPolygonOffset();
+        contourMapper_->SetResolveCoincidentTopologyLineOffsetParameters(
+            -1.0, -1.0);
+        contourActor_->GetProperty()->SetColor(0.0, 0.0, 0.0);
+        contourActor_->GetProperty()->SetLineWidth(1.2);
+        contourActor_->GetProperty()->LightingOff();
       }
 
       /// Declare static New() method expected by VTK factory classes
@@ -96,6 +110,11 @@ namespace mb_system {
 
       /// CPU slope-darkening (RGBA written per vertex)
       vtkNew<vtkProgrammableFilter> slopeColorFilter_;
+
+      /// Contour lines (off elevFilter_ output)
+      vtkNew<vtkContourFilter>   contourFilter_;
+      vtkNew<vtkPolyDataMapper>  contourMapper_;
+      vtkNew<vtkActor>           contourActor_;
 
       vtkNew<vtkIdFilter> idFilter_;
       vtkNew<vtkLookupTable> elevLookupTable_;
@@ -169,6 +188,13 @@ namespace mb_system {
 
     /// Toggle axes plot
     Q_INVOKABLE void showAxes(bool plotAxes);
+
+    /// Toggle contour lines on the data surface
+    Q_INVOKABLE void setContours(bool enabled);
+
+    /// Set how many contour levels to draw between elevMin and elevMax
+    /// (default 20).  Takes effect immediately if contours are enabled.
+    Q_INVOKABLE void setContourCount(int n);
 
     /// Set vertical exaggeration
     Q_INVOKABLE void setVerticalExagg(float verticalExagg);
@@ -324,6 +350,9 @@ namespace mb_system {
     /// Apply vertical exaggeration scale to the surface actor.
     void applyVerticalExagg(Pipeline *pipeline);
 
+    /// Add/remove the contour actor and refresh its contour values.
+    void applyContours(Pipeline *pipeline);
+
     /// Set up axes (geometry/units configuration)
     void setupAxes(vtkCubeAxesActor *axesActor,
                    vtkNamedColors *colors,
@@ -354,6 +383,12 @@ namespace mb_system {
     /// Show axes or not
     bool showAxes_;
 
+    /// Show contour lines or not
+    bool contoursEnabled_ = false;
+
+    /// Number of contour levels between elevMin and elevMax
+    int  contourCount_ = 20;
+
     /// Colormap scheme
     mb_system::TopoColorMap::Scheme scheme_;
 
@@ -364,7 +399,7 @@ namespace mb_system {
     ShadowSource shadowSource_ = ShadowSource::Illumination;
 
     /// Type of surface rendering
-    SurfaceRenderType surfaceRenderType_ = SurfaceRenderType::Polys;
+    SurfaceRenderType surfaceRenderType_;
 
     /// VTK pipeline
     Pipeline *pipeline_;

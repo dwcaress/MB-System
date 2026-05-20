@@ -13,6 +13,7 @@
 #include <vtkPolyDataNormals.h>
 #include <vtkIdTypeArray.h>
 #include <vtkProgrammableFilter.h>
+#include <vtkContourFilter.h>
 #include <vtkShaderProperty.h>
 #include <vtkUniforms.h>
 #include <QQuickWindow>
@@ -194,6 +195,7 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   applyRenderType(pipeline);
   applyVerticalExagg(pipeline);
   applyAxes(pipeline);
+  applyContours(pipeline);
 
   // Final assembly: actors / lights / interactor
   pipeline->renderer_->AddActor(pipeline->surfaceActor_);
@@ -534,6 +536,38 @@ void TopoDataItem::applyAxes(Pipeline *pipeline) {
 // ═════════════════════════════════════════════════════════════════════════════
 void TopoDataItem::applyVerticalExagg(Pipeline *pipeline) {
   pipeline->surfaceActor_->SetScale(1., 1., verticalExagg_);
+  // Contour lines sit on top of the surface — they need the same Z scale
+  // or they'll detach from the terrain when exaggeration changes.
+  pipeline->contourActor_->SetScale(1., 1., verticalExagg_);
+}
+
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  Stage 8 — contour lines
+// ═════════════════════════════════════════════════════════════════════════════
+void TopoDataItem::applyContours(Pipeline *pipeline) {
+  // Idempotent: always remove first.
+  pipeline->renderer_->RemoveActor(pipeline->contourActor_);
+
+  if (!contoursEnabled_ || !dataLoaded_) {
+    return;
+  }
+
+  // Feed contours from the elevation scalar.  Note we don't go through the
+  // colored port: contours should reflect elevation regardless of whether
+  // the surface is currently colored by Slope or DataQuality.
+  pipeline->contourFilter_->SetInputConnection(
+      pipeline->elevFilter_->GetOutputPort());
+
+  // Tell vtkContourFilter which scalar drives the iso-extraction.
+  pipeline->contourFilter_->SetInputArrayToProcess(
+      0, 0, 0,
+      vtkDataObject::FIELD_ASSOCIATION_POINTS, "Elevation");
+
+  pipeline->contourFilter_->GenerateValues(contourCount_, elevMin_, elevMax_);
+  pipeline->contourFilter_->Modified();
+
+  pipeline->renderer_->AddActor(pipeline->contourActor_);
 }
 
 
@@ -670,6 +704,32 @@ void TopoDataItem::showAxes(bool plotAxes) {
   dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
     auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
     applyAxes(p);
+    rw->Render();
+  });
+}
+
+
+void TopoDataItem::setContours(bool enabled) {
+  qDebug() << "setContours(): " << enabled;
+  contoursEnabled_ = enabled;
+
+  dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
+    auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
+    applyContours(p);
+    rw->Render();
+  });
+}
+
+
+void TopoDataItem::setContourCount(int n) {
+  qDebug() << "setContourCount(): " << n;
+  if (n < 1) n = 1;
+  contourCount_ = n;
+
+  // Only meaningful when contours are on; otherwise applyContours is a no-op.
+  dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
+    auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
+    applyContours(p);
     rw->Render();
   });
 }
