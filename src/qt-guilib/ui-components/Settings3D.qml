@@ -159,7 +159,7 @@ Item {
                     Layout.fillWidth: true
                     from: 1.0
                     to: 5.0
-                    value: 2.0
+                    value: 1.0
                 }
                 // Set displayed decimal places on slider label
                 Label { text: Math.round(verticalExagg.value *100)/100 }
