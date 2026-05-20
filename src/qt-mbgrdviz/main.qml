@@ -53,7 +53,7 @@ Window {
 	    }
 
             Action {
-	        text: qsTr('Lighting')
+	        text: qsTr('3D preferences')
 	        onTriggered: {console.log('show 3D preferences');
 			      settings3dDialog.show();
 			     }
@@ -330,7 +330,19 @@ Window {
 
             lightZ.onMoved: {
 		updateLighting()
-	    }				
+	    }
+
+	    slopeGamma.onMoved: {
+		topoDataItem.setSlopeGamma(slopeGamma.value)
+	    }
+
+	    slopeFloor.onMoved: {
+		topoDataItem.setMinBrightness(slopeFloor.value)
+	    }
+
+	    verticalExagg.onMoved: {
+		topoDataItem.setVerticalExagg(verticalExagg.value)
+	    }
         }
 	
 	onVisibilityChanged: { console.log('settings3dDialog opened');
@@ -340,7 +352,14 @@ Window {
 		    settings3D.lightX.value = pos[0]
 		    settings3D.lightY.value = pos[1]
 		    settings3D.lightZ.value = pos[2]
-		    settings3D.intensity.value = topoDataItem.getLightIntensity()
+		    settings3D.intensity.value =
+			       topoDataItem.getLightIntensity()
+
+		    settings3D.slopeGamma.value = 
+			       topoDataItem.getSlopeGamma()
+			       
+		    settings3D.slopeFloor.value = 
+			       topoDataItem.getMinBrightness()	       			       
 		  }
 	
 
