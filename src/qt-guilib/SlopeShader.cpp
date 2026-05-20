@@ -2,7 +2,8 @@
 #include <cmath>
 #include <iostream>
 #include <memory>
-
+#include <vtkShaderProperty.h>
+#include <vtkUniforms.h>
 #include "SlopeShader.h"
 
 using namespace mb_system;
@@ -110,6 +111,64 @@ void SlopeShader::execute(void* userData) {
 void SlopeShader::deleteCallbackData(void* userData) {
   delete static_cast<CallbackData*>(userData);
 }
+
+
+void SlopeShader::installGpuShader(vtkActor* actor,
+				     double slopeGamma,
+				     double minBrightness)
+{
+  auto* sp = actor->GetShaderProperty();
+
+  // Vertex shader: declare the normal attribute ourselves (with LightingOff,
+  // vtkOpenGLPolyDataMapper does not emit `in vec3 normalMC;` — the VBO is
+  // still uploaded, but the shader source has no declaration to bind it to).
+  // Then forward the model-space normal to the fragment shader.
+  sp->AddVertexShaderReplacement(
+      "//VTK::Normal::Dec",
+      true,
+      "//VTK::Normal::Dec\n"
+      "in  vec3 normalMC;\n"
+      "out vec3 slopeNormalMC;\n",
+      false);
+
+  sp->AddVertexShaderReplacement(
+      "//VTK::Normal::Impl",
+      true,
+      "//VTK::Normal::Impl\n"
+      "slopeNormalMC = normalMC;\n",
+      false);
+
+  // Fragment shader: matching declaration, then darken by |Nz| after the LUT
+  // has populated ambientColor and diffuseColor.
+  sp->AddFragmentShaderReplacement(
+      "//VTK::Normal::Dec",
+      true,
+      "//VTK::Normal::Dec\n"
+      "in vec3 slopeNormalMC;\n",
+      false);
+
+  sp->AddFragmentShaderReplacement(
+      "//VTK::Color::Impl",
+      true,
+      "//VTK::Color::Impl\n"
+      "{\n"
+      "  float Nz          = abs(normalize(slopeNormalMC).z);\n"
+      "  float slopeFactor = 1.0 - Nz;\n"
+      "  float darkening   = pow(slopeFactor, slopeGamma);\n"
+      "  float brightness  = 1.0 - darkening * (1.0 - minBrightness);\n"
+      "  ambientColor *= brightness;\n"
+      "  diffuseColor *= brightness;\n"
+      "}\n",
+      false);
+
+  // Initial uniform values; sliders update these later.
+  sp->GetFragmentCustomUniforms()
+      ->SetUniformf("slopeGamma",    static_cast<float>(slopeGamma));
+  sp->GetFragmentCustomUniforms()
+      ->SetUniformf("minBrightness", static_cast<float>(minBrightness));
+}
+
+
 
 
 #if 0

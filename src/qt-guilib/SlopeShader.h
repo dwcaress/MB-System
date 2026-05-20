@@ -32,22 +32,21 @@
 
 namespace mb_system {
   /**
-   * SlopeShader is used by a vtkProgrammableFilter to 
-   * color a terrain surface by elevation (via a lookup table),
-   * then darken each vertex in proportion to local surface slope.
-   *
-   * Application code fills in CallbackData instance, then invokes 
-   * vtkProgrammableFilter::SetExecuteMethod(SlopeShader::execute, callbackData) 
-   *
-   * E.g. within the VTK pipeline:
-   *   topoDataReader
-   *     ├─► vtkElevationFilter   → elevation scalar "Elevation"
-   *     └─► vtkPolyDataNormals   → per-vertex normals
-   *           └─► vtkProgrammableFilter  (SlopeShader accessed here)
-   *                 └─► vtkPolyDataMapper (SetColorModeToDirectScalars)
-   *                       └─► vtkActor ► vtkRenderer ► vtkRenderWindow
-   *
-   */
+   SlopeShader is used by a vtkProgrammableFilter to 
+   color a terrain surface by elevation (via a lookup table),
+   then darken each vertex in proportion to local surface slope.
+   
+   Application code fills in CallbackData instance, then invokes 
+   vtkProgrammableFilter::SetExecuteMethod(SlopeShader::execute, callbackData) 
+   
+   E.g. within the VTK pipeline:
+     topoDataReader
+       ├─► vtkElevationFilter   → elevation scalar "Elevation"
+       └─► vtkPolyDataNormals   → per-vertex normals
+             └─► vtkProgrammableFilter  (SlopeShader accessed here)
+                   └─► vtkPolyDataMapper (SetColorModeToDirectScalars)
+                         └─► vtkActor ► vtkRenderer ► vtkRenderWindow
+  */
   class SlopeShader {
 
   public:
@@ -75,6 +74,11 @@ namespace mb_system {
     ///  Cleanup callback so VTK properly frees CallbackData
     static void deleteCallbackData(void* userData);
 
+    /// Install GPU slope-shader replacements on the actor
+    /// Alternative to vtkProgrammableFilter approach
+    static void installGpuShader(vtkActor *actor,
+				 double slopeGamma,
+				 double minBrightness);
   };
 
 }
