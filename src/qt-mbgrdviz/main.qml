@@ -294,7 +294,7 @@ Window {
 
     Window {
         id: settings3dDialog
-	title: 'Lighting preferences'
+	title: '3D preferences'
 	visible: false
 	property list<double> intensity
 
