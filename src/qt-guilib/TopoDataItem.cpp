@@ -735,6 +735,13 @@ void TopoDataItem::setContours(bool enabled) {
 }
 
 
+void TopoDataItem::setContourInterval(double interval) {
+  qDebug() << "setContourInterval(): " << interval;
+  int nContours = (elevMax_ - elevMin_) / interval;
+  setContourCount(nContours);
+}
+
+
 void TopoDataItem::setContourCount(int n) {
   qDebug() << "setContourCount(): " << n;
   if (n < 1) n = 1;

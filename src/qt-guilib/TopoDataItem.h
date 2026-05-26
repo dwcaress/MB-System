@@ -196,6 +196,10 @@ namespace mb_system {
     /// (default 20).  Takes effect immediately if contours are enabled.
     Q_INVOKABLE void setContourCount(int n);
 
+    /// Set contour interval 
+    /// Takes effect immediately if contours are enabled.
+    Q_INVOKABLE void setContourInterval(double interval);
+    
     /// Set vertical exaggeration
     Q_INVOKABLE void setVerticalExagg(float verticalExagg);
 
