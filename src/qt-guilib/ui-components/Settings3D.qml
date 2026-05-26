@@ -15,7 +15,8 @@ Item {
     property alias slopeGamma: slopeGamma
     property alias slopeFloor: slopeFloor
     property alias verticalExagg: verticalExagg
-
+    property alias contourInterval: contourInterval
+    
     ColumnLayout {
         Label {
             text: qsTr('Lights enabled')
@@ -164,6 +165,25 @@ Item {
                 // Set displayed decimal places on slider label
                 Label { text: Math.round(verticalExagg.value *100)/100 }
             }}
+	    
+            Frame {ColumnLayout {
+                Label {
+                    text: qsTr("Contour interval")
+                    fontSizeMode: Text.Fit
+                    font.pixelSize: 18
+                }
+
+                Slider {
+                    id: contourInterval
+		    Layout.preferredWidth: 250		    
+                    Layout.fillWidth: true
+                    from: 1
+                    to: 100
+                    value: 100
+                }
+                // Set displayed decimal places on slider label
+                Label { text: Math.round(contourInterval.value *100)/100 }
+            }}	    
 
         }
     }
