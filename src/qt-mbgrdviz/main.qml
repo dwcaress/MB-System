@@ -343,6 +343,10 @@ Window {
 	    verticalExagg.onMoved: {
 		topoDataItem.setVerticalExagg(verticalExagg.value)
 	    }
+
+	    contourInterval.onMoved: {
+		topoDataItem.setContourInterval(contourInterval.value)
+	    }	    
         }
 	
 	onVisibilityChanged: { console.log('settings3dDialog opened');
