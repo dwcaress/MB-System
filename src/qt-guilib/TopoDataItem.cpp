@@ -37,7 +37,8 @@ TopoDataItem::TopoDataItem() {
   coloredScalar_ = ColoredScalar::Elevation;
   pointPicked_ = false;
   forceRender_ = false;
-
+  surfaceRenderType_ = SurfaceRenderType::Polys;
+  
   // Instantiate interactor styles
   pickInteractorStyle_ = new PickInteractorStyle(this);
   lightingInteractorStyle_ = new LightingInteractorStyle(this);
@@ -398,7 +399,7 @@ void TopoDataItem::applyShadowSource(Pipeline *pipeline) {
     break;
   }
 
-  case ShadowSource::None: {
+  case ShadowSource::NoShadows: {
     pipeline->surfaceMapper_->SetInputConnection(coloredOutputPort_);
     pipeline->surfaceMapper_->ScalarVisibilityOn();
     pipeline->surfaceMapper_->SetLookupTable(pipeline->elevLookupTable_);
@@ -591,6 +592,8 @@ void TopoDataItem::applyContours(Pipeline *pipeline) {
 void TopoDataItem::setColoredScalar(ColoredScalar coloredScalar) {
   qDebug() << "setColoredScalar to " << coloredScalar;
   coloredScalar_ = coloredScalar;
+  emit coloredScalarChanged();
+  
   dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
     auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
     applyColoredScalar(p);     // calls applyShadowSource internally
@@ -602,6 +605,8 @@ void TopoDataItem::setColoredScalar(ColoredScalar coloredScalar) {
 void TopoDataItem::setShadowSource(ShadowSource source) {
   qDebug() << "setShadowSource to " << source;
   shadowSource_ = source;
+  emit shadowSourceChanged();
+  
   dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
     auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
     applyShadowSource(p);
@@ -612,6 +617,8 @@ void TopoDataItem::setShadowSource(ShadowSource source) {
 
 void TopoDataItem::setSurfaceRenderType(SurfaceRenderType renderType) {
   surfaceRenderType_ = renderType;
+  emit surfaceRenderTypeChanged();
+  
   dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
     auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
     applyRenderType(p);
@@ -622,6 +629,8 @@ void TopoDataItem::setSurfaceRenderType(SurfaceRenderType renderType) {
 
 void TopoDataItem::setVerticalExagg(float verticalExagg) {
   verticalExagg_ = verticalExagg;
+  emit verticalExaggChanged();
+  
   dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
     auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
     applyVerticalExagg(p);
@@ -633,6 +642,8 @@ void TopoDataItem::setVerticalExagg(float verticalExagg) {
 
 void TopoDataItem::setSlopeGamma(double gamma) {
   slopeGamma_ = gamma;
+  emit slopeGammaChanged();
+  
   qDebug() << "setSlopeGamma(" << gamma << ")";
 
   switch (shadowSource_) {
@@ -657,7 +668,7 @@ void TopoDataItem::setSlopeGamma(double gamma) {
     });
     break;
   default:
-    // Gamma has no effect in Illumination / None modes; nothing to do.
+    // Gamma has no effect in Illumination / NoShadows modes; nothing to do.
     break;
   }
 }
@@ -665,6 +676,8 @@ void TopoDataItem::setSlopeGamma(double gamma) {
 
 void TopoDataItem::setMinBrightness(double minBrightness) {
   minBrightness_ = minBrightness;
+  emit minBrightnessChanged();
+  
   qDebug() << "setMinBrightness(" << minBrightness << ")";
 
   switch (shadowSource_) {
@@ -714,7 +727,8 @@ bool TopoDataItem::setColormap(QString name) {
 void TopoDataItem::showAxes(bool plotAxes) {
   qDebug() << "showAxes(): " << plotAxes;
   showAxes_ = plotAxes;
-
+  emit showAxesChanged();
+  
   dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
     auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
     applyAxes(p);
@@ -726,7 +740,8 @@ void TopoDataItem::showAxes(bool plotAxes) {
 void TopoDataItem::setContours(bool enabled) {
   qDebug() << "setContours(): " << enabled;
   contoursEnabled_ = enabled;
-
+  emit contoursEnabledChanged();
+  
   dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
     auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
     applyContours(p);
@@ -808,9 +823,9 @@ void TopoDataItem::setupLightSource() {
   qDebug() << "setupLightSource()";
   vtkLight *light = pipeline_->lightSource_;
   light->SetColor(1.0, 1.0, 1.0);
-  light->SetPosition(-0.03, 0.24, 0.50);
+  light->SetPosition(lightPosition_);
   light->SetFocalPoint(0.0, 0.0, 0.0);
-  light->SetIntensity(1.0);
+  light->SetIntensity(lightIntensity_);
 }
 
 
@@ -818,7 +833,11 @@ void TopoDataItem::setLight(bool lightsEnabled, float intensity,
                             double x, double y, double z) {
   qDebug() << "setLight()";
   lightsEnabled_ = lightsEnabled;
-
+  lightIntensity_ = intensity;
+  lightPosition_[0] = x;
+  lightPosition_[1] = y;
+  lightPosition_[2] = z;
+  
   dispatch_async([this, lightsEnabled, intensity, x, y, z]
                  (vtkRenderWindow *rw, vtkUserData ud) {
     auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
@@ -831,19 +850,12 @@ void TopoDataItem::setLight(bool lightsEnabled, float intensity,
 
 
 QVariantList TopoDataItem::getLightPosition() {
-  double position[3];
-  pipeline_->lightSource_->GetPosition(position);
-  QVariantList result;
-  for (int i = 0; i < 3; i++) {
-    qDebug() << "getLightPosition(): " << i << ": " << position[i];
-    result.append(position[i]);
-  }
-  return result;
+  return { lightPosition_[0], lightPosition_[1], lightPosition_[2] };
 }
 
 
 double TopoDataItem::getLightIntensity() {
-  return pipeline_->lightSource_->GetIntensity();
+  return lightIntensity_;
 }
 
 

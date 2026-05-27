@@ -80,7 +80,7 @@ namespace mb_system {
         contourMapper_->ScalarVisibilityOff();
         contourMapper_->SetResolveCoincidentTopologyToPolygonOffset();
         contourMapper_->SetResolveCoincidentTopologyLineOffsetParameters(
-            -1.0, -1.0);
+									 -1.0, -1.0);
         contourActor_->GetProperty()->SetColor(0.0, 0.0, 0.0);
         contourActor_->GetProperty()->SetLineWidth(1.2);
         contourActor_->GetProperty()->LightingOff();
@@ -162,7 +162,7 @@ namespace mb_system {
       Illumination,
       LocalSlope,
       LocalSlopeGpu,
-      None
+      NoShadows
     };
     Q_ENUM(ShadowSource)
 
@@ -292,6 +292,36 @@ namespace mb_system {
       reassemblePipeline();
     }
 
+    /// UI-visible state properties
+    Q_PROPERTY(ColoredScalar coloredScalar
+	       READ coloredScalar NOTIFY coloredScalarChanged)
+    Q_PROPERTY(ShadowSource shadowSource
+	       READ shadowSource   NOTIFY shadowSourceChanged)
+    Q_PROPERTY(SurfaceRenderType surfaceRenderType
+	       READ surfaceRenderType NOTIFY surfaceRenderTypeChanged)
+    Q_PROPERTY(bool showAxes
+	       READ showAxes   NOTIFY showAxesChanged)
+    Q_PROPERTY(bool contoursEnabled
+	       READ contoursEnabled NOTIFY contoursEnabledChanged)
+    Q_PROPERTY(float verticalExagg
+	       READ getVerticalExagg NOTIFY verticalExaggChanged)
+    Q_PROPERTY(double slopeGamma
+	       READ getSlopeGamma  NOTIFY slopeGammaChanged)
+    Q_PROPERTY(double minBrightness
+	       READ getMinBrightness NOTIFY minBrightnessChanged)
+    Q_PROPERTY(double lightIntensity
+	       READ getLightIntensity NOTIFY lightChanged)
+    Q_PROPERTY(QVariantList lightPosition
+	       READ getLightPosition  NOTIFY lightChanged)
+
+    // Q_PROPERTY READ methods (trivial for the ones already declared Q_INVOKABLE):
+    ColoredScalar    coloredScalar()    const { return coloredScalar_; }
+    ShadowSource     shadowSource()     const { return shadowSource_; }
+    SurfaceRenderType surfaceRenderType() const { return surfaceRenderType_; }
+    bool             showAxes()         const { return showAxes_; }
+    bool             contoursEnabled()  const { return contoursEnabled_; }
+    float getVerticalExagg() const { return verticalExagg_; }
+    
     /// Set pointsSelectInteractorStyle_ as a property so that its emitted
     /// signals can be received by QML
     Q_PROPERTY(MyRubberBandStyle* dataSelector
@@ -303,6 +333,20 @@ namespace mb_system {
 
 
   signals:
+
+signals:
+
+    void coloredScalarChanged();
+    void shadowSourceChanged();
+    void surfaceRenderTypeChanged();
+    void showAxesChanged();
+    void contoursEnabledChanged();
+    void verticalExaggChanged();
+    void slopeGammaChanged();
+    void minBrightnessChanged();
+    void lightChanged();       // covers both position and intensity
+
+    
     /// Emit when user defines a line with mouse
     void lineDefined(QList<QVector2D> elevProfile);
 
@@ -378,6 +422,9 @@ namespace mb_system {
     /// Shade display with lights?  (derived from shadowSource_)
     bool lightsEnabled_ = true;
 
+    double lightPosition_[3] = { -0.03, 0.24, 0.50 }; 
+    double lightIntensity_    = 1.0;
+    
     /// Indicates whether to render on next update()
     bool forceRender_;
 
@@ -417,7 +464,7 @@ namespace mb_system {
     bool   dataLoaded_   = false;
 
     // ── Slope-darkening parameters (sliders feed these) ────────────────────
-    double slopeGamma_    = 1.5;
+    double slopeGamma_    = 0.35;
     double minBrightness_ = 0.15;
 
     /// Persistent callback data for the CPU slope filter.  Owned by
@@ -439,6 +486,6 @@ namespace mb_system {
     vtkNew<DrawInteractorStyle> drawInteractorStyle_;
     vtkNew<DrawInteractorStyle> testStyle_;
   };
-}
+ }
 
 #endif
