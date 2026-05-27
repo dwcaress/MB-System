@@ -20,12 +20,11 @@ Window {
     property list<vector2d> myProfile
 
     Component.onCompleted: {
+	colormapMenu.currentCmap = 'Haxby'
+	mouseModeMenu.currentMode = SharedConstants.mouseModes[0].name
+	console.log('topoDataItem.shadowSource: ', topoDataItem.shadowSource)
     }
 
-    ActionGroup {
-        id: exclusiveActions
-        exclusive: true
-    }
     
     MenuBar {
         id: menuBar
@@ -64,28 +63,36 @@ Window {
             Menu {
                 title: qsTr('Overlays')
                 Action {
-                    text: qsTr('Axes'); checkable: true;
+                    text: qsTr('Axes');
+		    checkable: true;
+		    checked: topoDataItem.showAxes
                     onTriggered: {topoDataItem.showAxes(checked)}
                 }
                 Action {
-                    text: qsTr('Contours'); checkable: true;
+                    text: qsTr('Contours');
+		    checkable: true;
+		    checked: topoDataItem.contoursEnabled
                     onTriggered: {topoDataItem.setContours(checked)}
                 }		
             }
 
             Menu {
                 title: qsTr('Surface colored by')
+		ActionGroup { id: coloredScalarActions;  exclusive: true }
 
                 Action {
-                    text: qsTr('Elevation'); checkable: true;
-		    checked: true
-                    ActionGroup.group: exclusiveActions
+                    text: qsTr('Elevation')
+		    checkable: true;
+		    checked: topoDataItem.coloredScalar === TopoDataItem.Elevation
+                    ActionGroup.group: coloredScalarActions
                     onTriggered: {
 			topoDataItem.setColoredScalar(TopoDataItem.Elevation) }
                 }
                 Action {
-                    text: qsTr('Slope'); checkable: true;
-                    ActionGroup.group: exclusiveActions
+                    text: qsTr('Slope')
+		    checkable: true;
+		    checked: topoDataItem.coloredScalar === TopoDataItem.Slope  
+                    ActionGroup.group: coloredScalarActions
                     onTriggered: {
 			topoDataItem.setColoredScalar(TopoDataItem.Slope)}
                 }
@@ -93,29 +100,45 @@ Window {
 
             Menu {
                 title: qsTr('Surface shadows')
+		ActionGroup { id: shadowSourceActions;   exclusive: true }
 
                 Action {
-                    text: qsTr('Illumination'); checkable: true;
-		    checked: true
-                    ActionGroup.group: exclusiveActions
+                    text: qsTr('Illumination')
+		    checkable: true
+		    Component.onCompleted: {
+			console.log('topoDataItem.shadowSource: ',
+				    topoDataItem.shadowSource)
+
+			console.log('TopoDataItem.Illumination: ',
+				    TopoDataItem.Illumination)
+		    }
+		    
+		    checked: topoDataItem.shadowSource === TopoDataItem.Illumination
+                    ActionGroup.group: shadowSourceActions
                     onTriggered: {
 			topoDataItem.setShadowSource(TopoDataItem.Illumination) }
                 }
                 Action {
-                    text: qsTr('Local slope'); checkable: true;
-                    ActionGroup.group: exclusiveActions
+                    text: qsTr('Local slope')
+		    checkable: true
+		    checked: topoDataItem.shadowSource === TopoDataItem.LocalSlope
+                    ActionGroup.group: shadowSourceActions
                     onTriggered: {
 			topoDataItem.setShadowSource(TopoDataItem.LocalSlope)}
                 }
                 Action {
-                    text: qsTr('Local slope (GPU)'); checkable: true;
-                    ActionGroup.group: exclusiveActions
+                    text: qsTr('Local slope (GPU)')
+		    checkable: true
+		    checked: topoDataItem.shadowSource === TopoDataItem.LocalSlopeGpu
+                    ActionGroup.group: shadowSourceActions
                     onTriggered: {
 			topoDataItem.setShadowSource(TopoDataItem.LocalSlopeGpu)}
                 }		
                 Action {
-                    text: qsTr('No shadows'); checkable: true;
-                    ActionGroup.group: exclusiveActions
+                    text: qsTr('No shadows')
+		    checkable: true
+		    checked: topoDataItem.shadowSource === TopoDataItem.NoShadows
+                    ActionGroup.group: shadowSourceActions
                     onTriggered: {
 			topoDataItem.setShadowSource(TopoDataItem.None)
                     }
@@ -124,25 +147,33 @@ Window {
 
             Menu {
                 title: qsTr('Surface render')
-
+		ActionGroup { id: surfaceRenderActions;  exclusive: true }
+    
                 Action {
-                    text: qsTr('Polygons'); checkable: true;
-		    checked: true
-                    ActionGroup.group: exclusiveActions
+                    text: qsTr('Polygons')
+		    checkable: true
+		    checked: topoDataItem.surfaceRenderType === TopoDataItem.Polys
+                    ActionGroup.group: surfaceRenderActions
                     onTriggered: {
 			topoDataItem.setSurfaceRenderType(TopoDataItem.Polys)
 		    }
                 }
                 Action {
-                    text: qsTr('Point cloud'); checkable: true;
-                    ActionGroup.group: exclusiveActions
+                    text: qsTr('Point cloud')
+		    checkable: true
+		    checked: topoDataItem.surfaceRenderType === 
+		       TopoDataItem.PointCloud
+                    ActionGroup.group: surfaceRenderActions
                     onTriggered: {
 			topoDataItem.setSurfaceRenderType(TopoDataItem.PointCloud)
                     }
 		}
                 Action {
-		    text: qsTr('Wireframe'); checkable: true;
-		    ActionGroup.group: exclusiveActions
+		    text: qsTr('Wireframe')
+		    checkable: true
+		    checked: topoDataItem.surfaceRenderType === 
+		       TopoDataItem.Wireframe
+		    ActionGroup.group: surfaceRenderActions
 		    onTriggered: {
 			topoDataItem.setSurfaceRenderType(TopoDataItem.Wireframe)
 		    }		    
@@ -363,7 +394,10 @@ Window {
 			       topoDataItem.getSlopeGamma()
 			       
 		    settings3D.slopeFloor.value = 
-			       topoDataItem.getMinBrightness()	       			       
+			       topoDataItem.getMinBrightness()
+
+		    settings3D.verticalExagg.value =
+		               topoDataItem.getVerticalExagg()	        
 		  }
 	
 
