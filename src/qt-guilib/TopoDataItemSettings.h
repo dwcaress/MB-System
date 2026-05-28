@@ -15,10 +15,7 @@ class TopoDataItemSettings {
   static bool save(std::filesystem::path &path, TopoDataItem *item);  
 
   /// Read TopoDataItem properties from settings file; returns false on error
-  static bool load(std::filesystem::path &path) {
-    std::cerr << "TopoDataItemSettings::load() NOT IMPLEMENTD\n";
-    return false;
-  }
+  static bool load(std::filesystem::path &path, TopoDataItem *item);
   
 };
 

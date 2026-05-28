@@ -159,10 +159,10 @@ namespace mb_system {
 
     /// Render shadow method
     enum class ShadowSource {
+      NoShadows,
       Illumination,
       LocalSlope,
-      LocalSlopeGpu,
-      NoShadows
+      LocalSlopeGpu
     };
     Q_ENUM(ShadowSource)
 
@@ -260,6 +260,9 @@ namespace mb_system {
 
     /// Save settings to file
     Q_INVOKABLE bool saveSettings();
+
+    /// Load settings from file
+    Q_INVOKABLE bool loadSettings();    
 
 
     /// TEST
