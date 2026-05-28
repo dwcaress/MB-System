@@ -187,7 +187,7 @@ namespace mb_system {
     Q_INVOKABLE bool setColormap(QString cmapName);
 
     /// Toggle axes plot
-    Q_INVOKABLE void showAxes(bool plotAxes);
+    Q_INVOKABLE void setShowAxes(bool plotAxes);
 
     /// Toggle contour lines on the data surface
     Q_INVOKABLE void setContours(bool enabled);
@@ -258,6 +258,13 @@ namespace mb_system {
     /// Set camera for orthographic view
     Q_INVOKABLE void setOrthographicView();
 
+    /// Save settings to file
+    Q_INVOKABLE bool saveSettings();
+
+
+    /// TEST
+    Q_INVOKABLE void foo();
+    
     /// Set picked point
     void setPickedPoint(double *worldCoords);
 
@@ -301,8 +308,8 @@ namespace mb_system {
 	       READ surfaceRenderType NOTIFY surfaceRenderTypeChanged)
     Q_PROPERTY(bool showAxes
 	       READ showAxes   NOTIFY showAxesChanged)
-    Q_PROPERTY(bool contoursEnabled
-	       READ contoursEnabled NOTIFY contoursEnabledChanged)
+    Q_PROPERTY(bool showContours
+	       READ showContours NOTIFY showContoursChanged)
     Q_PROPERTY(float verticalExagg
 	       READ getVerticalExagg NOTIFY verticalExaggChanged)
     Q_PROPERTY(double slopeGamma
@@ -319,7 +326,7 @@ namespace mb_system {
     ShadowSource     shadowSource()     const { return shadowSource_; }
     SurfaceRenderType surfaceRenderType() const { return surfaceRenderType_; }
     bool             showAxes()         const { return showAxes_; }
-    bool             contoursEnabled()  const { return contoursEnabled_; }
+    bool             showContours()  const { return showContours_; }
     float getVerticalExagg() const { return verticalExagg_; }
     
     /// Set pointsSelectInteractorStyle_ as a property so that its emitted
@@ -331,8 +338,9 @@ namespace mb_system {
       return pointsSelectInteractorStyle_;
     }
 
-
-  signals:
+    /// Name of current TopoColorMap::Scheme
+    const char *getColormapScheme();
+    
 
 signals:
 
@@ -340,7 +348,7 @@ signals:
     void shadowSourceChanged();
     void surfaceRenderTypeChanged();
     void showAxesChanged();
-    void contoursEnabledChanged();
+    void showContoursChanged();
     void verticalExaggChanged();
     void slopeGammaChanged();
     void minBrightnessChanged();
@@ -386,7 +394,7 @@ signals:
     /// install/remove the GPU shader replacements, set lighting on/off.
     void applyShadowSource(Pipeline *pipeline);
 
-    /// Rebuild the lookup table from scheme_ (in place).
+    /// Rebuild the lookup table from colormapScheme_ (in place).
     void applyColormap(Pipeline *pipeline);
 
     /// Set actor representation (Polys/Wireframe/PointCloud).
@@ -435,13 +443,13 @@ signals:
     bool showAxes_;
 
     /// Show contour lines or not
-    bool contoursEnabled_ = false;
+    bool showContours_ = false;
 
     /// Number of contour levels between elevMin and elevMax
     int  contourCount_ = 20;
 
     /// Colormap scheme
-    mb_system::TopoColorMap::Scheme scheme_;
+    mb_system::TopoColorMap::Scheme colormapScheme_;
 
     /// Type of surface to display (Elevation, Slope, DataQuality)
     ColoredScalar coloredScalar_;

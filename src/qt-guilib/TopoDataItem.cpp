@@ -2,6 +2,7 @@
 
 #include <unistd.h>
 #include <climits>
+#include <filesystem>
 #include <array>
 #include <vector>
 #include <thread>
@@ -22,6 +23,7 @@
 #include "TopoColorMap.h"
 #include "SharedConstants.h"
 #include "SlopeShader.h"
+#include "TopoDataItemSettings.h"
 
 using namespace mb_system;
 
@@ -33,7 +35,7 @@ TopoDataItem::TopoDataItem() {
   dataFilename_ = strdup("");
   verticalExagg_ = 1.;
   showAxes_ = false;
-  scheme_ = TopoColorMap::Haxby;
+  colormapScheme_ = TopoColorMap::Haxby;
   coloredScalar_ = ColoredScalar::Elevation;
   pointPicked_ = false;
   forceRender_ = false;
@@ -487,7 +489,7 @@ void TopoDataItem::applyShadowSource(Pipeline *pipeline) {
 //  Stage 4 — colormap
 // ═════════════════════════════════════════════════════════════════════════════
 void TopoDataItem::applyColormap(Pipeline *pipeline) {
-  TopoColorMap::makeLUT(scheme_, pipeline->elevLookupTable_);
+  TopoColorMap::makeLUT(colormapScheme_, pipeline->elevLookupTable_);
 }
 
 
@@ -564,7 +566,7 @@ void TopoDataItem::applyContours(Pipeline *pipeline) {
   // Idempotent: always remove first.
   pipeline->renderer_->RemoveActor(pipeline->contourActor_);
 
-  if (!contoursEnabled_ || !dataLoaded_) {
+  if (!showContours_ || !dataLoaded_) {
     return;
   }
 
@@ -713,7 +715,7 @@ bool TopoDataItem::setColormap(QString name) {
   if (scheme == TopoColorMap::Unknown) {
     return false;
   }
-  scheme_ = scheme;
+  colormapScheme_ = scheme;
 
   dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
     auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
@@ -724,8 +726,8 @@ bool TopoDataItem::setColormap(QString name) {
 }
 
 
-void TopoDataItem::showAxes(bool plotAxes) {
-  qDebug() << "showAxes(): " << plotAxes;
+void TopoDataItem::setShowAxes(bool plotAxes) {
+  qDebug() << "setShowAxes(): " << plotAxes;
   showAxes_ = plotAxes;
   emit showAxesChanged();
   
@@ -737,10 +739,10 @@ void TopoDataItem::showAxes(bool plotAxes) {
 }
 
 
-void TopoDataItem::setContours(bool enabled) {
-  qDebug() << "setContours(): " << enabled;
-  contoursEnabled_ = enabled;
-  emit contoursEnabledChanged();
+void TopoDataItem::setContours(bool showContours) {
+  qDebug() << "setContours(): " << showContours;
+  showContours_ = showContours;
+  emit showContoursChanged();
   
   dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
     auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
@@ -865,7 +867,7 @@ vtkPolyData *TopoDataItem::getPolyData() {
 
 
 void TopoDataItem::resetCamera() {
-  qDebug() << "resetCamera()";
+  std::cerr << "now in resetCamera()!\n";
   dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
     auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
     p->renderer_->ResetCamera();
@@ -912,4 +914,27 @@ void TopoDataItem::setOrthographicView() {
   camera->SetClippingRange(1.0, cameraHeight - bounds[4] + 100.0);
 
   renderWindow_->Render();
+}
+
+
+bool TopoDataItem::saveSettings() {
+
+
+  auto configPath = std::filesystem::path(getenv("HOME")) 
+                      / ".config" / "myapp" / "settings.toml";
+
+  std::cout << "in TopoDataItem::saveSettings()\n";
+  
+  std::cout << "saveSettings() to " << configPath << "\n";
+  
+  return TopoDataItemSettings::save(configPath, this);
+  
+}
+
+void TopoDataItem::foo() {
+    std::cout << "in TopoDataItem::foo()\n";
+}
+
+const char * TopoDataItem::getColormapScheme() {
+  return TopoColorMap::schemeName(colormapScheme_);
 }
