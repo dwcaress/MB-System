@@ -36,6 +36,15 @@ Window {
                      onTriggered: {console.log('show file dialog')
 				   datafileDialog.open()}
 		   }
+
+            Action { text: qsTr('Save settings') ;
+                     onTriggered: {console.log('call topoDataItem.foo()')
+				   topoDataItem.foo()
+				   console.log('call topoDataItem.saveSettings()')
+				   topoDataItem.saveSettings()
+				  }
+		   }	    
+	    
             Action {
                 text: qsTr('Exit')
                 onTriggered: quitDialog.open()
@@ -66,12 +75,12 @@ Window {
                     text: qsTr('Axes');
 		    checkable: true;
 		    checked: topoDataItem.showAxes
-                    onTriggered: {topoDataItem.showAxes(checked)}
+                    onTriggered: {topoDataItem.setShowAxes(checked)}
                 }
                 Action {
                     text: qsTr('Contours');
 		    checkable: true;
-		    checked: topoDataItem.contoursEnabled
+		    checked: topoDataItem.showContours
                     onTriggered: {topoDataItem.setContours(checked)}
                 }		
             }
