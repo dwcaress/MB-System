@@ -81,6 +81,7 @@ set(src
     TopoColorMap.cpp
     TopoData.cpp
     TopoDataItem.cpp
+    TopoDataItemSettings.cpp    
     TopoDataReader.cpp
     TopoProfileItem.cpp    
     Utilities.cpp
