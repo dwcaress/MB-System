@@ -121,6 +121,16 @@ bool TopoColorMap::makeLUT(TopoColorMap::Scheme scheme,
 }
 
 
+const char *TopoColorMap::schemeName(Scheme scheme) {
+  for (int i = 0; i < NSchemes; i++) {
+    if (colorScheme[i].scheme_ == scheme) {
+      return colorScheme[i].name_;
+    }
+  }
+  return "unknown colormap scheme";
+}
+
+
 
 TopoColorMap::Scheme TopoColorMap::schemeFromName(const char *name) {
 

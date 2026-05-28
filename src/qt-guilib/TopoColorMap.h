@@ -34,6 +34,9 @@ namespace mb_system {
     /// invalid/unsupported scheme
     static Scheme schemeFromName(const char *schemeName);
 
+    /// Scheme name
+    static const char *schemeName(Scheme scheme);
+    
     /// Fill vector with supported scheme names
     static void schemeNames(std::vector<const char *> *names);
     
