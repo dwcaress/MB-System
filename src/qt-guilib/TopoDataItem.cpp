@@ -928,7 +928,20 @@ bool TopoDataItem::saveSettings() {
   std::cout << "saveSettings() to " << configPath << "\n";
   
   return TopoDataItemSettings::save(configPath, this);
+}
+
+
+bool TopoDataItem::loadSettings() {
+
+
+  auto configPath = std::filesystem::path(getenv("HOME")) 
+                      / ".config" / "myapp" / "settings.toml";
+
+  std::cout << "in TopoDataItem::loadSettings()\n";
   
+  std::cout << "loadSettings() from " << configPath << "\n";
+  
+  return TopoDataItemSettings::load(configPath, this);
 }
 
 void TopoDataItem::foo() {
