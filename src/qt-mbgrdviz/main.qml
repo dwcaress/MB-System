@@ -39,11 +39,18 @@ Window {
 
             Action { text: qsTr('Save settings') ;
                      onTriggered: {console.log('call topoDataItem.foo()')
-				   topoDataItem.foo()
 				   console.log('call topoDataItem.saveSettings()')
 				   topoDataItem.saveSettings()
 				  }
-		   }	    
+		     
+		   }
+
+	    Action { text: qsTr('Load settings') ;
+                     onTriggered: {console.log('call topoDataItem.foo()')
+				   console.log('call topoDataItem.loadSettings()')
+				   topoDataItem.loadSettings()
+				  }
+		   }
 	    
             Action {
                 text: qsTr('Exit')
@@ -149,7 +156,8 @@ Window {
 		    checked: topoDataItem.shadowSource === TopoDataItem.NoShadows
                     ActionGroup.group: shadowSourceActions
                     onTriggered: {
-			topoDataItem.setShadowSource(TopoDataItem.None)
+			console.log('selected no shadows')
+			topoDataItem.setShadowSource(TopoDataItem.NoShadows)
                     }
 		}
             }	    
