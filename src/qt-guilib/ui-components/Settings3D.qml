@@ -6,7 +6,7 @@ import QtQuick.Layouts 1.3
 Item {
     visible: true
     implicitWidth: 640
-    implicitHeight: 480
+    implicitHeight: 580
     property alias intensity: intensity
     property alias lightX: lightX
     property alias lightY: lightY
