@@ -15,6 +15,7 @@ using namespace mb_system;
 #define ContourLabels "contourLabels"
 #define ContourInterval "contourInterval"
 #define Axes "axes"
+#define VerticalExagg "verticalExagg"
 
 /**
    Helper class saves and loads TopoDataItem settings from a file
@@ -30,7 +31,8 @@ bool TopoDataItemSettings::save(std::filesystem::path &path, TopoDataItem *item)
 	    { Axes, item->showAxes() }	    
 	  }} },
       { ColorMap, item->getColormapScheme() },
-      { SurfaceColoredBy, item->coloredScalar() },      
+      { SurfaceColoredBy, item->coloredScalar() },
+      { VerticalExagg, item->getVerticalExagg() },
       { SurfaceRenderer, item->surfaceRenderType() },
       { ShadowSource, item->shadowSource() }            
     }};
@@ -54,7 +56,7 @@ bool TopoDataItemSettings::load(std::filesystem::path &path, TopoDataItem *item)
     auto tbl = toml::parse_file(path.string());
 
     item->setColormap(tbl[ColorMap].value_or("UNKNOWN"));
-
+    item->setVerticalExagg(tbl[VerticalExagg].value_or(1.));        
     item->setContours(tbl[Overlay][Contours].value_or(false));
     item->setShowContourLabels(tbl[Overlay][ContourLabels].value_or(false));
     item->setContourInterval(tbl[Overlay][ContourInterval].value_or(100.));    
