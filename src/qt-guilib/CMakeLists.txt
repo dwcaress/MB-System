@@ -40,7 +40,7 @@ endif()
 
 
 message("Find minimum VTK_VERSION ${MIN_VTK_VERSION}")
-find_package(VTK ${MIN_VTK_VERSION} COMPONENTS GUISupportQtQuick)
+find_package(VTK ${MIN_VTK_VERSION} COMPONENTS GUISupportQtQuick RenderingLabel)
 message("Found VTK_VERSION ${VTK_VERSION}")
 
 find_package(LibPROJ REQUIRED)
@@ -133,7 +133,8 @@ target_link_libraries(
   VTK::ParallelDIY
   VTK::RenderingAnnotation
   VTK::RenderingContext2D
-  VTK::RenderingCore  
+  VTK::RenderingCore
+  VTK::RenderingLabel
   VTK::RenderingFreeType
   VTK::RenderingOpenGL2
   VTK::RenderingVolume	 
@@ -153,5 +154,10 @@ target_link_libraries(
    VTK::netcdf
    GMT::GMT
     LibPROJ::LibPROJ)
+
+vtk_module_autoinit(
+  TARGETS MBGui
+  MODULES VTK::RenderingLabel
+)
 
 install(TARGETS MBGui DESTINATION ${CMAKE_INSTALL_LIBDIR})
