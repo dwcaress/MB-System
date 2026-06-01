@@ -22,7 +22,7 @@ Window {
     Component.onCompleted: {
 	colormapMenu.currentCmap = 'Haxby'
 	mouseModeMenu.currentMode = SharedConstants.mouseModes[0].name
-	console.log('topoDataItem.shadowSource: ', topoDataItem.shadowSource)
+	console.log('Running app ', Qt.application.name)
     }
 
     
@@ -394,7 +394,15 @@ Window {
 
 	    contourInterval.onMoved: {
 		topoDataItem.setContourInterval(contourInterval.value)
-	    }	    
+	    }
+
+	    showContours.onCheckedChanged: {
+		topoDataItem.setContours(showContours.checked)
+	    }
+
+	    showContourLabels.onCheckedChanged: {
+		topoDataItem.setShowContourLabels(showContourLabels.checked)
+	    }
         }
 	
 	onVisibilityChanged: { console.log('settings3dDialog opened');
@@ -414,12 +422,15 @@ Window {
 			       topoDataItem.getMinBrightness()
 
 		    settings3D.verticalExagg.value =
-		               topoDataItem.getVerticalExagg()	        
+		               topoDataItem.getVerticalExagg()
+ 		    console.log('showContours: ', topoDataItem.showContours)		       
+	            settings3D.showContours.checked = topoDataItem.showContours
+ 	            settings3D.showContourLabels.checked = topoDataItem.showContourLabels
+	            settings3D.contourInterval.value = topoDataItem.getContourInterval()
 		  }
-	
-
     }
     
+
     function updateLighting() {
         console.log('updateLighting()')
 	console.log('settings3dDialog=', settings3dDialog)
