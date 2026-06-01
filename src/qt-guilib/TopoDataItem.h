@@ -174,6 +174,7 @@ namespace mb_system {
       DataQuality
     };
     Q_ENUM(ColoredScalar)
+    
     /// Render surface style
     enum class SurfaceRenderType {
       Polys,
@@ -188,6 +189,7 @@ namespace mb_system {
       LocalSlope,
       LocalSlopeGpu
     };
+    
     Q_ENUM(ShadowSource)
     /// Constructor
     TopoDataItem();
