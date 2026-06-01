@@ -66,7 +66,8 @@ int main(int argc, char* argv[])
   }
   
   QGuiApplication app(argc, argv);
-
+  app.setApplicationName("qt-mbgrdviz");
+  
   QQmlApplicationEngine engine;
 
   // Register TopoDataItem type
