@@ -16,6 +16,8 @@ Item {
     property alias slopeFloor: slopeFloor
     property alias verticalExagg: verticalExagg
     property alias contourInterval: contourInterval
+    property alias showContours: showContours
+    property alias showContourLabels: showContourLabels
     
     ColumnLayout {
         Label {
@@ -167,6 +169,28 @@ Item {
             }}
 	    
             Frame {ColumnLayout {
+		Label {
+		    text: qsTr('Show contours')
+		    fontSizeMode: Text.Fit
+		    font.pixelSize: 18
+		}
+
+		CheckBox {
+		    id: showContours
+		    checked: true
+		}
+		
+		Label {
+		    text: qsTr('Contour labels')
+		    fontSizeMode: Text.Fit
+		    font.pixelSize: 18
+		}
+
+		CheckBox {
+		    id: showContourLabels
+		    checked: true
+		}
+		
                 Label {
                     text: qsTr("Contour interval")
                     fontSizeMode: Text.Fit
