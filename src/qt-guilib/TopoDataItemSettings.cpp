@@ -13,6 +13,7 @@ using namespace mb_system;
 #define ShadowSource "shadowSource"
 #define Contours "contours"
 #define ContourLabels "contourLabels"
+#define ContourInterval "contourInterval"
 #define Axes "axes"
 
 /**
@@ -24,7 +25,8 @@ bool TopoDataItemSettings::save(std::filesystem::path &path, TopoDataItem *item)
   auto tbl = toml::table {{
       {Overlay, toml::table{{
 	    { Contours, item->getShowContours() },
-	    { ContourLabels, item->getShowContourLabels() },	    
+	    { ContourLabels, item->getShowContourLabels() },
+	    { ContourInterval, item->getContourInterval() },	    	    
 	    { Axes, item->showAxes() }	    
 	  }} },
       { ColorMap, item->getColormapScheme() },
@@ -54,7 +56,8 @@ bool TopoDataItemSettings::load(std::filesystem::path &path, TopoDataItem *item)
     item->setColormap(tbl[ColorMap].value_or("UNKNOWN"));
 
     item->setContours(tbl[Overlay][Contours].value_or(false));
-    item->setShowContourLabels(tbl[Overlay][ContourLabels].value_or(false));    
+    item->setShowContourLabels(tbl[Overlay][ContourLabels].value_or(false));
+    item->setContourInterval(tbl[Overlay][ContourInterval].value_or(100.));    
     item->setShowAxes(tbl[Overlay][Axes].value_or(false));    
   }
   catch (const toml::parse_error &e) {

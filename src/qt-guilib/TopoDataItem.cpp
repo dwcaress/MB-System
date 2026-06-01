@@ -26,6 +26,7 @@
 #include <vtkUniforms.h>
 #include <QQuickWindow>
 #include <QMessageBox>
+#include <QCoreApplication>
 #include "TopoDataItem.h"
 #include "TopoColorMap.h"
 #include "SharedConstants.h"
@@ -34,6 +35,7 @@
 using namespace mb_system;
 /// Define TopoDataItem::Pipeline::New() (factory method)
 vtkStandardNewMacro(TopoDataItem::Pipeline);
+
 TopoDataItem::TopoDataItem() {
   dataFilename_ = strdup("");
   verticalExagg_ = 1.;
@@ -55,6 +57,7 @@ TopoDataItem::TopoDataItem() {
   testStyle_->setTopoDataItem(this);
   testStyle_->setDrawingMode(DrawInteractorStyle::DrawingMode::Line);
 }
+
 QQuickVTKItem::vtkUserData
 TopoDataItem::initializeVTK(vtkRenderWindow *renderWindow) {
   std::cerr << "initializeVTK()\n";
@@ -67,11 +70,13 @@ TopoDataItem::initializeVTK(vtkRenderWindow *renderWindow) {
   setupLightSource();
   return pipeline_;
 }
+
 void TopoDataItem::destroyingVTK(vtkRenderWindow *renderWindow,
                                  vtkUserData userData) {
   qInfo() << "TopoDataItem::destroyingVTK() not implemented";
   return;
 }
+
 // vtkCubeAxesActor version
 void TopoDataItem::setupAxes(vtkCubeAxesActor *axesActor,
                              vtkNamedColors *namedColors,
@@ -120,9 +125,11 @@ void TopoDataItem::setupAxes(vtkCubeAxesActor *axesActor,
   }
   axesActor->SetScreenSize(15.0);
 }
+
 void TopoDataItem::initializePipeline() {
   // Kept for compatibility; everything happens in assemblePipeline now.
 }
+
 bool TopoDataItem::loadDatafile(QUrl fileUrl) {
   char *filename = strdup(fileUrl.toLocalFile().toLatin1().data());
   qDebug() << "loadGridfile " << filename;
@@ -132,6 +139,7 @@ bool TopoDataItem::loadDatafile(QUrl fileUrl) {
   reassemblePipeline();
   return true;
 }
+
 void TopoDataItem::reassemblePipeline() {
   qDebug() << "reassemblePipeline() — full rebuild";
   dispatch_async([this](vtkRenderWindow *renderWindow, vtkUserData userData) {
@@ -140,6 +148,7 @@ void TopoDataItem::reassemblePipeline() {
     renderWindow_->Render();
   });
 }
+
 // ═════════════════════════════════════════════════════════════════════════════
 //  Full assembly — called on init and on data file load
 // ═════════════════════════════════════════════════════════════════════════════
@@ -182,6 +191,7 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
   vtkActorCollection* actors = pipeline->renderer_->GetActors();
   std::cerr << "TOTAL actors: " << actors->GetNumberOfItems() << "\n";
 }
+
 // ═════════════════════════════════════════════════════════════════════════════
 //  Stage 1 — read data file, cache bounds, build quality array
 // ═════════════════════════════════════════════════════════════════════════════
@@ -244,6 +254,7 @@ bool TopoDataItem::loadDataPipeline(Pipeline *pipeline) {
   dataLoaded_ = true;
   return true;
 }
+
 // ═════════════════════════════════════════════════════════════════════════════
 //  Stage 2 — select colored scalar; route upstream port
 // ═════════════════════════════════════════════════════════════════════════════
@@ -307,6 +318,7 @@ void TopoDataItem::applyColoredScalar(Pipeline *pipeline) {
   // The shadow source consumes coloredOutputPort_, so re-apply it.
   applyShadowSource(pipeline);
 }
+
 // ═════════════════════════════════════════════════════════════════════════════
 //  Stage 3 — configure mapper tail and lighting based on shadowSource_
 // ═════════════════════════════════════════════════════════════════════════════
@@ -400,12 +412,14 @@ void TopoDataItem::applyShadowSource(Pipeline *pipeline) {
   }
   pipeline->surfaceActor_->GetProperty()->SetLighting(lightsEnabled_);
 }
+
 // ═════════════════════════════════════════════════════════════════════════════
 //  Stage 4 — colormap
 // ═════════════════════════════════════════════════════════════════════════════
 void TopoDataItem::applyColormap(Pipeline *pipeline) {
   TopoColorMap::makeLUT(colormapScheme_, pipeline->elevLookupTable_);
 }
+
 // ═════════════════════════════════════════════════════════════════════════════
 //  Stage 5 — surface representation
 // ═════════════════════════════════════════════════════════════════════════════
@@ -422,6 +436,7 @@ void TopoDataItem::applyRenderType(Pipeline *pipeline) {
     break;
   }
 }
+
 // ═════════════════════════════════════════════════════════════════════════════
 //  Stage 6 — axes visibility
 // ═════════════════════════════════════════════════════════════════════════════
@@ -447,6 +462,7 @@ void TopoDataItem::applyAxes(Pipeline *pipeline) {
     pipeline->renderer_->AddActor(pipeline->axesActor_);
   }
 }
+
 // ═════════════════════════════════════════════════════════════════════════════
 //  Stage 7 — vertical exaggeration
 // ═════════════════════════════════════════════════════════════════════════════
@@ -473,6 +489,7 @@ void TopoDataItem::applyVerticalExagg(Pipeline *pipeline) {
 
   pipeline->renderer_->ResetCameraClippingRange();
 }
+
 // ═════════════════════════════════════════════════════════════════════════════
 //  Stage 8 — contour lines
 // ═════════════════════════════════════════════════════════════════════════════
@@ -509,6 +526,7 @@ void TopoDataItem::applyContours(Pipeline *pipeline) {
     pipeline->renderer_->AddActor2D(pipeline->contourLabelActor_);
   }
 }
+
 // ═════════════════════════════════════════════════════════════════════════════
 //  Q_INVOKABLE setters — dispatch only the narrow stage they affect
 // ═════════════════════════════════════════════════════════════════════════════
@@ -523,6 +541,7 @@ void TopoDataItem::setColoredScalar(ColoredScalar coloredScalar) {
     rw->Render();
   });
 }
+
 void TopoDataItem::setShadowSource(ShadowSource source) {
   qDebug() << "setShadowSource to " << source;
   shadowSource_ = source;
@@ -534,6 +553,7 @@ void TopoDataItem::setShadowSource(ShadowSource source) {
     rw->Render();
   });
 }
+
 void TopoDataItem::setSurfaceRenderType(SurfaceRenderType renderType) {
   surfaceRenderType_ = renderType;
   emit surfaceRenderTypeChanged();
@@ -544,6 +564,7 @@ void TopoDataItem::setSurfaceRenderType(SurfaceRenderType renderType) {
     rw->Render();
   });
 }
+
 void TopoDataItem::setVerticalExagg(float verticalExagg) {
   verticalExagg_ = verticalExagg;
   emit verticalExaggChanged();
@@ -555,6 +576,7 @@ void TopoDataItem::setVerticalExagg(float verticalExagg) {
     rw->Render();
   });
 }
+
 void TopoDataItem::setSlopeGamma(double gamma) {
   slopeGamma_ = gamma;
   emit slopeGammaChanged();
@@ -586,6 +608,7 @@ void TopoDataItem::setSlopeGamma(double gamma) {
     break;
   }
 }
+
 void TopoDataItem::setMinBrightness(double minBrightness) {
   minBrightness_ = minBrightness;
   emit minBrightnessChanged();
@@ -614,6 +637,7 @@ void TopoDataItem::setMinBrightness(double minBrightness) {
     break;
   }
 }
+
 bool TopoDataItem::setColormap(QString name) {
   QByteArray ba = name.toLocal8Bit();
   char *cname = ba.data();
@@ -629,6 +653,7 @@ bool TopoDataItem::setColormap(QString name) {
   });
   return true;
 }
+
 void TopoDataItem::setShowAxes(bool plotAxes) {
   qDebug() << "setShowAxes(): " << plotAxes;
   showAxes_ = plotAxes;
@@ -640,6 +665,7 @@ void TopoDataItem::setShowAxes(bool plotAxes) {
     rw->Render();
   });
 }
+
 void TopoDataItem::setContours(bool showContours) {
   qDebug() << "setContours(): " << showContours;
   showContours_ = showContours;
@@ -651,6 +677,7 @@ void TopoDataItem::setContours(bool showContours) {
     rw->Render();
   });
 }
+
 void TopoDataItem::setShowContourLabels(bool enabled) {
   qDebug() << "setShowContourLabels(): " << enabled;
   showContourLabels_ = enabled;
@@ -664,11 +691,13 @@ void TopoDataItem::setShowContourLabels(bool enabled) {
     rw->Render();
   });
 }
+
 void TopoDataItem::setContourInterval(double interval) {
   qDebug() << "setContourInterval(): " << interval;
   int nContours = (elevMax_ - elevMin_) / interval;
   setContourCount(nContours);
 }
+
 void TopoDataItem::setContourCount(int n) {
   qDebug() << "setContourCount(): " << n;
   if (n < 1) n = 1;
@@ -680,6 +709,12 @@ void TopoDataItem::setContourCount(int n) {
     rw->Render();
   });
 }
+
+double TopoDataItem::getContourInterval() {
+  qDebug() << "getContourInterval()";
+  return (elevMax_ - elevMin_) / contourCount_;
+}
+
 void TopoDataItem::setPickedPoint(double *worldCoords) {
   pointPicked_ = true;
   pickedCoords_[0] = worldCoords[0];
@@ -687,9 +722,11 @@ void TopoDataItem::setPickedPoint(double *worldCoords) {
   pickedCoords_[2] = worldCoords[2];
   forceRender_ = true;
 }
+
 TopoDataReader *TopoDataItem::getDataReader() {
   return pipeline_->topoReader_;
 }
+
 bool TopoDataItem::setMouseMode(QString mouseMode) {
   qDebug() << "setMouseMode(): " << mouseMode;
   if (mouseMode == MousePanAndZoom) {
@@ -720,6 +757,7 @@ bool TopoDataItem::setMouseMode(QString mouseMode) {
   });
   return true;
 }
+
 void TopoDataItem::setupLightSource() {
   qDebug() << "setupLightSource()";
   vtkLight *light = pipeline_->lightSource_;
@@ -728,6 +766,7 @@ void TopoDataItem::setupLightSource() {
   light->SetFocalPoint(0.0, 0.0, 0.0);
   light->SetIntensity(lightIntensity_);
 }
+
 void TopoDataItem::setLight(bool lightsEnabled, float intensity,
                             double x, double y, double z) {
   qDebug() << "setLight()";
@@ -746,12 +785,15 @@ void TopoDataItem::setLight(bool lightsEnabled, float intensity,
     rw->Render();
   });
 }
+
 QVariantList TopoDataItem::getLightPosition() {
   return { lightPosition_[0], lightPosition_[1], lightPosition_[2] };
 }
+
 double TopoDataItem::getLightIntensity() {
   return lightIntensity_;
 }
+
 vtkPolyData *TopoDataItem::getPolyData() {
   return pipeline_->polyData_;
 }
@@ -763,6 +805,7 @@ void TopoDataItem::resetCamera() {
     rw->Render();
   });
 }
+
 void TopoDataItem::setPBR(double roughness, double metallic) {
   qDebug() << "setPBR(): check pipeline_ pointer";
   if (!pipeline_) {
@@ -778,6 +821,7 @@ void TopoDataItem::setPBR(double roughness, double metallic) {
   prop->SetRoughness(roughness);
   prop->SetMetallic(metallic);
 }
+
 void TopoDataItem::setOrthographicView() {
   pipeline_->renderer_->ResetCamera();
   double bounds[6];
@@ -796,27 +840,40 @@ void TopoDataItem::setOrthographicView() {
   camera->SetClippingRange(1.0, cameraHeight - bounds[4] + 100.0);
   renderWindow_->Render();
 }
+
 bool TopoDataItem::saveSettings() {
+
+  QString appName = QCoreApplication::applicationName();
+  qDebug() << "appName = " << appName;
+  
   auto configPath = std::filesystem::path(getenv("HOME"))
-                      / ".config" / "myapp" / "settings.toml";
+    / ".config" / appName.toStdString() / "settings.toml";
+  
   std::cout << "in TopoDataItem::saveSettings()\n";
 
   std::cout << "saveSettings() to " << configPath << "\n";
 
   return TopoDataItemSettings::save(configPath, this);
 }
+
 bool TopoDataItem::loadSettings() {
+  
+  QString appName = QCoreApplication::applicationName();  
+
   auto configPath = std::filesystem::path(getenv("HOME"))
-                      / ".config" / "myapp" / "settings.toml";
+    / ".config" / appName.toStdString()  / "settings.toml";
+
   std::cout << "in TopoDataItem::loadSettings()\n";
 
   std::cout << "loadSettings() from " << configPath << "\n";
 
   return TopoDataItemSettings::load(configPath, this);
 }
+
 void TopoDataItem::foo() {
     std::cout << "in TopoDataItem::foo()\n";
 }
+
 const char * TopoDataItem::getColormapScheme() {
   return TopoColorMap::schemeName(colormapScheme_);
 }

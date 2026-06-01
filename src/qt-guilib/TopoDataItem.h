@@ -330,7 +330,8 @@ namespace mb_system {
     bool getShowAxes()          const { return showAxes_; }
     bool getShowContours()      const { return showContours_; }
     bool getShowContourLabels() const { return showContourLabels_; }
-
+    Q_INVOKABLE double getContourInterval();
+    
     /// Set pointsSelectInteractorStyle_ as a property so that its emitted
     /// signals can be received by QML
     Q_PROPERTY(MyRubberBandStyle* dataSelector
@@ -413,44 +414,60 @@ signals:
 
     /// Indicates whether to render on next update()
     bool forceRender_;
+    
     /// Vertical exaggeration
     float verticalExagg_;
+
     /// Show axes or not
     bool showAxes_;
+
     /// Show contour lines or not
     bool showContours_ = false;
+
     /// Show numeric labels on each contour line
     bool showContourLabels_ = false;
+
     /// Number of contour levels between elevMin and elevMax
     int  contourCount_ = 20;
+
     /// Colormap scheme
     mb_system::TopoColorMap::Scheme colormapScheme_;
+
     /// Type of surface to display (Elevation, Slope, DataQuality)
     ColoredScalar coloredScalar_;
+
     /// Shadow source
     ShadowSource shadowSource_ = ShadowSource::Illumination;
+
     /// Type of surface rendering
     SurfaceRenderType surfaceRenderType_;
+
     /// VTK pipeline
     Pipeline *pipeline_;
     vtkRenderWindow *renderWindow_;
+
     // ── Cached after loadDataPipeline ──────────────────────────────────────
     double elevMin_      = 0.0;
     double elevMax_      = 0.0;
     double gridBounds_[6]= {0,0,0,0,0,0};
     bool   dataLoaded_   = false;
+
     // ── Slope-darkening parameters (sliders feed these) ────────────────────
     double slopeGamma_    = 0.35;
     double minBrightness_ = 0.15;
+
     /// Persistent callback data for the CPU slope filter.  Owned by
     /// pipeline_->slopeColorFilter_ via SetExecuteMethodArgDelete.
     SlopeShader::CallbackData *slopeCallbackData_ = nullptr;
+
     /// Upstream port carrying the active colored scalar.  Set by
     /// applyColoredScalar, consumed by applyShadowSource.
     vtkAlgorithmOutput *coloredOutputPort_ = nullptr;
+
     /// Cached scalar range for the colored scalar
     double coloredMin_ = 0.0;
     double coloredMax_ = 0.0;
+
     // ── Interactor styles ──────────────────────────────────────────────────
     PickInteractorStyle *pickInteractorStyle_;
     LightingInteractorStyle *lightingInteractorStyle_;
