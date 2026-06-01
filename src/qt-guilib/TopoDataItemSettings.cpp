@@ -22,7 +22,7 @@ bool TopoDataItemSettings::save(std::filesystem::path &path, TopoDataItem *item)
   std::cerr << "TopoDataItemSettings::save()\n";
   auto tbl = toml::table {{
       {Overlay, toml::table{{
-	    { Contours, item->showContours() },
+	    { Contours, item->getShowContours() },
 	    { Axes, item->showAxes() }	    
 	  }} },
       { ColorMap, item->getColormapScheme() },
