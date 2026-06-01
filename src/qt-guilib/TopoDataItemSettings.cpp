@@ -10,7 +10,7 @@ using namespace mb_system;
 #define ColorMap "colorMap"
 #define SurfaceColoredBy "surfaceColoredBy"
 #define SurfaceRenderer "surfaceRenderer"
-#define ShadowSource "shadowSource"
+#define ShadowSrc "shadowSource"
 #define Contours "contours"
 #define ContourLabels "contourLabels"
 #define ContourInterval "contourInterval"
@@ -34,7 +34,7 @@ bool TopoDataItemSettings::save(std::filesystem::path &path, TopoDataItem *item)
       { SurfaceColoredBy, item->coloredScalar() },
       { VerticalExagg, item->getVerticalExagg() },
       { SurfaceRenderer, item->surfaceRenderType() },
-      { ShadowSource, item->shadowSource() }            
+      { ShadowSrc, item->shadowSource() }            
     }};
 
   std::filesystem::create_directories(path.parent_path());
@@ -57,10 +57,21 @@ bool TopoDataItemSettings::load(std::filesystem::path &path, TopoDataItem *item)
 
     item->setColormap(tbl[ColorMap].value_or("UNKNOWN"));
     item->setVerticalExagg(tbl[VerticalExagg].value_or(1.));        
+    item->
+      setShadowSource((TopoDataItem::ShadowSource)tbl[ShadowSrc].
+		      value_or(TopoDataItem::ShadowSource::Illumination));
+    item->
+      setColoredScalar((TopoDataItem::ColoredScalar)tbl[SurfaceColoredBy].
+		       value_or(TopoDataItem::ColoredScalar::Elevation));
+
+    item->
+      setSurfaceRenderType((TopoDataItem::SurfaceRenderType)tbl[SurfaceRenderer].
+			   value_or(TopoDataItem::ColoredScalar::Elevation));
+    
     item->setContours(tbl[Overlay][Contours].value_or(false));
     item->setShowContourLabels(tbl[Overlay][ContourLabels].value_or(false));
     item->setContourInterval(tbl[Overlay][ContourInterval].value_or(100.));    
-    item->setShowAxes(tbl[Overlay][Axes].value_or(false));    
+    item->setShowAxes(tbl[Overlay][Axes].value_or(false));
   }
   catch (const toml::parse_error &e) {
       std::cerr << "parse error: " << e.description() << "\n";
