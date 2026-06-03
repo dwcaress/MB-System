@@ -269,32 +269,25 @@ namespace mb_system {
 
     /// Set picked point
     void setPickedPoint(double *worldCoords);
-    /// Set grid filename
-    void setDataFilename(char *filename) {
-      if (dataFilename_) {
-        free((void *)dataFilename_);
-      }
-      if (filename) {
-	dataFilename_ = strdup(filename);
-      }
-      else {
-	dataFilename_ = strdup("");
-      }
-    }
+
     /// Get pipeline
     Pipeline *getPipeline() {
       return pipeline_;
     }
+
     /// Get surface renderer from pipeline
     vtkRenderer *getRenderer() {
       return pipeline_->renderer_;
     }
+
     /// Get source polydata
     vtkPolyData *getPolyData();
+
     /// Trigger re-render (full rebuild via render thread)
     void render() {
       reassemblePipeline();
     }
+
     /// UI-visible state properties
     Q_PROPERTY(ColoredScalar coloredScalar
 	       READ coloredScalar NOTIFY coloredScalarChanged)
@@ -318,6 +311,10 @@ namespace mb_system {
 	       READ getLightIntensity NOTIFY lightChanged)
     Q_PROPERTY(QVariantList lightPosition
 	       READ getLightPosition  NOTIFY lightChanged)
+
+    Q_PROPERTY(QString dataFilename READ getDataFileName
+	       WRITE setDataFilename NOTIFY dataFilenameChanged)
+    
     // Q_PROPERTY READ methods (trivial for the ones already declared Q_INVOKABLE):
     ColoredScalar    coloredScalar()    const { return coloredScalar_; }
     ShadowSource     shadowSource()     const { return shadowSource_; }
@@ -326,13 +323,17 @@ namespace mb_system {
     bool             showContours()  const { return showContours_; }
     bool             showContourLabels() const { return showContourLabels_; }
     float getVerticalExagg() const { return verticalExagg_; }
-
+    QString getDataFileName() const;
+    
     // get*-style aliases (used by TopoDataItemSettings and any other code
     // that prefers the prefix-style accessor).
     bool getShowAxes()          const { return showAxes_; }
     bool getShowContours()      const { return showContours_; }
     bool getShowContourLabels() const { return showContourLabels_; }
     Q_INVOKABLE double getContourInterval();
+
+    /// Set data file name
+    void setDataFilename(const QString name);
     
     /// Set pointsSelectInteractorStyle_ as a property so that its emitted
     /// signals can be received by QML
@@ -355,7 +356,8 @@ signals:
     void slopeGammaChanged();
     void minBrightnessChanged();
     void lightChanged();       // covers both position and intensity
-
+    void dataFilenameChanged(QString name);
+    
     /// Emit when user defines a line with mouse
     void lineDefined(QList<QVector2D> elevProfile);
     /// Emit when error occurs, QML will pop up message
@@ -404,7 +406,7 @@ signals:
                    const char *zUnits,
                    bool geographicCRS);
     /// Name of source data file
-    char *dataFilename_;
+    QString dataFilename_;
     /// Latest picked coordinates
     double pickedCoords_[3];
     /// Indicates if point has been picked by user

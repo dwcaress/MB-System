@@ -37,7 +37,7 @@ using namespace mb_system;
 vtkStandardNewMacro(TopoDataItem::Pipeline);
 
 TopoDataItem::TopoDataItem() {
-  dataFilename_ = strdup("");
+  dataFilename_ = QString("");
   verticalExagg_ = 1.;
   showAxes_ = false;
   colormapScheme_ = TopoColorMap::Haxby;
@@ -140,6 +140,11 @@ bool TopoDataItem::loadDatafile(QUrl fileUrl) {
   return true;
 }
 
+
+QString TopoDataItem::getDataFileName() const {
+  return dataFilename_;
+}
+
 void TopoDataItem::reassemblePipeline() {
   qDebug() << "reassemblePipeline() — full rebuild";
   dispatch_async([this](vtkRenderWindow *renderWindow, vtkUserData userData) {
@@ -197,15 +202,23 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
 // ═════════════════════════════════════════════════════════════════════════════
 bool TopoDataItem::loadDataPipeline(Pipeline *pipeline) {
   qDebug() << "loadDataPipeline()";
-  if (access(dataFilename_, R_OK) == -1) {
-    qWarning() << "Can't access input file " << dataFilename_;
-    emit errorOccurred(QString("Cannot access input file ") + dataFilename_);
+
+  // Get dataFilename_ char* representation
+  // 1. Convert to a QByteArray (this owns the actual memory bytes)
+  QByteArray byteArray = dataFilename_.toUtf8(); 
+
+  // 2. Get the const char* pointer from the byte array
+  char* dataFilename = byteArray.data();
+
+  if (access(dataFilename, R_OK) == -1) {
+    qWarning() << "Can't access input file " << dataFilename;
+    emit errorOccurred(QString("Cannot access input file ") + dataFilename);
     dataLoaded_ = false;
     return false;
   }
-  qDebug() << "set filename to " << dataFilename_;
-  pipeline->topoReader_->SetFileName(dataFilename_);
-  TopoDataType dataType = TopoDataReader::getDataType(dataFilename_);
+  qDebug() << "set filename to " << dataFilename;
+  pipeline->topoReader_->SetFileName(dataFilename);
+  TopoDataType dataType = TopoDataReader::getDataType(dataFilename);
   pipeline->topoReader_->setDataType(dataType);
   pipeline->topoReader_->Modified();
   pipeline->topoReader_->UpdateInformation();
@@ -213,9 +226,9 @@ bool TopoDataItem::loadDataPipeline(Pipeline *pipeline) {
   unsigned long errorCode = pipeline->topoReader_->GetErrorCode();
   if (errorCode != 0) {
     qWarning() << "grid reader error during Update(): " << errorCode;
-    qWarning() << dataFilename_ << ": "
+    qWarning() << dataFilename << ": "
                << vtkErrorCode::GetStringFromErrorCode(errorCode);
-    emit errorOccurred(QString("Cannot access input file ") + dataFilename_ +
+    emit errorOccurred(QString("Cannot access input file ") + dataFilename +
                        "\n" + vtkErrorCode::GetStringFromErrorCode(errorCode));
     dataLoaded_ = false;
     return false;
@@ -697,6 +710,18 @@ void TopoDataItem::setContourInterval(double interval) {
   int nContours = (elevMax_ - elevMin_) / interval;
   setContourCount(nContours);
 }
+
+void TopoDataItem::setDataFilename(const QString newName) {
+    // Prevent infinite evaluation loops by checking if the value actually changed
+    if (dataFilename_ == newName)
+        return;
+
+    dataFilename_ = newName;
+    
+    // Emit the notification signal so QML or other observers update automatically
+    emit dataFilenameChanged(dataFilename_);
+}
+
 
 void TopoDataItem::setContourCount(int n) {
   qDebug() << "setContourCount(): " << n;
