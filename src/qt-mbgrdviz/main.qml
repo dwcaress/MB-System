@@ -266,15 +266,12 @@ Window {
 
         anchors.top: menuBar.bottom
 
-        Button {
-            text: qsTr('Push me!')
-            onPressed: {
-		console.log('Pressed test button')
-		// TESTING
-		console.log('topoDataItem.setPBR()???')
-		topoDataItem.setPBR(0.5, 0.)
-            }
-        }
+        Label {
+	    id: dataFilename
+            text: qsTr('Data file')
+            fontSizeMode: Text.Fit
+            font.pixelSize: 18
+        }	
 
         TopoDataItem {
             objectName: 'topoDataItem'
@@ -453,6 +450,11 @@ Window {
 	ignoreUnknownSignals: true
 	
 	target: topoDataItem
+
+	function onDataFilenameChanged(newName) {
+	    dataFilename.text = newName
+	}
+	
 	function onLineDefined(profileData) {
 	    console.log("Line defined!")
 	    var xmin = Infinity
