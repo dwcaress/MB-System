@@ -117,6 +117,7 @@ namespace mb_system {
 
         contourLabelActor_->SetMapper(contourLabelMapper_);
       }
+      
       /// Declare static New() method expected by VTK factory classes
       static Pipeline* New();
       vtkTypeMacro(Pipeline, vtkObject);
@@ -166,7 +167,8 @@ namespace mb_system {
       vtkNew<vtkCubeAxesActor> axesActor_;
       vtkNew<vtkNamedColors>colors_;
       bool firstRender_ = true;
-    };
+    };  // end Pipeline
+    
     /// Color surface by this scalar value
     enum class ColoredScalar : int {
       Elevation,
