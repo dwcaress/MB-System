@@ -21,13 +21,16 @@ using namespace mb_system;
    Helper class saves and loads TopoDataItem settings from a file
 */
 bool TopoDataItemSettings::save(std::filesystem::path &path, TopoDataItem *item) {
-    
+
+  // Round double values
+  double contourInterval = round(item->getContourInterval(), 0);
+  
   std::cerr << "TopoDataItemSettings::save()\n";
   auto tbl = toml::table {{
       {Overlay, toml::table{{
 	    { Contours, item->getShowContours() },
 	    { ContourLabels, item->getShowContourLabels() },
-	    { ContourInterval, item->getContourInterval() },	    	    
+	    { ContourInterval, contourInterval },    
 	    { Axes, item->showAxes() }	    
 	  }} },
       { ColorMap, item->getColormapScheme() },
@@ -80,3 +83,7 @@ bool TopoDataItemSettings::load(std::filesystem::path &path, TopoDataItem *item)
   return true;
 }
 
+double TopoDataItemSettings::round(double value, int precision) {
+    double multiplier = std::pow(10.0, precision);
+    return std::round(value * multiplier) / multiplier;
+}

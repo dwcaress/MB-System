@@ -16,7 +16,9 @@ class TopoDataItemSettings {
 
   /// Read TopoDataItem properties from settings file; returns false on error
   static bool load(std::filesystem::path &path, TopoDataItem *item);
-  
+
+  /// Round double value to specified precision
+  static double round(double value, int precision);
 };
 
 }  // end namespace 
