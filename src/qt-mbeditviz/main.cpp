@@ -1,110 +1,140 @@
-#include <signal.h>
-#include <unistd.h>
+#include <sstream>
+#include <thread>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include <QQuickView>
-#include <QQuickItem>
-#include <QAbstractButton>
-#include <QList>
-#include <QButtonGroup>
-#include <QQmlContext>
-#include <QVariant>
-// #include <QQuickStyle>
-#include "GuiNames.h"
-#include "Backend.h"
-#include "PixmapImage.h"
-#include "Emitter.h"
+#include <QQuickWindow>
+#include <QtGraphs/QAbstractAxis>
+#include <QQuickVTKItem.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkActor.h>
+#include <vtkRenderer.h>
+#include <vtkConeSource.h>
+#include <vtkRenderWindow.h>
+#include "TopoDataset.h"
+#include "TopoDataItem.h"
+#include "SurfaceDataItem.h"
+#include "EditDataItem.h"
+#include "SharedConstants.h"
 
-// Reference for interrupt handler
-Backend *theBackend_ = nullptr;
+using namespace std;
+using namespace mb_system;
 
-void interruptHandler(int sig) {
-  // std::cerr << "interruptHandler(): sig " << sig << "\n";
-  fprintf(stdout, "interruptHandler(): got sig %d\n", sig);
-  fflush(stdout);
-  write(1,"Hello World!", 12);
-  
-  if (theBackend_) {
-    theBackend_->onMainWindowDestroyed();
-  }
-  
-  exit(1);
-}
+// objectName values assigned in main.qml
+static constexpr const char *SurfaceItemName = "surfaceDataItem";
+static constexpr const char *EditItemName    = "editDataItem";
 
-int main(int argc, char *argv[]) {
-  this is juink here
-  // Handle interruption
-  struct sigaction signalAction;
-  signalAction.sa_handler = &interruptHandler;
-  sigemptyset(&signalAction.sa_mask);
-  signalAction.sa_flags = 0;
-  sigaction(SIGINT, &signalAction, nullptr);
-  
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-	QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+int main(int argc, char* argv[])
+{
+#if defined(Q_OS_MACOS)
+  QGuiApplication::setAttribute(Qt::AA_DontUseNativeMenuBar);
+  QGuiApplication::setAttribute(Qt::AA_DontUseNativeMenuWindows);
 #endif
 
-    QGuiApplication app(argc, argv);
+  std::cerr << "main() thread: " << std::this_thread::get_id() << "\n";
 
-    /// QQuickStyle::setStyle("Fusion");
-    
-    Backend backend(argc, argv);
-    
-    // Keep a reference for interrupt handler
-    theBackend_ = &backend;
-    
-    QQmlApplicationEngine engine;
-    
-    // Make backend object and methods accessible to QML
-    engine.setInitialProperties({
-	{ "backend", QVariant::fromValue(&backend) }
-      });    
-
-
-    // Boilerplate...
-    const QUrl url(QStringLiteral("qrc:/main.qml"));
-    QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
-                     &app, [url](QObject *obj, const QUrl &objUrl) {
-        if (!obj && url == objUrl)
-            QCoreApplication::exit(-1);
-    }, Qt::QueuedConnection);
-
-    // QML instantiates a PixmapImage in GUI, and C++ will draw to
-    // that - so register PixmapImage class with QML
-    qmlRegisterType<mb_system::PixmapImage>("PixmapImage", 1, 0,
-					    "PixmapImage");    
-    
-    engine.load(url);
-
-    // Tell backend that UI is loaded
-    backend.setUiLoaded();
-
-    
-    QObject *rootObject = engine.rootObjects().value(0);
-    qDebug() << "engine.rootObjects().value(0): " << rootObject;
-    
-    // QML notifies C++ when root window is destroyed
-    QObject::connect(rootObject, SIGNAL(destroyed()),
-		     &backend, SLOT(onMainWindowDestroyed()));
-
-    // Backend C++ signals QML with message to display
-    if (!QObject::connect(&backend.emitter_,
-			  SIGNAL(showMessage(QVariant)),
-			  rootObject, SLOT(showInfoDialog(QVariant)))) {
-
-      qWarning() << "**Failed to connect showMessage() signal to QML";
+  char *topoDataFile = nullptr;
+  bool error = false;
+  for (int i = 1; i < argc; i++) {
+    if (!strcmp(argv[i], "-I") && i <= argc-2) {
+      topoDataFile = argv[++i];
     }
     else {
-      qDebug() << "connected to emitter";
+      cerr << "Unknown option: " << argv[i] << "\n";
+      error = true;
     }
+  }
+  if (error) {
+    cerr << "usage: " << argv[0] << " [-I inputFile]\n";
+    exit(1);
+  }
 
-    if (!backend.initialize(rootObject, argc, argv)) {
-      qWarning() << "failed to initialize backend";
-      exit(1);
-    }
+  QQuickVTKItem::setGraphicsApi();
 
-    return app.exec();
+  if (QGuiApplication::platformName() == QLatin1String("xcb"))
+    std::cerr << "Qt 6 running on X11 (xcb)\n";
+  else
+    std::cerr << "Qt 6 not running on X11\n";
+
+  QGuiApplication app(argc, argv);
+  app.setApplicationName("qt-mbgrdviz");
+
+  QQmlApplicationEngine engine;
+
+  // ── QML type registration ─────────────────────────────────────────────────
+  // SurfaceDataItem and EditDataItem are the concrete types instantiated by
+  // QML.  TopoDataItem is registered so any QML code that references the base
+  // type (e.g. property declarations) continues to compile.
+  qmlRegisterType<TopoDataItem>    ("Mbgrdviz", 1, 0, "TopoDataItem");
+  qmlRegisterType<SurfaceDataItem> ("Mbgrdviz", 1, 0, "SurfaceDataItem");
+  qmlRegisterType<EditDataItem>    ("Mbgrdviz", 1, 0, "EditDataItem");
+
+  // Dataset is created in C++; QML only holds a pointer to it via properties.
+  qmlRegisterUncreatableType<TopoDataset>(
+      "Mbgrdviz", 1, 0, "TopoDataset",
+      "TopoDataset instances are created in C++, not QML");
+
+  auto *sharedConstants = new SharedConstants();
+  qmlRegisterSingletonInstance("Mbgrdviz", 1, 0, "SharedConstants",
+                               sharedConstants);
+
+  // ── Shared dataset ────────────────────────────────────────────────────────
+  // Single source of truth for topo data and the quality array.
+  // Both view items hold a non-owning pointer to this object.
+  auto *dataset = new TopoDataset(&app);
+
+  engine.load(QUrl("qrc:/main.qml"));
+
+  QObject *topLevel = engine.rootObjects().value(0);
+  if (!topLevel) {
+    qFatal() << "Failed to load QML root object";
+    return 1;
+  }
+
+  // ── Locate view items ─────────────────────────────────────────────────────
+  auto *surfaceItem = topLevel->findChild<SurfaceDataItem*>(SurfaceItemName);
+  if (!surfaceItem) {
+    qFatal() << "Couldn't find SurfaceDataItem" << SurfaceItemName << "in QML";
+    return 1;
+  }
+
+  // Edit item lives inside a child Window in QML; findChild searches the full
+  // object tree so it is found regardless of nesting depth.
+  auto *editItem = topLevel->findChild<EditDataItem*>(EditItemName);
+  if (!editItem) {
+    qFatal() << "Couldn't find EditDataItem" << EditItemName << "in QML";
+    return 1;
+  }
+
+  // ── Bind shared dataset to both views ─────────────────────────────────────
+  // Each call connects three signals on the dataset:
+  //   dataLoaded    → rebuild that view's rendering pipeline
+  //   qualityChanged → re-render that view (the shared polyData is already
+  //                    modified in place by TopoDataset::setPointQuality)
+  //   errorOccurred → forwarded to each view's own errorOccurred signal,
+  //                   which QML connects to the error dialog
+  surfaceItem->setDataset(dataset);
+  editItem->setDataset(dataset);
+
+  // ── Wire selection → edit window ──────────────────────────────────────────
+  // When the user draws a rubber-band on the surface view, SurfaceDataItem
+  // emits editBoundsChanged(xMin,xMax,yMin,yMax,zMin,zMax).  The direct
+  // connection here passes those bounds straight to EditDataItem::setEditBounds,
+  // which updates the spatial clip filter and re-renders the edit view.
+  // Qt's typed connect() enforces that the six-double signatures match.
+  QObject::connect(surfaceItem, &SurfaceDataItem::editBoundsChanged,
+                   editItem,    &EditDataItem::setEditBounds);
+
+  // ── Load command-line file (if given) ─────────────────────────────────────
+  // loadFile() emits dataLoaded(); pipeline_ is still null on both items at
+  // this point so onDatasetLoaded() is a no-op.  initializeVTK() fires from
+  // the render thread on the first frame and calls connectDataset(), which
+  // finds the data already loaded and wires up both pipelines immediately.
+  if (topoDataFile) {
+    dataset->loadFile(QString::fromLocal8Bit(topoDataFile));
+  }
+
+  QQuickWindow *window = qobject_cast<QQuickWindow*>(topLevel);
+  window->show();
+
+  return app.exec();
 }
-
-
-
