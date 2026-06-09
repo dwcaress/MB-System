@@ -33,7 +33,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-add_executable(qt-mbeditviz Backend.cpp main.cpp qml.qrc)
+add_executable(qt-mbeditviz main.cpp qml.qrc)
 
 message("CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
 
