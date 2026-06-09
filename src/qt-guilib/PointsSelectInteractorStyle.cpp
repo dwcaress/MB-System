@@ -63,7 +63,6 @@ void PointsSelectInteractorStyle::OnLeftButtonUp() {
       start.append(startLineWorld[i]);
       end.append(endLineWorld[i]);
     }
-    /// emit topoDataItem_->lineDefined(start, end);
   }
 
   
@@ -188,6 +187,10 @@ void PointsSelectInteractorStyle::OnLeftButtonUp() {
     }
     qDebug() << "redraw data";
     topoDataItem_->update();
+
+    double bounds[6];
+    extractedData->GetBounds(bounds);
+    topoDataItem_->onRegionSelected(bounds);
   }
 }
 
