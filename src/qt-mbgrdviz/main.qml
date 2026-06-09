@@ -270,7 +270,7 @@ Window {
 	    id: dataFilename
             text: qsTr('Data file')
             fontSizeMode: Text.Fit
-            font.pixelSize: 18
+            font.pixelSize: 13
         }	
 
         TopoDataItem {
