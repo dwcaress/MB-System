@@ -30,7 +30,6 @@ MyRubberBandStyle::MyRubberBandStyle()
   endPosition_[0] = endPosition_[1] = 0;
   moving_ = 0;
   pixelArray_ = vtkUnsignedCharArray::New();
-  drawEnabled_ = false;
 }
 
 //-----------------------------------------------------------------
@@ -46,54 +45,10 @@ void MyRubberBandStyle::startSelect()
   ///  drawingMode_ = DrawingMode::DrawRectangle; // ????
 }
 
-/* ***
-void MyRubberBandStyle::OnKeyPress() {
-  qDebug() << "MyRubberBandStyle::OnKeyPress()";
-  Superclass::OnKeyPress();
-  qDebug() << "OnKeyPress(): GetKeyCode(): " <<
-    Interactor->GetKeyCode();
-}
-*** */
-/* ***
-//-----------------------------------------------------------------
-void MyRubberBandStyle::OnKeyPress()
-{
-  qDebug() << "OnKeyPress(): drawingMode_=" << (int )drawingMode_;
 
-  if (Interactor->GetAltKey()) {
-    drawEnabled_ = true;
-  }
-  else {
-    drawEnabled_ = false;
-  }
-  Superclass::OnKeyPress();
-}
-*** */
 void MyRubberBandStyle::OnChar() {
   qDebug() << "OnChar(): drawingMode_=" << (int )drawingMode_;  
   switch (int code = Interactor->GetKeyCode()) {
-  case 'r':
-  case 'l':
-    // r or l toggles the drawing rubber band
-    emit helpText("MyRubberBandStyle: toggled drawing mode");
-    drawEnabled_ = !drawEnabled_;
-    if (drawEnabled_) {
-      qDebug() << "OnKeyPress(): drawEnabled now true, reinitialize overlay";
-      overlayInitialized_ = false;
-      if (code == 'r') {
-	drawingMode_ = DrawingMode::Rectangle;
-      }
-      else {
-	drawingMode_ = DrawingMode::Line;
-      }
-    }
-    else {
-      qDebug() << "OnChar(): drawenabled now false, clear overlay";
-      ClearOverlay();
-    }
-    break;
-
-
   case 'p':
   case 'P': {
     vtkRenderWindowInteractor* rwi = Interactor;
@@ -114,7 +69,7 @@ void MyRubberBandStyle::OnChar() {
 //-----------------------------------------------------------------
 void MyRubberBandStyle::OnLeftButtonDown()
 {
-  if (!drawEnabled_)
+  if (!drawEnabled())
     {
       // if not in rubber band mode, let the parent class handle it
       Superclass::OnLeftButtonDown();
@@ -153,7 +108,10 @@ void MyRubberBandStyle::OnLeftButtonDown()
 //----------------------------------------------------------------
 void MyRubberBandStyle::OnMouseMove()
 {
-  if (!drawEnabled_)  {
+  qDebug() << "MyRubberBandStyle::onMouseMove(): alt-key " <<
+    Interactor->GetAltKey();
+  
+  if (!drawEnabled())  {
     // if not in rubber band mode,  let the parent class handle it
     Superclass::OnMouseMove();
     return;
@@ -207,7 +165,7 @@ void MyRubberBandStyle::OnMouseMove()
 //---------------------------------------------------------------
 void MyRubberBandStyle::OnLeftButtonUp()
 {
-  if (!drawEnabled_) {
+  if (!drawEnabled()) {
     // if not in rubber band mode,  let the parent class handle it
     Superclass::OnLeftButtonUp();
     return;
@@ -235,7 +193,7 @@ void MyRubberBandStyle::OnLeftButtonUp()
 /* ***** Claude.ai-inspired implementation ******* */
 void MyRubberBandStyle::redrawRubberBand() 
 {
-  if (!drawEnabled_) {
+  if (!drawEnabled()) {
     return;
   }
   if (!overlayInitialized_) {

@@ -10,9 +10,11 @@
 #include <vtkActor2D.h>
 #include <vtkProperty2D.h>
 #include <vtkPolyDataMapper2D.h>
+#include "vtkRenderWindowInteractor.h"
 #include <vtkPolyData.h>
 #include <QObject>
 #include <QQuickVTKItem.h>
+
 
 VTK_ABI_NAMESPACE_BEGIN
 class vtkUnsignedCharArray;
@@ -27,17 +29,19 @@ namespace mb_system {
      Like TrackBallCamera, but this can pick props underneath a rubber band
      selection rectangle.
      
-     This interactor style allows the user to draw a rectangle or line in the render
-     window. The user presses the 'r' key to toggle in and out of draw mode. When
-     in draw mode, the user presses the left mouse button and drags to define
+     This interactor style allows the user to draw a rectangle or line in
+     the render
+     window. The user presses the 'alt' key to draw. To select a rectangular
+     area, the user presses alt-key + left mouse button and drags to define
      upper-left/lower-right rectangle corners or line start and end points.
      When in DrawingMode::Rectangle and the left mouse button is released, the
-     attached picker operates on the pixel in the center of the selection rectangle.
-     If the picker happens to be a vtkAreaPicker it will
-     operate on the entire selection rectangle. When the 'p' key is hit the above
-     pick operation occurs on a 1x1 rectangle. In other respects it behaves the
-     same as its parent class.
-     This class is based on vtkInteractorStyleRubberBandPicker code, with changes
+     attached picker operates on the pixel in the center of the selection
+     rectangle.  If the picker happens to be a vtkAreaPicker it will
+     operate on the entire selection rectangle. When the 'p' key is hit the
+     above pick operation occurs on a 1x1 rectangle. In other respects it
+     behaves the same as its parent class.
+     This class is based on vtkInteractorStyleRubberBandPicker code, with
+     changes
      suggested by humans and Claude.ai to fix bugs arising from use with 
      QQuickVTKItem. In particular VTK 'drawing' operations of lines and boxes
      must be deferred to the the Qt render thread, via
@@ -61,10 +65,9 @@ public:
   };
 
   /// Return draw-enabled state
-  bool drawEnabled() { return drawEnabled_; }
+  bool drawEnabled() { return Interactor->GetAltKey(); }
 
   /// Set draw-enabled state
-  void setDrawEnable(bool enabled) { drawEnabled_ = enabled; }
   void setDrawingMode(DrawingMode mode) {
     drawingMode_ = mode;
   }
@@ -109,8 +112,6 @@ protected:
 
   virtual void Pick();
 
-  bool drawEnabled_;
-  
   int startPosition_[2];
   int endPosition_[2];
 
