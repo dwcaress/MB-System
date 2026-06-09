@@ -22,6 +22,8 @@ void PointsSelectInteractorStyle::OnLeftButtonUp() {
   // Forward events
   MyRubberBandStyle::OnLeftButtonUp();
 
+  if (!drawEnabled()) return;
+  
   if (!topoDataItem_) {
     qWarning() << "PointsSelectInteractorStyle::topoDataItem_ has not been set!";
     return;
