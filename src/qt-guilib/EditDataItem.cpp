@@ -37,7 +37,7 @@ void EditDataItem::buildQualityLut() {
     qualityLut_->SetTableRange(BAD_DATA, GOOD_DATA);
 
     // GOOD_DATA: bright yellow — high luminance, very visible on dark background
-    qualityLut_->SetTableValue(GOOD_DATA, 1.0, 1.0, 0.0, 1.0);
+    qualityLut_->SetTableValue(GOOD_DATA, 0.0, 0.0, 0.0, 1.0);
 
     // BAD_DATA: bright red; alpha is controlled by showBadPoints_
     const double badAlpha = showBadPoints_ ? 1.0 : 0.0;
@@ -143,14 +143,17 @@ void EditDataItem::assemblePipeline(Pipeline *pipeline) {
 
     // Point cloud: make points larger so they are easier to click
     pipeline->surfaceActor_->GetProperty()->SetRepresentationToPoints();
-    pipeline->surfaceActor_->GetProperty()->SetPointSize(5.0);
+    qDebug() << "SetPointSize()";
+    pipeline->surfaceActor_->GetProperty()->SetPointSize(15.0);
+    qDebug() << "actual pointsize:"
+	     << pipeline->surfaceActor_->GetProperty()->GetPointSize();    
     // No lighting needed for quality-colour point cloud
     pipeline->surfaceActor_->GetProperty()->LightingOff();
     pipeline->surfaceActor_->GetProperty()->SetAmbient(1.0);
     pipeline->surfaceActor_->GetProperty()->SetDiffuse(0.0);
     pipeline->surfaceActor_->GetProperty()->SetSpecular(0.0);
     // Very dark blue-gray background
-    pipeline->renderer_->SetBackground(0.08, 0.08, 0.12);
+    pipeline->renderer_->SetBackground(1.0, 1.0, 1.0);
     qDebug() << "renderer actors:"
              << pipeline->renderer_->GetActors()->GetNumberOfItems();
 }
