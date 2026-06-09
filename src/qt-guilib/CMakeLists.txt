@@ -58,6 +58,7 @@ set(src
     DataSelectInteractorStyle.cpp    
     DisplayProperties.cpp
     DrawInteractorStyle.cpp
+    EditDataItem.cpp
     Emitter.cpp
     GmtGridData.cpp
     GmtGridReader.cpp
@@ -76,6 +77,7 @@ set(src
     SharedConstants.cpp
     SlopeShader.cpp
     Surface.cpp
+    SurfaceDataItem.cpp
     SurfaceRenderer.cpp
     SwathData.cpp
     TopoColorMap.cpp
@@ -83,6 +85,7 @@ set(src
     TopoDataItem.cpp
     TopoDataItemSettings.cpp    
     TopoDataReader.cpp
+    TopoDataset.cpp        
     TopoProfileItem.cpp    
     Utilities.cpp
     resources.qrc)
