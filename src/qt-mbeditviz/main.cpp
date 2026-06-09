@@ -121,9 +121,11 @@ int main(int argc, char* argv[])
   // connection here passes those bounds straight to EditDataItem::setEditBounds,
   // which updates the spatial clip filter and re-renders the edit view.
   // Qt's typed connect() enforces that the six-double signatures match.
-  QObject::connect(surfaceItem, &SurfaceDataItem::editBoundsChanged,
-                   editItem,    &EditDataItem::setEditBounds);
+  auto conn = QObject::connect(surfaceItem, &SurfaceDataItem::editBoundsChanged,
+			       editItem,    &EditDataItem::setEditBounds);
 
+  qDebug() << "editBoundsChanged->setEditBounds connected: " << conn;
+	 
   // ── Load command-line file (if given) ─────────────────────────────────────
   // loadFile() emits dataLoaded(); pipeline_ is still null on both items at
   // this point so onDatasetLoaded() is a no-op.  initializeVTK() fires from
@@ -131,6 +133,7 @@ int main(int argc, char* argv[])
   // finds the data already loaded and wires up both pipelines immediately.
   if (topoDataFile) {
     dataset->loadFile(QString::fromLocal8Bit(topoDataFile));
+    emit surfaceItem->dataFilenameChanged(topoDataFile);
   }
 
   QQuickWindow *window = qobject_cast<QQuickWindow*>(topLevel);
