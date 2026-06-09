@@ -108,9 +108,6 @@ void MyRubberBandStyle::OnLeftButtonDown()
 //----------------------------------------------------------------
 void MyRubberBandStyle::OnMouseMove()
 {
-  qDebug() << "MyRubberBandStyle::onMouseMove(): alt-key " <<
-    Interactor->GetAltKey();
-  
   if (!drawEnabled())  {
     // if not in rubber band mode,  let the parent class handle it
     Superclass::OnMouseMove();
