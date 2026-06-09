@@ -47,6 +47,7 @@ SUBDIRS += $(XBUILD_SUB_MBTRNBIN)
 SUBDIRS += gmt
 SUBDIRS += otps
 SUBDIRS += mbgrd2gltf
+SUBDIRS += mbmesh
 SUBDIRS += macros
 SUBDIRS += share
 SUBDIRS += man

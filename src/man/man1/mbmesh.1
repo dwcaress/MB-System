@@ -1,0 +1,203 @@
+.TH mbmesh 1 "6 March 2026"
+.SH NAME
+mbmesh \- Process swath bathymetry data and generate 3D point clouds and GLB models
+.SH SYNOPSIS
+\fBmbmesh\fR \fB-I\fI datalist\fR [\fB-O\fI outputdir\fR] [\fB-R\fI west/east/south/north\fR]
+[\fB-html\fR] [\fB-V\fR [\fB-V\fR]] [\fB-H\fR]
+.SH DESCRIPTION
+.LP
+\fBmbmesh\fR reads swath sonar data files and processes bathymetric soundings 
+to generate 3D point cloud data in multiple formats. The primary use is to 
+extract multibeam echosounder (MBES) data and convert it to point clouds 
+suitable for 3D visualization and analysis.
+
+\fBmbmesh\fR reads a datalist file containing references to swath data files
+in MB-System supported formats. It extracts all valid bathymetry soundings,
+applies optional geographic filtering, and outputs the data in multiple formats:
+.RS
+.TP
+.B adjustedPointcloud.xyz
+Point cloud in local projected coordinates (meters) relative to data centroid
+.TP
+.B ecefPointcloud.xyz
+Point cloud in WGS84 Earth-Centered Earth-Fixed (ECEF) coordinates
+.TP
+.B adjustedPointcloud.glb
+Binary GLB (glTF) format suitable for 3D viewer applications
+.TP
+.B adjustedPointcloud.html
+Optional HTML viewer for interactive 3D visualization
+.RE
+
+.SH OPTIONS
+.TP
+.B \-I\fI datalist\fR
+.br
+Input datalist file containing list of swath data files. This is a required
+option. Each line in the datalist file should contain: path format [processed_path]
+following MB-System datalist format conventions.
+The default datalist file is \fIdatalist.mb-1\fR if not specified.
+.TP
+.B \-O\fI outputdir\fR
+.br
+Output directory for all generated files. The directory will be created if it
+does not exist. Default is \fI./tileset\fR.
+.TP
+.B \-R\fI west/east/south/north\fR
+.br
+Specify geographic bounds for filtering soundings. Only soundings within the
+specified rectangle (in degrees longitude/latitude) will be included in the
+output. The format is west/east/south/north where west and south are typically
+negative. If not specified, all soundings are included.
+.TP
+.B \-html
+.br
+Also generate an HTML viewer file (adjustedPointcloud.html) for interactive
+3D visualization of the point cloud. When this option is used, mbmesh will
+attempt to launch an HTTP server and open the viewer in the default web browser.
+.TP
+.B \-V
+.br
+Increase verbosity level. By default, only essential information is printed.
+Can be specified multiple times (\fB-V -V\fR) to increase debugging output.
+Higher verbosity levels provide detailed progress information, data statistics,
+and sample soundings from the dataset.
+.TP
+.B \-H
+.br
+Display help message and exit.
+.TP
+.B \-h
+.br
+Display help message and exit (alternative to \fB-H\fR).
+
+.SH EXAMPLES
+.LP
+Process all files in a datalist and output to default directory:
+.RS
+.B mbmesh -Idatalist.mb-1
+.RE
+.LP
+Process files in a specific geographic region:
+.RS
+.B mbmesh -Idatalist.mb-1 -R-122.5/-121.8/36.5/37.2 -V
+.RE
+.LP
+Process files with custom output directory and HTML viewer:
+.RS
+.B mbmesh -Idatalist.mb-1 -O./my_output -html -V
+.RE
+.LP
+Process files with increased verbosity for detailed debugging:
+.RS
+.B mbmesh -Idatalist.mb-1 -V -V
+.RE
+
+.SH OUTPUT FILES
+.LP
+\fBmbmesh\fR generates the following output files in the specified output directory:
+
+.TP
+.B adjustedPointcloud.xyz
+Standard XYZ point cloud in local projected coordinates where longitude/latitude
+are converted to meters relative to the data centroid and depth is centered
+around the mean depth. This format is suitable for visualization in standard
+3D point cloud viewers. Format: X(meters) Y(meters) Z(meters)
+.TP
+.B ecefPointcloud.xyz
+Point cloud in WGS84 ECEF coordinates with GeoOrigin offset applied. This format
+preserves accurate Earth-centered coordinates suitable for analysis requiring
+geodetic precision. Format: X(meters) Y(meters) Z(meters)
+.TP
+.B adjustedPointcloud.glb
+Binary GLB (GL Transmission Format) file containing the point cloud as a 3D model.
+This format is widely supported by web-based 3D viewers and applications.
+Can be directly embedded in web pages or used with tools like Cesium.js or
+Three.js for interactive visualization.
+.TP
+.B adjustedPointcloud.html
+Optional HTML file generated when \fB-html\fR option is used. This file provides
+an interactive web-based viewer for the GLB model. When generated, mbmesh attempts
+to launch a local HTTP server and open the viewer in the default web browser.
+
+.SH DATA STATISTICS
+.LP
+Upon completion, \fBmbmesh\fR prints detailed statistics including:
+.RS
+.TP
+Number of datalist files processed and successfully read
+.TP
+Total pings processed from all files
+.TP
+Total beams encountered vs. valid beams (acceptance rate)
+.TP
+Geographic bounds of the processed data
+.TP
+Sample soundings (first 10) with coordinates and quality flags
+.RE
+
+.SH PROCESSING NOTES
+.LP
+.B Beam Quality Filtering
+.br
+\fBmbmesh\fR automatically filters out beams flagged as bad or suspect using
+MB-System's standard beam quality flags. Only beams marked as good are included
+in the output point clouds. The percentage of valid beams vs. total beams
+is reported in the statistics.
+
+.B Geographic Filtering
+.br
+When \fB-R\fR is specified, soundings outside the geographic bounding box are
+excluded from output. This is useful for processing large datasets or focusing
+on areas of interest.
+
+.B Coordinate Transformations
+.br
+The adjusted point cloud uses a local projected coordinate system relative to
+the data centroid for better numerical stability in 3D applications. The ECEF
+point cloud preserves absolute WGS84 coordinates. Both formats include reference
+information in file headers for reproducibility.
+
+.B Memory Usage
+.br
+\fBmbmesh\fR stores all soundings in memory during processing. For very large datasets,
+this may require significant RAM. The program reports total soundings collected
+upon completion.
+
+.SH MB-SYSTEM INTEGRATION
+.LP
+\fBmbmesh\fR integrates with the MB-System datalist processing framework,
+allowing it to process multiple files in any MB-System supported format.
+File format is determined automatically or can be specified via the datalist
+file. Processed files (if available) are preferred over raw files unless
+the datalist indicates otherwise.
+
+.SH FUTURE DEVELOPMENT
+.LP
+Planned enhancements to \fBmbmesh\fR include:
+.RS
+.TP
+Triangle mesh generation from point cloud with seafloor feature preservation
+.TP
+Py3dtiles integration and evaluation of alternative 3D Tiles libraries
+.TP
+Draco compression support for efficient GLB file transmission
+.TP
+Improved X3DOM visualization and viewer enhancements
+.TP
+Refinement of GeoOrigin handling and direct ECEF coordinate output
+.RE
+
+.SH AUTHOR
+.LP
+David W. Caress and Dale N. Chayes
+.br
+Monterey Bay Aquarium Research Institute
+.br
+Original implementation: CSUMB Capstone - Spring 2026
+
+.SH SEE ALSO
+.BR mb-system (1),
+.BR mbgrid (1),
+.BR mbgrd2gltf (1),
+.BR mbgrdviz (1)

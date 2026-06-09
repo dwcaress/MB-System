@@ -18,6 +18,7 @@ bin_SCRIPTS = \
 	mbm_plot \
 	mbm_route2mission \
 	mbm_stat \
+	mbm_tmap \
 	mbm_trnplot \
 	mbm_utm \
 	mbm_xbt \

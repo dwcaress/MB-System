@@ -1,0 +1,277 @@
+#!/usr/bin/env perl
+#--------------------------------------------------------------------
+#    The MB-system:  mbm_tmap.perl  18/4/2026
+#
+#    Copyright (c) 2026 by
+#    MB-System contributors
+#
+#    MB-System was created by Caress and Chayes in 1992 at the
+#      Lamont-Doherty Earth Observatory
+#      Columbia University
+#      Palisades, NY 10964
+#
+#    See README.md file for copying and redistribution conditions.
+#--------------------------------------------------------------------
+#
+# Command:
+#   mbm_tmap
+#
+# Purpose:
+#   Macro to convert an XYZ point cloud into 3D Tiles using py3dtiles,
+#   generate a Cesium index.html viewer, and optionally start a local
+#   Python web server and open a browser.
+#
+# Basic Usage:
+#   mbm_tmap -Ipointcloud.xyz [-Otiles_dir -Pport -N -S -W -V -H]
+#   mbm_tmap --serve-only -Otiles_dir [-Pport -N -S -W -V -H]
+#
+
+use strict;
+use warnings;
+use Getopt::Long qw(GetOptions);
+use File::Path qw(make_path);
+
+my $program_name = "mbm_tmap";
+
+my $input_file = "";
+my $output_dir = "tiles";
+my $port = 8000;
+my $no_browser = 0;
+my $no_server = 0;
+my $wait_server = 0;
+my $serve_only = 0;
+my $verbose = 0;
+my $help = 0;
+
+sub print_help {
+  print "\n$program_name:\n";
+  print "Macro to convert an XYZ point cloud to 3D Tiles and generate a Cesium index.html viewer.\n";
+  print "\nBasic Usage:\n";
+  print "\t$program_name -Ipointcloud.xyz [-Otiles_dir -Pport -N -S -W -V -H]\n";
+  print "\t$program_name --serve-only -Otiles_dir [-Pport -N -S -W -V -H]\n";
+  print "\nOptions:\n";
+  print "\t-I, --input          Input point cloud XYZ file (required)\n";
+  print "\t-O, --output         Output tiles directory (default: tiles)\n";
+  print "\t-P, --port           HTTP server port (default: 8000)\n";
+  print "\t--serve-only         Skip conversion and serve existing tiles directory\n";
+  print "\t--no-convert         Alias of --serve-only\n";
+  print "\t-N, --no-browser     Do not auto-open browser\n";
+  print "\t-S, --no-server      Do not start python -m http.server\n";
+  print "\t-W, --wait           Wait for server process (Ctrl+C to stop)\n";
+  print "\t-V, --verbose        Enable verbose output\n";
+  print "\t-H, --help           Print this help message\n\n";
+}
+
+sub run_cmd {
+  my (@cmd) = @_;
+  if ($verbose) {
+    print "Running: @cmd\n";
+  }
+  system(@cmd);
+  if ($? != 0) {
+    die "\n$program_name:\nCommand failed: @cmd\n";
+  }
+}
+
+GetOptions(
+  "I|input=s"      => \$input_file,
+  "O|output=s"     => \$output_dir,
+  "P|port=i"       => \$port,
+  "serve-only"     => \$serve_only,
+  "no-convert"     => \$serve_only,
+  "N|no-browser"   => \$no_browser,
+  "S|no-server"    => \$no_server,
+  "W|wait"         => \$wait_server,
+  "V|verbose"      => \$verbose,
+  "H|help"         => \$help,
+) or die "\n$program_name:\nInvalid options. Use -H for help.\n";
+
+if ($help) {
+  print_help();
+  exit 0;
+}
+
+if (!$serve_only) {
+  if ($input_file eq "") {
+    die "\n$program_name:\nNo input file specified! Use -Ipointcloud.xyz\n";
+  }
+
+  if (!-f $input_file) {
+    die "\n$program_name:\nSpecified input file does not exist: $input_file\n";
+  }
+
+  if (!-d $output_dir) {
+    make_path($output_dir) or die "\n$program_name:\nFailed to create output directory: $output_dir\n";
+  }
+
+  print "Converting point cloud using py3dtiles...\n" if $verbose;
+  run_cmd("py3dtiles", "convert", $input_file, "--out", $output_dir);
+} else {
+  if (!-d $output_dir) {
+    die "\n$program_name:\nServe-only mode requires an existing output directory: $output_dir\n";
+  }
+  print "Serve-only mode: skipping py3dtiles conversion\n" if $verbose;
+}
+
+my $index_html = "$output_dir/index.html";
+my $write_index = 1;
+if ($serve_only && -f $index_html) {
+  $write_index = 0;
+  print "Serve-only mode: reusing existing $index_html\n" if $verbose;
+}
+
+if ($write_index) {
+  open(my $fh, ">", $index_html)
+    or die "\n$program_name:\nCannot write $index_html: $!\n";
+
+  print $fh <<'HTML';
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<title>Cesium Local Point Cloud</title>
+
+<script src="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Cesium.js"></script>
+<link href="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+
+<style>
+html, body, #cesiumContainer {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+#status {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 20;
+    background: rgba(0,0,0,0.65);
+    color: white;
+    font: 14px monospace;
+    padding: 8px;
+    border-radius: 6px;
+}
+</style>
+</head>
+
+<body>
+<div id="cesiumContainer"></div>
+<div id="status">Loading...</div>
+
+<script>
+
+const viewer = new Cesium.Viewer('cesiumContainer', {
+    scene3DOnly: true,
+    baseLayerPicker: false,
+    animation: false,
+    timeline: false,
+    geocoder: false,
+    homeButton: false,
+    sceneModePicker: false,
+    navigationHelpButton: false,
+    fullscreenButton: false,
+    terrainProvider: new Cesium.EllipsoidTerrainProvider(),
+    imageryProvider: new Cesium.OpenStreetMapImageryProvider({
+        url: 'https://tile.openstreetmap.org/'
+    })
+});
+
+const controller = viewer.scene.screenSpaceCameraController;
+controller.zoomFactor = 2.0;
+controller.inertiaZoom = 0.2;
+
+viewer.scene.light = new Cesium.DirectionalLight({
+    direction: new Cesium.Cartesian3(1, 0, -1)
+});
+
+(async () => {
+
+    const anchor = Cesium.Cartesian3.fromDegrees(-119.5383, 37.8651, 2200.0);
+
+    const tileset = await Cesium.Cesium3DTileset.fromUrl('./tileset.json', {
+        maximumScreenSpaceError: 16,
+        dynamicScreenSpaceError: true,
+        pointCloudShading: new Cesium.PointCloudShading({
+            attenuation: true,
+            geometricErrorScale: 3
+        })
+    });
+
+    const scale = 50.0;
+    const baseMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(anchor);
+
+    tileset.modelMatrix = Cesium.Matrix4.multiplyByUniformScale(
+        baseMatrix,
+        scale,
+        new Cesium.Matrix4()
+    );
+
+    viewer.scene.primitives.add(tileset);
+
+    tileset.style = new Cesium.Cesium3DTileStyle({
+        color: "color('white', 1.0)",
+        pointSize: '3.0'
+    });
+
+    tileset.debugColorizeTiles = true;
+
+    await viewer.zoomTo(tileset);
+
+    document.getElementById("status").innerText =
+        "Depth enabled via attenuation";
+
+})();
+
+</script>
+
+</body>
+</html>
+HTML
+
+  close($fh);
+  print "Created $index_html\n" if $verbose;
+}
+
+if (!$no_server) {
+  my $pid = fork();
+  if (!defined $pid) {
+    die "\n$program_name:\nFailed to fork server process\n";
+  }
+
+  if ($pid == 0) {
+    chdir($output_dir) or die "Cannot cd to $output_dir: $!\n";
+    exec("python", "-m", "http.server", "$port")
+      or die "Cannot exec python -m http.server $port\n";
+  }
+
+  my $url = "http://localhost:$port";
+  print "Server started on $url (PID $pid)\n";
+
+  if (!$no_browser) {
+    my $opened = 0;
+    if (system("xdg-open", $url) == 0) {
+      $opened = 1;
+    } elsif (system("open", $url) == 0) {
+      $opened = 1;
+    } elsif (system("cygstart", $url) == 0) {
+      $opened = 1;
+    } elsif (system("cmd", "/c", "start", "", $url) == 0) {
+      $opened = 1;
+    }
+
+    if (!$opened) {
+      print "Please open $url manually\n";
+    }
+  }
+
+  if ($wait_server) {
+    print "Server running (PID: $pid). Press Ctrl+C to stop.\n";
+    waitpid($pid, 0);
+  }
+}
+
+print "All done.\n" if $verbose;
+exit 0;
