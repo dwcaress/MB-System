@@ -30,8 +30,7 @@ SharedConstants::SharedConstants() {
 				 "alt-R-drag: change intensity "   \
 				 "(+ basic pan,tilt,zoom)");
     mouseModes_ += new MouseMode(MouseDataSelect,
-				 "'r': toggle select mode,  "	\
-				 "R-drag: select data "		\
+				 "alt-L-drag: select data "		\
 				 "(+ basic pan,tilt,zoom)");
 
     mouseModes_ += new MouseMode(MouseEditSites, "Tooltip goes here");
